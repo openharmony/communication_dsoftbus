@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
+import("../../../../../core/common/dfx/dsoftbus_dfx.gni")
 import("../../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/transmission"
@@ -24,6 +25,7 @@ ohos_unittest("TransUdpNegoTest") {
 
   include_dirs = [
     "$softbus_adapter_common/include",
+    "dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/common/include",
 
     "$dsoftbus_root_path/interfaces/kits/common",
@@ -73,6 +75,7 @@ ohos_unittest("TransUdpNegoTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
@@ -98,6 +101,7 @@ ohos_unittest("TransUdpNegotiationTest") {
 
   include_dirs = [
     "$softbus_adapter_common/include",
+    "dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/core/frame/common/include",
@@ -110,6 +114,7 @@ ohos_unittest("TransUdpNegotiationTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/sdk:softbus_client",
@@ -136,6 +141,7 @@ ohos_unittest("TransUdpNegotiationExchangeTest") {
 
   include_dirs = [
     "$softbus_adapter_common/include",
+    "dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/core/connection/interface",
@@ -144,6 +150,7 @@ ohos_unittest("TransUdpNegotiationExchangeTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "//third_party/googletest:gtest_main",
@@ -168,6 +175,7 @@ ohos_unittest("TransUdpManagerTest") {
 
   include_dirs = [
     "$softbus_adapter_common/include",
+    "dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/common/include",
 
     "$dsoftbus_root_path/interfaces/kits/common",
@@ -214,6 +222,7 @@ ohos_unittest("TransUdpManagerTest") {
   ]
 
   deps = [
+    "$dsoftbus_dfx_path/log:softbus_dfx_log",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "//third_party/googletest:gtest_main",

@@ -32,7 +32,7 @@ typedef struct {
     int32_t (*OnFileGetSessionId)(int32_t channelId, int32_t *sessionId);
     void (*OnMessageReceived)(void);
     void (*OnUdpChannelOpened)(int32_t channelId);
-    void (*OnUdpChannelClosed)(int32_t channelId);
+    void (*OnUdpChannelClosed)(int32_t channelId, ShutdownReason reason);
     void (*OnQosEvent)(int channelId, int eventId, int tvCount, const QosTv *tvList);
 } UdpChannelMgrCb;
 
@@ -61,10 +61,10 @@ void ClientTransUdpMgrDeinit(void);
 
 int32_t TransOnUdpChannelOpened(const char *sessionName, const ChannelInfo *channel, int32_t *udpPort);
 int32_t TransOnUdpChannelOpenFailed(int32_t channelId, int32_t errCode);
-int32_t TransOnUdpChannelClosed(int32_t channelId);
+int32_t TransOnUdpChannelClosed(int32_t channelId, ShutdownReason reason);
 int32_t TransOnUdpChannelQosEvent(int32_t channelId, int32_t eventId, int32_t tvCount, const QosTv *tvList);
 
-int32_t ClientTransCloseUdpChannel(int32_t channelId);
+int32_t ClientTransCloseUdpChannel(int32_t channelId, ShutdownReason reason);
 
 int32_t TransUdpChannelSendStream(int32_t channelId, const StreamData *data, const StreamData *ext,
     const StreamFrameInfo *param);

@@ -15,10 +15,10 @@
 
 #include "softbus_client_info_manager.h"
 
+#include "comm_log.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "softbus_utils.h"
 
 typedef struct {
@@ -34,13 +34,13 @@ static SoftBusList *g_clientInfoList = NULL;
 int SERVER_InitClient(void)
 {
     if (g_clientInfoList != NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "has inited");
+        COMM_LOGI(COMM_SVC, "has inited");
         return SOFTBUS_ERR;
     }
 
     g_clientInfoList = CreateSoftBusList();
     if (g_clientInfoList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "init service info list failed");
+        COMM_LOGE(COMM_SVC, "init service info list failed");
         return SOFTBUS_MALLOC_ERR;
     }
 
@@ -50,25 +50,25 @@ int SERVER_InitClient(void)
 int SERVER_RegisterService(const char *name, const struct CommonScvId *svcId)
 {
     if (name == NULL || svcId == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param");
+        COMM_LOGE(COMM_SVC, "invalid param");
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "new client register:%s", name);
+    COMM_LOGI(COMM_SVC, "new client register:%s", name);
 
     if (g_clientInfoList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "not init");
+        COMM_LOGE(COMM_SVC, "not init");
         return SOFTBUS_ERR;
     }
 
     SoftBusClientInfoNode *clientInfo = SoftBusMalloc(sizeof(SoftBusClientInfoNode));
     if (clientInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "malloc failed");
+        COMM_LOGE(COMM_SVC, "malloc failed");
         return SOFTBUS_ERR;
     }
     (void)memset_s(clientInfo, sizeof(SoftBusClientInfoNode), 0, sizeof(SoftBusClientInfoNode));
 
     if (strcpy_s(clientInfo->name, sizeof(clientInfo->name), name) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "strcpy failed");
+        COMM_LOGE(COMM_SVC, "strcpy failed");
         SoftBusFree(clientInfo);
         return SOFTBUS_ERR;
     }
@@ -79,7 +79,7 @@ int SERVER_RegisterService(const char *name, const struct CommonScvId *svcId)
     ListInit(&clientInfo->node);
 
     if (SoftBusMutexLock(&g_clientInfoList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
+        COMM_LOGE(COMM_SVC, "lock failed");
         SoftBusFree(clientInfo);
         return SOFTBUS_ERR;
     }
@@ -94,17 +94,17 @@ int SERVER_RegisterService(const char *name, const struct CommonScvId *svcId)
 int SERVER_GetIdentityByPkgName(const char *name, struct CommonScvId *svcId)
 {
     if (name == NULL || svcId == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param");
+        COMM_LOGE(COMM_SVC, "invalid param");
         return SOFTBUS_ERR;
     }
 
     if (g_clientInfoList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "not init");
+        COMM_LOGE(COMM_SVC, "not init");
         return SOFTBUS_ERR;
     }
 
     if (SoftBusMutexLock(&g_clientInfoList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
+        COMM_LOGE(COMM_SVC, "lock failed");
         return SOFTBUS_ERR;
     }
 
@@ -119,7 +119,7 @@ int SERVER_GetIdentityByPkgName(const char *name, struct CommonScvId *svcId)
         }
     }
 
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "not found");
+    COMM_LOGE(COMM_SVC, "not found");
     (void)SoftBusMutexUnlock(&g_clientInfoList->lock);
     return SOFTBUS_ERR;
 }
@@ -128,11 +128,11 @@ int SERVER_GetClientInfoNodeNum(int *num)
 {
     *num = 0;
     if (g_clientInfoList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "not init");
+        COMM_LOGE(COMM_SVC, "not init");
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexLock(&g_clientInfoList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
+        COMM_LOGE(COMM_SVC, "lock failed");
         return SOFTBUS_ERR;
     }
     *num = g_clientInfoList->cnt;
@@ -143,16 +143,16 @@ int SERVER_GetClientInfoNodeNum(int *num)
 int SERVER_GetAllClientIdentity(struct CommonScvId *svcId, int num)
 {
     if (svcId == NULL || num == 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid parameters");
+        COMM_LOGE(COMM_SVC, "invalid parameters");
         return SOFTBUS_ERR;
     }
     int32_t i = 0;
     if (g_clientInfoList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "not init");
+        COMM_LOGE(COMM_SVC, "not init");
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexLock(&g_clientInfoList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
+        COMM_LOGE(COMM_SVC, "lock failed");
         return SOFTBUS_ERR;
     }
     SoftBusClientInfoNode *clientInfo = NULL;
@@ -171,14 +171,14 @@ int SERVER_GetAllClientIdentity(struct CommonScvId *svcId, int num)
 void SERVER_UnregisterService(const char *name)
 {
     if (g_clientInfoList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "server info list not init");
+        COMM_LOGE(COMM_SVC, "server info list not init");
         return;
     }
     if (SoftBusMutexLock(&g_clientInfoList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
+        COMM_LOGE(COMM_SVC, "lock failed");
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "client service %s died, remove it from softbus server", name);
+    COMM_LOGE(COMM_SVC, "client service %s died, remove it from softbus server", name);
     SoftBusClientInfoNode *clientInfo = NULL;
     LIST_FOR_EACH_ENTRY(clientInfo, &g_clientInfoList->list, SoftBusClientInfoNode, node) {
         if (strcmp(clientInfo->name, name) == 0) {

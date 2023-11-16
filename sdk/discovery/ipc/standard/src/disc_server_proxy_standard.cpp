@@ -16,12 +16,11 @@
 #include "disc_server_proxy_standard.h"
 
 #include "ipc_skeleton.h"
-
+#include "disc_log.h"
 #include "discovery_service.h"
 #include "message_parcel.h"
 #include "softbus_errcode.h"
 #include "softbus_server_ipc_interface_code.h"
-#include "softbus_log.h"
 
 namespace OHOS {
 static uint32_t g_getSystemAbilityId = 2;
@@ -39,12 +38,12 @@ static sptr<IRemoteObject> GetSystemAbility()
     MessageOption option;
     sptr<IRemoteObject> samgr = IPCSkeleton::GetContextObject();
     if (samgr == nullptr) {
-        DLOGE("Get samgr failed!");
+        DISC_LOGE(DISC_CONTROL, "Get samgr failed!");
         return nullptr;
     }
     int32_t err = samgr->SendRequest(g_getSystemAbilityId, data, reply, option);
     if (err != 0) {
-        DLOGE("Get GetSystemAbility failed!");
+        DISC_LOGE(DISC_CONTROL, "Get GetSystemAbility failed!");
         return nullptr;
     }
     return reply.ReadRemoteObject();
@@ -54,13 +53,13 @@ int32_t DiscServerProxy::StartDiscovery(const char *pkgName, const SubscribeInfo
 {
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        DISC_LOGE(DISC_ABILITY, "remote is nullptr!");
         return SOFTBUS_ERR;
     }
 
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "StartDiscovery write InterfaceToken failed!");
+        DISC_LOGE(DISC_ABILITY, "StartDiscovery write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     data.WriteCString(pkgName);
@@ -79,13 +78,13 @@ int32_t DiscServerProxy::StartDiscovery(const char *pkgName, const SubscribeInfo
     MessageOption option;
     int32_t err = remote->SendRequest(SERVER_START_DISCOVERY, data, reply, option);
     if (err != 0) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "StartDiscovery send request failed!");
+        DISC_LOGE(DISC_ABILITY, "StartDiscovery send request failed!");
         return SOFTBUS_ERR;
     }
     int32_t serverRet = 0;
     int32_t ret = reply.ReadInt32(serverRet);
     if (!ret) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "StartDiscovery read serverRet failed!");
+        DISC_LOGE(DISC_ABILITY, "StartDiscovery read serverRet failed!");
         return SOFTBUS_ERR;
     }
     return serverRet;
@@ -95,13 +94,13 @@ int32_t DiscServerProxy::StopDiscovery(const char *pkgName, int subscribeId)
 {
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        DISC_LOGE(DISC_ABILITY, "remote is nullptr!");
         return SOFTBUS_ERR;
     }
 
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "StopDiscovery write InterfaceToken failed!");
+        DISC_LOGE(DISC_ABILITY, "StopDiscovery write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     data.WriteCString(pkgName);
@@ -110,15 +109,15 @@ int32_t DiscServerProxy::StopDiscovery(const char *pkgName, int subscribeId)
     MessageParcel reply;
     MessageOption option;
     int32_t err = remote->SendRequest(SERVER_STOP_DISCOVERY, data, reply, option);
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "StopDiscovery send request ret = %d!", err);
+    DISC_LOGI(DISC_ABILITY, "StopDiscovery send request ret = %d!", err);
     if (err != 0) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "StopDiscovery send request failed!");
+        DISC_LOGE(DISC_ABILITY, "StopDiscovery send request failed!");
         return SOFTBUS_ERR;
     }
     int32_t serverRet = 0;
     int32_t ret = reply.ReadInt32(serverRet);
     if (!ret) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "StopDiscovery read serverRet failed!");
+        DISC_LOGE(DISC_ABILITY, "StopDiscovery read serverRet failed!");
         return SOFTBUS_ERR;
     }
     return serverRet;
@@ -128,13 +127,13 @@ int32_t DiscServerProxy::PublishService(const char *pkgName, const PublishInfo *
 {
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        DISC_LOGE(DISC_ABILITY, "remote is nullptr!");
         return SOFTBUS_ERR;
     }
 
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "PublishService write InterfaceToken failed!");
+        DISC_LOGE(DISC_ABILITY, "PublishService write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     data.WriteCString(pkgName);
@@ -150,15 +149,15 @@ int32_t DiscServerProxy::PublishService(const char *pkgName, const PublishInfo *
     MessageParcel reply;
     MessageOption option;
     int32_t err = remote->SendRequest(SERVER_PUBLISH_SERVICE, data, reply, option);
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "PublishService send request ret = %d!", err);
+    DISC_LOGI(DISC_ABILITY, "PublishService send request ret = %d!", err);
     if (err != 0) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "PublishService send request failed!");
+        DISC_LOGE(DISC_ABILITY, "PublishService send request failed!");
         return SOFTBUS_ERR;
     }
     int32_t serverRet = 0;
     int32_t ret = reply.ReadInt32(serverRet);
     if (!ret) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "PublishService read serverRet failed!");
+        DISC_LOGE(DISC_ABILITY, "PublishService read serverRet failed!");
         return SOFTBUS_ERR;
     }
     return serverRet;
@@ -168,13 +167,13 @@ int32_t DiscServerProxy::UnPublishService(const char *pkgName, int publishId)
 {
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        DISC_LOGE(DISC_ABILITY, "remote is nullptr!");
         return SOFTBUS_ERR;
     }
 
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "UnPublishService write InterfaceToken failed!");
+        DISC_LOGE(DISC_ABILITY, "UnPublishService write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     data.WriteCString(pkgName);
@@ -183,15 +182,15 @@ int32_t DiscServerProxy::UnPublishService(const char *pkgName, int publishId)
     MessageParcel reply;
     MessageOption option;
     int32_t err = remote->SendRequest(SERVER_UNPUBLISH_SERVICE, data, reply, option);
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "UnPublishService send request ret = %d!", err);
+    DISC_LOGI(DISC_ABILITY, "UnPublishService send request ret = %d!", err);
     if (err != 0) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "UnPublishService send request failed!");
+        DISC_LOGE(DISC_ABILITY, "UnPublishService send request failed!");
         return SOFTBUS_ERR;
     }
     int32_t serverRet = 0;
     int32_t ret = reply.ReadInt32(serverRet);
     if (!ret) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "UnPublishService read serverRet failed!");
+        DISC_LOGE(DISC_ABILITY, "UnPublishService read serverRet failed!");
         return SOFTBUS_ERR;
     }
     return serverRet;

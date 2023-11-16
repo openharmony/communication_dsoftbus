@@ -16,9 +16,9 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include "disc_log.h"
 #include "disc_interface.h"
 #include "disc_manager.h"
-#include "softbus_log.h"
 #include "softbus_error_code.h"
 #include "ble_mock.h"
 #include "coap_mock.h"
@@ -93,7 +93,7 @@ public:
 */
 HWTEST_F(DiscManagerMockTest, DiscManagerInit001, TestSize.Level1)
 {
-    DLOGI("DiscManagerInit001 begin ----");
+    DISC_LOGI(DISC_TEST, "DiscManagerInit001 begin ----");
     BleMock bleMock;
     bleMock.SetupStub();
     EXPECT_CALL(bleMock, DiscBleInit).WillRepeatedly(Return(nullptr));
@@ -102,7 +102,7 @@ HWTEST_F(DiscManagerMockTest, DiscManagerInit001, TestSize.Level1)
     EXPECT_CALL(coapMock, DiscCoapInit).WillRepeatedly(Return(nullptr));
 
     EXPECT_EQ(DiscMgrInit(), SOFTBUS_ERR);
-    DLOGI("DiscManagerInit001 end ----");
+    DISC_LOGI(DISC_TEST, "DiscManagerInit001 end ----");
 }
 
 /*
@@ -113,14 +113,14 @@ HWTEST_F(DiscManagerMockTest, DiscManagerInit001, TestSize.Level1)
 */
 HWTEST_F(DiscManagerMockTest, DiscManagerInit002, TestSize.Level1)
 {
-    DLOGI("DiscManagerInit002 begin ----");
+    DISC_LOGI(DISC_TEST, "DiscManagerInit002 begin ----");
     BleMock bleMock;
     bleMock.SetupStub();
     CoapMock coapMock;
     coapMock.SetupStub();
 
     EXPECT_EQ(DiscMgrInit(), SOFTBUS_OK);
-    DLOGI("DiscManagerInit002 end ----");
+    DISC_LOGI(DISC_TEST, "DiscManagerInit002 end ----");
 }
 
 /*
@@ -131,7 +131,7 @@ HWTEST_F(DiscManagerMockTest, DiscManagerInit002, TestSize.Level1)
 */
 HWTEST_F(DiscManagerMockTest, ClientDeathCallback001, TestSize.Level1)
 {
-    DLOGI("ClientDeathCallback001 begin ----");
+    DISC_LOGI(DISC_TEST, "ClientDeathCallback001 begin ----");
     {
         ExceptionBranchChecker checker("pkgName is null");
         DiscMgrDeathCallback(nullptr);
@@ -142,7 +142,7 @@ HWTEST_F(DiscManagerMockTest, ClientDeathCallback001, TestSize.Level1)
         DiscMgrDeathCallback("Test");
         EXPECT_EQ(checker.GetResult(), true);
     }
-    DLOGI("ClientDeathCallback001 end ----");
+    DISC_LOGI(DISC_TEST, "ClientDeathCallback001 end ----");
 }
 
 /*
@@ -153,12 +153,12 @@ HWTEST_F(DiscManagerMockTest, ClientDeathCallback001, TestSize.Level1)
 */
 HWTEST_F(DiscManagerMockTest, DiscSetDiscoverCallback001, TestSize.Level1)
 {
-    DLOGI("DiscSetDiscoverCallback001 begin ----");
+    DISC_LOGI(DISC_TEST, "DiscSetDiscoverCallback001 begin ----");
     EXPECT_EQ(DiscSetDiscoverCallback(static_cast<DiscModule>(0), &innerCallback_), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(DiscSetDiscoverCallback(static_cast<DiscModule>(MODULE_MAX + 1), &innerCallback_), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(DiscSetDiscoverCallback(MODULE_LNN, nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(DiscSetDiscoverCallback(MODULE_LNN, &innerCallback_), SOFTBUS_OK);
-    DLOGI("DiscSetDiscoverCallback001 end ----");
+    DISC_LOGI(DISC_TEST, "DiscSetDiscoverCallback001 end ----");
 }
 
 /*
@@ -169,7 +169,7 @@ HWTEST_F(DiscManagerMockTest, DiscSetDiscoverCallback001, TestSize.Level1)
 */
 HWTEST_F(DiscManagerMockTest, DiscPublish001, TestSize.Level1)
 {
-    DLOGI("DiscPublish001 begin ----");
+    DISC_LOGI(DISC_TEST, "DiscPublish001 begin ----");
     PublishInfo info;
     info.publishId = 0;
     EXPECT_EQ(DiscPublish(static_cast<DiscModule>(0), &info), SOFTBUS_INVALID_PARAM);
@@ -197,7 +197,7 @@ HWTEST_F(DiscManagerMockTest, DiscPublish001, TestSize.Level1)
     info.capability = "test";
     EXPECT_EQ(DiscPublish(MODULE_LNN, &info), SOFTBUS_DISCOVER_MANAGER_INFO_NOT_CREATE);
 
-    DLOGI("DiscPublish001 end ----");
+    DISC_LOGI(DISC_TEST, "DiscPublish001 end ----");
 }
 
 /*
@@ -208,7 +208,7 @@ HWTEST_F(DiscManagerMockTest, DiscPublish001, TestSize.Level1)
 */
 HWTEST_F(DiscManagerMockTest, DiscPublish002, TestSize.Level1)
 {
-    DLOGI("DiscPublish002 begin ----");
+    DISC_LOGI(DISC_TEST, "DiscPublish002 begin ----");
     PublishInfo info;
     info.publishId = 0;
     info.mode = DISCOVER_MODE_ACTIVE;
@@ -247,7 +247,7 @@ HWTEST_F(DiscManagerMockTest, DiscPublish002, TestSize.Level1)
         coapMock.SetupStub();
         EXPECT_EQ(DiscPublish(MODULE_LNN, &info), SOFTBUS_OK);
     }
-    DLOGI("DiscPublish002 end ----");
+    DISC_LOGI(DISC_TEST, "DiscPublish002 end ----");
 }
 
 /*
@@ -258,7 +258,7 @@ HWTEST_F(DiscManagerMockTest, DiscPublish002, TestSize.Level1)
 */
 HWTEST_F(DiscManagerMockTest, DiscStartScan001, TestSize.Level1)
 {
-    DLOGI("DiscStartScan001 begin ----");
+    DISC_LOGI(DISC_TEST, "DiscStartScan001 begin ----");
     PublishInfo info;
     info.publishId = 0;
     EXPECT_EQ(DiscStartScan(static_cast<DiscModule>(0), &info), SOFTBUS_INVALID_PARAM);
@@ -286,7 +286,7 @@ HWTEST_F(DiscManagerMockTest, DiscStartScan001, TestSize.Level1)
     info.capability = "test";
     EXPECT_EQ(DiscStartScan(MODULE_LNN, &info), SOFTBUS_DISCOVER_MANAGER_INFO_NOT_CREATE);
 
-    DLOGI("DiscStartScan001 end ----");
+    DISC_LOGI(DISC_TEST, "DiscStartScan001 end ----");
 }
 
 /*
@@ -297,7 +297,7 @@ HWTEST_F(DiscManagerMockTest, DiscStartScan001, TestSize.Level1)
 */
 HWTEST_F(DiscManagerMockTest, DiscStartScan002, TestSize.Level1)
 {
-    DLOGI("DiscStartScan002 begin ----");
+    DISC_LOGI(DISC_TEST, "DiscStartScan002 begin ----");
     PublishInfo info;
     info.publishId = 0;
     info.mode = DISCOVER_MODE_PASSIVE;
@@ -337,7 +337,7 @@ HWTEST_F(DiscManagerMockTest, DiscStartScan002, TestSize.Level1)
         coapMock.SetupStub();
         EXPECT_EQ(DiscStartScan(MODULE_LNN, &info), SOFTBUS_OK);
     }
-    DLOGI("DiscStartScan002 end ----");
+    DISC_LOGI(DISC_TEST, "DiscStartScan002 end ----");
 }
 
 /*
@@ -348,7 +348,7 @@ HWTEST_F(DiscManagerMockTest, DiscStartScan002, TestSize.Level1)
 */
 HWTEST_F(DiscManagerMockTest, DiscUnpublish001, TestSize.Level1)
 {
-    DLOGI("DiscUnpublish001 begin ----");
+    DISC_LOGI(DISC_TEST, "DiscUnpublish001 begin ----");
     EXPECT_EQ(DiscUnpublish(static_cast<DiscModule>(0), 0), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(DiscUnpublish(static_cast<DiscModule>(MODULE_MAX + 1), 0), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(DiscUnpublish(MODULE_LNN, -1), SOFTBUS_DISCOVER_MANAGER_INFO_NOT_DELETE);
@@ -374,7 +374,7 @@ HWTEST_F(DiscManagerMockTest, DiscUnpublish001, TestSize.Level1)
         EXPECT_EQ(DiscUnpublish(MODULE_LNN, PUBLISH_ID7), SOFTBUS_OK);
     }
 
-    DLOGI("DiscUnpublish001 end ----");
+    DISC_LOGI(DISC_TEST, "DiscUnpublish001 end ----");
 }
 
 /*
@@ -385,7 +385,7 @@ HWTEST_F(DiscManagerMockTest, DiscUnpublish001, TestSize.Level1)
 */
 HWTEST_F(DiscManagerMockTest, DiscStartAdvertise001, TestSize.Level1)
 {
-    DLOGI("DiscStartAdvertise001 begin ----");
+    DISC_LOGI(DISC_TEST, "DiscStartAdvertise001 begin ----");
     SubscribeInfo info;
     info.subscribeId = 0;
     EXPECT_EQ(DiscStartAdvertise(static_cast<DiscModule>(0), &info), SOFTBUS_INVALID_PARAM);
@@ -413,7 +413,7 @@ HWTEST_F(DiscManagerMockTest, DiscStartAdvertise001, TestSize.Level1)
     info.capability = "test";
     EXPECT_EQ(DiscStartAdvertise(MODULE_LNN, &info), SOFTBUS_DISCOVER_MANAGER_INFO_NOT_CREATE);
 
-    DLOGI("DiscStartAdvertise001 end ----");
+    DISC_LOGI(DISC_TEST, "DiscStartAdvertise001 end ----");
 }
 
 /*
@@ -424,7 +424,7 @@ HWTEST_F(DiscManagerMockTest, DiscStartAdvertise001, TestSize.Level1)
 */
 HWTEST_F(DiscManagerMockTest, DiscStartAdvertise002, TestSize.Level1)
 {
-    DLOGI("DiscStartAdvertise002 begin ----");
+    DISC_LOGI(DISC_TEST, "DiscStartAdvertise002 begin ----");
     SubscribeInfo info;
     info.subscribeId = 0;
     info.mode = DISCOVER_MODE_ACTIVE;
@@ -463,7 +463,7 @@ HWTEST_F(DiscManagerMockTest, DiscStartAdvertise002, TestSize.Level1)
         coapMock.SetupStub();
         EXPECT_EQ(DiscStartAdvertise(MODULE_LNN, &info), SOFTBUS_OK);
     }
-    DLOGI("DiscStartAdvertise002 end ----");
+    DISC_LOGI(DISC_TEST, "DiscStartAdvertise002 end ----");
 }
 
 /*
@@ -474,7 +474,7 @@ HWTEST_F(DiscManagerMockTest, DiscStartAdvertise002, TestSize.Level1)
 */
 HWTEST_F(DiscManagerMockTest, DiscSubscribe001, TestSize.Level1)
 {
-    DLOGI("DiscSubscribe001 begin ----");
+    DISC_LOGI(DISC_TEST, "DiscSubscribe001 begin ----");
     SubscribeInfo info;
     info.subscribeId = 0;
     EXPECT_EQ(DiscSubscribe(static_cast<DiscModule>(0), &info), SOFTBUS_INVALID_PARAM);
@@ -502,7 +502,7 @@ HWTEST_F(DiscManagerMockTest, DiscSubscribe001, TestSize.Level1)
     info.capability = "test";
     EXPECT_EQ(DiscSubscribe(MODULE_LNN, &info), SOFTBUS_DISCOVER_MANAGER_INFO_NOT_CREATE);
 
-    DLOGI("DiscSubscribe001 end ----");
+    DISC_LOGI(DISC_TEST, "DiscSubscribe001 end ----");
 }
 
 /*
@@ -513,7 +513,7 @@ HWTEST_F(DiscManagerMockTest, DiscSubscribe001, TestSize.Level1)
 */
 HWTEST_F(DiscManagerMockTest, DiscSubscribe002, TestSize.Level1)
 {
-    DLOGI("DiscSubscribe002 begin ----");
+    DISC_LOGI(DISC_TEST, "DiscSubscribe002 begin ----");
     SubscribeInfo info;
     info.subscribeId = 0;
     info.mode = DISCOVER_MODE_PASSIVE;
@@ -553,7 +553,7 @@ HWTEST_F(DiscManagerMockTest, DiscSubscribe002, TestSize.Level1)
         coapMock.SetupStub();
         EXPECT_EQ(DiscSubscribe(MODULE_LNN, &info), SOFTBUS_OK);
     }
-    DLOGI("DiscSubscribe002 end ----");
+    DISC_LOGI(DISC_TEST, "DiscSubscribe002 end ----");
 }
 
 /*
@@ -564,7 +564,7 @@ HWTEST_F(DiscManagerMockTest, DiscSubscribe002, TestSize.Level1)
 */
 HWTEST_F(DiscManagerMockTest, DiscStopAdvertise001, TestSize.Level1)
 {
-    DLOGI("DiscStopAdvertise001 begin ----");
+    DISC_LOGI(DISC_TEST, "DiscStopAdvertise001 begin ----");
     EXPECT_EQ(DiscStopAdvertise(static_cast<DiscModule>(0), 0), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(DiscStopAdvertise(static_cast<DiscModule>(MODULE_MAX + 1), 0), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(DiscStopAdvertise(MODULE_LNN, -1), SOFTBUS_DISCOVER_MANAGER_INFO_NOT_DELETE);
@@ -586,7 +586,7 @@ HWTEST_F(DiscManagerMockTest, DiscStopAdvertise001, TestSize.Level1)
         EXPECT_EQ(DiscStopAdvertise(MODULE_LNN, SUBSCRIBE_ID7), SOFTBUS_OK);
     }
 
-    DLOGI("DiscStopAdvertise001 end ----");
+    DISC_LOGI(DISC_TEST, "DiscStopAdvertise001 end ----");
 }
 
 /*
@@ -597,7 +597,7 @@ HWTEST_F(DiscManagerMockTest, DiscStopAdvertise001, TestSize.Level1)
 */
 HWTEST_F(DiscManagerMockTest, DiscPublishService001, TestSize.Level1)
 {
-    DLOGI("DiscPublishService001 begin ----");
+    DISC_LOGI(DISC_TEST, "DiscPublishService001 begin ----");
     PublishInfo info;
     info.medium = BLE;
     info.mode = DISCOVER_MODE_ACTIVE;
@@ -626,7 +626,7 @@ HWTEST_F(DiscManagerMockTest, DiscPublishService001, TestSize.Level1)
         EXPECT_EQ(DiscPublishService(packageName_, &info), SOFTBUS_DISCOVER_MANAGER_DUPLICATE_PARAM);
     }
 
-    DLOGI("DiscPublishService001 end ----");
+    DISC_LOGI(DISC_TEST, "DiscPublishService001 end ----");
 }
 
 /*
@@ -637,7 +637,7 @@ HWTEST_F(DiscManagerMockTest, DiscPublishService001, TestSize.Level1)
 */
 HWTEST_F(DiscManagerMockTest, DiscUnPublishService001, TestSize.Level1)
 {
-    DLOGI("DiscUnPublishService001 begin ----");
+    DISC_LOGI(DISC_TEST, "DiscUnPublishService001 begin ----");
 
     EXPECT_EQ(DiscUnPublishService(nullptr, 0), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(DiscUnPublishService(largePackageName_, 0), SOFTBUS_INVALID_PARAM);
@@ -666,7 +666,7 @@ HWTEST_F(DiscManagerMockTest, DiscUnPublishService001, TestSize.Level1)
         EXPECT_EQ(DiscUnPublishService(packageName_, PUBLISH_ID8), SOFTBUS_OK);
     }
 
-    DLOGI("DiscUnPublishService001 end ----");
+    DISC_LOGI(DISC_TEST, "DiscUnPublishService001 end ----");
 }
 
 /*
@@ -677,7 +677,7 @@ HWTEST_F(DiscManagerMockTest, DiscUnPublishService001, TestSize.Level1)
 */
 HWTEST_F(DiscManagerMockTest, DiscStartDiscovery001, TestSize.Level1)
 {
-    DLOGI("DiscPublishService001 begin ----");
+    DISC_LOGI(DISC_TEST, "DiscPublishService001 begin ----");
     SubscribeInfo info;
     info.medium = BLE;
     info.mode = DISCOVER_MODE_ACTIVE;
@@ -708,7 +708,7 @@ HWTEST_F(DiscManagerMockTest, DiscStartDiscovery001, TestSize.Level1)
         EXPECT_EQ(DiscStartDiscovery(packageName_, &info, &serverCallback_), SOFTBUS_DISCOVER_MANAGER_DUPLICATE_PARAM);
     }
 
-    DLOGI("DiscStartDiscovery001 end ----");
+    DISC_LOGI(DISC_TEST, "DiscStartDiscovery001 end ----");
 }
 
 /*
@@ -719,7 +719,7 @@ HWTEST_F(DiscManagerMockTest, DiscStartDiscovery001, TestSize.Level1)
 */
 HWTEST_F(DiscManagerMockTest, DiscStopDiscovery001, TestSize.Level1)
 {
-    DLOGI("DiscStopDiscovery001 begin ----");
+    DISC_LOGI(DISC_TEST, "DiscStopDiscovery001 begin ----");
 
     EXPECT_EQ(DiscStopDiscovery(nullptr, 0), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(DiscStopDiscovery(largePackageName_, 0), SOFTBUS_INVALID_PARAM);
@@ -750,7 +750,7 @@ HWTEST_F(DiscManagerMockTest, DiscStopDiscovery001, TestSize.Level1)
         EXPECT_EQ(DiscStopDiscovery(packageName_, PUBLISH_ID8), SOFTBUS_DISCOVER_MANAGER_INFO_NOT_DELETE);
     }
 
-    DLOGI("DiscStopDiscovery001 end ----");
+    DISC_LOGI(DISC_TEST, "DiscStopDiscovery001 end ----");
 }
 
 /*
@@ -761,7 +761,7 @@ HWTEST_F(DiscManagerMockTest, DiscStopDiscovery001, TestSize.Level1)
 */
 HWTEST_F(DiscManagerMockTest, DiscMgrDeathCallback001, TestSize.Level1)
 {
-    DLOGI("DiscMgrDeathCallback001 begin ----");
+    DISC_LOGI(DISC_TEST, "DiscMgrDeathCallback001 begin ----");
     {
         SubscribeInfo info;
         info.subscribeId = SUBSCRIBE_ID8;
@@ -788,7 +788,7 @@ HWTEST_F(DiscManagerMockTest, DiscMgrDeathCallback001, TestSize.Level1)
         EXPECT_EQ(deviceInfo_.capabilityBitmapNum, deviceInfo.capabilityBitmapNum);
         EXPECT_EQ(innerDeviceInfo_.capabilityBitmapNum, deviceInfo.capabilityBitmapNum);
     }
-    DLOGI("DiscMgrDeathCallback001 end ----");
+    DISC_LOGI(DISC_TEST, "DiscMgrDeathCallback001 end ----");
 }
 
 /*
@@ -799,7 +799,7 @@ HWTEST_F(DiscManagerMockTest, DiscMgrDeathCallback001, TestSize.Level1)
 */
 HWTEST_F(DiscManagerMockTest, DiscManagerDeinit001, TestSize.Level1)
 {
-    DLOGI("DiscManagerDeinit001 begin ----");
+    DISC_LOGI(DISC_TEST, "DiscManagerDeinit001 begin ----");
     BleMock bleMock;
     bleMock.SetupStub();
     CoapMock coapMock;
@@ -808,6 +808,6 @@ HWTEST_F(DiscManagerMockTest, DiscManagerDeinit001, TestSize.Level1)
     ExceptionBranchChecker checker("disc manager deinit success");
     DiscMgrDeinit();
     EXPECT_EQ(checker.GetResult(), true);
-    DLOGI("DiscManagerDeinit001 end ----");
+    DISC_LOGI(DISC_TEST, "DiscManagerDeinit001 end ----");
 }
 }

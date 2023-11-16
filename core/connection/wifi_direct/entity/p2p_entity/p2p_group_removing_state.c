@@ -12,17 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include "conn_log.h"
 #include "entity/p2p_entity/p2p_group_removing_state.h"
-#include "softbus_log.h"
-
-#define LOG_LABEL "[WD] PGReS: "
 
 /* public interface */
 static void Enter(struct P2pEntityState *self)
 {
     (void)self;
-    CLOGI(LOG_LABEL "enter");
+    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     GetP2pEntity()->stopTimer();
     GetP2pEntity()->startTimer(TIMEOUT_WAIT_REMOVE_GROUP_MS, P2P_ENTITY_TIMEOUT_REMOVE_GROUP);
 }
@@ -30,18 +27,18 @@ static void Enter(struct P2pEntityState *self)
 static void Exit(struct P2pEntityState *self)
 {
     (void)self;
-    CLOGI(LOG_LABEL "enter");
+    CONN_LOGI(CONN_WIFI_DIRECT, "exit");
 }
 
 static void HandleTimeout(struct P2pEntityState *self, enum P2pEntityTimeoutEvent event)
 {
     (void)self;
     if (event != P2P_ENTITY_TIMEOUT_REMOVE_GROUP) {
-        CLOGE(LOG_LABEL "mismatch timeout event");
+        CONN_LOGW(CONN_WIFI_DIRECT, "mismatch timeout event");
         return;
     }
 
-    CLOGE(LOG_LABEL "remove group timeout");
+    CONN_LOGE(CONN_WIFI_DIRECT, "remove group timeout");
     GetP2pEntity()->notifyOperationComplete(ERROR_REMOVE_LINK_FAILED);
     GetP2pEntity()->changeState(P2P_ENTITY_STATE_AVAILABLE);
 }
@@ -50,7 +47,7 @@ static void HandleConnectionChange(struct P2pEntityState *self, struct WifiDirec
 {
     (void)self;
     if (groupInfo == NULL) {
-        CLOGI(LOG_LABEL "remove group complete");
+        CONN_LOGI(CONN_WIFI_DIRECT, "remove group complete");
         struct P2pEntity *entity = GetP2pEntity();
         entity->clearJoiningClient();
         entity->changeState(P2P_ENTITY_STATE_AVAILABLE);

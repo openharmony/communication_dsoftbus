@@ -22,6 +22,7 @@
 #include "auth_common_mock.h"
 #include "auth_hichain.h"
 #include "auth_interface.h"
+#include "auth_log.h"
 #include "auth_manager.h"
 #include "auth_net_ledger_mock.h"
 #include "auth_request.h"
@@ -35,7 +36,6 @@
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "auth_session_message.h"
-#include "softbus_log.h"
 
 namespace OHOS {
 using namespace testing;
@@ -127,15 +127,15 @@ NodeInfo g_localInfo = {
 };
 void SendSignal()
 {
-    ALOGI("SendSignal");
+    AUTH_LOGI(AUTH_TEST, "SendSignal");
     if (SoftBusMutexLock(&LnnHichainInterfaceMock::mutex) != SOFTBUS_OK) {
-        ALOGE("SendSignal Lock failed");
+        AUTH_LOGE(AUTH_TEST, "SendSignal Lock failed");
         return;
     }
     AuthNetLedgertInterfaceMock::isRuned = true;
     (void)SoftBusCondSignal(&LnnHichainInterfaceMock::cond);
     (void)SoftBusMutexUnlock(&LnnHichainInterfaceMock::mutex);
-    ALOGI("SendSignal end");
+    AUTH_LOGI(AUTH_TEST, "SendSignal end");
 }
 
 void ClientFSMCreate(MockInterfaces *mockInterface, GroupAuthManager &authManager, DeviceGroupManager &groupManager)
@@ -182,7 +182,7 @@ bool WaitForSignal()
 #define USECTONSEC 1000LL
     SoftBusSysTime now;
     if (SoftBusGetTime(&now) != SOFTBUS_OK) {
-        ALOGE("BrSoftBusCondWait SoftBusGetTime failed");
+        AUTH_LOGE(AUTH_TEST, "BrSoftBusCondWait SoftBusGetTime failed");
         return SOFTBUS_ERR;
     }
     int64_t time = now.sec * USECTONSEC * USECTONSEC + now.usec + DELAY_TIME * USECTONSEC;
@@ -190,7 +190,7 @@ bool WaitForSignal()
     tv.sec = time / USECTONSEC / USECTONSEC;
     tv.usec = time % (USECTONSEC * USECTONSEC);
     if (SoftBusMutexLock(&LnnHichainInterfaceMock::mutex) != SOFTBUS_OK) {
-        ALOGE("Wait signal Lock failed");
+        AUTH_LOGE(AUTH_TEST, "Wait signal Lock failed");
         return false;
     }
     if (!AuthNetLedgertInterfaceMock::isRuned) {
@@ -236,7 +236,7 @@ void AuthTestCallBackTest::TearDownTestCase()
 void AuthTestCallBackTest::SetUp()
 {
     LooperInit();
-    ALOGI("AuthTestCallBackTest start.");
+    AUTH_LOGI(AUTH_TEST, "AuthTestCallBackTest start.");
 }
 
 void AuthTestCallBackTest::TearDown()

@@ -81,6 +81,10 @@ typedef struct {
     int32_t batteryLevel;
 } BatteryInfo;
 
+typedef enum {
+    BIT_SUPPORT_EXCHANGE_NETWORKID = 0,
+} AuthCapability;
+
 typedef struct {
     char softBusVersion[VERSION_MAX_LEN];
     char versionType[VERSION_MAX_LEN]; // compatible nearby
@@ -97,6 +101,7 @@ typedef struct {
     ConnectRole role;
     ConnectStatus status;
     uint32_t netCapacity;
+    uint32_t authCapacity;
     uint32_t discoveryType;
     uint64_t heartbeatTimeStamp;
     DeviceBasicInfo deviceInfo;

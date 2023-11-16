@@ -45,7 +45,7 @@ int32_t OnSessionOpened(const char *sessionName, const ChannelInfo *channel, Ses
 {
     return SOFTBUS_OK;
 }
-int32_t OnSessionClosed(int32_t channelId, int32_t channelType)
+int32_t OnSessionClosed(int32_t channelId, int32_t channelType, ShutdownReason reason)
 {
     return SOFTBUS_OK;
 }

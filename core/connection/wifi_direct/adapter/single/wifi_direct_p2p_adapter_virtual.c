@@ -15,10 +15,10 @@
 
 #include "wifi_direct_p2p_adapter.h"
 #include "securec.h"
+#include "conn_log.h"
 #include "wifi_device.h"
 #include "wifi_p2p.h"
 #include "wifi_hid2d.h"
-#include "softbus_log.h"
 #include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_crypto.h"
@@ -27,7 +27,6 @@
 #include "utils/wifi_direct_anonymous.h"
 #include "data/resource_manager.h"
 
-#define LOG_LABEL "[WifiDirect] WifiDirectP2pAdapter: "
 #define DEFAULT_NET_MASK "255.255.255.0"
 
 static bool IsWifiP2pEnabled(void)
@@ -142,9 +141,10 @@ static int32_t P2pCreateGroup(int32_t frequency, bool wideBandSupported)
     return SOFTBUS_OK;
 }
 
-static int32_t P2pConnectGroup(char *groupConfigString)
+static int32_t P2pConnectGroup(char *groupConfigString, bool isLegacyGo)
 {
     (void)groupConfigString;
+    (void)isLegacyGo;
     return SOFTBUS_OK;
 }
 
@@ -197,7 +197,7 @@ static int32_t GetBaseMac(const char *interface, uint32_t cap, char baseMac[], s
     (void)cap;
     (void)baseMac;
     (void)baseMacLen;
-    CLOGE(LOG_LABEL "not supported");
+    CONN_LOGE(CONN_WIFI_DIRECT, "not supported");
     return SOFTBUS_ERR;
 }
 
@@ -206,7 +206,7 @@ static bool AddInterfaceMultiIps(const char *interface, const char *localIp, uin
     (void)interface;
     (void)localIp;
     (void)prefixLen;
-    CLOGE(LOG_LABEL "not supported");
+    CONN_LOGE(CONN_WIFI_DIRECT, "not supported");
     return false;
 }
 
@@ -215,7 +215,7 @@ static bool DeleteInterfaceMultiIps(const char *interface, const char *localIp, 
     (void)interface;
     (void)localIp;
     (void)prefixLen;
-    CLOGE(LOG_LABEL "not supported");
+    CONN_LOGE(CONN_WIFI_DIRECT, "not supported");
     return false;
 }
 
@@ -224,7 +224,7 @@ static bool AddInterfaceStaticArp(const char *interface, const char *remoteIp, c
     (void)interface;
     (void)remoteIp;
     (void)remoteMac;
-    CLOGE(LOG_LABEL "not supported");
+    CONN_LOGE(CONN_WIFI_DIRECT, "not supported");
     return false;
 }
 
@@ -233,7 +233,7 @@ static bool DeleteInterfaceStaticArp(const char *interface, const char *remoteIp
     (void)interface;
     (void)remoteIp;
     (void)remoteMac;
-    CLOGE(LOG_LABEL "not supported");
+    CONN_LOGE(CONN_WIFI_DIRECT, "not supported");
     return false;
 }
 
@@ -242,7 +242,7 @@ static int32_t GetInterfaceStaticArp(const char *interface, char *arpOutput[], i
     (void)interface;
     (void)arpOutput;
     (void)arpOutputLen;
-    CLOGE(LOG_LABEL "not supported");
+    CONN_LOGE(CONN_WIFI_DIRECT, "not supported");
     return SOFTBUS_ERR;
 }
 

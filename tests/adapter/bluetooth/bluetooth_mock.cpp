@@ -19,7 +19,7 @@
 
 #include "softbus_common.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_utils.h"
 
 MockBluetooth *MockBluetooth::targetMocker = nullptr;

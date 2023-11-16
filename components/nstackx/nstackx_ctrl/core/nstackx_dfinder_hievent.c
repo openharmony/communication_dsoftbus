@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -85,18 +85,18 @@ void NotifyStatisticsEvent(void)
     evt.paramNum = STAT_EVT_PARA_NUM;
     ret = memcpy_s(evt.eventName, DFINDER_EVENT_NAME_LEN, STAT_EVT_NAME, strlen(STAT_EVT_NAME));
     if (ret != EOK) {
-        DFINDER_LOGE(TAG, "memcpy_s eventName failed.");
+        DFINDER_LOGE(TAG, "memcpy_s eventName failed");
         return;
     }
 
     evt.params = CreateStatisticsEventParams();
     if (evt.params == NULL) {
-        DFINDER_LOGE(TAG, "SetStatisticsPara failed.");
+        DFINDER_LOGE(TAG, "create statistics params failed");
         return;
     }
     g_eventFunc(g_softObj, &evt);
     free(evt.params);
-    DFINDER_LOGD(TAG, "report the dfinder statistics event.");
+    DFINDER_LOGD(TAG, "report statistics event");
 }
 
 typedef struct {

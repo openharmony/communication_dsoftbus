@@ -19,14 +19,14 @@
 
 #include <securec.h>
 
+#include "lnn_log.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 
 bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type)
 {
     if (info == NULL || type >= DISCOVERY_TYPE_COUNT) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
+        LNN_LOGE(LNN_LEDGER, "para error");
         return false;
     }
     if (((uint32_t)info->discoveryType & (1 << (uint32_t)type)) != 0) {
@@ -49,7 +49,7 @@ int32_t LnnSetDeviceUdid(NodeInfo *info, const char *udid)
         return SOFTBUS_INVALID_PARAM;
     }
     if (strncpy_s(info->deviceInfo.deviceUdid, UDID_BUF_LEN, udid, strlen(udid)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
+        LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -66,7 +66,7 @@ const char *LnnGetDeviceUuid(const NodeInfo *info)
 int32_t LnnSetDiscoveryType(NodeInfo *info, DiscoveryType type)
 {
     if (info == NULL || type >= DISCOVERY_TYPE_COUNT) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
+        LNN_LOGE(LNN_LEDGER, "para error");
         return SOFTBUS_INVALID_PARAM;
     }
     info->discoveryType = (uint32_t)info->discoveryType | (1 << (uint32_t)type);
@@ -76,7 +76,7 @@ int32_t LnnSetDiscoveryType(NodeInfo *info, DiscoveryType type)
 int32_t LnnClearDiscoveryType(NodeInfo *info, DiscoveryType type)
 {
     if (info == NULL || type >= DISCOVERY_TYPE_COUNT) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
+        LNN_LOGE(LNN_LEDGER, "para error");
         return SOFTBUS_INVALID_PARAM;
     }
     info->discoveryType = (uint32_t)info->discoveryType & ~(1 << (uint32_t)type);
@@ -86,7 +86,7 @@ int32_t LnnClearDiscoveryType(NodeInfo *info, DiscoveryType type)
 bool LnnIsNodeOnline(const NodeInfo *info)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
+        LNN_LOGE(LNN_LEDGER, "para error");
         return false;
     }
     return (info->status == STATUS_ONLINE);
@@ -95,7 +95,7 @@ bool LnnIsNodeOnline(const NodeInfo *info)
 void LnnSetNodeConnStatus(NodeInfo *info, ConnectStatus status)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!!!");
+        LNN_LOGE(LNN_LEDGER, "para error");
         return;
     }
     info->status = status;
@@ -104,7 +104,7 @@ void LnnSetNodeConnStatus(NodeInfo *info, ConnectStatus status)
 const char *LnnGetBtMac(const NodeInfo *info)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
+        LNN_LOGE(LNN_LEDGER, "para error");
         return DEFAULT_MAC;
     }
     return info->connectInfo.macAddr;
@@ -113,11 +113,11 @@ const char *LnnGetBtMac(const NodeInfo *info)
 void LnnSetBtMac(NodeInfo *info, const char *mac)
 {
     if (info == NULL || mac == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PARA ERROR!");
+        LNN_LOGE(LNN_LEDGER, "PARA ERROR");
         return;
     }
     if (strncpy_s(info->connectInfo.macAddr, MAC_LEN, mac, strlen(mac)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "str copy error!");
+        LNN_LOGE(LNN_LEDGER, "str copy error");
     }
     return;
 }
@@ -125,7 +125,7 @@ void LnnSetBtMac(NodeInfo *info, const char *mac)
 const char *LnnGetNetIfName(const NodeInfo *info)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
+        LNN_LOGE(LNN_LEDGER, "para error");
         return DEFAULT_IFNAME;
     }
     return info->connectInfo.netIfName;
@@ -134,11 +134,11 @@ const char *LnnGetNetIfName(const NodeInfo *info)
 void LnnSetNetIfName(NodeInfo *info, const char *netIfName)
 {
     if (info == NULL || netIfName == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PARA ERROR!");
+        LNN_LOGE(LNN_LEDGER, "PARA ERROR");
         return;
     }
     if (strncpy_s(info->connectInfo.netIfName, NET_IF_NAME_LEN, netIfName, strlen(netIfName)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "str copy error!");
+        LNN_LOGE(LNN_LEDGER, "str copy error");
     }
     return;
 }
@@ -146,7 +146,7 @@ void LnnSetNetIfName(NodeInfo *info, const char *netIfName)
 const char *LnnGetWiFiIp(const NodeInfo *info)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PARA error!");
+        LNN_LOGE(LNN_LEDGER, "PARA error");
         return DEFAULT_IP;
     }
     return info->connectInfo.deviceIp;
@@ -155,11 +155,11 @@ const char *LnnGetWiFiIp(const NodeInfo *info)
 void LnnSetWiFiIp(NodeInfo *info, const char *ip)
 {
     if (info == NULL || ip == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PARA ERROR!");
+        LNN_LOGE(LNN_LEDGER, "PARA ERROR");
         return;
     }
     if (strncpy_s(info->connectInfo.deviceIp, sizeof(info->connectInfo.deviceIp), ip, strlen(ip)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
+        LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
     }
     return;
 }
@@ -167,7 +167,7 @@ void LnnSetWiFiIp(NodeInfo *info, const char *ip)
 const char *LnnGetMasterUdid(const NodeInfo *info)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PARA ERROR!");
+        LNN_LOGE(LNN_LEDGER, "PARA ERROR");
         return NULL;
     }
     return info->masterUdid;
@@ -176,11 +176,11 @@ const char *LnnGetMasterUdid(const NodeInfo *info)
 int32_t LnnSetMasterUdid(NodeInfo *info, const char *udid)
 {
     if (info == NULL || udid == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "PARA ERROR!");
+        LNN_LOGE(LNN_LEDGER, "PARA ERROR");
         return SOFTBUS_INVALID_PARAM;
     }
     if (strncpy_s(info->masterUdid, UDID_BUF_LEN, udid, strlen(udid)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "STR COPY ERROR!");
+        LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -189,7 +189,7 @@ int32_t LnnSetMasterUdid(NodeInfo *info, const char *udid)
 int32_t LnnGetAuthPort(const NodeInfo *info)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error");
+        LNN_LOGE(LNN_LEDGER, "para error");
         return SOFTBUS_INVALID_PARAM;
     }
     return info->connectInfo.authPort;
@@ -198,7 +198,7 @@ int32_t LnnGetAuthPort(const NodeInfo *info)
 int32_t LnnSetAuthPort(NodeInfo *info, int32_t port)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error.");
+        LNN_LOGE(LNN_LEDGER, "para error");
         return SOFTBUS_INVALID_PARAM;
     }
     info->connectInfo.authPort = port;
@@ -208,7 +208,7 @@ int32_t LnnSetAuthPort(NodeInfo *info, int32_t port)
 int32_t LnnGetSessionPort(const NodeInfo *info)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
+        LNN_LOGE(LNN_LEDGER, "para error");
         return SOFTBUS_INVALID_PARAM;
     }
     return info->connectInfo.sessionPort;
@@ -217,7 +217,7 @@ int32_t LnnGetSessionPort(const NodeInfo *info)
 int32_t LnnSetSessionPort(NodeInfo *info, int32_t port)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
+        LNN_LOGE(LNN_LEDGER, "para error");
         return SOFTBUS_INVALID_PARAM;
     }
     info->connectInfo.sessionPort = port;
@@ -227,7 +227,7 @@ int32_t LnnSetSessionPort(NodeInfo *info, int32_t port)
 int32_t LnnGetProxyPort(const NodeInfo *info)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
+        LNN_LOGE(LNN_LEDGER, "para error");
         return SOFTBUS_INVALID_PARAM;
     }
     return info->connectInfo.proxyPort;
@@ -236,7 +236,7 @@ int32_t LnnGetProxyPort(const NodeInfo *info)
 int32_t LnnSetProxyPort(NodeInfo *info, int32_t port)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
+        LNN_LOGE(LNN_LEDGER, "para error");
         return SOFTBUS_OK;
     }
     info->connectInfo.proxyPort = port;
@@ -246,7 +246,7 @@ int32_t LnnSetProxyPort(NodeInfo *info, int32_t port)
 int32_t LnnSetP2pRole(NodeInfo *info, int32_t p2pRole)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     info->p2pInfo.p2pRole = p2pRole;
@@ -256,7 +256,7 @@ int32_t LnnSetP2pRole(NodeInfo *info, int32_t p2pRole)
 int32_t LnnGetP2pRole(const NodeInfo *info)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        LNN_LOGE(LNN_LEDGER, "invalid param");
         return 0;
     }
     return info->p2pInfo.p2pRole;
@@ -265,11 +265,11 @@ int32_t LnnGetP2pRole(const NodeInfo *info)
 int32_t LnnSetWifiCfg(NodeInfo *info, const char *wifiCfg)
 {
     if (info == NULL || wifiCfg == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     if (strcpy_s(info->p2pInfo.wifiCfg, sizeof(info->p2pInfo.wifiCfg), wifiCfg) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy_s wifi cfg err.");
+        LNN_LOGE(LNN_LEDGER, "strcpy_s wifi cfg err");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -278,7 +278,7 @@ int32_t LnnSetWifiCfg(NodeInfo *info, const char *wifiCfg)
 const char *LnnGetWifiCfg(const NodeInfo *info)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        LNN_LOGE(LNN_LEDGER, "invalid param");
         return 0;
     }
     return info->p2pInfo.wifiCfg;
@@ -287,11 +287,11 @@ const char *LnnGetWifiCfg(const NodeInfo *info)
 int32_t LnnSetChanList5g(NodeInfo *info, const char *chanList5g)
 {
     if (info == NULL || chanList5g == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     if (strcpy_s(info->p2pInfo.chanList5g, sizeof(info->p2pInfo.chanList5g), chanList5g) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy_s chan list 5g err.");
+        LNN_LOGE(LNN_LEDGER, "strcpy_s chan list 5g err");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -300,7 +300,7 @@ int32_t LnnSetChanList5g(NodeInfo *info, const char *chanList5g)
 const char *LnnGetChanList5g(const NodeInfo *info)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        LNN_LOGE(LNN_LEDGER, "invalid param");
         return 0;
     }
     return info->p2pInfo.chanList5g;
@@ -309,7 +309,7 @@ const char *LnnGetChanList5g(const NodeInfo *info)
 int32_t LnnSetStaFrequency(NodeInfo *info, int32_t staFrequency)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     info->p2pInfo.staFrequency = staFrequency;
@@ -319,7 +319,7 @@ int32_t LnnSetStaFrequency(NodeInfo *info, int32_t staFrequency)
 int32_t LnnGetStaFrequency(const NodeInfo *info)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        LNN_LOGE(LNN_LEDGER, "invalid param");
         return 0;
     }
     return info->p2pInfo.staFrequency;
@@ -328,11 +328,11 @@ int32_t LnnGetStaFrequency(const NodeInfo *info)
 int32_t LnnSetP2pMac(NodeInfo *info, const char *p2pMac)
 {
     if (info == NULL || p2pMac == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     if (strcpy_s(info->p2pInfo.p2pMac, sizeof(info->p2pInfo.p2pMac), p2pMac) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy_s p2p mac err.");
+        LNN_LOGE(LNN_LEDGER, "strcpy_s p2p mac err");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -341,7 +341,7 @@ int32_t LnnSetP2pMac(NodeInfo *info, const char *p2pMac)
 const char *LnnGetP2pMac(const NodeInfo *info)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        LNN_LOGE(LNN_LEDGER, "invalid param");
         return NULL;
     }
     return info->p2pInfo.p2pMac;
@@ -350,7 +350,7 @@ const char *LnnGetP2pMac(const NodeInfo *info)
 int32_t LnnSetDataChangeFlag(NodeInfo *info, uint16_t dataChangeFlag)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     info->dataChangeFlag = dataChangeFlag;
@@ -360,7 +360,7 @@ int32_t LnnSetDataChangeFlag(NodeInfo *info, uint16_t dataChangeFlag)
 uint16_t LnnGetDataChangeFlag(const NodeInfo *info)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        LNN_LOGE(LNN_LEDGER, "invalid param");
         return 0;
     }
     return info->dataChangeFlag;
@@ -369,12 +369,12 @@ uint16_t LnnGetDataChangeFlag(const NodeInfo *info)
 int32_t LnnSetP2pGoMac(NodeInfo *info, const char *goMac)
 {
     if (info == NULL || goMac == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (strcpy_s(info->p2pInfo.goMac, sizeof(info->p2pInfo.goMac), goMac) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "strcpy_s go mac err.");
+        LNN_LOGE(LNN_LEDGER, "strcpy_s go mac err");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -383,7 +383,7 @@ int32_t LnnSetP2pGoMac(NodeInfo *info, const char *goMac)
 const char *LnnGetP2pGoMac(const NodeInfo *info)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        LNN_LOGE(LNN_LEDGER, "invalid param");
         return NULL;
     }
     return info->p2pInfo.goMac;
@@ -392,7 +392,7 @@ const char *LnnGetP2pGoMac(const NodeInfo *info)
 uint64_t LnnGetSupportedProtocols(const NodeInfo *info)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
+        LNN_LOGE(LNN_LEDGER, "para error");
         return 0;
     }
     return info->supportedProtocols;
@@ -401,7 +401,7 @@ uint64_t LnnGetSupportedProtocols(const NodeInfo *info)
 int32_t LnnSetSupportedProtocols(NodeInfo *info, uint64_t protocols)
 {
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
+        LNN_LOGE(LNN_LEDGER, "para error");
         return SOFTBUS_OK;
     }
     info->supportedProtocols = protocols;

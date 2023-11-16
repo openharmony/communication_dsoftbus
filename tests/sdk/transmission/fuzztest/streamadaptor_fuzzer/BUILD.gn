@@ -30,6 +30,7 @@ ohos_fuzztest("StreamAdaptorFuzzTest") {
     "../../../../../sdk/transmission/trans_channel/udp/stream/libsoftbus_stream/include",
     "../../../../../adapter/common/include",
     "../../../../../core/common/include",
+    "../../../../../core/common/dfx/interface/include",
     "//commonlibrary/c_utils/base/include",
     "//third_party/bounds_checking_function/include",
   ]

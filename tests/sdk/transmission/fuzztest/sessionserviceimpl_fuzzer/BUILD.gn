@@ -26,6 +26,7 @@ ohos_fuzztest("SessionServiceImplFuzzTest") {
     "../../../../../core/common/inner_communication",
     "../../../../../adapter/common/include",
     "../../../../../core/common/include",
+    "../../../../../core/common/dfx/interface/include",
     "../../../../../interfaces/kits/common",
     "../../../../../interfaces/inner_kits/transport",
     "../../../../../sdk/transmission/session/cpp/src",

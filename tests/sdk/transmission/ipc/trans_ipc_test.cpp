@@ -26,7 +26,6 @@
 #include "softbus_def.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_feature_config.h"
-#include "softbus_log.h"
 #include "softbus_access_token_test.h"
 #include "session.h"
 #include "trans_server_proxy.h"

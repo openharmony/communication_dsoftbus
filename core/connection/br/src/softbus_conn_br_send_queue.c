@@ -19,13 +19,13 @@
 #include <string.h>
 
 #include "common_list.h"
+#include "conn_log.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_common.h"
 #include "softbus_conn_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "softbus_queue.h"
 #include "softbus_type_def.h"
 
@@ -130,7 +130,7 @@ int32_t ConnBrEnqueueNonBlock(const void *msg)
     if (lockFreeQueue == NULL) {
         ConnectionQueue *newQueue = CreateBrQueue(queueNode->pid);
         if (newQueue == NULL) {
-            CLOGE("create queue fail");
+            CONN_LOGE(CONN_BR, "create queue fail");
             goto END;
         }
         ListTailInsert(&g_brQueueList, &(newQueue->node));
@@ -188,9 +188,9 @@ int32_t ConnBrDequeueBlock(void **msg)
             status = SOFTBUS_OK;
             break;
         }
-        CLOGD("br queue is empty, dequeue start wait ...");
+        CONN_LOGD(CONN_BR, "br queue is empty, dequeue start wait ...");
         if (SoftBusCondWait(&g_sendCond, &g_brQueueLock, NULL) != SOFTBUS_OK) {
-            CLOGD("BrSendCondWait failed");
+            CONN_LOGD(CONN_BR, "BrSendCondWait failed");
             status = SOFTBUS_ERR;
             break;
         }
@@ -219,7 +219,7 @@ int32_t ConnBrInnerQueueInit(void)
     }
     g_innerQueue = CreateBrQueue(0);
     if (g_innerQueue == NULL) {
-        CLOGE("CreateBrQueue failed");
+        CONN_LOGE(CONN_BR, "CreateBrQueue failed");
         (void)SoftBusMutexDestroy(&g_brQueueLock);
         (void)SoftBusCondDestroy(&g_sendWaitCond);
         (void)SoftBusCondDestroy(&g_sendCond);

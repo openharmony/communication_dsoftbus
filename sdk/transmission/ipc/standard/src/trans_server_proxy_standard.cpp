@@ -21,7 +21,7 @@
 #include "message_parcel.h"
 #include "softbus_errcode.h"
 #include "softbus_server_ipc_interface_code.h"
-#include "softbus_log.h"
+#include "trans_log.h"
 
 namespace OHOS {
 static uint32_t g_getSystemAbilityId = 2;
@@ -39,12 +39,12 @@ static sptr<IRemoteObject> GetSystemAbility()
     MessageOption option;
     sptr<IRemoteObject> samgr = IPCSkeleton::GetContextObject();
     if (samgr == nullptr) {
-        TLOGE("Get samgr failed!");
+        TRANS_LOGE(TRANS_SDK, "Get samgr failed!");
         return nullptr;
     }
     int32_t err = samgr->SendRequest(g_getSystemAbilityId, data, reply, option);
     if (err != 0) {
-        TLOGE("Get GetSystemAbility failed!");
+        TRANS_LOGE(TRANS_SDK, "Get GetSystemAbility failed!");
         return nullptr;
     }
     return reply.ReadRemoteObject();
@@ -92,34 +92,34 @@ int32_t TransServerProxy::CreateSessionServer(const char *pkgName, const char *s
     }
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        TRANS_LOGE(TRANS_SDK, "remote is nullptr!");
         return SOFTBUS_ERR;
     }
 
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreateSessionServer write InterfaceToken failed!");
+        TRANS_LOGE(TRANS_SDK, "write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteCString(pkgName)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreateSessionServer write pkg name failed!");
+        TRANS_LOGE(TRANS_SDK, "write pkg name failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteCString(sessionName)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreateSessionServer write session name failed!");
+        TRANS_LOGE(TRANS_SDK, "write session name failed!");
         return SOFTBUS_ERR;
     }
     MessageParcel reply;
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_CREATE_SESSION_SERVER, data, reply, option);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreateSessionServer send request failed! ret=%{public}d",
+        TRANS_LOGE(TRANS_SDK, "send request failed! ret=%{public}d",
             ret);
         return SOFTBUS_ERR;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreateSessionServer read serverRet failed!");
+        TRANS_LOGE(TRANS_SDK, "read serverRet failed!");
         return SOFTBUS_ERR;
     }
     return serverRet;
@@ -132,34 +132,34 @@ int32_t TransServerProxy::RemoveSessionServer(const char *pkgName, const char *s
     }
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        TRANS_LOGE(TRANS_SDK, "remote is nullptr!");
         return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
     }
 
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RemoveSessionServer write InterfaceToken failed!");
+        TRANS_LOGE(TRANS_SDK, "write InterfaceToken failed!");
         return SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED;
     }
     if (!data.WriteCString(pkgName)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RemoveSessionServer write pkg name failed!");
+        TRANS_LOGE(TRANS_SDK, "write pkg name failed!");
         return SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED;
     }
     if (!data.WriteCString(sessionName)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RemoveSessionServer session name failed!");
+        TRANS_LOGE(TRANS_SDK, "session name failed!");
         return SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED;
     }
     MessageParcel reply;
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_REMOVE_SESSION_SERVER, data, reply, option);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RemoveSessionServer send request failed! ret=%{public}d",
+        TRANS_LOGE(TRANS_SDK, "send request failed! ret=%{public}d",
             ret);
         return SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RemoveSessionServer read serverRet failed!");
+        TRANS_LOGE(TRANS_SDK, "read serverRet failed!");
         return SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED;
     }
     return serverRet;
@@ -168,44 +168,61 @@ int32_t TransServerProxy::RemoveSessionServer(const char *pkgName, const char *s
 static bool TransWriteSessionAttrs(const SessionAttribute *attrs, MessageParcel &data)
 {
     if (attrs == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "attrs is nullptr!");
+        TRANS_LOGE(TRANS_SDK, "attrs is nullptr!");
         return false;
     }
 
     if (!data.WriteInt32(attrs->dataType)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my attrs dataType failed!");
+        TRANS_LOGE(TRANS_SDK, "OpenSession write my attrs dataType failed!");
         return false;
     }
 
     if (!data.WriteInt32(attrs->linkTypeNum)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my attrs linkTypeNum failed!");
+        TRANS_LOGE(TRANS_SDK, "OpenSession write my attrs linkTypeNum failed!");
         return false;
     }
 
     if (attrs->linkTypeNum > 0) {
         if (!data.WriteBuffer(attrs->linkType, sizeof(LinkType) * attrs->linkTypeNum)) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my attrs linkType failed!");
+            TRANS_LOGE(TRANS_SDK, "OpenSession write my attrs linkType failed!");
             return false;
         }
     }
 
     if (!data.WriteInt32(attrs->attr.streamAttr.streamType)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my attrs streamAttr failed!");
+        TRANS_LOGE(TRANS_SDK, "OpenSession write my attrs streamAttr failed!");
         return false;
     }
 
     if (attrs->fastTransData != nullptr) {
         if (!data.WriteUint16(attrs->fastTransDataSize)) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my attrs fastTransDataSize failed!");
+            TRANS_LOGE(TRANS_SDK, "OpenSession write my attrs fastTransDataSize failed!");
             return false;
         }
         if (!data.WriteRawData(attrs->fastTransData, attrs->fastTransDataSize)) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my attrs fastTransData failed!");
+            TRANS_LOGE(TRANS_SDK, "OpenSession write my attrs fastTransData failed!");
             return false;
         }
     } else {
         if (!data.WriteUint16(0)) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my attrs fastTransDataSize failed!");
+            TRANS_LOGE(TRANS_SDK, "OpenSession write my attrs fastTransDataSize failed!");
+            return false;
+        }
+    }
+
+    return true;
+}
+
+static bool WriteQosInfo(const SessionParam *param, MessageParcel &data)
+{
+    if (!data.WriteUint32(param->qosCount)) {
+        TRANS_LOGE(TRANS_SDK, "OpenSession write count of qos failed!");
+        return false;
+    }
+
+    if (param->qosCount > 0) {
+        if (!data.WriteBuffer(param->qos, sizeof(QosTV) * param->qosCount)) {
+            TRANS_LOGE(TRANS_SDK, "OpenSession write qos info failed!");
             return false;
         }
     }
@@ -221,47 +238,52 @@ int32_t TransServerProxy::OpenSession(const SessionParam *param, TransInfo *info
     }
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        TRANS_LOGE(TRANS_SDK, "remote is nullptr!");
         return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
     }
 
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write InterfaceToken failed!");
+        TRANS_LOGE(TRANS_SDK, "OpenSession write InterfaceToken failed!");
         return SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED;
     }
     if (!data.WriteCString(param->sessionName)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my session name failed!");
+        TRANS_LOGE(TRANS_SDK, "OpenSession write my session name failed!");
         return SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED;
     }
     if (!data.WriteCString(param->peerSessionName)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write peer session name failed!");
+        TRANS_LOGE(TRANS_SDK, "OpenSession write peer session name failed!");
         return SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED;
     }
     if (!data.WriteCString(param->peerDeviceId)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write addr type length failed!");
+        TRANS_LOGE(TRANS_SDK, "OpenSession write addr type length failed!");
         return SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED;
     }
     if (!data.WriteCString(param->groupId)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write addr type length failed!");
+        TRANS_LOGE(TRANS_SDK, "OpenSession write addr type length failed!");
         return SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED;
     }
 
     if (!TransWriteSessionAttrs(param->attr, data)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write attr failed!");
+        TRANS_LOGE(TRANS_SDK, "OpenSession write attr failed!");
         return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;
+    }
+
+    if (!WriteQosInfo(param, data)) {
+        TRANS_LOGE(TRANS_SDK, "OpenSession write qos failed!");
+        return SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED;
     }
 
     MessageParcel reply;
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_OPEN_SESSION, data, reply, option);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession send request failed! ret=%{public}d", ret);
+        TRANS_LOGE(TRANS_SDK, "OpenSession send request failed! ret=%{public}d", ret);
         return SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED;
     }
     TransSerializer *transSerializer = (TransSerializer *)reply.ReadRawData(sizeof(TransSerializer));
     if (transSerializer == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OpenSession read TransSerializer failed!");
+        TRANS_LOGE(TRANS_SDK, "OpenSession read TransSerializer failed!");
         return SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED;
     }
     info->channelId = transSerializer->transInfo.channelId;
@@ -274,24 +296,27 @@ int32_t TransServerProxy::OpenAuthSession(const char *sessionName, const Connect
     if (sessionName == nullptr || addrInfo == nullptr) {
         return SOFTBUS_INVALID_PARAM;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "%s ServerIpcOpenAuthSession begin", sessionName);
+    char *tmpName = nullptr;
+    Anonymize(sessionName, &tmpName);
+    TRANS_LOGI(TRANS_SDK, "sessionName=%s ServerIpcOpenAuthSession begin", tmpName);
+    AnonymizeFree(tmpName);
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        TRANS_LOGE(TRANS_SDK, "remote is nullptr!");
         return SOFTBUS_ERR;
     }
 
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write InterfaceToken failed!");
+        TRANS_LOGE(TRANS_SDK, "OpenSession write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteCString(sessionName)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write my session name failed!");
+        TRANS_LOGE(TRANS_SDK, "OpenSession write my session name failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteRawData((void *)addrInfo, sizeof(ConnectionAddr))) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession write ConnectionAddr failed!");
+        TRANS_LOGE(TRANS_SDK, "OpenSession write ConnectionAddr failed!");
         return SOFTBUS_ERR;
     }
 
@@ -299,12 +324,12 @@ int32_t TransServerProxy::OpenAuthSession(const char *sessionName, const Connect
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_OPEN_AUTH_SESSION, data, reply, option);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession send request failed! ret=%{public}d", ret);
+        TRANS_LOGE(TRANS_SDK, "OpenSession send request failed! ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     int32_t channelId = 0;
     if (!reply.ReadInt32(channelId)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSession read channelId failed!");
+        TRANS_LOGE(TRANS_SDK, "OpenSession read channelId failed!");
         return SOFTBUS_ERR;
     }
     return channelId;
@@ -314,20 +339,20 @@ int32_t TransServerProxy::NotifyAuthSuccess(int32_t channelId, int32_t channelTy
 {
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        TRANS_LOGE(TRANS_SDK, "remote is nullptr!");
         return SOFTBUS_ERR;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcNotifyAuthSuccess write InterfaceToken failed!");
+        TRANS_LOGE(TRANS_SDK, "ServerIpcNotifyAuthSuccess write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(channelId)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcNotifyAuthSuccess write channel id failed!");
+        TRANS_LOGE(TRANS_SDK, "ServerIpcNotifyAuthSuccess write channel id failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(channelType)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcNotifyAuthSuccess write channel type failed!");
+        TRANS_LOGE(TRANS_SDK, "ServerIpcNotifyAuthSuccess write channel type failed!");
         return SOFTBUS_ERR;
     }
 
@@ -335,13 +360,13 @@ int32_t TransServerProxy::NotifyAuthSuccess(int32_t channelId, int32_t channelTy
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_NOTIFY_AUTH_SUCCESS, data, reply, option);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
+        TRANS_LOGE(TRANS_SDK,
             "ServerIpcNotifyAuthSuccess send request failed! ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ServerIpcNotifyAuthSuccess read serverRet failed!");
+        TRANS_LOGE(TRANS_SDK, "ServerIpcNotifyAuthSuccess read serverRet failed!");
         return SOFTBUS_ERR;
     }
     return serverRet;
@@ -351,20 +376,20 @@ int32_t TransServerProxy::CloseChannel(int32_t channelId, int32_t channelType)
 {
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        TRANS_LOGE(TRANS_SDK, "remote is nullptr!");
         return SOFTBUS_ERR;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CloseChannel write InterfaceToken failed!");
+        TRANS_LOGE(TRANS_SDK, "CloseChannel write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(channelId)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CloseChannel write channel id failed!");
+        TRANS_LOGE(TRANS_SDK, "CloseChannel write channel id failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(channelType)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CloseChannel write channel type failed!");
+        TRANS_LOGE(TRANS_SDK, "CloseChannel write channel type failed!");
         return SOFTBUS_ERR;
     }
 
@@ -372,12 +397,12 @@ int32_t TransServerProxy::CloseChannel(int32_t channelId, int32_t channelType)
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_CLOSE_CHANNEL, data, reply, option);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CloseChannel send request failed! ret=%{public}d", ret);
+        TRANS_LOGE(TRANS_SDK, "CloseChannel send request failed! ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CloseChannel read serverRet failed!");
+        TRANS_LOGE(TRANS_SDK, "CloseChannel read serverRet failed!");
         return SOFTBUS_ERR;
     }
     return serverRet;
@@ -388,32 +413,32 @@ int32_t TransServerProxy::SendMessage(int32_t channelId, int32_t channelType, co
 {
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        TRANS_LOGE(TRANS_SDK, "remote is nullptr!");
         return SOFTBUS_ERR;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendMessage write InterfaceToken failed!");
+        TRANS_LOGE(TRANS_SDK, "SendMessage write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(channelId)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendMessage write channel id failed!");
+        TRANS_LOGE(TRANS_SDK, "SendMessage write channel id failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(channelType)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendMessage write channel type failed!");
+        TRANS_LOGE(TRANS_SDK, "SendMessage write channel type failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteUint32(len)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendMessage write dataInfo len failed!");
+        TRANS_LOGE(TRANS_SDK, "SendMessage write dataInfo len failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteRawData(dataInfo, len)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendMessage write dataInfo failed!");
+        TRANS_LOGE(TRANS_SDK, "SendMessage write dataInfo failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(msgType)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendMessage msgType failed!");
+        TRANS_LOGE(TRANS_SDK, "SendMessage msgType failed!");
         return SOFTBUS_ERR;
     }
 
@@ -421,12 +446,12 @@ int32_t TransServerProxy::SendMessage(int32_t channelId, int32_t channelType, co
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_SESSION_SENDMSG, data, reply, option);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendMessage send request failed! ret=%{public}d", ret);
+        TRANS_LOGE(TRANS_SDK, "SendMessage send request failed! ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SendMessage read serverRet failed!");
+        TRANS_LOGE(TRANS_SDK, "SendMessage read serverRet failed!");
         return SOFTBUS_ERR;
     }
     return serverRet;
@@ -436,28 +461,28 @@ int32_t TransServerProxy::QosReport(int32_t channelId, int32_t chanType, int32_t
 {
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        TRANS_LOGE(TRANS_SDK, "remote is nullptr!");
         return SOFTBUS_ERR;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "QosReport write InterfaceToken failed!");
+        TRANS_LOGE(TRANS_SDK, "QosReport write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(channelId)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "QosReport channelId failed!");
+        TRANS_LOGE(TRANS_SDK, "QosReport channelId failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(chanType)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "QosReport chanType failed!");
+        TRANS_LOGE(TRANS_SDK, "QosReport chanType failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(appType)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "QosReport appType failed!");
+        TRANS_LOGE(TRANS_SDK, "QosReport appType failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(quality)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "QosReport quality failed!");
+        TRANS_LOGE(TRANS_SDK, "QosReport quality failed!");
         return SOFTBUS_ERR;
     }
 
@@ -465,12 +490,12 @@ int32_t TransServerProxy::QosReport(int32_t channelId, int32_t chanType, int32_t
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_QOS_REPORT, data, reply, option);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "QosReport send request failed! ret=%{public}d", ret);
+        TRANS_LOGE(TRANS_SDK, "QosReport send request failed! ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "QosReport read serverRet failed!");
+        TRANS_LOGE(TRANS_SDK, "QosReport read serverRet failed!");
         return SOFTBUS_ERR;
     }
     return serverRet;
@@ -480,35 +505,35 @@ int32_t TransServerProxy::StreamStats(int32_t channelId, int32_t channelType, co
 {
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        TRANS_LOGE(TRANS_SDK, "remote is nullptr!");
         return SOFTBUS_ERR;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "StreamStats write InterfaceToken failed!");
+        TRANS_LOGE(TRANS_SDK, "StreamStats write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(channelId)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "StreamStats channelId failed!");
+        TRANS_LOGE(TRANS_SDK, "StreamStats channelId failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(channelType)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "StreamStats channelType failed!");
+        TRANS_LOGE(TRANS_SDK, "StreamStats channelType failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteRawData((void *)statsData, sizeof(StreamSendStats))) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write streamSendStats failed!");
+        TRANS_LOGE(TRANS_SDK, "write streamSendStats failed!");
         return SOFTBUS_ERR;
     }
     MessageParcel reply;
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_STREAM_STATS, data, reply, option);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "StreamStats send request failed, ret:%{public}d", ret);
+        TRANS_LOGE(TRANS_SDK, "StreamStats send request failed, ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     if (!reply.ReadInt32(ret)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "StreamStats read serverRet failed");
+        TRANS_LOGE(TRANS_SDK, "StreamStats read serverRet failed");
         return SOFTBUS_ERR;
     }
     return ret;
@@ -518,35 +543,35 @@ int32_t TransServerProxy::RippleStats(int32_t channelId, int32_t channelType, co
 {
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        TRANS_LOGE(TRANS_SDK, "remote is nullptr!");
         return SOFTBUS_ERR;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RippleStats write InterfaceToken failed!");
+        TRANS_LOGE(TRANS_SDK, "RippleStats write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(channelId)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RippleStats channelId failed!");
+        TRANS_LOGE(TRANS_SDK, "RippleStats channelId failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(channelType)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RippleStats channelType failed!");
+        TRANS_LOGE(TRANS_SDK, "RippleStats channelType failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteRawData((void *)statsData, sizeof(TrafficStats))) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "write RippleStats failed!");
+        TRANS_LOGE(TRANS_SDK, "write RippleStats failed!");
         return SOFTBUS_ERR;
     }
     MessageParcel reply;
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_RIPPLE_STATS, data, reply, option);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RippleStats send request failed, ret:%{public}d", ret);
+        TRANS_LOGE(TRANS_SDK, "RippleStats send request failed, ret:%{public}d", ret);
         return SOFTBUS_ERR;
     }
     if (!reply.ReadInt32(ret)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RippleStats read serverRet failed");
+        TRANS_LOGE(TRANS_SDK, "RippleStats read serverRet failed");
         return SOFTBUS_ERR;
     }
     return ret;
@@ -556,24 +581,24 @@ int32_t TransServerProxy::GrantPermission(int uid, int pid, const char *sessionN
 {
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        TRANS_LOGE(TRANS_SDK, "remote is nullptr!");
         return SOFTBUS_ERR;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GrantPermission write InterfaceToken failed!");
+        TRANS_LOGE(TRANS_SDK, "GrantPermission write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(uid)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GrantPermission write uid failed!");
+        TRANS_LOGE(TRANS_SDK, "GrantPermission write uid failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteInt32(pid)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GrantPermission write pid failed!");
+        TRANS_LOGE(TRANS_SDK, "GrantPermission write pid failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteCString(sessionName)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GrantPermission write sessionName failed!");
+        TRANS_LOGE(TRANS_SDK, "GrantPermission write sessionName failed!");
         return SOFTBUS_ERR;
     }
 
@@ -581,11 +606,11 @@ int32_t TransServerProxy::GrantPermission(int uid, int pid, const char *sessionN
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_GRANT_PERMISSION, data, reply, option);
     if (ret != ERR_NONE) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GrantPermission send request failed, ret=%{public}d", ret);
+        TRANS_LOGE(TRANS_SDK, "GrantPermission send request failed, ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     if (!reply.ReadInt32(ret)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GrantPermission read serverRet failed!");
+        TRANS_LOGE(TRANS_SDK, "GrantPermission read serverRet failed!");
         return SOFTBUS_ERR;
     }
     return ret;
@@ -595,16 +620,16 @@ int32_t TransServerProxy::RemovePermission(const char *sessionName)
 {
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is nullptr!");
+        TRANS_LOGE(TRANS_SDK, "remote is nullptr!");
         return SOFTBUS_ERR;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RemovePermission write InterfaceToken failed!");
+        TRANS_LOGE(TRANS_SDK, "RemovePermission write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     if (!data.WriteCString(sessionName)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RemovePermission write sessionName failed!");
+        TRANS_LOGE(TRANS_SDK, "RemovePermission write sessionName failed!");
         return SOFTBUS_ERR;
     }
 
@@ -612,11 +637,11 @@ int32_t TransServerProxy::RemovePermission(const char *sessionName)
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_REMOVE_PERMISSION, data, reply, option);
     if (ret != ERR_NONE) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RemovePermission send request failed, ret=%{public}d", ret);
+        TRANS_LOGE(TRANS_SDK, "RemovePermission send request failed, ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     if (!reply.ReadInt32(ret)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RemovePermission read serverRet failed!");
+        TRANS_LOGE(TRANS_SDK, "RemovePermission read serverRet failed!");
         return SOFTBUS_ERR;
     }
     return ret;
@@ -710,24 +735,24 @@ int32_t TransServerProxy::GetSoftbusSpecObject(sptr<IRemoteObject> &object)
 {
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "remote is null");
+        TRANS_LOGE(TRANS_SDK, "remote is null");
         return SOFTBUS_ERR;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetSoftbusSpecObject write InterfaceToken failed!");
+        TRANS_LOGE(TRANS_SDK, "GetSoftbusSpecObject write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
     MessageParcel reply;
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_GET_SOFTBUS_SPEC_OBJECT, data, reply, option);
     if (ret != ERR_NONE) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetSoftbusSpecObject send request failed, ret=%{public}d",
+        TRANS_LOGE(TRANS_SDK, "GetSoftbusSpecObject send request failed, ret=%{public}d",
             ret);
         return SOFTBUS_ERR;
     }
     if (!reply.ReadInt32(ret)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetSoftbusSpecObject send ret failed");
+        TRANS_LOGE(TRANS_SDK, "GetSoftbusSpecObject send ret failed");
         return SOFTBUS_ERR;
     }
     if (ret == SOFTBUS_OK) {

@@ -17,11 +17,11 @@
 #include <stddef.h>
 #include <string.h>
 
+#include "lnn_log.h"
 #include "lnn_network_manager.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 
 #define MAX_SUPPORTED_PHYSICAL_SUBNET 6
 
@@ -32,7 +32,7 @@ static LnnPhysicalSubnet *g_physicalSubnets[MAX_SUPPORTED_PHYSICAL_SUBNET];
     do {                                                                     \
         ret = SoftBusMutexLock(LOCK);                                        \
         if (ret != SOFTBUS_OK) {                                             \
-            HILOG_ERROR(SOFTBUS_HILOG_ID, "%s:lock mutex failed", __func__); \
+            LNN_LOGE(LNN_BUILDER, "lock mutex failed"); \
             break;                                                           \
         }                                                                    \
         (RET) = (ACTION);                                                    \
@@ -42,7 +42,7 @@ static LnnPhysicalSubnet *g_physicalSubnets[MAX_SUPPORTED_PHYSICAL_SUBNET];
 #define CALL_VOID_FUNC_WITH_LOCK(LOCK, ACTION)                               \
     do {                                                                     \
         if (SoftBusMutexLock(LOCK) != 0) {                                   \
-            HILOG_ERROR(SOFTBUS_HILOG_ID, "%s:lock mutex failed", __func__); \
+            LNN_LOGE(LNN_BUILDER, "lock mutex failed"); \
             break;                                                           \
         }                                                                    \
         (ACTION);                                                            \
@@ -70,7 +70,7 @@ void LnnDeinitPhysicalSubnetManager(void)
 {
     CALL_VOID_FUNC_WITH_LOCK(&g_physicalSubnetsLock, ClearSubnetManager());
     if (SoftBusMutexDestroy(&g_physicalSubnetsLock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s: destroy mutex failed!", __func__);
+        LNN_LOGE(LNN_BUILDER, "destroy mutex failed");
     }
 }
 
@@ -86,14 +86,14 @@ static int32_t DoRegistSubnet(LnnPhysicalSubnet *subnet)
         }
         return SOFTBUS_OK;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s: subnet list is full", __func__);
+    LNN_LOGE(LNN_BUILDER, "subnet list is full");
     return SOFTBUS_ERR;
 }
 
 int32_t LnnRegistPhysicalSubnet(LnnPhysicalSubnet *subnet)
 {
     if (subnet == NULL || subnet->protocol == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s: protocol of subnet is required!", __func__);
+        LNN_LOGE(LNN_BUILDER, "protocol of subnet is required");
         return SOFTBUS_ERR;
     }
     int32_t ret = SOFTBUS_OK;

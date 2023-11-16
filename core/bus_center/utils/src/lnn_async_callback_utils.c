@@ -16,10 +16,10 @@
 #include "lnn_async_callback_utils.h"
 
 #include "common_list.h"
+#include "lnn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 
 #define LNN_ASYNC_CALLBACK_HANDLER_NAME "LnnAsyncHandler"
 
@@ -39,16 +39,16 @@ static void AsyncCallbackHandler(SoftBusMessage *msg)
     AsyncCallbackInfo *info = NULL;
 
     if (msg == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail async callback recv null msg");
+        LNN_LOGE(LNN_STATE, "fail async callback recv null msg");
         return;
     }
     info = (AsyncCallbackInfo *)msg->obj;
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail async callback recv null info");
+        LNN_LOGE(LNN_STATE, "fail async callback recv null info");
         return;
     }
     if (info->callback == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail async callback function is null");
+        LNN_LOGE(LNN_STATE, "fail async callback function is null");
         return;
     }
     info->callback(info->cbPara);
@@ -59,7 +59,7 @@ static void FreeAsyncCallbackMessage(SoftBusMessage *msg)
     AsyncCallbackInfo *info = NULL;
 
     if (msg == NULL || msg->obj == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: looper or callback is null");
+        LNN_LOGE(LNN_STATE, "fail: looper or callback is null");
         return;
     }
     info = (AsyncCallbackInfo *)msg->obj;
@@ -88,7 +88,7 @@ static AsyncCallbackInfo *CreateAsyncCallbackInfo(SoftBusLooper *looper,
 
     info = SoftBusCalloc(sizeof(AsyncCallbackInfo));
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail to malloc async callback info");
+        LNN_LOGE(LNN_STATE, "fail to malloc async callback info");
         return NULL;
     }
     info->callback = callback;
@@ -103,12 +103,12 @@ int32_t LnnAsyncCallbackHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callb
     AsyncCallbackInfo *info = NULL;
 
     if (looper == NULL || callback == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: looper or callback is null");
+        LNN_LOGE(LNN_STATE, "fail: looper or callback is null");
         return SOFTBUS_INVALID_PARAM;
     }
     info = CreateAsyncCallbackInfo(looper, callback, para, LNN_ASYNC_CALLBACK_REG);
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail to create async callback info");
+        LNN_LOGE(LNN_STATE, "fail to create async callback info");
         return SOFTBUS_MEM_ERR;
     }
     looper->PostMessage(looper, &info->msg);
@@ -121,12 +121,12 @@ int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc 
     AsyncCallbackInfo *info = NULL;
 
     if (looper == NULL || callback == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail: looper or callback is null");
+        LNN_LOGE(LNN_STATE, "fail: looper or callback is null");
         return SOFTBUS_INVALID_PARAM;
     }
     info = CreateAsyncCallbackInfo(looper, callback, para, LNN_ASYNC_CALLBACK_REG);
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fail to create async callback info");
+        LNN_LOGE(LNN_STATE, "fail to create async callback info");
         return SOFTBUS_MEM_ERR;
     }
     looper->PostMessageDelay(looper, &info->msg, delayMillis);

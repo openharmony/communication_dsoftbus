@@ -16,12 +16,11 @@
 #include "softbus_tcp_socket.h"
 #include <fcntl.h>
 #include <securec.h>
-
+#include "conn_log.h"
 #include "softbus_adapter_errcode.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_conn_common.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "softbus_socket.h"
 
 #define M_BYTES               0x100000
@@ -35,7 +34,7 @@ static int SetReusePort(int fd, int on)
 {
     int rc = SoftBusSocketSetOpt(fd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_REUSEPORT, &on, sizeof(on));
     if (rc != 0) {
-        CLOGE("set SO_REUSEPORT");
+        CONN_LOGE(CONN_COMMON, "set SO_REUSEPORT failed");
         return -1;
     }
     return 0;
@@ -46,7 +45,7 @@ static int SetReuseAddr(int fd, int on)
 {
     int rc = SoftBusSocketSetOpt(fd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_REUSEADDR, &on, sizeof(on));
     if (rc != 0) {
-        CLOGE("set SO_REUSEADDR");
+        CONN_LOGE(CONN_COMMON, "set SO_REUSEADDR failed");
         return -1;
     }
     return 0;
@@ -56,7 +55,7 @@ static int SetNoDelay(int fd, int on)
 {
     int rc = SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_TCP, SOFTBUS_TCP_NODELAY, &on, sizeof(on));
     if (rc != 0) {
-        CLOGE("set TCP_NODELAY");
+        CONN_LOGE(CONN_COMMON, "set TCP_NODELAY failed");
         return -1;
     }
     return 0;
@@ -71,7 +70,7 @@ static int SetQuickStart(int fd, int quick)
     errno = 0;
     int rc = setsockopt(fd, SOFTBUS_IPPROTO_TCP, TCP_QUICK_START, &quick, sizeof(quick));
     if (rc != 0) {
-        CLOGE("set TCP_QUICK_START");
+        CONN_LOGE(CONN_COMMON, "set TCP_QUICK_START");
         return -1;
     }
     return 0;
@@ -81,7 +80,7 @@ static int SetSendBufFix(int fd, int val)
 {
     int rc = setsockopt(fd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_SNDBUF, &val, sizeof(val));
     if (rc != 0) {
-        CLOGE("set SOFTBUS_SO_SNDBUF");
+        CONN_LOGE(CONN_COMMON, "set SOFTBUS_SO_SNDBUF");
         return -1;
     }
     return 0;
@@ -91,7 +90,7 @@ static int SetRcvBufFix(int fd, int val)
 {
     int rc = setsockopt(fd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_RCVBUF, &val, sizeof(val));
     if (rc != 0) {
-        CLOGE("set SOFTBUS_SO_RCVBUF");
+        CONN_LOGE(CONN_COMMON, "set SOFTBUS_SO_RCVBUF");
         return -1;
     }
     return 0;
@@ -161,19 +160,19 @@ static int BindLocalIP(int fd, const char *localIP, uint16_t port)
     SoftBusSockAddrIn addr;
 
     if (memset_s(&addr, sizeof(addr), 0, sizeof(addr)) != EOK) {
-        CLOGE("memset failed");
+        CONN_LOGW(CONN_COMMON, "memset failed");
     }
 
     addr.sinFamily = SOFTBUS_AF_INET;
     int rc = SoftBusInetPtoN(SOFTBUS_AF_INET, localIP, &addr.sinAddr);
     if (rc != SOFTBUS_ADAPTER_OK) {
-        CLOGE("SoftBusInetPtoN rc=%d", rc);
+        CONN_LOGE(CONN_COMMON, "SoftBusInetPtoN rc=%d", rc);
         return SOFTBUS_ERR;
     }
     addr.sinPort = SoftBusHtoNs(port);
     rc = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketBind(fd, (SoftBusSockAddr *)&addr, sizeof(addr)));
     if (rc < 0) {
-        CLOGE("bind fd=%d,rc=%d", fd, rc);
+        CONN_LOGE(CONN_COMMON, "bind fd=%d,rc=%d", fd, rc);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -183,7 +182,7 @@ int32_t SetIpTos(int fd, uint32_t tos)
 {
     int rc = SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_IP, SOFTBUS_IP_TOS, &tos, sizeof(tos));
     if (rc != 0) {
-        CLOGE("set tos failed");
+        CONN_LOGE(CONN_COMMON, "set tos failed");
         return SOFTBUS_TCP_SOCKET_ERR;
     }
     return SOFTBUS_OK;
@@ -192,15 +191,15 @@ int32_t SetIpTos(int fd, uint32_t tos)
 static int32_t OpenTcpServerSocket(const LocalListenerInfo *option)
 {
     if (option == NULL) {
-        CLOGE("null ptr!");
+        CONN_LOGE(CONN_COMMON, "null ptr!");
         return -1;
     }
     if (option->type != CONNECT_TCP && option->type != CONNECT_P2P) {
-        CLOGE("bad type!type=%d", option->type);
+        CONN_LOGE(CONN_COMMON, "bad type!type=%d", option->type);
         return -1;
     }
     if (option->socketOption.port < 0) {
-        CLOGE("bad port!port=%d", option->socketOption.port);
+        CONN_LOGE(CONN_COMMON, "bad port!port=%d", option->socketOption.port);
         return -1;
     }
 
@@ -208,18 +207,18 @@ static int32_t OpenTcpServerSocket(const LocalListenerInfo *option)
     int ret = SoftBusSocketCreate(
         SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM | SOFTBUS_SOCK_CLOEXEC | SOFTBUS_SOCK_NONBLOCK, 0, (int32_t *)&fd);
     if (ret != SOFTBUS_OK) {
-        CLOGE("Create socket failed! ret=%d", ret);
+        CONN_LOGE(CONN_COMMON, "Create socket failed! ret=%d", ret);
         return -1;
     }
 
     SetServerOption(fd);
     ret = BindLocalIP(fd, option->socketOption.addr, (uint16_t)option->socketOption.port);
     if (ret != SOFTBUS_OK) {
-        CLOGE("BindLocalIP ret=%d", ret);
+        CONN_LOGE(CONN_COMMON, "BindLocalIP ret=%d", ret);
         ConnShutdownSocket(fd);
         return -1;
     }
-    CLOGI("server listen tcp socket, fd=%d", fd);
+    CONN_LOGI(CONN_COMMON, "server listen tcp socket, fd=%d", fd);
     return fd;
 }
 
@@ -233,7 +232,7 @@ static int32_t BindTcpClientAddr(int fd, const char *inputAddr)
     if (strcmp(inputAddr, BIND_ADDR_ALL) == 0) {
         bindAddr = "0.0.0.0";
     } else {
-        ALOGI("using specified bind addr");
+        CONN_LOGI(CONN_COMMON, "using specified bind addr");
         bindAddr = inputAddr;
     }
     return BindLocalIP(fd, bindAddr, 0);
@@ -241,11 +240,11 @@ static int32_t BindTcpClientAddr(int fd, const char *inputAddr)
 
 static int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp, bool isNonBlock)
 {
-    CONN_CHECK_AND_RETURN_RET_LOG(option != NULL, SOFTBUS_ERR, "invalid param, option is null");
-    CONN_CHECK_AND_RETURN_RET_LOG(option->type == CONNECT_TCP || option->type == CONNECT_P2P ||
-        option->type == CONNECT_P2P_REUSE, SOFTBUS_ERR, "invalid param, unsupport type=%d", option->type);
-    CONN_CHECK_AND_RETURN_RET_LOG(
-        option->socketOption.port > 0, SOFTBUS_ERR, "invalid param, invalid port=%d", option->socketOption.port);
+    CONN_CHECK_AND_RETURN_RET_LOGW(option != NULL, SOFTBUS_ERR, CONN_COMMON, "invalid param, option is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(option->type == CONNECT_TCP || option->type == CONNECT_P2P ||
+        option->type == CONNECT_P2P_REUSE, SOFTBUS_ERR, CONN_COMMON, "invalid param, unsupport type=%d", option->type);
+    CONN_CHECK_AND_RETURN_RET_LOGW(option->socketOption.port > 0, SOFTBUS_ERR, CONN_COMMON,
+        "invalid param, invalid port=%d", option->socketOption.port);
 
     char animizedIp[IP_LEN] = { 0 };
     ConvertAnonymizeIpAddress(animizedIp, IP_LEN, option->socketOption.addr, IP_LEN);
@@ -253,19 +252,20 @@ static int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp
     int32_t fd = -1;
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &fd);
     if (ret != SOFTBUS_OK) {
-        CLOGE("create socket failed, server ip=%s, server port=%d, error=%d",
+        CONN_LOGE(CONN_COMMON, "create socket failed, server ip=%s, server port=%d, error=%d",
             animizedIp, option->socketOption.port, ret);
         return ret;
     }
     if (isNonBlock && ConnToggleNonBlockMode(fd, true) != SOFTBUS_OK) {
-        CLOGE("set nonblock failed, server ip=%s, server port=%d, fd=%d", animizedIp, option->socketOption.port, fd);
+        CONN_LOGE(CONN_COMMON, "set nonblock failed, server ip=%s, server port=%d, fd=%d", animizedIp,
+            option->socketOption.port, fd);
         SoftBusSocketClose(fd);
         return SOFTBUS_ERR;
     }
     SetClientOption(fd);
     ret = BindTcpClientAddr(fd, myIp);
     if (ret != SOFTBUS_OK) {
-        CLOGE("bind client address failed, server ip=%s, server port=%d, error=%d", animizedIp,
+        CONN_LOGE(CONN_COMMON, "bind client address failed, server ip=%s, server port=%d, error=%d", animizedIp,
             option->socketOption.port, ret);
         ConnShutdownSocket(fd);
         return ret;
@@ -278,12 +278,13 @@ static int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp
     ret = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketConnect(fd, (SoftBusSockAddr *)&addr));
     if ((ret != SOFTBUS_ADAPTER_OK) && (ret != SOFTBUS_ADAPTER_SOCKET_EINPROGRESS) &&
         (ret != SOFTBUS_ADAPTER_SOCKET_EAGAIN)) {
-        CLOGE("client connect failed, server ip=%s, server port=%d, fd=%d, error=%d, errno=%d", animizedIp,
-            option->socketOption.port, fd, ret, errno);
+        CONN_LOGE(CONN_COMMON, "client connect failed, server ip=%s, server port=%d, fd=%d, error=%d, errno=%d",
+            animizedIp, option->socketOption.port, fd, ret, errno);
         ConnShutdownSocket(fd);
         return ret;
     }
-    CLOGI("client open tcp socket, server ip=%s, server port=%d, fd=%d", animizedIp, option->socketOption.port, fd);
+    CONN_LOGI(CONN_COMMON, "client open tcp socket, server ip=%s, server port=%d, fd=%d", animizedIp,
+        option->socketOption.port, fd);
     return fd;
 }
 
@@ -293,7 +294,7 @@ static int32_t GetTcpSockPort(int32_t fd)
 
     int rc = SoftBusSocketGetLocalName(fd, (SoftBusSockAddr *)&addr);
     if (rc != 0) {
-        CLOGE("fd=%d,GetTcpSockPort rc=%d", fd, rc);
+        CONN_LOGE(CONN_COMMON, "fd=%d,GetTcpSockPort rc=%d", fd, rc);
         return rc;
     }
     return SoftBusNtoHs(addr.sinPort);
@@ -303,7 +304,7 @@ int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds)
 {
 #define KEEP_ALIVE_COUNT 5
     if (fd < 0) {
-        CLOGE("ConnSetTcpKeepAlive invalid param");
+        CONN_LOGW(CONN_COMMON, "ConnSetTcpKeepAlive invalid param");
         return -1;
     }
 
@@ -313,14 +314,14 @@ int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds)
         enable = 1;
         rc = SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_TCP, SOFTBUS_TCP_KEEPIDLE, &seconds, sizeof(seconds));
         if (rc != 0) {
-            CLOGE("set TCP_KEEPIDLE");
+            CONN_LOGE(CONN_COMMON, "set TCP_KEEPIDLE failed");
             return -1;
         }
 
         int32_t keepAliveCnt = KEEP_ALIVE_COUNT;
         rc = SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_TCP, SOFTBUS_TCP_KEEPCNT, &keepAliveCnt, sizeof(keepAliveCnt));
         if (rc != 0) {
-            CLOGE("set TCP_KEEPCNT");
+            CONN_LOGE(CONN_COMMON, "set TCP_KEEPCNT failed");
             return -1;
         }
 
@@ -328,7 +329,7 @@ int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds)
         rc = SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_TCP, SOFTBUS_TCP_KEEPINTVL, &keepAliveIntvl,
             sizeof(keepAliveIntvl));
         if (rc != 0) {
-            CLOGE("set TCP_KEEPINTVL");
+            CONN_LOGE(CONN_COMMON, "set TCP_KEEPINTVL failed");
             return -1;
         }
     } else {
@@ -337,7 +338,7 @@ int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds)
 
     rc = SoftBusSocketSetOpt(fd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_KEEPALIVE, &enable, sizeof(enable));
     if (rc != 0) {
-        CLOGE("set SO_KEEPALIVE");
+        CONN_LOGE(CONN_COMMON, "set SO_KEEPALIVE failed");
         return -1;
     }
     return 0;
@@ -347,11 +348,11 @@ int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds)
 int32_t ConnSetTcpUserTimeOut(int32_t fd, uint32_t millSec)
 {
     if (fd < 0) {
-        CLOGE("ConnSetTcpUserTimeOut invalid param");
+        CONN_LOGE(CONN_COMMON, "ConnSetTcpUserTimeOut invalid param");
         return -1;
     }
     if (SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_TCP, SOFTBUS_TCP_USER_TIMEOUT, &millSec, sizeof(millSec)) != 0) {
-        CLOGE("set SOFTBUS_TCP_USER_TIMEOUT failed");
+        CONN_LOGE(CONN_COMMON, "set SOFTBUS_TCP_USER_TIMEOUT failed");
         return -1;
     }
     return 0;
@@ -369,14 +370,14 @@ static int32_t AcceptTcpClient(int32_t fd, ConnectOption *clientAddr, int32_t *c
 {
     SoftBusSockAddrIn addr;
     if (memset_s(&addr, sizeof(addr), 0, sizeof(addr)) != EOK) {
-        CLOGE("memset failed");
+        CONN_LOGE(CONN_COMMON, "memset failed");
         return SOFTBUS_MEM_ERR;
     }
 
     int32_t ret =
         SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketAccept(fd, (SoftBusSockAddr *)&addr, cfd));
     if (ret != SOFTBUS_OK) {
-        CLOGE("accept failed, ret=%" PRId32 " cfd=%d, fd=%d", ret, *cfd, fd);
+        CONN_LOGE(CONN_COMMON, "accept failed, ret=%" PRId32 " cfd=%d, fd=%d", ret, *cfd, fd);
         return ret;
     }
 

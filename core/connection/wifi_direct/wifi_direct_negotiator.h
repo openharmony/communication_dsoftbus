@@ -40,6 +40,7 @@ struct NegotiatorContext {
 };
 
 struct WifiDirectNegotiator {
+    bool (*isRetryErrorCode)(int32_t reason);
     int32_t (*processNextCommand)(void);
     int32_t (*retryCurrentCommand)(void);
     bool (*isBusy)(void);
@@ -51,12 +52,13 @@ struct WifiDirectNegotiator {
     void (*onNegotiateChannelDataReceived)(struct WifiDirectNegotiateChannel *channel, const uint8_t *data, size_t len);
     void (*onNegotiateChannelDisconnected)(struct WifiDirectNegotiateChannel *channel);
 
-    void (*handleFailureWithoutChangeState)(int32_t reason);
-    void (*handleUnhandledRequest)(struct NegotiateMessage *msg);
     void (*onWifiDirectAuthOpened)(uint32_t requestId, int64_t authId);
     void (*syncLnnInfo)(struct InnerLink *innerLink);
 
-    struct NegotiatorContext context;
+    char currentRemoteMac[MAC_ADDR_STR_LEN];
+    char currentRemoteDeviceId[UUID_BUF_LEN];
+    struct WifiDirectProcessor *currentProcessor;
+    struct WifiDirectCommand *currentCommand;
 };
 
 struct WifiDirectNegotiator* GetWifiDirectNegotiator(void);

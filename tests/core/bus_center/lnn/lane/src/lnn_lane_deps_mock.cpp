@@ -16,6 +16,8 @@
 #include "lnn_lane_deps_mock.h"
 #include "softbus_error_code.h"
 
+const static uint16_t SHA_HASH_LEN = 32;
+
 using namespace testing::ext;
 using namespace testing;
 
@@ -46,6 +48,12 @@ void LaneDepsInterfaceMock::SetDefaultResult()
     EXPECT_CALL(*this, LnnGetNodeInfoById).WillRepeatedly(Return(nullptr));
     EXPECT_CALL(*this, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(*this, LnnHasDiscoveryType).WillRepeatedly(Return(true));
+}
+
+int32_t LaneDepsInterfaceMock::ActionOfGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash)
+{
+    (void)strcpy_s((char *)hash, SHA_HASH_LEN, "1234567890123456");
+    return SOFTBUS_OK;
 }
 
 extern "C" {
@@ -110,24 +118,9 @@ const NodeInfo *LnnGetLocalNodeInfo(void)
     return GetLaneDepsInterface()->LnnGetLocalNodeInfo();
 }
 
-int32_t P2pLinkGetRequestId(void)
-{
-    return GetLaneDepsInterface()->P2pLinkGetRequestId();
-}
-
 void AuthCloseConn(int64_t authId)
 {
     return GetLaneDepsInterface()->AuthCloseConn(authId);
-}
-
-int32_t P2pLinkConnectDevice(const P2pLinkConnectInfo *info)
-{
-    return GetLaneDepsInterface()->P2pLinkConnectDevice(info);
-}
-
-int32_t P2pLinkDisconnectDevice(const P2pLinkDisconnectInfo *info)
-{
-    return GetLaneDepsInterface()->P2pLinkDisconnectDevice(info);
 }
 
 int32_t AuthSetP2pMac(int64_t authId, const char *p2pMac)
@@ -198,6 +191,16 @@ bool ConnBleDirectIsEnable(BleProtocolType protocol)
 int32_t TransProxyCloseProxyChannel(int32_t channelId)
 {
     return GetLaneDepsInterface()->TransProxyCloseProxyChannel(channelId);
+}
+
+int64_t GetAuthIdByConnInfo(const AuthConnInfo *connInfo)
+{
+    return GetLaneDepsInterface()->GetAuthIdByConnInfo(connInfo);
+}
+
+int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash)
+{
+    return GetLaneDepsInterface()->SoftBusGenerateStrHash(str, len, hash);
 }
 }
 } // namespace OHOS
