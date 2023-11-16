@@ -33,6 +33,7 @@ if (defined(ohos_lite)) {
   bus_center_core_adapter_src += [
     "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_settingdata_event_monitor_virtual.cpp",
     "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account_virtual.cpp",
+    "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account_adapter_virtual.cpp",
   ]
   bus_center_core_adapter_inc += [
     "$dsoftbus_root_path/core/adapter/bus_center/include",
