@@ -549,7 +549,6 @@ static int32_t StartExchangeUdpInfo(UdpChannelInfo *channel, int64_t authId, int
         TRANS_LOGE(TRANS_CTRL, "cjson unformatted failed.");
         return SOFTBUS_ERR;
     }
-    PrintAnonymousPacket(TRANS_CTRL, "UdpStartExchangeUdpInfo, msgStr: ", msgStr);
     AuthTransData dataInfo = {
         .module = MODULE_UDP_INFO,
         .flag = FLAG_REQUEST,
@@ -808,7 +807,6 @@ static void UdpModuleCb(int64_t authId, const AuthTransData *data)
     }
     TRANS_LOGI(TRANS_CTRL,
         "module=%d, seq=%" PRId64 ", len=%u.", data->module, data->seq, data->len);
-    PrintAnonymousPacket(TRANS_CTRL, "UdpModuleCb TransOnExchangeUdpInfo: ", (char *)data->data);
     cJSON *json = cJSON_ParseWithLength((char *)data->data, data->len);
     if (json == NULL) {
         TRANS_LOGE(TRANS_CTRL, "cjson parse failed!");

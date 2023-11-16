@@ -767,9 +767,6 @@ static void TransProxyOnDataReceived(
         TRANS_LOGE(TRANS_CTRL, "parse proxy msg ret=%d", ret);
         return;
     }
-    if (msg.msgHead.type != PROXYCHANNEL_MSG_TYPE_NORMAL) {
-        PrintAnonymousPacket(TRANS_CTRL, "TransProxyonMessageReceived, msg->data: ", msg.data);
-    }
     TransProxyonMessageReceived(&msg);
     SoftBusFree(msg.data);
 }
