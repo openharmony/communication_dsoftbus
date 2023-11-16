@@ -59,7 +59,7 @@ int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel
     return SOFTBUS_OK;
 }
 
-int32_t TransOnSessionClosed(int32_t channelId, int32_t channelType)
+int32_t TransOnSessionClosed(int32_t channelId, int32_t channelType, ShutdownReason reason)
 {
     return SOFTBUS_OK;
 }
@@ -105,7 +105,7 @@ int32_t OnSessionOpened(const char *sessionName, const ChannelInfo *channel, Ses
     return SOFTBUS_ERR;
 }
 
-int32_t OnSessionClosed(int32_t channelId, int32_t channelType)
+int32_t OnSessionClosed(int32_t channelId, int32_t channelType, ShutdownReason reason)
 {
     return SOFTBUS_ERR;
 }
@@ -183,7 +183,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnChannelOpenedTest, TestS
 HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnChannelClosedTest, TestSize.Level0)
 {
     int32_t channelId = 1;
-    int ret = ClientTransProxyOnChannelClosed(channelId);
+    int ret = ClientTransProxyOnChannelClosed(channelId, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -232,7 +232,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyErrorCallBackTest, TestSiz
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     int32_t channelId = 1;
-    ret = ClientTransProxyOnChannelClosed(channelId);
+    ret = ClientTransProxyOnChannelClosed(channelId, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = ClientTransProxyOnChannelOpenFailed(channelId, TEST_ERR_CODE);

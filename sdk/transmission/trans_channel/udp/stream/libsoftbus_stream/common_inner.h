@@ -16,8 +16,8 @@
 #ifndef STREAM_COMMON_INNER_H
 #define STREAM_COMMON_INNER_H
 
-#include "softbus_log.h"
 #include "stream_common.h"
+#include "trans_log.h"
 
 namespace Communication {
 namespace SoftBus {

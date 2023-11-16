@@ -193,6 +193,12 @@ void GenerateAndAddUdpChannel(UdpChannel *channel)
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
+static void SocketFileCallbackFuncTest(int32_t socket, FileEvent *event)
+{
+    (void)socket;
+    (void)event;
+}
+
 /**
  * @tc.name: TransFileListenerTest001
  * @tc.desc: trans file listener init.
@@ -726,5 +732,26 @@ HWTEST_F(TransSdkFileTest, TransFileTest013, TestSize.Level0)
     int32_t ret = StartNStackXDFileClient(NULL, peerPort, &key, keyLen, g_fileMsgRecviver);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     (void)StartNStackXDFileClient("127.0.0.1", peerPort, &key, keyLen, g_fileMsgRecviver);
+}
+
+/**
+ * @tc.name: TransFileTest013
+ * @tc.desc: trans register file callback of socket
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, TransFileTest014, TestSize.Level0)
+{
+    int32_t ret = TransSetSocketFileListener(nullptr, nullptr);
+    ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = TransSetSocketFileListener(g_mySessionName, nullptr);
+    ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = TransSetSocketFileListener(nullptr, SocketFileCallbackFuncTest);
+    ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = TransSetSocketFileListener(g_mySessionName, SocketFileCallbackFuncTest);
+    ASSERT_EQ(ret, SOFTBUS_OK);
 }
 }

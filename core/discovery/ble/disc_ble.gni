@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("../../../dsoftbus.gni")
+import("../../common/dfx/dsoftbus_dfx.gni")
 
 native_source_path = rebase_path("$dsoftbus_root_path")
 disc_dep_dir = "dsoftbus_enhance/core/discovery/ble"
@@ -31,7 +32,7 @@ ble_discovery_inc = [
   "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
 ]
 
-ble_discovery_deps = []
+ble_discovery_deps = [ "$dsoftbus_dfx_path/log:softbus_dfx_log" ]
 
 if (!support_bluetooth) {
   ble_discovery_src = [ "$dsoftbus_root_path/core/discovery/ble/dispatcher/src/disc_ble_dispatcher_virtual.c" ]

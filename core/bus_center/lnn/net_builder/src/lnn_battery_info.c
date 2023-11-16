@@ -19,36 +19,36 @@
 #include <securec.h>
 #include "lnn_battery_info.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_log.h"
 #include "lnn_sync_info_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_json_utils.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 
 int32_t LnnSyncBatteryInfo(const char *udid, int32_t level, bool isCharging)
 {
     cJSON *json = cJSON_CreateObject();
     if (json == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "create battery json object failed");
+        LNN_LOGE(LNN_LANE, "create battery json object failed");
         return SOFTBUS_ERR;
     }
     if (!AddNumberToJsonObject(json, JSON_KEY_BATTERY_LEAVEL, level) ||
         !AddBoolToJsonObject(json, JSON_KEY_IS_CHARGING, isCharging)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "add elect info to json failed");
+        LNN_LOGE(LNN_LANE, "add elect info to json failed");
         cJSON_Delete(json);
         return SOFTBUS_ERR;
     }
     char *data = cJSON_PrintUnformatted(json);
     cJSON_Delete(json);
     if (data == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "format elect packet fail");
+        LNN_LOGE(LNN_LANE, "format elect packet fail");
         return SOFTBUS_ERR;
     }
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     int ret = LnnGetRemoteNodeInfoById(udid, CATEGORY_UDID, &nodeInfo);
     if (ret != SOFTBUS_OK) {
-        LLOGE("not target node");
+        LNN_LOGE(LNN_LANE, "not target node");
         cJSON_free(data);
         return SOFTBUS_ERR;
     }
@@ -60,20 +60,20 @@ int32_t LnnSyncBatteryInfo(const char *udid, int32_t level, bool isCharging)
 
 static void OnReceiveBatteryInfo(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len)
 {
-    LLOGD("OnReceiveBatteryInfo");
+    LNN_LOGD(LNN_LANE, "OnReceiveBatteryInfo");
     if (type != LNN_INFO_TYPE_BATTERY_INFO) {
         return;
     }
     cJSON *json = cJSON_Parse((char *)msg);
     if (json == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parse elect msg json fail");
+        LNN_LOGE(LNN_LANE, "parse elect msg json fail");
         return;
     }
     int32_t level = 0;
     bool isCharging = false;
     if (!GetJsonObjectNumberItem(json, JSON_KEY_BATTERY_LEAVEL, &level) ||
         !GetJsonObjectBoolItem(json, JSON_KEY_IS_CHARGING, &isCharging)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "parse master info json fail");
+        LNN_LOGE(LNN_LANE, "parse master info json fail");
         cJSON_Delete(json);
         return;
     }
@@ -82,7 +82,7 @@ static void OnReceiveBatteryInfo(LnnSyncInfoType type, const char *networkId, co
     battery.batteryLevel = level;
     battery.isCharging = isCharging;
     (void)LnnSetDLBatteryInfo(networkId, &battery);
-    LLOGD("update battery info");
+    LNN_LOGD(LNN_LANE, "update battery info");
 }
 
 int32_t  LnnInitBatteryInfo(void)

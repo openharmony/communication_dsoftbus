@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include "nstackx.h"
 #include "nstackx_log.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -46,7 +47,9 @@ void SetDFinderLogLevel(uint32_t logLevel);
 #define DFINDER_LOGD LOGD
 
 #endif
+
 #ifdef __cplusplus
 }
 #endif
+
 #endif /* #ifndef NSTACKX_DFINDER_LOG_H */

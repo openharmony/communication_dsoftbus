@@ -188,6 +188,10 @@ private:
 
     static void FillSupportDet(int fd, const FtEventCbkInfo *info, QosTv* metricList);
 
+    void CreateServerProcessThread();
+
+    void CreateClientProcessThread();
+
     static std::map<int, std::mutex &> g_streamSocketLockMap;
     static std::mutex g_streamSocketLockMapLock_;
     static std::map<int, std::shared_ptr<VtpStreamSocket>> g_streamSocketMap;

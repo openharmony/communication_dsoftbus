@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,10 @@
 #ifndef NSTACKX_STATISTICS_H
 #define NSTACKX_STATISTICS_H
 #include <stdint.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef enum {
     STATS_INVALID_OPT_AND_PAYLOAD,
@@ -48,10 +52,16 @@ typedef enum {
     STATS_ALLOC_RECORD_FAILED,
     STATS_FREE_RECORD_FAILED,
     STATS_OVER_DEVICE_LIMIT,
+    STATS_COAP_RESOURCE_INIT_FAILED,
     STATS_MAX
 } StatisticsType;
 
 void ResetStatistics(void);
 void IncStatistics(StatisticsType type);
 const uint64_t *GetStatistics(void);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

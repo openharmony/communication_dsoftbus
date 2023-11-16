@@ -26,6 +26,7 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_huks_utils.h"
 #include "lnn_local_net_ledger.h"
+#include "lnn_log.h"
 #include "lnn_meta_node_ledger.h"
 #include "lnn_net_capability.h"
 #include "lnn_net_ledger.h"
@@ -33,7 +34,6 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
-#include "softbus_log.h"
 #include "softbus_utils.h"
 
 #define ONE_BIT_MAX_HEX 15
@@ -92,7 +92,7 @@ void LNNNetLedgerCommonTest::TearDownTestCase()
 
 void LNNNetLedgerCommonTest::SetUp()
 {
-    LOG_INFO("LNNNetLedgerCommonTest start.");
+    LNN_LOGI(LNN_TEST, "LNNNetLedgerCommonTest start");
 }
 
 void LNNNetLedgerCommonTest::TearDown()

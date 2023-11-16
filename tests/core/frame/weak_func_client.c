@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 int OnStartDiscoveryWeak(const char *pkgName, const void *info)
 {

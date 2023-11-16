@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,19 +16,23 @@
 #ifndef NSTACKX_DFINDER_MGT_MSG_LOG_H
 #define NSTACKX_DFINDER_MGT_MSG_LOG_H
 
+#ifndef DFINDER_USE_MINI_NSTACKX
 #include "coap_discover.h"
+#endif
 #include "cJSON.h"
 #include "nstackx_error.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #ifdef DFINDER_MGT_MSG_LOG
 #define DFINDER_MGT_UNPACK_LOG_LEN 400
 #define DFINDER_MGT_UUID_LEN 14
 
-typedef struct DeviceInfo DeviceInfo;
-
 void DFinderSetMgtMsgLog(int enable);
 void DFinderMgtReqLog(CoapRequest *coapRequest);
-void DFinderMgtUnpackLog(DeviceInfo *deviceInfo);
+void DFinderMgtUnpackLog(struct DeviceInfo *deviceInfo);
 
 #define DFINDER_MGT_REQ_LOG(coapRequest) DFinderMgtReqLog(coapRequest)
 #define DFINDER_MGT_UNPACK_LOG(deviceInfo) DFinderMgtUnpackLog(deviceInfo)
@@ -36,6 +40,10 @@ void DFinderMgtUnpackLog(DeviceInfo *deviceInfo);
 #else
 #define DFINDER_MGT_REQ_LOG(coapRequest)
 #define DFINDER_MGT_UNPACK_LOG(deviceInfo)
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif /* END OF NSTACKX_DFINDER_MGT_MSG_LOG_H */

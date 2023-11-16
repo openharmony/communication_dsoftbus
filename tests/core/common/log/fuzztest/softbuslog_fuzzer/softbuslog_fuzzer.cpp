@@ -15,7 +15,7 @@
 
 #include "softbuslog_fuzzer.h"
 
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include <cstddef>
 #include <securec.h>
 #include <string>

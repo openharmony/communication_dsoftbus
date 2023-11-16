@@ -43,6 +43,13 @@ if (defined(ohos_lite)) {
   import("//build/ohos.gni")
 
   ohos_executable("disc_coap_test") {
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
+    branch_protector_ret = "pac_ret"
+
     install_enable = true
     sources = [ "disc_coap_test.c" ]
     include_dirs = [

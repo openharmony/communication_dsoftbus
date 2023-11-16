@@ -28,7 +28,6 @@
 #include "bus_center_manager.h"
 #include "softbus_conn_ble_connection.h"
 #include "softbus_network_utils.h"
-#include "p2plink_interface.h"
 #include "lnn_physical_subnet_manager.h"
 
 namespace OHOS {
@@ -50,10 +49,7 @@ public:
     virtual int SoftBusFrequencyToChannel(int frequency) = 0;
     virtual NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type) = 0;
     virtual const NodeInfo *LnnGetLocalNodeInfo(void) = 0;
-    virtual int32_t P2pLinkGetRequestId(void) = 0;
     virtual void AuthCloseConn(int64_t authId) = 0;
-    virtual int32_t P2pLinkConnectDevice(const P2pLinkConnectInfo *info) = 0;
-    virtual int32_t P2pLinkDisconnectDevice(const P2pLinkDisconnectInfo *info) = 0;
     virtual int32_t AuthSetP2pMac(int64_t authId, const char *p2pMac) = 0;
     virtual bool LnnVisitPhysicalSubnet(LnnVisitPhysicalSubnetCallback callback, void *data) = 0;
     virtual const char *LnnConvertDLidToUdid(const char *id, IdCategory type) = 0;
@@ -68,6 +64,8 @@ public:
     virtual void ConnBleReturnConnection(ConnBleConnection **connection) = 0;
     virtual bool ConnBleDirectIsEnable(BleProtocolType protocol) = 0;
     virtual int32_t TransProxyCloseProxyChannel(int32_t channelId) = 0;
+    virtual int64_t GetAuthIdByConnInfo(const AuthConnInfo *connInfo) = 0;
+    virtual int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash) = 0;
 };
 
 class LaneDepsInterfaceMock : public LaneDepsInterface {
@@ -86,10 +84,7 @@ public:
     MOCK_METHOD3(LnnGetRemoteNumInfo, int32_t (const char*, InfoKey, int32_t*));
     MOCK_METHOD2(LnnGetNodeInfoById, NodeInfo* (const char*, IdCategory));
     MOCK_METHOD0(LnnGetLocalNodeInfo, NodeInfo * ());
-    MOCK_METHOD0(P2pLinkGetRequestId, int32_t ());
     MOCK_METHOD1(AuthCloseConn, void (int64_t));
-    MOCK_METHOD1(P2pLinkConnectDevice, int32_t (const P2pLinkConnectInfo*));
-    MOCK_METHOD1(P2pLinkDisconnectDevice, int32_t (const P2pLinkDisconnectInfo*));
     MOCK_METHOD2(AuthSetP2pMac, int32_t (int64_t, const char*));
     MOCK_METHOD2(LnnVisitPhysicalSubnet, bool (LnnVisitPhysicalSubnetCallback, void*));
     MOCK_METHOD2(LnnConvertDLidToUdid, const char *(const char *, IdCategory));
@@ -104,8 +99,11 @@ public:
     MOCK_METHOD1(ConnBleReturnConnection, void (ConnBleConnection **));
     MOCK_METHOD1(ConnBleDirectIsEnable, bool (BleProtocolType));
     MOCK_METHOD1(TransProxyCloseProxyChannel, int32_t(int32_t));
+    MOCK_METHOD1(GetAuthIdByConnInfo, int64_t(const AuthConnInfo *));
+    MOCK_METHOD3(SoftBusGenerateStrHash, int32_t (const unsigned char *, uint32_t, unsigned char *));
 
     void SetDefaultResult(void);
+    static int32_t ActionOfGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash);
 };
 } // namespace OHOS
 #endif // LNN_LANE_DEPS_MOCK_H

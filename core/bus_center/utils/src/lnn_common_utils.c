@@ -18,11 +18,11 @@
 #include <securec.h>
 
 #include "lnn_common_utils.h"
+#include "lnn_log.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "softbus_utils.h"
 
 bool IsEnableSoftBusHeartbeat(void)
@@ -49,19 +49,19 @@ int32_t LnnEncryptAesGcm(AesGcmInputParam *in, int32_t keyIndex, uint8_t **out, 
     uint32_t encDataLen = in->dataLen + OVERHEAD_LEN;
     uint8_t *encData = (uint8_t *)SoftBusCalloc(encDataLen);
     if (encData == NULL) {
-        LLOGE("calloc encrypt data fail.");
+        LNN_LOGE(LNN_STATE, "calloc encrypt data fail");
         return SOFTBUS_MALLOC_ERR;
     }
     AesGcmCipherKey cipherKey = {.keyLen = in->keyLen};
     if (memcpy_s(cipherKey.key, sizeof(cipherKey.key), in->key, in->keyLen) != EOK) {
-        LLOGE("copy session key fail.");
+        LNN_LOGE(LNN_STATE, "copy session key fail");
         SoftBusFree(encData);
         return SOFTBUS_MEM_ERR;
     }
     int32_t ret = SoftBusEncryptData(&cipherKey, in->data, in->dataLen, encData, &encDataLen);
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK) {
-        LLOGE("SoftBusEncryptData fail(=%d).", ret);
+        LNN_LOGE(LNN_STATE, "SoftBusEncryptData fail=%d", ret);
         SoftBusFree(encData);
         return SOFTBUS_ENCRYPT_ERR;
     }
@@ -78,19 +78,19 @@ int32_t LnnDecryptAesGcm(AesGcmInputParam *in, uint8_t **out, uint32_t *outLen)
     uint32_t decDataLen = in->dataLen - OVERHEAD_LEN;
     uint8_t *decData = (uint8_t *)SoftBusCalloc(decDataLen);
     if (decData == NULL) {
-        LLOGE("malloc decrypt data fail.");
+        LNN_LOGE(LNN_STATE, "malloc decrypt data fail");
         return SOFTBUS_MALLOC_ERR;
     }
     AesGcmCipherKey cipherKey = {.keyLen = in->keyLen};
     if (memcpy_s(cipherKey.key, sizeof(cipherKey.key), in->key, in->keyLen) != EOK) {
-        LLOGE("copy session key fail.");
+        LNN_LOGE(LNN_STATE, "copy session key fail");
         SoftBusFree(decData);
         return SOFTBUS_MEM_ERR;
     }
     int32_t ret = SoftBusDecryptData(&cipherKey, in->data, in->dataLen, decData, &decDataLen);
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK) {
-        LLOGE("SoftBusDecryptData fail(=%d).", ret);
+        LNN_LOGE(LNN_STATE, "SoftBusDecryptData fail=%d", ret);
         SoftBusFree(decData);
         return SOFTBUS_ENCRYPT_ERR;
     }

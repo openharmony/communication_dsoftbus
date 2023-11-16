@@ -425,4 +425,118 @@ HWTEST_F(TransTcpDirectP2pTest, StartVerifyP2pInfo005, TestSize.Level1)
     SoftBusFree(conn);
     conn = nullptr;
 }
+
+/**
+ * @tc.name: StartNewHmlListenerTest001
+ * @tc.desc: StartNewHmlListener, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, StartNewHmlListenerTest001, TestSize.Level1)
+{
+    ListenerModule moduleType = UNUSE_BUTT;
+    int32_t ret = StartNewHmlListener(nullptr, &g_port, &moduleType);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+
+    ret = StartNewHmlListener(g_ip, &g_port, &moduleType);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+}
+
+/**
+ * @tc.name: StartHmlListenerTest001
+ * @tc.desc: StartHmlListener, ListenerList not init.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, StartHmlListenerTest001, TestSize.Level1)
+{
+    int32_t ret = StartHmlListener(g_ip, &g_port);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+}
+
+/**
+ * @tc.name: StartHmlListenerTest002
+ * @tc.desc: StartHmlListener, ListenerList is init.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, StartHmlListenerTest002, TestSize.Level1)
+{
+    int32_t ret = CreatHmlListenerList();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StartHmlListener(g_ip, &g_port);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+}
+
+/**
+ * @tc.name: DelHmlListenerByMoudleTest001
+ * @tc.desc: DelHmlListenerByMoudle
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, DelHmlListenerByMoudleTest001, TestSize.Level1)
+{
+    int32_t ret = CreatHmlListenerList();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StartHmlListener(g_ip, &g_port);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    for (int i = DIRECT_CHANNEL_SERVER_HML_START; i <= DIRECT_CHANNEL_SERVER_HML_END; i++) {
+        DelHmlListenerByMoudle((ListenerModule)i);
+    }
+}
+
+/**
+ * @tc.name: GetMoudleByHmlIpTest001
+ * @tc.desc: GetMoudleByHmlIp
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, GetMoudleByHmlIpTest001, TestSize.Level1)
+{
+    int32_t ret = CreatHmlListenerList();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = StartHmlListener(g_ip, &g_port);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    ListenerModule moduleType = GetMoudleByHmlIp(g_ip);
+    EXPECT_EQ(moduleType, UNUSE_BUTT);
+}
+
+/**
+ * @tc.name: StartVerifyP2pInfoTest001
+ * @tc.desc: StartVerifyP2pInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, StartVerifyP2pInfoTest001, TestSize.Level1)
+{
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    EXPECT_NE(appInfo, NULL);
+
+    SessionConn *conn = (SessionConn*)SoftBusCalloc(sizeof(SessionConn));
+    if (conn == NULL) {
+        SoftBusFree(appInfo);
+        appInfo = nullptr;
+    }
+    EXPECT_NE(conn, NULL);
+
+    int32_t ret = StartVerifyP2pInfo(appInfo, conn);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    SoftBusFree(appInfo);
+    appInfo = nullptr;
+    SoftBusFree(conn);
+    conn = nullptr;
+}
+
+/**
+ * @tc.name: OnP2pVerifyChannelClosedTest001
+ * @tc.desc: OnP2pVerifyChannelClosed
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, OnP2pVerifyChannelClosedTest001, TestSize.Level1)
+{
+    int32_t channelId = 0;
+    OnP2pVerifyChannelClosed(channelId);
+    EXPECT_TRUE(1);
+}
 }

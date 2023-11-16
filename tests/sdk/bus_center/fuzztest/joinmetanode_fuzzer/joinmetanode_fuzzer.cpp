@@ -22,10 +22,10 @@
 #include "softbus_errcode.h"
 
 namespace OHOS {
-    void JoinMetaNodeCb(ConnectionAddr *addr, const char *networkId, int32_t retCode)
+    void JoinMetaNodeCb(ConnectionAddr *addr, MetaBasicInfo *metaInfo, int32_t retCode)
     {
         (void) addr;
-        (void) networkId;
+        (void) metaInfo;
         (void) retCode;
     }
 
