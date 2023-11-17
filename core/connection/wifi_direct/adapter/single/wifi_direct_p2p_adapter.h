@@ -56,9 +56,15 @@ enum WifiDirectP2pAdapterEvent {
     WIFI_P2P_ADAPTER_EVENT_START = 0,
     WIFI_P2P_ADAPTER_EVENT_STATE_CHANGED = WIFI_P2P_ADAPTER_EVENT_START + 1,
     WIFI_P2P_ADAPTER_EVENT_CONNECTION_CHANGED = WIFI_P2P_ADAPTER_EVENT_START + 2,
-    WIFI_P2P_ADAPTER_EVENT_CONNECT_STATE_CHANGE = WIFI_P2P_ADAPTER_EVENT_START + 3,
-    WIFI_P2P_ADAPTER_EVENT_RPT_STATE_CHANGE = WIFI_P2P_ADAPTER_EVENT_START + 4,
+    WIFI_P2P_ADAPTER_EVENT_CONNECT_STATE_CHANGED = WIFI_P2P_ADAPTER_EVENT_START + 3,
+    WIFI_P2P_ADAPTER_EVENT_RPT_STATE_CHANGED = WIFI_P2P_ADAPTER_EVENT_START + 4,
     WIFI_P2P_ADAPTER_EVENT_END,
+
+    WIFI_HML_ADAPTER_EVENT_START = 10,
+    WIFI_HML_ADAPTER_EVENT_STATE_CHANGED = WIFI_HML_ADAPTER_EVENT_START + 1,
+    WIFI_HML_ADAPTER_CONNECTION_CHANGED = WIFI_HML_ADAPTER_EVENT_START + 2,
+    WIFI_HML_ADAPTER_NOTIFY_RESULT = WIFI_HML_ADAPTER_EVENT_START + 3,
+    WIFI_HML_ADAPTER_EVENT_END,
 };
 
 struct WifiDirectP2pAdapter {
@@ -82,7 +88,7 @@ struct WifiDirectP2pAdapter {
     int32_t (*configGcIp)(const char *interface, const char *ip);
 
     int32_t (*createGroup)(int32_t frequency, bool wideBandSupported);
-    int32_t (*connectGroup)(char *groupConfigString);
+    int32_t (*connectGroup)(char *groupConfigString, bool isLegacyGo);
     int32_t (*shareLinkReuse)(void);
     int32_t (*shareLinkRemoveGroupAsync)(const char *interface);
     int32_t (*shareLinkRemoveGroupSync)(const char *interface);

@@ -19,8 +19,7 @@
 #include "c_header/ohos_bt_gatt.h"
 #include "softbus_adapter_ble_gatt.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
-
+#include "conn_log.h"
 #include "assert_helper.h"
 #include "bluetooth_mock.h"
 
@@ -535,12 +534,12 @@ bool ScanResultCtx::Update(int id, const SoftBusBleScanResult *scanResult)
     this->scanResult = *scanResult;
     unsigned char *cpyAdvData = (unsigned char *)SoftBusCalloc(this->scanResult.advLen);
     if (cpyAdvData == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "malloc failed in OnScanResult, can not save ctx, id: %d", id);
+        CONN_LOGE(CONN_BLE, "malloc failed in OnScanResult, can not save ctx, id: %d", id);
         return false;
     }
 
     if (memcpy_s(cpyAdvData, this->scanResult.advLen, scanResult->advData, scanResult->advLen) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc failed in OnScanResult, can not save ctx, id: %d", id);
+        CONN_LOGE(CONN_BLE, "malloc failed in OnScanResult, can not save ctx, id: %d", id);
         SoftBusFree(cpyAdvData);
         return false;
     }

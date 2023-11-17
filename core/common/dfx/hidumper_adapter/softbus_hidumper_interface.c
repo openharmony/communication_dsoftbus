@@ -15,7 +15,7 @@
 #include <string.h>
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_hidumper.h"
 
 int32_t SoftBusDumpProcess(int fd, int32_t argc, const char **argv)

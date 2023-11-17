@@ -17,7 +17,7 @@
 #include <securec.h>
 
 #include "wifi_direct_ipv4_info.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
 #include "wifi_direct_defines.h"

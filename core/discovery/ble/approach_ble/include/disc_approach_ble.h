@@ -16,20 +16,17 @@
 #ifndef DISC_APPROACH_BLE_H
 #define DISC_APPROACH_BLE_H
 
-#include "disc_manager.h"
-#include "softbus_adapter_ble_gatt.h"
+#include "disc_ble_dispatcher.h"
 
 #ifdef __cplusplus
-#if __cplusplus
 extern "C" {
-#endif
-#endif
+#endif /* __cplusplus */
 
-void ProcessApproachPacket(const SoftBusBleScanResult *scanResultData, DiscInnerCallback *callback);
+DiscoveryBleDispatcherInterface *DiscApproachBleInit(DiscInnerCallback *discInnerCb);
+void DiscApproachBleDeinit(void);
 
 #ifdef __cplusplus
-#if __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* __cplusplus */
+
 #endif /* DISC_APPROACH_BLE_H */

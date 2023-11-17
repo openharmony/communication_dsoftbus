@@ -21,16 +21,25 @@
 extern "C" {
 #endif
 
+enum P2pV1ProcessorState {
+    P2P_V1_PROCESSOR_STATE_AVAILABLE = 0,
+    P2P_V1_PROCESSOR_STATE_WAITING_REQ_RESPONSE = 1,
+    P2P_V1_PROCESSOR_STATE_WAITING_REUSE_RESPONSE = 2,
+    P2P_V1_PROCESSOR_STATE_WAITING_REQUEST = 3,
+    P2P_V1_PROCESSOR_STATE_WAITING_CREATE_GROUP = 4,
+    P2P_V1_PROCESSOR_STATE_WAITING_CONNECT_GROUP = 5,
+    P2P_V1_PROCESSOR_STATE_WAITING_DISCONNECT = 6,
+    P2P_V1_PROCESSOR_STATE_WAITING_REMOVE_GROUP = 7,
+};
+
 struct P2pV1Processor {
     PROCESSOR_BASE;
 
+    enum P2pV1ProcessorState currentState;
     struct InnerLink *currentInnerLink;
-    bool needReply;
     struct NegotiateMessage *pendingRequestMsg;
-    int32_t currentRequestId;
     int32_t goPort;
-    int32_t busyTimes;
-    bool isActiveDisconnect;
+    int32_t pendingErrorCode;
 };
 
 struct P2pV1Processor* GetP2pV1Processor(void);

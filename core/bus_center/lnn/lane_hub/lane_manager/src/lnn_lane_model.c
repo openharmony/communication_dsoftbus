@@ -21,11 +21,11 @@
 #include "lnn_lane.h"
 #include "lnn_lane_common.h"
 #include "lnn_lane_def.h"
+#include "lnn_log.h"
 #include "lnn_map.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 
 #define LINK_TYPE_SHIFT 26
 #define TRANS_TYPE_SHIFT 22
@@ -74,13 +74,13 @@ static void AddLaneIdNode(uint32_t laneId, LaneModel *laneModel)
     LaneIdInfo *infoNode = NULL;
     LIST_FOR_EACH_ENTRY(infoNode, &laneModel->laneIdList, LaneIdInfo, node) {
         if (infoNode->laneId == laneId) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "laneId has been added");
+            LNN_LOGE(LNN_LANE, "laneId has been added");
             return;
         }
     }
     LaneIdInfo *newNode = (LaneIdInfo *)SoftBusCalloc(sizeof(LaneIdInfo));
     if (newNode == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "laneId add to list fail");
+        LNN_LOGE(LNN_LANE, "laneId add to list fail");
         return;
     }
     ListInit(&newNode->node);
@@ -118,7 +118,7 @@ static int32_t AddLaneModel(uint32_t laneId, uint32_t profileId, LaneProfile *la
     LaneModel newModel;
     (void)memset_s(&newModel, sizeof(LaneModel), 0, sizeof(LaneModel));
     if (memcpy_s(&newModel.profile, sizeof(LaneProfile), laneProfile, sizeof(LaneProfile)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "addLaneModel memcpy fail");
+        LNN_LOGE(LNN_LANE, "addLaneModel memcpy fail");
         ModelUnlock();
         return SOFTBUS_ERR;
     }
@@ -181,7 +181,7 @@ int32_t GetLaneProfile(uint32_t profileId, LaneProfile *profile)
     LaneModel *laneModel = (LaneModel *)LnnReadData(&g_profileMap, profileId);
     if (laneModel == NULL) {
         ModelUnlock();
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "read laneModel fail");
+        LNN_LOGE(LNN_LANE, "read laneModel fail");
         return SOFTBUS_ERR;
     }
     if (memcpy_s(profile, sizeof(LaneProfile), &laneModel->profile, sizeof(LaneProfile)) != EOK) {
@@ -200,17 +200,17 @@ int32_t GetLaneIdList(uint32_t profileId, uint32_t **laneIdList, uint32_t *listS
     LaneModel *laneModel = (LaneModel *)LnnReadData(&g_profileMap, profileId);
     if (laneModel == NULL) {
         ModelUnlock();
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "read laneModel fail");
+        LNN_LOGE(LNN_LANE, "read laneModel fail");
         return SOFTBUS_ERR;
     }
     if (laneModel->ref == 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ref count is zero");
+        LNN_LOGE(LNN_LANE, "ref count is zero");
         ModelUnlock();
         return SOFTBUS_ERR;
     }
     *laneIdList = (uint32_t *)SoftBusCalloc(sizeof(uint32_t) * laneModel->ref);
     if (*laneIdList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "laneIdList malloc fail");
+        LNN_LOGE(LNN_LANE, "laneIdList malloc fail");
         ModelUnlock();
         return SOFTBUS_ERR;
     }
@@ -240,7 +240,7 @@ int32_t InitLaneModel(void)
 {
     LnnMapInit(&g_profileMap);
     if (SoftBusMutexInit(&g_laneModelMutex, NULL) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "laneModel mutex init fail");
+        LNN_LOGE(LNN_LANE, "laneModel mutex init fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -250,7 +250,7 @@ static void ClearProfileMap(void)
 {
     MapIterator *it = LnnMapInitIterator(&g_profileMap);
     if (it == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "clear profileMap fail");
+        LNN_LOGE(LNN_LANE, "clear profileMap fail");
         return;
     }
     while (LnnMapHasNext(it)) {

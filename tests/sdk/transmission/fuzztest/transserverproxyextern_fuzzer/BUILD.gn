@@ -26,6 +26,7 @@ ohos_fuzztest("TransServerProxyExternFuzzTest") {
   include_dirs = [
     "../../../../../interfaces/kits/transport",
     "../../../../../core/common/include",
+    "../../../../../core/common/dfx/interface/include",
     "../../../../../sdk/transmission/trans_channel/manager/include",
     "../../../../../sdk/transmission/trans_channel/auth/include",
     "../../../../../sdk/transmission/trans_channel/proxy/include",

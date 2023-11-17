@@ -28,7 +28,6 @@
 #include "softbus_errcode.h"
 #include "softbus_app_info.h"
 #include "softbus_feature_config.h"
-#include "softbus_log.h"
 #include "softbus_access_token_test.h"
 #include "softbus_conn_interface.h"
 #include "softbus_socket.h"
@@ -95,23 +94,23 @@ void TransTcpDirectTest::TearDownTestCase(void)
 
 static int OnSessionOpened(int sessionId, int result)
 {
-    LOG_INFO("session opened,sesison id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session opened,sessionId= %d", sessionId);
     return SOFTBUS_OK;
 }
 
 static void OnSessionClosed(int sessionId)
 {
-    LOG_INFO("session closed, session id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session closed, sessionId= %d", sessionId);
 }
 
 static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
 {
-    LOG_INFO("session bytes received, session id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session bytes received, sessionId= %d", sessionId);
 }
 
 static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
 {
-    LOG_INFO("session msg received, session id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session msg received, sessionId=%d", sessionId);
 }
 
 static ISessionListener g_sessionlistener = {

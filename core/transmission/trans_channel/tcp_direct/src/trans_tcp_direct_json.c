@@ -17,6 +17,7 @@
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 #include "softbus_proxychannel_message.h"
+#include "trans_log.h"
 #include "trans_tcp_direct_p2p.h"
 
 #define MSG_CODE "CODE"
@@ -76,12 +77,12 @@ int32_t VerifyP2pUnPack(const cJSON *json, char *ip, uint32_t ipLen, int32_t *po
     }
     int32_t errCode;
     if (GetJsonObjectNumberItem(json, JSON_KEY_TYPE, &errCode)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "VerifyP2pUnPack peer proc fail: errCode=%d", errCode);
+        TRANS_LOGE(TRANS_CTRL, "VerifyP2pUnPack peer proc fail: errCode=%d", errCode);
         return SOFTBUS_PEER_PROC_ERR;
     }
     if (!GetJsonObjectNumberItem(json, P2P_PORT, port) ||
         !GetJsonObjectStringItem(json, P2P_IP, ip, ipLen)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "VerifyP2pUnPack get obj fail");
+        TRANS_LOGE(TRANS_INIT, "VerifyP2pUnPack get obj fail");
         return SOFTBUS_PARSE_JSON_ERR;
     }
     return SOFTBUS_OK;

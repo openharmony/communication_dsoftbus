@@ -14,7 +14,7 @@
  */
 
 #include "ble_mock.h"
-#include "softbus_log.h"
+#include "disc_log.h"
 #include "softbus_error_code.h"
 
 using testing::Return;
@@ -27,7 +27,7 @@ DiscoveryFuncInterface *DiscBleInit(DiscInnerCallback *callback)
 
 void DiscBleDeinit()
 {
-    DLOGI("destroy");
+    DISC_LOGI(DISC_TEST, "destroy");
 }
 
 int32_t BleMock::BlePublish(const PublishOption *option)

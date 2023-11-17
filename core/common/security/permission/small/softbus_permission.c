@@ -17,13 +17,13 @@
 
 #include <string.h>
 
+#include "comm_log.h"
 #include "permission_entry.h"
 #include "pms_interface.h"
 #include "pms_types.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 
 #define SOFTBUS_PERMISSION_NAME "ohos.permission.DISTRIBUTED_SOFTBUS_CENTER"
 
@@ -36,10 +36,10 @@
 static int32_t CheckSoftBusSysPermission(int32_t callingUid)
 {
     if (CheckPermission(callingUid, SOFTBUS_PERMISSION_NAME) != GRANTED) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus CheckPermission fail");
+        COMM_LOGE(COMM_PERM, "softbus CheckPermission fail");
         return SOFTBUS_PERMISSION_DENIED;
     }
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "CheckSoftBusSysPermission uid:%d success", callingUid);
+    COMM_LOGI(COMM_PERM, "CheckSoftBusSysPermission uid:%d success", callingUid);
     return SOFTBUS_OK;
 }
 
@@ -47,15 +47,15 @@ static int32_t GetPermType(pid_t callingUid, pid_t callingPid, const char *pkgNa
 {
     (void)pkgName;
     if (callingUid == (pid_t)getuid() && callingPid == getpid()) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "self app");
+        COMM_LOGI(COMM_PERM, "self app");
         return SELF_APP;
     }
     if (CheckSoftBusSysPermission(callingUid) == SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "system app");
+        COMM_LOGI(COMM_PERM, "system app");
         return SYSTEM_APP;
     }
     if (callingUid > INVALID_UID && callingUid < FIRST_APPLICATION_UID && callingUid != SHELL_UID) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "native app");
+        COMM_LOGI(COMM_PERM, "native app");
         return NATIVE_APP;
     }
     return NORMAL_APP;

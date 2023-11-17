@@ -68,13 +68,15 @@ extern "C" {
 #define MAX_SOCKET_ADDR_LEN 46
 
 #define MAX_SESSION_ID 16
-#define MAX_SESSION_SERVER_NUMBER 10
+#define MAX_SESSION_SERVER_NUMBER 32
 
 #define WAIT_SERVER_READY_INTERVAL 200
 
 #define NODE_ADDR_LOOPBACK "0"
 
 #define MAX_UDP_CHANNEL_ID_COUNT 20
+
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
 typedef struct {
     SoftBusMutex lock;

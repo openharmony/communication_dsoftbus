@@ -32,7 +32,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "channel/default_negotiate_channel.h"
 #include "resource_manager.h"
 #include "wifi_direct_ipv4_info.h"
@@ -323,7 +323,7 @@ HWTEST_F(WifiProcessorTest, testV1OnOperationEvent006, TestSize.Level1)
     struct P2pV1Processor *self = GetP2pV1Processor();
     constexpr int32_t result = OK;
     constexpr int32_t requestId = 1;
-    self->currentState = PROCESSOR_STATE_WAITING_SERVER_DESTROYED;
+    self->currentState = PROCESSOR_STATE_WAITING_SERVER_DISTROYED;
     int32_t ret = self->onOperationEvent(requestId, result);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 }

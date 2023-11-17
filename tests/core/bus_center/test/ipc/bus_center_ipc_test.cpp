@@ -19,7 +19,6 @@
 #include "lnn_bus_center_ipc.cpp"
 #include "bus_center_ipc_mock.h"
 #include "softbus_bus_center.h"
-#include "softbus_log.h"
 #include "softbus_common.h"
 #include "softbus_errcode.h"
 
@@ -203,14 +202,18 @@ HWTEST_F(BusCenterIpcTest, MetaNodeIpcNotifyJoinResultTest_01, TestSize.Level1)
     (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
     AddJoinMetaNodeInfo(TEST_PKGNAME, 0, &addr);
     AddJoinMetaNodeInfo(TEST_PKGNAME2, 0, &addr);
+    MetaBasicInfo metaInfo;
+    (void)memset_s(&metaInfo, sizeof(MetaBasicInfo), 0, sizeof(MetaBasicInfo));
+    (void)strcpy_s(metaInfo.metaNodeId, NETWORK_ID_BUF_LEN, TEST_NETWORK_ID);
     EXPECT_CALL(busCenterIpcMock, LnnIsSameConnectionAddr)
         .WillOnce(Return(true))
         .WillRepeatedly(Return(false));
-    int32_t ret = MetaNodeIpcNotifyJoinResult(nullptr, TEST_ADDR_TYPE_LEN, TEST_NETWORK_ID, TEST_RET_CODE);
+    int32_t ret =
+        MetaNodeIpcNotifyJoinResult(nullptr, TEST_ADDR_TYPE_LEN, &metaInfo, TEST_RET_CODE);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 
     ret = MetaNodeIpcNotifyJoinResult(reinterpret_cast<void *>(&addr),
-        TEST_ADDR_TYPE_LEN, TEST_NETWORK_ID, TEST_RET_CODE);
+        TEST_ADDR_TYPE_LEN, &metaInfo, TEST_RET_CODE);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 

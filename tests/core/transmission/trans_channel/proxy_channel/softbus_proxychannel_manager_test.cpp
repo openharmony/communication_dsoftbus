@@ -23,7 +23,6 @@
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_json_utils.h"
-#include "softbus_log.h"
 #include "softbus_protocol_def.h"
 #include "softbus_proxychannel_control.h"
 #include "softbus_proxychannel_manager.h"
@@ -60,8 +59,8 @@ namespace OHOS {
 #define TEST_NUMBER_THREE 3
 #define TEST_NUMBER_TWENTY 20
 #define TEST_NUMBER_TWO 2
-#define TEST_NUMBER_VALID -1
-#define TEST_NUMBER_ZERO -1
+#define TEST_NUMBER_VALID (-1)
+#define TEST_NUMBER_ZERO (-1)
 #define TEST_NUMBER_25 25
 #define TEST_NUMBER_26 26
 #define TEST_NUMBER_5000 5000

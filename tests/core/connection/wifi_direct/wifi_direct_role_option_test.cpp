@@ -34,7 +34,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_utils.h"
 #include "wifi_direct_role_option.h"
 
@@ -77,10 +77,10 @@ HWTEST_F(WifiDirectRoleTest, WifiDirectRoleOption001, TestSize.Level1)
     const char *networkId = "192.168.0.1";
     enum WifiDirectConnectType type = WIFI_DIRECT_CONNECT_TYPE_P2P;
     uint32_t value = 0xff;
-    uint32_t *expectedRole = &value;
+    uint32_t *expectdRole = &value;
     bool flagValue = true;
     bool *isStrict = &flagValue;
-    int32_t ret = self->getExpectedRole(networkId, type, expectedRole, isStrict);
+    int32_t ret = self->getExpectedRole(networkId, type, expectdRole, isStrict);
     EXPECT_EQ(ret, SOFTBUS_OK);
 };
 
@@ -96,10 +96,10 @@ HWTEST_F(WifiDirectRoleTest, WifiDirectRoleOption002, TestSize.Level1)
     const char *networkId = "192.168.0.1";
     enum WifiDirectConnectType type = WIFI_DIRECT_CONNECT_TYPE_HML;
     uint32_t value = 0x01;
-    uint32_t *expectedRole = &value;
+    uint32_t *expectdRole = &value;
     bool flagValue = true;
     bool *isStrict = &flagValue;
-    int32_t ret = self->getExpectedRole(networkId, type, expectedRole, isStrict);
+    int32_t ret = self->getExpectedRole(networkId, type, expectdRole, isStrict);
     EXPECT_EQ(ret, SOFTBUS_OK);
 };
 
@@ -115,10 +115,10 @@ HWTEST_F(WifiDirectRoleTest, WifiDirectRoleOption003, TestSize.Level1)
     const char *networkId = "192.168.0.1";
     enum WifiDirectConnectType type = WIFI_DIRECT_CONNECT_TYPE_WIFI_DIRECT;
     uint32_t value = 0x10;
-    uint32_t *expectedRole = &value;
+    uint32_t *expectdRole = &value;
     bool flagValue = true;
     bool *isStrict = &flagValue;
-    int32_t ret = self->getExpectedRole(networkId, type, expectedRole, isStrict);
+    int32_t ret = self->getExpectedRole(networkId, type, expectdRole, isStrict);
     EXPECT_EQ(ret, SOFTBUS_OK);
 };
 
@@ -134,10 +134,10 @@ HWTEST_F(WifiDirectRoleTest, WifiDirectRoleOption004, TestSize.Level1)
     const char *networkId = "192.168.0.1";
     enum WifiDirectConnectType type = WIFI_DIRECT_CONNECT_TYPE_INVALID;
     uint32_t value = 0x10;
-    uint32_t *expectedRole = &value;
+    uint32_t *expectdRole = &value;
     bool flagValue = true;
     bool *isStrict = &flagValue;
-    int32_t ret = self->getExpectedRole(networkId, type, expectedRole, isStrict);
+    int32_t ret = self->getExpectedRole(networkId, type, expectdRole, isStrict);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 };
 
@@ -153,10 +153,10 @@ HWTEST_F(WifiDirectRoleTest, WifiDirectRoleOption005, TestSize.Level1)
     const char *networkId = "192.168.0.1";
     enum WifiDirectConnectType type = WIFI_DIRECT_CONNECT_TYPE_MAX;
     uint32_t value = 0x10;
-    uint32_t *expectedRole = &value;
+    uint32_t *expectdRole = &value;
     bool flagValue = true;
     bool *isStrict = &flagValue;
-    int32_t ret = self->getExpectedRole(networkId, type, expectedRole, isStrict);
+    int32_t ret = self->getExpectedRole(networkId, type, expectdRole, isStrict);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 };
 }

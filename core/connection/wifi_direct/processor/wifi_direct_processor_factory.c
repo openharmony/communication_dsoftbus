@@ -15,15 +15,12 @@
 
 #include "wifi_direct_processor_factory.h"
 #include "processor/p2p_v1_processor.h"
-#include "processor/p2p_v2_processor.h"
 #include "wifi_direct_negotiator.h"
 
 static struct WifiDirectProcessor* CreateProcessor(enum WifiDirectProcessorType type)
 {
     if (type == WIFI_DIRECT_PROCESSOR_TYPE_P2P_V1) {
         return (struct WifiDirectProcessor *)GetP2pV1Processor();
-    } else if (type == WIFI_DIRECT_PROCESSOR_TYPE_P2P_V2) {
-        return (struct WifiDirectProcessor *)GetP2pV2Processor();
     }
 
     return NULL;

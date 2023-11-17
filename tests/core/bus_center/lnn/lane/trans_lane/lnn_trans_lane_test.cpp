@@ -26,7 +26,6 @@
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
-#include "softbus_log.h"
 
 namespace OHOS {
 using namespace testing::ext;

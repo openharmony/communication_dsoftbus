@@ -20,7 +20,7 @@
 #include "softbus_bus_center.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "trans_log.h"
 
 namespace Communication {
 namespace SoftBus {
@@ -49,7 +49,7 @@ int SessionServiceImpl::CreateSessionServer(const std::string &pkgName, const st
     std::shared_ptr<ISessionListener> listener)
 {
     if (pkgName.empty() || sessionName.empty() || listener == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SessionServiceImpl:CreateSessionServer, invalid parameter");
+        TRANS_LOGW(TRANS_SDK, "invalid parameter");
         return SOFTBUS_ERR;
     }
 
@@ -64,7 +64,7 @@ int SessionServiceImpl::CreateSessionServer(const std::string &pkgName, const st
 int SessionServiceImpl::RemoveSessionServer(const std::string &pkgName, const std::string &sessionName)
 {
     if (pkgName.empty() || sessionName.empty()) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SessionServiceImpl:RemoveSessionServer, invalid parameter");
+        TRANS_LOGW(TRANS_SDK, "invalid parameter");
         return SOFTBUS_ERR;
     }
 
@@ -74,21 +74,21 @@ int SessionServiceImpl::RemoveSessionServer(const std::string &pkgName, const st
         listenerMap_.erase(iter);
         return RemoveSessionServerInner(pkgName.c_str(), sessionName.c_str());
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SessionServiceImpl:RemoveSessionServer, not find session server");
+    TRANS_LOGE(TRANS_SDK, "not find session server");
     return SOFTBUS_ERR;
 }
 
 std::shared_ptr<Session> SessionServiceImpl::OpenSession(const std::string &mySessionName,
     const std::string &peerSessionName, const std::string &peerNetworkId, const std::string &groupId, int flags)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "SessionServiceImpl::OpenSession");
+    TRANS_LOGD(TRANS_SDK, "enter.");
     if (mySessionName.empty() || peerSessionName.empty() || peerNetworkId.empty()) {
         return nullptr;
     }
     int sessionId = OpenSessionInner(mySessionName.c_str(), peerSessionName.c_str(),
         peerNetworkId.c_str(), groupId.c_str(), flags);
     if (sessionId <= 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SessionServiceImpl:OpenSession, invalid sessionId.");
+        TRANS_LOGE(TRANS_SDK, "invalid sessionId.");
         return nullptr;
     }
 
@@ -97,21 +97,21 @@ std::shared_ptr<Session> SessionServiceImpl::OpenSession(const std::string &mySe
     auto iter = sessionMap_.find(sessionId);
     if (iter != sessionMap_.end()) {
         session = iter->second;
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "SessionServiceImpl::Session Find");
+        TRANS_LOGE(TRANS_SDK, "Session find");
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "SessionServiceImpl::OpenSession ok");
+    TRANS_LOGD(TRANS_SDK, "ok");
     return session;
 }
 
 int SessionServiceImpl::CloseSession(std::shared_ptr<Session> session)
 {
     if (session == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SessionServiceImpl:CloseSession, invalid parameter");
+        TRANS_LOGW(TRANS_SDK, "invalid parameter");
         return SOFTBUS_ERR;
     }
     int sessionId = session->GetSessionId();
     if (sessionId <= 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SessionServiceImpl:OpenSession, invalid sessionId.");
+        TRANS_LOGE(TRANS_SDK, "invalid sessionId. sessionId=%d", sessionId);
         return SOFTBUS_ERR;
     }
     CloseSessionInner(sessionId);
@@ -126,7 +126,7 @@ int SessionServiceImpl::CloseSession(std::shared_ptr<Session> session)
 int SessionServiceImpl::GrantPermission(int uid, int pid, const std::string &busName)
 {
     if (uid < 0 || pid < 0 || busName.empty()) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SessionServiceImpl:GrantPermission, invalid parameter");
+        TRANS_LOGW(TRANS_SDK, "invalid parameter");
         return SOFTBUS_ERR;
     }
     return GrantPermissionInner(uid, pid, busName.c_str());
@@ -135,7 +135,7 @@ int SessionServiceImpl::GrantPermission(int uid, int pid, const std::string &bus
 int SessionServiceImpl::RemovePermission(const std::string &busName)
 {
     if (busName.empty()) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SessionServiceImpl:RemovePermission, invalid parameter");
+        TRANS_LOGW(TRANS_SDK, "invalid parameter");
         return SOFTBUS_ERR;
     }
     return RemovePermissionInner(busName.c_str());
@@ -143,7 +143,7 @@ int SessionServiceImpl::RemovePermission(const std::string &busName)
 
 int SessionServiceImpl::OpenSessionCallback(int sessionId)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "SessionServiceImpl::OpenSessionCallback");
+    TRANS_LOGD(TRANS_SDK, "enter.");
     int isServer;
     if (IsServerSideInner(sessionId, &isServer) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
@@ -177,7 +177,7 @@ int SessionServiceImpl::OpenSessionCallback(int sessionId)
 
     std::shared_ptr<ISessionListener> listener;
     if (GetSessionListenerOnSessionOpened(sessionId, listener, session) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "OpenSessionCallback get session listener failed");
+        TRANS_LOGE(TRANS_SDK, "OpenSessionCallback get session listener failed");
         return SOFTBUS_ERR;
     }
 
@@ -200,7 +200,7 @@ int SessionServiceImpl::OpenSessionCallback(int sessionId)
         return SOFTBUS_ERR;
     }
     session->SetPeerPid(static_cast<pid_t>(tmp));
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "SessionServiceImpl::OpenSessionCallback Ok");
+    TRANS_LOGI(TRANS_SDK, "Ok");
     return listener->OnSessionOpened(session);
 }
 

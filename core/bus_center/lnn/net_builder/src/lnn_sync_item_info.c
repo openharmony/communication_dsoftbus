@@ -17,17 +17,17 @@
 
 #include <securec.h>
 
+#include "lnn_connection_addr_utils.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_local_net_ledger.h"
+#include "lnn_log.h"
+#include "lnn_net_builder.h"
 #include "lnn_sync_info_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "softbus_wifi_api_adapter.h"
 #include "softbus_adapter_socket.h"
-#include "lnn_net_builder.h"
-#include "lnn_connection_addr_utils.h"
 
 #define CONN_CODE_SHIFT 16
 #define DISCOVERY_TYPE_MASK 0x7FFF
@@ -36,19 +36,19 @@ static int32_t FillTargetWifiConfig(const unsigned char *targetBssid, const char
                                     const SoftBusWifiDevConf *conWifiConf, SoftBusWifiDevConf *targetWifiConf)
 {
     if (strcpy_s(targetWifiConf->ssid, sizeof(targetWifiConf->ssid), ssid) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "str copy ssid fail");
+        LNN_LOGE(LNN_BUILDER, "str copy ssid fail");
         return SOFTBUS_ERR;
     }
 
     if (memcpy_s(targetWifiConf->bssid, sizeof(targetWifiConf->bssid),
         targetBssid, sizeof(targetWifiConf->bssid)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "mem copy bssid fail");
+        LNN_LOGE(LNN_BUILDER, "mem copy bssid fail");
         return SOFTBUS_ERR;
     }
 
     if (strcpy_s(targetWifiConf->preSharedKey, sizeof(targetWifiConf->preSharedKey),
         conWifiConf->preSharedKey) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "str copy ssid fail");
+        LNN_LOGE(LNN_BUILDER, "str copy ssid fail");
         return SOFTBUS_ERR;
     }
 
@@ -74,7 +74,7 @@ static int32_t WifiConnectToTargetAp(const unsigned char *targetBssid, const cha
 
     result = (SoftBusWifiDevConf *)SoftBusMalloc(sizeof(SoftBusWifiDevConf) * WIFI_MAX_CONFIG_SIZE);
     if (result == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc wifi device config fail");
+        LNN_LOGE(LNN_BUILDER, "malloc wifi device config fail");
         return SOFTBUS_ERR;
     }
     (void)memset_s(&targetDeviceConf, sizeof(SoftBusWifiDevConf), 0, sizeof(SoftBusWifiDevConf));
@@ -82,13 +82,13 @@ static int32_t WifiConnectToTargetAp(const unsigned char *targetBssid, const cha
                    sizeof(SoftBusWifiDevConf) * WIFI_MAX_CONFIG_SIZE);
     retVal = SoftBusGetWifiDeviceConfig(result, &wifiConfigSize);
     if (retVal != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Get wifi device config fail");
+        LNN_LOGE(LNN_BUILDER, "Get wifi device config fail");
         ResultClean(result);
         return SOFTBUS_ERR;
     }
 
     if (wifiConfigSize > WIFI_MAX_CONFIG_SIZE) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "wifi device config size is invalid.");
+        LNN_LOGE(LNN_BUILDER, "wifi device config size is invalid.");
         ResultClean(result);
         return SOFTBUS_ERR;
     }
@@ -98,7 +98,7 @@ static int32_t WifiConnectToTargetAp(const unsigned char *targetBssid, const cha
             continue;
         }
         if (FillTargetWifiConfig(targetBssid, ssid, result + i, &targetDeviceConf) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "fill device config failed.");
+            LNN_LOGE(LNN_BUILDER, "fill device config fail");
             (void)memset_s(&targetDeviceConf, sizeof(SoftBusWifiDevConf), 0, sizeof(SoftBusWifiDevConf));
             ResultClean(result);
             return SOFTBUS_ERR;
@@ -106,14 +106,14 @@ static int32_t WifiConnectToTargetAp(const unsigned char *targetBssid, const cha
         break;
     }
     if (SoftBusDisconnectDevice() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "dis connect device failed.");
+        LNN_LOGE(LNN_BUILDER, "dis connect device fail");
         (void)memset_s(&targetDeviceConf, sizeof(SoftBusWifiDevConf), 0, sizeof(SoftBusWifiDevConf));
         ResultClean(result);
         return SOFTBUS_ERR;
     }
 
     if (SoftBusConnectToDevice(&targetDeviceConf) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "connect to target ap failed.");
+        LNN_LOGE(LNN_BUILDER, "connect to target ap fail");
         (void)memset_s(&targetDeviceConf, sizeof(SoftBusWifiDevConf), 0, sizeof(SoftBusWifiDevConf));
         ResultClean(result);
         return SOFTBUS_ERR;
@@ -128,19 +128,19 @@ void OnReceiveDeviceName(LnnSyncInfoType type, const char *networkId, const uint
     char udid[UDID_BUF_LEN];
     BssTransInfo *bssTranInfo = NULL;
     if (msg == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s: msg is null", __func__);
+        LNN_LOGE(LNN_BUILDER, "msg is null");
         return;
     }
     if (type != LNN_INFO_TYPE_DEVICE_NAME) {
         return;
     }
     if (LnnConvertDlId(networkId, CATEGORY_NETWORK_ID, CATEGORY_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "convert networkId to udid fail");
+        LNN_LOGE(LNN_BUILDER, "convert networkId to udid fail");
         return;
     }
     bssTranInfo = (BssTransInfo *)msg;
     if (WifiConnectToTargetAp(bssTranInfo->targetBssid, bssTranInfo->ssid) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "wifi connect to target ap failed");
+        LNN_LOGE(LNN_BUILDER, "wifi connect to target ap failed");
     }
 }
 
@@ -148,16 +148,16 @@ void OnReceiveTransReqMsg(LnnSyncInfoType type, const char *networkId, const uin
 {
     char udid[UDID_BUF_LEN];
 
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "recv trans req msg: %d, len: %d", type, len);
+    LNN_LOGI(LNN_BUILDER, "recv trans req msg infoType=%d, len=%d", type, len);
     if (type != LNN_INFO_TYPE_BSS_TRANS) {
         return;
     }
     if (LnnConvertDlId(networkId, CATEGORY_NETWORK_ID, CATEGORY_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "convert networkId to udid fail");
+        LNN_LOGE(LNN_BUILDER, "convert networkId to udid fail");
         return;
     }
     if (!LnnSetDLDeviceInfoName(udid, (char *)msg)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "set peer device name fail");
+        LNN_LOGI(LNN_BUILDER, "set peer device name fail");
     }
 }
 
@@ -168,7 +168,7 @@ static void OnReceiveBrOffline(LnnSyncInfoType type, const char *networkId, cons
     int16_t peerCode, code;
     DiscoveryType discType;
 
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "Recv offline info, type:%d, len:%d", type, len);
+    LNN_LOGI(LNN_BUILDER, "Recv offline info, infoType=%d, len=%d", type, len);
     if (type != LNN_INFO_TYPE_OFFLINE) {
         return;
     }
@@ -180,39 +180,39 @@ static void OnReceiveBrOffline(LnnSyncInfoType type, const char *networkId, cons
     peerCode = (int16_t)(combinedInt >> CONN_CODE_SHIFT);
     discType = (DiscoveryType)(combinedInt & DISCOVERY_TYPE_MASK);
     if (LnnConvertDlId(networkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "covert networkId to uuid fail!");
+        LNN_LOGE(LNN_BUILDER, "covert networkId to uuid fail");
         return;
     }
     code = LnnGetCnnCode(uuid, DISCOVERY_TYPE_BR);
     if (code == INVALID_CONNECTION_CODE_VALUE) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "uuid not exist!");
+        LNN_LOGE(LNN_BUILDER, "uuid not exist");
         return;
     }
     if (discType != DISCOVERY_TYPE_BR || code != peerCode) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "info error discType=%d, code=%d, peerCode=%d!",
+        LNN_LOGE(LNN_BUILDER, "info error discType=%d, code=%d, peerCode=%d",
             discType, code, peerCode);
         return;
     }
     if (LnnRequestLeaveSpecific(networkId, LnnDiscTypeToConnAddrType(discType)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "request leave specific fail!");
+        LNN_LOGE(LNN_BUILDER, "request leave specific fail");
     }
 }
 
 int32_t LnnSendTransReq(const char *peerNetWorkId, const BssTransInfo *transInfo)
 {
     if (peerNetWorkId == NULL || transInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para peerNetWorkId or tansInfo is null");
+        LNN_LOGE(LNN_BUILDER, "para peerNetWorkId or tansInfo is null");
         return SOFTBUS_ERR;
     }
 
     if (LnnSetDLBssTransInfo(peerNetWorkId, transInfo) != SOFTBUS_OK) {
-        LLOGE("save bssTransinfo fail");
+        LNN_LOGE(LNN_BUILDER, "save bssTransinfo fail");
         return SOFTBUS_ERR;
     }
 
     if (LnnSendSyncInfoMsg(LNN_INFO_TYPE_BSS_TRANS, peerNetWorkId,
         (const uint8_t *)transInfo, sizeof(BssTransInfo), NULL) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "send bss info fail");
+        LNN_LOGE(LNN_BUILDER, "send bss info fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

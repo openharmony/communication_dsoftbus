@@ -21,15 +21,18 @@
 #include "lnn_devicename_info.h"
 #include "lnn_net_builder.h"
 #include "lnn_service_mock.h"
+#include "lnn_net_ledger_mock.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "lnn_battery_info.c"
 
 #define TEST_VALID_PEER_NETWORKID "12345678"
 #define TEST_VALID_UDID_LEN 32
+
+constexpr int32_t LEVEL = 10;
+constexpr char UDID1[] = "123456789AB";
 
 namespace OHOS {
 using namespace testing;
@@ -81,5 +84,23 @@ HWTEST_F(LNNBatteryInfoTest, LNN_ON_RECEIVE_BATTERY_INFO_TEST_001, TestSize.Leve
 HWTEST_F(LNNBatteryInfoTest, LNN_ON_RECEIVE_BATTERY_INFO_TEST_002, TestSize.Level1)
 {
     OnReceiveBatteryInfo(LNN_INFO_TYPE_BATTERY_INFO, nullptr, nullptr, TEST_VALID_UDID_LEN);
+}
+
+/*
+* @tc.name: LNN_SYNC_BATTERY_INFO_TEST_001
+* @tc.desc: test LnnSyncBatteryInfo
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNBatteryInfoTest, LNN_SYNC_BATTERY_INFO_TEST_001, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById)
+        .WillOnce(Return(SOFTBUS_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = LnnSyncBatteryInfo(UDID1, LEVEL, true);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+    ret = LnnSyncBatteryInfo(UDID1, LEVEL, true);
+    EXPECT_NE(SOFTBUS_OK, ret);
 }
 } // namespace OHOS

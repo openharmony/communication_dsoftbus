@@ -12,52 +12,52 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include "conn_log.h"
 #include "entity/p2p_entity/p2p_entity_state.h"
-#include "softbus_adapter_mem.h"
-#include "softbus_log.h"
 #include "softbus_error_code.h"
 #include "entity/p2p_entity/p2p_entity.h"
 
-#define LOG_LABEL "[WD] PEnS: "
-
 static void Enter(struct P2pEntityState *self)
 {
-    CLOGI(LOG_LABEL "%s default implement", self->name);
+    CONN_LOGI(CONN_WIFI_DIRECT, "%s default implement", self->name);
 }
 
 static void Exit(struct P2pEntityState *self)
 {
-    CLOGI(LOG_LABEL "%s default implement", self->name);
+    CONN_LOGI(CONN_WIFI_DIRECT, "%s default implement", self->name);
 }
 
 static int32_t CreateServer(struct P2pEntityState *self, struct WifiDirectConnectParams *params)
 {
-    CLOGE(LOG_LABEL "%s ERROR_ENTITY_BUSY", self->name);
+    (void)params;
+    CONN_LOGE(CONN_WIFI_DIRECT, "%s ERROR_ENTITY_BUSY", self->name);
     return ERROR_ENTITY_BUSY;
 }
 
 static int32_t Connect(struct P2pEntityState *self, struct WifiDirectConnectParams *params)
 {
-    CLOGE(LOG_LABEL "%s ERROR_ENTITY_BUSY", self->name);
+    (void)params;
+    CONN_LOGE(CONN_WIFI_DIRECT, "%s ERROR_ENTITY_BUSY", self->name);
     return ERROR_ENTITY_BUSY;
 }
 
 static int32_t RemoveLink(struct P2pEntityState *self, struct WifiDirectConnectParams *params)
 {
-    CLOGE(LOG_LABEL "%s ERROR_ENTITY_BUSY", self->name);
+    (void)params;
+    CONN_LOGE(CONN_WIFI_DIRECT, "%s ERROR_ENTITY_BUSY", self->name);
     return ERROR_ENTITY_BUSY;
 }
 
 static int32_t DestroyServer(struct P2pEntityState *self, struct WifiDirectConnectParams *params)
 {
-    CLOGE(LOG_LABEL "%s ERROR_ENTITY_BUSY", self->name);
+    (void)params;
+    CONN_LOGE(CONN_WIFI_DIRECT, "%s ERROR_ENTITY_BUSY", self->name);
     return ERROR_ENTITY_BUSY;
 }
 
 static void HandleTimeout(struct P2pEntityState *self, enum P2pEntityTimeoutEvent event)
 {
-    CLOGE(LOG_LABEL "%s default implement, event=%d", self->name, event);
+    CONN_LOGE(CONN_WIFI_DIRECT, "%s default implement, event=%d", self->name, event);
     struct P2pEntity *entity = GetP2pEntity();
     entity->notifyOperationComplete(SOFTBUS_TIMOUT);
     entity->changeState(P2P_ENTITY_STATE_AVAILABLE);
@@ -65,12 +65,14 @@ static void HandleTimeout(struct P2pEntityState *self, enum P2pEntityTimeoutEven
 
 static void HandleConnectionChange(struct P2pEntityState *self, struct WifiDirectP2pGroupInfo *groupInfo)
 {
-    CLOGI(LOG_LABEL "%s default implement", self->name);
+    (void)groupInfo;
+    CONN_LOGI(CONN_WIFI_DIRECT, "%s default implement", self->name);
 }
 
 static void HandleConnectStateChange(struct P2pEntityState *self, enum WifiDirectP2pConnectState state)
 {
-    CLOGI(LOG_LABEL "%s default implement", self->name);
+    (void)state;
+    CONN_LOGI(CONN_WIFI_DIRECT, "%s default implement", self->name);
 }
 
 /* base constructor */

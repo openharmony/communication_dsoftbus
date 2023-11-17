@@ -12,63 +12,76 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include "conn_log.h"
 #include "entity/p2p_entity/p2p_unavailable_state.h"
-#include "softbus_log.h"
 #include "softbus_error_code.h"
 #include "entity/p2p_entity/p2p_entity.h"
-
-#define LOG_LABEL  "[WD] PUnS: "
 
 /* public interface */
 static void Enter(struct P2pEntityState *self)
 {
-    CLOGI(LOG_LABEL "enter");
+    (void)self;
+    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     GetP2pEntity()->stopTimer();
 }
 
 static void Exit(struct P2pEntityState *self)
 {
-    CLOGI(LOG_LABEL "enter");
+    (void)self;
+    CONN_LOGI(CONN_WIFI_DIRECT, "exit");
 }
 
 static int32_t CreateServer(struct P2pEntityState *self, struct WifiDirectConnectParams *params)
 {
-    CLOGE(LOG_LABEL "entity unavailable");
+    (void)self;
+    (void)params;
+    CONN_LOGE(CONN_WIFI_DIRECT, "entity unavailable");
     return ERROR_ENTITY_UNAVAILABLE;
 }
 
 static int32_t Connect(struct P2pEntityState *self, struct WifiDirectConnectParams *params)
 {
-    CLOGE(LOG_LABEL "entity unavailable");
+    (void)self;
+    (void)params;
+    CONN_LOGE(CONN_WIFI_DIRECT, "entity unavailable");
     return ERROR_ENTITY_UNAVAILABLE;
 }
 
 static int32_t RemoveLink(struct P2pEntityState *self, struct WifiDirectConnectParams *params)
 {
-    CLOGE(LOG_LABEL "entity unavailable");
+    (void)self;
+    (void)params;
+    CONN_LOGE(CONN_WIFI_DIRECT, "entity unavailable");
     return SOFTBUS_ERR;
 }
 
 static int32_t DestroyServer(struct P2pEntityState *self, struct WifiDirectConnectParams *params)
 {
-    CLOGE(LOG_LABEL "entity unavailable");
+    (void)self;
+    (void)params;
+    CONN_LOGE(CONN_WIFI_DIRECT, "entity unavailable");
     return SOFTBUS_ERR;
 }
 
 static void HandleTimeout(struct P2pEntityState *self, enum P2pEntityTimeoutEvent event)
 {
-    CLOGE(LOG_LABEL "entity unavailable");
+    (void)self;
+    (void)event;
+    CONN_LOGE(CONN_WIFI_DIRECT, "entity unavailable");
 }
 
 static void HandleConnectionChange(struct P2pEntityState *self, struct WifiDirectP2pGroupInfo *groupInfo)
 {
-    CLOGE(LOG_LABEL "entity unavailable");
+    (void)self;
+    (void)groupInfo;
+    CONN_LOGE(CONN_WIFI_DIRECT, "entity unavailable");
 }
 
 static void HandleConnectStateChange(struct P2pEntityState *self, enum WifiDirectP2pConnectState state)
 {
-    CLOGE(LOG_LABEL "entity unavailable");
+    (void)self;
+    (void)state;
+    CONN_LOGE(CONN_WIFI_DIRECT, "entity unavailable");
 }
 
 /* constructor */

@@ -23,6 +23,7 @@
 #include "lnn_lane_interface.h"
 #include "lnn_lane_score.h"
 #include "lnn_local_net_ledger.h"
+#include "lnn_log.h"
 #include "lnn_net_capability.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
@@ -30,7 +31,6 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_hisysevt_bus_center.h"
-#include "softbus_log.h"
 #include "softbus_network_utils.h"
 #include "softbus_utils.h"
 #include "softbus_wifi_api_adapter.h"
@@ -53,10 +53,10 @@ int32_t GetWlanLinkedFrequency(void)
     LnnWlanLinkedInfo info;
     int32_t ret = LnnGetWlanLinkedInfo(&info);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get linked info fail, reason:%d", ret);
+        LNN_LOGE(LNN_LANE, "get linked info fail, reason=%d", ret);
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "wlan linked frequency:%d", info.frequency);
+    LNN_LOGI(LNN_LANE, "wlan linked frequency=%d", info.frequency);
     return info.frequency;
 }
 
@@ -64,12 +64,12 @@ static bool GetNetCap(const char *networkId, int32_t *local, int32_t *remote)
 {
     int32_t ret = LnnGetLocalNumInfo(NUM_KEY_NET_CAP, local);
     if (ret != SOFTBUS_OK || *local < 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetLocalNumInfo err, ret = %d, local = %d", ret, *local);
+        LNN_LOGE(LNN_LANE, "LnnGetLocalNumInfo err, ret=%d, local=%d", ret, *local);
         return false;
     }
     ret = LnnGetRemoteNumInfo(networkId, NUM_KEY_NET_CAP, remote);
     if (ret != SOFTBUS_OK || *remote < 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LnnGetRemoteNumInfo err, ret = %d, remote = %d", ret, *remote);
+        LNN_LOGE(LNN_LANE, "LnnGetRemoteNumInfo err, ret=%d, remote=%d", ret, *remote);
         return false;
     }
     return true;
@@ -79,12 +79,12 @@ static bool GetFeatureCap(const char *networkId, uint64_t *local, uint64_t *remo
 {
     int32_t ret = LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, local);
     if (ret != SOFTBUS_OK || *local < 0) {
-        LLOGE("LnnGetLocalNumInfo err, ret = %d, local = %d", ret, *local);
+        LNN_LOGE(LNN_LANE, "LnnGetLocalNumInfo err, ret=%d, local=%d", ret, *local);
         return false;
     }
     ret = LnnGetRemoteNumU64Info(networkId, NUM_KEY_FEATURE_CAPA, remote);
     if (ret != SOFTBUS_OK || *remote < 0) {
-        LLOGE("LnnGetRemoteNumInfo err, ret = %d, remote = %d", ret, *remote);
+        LNN_LOGE(LNN_LANE, "LnnGetRemoteNumInfo err, ret=%d, remote=%d", ret, *remote);
         return false;
     }
     return true;
@@ -94,7 +94,7 @@ static bool IsEnableWlan2P4G(const char *networkId)
 {
     SoftBusBand band = SoftBusGetLinkBand();
     if (band != BAND_24G && band != BAND_UNKNOWN) {
-        LLOGE("band isn't 2.4G or unknown");
+        LNN_LOGE(LNN_LANE, "band isn't 2.4G or unknown");
         return false;
     }
     NodeInfo node;
@@ -107,14 +107,14 @@ static bool IsEnableWlan2P4G(const char *networkId)
     }
     int32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNetCap error");
+        LNN_LOGE(LNN_LANE, "GetNetCap error");
         return false;
     }
     if (((local & (1 << BIT_WIFI_24G)) || (local & (1 << BIT_ETH)) || (local & (1 << BIT_WIFI_5G))) &&
         ((remote & (1 << BIT_WIFI_24G)) || (remote & (1 << BIT_ETH)) || (local & (1 << BIT_WIFI_5G)))) {
         return true;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "2.4G capa disable, local:%d, remote:%d", local, remote);
+    LNN_LOGE(LNN_LANE, "2.4G capa disable, local:%d, remote:%d", local, remote);
     return false;
 }
 
@@ -122,7 +122,7 @@ static bool IsEnableWlan5G(const char *networkId)
 {
     SoftBusBand band = SoftBusGetLinkBand();
     if (band != BAND_5G && band != BAND_UNKNOWN) {
-        LLOGE("band isn't 5G or unknown");
+        LNN_LOGE(LNN_LANE, "band isn't 5G or unknown");
         return false;
     }
     NodeInfo node;
@@ -135,14 +135,14 @@ static bool IsEnableWlan5G(const char *networkId)
     }
     int32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNetCap error");
+        LNN_LOGE(LNN_LANE, "GetNetCap error");
         return false;
     }
     if (((local & (1 << BIT_WIFI_5G)) || (local & (1 << BIT_ETH)) || (local & (1 << BIT_WIFI_24G))) &&
         ((remote & (1 << BIT_WIFI_5G)) || (remote & (1 << BIT_ETH)) || (local & (1 << BIT_WIFI_24G)))) {
         return true;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "5G capa disable, local:%d, remote:%d", local, remote);
+    LNN_LOGE(LNN_LANE, "5G capa disable, local:%d, remote:%d", local, remote);
     return false;
 }
 
@@ -150,13 +150,13 @@ static bool IsEnableBr(const char *networkId)
 {
     int32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNetCap error");
+        LNN_LOGE(LNN_LANE, "GetNetCap error");
         return false;
     }
     if ((local & (1 << BIT_BR)) && (remote & (1 << BIT_BR))) {
         return true;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "BR capa disable, local:%d, remote:%d", local, remote);
+    LNN_LOGE(LNN_LANE, "BR capa disable, local:%d, remote:%d", local, remote);
     return false;
 }
 
@@ -164,11 +164,11 @@ static bool IsEnableP2p(const char *networkId)
 {
     int32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNetCap error");
+        LNN_LOGE(LNN_LANE, "GetNetCap error");
         return false;
     }
     if (((local & (1 << BIT_WIFI_P2P)) == 0) || ((remote & (1 << BIT_WIFI_P2P)) == 0)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "p2p capa disable, local:%d, remote:%d", local, remote);
+        LNN_LOGE(LNN_LANE, "p2p capa disable, local:%d, remote:%d", local, remote);
         return false;
     }
     return true;
@@ -197,9 +197,12 @@ static bool IsEnableP2pReuse(const char *networkId)
     }
     uint64_t local, remote;
     if (!GetFeatureCap(networkId, &local, &remote)) {
+        LNN_LOGE(LNN_LANE, "GetNetCap error");
         return false;
     }
     if (((local & (1 << BIT_WIFI_P2P_REUSE)) == 0) || ((remote & (1 << BIT_WIFI_P2P_REUSE)) == 0)) {
+        LNN_LOGE(LNN_LANE, "p2p reuse capa disable, local:" PRIu64 ", remote:%"  PRIu64,
+            local, remote);
         return false;
     }
     return true;
@@ -209,7 +212,7 @@ static bool IsEnableBle(const char *networkId)
 {
     int32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNetCap error");
+        LNN_LOGE(LNN_LANE, "GetNetCap error");
         return false;
     }
     if (((local & (1 << BIT_BLE)) == 0) || ((remote & (1 << BIT_BLE)) == 0)) {
@@ -221,18 +224,18 @@ static bool IsEnableBle(const char *networkId)
 static bool IsEnableBleDirect(const char *networkId)
 {
     if (!IsEnableBle(networkId)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ble is not enable");
+        LNN_LOGE(LNN_LANE, "ble is not enable");
         return false;
     }
 
     uint64_t local, remote;
     if (!GetFeatureCap(networkId, &local, &remote)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetFeatureCap error");
+        LNN_LOGE(LNN_LANE, "GetFeatureCap error");
         return false;
     }
     if (((local & (1 << BIT_BLE_DIRECT_CONNECT_CAPABILITY)) == 0) ||
         ((remote & (1 << BIT_BLE_DIRECT_CONNECT_CAPABILITY)) == 0)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ble direct capa disable, local:%" PRIu64 ", remote:%" PRIu64,
+        LNN_LOGE(LNN_LANE, "ble direct capa disable, local:%" PRIu64 ", remote:%" PRIu64,
             local, remote);
         return false;
     }
@@ -242,16 +245,16 @@ static bool IsEnableBleDirect(const char *networkId)
 static bool IsEnableCoc(const char *networkId)
 {
     if (!IsEnableBle(networkId)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ble is not enable");
+        LNN_LOGE(LNN_LANE, "ble is not enable");
         return false;
     }
     uint64_t local = 0, remote = 0;
     if (!GetFeatureCap(networkId, &local, &remote)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetFeatureCap error");
+        LNN_LOGE(LNN_LANE, "GetFeatureCap error");
         return false;
     }
     if (((local & (1 << BIT_COC_CONNECT_CAPABILITY)) == 0) || ((remote & (1 << BIT_COC_CONNECT_CAPABILITY)) == 0)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "coc capa disable, local:%" PRIu64 ", remote:%" PRIu64,
+        LNN_LOGE(LNN_LANE, "coc capa disable, local:%" PRIu64 ", remote:%" PRIu64,
             local, remote);
         return false;
     }
@@ -261,11 +264,11 @@ static bool IsEnableCoc(const char *networkId)
 static bool IsEnableCocDirect(const char *networkId)
 {
     if (!IsEnableCoc(networkId)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "coc is not enable");
+        LNN_LOGE(LNN_LANE, "coc is not enable");
         return false;
     }
     if (!IsEnableBleDirect(networkId)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ble direct is not enable");
+        LNN_LOGE(LNN_LANE, "ble direct is not enable");
         return false;
     }
     return true;
@@ -308,11 +311,11 @@ static int32_t GetLinkedChannelScore(void)
     }
     int32_t channel = SoftBusFrequencyToChannel(frequency);
     if (channel < 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get curr channel fail");
+        LNN_LOGE(LNN_LANE, "get curr channel fail");
         return LNN_LINK_DEFAULT_SCORE;
     }
     int32_t score = LnnGetCurrChannelScore(channel);
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "current channel:%d, score:%d", channel, score);
+    LNN_LOGI(LNN_LANE, "current channel=%d, score=%d", channel, score);
     if (score <= 0) {
         score = LNN_LINK_DEFAULT_SCORE;
     }

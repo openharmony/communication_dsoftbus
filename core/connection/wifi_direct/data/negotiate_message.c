@@ -16,13 +16,11 @@
 #include "negotiate_message.h"
 #include <securec.h>
 #include <string.h>
-#include "softbus_log.h"
+#include "conn_log.h"
 #include "data/link_info.h"
 #include "data/interface_info.h"
 #include "protocol/wifi_direct_protocol_factory.h"
 #include "utils/wifi_direct_utils.h"
-
-#define LOG_LABEL "[WD] NM: "
 
 #define NM_TAG_MSG_TYPE 0
 #define NM_TAG_SESSION_ID 1
@@ -180,7 +178,7 @@ static bool Marshalling(struct NegotiateMessage *self, struct WifiDirectProtocol
                 continue;
         }
 
-        CONN_CHECK_AND_RETURN_RET_LOG(ret, false, LOG_LABEL "marshalling nego message failed");
+        CONN_CHECK_AND_RETURN_RET_LOGW(ret, false, CONN_WIFI_DIRECT, "marshalling nego message failed");
     }
 
     return true;
@@ -196,7 +194,7 @@ static bool Unmarshalling(struct NegotiateMessage *self, struct WifiDirectProtoc
         bool ret = false;
         enum NegotiateMessageKey key = GetKeyFromKeyProperty(&keyProperty);
         if (key == NM_KEY_MAX) {
-            CLOGE(LOG_LABEL "not support key, tag=%d context=%s", keyProperty.tag, keyProperty.content);
+            CONN_LOGW(CONN_WIFI_DIRECT, "not support key, tag=%d context=%s", keyProperty.tag, keyProperty.content);
             continue;
         }
 
@@ -220,9 +218,9 @@ static bool Unmarshalling(struct NegotiateMessage *self, struct WifiDirectProtoc
                 break;
             case STRING: {
                 char *string = SoftBusCalloc(size + 1);
-                CONN_CHECK_AND_RETURN_RET_LOG(string, false, LOG_LABEL "alloc failed");
+                CONN_CHECK_AND_RETURN_RET_LOGE(string, false, CONN_WIFI_DIRECT, "alloc failed");
                 if (memcpy_s(string, size + 1, data, size) != EOK) {
-                    CLOGE("string memcpy fail");
+                    CONN_LOGW(CONN_WIFI_DIRECT, "string memcpy fail");
                     SoftBusFree(string);
                     return false;
                 }
@@ -240,7 +238,7 @@ static bool Unmarshalling(struct NegotiateMessage *self, struct WifiDirectProtoc
             default:
                 continue;
         }
-        CONN_CHECK_AND_RETURN_RET_LOG(ret, false, LOG_LABEL "unmarshalling failed key=%d", key);
+        CONN_CHECK_AND_RETURN_RET_LOGW(ret, false, CONN_WIFI_DIRECT, "unmarshalling failed key=%d", key);
     }
 
     return true;
@@ -269,7 +267,7 @@ static bool MarshallingInterfaceInfoArray(struct NegotiateMessage *self, struct 
     struct InterfaceInfo *interfaceArray = self->getContainerArray(self, key, &arraySize);
     for (size_t i = 0; i < arraySize; i++) {
         struct WifiDirectProtocol *subProtocol = GetWifiDirectProtocolFactory()->createProtocol(protocol->getType());
-        CONN_CHECK_AND_RETURN_RET_LOG(subProtocol, false, LOG_LABEL "create sub protocol failed");
+        CONN_CHECK_AND_RETURN_RET_LOGW(subProtocol, false, CONN_WIFI_DIRECT, "create sub protocol failed");
 
         struct ProtocolFormat format = {TLV_TAG_SIZE, TLV_LENGTH_SIZE2 };
         subProtocol->setFormat(subProtocol, &format);
@@ -285,7 +283,7 @@ static bool MarshallingInterfaceInfoArray(struct NegotiateMessage *self, struct 
         struct InfoContainerKeyProperty *keyProperty = self->getKeyProperty(self, key);
         ret = protocol->writeData(protocol, keyProperty, outData, outDataSize);
         GetWifiDirectProtocolFactory()->destroyProtocol(subProtocol);
-        CONN_CHECK_AND_RETURN_RET_LOG(ret, false, LOG_LABEL "pack failed");
+        CONN_CHECK_AND_RETURN_RET_LOGW(ret, false, CONN_WIFI_DIRECT, "pack failed");
     }
     return true;
 }
@@ -297,13 +295,13 @@ static bool UnmarshallingInterfaceInfoArray(struct NegotiateMessage *self, struc
     struct InterfaceInfo *currentInterfaceArray = self->getContainerArray(self, key, &currentInterfaceArraySize);
     size_t newInterfaceArraySize = currentInterfaceArraySize + 1;
     struct InterfaceInfo *newInterfaceArray = InterfaceInfoNewArray(newInterfaceArraySize);
-    CONN_CHECK_AND_RETURN_RET_LOG(newInterfaceArray, false, LOG_LABEL "new interface array failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(newInterfaceArray, false, CONN_WIFI_DIRECT, "new interface array failed");
     for (size_t i = 0; i < currentInterfaceArraySize; i++) {
         newInterfaceArray[i].deepCopy(newInterfaceArray + i, currentInterfaceArray + i);
     }
 
     struct WifiDirectProtocol *subProtocol = GetWifiDirectProtocolFactory()->createProtocol(protocol->getType());
-    CONN_CHECK_AND_RETURN_RET_LOG(subProtocol, false, LOG_LABEL "create sub protocol failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(subProtocol, false, CONN_WIFI_DIRECT, "create sub protocol failed");
 
     struct ProtocolFormat format = { TLV_TAG_SIZE, TLV_LENGTH_SIZE2 };
     subProtocol->setFormat(subProtocol, &format);
@@ -324,7 +322,7 @@ static bool MarshallingLinkInfo(struct NegotiateMessage *self, struct WifiDirect
     struct LinkInfo *linkInfo = self->getContainer(self, key);
     struct InfoContainerKeyProperty *keyProperty = self->getKeyProperty(self, key);
     struct WifiDirectProtocol *subProtocol = GetWifiDirectProtocolFactory()->createProtocol(protocol->getType());
-    CONN_CHECK_AND_RETURN_RET_LOG(subProtocol, false, LOG_LABEL "create sub protocol failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(subProtocol, false, CONN_WIFI_DIRECT, "create sub protocol failed");
 
     struct ProtocolFormat format = { TLV_TAG_SIZE, TLV_LENGTH_SIZE2 };
     subProtocol->setFormat(subProtocol, &format);
@@ -339,7 +337,7 @@ static bool MarshallingLinkInfo(struct NegotiateMessage *self, struct WifiDirect
     }
     ret = protocol->writeData(protocol, keyProperty, outData, outDataSize);
     GetWifiDirectProtocolFactory()->destroyProtocol(subProtocol);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret, false, LOG_LABEL "pack failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret, false, CONN_WIFI_DIRECT, "pack failed");
     return true;
 }
 
@@ -347,18 +345,18 @@ static bool UnmarshallingLinkInfo(struct NegotiateMessage *self, struct WifiDire
                                   enum NegotiateMessageKey key, uint8_t *data, size_t size)
 {
     struct LinkInfo *linkInfo = LinkInfoNew();
-    CONN_CHECK_AND_RETURN_RET_LOG(linkInfo, false, LOG_LABEL "new link info failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(linkInfo, false, CONN_WIFI_DIRECT, "new link info failed");
 
     struct WifiDirectProtocol *subProtocol = GetWifiDirectProtocolFactory()->createProtocol(protocol->getType());
-    CONN_CHECK_AND_RETURN_RET_LOG(subProtocol, false, LOG_LABEL "create sub protocol failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(subProtocol, false, CONN_WIFI_DIRECT, "create sub protocol failed");
 
     struct ProtocolFormat format = { TLV_TAG_SIZE, TLV_LENGTH_SIZE2 };
     subProtocol->setFormat(subProtocol, &format);
 
     bool ret = subProtocol->setDataSource(subProtocol, data, size);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret, false, LOG_LABEL "set data source failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret, false, CONN_WIFI_DIRECT, "set data source failed");
     ret = subProtocol->unpack(subProtocol, (struct InfoContainer *)linkInfo);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret, false, LOG_LABEL "unpack failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret, false, CONN_WIFI_DIRECT, "unpack failed");
 
     self->putContainer(self, key, (struct InfoContainer *)linkInfo, sizeof(*linkInfo));
     GetWifiDirectProtocolFactory()->destroyProtocol(subProtocol);

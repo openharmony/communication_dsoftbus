@@ -48,7 +48,6 @@
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "softbus_permission.h"
 
 
@@ -117,6 +116,7 @@ HWTEST_F(LNNBusCenterIpcTest, META_NODE_IPC_SERVER_LEAVE_Test_001, TestSize.Leve
     char *networkId = nullptr;
     char pkgNameValue[DEFAULT_LEN] = "test";
     char networkIdValue[DEFAULT_LEN] = "12345";
+    LnnInitMetaNodeExtLedger();
     int32_t ret = MetaNodeIpcServerLeave(pkgName, 0, networkIdValue);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = MetaNodeIpcServerLeave(pkgNameValue, 0, networkId);
@@ -139,14 +139,17 @@ HWTEST_F(LNNBusCenterIpcTest, META_NODE_IPC_NOTIFY_JOIN_RESULT_Test_001, TestSiz
     uint32_t addrTypeLen = 0;
     ConnectionAddr addrValue;
     (void)memset_s(&addrValue, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
-    char *networkId = nullptr;
+    MetaBasicInfo *metaInfo = nullptr;
     char networkIdValue[DEFAULT_LEN] = "1234";
     int32_t retCode = 0;
     CustomData customData;
     memcpy_s(customData.data, sizeof(CustomData), "test", DEFAULT_SIZE);
-    int32_t ret = MetaNodeIpcNotifyJoinResult(addr, addrTypeLen, networkId, retCode);
+    MetaBasicInfo metaInfoValue;
+    (void)memset_s(&metaInfoValue, sizeof(MetaBasicInfo), 0, sizeof(MetaBasicInfo));
+    (void)strcpy_s(metaInfoValue.metaNodeId, NETWORK_ID_BUF_LEN, networkIdValue);
+    int32_t ret = MetaNodeIpcNotifyJoinResult(addr, addrTypeLen, metaInfo, retCode);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = MetaNodeIpcNotifyJoinResult((void *)&addrValue, addrTypeLen, networkIdValue, retCode);
+    ret = MetaNodeIpcNotifyJoinResult((void *)&addrValue, addrTypeLen, &metaInfoValue, retCode);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 

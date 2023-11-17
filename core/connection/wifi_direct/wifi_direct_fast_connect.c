@@ -14,13 +14,11 @@
  */
 
 #include "wifi_direct_fast_connect.h"
+#include "conn_log.h"
 #include "softbus_error_code.h"
-#include "softbus_log.h"
 #include "processor/wifi_direct_processor.h"
 #include "data/negotiate_message.h"
 #include "wifi_direct_negotiate_channel.h"
-
-#define LOG_LABEL "[WifiDirect] WDFast: "
 
 int32_t FastConnectInit(void)
 {
@@ -36,7 +34,7 @@ int FastConnectOpenLink(struct WifiDirectConnectInfo *connectInfo, struct WifiDi
 {
     (void)connectInfo;
     (void)processor;
-    CLOGE(LOG_LABEL "not supported yet");
+    CONN_LOGE(CONN_WIFI_DIRECT, "not supported yet");
     return SOFTBUS_ERR;
 }
 
@@ -44,33 +42,33 @@ int FastConnectReuseLink(struct WifiDirectConnectInfo *connectInfo, struct WifiD
 {
     (void)connectInfo;
     (void)processor;
-    CLOGE(LOG_LABEL "not supported yet");
+    CONN_LOGE(CONN_WIFI_DIRECT, "not supported yet");
     return SOFTBUS_ERR;
 }
 
 void FastConnectHandleFailure(int result)
 {
     (void)result;
-    CLOGE(LOG_LABEL "not supported yet");
+    CONN_LOGE(CONN_WIFI_DIRECT, "not supported yet");
 }
 
 void FastConnectClientConnected(const char *remoteMac)
 {
     (void)remoteMac;
-    CLOGE(LOG_LABEL "not supported yet");
+    CONN_LOGE(CONN_WIFI_DIRECT, "not supported yet");
 }
 
 void FastConnectCloseChannel(struct WifiDirectNegotiateChannel *channel)
 {
     (void)channel;
-    CLOGE(LOG_LABEL "not supported yet");
+    CONN_LOGE(CONN_WIFI_DIRECT, "not supported yet");
 }
 
 int32_t FastConnectProcessNegotiateMessage(enum WifiDirectNegotiateCmdType cmd, struct NegotiateMessage *msg)
 {
     (void)cmd;
     (void)msg;
-    CLOGE(LOG_LABEL "not supported yet");
+    CONN_LOGE(CONN_WIFI_DIRECT, "not supported yet");
     return SOFTBUS_ERR;
 }
 

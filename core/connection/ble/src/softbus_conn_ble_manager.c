@@ -20,6 +20,7 @@
 
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
+#include "conn_log.h"
 #include "softbus_adapter_ble_conflict.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_crypto.h"
@@ -145,37 +146,37 @@ static char *BleNameConnectingState(void)
 
 static void BleEnterAvailableState(void)
 {
-    CLOGI("ble manager enter avaible state");
+    CONN_LOGI(CONN_BLE, "ble manager enter avaible state");
     ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_NEXT_CMD, 0, 0, NULL, 0);
 }
 
 static void BleEnterConnectingState(void)
 {
-    CLOGI("ble manager enter connecting state");
+    CONN_LOGI(CONN_BLE, "ble manager enter connecting state");
 }
 
 static void BleExitAvailableState(void)
 {
-    CLOGI("ble manager exit avaible state");
+    CONN_LOGI(CONN_BLE, "ble manager exit avaible state");
 }
 
 static void BleExitConnectingState(void)
 {
-    CLOGI("ble manager exit connecting state");
+    CONN_LOGI(CONN_BLE, "ble manager exit connecting state");
 }
 
 static void DfxRecordBleConnectFail(
     uint32_t reqId, uint32_t pId, ConnBleDevice *device, const ConnectStatistics *statistics, int32_t reason)
 {
     if (statistics == NULL) {
-        CLOGE("statistics is null");
+        CONN_LOGW(CONN_BLE, "statistics is null");
         return;
     }
 
     SoftBusConnType connType =
         device->protocol == BLE_GATT ? SOFTBUS_HISYSEVT_CONN_TYPE_BLE : SOFTBUS_HISYSEVT_CONN_TYPE_COC;
 
-    CLOGD("record ble conn fail, connectTraceId=%u, reason=%d", statistics->connectTraceId, reason);
+    CONN_LOGD(CONN_BLE, "record ble conn fail, connectTraceId=%u, reason=%d", statistics->connectTraceId, reason);
     uint64_t costTime = SoftBusGetSysTimeMs() - statistics->startTime;
     SoftbusRecordConnResult(pId, connType, SOFTBUS_EVT_CONN_FAIL, costTime, reason);
 }
@@ -183,11 +184,11 @@ static void DfxRecordBleConnectFail(
 static void DfxRecordBleConnectSuccess(uint32_t pId, ConnBleConnection *connection, ConnectStatistics *statistics)
 {
     if (statistics == NULL) {
-        CLOGE("statistics is null");
+        CONN_LOGW(CONN_BLE, "statistics is null");
         return;
     }
 
-    CLOGD("record ble conn succ, connectTraceId=%u", statistics->connectTraceId);
+    CONN_LOGD(CONN_BLE, "record ble conn succ, connectTraceId=%u", statistics->connectTraceId);
     SoftBusConnType connType =
         connection->protocol == BLE_GATT ? SOFTBUS_HISYSEVT_CONN_TYPE_BLE : SOFTBUS_HISYSEVT_CONN_TYPE_COC;
 
@@ -276,7 +277,8 @@ static int32_t BleConvert2ConnectionInfo(ConnBleConnection *connection, Connecti
         info->bleInfo.psm = connection->psm;
         ConnBleInnerComplementDeviceId(connection);
         if (strlen(connection->udid) == 0) {
-            CLOGW("generate udid hash failed: device is not lnn online, connId=%d", connection->connectionId);
+            CONN_LOGW(CONN_BLE, "generate udid hash failed: device is not lnn online, connId=%d",
+                connection->connectionId);
             // it will be complement later on lnn online listener
             return SOFTBUS_OK;
         }
@@ -284,7 +286,7 @@ static int32_t BleConvert2ConnectionInfo(ConnBleConnection *connection, Connecti
     status = SoftBusGenerateStrHash(
         (unsigned char *)connection->udid, strlen(connection->udid), (unsigned char *)info->bleInfo.deviceIdHash);
     if (status != SOFTBUS_OK) {
-        CLOGE("convert ble connection info failed: generate udid hash failed, connId=%u, err=%d",
+        CONN_LOGE(CONN_BLE, "convert ble connection info failed: generate udid hash failed, connId=%u, err=%d",
             connection->connectionId, status);
         return status;
     }
@@ -299,7 +301,7 @@ static void BleNotifyDeviceConnectResult(const ConnBleDevice *device, ConnBleCon
     ConnBleRequest *it = NULL;
     if (connection == NULL) {
         LIST_FOR_EACH_ENTRY(it, &device->requests, ConnBleRequest, node) {
-            CLOGI("ble notify connect request %u failed, addr=%s, protocol=%d, reason=%d", it->requestId,
+            CONN_LOGI(CONN_BLE, "ble notify connect request %u failed, addr=%s, protocol=%d, reason=%d", it->requestId,
                 anomizeAddress, device->protocol, reason);
             DfxRecordBleConnectFail(it->requestId, DEFAULT_PID, (ConnBleDevice *)device, &it->statistics, reason);
             it->result.OnConnectFailed(it->requestId, reason);
@@ -310,12 +312,12 @@ static void BleNotifyDeviceConnectResult(const ConnBleDevice *device, ConnBleCon
     ConnectionInfo info = { 0 };
     int32_t status = BleConvert2ConnectionInfo(connection, &info);
     if (status != SOFTBUS_OK) {
-        CLOGE("convert ble connection info failed, err=%d. It cann't backoff now, just ahead.", status);
+        CONN_LOGE(CONN_BLE, "convert ble connection info failed, err=%d. It cann't backoff now, just ahead.", status);
     }
     LIST_FOR_EACH_ENTRY(it, &device->requests, ConnBleRequest, node) {
         ConnBleUpdateConnectionRc(connection, 1);
-        CLOGI("ble notify connect request %u success, addr=%s, connId=%u, protocol=%d", it->requestId, anomizeAddress,
-            connection->connectionId, device->protocol);
+        CONN_LOGI(CONN_BLE, "ble notify connect request %u success, addr=%s, connId=%u, protocol=%d", it->requestId,
+            anomizeAddress, connection->connectionId, device->protocol);
         it->statistics.reqId = it->requestId;
         DfxRecordBleConnectSuccess(DEFAULT_PID, connection, &it->statistics);
         it->result.OnConnectSuccessed(it->requestId, connection->connectionId, &info);
@@ -324,7 +326,7 @@ static void BleNotifyDeviceConnectResult(const ConnBleDevice *device, ConnBleCon
 
 static bool BleReuseConnection(ConnBleDevice *device, ConnBleConnection *connection)
 {
-    CONN_CHECK_AND_RETURN_RET_LOG(SoftBusMutexLock(&connection->lock) == SOFTBUS_OK, false,
+    CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&connection->lock) == SOFTBUS_OK, false, CONN_BLE,
         "ATTENTION UNEXPECTED ERROR! ble reuse connection failed: try to lock failed, connId=%u",
         connection->connectionId);
     enum ConnBleConnectionState state = connection->state;
@@ -338,7 +340,7 @@ static bool BleReuseConnection(ConnBleDevice *device, ConnBleConnection *connect
 
 static bool BleCheckPreventing(const char *udid)
 {
-    CONN_CHECK_AND_RETURN_RET_LOG(SoftBusMutexLock(&g_bleManager.prevents->lock) == SOFTBUS_OK, false,
+    CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleManager.prevents->lock) == SOFTBUS_OK, false, CONN_BLE,
         "ATTENTION UNEXPECTED ERROR! ble check preventing failed: try to lock failed");
     bool preventing = false;
     BlePrevent *it = NULL;
@@ -366,8 +368,8 @@ static void AttempReuseConnect(ConnBleDevice *device, DeviceAction actionIfAbsen
     ConnBleConnection *serverConnection = ConnBleGetConnectionByAddr(device->addr, CONN_SIDE_SERVER, BLE_PROTOCOL_ANY);
     if (udidConnection == NULL && clientConnection == NULL && serverConnection == NULL) {
         if (BleCheckPreventing(device->udid)) {
-            CLOGI("ble manager reject connect request as udid is in prevent list, addr=%s, udid=%s", anomizeAddress,
-                anomizeUdid);
+            CONN_LOGI(CONN_BLE, "ble manager reject connect request as udid is in prevent list, addr=%s, udid=%s",
+                anomizeAddress, anomizeUdid);
             BleNotifyDeviceConnectResult(device, NULL, SOFTBUS_CONN_BLE_CONNECT_PREVENTED_ERR);
             FreeDevice(device);
             return;
@@ -382,17 +384,17 @@ static void AttempReuseConnect(ConnBleDevice *device, DeviceAction actionIfAbsen
     }
     do {
         if (udidConnection != NULL && BleReuseConnection(device, udidConnection)) {
-            CLOGW("reuse ble connection by udid");
+            CONN_LOGW(CONN_BLE, "reuse ble connection by udid");
             FreeDevice(device);
             break;
         }
         if (clientConnection != NULL && BleReuseConnection(device, clientConnection)) {
-            CLOGW("reuse ble client connection by address");
+            CONN_LOGW(CONN_BLE, "reuse ble client connection by address");
             FreeDevice(device);
             break;
         }
         if (serverConnection != NULL && BleReuseConnection(device, serverConnection)) {
-            CLOGW("reuse ble server connection by address");
+            CONN_LOGW(CONN_BLE, "reuse ble server connection by address");
             FreeDevice(device);
             break;
         }
@@ -413,7 +415,7 @@ static void AttempReuseConnect(ConnBleDevice *device, DeviceAction actionIfAbsen
 
 static int32_t BleConnectDeviceDirectly(ConnBleDevice *device, const char *anomizeAddress, const char *anomizeUdid)
 {
-    CLOGI("ble manager start schedule connect request, addr=%s, udid=%s", anomizeAddress, anomizeUdid);
+    CONN_LOGI(CONN_BLE, "ble manager start schedule connect request, addr=%s, udid=%s", anomizeAddress, anomizeUdid);
     DelayRegisterLnnOnlineListener();
     device->state = BLE_DEVICE_STATE_SCHEDULING;
     int32_t status = SOFTBUS_OK;
@@ -428,8 +430,8 @@ static int32_t BleConnectDeviceDirectly(ConnBleDevice *device, const char *anomi
     do {
         address = (char *)SoftBusCalloc(BT_MAC_LEN);
         if (address == NULL || strcpy_s(address, BT_MAC_LEN, device->addr) != EOK) {
-            CLOGE("copy ble address for connect timeout event failed, request address=%s, udid=%s", anomizeAddress,
-                anomizeUdid);
+            CONN_LOGE(CONN_BLE, "copy ble address for connect timeout event failed, request address=%s, udid=%s",
+                anomizeAddress, anomizeUdid);
             status = SOFTBUS_MEM_ERR;
             break;
         }
@@ -458,7 +460,7 @@ static int32_t BleConnectDeviceDirectly(ConnBleDevice *device, const char *anomi
 
 static int32_t PendingDevice(ConnBleDevice *device, const char *anomizeAddress, const char *anomizeUdid)
 {
-    CLOGI("ble manager pend connect request, addr=%s, udid=%s, device state=%d", anomizeAddress,
+    CONN_LOGI(CONN_BLE, "ble manager pend connect request, addr=%s, udid=%s, device state=%d", anomizeAddress,
         anomizeUdid, device->state);
     ConnBleDevice *connecting = g_bleManager.connecting;
     char connectingAnomizeAddress[BT_MAC_LEN] = { 0 };
@@ -478,7 +480,7 @@ static int32_t PendingDevice(ConnBleDevice *device, const char *anomizeAddress, 
             }
         }
     }
-    CLOGD("pengding current ble connect request, request addr=%s, connecting addr=%s", anomizeAddress,
+    CONN_LOGD(CONN_BLE, "pengding current ble connect request, request addr=%s, connecting addr=%s", anomizeAddress,
         connectingAnomizeAddress);
     if (target == NULL) {
         ListTailInsert(&g_bleManager.waitings, &device->node);
@@ -494,9 +496,8 @@ static int32_t PendingDevice(ConnBleDevice *device, const char *anomizeAddress, 
     target->fastestConnectEnable = (device->fastestConnectEnable || target->fastestConnectEnable);
     if (strlen(target->udid) == 0 && strlen(device->udid) != 0) {
         if (strcpy_s(target->udid, UDID_BUF_LEN, device->udid) != EOK) {
-            CLOGE("copy ble connect request udid to previous request failed, it is not a big deal, just ahead, "
-                  "addr=%s",
-                anomizeAddress);
+            CONN_LOGE(CONN_BLE, "copy ble connect request udid to previous request failed, it is not a big deal, just "
+                "ahead, addr=%s", anomizeAddress);
         }
     }
     target->state = device->state;
@@ -509,7 +510,7 @@ static void BleConnectRequestOnAvailableState(const ConnBleConnectRequestContext
     ConnBleDevice *device = NULL;
     int32_t status = ConvertCtxToDevice(&device, ctx);
     if (status != SOFTBUS_OK) {
-        CLOGE("convert ble connect request failed, reqId=%u, err=%d", ctx->requestId, status);
+        CONN_LOGE(CONN_BLE, "convert ble connect request failed, reqId=%u, err=%d", ctx->requestId, status);
         DfxRecordBleConnectFail(ctx->requestId, DEFAULT_PID, device, &ctx->statistics, status);
         ctx->result.OnConnectFailed(ctx->requestId, status);
         return;
@@ -528,7 +529,7 @@ static void BleConnectRequestOnConnectingState(const ConnBleConnectRequestContex
     ConnBleDevice *device = NULL;
     int32_t status = ConvertCtxToDevice(&device, ctx);
     if (status != SOFTBUS_OK) {
-        CLOGE("convert ble connect request failed, reqId=%u, err=%d", ctx->requestId, status);
+        CONN_LOGE(CONN_BLE, "convert ble connect request failed, reqId=%u, err=%d", ctx->requestId, status);
         DfxRecordBleConnectFail(ctx->requestId, DEFAULT_PID, device, &ctx->statistics, status);
         ctx->result.OnConnectFailed(ctx->requestId, status);
         return;
@@ -562,19 +563,19 @@ static void BleClientConnectTimeoutOnConnectingState(uint32_t connectionId, cons
 
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
     if (connection != NULL) {
-        CLOGE("ble connect timeout, addr=%s, connId=%u, interrupt connect progress", anomizeAddress,
+        CONN_LOGE(CONN_BLE, "ble connect timeout, addr=%s, connId=%u, interrupt connect progress", anomizeAddress,
             connection->connectionId);
         ConnBleDisconnectNow(connection, BLE_DISCONNECT_REASON_CONNECT_TIMEOUT);
         ConnBleRemoveConnection(connection);
         ConnBleReturnConnection(&connection);
     } else {
-        CLOGE("ble connect timeout, addr=%s, connId=%u, connection object not exist, skip "
+        CONN_LOGE(CONN_BLE, "ble connect timeout, addr=%s, connId=%u, connection object not exist, skip "
               "interrupt connect progress",
             anomizeAddress, connectionId);
     }
     ConnBleDevice *connectingDevice = g_bleManager.connecting;
     if (connectingDevice == NULL || StrCmpIgnoreCase(connectingDevice->addr, address) != 0) {
-        CLOGE("ble connect timeout, addr=%s, connId=%u, connecting device is null or address "
+        CONN_LOGE(CONN_BLE, "ble connect timeout, addr=%s, connId=%u, connecting device is null or address "
               "mismatch with this event",
             anomizeAddress, connectionId);
         return;
@@ -589,21 +590,21 @@ static void BleClientConnected(uint32_t connectionId)
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
     if (connection == NULL) {
-        CLOGE("can not get ble connection %u, is it removed? ", connectionId);
+        CONN_LOGE(CONN_BLE, "can not get ble connection %u, is it removed? ", connectionId);
         return;
     }
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, connection->addr, BT_MAC_LEN);
     ConnBleDevice *connectingDevice = g_bleManager.connecting;
     if (connectingDevice == NULL || StrCmpIgnoreCase(connectingDevice->addr, connection->addr) != 0) {
-        CLOGE("there is no connecting device, is it connected after timeout? connId=%u, addr=%d", connectionId,
-            anomizeAddress);
+        CONN_LOGE(CONN_BLE, "there is no connecting device, is it connected after timeout? connId=%u, addr=%d",
+            connectionId, anomizeAddress);
         ConnBleUpdateConnectionRc(connection, -1);
         ConnBleReturnConnection(&connection);
         return;
     }
     ConnRemoveMsgFromLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_CONNECT_TIMEOUT, connectionId, 0, NULL);
-    CLOGI("ble client connect success, client id=%d, addr=%s", connectionId, anomizeAddress);
+    CONN_LOGI(CONN_BLE, "ble client connect success, client id=%d, addr=%s", connectionId, anomizeAddress);
 
     BleNotifyDeviceConnectResult(connectingDevice, connection, 0);
     FreeDevice(connectingDevice);
@@ -617,19 +618,19 @@ static void BleClientConnectFailed(uint32_t connectionId, int32_t error)
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
     if (connection == NULL) {
-        CLOGE("can not get ble connection, is it removed? connId=%u, err=%d", connectionId, error);
+        CONN_LOGE(CONN_BLE, "can not get ble connection, is it removed? connId=%u, err=%d", connectionId, error);
         return;
     }
 
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, connection->addr, BT_MAC_LEN);
-    CLOGI("ble client connect failed, connId=%u, addr=%s, err=%d", connectionId, anomizeAddress, error);
+    CONN_LOGI(CONN_BLE, "ble client connect failed, connId=%u, addr=%s, err=%d", connectionId, anomizeAddress, error);
     ConnBleDisconnectNow(connection, BLE_DISCONNECT_REASON_INTERNAL_ERROR);
 
     ConnBleDevice *connectingDevice = g_bleManager.connecting;
     if (connectingDevice == NULL || StrCmpIgnoreCase(connectingDevice->addr, connection->addr) != 0) {
-        CLOGE("there is no connecting device, is it connected after timeout? connId=%u, addr=%s, err=%d", connectionId,
-            anomizeAddress, error);
+        CONN_LOGE(CONN_BLE, "there is no connecting device, is it connected after timeout? connId=%u, addr=%s, err=%d",
+            connectionId, anomizeAddress, error);
         ConnBleRemoveConnection(connection);
         ConnBleReturnConnection(&connection);
         return;
@@ -640,9 +641,8 @@ static void BleClientConnectFailed(uint32_t connectionId, int32_t error)
         ConnBleGetConnectionByAddr(connection->addr, CONN_SIDE_SERVER, connectingDevice->protocol);
     if (serverConnection != NULL) {
         if (BleReuseConnection(connectingDevice, serverConnection)) {
-            CLOGI("ble client connect failed, but there is a server connection connected, reuse it, connId=%u, "
-                  "addr=%s",
-                serverConnection->connectionId, anomizeAddress);
+            CONN_LOGI(CONN_BLE, "ble client connect failed, but there is a server connection connected, reuse it, "
+                "connId=%u, addr=%s", serverConnection->connectionId, anomizeAddress);
         } else {
             BleNotifyDeviceConnectResult(connectingDevice, NULL, error);
         }
@@ -688,7 +688,7 @@ static bool IsSameDevice(const char *leftIdentifier, const char *rightIdentifier
     unsigned char rightHash[UDID_HASH_LEN] = { 0 };
     if (SoftBusGenerateStrHash((const unsigned char *)leftIdentifier, leftLen, leftHash) != SOFTBUS_OK ||
         SoftBusGenerateStrHash((const unsigned char *)rightIdentifier, rightLen, rightHash) != SOFTBUS_OK) {
-        CLOGE("generate hash failed");
+        CONN_LOGE(CONN_BLE, "generate hash failed");
         return false;
     }
     // only compare first 8 bytes of hash
@@ -698,7 +698,7 @@ static bool IsSameDevice(const char *leftIdentifier, const char *rightIdentifier
             SOFTBUS_OK ||
         ConvertBytesToHexString(rightHashStr, HEXIFY_LEN(SHORT_UDID_HASH_LEN), rightHash, SHORT_UDID_HASH_LEN) !=
             SOFTBUS_OK) {
-        CLOGE("convert bytes to array failed");
+        CONN_LOGE(CONN_BLE, "convert bytes to array failed");
         return false;
     }
     if (leftLen == UDID_BUF_LEN - 1) {
@@ -715,24 +715,33 @@ static void BleServerAccepted(uint32_t connectionId)
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
     if (connection == NULL) {
-        CLOGE("can not get ble connection %u, is it removed? ", connectionId);
+        CONN_LOGE(CONN_BLE, "can not get ble connection %u, is it removed? ", connectionId);
         return;
     }
 
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, connection->addr, BT_MAC_LEN);
-    CLOGI("ble server accept a new connection, connId=%u, peer addr=%s", connectionId, anomizeAddress);
 
     ConnectionInfo info = { 0 };
     int32_t status = BleConvert2ConnectionInfo(connection, &info);
     if (status != SOFTBUS_OK) {
-        CLOGE("convert connection info failed, err=%d. It can not backoff now, just ahead.", status);
+        CONN_LOGE(CONN_BLE, "convert connection info failed, err=%d. It can not backoff now, just ahead.", status);
     }
+    char udidHashStr[HEXIFY_LEN(SHORT_UDID_HASH_LEN)] = { 0 };
+    status = ConvertBytesToHexString(udidHashStr, HEXIFY_LEN(SHORT_UDID_HASH_LEN),
+        (unsigned char *)info.bleInfo.deviceIdHash, SHORT_UDID_HASH_LEN);
+    if (status != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BLE, "convert peerUdidHash to string failed, connectionId=%u, err=%d.", connectionId, status);
+    }
+    char anomizeUdid[UDID_BUF_LEN] = { 0 };
+    ConvertAnonymizeSensitiveString(anomizeUdid, UDID_BUF_LEN, udidHashStr);
+    CONN_LOGI(CONN_BLE, "ble server accept a new connection, connId=%u, peer addr=%s, peer udid=%s",
+        connectionId, anomizeAddress, anomizeUdid);
     g_connectCallback.OnConnected(connectionId, &info);
 
     ConnBleDevice *connectingDevice = g_bleManager.connecting;
     if (connectingDevice != NULL && StrCmpIgnoreCase(connectingDevice->addr, connection->addr) == 0) {
-        CLOGW("both ends request establish connection at the same time, connId=%u, it will reused "
+        CONN_LOGW(CONN_BLE, "both ends request establish connection at the same time, connId=%u, it will reused "
               "after connect failed, peer addr=%s",
             connectionId, anomizeAddress);
     }
@@ -754,7 +763,7 @@ static void BleServerAccepted(uint32_t connectionId)
 static void BleConnectionClosed(uint32_t connectionId, int32_t error)
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
-    CONN_CHECK_AND_RETURN_LOG(connection != NULL, "connection not exist, connId=%u", connectionId);
+    CONN_CHECK_AND_RETURN_LOGW(connection != NULL, CONN_BLE, "connection not exist, connId=%u", connectionId);
 
     ConnBleDevice *it = NULL;
     LIST_FOR_EACH_ENTRY(it, &g_bleManager.waitings, ConnBleDevice, node) {
@@ -765,13 +774,13 @@ static void BleConnectionClosed(uint32_t connectionId, int32_t error)
     ConnectionInfo info = { 0 };
     int32_t status = BleConvert2ConnectionInfo(connection, &info);
     if (status != SOFTBUS_OK) {
-        CLOGE("convert ble connection info failed, err=%d. It cann't backoff now, just ahead.", status);
+        CONN_LOGE(CONN_BLE, "convert ble connection info failed, err=%d. It cann't backoff now, just ahead.", status);
     }
     char udidHashStr[HEXIFY_LEN(UDID_HASH_LEN)] = { 0 };
     status = ConvertBytesToHexString(
         udidHashStr, HEXIFY_LEN(UDID_HASH_LEN), (unsigned char *)info.bleInfo.deviceIdHash, UDID_HASH_LEN);
     if (status != SOFTBUS_OK) {
-        CLOGE("convert udid hash to string failed, err=%d. It cann't backoff now, just ahead.", status);
+        CONN_LOGE(CONN_BLE, "convert udid hash to string failed, err=%d. It cann't backoff now, just ahead.", status);
     }
     if (connection->protocol == BLE_GATT) {
         SoftbusBleConflictNotifyDisconnect(connection->addr, udidHashStr);
@@ -786,8 +795,8 @@ static void BleConnectionClosed(uint32_t connectionId, int32_t error)
 static void BleConnectionResume(uint32_t connectionId)
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
-    CONN_CHECK_AND_RETURN_LOG(
-        connection != NULL, "ble connection resume handle failed: connection not exist, connId=%u", connectionId);
+    CONN_CHECK_AND_RETURN_LOGW(connection != NULL, CONN_BLE,
+        "ble connection resume handle failed: connection not exist, connId=%u", connectionId);
 
     ConnBleDevice *it = NULL;
     ConnBleDevice *next = NULL;
@@ -808,7 +817,7 @@ static void BleConnectionResume(uint32_t connectionId)
 static void BleDisconnectRequest(uint32_t connectionId)
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
-    CONN_CHECK_AND_RETURN_LOG(connection != NULL, "connection is not exist, connId=%u", connectionId);
+    CONN_CHECK_AND_RETURN_LOGW(connection != NULL, CONN_BLE, "connection is not exist, connId=%u", connectionId);
     ConnBleUpdateConnectionRc(connection, -1);
     ConnBleReturnConnection(&connection);
 }
@@ -818,7 +827,7 @@ static void BleDataReceived(ConnBleDataReceivedContext *ctx)
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(ctx->connectionId);
     if (connection == NULL) {
-        CLOGE("connection not exist, is it removed? connId=%u",
+        CONN_LOGE(CONN_BLE, "connection not exist, is it removed? connId=%u",
             ctx->connectionId);
         SoftBusFree(ctx->data);
         return;
@@ -826,15 +835,15 @@ static void BleDataReceived(ConnBleDataReceivedContext *ctx)
 
     do {
         if (!ctx->isConnCharacteristic) {
-            CLOGI("ble dispatch receive data, none conn data, connId=%u, data length=%u", connection->connectionId,
-                ctx->dataLen);
+            CONN_LOGI(CONN_BLE, "ble dispatch receive data, none conn data, connId=%u, data length=%u",
+                connection->connectionId, ctx->dataLen);
             g_connectCallback.OnDataReceived(ctx->connectionId, MODULE_BLE_NET, 0, (char *)ctx->data, ctx->dataLen);
             break;
         }
 
         ConnPktHead *head = (ConnPktHead *)ctx->data;
         UnpackConnPktHead(head);
-        CLOGI("ble dispatch receive data, connId=%u, payload (Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 ")",
+        CONN_LOGI(CONN_BLE, "ble dispatch receive data, connId=%u, payload (Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 ")",
             connection->connectionId, ctx->dataLen, head->flag, head->module, head->seq);
         uint32_t pktHeadLen = ConnGetHeadSize();
         if (head->module == MODULE_CONNECTION) {
@@ -857,28 +866,28 @@ static void ReceivedControlData(ConnBleConnection *connection, const uint8_t *da
 {
     cJSON *json = cJSON_ParseWithLength((const char *)data, dataLen);
     if (json == NULL) {
-        CLOGE("connId:%u, parse json failed.", connection->connectionId);
+        CONN_LOGE(CONN_BLE, "connId:%u, parse json failed.", connection->connectionId);
         return;
     }
 
     int32_t method = 0;
     if (!GetJsonObjectNumberItem(json, CTRL_MSG_KEY_METHOD, &method)) {
-        CLOGE("connId:%u, parse method failed", connection->connectionId);
+        CONN_LOGE(CONN_BLE, "connId:%u, parse method failed", connection->connectionId);
         return;
     }
-    CLOGD("ble receive control data, connId=%u, method=%d", connection->connectionId, method);
+    CONN_LOGD(CONN_BLE, "ble receive control data, connId=%u, method=%d", connection->connectionId, method);
     int32_t status = SOFTBUS_OK;
     switch (method) {
         case METHOD_NOTIFY_REQUEST:
             status = ConnBleOnReferenceRequest(connection, json);
             break;
         default:
-            CLOGE("connection %u received control message, UNSUPPORT method, method=%d", connection->connectionId,
-                method);
+            CONN_LOGE(CONN_BLE, "connection %u received control message, UNSUPPORT method, method=%d",
+                connection->connectionId, method);
             break;
     }
     if (status != SOFTBUS_OK) {
-        CLOGE("connId:%u, unexpected error, method=%d, err=%d", connection->connectionId, method, status);
+        CONN_LOGE(CONN_BLE, "connId:%u, unexpected error, method=%d, err=%d", connection->connectionId, method, status);
     }
     cJSON_Delete(json);
 }
@@ -890,7 +899,7 @@ static int32_t BleReuseConnectionCommon(const char *udid, const char *anomizeAdd
         return SOFTBUS_CONN_BLE_CONNECTION_NOT_EXIST_ERR;
     }
     if (SoftBusMutexLock(&connection->lock) != SOFTBUS_OK) {
-        CLOGE("try to lock failed, connId=%u, addr=%s", connection->connectionId, anomizeAddress);
+        CONN_LOGE(CONN_BLE, "try to lock failed, connId=%u, addr=%s", connection->connectionId, anomizeAddress);
         ConnBleReturnConnection(&connection);
         return SOFTBUS_LOCK_ERR;
     }
@@ -901,8 +910,8 @@ static int32_t BleReuseConnectionCommon(const char *udid, const char *anomizeAdd
     if (state == BLE_CONNECTION_STATE_EXCHANGED_BASIC_INFO) {
         status = ConnBleUpdateConnectionRc(connection, 1);
     }
-    CLOGI("reuse connection, connId=%u, state=%d, addr=%s, status=%d", connection->connectionId, state, anomizeAddress,
-        status);
+    CONN_LOGI(CONN_BLE, "reuse connection, connId=%u, state=%d, addr=%s, status=%d", connection->connectionId, state,
+        anomizeAddress, status);
     ConnBleReturnConnection(&connection);
     if (status == SOFTBUS_OK) {
         return underlayerHandle;
@@ -924,6 +933,7 @@ static void ConflictOnConnectSuccessed(uint32_t requestId, uint32_t connectionId
     (void)connectionId;
     (void)info;
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
+    CONN_CHECK_AND_RETURN_LOGW(connection != NULL, CONN_BLE, "conn not exist, connId=%u", connectionId);
     int32_t underlayHandle = connection->underlayerHandle;
     ConnBleReturnConnection(&connection);
     SoftbusBleConflictNotifyConnectResult(requestId, underlayHandle, true);
@@ -971,7 +981,7 @@ static void BleReuseConnectionRequestOnConnectingState(const ConnBleReuseConnect
 
 static void BlePreventTimeout(const char *udid)
 {
-    CONN_CHECK_AND_RETURN_LOG(SoftBusMutexLock(&g_bleManager.prevents->lock) == SOFTBUS_OK,
+    CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_bleManager.prevents->lock) == SOFTBUS_OK, CONN_BLE,
         "ATTENTION UNEXPECTED ERROR! ble prevent timeout handle failed: try to lock failed");
     do {
         size_t udidLen = strlen(udid);
@@ -989,7 +999,7 @@ static void BlePreventTimeout(const char *udid)
 
 static void BleReset(int32_t reason)
 {
-    CLOGW("ble manager start process RESET event, reason=%d", reason);
+    CONN_LOGW(CONN_BLE, "ble manager start process RESET event, reason=%d", reason);
     if (g_bleManager.connecting != NULL) {
         ConnBleConnection *connection = ConnBleGetConnectionByAddr(
             g_bleManager.connecting->addr, CONN_SIDE_CLIENT, g_bleManager.connecting->protocol);
@@ -1012,7 +1022,7 @@ static void BleReset(int32_t reason)
 
     int32_t status = SoftBusMutexLock(&g_bleManager.prevents->lock);
     if (status != SOFTBUS_OK) {
-        CLOGE("try to lock prevents failed, err=%d", status);
+        CONN_LOGE(CONN_BLE, "try to lock prevents failed, err=%d", status);
         return;
     }
     BlePrevent *preventIt = NULL;
@@ -1027,7 +1037,7 @@ static void BleReset(int32_t reason)
 
     status = SoftBusMutexLock(&g_bleManager.connections->lock);
     if (status != SOFTBUS_OK) {
-        CLOGE("try to lock connections failed, err=%d", status);
+        CONN_LOGE(CONN_BLE, "try to lock connections failed, err=%d", status);
         return;
     }
     ConnBleConnection *connectionIt = NULL;
@@ -1054,11 +1064,12 @@ static uint32_t AllocateConnectionIdUnsafe()
 
 int32_t ConnBleSaveConnection(ConnBleConnection *connection)
 {
-    CONN_CHECK_AND_RETURN_RET_LOG(connection != NULL, SOFTBUS_INVALID_PARAM, "invalid param, ble connection is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE,
+        "invalid param, ble connection is null");
 
     int32_t status = SoftBusMutexLock(&g_bleManager.connections->lock);
     if (status != SOFTBUS_OK) {
-        CLOGW("try to get ble manager connections lock failed, err=%d", status);
+        CONN_LOGW(CONN_BLE, "try to get ble manager connections lock failed, err=%d", status);
         return status;
     }
     uint32_t connectionId = 0;
@@ -1075,8 +1086,8 @@ int32_t ConnBleSaveConnection(ConnBleConnection *connection)
 
 void ConnBleRemoveConnection(ConnBleConnection *connection)
 {
-    CONN_CHECK_AND_RETURN_LOG(connection != NULL, "invalid param, connection is null");
-    CONN_CHECK_AND_RETURN_LOG(SoftBusMutexLock(&g_bleManager.connections->lock) == SOFTBUS_OK,
+    CONN_CHECK_AND_RETURN_LOGW(connection != NULL, CONN_BLE, "invalid param, connection is null");
+    CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_bleManager.connections->lock) == SOFTBUS_OK, CONN_BLE,
         "try to get ble manager connections lock failed");
     bool exist = false;
     ConnBleConnection *it = NULL;
@@ -1090,7 +1101,7 @@ void ConnBleRemoveConnection(ConnBleConnection *connection)
         ListDelete(&connection->node);
         ConnBleReturnConnection(&connection);
     } else {
-        CLOGW("ble connection %u is not exist in global connection list, call remove duplicate?",
+        CONN_LOGW(CONN_BLE, "ble connection %u is not exist in global connection list, call remove duplicate?",
             connection->connectionId);
     }
     (void)SoftBusMutexUnlock(&g_bleManager.connections->lock);
@@ -1156,12 +1167,12 @@ static ConnBleConnection *GetConnectionByOption(const BleConnectionCompareOption
             compareFunc = ConnectionCompareByUdidClientSide;
             break;
         default:
-            CLOGE("there is no compare function implement for unkown type, type=%d", option->type);
+            CONN_LOGW(CONN_BLE, "there is no compare function implement for unkown type, type=%d", option->type);
             return NULL;
     }
     int32_t status = SoftBusMutexLock(&g_bleManager.connections->lock);
     if (status != SOFTBUS_OK) {
-        CLOGE("try to get manager connections lock failed, err=%d", status);
+        CONN_LOGE(CONN_BLE, "try to get manager connections lock failed, err=%d", status);
         return NULL;
     }
     ConnBleConnection *it = NULL;
@@ -1175,7 +1186,7 @@ static ConnBleConnection *GetConnectionByOption(const BleConnectionCompareOption
     if (target != NULL) {
         status = SoftBusMutexLock(&target->lock);
         if (status != SOFTBUS_OK) {
-            CLOGE("try to get connection lock failed, err=%d", status);
+            CONN_LOGE(CONN_BLE, "try to get connection lock failed, err=%d", status);
             SoftBusMutexUnlock(&g_bleManager.connections->lock);
             return NULL;
         }
@@ -1188,7 +1199,7 @@ static ConnBleConnection *GetConnectionByOption(const BleConnectionCompareOption
 
 ConnBleConnection *ConnBleGetConnectionByAddr(const char *addr, ConnSideType side, BleProtocolType protocol)
 {
-    CONN_CHECK_AND_RETURN_RET_LOG(addr != NULL, NULL, "invalid param, ble addr is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(addr != NULL, NULL, CONN_BLE, "invalid param, ble addr is null");
     BleConnectionCompareOption option = {
         .type = BLE_CONNECTION_COMPARE_TYPE_ADDRESS,
         .addressOption = {
@@ -1247,18 +1258,18 @@ ConnBleConnection *ConnBleGetClientConnectionByUdid(const char *udid, BleProtoco
 
 void ConnBleReturnConnection(ConnBleConnection **connection)
 {
-    CONN_CHECK_AND_RETURN_LOG(connection != NULL, "invalid param, ble connnetion is null");
-    CONN_CHECK_AND_RETURN_LOG(
-        *connection != NULL, "invalid param, ble *connnetion is null, use after return or remove action?");
+    CONN_CHECK_AND_RETURN_LOGW(connection != NULL, CONN_BLE, "invalid param, ble connnetion is null");
+    CONN_CHECK_AND_RETURN_LOGW(*connection != NULL, CONN_BLE,
+        "invalid param, ble *connnetion is null, use after return or remove action?");
 
     ConnBleConnection *underlayer = *connection;
-    CONN_CHECK_AND_RETURN_LOG(
-        SoftBusMutexLock(&underlayer->lock) == SOFTBUS_OK, "ble connection %u lock failed", underlayer->connectionId);
+    CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&underlayer->lock) == SOFTBUS_OK, CONN_BLE,
+        "ble connection %u lock failed", underlayer->connectionId);
     underlayer->objectRc -= 1;
     int32_t objectRc = underlayer->objectRc;
     SoftBusMutexUnlock(&underlayer->lock);
     if (objectRc <= 0) {
-        CLOGI("release ble connection %u", underlayer->connectionId);
+        CONN_LOGI(CONN_BLE, "release ble connection %u", underlayer->connectionId);
         ConnBleFreeConnection(*connection);
     }
     *connection = NULL;
@@ -1267,12 +1278,12 @@ void ConnBleReturnConnection(ConnBleConnection **connection)
 void NotifyReusedConnected(uint32_t connectionId)
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
-    CONN_CHECK_AND_RETURN_LOG(connection != NULL, "connection not exist, connId=%u", connectionId);
+    CONN_CHECK_AND_RETURN_LOGW(connection != NULL, CONN_BLE, "connection not exist, connId=%u", connectionId);
 
     ConnectionInfo info = { 0 };
     int32_t status = BleConvert2ConnectionInfo(connection, &info);
     if (status != SOFTBUS_OK) {
-        CLOGE("convert connection info failed, err=%d. It can not backoff now, just ahead.", status);
+        CONN_LOGE(CONN_BLE, "convert connection info failed, err=%d. It can not backoff now, just ahead.", status);
     }
     g_connectCallback.OnReusedConnected(connectionId, &info);
 }
@@ -1330,7 +1341,8 @@ static void TransitionToState(enum BleMgrState target)
 
 static void BleManagerMsgHandler(SoftBusMessage *msg)
 {
-    CLOGI("ble manager looper recieve msg %d, current state is '%s'", msg->what, g_bleManager.state->name());
+    CONN_LOGI(CONN_BLE, "ble manager looper recieve msg %d, current state is '%s'", msg->what,
+        g_bleManager.state->name());
     switch (msg->what) {
         case BLE_MGR_MSG_NEXT_CMD: {
             if (g_bleManager.state->handlePendingRequest != NULL) {
@@ -1431,10 +1443,12 @@ static void BleManagerMsgHandler(SoftBusMessage *msg)
             break;
         }
         default:
-            CLOGE("ble manager looper receive unexpected msg, what=%d, just ignore, FIX it quickly.", msg->what);
+            CONN_LOGW(CONN_BLE, "ble manager looper receive unexpected msg, what=%d, just ignore, FIX it quickly.",
+                msg->what);
             break;
     }
-    CLOGW("ble manager looper ignore handle %d message,  current state is '%s'", msg->what, g_bleManager.state->name());
+    CONN_LOGW(CONN_BLE, "ble manager looper ignore handle %d message,  current state is '%s'", msg->what,
+        g_bleManager.state->name());
 }
 
 static int BleCompareManagerLooperEventFunc(const SoftBusMessage *msg, void *args)
@@ -1460,7 +1474,7 @@ static int BleCompareManagerLooperEventFunc(const SoftBusMessage *msg, void *arg
             break;
     }
     if (ctx->arg1 != 0 || ctx->arg2 != 0 || ctx->obj != NULL) {
-        CLOGE("there is compare context value not use, forgot implement? "
+        CONN_LOGE(CONN_BLE, "there is compare context value not use, forgot implement? "
               "compare failed to avoid fault silence, what=%d, arg1=%" PRIu64 ", arg2=%" PRIu64 ", obj is null? %d",
             ctx->what, ctx->arg1, ctx->arg2, ctx->obj == NULL);
         return COMPARE_FAILED;
@@ -1470,22 +1484,22 @@ static int BleCompareManagerLooperEventFunc(const SoftBusMessage *msg, void *arg
 
 static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId, const ConnectResult *result)
 {
-    CONN_CHECK_AND_RETURN_RET_LOG(
-        option != NULL, SOFTBUS_INVALID_PARAM, "ble connect device failed: option is null, reqId=%u", requestId);
-    CONN_CHECK_AND_RETURN_RET_LOG(option->type == CONNECT_BLE, SOFTBUS_INVALID_PARAM,
+    CONN_CHECK_AND_RETURN_RET_LOGW(option != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE,
+        "ble connect device failed: option is null, reqId=%u", requestId);
+    CONN_CHECK_AND_RETURN_RET_LOGW(option->type == CONNECT_BLE, SOFTBUS_INVALID_PARAM, CONN_BLE,
         "ble connect device failed: not ble connect type, reqId=%u, type: %d", requestId, option->type);
-    CONN_CHECK_AND_RETURN_RET_LOG(result != NULL, SOFTBUS_INVALID_PARAM,
+    CONN_CHECK_AND_RETURN_RET_LOGW(result != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE,
         "ble connect device failed: result callback is null, reqId=%u", requestId);
-    CONN_CHECK_AND_RETURN_RET_LOG(result->OnConnectSuccessed != NULL, SOFTBUS_INVALID_PARAM,
+    CONN_CHECK_AND_RETURN_RET_LOGW(result->OnConnectSuccessed != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE,
         "ble connect device failed: result callback OnConnectSuccessed is null, reqId=%u", requestId);
-    CONN_CHECK_AND_RETURN_RET_LOG(result->OnConnectFailed != NULL, SOFTBUS_INVALID_PARAM,
+    CONN_CHECK_AND_RETURN_RET_LOGW(result->OnConnectFailed != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE,
         "ble connect device failed: result callback onConnectFailed is null, reqId=%u", requestId);
 
     // only use first SHORT_UDID_HASH_LEN bytes hash, keep same with share
     char udidHashStr[HEXIFY_LEN(SHORT_UDID_HASH_LEN)] = { 0 };
     int32_t status = ConvertBytesToHexString(udidHashStr, HEXIFY_LEN(SHORT_UDID_HASH_LEN),
         (unsigned char *)option->bleOption.deviceIdHash, SHORT_UDID_HASH_LEN);
-    CONN_CHECK_AND_RETURN_RET_LOG(status == SOFTBUS_OK, SOFTBUS_INVALID_PARAM,
+    CONN_CHECK_AND_RETURN_RET_LOGW(status == SOFTBUS_OK, SOFTBUS_INVALID_PARAM, CONN_BLE,
         "ble connect device failed: convert device id hash to string failed, reqId=%u, err=%d", requestId, status);
 
     char anomizeAddress[BT_MAC_LEN] = { 0 };
@@ -1495,7 +1509,7 @@ static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId,
 
     ConnBleConnectRequestContext *ctx =
         (ConnBleConnectRequestContext *)SoftBusCalloc(sizeof(ConnBleConnectRequestContext));
-    CONN_CHECK_AND_RETURN_RET_LOG(ctx != NULL, SOFTBUS_MEM_ERR,
+    CONN_CHECK_AND_RETURN_RET_LOGE(ctx != NULL, SOFTBUS_MEM_ERR, CONN_BLE,
         "calloc connect request context object failed: reqId=%u, addr=%s, udid=%s", requestId, anomizeAddress,
         anomizeUdid);
     ctx->statistics.startTime = SoftBusGetSysTimeMs();
@@ -1503,8 +1517,8 @@ static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId,
     ctx->requestId = requestId;
     if (strcpy_s(ctx->addr, BT_MAC_LEN, option->bleOption.bleMac) != EOK ||
         strcpy_s(ctx->udid, UDID_BUF_LEN, udidHashStr) != EOK) {
-        CLOGE("strcpy_s address or device identifier failed, reqId=%u, addr=%s, udid=%s", requestId, anomizeAddress,
-            anomizeUdid);
+        CONN_LOGE(CONN_BLE, "strcpy_s address or device identifier failed, reqId=%u, addr=%s, udid=%s",
+            requestId, anomizeAddress, anomizeUdid);
         SoftBusFree(ctx);
         return SOFTBUS_STRCPY_ERR;
     }
@@ -1512,7 +1526,8 @@ static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId,
     ctx->result = *result;
     //keep compatibility if protocol is undefined
     if (option->bleOption.protocol != BLE_GATT && option -> bleOption.protocol != BLE_COC) {
-        CLOGW("ble connect device warning, protocol=%d is unknown, use GATT forcely", option->bleOption.protocol);
+        CONN_LOGW(CONN_BLE, "ble connect device warning, protocol=%d is unknown, use GATT forcely",
+            option->bleOption.protocol);
         ctx->protocol = BLE_GATT;
         ctx->psm = 0;
     } else {
@@ -1521,13 +1536,13 @@ static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId,
     }
     status = ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_CONNECT_REQUEST, 0, 0, ctx, 0);
     if (status != SOFTBUS_OK) {
-        CLOGE("post connect msg to manager looper failed, reqId=%u, addr=%s, udid=%s, err=%d", requestId,
-            anomizeAddress, anomizeUdid, status);
+        CONN_LOGE(CONN_BLE, "post connect msg to manager looper failed, reqId=%u, addr=%s, udid=%s, err=%d",
+            requestId, anomizeAddress, anomizeUdid, status);
         SoftBusFree(ctx);
         return status;
     }
-    CLOGI("ble connect device: receive connect request, reqId=%u, addr=%s, protocol=%d, udid=%s, fastest "
-          "connect enable=%d, connectTraceId=%u",
+    CONN_LOGI(CONN_BLE, "ble connect device: receive connect request, reqId=%u, addr=%s, protocol=%d, udid=%s, "
+        "fastest connect enable=%d, connectTraceId=%u",
         requestId, anomizeAddress, ctx->protocol, anomizeUdid, ctx->fastestConnectEnable,
         ctx->statistics.connectTraceId);
     return SOFTBUS_OK;
@@ -1542,7 +1557,7 @@ static int32_t ConnBlePostBytes(
 static int32_t BleDisconnectDevice(uint32_t connectionId)
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
-    CONN_CHECK_AND_RETURN_RET_LOG(connection != NULL, SOFTBUS_CONN_BLE_CONNECTION_NOT_EXIST_ERR,
+    CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, SOFTBUS_CONN_BLE_CONNECTION_NOT_EXIST_ERR, CONN_BLE,
         "ble disconnect device failed: connection is not exist, reqId=%u", connectionId);
     char animizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(animizeAddress, BT_MAC_LEN, connection->addr, BT_MAC_LEN);
@@ -1550,24 +1565,24 @@ static int32_t BleDisconnectDevice(uint32_t connectionId)
 
     int32_t status =
         ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_DISCONNECT_REQUEST, connectionId, 0, NULL, 0);
-    CLOGI("ble disconnect device, connId=%u, addr=%s, status=%d", connectionId, animizeAddress, status);
+    CONN_LOGI(CONN_BLE, "ble disconnect device, connId=%u, addr=%s, status=%d", connectionId, animizeAddress, status);
     return status;
 }
 
 static int32_t BleDisconnectDeviceNow(const ConnectOption *option)
 {
-    CONN_CHECK_AND_RETURN_RET_LOG(
-        option != NULL, SOFTBUS_INVALID_PARAM, "ble disconnect device now failed: invaliad param, option is null");
-    CONN_CHECK_AND_RETURN_RET_LOG(option->type == CONNECT_BLE, SOFTBUS_INVALID_PARAM,
+    CONN_CHECK_AND_RETURN_RET_LOGW(option != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE,
+        "ble disconnect device now failed: invaliad param, option is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(option->type == CONNECT_BLE, SOFTBUS_INVALID_PARAM, CONN_BLE,
         "ble disconnect device now failed: invaliad param, not ble connect type type: %d", option->type);
 
     char animizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(animizeAddress, BT_MAC_LEN, option->bleOption.bleMac, BT_MAC_LEN);
-    CLOGI("ble disconnect device now, addr=%s", animizeAddress);
+    CONN_LOGI(CONN_BLE, "ble disconnect device now, addr=%s", animizeAddress);
 
     ConnBleConnection *connection =
         ConnBleGetConnectionByAddr(option->bleOption.bleMac, CONN_SIDE_ANY, option->bleOption.protocol);
-    CONN_CHECK_AND_RETURN_RET_LOG(connection != NULL, SOFTBUS_CONN_BLE_CONNECTION_NOT_EXIST_ERR,
+    CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, SOFTBUS_CONN_BLE_CONNECTION_NOT_EXIST_ERR, CONN_BLE,
         "ble disconnect device now failed: connection is not exist");
 
     int32_t status = ConnBleDisconnectNow(connection, BLE_DISCONNECT_REASON_FORCELY);
@@ -1577,9 +1592,9 @@ static int32_t BleDisconnectDeviceNow(const ConnectOption *option)
 
 static int32_t BleGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
 {
-    CONN_CHECK_AND_RETURN_RET_LOG(info != NULL, SOFTBUS_INVALID_PARAM, "invaliad param, info is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(info != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "invaliad param, info is null");
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
-    CONN_CHECK_AND_RETURN_RET_LOG(connection != NULL, SOFTBUS_CONN_BLE_CONNECTION_NOT_EXIST_ERR,
+    CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, SOFTBUS_CONN_BLE_CONNECTION_NOT_EXIST_ERR, CONN_BLE,
         "connection is not exist, connId=%u", connectionId);
 
     int32_t status = BleConvert2ConnectionInfo(connection, info);
@@ -1601,17 +1616,18 @@ static int32_t BleStopLocalListening(const LocalListenerInfo *info)
 
 static bool BleCheckActiveConnection(const ConnectOption *option)
 {
-    CONN_CHECK_AND_RETURN_RET_LOG(option != NULL, false, "invaliad param, option is null");
-    CONN_CHECK_AND_RETURN_RET_LOG(
-        option->type == CONNECT_BLE, false, "invaliad param, option->type is not ble, type=%d", option->type);
+    CONN_CHECK_AND_RETURN_RET_LOGW(option != NULL, false, CONN_BLE, "invaliad param, option is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(option->type == CONNECT_BLE, false, CONN_BLE,
+        "invaliad param, option->type is not ble, type=%d", option->type);
     char hashStr[HEXIFY_LEN(SHORT_UDID_HASH_LEN)] = { 0 };
     if (ConvertBytesToHexString(hashStr, HEXIFY_LEN(SHORT_UDID_HASH_LEN),
         (unsigned char *)option->bleOption.deviceIdHash, SHORT_UDID_HASH_LEN) != SOFTBUS_OK) {
-        CLOGE("convert bytes to array failed");
+        CONN_LOGE(CONN_BLE, "convert bytes to array failed");
         return false;
     }
     ConnBleConnection *connection = ConnBleGetConnectionByUdid(NULL, hashStr, option->bleOption.protocol);
-    CONN_CHECK_AND_RETURN_RET_LOG(connection != NULL, false, "ble check action connection: connection is not exist");
+    CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, false, CONN_BLE,
+        "ble check action connection: connection is not exist");
     bool isActive = (connection->state == BLE_CONNECTION_STATE_EXCHANGED_BASIC_INFO);
 
     ConnBleReturnConnection(&connection);
@@ -1620,12 +1636,12 @@ static bool BleCheckActiveConnection(const ConnectOption *option)
 
 static int32_t BleUpdateConnection(uint32_t connectionId, UpdateOption *option)
 {
-    CONN_CHECK_AND_RETURN_RET_LOG(option != NULL, SOFTBUS_INVALID_PARAM, "invaliad param, option is null");
-    CONN_CHECK_AND_RETURN_RET_LOG(option->type == CONNECT_BLE, SOFTBUS_INVALID_PARAM,
+    CONN_CHECK_AND_RETURN_RET_LOGW(option != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "invaliad param, option is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(option->type == CONNECT_BLE, SOFTBUS_INVALID_PARAM, CONN_BLE,
         "invaliad param, not ble connect type type: %d", option->type);
 
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
-    CONN_CHECK_AND_RETURN_RET_LOG(connection != NULL, SOFTBUS_CONN_BLE_CONNECTION_NOT_EXIST_ERR,
+    CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, SOFTBUS_CONN_BLE_CONNECTION_NOT_EXIST_ERR, CONN_BLE,
         "connection is not exist, connId=%u", connectionId);
 
     int32_t status = ConnBleUpdateConnectionPriority(connection, option->bleOption.priority);
@@ -1633,32 +1649,32 @@ static int32_t BleUpdateConnection(uint32_t connectionId, UpdateOption *option)
     return status;
 }
 
-void OnServerAccepted(uint32_t connectionId)
+static void OnServerAccepted(uint32_t connectionId)
 {
     ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_SERVER_ACCEPTED, connectionId, 0, NULL, 0);
 }
 
-void OnConnected(uint32_t connectionId)
+static void OnConnected(uint32_t connectionId)
 {
     ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_CONNECT_SUCCESS, connectionId, 0, NULL, 0);
 }
 
-void OnConnectFailed(uint32_t connectionId, int32_t error)
+static void OnConnectFailed(uint32_t connectionId, int32_t error)
 {
-    CLOGW("receive ble client connect failed notify, connId=%u, err=%d", connectionId, error);
+    CONN_LOGW(CONN_BLE, "receive ble client connect failed notify, connId=%u, err=%d", connectionId, error);
     BleStatusContext *ctx = (BleStatusContext *)SoftBusCalloc(sizeof(BleStatusContext));
-    CONN_CHECK_AND_RETURN_LOG(ctx != NULL, "on connect failed failed, calloc error context failed");
+    CONN_CHECK_AND_RETURN_LOGW(ctx != NULL, CONN_BLE, "on connect failed failed, calloc error context failed");
     ctx->connectionId = connectionId;
     ctx->status = error;
     ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_CONNECT_FAIL, 0, 0, ctx, 0);
 }
 
-void OnDataReceived(uint32_t connectionId, bool isConnCharacteristic, uint8_t *data, uint32_t dataLen)
+static void OnDataReceived(uint32_t connectionId, bool isConnCharacteristic, uint8_t *data, uint32_t dataLen)
 {
     ConnBleDataReceivedContext *ctx = (ConnBleDataReceivedContext *)SoftBusCalloc(sizeof(ConnBleDataReceivedContext));
     if (ctx == NULL) {
-        CLOGE("calloc data received context failed, connId=%u, conn characteristic=%d, data len=%u", connectionId,
-            isConnCharacteristic, dataLen);
+        CONN_LOGE(CONN_BLE, "calloc data received context failed, connId=%u, conn characteristic=%d, data len=%u",
+            connectionId, isConnCharacteristic, dataLen);
         SoftBusFree(data);
         return;
     }
@@ -1668,38 +1684,39 @@ void OnDataReceived(uint32_t connectionId, bool isConnCharacteristic, uint8_t *d
     ctx->dataLen = dataLen;
     int32_t status = ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_DATA_RECEIVED, 0, 0, ctx, 0);
     if (status != SOFTBUS_OK) {
-        CLOGE("post msg to looper failed, connId=%u, conn characteristic=%d, data len=%u", connectionId,
+        CONN_LOGE(CONN_BLE, "post msg to looper failed, connId=%u, conn characteristic=%d, data len=%u", connectionId,
             isConnCharacteristic, dataLen);
         SoftBusFree(data);
         SoftBusFree(ctx);
     }
 }
 
-void OnConnectionClosed(uint32_t connectionId, int32_t status)
+static void OnConnectionClosed(uint32_t connectionId, int32_t status)
 {
     BleStatusContext *ctx = (BleStatusContext *)SoftBusCalloc(sizeof(BleStatusContext));
-    CONN_CHECK_AND_RETURN_LOG(ctx != NULL, "on connect failed failed, calloc error context failed");
+    CONN_CHECK_AND_RETURN_LOGW(ctx != NULL, CONN_BLE, "on connect failed failed, calloc error context failed");
     ctx->connectionId = connectionId;
     ctx->status = status;
     ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_CONNECTION_CLOSED, 0, 0, ctx, 0);
 }
 
-void OnConnectionResume(uint32_t connectionId)
+static void OnConnectionResume(uint32_t connectionId)
 {
     ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_CONNECTION_RESUME, connectionId, 0, NULL, 0);
 }
 
-void onPostBytesFinished(
+static void onPostBytesFinished(
     uint32_t connectionId, uint32_t len, int32_t pid, int32_t flag, int32_t module, int64_t seq, int32_t error)
 {
-    CLOGD("ble post bytes finished, connId=%u, pid=%u, payload (Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 "), err=%d",
-        connectionId, pid, len, flag, module, seq, error);
+    CONN_LOGD(CONN_BLE, "ble post bytes finished, connId=%u, pid=%u, payload (Len/Flg/Module/Seq)="
+        "(%u/%d/%d/%" PRId64 "), err=%d", connectionId, pid, len, flag, module, seq, error);
 
     if (error != SOFTBUS_OK) {
         ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
         if (connection == NULL) {
             // maybe fail reason is that connection not exist, so log level is warning
-            CLOGW("ble post bytes finished, send failed, connection not exist, connId=%u", connectionId);
+            CONN_LOGW(CONN_BLE, "ble post bytes finished, send failed, connection not exist, connId=%u",
+                connectionId);
             return;
         }
         ConnBleDisconnectNow(connection, BLE_DISCONNECT_REASON_POST_BYTES_FAILED);
@@ -1713,23 +1730,24 @@ static void OnBtStateChanged(int listenerId, int state)
     int32_t status = SOFTBUS_OK;
     if (state == SOFTBUS_BT_STATE_TURN_ON) {
         status = ConnBleStartServer();
-        CLOGI("ble manager receive bt on event, start server, status=%d", status);
+        CONN_LOGI(CONN_BLE, "ble manager receive bt on event, start server, status=%d", status);
         return;
     }
 
     if (state == SOFTBUS_BT_STATE_TURN_OFF) {
         status = ConnBleStopServer();
-        CLOGI("ble manager receive bt off event, stop server, status=%d", status);
+        CONN_LOGI(CONN_BLE, "ble manager receive bt off event, stop server, status=%d", status);
         BleStatusContext *ctx = (BleStatusContext *)SoftBusCalloc(sizeof(BleStatusContext));
         if (ctx == NULL) {
-            CLOGE("ble manager receive bt off event, send reset event failed: calloc ctx "
-                  "object failed");
+            CONN_LOGE(CONN_BLE, "ble manager receive bt off event, send reset event failed: calloc ctx object "
+                "failed");
             return;
         }
         ctx->status = SOFTBUS_CONN_BLUETOOTH_OFF;
         status = ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_RESET, 0, 0, ctx, 0);
         if (status != SOFTBUS_OK) {
-            CLOGE("ble manager receive bt off event, send reset event failed: post msg to looper failed");
+            CONN_LOGE(CONN_BLE, "ble manager receive bt off event, send reset event failed: post msg to looper "
+                "failed");
             SoftBusFree(ctx);
         }
         return;
@@ -1739,25 +1757,25 @@ static void OnBtStateChanged(int listenerId, int state)
 // reuse connected or connecting connection, MUST NOT request connect
 static int32_t ConflictReuseConnection(const char *address, const char *udid, uint32_t requestId)
 {
-    CONN_CHECK_AND_RETURN_RET_LOG(
-        address != NULL, SOFTBUS_INVALID_PARAM, "conflict reuse connection failed: invalid param, address is null");
-    CONN_CHECK_AND_RETURN_RET_LOG(
-        udid != NULL, SOFTBUS_INVALID_PARAM, "conflict reuse connection failed: invalid param, udid is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(address != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE,
+        "conflict reuse connection failed: invalid param, address is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(udid != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE,
+        "conflict reuse connection failed: invalid param, udid is null");
 
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, address, BT_MAC_LEN);
     char anomizeUdid[UDID_BUF_LEN] = { 0 };
     ConvertAnonymizeSensitiveString(anomizeUdid, UDID_BUF_LEN, udid);
-    CLOGW("conflict reuse connection, receive reuse request, reqId=%u, addr=%s, udid=%s", requestId, anomizeAddress,
-        anomizeUdid);
+    CONN_LOGW(CONN_BLE, "conflict reuse connection, receive reuse request, reqId=%u, addr=%s, udid=%s",
+        requestId, anomizeAddress, anomizeUdid);
 
     ConnBleReuseConnectionContext *ctx =
         (ConnBleReuseConnectionContext *)SoftBusCalloc(sizeof(ConnBleReuseConnectionContext));
     ConnBleReuseConnectionWaitResult *waitResult =
         (ConnBleReuseConnectionWaitResult *)SoftBusCalloc(sizeof(ConnBleReuseConnectionWaitResult));
     if (ctx == NULL || waitResult == NULL) {
-        CLOGE(
-            "calloc reuse connect objects failed, reqId=%u, addr=%s, udid=%s", requestId, anomizeAddress, anomizeUdid);
+        CONN_LOGE(CONN_BLE, "calloc reuse connect objects failed, reqId=%u, addr=%s, udid=%s",
+            requestId, anomizeAddress, anomizeUdid);
         SoftBusFree(ctx);
         SoftBusFree(waitResult);
         return SOFTBUS_MALLOC_ERR;
@@ -1767,8 +1785,8 @@ static int32_t ConflictReuseConnection(const char *address, const char *udid, ui
     size_t udidLen = strlen(udid);
     if (memcpy_s(ctx->addr, BT_MAC_LEN - 1, address, addressLen) != EOK ||
         memcpy_s(ctx->udid, UDID_BUF_LEN - 1, udid, udidLen) != EOK) {
-        CLOGE("memcpy_s address or udid failed, address len=%u, udid len=%u, reqId=%u, addr=%s, udid=%s", addressLen,
-            udidLen, requestId, anomizeAddress, anomizeUdid);
+        CONN_LOGE(CONN_BLE, "memcpy_s address or udid failed, address len=%u, udid len=%u, reqId=%u, addr=%s, "
+            "udid=%s", addressLen, udidLen, requestId, anomizeAddress, anomizeUdid);
         SoftBusFree(ctx);
         SoftBusFree(waitResult);
         return SOFTBUS_MEM_ERR;
@@ -1776,7 +1794,8 @@ static int32_t ConflictReuseConnection(const char *address, const char *udid, ui
     ctx->requestId = requestId;
 
     if (sem_init(&waitResult->wait, 0, 0) != SOFTBUS_OK) {
-        CLOGE("init wait semaphore failed, reqId=%u, addr=%s, udid=%s", requestId, anomizeAddress, anomizeUdid);
+        CONN_LOGE(CONN_BLE, "init wait semaphore failed, reqId=%u, addr=%s, udid=%s",
+            requestId, anomizeAddress, anomizeUdid);
         SoftBusFree(ctx);
         SoftBusFree(waitResult);
         return SOFTBUS_ERR;
@@ -1785,8 +1804,8 @@ static int32_t ConflictReuseConnection(const char *address, const char *udid, ui
     ctx->protocol = BLE_GATT;
     int32_t status = ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_REUSE_CONNECTION_REQUEST, 0, 0, ctx, 0);
     if (status != SOFTBUS_OK) {
-        CLOGE("post reuse connection msg to looper failed, reqId=%u, addr=%s, udid=%s", requestId, anomizeAddress,
-            anomizeUdid);
+        CONN_LOGE(CONN_BLE, "post reuse connection msg to looper failed, reqId=%u, addr=%s, udid=%s",
+            requestId, anomizeAddress, anomizeUdid);
         sem_destroy(&waitResult->wait);
         SoftBusFree(ctx);
         SoftBusFree(waitResult);
@@ -1798,8 +1817,8 @@ static int32_t ConflictReuseConnection(const char *address, const char *udid, ui
     sem_destroy(&waitResult->wait);
     // MUST NOT free ctx here, as ctx is free-ed by message looper
     SoftBusFree(waitResult);
-    CLOGE("conflict reuse connection, reqId=%u, addr=%s, udid=%s, result=%d", requestId, anomizeAddress, anomizeUdid,
-        result);
+    CONN_LOGE(CONN_BLE, "conflict reuse connection, reqId=%u, addr=%s, udid=%s, result=%d",
+        requestId, anomizeAddress, anomizeUdid, result);
     return result;
 }
 
@@ -1807,18 +1826,18 @@ static bool ConflictPostBytes(int32_t underlayHandle, uint8_t *data, uint32_t da
 {
     static int64_t conflictSeqGenerator = 0;
 
-    CONN_CHECK_AND_RETURN_RET_LOG(data != NULL, false, "conflict post bytes failed: data is null");
-    CONN_CHECK_AND_RETURN_RET_LOG(dataLen != 0, false, "conflict post bytes failed: data length is 0");
+    CONN_CHECK_AND_RETURN_RET_LOGW(data != NULL, false, CONN_BLE, "conflict post bytes failed: data is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(dataLen != 0, false, CONN_BLE, "conflict post bytes failed: data length is 0");
 
     ConnBleConnection *connection = ConnBleGetConnectionByHandle(underlayHandle, CONN_SIDE_ANY, BLE_GATT);
-    CONN_CHECK_AND_RETURN_RET_LOG(connection != NULL, false,
+    CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, false, CONN_BLE,
         "conflict post bytes failed: connection not exist, underlayer handle=%d", underlayHandle);
     uint32_t connectionId = connection->connectionId;
     ConnBleReturnConnection(&connection);
 
     uint32_t payloadLen = ConnGetHeadSize() + dataLen;
     uint8_t *payload = (uint8_t *)SoftBusCalloc(payloadLen);
-    CONN_CHECK_AND_RETURN_RET_LOG(payload != NULL, false,
+    CONN_CHECK_AND_RETURN_RET_LOGE(payload != NULL, false, CONN_BLE,
         "conflict post bytes failed: alloc payload failed, underlayer handle=%d", underlayHandle);
 
     uint32_t seq = conflictSeqGenerator++;
@@ -1839,10 +1858,10 @@ static bool ConflictPostBytes(int32_t underlayHandle, uint8_t *data, uint32_t da
 
 static void ConflictDisconnect(int32_t handle, bool isForce)
 {
-    CLOGW("conflict disconnect, receive disconnect request, handle=%d, isForce=%d", handle, isForce);
+    CONN_LOGW(CONN_BLE, "conflict disconnect, receive disconnect request, handle=%d, isForce=%d", handle, isForce);
     ConnBleConnection *connection = ConnBleGetConnectionByHandle(handle, CONN_SIDE_ANY, BLE_GATT);
-    CONN_CHECK_AND_RETURN_LOG(
-        connection != NULL, "conflict disconnect failed: connection not exist, handle=%d", handle);
+    CONN_CHECK_AND_RETURN_LOGW(connection != NULL, CONN_BLE,
+        "conflict disconnect failed: connection not exist, handle=%d", handle);
     if (isForce) {
         ConnBleDisconnectNow(connection, BLE_DISCONNECT_REASON_CONFLICT);
     } else {
@@ -1853,25 +1872,25 @@ static void ConflictDisconnect(int32_t handle, bool isForce)
 
 static void ConflictOccupy(const char *udid, int32_t timeout)
 {
-    CONN_CHECK_AND_RETURN_LOG(udid != NULL, "conflict occupy failed: invalid param, udid is null");
-    CONN_CHECK_AND_RETURN_LOG(timeout > 0, "conflict occupy failed: invalid param, timeout=%d", timeout);
+    CONN_CHECK_AND_RETURN_LOGW(udid != NULL, CONN_BLE, "conflict occupy failed: invalid param, udid is null");
+    CONN_CHECK_AND_RETURN_LOGW(timeout > 0, CONN_BLE, "conflict occupy failed: invalid param, timeout=%d", timeout);
 
     char anomizeUdid[UDID_BUF_LEN] = { 0 };
     ConvertAnonymizeSensitiveString(anomizeUdid, UDID_BUF_LEN, udid);
-    CLOGW("receive conflict occupy, udid=%s, timeout=%d", anomizeUdid, timeout);
+    CONN_LOGW(CONN_BLE, "receive conflict occupy, udid=%s, timeout=%d", anomizeUdid, timeout);
 
-    CONN_CHECK_AND_RETURN_LOG(SoftBusMutexLock(&g_bleManager.prevents->lock) == SOFTBUS_OK,
+    CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_bleManager.prevents->lock) == SOFTBUS_OK, CONN_BLE,
         "ATTENTION UNEXPECTED ERROR! conflict occupy failed: try to lock failed, udid=%s", anomizeUdid);
     do {
         char *copyUdid = (char *)SoftBusCalloc(UDID_BUF_LEN);
         if (copyUdid == NULL) {
-            CLOGE("calloc udid failed, udid=%s", anomizeUdid);
+            CONN_LOGE(CONN_BLE, "calloc udid failed, udid=%s", anomizeUdid);
             break;
         }
         size_t udidLen = strlen(udid);
         if (memcpy_s(copyUdid, UDID_BUF_LEN - 1, udid, udidLen) != EOK) {
-            CLOGE(
-                "memcpy_s udid failed, source len=%u, destination len=%u, udid=%s", udidLen, UDID_BUF_LEN, anomizeUdid);
+            CONN_LOGE(CONN_BLE, "memcpy_s udid failed, source len=%u, destination len=%u, udid=%s",
+                udidLen, UDID_BUF_LEN, anomizeUdid);
             SoftBusFree(copyUdid);
             break;
         }
@@ -1884,7 +1903,7 @@ static void ConflictOccupy(const char *udid, int32_t timeout)
             }
         }
         if (exist != NULL) {
-            CLOGW("dumplicate occupy, refresh timeout, udid=%s", anomizeUdid);
+            CONN_LOGW(CONN_BLE, "dumplicate occupy, refresh timeout, udid=%s", anomizeUdid);
             exist->timeout = timeout;
             ConnRemoveMsgFromLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_PREVENT_TIMEOUT, 0, 0, copyUdid);
             ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_PREVENT_TIMEOUT, 0, 0, copyUdid, timeout);
@@ -1893,12 +1912,12 @@ static void ConflictOccupy(const char *udid, int32_t timeout)
         BlePrevent *prevent = (BlePrevent *)SoftBusCalloc(sizeof(BlePrevent));
         if (prevent == NULL) {
             SoftBusFree(copyUdid);
-            CLOGE("calloc prevent object failed, udid=%s", anomizeUdid);
+            CONN_LOGE(CONN_BLE, "calloc prevent object failed, udid=%s", anomizeUdid);
             break;
         }
         if (memcpy_s(prevent->udid, UDID_BUF_LEN - 1, udid, udidLen) != EOK) {
-            CLOGE("memcpy_s udid to prevent object failed, source length=%u, destination len=%u, udid=%s",
-                udidLen, UDID_BUF_LEN, anomizeUdid);
+            CONN_LOGE(CONN_BLE, "memcpy_s udid to prevent object failed, source length=%u, destination len=%u, "
+                "udid=%s", udidLen, UDID_BUF_LEN, anomizeUdid);
             SoftBusFree(copyUdid);
             SoftBusFree(prevent);
             break;
@@ -1908,18 +1927,18 @@ static void ConflictOccupy(const char *udid, int32_t timeout)
         ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_PREVENT_TIMEOUT, 0, 0, copyUdid, timeout);
     } while (false);
     SoftBusMutexUnlock(&g_bleManager.prevents->lock);
-    CLOGI("conflict occupy, add udid prevent done, udid=%s", anomizeUdid);
+    CONN_LOGI(CONN_BLE, "conflict occupy, add udid prevent done, udid=%s", anomizeUdid);
 }
 
 static void ConflictCancelOccupy(const char *udid)
 {
-    CONN_CHECK_AND_RETURN_LOG(udid != NULL, "conflict cancel occupy failed: invalid param, udid is null");
+    CONN_CHECK_AND_RETURN_LOGW(udid != NULL, CONN_BLE, "conflict cancel occupy failed: invalid param, udid is null");
 
     char anomizeUdid[UDID_BUF_LEN] = { 0 };
     ConvertAnonymizeSensitiveString(anomizeUdid, UDID_BUF_LEN, udid);
-    CLOGI("conflict cancel occupy, udid=%s", anomizeUdid);
+    CONN_LOGI(CONN_BLE, "conflict cancel occupy, udid=%s", anomizeUdid);
 
-    CONN_CHECK_AND_RETURN_LOG(SoftBusMutexLock(&g_bleManager.prevents->lock) == SOFTBUS_OK,
+    CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_bleManager.prevents->lock) == SOFTBUS_OK, CONN_BLE,
         "ATTENTION UNEXPECTED ERROR! conflict cancel occupy failed: try to lock failed, udid=%s", anomizeUdid);
     size_t udidLen = strlen(udid);
     BlePrevent *it = NULL;
@@ -1938,27 +1957,28 @@ static void ConflictCancelOccupy(const char *udid)
 
 static int32_t ConflictGetConnection(const char *udid)
 {
-    CONN_CHECK_AND_RETURN_RET_LOG(
-        udid != NULL, SOFTBUS_ERR, "conflict get connection failed: invalid param, udid is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(udid != NULL, SOFTBUS_ERR, CONN_BLE,
+        "conflict get connection failed: invalid param, udid is null");
 
     char anomizeUdid[UDID_BUF_LEN] = { 0 };
     ConvertAnonymizeSensitiveString(anomizeUdid, UDID_BUF_LEN, udid);
-    CLOGI("conflict get connection, udid=%s", anomizeUdid);
+    CONN_LOGI(CONN_BLE, "conflict get connection, udid=%s", anomizeUdid);
 
     ConnBleConnection *connection = ConnBleGetClientConnectionByUdid(udid, BLE_GATT);
-    CONN_CHECK_AND_RETURN_RET_LOG(connection != NULL, SOFTBUS_CONN_BLE_CONNECTION_NOT_EXIST_ERR,
+    CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, SOFTBUS_CONN_BLE_CONNECTION_NOT_EXIST_ERR, CONN_BLE,
         "conflict get connection failed: connection not exist, udid=%s", anomizeUdid);
     int32_t result = SOFTBUS_ERR;
     do {
         if (SoftBusMutexLock(&connection->lock) != SOFTBUS_OK) {
-            CLOGE("try to lock failed, connId=%u, udid=%s", connection->connectionId, anomizeUdid);
+            CONN_LOGE(CONN_BLE, "try to lock failed, connId=%u, udid=%s", connection->connectionId, anomizeUdid);
             result = SOFTBUS_LOCK_ERR;
             break;
         }
         result = connection->underlayerHandle;
         SoftBusMutexUnlock(&connection->lock);
     } while (false);
-    CLOGI("conflict get connection, connId=%u, udid=%s, result=%d", connection->connectionId, anomizeUdid, result);
+    CONN_LOGI(CONN_BLE, "conflict get connection, connId=%u, udid=%s, result=%d",
+        connection->connectionId, anomizeUdid, result);
     ConnBleReturnConnection(&connection);
     return result;
 }
@@ -1967,7 +1987,7 @@ static int32_t BleInitLooper(void)
 {
     g_bleManagerSyncHandler.handler.looper = CreateNewLooper("conn_ble_looper");
     if (g_bleManagerSyncHandler.handler.looper == NULL) {
-        CLOGE("init conn ble looper failed");
+        CONN_LOGE(CONN_INIT, "init conn ble looper failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -1977,8 +1997,8 @@ static int32_t InitBleManager(const ConnectCallback *callback)
 {
     SoftBusList *connections = CreateSoftBusList();
     SoftBusList *prevents = CreateSoftBusList();
-    CONN_CHECK_AND_RETURN_RET_LOG(
-        connections != NULL && prevents != NULL, SOFTBUS_ERR, "init ble manager failed: create list failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(connections != NULL && prevents != NULL, SOFTBUS_ERR, CONN_INIT,
+        "init ble manager failed: create list failed");
     g_bleManager.connections = connections;
     g_bleManager.prevents = prevents;
     ListInit(&g_bleManager.waitings);
@@ -1990,7 +2010,7 @@ static int32_t InitBleManager(const ConnectCallback *callback)
         .OnBtStateChanged = OnBtStateChanged,
     };
     int32_t listenerId = SoftBusAddBtStateListener(&btStateListener);
-    CONN_CHECK_AND_RETURN_RET_LOG(listenerId >= 0, SOFTBUS_ERR,
+    CONN_CHECK_AND_RETURN_RET_LOGW(listenerId >= 0, SOFTBUS_ERR, CONN_INIT,
         "int ble manager failed: add bluetooth state change listener failed, invalid listener id=%d", listenerId);
     static SoftBusBleConflictListener bleConflictListener = {
         .reuseConnection = ConflictReuseConnection,
@@ -2009,17 +2029,18 @@ static int32_t InitBleManager(const ConnectCallback *callback)
 
 ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback)
 {
-    CONN_CHECK_AND_RETURN_RET_LOG(callback != NULL, NULL, "conn init ble failed: invalid param, callback is null");
-    CONN_CHECK_AND_RETURN_RET_LOG(
-        callback->OnConnected != NULL, NULL, "conn init ble failed: invalid param, callback OnConnected  is null");
-    CONN_CHECK_AND_RETURN_RET_LOG(
-        callback->OnDataReceived != NULL, NULL, "conn init ble failed: invalid param, callback OnDataReceived is null");
-    CONN_CHECK_AND_RETURN_RET_LOG(
-        callback->OnDisconnected != NULL, NULL, "conn init ble failed: invalid param, callback OnDisconnected is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(callback != NULL, NULL, CONN_INIT,
+        "conn init ble failed: invalid param, callback is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(callback->OnConnected != NULL, NULL, CONN_INIT,
+        "conn init ble failed: invalid param, callback OnConnected  is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(callback->OnDataReceived != NULL, NULL, CONN_INIT,
+        "conn init ble failed: invalid param, callback OnDataReceived is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(callback->OnDisconnected != NULL, NULL, CONN_INIT,
+        "conn init ble failed: invalid param, callback OnDisconnected is null");
 
     int32_t status = BleInitLooper();
-    CONN_CHECK_AND_RETURN_RET_LOG(
-        status == SOFTBUS_OK, NULL, "conn init ble failed: init ble manager looper failed, err=%d", status);
+    CONN_CHECK_AND_RETURN_RET_LOGW(status == SOFTBUS_OK, NULL, CONN_INIT,
+        "conn init ble failed: init ble manager looper failed, err=%d", status);
 
     ConnBleConnectionEventListener connectionEventListener = {
         .onServerAccepted = OnServerAccepted,
@@ -2030,18 +2051,18 @@ ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback)
         .onConnectionResume = OnConnectionResume,
     };
     status = ConnBleInitConnectionMudule(g_bleManagerSyncHandler.handler.looper, &connectionEventListener);
-    CONN_CHECK_AND_RETURN_RET_LOG(
-        status == SOFTBUS_OK, NULL, "conn init ble failed: init ble connection mudule failed, err=%d", status);
+    CONN_CHECK_AND_RETURN_RET_LOGW(status == SOFTBUS_OK, NULL, CONN_INIT,
+        "conn init ble failed: init ble connection mudule failed, err=%d", status);
 
     ConnBleTransEventListener transEventListener = {
         .onPostBytesFinished = onPostBytesFinished,
     };
     status = ConnBleInitTransModule(&transEventListener);
-    CONN_CHECK_AND_RETURN_RET_LOG(
-        status == SOFTBUS_OK, NULL, "conn init ble failed: init ble trans mudule failed, err=%d", status);
+    CONN_CHECK_AND_RETURN_RET_LOGW(status == SOFTBUS_OK, NULL, CONN_INIT,
+        "conn init ble failed: init ble trans mudule failed, err=%d", status);
     status = InitBleManager(callback);
-    CONN_CHECK_AND_RETURN_RET_LOG(
-        status == SOFTBUS_OK, NULL, "conn init ble failed: init ble manager failed, err=%d", status);
+    CONN_CHECK_AND_RETURN_RET_LOGW(status == SOFTBUS_OK, NULL, CONN_INIT,
+        "conn init ble failed: init ble manager failed, err=%d", status);
 
     static ConnectFuncInterface bleFuncInterface = {
         .ConnectDevice = BleConnectDevice,
@@ -2055,19 +2076,19 @@ ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback)
         .UpdateConnection = BleUpdateConnection,
         .PreventConnection = NULL,
     };
-    CLOGI("conn init ble successfully");
+    CONN_LOGI(CONN_INIT, "conn init ble successfully");
     return &bleFuncInterface;
 }
 
 static void LnnOnlineEventListener(const LnnEventBasicInfo *info)
 {
-    CONN_CHECK_AND_RETURN_LOG(info != NULL, "receive lnn online event, null info");
-    CONN_CHECK_AND_RETURN_LOG(info->event == LNN_EVENT_NODE_ONLINE_STATE_CHANGED,
+    CONN_CHECK_AND_RETURN_LOGW(info != NULL, CONN_BLE, "receive lnn online event, null info");
+    CONN_CHECK_AND_RETURN_LOGW(info->event == LNN_EVENT_NODE_ONLINE_STATE_CHANGED, CONN_BLE,
         "receive lnn online event, unconcerned event=%d", info->event);
 
-    CLOGI("receive lnn online event, start auto-complementation coc connection udid");
+    CONN_LOGI(CONN_BLE, "receive lnn online event, start auto-complementation coc connection udid");
     int32_t status = SoftBusMutexLock(&g_bleManager.connections->lock);
-    CONN_CHECK_AND_RETURN_LOG(status == SOFTBUS_OK,
+    CONN_CHECK_AND_RETURN_LOGE(status == SOFTBUS_OK, CONN_BLE,
         "complementation coc connection udid failed: try to lock connections failed, err=%d", status);
 
     do {
@@ -2078,7 +2099,7 @@ static void LnnOnlineEventListener(const LnnEventBasicInfo *info)
             }
             status = SoftBusMutexLock(&it->lock);
             if (status != SOFTBUS_OK) {
-                CLOGE("complementation coc connection udid failed: try to get connection "
+                CONN_LOGE(CONN_BLE, "complementation coc connection udid failed: try to get connection "
                       "lock failed, connId=%u, err=%d",
                     it->connectionId, status);
                 continue;
@@ -2100,9 +2121,9 @@ static void DelayRegisterLnnOnlineListener(void)
 
     int32_t status = LnnRegisterEventHandler(LNN_EVENT_NODE_ONLINE_STATE_CHANGED, LnnOnlineEventListener);
     if (status != SOFTBUS_OK) {
-        CLOGE("delay register lnn online listener failed, err=%d", status);
+        CONN_LOGE(CONN_BLE, "delay register lnn online listener failed, err=%d", status);
         return;
     }
     registered = true;
-    CLOGI("delay register lnn online listener successfully");
+    CONN_LOGI(CONN_BLE, "delay register lnn online listener successfully");
 }

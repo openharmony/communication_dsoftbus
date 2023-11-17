@@ -23,7 +23,7 @@
 #include "resource_manager_broadcast_handler.c"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "wifi_direct_p2p_adapter.h"
 #include "wifi_p2p.h"
 #include "wifi_p2p_config.h"
@@ -114,13 +114,13 @@ struct InterfaceInfo* GetInterfaceInfo(const char *interface)
 HWTEST_F(ResourceManagerBroadcastTest, BroadcastTest001, TestSize.Level1)
 {
     enum P2pState state = P2P_STATE_NONE;
-    (void)WifiDirectStateChangeCallback(state);
+    (void)HandleP2pStateChanged(state);
 
     state = P2P_STATE_STARTED;
-    (void)WifiDirectStateChangeCallback(state);
+    (void)HandleP2pStateChanged(state);
 
     GetResourceManager()->getInterfaceInfo = GetInterfaceInfo;
-    (void)WifiDirectStateChangeCallback(state);
+    (void)HandleP2pStateChanged(state);
 };
 
 HWTEST_F(ResourceManagerBroadcastTest, BroadcastTest002, TestSize.Level1)
@@ -161,15 +161,15 @@ HWTEST_F(ResourceManagerBroadcastTest, BroadcastTest003, TestSize.Level1)
 
 HWTEST_F(ResourceManagerBroadcastTest, BroadcastTest004, TestSize.Level1)
 {
-    struct P2pBroadcastParam p2PBroadcastParam;
+    struct P2pConnChangedInfo changedInfo;
     struct WifiDirectP2pGroupInfo groupInfo;
 
-    p2PBroadcastParam.p2pLinkedInfo.connectState = P2P_DISCONNECTED;
-    (void)WifiDirectConnectionChangeCallback(&p2PBroadcastParam);
+    changedInfo.p2pLinkInfo.connectState = P2P_DISCONNECTED;
+    (void)HandleP2pConnectionChanged(&changedInfo);
 
-    p2PBroadcastParam.p2pLinkedInfo.connectState = P2P_CONNECTED;
-    p2PBroadcastParam.groupInfo = &groupInfo;
-    (void)WifiDirectConnectionChangeCallback(&p2PBroadcastParam);
+    changedInfo.p2pLinkInfo.connectState = P2P_CONNECTED;
+    changedInfo.groupInfo = &groupInfo;
+    (void)HandleP2pConnectionChanged(&changedInfo);
 };
 
 HWTEST_F(ResourceManagerBroadcastTest, BroadcastTest005, TestSize.Level1)

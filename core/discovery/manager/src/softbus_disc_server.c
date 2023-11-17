@@ -16,9 +16,9 @@
 #include "softbus_disc_server.h"
 
 #include "disc_client_proxy.h"
+#include "disc_log.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
-#include "softbus_log.h"
 #include "softbus_hisysevt_discreporter.h"
 
 static IServerDiscInnerCallback g_discInnerCb = {
@@ -29,7 +29,7 @@ int32_t DiscServerInit(void)
 {
     int32_t ret = DiscMgrInit();
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "DiscServerInit failed");
+        DISC_LOGE(DISC_INIT, "DiscServerInit failed");
         return ret;
     }
     return SOFTBUS_OK;
@@ -77,12 +77,12 @@ int32_t DiscIpcPublishService(const char *packageName, const PublishInfo *info)
 {
     int32_t ret = DiscPublishService(packageName, info);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "ServerPublishService failed");
+        DISC_LOGE(DISC_CONTROL, "ServerPublishService failed");
         SoftbusReportDiscFault(ConvertDiscType(&info->medium), ret);
         (void)ClientIpcOnPublishFail(packageName, info->publishId, PublishErroCodeProcess(ret));
         return ret;
     }
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "ServerPublishService success!");
+    DISC_LOGI(DISC_CONTROL, "ServerPublishService success!");
     (void)ClientIpcOnPublishSuccess(packageName, info->publishId);
     return SOFTBUS_OK;
 }
@@ -91,10 +91,10 @@ int32_t DiscIpcUnPublishService(const char *packageName, int32_t publishId)
 {
     int32_t ret = DiscUnPublishService(packageName, publishId);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "ServerUnPublishService failed");
+        DISC_LOGE(DISC_CONTROL, "ServerUnPublishService failed");
         return ret;
     }
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "ServerUnPublishService success!");
+    DISC_LOGI(DISC_CONTROL, "ServerUnPublishService success!");
     return SOFTBUS_OK;
 }
 
@@ -102,12 +102,12 @@ int32_t DiscIpcStartDiscovery(const char *packageName, const SubscribeInfo *info
 {
     int32_t ret = DiscStartDiscovery(packageName, info, &g_discInnerCb);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "ServerStartDiscovery failed");
+        DISC_LOGE(DISC_CONTROL, "ServerStartDiscovery failed");
         SoftbusReportDiscFault(ConvertDiscType(&info->medium), ret);
         (void)ClientIpcOnDiscoverFailed(packageName, info->subscribeId, DiscoveryErroCodeProcess(ret));
         return ret;
     }
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "ServerStartDiscovery success!");
+    DISC_LOGI(DISC_CONTROL, "ServerStartDiscovery success!");
     (void)ClientIpcDiscoverySuccess(packageName, info->subscribeId);
     return SOFTBUS_OK;
 }
@@ -116,9 +116,9 @@ int32_t DiscIpcStopDiscovery(const char *packageName, int32_t subscribeId)
 {
     int32_t ret = DiscStopDiscovery(packageName, subscribeId);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "ServerStopDiscovery failed");
+        DISC_LOGE(DISC_CONTROL, "ServerStopDiscovery failed");
         return ret;
     }
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "ServerStopDiscovery success!");
+    DISC_LOGI(DISC_CONTROL, "ServerStopDiscovery success!");
     return SOFTBUS_OK;
 }

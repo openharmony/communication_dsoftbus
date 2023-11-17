@@ -15,6 +15,8 @@
 
 #include "softbus_server.h"
 
+#include "bus_center_ex_obj.h"
+#include "comm_log.h"
 #include "ipc_skeleton.h"
 #include "ipc_types.h"
 #include "lnn_bus_center_ipc.h"
@@ -24,7 +26,6 @@
 #include "softbus_conn_interface.h"
 #include "softbus_disc_server.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "softbus_qos.h"
 #include "softbus_server_death_recipient.h"
 #include "softbus_server_frame.h"
@@ -84,30 +85,30 @@ int32_t SoftBusServer::UnPublishService(const char *pkgName, int publishId)
 int32_t SoftBusServer::SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject> &object)
 {
     if (clientPkgName == nullptr || object == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "package name or object is nullptr\n");
+        COMM_LOGE(COMM_SVC, "package name or object is nullptr");
         return SOFTBUS_ERR;
     }
     int32_t pid = (int32_t)(OHOS::IPCSkeleton::GetCallingPid());
     if (SoftbusClientInfoManager::GetInstance().SoftbusClientIsExist(clientPkgName, pid)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_WARN, "softbus client is exist.\n");
+        COMM_LOGW(COMM_SVC, "softbus client is exist.");
         return SOFTBUS_OK;
     }
     sptr<IRemoteObject::DeathRecipient> abilityDeath = new (std::nothrow) SoftBusDeathRecipient();
     if (abilityDeath == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "DeathRecipient object is nullptr\n");
+        COMM_LOGE(COMM_SVC, "DeathRecipient object is nullptr");
         return SOFTBUS_ERR;
     }
     bool ret = object->AddDeathRecipient(abilityDeath);
     if (!ret) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "AddDeathRecipient failed\n");
+        COMM_LOGE(COMM_SVC, "AddDeathRecipient failed");
         return SOFTBUS_ERR;
     }
     if (SoftbusClientInfoManager::GetInstance().SoftbusAddService(clientPkgName,
         object, abilityDeath, pid) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus add client service failed\n");
+        COMM_LOGE(COMM_SVC, "softbus add client service failed");
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "softbus register service success %s\n", clientPkgName);
+    COMM_LOGI(COMM_SVC, "softbus register service success %s", clientPkgName);
     return SOFTBUS_OK;
 }
 
@@ -302,7 +303,7 @@ int32_t SoftBusServer::ShiftLNNGear(const char *pkgName, const char *callerId, c
 int SoftBusServer::Dump(int fd, const std::vector<std::u16string> &args)
 {
     if (fd < 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "hidumper fd is invalid\n");
+        COMM_LOGE(COMM_SVC, "hidumper fd is invalid");
         return SOFTBUS_ERR;
     }
     std::vector<std::string> argsStr;
@@ -323,10 +324,10 @@ int SoftBusServer::Dump(int fd, const std::vector<std::u16string> &args)
 
 void SoftBusServer::OnStart()
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "SoftBusServer OnStart called!\n");
+    COMM_LOGI(COMM_SVC, "SoftBusServer OnStart called!");
     InitSoftBusServer();
     if (!Publish(this)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftBusServer publish failed!\n");
+        COMM_LOGE(COMM_SVC, "SoftBusServer publish failed!");
     }
 }
 
@@ -336,6 +337,17 @@ int32_t SoftBusServer::GetSoftbusSpecObject(sptr<IRemoteObject> &object)
 {
     sptr<TransSpecObject> result = new(std::nothrow) TransSpecObject();
     if (result == nullptr) {
+        return SOFTBUS_MEM_ERR;
+    }
+    object = result;
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServer::GetBusCenterExObj(sptr<IRemoteObject> &object)
+{
+    sptr<BusCenterExObj> result = new(std::nothrow) BusCenterExObj();
+    if (result == nullptr) {
+        COMM_LOGE(COMM_SVC, "SoftBusServer GetBusCenterExObj failed!");
         return SOFTBUS_MEM_ERR;
     }
     object = result;

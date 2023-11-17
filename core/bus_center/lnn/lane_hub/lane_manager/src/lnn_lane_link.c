@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "lnn_trans_lane.h"
+#include "anonymizer.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
@@ -25,6 +26,7 @@
 #include "lnn_lane_score.h"
 #include "lnn_lane_link_p2p.h"
 #include "lnn_local_net_ledger.h"
+#include "lnn_log.h"
 #include "lnn_net_capability.h"
 #include "lnn_network_manager.h"
 #include "lnn_node_info.h"
@@ -36,7 +38,6 @@
 #include "softbus_conn_ble_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "softbus_network_utils.h"
 #include "softbus_protocol_def.h"
 #include "softbus_utils.h"
@@ -360,14 +361,14 @@ static bool LinkTypeCheck(LaneLinkType type)
             return true;
         }
     }
-    LLOGE("link type[%d] is not supported", type);
+    LNN_LOGE(LNN_LANE, "linkType=%d not supported", type);
     return false;
 }
 
 static int32_t IsLinkRequestValid(const LinkRequest *reqInfo)
 {
     if (reqInfo == NULL) {
-        LLOGE("reqInfo is nullptr");
+        LNN_LOGE(LNN_LANE, "reqInfo is nullptr");
         return SOFTBUS_INVALID_PARAM;
     }
     return SOFTBUS_OK;
@@ -428,7 +429,7 @@ static int32_t LaneLinkOfBr(uint32_t reqId, const LinkRequest *reqInfo, const La
     int32_t ret = LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_BT_MAC,
         linkInfo.linkInfo.br.brMac, BT_MAC_LEN);
     if (ret != SOFTBUS_OK || strlen(linkInfo.linkInfo.br.brMac) == 0) {
-        LLOGE("LnnGetRemoteStrInfo brmac is failed");
+        LNN_LOGE(LNN_LANE, "LnnGetRemoteStrInfo brmac is failed");
         return SOFTBUS_ERR;
     }
     linkInfo.type = LANE_BR;
@@ -613,7 +614,7 @@ static int32_t LaneLinkOfBleReuseCommon(uint32_t reqId, const LinkRequest *reqIn
     (void)memcpy_s(linkInfo.linkInfo.ble.bleMac, BT_MAC_LEN, connection->addr, BT_MAC_LEN);
     if (SoftBusGenerateStrHash((uint8_t*)connection->udid, strlen(connection->udid),
         (uint8_t*)linkInfo.linkInfo.ble.deviceIdHash) != SOFTBUS_OK) {
-        LLOGE("generate deviceId hash err");
+        LNN_LOGE(LNN_LANE, "generate deviceId hash err");
         ConnBleReturnConnection(&connection);
         return SOFTBUS_ERR;
     }
@@ -639,21 +640,21 @@ static int32_t LaneLinkOfBle(uint32_t reqId, const LinkRequest *reqInfo, const L
     LaneLinkInfo linkInfo;
     (void)memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
     if (memcpy_s(linkInfo.linkInfo.ble.bleMac, BT_MAC_LEN, reqInfo->peerBleMac, BT_MAC_LEN) != EOK) {
-        LLOGE("memcpy peerBleMac error");
+        LNN_LOGE(LNN_LANE, "memcpy peerBleMac error");
         return SOFTBUS_MEM_ERR;
     }
     if (strlen(linkInfo.linkInfo.ble.bleMac) == 0) {
-        LLOGE("get peerBleMac error");
+        LNN_LOGE(LNN_LANE, "get peerBleMac error");
         return SOFTBUS_ERR;
     }
     char peerUdid[UDID_BUF_LEN] = {0};
     if (LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
-        LLOGE("get udid error");
+        LNN_LOGE(LNN_LANE, "get udid error");
         return SOFTBUS_ERR;
     }
     if (SoftBusGenerateStrHash((uint8_t*)peerUdid, strlen(peerUdid),
         (uint8_t*)linkInfo.linkInfo.ble.deviceIdHash) != SOFTBUS_OK) {
-        LLOGE("generate deviceId hash err");
+        LNN_LOGE(LNN_LANE, "generate deviceId hash err");
         return SOFTBUS_ERR;
     }
     linkInfo.linkInfo.ble.protoType = BLE_GATT;
@@ -706,7 +707,7 @@ static int32_t LaneLinkOfGattDirect(uint32_t reqId, const LinkRequest *reqInfo, 
     LaneLinkInfo linkInfo;
     (void)memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
     if (LaneLinkOfBleDirectCommon(reqInfo, &linkInfo) != SOFTBUS_OK) {
-        LLOGE("ble direct common failed");
+        LNN_LOGE(LNN_LANE, "ble direct common failed");
         return SOFTBUS_ERR;
     }
     linkInfo.linkInfo.bleDirect.protoType = BLE_GATT;
@@ -726,7 +727,7 @@ static int32_t LaneLinkOfP2pReuse(uint32_t reqId, const LinkRequest *reqInfo, co
     char ipAddr[MAX_SOCKET_ADDR_LEN];
     uint16_t port;
     if (!LaneGetP2PReuseMac(reqInfo->peerNetworkId, ipAddr, MAX_SOCKET_ADDR_LEN, &port)) {
-        LLOGE("p2p resue get addr failed");
+        LNN_LOGE(LNN_LANE, "p2p resue get addr failed");
         return SOFTBUS_ERR;
     }
     linkInfo.linkInfo.wlan.connInfo.protocol = LNN_PROTOCOL_IP;
@@ -743,14 +744,14 @@ static int32_t GetWlanLinkedAttribute(int32_t *channel, bool *is5GBand, bool *is
     LnnWlanLinkedInfo info;
     int32_t ret = LnnGetWlanLinkedInfo(&info);
     if (ret != SOFTBUS_OK) {
-        LLOGE("LnnGetWlanLinkedInfo fail, ret:%d", ret);
+        LNN_LOGE(LNN_LANE, "LnnGetWlanLinkedInfo fail, ret=%d", ret);
         return SOFTBUS_ERR;
     }
     *isConnected = info.isConnected;
     *is5GBand = (info.band != 1);
 
     *channel = SoftBusFrequencyToChannel(info.frequency);
-    LLOGI("wlan current channel is %d", *channel);
+    LNN_LOGI(LNN_LANE, "wlan current channel is %d", *channel);
     return SOFTBUS_OK;
 }
 
@@ -781,13 +782,13 @@ static ProtocolType LnnLaneSelectProtocol(LnnNetIfType ifType, const char *netWo
     NodeInfo remoteNodeInfo = {0};
     int ret = LnnGetRemoteNodeInfoById(netWorkId, CATEGORY_NETWORK_ID, &remoteNodeInfo);
     if (ret != SOFTBUS_OK) {
-        LLOGE("no such network id");
+        LNN_LOGE(LNN_LANE, "no such network id");
         return SOFTBUS_ERR;
     }
 
     const NodeInfo *localNode = LnnGetLocalNodeInfo();
     if (localNode == NULL) {
-        LLOGE("get local node info failed!");
+        LNN_LOGE(LNN_LANE, "get local node info failed!");
         return SOFTBUS_ERR;
     }
 
@@ -801,13 +802,13 @@ static ProtocolType LnnLaneSelectProtocol(LnnNetIfType ifType, const char *netWo
     if ((req.remoteSupporttedProtocol & LNN_PROTOCOL_NIP) != 0 &&
         (strcmp(remoteNodeInfo.nodeAddress, NODE_ADDR_LOOPBACK) == 0 ||
             strcmp(localNode->nodeAddress, NODE_ADDR_LOOPBACK) == 0)) {
-        LLOGW("newip temporarily unavailable!");
+        LNN_LOGW(LNN_LANE, "newip temporarily unavailable!");
         req.remoteSupporttedProtocol ^= LNN_PROTOCOL_NIP;
     }
 
     (void)LnnVisitPhysicalSubnet(FindBestProtocol, &req);
 
-    LLOGI("protocol = %d", req.selectedProtocol);
+    LNN_LOGI(LNN_LANE, "protocol=%d", req.selectedProtocol);
     if (req.selectedProtocol == 0) {
         req.selectedProtocol = LNN_PROTOCOL_IP;
     }
@@ -843,48 +844,48 @@ static int32_t LaneLinkOfWlan(uint32_t reqId, const LinkRequest *reqInfo, const 
     ProtocolType protocol =
         LnnLaneSelectProtocol(LNN_NETIF_TYPE_WLAN | LNN_NETIF_TYPE_ETH, reqInfo->peerNetworkId, acceptableProtocols);
     if (protocol == 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "protocal is invalid!");
+        LNN_LOGE(LNN_LANE, "protocal is invalid!");
         return SOFTBUS_ERR;
     }
     if (protocol == LNN_PROTOCOL_IP) {
         ret = LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_WLAN_IP, linkInfo.linkInfo.wlan.connInfo.addr,
             sizeof(linkInfo.linkInfo.wlan.connInfo.addr));
         if (ret != SOFTBUS_OK) {
-            LLOGE("LnnGetRemote wlan ip error, ret: %d", ret);
+            LNN_LOGE(LNN_LANE, "LnnGetRemote wlan ip error, ret=%d", ret);
             return SOFTBUS_ERR;
         }
         if (strnlen(linkInfo.linkInfo.wlan.connInfo.addr, sizeof(linkInfo.linkInfo.wlan.connInfo.addr)) == 0 ||
             strncmp(linkInfo.linkInfo.wlan.connInfo.addr, "127.0.0.1", strlen("127.0.0.1")) == 0) {
-            LLOGE("Wlan ip not found.");
+            LNN_LOGE(LNN_LANE, "Wlan ip not found");
             return SOFTBUS_ERR;
         }
     } else {
         ret = LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_NODE_ADDR, linkInfo.linkInfo.wlan.connInfo.addr,
             sizeof(linkInfo.linkInfo.wlan.connInfo.addr));
         if (ret != SOFTBUS_OK) {
-            LLOGE("LnnGetRemote wlan addr error, ret: %d", ret);
+            LNN_LOGE(LNN_LANE, "LnnGetRemote wlan addr error, ret=%d", ret);
             return SOFTBUS_ERR;
         }
     }
     if (reqInfo->transType == LANE_T_MSG) {
         ret = LnnGetRemoteNumInfo(reqInfo->peerNetworkId, NUM_KEY_PROXY_PORT, &port);
-        LLOGI("LnnGetRemote proxy port");
+        LNN_LOGI(LNN_LANE, "LnnGetRemote proxy port");
     } else {
         ret = LnnGetRemoteNumInfo(reqInfo->peerNetworkId, NUM_KEY_SESSION_PORT, &port);
-        LLOGI("LnnGetRemote session port");
+        LNN_LOGI(LNN_LANE, "LnnGetRemote session port");
     }
     if (ret < 0) {
-        LLOGE("LnnGetRemote is failed.");
+        LNN_LOGE(LNN_LANE, "LnnGetRemote is failed.");
         return SOFTBUS_ERR;
     }
     int32_t channel = -1;
     bool is5GBand = false;
     bool isConnected = false;
     if (GetWlanLinkedAttribute(&channel, &is5GBand, &isConnected) != SOFTBUS_OK) {
-        LLOGE("get wlan linked info fail");
+        LNN_LOGE(LNN_LANE, "get wlan linked info fail");
     }
     if (!isConnected) {
-        LLOGE("wlan is disconnected");
+        LNN_LOGE(LNN_LANE, "wlan is disconnected");
     }
     FillWlanLinkInfo(&linkInfo, is5GBand, channel, (uint16_t)port, protocol);
     callback->OnLaneLinkSuccess(reqId, &linkInfo);
@@ -896,22 +897,22 @@ static int32_t LaneLinkOfCoc(uint32_t reqId, const LinkRequest *reqInfo, const L
     LaneLinkInfo linkInfo;
     (void)memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
     if (memcpy_s(linkInfo.linkInfo.ble.bleMac, BT_MAC_LEN, reqInfo->peerBleMac, BT_MAC_LEN) != EOK) {
-        LLOGE("memcpy peerBleMac error");
+        LNN_LOGE(LNN_LANE, "memcpy peerBleMac error");
         return SOFTBUS_MEM_ERR;
     }
     linkInfo.linkInfo.ble.psm = reqInfo->psm;
     if (strlen(linkInfo.linkInfo.ble.bleMac) == 0) {
-        LLOGE("get peerBleMac error");
+        LNN_LOGE(LNN_LANE, "get peerBleMac error");
         return SOFTBUS_ERR;
     }
     char peerUdid[UDID_BUF_LEN] = {0};
     if (LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
-        LLOGE("get udid error");
+        LNN_LOGE(LNN_LANE, "get udid error");
         return SOFTBUS_ERR;
     }
     if (SoftBusGenerateStrHash((uint8_t*)peerUdid, strlen(peerUdid),
         (uint8_t*)linkInfo.linkInfo.ble.deviceIdHash) != SOFTBUS_OK) {
-        LLOGE("generate deviceId hash err");
+        LNN_LOGE(LNN_LANE, "generate deviceId hash err");
         return SOFTBUS_ERR;
     }
     linkInfo.linkInfo.ble.protoType = BLE_COC;
@@ -925,7 +926,7 @@ static int32_t LaneLinkOfCocDirect(uint32_t reqId, const LinkRequest *reqInfo, c
     LaneLinkInfo linkInfo;
     (void)memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
     if (LaneLinkOfBleDirectCommon(reqInfo, &linkInfo) != SOFTBUS_OK) {
-        LLOGE("ble direct common failed");
+        LNN_LOGE(LNN_LANE, "ble direct common failed");
         return SOFTBUS_ERR;
     }
     linkInfo.type = LANE_COC_DIRECT;
@@ -952,17 +953,21 @@ static LaneLinkByType g_linkTable[LANE_LINK_TYPE_BUTT] = {
 int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *callback)
 {
     if (IsLinkRequestValid(reqInfo) != SOFTBUS_OK || !LinkTypeCheck(reqInfo->linkType)) {
-        LLOGE("the reqInfo or type is invalid");
+        LNN_LOGE(LNN_LANE, "the reqInfo or type is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     if (callback == NULL || callback->OnLaneLinkSuccess == NULL ||
         callback->OnLaneLinkFail == NULL || callback->OnLaneLinkException == NULL) {
-        LLOGE("the callback is invalid");
+        LNN_LOGE(LNN_LANE, "the callback is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
-    LLOGI("build link, linktype:%d, peerNetworkId:%s", reqInfo->linkType, AnonymizesNetworkID(reqInfo->peerNetworkId));
+    char *anonyNetworkId = NULL;
+    Anonymize(reqInfo->peerNetworkId, &anonyNetworkId);
+    LNN_LOGI(LNN_LANE, "build link, linktype=%d, peerNetworkId=%s",
+        reqInfo->linkType, anonyNetworkId);
+    AnonymizeFree(anonyNetworkId);
     if (g_linkTable[reqInfo->linkType](reqId, reqInfo, callback) != SOFTBUS_OK) {
-        LLOGE("lane link is failed");
+        LNN_LOGE(LNN_LANE, "lane link is failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -970,17 +975,17 @@ int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *
 
 void DestroyLink(const char *networkId, uint32_t reqId, LaneLinkType type, int32_t pid)
 {
-    LLOGI("type=%d", type);
+    LNN_LOGI(LNN_LANE, "type=%d", type);
     if (networkId == NULL) {
-        LLOGE("the networkId is nullptr");
+        LNN_LOGE(LNN_LANE, "the networkId is nullptr");
         return;
     }
     if (type == LANE_P2P || type == LANE_HML) {
-        LLOGI("type=LANE_WD: %d", type);
+        LNN_LOGI(LNN_LANE, "type=LANE_WD: %d", type);
         LaneDeleteP2pAddress(networkId, false);
         LnnDisconnectP2p(networkId, pid, reqId);
     } else {
-        LLOGI("ignore this link request,link:%d", type);
+        LNN_LOGI(LNN_LANE, "ignore this link request,linkType=%d", type);
     }
 }
 

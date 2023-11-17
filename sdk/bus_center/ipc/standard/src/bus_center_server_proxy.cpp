@@ -21,9 +21,9 @@
 #include "iremote_broker.h"
 #include "iremote_object.h"
 #include "iremote_proxy.h"
+#include "lnn_log.h"
 #include "softbus_errcode.h"
 #include "softbus_server_ipc_interface_code.h"
-#include "softbus_log.h"
 
 using namespace OHOS;
 
@@ -47,12 +47,12 @@ static sptr<IRemoteObject> GetSystemAbility()
     MessageOption option;
     sptr<IRemoteObject> samgr = IPCSkeleton::GetContextObject();
     if (samgr == nullptr) {
-        LLOGE("Get samgr failed!");
+        LNN_LOGE(LNN_EVENT, "Get samgr failed");
         return nullptr;
     }
     int32_t err = samgr->SendRequest(g_getSystemAbilityId, data, reply, option);
     if (err != 0) {
-        LLOGE("Get GetSystemAbility failed!");
+        LNN_LOGE(LNN_EVENT, "Get GetSystemAbility failed=%d", err);
         return nullptr;
     }
     return reply.ReadRemoteObject();
@@ -63,12 +63,12 @@ int32_t BusCenterServerProxyInit(void)
     std::lock_guard<std::mutex> lock(g_mutex);
     sptr<IRemoteObject> object = GetSystemAbility();
     if (object == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Get remote softbus object failed!\n");
+        LNN_LOGE(LNN_EVENT, "Get remote softbus object failed");
         return SOFTBUS_ERR;
     }
     g_serverProxy = new (std::nothrow) BusCenterServerProxy(object);
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Create bus center server proxy failed!\n");
+        LNN_LOGE(LNN_EVENT, "Create bus center server proxy failed");
         return SOFTBUS_SERVER_NOT_INIT;
     }
     return SOFTBUS_OK;
@@ -83,12 +83,12 @@ void BusCenterServerProxyDeInit(void)
 int32_t ServerIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int32_t *infoNum)
 {
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcGetAllOnlineNodeInfo g_serverProxy is nullptr!\n");
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
         return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->GetAllOnlineNodeInfo(pkgName, info, infoTypeLen, infoNum);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcGetAllOnlineNodeInfo get all online info failed!\n");
+        LNN_LOGE(LNN_EVENT, "GetAllOnlineNodeInfo get all online info failed");
         return ret;
     }
     return SOFTBUS_OK;
@@ -97,12 +97,12 @@ int32_t ServerIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t
 int32_t ServerIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen)
 {
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcGetLocalDeviceInfo g_serverProxy is nullptr!\n");
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
         return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->GetLocalDeviceInfo(pkgName, info, infoTypeLen);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcGetLocalDeviceInfo get local device info failed!\n");
+        LNN_LOGE(LNN_EVENT, "GetLocalDeviceInfo get local device info failed");
         return ret;
     }
     return SOFTBUS_OK;
@@ -111,12 +111,12 @@ int32_t ServerIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t in
 int32_t ServerIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int key, unsigned char *buf, uint32_t len)
 {
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcGetNodeKeyInfo g_serverProxy is nullptr!\n");
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
         return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->GetNodeKeyInfo(pkgName, networkId, key, buf, len);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcGetNodeKeyInfo get node key info failed!\n");
+        LNN_LOGE(LNN_EVENT, "GetNodeKeyInfo get node key info failed");
         return ret;
     }
     return SOFTBUS_OK;
@@ -125,12 +125,12 @@ int32_t ServerIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int 
 int32_t ServerIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag)
 {
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcSetNodeDataChangeFlag g_serverProxy is nullptr!\n");
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
         return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->SetNodeDataChangeFlag(pkgName, networkId, dataChangeFlag);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcSetNodeDataChangeFlag get node key info failed!\n");
+        LNN_LOGE(LNN_EVENT, "SetNodeDataChangeFlag get node key info failed");
         return ret;
     }
     return SOFTBUS_OK;
@@ -139,12 +139,12 @@ int32_t ServerIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkI
 int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen)
 {
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcJoinLNN g_serverProxy is nullptr!\n");
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
         return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->JoinLNN(pkgName, addr, addrTypeLen);
     if (ret != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcJoinLNN failed!\n");
+        LNN_LOGE(LNN_EVENT, "JoinLNN failed");
         return ret;
     }
     return SOFTBUS_OK;
@@ -153,12 +153,12 @@ int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeL
 int32_t ServerIpcJoinMetaNode(const char *pkgName, void *addr, CustomData *customData, unsigned int addrTypeLen)
 {
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcJoinMetaNode g_serverProxy is nullptr!\n");
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
         return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->JoinMetaNode(pkgName, addr, customData, addrTypeLen);
     if (ret != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcJoinMetaNode failed!\n");
+        LNN_LOGE(LNN_EVENT, "JoinMetaNode failed");
         return ret;
     }
     return SOFTBUS_OK;
@@ -167,12 +167,12 @@ int32_t ServerIpcJoinMetaNode(const char *pkgName, void *addr, CustomData *custo
 int32_t ServerIpcLeaveLNN(const char *pkgName, const char *networkId)
 {
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcLeaveLNN g_serverProxy is nullptr!\n");
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
         return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->LeaveLNN(pkgName, networkId);
     if (ret != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcLeaveLNN failed!\n");
+        LNN_LOGE(LNN_EVENT, "LeaveLNN failed");
         return ret;
     }
     return SOFTBUS_OK;
@@ -181,12 +181,12 @@ int32_t ServerIpcLeaveLNN(const char *pkgName, const char *networkId)
 int32_t ServerIpcLeaveMetaNode(const char *pkgName, const char *networkId)
 {
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcLeaveMetaNode g_serverProxy is nullptr!\n");
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
         return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->LeaveMetaNode(pkgName, networkId);
     if (ret != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcLeaveMetaNode failed!\n");
+        LNN_LOGE(LNN_EVENT, "LeaveMetaNode failed");
         return ret;
     }
     return SOFTBUS_OK;
@@ -195,12 +195,12 @@ int32_t ServerIpcLeaveMetaNode(const char *pkgName, const char *networkId)
 int32_t ServerIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy, int32_t period)
 {
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcStartTimeSync g_serverProxy is nullptr!");
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
         return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->StartTimeSync(pkgName, targetNetworkId, accuracy, period);
     if (ret != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcStartTimeSync failed!");
+        LNN_LOGE(LNN_EVENT, "StartTimeSync failed");
         return ret;
     }
     return SOFTBUS_OK;
@@ -209,12 +209,12 @@ int32_t ServerIpcStartTimeSync(const char *pkgName, const char *targetNetworkId,
 int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
 {
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcStopTimeSync g_serverProxy is nullptr!");
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
         return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->StopTimeSync(pkgName, targetNetworkId);
     if (ret != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcStopTimeSync failed!");
+        LNN_LOGE(LNN_EVENT, "StopTimeSync failed");
         return ret;
     }
     return SOFTBUS_OK;
@@ -223,12 +223,12 @@ int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
 int32_t ServerIpcPublishLNN(const char *pkgName, const PublishInfo *info)
 {
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcPublishLNN g_serverProxy is nullptr!");
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
         return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->PublishLNN(pkgName, info);
     if (ret != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcPublishLNN failed!");
+        LNN_LOGE(LNN_EVENT, "PublishLNN failed");
         return ret;
     }
     return SOFTBUS_OK;
@@ -237,12 +237,12 @@ int32_t ServerIpcPublishLNN(const char *pkgName, const PublishInfo *info)
 int32_t ServerIpcStopPublishLNN(const char *pkgName, int32_t publishId)
 {
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcStopPublishLNN g_serverProxy is nullptr!");
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
         return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->StopPublishLNN(pkgName, publishId);
     if (ret != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcStopPublishLNN failed!");
+        LNN_LOGE(LNN_EVENT, "StopPublishLNN failed");
         return ret;
     }
     return SOFTBUS_OK;
@@ -251,12 +251,12 @@ int32_t ServerIpcStopPublishLNN(const char *pkgName, int32_t publishId)
 int32_t ServerIpcRefreshLNN(const char *pkgName, const SubscribeInfo *info)
 {
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcRefreshLNN g_serverProxy is nullptr!");
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
         return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->RefreshLNN(pkgName, info);
     if (ret != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcRefreshLNN failed!");
+        LNN_LOGE(LNN_EVENT, "RefreshLNN failed");
     }
     return ret;
 }
@@ -264,12 +264,12 @@ int32_t ServerIpcRefreshLNN(const char *pkgName, const SubscribeInfo *info)
 int32_t ServerIpcStopRefreshLNN(const char *pkgName, int32_t refreshId)
 {
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcStopRefreshLNN g_serverProxy is nullptr!");
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
         return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->StopRefreshLNN(pkgName, refreshId);
     if (ret != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcStopRefreshLNN failed!");
+        LNN_LOGE(LNN_EVENT, "StopRefreshLNN failed");
     }
     return ret;
 }
@@ -278,12 +278,12 @@ int32_t ServerIpcActiveMetaNode(const char *pkgName, const MetaNodeConfigInfo *i
 {
     (void)pkgName;
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcActiveMetaNode g_serverProxy is nullptr!");
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
         return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->ActiveMetaNode(info, metaNodeId);
     if (ret != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcActiveMetaNode failed!");
+        LNN_LOGE(LNN_EVENT, "ActiveMetaNode failed");
     }
     return ret;
 }
@@ -292,12 +292,12 @@ int32_t ServerIpcDeactiveMetaNode(const char *pkgName, const char *metaNodeId)
 {
     (void)pkgName;
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcDeactiveMetaNode g_serverProxy is nullptr!");
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
         return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->DeactiveMetaNode(metaNodeId);
     if (ret != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcDeactiveMetaNode failed!");
+        LNN_LOGE(LNN_EVENT, "DeactiveMetaNode failed");
     }
     return ret;
 }
@@ -306,12 +306,12 @@ int32_t ServerIpcGetAllMetaNodeInfo(const char *pkgName, MetaNodeInfo *infos, in
 {
     (void)pkgName;
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcGetAllMetaNodeInfo g_serverProxy is nullptr!");
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
         return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->GetAllMetaNodeInfo(infos, infoNum);
     if (ret != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcGetAllMetaNodeInfo failed!");
+        LNN_LOGE(LNN_EVENT, "GetAllMetaNodeInfo failed");
     }
     return ret;
 }
@@ -320,12 +320,12 @@ int32_t ServerIpcShiftLNNGear(const char *pkgName, const char *callerId, const c
     const GearMode *mode)
 {
     if (g_serverProxy == nullptr) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcShiftLNNGear g_serverProxy is nullptr!");
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
         return SOFTBUS_ERR;
     }
     int ret = g_serverProxy->ShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
     if (ret != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ServerIpcShiftLNNGear failed!");
+        LNN_LOGE(LNN_EVENT, "ShiftLNNGear failed");
     }
     return ret;
 }

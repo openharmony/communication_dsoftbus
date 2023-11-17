@@ -18,6 +18,7 @@
 #include <securec.h>
 #include <string.h>
 
+#include "disc_log.h"
 #include "disc_interface.h"
 #include "discovery_service.h"
 #include "lnn_coap_discovery_impl.h"
@@ -25,7 +26,6 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_hisysevt_bus_center.h"
-#include "softbus_log.h"
 
 static void DeviceFound(const ConnectionAddr *addr);
 
@@ -58,21 +58,21 @@ static LnnDiscoveryImplCallback g_discoveryCallback = {
 
 static void ReportDeviceFoundResultEvt(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "report device found result evt enter");
+    DISC_LOGI(DISC_LNN, "report device found result evt enter");
     if (SoftBusRecordDiscoveryResult(DEVICE_FOUND, NULL) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "report device found result fail");
+        DISC_LOGE(DISC_LNN, "report device found result fail");
     }
 }
 
 static void DeviceFound(const ConnectionAddr *addr)
 {
     if (addr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "device addr is null\n");
+        DISC_LOGE(DISC_LNN, "device addr is null\n");
         return;
     }
     ReportDeviceFoundResultEvt();
     if (LnnNotifyDiscoveryDevice(addr, true) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "notify device found failed\n");
+        DISC_LOGE(DISC_LNN, "notify device found failed\n");
     }
 }
 
@@ -85,7 +85,7 @@ int32_t LnnInitDiscoveryManager(void)
             continue;
         }
         if (g_discoveryImpl[i].InitDiscoveryImpl(&g_discoveryCallback) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init discovery impl(%d) failed\n", i);
+            DISC_LOGE(DISC_LNN, "init discovery impl(%d) failed\n", i);
             return SOFTBUS_ERR;
         }
     }
@@ -98,11 +98,11 @@ int32_t LnnStartPublish(void)
 
     for (i = 0; i < LNN_DISC_IMPL_TYPE_MAX; ++i) {
         if (g_discoveryImpl[i].StartPublishImpl == NULL) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not support start publish(%d)\n", i);
+            DISC_LOGE(DISC_LNN, "not support start publish(%d)\n", i);
             continue;
         }
         if (g_discoveryImpl[i].StartPublishImpl() != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start publish impl(%d) failed\n", i);
+            DISC_LOGE(DISC_LNN, "start publish impl(%d) failed\n", i);
             return SOFTBUS_ERR;
         }
     }
@@ -115,20 +115,20 @@ void LnnStopPublish(void)
 
     for (i = 0; i < LNN_DISC_IMPL_TYPE_MAX; ++i) {
         if (g_discoveryImpl[i].StopPublishImpl == NULL) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not support stop publish(%d)\n", i);
+            DISC_LOGE(DISC_LNN, "not support stop publish(%d)\n", i);
             continue;
         }
         if (g_discoveryImpl[i].StopPublishImpl() != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "stop publish impl(%d) failed\n", i);
+            DISC_LOGE(DISC_LNN, "stop publish impl(%d) failed\n", i);
         }
     }
 }
 
 static void ReportStartDiscoveryResultEvt(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "report start discovery result evt enter");
+    DISC_LOGI(DISC_LNN, "report start discovery result evt enter");
     if (SoftBusRecordDiscoveryResult(START_DISCOVERY, NULL) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "report start discovery result fail");
+        DISC_LOGE(DISC_LNN, "report start discovery result fail");
     }
 }
 
@@ -138,11 +138,11 @@ int32_t LnnStartDiscovery(void)
 
     for (i = 0; i < LNN_DISC_IMPL_TYPE_MAX; ++i) {
         if (g_discoveryImpl[i].StartDiscoveryImpl == NULL) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not support start discovery(%d)\n", i);
+            DISC_LOGE(DISC_LNN, "not support start discovery(%d)\n", i);
             continue;
         }
         if (g_discoveryImpl[i].StartDiscoveryImpl() != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start discovery impl(%d) failed\n", i);
+            DISC_LOGE(DISC_LNN, "start discovery impl(%d) failed\n", i);
             return SOFTBUS_ERR;
         }
     }
@@ -156,11 +156,11 @@ void LnnStopDiscovery(void)
 
     for (i = 0; i < LNN_DISC_IMPL_TYPE_MAX; ++i) {
         if (g_discoveryImpl[i].StopDiscoveryImpl == NULL) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not support stop discovery(%d)\n", i);
+            DISC_LOGE(DISC_LNN, "not support stop discovery(%d)\n", i);
             continue;
         }
         if (g_discoveryImpl[i].StopDiscoveryImpl() != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "stop discovery impl(%d) failed\n", i);
+            DISC_LOGE(DISC_LNN, "stop discovery impl(%d) failed\n", i);
         }
     }
 }

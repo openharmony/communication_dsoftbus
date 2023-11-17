@@ -26,7 +26,6 @@
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_hisysevt_transreporter.h"
-#include "softbus_log.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_session.h"
 #include "softbus_qos.h"
@@ -36,6 +35,7 @@
 #include "trans_lane_manager.h"
 #include "trans_lane_pending_ctl.h"
 #include "trans_link_listener.h"
+#include "trans_log.h"
 #include "trans_session_manager.h"
 #include "trans_tcp_direct_manager.h"
 #include "trans_udp_channel_manager.h"
@@ -67,7 +67,7 @@ static int32_t GenerateTdcChannelId()
 {
     int32_t channelId;
     if (SoftBusMutexLock(&g_myIdLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
     channelId = g_allocTdcChannelId++;
@@ -81,7 +81,7 @@ static int32_t GenerateTdcChannelId()
 static int32_t GenerateProxyChannelId()
 {
     if (SoftBusMutexLock(&g_myIdLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
     for (uint32_t id = 0; id < MAX_PROXY_CHANNEL_ID_COUNT; id++) {
@@ -103,7 +103,7 @@ void ReleaseProxyChannelId(int32_t channelId)
         return;
     }
     if (SoftBusMutexLock(&g_myIdLock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail");
+        TRANS_LOGE(TRANS_CTRL, "lock mutex fail");
         return;
     }
     uint32_t id = (uint32_t)channelId - MAX_FD_ID;
@@ -122,38 +122,44 @@ int32_t TransChannelInit(void)
 {
     IServerChannelCallBack *cb = TransServerGetChannelCb();
     if (cb == NULL) {
+        TRANS_LOGE(TRANS_INIT, "cd is null.");
         return SOFTBUS_ERR;
     }
 
     if (TransLaneMgrInit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans lane manager init failed.");
+        TRANS_LOGE(TRANS_INIT, "trans lane manager init failed.");
         return SOFTBUS_ERR;
     }
 
     if (TransAuthInit(cb) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_INIT, "trans auth init failed.");
         return SOFTBUS_ERR;
     }
 
     if (TransProxyManagerInit(cb) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_INIT, "trans proxy manager init failed.");
         return SOFTBUS_ERR;
     }
 
     if (TransTcpDirectInit(cb) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_INIT, "trans tcp direct init failed.");
         return SOFTBUS_ERR;
     }
 
     if (TransUdpChannelInit(cb) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_INIT, "trans udp channel init failed.");
         return SOFTBUS_ERR;
     }
 
     if (TransReqLanePendingInit() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_INIT, "trans req lane pending init failed.");
         return SOFTBUS_ERR;
     }
 
     ReqLinkListener();
 
     if (SoftBusMutexInit(&g_myIdLock, NULL) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "init lock failed");
+        TRANS_LOGE(TRANS_INIT, "init lock failed");
         return SOFTBUS_ERR;
     }
 
@@ -174,13 +180,13 @@ void TransChannelDeinit(void)
 static int32_t CopyAppInfoFromSessionParam(AppInfo* appInfo, const SessionParam* param)
 {
     if (param == NULL || param->attr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "parm is null");
+        TRANS_LOGE(TRANS_CTRL, "parm is null");
         return SOFTBUS_ERR;
     }
     if (param->attr->fastTransData != NULL && param->attr->fastTransDataSize > 0 &&
         param->attr->fastTransDataSize <= MAX_FAST_DATA_LEN) {
         if (appInfo->businessType == BUSINESS_TYPE_FILE || appInfo->businessType == BUSINESS_TYPE_STREAM) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not support send fast data");
+            TRANS_LOGE(TRANS_CTRL, "not support send fast data");
             return SOFTBUS_ERR;
         }
         appInfo->fastTransData = (uint8_t*)SoftBusCalloc(param->attr->fastTransDataSize);
@@ -189,7 +195,7 @@ static int32_t CopyAppInfoFromSessionParam(AppInfo* appInfo, const SessionParam*
         }
         if (memcpy_s((char *)appInfo->fastTransData, param->attr->fastTransDataSize,
             (const char *)param->attr->fastTransData, param->attr->fastTransDataSize) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy_s err");
+            TRANS_LOGE(TRANS_CTRL, "memcpy_s err");
             return SOFTBUS_ERR;
         }
     }
@@ -214,7 +220,7 @@ static int32_t CopyAppInfoFromSessionParam(AppInfo* appInfo, const SessionParam*
     }
     if (LnnGetRemoteStrInfo(param->peerDeviceId, STRING_KEY_UUID,
         appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get remote node uuid err");
+        TRANS_LOGE(TRANS_CTRL, "get remote node uuid err");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -222,10 +228,10 @@ static int32_t CopyAppInfoFromSessionParam(AppInfo* appInfo, const SessionParam*
 
 static AppInfo *GetAppInfo(const SessionParam *param)
 {
-    char *anoyDevId = NULL;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "GetAppInfo, deviceId=%s",
-        ToSecureStrDeviceID(param->peerDeviceId, &anoyDevId));
-    SoftBusFree(anoyDevId);
+    char *tmpId = NULL;
+    Anonymize(param->peerDeviceId, &tmpId);
+    TRANS_LOGI(TRANS_CTRL, "GetAppInfo, deviceId=%s", tmpId);
+    AnonymizeFree(tmpId);
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     if (appInfo == NULL) {
         return NULL;
@@ -259,7 +265,7 @@ static AppInfo *GetAppInfo(const SessionParam *param)
     appInfo->myHandleId = -1;
     appInfo->peerHandleId = -1;
 
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "GetAppInfo ok");
+    TRANS_LOGD(TRANS_CTRL, "GetAppInfo ok");
     return appInfo;
 EXIT_ERR:
     if (appInfo != NULL) {
@@ -294,22 +300,22 @@ static int32_t TransOpenChannelProc(ChannelType type, AppInfo *appInfo, const Co
     int32_t *channelId)
 {
     if (type == CHANNEL_TYPE_BUTT) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "open invalid channel type.");
+        TRANS_LOGE(TRANS_CTRL, "open invalid channel type.");
         return SOFTBUS_ERR;
     }
     if (type == CHANNEL_TYPE_UDP) {
         if (TransOpenUdpChannel(appInfo, connOpt, channelId) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "open udp channel err");
+            TRANS_LOGE(TRANS_CTRL, "open udp channel err");
             return SOFTBUS_ERR;
         }
     } else if (type == CHANNEL_TYPE_PROXY) {
         if (TransProxyOpenProxyChannel(appInfo, connOpt, channelId) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open proxy channel err");
+            TRANS_LOGE(TRANS_CTRL, "open proxy channel err");
             return SOFTBUS_ERR;
         }
     } else {
         if (TransOpenDirectChannel(appInfo, connOpt, channelId) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "open direct channel err");
+            TRANS_LOGE(TRANS_CTRL, "open direct channel err");
             return SOFTBUS_ERR;
         }
     }
@@ -339,17 +345,17 @@ static int TransGetLocalConfig(int32_t channelType, int32_t businessType, uint32
 {
     ConfigType configType = (ConfigType)FindConfigType(channelType, businessType);
     if (configType == SOFTBUS_CONFIG_TYPE_MAX) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Invalid channelType[%d] businessType[%d]",
+        TRANS_LOGE(TRANS_CTRL, "Invalid channelType=%d businessType=%d",
             channelType, businessType);
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t maxLen;
     if (SoftbusGetConfig(configType, (unsigned char *)&maxLen, sizeof(maxLen)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get fail configType[%d]", configType);
+        TRANS_LOGE(TRANS_CTRL, "get fail configType=%d", configType);
         return SOFTBUS_GET_CONFIG_VAL_ERR;
     }
     *len = maxLen;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "get appinfo local config[%d]", *len);
+    TRANS_LOGI(TRANS_CTRL, "get appinfo local config len=%d", *len);
     return SOFTBUS_OK;
 }
 
@@ -377,12 +383,12 @@ static void TransOpenChannelSetModule(int32_t channelType, ConnectOption *connOp
     if (module != UNUSE_BUTT) {
         connOpt->socketOption.moduleId = module;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "set nip module = %d", connOpt->socketOption.moduleId);
+    TRANS_LOGI(TRANS_CTRL, "set nip moduleId=%d", connOpt->socketOption.moduleId);
 }
 
 int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server TransOpenChannel");
+    TRANS_LOGI(TRANS_CTRL, "server TransOpenChannel");
     int64_t timeStart = GetSoftbusRecordTimeMillis();
     transInfo->channelId = INVALID_CHANNEL_ID;
     transInfo->channelType = CHANNEL_TYPE_BUTT;
@@ -394,16 +400,18 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     int32_t errCode = INVALID_CHANNEL_ID;
 
     AppInfo *appInfo = GetAppInfo(param);
-    TRAN_CHECK_AND_RETURN_RET_LOG(!(appInfo == NULL), INVALID_CHANNEL_ID, "GetAppInfo is null.");
+    TRANS_CHECK_AND_RETURN_RET_LOGW(!(appInfo == NULL), INVALID_CHANNEL_ID, TRANS_CTRL, "GetAppInfo is null.");
     errCode = TransGetLaneInfo(param, &connInfo, &laneId);
+    char *tmpName = NULL;
     if (errCode != SOFTBUS_OK) {
         SoftbusReportTransErrorEvt(SOFTBUS_TRANS_GET_LANE_INFO_ERR);
         ret = errCode;
         goto EXIT_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-        "sessionName[%s], get laneId[%u], link type[%u].", param->sessionName, laneId, connInfo.type);
-
+    Anonymize(param->sessionName, &tmpName);
+    TRANS_LOGI(TRANS_CTRL,
+        "sessionName=%s, get laneId=%u, link type=%u.", tmpName, laneId, connInfo.type);
+    AnonymizeFree(tmpName);
     if (TransGetConnectOptByConnInfo(&connInfo, &connOpt) != SOFTBUS_OK) {
         SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName, connInfo.type,
             SOFTBUS_EVT_OPEN_SESSION_FAIL, GetSoftbusRecordTimeMillis() - timeStart);
@@ -411,7 +419,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     }
     FillAppInfo(appInfo, &connOpt, param, transInfo, &connInfo);
     TransOpenChannelSetModule(transInfo->channelType, &connOpt);
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "lane[%u] get channel type[%u].", laneId, transInfo->channelType);
+    TRANS_LOGI(TRANS_CTRL, "laneId=%u get channelType=%u.", laneId, transInfo->channelType);
     if (TransOpenChannelProc((ChannelType)transInfo->channelType, appInfo, &connOpt,
         &(transInfo->channelId)) != SOFTBUS_OK) {
         SoftbusReportTransErrorEvt(SOFTBUS_TRANS_CREATE_CHANNEL_ERR);
@@ -434,24 +442,25 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         SoftBusFree((void*)appInfo->fastTransData);
     }
     SoftBusFree(appInfo);
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server TransOpenChannel ok: channelId=%d, channelType=%d",
+    TRANS_LOGI(TRANS_CTRL, "server TransOpenChannel ok: channelId=%d, channelType=%d",
         transInfo->channelId, transInfo->channelType);
     return SOFTBUS_OK;
 EXIT_ERR:
     if (appInfo->fastTransData != NULL) {
         SoftBusFree((void*)appInfo->fastTransData);
     }
+    AnonymizeFree(tmpName);
     SoftBusFree(appInfo);
     if (laneId != 0) {
         LnnFreeLane(laneId);
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "server TransOpenChannel err");
+    TRANS_LOGE(TRANS_CTRL, "server TransOpenChannel err");
     return ret;
 }
 
 static AppInfo *GetAuthAppInfo(const char *mySessionName)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "GetAuthAppInfo");
+    TRANS_LOGD(TRANS_CTRL, "enter.");
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     if (appInfo == NULL) {
         return NULL;
@@ -462,32 +471,32 @@ static AppInfo *GetAuthAppInfo(const char *mySessionName)
     appInfo->businessType = BUSINESS_TYPE_BYTE;
     appInfo->channelType = CHANNEL_TYPE_AUTH;
     if (TransGetUidAndPid(mySessionName, &appInfo->myData.uid, &appInfo->myData.pid) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetAuthAppInfo GetUidAndPid failed");
+        TRANS_LOGE(TRANS_CTRL, "GetAuthAppInfo GetUidAndPid failed");
         goto EXIT_ERR;
     }
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, appInfo->myData.deviceId,
         sizeof(appInfo->myData.deviceId)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetAuthAppInfo get deviceId failed");
+        TRANS_LOGE(TRANS_CTRL, "GetAuthAppInfo get deviceId failed");
         goto EXIT_ERR;
     }
     if (strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), mySessionName) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetAuthAppInfo strcpy_s mySessionName failed");
+        TRANS_LOGE(TRANS_CTRL, "GetAuthAppInfo strcpy_s mySessionName failed");
         goto EXIT_ERR;
     }
     if (strcpy_s(appInfo->peerData.sessionName, sizeof(appInfo->peerData.sessionName), mySessionName) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetAuthAppInfo strcpy_s peerSessionName failed");
+        TRANS_LOGE(TRANS_CTRL, "GetAuthAppInfo strcpy_s peerSessionName failed");
         goto EXIT_ERR;
     }
     if (TransGetPkgNameBySessionName(mySessionName, appInfo->myData.pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetAuthAppInfo get PkgName failed");
+        TRANS_LOGE(TRANS_CTRL, "GetAuthAppInfo get PkgName failed");
         goto EXIT_ERR;
     }
     if (TransGetLocalConfig(appInfo->channelType, appInfo->businessType, &appInfo->myData.dataConfig) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetAuthAppInfo get local data config failed");
+        TRANS_LOGE(TRANS_CTRL, "GetAuthAppInfo get local data config failed");
         goto EXIT_ERR;
     }
 
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "GetAuthAppInfo ok");
+    TRANS_LOGD(TRANS_CTRL, "ok");
     return appInfo;
 EXIT_ERR:
     if (appInfo != NULL) {
@@ -511,15 +520,15 @@ int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connO
     } else if (connOpt->type == CONNECT_BR || connOpt->type == CONNECT_BLE) {
         AppInfo *appInfo = GetAuthAppInfo(sessionName);
         if (appInfo == NULL) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "GetAuthAppInfo failed");
+            TRANS_LOGE(TRANS_CTRL, "GetAuthAppInfo failed");
             return INVALID_CHANNEL_ID;
         }
         if (strcpy_s(appInfo->reqId, REQ_ID_SIZE_MAX, reqId) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransOpenAuthChannel strcpy_s reqId failed");
+            TRANS_LOGE(TRANS_CTRL, "strcpy_s reqId failed");
             return INVALID_CHANNEL_ID;
         }
         if (TransProxyOpenProxyChannel(appInfo, connOpt, &channelId) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransOpenAuthChannel proxy channel err");
+            TRANS_LOGE(TRANS_CTRL, "proxy channel err");
             SoftBusFree(appInfo);
             return INVALID_CHANNEL_ID;
         }
@@ -556,16 +565,16 @@ int32_t TransStreamStats(int32_t channelId, int32_t channelType, const StreamSen
 {
     (void)channelType;
     if (data == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "streamStats data is null");
+        TRANS_LOGE(TRANS_STREAM, "streamStats data is null");
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t laneId;
     int32_t ret = TransGetLaneIdByChannelId(channelId, &laneId);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get laneId fail, streamStatsInfo cannot be processed");
+        TRANS_LOGE(TRANS_STREAM, "get laneId fail, streamStatsInfo cannot be processed");
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "transStreamStats channelId:%d, laneId:0x%x", channelId, laneId);
+    TRANS_LOGI(TRANS_STREAM, "transStreamStats channelId=%d, laneId=0x%x", channelId, laneId);
     LaneIdStatsInfo info;
     (void)memset_s(&info, sizeof(info), 0, sizeof(info));
     info.laneId = laneId;
@@ -583,24 +592,24 @@ int32_t TransRequestQos(int32_t channelId, int32_t chanType, int32_t appType, in
     uint32_t laneId;
     int32_t ret = TransGetLaneIdByChannelId(channelId, &laneId);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get laneId fail, transRequestQos cannot be processed");
+        TRANS_LOGE(TRANS_QOS, "get laneId fail, transRequestQos cannot be processed");
         return SOFTBUS_ERR;
     }
     int32_t result = 0;
     if (quality == QOS_IMPROVE) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans requestQos");
+        TRANS_LOGI(TRANS_QOS, "trans requestQos");
         ret = LnnRequestQosOptimization(&laneId, 1, &result, 1);
     } else if (quality == QOS_RECOVER) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans cancel Qos");
+        TRANS_LOGI(TRANS_QOS, "trans cancel Qos");
         LnnCancelQosOptimization(&laneId, 1);
         ret = SOFTBUS_OK;
     } else {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "requestQos quality[%d] invalid", quality);
+        TRANS_LOGE(TRANS_QOS, "requestQos quality=%d invalid", quality);
         ret = SOFTBUS_ERR;
     }
 
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "request Qos fail,type:%d, err:%d", quality, ret);
+        TRANS_LOGE(TRANS_QOS, "request Qos fail,quality=%d, ret=%d", quality, ret);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -610,20 +619,20 @@ int32_t TransRippleStats(int32_t channelId, int32_t channelType, const TrafficSt
 {
     (void)channelType;
     if (data == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "rippleStats data is null");
+        TRANS_LOGE(TRANS_CTRL, "rippleStats data is null");
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t laneId;
     int32_t ret = TransGetLaneIdByChannelId(channelId, &laneId);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get laneId fail, streamStatsInfo cannot be processed");
+        TRANS_LOGE(TRANS_CTRL, "get laneId fail, streamStatsInfo cannot be processed");
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "transRippleStats channelId:%d, laneId:0x%x", channelId, laneId);
+    TRANS_LOGI(TRANS_CTRL, "transRippleStats channelId=%d, laneId=0x%x", channelId, laneId);
     LnnRippleData rptdata;
     (void)memset_s(&rptdata, sizeof(rptdata), 0, sizeof(rptdata));
     if (memcpy_s(&rptdata.stats, sizeof(rptdata.stats), data->stats, sizeof(data->stats)) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy fail");
+        TRANS_LOGE(TRANS_CTRL, "memcpy fail");
         return SOFTBUS_ERR;
     }
     LnnReportRippleData(laneId, &rptdata);
@@ -643,11 +652,11 @@ int32_t TransNotifyAuthSuccess(int32_t channelId, int32_t channelType)
             break;
         default:
             ret = SOFTBUS_ERR;
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "channel=%d, type=%d invalid.", channelId, channelType);
+            TRANS_LOGE(TRANS_CTRL, "channelId=%d, channelType=%d invalid.", channelId, channelType);
     }
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
-            "channel=%d, type=%d,notfiy auth success error=%d.", channelId, channelType, ret);
+        TRANS_LOGE(TRANS_CTRL,
+            "channelId=%d, channelType=%d,notfiy auth success ret=%d.", channelId, channelType, ret);
         return ret;
     }
     return TransNotifyAuthDataSuccess(channelId, &connOpt);
@@ -655,7 +664,7 @@ int32_t TransNotifyAuthSuccess(int32_t channelId, int32_t channelType)
 
 int32_t TransCloseChannel(int32_t channelId, int32_t channelType)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "close channel: id=%d, type=%d", channelId, channelType);
+    TRANS_LOGI(TRANS_CTRL, "close channel: channelId=%d, channelType=%d", channelId, channelType);
     int32_t ret = SOFTBUS_ERR;
     switch (channelType) {
         case CHANNEL_TYPE_PROXY:
@@ -683,7 +692,7 @@ int32_t TransCloseChannel(int32_t channelId, int32_t channelType)
 int32_t TransSendMsg(int32_t channelId, int32_t channelType, const void *data, uint32_t len,
     int32_t msgType)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "send msg: id=%d, type=%d", channelId, channelType);
+    TRANS_LOGI(TRANS_MSG, "send msg: channelId=%d, channelType=%d", channelId, channelType);
     int32_t ret = SOFTBUS_OK;
     switch (channelType) {
         case CHANNEL_TYPE_AUTH:
@@ -693,7 +702,7 @@ int32_t TransSendMsg(int32_t channelId, int32_t channelType, const void *data, u
             ret = TransProxyPostSessionData(channelId, (unsigned char*)data, len, (SessionPktType)msgType);
             break;
         default:
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "send msg: id=%d invalid type=%d", channelId, channelType);
+            TRANS_LOGE(TRANS_MSG, "send msg: channelId=%d invalid channelType=%d", channelId, channelType);
             ret = SOFTBUS_TRANS_CHANNEL_TYPE_INVALID;
             break;
     }
@@ -748,11 +757,11 @@ int32_t TransGetAppInfoByChanId(int32_t channelId, int32_t channelType, AppInfo*
 int32_t TransGetConnByChanId(int32_t channelId, int32_t channelType, int32_t* connId)
 {
     if (channelType != CHANNEL_TYPE_PROXY) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "channelType:%d error", channelType);
+        TRANS_LOGE(TRANS_CTRL, "channelType=%d error", channelType);
         return SOFTBUS_ERR;
     }
     if (TransProxyGetConnIdByChanId(channelId, connId) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get proxy connId, channelId: %d", channelId);
+        TRANS_LOGE(TRANS_MSG, "get proxy connId, channelId=%d", channelId);
         return SOFTBUS_TRANS_PROXY_SEND_CHANNELID_INVALID;
     }
     return SOFTBUS_OK;

@@ -16,7 +16,7 @@
 #include "lnn_device_info_recovery.h"
 
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 int32_t LnnLoadLocalDeviceInfo(void)
 {
@@ -74,4 +74,12 @@ void LnnDeleteDeviceInfo(const char *udid)
 void ClearDeviceInfo(void)
 {
     return;
+}
+
+int32_t LnnGetUdidByBrMac(const char *brMac, char *udid, uint32_t udidLen)
+{
+    (void)brMac;
+    (void)udid;
+    (void)udidLen;
+    return SOFTBUS_NOT_IMPLEMENT;
 }

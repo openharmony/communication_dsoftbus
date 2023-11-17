@@ -17,9 +17,9 @@
 #include <unistd.h>
 
 #include "disc_ble_dispatcher.h"
+#include "disc_log.h"
 #include "disc_interface.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 
 using namespace testing::ext;
 
@@ -736,7 +736,7 @@ HWTEST_F(DiscBleDispatcherTest, testUpdateLocalDeviceInfo001, TestSize.Level1)
 */
 HWTEST_F(DiscBleDispatcherTest, BleDispatchPublishOption001, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "BleDispatchPublishOption001");
+    DISC_LOGI(DISC_TEST, "BleDispatchPublishOption001");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
     int32_t ret = interface->Publish(&g_pOption0);
     EXPECT_EQ(SOFTBUS_ERR, ret);
@@ -750,7 +750,7 @@ HWTEST_F(DiscBleDispatcherTest, BleDispatchPublishOption001, TestSize.Level1)
 */
 HWTEST_F(DiscBleDispatcherTest, BleDispatchSubscribeOption001, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "BleDispatchSubscribeOption001");
+    DISC_LOGI(DISC_TEST, "BleDispatchSubscribeOption001");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
     int32_t ret = interface->StartAdvertise(&g_sOption0);
     EXPECT_EQ(SOFTBUS_ERR, ret);
@@ -764,7 +764,7 @@ HWTEST_F(DiscBleDispatcherTest, BleDispatchSubscribeOption001, TestSize.Level1)
 */
 HWTEST_F(DiscBleDispatcherTest, DiscBleInit001, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscBleInit001");
+    DISC_LOGI(DISC_TEST, "DiscBleInit001");
     DiscoveryFuncInterface *interface = DiscBleInit(nullptr);
     EXPECT_EQ(interface, nullptr);
 }
@@ -777,7 +777,7 @@ HWTEST_F(DiscBleDispatcherTest, DiscBleInit001, TestSize.Level1)
 */
 HWTEST_F(DiscBleDispatcherTest, DiscBleInit002, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscBleInit002");
+    DISC_LOGI(DISC_TEST, "DiscBleInit002");
     DiscInnerCallback g_discMgrMediumCb;
     g_discMgrMediumCb.OnDeviceFound = nullptr;
     DiscoveryFuncInterface *interface = DiscBleInit(&g_discMgrMediumCb);
