@@ -16,7 +16,7 @@
 #ifndef DISC_EVENT_FORM_H
 #define DISC_EVENT_FORM_H
 
-#include <stdlib.h>
+#include <stdint.h>
 
 typedef enum {
     SCENE_BROADCAST = 1,
@@ -43,6 +43,7 @@ typedef struct {
     int32_t costTime;        // FIRST_DISCOVERY_TIME
     int32_t peerNetworkId;   // PEER_NETID
     int32_t peerDeviceType;  // PEER_DEV_TYPE
+    int32_t result;          // STAGE_RES
     int32_t errcode;         // ERROR_CODE
     const char *callerPkg;   // HOST_PKG
     const char *scanCycle;   // SCAN_CYCLE
