@@ -94,5 +94,8 @@ void ReqLinkListener(void)
         .onLocalRoleChange = OnWifiDirectRoleChange,
         .onDeviceOnLine = OnWifiDirectDeviceOnLine,
     };
-    GetWifiDirectManager()->registerStatusListener(&listener);
+    struct WifiDirectManager *mgr = GetWifiDirectManager();
+    if (mgr != NULL && mgr->registerStatusListener != NULL) {
+        mgr->registerStatusListener(&listener);
+    }
 }
