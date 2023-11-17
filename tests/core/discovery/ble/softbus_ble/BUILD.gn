@@ -21,7 +21,7 @@ module_output_path = "dsoftbus/discovery"
 
 ohos_unittest("DiscSoftBusBleTest") {
   module_out_path = module_output_path
-  sources = [ "disc_ble_softbus_test.cpp" ]
+  sources = [ "disc_ble_dsoftbus_test.cpp" ]
 
   include_dirs = [
     "$dsoftbus_root_path/core/common/include",
