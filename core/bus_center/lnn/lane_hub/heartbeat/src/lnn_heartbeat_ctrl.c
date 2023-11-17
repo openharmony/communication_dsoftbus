@@ -719,14 +719,15 @@ int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *t
     return SOFTBUS_OK;
 }
 
-int32_t HmosShiftLNNGear(const char *callerId, const GearMode *mode, LnnHeartbeatStrategyType strategyType)
+int32_t LnnShiftLNNGearWithoutPkgName(const char *callerId, const GearMode *mode,
+    LnnHeartbeatStrategyType strategyType)
 {
     if (mode == NULL || callerId == NULL) {
         LNN_LOGE(LNN_HEART_BEAT, "shift lnn gear get invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     ReportBusinessDiscoveryResultEvt(callerId, 1);
-    LNN_LOGD(LNN_HEART_BEAT, "HmosShiftLNNGear >> [callerId=%s cycle=%d, "
+    LNN_LOGD(LNN_HEART_BEAT, "shift lnn gear mode >> [callerId=%s cycle=%d, "
         "duration=%d, wakeupFlag=%d]", callerId, mode->cycle, mode->duration, mode->wakeupFlag);
     if (LnnSetGearModeBySpecificType(callerId, mode, HEARTBEAT_TYPE_BLE_V0) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "ctrl reset medium mode fail");
