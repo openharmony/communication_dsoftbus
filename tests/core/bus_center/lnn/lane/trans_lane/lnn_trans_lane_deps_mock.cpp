@@ -42,6 +42,12 @@ int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
     return GetTransLaneIf()->SelectLane(networkId, request, recommendList, listNum);
 }
 
+int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *request,
+    LanePreferredLinkList *recommendList)
+{
+        return GetTransLaneIf()->SelectExpectLanesByQos(networkId, request, recommendList);
+}
+
 int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *cb)
 {
     return GetTransLaneIf()->BuildLink(reqInfo, reqId, cb);
@@ -65,6 +71,38 @@ void UnbindLaneIdFromProfile(uint32_t laneId, uint32_t profileId)
 int32_t BindLaneIdToProfile(uint32_t laneId, LaneProfile *profile)
 {
     return GetTransLaneIf()->BindLaneIdToProfile(laneId, profile);
+}
+int32_t AddLaneResourceItem(const LaneResource *resourceItem)
+{
+    return GetTransLaneIf()->AddLaneResourceItem(resourceItem);
+}
+int32_t DelLaneResourceItem(const LaneResource *resourceItem)
+{
+    return GetTransLaneIf()->DelLaneResourceItem(resourceItem);
+}
+int32_t AddLinkInfoItem(const LaneLinkInfo *linkInfoItem)
+{
+    return GetTransLaneIf()->AddLinkInfoItem(linkInfoItem);
+}
+int32_t DelLinkInfoItem(uint32_t laneId)
+{
+    return GetTransLaneIf()->DelLinkInfoItem(laneId);
+}
+int32_t FindLaneLinkInfoByLaneId(uint32_t laneId, LaneLinkInfo *linkInfoitem)
+{
+    return GetTransLaneIf()->FindLaneLinkInfoByLaneId(laneId, linkInfoitem);
+}
+int32_t ConvertToLaneResource(const LaneLinkInfo *linkInfo, LaneResource *laneResourceInfo)
+{
+    return GetTransLaneIf()->ConvertToLaneResource(linkInfo, laneResourceInfo);
+}
+int32_t DelLaneResourceItemWithDelayDestroy(LaneResource *resourceItem, uint32_t laneId, bool *isDelayDestroy)
+{
+    return GetTransLaneIf()->DelLaneResourceItemWithDelayDestroy(resourceItem, laneId, isDelayDestroy);
+}
+void FreeLaneId(uint32_t laneId)
+{
+    return GetTransLaneIf()->FreeLaneId(laneId);
 }
 }
 } // namespace OHOS
