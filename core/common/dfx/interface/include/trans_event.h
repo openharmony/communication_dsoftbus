@@ -22,10 +22,10 @@
 extern "C" {
 #endif
 
-#define TRANS_EVENT(scene, stage, extra) TransEventInner(scene, stage, __FUNCTION__, extra)
+#define TRANS_EVENT(scene, stage, extra) TransEventInner(scene, stage, __FUNCTION__, __LINE__, extra)
 
 /* For inner use only */
-void TransEventInner(int32_t scene, int32_t stage, const char *func, TransEventExtra extra);
+void TransEventInner(int32_t scene, int32_t stage, const char *func, int32_t line, TransEventExtra extra);
 
 #ifdef __cplusplus
 }

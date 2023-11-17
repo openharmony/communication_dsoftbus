@@ -17,15 +17,14 @@
 
 #include "softbus_event.h"
 
-#define DISC_EVENT_NAME "DISC_EVENT"
-
-void DiscEventInner(int32_t scene, int32_t stage, const char *func, const DiscEventExtra extra)
+void DiscEventInner(int32_t scene, int32_t stage, const char *func, int32_t line, DiscEventExtra extra)
 {
     SoftbusEventForm form = {
         .eventName = DISC_EVENT_NAME,
         .scene = scene,
         .stage = stage,
         .func = func,
+        .line = line,
         .discExtra = extra,
     };
     SoftbusEventInner(EVENT_MODULE_DISC, form);

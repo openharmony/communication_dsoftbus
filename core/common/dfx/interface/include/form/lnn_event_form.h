@@ -16,7 +16,7 @@
 #ifndef LNN_EVENT_FORM_H
 #define LNN_EVENT_FORM_H
 
-#include <stdlib.h>
+#include <stdint.h>
 
 typedef enum {
     SCENE_JION_LNN = 1,
@@ -46,6 +46,7 @@ typedef struct {
     int32_t peerDeviceAbility; // PEER_DEV_ABILITY
     int32_t peerDeviceInfo;    // PEER_DEV_INFO
     int32_t onlineNum;         // ONLINE_NUM
+    int32_t result;            // STAGE_RES
     int32_t errcode;           // ERROR_CODE
     const char *callerPkg;     // HOST_PKG
     const char *calleePkg;     // TO_CALL_PKG

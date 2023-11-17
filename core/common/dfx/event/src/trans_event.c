@@ -17,15 +17,14 @@
 
 #include "softbus_event.h"
 
-#define TRANS_EVENT_NAME "TRANS_EVENT"
-
-void TransEventInner(int32_t scene, int32_t stage, const char *func, const TransEventExtra extra)
+void TransEventInner(int32_t scene, int32_t stage, const char *func, int32_t line, TransEventExtra extra)
 {
     SoftbusEventForm form = {
         .eventName = TRANS_EVENT_NAME,
         .scene = scene,
         .stage = stage,
         .func = func,
+        .line = line,
         .transExtra = extra,
     };
     SoftbusEventInner(EVENT_MODULE_TRANS, form);

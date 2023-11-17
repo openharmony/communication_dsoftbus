@@ -22,10 +22,10 @@
 extern "C" {
 #endif
 
-#define DISC_EVENT(scene, stage, extra) DiscEventInner(scene, stage, __FUNCTION__, extra)
+#define DISC_EVENT(scene, stage, extra) DiscEventInner(scene, stage, __FUNCTION__, __LINE__, extra)
 
 /* For inner use only */
-void DiscEventInner(int32_t scene, int32_t stage, const char *func, DiscEventExtra extra);
+void DiscEventInner(int32_t scene, int32_t stage, const char *func, int32_t line, DiscEventExtra extra);
 
 #ifdef __cplusplus
 }
