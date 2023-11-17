@@ -716,8 +716,8 @@ static int32_t BuildBleConfigAdvData(SoftBusBleAdvData *advData, const Broadcast
     advData->scanRspData[POS_COMPANY_ID] = COMPANY_ID & BYTE_MASK;
     advData->scanRspData[POS_COMPANY_ID + 1] = (COMPANY_ID >> BYTE_SHIFT_BIT) & BYTE_MASK;
     if (advData->scanRspLength > RSP_HEAD_LEN) {
-        if (memcpy_s(&advData->scanRspData[RSP_HEAD_LEN], advData->scanRspLength,
-            broadcastData->data.rspData, advData->scanRspLength) != EOK) {
+        if (memcpy_s(&advData->scanRspData[RSP_HEAD_LEN], RESP_DATA_MAX_LEN,
+            broadcastData->data.rspData, advData->scanRspLength - RSP_HEAD_LEN) != EOK) {
             DISC_LOGE(DISC_BLE, "memcpy err");
             return SOFTBUS_MEM_ERR;
         }
