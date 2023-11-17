@@ -60,8 +60,8 @@ static int32_t GenerateUdpChannelId(void)
         id = id % MAX_UDP_CHANNEL_ID_COUNT;
         if (((g_channelIdFlagBitsMap >> id) & ID_USED) == ID_NOT_USED) {
             g_channelIdFlagBitsMap |= (ID_USED << id);
-            SoftBusMutexUnlock(&g_udpNegLock);
             g_idMark = id;
+            SoftBusMutexUnlock(&g_udpNegLock);
             return (int32_t)id;
         }
     }
