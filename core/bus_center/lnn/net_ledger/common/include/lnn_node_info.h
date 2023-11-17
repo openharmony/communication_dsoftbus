@@ -107,7 +107,7 @@ typedef struct {
     DeviceBasicInfo deviceInfo;
     ConnectInfo connectInfo;
     int64_t authSeqNum;
-    int32_t authChannelId[CONNECTION_ADDR_MAX];
+    int32_t authChannelId[CONNECTION_ADDR_MAX][AUTH_SIDE_MAX];
     BssTransInfo bssTransInfo;
     bool isBleP2p; // true: this device support connect p2p via ble connection
     P2pInfo p2pInfo;
@@ -134,6 +134,10 @@ typedef struct {
     int32_t groupType;
     bool initPreventFlag;
     int64_t networkIdTimestamp;
+    RpaInfo rpaInfo;
+    BroadcastCipherInfo cipherInfo;
+    int32_t bleMacRefreshSwitch;
+    int32_t bleConnCloseDelayTime;
 } NodeInfo;
 
 const char *LnnGetDeviceUdid(const NodeInfo *info);
@@ -146,6 +150,8 @@ bool LnnIsNodeOnline(const NodeInfo *info);
 void LnnSetNodeConnStatus(NodeInfo *info, ConnectStatus status);
 const char *LnnGetBtMac(const NodeInfo *info);
 void LnnSetBtMac(NodeInfo *info, const char *mac);
+const char *LnnGetBleMac(const NodeInfo *info);
+void LnnSetBleMac(NodeInfo *info, const char *mac);
 const char *LnnGetWiFiIp(const NodeInfo *info);
 void LnnSetWiFiIp(NodeInfo *info, const char *ip);
 const char *LnnGetNetIfName(const NodeInfo *info);

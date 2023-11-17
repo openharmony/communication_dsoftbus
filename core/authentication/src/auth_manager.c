@@ -36,7 +36,6 @@
 
 #define MAX_AUTH_VALID_PERIOD              (30 * 60 * 1000L)            /* 30 mins */
 #define SCHEDULE_UPDATE_SESSION_KEY_PERIOD ((5 * 60 + 30) * 60 * 1000L) /* 5 hour 30 mins */
-#define BLE_CONNECTION_CLOSE_DELAY         (10 * 1000L)
 #define FLAG_REPLY 1
 #define FLAG_ACTIVE 0
 #define RETRY_REGDATA_TIMES    3
@@ -927,8 +926,8 @@ void AuthManagerSetAuthFinished(int64_t authSeq, const AuthSessionInfo *info)
         if (info->connInfo.info.bleInfo.protocol == BLE_GATT &&
             IsFeatureSupport(localFeature, BIT_BLE_ONLINE_REUSE_CAPABILITY) &&
             IsFeatureSupport(info->nodeInfo.feature, BIT_BLE_ONLINE_REUSE_CAPABILITY)) {
-            AUTH_LOGI(AUTH_FSM, "support ble reuse, will disconnect after 10s");
-            BleDisconnectDelay(info->connId, BLE_CONNECTION_CLOSE_DELAY);
+            AUTH_LOGI(AUTH_FSM, "support ble reuse, will disconnect after %ds", info->nodeInfo.bleConnCloseDelayTime);
+            BleDisconnectDelay(info->connId, info->nodeInfo.bleConnCloseDelayTime);
         } else {
             AUTH_LOGI(AUTH_FSM, "ble disconn now");
             DisconnectAuthDevice((uint64_t *)&info->connId);

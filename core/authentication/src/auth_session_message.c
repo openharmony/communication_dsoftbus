@@ -40,6 +40,8 @@
 #include "softbus_adapter_socket.h"
 #include "softbus_def.h"
 #include "softbus_common.h"
+#include "softbus_config_type.h"
+#include "softbus_feature_config.h"
 #include "softbus_json_utils.h"
 #include "lnn_compress.h"
 #include "softbus_adapter_json.h"
@@ -89,6 +91,7 @@
 #define NODE_ADDR "NODE_ADDR"
 #define VERSION_TYPE "VERSION_TYPE"
 #define BT_MAC "BT_MAC"
+#define BLE_MAC "BLE_MAC"
 #define CONN_CAP "CONN_CAP"
 #define AUTH_CAP "AUTH_CAP"
 #define SW_VERSION "SW_VERSION"
@@ -167,6 +170,12 @@
 #define ENCRYPTED_FAST_AUTH_MAX_LEN 512
 #define UDID_SHORT_HASH_HEX_STR 16
 #define UDID_SHORT_HASH_LEN_TEMP 8
+
+/* ble conn close delay time */
+#define BLE_CONN_CLOSE_DELAY_TIME "BLE_CONN_CLOSE_DELAY_TIME"
+#define BLE_MAC_REFRESH_SWITCH "BLE_MAC_REFRESH_SWITCH"
+#define BLE_CONNECTION_CLOSE_DELAY (10 * 1000L)
+#define BLE_MAC_AUTO_REFRESH_SWITCH 1
 
 static void OptString(const JsonObj *json, const char * const key,
     char *target, uint32_t targetLen, const char *defaultValue)
@@ -772,6 +781,7 @@ static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion ve
         !JSON_AddInt64ToObject(json, WIFI_VERSION, info->wifiVersion) ||
         !JSON_AddInt64ToObject(json, BLE_VERSION, info->bleVersion) ||
         !JSON_AddStringToObject(json, BT_MAC, btMacUpper) ||
+        !JSON_AddStringToObject(json, BLE_MAC, info->connectInfo.bleMacAddr) ||
         !JSON_AddInt32ToObject(json, REMAIN_POWER, info->batteryInfo.batteryLevel) ||
         !JSON_AddBoolToObject(json, IS_CHARGING, info->batteryInfo.isCharging) ||
         !JSON_AddBoolToObject(json, IS_SCREENON, info->isScreenOn) ||
@@ -815,6 +825,7 @@ static void UnpackCommon(const JsonObj *json, NodeInfo *info, SoftBusVersion ver
     OptInt64(json, WIFI_VERSION, &info->wifiVersion, 0);
     OptInt64(json, BLE_VERSION, &info->bleVersion, 0);
     OptString(json, BT_MAC, info->connectInfo.macAddr, MAC_LEN, "");
+    OptString(json, BLE_MAC, info->connectInfo.bleMacAddr, MAC_LEN, "");
     char deviceType[DEVICE_TYPE_BUF_LEN] = {0};
     (void)JSON_GetStringFromOject(json, DEVICE_NAME, info->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN);
     if (JSON_GetStringFromOject(json, DEVICE_TYPE, deviceType, DEVICE_TYPE_BUF_LEN)) {
@@ -917,6 +928,20 @@ static int32_t PackBt(JsonObj *json, const NodeInfo *info, SoftBusVersion versio
         return SOFTBUS_ERR;
     }
     AddDiscoveryType(json, remoteUuid);
+    int32_t delayTime = BLE_CONNECTION_CLOSE_DELAY;
+    if (SoftbusGetConfig(SOFTBUS_INT_CONN_BLE_CLOSE_DELAY_TIME,
+        (unsigned char *)(&delayTime), sizeof(delayTime)) != SOFTBUS_OK) {
+        AUTH_LOGI(AUTH_FSM, "get ble conn close delay time from config file fail");
+    }
+    int32_t bleMacRefreshSwitch = BLE_MAC_AUTO_REFRESH_SWITCH;
+    if (SoftbusGetConfig(SOFTBUS_INT_BLE_MAC_AUTO_REFRESH_SWITCH,
+        (unsigned char *)(&bleMacRefreshSwitch), sizeof(bleMacRefreshSwitch)) != SOFTBUS_OK) {
+        AUTH_LOGI(AUTH_FSM, "get ble mac refresh switch from config file fail");
+    }
+    if (!JSON_AddInt32ToObject(json, BLE_CONN_CLOSE_DELAY_TIME, delayTime) ||
+        !JSON_AddInt32ToObject(json, BLE_MAC_REFRESH_SWITCH, bleMacRefreshSwitch)) {
+        AUTH_LOGI(AUTH_FSM, "add ble conn close delay time or refresh switch fail");
+    }
     if (PackCommon(json, info, version, isMetaAuth) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "PackCommon fail");
         return SOFTBUS_ERR;
@@ -943,6 +968,8 @@ static int32_t UnpackBt(const JsonObj *json, NodeInfo *info, SoftBusVersion vers
     (void)SetDiscType(&info->discoveryType, discTypeStr);
     OptInt64(json, BLE_TIMESTAMP, &info->bleStartTimestamp, DEFAULT_BLE_TIMESTAMP);
     OptInt(json, STATE_VERSION, &info->stateVersion, 0);
+    OptInt(json, BLE_CONN_CLOSE_DELAY_TIME, &info->bleConnCloseDelayTime, BLE_CONNECTION_CLOSE_DELAY);
+    OptInt(json, BLE_MAC_REFRESH_SWITCH, &info->bleMacRefreshSwitch, BLE_MAC_AUTO_REFRESH_SWITCH);
     UnpackCommon(json, info, version, isMetaAuth);
     return SOFTBUS_OK;
 }

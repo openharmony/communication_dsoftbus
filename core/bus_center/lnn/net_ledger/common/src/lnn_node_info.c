@@ -119,7 +119,26 @@ void LnnSetBtMac(NodeInfo *info, const char *mac)
     if (strncpy_s(info->connectInfo.macAddr, MAC_LEN, mac, strlen(mac)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "str copy error");
     }
-    return;
+}
+
+const char *LnnGetBleMac(const NodeInfo *info)
+{
+    if (info == NULL) {
+        LNN_LOGE(LNN_LEDGER, "PARA ERROR");
+        return DEFAULT_MAC;
+    }
+    return info->connectInfo.bleMacAddr;
+}
+
+void LnnSetBleMac(NodeInfo *info, const char *mac)
+{
+    if (info == NULL || mac == NULL) {
+        LNN_LOGE(LNN_LEDGER, "PARA ERROR");
+        return;
+    }
+    if (strcpy_s(info->connectInfo.bleMacAddr, MAC_LEN, mac) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "str copy error");
+    }
 }
 
 const char *LnnGetNetIfName(const NodeInfo *info)
@@ -140,7 +159,6 @@ void LnnSetNetIfName(NodeInfo *info, const char *netIfName)
     if (strncpy_s(info->connectInfo.netIfName, NET_IF_NAME_LEN, netIfName, strlen(netIfName)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "str copy error");
     }
-    return;
 }
 
 const char *LnnGetWiFiIp(const NodeInfo *info)
@@ -161,7 +179,6 @@ void LnnSetWiFiIp(NodeInfo *info, const char *ip)
     if (strncpy_s(info->connectInfo.deviceIp, sizeof(info->connectInfo.deviceIp), ip, strlen(ip)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
     }
-    return;
 }
 
 const char *LnnGetMasterUdid(const NodeInfo *info)
