@@ -19,7 +19,6 @@
 #include <stddef.h>
 #include "wifi_p2p.h"
 #include "common_list.h"
-#include "wifi_p2p_config.h"
 #include "wifi_direct_types.h"
 
 #ifdef __cplusplus
@@ -35,7 +34,7 @@ enum BroadcastReceiverAction {
 
 struct P2pBroadcastParam {
     P2pState p2pState;
-    WifiP2pLinkedInfo p2pLinkedInfo;
+    WifiP2pLinkedInfo p2pLinkInfo;
     struct WifiDirectP2pGroupInfo *groupInfo;
 };
 

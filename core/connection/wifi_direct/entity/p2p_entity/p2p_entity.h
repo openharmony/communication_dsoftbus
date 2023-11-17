@@ -60,7 +60,6 @@ struct P2pEntity {
     struct P2pEntityState *states[P2P_ENTITY_STATE_MAX];
     struct P2pEntityState *currentState;
     enum P2pEntityStateType currentStateType;
-    int32_t currentRequestId;
     int32_t currentTimerId;
     int32_t joiningClientCount;
     ListNode joiningClientList;

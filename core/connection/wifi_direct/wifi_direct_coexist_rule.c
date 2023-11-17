@@ -15,13 +15,12 @@
 
 #include "wifi_direct_coexist_rule.h"
 #include "securec.h"
-#include "softbus_log.h"
+#include "conn_log.h"
 #include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_json_utils.h"
 #include "wifi_direct_p2p_adapter.h"
 
-#define LOG_LABEL "[WD] CoR: "
 #define RULE_BUFFER_LEN 128
 
 struct CombinationHead {
@@ -49,7 +48,7 @@ static void ShowRulesList(ListNode *rulesList)
                 pos += ret;
             }
         }
-        CLOGI(LOG_LABEL "rules[%d]:%s", index, buffer);
+        CONN_LOGI(CONN_WIFI_DIRECT, "rules[%d]:%s", index, buffer);
         index++;
     }
 }
@@ -59,23 +58,23 @@ static int32_t SetCoexistRule(const char *rule)
     struct WifiDirectCoexistRule *self = GetWifiDirectCoexistRule();
 
     cJSON *coexistObj = cJSON_ParseWithLength(rule, strlen(rule) + 1);
-    CONN_CHECK_AND_RETURN_RET_LOG(coexistObj, SOFTBUS_MALLOC_ERR, LOG_LABEL "create json object failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(coexistObj, SOFTBUS_MALLOC_ERR, CONN_WIFI_DIRECT, "create json object failed");
     if (!cJSON_IsArray(coexistObj)) {
         cJSON_Delete(coexistObj);
-        CLOGE(LOG_LABEL "coexistObj is not a array");
+        CONN_LOGE(CONN_WIFI_DIRECT, "coexistObj is not a array");
         return SOFTBUS_INVALID_PARAM;
     }
 
     for (int i = 0; i < cJSON_GetArraySize(coexistObj); i++) {
         cJSON *subItems = cJSON_GetArrayItem(coexistObj, i);
         if (!cJSON_IsArray(subItems)) {
-            CLOGE(LOG_LABEL "item %d is not array", i);
+            CONN_LOGW(CONN_WIFI_DIRECT, "item %d is not array", i);
             continue;
         }
 
         struct CombinationHead *head = SoftBusCalloc(sizeof(*head));
         if (head == NULL) {
-            CLOGE(LOG_LABEL "malloc head failed");
+            CONN_LOGE(CONN_WIFI_DIRECT, "malloc head failed");
             continue;
         }
 
@@ -85,19 +84,19 @@ static int32_t SetCoexistRule(const char *rule)
             cJSON *subItem = cJSON_GetArrayItem(subItems, j);
             char interface[IF_NAME_LEN] = {0};
             if (!GetJsonObjectStringItem(subItem, "IF", interface, sizeof(interface))) {
-                CLOGE(LOG_LABEL "get if failed");
+                CONN_LOGW(CONN_WIFI_DIRECT, "get if failed");
                 continue;
             }
 
             struct CombinationEntry *entry = SoftBusMalloc(sizeof(*entry));
             if (entry == NULL) {
-                CLOGE(LOG_LABEL "malloc entry failed");
+                CONN_LOGE(CONN_WIFI_DIRECT, "malloc entry failed");
                 continue;
             }
 
             ListInit(&entry->node);
             if (strcpy_s(entry->interface, sizeof(entry->interface), interface) != EOK) {
-                CLOGE(LOG_LABEL "copy interface failed");
+                CONN_LOGW(CONN_WIFI_DIRECT, "copy interface failed");
                 SoftBusFree(entry);
                 entry = NULL;
                 continue;
@@ -145,17 +144,17 @@ static void ShowCombinations(ListNode *combinations)
             pos += ret;
         }
     }
-    CLOGI(LOG_LABEL "%s", buffer);
+    CONN_LOGI(CONN_WIFI_DIRECT, "%s", buffer);
 }
 
 static bool RecoverCoexistRule(void)
 {
     char *coexistCap = NULL;
     int32_t ret = GetWifiDirectP2pAdapter()->getInterfaceCoexistCap(&coexistCap);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, false, LOG_LABEL "get interface coexist cap failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, false, CONN_WIFI_DIRECT, "get interface coexist cap failed");
 
     if (coexistCap == NULL || strlen(coexistCap) == 0) {
-        CLOGE(LOG_LABEL "coexistCap is empty");
+        CONN_LOGW(CONN_WIFI_DIRECT, "coexistCap is empty");
         GetWifiDirectCoexistRule()->bypass = true;
         return true;
     }
@@ -164,6 +163,7 @@ static bool RecoverCoexistRule(void)
         SoftBusFree(coexistCap);
         return false;
     }
+
     SoftBusFree(coexistCap);
     return true;
 }
@@ -183,19 +183,20 @@ static bool IsCombinationAvailable(ListNode *combinations)
         }
     }
 
-    CLOGE(LOG_LABEL "conflict coexist rules");
+    CONN_LOGI(CONN_WIFI_DIRECT, "conflict coexist rules");
     ShowRulesList(&self->rulesList);
     ShowCombinations(combinations);
 
     if (IsListEmpty(&self->rulesList)) {
-        CLOGE(LOG_LABEL "rule list empty");
+        CONN_LOGW(CONN_WIFI_DIRECT, "rule list empty");
         if (!RecoverCoexistRule()) {
-            CLOGE(LOG_LABEL "recover coexist rule failed");
+            CONN_LOGE(CONN_WIFI_DIRECT, "recover coexist rule failed");
             return false;
         }
-        CLOGI(LOG_LABEL "recover coexist rule success");
+        CONN_LOGI(CONN_WIFI_DIRECT, "recover coexist rule success");
         return IsCombinationAvailable(combinations);
     }
+
     return false;
 }
 

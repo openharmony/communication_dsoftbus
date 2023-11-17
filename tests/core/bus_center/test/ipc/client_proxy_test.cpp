@@ -22,6 +22,7 @@
 #include "iremote_object.h"
 #include "iservice_registry.h"
 #include "softbus_adapter_log.h"
+#include "softbus_bus_center.h"
 #include "softbus_error_code.h"
 
 namespace OHOS {
@@ -93,12 +94,18 @@ HWTEST_F(ClientProxyTest, OnJoinMetaNodeResultTest_01, TestSize.Level1)
     sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(remoteObject);
     ASSERT_TRUE(clientProxy != nullptr);
     char *addr = const_cast<char *>(TEST_ADDR);
+    MetaBasicInfo metaInfo;
+    (void)memset_s(&metaInfo, sizeof(MetaBasicInfo), 0, sizeof(MetaBasicInfo));
+    (void)strcpy_s(metaInfo.metaNodeId, NETWORK_ID_BUF_LEN, TEST_NETWORK_ID);
     void *addrInput = reinterpret_cast<void *>(addr);
-    int32_t ret = clientProxy->OnJoinMetaNodeResult(nullptr, TEST_ADDR_TYPE_LEN, TEST_NETWORK_ID, TEST_RET_CODE);
+    void *metaInfoInput = reinterpret_cast<void *>(&metaInfo);
+    int32_t ret = clientProxy->OnJoinMetaNodeResult(nullptr, TEST_ADDR_TYPE_LEN, metaInfoInput,
+        sizeof(MetaBasicInfo), TEST_RET_CODE);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = clientProxy->OnJoinMetaNodeResult(addrInput, TEST_ADDR_TYPE_LEN, nullptr, TEST_RET_CODE);
+    ret = clientProxy->OnJoinMetaNodeResult(addrInput, TEST_ADDR_TYPE_LEN, nullptr, 0, TEST_RET_CODE);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = clientProxy->OnJoinMetaNodeResult(addrInput, TEST_ADDR_TYPE_LEN, TEST_NETWORK_ID, TEST_RET_CODE);
+    ret = clientProxy->OnJoinMetaNodeResult(addrInput, TEST_ADDR_TYPE_LEN, metaInfoInput,
+        sizeof(MetaBasicInfo), TEST_RET_CODE);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 

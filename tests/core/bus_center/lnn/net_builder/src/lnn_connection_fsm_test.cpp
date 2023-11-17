@@ -26,7 +26,6 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 
 #define FUNC_SLEEP_MS 10
 constexpr char IP[IP_STR_MAX_LEN] = "127.0.0.1";

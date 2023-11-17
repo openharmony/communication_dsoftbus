@@ -22,8 +22,8 @@
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "softbus_utils.h"
+#include "trans_log.h"
 #include "trans_udp_negotiation.h"
 
 #define MAX_WAIT_CONNECT_TIME 15
@@ -41,7 +41,7 @@ int32_t GetUdpChannelLock(void)
         return SOFTBUS_NO_INIT;
     }
     if (SoftBusMutexLock(&g_udpChannelMgr->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        TRANS_LOGE(TRANS_CTRL, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
     return SOFTBUS_OK;
@@ -58,10 +58,10 @@ static void NotifyTimeOutUdpChannel(ListNode *udpChannelList)
     UdpChannelInfo *nextUdpChannel = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(udpChannel, nextUdpChannel, udpChannelList, UdpChannelInfo, node) {
         if (udpChannel->info.udpChannelOptType == TYPE_UDP_CHANNEL_OPEN) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "open udp channel time out, notify open failed.");
+            TRANS_LOGW(TRANS_CTRL, "open udp channel time out, notify open failed.");
             (void)NotifyUdpChannelOpenFailed(&(udpChannel->info), SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
         } else if (udpChannel->info.udpChannelOptType == TYPE_UDP_CHANNEL_CLOSE) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "close udp channel time out, notify close.");
+            TRANS_LOGW(TRANS_CTRL, "close udp channel time out, notify close.");
             (void)NotifyUdpChannelClosed(&(udpChannel->info));
         }
         ListDelete(&(udpChannel->node));
@@ -75,7 +75,7 @@ static void TransUdpTimerProc(void)
         return;
     }
     if (SoftBusMutexLock(&g_udpChannelMgr->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        TRANS_LOGE(TRANS_CTRL, "lock failed");
         return;
     }
 
@@ -105,16 +105,16 @@ static void TransUdpTimerProc(void)
 int32_t TransUdpChannelMgrInit(void)
 {
     if (g_udpChannelMgr != NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "udp channel info manager has initialized.");
+        TRANS_LOGI(TRANS_INIT, "udp channel info manager has init.");
         return SOFTBUS_OK;
     }
     g_udpChannelMgr = CreateSoftBusList();
     if (g_udpChannelMgr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "create udp channel manager list failed.");
+        TRANS_LOGE(TRANS_INIT, "create udp channel manager list failed.");
         return SOFTBUS_MALLOC_ERR;
     }
     if (RegisterTimeoutCallback(SOFTBUS_UDP_CHANNEL_TIMER_FUN, TransUdpTimerProc) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "register udp channel time out callback failed.");
+        TRANS_LOGE(TRANS_INIT, "register udp channel time out callback failed.");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -126,7 +126,7 @@ void TransUdpChannelMgrDeinit(void)
         return;
     }
     if (SoftBusMutexLock(&g_udpChannelMgr->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        TRANS_LOGE(TRANS_INIT, "lock failed");
         return;
     }
     UdpChannelInfo *udpChannel = NULL;
@@ -145,24 +145,24 @@ void TransUdpChannelMgrDeinit(void)
 int32_t TransAddUdpChannel(UdpChannelInfo *channel)
 {
     if (g_udpChannelMgr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel manager hasn't initialized.");
+        TRANS_LOGE(TRANS_INIT, "udp channel manager hasn't init.");
         return SOFTBUS_ERR;
     }
 
     if (channel == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        TRANS_LOGW(TRANS_CTRL, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        TRANS_LOGE(TRANS_CTRL, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
 
     UdpChannelInfo *udpChannelNode = NULL;
     LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
         if (udpChannelNode->info.myData.channelId == channel->info.myData.channelId) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "udp channel has exited.[channelId = %" PRId64 "]",
+            TRANS_LOGE(TRANS_CTRL, "udp channel has exited. channelId=%" PRId64,
                 channel->info.myData.channelId);
             (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
             return SOFTBUS_ERR;
@@ -173,7 +173,7 @@ int32_t TransAddUdpChannel(UdpChannelInfo *channel)
     g_udpChannelMgr->cnt++;
 
     (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "add udp channel success.[channelId = %" PRId64 "].",
+    TRANS_LOGI(TRANS_CTRL, "add udp channel success. channelId=%" PRId64,
         channel->info.myData.channelId);
     return SOFTBUS_OK;
 }
@@ -181,11 +181,11 @@ int32_t TransAddUdpChannel(UdpChannelInfo *channel)
 int32_t TransDelUdpChannel(int32_t channelId)
 {
     if (g_udpChannelMgr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel manager hasn't initialized.");
+        TRANS_LOGE(TRANS_INIT, "udp channel manager hasn't init.");
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        TRANS_LOGE(TRANS_CTRL, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
 
@@ -202,7 +202,7 @@ int32_t TransDelUdpChannel(int32_t channelId)
         }
     }
     (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel not found.[channelId = %d]", channelId);
+    TRANS_LOGE(TRANS_CTRL, "udp channel not found. channelId=%d", channelId);
     return SOFTBUS_ERR;
 }
 
@@ -224,7 +224,7 @@ void TransCloseUdpChannelByNetWorkId(const char* netWorkId)
         return;
     }
     if (SoftBusMutexLock(&g_udpChannelMgr->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransCloseUdpChannelByAuId lock failed");
+        TRANS_LOGE(TRANS_CTRL, "TransCloseUdpChannelByAuId lock failed");
         return;
     }
 
@@ -250,17 +250,17 @@ void TransCloseUdpChannelByNetWorkId(const char* netWorkId)
 int32_t TransGetUdpChannelBySeq(int64_t seq, UdpChannelInfo *channel)
 {
     if (g_udpChannelMgr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel manager hasn't initialized.");
+        TRANS_LOGE(TRANS_INIT, "udp channel manager hasn't init.");
         return SOFTBUS_ERR;
     }
 
     if (channel == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        TRANS_LOGW(TRANS_CTRL, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        TRANS_LOGE(TRANS_CTRL, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
 
@@ -268,7 +268,7 @@ int32_t TransGetUdpChannelBySeq(int64_t seq, UdpChannelInfo *channel)
     LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
         if (udpChannelNode->seq == seq) {
             if (memcpy_s(channel, sizeof(UdpChannelInfo), udpChannelNode, sizeof(UdpChannelInfo)) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy_s failed.");
+                TRANS_LOGE(TRANS_CTRL, "memcpy_s failed.");
                 (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
                 return SOFTBUS_MEM_ERR;
             }
@@ -277,24 +277,24 @@ int32_t TransGetUdpChannelBySeq(int64_t seq, UdpChannelInfo *channel)
         }
     }
     (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel not found.[seq = %" PRId64 "]", seq);
+    TRANS_LOGE(TRANS_CTRL, "udp channel not found. seq=%" PRId64 "]", seq);
     return SOFTBUS_ERR;
 }
 
 int32_t TransGetUdpChannelById(int32_t channelId, UdpChannelInfo *channel)
 {
     if (g_udpChannelMgr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel manager hasn't initialized.");
+        TRANS_LOGE(TRANS_INIT, "udp channel manager hasn't init.");
         return SOFTBUS_ERR;
     }
 
     if (channel == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        TRANS_LOGW(TRANS_CTRL, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        TRANS_LOGE(TRANS_CTRL, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
 
@@ -302,7 +302,7 @@ int32_t TransGetUdpChannelById(int32_t channelId, UdpChannelInfo *channel)
     LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
         if (udpChannelNode->info.myData.channelId == channelId) {
             if (memcpy_s(channel, sizeof(UdpChannelInfo), udpChannelNode, sizeof(UdpChannelInfo)) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy_s failed.");
+                TRANS_LOGE(TRANS_CTRL, "memcpy_s failed.");
                 (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
                 return SOFTBUS_MEM_ERR;
             }
@@ -311,7 +311,7 @@ int32_t TransGetUdpChannelById(int32_t channelId, UdpChannelInfo *channel)
         }
     }
     (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel not found.[channelId = %d]", channelId);
+    TRANS_LOGE(TRANS_CTRL, "udp channel not found. channelId=%d", channelId);
     return SOFTBUS_ERR;
 }
 
@@ -319,15 +319,15 @@ int32_t TransUdpGetNameByChanId(int32_t channelId, char *pkgName, char *sessionN
     uint16_t pkgNameLen, uint16_t sessionNameLen)
 {
     if (g_udpChannelMgr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel manager hasn't initialized.");
+        TRANS_LOGE(TRANS_INIT, "udp channel manager hasn't init.");
         return SOFTBUS_ERR;
     }
     if (pkgName == NULL || sessionName == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        TRANS_LOGW(TRANS_CTRL, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        TRANS_LOGE(TRANS_CTRL, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
 
@@ -336,7 +336,7 @@ int32_t TransUdpGetNameByChanId(int32_t channelId, char *pkgName, char *sessionN
         if (udpChannelNode->info.myData.channelId == channelId) {
             if (strcpy_s(pkgName, pkgNameLen, udpChannelNode->info.myData.pkgName) != EOK ||
                 strcpy_s(sessionName, sessionNameLen, udpChannelNode->info.myData.sessionName) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "strcpy_s failed.");
+                TRANS_LOGE(TRANS_CTRL, "strcpy_s failed.");
                 (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
                 return SOFTBUS_MEM_ERR;
             }
@@ -345,19 +345,19 @@ int32_t TransUdpGetNameByChanId(int32_t channelId, char *pkgName, char *sessionN
         }
     }
     (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel not found.[channelId = %d]", channelId);
+    TRANS_LOGE(TRANS_CTRL, "udp channel not found. channelId=%d", channelId);
     return SOFTBUS_ERR;
 }
 
 int32_t TransSetUdpChannelStatus(int64_t seq, UdpChannelStatus status)
 {
     if (g_udpChannelMgr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel manager hasn't initialized.");
+        TRANS_LOGE(TRANS_INIT, "udp channel manager hasn't init.");
         return SOFTBUS_ERR;
     }
 
     if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        TRANS_LOGE(TRANS_CTRL, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
 
@@ -370,19 +370,19 @@ int32_t TransSetUdpChannelStatus(int64_t seq, UdpChannelStatus status)
         }
     }
     (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel not found.[seq = %" PRId64 "]", seq);
+    TRANS_LOGE(TRANS_CTRL, "udp channel not found. seq=%" PRId64, seq);
     return SOFTBUS_ERR;
 }
 
 int32_t TransSetUdpChannelOptType(int32_t channelId, UdpChannelOptType type)
 {
     if (g_udpChannelMgr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel manager hasn't initialized.");
+        TRANS_LOGE(TRANS_INIT, "udp channel manager hasn't init.");
         return SOFTBUS_ERR;
     }
 
     if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        TRANS_LOGE(TRANS_CTRL, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
 
@@ -395,24 +395,24 @@ int32_t TransSetUdpChannelOptType(int32_t channelId, UdpChannelOptType type)
         }
     }
     (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel not found.[channelId = %d]", channelId);
+    TRANS_LOGE(TRANS_CTRL, "udp channel not found. channelId=%d", channelId);
     return SOFTBUS_ERR;
 }
 
 void TransUpdateUdpChannelInfo(int64_t seq, const AppInfo *appInfo)
 {
     if (g_udpChannelMgr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel manager hasn't initialized.");
+        TRANS_LOGE(TRANS_INIT, "udp channel manager hasn't init.");
         return;
     }
 
     if (appInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        TRANS_LOGW(TRANS_CTRL, "invalid param.");
         return;
     }
 
     if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        TRANS_LOGE(TRANS_CTRL, "lock failed");
         return;
     }
 
@@ -420,30 +420,30 @@ void TransUpdateUdpChannelInfo(int64_t seq, const AppInfo *appInfo)
     LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
         if (udpChannelNode->seq == seq) {
             if (memcpy_s(&(udpChannelNode->info), sizeof(AppInfo), appInfo, sizeof(AppInfo)) != EOK) {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy_s failed.");
+                TRANS_LOGE(TRANS_CTRL, "memcpy_s failed.");
             }
             (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
             return;
         }
     }
     (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel not found.[seq = %" PRId64 "]", seq);
+    TRANS_LOGE(TRANS_CTRL, "udp channel not found. seq=%" PRId64 "]", seq);
 }
 
 int32_t TransGetUdpChannelByRequestId(uint32_t requestId, UdpChannelInfo *channel)
 {
     if (g_udpChannelMgr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel manager hasn't initialized.");
+        TRANS_LOGE(TRANS_INIT, "udp channel manager hasn't init.");
         return SOFTBUS_ERR;
     }
 
     if (channel == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        TRANS_LOGW(TRANS_CTRL, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        TRANS_LOGE(TRANS_CTRL, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
 
@@ -459,7 +459,7 @@ int32_t TransGetUdpChannelByRequestId(uint32_t requestId, UdpChannelInfo *channe
         }
     }
     (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel not found.[requestId = %u]", requestId);
+    TRANS_LOGE(TRANS_CTRL, "udp channel not found. reqId=%u", requestId);
     return SOFTBUS_ERR;
 }
 
@@ -474,7 +474,7 @@ UdpChannelInfo *TransGetChannelObj(int32_t channelId)
             return item;
         }
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransGetChannelObj not found: channelId=%d", channelId);
+    TRANS_LOGE(TRANS_CTRL, "not found: channelId=%d", channelId);
     return NULL;
 }
 
@@ -497,6 +497,6 @@ int32_t TransGetUdpAppInfoByChannelId(int32_t channelId, AppInfo *appInfo)
         }
     }
     (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "udp channel not found.[channelId = %d]", channelId);
+    TRANS_LOGE(TRANS_CTRL, "udp channel not found. channelId=%d", channelId);
     return SOFTBUS_ERR;
 }

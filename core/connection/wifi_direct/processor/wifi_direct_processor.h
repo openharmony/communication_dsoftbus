@@ -29,34 +29,25 @@ enum WifiDirectProcessorType {
     WIFI_DIRECT_PROCESSOR_TYPE_MAX
 };
 
-enum WifiDirectProcessorState {
-    PROCESSOR_STATE_AVAILABLE = 0,
-    PROCESSOR_STATE_WAITING_CONNECT_GROUP = 1,
-    PROCESSOR_STATE_WAITING_CREATE_GROUP = 2,
-    PROCESSOR_STATE_WAITING_REMOVE_GROUP = 3,
-    PROCESSOR_STATE_WAITING_CONNECT_NOTIFY = 4,
-    PROCESSOR_STATE_WAITING_DISCONNECTED_NO_DESTROY = 5,
-    PROCESSOR_STATE_WAITING_SERVER_DESTROYED = 6,
-    PROCESSOR_STATE_WAITING_CLIENT_JOINING = 7,
-};
-
 struct NegotiateMessage;
-struct NegotiateState;
 struct InnerLink;
+struct WifiDirectCommand;
 
 #define PROCESSOR_BASE                                                                                            \
     int32_t (*createLink)(struct WifiDirectConnectInfo *connectInfo);                                             \
     int32_t (*reuseLink)(struct WifiDirectConnectInfo *connectInfo, struct InnerLink *innerLink);                 \
     int32_t (*disconnectLink)(struct WifiDirectConnectInfo *connectInfo, struct InnerLink *innerLink);            \
-    int32_t (*processNegotiateMessage)(enum WifiDirectNegotiateCmdType cmd, struct NegotiateMessage *msg);        \
-    int32_t (*onOperationEvent)(int32_t requestId, int32_t result);                                               \
+    void (*processNegotiateMessage)(enum WifiDirectNegotiateCmdType cmd, struct WifiDirectCommand *command);      \
+    void (*onOperationEvent)(int32_t result);                                                                     \
                                                                                                                   \
-    void (*processUnhandledRequest)(struct NegotiateMessage *msg, int32_t errorCode);                             \
+    bool (*isMessageNeedPending)(enum WifiDirectNegotiateCmdType cmd, struct NegotiateMessage *msg);              \
     void (*onReversal)(enum WifiDirectNegotiateCmdType cmd, struct NegotiateMessage *msg);                        \
+    void (*resetContext)(void);                                                                                   \
                                                                                                                   \
-    enum WifiDirectProcessorState currentState;                                                                   \
-    struct NegotiateMessage *currentMsg;                                                                          \
-    char *name;
+    char *name;                                                                                                   \
+    int32_t timerId;                                                                                              \
+    struct WifiDirectCommand *activeCommand;                                                                      \
+    struct WifiDirectCommand *passiveCommand;
 
 struct WifiDirectProcessor {
     PROCESSOR_BASE;

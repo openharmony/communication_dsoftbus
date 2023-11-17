@@ -16,14 +16,12 @@
 
 #include <string.h>
 #include "securec.h"
-#include "softbus_log.h"
+#include "conn_log.h"
 #include "softbus_errcode.h"
 #include "softbus_adapter_mem.h"
 #include "wifi_direct_types.h"
 #include "utils/wifi_direct_ipv4_info.h"
 #include "utils/wifi_direct_anonymous.h"
-
-#define LOG_LABEL "[WD] IC: "
 
 #define INT_ARRAY_BUFFER_LEN 128
 #define IPV4_INFO_ARRAY_BUFFER_LEN 256
@@ -149,6 +147,7 @@ static void PutContainerArray(struct InfoContainer *self, size_t key, struct Inf
     if (data == NULL) {
         return;
     }
+
     for (size_t i = 0; i < containerArraySizes; i++) {
         struct InfoContainer *container = (struct InfoContainer *)data;
         for (size_t j = 0; j < container->getKeySize(); j++) {
@@ -242,7 +241,7 @@ static char* GetString(struct InfoContainer *self, size_t key, const char *defau
     return (char *)defaultValue;
 }
 
-static int32_t *GetIntArray(struct InfoContainer *self, size_t key, size_t *arraySize, void *defaultValue)
+static int32_t* GetIntArray(struct InfoContainer *self, size_t key, size_t *arraySize, void *defaultValue)
 {
     size_t size = 0;
     int32_t *value = self->get(self, key, &size, NULL);
@@ -280,13 +279,18 @@ static struct InfoContainerKeyProperty* GetKeyProperty(struct InfoContainer *sel
 static void DumpStringContent(struct InfoContainerKeyProperty *keyProperty, struct InfoContainer *self, size_t key)
 {
     if (keyProperty->flag & MAC_ADDR_FLAG) {
-        CLOGI(LOG_LABEL "%s=%s", keyProperty->content, WifiDirectAnonymizeMac(self->getString(self, key, "")));
+        CONN_LOGI(CONN_WIFI_DIRECT, "%s=%s", keyProperty->content,
+            WifiDirectAnonymizeMac(self->getString(self, key, "")));
     } else if (keyProperty->flag & IP_ADDR_FLAG) {
-        CLOGI(LOG_LABEL "%s=%s", keyProperty->content, WifiDirectAnonymizeIp(self->getString(self, key, "")));
+        CONN_LOGI(CONN_WIFI_DIRECT, "%s=%s", keyProperty->content,
+            WifiDirectAnonymizeIp(self->getString(self, key, "")));
     } else if (keyProperty->flag & DEVICE_ID_FLAG) {
-        CLOGI(LOG_LABEL "%s=%s", keyProperty->content, AnonymizesUUID(self->getString(self, key, "")));
+        char *anonymizedUuid;
+        Anonymize(self->getString(self, key, ""), &anonymizedUuid);
+        CONN_LOGI(CONN_WIFI_DIRECT, "%s=%s", keyProperty->content, anonymizedUuid);
+        AnonymizeFree(anonymizedUuid);
     } else {
-        CLOGI(LOG_LABEL "%s=%s", keyProperty->content, self->getString(self, key, ""));
+        CONN_LOGI(CONN_WIFI_DIRECT, "%s=%s", keyProperty->content, self->getString(self, key, ""));
     }
 }
 
@@ -301,14 +305,14 @@ static void DumpIntArrayContent(struct InfoContainerKeyProperty *keyProperty, co
         }
         pos += ret;
     }
-    CLOGI(LOG_LABEL "%s=%s", keyProperty->content, buffer);
+    CONN_LOGI(CONN_WIFI_DIRECT, "%s=%s", keyProperty->content, buffer);
 }
 
 static void DumpIpv4InfoContent(struct InfoContainerKeyProperty *keyProperty, struct WifiDirectIpv4Info *ipv4)
 {
     char ipString[IP_ADDR_STR_LEN] = {0};
     WifiDirectIpv4ToString(ipv4, ipString, sizeof(ipString));
-    CLOGI(LOG_LABEL "%s=%s", keyProperty->content, WifiDirectAnonymizeIp(ipString));
+    CONN_LOGI(CONN_WIFI_DIRECT, "%s=%s", keyProperty->content, WifiDirectAnonymizeIp(ipString));
 }
 
 static void DumpIpv4InfoArrayContent(struct InfoContainerKeyProperty *keyProperty, const uint8_t *item, size_t size)
@@ -330,7 +334,7 @@ static void DumpIpv4InfoArrayContent(struct InfoContainerKeyProperty *keyPropert
         }
         pos += ret;
     }
-    CLOGI(LOG_LABEL "%s=%s", keyProperty->content, buffer);
+    CONN_LOGI(CONN_WIFI_DIRECT, "%s=%s", keyProperty->content, buffer);
 }
 
 static void DumpContent(struct InfoContainerKeyProperty *keyProperty, struct InfoContainer *self, size_t key,
@@ -338,16 +342,16 @@ static void DumpContent(struct InfoContainerKeyProperty *keyProperty, struct Inf
 {
     switch (keyProperty->type) {
         case BOOLEAN:
-            CLOGI(LOG_LABEL "%s=%d", keyProperty->content, self->getBoolean(self, key, false));
+            CONN_LOGI(CONN_WIFI_DIRECT, "%s=%d", keyProperty->content, self->getBoolean(self, key, false));
             break;
         case INT:
-            CLOGI(LOG_LABEL "%s=%d", keyProperty->content, self->getInt(self, key, 0));
+            CONN_LOGI(CONN_WIFI_DIRECT, "%s=%d", keyProperty->content, self->getInt(self, key, 0));
             break;
         case STRING:
             DumpStringContent(keyProperty, self, key);
             break;
         case BYTE_ARRAY:
-            CLOGI(LOG_LABEL "%s=(%zd)", keyProperty->content, totalSize);
+            CONN_LOGI(CONN_WIFI_DIRECT, "%s=(%zd)", keyProperty->content, totalSize);
             break;
         case INT_ARRAY:
             DumpIntArrayContent(keyProperty, item, totalSize);
@@ -359,7 +363,7 @@ static void DumpContent(struct InfoContainerKeyProperty *keyProperty, struct Inf
             DumpIpv4InfoArrayContent(keyProperty, item, totalSize);
             break;
         case AUTH_CONNECTION:
-            CLOGI(LOG_LABEL "%s=%s", keyProperty->content, item ? "not null" : "null");
+            CONN_LOGI(CONN_WIFI_DIRECT, "%s=%s", keyProperty->content, item ? "not null" : "null");
             break;
         default:
             break;
@@ -368,7 +372,7 @@ static void DumpContent(struct InfoContainerKeyProperty *keyProperty, struct Inf
 
 static void Dump(struct InfoContainer *self)
 {
-    CLOGI(LOG_LABEL "--%s--", self->getContainerName());
+    CONN_LOGI(CONN_WIFI_DIRECT, "--%s--", self->getContainerName());
     size_t keyMax = self->getKeySize();
     for (size_t key = 0; key < keyMax; key++) {
         struct InfoContainerKeyProperty *keyProperty = self->getKeyProperty(self, key);
@@ -383,17 +387,17 @@ static void Dump(struct InfoContainer *self)
         }
 
         if (keyProperty->flag == CONTAINER_FLAG) {
-            CLOGI(LOG_LABEL "[%s] >>", keyProperty->content);
+            CONN_LOGI(CONN_WIFI_DIRECT, "[%s] >>", keyProperty->content);
             ((struct InfoContainer *)item)->dump(item);
-            CLOGI(LOG_LABEL "[%s] <<", keyProperty->content);
+            CONN_LOGI(CONN_WIFI_DIRECT, "[%s] <<", keyProperty->content);
         } else if (keyProperty->flag == CONTAINER_ARRAY_FLAG) {
-            CLOGI(LOG_LABEL "[%s] count=%d >>", keyProperty->content, itemCount);
+            CONN_LOGI(CONN_WIFI_DIRECT, "[%s] count=%d >>", keyProperty->content, itemCount);
             size_t itemSize = totalSize / itemCount;
             for (size_t i = 0; i < itemCount; i++) {
                 struct InfoContainer *container = (struct InfoContainer *)((uint8_t *) item + itemSize * i);
                 container->dump(container);
             }
-            CLOGI(LOG_LABEL "[%s] count=%d <<", keyProperty->content, itemCount);
+            CONN_LOGI(CONN_WIFI_DIRECT, "[%s] count=%d <<", keyProperty->content, itemCount);
         } else {
             DumpContent(keyProperty, self, key, item, totalSize);
         }
@@ -441,7 +445,6 @@ void InfoContainerDestructor(struct InfoContainer *self, size_t max)
         char *data = self->entries[key].data;
         if (data) {
             uint32_t keyFlag = self->getKeyProperty(self, key)->flag;
-
             if (keyFlag == CONTAINER_FLAG) {
                 ((struct InfoContainer *)data)->destructor((struct InfoContainer *)data);
             } else if (keyFlag == CONTAINER_ARRAY_FLAG) {

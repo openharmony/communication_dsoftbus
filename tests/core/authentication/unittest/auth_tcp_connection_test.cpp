@@ -18,10 +18,10 @@
 #include <securec.h>
 #include <sys/time.h>
 
+#include "auth_log.h"
 #include "auth_tcp_connection.h"
 #include "auth_tcp_connection.c"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "softbus_socket.h"
 
 namespace OHOS {
@@ -44,7 +44,7 @@ void AuthTcpConnectionTest::TearDownTestCase() {}
 
 void AuthTcpConnectionTest::SetUp()
 {
-    LOG_INFO("AuthTcpConnectionTest start.");
+    AUTH_LOGI(AUTH_TEST, "AuthTcpConnectionTest start.");
 }
 
 void AuthTcpConnectionTest::TearDown() {}

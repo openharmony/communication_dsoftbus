@@ -55,6 +55,7 @@
 
 -   组网设备需在同一局域网中 或者 距离相近的近场设备间。
 -   组网之前，需先完成设备绑定，绑定流程参见安全子系统中说明。
+-   传输完成数据收发之后，业务要主动关闭会话，释放资源。
 
 ## 说明<a name="section1312121216216"></a>
 
@@ -245,7 +246,7 @@
     int SetFileReceiveListener(const char *pkgName, const char *sessionName,const IFileReceiveListener *recvListener, const char *rootDir);
     ```
 
-3.  创建会话 ，用于收发数据。
+3.  创建会话，用于收发数据。
 
     ```C
     // 创建会话

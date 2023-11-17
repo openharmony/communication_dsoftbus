@@ -39,7 +39,6 @@
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_file_test_entry.h"
-#include "softbus_log.h"
 #include "softbus_utils.h"
 
 using namespace testing::ext;

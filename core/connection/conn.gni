@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("../../core/common/dfx/dsoftbus_dfx.gni")
 import("../../core/connection/ble/conn_ble.gni")
 import("../../core/connection/br/conn_br.gni")
 import("../../core/connection/wifi_direct/wifi_direct.gni")
@@ -24,6 +25,9 @@ conn_manager_inc = ble_connection_inc + br_connection_inc + tcp_connection_inc +
                    wifi_direct_connection_inc
 conn_manager_external_deps =
     wifi_direct_connection_external_deps + ble_connection_external_deps
+conn_manager_common_deps = [ "$dsoftbus_dfx_path/log:softbus_dfx_log" ]
+conn_manager_common_deps += wifi_direct_connection_common_deps
+
 conn_manager_src +=
     [ "$dsoftbus_root_path/core/connection/manager/softbus_conn_manager.c" ]
 conn_manager_inc += [

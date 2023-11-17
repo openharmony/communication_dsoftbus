@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_hidumper.h"
 #include "fillpinc.h"
 #include "nstackx.h"

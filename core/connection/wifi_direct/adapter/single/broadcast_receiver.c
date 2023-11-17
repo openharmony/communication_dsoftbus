@@ -16,13 +16,11 @@
 #include "broadcast_receiver.h"
 #include <string.h>
 #include "securec.h"
-#include "softbus_log.h"
+#include "conn_log.h"
 #include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
 #include "wifi_direct_p2p_adapter.h"
 #include "utils/wifi_direct_work_queue.h"
-
-#define LOG_LABEL "[WD] BrR: "
 
 struct ActionListenerNode {
     ListNode node;
@@ -37,7 +35,7 @@ static void RegisterBroadcastListener(const enum BroadcastReceiverAction *action
     for (size_t i = 0; i < actionSize; i++) {
         struct ActionListenerNode *actionListenerNode =
             (struct ActionListenerNode *)SoftBusCalloc(sizeof(*actionListenerNode));
-        CONN_CHECK_AND_RETURN_LOG(actionListenerNode, LOG_LABEL "alloc action listener node failed");
+        CONN_CHECK_AND_RETURN_LOGE(actionListenerNode, CONN_WIFI_DIRECT, "alloc action listener node failed");
         enum BroadcastReceiverAction action = actionArray[i];
 
         ListInit(&actionListenerNode->node);
@@ -75,10 +73,10 @@ struct BroadcastReceiver* GetBroadcastReceiver(void)
     return &g_broadcastReceiver;
 }
 
-static void WifiDirectStateChangeCallback(P2pState state)
+static void WifiDirectP2pStateChangeCallback(P2pState state)
 {
     struct BroadcastParam *param = (struct BroadcastParam *)SoftBusCalloc(sizeof(struct BroadcastParam));
-    CONN_CHECK_AND_RETURN_LOG(param, LOG_LABEL "alloc failed");
+    CONN_CHECK_AND_RETURN_LOGE(param != NULL, CONN_WIFI_DIRECT, "alloc failed");
 
     param->action = WIFI_P2P_STATE_CHANGED_ACTION;
     param->p2pParam.p2pState = state;
@@ -88,18 +86,18 @@ static void WifiDirectStateChangeCallback(P2pState state)
     }
 }
 
-static void WifiDirectConnectionChangeCallback(const WifiP2pLinkedInfo info)
+static void WifiDirectP2pConnectionChangeCallback(const WifiP2pLinkedInfo info)
 {
     struct BroadcastParam *param = (struct BroadcastParam *)SoftBusCalloc(sizeof(struct BroadcastParam));
-    CONN_CHECK_AND_RETURN_LOG(param, LOG_LABEL "alloc failed");
+    CONN_CHECK_AND_RETURN_LOGE(param != NULL, CONN_WIFI_DIRECT, "alloc failed");
 
     param->action = WIFI_P2P_CONNECTION_CHANGED_ACTION;
-    (void)memcpy_s(&param->p2pParam.p2pLinkedInfo, sizeof(WifiP2pLinkedInfo), &info, sizeof(WifiP2pLinkedInfo));
+    (void)memcpy_s(&param->p2pParam.p2pLinkInfo, sizeof(WifiP2pLinkedInfo), &info, sizeof(WifiP2pLinkedInfo));
     param->p2pParam.groupInfo = NULL;
     (void)GetWifiDirectP2pAdapter()->getGroupInfo(&param->p2pParam.groupInfo);
 
     if (CallMethodAsync(DispatchWorkHandler, param, 0) != SOFTBUS_OK) {
-        if (param->p2pParam.groupInfo) {
+        if (param->p2pParam.groupInfo != NULL) {
             SoftBusFree(param->p2pParam.groupInfo);
         }
         SoftBusFree(param);
@@ -108,17 +106,18 @@ static void WifiDirectConnectionChangeCallback(const WifiP2pLinkedInfo info)
 
 int32_t BroadcastReceiverInit(void)
 {
+    CONN_LOGI(CONN_INIT, "init enter");
     for (size_t i = 0; i < BROADCAST_RECEIVER_ACTION_MAX; i++) {
         ListInit(g_broadcastReceiver.listeners + i);
     }
 
-    WifiErrorCode ret = RegisterP2pStateChangedCallback(WifiDirectStateChangeCallback);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == WIFI_SUCCESS, SOFTBUS_ERR,
-                                  LOG_LABEL "RegisterP2pStateChangedCallback failed, error code=%d", ret);
+    WifiErrorCode ret = RegisterP2pStateChangedCallback(WifiDirectP2pStateChangeCallback);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, SOFTBUS_ERR, CONN_INIT,
+                                  "register p2p state change callback failed, ret=%d", ret);
 
-    ret = RegisterP2pConnectionChangedCallback(WifiDirectConnectionChangeCallback);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == WIFI_SUCCESS, SOFTBUS_ERR,
-                                  LOG_LABEL "RegisterP2pConnectionChangedCallback failed, error code=%d", ret);
+    ret = RegisterP2pConnectionChangedCallback(WifiDirectP2pConnectionChangeCallback);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, SOFTBUS_ERR, CONN_INIT,
+                                  "register p2p connection change callback failed, ret=%d", ret);
 
     g_broadcastReceiver.isInited = true;
     return SOFTBUS_OK;

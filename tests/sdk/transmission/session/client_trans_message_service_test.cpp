@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,6 @@
 #include <gtest/gtest.h>
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "softbus_trans_def.h"
 #include "softbus_json_utils.h"
 #include "softbus_app_info.h"
@@ -29,6 +28,7 @@
 #include "client_trans_message_service.c"
 #include "client_trans_session_manager.h"
 #include "softbus_common.h"
+#include "trans_log.h"
 
 
 #define TRANS_TEST_SESSION_ID 10
@@ -84,33 +84,33 @@ void TransClientMsgServiceTest::TearDownTestCase(void)
 
 static int OnSessionOpened(int sessionId, int result)
 {
-    LOG_INFO("session opened,sesison id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session opened, sessionId=%d", sessionId);
     return SOFTBUS_OK;
 }
 
 static void OnSessionClosed(int sessionId)
 {
-    LOG_INFO("session closed, session id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session closed, sessionId=%d", sessionId);
 }
 
 static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
 {
-    LOG_INFO("session bytes received, session id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session bytes received, sessionId=%d", sessionId);
 }
 
 static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
 {
-    LOG_INFO("session msg received, session id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session msg received, sessionId=%d", sessionId);
 }
 
 static void OnStreamReceived(int sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
 {
-    LOG_INFO("session stream received, session id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session stream received, sessionId=%d", sessionId);
 }
 
 static void OnQosEvent(int sessionId, int eventId, int tvCount, const QosTv *tvList)
 {
-    LOG_INFO("session Qos event emit, session id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session Qos event emit, sessionId=%d", sessionId);
 }
 
 static ISessionListener g_sessionlistener = {
@@ -233,12 +233,12 @@ HWTEST_F(TransClientMsgServiceTest, TransClientMsgServiceTest02, TestSize.Level1
     int32_t sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_AUTH, BUSINESS_TYPE_BUTT, false, true);
     ASSERT_GT(sessionId, 0);
     int ret = SendBytes(sessionId, TRANS_TEST_AUTH_DATA, (unsigned int)strlen(TRANS_TEST_AUTH_DATA));
-    EXPECT_EQ(ret, SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
     sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_AUTH, BUSINESS_TYPE_NOT_CARE, false, true);
     ASSERT_GT(sessionId, 0);
     ret = SendBytes(sessionId, TRANS_TEST_AUTH_DATA, (unsigned int)strlen(TRANS_TEST_AUTH_DATA));
-    EXPECT_EQ(ret, SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 }
 
@@ -258,12 +258,12 @@ HWTEST_F(TransClientMsgServiceTest, TransClientMsgServiceTest03, TestSize.Level1
     sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_AUTH, BUSINESS_TYPE_BUTT, false, true);
     ASSERT_GT(sessionId, 0);
     ret = SendMessage(sessionId, TRANS_TEST_AUTH_DATA, (unsigned int)strlen(TRANS_TEST_AUTH_DATA));
-    EXPECT_EQ(ret, SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
     sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_AUTH, BUSINESS_TYPE_NOT_CARE, false, true);
     ASSERT_GT(sessionId, 0);
     ret = SendMessage(sessionId, TRANS_TEST_AUTH_DATA, (unsigned int)strlen(TRANS_TEST_AUTH_DATA));
-    EXPECT_EQ(ret, SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 }
 

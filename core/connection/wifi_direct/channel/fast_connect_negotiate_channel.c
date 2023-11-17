@@ -14,15 +14,13 @@
  */
 #include "fast_connect_negotiate_channel.h"
 #include "securec.h"
-#include "softbus_log.h"
+#include "conn_log.h"
 #include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
-#include "bus_center_manager.h"
 #include "softbus_proxychannel_pipeline.h"
 #include "wifi_direct_manager.h"
 #include "utils/wifi_direct_work_queue.h"
 
-#define LOG_LABEL "[WifiDirect] FastConnectNegotiateChannel: "
 #define MAX_FAST_CONNECT_DATA_LEN 1024
 
 struct DataStruct {
@@ -43,41 +41,35 @@ static void DataReceivedWorkHandler(void *data)
 
 static void OnDataReceived(int32_t channelId, const char *data, uint32_t len)
 {
-    CONN_CHECK_AND_RETURN_LOG(data != NULL && len != 0, LOG_LABEL "data invalid");
-    CONN_CHECK_AND_RETURN_LOG(len <= MAX_FAST_CONNECT_DATA_LEN, LOG_LABEL "data too large");
-    CLOGI(LOG_LABEL "len=%u", len);
+    CONN_CHECK_AND_RETURN_LOGW(data != NULL && len != 0, CONN_WIFI_DIRECT, "data invalid");
+    CONN_CHECK_AND_RETURN_LOGW(len <= MAX_FAST_CONNECT_DATA_LEN, CONN_WIFI_DIRECT, "data too large");
+    CONN_LOGI(CONN_WIFI_DIRECT, "len=%u", len);
 
     struct DataStruct *dataStruct = SoftBusCalloc(sizeof(struct DataStruct) + len);
-    CONN_CHECK_AND_RETURN_LOG(dataStruct, LOG_LABEL "malloc failed");
+    CONN_CHECK_AND_RETURN_LOGE(dataStruct, CONN_WIFI_DIRECT, "malloc failed");
 
     dataStruct->channelId = channelId;
     dataStruct->len = len;
     if (memcpy_s(dataStruct->data, dataStruct->len, data, len) != EOK) {
-        CLOGE(LOG_LABEL "copy data failed");
+        CONN_LOGE(CONN_WIFI_DIRECT, "copy data failed");
         SoftBusFree(dataStruct);
         return;
     }
     if (CallMethodAsync(DataReceivedWorkHandler, dataStruct, 0) != SOFTBUS_OK) {
-        CLOGE(LOG_LABEL "async failed");
+        CONN_LOGE(CONN_WIFI_DIRECT, "async failed");
         SoftBusFree(dataStruct);
     }
 }
 
 static void OnDisconnected(int32_t channelId)
 {
-    CLOGE(LOG_LABEL "channelId=%d", channelId);
+    CONN_LOGI(CONN_WIFI_DIRECT, "channelId=%d", channelId);
 }
 
 static int32_t PostData(struct WifiDirectNegotiateChannel *base, const uint8_t *data, size_t size)
 {
     struct FastConnectNegotiateChannel *self = (struct FastConnectNegotiateChannel*)base;
     return TransProxyPipelineSendMessage(self->channelId, data, size, MSG_TYPE_P2P_NEGO);
-}
-
-static bool IsRemoteTlvSupported(struct WifiDirectNegotiateChannel *base)
-{
-    struct FastConnectNegotiateChannel *self = (struct FastConnectNegotiateChannel*)base;
-    return self->tlvFeature;
 }
 
 static int32_t GetDeviceId(struct WifiDirectNegotiateChannel *base, char *deviceId, size_t deviceIdSize)
@@ -90,7 +82,7 @@ static int32_t GetP2pMac(struct WifiDirectNegotiateChannel *base, char *p2pMac, 
 {
     struct FastConnectNegotiateChannel *self = (struct FastConnectNegotiateChannel*)base;
     int32_t ret = strcpy_s(p2pMac, p2pMacSize, self->p2pMac);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == EOK, SOFTBUS_ERR, LOG_LABEL "copy p2p mac failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == EOK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "copy p2p mac failed");
     return SOFTBUS_OK;
 }
 
@@ -98,29 +90,13 @@ static void SetP2pMac(struct WifiDirectNegotiateChannel *base, const char *p2pMa
 {
     struct FastConnectNegotiateChannel *self = (struct FastConnectNegotiateChannel*)base;
     int32_t ret = strcpy_s(self->p2pMac, sizeof(self->p2pMac), p2pMac);
-    CONN_CHECK_AND_RETURN_LOG(ret == EOK, LOG_LABEL "copy p2p mac failed");
+    CONN_CHECK_AND_RETURN_LOGW(ret == EOK, CONN_WIFI_DIRECT, "copy p2p mac failed");
 }
 
 static bool IsP2pChannel(struct WifiDirectNegotiateChannel *base)
 {
+    (void)base;
     return false;
-}
-
-static bool GetTlvFeature(struct FastConnectNegotiateChannel *self)
-{
-    char uuid[UUID_BUF_LEN] = {0};
-    int32_t ret = self->getDeviceId((struct WifiDirectNegotiateChannel *)self, uuid, sizeof(uuid));
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, false, LOG_LABEL "get uuid failed");
-    char networkId[NETWORK_ID_BUF_LEN] = {0};
-    ret = LnnGetNetworkIdByUuid(uuid, networkId, sizeof(networkId));
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, false, LOG_LABEL "get networkId failed");
-
-    bool result = false;
-    ret = LnnGetRemoteBoolInfo(networkId, BOOL_KEY_TLV_NEGOTIATION, &result);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, false, LOG_LABEL "get key failed");
-    CLOGI(LOG_LABEL "uuid=%s isTlvSupport=%s", AnonymizesUUID(uuid), result ? "true" : "false");
-
-    return result;
 }
 
 static struct WifiDirectNegotiateChannel* Duplicate(struct WifiDirectNegotiateChannel *base)
@@ -142,7 +118,6 @@ void FastConnectNegotiateChannelConstructor(struct FastConnectNegotiateChannel *
 
     self->postData = PostData;
     self->getDeviceId = GetDeviceId;
-    self->isRemoteTlvSupported = IsRemoteTlvSupported;
     self->getP2pMac = GetP2pMac;
     self->setP2pMac = SetP2pMac;
     self->isP2pChannel = IsP2pChannel;
@@ -150,11 +125,11 @@ void FastConnectNegotiateChannelConstructor(struct FastConnectNegotiateChannel *
     self->destructor = Destructor;
 
     self->channelId = channelId;
-    self->tlvFeature = GetTlvFeature(self);
 }
 
 void FastConnectNegotiateChannelDestructor(struct FastConnectNegotiateChannel *self)
 {
+    (void)self;
 }
 
 struct FastConnectNegotiateChannel* FastConnectNegotiateChannelNew(int32_t channelId)
@@ -174,11 +149,12 @@ void FastConnectNegotiateChannelDelete(struct FastConnectNegotiateChannel *self)
 
 int32_t FastConnectNegotiateChannelInit(void)
 {
+    CONN_LOGI(CONN_INIT, "init enter");
     ITransProxyPipelineListener listener = {
         .onDataReceived = OnDataReceived,
         .onDisconnected = OnDisconnected,
     };
     int32_t ret = TransProxyPipelineRegisterListener(MSG_TYPE_P2P_NEGO, &listener);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, ret, LOG_LABEL "register proxy channel listener failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_INIT, "register proxy channel listener failed");
     return SOFTBUS_OK;
 }

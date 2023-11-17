@@ -31,7 +31,7 @@ int32_t ClientTransTdcSetCallBack(const IClientSessionCallBack *cb);
 
 int32_t ClientTransTdcOnSessionOpened(const char *sessionName, const ChannelInfo *channel);
 
-int32_t ClientTransTdcOnSessionClosed(int32_t channelId);
+int32_t ClientTransTdcOnSessionClosed(int32_t channelId, ShutdownReason reason);
 
 int32_t ClientTransTdcOnSessionOpenFailed(int32_t channelId, int32_t errCode);
 

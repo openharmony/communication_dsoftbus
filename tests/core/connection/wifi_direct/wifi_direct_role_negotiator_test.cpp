@@ -29,7 +29,7 @@
 #include "wifi_direct_role_negotiator.h"
 #include <string.h>
 #include "softbus_error_code.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "utils/wifi_direct_utils.h"
 #include "utils/wifi_direct_anonymous.h"
 

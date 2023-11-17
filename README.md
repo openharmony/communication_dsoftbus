@@ -54,6 +54,7 @@ The main code directory structure of DSoftBus is as follows:
 
 -   The devices between which you want to set up a connection must be in the same LAN.
 -   Before setting up a connection between two devices, you must bind the devices. For details about the binding process, see relevant descriptions in the Security subsystem readme file.
+-   After the data transmission is complete, the service should actively close the session and release resources.
 
 ## Usage<a name="section1312121216216"></a>
 

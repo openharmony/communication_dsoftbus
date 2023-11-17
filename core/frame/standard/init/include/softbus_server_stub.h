@@ -71,6 +71,7 @@ private:
     int32_t GetAllMetaNodeInfoInner(MessageParcel &data, MessageParcel &reply);
     int32_t ShiftLNNGearInner(MessageParcel &data, MessageParcel &reply);
     int32_t GetSoftbusSpecObjectInner(MessageParcel &data, MessageParcel &reply);
+    int32_t GetBusCenterExObjInner(MessageParcel &data, MessageParcel &reply);
 
     void InitMemberFuncMap();
     void InitMemberPermissionMap();

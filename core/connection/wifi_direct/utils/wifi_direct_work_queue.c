@@ -15,12 +15,10 @@
 
 #include "wifi_direct_work_queue.h"
 #include <stdint.h>
+#include "conn_log.h"
 #include "message_handler.h"
 #include "softbus_error_code.h"
-#include "softbus_log.h"
 #include "softbus_adapter_mem.h"
-
-#define LOG_LABEL "[WD] WQ: "
 
 struct WifiDirectWork {
     WorkFunction work;
@@ -115,24 +113,25 @@ struct WifiDirectWorkQueue* GetWifiDirectWorkQueue(void)
 int32_t CallMethodAsync(WorkFunction function, void *data, int64_t delayTimeMs)
 {
     struct WifiDirectWorkQueue *queue = GetWifiDirectWorkQueue();
-    CONN_CHECK_AND_RETURN_RET_LOG(queue->isInited, SOFTBUS_ERR, LOG_LABEL "queue is not inited");
+    CONN_CHECK_AND_RETURN_RET_LOGW(queue->isInited, SOFTBUS_ERR, CONN_WIFI_DIRECT, "queue is not inited");
     struct WifiDirectWork *work = ObtainWifiDirectWork(function, data);
-    CONN_CHECK_AND_RETURN_RET_LOG(work, SOFTBUS_MALLOC_ERR, "alloc work failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(work, SOFTBUS_MALLOC_ERR, CONN_WIFI_DIRECT, "alloc work failed");
     if (delayTimeMs <= 0) {
         queue->scheduleWork(work);
         return SOFTBUS_OK;
     }
 
-    CLOGI(LOG_LABEL "delayTimeMs=%d", delayTimeMs);
+    CONN_LOGI(CONN_WIFI_DIRECT, "delayTimeMs=%d", delayTimeMs);
     queue->scheduleDelayWork(work, delayTimeMs);
     return SOFTBUS_OK;
 }
 
 int32_t WifiDirectWorkQueueInit(void)
 {
+    CONN_LOGI(CONN_INIT, "init enter");
     SoftBusLooper *looper = CreateNewLooper("WDWQLooper");
     if (!looper) {
-        CLOGE(LOG_LABEL "create looper failed");
+        CONN_LOGE(CONN_INIT, "create looper failed");
         return SOFTBUS_ERR;
     }
 

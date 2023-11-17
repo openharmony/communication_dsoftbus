@@ -19,7 +19,7 @@
 #include "ipc_skeleton.h"
 #include "softbus_errcode.h"
 #include "softbus_server_ipc_interface_code.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 int32_t ClientOnChannelOpened(IpcIo *data, IpcIo *reply)
 {
@@ -96,7 +96,7 @@ int32_t ClientOnChannelClosed(IpcIo *data, IpcIo *reply)
     int32_t channelType = 0;
     ReadInt32(data, &channelId);
     ReadInt32(data, &channelType);
-    (void)TransOnChannelClosed(channelId, channelType);
+    (void)TransOnChannelClosed(channelId, channelType, SHUTDOWN_REASON_PEER);
     return SOFTBUS_OK;
 }
 

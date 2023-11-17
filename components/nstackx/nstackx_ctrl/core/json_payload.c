@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,14 +25,42 @@
 #include "nstackx_error.h"
 #include "nstackx_device.h"
 #include "nstackx_statistics.h"
+#include "nstackx_device_local.h"
 
 #define TAG "nStackXCoAP"
 
+static const int DEVICE_TYPE_DEFAULT = 0;
+
+static int32_t AddDeviceType(cJSON *data, const DeviceInfo *deviceInfo)
+{
+    cJSON *item = NULL;
+
+    if (deviceInfo->deviceType <= UINT8_MAX) {
+        item = cJSON_CreateNumber(deviceInfo->deviceType);
+        if (item == NULL || !cJSON_AddItemToObject(data, JSON_DEVICE_TYPE, item)) {
+            cJSON_Delete(item);
+            return NSTACKX_EFAILED;
+        }
+    } else {
+        item = cJSON_CreateNumber(DEVICE_TYPE_DEFAULT);
+        if (item == NULL || !cJSON_AddItemToObject(data, JSON_DEVICE_TYPE, item)) {
+            cJSON_Delete(item);
+            return NSTACKX_EFAILED;
+        }
+        item = cJSON_CreateNumber(deviceInfo->deviceType);
+        if (item == NULL || !cJSON_AddItemToObject(data, JSON_DEVICE_TYPE_EXTERN, item)) {
+            cJSON_Delete(item);
+            return NSTACKX_EFAILED;
+        }
+    }
+
+    return NSTACKX_EOK;
+}
+
+
 static int32_t AddDeviceJsonData(cJSON *data, const DeviceInfo *deviceInfo)
 {
-    cJSON *item;
-
-    item = cJSON_CreateString(deviceInfo->deviceId);
+    cJSON *item = cJSON_CreateString(deviceInfo->deviceId);
     if (item == NULL || !cJSON_AddItemToObject(data, JSON_DEVICE_ID, item)) {
         cJSON_Delete(item);
         return NSTACKX_EFAILED;
@@ -44,9 +72,7 @@ static int32_t AddDeviceJsonData(cJSON *data, const DeviceInfo *deviceInfo)
         return NSTACKX_EFAILED;
     }
 
-    item = cJSON_CreateNumber(deviceInfo->deviceType);
-    if (item == NULL || !cJSON_AddItemToObject(data, JSON_DEVICE_TYPE, item)) {
-        cJSON_Delete(item);
+    if (AddDeviceType(data, deviceInfo) != NSTACKX_EOK) {
         return NSTACKX_EFAILED;
     }
 
@@ -87,46 +113,6 @@ static int32_t AddDeviceJsonData(cJSON *data, const DeviceInfo *deviceInfo)
     return NSTACKX_EOK;
 }
 
-#ifdef DFINDER_SUPPORT_MULTI_NIF
-static int32_t AddApJsonDataWithIdx(cJSON *data, uint8_t idx)
-{
-    cJSON *item = NULL;
-    char ipString[INET_ADDRSTRLEN] = {0};
-
-    if (GetLocalIpStringWithIdx(ipString, sizeof(ipString), idx) != NSTACKX_EOK) {
-        DFINDER_LOGE(TAG, "get local ip string failed with idx-%hhu", idx);
-        return NSTACKX_EFAILED;
-    }
-
-    item = cJSON_CreateString(ipString);
-    if (item == NULL || !cJSON_AddItemToObject(data, JSON_DEVICE_WLAN_IP, item)) {
-        DFINDER_LOGE(TAG, "cjson create ip string failed");
-        cJSON_Delete(item);
-        return NSTACKX_EFAILED;
-    }
-
-    return NSTACKX_EOK;
-}
-#else
-static int32_t AddWifiApJsonData(cJSON *data)
-{
-    cJSON *item = NULL;
-    char ipString[INET_ADDRSTRLEN] = {0};
-
-    if (GetLocalIpString(ipString, sizeof(ipString)) != NSTACKX_EOK) {
-        return NSTACKX_EFAILED;
-    }
-
-    item = cJSON_CreateString(ipString);
-    if (item == NULL || !cJSON_AddItemToObject(data, JSON_DEVICE_WLAN_IP, item)) {
-        cJSON_Delete(item);
-        return NSTACKX_EFAILED;
-    }
-
-    return NSTACKX_EOK;
-}
-#endif
-
 static int32_t AddCapabilityBitmap(cJSON *data, const DeviceInfo *deviceInfo)
 {
     cJSON *capabilityArray = NULL;
@@ -160,11 +146,10 @@ L_END_JSON:
     return NSTACKX_EFAILED;
 }
 
-static int32_t AddBusinessJsonData(cJSON *data, const DeviceInfo *deviceInfo, uint8_t isBroadcast)
+static int32_t AddBusinessJsonData(cJSON *data, const DeviceInfo *deviceInfo, uint8_t isBroadcast, uint8_t businessType)
 {
-    cJSON *item = NULL;
-
-    item = cJSON_CreateNumber(deviceInfo->businessType);
+    uint8_t tmpType = (isBroadcast) ? deviceInfo->businessType : businessType;
+    cJSON *item = cJSON_CreateNumber(tmpType);
     if (item == NULL || !cJSON_AddItemToObject(data, JSON_BUSINESS_TYPE, item)) {
         cJSON_Delete(item);
         DFINDER_LOGE(TAG, "cJSON_CreateString for businessType failed");
@@ -181,6 +166,17 @@ static int32_t AddBusinessJsonData(cJSON *data, const DeviceInfo *deviceInfo, ui
         return NSTACKX_EFAILED;
     }
 
+    return NSTACKX_EOK;
+}
+
+static int32_t AddSequenceNumber(cJSON *data, uint8_t sendBcast)
+{
+    cJSON *item = cJSON_CreateNumber(GetSequenceNumber(sendBcast));
+    if (item == NULL || !cJSON_AddItemToObject(data, JSON_SEQUENCE_NUMBER, item)) {
+        cJSON_Delete(item);
+        DFINDER_LOGE(TAG, "cJSON_CreateNumber for sequence number failed");
+        return NSTACKX_EFAILED;
+    }
     return NSTACKX_EOK;
 }
 
@@ -211,7 +207,15 @@ static int32_t ParseDeviceJsonData(const cJSON *data, DeviceInfo *dev)
         DFINDER_LOGE(TAG, "Cannot find device type or invalid device type");
         return NSTACKX_EINVAL;
     }
-    dev->deviceType = (uint8_t)item->valuedouble;
+    dev->deviceType = (uint32_t)item->valuedouble;
+    if (dev->deviceType == DEVICE_TYPE_DEFAULT) {
+        item = cJSON_GetObjectItemCaseSensitive(data, JSON_DEVICE_TYPE_EXTERN);
+        if (!cJSON_IsNumber(item) || (item->valuedouble < 0) || (item->valuedouble > UINT32_MAX)) {
+            DFINDER_LOGI(TAG, "Cannot find device type or invalid device type extern");
+        } else {
+            dev->deviceType = (uint32_t)item->valuedouble;
+        }
+    }
 
     item = cJSON_GetObjectItemCaseSensitive(data, JSON_HICOM_VERSION);
     if (!cJSON_IsString(item) || !strlen(item->valuestring)) {
@@ -395,6 +399,35 @@ static void ParseBusinessDataJsonData(const cJSON *data, DeviceInfo *dev, uint8_
     }
 }
 
+static void ParseSequenceNumber(const cJSON *data, DeviceInfo *dev, uint8_t isBroadcast)
+{
+    cJSON *item = cJSON_GetObjectItemCaseSensitive(data, JSON_SEQUENCE_NUMBER);
+    if (item == NULL) {
+        return;
+    }
+    if (!cJSON_IsNumber(item) || (item->valueint < 0) || (item->valueint > UINT16_MAX)) {
+        DFINDER_LOGE(TAG, "invalid sequence number");
+        return;
+    }
+    dev->seq.dealBcast = isBroadcast;
+    if (isBroadcast) {
+        dev->seq.seqBcast = (uint16_t)item->valueint;
+    } else {
+        dev->seq.seqUcast = (uint16_t)item->valueint;
+    }
+}
+
+static int JsonAddStr(cJSON *data, const char *key, const char *value)
+{
+    cJSON *item = cJSON_CreateString(value);
+    if (item == NULL || !cJSON_AddItemToObject(data, key, item)) {
+        cJSON_Delete(item);
+        return NSTACKX_EFAILED;
+    }
+
+    return NSTACKX_EOK;
+}
+
 /*
  * Service Discover JSON format
  * {
@@ -407,51 +440,34 @@ static void ParseBusinessDataJsonData(const cJSON *data, DeviceInfo *dev, uint8_
  *   "coapUri":[coap uri for discover, string]   <-- optional. When present, means it's broadcast request.
  * }
  */
-#ifdef DFINDER_SUPPORT_MULTI_NIF
-static char *PrepareServiceDiscoverWithIdxEx(uint8_t isBroadcast, uint32_t idx)
-#else
-static char *PrepareServiceDiscoverEx(uint8_t isBroadcast)
-#endif /* #ifdef DFINDER_SUPPORT_MULTI_NIF */
+static char *PrepareServiceDiscoverEx(const char *locaIpStr, uint8_t isBroadcast, uint8_t businessType)
 {
-    char coapUriBuffer[NSTACKX_MAX_URI_BUFFER_LENGTH] = {0};
-    char host[NSTACKX_MAX_IP_STRING_LEN] = {0};
-    char *formatString = NULL;
-    const DeviceInfo *deviceInfo = GetLocalDeviceInfoPtr();
-    cJSON *data = NULL;
-    cJSON *localCoapString = NULL;
-
-    data = cJSON_CreateObject();
+    cJSON *data = cJSON_CreateObject();
     if (data == NULL) {
-        goto L_END_JSON;
+        DFINDER_LOGE(TAG, "create json object failed");
+        return NULL;
     }
 
+    char *formatString = NULL;
+    const DeviceInfo *deviceInfo = GetLocalDeviceInfo();
     /* Prepare local device info */
     if ((AddDeviceJsonData(data, deviceInfo) != NSTACKX_EOK) ||
-#ifdef DFINDER_SUPPORT_MULTI_NIF
-        (AddApJsonDataWithIdx(data, idx) != NSTACKX_EOK) ||
-#else
-        (AddWifiApJsonData(data) != NSTACKX_EOK) ||
-#endif
+        (JsonAddStr(data, JSON_DEVICE_WLAN_IP, locaIpStr) != NSTACKX_EOK) ||
         (AddCapabilityBitmap(data, deviceInfo) != NSTACKX_EOK) ||
-        (AddBusinessJsonData(data, deviceInfo, isBroadcast) != NSTACKX_EOK)) {
+        (AddBusinessJsonData(data, deviceInfo, isBroadcast, businessType) != NSTACKX_EOK) ||
+        (AddSequenceNumber(data, isBroadcast) != NSTACKX_EOK)) {
         DFINDER_LOGE(TAG, "Add json data failed");
         goto L_END_JSON;
     }
 
     if (isBroadcast) {
-#ifdef DFINDER_SUPPORT_MULTI_NIF
-        if (GetLocalIpStringWithIdx(host, sizeof(host), idx) != NSTACKX_EOK) {
-#else
-        if (GetLocalIpString(host, sizeof(host)) != NSTACKX_EOK) {
-#endif
-            DFINDER_LOGE(TAG, "GetLocalIpStringWithIdx failed");
-            goto L_END_JSON;
-        }
-        if (sprintf_s(coapUriBuffer, sizeof(coapUriBuffer), "coap://%s/" COAP_DEVICE_DISCOVER_URI, host) < 0) {
+        char coapUriBuffer[NSTACKX_MAX_URI_BUFFER_LENGTH] = {0};
+        if (sprintf_s(coapUriBuffer, sizeof(coapUriBuffer), "coap://%s/" COAP_DEVICE_DISCOVER_URI, locaIpStr) < 0) {
             DFINDER_LOGE(TAG, "deal coap url failed");
             goto L_END_JSON;
         }
-        localCoapString = cJSON_CreateString(coapUriBuffer);
+
+        cJSON *localCoapString = cJSON_CreateString(coapUriBuffer);
         if (localCoapString == NULL || !cJSON_AddItemToObject(data, JSON_COAP_URI, localCoapString)) {
             cJSON_Delete(localCoapString);
             DFINDER_LOGE(TAG, "local coap string failed");
@@ -469,25 +485,15 @@ L_END_JSON:
     return formatString;
 }
 
-#ifdef DFINDER_SUPPORT_MULTI_NIF
-char *PrepareServiceDiscoverWithIdx(uint8_t isBroadcast, uint32_t idx)
+char *PrepareServiceDiscover(const char *localIpStr, uint8_t isBroadcast, uint8_t businessType)
 {
-    char *str = PrepareServiceDiscoverWithIdxEx(isBroadcast, idx);
+    char *str = PrepareServiceDiscoverEx(localIpStr, isBroadcast, businessType);
     if (str == NULL) {
+        DFINDER_LOGE(TAG, "prepare service discover ex failed");
         IncStatistics(STATS_PREPARE_SD_MSG_FAILED);
     }
     return str;
 }
-#else
-char *PrepareServiceDiscover(uint8_t isBroadcast)
-{
-    char *str = PrepareServiceDiscoverEx(isBroadcast);
-    if (str == NULL) {
-        IncStatistics(STATS_PREPARE_SD_MSG_FAILED);
-    }
-    return str;
-}
-#endif
 
 static int32_t ParseServiceDiscoverEx(const uint8_t *buf, DeviceInfo *deviceInfo, char **remoteUrlPtr)
 {
@@ -497,11 +503,13 @@ static int32_t ParseServiceDiscoverEx(const uint8_t *buf, DeviceInfo *deviceInfo
     uint8_t isBroadcast = NSTACKX_FALSE;
 
     if (buf == NULL || deviceInfo == NULL || remoteUrlPtr == NULL) {
+        DFINDER_LOGE(TAG, "invalid params passed in");
         return NSTACKX_EINVAL;
     }
 
     data = cJSON_Parse((char *)buf);
     if (data == NULL) {
+        DFINDER_LOGE(TAG, "cJSON_Parse buf return null");
         return NSTACKX_EINVAL;
     }
 
@@ -535,13 +543,14 @@ static int32_t ParseServiceDiscoverEx(const uint8_t *buf, DeviceInfo *deviceInfo
     }
     ParseBusinessDataJsonData(data, deviceInfo, isBroadcast);
     deviceInfo->businessData.isBroadcast = isBroadcast;
+    ParseSequenceNumber(data, deviceInfo, isBroadcast);
     *remoteUrlPtr = remoteUrl;
     cJSON_Delete(data);
     DFINDER_MGT_UNPACK_LOG(deviceInfo);
     return NSTACKX_EOK;
 }
 
-int32_t ParseServiceDiscover(const uint8_t *buf, DeviceInfo *deviceInfo, char **remoteUrlPtr)
+int32_t ParseServiceDiscover(const uint8_t *buf, struct DeviceInfo *deviceInfo, char **remoteUrlPtr)
 {
     int32_t ret = ParseServiceDiscoverEx(buf, deviceInfo, remoteUrlPtr);
     if (ret != NSTACKX_EOK) {

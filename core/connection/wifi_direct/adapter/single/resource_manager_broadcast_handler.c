@@ -15,8 +15,7 @@
 
 #include "resource_manager_broadcast_handler.h"
 #include <string.h>
-#include "securec.h"
-#include "softbus_log.h"
+#include "conn_log.h"
 #include "softbus_error_code.h"
 #include "broadcast_receiver.h"
 #include "wifi_direct_p2p_adapter.h"
@@ -24,9 +23,7 @@
 #include "data/resource_manager.h"
 #include "utils/wifi_direct_anonymous.h"
 
-#define LOG_LABEL "[WD] RMBrH: "
-
-static void WifiDirectStateChangeCallback(enum P2pState state)
+static void HandleP2pStateChanged(enum P2pState state)
 {
     struct InterfaceInfo info;
     InterfaceInfoConstructorWithName(&info, IF_NAME_P2P);
@@ -43,7 +40,7 @@ static void WifiDirectStateChangeCallback(enum P2pState state)
         enabled = true;
     }
 
-    CLOGI(LOG_LABEL "state=%d enable=%d", state, enabled);
+    CONN_LOGI(CONN_WIFI_DIRECT, "state=%d enable=%d", state, enabled);
     info.putBoolean(&info, II_KEY_IS_ENABLE, enabled);
     GetResourceManager()->notifyInterfaceInfoChange(&info);
     InterfaceInfoDestructor(&info);
@@ -51,7 +48,7 @@ static void WifiDirectStateChangeCallback(enum P2pState state)
     struct InterfaceInfo *interfaceInfo = GetResourceManager()->getInterfaceInfo(IF_NAME_P2P);
     if (interfaceInfo) {
         int32_t connectCap = interfaceInfo->getInt(interfaceInfo, II_KEY_CONNECT_CAPABILITY, WIFI_DIRECT_API_ROLE_NONE);
-        CLOGI(LOG_LABEL "connectCap=%d", connectCap);
+        CONN_LOGI(CONN_WIFI_DIRECT, "connectCap=%d", connectCap);
         if (connectCap == WIFI_DIRECT_API_ROLE_NONE) {
             GetResourceManager()->initWifiDirectInfo();
         }
@@ -60,11 +57,11 @@ static void WifiDirectStateChangeCallback(enum P2pState state)
 
 static void ResetInterfaceInfo(void)
 {
-    CLOGI(LOG_LABEL "enter");
+    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     struct InterfaceInfo *oldInfo = GetResourceManager()->getInterfaceInfo(IF_NAME_P2P);
     int32_t port = oldInfo->getInt(oldInfo, II_KEY_PORT, -1);
     if (port > 0) {
-        CLOGI(LOG_LABEL "stop auth listening");
+        CONN_LOGI(CONN_WIFI_DIRECT, "stop auth listening");
         StopListeningForDefaultChannel();
     }
 
@@ -89,20 +86,21 @@ static void ResetInterfaceInfo(void)
 
 static void UpdateInterfaceInfo(struct WifiDirectP2pGroupInfo *groupInfo)
 {
-    CLOGI(LOG_LABEL "isGroupOwner=%d clientDeviceSize=%d", groupInfo->isGroupOwner, groupInfo->clientDeviceSize);
+    CONN_LOGI(CONN_WIFI_DIRECT, "isGroupOwner=%d clientDeviceSize=%d", groupInfo->isGroupOwner,
+        groupInfo->clientDeviceSize);
 
     char localMac[MAC_ADDR_STR_LEN] = {0};
     GetWifiDirectP2pAdapter()->getMacAddress(localMac, sizeof(localMac));
 
     char dynamicMacString[MAC_ADDR_STR_LEN] = {0};
     int32_t ret = GetWifiDirectP2pAdapter()->getDynamicMacAddress(dynamicMacString, sizeof(dynamicMacString));
-    CONN_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, LOG_LABEL "get mac failed");
-    CLOGI(LOG_LABEL "localDynamicMac=%s", WifiDirectAnonymizeMac(dynamicMacString));
+    CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get mac failed");
+    CONN_LOGI(CONN_WIFI_DIRECT, "localDynamicMac=%s", WifiDirectAnonymizeMac(dynamicMacString));
 
     char ipString[IP_ADDR_STR_LEN] = {0};
     ret = GetWifiDirectP2pAdapter()->getIpAddress(ipString, sizeof(ipString));
-    CONN_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, LOG_LABEL "get ip failed");
-    CLOGI(LOG_LABEL "localIp=%s", WifiDirectAnonymizeIp(ipString));
+    CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get ip failed");
+    CONN_LOGI(CONN_WIFI_DIRECT, "localIp=%s", WifiDirectAnonymizeIp(ipString));
 
     struct InterfaceInfo info;
     InterfaceInfoConstructorWithName(&info, IF_NAME_P2P);
@@ -115,14 +113,14 @@ static void UpdateInterfaceInfo(struct WifiDirectP2pGroupInfo *groupInfo)
         char groupConfigInfo[GROUP_CONFIG_STR_LEN] = {0};
         size_t groupConfigInfoSize = GROUP_CONFIG_STR_LEN;
         ret = GetWifiDirectP2pAdapter()->getGroupConfig(groupConfigInfo, &groupConfigInfoSize);
-        CONN_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, LOG_LABEL "get group config failed");
-        CLOGI(LOG_LABEL "set groupConfig");
+        CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get group config failed");
+        CONN_LOGI(CONN_WIFI_DIRECT, "set groupConfig");
         ret = info.setP2pGroupConfig(&info, groupConfigInfo);
-        CONN_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, LOG_LABEL "interface set group config failed");
-        CLOGI(LOG_LABEL "myRole=WIFI_DIRECT_ROLE_GO");
+        CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "interface set group config failed");
+        CONN_LOGI(CONN_WIFI_DIRECT, "myRole=WIFI_DIRECT_ROLE_GO");
         info.putInt(&info, II_KEY_WIFI_DIRECT_ROLE, WIFI_DIRECT_API_ROLE_GO);
     } else {
-        CLOGI(LOG_LABEL "myRole=WIFI_DIRECT_ROLE_GC");
+        CONN_LOGI(CONN_WIFI_DIRECT, "myRole=WIFI_DIRECT_ROLE_GC");
         info.putInt(&info, II_KEY_WIFI_DIRECT_ROLE, WIFI_DIRECT_API_ROLE_GC);
     }
 
@@ -130,31 +128,31 @@ static void UpdateInterfaceInfo(struct WifiDirectP2pGroupInfo *groupInfo)
     InterfaceInfoDestructor(&info);
 }
 
-static void WifiDirectConnectionChangeCallback(const struct P2pBroadcastParam *param)
+static void HandleP2pConnectionChanged(const struct BroadcastParam *param)
 {
-    CLOGI(LOG_LABEL "enter");
+    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     struct InterfaceInfo info;
     InterfaceInfoConstructor(&info);
     info.putName(&info, IF_NAME_P2P);
 
-    if (param->p2pLinkedInfo.connectState == P2P_DISCONNECTED || !param->groupInfo) {
-        CLOGI(LOG_LABEL "p2p disconnected, reset p2p interface info");
+    if (param->p2pParam.p2pLinkInfo.connectState == P2P_DISCONNECTED || param->p2pParam.groupInfo == NULL) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "p2p disconnected, reset p2p interface info");
         ResetInterfaceInfo();
         return;
     }
 
-    CLOGI(LOG_LABEL "p2p has group, update p2p interface info");
-    UpdateInterfaceInfo(param->groupInfo);
+    CONN_LOGI(CONN_WIFI_DIRECT, "p2p has group, update p2p interface info");
+    UpdateInterfaceInfo(param->p2pParam.groupInfo);
 }
 
 static void Listener(enum BroadcastReceiverAction action, const struct BroadcastParam *param)
 {
     if (action == WIFI_P2P_STATE_CHANGED_ACTION) {
-        CLOGI(LOG_LABEL "WIFI_P2P_STATE_CHANGED_ACTION");
-        WifiDirectStateChangeCallback(param->p2pParam.p2pState);
+        CONN_LOGI(CONN_WIFI_DIRECT, "WIFI_P2P_STATE_CHANGED_ACTION");
+        HandleP2pStateChanged(param->p2pParam.p2pState);
     } else if (action == WIFI_P2P_CONNECTION_CHANGED_ACTION) {
-        CLOGI(LOG_LABEL "WIFI_P2P_CONNECTION_CHANGED_ACTION");
-        WifiDirectConnectionChangeCallback(&param->p2pParam);
+        CONN_LOGI(CONN_WIFI_DIRECT, "WIFI_P2P_CONNECTION_CHANGED_ACTION");
+        HandleP2pConnectionChanged(param);
     }
 }
 
