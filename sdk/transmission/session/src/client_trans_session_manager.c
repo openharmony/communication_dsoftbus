@@ -1653,7 +1653,7 @@ int32_t ClientSetListenerBySessionId(int32_t sessionId, const ISocketListenerAda
     }
 
     // register file listener
-    if (sessionNode->info.flag != DATA_TYPE_FILE || serverNode->listener.socket.OnFile == NULL) {
+    if (serverNode->listener.socket.OnFile == NULL) {
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
         return SOFTBUS_OK;
     }
