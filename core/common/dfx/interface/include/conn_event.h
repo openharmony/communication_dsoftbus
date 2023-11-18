@@ -22,10 +22,10 @@
 extern "C" {
 #endif
 
-#define CONN_EVENT(scene, stage, extra) ConnEventInner(scene, stage, __FUNCTION__, extra)
+#define CONN_EVENT(scene, stage, extra) ConnEventInner(scene, stage, __FUNCTION__, __LINE__, extra)
 
 /* For inner use only */
-void ConnEventInner(int32_t scene, int32_t stage, const char *func, ConnEventExtra extra);
+void ConnEventInner(int32_t scene, int32_t stage, const char *func, int32_t line, ConnEventExtra extra);
 
 #ifdef __cplusplus
 }

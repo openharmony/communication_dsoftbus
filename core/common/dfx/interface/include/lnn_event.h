@@ -22,10 +22,10 @@
 extern "C" {
 #endif
 
-#define LNN_EVENT(scene, stage, extra) LnnEventInner(scene, stage, __FUNCTION__, extra)
+#define LNN_EVENT(scene, stage, extra) LnnEventInner(scene, stage, __FUNCTION__, __LINE__, extra)
 
 /* For inner use only */
-void LnnEventInner(int32_t scene, int32_t stage, const char *func, LnnEventExtra extra);
+void LnnEventInner(int32_t scene, int32_t stage, const char *func, int32_t line, LnnEventExtra extra);
 
 #ifdef __cplusplus
 }

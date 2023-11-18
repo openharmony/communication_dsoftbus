@@ -17,15 +17,14 @@
 
 #include "softbus_event.h"
 
-#define LNN_EVENT_NAME "LNN_EVENT"
-
-void LnnEventInner(int32_t scene, int32_t stage, const char *func, const LnnEventExtra extra)
+void LnnEventInner(int32_t scene, int32_t stage, const char *func, int32_t line, LnnEventExtra extra)
 {
     SoftbusEventForm form = {
         .eventName = LNN_EVENT_NAME,
         .scene = scene,
         .stage = stage,
         .func = func,
+        .line = line,
         .lnnExtra = extra,
     };
     SoftbusEventInner(EVENT_MODULE_LNN, form);

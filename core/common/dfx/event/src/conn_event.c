@@ -17,15 +17,14 @@
 
 #include "softbus_event.h"
 
-#define CONN_EVENT_NAME "CONN_EVENT"
-
-void ConnEventInner(int32_t scene, int32_t stage, const char *func, const ConnEventExtra extra)
+void ConnEventInner(int32_t scene, int32_t stage, const char *func, int32_t line, ConnEventExtra extra)
 {
     SoftbusEventForm form = {
         .eventName = CONN_EVENT_NAME,
         .scene = scene,
         .stage = stage,
         .func = func,
+        .line = line,
         .connExtra = extra,
     };
     SoftbusEventInner(EVENT_MODULE_CONN, form);
