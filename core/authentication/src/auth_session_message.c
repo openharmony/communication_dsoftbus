@@ -30,6 +30,7 @@
 #include "bus_center_manager.h"
 #include "lnn_cipherkey_manager.h"
 #include "lnn_common_utils.h"
+#include "lnn_event.h"
 #include "lnn_extdata_config.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_feature_capability.h"
@@ -1341,7 +1342,11 @@ int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
         .flag = compressFlag,
         .len = dataLen,
     };
+    LnnEventExtra lnnEventExtra = {0};
+    LNN_EVENT(SCENE_JION_LNN, STAGE_EXCHANGE_DEVICE_INFO, lnnEventExtra);
     if (PostAuthData(info->connId, !info->isServer, &head, data) != SOFTBUS_OK) {
+        lnnEventExtra.errcode = SOFTBUS_AUTH_EXCHANGE_DEVICE_INFO_START_ERR;
+        LNN_EVENT(SCENE_JION_LNN, STAGE_EXCHANGE_DEVICE_INFO, lnnEventExtra);
         AUTH_LOGE(AUTH_FSM, "post device info fail");
         SoftBusFree(data);
         return SOFTBUS_ERR;
