@@ -136,9 +136,8 @@ int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel
     }
     char *tmpName = NULL;
     Anonymize(sessionName, &tmpName);
-    TRANS_LOGI(TRANS_SDK,
-        "TransOnSessionOpened: sessionName=%s, flag=%d, isServer=%d, type=%d, crc=%d",
-        tmpName, flag, channel->isServer, channel->routeType, channel->crc);
+    TRANS_LOGI(TRANS_SDK, "TransOnSessionOpened: sessionName=%s, flag=%d, isServer=%d, type=%d, crc=%d", tmpName, flag,
+        channel->isServer, channel->routeType, channel->crc);
     AnonymizeFree(tmpName);
 
     SessionListenerAdapter sessionCallback;
@@ -193,8 +192,7 @@ int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t channelType, int32_t
 
 int32_t TransOnSessionClosed(int32_t channelId, int32_t channelType, ShutdownReason reason)
 {
-    TRANS_LOGI(TRANS_SDK, "channelId=%d, channelType=%d",
-        channelId, channelType);
+    TRANS_LOGI(TRANS_SDK, "channelId=%d, channelType=%d", channelId, channelType);
     int32_t sessionId = INVALID_SESSION_ID;
     int32_t ret;
     SessionListenerAdapter sessionCallback;
@@ -205,10 +203,6 @@ int32_t TransOnSessionClosed(int32_t channelId, int32_t channelType, ShutdownRea
         sessionCallback.socket.OnShutdown(sessionId, reason);
         TRANS_LOGE(TRANS_SDK, "TransOnSessionClosed ok");
         return SOFTBUS_OK;
-    }
-
-    if (sessionCallback.session.OnSessionClosed != NULL) {
-        sessionCallback.session.OnSessionClosed(sessionId);
     }
 
     if (sessionCallback.session.OnSessionClosed != NULL) {
@@ -247,7 +241,6 @@ int32_t TransOnDataReceived(int32_t channelId, int32_t channelType, const void *
     SessionListenerAdapter sessionCallback;
     (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
     int32_t ret = GetSocketCallbackAdapterByChannelId(channelId, channelType, &sessionId, &sessionCallback);
-
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "get session callback failed");
         return ret;
