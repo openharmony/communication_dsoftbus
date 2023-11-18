@@ -16,7 +16,7 @@
 #ifndef TRANS_EVENT_ATOM_FORM_H
 #define TRANS_EVENT_ATOM_FORM_H
 
-#include <stdlib.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -51,11 +51,12 @@ typedef struct {
     int32_t peerChannelId;  // PEER_CHAN_ID
     int32_t requestId;      // REQ_ID
     int32_t connectionId;   // CONN_ID
-    int32_t costTime;       // HANDSHAKE_TIME_CONSUMING & OPEN_SESSION_TIME_CONSUMING
+    int32_t costTime;       // HANDSHAKE_TIME_CONSUMING & OPEN_SESSION_TIME_CONSUMING -> COST_TIME
+    int32_t result;         // STAGE_RES
     int32_t errcode;        // ERROR_CODE
     const char *callerPkg;  // HOST_PKG
     const char *calleePkg;  // TO_CALL_PKG
-    const char *socketName; // SESSION_NAME
+    const char *socketName; // SESSION_NAME -> SOCKET_NAME
 } TransEventExtra;
 
 #ifdef __cplusplus
