@@ -22,6 +22,8 @@
 extern "C" {
 #endif
 
+#define EVENT_STAGE_RESULT_OK 1
+
 #define DISC_EVENT(scene, stage, extra) DiscEventInner(scene, stage, __FUNCTION__, __LINE__, extra)
 
 /* For inner use only */
