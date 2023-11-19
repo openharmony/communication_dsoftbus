@@ -27,6 +27,7 @@
 #include "softbus_errcode.h"
 #include "softbus_type_def.h"
 #include "softbus_utils.h"
+#include "conn_event.h"
 
 #define INVALID_GATTC_ID (-1)
 #define DEFAULT_MTU_SIZE 512
@@ -111,6 +112,12 @@ int32_t ConnGattClientConnect(ConnBleConnection *connection)
     if (connection->fastestConnectEnable && SoftbusGattcSetFastestConn(underlayerHandle) != SOFTBUS_OK) {
         CONN_LOGW(CONN_BLE, "enable ble fastest connection failed, it is not a big deal, go ahead");
     }
+    ConnEventExtra extra = {
+        .peerBleMac = connection->addr,
+        .connectionId = connection->connectionId,
+        .result = CONN_STAGE_RESULT_OK
+    };
+    CONN_EVENT(SCENE_CONNECT, STAGE_CONNECT_INVOKE_PROTOCOL, extra);
     status = SoftbusGattcConnect(underlayerHandle, &binaryAddr);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "client connect %u failed: underlayer connect failed, err=%d", connection->connectionId,

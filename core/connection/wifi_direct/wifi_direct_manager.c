@@ -29,6 +29,7 @@
 #include "utils/wifi_direct_utils.h"
 #include "utils/wifi_direct_perf_recorder.h"
 #include "utils/wifi_direct_anonymous.h"
+#include "conn_event.h"
 
 /* public interface implement */
 static int32_t GetRequestId(void)
@@ -44,6 +45,13 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *connectInfo, struct W
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(connectInfo && callback, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT,
         "invalid parameters");
+    ConnEventExtra extra = {
+        .requestId = connectInfo->requestId,
+        .linkType = connectInfo->connectType,
+        .expectRole = connectInfo->expectApiRole,
+        .peerIp = connectInfo->remoteMac
+    };
+    CONN_EVENT(SCENE_CONNECT, STAGE_CONNECT_START, extra);
     char uuid[UUID_BUF_LEN] = {0};
     (void)connectInfo->negoChannel->getDeviceId(connectInfo->negoChannel, uuid, sizeof(uuid));
     int32_t ret = GetWifiDirectRoleOption()->getExpectedRole(connectInfo->remoteNetworkId, connectInfo->connectType,
@@ -64,6 +72,8 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *connectInfo, struct W
 
     GetWifiDirectCommandManager()->enqueueCommand(command);
     ret = GetWifiDirectNegotiator()->processNextCommand();
+    extra.errcode = ret;
+    CONN_EVENT(SCENE_CONNECT, STAGE_CONNECT_INVOKE_PROTOCOL, extra);
     return ret;
 }
 

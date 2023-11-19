@@ -44,7 +44,7 @@ typedef enum {
 
 typedef struct {
     int32_t dataType;       // DATA_TYPE
-    int32_t peerNetworkId;  // PEER_NETID
+    const char *peerNetworkId;  // PEER_NETID
     int32_t linkType;       // LINK_TYPE
     int32_t channelType;    // LOCAL_CHAN_TYPE
     int32_t channelId;      // CHAN_ID
@@ -54,6 +54,10 @@ typedef struct {
     int32_t costTime;       // HANDSHAKE_TIME_CONSUMING & OPEN_SESSION_TIME_CONSUMING -> COST_TIME
     int32_t result;         // STAGE_RES
     int32_t errcode;        // ERROR_CODE
+    int32_t laneId;         //LANE_ID
+    int32_t laneTransType;  //LANE_TRANS_TYPE
+    int32_t authId;         //AUTH_ID
+    int32_t fd;             //SOCKET_FD
     const char *callerPkg;  // HOST_PKG
     const char *calleePkg;  // TO_CALL_PKG
     const char *socketName; // SESSION_NAME -> SOCKET_NAME
