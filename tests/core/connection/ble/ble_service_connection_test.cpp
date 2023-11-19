@@ -214,16 +214,17 @@ HWTEST_F(ServiceConnectionTest, ServiceConnection008, TestSize.Level1)
     int ret;
     ConnBleConnection connection;
 
-    SoftBusMutexInit(&connection.lock, nullptr);
+    (void)memset_s(&connection, sizeof(ConnBleConnection), 0, sizeof(ConnBleConnection));
+    ret = ConnGattServerConnect(&connection);
+    EXPECT_EQ(SOFTBUS_LOCK_ERR, ret);
+
+    ret = SoftBusMutexInit(&connection.lock, nullptr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
     connection.underlayerHandle = INVALID_UNDERLAY_HANDLE;
     ret = ConnGattServerConnect(&connection);
     EXPECT_EQ(SOFTBUS_ERR, ret);
-
-    connection.underlayerHandle = 1;
-    ret = ConnGattServerConnect(&connection);
-    EXPECT_EQ(SOFTBUS_OK, ret);
 }
-
 
 /*
 * @tc.name: ServiceConnection009
