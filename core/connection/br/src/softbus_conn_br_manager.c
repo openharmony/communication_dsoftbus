@@ -31,6 +31,7 @@
 #include "softbus_conn_common.h"
 #include "softbus_json_utils.h"
 #include "softbus_utils.h"
+#include "conn_event.h"
 
 enum BrServerState {
     BR_STATE_AVAILABLE,
@@ -122,6 +123,13 @@ static void DfxRecordBrConnectFail(uint32_t reqId, uint32_t pId, ConnBrDevice *d
     CONN_LOGD(CONN_BR, "traceId=%u, reason=%d", statistics->connectTraceId, reason);
     uint64_t costTime = SoftBusGetSysTimeMs() - statistics->startTime;
     SoftbusRecordConnResult(pId, SOFTBUS_HISYSEVT_CONN_TYPE_BR, SOFTBUS_EVT_CONN_FAIL, costTime, reason);
+    ConnEventExtra extra = {
+        .requestId = reqId,
+        .linkType = CONNECT_BR,
+        .costTime = costTime,
+        .errcode = reason
+    };
+    CONN_EVENT(SCENE_CONNECT, STAGE_CONNECT_END, extra);
 }
 
 static void DfxRecordBrConnectSuccess(uint32_t pId, ConnBrConnection *connection, ConnectStatistics *statistics)
@@ -135,6 +143,13 @@ static void DfxRecordBrConnectSuccess(uint32_t pId, ConnBrConnection *connection
     uint64_t costTime = SoftBusGetSysTimeMs() - statistics->startTime;
     SoftbusRecordConnResult(pId, SOFTBUS_HISYSEVT_CONN_TYPE_BR, SOFTBUS_EVT_CONN_SUCC, costTime,
                             SOFTBUS_HISYSEVT_CONN_OK);
+    ConnEventExtra extra = {
+        .connectionId = connection->connectionId,
+        .linkType = CONNECT_BR,
+        .costTime = costTime,
+        .result = CONN_STAGE_RESULT_OK
+    };
+    CONN_EVENT(SCENE_CONNECT, STAGE_CONNECT_END, extra);
 }
 
 static int32_t NewDevice(ConnBrDevice **outDevice, const char *addr)
@@ -409,6 +424,12 @@ static int32_t ConnectDeviceDirectly(ConnBrDevice *device, const char *anomizeAd
         if (status != SOFTBUS_OK) {
             break;
         }
+        ConnEventExtra extra = {
+            .peerBrMac = device->addr,
+            .connectionId = connection->connectionId,
+            .result = CONN_STAGE_RESULT_OK
+        };
+        CONN_EVENT(SCENE_CONNECT, STAGE_CONNECT_INVOKE_PROTOCOL, extra);
         status = ConnBrConnect(connection);
         if (status != SOFTBUS_OK) {
             break;

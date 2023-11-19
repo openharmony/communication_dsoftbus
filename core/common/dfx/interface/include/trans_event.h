@@ -22,6 +22,8 @@
 extern "C" {
 #endif
 
+#define TRANS_STAGE_RESULT_OK 1
+
 #define TRANS_EVENT(scene, stage, extra) TransEventInner(scene, stage, __FUNCTION__, __LINE__, extra)
 
 /* For inner use only */

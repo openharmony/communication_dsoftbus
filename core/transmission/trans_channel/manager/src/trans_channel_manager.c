@@ -42,6 +42,7 @@
 #include "trans_udp_negotiation.h"
 #include "trans_tcp_direct_sessionconn.h"
 #include "lnn_network_manager.h"
+#include "trans_event.h"
 
 #define MIGRATE_ENABLE 2
 #define MIGRATE_SUPPORTED 1
@@ -403,6 +404,13 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
 
     AppInfo *appInfo = GetAppInfo(param);
     TRANS_CHECK_AND_RETURN_RET_LOGW(!(appInfo == NULL), INVALID_CHANNEL_ID, TRANS_CTRL, "GetAppInfo is null.");
+    TransEventExtra extra = {
+        .callerPkg = appInfo->myData.pkgName,
+        .socketName = appInfo->myData.sessionName,
+        .dataType = appInfo->businessType,
+        .peerNetworkId = appInfo->peerNetWorkId
+    };
+    TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_OPEN_CHANNEL_START, extra);
     errCode = TransGetLaneInfo(param, &connInfo, &laneId);
     char *tmpName = NULL;
     if (errCode != SOFTBUS_OK) {
@@ -448,6 +456,10 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         transInfo->channelId, transInfo->channelType);
     return SOFTBUS_OK;
 EXIT_ERR:
+    extra.channelId = transInfo->channelId;
+    extra.errcode = ret;
+    extra.costTime = GetSoftbusRecordTimeMillis() - timeStart;
+    TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_OPEN_CHANNEL_END, extra);
     if (appInfo->fastTransData != NULL) {
         SoftBusFree((void*)appInfo->fastTransData);
     }
@@ -688,6 +700,12 @@ int32_t TransCloseChannel(int32_t channelId, int32_t channelType)
         default:
             break;
     }
+    TransEventExtra extra = {
+        .channelId = channelId,
+        .channelType = channelType,
+        .errcode = ret
+    };
+    TRANS_EVENT(SCENE_CLOSE_CHANNEL_ACTIVE, STAGE_CLOSE_CHANNEL, extra);
     return ret;
 }
 

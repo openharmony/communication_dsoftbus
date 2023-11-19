@@ -30,6 +30,7 @@
 #include "softbus_conn_common.h"
 #include "softbus_datahead_transform.h"
 #include "softbus_utils.h"
+#include "conn_event.h"
 
 #define CONFLICT_REUSE_CONNECTING 0
 #define SHORT_UDID_HASH_LEN       8
@@ -179,6 +180,13 @@ static void DfxRecordBleConnectFail(
     CONN_LOGD(CONN_BLE, "record ble conn fail, connectTraceId=%u, reason=%d", statistics->connectTraceId, reason);
     uint64_t costTime = SoftBusGetSysTimeMs() - statistics->startTime;
     SoftbusRecordConnResult(pId, connType, SOFTBUS_EVT_CONN_FAIL, costTime, reason);
+    ConnEventExtra extra = {
+        .requestId = reqId,
+        .linkType = CONNECT_BLE,
+        .costTime = costTime,
+        .errcode = reason
+    };
+    CONN_EVENT(SCENE_CONNECT, STAGE_CONNECT_END, extra);
 }
 
 static void DfxRecordBleConnectSuccess(uint32_t pId, ConnBleConnection *connection, ConnectStatistics *statistics)
@@ -194,6 +202,13 @@ static void DfxRecordBleConnectSuccess(uint32_t pId, ConnBleConnection *connecti
 
     uint64_t costTime = SoftBusGetSysTimeMs() - statistics->startTime;
     SoftbusRecordConnResult(pId, connType, SOFTBUS_EVT_CONN_SUCC, costTime, SOFTBUS_HISYSEVT_CONN_OK);
+    ConnEventExtra extra = {
+        .connectionId = connection->connectionId,
+        .linkType = CONNECT_BLE,
+        .costTime = costTime,
+        .result = CONN_STAGE_RESULT_OK
+    };
+    CONN_EVENT(SCENE_CONNECT, STAGE_CONNECT_END, extra);
 }
 
 static int32_t NewRequest(ConnBleRequest **outRequest, const ConnBleConnectRequestContext *ctx)

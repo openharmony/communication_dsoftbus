@@ -34,7 +34,7 @@ extern "C" {
     }
 
 TRANS_ASSIGNER(Int32, DataType, dataType)
-TRANS_ASSIGNER(Int32, PeerNetworkId, peerNetworkId)
+TRANS_ASSIGNER(String, PeerNetworkId, peerNetworkId)
 TRANS_ASSIGNER(Int32, LinkType, linkType)
 TRANS_ASSIGNER(Int32, ChannelType, channelType)
 TRANS_ASSIGNER(Int32, ChannelId, channelId)
@@ -44,14 +44,18 @@ TRANS_ASSIGNER(Int32, ConnectionId, connectionId)
 TRANS_ASSIGNER(Int32, CostTime, costTime)
 TRANS_ASSIGNER(Int32, Result, result)
 TRANS_ASSIGNER(Errcode, Errcode, errcode)
+TRANS_ASSIGNER(Int32, LaneId, laneId)
+TRANS_ASSIGNER(Int32, LaneTransType, laneTransType)
+TRANS_ASSIGNER(Int32, AuthId, authId)
+TRANS_ASSIGNER(Int32, Fd, fd)
 TRANS_ASSIGNER(String, CallerPkg, callerPkg)
 TRANS_ASSIGNER(String, CalleePkg, calleePkg)
 TRANS_ASSIGNER(String, SocketName, socketName)
 
-#define TRANS_ASSIGNER_SIZE 14 // Size of g_transAssigners
+#define TRANS_ASSIGNER_SIZE 18 // Size of g_transAssigners
 static const HiSysEventParamAssigner g_transAssigners[] = {
     {"DATA_TYPE",        HISYSEVENT_INT32,  TransAssignerDataType     },
-    { "PEER_NETID",      HISYSEVENT_INT32,  TransAssignerPeerNetworkId},
+    { "PEER_NETID",      HISYSEVENT_STRING,  TransAssignerPeerNetworkId},
     { "LINK_TYPE",       HISYSEVENT_INT32,  TransAssignerLinkType     },
     { "LOCAL_CHAN_TYPE", HISYSEVENT_INT32,  TransAssignerChannelType  },
     { "CHAN_ID",         HISYSEVENT_INT32,  TransAssignerChannelId    },
@@ -61,6 +65,10 @@ static const HiSysEventParamAssigner g_transAssigners[] = {
     { "COST_TIME",       HISYSEVENT_INT32,  TransAssignerCostTime     },
     { "STAGE_RES",       HISYSEVENT_INT32,  TransAssignerResult       },
     { "ERROR_CODE",      HISYSEVENT_INT32,  TransAssignerErrcode      },
+    { "LANE_ID",         HISYSEVENT_INT32,  TransAssignerLaneId       },
+    { "LANE_TRANS_TYPE", HISYSEVENT_INT32,  TransAssignerLaneTransType},
+    { "AUTH_ID",         HISYSEVENT_INT32,  TransAssignerAuthId       },
+    { "SOCKET_FD",       HISYSEVENT_INT32,  TransAssignerFd           },
     { "HOST_PKG",        HISYSEVENT_STRING, TransAssignerCallerPkg    },
     { "TO_CALL_PKG",     HISYSEVENT_STRING, TransAssignerCalleePkg    },
     { "SOCKET_NAME",     HISYSEVENT_STRING, TransAssignerSocketName   },
