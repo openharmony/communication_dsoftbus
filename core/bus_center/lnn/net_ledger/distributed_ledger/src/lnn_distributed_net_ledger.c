@@ -21,6 +21,7 @@
 
 #include <securec.h>
 
+#include "lnn_event.h"
 #include "anonymizer.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_fast_offline.h"
@@ -1457,6 +1458,8 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
 
     udid = LnnGetDeviceUdid(info);
     map = &g_distributedNetLedger.distributedInfo;
+    LnnEventExtra lnnEventExtra = { .result = EVENT_STAGE_RESULT_OK };
+    LNN_EVENT(SCENE_JION_LNN, STAGE_JOIN_LNN_END, lnnEventExtra);
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail!");
         return REPORT_NONE;
@@ -1583,15 +1586,24 @@ static void NotifyMigrateDegrade(const char *udid)
     }
 }
 
+static void LnnCleanNodeInfo(NodeInfo *info)
+{
+    LnnSetNodeConnStatus(info, STATUS_OFFLINE);
+    LnnClearAuthTypeValue(&info->AuthTypeValue, ONLINE_HICHAIN);
+    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    LNN_LOGI(LNN_LEDGER, "need to report offline");
+}
+
 ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int32_t authId)
 {
     NodeInfo *info = NULL;
-
     DoubleHashMap *map = &g_distributedNetLedger.distributedInfo;
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail!");
         return REPORT_NONE;
     }
+    LnnEventExtra lnnEventExtra = { .result = EVENT_STAGE_RESULT_OK };
+    LNN_EVENT(SCENE_LEAVE_LNN, STAGE_LEAVE_LNN_END, lnnEventExtra);
     info = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
     if (info == NULL) {
         LNN_LOGE(LNN_LEDGER, "PARA ERROR!");
@@ -1616,8 +1628,7 @@ ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int3
     }
     LnnClearDiscoveryType(info, LnnConvAddrTypeToDiscType(type));
     if (info->discoveryType != 0) {
-        LNN_LOGI(LNN_LEDGER, "discoveryType=%u after clear, not need to report offline.",
-            info->discoveryType);
+        LNN_LOGI(LNN_LEDGER, "discoveryType=%u after clear, not need to report offline.", info->discoveryType);
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         UpdateNetworkInfo(udid);
         if (type == CONNECTION_ADDR_WLAN) {
@@ -1630,10 +1641,7 @@ ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int3
         LNN_LOGI(LNN_LEDGER, "the state is already offline, no need to report offline");
         return REPORT_NONE;
     }
-    LnnSetNodeConnStatus(info, STATUS_OFFLINE);
-    LnnClearAuthTypeValue(&info->AuthTypeValue, ONLINE_HICHAIN);
-    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
-    LNN_LOGI(LNN_LEDGER, "need to report offline");
+    LnnCleanNodeInfo(info);
     return REPORT_OFFLINE;
 }
 
