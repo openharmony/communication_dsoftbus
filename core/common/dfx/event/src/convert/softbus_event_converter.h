@@ -31,15 +31,10 @@ extern "C" {
 #define PARAM_STRING_MAX_LEN 256
 
 typedef struct {
-    HiSysEventParam value;
-    bool isValid;
-} SoftbusEventParam;
-
-typedef struct {
     char name[MAX_LENGTH_OF_PARAM_NAME];
     HiSysEventParamType type;
-    bool (*Assign)(const char[], HiSysEventParamType, SoftbusEventForm, SoftbusEventParam *);
-} SoftbusEventParamAssigner;
+    bool (*Assign)(const char[], HiSysEventParamType, SoftbusEventForm, HiSysEventParam *);
+} HiSysEventParamAssigner;
 
 static inline bool InitString(char **str)
 {
@@ -64,34 +59,43 @@ static inline bool CopyString(char *destName, const char *srcName)
     return true;
 }
 
-static inline bool AssignerInt32(int32_t value, HiSysEventParam *param)
+/* Used by ASSIGNER macros */
+static inline bool AssignerInt32(int32_t value, HiSysEventParam **param)
 {
-    if (value == INVALID_INT_VALUE) {
-        param->v.i32 = INVALID_INT_VALUE;
+    if (value <= INVALID_INT_VALUE) {
+        (*param)->v.i32 = INVALID_INT_VALUE;
         return false;
     }
-    param->v.i32 = value;
+    (*param)->v.i32 = value;
     return true;
 }
 
-static inline bool AssignerString(const char *value, HiSysEventParam *param)
+/* Used by ASSIGNER macros */
+static inline bool AssignerString(const char *value, HiSysEventParam **param)
 {
     if (value == NULL || strlen(value) == 0) {
-        param->v.s = NULL;
+        (*param)->v.s = NULL;
         return false;
     }
-    return InitString(&param->v.s) && CopyString(param->v.s, value);
+    return InitString(&(*param)->v.s) && CopyString((*param)->v.s, value);
 }
 
-#define SOFTBUS_ASSIGNER(dataType, filedName, filed)                                                             \
-    static inline bool SoftbusAssigner##filedName(                                                        \
-        const char name[], HiSysEventParamType type, SoftbusEventForm form, SoftbusEventParam *param) \
-    {                                                                                                 \
-        if (!Assigner##dataType(form.filed, &param->value)) {                                         \
-            return false;                                                                             \
-        }                                                                                             \
-        param->value.t = type;                                                                        \
-        return CopyString(param->value.name, name);                                                   \
+/* Used by ASSIGNER macros */
+static inline bool AssignerErrcode(int32_t value, HiSysEventParam **param)
+{
+    (*param)->v.i32 = value;
+    return true;
+}
+
+#define SOFTBUS_ASSIGNER(type, filedName, filed)                                                              \
+    static inline bool SoftbusAssigner##filedName(                                                            \
+        const char eventName[], HiSysEventParamType paramType, SoftbusEventForm form, HiSysEventParam *param) \
+    {                                                                                                         \
+        if (Assigner##type(form.filed, &param) && CopyString(param->name, eventName)) {                       \
+            param->t = paramType;                                                                             \
+            return true;                                                                                      \
+        }                                                                                                     \
+        return false;                                                                                         \
     }
 
 SOFTBUS_ASSIGNER(Int32, Scene, scene)
@@ -100,7 +104,7 @@ SOFTBUS_ASSIGNER(String, OrgPkg, orgPkg)
 SOFTBUS_ASSIGNER(String, Func, func)
 
 #define SOFTBUS_ASSIGNER_SIZE 4 // Size of g_softbusAssigners
-static const SoftbusEventParamAssigner g_softbusAssigners[] = {
+static HiSysEventParamAssigner g_softbusAssigners[] = {
     {"BIZ_SCENE",  HISYSEVENT_INT32,  SoftbusAssignerScene },
     { "BIZ_STAGE", HISYSEVENT_INT32,  SoftbusAssignerStage },
     { "ORG_PKG",   HISYSEVENT_STRING, SoftbusAssignerOrgPkg},
@@ -108,15 +112,13 @@ static const SoftbusEventParamAssigner g_softbusAssigners[] = {
  // Modification Note: remember updating SOFTBUS_ASSIGNER_SIZE
 };
 
-static inline void ConvertSoftbusForm2Param(SoftbusEventParam params[], size_t size, SoftbusEventForm form)
+static inline void ConvertSoftbusForm2Param(HiSysEventParam params[], size_t size, SoftbusEventForm form)
 {
     for (size_t i = 0; i < size; ++i) {
-        SoftbusEventParamAssigner assigner = g_softbusAssigners[i];
-        if (assigner.Assign(assigner.name, assigner.type, form, &params[i])) {
-            params[i].isValid = true;
-            continue;
+        HiSysEventParamAssigner assigner = g_softbusAssigners[i];
+        if (!assigner.Assign(assigner.name, assigner.type, form, &params[i])) {
+            COMM_LOGE(COMM_DFX, "assign event fail, name=%s", assigner.name);
         }
-        params[i].isValid = false;
     }
 }
 

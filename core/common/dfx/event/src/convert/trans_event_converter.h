@@ -22,15 +22,15 @@
 extern "C" {
 #endif
 
-#define TRANS_ASSIGNER(dataType, fieldName, filed)                                                    \
-    static inline bool TransAssigner##fieldName(                                                      \
-        const char name[], HiSysEventParamType type, SoftbusEventForm form, SoftbusEventParam *param) \
-    {                                                                                                 \
-        if (!Assigner##dataType(form.transExtra.filed, &param->value)) {                              \
-            return false;                                                                             \
-        }                                                                                             \
-        param->value.t = type;                                                                        \
-        return CopyString(param->value.name, name);                                                   \
+#define TRANS_ASSIGNER(type, filedName, filed)                                                                \
+    static inline bool TransAssigner##filedName(                                                              \
+        const char eventName[], HiSysEventParamType paramType, SoftbusEventForm form, HiSysEventParam *param) \
+    {                                                                                                         \
+        if (Assigner##type(form.transExtra.filed, &param) && CopyString(param->name, eventName)) {            \
+            param->t = paramType;                                                                             \
+            return true;                                                                                      \
+        }                                                                                                     \
+        return false;                                                                                         \
     }
 
 TRANS_ASSIGNER(Int32, DataType, dataType)
@@ -43,13 +43,13 @@ TRANS_ASSIGNER(Int32, RequestId, requestId)
 TRANS_ASSIGNER(Int32, ConnectionId, connectionId)
 TRANS_ASSIGNER(Int32, CostTime, costTime)
 TRANS_ASSIGNER(Int32, Result, result)
-TRANS_ASSIGNER(Int32, Errcode, errcode)
+TRANS_ASSIGNER(Errcode, Errcode, errcode)
 TRANS_ASSIGNER(String, CallerPkg, callerPkg)
 TRANS_ASSIGNER(String, CalleePkg, calleePkg)
 TRANS_ASSIGNER(String, SocketName, socketName)
 
 #define TRANS_ASSIGNER_SIZE 14 // Size of g_transAssigners
-static const SoftbusEventParamAssigner g_transAssigners[] = {
+static const HiSysEventParamAssigner g_transAssigners[] = {
     {"DATA_TYPE",        HISYSEVENT_INT32,  TransAssignerDataType     },
     { "PEER_NETID",      HISYSEVENT_INT32,  TransAssignerPeerNetworkId},
     { "LINK_TYPE",       HISYSEVENT_INT32,  TransAssignerLinkType     },
@@ -67,15 +67,13 @@ static const SoftbusEventParamAssigner g_transAssigners[] = {
  // Modification Note: remember updating TRANS_ASSIGNER_SIZE
 };
 
-static inline void ConvertTransForm2Param(SoftbusEventParam params[], size_t size, SoftbusEventForm form)
+static inline void ConvertTransForm2Param(HiSysEventParam params[], size_t size, SoftbusEventForm form)
 {
     for (size_t i = 0; i < size; ++i) {
-        SoftbusEventParamAssigner assigner = g_transAssigners[i];
-        if (assigner.Assign(assigner.name, assigner.type, form, &params[i])) {
-            params[i].isValid = true;
-            continue;
+        HiSysEventParamAssigner assigner = g_transAssigners[i];
+        if (!assigner.Assign(assigner.name, assigner.type, form, &params[i])) {
+            COMM_LOGE(COMM_DFX, "assign event fail, name=%s", assigner.name);
         }
-        params[i].isValid = false;
     }
 }
 
