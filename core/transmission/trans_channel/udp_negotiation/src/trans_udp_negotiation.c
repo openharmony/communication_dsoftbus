@@ -33,6 +33,7 @@
 #include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation_exchange.h"
 #include "wifi_direct_manager.h"
+#include "trans_event.h"
 
 #define ID_NOT_USED 0
 #define ID_USED 1
@@ -168,6 +169,16 @@ int32_t NotifyUdpChannelOpenFailed(const AppInfo *info, int32_t errCode)
 
     int64_t timeStart = info->timeStart;
     int64_t timediff = GetSoftbusRecordTimeMillis() - timeStart;
+    TransEventExtra extra = {
+        .callerPkg = info->myData.pkgName,
+        .channelId = info->myData.channelId,
+        .peerNetworkId = info->myData.deviceId,
+        .socketName = info->myData.sessionName,
+        .linkType = info->linkType,
+        .costTime = timediff,
+        .errcode = errCode
+    };
+    TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_OPEN_CHANNEL_END, extra);
     SoftbusRecordOpenSessionKpi(info->myData.pkgName, info->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);
     int ret = g_channelCb->OnChannelOpenFailed(info->myData.pkgName, info->myData.pid,
         (int32_t)(info->myData.channelId), CHANNEL_TYPE_UDP, errCode);
@@ -482,6 +493,12 @@ static void TransOnExchangeUdpInfoReply(int64_t authId, int64_t seq, const cJSON
         return;
     }
     TransUpdateUdpChannelInfo(seq, &(channel.info));
+    TransEventExtra extra = {
+        .channelId = channel.info.myData.channelId,
+        .authId = authId,
+        .errcode = 0
+    };
+    TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_HANDSHAKE_REPLY, extra);
 }
 
 static void TransOnExchangeUdpInfoRequest(int64_t authId, int64_t seq, const cJSON *msg)
@@ -566,11 +583,23 @@ static int32_t StartExchangeUdpInfo(UdpChannelInfo *channel, int64_t authId, int
     if (TransSetUdpChannelStatus(seq, UDP_CHANNEL_STATUS_NEGING) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "set udp channel negotiation status neging failed.");
     }
+    TransEventExtra extra = {
+        .channelId = channel->info.myData.channelId,
+        .authId = authId,
+        .result = TRANS_STAGE_RESULT_OK
+    };
+    TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_HANDSHAKE_START, extra);
     return SOFTBUS_OK;
 }
 
 static void UdpOnAuthConnOpened(uint32_t requestId, int64_t authId)
 {
+    TransEventExtra extra = {
+        .requestId = requestId,
+        .authId = authId,
+        .result = TRANS_STAGE_RESULT_OK
+    };
+    TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_START_CONNECT, extra);
     TRANS_LOGI(
         TRANS_CTRL, "reqId=%u, authId=%" PRId64, requestId, authId);
     UdpChannelInfo *channel = (UdpChannelInfo *)SoftBusCalloc(sizeof(UdpChannelInfo));
@@ -593,6 +622,13 @@ static void UdpOnAuthConnOpened(uint32_t requestId, int64_t authId)
     TRANS_LOGD(TRANS_CTRL, "ok");
     return;
 EXIT_ERR:
+    extra.socketName = channel->info.myData.sessionName;
+    extra.channelType = CHANNEL_TYPE_UDP;
+    extra.channelId = channel->info.myData.channelId;
+    extra.requestId = requestId;
+    extra.authId = authId;
+    extra.errcode = SOFTBUS_ERR;
+    TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_HANDSHAKE_START, extra);
     TRANS_LOGE(TRANS_CTRL, "proc fail");
     AuthCloseConn(authId);
 }
@@ -611,6 +647,14 @@ static void UdpOnAuthConnOpenFailed(uint32_t requestId, int32_t reason)
         return;
     }
     ProcessAbnormalUdpChannelState(&channel->info, SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED, true);
+    TransEventExtra extra = {
+        .socketName = channel->info.myData.sessionName,
+        .channelType = CHANNEL_TYPE_UDP,
+        .channelId = channel->info.myData.channelId,
+        .requestId = requestId,
+        .errcode = reason
+    };
+    TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_START_CONNECT, extra);
     SoftBusFree(channel);
     TRANS_LOGW(TRANS_CTRL, "ok");
 }
@@ -680,6 +724,14 @@ static int32_t OpenAuthConnForUdpNegotiation(UdpChannelInfo *channel)
     ReleaseUdpChannelLock();
 
     int32_t ret = UdpOpenAuthConn(channel->info.peerData.deviceId, requestId, channelObj->isMeta);
+    TransEventExtra extra = {
+        .socketName = channel->info.myData.sessionName,
+        .channelType = CHANNEL_TYPE_UDP,
+        .channelId = channel->info.myData.channelId,
+        .requestId = requestId,
+        .peerNetworkId = channel->info.peerData.deviceId
+    };
+    TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_START_CONNECT, extra);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "open auth conn fail");
         return SOFTBUS_TRANS_OPEN_AUTH_CHANNANEL_FAILED;
