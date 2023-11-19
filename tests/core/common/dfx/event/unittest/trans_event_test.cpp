@@ -36,7 +36,6 @@ HWTEST_F(TransEventTest, TransEventTest001, TestSize.Level0)
 {
     TransEventExtra extra = {
         .dataType = 0,       // invalid
-        .peerNetworkId = -1, // invalid
         .result = 1,
         .errcode = 2233,
         .socketName = "testSocket",
@@ -61,7 +60,7 @@ HWTEST_F(TransEventTest, TransEventTest002, TestSize.Level0)
 {
     TransEventExtra validExtra = {
         .dataType = 1,
-        .peerNetworkId = 2,
+        .peerNetworkId = "2**2",
         .linkType = 3,
         .channelType = 4,
         .channelId = 5,
@@ -71,6 +70,10 @@ HWTEST_F(TransEventTest, TransEventTest002, TestSize.Level0)
         .costTime = 9,
         .result = 10,
         .errcode = 11,
+        .laneId = 12,
+        .laneTransType = 13,
+        .authId = 14,
+        .fd = 15,
         .callerPkg = "testCaller",
         .calleePkg = "testCallee",
         .socketName = "testSocket",
@@ -95,7 +98,7 @@ HWTEST_F(TransEventTest, TransEventTest003, TestSize.Level0)
 {
     TransEventExtra invalidExtra = {
         .dataType = -1,
-        .peerNetworkId = -2,
+        .peerNetworkId = nullptr,
         .linkType = -3,
         .channelType = -4,
         .channelId = -5,
@@ -105,6 +108,10 @@ HWTEST_F(TransEventTest, TransEventTest003, TestSize.Level0)
         .costTime = -9,
         .result = 0,
         .errcode = 11, // valid
+        .laneId = -10,
+        .laneTransType = -11,
+        .authId = -12,
+        .fd = -13,
         .callerPkg = nullptr,
         .calleePkg = "\0",
         .socketName = "",

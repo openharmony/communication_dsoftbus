@@ -33,6 +33,7 @@
 #include "softbus_socket.h"
 #include "softbus_tcp_connect_manager.h"
 #include "softbus_utils.h"
+#include "conn_event.h"
 
 ConnectFuncInterface *g_connManager[CONNECT_TYPE_MAX] = { 0 };
 static SoftBusList *g_listenerList = NULL;
@@ -509,6 +510,20 @@ int32_t ConnConnectDevice(const ConnectOption *info, uint32_t requestId, const C
         return SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT;
     }
     RecordStartTime(info);
+    ConnEventExtra extra = {
+        .requestId = requestId,
+        .linkType = info->type
+    };
+    if (info->type == CONNECT_BR) {
+        extra.peerBrMac = info->brOption.brMac;
+    }
+    if (info->type == CONNECT_BLE) {
+        extra.peerBleMac = info->bleOption.bleMac;
+    }
+    if (info->type == CONNECT_TCP) {
+        extra.peerWifiMac = info->socketOption.addr;
+    }
+    CONN_EVENT(SCENE_CONNECT, STAGE_CONNECT_START, extra);
     return g_connManager[info->type]->ConnectDevice(info, requestId, result);
 }
 

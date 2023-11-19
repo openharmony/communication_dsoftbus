@@ -27,6 +27,7 @@
 #include "softbus_proxychannel_transceiver.h"
 #include "softbus_utils.h"
 #include "trans_log.h"
+#include "trans_event.h"
 
 int32_t TransProxySendInnerMessage(ProxyChannelInfo *info, const char *payLoad,
     uint32_t payLoadLen, int32_t priority)
@@ -123,6 +124,12 @@ int32_t TransProxyHandshake(ProxyChannelInfo *info)
         TRANS_LOGE(TRANS_CTRL, "send handshake buf fail");
         return SOFTBUS_ERR;
     }
+    TransEventExtra extra = {
+        .channelId = info->myId,
+        .connectionId = info->connId,
+        .result = TRANS_STAGE_RESULT_OK
+    };
+    TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_HANDSHAKE_START, extra);
     return SOFTBUS_OK;
 }
 
