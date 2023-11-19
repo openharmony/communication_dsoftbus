@@ -22,15 +22,15 @@
 extern "C" {
 #endif
 
-#define LNN_ASSIGNER(dataType, filedName, filed)                                                      \
-    static inline bool LnnAssigner##filedName(                                                        \
-        const char name[], HiSysEventParamType type, SoftbusEventForm form, SoftbusEventParam *param) \
-    {                                                                                                 \
-        if (!Assigner##dataType(form.lnnExtra.filed, &param->value)) {                                \
-            return false;                                                                             \
-        }                                                                                             \
-        param->value.t = type;                                                                        \
-        return CopyString(param->value.name, name);                                                   \
+#define LNN_ASSIGNER(type, filedName, filed)                                                                  \
+    static inline bool LnnAssigner##filedName(                                                                \
+        const char eventName[], HiSysEventParamType paramType, SoftbusEventForm form, HiSysEventParam *param) \
+    {                                                                                                         \
+        if (Assigner##type(form.lnnExtra.filed, &param) && CopyString(param->name, eventName)) {             \
+            param->t = paramType;                                                                             \
+            return true;                                                                                      \
+        }                                                                                                     \
+        return false;                                                                                         \
     }
 
 LNN_ASSIGNER(Int32, PeerNetworkId, peerNetworkId)
@@ -42,7 +42,7 @@ LNN_ASSIGNER(Int32, PeerDeviceAbility, peerDeviceAbility)
 LNN_ASSIGNER(Int32, PeerDeviceInfo, peerDeviceInfo)
 LNN_ASSIGNER(Int32, OnlineNum, onlineNum)
 LNN_ASSIGNER(Int32, Result, result)
-LNN_ASSIGNER(Int32, Errcode, errcode)
+LNN_ASSIGNER(Errcode, Errcode, errcode)
 LNN_ASSIGNER(String, CallerPkg, callerPkg)
 LNN_ASSIGNER(String, CalleePkg, calleePkg)
 LNN_ASSIGNER(String, PeerBrMac, peerBrMac)
@@ -52,7 +52,7 @@ LNN_ASSIGNER(String, PeerIp, peerIp)
 LNN_ASSIGNER(String, PeerPort, peerPort)
 
 #define LNN_ASSIGNER_SIZE 17 // Size of g_connAssigners
-static const SoftbusEventParamAssigner g_lnnAssigners[] = {
+static const HiSysEventParamAssigner g_lnnAssigners[] = {
     {"PEER_NETID",        HISYSEVENT_INT32,  LnnAssignerPeerNetworkId    },
     { "CONN_ID",          HISYSEVENT_INT32,  LnnAssignerConnectionId     },
     { "AUTH_TYPE",        HISYSEVENT_INT32,  LnnAssignerAuthType         },
@@ -73,15 +73,13 @@ static const SoftbusEventParamAssigner g_lnnAssigners[] = {
  // Modification Note: remember updating LNN_ASSIGNER_SIZE
 };
 
-static inline void ConvertLnnForm2Param(SoftbusEventParam params[], size_t size, SoftbusEventForm form)
+static inline void ConvertLnnForm2Param(HiSysEventParam params[], size_t size, SoftbusEventForm form)
 {
     for (size_t i = 0; i < size; ++i) {
-        SoftbusEventParamAssigner assigner = g_lnnAssigners[i];
-        if (assigner.Assign(assigner.name, assigner.type, form, &params[i])) {
-            params[i].isValid = true;
-            continue;
+        HiSysEventParamAssigner assigner = g_lnnAssigners[i];
+        if (!assigner.Assign(assigner.name, assigner.type, form, &params[i])) {
+            COMM_LOGE(COMM_DFX, "assign event fail, name=%s", assigner.name);
         }
-        params[i].isValid = false;
     }
 }
 #ifdef __cplusplus

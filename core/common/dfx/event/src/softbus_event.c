@@ -22,87 +22,91 @@
 #include "convert/trans_event_converter.h"
 #include "hisysevent_c.h"
 
+#define HISYSEVENT_WRITE_SUCCESS 0
+
 static size_t GetValidParamSize(
-    const SoftbusEventParam *params, size_t size, const SoftbusEventParam *extraParams, size_t extraSize)
+    const HiSysEventParam *params, size_t size, const HiSysEventParam *extraParams, size_t extraSize)
 {
     size_t validSize = 0;
     for (size_t i = 0; i < size; ++i) {
-        if (params[i].isValid) {
+        if (params[i].t != HISYSEVENT_INVALID) {
             validSize++;
         }
     }
     for (size_t j = 0; j < extraSize; ++j) {
-        if (extraParams[j].isValid) {
+        if (extraParams[j].t != HISYSEVENT_INVALID) {
             validSize++;
         }
     }
     return validSize;
 }
 
-static void ConstructHiSysEventParams(HiSysEventParam *eventParams, const SoftbusEventParam *params, size_t size,
-    const SoftbusEventParam *extraParams, size_t extraSize)
+static void ConstructHiSysEventParams(HiSysEventParam *eventParams, const HiSysEventParam *params, size_t size,
+    const HiSysEventParam *extraParams, size_t extraSize)
 {
     size_t index = 0;
     for (size_t i = 0; i < size; ++i) {
-        if (!params[i].isValid) {
-            continue;
+        if (params[i].t != HISYSEVENT_INVALID) {
+            eventParams[index++] = params[i];
         }
-        eventParams[index++] = params[i].value;
     }
     for (size_t j = 0; j < extraSize; ++j) {
-        if (!extraParams[j].isValid) {
-            continue;
+        if (extraParams[j].t != HISYSEVENT_INVALID) {
+            eventParams[index++] = extraParams[j];
         }
-        eventParams[index++] = extraParams[j].value;
     }
 }
 
 static void WriteHiSysEvent(
-    SoftbusEventParam params[], size_t size, SoftbusEventParam extraParams[], size_t extraSize, SoftbusEventForm form)
+    HiSysEventParam params[], size_t size, HiSysEventParam extraParams[], size_t extraSize, SoftbusEventForm form)
 {
     size_t validParamSize = GetValidParamSize(params, size, extraParams, extraSize);
     HiSysEventParam eventParams[validParamSize];
     ConstructHiSysEventParams(eventParams, params, size, extraParams, extraSize);
-    HiSysEvent_Write(form.func, form.line, form.domain, form.eventName, form.eventType, eventParams, validParamSize);
+    int32_t ret = HiSysEvent_Write(
+        form.func, form.line, form.domain, form.eventName, form.eventType, eventParams, validParamSize);
+    if (ret != HISYSEVENT_WRITE_SUCCESS) {
+        COMM_LOGE(COMM_DFX, "write to hisysevent failed, ret=%d", ret);
+    }
 }
 
-static void SoftbusEventParamsFree(SoftbusEventParam params[], size_t size)
+static void SoftbusEventParamsFree(HiSysEventParam params[], size_t size)
 {
     for (size_t i = 0; i < size; ++i) {
-        if (params[i].value.t == HISYSEVENT_STRING) {
-            free(params[i].value.v.s);
+        if (params[i].t == HISYSEVENT_STRING) {
+            free(params[i].v.s);
         }
     }
 }
 
 static void WriteSoftbusEvent(SoftbusEventModule module, SoftbusEventForm form)
 {
-    SoftbusEventParam params[SOFTBUS_ASSIGNER_SIZE] = { 0 };
+    HiSysEventParam params[SOFTBUS_ASSIGNER_SIZE] = { 0 };
     ConvertSoftbusForm2Param(params, SOFTBUS_ASSIGNER_SIZE, form);
     switch (module) {
         case EVENT_MODULE_CONN: {
-            SoftbusEventParam connParams[CONN_ASSIGNER_SIZE] = { 0 };
+            HiSysEventParam connParams[CONN_ASSIGNER_SIZE] = { 0 };
             ConvertConnForm2Param(connParams, CONN_ASSIGNER_SIZE, form);
             WriteHiSysEvent(params, SOFTBUS_ASSIGNER_SIZE, connParams, CONN_ASSIGNER_SIZE, form);
             SoftbusEventParamsFree(connParams, CONN_ASSIGNER_SIZE);
             break;
         }
         case EVENT_MODULE_DISC: {
-            SoftbusEventParam discParams[DISC_ASSIGNER_SIZE] = { 0 };
+            HiSysEventParam discParams[DISC_ASSIGNER_SIZE] = { 0 };
             ConvertDiscForm2Param(discParams, DISC_ASSIGNER_SIZE, form);
             WriteHiSysEvent(params, SOFTBUS_ASSIGNER_SIZE, discParams, DISC_ASSIGNER_SIZE, form);
             SoftbusEventParamsFree(discParams, DISC_ASSIGNER_SIZE);
             break;
         }
         case EVENT_MODULE_LNN: {
-            SoftbusEventParam lnnParams[LNN_ASSIGNER_SIZE] = { 0 };
+            HiSysEventParam lnnParams[LNN_ASSIGNER_SIZE] = { 0 };
             ConvertLnnForm2Param(lnnParams, LNN_ASSIGNER_SIZE, form);
             WriteHiSysEvent(params, SOFTBUS_ASSIGNER_SIZE, lnnParams, LNN_ASSIGNER_SIZE, form);
             SoftbusEventParamsFree(lnnParams, LNN_ASSIGNER_SIZE);
             break;
         }
         case EVENT_MODULE_TRANS: {
-            SoftbusEventParam transParams[TRANS_ASSIGNER_SIZE] = { 0 };
+            HiSysEventParam transParams[TRANS_ASSIGNER_SIZE] = { 0 };
             ConvertTransForm2Param(transParams, TRANS_ASSIGNER_SIZE, form);
             WriteHiSysEvent(params, SOFTBUS_ASSIGNER_SIZE, transParams, TRANS_ASSIGNER_SIZE, form);
             SoftbusEventParamsFree(transParams, TRANS_ASSIGNER_SIZE);
