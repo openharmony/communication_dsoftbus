@@ -276,16 +276,26 @@ void FreeLaneId(uint32_t laneId)
 static int32_t LnnRequestLaneByQos(uint32_t laneId, const LaneRequestOption *request,
     const ILaneListener *listener)
 {
+    LNN_LOGI(LNN_LANE, "laneRequestByQos enter, minBW=%u, maxLaneLatency=%u, minLaneLatency=%u",
+        request->requestInfo.trans.qosRequire.minBW,
+        request->requestInfo.trans.qosRequire.maxLaneLatency,
+        request->requestInfo.trans.qosRequire.minLaneLatency);
     if (RequestInfoCheck(request, listener) == false) {
+        LNN_LOGE(LNN_LANE, "lane requestInfoByQos invalid");
         return SOFTBUS_ERR;
     }
     if (g_laneObject[request->type] == NULL) {
+        LNN_LOGE(LNN_LANE, "laneType=%d is not supported", request->type);
         return SOFTBUS_ERR;
     }
+    LNN_LOGI(LNN_LANE, "laneRequestByQos, laneId=%u, laneType=%d, transType=%d",
+        laneId, request->type, request->requestInfo.trans.transType);
     int32_t result = g_laneObject[request->type]->allocLaneByQos(laneId, request, listener);
     if (result != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "alloc lane by qos fail, result=%d", result);
         return SOFTBUS_ERR;
     }
+    LNN_LOGI(LNN_LANE, "request lane by qos success, laneId=%u", laneId);
     return SOFTBUS_OK;
 }
 
