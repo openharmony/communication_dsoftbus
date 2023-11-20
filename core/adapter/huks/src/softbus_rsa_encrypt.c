@@ -22,10 +22,10 @@
 #include <openssl/rsa.h>
 #include <openssl/x509.h>
 #include <securec.h>
-
-#include "softbus_adapter_log.h"
+ 
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
+#include "softbus_log_old.h"
 
 static const uint8_t SOFTBUS_RSA_KEY_ALIAS[] = "DsoftbusRsaKey";
 static const struct HksBlob g_rsaKeyAlias = { sizeof(SOFTBUS_RSA_KEY_ALIAS), (uint8_t *)SOFTBUS_RSA_KEY_ALIAS };
@@ -49,10 +49,10 @@ static struct HksParam g_decryptParams[] = {
 static bool IsRsaKeyPairExist(struct HksBlob Alias)
 {
     if (HksKeyExist(&Alias, NULL) == HKS_SUCCESS) {
-        HILOG_INFO(SOFTBUS_HILOG_ID, "rsa keypair already exist.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "rsa keypair already exist.");
         return true;
     } else {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "rsa keypair do not exist.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "rsa keypair do not exist.");
         return false;
     }
 }
@@ -60,16 +60,16 @@ static bool IsRsaKeyPairExist(struct HksBlob Alias)
 static int32_t ConstructKeyParamSet(struct HksParamSet **paramSet, const struct HksParam *params, uint32_t paramCount)
 {
     if (HksInitParamSet(paramSet) != HKS_SUCCESS) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "HksInitParamSet failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "HksInitParamSet failed.");
         return SOFTBUS_ERR;
     }
     if (HksAddParams(*paramSet, params, paramCount) != HKS_SUCCESS) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "HksAddParams failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "HksAddParams failed.");
         HksFreeParamSet(paramSet);
         return SOFTBUS_ERR;
     }
     if (HksBuildParamSet(paramSet) != HKS_SUCCESS) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "HksBuildParamSet failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "HksBuildParamSet failed.");
         HksFreeParamSet(paramSet);
         return SOFTBUS_ERR;
     }
@@ -84,7 +84,7 @@ static int32_t GenerateRsaKeyPair(void)
         return SOFTBUS_ERR;
     }
     if (HksGenerateKey(&g_rsaKeyAlias, paramSet, NULL) != HKS_SUCCESS) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "HksGenerateKey failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "HksGenerateKey failed.");
         HksFreeParamSet(&paramSet);
         return SOFTBUS_ERR;
     }
@@ -95,12 +95,12 @@ static int32_t GenerateRsaKeyPair(void)
 int32_t SoftbusGetPublicKey(uint8_t *publicKey, uint32_t publicKeyLen)
 {
     if (publicKey == NULL || publicKeyLen == 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "invalid param");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     if (!IsRsaKeyPairExist(g_rsaKeyAlias)) {
         if (GenerateRsaKeyPair() != SOFTBUS_OK) {
-            HILOG_ERROR(SOFTBUS_HILOG_ID, "Generate RsaKeyPair failed");
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Generate RsaKeyPair failed");
             return SOFTBUS_ERR;
         }
     }
@@ -108,10 +108,10 @@ int32_t SoftbusGetPublicKey(uint8_t *publicKey, uint32_t publicKeyLen)
     uint8_t pubKey[HKS_RSA_KEY_SIZE_4096] = { 0 };
     struct HksBlob publicKeyBlob = { HKS_RSA_KEY_SIZE_4096, pubKey };
     if (HksExportPublicKey(&g_rsaKeyAlias, NULL, &publicKeyBlob) != HKS_SUCCESS) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "HksExportPubKey failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "HksExportPubKey failed.");
         return SOFTBUS_ERR;
     }
-    HILOG_DEBUG(SOFTBUS_HILOG_ID, "X509 public key size is: %u.", publicKeyBlob.size);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "X509 public key size is: %u.", publicKeyBlob.size);
     if (memcpy_s(publicKey, publicKeyBlob.size, publicKeyBlob.data, publicKeyBlob.size) != EOK) {
         return SOFTBUS_ERR;
     }
@@ -120,16 +120,16 @@ int32_t SoftbusGetPublicKey(uint8_t *publicKey, uint32_t publicKeyLen)
 
 static int32_t X509ToRsaPublicKey(struct HksBlob *x509Key, struct HksBlob *publicKey)
 {
-    HILOG_DEBUG(SOFTBUS_HILOG_ID, "X509ToRsaPublicKey invoked.");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "X509ToRsaPublicKey invoked.");
     uint8_t *data = x509Key->data;
     EVP_PKEY *pkey = d2i_PUBKEY(NULL, (const unsigned char **)&data, x509Key->size);
     if (pkey == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "d2i_PUBKEY failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "d2i_PUBKEY failed.");
         return SOFTBUS_ERR;
     }
     const RSA *rsa = EVP_PKEY_get0_RSA(pkey);
     if (rsa == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP_PKEY_get0_RSA failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "EVP_PKEY_get0_RSA failed.");
         return SOFTBUS_ERR;
     }
     int32_t nSizeTemp = BN_num_bytes(RSA_get0_n(rsa));
@@ -150,8 +150,8 @@ static int32_t X509ToRsaPublicKey(struct HksBlob *x509Key, struct HksBlob *publi
         EVP_PKEY_free(pkey);
         return SOFTBUS_ERR;
     }
-    HILOG_INFO(SOFTBUS_HILOG_ID, "nSize is: %u.", nSize);
-    HILOG_INFO(SOFTBUS_HILOG_ID, "eSize is: %u.", eSize);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "nSize is: %u.", nSize);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "eSize is: %u.", eSize);
     EVP_PKEY_free(pkey);
     return SOFTBUS_OK;
 }
@@ -161,7 +161,7 @@ static RSA *InitRsa(struct HksBlob *key, const bool needPrivateExponent)
     const struct HksKeyMaterialRsa *keyMaterial = (struct HksKeyMaterialRsa *)(key->data);
     uint8_t *buff = (uint8_t *)SoftBusCalloc(HKS_KEY_BYTES(keyMaterial->keySize));
     if (buff == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "buff calloc failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "buff calloc failed.");
         return NULL;
     }
 
@@ -215,7 +215,7 @@ static const EVP_MD *GetOpensslDigestType(int digestType)
         case DIGEST_SHA512:
             return EVP_sha512();
         default:
-            HILOG_ERROR(SOFTBUS_HILOG_ID, "GetOpensslDigestType failed.");
+            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "GetOpensslDigestType failed.");
             return NULL;
     }
 }
@@ -272,32 +272,32 @@ int32_t SoftbusRsaEncrypt(const uint8_t *srcData, uint32_t srcDataLen, const uin
     uint8_t **encryptedData, uint32_t *encryptedDataLen)
 {
     if (srcData == NULL || srcDataLen == 0 || publicKey == NULL || encryptedData == NULL || encryptedDataLen == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "invalid param");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t publicKeySize = SOFTBUS_RSA_PUB_KEY_LEN;
     uint8_t huksPublicKey[publicKeySize];
     if (memcpy_s(huksPublicKey, publicKeySize, publicKey, publicKeySize) != EOK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "huksPublicKey memcpy_s failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "huksPublicKey memcpy_s failed.");
         return SOFTBUS_MEM_ERR;
     }
     struct HksBlob huksPublicKeyInfo = { publicKeySize, huksPublicKey };
     uint8_t opensslPublicKey[HKS_RSA_KEY_SIZE_4096] = { 0 };
     struct HksBlob opensslPublicKeyInfo = { HKS_RSA_KEY_SIZE_4096, opensslPublicKey };
     if (X509ToRsaPublicKey(&huksPublicKeyInfo, &opensslPublicKeyInfo) != SOFTBUS_OK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "X509ToRsaPublicKey failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "X509ToRsaPublicKey failed.");
         return SOFTBUS_ERR;
     }
-    HILOG_DEBUG(SOFTBUS_HILOG_ID, "opensslPublicKeyInfo.size is: %u.", opensslPublicKeyInfo.size);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "opensslPublicKeyInfo.size is: %u.", opensslPublicKeyInfo.size);
     struct HksBlob finalPublicKeyInfo = { .size = opensslPublicKeyInfo.size,
         .data = (uint8_t *)SoftBusCalloc(opensslPublicKeyInfo.size) };
     if (finalPublicKeyInfo.data == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "malloc failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "malloc failed.");
         return SOFTBUS_ERR;
     }
     if (memcpy_s(finalPublicKeyInfo.data, finalPublicKeyInfo.size, opensslPublicKeyInfo.data,
             opensslPublicKeyInfo.size) != EOK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "memcpy_s failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "memcpy_s failed.");
         SoftBusFree(finalPublicKeyInfo.data);
         return SOFTBUS_ERR;
     }
@@ -305,13 +305,13 @@ int32_t SoftbusRsaEncrypt(const uint8_t *srcData, uint32_t srcDataLen, const uin
     struct HksBlob cipherText = { .size = HKS_RSA_KEY_SIZE_4096,
         .data = (uint8_t *)SoftBusCalloc(HKS_RSA_KEY_SIZE_4096) };
     if (cipherText.data == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "malloc failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "malloc failed.");
         SoftBusFree(finalPublicKeyInfo.data);
         return SOFTBUS_ERR;
     }
     if (EncryptByPublicKey(&plainText, &cipherText, &finalPublicKeyInfo, RSA_PKCS1_OAEP_PADDING, DIGEST_SHA256) !=
         SOFTBUS_OK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "EVP_PKEY_encrypt failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "EVP_PKEY_encrypt failed.");
         SoftBusFree(finalPublicKeyInfo.data);
         SoftBusFree(cipherText.data);
         return SOFTBUS_ERR;
@@ -319,13 +319,13 @@ int32_t SoftbusRsaEncrypt(const uint8_t *srcData, uint32_t srcDataLen, const uin
     *encryptedDataLen = cipherText.size;
     *encryptedData = (uint8_t *)SoftBusCalloc(cipherText.size);
     if (*encryptedData == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "encrypted Data calloc fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "encrypted Data calloc fail");
         SoftBusFree(finalPublicKeyInfo.data);
         SoftBusFree(cipherText.data);
         return SOFTBUS_MEM_ERR;
     }
     if (memcpy_s(*encryptedData, cipherText.size, cipherText.data, cipherText.size) != EOK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "encryptedData memcpy_s fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "encryptedData memcpy_s fail");
         SoftBusFree(finalPublicKeyInfo.data);
         SoftBusFree(cipherText.data);
         return SOFTBUS_MEM_ERR;
@@ -339,10 +339,10 @@ int32_t SoftbusRsaDecrypt(const uint8_t *srcData, uint32_t srcDataLen, uint8_t *
     uint32_t *decryptedDataLen)
 {
     if (srcData == NULL || srcDataLen == 0 || decryptedData == NULL || decryptedDataLen == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "invalid srcData");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "invalid srcData");
         return SOFTBUS_INVALID_PARAM;
     }
-    HILOG_DEBUG(SOFTBUS_HILOG_ID, "DecryptByPrivateKey invoked.");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "DecryptByPrivateKey invoked.");
     struct HksBlob encryptedBlob = { srcDataLen, (uint8_t *)srcData };
     struct HksParamSet *paramSet = NULL;
     if (ConstructKeyParamSet(&paramSet, g_decryptParams, sizeof(g_decryptParams) / sizeof(struct HksParam)) !=
@@ -352,26 +352,26 @@ int32_t SoftbusRsaDecrypt(const uint8_t *srcData, uint32_t srcDataLen, uint8_t *
     struct HksBlob decryptedBlob = { .size = HKS_RSA_KEY_SIZE_4096,
         .data = (uint8_t *)(SoftBusCalloc(HKS_RSA_KEY_SIZE_4096)) };
     if (decryptedBlob.data == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "decryptedBlob data calloc failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "decryptedBlob data calloc failed.");
         return SOFTBUS_MEM_ERR;
     }
     if (HksDecrypt(&g_rsaKeyAlias, paramSet, &encryptedBlob, &decryptedBlob) != HKS_SUCCESS) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "HksDecrypt failed.");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "HksDecrypt failed.");
         HksFreeParamSet(&paramSet);
         SoftBusFree(decryptedBlob.data);
         return SOFTBUS_ERR;
     }
-    HILOG_DEBUG(SOFTBUS_HILOG_ID, "HksDecrypt success.");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_DBG, "HksDecrypt success.");
     *decryptedDataLen = decryptedBlob.size;
     *decryptedData = (uint8_t *)SoftBusCalloc(decryptedBlob.size);
     if (*decryptedData == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "decrypted Data calloc fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "decrypted Data calloc fail");
         HksFreeParamSet(&paramSet);
         SoftBusFree(decryptedBlob.data);
         return SOFTBUS_MEM_ERR;
     }
     if (memcpy_s(*decryptedData, decryptedBlob.size, decryptedBlob.data, decryptedBlob.size) != EOK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "decrypted Data memcpy_s fail");
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "decrypted Data memcpy_s fail");
         HksFreeParamSet(&paramSet);
         SoftBusFree(decryptedBlob.data);
         return SOFTBUS_MEM_ERR;
