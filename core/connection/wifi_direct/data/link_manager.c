@@ -14,7 +14,10 @@
  */
 
 #include "link_manager.h"
+
 #include <string.h>
+
+#include "anonymizer.h"
 #include "conn_log.h"
 #include "softbus_error_code.h"
 #include "inner_link.h"

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "anonymizer.h"
 #include "client_trans_session_adapter.h"
 #include "socket.h"
 #include "softbus_adapter_mem.h"

@@ -14,7 +14,10 @@
  */
 
 #include "wifi_direct_negotiator.h"
+
 #include <string.h>
+
+#include "anonymizer.h"
 #include "securec.h"
 #include "softbus_error_code.h"
 #include "softbus_adapter_timer.h"

@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "anonymizer.h"
 #include "bus_center_manager.h"
 #include "lnn_lane_qos.h"
 #include "session.h"

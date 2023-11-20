@@ -21,6 +21,7 @@
 
 #include <unistd.h>
 
+#include "anonymizer.h"
 #include "client_qos_manager.h"
 #include "client_trans_channel_manager.h"
 #include "client_trans_file_listener.h"

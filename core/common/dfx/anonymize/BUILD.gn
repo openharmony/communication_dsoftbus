@@ -15,8 +15,8 @@ import("../dsoftbus_dfx.gni")
 
 dsoftbus_root_path = "../../../.."
 
-softbus_log_src = [
-  "src/softbus_log.c",
+softbus_anonymizer_src = [
+  "src/anonymizer.c",
 ]
 
 if (defined(ohos_lite)) {
@@ -25,7 +25,7 @@ if (defined(ohos_lite)) {
   } else {
     build_type = "shared_library"
   }
-  config("dsoftbus_log_interface_lite") {
+  config("dsoftbus_anonymizer_interface_lite") {
     include_dirs = [
       "$dsoftbus_dfx_path/interface/include",
       "$dsoftbus_root_path/interfaces/kits/common",
@@ -35,23 +35,23 @@ if (defined(ohos_lite)) {
     cflags_cc = ohos_lite_cflags
   }
 
-  target(build_type, "softbus_dfx_log") {
+  target(build_type, "softbus_dfx_anonymizer") {
     include_dirs = [
       "$dsoftbus_dfx_path/interface/include",
       "$dsoftbus_root_path/interfaces/kits/common",
     ]
-    sources = softbus_log_src
+    sources = softbus_anonymizer_src
     deps = [ "$hilog_lite_deps_path" ]
-    public_configs = [ ":dsoftbus_log_interface_lite" ]
+    public_configs = [ ":dsoftbus_anonymizer_interface_lite" ]
   }
 } else {
-  config("dsoftbus_log_interface_std") {
+  config("dsoftbus_anonymizer_interface_std") {
     include_dirs = [
       "$dsoftbus_dfx_path/interface/include",
       "$dsoftbus_root_path/interfaces/kits/common",
     ]
   }
-  ohos_shared_library("softbus_dfx_log") {
+  ohos_shared_library("softbus_dfx_anonymizer") {
     sanitize = {
       cfi = true
       cfi_cross_dso = true
@@ -62,15 +62,18 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/interfaces/kits/common",
       "//third_party/bounds_checking_function/include",
     ]
-    sources = softbus_log_src
+    sources = softbus_anonymizer_src
     defines = [ "SOFTBUS_STANDARD_SYSTEM" ]
     defines += [ "__STDC_FORMAT_MACROS" ]
     if (is_asan) {
       defines += [ "ASAN_BUILD" ]
     }
 
-    public_configs = [ ":dsoftbus_log_interface_std" ]
-    deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
+    public_configs = [ ":dsoftbus_anonymizer_interface_std" ]
+    deps = [
+      "$dsoftbus_dfx_path/log:softbus_dfx_log",
+      "//third_party/bounds_checking_function:libsec_shared"
+    ]
     external_deps = [ "hilog:libhilog" ]
     innerapi_tags = [ "platformsdk_indirect" ]
     part_name = "dsoftbus"

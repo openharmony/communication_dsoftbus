@@ -16,7 +16,6 @@
 #ifndef DSOFTBUS_TRANS_LOG_H
 #define DSOFTBUS_TRANS_LOG_H
 
-#include "anonymizer.h"
 #include "softbus_log.h"
 
 #ifdef __cplusplus
@@ -63,8 +62,6 @@ static const SoftBusLogLabel TRANS_LABELS[MODULE_DOMAIN_MAX_LEN] = {
     CHECK_AND_RETURN_LOG_INNER(cond, TRANS_LOGW, label, fmt, ##__VA_ARGS__)
 #define TRANS_CHECK_AND_RETURN_LOGE(cond, label, fmt, ...) \
     CHECK_AND_RETURN_LOG_INNER(cond, TRANS_LOGE, label, fmt, ##__VA_ARGS__)
-
-void PrintAnonymousPacket(TransLogLabelEnum label, const char *msg, const char *packet);
 
 #ifdef __cplusplus
 }
