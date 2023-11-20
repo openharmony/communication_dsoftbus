@@ -22,8 +22,6 @@
 extern "C" {
 #endif
 
-#define EVENT_STAGE_RESULT_OK 1
-
 #define LNN_EVENT(scene, stage, extra) LnnEventInner(scene, stage, __FUNCTION__, __LINE__, extra)
 
 /* For inner use only */
