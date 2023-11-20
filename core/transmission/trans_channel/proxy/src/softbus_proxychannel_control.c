@@ -126,9 +126,8 @@ int32_t TransProxyHandshake(ProxyChannelInfo *info)
     }
     TransEventExtra extra = {
         .channelId = info->myId,
-        .connectionId = info->connId,
-        .result = TRANS_STAGE_RESULT_OK
-    };
+        .connectionId = (int32_t)info->connId,
+        .result = STAGE_RESULT_OK };
     TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_HANDSHAKE_START, extra);
     return SOFTBUS_OK;
 }
