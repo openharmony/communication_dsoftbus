@@ -1034,6 +1034,50 @@ static int32_t DlGetAccountHash(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t DlGetDeviceIrk(const char *networkId, void *buf, uint32_t len)
+{
+    NodeInfo *info = NULL;
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if (memcpy_s(buf, len, info->rpaInfo.peerIrk, LFINDER_IRK_LEN) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy peerIrk fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t DlGetDevicePubMac(const char *networkId, void *buf, uint32_t len)
+{
+    NodeInfo *info = NULL;
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if (memcpy_s(buf, len, info->rpaInfo.publicAddress, LFINDER_MAC_ADDR_LEN) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy publicAddress fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t DlGetDeviceCipherInfoKey(const char *networkId, void *buf, uint32_t len)
+{
+    NodeInfo *info = NULL;
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if (memcpy_s(buf, len, info->cipherInfo.key, SESSION_KEY_LENGTH) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy cipher key fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t DlGetDeviceCipherInfoIv(const char *networkId, void *buf, uint32_t len)
+{
+    NodeInfo *info = NULL;
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if (memcpy_s(buf, len, info->cipherInfo.iv, BROADCAST_IV_LEN) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy cipher iv fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static DistributedLedgerKey g_dlKeyTable[] = {
     {STRING_KEY_HICE_VERSION, DlGetNodeSoftBusVersion},
     {STRING_KEY_DEV_UDID, DlGetDeviceUdid},
@@ -1065,6 +1109,10 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {NUM_KEY_DEV_TYPE_ID, DlGetDeviceTypeId},
     {BOOL_KEY_TLV_NEGOTIATION, DlGetNodeTlvNegoFlag},
     {BYTE_KEY_ACCOUNT_HASH, DlGetAccountHash},
+    {BYTE_KEY_IRK, DlGetDeviceIrk},
+    {BYTE_KEY_PUB_MAC, DlGetDevicePubMac},
+    {BYTE_KEY_BROADCAST_CIPHER_KEY, DlGetDeviceCipherInfoKey},
+    {BYTE_KEY_BROADCAST_CIPHER_IV, DlGetDeviceCipherInfoIv},
 };
 
 static char *CreateCnnCodeKey(const char *uuid, DiscoveryType type)

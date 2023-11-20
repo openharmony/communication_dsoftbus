@@ -20,10 +20,17 @@
 
 #include "cJSON.h"
 #include "softbus_common.h"
+#include "lnn_node_info.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+typedef struct {
+    char udid[UDID_BUF_LEN];
+    uint64_t endTime;
+    BroadcastCipherInfo cipherInfo;
+} BroadcastCipherKey;
 
 int32_t LnnInitCipherKeyManager(void);
 void LnnDeinitCipherKeyManager(void);
@@ -34,6 +41,10 @@ void LoadBleBroadcastKey(void);
 bool IsCipherManagerFindKey(const char *udid);
 bool PackCipherKeySyncMsg(void *json);
 void ProcessCipherKeySyncInfo(const void *json, const char *networkId);
+int32_t LnnLoadLocalBroadcastCipherKey(void);
+int32_t LnnGetLocalBroadcastCipherKey(BroadcastCipherKey *broadcastKey);
+int32_t LnnSaveLocalBroadcastCipherKey(const BroadcastCipherKey *broadcastKey);
+int32_t LnnUpdateLocalBroadcastCipherKey(BroadcastCipherKey *broadcastCipherKey);
 
 #ifdef __cplusplus
 }

@@ -98,6 +98,7 @@ static void LnnRestoreLocalDeviceInfo()
         return;
     }
     LoadBleBroadcastKey();
+    LnnLoadLocalBroadcastCipherKey();
     LNN_LOGI(LNN_LEDGER, "load remote deviceInfo devicekey success");
 }
 

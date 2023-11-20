@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef LNN_NETWORK_ID_H
-#define LNN_NETWORK_ID_H
+#include "lnn_link_finder.h"
+#include "softbus_error_code.h"
 
-#include <stdint.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-int32_t LnnGenLocalNetworkId(char *networkId, uint32_t len);
-int32_t LnnGenLocalUuid(char *uuid, uint32_t len);
-int32_t LnnGenLocalIrk(unsigned char *irk, uint32_t len);
-
-#ifdef __cplusplus
+int32_t LnnLinkFinderInit(void)
+{
+    return SOFTBUS_OK;
 }
-#endif
-#endif
+
+int32_t LnnUpdateLinkFinderInfo(void)
+{
+    return SOFTBUS_OK;
+}
+
+int32_t LnnRemoveLinkFinderInfo(const char *networkId)
+{
+    (void)networkId;
+    return SOFTBUS_OK;
+}
+
+int32_t LnnInsertLinkFinderInfo(const char *networkId)
+{
+    (void)networkId;
+    return SOFTBUS_OK;
+}
