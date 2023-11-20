@@ -21,6 +21,7 @@
 #include "softbus_errcode.h"
 #include "softbus_permission.h"
 #include "softbus_qos.h"
+#include "softbus_scenario_manager.h"
 #include "softbus_utils.h"
 #include "trans_channel_manager.h"
 #include "trans_log.h"
@@ -49,6 +50,10 @@ int32_t TransServerInit(void)
         TRANS_LOGE(TRANS_INIT, "QosInit Failed");
         return SOFTBUS_ERR;
     }
+    if (ScenarioManagerGetInstance() == NULL) {
+        TRANS_LOGE(TRANS_INIT, "ScenarioManager init Failed");
+        return SOFTBUS_ERR;
+    }
     g_transSessionInitFlag = true;
     TRANS_LOGI(TRANS_INIT, "trans session server list init succ");
     return SOFTBUS_OK;
@@ -63,6 +68,7 @@ void TransServerDeinit(void)
     TransSessionMgrDeinit();
     TransChannelDeinit();
     TransPermissionDeinit();
+    ScenarioManagerdestroyInstance();
     g_transSessionInitFlag = false;
 }
 
