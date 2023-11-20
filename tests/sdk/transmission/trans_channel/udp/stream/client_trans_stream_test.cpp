@@ -90,8 +90,10 @@ HWTEST_F(ClientTransStreamTest, RegisterStreamCb001, TestSize.Level0)
 
     status = STREAM_OPENED;
     SetStreamChannelStatus(channelId, status);
-    UnregisterStreamCb();
 
+    OnStreamReceived(channelId, NULL, NULL, NULL);
+    UnregisterStreamCb();
+    OnStreamReceived(channelId, NULL, NULL, NULL);
     if (streamCb != nullptr) {
         SoftBusFree(streamCb);
     }
