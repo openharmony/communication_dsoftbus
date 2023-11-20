@@ -20,7 +20,6 @@
 #include <unistd.h>
 
 #include "client_trans_pending.h"
-#include "client_trans_proxy_file_common.h"
 #include "client_trans_proxy_file_manager.h"
 #include "client_trans_session_manager.h"
 #include "client_trans_tcp_direct_message.h"
@@ -947,56 +946,4 @@ int32_t TransProxyChannelSendMessage(int32_t channelId, const void *data, uint32
     }
 
     return ProcPendingPacket(channelId, info.sequence, PENDING_TYPE_PROXY);
-}
-
-int32_t ProcessFileFrameData(int32_t sessionId, int32_t channelId, const char *data, uint32_t len, int32_t type)
-{
-    FileFrame oneFrame;
-    oneFrame.frameType = type;
-    oneFrame.frameLength = len;
-    oneFrame.data = (uint8_t *)data;
-    return ProcessRecvFileFrameData(sessionId, channelId, &oneFrame);
-}
-
-static const char **GenerateRemoteFiles(const char *sFileList[], uint32_t fileCnt)
-{
-    const char **files = SoftBusCalloc(sizeof(const char *) * fileCnt);
-    if (files == NULL) {
-        TRANS_LOGE(TRANS_SDK, "malloc *fileCnt oom");
-        return NULL;
-    }
-    for (uint32_t i = 0; i < fileCnt; i++) {
-        files[i] = TransGetFileName(sFileList[i]);
-        if (files[i] == NULL) {
-            TRANS_LOGE(TRANS_SDK, "GetFileName failed at index=%" PRIu32, i);
-            SoftBusFree(files);
-            return NULL;
-        }
-    }
-    return files;
-}
-
-int32_t TransProxyChannelSendFile(int32_t channelId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)
-{
-    if (sFileList == NULL || fileCnt == 0 || fileCnt > MAX_SEND_FILE_NUM) {
-        TRANS_LOGE(TRANS_SDK, "input para failed! fileCnt=%" PRIu32, fileCnt);
-        return SOFTBUS_INVALID_PARAM;
-    }
-    const char **remoteFiles = NULL;
-    const char **generatedRemoteFiles = NULL;
-    if (dFileList == NULL) {
-        generatedRemoteFiles = GenerateRemoteFiles(sFileList, fileCnt);
-        if (generatedRemoteFiles == NULL) {
-            return SOFTBUS_ERR;
-        }
-        remoteFiles = generatedRemoteFiles;
-    } else {
-        remoteFiles = dFileList;
-    }
-    int32_t ret = ProxyChannelSendFile(channelId, sFileList, remoteFiles, fileCnt);
-    if (generatedRemoteFiles != NULL) {
-        SoftBusFree(generatedRemoteFiles);
-        generatedRemoteFiles = NULL;
-    }
-    return ret;
 }

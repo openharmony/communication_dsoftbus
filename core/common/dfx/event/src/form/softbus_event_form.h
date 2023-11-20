@@ -25,30 +25,31 @@
 extern "C" {
 #endif
 
+#define SOFTBUS_EVENT_DOMAIN        "DSOFTBUS"
+#define SOFTBUS_EVENT_PKG_NAME      "dsoftbus"
+#define SOFTBUS_EVENT_TYPE_BEHAVIOR 4
+
 typedef enum {
-    STAGE_RESULT_IDLE = 0,
     STAGE_RESULT_OK = 1,
     STAGE_RESULT_FAILED = 2,
     STAGE_RESULT_CANCELED = 3,
-    STAGE_RESULT_UNKNOWN = 4,
-} TransEventStageResult;
+} SoftbusEventStageResult;
 
 typedef struct {
-    const char *domain;    // DOMAIN
-    const char *eventName; // EVENT_NAME
-    int32_t eventType;     // EVENT_TYPE
-    const char *orgPkg;    // ORG_PKG
-    const char *func;      // FUNC
-    int32_t scene;         // BIZ_SCENE
-    int32_t stage;         // BIZ_STAGE
-    int32_t result;        // STAGE_RES
-    int32_t errcode;       // ERROR_CODE
+    int32_t scene;     // BIZ_SCENE
+    int32_t stage;     // BIZ_STAGE
+    int32_t eventType; // EVENT_TYPE
+    int32_t line;      // CODE_LINE
     union {
         ConnEventExtra connExtra;
         DiscEventExtra discExtra;
         LnnEventExtra lnnExtra;
         TransEventExtra transExtra;
     };
+    const char *domain;    // DOMAIN
+    const char *eventName; // EVENT_NAME
+    const char *orgPkg;    // ORG_PKG
+    const char *func;      // FUNC
 } SoftbusEventForm;
 
 #ifdef __cplusplus

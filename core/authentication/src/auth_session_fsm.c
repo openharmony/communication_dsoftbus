@@ -25,6 +25,7 @@
 #include "auth_manager.h"
 #include "auth_request.h"
 #include "auth_session_message.h"
+#include "lnn_event.h"
 #include "softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
@@ -504,8 +505,12 @@ static void HandleMsgRecvDeviceId(AuthFsm *authFsm, MessagePara *para)
             Anonymize(info->udid, &anonyUdid);
             AUTH_LOGI(AUTH_FSM, "start auth send udid=%s", anonyUdid);
             AnonymizeFree(anonyUdid);
+            LnnEventExtra lnnEventExtra = { .authId = authFsm->authSeq };
+            LNN_EVENT(SCENE_JION_LNN, STAGE_AUTH_DEVICE, lnnEventExtra);
             if (HichainStartAuth(authFsm->authSeq, info->udid, info->connInfo.peerUid) != SOFTBUS_OK) {
                 ret = SOFTBUS_AUTH_HICHAIN_AUTH_FAIL;
+                lnnEventExtra.errcode = SOFTBUS_AUTH_START_ERR;
+                LNN_EVENT(SCENE_JION_LNN, STAGE_AUTH_DEVICE, lnnEventExtra);
                 break;
             }
         }
@@ -544,8 +549,12 @@ static bool SyncDevIdStateProcess(FsmStateMachine *fsm, int32_t msgType, void *p
 
 static void HandleMsgRecvAuthData(AuthFsm *authFsm, MessagePara *para)
 {
+    LnnEventExtra lnnEventExtra = {0};
+    LNN_EVENT(SCENE_JION_LNN, STAGE_EXCHANGE_CIPHER, lnnEventExtra);
     int32_t ret = HichainProcessData(authFsm->authSeq, para->data, para->len);
     if (ret != SOFTBUS_OK) {
+        lnnEventExtra.errcode = SOFTBUS_AUTH_EXCHANGE_CIPHER_START_ERR;
+        LNN_EVENT(SCENE_JION_LNN, STAGE_EXCHANGE_CIPHER, lnnEventExtra);
         AUTH_LOGE(AUTH_FSM, "process hichain data fail");
         if (!authFsm->info.isAuthFinished) {
             CompleteAuthSession(authFsm, SOFTBUS_AUTH_HICHAIN_PROCESS_FAIL);
@@ -576,6 +585,8 @@ static int32_t TrySyncDeviceInfo(int64_t authSeq, AuthSessionInfo *info)
 
 static void HandleMsgSaveSessionKey(AuthFsm *authFsm, MessagePara *para)
 {
+    LnnEventExtra lnnEventExtra = { .result = EVENT_STAGE_RESULT_OK };
+    LNN_EVENT(SCENE_JION_LNN, STAGE_EXCHANGE_CIPHER, lnnEventExtra);
     SessionKey sessionKey = {.len = para->len};
     if (memcpy_s(sessionKey.value, sizeof(sessionKey.value), para->data, para->len) != EOK) {
         AUTH_LOGE(AUTH_FSM, "copy session key fail.");
@@ -639,6 +650,8 @@ static void HandleMsgAuthFinish(AuthFsm *authFsm, MessagePara *para)
 {
     (void)para;
     AuthSessionInfo *info = &authFsm->info;
+    LnnEventExtra lnnEventExtra = { .authId = authFsm->authSeq, .result = EVENT_STAGE_RESULT_OK };
+    LNN_EVENT(SCENE_JION_LNN, STAGE_AUTH_DEVICE, lnnEventExtra);
     AUTH_LOGI(AUTH_FSM, "auth fsm[%" PRId64"] hichain finished, devInfo|closeAck=%d|%d",
         authFsm->authSeq, info->isNodeInfoReceived, info->isCloseAckReceived);
     info->isAuthFinished = true;
@@ -685,14 +698,19 @@ static bool DeviceAuthStateProcess(FsmStateMachine *fsm, int32_t msgType, void *
 
 static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, MessagePara *para)
 {
+    LnnEventExtra lnnEventExtra = { .result = EVENT_STAGE_RESULT_OK };
     AuthSessionInfo *info = &authFsm->info;
     if (ProcessDeviceInfoMessage(authFsm->authSeq, info, para->data, para->len) != SOFTBUS_OK) {
+        lnnEventExtra.errcode = SOFTBUS_AUTH_EXCHANGE_DEVICE_INFO_END_ERR;
+        LNN_EVENT(SCENE_JION_LNN, STAGE_EXCHANGE_DEVICE_INFO, lnnEventExtra);
         AUTH_LOGE(AUTH_FSM, "process device info msg fail");
         CompleteAuthSession(authFsm, SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL);
         return;
     }
     info->isNodeInfoReceived = true;
 
+    lnnEventExtra.peerDeviceAbility = info->nodeInfo.netCapacity;
+    LNN_EVENT(SCENE_JION_LNN, STAGE_EXCHANGE_DEVICE_INFO, lnnEventExtra);
     if (info->connInfo.type == AUTH_LINK_TYPE_WIFI) {
         info->isCloseAckReceived = true; /* WiFi auth no need close ack, set true directly */
         if (!info->isServer) {

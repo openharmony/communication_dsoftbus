@@ -127,6 +127,7 @@ struct WifiDirectConnectInfo {
     char remoteMac[MAC_ADDR_STR_LEN];
     bool isNetworkDelegate;
     int32_t linkId;
+    uint32_t bandWidth;
 };
 
 struct WifiDirectConnectCallback {

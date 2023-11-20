@@ -43,4 +43,5 @@ declare_args() {
   dsoftbus_standard_feature_dfinder_support_multi_nif = true
 
   dsoftbus_feature_ex_kits = false
+  dsoftbus_feature_proxy_file = true
 }

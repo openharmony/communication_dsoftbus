@@ -268,6 +268,39 @@ uint32_t ApplyLaneId(LaneType type)
     return AllocLaneId(type);
 }
 
+void FreeLaneId(uint32_t laneId)
+{
+    return DestroyLaneId(laneId);
+}
+
+static int32_t LnnRequestLaneByQos(uint32_t laneId, const LaneRequestOption *request,
+    const ILaneListener *listener)
+{
+    if (RequestInfoCheck(request, listener) == false) {
+        return SOFTBUS_ERR;
+    }
+    if (g_laneObject[request->type] == NULL) {
+        return SOFTBUS_ERR;
+    }
+    int32_t result = g_laneObject[request->type]->allocLaneByQos(laneId, request, listener);
+    if (result != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static LnnLaneManager g_LaneManager = {
+    .lnnQueryLaneResource = LnnQueryLaneResource,
+    .applyLaneId = ApplyLaneId,
+    .lnnRequestLane = LnnRequestLaneByQos,
+    .lnnFreeLane = LnnFreeLane,
+};
+
+LnnLaneManager* GetLaneManager(void)
+{
+    return &g_LaneManager;
+}
+
 int32_t LnnRequestLane(uint32_t laneId, const LaneRequestOption *request,
     const ILaneListener *listener)
 {
@@ -306,7 +339,6 @@ int32_t LnnFreeLane(uint32_t laneId)
         LNN_LOGE(LNN_LANE, "freeLane fail, result:%d", result);
         return SOFTBUS_ERR;
     }
-    DestroyLaneId(laneId);
     return SOFTBUS_OK;
 }
 

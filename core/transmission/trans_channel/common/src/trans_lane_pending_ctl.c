@@ -28,6 +28,7 @@
 #include "trans_log.h"
 #include "trans_session_manager.h"
 #include "lnn_distributed_net_ledger.h"
+#include "trans_event.h"
 
 #define TRANS_REQUEST_PENDING_TIMEOUT (5000)
 #define SESSION_NAME_PHONEPAD "com.huawei.pcassistant.phonepad-connect-channel"
@@ -498,6 +499,14 @@ int32_t TransGetLaneInfo(const SessionParam *param, LaneConnInfo *connInfo, uint
     }
 
     int32_t ret = TransGetLaneInfoByOption(&requestOption, connInfo, laneId);
+    TransEventExtra extra = {
+        .socketName = param->sessionName,
+        .laneId = *laneId,
+        .peerNetworkId = param->peerDeviceId,
+        .laneTransType = requestOption.requestInfo.trans.transType,
+        .errcode = ret
+    };
+    TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_SELECT_LANE, extra);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "get lane info by option failed.");
         return ret;

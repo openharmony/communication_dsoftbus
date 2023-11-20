@@ -181,6 +181,7 @@ if (defined(ohos_lite)) {
 
     public_configs = [ ":dsoftbus_utils_interface_L2" ]
     public_deps = [
+      "$dsoftbus_dfx_path/event:softbus_dfx_event",
       "$dsoftbus_dfx_path/log:softbus_dfx_log",
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "//third_party/cJSON:cjson",
@@ -196,7 +197,10 @@ if (defined(ohos_lite)) {
       ]
     }
     if (is_standard_system) {
-      external_deps = [ "hilog:libhilog" ]
+      external_deps = [
+        "hilog:libhilog",
+        "hisysevent:libhisysevent",
+      ]
     }
     innerapi_tags = [ "platformsdk_indirect" ]
     part_name = "dsoftbus"

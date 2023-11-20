@@ -24,6 +24,11 @@
 extern "C" {
 #endif
 
+#define CONN_EVENT_NAME  "CONN_EVENT"
+#define DISC_EVENT_NAME  "DISC_EVENT"
+#define LNN_EVENT_NAME   "LNN_EVENT"
+#define TRANS_EVENT_NAME "TRANS_EVENT"
+
 typedef enum {
     EVENT_MODULE_CONN,
     EVENT_MODULE_DISC,
