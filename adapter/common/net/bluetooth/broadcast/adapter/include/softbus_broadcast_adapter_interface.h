@@ -72,8 +72,6 @@ struct SoftbusBroadcastMediumInterface {
         const SoftbusBroadcastData *rspData);
     int32_t (*UpdateBroadcasting)(int32_t advId, const SoftbusBroadcastParam *param, const SoftbusBroadcastData *bcData,
         const SoftbusBroadcastData *rspData);
-    int32_t (*SetBroadcastingData)(int32_t advId, const SoftbusBroadcastData *bcData,
-        const SoftbusBroadcastData *rspData);
     int32_t (*StopBroadcasting)(int32_t advId);
     int32_t (*StartScan)(int32_t scanerId, const SoftBusBcScanParams *param);
     int32_t (*StopScan)(int32_t scanerId);
