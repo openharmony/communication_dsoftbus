@@ -28,6 +28,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_hisysevt_transreporter.h"
+#include "softbus_scenario_manager.h"
 #include "trans_lane_pending_ctl.h"
 #include "trans_log.h"
 #include "trans_udp_channel_manager.h"
@@ -50,6 +51,10 @@ static uint64_t g_channelIdFlagBitsMap = 0;
 static IServerChannelCallBack *g_channelCb = NULL;
 static SoftBusMutex g_udpNegLock;
 static uint32_t g_idMark = 0;
+
+// it's fake, gona replaced by wifi interface
+const char *LOCAL_MAC_1 = "18:65";
+const char *PEER_MAC_1 = "de:4f";
 
 static int32_t GenerateUdpChannelId(void)
 {
@@ -277,11 +282,34 @@ static int32_t CloseUdpChannel(AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
+static void NotifyWifiByAddScenario(StreamType streamType, int pid)
+{
+    if (streamType == COMMON_AUDIO_STREAM || streamType == COMMON_VIDEO_STREAM) {
+        if (AddScenario(LOCAL_MAC_1, PEER_MAC_1, pid, SM_AUDIO_TYPE) !=0) {
+            TRANS_LOGE(TRANS_CTRL, "notify wifi scan failed!");
+        } else {
+            TRANS_LOGI(TRANS_CTRL, "notify wifi scan success!");
+        }
+    }
+}
+
+static void NotifyWifiByDelScenario(StreamType streamType, int pid)
+{
+    if (streamType == COMMON_AUDIO_STREAM || streamType == COMMON_VIDEO_STREAM) {
+        if (DelScenario(LOCAL_MAC_1, PEER_MAC_1, pid, SM_AUDIO_TYPE) !=0) {
+            TRANS_LOGE(TRANS_CTRL, "recover wifi scan failed");
+        } else {
+            TRANS_LOGI(TRANS_CTRL, "recover wifi scan success!");
+        }
+    }
+}
+
 static int32_t ProcessUdpChannelState(AppInfo *appInfo, bool isServerSide)
 {
     int32_t ret = SOFTBUS_OK;
     switch (appInfo->udpChannelOptType) {
         case TYPE_UDP_CHANNEL_OPEN:
+            NotifyWifiByAddScenario(appInfo->streamType, appInfo->myData.pid);
             if (isServerSide) {
                 ret = AcceptUdpChannelAsServer(appInfo);
             } else {
@@ -289,6 +317,7 @@ static int32_t ProcessUdpChannelState(AppInfo *appInfo, bool isServerSide)
             }
             return ret;
         case TYPE_UDP_CHANNEL_CLOSE:
+            NotifyWifiByDelScenario(appInfo->streamType, appInfo->myData.pid);
             ret = CloseUdpChannel(appInfo);
             break;
         default:
@@ -844,6 +873,7 @@ int32_t TransCloseUdpChannel(int32_t channelId)
         TRANS_LOGE(TRANS_CTRL, "get udp channel by channel id failed. channelId=%d", channelId);
         return SOFTBUS_ERR;
     }
+    NotifyWifiByDelScenario(channel.info.streamType, channel.info.myData.pid);
     if (OpenAuthConnForUdpNegotiation(&channel) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "open udp negotiation failed.");
         return SOFTBUS_ERR;
