@@ -209,6 +209,7 @@ HWTEST_F(DiscSoftBusBleTest, TestProcessHwHashAccout001, TestSize.Level1)
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
     DeviceInfo testFoundInfo;
+    (void)memset_s(&testFoundInfo, sizeof(testFoundInfo), 0, sizeof(testFoundInfo));
     testFoundInfo.capabilityBitmap[0] = 0x1;
     g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].isSameAccount[0] = false;
     g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].isSameAccount[0] = false;
