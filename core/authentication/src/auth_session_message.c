@@ -131,6 +131,10 @@
 #define UNIFIED_DISPLAY_DEVICE_NAME "UNIFIED_DISPLAY_DEVICE_NAME"
 #define UNIFIED_DEFAULT_DEVICE_NAME "UNIFIED_DEFAULT_DEVICE_NAME"
 #define UNIFIED_DEVICE_NAME "UNIFIED_DEVICE_NAME"
+#define BROADCAST_CIPHER_KEY "BROADCAST_CIPHER_KEY"
+#define BROADCAST_CIPHER_IV "BROADCAST_CIPHER_IV"
+#define IRK "IRK"
+#define PUB_MAC "PUB_MAC"
 
 #define FLAG_COMPRESS_DEVICE_INFO 1
 #define FLAG_UNCOMPRESS_DEVICE_INFO 0
@@ -731,6 +735,88 @@ static void PackCommP2pInfo(JsonObj *json, const NodeInfo *info)
     (void)JSON_AddInt32ToObject(json, STA_FREQUENCY, LnnGetStaFrequency(info));
 }
 
+static int32_t PackCipherRpaInfo(JsonObj *json, const NodeInfo *info)
+{
+    unsigned char cipherKey[SESSION_KEY_STR_LEN] = {0};
+    unsigned char cipherIv[BROADCAST_IV_STR_LEN] = {0};
+    unsigned char peerIrk[LFINDER_IRK_STR_LEN] = {0};
+    unsigned char pubMac[LFINDER_MAC_ADDR_STR_LEN] = {0};
+
+    if (ConvertBytesToHexString((char *)cipherKey, SESSION_KEY_STR_LEN,
+        info->cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "convert cipher key to string fail.");
+        return SOFTBUS_ERR;
+    }
+    if (ConvertBytesToHexString((char *)cipherIv, BROADCAST_IV_STR_LEN,
+        info->cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "convert cipher iv to string fail.");
+        return SOFTBUS_ERR;
+    }
+    if (ConvertBytesToHexString((char *)peerIrk, LFINDER_IRK_STR_LEN,
+        info->rpaInfo.peerIrk, LFINDER_IRK_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "convert peerIrk to string fail.");
+        return SOFTBUS_ERR;
+    }
+    if (ConvertBytesToHexString((char *)pubMac, LFINDER_MAC_ADDR_STR_LEN,
+        info->rpaInfo.publicAddress, LFINDER_MAC_ADDR_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "convert publicAddress to string fail.");
+        return SOFTBUS_ERR;
+    }
+
+    (void)JSON_AddStringToObject(json, BROADCAST_CIPHER_KEY, (const char *)cipherKey);
+    (void)JSON_AddStringToObject(json, BROADCAST_CIPHER_IV, (const char *)cipherIv);
+    (void)JSON_AddStringToObject(json, IRK, (const char *)peerIrk);
+    (void)JSON_AddStringToObject(json, PUB_MAC, (const char *)pubMac);
+    BroadcastCipherKey broadcastKey;
+    (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
+    if (LnnGetLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "get local info failed");
+        return SOFTBUS_ERR;
+    }
+    if (LnnUpdateLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "update local broadcast key failed");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static void UnpackCipherRpaInfo(const JsonObj *json, NodeInfo *info)
+{
+    char cipherKey[SESSION_KEY_STR_LEN] = {0};
+    char cipherIv[BROADCAST_IV_STR_LEN] = {0};
+    char peerIrk[LFINDER_IRK_STR_LEN] = {0};
+    char pubMac[LFINDER_MAC_ADDR_STR_LEN] = {0};
+
+    if (!JSON_GetStringFromOject(json, BROADCAST_CIPHER_KEY, cipherKey, SESSION_KEY_STR_LEN) ||
+        !JSON_GetStringFromOject(json, BROADCAST_CIPHER_IV, cipherIv, BROADCAST_IV_STR_LEN) ||
+        !JSON_GetStringFromOject(json, IRK, peerIrk, LFINDER_IRK_STR_LEN) ||
+        !JSON_GetStringFromOject(json, PUB_MAC, pubMac, LFINDER_MAC_ADDR_STR_LEN)) {
+        AUTH_LOGE(AUTH_FSM, "get json info fail.");
+        return;
+    }
+
+     if (ConvertHexStringToBytes((unsigned char *)info->cipherInfo.key,
+        SESSION_KEY_LENGTH, cipherKey, strlen(cipherKey)) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "convert cipher key to bytes fail.");
+        return;
+    }
+    if (ConvertHexStringToBytes((unsigned char *)info->cipherInfo.iv,
+        BROADCAST_IV_LEN, cipherIv, strlen(cipherIv)) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "convert cipher iv to bytes fail.");
+        return;
+    }
+    if (ConvertHexStringToBytes((unsigned char *)info->rpaInfo.peerIrk,
+        LFINDER_IRK_LEN, peerIrk, strlen(peerIrk)) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "convert peerIrk to bytes fail.");
+        return;
+    }
+    if (ConvertHexStringToBytes((unsigned char *)info->rpaInfo.publicAddress,
+        LFINDER_MAC_ADDR_LEN, pubMac, strlen(pubMac)) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "convert publicAddress to bytes fail.");
+        return;
+    }
+}
+
 static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion version, bool isMetaAuth)
 {
     if (version >= SOFTBUS_NEW_V1) {
@@ -792,6 +878,11 @@ static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion ve
         AUTH_LOGE(AUTH_FSM, "PackCipherKeySyncMsg fail");
     }
     PackCommP2pInfo(json, info);
+
+    if (PackCipherRpaInfo(json, info) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "pack CipherRpaInfo of device key fail.");
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 
@@ -863,6 +954,8 @@ static void UnpackCommon(const JsonObj *json, NodeInfo *info, SoftBusVersion ver
     OptInt(json, STA_FREQUENCY, &info->p2pInfo.staFrequency, -1);
     OptString(json, P2P_MAC_ADDR, info->p2pInfo.p2pMac, MAC_LEN, "");
     OptString(json, HML_MAC, info->wifiDirectAddr, MAC_LEN, "");
+
+    UnpackCipherRpaInfo(json, info);
 }
 
 static int32_t GetBtDiscTypeString(const NodeInfo *info, char *buf, uint32_t len)

@@ -19,6 +19,7 @@
 #include <string.h>
 
 #include <securec.h>
+#include "bus_center_adapter.h"
 #include "lnn_log.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"

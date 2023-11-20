@@ -39,6 +39,7 @@
 #include "lnn_event.h"
 #include "lnn_fast_offline.h"
 #include "lnn_heartbeat_utils.h"
+#include "lnn_link_finder.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_network_id.h"
@@ -1795,6 +1796,20 @@ static const char *SelectUseUdid(const char *peerUdid, const char *lowerUdid)
     }
 }
 
+static void LnnDeleteLinkFinderInfo(const char *peerUdid)
+{
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
+    if (LnnGetNetworkIdByUdid(peerUdid, networkId, sizeof(networkId)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get networkId fail.");
+        return;
+    }
+
+    if (LnnRemoveLinkFinderInfo(networkId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "remove a rpa info fail.");
+        return;
+    }
+}
+
 static void OnDeviceNotTrusted(const char *peerUdid)
 {
     if (peerUdid == NULL) {
@@ -1819,6 +1834,7 @@ static void OnDeviceNotTrusted(const char *peerUdid)
     if (useUdid == NULL) {
         return;
     }
+    LnnDeleteLinkFinderInfo(peerUdid);
     NotTrustedDelayInfo *info  = (NotTrustedDelayInfo *)SoftBusCalloc(sizeof(NotTrustedDelayInfo));
     if (info == NULL) {
         LNN_LOGE(LNN_BUILDER, "malloc NotTrustedDelayInfo fail");
@@ -2171,15 +2187,27 @@ static int32_t ConifgLocalLedger(void)
 {
     char uuid[UUID_BUF_LEN] = {0};
     char networkId[NETWORK_ID_BUF_LEN] = {0};
+    unsigned char irk[LFINDER_IRK_LEN] = {0};
 
-    // set local uuid and networkId
+    // set local networkId and uuid
     if (LnnGenLocalNetworkId(networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK ||
         LnnGenLocalUuid(uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local id fail");
         return SOFTBUS_ERR;
     }
+
+    // irk fail should not cause softbus init fail
+    if (LnnGenLocalIrk(irk, LFINDER_IRK_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get local irk fail");
+    }
     LnnSetLocalStrInfo(STRING_KEY_UUID, uuid);
     LnnSetLocalStrInfo(STRING_KEY_NETWORKID, networkId);
+    LnnSetLocalByteInfo(BYTE_KEY_IRK, irk, LFINDER_IRK_LEN);
+
+    // irk fail should not cause softbus init fail
+    if (LnnUpdateLinkFinderInfo() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "sync rpa info to linkfinder fail.");
+    }
     return SOFTBUS_OK;
 }
 
@@ -2399,6 +2427,7 @@ int32_t LnnInitNetBuilder(void)
     LnnInitTopoManager();
     InitNodeInfoSync();
     NetBuilderConfigInit();
+    LnnLinkFinderInit();
     if (RegAuthVerifyListener(&g_verifyListener) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "register auth verify listener fail");
         return SOFTBUS_ERR;
