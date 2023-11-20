@@ -16,9 +16,16 @@ import("../../../../dsoftbus.gni")
 trans_proxy_channel_sdk_src = [
   "$dsoftbus_sdk_path/transmission/trans_channel/proxy/src/client_trans_proxy_manager.c",
   "$dsoftbus_sdk_path/transmission/trans_channel/proxy/src/client_trans_pending.c",
-  "$dsoftbus_sdk_path/transmission/trans_channel/proxy/src/client_trans_proxy_file_common.c",
-  "$dsoftbus_sdk_path/transmission/trans_channel/proxy/src/client_trans_proxy_file_manager.c",
 ]
+
+if (dsoftbus_feature_proxy_file == true) {
+  trans_proxy_channel_sdk_src += [
+    "$dsoftbus_sdk_path/transmission/trans_channel/proxy/src/client_trans_proxy_file_common.c",
+    "$dsoftbus_sdk_path/transmission/trans_channel/proxy/src/client_trans_proxy_file_manager.c",
+  ]
+} else {
+  trans_proxy_channel_sdk_src += [ "$dsoftbus_sdk_path/transmission/trans_channel/proxy/src/client_trans_proxy_file_manager_virtual.c" ]
+}
 
 trans_proxy_channel_sdk_inc =
     [ "$dsoftbus_sdk_path/transmission/trans_channel/proxy/include/" ]

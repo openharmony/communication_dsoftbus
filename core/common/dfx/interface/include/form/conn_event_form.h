@@ -16,7 +16,7 @@
 #ifndef CONN_EVENT_FORM_H
 #define CONN_EVENT_FORM_H
 
-#include <stdlib.h>
+#include <stdint.h>
 
 typedef enum {
     SCENE_CONNECT = 1,
@@ -30,7 +30,7 @@ typedef enum {
 
 typedef struct {
     int32_t requestId;       // REQ_ID
-    int32_t LinkType;        // LINK_TYPE
+    int32_t linkType;        // LINK_TYPE
     int32_t expectRole;      // EXPECT_ROLE
     int32_t authType;        // AUTH_TYPE
     int32_t authId;          // AUTH_ID
@@ -39,7 +39,8 @@ typedef struct {
     int32_t rssi;            // RSSI
     int32_t load;            // CHLOAD
     int32_t frequency;       // FREQ
-    int32_t costTime;        // CONN_COST_TIME
+    int32_t costTime;        // CONN_COST_TIME -> COST_TIME
+    int32_t result;          // STAGE_RES
     int32_t errcode;         // ERROR_CODE
     const char *peerBrMac;   // PEER_BR_MAC
     const char *peerBleMac;  // PEER_BLE_MAC

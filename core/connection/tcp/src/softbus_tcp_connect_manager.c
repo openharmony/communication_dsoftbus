@@ -35,6 +35,7 @@
 #include "softbus_utils.h"
 #include "softbus_hidumper_conn.h"
 #include "softbus_hisysevt_connreporter.h"
+#include "conn_event.h"
 
 #define INVALID_DATA (-1)
 #define AUTH_P2P_KEEP_ALIVE_TIME 10
@@ -489,6 +490,12 @@ int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId,
     statistics->startTime = SoftBusGetSysTimeMs();
     statistics->connectTraceId = SoftbusGetConnectTraceId();
     CONN_LOGI(CONN_COMMON, "tcp conn start connectTraceId=%u", statistics->connectTraceId);
+    ConnEventExtra extra = {
+        .requestId = requestId,
+        .peerWifiMac = option->socketOption.addr,
+        .result = CONN_STAGE_RESULT_OK
+    };
+    CONN_EVENT(SCENE_CONNECT, STAGE_CONNECT_INVOKE_PROTOCOL, extra);
     int32_t fd = ConnOpenClientSocket(option, BIND_ADDR_ALL, true);
     if (fd < 0) {
         return TcpOpenClientSocketErr(option, requestId, statistics, result);
