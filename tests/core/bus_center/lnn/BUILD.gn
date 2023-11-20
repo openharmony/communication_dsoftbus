@@ -63,6 +63,7 @@ bus_center_unittest_dirs = [
   "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/include",
   "$dsoftbus_root_path/core/authentication/include",
   "$dsoftbus_root_path/core/bus_center/lnn/meta_node/include",
+  "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
 ]
 
 bus_center_unittest_deps = [
@@ -1369,6 +1370,7 @@ ohos_unittest("LNNLaneMockTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
     "//commonlibrary/c_utils/base/include",
     "//foundation/communication/wifi/wifi/interfaces/kits/c",
     "//foundation/communication/wifi/wifi/frameworks/native/include",
@@ -1452,6 +1454,7 @@ ohos_unittest("LNNLaneLinkTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
     "$dsoftbus_root_path/core/transmission/interface",
     "//commonlibrary/c_utils/base/include",
     "//foundation/communication/wifi/wifi/interfaces/kits/c",
@@ -1523,6 +1526,7 @@ ohos_unittest("LNNTransLaneMockTest") {
     "//commonlibrary/c_utils/base/include",
     "//foundation/communication/wifi/wifi/interfaces/kits/c",
     "//foundation/communication/wifi/wifi/frameworks/native/include",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
     "//third_party/cJSON",
     "unittest/common/",
     "$dsoftbus_root_path/core/connection/wifi_direct",

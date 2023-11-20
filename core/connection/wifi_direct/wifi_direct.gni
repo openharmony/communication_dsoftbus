@@ -140,4 +140,11 @@ if (enhanced_legacy_connection == true) {
   wifi_direct_connection_src += legacy_connection_src
   wifi_direct_connection_common_deps += legacy_connection_common_deps
   wifi_direct_connection_external_deps += legacy_connection_external_deps
+} else {
+  wifi_direct_connection_inc +=
+      [ "$dsoftbus_root_path/core/connection/ble/channel" ]
+  wifi_direct_connection_src += [
+    "$dsoftbus_root_path/core/connection/ble/channel/legacy_ble_channel_virtual.c",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/ble/softbus_adapter_ble_conflict_virtual.c",
+  ]
 }
