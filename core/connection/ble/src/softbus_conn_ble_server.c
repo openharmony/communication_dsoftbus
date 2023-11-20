@@ -799,7 +799,8 @@ static void BleConnectServerCallback(int32_t underlayerHandle, const SoftBusBtAd
 
     status = LegacyBleSaveConnection(legacyConnection);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "save legacy connection failed, disconnect this connection, address=%s, err=%d", anomizeAddress, status);
+        CONN_LOGE(CONN_BLE, "save legacy connection failed, disconnect this connection, address=%s, err=%d",
+            anomizeAddress, status);
         LegacyBleReturnConnection(&legacyConnection);
         SoftBusGattsDisconnect(*btAddr, underlayerHandle);
         return;
