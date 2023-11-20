@@ -157,7 +157,7 @@ HWTEST_F(AdapterDsoftbusAesCryptoTest, SoftbusAesCfbRootEncrypt001, TestSize.Lev
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = memcmp((const char *)decryptOutData.data, (const char *)encryptInData.data, decryptOutData.len);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(0, ret);
     SoftBusFree(encryptOutData.data);
     SoftBusFree(decryptOutData.data);
 }
@@ -332,7 +332,7 @@ HWTEST_F(AdapterDsoftbusAesCryptoTest, SoftbusAesGcmEncrypt001, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = memcmp((const char *)decryptOutData.data, (const char *)encryptInData.data, decryptOutData.len);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(0, ret);
     SoftBusFree(encryptOutData.data);
     SoftBusFree(decryptOutData.data);
 }

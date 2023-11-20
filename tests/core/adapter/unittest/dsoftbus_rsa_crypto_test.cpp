@@ -187,7 +187,7 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftbusRsaDecrypt001, TestSize.Level0)
     ret = SoftbusRsaDecrypt(encryptedData, encryptedDataLen, &decryptedData, &decryptedDataLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = memcmp((const char *)decryptedData, (const char *)srcData, decryptedDataLen);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(0, ret);
 
     SoftBusFree(encryptedData);
     SoftBusFree(decryptedData);
