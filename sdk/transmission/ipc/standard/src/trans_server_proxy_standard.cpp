@@ -18,6 +18,7 @@
 #include "ipc_skeleton.h"
 #include "ipc_types.h"
 
+#include "anonymizer.h"
 #include "message_parcel.h"
 #include "softbus_errcode.h"
 #include "softbus_server_ipc_interface_code.h"

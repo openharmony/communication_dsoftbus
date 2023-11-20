@@ -16,7 +16,6 @@
 #ifndef DSOFTBUS_CONN_LOG_H
 #define DSOFTBUS_CONN_LOG_H
 
-#include "anonymizer.h"
 #include "softbus_log.h"
 
 #ifdef __cplusplus

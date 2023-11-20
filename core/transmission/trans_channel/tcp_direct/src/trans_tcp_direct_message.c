@@ -18,6 +18,7 @@
 #include <securec.h>
 #include <string.h>
 
+#include "anonymizer.h"
 #include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "cJSON.h"

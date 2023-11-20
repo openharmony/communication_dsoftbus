@@ -46,6 +46,7 @@ if (defined(ohos_lite)) {
     build_type = "static_library"
   } else {
     diff_deps = [
+      "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
       "$dsoftbus_dfx_path/log:softbus_dfx_log",
       "$hilog_lite_deps_path",
       "//build/lite/config/component/cJSON:cjson_shared",
@@ -110,6 +111,7 @@ if (defined(ohos_lite)) {
       defines += [ "SOFTBUS_SMALL_SYSTEM" ]
     }
     deps = [
+      "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
       "$dsoftbus_dfx_path/log:softbus_dfx_log",
       "$dsoftbus_root_path/adapter:softbus_adapter",
     ]
@@ -181,6 +183,7 @@ if (defined(ohos_lite)) {
 
     public_configs = [ ":dsoftbus_utils_interface_L2" ]
     public_deps = [
+      "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
       "$dsoftbus_dfx_path/event:softbus_dfx_event",
       "$dsoftbus_dfx_path/log:softbus_dfx_log",
       "$dsoftbus_root_path/adapter:softbus_adapter",

@@ -14,6 +14,8 @@
  */
 
 #include "wifi_direct_manager.h"
+
+#include "anonymizer.h"
 #include "securec.h"
 #include "softbus_error_code.h"
 #include "lnn_distributed_net_ledger.h"

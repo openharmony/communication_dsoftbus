@@ -27,9 +27,9 @@ typedef enum {
     COMM_EVENT,
     COMM_VERIFY,
     COMM_PERM,
-    COMM_SVC,
     COMM_UTILS,
     COMM_SDK,
+    COMM_SVC,
     COMM_TEST,
 } CommLogLabelEnum;
 
@@ -39,10 +39,10 @@ static const SoftBusLogLabel COMM_LABELS[MODULE_DOMAIN_MAX_LEN] = {
     { COMM_DFX,     0xd005701,      "CommDfx"        },
     { COMM_EVENT,   0xd005702,      "CommEvent"      },
     { COMM_VERIFY,  0xd005703,      "CommVerify"     },
-    { COMM_PERM,    0xd005704,      "CommPermission" },
-    { COMM_SVC,     0xd005705,      "CommService"    },
-    { COMM_UTILS,   0xd005706,      "CommUtils"      },
-    { COMM_SDK,     0xd005707,      "CommSdk"        },
+    { COMM_PERM,    0xd005704,      "CommPerm" },
+    { COMM_UTILS,   0xd005705,      "CommUtils"      },
+    { COMM_SDK,     0xd005706,      "CommSdk"        },
+    { COMM_SVC,     0xd005707,      "CommSvc"    },
     { COMM_TEST,    DOMAIN_ID_TEST, "CommTest"       },
 };
 
