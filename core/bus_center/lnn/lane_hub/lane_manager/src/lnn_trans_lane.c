@@ -389,6 +389,7 @@ static int32_t FreeLaneLink(uint32_t laneId, LaneResource *laneResourceInfo, boo
             DestroyLink(item->info.networkId, laneId, item->type, item->info.pid);
             UnbindLaneId(laneId, item);
             SoftBusFree(item);
+            FreeLaneId(laneId);
             return SOFTBUS_OK;
         }
     }
