@@ -13,21 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef DISC_EVENT_H
-#define DISC_EVENT_H
-
-#include "form/disc_event_form.h"
+#ifndef EVENT_FORM_ENUM_H
+#define EVENT_FORM_ENUM_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define DISC_EVENT(scene, stage, extra) DiscEventInner(scene, stage, __FUNCTION__, __LINE__, extra)
-
-/* For inner use only */
-void DiscEventInner(int32_t scene, int32_t stage, const char *func, int32_t line, DiscEventExtra extra);
+typedef enum {
+    STAGE_RESULT_OK = 1,
+    STAGE_RESULT_FAILED = 2,
+    STAGE_RESULT_CANCELED = 3,
+} SoftbusEventStageResult;
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif // DISC_EVENT_H
+#endif // EVENT_FORM_ENUM_H

@@ -544,8 +544,7 @@ static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *re
     }
     TransEventExtra extra = {
         .channelId = channelId,
-        .result = TRANS_STAGE_RESULT_OK
-    };
+        .result = STAGE_RESULT_OK };
     TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_HANDSHAKE_REPLY, extra);
     TRANS_LOGD(TRANS_CTRL, "ok");
     return SOFTBUS_OK;
