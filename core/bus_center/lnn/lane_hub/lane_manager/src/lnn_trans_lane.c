@@ -178,16 +178,19 @@ static void DeleteLaneLinkNode(uint32_t laneId)
 static int32_t TriggerLink(uint32_t laneId, TransOption *request,
     LanePreferredLinkList *recommendLinkList)
 {
+    LNN_LOGI(LNN_LANE, "TriggerLink enter");
     LaneLinkNodeInfo *linkNode = (LaneLinkNodeInfo *)SoftBusCalloc(sizeof(LaneLinkNodeInfo));
     if (linkNode == NULL) {
         return SOFTBUS_MALLOC_ERR;
     }
     if (memcpy_s(linkNode->networkId, NETWORK_ID_BUF_LEN,
         request->networkId, NETWORK_ID_BUF_LEN) != EOK) {
+        LNN_LOGE(LNN_LANE, "memcpy fail for networkId");
         SoftBusFree(linkNode);
         return SOFTBUS_MEM_ERR;
     }
     if (memcpy_s(linkNode->peerBleMac, MAX_MAC_LEN, request->peerBleMac, MAX_MAC_LEN) != EOK) {
+        LNN_LOGE(LNN_LANE, "memcpy fail for peerBlsMac");
         SoftBusFree(linkNode);
         return SOFTBUS_MEM_ERR;
     }
@@ -208,6 +211,7 @@ static int32_t TriggerLink(uint32_t laneId, TransOption *request,
     }
     ListTailInsert(&g_multiLinkList, &linkNode->node);
     Unlock();
+    LNN_LOGI(LNN_LANE, "start LaneTriggerLink, postMsg=%d, ", MSG_TYPE_LANE_TRIGGER_LINK);
     if (LnnLanePostMsgToHandler(MSG_TYPE_LANE_TRIGGER_LINK, laneId,
         request->acceptableProtocols, NULL, 0) != SOFTBUS_OK) {
         DeleteLaneLinkNode(laneId);
@@ -257,6 +261,7 @@ static void DeleteRequestNode(uint32_t laneId)
 static int32_t StartTriggerLink(uint32_t laneId, TransOption *transRequest, const ILaneListener *listener,
     LanePreferredLinkList *recommendLinkList)
 {
+    LNN_LOGI(LNN_LANE, "StartTriggerLink enter");
     TransReqInfo *newItem = CreateRequestNode(laneId, transRequest, listener);
     if (newItem == NULL) {
         return SOFTBUS_ERR;
@@ -296,6 +301,7 @@ static int32_t AllocLane(uint32_t laneId, const LaneRequestOption *request, cons
         SoftBusFree(recommendLinkList);
         return SOFTBUS_ERR;
     }
+    LNN_LOGI(LNN_LANE, "select lane link by qos success, linkNum=%d", recommendLinkList->linkTypeNum);
     if (recommendLinkList->linkTypeNum == 0) {
         SoftBusFree(recommendLinkList);
         return SOFTBUS_ERR;

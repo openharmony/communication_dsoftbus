@@ -446,6 +446,7 @@ static void DecideOptimalLinks(const char *networkId, const LaneSelectParam *req
     } else {
         bandWidthType = LOW_BAND_WIDTH;
     }
+    LNN_LOGI(LNN_LANE, "band width type=%ld", bandWidthType);
     for (uint32_t i = 0; i < (LANE_LINK_TYPE_BUTT + 1); i++) {
         if (g_laneBandWidth[bandWidthType][i] == LANE_LINK_TYPE_BUTT) {
             break;
@@ -453,6 +454,7 @@ static void DecideOptimalLinks(const char *networkId, const LaneSelectParam *req
         if (IsValidLane(networkId, g_laneBandWidth[bandWidthType][i], request->transType) &&
             IsLaneFillMinLatency(minLaneLatency, g_laneBandWidth[bandWidthType][i])) {
             linkList[(*linksNum)++] = g_laneBandWidth[bandWidthType][i];
+            LNN_LOGI(LNN_LANE, "decide optimal linkType=%d", g_laneBandWidth[bandWidthType][i]);
             break;
         }
     }
@@ -484,6 +486,7 @@ static void DecideRetryLinks(const char *networkId, const LaneSelectParam *reque
     } else {
         bandWidthType = LOW_BAND_WIDTH;
     }
+    LNN_LOGI(LNN_LANE, "band width type=%ld", bandWidthType);
     int32_t retryTime;
     if (linksNum == 0) {
         retryTime = maxLaneLatency;
@@ -499,6 +502,7 @@ static void DecideRetryLinks(const char *networkId, const LaneSelectParam *reque
             retryTime - g_laneLatency[g_retryLaneList[bandWidthType][i]] >= 0) {
             retryTime -= g_laneLatency[g_retryLaneList[bandWidthType][i]];
             linkList[(*linksNum)++] = g_retryLaneList[bandWidthType][i];
+            LNN_LOGI(LNN_LANE, "decide retry linkType=%d", g_retryLaneList[bandWidthType][i]);
         }
     }
 }
