@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "anonymizer.h"
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
@@ -100,9 +101,18 @@ static bool IsEnableWlan2P4G(const char *networkId)
     NodeInfo node;
     (void)memset_s(&node, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &node) != SOFTBUS_OK) {
+        char *anonyNetworkId = NULL;
+        Anonymize(networkId, &anonyNetworkId);
+        LNN_LOGE(LNN_LANE, "get remote node info fail, networkId=%s", anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
         return SOFTBUS_ERR;
     }
     if (!LnnHasDiscoveryType(&node, DISCOVERY_TYPE_WIFI) && !LnnHasDiscoveryType(&node, DISCOVERY_TYPE_LSA)) {
+        char *anonyNetworkId = NULL;
+        Anonymize(networkId, &anonyNetworkId);
+        LNN_LOGE(LNN_LANE, "peer node networkId=%s, not have discType[%d,%d]",
+            anonyNetworkId, DISCOVERY_TYPE_WIFI, DISCOVERY_TYPE_LSA);
+        AnonymizeFree(anonyNetworkId);
         return SOFTBUS_ERR;
     }
     int32_t local, remote;
@@ -128,9 +138,18 @@ static bool IsEnableWlan5G(const char *networkId)
     NodeInfo node;
     (void)memset_s(&node, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &node) != SOFTBUS_OK) {
+        char *anonyNetworkId = NULL;
+        Anonymize(networkId, &anonyNetworkId);
+        LNN_LOGE(LNN_LANE, "get remote node info fail, networkId=%s", anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
         return SOFTBUS_ERR;
     }
     if (!LnnHasDiscoveryType(&node, DISCOVERY_TYPE_WIFI) && !LnnHasDiscoveryType(&node, DISCOVERY_TYPE_LSA)) {
+        char *anonyNetworkId = NULL;
+        Anonymize(networkId, &anonyNetworkId);
+        LNN_LOGE(LNN_LANE, "peer node networkId=%s, not have discType[%d,%d]",
+            anonyNetworkId, DISCOVERY_TYPE_WIFI, DISCOVERY_TYPE_LSA);
+        AnonymizeFree(anonyNetworkId);
         return SOFTBUS_ERR;
     }
     int32_t local, remote;
