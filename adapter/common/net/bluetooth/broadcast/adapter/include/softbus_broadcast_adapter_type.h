@@ -39,6 +39,18 @@ extern "C"{
 #define SOFTBUS_ADDR_MAC_LEN 6
 
 /**
+ * @brief Defines different broadcast media protocol stacks
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+enum SoftbusMediumType {
+    BROADCAST_MEDIUM_TYPE_BLE,
+    BROADCAST_MEDIUM_TYPE_SLE,
+    BROADCAST_MEDIUM_TYPE_BUTT,
+};
+
+/**
  * @brief Defines the broadcast data information
  *
  * @since 1.0
