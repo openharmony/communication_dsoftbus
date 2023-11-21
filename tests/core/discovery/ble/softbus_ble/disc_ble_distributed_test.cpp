@@ -23,11 +23,11 @@
 
 using namespace testing::ext;
 namespace OHOS {
-class DiscSoftBusBleTest : public testing::Test {
+class DiscDistributedBleTest : public testing::Test {
 public:
-    DiscSoftBusBleTest()
+    DiscDistributedBleTest()
     {}
-    ~DiscSoftBusBleTest()
+    ~DiscDistributedBleTest()
     {}
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
@@ -35,12 +35,12 @@ public:
     void TearDown() override {}
 };
 
-void DiscSoftBusBleTest::SetUpTestCase(void)
+void DiscDistributedBleTest::SetUpTestCase(void)
 {
     LooperInit();
 }
 
-void DiscSoftBusBleTest::TearDownTestCase(void)
+void DiscDistributedBleTest::TearDownTestCase(void)
 {
     LooperDeinit();
 }
@@ -56,7 +56,7 @@ static DiscInnerCallback g_testDiscInnerCallBack = {
     .OnDeviceFound = TestOnDeviceFound,
 };
 
-static DiscoveryBleDispatcherInterface *g_testDiscBleDispatcherInterface;
+static DiscoveryBleDispatcherInterface *g_testDiscBleDispatcherInterface = nullptr;
 
 /*
  * @tc.name: TestGetNeedUpdateAdvertiser001
@@ -65,9 +65,9 @@ static DiscoveryBleDispatcherInterface *g_testDiscBleDispatcherInterface;
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscSoftBusBleTest, TestGetNeedUpdateAdvertiser001, TestSize.Level1)
+HWTEST_F(DiscDistributedBleTest, TestGetNeedUpdateAdvertiser001, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "DiscSoftBusBleTest, TestGetNeedUpdateAdvertiser001, Start");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestGetNeedUpdateAdvertiser001, Start");
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
@@ -92,7 +92,7 @@ HWTEST_F(DiscSoftBusBleTest, TestGetNeedUpdateAdvertiser001, TestSize.Level1)
     EXPECT_EQ(ret, false);
 
     DiscSoftBusBleDeinit();
-    DISC_LOGI(DISC_TEST, "DiscSoftBusBleTest, TestGetNeedUpdateAdvertiser001, End");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestGetNeedUpdateAdvertiser001, End");
 }
 
 /*
@@ -102,9 +102,9 @@ HWTEST_F(DiscSoftBusBleTest, TestGetNeedUpdateAdvertiser001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscSoftBusBleTest, TestCheckScanner001, TestSize.Level1)
+HWTEST_F(DiscDistributedBleTest, TestCheckScanner001, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "DiscSoftBusBleTest, TestCheckScanner001, Start");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestCheckScanner001, Start");
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
@@ -121,7 +121,7 @@ HWTEST_F(DiscSoftBusBleTest, TestCheckScanner001, TestSize.Level1)
     EXPECT_EQ(ret, true);
 
     DiscSoftBusBleDeinit();
-    DISC_LOGI(DISC_TEST, "DiscSoftBusBleTest, TestCheckScanner001, End");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestCheckScanner001, End");
 }
 
 /*
@@ -135,9 +135,9 @@ HWTEST_F(DiscSoftBusBleTest, TestCheckScanner001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscSoftBusBleTest, TestScanFilter001, TestSize.Level1)
+HWTEST_F(DiscDistributedBleTest, TestScanFilter001, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "DiscSoftBusBleTest, TestScanFilter001, Start");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestScanFilter001, Start");
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
@@ -191,7 +191,7 @@ HWTEST_F(DiscSoftBusBleTest, TestScanFilter001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     DiscSoftBusBleDeinit();
-    DISC_LOGI(DISC_TEST, "DiscSoftBusBleTest, TestScanFilter001, End");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestScanFilter001, End");
 }
 
 /*
@@ -202,9 +202,9 @@ HWTEST_F(DiscSoftBusBleTest, TestScanFilter001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscSoftBusBleTest, TestProcessHwHashAccout001, TestSize.Level1)
+HWTEST_F(DiscDistributedBleTest, TestProcessHwHashAccout001, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "DiscSoftBusBleTest, TestProcessHwHashAccout001, Start");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestProcessHwHashAccout001, Start");
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
@@ -221,7 +221,7 @@ HWTEST_F(DiscSoftBusBleTest, TestProcessHwHashAccout001, TestSize.Level1)
     EXPECT_EQ(ret, false);
 
     DiscSoftBusBleDeinit();
-    DISC_LOGI(DISC_TEST, "DiscSoftBusBleTest, TestProcessHwHashAccout001, End");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestProcessHwHashAccout001, End");
 }
 
 /*
@@ -231,9 +231,9 @@ HWTEST_F(DiscSoftBusBleTest, TestProcessHwHashAccout001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscSoftBusBleTest, TestRangeDevice001, TestSize.Level1)
+HWTEST_F(DiscDistributedBleTest, TestRangeDevice001, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "DiscSoftBusBleTest, TestRangeDevice001, Start");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestRangeDevice001, Start");
     DeviceInfo foundInfoTest;
     const char rssiTest = 's';
     int8_t powerTest = SOFTBUS_ILLEGAL_BLE_POWER;
@@ -243,7 +243,7 @@ HWTEST_F(DiscSoftBusBleTest, TestRangeDevice001, TestSize.Level1)
     powerTest = SOFTBUS_ILLEGAL_BLE_POWER - 1;
     RangeDevice(&foundInfoTest, rssiTest, powerTest);
     EXPECT_EQ(foundInfoTest.range, 0);
-    DISC_LOGI(DISC_TEST, "DiscSoftBusBleTest, TestRangeDevice001, End");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestRangeDevice001, End");
 }
 
 /*
@@ -253,9 +253,9 @@ HWTEST_F(DiscSoftBusBleTest, TestRangeDevice001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscSoftBusBleTest, TestGetConDeviceInfo001, TestSize.Level1)
+HWTEST_F(DiscDistributedBleTest, TestGetConDeviceInfo001, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "DiscSoftBusBleTest, TestGetConDeviceInfo001, Start");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestGetConDeviceInfo001, Start");
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
@@ -269,7 +269,7 @@ HWTEST_F(DiscSoftBusBleTest, TestGetConDeviceInfo001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     DiscSoftBusBleDeinit();
-    DISC_LOGI(DISC_TEST, "DiscSoftBusBleTest, TestGetConDeviceInfo001, End");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestGetConDeviceInfo001, End");
 }
 
 /*
@@ -279,9 +279,9 @@ HWTEST_F(DiscSoftBusBleTest, TestGetConDeviceInfo001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscSoftBusBleTest, TestGetNonDeviceInfo001, TestSize.Level1)
+HWTEST_F(DiscDistributedBleTest, TestGetNonDeviceInfo001, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "DiscSoftBusBleTest, TestGetNonDeviceInfo001, Start");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestGetNonDeviceInfo001, Start");
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
@@ -295,7 +295,7 @@ HWTEST_F(DiscSoftBusBleTest, TestGetNonDeviceInfo001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     DiscSoftBusBleDeinit();
-    DISC_LOGI(DISC_TEST, "DiscSoftBusBleTest, TestGetNonDeviceInfo001, End");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestGetNonDeviceInfo001, End");
 }
 
 /*
@@ -305,9 +305,9 @@ HWTEST_F(DiscSoftBusBleTest, TestGetNonDeviceInfo001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscSoftBusBleTest, TestBuildBleConfigAdvData001, TestSize.Level1)
+HWTEST_F(DiscDistributedBleTest, TestBuildBleConfigAdvData001, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "DiscSoftBusBleTest, TestBuildBleConfigAdvData001, Start");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestBuildBleConfigAdvData001, Start");
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
@@ -324,7 +324,7 @@ HWTEST_F(DiscSoftBusBleTest, TestBuildBleConfigAdvData001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     DiscSoftBusBleDeinit();
-    DISC_LOGI(DISC_TEST, "DiscSoftBusBleTest, TestBuildBleConfigAdvData001, End");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestBuildBleConfigAdvData001, End");
 }
 
 /*
@@ -333,9 +333,9 @@ HWTEST_F(DiscSoftBusBleTest, TestBuildBleConfigAdvData001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscSoftBusBleTest, TestGetBroadcastData001, TestSize.Level1)
+HWTEST_F(DiscDistributedBleTest, TestGetBroadcastData001, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "DiscSoftBusBleTest, TestGetBroadcastData001, Start");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestGetBroadcastData001, Start");
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
@@ -350,7 +350,7 @@ HWTEST_F(DiscSoftBusBleTest, TestGetBroadcastData001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     DiscSoftBusBleDeinit();
-    DISC_LOGI(DISC_TEST, "DiscSoftBusBleTest, TestGetBroadcastData001, End");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestGetBroadcastData001, End");
 }
 
 /*
@@ -359,9 +359,9 @@ HWTEST_F(DiscSoftBusBleTest, TestGetBroadcastData001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscSoftBusBleTest, TestStartAdvertiser001, TestSize.Level1)
+HWTEST_F(DiscDistributedBleTest, TestStartAdvertiser001, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "DiscSoftBusBleTest, TestStartAdvertiser001, Start");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestStartAdvertiser001, Start");
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
@@ -388,7 +388,7 @@ HWTEST_F(DiscSoftBusBleTest, TestStartAdvertiser001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     DiscSoftBusBleDeinit();
-    DISC_LOGI(DISC_TEST, "DiscSoftBusBleTest, TestStartAdvertiser001, End");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestStartAdvertiser001, End");
 }
 
 /*
@@ -397,9 +397,9 @@ HWTEST_F(DiscSoftBusBleTest, TestStartAdvertiser001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscSoftBusBleTest, TestStopAdvertiser001, TestSize.Level1)
+HWTEST_F(DiscDistributedBleTest, TestStopAdvertiser001, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "DiscSoftBusBleTest, TestStopAdvertiser001, Start");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestStopAdvertiser001, Start");
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
@@ -422,7 +422,7 @@ HWTEST_F(DiscSoftBusBleTest, TestStopAdvertiser001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     DiscSoftBusBleDeinit();
-    DISC_LOGI(DISC_TEST, "DiscSoftBusBleTest, TestStopAdvertiser001, End");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestStopAdvertiser001, End");
 }
 
 /*
@@ -431,9 +431,9 @@ HWTEST_F(DiscSoftBusBleTest, TestStopAdvertiser001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscSoftBusBleTest, TestUpdateAdvertiser001, TestSize.Level1)
+HWTEST_F(DiscDistributedBleTest, TestUpdateAdvertiser001, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "DiscSoftBusBleTest, TestUpdateAdvertiser001, Start");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestUpdateAdvertiser001, Start");
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
@@ -447,7 +447,7 @@ HWTEST_F(DiscSoftBusBleTest, TestUpdateAdvertiser001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     DiscSoftBusBleDeinit();
-    DISC_LOGI(DISC_TEST, "DiscSoftBusBleTest, TestUpdateAdvertiser001, End");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestUpdateAdvertiser001, End");
 }
 
 /*
@@ -456,9 +456,9 @@ HWTEST_F(DiscSoftBusBleTest, TestUpdateAdvertiser001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscSoftBusBleTest, TestGetScannerParam001, TestSize.Level1)
+HWTEST_F(DiscDistributedBleTest, TestGetScannerParam001, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "DiscSoftBusBleTest, TestGetScannerParam001, Start");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestGetScannerParam001, Start");
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
@@ -468,7 +468,7 @@ HWTEST_F(DiscSoftBusBleTest, TestGetScannerParam001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     DiscSoftBusBleDeinit();
-    DISC_LOGI(DISC_TEST, "DiscSoftBusBleTest, TestGetScannerParam001, End");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestGetScannerParam001, End");
 }
 
 /*
@@ -478,9 +478,9 @@ HWTEST_F(DiscSoftBusBleTest, TestGetScannerParam001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscSoftBusBleTest, TestStopScaner001, TestSize.Level1)
+HWTEST_F(DiscDistributedBleTest, TestStopScaner001, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "DiscSoftBusBleTest, TestStopScaner001, Start");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestStopScaner001, Start");
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
@@ -494,7 +494,7 @@ HWTEST_F(DiscSoftBusBleTest, TestStopScaner001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_ERR);
 
     DiscSoftBusBleDeinit();
-    DISC_LOGI(DISC_TEST, "DiscSoftBusBleTest, TestStopScaner001, End");
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestStopScaner001, End");
 }
 
 } // namespace OHOS
