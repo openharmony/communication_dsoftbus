@@ -211,7 +211,7 @@ static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channel
             .socketFd = fd,
             .errcode = ret
         };
-        TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_HANDSHAKE_REPLY, extra);
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
         DelTrigger(module, fd, READ_TRIGGER);
         ConnShutdownSocket(fd);
         NotifyChannelOpenFailed(channelId, ret);
@@ -265,7 +265,7 @@ static int32_t TdcOnDataEvent(ListenerModule module, int events, int fd)
             .authId = conn->authId,
             .errcode = ret
         };
-        TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_HANDSHAKE_START, extra);
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_START, extra);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "start verify session fail.");
             DelTrigger(conn->listenMod, fd, READ_TRIGGER);

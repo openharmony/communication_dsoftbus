@@ -21,13 +21,13 @@
 #include "event_form_enum.h"
 
 typedef enum {
-    SCENE_CONNECT = 1,
+    EVENT_SCENE_CONNECT = 1,
 } ConnEventScene;
 
 typedef enum {
-    STAGE_CONNECT_START = 1,
-    STAGE_CONNECT_INVOKE_PROTOCOL = 2,
-    STAGE_CONNECT_END = 3,
+    EVENT_STAGE_CONNECT_START = 1,
+    EVENT_STAGE_CONNECT_INVOKE_PROTOCOL = 2,
+    EVENT_STAGE_CONNECT_END = 3,
 } ConnEventConnectStage;
 
 typedef struct {

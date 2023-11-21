@@ -410,7 +410,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         .dataType = appInfo->businessType,
         .peerNetworkId = appInfo->peerNetWorkId
     };
-    TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_OPEN_CHANNEL_START, extra);
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_START, extra);
     errCode = TransGetLaneInfo(param, &connInfo, &laneId);
     char *tmpName = NULL;
     if (errCode != SOFTBUS_OK) {
@@ -459,7 +459,7 @@ EXIT_ERR:
     extra.channelId = transInfo->channelId;
     extra.errcode = ret;
     extra.costTime = GetSoftbusRecordTimeMillis() - timeStart;
-    TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_OPEN_CHANNEL_END, extra);
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     if (appInfo->fastTransData != NULL) {
         SoftBusFree((void*)appInfo->fastTransData);
     }
@@ -705,7 +705,7 @@ int32_t TransCloseChannel(int32_t channelId, int32_t channelType)
         .channelType = channelType,
         .errcode = ret
     };
-    TRANS_EVENT(SCENE_CLOSE_CHANNEL_ACTIVE, STAGE_CLOSE_CHANNEL, extra);
+    TRANS_EVENT(EVENT_SCENE_CLOSE_CHANNEL_ACTIVE, EVENT_STAGE_CLOSE_CHANNEL, extra);
     return ret;
 }
 

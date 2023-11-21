@@ -523,7 +523,7 @@ int32_t ConnConnectDevice(const ConnectOption *info, uint32_t requestId, const C
     if (info->type == CONNECT_TCP) {
         extra.peerWifiMac = info->socketOption.addr;
     }
-    CONN_EVENT(SCENE_CONNECT, STAGE_CONNECT_START, extra);
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_START, extra);
     return g_connManager[info->type]->ConnectDevice(info, requestId, result);
 }
 

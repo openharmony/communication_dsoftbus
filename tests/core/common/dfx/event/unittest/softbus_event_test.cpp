@@ -47,8 +47,8 @@ HWTEST_F(SoftbusEventTest, SoftbusEventTest001, TestSize.Level0)
 HWTEST_F(SoftbusEventTest, SoftbusEventTest002, TestSize.Level0)
 {
     SoftbusEventForm form = {
-        .scene = SCENE_OPEN_CHANNEL,
-        .stage = STAGE_START_CONNECT,
+        .scene = EVENT_SCENE_OPEN_CHANNEL,
+        .stage = EVENT_STAGE_START_CONNECT,
         .line = 233,
         .func = "TestFunc",
     };
