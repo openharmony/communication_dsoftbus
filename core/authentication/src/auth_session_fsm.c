@@ -585,7 +585,7 @@ static int32_t TrySyncDeviceInfo(int64_t authSeq, AuthSessionInfo *info)
 
 static void HandleMsgSaveSessionKey(AuthFsm *authFsm, MessagePara *para)
 {
-    LnnEventExtra lnnEventExtra = { .result = STAGE_RESULT_OK };
+    LnnEventExtra lnnEventExtra = { .result = EVENT_STAGE_RESULT_OK };
     LNN_EVENT(SCENE_JION_LNN, STAGE_EXCHANGE_CIPHER, lnnEventExtra);
     SessionKey sessionKey = {.len = para->len};
     if (memcpy_s(sessionKey.value, sizeof(sessionKey.value), para->data, para->len) != EOK) {
@@ -650,7 +650,7 @@ static void HandleMsgAuthFinish(AuthFsm *authFsm, MessagePara *para)
 {
     (void)para;
     AuthSessionInfo *info = &authFsm->info;
-    LnnEventExtra lnnEventExtra = { .authId = (int32_t)authFsm->authSeq, .result = STAGE_RESULT_OK };
+    LnnEventExtra lnnEventExtra = { .authId = authFsm->authSeq, .result = EVENT_STAGE_RESULT_OK };
     LNN_EVENT(SCENE_JION_LNN, STAGE_AUTH_DEVICE, lnnEventExtra);
     AUTH_LOGI(AUTH_FSM, "auth fsm[%" PRId64"] hichain finished, devInfo|closeAck=%d|%d",
         authFsm->authSeq, info->isNodeInfoReceived, info->isCloseAckReceived);
@@ -698,7 +698,7 @@ static bool DeviceAuthStateProcess(FsmStateMachine *fsm, int32_t msgType, void *
 
 static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, MessagePara *para)
 {
-    LnnEventExtra lnnEventExtra = { .result = STAGE_RESULT_OK };
+    LnnEventExtra lnnEventExtra = { .result = EVENT_STAGE_RESULT_OK };
     AuthSessionInfo *info = &authFsm->info;
     if (ProcessDeviceInfoMessage(authFsm->authSeq, info, para->data, para->len) != SOFTBUS_OK) {
         lnnEventExtra.errcode = SOFTBUS_AUTH_EXCHANGE_DEVICE_INFO_END_ERR;
