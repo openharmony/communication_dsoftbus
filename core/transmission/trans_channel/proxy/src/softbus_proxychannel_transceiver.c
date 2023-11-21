@@ -610,14 +610,29 @@ int32_t TransProxyConnExistProc(ProxyConnInfo *conn, ProxyChannelInfo *chan, int
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(chanNewId + ID_OFFSET));
     TRANS_LOGI(TRANS_CTRL,
         "SoftbusHitraceChainBegin: set hitraceId=%lx.", (uint64_t)(chanNewId + ID_OFFSET));
-    chan->type = conn->connInfo.type;
+    ConnectType type = conn->connInfo.type;
     if (conn->state == PROXY_CHANNEL_STATUS_PYH_CONNECTING) {
-        chan->reqId = (int32_t)conn->requestId;
-        chan->status = PROXY_CHANNEL_STATUS_PYH_CONNECTING;
+        ProxyChannelInfo channelInfo = {
+            .channelId = chanNewId,
+            .reqId = (int32_t)conn->requestId,
+            .isServer = -1,
+            .type = type,
+            .status = PROXY_CHANNEL_STATUS_PYH_CONNECTING,
+            .connId = 0
+        };
+
+        TransProxySpecialUpdateChanInfo(&channelInfo);
         TRANS_LOGI(TRANS_CTRL, "reuse connection reqId=%d", chan->reqId);
     } else {
-        chan->connId = conn->connId;
-        chan->status = PROXY_CHANNEL_STATUS_HANDSHAKEING;
+        ProxyChannelInfo channelInfo = {
+            .channelId = chanNewId,
+            .reqId = -1,
+            .isServer = -1,
+            .type = type,
+            .status = PROXY_CHANNEL_STATUS_HANDSHAKEING,
+            .connId = conn->connId
+        };
+        TransProxySpecialUpdateChanInfo(&channelInfo);
         if (TransAddConnRefByConnId(conn->connId) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "TransAddConnRefByConnId: connId=%d err", conn->connId);
             return SOFTBUS_TRANS_PROXY_CONN_ADD_REF_FAILED;
@@ -646,9 +661,15 @@ static int32_t TransProxyOpenNewConnChannel(
     TRANS_LOGI(TRANS_CTRL,
         "SoftbusHitraceChainBegin: set hitraceId=%lx.", (uint64_t)(channelId + ID_OFFSET));
     uint32_t reqId = ConnGetNewRequestId(MODULE_PROXY_CHANNEL);
-    chan->reqId = (int32_t)reqId;
-    chan->isServer = 0;
-    chan->status = PROXY_CHANNEL_STATUS_PYH_CONNECTING;
+    ProxyChannelInfo channelInfo = {
+        .channelId = channelId,
+        .reqId = (int32_t)reqId,
+        .isServer = 0,
+        .type = CONNECT_TYPE_MAX,
+        .status = PROXY_CHANNEL_STATUS_PYH_CONNECTING,
+        .connId = 0
+    };
+    TransProxySpecialUpdateChanInfo(&channelInfo);
 
     ProxyConnInfo *connChan = (ProxyConnInfo *)SoftBusCalloc(sizeof(ProxyConnInfo));
     if (connChan == NULL) {
