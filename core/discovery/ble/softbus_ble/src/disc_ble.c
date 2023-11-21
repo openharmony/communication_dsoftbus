@@ -874,7 +874,7 @@ static int32_t StopAdvertiser(int32_t adv)
         DISC_LOGI(DISC_BLE, "advertiser adv adv=%d is already stopped.", adv);
         return SOFTBUS_OK;
     }
-    DiscEventExtra discEventExtra = { .broadcastType = BLE, .result = STAGE_RESULT_OK };
+    DiscEventExtra discEventExtra = { .broadcastType = BLE, .result = EVENT_STAGE_RESULT_OK };
     DISC_EVENT(SCENE_BROADCAST, STAGE_BROADCAST, discEventExtra);
     if (SoftBusStopAdv(advertiser->channel) != SOFTBUS_OK) {
         discEventExtra.errcode = SOFTBUS_DISCOVER_END_BROADCAST_FAIL;
@@ -974,7 +974,7 @@ static int32_t StopScaner(void)
         DISC_LOGI(DISC_BLE, "already stop scanning");
         return SOFTBUS_OK;
     }
-    DiscEventExtra discEventExtra = { .scanType = BLE, .result = STAGE_RESULT_OK };
+    DiscEventExtra discEventExtra = { .scanType = BLE, .result = EVENT_STAGE_RESULT_OK };
     DISC_EVENT(SCENE_SCAN, STAGE_SCAN_START, discEventExtra);
     if (SoftBusStopScan(g_bleListener.scanListenerId, g_bleScannerId) != SOFTBUS_OK) {
         discEventExtra.errcode = SOFTBUS_DISCOVER_END_SCAN_FAIL;

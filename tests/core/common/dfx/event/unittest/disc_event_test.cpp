@@ -35,9 +35,10 @@ class DiscEventTest : public testing::Test { };
 HWTEST_F(DiscEventTest, DiscEventTest001, TestSize.Level0)
 {
     DiscEventExtra extra = {
+        .broadcastType = 0,  // invalid
+        .peerNetworkId = -1, // invalid
         .result = 1,
         .errcode = 2233,
-        .broadcastType = 0, // invalid
         .peerPort = "9000",
     };
     constexpr int32_t VALID_EXTRA_SIZE = 3;
@@ -59,27 +60,25 @@ HWTEST_F(DiscEventTest, DiscEventTest001, TestSize.Level0)
 HWTEST_F(DiscEventTest, DiscEventTest002, TestSize.Level0)
 {
     DiscEventExtra validExtra = {
-        .result = 1,
-        .errcode = 2,
-        .broadcastType = 3,
-        .broadcastFreq = 4,
-        .scanType = 5,
+        .broadcastType = 1,
+        .broadcastFreq = 2,
+        .scanType = 3,
+        .discMode = 4,
+        .discType = 5,
+        .localNetworkId = 6,
+        .localDeviceType = 7,
+        .costTime = 8,
+        .peerNetworkId = 9,
+        .peerDeviceType = 10,
+        .result = 11,
+        .errcode = 12,
+        .callerPkg = "testCallerPkg",
         .scanCycle = "testScanCycle",
-        .discType = 7,
-        .discMode = 8,
-        .costTime = 9,
-        .localNetworkId = "testLocalNetworkId",
-        .localUdid = "testLocalUdid",
-        .localDeviceType = "testLocalDeviceType",
-        .peerIp = "testPeerIp",
         .peerBrMac = "testPeerBrMac",
         .peerBleMac = "testPeerBleMac",
         .peerWifiMac = "testPeerWifiMac",
+        .peerIp = "testPeerIp",
         .peerPort = "testPeerPort",
-        .peerUdid = "testPeerUdid",
-        .peerNetworkId = "testPeerNetworkId",
-        .peerDeviceType = "testPeerDeviceType",
-        .callerPkg = "testCallerPkg",
     };
     constexpr int32_t VALID_EXTRA_SIZE = DISC_ASSIGNER_SIZE;
 
@@ -100,27 +99,25 @@ HWTEST_F(DiscEventTest, DiscEventTest002, TestSize.Level0)
 HWTEST_F(DiscEventTest, DiscEventTest003, TestSize.Level0)
 {
     DiscEventExtra invalidExtra = {
-        .result = -1,
-        .errcode = -2, // valid
-        .broadcastType = -3,
-        .broadcastFreq = -4,
-        .scanType = -5,
-        .scanCycle = "",
-        .discType = -7,
-        .discMode = -8,
-        .costTime = -9,
-        .localNetworkId = "",
-        .localUdid = "",
-        .localDeviceType = "",
-        .peerIp = "",
-        .peerBrMac = "",
-        .peerBleMac = "",
-        .peerWifiMac = "",
-        .peerPort = "",
-        .peerUdid = "",
-        .peerNetworkId = "",
-        .peerDeviceType = "\0",
+        .broadcastType = -1,
+        .broadcastFreq = -2,
+        .scanType = -3,
+        .discMode = -4,
+        .discType = -5,
+        .localNetworkId = -6,
+        .localDeviceType = -7,
+        .costTime = -8,
+        .peerNetworkId = -9,
+        .peerDeviceType = -10,
+        .result = -11,
+        .errcode = -12, // valid
         .callerPkg = nullptr,
+        .scanCycle = "\0",
+        .peerBrMac = "",
+        .peerBleMac = nullptr,
+        .peerWifiMac = nullptr,
+        .peerIp = nullptr,
+        .peerPort = nullptr,
     };
     constexpr int32_t VALID_EXTRA_SIZE = 1; // errcode is valid
 

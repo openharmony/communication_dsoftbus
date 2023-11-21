@@ -35,9 +35,10 @@ class LnnEventTest : public testing::Test { };
 HWTEST_F(LnnEventTest, LnnEventTest001, TestSize.Level0)
 {
     LnnEventExtra extra = {
+        .peerNetworkId = 0, // invalid
+        .onlineNum = -1,    // invalid
         .result = 1,
         .errcode = 2233,
-        .onlineNum = -1, // invalid
         .peerPort = "9000",
     };
     constexpr int32_t VALID_EXTRA_SIZE = 3;
@@ -59,25 +60,23 @@ HWTEST_F(LnnEventTest, LnnEventTest001, TestSize.Level0)
 HWTEST_F(LnnEventTest, LnnEventTest002, TestSize.Level0)
 {
     LnnEventExtra validExtra = {
-        .result = 1,
-        .errcode = 2,
-        .connectionId = 3,
-        .authType = 4,
-        .authId = 5,
-        .lnnType = 6,
-        .onlineNum = 7,
-        .peerDeviceAbility = 8,
-        .peerDeviceInfo = "testPeerDeviceInfo",
-        .peerIp = "testPeerIp",
+        .peerNetworkId = 1,
+        .connectionId = 2,
+        .authType = 3,
+        .authId = 4,
+        .peerDeviceType = 5,
+        .peerDeviceAbility = 6,
+        .peerDeviceInfo = 7,
+        .onlineNum = 8,
+        .result = 9,
+        .errcode = 10,
+        .callerPkg = "testCallerPkg",
+        .calleePkg = "testScanCycle",
         .peerBrMac = "testPeerBrMac",
         .peerBleMac = "testPeerBleMac",
         .peerWifiMac = "testPeerWifiMac",
+        .peerIp = "testPeerIp",
         .peerPort = "testPeerPort",
-        .peerUdid = "testPeerUdid",
-        .peerNetworkId = "testPeerNetworkId",
-        .peerDeviceType = "testPeerDeviceType",
-        .callerPkg = "testCallerPkg",
-        .calleePkg = "testCalleePkg",
     };
     constexpr int32_t VALID_EXTRA_SIZE = LNN_ASSIGNER_SIZE;
 
@@ -98,25 +97,23 @@ HWTEST_F(LnnEventTest, LnnEventTest002, TestSize.Level0)
 HWTEST_F(LnnEventTest, LnnEventTest003, TestSize.Level0)
 {
     LnnEventExtra invalidExtra = {
-        .result = -1,
-        .errcode = -2, // valid
-        .connectionId = -3,
-        .authType = -4,
-        .authId = -5,
-        .lnnType = -6,
-        .onlineNum = -7,
-        .peerDeviceAbility = -8,
-        .peerDeviceInfo = "",
-        .peerIp = "",
+        .peerNetworkId = -1,
+        .connectionId = -2,
+        .authType = -3,
+        .authId = -4,
+        .peerDeviceType = -5,
+        .peerDeviceAbility = -6,
+        .peerDeviceInfo = -7,
+        .onlineNum = -8,
+        .result = -9,
+        .errcode = -10, // valid
+        .callerPkg = nullptr,
+        .calleePkg = "\0",
         .peerBrMac = "",
-        .peerBleMac = "",
-        .peerWifiMac = "",
-        .peerPort = "",
-        .peerUdid = "",
-        .peerNetworkId = "",
-        .peerDeviceType = "",
-        .callerPkg = "\0",
-        .calleePkg = nullptr,
+        .peerBleMac = nullptr,
+        .peerWifiMac = nullptr,
+        .peerIp = nullptr,
+        .peerPort = nullptr,
     };
     constexpr int32_t VALID_EXTRA_SIZE = 1; // errcode is valid
 

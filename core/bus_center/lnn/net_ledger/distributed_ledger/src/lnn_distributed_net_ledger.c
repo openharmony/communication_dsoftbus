@@ -1458,7 +1458,7 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
 
     udid = LnnGetDeviceUdid(info);
     map = &g_distributedNetLedger.distributedInfo;
-    LnnEventExtra lnnEventExtra = { .result = STAGE_RESULT_OK };
+    LnnEventExtra lnnEventExtra = { .result = EVENT_STAGE_RESULT_OK };
     LNN_EVENT(SCENE_JION_LNN, STAGE_JOIN_LNN_END, lnnEventExtra);
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail!");
@@ -1602,7 +1602,7 @@ ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int3
         LNN_LOGE(LNN_LEDGER, "lock mutex fail!");
         return REPORT_NONE;
     }
-    LnnEventExtra lnnEventExtra = { .result = STAGE_RESULT_OK };
+    LnnEventExtra lnnEventExtra = { .result = EVENT_STAGE_RESULT_OK };
     LNN_EVENT(SCENE_LEAVE_LNN, STAGE_LEAVE_LNN_END, lnnEventExtra);
     info = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
     if (info == NULL) {
