@@ -26,7 +26,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log_old.h"
 
-#define STATE_LISTENER_MAX_NUM 9
+#define STATE_LISTENER_MAX_NUM 18
 #define BR_STATE_CB_TRANSPORT 1
 
 typedef struct {
