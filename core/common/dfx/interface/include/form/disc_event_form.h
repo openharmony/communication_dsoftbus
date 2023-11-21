@@ -20,6 +20,10 @@
 
 #include "event_form_enum.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     EVENT_SCENE_BROADCAST = 1,
     EVENT_SCENE_SCAN = 2,
@@ -55,7 +59,34 @@ typedef struct {
     const char *peerUdid;        // PEER_UDID
     const char *peerNetworkId;   // PEER_NET_ID
     const char *peerDeviceType;  // PEER_DEV_TYPE
-    const char *callerPkg;     // HOST_PKG
+    const char *callerPkg;       // HOST_PKG
 } DiscEventExtra;
 
+typedef enum {
+    ALARM_SCENE_DISC_RESERVED = 1,
+} DiscAlarmScene;
+
+typedef struct {
+    int32_t errcode;
+} DiscAlarmExtra;
+
+typedef enum {
+    STATS_SCENE_DISC_RESERVED = 1,
+} DiscStatsScene;
+
+typedef struct {
+    int32_t reserved;
+} DiscStatsExtra;
+
+typedef enum {
+    AUDIT_SCENE_DISC_RESERVED = 1,
+} DiscAuditScene;
+
+typedef struct {
+    int32_t reserved;
+} DiscAuditExtra;
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 #endif // DISC_EVENT_FORM_H

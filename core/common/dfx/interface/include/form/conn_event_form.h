@@ -20,6 +20,10 @@
 
 #include "event_form_enum.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     EVENT_SCENE_CONNECT = 1,
 } ConnEventScene;
@@ -54,4 +58,31 @@ typedef struct {
     const char *calleePkg;     // TO_CALL_PKG
 } ConnEventExtra;
 
+typedef enum {
+    ALARM_SCENE_CONN_RESERVED = 1,
+} ConnAlarmScene;
+
+typedef struct {
+    int32_t errcode;
+} ConnAlarmExtra;
+
+typedef enum {
+    STATS_SCENE_CONN_RESERVED = 1,
+} ConnStatsScene;
+
+typedef struct {
+    int32_t reserved;
+} ConnStatsExtra;
+
+typedef enum {
+    AUDIT_SCENE_CONN_RESERVED = 1,
+} ConnAuditScene;
+
+typedef struct {
+    int32_t reserved;
+} ConnAuditExtra;
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 #endif // CONN_EVENT_FORM_H

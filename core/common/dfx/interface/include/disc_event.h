@@ -23,9 +23,15 @@ extern "C" {
 #endif
 
 #define DISC_EVENT(scene, stage, extra) DiscEventInner(scene, stage, __FUNCTION__, __LINE__, extra)
+#define DISC_ALARM(scene, extra) ConnAlarmInner(scene, __FUNCTION__, __LINE__, extra)
+#define DISC_STATS(scene, extra) ConnStatsInner(scene, __FUNCTION__, __LINE__, extra)
+#define DISC_AUDIT(scene, extra) ConnStatsInner(scene, __FUNCTION__, __LINE__, extra)
 
 /* For inner use only */
 void DiscEventInner(int32_t scene, int32_t stage, const char *func, int32_t line, DiscEventExtra extra);
+void DiscAlarmInner(int32_t scene, const char *func, int32_t line, DiscAlarmExtra extra);
+void DiscStatsInner(int32_t scene, const char *func, int32_t line, DiscStatsExtra extra);
+void DiscAuditInner(int32_t scene, const char *func, int32_t line, DiscStatsExtra extra);
 
 #ifdef __cplusplus
 }

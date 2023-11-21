@@ -20,6 +20,10 @@
 
 #include "event_form_enum.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     EVENT_SCENE_JOIN_LNN = 1,
     EVENT_SCENE_LEAVE_LNN = 2,
@@ -57,8 +61,35 @@ typedef struct {
     const char *peerUdid;       // PEER_UDID
     const char *peerNetworkId;  // PEER_NET_ID
     const char *peerDeviceType; // PEER_DEV_TYPE
-    const char *callerPkg;     // HOST_PKG
-    const char *calleePkg;     // TO_CALL_PKG
+    const char *callerPkg;      // HOST_PKG
+    const char *calleePkg;      // TO_CALL_PKG
 } LnnEventExtra;
 
+typedef enum {
+    ALARM_SCENE_LNN_RESERVED = 1,
+} LnnAlarmScene;
+
+typedef struct {
+    int32_t errcode;
+} LnnAlarmExtra;
+
+typedef enum {
+    STATS_SCENE_LNN_RESERVED = 1,
+} LnnStatsScene;
+
+typedef struct {
+    int32_t reserved;
+} LnnStatsExtra;
+
+typedef enum {
+    AUDIT_SCENE_LNN_RESERVED = 1,
+} LnnAuditScene;
+
+typedef struct {
+    int32_t reserved;
+} LnnAuditExtra;
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 #endif // LNN_EVENT_FORM_H
