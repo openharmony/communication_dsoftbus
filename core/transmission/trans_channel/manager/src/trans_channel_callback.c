@@ -47,8 +47,8 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
             .peerNetworkId = channel->peerDeviceId,
             .linkType = channel->linkType,
             .channelId = channel->channelId,
-            .costTime = (int32_t)timediff,
-            .result = STAGE_RESULT_OK,
+            .costTime = timediff,
+            .result = TRANS_STAGE_RESULT_OK,
             .callerPkg = pkgName,
             .socketName = sessionName
         };

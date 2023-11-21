@@ -283,7 +283,7 @@ int32_t TransOpenDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, 
     SessionConn conn;
     if (GetSessionConnById(*channelId, &conn) != NULL) {
         extra.authId = conn.authId;
-        extra.socketFd = conn.appInfo.fd;
+        extra.fd = conn.appInfo.fd;
         extra.requestId = conn.requestId;
     };
     TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_START_CONNECT, extra);

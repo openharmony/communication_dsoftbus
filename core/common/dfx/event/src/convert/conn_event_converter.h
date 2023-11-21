@@ -33,51 +33,45 @@ extern "C" {
         return false;                                                                                         \
     }
 
-CONN_ASSIGNER(Int32, Result, result)
-CONN_ASSIGNER(Errcode, Errcode, errcode)
-CONN_ASSIGNER(Int32, ConnectionId, connectionId)
 CONN_ASSIGNER(Int32, RequestId, requestId)
 CONN_ASSIGNER(Int32, LinkType, linkType)
+CONN_ASSIGNER(Int32, ExpectRole, expectRole)
 CONN_ASSIGNER(Int32, AuthType, authType)
 CONN_ASSIGNER(Int32, AuthId, authId)
-CONN_ASSIGNER(String, LnnType, lnnType)
-CONN_ASSIGNER(Int32, ExpectRole, expectRole)
-CONN_ASSIGNER(Int32, CostTime, costTime)
+CONN_ASSIGNER(Int32, ConnectionId, connectionId)
+CONN_ASSIGNER(Int32, PeerNetworkId, peerNetworkId)
 CONN_ASSIGNER(Int32, Rssi, rssi)
 CONN_ASSIGNER(Int32, Load, load)
 CONN_ASSIGNER(Int32, Frequency, frequency)
-CONN_ASSIGNER(String, PeerIp, peerIp)
-CONN_ASSIGNER(String, PeerNetworkId, peerNetworkId)
+CONN_ASSIGNER(Int32, CostTime, costTime)
+CONN_ASSIGNER(Int32, Result, result)
+CONN_ASSIGNER(Errcode, Errcode, errcode)
 CONN_ASSIGNER(String, PeerBrMac, peerBrMac)
 CONN_ASSIGNER(String, PeerBleMac, peerBleMac)
 CONN_ASSIGNER(String, PeerWifiMac, peerWifiMac)
+CONN_ASSIGNER(String, PeerIp, peerIp)
 CONN_ASSIGNER(String, PeerPort, peerPort)
-CONN_ASSIGNER(String, CallerPkg, callerPkg)
-CONN_ASSIGNER(String, CalleePkg, calleePkg)
 
-#define CONN_ASSIGNER_SIZE 21 // Size of g_connAssigners
+#define CONN_ASSIGNER_SIZE 18 // Size of g_connAssigners
 static HiSysEventParamAssigner g_connAssigners[] = {
-    {"STAGE_RES",      HISYSEVENT_INT32,  ConnAssignerResult       },
-    { "ERROR_CODE",    HISYSEVENT_INT32,  ConnAssignerErrcode      },
-    { "CONN_ID",       HISYSEVENT_INT32,  ConnAssignerConnectionId },
-    { "REQ_ID",        HISYSEVENT_INT32,  ConnAssignerRequestId    },
+    {"REQ_ID",         HISYSEVENT_INT32,  ConnAssignerRequestId    },
     { "LINK_TYPE",     HISYSEVENT_INT32,  ConnAssignerLinkType     },
+    { "EXPECT_ROLE",   HISYSEVENT_INT32,  ConnAssignerExpectRole   },
     { "AUTH_TYPE",     HISYSEVENT_INT32,  ConnAssignerAuthType     },
     { "AUTH_ID",       HISYSEVENT_INT32,  ConnAssignerAuthId       },
-    { "LNN_TYPE",      HISYSEVENT_STRING, ConnAssignerLnnType      },
-    { "EXPECT_ROLE",   HISYSEVENT_INT32,  ConnAssignerExpectRole   },
-    { "COST_TIME",     HISYSEVENT_INT32,  ConnAssignerCostTime     },
+    { "CONN_ID",       HISYSEVENT_INT32,  ConnAssignerConnectionId },
+    { "PEER_NETID",    HISYSEVENT_INT32,  ConnAssignerPeerNetworkId},
     { "RSSI",          HISYSEVENT_INT32,  ConnAssignerRssi         },
     { "CHLOAD",        HISYSEVENT_INT32,  ConnAssignerLoad         },
     { "FREQ",          HISYSEVENT_INT32,  ConnAssignerFrequency    },
-    { "PEER_IP",       HISYSEVENT_STRING, ConnAssignerPeerIp       },
-    { "PEER_NET_ID",   HISYSEVENT_STRING, ConnAssignerPeerNetworkId},
+    { "COST_TIME",     HISYSEVENT_INT32,  ConnAssignerCostTime     },
+    { "STAGE_RES",     HISYSEVENT_INT32,  ConnAssignerResult       },
+    { "ERROR_CODE",    HISYSEVENT_INT32,  ConnAssignerErrcode      },
     { "PEER_BR_MAC",   HISYSEVENT_STRING, ConnAssignerPeerBrMac    },
     { "PEER_BLE_MAC",  HISYSEVENT_STRING, ConnAssignerPeerBleMac   },
     { "PEER_WIFI_MAC", HISYSEVENT_STRING, ConnAssignerPeerWifiMac  },
+    { "PEER_IP",       HISYSEVENT_STRING, ConnAssignerPeerIp       },
     { "PEER_PORT",     HISYSEVENT_STRING, ConnAssignerPeerPort     },
-    { "HOST_PKG",      HISYSEVENT_STRING, ConnAssignerCallerPkg    },
-    { "TO_CALL_PKG",   HISYSEVENT_STRING, ConnAssignerCalleePkg    },
  // Modification Note: remember updating CONN_ASSIGNER_SIZE
 };
 

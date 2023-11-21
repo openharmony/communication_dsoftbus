@@ -33,49 +33,45 @@ extern "C" {
         return false;                                                                                         \
     }
 
-TRANS_ASSIGNER(Int32, Result, result)
-TRANS_ASSIGNER(Errcode, Errcode, errcode)
-TRANS_ASSIGNER(String, SocketName, socketName)
 TRANS_ASSIGNER(Int32, DataType, dataType)
+TRANS_ASSIGNER(String, PeerNetworkId, peerNetworkId)
+TRANS_ASSIGNER(Int32, LinkType, linkType)
 TRANS_ASSIGNER(Int32, ChannelType, channelType)
-TRANS_ASSIGNER(Int32, LaneId, laneId)
-TRANS_ASSIGNER(Int32, PreferLinkType, preferLinkType)
-TRANS_ASSIGNER(Int32, LaneTransType, laneTransType)
 TRANS_ASSIGNER(Int32, ChannelId, channelId)
+TRANS_ASSIGNER(Int32, PeerChannelId, peerChannelId)
 TRANS_ASSIGNER(Int32, RequestId, requestId)
 TRANS_ASSIGNER(Int32, ConnectionId, connectionId)
-TRANS_ASSIGNER(Int32, LinkType, linkType)
-TRANS_ASSIGNER(Int32, AuthId, authId)
-TRANS_ASSIGNER(Int32, SocketFd, socketFd)
 TRANS_ASSIGNER(Int32, CostTime, costTime)
-TRANS_ASSIGNER(Int32, ChannelScore, channelScore)
-TRANS_ASSIGNER(Int32, PeerChannelId, peerChannelId)
-TRANS_ASSIGNER(String, PeerNetworkId, peerNetworkId)
+TRANS_ASSIGNER(Int32, Result, result)
+TRANS_ASSIGNER(Errcode, Errcode, errcode)
+TRANS_ASSIGNER(Int32, LaneId, laneId)
+TRANS_ASSIGNER(Int32, LaneTransType, laneTransType)
+TRANS_ASSIGNER(Int32, AuthId, authId)
+TRANS_ASSIGNER(Int32, Fd, fd)
 TRANS_ASSIGNER(String, CallerPkg, callerPkg)
 TRANS_ASSIGNER(String, CalleePkg, calleePkg)
+TRANS_ASSIGNER(String, SocketName, socketName)
 
-#define TRANS_ASSIGNER_SIZE 20 // Size of g_transAssigners
+#define TRANS_ASSIGNER_SIZE 18 // Size of g_transAssigners
 static const HiSysEventParamAssigner g_transAssigners[] = {
-    {"STAGE_RES",         HISYSEVENT_INT32,  TransAssignerResult        },
-    { "ERROR_CODE",       HISYSEVENT_INT32,  TransAssignerErrcode       },
-    { "SOCKET_NAME",      HISYSEVENT_STRING, TransAssignerSocketName    },
-    { "DATA_TYPE",        HISYSEVENT_INT32,  TransAssignerDataType      },
-    { "LOGIC_CHAN_TYPE",  HISYSEVENT_INT32,  TransAssignerChannelType   },
-    { "LANE_ID",          HISYSEVENT_INT32,  TransAssignerLaneId        },
-    { "PREFER_LINK_TYPE", HISYSEVENT_INT32,  TransAssignerPreferLinkType},
-    { "LANE_TRANS_TYPE",  HISYSEVENT_INT32,  TransAssignerLaneTransType },
-    { "CHAN_ID",          HISYSEVENT_INT32,  TransAssignerChannelId     },
-    { "REQ_ID",           HISYSEVENT_INT32,  TransAssignerRequestId     },
-    { "CONN_ID",          HISYSEVENT_INT32,  TransAssignerConnectionId  },
-    { "LINK_TYPE",        HISYSEVENT_INT32,  TransAssignerLinkType      },
-    { "AUTH_ID",          HISYSEVENT_INT32,  TransAssignerAuthId        },
-    { "SOCKET_FD",        HISYSEVENT_INT32,  TransAssignerSocketFd      },
-    { "COST_TIME",        HISYSEVENT_INT32,  TransAssignerCostTime      },
-    { "CHAN_SCORE",       HISYSEVENT_INT32,  TransAssignerChannelScore  },
-    { "PEER_CHAN_ID",     HISYSEVENT_INT32,  TransAssignerPeerChannelId },
-    { "PEER_NET_ID",      HISYSEVENT_STRING, TransAssignerPeerNetworkId },
-    { "HOST_PKG",         HISYSEVENT_STRING, TransAssignerCallerPkg     },
-    { "TO_CALL_PKG",      HISYSEVENT_STRING, TransAssignerCalleePkg     },
+    {"DATA_TYPE",        HISYSEVENT_INT32,  TransAssignerDataType     },
+    { "PEER_NETID",      HISYSEVENT_STRING,  TransAssignerPeerNetworkId},
+    { "LINK_TYPE",       HISYSEVENT_INT32,  TransAssignerLinkType     },
+    { "LOCAL_CHAN_TYPE", HISYSEVENT_INT32,  TransAssignerChannelType  },
+    { "CHAN_ID",         HISYSEVENT_INT32,  TransAssignerChannelId    },
+    { "PEER_CHAN_ID",    HISYSEVENT_INT32,  TransAssignerPeerChannelId},
+    { "REQ_ID",          HISYSEVENT_INT32,  TransAssignerRequestId    },
+    { "CONN_ID",         HISYSEVENT_INT32,  TransAssignerConnectionId },
+    { "COST_TIME",       HISYSEVENT_INT32,  TransAssignerCostTime     },
+    { "STAGE_RES",       HISYSEVENT_INT32,  TransAssignerResult       },
+    { "ERROR_CODE",      HISYSEVENT_INT32,  TransAssignerErrcode      },
+    { "LANE_ID",         HISYSEVENT_INT32,  TransAssignerLaneId       },
+    { "LANE_TRANS_TYPE", HISYSEVENT_INT32,  TransAssignerLaneTransType},
+    { "AUTH_ID",         HISYSEVENT_INT32,  TransAssignerAuthId       },
+    { "SOCKET_FD",       HISYSEVENT_INT32,  TransAssignerFd           },
+    { "HOST_PKG",        HISYSEVENT_STRING, TransAssignerCallerPkg    },
+    { "TO_CALL_PKG",     HISYSEVENT_STRING, TransAssignerCalleePkg    },
+    { "SOCKET_NAME",     HISYSEVENT_STRING, TransAssignerSocketName   },
  // Modification Note: remember updating TRANS_ASSIGNER_SIZE
 };
 
