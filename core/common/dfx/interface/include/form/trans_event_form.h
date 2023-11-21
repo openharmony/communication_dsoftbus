@@ -67,6 +67,30 @@ typedef struct {
     const char *calleePkg;     // TO_CALL_PKG
 } TransEventExtra;
 
+typedef enum {
+    ALARM_SCENE_TRANS_RESERVED = 1,
+} TransAlarmScene;
+
+typedef struct {
+    int32_t errcode;
+} TransAlarmExtra;
+
+typedef enum {
+    STATS_SCENE_TRANS_RESERVED = 1,
+} TransStatsScene;
+
+typedef struct {
+    int32_t reserved;
+} TransStatsExtra;
+
+typedef enum {
+    AUDIT_SCENE_TRANS_RESERVED = 1,
+} TransAuditScene;
+
+typedef struct {
+    int32_t reserved;
+} TransAuditExtra;
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
