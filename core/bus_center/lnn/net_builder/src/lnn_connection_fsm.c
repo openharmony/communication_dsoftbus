@@ -626,11 +626,14 @@ int32_t OnJoinMetaNode(MetaJoinRequestNode *metaJoinNode, CustomData *customData
 
 static int32_t LnnFillConnInfo(LnnConntionInfo *connInfo)
 {
+    bool isAuthServer = false;
     SoftBusVersion version;
     NodeInfo *nodeInfo = connInfo->nodeInfo;
     nodeInfo->discoveryType = 1 << (uint32_t)LnnConvAddrTypeToDiscType(connInfo->addr.type);
     nodeInfo->authSeqNum = connInfo->authId;
-    nodeInfo->authChannelId[connInfo->addr.type] = (int32_t)connInfo->authId;
+    (void)AuthGetServerSide(connInfo->authId, &isAuthServer);
+    nodeInfo->authChannelId[connInfo->addr.type][isAuthServer ? AUTH_AS_SERVER_SIDE : AUTH_AS_CLIENT_SIDE] =
+        (int32_t)connInfo->authId;
     nodeInfo->relation[connInfo->addr.type]++;
     if (AuthGetVersion(connInfo->authId, &version) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "fill version fail");
