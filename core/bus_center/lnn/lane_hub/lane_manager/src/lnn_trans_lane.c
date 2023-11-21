@@ -122,18 +122,22 @@ static void LinkSuccess(uint32_t laneId, const LaneLinkInfo *linkInfo)
     (void)memset_s(&resourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
     if (memcpy_s(linkParam, sizeof(LaneLinkInfo), linkInfo, sizeof(LaneLinkInfo)) != EOK) {
         SoftBusFree(linkParam);
+        LNN_LOGE(LNN_LANE, "linkParam memcpy_s fail");
         return;
     }
     linkParam->laneId = laneId;
     if (ConvertToLaneResource(linkParam, &resourceItem) != SOFTBUS_OK) {
         SoftBusFree(linkParam);
+        LNN_LOGE(LNN_LANE, "convert to laneResource fail, laneId=%u", laneId);
         return;
     }
     if (AddLinkInfoItem(linkParam) != SOFTBUS_OK || AddLaneResourceItem(&resourceItem) != SOFTBUS_OK) {
         SoftBusFree(linkParam);
+        LNN_LOGE(LNN_LANE, "add linkInfo item fail, laneId=%u", laneId);
         return;
     }
     if (LnnLanePostMsgToHandler(MSG_TYPE_LANE_LINK_SUCCESS, laneId, 0, linkParam, 0) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "post LaneLinkSuccess msg err, laneId=%u", laneId);
         SoftBusFree(linkParam);
         DelLaneResourceItem(&resourceItem);
         DelLinkInfoItem(laneId);
@@ -283,6 +287,7 @@ static int32_t StartTriggerLink(uint32_t laneId, TransOption *transRequest, cons
 static int32_t AllocLane(uint32_t laneId, const LaneRequestOption *request, const ILaneListener *listener)
 {
     if ((request == NULL) || (request->type != LANE_TYPE_TRANS)) {
+        LNN_LOGE(LNN_LANE, "AllocLane param invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     TransOption *transRequest = (TransOption *)&request->requestInfo.trans;
@@ -292,21 +297,25 @@ static int32_t AllocLane(uint32_t laneId, const LaneRequestOption *request, cons
     selectParam.qosRequire = transRequest->qosRequire;
     LanePreferredLinkList *recommendLinkList = (LanePreferredLinkList *)SoftBusMalloc(sizeof(LanePreferredLinkList));
     if (recommendLinkList == NULL) {
+        LNN_LOGE(LNN_LANE, "recommendLinkList malloc fail");
         return SOFTBUS_ERR;
     }
     recommendLinkList->linkTypeNum = 0;
     if (SelectExpectLanesByQos((const char *)transRequest->networkId, &selectParam,
             recommendLinkList) != SOFTBUS_OK) {
         SoftBusFree(recommendLinkList);
+        LNN_LOGE(LNN_LANE, "selectExpectLanesByQos fail, laneId=%u", laneId);
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_LANE, "select lane link by qos success, linkNum=%d", recommendLinkList->linkTypeNum);
+    LNN_LOGI(LNN_LANE, "select lane link by qos success, laneId=%u, linkNum=%d", laneId, recommendLinkList->linkTypeNum);
     if (recommendLinkList->linkTypeNum == 0) {
         SoftBusFree(recommendLinkList);
+        LNN_LOGE(LNN_LANE, "no link resources available, allocLane fail, laneId=%u", laneId);
         return SOFTBUS_ERR;
     }
     if (StartTriggerLink(laneId, transRequest, listener, recommendLinkList) != SOFTBUS_OK) {
         SoftBusFree(recommendLinkList);
+        LNN_LOGE(LNN_LANE, "trigger link fail, laneId=%u", laneId);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -412,6 +421,7 @@ static int32_t Free(uint32_t laneId)
     ConvertToLaneResource(&laneLinkInfo, &laneResourceInfo);
     bool isDelayDestroy = false;
     DelLaneResourceItemWithDelayDestroy(&laneResourceInfo, laneId, &isDelayDestroy);
+    LNN_LOGI(LNN_LANE, "delayDestroy is %s", isDelayDestroy?"true":"false");
     if (isDelayDestroy) {
         return SOFTBUS_OK;
     }
@@ -661,6 +671,7 @@ static void LaneLinkException(SoftBusMessage *msg)
 static void HandleDelayDestroyLink(SoftBusMessage *msg)
 {
     if (msg->obj == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid msg->obj");
         return;
     }
     uint32_t laneId = msg->arg1;
