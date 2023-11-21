@@ -143,7 +143,6 @@ HWTEST_F(DiscDistributedBleTest, TestScanFilter001, TestSize.Level1)
 
     uint8_t advDataTest[INT32_MAX_BIT_NUM];
     uint32_t advLenTest = sizeof(advDataTest);
-    (void)advLenTest;
     SoftBusBleScanResult testScanResultData{
         .dataStatus = SOFTBUS_BLE_DATA_INCOMPLETE_MORE_TO_COME,
         .advLen = POS_TLV,
@@ -208,8 +207,7 @@ HWTEST_F(DiscDistributedBleTest, TestProcessHwHashAccout001, TestSize.Level1)
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
-    DeviceInfo testFoundInfo;
-    (void)memset_s(&testFoundInfo, sizeof(testFoundInfo), 0, sizeof(testFoundInfo));
+    DeviceInfo testFoundInfo = {{0}};
     testFoundInfo.capabilityBitmap[0] = 0x1;
     g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].isSameAccount[0] = false;
     g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].isSameAccount[0] = false;
