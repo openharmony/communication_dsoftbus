@@ -36,31 +36,40 @@ class AuthLogTest : public testing::Test { };
  */
 HWTEST_F(AuthLogTest, AuthLogTest001, TestSize.Level0)
 {
+    int32_t index = 0;
+    int32_t authDomainBase = 0xd005720;
+
+    EXPECT_EQ(index, AUTH_INIT);
     auto label = AUTH_LABELS[AUTH_INIT];
     EXPECT_EQ(AUTH_INIT, label.label);
-    EXPECT_EQ(0xd005720, label.domain);
+    EXPECT_EQ(authDomainBase, label.domain);
     EXPECT_STREQ("AuthInit", label.tag);
 
+    EXPECT_EQ(++index, AUTH_HICHAIN);
     label = AUTH_LABELS[AUTH_HICHAIN];
     EXPECT_EQ(AUTH_HICHAIN, label.label);
-    EXPECT_EQ(0xd005721, label.domain);
+    EXPECT_EQ(++authDomainBase, label.domain);
     EXPECT_STREQ("AuthHiChain", label.tag);
 
+    EXPECT_EQ(++index, AUTH_CONN);
     label = AUTH_LABELS[AUTH_CONN];
     EXPECT_EQ(AUTH_CONN, label.label);
-    EXPECT_EQ(0xd005722, label.domain);
+    EXPECT_EQ(++authDomainBase, label.domain);
     EXPECT_STREQ("AuthConn", label.tag);
 
+    EXPECT_EQ(++index, AUTH_FSM);
     label = AUTH_LABELS[AUTH_FSM];
     EXPECT_EQ(AUTH_FSM, label.label);
-    EXPECT_EQ(0xd005723, label.domain);
+    EXPECT_EQ(++authDomainBase, label.domain);
     EXPECT_STREQ("AuthFsm", label.tag);
 
+    EXPECT_EQ(++index, AUTH_KEY);
     label = AUTH_LABELS[AUTH_KEY];
     EXPECT_EQ(AUTH_KEY, label.label);
-    EXPECT_EQ(0xd005724, label.domain);
+    EXPECT_EQ(++authDomainBase, label.domain);
     EXPECT_STREQ("AuthKey", label.tag);
 
+    EXPECT_EQ(++index, AUTH_TEST);
     label = AUTH_LABELS[AUTH_TEST];
     EXPECT_EQ(AUTH_TEST, label.label);
     EXPECT_EQ(DOMAIN_ID_TEST, label.domain);
