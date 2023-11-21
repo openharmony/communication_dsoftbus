@@ -1491,6 +1491,7 @@ int32_t ClientDeleteSocketSession(int32_t sessionId)
             // delete session server if session server is empty
             if (IsListEmpty(&serverNode->sessionList)) {
                 ListDelete(&(serverNode->node));
+                g_clientSessionServerList->cnt--;
             }
             (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
             return SOFTBUS_OK;
