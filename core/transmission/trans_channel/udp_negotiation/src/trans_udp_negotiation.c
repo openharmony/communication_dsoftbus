@@ -613,9 +613,9 @@ static int32_t StartExchangeUdpInfo(UdpChannelInfo *channel, int64_t authId, int
         TRANS_LOGE(TRANS_CTRL, "set udp channel negotiation status neging failed.");
     }
     TransEventExtra extra = {
-        .channelId = channel->info.myData.channelId,
-        .authId = authId,
-        .result = TRANS_STAGE_RESULT_OK
+        .channelId = (int32_t)channel->info.myData.channelId,
+        .authId = (int32_t)authId,
+        .result = STAGE_RESULT_OK
     };
     TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_HANDSHAKE_START, extra);
     return SOFTBUS_OK;
@@ -624,10 +624,9 @@ static int32_t StartExchangeUdpInfo(UdpChannelInfo *channel, int64_t authId, int
 static void UdpOnAuthConnOpened(uint32_t requestId, int64_t authId)
 {
     TransEventExtra extra = {
-        .requestId = requestId,
-        .authId = authId,
-        .result = TRANS_STAGE_RESULT_OK
-    };
+        .requestId = (int32_t)requestId,
+        .authId = (int32_t)authId,
+        .result = STAGE_RESULT_OK };
     TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_START_CONNECT, extra);
     TRANS_LOGI(
         TRANS_CTRL, "reqId=%u, authId=%" PRId64, requestId, authId);

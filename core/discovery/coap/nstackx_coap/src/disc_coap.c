@@ -201,7 +201,7 @@ static int32_t UnPublish(const PublishOption *option, bool isActive)
     DISC_CHECK_AND_RETURN_RET_LOGW(SoftBusMutexLock(&(g_publishMgr->lock)) == 0, SOFTBUS_LOCK_ERR, DISC_COAP,
         "%s unPublish mutex lock failed", isActive ? "active" : "passive");
 
-    DiscEventExtra discScanEventExtra = { .scanType = COAP, .result = EVENT_STAGE_RESULT_OK };
+    DiscEventExtra discScanEventExtra = { .scanType = COAP, .result = STAGE_RESULT_OK };
     DISC_EVENT(SCENE_SCAN, STAGE_SCAN_START, discScanEventExtra);
     if (UnregisterAllCapBitmap(CAPABILITY_NUM, option->capabilityBitmap, g_publishMgr, MAX_CAP_NUM) != SOFTBUS_OK) {
         discScanEventExtra.errcode = SOFTBUS_DISCOVER_END_SCAN_FAIL;
@@ -231,7 +231,8 @@ static int32_t UnPublish(const PublishOption *option, bool isActive)
     }
     if (isActive && g_publishMgr->isEmpty) {
         DiscEventExtra discEventExtra = {
-            .broadcastType = COAP, .broadcastFreq = option->freq, .result = EVENT_STAGE_RESULT_OK };
+            .broadcastType = COAP, .broadcastFreq = option->freq, .result = STAGE_RESULT_OK
+        };
         DISC_EVENT(SCENE_BROADCAST, STAGE_BROADCAST, discEventExtra);
         if (DiscCoapStopDiscovery() != SOFTBUS_OK) {
             discEventExtra.errcode = SOFTBUS_DISCOVER_END_BROADCAST_FAIL;
@@ -340,7 +341,7 @@ static int32_t StopDisc(const SubscribeOption *option, bool isActive)
     DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&(g_subscribeMgr->lock)) == 0, SOFTBUS_LOCK_ERR,
         DISC_COAP, "stop %s discovery mutex lock failed", isActive ? "active" : "passive");
 
-    DiscEventExtra discScanEventExtra = { .scanType = COAP, .result = EVENT_STAGE_RESULT_OK };
+    DiscEventExtra discScanEventExtra = { .scanType = COAP, .result = STAGE_RESULT_OK };
     DISC_EVENT(SCENE_SCAN, STAGE_SCAN_START, discScanEventExtra);
     if (UnregisterAllCapBitmap(CAPABILITY_NUM, option->capabilityBitmap, g_subscribeMgr,  MAX_CAP_NUM) != SOFTBUS_OK) {
         discScanEventExtra.errcode = SOFTBUS_DISCOVER_END_SCAN_FAIL;
@@ -363,7 +364,8 @@ static int32_t StopDisc(const SubscribeOption *option, bool isActive)
     }
     if (isActive && g_subscribeMgr->isEmpty) {
         DiscEventExtra discEventExtra = {
-            .broadcastType = COAP, .broadcastFreq = option->freq, .result = EVENT_STAGE_RESULT_OK };
+            .broadcastType = COAP, .broadcastFreq = option->freq, .result = STAGE_RESULT_OK
+        };
         DISC_EVENT(SCENE_BROADCAST, STAGE_BROADCAST, discEventExtra);
         if (DiscCoapStopDiscovery() != SOFTBUS_OK) {
             discEventExtra.errcode = SOFTBUS_DISCOVER_END_BROADCAST_FAIL;

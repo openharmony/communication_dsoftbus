@@ -203,11 +203,10 @@ static void DfxRecordBleConnectSuccess(uint32_t pId, ConnBleConnection *connecti
     uint64_t costTime = SoftBusGetSysTimeMs() - statistics->startTime;
     SoftbusRecordConnResult(pId, connType, SOFTBUS_EVT_CONN_SUCC, costTime, SOFTBUS_HISYSEVT_CONN_OK);
     ConnEventExtra extra = {
-        .connectionId = connection->connectionId,
+        .connectionId = (int32_t)connection->connectionId,
         .linkType = CONNECT_BLE,
-        .costTime = costTime,
-        .result = CONN_STAGE_RESULT_OK
-    };
+        .costTime = (int32_t)costTime,
+        .result = STAGE_RESULT_OK };
     CONN_EVENT(SCENE_CONNECT, STAGE_CONNECT_END, extra);
 }
 
