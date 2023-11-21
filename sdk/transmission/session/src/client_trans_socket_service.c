@@ -54,8 +54,8 @@ int32_t Socket(SocketInfo info)
     Anonymize(info.name, &anonyOutMy);
     Anonymize(info.peerName, &anonyOutPeer);
     TRANS_LOGI(TRANS_SDK, "Socket: mySessionName=%s, peerSessionName=%s", anonyOutMy, anonyOutPeer);
-    SoftBusFree(anonyOutMy);
-    SoftBusFree(anonyOutPeer);
+    AnonymizeFree(anonyOutMy);
+    AnonymizeFree(anonyOutPeer);
 
     ret = CreateSocket(info.pkgName, info.name);
     if (ret != SOFTBUS_OK) {
