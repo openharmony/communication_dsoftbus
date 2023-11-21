@@ -15,9 +15,7 @@ import("../dsoftbus_dfx.gni")
 
 dsoftbus_root_path = "../../../.."
 
-softbus_anonymizer_src = [
-  "src/anonymizer.c",
-]
+softbus_anonymizer_src = [ "src/anonymizer.c" ]
 
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
@@ -72,7 +70,7 @@ if (defined(ohos_lite)) {
     public_configs = [ ":dsoftbus_anonymizer_interface_std" ]
     deps = [
       "$dsoftbus_dfx_path/log:softbus_dfx_log",
-      "//third_party/bounds_checking_function:libsec_shared"
+      "//third_party/bounds_checking_function:libsec_shared",
     ]
     external_deps = [ "hilog:libhilog" ]
     innerapi_tags = [ "platformsdk_indirect" ]
