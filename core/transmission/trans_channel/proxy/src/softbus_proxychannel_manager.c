@@ -1059,7 +1059,7 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
         TransEventExtra extra = {
             .channelId = msg->msgHead.myId,
             .peerChannelId = msg->msgHead.peerId,
-            .result = STAGE_RESULT_OK
+            .result = TRANS_STAGE_RESULT_OK
         };
         TRANS_EVENT(SCENE_CLOSE_CHANNEL_PASSIVE, STAGE_CLOSE_CHANNEL, extra);
         OnProxyChannelClosed(info->channelId, &(info->appInfo));
@@ -1326,8 +1326,8 @@ static void TransProxyTimerItemProc(const ListNode *proxyProcList)
             TransProxyPostDisConnectMsgToLoop(connId);
             TransEventExtra extra = {
                 .channelId = removeNode->channelId,
-                .connectionId = (int32_t)connId,
-                .result = STAGE_RESULT_OK,
+                .connectionId = connId,
+                .result = TRANS_STAGE_RESULT_OK,
                 .socketName = removeNode->appInfo.myData.sessionName
             };
             TRANS_EVENT(SCENE_CLOSE_CHANNEL_TIMEOUT, STAGE_CLOSE_CHANNEL, extra);

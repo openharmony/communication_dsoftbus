@@ -35,10 +35,10 @@ class TransEventTest : public testing::Test { };
 HWTEST_F(TransEventTest, TransEventTest001, TestSize.Level0)
 {
     TransEventExtra extra = {
+        .dataType = 0,       // invalid
         .result = 1,
         .errcode = 2233,
         .socketName = "testSocket",
-        .dataType = 0, // invalid
     };
     constexpr int32_t VALID_EXTRA_SIZE = 3;
 
@@ -59,26 +59,24 @@ HWTEST_F(TransEventTest, TransEventTest001, TestSize.Level0)
 HWTEST_F(TransEventTest, TransEventTest002, TestSize.Level0)
 {
     TransEventExtra validExtra = {
-        .result = 1,
-        .errcode = 2,
-        .socketName = "testSocketName",
-        .dataType = 3,
+        .dataType = 1,
+        .peerNetworkId = "2**2",
+        .linkType = 3,
         .channelType = 4,
-        .laneId = 5,
-        .preferLinkType = 6,
-        .laneTransType = 7,
-        .channelId = 8,
-        .requestId = 9,
-        .connectionId = 10,
-        .linkType = 11,
-        .authId = 12,
-        .socketFd = 13,
-        .costTime = 14,
-        .channelScore = 15,
-        .peerChannelId = 16,
-        .peerNetworkId = "testNetworkId",
-        .callerPkg = "testCallerPkg",
-        .calleePkg = "testCalleePkg",
+        .channelId = 5,
+        .peerChannelId = 6,
+        .requestId = 7,
+        .connectionId = 8,
+        .costTime = 9,
+        .result = 10,
+        .errcode = 11,
+        .laneId = 12,
+        .laneTransType = 13,
+        .authId = 14,
+        .fd = 15,
+        .callerPkg = "testCaller",
+        .calleePkg = "testCallee",
+        .socketName = "testSocket",
     };
     constexpr int32_t VALID_EXTRA_SIZE = TRANS_ASSIGNER_SIZE;
 
@@ -99,26 +97,24 @@ HWTEST_F(TransEventTest, TransEventTest002, TestSize.Level0)
 HWTEST_F(TransEventTest, TransEventTest003, TestSize.Level0)
 {
     TransEventExtra invalidExtra = {
-        .result = -1,
-        .errcode = -2,
-        .socketName = "",
-        .dataType = -3,
+        .dataType = -1,
+        .peerNetworkId = nullptr,
+        .linkType = -3,
         .channelType = -4,
-        .laneId = -5,
-        .preferLinkType = -6,
-        .laneTransType = -7,
-        .channelId = -8,
-        .requestId = -9,
-        .connectionId = -10,
-        .linkType = -11,
+        .channelId = -5,
+        .peerChannelId = -6,
+        .requestId = -7,
+        .connectionId = -8,
+        .costTime = -9,
+        .result = 0,
+        .errcode = 11, // valid
+        .laneId = -10,
+        .laneTransType = -11,
         .authId = -12,
-        .socketFd = -13,
-        .costTime = -14,
-        .channelScore = -15,
-        .peerChannelId = -16,
-        .peerNetworkId = "",
-        .callerPkg = "\0",
-        .calleePkg = nullptr,
+        .fd = -13,
+        .callerPkg = nullptr,
+        .calleePkg = "\0",
+        .socketName = "",
     };
     constexpr int32_t VALID_EXTRA_SIZE = 1; // errcode is valid
 

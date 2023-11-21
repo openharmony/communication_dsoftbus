@@ -118,8 +118,8 @@ int32_t ConnGattClientConnect(ConnBleConnection *connection)
     }
     ConnEventExtra extra = {
         .peerBleMac = connection->addr,
-        .connectionId = (int32_t)connection->connectionId,
-        .result = STAGE_RESULT_OK
+        .connectionId = connection->connectionId,
+        .result = CONN_STAGE_RESULT_OK
     };
     CONN_EVENT(SCENE_CONNECT, STAGE_CONNECT_INVOKE_PROTOCOL, extra);
     status = SoftbusGattcConnect(underlayerHandle, &binaryAddr);

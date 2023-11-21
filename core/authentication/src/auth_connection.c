@@ -315,7 +315,7 @@ static void HandleConnConnectResult(const void *para)
     uint64_t connId = GenConnId(AUTH_LINK_TYPE_WIFI, fd);
     RemoveConnConnectTimeout(item->requestId);
     NotifyClientConnected(item->requestId, connId, SOFTBUS_OK, &item->connInfo);
-    LnnEventExtra lnnEventExtra = { .connectionId = connId, .result = STAGE_RESULT_OK };
+    LnnEventExtra lnnEventExtra = { .connectionId = connId, .result = EVENT_STAGE_RESULT_OK };
     LNN_EVENT(SCENE_JION_LNN, STAGE_AUTH_CONNECTION, lnnEventExtra);
     DelConnRequest(item);
 }
@@ -493,7 +493,7 @@ static void OnCommConnectSucc(uint32_t requestId, uint32_t connectionId, const C
     RemoveConnConnectTimeout(requestId);
     uint64_t connId = GenConnId(connInfo.type, connectionId);
     NotifyClientConnected(requestId, connId, SOFTBUS_OK, &connInfo);
-    LnnEventExtra lnnEventExtra = { .connectionId = (int32_t)connId, .result = STAGE_RESULT_OK };
+    LnnEventExtra lnnEventExtra = { .connectionId = connId, .result = EVENT_STAGE_RESULT_OK };
     LNN_EVENT(SCENE_JION_LNN, STAGE_AUTH_CONNECTION, lnnEventExtra);
 }
 
