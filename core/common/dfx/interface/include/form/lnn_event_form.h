@@ -18,6 +18,8 @@
 
 #include <stdint.h>
 
+#include "event_form_enum.h"
+
 typedef enum {
     SCENE_JION_LNN = 1,
     SCENE_LEAVE_LNN = 2,
@@ -38,23 +40,25 @@ typedef enum {
 } LnnEventLeaveLnnStage;
 
 typedef struct {
-    int32_t peerNetworkId;     // PEER_NETID
-    int32_t connectionId;      // CONN_ID
-    int32_t authType;          // AUTH_TYPE
-    int32_t authId;            // AUTH_ID
-    int32_t peerDeviceType;    // PEER_DEV_TYPE
-    int32_t peerDeviceAbility; // PEER_DEV_ABILITY
-    int32_t peerDeviceInfo;    // PEER_DEV_INFO
-    int32_t onlineNum;         // ONLINE_NUM
-    int32_t result;            // STAGE_RES
-    int32_t errcode;           // ERROR_CODE
+    int32_t result;             // STAGE_RES
+    int32_t errcode;            // ERROR_CODE
+    int32_t connectionId;       // CONN_ID
+    int32_t authType;           // AUTH_TYPE
+    int32_t authId;             // AUTH_ID
+    int32_t lnnType;            // LNN_TYPE
+    int32_t onlineNum;          // ONLINE_NUM
+    int32_t peerDeviceAbility;  // PEER_DEV_ABILITY
+    const char *peerDeviceInfo; // PEER_DEV_INFO
+    const char *peerIp;         // PEER_IP
+    const char *peerBrMac;      // PEER_BR_MAC
+    const char *peerBleMac;     // PEER_BLE_MAC
+    const char *peerWifiMac;    // PEER_WIFI_MAC
+    const char *peerPort;       // PEER_PORT
+    const char *peerUdid;       // PEER_UDID
+    const char *peerNetworkId;  // PEER_NET_ID
+    const char *peerDeviceType; // PEER_DEV_TYPE
     const char *callerPkg;     // HOST_PKG
     const char *calleePkg;     // TO_CALL_PKG
-    const char *peerBrMac;     // PEER_BR_MAC
-    const char *peerBleMac;    // PEER_BLE_MAC
-    const char *peerWifiMac;   // PEER_WIFI_MAC
-    const char *peerIp;        // PEER_IP
-    const char *peerPort;      // PEER_PORT
 } LnnEventExtra;
 
 #endif // LNN_EVENT_FORM_H

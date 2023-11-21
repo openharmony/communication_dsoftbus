@@ -95,7 +95,6 @@ static void UpdateDiscEventByDeviceInfo(DiscEventExtra *discEventExtra, const De
         DISC_LOGI(DISC_CONTROL, "discEventExtra or device is null");
         return;
     }
-    discEventExtra->peerDeviceType = device->devType;
     if (device->addrNum <= CONNECTION_ADDR_WLAN || device->addrNum > CONNECTION_ADDR_MAX) {
         DISC_LOGI(DISC_CONTROL, "unknow device info");
         return;
@@ -117,6 +116,12 @@ static void UpdateDiscEventByDeviceInfo(DiscEventExtra *discEventExtra, const De
             DISC_LOGI(DISC_CONTROL, "unknow param type!");
             break;
     }
+    char deviceType[DISC_MAX_DEVICE_NAME_LEN] = { 0 };
+    if (sprintf_s(deviceType, DISC_MAX_DEVICE_NAME_LEN + 1, "%d", device->devType) < 0) {
+        DISC_LOGI(DISC_CONTROL, "sprintf_s fail, devType=%d", device->devType);
+        return;
+    }
+    discEventExtra->peerDeviceType = deviceType;
 }
 
 static void DfxRecordStartDiscoveryDevice(DiscInfo *infoNode)
@@ -131,7 +136,8 @@ static void DfxRecordDeviceFound(DiscInfo *infoNode, const DeviceInfo *device, c
 {
     DISC_LOGI(DISC_CONTROL, "record device found");
     DiscEventExtra discEventExtra = {
-        .discType = addtions->medium, .discMode = infoNode->mode, .result = EVENT_STAGE_RESULT_OK };
+        .discType = addtions->medium, .discMode = infoNode->mode, .result = STAGE_RESULT_OK
+    };
     UpdateDiscEventByDeviceInfo(&discEventExtra, device);
     if (infoNode->statistics.repTimes == 0) {
         uint64_t costTime = SoftBusGetSysTimeMs() - infoNode->statistics.startTime;
@@ -273,7 +279,7 @@ static void InnerDeviceFound(DiscInfo *infoNode, const DeviceInfo *device,
                                                 const InnerDeviceInfoAddtions *additions)
 {
     if (IsInnerModule(infoNode) == false) {
-        DiscEventExtra discEventExtra = { .discMode = infoNode->mode, .result = EVENT_STAGE_RESULT_OK };
+        DiscEventExtra discEventExtra = { .discMode = infoNode->mode, .result = STAGE_RESULT_OK };
         UpdateDiscEventByDeviceInfo(&discEventExtra, device);
         DISC_EVENT(SCENE_SCAN, STAGE_SCAN_END, discEventExtra);
         (void)infoNode->item->callback.serverCb.OnServerDeviceFound(infoNode->item->packageName, device, additions);

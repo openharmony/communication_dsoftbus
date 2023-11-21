@@ -147,8 +147,7 @@ static void DfxRecordBrConnectSuccess(uint32_t pId, ConnBrConnection *connection
         .connectionId = connection->connectionId,
         .linkType = CONNECT_BR,
         .costTime = costTime,
-        .result = CONN_STAGE_RESULT_OK
-    };
+        .result = STAGE_RESULT_OK };
     CONN_EVENT(SCENE_CONNECT, STAGE_CONNECT_END, extra);
 }
 
@@ -426,8 +425,8 @@ static int32_t ConnectDeviceDirectly(ConnBrDevice *device, const char *anomizeAd
         }
         ConnEventExtra extra = {
             .peerBrMac = device->addr,
-            .connectionId = connection->connectionId,
-            .result = CONN_STAGE_RESULT_OK
+            .connectionId = (int32_t)connection->connectionId,
+            .result = STAGE_RESULT_OK
         };
         CONN_EVENT(SCENE_CONNECT, STAGE_CONNECT_INVOKE_PROTOCOL, extra);
         status = ConnBrConnect(connection);
