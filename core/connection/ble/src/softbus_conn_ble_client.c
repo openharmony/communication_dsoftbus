@@ -179,7 +179,7 @@ static void BleGattcConnStateCallback(int32_t underlayerHandle, int32_t state, i
 
 static void ConnectedMsgHandler(const CommonStatusContext *ctx)
 {
-    ConnBleConnection *connection = ConnBleGetConnectionByHandle(ctx->underlayerHandle, CONN_SIDE_CLIENT, BLE_GATT);
+    ConnBleConnection *connection = BleGetConnectionByHandle(ctx->underlayerHandle);
     if (connection == NULL) {
         CONN_LOGW(CONN_BLE, "connection not exist, handle=%d", ctx->underlayerHandle);
         (void)SoftbusGattcUnRegister(ctx->underlayerHandle);
