@@ -119,9 +119,8 @@ int32_t ConnGattClientConnect(ConnBleConnection *connection)
     ConnEventExtra extra = {
         .peerBleMac = connection->addr,
         .connectionId = (int32_t)connection->connectionId,
-        .result = STAGE_RESULT_OK
-    };
-    CONN_EVENT(SCENE_CONNECT, STAGE_CONNECT_INVOKE_PROTOCOL, extra);
+        .result = EVENT_STAGE_RESULT_OK };
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_INVOKE_PROTOCOL, extra);
     status = SoftbusGattcConnect(underlayerHandle, &binaryAddr);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "client connect %u failed: underlayer connect failed, err=%d", connection->connectionId,

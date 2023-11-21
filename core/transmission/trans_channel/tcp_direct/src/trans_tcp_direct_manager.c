@@ -286,6 +286,6 @@ int32_t TransOpenDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, 
         extra.socketFd = conn.appInfo.fd;
         extra.requestId = conn.requestId;
     };
-    TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_START_CONNECT, extra);
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, extra);
     return ret;
 }

@@ -21,9 +21,9 @@ extern "C" {
 #endif
 
 typedef enum {
-    STAGE_RESULT_OK = 1,
-    STAGE_RESULT_FAILED = 2,
-    STAGE_RESULT_CANCELED = 3,
+    EVENT_STAGE_RESULT_OK = 1,
+    EVENT_STAGE_RESULT_FAILED = 2,
+    EVENT_STAGE_RESULT_CANCELED = 3,
 } SoftbusEventStageResult;
 
 #ifdef __cplusplus

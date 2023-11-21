@@ -122,7 +122,7 @@ int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned
         .costTime = GetSoftbusRecordTimeMillis() - appInfo->connectedStart,
         .errcode = ret
     };
-    TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_HANDSHAKE_REPLY, extra);
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
     TRANS_LOGI(TRANS_CTRL, "on open ret %d", ret);
     return ret;
 }
@@ -149,7 +149,7 @@ int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int3
             .callerPkg = appInfo->myData.pkgName,
             .socketName = appInfo->myData.sessionName
         };
-        TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_OPEN_CHANNEL_END, extra);
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     }
     SoftBusFree(chan);
     SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName, appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);

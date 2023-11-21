@@ -21,17 +21,17 @@
 #include "event_form_enum.h"
 
 typedef enum {
-    SCENE_BROADCAST = 1,
-    SCENE_SCAN = 2,
+    EVENT_SCENE_BROADCAST = 1,
+    EVENT_SCENE_SCAN = 2,
 } DiscEventScene;
 
 typedef enum {
-    STAGE_BROADCAST = 1,
+    EVENT_STAGE_BROADCAST = 1,
 } DiscEventBroadcastStage;
 
 typedef enum {
-    STAGE_SCAN_START = 1,
-    STAGE_SCAN_END = 2,
+    EVENT_STAGE_SCAN_START = 1,
+    EVENT_STAGE_SCAN_END = 2,
 } DiscEventScanStage;
 
 typedef struct {

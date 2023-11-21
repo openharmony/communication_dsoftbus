@@ -21,22 +21,22 @@
 #include "event_form_enum.h"
 
 typedef enum {
-    SCENE_JION_LNN = 1,
-    SCENE_LEAVE_LNN = 2,
+    EVENT_SCENE_JOIN_LNN = 1,
+    EVENT_SCENE_LEAVE_LNN = 2,
 } LnnEventScene;
 
 typedef enum {
-    STAGE_JOIN_LNN_START = 1,
-    STAGE_AUTH_CONNECTION = 2,
-    STAGE_AUTH_DEVICE = 3,
-    STAGE_EXCHANGE_CIPHER = 4,
-    STAGE_EXCHANGE_DEVICE_INFO = 5,
-    STAGE_JOIN_LNN_END = 6,
+    EVENT_STAGE_JOIN_LNN_START = 1,
+    EVENT_STAGE_AUTH_CONNECTION = 2,
+    EVENT_STAGE_AUTH_DEVICE = 3,
+    EVENT_STAGE_EXCHANGE_CIPHER = 4,
+    EVENT_STAGE_EXCHANGE_DEVICE_INFO = 5,
+    EVENT_STAGE_JOIN_LNN_END = 6,
 } LnnEventJoinLnnStage;
 
 typedef enum {
-    STAGE_LEAVE_LNN_START = 1,
-    STAGE_LEAVE_LNN_END = 2,
+    EVENT_STAGE_LEAVE_LNN_START = 1,
+    EVENT_STAGE_LEAVE_LNN_END = 2,
 } LnnEventLeaveLnnStage;
 
 typedef struct {
