@@ -446,7 +446,7 @@ static void DecideOptimalLinks(const char *networkId, const LaneSelectParam *req
     } else {
         bandWidthType = LOW_BAND_WIDTH;
     }
-    LNN_LOGI(LNN_LANE, "band width type=%ld", bandWidthType);
+    LNN_LOGI(LNN_LANE, "decide optimal link, band width type=%ld", bandWidthType);
     for (uint32_t i = 0; i < (LANE_LINK_TYPE_BUTT + 1); i++) {
         if (g_laneBandWidth[bandWidthType][i] == LANE_LINK_TYPE_BUTT) {
             break;
@@ -486,7 +486,7 @@ static void DecideRetryLinks(const char *networkId, const LaneSelectParam *reque
     } else {
         bandWidthType = LOW_BAND_WIDTH;
     }
-    LNN_LOGI(LNN_LANE, "band width type=%ld", bandWidthType);
+    LNN_LOGI(LNN_LANE, "decide retry link, band width type=%ld", bandWidthType);
     int32_t retryTime;
     if (linksNum == 0) {
         retryTime = maxLaneLatency;

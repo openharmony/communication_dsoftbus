@@ -190,7 +190,7 @@ static int32_t TriggerLink(uint32_t laneId, TransOption *request,
         return SOFTBUS_MEM_ERR;
     }
     if (memcpy_s(linkNode->peerBleMac, MAX_MAC_LEN, request->peerBleMac, MAX_MAC_LEN) != EOK) {
-        LNN_LOGE(LNN_LANE, "memcpy fail for peerBlsMac");
+        LNN_LOGE(LNN_LANE, "memcpy fail for peerBleMac");
         SoftBusFree(linkNode);
         return SOFTBUS_MEM_ERR;
     }
@@ -211,7 +211,6 @@ static int32_t TriggerLink(uint32_t laneId, TransOption *request,
     }
     ListTailInsert(&g_multiLinkList, &linkNode->node);
     Unlock();
-    LNN_LOGI(LNN_LANE, "start LaneTriggerLink, postMsg=%d, ", MSG_TYPE_LANE_TRIGGER_LINK);
     if (LnnLanePostMsgToHandler(MSG_TYPE_LANE_TRIGGER_LINK, laneId,
         request->acceptableProtocols, NULL, 0) != SOFTBUS_OK) {
         DeleteLaneLinkNode(laneId);
