@@ -302,7 +302,7 @@ int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *req
         return SOFTBUS_INVALID_PARAM;
     }
     if (!LnnGetOnlineStateById(networkId, CATEGORY_NETWORK_ID)) {
-        LNN_LOGE(LNN_LANE, "lnn get online state by networkid err");
+        LNN_LOGE(LNN_LANE, "device not online, cancel selectLaneByQos, networkId=%s", networkId);
         return SOFTBUS_ERR;
     }
     LanePreferredLinkList laneLinkList = {0};

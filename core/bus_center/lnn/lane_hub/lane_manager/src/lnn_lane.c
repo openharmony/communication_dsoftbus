@@ -292,7 +292,7 @@ static int32_t LnnRequestLaneByQos(uint32_t laneId, const LaneRequestOption *req
         laneId, request->type, request->requestInfo.trans.transType);
     int32_t result = g_laneObject[request->type]->allocLaneByQos(laneId, request, listener);
     if (result != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "alloc lane by qos fail, result=%d", result);
+        LNN_LOGE(LNN_LANE, "alloc lane by qos fail, laneId=%u, result=%d", laneId, result);
         return SOFTBUS_ERR;
     }
     LNN_LOGI(LNN_LANE, "request lane by qos success, laneId=%u", laneId);
