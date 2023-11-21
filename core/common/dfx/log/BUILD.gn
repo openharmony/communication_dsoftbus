@@ -15,9 +15,7 @@ import("../dsoftbus_dfx.gni")
 
 dsoftbus_root_path = "../../../.."
 
-softbus_log_src = [
-  "src/softbus_log.c",
-]
+softbus_log_src = [ "src/softbus_log.c" ]
 
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
