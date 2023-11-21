@@ -35,10 +35,9 @@ class ConnEventTest : public testing::Test { };
 HWTEST_F(ConnEventTest, ConnEventTest001, TestSize.Level0)
 {
     ConnEventExtra extra = {
-        .requestId = 0,      // invalid
-        .peerNetworkId = -1, // invalid
         .result = 1,
         .errcode = 2233,
+        .requestId = 0, // invalid
         .peerPort = "9000",
     };
     constexpr int32_t VALID_EXTRA_SIZE = 3;
@@ -60,24 +59,27 @@ HWTEST_F(ConnEventTest, ConnEventTest001, TestSize.Level0)
 HWTEST_F(ConnEventTest, ConnEventTest002, TestSize.Level0)
 {
     ConnEventExtra validExtra = {
-        .requestId = 1,
-        .linkType = 2,
-        .expectRole = 3,
-        .authType = 4,
-        .authId = 5,
-        .connectionId = 6,
-        .peerNetworkId = 7,
-        .rssi = 8,
-        .load = 9,
-        .frequency = 10,
-        .costTime = 11,
-        .result = 12,
-        .errcode = 13,
+        .result = 1,
+        .errcode = 2,
+        .connectionId = 3,
+        .requestId = 4,
+        .linkType = 5,
+        .authType = 6,
+        .authId = 7,
+        .lnnType = "testLnnType",
+        .expectRole = 8,
+        .costTime = 9,
+        .rssi = 10,
+        .load = 11,
+        .frequency = 12,
+        .peerIp = "testPeerIp",
+        .peerNetworkId = "testPeerNetworkId",
         .peerBrMac = "testPeerBrMac",
         .peerBleMac = "testPeerBleMac",
         .peerWifiMac = "testPeerWifiMac",
-        .peerIp = "testPeerIp",
         .peerPort = "testPeerPort",
+        .callerPkg = "testCallerPkg",
+        .calleePkg = "testCalleePkg",
     };
     constexpr int32_t VALID_EXTRA_SIZE = CONN_ASSIGNER_SIZE;
 
@@ -98,24 +100,27 @@ HWTEST_F(ConnEventTest, ConnEventTest002, TestSize.Level0)
 HWTEST_F(ConnEventTest, ConnEventTest003, TestSize.Level0)
 {
     ConnEventExtra invalidExtra = {
-        .requestId = -1,
-        .linkType = -2,
-        .expectRole = -3,
-        .authType = -4,
-        .authId = -5,
-        .connectionId = -6,
-        .peerNetworkId = -7,
-        .rssi = -8,
-        .load = -9,
-        .frequency = -10,
-        .costTime = -11,
-        .result = -12,
-        .errcode = -13, // valid
-        .peerBrMac = nullptr,
-        .peerBleMac = "\0",
-        .peerWifiMac = "",
-        .peerIp = nullptr,
+        .result = -1,
+        .errcode = -2, // valid
+        .connectionId = -3,
+        .requestId = -4,
+        .linkType = -5,
+        .authType = -6,
+        .authId = -7,
+        .lnnType = "",
+        .expectRole = -8,
+        .costTime = -9,
+        .rssi = -10,
+        .load = -11,
+        .frequency = -12,
+        .peerIp = "",
+        .peerNetworkId = "",
+        .peerBrMac = "",
+        .peerBleMac = "",
+        .peerWifiMac = "\0",
         .peerPort = nullptr,
+        .callerPkg = "\0",
+        .calleePkg = nullptr,
     };
     constexpr int32_t VALID_EXTRA_SIZE = 1; // errcode is valid
 

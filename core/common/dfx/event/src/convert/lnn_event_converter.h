@@ -26,50 +26,54 @@ extern "C" {
     static inline bool LnnAssigner##filedName(                                                                \
         const char eventName[], HiSysEventParamType paramType, SoftbusEventForm form, HiSysEventParam *param) \
     {                                                                                                         \
-        if (Assigner##type(form.lnnExtra.filed, &param) && CopyString(param->name, eventName)) {             \
+        if (Assigner##type(form.lnnExtra.filed, &param) && CopyString(param->name, eventName)) {              \
             param->t = paramType;                                                                             \
             return true;                                                                                      \
         }                                                                                                     \
         return false;                                                                                         \
     }
 
-LNN_ASSIGNER(Int32, PeerNetworkId, peerNetworkId)
+LNN_ASSIGNER(Int32, Result, result)
+LNN_ASSIGNER(Errcode, Errcode, errcode)
 LNN_ASSIGNER(Int32, ConnectionId, connectionId)
 LNN_ASSIGNER(Int32, AuthType, authType)
 LNN_ASSIGNER(Int32, AuthId, authId)
-LNN_ASSIGNER(Int32, PeerDeviceType, peerDeviceType)
-LNN_ASSIGNER(Int32, PeerDeviceAbility, peerDeviceAbility)
-LNN_ASSIGNER(Int32, PeerDeviceInfo, peerDeviceInfo)
+LNN_ASSIGNER(Int32, LnnType, lnnType)
 LNN_ASSIGNER(Int32, OnlineNum, onlineNum)
-LNN_ASSIGNER(Int32, Result, result)
-LNN_ASSIGNER(Errcode, Errcode, errcode)
-LNN_ASSIGNER(String, CallerPkg, callerPkg)
-LNN_ASSIGNER(String, CalleePkg, calleePkg)
+LNN_ASSIGNER(Int32, PeerDeviceAbility, peerDeviceAbility)
+LNN_ASSIGNER(String, PeerDeviceInfo, peerDeviceInfo)
+LNN_ASSIGNER(String, PeerIp, peerIp)
 LNN_ASSIGNER(String, PeerBrMac, peerBrMac)
 LNN_ASSIGNER(String, PeerBleMac, peerBleMac)
 LNN_ASSIGNER(String, PeerWifiMac, peerWifiMac)
-LNN_ASSIGNER(String, PeerIp, peerIp)
 LNN_ASSIGNER(String, PeerPort, peerPort)
+LNN_ASSIGNER(String, PeerUdid, peerUdid)
+LNN_ASSIGNER(String, PeerNetworkId, peerNetworkId)
+LNN_ASSIGNER(String, PeerDeviceType, peerDeviceType)
+LNN_ASSIGNER(String, CallerPkg, callerPkg)
+LNN_ASSIGNER(String, CalleePkg, calleePkg)
 
-#define LNN_ASSIGNER_SIZE 17 // Size of g_connAssigners
+#define LNN_ASSIGNER_SIZE 19 // Size of g_connAssigners
 static const HiSysEventParamAssigner g_lnnAssigners[] = {
-    {"PEER_NETID",        HISYSEVENT_INT32,  LnnAssignerPeerNetworkId    },
+    {"STAGE_RES",         HISYSEVENT_INT32,  LnnAssignerResult           },
+    { "ERROR_CODE",       HISYSEVENT_INT32,  LnnAssignerErrcode          },
     { "CONN_ID",          HISYSEVENT_INT32,  LnnAssignerConnectionId     },
     { "AUTH_TYPE",        HISYSEVENT_INT32,  LnnAssignerAuthType         },
     { "AUTH_ID",          HISYSEVENT_INT32,  LnnAssignerAuthId           },
-    { "PEER_DEV_TYPE",    HISYSEVENT_INT32,  LnnAssignerPeerDeviceType   },
-    { "PEER_DEV_ABILITY", HISYSEVENT_INT32,  LnnAssignerPeerDeviceAbility},
-    { "PEER_DEV_INFO",    HISYSEVENT_INT32,  LnnAssignerPeerDeviceInfo   },
+    { "LNN_TYPE",         HISYSEVENT_INT32,  LnnAssignerLnnType          },
     { "ONLINE_NUM",       HISYSEVENT_INT32,  LnnAssignerOnlineNum        },
-    { "STAGE_RES",        HISYSEVENT_INT32,  LnnAssignerResult           },
-    { "ERROR_CODE",       HISYSEVENT_INT32,  LnnAssignerErrcode          },
-    { "HOST_PKG",         HISYSEVENT_STRING, LnnAssignerCallerPkg        },
-    { "TO_CALL_PKG",      HISYSEVENT_STRING, LnnAssignerCalleePkg        },
+    { "PEER_DEV_ABILITY", HISYSEVENT_INT32,  LnnAssignerPeerDeviceAbility},
+    { "PEER_DEV_INFO",    HISYSEVENT_STRING, LnnAssignerPeerDeviceInfo   },
+    { "PEER_IP",          HISYSEVENT_STRING, LnnAssignerPeerIp           },
     { "PEER_BR_MAC",      HISYSEVENT_STRING, LnnAssignerPeerBrMac        },
     { "PEER_BLE_MAC",     HISYSEVENT_STRING, LnnAssignerPeerBleMac       },
     { "PEER_WIFI_MAC",    HISYSEVENT_STRING, LnnAssignerPeerWifiMac      },
-    { "PEER_IP",          HISYSEVENT_STRING, LnnAssignerPeerIp           },
-    { "PEER_PORT",        HISYSEVENT_STRING, LnnAssignerPeerPort         },
+    { "PEER_PORT",        HISYSEVENT_INT32,  LnnAssignerPeerPort         },
+    { "PEER_UDID",        HISYSEVENT_STRING, LnnAssignerPeerUdid         },
+    { "PEER_NET_ID",      HISYSEVENT_STRING, LnnAssignerPeerNetworkId    },
+    { "PEER_DEV_TYPE",    HISYSEVENT_INT32,  LnnAssignerPeerDeviceType   },
+    { "HOST_PKG",         HISYSEVENT_STRING, LnnAssignerCallerPkg        },
+    { "TO_CALL_PKG",      HISYSEVENT_STRING, LnnAssignerCalleePkg        },
  // Modification Note: remember updating LNN_ASSIGNER_SIZE
 };
 
