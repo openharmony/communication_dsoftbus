@@ -1472,12 +1472,15 @@ static NodeInfo *DupNodeInfo(const NodeInfo *nodeInfo)
 
 static int32_t FillNodeInfo(MetaJoinRequestNode *metaNode, NodeInfo *info)
 {
-    if (metaNode == NULL || info ==NULL) {
+    if (metaNode == NULL || info == NULL) {
         return SOFTBUS_ERR;
     }
+    bool isAuthServer = false;
     info->discoveryType = 1 << (uint32_t)LnnConvAddrTypeToDiscType(metaNode->addr.type);
     info->authSeqNum = metaNode->authId;
-    info->authChannelId[metaNode->addr.type] = (int32_t)metaNode->authId;
+    (void)AuthGetServerSide(metaNode->authId, &isAuthServer);
+    info->authChannelId[metaNode->addr.type][isAuthServer ? AUTH_AS_SERVER_SIDE : AUTH_AS_CLIENT_SIDE] =
+        (int32_t)metaNode->authId;
     info->relation[metaNode->addr.type]++;
     if (AuthGetDeviceUuid(metaNode->authId, info->uuid, sizeof(info->uuid)) != SOFTBUS_OK ||
         info->uuid[0] == '\0') {

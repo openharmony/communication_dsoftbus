@@ -37,6 +37,12 @@ extern "C" {
 #define CHANNEL_LIST_STR_LEN  256
 
 typedef enum {
+    AUTH_AS_CLIENT_SIDE = 0,
+    AUTH_AS_SERVER_SIDE,
+    AUTH_SIDE_MAX,
+} AuthSide;
+
+typedef enum {
     ROLE_UNKNOWN = 0,
     ROLE_CONTROLLER,
     ROLE_LEAF,
@@ -107,7 +113,7 @@ typedef struct {
     DeviceBasicInfo deviceInfo;
     ConnectInfo connectInfo;
     int64_t authSeqNum;
-    int32_t authChannelId[CONNECTION_ADDR_MAX];
+    int32_t authChannelId[CONNECTION_ADDR_MAX][AUTH_SIDE_MAX];
     BssTransInfo bssTransInfo;
     bool isBleP2p; // true: this device support connect p2p via ble connection
     P2pInfo p2pInfo;

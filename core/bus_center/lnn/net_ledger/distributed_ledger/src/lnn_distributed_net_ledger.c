@@ -1147,16 +1147,23 @@ short LnnGetCnnCode(const char *uuid, DiscoveryType type)
 
 static void MergeLnnInfo(const NodeInfo *oldInfo, NodeInfo *info)
 {
-    int32_t i;
+    int32_t i, j;
 
     for (i = 0; i < CONNECTION_ADDR_MAX; ++i) {
         info->relation[i] += oldInfo->relation[i];
         info->relation[i] &= LNN_RELATION_MASK;
-        if (oldInfo->authChannelId[i] != 0) {
-            info->authChannelId[i] = oldInfo->authChannelId[i];
+        for (j = 0; j < AUTH_SIDE_MAX; ++j) {
+            if (oldInfo->authChannelId[i][j] != 0 && info->authChannelId[i][j] == 0) {
+                info->authChannelId[i][j] = oldInfo->authChannelId[i][j];
+            }
         }
-        LNN_LOGI(LNN_LEDGER,
-            "Update authChannelId: %d, addrType=%d.", info->authChannelId[i], i);
+        if (oldInfo->authChannelId[i][AUTH_AS_CLIENT_SIDE] != 0 ||
+            oldInfo->authChannelId[i][AUTH_AS_SERVER_SIDE] != 0 || info->authChannelId[i][AUTH_AS_CLIENT_SIDE] != 0 ||
+            info->authChannelId[i][AUTH_AS_SERVER_SIDE] != 0 ) {
+            LNN_LOGD(LNN_LEDGER, "Merge authChannelId %d|%d -> %d|%d, addrType = %d ",
+                oldInfo->authChannelId[i][AUTH_AS_CLIENT_SIDE], oldInfo->authChannelId[i][AUTH_AS_SERVER_SIDE],
+                info->authChannelId[i][AUTH_AS_CLIENT_SIDE], info->authChannelId[i][AUTH_AS_SERVER_SIDE], i);
+        }
     }
 }
 
@@ -1360,13 +1367,15 @@ static void NotifyMigrateUpgrade(NodeInfo *info)
 static void FilterWifiInfo(NodeInfo *info)
 {
     (void)LnnClearDiscoveryType(info, DISCOVERY_TYPE_WIFI);
-    info->authChannelId[CONNECTION_ADDR_WLAN] = 0;
+    info->authChannelId[CONNECTION_ADDR_WLAN][AUTH_AS_CLIENT_SIDE] = 0;
+    info->authChannelId[CONNECTION_ADDR_WLAN][AUTH_AS_SERVER_SIDE] = 0;
 }
 
 static void FilterBrInfo(NodeInfo *info)
 {
     (void)LnnClearDiscoveryType(info, DISCOVERY_TYPE_BR);
-    info->authChannelId[CONNECTION_ADDR_BR] = 0;
+    info->authChannelId[CONNECTION_ADDR_BR][AUTH_AS_CLIENT_SIDE] = 0;
+    info->authChannelId[CONNECTION_ADDR_BR][AUTH_AS_SERVER_SIDE] = 0;
 }
 
 static void BleDirectlyOnlineProc(NodeInfo *info)
@@ -1586,6 +1595,27 @@ static void NotifyMigrateDegrade(const char *udid)
     }
 }
 
+static ReportCategory ClearAuthChannelId(NodeInfo *info, ConnectionAddrType type, int32_t authId)
+{
+    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI) && LnnConvAddrTypeToDiscType(type) == DISCOVERY_TYPE_WIFI) {
+        if (info->authChannelId[type][AUTH_AS_CLIENT_SIDE] == authId) {
+            info->authChannelId[type][AUTH_AS_CLIENT_SIDE] = 0;
+        }
+        if (info->authChannelId[type][AUTH_AS_SERVER_SIDE] == authId) {
+            info->authChannelId[type][AUTH_AS_SERVER_SIDE] = 0;
+        }
+        if (info->authChannelId[type][AUTH_AS_CLIENT_SIDE] != 0 ||
+            info->authChannelId[type][AUTH_AS_SERVER_SIDE] != 0) {
+            LNN_LOGI(LNN_LEDGER, "authChannelId(%d|%d) not clear, not need to report offline.",
+                info->authChannelId[type][AUTH_AS_CLIENT_SIDE], info->authChannelId[type][AUTH_AS_SERVER_SIDE]);
+            return REPORT_NONE;
+        }
+    }
+    info->authChannelId[type][AUTH_AS_CLIENT_SIDE] = 0;
+    info->authChannelId[type][AUTH_AS_SERVER_SIDE] = 0;
+    return REPORT_OFFLINE;
+}
+
 static void LnnCleanNodeInfo(NodeInfo *info)
 {
     LnnSetNodeConnStatus(info, STATUS_OFFLINE);
@@ -1616,13 +1646,10 @@ ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int3
     if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR) && LnnConvAddrTypeToDiscType(type) == DISCOVERY_TYPE_BR) {
         RemoveCnnCode(&g_distributedNetLedger.cnnCode.connectionCode, info->uuid, DISCOVERY_TYPE_BR);
     }
-    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI) && LnnConvAddrTypeToDiscType(type) == DISCOVERY_TYPE_WIFI &&
-        info->authChannelId[type] != authId) {
-        LNN_LOGI(LNN_LEDGER, "authChannelId != authId, not need to report offline.");
+    if (ClearAuthChannelId(info, type, authId) == REPORT_NONE) {
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return REPORT_NONE;
     }
-    info->authChannelId[type] = 0;
     if (LnnConvAddrTypeToDiscType(type) == DISCOVERY_TYPE_WIFI) {
         LnnSetWiFiIp(info, LOCAL_IP);
     }
