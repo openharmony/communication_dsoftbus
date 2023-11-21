@@ -491,9 +491,9 @@ int32_t TcpConnectDevice(const ConnectOption *option, uint32_t requestId,
     statistics->connectTraceId = SoftbusGetConnectTraceId();
     CONN_LOGI(CONN_COMMON, "tcp conn start connectTraceId=%u", statistics->connectTraceId);
     ConnEventExtra extra = {
-        .requestId = requestId,
+        .requestId = (int32_t)requestId,
         .peerWifiMac = option->socketOption.addr,
-        .result = CONN_STAGE_RESULT_OK
+        .result = STAGE_RESULT_OK
     };
     CONN_EVENT(SCENE_CONNECT, STAGE_CONNECT_INVOKE_PROTOCOL, extra);
     int32_t fd = ConnOpenClientSocket(option, BIND_ADDR_ALL, true);

@@ -22,8 +22,6 @@
 extern "C" {
 #endif
 
-#define CONN_STAGE_RESULT_OK 1
-
 #define CONN_EVENT(scene, stage, extra) ConnEventInner(scene, stage, __FUNCTION__, __LINE__, extra)
 
 /* For inner use only */
