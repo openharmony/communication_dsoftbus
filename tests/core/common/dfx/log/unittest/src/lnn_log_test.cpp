@@ -36,56 +36,70 @@ class LnnLogTest : public testing::Test { };
  */
 HWTEST_F(LnnLogTest, LnnLogTest001, TestSize.Level0)
 {
+    int32_t index = 0;
+    int32_t lnnDomainBase = 0xd005780;
+
+    EXPECT_EQ(index, LNN_INIT);
     auto label = LNN_LABELS[LNN_INIT];
     EXPECT_EQ(LNN_INIT, label.label);
-    EXPECT_EQ(0xd005780, label.domain);
+    EXPECT_EQ(lnnDomainBase, label.domain);
     EXPECT_STREQ("LnnInit", label.tag);
 
+    EXPECT_EQ(++index, LNN_HEART_BEAT);
     label = LNN_LABELS[LNN_HEART_BEAT];
     EXPECT_EQ(LNN_HEART_BEAT, label.label);
-    EXPECT_EQ(0xd005781, label.domain);
+    EXPECT_EQ(++lnnDomainBase, label.domain);
     EXPECT_STREQ("LnnHeartBeat", label.tag);
 
+    EXPECT_EQ(++index, LNN_LEDGER);
     label = LNN_LABELS[LNN_LEDGER];
     EXPECT_EQ(LNN_LEDGER, label.label);
-    EXPECT_EQ(0xd005782, label.domain);
+    EXPECT_EQ(++lnnDomainBase, label.domain);
     EXPECT_STREQ("LnnLedger", label.tag);
 
+    EXPECT_EQ(++index, LNN_BUILDER);
     label = LNN_LABELS[LNN_BUILDER];
     EXPECT_EQ(LNN_BUILDER, label.label);
-    EXPECT_EQ(0xd005783, label.domain);
+    EXPECT_EQ(++lnnDomainBase, label.domain);
     EXPECT_STREQ("LnnBuilder", label.tag);
 
+    EXPECT_EQ(++index, LNN_LANE);
     label = LNN_LABELS[LNN_LANE];
     EXPECT_EQ(LNN_LANE, label.label);
-    EXPECT_EQ(0xd005784, label.domain);
+    EXPECT_EQ(++lnnDomainBase, label.domain);
     EXPECT_STREQ("LnnLane", label.tag);
 
+    EXPECT_EQ(++index, LNN_QOS);
     label = LNN_LABELS[LNN_QOS];
     EXPECT_EQ(LNN_QOS, label.label);
-    EXPECT_EQ(0xd005785, label.domain);
+    EXPECT_EQ(++lnnDomainBase, label.domain);
     EXPECT_STREQ("LnnQos", label.tag);
 
+    EXPECT_EQ(++index, LNN_EVENT);
     label = LNN_LABELS[LNN_EVENT];
     EXPECT_EQ(LNN_EVENT, label.label);
-    EXPECT_EQ(0xd005786, label.domain);
+    EXPECT_EQ(++lnnDomainBase, label.domain);
     EXPECT_STREQ("LnnEvent", label.tag);
 
+    EXPECT_EQ(++index, LNN_STATE);
     label = LNN_LABELS[LNN_STATE];
     EXPECT_EQ(LNN_STATE, label.label);
-    EXPECT_EQ(0xd005787, label.domain);
+    EXPECT_EQ(++lnnDomainBase, label.domain);
     EXPECT_STREQ("LnnState", label.tag);
 
+    EXPECT_EQ(++index, LNN_META_NODE);
     label = LNN_LABELS[LNN_META_NODE];
     EXPECT_EQ(LNN_META_NODE, label.label);
-    EXPECT_EQ(0xd005788, label.domain);
+    EXPECT_EQ(++lnnDomainBase, label.domain);
     EXPECT_STREQ("LnnMetaNode", label.tag);
 
+    EXPECT_EQ(++index, LNN_CLOCK);
     label = LNN_LABELS[LNN_CLOCK];
     EXPECT_EQ(LNN_CLOCK, label.label);
-    EXPECT_EQ(0xd005789, label.domain);
+    EXPECT_EQ(++lnnDomainBase, label.domain);
     EXPECT_STREQ("LnnClock", label.tag);
 
+    EXPECT_EQ(++index, LNN_TEST);
     label = LNN_LABELS[LNN_TEST];
     EXPECT_EQ(LNN_TEST, label.label);
     EXPECT_EQ(DOMAIN_ID_TEST, label.domain);

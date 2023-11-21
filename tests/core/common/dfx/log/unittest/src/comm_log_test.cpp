@@ -36,16 +36,58 @@ class CommLogTest : public testing::Test { };
  */
 HWTEST_F(CommLogTest, CommLogTest001, TestSize.Level0)
 {
-    auto label = COMM_LABELS[COMM_INIT];
+    int32_t index = 0;
+    int32_t authDomainBase = 0xd005700;
+
+    EXPECT_EQ(index, COMM_SDK);
+    auto label = COMM_LABELS[COMM_SDK];
+    EXPECT_EQ(COMM_SDK, label.label);
+    EXPECT_EQ(authDomainBase, label.domain);
+    EXPECT_STREQ("CommSdk", label.tag);
+
+    EXPECT_EQ(++index, COMM_SVC);
+    label = COMM_LABELS[COMM_SVC];
+    EXPECT_EQ(COMM_SVC, label.label);
+    EXPECT_EQ(++authDomainBase, label.domain);
+    EXPECT_STREQ("CommSvc", label.tag);
+
+    EXPECT_EQ(++index, COMM_INIT);
+    label = COMM_LABELS[COMM_INIT];
     EXPECT_EQ(COMM_INIT, label.label);
-    EXPECT_EQ(0xd005700, label.domain);
+    EXPECT_EQ(++authDomainBase, label.domain);
     EXPECT_STREQ("CommInit", label.tag);
 
+    EXPECT_EQ(++index, COMM_DFX);
     label = COMM_LABELS[COMM_DFX];
     EXPECT_EQ(COMM_DFX, label.label);
-    EXPECT_EQ(0xd005701, label.domain);
+    EXPECT_EQ(++authDomainBase, label.domain);
     EXPECT_STREQ("CommDfx", label.tag);
 
+    EXPECT_EQ(++index, COMM_EVENT);
+    label = COMM_LABELS[COMM_EVENT];
+    EXPECT_EQ(COMM_EVENT, label.label);
+    EXPECT_EQ(++authDomainBase, label.domain);
+    EXPECT_STREQ("CommEvent", label.tag);
+
+    EXPECT_EQ(++index, COMM_VERIFY);
+    label = COMM_LABELS[COMM_VERIFY];
+    EXPECT_EQ(COMM_VERIFY, label.label);
+    EXPECT_EQ(++authDomainBase, label.domain);
+    EXPECT_STREQ("CommVerify", label.tag);
+
+    EXPECT_EQ(++index, COMM_PERM);
+    label = COMM_LABELS[COMM_PERM];
+    EXPECT_EQ(COMM_PERM, label.label);
+    EXPECT_EQ(++authDomainBase, label.domain);
+    EXPECT_STREQ("CommPerm", label.tag);
+
+    EXPECT_EQ(++index, COMM_UTILS);
+    label = COMM_LABELS[COMM_UTILS];
+    EXPECT_EQ(COMM_UTILS, label.label);
+    EXPECT_EQ(++authDomainBase, label.domain);
+    EXPECT_STREQ("CommUtils", label.tag);
+
+    EXPECT_EQ(++index, COMM_TEST);
     label = COMM_LABELS[COMM_TEST];
     EXPECT_EQ(COMM_TEST, label.label);
     EXPECT_EQ(DOMAIN_ID_TEST, label.domain);
@@ -62,8 +104,7 @@ HWTEST_F(CommLogTest, CommLogTest002, TestSize.Level0)
 {
     SoftBusLogLabel label = COMM_LABELS[COMM_TEST];
     HilogMock mock;
-    EXPECT_CALL(mock, HiLogPrint(Eq(LOG_CORE), Eq(LOG_DEBUG), Eq(label.domain), StrEq(label.tag), _, _))
-        .Times(1);
+    EXPECT_CALL(mock, HiLogPrint(Eq(LOG_CORE), Eq(LOG_DEBUG), Eq(label.domain), StrEq(label.tag), _, _)).Times(1);
     COMM_LOGD(COMM_TEST, "test log");
 }
 
@@ -77,8 +118,7 @@ HWTEST_F(CommLogTest, CommLogTest003, TestSize.Level0)
 {
     SoftBusLogLabel label = COMM_LABELS[COMM_TEST];
     HilogMock mock;
-    EXPECT_CALL(mock, HiLogPrint(Eq(LOG_CORE), Eq(LOG_INFO), Eq(label.domain), StrEq(label.tag), _, _))
-        .Times(1);
+    EXPECT_CALL(mock, HiLogPrint(Eq(LOG_CORE), Eq(LOG_INFO), Eq(label.domain), StrEq(label.tag), _, _)).Times(1);
     COMM_LOGI(COMM_TEST, "test log");
 }
 
@@ -92,8 +132,7 @@ HWTEST_F(CommLogTest, CommLogTest004, TestSize.Level0)
 {
     SoftBusLogLabel label = COMM_LABELS[COMM_TEST];
     HilogMock mock;
-    EXPECT_CALL(mock, HiLogPrint(Eq(LOG_CORE), Eq(LOG_WARN), Eq(label.domain), StrEq(label.tag), _, _))
-        .Times(1);
+    EXPECT_CALL(mock, HiLogPrint(Eq(LOG_CORE), Eq(LOG_WARN), Eq(label.domain), StrEq(label.tag), _, _)).Times(1);
     COMM_LOGW(COMM_TEST, "test log");
 }
 
@@ -107,8 +146,7 @@ HWTEST_F(CommLogTest, CommLogTest005, TestSize.Level0)
 {
     SoftBusLogLabel label = COMM_LABELS[COMM_TEST];
     HilogMock mock;
-    EXPECT_CALL(mock, HiLogPrint(Eq(LOG_CORE), Eq(LOG_ERROR), Eq(label.domain), StrEq(label.tag), _, _))
-        .Times(1);
+    EXPECT_CALL(mock, HiLogPrint(Eq(LOG_CORE), Eq(LOG_ERROR), Eq(label.domain), StrEq(label.tag), _, _)).Times(1);
     COMM_LOGE(COMM_TEST, "test log");
 }
 
@@ -122,8 +160,7 @@ HWTEST_F(CommLogTest, CommLogTest006, TestSize.Level0)
 {
     SoftBusLogLabel label = COMM_LABELS[COMM_TEST];
     HilogMock mock;
-    EXPECT_CALL(mock, HiLogPrint(Eq(LOG_CORE), Eq(LOG_FATAL), Eq(label.domain), StrEq(label.tag), _, _))
-        .Times(1);
+    EXPECT_CALL(mock, HiLogPrint(Eq(LOG_CORE), Eq(LOG_FATAL), Eq(label.domain), StrEq(label.tag), _, _)).Times(1);
     COMM_LOGF(COMM_TEST, "test log");
 }
 } // namespace OHOS

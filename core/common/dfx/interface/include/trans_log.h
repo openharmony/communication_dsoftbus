@@ -16,12 +16,15 @@
 #ifndef DSOFTBUS_TRANS_LOG_H
 #define DSOFTBUS_TRANS_LOG_H
 
+#include "anonymizer.h"
 #include "softbus_log.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 typedef enum {
+    TRANS_SDK,
+    TRANS_SVC,
     TRANS_INIT,
     TRANS_CTRL,
     TRANS_BYTES,
@@ -29,23 +32,21 @@ typedef enum {
     TRANS_MSG,
     TRANS_STREAM,
     TRANS_QOS,
-    TRANS_SDK,
-    TRANS_SVC,
     TRANS_TEST,
 } TransLogLabelEnum;
 
 /* Keep consistent with labels */
 static const SoftBusLogLabel TRANS_LABELS[MODULE_DOMAIN_MAX_LEN] = {
-    {TRANS_INIT,     0xd005740,      "TransInit"   },
-    { TRANS_CTRL,    0xd005741,      "TransCtrl"   },
-    { TRANS_BYTES,   0xd005742,      "TransBytes"  },
-    { TRANS_FILE,    0xd005743,      "TransFile"   },
-    { TRANS_MSG,     0xd005744,      "TransMsg"    },
-    { TRANS_STREAM,  0xd005745,      "TransStream" },
-    { TRANS_QOS,     0xd005746,      "TransQos"    },
-    { TRANS_SDK,     0xd005747,      "TransSdk"    },
-    { TRANS_SVC,     0xd005748,      "TransSvc"    },
-    { TRANS_TEST,    DOMAIN_ID_TEST, "TransTest"   },
+    {TRANS_SDK,     0xd005740,      "TransSdk"   },
+    { TRANS_SVC,    0xd005741,      "TransSvc"   },
+    { TRANS_INIT,   0xd005742,      "TransInit"  },
+    { TRANS_CTRL,   0xd005743,      "TransCtrl"  },
+    { TRANS_BYTES,  0xd005744,      "TransBytes" },
+    { TRANS_FILE,   0xd005745,      "TransFile"  },
+    { TRANS_MSG,    0xd005746,      "TransMsg"   },
+    { TRANS_STREAM, 0xd005747,      "TransStream"},
+    { TRANS_QOS,    0xd005748,      "TransQos"   },
+    { TRANS_TEST,   DOMAIN_ID_TEST, "TransTest"  },
 };
 
 #define TRANS_LOGF(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_FATAL, TRANS_LABELS[label], ##__VA_ARGS__)
