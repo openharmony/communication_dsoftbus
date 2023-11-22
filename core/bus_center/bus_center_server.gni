@@ -182,3 +182,26 @@ if (meta_node_enhanced) {
   bus_center_server_src += bus_center_meta_node_src
   bus_center_server_inc += bus_center_meta_node_inc
 }
+
+native_source_path = rebase_path("$dsoftbus_root_path")
+dep_linkfinder = "dsoftbus_enhance/core/bus_center/adapter"
+lk_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                          [
+                            "$native_source_path",
+                            "$dep_linkfinder",
+                          ],
+                          "value")
+
+if (lk_enhanced) {
+  import("../../dsoftbus_enhance/core/bus_center/adapter/adapter.gni")
+
+  bus_center_server_src += lnn_link_finder_sources
+  bus_center_server_inc += lnn_link_finder_include_dirs
+  bus_center_server_deps += lnn_link_finder_deps
+} else {
+  bus_center_server_src += [
+    "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_link_finder_virtul.c",
+  ]
+  bus_center_server_inc +=
+      [ "$dsoftbus_root_path/core/adapter/bus_center/include" ]
+}
