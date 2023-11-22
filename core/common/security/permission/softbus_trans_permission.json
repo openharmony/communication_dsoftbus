@@ -310,5 +310,17 @@
         "ACTIONS": "create,open"
       }
     ]
+  },
+  {
+    "SESSION_NAME": "com.huawei.*CastPlusDiscoveryModule",
+    "REGEXP": "true",
+    "DEVID": "UDID",
+    "APP_INFO": [
+      {
+        "PKG_NAME": "ohos.distributedhardware.devicemanager",
+        "TYPE": "native_app",
+        "ACTIONS": "create,open"
+      }
+    ]
   }
 ]
