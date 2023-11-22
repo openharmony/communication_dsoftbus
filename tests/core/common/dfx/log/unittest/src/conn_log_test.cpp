@@ -36,31 +36,46 @@ class ConnLogTest : public testing::Test { };
  */
 HWTEST_F(ConnLogTest, ConnLogTest001, TestSize.Level0)
 {
+    int32_t index = 0;
+    int32_t connDomainBase = 0xd005760;
+
+    EXPECT_EQ(index, CONN_INIT);
     auto label = CONN_LABELS[CONN_INIT];
     EXPECT_EQ(CONN_INIT, label.label);
-    EXPECT_EQ(0xd005760, label.domain);
+    EXPECT_EQ(connDomainBase, label.domain);
     EXPECT_STREQ("ConnInit", label.tag);
 
+    EXPECT_EQ(++index, CONN_BLE);
     label = CONN_LABELS[CONN_BLE];
     EXPECT_EQ(CONN_BLE, label.label);
-    EXPECT_EQ(0xd005761, label.domain);
+    EXPECT_EQ(++connDomainBase, label.domain);
     EXPECT_STREQ("ConnBle", label.tag);
 
+    EXPECT_EQ(++index, CONN_BR);
     label = CONN_LABELS[CONN_BR];
     EXPECT_EQ(CONN_BR, label.label);
-    EXPECT_EQ(0xd005762, label.domain);
+    EXPECT_EQ(++connDomainBase, label.domain);
     EXPECT_STREQ("ConnBr", label.tag);
 
+    EXPECT_EQ(++index, CONN_COMMON);
     label = CONN_LABELS[CONN_COMMON];
     EXPECT_EQ(CONN_COMMON, label.label);
-    EXPECT_EQ(0xd005763, label.domain);
+    EXPECT_EQ(++connDomainBase, label.domain);
     EXPECT_STREQ("ConnCommon", label.tag);
 
+    EXPECT_EQ(++index, CONN_WIFI_DIRECT);
     label = CONN_LABELS[CONN_WIFI_DIRECT];
     EXPECT_EQ(CONN_WIFI_DIRECT, label.label);
-    EXPECT_EQ(0xd005764, label.domain);
+    EXPECT_EQ(++connDomainBase, label.domain);
     EXPECT_STREQ("ConnWD", label.tag);
 
+    EXPECT_EQ(++index, CONN_NEARBY);
+    label = CONN_LABELS[CONN_NEARBY];
+    EXPECT_EQ(CONN_NEARBY, label.label);
+    EXPECT_EQ(++connDomainBase, label.domain);
+    EXPECT_STREQ("ConnNearby", label.tag);
+
+    EXPECT_EQ(++index, CONN_TEST);
     label = CONN_LABELS[CONN_TEST];
     EXPECT_EQ(CONN_TEST, label.label);
     EXPECT_EQ(DOMAIN_ID_TEST, label.domain);

@@ -73,43 +73,6 @@ static LogInfo g_logInfo[SOFTBUS_LOG_MODULE_MAX] = {
     {SOFTBUS_LOG_COMM, "Comm"},
 };
 
-void NstackxLog(const char *moduleName, uint32_t nstackLevel, const char *format, ...)
-{
-    uint32_t ulPos;
-    uint32_t level = CUST_NSTACKX_DFINDER_LOG - nstackLevel;
-    char szStr[LOG_PRINT_MAX_LEN] = {0};
-    va_list arg;
-    int32_t ret;
-
-    if (moduleName == NULL || level >= SOFTBUS_LOG_LEVEL_MAX) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "Nstackx log moduleName or level error");
-        return;
-    }
-
-    SoftbusGetConfig(SOFTBUS_INT_ADAPTER_LOG_LEVEL, (unsigned char *)&g_logLevel, sizeof(g_logLevel));
-    if ((int32_t)level < g_logLevel) {
-        return;
-    }
-
-    ret = sprintf_s(szStr, sizeof(szStr), "[%s]", moduleName);
-    if (ret < 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "Nstackx log error");
-        return;
-    }
-    ulPos = strlen(szStr);
-    (void)memset_s(&arg, sizeof(va_list), 0, sizeof(va_list));
-    va_start(arg, format);
-    ret = vsprintf_s(&szStr[ulPos], sizeof(szStr) - ulPos, format, arg);
-    va_end(arg);
-    if (ret < 0) {
-        HILOG_WARN(SOFTBUS_HILOG_ID, "Nstackx log len error");
-        return;
-    }
-    SoftBusOutPrint(szStr, (SoftBusLogLevel)level);
-
-    return;
-}
-
 void SoftBusLogImpl(SoftBusLogModule module, SoftBusLogLevel level, const char* funcName,
     int lineNo, const char *fmt, ...)
 {

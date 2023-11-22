@@ -15,6 +15,7 @@
 
 #include "p2p_v1_processor.h"
 #include <string.h>
+#include "anonymizer.h"
 #include "securec.h"
 #include "conn_log.h"
 #include "softbus_adapter_mem.h"
