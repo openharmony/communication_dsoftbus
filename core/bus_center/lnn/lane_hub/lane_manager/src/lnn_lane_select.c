@@ -26,6 +26,10 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
+#include "lnn_select_rule.h"
+#include "lnn_common_utils.h"
+
+#define INVALID_LINK -1
 
 static void GetFileDefaultLink(LaneLinkType *linkList, uint32_t *listNum)
 {
@@ -100,7 +104,7 @@ static bool IsLinkTypeValid(LaneLinkType type)
     return true;
 }
 
-static bool IsValidLane(const char *networkId, LaneLinkType linkType, uint32_t expectedBw, bool isIgnoreScore)
+static bool IsValidLane(const char *networkId, LaneLinkType linkType)
 {
     if (!IsLinkTypeValid(linkType)) {
         return false;
@@ -110,15 +114,6 @@ static bool IsValidLane(const char *networkId, LaneLinkType linkType, uint32_t e
         return false;
     }
     if (linkAttr->IsEnable(networkId) != true) {
-        return false;
-    }
-    if (isIgnoreScore) {
-        LNN_LOGI(LNN_LANE, "ignore score");
-        return true;
-    }
-
-    if (linkAttr->GetLinkScore(networkId, expectedBw) <= UNACCEPT_SCORE) {
-        LNN_LOGE(LNN_LANE, "curr score is unaccept, linkType=%d", linkType);
         return false;
     }
     return true;
@@ -159,35 +154,12 @@ static void DumpPreferredLink(LaneLinkType preferredLink, uint32_t priority)
     LNN_LOGD(LNN_LANE, "the %u priority link=%s", priority, GetLinkTypeStrng(preferredLink));
 }
 
-static bool IsIgnoreLinkScore(const char *networkId, LaneLinkType *list, uint32_t num)
-{
-    if (list == NULL || num == 0) {
-        return false;
-    }
-    NodeInfo node = {0};
-    if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &node) != SOFTBUS_OK) {
-        LNN_LOGW(LNN_LANE, "can not get peer node");
-        return false;
-    }
-    if (node.discoveryType == (1 << (uint32_t)DISCOVERY_TYPE_WIFI)) {
-        LNN_LOGI(LNN_LANE, "lnn discoveryType is only wifi");
-        return true;
-    }
-    for (uint32_t i = 0; i < num; i++) {
-        if (list[i] != LANE_WLAN_2P4G && list[i] != LANE_WLAN_5G) {
-            return false;
-        }
-    }
-    return true;
-}
-
 static void SelectByPreferredLink(const char *networkId, const LaneSelectParam *request,
     LaneLinkType *resList, uint32_t *resNum)
 {
     LaneLinkType *preferredList = (LaneLinkType *)&(request->list.linkType[0]);
     uint32_t listNum = request->list.linkTypeNum;
     *resNum = 0;
-    bool isIgnoreScore = IsIgnoreLinkScore(networkId, preferredList, listNum);
     bool isStream = (request->transType == LANE_T_RAW_STREAM ||
                     request->transType == LANE_T_COMMON_VIDEO ||
                     request->transType == LANE_T_COMMON_VOICE);
@@ -198,7 +170,7 @@ static void SelectByPreferredLink(const char *networkId, const LaneSelectParam *
         if (isStream && isBt) {
             continue;
         }
-        if (!IsValidLane(networkId, preferredList[i], request->expectedBw, isIgnoreScore)) {
+        if (!IsValidLane(networkId, preferredList[i])) {
             continue;
         }
         resList[(*resNum)] = preferredList[i];
@@ -220,7 +192,7 @@ static void SelectByDefaultLink(const char *networkId, const LaneSelectParam *re
     }
     *resNum = 0;
     for (uint32_t i = 0; i < optLinkNum; i++) {
-        if (!IsValidLane(networkId, optionalLink[i], request->expectedBw, false)) {
+        if (!IsValidLane(networkId, optionalLink[i])) {
             continue;
         }
         resList[(*resNum)++] = optionalLink[i];
@@ -240,6 +212,50 @@ static int32_t PreProcLaneSelect(const char *networkId, const LaneSelectParam *r
         LNN_LOGE(LNN_LANE, "device not online, cancel selectLane, networkId=%s", anonyNetworkId);
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t GetListScore(const char *networkId, uint32_t expectedBw, const LaneLinkType *resList, int32_t *resListScore, uint32_t resNum)
+{
+    for (uint32_t i = 0; i < resNum; ++i) {
+        if (resList[i] < 0 || resList[i] >= LANE_LINK_TYPE_BUTT) {
+            LNN_LOGE(LNN_LANE, "LaneLinkType i=%d is invalid, %d", i, resList[i]);
+            return SOFTBUS_ERR;
+        }
+        LinkAttribute *linkAttr = GetLinkAttrByLinkType(resList[i]);
+        resListScore[resList[i]] = linkAttr->GetLinkScore(networkId, expectedBw);
+        LNN_LOGI(LNN_LANE, "LaneLinkType=%d, Score=%d",
+            resList[i], resListScore[resList[i]]);
+    }
+    return SOFTBUS_OK;
+}
+
+static void SwapListNode(LaneLinkType *left, LaneLinkType *right)
+{
+    LaneLinkType tmp = *left;
+    *left = *right;
+    *right = tmp;
+}
+
+static int32_t AdjustLanePriority(LaneLinkType *resList, int32_t *resListScore, uint32_t resNum)
+{
+    if ((resListScore[LANE_WLAN_2P4G] == INVALID_LINK && resListScore[LANE_WLAN_5G] == INVALID_LINK) ||
+        resListScore[LANE_P2P] == INVALID_LINK) {
+        LNN_LOGI(LNN_LANE, "resList no change");
+        return SOFTBUS_OK;
+    }
+    uint32_t idxWlan = LANE_LINK_TYPE_BUTT;
+    uint32_t idxP2p = LANE_LINK_TYPE_BUTT;
+    for (uint32_t i = 0; i < resNum; ++i) {
+        if (resList[i] == LANE_P2P) {
+            idxP2p = i;
+        } else if (resList[i] == LANE_WLAN_2P4G || resList[i] == LANE_WLAN_5G) {
+            idxWlan = i;
+        }
+    }
+    if (resListScore[resList[idxWlan]] < UNACCEPT_SCORE && idxWlan < idxP2p) {
+        SwapListNode(&resList[idxWlan], &resList[idxP2p]);
     }
     return SOFTBUS_OK;
 }
@@ -265,6 +281,21 @@ int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
         *listNum = 0;
         return SOFTBUS_ERR;
     }
+
+    int32_t resListScore[LANE_LINK_TYPE_BUTT];
+    (void)memset_s(resListScore, sizeof(resListScore), INVALID_LINK, sizeof(resListScore));
+    if (GetListScore(networkId, request->expectedBw, resList, resListScore, resNum) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get resListScore fail");
+        return SOFTBUS_ERR;
+    }
+    if (AdjustLanePriority(resList, resListScore, resNum) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "AdjustLanePriority fail");
+        return SOFTBUS_ERR;
+    }
+    for (uint32_t i = 0; i < resNum; ++i) {
+        LNN_LOGI(LNN_LANE, "adjusted list : resList[%d]=%d, score=%d", i, resList[i], resListScore[resList[i]]);
+    }
+
     recommendList->linkTypeNum = resNum;
     for (uint32_t i = 0; i < resNum; i++) {
         recommendList->linkType[i] = resList[i];
