@@ -31,23 +31,23 @@ typedef enum {
     DISC_DFINDER,
     DISC_ABILITY,
     DISC_USB,
-    DISC_USB_ADAPTER,
+    DISC_USB_ADAPER,
     DISC_TEST,
 } DiscLogLabelEnum;
 
 /* Keep consistent with labels */
 static const SoftBusLogLabel DISC_LABELS[MODULE_DOMAIN_MAX_LEN] = {
-    {DISC_INIT,         0xd0057a0,      "DiscInit"      },
-    { DISC_CONTROL,     0xd0057a1,      "DiscControl"   },
-    { DISC_LNN,         0xd0057a2,      "DiscLnn"       },
-    { DISC_BLE,         0xd0057a3,      "DiscBle"       },
-    { DISC_BLE_ADAPTER, 0xd0057a4,      "DiscBleAdapter"},
-    { DISC_COAP,        0xd0057a5,      "DiscCoap"      },
-    { DISC_DFINDER,     0xd0057a6,      "DiscDfinder"   },
-    { DISC_ABILITY,     0xd0057a7,      "DiscAbility"   },
-    { DISC_USB,         0xd0057a8,      "DiscUsb"       },
-    { DISC_USB_ADAPTER, 0xd0057a9,      "DiscUsbAdapter"},
-    { DISC_TEST,        DOMAIN_ID_TEST, "DiscTest"      },
+    { DISC_INIT,  0xd0057a0,      "DiscInit"},
+    { DISC_CONTROL,  0xd0057a1,      "DiscControl"},
+    { DISC_LNN,  0xd0057a2,      "DiscLnn"},
+    { DISC_BLE,  0xd0057a3,      "DiscBle"},
+    { DISC_BLE_ADAPTER,  0xd0057a4,      "DiscBleAdapter"},
+    { DISC_COAP,  0xd0057a5,      "DiscCoap"},
+    { DISC_DFINDER,  0xd0057a6,      "DiscDfinder"},
+    { DISC_ABILITY,  0xd0057a7,      "DiscAbility"},
+    { DISC_USB,  0xd0057a8,      "DiscUsb"},
+    { DISC_USB_ADAPER,  0xd0057a9,      "DiscUsbAdaper"},
+    { DISC_TEST, DOMAIN_ID_TEST, "DiscTest"},
 };
 
 #define DISC_LOGF(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_FATAL, DISC_LABELS[label], ##__VA_ARGS__)
