@@ -47,7 +47,6 @@ CONN_ASSIGNER(Int32, Rssi, rssi)
 CONN_ASSIGNER(Int32, Load, load)
 CONN_ASSIGNER(Int32, Frequency, frequency)
 CONN_ASSIGNER(String, PeerIp, peerIp)
-CONN_ASSIGNER(String, PeerNetworkId, peerNetworkId)
 CONN_ASSIGNER(String, PeerBrMac, peerBrMac)
 CONN_ASSIGNER(String, PeerBleMac, peerBleMac)
 CONN_ASSIGNER(String, PeerWifiMac, peerWifiMac)
@@ -55,7 +54,7 @@ CONN_ASSIGNER(String, PeerPort, peerPort)
 CONN_ASSIGNER(String, CallerPkg, callerPkg)
 CONN_ASSIGNER(String, CalleePkg, calleePkg)
 
-#define CONN_ASSIGNER_SIZE 21 // Size of g_connAssigners
+#define CONN_ASSIGNER_SIZE 20 // Size of g_connAssigners
 static HiSysEventParamAssigner g_connAssigners[] = {
     {"STAGE_RES",      HISYSEVENT_INT32,  ConnAssignerResult       },
     { "ERROR_CODE",    HISYSEVENT_INT32,  ConnAssignerErrcode      },
@@ -71,7 +70,6 @@ static HiSysEventParamAssigner g_connAssigners[] = {
     { "CHLOAD",        HISYSEVENT_INT32,  ConnAssignerLoad         },
     { "FREQ",          HISYSEVENT_INT32,  ConnAssignerFrequency    },
     { "PEER_IP",       HISYSEVENT_STRING, ConnAssignerPeerIp       },
-    { "PEER_NET_ID",   HISYSEVENT_STRING, ConnAssignerPeerNetworkId},
     { "PEER_BR_MAC",   HISYSEVENT_STRING, ConnAssignerPeerBrMac    },
     { "PEER_BLE_MAC",  HISYSEVENT_STRING, ConnAssignerPeerBleMac   },
     { "PEER_WIFI_MAC", HISYSEVENT_STRING, ConnAssignerPeerWifiMac  },

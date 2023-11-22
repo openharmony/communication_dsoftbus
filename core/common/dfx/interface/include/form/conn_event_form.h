@@ -49,7 +49,6 @@ typedef struct {
     int32_t load;              // CHLOAD
     int32_t frequency;         // FREQ
     const char *peerIp;        // PEER_IP
-    const char *peerNetworkId; // PEER_NETID
     const char *peerBrMac;     // PEER_BR_MAC
     const char *peerBleMac;    // PEER_BLE_MAC
     const char *peerWifiMac;   // PEER_WIFI_MAC
