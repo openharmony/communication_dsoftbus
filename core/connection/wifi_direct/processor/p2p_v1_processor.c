@@ -1775,6 +1775,20 @@ static void ProcessSuccess(struct InnerLink *innerLink)
     self->resetContext();
 }
 
+static int32_t PrejudgeAvailability(const char *remoteNetworkId)
+{
+    struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(IF_NAME_P2P);
+    if (!info->getBoolean(info, II_KEY_IS_ENABLE, false)) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "%s IS_ENABLE=0", IF_NAME_P2P);
+        return V1_ERROR_IF_NOT_AVAILABLE;
+    }
+    if (info->getInt(info, II_KEY_WIFI_DIRECT_ROLE, WIFI_DIRECT_API_ROLE_NONE) == WIFI_DIRECT_API_ROLE_GC) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "already gc");
+        return V1_ERROR_GC_CONNECTED_TO_ANOTHER_DEVICE;
+    }
+    return SOFTBUS_OK;
+}
+
 static struct P2pV1Processor g_processor = {
     .createLink = CreateLink,
     .disconnectLink = DisconnectLink,
@@ -1783,6 +1797,8 @@ static struct P2pV1Processor g_processor = {
     .onOperationEvent = OnOperationEvent,
     .resetContext = ResetContext,
     .isMessageNeedPending = IsMessageNeedPending,
+    .prejudgeAvailability = PrejudgeAvailability,
+
     .name = "P2pV1Processor",
     .timerId = TIMER_ID_INVALID,
     .currentState = P2P_V1_PROCESSOR_STATE_AVAILABLE,
