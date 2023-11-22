@@ -665,15 +665,14 @@ static void BleGattcNotificationReceiveCallback(int32_t underlayerHandle, SoftBu
     GattServiceType serviceId = SOFTBUS_GATT_SERVICE;
     ConnBleConnection *connection = ConnBleGetConnectionByHandle(underlayerHandle, CONN_SIDE_CLIENT, BLE_GATT);
     if (connection == NULL) {
-        CONN_LOGE(CONN_BLE, "connection not exist, handle=%d", underlayerHandle);
         serviceId = LEGACY_GATT_SERVICE;
         connection = LegacyBleGetConnectionByHandle(underlayerHandle, CONN_SIDE_CLIENT);
-        return;
     }
+    CONN_CHECK_AND_RETURN_LOG(connection != NULL, "connection not exist");
     if (status != SOFTBUS_OK) {
         CONN_LOGW(CONN_BLE, "notification receive failed: status error, connId=%u, handle=%d, status=%d",
             connection->connectionId, underlayerHandle, status);
-        ConnBleReturnConnection(&connection);
+        ReturnConnection(serviceId, connection);
         return;
     }
 
@@ -697,10 +696,9 @@ static void BleGattcNotificationReceiveCallback(int32_t underlayerHandle, SoftBu
     } else {
         value = SoftBusCalloc(sizeof(uint8_t) * param->dataLen);
         valueLen = param->dataLen;
-        CONN_CHECK_AND_RETURN_LOG(value != NULL, "legacy malloc value failed, connId=%u, dataLen=%u",
-            connection->connectionId, valueLen);
-        if (memcpy_s(value, valueLen, param->data, valueLen) != EOK) {
-            CONN_LOGE(CONN_BLE, "legacy memcpy failed, connId=%u, dataLen=%u", connection->connectionId, valueLen);
+        if (value == NULL || memcpy_s(value, valueLen, param->data, valueLen) != EOK) {
+            CONN_LOGE(CONN_BLE, "legacy calloc or memcpy failed, connId=%u, dataLen=%u",
+                connection->connectionId, valueLen);
             SoftBusFree(value);
             ReturnConnection(serviceId, connection);
             return;

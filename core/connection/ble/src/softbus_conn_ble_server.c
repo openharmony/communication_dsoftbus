@@ -1296,10 +1296,9 @@ static void BleRequestWriteCallback(SoftBusGattWriteRequest writeCbPara)
     } else {
         value = SoftBusCalloc(sizeof(uint8_t) * writeCbPara.length);
         valueLen = writeCbPara.length;
-        CONN_CHECK_AND_RETURN_LOG(value != NULL, "legacy malloc value failed, connId=%u, dataLen=%u",
-            connection->connectionId, valueLen);
-        if (memcpy_s(value, valueLen, writeCbPara.value, valueLen) != EOK) {
-            CONN_LOGE(CONN_BLE, "legacy memcpy failed, connId=%u, dataLen=%u", connection->connectionId, valueLen);
+        if (value == NULL || memcpy_s(value, valueLen, writeCbPara.value, valueLen) != EOK) {
+            CONN_LOGE(CONN_BLE, "legacy calloc or memcpy failed, connId=%u, dataLen=%u",
+                connection->connectionId, valueLen);
             SoftBusFree(value);
             value = NULL;
         }
