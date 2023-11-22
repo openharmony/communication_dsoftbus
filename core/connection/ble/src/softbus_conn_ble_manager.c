@@ -186,7 +186,7 @@ static void DfxRecordBleConnectFail(
         .costTime = costTime,
         .errcode = reason
     };
-    CONN_EVENT(SCENE_CONNECT, STAGE_CONNECT_END, extra);
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
 }
 
 static void DfxRecordBleConnectSuccess(uint32_t pId, ConnBleConnection *connection, ConnectStatistics *statistics)
@@ -206,8 +206,8 @@ static void DfxRecordBleConnectSuccess(uint32_t pId, ConnBleConnection *connecti
         .connectionId = (int32_t)connection->connectionId,
         .linkType = CONNECT_BLE,
         .costTime = (int32_t)costTime,
-        .result = STAGE_RESULT_OK };
-    CONN_EVENT(SCENE_CONNECT, STAGE_CONNECT_END, extra);
+        .result = EVENT_STAGE_RESULT_OK };
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
 }
 
 static int32_t NewRequest(ConnBleRequest **outRequest, const ConnBleConnectRequestContext *ctx)

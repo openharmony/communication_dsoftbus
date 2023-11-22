@@ -506,7 +506,7 @@ int32_t TransGetLaneInfo(const SessionParam *param, LaneConnInfo *connInfo, uint
         .laneTransType = requestOption.requestInfo.trans.transType,
         .errcode = ret
     };
-    TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_SELECT_LANE, extra);
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_SELECT_LANE, extra);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "get lane info by option failed.");
         return ret;

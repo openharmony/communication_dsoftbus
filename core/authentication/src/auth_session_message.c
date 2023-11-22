@@ -1343,10 +1343,10 @@ int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
         .len = dataLen,
     };
     LnnEventExtra lnnEventExtra = {0};
-    LNN_EVENT(SCENE_JION_LNN, STAGE_EXCHANGE_DEVICE_INFO, lnnEventExtra);
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_EXCHANGE_DEVICE_INFO, lnnEventExtra);
     if (PostAuthData(info->connId, !info->isServer, &head, data) != SOFTBUS_OK) {
         lnnEventExtra.errcode = SOFTBUS_AUTH_EXCHANGE_DEVICE_INFO_START_ERR;
-        LNN_EVENT(SCENE_JION_LNN, STAGE_EXCHANGE_DEVICE_INFO, lnnEventExtra);
+        LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_EXCHANGE_DEVICE_INFO, lnnEventExtra);
         AUTH_LOGE(AUTH_FSM, "post device info fail");
         SoftBusFree(data);
         return SOFTBUS_ERR;

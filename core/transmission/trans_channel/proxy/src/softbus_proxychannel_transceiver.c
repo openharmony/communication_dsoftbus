@@ -559,8 +559,9 @@ static void TransOnConnectSuccessed(uint32_t requestId, uint32_t connectionId, c
     TransEventExtra extra = {
         .requestId = (int32_t)requestId,
         .connectionId = (int32_t)connectionId,
-        .result = STAGE_RESULT_OK };
-    TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_START_CONNECT, extra);
+        .result = EVENT_STAGE_RESULT_OK
+    };
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, extra);
     TRANS_LOGI(TRANS_CTRL,
         "Connect Successe reqId=%d, connId=%d", requestId, connectionId);
     TransSetConnStateByReqId(requestId, connectionId, PROXY_CHANNEL_STATUS_PYH_CONNECTED);
@@ -573,7 +574,7 @@ static void TransOnConnectFailed(uint32_t requestId, int32_t reason)
         .requestId = requestId,
         .errcode = reason
     };
-    TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_START_CONNECT, extra);
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, extra);
     TRANS_LOGE(TRANS_CTRL, "Connect fail reqId=%u, reason=%d", requestId, reason);
     if (TransDelConnByReqId(requestId) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "Connect fail del reqId=%u fail", requestId);
@@ -723,7 +724,7 @@ int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, const ConnectOption *c
         .linkType = chan->type
 
     };
-    TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_START_CONNECT, extra);
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, extra);
     return ret;
 }
 

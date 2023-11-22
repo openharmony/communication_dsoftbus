@@ -47,7 +47,7 @@ HWTEST_F(DiscEventTest, DiscEventTest001, TestSize.Level0)
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(DISC_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR), _,
             ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
         .Times(1);
-    DISC_EVENT(SCENE_BROADCAST, STAGE_BROADCAST, extra);
+    DISC_EVENT(EVENT_SCENE_BROADCAST, EVENT_STAGE_BROADCAST, extra);
 }
 
 /**
@@ -88,7 +88,7 @@ HWTEST_F(DiscEventTest, DiscEventTest002, TestSize.Level0)
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(DISC_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR),
             DiscValidParamArrayMatcher(validExtra, VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
         .Times(1);
-    DISC_EVENT(SCENE_SCAN, STAGE_SCAN_START, validExtra);
+    DISC_EVENT(EVENT_SCENE_SCAN, EVENT_STAGE_SCAN_START, validExtra);
 }
 
 /**
@@ -129,7 +129,7 @@ HWTEST_F(DiscEventTest, DiscEventTest003, TestSize.Level0)
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(DISC_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR),
             DiscInvalidParamArrayMatcher(invalidExtra, VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
         .Times(1);
-    DISC_EVENT(SCENE_SCAN, STAGE_SCAN_END, invalidExtra);
+    DISC_EVENT(EVENT_SCENE_SCAN, EVENT_STAGE_SCAN_END, invalidExtra);
 }
 
 /**
@@ -148,6 +148,6 @@ HWTEST_F(DiscEventTest, DiscEventTest004, TestSize.Level0)
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(DISC_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR),
             DiscInvalidParamArrayMatcher(emptyExtra, VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
         .Times(1);
-    DISC_EVENT(SCENE_BROADCAST, STAGE_BROADCAST, emptyExtra);
+    DISC_EVENT(EVENT_SCENE_BROADCAST, EVENT_STAGE_BROADCAST, emptyExtra);
 }
 } // namespace OHOS
