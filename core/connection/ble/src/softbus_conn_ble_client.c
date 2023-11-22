@@ -669,7 +669,7 @@ static void BleGattcNotificationReceiveCallback(int32_t underlayerHandle, SoftBu
         serviceId = LEGACY_GATT_SERVICE;
         connection = LegacyBleGetConnectionByHandle(underlayerHandle, CONN_SIDE_CLIENT);
     }
-    CONN_CHECK_AND_RETURN_LOG(connection != NULL, "connection not exist");
+    CONN_CHECK_AND_RETURN_LOGE(connection != NULL, CONN_BLE, "connection not exist");
     if (status != SOFTBUS_OK) {
         CONN_LOGW(CONN_BLE, "notification receive failed: status error, connId=%u, handle=%d, status=%d",
             connection->connectionId, underlayerHandle, status);
@@ -881,6 +881,7 @@ int32_t ConnGattInitClientModule(SoftBusLooper *looper, const ConnBleClientEvent
 
     g_bleGattClientAsyncHandler.handler.looper = looper;
     int32_t status = RegisterClientListener(listener, serviceId);
-    CONN_CHECK_AND_RETURN_RET_LOG(status == SOFTBUS_OK, SOFTBUS_INVALID_PARAM, "register client listener failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(status == SOFTBUS_OK, SOFTBUS_INVALID_PARAM, CONN_BLE,
+        "register client listener failed");
     return SOFTBUS_OK;
 }
