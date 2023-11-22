@@ -44,7 +44,7 @@ HWTEST_F(TransLogTest, TransLogTest001, TestSize.Level0)
     label = TRANS_LABELS[TRANS_CTRL];
     EXPECT_EQ(TRANS_CTRL, label.label);
     EXPECT_EQ(0xd005741, label.domain);
-    EXPECT_STREQ("TransCtrl", label.tag);
+    EXPECT_STREQ("TransControl", label.tag);
 
     label = TRANS_LABELS[TRANS_BYTES];
     EXPECT_EQ(TRANS_BYTES, label.label);

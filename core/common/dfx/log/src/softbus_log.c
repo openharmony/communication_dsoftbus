@@ -54,12 +54,10 @@ void SoftBusLogInnerImpl(SoftBusDfxLogLevel level, SoftBusLogLabel label, const 
     SoftBusLogExtraInfoFormat(&str, fileName, lineNum, funName);
     pos = strlen(str);
     if (memset_s(&args, sizeof(va_list), 0, sizeof(va_list)) != EOK) {
-        free(str);
         return; // Do not print log here
     }
     va_start(args, fmt);
     (void)vsprintf_s(&str[pos], LOG_LINE_MAX_LENGTH + 1, fmt, args);
     va_end(args);
     SoftBusLogPrint(str, level, label.domain, label.tag);
-    free(str);
 }
