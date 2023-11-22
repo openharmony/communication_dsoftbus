@@ -32,6 +32,7 @@
 #define AUTH_APPID "softbus_auth"
 #define GROUPID_BUF_LEN 65
 #define KEY_LENGTH 16 /* Note: WinPc's special nearby only support 128 bits key */
+#define ONTRANSMIT_MAX_DATA_BUFFER_LEN 5120 /* 5 × 1024 */
 
 typedef struct {
     char groupId[GROUPID_BUF_LEN];
@@ -75,6 +76,8 @@ static char *GenDeviceLevelParam(const char *udid, const char *uid, bool isClien
 
 static bool OnTransmit(int64_t authSeq, const uint8_t *data, uint32_t len)
 {
+    AUTH_CHECK_AND_RETURN_RET_LOGE(len <= ONTRANSMIT_MAX_DATA_BUFFER_LEN, false, AUTH_HICHAIN,
+        "data len is invalid, len=%u", len);
     AUTH_LOGI(AUTH_HICHAIN, "hichain OnTransmit: authSeq=%" PRId64 ", len=%u", authSeq, len);
     if (AuthSessionPostAuthData(authSeq, data, len) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_HICHAIN, "hichain OnTransmit fail: authSeq=%" PRId64, authSeq);
