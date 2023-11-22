@@ -47,7 +47,7 @@ HWTEST_F(LnnEventTest, LnnEventTest001, TestSize.Level0)
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(LNN_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR), _,
             ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
         .Times(1);
-    LNN_EVENT(SCENE_JION_LNN, STAGE_JOIN_LNN_START, extra);
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_START, extra);
 }
 
 /**
@@ -86,7 +86,7 @@ HWTEST_F(LnnEventTest, LnnEventTest002, TestSize.Level0)
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(LNN_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR),
             LnnValidParamArrayMatcher(validExtra, VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
         .Times(1);
-    LNN_EVENT(SCENE_JION_LNN, STAGE_JOIN_LNN_END, validExtra);
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, validExtra);
 }
 
 /**
@@ -125,7 +125,7 @@ HWTEST_F(LnnEventTest, LnnEventTest003, TestSize.Level0)
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(LNN_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR),
             LnnInvalidParamArrayMatcher(invalidExtra, VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
         .Times(1);
-    LNN_EVENT(SCENE_LEAVE_LNN, STAGE_LEAVE_LNN_START, invalidExtra);
+    LNN_EVENT(EVENT_SCENE_LEAVE_LNN, EVENT_STAGE_LEAVE_LNN_START, invalidExtra);
 }
 
 /**
@@ -144,6 +144,6 @@ HWTEST_F(LnnEventTest, LnnEventTest004, TestSize.Level0)
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(LNN_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR),
             LnnInvalidParamArrayMatcher(emptyExtra, VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
         .Times(1);
-    LNN_EVENT(SCENE_LEAVE_LNN, STAGE_LEAVE_LNN_END, emptyExtra);
+    LNN_EVENT(EVENT_SCENE_LEAVE_LNN, EVENT_STAGE_LEAVE_LNN_END, emptyExtra);
 }
 } // namespace OHOS

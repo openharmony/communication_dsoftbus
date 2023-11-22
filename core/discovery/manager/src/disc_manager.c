@@ -136,7 +136,7 @@ static void DfxRecordDeviceFound(DiscInfo *infoNode, const DeviceInfo *device, c
 {
     DISC_LOGI(DISC_CONTROL, "record device found");
     DiscEventExtra discEventExtra = {
-        .discType = addtions->medium, .discMode = infoNode->mode, .result = STAGE_RESULT_OK
+        .discType = addtions->medium, .discMode = infoNode->mode, .result = EVENT_STAGE_RESULT_OK
     };
     UpdateDiscEventByDeviceInfo(&discEventExtra, device);
     if (infoNode->statistics.repTimes == 0) {
@@ -144,7 +144,7 @@ static void DfxRecordDeviceFound(DiscInfo *infoNode, const DeviceInfo *device, c
         SoftbusRecordFirstDiscTime((SoftBusDiscMedium)addtions->medium, costTime);
         discEventExtra.costTime = costTime;
     }
-    DISC_EVENT(SCENE_SCAN, STAGE_SCAN_END, discEventExtra);
+    DISC_EVENT(EVENT_SCENE_SCAN, EVENT_STAGE_SCAN_END, discEventExtra);
     infoNode->statistics.repTimes++;
     infoNode->statistics.devNum++;
 }
@@ -279,9 +279,9 @@ static void InnerDeviceFound(DiscInfo *infoNode, const DeviceInfo *device,
                                                 const InnerDeviceInfoAddtions *additions)
 {
     if (IsInnerModule(infoNode) == false) {
-        DiscEventExtra discEventExtra = { .discMode = infoNode->mode, .result = STAGE_RESULT_OK };
+        DiscEventExtra discEventExtra = { .discMode = infoNode->mode, .result = EVENT_STAGE_RESULT_OK };
         UpdateDiscEventByDeviceInfo(&discEventExtra, device);
-        DISC_EVENT(SCENE_SCAN, STAGE_SCAN_END, discEventExtra);
+        DISC_EVENT(EVENT_SCENE_SCAN, EVENT_STAGE_SCAN_END, discEventExtra);
         (void)infoNode->item->callback.serverCb.OnServerDeviceFound(infoNode->item->packageName, device, additions);
         return;
     }

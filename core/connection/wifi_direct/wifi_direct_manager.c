@@ -51,7 +51,7 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *connectInfo, struct W
         .expectRole = connectInfo->expectApiRole,
         .peerIp = connectInfo->remoteMac
     };
-    CONN_EVENT(SCENE_CONNECT, STAGE_CONNECT_START, extra);
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_START, extra);
     char uuid[UUID_BUF_LEN] = {0};
     (void)connectInfo->negoChannel->getDeviceId(connectInfo->negoChannel, uuid, sizeof(uuid));
     int32_t ret = GetWifiDirectRoleOption()->getExpectedRole(connectInfo->remoteNetworkId, connectInfo->connectType,
@@ -73,7 +73,7 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *connectInfo, struct W
     GetWifiDirectCommandManager()->enqueueCommand(command);
     ret = GetWifiDirectNegotiator()->processNextCommand();
     extra.errcode = ret;
-    CONN_EVENT(SCENE_CONNECT, STAGE_CONNECT_INVOKE_PROTOCOL, extra);
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_INVOKE_PROTOCOL, extra);
     return ret;
 }
 

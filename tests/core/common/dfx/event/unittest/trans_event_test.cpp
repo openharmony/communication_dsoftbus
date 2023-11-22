@@ -47,7 +47,7 @@ HWTEST_F(TransEventTest, TransEventTest001, TestSize.Level0)
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(TRANS_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR), _,
             ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
         .Times(1);
-    TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_OPEN_CHANNEL_START, extra);
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_START, extra);
 }
 
 /**
@@ -87,7 +87,7 @@ HWTEST_F(TransEventTest, TransEventTest002, TestSize.Level0)
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(TRANS_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR),
             TransValidParamArrayMatcher(validExtra, VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
         .Times(1);
-    TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_OPEN_CHANNEL_END, validExtra);
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, validExtra);
 }
 
 /**
@@ -127,7 +127,7 @@ HWTEST_F(TransEventTest, TransEventTest003, TestSize.Level0)
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(TRANS_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR),
             TransInvalidParamArrayMatcher(invalidExtra, VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
         .Times(1);
-    TRANS_EVENT(SCENE_CLOSE_CHANNEL_ACTIVE, STAGE_CLOSE_CHANNEL, invalidExtra);
+    TRANS_EVENT(EVENT_SCENE_CLOSE_CHANNEL_ACTIVE, EVENT_STAGE_CLOSE_CHANNEL, invalidExtra);
 }
 
 /**
@@ -146,6 +146,6 @@ HWTEST_F(TransEventTest, TransEventTest004, TestSize.Level0)
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(TRANS_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR),
             TransInvalidParamArrayMatcher(emptyExtra, VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
         .Times(1);
-    TRANS_EVENT(SCENE_CLOSE_CHANNEL_PASSIVE, STAGE_CLOSE_CHANNEL, emptyExtra);
+    TRANS_EVENT(EVENT_SCENE_CLOSE_CHANNEL_PASSIVE, EVENT_STAGE_CLOSE_CHANNEL, emptyExtra);
 }
 } // namespace OHOS

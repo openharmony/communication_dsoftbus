@@ -47,7 +47,7 @@ HWTEST_F(ConnEventTest, ConnEventTest001, TestSize.Level0)
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(CONN_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR), _,
             ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
         .Times(1);
-    CONN_EVENT(SCENE_OPEN_CHANNEL, STAGE_START_CONNECT, extra);
+    CONN_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, extra);
 }
 
 /**
@@ -73,7 +73,6 @@ HWTEST_F(ConnEventTest, ConnEventTest002, TestSize.Level0)
         .load = 11,
         .frequency = 12,
         .peerIp = "testPeerIp",
-        .peerNetworkId = "testPeerNetworkId",
         .peerBrMac = "testPeerBrMac",
         .peerBleMac = "testPeerBleMac",
         .peerWifiMac = "testPeerWifiMac",
@@ -88,7 +87,7 @@ HWTEST_F(ConnEventTest, ConnEventTest002, TestSize.Level0)
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(CONN_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR),
             ConnValidParamArrayMatcher(validExtra, VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
         .Times(1);
-    CONN_EVENT(SCENE_OPEN_CHANNEL, STAGE_CONNECT_INVOKE_PROTOCOL, validExtra);
+    CONN_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_CONNECT_INVOKE_PROTOCOL, validExtra);
 }
 
 /**
@@ -114,7 +113,6 @@ HWTEST_F(ConnEventTest, ConnEventTest003, TestSize.Level0)
         .load = -11,
         .frequency = -12,
         .peerIp = "",
-        .peerNetworkId = "",
         .peerBrMac = "",
         .peerBleMac = "",
         .peerWifiMac = "\0",
@@ -129,7 +127,7 @@ HWTEST_F(ConnEventTest, ConnEventTest003, TestSize.Level0)
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(CONN_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR),
             ConnInvalidParamArrayMatcher(invalidExtra, VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
         .Times(1);
-    CONN_EVENT(SCENE_CONNECT, STAGE_CONNECT_END, invalidExtra);
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, invalidExtra);
 }
 
 /**
@@ -148,6 +146,6 @@ HWTEST_F(ConnEventTest, ConnEventTest004, TestSize.Level0)
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(CONN_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR),
             ConnInvalidParamArrayMatcher(emptyExtra, VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
         .Times(1);
-    CONN_EVENT(SCENE_CONNECT, STAGE_CONNECT_START, emptyExtra);
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_START, emptyExtra);
 }
 } // namespace OHOS

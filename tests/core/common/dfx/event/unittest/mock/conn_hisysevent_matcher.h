@@ -86,10 +86,6 @@ MATCHER_P2(ConnValidParamArrayMatcher, inExtra, validSize, "conn valid param arr
     ++index;
     EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
     EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.peerNetworkId);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
     EXPECT_STREQ(params[index].v.s, extra.peerBrMac);
     ++index;
     EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
