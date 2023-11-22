@@ -51,6 +51,7 @@ if (!defined(ohos_lite)) {
 
     public_configs = [ ":dsoftbus_event_interface_std" ]
     deps = [
+      "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
       "$dsoftbus_dfx_path/log:softbus_dfx_log",
       "//third_party/bounds_checking_function:libsec_shared",
     ]
