@@ -43,6 +43,7 @@ struct WifiDirectCommand;
     bool (*isMessageNeedPending)(enum WifiDirectNegotiateCmdType cmd, struct NegotiateMessage *msg);              \
     void (*onReversal)(enum WifiDirectNegotiateCmdType cmd, struct NegotiateMessage *msg);                        \
     void (*resetContext)(void);                                                                                   \
+    int32_t (*prejudgeAvailability)(const char *remoteNetworkId);                                                 \
                                                                                                                   \
     char *name;                                                                                                   \
     int32_t timerId;                                                                                              \

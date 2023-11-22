@@ -520,6 +520,23 @@ static void SyncLnnInfo(struct InnerLink *innerLink)
     }
 }
 
+static int32_t PrejudgeAvailability(const char *remoteNetworkId, enum WifiDirectConnectType connectType)
+{
+    struct WifiDirectProcessor *processor = NULL;
+    if (connectType == WIFI_DIRECT_CONNECT_TYPE_P2P) {
+        processor = GetWifiDirectProcessorFactory()->createProcessor(WIFI_DIRECT_PROCESSOR_TYPE_P2P_V1);
+    } else {
+        processor = GetWifiDirectProcessorFactory()->createProcessor(WIFI_DIRECT_PROCESSOR_TYPE_HML);
+    }
+
+    if (processor != NULL) {
+        return processor->prejudgeAvailability(remoteNetworkId);
+    }
+
+    CONN_LOGI(CONN_WIFI_DIRECT, "processor is null");
+    return SOFTBUS_OK;
+}
+
 static void OnWifiDirectAuthOpened(uint32_t requestId, int64_t authId)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%u authId=%zd", requestId, authId);
@@ -541,7 +558,9 @@ static struct WifiDirectNegotiator g_negotiator = {
     .onNegotiateChannelDataReceived = OnNegotiateChannelDataReceived,
     .onNegotiateChannelDisconnected = OnNegotiateChannelDisconnected,
     .syncLnnInfo = SyncLnnInfo,
+    .prejudgeAvailability = PrejudgeAvailability,
     .onWifiDirectAuthOpened = OnWifiDirectAuthOpened,
+
     .currentCommand = NULL,
     .currentProcessor = NULL,
 };
