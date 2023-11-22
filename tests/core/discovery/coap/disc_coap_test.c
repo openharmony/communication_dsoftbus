@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,6 +74,23 @@ static SubscribeOption g_subscribeOption = {
     .capabilityData = NULL,
     .dataLen = 0
 };
+
+typedef int (*Function)(void);
+
+typedef struct {
+    char command;
+    Function function;
+} CommandFunction;
+
+static Function FindFunction(char command, const CommandFunction *funcList, int funcNum)
+{
+    for (int index = 0; index < funcNum; ++index) {
+        if (command == funcList[index].command) {
+            return funcList[index].function;
+        }
+    }
+    return NULL;
+}
 
 static void SampleHelp()
 {
@@ -584,135 +601,91 @@ static int32_t CoapUnsubscribe002(void)
     return DISC_TEST_OK;
 }
 
+static const CommandFunction COAPPUBSERVCASE_FUNCLIST[] = {
+    { '1', CoapPulblish001 },
+    { '2', CoapPulblish002 },
+    { '3', CoapStartScan001 },
+    { '4', CoapStartScan002 },
+};
+
 static int32_t DiscCoapTestPulbishServiceCase()
 {
     printf("input the testcase num=");
     char input = getchar();
     getchar();
-    switch (input) {
-        case '1':
-            if (CoapPulblish001() != DISC_TEST_OK) {
-                return DISC_TEST_ERR;
-            }
-            break;
-        case '2':
-            if (CoapPulblish002() != DISC_TEST_OK) {
-                return DISC_TEST_ERR;
-            }
-            break;
-        case '3':
-            if (CoapStartScan001() != DISC_TEST_OK) {
-                return DISC_TEST_ERR;
-            }
-            break;
-        case '4':
-            if (CoapStartScan002() != DISC_TEST_OK) {
-                return DISC_TEST_ERR;
-            }
-            break;
-        default:
-            printf("invalid test case num.");
-            break;
+
+    int funcNum = sizeof(COAPPUBSERVCASE_FUNCLIST) / sizeof(CommandFunction);
+    Function func = FindFunction(input, COAPPUBSERVCASE_FUNCLIST, funcNum);
+    if (func && func() != DISC_TEST_OK) {
+        return DISC_TEST_ERR;
     }
+
     return DISC_TEST_OK;
 }
+
+static const CommandFunction COAPUNPUBSERVCASE_FUNCLIST[] = {
+    { '1', CoapUnpulblish001 },
+    { '2', CoapUnpulblish002 },
+    { '3', CoapStopScan001 },
+    { '4', CoapStopScan002 },
+};
 
 static int32_t DiscCoapTestUnpulbishServiceCase()
 {
     printf("input the testcase num=");
     char input = getchar();
     getchar();
-    switch (input) {
-        case '1':
-            if (CoapUnpulblish001() != DISC_TEST_OK) {
-                return DISC_TEST_ERR;
-            }
-            break;
-        case '2':
-            if (CoapUnpulblish002() != DISC_TEST_OK) {
-                return DISC_TEST_ERR;
-            }
-            break;
-        case '3':
-            if (CoapStopScan001() != DISC_TEST_OK) {
-                return DISC_TEST_ERR;
-            }
-            break;
-        case '4':
-            if (CoapStopScan002() != DISC_TEST_OK) {
-                return DISC_TEST_ERR;
-            }
-            break;
-        default:
-            printf("invalid test case num.");
-            break;
+
+    int funcNum = sizeof(COAPUNPUBSERVCASE_FUNCLIST) / sizeof(CommandFunction);
+    Function func = FindFunction(input, COAPUNPUBSERVCASE_FUNCLIST, funcNum);
+    if (func && func() != DISC_TEST_OK) {
+        return DISC_TEST_ERR;
     }
+
     return DISC_TEST_OK;
 }
+
+static const CommandFunction COAPSTOPDISC_FUNCLIST[] = {
+    { '1', CoapStartAdvertise001 },
+    { '2', CoapStartAdvertise002 },
+    { '3', CoapSubscribe001 },
+    { '4', CoapSubscribe002 },
+};
 
 static int32_t DiscCoapTestStartDiscoveryCase()
 {
     printf("input the testcase num=");
     char input = getchar();
     getchar();
-    switch (input) {
-        case '1':
-            if (CoapStartAdvertise001() != DISC_TEST_OK) {
-                return DISC_TEST_ERR;
-            }
-            break;
-        case '2':
-            if (CoapStartAdvertise002() != DISC_TEST_OK) {
-                return DISC_TEST_ERR;
-            }
-            break;
-        case '3':
-            if (CoapSubscribe001() != DISC_TEST_OK) {
-                return DISC_TEST_ERR;
-            }
-            break;
-        case '4':
-            if (CoapSubscribe002() != DISC_TEST_OK) {
-                return DISC_TEST_ERR;
-            }
-            break;
-        default:
-            printf("invalid test case num.");
-            break;
+
+    int funcNum = sizeof(COAPSTOPDISC_FUNCLIST) / sizeof(CommandFunction);
+    Function func = FindFunction(input, COAPSTOPDISC_FUNCLIST, funcNum);
+    if (func && func() != DISC_TEST_OK) {
+        return DISC_TEST_ERR;
     }
+
     return DISC_TEST_OK;
 }
+
+static const CommandFunction COAPSTARTDISC_FUNCLIST[] = {
+    { '1', CoapStopAdvertise001 },
+    { '2', CoapStopAdvertise002 },
+    { '3', CoapUnsubscribe001 },
+    { '4', CoapUnsubscribe002 },
+};
 
 static int32_t DiscCoapTestStopDiscoveryCase()
 {
     printf("input the testcase num=");
     char input = getchar();
     getchar();
-    switch (input) {
-        case '1':
-            if (CoapStopAdvertise001() != DISC_TEST_OK) {
-                return DISC_TEST_ERR;
-            }
-            break;
-        case '2':
-            if (CoapStopAdvertise002() != DISC_TEST_OK) {
-                return DISC_TEST_ERR;
-            }
-            break;
-        case '3':
-            if (CoapUnsubscribe001() != DISC_TEST_OK) {
-                return DISC_TEST_ERR;
-            }
-            break;
-        case '4':
-            if (CoapUnsubscribe002() != DISC_TEST_OK) {
-                return DISC_TEST_ERR;
-            }
-            break;
-        default:
-            printf("invalid test case num.");
-            break;
+
+    int funcNum = sizeof(COAPSTARTDISC_FUNCLIST) / sizeof(CommandFunction);
+    Function func = FindFunction(input, COAPSTARTDISC_FUNCLIST, funcNum);
+    if (func && func() != DISC_TEST_OK) {
+        return DISC_TEST_ERR;
     }
+
     return DISC_TEST_OK;
 }
 
@@ -743,6 +716,19 @@ static int32_t DiscCoapTestTimeDelay(void)
     return DISC_TEST_OK;
 }
 
+static const CommandFunction FUNCTION_LIST[] = {
+    { '1', DiscCoapTestInit },
+    { '2', DiscCoapTestPulbishService },
+    { '3', DiscCoapTestUnpulbishService },
+    { '4', DiscCoapTestStartDiscovery },
+    { '5', DiscCoapTestStopDiscovery },
+    { '6', DiscCoapTestPulbishServiceCase },
+    { '7', DiscCoapTestUnpulbishServiceCase },
+    { '8', DiscCoapTestStartDiscoveryCase },
+    { '9', DiscCoapTestStopDiscoveryCase },
+    { 't', DiscCoapTestTimeDelay },
+};
+
 int main()
 {
     printf("**************start coap discovery test sample!!!!!!***************\n");
@@ -752,72 +738,20 @@ int main()
         printf("input=");
         char input = getchar();
         getchar();
-        switch (input) {
-            case '1': {
-                if (DiscCoapTestInit() != DISC_TEST_OK) {
-                    goto EXIT;
-                }
-                break;
-            }
-            case '2': {
-                if (DiscCoapTestPulbishService() != DISC_TEST_OK) {
-                    goto EXIT;
-                }
-                break;
-            }
-            case '3': {
-                if (DiscCoapTestUnpulbishService() != DISC_TEST_OK) {
-                    goto EXIT;
-                }
-                break;
-            }
-            case '4': {
-                if (DiscCoapTestStartDiscovery() != DISC_TEST_OK) {
-                    goto EXIT;
-                }
-                break;
-            }
-            case '5': {
-                if (DiscCoapTestStopDiscovery() != DISC_TEST_OK) {
-                    goto EXIT;
-                }
-                break;
-            }
-            case '6': {
-                if (DiscCoapTestPulbishServiceCase() != DISC_TEST_OK) {
-                    goto EXIT;
-                }
-                break;
-            }
-            case '7': {
-                if (DiscCoapTestUnpulbishServiceCase() != DISC_TEST_OK) {
-                    goto EXIT;
-                }
-                break;
-            }
-            case '8': {
-                if (DiscCoapTestStartDiscoveryCase() != DISC_TEST_OK) {
-                    goto EXIT;
-                }
-                break;
-            }
-            case '9': {
-                if (DiscCoapTestStopDiscoveryCase() != DISC_TEST_OK) {
-                    goto EXIT;
-                }
-                break;
-            }
-            case 't': {
-                if (DiscCoapTestTimeDelay() != DISC_TEST_OK) {
-                    goto EXIT;
-                }
-                break;
-            }
-            case 'q':
-                goto EXIT;
-            default:
-                SampleHelp();
-                break;
+
+        if (input == 'q') {
+            goto EXIT;
+        }
+
+        int funcNum = sizeof(FUNCTION_LIST) / sizeof(CommandFunction);
+        Function func = FindFunction(input, FUNCTION_LIST, funcNum);
+        if (!func) {
+            SampleHelp();
+            continue;
+        }
+
+        if (func() != DISC_TEST_OK) {
+            goto EXIT;
         }
     }
 
