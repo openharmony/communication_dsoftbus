@@ -63,7 +63,7 @@ typedef struct {
     bool networkDelegate;
     bool p2pOnly;
     int32_t p2pErrCode;
-    //OldInfo
+    // OldInfo
     char peerBleMac[MAX_MAC_LEN];
     int32_t psm;
     LaneTransType transType;
@@ -307,7 +307,8 @@ static int32_t AllocLane(uint32_t laneId, const LaneRequestOption *request, cons
         LNN_LOGE(LNN_LANE, "selectExpectLanesByQos fail, laneId=%u", laneId);
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_LANE, "select lane link by qos success, laneId=%u, linkNum=%d", laneId, recommendLinkList->linkTypeNum);
+    LNN_LOGI(LNN_LANE, "select lane link by qos success, laneId=%u, linkNum=%d",
+        laneId, recommendLinkList->linkTypeNum);
     if (recommendLinkList->linkTypeNum == 0) {
         SoftBusFree(recommendLinkList);
         LNN_LOGE(LNN_LANE, "no link resources available, allocLane fail, laneId=%u", laneId);
@@ -421,7 +422,7 @@ static int32_t Free(uint32_t laneId)
     ConvertToLaneResource(&laneLinkInfo, &laneResourceInfo);
     bool isDelayDestroy = false;
     DelLaneResourceItemWithDelayDestroy(&laneResourceInfo, laneId, &isDelayDestroy);
-    LNN_LOGI(LNN_LANE, "delayDestroy is %s", isDelayDestroy?"true":"false");
+    LNN_LOGI(LNN_LANE, "delayDestroy is %s", isDelayDestroy ? "true" : "false");
     if (isDelayDestroy) {
         return SOFTBUS_OK;
     }
