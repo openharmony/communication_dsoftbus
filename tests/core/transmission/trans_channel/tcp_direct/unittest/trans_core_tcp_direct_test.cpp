@@ -31,7 +31,6 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
-#include "softbus_log.h"
 #include "softbus_protocol_def.h"
 #include "softbus_server_frame.h"
 #include "softbus_trans_def.h"
@@ -42,6 +41,7 @@
 #include "trans_tcp_direct_manager.h"
 #include "trans_auth_message.h"
 #include "trans_lane_pending_ctl.h"
+#include "trans_log.h"
 #include "trans_session_manager.h"
 #include "trans_tcp_direct_json.h"
 #include "trans_tcp_direct_p2p.h"
@@ -425,7 +425,7 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcStartSessionListenerTest0012, TestSize.
     info.socketOption.moduleId = DIRECT_CHANNEL_SERVER_P2P;
 
     if (strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), g_ip) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "copy addr failed!");
+        TRANS_LOGE(TRANS_TEST, "copy addr failed!");
         return;
     }
     info.type = CONNECT_TCP;

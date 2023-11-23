@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
+#include "bus_center_adapter.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "client_bus_center_manager.h"
@@ -23,6 +24,7 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_huks_utils.h"
 #include "lnn_local_net_ledger.h"
+#include "lnn_log.h"
 #include "lnn_meta_node_ledger.h"
 #include "lnn_network_id.h"
 #include "lnn_net_ledger.h"
@@ -33,7 +35,6 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "softbus_utils.h"
 
 namespace OHOS {

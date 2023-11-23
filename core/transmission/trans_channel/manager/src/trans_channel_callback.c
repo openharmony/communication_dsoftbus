@@ -19,11 +19,12 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_hisysevt_transreporter.h"
-#include "softbus_log.h"
 #include "trans_client_proxy.h"
 #include "trans_lane_manager.h"
+#include "trans_log.h"
 #include "trans_session_manager.h"
 #include "softbus_qos.h"
+#include "trans_event.h"
 
 static IServerChannelCallBack g_channelCallBack;
 
@@ -36,11 +37,23 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
 
     if (!channel->isServer && channel->channelType == CHANNEL_TYPE_UDP &&
         NotifyQosChannelOpened(channel) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "NotifyQosChannelOpened failed.");
+        TRANS_LOGE(TRANS_QOS, "NotifyQosChannelOpened failed.");
         return SOFTBUS_ERR;
     }
     int64_t timeStart = channel->timeStart;
     int64_t timediff = GetSoftbusRecordTimeMillis() - timeStart;
+    if (!channel->isServer) {
+        TransEventExtra extra = {
+            .peerNetworkId = channel->peerDeviceId,
+            .linkType = channel->linkType,
+            .channelId = channel->channelId,
+            .costTime = (int32_t)timediff,
+            .result = EVENT_STAGE_RESULT_OK,
+            .callerPkg = pkgName,
+            .socketName = sessionName
+        };
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
+    }
     SoftbusRecordOpenSessionKpi(pkgName, channel->linkType, SOFTBUS_EVT_OPEN_SESSION_SUCC, timediff);
     SoftbusHitraceStop();
     return ClientIpcOnChannelOpened(pkgName, sessionName, channel, pid);
@@ -53,11 +66,11 @@ static int32_t TransServerOnChannelClosed(const char *pkgName, int32_t pid, int3
     }
 
     if (TransLaneMgrDelLane(channelId, channelType) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "delete lane object failed.");
+        TRANS_LOGW(TRANS_CTRL, "delete lane object failed.");
     }
     NotifyQosChannelClosed(channelId, channelType);
     if (ClientIpcOnChannelClosed(pkgName, channelId, channelType, pid) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify fail");
+        TRANS_LOGE(TRANS_CTRL, "client ipc on channel close fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -70,16 +83,16 @@ static int32_t TransServerOnChannelOpenFailed(const char *pkgName, int32_t pid, 
         return SOFTBUS_INVALID_PARAM;
     }
     if (TransLaneMgrDelLane(channelId, channelType) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "delete lane object failed.");
+        TRANS_LOGW(TRANS_CTRL, "delete lane object failed.");
     }
     NotifyQosChannelClosed(channelId, channelType);
     if (ClientIpcOnChannelOpenFailed(pkgName, channelId, channelType, errCode, pid) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify fail");
+        TRANS_LOGE(TRANS_CTRL, "client ipc on channel open fail");
         return SOFTBUS_ERR;
     }
     SoftbusHitraceStop();
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN,
-        "trasn server on channel open failed.[pkgname=%s][channid=%d][type=%d]", pkgName, channelId, channelType);
+    TRANS_LOGW(TRANS_CTRL,
+        "trasn server on channel open failed.[pkgname=%s][channId=%d][type=%d]", pkgName, channelId, channelType);
     return SOFTBUS_OK;
 }
 
@@ -91,7 +104,7 @@ static int32_t TransServerOnMsgReceived(const char *pkgName, int32_t pid, int32_
     }
 
     if (ClientIpcOnChannelMsgReceived(pkgName, channelId, channelType, receiveData, pid) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get pkg name fail");
+        TRANS_LOGE(TRANS_CTRL, "get pkg name fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -104,7 +117,7 @@ static int32_t TransServerOnQosEvent(const char *pkgName, const QosParam *param)
     }
 
     if (ClientIpcOnChannelQosEvent(pkgName, param) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "ClientIpcOnChannelQosEvent fail");
+        TRANS_LOGE(TRANS_CTRL, "ClientIpcOnChannelQosEvent fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -128,10 +141,10 @@ int32_t TransServerOnChannelLinkDown(const char *pkgName, int32_t pid, const cha
     if (pkgName == NULL || networkId == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "TransServerOnChannelLinkDown: pkgName=%s", pkgName);
+    TRANS_LOGW(TRANS_CTRL, "TransServerOnChannelLinkDown: pkgName=%s", pkgName);
 
     if (ClientIpcOnChannelLinkDown(pkgName, networkId, uuid, udid, peerIp, routeType, pid) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "notify fail");
+        TRANS_LOGE(TRANS_CTRL, "client ipc on channel link down fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

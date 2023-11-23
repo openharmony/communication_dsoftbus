@@ -14,37 +14,38 @@
  */
 
 #include "lnn_decision_center.h"
+
+#include "lnn_log.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 
 int32_t LnnInitDecisionCenter(uint32_t version)
 {
     (void)version;
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "decision center init success");
+    LNN_LOGI(LNN_INIT, "decision center init success");
     return SOFTBUS_OK;
 }
 
 void LnnDeinitDecisionCenter(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "decision center deinit success");
+    LNN_LOGI(LNN_INIT, "decision center deinit success");
 }
 
 int32_t LnnDcSubscribe(DcTask *task)
 {
     (void)task;
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "decision center subscribe task success");
+    LNN_LOGI(LNN_BUILDER, "decision center subscribe task success");
     return SOFTBUS_OK;
 }
 
 int32_t LnnDcUnsubscribe(DcTask *task)
 {
     (void)task;
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "decision center unsubscribe task success");
+    LNN_LOGI(LNN_BUILDER, "decision center unsubscribe task success");
     return SOFTBUS_OK;
 }
 
 void LnnDcDispatchEvent(DcEvent *dcEvent)
 {
     (void)dcEvent;
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "decision center disptach event success");
+    LNN_LOGI(LNN_BUILDER, "decision center disptach event success");
 }

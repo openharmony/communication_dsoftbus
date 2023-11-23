@@ -15,18 +15,12 @@
 
 #include "softbuslog_fuzzer.h"
 
-#include "softbus_log.h"
-#include <cstddef>
 #include <securec.h>
-#include <string>
-#include "softbus_adapter_mem.h"
+
+#include "softbus_log_old.h"
 
 namespace OHOS {
 static constexpr size_t MAX_BUFFER_LEN = 100;
-static void NstackxLogTest(const char *buffer)
-{
-    NstackxLog("nstackx", SOFTBUS_LOG_DBG, "nstackx log is test.");
-}
 
 static void AnonymizesTest(const char *buffer)
 {
@@ -57,7 +51,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
         return 0;
     }
 
-    OHOS::NstackxLogTest(buffer);
     OHOS::AnonymizesTest(buffer);
     OHOS::AnonyPacketPrintoutTest(buffer, OHOS::MAX_BUFFER_LEN - 1);
     OHOS::AnonyDevIdTest(buffer);

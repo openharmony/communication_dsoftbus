@@ -11,7 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("../../core/common/dfx/dsoftbus_dfx.gni")
 import("../../dsoftbus.gni")
+import("../common/dfx/dsoftbus_dfx.gni")
 import("../connection/common/conn_common.gni")
 import("../transmission/common/trans_common.gni")
 
@@ -22,7 +24,7 @@ common_utils_src = [
   "bitmap/softbus_bitmap.c",
   "network/softbus_network_utils.c",
   "json_utils/softbus_json_utils.c",
-  "log/softbus_log.c",
+  "log/softbus_log_old.c",
   "message_handler/message_handler.c",
   "queue/softbus_queue.c",
   "security/sequence_verification/softbus_sequence_verification.c",
@@ -44,6 +46,8 @@ if (defined(ohos_lite)) {
     build_type = "static_library"
   } else {
     diff_deps = [
+      "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
+      "$dsoftbus_dfx_path/log:softbus_dfx_log",
       "$hilog_lite_deps_path",
       "//build/lite/config/component/cJSON:cjson_shared",
     ]
@@ -55,6 +59,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/interfaces/kits/common",
       "$dsoftbus_root_path/core/common/dfx/hidumper_adapter/include",
       "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
+      "$dsoftbus_root_path/core/common/dfx/interface/include",
       "$softbus_adapter_common/include",
       "$hilog_lite_include_path",
     ]
@@ -105,7 +110,11 @@ if (defined(ohos_lite)) {
       defines += [ "__STDC_FORMAT_MACROS" ]
       defines += [ "SOFTBUS_SMALL_SYSTEM" ]
     }
-    deps = [ "$dsoftbus_root_path/adapter:softbus_adapter" ]
+    deps = [
+      "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
+      "$dsoftbus_dfx_path/log:softbus_dfx_log",
+      "$dsoftbus_root_path/adapter:softbus_adapter",
+    ]
     deps += diff_deps
     public_configs = [ ":dsoftbus_utils_interface" ]
   }
@@ -125,6 +134,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_root_path/core/common/dfx/hidumper_adapter/include",
       "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
+      "$dsoftbus_root_path/core/common/dfx/interface/include",
       "$dsoftbus_root_path/interfaces/kits/common",
       "$softbus_adapter_common/include",
       "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/interface",
@@ -137,6 +147,8 @@ if (defined(ohos_lite)) {
       cfi_cross_dso = true
       debug = false
     }
+    branch_protector_ret = "pac_ret"
+
     include_dirs = [
       "$dsoftbus_root_path/interfaces/kits/common",
       "$dsoftbus_root_path/core/bus_center/utils/include",
@@ -158,6 +170,7 @@ if (defined(ohos_lite)) {
       "dfx/hidumper_adapter/softbus_hidumper_trans.c",
       "dfx/hidumper_adapter/softbus_hidumper_buscenter.c",
       "dfx/hisysevent_adapter/softbus_hisysevt_nstack.c",
+      "dfx/log/src/softbus_log.c",
     ]
     sources = common_utils_src + conn_common_src + trans_common_src + dfx_source
     sources += [ "$dsoftbus_root_path/core/common/utils/sqlite3_utils.c" ]
@@ -170,6 +183,9 @@ if (defined(ohos_lite)) {
 
     public_configs = [ ":dsoftbus_utils_interface_L2" ]
     public_deps = [
+      "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
+      "$dsoftbus_dfx_path/event:softbus_dfx_event",
+      "$dsoftbus_dfx_path/log:softbus_dfx_log",
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "//third_party/cJSON:cjson",
       "//third_party/sqlite:sqlite",
@@ -184,7 +200,10 @@ if (defined(ohos_lite)) {
       ]
     }
     if (is_standard_system) {
-      external_deps = [ "hilog:libhilog" ]
+      external_deps = [
+        "hilog:libhilog",
+        "hisysevent:libhisysevent",
+      ]
     }
     innerapi_tags = [ "platformsdk_indirect" ]
     part_name = "dsoftbus"

@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("../../dsoftbus.gni")
+import("../common/dfx/dsoftbus_dfx.gni")
 AUTH_SERVER_DEFINES = []
 if (dsoftbus_feature_auth_account == true) {
   AUTH_SERVER_DEFINES += [ "AUTH_ACCOUNT" ]
@@ -19,7 +20,7 @@ if (dsoftbus_feature_auth_account == true) {
 
 authentication_path = "$dsoftbus_root_path/core/authentication"
 native_source_path = rebase_path("$dsoftbus_root_path")
-auth_dir = "dsoftbus_enhance/core/authentication/src"
+auth_dir = "dsoftbus_enhance/core/authentication/"
 enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
                        [
                          "$native_source_path",
@@ -27,6 +28,16 @@ enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
                        ],
                        "value")
 
+auth_server_inc = [
+  "$dsoftbus_root_path/core/authentication/include",
+  "$dsoftbus_root_path/core/authentication/interface",
+  "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
+  "$dsoftbus_root_path/core/common/dfx/interface/include",
+  "$dsoftbus_root_path/core/adapter/authentication/include",
+  "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+  "$dsoftbus_root_path/core/adapter/bus_center/include",
+  "$dsoftbus_root_path/core/bus_center/utils/include/",
+]
 if (dsoftbus_feature_lnn_net) {
   auth_server_src = [
     "$authentication_path/src/auth_common.c",
@@ -42,13 +53,22 @@ if (dsoftbus_feature_lnn_net) {
   ]
   if (enhanced) {
     auth_server_src += [
-      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/src/auth_meta_manager.c",
-      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/src/auth_device_common_key.c",
+      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/auth_device_common_key.c",
+      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/auth_meta_manager.c",
+      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_instance.c",
+      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_key.c",
+      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_manager.c",
+      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_message.c",
+    ]
+    auth_server_inc += [
+      "$dsoftbus_root_path/adapter/common/include/",
+      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/include/",
     ]
   } else {
     auth_server_src += [
-      "$authentication_path/src/virtual/auth_meta_manager_virtual.c",
       "$authentication_path/src/virtual/auth_device_common_key_virtual.c",
+      "$authentication_path/src/virtual/auth_meta_manager_virtual.c",
+      "$authentication_path/src/virtual/customized_security_protocol_virtual.c",
     ]
   }
   if (dsoftbus_feature_ip_auth) {
@@ -64,16 +84,10 @@ if (dsoftbus_feature_lnn_net) {
     "$authentication_path/src/virtual/auth_meta_manager_virtual.c",
   ]
 }
-auth_server_inc = [
-  "$dsoftbus_root_path/core/authentication/include",
-  "$dsoftbus_root_path/core/authentication/interface",
-  "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
-  "$dsoftbus_root_path/core/adapter/authentication/include",
-  "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
-  "$dsoftbus_root_path/core/adapter/bus_center/include",
-  "$dsoftbus_root_path/core/bus_center/utils/include/",
+auth_server_deps = [
+  "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
+  "$dsoftbus_dfx_path/log:softbus_dfx_log",
 ]
-auth_server_deps = []
 
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {

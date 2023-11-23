@@ -15,12 +15,12 @@
 
 #include "lnn_heartbeat_ctrl.h"
 
+#include "lnn_log.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 
 int32_t LnnStartHeartbeatFrameDelay(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) stub process start.");
+    LNN_LOGI(LNN_HEART_BEAT, "heartbeat(HB) stub process start.");
     return SOFTBUS_OK;
 }
 
@@ -28,7 +28,7 @@ int32_t LnnSetHeartbeatMediumParam(const LnnHeartbeatMediumParam *param)
 {
     (void)param;
 
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat stub set medium param");
+    LNN_LOGI(LNN_HEART_BEAT, "heartbeat stub set medium param");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
@@ -47,7 +47,7 @@ int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *t
     (void)targetNetworkId;
     (void)mode;
 
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat stub ShiftLNNGear");
+    LNN_LOGI(LNN_HEART_BEAT, "heartbeat stub ShiftLNNGear");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
@@ -55,24 +55,31 @@ void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type)
 {
     (void)type;
 
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat stub update send info");
+    LNN_LOGI(LNN_HEART_BEAT, "heartbeat stub update send info");
+}
+
+void LnnHbOnTrustedRelationChanged(int32_t groupType)
+{
+    (void)groupType;
+
+    LNN_LOGI(LNN_HEART_BEAT, "heartbeat stub process auth OnDeviceBound");
 }
 
 void LnnHbOnTrustedRelationIncreased(int32_t groupType)
 {
     (void)groupType;
 
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat stub process auth group created");
+    LNN_LOGI(LNN_HEART_BEAT, "heartbeat stub process auth group created");
 }
 
 void LnnHbOnTrustedRelationReduced(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat stub process auth group deleted");
+    LNN_LOGI(LNN_HEART_BEAT, "heartbeat stub process auth group deleted");
 }
 
 int32_t LnnInitHeartbeat(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "heartbeat(HB) stub init success");
+    LNN_LOGI(LNN_INIT, "heartbeat(HB) stub init success");
     return SOFTBUS_OK;
 }
 

@@ -21,9 +21,9 @@
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "softbus_utils.h"
 #include "trans_channel_manager.h"
+#include "trans_log.h"
 #include "softbus_hidumper_trans.h"
 
 #define CMD_CONCURRENT_SESSION_LIST "concurrent_sessionlist"
@@ -42,7 +42,7 @@ static SoftBusList *g_channelLaneList = NULL;
 static void GetTransSessionInfoByLane(TransLaneInfo * laneItem, AppInfo *appInfo)
 {
     if (TransGetAppInfoByChanId(laneItem->channelId, laneItem->channelType, appInfo) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransGetAppInfoByChanId get appInfo failed");
+        TRANS_LOGE(TRANS_SVC, "TransGetAppInfoByChanId get appInfo failed");
     }
 }
 
@@ -70,16 +70,16 @@ static TransDumpLaneLinkType ConvertLaneLinkTypeToDumper(LaneLinkType type)
 static int32_t TransLaneChannelForEachShowInfo(int fd)
 {
     if (g_channelLaneList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans lane manager hasn't initialized.");
+        TRANS_LOGE(TRANS_INIT, "trans lane manager hasn't init.");
         return SOFTBUS_ERR;
     }
     AppInfo *appInfo = (AppInfo *)SoftBusMalloc(sizeof(AppInfo));
     if (appInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransSessionInfoForEach malloc appInfo failed");
+        TRANS_LOGE(TRANS_SVC, "TransSessionInfoForEach malloc appInfo failed");
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexLock(&(g_channelLaneList->lock)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        TRANS_LOGE(TRANS_SVC, "lock failed");
         SoftBusFree(appInfo);
         return SOFTBUS_ERR;
     }
@@ -99,12 +99,12 @@ static int32_t TransLaneChannelForEachShowInfo(int fd)
 int32_t TransLaneMgrInit(void)
 {
     if (g_channelLaneList != NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "trans lane info manager hasn't initialized.");
+        TRANS_LOGI(TRANS_INIT, "trans lane info manager has init.");
         return SOFTBUS_OK;
     }
     g_channelLaneList = CreateSoftBusList();
     if (g_channelLaneList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans lane info manager init failed.");
+        TRANS_LOGE(TRANS_INIT, "trans lane info manager init failed.");
         return SOFTBUS_MALLOC_ERR;
     }
     
@@ -118,7 +118,7 @@ void TransLaneMgrDeinit(void)
     }
 
     if (SoftBusMutexLock(&g_channelLaneList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        TRANS_LOGE(TRANS_SVC, "lock failed");
         return;
     }
     TransLaneInfo *laneItem = NULL;
@@ -151,7 +151,7 @@ int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LaneConnInfo
     newLane->pid = myData->pid;
     if (memcpy_s(&(newLane->laneConnInfo), sizeof(LaneConnInfo), connInfo, sizeof(LaneConnInfo)) != EOK) {
         SoftBusFree(newLane);
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "memcpy failed.");
+        TRANS_LOGE(TRANS_SVC, "memcpy failed.");
         return SOFTBUS_ERR;
     }
     if (strcpy_s(newLane->pkgName, sizeof(newLane->pkgName), myData->pkgName) != EOK) {
@@ -160,15 +160,15 @@ int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LaneConnInfo
     }
     if (SoftBusMutexLock(&(g_channelLaneList->lock)) != 0) {
         SoftBusFree(newLane);
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        TRANS_LOGE(TRANS_SVC, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
 
     TransLaneInfo *laneItem = NULL;
     LIST_FOR_EACH_ENTRY(laneItem, &(g_channelLaneList->list), TransLaneInfo, node) {
         if (laneItem->channelId == channelId && laneItem->channelType == channelType) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-                "trans lane info has exited.[channelId = %d, channelType = %d]", channelId, channelType);
+            TRANS_LOGI(TRANS_SVC,
+                "trans lane info has exited.channelId=%d, channelType=%d", channelId, channelType);
             SoftBusFree(newLane);
             (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
             return SOFTBUS_ERR;
@@ -177,20 +177,20 @@ int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LaneConnInfo
     ListInit(&(newLane->node));
     ListAdd(&(g_channelLaneList->list), &(newLane->node));
     g_channelLaneList->cnt++;
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "lane num is %d", g_channelLaneList->cnt);
+    TRANS_LOGI(TRANS_SVC, "lane count is cnt=%d", g_channelLaneList->cnt);
     (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
     return SOFTBUS_OK;
 }
 
 int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "del trans land mgr.[chanid=%d][type=%d]", channelId, channelType);
+    TRANS_LOGI(TRANS_SVC, "del trans land mgr.chanId=%d channelType=%d", channelId, channelType);
     if (g_channelLaneList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans lane manager hasn't initialized.");
+        TRANS_LOGE(TRANS_INIT, "trans lane manager hasn't init.");
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexLock(&(g_channelLaneList->lock)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        TRANS_LOGE(TRANS_SVC, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
     TransLaneInfo *laneItem = NULL;
@@ -206,7 +206,7 @@ int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType)
         }
     }
     (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans lane not found.[channelId = %d, channelType = %d]",
+    TRANS_LOGE(TRANS_SVC, "trans lane not found.channelId=%d, channelType=%d",
         channelId, channelType);
     return SOFTBUS_ERR;
 }
@@ -214,11 +214,11 @@ int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType)
 void TransLaneMgrDeathCallback(const char *pkgName, int32_t pid)
 {
     if (g_channelLaneList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "trans lane manager hasn't initialized.");
+        TRANS_LOGE(TRANS_INIT, "trans lane manager hasn't init.");
         return;
     }
     if (SoftBusMutexLock(&(g_channelLaneList->lock)) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock failed");
+        TRANS_LOGE(TRANS_SVC, "lock failed");
         return;
     }
     TransLaneInfo *laneItem = NULL;
@@ -230,7 +230,7 @@ void TransLaneMgrDeathCallback(const char *pkgName, int32_t pid)
             LnnFreeLane(laneItem->laneId);
             SoftBusFree(laneItem);
             (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "%s death del lane[id=%d, type = %d]",
+            TRANS_LOGI(TRANS_SVC, "pkgName=%s death del lane channelId=%d, channelType=%d",
                 pkgName, laneItem->channelId, laneItem->channelType);
             return;
         }

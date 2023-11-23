@@ -1,0 +1,97 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef TRANS_EVENT_ATOM_FORM_H
+#define TRANS_EVENT_ATOM_FORM_H
+
+#include <stdint.h>
+
+#include "event_form_enum.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef enum {
+    EVENT_SCENE_OPEN_CHANNEL = 1,
+    EVENT_SCENE_CLOSE_CHANNEL_ACTIVE = 2,
+    EVENT_SCENE_CLOSE_CHANNEL_PASSIVE = 3,
+    EVENT_SCENE_CLOSE_CHANNEL_TIMEOUT = 4,
+} TransEventScene;
+
+typedef enum {
+    EVENT_STAGE_OPEN_CHANNEL_START = 1,
+    EVENT_STAGE_SELECT_LANE = 2,
+    EVENT_STAGE_START_CONNECT = 3,
+    EVENT_STAGE_HANDSHAKE_START = 4,
+    EVENT_STAGE_HANDSHAKE_REPLY = 5,
+    EVENT_STAGE_OPEN_CHANNEL_END = 6,
+} TransEventOpenChannelStage;
+
+typedef enum {
+    EVENT_STAGE_CLOSE_CHANNEL = 1,
+} TransEventCloseChannelStage;
+
+typedef struct {
+    int32_t result;            // STAGE_RES
+    int32_t errcode;           // ERROR_CODE
+    const char *socketName;    // SESSION_NAME
+    int32_t dataType;          // DATA_TYPE
+    int32_t channelType;       // LOGIC_CHAN_TYPE
+    int32_t laneId;            // LANE_ID
+    int32_t preferLinkType;    // PREFER_LINK_TYPE
+    int32_t laneTransType;     // LANE_TRANS_TYPE
+    int32_t channelId;         // CHAN_ID
+    int32_t requestId;         // REQ_ID
+    int32_t connectionId;      // CONN_ID
+    int32_t linkType;          // LINK_TYPE
+    int32_t authId;            // AUTH_ID
+    int32_t socketFd;          // SOCKET_FD
+    int32_t costTime;          // TIME_CONSUMING
+    int32_t channelScore;      // CHAN_SCORE
+    int32_t peerChannelId;     // PEER_CHAN_ID
+    const char *peerNetworkId; // PEER_NET_ID
+    const char *callerPkg;     // HOST_PKG
+    const char *calleePkg;     // TO_CALL_PKG
+} TransEventExtra;
+
+typedef enum {
+    ALARM_SCENE_TRANS_RESERVED = 1,
+} TransAlarmScene;
+
+typedef struct {
+    int32_t errcode;
+} TransAlarmExtra;
+
+typedef enum {
+    STATS_SCENE_TRANS_RESERVED = 1,
+} TransStatsScene;
+
+typedef struct {
+    int32_t reserved;
+} TransStatsExtra;
+
+typedef enum {
+    AUDIT_SCENE_TRANS_RESERVED = 1,
+} TransAuditScene;
+
+typedef struct {
+    int32_t reserved;
+} TransAuditExtra;
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+#endif // TRANS_EVENT_ATOM_FORM_H

@@ -18,7 +18,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "anonymizer.h"
 #include "auth_interface.h"
+#include "bus_center_adapter.h"
 #include "bus_center_event.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
@@ -28,8 +30,8 @@
 #include "lnn_discovery_manager.h"
 #include "lnn_fast_offline.h"
 #include "lnn_ip_utils_adapter.h"
-#include "bus_center_adapter.h"
 #include "lnn_linkwatch.h"
+#include "lnn_log.h"
 #include "lnn_net_builder.h"
 #include "lnn_network_manager.h"
 #include "lnn_physical_subnet_manager.h"
@@ -41,7 +43,6 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
-#include "softbus_log.h"
 #include "softbus_protocol_def.h"
 #include "trans_tcp_direct_listener.h"
 
@@ -62,15 +63,15 @@ static int32_t GetWifiServiceIpAddr(const char *ifName, char *ip, uint32_t size)
         return SOFTBUS_ERR;
     }
     if (strcmp(ifName, WLAN_IFNAME) != 0) {
-        LLOGE("ifname isn't expected, ifname:%s", ifName);
+        LNN_LOGE(LNN_BUILDER, "ifname isn't expected, ifname=%s", ifName);
         return SOFTBUS_ERR;
     }
     if (GetWlanIpv4Addr(ip, size) != SOFTBUS_OK) {
-        LLOGE("get wlan ip addr from wifiservice fail");
+        LNN_LOGE(LNN_BUILDER, "get wlan ip addr from wifiservice fail");
         return SOFTBUS_ERR;
     }
     if (strnlen(ip, size) == 0 || strnlen(ip, size) == size) {
-        LLOGE("get ipAddr fail, from wifiService");
+        LNN_LOGE(LNN_BUILDER, "get ipAddr fail, from wifiService");
         return SOFTBUS_ERR;
     }
     if (strcmp(ip, LNN_LOOPBACK_IP) == 0 || strcmp(ip, "") == 0 || strcmp(ip, "0.0.0.0") == 0) {
@@ -82,7 +83,7 @@ static int32_t GetWifiServiceIpAddr(const char *ifName, char *ip, uint32_t size)
 static int32_t GetIpAddrFromNetlink(const char *ifName, char *ip, uint32_t size)
 {
     if (GetNetworkIpByIfName(ifName, ip, NULL, size) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:get network IP by ifName failed!", __func__);
+        LNN_LOGE(LNN_BUILDER, "get network IP by ifName fail");
         return SOFTBUS_ERR;
     }
 
@@ -96,7 +97,7 @@ static bool GetIpProcess(const char *ifName, char *ip, uint32_t size)
 {
     if (GetIpAddrFromNetlink(ifName, ip, size) != SOFTBUS_OK &&
         GetWifiServiceIpAddr(ifName, ip, size) != SOFTBUS_OK) {
-        LLOGE("get network IP by ifName failed!");
+        LNN_LOGE(LNN_BUILDER, "get network IP by ifName fail");
         return false;
     }
     return true;
@@ -105,7 +106,7 @@ static bool GetIpProcess(const char *ifName, char *ip, uint32_t size)
 static VisitNextChoice NotifyWlanAddressChanged(const LnnNetIfMgr *netifManager, void *data)
 {
     if (netifManager->type == LNN_NETIF_TYPE_WLAN) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "%s: notify wlan changed", __func__);
+        LNN_LOGI(LNN_BUILDER, "notify wlan changed");
         LnnNotifyPhysicalSubnetStatusChanged(netifManager->ifName, LNN_PROTOCOL_IP, data);
     }
     return CHOICE_VISIT_NEXT;
@@ -121,7 +122,7 @@ static int32_t GetAvailableIpAddr(const char *ifName, char *ip, uint32_t size)
 {
     static int32_t retryTime = GET_IP_RETRY_TIMES;
     if (!LnnIsLinkReady(ifName)) {
-        LLOGE("ifName %s link not ready", ifName);
+        LNN_LOGE(LNN_BUILDER, "ifName=%s link not ready", ifName);
     }
     if (strcmp(ifName, WLAN_IFNAME) != 0) {
         retryTime = 0;
@@ -130,10 +131,10 @@ static int32_t GetAvailableIpAddr(const char *ifName, char *ip, uint32_t size)
         retryTime = GET_IP_RETRY_TIMES;
         return SOFTBUS_OK;
     }
-    LLOGI("get ip retry time :%d", retryTime);
+    LNN_LOGD(LNN_BUILDER, "get ip retry time=%d", retryTime);
     if (--retryTime > 0 && LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), RetryGetAvailableIpAddr,
         NULL, GET_IP_INTERVAL_TIME) != SOFTBUS_OK) {
-        LLOGE("LnnAsyncCallbackDelayHelper get available ip fail.");
+        LNN_LOGE(LNN_BUILDER, "LnnAsyncCallbackDelayHelper get available ip fail");
         return SOFTBUS_ERR;
     }
     if (retryTime <= 0) {
@@ -149,20 +150,23 @@ static int32_t OpenAuthPort(void)
 
     int32_t authPort;
     if (LnnGetLocalNumInfo(NUM_KEY_AUTH_PORT, &authPort) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get port failed");
+        LNN_LOGE(LNN_BUILDER, "get port failed");
         authPort = 0;
     }
 
     if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, MAX_ADDR_LEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local ip failed");
+        LNN_LOGE(LNN_BUILDER, "get local ip failed");
         return SOFTBUS_ERR;
     }
     port = AuthStartListening(AUTH_LINK_TYPE_WIFI, localIp, authPort);
     if (port < 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "AuthStartListening failed");
+        LNN_LOGE(LNN_BUILDER, "AuthStartListening failed");
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "open auth port listening on ip:%s", AnonymizesIp(localIp));
+    char *anonyIp = NULL;
+    Anonymize(localIp, &anonyIp);
+    LNN_LOGI(LNN_BUILDER, "open auth port listening on ip=%s", anonyIp);
+    AnonymizeFree(anonyIp);
     if (authPort == 0) {
         return LnnSetLocalNumInfo(NUM_KEY_AUTH_PORT, port);
     }
@@ -179,7 +183,7 @@ static int32_t OpenSessionPort(void)
 {
     int32_t sessionPort;
     if (LnnGetLocalNumInfo(NUM_KEY_SESSION_PORT, &sessionPort) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get port failed");
+        LNN_LOGE(LNN_BUILDER, "get port failed");
         sessionPort = 0;
     }
 
@@ -194,12 +198,12 @@ static int32_t OpenSessionPort(void)
         }
     };
     if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, info.socketOption.addr, sizeof(info.socketOption.addr)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local ip failed\n");
+        LNN_LOGE(LNN_BUILDER, "get local ip failed");
         return SOFTBUS_ERR;
     }
     port = TransTdcStartSessionListener(DIRECT_CHANNEL_SERVER_WIFI, &info);
     if (port < 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open session server failed");
+        LNN_LOGE(LNN_BUILDER, "open session server failed");
         return SOFTBUS_ERR;
     }
     if (sessionPort == 0) {
@@ -219,7 +223,7 @@ static void OpenProxyPort(void)
 {
     int32_t proxyPort;
     if (LnnGetLocalNumInfo(NUM_KEY_PROXY_PORT, &proxyPort) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get port failed");
+        LNN_LOGE(LNN_BUILDER, "get port failed");
         proxyPort = 0;
     }
 
@@ -235,12 +239,12 @@ static void OpenProxyPort(void)
     int32_t ret = LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, listenerInfo.socketOption.addr,
         sizeof(listenerInfo.socketOption.addr));
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local ip failed\n");
+        LNN_LOGE(LNN_BUILDER, "get local ip failed");
         return;
     }
     int32_t port = ConnStartLocalListening(&listenerInfo);
     if (port < 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open proxy server failed");
+        LNN_LOGE(LNN_BUILDER, "open proxy server failed");
         return;
     }
     if (proxyPort == 0) {
@@ -260,7 +264,7 @@ static void CloseProxyPort(void)
         }
     };
     if (ConnStopLocalListening(&listenerInfo) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ConnStopLocalListening fail!");
+        LNN_LOGE(LNN_BUILDER, "ConnStopLocalListening fail");
     }
     (void)LnnSetLocalNumInfo(NUM_KEY_PROXY_PORT, IP_DEFAULT_PORT);
 }
@@ -269,12 +273,12 @@ static int32_t OpenIpLink(void)
 {
     int32_t ret = OpenAuthPort();
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OpenAuthPort fail!");
+        LNN_LOGE(LNN_BUILDER, "OpenAuthPort fail");
         return SOFTBUS_ERR;
     }
     ret = OpenSessionPort();
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "OpenSessionPort fail!");
+        LNN_LOGE(LNN_BUILDER, "OpenSessionPort fail");
         CloseAuthPort();
         return SOFTBUS_ERR;
     }
@@ -292,11 +296,11 @@ static void CloseIpLink(void)
 static int32_t GetLocalIpInfo(char *ipAddr, uint32_t ipAddrLen, char *ifName, uint32_t ifNameLen)
 {
     if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, ipAddr, ipAddrLen) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local ip error!");
+        LNN_LOGE(LNN_BUILDER, "get local ip error");
         return SOFTBUS_ERR;
     }
     if (LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, ifName, ifNameLen) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local ifName error!");
+        LNN_LOGE(LNN_BUILDER, "get local ifName error");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -305,11 +309,11 @@ static int32_t GetLocalIpInfo(char *ipAddr, uint32_t ipAddrLen, char *ifName, ui
 static int32_t SetLocalIpInfo(const char *ipAddr, const char *ifName)
 {
     if (LnnSetLocalStrInfo(STRING_KEY_WLAN_IP, ipAddr) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set local ip error!");
+        LNN_LOGE(LNN_BUILDER, "set local ip error");
         return SOFTBUS_ERR;
     }
     if (LnnSetLocalStrInfo(STRING_KEY_NET_IF_NAME, ifName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set local ifName error!");
+        LNN_LOGE(LNN_BUILDER, "set local ifName error");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -321,8 +325,7 @@ static void LeaveOldIpNetwork(const char *ifCurrentName)
     bool addrType[CONNECTION_ADDR_MAX] = {0};
 
     if (LnnGetAddrTypeByIfName(ifCurrentName, &type) != SOFTBUS_OK) {
-        SoftBusLog(
-            SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:LnnGetAddrTypeByIfName failed! ifName=%s", __func__, ifCurrentName);
+        LNN_LOGE(LNN_BUILDER, "LnnGetAddrTypeByIfName failed ifName=%s", ifCurrentName);
         return;
     }
     if (type == CONNECTION_ADDR_MAX) {
@@ -331,9 +334,9 @@ static void LeaveOldIpNetwork(const char *ifCurrentName)
     } else {
         addrType[type] = true;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "LNN start leave ip network");
+    LNN_LOGI(LNN_BUILDER, "LNN start leave ip network");
     if (LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "LNN leave ip network fail");
+        LNN_LOGE(LNN_BUILDER, "LNN leave ip network fail");
     }
 }
 
@@ -342,16 +345,16 @@ static int32_t ReleaseMainPort(const char *ifName)
     char oldMainIf[NET_IF_NAME_LEN] = {0};
     do {
         if (LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, oldMainIf, sizeof(oldMainIf)) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:get local ifName error!", __func__);
+            LNN_LOGE(LNN_BUILDER, "get local ifName error!");
             break;
         }
         if (strcmp(ifName, oldMainIf) != 0) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "ifName %s is not main port!", ifName);
+            LNN_LOGE(LNN_BUILDER, "ifName=%s is not main port!", ifName);
             return SOFTBUS_ERR;
         }
     } while (false);
     if (SetLocalIpInfo(LNN_LOOPBACK_IP, LNN_LOOPBACK_IFNAME) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:set local ip info failed", __func__);
+        LNN_LOGE(LNN_BUILDER, "set local ip info failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -360,24 +363,24 @@ static int32_t ReleaseMainPort(const char *ifName)
 static int32_t RequestMainPort(const char *ifName, const char *address)
 {
     if (strcmp(ifName, LNN_LOOPBACK_IFNAME) == 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "loopback ifName not allowed!");
+        LNN_LOGE(LNN_BUILDER, "loopback ifName not allowed");
         return SOFTBUS_ERR;
     }
     if (strcmp(address, LNN_LOOPBACK_IP) == 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "loopback ip not allowed!");
+        LNN_LOGE(LNN_BUILDER, "loopback ip not allowed");
         return SOFTBUS_ERR;
     }
     char oldMainIf[NET_IF_NAME_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, oldMainIf, sizeof(oldMainIf)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local ifName error!");
+        LNN_LOGE(LNN_BUILDER, "get local ifName error");
         return SOFTBUS_ERR;
     }
     if (strcmp(oldMainIf, ifName) != 0 && strcmp(oldMainIf, LNN_LOOPBACK_IFNAME) != 0) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "Only 1 local subnet is allowed!");
+        LNN_LOGE(LNN_BUILDER, "Only 1 local subnet is allowed");
         return SOFTBUS_ERR;
     }
     if (SetLocalIpInfo(address, ifName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set local ip info failed");
+        LNN_LOGE(LNN_BUILDER, "set local ip info failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -389,28 +392,27 @@ static int32_t EnableIpSubnet(LnnPhysicalSubnet *subnet)
 
     int32_t ret = GetAvailableIpAddr(subnet->ifName, address, sizeof(address));
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(
-            SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get available Ip failed!ifName=%s, ret=%d", subnet->ifName, ret);
+        LNN_LOGE(LNN_BUILDER, "get available Ip failed!ifName=%s, ret=%d", subnet->ifName, ret);
         return ret;
     }
     if (RequestMainPort(subnet->ifName, address)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "request main port failed! ifName=%s", subnet->ifName);
+        LNN_LOGE(LNN_BUILDER, "request main port failed!ifName=%s", subnet->ifName);
         return SOFTBUS_ERR;
     }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "open ip link and start discovery");
+    LNN_LOGI(LNN_BUILDER, "open ip link and start discovery");
     if (OpenIpLink() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "open ip link failed");
+        LNN_LOGE(LNN_BUILDER, "open ip link failed");
     }
     if (!LnnIsAutoNetWorkingEnabled()) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "auto network disable");
+        LNN_LOGI(LNN_BUILDER, "auto network disable");
         return SOFTBUS_OK;
     }
     DiscLinkStatusChanged(LINK_STATUS_UP, COAP);
     if (LnnStartPublish() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start publish failed");
+        LNN_LOGE(LNN_BUILDER, "start publish failed");
     }
     if (LnnStartDiscovery() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start discovery failed");
+        LNN_LOGE(LNN_BUILDER, "start discovery failed");
     }
     return SOFTBUS_OK;
 }
@@ -468,7 +470,7 @@ static void TransactIpSubnetState(LnnPhysicalSubnet *subnet, IpSubnetManagerEven
         [IP_SUBNET_MANAGER_EVENT_IF_CHANGED] = {LNN_SUBNET_RESETTING, subnet->status}
     };
     subnet->status = transactMap[event][isAccepted ? IP_EVENT_RESULT_ACCEPTED : IP_EVENT_RESULT_REJECTED];
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "subnet [%s, %u] state change to %d", subnet->ifName,
+    LNN_LOGD(LNN_BUILDER, "subnet [%s, %u] state change to %d", subnet->ifName,
         subnet->protocol->id, subnet->status);
 }
 
@@ -494,7 +496,7 @@ static IpSubnetManagerEvent GetIpEventInRunning(LnnPhysicalSubnet *subnet)
     char localIpAddr[IP_LEN] = {0};
     char localNetifName[NET_IF_NAME_LEN] = {0};
     if (GetLocalIpInfo(localIpAddr, sizeof(localIpAddr), localNetifName, sizeof(localNetifName)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get main ip info failed");
+        LNN_LOGE(LNN_BUILDER, "get main ip info failed");
         return IP_SUBNET_MANAGER_EVENT_IF_READY;
     }
     if (strcmp(localNetifName, subnet->ifName) != 0) {
@@ -526,10 +528,10 @@ static void OnIpNetifStatusChanged(LnnPhysicalSubnet *subnet, void *status)
         }
     } else {
         event = *(IpSubnetManagerEvent *)status;
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "want to enter event %d", event);
+        LNN_LOGI(LNN_BUILDER, "want to enter event=%d", event);
         SoftBusFree(status);
         if (event < IP_SUBNET_MANAGER_EVENT_IF_READY || event > IP_SUBNET_MANAGER_EVENT_MAX) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "is not right event %d", event);
+            LNN_LOGW(LNN_BUILDER, "is not right event=%d", event);
             return;
         }
     }
@@ -549,7 +551,7 @@ static void OnIpNetifStatusChanged(LnnPhysicalSubnet *subnet, void *status)
             break;
         }
         default:
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_WARN, "discard unexpected event %d", event);
+            LNN_LOGW(LNN_BUILDER, "discard unexpected event=%d", event);
             return;
     }
 
@@ -560,7 +562,7 @@ static LnnPhysicalSubnet *CreateIpSubnetManager(const struct LnnProtocolManager 
 {
     LnnPhysicalSubnet *subnet = (LnnPhysicalSubnet *)SoftBusCalloc(sizeof(LnnPhysicalSubnet));
     if (subnet == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:oom", __func__);
+        LNN_LOGE(LNN_BUILDER, "malloc subnet fail");
         return NULL;
     }
 
@@ -573,7 +575,7 @@ static LnnPhysicalSubnet *CreateIpSubnetManager(const struct LnnProtocolManager 
 
         int32_t ret = strcpy_s(subnet->ifName, sizeof(subnet->ifName), ifName);
         if (ret != EOK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:copy ifName failed! ret=%d", __func__, ret);
+            LNN_LOGE(LNN_BUILDER, "copy ifName failed ret=%d", ret);
             break;
         }
         return subnet;
@@ -595,7 +597,7 @@ static VisitNextChoice NotifyIpAddressChanged(const LnnPhysicalSubnet *subnet, v
 static void IpAddrChangeEventHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_IP_ADDR_CHANGED) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "not interest event");
+        LNN_LOGE(LNN_BUILDER, "not interest event");
         return;
     }
     const LnnMonitorAddressChangedEvent *event = (const LnnMonitorAddressChangedEvent *)info;
@@ -610,7 +612,7 @@ static bool IsValidLocalIp(void)
 {
     char localIp[MAX_ADDR_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, MAX_ADDR_LEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get local ip failed");
+        LNN_LOGE(LNN_BUILDER, "get local ip failed");
         return false;
     }
     if (strcmp(localIp, LNN_LOOPBACK_IP) == 0 || strcmp(localIp, "") == 0 || strcmp(localIp, "0.0.0.0") == 0) {
@@ -622,11 +624,11 @@ static bool IsValidLocalIp(void)
 static void WifiStateChangeEventHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_WIFI_STATE_CHANGED) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:not interest event", __func__);
+        LNN_LOGE(LNN_BUILDER, "not interest event");
         return;
     }
     if (!g_heartbeatEnable) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "%s:g_heartbeatEnable not enable", __func__);
+        LNN_LOGI(LNN_BUILDER, "g_heartbeatEnable not enable");
         return;
     }
     bool beforeConnected = false;
@@ -634,7 +636,7 @@ static void WifiStateChangeEventHandler(const LnnEventBasicInfo *info)
     bool isValidIp = false;
     const LnnMonitorWlanStateChangedEvent *event = (const LnnMonitorWlanStateChangedEvent *)info;
     SoftBusWifiState wifiState = (SoftBusWifiState)event->status;
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "wifi state change wifiState = %d", wifiState);
+    LNN_LOGI(LNN_BUILDER, "wifi state change wifiState=%d", wifiState);
     beforeConnected = g_apEnabled || g_wifiConnected;
     switch (wifiState) {
         case SOFTBUS_WIFI_CONNECTED:
@@ -650,21 +652,21 @@ static void WifiStateChangeEventHandler(const LnnEventBasicInfo *info)
             g_apEnabled = false;
             break;
         default:
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "%s:not interest wifi event", __func__);
+            LNN_LOGI(LNN_BUILDER, "not interest wifi event");
             return;
     }
     currentConnected = g_apEnabled || g_wifiConnected;
     isValidIp = IsValidLocalIp();
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO,
-        "wifi or ap wifiConnected = %d, apEnabled = %d, beforeConnected = %d, currentConnected = %d, isValidIp = %d",
+    LNN_LOGI(LNN_BUILDER,
+        "wifi or ap wifiConnected=%d, apEnabled=%d, beforeConnected=%d, currentConnected=%d, isValidIp=%d",
         g_wifiConnected, g_apEnabled, beforeConnected, currentConnected, isValidIp);
     IpSubnetManagerEvent *status = (IpSubnetManagerEvent *)SoftBusCalloc(sizeof(IpSubnetManagerEvent));
     if (status == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "wifi start calloc fail");
+        LNN_LOGE(LNN_BUILDER, "wifi start calloc fail");
         return;
     }
     if ((beforeConnected != currentConnected) || (currentConnected && !isValidIp)) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "wifi start to subnet change!");
+        LNN_LOGI(LNN_BUILDER, "wifi start to subnet change!");
         if (currentConnected) {
             SoftBusFree(status);
             (void)LnnVisitNetif(NotifyWlanAddressChanged, NULL);
@@ -680,16 +682,16 @@ int32_t LnnInitIpProtocol(struct LnnProtocolManager *self)
     (void)self;
     int32_t ret = SOFTBUS_OK;
     if (LnnRegisterEventHandler(LNN_EVENT_IP_ADDR_CHANGED, IpAddrChangeEventHandler) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "register ip addr change event handler failed");
+        LNN_LOGE(LNN_INIT, "register ip addr change event handler failed");
         return SOFTBUS_ERR;
     }
     if (SetLocalIpInfo(LNN_LOOPBACK_IP, LNN_LOOPBACK_IFNAME) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "init local ip as loopback failed!");
+        LNN_LOGE(LNN_INIT, "init local ip as loopback failed!");
         return SOFTBUS_ERR;
     }
     DiscLinkStatusChanged(LINK_STATUS_DOWN, COAP);
     g_heartbeatEnable = IsEnableSoftBusHeartbeat();
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "init IP protocol g_heartbeatEnable = %d!", g_heartbeatEnable);
+    LNN_LOGI(LNN_INIT, "init IP protocol g_heartbeatEnable=%d", g_heartbeatEnable);
     return ret;
 }
 
@@ -697,17 +699,17 @@ int32_t LnnEnableIpProtocol(struct LnnProtocolManager *self, LnnNetIfMgr *netifM
 {
     (void)self;
     if (netifMgr == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:null ptr!", __func__);
+        LNN_LOGE(LNN_BUILDER, "netif mgr is null");
         return SOFTBUS_ERR;
     }
     LnnPhysicalSubnet *manager = CreateIpSubnetManager(self, netifMgr->ifName);
     if (manager == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:oom!", __func__);
+        LNN_LOGE(LNN_BUILDER, "malloc subnet mgr fail");
         return SOFTBUS_ERR;
     }
     int ret = LnnRegistPhysicalSubnet(manager);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "%s:regist subnet manager failed! ret=%d", __func__, ret);
+        LNN_LOGE(LNN_BUILDER, "regist subnet manager failed!ret=%d", ret);
         manager->destroy(manager);
         return ret;
     }
@@ -731,7 +733,7 @@ void LnnDeinitIpNetwork(struct LnnProtocolManager *self)
     LnnUnregisterEventHandler(LNN_EVENT_IP_ADDR_CHANGED, IpAddrChangeEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_WIFI_STATE_CHANGED, WifiStateChangeEventHandler);
     LnnUnregistPhysicalSubnetByType(LNN_PROTOCOL_IP);
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_WARN, "%s:ip network deinited", __func__);
+    LNN_LOGW(LNN_INIT, "ip network deinited");
 }
 
 static LnnProtocolManager g_ipProtocol = {

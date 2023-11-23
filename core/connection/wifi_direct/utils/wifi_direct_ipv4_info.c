@@ -14,33 +14,31 @@
  */
 
 #include "wifi_direct_ipv4_info.h"
-#include "softbus_log.h"
+#include "conn_log.h"
 #include "softbus_error_code.h"
 #include "wifi_direct_defines.h"
 #include "wifi_direct_network_utils.h"
 
-#define LOG_LABEL "[WD] IPV4: "
-
 int32_t WifiDirectIpStringToIpv4(const char *ipString, struct WifiDirectIpv4Info *ipv4)
 {
-    CONN_CHECK_AND_RETURN_RET_LOG(ipString, SOFTBUS_INVALID_PARAM, LOG_LABEL "ip is null");
-    CONN_CHECK_AND_RETURN_RET_LOG(ipv4, SOFTBUS_INVALID_PARAM, LOG_LABEL "ipv4 is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ipString, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "ip is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ipv4, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "ipv4 is null");
 
     struct WifiDirectNetWorkUtils *netWorkUtils = GetWifiDirectNetWorkUtils();
     int32_t ret = netWorkUtils->ipStringToAddr(ipString, &ipv4->address);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_ERR, LOG_LABEL "convert ip to addr failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "convert ip to addr failed");
     ipv4->prefixLength = DEFAULT_PREFIX_LEN;
     return SOFTBUS_OK;
 }
 
 int32_t WifiDirectIpv4ToString(struct WifiDirectIpv4Info *ipv4, char *ipString, size_t ipStringSize)
 {
-    CONN_CHECK_AND_RETURN_RET_LOG(ipv4, SOFTBUS_INVALID_PARAM, LOG_LABEL "ipv4 is null");
-    CONN_CHECK_AND_RETURN_RET_LOG(ipString, SOFTBUS_INVALID_PARAM, LOG_LABEL "ip is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ipv4, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "ipv4 is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ipString, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "ip is null");
 
     struct WifiDirectNetWorkUtils *netWorkUtils = GetWifiDirectNetWorkUtils();
     int32_t ret = netWorkUtils->ipAddrToString(ipv4->address, ipString, ipStringSize);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == SOFTBUS_OK, SOFTBUS_ERR, LOG_LABEL "convert addr to ip failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "convert addr to ip failed");
 
     return SOFTBUS_OK;
 }
@@ -67,7 +65,7 @@ int32_t WifiDirectIpv4InfoToBytes(const struct WifiDirectIpv4Info *ipv4, size_t 
     size_t offset = 0;
     for (size_t i = 0; i < ipv4Count; i++) {
         if (offset + IPV4_INFO_BYTES_ARRAY_LEN > *dataLen) {
-            CLOGE(LOG_LABEL "[%zu] invalid data len: %zu, ipv4 count: %zu, offset: %zu",
+            CONN_LOGW(CONN_WIFI_DIRECT, "[%zu] invalid data len: %zu, ipv4 count: %zu, offset: %zu",
                   i, *dataLen, ipv4Count, offset);
             return SOFTBUS_ERR;
         }
@@ -85,14 +83,14 @@ void WifiDirectIpv4BytesToInfo(const uint8_t *ipv4Bytes, size_t ipv4BytesLen,
 {
     size_t offset = 0;
     if ((ipv4BytesLen % IPV4_INFO_BYTES_ARRAY_LEN) != 0) {
-        CLOGE(LOG_LABEL "invalid ip bytes len %zu", ipv4BytesLen);
+        CONN_LOGW(CONN_WIFI_DIRECT, "invalid ip bytes len %zu", ipv4BytesLen);
         *ipv4Count = 0;
         return;
     }
 
     for (size_t i = 0; i + IPV4_INFO_BYTES_ARRAY_LEN <= ipv4BytesLen; i += IPV4_INFO_BYTES_ARRAY_LEN) {
         if (offset == *ipv4Count) {
-            CLOGE(LOG_LABEL "invalid ipv4 count: %zu, ipv4 bytes len: %zu", *ipv4Count, ipv4BytesLen);
+            CONN_LOGW(CONN_WIFI_DIRECT, "invalid ipv4 count: %zu, ipv4 bytes len: %zu", *ipv4Count, ipv4BytesLen);
             *ipv4Count = 0;
             return;
         }

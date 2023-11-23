@@ -48,7 +48,7 @@ int32_t LnnIpcDeactiveMetaNode(const char *metaNodeId);
 int32_t LnnIpcGetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum);
 
 int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId, int32_t retCode);
-int32_t MetaNodeIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId, int32_t retCode);
+int32_t MetaNodeIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, MetaBasicInfo *metaInfo, int32_t retCode);
 int32_t LnnIpcNotifyLeaveResult(const char *networkId, int32_t retCode);
 int32_t MetaNodeIpcNotifyLeaveResult(const char *networkId, int32_t retCode);
 int32_t LnnIpcNotifyOnlineState(bool isOnline, void *info, uint32_t infoTypeLen);

@@ -88,7 +88,7 @@ struct WifiDirectP2pAdapter {
     int32_t (*configGcIp)(const char *interface, const char *ip);
 
     int32_t (*createGroup)(int32_t frequency, bool wideBandSupported);
-    int32_t (*connectGroup)(char *groupConfigString);
+    int32_t (*connectGroup)(char *groupConfigString, bool isLegacyGo);
     int32_t (*shareLinkReuse)(void);
     int32_t (*shareLinkRemoveGroupAsync)(const char *interface);
     int32_t (*shareLinkRemoveGroupSync)(const char *interface);

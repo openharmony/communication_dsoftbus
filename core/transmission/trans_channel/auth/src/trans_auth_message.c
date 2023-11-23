@@ -19,8 +19,8 @@
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "softbus_utils.h"
+#include "trans_log.h"
 
 #define CODE_OPEN_AUTH_MSG_CHANNEL 4
 
@@ -41,7 +41,7 @@ int32_t TransAuthChannelMsgPack(cJSON *msg, const AppInfo *appInfo)
         !AddStringToJsonObject(msg, "DST_BUS_NAME", appInfo->peerData.sessionName) ||
         !AddStringToJsonObject(msg, "REQ_ID", appInfo->reqId) ||
         !AddNumberToJsonObject(msg, "MTU_SIZE", appInfo->myData.dataConfig)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransAuthChannelMsgPack failed");
+        TRANS_LOGE(TRANS_SVC, "failed");
         return SOFTBUS_PARSE_JSON_ERR;
     }
     return SOFTBUS_OK;
@@ -59,7 +59,7 @@ int32_t TransAuthChannelMsgUnpack(const char *msg, AppInfo *appInfo, int32_t len
     }
     int32_t errcode;
     if (GetJsonObjectNumberItem(obj, "ERR_CODE", &errcode)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "unpack errcode:%d", errcode);
+        TRANS_LOGE(TRANS_SVC, "unpack errcode=%d", errcode);
         cJSON_Delete(obj);
         return SOFTBUS_ERR;
     }
@@ -72,7 +72,7 @@ int32_t TransAuthChannelMsgUnpack(const char *msg, AppInfo *appInfo, int32_t len
         return SOFTBUS_PARSE_JSON_ERR;
     }
     if (!GetJsonObjectNumberItem(obj, "MTU_SIZE", (int32_t *)&(appInfo->peerData.dataConfig))) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "peer dataconfig is null.");
+        TRANS_LOGW(TRANS_SVC, "peer dataconfig is null.");
     }
     cJSON_Delete(obj);
     return SOFTBUS_OK;

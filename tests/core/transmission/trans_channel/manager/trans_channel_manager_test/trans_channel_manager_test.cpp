@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,6 @@
 #include "session.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
-#include "softbus_log.h"
 #include "softbus_protocol_def.h"
 #include "trans_channel_manager.h"
 #include "trans_lane_manager.h"
@@ -30,6 +29,7 @@
 #include "trans_lane_pending_ctl.c"
 #include "trans_channel_callback.c"
 #include "trans_channel_manager.c"
+#include "trans_log.h"
 #include "trans_session_service.h"
 #include "lnn_lane_qos.h"
 #include "softbus_trans_def.h"
@@ -345,7 +345,7 @@ HWTEST_F(TransChannelManagerTest, MergeStatsInterval001, TestSize.Level1)
 
     destBitRate[FRAME_BIT_RATE_MEDIUM] = MergeStatsInterval(srcBitRate, FRAME_BIT_RATE_LT30M, FRAME_BIT_RATE_LT6M);
     EXPECT_EQ(0, (int)destBitRate[FRAME_BIT_RATE_MEDIUM]);
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "destBitRate[FRAME_BIT_RATE_MEDIUM] is %d",
+    TRANS_LOGI(TRANS_TEST, "destBitRate[FRAME_BIT_RATE_MEDIUM] is %d",
         destBitRate[FRAME_BIT_RATE_MEDIUM]);
     ConvertStreamStats(src, dest);
 
@@ -585,5 +585,46 @@ HWTEST_F(TransChannelManagerTest, TransGetConnByChanId001, TestSize.Level1)
     channelType = CHANNEL_TYPE_PROXY + 1;
     int32_t ret = TransGetConnByChanId(channelId, channelType, &connId);
     EXPECT_EQ(SOFTBUS_ERR, ret);
+}
+
+/**
+ * @tc.name: FindConfigType001
+ * @tc.desc: FindConfigType001, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, FindConfigType001, TestSize.Level1)
+{
+    int32_t channelType = 0;
+    int32_t businessType = 0;
+
+    int32_t ret = FindConfigType(channelType, businessType);
+    EXPECT_EQ(SOFTBUS_CONFIG_TYPE_MAX, ret);
+
+    channelType = CHANNEL_TYPE_AUTH;
+    businessType = BUSINESS_TYPE_BYTE;
+    ret = FindConfigType(channelType, businessType);
+    EXPECT_EQ(SOFTBUS_INT_AUTH_MAX_BYTES_LENGTH, ret);
+}
+
+/**
+ * @tc.name: TransGetLocalConfig001
+ * @tc.desc: TransGetLocalConfig001, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, TransGetLocalConfig001, TestSize.Level1)
+{
+    int32_t channelType = 0;
+    int32_t businessType = 0;
+    uint32_t len = 0;
+
+    int32_t ret = TransGetLocalConfig(channelType, businessType, &len);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    channelType = CHANNEL_TYPE_AUTH;
+    businessType = BUSINESS_TYPE_BYTE;
+    ret = TransGetLocalConfig(channelType, businessType, &len);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 } // OHOS

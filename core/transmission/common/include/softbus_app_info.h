@@ -113,6 +113,7 @@ typedef struct {
     int32_t channelType;
     int32_t errorCode;
     int64_t timeStart;
+    int64_t connectedStart;
     const uint8_t *fastTransData;
     uint16_t fastTransDataSize;
 } AppInfo;

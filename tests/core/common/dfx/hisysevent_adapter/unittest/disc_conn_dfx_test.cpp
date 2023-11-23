@@ -18,7 +18,7 @@
 
 #include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_common.h"
 #include "softbus_hisysevt_bus_center.h"
 #include "securec.h"

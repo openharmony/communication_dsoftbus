@@ -27,7 +27,6 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 
 #define BLE_DISABLE 0
 #define LNN_DEFAULT_IF_NAME_BR "br0"

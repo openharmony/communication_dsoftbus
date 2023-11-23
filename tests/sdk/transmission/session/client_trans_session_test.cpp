@@ -18,7 +18,6 @@
 #include <gtest/gtest.h>
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "softbus_trans_def.h"
 #include "softbus_json_utils.h"
 #include "softbus_app_info.h"
@@ -31,6 +30,7 @@
 #include "client_trans_session_manager.c"
 #include "softbus_access_token_test.h"
 #include "softbus_common.h"
+#include "trans_log.h"
 
 #define TRANS_TEST_SESSION_ID 10
 #define TRANS_TEST_CHANNEL_ID 1000
@@ -90,72 +90,72 @@ void TransClientSessionTest::TearDownTestCase(void)
 
 static int OnSessionOpened(int sessionId, int result)
 {
-    LOG_INFO("session opened,sesison id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session opened, sessionId=%d", sessionId);
     return SOFTBUS_OK;
 }
 
 static void OnSessionClosed(int sessionId)
 {
-    LOG_INFO("session closed, session id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session closed, sessionId=%d", sessionId);
 }
 
 static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
 {
-    LOG_INFO("session bytes received, session id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session bytes received, sessionId=%d", sessionId);
 }
 
 static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
 {
-    LOG_INFO("session msg received, session id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session msg received, sessionId=%d", sessionId);
 }
 
 static void OnStreamReceived(int sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
 {
-    LOG_INFO("session stream received, session id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session stream received, sessionId=%d", sessionId);
 }
 
 static void OnQosEvent(int sessionId, int eventId, int tvCount, const QosTv *tvList)
 {
-    LOG_INFO("session Qos event emit, session id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session Qos event emit, sessionId=%d", sessionId);
 }
 
 static int OnSessionOpenedErr(int sessionId, int result)
 {
-    LOG_INFO("session opened,sesison id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session opened, sessionId=%d", sessionId);
     return SOFTBUS_ERR;
 }
 
 static int OnReceiveFileStarted(int sessionId, const char *files, int fileCnt)
 {
-    LOG_INFO("receive file start,sesison id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "receive file start, sessionId=%d", sessionId);
     return SOFTBUS_OK;
 }
 
 static int OnReceiveFileProcess(int sessionId, const char *firstFile, uint64_t bytesUpload, uint64_t bytesTotal)
 {
-    LOG_INFO("receive file process,sesison id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "receive file process, sessionId=%d", sessionId);
     return SOFTBUS_OK;
 }
 
 static void OnReceiveFileFinished(int sessionId, const char *files, int fileCnt)
 {
-    LOG_INFO("receive file finished,sesison id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "receive file finished, sessionId=%d", sessionId);
 }
 
 void OnFileTransError(int sessionId)
 {
-    LOG_INFO("file transmission error,sesison id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "file transmission error, sessionId=%d", sessionId);
 }
 
 int OnSendFileProcess(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
 {
-    LOG_INFO("send file process,sesison id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "send file process, sessionId=%d", sessionId);
     return SOFTBUS_OK;
 }
 
 int OnSendFileFinished(int sessionId, const char *firstFile)
 {
-    LOG_INFO("send file finished,sesison id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "send file finished, sessionId=%d", sessionId);
     return SOFTBUS_OK;
 }
 

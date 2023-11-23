@@ -14,6 +14,8 @@
  */
 
 #include "lnn_connection_mock.h"
+
+#include "lnn_log.h"
 #include "softbus_error_code.h"
 
 using namespace testing;
@@ -101,11 +103,6 @@ int32_t ConnUpdateConnection(uint32_t connectionId, UpdateOption *option)
 {
     return GetConnInterface()->ConnUpdateConnection(connectionId, option);
 }
-
-int32_t P2pLinkQueryDevIsOnline(const char *peerMac)
-{
-    return GetConnInterface()->P2pLinkQueryDevIsOnline(peerMac);
-}
 }
 
 int32_t LnnConnectInterfaceMock::ActionofConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback)
@@ -132,7 +129,7 @@ int32_t LnnConnectInterfaceMock::ActionofOnConnectSuccessed(
         .brInfo.brMac = "11:22:33:44:55:66",
     };
     result->OnConnectSuccessed(requestId, connectionId, &info);
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "ActionofConnConnectDevice!!");
+    LNN_LOGI(LNN_TEST, "ActionofConnConnectDevice");
     return SOFTBUS_OK;
 }
 
@@ -141,7 +138,7 @@ int32_t LnnConnectInterfaceMock::LnnConnectInterfaceMock::ActionofOnConnectFaile
 {
     int32_t reason = 0;
     result->OnConnectFailed(requestId, reason);
-    SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_INFO, "ActionofOnConnectFailed!!");
+    LNN_LOGI(LNN_TEST, "ActionofOnConnectFailed");
     return SOFTBUS_OK;
 }
 
@@ -162,10 +159,10 @@ void LnnConnectInterfaceMock::ActionofConnUnSetConnectCallback(ConnModule module
 
 int32_t LnnConnectInterfaceMock::ActionOfConnPostBytes(uint32_t connectionId, ConnPostData *data)
 {
-    ALOGI("ActionOfConnPostBytes");
+    LNN_LOGI(LNN_TEST, "ActionOfConnPostBytes");
     g_encryptData = data->buf;
     if (strcpy_s(g_encryptData, TEST_DATA_LEN, data->buf) != SOFTBUS_OK) {
-        ALOGE("strcpy failed in conn post bytes");
+        LNN_LOGE(LNN_TEST, "strcpy failed in conn post bytes");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

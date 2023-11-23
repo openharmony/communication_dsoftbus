@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -669,20 +669,17 @@ static int32_t BuildCoapPktEx(const CoapBuildParam *param, const char *pktPayloa
     }
 
     CoapOption options[COAP_MAX_OPTION] = {0};
-    CoapPacketParam outParam;
-    (void)memset_s(&outParam, sizeof(CoapPacketParam), 0, sizeof(CoapPacketParam));
+    CoapPacketParam outParam = {0};
     outParam.options = options;
     BuildCoapPktParam(param, &outParam);
 
-    CoapPacket respPkt;
-    (void)memset_s(&respPkt, sizeof(CoapPacket), 0, sizeof(CoapPacket));
+    CoapPacket respPkt = {0};
     if (isAck) {
         if (CoapCreateHeader(&respPkt, &outParam, sndPktBuff) != DISCOVERY_ERR_SUCCESS) {
             return DISCOVERY_ERR_BAD_REQ;
         }
     } else {
         CoapResponseInfo respInfo = {0};
-        (void)memset_s(&respInfo, sizeof(CoapResponseInfo), 0, sizeof(CoapResponseInfo));
         respInfo.pkt = &respPkt;
         respInfo.param = &outParam;
         respInfo.payload = (uint8_t *)pktPayload;

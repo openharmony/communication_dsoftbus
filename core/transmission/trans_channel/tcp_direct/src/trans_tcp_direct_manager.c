@@ -24,31 +24,32 @@
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "softbus_socket.h"
+#include "trans_log.h"
 #include "trans_tcp_direct_callback.h"
 #include "trans_tcp_direct_message.h"
 #include "trans_tcp_direct_p2p.h"
 #include "trans_tcp_direct_sessionconn.h"
 #include "trans_tcp_direct_wifi.h"
 #include "wifi_direct_manager.h"
+#include "trans_event.h"
 
 #define HANDSHAKE_TIMEOUT 19
 
 static void OnSessionOpenFailProc(const SessionConn *node, int32_t errCode)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "OnSesssionOpenFailProc: channelId=%d, side=%d, status=%d",
+    TRANS_LOGW(TRANS_CTRL, "OnSesssionOpenFailProc: channelId=%d, side=%d, status=%d",
         node->channelId, node->serverSide, node->status);
     if (node->serverSide == false) {
         if (TransTdcOnChannelOpenFailed(node->appInfo.myData.pkgName, node->appInfo.myData.pid,
             node->channelId, errCode) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "notify channel open fail err");
+            TRANS_LOGW(TRANS_CTRL, "notify channel open fail err");
         }
     }
 
     int32_t fd = node->appInfo.fd;
     if (fd >= 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "fd[%d] is shutdown", fd);
+        TRANS_LOGW(TRANS_CTRL, "fd=%d is shutdown", fd);
         DelTrigger(node->listenMod, fd, RW_TRIGGER);
         ConnShutdownSocket(fd);
     }
@@ -120,7 +121,7 @@ static void NotifyTdcChannelStopProc(ListNode *tdcChannelList)
 
 void TransTdcStopSessionProc(ListenerModule listenMod)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransTdcStopSessionProc");
+    TRANS_LOGD(TRANS_CTRL, "enter.");
     SessionConn *item = NULL;
     SessionConn *nextItem = NULL;
 
@@ -147,7 +148,7 @@ void TransTdcStopSessionProc(ListenerModule listenMod)
     ReleaseSessonConnLock();
 
     NotifyTdcChannelStopProc(&tempTdcChannelList);
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransTdcStopSessionProc end");
+    TRANS_LOGD(TRANS_CTRL, "ok");
 }
 
 int32_t TransTcpDirectInit(const IServerChannelCallBack *cb)
@@ -155,25 +156,25 @@ int32_t TransTcpDirectInit(const IServerChannelCallBack *cb)
     int32_t ret = P2pDirectChannelInit();
     if (ret != SOFTBUS_OK) {
         if (ret != SOFTBUS_FUNC_NOT_SUPPORT) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "init p2p direct channel failed");
+            TRANS_LOGE(TRANS_INIT, "init p2p direct channel failed");
             return SOFTBUS_ERR;
         }
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "p2p direct channel not support.");
+        TRANS_LOGW(TRANS_INIT, "p2p direct channel not support.");
     }
     if (TransSrvDataListInit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "init srv trans tcp direct databuf list failed");
+        TRANS_LOGE(TRANS_INIT, "init srv trans tcp direct databuf list failed");
         return SOFTBUS_ERR;
     }
     if (TransTdcSetCallBack(cb) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set srv trans tcp dierct call failed");
+        TRANS_LOGE(TRANS_INIT, "set srv trans tcp dierct call failed");
         return SOFTBUS_ERR;
     }
     if (RegisterTimeoutCallback(SOFTBUS_TCP_DIRECTCHANNEL_TIMER_FUN, TransTdcTimerProc) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "RegisterTimeoutCallback failed");
+        TRANS_LOGE(TRANS_INIT, "RegisterTimeoutCallback failed");
         return SOFTBUS_ERR;
     }
     if (CreatSessionConnList() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "CreatSessionConnList failed");
+        TRANS_LOGE(TRANS_INIT, "CreatSessionConnList failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -190,7 +191,7 @@ void TransTdcDeathCallback(const char *pkgName, int32_t pid)
     if (pkgName == NULL) {
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransTdcDeathCallback: pkgName=%s", pkgName);
+    TRANS_LOGW(TRANS_CTRL, "TransTdcDeathCallback: pkgName=%s", pkgName);
     SessionConn *item = NULL;
     SessionConn *nextItem = NULL;
     if (GetSessionConnLock() != SOFTBUS_OK) {
@@ -217,7 +218,7 @@ static int32_t TransUpdAppInfo(AppInfo *appInfo, const ConnectOption *connInfo)
 {
     appInfo->peerData.port = connInfo->socketOption.port;
     if (strcpy_s(appInfo->peerData.addr, sizeof(appInfo->peerData.addr), connInfo->socketOption.addr) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransUpdAppInfo cpy fail");
+        TRANS_LOGE(TRANS_CTRL, "TransUpdAppInfo cpy fail");
         return SOFTBUS_MEM_ERR;
     }
 
@@ -227,20 +228,20 @@ static int32_t TransUpdAppInfo(AppInfo *appInfo, const ConnectOption *connInfo)
     if (connInfo->socketOption.protocol == LNN_PROTOCOL_NIP) {
         if (LnnGetLocalStrInfo(STRING_KEY_NODE_ADDR, appInfo->myData.addr, sizeof(appInfo->myData.addr)) !=
             SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransUpdAppInfo get local nip fail");
+            TRANS_LOGE(TRANS_CTRL, "TransUpdAppInfo get local nip fail");
             return SOFTBUS_ERR;
         }
     } else {
         if (connInfo->type == CONNECT_TCP) {
             if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, appInfo->myData.addr, sizeof(appInfo->myData.addr)) !=
                 SOFTBUS_OK) {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransUpdAppInfo get local ip fail");
+                TRANS_LOGE(TRANS_CTRL, "TransUpdAppInfo get local ip fail");
                 return SOFTBUS_ERR;
             }
         } else if ((connInfo->type == CONNECT_P2P_REUSE) || (connInfo->type == CONNECT_P2P)) {
             if (GetWifiDirectManager()->getLocalIpByUuid(appInfo->peerData.deviceId, appInfo->myData.addr,
                 sizeof(appInfo->myData.addr)) != SOFTBUS_OK) {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransUpdAppInfo get p2p ip fail");
+                TRANS_LOGE(TRANS_CTRL, "TransUpdAppInfo get p2p ip fail");
                 return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
             }
         }
@@ -250,13 +251,13 @@ static int32_t TransUpdAppInfo(AppInfo *appInfo, const ConnectOption *connInfo)
 
 int32_t TransOpenDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransOpenDirectChannel");
+    TRANS_LOGD(TRANS_CTRL, "enter.");
     if (appInfo == NULL || connInfo == NULL || channelId == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (TransUpdAppInfo((AppInfo *)appInfo, connInfo) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransOpenDirectChannel udp app fail");
+        TRANS_LOGE(TRANS_CTRL, "udp app fail");
         return SOFTBUS_ERR;
     }
 
@@ -271,5 +272,20 @@ int32_t TransOpenDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, 
         appInfo->routeType = WIFI_STA;
         ret = OpenTcpDirectChannel(appInfo, connInfo, channelId);
     }
+    TransEventExtra extra = {
+        .linkType = connInfo->type,
+        .channelType = CHANNEL_TYPE_TCP_DIRECT,
+        .channelId = *channelId,
+        .errcode = ret,
+        .socketName = appInfo->myData.sessionName
+    };
+
+    SessionConn conn;
+    if (GetSessionConnById(*channelId, &conn) != NULL) {
+        extra.authId = conn.authId;
+        extra.socketFd = conn.appInfo.fd;
+        extra.requestId = conn.requestId;
+    };
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, extra);
     return ret;
 }

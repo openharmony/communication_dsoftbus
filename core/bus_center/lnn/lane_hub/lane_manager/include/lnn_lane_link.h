@@ -28,14 +28,15 @@ extern "C" {
 
 typedef struct {
     char peerNetworkId[NETWORK_ID_BUF_LEN];
-    char peerBleMac[MAX_MAC_LEN];
-    int32_t psm;
-    int32_t pid;
     bool networkDelegate;
     bool p2pOnly;
-    LaneTransType transType;
     LaneLinkType linkType;
     ProtocolType acceptableProtocols;
+    int32_t pid;
+    //OldInfo
+    LaneTransType transType;
+    char peerBleMac[MAX_MAC_LEN];
+    int32_t psm;
 } LinkRequest;
 
 typedef struct {
@@ -72,6 +73,7 @@ typedef struct {
 } BleDirectInfo;
 
 typedef struct {
+    ListNode node;
     LaneLinkType type;
     union {
         WlanLinkInfo wlan;
@@ -80,7 +82,26 @@ typedef struct {
         BleLinkInfo ble;
         BleDirectInfo bleDirect;
     } linkInfo;
+    uint32_t laneId;
 } LaneLinkInfo;
+
+typedef struct {
+    ListNode node;
+    LaneLinkType type;
+    union {
+        WlanLinkInfo wlan;
+        P2pLinkInfo p2p;
+        BrLinkInfo br;
+        BleLinkInfo ble;
+        BleDirectInfo bleDirect;
+    } linkInfo;
+    bool isReliable;
+    bool isTimeValid;
+    uint32_t timeOut;
+    uint32_t laneScore;
+    uint32_t laneFload;
+    uint32_t laneRef;
+} LaneResource;
 
 typedef struct {
     void (*OnLaneLinkSuccess)(uint32_t reqId, const LaneLinkInfo *linkInfo);
@@ -98,6 +119,14 @@ void LaneAddP2pAddress(const char *networkId, const char *ipAddr, uint16_t port)
 
 void LaneAddP2pAddressByIp(const char *ipAddr, uint16_t port);
 void LaneUpdateP2pAddressByIp(const char *ipAddr, const char *networkId);
+
+int32_t AddLaneResourceItem(const LaneResource *resourceItem);
+int32_t DelLaneResourceItem(const LaneResource *resourceItem);
+int32_t AddLinkInfoItem(const LaneLinkInfo *linkInfoItem);
+int32_t DelLinkInfoItem(uint32_t laneId);
+int32_t FindLaneLinkInfoByLaneId(uint32_t laneId, LaneLinkInfo *linkInfoitem);
+int32_t ConvertToLaneResource(const LaneLinkInfo *linkInfo, LaneResource *laneResourceInfo);
+int32_t DelLaneResourceItemWithDelayDestroy(LaneResource *resourceItem, uint32_t laneId, bool *isDelayDestroy);
 
 #ifdef __cplusplus
 }

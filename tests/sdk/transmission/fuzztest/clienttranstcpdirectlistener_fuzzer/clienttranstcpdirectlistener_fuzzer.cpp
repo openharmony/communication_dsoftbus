@@ -34,7 +34,7 @@ namespace OHOS {
         return 0;
     }
 
-    int32_t TransOnSessionClosed(int32_t channelId, int32_t channelType)
+    int32_t TransOnSessionClosed(int32_t channelId, int32_t channelType, ShutdownReason reason)
     {
         return 0;
     }
@@ -205,7 +205,7 @@ namespace OHOS {
         if (ClientTransTdcSetCallBack(&cb) != SOFTBUS_OK) {
             return;
         }
-        ClientTransTdcOnSessionClosed((int32_t)size);
+        ClientTransTdcOnSessionClosed((int32_t)size, SHUTDOWN_REASON_UNKNOWN);
     }
 
     void ClientTransTdcOnSessionOpenFailedTest(const uint8_t* data, size_t size)

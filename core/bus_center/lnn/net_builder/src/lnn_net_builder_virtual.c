@@ -15,13 +15,13 @@
 
 #include "lnn_net_builder.h"
 
+#include "lnn_log.h"
 #include "lnn_p2p_info.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 
 int32_t LnnInitNetBuilder(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "init virtual net builder");
+    LNN_LOGI(LNN_INIT, "init virtual net builder");
     return SOFTBUS_OK;
 }
 

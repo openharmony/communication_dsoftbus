@@ -17,7 +17,7 @@
 #include <gtest/gtest.h>
 
 #include "softbus_adapter_mem.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 using namespace std;
 using namespace testing::ext;
