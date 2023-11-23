@@ -1728,7 +1728,6 @@ static void ProcessFailure(int32_t errorCode, bool reply)
     CONN_LOGI(CONN_WIFI_DIRECT, "errorCode=%d", errorCode);
     if (self->activeCommand != NULL) {
         self->activeCommand->onFailure(self->activeCommand, errorCode);
-        self->resetContext();
         return;
     }
 
@@ -1742,8 +1741,9 @@ static void ProcessFailure(int32_t errorCode, bool reply)
         GetWifiDirectNegotiator()->handleMessageFromProcessor(response);
         NegotiateMessageDelete(response);
     }
-    self->passiveCommand->onFailure(self->passiveCommand, errorCode);
-    self->resetContext();
+    if (self->passiveCommand) {
+        self->passiveCommand->onFailure(self->passiveCommand, errorCode);
+    }
 }
 
 static void ProcessSuccess(struct InnerLink *innerLink)
@@ -1760,7 +1760,6 @@ static void ProcessSuccess(struct InnerLink *innerLink)
         }
 
         self->activeCommand->onSuccess(self->activeCommand, NULL);
-        self->resetContext();
         return;
     }
 
@@ -1772,8 +1771,10 @@ static void ProcessSuccess(struct InnerLink *innerLink)
     CONN_CHECK_AND_RETURN_LOGW(response != NULL, CONN_WIFI_DIRECT, "build connect response failed");
     GetWifiDirectNegotiator()->handleMessageFromProcessor(response);
     NegotiateMessageDelete(response);
-    self->passiveCommand->onSuccess(self->passiveCommand, NULL);
-    self->resetContext();
+
+    if (self->passiveCommand) {
+        self->passiveCommand->onSuccess(self->passiveCommand, NULL);
+    }
 }
 
 static int32_t PrejudgeAvailability(const char *remoteNetworkId)
