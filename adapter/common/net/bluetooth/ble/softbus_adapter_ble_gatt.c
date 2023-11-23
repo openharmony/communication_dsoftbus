@@ -787,10 +787,15 @@ int SoftBusStartAdv(int advId, const SoftBusBleAdvParams *param)
     StartAdvRawData advData;
     ConvertAdvParam(param, &dstParam);
     ConvertAdvData(&g_advChannel[advId].advData, &advData);
+
+    if (g_advChannel[advId].advId != -1) {
+        CLOGE("advId not -1, %d", g_advChannel[advId].advId);
+        SoftBusMutexUnlock(&g_advLock);
+        return SOFTBUS_ERR;
+    }
     int ret = BleStartAdvEx(&btAdvId, advData, dstParam);
     g_advChannel[advId].advId = btAdvId;
-    CLOGI("BleStartAdvEx, inner-advId: %d, bt-advId: %d, "
-        "ret: %d", advId, btAdvId, ret);
+    CLOGI("BleStartAdvEx, inner-advId: %d, bt-advId: %d, ret: %d", advId, btAdvId, ret);
     if (ret != OHOS_BT_STATUS_SUCCESS) {
         g_advChannel[advId].advCallback->AdvEnableCallback(advId, SOFTBUS_BT_STATUS_FAIL);
         SoftBusMutexUnlock(&g_advLock);
