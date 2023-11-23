@@ -878,13 +878,14 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_003, TestSize.Level1)
 */
 HWTEST_F(LNNLaneMockTest, LNN_LANE_QUERY_001, TestSize.Level1)
 {
-    QueryResult ret = LnnQueryLaneResource(nullptr);
-    EXPECT_EQ(ret, QUERY_RESULT_REQUEST_ILLEGAL);
+    QosInfo qosInfo = {0};
+    int32_t ret = LnnQueryLaneResource(nullptr, &qosInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     LaneQueryInfo query;
     query.transType = LANE_T_BYTE;
-    ret = LnnQueryLaneResource((const LaneQueryInfo *)&query);
-    EXPECT_EQ(ret, QUERY_RESULT_OK);
+    ret = LnnQueryLaneResource((const LaneQueryInfo *)&query, &qosInfo);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
