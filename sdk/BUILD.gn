@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("../core/common/dfx/dsoftbus_dfx.gni")
 import("../dsoftbus.gni")
 import("bus_center/bus_center_sdk.gni")
 import("discovery/disc_sdk.gni")
@@ -26,6 +27,8 @@ common_client_inc = bus_center_sdk_inc + disc_sdk_inc +
 common_client_deps = bus_center_sdk_deps + trans_session_manager_sdk_deps
 
 common_client_deps += [
+  "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
+  "$dsoftbus_dfx_path/log:softbus_dfx_log",
   "$dsoftbus_root_path/adapter:softbus_adapter",
   "$dsoftbus_root_path/core/common:softbus_utils",
 ]
@@ -63,11 +66,17 @@ config("dsoftbus_sdk_interface") {
     "$dsoftbus_root_path/sdk/transmission/session/cpp/include",
     "$dsoftbus_root_path/interfaces/inner_kits/transport",
     "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
+    "$dsoftbus_root_path/core/common/dfx/interface/include",
   ]
 
   if (enhanced_kits_broadcast) {
     include_dirs +=
         [ "$dsoftbus_root_path/dsoftbus_enhance/interfaces/kits/broadcast" ]
+  }
+
+  if (dsoftbus_feature_ex_kits) {
+    include_dirs +=
+        [ "$dsoftbus_root_path/dsoftbus_enhance/interfaces/kits/bus_center" ]
   }
 }
 
@@ -97,6 +106,8 @@ target(build_type, "softbus_client") {
       cfi_cross_dso = true
       debug = false
     }
+    branch_protector_ret = "pac_ret"
+
     version_script = "libsoftbus_client_map"
     cflags = [ "-fPIC" ]
     cflags_cc = [ "-std=c++14" ]

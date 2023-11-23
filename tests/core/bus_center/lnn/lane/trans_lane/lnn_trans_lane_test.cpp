@@ -26,7 +26,6 @@
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
-#include "softbus_log.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -124,6 +123,28 @@ HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_002, TestSize.Level1)
     ret = transObj->AllocLane(laneId, (const LaneRequestOption *)&request, &listener);
     EXPECT_EQ(ret, SOFTBUS_OK);
     */
+    std::this_thread::sleep_for(std::chrono::milliseconds(200)); // delay 200ms for looper completion.
+    transObj->Deinit();
+}
+
+/*
+* @tc.name: LNN_TRANS_LANE_003
+* @tc.desc: Callback process
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_003, TestSize.Level1)
+{
+    TransLaneDepsInterfaceMock laneMock;
+    LaneInterface *transObj = TransLaneGetInstance();
+    EXPECT_TRUE(transObj != nullptr);
+    transObj->Init(nullptr);
+    uint32_t laneId = 1;
+    LaneRequestOption request;
+    request.type = LANE_TYPE_TRANS;
+    EXPECT_CALL(laneMock, SelectExpectLanesByQos).WillOnce(Return(SOFTBUS_OK));
+    int32_t ret = transObj->allocLaneByQos(laneId, (const LaneRequestOption *)&request, nullptr);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     std::this_thread::sleep_for(std::chrono::milliseconds(200)); // delay 200ms for looper completion.
     transObj->Deinit();
 }

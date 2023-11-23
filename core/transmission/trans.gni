@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("../../core/common/dfx/dsoftbus_dfx.gni")
 import("../../core/transmission/trans_channel/trans_channel.gni")
 import("../../dsoftbus.gni")
 
@@ -27,6 +28,7 @@ enhanced_broadcast = exec_script("$dsoftbus_root_path/check_sub_module.py",
 trans_session_src = trans_channel_src
 trans_session_inc = trans_channel_inc
 trans_session_deps = trans_channel_deps
+trans_session_deps += [ "$dsoftbus_dfx_path/log:softbus_dfx_log" ]
 trans_session_external_deps = []
 
 trans_session_src += [
@@ -82,4 +84,12 @@ if (defined(ohos_lite)) {
   trans_session_deps +=
       [ "//third_party/bounds_checking_function:libsec_shared" ]
   trans_session_external_deps += [ "c_utils:utils" ]
+}
+
+if (dsoftbus_feature_wifi_notify == true &&
+    softbus_communication_wifi_feature == true) {
+  trans_session_src += [ "$dsoftbus_root_path/core/transmission/session/src/softbus_scenario_manager.c" ]
+  trans_session_external_deps += [ "wifi:wifi_sdk" ]
+} else {
+  trans_session_src += [ "$dsoftbus_root_path/core/transmission/session/src/softbus_scenario_manager_virtual.c" ]
 }

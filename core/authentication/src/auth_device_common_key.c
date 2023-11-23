@@ -18,6 +18,8 @@
 #include <stdlib.h>
 #include <securec.h>
 
+#include "anonymizer.h"
+#include "auth_log.h"
 #include "auth_interface.h"
 #include "lnn_map.h"
 #include "lnn_secure_storage.h"
@@ -26,7 +28,7 @@
 #include "softbus_json_utils.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 #include "softbus_utils.h"
 
 #define UDID_SHORT_HASH 8
@@ -73,7 +75,7 @@ static bool isInit = false;
 static bool AuthDeviceKeyInit(void)
 {
     if (SoftBusMutexInit(&g_deviceKeyMutex, NULL) != SOFTBUS_OK) {
-        ALOGE("devicekey mutex init fail");
+        AUTH_LOGE(AUTH_INIT, "devicekey mutex init fail");
         return false;
     }
     LnnMapInit(&g_deviceKeyMap);
@@ -105,11 +107,11 @@ static int32_t GetShortHash(const char *src, char *dst, uint32_t dstLen, uint32_
     uint8_t hash[SHA_256_HASH_LEN] = {0};
     int ret = SoftBusGenerateStrHash((uint8_t *)src, strlen(src), hash);
     if (ret != SOFTBUS_OK) {
-        ALOGE("generate udidHash fail");
+        AUTH_LOGE(AUTH_KEY, "generate udidHash fail");
         return SOFTBUS_ERR;
     }
     if (ConvertBytesToUpperCaseHexString(dst, dstLen, hash, hashUsedLen) != SOFTBUS_OK) {
-        ALOGE("convert bytes to string fail");
+        AUTH_LOGE(AUTH_KEY, "convert bytes to string fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -119,11 +121,11 @@ static int32_t Int64ToHash(int64_t num, char *dst, uint32_t dstLen, uint32_t has
 {
     char buff[INT64_TO_STR_MAX_LEN] = {0};
     if (sprintf_s(buff, INT64_TO_STR_MAX_LEN, "%" PRIu64"", num) < 0) {
-        ALOGE("convert int64 to string fail");
+        AUTH_LOGE(AUTH_KEY, "convert int64 to string fail");
         return SOFTBUS_ERR;
     }
     if (buff[INT64_TO_STR_MAX_LEN - 1] != '\0') {
-        ALOGE("buff is corrupted");
+        AUTH_LOGE(AUTH_KEY, "buff is corrupted");
         return SOFTBUS_ERR;
     }
     return GetShortHash((const char *)buff, dst, dstLen, hashUsedLen);
@@ -135,11 +137,11 @@ static int32_t BytesToShortHash(uint8_t *src, uint32_t srcLen,
     uint8_t hash[SHA_256_HASH_LEN] = {0};
     int ret = SoftBusGenerateStrHash(src, srcLen, hash);
     if (ret != SOFTBUS_OK) {
-        ALOGE("generate udidHash fail");
+        AUTH_LOGE(AUTH_KEY, "generate udidHash fail");
         return SOFTBUS_ERR;
     }
     if (ConvertBytesToUpperCaseHexString(dst, dstLen, hash, hashUsedLen) != SOFTBUS_OK) {
-        ALOGE("convert bytes to string fail");
+        AUTH_LOGE(AUTH_KEY, "convert bytes to string fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -151,7 +153,7 @@ static bool Int64ToString(int64_t src, char *buf, uint32_t bufLen)
         return false;
     }
     if (sprintf_s(buf, bufLen, "%" PRId64"", src) < 0) {
-        ALOGE("convert int64 to string fail");
+        AUTH_LOGE(AUTH_KEY, "convert int64 to string fail");
         return false;
     }
     return true;
@@ -194,7 +196,7 @@ static int32_t PackDeviceKey(cJSON *json, AuthDeviceCommonKey *commonKey)
         !AddStringToJsonObject(json, DEVICE_KEY_ACCOUNT_HASH, commonKey->accountHashStr) ||
         !AddStringToJsonObject(json, DEVICE_KEY_COMMON_KEY_HASH, commonKey->deviceKeyHashStr) ||
         !AddBoolToJsonObject(json, DEVICE_KEY_SERVER_SIDE, commonKey->keyInfo.isServerSide)) {
-        ALOGE("pack device key fail");
+        AUTH_LOGE(AUTH_KEY, "pack device key fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -233,7 +235,7 @@ static int32_t UnpackDeviceKey(cJSON *json, AuthDeviceCommonKey *commKey)
         !GetJsonObjectStringItem(json, DEVICE_KEY_ACCOUNT_HASH, commKey->accountHashStr, USER_ID_HASH_LEN) ||
         !GetJsonObjectStringItem(json, DEVICE_KEY_COMMON_KEY_HASH, commKey->deviceKeyHashStr, DEVICE_KEY_HASH_LEN) ||
         !GetJsonObjectBoolItem(json, DEVICE_KEY_SERVER_SIDE, &commKey->keyInfo.isServerSide)) {
-        ALOGE("unpack device key fail");
+        AUTH_LOGE(AUTH_KEY, "unpack device key fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -243,7 +245,7 @@ static char *PackAllDeviceKey(void)
 {
     cJSON *jsonArray = cJSON_CreateArray();
     if (jsonArray == NULL) {
-        ALOGE("jsonArray is null");
+        AUTH_LOGE(AUTH_KEY, "jsonArray is null");
         return NULL;
     }
     if (KeyLock() != SOFTBUS_OK) {
@@ -252,7 +254,7 @@ static char *PackAllDeviceKey(void)
     }
     MapIterator *it = LnnMapInitIterator(&g_deviceKeyMap);
     if (it == NULL) {
-        ALOGE("map is empty");
+        AUTH_LOGE(AUTH_KEY, "map is empty");
         KeyUnlock();
         cJSON_Delete(jsonArray);
         return NULL;
@@ -264,12 +266,12 @@ static char *PackAllDeviceKey(void)
         }
         AuthDeviceCommonKey *devicekey = (AuthDeviceCommonKey *)it->node->value;
         if (devicekey == NULL) {
-            ALOGE("device key is nullptr");
+            AUTH_LOGE(AUTH_KEY, "device key is nullptr");
             continue;
         }
         cJSON *obj = cJSON_CreateObject();
         if (obj == NULL) {
-            ALOGE("jsonObj create fail");
+            AUTH_LOGE(AUTH_KEY, "jsonObj create fail");
             continue;
         }
         (void)PackDeviceKey(obj, devicekey);
@@ -288,7 +290,7 @@ static void AuthInserToDeviceKeyMap(const AuthDeviceCommonKey *deviceKey)
     int32_t ret = sprintf_s(keyStr, MAP_KEY_LEN, "%s-%d",
         deviceKey->udidHashStr, deviceKey->keyInfo.keyType);
     if (ret <= 0) {
-        ALOGE("generate key fail");
+        AUTH_LOGE(AUTH_KEY, "generate key fail");
         return;
     }
     if (KeyLock() != SOFTBUS_OK) {
@@ -296,7 +298,7 @@ static void AuthInserToDeviceKeyMap(const AuthDeviceCommonKey *deviceKey)
     }
     if (LnnMapSet(&g_deviceKeyMap, (const char *)keyStr, (const void *)deviceKey,
         sizeof(AuthDeviceCommonKey)) != SOFTBUS_OK) {
-        ALOGE("save data fail");
+        AUTH_LOGE(AUTH_KEY, "save data fail");
         KeyUnlock();
         return;
     }
@@ -307,11 +309,11 @@ static void AuthInsertToSecureStorage(void)
 {
     char *dataStr = PackAllDeviceKey();
     if (dataStr == NULL) {
-        ALOGE("pack all deviceKey fail");
+        AUTH_LOGE(AUTH_KEY, "pack all deviceKey fail");
         return;
     }
     if (LnnSaveDeviceData((const char *)dataStr, LNN_DATA_TYPE_DEVICE_KEY) != SOFTBUS_OK) {
-        ALOGE("save device key fail");
+        AUTH_LOGE(AUTH_KEY, "save device key fail");
         cJSON_free(dataStr);
         return;
     }
@@ -320,7 +322,7 @@ static void AuthInsertToSecureStorage(void)
 
 static void AuthSaveDeviceKey(const AuthDeviceCommonKey *deviceKey)
 {
-    ALOGD("save deviceKey");
+    AUTH_LOGD(AUTH_KEY, "save deviceKey");
     AuthInserToDeviceKeyMap(deviceKey);
     AuthInsertToSecureStorage();
 }
@@ -328,33 +330,33 @@ static void AuthSaveDeviceKey(const AuthDeviceCommonKey *deviceKey)
 int32_t AuthInsertDeviceKey(const NodeInfo *deviceInfo, const AuthDeviceKeyInfo *deviceKey)
 {
     if (deviceInfo == NULL || deviceKey == NULL) {
-        ALOGE("invalid param");
+        AUTH_LOGW(AUTH_KEY, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     AuthDeviceCommonKey newDeviceKey = {0};
     if (memcpy_s(&newDeviceKey.keyInfo, sizeof(newDeviceKey.keyInfo),
         deviceKey, sizeof(AuthDeviceKeyInfo)) != EOK) {
-        ALOGE("deviceKey memcpy fail");
+        AUTH_LOGE(AUTH_KEY, "deviceKey memcpy fail");
         return SOFTBUS_MEM_ERR;
     }
     if (strcpy_s(newDeviceKey.udid, UDID_BUF_LEN, deviceInfo->deviceInfo.deviceUdid) != EOK) {
-        ALOGE("strcpy fail");
+        AUTH_LOGE(AUTH_KEY, "strcpy fail");
         return SOFTBUS_MEM_ERR;
     }
     if (GetShortHash(deviceInfo->deviceInfo.deviceUdid, newDeviceKey.udidHashStr,
         UDID_SHORT_HASH_HEX_STR, UDID_SHORT_HASH) != SOFTBUS_OK) {
-        ALOGE("get udid short hash fail");
+        AUTH_LOGE(AUTH_KEY, "get udid short hash fail");
         return SOFTBUS_ERR;
     }
     newDeviceKey.accountId = deviceInfo->accountId;
     if (Int64ToHash(deviceInfo->accountId, newDeviceKey.accountHashStr,
         USER_ID_HASH_LEN, USER_ID_SHORT_HASH) != SOFTBUS_OK) {
-        ALOGE("get accont short hash fail");
+        AUTH_LOGE(AUTH_KEY, "get accont short hash fail");
         return SOFTBUS_ERR;
     }
     if (BytesToShortHash((uint8_t *)deviceKey->deviceKey, deviceKey->keyLen, newDeviceKey.deviceKeyHashStr,
         DEVICE_KEY_HASH_LEN, DEVICE_KEY_SHORT_HASH) != SOFTBUS_OK) {
-        ALOGE("get udid short hash fail");
+        AUTH_LOGE(AUTH_KEY, "get udid short hash fail");
         return SOFTBUS_ERR;
     }
     newDeviceKey.createTime = SoftBusGetSysTimeMs();
@@ -366,31 +368,31 @@ int32_t AuthInsertDeviceKey(const NodeInfo *deviceInfo, const AuthDeviceKeyInfo 
 void AuthRemoveDeviceKey(const char *udidHash, int32_t keyType)
 {
     if (udidHash == NULL) {
-        ALOGE("param err");
+        AUTH_LOGW(AUTH_KEY, "param err");
         return;
     }
     if (strlen(udidHash) != UDID_HASH_STR_LEN) {
-        ALOGE("udidHash length id invalid");
+        AUTH_LOGE(AUTH_KEY, "udidHash length id invalid");
         return;
     }
     char upperCaseHash[UDID_SHORT_HASH_HEX_STR] = {0};
     if (StringToUpperCase(udidHash, upperCaseHash, UDID_SHORT_HASH_HEX_STR) != SOFTBUS_OK) {
-        ALOGE("udid hash transfer to uppercase fail");
+        AUTH_LOGE(AUTH_KEY, "udid hash transfer to uppercase fail");
         return;
     }
     char keyStr[MAP_KEY_LEN] = {0};
     int32_t ret = sprintf_s(keyStr, MAP_KEY_LEN, "%s-%d", upperCaseHash, keyType);
     if (ret <= 0) {
-        ALOGE("generate key fail");
+        AUTH_LOGE(AUTH_KEY, "generate key fail");
         return;
     }
     if (KeyLock() != SOFTBUS_OK) {
-        ALOGE("lock fail");
+        AUTH_LOGE(AUTH_KEY, "lock fail");
         return;
     }
     ret = LnnMapErase(&g_deviceKeyMap, (const char *)keyStr);
     if (ret != SOFTBUS_OK) {
-        ALOGE("delete item fail(%d): keyStr=%s", ret, keyStr);
+        AUTH_LOGE(AUTH_KEY, "delete item fail ret=%d, keyStr=%s", ret, keyStr);
         KeyUnlock();
         return;
     }
@@ -400,14 +402,17 @@ void AuthRemoveDeviceKey(const char *udidHash, int32_t keyType)
 
 void AuthRemoveDeviceKeyByUdid(const char *udidOrHash)
 {
-    ALOGE("remove device key, udid:%s", AnonymizesUDID(udidOrHash));
+    char *anonyUdid = NULL;
+    Anonymize(udidOrHash, &anonyUdid);
+    AUTH_LOGE(AUTH_KEY, "remove device key, udid=%s", anonyUdid);
+    AnonymizeFree(anonyUdid);
     bool isDeviceKeyMapChange = false;
     if (KeyLock() != SOFTBUS_OK) {
         return;
     }
     MapIterator *it = LnnMapInitIterator(&g_deviceKeyMap);
     if (it == NULL) {
-        ALOGE("map is empty");
+        AUTH_LOGE(AUTH_KEY, "map is empty");
         KeyUnlock();
         return;
     }
@@ -418,12 +423,12 @@ void AuthRemoveDeviceKeyByUdid(const char *udidOrHash)
         }
         AuthDeviceCommonKey *deviceKey = (AuthDeviceCommonKey *)it->node->value;
         if (deviceKey == NULL) {
-            ALOGE("device key is nullptr");
+            AUTH_LOGE(AUTH_KEY, "device key is nullptr");
             continue;
         }
         if (StrCmpIgnoreCase(deviceKey->udid, udidOrHash) == 0 ||
             StrCmpIgnoreCase(deviceKey->udidHashStr, udidOrHash) == 0) {
-            ALOGI("device udidOrHash match, remove ");
+            AUTH_LOGI(AUTH_KEY, "device udidOrHash match, remove");
             if (LnnMapErase(&g_deviceKeyMap, it->node->key) == SOFTBUS_OK) {
                 isDeviceKeyMapChange = true;
             }
@@ -440,21 +445,22 @@ void AuthRemoveDeviceKeyByUdid(const char *udidOrHash)
 int32_t AuthFindDeviceKey(const char *udidHash, int32_t keyType, AuthDeviceKeyInfo * deviceKey)
 {
     if (udidHash == NULL || deviceKey == NULL) {
+        AUTH_LOGW(AUTH_KEY, "param error");
         return SOFTBUS_INVALID_PARAM;
     }
     if (strlen(udidHash) != UDID_HASH_STR_LEN) {
-        ALOGE("udidHash length is invalid");
+        AUTH_LOGE(AUTH_KEY, "udidHash length is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     char upperCaseHash[UDID_SHORT_HASH_HEX_STR] = {0};
     if (StringToUpperCase(udidHash, upperCaseHash, UDID_SHORT_HASH_HEX_STR) != SOFTBUS_OK) {
-        ALOGE("udid hash transfer to uppercase fail");
+        AUTH_LOGE(AUTH_KEY, "udid hash transfer to uppercase fail");
         return SOFTBUS_ERR;
     }
     char keyStr[MAP_KEY_LEN] = {0};
     int32_t ret = sprintf_s(keyStr, MAP_KEY_LEN, "%s-%d", upperCaseHash, keyType);
     if (ret <= 0) {
-        ALOGE("generate key fail");
+        AUTH_LOGE(AUTH_KEY, "generate key fail");
         return SOFTBUS_ERR;
     }
     if (KeyLock() != SOFTBUS_OK) {
@@ -462,16 +468,16 @@ int32_t AuthFindDeviceKey(const char *udidHash, int32_t keyType, AuthDeviceKeyIn
     }
     AuthDeviceCommonKey *data = (AuthDeviceCommonKey *)LnnMapGet(&g_deviceKeyMap, (const char *)keyStr);
     if (data == NULL) {
-        ALOGE("data not foune");
+        AUTH_LOGE(AUTH_KEY, "data not foune");
         KeyUnlock();
         return SOFTBUS_ERR;
     }
     if (SoftBusGetSysTimeMs() > data->endTime) {
-        ALOGE("deviceKey has expired, force delete. currTime:%" PRId64", deviceKeyEndTime:%" PRId64".",
+        AUTH_LOGE(AUTH_KEY, "deviceKey has expired, force delete. currTime=%" PRId64", deviceKeyEndTime=%" PRId64".",
             SoftBusGetSysTimeMs(), data->endTime);
         ret = LnnMapErase(&g_deviceKeyMap, (const char *)keyStr);
         if (ret != SOFTBUS_OK) {
-            ALOGE("delete element fial");
+            AUTH_LOGE(AUTH_KEY, "delete element fail");
         }
         KeyUnlock();
         AuthInsertToSecureStorage();
@@ -489,15 +495,15 @@ static bool AuthParseDeviceKey(const char *deviceKey)
 {
     cJSON *json = cJSON_Parse(deviceKey);
     if (json == NULL) {
-        ALOGE("parse json fail");
+        AUTH_LOGE(AUTH_KEY, "parse json fail");
         return false;
     }
     int32_t arraySize = cJSON_GetArraySize(json);
     if (arraySize <= 0) {
-        ALOGE("no valid deviceKey");
+        AUTH_LOGE(AUTH_KEY, "no valid deviceKey");
         return false;
     }
-    ALOGD("jsonArray size:%d", arraySize);
+    AUTH_LOGD(AUTH_KEY, "jsonArray size:%d", arraySize);
     AuthDeviceCommonKey oldDeviceKey;
     for (int32_t i = 0; i < arraySize; i++) {
         cJSON *item = cJSON_GetArrayItem(json, i);
@@ -514,13 +520,13 @@ static bool AuthParseDeviceKey(const char *deviceKey)
 void AuthUpdateKeyIndex(const char *udidHash, int32_t keyType, int64_t index, bool isServer)
 {
     if (udidHash == NULL) {
-        ALOGW("update fail");
+        AUTH_LOGW(AUTH_KEY, "update fail");
         return;
     }
     char keyStr[MAP_KEY_LEN] = {0};
     int32_t ret = sprintf_s(keyStr, MAP_KEY_LEN, "%s-%d", udidHash, keyType);
     if (ret <= 0) {
-        ALOGE("generate key fail");
+        AUTH_LOGE(AUTH_KEY, "generate key fail");
         return;
     }
     if (KeyLock() != SOFTBUS_OK) {
@@ -536,27 +542,27 @@ void AuthUpdateKeyIndex(const char *udidHash, int32_t keyType, int64_t index, bo
 /*called during initialization*/
 void AuthLoadDeviceKey(void)
 {
-    ALOGD("load deviceKey");
+    AUTH_LOGD(AUTH_KEY, "load deviceKey");
     char *deviceKey = NULL;
     uint32_t deviceKeyLen = 0;
     if (LnnRetrieveDeviceData(LNN_DATA_TYPE_DEVICE_KEY, &deviceKey, &deviceKeyLen) != SOFTBUS_OK) {
-        ALOGW("load deviceKey fail, maybe no device has ever gone online.");
+        AUTH_LOGW(AUTH_KEY, "load deviceKey fail, maybe no device has ever gone online");
         return;
     }
     if (deviceKey == NULL) {
-        ALOGE("load deviceKey fail,deviceKey is nullptr");
+        AUTH_LOGE(AUTH_KEY, "load deviceKey fail,deviceKey is nullptr");
         return;
     }
     if (deviceKeyLen == 0 || strlen(deviceKey) != deviceKeyLen) {
-        ALOGE("deviceKeyLen is invalid");
+        AUTH_LOGE(AUTH_KEY, "deviceKeyLen is invalid");
         SoftBusFree(deviceKey);
         return;
     }
     if (!AuthParseDeviceKey(deviceKey)) {
-        ALOGE("parse device key fail");
+        AUTH_LOGE(AUTH_KEY, "parse device key fail");
     }
     SoftBusFree(deviceKey);
-    ALOGD("load deviceKey fail");
+    AUTH_LOGD(AUTH_KEY, "load deviceKey finish");
 }
 
 void AUthClearDeviceKey(void)

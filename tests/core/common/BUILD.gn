@@ -19,8 +19,11 @@ group("unittest") {
   deps = [
     "anonymize:unittest",
     "bitmap:unittest",
+    "dfx/anonymize:unittest",
+    "dfx/event:unittest",
     "dfx/hidumper_adapter/unittest:unittest",
     "dfx/hisysevent_adapter/unittest:unittest",
+    "dfx/log:unittest",
     "log:unittest",
     "network:unittest",
     "security/permission/common:unittest",

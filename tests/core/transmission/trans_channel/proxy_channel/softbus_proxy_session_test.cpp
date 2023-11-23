@@ -23,7 +23,6 @@
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 #include "softbus_json_utils.h"
-#include "softbus_log.h"
 #include "softbus_protocol_def.h"
 #include "softbus_proxychannel_session.h"
 #include "softbus_proxychannel_manager.h"

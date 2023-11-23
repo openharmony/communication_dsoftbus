@@ -23,13 +23,13 @@
 
 #include "lnn_connection_addr_utils.h"
 #include "lnn_fast_offline.h"
+#include "lnn_log.h"
 #include "lnn_map.h"
 #include "lnn_node_info.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "softbus_utils.h"
 #include "softbus_hidumper_buscenter.h"
 #include "bus_center_manager.h"
@@ -84,7 +84,7 @@ void LNNDisctributedLedgerTest::TearDownTestCase()
 
 void LNNDisctributedLedgerTest::SetUp()
 {
-    LOG_INFO("LocalLedgerTest start.");
+    LNN_LOGI(LNN_TEST, "LocalLedgerTest start");
     int32_t ret = LnnInitDistributedLedger();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     NodeInfo info;
@@ -101,7 +101,7 @@ void LNNDisctributedLedgerTest::SetUp()
 
 void LNNDisctributedLedgerTest::TearDown()
 {
-    LOG_INFO("LocalLedgerTest end.");
+    LNN_LOGI(LNN_TEST, "LocalLedgerTest end");
     LnnDeinitDistributedLedger();
 }
 
@@ -764,15 +764,6 @@ HWTEST_F(LNNDisctributedLedgerTest, SOFTBUS_DUMPBUSCENTER_Test_001, TestSize.Lev
     int32_t fd = 0;
     int32_t ret = SoftBusDumpBusCenterRemoteDeviceInfo(fd);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-}
-
-HWTEST_F(LNNDisctributedLedgerTest, REFRESH_DEVICEINFO_BYDEVID_Test_001, TestSize.Level1)
-{
-    InnerDeviceInfoAddtions addtions;
-    addtions.medium = AUTO;
-    (void)RefreshDeviceInfoByDevId(nullptr, &addtions);
-    addtions.medium = COAP;
-    (void)RefreshDeviceInfoByDevId(nullptr, &addtions);
 }
 
 HWTEST_F(LNNDisctributedLedgerTest, REFRESH_DEVICEONLINE_STATEINFO_Test_001, TestSize.Level1)

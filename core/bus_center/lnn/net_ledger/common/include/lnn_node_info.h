@@ -22,6 +22,7 @@
 #include "lnn_connect_info.h"
 #include "lnn_device_info.h"
 #include "lnn_net_capability.h"
+#include "softbus_def.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,6 +36,23 @@ extern "C" {
 #define LNN_RELATION_MASK 0x03
 #define WIFI_CFG_INFO_MAX_LEN 512
 #define CHANNEL_LIST_STR_LEN  256
+
+#define SESSION_KEY_STR_LEN 65
+
+#define BROADCAST_IV_LEN 16
+#define BROADCAST_IV_STR_LEN 33
+
+#define LFINDER_UDID_HASH_LEN 32
+#define LFINDER_IRK_LEN 16
+#define LFINDER_IRK_STR_LEN 33
+#define LFINDER_MAC_ADDR_LEN 6
+#define LFINDER_MAC_ADDR_STR_LEN 13
+
+typedef enum {
+    AUTH_AS_CLIENT_SIDE = 0,
+    AUTH_AS_SERVER_SIDE,
+    AUTH_SIDE_MAX,
+} AuthSide;
 
 typedef enum {
     ROLE_UNKNOWN = 0,
@@ -81,6 +99,22 @@ typedef struct {
     int32_t batteryLevel;
 } BatteryInfo;
 
+typedef enum {
+    BIT_SUPPORT_EXCHANGE_NETWORKID = 0,
+} AuthCapability;
+
+typedef struct {
+    int32_t keylen;
+    unsigned char key[SESSION_KEY_LENGTH];
+    unsigned char iv[BROADCAST_IV_LEN];
+} BroadcastCipherInfo;
+
+typedef struct {
+    uint8_t peerIrk[LFINDER_IRK_LEN];
+    unsigned char publicAddress[LFINDER_MAC_ADDR_LEN];
+    unsigned char peerUdidHash[LFINDER_UDID_HASH_LEN];
+} RpaInfo;
+
 typedef struct {
     char softBusVersion[VERSION_MAX_LEN];
     char versionType[VERSION_MAX_LEN]; // compatible nearby
@@ -97,12 +131,13 @@ typedef struct {
     ConnectRole role;
     ConnectStatus status;
     uint32_t netCapacity;
+    uint32_t authCapacity;
     uint32_t discoveryType;
     uint64_t heartbeatTimeStamp;
     DeviceBasicInfo deviceInfo;
     ConnectInfo connectInfo;
     int64_t authSeqNum;
-    int32_t authChannelId[CONNECTION_ADDR_MAX];
+    int32_t authChannelId[CONNECTION_ADDR_MAX][AUTH_SIDE_MAX];
     BssTransInfo bssTransInfo;
     bool isBleP2p; // true: this device support connect p2p via ble connection
     P2pInfo p2pInfo;
@@ -129,6 +164,8 @@ typedef struct {
     int32_t groupType;
     bool initPreventFlag;
     int64_t networkIdTimestamp;
+    RpaInfo rpaInfo;
+    BroadcastCipherInfo cipherInfo;
 } NodeInfo;
 
 const char *LnnGetDeviceUdid(const NodeInfo *info);

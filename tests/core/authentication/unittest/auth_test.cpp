@@ -24,6 +24,7 @@
 #include "auth_hichain.h"
 #include "auth_interface.c"
 #include "auth_interface.h"
+#include "auth_log.h"
 #include "auth_manager.h"
 #include "auth_request.h"
 #include "auth_session_fsm.h"
@@ -37,7 +38,6 @@
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "softbus_socket.h"
 
 namespace OHOS {
@@ -67,7 +67,7 @@ void AuthTest::TearDownTestCase() {}
 
 void AuthTest::SetUp()
 {
-    LOG_INFO("AuthTest start.");
+    AUTH_LOGI(AUTH_TEST, "AuthTest start");
 }
 
 static void OnGroupCreated(const char *groupId, int32_t groupType)
@@ -1553,12 +1553,12 @@ HWTEST_F(AuthTest, CHECK_VERIFY_CALLBACK_Test_001, TestSize.Level1)
 
 static void OnConnOpenedTest(uint32_t requestId, int64_t authId)
 {
-    ALOGI("OnConnOpenedTest: requestId = %d, authId = %" PRId64 ".", requestId, authId);
+    AUTH_LOGI(AUTH_TEST, "requestId=%d, authId=%" PRId64, requestId, authId);
 }
 
 static void OnConnOpenFailedTest(uint32_t requestId, int32_t reason)
 {
-    ALOGI("OnConnOpenFailedTest: requestId = %d, reason = %d.", requestId, reason);
+    AUTH_LOGI(AUTH_TEST, "requestId=%d, reason=%d", requestId, reason);
 }
 /*
  * @tc.name: CHECK_AUTH_CONN_CALLBACK_Test_001

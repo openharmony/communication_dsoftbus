@@ -23,12 +23,15 @@
 extern "C" {
 #endif
 
+typedef void (*SocketFileCallbackFunc)(int32_t socket, FileEvent *event);
+
 typedef struct {
     ListNode node;
     char mySessionName[SESSION_NAME_SIZE_MAX];
     IFileSendListener sendListener;
     IFileReceiveListener recvListener;
     char rootDir[FILE_RECV_ROOT_DIR_SIZE_MAX];
+    SocketFileCallbackFunc fileCallback;
 } FileListener;
 
 int TransFileInit(void);
@@ -43,6 +46,8 @@ int32_t TransSetFileSendListener(const char *sessionName, const IFileSendListene
 int32_t TransGetFileListener(const char *sessionName, FileListener *fileListener);
 
 void TransDeleteFileListener(const char *sessionName);
+
+int32_t TransSetSocketFileListener(const char *sessionName, SocketFileCallbackFunc fileCallback);
 #ifdef __cplusplus
 }
 #endif

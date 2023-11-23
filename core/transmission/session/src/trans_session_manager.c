@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,30 +15,31 @@
 
 #include "trans_session_manager.h"
 
+#include "anonymizer.h"
 #include "lnn_lane_link.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 #include "softbus_utils.h"
-#include "trans_channel_callback.h"
 #include "softbus_hidumper_trans.h"
+#include "trans_channel_callback.h"
+#include "trans_log.h"
 
 #define MAX_SESSION_SERVER_NUM 100
 #define CMD_REGISTED_SESSION_LIST "registed_sessionlist"
 
 static SoftBusList *g_sessionServerList = NULL;
 
-static int32_t TransSessionForEachShowInfo(int fd)
+static int32_t TransSessionForEachShowInfo(int32_t fd)
 {
     if (g_sessionServerList == NULL) {
         return SOFTBUS_ERR;
     }
 
-    if (SoftBusMutexLock(&g_sessionServerList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+    if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock mutex failed");
         return SOFTBUS_ERR;
     }
 
@@ -78,38 +79,45 @@ bool TransSessionServerIsExist(const char *sessionName)
         return false;
     }
     if (g_sessionServerList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "not init");
+        TRANS_LOGE(TRANS_CTRL, "sessionServerList not init");
         return false;
     }
 
     SessionServer *pos = NULL;
     SessionServer *tmp = NULL;
-    if (SoftBusMutexLock(&g_sessionServerList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+    if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock mutex failed");
         return false;
     }
+    char *tmpName = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
         if (strcmp(pos->sessionName, sessionName) == 0) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "session server [%s] is exist", sessionName);
+            Anonymize(sessionName, &tmpName);
+            TRANS_LOGW(TRANS_CTRL, "session server sessionName=%s is exist", tmpName);
             (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+            AnonymizeFree(tmpName);
             return true;
         }
     }
 
+    AnonymizeFree(tmpName);
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
     return false;
 }
 
 static void ShowSessionServer(void)
 {
-    SessionServer  *pos = NULL;
-    SessionServer  *tmp = NULL;
-    int count = 0;
+    SessionServer *pos = NULL;
+    SessionServer *tmp = NULL;
+    int32_t count = 0;
+    char *tmpName = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR,
-            "ShowSessionServer: [%d] session server [%s] is exist", count, pos->sessionName);
+        Anonymize(pos->sessionName, &tmpName);
+        TRANS_LOGI(TRANS_CTRL,
+            "count=%d session server sessionName=%s is exist", count, tmpName);
         count++;
     }
+    AnonymizeFree(tmpName);
 }
 
 int32_t TransSessionServerAddItem(SessionServer *newNode)
@@ -118,32 +126,38 @@ int32_t TransSessionServerAddItem(SessionServer *newNode)
         return SOFTBUS_INVALID_PARAM;
     }
     if (g_sessionServerList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "not init");
+        TRANS_LOGE(TRANS_CTRL, "not init");
         return SOFTBUS_NO_INIT;
     }
 
-    if (SoftBusMutexLock(&g_sessionServerList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+    if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock mutex failed");
         return SOFTBUS_ERR;
     }
     if (g_sessionServerList->cnt >= MAX_SESSION_SERVER_NUM) {
         (void)ShowSessionServer();
         (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransSessionServerAddItem: session server num reach max");
+        TRANS_LOGE(TRANS_CTRL, "session server num reach max");
         return SOFTBUS_INVALID_NUM;
     }
-    SessionServer  *pos = NULL;
-    SessionServer  *tmp = NULL;
+
+    SessionServer *pos = NULL;
+    SessionServer *tmp = NULL;
+    char *tmpName = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
         if (strcmp(pos->sessionName, newNode->sessionName) == 0) {
+            Anonymize(newNode->sessionName, &tmpName);
             if ((pos->uid == newNode->uid) && (pos->pid == newNode->pid)) {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "session server [%s] is exist", newNode->sessionName);
+                TRANS_LOGI(TRANS_CTRL, "session server sessionName=%s is exist",
+                    tmpName);
                 (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+                AnonymizeFree(tmpName);
                 return SOFTBUS_SERVER_NAME_REPEATED;
             } else {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-                    "sessionname [%s] has been used by other processes", newNode->sessionName);
+                TRANS_LOGI(TRANS_CTRL,
+                    "sessionName=%s has been used by other processes", tmpName);
                 (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+                AnonymizeFree(tmpName);
                 return SOFTBUS_SERVER_NAME_USED;
             }
         }
@@ -152,7 +166,7 @@ int32_t TransSessionServerAddItem(SessionServer *newNode)
     ListAdd(&(g_sessionServerList->list), &(newNode->node));
     g_sessionServerList->cnt++;
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
-
+    AnonymizeFree(tmpName);
     return SOFTBUS_OK;
 }
 
@@ -168,7 +182,7 @@ int32_t TransSessionServerDelItem(const char *sessionName)
     bool isFind = false;
     SessionServer *pos = NULL;
     SessionServer *tmp = NULL;
-    if (SoftBusMutexLock(&g_sessionServerList->lock) != 0) {
+    if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
@@ -180,8 +194,10 @@ int32_t TransSessionServerDelItem(const char *sessionName)
     if (isFind) {
         ListDelete(&pos->node);
         g_sessionServerList->cnt--;
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "destroy session server [%s]", sessionName);
-        SoftBusFree(pos);
+        char *tmpName = NULL;
+        Anonymize(sessionName, &tmpName);
+        TRANS_LOGI(TRANS_CTRL, "destroy session server sessionName=%s", tmpName);
+        AnonymizeFree(tmpName);
     }
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
     return SOFTBUS_OK;
@@ -195,8 +211,8 @@ void TransDelItemByPackageName(const char *pkgName, int32_t pid)
 
     SessionServer *pos = NULL;
     SessionServer *tmp = NULL;
-    if (SoftBusMutexLock(&g_sessionServerList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+    if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock mutex failed");
         return;
     }
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
@@ -208,32 +224,32 @@ void TransDelItemByPackageName(const char *pkgName, int32_t pid)
         }
     }
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "del package name [%s].", pkgName);
+    TRANS_LOGI(TRANS_CTRL, "del pkgName=%s", pkgName);
 }
 
 int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uint16_t len)
 {
-    if ((sessionName == NULL) || (pkgName == NULL) || (len == 0)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransGetPkgNameBySessionName param error.");
+    if (sessionName == NULL || pkgName == NULL || len == 0) {
+        TRANS_LOGE(TRANS_CTRL, "param error");
         return SOFTBUS_ERR;
     }
     if (g_sessionServerList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "session server list not init");
+        TRANS_LOGE(TRANS_CTRL, "session server list not init");
         return SOFTBUS_ERR;
     }
 
     SessionServer *pos = NULL;
     SessionServer *tmp = NULL;
-    if (SoftBusMutexLock(&g_sessionServerList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+    if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock mutex failed");
         return SOFTBUS_ERR;
     }
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
         if (strcmp(pos->sessionName, sessionName) == 0) {
             int32_t ret = strcpy_s(pkgName, len, pos->pkgName);
             (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
-            if (ret != 0) {
-                SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "strcpy_s error ret, [%d]", ret);
+            if (ret != EOK) {
+                TRANS_LOGE(TRANS_CTRL, "strcpy_s error ret, ret=%d", ret);
                 return SOFTBUS_ERR;
             }
             return SOFTBUS_OK;
@@ -241,7 +257,10 @@ int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uin
     }
 
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "not found session name [%s].", sessionName);
+    char *tmpName = NULL;
+    Anonymize(sessionName, &tmpName);
+    TRANS_LOGE(TRANS_CTRL, "not found sessionName=%s.", tmpName);
+    AnonymizeFree(tmpName);
     return SOFTBUS_ERR;
 }
 
@@ -251,33 +270,34 @@ int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
         return SOFTBUS_INVALID_PARAM;
     }
     if (g_sessionServerList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "not init");
+        TRANS_LOGE(TRANS_CTRL, "not init");
         return SOFTBUS_ERR;
+    }
+
+    if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock mutex failed");
+        return SOFTBUS_LOCK_ERR;
     }
 
     SessionServer *pos = NULL;
     SessionServer *tmp = NULL;
-    if (SoftBusMutexLock(&g_sessionServerList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
-        return SOFTBUS_LOCK_ERR;
-    }
-    char *anonyOut = NULL;
+    char *tmpName = NULL;
+    Anonymize(sessionName, &tmpName);
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
         if (strcmp(pos->sessionName, sessionName) == 0) {
             *uid = pos->uid;
             *pid = pos->pid;
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransGetUidAndPid: sessionName=%s, uid=%d, pid=%d",
-                AnonyDevId(&anonyOut, sessionName), pos->uid, pos->pid);
-            SoftBusFree(anonyOut);
+            TRANS_LOGI(TRANS_CTRL, "sessionName=%s, uid=%d, pid=%d",
+                tmpName, pos->uid, pos->pid);
             (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+            AnonymizeFree(tmpName);
             return SOFTBUS_OK;
         }
     }
 
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransGetUidAndPid err: sessionName=%s",
-        AnonyDevId(&anonyOut, sessionName));
-    SoftBusFree(anonyOut);
+    TRANS_LOGE(TRANS_CTRL, "err: sessionName=%s", tmpName);
+    AnonymizeFree(tmpName);
     return SOFTBUS_ERR;
 }
 
@@ -290,7 +310,6 @@ static void TransListDelete(ListNode *sessionServerList)
         ListDelete(&pos->node);
         SoftBusFree(pos);
     }
-    return;
 }
 
 static int32_t TransListCopy(ListNode *sessionServerList)
@@ -301,39 +320,37 @@ static int32_t TransListCopy(ListNode *sessionServerList)
 
     SessionServer *pos = NULL;
     SessionServer *tmp = NULL;
-
-    if (SoftBusMutexLock(&g_sessionServerList->lock) != 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
+    if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock mutex failed");
         return SOFTBUS_ERR;
     }
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
-        SessionServer *newpos = (SessionServer *)SoftBusMalloc(sizeof(SessionServer));
-        if (newpos == NULL) {
+        SessionServer *newPos = (SessionServer *)SoftBusMalloc(sizeof(SessionServer));
+        if (newPos == NULL) {
             TransListDelete(sessionServerList);
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SoftBusMalloc fail!");
+            TRANS_LOGE(TRANS_CTRL, "SoftBusMalloc failed");
             (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
             return SOFTBUS_MALLOC_ERR;
         }
-        *newpos = *pos;
-        ListAdd(sessionServerList, &newpos->node);
+        *newPos = *pos;
+        ListAdd(sessionServerList, &newPos->node);
     }
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
     return SOFTBUS_OK;
 }
 
-void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid,
-    const char *peerIp, int32_t routeType)
+void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid, const char *peerIp, int32_t routeType)
 {
     if (networkId == NULL || g_sessionServerList == NULL) {
         return;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransOnLinkDown: routeType=%d", routeType);
+    TRANS_LOGI(TRANS_CTRL, "routeType=%d", routeType);
 
     ListNode sessionServerList = {0};
     ListInit(&sessionServerList);
     int32_t ret = TransListCopy(&sessionServerList);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransOnLinkDown copy list fail!");
+        TRANS_LOGE(TRANS_CTRL, "copy list failed");
         return;
     }
 
@@ -348,6 +365,4 @@ void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid,
         LaneDeleteP2pAddress(networkId, true);
     }
     TransListDelete(&sessionServerList);
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "TransOnLinkDown end");
-    return;
 }

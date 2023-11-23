@@ -17,12 +17,10 @@
 #include <securec.h>
 #include <string.h>
 #include <cJSON.h>
-#include "softbus_log.h"
+#include "conn_log.h"
 #include "softbus_error_code.h"
 #include "protocol/wifi_direct_protocol.h"
 #include "utils/wifi_direct_ipv4_info.h"
-
-#define LOG_LABEL "[WD] LI: "
 
 #define LI_TAG_LOCAL_INTERFACE 0
 #define LI_TAG_REMOTE_INTERFACE 1
@@ -121,7 +119,7 @@ static bool Marshalling(struct LinkInfo *self, struct WifiDirectProtocol *protoc
                 break;
         }
 
-        CONN_CHECK_AND_RETURN_RET_LOG(ret, false, LOG_LABEL "marshalling failed");
+        CONN_CHECK_AND_RETURN_RET_LOGW(ret, false, CONN_WIFI_DIRECT, "marshalling failed");
     }
 
     return true;
@@ -136,7 +134,8 @@ static bool Unmarshalling(struct LinkInfo *self, struct WifiDirectProtocol *prot
     while (protocol->readData(protocol, &keyProperty, &data, &size)) {
         bool ret = true;
         enum LinkInfoKey key = GetKeyFromKeyProperty(&keyProperty);
-        CONN_CHECK_AND_RETURN_RET_LOG(key < LI_KEY_MAX, false, LOG_LABEL "key out of range, tag=%d", keyProperty.tag);
+        CONN_CHECK_AND_RETURN_RET_LOGW(key < LI_KEY_MAX, false, CONN_WIFI_DIRECT, "key out of range, tag=%d",
+            keyProperty.tag);
 
         switch (LinkInfoKeyProperties[key].type) {
             case INT:
@@ -154,9 +153,9 @@ static bool Unmarshalling(struct LinkInfo *self, struct WifiDirectProtocol *prot
                 }
             case STRING: {
                 char *string = SoftBusCalloc(size + 1);
-                CONN_CHECK_AND_RETURN_RET_LOG(string, false, LOG_LABEL "alloc failed");
+                CONN_CHECK_AND_RETURN_RET_LOGE(string, false, CONN_WIFI_DIRECT, "alloc failed");
                 if (memcpy_s(string, size + 1, data, size) != EOK) {
-                    CLOGE("string memcpy fail");
+                    CONN_LOGW(CONN_WIFI_DIRECT, "string memcpy fail");
                     SoftBusFree(string);
                     return false;
                 }
@@ -167,7 +166,7 @@ static bool Unmarshalling(struct LinkInfo *self, struct WifiDirectProtocol *prot
             default:
                 continue;
         }
-        CONN_CHECK_AND_RETURN_RET_LOG(ret, false, LOG_LABEL "unmarshalling failed key=%d", key);
+        CONN_CHECK_AND_RETURN_RET_LOGW(ret, false, CONN_WIFI_DIRECT, "unmarshalling failed key=%d", key);
     }
 
     return true;
@@ -236,7 +235,7 @@ static void PutLocalIpString(struct LinkInfo *self, const char *ipString)
 {
     struct WifiDirectIpv4Info ipv4;
     int32_t ret = WifiDirectIpStringToIpv4(ipString, &ipv4);
-    CONN_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, "ip to ipv4 failed");
+    CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "ip to ipv4 failed");
     self->putRawData(self, LI_KEY_LOCAL_IPV4, &ipv4, sizeof(ipv4));
 }
 
@@ -244,7 +243,7 @@ static void PutRemoteIpString(struct LinkInfo *self, const char *ipString)
 {
     struct WifiDirectIpv4Info ipv4;
     int32_t ret = WifiDirectIpStringToIpv4(ipString, &ipv4);
-    CONN_CHECK_AND_RETURN_LOG(ret == SOFTBUS_OK, "ip to ipv4 failed");
+    CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "ip to ipv4 failed");
     self->putRawData(self, LI_KEY_REMOTE_IPV4, &ipv4, sizeof(ipv4));
 }
 

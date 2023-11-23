@@ -16,7 +16,7 @@
 #include "permission_utils.h"
 
 #include "softbus_errcode.h"
-#include "softbus_log.h"
+#include "softbus_log_old.h"
 
 extern "C" int32_t IsValidPkgName(int32_t uid, const char *pkgName)
 {

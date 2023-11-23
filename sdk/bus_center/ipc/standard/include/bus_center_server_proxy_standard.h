@@ -65,6 +65,7 @@ public:
     int32_t GetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum) override;
     int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
         const GearMode *mode) override;
+    int32_t GetBusCenterExObj(sptr<IRemoteObject> &object) override;
 
 private:
     static inline BrokerDelegator<BusCenterServerProxy> delegator_;

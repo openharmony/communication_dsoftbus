@@ -98,6 +98,7 @@ typedef struct {
 
 int32_t ClinetTransProxyFileManagerInit(void);
 void ClinetTransProxyFileManagerDeinit(void);
+void ClientDeleteRecvFileList(int32_t sessionId);
 
 int32_t ProxyChannelSendFile(int32_t channelId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt);
 int32_t ProcessRecvFileFrameData(int32_t sessionId, int32_t channelId, const FileFrame *oneFrame);

@@ -39,6 +39,127 @@
 
 domain: DSOFTBUS
 
+DISCOVER_BEHAVIOR:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: discovery behavior }
+  ORG_PKG: {type: STRING, desc: organization module name }
+  FUNC: {type: STRING, desc: current function name }
+  HOST_PKG: {type: STRING, desc: host module name }
+  BIZ_SCENE: {type: INT32, desc: business scene }
+  BIZ_STAGE: {type: INT32, desc: business stage }
+  STAGE_RES: {type: INT32, desc: stage result }
+  ERROR_CODE: { type: INT32, desc: error code }
+  BROADCAST_TYPE: { type: INT32, desc: broadcast type }
+  BROADCAST_FREQ: { type: INT32, desc: broadcast frequency }
+  SCAN_TYPE: { type: INT32, desc: scan type }
+  SCAN_CYCLE: { type: STRING, desc: scan duty cycle }
+  DISC_TYPE: { type: INT32, desc: discovery type }
+  DISC_MODE: { type: INT32, desc: discovery mode }
+  FIRST_DISCOVERY_TIME: { type: INT32, desc: time consuming to discover for the first time }
+  LOCAL_NET_ID: { type: STRING, desc: local device net id }
+  LOCAL_UDID: { type: STRING, desc: local device udid }
+  LOCAL_DEV_TYPE: { type: STRING, desc: local device type }
+  PEER_IP: { type: STRING, desc: peer device ip }
+  PEER_BR_MAC: { type: STRING, desc: peer device br mac }
+  PEER_BLE_MAC: { type: STRING, desc: peer device ble mac }
+  PEER_WIFI_MAC: { type: STRING, desc: peer device wifi mac }
+  PEER_PORT: { type: STRING, desc: peer device port }
+  PEER_UDID: { type: STRING, desc: peer device udid }
+  PEER_NET_ID: { type: STRING, desc: peer device net id }
+  PEER_DEV_TYPE: { type: STRING, desc: peer device type }
+
+BUSCENTER_BEHAVIOR:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: bus center behavior }
+  ORG_PKG: {type: STRING, desc: organization module name }
+  FUNC: {type: STRING, desc: current function name }
+  HOST_PKG: {type: STRING, desc: host module name }
+  TO_CALL_PKG: {type: STRING, desc: to call module name }
+  BIZ_SCENE: {type: INT32, desc: business scene }
+  BIZ_STAGE: {type: INT32, desc: business stage }
+  STAGE_RES: {type: INT32, desc: stage result }
+  ERROR_CODE: { type: INT32, desc: error code }
+  CONN_ID: { type: INT32, desc: connection id }
+  AUTH_TYPE: { type: INT32, desc: auth type }
+  AUTH_ID: { type: INT32, desc: auth id }
+  LNN_TYPE: { type: INT32, desc: lnn type }
+  ONLINE_NUM: { type: INT32, desc: current online device num }
+  PEER_DEV_ABILITY: { type: INT32, desc: peer device ability }
+  PEER_DEV_INFO: { type: STRING, desc: peer device lnn info }
+  PEER_IP: { type: STRING, desc: peer device ip }
+  PEER_BR_MAC: { type: STRING, desc: peer device br mac }
+  PEER_BLE_MAC: { type: STRING, desc: peer device ble mac }
+  PEER_WIFI_MAC: { type: STRING, desc: peer device wifi mac }
+  PEER_PORT: { type: STRING, desc: peer device port }
+  PEER_UDID: { type: STRING, desc: peer device udid }
+  PEER_NET_ID: { type: STRING, desc: peer device net id }
+  PEER_DEV_TYPE: { type: STRING, desc: peer device type }
+
+TRANSPORT_BEHAVIOR:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: transport behavior }
+  ORG_PKG: {type: STRING, desc: organization module name }
+  FUNC: {type: STRING, desc: current function name }
+  HOST_PKG: {type: STRING, desc: host module name }
+  TO_CALL_PKG: {type: STRING, desc: to call module name }
+  BIZ_SCENE: {type: INT32, desc: business scene }
+  BIZ_STAGE: {type: INT32, desc: business stage }
+  STAGE_RES: {type: INT32, desc: stage result }
+  ERROR_CODE: { type: INT32, desc: error code }
+  SESSION_NAME: {type: STRING, desc: session name }
+  DATA_TYPE: { type: INT32, desc: channel data type }
+  LOGIC_CHAN_TYPE: { type: INT32, desc: logic channel type }
+  LANE_ID: { type: INT32, desc: lane id }
+  PREFER_LINK_TYPE: { type: INT32, desc: preferred link type }
+  LANE_TRANS_TYPE: { type: INT32, desc: transport lane data type }
+  CHAN_ID: { type: INT32, desc: channel id }
+  REQ_ID: { type: INT32, desc: request id }
+  CONN_ID: { type: INT32, desc: connection id }
+  LINK_TYPE: { type: INT32, desc: link type }
+  AUTH_ID: { type: INT32, desc: auth id }
+  SOCKET_FD: { type: INT32, desc: socket fd }
+  TIME_CONSUMING: { type: INT32, desc: total cost time}
+  CHAN_SCORE: { type: INT32, desc: channel score }
+  PEER_CHAN_ID: { type: INT32, desc: peer channel id }
+  PEER_NET_ID: { type: STRING, desc: peer device net id }
+
+CONNECTION_BEHAVIOR:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: connection behavior }
+  ORG_PKG: {type: STRING, desc: organization module name }
+  FUNC: {type: STRING, desc: current function name }
+  HOST_PKG: {type: STRING, desc: host module name }
+  TO_CALL_PKG: {type: STRING, desc: to call module name }
+  BIZ_SCENE: {type: INT32, desc: business scene }
+  BIZ_STAGE: {type: INT32, desc: business stage }
+  STAGE_RES: {type: INT32, desc: stage result }
+  ERROR_CODE: { type: INT32, desc: error code }
+  CONN_ID: { type: INT32, desc: connection id }
+  REQ_ID: { type: INT32, desc: request id }
+  LINK_TYPE: { type: INT32, desc: link type }
+  AUTH_TYPE: { type: INT32, desc: auth type }
+  AUTH_ID: { type: INT32, desc: auth id }
+  LNN_TYPE: { type: STRING, desc: lnn type }
+  EXPECT_ROLE: { type: INT32, desc: expect role }
+  TIME_CONSUMING: { type: INT32, desc: total cost time}
+  RSSI: { type: INT32, desc: rssi}
+  CHLOAD: { type: INT32, desc: chload}
+  FREQ: { type: INT32, desc: frequency}
+  PEER_IP: { type: STRING, desc: peer device ip }
+  PEER_BR_MAC: { type: STRING, desc: peer device br mac }
+  PEER_BLE_MAC: { type: STRING, desc: peer device ble mac }
+  PEER_WIFI_MAC: { type: STRING, desc: peer device wifi mac }
+  PEER_PORT: { type: STRING, desc: peer device port }
+
+IPC_BEHAVIOR:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: SOFTBUS IPC BEHAVIOR DOTTING EVENT}
+  ORG_PKG: {type: STRING, desc: business package name }
+  FUNC: {type: STRING, desc: fuction name}
+  BIZ_SCENE: {type: INT32, desc: business scene }
+  BIZ_STAGE: {type: INT32, desc: eack scene process stage }
+  STAGE_RES: {type: INT32, desc: stage result }
+  BIZ_STATE: {type: INT32, desc: current business result }
+  ERROR_CODE: {type: INT32, desc: error code }
+  COMM_TYPE: {type: INT32, desc: ipc communication type }
+  HOST_PKG: {type: STRING, desc: host package name }
+  TO_CALL_PKG: {type: STRING, desc: called package name }
+
 FIRST_DISC_DURATION:
   __BASE: {type: STATISTIC, level: MINOR, desc: first discovery device duration }
   SOFT_BUS_VERSION: {type: STRING, desc: softbus version }

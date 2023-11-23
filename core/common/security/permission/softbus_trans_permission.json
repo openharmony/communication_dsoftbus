@@ -161,8 +161,10 @@
     ]
   },
   {
-    "SESSION_NAME": "device.security.level",
+    "SESSION_NAME": "device.security.level*",
+    "REGEXP": "true",
     "DEVID": "UDID",
+    "SEC_LEVEL": "public",
     "APP_INFO": [
       {
         "TYPE": "native_app",
@@ -215,6 +217,19 @@
     "APP_INFO": [
       {
         "PKG_NAME": "ohos.InterConnection.iShare",
+        "TYPE": "native_app",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
+    "SESSION_NAME": "DeviceCollaboration.*",
+    "REGEXP": "true",
+    "DEVID": "NETWORKID",
+    "SEC_LEVEL": "public",
+    "APP_INFO": [
+      {
+        "PKG_NAME": "ohos.InterConnection.device_collaboration_service",
         "TYPE": "native_app",
         "ACTIONS": "create,open"
       }
@@ -279,6 +294,30 @@
     "APP_INFO": [
       {
         "PKG_NAME": "ohos.InterConnection.collaborationFwk",
+        "TYPE": "native_app",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
+    "SESSION_NAME": "com.huawei.devicemanager.*",
+    "REGEXP": "true",
+    "DEVID": "UUID",
+    "APP_INFO": [
+      {
+        "PKG_NAME": "ohos.distributedhardware.devicemanager.adapter",
+        "TYPE": "native_app",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
+    "SESSION_NAME": "com.huawei.*CastPlusDiscoveryModule",
+    "REGEXP": "true",
+    "DEVID": "UDID",
+    "APP_INFO": [
+      {
+        "PKG_NAME": "ohos.distributedhardware.devicemanager",
         "TYPE": "native_app",
         "ACTIONS": "create,open"
       }

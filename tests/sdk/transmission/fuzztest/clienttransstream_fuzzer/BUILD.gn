@@ -28,6 +28,7 @@ ohos_fuzztest("ClientTransStreamFuzzTest") {
     "../../../../../sdk/transmission/trans_channel/udp/common/include",
     "../../../../../sdk/transmission/session/include",
     "../../../../../core/common/include",
+    "../../../../../core/common/dfx/interface/include",
     "../../../../../core/transmission/common/include",
     "//commonlibrary/c_utils/base/include",
     "//third_party/bounds_checking_function/include",

@@ -14,9 +14,8 @@
  */
 
 #include "softbus_qos.h"
-#include "softbus_log.h"
-
 #include "softbus_errcode.h"
+#include "trans_log.h"
 
 int32_t NotifyQosChannelOpened(const ChannelInfo *chanInfo)
 {
@@ -32,7 +31,7 @@ void NotifyQosChannelClosed(int32_t channelId, int32_t channelType)
 
 int32_t InitQos(void)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "InitQos virtual");
+    TRANS_LOGE(TRANS_INIT, "InitQos virtual");
     return SOFTBUS_OK;
 }
 

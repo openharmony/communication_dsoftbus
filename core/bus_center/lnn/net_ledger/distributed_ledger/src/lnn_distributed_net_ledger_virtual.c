@@ -15,12 +15,12 @@
 
 #include "lnn_distributed_net_ledger.h"
 
+#include "lnn_log.h"
 #include "softbus_errcode.h"
-#include "softbus_log.h"
 
 int32_t LnnInitDistributedLedger(void)
 {
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "init virtual distribute ledger");
+    LNN_LOGI(LNN_INIT, "init virtual distribute ledger");
     return SOFTBUS_OK;
 }
 

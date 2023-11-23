@@ -42,14 +42,15 @@ void StreamManager::DestroyEnvironment(const std::string &pkgName)
 int StreamManager::CreateStreamClientChannel(IpAndPort &local, IpAndPort remote, Proto protocol,
     int streamType, std::pair<uint8_t*, uint32_t> sessionKey)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-        "Start to create client channel, local:%d, remote:%d, proto:%d", local.port, remote.port, protocol);
+    TRANS_LOGI(TRANS_STREAM,
+        "Start to create client channel, localPort=%d, remotePort=%d, proto=%d",
+        local.port, remote.port, protocol);
 
     std::shared_ptr<IStreamSocket> streamSocket = nullptr;
     if (protocol == VTP) {
         streamSocket = std::make_shared<VtpStreamSocket>();
     } else {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "do not support %d protocol", protocol);
+        TRANS_LOGE(TRANS_STREAM, "do not support protocol=%d", protocol);
         return -1;
     }
 
@@ -59,10 +60,10 @@ int StreamManager::CreateStreamClientChannel(IpAndPort &local, IpAndPort remote,
         SetStreamRecvListener(streamListener_);
         int scene = SOFTBUS_SCENE;
         if (!streamSocket->SetOption(SCENE, StreamAttr(scene))) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set stream scene failed");
+            TRANS_LOGE(TRANS_STREAM, "set stream scene failed");
             return -1;
         }
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "streamSocket CreateClient success, port:%d", local.port);
+        TRANS_LOGI(TRANS_STREAM, "streamSocket CreateClient success, localPort=%d", local.port);
         return local.port;
     }
 
@@ -72,20 +73,20 @@ int StreamManager::CreateStreamClientChannel(IpAndPort &local, IpAndPort remote,
 int StreamManager::CreateStreamServerChannel(IpAndPort &local, Proto protocol,
     int streamType, std::pair<uint8_t*, uint32_t> sessionKey)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO,
-        "Start to create server channel, local:%d, proto:%d", local.port, protocol);
+    TRANS_LOGI(TRANS_STREAM,
+        "Start to create server channel, localPort=%d, protocol=%d", local.port, protocol);
 
     std::shared_ptr<IStreamSocket> streamSocket = nullptr;
     if (protocol == VTP) {
         streamSocket = std::make_shared<VtpStreamSocket>();
     } else {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "do not support %d protocol", protocol);
+        TRANS_LOGE(TRANS_STREAM, "do not support protocol=%d", protocol);
         return -1;
     }
 
     curProtocol_ = protocol;
     if (!streamSocket->CreateServer(local, streamType, sessionKey)) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "create %d server error", protocol);
+        TRANS_LOGE(TRANS_STREAM, "create protocol=%d server error", protocol);
         return -1;
     }
 
@@ -94,7 +95,7 @@ int StreamManager::CreateStreamServerChannel(IpAndPort &local, Proto protocol,
 
     int scene = SOFTBUS_SCENE;
     if (!streamSocket->SetOption(SCENE, StreamAttr(scene))) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set stream scene failed");
+        TRANS_LOGE(TRANS_STREAM, "set stream scene failed");
         return -1;
     }
     return local.port;
@@ -107,7 +108,7 @@ bool StreamManager::DestroyStreamDataChannel()
         auto streamSocket = it->second;
         streamSocket->DestroyStreamSocket();
         socketMap_.erase(it);
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "DestroyStreamDataChannel %d protocol success", curProtocol_);
+        TRANS_LOGI(TRANS_STREAM, "curProtocol=%d  success", curProtocol_);
         return true;
     }
     return false;
@@ -120,7 +121,7 @@ bool StreamManager::Send(std::unique_ptr<IStream> data)
         auto streamSocket = it->second;
         return streamSocket->Send(std::move(data));
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "do not found curProtocol = %d", curProtocol_);
+    TRANS_LOGE(TRANS_STREAM, "do not found curProtocol=%d", curProtocol_);
     return false;
 }
 
@@ -147,10 +148,10 @@ StreamAttr StreamManager::GetOption(int type) const
 
 void StreamManager::SetStreamRecvListener(std::shared_ptr<IStreamManagerListener> recvListener)
 {
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "SetStreamRecvListener in");
+    TRANS_LOGD(TRANS_STREAM, "enter.");
     streamListener_ = recvListener;
     if (socketListener_ != nullptr) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_WARN, "Socket listener has existed");
+        TRANS_LOGW(TRANS_STREAM, "Socket listener has existed");
         return;
     }
 
@@ -159,7 +160,7 @@ void StreamManager::SetStreamRecvListener(std::shared_ptr<IStreamManagerListener
     if (it != socketMap_.end()) {
         auto streamSocket = it->second;
         streamSocket->SetStreamListener(socketListener_);
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "SetStreamRecvListener %d protocol success", curProtocol_);
+        TRANS_LOGI(TRANS_STREAM, "curProtocol=%d success", curProtocol_);
     }
 }
 } // namespace SoftBus

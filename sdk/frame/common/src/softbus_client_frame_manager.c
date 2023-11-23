@@ -21,6 +21,7 @@
 #include "client_bus_center_manager.h"
 #include "client_disc_manager.h"
 #include "client_trans_session_manager.h"
+#include "comm_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_base_listener.h"
@@ -29,7 +30,6 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
-#include "softbus_log.h"
 #include "softbus_socket.h"
 #include "softbus_utils.h"
 
@@ -56,7 +56,7 @@ static bool CheckPkgNameInfo(const char *pkgName)
         }
     }
     if (totalNum >= SOFTBUS_PKGNAME_MAX_NUM) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "number of pkgName exceeds maximum");
+        COMM_LOGI(COMM_SDK, "number of pkgName exceeds maximum");
         return false;
     }
     return true;
@@ -65,7 +65,7 @@ static bool CheckPkgNameInfo(const char *pkgName)
 static int32_t AddClientPkgName(const char *pkgName)
 {
     if (SoftBusMutexLock(&g_pkgNameLock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock init failed");
+        COMM_LOGE(COMM_SDK, "lock init failed");
         return SOFTBUS_LOCK_ERR;
     }
     if (CheckPkgNameInfo(pkgName) == false) {
@@ -74,12 +74,12 @@ static int32_t AddClientPkgName(const char *pkgName)
     }
     PkgNameInfo *info = (PkgNameInfo *)SoftBusCalloc(sizeof(PkgNameInfo));
     if (info == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Create PkgNameInfo malloc fail.");
+        COMM_LOGE(COMM_SDK, "Create PkgNameInfo malloc fail.");
         SoftBusMutexUnlock(&g_pkgNameLock);
         return SOFTBUS_MALLOC_ERR;
     }
     if (strcpy_s(info->pkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Add strcpy_s failed.");
+        COMM_LOGE(COMM_SDK, "Add strcpy_s failed.");
         SoftBusFree(info);
         SoftBusMutexUnlock(&g_pkgNameLock);
         return SOFTBUS_MEM_ERR;
@@ -93,7 +93,7 @@ static int32_t AddClientPkgName(const char *pkgName)
 static void DelClientPkgName(const char *pkgName)
 {
     if (SoftBusMutexLock(&g_pkgNameLock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "del lock init failed");
+        COMM_LOGE(COMM_SDK, "del lock init failed");
         return;
     }
     ListNode *item = NULL;
@@ -117,18 +117,18 @@ static int32_t ClientRegisterPkgName(const char *pkgName)
     }
     int32_t ret = ClientRegisterService(pkgName);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientRegisterService failed. ret = %d", ret);
+        COMM_LOGE(COMM_SDK, "ClientRegisterService failed. ret = %d", ret);
         DelClientPkgName(pkgName);
         return ret;
     }
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "ClientRegisterService success");
+    COMM_LOGI(COMM_SDK, "ClientRegisterService success");
     return SOFTBUS_OK;
 }
 
 static void FreeClientPkgName(void)
 {
     if (SoftBusMutexLock(&g_pkgNameLock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock init failed");
+        COMM_LOGE(COMM_SDK, "lock init failed");
         return;
     }
     ListNode *item = NULL;
@@ -161,16 +161,16 @@ static int32_t ConnClientInit(void)
 {
     int32_t ret = ConnInitSockets();
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "ConnInitSockets failed!ret=%" PRId32 " \r\n", ret);
+        COMM_LOGE(COMM_EVENT, "ConnInitSockets failed!ret=%" PRId32 " \r\n", ret);
         return ret;
     }
 
     ret = InitBaseListener();
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "InitBaseListener failed!ret=%" PRId32 " \r\n", ret);
+        COMM_LOGE(COMM_EVENT, "InitBaseListener failed!ret=%" PRId32 " \r\n", ret);
         return ret;
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "init conn client success");
+    COMM_LOGI(COMM_EVENT, "init conn client success");
     return ret;
 }
 
@@ -178,34 +178,34 @@ static int32_t ClientModuleInit(void)
 {
     SoftbusConfigInit();
     if (EventClientInit() == SOFTBUS_ERR) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "init event manager failed");
+        COMM_LOGE(COMM_SDK, "init event manager failed");
         goto ERR_EXIT;
     }
 
     if (BusCenterClientInit() == SOFTBUS_ERR) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "init bus center failed");
+        COMM_LOGE(COMM_SDK, "init bus center failed");
         goto ERR_EXIT;
     }
 
     if (DiscClientInit() == SOFTBUS_ERR) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "init service manager failed");
+        COMM_LOGE(COMM_SDK, "init service manager failed");
         goto ERR_EXIT;
     }
 
     if (ConnClientInit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "init connect manager failed");
+        COMM_LOGE(COMM_SDK, "init connect manager failed");
         goto ERR_EXIT;
     }
 
     if (TransClientInit() == SOFTBUS_ERR) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "init trans manager failed");
+        COMM_LOGE(COMM_SDK, "init trans manager failed");
         goto ERR_EXIT;
     }
 
     return SOFTBUS_OK;
 
 ERR_EXIT:
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "softbus sdk frame init failed.");
+    COMM_LOGE(COMM_SDK, "softbus sdk frame init failed.");
     ClientModuleDeinit();
     return SOFTBUS_ERR;
 }
@@ -213,20 +213,19 @@ ERR_EXIT:
 int32_t InitSoftBus(const char *pkgName)
 {
     if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR,
-                   "init softbus sdk fail. Package name is empty or length exceeds");
+        COMM_LOGE(COMM_SDK, "init softbus sdk fail. Package name is empty or length exceeds");
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexInit(&g_pkgNameLock, NULL) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock init pkgName failed");
+        COMM_LOGE(COMM_SDK, "lock init pkgName failed");
         return SOFTBUS_LOCK_ERR;
     }
     if ((g_isInited == false) && (SoftBusMutexInit(&g_isInitedLock, NULL) != SOFTBUS_OK)) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock init failed");
+        COMM_LOGE(COMM_SDK, "lock init failed");
         return SOFTBUS_LOCK_ERR;
     }
     if (SoftBusMutexLock(&g_isInitedLock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock failed");
+        COMM_LOGE(COMM_SDK, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
     if (g_isInited == true) {
@@ -236,28 +235,28 @@ int32_t InitSoftBus(const char *pkgName)
     }
     if (AddClientPkgName(pkgName) != SOFTBUS_OK) {
         SoftBusMutexUnlock(&g_isInitedLock);
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "AddClientPkgName failed.");
+        COMM_LOGE(COMM_SDK, "AddClientPkgName failed.");
         return SOFTBUS_MEM_ERR;
     }
     if (SoftBusTimerInit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "client timer init fail");
+        COMM_LOGE(COMM_SDK, "client timer init fail");
         goto EXIT;
     }
     if (ClientModuleInit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ctx init fail");
+        COMM_LOGE(COMM_SDK, "ctx init fail");
         goto EXIT;
     }
     if (ClientStubInit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "service init fail");
+        COMM_LOGE(COMM_SDK, "service init fail");
         goto EXIT;
     }
     if (ClientRegisterService(pkgName) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ClientRegisterService fail");
+        COMM_LOGE(COMM_SDK, "ClientRegisterService fail");
         goto EXIT;
     }
     g_isInited = true;
     SoftBusMutexUnlock(&g_isInitedLock);
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "softbus sdk frame init success.");
+    COMM_LOGI(COMM_SDK, "softbus sdk frame init success.");
     return SOFTBUS_OK;
 EXIT:
     FreeClientPkgName();
@@ -271,7 +270,7 @@ uint32_t GetSoftBusClientNameList(char *pkgList[], uint32_t len)
         return 0;
     }
     if (SoftBusMutexLock(&g_pkgNameLock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock init failed");
+        COMM_LOGE(COMM_SDK, "lock init failed");
         return 0;
     }
     ListNode *item = NULL;
@@ -280,11 +279,11 @@ uint32_t GetSoftBusClientNameList(char *pkgList[], uint32_t len)
         PkgNameInfo *info = LIST_ENTRY(item, PkgNameInfo, node);
         char *pkgName = (char *)SoftBusCalloc(PKG_NAME_SIZE_MAX);
         if (pkgName == NULL) {
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "get client name malloc fail");
+            COMM_LOGE(COMM_SDK, "get client name malloc fail");
             goto EXIT;
         }
         if (strcpy_s(pkgName, PKG_NAME_SIZE_MAX, info->pkgName) != EOK) {
-            SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "get client name strcpy_s failed");
+            COMM_LOGE(COMM_SDK, "get client name strcpy_s failed");
             SoftBusFree(pkgName);
             goto EXIT;
         }
@@ -312,7 +311,7 @@ int32_t CheckPackageName(const char *pkgName)
     return SOFTBUS_OK;
 #else
     if (SoftBusMutexLock(&g_pkgNameLock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "lock init failed");
+        COMM_LOGE(COMM_SDK, "lock init failed");
         return SOFTBUS_LOCK_ERR;
     }
     ListNode *item = NULL;

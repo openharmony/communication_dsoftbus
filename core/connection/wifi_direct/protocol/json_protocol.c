@@ -15,13 +15,11 @@
 
 #include "json_protocol.h"
 #include "securec.h"
-#include "softbus_log.h"
+#include "conn_log.h"
 #include "softbus_adapter_mem.h"
 #include "cJSON.h"
 #include "string.h"
 #include "softbus_json_utils.h"
-
-#define LOG_LABEL "[WD] Json: "
 
 #define DEFAULT_CAPACITY 1000
 #define CAPACITY_MAX (1024 * 64)
@@ -38,10 +36,10 @@ static enum WifiDirectProtocolType GetType(void)
 static bool Pack(struct WifiDirectProtocol *base, struct InfoContainer *container, uint8_t **outBuffer, size_t *size)
 {
     struct WifiDirectJsonProtocol *self = (struct WifiDirectJsonProtocol *)base;
-    CONN_CHECK_AND_RETURN_RET_LOG(container, false, LOG_LABEL "container is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(container, false, CONN_WIFI_DIRECT, "container is null");
 
     if (!container->marshalling(container, base)) {
-        CLOGE(LOG_LABEL "marshalling failed");
+        CONN_LOGE(CONN_WIFI_DIRECT, "marshalling failed");
         return false;
     }
 
@@ -50,9 +48,9 @@ static bool Pack(struct WifiDirectProtocol *base, struct InfoContainer *containe
 
     SoftBusFree(self->data);
     self->data = SoftBusCalloc(writeSize);
-    CONN_CHECK_AND_RETURN_RET_LOG(self->data, false, LOG_LABEL "alloc failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(self->data, false, CONN_WIFI_DIRECT, "alloc failed");
     int32_t ret = memcpy_s(self->data, writeSize, msgStr, writeSize);
-    CONN_CHECK_AND_RETURN_RET_LOG(ret == EOK, false, LOG_LABEL "copy failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == EOK, false, CONN_WIFI_DIRECT, "copy failed");
     self->writePos = writeSize;
     cJSON_free(msgStr);
     *outBuffer = self->data;
@@ -63,22 +61,23 @@ static bool Pack(struct WifiDirectProtocol *base, struct InfoContainer *containe
 static bool SetDataSource(struct WifiDirectProtocol *base, const uint8_t *data, size_t size)
 {
     struct WifiDirectJsonProtocol *self = (struct WifiDirectJsonProtocol *)base;
-    CONN_CHECK_AND_RETURN_RET_LOG(data, false, LOG_LABEL "data is null");
-    CONN_CHECK_AND_RETURN_RET_LOG(size > 0 && size <= CAPACITY_MAX, false, "size=%u is too large", size);
-    CLOGI(LOG_LABEL "size=%d", size);
+    CONN_CHECK_AND_RETURN_RET_LOGW(data, false, CONN_WIFI_DIRECT, "data is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(size > 0 && size <= CAPACITY_MAX, false, CONN_WIFI_DIRECT,
+        "size=%u is too large", size);
+    CONN_LOGI(CONN_WIFI_DIRECT, "size=%d", size);
     cJSON_Delete(self->cJsonOfMsg);
     self->cJsonOfMsg = cJSON_ParseWithLength((char *)data, size);
-    CONN_CHECK_AND_RETURN_RET_LOG(self->cJsonOfMsg, false, LOG_LABEL "cJsonOfMsg is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(self->cJsonOfMsg, false, CONN_WIFI_DIRECT, "cJsonOfMsg is null");
     self->readPos = self->cJsonOfMsg->child;
-    CONN_CHECK_AND_RETURN_RET_LOG(self->cJsonOfMsg->child, false, LOG_LABEL "cJsonOfMsg->child is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(self->cJsonOfMsg->child, false, CONN_WIFI_DIRECT, "cJsonOfMsg->child is null");
     return true;
 }
 
 static bool Unpack(struct WifiDirectProtocol *base, struct InfoContainer *container)
 {
     struct WifiDirectJsonProtocol *self = (struct WifiDirectJsonProtocol *)base;
-    CONN_CHECK_AND_RETURN_RET_LOG(self->cJsonOfMsg, false, LOG_LABEL "not set data source");
-    CONN_CHECK_AND_RETURN_RET_LOG(container, false, LOG_LABEL "container is NULL");
+    CONN_CHECK_AND_RETURN_RET_LOGW(self->cJsonOfMsg, false, CONN_WIFI_DIRECT, "not set data source");
+    CONN_CHECK_AND_RETURN_RET_LOGW(container, false, CONN_WIFI_DIRECT, "container is NULL");
     return container->unmarshalling(container, base);
 }
 
@@ -89,27 +88,27 @@ static bool WriteData(struct WifiDirectProtocol *base, struct InfoContainerKeyPr
     switch (keyProperty->type) {
         case STRING: {
             if (!AddStringToJsonObject(self->cJsonOfMsg, keyProperty->content, (char *)data)) {
-                CLOGE(LOG_LABEL "JsonProtocol pack: msg failed");
+                CONN_LOGW(CONN_WIFI_DIRECT, "JsonProtocol pack: msg failed");
                 return false;
             }
             break;
         }
         case INT: {
             if (!AddNumberToJsonObject(self->cJsonOfMsg, keyProperty->content, *(int *)data)) {
-                CLOGE(LOG_LABEL "JsonProtocol pack: msg failed");
+                CONN_LOGW(CONN_WIFI_DIRECT, "JsonProtocol pack: msg failed");
                 return false;
             }
             break;
         }
         case BOOLEAN: {
             if (!AddBoolToJsonObject(self->cJsonOfMsg, keyProperty->content, *(bool*)data)) {
-                CLOGE(LOG_LABEL "JsonProtocol pack: msg failed");
+                CONN_LOGW(CONN_WIFI_DIRECT, "JsonProtocol pack: msg failed");
                 return false;
             }
             break;
         }
         default: {
-            CLOGE(LOG_LABEL "JsonProtocol pack: invalid value type=%d", keyProperty->type);
+            CONN_LOGW(CONN_WIFI_DIRECT, "JsonProtocol pack: invalid value type=%d", keyProperty->type);
             return false;
         }
     }
@@ -122,7 +121,7 @@ static bool ReadData(struct WifiDirectProtocol *base, struct InfoContainerKeyPro
     struct WifiDirectJsonProtocol *self = (struct WifiDirectJsonProtocol *)base;
 
     cJSON *json = self->readPos;
-    CONN_CHECK_AND_RETURN_RET_LOG(json, false, LOG_LABEL "self->readPos is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(json, false, CONN_WIFI_DIRECT, "self->readPos is null");
     keyProperty->content = json->string;
     keyProperty->tag = -1;
 
@@ -130,7 +129,7 @@ static bool ReadData(struct WifiDirectProtocol *base, struct InfoContainerKeyPro
         case cJSON_String: {
             if (!GetJsonObjectStringItem(self->cJsonOfMsg, keyProperty->content,
                 (char *)self->data, DEFAULT_CAPACITY)) {
-                CLOGE(LOG_LABEL "JsonProtocol unpack: json to msg failed");
+                CONN_LOGE(CONN_WIFI_DIRECT, "JsonProtocol unpack: json to msg failed");
                 return false;
             }
             *data = self->data;
@@ -139,7 +138,7 @@ static bool ReadData(struct WifiDirectProtocol *base, struct InfoContainerKeyPro
         }
         case cJSON_Number: {
             if (!GetJsonObjectInt32Item(self->cJsonOfMsg, keyProperty->content, (int32_t *)self->data)) {
-                CLOGE(LOG_LABEL "JsonProtocol unpack: json to msg failed");
+                CONN_LOGE(CONN_WIFI_DIRECT, "JsonProtocol unpack: json to msg failed");
                 return false;
             }
             *data = self->data;
@@ -149,7 +148,7 @@ static bool ReadData(struct WifiDirectProtocol *base, struct InfoContainerKeyPro
         case cJSON_True:
         case cJSON_False : {
             if (!GetJsonObjectBoolItem(self->cJsonOfMsg, keyProperty->content, (bool *)self->data)) {
-                CLOGE(LOG_LABEL "JsonProtocol unpack: json to msg failed");
+                CONN_LOGE(CONN_WIFI_DIRECT, "JsonProtocol unpack: json to msg failed");
                 return false;
             }
             *data = self->data;
@@ -157,7 +156,7 @@ static bool ReadData(struct WifiDirectProtocol *base, struct InfoContainerKeyPro
             break;
         }
         default:
-            CLOGE(LOG_LABEL "invalid cJson type=%d", self->readPos->type);
+            CONN_LOGE(CONN_WIFI_DIRECT, "invalid cJson type=%d", self->readPos->type);
             return false;
     }
     self->readPos = self->readPos->next;
@@ -180,9 +179,9 @@ bool WifiDirectJsonProtocolConstructor(struct WifiDirectJsonProtocol *self)
 {
     self->capacity = DEFAULT_CAPACITY;
     self->data = SoftBusCalloc(self->capacity);
-    CONN_CHECK_AND_RETURN_RET_LOG(self->data, false, LOG_LABEL "alloc failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(self->data, false, CONN_WIFI_DIRECT, "alloc failed");
     self->cJsonOfMsg = cJSON_CreateObject();
-    CONN_CHECK_AND_RETURN_RET_LOG(self->cJsonOfMsg, false, LOG_LABEL "cJSON_CreateObject failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(self->cJsonOfMsg, false, CONN_WIFI_DIRECT, "cJSON_CreateObject failed");
     self->getType = GetType;
     self->pack = Pack;
     self->setDataSource = SetDataSource;

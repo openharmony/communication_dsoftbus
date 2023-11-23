@@ -18,6 +18,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "softbus_bus_center.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -28,7 +29,7 @@ extern "C" {
 int32_t ClientOnJoinLNNResult(const char *pkgName, void *addr, uint32_t addrTypeLen,
     const char *networkId, int32_t retCode);
 int32_t ClientOnJoinMetaNodeResult(const char *pkgName, void *addr, uint32_t addrTypeLen,
-    const char *networkId, int32_t retCode);
+    MetaBasicInfo *metaInfo, int32_t retCode);
 int32_t ClientOnLeaveLNNResult(const char *pkgName, const char *networkId, int32_t retCode);
 int32_t ClientOnLeaveMetaNodeResult(const char *pkgName, const char *networkId, int32_t retCode);
 int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen);

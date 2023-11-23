@@ -69,6 +69,7 @@ public:
     int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
         const GearMode *mode) override;
     int Dump(int fd, const std::vector<std::u16string> &args) override;
+    int32_t GetBusCenterExObj(sptr<IRemoteObject> &object) override;
 
 protected:
     void OnStart() override;
