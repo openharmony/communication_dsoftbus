@@ -270,4 +270,14 @@ int32_t SoftBusServerProxyFrame::RippleStats(int32_t channelId, int32_t channelT
     (void)data;
     return SOFTBUS_OK;
 }
+
+int32_t SoftBusServerProxyFrame::EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos,
+    uint32_t qosCount)
+{
+    (void)peerNetworkId;
+    (void)dataType;
+    (void)qos;
+    (void)qosCount;
+    return SOFTBUS_OK;
+}
 } // namespace OHOS

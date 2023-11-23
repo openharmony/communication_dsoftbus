@@ -71,6 +71,8 @@ public:
         const GearMode *mode);
     virtual int32_t GetSoftbusSpecObject(sptr<IRemoteObject> &object);
     virtual int32_t GetBusCenterExObj(sptr<IRemoteObject> &object);
+    virtual int32_t EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos,
+        uint32_t qosCount) = 0;
 
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISoftBusServer");

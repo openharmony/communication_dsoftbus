@@ -59,6 +59,8 @@ public:
     int32_t QosReport(int32_t channelId, int32_t chanType, int32_t appType, int32_t quality) override;
     int32_t StreamStats(int32_t channelId, int32_t channelType, const StreamSendStats *data) override;
     int32_t RippleStats(int32_t channelId, int32_t channelType, const TrafficStats *data) override;
+    int32_t EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos,
+        uint32_t qosCount) override;
 
 private:
     static inline BrokerDelegator<SoftBusServerProxyFrame> delegator_;
