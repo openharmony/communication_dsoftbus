@@ -1018,7 +1018,7 @@ int32_t InitLaneLink(void)
 {
     LaneInitP2pAddrList();
     if (SoftBusMutexInit(&g_laneResourceMutex, NULL) != SOFTBUS_OK) {
-        LNN_LOGI(LNN_LANE, "g_laneResourceMutex init failed");
+        LNN_LOGI(LNN_LANE, "g_laneResourceMutex init fail");
         return SOFTBUS_ERR;
     }
     ListInit(&g_laneResourceList);

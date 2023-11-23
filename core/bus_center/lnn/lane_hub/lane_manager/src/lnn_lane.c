@@ -277,7 +277,7 @@ static int32_t LnnRequestLaneByQos(uint32_t laneId, const LaneRequestOption *req
     const ILaneListener *listener)
 {
     if (RequestInfoCheck(request, listener) == false) {
-        LNN_LOGE(LNN_LANE, "lane requestInfoByQos invalid");
+        LNN_LOGE(LNN_LANE, "lane requestInfo by qos invalid");
         return SOFTBUS_ERR;
     }
     if (g_laneObject[request->type] == NULL) {
