@@ -21,8 +21,8 @@ int32_t SoftbusGetPublicKey(uint8_t *publicKey, uint32_t publicKeyLen)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t SoftbusRsaEncrypt(const uint8_t *srcData, uint32_t srcDataLen, const uint8_t *publicKey,
-    uint8_t **encryptedData, uint32_t *encryptedDataLen)
+int32_t SoftbusRsaEncrypt(const uint8_t *srcData, uint32_t srcDataLen, PublicKey *publicKey, uint8_t **encryptedData,
+    uint32_t *encryptedDataLen)
 {
     return SOFTBUS_NOT_IMPLEMENT;
 }
