@@ -110,7 +110,7 @@ static bool IsEnableWlan2P4G(const char *networkId)
     if (!LnnHasDiscoveryType(&node, DISCOVERY_TYPE_WIFI) && !LnnHasDiscoveryType(&node, DISCOVERY_TYPE_LSA)) {
         char *anonyNetworkId = NULL;
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGE(LNN_LANE, "peer node networkId=%s, not have discType[%d,%d]",
+        LNN_LOGE(LNN_LANE, "peer node networkId=%s, not have discType[%d, %d]",
             anonyNetworkId, DISCOVERY_TYPE_WIFI, DISCOVERY_TYPE_LSA);
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_ERR;
@@ -147,7 +147,7 @@ static bool IsEnableWlan5G(const char *networkId)
     if (!LnnHasDiscoveryType(&node, DISCOVERY_TYPE_WIFI) && !LnnHasDiscoveryType(&node, DISCOVERY_TYPE_LSA)) {
         char *anonyNetworkId = NULL;
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGE(LNN_LANE, "peer node networkId=%s, not have discType[%d,%d]",
+        LNN_LOGE(LNN_LANE, "peer node networkId=%s, not have discType[%d, %d]",
             anonyNetworkId, DISCOVERY_TYPE_WIFI, DISCOVERY_TYPE_LSA);
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_ERR;

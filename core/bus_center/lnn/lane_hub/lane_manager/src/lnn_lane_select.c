@@ -304,7 +304,7 @@ int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *req
     if (!LnnGetOnlineStateById(networkId, CATEGORY_NETWORK_ID)) {
         char *anonyNetworkId = NULL;
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGE(LNN_LANE, "device not online, cancel selectLaneByQos, networkId=%s", anonyNetworkId);
+        LNN_LOGE(LNN_LANE, "device not online, cancel selectLane by qos, networkId=%s", anonyNetworkId);
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_ERR;
     }
