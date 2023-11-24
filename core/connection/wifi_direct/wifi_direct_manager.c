@@ -75,6 +75,7 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *connectInfo, struct W
     GetWifiDirectCommandManager()->enqueueCommand(command);
     ret = GetWifiDirectNegotiator()->processNextCommand();
     extra.errcode = ret;
+    extra.result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_INVOKE_PROTOCOL, extra);
     return ret;
 }
@@ -159,7 +160,7 @@ static int32_t GetLocalIpByUuid(const char *uuid, char *localIp, int32_t localIp
     return innerLink->getLocalIpString(innerLink, localIp, localIpSize);
 }
 
-static int32_t PrejudgeAvailability(const char *remoteNetworkId, enum WifiDirectConnectType connectType)
+static int32_t PrejudgeAvailability(const char *remoteNetworkId, enum WifiDirectLinkType connectType)
 {
     return GetWifiDirectNegotiator()->prejudgeAvailability(remoteNetworkId, connectType);
 }
@@ -212,7 +213,7 @@ static void OnRemoteP2pDisable(const char *networkId)
         return;
     }
     AnonymizeFree(anonymizedNetworkId);
-    GetLinkManager()->clearNegoChannelForLink(uuid, true);
+    GetLinkManager()->clearNegotiateChannelForLink(uuid, true);
 }
 
 /* private method implement */

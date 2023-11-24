@@ -120,7 +120,8 @@ int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned
     TransEventExtra extra = {
         .channelId = channelId,
         .costTime = GetSoftbusRecordTimeMillis() - appInfo->connectedStart,
-        .errcode = ret
+        .errcode = ret,
+        .result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
     TRANS_LOGI(TRANS_CTRL, "on open ret %d", ret);
@@ -147,7 +148,8 @@ int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int3
             .costTime = timediff,
             .errcode = errCode,
             .callerPkg = appInfo->myData.pkgName,
-            .socketName = appInfo->myData.sessionName
+            .socketName = appInfo->myData.sessionName,
+            .result = EVENT_STAGE_RESULT_FAILED
         };
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     }

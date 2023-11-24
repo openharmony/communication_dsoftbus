@@ -204,7 +204,7 @@ static int32_t P2pLinkState(const char *networkId)
         return SOFTBUS_P2P_NOT_SUPPORT;
     }
 
-    int32_t ret = GetWifiDirectManager()->prejudgeAvailability(networkId, WIFI_DIRECT_CONNECT_TYPE_P2P);
+    int32_t ret = GetWifiDirectManager()->prejudgeAvailability(networkId, WIFI_DIRECT_LINK_TYPE_P2P);
     if (ret == V1_ERROR_GC_CONNECTED_TO_ANOTHER_DEVICE) {
         return SOFTBUS_P2P_ROLE_CONFLICT;
     }
@@ -234,7 +234,7 @@ static int32_t HmlLinkState(const char *networkId)
         return SOFTBUS_HML_NOT_SUPPORT;
     }
 
-    int32_t ret = GetWifiDirectManager()->prejudgeAvailability(networkId, WIFI_DIRECT_CONNECT_TYPE_HML);
+    int32_t ret = GetWifiDirectManager()->prejudgeAvailability(networkId, WIFI_DIRECT_LINK_TYPE_HML);
     if (ret == ERROR_LOCAL_THREE_VAP_CONFLICT) {
         return SOFTBUS_HML_THREE_VAP_CONFLIC;
     }

@@ -321,6 +321,29 @@ static void TransformSessionPreferredToLanePreferred(const SessionParam *param,
     return;
 }
 
+static void TransGetQosInfo(const SessionParam *param, QosInfo *qosInfo)
+{
+    if (param->qosCount == 0) {
+        return;
+    }
+
+    for (uint32_t i = 0; i < param->qosCount; i++) {
+        switch (param->qos[i].qos) {
+            case QOS_TYPE_MIN_BW:
+                qosInfo->minBW = param->qos[i].value;
+                break;
+            case QOS_TYPE_MAX_LATENCY:
+                qosInfo->maxLaneLatency = param->qos[i].value;
+                break;
+            case QOS_TYPE_MIN_LATENCY:
+                qosInfo->minLaneLatency = param->qos[i].value;
+                break;
+            default:
+                break;
+        }
+    }
+}
+
 static int32_t GetRequestOptionBySessionParam(const SessionParam *param, LaneRequestOption *requestOption)
 {
     requestOption->type = LANE_TYPE_TRANS;
@@ -346,6 +369,7 @@ static int32_t GetRequestOptionBySessionParam(const SessionParam *param, LaneReq
     requestOption->requestInfo.trans.transType = transType;
     requestOption->requestInfo.trans.expectedBw = 0; /* init expectBW */
     requestOption->requestInfo.trans.acceptableProtocols = LNN_PROTOCOL_ALL ^ LNN_PROTOCOL_NIP;
+    TransGetQosInfo(param, &requestOption->requestInfo.trans.qosRequire);
 
     NodeInfo *info = LnnGetNodeInfoById(requestOption->requestInfo.trans.networkId, CATEGORY_NETWORK_ID);
     if (info != NULL && LnnHasDiscoveryType(info, DISCOVERY_TYPE_LSA)) {
@@ -420,7 +444,8 @@ static int32_t TransWaitingRequestCallback(uint32_t laneId)
     return SOFTBUS_OK;
 }
 
-static int32_t TransAddLaneReqToPendingAndWaiting(uint32_t laneId, const LaneRequestOption *requestOption)
+static int32_t TransAddLaneReqToPendingAndWaiting(const LnnLaneManager *laneMgr, uint32_t laneId,
+    const LaneRequestOption *requestOption)
 {
     if (requestOption == NULL) {
         TRANS_LOGE(TRANS_SVC, "param error.");
@@ -437,7 +462,7 @@ static int32_t TransAddLaneReqToPendingAndWaiting(uint32_t laneId, const LaneReq
     listener.OnLaneRequestSuccess = TransOnLaneRequestSuccess;
     listener.OnLaneRequestFail = TransOnLaneRequestFail;
     listener.OnLaneStateChange = TransOnLaneStateChange;
-    if (LnnRequestLane(laneId, requestOption, &listener) != SOFTBUS_OK) {
+    if (laneMgr->lnnRequestLane(laneId, requestOption, &listener) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "trans request lane failed.");
         (void)TransDelLaneReqFromPendingList(laneId);
         return SOFTBUS_ERR;
@@ -459,12 +484,18 @@ int32_t TransGetLaneInfoByOption(const LaneRequestOption *requestOption, LaneCon
         return SOFTBUS_ERR;
     }
 
-    *laneId = ApplyLaneId(LANE_TYPE_TRANS);
+    const LnnLaneManager *laneMgr = GetLaneManager();
+    if (laneMgr == NULL) {
+        TRANS_LOGE(TRANS_SVC, "get LnnLaneManager error.");
+        return SOFTBUS_ERR;
+    }
+
+    *laneId = laneMgr->applyLaneId(LANE_TYPE_TRANS);
     if (*laneId <= 0) {
         TRANS_LOGE(TRANS_SVC, "trans apply lane failed.");
         return SOFTBUS_ERR;
     }
-    if (TransAddLaneReqToPendingAndWaiting(*laneId, requestOption) != SOFTBUS_OK) {
+    if (TransAddLaneReqToPendingAndWaiting(laneMgr, *laneId, requestOption) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "trans add lane to pending list failed.");
         return SOFTBUS_ERR;
     }
@@ -505,7 +536,8 @@ int32_t TransGetLaneInfo(const SessionParam *param, LaneConnInfo *connInfo, uint
         .laneId = *laneId,
         .peerNetworkId = param->peerDeviceId,
         .laneTransType = requestOption.requestInfo.trans.transType,
-        .errcode = ret
+        .errcode = ret,
+        .result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_SELECT_LANE, extra);
     if (ret != SOFTBUS_OK) {
@@ -602,13 +634,26 @@ static int32_t SetBleDirectConnInfo(const BleDirectConnInfo* bleDirect, ConnectO
     return SOFTBUS_OK;
 }
 
+static int32_t SetHmlConnectInfo(const P2pConnInfo *p2pInfo, ConnectOption *connOpt)
+{
+    TRANS_LOGI(TRANS_SVC, "set hml conn info.");
+    connOpt->type = CONNECT_HML;
+    if (strcpy_s(connOpt->socketOption.addr, sizeof(connOpt->socketOption.addr), p2pInfo->peerIp) != EOK) {
+        TRANS_LOGE(TRANS_SVC, "set hml localIp err");
+        return SOFTBUS_MEM_ERR;
+    }
+    connOpt->socketOption.protocol = LNN_PROTOCOL_IP;
+    connOpt->socketOption.port = -1;
+    return SOFTBUS_OK;
+}
+
 int32_t TransGetConnectOptByConnInfo(const LaneConnInfo *info, ConnectOption *connOpt)
 {
     if (info == NULL || connOpt == NULL) {
         TRANS_LOGW(TRANS_SVC, "invalid param.");
         return SOFTBUS_ERR;
     }
-    if (info->type == LANE_P2P) {
+    if (info->type == LANE_P2P || info->type == LANE_HML) {
         return SetP2pConnInfo(&(info->connInfo.p2p), connOpt);
     } else if (info->type == LANE_WLAN_2P4G || info->type == LANE_WLAN_5G || info->type == LANE_ETH) {
         return SetWlanConnInfo(&(info->connInfo.wlan), connOpt);
@@ -620,6 +665,8 @@ int32_t TransGetConnectOptByConnInfo(const LaneConnInfo *info, ConnectOption *co
         return SetP2pReusesConnInfo(&(info->connInfo.wlan), connOpt);
     } else if (info->type == LANE_BLE_DIRECT || info->type == LANE_COC_DIRECT) {
         return SetBleDirectConnInfo(&(info->connInfo.bleDirect), connOpt);
+    } else if (info->type == LANE_HML) {
+        return SetHmlConnectInfo(&(info->connInfo.p2p), connOpt);
     }
 
     TRANS_LOGE(TRANS_SVC, "get conn opt err: type=%d", info->type);

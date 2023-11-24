@@ -468,6 +468,7 @@ EXIT_ERR:
     extra.channelId = transInfo->channelId;
     extra.errcode = ret;
     extra.costTime = GetSoftbusRecordTimeMillis() - timeStart;
+    extra.result = EVENT_STAGE_RESULT_FAILED;
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     if (appInfo->fastTransData != NULL) {
         SoftBusFree((void*)appInfo->fastTransData);
@@ -712,7 +713,8 @@ int32_t TransCloseChannel(int32_t channelId, int32_t channelType)
     TransEventExtra extra = {
         .channelId = channelId,
         .channelType = channelType,
-        .errcode = ret
+        .errcode = ret,
+        .result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED
     };
     TRANS_EVENT(EVENT_SCENE_CLOSE_CHANNEL_ACTIVE, EVENT_STAGE_CLOSE_CHANNEL, extra);
     return ret;

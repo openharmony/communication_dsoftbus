@@ -236,26 +236,33 @@ int32_t DiscCoapSetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capab
     return SOFTBUS_OK;
 }
 
-int32_t DiscCoapRegisterServiceData(const unsigned char *serviceData, uint32_t dataLen)
+int32_t DiscCoapRegisterServiceData(const unsigned char *capabilityData, uint32_t dataLen, uint32_t capability)
 {
-    (void)serviceData;
-    (void)dataLen;
-    DISC_CHECK_AND_RETURN_RET_LOGW(g_capabilityData != NULL, SOFTBUS_DISCOVER_COAP_INIT_FAIL,
+    DISC_CHECK_AND_RETURN_RET_LOGE(g_capabilityData != NULL, SOFTBUS_DISCOVER_COAP_INIT_FAIL,
         DISC_COAP, "g_capabilityData=NULL");
 
     int32_t authPort = 0;
-    if (LnnGetLocalNumInfo(NUM_KEY_AUTH_PORT, &authPort) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_COAP, "get auth port from lnn failed.");
-    }
-    (void)memset_s(g_capabilityData, NSTACKX_MAX_SERVICE_DATA_LEN, 0, NSTACKX_MAX_SERVICE_DATA_LEN);
-    if (sprintf_s(g_capabilityData, NSTACKX_MAX_SERVICE_DATA_LEN, "port:%d,", authPort) == -1) {
+    int32_t ret = LnnGetLocalNumInfo(NUM_KEY_AUTH_PORT, &authPort);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, DISC_COAP, "get auth port failed: %d", ret);
+
+    char serviceData[NSTACKX_MAX_SERVICE_DATA_LEN] = {0};
+    if (sprintf_s(serviceData, NSTACKX_MAX_SERVICE_DATA_LEN, "port:%d,", authPort) == -1) {
         DISC_LOGE(DISC_COAP, "write auth port to service data failed.");
         return SOFTBUS_ERR;
     }
-    if (NSTACKX_RegisterServiceData(g_capabilityData) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_COAP, "register service data to nstackx failed.");
+    // capabilityData can be NULL, it will be check in this func
+    ret = DiscCoapFillServiceData(capability, (const char *)capabilityData, dataLen, g_capabilityData);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, DISC_COAP, "fill service data failed: %d", ret);
+
+    if (strlen(g_capabilityData) != 0 &&
+        sprintf_s(serviceData, NSTACKX_MAX_SERVICE_DATA_LEN, "%s%s", serviceData, g_capabilityData) < 0) {
+        DISC_LOGE(DISC_COAP, "write capability data to service data failed.");
         return SOFTBUS_ERR;
     }
+
+    ret = NSTACKX_RegisterServiceData(serviceData);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, DISC_COAP,
+        "register service data to nstackx failed: %d", ret);
     return SOFTBUS_OK;
 }
 

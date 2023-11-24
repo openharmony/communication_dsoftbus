@@ -59,7 +59,8 @@ public:
     int32_t RemovePermission(const char *sessionName) override;
     int32_t RippleStats(int32_t channelId, int32_t channelType, const TrafficStats *statsData) override;
     int32_t GetSoftbusSpecObject(sptr<IRemoteObject> &object) override;
-
+    int32_t EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos,
+        uint32_t qosCount) override;
 private:
     static inline BrokerDelegator<TransServerProxy> delegator_;
 };

@@ -380,7 +380,8 @@ int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)
         .socketName = conn.appInfo.myData.sessionName,
         .linkType = conn.appInfo.linkType,
         .costTime = timediff,
-        .errcode = errCode
+        .errcode = errCode,
+        .result = EVENT_STAGE_RESULT_FAILED
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     SoftbusRecordOpenSessionKpi(conn.appInfo.myData.pkgName,
@@ -505,7 +506,8 @@ static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *re
     if (UnpackReplyErrCode(reply, &errCode) == SOFTBUS_OK) {
         TransEventExtra extra = {
             .channelId = channelId,
-            .errcode = errCode
+            .errcode = errCode,
+            .result = EVENT_STAGE_RESULT_FAILED
         };
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
         TRANS_LOGE(TRANS_CTRL, "receive err reply msg");

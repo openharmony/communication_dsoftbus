@@ -957,4 +957,14 @@ int32_t BusCenterServerProxy::GetBusCenterExObj(sptr<IRemoteObject> &object)
     }
     return ret;
 }
+
+int32_t BusCenterServerProxy::EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos,
+    uint32_t qosCount)
+{
+    (void)peerNetworkId;
+    (void)dataType;
+    (void)qos;
+    (void)qosCount;
+    return SOFTBUS_OK;
+}
 } // namespace OHOS

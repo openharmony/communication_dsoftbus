@@ -64,12 +64,13 @@ static int32_t ReuseLink(struct WifiDirectConnectCommand *command)
         return SOFTBUS_OK;
     }
 
-    enum WifiDirectConnectType connectType = link->getInt(link, IL_KEY_CONNECT_TYPE, WIFI_DIRECT_CONNECT_TYPE_HML);
+    enum WifiDirectLinkType linkType = link->getInt(link, IL_KEY_LINK_TYPE, WIFI_DIRECT_LINK_TYPE_HML);
     struct WifiDirectProcessor *processor =
-        GetWifiDirectDecisionCenter()->getProcessorByNegoChannelAndConnectType(connectInfo->negoChannel, connectType);
+        GetWifiDirectDecisionCenter()->getProcessorByNegoChannelAndLinkType(connectInfo->negoChannel, linkType);
 
     command->processor = processor;
     processor->activeCommand = (struct WifiDirectCommand *)command;
+    CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=%p", command);
     GetWifiDirectNegotiator()->currentProcessor = processor;
 
     return processor->reuseLink(connectInfo, link);
@@ -91,6 +92,7 @@ static int32_t OpenLink(struct WifiDirectConnectCommand *command)
 
     command->processor = processor;
     processor->activeCommand = (struct WifiDirectCommand *)command;
+    CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=%p", command);
     GetWifiDirectNegotiator()->currentProcessor = processor;
 
     return processor->createLink(connectInfo);
@@ -157,6 +159,17 @@ static void OnFailure(struct WifiDirectCommand *base, int32_t reason)
     GetLinkManager()->dump();
 }
 
+static struct WifiDirectCommand* Duplicate(struct WifiDirectCommand *base)
+{
+    struct WifiDirectConnectCommand *self = (struct WifiDirectConnectCommand *)base;
+    struct WifiDirectConnectCommand *copy =
+        (struct WifiDirectConnectCommand *)WifiDirectConnectCommandNew(&self->connectInfo, &self->callback);
+    if (copy != NULL) {
+        copy->times = self->times;
+    }
+    return (struct WifiDirectCommand *)copy;
+}
+
 void WifiDirectConnectCommandConstructor(struct WifiDirectConnectCommand *self,
                                          struct WifiDirectConnectInfo *connectInfo,
                                          struct WifiDirectConnectCallback *callback)
@@ -166,6 +179,7 @@ void WifiDirectConnectCommandConstructor(struct WifiDirectConnectCommand *self,
     self->execute = ExecuteConnection;
     self->onSuccess = OnSuccess;
     self->onFailure = OnFailure;
+    self->duplicate = Duplicate;
     self->deleteSelf = WifiDirectConnectCommandDelete;
     *(&self->connectInfo) = *connectInfo;
     if (connectInfo->negoChannel != NULL) {
