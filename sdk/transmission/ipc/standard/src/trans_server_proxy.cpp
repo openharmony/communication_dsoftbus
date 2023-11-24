@@ -231,3 +231,18 @@ int32_t ServerIpcRemovePermission(const char *sessionName)
     }
     return g_serverProxy->RemovePermission(sessionName);
 }
+
+int32_t ServerIpcEvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos, uint32_t qosCount)
+{
+    if (g_serverProxy == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "softbus server g_serverProxy is nullptr!");
+        return SOFTBUS_NO_INIT;
+    }
+
+    if (peerNetworkId == NULL || dataType >= DATA_TYPE_BUTT || qosCount >= QOS_TYPE_BUTT) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    return g_serverProxy->EvaluateQos(peerNetworkId, dataType, qos, qosCount);
+}

@@ -407,3 +407,50 @@ int32_t LnnSetSupportedProtocols(NodeInfo *info, uint64_t protocols)
     info->supportedProtocols = protocols;
     return SOFTBUS_OK;
 }
+
+int32_t LnnSetStaticCapability(NodeInfo *info, uint8_t *cap, uint32_t len)
+{
+    if (info == NULL || cap == NULL) {
+        LNN_LOGE(LNN_LEDGER, "param is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (len <= 0 || len > STATIC_CAP_LEN) {
+        LNN_LOGE(LNN_LEDGER, "length error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (memcpy_s(info->staticCapability, STATIC_CAP_LEN, cap, len) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy static cap err");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnGetStaticCapability(NodeInfo *info, uint8_t *cap, uint32_t len)
+{
+    if (info == NULL || cap == NULL) {
+        LNN_LOGE(LNN_LEDGER, "param err");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (len < 0 || len > STATIC_CAP_LEN) {
+        LNN_LOGE(LNN_LEDGER, "param err");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (memcpy_s(cap, len, info->staticCapability, info->staticCapLen) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy static cap err");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnSetPtk(NodeInfo *info, const char *remotePtk)
+{
+    if (info == NULL || remotePtk == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (memcpy_s(info->remotePtk, PTK_DEFAULT_LEN, remotePtk, PTK_DEFAULT_LEN) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy ptk err");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
