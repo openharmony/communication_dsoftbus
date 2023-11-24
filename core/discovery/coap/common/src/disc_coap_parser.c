@@ -26,6 +26,7 @@
 #define JSON_WLAN_IP      "wifiIpAddr"
 #define JSON_SERVICE_DATA "serviceData"
 #define JSON_HW_ACCOUNT   "hwAccountHashVal"
+#define JSON_KEY_CAST_PLUS "castPlus"
 
 #define MAX_SERVICE_DATA_LEN 64
 #define HEX_HASH_LEN 16
@@ -108,6 +109,11 @@ int32_t DiscCoapParseServiceData(const cJSON *data, DeviceInfo *device)
         DISC_LOGW(DISC_COAP, "parse service data failed.");
         return SOFTBUS_ERR;
     }
+    char serviceDataBak[MAX_SERVICE_DATA_LEN] = {0};
+    if (memcpy_s(serviceDataBak, MAX_SERVICE_DATA_LEN, serviceData, MAX_SERVICE_DATA_LEN) != EOK) {
+        DISC_LOGE(DISC_COAP, "copy service data bak failed.");
+        return SOFTBUS_ERR;
+    }
     char port[MAX_PORT_STR_LEN] = {0};
     ParseItemDataFromServiceData(serviceData, SERVICE_DATA_PORT, port, sizeof(port));
     int authPort = atoi(port);
@@ -116,6 +122,29 @@ int32_t DiscCoapParseServiceData(const cJSON *data, DeviceInfo *device)
         return SOFTBUS_ERR;
     }
     device->addr[0].info.ip.port = (uint16_t)authPort;
+
+    char castData[MAX_SERVICE_DATA_LEN] = {0};
+    ParseItemDataFromServiceData(serviceDataBak, JSON_KEY_CAST_PLUS, castData, sizeof(castData));
+    if (strlen(castData) == 0) {
+        // no cast data, just return ok
+        return SOFTBUS_OK;
+    }
+    cJSON *castJson = cJSON_CreateObject();
+    DISC_CHECK_AND_RETURN_RET_LOGE(castJson != NULL, SOFTBUS_CREATE_JSON_ERR, DISC_COAP, "create cast json failed");
+    if (!AddStringToJsonObject(castJson, JSON_KEY_CAST_PLUS, castData)) {
+        DISC_LOGE(DISC_COAP, "add cast data failed");
+        cJSON_Delete(castJson);
+        return SOFTBUS_CREATE_JSON_ERR;
+    }
+    char *castStr = cJSON_PrintUnformatted(castJson);
+    cJSON_Delete(castJson);
+
+    if (strcpy_s(device->custData, strlen(castStr) + 1, castStr) != EOK) {
+        DISC_LOGE(DISC_COAP, "copy cast data failed");
+        cJSON_free(castStr);
+        return SOFTBUS_STRCPY_ERR;
+    }
+    cJSON_free(castStr);
     return SOFTBUS_OK;
 }
 
@@ -132,4 +161,38 @@ void DiscCoapParseHwAccountHash(const cJSON *data, DeviceInfo *device)
     int32_t ret = SoftBusGenerateStrHash((const unsigned char *)tmpAccount, strlen(tmpAccount),
         (unsigned char *)device->accountHash);
     DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "generate account hash failed, ret=%d", ret);
+}
+
+int32_t DiscCoapFillServiceData(uint32_t capability, const char *capabilityData, uint32_t dataLen, char *outData)
+{
+    DISC_CHECK_AND_RETURN_RET_LOGE(outData != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "out data is NULL");
+    if (capability != (1 << CASTPLUS_CAPABILITY_BITMAP)) {
+        // only castPlus need add extra service data
+        return SOFTBUS_OK;
+    }
+    (void)memset_s(outData, sizeof(outData), 0, sizeof(outData));
+    if (capabilityData == NULL || dataLen == 0) {
+        DISC_LOGI(DISC_COAP, "no capability data, no need to fill service data");
+        return SOFTBUS_OK;
+    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(strlen(capabilityData) == dataLen, SOFTBUS_INVALID_PARAM, DISC_COAP,
+        "capability data len(%u) != expected len(%u), data=%s", strlen(capabilityData), dataLen, capabilityData);
+
+    cJSON *json = cJSON_ParseWithLength(capabilityData, dataLen);
+    DISC_CHECK_AND_RETURN_RET_LOGE(json != NULL, SOFTBUS_CREATE_JSON_ERR, DISC_COAP,
+        "trans capability data to json failed");
+    
+    char jsonStr[MAX_SERVICE_DATA_LEN] = {0};
+    if (!GetJsonObjectStringItem(json, JSON_KEY_CAST_PLUS, jsonStr, MAX_SERVICE_DATA_LEN)) {
+        DISC_LOGE(DISC_COAP, "parse cast capability data failed");
+        cJSON_Delete(json);
+        return SOFTBUS_PARSE_JSON_ERR;
+    }
+    if (sprintf_s(outData, MAX_SERVICE_DATA_LEN, "%s:%s", JSON_KEY_CAST_PLUS, jsonStr) < 0) {
+        DISC_LOGE(DISC_COAP, "write cast capability data failed");
+        cJSON_Delete(json);
+        return SOFTBUS_ERR;
+    }
+    cJSON_Delete(json);
+    return SOFTBUS_OK;
 }
