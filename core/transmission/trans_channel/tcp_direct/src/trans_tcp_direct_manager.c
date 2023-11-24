@@ -262,7 +262,7 @@ int32_t TransOpenDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, 
     }
 
     int32_t ret = SOFTBUS_ERR;
-    if (connInfo->type == CONNECT_P2P) {
+    if (connInfo->type == CONNECT_P2P || connInfo->type == CONNECT_HML) {
         appInfo->routeType = WIFI_P2P;
         ret = OpenP2pDirectChannel(appInfo, connInfo, channelId);
     } else if (connInfo->type == CONNECT_P2P_REUSE) {
