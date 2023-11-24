@@ -607,7 +607,7 @@ int32_t TransGetConnectOptByConnInfo(const LaneConnInfo *info, ConnectOption *co
         TRANS_LOGW(TRANS_SVC, "invalid param.");
         return SOFTBUS_ERR;
     }
-    if (info->type == LANE_P2P) {
+    if (info->type == LANE_P2P || info->type == LANE_HML) {
         return SetP2pConnInfo(&(info->connInfo.p2p), connOpt);
     } else if (info->type == LANE_WLAN_2P4G || info->type == LANE_WLAN_5G || info->type == LANE_ETH) {
         return SetWlanConnInfo(&(info->connInfo.wlan), connOpt);

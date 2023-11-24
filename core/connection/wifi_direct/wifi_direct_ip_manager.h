@@ -24,15 +24,13 @@ extern "C" {
 #endif
 
 struct WifiDirectIpManager {
-    int32_t (*applyIp)(struct WifiDirectIpv4Info *remoteArray, int32_t remoteArraySize,
-                       struct WifiDirectIpv4Info *local, struct WifiDirectIpv4Info *remote);
+    int32_t (*applyIp)(struct WifiDirectIpv4Info *remoteArray, size_t remoteArraySize,
+                       struct WifiDirectIpv4Info *sink, struct WifiDirectIpv4Info *source);
     int32_t (*configIp)(const char *interface, struct WifiDirectIpv4Info *local, struct WifiDirectIpv4Info *remote,
                         const char *remoteMac);
     void (*releaseIp)(const char *interface, struct WifiDirectIpv4Info *local, struct WifiDirectIpv4Info *remote,
                       const char *remoteMac);
     void (*cleanAllIps)(const char *interface);
-
-    ListNode ipList;
 };
 
 struct WifiDirectIpManager* GetWifiDirectIpManager(void);
