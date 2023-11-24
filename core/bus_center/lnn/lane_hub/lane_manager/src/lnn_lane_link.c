@@ -717,7 +717,24 @@ static int32_t LaneLinkOfGattDirect(uint32_t reqId, const LinkRequest *reqInfo, 
 
 static int32_t LaneLinkOfP2p(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
 {
-    return LnnConnectP2p(reqInfo, reqId, callback);
+    LinkRequest linkInfo;
+    if (memcpy_s(&linkInfo, sizeof(LinkRequest), reqInfo, sizeof(LinkRequest)) != EOK) {
+        LNN_LOGE(LNN_LANE, "p2p copy linkreqinfo fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    linkInfo.linkType = LANE_P2P;
+    return LnnConnectP2p(&linkInfo, reqId, callback);
+}
+
+static int32_t LaneLinkOfHml(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
+{
+    LinkRequest linkInfo;
+    if (memcpy_s(&linkInfo, sizeof(LinkRequest), reqInfo, sizeof(LinkRequest)) != EOK) {
+        LNN_LOGE(LNN_LANE, "hml copy linkreqinfo fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    linkInfo.linkType = LANE_HML;
+    return LnnConnectP2p(&linkInfo, reqId, callback);
 }
 
 static int32_t LaneLinkOfP2pReuse(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
@@ -940,7 +957,6 @@ static LaneLinkByType g_linkTable[LANE_LINK_TYPE_BUTT] = {
     [LANE_BR] = LaneLinkOfBr,
     [LANE_BLE] = LaneLinkOfBle,
     [LANE_P2P] = LaneLinkOfP2p,
-    [LANE_HML] = LaneLinkOfP2p,
     [LANE_WLAN_2P4G] = LaneLinkOfWlan,
     [LANE_WLAN_5G] = LaneLinkOfWlan,
     [LANE_BLE_REUSE] = LaneLinkOfBleReuse,
@@ -948,6 +964,7 @@ static LaneLinkByType g_linkTable[LANE_LINK_TYPE_BUTT] = {
     [LANE_BLE_DIRECT] = LaneLinkOfGattDirect,
     [LANE_COC] = LaneLinkOfCoc,
     [LANE_COC_DIRECT] = LaneLinkOfCocDirect,
+    [LANE_HML] = LaneLinkOfHml,
 };
 
 int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *callback)
