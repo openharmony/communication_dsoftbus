@@ -720,7 +720,8 @@ void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg)
         TransEventExtra extra = {
             .channelId = info->myId,
             .peerChannelId = info->peerId,
-            .errcode = errCode
+            .errcode = errCode,
+            .result = EVENT_STAGE_RESULT_FAILED
         };
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
         TransProxyProcessErrMsg(info, errCode);
@@ -1253,7 +1254,8 @@ void TransProxyOpenProxyChannelSuccess(int32_t chanId)
         TransEventExtra extra = {
             .channelId = chanId,
             .connectionId = chan->connId,
-            .errcode = ret
+            .errcode = ret,
+            .result = EVENT_STAGE_RESULT_FAILED
         };
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_START, extra);
         (void)TransProxyCloseConnChannel(chan->connId);

@@ -572,7 +572,8 @@ static void TransOnConnectFailed(uint32_t requestId, int32_t reason)
 {
     TransEventExtra extra = {
         .requestId = requestId,
-        .errcode = reason
+        .errcode = reason,
+        .result = EVENT_STAGE_RESULT_FAILED
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, extra);
     TRANS_LOGE(TRANS_CTRL, "Connect fail reqId=%u, reason=%d", requestId, reason);

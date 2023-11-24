@@ -262,7 +262,7 @@ int32_t TransOpenDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, 
         return ret;
     }
 
-    if (connInfo->type == CONNECT_P2P) {
+    if (connInfo->type == CONNECT_P2P || connInfo->type == CONNECT_HML) {
         appInfo->routeType = WIFI_P2P;
         ret = OpenP2pDirectChannel(appInfo, connInfo, channelId);
     } else if (connInfo->type == CONNECT_P2P_REUSE) {
@@ -277,7 +277,8 @@ int32_t TransOpenDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, 
         .channelType = CHANNEL_TYPE_TCP_DIRECT,
         .channelId = *channelId,
         .errcode = ret,
-        .socketName = appInfo->myData.sessionName
+        .socketName = appInfo->myData.sessionName,
+        .result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED
     };
 
     SessionConn conn;

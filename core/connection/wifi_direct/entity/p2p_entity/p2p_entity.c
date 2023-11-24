@@ -38,7 +38,7 @@ static void OnClientJoinTimeout(void *data);
 static int32_t CreateServer(struct WifiDirectConnectParams *params)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "freq=%d isNeedDhcp=%d isWideBandSupported=%d ifName=%s peerMac=%s",
-          params->freq, params->isNeedDhcp, params->isWideBandSupported, params->interface,
+          params->frequency, params->isNeedDhcp, params->isWideBandSupported, params->interface,
           WifiDirectAnonymizeMac(params->remoteMac));
 
     struct P2pEntity *self = GetP2pEntity();

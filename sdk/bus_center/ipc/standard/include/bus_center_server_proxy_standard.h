@@ -66,6 +66,8 @@ public:
     int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
         const GearMode *mode) override;
     int32_t GetBusCenterExObj(sptr<IRemoteObject> &object) override;
+    int32_t EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos,
+        uint32_t qosCount) override;
 
 private:
     static inline BrokerDelegator<BusCenterServerProxy> delegator_;

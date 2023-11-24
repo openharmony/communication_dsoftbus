@@ -210,7 +210,8 @@ static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channel
         TransEventExtra extra = {
             .channelId = channelId,
             .socketFd = fd,
-            .errcode = ret
+            .errcode = ret,
+            .result = EVENT_STAGE_RESULT_FAILED
         };
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
         DelTrigger(module, fd, READ_TRIGGER);
@@ -264,7 +265,8 @@ static int32_t TdcOnDataEvent(ListenerModule module, int events, int fd)
             .socketFd = fd,
             .channelId = conn->channelId,
             .authId = conn->authId,
-            .errcode = ret
+            .errcode = ret,
+            .result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED
         };
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_START, extra);
         if (ret != SOFTBUS_OK) {

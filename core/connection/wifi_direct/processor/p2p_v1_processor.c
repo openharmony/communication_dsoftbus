@@ -91,7 +91,7 @@ static struct NegotiateMessage* BuildNegotiateResult(enum WifiDirectErrorCode re
                                                      struct WifiDirectNegotiateChannel *channel);
 
 static void UpdateReuseCount(int32_t delta);
-static void InitBasicInnerLink(struct InnerLink *innerLink, bool isClient);
+static void InitBasicInnerLink(struct InnerLink *innerLink);
 static void NotifyNewClient(const char *localInterface, const char *remoteMac);
 static void CancelNewClient(const char *localInterface, const char *remoteMac);
 static int32_t ChoseFrequency(int32_t gcFreq, int32_t *gcChannelArray, size_t gcChannelArraySize);
@@ -124,10 +124,9 @@ static int32_t CreateLink(struct WifiDirectConnectInfo *connectInfo)
 
     struct InnerLink link;
     InnerLinkConstructor(&link);
-    InitBasicInnerLink(&link, false);
+    InitBasicInnerLink(&link);
     link.putString(&link, IL_KEY_DEVICE_ID, remoteDeviceId);
 
-    link.putBoolean(&link, IL_KEY_IS_SOURCE, true);
     link.putString(&link, IL_KEY_LOCAL_BASE_MAC, info->getString(info, II_KEY_BASE_MAC, ""));
     link.putString(&link, IL_KEY_REMOTE_BASE_MAC, connectInfo->remoteMac);
     link.putRawData(&link, IL_KEY_LOCAL_IPV4, info->getRawData(info, II_KEY_IPV4, NULL, NULL),
@@ -223,6 +222,7 @@ static void ProcessNegotiateMessage(enum WifiDirectNegotiateCmdType cmd, struct 
         self->passiveCommand->deleteSelf(self->passiveCommand);
     }
     self->passiveCommand = command;
+    CONN_LOGI(CONN_WIFI_DIRECT, "passiveCommand=%p", command);
 
     switch (cmd) {
         case CMD_CONN_V1_REQ:
@@ -297,10 +297,12 @@ static void ResetContext(void)
     if (self->activeCommand != NULL) {
         self->activeCommand->deleteSelf(self->activeCommand);
         self->activeCommand = NULL;
+        CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=NULL");
     }
     if (self->passiveCommand != NULL) {
         self->passiveCommand->deleteSelf(self->passiveCommand);
         self->passiveCommand = NULL;
+        CONN_LOGI(CONN_WIFI_DIRECT, "passiveCommand=NULL");
     }
 }
 
@@ -310,7 +312,7 @@ static bool IsMessageNeedPending(enum WifiDirectNegotiateCmdType cmd, struct Neg
     CONN_LOGI(CONN_WIFI_DIRECT, "currentState=%d", self->currentState);
     switch (self->currentState) {
         case P2P_V1_PROCESSOR_STATE_AVAILABLE:
-            return false;
+            return self->passiveCommand != NULL;
         case P2P_V1_PROCESSOR_STATE_WAITING_REQ_RESPONSE:
             return !(cmd == CMD_CONN_V1_RESP || cmd == CMD_CONN_V1_REQ);
         case P2P_V1_PROCESSOR_STATE_WAITING_REUSE_RESPONSE:
@@ -373,7 +375,6 @@ static int32_t CreateLinkAsGo(int32_t requestId, const char *remoteMac, struct I
         "request gc ip failed");
 
     innerLink->putRemoteIpString(innerLink, gcIp);
-    innerLink->putBoolean(innerLink, IL_KEY_IS_CLIENT, false);
     GetLinkManager()->notifyLinkChange(innerLink);
 
     struct NegotiateMessage *output = BuildConnectRequestAsGo(remoteMac, gcIp, channel);
@@ -441,7 +442,7 @@ static int32_t CreateGroup(struct NegotiateMessage *msg)
 
     struct WifiDirectConnectParams params;
     (void)memset_s(&params, sizeof(params), 0, sizeof(params));
-    params.freq = finalFrequency;
+    params.frequency = finalFrequency;
     params.isWideBandSupported = isLocalWideBandSupported && isRemoteWideBandSupported;
     ret = strcpy_s(params.interface, sizeof(params.interface), IF_NAME_P2P);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == EOK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "copy interface failed");
@@ -495,7 +496,6 @@ static int32_t RemoveLink(const char *remoteMac)
 {
     struct WifiDirectConnectParams params;
     (void)memset_s(&params, sizeof(params), 0, sizeof(params));
-    params.connectType = WIFI_DIRECT_CONNECT_TYPE_P2P;
 
     int32_t ret = strcpy_s(params.remoteMac, sizeof(params.remoteMac), remoteMac);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == EOK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "copy remote mac failed");
@@ -822,11 +822,10 @@ static int32_t ProcessConnectRequestAsGo(struct NegotiateMessage *msg, enum Wifi
 
     struct InnerLink link;
     InnerLinkConstructor(&link);
-    InitBasicInnerLink(&link, false);
+    InitBasicInnerLink(&link);
     SetInnerLinkDeviceId(msg, &link);
     link.putString(&link, IL_KEY_LOCAL_BASE_MAC, info->getString(info, II_KEY_BASE_MAC, ""));
     link.putString(&link, IL_KEY_REMOTE_BASE_MAC, msg->getString(msg, NM_KEY_GC_MAC, ""));
-    link.putBoolean(&link, IL_KEY_IS_SOURCE, false);
     link.putBoolean(&link, IL_KEY_IS_BEING_USED_BY_REMOTE, true);
 
     int32_t ret = SOFTBUS_OK;
@@ -854,7 +853,7 @@ static int32_t ProcessConnectRequestAsGc(struct NegotiateMessage *msg, enum Wifi
 
     struct InnerLink link;
     InnerLinkConstructor(&link);
-    InitBasicInnerLink(&link, true);
+    InitBasicInnerLink(&link);
     SetInnerLinkDeviceId(msg, &link);
 
     char *localMac = info->getString(info, II_KEY_BASE_MAC, "");
@@ -921,7 +920,7 @@ static int32_t ProcessNoAvailableInterface(struct NegotiateMessage *msg, enum Wi
     CONN_LOGI(CONN_WIFI_DIRECT, "remoteDeviceId=%s", anonymizedRemoteUuid);
     AnonymizeFree(anonymizedRemoteUuid);
 
-    ListNode *linkList = &GetLinkManager()->linkLists[WIFI_DIRECT_CONNECT_TYPE_P2P];
+    ListNode *linkList = &GetLinkManager()->linkLists[WIFI_DIRECT_LINK_TYPE_P2P];
     struct InnerLink *link = NULL;
     LIST_FOR_EACH_ENTRY(link, linkList, struct InnerLink, node) {
         char *remoteDeviceIdOfLink = link->getString(link, IL_KEY_DEVICE_ID, "");
@@ -951,7 +950,7 @@ static char *GetGoMac(enum WifiDirectRole myRole)
         return info->getString(info, II_KEY_BASE_MAC, "");
     }
 
-    ListNode *p2pList = &GetLinkManager()->linkLists[WIFI_DIRECT_CONNECT_TYPE_P2P];
+    ListNode *p2pList = &GetLinkManager()->linkLists[WIFI_DIRECT_LINK_TYPE_P2P];
     if (IsListEmpty(p2pList)) {
         return "";
     }
@@ -987,9 +986,11 @@ static int32_t ProcessConflictRequest(struct WifiDirectCommand *command)
         }
         self->passiveCommand->deleteSelf(self->passiveCommand);
         self->passiveCommand = NULL;
+        CONN_LOGI(CONN_WIFI_DIRECT, "passiveCommand=NULL");
         return SOFTBUS_OK;
     }
 
+    StopTimer();
     CONN_LOGI(CONN_WIFI_DIRECT, "need reversal, process remote request and retry local command");
     struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(IF_NAME_P2P);
     enum WifiDirectApiRole myApiRole =
@@ -1003,6 +1004,8 @@ static int32_t ProcessConflictRequest(struct WifiDirectCommand *command)
 
     GetWifiDirectNegotiator()->retryCurrentCommand();
     self->activeCommand = NULL;
+    CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=NULL");
+    self->currentState = P2P_V1_PROCESSOR_STATE_AVAILABLE;
     return SOFTBUS_ERR;
 }
 
@@ -1070,13 +1073,13 @@ static int32_t ProcessConnectResponseAsGo(struct NegotiateMessage *msg)
         return result;
     }
     struct InnerLink link;
-    InnerLinkConstructorWithArgs(&link, WIFI_DIRECT_CONNECT_TYPE_P2P, false, IF_NAME_P2P, remoteMac);
+    InnerLinkConstructorWithArgs(&link, WIFI_DIRECT_LINK_TYPE_P2P, IF_NAME_P2P, remoteMac);
     link.setState(&link, INNER_LINK_STATE_CONNECTED);
     link.putRemoteIpString(&link, msg->getString(msg, NM_KEY_IP, ""));
     GetLinkManager()->notifyLinkChange(&link);
     InnerLinkDestructor(&link);
 
-    struct InnerLink *innerLink = GetLinkManager()->getLinkByTypeAndDevice(WIFI_DIRECT_CONNECT_TYPE_P2P, remoteMac);
+    struct InnerLink *innerLink = GetLinkManager()->getLinkByTypeAndDevice(WIFI_DIRECT_LINK_TYPE_P2P, remoteMac);
     ProcessSuccess(innerLink);
     return SOFTBUS_OK;
 }
@@ -1107,7 +1110,6 @@ static int32_t ProcessConnectResponseWithGoInfoAsNone(struct NegotiateMessage *m
     }
 
     struct InnerLink *link = self->currentInnerLink;
-    link->putBoolean(link, IL_KEY_IS_CLIENT, true);
     link->putRemoteIpString(link, remoteIp);
     link->putLocalIpString(link, localIp);
     link->putString(link, IL_KEY_REMOTE_BASE_MAC, remoteMac);
@@ -1188,7 +1190,7 @@ static int32_t ProcessDisconnectRequest(struct WifiDirectCommand *command)
     }
 
     CONN_LOGI(CONN_WIFI_DIRECT, "wait removing group to be done");
-    struct InnerLink *innerLink = GetLinkManager()->getLinkByTypeAndDevice(WIFI_DIRECT_CONNECT_TYPE_P2P, remoteMac);
+    struct InnerLink *innerLink = GetLinkManager()->getLinkByTypeAndDevice(WIFI_DIRECT_LINK_TYPE_P2P, remoteMac);
     if (innerLink != NULL) {
         innerLink->setState(innerLink, INNER_LINK_STATE_DISCONNECTING);
         CONN_LOGI(CONN_WIFI_DIRECT, "set innerLink state to disconnecting");
@@ -1213,7 +1215,7 @@ static int32_t ProcessReuseRequest(struct WifiDirectCommand *command)
         goto Failed;
     }
     char *remoteMac = msg->getString(msg, NM_KEY_MAC, "");
-    struct InnerLink *oldLink = GetLinkManager()->getLinkByTypeAndDevice(WIFI_DIRECT_CONNECT_TYPE_P2P, remoteMac);
+    struct InnerLink *oldLink = GetLinkManager()->getLinkByTypeAndDevice(WIFI_DIRECT_LINK_TYPE_P2P, remoteMac);
     if (oldLink == NULL) {
         CONN_LOGE(CONN_WIFI_DIRECT, "link is null");
         goto Failed;
@@ -1224,8 +1226,7 @@ static int32_t ProcessReuseRequest(struct WifiDirectCommand *command)
     }
 
     struct InnerLink link;
-    InnerLinkConstructorWithArgs(&link, WIFI_DIRECT_CONNECT_TYPE_P2P,
-                                 oldLink->getBoolean(oldLink, IL_KEY_IS_CLIENT, false), IF_NAME_P2P, remoteMac);
+    InnerLinkConstructorWithArgs(&link, WIFI_DIRECT_LINK_TYPE_P2P, IF_NAME_P2P, remoteMac);
     link.putBoolean(&link, IL_KEY_IS_BEING_USED_BY_REMOTE, true);
     GetLinkManager()->notifyLinkChange(&link);
     InnerLinkDestructor(&link);
@@ -1263,15 +1264,14 @@ static int32_t ProcessReuseResponse(struct WifiDirectCommand *command)
 
     struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(IF_NAME_P2P);
     CONN_CHECK_AND_RETURN_RET_LOGW(info, SOFTBUS_ERR, CONN_WIFI_DIRECT, "local interface info is null");
-    bool isClient = info->getInt(info, II_KEY_WIFI_DIRECT_ROLE, WIFI_DIRECT_API_ROLE_NONE) != WIFI_DIRECT_API_ROLE_GO;
 
     struct InnerLink innerLink;
-    InnerLinkConstructorWithArgs(&innerLink, WIFI_DIRECT_CONNECT_TYPE_P2P, isClient, IF_NAME_P2P, remoteMac);
+    InnerLinkConstructorWithArgs(&innerLink, WIFI_DIRECT_LINK_TYPE_P2P, IF_NAME_P2P, remoteMac);
     innerLink.putBoolean(&innerLink, IL_KEY_IS_BEING_USED_BY_REMOTE, true);
     GetLinkManager()->notifyLinkChange(&innerLink);
     InnerLinkDestructor(&innerLink);
 
-    struct InnerLink *newInnerLink = GetLinkManager()->getLinkByTypeAndDevice(WIFI_DIRECT_CONNECT_TYPE_P2P, remoteMac);
+    struct InnerLink *newInnerLink = GetLinkManager()->getLinkByTypeAndDevice(WIFI_DIRECT_LINK_TYPE_P2P, remoteMac);
     CONN_CHECK_AND_RETURN_RET_LOGW(newInnerLink, SOFTBUS_ERR, CONN_WIFI_DIRECT, "inner link is null");
     ProcessSuccess(newInnerLink);
     return SOFTBUS_OK;
@@ -1342,7 +1342,7 @@ static void SendHandShakeToGoAsync(void *data)
     GetWifiDirectNegotiator()->postData(&handShakeInfo);
     NegotiateMessageDestructor(&handShakeInfo);
 
-    GetLinkManager()->setNegoChannelForLink((struct WifiDirectNegotiateChannel*)channel);
+    GetLinkManager()->setNegotiateChannelForLink((struct WifiDirectNegotiateChannel*)channel);
     channel->destructor(channel);
 }
 
@@ -1387,8 +1387,7 @@ static void UpdateInnerLinkOnCreateGroupComplete(const char *localMac, const cha
     struct P2pV1Processor *self = GetP2pV1Processor();
     struct InnerLink link;
     InnerLinkConstructor(&link);
-
-    InitBasicInnerLink(&link, false);
+    InitBasicInnerLink(&link);
     SetInnerLinkDeviceId(self->passiveCommand->msg, &link);
 
     link.putLocalIpString(&link, localIp);
@@ -1458,7 +1457,7 @@ static void UpdateInnerLinkOnConnectGroupComplete(const char *localMac, const ch
                                                   const char *remoteMac, const char *remoteIp)
 {
     struct InnerLink link;
-    InnerLinkConstructorWithArgs(&link, WIFI_DIRECT_CONNECT_TYPE_P2P, true, IF_NAME_P2P, remoteMac);
+    InnerLinkConstructorWithArgs(&link, WIFI_DIRECT_LINK_TYPE_P2P, IF_NAME_P2P, remoteMac);
 
     link.putString(&link, IL_KEY_LOCAL_BASE_MAC, localMac);
     link.putRemoteIpString(&link, remoteIp);
@@ -1502,7 +1501,7 @@ static int32_t OnConnectGroupComplete(int32_t event)
     channel->setP2pMac(channel, remoteMac);
     StartAuthListening(localIp);
 
-    struct InnerLink *innerLink = GetLinkManager()->getLinkByTypeAndDevice(WIFI_DIRECT_CONNECT_TYPE_P2P, remoteMac);
+    struct InnerLink *innerLink = GetLinkManager()->getLinkByTypeAndDevice(WIFI_DIRECT_LINK_TYPE_P2P, remoteMac);
     CONN_CHECK_AND_RETURN_RET_LOGW(innerLink, SOFTBUS_ERR, CONN_WIFI_DIRECT, "inner link is null");
     OpenAuthConnection(channel, innerLink, self->goPort);
 
@@ -1550,19 +1549,17 @@ static void UpdateReuseCount(int32_t delta)
     CONN_LOGI(CONN_WIFI_DIRECT, "reuseCount=%d", interfaceInfo->getInt(interfaceInfo, II_KEY_REUSE_COUNT, -1));
 }
 
-static void InitBasicInnerLink(struct InnerLink *innerLink, bool isClient)
+static void InitBasicInnerLink(struct InnerLink *innerLink)
 {
-    innerLink->putInt(innerLink, IL_KEY_CONNECT_TYPE, WIFI_DIRECT_CONNECT_TYPE_P2P);
+    innerLink->putInt(innerLink, IL_KEY_LINK_TYPE, WIFI_DIRECT_LINK_TYPE_P2P);
     innerLink->putString(innerLink, IL_KEY_LOCAL_INTERFACE, IF_NAME_P2P);
     innerLink->putString(innerLink, IL_KEY_REMOTE_INTERFACE, IF_NAME_P2P);
     innerLink->setState(innerLink, INNER_LINK_STATE_CONNECTING);
-    innerLink->putBoolean(innerLink, IL_KEY_IS_CLIENT, isClient);
 }
 
 static void NotifyNewClient(const char *localInterface, const char *remoteMac)
 {
     struct WifiDirectConnectParams params;
-    params.connectType = WIFI_DIRECT_CONNECT_TYPE_P2P;
     (void)strcpy_s(params.interface, sizeof(params.interface), localInterface);
     (void)strcpy_s(params.remoteMac, sizeof(params.remoteMac), remoteMac);
 
@@ -1572,7 +1569,6 @@ static void NotifyNewClient(const char *localInterface, const char *remoteMac)
 static void CancelNewClient(const char *localInterface, const char *remoteMac)
 {
     struct WifiDirectConnectParams params;
-    params.connectType = WIFI_DIRECT_CONNECT_TYPE_P2P;
     (void)strcpy_s(params.interface, sizeof(params.interface), localInterface);
     (void)strcpy_s(params.remoteMac, sizeof(params.remoteMac), remoteMac);
 

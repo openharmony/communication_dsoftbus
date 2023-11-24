@@ -181,7 +181,8 @@ int32_t NotifyUdpChannelOpenFailed(const AppInfo *info, int32_t errCode)
         .socketName = info->myData.sessionName,
         .linkType = info->linkType,
         .costTime = timediff,
-        .errcode = errCode
+        .errcode = errCode,
+        .result = EVENT_STAGE_RESULT_FAILED
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     SoftbusRecordOpenSessionKpi(info->myData.pkgName, info->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);
@@ -525,7 +526,7 @@ static void TransOnExchangeUdpInfoReply(int64_t authId, int64_t seq, const cJSON
     TransEventExtra extra = {
         .channelId = channel.info.myData.channelId,
         .authId = authId,
-        .errcode = 0
+        .result = EVENT_STAGE_RESULT_OK
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
 }
@@ -663,6 +664,7 @@ EXIT_ERR:
     extra.requestId = requestId;
     extra.authId = authId;
     extra.errcode = ret;
+    extra.result = EVENT_STAGE_RESULT_FAILED;
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_START, extra);
     TRANS_LOGE(TRANS_CTRL, "proc fail");
     AuthCloseConn(authId);
@@ -687,7 +689,8 @@ static void UdpOnAuthConnOpenFailed(uint32_t requestId, int32_t reason)
         .channelType = CHANNEL_TYPE_UDP,
         .channelId = channel->info.myData.channelId,
         .requestId = requestId,
-        .errcode = reason
+        .errcode = reason,
+        .result = EVENT_STAGE_RESULT_FAILED
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, extra);
     SoftBusFree(channel);
@@ -765,11 +768,12 @@ static int32_t OpenAuthConnForUdpNegotiation(UdpChannelInfo *channel)
         .channelId = channel->info.myData.channelId,
         .requestId = requestId,
         .peerNetworkId = channel->info.peerData.deviceId,
-        .result = 0
+        .result = EVENT_STAGE_RESULT_OK
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, extra);
     if (ret != SOFTBUS_OK) {
         extra.errcode = ret;
+        extra.result = EVENT_STAGE_RESULT_FAILED;
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, extra);
         TRANS_LOGE(TRANS_CTRL, "open auth conn fail");
         return SOFTBUS_TRANS_OPEN_AUTH_CHANNANEL_FAILED;

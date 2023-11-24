@@ -32,6 +32,10 @@ extern "C" {
 #define OFFLINE_CODE_LEN 32
 #define OFFLINE_CODE_BYTE_SIZE 4
 #define EXTDATA_LEN 8
+#define PTK_DEFAULT_LEN 32
+#define STATIC_CAP_LEN 100
+#define STATIC_CAP_STR_LEN 201
+#define PTK_ENCODE_LEN 45
 
 #define LNN_RELATION_MASK 0x03
 #define WIFI_CFG_INFO_MAX_LEN 512
@@ -164,6 +168,9 @@ typedef struct {
     int32_t groupType;
     bool initPreventFlag;
     int64_t networkIdTimestamp;
+    uint8_t staticCapability[STATIC_CAP_LEN];
+    int32_t staticCapLen;
+    char remotePtk[PTK_DEFAULT_LEN];
     RpaInfo rpaInfo;
     BroadcastCipherInfo cipherInfo;
 } NodeInfo;
@@ -206,6 +213,9 @@ int32_t LnnSetP2pGoMac(NodeInfo *info, const char *goMac);
 const char *LnnGetP2pGoMac(const NodeInfo *info);
 uint64_t LnnGetSupportedProtocols(const NodeInfo *info);
 int32_t LnnSetSupportedProtocols(NodeInfo *info, uint64_t protocols);
+int32_t LnnSetStaticCapability(NodeInfo *info, uint8_t *cap, uint32_t len);
+int32_t LnnGetStaticCapability(NodeInfo *info, uint8_t *cap, uint32_t len);
+int32_t LnnSetPtk(NodeInfo *info, const char *remotePtk);
 
 #ifdef __cplusplus
 }
