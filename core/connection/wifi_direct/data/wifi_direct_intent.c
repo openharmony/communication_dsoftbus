@@ -14,6 +14,7 @@
  */
 
 #include "wifi_direct_intent.h"
+#include "conn_log.h"
 
 #define INTENT_TAG_P2P_STATE 0
 #define INTENT_TAG_P2P_CONNECT_STATE 1
@@ -60,9 +61,8 @@ void WifiDirectIntentDestructor(struct WifiDirectIntent* self)
 struct WifiDirectIntent* WifiDirectIntentNew(void)
 {
     struct WifiDirectIntent *self = (struct WifiDirectIntent *)SoftBusCalloc(sizeof(*self));
-    if (self) {
-        WifiDirectIntentConstructor(self);
-    }
+    CONN_CHECK_AND_RETURN_RET_LOGE(self != NULL, NULL, CONN_WIFI_DIRECT, "self is null");
+    WifiDirectIntentConstructor(self);
 
     return self;
 }
