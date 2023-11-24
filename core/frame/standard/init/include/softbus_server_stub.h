@@ -46,6 +46,7 @@ private:
     int32_t SendMessageInner(MessageParcel &data, MessageParcel &reply);
     int32_t CheckOpenSessionPermission(const SessionParam *param);
     int32_t CheckChannelPermission(int32_t channelId, int32_t channelType);
+    int32_t EvaluateQosInner(MessageParcel &data, MessageParcel &reply);
 
     int32_t JoinLNNInner(MessageParcel &data, MessageParcel &reply);
     int32_t JoinMetaNodeInner(MessageParcel &data, MessageParcel &reply);

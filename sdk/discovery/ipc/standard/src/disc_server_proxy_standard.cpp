@@ -364,4 +364,14 @@ int32_t DiscServerProxy::RippleStats(int32_t channelId, int32_t channelType, con
     (void)data;
     return SOFTBUS_OK;
 }
+
+int32_t DiscServerProxy::EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos,
+    uint32_t qosCount)
+{
+    (void)peerNetworkId;
+    (void)dataType;
+    (void)qos;
+    (void)qosCount;
+    return SOFTBUS_OK;
+}
 } // namespace OHOS
