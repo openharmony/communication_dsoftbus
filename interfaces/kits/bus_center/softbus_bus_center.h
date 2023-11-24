@@ -250,12 +250,6 @@ typedef struct {
     uint16_t deviceTypeId;                 /**< Device type id */
 } NodeBasicInfo;
 
-typedef struct {
-    MetaNodeType type;
-    char metaNodeId[NETWORK_ID_BUF_LEN];
-    uint8_t data[USER_DATA_MAX_LEN];
-} MetaBasicInfo;
-
 /**
  * @brief Enumerates device information change types. For details, see {@link INodeStateCb.onNodeBasicInfoChanged}.
  *
@@ -519,17 +513,6 @@ typedef struct {
 } GearMode;
 
 /**
- * @brief Defines  parameter, see {@link CustomData}.
- *
- * @since 1.0
- * @version 1.0
- */
-typedef struct {
-    MetaNodeType type;                  /**< User type */
-    uint8_t data[USER_DATA_MAX_LEN];  /**< User data */
-} CustomData;
-
-/**
  * @brief Called when a device is added to a LNN via {@link JoinLNN}.
  *
  * @param addr Indicates the pointer to the address of the peer device.
@@ -544,20 +527,6 @@ typedef struct {
 typedef void (*OnJoinLNNResult)(ConnectionAddr *addr, const char *networkId, int32_t retCode);
 
 /**
- * @brief Called when a device is added to a LNN via {@link JoinLNN}.
- *
- * @param addr Indicates the pointer to the address of the peer device.
- * @param networkId Indicates the pointer to the network ID of the device if it is successfully added to the LNN.
- * This parameter makes no sense if the device fails to be added to the LNN.
- * @param retCode Indicates the result code. Value <b>0</b> indicates that the device is successfully added to the LNN,
- * and any other value indicates the opposite.
- *
- * @since 1.0
- * @version 1.0
- */
-typedef void (*OnJoinMetaNodeResult)(ConnectionAddr *addr, MetaBasicInfo *metaInfo, int32_t retCode);
-
-/**
  * @brief Called when a device is removed from a LNN via {@link LeaveLNN}.
  *
  * @param networkId Indicates the pointer to the network ID of the device.
@@ -568,18 +537,6 @@ typedef void (*OnJoinMetaNodeResult)(ConnectionAddr *addr, MetaBasicInfo *metaIn
  * @version 1.0
  */
 typedef void (*OnLeaveLNNResult)(const char *networkId, int32_t retCode);
-
-/**
- * @brief Called when a device is removed from a LNN via {@link LeaveMetaNode}.
- *
- * @param networkId Indicates the pointer to the network ID of the device.
- * @param retCode Indicates the result code. Value <b>0</b> indicates that the device is successfully
- * removed from the LNN, and any other value indicates the opposite.
- *
- * @since 1.0
- * @version 1.0
- */
-typedef void (*OnLeaveMetaNodeResult)(const char *networkId, int32_t retCode);
 
 /**
  * @brief Adds the current device to the LNN where a specified device resides.
@@ -599,24 +556,6 @@ typedef void (*OnLeaveMetaNodeResult)(const char *networkId, int32_t retCode);
 int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb);
 
 /**
- * @brief Adds the current device to the MetaNode where a specified device resides.
- *
- * @param pkgName Indicates the pointer to the caller ID, for example, the package name.
- * For the same caller, the value of this parameter must be the same for all functions.
- * @param target Indicates the pointer to the address of the specified device. For details, see {@link ConnectionAddr}.
- * @param customData Indicates the pointer to the key of the specified device.
- * @param cb Indicates the callback for the result. If you set this parameter to NULL, you will not receive the result.
- *
- * @return Returns <b>0</b> if the request to add the device is accepted, and the result can be obtained from the
- * callback; returns any other value if the device fails to be added to the network, in which case you will not receive
- * the result.
- *
- * @since 1.0
- * @version 1.0
- */
-int32_t JoinMetaNode(const char *pkgName, ConnectionAddr *target, CustomData *customData, OnJoinMetaNodeResult cb);
-
-/**
  * @brief Removes the current device from the LNN.
  *
  * @param pkgName Indicates the pointer to the caller ID, for example, the package name.
@@ -634,25 +573,6 @@ int32_t JoinMetaNode(const char *pkgName, ConnectionAddr *target, CustomData *cu
  * @version 1.0
  */
 int32_t LeaveLNN(const char *pkgName, const char *networkId, OnLeaveLNNResult cb);
-
-/**
- * @brief Removes the current device from the MetaNode.
- *
- * @param pkgName Indicates the pointer to the caller ID, for example, the package name.
- * For the same caller, the value of this parameter must be the same for all functions.
- * @param networkId Indicates the pointer to the network ID that is returned
- * after the device is added to the LNN via {@link JoinMetaNode}.
- * @param cb Indicates the callback for the result. If you set this parameter to <b>NULL</b>,
- * you will not receive the result.
- *
- * @return Returns <b>0</b> if the request to remove the device is accepted, and the result can be obtained from the
- * callback; returns any other value if the device fails to be removed from the network, in which case you will not
- * receive the result.
- *
- * @since 1.0
- * @version 1.0
- */
-int32_t LeaveMetaNode(const char *pkgName, const char *networkId, OnLeaveMetaNodeResult cb);
 
 /**
  * @brief Registers a callback for device state changes, rather than a specified ability, gets online.

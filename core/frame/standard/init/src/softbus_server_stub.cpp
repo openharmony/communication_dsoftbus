@@ -134,9 +134,7 @@ void SoftBusServerStub::InitMemberFuncMap()
     memberFuncMap_[SERVER_CLOSE_CHANNEL] = &SoftBusServerStub::CloseChannelInner;
     memberFuncMap_[SERVER_SESSION_SENDMSG] = &SoftBusServerStub::SendMessageInner;
     memberFuncMap_[SERVER_JOIN_LNN] = &SoftBusServerStub::JoinLNNInner;
-    memberFuncMap_[SERVER_JOIN_METANODE] = &SoftBusServerStub::JoinMetaNodeInner;
     memberFuncMap_[SERVER_LEAVE_LNN] = &SoftBusServerStub::LeaveLNNInner;
-    memberFuncMap_[SERVER_LEAVE_METANODE] = &SoftBusServerStub::LeaveMetaNodeInner;
     memberFuncMap_[SERVER_GET_ALL_ONLINE_NODE_INFO] = &SoftBusServerStub::GetAllOnlineNodeInfoInner;
     memberFuncMap_[SERVER_GET_LOCAL_DEVICE_INFO] = &SoftBusServerStub::GetLocalDeviceInfoInner;
     memberFuncMap_[SERVER_GET_NODE_KEY_INFO] = &SoftBusServerStub::GetNodeKeyInfoInner;
@@ -736,40 +734,6 @@ int32_t SoftBusServerStub::JoinLNNInner(MessageParcel &data, MessageParcel &repl
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusServerStub::JoinMetaNodeInner(MessageParcel &data, MessageParcel &reply)
-{
-    const char *clientName = data.ReadCString();
-    void *addr = nullptr;
-    if (clientName == nullptr) {
-        COMM_LOGE(COMM_SVC, "SoftbusJoinMetaNodeInner read clientName failed!");
-        return SOFTBUS_IPC_ERR;
-    }
-    uint32_t addrTypeLen;
-    if (!data.ReadUint32(addrTypeLen) || (addrTypeLen != 0 && addrTypeLen != sizeof(ConnectionAddr))) {
-        COMM_LOGE(COMM_SVC, "SoftbusJoinMetaNodeInner read addr type length:%d failed!", addrTypeLen);
-        return SOFTBUS_IPC_ERR;
-    }
-    if (addrTypeLen != 0) {
-        addr = (void *)data.ReadRawData(addrTypeLen);
-        if (addr == nullptr) {
-            COMM_LOGE(COMM_SVC, "SoftbusJoinMetaNodeInner read addr failed!");
-            return SOFTBUS_IPC_ERR;
-        }
-    }
-    CustomData *customData = nullptr;
-    customData = (CustomData *)data.ReadRawData(sizeof(CustomData));
-    if (customData == nullptr) {
-        COMM_LOGE(COMM_SVC, "SoftbusJoinMetaNodeInner read customData failed!");
-        return SOFTBUS_IPC_ERR;
-    }
-    int32_t retReply = JoinMetaNode(clientName, (void *)addr, customData, addrTypeLen);
-    if (!reply.WriteInt32(retReply)) {
-        COMM_LOGE(COMM_SVC, "SoftbusJoinMetaNodeInner write reply failed!");
-        return SOFTBUS_IPC_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
 int32_t SoftBusServerStub::LeaveLNNInner(MessageParcel &data, MessageParcel &reply)
 {
     const char *clientName = data.ReadCString();
@@ -785,26 +749,6 @@ int32_t SoftBusServerStub::LeaveLNNInner(MessageParcel &data, MessageParcel &rep
     int32_t retReply = LeaveLNN(clientName, networkId);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "SoftbusJoinLNNInner write reply failed!");
-        return SOFTBUS_IPC_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
-int32_t SoftBusServerStub::LeaveMetaNodeInner(MessageParcel &data, MessageParcel &reply)
-{
-    const char *clientName = data.ReadCString();
-    if (clientName == nullptr) {
-        COMM_LOGE(COMM_SVC, "SoftbusLeaveMetaNodeInner read clientName failed!");
-        return SOFTBUS_IPC_ERR;
-    }
-    const char *networkId = data.ReadCString();
-    if (networkId == nullptr) {
-        COMM_LOGE(COMM_SVC, "SoftbusLeaveMetaNodeInner read networkId failed!");
-        return SOFTBUS_IPC_ERR;
-    }
-    int32_t retReply = LeaveMetaNode(clientName, networkId);
-    if (!reply.WriteInt32(retReply)) {
-        COMM_LOGE(COMM_SVC, "SoftbusJoinMetaNodeInner write reply failed!");
         return SOFTBUS_IPC_ERR;
     }
     return SOFTBUS_OK;

@@ -23,13 +23,8 @@
 extern "C" {
 #endif
 
-int32_t LnnLoadMetaNode(const int32_t tType);
-int32_t LnnUnLoadMetaNode(const int32_t tType);
-int32_t MetaNodeServerLeaveExt(const char *metaNodeId, MetaNodeType tType);
-int32_t MetaNodeServerJoinExt(CustomData *customData);
 int32_t LnnInitMetaNode(void);
 void LnnDeinitMetaNode(void);
-MetaNodeType FindMetaNodeType(const char *metaNodeId);
 int32_t LnnInitMetaNodeExtLedger(void);
 void LnnDeinitMetaNodeExtLedger(void);
 

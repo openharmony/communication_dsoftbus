@@ -130,29 +130,6 @@ HWTEST_F(LNNNetBuilderMockTest, CONFIG_LOCAL_LEDGER_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_FILL_NODE_INFO_TEST_001
-* @tc.desc: test FillNodeInfo
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNNetBuilderMockTest, LNN_FILL_NODE_INFO_TEST_001, TestSize.Level1)
-{
-    NiceMock<NetBuilderDepsInterfaceMock> uuidMock;
-    EXPECT_CALL(uuidMock, AuthGetDeviceUuid(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    MetaJoinRequestNode metaNode;
-    NodeInfo info;
-    info.uuid[0] = 'x';
-    metaNode.addr.type = CONNECTION_ADDR_ETH;
-    EXPECT_TRUE(FillNodeInfo(&metaNode, &info) == SOFTBUS_OK);
-    EXPECT_CALL(uuidMock, AuthGetDeviceUuid(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    metaNode.addr.type = CONNECTION_ADDR_WLAN;
-    EXPECT_TRUE(FillNodeInfo(&metaNode, &info) == SOFTBUS_OK);
-    EXPECT_CALL(uuidMock, AuthGetDeviceUuid(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    metaNode.addr.type = CONNECTION_ADDR_BR;
-    EXPECT_TRUE(FillNodeInfo(&metaNode, &info) == SOFTBUS_OK);
-}
-
-/*
 * @tc.name: LNN_INIT_NET_BUILDER_DELAY_TEST_001
 * @tc.desc: lnn init netbuilder delay test
 * @tc.type: FUNC
@@ -170,45 +147,6 @@ HWTEST_F(LNNNetBuilderMockTest, LNN_INIT_NET_BUILDER_DELAY_TEST_001, TestSize.Le
     EXPECT_TRUE(LnnInitNetBuilderDelay() == SOFTBUS_ERR);
     EXPECT_TRUE(LnnInitNetBuilderDelay() == SOFTBUS_OK);
     EXPECT_TRUE(LnnInitNetBuilderDelay() == SOFTBUS_OK);
-}
-
-/*
-* @tc.name: LNN_LEAVE_META_TO_LEDGER_TEST_001
-* @tc.desc: leave meta info to ledger
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNNetBuilderMockTest, LNN_LEAVE_META_TO_LEDGER_TEST_001, TestSize.Level1)
-{
-    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
-    MetaJoinRequestNode metaInfo;
-    NodeInfo nodeInfo;
-    EXPECT_CALL(NetBuilderMock, LnnGetNodeInfoById(_, _)).WillRepeatedly(Return(&nodeInfo));
-    EXPECT_CALL(NetBuilderMock, LnnGetDeviceUdid(_)).WillRepeatedly(Return(NODE_UDID));
-    EXPECT_CALL(NetBuilderMock, LnnDeleteMetaInfo(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    LeaveMetaInfoToLedger(&metaInfo, nullptr);
-    LeaveMetaInfoToLedger(&metaInfo, nullptr);
-    LeaveMetaInfoToLedger(&metaInfo, nullptr);
-}
-
-/*
-* @tc.name: POST_JOIN_REQUEST_TO_META_NODE_TEST_001
-* @tc.desc: post join request to meta node test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNNetBuilderMockTest, POST_JOIN_REQUEST_TO_META_NODE_TEST_001, TestSize.Level1)
-{
-    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
-    MetaJoinRequestNode metaJoinNode;
-    CustomData customData;
-    EXPECT_CALL(NetBuilderMock, OnJoinMetaNode(_, _))
-        .WillOnce(Return(SOFTBUS_OK))
-        .WillRepeatedly(Return(SOFTBUS_ERR));
-    EXPECT_CALL(NetBuilderMock, MetaNodeNotifyJoinResult(_, _, _)).WillRepeatedly(Return());
-    EXPECT_TRUE(PostJoinRequestToMetaNode(&metaJoinNode, nullptr, nullptr, true) == SOFTBUS_OK);
-    EXPECT_TRUE(PostJoinRequestToMetaNode(&metaJoinNode, nullptr, &customData, true) == SOFTBUS_ERR);
-    EXPECT_TRUE(PostJoinRequestToMetaNode(&metaJoinNode, nullptr, &customData, false) == SOFTBUS_ERR);
 }
 
 /*
@@ -335,20 +273,6 @@ HWTEST_F(LNNNetBuilderMockTest, GET_CURRENT_CONNECT_TYPE_TEST_001, TestSize.Leve
     EXPECT_TRUE(GetCurrentConnectType() == CONNECTION_ADDR_MAX);
     EXPECT_TRUE(GetCurrentConnectType() == CONNECTION_ADDR_MAX);
     EXPECT_TRUE(GetCurrentConnectType() == CONNECTION_ADDR_MAX);
-}
-
-/*
-* @tc.name: PROCESS_ON_AUTH_META_VERIFY_TEST_001
-* @tc.desc: process on auth meta verify failed and passed test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNNetBuilderMockTest, PROCESS_ON_AUTH_META_VERIFY_FAILED_TEST_001, TestSize.Level1)
-{
-    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
-    EXPECT_CALL(NetBuilderMock, MetaNodeNotifyJoinResult(_, _, _)).WillRepeatedly(Return());
-    EXPECT_TRUE(ProcessOnAuthMetaVerifyFailed(nullptr) == SOFTBUS_ERR);
-    EXPECT_TRUE(ProcessOnAuthMetaVerifyPassed(nullptr) == SOFTBUS_ERR);
 }
 
 /*
@@ -612,21 +536,6 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_SYNC_OFFLINE_FINISH_TEST_001, TestSize.L
 }
 
 /*
-* @tc.name: PROCESS_LEAVE_META_NODE_REQUEST_TEST_001
-* @tc.desc: process leave meta node request test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_META_NODE_REQUEST_TEST_001, TestSize.Level1)
-{
-    void *para = reinterpret_cast<void *>(SoftBusMalloc(sizeof(char) * NETWORK_ID_BUF_LEN));
-    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
-    EXPECT_CALL(NetBuilderMock, MetaNodeNotifyLeaveResult(_, _)).WillRepeatedly(Return());
-    EXPECT_TRUE(ProcessLeaveMetaNodeRequest(nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(ProcessLeaveMetaNodeRequest(para) == SOFTBUS_ERR);
-}
-
-/*
 * @tc.name: PROCESS_LEAVE_LNN_REQUEST_TEST_001
 * @tc.desc: process leave lnn request test
 * @tc.type: FUNC
@@ -789,7 +698,6 @@ HWTEST_F(LNNNetBuilderMockTest, DUP_NODE_INFO_TEST_001, TestSize.Level1)
     }
     CleanConnectionFsm(nullptr);
     EXPECT_TRUE(CreateNetworkIdMsgPara(nullptr) == nullptr);
-    EXPECT_TRUE(CreateConnectionAddrMsgParaKey(nullptr) == nullptr);
     EXPECT_TRUE(CreateConnectionAddrMsgPara(nullptr) == nullptr);
 }
 
@@ -815,7 +723,6 @@ HWTEST_F(LNNNetBuilderMockTest, FIND_CONNECTION_FSM_TEST_001, TestSize.Level1)
     ListInit(&requestNode->node);
     (void)strcpy_s(requestNode->addr.info.br.brMac, BT_MAC_LEN, NODE1_BR_MAC);
     requestNode->requestId = REQUEST_ID;
-    ListAdd(&g_netBuilder.metaNodeList, &requestNode->node);
 
     ConnectionAddr addr;
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
@@ -825,16 +732,12 @@ HWTEST_F(LNNNetBuilderMockTest, FIND_CONNECTION_FSM_TEST_001, TestSize.Level1)
     EXPECT_CALL(NetBuilderMock, LnnIsSameConnectionAddr(_, _, _)).WillOnce(Return(true));
     EXPECT_TRUE(FindConnectionFsmByAddr(&addr, false) != nullptr);
     EXPECT_CALL(NetBuilderMock, LnnIsSameConnectionAddr(_, _, _)).WillOnce(Return(true));
-    EXPECT_TRUE(FindMetaNodeByAddr(&addr) != nullptr);
     addr.type = CONNECTION_ADDR_BLE;
     EXPECT_CALL(NetBuilderMock, LnnIsSameConnectionAddr(_, _, _)).WillOnce(Return(false));
     EXPECT_TRUE(FindConnectionFsmByAddr(&addr, false) == nullptr);
     EXPECT_CALL(NetBuilderMock, LnnIsSameConnectionAddr(_, _, _)).WillOnce(Return(false));
-    EXPECT_TRUE(FindMetaNodeByAddr(&addr) == nullptr);
 
-    EXPECT_TRUE(FindMetaNodeByRequestId(REQUEST_ID) != nullptr);
     EXPECT_TRUE(FindConnectionFsmByRequestId(REQUEST_ID) != nullptr);
-    EXPECT_TRUE(FindMetaNodeByRequestId(REQUEST_ID_ADD) == nullptr);
 
     EXPECT_TRUE(FindConnectionFsmByRequestId(REQUEST_ID_ADD) == nullptr);
     EXPECT_TRUE(FindConnectionFsmByAuthId(AUTH_ID) != nullptr);

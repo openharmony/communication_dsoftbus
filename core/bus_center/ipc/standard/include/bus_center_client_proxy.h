@@ -34,10 +34,7 @@ typedef struct {
 
 int32_t ClientOnJoinLNNResult(PkgNameAndPidInfo *info, void *addr, uint32_t addrTypeLen,
     const char *networkId, int32_t retCode);
-int32_t ClientOnJoinMetaNodeResult(PkgNameAndPidInfo *info, void *addr, uint32_t addrTypeLen,
-    MetaBasicInfo *metaInfo, int32_t retCode);
 int32_t ClientOnLeaveLNNResult(const char *pkgName, int32_t pid, const char *networkId, int32_t retCode);
-int32_t ClientOnLeaveMetaNodeResult(const char *pkgName, int32_t pid, const char *networkId, int32_t retCode);
 int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoTypeLen);
 int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type);
 int32_t ClientOnTimeSyncResult(

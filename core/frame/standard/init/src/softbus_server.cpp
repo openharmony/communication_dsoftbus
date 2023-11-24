@@ -191,22 +191,10 @@ int32_t SoftBusServer::JoinLNN(const char *pkgName, void *addr, uint32_t addrTyp
     return LnnIpcServerJoin(pkgName, (int32_t)callingPid, addr, addrTypeLen);
 }
 
-int32_t SoftBusServer::JoinMetaNode(const char *pkgName, void *addr, CustomData *customData, uint32_t addrTypeLen)
-{
-    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
-    return MetaNodeIpcServerJoin(pkgName, (int32_t)callingPid, addr, customData, addrTypeLen);
-}
-
 int32_t SoftBusServer::LeaveLNN(const char *pkgName, const char *networkId)
 {
     pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
     return LnnIpcServerLeave(pkgName, (int32_t)callingPid, networkId);
-}
-
-int32_t SoftBusServer::LeaveMetaNode(const char *pkgName, const char *networkId)
-{
-    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
-    return MetaNodeIpcServerLeave(pkgName, (int32_t)callingPid, networkId);
 }
 
 int32_t SoftBusServer::GetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int *infoNum)

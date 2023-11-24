@@ -99,7 +99,6 @@ int32_t LnnSendDisconnectMsgToConnFsm(LnnConnectionFsm *connFsm);
 int32_t LnnSendLeaveRequestToConnFsm(LnnConnectionFsm *connFsm);
 int32_t LnnSendSyncOfflineFinishToConnFsm(LnnConnectionFsm *connFsm);
 int32_t LnnSendNewNetworkOnlineToConnFsm(LnnConnectionFsm *connFsm);
-int32_t OnJoinMetaNode(MetaJoinRequestNode *mateJoinNode, CustomData *customData);
 
 #ifdef __cplusplus
 #if __cplusplus

@@ -74,27 +74,6 @@ HWTEST_F(BusCenterServerTest, SERVER_IPC_JOIN_LNN_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: SERVER_IPC_JOIN_META_NODE_TEST_001
-* @tc.desc: server ipc join meta node test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(BusCenterServerTest, SERVER_IPC_JOIN_META_NODE_TEST_001, TestSize.Level1)
-{
-    const char *pkgName = "000";
-    CustomData customData;
-    ConnectionAddr addr  = {
-        .type = CONNECTION_ADDR_BR,
-        .peerUid = "001"
-    };
-
-    EXPECT_TRUE(strncpy_s(addr.info.br.brMac, BT_MAC_LEN, BR_MAC, BT_MAC_LEN) == EOK);
-    (void)memset_s(&customData, sizeof(CustomData), 0, sizeof(CustomData));
-    int32_t ret = ServerIpcJoinMetaNode(pkgName, static_cast<void *>(&addr), &customData, sizeof(ConnectionAddr));
-    EXPECT_TRUE(ret != SOFTBUS_ERR);
-}
-
-/*
 * @tc.name: SERVER_IPC_LEAVE_LNN_TEST_001
 * @tc.desc: server ipc leave lnn test
 * @tc.type: FUNC
@@ -106,21 +85,6 @@ HWTEST_F(BusCenterServerTest, SERVER_IPC_LEAVE_LNN_TEST_001, TestSize.Level1)
     const char *networkId = "1234";
 
     int32_t ret = ServerIpcLeaveLNN(pkgName, networkId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-}
-
-/*
-* @tc.name: SERVER_IPC_LEAVE_META_NODE_TEST_001
-* @tc.desc: server ipc leave meta node test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(BusCenterServerTest, SERVER_IPC_LEAVE_META_NODE_TEST_001, TestSize.Level1)
-{
-    const char *pkgName = "000";
-    const char *networkId = "1234";
-
-    int32_t ret = ServerIpcLeaveMetaNode(pkgName, networkId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 

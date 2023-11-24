@@ -27,10 +27,7 @@ extern "C" {
 
 int32_t LnnIpcInit (void);
 int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, uint32_t addrTypeLen);
-int32_t MetaNodeIpcServerJoin(
-    const char *pkgName, int32_t callingPid, void *addr, CustomData *customData, uint32_t addrTypeLen);
 int32_t LnnIpcServerLeave(const char *pkgName, int32_t callingPid, const char *networkId);
-int32_t MetaNodeIpcServerLeave(const char *pkgName, int32_t callingPid, const char *networkId);
 int32_t LnnIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int *infoNum);
 int32_t LnnIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen);
 int32_t LnnIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int key, unsigned char *buf, uint32_t len);
@@ -48,9 +45,7 @@ int32_t LnnIpcDeactiveMetaNode(const char *metaNodeId);
 int32_t LnnIpcGetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum);
 
 int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId, int32_t retCode);
-int32_t MetaNodeIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, MetaBasicInfo *metaInfo, int32_t retCode);
 int32_t LnnIpcNotifyLeaveResult(const char *networkId, int32_t retCode);
-int32_t MetaNodeIpcNotifyLeaveResult(const char *networkId, int32_t retCode);
 int32_t LnnIpcNotifyOnlineState(bool isOnline, void *info, uint32_t infoTypeLen);
 int32_t LnnIpcNotifyBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type);
 int32_t LnnIpcNotifyTimeSyncResult(

@@ -80,36 +80,6 @@ HWTEST_F(ClientProxyTest, OnJoinLNNResultTest_01, TestSize.Level1)
 }
 
 /*
- * @tc.name: OnJoinMetaNodeResult
- * @tc.desc: bus center client proxy standard
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(ClientProxyTest, OnJoinMetaNodeResultTest_01, TestSize.Level1)
-{
-    static const uint32_t SOFTBUS_SA_ID = 4700;
-    sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    sptr<IRemoteObject> remoteObject = saManager->GetSystemAbility(SOFTBUS_SA_ID);
-    ASSERT_TRUE(remoteObject != nullptr);
-    sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(remoteObject);
-    ASSERT_TRUE(clientProxy != nullptr);
-    char *addr = const_cast<char *>(TEST_ADDR);
-    MetaBasicInfo metaInfo;
-    (void)memset_s(&metaInfo, sizeof(MetaBasicInfo), 0, sizeof(MetaBasicInfo));
-    (void)strcpy_s(metaInfo.metaNodeId, NETWORK_ID_BUF_LEN, TEST_NETWORK_ID);
-    void *addrInput = reinterpret_cast<void *>(addr);
-    void *metaInfoInput = reinterpret_cast<void *>(&metaInfo);
-    int32_t ret = clientProxy->OnJoinMetaNodeResult(nullptr, TEST_ADDR_TYPE_LEN, metaInfoInput,
-        sizeof(MetaBasicInfo), TEST_RET_CODE);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = clientProxy->OnJoinMetaNodeResult(addrInput, TEST_ADDR_TYPE_LEN, nullptr, 0, TEST_RET_CODE);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = clientProxy->OnJoinMetaNodeResult(addrInput, TEST_ADDR_TYPE_LEN, metaInfoInput,
-        sizeof(MetaBasicInfo), TEST_RET_CODE);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-}
-
-/*
  * @tc.name: OnLeaveLNNResult
  * @tc.desc: bus center client proxy standard
  * @tc.type: FUNC
@@ -126,26 +96,6 @@ HWTEST_F(ClientProxyTest, OnLeaveLNNResultTest_01, TestSize.Level1)
     int32_t ret = clientProxy->OnLeaveLNNResult(nullptr, TEST_RET_CODE);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = clientProxy->OnLeaveLNNResult(TEST_NETWORK_ID, TEST_RET_CODE);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-}
-
-/*
- * @tc.name: OnLeaveMetaNodeResult
- * @tc.desc: bus center client proxy standard
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(ClientProxyTest, OnLeaveMetaNodeResultTest_01, TestSize.Level1)
-{
-    static const uint32_t SOFTBUS_SA_ID = 4700;
-    sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    sptr<IRemoteObject> remoteObject = saManager->GetSystemAbility(SOFTBUS_SA_ID);
-    ASSERT_TRUE(remoteObject != nullptr);
-    sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(remoteObject);
-    ASSERT_TRUE(clientProxy != nullptr);
-    int32_t ret = clientProxy->OnLeaveMetaNodeResult(nullptr, TEST_RET_CODE);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = clientProxy->OnLeaveMetaNodeResult(TEST_NETWORK_ID, TEST_RET_CODE);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 

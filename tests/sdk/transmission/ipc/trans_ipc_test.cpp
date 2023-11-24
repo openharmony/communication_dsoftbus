@@ -131,20 +131,11 @@ HWTEST_F(TransIpcStandardTest, SoftbusRegisterServiceTest002, TestSize.Level0)
     int32_t accuracy = 1;
     int32_t period = 1;
     TransServerProxy transServerProxy(nullptr);
-    CustomData *customData = (CustomData *)SoftBusCalloc(sizeof(CustomData));
-    ASSERT_TRUE(customData != nullptr);
-    (void)memset_s(customData, sizeof(customData), 0, sizeof(customData));
 
     int32_t ret = transServerProxy.JoinLNN(g_pkgName, (void *)g_addr, addrTypeLen);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
-    ret = transServerProxy.JoinMetaNode(g_pkgName, (void *)g_addr, customData, addrTypeLen);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-
     ret = transServerProxy.LeaveLNN(g_pkgName, g_networkId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-
-    ret = transServerProxy.LeaveMetaNode(g_pkgName, g_networkId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
     ret = transServerProxy.GetAllOnlineNodeInfo(g_pkgName, &info, infoTypeLen, &infoNum);
@@ -164,7 +155,6 @@ HWTEST_F(TransIpcStandardTest, SoftbusRegisterServiceTest002, TestSize.Level0)
 
     ret = transServerProxy.StopTimeSync(g_pkgName, g_networkId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    SoftBusFree(customData);
 }
 
 /**

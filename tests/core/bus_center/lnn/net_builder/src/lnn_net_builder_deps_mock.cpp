@@ -250,19 +250,9 @@ int32_t AuthGetConnInfo(int64_t authId, AuthConnInfo *connInfo)
     return GetNetBuilderDepsInterface()->AuthGetConnInfo(authId, connInfo);
 }
 
-void MetaNodeNotifyJoinResult(ConnectionAddr *addr, MetaBasicInfo *metaInfo, int32_t retCode)
-{
-    return GetNetBuilderDepsInterface()->MetaNodeNotifyJoinResult(addr, metaInfo, retCode);
-}
-
 void LnnNotifyLeaveResult(const char *networkId, int32_t retCode)
 {
     return GetNetBuilderDepsInterface()->LnnNotifyLeaveResult(networkId, retCode);
-}
-
-int32_t MetaNodeIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, MetaBasicInfo *metaInfo, int32_t retCode)
-{
-    return GetNetBuilderDepsInterface()->MetaNodeIpcNotifyJoinResult(addr, addrTypeLen, metaInfo, retCode);
 }
 
 int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type)
@@ -391,11 +381,6 @@ void LnnDeinitFastOffline(void)
     return GetNetBuilderDepsInterface()->LnnDeinitFastOffline();
 }
 
-int32_t OnJoinMetaNode(MetaJoinRequestNode *mateJoinNode, CustomData *customData)
-{
-    return GetNetBuilderDepsInterface()->OnJoinMetaNode(mateJoinNode, customData);
-}
-
 int32_t LnnSendNewNetworkOnlineToConnFsm(LnnConnectionFsm *connFsm)
 {
     return GetNetBuilderDepsInterface()->LnnSendNewNetworkOnlineToConnFsm(connFsm);
@@ -434,11 +419,6 @@ int32_t LnnGetLocalWeight(void)
 void AuthMetaReleaseVerify(int64_t authId)
 {
     return GetNetBuilderDepsInterface()->AuthMetaReleaseVerify(authId);
-}
-
-void MetaNodeNotifyLeaveResult(const char *networkId, int32_t retCode)
-{
-    return GetNetBuilderDepsInterface()->MetaNodeNotifyLeaveResult(networkId, retCode);
 }
 
 int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm)
