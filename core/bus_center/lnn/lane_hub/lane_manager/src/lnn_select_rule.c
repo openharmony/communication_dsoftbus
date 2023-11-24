@@ -73,8 +73,8 @@ static bool IsEnableWlan2P4G(const char *networkId)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNetCap error");
         return false;
     }
-    if (((local & (1<< BIT_WIFI_24G)) || (local & (1 << BIT_ETH)) || (local &(1<< BIT_WIFI_5G))) &&
-        ((remote & (1 << BIT_WIFI_24G)) || (remote & (1 << BIT_ETH)) || (remote &(1<< BIT_WIFI_5G)))) {
+    if (((local & (1<< BIT_WIFI_24G)) || (local & (1 << BIT_ETH))) &&
+        ((remote & (1 << BIT_WIFI_24G)) || (remote & (1 << BIT_ETH)))) {
         return true;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "2.4G capa disable, local:%d, remote:%d", local, remote);
@@ -93,8 +93,8 @@ static bool IsEnableWlan5G(const char *networkId)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "GetNetCap error");
         return false;
     }
-    if (((local & (1 << BIT_WIFI_5G)) || (local & (1 << BIT_ETH)) || (local & (1 << BIT_WIFI_24G))) &&
-        ((remote & (1 << BIT_WIFI_5G)) || (remote & (1 << BIT_ETH)) || (remote & (1 << BIT_WIFI_24G)))) {
+    if (((local & (1 << BIT_WIFI_5G)) || (local & (1 << BIT_ETH))) &&
+        ((remote & (1 << BIT_WIFI_5G)) || (remote & (1 << BIT_ETH)))) {
         return true;
     }
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "5G capa disable, local:%d, remote:%d", local, remote);
