@@ -327,12 +327,12 @@ static int32_t GetRequestOptionBySessionParam(const SessionParam *param, LaneReq
     if (memcpy_s(requestOption->requestInfo.trans.networkId, NETWORK_ID_BUF_LEN,
         param->peerDeviceId, NETWORK_ID_BUF_LEN) != EOK) {
         TRANS_LOGE(TRANS_SVC, "memcpy networkId failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
 
     LaneTransType transType = TransGetLaneTransTypeBySession(param);
     if (transType == LANE_T_BUTT) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_INVALID_SESSION_TYPE;
     }
     requestOption->requestInfo.trans.networkDelegate = false;
     if (strcmp(param->sessionName, SESSION_NAME_PHONEPAD) == 0 ||
@@ -353,9 +353,10 @@ static int32_t GetRequestOptionBySessionParam(const SessionParam *param, LaneReq
     }
 
     int32_t uid;
-    if (TransGetUidAndPid(param->sessionName, &uid, &(requestOption->requestInfo.trans.pid)) != SOFTBUS_OK) {
+    int32_t ret = TransGetUidAndPid(param->sessionName, &uid, &(requestOption->requestInfo.trans.pid));
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "transGetUidAndPid failed.");
-        return SOFTBUS_ERR;
+        return ret;
     }
 
     TransformSessionPreferredToLanePreferred(param, &(requestOption->requestInfo.trans.expectedLink),
@@ -489,7 +490,7 @@ int32_t TransGetLaneInfo(const SessionParam *param, LaneConnInfo *connInfo, uint
 {
     if ((param == NULL) || (connInfo == NULL) || (laneId == NULL)) {
         TRANS_LOGE(TRANS_SVC, "get lane info param error.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     LaneRequestOption requestOption;
