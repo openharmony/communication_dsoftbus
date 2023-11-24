@@ -305,22 +305,26 @@ static int32_t TransOpenChannelProc(ChannelType type, AppInfo *appInfo, const Co
 {
     if (type == CHANNEL_TYPE_BUTT) {
         TRANS_LOGE(TRANS_CTRL, "open invalid channel type.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }
+    int32_t ret = SOFTBUS_ERR;
     if (type == CHANNEL_TYPE_UDP) {
-        if (TransOpenUdpChannel(appInfo, connOpt, channelId) != SOFTBUS_OK) {
+        ret = TransOpenUdpChannel(appInfo, connOpt, channelId);
+        if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "open udp channel err");
-            return SOFTBUS_ERR;
+            return ret;
         }
     } else if (type == CHANNEL_TYPE_PROXY) {
-        if (TransProxyOpenProxyChannel(appInfo, connOpt, channelId) != SOFTBUS_OK) {
+        ret = TransProxyOpenProxyChannel(appInfo, connOpt, channelId);
+        if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "open proxy channel err");
-            return SOFTBUS_ERR;
+            return ret;
         }
     } else {
-        if (TransOpenDirectChannel(appInfo, connOpt, channelId) != SOFTBUS_OK) {
+        ret = TransOpenDirectChannel(appInfo, connOpt, channelId);
+        if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "open direct channel err");
-            return SOFTBUS_ERR;
+            return ret;
         }
     }
     return SOFTBUS_OK;
@@ -423,7 +427,9 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     TRANS_LOGI(TRANS_CTRL,
         "sessionName=%s, get laneId=%u, link type=%u.", tmpName, laneId, connInfo.type);
     AnonymizeFree(tmpName);
-    if (TransGetConnectOptByConnInfo(&connInfo, &connOpt) != SOFTBUS_OK) {
+    errCode = TransGetConnectOptByConnInfo(&connInfo, &connOpt);
+    if (errCode != SOFTBUS_OK) {
+        ret = errCode;
         SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName, connInfo.type,
             SOFTBUS_EVT_OPEN_SESSION_FAIL, GetSoftbusRecordTimeMillis() - timeStart);
         goto EXIT_ERR;
@@ -431,8 +437,10 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     FillAppInfo(appInfo, &connOpt, param, transInfo, &connInfo);
     TransOpenChannelSetModule(transInfo->channelType, &connOpt);
     TRANS_LOGI(TRANS_CTRL, "laneId=%u get channelType=%u.", laneId, transInfo->channelType);
-    if (TransOpenChannelProc((ChannelType)transInfo->channelType, appInfo, &connOpt,
-        &(transInfo->channelId)) != SOFTBUS_OK) {
+    errCode = TransOpenChannelProc((ChannelType)transInfo->channelType, appInfo, &connOpt,
+        &(transInfo->channelId));
+    if (errCode != SOFTBUS_OK) {
+        ret = errCode;
         SoftbusReportTransErrorEvt(SOFTBUS_TRANS_CREATE_CHANNEL_ERR);
         SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName,
             appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, GetSoftbusRecordTimeMillis() - timeStart);
