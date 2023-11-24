@@ -44,9 +44,7 @@ public:
     virtual int32_t SendMessage(int32_t channelId, int32_t channelType,
         const void *data, uint32_t len, int32_t msgType) = 0;
     virtual int32_t JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen) = 0;
-    virtual int32_t JoinMetaNode(const char *pkgName, void *addr, CustomData *customData, uint32_t addrTypeLen) = 0;
     virtual int32_t LeaveLNN(const char *pkgName, const char *networkId) = 0;
-    virtual int32_t LeaveMetaNode(const char *pkgName, const char *networkId) = 0;
     virtual int32_t GetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int *infoNum) = 0;
     virtual int32_t GetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen) = 0;
     virtual int32_t GetNodeKeyInfo(const char *pkgName, const char *networkId, int key, unsigned char *buf,

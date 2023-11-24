@@ -22,7 +22,6 @@ group("fuzztest") {
     "getnodekeyinfo_fuzzer:GetNodeKeyInfoFuzzTest",
     "ispassseqcheck_fuzzer:IsPassSeqCheckFuzzTest",
     "joinlnn_fuzzer:JoinLNNFuzzTest",
-    "joinmetanode_fuzzer:JoinMetaNodeFuzzTest",
     "leavelnn_fuzzer:LeaveLNNFuzzTest",
     "leavelnninner_fuzzer:LeaveLNNInnerFuzzTest",
     "publishlnn_fuzzer:PublishLNNFuzzTest",

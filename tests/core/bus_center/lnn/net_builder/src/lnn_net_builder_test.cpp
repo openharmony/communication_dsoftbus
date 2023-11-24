@@ -227,52 +227,6 @@ HWTEST_F(LNNNetBuilderTest, LNN_UPDATE_NODE_ADDR_TEST_001, TestSize.Level0)
 }
 
 /*
-* @tc.name: META_NODE_SERVER_JOIN_TEST_001
-* @tc.desc: test MetaNodeServerJoin
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNNetBuilderTest, META_NODE_SERVER_JOIN_TEST_001, TestSize.Level0)
-{
-    ConnectionAddr addr = {
-        .type = CONNECTION_ADDR_WLAN,
-        .info.ip.port = PORT
-    };
-    CustomData customData = {
-        .type = PROXY_TRANSMISION,
-        .data = {0},
-    };
-    int32_t ret;
-
-    (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
-    ret = LnnInitNetBuilder();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = MetaNodeServerJoin("testName", 0, &addr, &customData);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-}
-
-/*
-* @tc.name: META_NODE_SERVER_LEAVE_TEST_001
-* @tc.desc: test MetaNodeServerLeave
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNNetBuilderTest, META_NODE_SERVER_LEAVE_TEST_001, TestSize.Level0)
-{
-    const char *networkId = "1234";
-    int32_t ret;
-
-    ret = MetaNodeServerLeave(networkId);
-    EXPECT_TRUE(ret == SOFTBUS_NO_INIT);
-    ret = LnnInitNetBuilder();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = MetaNodeServerLeave(networkId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = MetaNodeServerLeave(nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_MALLOC_ERR);
-}
-
-/*
 * @tc.name: LNN_SYNC_OFFLINE_COMPLETE_TEST_001
 * @tc.desc: test LnnSyncOfflineComplete
 * @tc.type: FUNC
@@ -390,10 +344,6 @@ HWTEST_F(LNNNetBuilderTest, LNN_GET_VERIFY_CALLBACK_TEST_001, TestSize.Level0)
     AuthVerifyCallback *authVerifyCallback = LnnGetVerifyCallback();
     authVerifyCallback->onVerifyPassed(REQUEST_ID, AUTH_ID, info);
     authVerifyCallback->onVerifyPassed(REQUEST_ID, AUTH_ID, &info1);
-    authVerifyCallback = LnnGetMetaVerifyCallback();
-    authVerifyCallback->onVerifyPassed(REQUEST_ID, AUTH_ID, info);
-    authVerifyCallback->onVerifyPassed(REQUEST_ID, AUTH_ID, &info1);
-    authVerifyCallback->onVerifyFailed(REQUEST_ID, SOFTBUS_OK);
     authVerifyCallback = LnnGetReAuthVerifyCallback();
     authVerifyCallback->onVerifyPassed(REQUEST_ID, AUTH_ID, info);
     authVerifyCallback->onVerifyPassed(REQUEST_ID, AUTH_ID, &info1);

@@ -157,25 +157,9 @@ int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *net
     return LnnOnJoinResult(addr, networkId, retCode);
 }
 
-int32_t MetaNodeIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, MetaBasicInfo *metaInfo, int32_t retCode)
-{
-    (void)addr;
-    (void)addrTypeLen;
-    (void)metaInfo;
-    (void)retCode;
-    return SOFTBUS_OK;
-}
-
 int32_t LnnIpcNotifyLeaveResult(const char *networkId, int32_t retCode)
 {
     return LnnOnLeaveResult(networkId, retCode);
-}
-
-int32_t MetaNodeIpcNotifyLeaveResult(const char *networkId, int32_t retCode)
-{
-    (void)networkId;
-    (void)retCode;
-    return SOFTBUS_OK;
 }
 
 int32_t LnnIpcNotifyOnlineState(bool isOnline, void *info, uint32_t infoTypeLen)

@@ -33,9 +33,7 @@ int32_t ServerIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t in
 int32_t ServerIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int key, unsigned char *buf, uint32_t len);
 int32_t ServerIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag);
 int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen);
-int32_t ServerIpcJoinMetaNode(const char *pkgName, void *addr, CustomData *customData, unsigned int addrTypeLen);
 int32_t ServerIpcLeaveLNN(const char *pkgName, const char *networkId);
-int32_t ServerIpcLeaveMetaNode(const char *pkgName, const char *networkId);
 int32_t ServerIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy, int32_t period);
 int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId);
 int32_t ServerIpcPublishLNN(const char *pkgName, const PublishInfo *info);

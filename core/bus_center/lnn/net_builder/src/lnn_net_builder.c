@@ -85,10 +85,6 @@ typedef enum {
     MSG_TYPE_LEAVE_INVALID_CONN,
     MSG_TYPE_LEAVE_BY_ADDR_TYPE,
     MSG_TYPE_LEAVE_SPECIFIC,
-    MSG_TYPE_JOIN_METANODE,
-    MSG_TYPE_JOIN_METANODE_AUTH_PASS,
-    MSG_TYPE_LEAVE_METANODE,
-    MSG_TYPE_JOIN_METANODE_AUTH_FAIL,
     MSG_TYPE_MAX,
 } NetBuilderMessageType;
 
@@ -106,7 +102,6 @@ typedef struct {
     /* connection fsm list */
     ListNode fsmList;
     ListNode pendingList;
-    ListNode metaNodeList;
     /* connection count */
     int32_t connCount;
 
@@ -147,24 +142,6 @@ typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];
     ConnectionAddrType addrType;
 } SpecificLeaveMsgPara;
-
-typedef struct {
-    ConnectionAddr addr;
-    CustomData customData;
-    char pkgName[PKG_NAME_SIZE_MAX];
-    int32_t callingPid;
-} ConnectionAddrKey;
-
-typedef struct {
-    MetaJoinRequestNode *metaJoinNode;
-    int32_t reason;
-} MetaReason;
-
-typedef struct {
-    MetaJoinRequestNode *metaJoinNode;
-    int64_t authMetaId;
-    NodeInfo info;
-} MetaAuthInfo;
 
 typedef struct {
     char pkgName[PKG_NAME_SIZE_MAX];
@@ -242,30 +219,6 @@ static LnnConnectionFsm *FindConnectionFsmByAddr(const ConnectionAddr *addr, boo
 
     LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
         if (LnnIsSameConnectionAddr(addr, &item->connInfo.addr, isShort)) {
-            return item;
-        }
-    }
-    return NULL;
-}
-
-static MetaJoinRequestNode *FindMetaNodeByAddr(const ConnectionAddr *addr)
-{
-    MetaJoinRequestNode *item = NULL;
-
-    LIST_FOR_EACH_ENTRY(item, &g_netBuilder.metaNodeList, MetaJoinRequestNode, node) {
-        if (LnnIsSameConnectionAddr(addr, &item->addr, false)) {
-            return item;
-        }
-    }
-    return NULL;
-}
-
-static MetaJoinRequestNode *FindMetaNodeByRequestId(uint32_t requestId)
-{
-    MetaJoinRequestNode *item = NULL;
-
-    LIST_FOR_EACH_ENTRY(item, &g_netBuilder.metaNodeList, MetaJoinRequestNode, node) {
-        if (item->requestId == requestId) {
             return item;
         }
     }
@@ -500,29 +453,6 @@ static bool TryPendingJoinRequest(const JoinLnnMsgPara *para, bool needReportFai
     return true;
 }
 
-static MetaJoinRequestNode *TryJoinRequestMetaNode(const char *pkgName, const ConnectionAddr *addr,
-    int32_t callingPid, bool needReportFailure)
-{
-    MetaJoinRequestNode *request = NULL;
-
-    request = (MetaJoinRequestNode *)SoftBusCalloc(sizeof(MetaJoinRequestNode));
-    if (request == NULL) {
-        LNN_LOGE(LNN_BUILDER, "malloc MetaNode join request fail, go on it");
-        return NULL;
-    }
-    ListInit(&request->node);
-    request->addr = *addr;
-    request->callingPid = callingPid;
-    request->needReportFailure = needReportFailure;
-    if (memcpy_s(request->pkgName, PKG_NAME_SIZE_MAX, pkgName, strlen(pkgName)) != EOK) {
-        LNN_LOGE(LNN_BUILDER, "memcpy_s error");
-        SoftBusFree(request);
-        return NULL;
-    }
-    ListTailInsert(&g_netBuilder.metaNodeList, &request->node);
-    return request;
-}
-
 static int32_t PostJoinRequestToConnFsm(LnnConnectionFsm *connFsm, const ConnectionAddr *addr,
     const char* pkgName, bool isNeedConnect, bool needReportFailure)
 {
@@ -551,22 +481,6 @@ static int32_t PostJoinRequestToConnFsm(LnnConnectionFsm *connFsm, const Connect
     if (rc == SOFTBUS_OK) {
         connFsm->connInfo.flag |=
             (needReportFailure ? LNN_CONN_INFO_FLAG_JOIN_REQUEST : LNN_CONN_INFO_FLAG_JOIN_AUTO);
-    }
-    return rc;
-}
-
-static int32_t PostJoinRequestToMetaNode(MetaJoinRequestNode *metaJoinNode, const ConnectionAddr *addr,
-    CustomData *customData, bool needReportFailure)
-{
-    int32_t rc = SOFTBUS_OK;
-    if (OnJoinMetaNode(metaJoinNode, customData) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_META_NODE, "Post Request To MetaNode failed");
-        rc = SOFTBUS_ERR;
-        if (needReportFailure) {
-            MetaBasicInfo metaInfo;
-            (void)memset_s(&metaInfo, sizeof(MetaBasicInfo), 0, sizeof(MetaBasicInfo));
-            MetaNodeNotifyJoinResult((ConnectionAddr *)addr, &metaInfo, SOFTBUS_ERR);
-        }
     }
     return rc;
 }
@@ -645,39 +559,9 @@ static int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReport
     return SOFTBUS_OK;
 }
 
-static int32_t TrySendJoinMetaNodeRequest(const ConnectionAddrKey *addrDataKey, bool needReportFailure)
-{
-    if (addrDataKey == NULL) {
-        LNN_LOGW(LNN_META_NODE, "addrDataKey is NULL");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    const ConnectionAddr *addr = &addrDataKey->addr;
-    CustomData customData = addrDataKey->customData;
-    MetaJoinRequestNode *metaJoinNode = NULL;
-    int32_t rc;
-    metaJoinNode = FindMetaNodeByAddr(addr);
-    if (metaJoinNode == NULL) {
-        LNN_LOGI(LNN_META_NODE, "not find metaJoinNode");
-        metaJoinNode = TryJoinRequestMetaNode(addrDataKey->pkgName, addr, addrDataKey->callingPid, needReportFailure);
-        if (metaJoinNode == NULL) {
-            LNN_LOGI(LNN_META_NODE, "join request is pending");
-            SoftBusFree((void *)addrDataKey);
-            return SOFTBUS_ERR;
-        }
-    }
-    rc = PostJoinRequestToMetaNode(metaJoinNode, addr, &customData, needReportFailure);
-    SoftBusFree((void *)addrDataKey);
-    return rc;
-}
-
 static int32_t ProcessJoinLNNRequest(const void *para)
 {
     return TrySendJoinLNNRequest((const JoinLnnMsgPara *)para, true, false);
-}
-
-static int32_t ProcessJoinMetaNodeRequest(const void *para)
-{
-    return TrySendJoinMetaNodeRequest((const ConnectionAddrKey *)para, true);
 }
 
 static int32_t ProcessDevDiscoveryRequest(const void *para)
@@ -1037,46 +921,6 @@ static int32_t ProcessLeaveLNNRequest(const void *para)
     if (rc != SOFTBUS_OK) {
         LnnNotifyLeaveResult(networkId, SOFTBUS_ERR);
     }
-    SoftBusFree((void *)networkId);
-    return rc;
-}
-
-static void LeaveMetaInfoToLedger(const MetaJoinRequestNode *metaInfo, const char *networkId)
-{
-    NodeInfo info;
-    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    const char *udid = NULL;
-    if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &info) != SOFTBUS_OK) {
-        return;
-    }
-    udid = LnnGetDeviceUdid(&info);
-    if (LnnDeleteMetaInfo(udid, metaInfo->addr.type) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_META_NODE, "LnnDeleteMetaInfo error");
-    }
-}
-
-static int32_t ProcessLeaveMetaNodeRequest(const void *para)
-{
-    const char *networkId = (const char *)para;
-    MetaJoinRequestNode *item = NULL;
-    MetaJoinRequestNode *next = NULL;
-    int rc = SOFTBUS_ERR;
-    if (networkId == NULL) {
-        LNN_LOGW(LNN_BUILDER, "leave networkId is null");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_netBuilder.metaNodeList, MetaJoinRequestNode, node) {
-        if (strcmp(networkId, item->networkId) != 0) {
-            continue;
-        }
-        LNN_LOGD(LNN_META_NODE, "find networkId");
-        AuthMetaReleaseVerify(item->authId);
-        LeaveMetaInfoToLedger(item, networkId);
-        ListDelete(&item->node);
-        SoftBusFree(item);
-        rc = SOFTBUS_OK;
-    }
-    MetaNodeNotifyLeaveResult(networkId, rc);
     SoftBusFree((void *)networkId);
     return rc;
 }
@@ -1471,98 +1315,6 @@ static NodeInfo *DupNodeInfo(const NodeInfo *nodeInfo)
     return node;
 }
 
-static int32_t FillNodeInfo(MetaJoinRequestNode *metaNode, NodeInfo *info)
-{
-    if (metaNode == NULL || info == NULL) {
-        return SOFTBUS_ERR;
-    }
-    bool isAuthServer = false;
-    info->discoveryType = 1 << (uint32_t)LnnConvAddrTypeToDiscType(metaNode->addr.type);
-    info->authSeqNum = metaNode->authId;
-    (void)AuthGetServerSide(metaNode->authId, &isAuthServer);
-    info->authChannelId[metaNode->addr.type][isAuthServer ? AUTH_AS_SERVER_SIDE : AUTH_AS_CLIENT_SIDE] =
-        (int32_t)metaNode->authId;
-    info->relation[metaNode->addr.type]++;
-    if (AuthGetDeviceUuid(metaNode->authId, info->uuid, sizeof(info->uuid)) != SOFTBUS_OK ||
-        info->uuid[0] == '\0') {
-        LNN_LOGE(LNN_BUILDER, "fill uuid fail");
-        return SOFTBUS_ERR;
-    }
-    if (metaNode->addr.type == CONNECTION_ADDR_ETH || metaNode->addr.type == CONNECTION_ADDR_WLAN) {
-        if (strcpy_s(info->connectInfo.deviceIp, MAX_ADDR_LEN, metaNode->addr.info.ip.ip) != EOK) {
-            LNN_LOGE(LNN_BUILDER, "fill deviceIp fail");
-            return SOFTBUS_MEM_ERR;
-        }
-    }
-    info->metaInfo.metaDiscType = 1 << (uint32_t)LnnConvAddrTypeToDiscType(metaNode->addr.type);
-    info->metaInfo.isMetaNode = true;
-    return SOFTBUS_OK;
-}
-
-static int32_t ProcessOnAuthMetaVerifyPassed(const void *para)
-{
-    if (para == NULL) {
-        LNN_LOGE(LNN_BUILDER, "para is NULL");
-        return SOFTBUS_ERR;
-    }
-    MetaAuthInfo *meta = (MetaAuthInfo *)para;
-    MetaJoinRequestNode *metaNode = meta->metaJoinNode;
-    int64_t authMetaId = meta->authMetaId;
-    NodeInfo *info = &meta->info;
-    int32_t ret = SOFTBUS_ERR;
-    do {
-        if (strcpy_s(metaNode->networkId, sizeof(metaNode->networkId), info->networkId) != EOK) {
-            LNN_LOGE(LNN_BUILDER, "ProcessOnAuthMetaVerifyPassed copy networkId error");
-            break;
-        }
-        metaNode->authId = authMetaId;
-        NodeInfo *newInfo = DupNodeInfo(info);
-        if (newInfo == NULL) {
-            break;
-        }
-        if (FillNodeInfo(metaNode, newInfo) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "ProcessOnAuthMetaVerifyPassed FillNodeInfo error");
-            SoftBusFree(newInfo);
-            break;
-        }
-        ret = LnnAddMetaInfo(newInfo);
-        SoftBusFree(newInfo);
-    } while (0);
-    MetaBasicInfo metaInfo;
-    (void)memset_s(&metaInfo, sizeof(MetaBasicInfo), 0, sizeof(MetaBasicInfo));
-    if (ret == SOFTBUS_OK) {
-        if (strncpy_s(metaInfo.metaNodeId, NETWORK_ID_BUF_LEN, info->networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "copy meta node id fail");
-            return SOFTBUS_ERR;
-        }
-        MetaNodeNotifyJoinResult(&metaNode->addr, &metaInfo, SOFTBUS_OK);
-    } else {
-        LNN_LOGE(LNN_BUILDER, "ProcessOnAuthMetaVerifyPassed error");
-        MetaNodeNotifyJoinResult(&metaNode->addr, &metaInfo, SOFTBUS_ERR);
-        ListDelete(&metaNode->node);
-        SoftBusFree(metaNode);
-    }
-    SoftBusFree(meta);
-    return ret;
-}
-
-static int32_t ProcessOnAuthMetaVerifyFailed(const void *para)
-{
-    if (para == NULL) {
-        LNN_LOGE(LNN_BUILDER, "para is NULL");
-        return SOFTBUS_ERR;
-    }
-    MetaReason *mataReason = (MetaReason *)para;
-    MetaJoinRequestNode *metaNode = mataReason->metaJoinNode;
-    MetaBasicInfo metaInfo;
-    (void)memset_s(&metaInfo, sizeof(MetaBasicInfo), 0, sizeof(MetaBasicInfo));
-    MetaNodeNotifyJoinResult(&metaNode->addr, &metaInfo, mataReason->reason);
-    ListDelete(&metaNode->node);
-    SoftBusFree(metaNode);
-    SoftBusFree(mataReason);
-    return SOFTBUS_OK;
-}
-
 static NetBuilderMessageProcess g_messageProcessor[MSG_TYPE_MAX] = {
     ProcessJoinLNNRequest,
     ProcessDevDiscoveryRequest,
@@ -1578,10 +1330,6 @@ static NetBuilderMessageProcess g_messageProcessor[MSG_TYPE_MAX] = {
     ProcessLeaveInvalidConn,
     ProcessLeaveByAddrType,
     ProcessLeaveSpecific,
-    ProcessJoinMetaNodeRequest,
-    ProcessOnAuthMetaVerifyPassed,
-    ProcessLeaveMetaNodeRequest,
-    ProcessOnAuthMetaVerifyFailed,
 };
 
 static void NetBuilderMessageHandler(SoftBusMessage *msg)
@@ -2000,60 +1748,6 @@ AuthVerifyCallback *LnnGetReAuthVerifyCallback(void)
     return &g_reAuthVerifyCallback;
 }
 
-void OnAuthMetaVerifyPassed(uint32_t requestId, int64_t authMetaId, const NodeInfo *info)
-{
-    if (info == NULL) {
-        LNN_LOGE(LNN_META_NODE, "info is NULL");
-        return;
-    }
-    MetaJoinRequestNode *metaNode = FindMetaNodeByRequestId(requestId);
-    if (metaNode == NULL) {
-        LNN_LOGE(LNN_META_NODE, "not find metaNode");
-        return;
-    }
-    MetaAuthInfo *meta = (MetaAuthInfo *)SoftBusMalloc(sizeof(MetaAuthInfo));
-    if (meta == NULL) {
-        LNN_LOGE(LNN_META_NODE, "meta is NULL");
-        return;
-    }
-    meta->authMetaId = authMetaId;
-    meta->metaJoinNode = metaNode;
-    meta->info = *info;
-    if (PostMessageToHandler(MSG_TYPE_JOIN_METANODE_AUTH_PASS, meta) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_META_NODE, "post join metanode auth pass message failed");
-        SoftBusFree(meta);
-        return;
-    }
-}
-
-void OnAuthMetaVerifyFailed(uint32_t requestId, int32_t reason)
-{
-    MetaJoinRequestNode *metaJoinNode = FindMetaNodeByRequestId(requestId);
-    MetaReason *para = (MetaReason *)SoftBusMalloc(sizeof(MetaReason));
-    if (para == NULL) {
-        LNN_LOGE(LNN_META_NODE, "para is null");
-        return;
-    }
-    para->metaJoinNode = metaJoinNode;
-    para->reason = reason;
-    LNN_LOGI(LNN_META_NODE, "can find metaNode");
-    if (PostMessageToHandler(MSG_TYPE_JOIN_METANODE_AUTH_FAIL, para) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_META_NODE, "post join metanode authfail message failed");
-        SoftBusFree(para);
-        return;
-    }
-}
-
-static AuthVerifyCallback g_metaVerifyCallback = {
-    .onVerifyPassed = OnAuthMetaVerifyPassed,
-    .onVerifyFailed = OnAuthMetaVerifyFailed,
-};
-
-AuthVerifyCallback *LnnGetMetaVerifyCallback(void)
-{
-    return &g_metaVerifyCallback;
-}
-
 NodeInfo *FindNodeInfoByRquestId(uint32_t requestId)
 {
     LnnConnectionFsm *connFsm = FindConnectionFsmByRequestId(requestId);
@@ -2146,23 +1840,6 @@ static void BuildLnnEvent(LnnEventExtra *lnnEventExtra, const ConnectionAddr *ad
             LNN_LOGE(LNN_BUILDER, "unknow param type!");
             break;
     }
-}
-
-static ConnectionAddrKey *CreateConnectionAddrMsgParaKey(const ConnectionAddrKey *addrDataKey)
-{
-    ConnectionAddrKey *para = NULL;
-
-    if (addrDataKey == NULL) {
-        LNN_LOGE(LNN_BUILDER, "addrDataKey is null");
-        return NULL;
-    }
-    para = (ConnectionAddrKey *)SoftBusCalloc(sizeof(ConnectionAddrKey));
-    if (para == NULL) {
-        LNN_LOGE(LNN_BUILDER, "malloc connecton addrKey message fail");
-        return NULL;
-    }
-    *para = *addrDataKey;
-    return para;
 }
 
 static char *CreateNetworkIdMsgPara(const char *networkId)
@@ -2453,7 +2130,6 @@ int32_t LnnInitNetBuilder(void)
     }
     ListInit(&g_netBuilder.fsmList);
     ListInit(&g_netBuilder.pendingList);
-    ListInit(&g_netBuilder.metaNodeList);
     g_netBuilder.nodeType = NODE_TYPE_L;
     g_netBuilder.looper = GetLooper(LOOP_TYPE_DEFAULT);
     if (g_netBuilder.looper == NULL) {
@@ -2534,37 +2210,6 @@ int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName)
     return SOFTBUS_OK;
 }
 
-int32_t MetaNodeServerJoin(const char *pkgName, int32_t callingPid,
-    ConnectionAddr *addr, CustomData *customData)
-{
-    ConnectionAddrKey addrDataKey = {
-        .addr = *addr,
-        .customData = *customData,
-        .callingPid = callingPid,
-    };
-    if (memcpy_s(addrDataKey.pkgName, PKG_NAME_SIZE_MAX, pkgName, strlen(pkgName)) != EOK) {
-        LNN_LOGE(LNN_META_NODE, "memcpy_s error");
-        return SOFTBUS_ERR;
-    }
-    ConnectionAddrKey *para = NULL;
-    LNN_LOGD(LNN_META_NODE, "MetaNodeServerJoin enter!");
-    if (g_netBuilder.isInit == false) {
-        LNN_LOGE(LNN_META_NODE, "no init");
-        return SOFTBUS_NO_INIT;
-    }
-    para = CreateConnectionAddrMsgParaKey(&addrDataKey);
-    if (para == NULL) {
-        LNN_LOGE(LNN_META_NODE, "prepare join lnn message fail");
-        return SOFTBUS_MALLOC_ERR;
-    }
-    if (PostMessageToHandler(MSG_TYPE_JOIN_METANODE, para) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_META_NODE, "post join lnn message failed");
-        SoftBusFree(para);
-        return SOFTBUS_NETWORK_LOOPER_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
 int32_t LnnServerLeave(const char *networkId, const char *pkgName)
 {
     (void)pkgName;
@@ -2586,28 +2231,6 @@ int32_t LnnServerLeave(const char *networkId, const char *pkgName)
         lnnEventExtra.errcode = SOFTBUS_NETWORK_LEAVE_LNN_START_ERR;
         LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_LEAVE_LNN_START, lnnEventExtra);
         LNN_LOGE(LNN_BUILDER, "post leave lnn message fail");
-        SoftBusFree(para);
-        return SOFTBUS_NETWORK_LOOPER_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
-int32_t MetaNodeServerLeave(const char *networkId)
-{
-    char *para = NULL;
-
-    LNN_LOGI(LNN_META_NODE, "MetaNodeServerLeave enter!");
-    if (g_netBuilder.isInit == false) {
-        LNN_LOGE(LNN_META_NODE, "no init");
-        return SOFTBUS_NO_INIT;
-    }
-    para = CreateNetworkIdMsgPara(networkId);
-    if (para == NULL) {
-        LNN_LOGE(LNN_META_NODE, "prepare leave lnn message fail");
-        return SOFTBUS_MALLOC_ERR;
-    }
-    if (PostMessageToHandler(MSG_TYPE_LEAVE_METANODE, para) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_META_NODE, "post leave lnn message failed");
         SoftBusFree(para);
         return SOFTBUS_NETWORK_LOOPER_ERR;
     }

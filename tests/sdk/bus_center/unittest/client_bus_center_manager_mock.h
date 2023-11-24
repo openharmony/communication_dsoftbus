@@ -41,10 +41,7 @@ public:
     virtual int32_t ServerIpcSetNodeDataChangeFlag(const char *pkgName,
         const char *networkId, uint16_t dataChangeFlag);
     virtual int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen);
-    virtual int32_t ServerIpcJoinMetaNode(const char *pkgName,
-        void *addr, CustomData *customData, unsigned int addrTypeLen);
     virtual int32_t ServerIpcLeaveLNN(const char *pkgName, const char *networkId);
-    virtual int32_t ServerIpcLeaveMetaNode(const char *pkgName, const char *networkId);
     virtual int32_t ServerIpcStartTimeSync(const char *pkgName,
         const char *targetNetworkId, int32_t accuracy, int32_t period);
     virtual int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId);
@@ -66,9 +63,7 @@ public:
     MOCK_METHOD5(ServerIpcGetNodeKeyInfo, int32_t (const char *, const char *, int, unsigned char *, uint32_t));
     MOCK_METHOD3(ServerIpcSetNodeDataChangeFlag, int32_t (const char *, const char *, uint16_t));
     MOCK_METHOD3(ServerIpcJoinLNN, int32_t (const char *, void *, unsigned int));
-    MOCK_METHOD4(ServerIpcJoinMetaNode, int32_t (const char *, void *, CustomData *, unsigned int));
     MOCK_METHOD2(ServerIpcLeaveLNN, int32_t (const char *, const char *));
-    MOCK_METHOD2(ServerIpcLeaveMetaNode, int32_t (const char *, const char *));
     MOCK_METHOD4(ServerIpcStartTimeSync, int32_t (const char *, const char *, int32_t, int32_t));
     MOCK_METHOD2(ServerIpcStopTimeSync, int32_t (const char *, const char *));
     MOCK_METHOD2(ServerIpcPublishLNN, int32_t (const char *, const PublishInfo *));

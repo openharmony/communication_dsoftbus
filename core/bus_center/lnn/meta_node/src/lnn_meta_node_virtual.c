@@ -18,31 +18,6 @@
 #include "softbus_common.h"
 #include "softbus_errcode.h"
 
-int32_t LnnLoadMetaNode(const int32_t tType)
-{
-    (void)tType;
-    return SOFTBUS_OK;
-}
-
-int32_t LnnUnLoadMetaNode(const int32_t tType)
-{
-    (void)tType;
-    return SOFTBUS_OK;
-}
-
-int32_t MetaNodeServerLeaveExt(const char *metaNodeId, MetaNodeType tType)
-{
-    (void)metaNodeId;
-    (void)tType;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-int32_t MetaNodeServerJoinExt(CustomData *customData)
-{
-    (void)customData;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
 int32_t LnnInitMetaNode(void)
 {
     return SOFTBUS_OK;
@@ -51,12 +26,6 @@ int32_t LnnInitMetaNode(void)
 void LnnDeinitMetaNode(void)
 {
     return;
-}
-
-MetaNodeType FindMetaNodeType(const char *metaNodeId)
-{
-    (void)metaNodeId;
-    return CUSTOM_UNKNOWN;
 }
 
 int32_t LnnInitMetaNodeExtLedger(void)

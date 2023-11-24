@@ -625,33 +625,6 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
     return rc;
 }
 
-int32_t OnJoinMetaNode(MetaJoinRequestNode *metaJoinNode, CustomData *customData)
-{
-    if (metaJoinNode == NULL || customData == NULL) {
-        return SOFTBUS_ERR;
-    }
-    int32_t rc = SOFTBUS_OK;
-    int32_t connId = 0;
-    LNN_LOGI(LNN_BUILDER, "channelId=%d, type=%d",
-        metaJoinNode->addr.info.session.channelId, metaJoinNode->addr.info.session.type);
-    if (metaJoinNode->addr.type == CONNECTION_ADDR_SESSION) {
-        rc = TransGetConnByChanId(metaJoinNode->addr.info.session.channelId,
-            metaJoinNode->addr.info.session.type, &connId);
-        if (rc != SOFTBUS_OK) {
-            LNN_LOGI(LNN_BUILDER, "OnJoinMetaNode fail");
-            return SOFTBUS_ERR;
-        }
-        metaJoinNode->requestId = AuthGenRequestId();
-        if (AuthMetaStartVerify(connId, customData->data, DATA_SIZE,
-            metaJoinNode->requestId, metaJoinNode->callingPid, LnnGetMetaVerifyCallback()) != SOFTBUS_OK) {
-                rc = SOFTBUS_ERR;
-        }
-        LNN_LOGI(LNN_BUILDER,
-            "AuthMetaStartVerify resultId=%d, requestId=%u", rc, metaJoinNode->requestId);
-    }
-    return rc;
-}
-
 static int32_t LnnFillConnInfo(LnnConntionInfo *connInfo)
 {
     bool isAuthServer = false;
