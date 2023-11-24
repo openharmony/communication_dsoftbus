@@ -441,9 +441,8 @@ int32_t SoftbusAesCfbEncrypt(
     uint8_t random[RANDOM_LENGTH] = { 0 };
     uint8_t result[SHA256_MAC_LEN] = { 0 };
 
-    if (inData == NULL || inData->data == NULL || cipherKey == NULL || cipherKey->iv == NULL ||
-        cipherKey->ivLen < sizeof(random) || cipherKey->key == NULL || outData == NULL ||
-        (encMode != ENCRYPT_MODE && encMode != DECRYPT_MODE)) {
+    if (inData == NULL || inData->data == NULL || cipherKey == NULL || outData == NULL ||
+        (cipherKey->ivLen < RANDOM_LENGTH) || (encMode != ENCRYPT_MODE && encMode != DECRYPT_MODE)) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -459,6 +458,7 @@ int32_t SoftbusAesCfbEncrypt(
         return SOFTBUS_MEM_ERR;
     }
     EncryptKey key = { cipherKey->key, cipherKey->keyLen };
+    (void)memset_s(cipherKey->key, cipherKey->keyLen, 0, cipherKey->keyLen);
     if (SoftBusGenerateHmacHash(&key, random, sizeof(random), result, SHA256_MAC_LEN) != SOFTBUS_OK) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "SslHmacSha256 failed.");
         SoftBusFree(encryptData);
@@ -467,19 +467,19 @@ int32_t SoftbusAesCfbEncrypt(
     if (memcpy_s(cipherKey->key, cipherKey->keyLen, result, SHA256_MAC_LEN) != EOK) {
         HILOG_ERROR(SOFTBUS_HILOG_ID, "fill cipherKey->key failed!");
         SoftBusFree(encryptData);
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     if (encMode == ENCRYPT_MODE) {
         if (OpensslAesCfbEncrypt(cipherKey, inData->data, inData->len, encryptData, &encryptDataLen) != SOFTBUS_OK) {
             HILOG_ERROR(SOFTBUS_HILOG_ID, "OpensslAesCfbEncrypt failed.");
             SoftBusFree(encryptData);
-            return SOFTBUS_ERR;
+            return SOFTBUS_ENCRYPT_ERR;
         }
     } else {
         if (OpensslAesCfbDecrypt(cipherKey, inData->data, inData->len, encryptData, &encryptDataLen) != SOFTBUS_OK) {
             HILOG_ERROR(SOFTBUS_HILOG_ID, "OpensslAesCfbEncrypt failed.");
             SoftBusFree(encryptData);
-            return SOFTBUS_ERR;
+            return SOFTBUS_DECRYPT_ERR;
         }
     }
     outData->data = encryptData;
