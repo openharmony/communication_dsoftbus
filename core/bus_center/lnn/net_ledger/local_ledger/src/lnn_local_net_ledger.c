@@ -24,6 +24,7 @@
 #include "anonymizer.h"
 #include "bus_center_adapter.h"
 #include "bus_center_manager.h"
+#include "lnn_cipherkey_manager.h"
 #include "lnn_device_info_recovery.h"
 #include "lnn_log.h"
 #include "lnn_ohos_account.h"
@@ -1361,19 +1362,45 @@ static int32_t LnnFirstGetUdid(void)
 
 static int32_t LnnGenBroadcastCipherInfo(void)
 {
-    unsigned char cipherKey[SESSION_KEY_LENGTH] = {0};
-    if (SoftBusGenerateRandomArray(cipherKey, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "generate broadcast key error.");
-        return SOFTBUS_ERR;
+    if (LnnLoadLocalBroadcastCipherKey() == SOFTBUS_OK) {
+        BroadcastCipherKey broadcastKey;
+        (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
+        if (LnnGetLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "get local info failed.");
+            return SOFTBUS_ERR;
+        }
+        if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_KEY,
+            broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "set key error.");
+            return SOFTBUS_ERR;
+        }
+        if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_IV,
+            broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "set iv error.");
+            return SOFTBUS_ERR;
+        }
+        LNN_LOGI(LNN_LEDGER, "load BroadcastCipherInfo success!");
+        return SOFTBUS_OK;
     }
-    LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_KEY, cipherKey, SESSION_KEY_LENGTH);
 
+    unsigned char cipherKey[SESSION_KEY_LENGTH] = {0};
     unsigned char cipherIv[BROADCAST_IV_LEN] = {0};
-    if (SoftBusGenerateRandomArray(cipherIv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "generate broadcast iv error.");
+    if (SoftBusGenerateRandomArray(cipherKey, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "generate broadcast key error.");
         return SOFTBUS_ERR;
     }
-    LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_IV, cipherIv, BROADCAST_IV_LEN);
+    if (SoftBusGenerateRandomArray(cipherIv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "generate broadcast iv error.");
+        return SOFTBUS_ERR;
+    }
+    if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_KEY, cipherKey, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "set key error.");
+        return SOFTBUS_ERR;
+    }
+    if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_IV, cipherIv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "set iv error.");
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 
