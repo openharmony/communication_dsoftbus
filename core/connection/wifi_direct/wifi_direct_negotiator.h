@@ -55,7 +55,7 @@ struct WifiDirectNegotiator {
     void (*onWifiDirectAuthOpened)(uint32_t requestId, int64_t authId);
     void (*syncLnnInfo)(struct InnerLink *innerLink);
 
-    int32_t (*prejudgeAvailability)(const char *remoteNetworkId, enum WifiDirectConnectType connectType);
+    int32_t (*prejudgeAvailability)(const char *remoteNetworkId, enum WifiDirectLinkType linkType);
 
     char currentRemoteMac[MAC_ADDR_STR_LEN];
     char currentRemoteDeviceId[UUID_BUF_LEN];
