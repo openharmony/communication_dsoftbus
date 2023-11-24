@@ -29,6 +29,7 @@
 #include "lnn_log.h"
 #include "lnn_meta_node_ledger.h"
 #include "lnn_meta_node_interface.h"
+#include "lnn_p2p_info.h"
 #include "lnn_device_info_recovery.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
@@ -98,6 +99,7 @@ static void LnnRestoreLocalDeviceInfo()
         return;
     }
     LoadBleBroadcastKey();
+    LnnLoadPtkInfo();
     LnnLoadLocalBroadcastCipherKey();
     LNN_LOGI(LNN_LEDGER, "load remote deviceInfo devicekey success");
 }

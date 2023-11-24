@@ -25,6 +25,7 @@
 #include "auth_device_common_key.h"
 #include "common_list.h"
 #include "lnn_node_info.h"
+#include "lnn_p2p_info.h"
 #include "lnn_state_machine.h"
 #include "softbus_hisysevt_bus_center.h"
 
