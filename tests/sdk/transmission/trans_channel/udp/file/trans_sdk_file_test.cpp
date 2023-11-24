@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -735,7 +735,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest013, TestSize.Level0)
 }
 
 /**
- * @tc.name: TransFileTest013
+ * @tc.name: TransFileTest014
  * @tc.desc: trans register file callback of socket
  * @tc.type: FUNC
  * @tc.require:
@@ -751,7 +751,10 @@ HWTEST_F(TransSdkFileTest, TransFileTest014, TestSize.Level0)
     ret = TransSetSocketFileListener(nullptr, SocketFileCallbackFuncTest);
     ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
+    ret = TransFileInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = TransSetSocketFileListener(g_mySessionName, SocketFileCallbackFuncTest);
     ASSERT_EQ(ret, SOFTBUS_OK);
+    TransFileDeinit();
 }
 }
