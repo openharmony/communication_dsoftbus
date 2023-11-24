@@ -38,6 +38,10 @@
 
 int32_t LnnInitNetLedger(void)
 {
+    if (LnnInitHuksInterface() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "init huks interface fail");
+        return SOFTBUS_ERR;
+    }
     if (LnnInitLocalLedger() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init local net ledger fail!");
         return SOFTBUS_ERR;
@@ -48,10 +52,6 @@ int32_t LnnInitNetLedger(void)
     }
     if (LnnInitMetaNodeLedger() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init meta node ledger fail");
-        return SOFTBUS_ERR;
-    }
-    if (LnnInitHuksInterface() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "init huks interface fail");
         return SOFTBUS_ERR;
     }
     if (LnnInitMetaNodeExtLedger() != SOFTBUS_OK) {

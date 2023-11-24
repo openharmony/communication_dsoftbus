@@ -1152,7 +1152,7 @@ static SoftBusMessage *CreateBleHandlerMsg(int32_t what, uint64_t arg1, uint64_t
 static int32_t ProcessBleDiscFunc(bool isStart, uint8_t publishFlags, uint8_t activeFlags,
     int32_t funcCode, const void *option)
 {
-    if (SoftBusGetBtState() != BLE_ENABLE) {
+    if (isStart && SoftBusGetBtState() != BLE_ENABLE) {
         DISC_LOGE(DISC_BLE, "get bt state failed.");
         return SOFTBUS_ERR;
     }
