@@ -82,6 +82,10 @@ HWTEST_F(P2pInfoMockTest, P2P_INFO_MOCK_TEST_001, TestSize.Level1)
     EXPECT_CALL(netLedgerMock, LnnSetP2pGoMac(_, _)).WillRepeatedly(Return(SOFTBUS_ERR));
     ret = LnnInitLocalP2pInfo(&info);
     EXPECT_TRUE(ret != SOFTBUS_OK);
+
+    EXPECT_CALL(netLedgerMock, LnnSetWifiDirectAddr(_, _)).WillRepeatedly(Return(SOFTBUS_ERR));
+    ret = LnnInitLocalP2pInfo(&info);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /*
@@ -111,5 +115,34 @@ HWTEST_F(P2pInfoMockTest, P2P_INFO_MOCK_TEST_003, TestSize.Level1)
     int32_t ret = LnnInitP2p();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     LnnDeinitP2p();
+}
+
+/*
+* @tc.name: P2P_INFO_MOCK_TEST_003
+* @tc.desc: test LnnInitWifiDirect
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(P2pInfoMockTest, P2P_INFO_MOCK_TEST_004, TestSize.Level1)
+{
+    int32_t ret = LnnInitWifiDirect();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    LnnDeinitP2p();
+}
+
+/*
+* @tc.name: P2P_INFO_MOCK_TEST_002
+* @tc.desc: test LnnSyncP2pInfo
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(P2pInfoMockTest, P2P_INFO_MOCK_TEST_005, TestSize.Level1)
+{
+    NetLedgerMock netLedgerMock;
+    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineAndMetaNodeInfo)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = LnnSyncWifiDirectAddr();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    SoftBusSleepMs(500);
 }
 } // namespace OHOS
