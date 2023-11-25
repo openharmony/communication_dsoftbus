@@ -816,11 +816,11 @@ static int32_t PackCipherRpaInfo(JsonObj *json, const NodeInfo *info)
         AUTH_LOGE(AUTH_FSM, "get udid fail");
         return SOFTBUS_ERR;
     }
-    if (memcpy_s(&broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH, info->cipherInfo.key, SESSION_KEY_LENGTH) != EOK) {
+    if (memcpy_s(broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH, info->cipherInfo.key, SESSION_KEY_LENGTH) != EOK) {
         AUTH_LOGE(AUTH_FSM, "memcpy key fail.");
         return SOFTBUS_ERR;
     }
-    if (memcpy_s(&broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN, info->cipherInfo.iv, BROADCAST_IV_LEN) != EOK) {
+    if (memcpy_s(broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN, info->cipherInfo.iv, BROADCAST_IV_LEN) != EOK) {
         AUTH_LOGE(AUTH_FSM, "memcpy iv fail.");
         return SOFTBUS_ERR;
     }

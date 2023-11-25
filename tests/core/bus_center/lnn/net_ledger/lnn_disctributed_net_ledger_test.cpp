@@ -196,6 +196,47 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_NUMNFO_Test_002, TestSize.Lev
 }
 
 /*
+* @tc.name: LNN_GET_REMOTE_BYTEINFO_Test_003
+* @tc.desc: lnn get remote byte info test
+* @tc.type: FUNC
+* @tc.require:
+ */
+HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_BYTEINFO_Test_003, TestSize.Level1)
+{
+    unsigned char irk[LFINDER_IRK_LEN] = {0};
+    int32_t ret = LnnGetRemoteByteInfo(nullptr, BYTE_KEY_IRK, irk, LFINDER_IRK_LEN);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = LnnGetRemoteByteInfo(NODE1_NETWORK_ID, BYTE_KEY_IRK, nullptr, LFINDER_IRK_LEN);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = LnnGetRemoteByteInfo(NODE1_NETWORK_ID, BYTE_KEY_IRK, irk, LFINDER_IRK_LEN);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    unsigned char pubMac[LFINDER_MAC_ADDR_LEN] = {0};
+    ret = LnnGetRemoteByteInfo(nullptr, BYTE_KEY_PUB_MAC, pubMac, LFINDER_MAC_ADDR_LEN);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = LnnGetRemoteByteInfo(NODE1_NETWORK_ID, BYTE_KEY_PUB_MAC, nullptr, LFINDER_MAC_ADDR_LEN);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = LnnGetRemoteByteInfo(NODE1_NETWORK_ID, BYTE_KEY_PUB_MAC, pubMac, LFINDER_MAC_ADDR_LEN);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    unsigned char cipherKey[SESSION_KEY_LENGTH] = {0};
+    ret = LnnGetRemoteByteInfo(nullptr, BYTE_KEY_BROADCAST_CIPHER_KEY, cipherKey, SESSION_KEY_LENGTH);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = LnnGetRemoteByteInfo(NODE1_NETWORK_ID, BYTE_KEY_BROADCAST_CIPHER_KEY, nullptr, SESSION_KEY_LENGTH);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = LnnGetRemoteByteInfo(NODE1_NETWORK_ID, BYTE_KEY_BROADCAST_CIPHER_KEY, cipherKey, SESSION_KEY_LENGTH);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    unsigned char cipherIv[BROADCAST_IV_LEN] = {0};
+    ret = LnnGetRemoteByteInfo(nullptr, BYTE_KEY_BROADCAST_CIPHER_IV, cipherIv, BROADCAST_IV_LEN);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = LnnGetRemoteByteInfo(NODE1_NETWORK_ID, BYTE_KEY_BROADCAST_CIPHER_IV, nullptr, BROADCAST_IV_LEN);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = LnnGetRemoteByteInfo(NODE1_NETWORK_ID, BYTE_KEY_BROADCAST_CIPHER_IV, cipherIv, BROADCAST_IV_LEN);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
 * @tc.name: LNN_GET_CNN_CODE_Test_001
 * @tc.desc: lnn get cnn code test
 * @tc.type: FUNC
