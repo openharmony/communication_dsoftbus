@@ -186,6 +186,25 @@ static int32_t LlGetDeviceType(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t LlGetWifiDirectAddr(void *buf, uint32_t len)
+{
+    const char *wifiDirectAddr = NULL;
+    if (buf == NULL || len < MAC_LEN) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    wifiDirectAddr = LnnGetWifiDirectAddr(&g_localNetLedger.localInfo);
+    if (wifiDirectAddr == NULL) {
+        LNN_LOGE(LNN_LEDGER, "get wifidirect addr fail");
+        return SOFTBUS_ERR;
+    }
+    if (strncpy_s((char *)buf, len, wifiDirectAddr, strlen(wifiDirectAddr)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "copy wifidirect addr failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t LlGetAccount(void *buf, uint32_t len)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
@@ -212,6 +231,15 @@ static int32_t LlUpdateAccount(const void *buf)
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
+}
+
+static int32_t UpdateWifiDirectAddr(const void *wifiDirectAddr)
+{
+    if (wifiDirectAddr == NULL) {
+        LNN_LOGE(LNN_LEDGER, "para error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return LnnSetWifiDirectAddr(&g_localNetLedger.localInfo, (char *)wifiDirectAddr);
 }
 
 static int32_t UpdateLocalDeviceType(const void *buf)
@@ -1224,6 +1252,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {STRING_KEY_P2P_GO_MAC, MAC_LEN, LlGetP2pGoMac, UpdateP2pGoMac},
     {STRING_KEY_OFFLINE_CODE, OFFLINE_CODE_LEN, LlGetOffLineCode, LlUpdateLocalOffLineCode},
     {STRING_KEY_EXTDATA, EXTDATA_LEN, LlGetExtData, LlUpdateLocalExtData},
+    {STRING_KEY_WIFIDIRECT_ADDR, MAC_LEN, LlGetWifiDirectAddr, UpdateWifiDirectAddr},
     {NUM_KEY_SESSION_PORT, -1, LlGetSessionPort, UpdateLocalSessionPort},
     {NUM_KEY_AUTH_PORT, -1, LlGetAuthPort, UpdateLocalAuthPort},
     {NUM_KEY_PROXY_PORT, -1, LlGetProxyPort, UpdateLocalProxyPort},
