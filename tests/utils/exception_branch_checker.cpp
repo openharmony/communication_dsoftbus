@@ -17,9 +17,28 @@
 #include "softbus_log.h"
 #include "securec.h"
 
+#if defined(__LITEOS_M__)
+#define SOFTBUS_PRINTF
+#include "log.h"
+#else
+#include "hilog/log.h"
+#endif
+
 static void SoftBusLogExtraInfoFormat(char *line, const char *fileName, int lineNum, const char *funName)
 {
     (void)sprintf_s(line, LOG_LINE_MAX_LENGTH + 1, "[%s:%d] %s# ", fileName, lineNum, funName);
+}
+
+static void SoftBusLogPrint(const char *buf, SoftBusDfxLogLevel level, unsigned int domain, const char *tag)
+{
+#ifdef SOFTBUS_PRINTF
+    (void)level;
+    (void)domain;
+    (void)tag;
+    printf("%s\n", buf);
+#else
+    (void)HiLogPrint(LOG_CORE, (LogLevel)level, domain, tag, "%{public}s", buf);
+#endif
 }
 
 void SoftBusLogInnerImpl(SoftBusDfxLogLevel level, SoftBusLogLabel label, const char *fileName, int lineNum,
@@ -37,6 +56,7 @@ void SoftBusLogInnerImpl(SoftBusDfxLogLevel level, SoftBusLogLabel label, const 
         return;
     }
     va_end(args);
+    SoftBusLogPrint(buffer, level, label.domain, label.tag);
 
     auto *checker = ExceptionBranchChecker::GetCurrentInstance();
     if (checker != nullptr) {
