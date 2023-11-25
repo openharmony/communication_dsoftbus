@@ -33,7 +33,7 @@ extern "C" {
         return false;                                                                                         \
     }
 
-TRANS_ASSIGNER(Int32, Result, result)
+TRANS_ASSIGNER(Errcode, Result, result)
 TRANS_ASSIGNER(Errcode, Errcode, errcode)
 TRANS_ASSIGNER(String, SocketName, socketName)
 TRANS_ASSIGNER(Int32, DataType, dataType)

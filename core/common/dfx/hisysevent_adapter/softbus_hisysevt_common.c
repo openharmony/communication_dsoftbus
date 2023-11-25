@@ -170,31 +170,10 @@ void DeinitSoftbusSysEvt(void)
     DeinitTransStatisticSysEvt();
 }
 
-static uint32_t GetErrorCode(int32_t errorCode, int32_t baseErrorCode)
+int32_t GetErrorCodeEx(int32_t errorCode)
 {
-    return errorCode - baseErrorCode;
-}
-
-int32_t GetErrorCodeEx(int32_t errorCode, int32_t module)
-{
-    if (errorCode == -1) {
-        return SOFTBUS_MODULE_CODE | COMMON_SUB_MODULE_CODE | FAIL_RET_EX;
+    if (errorCode < 0) {
+        return -errorCode;
     }
-    if (errorCode >= 0) {
-        return errorCode;
-    }
-    switch (module) {
-        case SOFTBUS_MOD_DISCOVERY:
-            return SOFTBUS_MODULE_CODE | DISCOVER_SUB_MODULE_CODE | GetErrorCode(-errorCode, DISCOVER_BASE_ERROR);
-        case SOFTBUS_MOD_CONNECT:
-            return SOFTBUS_MODULE_CODE | COMMON_SUB_MODULE_CODE | GetErrorCode(-errorCode, CONNECT_BASE_ERROR);
-        case SOFTBUS_MOD_LNN:
-            return SOFTBUS_MODULE_CODE | NETWORK_SUB_MODULE_CODE | GetErrorCode(-errorCode, NETWORK_BASE_ERROR);
-        case SOFTBUS_MOD_TRANS:
-            return SOFTBUS_MODULE_CODE | TRANSPORT_SUB_MODULE_CODE | GetErrorCode(-errorCode, TRANSPORT_BASE_ERROR);
-        case SOFTBUS_HISYSEVT_CONN_TYPE_BR:
-            return SOFTBUS_MODULE_CODE | BR_LINK_SUB_MODULE_CODE | GetErrorCode(-errorCode, CONNECT_LINK_TYPE_BR);
-        default:
-            return SOFTBUS_MODULE_CODE | COMMON_SUB_MODULE_CODE | FAIL_RET_EX;
-    }
+    return errorCode;
 }
