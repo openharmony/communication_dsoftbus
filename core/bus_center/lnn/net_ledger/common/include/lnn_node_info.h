@@ -220,7 +220,8 @@ int32_t LnnSetSupportedProtocols(NodeInfo *info, uint64_t protocols);
 int32_t LnnSetStaticCapability(NodeInfo *info, uint8_t *cap, uint32_t len);
 int32_t LnnGetStaticCapability(NodeInfo *info, uint8_t *cap, uint32_t len);
 int32_t LnnSetPtk(NodeInfo *info, const char *remotePtk);
-
+int32_t LnnSetWifiDirectAddr(NodeInfo *info, const char *wifiDirectAddr);
+const char *LnnGetWifiDirectAddr(const NodeInfo *info);
 #ifdef __cplusplus
 }
 #endif

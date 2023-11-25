@@ -906,6 +906,28 @@ static int32_t DlGetP2pMac(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t DlGetWifiDirectAddr(const char *networkId, void *buf, uint32_t len)
+{
+    NodeInfo *info = NULL;
+    const char *wifiDirectAddr = NULL;
+
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if ((!LnnIsNodeOnline(info)) && (!info->metaInfo.isMetaNode)) {
+        LNN_LOGE(LNN_LEDGER, "node is offline");
+        return SOFTBUS_ERR;
+    }
+    wifiDirectAddr = LnnGetWifiDirectAddr(info);
+    if (wifiDirectAddr == NULL) {
+        LNN_LOGE(LNN_LEDGER, "get wifidirect addr fail");
+        return SOFTBUS_ERR;
+    }
+    if (strcpy_s((char*)buf, len, wifiDirectAddr) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "copy wifidirect addr to buf fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t DlGetNodeAddr(const char *networkId, void *buf, uint32_t len)
 {
     NodeInfo *info = NULL;
@@ -1145,6 +1167,7 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {STRING_KEY_NODE_ADDR, DlGetNodeAddr},
     {STRING_KEY_OFFLINE_CODE, DlGetDeviceOfflineCode},
     {STRING_KEY_BLE_MAC, DlGetNodeBleMac},
+    {STRING_KEY_WIFIDIRECT_ADDR, DlGetWifiDirectAddr},
     {NUM_KEY_META_NODE, DlGetAuthType},
     {NUM_KEY_SESSION_PORT, DlGetSessionPort},
     {NUM_KEY_AUTH_PORT, DlGetAuthPort},
@@ -2711,4 +2734,31 @@ void LnnRefreshDeviceOnlineStateAndDevIdInfo(const char *pkgName, DeviceInfo *de
     RefreshDeviceOnlineStateInfo(device, addtions);
     LNN_LOGI(LNN_LEDGER, "device found by medium=%d, udidhash=%s, online status=%d",
         addtions->medium, device->devId, device->isOnline);
+}
+
+bool LnnSetDLWifiDirectAddr(const char *networkId, const char *addr)
+{
+    NodeInfo *node = NULL;
+    if (networkId == NULL || addr == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return false;
+    }
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return false;
+    }
+    node = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
+    if (node == NULL) {
+        LNN_LOGE(LNN_LEDGER, "udid not found");
+        goto EXIT;
+    }
+    if (LnnSetWifiDirectAddr(node, addr) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "set wifidirect addr fail");
+        goto EXIT;
+    }
+    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    return true;
+EXIT:
+    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    return false;
 }
