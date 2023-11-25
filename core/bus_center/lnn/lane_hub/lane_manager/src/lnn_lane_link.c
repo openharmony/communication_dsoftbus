@@ -92,8 +92,7 @@ static bool FindLaneResource(const LaneResource *resourceItem, LaneResource *ite
             break;
         case LANE_BLE_DIRECT:
         case LANE_COC_DIRECT:
-            if (memcmp(resourceItem->linkInfo.bleDirect.peerUdidHash,
-                item->linkInfo.bleDirect.peerUdidHash, SHA_256_HASH_LEN) != 0) {
+            if (strcmp(resourceItem->linkInfo.bleDirect.networkId, item->linkInfo.bleDirect.networkId) != 0) {
                 return false;
             }
             break;
@@ -689,52 +688,15 @@ static int32_t LaneLinkOfBle(uint32_t reqId, const LinkRequest *reqInfo, const L
     return SOFTBUS_OK;
 }
 
-static int32_t LaneLinkOfBleDirectCommon(const LinkRequest *reqInfo, LaneLinkInfo *linkInfo)
-{
-    unsigned char peerUdid[UDID_BUF_LEN] = {0};
-    unsigned char peerNetwordIdHash[SHA_256_HASH_LEN] = {0};
-    unsigned char localUdidHash[SHA_256_HASH_LEN] = {0};
-
-    if (SoftBusGenerateStrHash((const unsigned char*)reqInfo->peerNetworkId, strlen(reqInfo->peerNetworkId),
-        peerNetwordIdHash) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
-
-    const NodeInfo* nodeInfo = LnnGetLocalNodeInfo();
-    if (SoftBusGenerateStrHash((const unsigned char*)nodeInfo->deviceInfo.deviceUdid,
-        strlen(nodeInfo->deviceInfo.deviceUdid), localUdidHash) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
-
-    if (LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_DEV_UDID,
-        (char *)peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
-    if (SoftBusGenerateStrHash(peerUdid, strlen((char*)peerUdid),
-            (unsigned char *)linkInfo->linkInfo.bleDirect.peerUdidHash) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
-
-    if (memcpy_s(linkInfo->linkInfo.bleDirect.nodeIdHash, NODEID_SHORT_HASH_LEN, peerNetwordIdHash,
-            NODEID_SHORT_HASH_LEN) != EOK) {
-        return SOFTBUS_ERR;
-    }
-    if (memcpy_s(linkInfo->linkInfo.bleDirect.localUdidHash, UDID_SHORT_HASH_LEN, localUdidHash, UDID_SHORT_HASH_LEN) !=
-        EOK) {
-        return SOFTBUS_ERR;
-    }
-    linkInfo->type = LANE_BLE_DIRECT;
-    return SOFTBUS_OK;
-}
-
 static int32_t LaneLinkOfGattDirect(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
 {
     LaneLinkInfo linkInfo;
     (void)memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
-    if (LaneLinkOfBleDirectCommon(reqInfo, &linkInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "ble direct common failed");
-        return SOFTBUS_ERR;
+    if (strcpy_s(linkInfo.linkInfo.bleDirect.networkId, NETWORK_ID_BUF_LEN, reqInfo->peerNetworkId) != EOK) {
+        LNN_LOGE(LNN_LANE, "copy networkId fail");
+        return SOFTBUS_MEM_ERR;
     }
+    linkInfo.type = LANE_BLE_DIRECT;
     linkInfo.linkInfo.bleDirect.protoType = BLE_GATT;
     callback->OnLaneLinkSuccess(reqId, &linkInfo);
     return SOFTBUS_OK;
@@ -950,9 +912,9 @@ static int32_t LaneLinkOfCocDirect(uint32_t reqId, const LinkRequest *reqInfo, c
 {
     LaneLinkInfo linkInfo;
     (void)memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
-    if (LaneLinkOfBleDirectCommon(reqInfo, &linkInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "ble direct common failed");
-        return SOFTBUS_ERR;
+    if (strcpy_s(linkInfo.linkInfo.bleDirect.networkId, NETWORK_ID_BUF_LEN, reqInfo->peerNetworkId) != EOK) {
+        LNN_LOGE(LNN_LANE, "copy networkId fail");
+        return SOFTBUS_MEM_ERR;
     }
     linkInfo.type = LANE_COC_DIRECT;
     linkInfo.linkInfo.bleDirect.protoType = BLE_COC;

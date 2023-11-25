@@ -373,7 +373,7 @@ static void RecordStartTime(const ConnectOption *info)
                 return;
             }
             conInfo.bleInfo.protocol = info->bleOption.protocol;
-            conInfo.bleInfo.psm = info->bleDirectOption.psm;
+            conInfo.bleInfo.psm = info->bleOption.psm;
             break;
         case CONNECT_TCP:
             if (memcpy_s(&conInfo.socketInfo.addr, MAX_SOCKET_ADDR_LEN, info->socketOption.addr, MAX_SOCKET_ADDR_LEN) !=

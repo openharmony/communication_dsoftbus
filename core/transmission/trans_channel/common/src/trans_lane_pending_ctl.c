@@ -612,21 +612,12 @@ static int32_t SetBleConnInfo(const BleConnInfo *bleInfo, ConnectOption *connOpt
     return SOFTBUS_OK;
 }
 
-static int32_t SetBleDirectConnInfo(const BleDirectConnInfo* bleDirect, ConnectOption *connOpt)
+static int32_t SetBleDirectConnInfo(const BleDirectConnInfo *bleDirect, ConnectOption *connOpt)
 {
-    if (memcpy_s(connOpt->bleDirectOption.nodeIdHash, NODEID_SHORT_HASH_LEN,
-        bleDirect->nodeIdHash, NODEID_SHORT_HASH_LEN) != EOK) {
-        return SOFTBUS_ERR;
+    if (strcpy_s(connOpt->bleDirectOption.networkId, NETWORK_ID_BUF_LEN, bleDirect->networkId) != EOK) {
+        TRANS_LOGW(TRANS_SVC, "set networkId err.");
+        return SOFTBUS_MEM_ERR;
     }
-    if (memcpy_s(connOpt->bleDirectOption.localUdidHash, UDID_SHORT_HASH_LEN,
-        bleDirect->localUdidHash, UDID_SHORT_HASH_LEN) != EOK) {
-        return SOFTBUS_ERR;
-    }
-    if (memcpy_s(connOpt->bleDirectOption.peerUdidHash, SHA_256_HASH_LEN,
-        bleDirect->peerUdidHash, SHA_256_HASH_LEN) != EOK) {
-        return SOFTBUS_ERR;
-    }
-
     connOpt->type = CONNECT_BLE_DIRECT;
     connOpt->bleDirectOption.protoType = bleDirect->protoType;
     return SOFTBUS_OK;
