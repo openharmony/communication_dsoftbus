@@ -118,7 +118,7 @@ HWTEST_F(P2pInfoMockTest, P2P_INFO_MOCK_TEST_003, TestSize.Level1)
 }
 
 /*
-* @tc.name: P2P_INFO_MOCK_TEST_003
+* @tc.name: P2P_INFO_MOCK_TEST_004
 * @tc.desc: test LnnInitWifiDirect
 * @tc.type: FUNC
 * @tc.require:
@@ -131,8 +131,8 @@ HWTEST_F(P2pInfoMockTest, P2P_INFO_MOCK_TEST_004, TestSize.Level1)
 }
 
 /*
-* @tc.name: P2P_INFO_MOCK_TEST_002
-* @tc.desc: test LnnSyncP2pInfo
+* @tc.name: P2P_INFO_MOCK_TEST_005
+* @tc.desc: test LnnSyncWifiDirectAddr
 * @tc.type: FUNC
 * @tc.require:
 */
