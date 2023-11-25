@@ -25,6 +25,7 @@
 #include "data/inner_link.h"
 #include "data/link_manager.h"
 #include "data/resource_manager.h"
+#include "conn_event.h"
 
 static bool IsNeedRetry(struct WifiDirectCommand *base, int32_t reason)
 {
@@ -133,6 +134,12 @@ static void OnSuccess(struct WifiDirectCommand *base, struct NegotiateMessage *m
         CONN_LOGI(CONN_WIFI_DIRECT, "call onConnectSuccess");
         self->callback.onConnectSuccess(requestId, &link);
     }
+    ConnEventExtra extra = {
+        .requestId = self->connectInfo.requestId,
+        .linkType = CONNECT_P2P,
+        .result = EVENT_STAGE_RESULT_OK
+    };
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
     GetWifiDirectNegotiator()->resetContext();
     GetResourceManager()->dump();
     GetLinkManager()->dump();
@@ -153,7 +160,13 @@ static void OnFailure(struct WifiDirectCommand *base, int32_t reason)
         CONN_LOGI(CONN_WIFI_DIRECT, "call onConnectFailure");
         self->callback.onConnectFailure(self->connectInfo.requestId, reason);
     }
-
+    ConnEventExtra extra = {
+        .requestId = self->connectInfo.requestId,
+        .linkType = CONNECT_P2P,
+        .result = EVENT_STAGE_RESULT_FAILED,
+        .errcode = reason
+    };
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
     GetWifiDirectNegotiator()->resetContext();
     GetResourceManager()->dump();
     GetLinkManager()->dump();
