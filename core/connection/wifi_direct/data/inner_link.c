@@ -39,14 +39,13 @@
 #define IL_TAG_IS_CLIENT 11
 #define IL_TAG_IS_BEING_USED_BY_LOCAL 12
 #define IL_TAG_IS_BEING_USED_BY_REMOTE 13
-#define IL_TAG_IS_SOURCE 14
 #define IL_TAG_FREQUENCY 15
 #define IL_TAG_STATE_CHANGE_TIME 16
 #define IL_TAG_DEVICE_ID 17
 #define IL_TAG_AUTH_CONNECTION 18
 
 IC_DECLARE_KEY_PROPERTIES(InnerLink, IL_KEY_MAX) = {
-    IC_KEY_PROPERTY(IL_KEY_CONNECT_TYPE, IL_TAG_CONNECT_TYPE, "CONNECT_TYPE", INT, DUMP_FLAG),
+    IC_KEY_PROPERTY(IL_KEY_LINK_TYPE, IL_TAG_CONNECT_TYPE, "CONNECT_TYPE", INT, DUMP_FLAG),
     IC_KEY_PROPERTY(IL_KEY_STATE, IL_TAG_STATE, "STATE", INT, DUMP_FLAG),
     IC_KEY_PROPERTY(IL_KEY_LOCAL_INTERFACE, IL_TAG_LOCAL_INTERFACE, "LOCAL_INTERFACE", STRING, 0),
     IC_KEY_PROPERTY(IL_KEY_LOCAL_BASE_MAC, IL_TAG_LOCAL_BASE_MAC, "LOCAL_BASE_MAC", STRING, MAC_ADDR_FLAG | DUMP_FLAG),
@@ -57,12 +56,10 @@ IC_DECLARE_KEY_PROPERTIES(InnerLink, IL_KEY_MAX) = {
                     MAC_ADDR_FLAG | DUMP_FLAG),
     IC_KEY_PROPERTY(IL_KEY_REMOTE_DYNAMIC_MAC, IL_TAG_REMOTE_DYNAMIC_MAC, "REMOTE_DYNAMIC_MAC", STRING, MAC_ADDR_FLAG),
     IC_KEY_PROPERTY(IL_KEY_REMOTE_IPV4, IL_TAG_REMOTE_IPV4, "REMOTE_IPV4", IPV4_INFO, DUMP_FLAG),
-    IC_KEY_PROPERTY(IL_KEY_IS_CLIENT, IL_TAG_IS_CLIENT, "IS_CLIENT", BOOLEAN, 0),
     IC_KEY_PROPERTY(IL_KEY_IS_BEING_USED_BY_LOCAL, IL_TAG_IS_BEING_USED_BY_LOCAL, "IS_BEING_USED_BY_LOCAL",
                     BOOLEAN, DUMP_FLAG),
     IC_KEY_PROPERTY(IL_KEY_IS_BEING_USED_BY_REMOTE, IL_TAG_IS_BEING_USED_BY_REMOTE, "IS_BEING_USED_BY_REMOTE",
                     BOOLEAN, DUMP_FLAG),
-    IC_KEY_PROPERTY(IL_KEY_IS_SOURCE, IL_TAG_IS_SOURCE, "IS_SOURCE", BOOLEAN, 0),
     IC_KEY_PROPERTY(IL_KEY_FREQUENCY, IL_TAG_FREQUENCY, "FREQUENCY", INT, 0),
     IC_KEY_PROPERTY(IL_KEY_STATE_CHANGE_TIME, IL_TAG_STATE_CHANGE_TIME, "STATE_CHANGE_TIME", LONG, 0),
     IC_KEY_PROPERTY(IL_KEY_DEVICE_ID, IL_TAG_DEVICE_ID, "DEVICE_ID", STRING, DEVICE_ID_FLAG | DUMP_FLAG),
@@ -198,7 +195,7 @@ static int32_t GetLink(struct InnerLink *self, int32_t requestId, int32_t pid, s
     CONN_CHECK_AND_RETURN_RET_LOGW(link, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "link is null");
 
     link->linkId = GetLinkManager()->generateLinkId(self, requestId, pid);
-    link->connectType = self->getInt(self, IL_KEY_CONNECT_TYPE, WIFI_DIRECT_CONNECT_TYPE_INVALID);
+    link->linkType = self->getInt(self, IL_KEY_LINK_TYPE, WIFI_DIRECT_LINK_TYPE_INVALID);
 
     int32_t ret = self->getLocalIpString(self, link->localIp, sizeof(link->localIp));
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "get local ip failed");
@@ -395,12 +392,11 @@ void InnerLinkConstructor(struct InnerLink *self)
     self->isProtected = IsProtected;
 }
 
-void InnerLinkConstructorWithArgs(struct InnerLink *self, enum WifiDirectConnectType type, bool isClient,
+void InnerLinkConstructorWithArgs(struct InnerLink *self, enum WifiDirectLinkType type,
                                   const char *localInterface, const char *remoteMac)
 {
     InnerLinkConstructor(self);
-    self->putInt(self, IL_KEY_CONNECT_TYPE, type);
-    self->putBoolean(self, IL_KEY_IS_CLIENT, isClient);
+    self->putInt(self, IL_KEY_LINK_TYPE, type);
     self->putString(self, IL_KEY_LOCAL_INTERFACE, localInterface);
     self->putString(self, IL_KEY_REMOTE_BASE_MAC, remoteMac);
 }

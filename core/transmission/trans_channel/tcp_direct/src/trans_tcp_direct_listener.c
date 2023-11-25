@@ -31,6 +31,7 @@
 #include "trans_tcp_direct_sessionconn.h"
 #include "trans_channel_manager.h"
 #include "trans_log.h"
+#include "trans_event.h"
 
 #define ID_OFFSET (1)
 
@@ -205,6 +206,12 @@ static void CloseTcpDirectFd(int fd)
 static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channelId, int32_t fd)
 {
     if (ret != SOFTBUS_OK) {
+        TransEventExtra extra = {
+            .channelId = channelId,
+            .socketFd = fd,
+            .errcode = ret
+        };
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
         DelTrigger(module, fd, READ_TRIGGER);
         ConnShutdownSocket(fd);
         NotifyChannelOpenFailed(channelId, ret);
@@ -252,6 +259,13 @@ static int32_t TdcOnDataEvent(ListenerModule module, int events, int fd)
         DelTrigger(conn->listenMod, fd, WRITE_TRIGGER);
         AddTrigger(conn->listenMod, fd, READ_TRIGGER);
         ret = StartVerifySession(conn);
+        TransEventExtra extra = {
+            .socketFd = fd,
+            .channelId = conn->channelId,
+            .authId = conn->authId,
+            .errcode = ret
+        };
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_START, extra);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "start verify session fail.");
             DelTrigger(conn->listenMod, fd, READ_TRIGGER);

@@ -381,6 +381,7 @@
         "ClientGetSessionCallbackAdapterById";
         "ClientGetPeerSocketInfoById";
         "TransSetSocketFileListener";
+        "EvaluateQos";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;

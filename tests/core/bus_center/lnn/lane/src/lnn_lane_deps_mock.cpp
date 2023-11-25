@@ -192,6 +192,10 @@ int32_t TransProxyCloseProxyChannel(int32_t channelId)
 {
     return GetLaneDepsInterface()->TransProxyCloseProxyChannel(channelId);
 }
+LaneResource *LaneResourceIsExist(LaneResource *resourceItem)
+{
+    return GetLaneDepsInterface()->LaneResourceIsExist(resourceItem);
+}
 
 int64_t GetAuthIdByConnInfo(const AuthConnInfo *connInfo)
 {

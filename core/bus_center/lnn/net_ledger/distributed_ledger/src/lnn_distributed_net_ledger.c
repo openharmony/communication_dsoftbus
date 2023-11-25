@@ -21,6 +21,7 @@
 
 #include <securec.h>
 
+#include "lnn_event.h"
 #include "anonymizer.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_fast_offline.h"
@@ -733,6 +734,52 @@ static int32_t DlGetNodeBleMac(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t DlGetRemotePtk(const char *networkId, void *buf, uint32_t len)
+{
+    if (len != PTK_DEFAULT_LEN) {
+        LNN_LOGE(LNN_LEDGER, "length error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeInfo *info = NULL;
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if (memcpy_s(buf, len, info->remotePtk, PTK_DEFAULT_LEN) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy remote ptk err");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t DlGetStaticCapLen(const char *networkId, void *buf, uint32_t len)
+{
+    NodeInfo *info = NULL;
+    if (len != LNN_COMMON_LEN) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if (!LnnIsNodeOnline(info)) {
+        LNN_LOGE(LNN_LEDGER, "device is offline");
+        return SOFTBUS_ERR;
+    }
+    *((int32_t *)buf) = info->staticCapLen;
+    return SOFTBUS_OK;
+}
+
+static int32_t DlGetStaticCap(const char *networkId, void *buf, uint32_t len)
+{
+    if (len > STATIC_CAP_LEN) {
+        LNN_LOGE(LNN_LEDGER, "length error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeInfo *info = NULL;
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if (memcpy_s(buf, len, info->staticCapability, STATIC_CAP_LEN) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy static cap err");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 void LnnUpdateNodeBleMac(const char *networkId, char *bleMac, uint32_t len)
 {
     if ((networkId == NULL) || (bleMac == NULL) || (len != MAC_LEN)) {
@@ -1038,6 +1085,50 @@ static int32_t DlGetAccountHash(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t DlGetDeviceIrk(const char *networkId, void *buf, uint32_t len)
+{
+    NodeInfo *info = NULL;
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if (memcpy_s(buf, len, info->rpaInfo.peerIrk, LFINDER_IRK_LEN) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy peerIrk fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t DlGetDevicePubMac(const char *networkId, void *buf, uint32_t len)
+{
+    NodeInfo *info = NULL;
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if (memcpy_s(buf, len, info->rpaInfo.publicAddress, LFINDER_MAC_ADDR_LEN) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy publicAddress fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t DlGetDeviceCipherInfoKey(const char *networkId, void *buf, uint32_t len)
+{
+    NodeInfo *info = NULL;
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if (memcpy_s(buf, len, info->cipherInfo.key, SESSION_KEY_LENGTH) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy cipher key fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t DlGetDeviceCipherInfoIv(const char *networkId, void *buf, uint32_t len)
+{
+    NodeInfo *info = NULL;
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if (memcpy_s(buf, len, info->cipherInfo.iv, BROADCAST_IV_LEN) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy cipher iv fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static DistributedLedgerKey g_dlKeyTable[] = {
     {STRING_KEY_HICE_VERSION, DlGetNodeSoftBusVersion},
     {STRING_KEY_DEV_UDID, DlGetDeviceUdid},
@@ -1067,8 +1158,15 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {NUM_KEY_STATE_VERSION, DlGetStateVersion},
     {NUM_KEY_DATA_CHANGE_FLAG, DlGetNodeDataChangeFlag},
     {NUM_KEY_DEV_TYPE_ID, DlGetDeviceTypeId},
+    {NUM_KEY_STATIC_CAP_LEN, DlGetStaticCapLen},
     {BOOL_KEY_TLV_NEGOTIATION, DlGetNodeTlvNegoFlag},
     {BYTE_KEY_ACCOUNT_HASH, DlGetAccountHash},
+    {BYTE_KEY_REMOTE_PTK, DlGetRemotePtk},
+    {BYTE_KEY_STATIC_CAPABILITY, DlGetStaticCap},
+    {BYTE_KEY_IRK, DlGetDeviceIrk},
+    {BYTE_KEY_PUB_MAC, DlGetDevicePubMac},
+    {BYTE_KEY_BROADCAST_CIPHER_KEY, DlGetDeviceCipherInfoKey},
+    {BYTE_KEY_BROADCAST_CIPHER_IV, DlGetDeviceCipherInfoIv},
 };
 
 static char *CreateCnnCodeKey(const char *uuid, DiscoveryType type)
@@ -1151,16 +1249,23 @@ short LnnGetCnnCode(const char *uuid, DiscoveryType type)
 
 static void MergeLnnInfo(const NodeInfo *oldInfo, NodeInfo *info)
 {
-    int32_t i;
+    int32_t i, j;
 
     for (i = 0; i < CONNECTION_ADDR_MAX; ++i) {
         info->relation[i] += oldInfo->relation[i];
         info->relation[i] &= LNN_RELATION_MASK;
-        if (oldInfo->authChannelId[i] != 0) {
-            info->authChannelId[i] = oldInfo->authChannelId[i];
+        for (j = 0; j < AUTH_SIDE_MAX; ++j) {
+            if (oldInfo->authChannelId[i][j] != 0 && info->authChannelId[i][j] == 0) {
+                info->authChannelId[i][j] = oldInfo->authChannelId[i][j];
+            }
         }
-        LNN_LOGI(LNN_LEDGER,
-            "Update authChannelId: %d, addrType=%d.", info->authChannelId[i], i);
+        if (oldInfo->authChannelId[i][AUTH_AS_CLIENT_SIDE] != 0 ||
+            oldInfo->authChannelId[i][AUTH_AS_SERVER_SIDE] != 0 || info->authChannelId[i][AUTH_AS_CLIENT_SIDE] != 0 ||
+            info->authChannelId[i][AUTH_AS_SERVER_SIDE] != 0 ) {
+            LNN_LOGD(LNN_LEDGER, "Merge authChannelId %d|%d -> %d|%d, addrType = %d ",
+                oldInfo->authChannelId[i][AUTH_AS_CLIENT_SIDE], oldInfo->authChannelId[i][AUTH_AS_SERVER_SIDE],
+                info->authChannelId[i][AUTH_AS_CLIENT_SIDE], info->authChannelId[i][AUTH_AS_SERVER_SIDE], i);
+        }
     }
 }
 
@@ -1364,13 +1469,15 @@ static void NotifyMigrateUpgrade(NodeInfo *info)
 static void FilterWifiInfo(NodeInfo *info)
 {
     (void)LnnClearDiscoveryType(info, DISCOVERY_TYPE_WIFI);
-    info->authChannelId[CONNECTION_ADDR_WLAN] = 0;
+    info->authChannelId[CONNECTION_ADDR_WLAN][AUTH_AS_CLIENT_SIDE] = 0;
+    info->authChannelId[CONNECTION_ADDR_WLAN][AUTH_AS_SERVER_SIDE] = 0;
 }
 
 static void FilterBrInfo(NodeInfo *info)
 {
     (void)LnnClearDiscoveryType(info, DISCOVERY_TYPE_BR);
-    info->authChannelId[CONNECTION_ADDR_BR] = 0;
+    info->authChannelId[CONNECTION_ADDR_BR][AUTH_AS_CLIENT_SIDE] = 0;
+    info->authChannelId[CONNECTION_ADDR_BR][AUTH_AS_SERVER_SIDE] = 0;
 }
 
 static void BleDirectlyOnlineProc(NodeInfo *info)
@@ -1462,6 +1569,8 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
 
     udid = LnnGetDeviceUdid(info);
     map = &g_distributedNetLedger.distributedInfo;
+    LnnEventExtra lnnEventExtra = { .result = EVENT_STAGE_RESULT_OK };
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, lnnEventExtra);
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail!");
         return REPORT_NONE;
@@ -1588,15 +1697,45 @@ static void NotifyMigrateDegrade(const char *udid)
     }
 }
 
+static ReportCategory ClearAuthChannelId(NodeInfo *info, ConnectionAddrType type, int32_t authId)
+{
+    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI) && LnnConvAddrTypeToDiscType(type) == DISCOVERY_TYPE_WIFI) {
+        if (info->authChannelId[type][AUTH_AS_CLIENT_SIDE] == authId) {
+            info->authChannelId[type][AUTH_AS_CLIENT_SIDE] = 0;
+        }
+        if (info->authChannelId[type][AUTH_AS_SERVER_SIDE] == authId) {
+            info->authChannelId[type][AUTH_AS_SERVER_SIDE] = 0;
+        }
+        if (info->authChannelId[type][AUTH_AS_CLIENT_SIDE] != 0 ||
+            info->authChannelId[type][AUTH_AS_SERVER_SIDE] != 0) {
+            LNN_LOGI(LNN_LEDGER, "authChannelId(%d|%d) not clear, not need to report offline.",
+                info->authChannelId[type][AUTH_AS_CLIENT_SIDE], info->authChannelId[type][AUTH_AS_SERVER_SIDE]);
+            return REPORT_NONE;
+        }
+    }
+    info->authChannelId[type][AUTH_AS_CLIENT_SIDE] = 0;
+    info->authChannelId[type][AUTH_AS_SERVER_SIDE] = 0;
+    return REPORT_OFFLINE;
+}
+
+static void LnnCleanNodeInfo(NodeInfo *info)
+{
+    LnnSetNodeConnStatus(info, STATUS_OFFLINE);
+    LnnClearAuthTypeValue(&info->AuthTypeValue, ONLINE_HICHAIN);
+    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    LNN_LOGI(LNN_LEDGER, "need to report offline");
+}
+
 ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int32_t authId)
 {
     NodeInfo *info = NULL;
-
     DoubleHashMap *map = &g_distributedNetLedger.distributedInfo;
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail!");
         return REPORT_NONE;
     }
+    LnnEventExtra lnnEventExtra = { .result = EVENT_STAGE_RESULT_OK };
+    LNN_EVENT(EVENT_SCENE_LEAVE_LNN, EVENT_STAGE_LEAVE_LNN_END, lnnEventExtra);
     info = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
     if (info == NULL) {
         LNN_LOGE(LNN_LEDGER, "PARA ERROR!");
@@ -1609,20 +1748,16 @@ ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int3
     if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR) && LnnConvAddrTypeToDiscType(type) == DISCOVERY_TYPE_BR) {
         RemoveCnnCode(&g_distributedNetLedger.cnnCode.connectionCode, info->uuid, DISCOVERY_TYPE_BR);
     }
-    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI) && LnnConvAddrTypeToDiscType(type) == DISCOVERY_TYPE_WIFI &&
-        info->authChannelId[type] != authId) {
-        LNN_LOGI(LNN_LEDGER, "authChannelId != authId, not need to report offline.");
+    if (ClearAuthChannelId(info, type, authId) == REPORT_NONE) {
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return REPORT_NONE;
     }
-    info->authChannelId[type] = 0;
     if (LnnConvAddrTypeToDiscType(type) == DISCOVERY_TYPE_WIFI) {
         LnnSetWiFiIp(info, LOCAL_IP);
     }
     LnnClearDiscoveryType(info, LnnConvAddrTypeToDiscType(type));
     if (info->discoveryType != 0) {
-        LNN_LOGI(LNN_LEDGER, "discoveryType=%u after clear, not need to report offline.",
-            info->discoveryType);
+        LNN_LOGI(LNN_LEDGER, "discoveryType=%u after clear, not need to report offline.", info->discoveryType);
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         UpdateNetworkInfo(udid);
         if (type == CONNECTION_ADDR_WLAN) {
@@ -1635,10 +1770,7 @@ ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int3
         LNN_LOGI(LNN_LEDGER, "the state is already offline, no need to report offline");
         return REPORT_NONE;
     }
-    LnnSetNodeConnStatus(info, STATUS_OFFLINE);
-    LnnClearAuthTypeValue(&info->AuthTypeValue, ONLINE_HICHAIN);
-    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
-    LNN_LOGI(LNN_LEDGER, "need to report offline");
+    LnnCleanNodeInfo(info);
     return REPORT_OFFLINE;
 }
 
@@ -1834,6 +1966,33 @@ bool LnnSetDLP2pInfo(const char *networkId, const P2pInfo *info)
         LnnSetP2pMac(node, info->p2pMac) != SOFTBUS_OK ||
         LnnSetP2pGoMac(node, info->goMac) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "set p2p info fail");
+        goto EXIT;
+    }
+    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    return true;
+EXIT:
+    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    return false;
+}
+
+bool LnnSetDlPtk(const char *networkId, const char *remotePtk)
+{
+    NodeInfo *node = NULL;
+    if (networkId == NULL || remotePtk == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return false;
+    }
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return false;
+    }
+    node = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
+    if (node == NULL) {
+        LNN_LOGE(LNN_LEDGER, "get node info fail");
+        goto EXIT;
+    }
+    if (LnnSetPtk(node, remotePtk) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "set ptk fail");
         goto EXIT;
     }
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);

@@ -15,6 +15,7 @@
 
 #include "trans_session_manager.h"
 
+#include "anonymizer.h"
 #include "lnn_lane_link.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"

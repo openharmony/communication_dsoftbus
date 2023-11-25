@@ -77,14 +77,15 @@ static int32_t CloseLink(struct WifiDirectDisconnectCommand *command)
     ret = PreferNegotiateChannelForConnectInfo(link, connectInfo);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "prefer channel failed");
 
-    enum WifiDirectConnectType connectType = link->getInt(link, IL_KEY_CONNECT_TYPE, WIFI_DIRECT_CONNECT_TYPE_INVALID);
+    enum WifiDirectLinkType linkType = link->getInt(link, IL_KEY_LINK_TYPE, WIFI_DIRECT_LINK_TYPE_INVALID);
     struct WifiDirectProcessor *processor =
-        GetWifiDirectDecisionCenter()->getProcessorByNegoChannelAndConnectType(connectInfo->negoChannel, connectType);
+        GetWifiDirectDecisionCenter()->getProcessorByNegoChannelAndLinkType(connectInfo->negoChannel, linkType);
     CONN_CHECK_AND_RETURN_RET_LOGW(processor, ERROR_WIFI_DIRECT_NO_SUITABLE_PROTOCOL, CONN_WIFI_DIRECT,
         "no suitable processor");
 
     command->processor = processor;
     processor->activeCommand = (struct WifiDirectCommand *)command;
+    CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=%p", command);
     negotiator->currentProcessor = processor;
 
     return processor->disconnectLink(connectInfo, link);
@@ -136,6 +137,17 @@ static void OnFailure(struct WifiDirectCommand *base, int32_t reason)
     GetLinkManager()->dump();
 }
 
+static struct WifiDirectCommand* Duplicate(struct WifiDirectCommand *base)
+{
+    struct WifiDirectDisconnectCommand *self = (struct WifiDirectDisconnectCommand *)base;
+    struct WifiDirectDisconnectCommand *copy =
+        (struct WifiDirectDisconnectCommand *)WifiDirectDisconnectCommandNew(&self->connectInfo, &self->callback);
+    if (copy != NULL) {
+        copy->times = self->times;
+    }
+    return (struct WifiDirectCommand *)copy;
+}
+
 void WifiDirectDisconnectCommandConstructor(struct WifiDirectDisconnectCommand *self,
                                             struct WifiDirectConnectInfo *connectInfo,
                                             struct WifiDirectConnectCallback *callback)
@@ -145,6 +157,7 @@ void WifiDirectDisconnectCommandConstructor(struct WifiDirectDisconnectCommand *
     self->execute = ExecuteDisconnection;
     self->onSuccess = OnSuccess;
     self->onFailure = OnFailure;
+    self->duplicate = Duplicate;
     self->deleteSelf = WifiDirectDisconnectCommandDelete;
     *(&self->connectInfo) = *connectInfo;
     if (connectInfo->negoChannel != NULL) {

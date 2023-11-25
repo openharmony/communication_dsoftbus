@@ -18,6 +18,7 @@
 
 #include "common_list.h"
 #include "message_handler.h"
+#include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_conn_ble_trans.h"
 #include "softbus_conn_interface.h"
@@ -37,6 +38,7 @@ extern "C" {
 #define INVALID_UNDERLAY_HANDLE                   (-1)
 #define NET_CTRL_MSG_TYPE_HEADER_SIZE             4
 #define BLE_CLIENT_MAX_RETRY_SEARCH_SERVICE_TIMES 1
+#define DEFAULT_MTU_SIZE                          512
 
 #define RETRY_SERVER_STATE_CONSISTENT_MILLIS      (3 * 1000)
 #define BASIC_INFO_EXCHANGE_TIMEOUT               (5 * 1000)
@@ -91,6 +93,13 @@ enum ConnBleFeatureCapability {
 typedef uint32_t ConnBleFeatureBitSet;
 
 typedef struct {
+    SoftBusBtUuid serviceUuid;
+    SoftBusBtUuid connCharacteristicUuid;
+    SoftBusBtUuid netUuid;
+    SoftBusBtUuid descriptorUuid;
+} GattService;
+
+typedef struct {
     ListNode node;
     BleProtocolType protocol;
     uint32_t connectionId;
@@ -120,6 +129,10 @@ typedef struct {
 
     // NOTICE: fields below are inner ones for helping connect progress, they are invalid after connection established
     int32_t retrySearchServiceCnt;
+
+    GattServiceType serviceId;
+    GattService gattService;
+    uint32_t expectedMtuSize;
 } ConnBleConnection;
 
 typedef struct {
@@ -154,13 +167,15 @@ typedef struct {
     int32_t (*bleClientDisconnect)(ConnBleConnection *connection, bool grace, bool refreshGatt);
     int32_t (*bleClientSend)(ConnBleConnection *connection, const uint8_t *data, uint32_t dataLen, int32_t module);
     int32_t (*bleClientUpdatePriority)(ConnBleConnection *connection, ConnectBlePriority priority);
-    int32_t (*bleServerStartService)(void);
-    int32_t (*bleServerStopService)(void);
+    int32_t (*bleServerStartService)(GattService *servce, GattServiceType serviceId);
+    int32_t (*bleServerStopService)(GattServiceType serviceId);
     int32_t (*bleServerSend)(ConnBleConnection *connection, const uint8_t *data, uint32_t dataLen, int32_t module);
     int32_t (*bleServerConnect)(ConnBleConnection *connection);
     int32_t (*bleServerDisconnect)(ConnBleConnection *connection);
-    int32_t (*bleClientInitModule)(SoftBusLooper *looper, const ConnBleClientEventListener *listener);
-    int32_t (*bleServerInitModule)(SoftBusLooper *looper, const ConnBleServerEventListener *listener);
+    int32_t (*bleClientInitModule)(
+        SoftBusLooper *looper, const ConnBleClientEventListener *listener, GattServiceType serviceId);
+    int32_t (*bleServerInitModule)(
+        SoftBusLooper *looper, const ConnBleServerEventListener *listener, GattServiceType serviceId);
 } BleUnifyInterface;
 
 ConnBleConnection *ConnBleCreateConnection(
@@ -170,7 +185,7 @@ int32_t ConnBleStartServer(void);
 int32_t ConnBleStopServer(void);
 int32_t ConnBleConnect(ConnBleConnection *connection);
 int32_t ConnBleDisconnectNow(ConnBleConnection *connection, enum ConnBleDisconnectReason reason);
-int32_t ConnBleUpdateConnectionRc(ConnBleConnection *connection, int32_t delta);
+int32_t ConnBleUpdateConnectionRc(ConnBleConnection *connection, uint16_t challengeCode, int32_t delta);
 int32_t ConnBleOnReferenceRequest(ConnBleConnection *connection, const cJSON *json);
 int32_t ConnBleUpdateConnectionPriority(ConnBleConnection *connection, ConnectBlePriority priority);
 int32_t ConnBleSend(ConnBleConnection *connection, const uint8_t *data, uint32_t dataLen, int32_t module);
@@ -183,6 +198,7 @@ void ConnBleInnerComplementDeviceId(ConnBleConnection *connection);
 
 int32_t ConnBleInitConnectionMudule(SoftBusLooper *looper, ConnBleConnectionEventListener *listener);
 
+void ReturnConnection(GattServiceType serviceId, ConnBleConnection *connection);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

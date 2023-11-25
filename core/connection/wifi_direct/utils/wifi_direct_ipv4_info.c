@@ -31,7 +31,7 @@ int32_t WifiDirectIpStringToIpv4(const char *ipString, struct WifiDirectIpv4Info
     return SOFTBUS_OK;
 }
 
-int32_t WifiDirectIpv4ToString(struct WifiDirectIpv4Info *ipv4, char *ipString, size_t ipStringSize)
+int32_t WifiDirectIpv4ToString(const struct WifiDirectIpv4Info *ipv4, char *ipString, size_t ipStringSize)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(ipv4, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "ipv4 is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(ipString, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "ip is null");

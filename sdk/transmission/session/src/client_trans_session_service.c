@@ -21,6 +21,7 @@
 
 #include <unistd.h>
 
+#include "anonymizer.h"
 #include "client_qos_manager.h"
 #include "client_trans_channel_manager.h"
 #include "client_trans_file_listener.h"
@@ -904,10 +905,10 @@ int32_t ClientAddSocket(const SocketInfo *info, int32_t *sessionId)
     if (ret != SOFTBUS_OK) {
         SoftBusFree(tmpAttr);
         if (ret == SOFTBUS_TRANS_SESSION_REPEATED) {
-            TRANS_LOGI(TRANS_SDK, "session already opened");
-            return OpenSessionWithExistSession(*sessionId, isEnabled);
+            TRANS_LOGI(TRANS_SDK, "socket already create");
+            return SOFTBUS_OK;
         }
-        TRANS_LOGE(TRANS_SDK, "add session err: ret=%d", ret);
+        TRANS_LOGE(TRANS_SDK, "add socket err: ret=%d", ret);
         return ret;
     }
     SoftBusFree(tmpAttr);

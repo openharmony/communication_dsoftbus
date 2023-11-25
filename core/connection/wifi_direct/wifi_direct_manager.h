@@ -39,7 +39,10 @@ struct WifiDirectManager {
     bool (*isDeviceOnline)(const char *remoteMac);
     int32_t (*getLocalIpByRemoteIp)(const char *remoteIp, char *localIp, int32_t localIpSize);
     int32_t (*getLocalIpByUuid)(const char *uuid, char *localIp, int32_t localIpSize);
-    int32_t (*prejudgeAvailability)(const char *remoteNetworkId, enum WifiDirectConnectType connectType);
+    int32_t (*prejudgeAvailability)(const char *remoteNetworkId, enum WifiDirectLinkType linkType);
+    int32_t (*getInterfaceNameByLocalIp)(const char *localIp, char *interfaceName, size_t interfaceNameSize);
+    int32_t (*getLocalAndRemoteMacByLocalIp)(const char *localIp,  char *localMac, size_t localMacSize,
+                                             char *remoteMac, size_t remoteMacSize);
 
     void (*onNegotiateChannelDataReceived)(struct WifiDirectNegotiateChannel *channel, const uint8_t *data, size_t len);
     void (*onNegotiateChannelDisconnected)(struct WifiDirectNegotiateChannel *channel);

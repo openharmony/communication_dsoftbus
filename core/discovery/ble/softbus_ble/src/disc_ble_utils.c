@@ -113,7 +113,7 @@ uint16_t DiscBleGetDeviceType(void)
     return typeId;
 }
 
-int32_t DiscBleGetDeviceIdHash(uint8_t *hashStr)
+int32_t DiscBleGetDeviceIdHash(uint8_t *devIdHash)
 {
     char udid[DISC_MAX_DEVICE_ID_LEN] = {0};
     char hashResult[SHA_HASH_LEN] = {0};
@@ -127,11 +127,10 @@ int32_t DiscBleGetDeviceIdHash(uint8_t *hashStr)
         DISC_LOGE(DISC_BLE, "GenerateStrHash failed");
         return ret;
     }
-    ret = ConvertBytesToHexString((char *)hashStr, SHORT_DEVICE_ID_HASH_LENGTH + 1, (const uint8_t *)hashResult,
-        SHORT_DEVICE_ID_HASH_LENGTH / HEXIFY_UNIT_LEN);
-    if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "ConvertBytesToHexString failed");
-        return ret;
+
+    if (memcpy_s(devIdHash, DISC_MAX_DEVICE_ID_LEN, hashResult, SHORT_DEVICE_ID_HASH_LENGTH) != EOK) {
+        DISC_LOGE(DISC_BLE, "copy device id hash failed");
+        return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -153,16 +152,18 @@ int32_t DiscBleGetShortUserIdHash(uint8_t *hashStr, uint32_t len)
 int32_t AssembleTLV(BroadcastData *broadcastData, uint8_t dataType, const void *value,
     uint32_t dataLen)
 {
-    broadcastData->data.data[broadcastData->dataLen] = (dataType << BYTE_SHIFT) & DATA_TYPE_MASK;
-    if (dataLen <= TLV_MAX_DATA_LEN) {
-        broadcastData->data.data[broadcastData->dataLen] |= dataLen & DATA_LENGTH_MASK;
-    }
-    broadcastData->dataLen += 1;
     uint32_t remainLen = BROADCAST_MAX_LEN - broadcastData->dataLen;
     if (remainLen == 0) {
         DISC_LOGE(DISC_BLE, "tlv remainLen is 0.");
         return SOFTBUS_ERR;
     }
+    broadcastData->data.data[broadcastData->dataLen] = (dataType << BYTE_SHIFT) & DATA_TYPE_MASK;
+    if (dataLen <= TLV_MAX_DATA_LEN) {
+        broadcastData->data.data[broadcastData->dataLen] |= dataLen & DATA_LENGTH_MASK;
+    }
+    broadcastData->dataLen += 1;
+    remainLen -= 1;
+
     uint32_t validLen = (dataLen > remainLen) ? remainLen : dataLen;
     if (memcpy_s(&(broadcastData->data.data[broadcastData->dataLen]), validLen, value, validLen) != EOK) {
         DISC_LOGE(DISC_BLE, "assemble tlv memcpy failed");
@@ -197,6 +198,36 @@ static int32_t CopyBrAddrValue(DeviceWrapper *device, const uint8_t *src, uint32
     return ret;
 }
 
+static int32_t CopyDeviceIdHashValue(DeviceWrapper *device, const uint8_t *data, uint32_t len)
+{
+    if (CopyValue(device->info->addr[0].info.ble.udidHash, DISC_MAX_DEVICE_ID_LEN,
+        (void *)data, len, "TLV_TYPE_DEVICE_ID_HASH") != SOFTBUS_OK) {
+        DISC_LOGE(DISC_BLE, "parse tlv copy device id hash value failed");
+        return SOFTBUS_ERR;
+    }
+    if (ConvertBytesToHexString((char *)device->info->devId, DISC_MAX_DEVICE_ID_LEN,
+        (const uint8_t *)device->info->addr[0].info.ble.udidHash, len) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_BLE, "ConvertBytesToHexString failed");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t CopyDeviceNameValue(DeviceWrapper *device, const uint8_t *data, uint32_t len, uint32_t remainLen)
+{
+    // TLV_VARIBALE_DATA_LEN indicate indefinite length
+    if (len == TLV_VARIABLE_DATA_LEN) {
+        uint32_t devNameLen = strlen((char *)data);
+        len = (devNameLen > remainLen) ? remainLen : devNameLen;
+    }
+    if (CopyValue(device->info->devName, DISC_MAX_DEVICE_NAME_LEN,
+        (void *)data, len, "TLV_TYPE_DEVICE_NAME") != SOFTBUS_OK) {
+        DISC_LOGE(DISC_BLE, "parse tlv copy device name value failed");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t ParseDeviceType(DeviceWrapper *device, const uint8_t* data, const uint32_t len)
 {
     uint8_t recvDevType[DEVICE_TYPE_LEN] = {0};
@@ -217,7 +248,7 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_
     while (curLen < dataLen) {
         uint8_t type = (data[curLen] & DATA_TYPE_MASK) >> BYTE_SHIFT;
         uint32_t len = (uint32_t)(data[curLen] & DATA_LENGTH_MASK);
-        if (curLen + TL_LEN + len > dataLen) {
+        if (curLen + TL_LEN + len > dataLen || (len == TLV_VARIABLE_DATA_LEN && curLen + TL_LEN  >= dataLen)) {
             DISC_LOGE(DISC_BLE,
                 "unexperted advData: out of range, tlvType: %d, tlvLen: %u, current pos: %u, total pos: %u",
                 type, len, curLen, dataLen);
@@ -225,18 +256,13 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_
         }
         switch (type) {
             case TLV_TYPE_DEVICE_ID_HASH:
-                ret = CopyValue(device->info->devId, DISC_MAX_DEVICE_ID_LEN,
-                                (void *)&data[curLen + 1], len, "TLV_TYPE_DEVICE_ID_HASH");
+                ret = CopyDeviceIdHashValue(device, &data[curLen + 1], len);
                 break;
             case TLV_TYPE_DEVICE_TYPE:
                 ret = ParseDeviceType(device, &data[curLen + 1], len);
                 break;
             case TLV_TYPE_DEVICE_NAME:
-                if (len == TLV_VARIABLE_DATA_LEN) {
-                    len = strlen((char *)&data[curLen + 1]);
-                }
-                ret = CopyValue(device->info->devName, DISC_MAX_DEVICE_NAME_LEN,
-                                (void *)&data[curLen + 1], len, "TLV_TYPE_DEVICE_NAME");
+                ret = CopyDeviceNameValue(device, &data[curLen + 1], len, dataLen - curLen - TL_LEN);
                 break;
             case TLV_TYPE_CUST:
                 ret = CopyValue(device->info->custData, DISC_MAX_CUST_DATA_LEN,
@@ -295,7 +321,7 @@ int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const uint8_t *data, 
         nextAdsPtr += data[nextAdsPtr] + 1;
     }
     uint32_t advLen = FLAG_BYTE_LEN + 1 + data[POS_PACKET_LENGTH] + 1;
-    uint8_t *copyData = SoftBusCalloc(advLen + scanRspTlvLen);
+    uint8_t *copyData = SoftBusCalloc(advLen + scanRspTlvLen + 1);
     DISC_CHECK_AND_RETURN_RET_LOGE(copyData != NULL, SOFTBUS_MEM_ERR, DISC_BLE, "malloc failed.");
     if (memcpy_s(copyData, advLen, data, advLen) != EOK) {
         DISC_LOGE(DISC_BLE, "memcpy_s adv failed, advLen: %u", advLen);

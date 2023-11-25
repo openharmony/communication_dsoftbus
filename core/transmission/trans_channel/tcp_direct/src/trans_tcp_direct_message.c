@@ -18,6 +18,7 @@
 #include <securec.h>
 #include <string.h>
 
+#include "anonymizer.h"
 #include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "cJSON.h"
@@ -40,6 +41,7 @@
 #include "data_bus_native.h"
 #include "lnn_lane_link.h"
 #include "lnn_net_builder.h"
+#include "trans_event.h"
 
 #define MAX_PACKET_SIZE (64 * 1024)
 #define MIN_META_LEN 6
@@ -371,6 +373,16 @@ int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)
     }
     int64_t timeStart = conn.appInfo.timeStart;
     int64_t timediff = GetSoftbusRecordTimeMillis() - timeStart;
+    TransEventExtra extra = {
+        .callerPkg = conn.appInfo.myData.pkgName,
+        .channelId = conn.appInfo.myData.channelId,
+        .peerNetworkId = conn.appInfo.myData.deviceId,
+        .socketName = conn.appInfo.myData.sessionName,
+        .linkType = conn.appInfo.linkType,
+        .costTime = timediff,
+        .errcode = errCode
+    };
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     SoftbusRecordOpenSessionKpi(conn.appInfo.myData.pkgName,
         conn.appInfo.linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);
     char pkgName[PKG_NAME_SIZE_MAX] = {0};
@@ -491,6 +503,11 @@ static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *re
 
     int errCode = SOFTBUS_OK;
     if (UnpackReplyErrCode(reply, &errCode) == SOFTBUS_OK) {
+        TransEventExtra extra = {
+            .channelId = channelId,
+            .errcode = errCode
+        };
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
         TRANS_LOGE(TRANS_CTRL, "receive err reply msg");
         if (NotifyChannelOpenFailed(channelId, errCode) != SOFTBUS_OK) {
             return SOFTBUS_ERR;
@@ -526,6 +543,10 @@ static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *re
             return SOFTBUS_ERR;
         }
     }
+    TransEventExtra extra = {
+        .channelId = channelId,
+        .result = EVENT_STAGE_RESULT_OK };
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
     TRANS_LOGD(TRANS_CTRL, "ok");
     return SOFTBUS_OK;
 }

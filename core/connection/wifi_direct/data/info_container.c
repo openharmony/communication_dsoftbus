@@ -15,6 +15,8 @@
 #include "info_container.h"
 
 #include <string.h>
+
+#include "anonymizer.h"
 #include "securec.h"
 #include "conn_log.h"
 #include "softbus_errcode.h"

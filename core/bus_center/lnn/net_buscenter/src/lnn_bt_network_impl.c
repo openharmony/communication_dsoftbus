@@ -74,6 +74,7 @@ static int32_t GetAvailableBtMac(char *macStr, uint32_t len)
         LNN_LOGE(LNN_BUILDER, "convert bt mac to str fail");
         return ret;
     }
+    LnnSetLocalByteInfo(BYTE_KEY_PUB_MAC, mac.addr, sizeof(mac.addr));
     return SOFTBUS_OK;
 }
 

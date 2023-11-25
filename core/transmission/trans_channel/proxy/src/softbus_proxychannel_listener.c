@@ -31,6 +31,7 @@
 #include "softbus_adapter_mem.h"
 #include "trans_lane_pending_ctl.h"
 #include "trans_log.h"
+#include "trans_event.h"
 
 static int32_t NotifyNormalChannelClosed(const char *pkgName, int32_t pid, int32_t channelId)
 {
@@ -116,6 +117,12 @@ int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned
             ret = SOFTBUS_ERR;
             break;
     }
+    TransEventExtra extra = {
+        .channelId = channelId,
+        .costTime = GetSoftbusRecordTimeMillis() - appInfo->connectedStart,
+        .errcode = ret
+    };
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
     TRANS_LOGI(TRANS_CTRL, "on open ret %d", ret);
     return ret;
 }
@@ -127,6 +134,24 @@ int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int3
     }
     int64_t timeStart = appInfo->timeStart;
     int64_t timediff = GetSoftbusRecordTimeMillis() - timeStart;
+    ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
+    if (chan == NULL) {
+        TRANS_LOGE(TRANS_MSG, "malloc in trans proxy send message. channelId=%d", channelId);
+        return SOFTBUS_MALLOC_ERR;
+    }
+    if (TransProxyGetChanByChanId(channelId, chan) == SOFTBUS_OK && !chan->isServer) {
+        TransEventExtra extra = {
+            .peerNetworkId = appInfo->peerData.deviceId,
+            .linkType = appInfo->linkType,
+            .channelId = channelId,
+            .costTime = timediff,
+            .errcode = errCode,
+            .callerPkg = appInfo->myData.pkgName,
+            .socketName = appInfo->myData.sessionName
+        };
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
+    }
+    SoftBusFree(chan);
     SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName, appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);
     TRANS_LOGI(TRANS_CTRL,
         "proxy channel openfailed: channelId=%d, appType=%d", channelId, appInfo->appType);

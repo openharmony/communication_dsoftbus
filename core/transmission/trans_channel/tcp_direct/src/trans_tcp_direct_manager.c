@@ -32,6 +32,7 @@
 #include "trans_tcp_direct_sessionconn.h"
 #include "trans_tcp_direct_wifi.h"
 #include "wifi_direct_manager.h"
+#include "trans_event.h"
 
 #define HANDSHAKE_TIMEOUT 19
 
@@ -261,7 +262,7 @@ int32_t TransOpenDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, 
     }
 
     int32_t ret = SOFTBUS_ERR;
-    if (connInfo->type == CONNECT_P2P) {
+    if (connInfo->type == CONNECT_P2P || connInfo->type == CONNECT_HML) {
         appInfo->routeType = WIFI_P2P;
         ret = OpenP2pDirectChannel(appInfo, connInfo, channelId);
     } else if (connInfo->type == CONNECT_P2P_REUSE) {
@@ -271,5 +272,20 @@ int32_t TransOpenDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, 
         appInfo->routeType = WIFI_STA;
         ret = OpenTcpDirectChannel(appInfo, connInfo, channelId);
     }
+    TransEventExtra extra = {
+        .linkType = connInfo->type,
+        .channelType = CHANNEL_TYPE_TCP_DIRECT,
+        .channelId = *channelId,
+        .errcode = ret,
+        .socketName = appInfo->myData.sessionName
+    };
+
+    SessionConn conn;
+    if (GetSessionConnById(*channelId, &conn) != NULL) {
+        extra.authId = conn.authId;
+        extra.socketFd = conn.appInfo.fd;
+        extra.requestId = conn.requestId;
+    };
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, extra);
     return ret;
 }

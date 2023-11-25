@@ -46,6 +46,7 @@
 #include "trans_log.h"
 #include "trans_pending_pkt.h"
 #include "trans_session_manager.h"
+#include "trans_event.h"
 
 #define ID_OFFSET (1)
 
@@ -715,6 +716,12 @@ void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg)
     }
     int32_t errCode = SOFTBUS_OK;
     if (TransProxyUnPackHandshakeErrMsg(msg->data, &errCode, msg->dateLen) == SOFTBUS_OK) {
+        TransEventExtra extra = {
+            .channelId = info->myId,
+            .peerChannelId = info->peerId,
+            .errcode = errCode
+        };
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
         TransProxyProcessErrMsg(info, errCode);
         SoftBusFree(info);
         return;
@@ -1049,6 +1056,12 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
         TRANS_LOGE(TRANS_CTRL, "TransProxyProcessResetMsg errCode=%d", errCode);
         TransProxyOpenProxyChannelFail(info->channelId, &(info->appInfo), errCode);
     } else if (info->status == PROXY_CHANNEL_STATUS_COMPLETED) {
+        TransEventExtra extra = {
+            .channelId = msg->msgHead.myId,
+            .peerChannelId = msg->msgHead.peerId,
+            .result = EVENT_STAGE_RESULT_OK
+        };
+        TRANS_EVENT(EVENT_SCENE_CLOSE_CHANNEL_PASSIVE, EVENT_STAGE_CLOSE_CHANNEL, extra);
         OnProxyChannelClosed(info->channelId, &(info->appInfo));
         (void)TransProxyCloseConnChannelReset(msg->connId, (info->isServer == 0));
     }
@@ -1235,6 +1248,12 @@ void TransProxyOpenProxyChannelSuccess(int32_t chanId)
     }
 
     if (TransProxyHandshake(chan) == SOFTBUS_ERR) {
+        TransEventExtra extra = {
+            .channelId = chanId,
+            .connectionId = chan->connId,
+            .errcode = SOFTBUS_TRANS_HANDSHAKE_ERROR
+        };
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_START, extra);
         (void)TransProxyCloseConnChannel(chan->connId);
         TRANS_LOGE(TRANS_CTRL, "channelId=%d shake hand err.", chanId);
         TransProxyOpenProxyChannelFail(chan->channelId, &(chan->appInfo), SOFTBUS_TRANS_HANDSHAKE_ERROR);
@@ -1305,6 +1324,13 @@ static void TransProxyTimerItemProc(const ListNode *proxyProcList)
             }
             TransProxyPostOpenClosedMsgToLoop(removeNode);
             TransProxyPostDisConnectMsgToLoop(connId);
+            TransEventExtra extra = {
+                .channelId = removeNode->channelId,
+                .connectionId = (int32_t)connId,
+                .result = EVENT_STAGE_RESULT_OK,
+                .socketName = removeNode->appInfo.myData.sessionName
+            };
+            TRANS_EVENT(EVENT_SCENE_CLOSE_CHANNEL_TIMEOUT, EVENT_STAGE_CLOSE_CHANNEL, extra);
         } else if (status == PROXY_CHANNEL_STATUS_HANDSHAKE_TIMEOUT) {
             connId = removeNode->connId;
             TransProxyPostOpenFailMsgToLoop(removeNode, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);

@@ -98,3 +98,8 @@ char* SoftBusGetWifiInterfaceCoexistCap(void)
 {
     return NULL;
 }
+
+bool SoftBusIsWifiActive(void)
+{
+    return true;
+}

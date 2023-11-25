@@ -26,6 +26,7 @@
 #include "auth_manager.h"
 #include "auth_net_ledger_mock.h"
 #include "auth_request.h"
+#include "bus_center_adapter.h"
 #include "lnn_connection_mock.h"
 #include "lnn_hichain_mock.h"
 #include "lnn_socket_mock.h"

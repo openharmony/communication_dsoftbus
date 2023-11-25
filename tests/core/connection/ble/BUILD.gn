@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -88,10 +88,7 @@ ohos_unittest("ConnectionBleSwitchTest") {
 ohos_unittest("BleConnectionServiceTest") {
   module_out_path = module_output_path
   public_configs = [ ":softbus_connection_ble_test_config" ]
-  sources = [
-    "ble_service_connection_test.cpp",
-    "connection_ble_mock.cpp",
-  ]
+  sources = [ "connection_ble_mock.cpp" ]
 
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",

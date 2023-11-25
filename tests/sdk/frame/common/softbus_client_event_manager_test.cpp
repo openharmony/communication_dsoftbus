@@ -20,6 +20,12 @@
 #include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
 
+#define protected public
+#define private public
+#include "softbus_client_frame_manager.c"
+#undef private
+#undef protected
+
 using namespace std;
 using namespace testing::ext;
 
@@ -34,6 +40,10 @@ public:
     {}
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
+    static int OnEventCallback(void *arg, unsigned int argLen, void *userData)
+    {
+        return 0;
+    }
     void SetUp() override
     {}
     void TearDown() override
@@ -57,6 +67,24 @@ HWTEST_F(SoftbusClientEventManagerTest, EventClientInit001, TestSize.Level1)
 {
     EventClientDeinit();
     int ret = EventClientInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    EventClientDeinit();
+}
+
+/**
+ * @tc.name: EventClientInit002
+ * @tc.desc: EventClientInit, use the wrong parameter.
+ * @tc.desc: EventClientDeinit, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusClientEventManagerTest, EventClientInit002, TestSize.Level1)
+{
+    int ret = EventClientInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = EventClientInit(); // test is inited
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     EventClientDeinit();
@@ -96,12 +124,44 @@ HWTEST_F(SoftbusClientEventManagerTest, RegisterEventCallback001, TestSize.Level
     unsigned int argLen = 2;
     CLIENT_NotifyObserver((enum SoftBusEvent)res, data.get() + FRAME_HEADER_LEN, argLen);
 
-    res = 4;
     CLIENT_NotifyObserver(EVENT_SERVER_DEATH, data.get() + FRAME_HEADER_LEN, argLen);
 
+    enum SoftBusEvent event = SoftBusEvent::EVENT_SERVER_DEATH;
+    CLIENT_NotifyObserver(event, data.get() + FRAME_HEADER_LEN, argLen);
+
+    ret = EventClientInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    CLIENT_NotifyObserver(event, data.get() + FRAME_HEADER_LEN, argLen);
     if (cb != nullptr) {
         SoftBusFree(cb);
     }
+}
+
+/**
+ * @tc.name: RegisterEventCallback002
+ * @tc.desc: RegisterEventCallback
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusClientEventManagerTest, RegisterEventCallback002, TestSize.Level1)
+{
+    EventCallback cb = SoftbusClientEventManagerTest::OnEventCallback;
+
+    enum SoftBusEvent event = EVENT_SERVER_RECOVERY;
+    const ssize_t len = 2;
+    std::unique_ptr<char[]> data = std::make_unique<char[]>(len + FRAME_HEADER_LEN);
+    ASSERT_TRUE(data != nullptr);
+
+    EventClientDeinit();
+    int ret = RegisterEventCallback(event, cb, data.get() + FRAME_HEADER_LEN);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    ret = EventClientInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = RegisterEventCallback(event, cb, data.get());
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
@@ -134,6 +194,9 @@ HWTEST_F(SoftbusClientEventManagerTest, DelClientPkgName001, TestSize.Level1)
  * @tc.name: CheckPackageName001
  * @tc.desc: CheckPackageName, use the wrong parameter.
  * @tc.desc: EventClientDeinit, use the wrong parameter.
+ * @tc.desc: AddClientPkgName, number of pkgName exceeds maximum.
+ * @tc.desc: DelClientPkgName
+ * @tc.desc: FreeClientPkgName
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -149,5 +212,27 @@ HWTEST_F(SoftbusClientEventManagerTest, CheckPackageName001, TestSize.Level1)
 
     ret = CheckPackageName(pkgName);
     EXPECT_EQ(SOFTBUS_OK, ret);
+
+    FreeClientPkgName();
+    ret = AddClientPkgName(pkgName);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = AddClientPkgName(pkgName);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    DelClientPkgName(pkgName);
+    FreeClientPkgName();
+}
+
+/**
+ * @tc.name: ConnClientDeinitTest001
+ * @tc.desc: ClientModuleDeinit
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusClientEventManagerTest, ConnClientDeinitTest001, TestSize.Level1)
+{
+    ConnClientDeinit();
+    ClientModuleDeinit();
+    EXPECT_TRUE(1);
 }
 } // OHOS

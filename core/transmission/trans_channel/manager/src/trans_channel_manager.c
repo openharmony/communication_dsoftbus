@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "anonymizer.h"
 #include "bus_center_manager.h"
 #include "lnn_lane_qos.h"
 #include "session.h"
@@ -42,6 +43,7 @@
 #include "trans_udp_negotiation.h"
 #include "trans_tcp_direct_sessionconn.h"
 #include "lnn_network_manager.h"
+#include "trans_event.h"
 
 #define MIGRATE_ENABLE 2
 #define MIGRATE_SUPPORTED 1
@@ -50,12 +52,13 @@
 #define MAX_FD_ID 1025
 #define MAX_PROXY_CHANNEL_ID_COUNT 1024
 #define ID_NOT_USED 0
-#define ID_USED 1
+#define ID_USED 1UL
 #define BIT_NUM 8
 
 static int32_t g_allocTdcChannelId = MAX_PROXY_CHANNEL_ID;
 static SoftBusMutex g_myIdLock;
-static unsigned long g_proxyChanIdBits[MAX_PROXY_CHANNEL_ID_COUNT / BIT_NUM / sizeof(long)];
+static unsigned long g_proxyChanIdBits[MAX_PROXY_CHANNEL_ID_COUNT / BIT_NUM / sizeof(long)] = {0};
+static uint32_t g_proxyIdMark = 0;
 
 typedef struct {
     int32_t channelType;
@@ -84,11 +87,12 @@ static int32_t GenerateProxyChannelId()
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
-    for (uint32_t id = 0; id < MAX_PROXY_CHANNEL_ID_COUNT; id++) {
-        uint32_t dex = id / (8 * sizeof(long));
+    for (uint32_t id = g_proxyIdMark + 1; id != g_proxyIdMark; id++) {
+        id = id % MAX_PROXY_CHANNEL_ID_COUNT;
+        uint32_t index = id / (8 * sizeof(long));
         uint32_t bit = id % (8 * sizeof(long));
-        if (((g_proxyChanIdBits[dex] >> bit) & ID_USED) == ID_NOT_USED) {
-            g_proxyChanIdBits[dex] |= (ID_USED << id);
+        if ((g_proxyChanIdBits[index] & (ID_USED << bit)) == ID_NOT_USED) {
+            g_proxyChanIdBits[index] |= (ID_USED << bit);
             SoftBusMutexUnlock(&g_myIdLock);
             return (int32_t)id + MAX_FD_ID;
         }
@@ -401,6 +405,13 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
 
     AppInfo *appInfo = GetAppInfo(param);
     TRANS_CHECK_AND_RETURN_RET_LOGW(!(appInfo == NULL), INVALID_CHANNEL_ID, TRANS_CTRL, "GetAppInfo is null.");
+    TransEventExtra extra = {
+        .callerPkg = appInfo->myData.pkgName,
+        .socketName = appInfo->myData.sessionName,
+        .dataType = appInfo->businessType,
+        .peerNetworkId = appInfo->peerNetWorkId
+    };
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_START, extra);
     errCode = TransGetLaneInfo(param, &connInfo, &laneId);
     char *tmpName = NULL;
     if (errCode != SOFTBUS_OK) {
@@ -446,6 +457,10 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         transInfo->channelId, transInfo->channelType);
     return SOFTBUS_OK;
 EXIT_ERR:
+    extra.channelId = transInfo->channelId;
+    extra.errcode = ret;
+    extra.costTime = GetSoftbusRecordTimeMillis() - timeStart;
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     if (appInfo->fastTransData != NULL) {
         SoftBusFree((void*)appInfo->fastTransData);
     }
@@ -686,6 +701,12 @@ int32_t TransCloseChannel(int32_t channelId, int32_t channelType)
         default:
             break;
     }
+    TransEventExtra extra = {
+        .channelId = channelId,
+        .channelType = channelType,
+        .errcode = ret
+    };
+    TRANS_EVENT(EVENT_SCENE_CLOSE_CHANNEL_ACTIVE, EVENT_STAGE_CLOSE_CHANNEL, extra);
     return ret;
 }
 
