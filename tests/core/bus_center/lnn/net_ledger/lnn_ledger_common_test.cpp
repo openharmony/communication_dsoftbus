@@ -67,6 +67,7 @@ constexpr char MASTER_NODE_UDID[] = "234567LOCALTEST";
 constexpr char LOCAL_NODE_ADDR[] = "ADDR";
 constexpr char LOCAL_P2P_MAC[] = "11:22:33:44:55";
 constexpr char LOCAL_GO_MAC[] = "22:33:44:55:66";
+constexpr char LOCAL_WIFIDIRECT_ADDR[] = "55:66:77:88:99";
 constexpr uint32_t LOCAL_SESSION_PORT = 5000;
 constexpr uint32_t LOCAL_AUTH_PORT = 6000;
 constexpr uint32_t LOCAL_PROXY_PORT = 7000;
@@ -197,6 +198,8 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_001, TestSize.Level1)
     EXPECT_TRUE(LnnSetP2pMac(nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnGetP2pMac(nullptr) == nullptr);
     EXPECT_TRUE(LnnSetP2pGoMac(nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnGetWifiDirectAddr(nullptr) == nullptr);
+    EXPECT_TRUE(LnnSetWifiDirectAddr(nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnGetP2pGoMac(nullptr) == nullptr);
     EXPECT_TRUE(LnnGetSupportedProtocols(nullptr) == 0);
     EXPECT_TRUE(LnnSetSupportedProtocols(nullptr, PROTOCOLS) == SOFTBUS_OK);
@@ -320,7 +323,8 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_001, TestSize.Level1)
         STRING_KEY_NODE_ADDR,
         STRING_KEY_P2P_MAC,
         STRING_KEY_P2P_GO_MAC,
-        STRING_KEY_OFFLINE_CODE
+        STRING_KEY_OFFLINE_CODE,
+        STRING_KEY_WIFIDIRECT_ADDR,
     };
     char buf[UDID_BUF_LEN] = {0};
     int32_t ret;
@@ -364,6 +368,8 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_002, TestSize.Level1)
     ret = LnnSetLocalStrInfo(STRING_KEY_P2P_MAC, LOCAL_P2P_MAC);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnSetLocalStrInfo(STRING_KEY_P2P_GO_MAC, LOCAL_GO_MAC);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = LnnSetLocalStrInfo(STRING_KEY_WIFIDIRECT_ADDR, LOCAL_WIFIDIRECT_ADDR);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     LnnDeinitLocalLedger();
 }
