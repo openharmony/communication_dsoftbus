@@ -47,7 +47,7 @@ void AdapterDsoftbusRsaCryptoTest::TearDown() { }
  */
 HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftbusGetPublicKey001, TestSize.Level0)
 {
-    uint32_t pKeyLen = SOFTBUS_RSA_LEN;
+    uint32_t pKeyLen = SOFTBUS_RSA_PUB_KEY_LEN;
     uint8_t publicKey[pKeyLen];
     int32_t ret = SoftbusGetPublicKey(publicKey, pKeyLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -61,7 +61,7 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftbusGetPublicKey001, TestSize.Level0)
  */
 HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftbusGetPublicKey002, TestSize.Level0)
 {
-    uint32_t pKeyLen = SOFTBUS_RSA_LEN;
+    uint32_t pKeyLen = SOFTBUS_RSA_PUB_KEY_LEN;
     int32_t ret = SoftbusGetPublicKey(nullptr, pKeyLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
@@ -74,7 +74,7 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftbusGetPublicKey002, TestSize.Level0)
  */
 HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftbusGetPublicKey003, TestSize.Level0)
 {
-    uint8_t publicKey[SOFTBUS_RSA_LEN];
+    uint8_t publicKey[SOFTBUS_RSA_PUB_KEY_LEN];
     uint32_t pKeyLen = 0;
     int32_t ret = SoftbusGetPublicKey(publicKey, pKeyLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -88,7 +88,7 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftbusGetPublicKey003, TestSize.Level0)
  */
 HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftbusRsaEncrypt001, TestSize.Level0)
 {
-    uint32_t pKeyLen = SOFTBUS_RSA_LEN;
+    uint32_t pKeyLen = SOFTBUS_RSA_PUB_KEY_LEN;
     uint8_t publicKey[pKeyLen];
     uint32_t srcDataLen = 5;
     uint8_t srcData[srcDataLen];
@@ -99,8 +99,9 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftbusRsaEncrypt001, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusGenerateRandomArray(srcData, srcDataLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    PublicKey peerPublicKey = { publicKey, pKeyLen };
 
-    ret = SoftbusRsaEncrypt(srcData, srcDataLen, publicKey, &encryptedData, &encryptedDataLen);
+    ret = SoftbusRsaEncrypt(srcData, srcDataLen, &peerPublicKey, &encryptedData, &encryptedDataLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
     SoftBusFree(encryptedData);
 }
@@ -113,7 +114,7 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftbusRsaEncrypt001, TestSize.Level0)
  */
 HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftbusRsaEncrypt002, TestSize.Level0)
 {
-    uint32_t pKeyLen = SOFTBUS_RSA_LEN;
+    uint32_t pKeyLen = SOFTBUS_RSA_PUB_KEY_LEN;
     uint8_t publicKey[pKeyLen];
     uint32_t srcDataLen = 5;
     uint8_t srcData[srcDataLen];
@@ -124,14 +125,15 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftbusRsaEncrypt002, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusGenerateRandomArray(srcData, srcDataLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    PublicKey peerPublicKey = { publicKey, pKeyLen };
 
-    ret = SoftbusRsaEncrypt(nullptr, srcDataLen, publicKey, &encryptedData, &encryptedDataLen);
+    ret = SoftbusRsaEncrypt(nullptr, srcDataLen, &peerPublicKey, &encryptedData, &encryptedDataLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = SoftbusRsaEncrypt(srcData, srcDataLen, nullptr, &encryptedData, &encryptedDataLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = SoftbusRsaEncrypt(srcData, srcDataLen, publicKey, nullptr, &encryptedDataLen);
+    ret = SoftbusRsaEncrypt(srcData, srcDataLen, &peerPublicKey, nullptr, &encryptedDataLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = SoftbusRsaEncrypt(srcData, srcDataLen, publicKey, &encryptedData, nullptr);
+    ret = SoftbusRsaEncrypt(srcData, srcDataLen, &peerPublicKey, &encryptedData, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -143,7 +145,7 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftbusRsaEncrypt002, TestSize.Level0)
  */
 HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftbusRsaEncrypt003, TestSize.Level0)
 {
-    uint32_t pKeyLen = SOFTBUS_RSA_LEN;
+    uint32_t pKeyLen = SOFTBUS_RSA_PUB_KEY_LEN;
     uint8_t publicKey[pKeyLen];
     uint32_t inDataLen = 0;
     uint32_t srcDataLen = 5;
@@ -155,8 +157,9 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftbusRsaEncrypt003, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusGenerateRandomArray(srcData, srcDataLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    PublicKey peerPublicKey = { publicKey, pKeyLen };
 
-    ret = SoftbusRsaEncrypt(srcData, inDataLen, publicKey, &encryptedData, &encryptedDataLen);
+    ret = SoftbusRsaEncrypt(srcData, inDataLen, &peerPublicKey, &encryptedData, &encryptedDataLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -168,7 +171,7 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftbusRsaEncrypt003, TestSize.Level0)
  */
 HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftbusRsaDecrypt001, TestSize.Level0)
 {
-    uint32_t pKeyLen = SOFTBUS_RSA_LEN;
+    uint32_t pKeyLen = SOFTBUS_RSA_PUB_KEY_LEN;
     uint8_t publicKey[pKeyLen];
     uint32_t srcDataLen = 5;
     uint8_t srcData[srcDataLen];
@@ -181,8 +184,9 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftbusRsaDecrypt001, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusGenerateRandomArray(srcData, srcDataLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    PublicKey peerPublicKey = { publicKey, pKeyLen };
 
-    ret = SoftbusRsaEncrypt(srcData, srcDataLen, publicKey, &encryptedData, &encryptedDataLen);
+    ret = SoftbusRsaEncrypt(srcData, srcDataLen, &peerPublicKey, &encryptedData, &encryptedDataLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftbusRsaDecrypt(encryptedData, encryptedDataLen, &decryptedData, &decryptedDataLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -201,7 +205,7 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftbusRsaDecrypt001, TestSize.Level0)
  */
 HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftbusRsaDecrypt002, TestSize.Level0)
 {
-    uint32_t pKeyLen = SOFTBUS_RSA_LEN;
+    uint32_t pKeyLen = SOFTBUS_RSA_PUB_KEY_LEN;
     uint8_t publicKey[pKeyLen];
     uint32_t srcDataLen = 5;
     uint8_t srcData[srcDataLen];
@@ -214,7 +218,8 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftbusRsaDecrypt002, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusGenerateRandomArray(srcData, srcDataLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = SoftbusRsaEncrypt(srcData, srcDataLen, publicKey, &encryptedData, &encryptedDataLen);
+    PublicKey peerPublicKey = { publicKey, pKeyLen };
+    ret = SoftbusRsaEncrypt(srcData, srcDataLen, &peerPublicKey, &encryptedData, &encryptedDataLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = SoftbusRsaDecrypt(nullptr, encryptedDataLen, &decryptedData, &decryptedDataLen);
@@ -235,7 +240,7 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftbusRsaDecrypt002, TestSize.Level0)
  */
 HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftbusRsaDecrypt003, TestSize.Level0)
 {
-    uint32_t pKeyLen = SOFTBUS_RSA_LEN;
+    uint32_t pKeyLen = SOFTBUS_RSA_PUB_KEY_LEN;
     uint8_t publicKey[pKeyLen];
     uint32_t srcDataLen = 5;
     uint8_t srcData[srcDataLen];
@@ -249,7 +254,8 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftbusRsaDecrypt003, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = SoftBusGenerateRandomArray(srcData, srcDataLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = SoftbusRsaEncrypt(srcData, srcDataLen, publicKey, &encryptedData, &encryptedDataLen);
+    PublicKey peerPublicKey = { publicKey, pKeyLen };
+    ret = SoftbusRsaEncrypt(srcData, srcDataLen, &peerPublicKey, &encryptedData, &encryptedDataLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = SoftbusRsaDecrypt(encryptedData, srcDataLen1, &decryptedData, &decryptedDataLen);
