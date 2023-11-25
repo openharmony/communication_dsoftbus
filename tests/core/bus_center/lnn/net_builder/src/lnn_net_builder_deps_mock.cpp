@@ -296,6 +296,11 @@ int32_t LnnGenLocalUuid(char *uuid, uint32_t len)
     return GetNetBuilderDepsInterface()->LnnGenLocalUuid(uuid, len);
 }
 
+int32_t LnnGenLocalIrk(unsigned char *irk, uint32_t len)
+{
+    return GetNetBuilderDepsInterface()->LnnGenLocalIrk(irk, len);
+}
+
 int32_t LnnGenLocalNetworkId(char *networkId, uint32_t len)
 {
     return GetNetBuilderDepsInterface()->LnnGenLocalNetworkId(networkId, len);
