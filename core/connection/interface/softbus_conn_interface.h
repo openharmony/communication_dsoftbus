@@ -93,6 +93,7 @@ struct BleInfo {
     char deviceIdHash[UDID_HASH_LEN];
     BleProtocolType protocol;
     uint32_t psm;
+    uint16_t challengeCode;
 };
 struct ConnSocketInfo {
     char addr[IP_LEN];
@@ -158,14 +159,12 @@ struct BleOption {
     char deviceIdHash[UDID_HASH_LEN];
     bool fastestConnectEnable;
     int32_t psm;
+    uint16_t challengeCode;
 };
 
 struct BleDirectOption {
     BleProtocolType protoType;
-    int32_t psm;
-    char nodeIdHash[NODEID_SHORT_HASH_LEN];
-    char localUdidHash[UDID_SHORT_HASH_LEN];
-    char peerUdidHash[SHA_256_HASH_LEN];
+    char networkId[NETWORK_ID_BUF_LEN];
 };
 
 struct SocketOption {
