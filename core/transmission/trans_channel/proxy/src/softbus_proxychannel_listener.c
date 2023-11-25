@@ -272,7 +272,7 @@ static int32_t TransGetConnectOption(
         option.requestInfo.trans.expectedLink.linkTypeNum = preferred->linkTypeNum;
     }
 
-    if (TransGetLaneInfoByOption(&option, &connInfo, &laneId) != SOFTBUS_OK) {
+    if (TransGetLaneInfoByOption(false, &option, &connInfo, &laneId) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
     TRANS_LOGI(TRANS_CTRL, "net channel lane info laneId=%u type=%d", laneId, connInfo.type);
