@@ -28,7 +28,7 @@
 #include "softbus_wifi_api_adapter.h"
 #include "wifi_direct_manager.h"
 
-#define QOS_MIN_BANDWIDTH (500 * 1024)
+#define QOS_MIN_BANDWIDTH (375 * 1024)
 #define QOS_P2P_ONLY_BANDWIDTH (160 * 1024 * 1024)
 
 typedef struct {
