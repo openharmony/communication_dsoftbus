@@ -24,9 +24,9 @@ extern "C" {
 
 #define DISC_ASSIGNER(type, filedName, filed)                                                                 \
     static inline bool DiscAssigner##filedName(                                                               \
-        const char eventName[], HiSysEventParamType paramType, SoftbusEventForm form, HiSysEventParam *param) \
+        const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param) \
     {                                                                                                         \
-        if (Assigner##type(form.discExtra.filed, &param) && CopyString(param->name, eventName)) {             \
+        if (Assigner##type(form->discExtra->filed, &param) && CopyString(param->name, eventName)) {           \
             param->t = paramType;                                                                             \
             return true;                                                                                      \
         }                                                                                                     \
@@ -57,7 +57,7 @@ DISC_ASSIGNER(String, CallerPkg, callerPkg)
 
 #define DISC_ASSIGNER_SIZE 21 // Size of g_discAssigners
 static HiSysEventParamAssigner g_discAssigners[] = {
-    {"STAGE_RES",             HISYSEVENT_INT32,  DiscAssignerResult         },
+    { "STAGE_RES",            HISYSEVENT_INT32,  DiscAssignerResult         },
     { "ERROR_CODE",           HISYSEVENT_INT32,  DiscAssignerErrcode        },
     { "BROADCAST_TYPE",       HISYSEVENT_INT32,  DiscAssignerBroadcastType  },
     { "BROADCAST_FREQ",       HISYSEVENT_INT32,  DiscAssignerBroadcastFreq  },
@@ -78,17 +78,22 @@ static HiSysEventParamAssigner g_discAssigners[] = {
     { "PEER_NET_ID",          HISYSEVENT_STRING, DiscAssignerPeerNetworkId  },
     { "PEER_DEV_TYPE",        HISYSEVENT_STRING, DiscAssignerPeerDeviceType },
     { "HOST_PKG",             HISYSEVENT_STRING, DiscAssignerCallerPkg      },
- // Modification Note: remember updating DISC_ASSIGNER_SIZE
+    // Modification Note: remember updating DISC_ASSIGNER_SIZE
 };
 
-static inline void ConvertDiscForm2Param(HiSysEventParam params[], size_t size, SoftbusEventForm form)
+static inline size_t ConvertDiscForm2Param(HiSysEventParam params[], size_t size, SoftbusEventForm *form)
 {
+    size_t validSize = 0;
+    if (form == NULL || form->discExtra == NULL) {
+        return validSize;
+    }
     for (size_t i = 0; i < size; ++i) {
         HiSysEventParamAssigner assigner = g_discAssigners[i];
-        if (!assigner.Assign(assigner.name, assigner.type, form, &params[i])) {
-            COMM_LOGE(COMM_DFX, "assign event fail, name=%s", assigner.name);
+        if (assigner.Assign(assigner.name, assigner.type, form, &params[validSize])) {
+            ++validSize;
         }
     }
+    return validSize;
 }
 
 #ifdef __cplusplus
