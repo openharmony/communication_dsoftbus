@@ -65,6 +65,7 @@ enum NegotiateMessageKey {
     NM_KEY_GC_CHANNEL_SCORE = 37,
     NM_KEY_COMMAND_TYPE = 38,
     NM_KEY_INTERFACE_NAME = 39,
+    NM_KEY_CHANNEL_ID = 40,
 
     NM_KEY_MAX
 };

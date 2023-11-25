@@ -34,6 +34,7 @@
 #include "trans_session_service.h"
 #include "softbus_hidumper_interface.h"
 #include "trans_spec_object.h"
+#include "lnn_lane_interface.h"
 
 namespace OHOS {
 REGISTER_SYSTEM_ABILITY_BY_ID(SoftBusServer, SOFTBUS_SERVER_SA_ID, true);
@@ -352,5 +353,69 @@ int32_t SoftBusServer::GetBusCenterExObj(sptr<IRemoteObject> &object)
     }
     object = result;
     return SOFTBUS_OK;
+}
+
+static LaneTransType ConvertTransType(TransDataType dataType)
+{
+    switch (dataType) {
+        case DATA_TYPE_MESSAGE:
+            return LANE_T_MSG;
+        case DATA_TYPE_BYTES:
+            return LANE_T_BYTE;
+        case DATA_TYPE_FILE:
+            return LANE_T_FILE;
+        case DATA_TYPE_RAW_STREAM:
+            return LANE_T_RAW_STREAM;
+        case DATA_TYPE_VIDEO_STREAM:
+            return LANE_T_COMMON_VIDEO;
+        case DATA_TYPE_AUDIO_STREAM:
+            return LANE_T_COMMON_VOICE;
+        case DATA_TYPE_SLICE_STREAM:
+            return LANE_T_RAW_STREAM;
+        default:
+            return LANE_T_BUTT;
+    }
+}
+
+static void ConvertQosInfo(const QosTV *qos, uint32_t qosCount, QosInfo *qosInfo)
+{
+    if (qos == NULL || qosCount == 0) {
+        return;
+    }
+
+    for (uint32_t i = 0; i < qosCount; i++) {
+        switch (qos[i].qos) {
+            case QOS_TYPE_MIN_BW:
+                qosInfo->minBW = qos[i].value;
+                break;
+            case QOS_TYPE_MAX_LATENCY:
+                qosInfo->maxLaneLatency = qos[i].value;
+                break;
+            case QOS_TYPE_MIN_LATENCY:
+                qosInfo->minLaneLatency = qos[i].value;
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+int32_t SoftBusServer::EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos,
+    uint32_t qosCount)
+{
+    if (peerNetworkId == NULL || dataType >= DATA_TYPE_BUTT || qosCount >= QOS_TYPE_BUTT) {
+        COMM_LOGE(COMM_SVC, "SoftBusServer invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    LaneQueryInfo info;
+    (void)memset_s(&info, sizeof(LaneQueryInfo), 0, sizeof(LaneQueryInfo));
+    (void)memcpy_s(info.networkId, NETWORK_ID_BUF_LEN, peerNetworkId, NETWORK_ID_BUF_LEN);
+    info.transType = ConvertTransType(dataType);
+
+    QosInfo qosInfo;
+    (void)memset_s(&qosInfo, sizeof(QosInfo), 0, sizeof(QosInfo));
+    ConvertQosInfo(qos, qosCount, &qosInfo);
+    return LnnQueryLaneResource(&info, &qosInfo);
 }
 } // namespace OHOS

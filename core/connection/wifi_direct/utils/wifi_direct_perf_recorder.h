@@ -45,8 +45,8 @@ enum TimeCostType {
 struct WifiDirectPerfRecorder {
     void (*setPid)(int32_t pid);
     int32_t (*getPid)(void);
-    void (*setConnectType)(enum WifiDirectConnectType type);
-    enum WifiDirectConnectType (*getConnectType)(void);
+    void (*setConnectType)(enum WifiDirectLinkType type);
+    enum WifiDirectLinkType (*getConnectType)(void);
     void (*record)(enum TimePointType type);
     void (*calculate)(void);
     void (*clear)(void);
@@ -54,7 +54,7 @@ struct WifiDirectPerfRecorder {
 
     bool isInited;
     int32_t pid;
-    enum WifiDirectConnectType type;
+    enum WifiDirectLinkType type;
     uint64_t timePoints[TP_MAX];
     uint64_t timeCosts[TC_MAX];
 };
