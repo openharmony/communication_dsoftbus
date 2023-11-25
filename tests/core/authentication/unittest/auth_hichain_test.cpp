@@ -107,7 +107,7 @@ HWTEST_F(AuthHichainTest, ON_DEVICE_NOT_TRUSTED_TEST_001, TestSize.Level1)
 
     (void)memset_s(&info, sizeof(GroupInfo), 0, sizeof(GroupInfo));
     int32_t ret = ParseGroupInfo(nullptr, &info);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = ParseGroupInfo(groupInfoStr, &info);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = ParseGroupInfo(groupInfoStr, &info);

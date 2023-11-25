@@ -280,15 +280,25 @@ static int32_t LnnRequestLaneByQos(uint32_t laneId, const LaneRequestOption *req
     const ILaneListener *listener)
 {
     if (RequestInfoCheck(request, listener) == false) {
+        LNN_LOGE(LNN_LANE, "lane requestInfo by qos invalid");
         return SOFTBUS_ERR;
     }
     if (g_laneObject[request->type] == NULL) {
+        LNN_LOGE(LNN_LANE, "laneType=%d is not supported", request->type);
         return SOFTBUS_ERR;
     }
+    LNN_LOGI(LNN_LANE, "laneRequestByQos, laneId=%u, laneType=%d, transType=%d, "
+        "minBW=%u, maxLaneLatency=%u, minLaneLatency=%u",
+        laneId, request->type, request->requestInfo.trans.transType,
+        request->requestInfo.trans.qosRequire.minBW,
+        request->requestInfo.trans.qosRequire.maxLaneLatency,
+        request->requestInfo.trans.qosRequire.minLaneLatency);
     int32_t result = g_laneObject[request->type]->allocLaneByQos(laneId, request, listener);
     if (result != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "alloc lane by qos fail, laneId=%u, result=%d", laneId, result);
         return SOFTBUS_ERR;
     }
+    LNN_LOGI(LNN_LANE, "request lane by qos success, laneId=%u", laneId);
     return SOFTBUS_OK;
 }
 
