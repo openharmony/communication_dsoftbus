@@ -347,6 +347,15 @@ const char *LnnGetP2pMac(const NodeInfo *info)
     return info->p2pInfo.p2pMac;
 }
 
+const char *LnnGetWifiDirectAddr(const NodeInfo *info)
+{
+    if (info == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return NULL;
+    }
+    return info->wifiDirectAddr;
+}
+
 int32_t LnnSetDataChangeFlag(NodeInfo *info, uint16_t dataChangeFlag)
 {
     if (info == NULL) {
@@ -450,6 +459,19 @@ int32_t LnnSetPtk(NodeInfo *info, const char *remotePtk)
     }
     if (memcpy_s(info->remotePtk, PTK_DEFAULT_LEN, remotePtk, PTK_DEFAULT_LEN) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy ptk err");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnSetWifiDirectAddr(NodeInfo *info, const char *wifiDirectAddr)
+{
+    if (info == NULL || wifiDirectAddr == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strcpy_s(info->wifiDirectAddr, sizeof(info->wifiDirectAddr), wifiDirectAddr) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s wifidirect addr err");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
