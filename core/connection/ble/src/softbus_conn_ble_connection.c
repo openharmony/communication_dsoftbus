@@ -28,6 +28,7 @@
 #include "softbus_datahead_transform.h"
 #include "softbus_json_utils.h"
 #include "ble_protocol_interface_factory.h"
+#include "legacy_ble_channel.h"
 
 // basic info json key definition
 #define BASIC_INFO_KEY_DEVID   "devid"
@@ -118,7 +119,39 @@ ConnBleConnection *ConnBleCreateConnection(
     connection->objectRc = 1;
 
     connection->retrySearchServiceCnt = 0;
+
+    SoftBusBtUuid serviceUuid = {
+        .uuid = SOFTBUS_SERVICE_UUID,
+        .uuidLen = strlen(SOFTBUS_SERVICE_UUID),
+    };
+    SoftBusBtUuid connCharacteristicUuid = {
+        .uuid = SOFTBUS_CHARA_BLECONN_UUID,
+        .uuidLen = strlen(SOFTBUS_CHARA_BLECONN_UUID),
+    };
+    SoftBusBtUuid netUuid = {
+        .uuid = SOFTBUS_CHARA_BLENET_UUID,
+        .uuidLen = strlen(SOFTBUS_CHARA_BLENET_UUID),
+    };
+    SoftBusBtUuid descriptorUuid = {
+        .uuid = SOFTBUS_DESCRIPTOR_CONFIGURE_UUID,
+        .uuidLen = strlen(SOFTBUS_DESCRIPTOR_CONFIGURE_UUID),
+    };
+    connection->gattService.serviceUuid = serviceUuid;
+    connection->gattService.connCharacteristicUuid = connCharacteristicUuid;
+    connection->gattService.netUuid = netUuid;
+    connection->gattService.descriptorUuid = descriptorUuid;
+    connection->serviceId = SOFTBUS_GATT_SERVICE;
+    connection->expectedMtuSize = DEFAULT_MTU_SIZE;
     return connection;
+}
+
+void ReturnConnection(GattServiceType serviceId, ConnBleConnection *connection)
+{
+    if (serviceId == SOFTBUS_GATT_SERVICE) {
+        ConnBleReturnConnection(&connection);
+    } else {
+        LegacyBleReturnConnection(&connection);
+    }
 }
 
 void ConnBleFreeConnection(ConnBleConnection *connection)
@@ -132,6 +165,33 @@ void ConnBleFreeConnection(ConnBleConnection *connection)
         SoftBusFree(it);
     }
     SoftBusFree(connection);
+}
+
+static GattService *CreateGattService(void)
+{
+    GattService *gattService = SoftBusCalloc(sizeof(GattService));
+    CONN_CHECK_AND_RETURN_RET_LOG(gattService != NULL, NULL, "calloc gatt service failed");
+    SoftBusBtUuid serviceUuid = {
+        .uuid = SOFTBUS_SERVICE_UUID,
+        .uuidLen = strlen(SOFTBUS_SERVICE_UUID),
+    };
+    SoftBusBtUuid connCharacteristicUuid = {
+        .uuid = SOFTBUS_CHARA_BLECONN_UUID,
+        .uuidLen = strlen(SOFTBUS_CHARA_BLECONN_UUID),
+    };
+    SoftBusBtUuid netUuid = {
+        .uuid = SOFTBUS_CHARA_BLENET_UUID,
+        .uuidLen = strlen(SOFTBUS_CHARA_BLENET_UUID),
+    };
+    SoftBusBtUuid descriptorUuid = {
+        .uuid = SOFTBUS_DESCRIPTOR_CONFIGURE_UUID,
+        .uuidLen = strlen(SOFTBUS_DESCRIPTOR_CONFIGURE_UUID),
+    };
+    gattService->serviceUuid = serviceUuid;
+    gattService->connCharacteristicUuid = connCharacteristicUuid;
+    gattService->netUuid = netUuid;
+    gattService->descriptorUuid = descriptorUuid;
+    return gattService;
 }
 
 int32_t ConnBleStartServer(void)
@@ -150,7 +210,8 @@ int32_t ConnBleStartServer(void)
         if (interface == NULL) {
             continue;
         }
-        g_serverCoordination.status[i] = interface->bleServerStartService();
+        GattService *service = CreateGattService();
+        g_serverCoordination.status[i] = interface->bleServerStartService(service, SOFTBUS_GATT_SERVICE);
     }
     for (int i = BLE_GATT; i < BLE_PROTOCOL_MAX; i++) {
         if (g_serverCoordination.status[i] != SOFTBUS_OK) {
@@ -182,7 +243,7 @@ int32_t ConnBleStopServer(void)
         if (interface == NULL) {
             continue;
         }
-        g_serverCoordination.status[i] = interface->bleServerStopService();
+        g_serverCoordination.status[i] = interface->bleServerStopService(SOFTBUS_GATT_SERVICE);
     }
     for (int i = BLE_GATT; i < BLE_PROTOCOL_MAX; i++) {
         if (g_serverCoordination.status[i] != SOFTBUS_OK) {
@@ -264,7 +325,7 @@ static void OnDisconnectedDataFinished(uint32_t connectionId, int32_t error)
 }
 
 
-int32_t ConnBleUpdateConnectionRc(ConnBleConnection *connection, int32_t delta)
+int32_t ConnBleUpdateConnectionRc(ConnBleConnection *connection, uint16_t challengeCode, int32_t delta)
 {
     int32_t status = SoftBusMutexLock(&connection->lock);
     if (status != SOFTBUS_OK) {
@@ -278,8 +339,9 @@ int32_t ConnBleUpdateConnectionRc(ConnBleConnection *connection, int32_t delta)
         connection->state = BLE_CONNECTION_STATE_NEGOTIATION_CLOSING;
     }
     (void)SoftBusMutexUnlock(&connection->lock);
-    CONN_LOGI(CONN_BLE, "ble notify refrence, connId=%u, handle=%d, side=%d, delta=%d, after update, localRc=%d,",
-        connection->connectionId, underlayerHandle, connection->side, delta, localRc);
+    CONN_LOGI(CONN_BLE, "ble notify refrence, connId=%u, handle=%d, side=%d, delta=%d, challenge=%u, "
+        "after update, localRc=%d,",
+        connection->connectionId, underlayerHandle, connection->side, delta, challengeCode, localRc);
 
     if (localRc <= 0) {
         if ((featureBitSet & (1 << BLE_FEATURE_SUPPORT_REMOTE_DISCONNECT)) == 0) {
@@ -301,6 +363,7 @@ int32_t ConnBleUpdateConnectionRc(ConnBleConnection *connection, int32_t delta)
             .delta = delta,
             .referenceNumber = localRc,
         },
+        .challengeCode = challengeCode,
     };
     uint8_t *data = NULL;
     uint32_t dataLen = 0;
@@ -323,11 +386,15 @@ int32_t ConnBleOnReferenceRequest(ConnBleConnection *connection, const cJSON *js
 {
     int32_t delta = 0;
     int32_t peerRc = 0;
+    uint16_t challengeCode = 0;
     if (!GetJsonObjectSignedNumberItem(json, CTRL_MSG_KEY_DELTA, &delta) ||
         !GetJsonObjectSignedNumberItem(json, CTRL_MSG_KEY_REF_NUM, &peerRc)) {
         CONN_LOGE(CONN_BLE, "connId=%u, parse delta or reference number fields failed, delta=%d, peer reference "
             "count=%d", connection->connectionId, delta, peerRc);
         return SOFTBUS_PARSE_JSON_ERR;
+    }
+    if (!GetJsonObjectNumber16Item(json, CTRL_MSG_KEY_CHALLENGE, &challengeCode)) {
+        CONN_LOGW(CONN_BLE, "connId=%u, old version NOT have KEY_CHALLENGE field", connection->connectionId);
     }
 
     int32_t status = SoftBusMutexLock(&connection->lock);
@@ -338,8 +405,8 @@ int32_t ConnBleOnReferenceRequest(ConnBleConnection *connection, const cJSON *js
     connection->connectionRc += delta;
     int32_t localRc = connection->connectionRc;
 
-    CONN_LOGI(CONN_BLE, "ble received reference request, connId=%u, delta=%d, peerRef=%d, localRc=%d",
-        connection->connectionId, delta, peerRc, localRc);
+    CONN_LOGI(CONN_BLE, "ble received reference request, connId=%u, delta=%d, peerRef=%d, localRc=%d, challenge=%u",
+        connection->connectionId, delta, peerRc, localRc, challengeCode);
     if (peerRc > 0) {
         if (connection->state == BLE_CONNECTION_STATE_NEGOTIATION_CLOSING) {
             ConnRemoveMsgFromLooper(&g_bleConnectionAsyncHandler, MSG_CONNECTION_WAIT_NEGOTIATION_CLOSING_TIMEOUT,
@@ -348,7 +415,7 @@ int32_t ConnBleOnReferenceRequest(ConnBleConnection *connection, const cJSON *js
             g_connectionListener.onConnectionResume(connection->connectionId);
         }
         (void)SoftBusMutexUnlock(&connection->lock);
-        NotifyReusedConnected(connection->connectionId);
+        NotifyReusedConnected(connection->connectionId, challengeCode);
         return SOFTBUS_OK;
     }
     if (localRc <= 0) {
@@ -368,6 +435,7 @@ int32_t ConnBleOnReferenceRequest(ConnBleConnection *connection, const cJSON *js
             .referenceNumber = localRc,
             .delta = 0,
         },
+        .challengeCode = challengeCode,
     };
     uint8_t *data = NULL;
     uint32_t dataLen = 0;
@@ -807,16 +875,24 @@ static int32_t DoRetryAction(enum BleServerState expect)
     if (g_serverCoordination.status[BLE_GATT] != SOFTBUS_OK) {
         const BleUnifyInterface *interface = ConnBleGetUnifyInterface(BLE_GATT);
         if (interface != NULL) {
-            statusGatt = (expect == BLE_SERVER_STATE_STARTED) ? interface->bleServerStartService() :
-                                 interface->bleServerStopService();
+            if (expect == BLE_SERVER_STATE_STARTED) {
+                GattService *service = CreateGattService();
+                interface->bleServerStartService(service, SOFTBUS_GATT_SERVICE);
+            } else {
+                interface->bleServerStopService(SOFTBUS_GATT_SERVICE);
+            }
         }
     }
 
     if (g_serverCoordination.status[BLE_COC] != SOFTBUS_OK) {
         const BleUnifyInterface *interface = ConnBleGetUnifyInterface(BLE_COC);
         if (interface != NULL) {
-            statusCoc = (expect == BLE_SERVER_STATE_STARTED) ? interface->bleServerStartService() :
-                                interface->bleServerStopService();
+            if (expect == BLE_SERVER_STATE_STARTED) {
+                GattService *service = CreateGattService();
+                interface->bleServerStartService(service, SOFTBUS_GATT_SERVICE);
+            } else {
+                interface->bleServerStopService(SOFTBUS_GATT_SERVICE);
+            }
         }
     }
 
@@ -990,10 +1066,10 @@ int32_t ConnBleInitConnectionMudule(SoftBusLooper *looper, ConnBleConnectionEven
         if (interface == NULL) {
             continue;
         }
-        status = interface->bleClientInitModule(looper, &clientEventListener);
+        status = interface->bleClientInitModule(looper, &clientEventListener, SOFTBUS_GATT_SERVICE);
         CONN_CHECK_AND_RETURN_RET_LOGW(status == SOFTBUS_OK, status, CONN_INIT,
             "init ble connection failed: init ble %d client failed, err=%d", i, status);
-        status = interface->bleServerInitModule(looper, &serverEventListener);
+        status = interface->bleServerInitModule(looper, &serverEventListener, SOFTBUS_GATT_SERVICE);
         CONN_CHECK_AND_RETURN_RET_LOGW(status == SOFTBUS_OK, status, CONN_INIT,
             "init ble connection failed: init ble %d server failed, err=%d", i, status);
     }

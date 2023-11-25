@@ -17,6 +17,7 @@
 #define LNN_SELECT_RULE_H
 
 #include "softbus_common.h"
+#include "lnn_lane_select.h"
 #include "lnn_lane_interface.h"
 
 #ifdef __cplusplus
@@ -24,6 +25,13 @@ extern "C" {
 #endif
 
 #define UNACCEPT_SCORE 20
+
+typedef enum {
+    HIGH_BAND_WIDTH = 0,
+    MIDDLE_BAND_WIDTH,
+    LOW_BAND_WIDTH,
+    BW_TYPE_BUTT,
+} BandWidthType;
 
 typedef struct {
     bool available;
@@ -34,6 +42,9 @@ typedef struct {
 int32_t GetWlanLinkedFrequency(void);
 
 LinkAttribute *GetLinkAttrByLinkType(LaneLinkType linkType);
+
+int32_t DecideAvailableLane(const char *networkId, const LaneSelectParam *request,
+    LanePreferredLinkList *recommendList);
 
 #ifdef __cplusplus
 }

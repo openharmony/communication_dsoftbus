@@ -38,6 +38,9 @@
 #include "softbus_proxychannel_pipeline.h"
 #include "wifi_direct_manager.h"
 
+#include "lnn_trans_lane.h"
+#include "lnn_lane_interface.h"
+
 typedef struct {
     uint32_t requestId;
     int64_t authId;
@@ -47,6 +50,7 @@ typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];
     uint32_t laneLinkReqId;
     int32_t pid;
+    LaneLinkType laneType;
     LaneLinkCb cb;
 } LaneLinkRequestInfo;
 
@@ -55,6 +59,7 @@ typedef struct {
     int32_t p2pModuleGenId;
     bool networkDelegate;
     bool p2pOnly;
+    uint32_t bandWidth;
 } P2pRequestInfo;
 
 typedef struct {
@@ -161,7 +166,7 @@ static void DisconnectP2pWithoutAuthConn(int32_t pid, const char *mac, int32_t l
     struct WifiDirectConnectInfo info;
     (void)memset_s(&info, sizeof(info), 0, sizeof(info));
     info.requestId = GetWifiDirectManager()->getRequestId();
-    info.connectType = WIFI_DIRECT_CONNECT_TYPE_WIFI_DIRECT;
+    info.connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML;
     info.negoChannel = NULL;
     info.pid = pid;
     info.linkId = linkId;
@@ -231,7 +236,7 @@ static void OnConnOpenFailedForDisconnect(uint32_t requestId, int32_t reason)
     struct WifiDirectConnectInfo info;
     (void)memset_s(&info, sizeof(info), 0, sizeof(info));
     info.requestId = GetWifiDirectManager()->getRequestId();
-    info.connectType = WIFI_DIRECT_CONNECT_TYPE_WIFI_DIRECT;
+    info.connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML;
     info.negoChannel = NULL;
     if (GetP2pLinkDownParam(requestId, info.requestId, &info) != SOFTBUS_OK) {
         return;
@@ -256,7 +261,7 @@ static void OnConnOpenedForDisconnect(uint32_t requestId, int64_t authId)
     struct DefaultNegotiateChannel channel;
     DefaultNegotiateChannelConstructor(&channel, authId);
     info.negoChannel = (struct WifiDirectNegotiateChannel*)&channel;
-    info.connectType = WIFI_DIRECT_CONNECT_TYPE_WIFI_DIRECT;
+    info.connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML;
     if (GetP2pLinkDownParam(requestId, info.requestId, &info) != SOFTBUS_OK) {
         goto FAIL;
     }
@@ -320,6 +325,7 @@ static int32_t GetP2pLinkReqParamByChannelRequetId(
             LNN_LOGE(LNN_LANE, "get remote p2p mac fail");
             return SOFTBUS_ERR;
         }
+        wifiDirectInfo->bandWidth = item->p2pInfo.bandWidth;
         wifiDirectInfo->pid = item->laneRequestInfo.pid;
         wifiDirectInfo->isNetworkDelegate = item->p2pInfo.networkDelegate;
         item->p2pInfo.p2pRequestId = p2pRequestId;
@@ -356,9 +362,14 @@ static int32_t GetP2pLinkReqParamByAuthId(uint32_t authRequestId, int32_t p2pReq
         int32_t ret = strcpy_s(wifiDirectInfo->remoteNetworkId, sizeof(wifiDirectInfo->remoteNetworkId),
                                item->laneRequestInfo.networkId);
         LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, LNN_LANE, "copy networkId failed");
+        wifiDirectInfo->bandWidth = item->p2pInfo.bandWidth;
         wifiDirectInfo->isNetworkDelegate = item->p2pInfo.networkDelegate;
-        wifiDirectInfo->connectType =
-            item->p2pInfo.p2pOnly ? WIFI_DIRECT_CONNECT_TYPE_P2P : WIFI_DIRECT_CONNECT_TYPE_WIFI_DIRECT;
+        if (item->p2pInfo.p2pOnly) {
+            wifiDirectInfo->connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P;
+        } else {
+            wifiDirectInfo->connectType = ((item->laneRequestInfo.laneType == LANE_HML) ?
+                WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML : WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P);
+        }
         item->p2pInfo.p2pRequestId = p2pRequestId;
         LinkUnlock();
         return SOFTBUS_OK;
@@ -497,7 +508,11 @@ static void OnWifiDirectConnectSuccess(int32_t p2pRequestId, const struct WifiDi
     }
     LNN_LOGI(LNN_LANE, "requestId=%d p2pGenLinkId=%d", p2pRequestId, link->linkId);
     (void)memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
-    linkInfo.type = LANE_P2P;
+    if (link->linkType == WIFI_DIRECT_LINK_TYPE_HML) {
+        linkInfo.type = LANE_HML;
+    } else {
+        linkInfo.type = LANE_P2P;
+    }
     linkInfo.linkInfo.p2p.bw = LANE_BW_RANDOM;
     P2pConnInfo *p2p = (P2pConnInfo *)&(linkInfo.linkInfo.p2p.connInfo);
     if (strcpy_s(p2p->localIp, IP_LEN, link->localIp) != EOK) {
@@ -572,6 +587,12 @@ static int32_t AddConnRequestItem(uint32_t authRequestId, int32_t p2pRequestId, 
         SoftBusFree(item);
         return SOFTBUS_MEM_ERR;
     }
+    QosInfo qosOpt = {0};
+    if (GetQosInfoByLaneId(laneLinkReqId, &qosOpt) != SOFTBUS_OK) {
+        item->p2pInfo.bandWidth = 0;
+    } else {
+        item->p2pInfo.bandWidth = qosOpt.minBW;
+    }
     item->laneRequestInfo.laneLinkReqId = laneLinkReqId;
     item->laneRequestInfo.pid = request->pid;
     item->auth.authId = INVAILD_AUTH_ID;
@@ -581,6 +602,7 @@ static int32_t AddConnRequestItem(uint32_t authRequestId, int32_t p2pRequestId, 
     item->p2pInfo.p2pOnly = request->p2pOnly;
     item->p2pInfo.p2pRequestId = p2pRequestId;
     item->proxyChannelInfo.requestId = channelRequestId;
+    item->laneRequestInfo.laneType = request->linkType;
     if (LinkLock() != 0) {
         SoftBusFree(item);
         LNN_LOGE(LNN_LANE, "lock fail, add conn request fail");
@@ -662,7 +684,7 @@ static void OnProxyChannelOpened(int32_t channelRequestId, int32_t channelId)
     LNN_LOGI(LNN_LANE, "channelRequestId=%d, channelId=%d", channelRequestId, channelId);
     struct WifiDirectConnectInfo info;
     info.requestId = GetWifiDirectManager()->getRequestId();
-    info.connectType = WIFI_DIRECT_CONNECT_TYPE_WIFI_DIRECT;
+    info.connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML;
 
     struct FastConnectNegotiateChannel channel;
     FastConnectNegotiateChannelConstructor(&channel, channelId);

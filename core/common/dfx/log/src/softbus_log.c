@@ -25,6 +25,8 @@
 #include "hilog/log.h"
 #endif
 
+#define NSTACKX_LOG_CONVERT_BASE 8
+
 static void SoftBusLogExtraInfoFormat(char **str, const char *fileName, int lineNum, const char *funName)
 {
     (void)sprintf_s(*str, LOG_LINE_MAX_LENGTH + 1, "[%s:%d] %s# ", fileName, lineNum, funName);
@@ -61,5 +63,24 @@ void SoftBusLogInnerImpl(SoftBusDfxLogLevel level, SoftBusLogLabel label, const 
     (void)vsprintf_s(&str[pos], LOG_LINE_MAX_LENGTH + 1, fmt, args);
     va_end(args);
     SoftBusLogPrint(str, level, label.domain, label.tag);
+    free(str);
+}
+
+void NstackxLogInnerImpl(const char *moduleName, uint32_t logLevel, const char *fmt, ...)
+{
+    SoftBusDfxLogLevel level = NSTACKX_LOG_CONVERT_BASE - logLevel;
+    va_list args;
+    char *str = (char *)malloc(LOG_LINE_MAX_LENGTH + 1);
+    if (str == NULL) {
+        return; // Do not print log here
+    }
+    if (memset_s(&args, sizeof(va_list), 0, sizeof(va_list)) != EOK) {
+        free(str);
+        return; // Do not print log here
+    }
+    va_start(args, fmt);
+    (void)vsprintf_s(str, LOG_LINE_MAX_LENGTH + 1, fmt, args);
+    va_end(args);
+    SoftBusLogPrint(str, level, NSTACKX_LOG_DOMAIN, moduleName);
     free(str);
 }

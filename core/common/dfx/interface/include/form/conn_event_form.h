@@ -16,36 +16,72 @@
 #ifndef CONN_EVENT_FORM_H
 #define CONN_EVENT_FORM_H
 
-#include <stdlib.h>
+#include <stdint.h>
+
+#include "event_form_enum.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef enum {
-    SCENE_CONNECT = 1,
+    EVENT_SCENE_CONNECT = 1,
 } ConnEventScene;
 
 typedef enum {
-    STAGE_CONNECT_START = 1,
-    STAGE_CONNECT_INVOKE_PROTOCOL = 2,
-    STAGE_CONNECT_END = 3,
+    EVENT_STAGE_CONNECT_START = 1,
+    EVENT_STAGE_CONNECT_INVOKE_PROTOCOL = 2,
+    EVENT_STAGE_CONNECT_END = 3,
 } ConnEventConnectStage;
 
 typedef struct {
-    int32_t requestId;       // REQ_ID
-    int32_t LinkType;        // LINK_TYPE
-    int32_t expectRole;      // EXPECT_ROLE
-    int32_t authType;        // AUTH_TYPE
-    int32_t authId;          // AUTH_ID
-    int32_t connectionId;    // CONN_ID
-    int32_t peerNetworkId;   // PEER_NETID
-    int32_t rssi;            // RSSI
-    int32_t load;            // CHLOAD
-    int32_t frequency;       // FREQ
-    int32_t costTime;        // CONN_COST_TIME
-    int32_t errcode;         // ERROR_CODE
-    const char *peerBrMac;   // PEER_BR_MAC
-    const char *peerBleMac;  // PEER_BLE_MAC
-    const char *peerWifiMac; // PEER_WIFI_MAC
-    const char *peerIp;      // PEER_IP
-    const char *peerPort;    // PEER_PORT
+    int32_t result;            // STAGE_RES
+    int32_t errcode;           // ERROR_CODE
+    int32_t connectionId;      // CONN_ID
+    int32_t requestId;         // REQ_ID
+    int32_t linkType;          // LINK_TYPE
+    int32_t authType;          // AUTH_TYPE
+    int32_t authId;            // AUTH_ID
+    const char *lnnType;       // LNN_TYPE
+    int32_t expectRole;        // EXPECT_ROLE
+    int32_t costTime;          // TIME_CONSUMING
+    int32_t rssi;              // RSSI
+    int32_t load;              // CHLOAD
+    int32_t frequency;         // FREQ
+    const char *peerIp;        // PEER_IP
+    const char *peerBrMac;     // PEER_BR_MAC
+    const char *peerBleMac;    // PEER_BLE_MAC
+    const char *peerWifiMac;   // PEER_WIFI_MAC
+    const char *peerPort;      // PEER_PORT
+    const char *callerPkg;     // HOST_PKG
+    const char *calleePkg;     // TO_CALL_PKG
 } ConnEventExtra;
 
+typedef enum {
+    ALARM_SCENE_CONN_RESERVED = 1,
+} ConnAlarmScene;
+
+typedef struct {
+    int32_t errcode;
+} ConnAlarmExtra;
+
+typedef enum {
+    STATS_SCENE_CONN_RESERVED = 1,
+} ConnStatsScene;
+
+typedef struct {
+    int32_t reserved;
+} ConnStatsExtra;
+
+typedef enum {
+    AUDIT_SCENE_CONN_RESERVED = 1,
+} ConnAuditScene;
+
+typedef struct {
+    int32_t reserved;
+} ConnAuditExtra;
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 #endif // CONN_EVENT_FORM_H

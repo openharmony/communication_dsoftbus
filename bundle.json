@@ -39,7 +39,8 @@
         "dsoftbus_feature_lnn_wifiservice_dependence",
         "dsoftbus_standard_feature_dfinder_support_multi_nif",
         "dsoftbus_feature_protocol_newip",
-        "dsoftbus_feature_ex_kits"
+        "dsoftbus_feature_ex_kits",
+        "dsoftbus_feature_wifi_notify"
       ],
       "rom": "3000KB",
       "ram": "40MB",
@@ -107,6 +108,7 @@
         "test": [
           "//foundation/communication/dsoftbus/tests/adapter:fuzztest",
           "//foundation/communication/dsoftbus/tests/adapter:unittest",
+          "//foundation/communication/dsoftbus/tests/core/adapter:unittest",
           "//foundation/communication/dsoftbus/tests/core/authentication:fuzztest",
           "//foundation/communication/dsoftbus/tests/core/authentication:unittest",
           "//foundation/communication/dsoftbus/tests/core/bus_center:unittest",

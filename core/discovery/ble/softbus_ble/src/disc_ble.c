@@ -21,6 +21,7 @@
 #include "common_list.h"
 #include "disc_ble_constant.h"
 #include "disc_ble_utils.h"
+#include "disc_event.h"
 #include "disc_log.h"
 #include "disc_manager.h"
 #include "discovery_service.h"
@@ -715,8 +716,8 @@ static int32_t BuildBleConfigAdvData(SoftBusBleAdvData *advData, const Broadcast
     advData->scanRspData[POS_COMPANY_ID] = COMPANY_ID & BYTE_MASK;
     advData->scanRspData[POS_COMPANY_ID + 1] = (COMPANY_ID >> BYTE_SHIFT_BIT) & BYTE_MASK;
     if (advData->scanRspLength > RSP_HEAD_LEN) {
-        if (memcpy_s(&advData->scanRspData[RSP_HEAD_LEN], advData->scanRspLength,
-            broadcastData->data.rspData, advData->scanRspLength) != EOK) {
+        if (memcpy_s(&advData->scanRspData[RSP_HEAD_LEN], RESP_DATA_MAX_LEN,
+            broadcastData->data.rspData, advData->scanRspLength - RSP_HEAD_LEN) != EOK) {
             DISC_LOGE(DISC_BLE, "memcpy err");
             return SOFTBUS_MEM_ERR;
         }
@@ -851,9 +852,12 @@ static int32_t StartAdvertiser(int32_t adv)
         DestroyBleConfigAdvData(&advData);
         return SOFTBUS_ERR;
     }
-    SignalingMsgPrint("ble send", (uint8_t *)advData.advData, (uint8_t)advData.advLength,
-                      SOFTBUS_LOG_DISC);
+    SignalingMsgPrint("ble send", (uint8_t *)advData.advData, (uint8_t)advData.advLength, SOFTBUS_LOG_DISC);
+    DiscEventExtra discEventExtra = { .broadcastType = BLE };
+    DISC_EVENT(EVENT_SCENE_BROADCAST, EVENT_STAGE_BROADCAST, discEventExtra);
     if (SoftBusStartAdv(advertiser->channel, &advParam) != SOFTBUS_OK) {
+        discEventExtra.errcode = SOFTBUS_DISCOVER_START_BROADCAST_FAIL;
+        DISC_EVENT(EVENT_SCENE_BROADCAST, EVENT_STAGE_BROADCAST, discEventExtra);
         DestroyBleConfigAdvData(&advData);
         DISC_LOGE(DISC_BLE, "start adv adv=%d failed", adv);
         return SOFTBUS_ERR;
@@ -870,7 +874,11 @@ static int32_t StopAdvertiser(int32_t adv)
         DISC_LOGI(DISC_BLE, "advertiser adv adv=%d is already stopped.", adv);
         return SOFTBUS_OK;
     }
+    DiscEventExtra discEventExtra = { .broadcastType = BLE, .result = EVENT_STAGE_RESULT_OK };
+    DISC_EVENT(EVENT_SCENE_BROADCAST, EVENT_STAGE_BROADCAST, discEventExtra);
     if (SoftBusStopAdv(advertiser->channel) != SOFTBUS_OK) {
+        discEventExtra.errcode = SOFTBUS_DISCOVER_END_BROADCAST_FAIL;
+        DISC_EVENT(EVENT_SCENE_BROADCAST, EVENT_STAGE_BROADCAST, discEventExtra);
         DISC_LOGE(DISC_BLE, "stop advertiser advId=%d failed.", adv);
     }
     if (adv == NON_ADV_ID) {
@@ -901,7 +909,11 @@ static int32_t UpdateAdvertiser(int32_t adv)
     }
     SoftBusBleAdvParams advParam = {0};
     BuildAdvParam(&advParam);
+    DiscEventExtra discEventExtra = { .broadcastType = BLE };
+    DISC_EVENT(EVENT_SCENE_BROADCAST, EVENT_STAGE_BROADCAST, discEventExtra);
     if (SoftBusUpdateAdv(advertiser->channel, &advData, &advParam) != SOFTBUS_OK) {
+        discEventExtra.errcode = SOFTBUS_DISCOVER_START_BROADCAST_FAIL;
+        DISC_EVENT(EVENT_SCENE_BROADCAST, EVENT_STAGE_BROADCAST, discEventExtra);
         DestroyBleConfigAdvData(&advData);
         DISC_LOGE(DISC_BLE, "UpdateAdv failed");
         return SOFTBUS_ERR;
@@ -939,11 +951,17 @@ static void StartScaner(void)
     }
     SoftBusBleScanParams scanParam;
     int32_t maxFreq = GetMaxExchangeFreq();
+    DiscEventExtra discEventExtra = { .scanType = BLE };
+    DISC_EVENT(EVENT_SCENE_SCAN, EVENT_STAGE_SCAN_START, discEventExtra);
     if (GetScannerParam(maxFreq, &scanParam) != SOFTBUS_OK) {
+        discEventExtra.errcode = SOFTBUS_DISCOVER_START_SCAN_FAIL;
+        DISC_EVENT(EVENT_SCENE_SCAN, EVENT_STAGE_SCAN_START, discEventExtra);
         DISC_LOGE(DISC_BLE, "GetScannerParam failed");
         return;
     }
     if (SoftBusStartScan(g_bleListener.scanListenerId, g_bleScannerId, &scanParam) != SOFTBUS_OK) {
+        discEventExtra.errcode = SOFTBUS_DISCOVER_START_SCAN_FAIL;
+        DISC_EVENT(EVENT_SCENE_SCAN, EVENT_STAGE_SCAN_START, discEventExtra);
         DISC_LOGE(DISC_BLE, "start scan failed");
         return;
     }
@@ -956,7 +974,11 @@ static int32_t StopScaner(void)
         DISC_LOGI(DISC_BLE, "already stop scanning");
         return SOFTBUS_OK;
     }
+    DiscEventExtra discEventExtra = { .scanType = BLE, .result = EVENT_STAGE_RESULT_OK };
+    DISC_EVENT(EVENT_SCENE_SCAN, EVENT_STAGE_SCAN_START, discEventExtra);
     if (SoftBusStopScan(g_bleListener.scanListenerId, g_bleScannerId) != SOFTBUS_OK) {
+        discEventExtra.errcode = SOFTBUS_DISCOVER_END_SCAN_FAIL;
+        DISC_EVENT(EVENT_SCENE_SCAN, EVENT_STAGE_SCAN_START, discEventExtra);
         DISC_LOGI(DISC_BLE, "StopScaner failed");
         return SOFTBUS_ERR;
     }
@@ -1130,7 +1152,7 @@ static SoftBusMessage *CreateBleHandlerMsg(int32_t what, uint64_t arg1, uint64_t
 static int32_t ProcessBleDiscFunc(bool isStart, uint8_t publishFlags, uint8_t activeFlags,
     int32_t funcCode, const void *option)
 {
-    if (SoftBusGetBtState() != BLE_ENABLE) {
+    if (isStart && SoftBusGetBtState() != BLE_ENABLE) {
         DISC_LOGE(DISC_BLE, "get bt state failed.");
         return SOFTBUS_ERR;
     }

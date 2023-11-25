@@ -36,8 +36,10 @@
 #include "lnn_devicename_info.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_event.h"
 #include "lnn_fast_offline.h"
 #include "lnn_heartbeat_utils.h"
+#include "lnn_link_finder.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_network_id.h"
@@ -1471,12 +1473,15 @@ static NodeInfo *DupNodeInfo(const NodeInfo *nodeInfo)
 
 static int32_t FillNodeInfo(MetaJoinRequestNode *metaNode, NodeInfo *info)
 {
-    if (metaNode == NULL || info ==NULL) {
+    if (metaNode == NULL || info == NULL) {
         return SOFTBUS_ERR;
     }
+    bool isAuthServer = false;
     info->discoveryType = 1 << (uint32_t)LnnConvAddrTypeToDiscType(metaNode->addr.type);
     info->authSeqNum = metaNode->authId;
-    info->authChannelId[metaNode->addr.type] = (int32_t)metaNode->authId;
+    (void)AuthGetServerSide(metaNode->authId, &isAuthServer);
+    info->authChannelId[metaNode->addr.type][isAuthServer ? AUTH_AS_SERVER_SIDE : AUTH_AS_CLIENT_SIDE] =
+        (int32_t)metaNode->authId;
     info->relation[metaNode->addr.type]++;
     if (AuthGetDeviceUuid(metaNode->authId, info->uuid, sizeof(info->uuid)) != SOFTBUS_OK ||
         info->uuid[0] == '\0') {
@@ -1794,6 +1799,20 @@ static const char *SelectUseUdid(const char *peerUdid, const char *lowerUdid)
     }
 }
 
+static void LnnDeleteLinkFinderInfo(const char *peerUdid)
+{
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
+    if (LnnGetNetworkIdByUdid(peerUdid, networkId, sizeof(networkId)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get networkId fail.");
+        return;
+    }
+
+    if (LnnRemoveLinkFinderInfo(networkId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "remove a rpa info fail.");
+        return;
+    }
+}
+
 static void OnDeviceNotTrusted(const char *peerUdid)
 {
     if (peerUdid == NULL) {
@@ -1818,6 +1837,7 @@ static void OnDeviceNotTrusted(const char *peerUdid)
     if (useUdid == NULL) {
         return;
     }
+    LnnDeleteLinkFinderInfo(peerUdid);
     NotTrustedDelayInfo *info  = (NotTrustedDelayInfo *)SoftBusCalloc(sizeof(NotTrustedDelayInfo));
     if (info == NULL) {
         LNN_LOGE(LNN_BUILDER, "malloc NotTrustedDelayInfo fail");
@@ -2105,6 +2125,29 @@ static JoinLnnMsgPara *CreateJoinLnnMsgPara(const ConnectionAddr *addr, const ch
     return para;
 }
 
+static void BuildLnnEvent(LnnEventExtra *lnnEventExtra, const ConnectionAddr *addr)
+{
+    if (lnnEventExtra == NULL || addr == NULL) {
+        LNN_LOGW(LNN_STATE, "lnnEventExtra or addr is null");
+        return;
+    }
+    switch (addr->type) {
+        case CONNECTION_ADDR_BR:
+            lnnEventExtra->peerBrMac = addr->info.br.brMac;
+            break;
+        case CONNECTION_ADDR_BLE:
+            lnnEventExtra->peerBleMac = addr->info.ble.bleMac;
+            break;
+        case CONNECTION_ADDR_WLAN:
+        case CONNECTION_ADDR_ETH:
+            lnnEventExtra->peerIp = addr->info.ip.ip;
+            break;
+        default:
+            LNN_LOGE(LNN_BUILDER, "unknow param type!");
+            break;
+    }
+}
+
 static ConnectionAddrKey *CreateConnectionAddrMsgParaKey(const ConnectionAddrKey *addrDataKey)
 {
     ConnectionAddrKey *para = NULL;
@@ -2147,15 +2190,27 @@ static int32_t ConifgLocalLedger(void)
 {
     char uuid[UUID_BUF_LEN] = {0};
     char networkId[NETWORK_ID_BUF_LEN] = {0};
+    unsigned char irk[LFINDER_IRK_LEN] = {0};
 
-    // set local uuid and networkId
+    // set local networkId and uuid
     if (LnnGenLocalNetworkId(networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK ||
         LnnGenLocalUuid(uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local id fail");
         return SOFTBUS_ERR;
     }
+
+    // irk fail should not cause softbus init fail
+    if (LnnGenLocalIrk(irk, LFINDER_IRK_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get local irk fail");
+    }
     LnnSetLocalStrInfo(STRING_KEY_UUID, uuid);
     LnnSetLocalStrInfo(STRING_KEY_NETWORKID, networkId);
+    LnnSetLocalByteInfo(BYTE_KEY_IRK, irk, LFINDER_IRK_LEN);
+
+    // irk fail should not cause softbus init fail
+    if (LnnUpdateLinkFinderInfo() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "sync rpa info to linkfinder fail.");
+    }
     return SOFTBUS_OK;
 }
 
@@ -2375,6 +2430,10 @@ int32_t LnnInitNetBuilder(void)
     LnnInitTopoManager();
     InitNodeInfoSync();
     NetBuilderConfigInit();
+    // link finder init fail will not cause softbus init fail
+    if (LnnLinkFinderInit() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "link finder init fail");
+    }
     if (RegAuthVerifyListener(&g_verifyListener) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "register auth verify listener fail");
         return SOFTBUS_ERR;
@@ -2465,7 +2524,12 @@ int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName)
         LNN_LOGE(LNN_BUILDER, "prepare join lnn message fail");
         return SOFTBUS_MALLOC_ERR;
     }
+    LnnEventExtra lnnEventExtra = { .callerPkg = pkgName };
+    BuildLnnEvent(&lnnEventExtra, addr);
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_START, lnnEventExtra);
     if (PostMessageToHandler(MSG_TYPE_JOIN_LNN, para) != SOFTBUS_OK) {
+        lnnEventExtra.errcode = SOFTBUS_NETWORK_JOIN_LNN_START_ERR;
+        LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_START, lnnEventExtra);
         LNN_LOGE(LNN_BUILDER, "post join lnn message fail");
         SoftBusFree(para);
         return SOFTBUS_NETWORK_LOOPER_ERR;
@@ -2519,7 +2583,11 @@ int32_t LnnServerLeave(const char *networkId, const char *pkgName)
         LNN_LOGE(LNN_BUILDER, "prepare leave lnn message fail");
         return SOFTBUS_MALLOC_ERR;
     }
+    LnnEventExtra lnnEventExtra = { .callerPkg = pkgName };
+    LNN_EVENT(EVENT_SCENE_LEAVE_LNN, EVENT_STAGE_LEAVE_LNN_START, lnnEventExtra);
     if (PostMessageToHandler(MSG_TYPE_LEAVE_LNN, para) != SOFTBUS_OK) {
+        lnnEventExtra.errcode = SOFTBUS_NETWORK_LEAVE_LNN_START_ERR;
+        LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_LEAVE_LNN_START, lnnEventExtra);
         LNN_LOGE(LNN_BUILDER, "post leave lnn message fail");
         SoftBusFree(para);
         return SOFTBUS_NETWORK_LOOPER_ERR;
@@ -2553,17 +2621,26 @@ int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, bool isNeedConnect)
 {
     JoinLnnMsgPara *para = NULL;
 
+    LnnEventExtra lnnEventExtra = {0};
+    BuildLnnEvent(&lnnEventExtra, addr);
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_START, lnnEventExtra);
     LNN_LOGI(LNN_BUILDER, "notify discovery device enter! isNeedConnect = %d", isNeedConnect);
     if (g_netBuilder.isInit == false) {
+        lnnEventExtra.errcode = SOFTBUS_NETWORK_JOIN_LNN_START_ERR;
+        LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_START, lnnEventExtra);
         LNN_LOGE(LNN_BUILDER, "no init");
         return SOFTBUS_ERR;
     }
     para = CreateJoinLnnMsgPara(addr, DEFAULT_PKG_NAME, isNeedConnect);
     if (para == NULL) {
+        lnnEventExtra.errcode = SOFTBUS_NETWORK_JOIN_LNN_START_ERR;
+        LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_START, lnnEventExtra);
         LNN_LOGE(LNN_BUILDER, "malloc discovery device message fail");
         return SOFTBUS_MALLOC_ERR;
     }
     if (PostMessageToHandler(MSG_TYPE_DISCOVERY_DEVICE, para) != SOFTBUS_OK) {
+        lnnEventExtra.errcode = SOFTBUS_NETWORK_JOIN_LNN_START_ERR;
+        LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_START, lnnEventExtra);
         LNN_LOGE(LNN_BUILDER, "post notify discovery device message failed");
         SoftBusFree(para);
         return SOFTBUS_ERR;
@@ -2638,7 +2715,11 @@ void LnnSyncOfflineComplete(LnnSyncInfoType type, const char *networkId, const u
         LNN_LOGE(LNN_BUILDER, "prepare notify sync offline message fail");
         return;
     }
+    LnnEventExtra lnnEventExtra = {0};
+    LNN_EVENT(EVENT_SCENE_LEAVE_LNN, EVENT_STAGE_LEAVE_LNN_START, lnnEventExtra);
     if (PostMessageToHandler(MSG_TYPE_SYNC_OFFLINE_FINISH, para) != SOFTBUS_OK) {
+        lnnEventExtra.errcode = SOFTBUS_NETWORK_LEAVE_LNN_START_ERR;
+        LNN_EVENT(EVENT_SCENE_LEAVE_LNN, EVENT_STAGE_LEAVE_LNN_START, lnnEventExtra);
         LNN_LOGE(LNN_BUILDER, "post sync offline finish message failed");
         SoftBusFree(para);
     }

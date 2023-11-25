@@ -24,6 +24,7 @@
 #include "trans_log.h"
 #include "trans_session_manager.h"
 #include "softbus_qos.h"
+#include "trans_event.h"
 
 static IServerChannelCallBack g_channelCallBack;
 
@@ -41,6 +42,18 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
     }
     int64_t timeStart = channel->timeStart;
     int64_t timediff = GetSoftbusRecordTimeMillis() - timeStart;
+    if (!channel->isServer) {
+        TransEventExtra extra = {
+            .peerNetworkId = channel->peerDeviceId,
+            .linkType = channel->linkType,
+            .channelId = channel->channelId,
+            .costTime = (int32_t)timediff,
+            .result = EVENT_STAGE_RESULT_OK,
+            .callerPkg = pkgName,
+            .socketName = sessionName
+        };
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
+    }
     SoftbusRecordOpenSessionKpi(pkgName, channel->linkType, SOFTBUS_EVT_OPEN_SESSION_SUCC, timediff);
     SoftbusHitraceStop();
     return ClientIpcOnChannelOpened(pkgName, sessionName, channel, pid);
