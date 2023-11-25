@@ -70,10 +70,7 @@ static enum WifiDirectRole GetExpectedP2pRole(const char *networkId)
 static int32_t GetExpectedRole(const char *networkId, enum WifiDirectConnectType type, uint32_t *expectedRole,
                                bool *isStrict)
 {
-    if (type == WIFI_DIRECT_CONNECT_TYPE_HML) {
-        *expectedRole = WIFI_DIRECT_API_ROLE_HML;
-        *isStrict = true;
-    } else if (type == WIFI_DIRECT_CONNECT_TYPE_P2P) {
+    if (type == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P || type == WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_P2P) {
         enum WifiDirectRole role = GetExpectedP2pRole(networkId);
         if (role == WIFI_DIRECT_ROLE_GC) {
             *expectedRole = WIFI_DIRECT_API_ROLE_GC;
@@ -83,7 +80,8 @@ static int32_t GetExpectedRole(const char *networkId, enum WifiDirectConnectType
             *expectedRole = WIFI_DIRECT_API_ROLE_GC | WIFI_DIRECT_API_ROLE_GO;
         }
         *isStrict = true;
-    } else if (type == WIFI_DIRECT_CONNECT_TYPE_WIFI_DIRECT) {
+    } else if (type == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML || type == WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML ||
+        type == WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML) {
         enum WifiDirectRole role = GetExpectedP2pRole(networkId);
         if (role == WIFI_DIRECT_ROLE_GC) {
             *expectedRole = WIFI_DIRECT_API_ROLE_GC | WIFI_DIRECT_API_ROLE_HML;

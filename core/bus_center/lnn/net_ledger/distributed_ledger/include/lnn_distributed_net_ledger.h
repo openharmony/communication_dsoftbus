@@ -87,6 +87,9 @@ int32_t LnnSetDLProxyPort(const char *id, IdCategory type, int32_t proxyPort);
 int32_t LnnSetDLSessionPort(const char *id, IdCategory type, int32_t sessionPort);
 int32_t LnnSetDLAuthPort(const char *id, IdCategory type, int32_t authPort);
 NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type);
+
+bool LnnSetDlPtk(const char *networkId, const char *remotePtk);
+bool LnnSetDLWifiDirectAddr(const char *networkId, const char *addr);
 #ifdef __cplusplus
 }
 #endif

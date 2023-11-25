@@ -729,6 +729,52 @@ static int32_t DlGetNodeBleMac(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t DlGetRemotePtk(const char *networkId, void *buf, uint32_t len)
+{
+    if (len != PTK_DEFAULT_LEN) {
+        LNN_LOGE(LNN_LEDGER, "length error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeInfo *info = NULL;
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if (memcpy_s(buf, len, info->remotePtk, PTK_DEFAULT_LEN) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy remote ptk err");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t DlGetStaticCapLen(const char *networkId, void *buf, uint32_t len)
+{
+    NodeInfo *info = NULL;
+    if (len != LNN_COMMON_LEN) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if (!LnnIsNodeOnline(info)) {
+        LNN_LOGE(LNN_LEDGER, "device is offline");
+        return SOFTBUS_ERR;
+    }
+    *((int32_t *)buf) = info->staticCapLen;
+    return SOFTBUS_OK;
+}
+
+static int32_t DlGetStaticCap(const char *networkId, void *buf, uint32_t len)
+{
+    if (len > STATIC_CAP_LEN) {
+        LNN_LOGE(LNN_LEDGER, "length error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeInfo *info = NULL;
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if (memcpy_s(buf, len, info->staticCapability, STATIC_CAP_LEN) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy static cap err");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 void LnnUpdateNodeBleMac(const char *networkId, char *bleMac, uint32_t len)
 {
     if ((networkId == NULL) || (bleMac == NULL) || (len != MAC_LEN)) {
@@ -850,6 +896,28 @@ static int32_t DlGetP2pMac(const char *networkId, void *buf, uint32_t len)
     }
     if (strcpy_s((char*)buf, len, mac) != EOK) {
         LNN_LOGE(LNN_LEDGER, "copy p2p mac to buf fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t DlGetWifiDirectAddr(const char *networkId, void *buf, uint32_t len)
+{
+    NodeInfo *info = NULL;
+    const char *wifiDirectAddr = NULL;
+
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if ((!LnnIsNodeOnline(info)) && (!info->metaInfo.isMetaNode)) {
+        LNN_LOGE(LNN_LEDGER, "node is offline");
+        return SOFTBUS_ERR;
+    }
+    wifiDirectAddr = LnnGetWifiDirectAddr(info);
+    if (wifiDirectAddr == NULL) {
+        LNN_LOGE(LNN_LEDGER, "get wifidirect addr fail");
+        return SOFTBUS_ERR;
+    }
+    if (strcpy_s((char*)buf, len, wifiDirectAddr) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "copy wifidirect addr to buf fail");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -1094,6 +1162,7 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {STRING_KEY_NODE_ADDR, DlGetNodeAddr},
     {STRING_KEY_OFFLINE_CODE, DlGetDeviceOfflineCode},
     {STRING_KEY_BLE_MAC, DlGetNodeBleMac},
+    {STRING_KEY_WIFIDIRECT_ADDR, DlGetWifiDirectAddr},
     {NUM_KEY_META_NODE, DlGetAuthType},
     {NUM_KEY_SESSION_PORT, DlGetSessionPort},
     {NUM_KEY_AUTH_PORT, DlGetAuthPort},
@@ -1107,8 +1176,11 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {NUM_KEY_STATE_VERSION, DlGetStateVersion},
     {NUM_KEY_DATA_CHANGE_FLAG, DlGetNodeDataChangeFlag},
     {NUM_KEY_DEV_TYPE_ID, DlGetDeviceTypeId},
+    {NUM_KEY_STATIC_CAP_LEN, DlGetStaticCapLen},
     {BOOL_KEY_TLV_NEGOTIATION, DlGetNodeTlvNegoFlag},
     {BYTE_KEY_ACCOUNT_HASH, DlGetAccountHash},
+    {BYTE_KEY_REMOTE_PTK, DlGetRemotePtk},
+    {BYTE_KEY_STATIC_CAPABILITY, DlGetStaticCap},
     {BYTE_KEY_IRK, DlGetDeviceIrk},
     {BYTE_KEY_PUB_MAC, DlGetDevicePubMac},
     {BYTE_KEY_BROADCAST_CIPHER_KEY, DlGetDeviceCipherInfoKey},
@@ -1921,6 +1993,33 @@ EXIT:
     return false;
 }
 
+bool LnnSetDlPtk(const char *networkId, const char *remotePtk)
+{
+    NodeInfo *node = NULL;
+    if (networkId == NULL || remotePtk == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return false;
+    }
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return false;
+    }
+    node = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
+    if (node == NULL) {
+        LNN_LOGE(LNN_LEDGER, "get node info fail");
+        goto EXIT;
+    }
+    if (LnnSetPtk(node, remotePtk) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "set ptk fail");
+        goto EXIT;
+    }
+    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    return true;
+EXIT:
+    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    return false;
+}
+
 int32_t LnnGetRemoteStrInfo(const char *networkId, InfoKey key, char *info, uint32_t len)
 {
     uint32_t i;
@@ -2630,4 +2729,31 @@ void LnnRefreshDeviceOnlineStateAndDevIdInfo(const char *pkgName, DeviceInfo *de
     RefreshDeviceOnlineStateInfo(device, addtions);
     LNN_LOGI(LNN_LEDGER, "device found by medium=%d, udidhash=%s, online status=%d",
         addtions->medium, device->devId, device->isOnline);
+}
+
+bool LnnSetDLWifiDirectAddr(const char *networkId, const char *addr)
+{
+    NodeInfo *node = NULL;
+    if (networkId == NULL || addr == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return false;
+    }
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return false;
+    }
+    node = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
+    if (node == NULL) {
+        LNN_LOGE(LNN_LEDGER, "udid not found");
+        goto EXIT;
+    }
+    if (LnnSetWifiDirectAddr(node, addr) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "set wifidirect addr fail");
+        goto EXIT;
+    }
+    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    return true;
+EXIT:
+    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    return false;
 }

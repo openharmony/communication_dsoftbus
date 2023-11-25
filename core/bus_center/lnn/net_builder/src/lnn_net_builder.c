@@ -2368,6 +2368,10 @@ static int32_t InitNodeInfoSync(void)
         LNN_LOGE(LNN_INIT, "LnnInitCipherKeyManager fail");
         return SOFTBUS_ERR;
     }
+    if (LnnInitWifiDirect() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "init lnn wifidirect addr fail");
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 
@@ -2378,6 +2382,7 @@ static void DeinitNodeInfoSync(void)
     LnnDeinitDevicename();
     LnnDeinitOffline();
     LnnDeinitBatteryInfo();
+    LnnDeinitWifiDirect();
 }
 
 static void UpdatePCInfoWithoutSoftbus(void)
@@ -2430,7 +2435,10 @@ int32_t LnnInitNetBuilder(void)
     LnnInitTopoManager();
     InitNodeInfoSync();
     NetBuilderConfigInit();
-    LnnLinkFinderInit();
+    // link finder init fail will not cause softbus init fail
+    if (LnnLinkFinderInit() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "link finder init fail");
+    }
     if (RegAuthVerifyListener(&g_verifyListener) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "register auth verify listener fail");
         return SOFTBUS_ERR;

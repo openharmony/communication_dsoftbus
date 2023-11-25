@@ -193,6 +193,9 @@ int SoftBusSetAdvData(int advId, const SoftBusBleAdvData *data);
 
 int SoftBusStartAdv(int advId, const SoftBusBleAdvParams *param);
 
+int SoftBusStartAdvEx(int advId, const SoftBusBleAdvParams *param,
+    int (*startAdvEx)(int *, const SoftBusBleAdvParams *, const SoftBusBleAdvData *));
+
 int SoftBusStopAdv(int advId);
 
 int SoftBusUpdateAdv(int advId, const SoftBusBleAdvData *data, const SoftBusBleAdvParams *param);

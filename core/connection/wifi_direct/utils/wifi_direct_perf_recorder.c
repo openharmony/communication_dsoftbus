@@ -14,9 +14,7 @@
  */
 #include "wifi_direct_perf_recorder.h"
 #include <securec.h>
-#include <string.h>
 #include "conn_log.h"
-#include "softbus_error_code.h"
 #include "softbus_adapter_timer.h"
 
 #define TIME_POINT_ITEM_DEFINE(TP) { TP, #TP }
@@ -53,12 +51,12 @@ static int32_t GetPid(void)
     return GetWifiDirectPerfRecorder()->pid;
 }
 
-static void SetConnectType(enum WifiDirectConnectType type)
+static void SetConnectType(enum WifiDirectLinkType type)
 {
     GetWifiDirectPerfRecorder()->type = type;
 }
 
-static enum WifiDirectConnectType GetConnectType(void)
+static enum WifiDirectLinkType GetConnectType(void)
 {
     return GetWifiDirectPerfRecorder()->type;
 }

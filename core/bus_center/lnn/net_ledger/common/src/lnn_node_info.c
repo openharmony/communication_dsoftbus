@@ -347,6 +347,15 @@ const char *LnnGetP2pMac(const NodeInfo *info)
     return info->p2pInfo.p2pMac;
 }
 
+const char *LnnGetWifiDirectAddr(const NodeInfo *info)
+{
+    if (info == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return NULL;
+    }
+    return info->wifiDirectAddr;
+}
+
 int32_t LnnSetDataChangeFlag(NodeInfo *info, uint16_t dataChangeFlag)
 {
     if (info == NULL) {
@@ -405,5 +414,65 @@ int32_t LnnSetSupportedProtocols(NodeInfo *info, uint64_t protocols)
         return SOFTBUS_OK;
     }
     info->supportedProtocols = protocols;
+    return SOFTBUS_OK;
+}
+
+int32_t LnnSetStaticCapability(NodeInfo *info, uint8_t *cap, uint32_t len)
+{
+    if (info == NULL || cap == NULL) {
+        LNN_LOGE(LNN_LEDGER, "param is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (len <= 0 || len > STATIC_CAP_LEN) {
+        LNN_LOGE(LNN_LEDGER, "length error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (memcpy_s(info->staticCapability, STATIC_CAP_LEN, cap, len) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy static cap err");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnGetStaticCapability(NodeInfo *info, uint8_t *cap, uint32_t len)
+{
+    if (info == NULL || cap == NULL) {
+        LNN_LOGE(LNN_LEDGER, "param err");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (len < 0 || len > STATIC_CAP_LEN) {
+        LNN_LOGE(LNN_LEDGER, "param err");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (memcpy_s(cap, len, info->staticCapability, info->staticCapLen) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy static cap err");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnSetPtk(NodeInfo *info, const char *remotePtk)
+{
+    if (info == NULL || remotePtk == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (memcpy_s(info->remotePtk, PTK_DEFAULT_LEN, remotePtk, PTK_DEFAULT_LEN) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy ptk err");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnSetWifiDirectAddr(NodeInfo *info, const char *wifiDirectAddr)
+{
+    if (info == NULL || wifiDirectAddr == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strcpy_s(info->wifiDirectAddr, sizeof(info->wifiDirectAddr), wifiDirectAddr) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s wifidirect addr err");
+        return SOFTBUS_MEM_ERR;
+    }
     return SOFTBUS_OK;
 }

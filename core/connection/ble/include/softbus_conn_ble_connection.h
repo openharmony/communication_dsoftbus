@@ -185,7 +185,7 @@ int32_t ConnBleStartServer(void);
 int32_t ConnBleStopServer(void);
 int32_t ConnBleConnect(ConnBleConnection *connection);
 int32_t ConnBleDisconnectNow(ConnBleConnection *connection, enum ConnBleDisconnectReason reason);
-int32_t ConnBleUpdateConnectionRc(ConnBleConnection *connection, int32_t delta);
+int32_t ConnBleUpdateConnectionRc(ConnBleConnection *connection, uint16_t challengeCode, int32_t delta);
 int32_t ConnBleOnReferenceRequest(ConnBleConnection *connection, const cJSON *json);
 int32_t ConnBleUpdateConnectionPriority(ConnBleConnection *connection, ConnectBlePriority priority);
 int32_t ConnBleSend(ConnBleConnection *connection, const uint8_t *data, uint32_t dataLen, int32_t module);

@@ -145,7 +145,8 @@ static int32_t Publish(const PublishOption *option, bool isActive)
         DISC_LOGW(DISC_COAP, "register all capability to dfinder failed.");
         goto PUB_FAIL;
     }
-    if (DiscCoapRegisterServiceData(option->capabilityData, option->dataLen) != SOFTBUS_OK) {
+    if (DiscCoapRegisterServiceData(option->capabilityData, option->dataLen,
+        option->capabilityBitmap[0]) != SOFTBUS_OK) {
         DISC_LOGW(DISC_COAP, "register service data to dfinder failed.");
         goto PUB_FAIL;
     }
@@ -222,7 +223,8 @@ static int32_t UnPublish(const PublishOption *option, bool isActive)
             return SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL;
         }
     }
-    if (DiscCoapRegisterServiceData(option->capabilityData, option->dataLen) != SOFTBUS_OK) {
+    if (DiscCoapRegisterServiceData(option->capabilityData, option->dataLen,
+        option->capabilityBitmap[0]) != SOFTBUS_OK) {
         discScanEventExtra.errcode = SOFTBUS_DISCOVER_END_SCAN_FAIL;
         DISC_EVENT(EVENT_SCENE_SCAN, EVENT_STAGE_SCAN_START, discScanEventExtra);
         (void)SoftBusMutexUnlock(&(g_publishMgr->lock));
