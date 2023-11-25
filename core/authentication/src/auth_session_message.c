@@ -539,11 +539,11 @@ static int32_t UnPackBtDeviceIdV1(AuthSessionInfo *info, const uint8_t *data, ui
 {
     if (!info->isServer) {
         AUTH_LOGE(AUTH_FSM, "invalid bt deviceId msg");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (memcpy_s(info->udid, UDID_BUF_LEN, data, len) != EOK) { // data:StandardCharsets.UTF_8
         AUTH_LOGE(AUTH_FSM, "memcpy fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -574,7 +574,7 @@ static int32_t SetExchangeIdTypeAndValve(JsonObj *obj, AuthSessionInfo *info)
     char peerUdid[UDID_BUF_LEN] = {0};
     if (obj == NULL || info == NULL) {
         AUTH_LOGE(AUTH_FSM, "param invalid");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (!JSON_GetInt32FromOject(obj, EXCHANGE_ID_TYPE, &idType)) {
         AUTH_LOGI(AUTH_FSM, "parse idType failed, ignore");
@@ -598,7 +598,7 @@ static int32_t SetExchangeIdTypeAndValve(JsonObj *obj, AuthSessionInfo *info)
                     AUTH_LOGE(AUTH_FSM, "copy peer udid fail");
                     info->idType = EXCHANGE_FAIL;
                     AnonymizeFree(anonyUdid);
-                    return SOFTBUS_ERR;
+                    return SOFTBUS_MEM_ERR;
                 }
                 info->idType = EXCHANGE_NETWORKID;
             }
@@ -619,7 +619,7 @@ static int32_t SetExchangeIdTypeAndValve(JsonObj *obj, AuthSessionInfo *info)
                     AUTH_LOGE(AUTH_FSM, "copy peer udid fail");
                     info->idType = EXCHANGE_FAIL;
                     AnonymizeFree(anonyUdid);
-                    return SOFTBUS_ERR;
+                    return SOFTBUS_MEM_ERR;
                 }
                 AUTH_LOGE(AUTH_FSM, "get peer udid success, peer udid=%s", anonyUdid);
                 info->idType = EXCHANGE_NETWORKID;
@@ -1377,7 +1377,7 @@ static int32_t PostDeviceIdData(int64_t authSeq, const AuthSessionInfo *info, ui
     };
     if (PostAuthData(info->connId, !info->isServer, &head, data) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "post device id fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_SEND_FAIL;
     }
     return SOFTBUS_OK;
 }
@@ -1434,7 +1434,7 @@ static int32_t PostDeviceIdNew(int64_t authSeq, const AuthSessionInfo *info)
     }
     if (PostDeviceIdData(authSeq, info, (uint8_t *)msg, strlen(msg) + 1) != SOFTBUS_OK) {
         JSON_Free(msg);
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_SEND_FAIL;
     }
     JSON_Free(msg);
     return SOFTBUS_OK;
@@ -1533,11 +1533,12 @@ int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
     LnnEventExtra lnnEventExtra = {0};
     LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_EXCHANGE_DEVICE_INFO, lnnEventExtra);
     if (PostAuthData(info->connId, !info->isServer, &head, data) != SOFTBUS_OK) {
+        lnnEventExtra.result = EVENT_STAGE_RESULT_FAILED;
         lnnEventExtra.errcode = SOFTBUS_AUTH_EXCHANGE_DEVICE_INFO_START_ERR;
         LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_EXCHANGE_DEVICE_INFO, lnnEventExtra);
         AUTH_LOGE(AUTH_FSM, "post device info fail");
         SoftBusFree(data);
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_SEND_FAIL;
     }
     SoftBusFree(data);
     return SOFTBUS_OK;
@@ -1580,7 +1581,7 @@ int32_t ProcessDeviceInfoMessage(int64_t authSeq, AuthSessionInfo *info, const u
         AUTH_LOGE(AUTH_FSM, "unpack device info fail");
         SoftBusFree(msg);
         SoftBusFree(decompressData);
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL;
     }
     SoftBusFree(msg);
     SoftBusFree(decompressData);
@@ -1600,7 +1601,7 @@ int32_t PostCloseAckMessage(int64_t authSeq, const AuthSessionInfo *info)
     };
     if (PostAuthData(info->connId, !info->isServer, &head, (uint8_t *)msg) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "post close ack fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_SEND_FAIL;
     }
     return SOFTBUS_OK;
 }
@@ -1618,7 +1619,7 @@ int32_t PostHichainAuthMessage(int64_t authSeq, const AuthSessionInfo *info, con
     };
     if (PostAuthData(info->connId, !info->isServer, &head, data) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "post hichain data fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_SEND_FAIL;
     }
     return SOFTBUS_OK;
 }
@@ -1708,7 +1709,7 @@ int32_t PostVerifyDeviceMessage(const AuthManager *auth, int32_t flagRelay)
     if (PostAuthData(auth->connId, !auth->isServer, &head, data) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "post verify device msg fail");
         SoftBusFree(data);
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_SEND_FAIL;
     }
     SoftBusFree(data);
     return SOFTBUS_OK;

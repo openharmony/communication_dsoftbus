@@ -804,6 +804,12 @@ int SoftBusStartAdvEx(int advId, const SoftBusBleAdvParams *param,
             return SOFTBUS_ERR;
         }
     }
+    if (g_advChannel[advId].advId != -1) {
+        CLOGE("already assigned an advId %d", g_advChannel[advId].advId);
+        SoftBusMutexUnlock(&g_advLock);
+        return SOFTBUS_ERR;
+    }
+
     int ret = startAdvEx(&g_advChannel[advId].advId, param, &g_advChannel[advId].advData);
     CLOGI("inner-advId: %d, bt-advId: %d, ret: %d", advId, g_advChannel[advId].advId, ret);
     if (ret != SOFTBUS_OK) {

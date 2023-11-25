@@ -38,11 +38,12 @@ int32_t LnnInitP2p(void);
 void LnnDeinitP2p(void);
 int32_t LnnInitLocalP2pInfo(NodeInfo *info);
 int32_t LnnSyncP2pInfo(void);
-
+int32_t LnnSyncWifiDirectAddr(void);
+int32_t LnnInitWifiDirect(void);
+void LnnDeinitWifiDirect(void);
 int32_t LnnInitPtk(void);
 void LnnDeinitPtk(void);
 int32_t LnnGetLocalPtkByUdid(const char *udid, char *localPtk);
-
 void LnnLoadPtkInfo(void);
 int32_t LnnSyncPtk(char *networkId);
 int32_t UpdateLocalPtkIfValid(char *udid);
