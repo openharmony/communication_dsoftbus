@@ -28,14 +28,16 @@ void SoftBusLogInnerImpl(SoftBusDfxLogLevel level, SoftBusLogLabel label, const 
     uint32_t pos;
     va_list args = { 0 };
     char buffer[LOG_LINE_MAX_LENGTH + 1] = { 0 };
+
     SoftBusLogExtraInfoFormat(buffer, fileName, lineNum, funName);
     pos = strlen(buffer);
     va_start(args, fmt);
     int32_t ret = vsprintf_s(&buffer[pos], sizeof(buffer) - pos, fmt, args);
     if (ret < 0) {
-        return; // Do not print log here
+        return;
     }
     va_end(args);
+
     auto *checker = ExceptionBranchChecker::GetCurrentInstance();
     if (checker != nullptr) {
         checker->WriteLog(buffer);
@@ -61,7 +63,6 @@ ExceptionBranchChecker::~ExceptionBranchChecker()
 void ExceptionBranchChecker::WriteLog(const std::string& log)
 {
     if (log.find(matchBranch_) != std::string::npos) {
-        // HILOG_ERROR(SOFTBUS_HILOG_ID, "[Unit Test] exception branch match !!");
         isMatched_ = true;
     }
 }
