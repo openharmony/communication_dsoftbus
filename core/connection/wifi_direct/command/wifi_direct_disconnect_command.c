@@ -24,7 +24,6 @@
 #include "data/link_manager.h"
 #include "data/resource_manager.h"
 #include "utils/wifi_direct_anonymous.h"
-#include "conn_event.h"
 
 static int32_t PreferNegotiateChannelForConnectInfo(struct InnerLink *link, struct WifiDirectConnectInfo *connectInfo)
 {
@@ -115,12 +114,6 @@ static void OnSuccess(struct WifiDirectCommand *base, struct NegotiateMessage *m
         CONN_LOGI(CONN_WIFI_DIRECT, "call onDisconnectSuccess");
         self->callback.onDisconnectSuccess(self->connectInfo.requestId);
     }
-    ConnEventExtra extra = {
-        .requestId = self->connectInfo.requestId,
-        .linkType = CONNECT_P2P,
-        .result = EVENT_STAGE_RESULT_OK
-    };
-    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
 
     GetWifiDirectNegotiator()->resetContext();
     GetResourceManager()->dump();
@@ -138,13 +131,6 @@ static void OnFailure(struct WifiDirectCommand *base, int32_t reason)
         CONN_LOGI(CONN_WIFI_DIRECT, "call onDisconnectFailure");
         self->callback.onDisconnectFailure(self->connectInfo.requestId, reason);
     }
-    ConnEventExtra extra = {
-        .requestId = self->connectInfo.requestId,
-        .linkType = CONNECT_P2P,
-        .result = EVENT_STAGE_RESULT_FAILED,
-        .errcode = reason
-    };
-    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
 
     GetWifiDirectNegotiator()->resetContext();
     GetResourceManager()->dump();
