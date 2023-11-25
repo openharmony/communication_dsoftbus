@@ -21,6 +21,7 @@
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
 #include "trans_log.h"
+#include "trans_server_proxy.h"
 
 static int32_t CheckSocketInfoIsValid(const SocketInfo *info)
 {
@@ -96,4 +97,14 @@ int32_t Bind(int32_t socket, const QosTV qos[], uint32_t len, const ISocketListe
 void Shutdown(int32_t socket)
 {
     ClientShutdown(socket);
+}
+
+int32_t EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos, uint32_t qosCount)
+{
+    if (!IsValidString(peerNetworkId, DEVICE_ID_SIZE_MAX) || dataType >= DATA_TYPE_BUTT || qosCount >= QOS_TYPE_BUTT) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    return ServerIpcEvaluateQos(peerNetworkId, dataType, qos, qosCount);
 }

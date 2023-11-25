@@ -12,24 +12,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "conn_log.h"
-#include "softbus_conn_interface.h"
-#include "softbus_conn_ble_direct.h"
-#include "softbus_errcode.h"
+#include "net_manager_adapter.h"
+#include "softbus_error_code.h"
 
-int32_t ConnBleDirectConnectDevice(const ConnectOption *option, uint32_t reqId, const ConnectResult* result)
+int32_t AddInterfaceAddress(const char *interface, const char *ipString, int32_t prefixLength)
 {
-    CONN_LOGW(CONN_BLE, "do not support ble direct connection");
-    return SOFTBUS_ERR;
+    return SOFTBUS_OK;
 }
 
-bool ConnBleDirectIsEnable(BleProtocolType protocol)
+int32_t DeleteInterfaceAddress(const char *interface, const char *ipString, int32_t prefixLength)
 {
-    CONN_LOGW(CONN_BLE, "do not support ble direct connection");
-    return false;
+    return SOFTBUS_OK;
 }
 
-int32_t ConnBleDirectInit(void)
+int32_t AddStaticArp(const char *interface, const char *ipString, const char *macString)
+{
+    return SOFTBUS_OK;
+}
+
+int32_t DeleteStaticArp(const char *interface, const char *ipString, const char *macString)
 {
     return SOFTBUS_OK;
 }

@@ -41,11 +41,11 @@ static struct WifiDirectProcessor* GetProcessorByNegoChannel(struct WifiDirectNe
     return factory->createProcessor(WIFI_DIRECT_PROCESSOR_TYPE_P2P_V1);
 }
 
-static struct WifiDirectProcessor* GetProcessorByNegoChannelAndConnectType(struct WifiDirectNegotiateChannel *channel,
-                                                                           enum WifiDirectConnectType connectType)
+static struct WifiDirectProcessor* GetProcessorByNegoChannelAndLink(struct WifiDirectNegotiateChannel *channel,
+                                                                    enum WifiDirectLinkType linkType)
 {
     (void)channel;
-    (void)connectType;
+    (void)linkType;
     struct WifiDirectProcessorFactory *factory = GetWifiDirectProcessorFactory();
     return factory->createProcessor(WIFI_DIRECT_PROCESSOR_TYPE_P2P_V1);
 }
@@ -62,7 +62,7 @@ static struct WifiDirectDecisionCenter g_decisionCenter = {
     .getProtocol = GetProtocol,
     .putProtocol = PutProtocol,
     .getProcessorByNegoChannel = GetProcessorByNegoChannel,
-    .getProcessorByNegoChannelAndConnectType = GetProcessorByNegoChannelAndConnectType,
+    .getProcessorByNegoChannelAndLinkType = GetProcessorByNegoChannelAndLink,
     .getProcessorByNegotiateMessage = GetProcessorByNegotiateMessage,
 };
 

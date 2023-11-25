@@ -457,4 +457,186 @@ HWTEST_F(AdapterDsoftbusAesCryptoTest, SoftbusAesGcmEncrypt004, TestSize.Level0)
 
     SoftBusFree(encryptOutData.data);
 }
+
+/*
+* @tc.name: SoftbusAesCfbEncrypt001
+* @tc.desc: parameters are Legal
+* @tc.type: FUNC
+* @tc.require: I5OHDE
+*/
+HWTEST_F(AdapterDsoftbusAesCryptoTest, SoftbusAesCfbEncrypt001, TestSize.Level0)
+{
+    uint32_t randKeyLen = 32;
+    uint32_t randIvLen = 16;
+    uint32_t inDataLen = 10;
+    uint8_t inData[inDataLen];
+    uint8_t randSession[randKeyLen];
+    uint8_t randIv[randIvLen];
+    AesOutputData encryptOutData = { 0 };
+    AesOutputData decryptOutData = { 0 };
+
+    int32_t ret = SoftBusGenerateRandomArray(inData, inDataLen);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusGenerateRandomArray(randSession, randKeyLen);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusGenerateRandomArray(randIv, randIvLen);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    AesInputData encryptInData = { inData, inDataLen };
+    AesCipherKey cipherKey = { randSession, randKeyLen, randIv, randIvLen };
+
+    uint8_t randSession1[randKeyLen];
+    (void)memcpy_s(randSession1, randKeyLen, randSession, randKeyLen);
+    uint8_t randIv1[randIvLen];
+    (void)memcpy_s(randIv1, randIvLen, randIv, randIvLen);
+
+    ret = SoftbusAesCfbEncrypt(&encryptInData, &cipherKey, ENCRYPT_MODE, &encryptOutData);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    AesCipherKey cipherKey1 = { randSession1, randKeyLen, randIv1, randIvLen };
+    ret = SoftbusAesCfbEncrypt((const AesInputData *)&encryptOutData, &cipherKey1, DECRYPT_MODE, &decryptOutData);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = memcmp((const char *)decryptOutData.data, (const char *)encryptInData.data, decryptOutData.len);
+    EXPECT_EQ(0, ret);
+    SoftBusFree(encryptOutData.data);
+    SoftBusFree(decryptOutData.data);
+}
+
+/*
+* @tc.name: SoftbusAesCfbEncrypt002
+* @tc.desc: encrypt parameter is nullptr
+* @tc.require: I5OHDE
+*/
+HWTEST_F(AdapterDsoftbusAesCryptoTest, SoftbusAesCfbEncrypt002, TestSize.Level0)
+{
+    uint32_t randKeyLen = 32;
+    uint32_t randIvLen = 16;
+    uint32_t inDataLen = 10;
+    uint8_t inData[inDataLen];
+    uint8_t randSession[randKeyLen];
+    uint8_t randIv[randIvLen];
+    AesOutputData encryptOutData = { 0 };
+    AesOutputData decryptOutData = { 0 };
+
+    int32_t ret = SoftBusGenerateRandomArray(inData, inDataLen);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusGenerateRandomArray(randSession, randKeyLen);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusGenerateRandomArray(randIv, randIvLen);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    AesInputData encryptInData = { inData, inDataLen };
+    AesCipherKey cipherKey = { randSession, randKeyLen, randIv, randIvLen };
+
+    uint8_t randSession1[randKeyLen];
+    (void)memcpy_s(randSession1, randKeyLen, randSession, randKeyLen);
+    uint8_t randIv1[randIvLen];
+    (void)memcpy_s(randIv1, randIvLen, randIv, randIvLen);
+    AesCipherKey cipherKey1 = { randSession1, randKeyLen, randIv1, randIvLen };
+
+    ret = SoftbusAesCfbEncrypt(nullptr, &cipherKey, ENCRYPT_MODE, &encryptOutData);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = SoftbusAesCfbEncrypt((const AesInputData *)&encryptOutData, &cipherKey1, DECRYPT_MODE, &decryptOutData);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = SoftbusAesCfbEncrypt(&encryptInData, nullptr, ENCRYPT_MODE, &encryptOutData);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = SoftbusAesCfbEncrypt((const AesInputData *)&encryptOutData, &cipherKey1, DECRYPT_MODE, &decryptOutData);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = SoftbusAesCfbEncrypt(&encryptInData, &cipherKey, ENCRYPT_MODE, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = SoftbusAesCfbEncrypt((const AesInputData *)&encryptOutData, &cipherKey1, DECRYPT_MODE, &decryptOutData);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+* @tc.name: SoftbusAesCfbEncrypt003
+* @tc.desc: decrypt parameter is nullptr
+* @tc.type: FUNC
+* @tc.require: I5OHDE
+*/
+HWTEST_F(AdapterDsoftbusAesCryptoTest, SoftbusAesCfbEncrypt003, TestSize.Level0)
+{
+    uint32_t randKeyLen = 32;
+    uint32_t randIvLen = 16;
+    uint32_t inDataLen = 10;
+    uint8_t inData[inDataLen];
+    uint8_t randSession[randKeyLen];
+    uint8_t randIv[randIvLen];
+    AesOutputData encryptOutData = { 0 };
+    AesOutputData decryptOutData = { 0 };
+
+    int32_t ret = SoftBusGenerateRandomArray(inData, inDataLen);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusGenerateRandomArray(randSession, randKeyLen);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusGenerateRandomArray(randIv, randIvLen);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    AesInputData encryptInData = { inData, inDataLen };
+    AesCipherKey cipherKey = { randSession, randKeyLen, randIv, randIvLen };
+
+    uint8_t randSession1[randKeyLen];
+    (void)memcpy_s(randSession1, randKeyLen, randSession, randKeyLen);
+    uint8_t randIv1[randIvLen];
+    (void)memcpy_s(randIv1, randIvLen, randIv, randIvLen);
+    AesCipherKey cipherKey1 = { randSession1, randKeyLen, randIv1, randIvLen };
+
+    ret = SoftbusAesCfbEncrypt(&encryptInData, &cipherKey, ENCRYPT_MODE, &encryptOutData);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = SoftbusAesCfbEncrypt(nullptr, &cipherKey1, DECRYPT_MODE, &decryptOutData);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = SoftbusAesCfbEncrypt((const AesInputData *)&encryptOutData, nullptr, DECRYPT_MODE, &decryptOutData);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = SoftbusAesCfbEncrypt((const AesInputData *)&encryptOutData, &cipherKey1, DECRYPT_MODE, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    SoftBusFree(encryptOutData.data);
+}
+
+/*
+* @tc.name: SoftbusAesCfbEncrypt004
+* @tc.desc: encMode is illegal
+* @tc.type: FUNC
+* @tc.require: I5OHDE
+*/
+HWTEST_F(AdapterDsoftbusAesCryptoTest, SoftbusAesCfbEncrypt004, TestSize.Level0)
+{
+    uint32_t randKeyLen = 32;
+    uint32_t randIvLen = 16;
+    uint32_t inDataLen = 10;
+    int32_t encMode = 2;
+    uint8_t inData[inDataLen];
+    uint8_t randSession[randKeyLen];
+    uint8_t randIv[randIvLen];
+    AesOutputData encryptOutData = { 0 };
+    AesOutputData decryptOutData = { 0 };
+
+    int32_t ret = SoftBusGenerateRandomArray(inData, inDataLen);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusGenerateRandomArray(randSession, randKeyLen);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftBusGenerateRandomArray(randIv, randIvLen);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    AesInputData encryptInData = { inData, inDataLen };
+    AesCipherKey cipherKey = { randSession, randKeyLen, randIv, randIvLen };
+
+    uint8_t randSession1[randKeyLen];
+    (void)memcpy_s(randSession1, randKeyLen, randSession, randKeyLen);
+    uint8_t randIv1[randIvLen];
+    (void)memcpy_s(randIv1, randIvLen, randIv, randIvLen);
+    AesCipherKey cipherKey1 = { randSession1, randKeyLen, randIv1, randIvLen };
+
+    ret = SoftbusAesCfbEncrypt(&encryptInData, &cipherKey, encMode, &encryptOutData);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = SoftbusAesCfbEncrypt((const AesInputData *)&encryptOutData, &cipherKey1, DECRYPT_MODE, &decryptOutData);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = SoftbusAesCfbEncrypt(&encryptInData, &cipherKey, ENCRYPT_MODE, &encryptOutData);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SoftbusAesCfbEncrypt((const AesInputData *)&encryptOutData, &cipherKey1, encMode, &decryptOutData);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    SoftBusFree(encryptOutData.data);
+}
 } // namespace OHOS
