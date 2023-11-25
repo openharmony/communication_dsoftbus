@@ -168,11 +168,13 @@ typedef struct {
     int32_t groupType;
     bool initPreventFlag;
     int64_t networkIdTimestamp;
+    RpaInfo rpaInfo;
+    BroadcastCipherInfo cipherInfo;
+    int32_t bleMacRefreshSwitch;
+    int32_t bleConnCloseDelayTime;
     uint8_t staticCapability[STATIC_CAP_LEN];
     int32_t staticCapLen;
     char remotePtk[PTK_DEFAULT_LEN];
-    RpaInfo rpaInfo;
-    BroadcastCipherInfo cipherInfo;
 } NodeInfo;
 
 const char *LnnGetDeviceUdid(const NodeInfo *info);
@@ -185,6 +187,8 @@ bool LnnIsNodeOnline(const NodeInfo *info);
 void LnnSetNodeConnStatus(NodeInfo *info, ConnectStatus status);
 const char *LnnGetBtMac(const NodeInfo *info);
 void LnnSetBtMac(NodeInfo *info, const char *mac);
+const char *LnnGetBleMac(const NodeInfo *info);
+void LnnSetBleMac(NodeInfo *info, const char *mac);
 const char *LnnGetWiFiIp(const NodeInfo *info);
 void LnnSetWiFiIp(NodeInfo *info, const char *ip);
 const char *LnnGetNetIfName(const NodeInfo *info);
