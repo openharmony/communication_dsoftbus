@@ -326,9 +326,19 @@ int32_t LnnInitP2p(void)
     return GetNetBuilderDepsInterface()->LnnInitP2p();
 }
 
+int32_t LnnInitWifiDirect(void)
+{
+    return GetNetBuilderDepsInterface()->LnnInitWifiDirect();
+}
+
 void LnnDeinitP2p(void)
 {
     return GetNetBuilderDepsInterface()->LnnDeinitP2p();
+}
+
+void LnnDeinitWifiDirect(void)
+{
+    return GetNetBuilderDepsInterface()->LnnDeinitWifiDirect();
 }
 
 int32_t LnnInitNetworkInfo(void)

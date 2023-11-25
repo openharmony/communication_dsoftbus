@@ -143,7 +143,8 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_STRINFO_Test_001, TestSize.Le
         STRING_KEY_P2P_MAC,
         STRING_KEY_P2P_GO_MAC,
         STRING_KEY_NODE_ADDR,
-        STRING_KEY_OFFLINE_CODE
+        STRING_KEY_OFFLINE_CODE,
+        STRING_KEY_WIFIDIRECT_ADDR,
     };
     char buf[UDID_BUF_LEN] = {0};
     int32_t ret = LnnGetRemoteStrInfo(nullptr, STRING_KEY_HICE_VERSION, buf, UDID_BUF_LEN);
@@ -838,6 +839,33 @@ HWTEST_F(LNNDisctributedLedgerTest, DLGET_FEATURE_CAP_Test_001, TestSize.Level1)
     len = LNN_COMMON_LEN_64;
     ret = DlGetFeatureCap(networkId, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: LNN_SET_DLWIFIDIRECT_ADDR_Test_001
+* @tc.desc: lnn get lnn relation test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNDisctributedLedgerTest, LNN_SET_DLWIFIDIRECT_ADDR_Test_001, TestSize.Level1)
+{
+    bool ret = LnnSetDLWifiDirectAddr(NODE1_NETWORK_ID, nullptr);
+    EXPECT_TRUE(ret == false);
+    char wifiDirectAddr1[MAC_LEN] = "11223344556677889";
+    ret = LnnSetDLWifiDirectAddr(nullptr, wifiDirectAddr1);
+    EXPECT_TRUE(ret == false);
+    ret = LnnSetDLWifiDirectAddr(NODE1_NETWORK_ID, wifiDirectAddr1);
+    EXPECT_TRUE(ret == true);
+    ret = LnnSetDLWifiDirectAddr(NODE2_NETWORK_ID, wifiDirectAddr1);
+    EXPECT_TRUE(ret == false);
+
+    char wifiDirectAddr2[MAC_LEN] = "11223344";
+    ret = LnnSetDLWifiDirectAddr(nullptr, wifiDirectAddr2);
+    EXPECT_TRUE(ret == false);
+    ret = LnnSetDLWifiDirectAddr(NODE1_NETWORK_ID, wifiDirectAddr2);
+    EXPECT_TRUE(ret == true);
+    ret = LnnSetDLWifiDirectAddr(NODE2_NETWORK_ID, wifiDirectAddr2);
+    EXPECT_TRUE(ret == false);
 }
 
 HWTEST_F(LNNDisctributedLedgerTest, DLGET_STATIC_CAP_Test_001, TestSize.Level1)
