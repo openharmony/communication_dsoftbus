@@ -80,7 +80,6 @@ if (dsoftbus_feature_lnn_net) {
       "$dsoftbus_core_path/core/common/include",
     ]
     bus_center_hub_src += [
-      "$core_lane_hub_path/heartbeat/src/lnn_heartbeat_ctrl.c",
       "$core_lane_hub_path/heartbeat/src/lnn_heartbeat_fsm.c",
       "$core_lane_hub_path/heartbeat/src/lnn_heartbeat_medium_mgr.c",
       "$core_lane_hub_path/heartbeat/src/lnn_heartbeat_strategy.c",
@@ -88,9 +87,13 @@ if (dsoftbus_feature_lnn_net) {
     ]
     if (!enhanced) {
       bus_center_hub_src += [
+        "$core_lane_hub_path/heartbeat/src/lnn_heartbeat_ctrl_virtual.c",
         "$core_lane_hub_path/heartbeat/src/lnn_ble_heartbeat_virtual.c",
         "$core_lane_hub_path/heartbeat/src/lnn_ble_lpdevice_virtual.c",
       ]
+    } else {
+      bus_center_hub_src +=
+          [ "$core_lane_hub_path/heartbeat/src/lnn_heartbeat_ctrl.c" ]
     }
   } else {
     bus_center_hub_src += [

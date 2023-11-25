@@ -719,11 +719,16 @@ static int32_t DlGetNodeBleMac(const char *networkId, void *buf, uint32_t len)
     NodeInfo *info = NULL;
 
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
-    uint64_t currentTimeMs = GetCurrentTime();
-    LNN_CHECK_AND_RETURN_RET_LOGE(info->connectInfo.latestTime + BLE_ADV_LOST_TIME >= currentTimeMs, SOFTBUS_ERR,
+    if (strlen(info->connectInfo.bleMacAddr) == 0) {
+        LNN_LOGE(LNN_LEDGER, "ble mac is invalid.");
+        return SOFTBUS_ERR;
+    }
+    if (info->bleMacRefreshSwitch != 0) {
+        uint64_t currentTimeMs = GetCurrentTime();
+        LNN_CHECK_AND_RETURN_RET_LOGE(info->connectInfo.latestTime + BLE_ADV_LOST_TIME >= currentTimeMs, SOFTBUS_ERR,
         LNN_LEDGER, "ble mac out date, lastAdvTime:%llu, now:%llu", info->connectInfo.latestTime, currentTimeMs);
-
-    if (memcpy_s(buf, len, info->connectInfo.bleMacAddr, MAC_LEN) != EOK) {
+    }
+    if (strcpy_s((char *)buf, len, info->connectInfo.bleMacAddr) != EOK) {
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
