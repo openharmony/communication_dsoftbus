@@ -726,12 +726,18 @@ HWTEST_F(AuthOtherTest, CHECK_BUS_VERSION_TEST_001, TestSize.Level1)
     ret = UnpackWiFi(obj, info, version, false);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 
+    (void)JSON_AddStringToObject(obj, "BROADCAST_CIPHER_KEY", "1222222222");
+    (void)JSON_AddStringToObject(obj, "BROADCAST_CIPHER_IV", "1222222222");
+    (void)JSON_AddStringToObject(obj, "IRK", "1222222222");
+    (void)JSON_AddStringToObject(obj, "PUB_MAC", "1222222222");
+
     JSON_AddStringToObject(obj, "MASTER_UDID", "1122334554444");
     JSON_AddStringToObject(obj, "NODE_ADDR", "1122334554444");
     UnpackCommon(obj, info, version, false);
     version = SOFTBUS_OLD_V1;
     JSON_AddInt32ToObject(obj, "MASTER_WEIGHT", (int32_t)10);
     UnpackCommon(obj, info, version, true);
+    UnpackCipherRpaInfo(obj, info);
     JSON_Delete(obj);
     SoftBusFree(info);
 }
