@@ -300,6 +300,7 @@ static LaneLinkType TransGetLaneLinkTypeBySessionLinkType(LinkType type)
 static void TransformSessionPreferredToLanePreferred(const SessionParam *param,
     LanePreferredLinkList *preferred, TransOption *transOption)
 {
+    (void)transOption;
     if (param->attr->linkTypeNum <= 0 || param->attr->linkTypeNum > LINK_TYPE_MAX) {
         preferred->linkTypeNum = 0;
         return;
@@ -321,9 +322,11 @@ static void TransformSessionPreferredToLanePreferred(const SessionParam *param,
     return;
 }
 
-static void TransGetQosInfo(const SessionParam *param, QosInfo *qosInfo)
+static void TransGetQosInfo(const SessionParam *param, QosInfo *qosInfo, bool *isQosLane)
 {
-    if (param->qosCount == 0) {
+    *isQosLane = param->isQosLane;
+    if (!(*isQosLane)) {
+        TRANS_LOGD(TRANS_SVC, "not support qos lane");
         return;
     }
 
@@ -344,7 +347,8 @@ static void TransGetQosInfo(const SessionParam *param, QosInfo *qosInfo)
     }
 }
 
-static int32_t GetRequestOptionBySessionParam(const SessionParam *param, LaneRequestOption *requestOption)
+static int32_t GetRequestOptionBySessionParam(const SessionParam *param, LaneRequestOption *requestOption,
+    bool *isQosLane)
 {
     requestOption->type = LANE_TYPE_TRANS;
     if (memcpy_s(requestOption->requestInfo.trans.networkId, NETWORK_ID_BUF_LEN,
@@ -369,7 +373,7 @@ static int32_t GetRequestOptionBySessionParam(const SessionParam *param, LaneReq
     requestOption->requestInfo.trans.transType = transType;
     requestOption->requestInfo.trans.expectedBw = 0; /* init expectBW */
     requestOption->requestInfo.trans.acceptableProtocols = LNN_PROTOCOL_ALL ^ LNN_PROTOCOL_NIP;
-    TransGetQosInfo(param, &requestOption->requestInfo.trans.qosRequire);
+    TransGetQosInfo(param, &requestOption->requestInfo.trans.qosRequire, isQosLane);
 
     NodeInfo *info = LnnGetNodeInfoById(requestOption->requestInfo.trans.networkId, CATEGORY_NETWORK_ID);
     if (info != NULL && LnnHasDiscoveryType(info, DISCOVERY_TYPE_LSA)) {
@@ -443,7 +447,7 @@ static int32_t TransWaitingRequestCallback(uint32_t laneId)
     return SOFTBUS_OK;
 }
 
-static int32_t TransAddLaneReqToPendingAndWaiting(const LnnLaneManager *laneMgr, uint32_t laneId,
+static int32_t TransAddLaneReqToPendingAndWaiting(bool isQosLane, uint32_t laneId,
     const LaneRequestOption *requestOption)
 {
     if (requestOption == NULL) {
@@ -461,7 +465,13 @@ static int32_t TransAddLaneReqToPendingAndWaiting(const LnnLaneManager *laneMgr,
     listener.OnLaneRequestSuccess = TransOnLaneRequestSuccess;
     listener.OnLaneRequestFail = TransOnLaneRequestFail;
     listener.OnLaneStateChange = TransOnLaneStateChange;
-    if (laneMgr->lnnRequestLane(laneId, requestOption, &listener) != SOFTBUS_OK) {
+    if (isQosLane) {
+        // lane by qos
+        ret = GetLaneManager()->lnnRequestLane(laneId, requestOption, &listener);
+    } else {
+        ret = LnnRequestLane(laneId, requestOption, &listener);
+    }
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "trans request lane failed.");
         (void)TransDelLaneReqFromPendingList(laneId);
         return SOFTBUS_ERR;
@@ -475,7 +485,7 @@ static int32_t TransAddLaneReqToPendingAndWaiting(const LnnLaneManager *laneMgr,
     return SOFTBUS_OK;
 }
 
-int32_t TransGetLaneInfoByOption(const LaneRequestOption *requestOption, LaneConnInfo *connInfo,
+int32_t TransGetLaneInfoByOption(bool isQosLane, const LaneRequestOption *requestOption, LaneConnInfo *connInfo,
     uint32_t *laneId)
 {
     if ((requestOption == NULL) || (connInfo == NULL) || (laneId == NULL)) {
@@ -483,18 +493,12 @@ int32_t TransGetLaneInfoByOption(const LaneRequestOption *requestOption, LaneCon
         return SOFTBUS_ERR;
     }
 
-    const LnnLaneManager *laneMgr = GetLaneManager();
-    if (laneMgr == NULL) {
-        TRANS_LOGE(TRANS_SVC, "get LnnLaneManager error.");
-        return SOFTBUS_ERR;
-    }
-
-    *laneId = laneMgr->applyLaneId(LANE_TYPE_TRANS);
+    *laneId = GetLaneManager()->applyLaneId(LANE_TYPE_TRANS);
     if (*laneId <= 0) {
         TRANS_LOGE(TRANS_SVC, "trans apply lane failed.");
         return SOFTBUS_ERR;
     }
-    if (TransAddLaneReqToPendingAndWaiting(laneMgr, *laneId, requestOption) != SOFTBUS_OK) {
+    if (TransAddLaneReqToPendingAndWaiting(isQosLane, *laneId, requestOption) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "trans add lane to pending list failed.");
         return SOFTBUS_ERR;
     }
@@ -525,11 +529,12 @@ int32_t TransGetLaneInfo(const SessionParam *param, LaneConnInfo *connInfo, uint
 
     LaneRequestOption requestOption;
     (void)memset_s(&requestOption, sizeof(LaneRequestOption), 0, sizeof(LaneRequestOption));
-    if (GetRequestOptionBySessionParam(param, &requestOption) != SOFTBUS_OK) {
+    bool isQosLane = false;
+    if (GetRequestOptionBySessionParam(param, &requestOption, &isQosLane) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
 
-    int32_t ret = TransGetLaneInfoByOption(&requestOption, connInfo, laneId);
+    int32_t ret = TransGetLaneInfoByOption(isQosLane, &requestOption, connInfo, laneId);
     TransEventExtra extra = {
         .socketName = param->sessionName,
         .laneId = *laneId,

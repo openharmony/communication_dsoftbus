@@ -533,20 +533,20 @@ HWTEST_F(TransLaneTest, TransLaneTest014, TestSize.Level1)
         .type = LANE_TYPE_TRANS,
     };
     LaneConnInfo connInfo;
-    int32_t ret = TransGetLaneInfoByOption(NULL, &connInfo, &laneId);
+    int32_t ret = TransGetLaneInfoByOption(false, NULL, &connInfo, &laneId);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    ret = TransGetLaneInfoByOption(&requestOption, &connInfo, &laneId);
+    ret = TransGetLaneInfoByOption(false, &requestOption, &connInfo, &laneId);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     (void)InitLane();
-    ret = TransGetLaneInfoByOption(&requestOption, &connInfo, &laneId);
+    ret = TransGetLaneInfoByOption(false, &requestOption, &connInfo, &laneId);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     ret = TransUpdateLaneConnInfoByLaneId(laneId, true, &connInfo, errCode);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    ret = TransGetLaneInfoByOption(&requestOption, &connInfo, &laneId);
+    ret = TransGetLaneInfoByOption(false, &requestOption, &connInfo, &laneId);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     (void)LnnFreeLane(laneId);
