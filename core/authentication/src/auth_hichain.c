@@ -156,7 +156,7 @@ static int32_t ParseGroupInfo(const char *groupInfoStr, GroupInfo *groupInfo)
     cJSON *msg = cJSON_Parse(groupInfoStr);
     if (msg == NULL) {
         AUTH_LOGE(AUTH_HICHAIN, "parse json fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_PARSE_JSON_ERR;
     }
     if (!GetJsonObjectStringItem(msg, FIELD_GROUP_ID, groupInfo->groupId, GROUPID_BUF_LEN)) {
         AUTH_LOGE(AUTH_HICHAIN, "get FIELD_GROUP_ID fail");
@@ -248,7 +248,7 @@ int32_t RegTrustDataChangeListener(const TrustDataChangeListener *listener)
     hichainListener.onDeviceBound = OnDeviceBound;
     if (RegChangeListener(AUTH_APPID, &hichainListener) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_HICHAIN, "hichain regDataChangeListener fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_REG_DATA_FAIL;
     }
     return SOFTBUS_OK;
 }
@@ -280,7 +280,7 @@ int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid)
     }
     AUTH_LOGE(AUTH_HICHAIN, "hichain call authDevice failed");
     cJSON_free(authParams);
-    return SOFTBUS_ERR;
+    return SOFTBUS_AUTH_START_ERR;
 }
 
 int32_t HichainProcessData(int64_t authSeq, const uint8_t *data, uint32_t len)
@@ -291,7 +291,7 @@ int32_t HichainProcessData(int64_t authSeq, const uint8_t *data, uint32_t len)
     int32_t ret = ProcessAuthData(authSeq, data, len, &g_hichainCallback);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_HICHAIN, "hichain processData err=%d", ret);
-        return SOFTBUS_ERR;
+        return ret;
     }
     return SOFTBUS_OK;
 }

@@ -438,7 +438,7 @@ static int32_t RecoveryDeviceKey(AuthFsm *authFsm)
     int ret = SoftBusGenerateStrHash((uint8_t *)authFsm->info.udid, strlen(authFsm->info.udid), hash);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "generate udidHash fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
     char udidShortHash[UDID_SHORT_HASH_HEX_STRING] = {0};
     if (ConvertBytesToUpperCaseHexString(udidShortHash, UDID_SHORT_HASH_HEX_STRING,
@@ -455,7 +455,7 @@ static int32_t RecoveryDeviceKey(AuthFsm *authFsm)
     ret = AuthSessionSaveSessionKey(authFsm->authSeq, key.deviceKey, key.keyLen);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "post save sessionKey event");
-        return SOFTBUS_ERR;
+        return ret;
     }
     return AuthSessionHandleAuthFinish(authFsm->authSeq);
 }
@@ -509,6 +509,7 @@ static void HandleMsgRecvDeviceId(AuthFsm *authFsm, MessagePara *para)
             LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_DEVICE, lnnEventExtra);
             if (HichainStartAuth(authFsm->authSeq, info->udid, info->connInfo.peerUid) != SOFTBUS_OK) {
                 ret = SOFTBUS_AUTH_HICHAIN_AUTH_FAIL;
+                lnnEventExtra.result = EVENT_STAGE_RESULT_FAILED;
                 lnnEventExtra.errcode = SOFTBUS_AUTH_START_ERR;
                 LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_DEVICE, lnnEventExtra);
                 break;
@@ -553,7 +554,8 @@ static void HandleMsgRecvAuthData(AuthFsm *authFsm, MessagePara *para)
     LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_EXCHANGE_CIPHER, lnnEventExtra);
     int32_t ret = HichainProcessData(authFsm->authSeq, para->data, para->len);
     if (ret != SOFTBUS_OK) {
-        lnnEventExtra.errcode = SOFTBUS_AUTH_EXCHANGE_CIPHER_START_ERR;
+        lnnEventExtra.result = EVENT_STAGE_RESULT_FAILED;
+        lnnEventExtra.errcode = ret;
         LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_EXCHANGE_CIPHER, lnnEventExtra);
         AUTH_LOGE(AUTH_FSM, "process hichain data fail");
         if (!authFsm->info.isAuthFinished) {
@@ -703,7 +705,8 @@ static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, MessagePara *para)
     LnnEventExtra lnnEventExtra = { .result = EVENT_STAGE_RESULT_OK };
     AuthSessionInfo *info = &authFsm->info;
     if (ProcessDeviceInfoMessage(authFsm->authSeq, info, para->data, para->len) != SOFTBUS_OK) {
-        lnnEventExtra.errcode = SOFTBUS_AUTH_EXCHANGE_DEVICE_INFO_END_ERR;
+        lnnEventExtra.result = EVENT_STAGE_RESULT_FAILED;
+        lnnEventExtra.errcode = SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL;
         LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_EXCHANGE_DEVICE_INFO, lnnEventExtra);
         AUTH_LOGE(AUTH_FSM, "process device info msg fail");
         CompleteAuthSession(authFsm, SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL);
@@ -842,7 +845,7 @@ static int32_t GetSessionInfoFromAuthFsm(int64_t authSeq, AuthSessionInfo *info)
     if (authFsm == NULL) {
         AUTH_LOGE(AUTH_FSM, "auth fsm[%" PRId64 "] not found", authSeq);
         ReleaseAuthLock();
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_NOT_FOUND;
     }
     *info = authFsm->info;
     info->deviceInfoData = NULL;
@@ -865,13 +868,13 @@ static int32_t PostMessageToAuthFsm(int32_t msgType, int64_t authSeq, const uint
     if (authFsm == NULL) {
         ReleaseAuthLock();
         SoftBusFree(para);
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_GET_FSM_FAIL;
     }
     if (LnnFsmPostMessage(&authFsm->fsm, msgType, para) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "post message to auth fsm fail");
         ReleaseAuthLock();
         SoftBusFree(para);
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_SEND_FAIL;
     }
     ReleaseAuthLock();
     return SOFTBUS_OK;
@@ -892,13 +895,13 @@ static int32_t PostMessageToAuthFsmByConnId(int32_t msgType, uint64_t connId, bo
     if (authFsm == NULL) {
         ReleaseAuthLock();
         SoftBusFree(para);
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_GET_FSM_FAIL;
     }
     if (LnnFsmPostMessage(&authFsm->fsm, msgType, para) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "post message to auth fsm by connId fail");
         ReleaseAuthLock();
         SoftBusFree(para);
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_SEND_FAIL;
     }
     ReleaseAuthLock();
     return SOFTBUS_OK;
@@ -946,7 +949,7 @@ int32_t AuthSessionPostAuthData(int64_t authSeq, const uint8_t *data, uint32_t l
 {
     AuthSessionInfo info;
     if (GetSessionInfoFromAuthFsm(authSeq, &info) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_GET_SESSION_INFO_FAIL;
     }
     if (PostHichainAuthMessage(authSeq, &info, data, len) != SOFTBUS_OK) {
         return SOFTBUS_AUTH_SYNC_DEVID_FAIL;
@@ -969,7 +972,7 @@ int32_t AuthSessionGetUdid(int64_t authSeq, char *udid, uint32_t size)
     }
     AuthSessionInfo info = {0};
     if (GetSessionInfoFromAuthFsm(authSeq, &info) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_GET_SESSION_INFO_FAIL;
     }
     if (memcpy_s(udid, size, info.udid, sizeof(info.udid)) != EOK) {
         AUTH_LOGE(AUTH_FSM, "copy udid fail");
