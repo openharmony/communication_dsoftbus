@@ -73,6 +73,7 @@ constexpr uint32_t LOCAL_PROXY_PORT = 7000;
 constexpr uint32_t LOCAL_CAPACITY = 3;
 constexpr int32_t MASTER_WEIGHT = 10;
 constexpr int32_t P2P_ROLE = 1;
+constexpr int32_t STATIC_LEN = 10;
 using namespace testing;
 class LNNNetLedgerCommonTest : public testing::Test {
 public:
@@ -199,6 +200,9 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_001, TestSize.Level1)
     EXPECT_TRUE(LnnGetP2pGoMac(nullptr) == nullptr);
     EXPECT_TRUE(LnnGetSupportedProtocols(nullptr) == 0);
     EXPECT_TRUE(LnnSetSupportedProtocols(nullptr, PROTOCOLS) == SOFTBUS_OK);
+    EXPECT_TRUE(LnnSetStaticCapability(nullptr, nullptr, 0) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnGetStaticCapability(nullptr, nullptr, 0) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnSetPtk(nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
 }
 
 /*
@@ -381,7 +385,8 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_003, TestSize.Level1)
         NUM_KEY_DISCOVERY_TYPE,
         NUM_KEY_DEV_TYPE_ID,
         NUM_KEY_MASTER_NODE_WEIGHT,
-        NUM_KEY_P2P_ROLE
+        NUM_KEY_P2P_ROLE,
+        NUM_KEY_STATIC_CAP_LEN
     };
     int32_t ret, info;
     LnnSetLocalNumInfo(NUM_KEY_AUTH_PORT, LOCAL_AUTH_PORT);
@@ -413,6 +418,8 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_004, TestSize.Level1)
     ret = LnnSetLocalNumInfo(NUM_KEY_MASTER_NODE_WEIGHT, MASTER_WEIGHT);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnSetLocalNumInfo(NUM_KEY_P2P_ROLE, P2P_ROLE);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = LnnSetLocalNumInfo(NUM_KEY_STATIC_CAP_LEN, STATIC_LEN);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     LnnDeinitLocalLedger();
 }
