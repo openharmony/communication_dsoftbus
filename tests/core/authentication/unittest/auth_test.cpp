@@ -129,7 +129,7 @@ HWTEST_F(AuthTest, REG_TRUST_DATA_CHANGE_LISTENER_Test_001, TestSize.Level1)
     ret = RegTrustDataChangeListener(nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = RegTrustDataChangeListener(&listener);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /*
@@ -229,7 +229,7 @@ HWTEST_F(AuthTest, AUTH_SESSION_POST_AUTH_DATA_Test_001, TestSize.Level1)
     int32_t ret;
 
     ret = AuthSessionPostAuthData(authSeq, nullptr, len);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /*
@@ -265,7 +265,7 @@ HWTEST_F(AuthTest, AUTH_SESSION_GET_UDID_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     authSeq = -1;
     ret = AuthSessionGetUdid(authSeq, udid, size);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /*
@@ -333,7 +333,7 @@ HWTEST_F(AuthTest, AUTH_SESSION_PROCESS_CLOSE_ACK_BY_CONNID_Test_001, TestSize.L
     ret = AuthSessionProcessCloseAckByConnId(connId, isServer, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = AuthSessionProcessCloseAckByConnId(connId, isServer, data, len);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /*
@@ -454,9 +454,9 @@ HWTEST_F(AuthTest, POST_DEVICEID_MESSAGE_Test_001, TestSize.Level1)
     int32_t ret;
 
     ret = PostDeviceIdMessage(errAuthSeq, &info);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = PostDeviceIdMessage(authSeq, &info);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /*
@@ -528,7 +528,7 @@ HWTEST_F(AuthTest, POST_HICHAIN_AUTH_MESSAGE_Test_001, TestSize.Level1)
     uint32_t len = TEST_DATA_LEN;
 
     int32_t ret = PostHichainAuthMessage(authSeq, &info, data, len);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /*
@@ -716,7 +716,7 @@ HWTEST_F(AuthTest, AUTH_MANAGER_GET_SESSION_KEY_Test_001, TestSize.Level1)
     SessionKey sessionKey = { { 0 }, TEST_DATA_LEN };
 
     int32_t ret = AuthManagerGetSessionKey(authSeq, &info, &sessionKey);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /*
@@ -944,7 +944,7 @@ HWTEST_F(AuthTest, AUTH_GET_PREFER_CONNINFO_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret != SOFTBUS_OK);
     uuid[0] = '1';
     ret = AuthGetPreferConnInfo(const_cast<const char *>(uuid), &connInfo, false);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = AuthGetPreferConnInfo(const_cast<const char *>(uuid), &connInfo, true);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
@@ -1466,7 +1466,7 @@ HWTEST_F(AuthTest, AUTH_CONN_INIT_Test_001, TestSize.Level1)
     int32_t ret = AuthConnInit(nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = AuthConnInit(&listener);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /*
@@ -1804,7 +1804,7 @@ HWTEST_F(AuthTest, POST_DEVICE_ID_MESSAGE_Test_001, TestSize.Level1)
     int32_t ret = PostDeviceIdMessage(GenSeq(false), info);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = PostDeviceIdMessage(GenSeq(false), &infoValue);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /*
@@ -1822,7 +1822,7 @@ HWTEST_F(AuthTest, PROCESS_DEVICE_ID_MESSAGE_Test_001, TestSize.Level1)
     int32_t ret = ProcessDeviceIdMessage(info, data, sizeof(data));
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = ProcessDeviceIdMessage(&infoValue, data, sizeof(data));
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /*

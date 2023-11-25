@@ -393,7 +393,7 @@ static bool CompareConnectOption(const ConnectOption *itemConnInfo, const Connec
         }
         return false;
     } else if (connInfo->type == CONNECT_BLE_DIRECT) {
-        if ((strcmp(connInfo->bleDirectOption.nodeIdHash, itemConnInfo->bleDirectOption.nodeIdHash) == 0) &&
+        if ((strcmp(connInfo->bleDirectOption.networkId, itemConnInfo->bleDirectOption.networkId) == 0) &&
             (connInfo->bleDirectOption.protoType == itemConnInfo->bleDirectOption.protoType)) {
             return true;
         }

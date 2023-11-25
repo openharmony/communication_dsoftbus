@@ -33,7 +33,7 @@ extern "C" {
         return false;                                                                                         \
     }
 
-LNN_ASSIGNER(Int32, Result, result)
+LNN_ASSIGNER(Errcode, Result, result)
 LNN_ASSIGNER(Errcode, Errcode, errcode)
 LNN_ASSIGNER(Int32, ConnectionId, connectionId)
 LNN_ASSIGNER(Int32, AuthType, authType)

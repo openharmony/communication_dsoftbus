@@ -83,7 +83,7 @@ static inline bool AssignerString(const char *value, HiSysEventParam **param)
 /* Used by ASSIGNER macros */
 static inline bool AssignerErrcode(int32_t value, HiSysEventParam **param)
 {
-    (*param)->v.i32 = (value < 0) ? -value : value;
+    (*param)->v.i32 = (value < 0) ? (-value) : value;
     return true;
 }
 
