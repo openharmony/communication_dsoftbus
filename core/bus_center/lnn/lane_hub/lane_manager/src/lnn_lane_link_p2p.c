@@ -328,8 +328,12 @@ static int32_t GetP2pLinkReqParamByChannelRequetId(
         wifiDirectInfo->bandWidth = item->p2pInfo.bandWidth;
         wifiDirectInfo->pid = item->laneRequestInfo.pid;
         wifiDirectInfo->isNetworkDelegate = item->p2pInfo.networkDelegate;
-        wifiDirectInfo->connectType = item->p2pInfo.p2pOnly ?
-            WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P : WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML;
+        if (item->p2pInfo.p2pOnly) {
+            wifiDirectInfo->connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P;
+        } else {
+            wifiDirectInfo->connectType = ((item->laneRequestInfo.laneType == LANE_HML) ?
+                WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML : WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P);
+        }
         item->p2pInfo.p2pRequestId = p2pRequestId;
         item->proxyChannelInfo.channelId = channelId;
         LinkUnlock();
