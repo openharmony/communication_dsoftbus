@@ -66,7 +66,7 @@ static int32_t PostMessageToHandlerDelay(SoftBusMessage *msg, uint64_t delayMill
     if (g_notifyHandler.looper->PostMessage == NULL || g_notifyHandler.looper->PostMessageDelay == NULL) {
         LNN_LOGE(LNN_EVENT, "invalid looper");
         FreeMessage(msg);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (delayMillis == 0) {
         g_notifyHandler.looper->PostMessage(g_notifyHandler.looper, msg);
