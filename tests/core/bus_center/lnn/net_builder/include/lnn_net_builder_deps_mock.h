@@ -118,6 +118,8 @@ public:
     virtual int32_t LnnSetDLAuthPort(const char *id, IdCategory type, int32_t authPort);
     virtual int32_t LnnInitP2p(void);
     virtual void LnnDeinitP2p(void);
+    virtual int32_t LnnInitWifiDirect(void);
+    virtual void LnnDeinitWifiDirect(void);
     virtual int32_t LnnInitNetworkInfo(void);
     virtual int32_t LnnInitDevicename(void);
     virtual int32_t LnnInitSyncInfoManager(void);
@@ -216,6 +218,8 @@ public:
     MOCK_METHOD3(LnnSetDLAuthPort, int32_t (const char *, IdCategory, int32_t));
     MOCK_METHOD0(LnnInitP2p, int32_t ());
     MOCK_METHOD0(LnnDeinitP2p, void ());
+    MOCK_METHOD0(LnnInitWifiDirect, int32_t ());
+    MOCK_METHOD0(LnnDeinitWifiDirect, void ());
     MOCK_METHOD0(LnnInitNetworkInfo, int32_t ());
     MOCK_METHOD0(LnnInitDevicename, int32_t ());
     MOCK_METHOD0(LnnInitSyncInfoManager, int32_t ());
