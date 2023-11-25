@@ -144,7 +144,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_STRINFO_Test_001, TestSize.Le
         STRING_KEY_P2P_GO_MAC,
         STRING_KEY_NODE_ADDR,
         STRING_KEY_OFFLINE_CODE,
-        STRING_KEY_WIFIDIRECT_ADDR,
+        STRING_KEY_WIFIDIRECT_ADDR
     };
     char buf[UDID_BUF_LEN] = {0};
     int32_t ret = LnnGetRemoteStrInfo(nullptr, STRING_KEY_HICE_VERSION, buf, UDID_BUF_LEN);

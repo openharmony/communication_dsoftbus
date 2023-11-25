@@ -324,7 +324,7 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_001, TestSize.Level1)
         STRING_KEY_P2P_MAC,
         STRING_KEY_P2P_GO_MAC,
         STRING_KEY_OFFLINE_CODE,
-        STRING_KEY_WIFIDIRECT_ADDR,
+        STRING_KEY_WIFIDIRECT_ADDR
     };
     char buf[UDID_BUF_LEN] = {0};
     int32_t ret;
