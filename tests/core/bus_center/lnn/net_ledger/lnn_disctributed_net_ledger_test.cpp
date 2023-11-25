@@ -839,4 +839,43 @@ HWTEST_F(LNNDisctributedLedgerTest, DLGET_FEATURE_CAP_Test_001, TestSize.Level1)
     ret = DlGetFeatureCap(networkId, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
+
+HWTEST_F(LNNDisctributedLedgerTest, DLGET_STATIC_CAP_Test_001, TestSize.Level1)
+{
+    uint32_t len = 0;
+    int32_t ret = DlGetStaticCap(nullptr, nullptr, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    len = STATIC_CAP_LEN + 1;
+    ret = DlGetStaticCap(nullptr, nullptr, STATIC_CAP_LEN + 1);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    const char *networkId = "softbus";
+    ret = DlGetStaticCap(networkId, nullptr, STATIC_CAP_LEN + 1);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, DLGET_STATIC_CAP_LEN_Test_001, TestSize.Level1)
+{
+    uint32_t len = 0;
+    int32_t ret = DlGetStaticCapLen(nullptr, nullptr, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    len = STATIC_CAP_LEN + 1;
+    ret = DlGetStaticCapLen(nullptr, nullptr, STATIC_CAP_LEN + 1);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    const char *networkId = "softbus";
+    ret = DlGetStaticCapLen(networkId, nullptr, STATIC_CAP_LEN + 1);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+}
+
+HWTEST_F(LNNDisctributedLedgerTest, DLGET_REMOTE_PTK_Test_001, TestSize.Level1)
+{
+    uint32_t len = 0;
+    int32_t ret = DlGetRemotePtk(nullptr, nullptr, len);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    len = STATIC_CAP_LEN + 1;
+    ret = DlGetRemotePtk(nullptr, nullptr, STATIC_CAP_LEN + 1);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    const char *networkId = "softbus";
+    ret = DlGetRemotePtk(networkId, nullptr, STATIC_CAP_LEN + 1);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+}
 } // namespace OHOS
