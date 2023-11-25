@@ -195,7 +195,7 @@ int32_t SetAppInfoById(int32_t channelId, const AppInfo *appInfo)
     }
     ReleaseSessonConnLock();
     TRANS_LOGE(TRANS_CTRL, "can not get srv session conn info.");
-    return SOFTBUS_ERR;
+    return SOFTBUS_TRANS_SET_APP_INFO_FAILED;
 }
 
 int32_t GetAppInfoById(int32_t channelId, AppInfo *appInfo)

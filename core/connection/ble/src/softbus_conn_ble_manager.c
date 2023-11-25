@@ -184,7 +184,8 @@ static void DfxRecordBleConnectFail(
         .requestId = reqId,
         .linkType = CONNECT_BLE,
         .costTime = costTime,
-        .errcode = reason
+        .errcode = reason,
+        .result = EVENT_STAGE_RESULT_FAILED
     };
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
 }
