@@ -27,17 +27,17 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 
-#define AES_128_CFB_KEYLEN   16
-#define AES_256_CFB_KEYLEN   32
-#define AES_128_GCM_KEYLEN   16
-#define AES_256_GCM_KEYLEN   32
-#define AES_128_CFB_BITS_LEN 128
-#define AES_256_CFB_BITS_LEN 256
+#define AES_128_CFB_KEYLEN             16
+#define AES_256_CFB_KEYLEN             32
+#define AES_128_GCM_KEYLEN             16
+#define AES_256_GCM_KEYLEN             32
+#define AES_128_CFB_BITS_LEN           128
+#define AES_256_CFB_BITS_LEN           256
 #define OPENSSL_EVP_PADDING_FUNC_OPEN  (1)
 #define OPENSSL_EVP_PADDING_FUNC_CLOSE (0)
 
-int32_t SoftBusGenerateHmacHash(const EncryptKey *randomKey, const uint8_t *rootKey, uint32_t rootKeyLen,
-    uint8_t *hash, uint32_t hashLen)
+int32_t SoftBusGenerateHmacHash(
+    const EncryptKey *randomKey, const uint8_t *rootKey, uint32_t rootKeyLen, uint8_t *hash, uint32_t hashLen)
 {
     uint32_t outBufLen;
     uint8_t tempOutputData[EVP_MAX_MD_SIZE];
@@ -438,5 +438,51 @@ int32_t SoftbusAesGcmEncrypt(
 int32_t SoftbusAesCfbEncrypt(
     const AesInputData *inData, AesCipherKey *cipherKey, int32_t encMode, AesOutputData *outData)
 {
-    return SOFTBUS_NOT_IMPLEMENT;
+    uint8_t random[RANDOM_LENGTH] = { 0 };
+    uint8_t result[SHA256_MAC_LEN] = { 0 };
+
+    if (inData == NULL || inData->data == NULL || cipherKey == NULL || outData == NULL ||
+        (cipherKey->ivLen < RANDOM_LENGTH) || (encMode != ENCRYPT_MODE && encMode != DECRYPT_MODE)) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint32_t encryptDataLen = inData->len;
+    uint8_t *encryptData = (uint8_t *)SoftBusCalloc(encryptDataLen);
+    if (encryptData == NULL) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "encrypt data calloc fail.");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (memcpy_s(random, sizeof(random), cipherKey->iv, sizeof(random)) != EOK) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "random memcpy_s failed!");
+        SoftBusFree(encryptData);
+        return SOFTBUS_MEM_ERR;
+    }
+    EncryptKey key = { cipherKey->key, cipherKey->keyLen };
+    (void)memset_s(cipherKey->key, cipherKey->keyLen, 0, cipherKey->keyLen);
+    if (SoftBusGenerateHmacHash(&key, random, sizeof(random), result, SHA256_MAC_LEN) != SOFTBUS_OK) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "SslHmacSha256 failed.");
+        SoftBusFree(encryptData);
+        return SOFTBUS_ERR;
+    }
+    if (memcpy_s(cipherKey->key, cipherKey->keyLen, result, SHA256_MAC_LEN) != EOK) {
+        HILOG_ERROR(SOFTBUS_HILOG_ID, "fill cipherKey->key failed!");
+        SoftBusFree(encryptData);
+        return SOFTBUS_MEM_ERR;
+    }
+    if (encMode == ENCRYPT_MODE) {
+        if (OpensslAesCfbEncrypt(cipherKey, inData->data, inData->len, encryptData, &encryptDataLen) != SOFTBUS_OK) {
+            HILOG_ERROR(SOFTBUS_HILOG_ID, "OpensslAesCfbEncrypt failed.");
+            SoftBusFree(encryptData);
+            return SOFTBUS_ENCRYPT_ERR;
+        }
+    } else {
+        if (OpensslAesCfbDecrypt(cipherKey, inData->data, inData->len, encryptData, &encryptDataLen) != SOFTBUS_OK) {
+            HILOG_ERROR(SOFTBUS_HILOG_ID, "OpensslAesCfbEncrypt failed.");
+            SoftBusFree(encryptData);
+            return SOFTBUS_DECRYPT_ERR;
+        }
+    }
+    outData->data = encryptData;
+    outData->len = encryptDataLen;
+    return SOFTBUS_OK;
 }
