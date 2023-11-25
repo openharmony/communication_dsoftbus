@@ -69,7 +69,7 @@ StatisticEvtReportFunc GetStatisticEvtReportFunc(StatisticEvtType type);
 
 int32_t SetStatisticEvtReportFunc(StatisticEvtType type, StatisticEvtReportFunc func);
 
-int32_t GetErrorCodeEx(int32_t errorCode, int32_t module);
+int32_t GetErrorCodeEx(int32_t errorCode);
 
 #ifdef __cplusplus
 #if __cplusplus

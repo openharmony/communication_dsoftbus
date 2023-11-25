@@ -33,7 +33,7 @@ extern "C" {
         return false;                                                                                         \
     }
 
-CONN_ASSIGNER(Int32, Result, result)
+CONN_ASSIGNER(Errcode, Result, result)
 CONN_ASSIGNER(Errcode, Errcode, errcode)
 CONN_ASSIGNER(Int32, ConnectionId, connectionId)
 CONN_ASSIGNER(Int32, RequestId, requestId)

@@ -33,7 +33,7 @@ extern "C" {
         return false;                                                                                         \
     }
 
-DISC_ASSIGNER(Int32, Result, result)
+DISC_ASSIGNER(Errcode, Result, result)
 DISC_ASSIGNER(Errcode, Errcode, errcode)
 DISC_ASSIGNER(Int32, BroadcastType, broadcastType)
 DISC_ASSIGNER(Int32, BroadcastFreq, broadcastFreq)
