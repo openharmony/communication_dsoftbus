@@ -104,7 +104,10 @@ static PeMap g_peMap[] = {
 
 static int32_t ReadConfigJson(const char* permissionFile)
 {
-    (void)memset_s(g_permissonJson, PERMISSION_JSON_LEN, 0, PERMISSION_JSON_LEN);
+    if (memset_s(g_permissonJson, PERMISSION_JSON_LEN, 0, PERMISSION_JSON_LEN) != EOK) {
+        COMM_LOGE(COMM_PERM, "ReadConfigJson memset_s failed.");
+        return SOFTBUS_MEM_ERR;
+    }
     if (SoftBusReadFullFile(permissionFile, g_permissonJson, PERMISSION_JSON_LEN - 1) != SOFTBUS_OK) {
         COMM_LOGE(COMM_PERM, "ReadConfigJson failed.");
         return SOFTBUS_FILE_ERR;
@@ -127,6 +130,7 @@ static int32_t GetPeMapValue(const char *string)
 static bool StrIsEmpty(const char *string)
 {
     if (string == NULL || strlen(string) == 0) {
+        COMM_LOGE(COMM_PERM, "invalid param");
         return true;
     }
     return false;
@@ -135,15 +139,18 @@ static bool StrIsEmpty(const char *string)
 static bool StrStartWith(const char *string, const char *target)
 {
     if (string == NULL || target == NULL) {
+        COMM_LOGE(COMM_PERM, "invalid param");
         return false;
     }
     size_t stringLen = strlen(string);
     size_t targetLen = strlen(target);
     if (stringLen == 0 || targetLen == 0 || stringLen < targetLen) {
+        COMM_LOGE(COMM_PERM, "invalid len param");
         return false;
     }
     for (size_t index = 0; index < targetLen; index++) {
         if (string[index] != target[index]) {
+            COMM_LOGE(COMM_PERM, "string don't equal target");
             return false;
         }
     }
@@ -153,11 +160,13 @@ static bool StrStartWith(const char *string, const char *target)
 static SoftBusAppInfo *ProcessAppInfo(cJSON *object)
 {
     if (object == NULL) {
+        COMM_LOGE(COMM_PERM, "object is null");
         return NULL;
     }
 
     SoftBusAppInfo *appInfo = (SoftBusAppInfo *)SoftBusCalloc(sizeof(SoftBusAppInfo));
     if (appInfo == NULL) {
+        COMM_LOGE(COMM_PERM, "appInfo is null");
         return NULL;
     }
     ListInit(&appInfo->node);
@@ -211,11 +220,13 @@ EXIT:
 static SoftBusPermissionEntry *ProcessPermissionEntry(cJSON *object)
 {
     if (object == NULL) {
+        COMM_LOGE(COMM_PERM, "object is null.");
         return NULL;
     }
 
     SoftBusPermissionEntry *permissionEntry = (SoftBusPermissionEntry *)SoftBusCalloc(sizeof(SoftBusPermissionEntry));
     if (permissionEntry == NULL) {
+        COMM_LOGE(COMM_PERM, "permission entry calloc fail.");
         return NULL;
     }
     ListInit(&permissionEntry->node);
@@ -256,7 +267,7 @@ static SoftBusPermissionEntry *ProcessPermissionEntry(cJSON *object)
 static int32_t CompareString(const char *src, const char *dest, bool regexp)
 {
     if (src == NULL || dest == NULL) {
-        return SOFTBUS_PERMISSION_DENIED;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (regexp) {
         regex_t regComp;
@@ -319,7 +330,7 @@ static int32_t GetPermType(const SoftBusAppInfo *appInfo, const SoftBusPermissio
             }
             break;
         default:
-            return SOFTBUS_PERMISSION_DENIED;
+            return SOFTBUS_INVALID_PARAM;
     }
     return SOFTBUS_PERMISSION_DENIED;
 }
@@ -394,6 +405,10 @@ static bool HaveGrantedPermission(const char *sessionName)
 
 int32_t LoadPermissionJson(const char *fileName)
 {
+    if (fileName == NULL) {
+        COMM_LOGE(COMM_PERM, "fileName is null.");
+        return SOFTBUS_INVALID_PARAM;
+    }
     int ret = ReadConfigJson(fileName);
     if (ret != SOFTBUS_OK) {
         return ret;
@@ -601,6 +616,10 @@ static int32_t NewDynamicPermissionEntry(SoftBusPermissionEntry *permissionEntry
 
 int32_t AddDynamicPermission(int32_t callingUid, int32_t callingPid, const char *sessionName)
 {
+    if (sessionName == NULL) {
+        COMM_LOGE(COMM_PERM, "sessionName is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
     SoftBusMutexLock(&g_dynamicPermissionList->lock);
     if (g_dynamicPermissionList->cnt >= DYNAMIC_PERMISSION_MAX_SIZE) {
         COMM_LOGE(COMM_PERM, "dynamic permission reach the upper limit");
@@ -620,7 +639,7 @@ int32_t AddDynamicPermission(int32_t callingUid, int32_t callingPid, const char 
         SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
         return SOFTBUS_MALLOC_ERR;
     }
-    
+
     int32_t ret = NewDynamicPermissionEntry(permissionEntry, sessionName, callingUid, callingPid);
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_PERM, "NewDynamicPermissionEntry failed %d", ret);
@@ -639,6 +658,10 @@ int32_t AddDynamicPermission(int32_t callingUid, int32_t callingPid, const char 
 
 int32_t DeleteDynamicPermission(const char *sessionName)
 {
+    if (sessionName == NULL) {
+        COMM_LOGE(COMM_PERM, "sessionName is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
     SoftBusMutexLock(&g_dynamicPermissionList->lock);
     SoftBusPermissionEntry *pe = NULL;
     LIST_FOR_EACH_ENTRY(pe, &g_dynamicPermissionList->list, SoftBusPermissionEntry, node) {

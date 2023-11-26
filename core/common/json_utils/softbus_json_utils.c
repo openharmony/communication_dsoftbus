@@ -19,14 +19,14 @@
 
 #include "comm_log.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_def.h"
 #include "softbus_error_code.h"
 
 int32_t GetStringItemByJsonObject(const cJSON *json, const char * const string, char *target,
     uint32_t targetLen)
 {
     if (json == NULL || string == NULL || target == NULL) {
-        return SOFTBUS_ERR;
+        COMM_LOGE(COMM_UTILS, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
     }
     cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
     if (item == NULL || !cJSON_IsString(item)) {
@@ -38,8 +38,8 @@ int32_t GetStringItemByJsonObject(const cJSON *json, const char * const string, 
         COMM_LOGE(COMM_UTILS, "the length [%d] is to long for [%s]", length, string);
         return SOFTBUS_INVALID_PARAM;
     }
-    int ret = strcpy_s(target, targetLen, item->valuestring);
-    if (ret != 0) {
+    int32_t ret = strcpy_s(target, targetLen, item->valuestring);
+    if (ret != EOK) {
         COMM_LOGE(COMM_UTILS, "strcpy error %d\n", ret);
         return SOFTBUS_ERR;
     }
@@ -50,6 +50,7 @@ bool GetJsonObjectStringItem(const cJSON *json, const char * const string, char 
     uint32_t targetLen)
 {
     if (json == NULL || string == NULL || target == NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
         return false;
     }
     cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
@@ -62,17 +63,18 @@ bool GetJsonObjectStringItem(const cJSON *json, const char * const string, char 
         COMM_LOGE(COMM_UTILS, "the length [%d] is to long for [%s]", length, string);
         return false;
     }
-    int ret = strcpy_s(target, targetLen, item->valuestring);
-    if (ret != 0) {
+    int32_t ret = strcpy_s(target, targetLen, item->valuestring);
+    if (ret != EOK) {
         COMM_LOGE(COMM_UTILS, "strcpy error %d\n", ret);
         return false;
     }
     return true;
 }
 
-bool GetJsonObjectNumberItem(const cJSON *json, const char * const string, int *target)
+bool GetJsonObjectNumberItem(const cJSON *json, const char * const string, int32_t *target)
 {
     if (json == NULL || string == NULL || target == NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
         return false;
     }
     cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
@@ -80,13 +82,14 @@ bool GetJsonObjectNumberItem(const cJSON *json, const char * const string, int *
         COMM_LOGE(COMM_UTILS, "Cannot find or invalid [%s]", string);
         return false;
     }
-    *target = (int)item->valuedouble;
+    *target = (int32_t)item->valuedouble;
     return true;
 }
 
-bool GetJsonObjectSignedNumberItem(const cJSON *json, const char * const string, int *target)
+bool GetJsonObjectSignedNumberItem(const cJSON *json, const char * const string, int32_t *target)
 {
     if (json == NULL || string == NULL || target == NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
         return false;
     }
     cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
@@ -94,13 +97,14 @@ bool GetJsonObjectSignedNumberItem(const cJSON *json, const char * const string,
         COMM_LOGE(COMM_UTILS, "Cannot find or invalid [%s]", string);
         return false;
     }
-    *target = (int)item->valuedouble;
+    *target = (int32_t)item->valuedouble;
     return true;
 }
 
 bool GetJsonObjectDoubleItem(const cJSON *json, const char * const string, double *target)
 {
     if (json == NULL || string == NULL || target == NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
         return false;
     }
     cJSON* item = cJSON_GetObjectItemCaseSensitive(json, string);
@@ -115,6 +119,7 @@ bool GetJsonObjectDoubleItem(const cJSON *json, const char * const string, doubl
 bool GetJsonObjectNumber16Item(const cJSON *json, const char * const string, uint16_t *target)
 {
     if (json == NULL || string == NULL || target == NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
         return false;
     }
     cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
@@ -129,6 +134,7 @@ bool GetJsonObjectNumber16Item(const cJSON *json, const char * const string, uin
 bool GetJsonObjectNumber64Item(const cJSON *json, const char * const string, int64_t *target)
 {
     if (json == NULL || string == NULL || target == NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
         return false;
     }
     cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
@@ -143,6 +149,7 @@ bool GetJsonObjectNumber64Item(const cJSON *json, const char * const string, int
 bool GetJsonObjectSignedNumber64Item(const cJSON *json, const char * const string, int64_t *target)
 {
     if (json == NULL || string == NULL || target == NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
         return false;
     }
     cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
@@ -157,6 +164,7 @@ bool GetJsonObjectSignedNumber64Item(const cJSON *json, const char * const strin
 bool GetJsonObjectInt32Item(const cJSON *json, const char * const string, int32_t *target)
 {
     if (json == NULL || string == NULL || target == NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
         return false;
     }
     cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
@@ -171,6 +179,7 @@ bool GetJsonObjectInt32Item(const cJSON *json, const char * const string, int32_
 bool GetJsonObjectBoolItem(const cJSON *json, const char * const string, bool *target)
 {
     if (json == NULL || string == NULL || target == NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
         return false;
     }
     cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
@@ -185,6 +194,7 @@ bool GetJsonObjectBoolItem(const cJSON *json, const char * const string, bool *t
 bool AddStringToJsonObject(cJSON *json, const char * const string, const char *value)
 {
     if (value == NULL || json == NULL || string == NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
         return false;
     }
     cJSON *item = cJSON_CreateString(value);
@@ -222,31 +232,35 @@ bool AddStringArrayToJsonObject(cJSON *json, const char * const string, const ch
 bool AddNumber16ToJsonObject(cJSON *json, const char * const string, uint16_t num)
 {
     if (json == NULL || string == NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
         return false;
     }
-    cJSON *item = cJSON_CreateNumber(num);
+    cJSON *item = cJSON_CreateNumber((double)num);
     if (item == NULL) {
         COMM_LOGE(COMM_UTILS, "Cannot create cJSON number object [%s]", string);
         return false;
     }
     if (!cJSON_AddItemToObject(json, string, item)) {
+        COMM_LOGE(COMM_UTILS, "Cannot add num object to json [%s]", string);
         cJSON_Delete(item);
         return false;
     }
     return true;
 }
 
-bool AddNumberToJsonObject(cJSON *json, const char * const string, int num)
+bool AddNumberToJsonObject(cJSON *json, const char * const string, int32_t num)
 {
     if (json == NULL || string == NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
         return false;
     }
-    cJSON *item = cJSON_CreateNumber(num);
+    cJSON *item = cJSON_CreateNumber((double)num);
     if (item == NULL) {
         COMM_LOGE(COMM_UTILS, "Cannot create cJSON number object [%s]", string);
         return false;
     }
     if (!cJSON_AddItemToObject(json, string, item)) {
+        COMM_LOGE(COMM_UTILS, "Cannot add num object to json [%s]", string);
         cJSON_Delete(item);
         return false;
     }
@@ -256,14 +270,16 @@ bool AddNumberToJsonObject(cJSON *json, const char * const string, int num)
 bool AddNumber64ToJsonObject(cJSON *json, const char * const string, int64_t num)
 {
     if (json == NULL || string == NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
         return false;
     }
-    cJSON *item = cJSON_CreateNumber(num);
+    cJSON *item = cJSON_CreateNumber((double)num);
     if (item == NULL) {
         COMM_LOGE(COMM_UTILS, "Cannot create cJSON number object [%s]", string);
         return false;
     }
     if (!cJSON_AddItemToObject(json, string, item)) {
+        COMM_LOGE(COMM_UTILS, "Cannot add num64 object to json [%s]", string);
         cJSON_Delete(item);
         return false;
     }
@@ -273,6 +289,7 @@ bool AddNumber64ToJsonObject(cJSON *json, const char * const string, int64_t num
 bool AddBoolToJsonObject(cJSON *json, const char * const string, bool value)
 {
     if (json == NULL || string == NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
         return false;
     }
     cJSON *item = cJSON_CreateBool(value);
@@ -281,6 +298,7 @@ bool AddBoolToJsonObject(cJSON *json, const char * const string, bool value)
         return false;
     }
     if (!cJSON_AddItemToObject(json, string, item)) {
+        COMM_LOGE(COMM_UTILS, "Cannot add bool object to json [%s]", string);
         cJSON_Delete(item);
         return false;
     }
@@ -290,6 +308,7 @@ bool AddBoolToJsonObject(cJSON *json, const char * const string, bool value)
 char *GetDynamicStringItemByJsonObject(const cJSON * const json, const char * const string, uint32_t limit)
 {
     if (json == NULL || string == NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
         return NULL;
     }
 
@@ -319,6 +338,7 @@ char *GetDynamicStringItemByJsonObject(const cJSON * const json, const char * co
 bool AddIntArrayToJsonObject(cJSON *json, const char *string, const int32_t *array, int32_t arrayLen)
 {
     if (json == NULL || string == NULL || array == NULL || arrayLen <= 0) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
         return false;
     }
     cJSON *arrayObj = cJSON_CreateIntArray(array, arrayLen);
@@ -336,16 +356,18 @@ bool AddIntArrayToJsonObject(cJSON *json, const char *string, const int32_t *arr
 bool GetJsonObjectIntArrayItem(const cJSON *json, const char *string, int32_t *array, int32_t arrayLen)
 {
     if (json == NULL || string == NULL || array == NULL || arrayLen <= 0) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
         return false;
     }
     cJSON *objValue = cJSON_GetObjectItem(json, string);
     if (objValue == NULL) {
+        COMM_LOGE(COMM_EVENT, "Cannot create cJSON objValue [%s]", string);
         return false;
     }
     if (!cJSON_IsArray(objValue)) {
         return false;
     }
-    int size = cJSON_GetArraySize(objValue);
+    int32_t size = cJSON_GetArraySize(objValue);
     if (size > arrayLen) {
         size = arrayLen;
     }

@@ -72,7 +72,7 @@ void InitSoftBusServer(void)
         return;
     }
 
-    if (LooperInit() == -1) {
+    if (LooperInit() == SOFTBUS_ERR) {
         return;
     }
     if (ConnServerInit() == SOFTBUS_ERR) {

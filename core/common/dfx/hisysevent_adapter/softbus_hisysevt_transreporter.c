@@ -124,7 +124,7 @@ typedef struct {
     uint32_t failCnt;
     uint32_t successCnt;
     float successRate;
-}OpenSessionCntStruct;
+} OpenSessionCntStruct;
 
 typedef struct {
     SoftBusMutex lock;
@@ -135,7 +135,7 @@ typedef struct {
     uint32_t timesIn500and1s;
     uint32_t timesIn1and2s;
     uint32_t timesOn2s;
-}OpenSessionTimeStruct;
+} OpenSessionTimeStruct;
 
 typedef struct {
     SoftBusMutex lock;
@@ -153,13 +153,7 @@ typedef struct {
     int32_t count4;
     int32_t count5;
     char callerPackageName[SOFTBUS_HISYSEVT_PARAM_LEN];
-}OpenSessionKpiStruct;
-
-typedef struct {
-    SoftBusMutex lock;
-    int32_t cnt; //app count
-    ListNode apiInfolist;
-}ApiInfoList;
+} OpenSessionKpiStruct;
 
 typedef struct {
     ListNode node;
@@ -168,19 +162,19 @@ typedef struct {
     char packageVersion[SOFTBUS_HISYSEVT_PARAM_LEN];
     int32_t cnt; //Api count
     ListNode apiCntList;
-}CalledApiInfoStruct;
+} CalledApiInfoStruct;
 
 typedef struct {
     ListNode node;
     char apiName[SOFTBUS_HISYSEVT_PARAM_LEN];
     int32_t calledtotalCnt;
-}CalledApiCntStruct;
+} CalledApiCntStruct;
 
 static OpenSessionCntStruct g_openSessionCnt;
 static OpenSessionTimeStruct g_openSessionTime;
 static OpenSessionKpiStruct g_openSessionKpi;
-static ApiInfoList *g_calledApiInfoList = NULL;
-static ApiInfoList *g_calledApiCntlist = NULL;
+static SoftBusList *g_calledApiInfoList = NULL;
+static SoftBusList *g_calledApiCntlist = NULL;
 
 #define TIME_THOUSANDS_FACTOR (1000)
 
@@ -192,33 +186,6 @@ int64_t GetSoftbusRecordTimeMillis(void)
     SoftBusGetTime(&t);
     int64_t when = t.sec * TIME_THOUSANDS_FACTOR + (t.usec / TIME_THOUSANDS_FACTOR);
     return when;
-}
-
-static ApiInfoList *CreateApiInfoList(void)
-{
-    ApiInfoList *list = (ApiInfoList *)SoftBusMalloc(sizeof(ApiInfoList));
-    if (list == NULL) {
-        COMM_LOGE(COMM_EVENT, "malloc failed");
-        return NULL;
-    }
-    (void)memset_s(list, sizeof(ApiInfoList), 0, sizeof(ApiInfoList));
-    SoftBusMutexAttr mutexAttr;
-    mutexAttr.type = SOFTBUS_MUTEX_RECURSIVE;
-    if (SoftBusMutexInit(&list->lock, &mutexAttr) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_EVENT, "init lock failed");
-        SoftBusFree(list);
-        return NULL;
-    }
-    ListInit(&list->apiInfolist);
-    return list;
-}
-
-static void DetroyApiInfoList(ApiInfoList *list)
-{
-    ListDelInit(&list->apiInfolist);
-    SoftBusMutexDestroy(&list->lock);
-    SoftBusFree(list);
-    return;
 }
 
 static void ReleaseCalledApiInfoList(void)
@@ -233,14 +200,13 @@ static void ReleaseCalledApiInfoList(void)
     }
     CalledApiInfoStruct *item = NULL;
     CalledApiInfoStruct *nextItem = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_calledApiInfoList->apiInfolist, CalledApiInfoStruct, node) {
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_calledApiInfoList->list, CalledApiInfoStruct, node) {
         ListDelete(&item->node);
         SoftBusFree(item);
         g_calledApiInfoList->cnt--;
     }
-    ListInit(&g_calledApiInfoList->apiInfolist);
+    ListInit(&g_calledApiInfoList->list);
     (void)SoftBusMutexUnlock(&g_calledApiInfoList->lock);
-    return;
 }
 
 static void ReleaseCalledApiCntList(void)
@@ -255,14 +221,13 @@ static void ReleaseCalledApiCntList(void)
     }
     CalledApiCntStruct *item = NULL;
     CalledApiCntStruct *nextItem = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_calledApiCntlist->apiInfolist, CalledApiCntStruct, node) {
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_calledApiCntlist->list, CalledApiCntStruct, node) {
         ListDelete(&item->node);
         SoftBusFree(item);
         g_calledApiCntlist->cnt--;
     }
-    ListInit(&g_calledApiCntlist->apiInfolist);
+    ListInit(&g_calledApiCntlist->list);
     (void)SoftBusMutexUnlock(&g_calledApiCntlist->lock);
-    return;
 }
 
 static CalledApiCntStruct *GetNewApiCnt(char *apiName)
@@ -299,6 +264,11 @@ static CalledApiInfoStruct *GetNewApiInfo(const char *appName, char *apiName)
     ListInit(&apiInfo->node);
     ListInit(&apiInfo->apiCntList);
     CalledApiCntStruct *apiCnt = GetNewApiCnt(apiName);
+    if (apiCnt == NULL) {
+        COMM_LOGE(COMM_EVENT, "GetNewApiCnt return NULL");
+        SoftBusFree(apiInfo);
+        return NULL;
+    }
     ListAdd(&apiInfo->apiCntList, &apiCnt->node);
     apiInfo->cnt = API_TYPE_DEFAULT;
     return apiInfo;
@@ -330,7 +300,7 @@ void SoftbusRecordCalledApiInfo(const char *appName, uint32_t code)
     CalledApiCntStruct *apiCntNode = NULL;
     bool isAppDiff = true;
     bool isApiDiff = true;
-    LIST_FOR_EACH_ENTRY(apiInfoNode, &g_calledApiInfoList->apiInfolist, CalledApiInfoStruct, node) {
+    LIST_FOR_EACH_ENTRY(apiInfoNode, &g_calledApiInfoList->list, CalledApiInfoStruct, node) {
         if (strcmp(apiInfoNode->appName, appName) == 0) {
             isAppDiff = false;
             LIST_FOR_EACH_ENTRY(apiCntNode, &apiInfoNode->apiCntList, CalledApiCntStruct, node) {
@@ -349,12 +319,12 @@ void SoftbusRecordCalledApiInfo(const char *appName, uint32_t code)
             (void)SoftBusMutexUnlock(&g_calledApiInfoList->lock);
             return;
         }
-        ListAdd(&g_calledApiInfoList->apiInfolist, &apiInfoNode->node);
+        ListAdd(&g_calledApiInfoList->list, &apiInfoNode->node);
         g_calledApiInfoList->cnt++;
     }
     if ((isAppDiff == false) && (isApiDiff == true)) {
         apiInfoNode = NULL;
-        LIST_FOR_EACH_ENTRY(apiInfoNode, &g_calledApiInfoList->apiInfolist, CalledApiInfoStruct, node) {
+        LIST_FOR_EACH_ENTRY(apiInfoNode, &g_calledApiInfoList->list, CalledApiInfoStruct, node) {
             if (strcmp(apiInfoNode->appName, appName) == 0) {
                 apiCntNode = GetNewApiCnt(apiName);
                 if (apiCntNode == NULL) {
@@ -384,7 +354,7 @@ void SoftbusRecordCalledApiCnt(uint32_t code)
 
     CalledApiCntStruct *apiCntNode = NULL;
     bool isDiff = true;
-    LIST_FOR_EACH_ENTRY(apiCntNode, &g_calledApiCntlist->apiInfolist, CalledApiCntStruct, node) {
+    LIST_FOR_EACH_ENTRY(apiCntNode, &g_calledApiCntlist->list, CalledApiCntStruct, node) {
         if (strcmp(apiCntNode->apiName, apiName) == 0) {
             isDiff = false;
             apiCntNode->calledtotalCnt++;
@@ -398,7 +368,7 @@ void SoftbusRecordCalledApiCnt(uint32_t code)
             (void)SoftBusMutexUnlock(&g_calledApiCntlist->lock);
             return;
         }
-        ListAdd(&g_calledApiCntlist->apiInfolist, &apiCntNode->node);
+        ListAdd(&g_calledApiCntlist->list, &apiCntNode->node);
         g_calledApiCntlist->cnt++;
     }
     (void)SoftBusMutexUnlock(&g_calledApiCntlist->lock);
@@ -423,13 +393,13 @@ void SoftbusRecordOpenSessionKpi(const char *pkgName, int32_t linkType, SoftBusO
         g_openSessionKpi.failTotalTime = time;
     }
 
-    if (time > TIME_COST_1S) {
+    if (time > TIME_COST_1S && time <= TIME_COST_2S) {
         g_openSessionKpi.count1++;
-    } else if (time > TIME_COST_2S) {
+    } else if (time > TIME_COST_2S && time <= TIME_COST_4S) {
         g_openSessionKpi.count2++;
-    } else if (time > TIME_COST_4S) {
+    } else if (time > TIME_COST_4S && time <= TIME_COST_7S) {
         g_openSessionKpi.count3++;
-    } else if (time > TIME_COST_7S) {
+    } else if (time > TIME_COST_7S && time <= TIME_COST_11S) {
         g_openSessionKpi.count4++;
     } else if (time > TIME_COST_11S) {
         g_openSessionKpi.count5++;
@@ -649,6 +619,7 @@ static void CreateOpenSessionKpiMsg(SoftBusEvtReportMsg* msg)
 static void CreateOpenSessionCntMsg(SoftBusEvtReportMsg* msg)
 {
     if (SoftBusMutexLock(&g_openSessionCnt.lock) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_EVENT, "CreateOpenSessionCntMsg lock fail");
         return;
     }
 
@@ -684,9 +655,11 @@ static int32_t SoftbusReportCalledAPIEvt(void)
 {
     SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_FIVE);
     if (msg == NULL) {
+        COMM_LOGE(COMM_EVENT, "Alloc EvtReport Msg Fail!");
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexLock(&g_calledApiInfoList->lock) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_EVENT, "SoftbusReportCalledAPIEvt lock fail");
         return SOFTBUS_LOCK_ERR;
     }
     char appName[SOFTBUS_HISYSEVT_PARAM_LEN];
@@ -694,7 +667,7 @@ static int32_t SoftbusReportCalledAPIEvt(void)
     char packageVersion[SOFTBUS_HISYSEVT_PARAM_LEN];
     CalledApiInfoStruct *apiInfoItem = NULL;
     CalledApiCntStruct *apiCntItem = NULL;
-    LIST_FOR_EACH_ENTRY(apiInfoItem, &g_calledApiInfoList->apiInfolist, CalledApiInfoStruct, node) {
+    LIST_FOR_EACH_ENTRY(apiInfoItem, &g_calledApiInfoList->list, CalledApiInfoStruct, node) {
         (void)strcpy_s(appName, SOFTBUS_HISYSEVT_NAME_LEN, apiInfoItem->appName);
         (void)strcpy_s(softbusVersion, SOFTBUS_HISYSEVT_NAME_LEN, apiInfoItem->softbusVersion);
         (void)strcpy_s(packageVersion, SOFTBUS_HISYSEVT_NAME_LEN, apiInfoItem->packageVersion);
@@ -718,13 +691,14 @@ static int32_t SoftbusReportCalledAPICntEvt(void)
 {
     SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_TWO);
     if (msg == NULL) {
+        COMM_LOGE(COMM_EVENT, "Alloc EvtReport Msg Fail!");
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexLock(&g_calledApiCntlist->lock) != SOFTBUS_OK) {
         return SOFTBUS_LOCK_ERR;
     }
     CalledApiCntStruct *apiCntItem = NULL;
-    LIST_FOR_EACH_ENTRY(apiCntItem, &g_calledApiCntlist->apiInfolist, CalledApiCntStruct, node) {
+    LIST_FOR_EACH_ENTRY(apiCntItem, &g_calledApiCntlist->list, CalledApiCntStruct, node) {
         CreateCalledApiCntMsg(msg, apiCntItem);
         if (SoftbusWriteHisEvt(msg) != SOFTBUS_OK) {
             SoftbusFreeEvtReporMsg(msg);
@@ -743,6 +717,7 @@ static int32_t SoftbusReportOpenSessionKpiEvt(void)
 {
     SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_THIRTEEN);
     if (msg == NULL) {
+        COMM_LOGE(COMM_EVENT, "Alloc EvtReport Msg Fail!");
         return SOFTBUS_ERR;
     }
     CreateOpenSessionKpiMsg(msg);
@@ -755,6 +730,7 @@ static int32_t SoftbusReportOpenSessionCntEvt(void)
 {
     SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_THREE);
     if (msg == NULL) {
+        COMM_LOGE(COMM_EVENT, "Alloc EvtReport Msg Fail!");
         return SOFTBUS_ERR;
     }
     CreateOpenSessionCntMsg(msg);
@@ -767,6 +743,7 @@ static int32_t SoftbusReportOpenSessionCntEvt(void)
 static void CreateOpenSessionTimeMsg(SoftBusEvtReportMsg* msg)
 {
     if (SoftBusMutexLock(&g_openSessionTime.lock) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_EVENT, "CreateOpenSessionTimeMsg lock fail");
         return;
     }
 
@@ -826,6 +803,7 @@ static int32_t SoftbusReportOpenSessionTimeEvt(void)
 {
     SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(SOFTBUS_EVT_PARAM_SEVEN);
     if (msg == NULL) {
+        COMM_LOGE(COMM_EVENT, "SoftbusCreateEvtReportMsg fail");
         return SOFTBUS_ERR;
     }
     CreateOpenSessionTimeMsg(msg);
@@ -907,8 +885,8 @@ int32_t InitTransStatisticSysEvt(void)
         return SOFTBUS_ERR;
     }
 
-    g_calledApiInfoList = CreateApiInfoList();
-    g_calledApiCntlist = CreateApiInfoList();
+    g_calledApiInfoList = CreateSoftBusList();
+    g_calledApiCntlist = CreateSoftBusList();
     ClearOpenSessionCnt();
     ClearOpenSessionKpi();
     ClearOpenSessionTime();
@@ -927,6 +905,6 @@ void DeinitTransStatisticSysEvt(void)
         COMM_LOGE(COMM_EVENT, "g_calledApiInfoList or g_calledApiCntlist is NULL");
         return;
     }
-    DetroyApiInfoList(g_calledApiInfoList);
-    DetroyApiInfoList(g_calledApiCntlist);
+    DestroySoftBusList(g_calledApiInfoList);
+    DestroySoftBusList(g_calledApiCntlist);
 }

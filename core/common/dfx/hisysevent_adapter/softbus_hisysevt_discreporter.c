@@ -327,23 +327,23 @@ static int32_t SoftBusReportFirstDiscDurationEvt(void)
             SoftbusFreeEvtReporMsg(msg);
             ClearFirstDiscTime();
             COMM_LOGE(COMM_EVENT, "lock first disc time fail");
-            return SOFTBUS_ERR;
+            return SOFTBUS_LOCK_ERR;
         }
         if (g_firstDiscTime[i].mDiscTotalCount == 0) {
             SoftBusMutexUnlock(&g_firstDiscTime[i].lock);
             continue;
         }
         if (SoftBusCreateFirstDiscDurMsg(msg, i) != SOFTBUS_OK) {
+            ClearFirstDiscTime();
             SoftBusMutexUnlock(&g_firstDiscTime[i].lock);
             SoftbusFreeEvtReporMsg(msg);
-            ClearFirstDiscTime();
             COMM_LOGE(COMM_EVENT, "create first disc duration reportMsg fail");
             return SOFTBUS_ERR;
         }
         if (SoftbusWriteHisEvt(msg) != SOFTBUS_OK) {
+            ClearFirstDiscTime();
             SoftBusMutexUnlock(&g_firstDiscTime[i].lock);
             SoftbusFreeEvtReporMsg(msg);
-            ClearFirstDiscTime();
             COMM_LOGE(COMM_EVENT, "write first disc duration reportMsg fail");
             return SOFTBUS_ERR;
         }
@@ -365,7 +365,7 @@ static int32_t SoftBusReportDiscDetailsEvt(void)
 {
     COMM_LOGD(COMM_EVENT, "report disc detail event");
     int32_t ret = SoftBusMutexLock(&g_discDetailLock);
-    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, COMM_EVENT, "disc detail lock fail");
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, COMM_EVENT, "disc detail lock fail");
 
     SoftBusEvtReportMsg *msg = SoftbusCreateEvtReportMsg(DISCOVERY_DETAILS_PARAM_NUM);
     if (msg == NULL) {
@@ -404,7 +404,7 @@ static int32_t SoftBusReportDiscBleRssiEvt(void)
 {
     COMM_LOGD(COMM_EVENT, "report disc ble rssi event");
     int32_t ret = SoftBusMutexLock(&g_bleRssiRangeLock);
-    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, COMM_EVENT, "ble rssi range lock fail");
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, COMM_EVENT, "ble rssi range lock fail");
 
     SoftBusEvtReportMsg *msg = SoftbusCreateEvtReportMsg(DISCOVERY_BLE_RSSI_PARAM_NUM);
     if (msg == NULL) {
@@ -436,7 +436,7 @@ int32_t SoftbusRecordFirstDiscTime(SoftBusDiscMedium medium, uint64_t costTime)
     }
     if (SoftBusMutexLock(&g_firstDiscTime[medium].lock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_EVENT, "first disc time lock fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     FirstDiscTime *record = &g_firstDiscTime[medium];
     record->mDiscTotalTime += costTime;
@@ -458,7 +458,7 @@ int32_t SoftbusRecordFirstDiscTime(SoftBusDiscMedium medium, uint64_t costTime)
     }
     if (SoftBusMutexUnlock(&record->lock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_EVENT, "record first disc time unlock fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -470,7 +470,7 @@ int32_t SoftbusRecordBleDiscDetails(char *moduleName, uint64_t duration, uint32_
     COMM_CHECK_AND_RETURN_RET_LOGE(IsValidString(moduleName, MODULE_NAME_MAX_LEN), SOFTBUS_ERR, COMM_EVENT,
         "invalid param!");
     int32_t ret = SoftBusMutexLock(&g_discDetailLock);
-    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, COMM_EVENT, "disc detail lock fail");
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, COMM_EVENT, "disc detail lock fail");
     DiscDetailNode *discDetailNode = GetDiscDetailByModuleName(moduleName);
     if (discDetailNode == NULL) {
         ret = AddDiscDetailNode(&discDetailNode, moduleName);
@@ -495,7 +495,7 @@ int32_t SoftbusRecordDiscBleRssi(int32_t rssi)
         COMM_LOGE(COMM_EVENT, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    COMM_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleRssiRangeLock) == SOFTBUS_OK, SOFTBUS_ERR, COMM_EVENT,
+    COMM_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleRssiRangeLock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, COMM_EVENT,
                                   "ble rssi range lock fail");
 
     size_t rangeId = (MAX_RANGE_ID - rssi) / INTERVAL_OF_RSSI;

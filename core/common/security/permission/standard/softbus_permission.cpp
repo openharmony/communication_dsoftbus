@@ -29,14 +29,10 @@
 #include "system_ability_definition.h"
 #include "trans_session_manager.h"
 
-#ifndef PERMISSION_JSON_FILE_PATH
-#define PERMISSION_JSON_FILE_PATH "/system/etc/communication/softbus/softbus_trans_permission.json"
-#endif
-
 namespace {
     using namespace OHOS::Security;
 
-    const std::string PERMISSION_JSON_FILE = PERMISSION_JSON_FILE_PATH;
+    const std::string PERMISSION_JSON_FILE = "/system/etc/communication/softbus/softbus_trans_permission.json";
     const std::string DANGER_APP_PERMISSION = "ohos.permission.DISTRIBUTED_DATASYNC";
     const int32_t SYSTEM_UID = 1000;
     const int32_t MULTE_USER_RADIX = 100000;
@@ -47,6 +43,7 @@ int32_t TransPermissionInit(void)
 {
     int32_t ret = LoadPermissionJson(PERMISSION_JSON_FILE.c_str());
     if (ret != SOFTBUS_OK) {
+        COMM_LOGI(COMM_PERM, "load permission json fail");
         return ret;
     }
     return InitDynamicPermission();
@@ -84,11 +81,13 @@ int32_t CheckTransPermission(pid_t callingUid, pid_t callingPid,
     const char *pkgName, const char *sessionName, uint32_t actions)
 {
     if (sessionName == nullptr || pkgName == nullptr) {
+        COMM_LOGI(COMM_PERM, "invalid param");
         return SOFTBUS_PERMISSION_DENIED;
     }
     int32_t permType = CalcPermType(callingUid, callingPid);
     SoftBusPermissionItem *pItem = CreatePermissionItem(permType, callingUid, callingPid, pkgName, actions);
     if (pItem == nullptr) {
+        COMM_LOGI(COMM_PERM, "pItem is null");
         return SOFTBUS_MALLOC_ERR;
     }
     int32_t ret = CheckPermissionEntry(sessionName, pItem);
@@ -102,15 +101,18 @@ int32_t CheckTransPermission(pid_t callingUid, pid_t callingPid,
 int32_t CheckTransSecLevel(const char *mySessionName, const char *peerSessionName)
 {
     if (mySessionName == nullptr || peerSessionName == nullptr) {
+        COMM_LOGI(COMM_PERM, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     if (strcmp(mySessionName, peerSessionName) == 0) {
         return SOFTBUS_OK;
     }
     if (!PermIsSecLevelPublic(mySessionName)) {
+        COMM_LOGI(COMM_PERM, "mySessionName isn't seclevel");
         return SOFTBUS_PERMISSION_DENIED;
     }
     if (!PermIsSecLevelPublic(peerSessionName)) {
+        COMM_LOGI(COMM_PERM, "peerSessionName isn't seclevel");
         return SOFTBUS_PERMISSION_DENIED;
     }
     return SOFTBUS_OK;
@@ -146,11 +148,17 @@ bool CheckBusCenterPermission(pid_t callingUid, const char *pkgName)
 
 int32_t GrantTransPermission(int32_t callingUid, int32_t callingPid, const char *sessionName)
 {
+    if (sessionName == nullptr) {
+        return SOFTBUS_INVALID_PARAM;
+    }
     return AddDynamicPermission(callingUid, callingPid, sessionName);
 }
 
 int32_t RemoveTransPermission(const char *sessionName)
 {
+    if (sessionName == nullptr) {
+        return SOFTBUS_INVALID_PARAM;
+    }
     return DeleteDynamicPermission(sessionName);
 }
 

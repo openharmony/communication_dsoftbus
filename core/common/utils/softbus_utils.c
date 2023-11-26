@@ -15,7 +15,6 @@
 
 #include "softbus_utils.h"
 
-#include <ctype.h>
 #include <stdlib.h>
 
 #include "comm_log.h"
@@ -28,7 +27,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_log_old.h"
-#include "softbus_type_def.h"
+
 
 #define MAC_BIT_ZERO 0
 #define MAC_BIT_ONE 1
@@ -83,6 +82,7 @@ SoftBusList *CreateSoftBusList(void)
 void DestroySoftBusList(SoftBusList *list)
 {
     if (list == NULL) {
+        COMM_LOGE(COMM_UTILS, "list is null");
         return;
     }
     ListDelInit(&list->list);
@@ -95,6 +95,7 @@ int32_t RegisterTimeoutCallback(int32_t timerFunId, TimerFunCallback callback)
 {
     if (callback == NULL || timerFunId >= SOFTBUS_MAX_TIMER_FUN_NUM ||
         timerFunId < SOFTBUS_CONN_TIMER_FUN) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
         return SOFTBUS_ERR;
     }
     if (g_timerFunList[timerFunId] != NULL) {
@@ -168,13 +169,16 @@ int32_t ConvertBytesToUpperCaseHexString(char *outBuf, uint32_t outBufLen, const
 int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen, const char *inBuf,
     uint32_t inLen)
 {
-    (void)outBufLen;
     if ((outBuf == NULL) || (inBuf == NULL) || (inLen % HEXIFY_UNIT_LEN != 0)) {
         COMM_LOGE(COMM_UTILS, "invalid param");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     uint32_t outLen = UN_HEXIFY_LEN(inLen);
+    if (outLen > outBufLen) {
+        COMM_LOGE(COMM_UTILS, "outLen > outBufLen");
+        return SOFTBUS_ERR;
+    }
     uint32_t i = 0;
     while (i < outLen) {
         unsigned char c = *inBuf++;
@@ -245,10 +249,12 @@ int32_t GenerateRandomStr(char *str, uint32_t len)
     }
     (void)memset_s(hexAuthId, hexLen, 0, hexLen);
     if (SoftBusGenerateRandomArray(hexAuthId, hexLen) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_UTILS, "Generate random array fail");
         SoftBusFree(hexAuthId);
         return SOFTBUS_ERR;
     }
     if (ConvertBytesToHexString(str, len, hexAuthId, hexLen) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_UTILS, "Convert bytes to hexstring fail");
         SoftBusFree(hexAuthId);
         return SOFTBUS_ERR;
     }
@@ -259,10 +265,12 @@ int32_t GenerateRandomStr(char *str, uint32_t len)
 bool IsValidString(const char *input, uint32_t maxLen)
 {
     if (input == NULL) {
+        COMM_LOGE(COMM_UTILS, "input is null");
         return false;
     }
     uint32_t len = strlen(input);
     if (len == 0 || len > maxLen) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
         return false;
     }
     return true;
@@ -272,13 +280,16 @@ int32_t ConvertBtMacToBinary(const char *strMac, uint32_t strMacLen, uint8_t *bi
     uint32_t binMacLen)
 {
     if (strMac == NULL || strMacLen < BT_MAC_LEN || binMac == NULL || binMacLen < BT_ADDR_LEN) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     char *tmpMac = (char *)SoftBusMalloc(strMacLen * sizeof(char));
     if (tmpMac == NULL) {
+        COMM_LOGE(COMM_UTILS, "tmpMac is null");
         return SOFTBUS_MALLOC_ERR;
     }
     if (memcpy_s(tmpMac, strMacLen, strMac, strMacLen) != EOK) {
+        COMM_LOGE(COMM_UTILS, "memcpy tmpMac fail");
         SoftBusFree(tmpMac);
         return SOFTBUS_MEM_ERR;
     }
@@ -303,12 +314,14 @@ int32_t ConvertBtMacToStrNoColon(char *strMac, uint32_t strMacLen, const uint8_t
     int32_t ret;
 
     if (strMac == NULL || strMacLen < BT_MAC_NO_COLON_LEN || binMac == NULL || binMacLen < BT_ADDR_LEN) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     ret = snprintf_s(strMac, strMacLen, strMacLen - 1, "%02x%02x%02x%02x%02x%02x",
         binMac[MAC_BIT_ZERO], binMac[MAC_BIT_ONE], binMac[MAC_BIT_TWO],
         binMac[MAC_BIT_THREE], binMac[MAC_BIT_FOUR], binMac[MAC_BIT_FIVE]);
     if (ret < 0) {
+        COMM_LOGE(COMM_UTILS, "snprintf_s fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -320,12 +333,14 @@ int32_t ConvertBtMacToStr(char *strMac, uint32_t strMacLen, const uint8_t *binMa
     int32_t ret;
 
     if (strMac == NULL || strMacLen < BT_MAC_LEN || binMac == NULL || binMacLen < BT_ADDR_LEN) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     ret = snprintf_s(strMac, strMacLen, strMacLen - 1, "%02x:%02x:%02x:%02x:%02x:%02x",
         binMac[MAC_BIT_ZERO], binMac[MAC_BIT_ONE], binMac[MAC_BIT_TWO],
         binMac[MAC_BIT_THREE], binMac[MAC_BIT_FOUR], binMac[MAC_BIT_FIVE]);
     if (ret < 0) {
+        COMM_LOGE(COMM_UTILS, "snprintf_s fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -334,11 +349,13 @@ int32_t ConvertBtMacToStr(char *strMac, uint32_t strMacLen, const uint8_t *binMa
 int32_t ConvertBtMacToU64(const char *strMac, uint32_t strMacLen, uint64_t *u64Mac)
 {
     if (strMac == NULL || strMacLen < BT_MAC_LEN || u64Mac == NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     uint8_t binaryAddr[BT_ADDR_LEN] = { 0 };
     int32_t status = ConvertBtMacToBinary(strMac, BT_MAC_LEN, binaryAddr, BT_ADDR_LEN);
     if (status != SOFTBUS_OK) {
+        COMM_LOGE(COMM_UTILS, "Convert btMac to binary fail");
         return SOFTBUS_ERR;
     }
     uint64_t u64Value = 0;
@@ -406,6 +423,7 @@ int32_t StringToLowerCase(const char *str, char *buf, int32_t size)
 int32_t StrCmpIgnoreCase(const char *str1, const char *str2)
 {
     if (str1 == NULL || str2 == NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
         return SOFTBUS_ERR;
     }
     int32_t i;
@@ -415,6 +433,7 @@ int32_t StrCmpIgnoreCase(const char *str1, const char *str2)
         }
     }
     if (str1[i] != '\0' || str2[i] != '\0') {
+        COMM_LOGE(COMM_UTILS, "str end != '\0'");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -441,6 +460,7 @@ void SignalingMsgPrint(const char *distinguish, unsigned char *data, unsigned ch
     char signalingMsgBuf[BUF_HEX_LEN] = {0};
 
     if (!GetSignalingMsgSwitch()) {
+        COMM_LOGE(COMM_UTILS, "signalingMsgSwitch end != '\0'");
         return;
     }
     if (dataLen >= BUF_BYTE_LEN) {
