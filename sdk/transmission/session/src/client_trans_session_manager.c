@@ -288,6 +288,7 @@ static ClientSessionServer *GetNewSessionServer(SoftBusSecType type, const char 
     if (memcpy_s(&server->listener.session, sizeof(ISessionListener), listener, sizeof(ISessionListener)) != EOK) {
         goto EXIT_ERR;
     }
+    server->listener.isSocketListener = false;
 
     ListInit(&server->node);
     ListInit(&server->sessionList);
@@ -1507,20 +1508,13 @@ int32_t ClientDeleteSocketSession(int32_t sessionId)
 static SessionInfo *GetSocketExistSession(const SessionParam *param)
 {
     ClientSessionServer *serverNode = NULL;
-    SessionInfo *sessionNode = NULL;
+    SessionInfo *sessionInfo = NULL;
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
         if ((strcmp(serverNode->sessionName, param->sessionName) != 0) || IsListEmpty(&serverNode->sessionList)) {
             continue;
         }
-        LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
-            if (sessionNode->isServer || (strcmp(sessionNode->info.peerSessionName, param->peerSessionName) != 0) ||
-                (strcmp(sessionNode->info.peerDeviceId, param->peerDeviceId) != 0) ||
-                (strcmp(sessionNode->info.groupId, param->groupId) != 0) ||
-                (memcmp(sessionNode->linkType, param->attr->linkType, sizeof(param->attr->linkType)) != 0) ||
-                (sessionNode->info.flag != param->attr->dataType)) {
-                continue;
-            }
-            return sessionNode;
+        LIST_FOR_EACH_ENTRY(sessionInfo, &(serverNode->sessionList), SessionInfo, node) {
+            return sessionInfo;
         }
     }
     return NULL;
@@ -1613,7 +1607,7 @@ int32_t ClientAddSocketSession(const SessionParam *param, int32_t *sessionId, bo
     return SOFTBUS_OK;
 }
 
-int32_t ClientSetListenerBySessionId(int32_t sessionId, const ISocketListenerAdapt *listener)
+int32_t ClientSetListenerBySessionId(int32_t sessionId, const ISocketListener *listener)
 {
     if ((sessionId < 0) || listener == NULL) {
         TRANS_LOGE(TRANS_SDK, "Invalid param");
@@ -1646,8 +1640,9 @@ int32_t ClientSetListenerBySessionId(int32_t sessionId, const ISocketListenerAda
             sessionNode->role);
         return SOFTBUS_TRANS_SOCKET_IN_USE;
     }
-    ret = memcpy_s(&(serverNode->listener.socket), sizeof(ISocketListenerAdapt), listener,
-        sizeof(ISocketListenerAdapt));
+    ret = memcpy_s(&(serverNode->listener.socket), sizeof(ISocketListener), listener,
+        sizeof(ISocketListener));
+    serverNode->listener.isSocketListener = true;
     if (ret != EOK) {
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
         TRANS_LOGE(TRANS_SDK, "%s:memcpy failed", __func__);
@@ -1668,6 +1663,22 @@ int32_t ClientSetListenerBySessionId(int32_t sessionId, const ISocketListenerAda
     }
 
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+    return SOFTBUS_OK;
+}
+
+static int32_t CheckBindSocketInfo(const SessionInfo *session)
+{
+    if (!IsValidString(session->info.peerSessionName, SESSION_NAME_SIZE_MAX) ||
+        !IsValidString(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX)) {
+        TRANS_LOGE(TRANS_SDK, "invalid peerName or peerNetworkId");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (session->info.flag < TYPE_MESSAGE || session->info.flag >= TYPE_BUTT) {
+        TRANS_LOGE(TRANS_SDK, "invalid dataType");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
     return SOFTBUS_OK;
 }
 
@@ -1693,8 +1704,14 @@ int32_t ClientIpcOpenSession(int32_t sessionId, const QosTV *qos, uint32_t qosCo
     int32_t ret = GetSessionById(sessionId, &serverNode, &sessionNode);
     if (ret != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-        TRANS_LOGE(TRANS_SDK, "%s:not found", __func__);
+        TRANS_LOGE(TRANS_SDK, "not found sessionInfo, socket=%d, ret=%d", sessionId, ret);
         return SOFTBUS_NOT_FIND;
+    }
+    ret = CheckBindSocketInfo(sessionNode);
+    if (ret != SOFTBUS_OK) {
+        (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+        TRANS_LOGE(TRANS_SDK, "check socekt info failed, ret=%d", ret);
+        return ret;
     }
 
     SessionAttribute tmpAttr;
@@ -1713,9 +1730,9 @@ int32_t ClientIpcOpenSession(int32_t sessionId, const QosTV *qos, uint32_t qosCo
     };
 
     param.qosCount = qosCount;
-    if (memcpy_s(param.qos, sizeof(param.qos), qos, sizeof(QosTV) * qosCount)) {
+    if (param.qosCount > 0 && memcpy_s(param.qos, sizeof(param.qos), qos, sizeof(QosTV) * qosCount) != EOK) {
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-        TRANS_LOGE(TRANS_SDK, "%s:memcpy qos failed", __func__);
+        TRANS_LOGE(TRANS_SDK, "memcpy qos failed");
         return SOFTBUS_MEM_ERR;
     }
 
@@ -1751,7 +1768,7 @@ int32_t ClientSetSocketState(int32_t socket, SessionRole role)
     int32_t ret = GetSessionById(socket, &serverNode, &sessionNode);
     if (ret != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-        TRANS_LOGE(TRANS_SDK, "%s:not found", __func__);
+        TRANS_LOGE(TRANS_SDK, "SessionInfo not found, socket=%d", socket);
         return ret;
     }
 
@@ -1788,14 +1805,14 @@ int32_t ClientGetSessionCallbackAdapterByName(const char *sessionName, SessionLi
             &serverNode->listener, sizeof(SessionListenerAdapter));
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
         if (ret != EOK) {
-            TRANS_LOGE(TRANS_SDK, "%s:memcpy failed", __func__);
+            TRANS_LOGE(TRANS_SDK, "memcpy SessionListenerAdapter failed, sessionName=%s", sessionName);
             return SOFTBUS_MEM_ERR;
         }
         return SOFTBUS_OK;
     }
 
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-    TRANS_LOGE(TRANS_SDK, "%s:not found", __func__);
+    TRANS_LOGE(TRANS_SDK, "SessionCallbackAdapter not found, sessionName=%s", sessionName);
     return SOFTBUS_ERR;
 }
 
@@ -1821,7 +1838,7 @@ int32_t ClientGetSessionCallbackAdapterById(int32_t sessionId, SessionListenerAd
     int32_t ret = GetSessionById(sessionId, &serverNode, &sessionNode);
     if (ret != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-        TRANS_LOGE(TRANS_SDK, "%s:not found", __func__);
+        TRANS_LOGE(TRANS_SDK, "SessionInfo not found, socket=%d", sessionId);
         return SOFTBUS_ERR;
     }
 
@@ -1829,7 +1846,7 @@ int32_t ClientGetSessionCallbackAdapterById(int32_t sessionId, SessionListenerAd
         sizeof(SessionListenerAdapter));
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     if (ret != EOK) {
-        TRANS_LOGE(TRANS_SDK, "%s:memcpy failed", __func__);
+        TRANS_LOGE(TRANS_SDK, "memcpy SessionListenerAdapter failed, socket=%d", sessionId);
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -1857,7 +1874,7 @@ int32_t ClientGetPeerSocketInfoById(int32_t sessionId, PeerSocketInfo *peerSocke
     int32_t ret = GetSessionById(sessionId, &serverNode, &sessionNode);
     if (ret != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-        TRANS_LOGE(TRANS_SDK, "%s:not found", __func__);
+        TRANS_LOGE(TRANS_SDK, "SessionInfo not found, socket=%d", sessionId);
         return SOFTBUS_ERR;
     }
 

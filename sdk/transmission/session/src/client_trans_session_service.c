@@ -231,7 +231,9 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
         .groupId = groupId,
         .attr = tmpAttr,
         .isQosLane = false,
+        .qosCount = 0,
     };
+    (void)memset_s(param.qos, sizeof(param.qos), 0, sizeof(param.qos));
 
     int32_t sessionId = INVALID_SESSION_ID;
     bool isEnabled = false;
@@ -872,9 +874,7 @@ static SessionAttribute *CreateSessionAttributeBySocketInfoTrans(const SocketInf
             tmpAttr->attr.streamAttr.streamType = VIDEO_SLICE_STREAM;
             break;
         default:
-            SoftBusFree(tmpAttr);
-            tmpAttr = NULL;
-            TRANS_LOGE(TRANS_SDK, "invalid dataType:%d", info->dataType);
+            // The socket used for listening does not require setting the data type
             break;
     }
     return tmpAttr;
@@ -916,59 +916,79 @@ int32_t ClientAddSocket(const SocketInfo *info, int32_t *sessionId)
     return SOFTBUS_OK;
 }
 
-int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t len, const ISocketListenerAdapt *listener)
+static bool IsValidSocketListener(const ISocketListener *listener, bool isListenSocket)
 {
-    if (listener == NULL) {
-        TRANS_LOGI(TRANS_SDK, "ClientBind invalid param");
+    if (listener == NULL || listener->OnShutdown == NULL) {
+        TRANS_LOGE(TRANS_SDK, "listener is null or OnShutdown is null");
+        return false;
+    }
+
+    if (isListenSocket && listener->OnBind == NULL) {
+        TRANS_LOGE(TRANS_SDK, "no OnBind callback function of listen socket");
+        return false;
+    }
+
+    return true;
+}
+
+static bool IsValidQosInfo(const QosTV qos[], uint32_t qosCount)
+{
+    return (qos == NULL) ? (qosCount == 0) : (qosCount <= QOS_TYPE_BUTT);
+}
+
+int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener)
+{
+    if (!IsValidSessionId(socket) || !IsValidSocketListener(listener, false) || !IsValidQosInfo(qos, qosCount)) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
     int32_t ret = ClientSetListenerBySessionId(socket, listener);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGI(TRANS_SDK, "ClientBind set listener failed: %d", ret);
+        TRANS_LOGI(TRANS_SDK, "ClientBind set listener failed, ret=%d", ret);
         return ret;
     }
 
     TransInfo transInfo;
-    ret = ClientIpcOpenSession(socket, (QosTV *)qos, len, &transInfo);
+    ret = ClientIpcOpenSession(socket, (QosTV *)qos, qosCount, &transInfo);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGI(TRANS_SDK, "ClientBind open session failed: %d", ret);
+        TRANS_LOGI(TRANS_SDK, "ClientBind open session failed, ret=%d", ret);
         return ret;
     }
 
     ret = ClientSetChannelBySessionId(socket, &transInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "set channel failed");
-        return SOFTBUS_ERR;
+        return ret;
     }
 
     ret = CheckSessionIsOpened(socket);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "CheckSessionIsOpened err: ret=%d", ret);
+        TRANS_LOGE(TRANS_SDK, "CheckSessionIsOpened err, ret=%d", ret);
         return SOFTBUS_TRANS_SESSION_NO_ENABLE;
     }
 
     ret = ClientSetSocketState(socket, SESSION_ROLE_CLIENT);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "set session role failed: %d", ret);
+        TRANS_LOGE(TRANS_SDK, "set session role failed, ret=%d", ret);
         return SOFTBUS_ERR;
     }
 
-    TRANS_LOGI(TRANS_SDK, "ClientBind ok: socket=%d, channelId=%d, channelType = %d", socket,
+    TRANS_LOGI(TRANS_SDK, "Bind ok: socket=%d, channelId=%d, channelType=%d", socket,
         transInfo.channelId, transInfo.channelType);
     return SOFTBUS_OK;
 }
 
-int32_t ClientListen(int32_t socket, const QosTV qos[], uint32_t len, const ISocketListenerAdapt *listener)
+int32_t ClientListen(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener)
 {
-    if (listener == NULL) {
-        TRANS_LOGI(TRANS_SDK, "ClientBind invalid param");
+    if (!IsValidSocketListener(listener, true) || !IsValidQosInfo(qos, qosCount)) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
     int32_t ret = ClientSetListenerBySessionId(socket, listener);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGI(TRANS_SDK, "ClientBind set listener failed: %d", ret);
+        TRANS_LOGI(TRANS_SDK, "set listener failed: %d", ret);
         return ret;
     }
 
@@ -978,6 +998,7 @@ int32_t ClientListen(int32_t socket, const QosTV qos[], uint32_t len, const ISoc
         return SOFTBUS_ERR;
     }
 
+    TRANS_LOGI(TRANS_SDK, "Listen ok: socket=%d", socket);
     return SOFTBUS_OK;
 }
 
@@ -1006,5 +1027,5 @@ void ClientShutdown(int32_t socket)
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "ClientShutdown delete socket session server: ret=%d", ret);
     }
-    TRANS_LOGI(TRANS_SDK, "ClientShutdown ok: socket=%d", socket);
+    TRANS_LOGI(TRANS_SDK, "Shutdown ok: socket=%d", socket);
 }
