@@ -1157,7 +1157,7 @@ int32_t SoftBusDeregisterScanCallbacks(int32_t scannerId)
     return BleDeregisterScanCallbacks(scannerId);
 }
 
-int32_t SoftBusSetScanReportChannelToLpDevice(int scannerId, bool enable)
+int32_t SoftBusSetScanReportChannelToLpDevice(int32_t scannerId, bool enable)
 {
     return SetScanReportChannelToLpDevice(scannerId, enable);
 }
