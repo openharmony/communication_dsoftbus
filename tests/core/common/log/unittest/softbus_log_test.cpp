@@ -89,12 +89,14 @@ HWTEST_F(SoftBusLogTest, AnonyDevIdTest001, TestSize.Level1)
     const char *expected = "null";
     const char *actual = AnonyDevId(&outName, inName);
     EXPECT_STREQ(expected, actual);
+    SoftBusFree(outName);
 
     char *outName2 = nullptr;
     const char *inName2 = "abcdeg";
     const char *expected2 = "abcdeg";
     const char *actual2 = AnonyDevId(&outName2, inName2);
     EXPECT_STREQ(expected2, actual2);
+    SoftBusFree(outName2);
 }
 
 } // namespace OHOS

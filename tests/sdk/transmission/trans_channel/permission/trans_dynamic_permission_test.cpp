@@ -54,7 +54,9 @@ void TransDynamicPermissionTest::SetUpTestCase(void)
 }
 
 void TransDynamicPermissionTest::TearDownTestCase(void)
-{}
+{
+    TransPermissionDeinit();
+}
 
 /**
  * @tc.name: DynamicPermissionTest001

@@ -29,7 +29,7 @@ static bool IsDifferentSign(int32_t seqA, int32_t seqB)
 static bool IsPassDuplicateCheck(SeqVerifyInfo *seqVerifyInfo, int32_t recvSeq)
 {
     uint32_t offset = (uint32_t)(seqVerifyInfo->maxSeq - recvSeq);
-    int32_t isRepeat = seqVerifyInfo->recvBitmap & (0x1UL << offset);
+    uint64_t isRepeat = seqVerifyInfo->recvBitmap & (0x1UL << offset);
     if (isRepeat) {
         COMM_LOGI(COMM_VERIFY, "duplicated package seq[%d].", recvSeq);
         return false;
@@ -117,8 +117,7 @@ static bool IsPassFlipPositiveCheck(SeqVerifyInfo *seqVerifyInfo, int32_t recvSe
             return IsPassDuplicateCheck(seqVerifyInfo, recvSeq);
         }
         return IsPassOverMaxCheck(seqVerifyInfo, recvSeq);
-    }
-    if (recvSeq < 0) {
+    } else {
         if (recvSeq == seqVerifyInfo->minSeq) {
             seqVerifyInfo->minSeq = ++recvSeq;
             return true;
@@ -143,8 +142,7 @@ static bool IsPassFlipNegativeCheck(SeqVerifyInfo *seqVerifyInfo, int32_t recvSe
             return IsPassDuplicateCheck(seqVerifyInfo, recvSeq);
         }
         return false;
-    }
-    if (recvSeq < 0) {
+    } else {
         if (recvSeq < seqVerifyInfo->maxSeq) {
             return IsPassDuplicateCheck(seqVerifyInfo, recvSeq);
         }
