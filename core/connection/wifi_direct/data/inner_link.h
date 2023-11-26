@@ -70,7 +70,7 @@ struct InnerLink {
     bool (*containId)(struct InnerLink *self, int32_t linkId);
     void (*setState)(struct InnerLink *self, enum InnerLinkState state);
     bool (*isProtected)(struct InnerLink *self);
-    void (*dumpLinkId)(struct InnerLink *self);
+    void (*dumpLinkId)(struct InnerLink *self, int32_t fd);
 
     /* for link manager */
     ListNode node;

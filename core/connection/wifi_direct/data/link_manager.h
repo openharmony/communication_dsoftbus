@@ -43,7 +43,7 @@ struct LinkManager {
     void (*recycleLinkId)(int32_t linkId, const char *remoteMac);
     void (*setNegotiateChannelForLink)(struct WifiDirectNegotiateChannel *channel);
     void  (*clearNegotiateChannelForLink)(const char *uuid, bool destroy);
-    void (*dump)(void);
+    void (*dump)(int32_t fd);
     bool (*checkAll)(enum WifiDirectLinkType type, const char *interface, bool (*checker)(struct InnerLink *));
 
     SoftBusMutex mutex;

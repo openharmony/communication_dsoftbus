@@ -18,6 +18,7 @@
 #include "anonymizer.h"
 #include "securec.h"
 #include "softbus_error_code.h"
+#include "softbus_hidumper_conn.h"
 #include "lnn_distributed_net_ledger.h"
 #include "wifi_direct_negotiator.h"
 #include "wifi_direct_role_option.h"
@@ -324,6 +325,27 @@ static void OnInnerLinkChange(struct InnerLink *innerLink, bool isStateChange)
     AnonymizeFree(anonymizedRemoteUuid);
 }
 
+static int32_t WifiDirectDumperCallbackForShow(int32_t fd)
+{
+    GetResourceManager()->dump(fd);
+    GetLinkManager()->dump(fd);
+    return SOFTBUS_OK;
+}
+
+static int32_t WifiDirectDumperCallbackForSetFeature(int32_t fd)
+{
+    g_manager.feature = true;
+    dprintf(fd, "set feature=%d\n", g_manager.feature);
+    return SOFTBUS_OK;
+}
+
+static int32_t WifiDirectDumperCallbackForClearFeature(int32_t fd)
+{
+    g_manager.feature = false;
+    dprintf(fd, "set feature=%d\n", g_manager.feature);
+    return SOFTBUS_OK;
+}
+
 int32_t WifiDirectManagerInit(void)
 {
     CONN_LOGI(CONN_INIT, "init enter");
@@ -340,6 +362,16 @@ int32_t WifiDirectManagerInit(void)
     ListInit(&g_manager.callbackList);
     SetLnnInfo(IF_NAME_P2P);
     SetLnnInfo(IF_NAME_HML);
+
+    if (SoftBusRegConnVarDump("WifiDirectShow", WifiDirectDumperCallbackForShow) != SOFTBUS_OK) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "add dumper callback failed");
+    }
+    if (SoftBusRegConnVarDump("WifiDirectSet", WifiDirectDumperCallbackForSetFeature) != SOFTBUS_OK) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "add dumper callback failed");
+    }
+    if (SoftBusRegConnVarDump("WifiDirectClear", WifiDirectDumperCallbackForClearFeature) != SOFTBUS_OK) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "add dumper callback failed");
+    }
 
     return SOFTBUS_OK;
 }

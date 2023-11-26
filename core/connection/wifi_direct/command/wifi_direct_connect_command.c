@@ -119,8 +119,8 @@ static void OnSuccess(struct WifiDirectCommand *base, struct NegotiateMessage *m
         CONN_LOGW(CONN_WIFI_DIRECT, " no inner link");
         base->onFailure(base, ERROR_NO_CONTEXT);
         GetWifiDirectNegotiator()->resetContext();
-        GetResourceManager()->dump();
-        GetLinkManager()->dump();
+        GetResourceManager()->dump(0);
+        GetLinkManager()->dump(0);
         return;
     }
 
@@ -141,8 +141,8 @@ static void OnSuccess(struct WifiDirectCommand *base, struct NegotiateMessage *m
     };
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
     GetWifiDirectNegotiator()->resetContext();
-    GetResourceManager()->dump();
-    GetLinkManager()->dump();
+    GetResourceManager()->dump(0);
+    GetLinkManager()->dump(0);
 }
 
 static void OnFailure(struct WifiDirectCommand *base, int32_t reason)
@@ -168,8 +168,8 @@ static void OnFailure(struct WifiDirectCommand *base, int32_t reason)
     };
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
     GetWifiDirectNegotiator()->resetContext();
-    GetResourceManager()->dump();
-    GetLinkManager()->dump();
+    GetResourceManager()->dump(0);
+    GetLinkManager()->dump(0);
 }
 
 static struct WifiDirectCommand* Duplicate(struct WifiDirectCommand *base)
