@@ -373,7 +373,7 @@ static void ClearNegotiateChannelForLink(const char *uuid, bool destroy)
     SoftBusMutexUnlock(&self->mutex);
 }
 
-static void Dump(void)
+static void Dump(int32_t fd)
 {
     struct LinkManager *self = GetLinkManager();
     CONN_CHECK_AND_RETURN_LOGW(self->isInited, CONN_WIFI_DIRECT, "not inited");
@@ -382,8 +382,8 @@ static void Dump(void)
     SoftBusMutexLock(&self->mutex);
     for (enum WifiDirectLinkType type = 0; type < WIFI_DIRECT_LINK_TYPE_MAX; type++) {
         LIST_FOR_EACH_ENTRY(innerLink, &self->linkLists[type], struct InnerLink, node) {
-            innerLink->dump(innerLink);
-            innerLink->dumpLinkId(innerLink);
+            innerLink->dump(innerLink, fd);
+            innerLink->dumpLinkId(innerLink, fd);
         }
     }
     SoftBusMutexUnlock(&self->mutex);

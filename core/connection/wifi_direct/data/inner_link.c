@@ -301,8 +301,21 @@ static bool ContainId(struct InnerLink *self, int32_t linkId)
     return false;
 }
 
-static void DumpLinkId(struct InnerLink *self)
+static void DumpLinkIdWithFd(struct InnerLink *self, int32_t fd)
 {
+    struct LinkIdStruct *item = NULL;
+    dprintf(fd, "reference=%d\n", self->reference);
+    LIST_FOR_EACH_ENTRY(item, &self->idList, struct LinkIdStruct, node) {
+        dprintf(fd, "linkId=%d requestId=%d pid=%d\n", item->id, item->requestId, item->pid);
+    }
+}
+
+static void DumpLinkId(struct InnerLink *self, int32_t fd)
+{
+    if (fd != 0) {
+        DumpLinkIdWithFd(self, fd);
+        return;
+    }
     struct LinkIdStruct *item = NULL;
     CONN_LOGI(CONN_WIFI_DIRECT, "reference=%d", self->reference);
     LIST_FOR_EACH_ENTRY(item, &self->idList, struct LinkIdStruct, node) {
@@ -390,6 +403,7 @@ void InnerLinkConstructor(struct InnerLink *self)
     self->dumpLinkId = DumpLinkId;
     self->setState = SetState;
     self->isProtected = IsProtected;
+    self->dumpFilter = false;
 }
 
 void InnerLinkConstructorWithArgs(struct InnerLink *self, enum WifiDirectLinkType type,
