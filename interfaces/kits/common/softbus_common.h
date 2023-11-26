@@ -141,7 +141,7 @@ extern "C" {
  * @brief Indicates the maximum length of the custom data in <b>IDiscoveryCallback</b>.
  *
  */
-#define DISC_MAX_CUST_DATA_LEN 219
+#define DISC_MAX_CUST_DATA_LEN 513
 
 /**
  * @brief Indicates the maximum number of capabilities contained in the bitmap in <b>IDiscoveryCallback</b>.
