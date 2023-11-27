@@ -20,12 +20,12 @@
 #include <securec.h>
 
 #include "common_list.h"
+#include "conn_log.h"
 #include "softbus_conn_interface.h"
 #include "softbus_conn_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
-#include "softbus_log_old.h"
 
 static const uint32_t CONN_HEAD_SIZE = 24;
 static const char *TEST_BLE_MAC = "11:22:33:44:55:66";
@@ -722,7 +722,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger0012, TestSize.Level1)
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger0013, TestSize.Level1)
 {
     int ret;
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "testConnmanger0013");
+    CONN_LOGI(CONN_WIFI_DIRECT, "testConnmanger0013");
     ret = ConnTypeIsSupport(CONNECT_BLE);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
@@ -735,7 +735,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger0013, TestSize.Level1)
 */
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger0014, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "testConnmanger0014");
+    CONN_LOGI(CONN_WIFI_DIRECT, "testConnmanger0014");
     int ret = ConnSetConnectCallback(static_cast<ConnModule>(0), nullptr);
     ASSERT_TRUE(ret != SOFTBUS_OK);
     ret = ConnConnectDevice(nullptr, 0, nullptr);
@@ -758,7 +758,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger0014, TestSize.Level1)
 */
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger0015, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "testConnmanger0015");
+    CONN_LOGI(CONN_WIFI_DIRECT, "testConnmanger0015");
     ConnectCallback connCb;
     connCb.OnConnected = ConnectedCB;
     connCb.OnDisconnected = DisConnectCB;
@@ -779,7 +779,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger0015, TestSize.Level1)
 */
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger0016, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "testConnmanger0016");
+    CONN_LOGI(CONN_WIFI_DIRECT, "testConnmanger0016");
     ConnectCallback connCb;
     connCb.OnConnected = ConnectedCB;
     connCb.OnDisconnected = DisConnectCB;
@@ -807,7 +807,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger0016, TestSize.Level1)
 */
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger0017, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "testConnmanger0017");
+    CONN_LOGI(CONN_WIFI_DIRECT, "testConnmanger0017");
     int ret = ConnTypeIsSupport(CONNECT_P2P);
     EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
 }
@@ -822,7 +822,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger0017, TestSize.Level1)
 */
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger0018, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "testConnmanger0018");
+    CONN_LOGI(CONN_WIFI_DIRECT, "testConnmanger0018");
     int ret = ConnTypeIsSupport(CONNECT_BR);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
@@ -837,7 +837,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger0018, TestSize.Level1)
 */
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger0019, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "testConnmanger0019");
+    CONN_LOGI(CONN_WIFI_DIRECT, "testConnmanger0019");
     int ret = ConnTypeIsSupport(CONNECT_TCP);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
