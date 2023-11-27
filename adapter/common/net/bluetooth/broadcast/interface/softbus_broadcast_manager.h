@@ -17,7 +17,7 @@
  * @file softbus_broadcast_manager.h
  * @brief
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 
@@ -33,7 +33,7 @@ extern "C"{
 /**
  * @brief Defines the broadcast callback function.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 typedef struct {
@@ -46,7 +46,7 @@ typedef struct {
 /**
  * @brief Defines the broadcast scan callback function.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 typedef struct {
@@ -60,7 +60,7 @@ typedef struct {
  *
  * @return Returns <b>0</b> If the broadcast management initialization fails;
  * returns any other value if the request fails.
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 int32_t InitBroadcastMgr(void);
@@ -70,7 +70,7 @@ int32_t InitBroadcastMgr(void);
  *
  * @return Returns <b>SOFTBUS_OK</b> If the broadcast management deinitialization fails;
  * returns any other value if the request fails.
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 int32_t DeInitBroadcastMgr(void);
@@ -85,10 +85,10 @@ int32_t DeInitBroadcastMgr(void);
  * @return Returns <b>SOFTBUS_OK</b> if the service register is successful.
  * returns any other value if the register fails.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
-int32_t RegisterBroadcaster(enum BaseServiceType type, int32_t *bcId, const BroadcastCallback *cb);
+int32_t RegisterBroadcaster(BaseServiceType type, int32_t *bcId, const BroadcastCallback *cb);
 
 /**
  * @brief UnRegister the service to the broadcast manager.
@@ -98,7 +98,7 @@ int32_t RegisterBroadcaster(enum BaseServiceType type, int32_t *bcId, const Broa
  * @return Returns <b>SOFTBUS_OK</b> if the service unregister is successful.
  * returns any other value if the unregister fails.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 int32_t UnRegisterBroadcaster(int32_t bcId);
@@ -113,10 +113,10 @@ int32_t UnRegisterBroadcaster(int32_t bcId);
  * @return Returns <b>SOFTBUS_OK</b> if the service register is successful.
  * returns any other value if the register fails.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
-int32_t RegisterScanListener(enum BaseServiceType type, int32_t *listenerId, const ScanCallback *cb);
+int32_t RegisterScanListener(BaseServiceType type, int32_t *listenerId, const ScanCallback *cb);
 
 /**
  * @brief UnRegister the service listener to the broadcast manager.
@@ -126,7 +126,7 @@ int32_t RegisterScanListener(enum BaseServiceType type, int32_t *listenerId, con
  * @return Returns <b>SOFTBUS_OK</b> if the service unregister is successful.
  * returns any other value if the unregister fails.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 int32_t UnRegisterScanListener(int32_t listenerId);
@@ -142,11 +142,11 @@ int32_t UnRegisterScanListener(int32_t listenerId);
  * @return Returns <b>SOFTBUS_OK</b> if the service starts the broadcast successfully.
  * returns any other value if the unregister fails.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
-int32_t StartBroadcasting(int32_t bcId, const BroadcastParam *param, const BroadcastData *bcData,
-    const BroadcastData *rspData);
+int32_t StartBroadcasting(int32_t bcId, const BroadcastParam *param, const BroadcastPayload *bcData,
+    const BroadcastPayload *rspData);
 
 /**
  * @brief The service update broadcast data and parameters.
@@ -159,11 +159,11 @@ int32_t StartBroadcasting(int32_t bcId, const BroadcastParam *param, const Broad
  * @return Returns <b>SOFTBUS_OK</b> if the service updates the broadcast successfully.
  * returns any other value if the service fails to update the broadcast.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
-int32_t UpdateBroadcasting(int32_t bcId, const BroadcastParam *param, const BroadcastData *bcData,
-    const BroadcastData *rspData);
+int32_t UpdateBroadcasting(int32_t bcId, const BroadcastParam *param, const BroadcastPayload *bcData,
+    const BroadcastPayload *rspData);
 
 /**
  * @brief The service stop broadcast
@@ -173,7 +173,7 @@ int32_t UpdateBroadcasting(int32_t bcId, const BroadcastParam *param, const Broa
  * @return Returns <b>SOFTBUS_OK</b> if the service stop the broadcast successfully.
  * returns any other value if the service fails to stop the broadcast.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 int32_t StopBroadcasting(int32_t bcId);
@@ -187,7 +187,7 @@ int32_t StopBroadcasting(int32_t bcId);
  * @return Returns <b>SOFTBUS_OK</b> if the service start to scan the broadcast successfully.
  * returns any other value if the service fails to scan the broadcast.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 int32_t StartScan(int32_t listenerId, const BcScanParams *param);
@@ -200,7 +200,7 @@ int32_t StartScan(int32_t listenerId, const BcScanParams *param);
  * @return Returns <b>SOFTBUS_OK</b> if the service stop to scan the broadcast successfully.
  * returns any other value if the service fails to stop scanning the broadcast.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 int32_t StopScan(int32_t listenerId);
@@ -215,7 +215,7 @@ int32_t StopScan(int32_t listenerId);
  * @return Returns <b>SOFTBUS_OK</b> if the service set the Scan Filter successfully.
  * returns any other value if the service fails to set the Scan Filter.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 int32_t SetScanFilter(int32_t listenerId, const BcScanFilter *scanFilter, uint8_t filterNum);
@@ -230,7 +230,7 @@ int32_t SetScanFilter(int32_t listenerId, const BcScanFilter *scanFilter, uint8_
  * @return Returns <b>SOFTBUS_OK</b> if the service get the Scan Filter successfully.
  * returns any other value if the service fails to get the Scan Filter.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 int32_t GetScanFilter(int32_t listenerId, const BcScanFilter *scanFilter, uint8_t *filterNum);
@@ -244,10 +244,14 @@ int32_t GetScanFilter(int32_t listenerId, const BcScanFilter *scanFilter, uint8_
  * @return Returns <b>SOFTBUS_OK</b> if the service query status successfully.
  * returns any other value if the service fails to query status.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 int32_t QueryBroadcastStatus(int32_t bcId, int32_t *status);
+
+void SetBroadcastAdvFlag();
+
+uint8_t GetBroadcastFlag();
 
 #ifdef __cplusplus
 }
