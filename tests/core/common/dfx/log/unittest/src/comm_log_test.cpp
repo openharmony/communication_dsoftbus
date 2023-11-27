@@ -87,6 +87,12 @@ HWTEST_F(CommLogTest, CommLogTest001, TestSize.Level0)
     EXPECT_EQ(++authDomainBase, label.domain);
     EXPECT_STREQ("CommUtils", label.tag);
 
+    EXPECT_EQ(++index, COMM_ADAPTER);
+    label = COMM_LABELS[COMM_ADAPTER];
+    EXPECT_EQ(COMM_ADAPTER, label.label);
+    EXPECT_EQ(++authDomainBase, label.domain);
+    EXPECT_STREQ("CommAdapter", label.tag);
+
     EXPECT_EQ(++index, COMM_TEST);
     label = COMM_LABELS[COMM_TEST];
     EXPECT_EQ(COMM_TEST, label.label);

@@ -30,20 +30,22 @@ typedef enum {
     COMM_VERIFY,
     COMM_PERM,
     COMM_UTILS,
+    COMM_ADAPTER,
     COMM_TEST,
 } CommLogLabelEnum;
 
 /* Keep consistent with labels */
 static const SoftBusLogLabel COMM_LABELS[MODULE_DOMAIN_MAX_LEN] = {
-    {COMM_SDK,     0xd005700,      "CommSdk"   },
-    { COMM_SVC,    0xd005701,      "CommSvc"   },
-    { COMM_INIT,   0xd005702,      "CommInit"  },
-    { COMM_DFX,    0xd005703,      "CommDfx"   },
-    { COMM_EVENT,  0xd005704,      "CommEvent" },
-    { COMM_VERIFY, 0xd005705,      "CommVerify"},
-    { COMM_PERM,   0xd005706,      "CommPerm"  },
-    { COMM_UTILS,  0xd005707,      "CommUtils" },
-    { COMM_TEST,   DOMAIN_ID_TEST, "CommTest"  },
+    { COMM_SDK,     0xd005700,      "CommSdk"    },
+    { COMM_SVC,     0xd005701,      "CommSvc"    },
+    { COMM_INIT,    0xd005702,      "CommInit"   },
+    { COMM_DFX,     0xd005703,      "CommDfx"    },
+    { COMM_EVENT,   0xd005704,      "CommEvent"  },
+    { COMM_VERIFY,  0xd005705,      "CommVerify" },
+    { COMM_PERM,    0xd005706,      "CommPerm"   },
+    { COMM_UTILS,   0xd005707,      "CommUtils"  },
+    { COMM_ADAPTER, 0xd005708,      "CommAdapter"},
+    { COMM_TEST,    DOMAIN_ID_TEST, "CommTest"   },
 };
 
 #define COMM_LOGF(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_FATAL, COMM_LABELS[label], ##__VA_ARGS__)
