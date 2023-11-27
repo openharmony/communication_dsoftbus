@@ -470,9 +470,6 @@ void SignalingMsgPrint(const char *distinguish, unsigned char *data, unsigned ch
     if (module == SOFTBUS_LOG_DISC) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "[signaling]:%s, len:%d, data:%s",
                    distinguish, dataLen, signalingMsgBuf);
-    } else if (module == SOFTBUS_LOG_CONN) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[signaling]:%s, len:%d, data:%s",
-                   distinguish, dataLen, signalingMsgBuf);
     }
 }
 

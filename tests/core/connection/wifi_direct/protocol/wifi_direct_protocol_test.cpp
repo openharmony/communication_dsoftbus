@@ -16,9 +16,9 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
+#include "conn_log.h"
 #include "cJSON.h"
 #include "json_protocol.h"
-#include "softbus_log_old.h"
 #include "softbus_adapter_mem.h"
 #include "wifi_direct_protocol_factory.h"
 #include "wifi_direct_protocol.h"
@@ -64,7 +64,7 @@ static bool TrueMarShalling(InfoContainer *container, WifiDirectProtocol *base)
 */
 HWTEST_F(WifiDirectProtocolTest, testWifiProtocol001, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WifiDirectProtocolTest, testWifiProtocol001, Start");
+    CONN_LOGI(CONN_WIFI_DIRECT, "WifiDirectProtocolTest, testWifiProtocol001, Start");
     WifiDirectMock wifiDirectMock;
     struct WifiDirectProtocolFactory* factory = GetWifiDirectProtocolFactory();
     struct WifiDirectProtocol *base = static_cast<struct WifiDirectProtocol*>(SoftBusCalloc(sizeof(*base)));
@@ -102,7 +102,7 @@ HWTEST_F(WifiDirectProtocolTest, testWifiProtocol001, TestSize.Level1)
     SoftBusFree(keyProperty);
     SoftBusFree(data);
     factory->destroyProtocol(protocol);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WifiDirectProtocolTest, testWifiProtocol001, End");
+    CONN_LOGI(CONN_WIFI_DIRECT, "WifiDirectProtocolTest, testWifiProtocol001, End");
 };
 
 /* tlv_protocol.c */
@@ -114,7 +114,7 @@ HWTEST_F(WifiDirectProtocolTest, testWifiProtocol001, TestSize.Level1)
 */
 HWTEST_F(WifiDirectProtocolTest, testWifiProtocol002, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WifiDirectProtocolTest, testWifiProtocol002, Start");
+    CONN_LOGI(CONN_WIFI_DIRECT, "WifiDirectProtocolTest, testWifiProtocol002, Start");
     struct WifiDirectProtocolFactory* factory = GetWifiDirectProtocolFactory();
     struct WifiDirectProtocol *base = static_cast<struct WifiDirectProtocol*>(SoftBusCalloc(sizeof(*base)));
     struct InfoContainer *container = static_cast<struct InfoContainer*>(SoftBusCalloc(sizeof(*container)));
@@ -132,7 +132,7 @@ HWTEST_F(WifiDirectProtocolTest, testWifiProtocol002, TestSize.Level1)
     SoftBusFree(base);
     SoftBusFree(container);
     SoftBusFree(outBuffer);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WifiDirectProtocolTest, testWifiProtocol002, End");
+    CONN_LOGI(CONN_WIFI_DIRECT, "WifiDirectProtocolTest, testWifiProtocol002, End");
 };
 
 /*
@@ -143,7 +143,7 @@ HWTEST_F(WifiDirectProtocolTest, testWifiProtocol002, TestSize.Level1)
 */
 HWTEST_F(WifiDirectProtocolTest, testWifiProtocol003, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WifiDirectProtocolTest, testWifiProtocol003, Start");
+    CONN_LOGI(CONN_WIFI_DIRECT, "WifiDirectProtocolTest, testWifiProtocol003, Start");
     struct WifiDirectProtocol *base = static_cast<struct WifiDirectProtocol*>(SoftBusCalloc(sizeof(*base)));
     struct InfoContainerKeyProperty *keyProperty = static_cast<struct InfoContainerKeyProperty*>
                                                     (SoftBusCalloc(sizeof(*keyProperty)));
@@ -169,6 +169,6 @@ HWTEST_F(WifiDirectProtocolTest, testWifiProtocol003, TestSize.Level1)
     SoftBusFree(base);
     SoftBusFree(keyProperty);
     SoftBusFree(data);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "WifiDirectProtocolTest, testWifiProtocol003, End");
+    CONN_LOGI(CONN_WIFI_DIRECT, "WifiDirectProtocolTest, testWifiProtocol003, End");
 };
 } // namespace OHOS

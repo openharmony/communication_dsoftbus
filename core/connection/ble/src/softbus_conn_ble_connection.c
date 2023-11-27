@@ -170,7 +170,7 @@ void ConnBleFreeConnection(ConnBleConnection *connection)
 static GattService *CreateGattService(void)
 {
     GattService *gattService = SoftBusCalloc(sizeof(GattService));
-    CONN_CHECK_AND_RETURN_RET_LOG(gattService != NULL, NULL, "calloc gatt service failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(gattService != NULL, NULL, CONN_BLE, "calloc gatt service failed");
     SoftBusBtUuid serviceUuid = {
         .uuid = SOFTBUS_SERVICE_UUID,
         .uuidLen = strlen(SOFTBUS_SERVICE_UUID),
