@@ -19,12 +19,12 @@
 #include "c_header/ohos_bt_gap.h"
 #include "c_header/ohos_bt_gatt.h"
 #include "securec.h"
-#include "conn_log.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_log_old.h"
 #include "softbus_utils.h"
 
 #define BT_UUID "43d4a49f-604d-45b5-9302-4ddbbfd538fd"
@@ -69,9 +69,9 @@ static void OnBtStateChanged(int32_t listenerId, int32_t state)
         return;
     }
 
-    CONN_LOGI(CONN_BLE, "receive bt turn off event, start reset bt adapter state...");
+    CLOGI("receive bt turn off event, start reset bt adapter state...");
     if (SoftBusMutexLock(&g_advLock) != 0) {
-        CONN_LOGE(CONN_BLE, "ATTENTION, try to get adv lock failed, something unexpected happened");
+        CLOGE("ATTENTION, try to get adv lock failed, something unexpected happened");
         return;
     }
     for (uint32_t index = 0; index < ADV_MAX_NUM; index++) {
@@ -88,7 +88,7 @@ static void OnBtStateChanged(int32_t listenerId, int32_t state)
     (void)SoftBusMutexUnlock(&g_advLock);
 
     if (SoftBusMutexLock(&g_scanerLock) != 0) {
-        CONN_LOGE(CONN_BLE, "ATTENTION, try to get scan lock failed, something unexpected happened");
+        CLOGE("ATTENTION, try to get scan lock failed, something unexpected happened");
         return;
     }
     for (int index = 0; index < SCAN_MAX_NUM; index++) {
@@ -108,11 +108,11 @@ int BleGattLockInit(void)
         return SOFTBUS_OK;
     }
     if (SoftBusMutexInit(&g_advLock, NULL) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "g_advLock init failed");
+        CLOGE("g_advLock init failed");
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexInit(&g_scanerLock, NULL) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "g_scanerLock init failed");
+        CLOGE("g_scanerLock init failed");
         return SOFTBUS_ERR;
     }
     g_lockInit = true;
@@ -256,7 +256,7 @@ static void DumpBleScanFilter(BleScanNativeFilter *nativeFilter, uint8_t filterS
         }
         (void)ConvertBytesToHexString(serviceData, hexLen, (nativeFilter + filterSize)->serviceData, len);
         (void)ConvertBytesToHexString(serviceDataMask, hexLen, (nativeFilter + filterSize)->serviceDataMask, len);
-        CONN_LOGI(CONN_BLE, "BLE Scan Filter id:%d [serviceData:%s, serviceDataMask:%s]",
+        CLOGI("BLE Scan Filter id:%d [serviceData:%s, serviceDataMask:%s]",
             filterSize, serviceData, serviceDataMask);
         SoftBusFree(serviceData);
         SoftBusFree(serviceDataMask);
@@ -335,7 +335,7 @@ static void ConvertScanResult(const BtScanResultData *src, SoftBusBleScanResult 
     dst->dataStatus = ConvertScanDataStatus(src->dataStatus);
     dst->addrType = ConvertScanAddrType(src->addrType);
     if (memcpy_s(dst->addr.addr, BT_ADDR_LEN, src->addr.addr, BT_ADDR_LEN) != EOK) {
-        CONN_LOGE(CONN_BLE, "ConvertScanResult memcpy addr fail");
+        CLOGE("ConvertScanResult memcpy addr fail");
         return;
     }
     dst->primaryPhy = ConvertScanPhyType(src->primaryPhy);
@@ -346,7 +346,7 @@ static void ConvertScanResult(const BtScanResultData *src, SoftBusBleScanResult 
     dst->periodicAdvInterval = src->periodicAdvInterval;
     dst->directAddrType = ConvertScanAddrType(src->directAddrType);
     if (memcpy_s(dst->directAddr.addr, BT_ADDR_LEN, src->directAddr.addr, BT_ADDR_LEN) != EOK) {
-        CONN_LOGE(CONN_BLE, "ConvertScanResult memcpy directAddr fail");
+        CLOGE("ConvertScanResult memcpy directAddr fail");
         return;
     }
     dst->advLen = src->advLen;
@@ -403,7 +403,7 @@ static void ConvertAdvParam(const SoftBusBleAdvParams *src, BleAdvParams *dst)
     dst->ownAddrType = 0x00;
     dst->peerAddrType = 0x00;
     if (memcpy_s(dst->peerAddr.addr, BT_ADDR_LEN, src->peerAddr.addr, BT_ADDR_LEN) != EOK) {
-        CONN_LOGE(CONN_BLE, "ConvertAdvParam memcpy directAddr fail");
+        CLOGE("ConvertAdvParam memcpy directAddr fail");
         return;
     }
     dst->channelMap = src->channelMap;
@@ -423,7 +423,7 @@ static void WrapperAdvEnableCallback(int advId, int status)
             advChannel->advCallback->AdvEnableCallback == NULL) {
             continue;
         }
-        CONN_LOGI(CONN_BLE, "WrapperAdvEnableCallback, inner-advId: %d, bt-advId: %d, "
+        CLOGI("WrapperAdvEnableCallback, inner-advId: %d, bt-advId: %d, "
             "status: %d", index, advId, st);
         if (st == SOFTBUS_BT_STATUS_SUCCESS) {
             advChannel->isAdvertising = true;
@@ -445,7 +445,7 @@ static void WrapperAdvDisableCallback(int advId, int status)
             advChannel->advCallback->AdvDisableCallback == NULL) {
             continue;
         }
-        CONN_LOGI(CONN_BLE, "WrapperAdvDisableCallback, inner-advId: %d, bt-advId: %d, "
+        CLOGI("WrapperAdvDisableCallback, inner-advId: %d, bt-advId: %d, "
             "status: %d", index, advId, st);
         if (st == SOFTBUS_BT_STATUS_SUCCESS) {
             advChannel->advId = -1;
@@ -468,7 +468,7 @@ static void WrapperAdvDataCallback(int advId, int status)
             advChannel->advCallback->AdvDataCallback == NULL) {
             continue;
         }
-        CONN_LOGI(CONN_BLE, "WrapperAdvDataCallback, inner-advId: %d, bt-advId: %d, "
+        CLOGI("WrapperAdvDataCallback, inner-advId: %d, bt-advId: %d, "
             "status: %d", index, advId, st);
         advChannel->advCallback->AdvDataCallback(index, st);
         break;
@@ -486,7 +486,7 @@ static void WrapperAdvUpdateCallback(int advId, int status)
             advChannel->advCallback->AdvUpdateCallback == NULL) {
             continue;
         }
-        CONN_LOGI(CONN_BLE, "WrapperAdvUpdateCallback, inner-advId: %d, bt-advId: %d, "
+        CLOGI("WrapperAdvUpdateCallback, inner-advId: %d, bt-advId: %d, "
             "status: %d", index, advId, st);
         advChannel->advCallback->AdvUpdateCallback(index, st);
         break;
@@ -496,7 +496,7 @@ static void WrapperAdvUpdateCallback(int advId, int status)
 static void WrapperSecurityRespondCallback(const BdAddr *bdAddr)
 {
     (void)bdAddr;
-    CONN_LOGI(CONN_BLE, "WrapperSecurityRespondCallback");
+    CLOGI("WrapperSecurityRespondCallback");
 }
 
 static void WrapperScanResultCallback(BtScanResultData *scanResultdata)
@@ -584,7 +584,7 @@ static int RegisterBleGattCallback(int32_t *scannerId, bool isLpDeviceScan)
             return SOFTBUS_OK;
         }
         if (BleRegisterScanCallbacks(&g_softbusBleScanCb, scannerId) != 0) {
-            CONN_LOGE(CONN_BLE, "SH register ble scan callback failed");
+            CLOGE("SH register ble scan callback failed");
             return SOFTBUS_ERR;
         }
         g_scannerId = *scannerId;
@@ -595,7 +595,7 @@ static int RegisterBleGattCallback(int32_t *scannerId, bool isLpDeviceScan)
             return SOFTBUS_OK;
         }
         if (BleRegisterScanCallbacks(&g_softbusBleScanCb, scannerId) != 0) {
-            CONN_LOGE(CONN_BLE, "SH register sh scan callback failed");
+            CLOGE("SH register sh scan callback failed");
             return SOFTBUS_ERR;
         }
         g_isLpDeviceRegCb = true;
@@ -609,7 +609,7 @@ static bool CheckAdvChannelInUsed(int advId)
         return false;
     }
     if (!g_advChannel[advId].isUsed) {
-        CONN_LOGE(CONN_BLE, "advId %d is ready released", advId);
+        CLOGE("advId %d is ready released", advId);
         return false;
     }
     return true;
@@ -621,7 +621,7 @@ static bool CheckScanChannelInUsed(int listenerId)
         return false;
     }
     if (!g_scanListener[listenerId].isUsed) {
-        CONN_LOGE(CONN_BLE, "listenerId %d is ready released", listenerId);
+        CLOGE("listenerId %d is ready released", listenerId);
         return false;
     }
     return true;
@@ -639,12 +639,12 @@ static int SetAdvData(int advId, const SoftBusBleAdvData *data)
     if (data->advLength != 0) {
         g_advChannel[advId].advData.advData = SoftBusCalloc(data->advLength);
         if (g_advChannel[advId].advData.advData == NULL) {
-            CONN_LOGE(CONN_BLE, "SetAdvData calloc advData failed");
+            CLOGE("SetAdvData calloc advData failed");
             return SOFTBUS_MALLOC_ERR;
         }
         if (memcpy_s(g_advChannel[advId].advData.advData, data->advLength,
             data->advData, data->advLength) != EOK) {
-            CONN_LOGE(CONN_BLE, "SetAdvData memcpy advData failed");
+            CLOGE("SetAdvData memcpy advData failed");
             SoftBusFree(g_advChannel[advId].advData.advData);
             g_advChannel[advId].advData.advData = NULL;
             return SOFTBUS_MEM_ERR;
@@ -653,14 +653,14 @@ static int SetAdvData(int advId, const SoftBusBleAdvData *data)
     if (data->scanRspLength != 0) {
         g_advChannel[advId].advData.scanRspData = SoftBusCalloc(data->scanRspLength);
         if (g_advChannel[advId].advData.scanRspData == NULL) {
-            CONN_LOGE(CONN_BLE, "SetAdvData calloc scanRspData failed");
+            CLOGE("SetAdvData calloc scanRspData failed");
             SoftBusFree(g_advChannel[advId].advData.advData);
             g_advChannel[advId].advData.advData = NULL;
             return SOFTBUS_MALLOC_ERR;
         }
         if (memcpy_s(g_advChannel[advId].advData.scanRspData, data->scanRspLength,
             data->scanRspData, data->scanRspLength) != EOK) {
-            CONN_LOGE(CONN_BLE, "SetAdvData memcpy scanRspData failed");
+            CLOGE("SetAdvData memcpy scanRspData failed");
             SoftBusFree(g_advChannel[advId].advData.advData);
             SoftBusFree(g_advChannel[advId].advData.scanRspData);
             g_advChannel[advId].advData.advData = NULL;
@@ -700,7 +700,7 @@ int SoftBusGetAdvChannel(const SoftBusAdvCallback *callback, int *scannerId, boo
         }
     }
     if (freeAdvId == ADV_MAX_NUM) {
-        CONN_LOGE(CONN_BLE, "no available adv channel");
+        CLOGE("no available adv channel");
         SoftBusMutexUnlock(&g_advLock);
         return SOFTBUS_ERR;
     }
@@ -763,7 +763,7 @@ static int OhosBleStartAdvEx(int *advId, const SoftBusBleAdvParams *param, const
     ConvertAdvData(data, &advData);
     int ret = BleStartAdvEx(&btAdvId, advData, dstParam);
     if (ret != OHOS_BT_STATUS_SUCCESS) {
-        CONN_LOGE(CONN_BLE, "BleStartAdvEx, bt-advId: %d, ret: %d", btAdvId, ret);
+        CLOGE("BleStartAdvEx, bt-advId: %d, ret: %d", btAdvId, ret);
         return SOFTBUS_ERR;
     }
     *advId = btAdvId;
@@ -789,29 +789,29 @@ int SoftBusStartAdvEx(int advId, const SoftBusBleAdvParams *param,
         return SOFTBUS_ERR;
     }
     if (g_advChannel[advId].isAdvertising) {
-        CONN_LOGW(CONN_BLE, "SoftBusStartAdv, wait condition inner-advId: %d", advId);
+        CLOGW("SoftBusStartAdv, wait condition inner-advId: %d", advId);
         SoftBusSysTime absTime = {0};
         if (SoftBusGetTime(&absTime) != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BLE, "Softbus get time failed");
+            CLOGE("Softbus get time failed");
             SoftBusMutexUnlock(&g_advLock);
             return SOFTBUS_ERR;
         }
 
         absTime.sec += ADV_WAIT_TIME_SEC;
         if (SoftBusCondWait(&g_advChannel[advId].cond, &g_advLock, &absTime) != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BLE, "SoftBusStartAdv, wait timeout");
+            CLOGE("SoftBusStartAdv, wait timeout");
             SoftBusMutexUnlock(&g_advLock);
             return SOFTBUS_ERR;
         }
     }
     if (g_advChannel[advId].advId != -1) {
-        CONN_LOGE(CONN_BLE, "already assigned an advId %d", g_advChannel[advId].advId);
+        CLOGE("already assigned an advId %d", g_advChannel[advId].advId);
         SoftBusMutexUnlock(&g_advLock);
         return SOFTBUS_ERR;
     }
 
     int ret = startAdvEx(&g_advChannel[advId].advId, param, &g_advChannel[advId].advData);
-    CONN_LOGI(CONN_BLE, "inner-advId: %d, bt-advId: %d, ret: %d", advId, g_advChannel[advId].advId, ret);
+    CLOGI("inner-advId: %d, bt-advId: %d, ret: %d", advId, g_advChannel[advId].advId, ret);
     if (ret != SOFTBUS_OK) {
         g_advChannel[advId].advCallback->AdvEnableCallback(advId, SOFTBUS_BT_STATUS_FAIL);
         SoftBusMutexUnlock(&g_advLock);
@@ -831,12 +831,12 @@ int SoftBusStopAdv(int advId)
         return SOFTBUS_ERR;
     }
     if (!g_advChannel[advId].isAdvertising) {
-        CONN_LOGI(CONN_BLE, "SoftBusStopAdv, adv %d is not advertising", advId);
+        CLOGI("SoftBusStopAdv, adv %d is not advertising", advId);
         SoftBusMutexUnlock(&g_advLock);
         return SOFTBUS_OK;
     }
     int ret = BleStopAdv(g_advChannel[advId].advId);
-    CONN_LOGI(CONN_BLE, "SoftBusStopAdv, inner-advId: %d, "
+    CLOGI("SoftBusStopAdv, inner-advId: %d, "
         "bt-advId: %d, ret: %d", advId, g_advChannel[advId].advId, ret);
     if (ret != OHOS_BT_STATUS_SUCCESS) {
         g_advChannel[advId].advCallback->AdvDisableCallback(advId, SOFTBUS_BT_STATUS_FAIL);
@@ -943,7 +943,7 @@ static bool CheckNeedReStartScan(int scannerId)
     }
     if (isNeedReset && isScanning) {
         if (BleOhosStatusToSoftBus(BleStopScan(scannerId)) != SOFTBUS_BT_STATUS_SUCCESS) {
-            CONN_LOGE(CONN_BLE, "ble stop scan failed");
+            CLOGE("ble stop scan failed");
             return false;
         }
         return true;
@@ -976,7 +976,7 @@ int SoftBusSetScanFilter(int listenerId, SoftBusBleScanFilter *filter, uint8_t f
         return SOFTBUS_LOCK_ERR;
     }
     if (!CheckScanChannelInUsed(listenerId)) {
-        CONN_LOGE(CONN_BLE, "ScanListener id:%d is not in use", listenerId);
+        CLOGE("ScanListener id:%d is not in use", listenerId);
         SoftBusMutexUnlock(&g_scanerLock);
         return SOFTBUS_ERR;
     }
@@ -997,7 +997,7 @@ int SoftBusStartScan(int listenerId, int scannerId, const SoftBusBleScanParams *
         return SOFTBUS_LOCK_ERR;
     }
     if (!CheckScanChannelInUsed(listenerId)) {
-        CONN_LOGE(CONN_BLE, "ScanListener id:%d is not in use", listenerId);
+        CLOGE("ScanListener id:%d is not in use", listenerId);
         SoftBusMutexUnlock(&g_scanerLock);
         return SOFTBUS_ERR;
     }
@@ -1079,17 +1079,17 @@ int SoftBusReplaceAdvertisingAdv(int advId, const SoftBusBleAdvData *data)
     }
     if (!g_advChannel[advId].isAdvertising) {
         SoftBusMutexUnlock(&g_advLock);
-        CONN_LOGE(CONN_BLE, "adv %d is not advertising", advId);
+        CLOGE("adv %d is not advertising", advId);
         return SOFTBUS_ERR;
     }
     int btAdvId = g_advChannel[advId].advId;
     int ret = SetAdvData(advId, data);
     SoftBusMutexUnlock(&g_advLock);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "SetAdvData failed, advId: %d, btadvId: %d", advId, btAdvId);
+        CLOGE("SetAdvData failed, advId: %d, btadvId: %d", advId, btAdvId);
         return SOFTBUS_ERR;
     }
-    CONN_LOGI(CONN_BLE, "BleSetAdvData, advId: %d, btadvId: %d", advId, btAdvId);
+    CLOGI("BleSetAdvData, advId: %d, btadvId: %d", advId, btAdvId);
     StartAdvRawData advData = {0};
     ConvertAdvData(data, &advData);
     ret = BleOhosStatusToSoftBus(BleSetAdvData(btAdvId, advData));
@@ -1130,7 +1130,7 @@ bool SoftBusSetAdvFilterParam(int advHandle, int advId, SoftBusBleAdvParams *adv
     btLpDeviceParam.advHandle = advHandle;
     btLpDeviceParam.duration = ADV_DURATION_MS;
     if (SetLpDeviceParam(&btLpDeviceParam) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "SH SetLpDeviceParam failed");
+        CLOGE("SH SetLpDeviceParam failed");
         return false;
     }
     SoftBusFree(filter);

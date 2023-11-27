@@ -281,7 +281,8 @@ static void BleIncludeServiceAddCallback(int status, int serverId, int srvcHandl
 {
     (void)serverId;
     (void)srvcHandle;
-    CONN_LOGI(CONN_BLE, "IncludeServiceAddCallback srvcHandle=%d,includeSrvcHandle=%d\n", srvcHandle, includeSrvcHandle);
+    CONN_LOGI(CONN_BLE, "IncludeServiceAddCallback srvcHandle=%d,includeSrvcHandle=%d\n", srvcHandle,
+        includeSrvcHandle);
 }
 
 static void BleCharacteristicAddCallback(int status, int serverId, BtUuid *uuid, int srvcHandle,
@@ -351,7 +352,8 @@ static void BleRequestReadCallback(BtReqReadCbPara readCbPara)
 
 static void BleRequestWriteCallback(BtReqWriteCbPara writeCbPara)
 {
-    CONN_LOGI(CONN_BLE, "RequestWriteCallback transId=%d, attrHandle=%d\n", writeCbPara.transId, writeCbPara.attrHandle);
+    CONN_LOGI(CONN_BLE, "RequestWriteCallback transId=%d, attrHandle=%d\n", writeCbPara.transId,
+        writeCbPara.attrHandle);
     SoftBusGattWriteRequest req = {
         .connId = writeCbPara.connId,
         .transId = writeCbPara.transId,
