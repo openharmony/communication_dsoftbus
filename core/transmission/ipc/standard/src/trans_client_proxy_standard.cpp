@@ -301,6 +301,7 @@ int32_t TransClientProxy::OnChannelMsgReceived(int32_t channelId, int32_t channe
 
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
+    TRANS_LOGD(TRANS_CTRL, "SendRequest start");
     int32_t ret = remote->SendRequest(CLIENT_ON_CHANNEL_MSGRECEIVED, data, reply, option);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "OnChannelMsgReceived send request failed, ret=%{public}d",
