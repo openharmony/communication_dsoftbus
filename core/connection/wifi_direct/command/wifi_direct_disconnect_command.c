@@ -116,8 +116,8 @@ static void OnSuccess(struct WifiDirectCommand *base, struct NegotiateMessage *m
     }
 
     GetWifiDirectNegotiator()->resetContext();
-    GetResourceManager()->dump();
-    GetLinkManager()->dump();
+    GetResourceManager()->dump(0);
+    GetLinkManager()->dump(0);
 }
 
 static void OnFailure(struct WifiDirectCommand *base, int32_t reason)
@@ -133,8 +133,8 @@ static void OnFailure(struct WifiDirectCommand *base, int32_t reason)
     }
 
     GetWifiDirectNegotiator()->resetContext();
-    GetResourceManager()->dump();
-    GetLinkManager()->dump();
+    GetResourceManager()->dump(0);
+    GetLinkManager()->dump(0);
 }
 
 static struct WifiDirectCommand* Duplicate(struct WifiDirectCommand *base)

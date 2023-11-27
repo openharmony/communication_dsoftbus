@@ -66,10 +66,7 @@ typedef struct {
 // 'GATT' and 'CoC' protocols under BLE use the same definitions
 typedef struct {
     BleProtocolType protoType;
-    int32_t psm; // mark--
-    char nodeIdHash[NODEID_SHORT_HASH_LEN];
-    char localUdidHash[UDID_SHORT_HASH_LEN];
-    char peerUdidHash[SHA_256_HASH_LEN];
+    char networkId[NETWORK_ID_BUF_LEN];
 } BleDirectInfo;
 
 typedef struct {

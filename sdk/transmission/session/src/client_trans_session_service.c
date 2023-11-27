@@ -230,6 +230,7 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
         .peerDeviceId = peerNetworkId,
         .groupId = groupId,
         .attr = tmpAttr,
+        .isQosLane = false,
     };
 
     int32_t sessionId = INVALID_SESSION_ID;

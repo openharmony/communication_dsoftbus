@@ -328,7 +328,7 @@ static int32_t GetAllInterfacesNameAndMac(struct InterfaceInfo **infoArray, int3
     return SOFTBUS_OK;
 }
 
-static void Dump(void)
+static void Dump(int32_t fd)
 {
     struct ResourceManager *self = GetResourceManager();
     CONN_CHECK_AND_RETURN_LOGW(self->isInited, CONN_WIFI_DIRECT, "not inited");
@@ -336,7 +336,7 @@ static void Dump(void)
 
     SoftBusMutexLock(&self->mutex);
     LIST_FOR_EACH_ENTRY(interfaceInfo, &self->interfaces, struct InterfaceInfo, node) {
-        interfaceInfo->dump(interfaceInfo);
+        interfaceInfo->dump(interfaceInfo, fd);
     }
     SoftBusMutexUnlock(&self->mutex);
 }
@@ -494,7 +494,7 @@ int32_t ResourceManagerInit(void)
     ret = InitWifiDirectInfo();
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_INIT, "init interface info failed");
 
-    g_manager.dump();
+    g_manager.dump(0);
     return SOFTBUS_OK;
 }
 

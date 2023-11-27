@@ -29,7 +29,7 @@ bool ConnBleDirectIsEnable(BleProtocolType protocol)
     return false;
 }
 
-int32_t ConnBleDirectInit()
+int32_t ConnBleDirectInit(void)
 {
     return SOFTBUS_OK;
 }

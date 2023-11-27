@@ -296,6 +296,11 @@ int32_t LnnGenLocalUuid(char *uuid, uint32_t len)
     return GetNetBuilderDepsInterface()->LnnGenLocalUuid(uuid, len);
 }
 
+int32_t LnnGenLocalIrk(unsigned char *irk, uint32_t len)
+{
+    return GetNetBuilderDepsInterface()->LnnGenLocalIrk(irk, len);
+}
+
 int32_t LnnGenLocalNetworkId(char *networkId, uint32_t len)
 {
     return GetNetBuilderDepsInterface()->LnnGenLocalNetworkId(networkId, len);
@@ -326,9 +331,19 @@ int32_t LnnInitP2p(void)
     return GetNetBuilderDepsInterface()->LnnInitP2p();
 }
 
+int32_t LnnInitWifiDirect(void)
+{
+    return GetNetBuilderDepsInterface()->LnnInitWifiDirect();
+}
+
 void LnnDeinitP2p(void)
 {
     return GetNetBuilderDepsInterface()->LnnDeinitP2p();
+}
+
+void LnnDeinitWifiDirect(void)
+{
+    return GetNetBuilderDepsInterface()->LnnDeinitWifiDirect();
 }
 
 int32_t LnnInitNetworkInfo(void)

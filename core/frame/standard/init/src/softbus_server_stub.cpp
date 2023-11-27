@@ -203,7 +203,6 @@ void SoftBusServerStub::InitMemberPermissionMap()
 int32_t SoftBusServerStub::OnRemoteRequest(uint32_t code,
     MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    COMM_LOGI(COMM_SVC, "SoftBusServerStub::OnReceived, code = %u", code);
     SoftbusRecordCalledApiCnt(code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         COMM_LOGE(COMM_SVC, "SOFTBUS_SERVER_NOT_INIT ReadInterfaceToken failed!");

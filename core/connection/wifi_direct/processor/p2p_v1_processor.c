@@ -928,7 +928,7 @@ static int32_t ProcessNoAvailableInterface(struct NegotiateMessage *msg, enum Wi
             continue;
         }
 
-        GetLinkManager()->dump();
+        GetLinkManager()->dump(0);
         CONN_LOGI(CONN_WIFI_DIRECT, "fix the obsolete link");
         if (myRole == WIFI_DIRECT_ROLE_GC) {
             (void)DestroyGroup();

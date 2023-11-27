@@ -119,7 +119,26 @@ void LnnSetBtMac(NodeInfo *info, const char *mac)
     if (strncpy_s(info->connectInfo.macAddr, MAC_LEN, mac, strlen(mac)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "str copy error");
     }
-    return;
+}
+
+const char *LnnGetBleMac(const NodeInfo *info)
+{
+    if (info == NULL) {
+        LNN_LOGE(LNN_LEDGER, "PARA ERROR");
+        return DEFAULT_MAC;
+    }
+    return info->connectInfo.bleMacAddr;
+}
+
+void LnnSetBleMac(NodeInfo *info, const char *mac)
+{
+    if (info == NULL || mac == NULL) {
+        LNN_LOGE(LNN_LEDGER, "PARA ERROR");
+        return;
+    }
+    if (strcpy_s(info->connectInfo.bleMacAddr, MAC_LEN, mac) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "str copy error");
+    }
 }
 
 const char *LnnGetNetIfName(const NodeInfo *info)
@@ -140,7 +159,6 @@ void LnnSetNetIfName(NodeInfo *info, const char *netIfName)
     if (strncpy_s(info->connectInfo.netIfName, NET_IF_NAME_LEN, netIfName, strlen(netIfName)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "str copy error");
     }
-    return;
 }
 
 const char *LnnGetWiFiIp(const NodeInfo *info)
@@ -161,7 +179,6 @@ void LnnSetWiFiIp(NodeInfo *info, const char *ip)
     if (strncpy_s(info->connectInfo.deviceIp, sizeof(info->connectInfo.deviceIp), ip, strlen(ip)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
     }
-    return;
 }
 
 const char *LnnGetMasterUdid(const NodeInfo *info)
@@ -347,6 +364,15 @@ const char *LnnGetP2pMac(const NodeInfo *info)
     return info->p2pInfo.p2pMac;
 }
 
+const char *LnnGetWifiDirectAddr(const NodeInfo *info)
+{
+    if (info == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return NULL;
+    }
+    return info->wifiDirectAddr;
+}
+
 int32_t LnnSetDataChangeFlag(NodeInfo *info, uint16_t dataChangeFlag)
 {
     if (info == NULL) {
@@ -450,6 +476,19 @@ int32_t LnnSetPtk(NodeInfo *info, const char *remotePtk)
     }
     if (memcpy_s(info->remotePtk, PTK_DEFAULT_LEN, remotePtk, PTK_DEFAULT_LEN) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy ptk err");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnSetWifiDirectAddr(NodeInfo *info, const char *wifiDirectAddr)
+{
+    if (info == NULL || wifiDirectAddr == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strcpy_s(info->wifiDirectAddr, sizeof(info->wifiDirectAddr), wifiDirectAddr) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s wifidirect addr err");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;

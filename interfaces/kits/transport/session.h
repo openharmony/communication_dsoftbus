@@ -311,6 +311,7 @@ typedef struct {
      *
      * @param sessionId Indicates the unique session ID.
      * @param data Indicates the pointer to the data received.
+     * User-defined data type, users should apply for memory by themselves.
      * @param dataLen Indicates the length of the data received.
      * @since 1.0
      * @version 1.0

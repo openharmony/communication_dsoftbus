@@ -386,6 +386,7 @@ void InterfaceInfoConstructor(struct InterfaceInfo* self)
     self->decreaseRefCount = DecreaseRefCount;
 
     ListInit(&self->node);
+    self->dumpFilter = false;
 }
 
 void InterfaceInfoConstructorWithName(struct InterfaceInfo* self, const char *name)

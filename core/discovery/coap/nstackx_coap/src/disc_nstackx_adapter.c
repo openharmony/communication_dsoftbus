@@ -243,7 +243,9 @@ int32_t DiscCoapRegisterServiceData(const unsigned char *capabilityData, uint32_
 
     int32_t authPort = 0;
     int32_t ret = LnnGetLocalNumInfo(NUM_KEY_AUTH_PORT, &authPort);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, DISC_COAP, "get auth port failed: %d", ret);
+    if (ret != SOFTBUS_OK) {
+        DISC_LOGW(DISC_COAP, "get auth port from lnn failed: %d", ret);
+    }
 
     char serviceData[NSTACKX_MAX_SERVICE_DATA_LEN] = {0};
     if (sprintf_s(serviceData, NSTACKX_MAX_SERVICE_DATA_LEN, "port:%d,", authPort) == -1) {

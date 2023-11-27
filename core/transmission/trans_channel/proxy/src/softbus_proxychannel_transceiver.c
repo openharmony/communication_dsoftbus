@@ -393,7 +393,7 @@ static bool CompareConnectOption(const ConnectOption *itemConnInfo, const Connec
         }
         return false;
     } else if (connInfo->type == CONNECT_BLE_DIRECT) {
-        if ((strcmp(connInfo->bleDirectOption.nodeIdHash, itemConnInfo->bleDirectOption.nodeIdHash) == 0) &&
+        if ((strcmp(connInfo->bleDirectOption.networkId, itemConnInfo->bleDirectOption.networkId) == 0) &&
             (connInfo->bleDirectOption.protoType == itemConnInfo->bleDirectOption.protoType)) {
             return true;
         }
@@ -572,7 +572,8 @@ static void TransOnConnectFailed(uint32_t requestId, int32_t reason)
 {
     TransEventExtra extra = {
         .requestId = requestId,
-        .errcode = reason
+        .errcode = reason,
+        .result = EVENT_STAGE_RESULT_FAILED
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, extra);
     TRANS_LOGE(TRANS_CTRL, "Connect fail reqId=%u, reason=%d", requestId, reason);
@@ -652,7 +653,7 @@ static int32_t TransProxyOpenNewConnChannel(
     ProxyConnInfo *connChan = (ProxyConnInfo *)SoftBusCalloc(sizeof(ProxyConnInfo));
     if (connChan == NULL) {
         TransProxyDelChanByChanId(channelId);
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     connChan->requestId = reqId;
     connChan->state = PROXY_CHANNEL_STATUS_PYH_CONNECTING;
@@ -685,20 +686,20 @@ int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, const ConnectOption *c
     int32_t chanNewId = GenerateChannelId(false);
     if (chanNewId == INVALID_CHANNEL_ID) {
         TRANS_LOGE(TRANS_CTRL, "proxy channelId is invalid");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_INVALID_CHANNEL_ID;
     }
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (chan == NULL) {
         ReleaseProxyChannelId(chanNewId);
         TRANS_LOGE(TRANS_CTRL, "SoftBusCalloc fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     chan->type = connInfo->type;
     if (TransProxyCreateChanInfo(chan, chanNewId, appInfo) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "TransProxyCreateChanInfo err");
         ReleaseProxyChannelId(chanNewId);
         SoftBusFree(chan);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_PROXY_CREATE_CHANNEL_FAILED;
     }
     if (TransGetConn(connInfo, &conn) == SOFTBUS_OK) {
         ret = TransProxyConnExistProc(&conn, chan, chanNewId);

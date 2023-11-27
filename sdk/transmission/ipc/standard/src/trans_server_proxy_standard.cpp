@@ -216,6 +216,15 @@ static bool TransWriteSessionAttrs(const SessionAttribute *attrs, MessageParcel 
 
 static bool WriteQosInfo(const SessionParam *param, MessageParcel &data)
 {
+    if (!data.WriteBool(param->isQosLane)) {
+        TRANS_LOGE(TRANS_SDK, "OpenSession write qos flag failed!");
+        return false;
+    }
+
+    if (!param->isQosLane) {
+        return true;
+    }
+
     if (!data.WriteUint32(param->qosCount)) {
         TRANS_LOGE(TRANS_SDK, "OpenSession write count of qos failed!");
         return false;

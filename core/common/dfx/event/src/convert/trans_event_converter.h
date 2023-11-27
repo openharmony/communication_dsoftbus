@@ -24,16 +24,16 @@ extern "C" {
 
 #define TRANS_ASSIGNER(type, filedName, filed)                                                                \
     static inline bool TransAssigner##filedName(                                                              \
-        const char eventName[], HiSysEventParamType paramType, SoftbusEventForm form, HiSysEventParam *param) \
+        const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param) \
     {                                                                                                         \
-        if (Assigner##type(form.transExtra.filed, &param) && CopyString(param->name, eventName)) {            \
+        if (Assigner##type(form->transExtra->filed, &param) && CopyString(param->name, eventName)) {          \
             param->t = paramType;                                                                             \
             return true;                                                                                      \
         }                                                                                                     \
         return false;                                                                                         \
     }
 
-TRANS_ASSIGNER(Int32, Result, result)
+TRANS_ASSIGNER(Errcode, Result, result)
 TRANS_ASSIGNER(Errcode, Errcode, errcode)
 TRANS_ASSIGNER(String, SocketName, socketName)
 TRANS_ASSIGNER(Int32, DataType, dataType)
@@ -56,7 +56,7 @@ TRANS_ASSIGNER(String, CalleePkg, calleePkg)
 
 #define TRANS_ASSIGNER_SIZE 20 // Size of g_transAssigners
 static const HiSysEventParamAssigner g_transAssigners[] = {
-    {"STAGE_RES",         HISYSEVENT_INT32,  TransAssignerResult        },
+    { "STAGE_RES",        HISYSEVENT_INT32,  TransAssignerResult        },
     { "ERROR_CODE",       HISYSEVENT_INT32,  TransAssignerErrcode       },
     { "SOCKET_NAME",      HISYSEVENT_STRING, TransAssignerSocketName    },
     { "DATA_TYPE",        HISYSEVENT_INT32,  TransAssignerDataType      },
@@ -76,17 +76,22 @@ static const HiSysEventParamAssigner g_transAssigners[] = {
     { "PEER_NET_ID",      HISYSEVENT_STRING, TransAssignerPeerNetworkId },
     { "HOST_PKG",         HISYSEVENT_STRING, TransAssignerCallerPkg     },
     { "TO_CALL_PKG",      HISYSEVENT_STRING, TransAssignerCalleePkg     },
- // Modification Note: remember updating TRANS_ASSIGNER_SIZE
+    // Modification Note: remember updating TRANS_ASSIGNER_SIZE
 };
 
-static inline void ConvertTransForm2Param(HiSysEventParam params[], size_t size, SoftbusEventForm form)
+static inline size_t ConvertTransForm2Param(HiSysEventParam params[], size_t size, SoftbusEventForm *form)
 {
+    size_t validSize = 0;
+    if (form == NULL || form->transExtra == NULL) {
+        return validSize;
+    }
     for (size_t i = 0; i < size; ++i) {
         HiSysEventParamAssigner assigner = g_transAssigners[i];
-        if (!assigner.Assign(assigner.name, assigner.type, form, &params[i])) {
-            COMM_LOGE(COMM_DFX, "assign event fail, name=%s", assigner.name);
+        if (assigner.Assign(assigner.name, assigner.type, form, &params[validSize])) {
+            ++validSize;
         }
     }
+    return validSize;
 }
 
 #ifdef __cplusplus
