@@ -36,7 +36,7 @@ typedef enum {
     EVENT_MODULE_TRANS,
 } SoftbusEventModule;
 
-void SoftbusEventInner(SoftbusEventModule module, SoftbusEventForm form);
+void SoftbusEventInner(SoftbusEventModule module, SoftbusEventForm *form);
 
 #ifdef __cplusplus
 }

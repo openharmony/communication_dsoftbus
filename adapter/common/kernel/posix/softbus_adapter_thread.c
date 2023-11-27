@@ -54,7 +54,6 @@ int32_t SoftBusMutexInit(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr)
         return SOFTBUS_INVALID_PARAM;
     }
     if ((void *)*mutex != NULL) {
-        HILOG_WARN(SOFTBUS_HILOG_ID, "mutex is already init");
         (void)pthread_mutex_unlock(&g_adapterStaticLock);
         return SOFTBUS_OK;
     }

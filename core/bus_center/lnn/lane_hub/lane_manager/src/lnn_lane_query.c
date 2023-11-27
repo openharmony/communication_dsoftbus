@@ -18,6 +18,7 @@
 #include <securec.h>
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
+#include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
@@ -28,7 +29,7 @@
 #include "softbus_wifi_api_adapter.h"
 #include "wifi_direct_manager.h"
 
-#define QOS_MIN_BANDWIDTH (500 * 1024)
+#define QOS_MIN_BANDWIDTH (384 * 1024)
 #define QOS_P2P_ONLY_BANDWIDTH (160 * 1024 * 1024)
 
 typedef struct {
@@ -169,10 +170,20 @@ static int32_t BleLinkState(const char *networkId)
 
 static int32_t WlanLinkState(const char *networkId)
 {
-    int32_t local, remote;
     if (!SoftBusIsWifiActive()) {
         return SOFTBUS_WIFI_OFF;
     }
+    NodeInfo node;
+    (void)memset_s(&node, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &node) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get remote node info fail");
+        return SOFTBUS_ERR;
+    }
+    if (!LnnHasDiscoveryType(&node, DISCOVERY_TYPE_WIFI) && !LnnHasDiscoveryType(&node, DISCOVERY_TYPE_LSA)) {
+        LNN_LOGE(LNN_LANE, "peer node not wifi online");
+        return SOFTBUS_ERR;
+    }
+    int32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
         return SOFTBUS_ERR;

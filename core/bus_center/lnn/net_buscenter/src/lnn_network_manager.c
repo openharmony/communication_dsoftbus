@@ -155,7 +155,7 @@ static int32_t ParseIfNameConfig(char *buf, uint32_t bufLen)
     char *value2 = NULL;
     if (buf == NULL || bufLen == 0) {
         LNN_LOGE(LNN_BUILDER, "parameters invaild");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     char *key = strtok_s(buf, LNN_DELIMITER_OUTSIDE, &outerPtr);
     while (key != NULL) {
@@ -214,9 +214,10 @@ static int32_t LnnInitManagerByConfig(void)
         }
         return SOFTBUS_OK;
     }
-    if (ParseIfNameConfig(netIfName, strlen(netIfName)) != SOFTBUS_OK) {
+    int32_t ret = ParseIfNameConfig(netIfName, strlen(netIfName));
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "ifName str parse fail!");
-        return SOFTBUS_ERR;
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -319,7 +320,7 @@ int32_t LnnRegistProtocol(LnnProtocolManager *protocolMgr)
     if (protocolMgr == NULL || protocolMgr->getListenerModule == NULL || protocolMgr->init == NULL ||
         protocolMgr->enable == NULL) {
         LNN_LOGE(LNN_BUILDER, "bad input protocol");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     for (uint8_t i = 0; i < LNN_NETWORK_MAX_PROTOCOL_COUNT; i++) {
         if (g_networkProtocols[i] != NULL) {
@@ -346,7 +347,7 @@ int32_t UnregistProtocol(LnnProtocolManager *protocolMgr)
     uint8_t i;
     if (protocolMgr == NULL) {
         LNN_LOGE(LNN_BUILDER, "protocoMgr is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     for (i = 0; i < LNN_NETWORK_MAX_PROTOCOL_COUNT; i++) {
         if (g_networkProtocols[i] == protocolMgr) {
@@ -625,23 +626,23 @@ int32_t LnnInitNetworkManager(void)
     }
     if (LnnRegisterEventHandler(LNN_EVENT_NIGHT_MODE_CHANGED, NightModeChangeEventHandler) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "register night mode change event handler fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
     }
     if (LnnRegisterEventHandler(LNN_EVENT_USER_STATE_CHANGED, NetUserStateEventHandler) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "Net regist user background evt handler fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
     }
     if (LnnRegisterEventHandler(LNN_EVENT_SCREEN_LOCK_CHANGED, NetLockStateEventHandler) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "Net regist user unlock evt handler fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
     }
     if (LnnRegisterEventHandler(LNN_EVENT_OOBE_STATE_CHANGED, NetOOBEStateEventHandler) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "Net regist OOBE state evt handler fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
     }
     if (LnnRegisterEventHandler(LNN_EVENT_ACCOUNT_CHANGED, NetAccountStateChangeEventHandler) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "Net regist account change evt handler fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -666,7 +667,7 @@ int32_t LnnInitNetworkManagerDelay(void)
     char udid[UDID_BUF_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "get local udid error");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR;
     }
     LnnNetIfMgr *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_netIfNameList, LnnNetIfMgr, node) {
@@ -740,7 +741,7 @@ int32_t LnnGetNetIfTypeByName(const char *ifName, LnnNetIfType *type)
 {
     if (ifName == NULL || type == NULL) {
         LNN_LOGE(LNN_BUILDER, "parameters is NULL");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     LnnNetIfMgr *netif = NULL;
     LIST_FOR_EACH_ENTRY(netif, &g_netIfNameList, LnnNetIfMgr, node) {
@@ -756,7 +757,7 @@ int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type)
 {
     if (type == NULL || ifName == NULL) {
         LNN_LOGE(LNN_BUILDER, "parameters is NULL");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     LnnNetIfType netifType;
     int32_t ret = LnnGetNetIfTypeByName(ifName, &netifType);

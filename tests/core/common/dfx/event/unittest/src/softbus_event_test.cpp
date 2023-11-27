@@ -59,7 +59,7 @@ HWTEST_F(SoftbusEventTest, SoftbusEventTest002, TestSize.Level0)
         HiSysEvent_Write(StrEq(form.func), Eq(form.line), StrEq(SOFTBUS_EVENT_DOMAIN), _,
             Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR), SoftbusParamArrayMatcher(form, VALID_FORM_SIZE), _))
         .Times(1);
-    SoftbusEventInner(EVENT_MODULE_CONN, form);
+    SoftbusEventInner(EVENT_MODULE_CONN, &form);
 }
 
 } // namespace OHOS

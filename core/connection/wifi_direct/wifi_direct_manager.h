@@ -54,6 +54,7 @@ struct WifiDirectManager {
     struct WifiDirectStatusListener listener;
     enum WifiDirectRole myRole;
     char localMac[MAC_ADDR_STR_LEN];
+    bool feature;
 };
 
 /* singleton */

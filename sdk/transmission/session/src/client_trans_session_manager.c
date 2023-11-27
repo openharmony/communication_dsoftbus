@@ -1709,6 +1709,7 @@ int32_t ClientIpcOpenSession(int32_t sessionId, const QosTV *qos, uint32_t qosCo
         .peerDeviceId = sessionNode->info.peerDeviceId,
         .groupId = "reserved",
         .attr = &tmpAttr,
+        .isQosLane = true,
     };
 
     param.qosCount = qosCount;
