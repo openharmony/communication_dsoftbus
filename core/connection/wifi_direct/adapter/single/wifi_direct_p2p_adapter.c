@@ -454,6 +454,7 @@ static int32_t P2pShareLinkRemoveGroup(const char *interface)
 
 static int32_t P2pRemoveGroup(const char *interface)
 {
+    CONN_CHECK_AND_RETURN_RET_LOGW(interface != NULL, SOFTBUS_ERR, CONN_WIFI_DIRECT, "interface is null");
     struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(interface);
     if (info == NULL) {
         CONN_LOGE(CONN_WIFI_DIRECT, "can't find interface %s", interface);

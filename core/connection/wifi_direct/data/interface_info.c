@@ -404,9 +404,8 @@ void InterfaceInfoDestructor(struct InterfaceInfo* self)
 struct InterfaceInfo* InterfaceInfoNew(void)
 {
     struct InterfaceInfo *self = (struct InterfaceInfo *)SoftBusCalloc(sizeof(*self));
-    if (self) {
-        InterfaceInfoConstructor(self);
-    }
+    CONN_CHECK_AND_RETURN_RET_LOGE(self != NULL, NULL, CONN_WIFI_DIRECT, "self is null");
+    InterfaceInfoConstructor(self);
 
     return self;
 }
@@ -420,10 +419,9 @@ void InterfaceInfoDelete(struct InterfaceInfo* self)
 struct InterfaceInfo* InterfaceInfoNewArray(size_t size)
 {
     struct InterfaceInfo *self = (struct InterfaceInfo *)SoftBusCalloc(sizeof(*self) * size);
-    if (self) {
-        for (size_t i = 0; i < size; i++) {
-            InterfaceInfoConstructor(self + i);
-        }
+    CONN_CHECK_AND_RETURN_RET_LOGE(self != NULL, NULL, CONN_WIFI_DIRECT, "self is null");
+    for (size_t i = 0; i < size; i++) {
+        InterfaceInfoConstructor(self + i);
     }
 
     return self;

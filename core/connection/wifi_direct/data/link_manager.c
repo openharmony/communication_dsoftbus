@@ -43,7 +43,7 @@ static struct InnerLink* GetLinkByDevice(const char *macString)
     struct InnerLink *target = NULL;
     for (size_t type = 0; type < WIFI_DIRECT_LINK_TYPE_MAX; type++) {
         target = self->getLinkByTypeAndDevice(type, macString);
-        if (target) {
+        if (target != NULL) {
             return target;
         }
     }
@@ -61,7 +61,7 @@ static struct InnerLink* GetLinkByTypeAndDevice(enum WifiDirectLinkType linkType
     SoftBusMutexLock(&self->mutex);
     LIST_FOR_EACH_ENTRY(target, &self->linkLists[linkType], struct InnerLink, node) {
         char *mac = target->get(target, IL_KEY_REMOTE_BASE_MAC, NULL, NULL);
-        if (mac && !strcmp(mac, macString)) {
+        if ((mac != NULL) && (strcmp(mac, macString) == 0)) {
             SoftBusMutexUnlock(&self->mutex);
             return target;
         }
@@ -293,7 +293,7 @@ static int32_t GenerateLinkId(struct InnerLink *innerLink, int32_t requestId, in
     enum WifiDirectLinkType type = innerLink->getInt(innerLink, IL_KEY_LINK_TYPE, WIFI_DIRECT_LINK_TYPE_INVALID);
     char *remoteMac = innerLink->getString(innerLink, IL_KEY_REMOTE_BASE_MAC, "");
     struct InnerLink *originInnerLink = self->getLinkByTypeAndDevice(type, remoteMac);
-    if (!originInnerLink) {
+    if (originInnerLink == NULL) {
         CONN_LOGE(CONN_WIFI_DIRECT, "not find");
         return LINK_ID_INVALID;
     }
@@ -320,7 +320,7 @@ static void RecycleLinkId(int32_t linkId, const char *remoteMac)
         return;
     }
     struct InnerLink *originInnerLink = GetLinkManager()->getLinkById(linkId);
-    if (!originInnerLink) {
+    if (originInnerLink == NULL) {
         CONN_LOGE(CONN_WIFI_DIRECT, "not find");
         return;
     }
@@ -342,7 +342,7 @@ static void SetNegotiateChannelForLink(struct WifiDirectNegotiateChannel *channe
     AnonymizeFree(anonymousUuid);
 
     struct WifiDirectNegotiateChannel *channelOld = target->getPointer(target, IL_KEY_NEGO_CHANNEL, NULL);
-    if (channelOld) {
+    if (channelOld != NULL) {
         channelOld->destructor(channelOld);
     }
     struct WifiDirectNegotiateChannel *channelNew = channel->duplicate(channel);
@@ -366,7 +366,7 @@ static void ClearNegotiateChannelForLink(const char *uuid, bool destroy)
     }
 
     struct DefaultNegotiateChannel *channelOld = target->getPointer(target, IL_KEY_NEGO_CHANNEL, NULL);
-    if (channelOld) {
+    if (channelOld != NULL) {
         DefaultNegotiateChannelDelete(channelOld);
     }
     target->remove(target, IL_KEY_NEGO_CHANNEL);
@@ -479,7 +479,7 @@ static void RemoveLink(struct InnerLink *link)
 
     struct LinkManager *self = GetLinkManager();
     struct InnerLink *oldLink = self->getLinkByTypeAndDevice(linkType, mac);
-    if (oldLink) {
+    if (oldLink != NULL) {
         SoftBusMutexLock(&self->mutex);
         oldLink->setState(oldLink, INNER_LINK_STATE_DISCONNECTED);
         OnInnerLinkChange(oldLink, true);
@@ -493,11 +493,11 @@ static void RemoveLink(struct InnerLink *link)
 
 static void UpdateLink(struct InnerLink *oldLink, struct InnerLink *newLink)
 {
-    if (!oldLink) {
+    if (oldLink == NULL) {
         AddLink(newLink);
         return;
     }
-    if (!newLink) {
+    if (newLink == NULL) {
         RemoveLink(oldLink);
         return;
     }
@@ -567,7 +567,7 @@ static void AdjustIfRemoteMacChange(struct InnerLink *innerLink)
         innerLink->putString(innerLink, IL_KEY_LOCAL_BASE_MAC, targetLocalMac);
     }
     struct WifiDirectIpv4Info *targetRemoteIpv4 = target->getRawData(target, IL_KEY_REMOTE_IPV4, NULL, NULL);
-    if (targetRemoteIpv4) {
+    if (targetRemoteIpv4 != NULL) {
         innerLink->putRawData(innerLink, IL_KEY_REMOTE_IPV4, targetRemoteIpv4, sizeof(*targetRemoteIpv4));
     }
     SoftBusFree(target);

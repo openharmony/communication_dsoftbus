@@ -512,6 +512,7 @@ static void Dump(struct InfoContainer *self, int32_t fd)
 
 void InfoContainerConstructor(struct InfoContainer *self, struct InfoContainerKeyProperty *keyProperties, size_t max)
 {
+    CONN_CHECK_AND_RETURN_LOGW(self != NULL, CONN_WIFI_DIRECT, "self is null");
     self->dumpFilter = true;
     for (size_t key = 0; key < max; key++) {
         self->entries[key].data = NULL;
@@ -547,6 +548,7 @@ void InfoContainerConstructor(struct InfoContainer *self, struct InfoContainerKe
 
 void InfoContainerDestructor(struct InfoContainer *self, size_t max)
 {
+    CONN_CHECK_AND_RETURN_LOGW(self != NULL, CONN_WIFI_DIRECT, "self is null");
     for (size_t key = 0; key < max; key++) {
         char *data = self->entries[key].data;
         if (data) {
