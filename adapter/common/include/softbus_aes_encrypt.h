@@ -29,8 +29,6 @@ extern "C" {
 #define AES_IV_LENGTH          16
 #define AES_GCM_TAG_LEN        16
 #define RANDOM_LENGTH          8
-#define TAG_LEN                16
-#define GCM_OVERHEAD_LEN       TAG_LEN
 
 typedef struct {
     uint8_t *key;
@@ -58,13 +56,13 @@ int32_t SoftBusGenerateHmacHash(
     const EncryptKey *randomKey, const uint8_t *rootKey, uint32_t rootKeyLen, uint8_t *hash, uint32_t hashLen);
 
 // Aes-cfb encrypt and decrypt by randomKey and rootKey
-int32_t SoftbusAesCfbRootEncrypt(const AesInputData *inData, const EncryptKey *randomKey, EncryptKey *rootKey,
+int32_t SoftBusAesCfbRootEncrypt(const AesInputData *inData, const EncryptKey *randomKey, EncryptKey *rootKey,
     int32_t encMode, AesOutputData *outData);
 
-int32_t SoftbusAesCfbEncrypt(
+int32_t SoftBusAesCfbEncrypt(
     const AesInputData *inData, AesCipherKey *cipherKey, int32_t encMode, AesOutputData *outData);
 
-int32_t SoftbusAesGcmEncrypt(
+int32_t SoftBusAesGcmEncrypt(
     const AesInputData *inData, AesCipherKey *cipherKey, int32_t encMode, AesOutputData *outData);
 
 #ifdef __cplusplus
