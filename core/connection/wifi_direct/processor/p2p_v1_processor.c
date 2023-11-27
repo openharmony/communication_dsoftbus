@@ -1290,7 +1290,7 @@ static int32_t ProcessGetInterfaceInfoRequest(struct NegotiateMessage *msg)
         CONN_CHECK_AND_RETURN_RET_LOGW(response, SOFTBUS_ERR, CONN_WIFI_DIRECT, "build interface info response failed");
         ret = GetWifiDirectNegotiator()->postData(response);
         NegotiateMessageDelete(response);
-        if (self->pendingRequestMsg) {
+        if (self->pendingRequestMsg != NULL) {
             NegotiateMessageDelete(self->pendingRequestMsg);
             self->pendingRequestMsg = NULL;
         }
@@ -1560,8 +1560,10 @@ static void InitBasicInnerLink(struct InnerLink *innerLink)
 static void NotifyNewClient(const char *localInterface, const char *remoteMac)
 {
     struct WifiDirectConnectParams params;
-    (void)strcpy_s(params.interface, sizeof(params.interface), localInterface);
-    (void)strcpy_s(params.remoteMac, sizeof(params.remoteMac), remoteMac);
+    int32_t ret = strcpy_s(params.interface, sizeof(params.interface), localInterface);
+    CONN_CHECK_AND_RETURN_LOGE(ret == EOK, CONN_WIFI_DIRECT, "copy local interface failed");
+    ret = strcpy_s(params.remoteMac, sizeof(params.remoteMac), remoteMac);
+    CONN_CHECK_AND_RETURN_LOGE(ret == EOK, CONN_WIFI_DIRECT, "copy remote mac failed");
 
     GetWifiDirectEntityFactory()->createEntity(ENTITY_TYPE_P2P)->notifyNewClientJoining(&params);
 }
@@ -1569,8 +1571,10 @@ static void NotifyNewClient(const char *localInterface, const char *remoteMac)
 static void CancelNewClient(const char *localInterface, const char *remoteMac)
 {
     struct WifiDirectConnectParams params;
-    (void)strcpy_s(params.interface, sizeof(params.interface), localInterface);
-    (void)strcpy_s(params.remoteMac, sizeof(params.remoteMac), remoteMac);
+    int32_t ret = strcpy_s(params.interface, sizeof(params.interface), localInterface);
+    CONN_CHECK_AND_RETURN_LOGE(ret == EOK, CONN_WIFI_DIRECT, "copy local interface failed");
+    ret = strcpy_s(params.remoteMac, sizeof(params.remoteMac), remoteMac);
+    CONN_CHECK_AND_RETURN_LOGE(ret == EOK, CONN_WIFI_DIRECT, "copy remote mac failed");
 
     GetWifiDirectEntityFactory()->createEntity(ENTITY_TYPE_P2P)->cancelNewClientJoining(&params);
 }

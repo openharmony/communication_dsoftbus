@@ -369,6 +369,7 @@ static size_t GetKeyFromKeyProperty(struct InfoContainerKeyProperty *keyProperty
 
 static bool UnmarshallingPrimary(struct InnerLink *self, enum InnerLinkKey key, uint8_t *data, size_t size)
 {
+    CONN_CHECK_AND_RETURN_RET_LOGW(self != NULL, false, CONN_WIFI_DIRECT, "self is null");
     self->putRawData(self, key, data, ALIGN_SIZE_4(size));
     return true;
 }
@@ -424,6 +425,7 @@ void InnerLinkDestructor(struct InnerLink *self)
 struct InnerLink* InnerLinkNew(void)
 {
     struct InnerLink *self = SoftBusCalloc(sizeof(*self));
+    CONN_CHECK_AND_RETURN_RET_LOGE(self != NULL, NULL, CONN_WIFI_DIRECT, "self is null");
     InnerLinkConstructor(self);
     return self;
 }
@@ -437,10 +439,9 @@ void InnerLinkDelete(struct InnerLink *self)
 struct InnerLink* InnerLinkNewArray(size_t size)
 {
     struct InnerLink *self = (struct InnerLink *)SoftBusCalloc(sizeof(*self) * size);
-    if (self) {
-        for (size_t i = 0; i < size; i++) {
-            InnerLinkConstructor(self + i);
-        }
+    CONN_CHECK_AND_RETURN_RET_LOGE(self != NULL, NULL, CONN_WIFI_DIRECT, "self is null");
+    for (size_t i = 0; i < size; i++) {
+        InnerLinkConstructor(self + i);
     }
 
     return self;
