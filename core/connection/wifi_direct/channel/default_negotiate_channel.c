@@ -220,8 +220,10 @@ int32_t OpenDefaultNegotiateChannel(const char *remoteIp, int32_t remotePort,
                                     struct WifiDirectNegotiateChannel *srcChannel,
                                     struct DefaultNegoChannelOpenCallback *callback)
 {
+    CONN_CHECK_AND_RETURN_RET_LOGW(remoteIp != NULL, SOFTBUS_ERR, CONN_WIFI_DIRECT, "remoteIp is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(callback != NULL, SOFTBUS_ERR, CONN_WIFI_DIRECT, "callback is null");
     bool isMeta = false;
-    if (srcChannel && srcChannel->isMetaChannel) {
+    if ((srcChannel != NULL) && (srcChannel->isMetaChannel != NULL)) {
         isMeta = srcChannel->isMetaChannel(srcChannel);
     }
     CONN_LOGI(CONN_WIFI_DIRECT, "remoteIp=%s remotePort=%d isMeta=%d", WifiDirectAnonymizeIp(remoteIp), remotePort,
@@ -249,6 +251,7 @@ int32_t OpenDefaultNegotiateChannel(const char *remoteIp, int32_t remotePort,
 
 void CloseDefaultNegotiateChannel(struct DefaultNegotiateChannel *self)
 {
+    CONN_CHECK_AND_RETURN_LOGW(self != NULL, CONN_WIFI_DIRECT, "self is null");
     AuthCloseConn(self->authId);
 }
 
