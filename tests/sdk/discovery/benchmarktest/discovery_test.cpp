@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -146,7 +146,10 @@ BENCHMARK_F(DiscoveryTest, PublishLNNTestCase)(benchmark::State &state)
             state.SkipWithError("PublishLNNTestCase failed.");
         }
         state.PauseTiming();
-        StopPublishLNN(g_pkgName, g_pInfo.publishId);
+        ret = StopPublishLNN(g_pkgName, g_pInfo.publishId);
+        if (ret != 0) {
+            state.SkipWithError("StopPublishLNNTestCase failed.");
+        }
     }
 }
 BENCHMARK_REGISTER_F(DiscoveryTest, PublishLNNTestCase);
@@ -191,7 +194,10 @@ BENCHMARK_F(DiscoveryTest, RefreshLNNTestCase)(benchmark::State &state)
             state.SkipWithError("RefreshLNNTestCase failed.");
         }
         state.PauseTiming();
-        StopRefreshLNN(g_pkgName, g_sInfo.subscribeId);
+        ret = StopRefreshLNN(g_pkgName, g_sInfo.subscribeId);
+        if (ret != 0) {
+            state.SkipWithError("StoptRefreshLNNTestCase failed.");
+        }
     }
 }
 BENCHMARK_REGISTER_F(DiscoveryTest, RefreshLNNTestCase);
