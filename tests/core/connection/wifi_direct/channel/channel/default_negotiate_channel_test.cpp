@@ -127,7 +127,8 @@ void WifiDirectNegotiateChannelConstructorTest(struct WifiDirectNegotiateChannel
 
 struct WifiDirectNegotiateChannel *WifiDirectNegotiateChannelNew(void)
 {
-    struct WifiDirectNegotiateChannel *self = static_cast<struct WifiDirectNegotiateChannel *>(SoftBusCalloc(sizeof(*self)));
+    struct WifiDirectNegotiateChannel *self
+                     = static_cast<struct WifiDirectNegotiateChannel *>(SoftBusCalloc(sizeof(*self)));
     WifiDirectNegotiateChannelConstructorTest(self);
     return self;
 }
@@ -148,16 +149,15 @@ HWTEST_F(WifiDirectChannelTest, testDirectChannelTest001, TestSize.Level0)
     struct DefaultNegoChannelOpenCallback callback;
     struct P2pV1Processor *self = GetP2pV1Processor();
     struct NegotiateMessage *msg = NegotiateMessageNew();
-    EXPECT_NE(msg,nullptr);
+    EXPECT_NE(msg, nullptr);
     
     struct WifiDirectNegotiateChannel *channel = WifiDirectNegotiateChannelNew();
-    EXPECT_NE(channel,nullptr);
+    EXPECT_NE(channel, nullptr);
     const char *remoteMac = "1a:2b:3c:4d:5e:6f:7g";
     const char *remoteIp = "192.168.1.1";
     channel->setP2pMac(channel, remoteMac);
     callback.onConnectFailure = OnConnectFailure;
     callback.onConnectSuccess = OnConnectSuccess;
-    EXPECT_NE(&callback,nullptr);
     int ret = OpenDefaultNegotiateChannel(remoteIp, self->goPort, channel, &callback);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 };
@@ -188,7 +188,7 @@ HWTEST_F(WifiDirectChannelTest, testDirectChannelTest003, TestSize.Level0)
 {
     WifiDirectNegotiateChannel channel;
     char deviceId[] = {'d', 'e', 'v', 'i', 'c', 'e', 'I', 'd'};
-    size_t size = sizeof(deviceId)/sizeof(deviceId[0]);
+    size_t size = sizeof(deviceId) / sizeof(deviceId[0]);
     int32_t ret = DefaultNegotiateChannelNew(1)->getDeviceId(&channel, deviceId, size);
     EXPECT_EQ(SOFTBUS_NOT_IMPLEMENT, ret);
 };
@@ -204,7 +204,7 @@ HWTEST_F(WifiDirectChannelTest, testDirectChannelTest004, TestSize.Level0)
     DefaultNegotiateChannel *base = DefaultNegotiateChannelNew(1);
     EXPECT_NE(base, nullptr);
     char p2pMac[] = {'p', '2', 'p', 'M', 'a', 'c'};
-    size_t p2pMacSize = sizeof(p2pMac)/sizeof(p2pMac[0]);
+    size_t p2pMacSize = sizeof(p2pMac) / sizeof(p2pMac[0]);
     int32_t ret = base->getP2pMac((WifiDirectNegotiateChannel*)base, p2pMac, p2pMacSize);
     EXPECT_EQ(SOFTBUS_NOT_IMPLEMENT, ret);
 };
