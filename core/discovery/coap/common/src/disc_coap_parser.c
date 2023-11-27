@@ -83,6 +83,8 @@ static void ParseItemDataFromServiceData(char *serviceData, const char *key, cha
     while (itemStr != NULL) {
         valueStr = strchr(itemStr, ':');
         if (valueStr == NULL) {
+            DISC_LOGW(DISC_COAP, "invalid service data item=%s", itemStr);
+            itemStr = strtok_s(NULL, itemDelimit, &saveItemPtr);
             continue;
         }
         *valueStr = '\0';
