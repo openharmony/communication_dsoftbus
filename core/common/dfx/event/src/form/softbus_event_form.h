@@ -43,6 +43,10 @@ typedef struct {
         DiscEventExtra *discExtra;
         LnnEventExtra *lnnExtra;
         TransEventExtra *transExtra;
+        ConnAuditExtra *connAuditExtra;
+        DiscAuditExtra *discAuditExtra;
+        LnnAuditExtra *lnnAuditExtra;
+        TransAuditExtra *transAuditExtra;
     };
 } SoftbusEventForm;
 

@@ -67,6 +67,48 @@ DISCOVER_BEHAVIOR:
   PEER_NET_ID: { type: STRING, desc: peer device net id }
   PEER_DEV_TYPE: { type: STRING, desc: peer device type }
 
+DISCOVER_AUDIT:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: discovery audit behavior }
+  ORG_PKG: {type: STRING, desc: organization module name }
+  FUNC: {type: STRING, desc: current function name }
+  HOST_PKG: {type: STRING, desc: host module name }
+  BIZ_SCENE: {type: INT32, desc: business scene }
+  ERROR_CODE: { type: INT32, desc: error code }
+  AUDIT_TYPE: {type: INT32, desc: audit type }
+  BROADCAST_TYPE: { type: INT32, desc: broadcast type }
+  BROADCAST_FREQ: { type: INT32, desc: broadcast frequency }
+  ADV_CHANNEL: { type: INT32, desc: adv channel }
+  SCAN_TYPE: { type: INT32, desc: scan type }
+  SCAN_CYCLE: { type: STRING, desc: scan duty cycle }
+  SCAN_ID: { type: INT32, desc: scanner id }
+  SCAN_LISTENER_ID: { type: INT32, desc: scanner listhener id }
+  SCAN_INTERCAL: { type: INT32, desc: scanner interval }
+  SCAN_WINDOW: { type: INT32, desc: scanner window }
+  DISC_TYPE: { type: INT32, desc: discovery type }
+  DISC_MODE: { type: INT32, desc: discovery mode }
+  FIRST_DISCOVERY_TIME: { type: INT32, desc: time consuming to discover for the first time }
+  LOCAL_NET_ID: { type: STRING, desc: local device net id }
+  LOCAL_UDID: { type: STRING, desc: local device udid }
+  LOCAL_DEV_TYPE: { type: STRING, desc: local device type }
+  LOCAL_DEV_NAME: { type: STRING, desc: local device name }
+  LOCAL_CAPABILITY_BITMAP: { type: INT32, desc: local capability bitmap }
+  LOCAL_ACCOUNT_HASH: { type: STRING, desc: local account hash }
+  LOCAL_CUST_DATA: { type: STRING, desc: local cust data }
+  PEER_IP: { type: STRING, desc: peer device ip }
+  PEER_BR_MAC: { type: STRING, desc: peer device br mac }
+  PEER_BLE_MAC: { type: STRING, desc: peer device ble mac }
+  PEER_WIFI_MAC: { type: STRING, desc: peer device wifi mac }
+  PEER_PORT: { type: STRING, desc: peer device port }
+  PEER_UDID: { type: STRING, desc: peer device udid }
+  PEER_NET_ID: { type: STRING, desc: peer device net id }
+  PEER_DEV_TYPE: { type: STRING, desc: peer device type }
+  PEER_DEV_NAME: { type: STRING, desc: peer device name }
+  PEER_CAPABILITY_BITMAP: { type: INT32, desc: peer capability bitmap }
+  PEER_ACCOUNT_HASH: { type: STRING, desc: peer account hash }
+  PEER_CUST_DATA: { type: STRING, desc: peer cust data }
+  ERR_MSG: { type: STRING, desc: error message }
+  EXTRA: { type: STRING, desc: ectra information }
+
 BUSCENTER_BEHAVIOR:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: bus center behavior }
   ORG_PKG: {type: STRING, desc: organization module name }
@@ -91,6 +133,25 @@ BUSCENTER_BEHAVIOR:
   PEER_PORT: { type: STRING, desc: peer device port }
   PEER_UDID: { type: STRING, desc: peer device udid }
   PEER_NET_ID: { type: STRING, desc: peer device net id }
+  PEER_DEV_TYPE: { type: STRING, desc: peer device type }
+
+BUSCENTER_AUDIT:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: bus center audit behavior }
+  ORG_PKG: {type: STRING, desc: organization module name }
+  FUNC: {type: STRING, desc: current function name }
+  HOST_PKG: {type: STRING, desc: host module name }
+  TO_CALL_PKG: {type: STRING, desc: to call module name }
+  BIZ_SCENE: {type: INT32, desc: business scene }
+  ERROR_CODE: { type: INT32, desc: error code }
+  AUDIT_TYPE: {type: INT32, desc: audit type }
+  CONN_ID: { type: INT32, desc: connection id }
+  AUTH_LINK_TYPE: { type: INT32, desc: auth link type }
+  AUTH_ID: { type: INT32, desc: auth id }
+  ONLINE_NUM: { type: INT32, desc: current online device num }
+  PEER_IP: { type: STRING, desc: peer device ip }
+  PEER_BR_MAC: { type: STRING, desc: peer device br mac }
+  PEER_AUTH_PORT: { type: STRING, desc: peer puth port }
+  PEER_UDID: { type: STRING, desc: peer device udid }
   PEER_DEV_TYPE: { type: STRING, desc: peer device type }
 
 TRANSPORT_BEHAVIOR:
@@ -120,6 +181,35 @@ TRANSPORT_BEHAVIOR:
   PEER_CHAN_ID: { type: INT32, desc: peer channel id }
   PEER_NET_ID: { type: STRING, desc: peer device net id }
 
+TRANSPORT_AUDIT:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: transport audit behavior }
+  ORG_PKG: {type: STRING, desc: organization module name }
+  FUNC: {type: STRING, desc: current function name }
+  HOST_PKG: {type: STRING, desc: host module name }
+  TO_CALL_PKG: {type: STRING, desc: to call module name }
+  BIZ_SCENE: {type: INT32, desc: business scene }
+  ERROR_CODE: { type: INT32, desc: error code }
+  AUDIT_TYPE: {type: INT32, desc: audit type }
+  SESSION_NAME: {type: STRING, desc: session name }
+  PEER_DEV_ID: { type: INT32, desc: peer device id }
+  CHANNEL_ID: { type: INT32, desc: channel id }
+  PEER_CHANNEL_ID: { type: INT32, desc: peer channel id }
+  CHANNEL_TYPE: { type: INT32, desc: channel type }
+  LANE_ID: { type: INT32, desc: lane id }
+  AUTH_ID: { type: INT32, desc: auth id }
+  PREFER_LINK_TYPE: { type: INT32, desc: preferred link type }
+  LANE_TRANS_TYPE: { type: INT32, desc: transport lane data type }
+  REQ_ID: { type: INT32, desc: request id }
+  LINK_TYPE: { type: INT32, desc: link type }
+  CONN_ID: { type: INT32, desc: connection id }
+  SOCKET_FD: { type: INT32, desc: socket fd }
+  DATA_TYPE: { type: INT32, desc: channel data type }
+  DATA_LEN: { type: INT32, desc: channel data length }
+  DATA_SEQ: { type: INT32, desc: channel data seq }
+  COST_TIME: { type: INT32, desc: total cost time}
+  CHAN_SCORE: { type: INT32, desc: channel score }
+  CHAN_LIMIT: { type: INT32, desc: data limit }
+
 CONNECTION_BEHAVIOR:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: connection behavior }
   ORG_PKG: {type: STRING, desc: organization module name }
@@ -146,6 +236,30 @@ CONNECTION_BEHAVIOR:
   PEER_BLE_MAC: { type: STRING, desc: peer device ble mac }
   PEER_WIFI_MAC: { type: STRING, desc: peer device wifi mac }
   PEER_PORT: { type: STRING, desc: peer device port }
+
+CONNECTION_AUDIT:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: connection audit behavior }
+  ORG_PKG: {type: STRING, desc: organization module name }
+  FUNC: {type: STRING, desc: current function name }
+  HOST_PKG: {type: STRING, desc: host module name }
+  TO_CALL_PKG: {type: STRING, desc: to call module name }
+  BIZ_SCENE: {type: INT32, desc: business scene }
+  ERROR_CODE: { type: INT32, desc: error code }
+  AUDIT_TYPE: {type: INT32, desc: audit type }
+  CONN_ID: { type: INT32, desc: connection id }
+  REQ_ID: { type: INT32, desc: request id }
+  LINK_TYPE: { type: INT32, desc: link type }
+  EXPECT_ROLE: { type: INT32, desc: expect role }
+  COST_TIME: { type: INT32, desc: total cost time}
+  FREQ: { type: STRING, desc: frequency}
+  PEER_BR_MAC: { type: STRING, desc: peer device br mac }
+  PEER_BLE_MAC: { type: STRING, desc: peer device ble mac }
+  PEER_DEV_TYPE: { type: STRING, desc: peer device type }
+  PEER_WIFI_MAC: { type: STRING, desc: peer device wifi mac }
+  PEER_UDID: { type: STRING, desc: peer device udid }
+  CONN_PALOAD: { type: STRING, desc: paload data }
+  LOCAL_DEV_NAME: { type: STRING, desc: local device name }
+  PEER_IP: { type: STRING, desc: peer device ip }
 
 IPC_BEHAVIOR:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: softbus ipc behavior dotting event }

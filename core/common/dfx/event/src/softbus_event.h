@@ -29,6 +29,11 @@ extern "C" {
 #define LNN_EVENT_NAME   "BUSCENTER_BEHAVIOR"
 #define TRANS_EVENT_NAME "TRANSPORT_BEHAVIOR"
 
+#define CONN_AUDIT_NAME  "CONNECTION_AUDIT"
+#define DISC_AUDIT_NAME  "DISCOVER_AUDIT"
+#define LNN_AUDIT_NAME   "BUSCENTER_AUDIT"
+#define TRANS_AUDIT_NAME "TRANSPORT_AUDIT"
+
 typedef enum {
     EVENT_MODULE_CONN,
     EVENT_MODULE_DISC,
@@ -37,6 +42,8 @@ typedef enum {
 } SoftbusEventModule;
 
 void SoftbusEventInner(SoftbusEventModule module, SoftbusEventForm *form);
+
+void SoftbusAuditInner(SoftbusEventModule module, SoftbusEventForm *form);
 
 #ifdef __cplusplus
 }
