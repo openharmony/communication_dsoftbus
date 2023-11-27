@@ -17,12 +17,16 @@
 #include "accesstoken_kit.h"
 #include "discovery_service.h"
 #include "nativetoken_kit.h"
+#include "softbus_bus_center.h"
 #include "token_setproc.h"
 
+#define CAPABILITY_3 "capdata3"
+#define CAPABILITY_4 "capdata4"
+
 namespace OHOS {
+constexpr char TEST_PKG_NAME[] = "com.softbus.test";
 static int g_subscribeId = 0;
 static int g_publishId = 0;
-static const char *g_pkgName = "Softbus_Kits";
 static bool g_flag = true;
 void AddPermission()
 {
@@ -77,16 +81,33 @@ void DiscoveryTest::SetUpTestCase(void)
 void DiscoveryTest::TearDownTestCase(void)
 {}
 
-static int GetSubscribeId(void)
-{
-    g_subscribeId++;
-    return g_subscribeId;
-}
-
-static int GetPublishId(void)
+static int32_t GetPublishId(void)
 {
     g_publishId++;
     return g_publishId;
+}
+
+static PublishInfo g_pInfo = {
+    .publishId = 1,
+    .mode = DISCOVER_MODE_ACTIVE,
+    .medium = COAP,
+    .freq = MID,
+    .capability = "dvKit",
+    .capabilityData = (unsigned char *)CAPABILITY_4,
+    .dataLen = strlen(CAPABILITY_4)
+};
+
+static void TestPublishResult(int publishId, PublishResult reason)
+{}
+
+static IPublishCb g_publishCb = {
+    .OnPublishResult = TestPublishResult
+};
+
+static int32_t GetSubscribeId(void)
+{
+    g_subscribeId++;
+    return g_subscribeId;
 }
 
 static SubscribeInfo g_sInfo = {
@@ -97,135 +118,111 @@ static SubscribeInfo g_sInfo = {
     .isSameAccount = true,
     .isWakeRemote = false,
     .capability = "dvKit",
-    .capabilityData = (unsigned char *)"capdata3",
-    .dataLen = strlen("capdata3")
-};
-
-static PublishInfo g_pInfo = {
-    .publishId = 1,
-    .mode = DISCOVER_MODE_ACTIVE,
-    .medium = COAP,
-    .freq = MID,
-    .capability = "dvKit",
-    .capabilityData = (unsigned char *)"capdata4",
-    .dataLen = strlen("capdata4")
+    .capabilityData = (unsigned char *)CAPABILITY_3,
+    .dataLen = strlen(CAPABILITY_3)
 };
 
 static void TestDeviceFound(const DeviceInfo *device)
 {}
 
-static void TestDiscoverFailed(int subscribeId, DiscoveryFailReason failReason)
+static void TestDiscoverResult(int32_t refreshId, RefreshResult reason)
 {}
 
-static void TestDiscoverySuccess(int subscribeId)
-{}
-
-static void TestPublishSuccess(int publishId)
-{}
-
-static void TestPublishFail(int publishId, PublishFailReason reason)
-{}
-
-static IDiscoveryCallback g_subscribeCb = {
+static IRefreshCallback g_refreshCb = {
     .OnDeviceFound = TestDeviceFound,
-    .OnDiscoverFailed = TestDiscoverFailed,
-    .OnDiscoverySuccess = TestDiscoverySuccess
-};
-
-static IPublishCallback g_publishCb = {
-    .OnPublishSuccess = TestPublishSuccess,
-    .OnPublishFail = TestPublishFail
+    .OnDiscoverResult = TestDiscoverResult
 };
 
 /**
- * @tc.name: PublishServiceTestCase
- * @tc.desc: PublishService Performance Testing
+ * @tc.name: PublishLNNTestCase
+ * @tc.desc: PublishLNN Performance Testing
  * @tc.type: FUNC
- * @tc.require: PublishService normal operation
+ * @tc.require: PublishLNN normal operation
  */
-BENCHMARK_F(DiscoveryTest, PublishServiceTestCase)(benchmark::State &state)
+BENCHMARK_F(DiscoveryTest, PublishLNNTestCase)(benchmark::State &state)
 {
     while (state.KeepRunning()) {
+        int ret;
         g_pInfo.publishId = GetPublishId();
         state.ResumeTiming();
-        int ret = PublishService(g_pkgName, &g_pInfo, &g_publishCb);
+        ret = PublishLNN(TEST_PKG_NAME, &g_pInfo, &g_publishCb);
         if (ret != 0) {
-            state.SkipWithError("PublishServiceTestCase failed.");
+            state.SkipWithError("PublishLNNTestCase failed.");
         }
         state.PauseTiming();
-        ret = UnPublishService(g_pkgName, g_pInfo.publishId);
+        StopPublishLNN(TEST_PKG_NAME, g_pInfo.publishId);
     }
 }
-BENCHMARK_REGISTER_F(DiscoveryTest, PublishServiceTestCase);
+BENCHMARK_REGISTER_F(DiscoveryTest, PublishLNNTestCase);
 
 /**
- * @tc.name: UnPublishServiceTestCase
- * @tc.desc: UnPublishService Performance Testing
+ * @tc.name: StopPublishLNNTestCase
+ * @tc.desc: StopPublishLNN Performance Testing
  * @tc.type: FUNC
- * @tc.require: UnPublishService normal operation
+ * @tc.require: StopPublishLNN normal operation
  */
-BENCHMARK_F(DiscoveryTest, UnPublishServiceTestCase)(benchmark::State &state)
+BENCHMARK_F(DiscoveryTest, StopPublishLNNTestCase)(benchmark::State &state)
 {
     while (state.KeepRunning()) {
+        int ret;
         g_pInfo.publishId = GetPublishId();
+
         state.PauseTiming();
-        int ret = PublishService(g_pkgName, &g_pInfo, &g_publishCb);
-        if (ret != 0) {
-            state.SkipWithError("UnPublishServiceTestCase failed.");
-        }
+        PublishLNN(TEST_PKG_NAME, &g_pInfo, &g_publishCb);
         state.ResumeTiming();
-        ret = UnPublishService(g_pkgName, g_pInfo.publishId);
+        ret = StopPublishLNN(TEST_PKG_NAME, g_pInfo.publishId);
         if (ret != 0) {
-            state.SkipWithError("UnPublishServiceTestCase failed.");
+            state.SkipWithError("StopPublishLNNTestCase failed.");
         }
     }
 }
-BENCHMARK_REGISTER_F(DiscoveryTest, UnPublishServiceTestCase);
+BENCHMARK_REGISTER_F(DiscoveryTest, StopPublishLNNTestCase);
 
 /**
- * @tc.name: StartDiscoveryTestCase
- * @tc.desc: StartDiscovery Performance Testing
+ * @tc.name: RefreshLNNTestCase
+ * @tc.desc: RefreshLNN Performance Testing
  * @tc.type: FUNC
- * @tc.require: StartDiscovery normal operation
+ * @tc.require: RefreshLNN normal operation
  */
-BENCHMARK_F(DiscoveryTest, StartDiscoveryTestCase)(benchmark::State &state)
+BENCHMARK_F(DiscoveryTest, RefreshLNNTestCase)(benchmark::State &state)
 {
     while (state.KeepRunning()) {
+        int ret;
         g_sInfo.subscribeId = GetSubscribeId();
+
         state.ResumeTiming();
-        int ret = StartDiscovery(g_pkgName, &g_sInfo, &g_subscribeCb);
+        ret = RefreshLNN(TEST_PKG_NAME, &g_sInfo, &g_refreshCb);
         if (ret != 0) {
-            state.SkipWithError("StartDiscoveryTestCase failed.");
+            state.SkipWithError("RefreshLNNTestCase failed.");
         }
         state.PauseTiming();
-        ret = StopDiscovery(g_pkgName, g_sInfo.subscribeId);
+        StopRefreshLNN(TEST_PKG_NAME, g_sInfo.subscribeId);
     }
 }
-BENCHMARK_REGISTER_F(DiscoveryTest, StartDiscoveryTestCase);
+BENCHMARK_REGISTER_F(DiscoveryTest, RefreshLNNTestCase);
 
 /**
- * @tc.name: StopDiscoveryTestCase
- * @tc.desc: StoptDiscovery Performance Testing
+ * @tc.name:StopRefreshLNNTestCase
+ * @tc.desc: StopRefreshLNN Performance Testing
  * @tc.type: FUNC
- * @tc.require: StoptDiscovery normal operation
+ * @tc.require: StopRefreshLNN normal operation
  */
-BENCHMARK_F(DiscoveryTest, StoptDiscoveryTestCase)(benchmark::State &state)
+BENCHMARK_F(DiscoveryTest, StopRefreshLNNTestCase)(benchmark::State &state)
 {
     while (state.KeepRunning()) {
+        int ret;
         g_sInfo.subscribeId = GetSubscribeId();
+
         state.PauseTiming();
-        int ret = StartDiscovery(g_pkgName, &g_sInfo, &g_subscribeCb);
-        if (ret != 0) {
-            state.SkipWithError("StoptDiscoveryTestCase failed.");
-        }
+        RefreshLNN(TEST_PKG_NAME, &g_sInfo, &g_refreshCb);
         state.ResumeTiming();
-        ret = StopDiscovery(g_pkgName, g_sInfo.subscribeId);
+        ret = StopRefreshLNN(TEST_PKG_NAME, g_sInfo.subscribeId);
         if (ret != 0) {
-            state.SkipWithError("StoptDiscoveryTestCase failed.");
+            state.SkipWithError("StopRefreshLNNTestCase failed.");
         }
     }
 }
-BENCHMARK_REGISTER_F(DiscoveryTest, StoptDiscoveryTestCase);
+BENCHMARK_REGISTER_F(DiscoveryTest, StopRefreshLNNTestCase);
 }
 
 // Run the benchmark
