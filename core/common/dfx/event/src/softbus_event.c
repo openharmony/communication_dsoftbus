@@ -16,9 +16,13 @@
 #include "softbus_event.h"
 
 #include "comm_log.h"
+#include "convert/conn_audit_converter.h"
 #include "convert/conn_event_converter.h"
+#include "convert/disc_audit_converter.h"
 #include "convert/disc_event_converter.h"
+#include "convert/lnn_audit_converter.h"
 #include "convert/lnn_event_converter.h"
+#include "convert/trans_audit_converter.h"
 #include "convert/trans_event_converter.h"
 #include "hisysevent_c.h"
 
@@ -108,4 +112,56 @@ void SoftbusEventInner(SoftbusEventModule module, SoftbusEventForm *form)
     form->eventType = SOFTBUS_EVENT_TYPE_BEHAVIOR;
     form->orgPkg = SOFTBUS_EVENT_PKG_NAME;
     WriteSoftbusEvent(module, form);
+}
+
+static void WriteSoftbusAudit(SoftbusEventModule module, SoftbusEventForm *form)
+{
+    HiSysEventParam params[SOFTBUS_ASSIGNER_SIZE] = { 0 };
+    size_t size = ConvertSoftbusForm2Param(params, SOFTBUS_ASSIGNER_SIZE, form);
+    switch (module) {
+        case EVENT_MODULE_CONN: {
+            HiSysEventParam connParams[CONN_ASSIGNER_SIZE] = { 0 };
+            size_t connSize = ConvertConnAuditForm2Param(connParams, form);
+            WriteHiSysEvent(params, size, connParams, connSize, form);
+            HiSysEventParamsFree(connParams, connSize);
+            break;
+        }
+        case EVENT_MODULE_DISC: {
+            HiSysEventParam discParams[DISC_ASSIGNER_SIZE] = { 0 };
+            size_t discSize = ConvertDiscAuditForm2Param(discParams, form);
+            WriteHiSysEvent(params, size, discParams, discSize, form);
+            HiSysEventParamsFree(discParams, discSize);
+            break;
+        }
+        case EVENT_MODULE_LNN: {
+            HiSysEventParam lnnParams[LNN_ASSIGNER_SIZE] = { 0 };
+            size_t lnnSize = ConvertLnnAuditForm2Param(lnnParams, form);
+            WriteHiSysEvent(params, size, lnnParams, lnnSize, form);
+            HiSysEventParamsFree(lnnParams, lnnSize);
+            break;
+        }
+        case EVENT_MODULE_TRANS: {
+            HiSysEventParam transParams[TRANS_AUDIT_ASSIGNER_SIZE] = { 0 };
+            size_t transSize = ConvertTransAuditForm2Param(transParams, form);
+            WriteHiSysEvent(params, size, transParams, transSize, form);
+            HiSysEventParamsFree(transParams, transSize);
+            break;
+        }
+        default: {
+            COMM_LOGW(COMM_DFX, "invalid module %d", (int32_t)module);
+            break;
+        }
+    }
+    HiSysEventParamsFree(params, size);
+}
+
+void SoftbusAuditInner(SoftbusEventModule module, SoftbusEventForm *form)
+{
+    if (form == NULL) {
+        return;
+    }
+    form->domain = SOFTBUS_EVENT_DOMAIN;
+    form->eventType = SOFTBUS_EVENT_TYPE_BEHAVIOR;
+    form->orgPkg = SOFTBUS_EVENT_PKG_NAME;
+    WriteSoftbusAudit(module, form);
 }

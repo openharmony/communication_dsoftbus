@@ -84,11 +84,37 @@ typedef struct {
 } TransStatsExtra;
 
 typedef enum {
-    AUDIT_SCENE_TRANS_RESERVED = 1,
+    AUDIT_SCENE_OPEN_SESSION = 1,
+    AUDIT_SCENE_SEND_FILE = 2,
+    AUDIT_SCENE_SEND_BYTES = 3,
+    AUDIT_SCENE_SEND_MSG = 4,
+    AUDIT_SCENE_SEND_STREAM = 5,
 } TransAuditScene;
 
 typedef struct {
-    int32_t reserved;
+    int32_t errcode;             // ERROR_CODE
+    SoftbusAuditType auditType;  // AUDIT_TYPE
+    const char *sessionName;     // SESSION_NAME
+    const char *peerDeviceId;    // PEER_DEVICE_ID
+    int32_t channelId;           // CHAN_ID
+    int32_t peerChannelId;       // PEER_CHAN_ID
+    int32_t channelType;         // LOGIC_CHAN_TYPE
+    int32_t laneId;              // LANE_ID
+    int32_t authId;              // AUTH_ID
+    int32_t preferLinkType;      // PREFER_LINK_TYPE
+    int32_t laneTransType;       // LANE_TRANS_TYPE
+    int32_t reqId;               // REQ_ID
+    int32_t linkType;            // LINK_TYPE
+    int32_t connId;              // CONN_ID
+    int32_t socketFd;            // SOCKET_FD
+    int32_t dataType;            // DATA_TYPE
+    int32_t dataLen;             // DATA_LENGTH
+    int32_t dataSeq;             // DATA_SEQ
+    int32_t costTime;            // TIME_CONSUMING
+    int32_t channelScore;        // CHAN_SCORE
+    int32_t dataLimit;           // DATA_LIMIT
+    const char *callerPkg;       // HOST_PKG
+    const char *calleePkg;       // TO_CALL_PKG
 } TransAuditExtra;
 
 #ifdef __cplusplus

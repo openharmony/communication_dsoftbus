@@ -26,6 +26,16 @@ typedef enum {
     EVENT_STAGE_RESULT_CANCELED = 3,
 } SoftbusEventStageResult;
 
+typedef enum {
+    AUDIT_EVENT_MSG_ERROR = 1,
+    AUDIT_EVENT_REPLAY = 2,
+    AUDIT_EVENT_PACKETS_ERROR = 3,
+    AUDIT_EVENT_CONN_ERROR = 4,
+    AUDIT_EVENT_IO_ERROR = 5,
+    AUDIT_EVENT_DOS_ATTACK = 6,
+    AUDIT_EVENT_DATA_LIMIT = 7,
+} SoftbusAuditType;
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

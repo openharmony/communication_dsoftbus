@@ -13,13 +13,15 @@
  * limitations under the License.
  */
 
+#include "comm_log.h"
 #include "disc_event.h"
 
 #include "softbus_event.h"
 
 void DiscEventInner(int32_t scene, int32_t stage, const char *func, int32_t line, DiscEventExtra *extra)
 {
-    if (extra == NULL) {
+    if (func == NULL || extra == NULL) {
+        COMM_LOGE(COMM_DFX, "func or extra is NUll");
         return;
     }
     SoftbusEventForm form = {
@@ -31,4 +33,20 @@ void DiscEventInner(int32_t scene, int32_t stage, const char *func, int32_t line
         .discExtra = extra,
     };
     SoftbusEventInner(EVENT_MODULE_DISC, &form);
+}
+
+void DiscAuditInner(int32_t scene, const char *func, int32_t line, DiscAuditExtra *extra)
+{
+    if (func == NULL || extra == NULL) {
+        COMM_LOGE(COMM_DFX, "func or extra is NUll");
+        return;
+    }
+    SoftbusEventForm form = {
+        .eventName = DISC_AUDIT_NAME,
+        .scene = scene,
+        .func = func,
+        .line = line,
+        .discAuditExtra = extra,
+    };
+    SoftbusAuditInner(EVENT_MODULE_DISC, &form);
 }
