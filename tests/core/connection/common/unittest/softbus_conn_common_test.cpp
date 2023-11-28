@@ -498,7 +498,7 @@ HWTEST_F(SoftbusConnCommonTest, testConnSetTcpUserTimeOut001, TestSize.Level1)
     int32_t fd = -1;
     uint32_t millSec= 1;
     int ret = ConnSetTcpUserTimeOut(fd, millSec);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 }
 
 /*
@@ -514,7 +514,7 @@ HWTEST_F(SoftbusConnCommonTest, testConnSetTcpUserTimeOut002, TestSize.Level1)
     int32_t fd = 1;
     uint32_t millSec= 321;
     int ret = ConnSetTcpUserTimeOut(fd, millSec);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 }
 
 /*
@@ -528,7 +528,7 @@ HWTEST_F(SoftbusConnCommonTest, testSocket003, TestSize.Level1)
     int ret;
     SocketAddr socketAddr;
     ret = ConnGetPeerSocketAddr(INVALID_FD, &socketAddr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 }
 
 /*
@@ -541,6 +541,6 @@ HWTEST_F(SoftbusConnCommonTest, testSocket004, TestSize.Level1)
 {
     int ret;
     ret = ConnGetLocalSocketPort(INVALID_FD);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 }
 }

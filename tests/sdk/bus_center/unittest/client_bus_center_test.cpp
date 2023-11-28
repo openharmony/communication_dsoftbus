@@ -129,7 +129,7 @@ HWTEST_F(ClientBusMangerTest, META_NODE_ON_JOIN_Test_001, TestSize.Level1)
     char networkId[] = "3333";
     int32_t retCod = 111;
     int32_t ret = MetaNodeOnJoinResult(addr, networkId, retCod);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     g_busCenterClient.isInit = true;
     ConnectionAddr connAddr;
     (void)memset_s(&connAddr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));

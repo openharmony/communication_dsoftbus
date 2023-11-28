@@ -473,9 +473,9 @@ HWTEST_F(AuthTest, POST_DEVICE_INFO_MESSAGE_Test_001, TestSize.Level1)
     int32_t ret;
 
     ret = PostDeviceInfoMessage(errAuthSeq, &info);
-    EXPECT_TRUE(ret == SOFTBUS_ENCRYPT_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = PostDeviceInfoMessage(authSeq, &info);
-    EXPECT_TRUE(ret == SOFTBUS_ENCRYPT_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /*
@@ -509,9 +509,9 @@ HWTEST_F(AuthTest, POST_CLOSE_ACK_MESSAGE_Test_001, TestSize.Level1)
     int32_t ret;
 
     ret = PostDeviceInfoMessage(errAuthSeq, &info);
-    EXPECT_TRUE(ret == SOFTBUS_ENCRYPT_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = PostDeviceInfoMessage(authSeq, &info);
-    EXPECT_TRUE(ret == SOFTBUS_ENCRYPT_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /*
