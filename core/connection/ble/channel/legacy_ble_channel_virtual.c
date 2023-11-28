@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "conn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_ble_connection.h"
 #include "softbus_conn_interface.h"
@@ -23,7 +24,7 @@ ConnBleConnection *LegacyBleCreateConnection(const char *addr, ConnSideType side
 {
     if (g_connection == NULL) {
         g_connection = (ConnBleConnection *)SoftBusCalloc(sizeof(ConnBleConnection));
-        CONN_CHECK_AND_RETURN_RET_LOG(g_connection != NULL, NULL, "ble connection calloc failed");
+        CONN_CHECK_AND_RETURN_RET_LOGE(g_connection != NULL, NULL, CONN_NEARBY, "ble connection calloc failed");
         g_connection->side = side;
         g_connection->underlayerHandle = underlayerHandle;
     }

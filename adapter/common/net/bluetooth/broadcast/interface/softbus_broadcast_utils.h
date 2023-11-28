@@ -17,7 +17,7 @@
  * @file softbus_broadcast_utils.h
  * @brief Declare functions and constants for the softbus broadcast or scan data fill or parse common functions.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 
@@ -30,13 +30,54 @@
 extern "C"{
 #endif
 
+#define MEDIUM_NUM_MAX         2
+
+// max broadcasting and scan limit
+#define BC_NUM_MAX             9
+#define SCAN_NUM_MAX           9
+
+#define BC_DATA_MAX_LEN        24
+#define RSP_DATA_MAX_LEN       27
+#define BC_BYTE_MASK           0xFF
+#define BC_SHIFT_BIT           8
+
+// adv broadcast head
+#define BC_HEAD_LEN             7
+#define IDX_BC_FLAG_BYTE_LEN    0
+#define IDX_BC_FLAG_AD_TYPE     1
+#define IDX_BC_FLAG_AD_DATA     2
+#define IDX_PACKET_LEN          3
+#define IDX_BC_TYPE             4
+#define IDX_BC_UUID             5
+#define BC_UUID_LEN             2
+
+#define BC_FLAG_BYTE_LEN        0x2
+#define BC_FLAG_AD_TYPE         0x1
+#define BC_FLAG_AD_DATA         0x2
+
+// broadcast type
+#define SERVICE_BC_TYPE          0x16
+#define MANUFACTURE_BC_TYPE      0xFF
+
+// scan rsp head
+#define RSP_HEAD_LEN             4
+
+#define IDX_RSP_PACKET_LEN       0
+#define IDX_RSP_TYPE             1
+#define IDX_RSP_UUID             2
+#define RSP_UUID_LEN             2
+
+#define RSP_FLAG_BYTE_LEN        0x2
+#define RSP_FLAG_AD_TYPE         0x1
+#define RSP_FLAG_AD_DATA         0x2
+
 /**
  * @brief Defines the format of broadcast TLV data
  *
  * DATA_FORMAT_TL_1BYTE indicates BcTlvDataFormatThe TLV format is 4 bits for T and 4 bits for L
  * DATA_FORMAT_TL_2BYTE indicates BcTlvDataFormatThe TLV format is 1 byte for T and 1 byte for L
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 enum BcTlvDataFormat {
@@ -47,7 +88,7 @@ enum BcTlvDataFormat {
 /**
  * @brief Defines the broadcast TLV data
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 typedef struct {
@@ -68,7 +109,7 @@ typedef struct {
  * @return Returns <b>SOFTBUS_OK</b> if the service gets service data successful.
  * returns any other value if the service fails to get service data.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 int32_t GetServiceAdvData(uint16_t uuid, uint8_t **advPosPtr, uint32_t *advLen,
@@ -86,7 +127,7 @@ int32_t GetServiceAdvData(uint16_t uuid, uint8_t **advPosPtr, uint32_t *advLen,
  * @return Returns <b>SOFTBUS_OK</b> if the service gets respond service data successful.
  * returns any other value if the service fails to get respond service data.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 int32_t GetServiceRspData(uint16_t uuid, uint8_t **rspPosPtr, uint32_t *rspLen,
@@ -104,7 +145,7 @@ int32_t GetServiceRspData(uint16_t uuid, uint8_t **rspPosPtr, uint32_t *rspLen,
  * @return Returns <b>SOFTBUS_OK</b> if the service gets manufacturer data successful.
  * returns any other value if the service fails to get manufacturer data.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 int32_t GetManufacturerAdvData(uint16_t companyId, uint8_t **advPosPtr, uint32_t *advLen, const uint8_t *rawData,
@@ -122,7 +163,7 @@ int32_t GetManufacturerAdvData(uint16_t companyId, uint8_t **advPosPtr, uint32_t
  * @return Returns <b>SOFTBUS_OK</b> if the service gets respond manufacturer data successful.
  * returns any other value if the service fails to get respond manufacturer data.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 int32_t GetManufacturerRspData(uint16_t companyId, uint8_t **rspPosPtr, uint32_t *rspLen, const uint8_t *rawData,
@@ -139,7 +180,7 @@ int32_t GetManufacturerRspData(uint16_t companyId, uint8_t **rspPosPtr, uint32_t
  * @return Returns <b>SOFTBUS_OK</b> if the service gets local name successful.
  * returns any other value if the service fails to get local name.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 int32_t GetLocalNameData(uint8_t *localName, uint32_t *len, const uint8_t *rawData, uint32_t dataLen);
@@ -154,7 +195,7 @@ int32_t GetLocalNameData(uint8_t *localName, uint32_t *len, const uint8_t *rawDa
  * @return Returns <b>SOFTBUS_OK</b> if the service gets flag successful.
  * returns any other value if the service fails to get flag.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 int32_t GetBcFlag(uint8_t *flag, const uint8_t *rawData, uint32_t dataLen);
@@ -169,7 +210,7 @@ int32_t GetBcFlag(uint8_t *flag, const uint8_t *rawData, uint32_t dataLen);
  * @return Returns <b>SOFTBUS_OK</b> if the service gets uuid successful.
  * returns any other value if the service fails to get uuid.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 int32_t GetServiceUuid(uint16_t *uuid, const uint8_t *rawData, uint32_t dataLen);
@@ -184,7 +225,7 @@ int32_t GetServiceUuid(uint16_t *uuid, const uint8_t *rawData, uint32_t dataLen)
  * @return Returns <b>SOFTBUS_OK</b> if the service gets companyId successful.
  * returns any other value if the service fails to get companyId.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 int32_t GetManufacturerId(uint16_t *companyId, const uint8_t *rawData, uint32_t dataLen);
@@ -198,7 +239,7 @@ int32_t GetManufacturerId(uint16_t *companyId, const uint8_t *rawData, uint32_t 
  * @return true
  * @return false
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 bool IsServiceData(const uint8_t *rawData, uint32_t dataLen);
@@ -213,7 +254,7 @@ bool IsServiceData(const uint8_t *rawData, uint32_t dataLen);
  * @return Returns <b>SOFTBUS_OK</b> if the TLV packet assemble successful.
  * returns any other value if the TLV packet fails to assemble.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 int32_t AssembleTlvPkg(enum BcTlvDataFormat, uint8_t *bcData, uint32_t dataLen, const BcTlv *tlv);
@@ -228,7 +269,7 @@ int32_t AssembleTlvPkg(enum BcTlvDataFormat, uint8_t *bcData, uint32_t dataLen, 
  * @return Returns <b>SOFTBUS_OK</b> if the TLV packet parse successful.
  * returns any other value if the TLV packet fails to parse.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 int32_t ParseTlvPkg(enum BcTlvDataFormat, const uint8_t *bcData, uint32_t dataLen, BcTlv *tlv);

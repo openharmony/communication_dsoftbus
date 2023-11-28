@@ -24,8 +24,8 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "comm_log.h"
 #include "securec.h"
-#include "softbus_adapter_log.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -54,7 +54,7 @@ void SetTimerFunc(TimerFunc func)
 void *SoftBusCreateTimer(void **timerId, unsigned int type)
 {
     if (timerId == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "timerId is null");
+        COMM_LOGE(COMM_ADAPTER, "timerId is null");
         return NULL;
     }
     struct sigevent envent;
@@ -65,7 +65,7 @@ void *SoftBusCreateTimer(void **timerId, unsigned int type)
 
     g_timerType = type;
     if (timer_create(CLOCK_REALTIME, &envent, timerId) != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "timer create error, errno code: [%{public}d]", errno);
+        COMM_LOGE(COMM_ADAPTER, "timer create error, errno code: [%d]", errno);
         return NULL;
     }
 
@@ -75,7 +75,7 @@ void *SoftBusCreateTimer(void **timerId, unsigned int type)
 int SoftBusStartTimer(void *timerId, unsigned int tickets)
 {
     if (timerId == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "timerId is null");
+        COMM_LOGE(COMM_ADAPTER, "timerId is null");
         return SOFTBUS_ERR;
     }
     struct itimerspec value;
@@ -91,7 +91,7 @@ int SoftBusStartTimer(void *timerId, unsigned int tickets)
     }
 
     if (timer_settime(timerId, 0, &value, NULL) != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "timer start error, errno code: [%{public}d]", errno);
+        COMM_LOGE(COMM_ADAPTER, "timer start error, errno code: [%d]", errno);
         return SOFTBUS_ERR;
     }
 
@@ -101,12 +101,12 @@ int SoftBusStartTimer(void *timerId, unsigned int tickets)
 int SoftBusDeleteTimer(void *timerId)
 {
     if (timerId == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "timerId is null");
+        COMM_LOGE(COMM_ADAPTER, "timerId is null");
         return SOFTBUS_ERR;
     }
 
     if (timer_delete(timerId) != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "timer delete err, errno code: [%{public}d]", errno);
+        COMM_LOGE(COMM_ADAPTER, "timer delete err, errno code: [%d]", errno);
         return SOFTBUS_ERR;
     }
 
@@ -130,7 +130,7 @@ int SoftBusSleepMs(unsigned int ms)
 int32_t SoftBusGetTime(SoftBusSysTime *sysTime)
 {
     if (sysTime == NULL) {
-        HILOG_INFO(SOFTBUS_HILOG_ID, "sysTime is null");
+        COMM_LOGI(COMM_ADAPTER, "sysTime is null");
         return SOFTBUS_INVALID_PARAM;
     }
     struct timespec time = {0};
@@ -147,7 +147,7 @@ uint64_t SoftBusGetSysTimeMs(void)
     time.tv_sec = 0;
     time.tv_usec = 0;
     if (gettimeofday(&time, NULL) != 0) {
-        HILOG_INFO(SOFTBUS_HILOG_ID, "get sys time fail");
+        COMM_LOGI(COMM_ADAPTER, "get sys time fail");
         return 0;
     }
     uint64_t ms = (uint64_t)time.tv_sec * MS_PER_SECOND + (uint64_t)time.tv_usec / US_PER_MSECOND;
