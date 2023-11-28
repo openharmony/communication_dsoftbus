@@ -17,9 +17,8 @@
 #include <string>
 #include <sstream>
 #include <securec.h>
+#include "comm_log.h"
 #include "softbus_error_code.h"
-
-#include "softbus_adapter_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "message_handler.h"
@@ -74,12 +73,12 @@ static int32_t ConvertEventParam(SoftBusEvtParam *srcParam, HiSysEventParam *dst
             dstParam->t = HISYSEVENT_STRING;
             dstParam->v.s = (char *)SoftBusCalloc(sizeof(char) * SOFTBUS_HISYSEVT_PARAM_LEN);
             if (dstParam->v.s == NULL) {
-                HILOG_ERROR(SOFTBUS_HILOG_ID, "ConvertEventParam: SoftBusMalloc fail");
+                COMM_LOGE(COMM_ADAPTER, "ConvertEventParam: SoftBusMalloc fail");
                 return SOFTBUS_ERR;
             }
             if (strcpy_s(dstParam->v.s, SOFTBUS_HISYSEVT_PARAM_LEN, srcParam->paramValue.str) != EOK) {
                 SoftBusFree(dstParam->v.s);
-                HILOG_ERROR(SOFTBUS_HILOG_ID, "ConvertEventParam:copy string var fail");
+                COMM_LOGE(COMM_ADAPTER, "ConvertEventParam:copy string var fail");
                 return SOFTBUS_ERR;
             }
             break;
@@ -87,12 +86,12 @@ static int32_t ConvertEventParam(SoftBusEvtParam *srcParam, HiSysEventParam *dst
             dstParam->t = HISYSEVENT_UINT32_ARRAY;
             dstParam->v.array = (uint32_t *)SoftBusCalloc(arraySize);
             if (dstParam->v.array == NULL) {
-                HILOG_ERROR(SOFTBUS_HILOG_ID, "ConvertEventParam: SoftBusMalloc fail");
+                COMM_LOGE(COMM_ADAPTER, "ConvertEventParam: SoftBusMalloc fail");
                 return SOFTBUS_ERR;
             }
             if (memcpy_s(dstParam->v.array, arraySize, srcParam->paramValue.u32a, arraySize) != EOK) {
                 SoftBusFree(dstParam->v.array);
-                HILOG_ERROR(SOFTBUS_HILOG_ID, "ConvertEventParam:copy uint32 array var fail");
+                COMM_LOGE(COMM_ADAPTER, "ConvertEventParam:copy uint32 array var fail");
                 return SOFTBUS_ERR;
             }
             break;
@@ -106,16 +105,16 @@ static int32_t ConvertMsgToHiSysEvent(SoftBusEvtReportMsg *msg)
 {
     if (memset_s(g_dstParam, sizeof(HiSysEventParam) * SOFTBUS_EVT_PARAM_BUTT, 0,
         sizeof(HiSysEventParam) * SOFTBUS_EVT_PARAM_BUTT) != EOK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "init  g_dstParam fail");
+        COMM_LOGE(COMM_ADAPTER, "init  g_dstParam fail");
         return SOFTBUS_ERR;
     }
     for (uint32_t i = 0; i < msg->paramNum; i++) {
         if (strcpy_s(g_dstParam[i].name, SOFTBUS_HISYSEVT_NAME_LEN, msg->paramArray[i].paramName) != EOK) {
-            HILOG_ERROR(SOFTBUS_HILOG_ID, "copy param fail");
+            COMM_LOGE(COMM_ADAPTER, "copy param fail");
             return SOFTBUS_ERR;
         }
         if (ConvertEventParam(&msg->paramArray[i], &g_dstParam[i]) != SOFTBUS_OK) {
-            HILOG_ERROR(SOFTBUS_HILOG_ID, "ConvertMsgToHiSysEvent:convert param fail");
+            COMM_LOGE(COMM_ADAPTER, "ConvertMsgToHiSysEvent:convert param fail");
             return SOFTBUS_ERR;
         }
     }
@@ -158,7 +157,7 @@ static HiSysEventEventType ConvertMsgType(SoftBusEvtType type)
 static void InitHisEvtMutexLock()
 {
     if (SoftBusMutexInit(&g_dfx_lock, NULL) != SOFTBUS_OK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "init HisEvtMutexLock fail");
+        COMM_LOGE(COMM_ADAPTER, "init HisEvtMutexLock fail");
         return;
     }
 }
@@ -179,7 +178,7 @@ int32_t SoftbusWriteHisEvt(SoftBusEvtReportMsg* reportMsg)
         g_init_lock = true;
     }
     if (SoftBusMutexLock(&g_dfx_lock) != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "%s:lock failed", __func__);
+        COMM_LOGE(COMM_ADAPTER, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
     ConvertMsgToHiSysEvent(reportMsg);
@@ -205,12 +204,12 @@ void SoftbusFreeEvtReporMsg(SoftBusEvtReportMsg* msg)
 SoftBusEvtReportMsg* SoftbusCreateEvtReportMsg(int32_t paramNum)
 {
     if (paramNum <= SOFTBUS_EVT_PARAM_ZERO || paramNum >= SOFTBUS_EVT_PARAM_BUTT) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "param is invalid");
+        COMM_LOGE(COMM_ADAPTER, "param is invalid");
         return nullptr;
     }
     SoftBusEvtReportMsg *msg = (SoftBusEvtReportMsg*)SoftBusMalloc(sizeof(SoftBusEvtReportMsg));
     if (msg == nullptr) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "report msg is null");
+        COMM_LOGE(COMM_ADAPTER, "report msg is null");
         return nullptr;
     }
     msg->paramArray = (SoftBusEvtParam*)SoftBusMalloc(sizeof(SoftBusEvtParam) * paramNum);
