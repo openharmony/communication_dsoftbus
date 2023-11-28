@@ -118,10 +118,13 @@ MATCHER_P2(TransInvalidParamArrayMatcher, inExtra, validSize, "trans invalid par
     params += SOFTBUS_ASSIGNER_SIZE; // Skip softbus params, they are matched by SoftbusParamArrayMatcher
     auto extra = static_cast<TransEventExtra>(inExtra);
     int32_t index = 0;
-    int32_t errcodeIndex = 1;
-    EXPECT_STREQ(params[index].name, g_transAssigners[errcodeIndex].name);
-    EXPECT_EQ(params[index].t, g_transAssigners[errcodeIndex].type);
-    EXPECT_EQ(params[index].v.i32, extra.errcode);
+    EXPECT_STREQ(params[index].name, g_transAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_transAssigners[index].type);
+    EXPECT_EQ(params[index].v.i32, ((extra.result < 0) ? (-extra.result) : extra.result));
+    ++index;
+    EXPECT_STREQ(params[index].name, g_transAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_transAssigners[index].type);
+    EXPECT_EQ(params[index].v.i32, ((extra.errcode < 0) ? (-extra.errcode) : extra.errcode));
     EXPECT_EQ(++index, validSize);
     return true;
 }
