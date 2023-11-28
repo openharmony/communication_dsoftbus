@@ -94,10 +94,7 @@ void InitSoftBusServer(void)
         COMM_LOGE(COMM_SVC, "softbus buscenter server init failed.");
         goto ERR_EXIT;
     }
-    if (ConnBleDirectInit() == SOFTBUS_ERR) {
-        COMM_LOGE(COMM_SVC, "softbus ble direct init failed.");
-        goto ERR_EXIT;
-    }
+
     if (TransServerInit() == SOFTBUS_ERR) {
         COMM_LOGE(COMM_SVC, "softbus trans server init failed.");
         goto ERR_EXIT;
@@ -105,6 +102,11 @@ void InitSoftBusServer(void)
 
     if (WifiDirectInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "softbus wifi direct init failed.");
+        goto ERR_EXIT;
+    }
+
+    if (ConnBleDirectInit() == SOFTBUS_ERR) {
+        COMM_LOGE(COMM_SVC, "softbus ble direct init failed.");
         goto ERR_EXIT;
     }
 
