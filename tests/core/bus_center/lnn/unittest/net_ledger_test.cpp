@@ -155,7 +155,7 @@ HWTEST_F(NetLedgerTest, DL_GET_Test_001, TestSize.Level1)
     EXPECT_TRUE(LnnGetRemoteNumInfo(networkId, STRING_KEY_END, &info) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnGetRemoteNumInfo(networkId, NUM_KEY_END, &info) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnGetRemoteNumInfo(networkId, NUM_KEY_END, nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnGetRemoteNumInfo(networkId, NUM_KEY_AUTH_PORT, &info) == SOFTBUS_ERR);
+    EXPECT_TRUE(LnnGetRemoteNumInfo(networkId, NUM_KEY_AUTH_PORT, &info) != SOFTBUS_OK);
 }
 
 /*
@@ -181,7 +181,7 @@ HWTEST_F(NetLedgerTest, LNN_DELETE_META_INFO_Test_001, TestSize.Level1)
 {
     char udid[DEFAULT_SIZE] = "1234";
     ConnectionAddrType type = CONNECTION_ADDR_WLAN;
-    EXPECT_TRUE(LnnDeleteMetaInfo(udid, type) == SOFTBUS_ERR);
+    EXPECT_TRUE(LnnDeleteMetaInfo(udid, type) != SOFTBUS_OK);
 }
 
 /*

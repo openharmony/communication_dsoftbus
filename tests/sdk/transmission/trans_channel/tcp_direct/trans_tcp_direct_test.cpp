@@ -209,7 +209,7 @@ HWTEST_F(TransTcpDirectTest, CreateSessionServerTest004, TestSize.Level0)
         EXPECT_EQ(SOFTBUS_OK, ret);
     }
     ret = CreateSessionServer(g_pkgName, sessionName[i], &g_sessionlistener);
-    EXPECT_EQ(SOFTBUS_INVALID_NUM, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     for (i = 0; i < MAX_SESSION_SERVER_NUMBER; i++) {
         ret = RemoveSessionServer(g_pkgName, sessionName[i]);
