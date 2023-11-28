@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -117,14 +117,14 @@ static IPublishCb g_publishCb = {
 };
 
 /**
- * @tc.name: UnPublishServiceTest004
+ * @tc.name: StopPublishLNNTest004
  * @tc.desc: not start publish.
  * @tc.in: Test Moudle, Test Number, Test Levels.
  * @tc.out: NonZero
  * @tc.type: FUNC
- * @tc.require: The UnPublishService operates normally.
+ * @tc.require: The StopPublishLNN operates normally.
  */
-HWTEST_F(DiscSdkOnlyL2Test, UnPublishServiceTest001, TestSize.Level2)
+HWTEST_F(DiscSdkOnlyL2Test, StopPublishLNNTest001, TestSize.Level2)
 {
     int ret;
     int tmpId = GetPublishId();
@@ -134,14 +134,14 @@ HWTEST_F(DiscSdkOnlyL2Test, UnPublishServiceTest001, TestSize.Level2)
 }
 
 /**
- * @tc.name: UnPublishServiceTest005
- * @tc.desc: Verify UnPublishService again.
+ * @tc.name: StopPublishLNNTest005
+ * @tc.desc: Verify StopPublishLNN again.
  * @tc.in: Test Moudle, Test Number, Test Levels.
  * @tc.out: NonZero
  * @tc.type: FUNC
- * @tc.require: The UnPublishService operates normally.
+ * @tc.require: The StopPublishLNN operates normally.
  */
-HWTEST_F(DiscSdkOnlyL2Test, UnPublishServiceTest002, TestSize.Level2)
+HWTEST_F(DiscSdkOnlyL2Test, StopPublishLNNTest002, TestSize.Level2)
 {
     int ret;
     int tmpId = GetPublishId();
@@ -155,14 +155,14 @@ HWTEST_F(DiscSdkOnlyL2Test, UnPublishServiceTest002, TestSize.Level2)
 }
 
 /**
- * @tc.name: StopDiscoveryTest004
+ * @tc.name: StopRefreshLNNTest004
  * @tc.desc: not start discover.
  * @tc.in: Test Moudle, Test Number, Test Levels.
  * @tc.out: NonZero
  * @tc.type: FUNC
- * @tc.require: The StopDiscovery operates normally.
+ * @tc.require: The StopRefreshLNN operates normally.
  */
-HWTEST_F(DiscSdkOnlyL2Test, StopDiscoveryTest001, TestSize.Level2)
+HWTEST_F(DiscSdkOnlyL2Test, StopRefreshLNNTest001, TestSize.Level2)
 {
     int ret;
     int tmpId = GetSubscribeId();
@@ -172,14 +172,14 @@ HWTEST_F(DiscSdkOnlyL2Test, StopDiscoveryTest001, TestSize.Level2)
 }
 
 /**
- * @tc.name: StopDiscoveryTest005
- * @tc.desc: Verify StopDiscovery again.
+ * @tc.name: StopRefreshLNNTest005
+ * @tc.desc: Verify StopRefreshLNN again.
  * @tc.in: Test Moudle, Test Number, Test Levels.
  * @tc.out: NonZero
  * @tc.type: FUNC
- * @tc.require: The StopDiscovery operates normally.
+ * @tc.require: The StopRefreshLNN operates normally.
  */
-HWTEST_F(DiscSdkOnlyL2Test, StopDiscoveryTest002, TestSize.Level2)
+HWTEST_F(DiscSdkOnlyL2Test, StopRefreshLNNTest002, TestSize.Level2)
 {
     int ret;
     int tmpId = GetSubscribeId();
