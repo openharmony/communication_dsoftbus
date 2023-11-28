@@ -59,7 +59,7 @@ if (defined(ohos_lite)) {
     bus_center_core_adapter_external_deps += [ "huks:libhukssdk" ]
   }
 } else {
-  if (dsoftbus_get_devicename == false) {
+  if (!dsoftbus_get_devicename) {
     bus_center_core_adapter_src += [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_settingdata_event_monitor_virtual.cpp" ]
     bus_center_core_adapter_inc +=
         [ "$dsoftbus_root_path/core/adapter/bus_center/include" ]
@@ -82,7 +82,7 @@ if (defined(ohos_lite)) {
       "relational_store:native_rdb",
     ]
   }
-  if (softbus_os_account == true) {
+  if (softbus_os_account) {
     bus_center_core_adapter_src += [
       "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account.cpp",
       "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account_adapter.cpp",

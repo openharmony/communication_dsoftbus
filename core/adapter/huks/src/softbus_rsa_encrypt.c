@@ -99,6 +99,7 @@ static int32_t GenerateRsaKeyPair(void)
 int32_t SoftBusGetPublicKey(uint8_t *publicKey, uint32_t publicKeyLen)
 {
     if (publicKey == NULL || publicKeyLen == 0) {
+        COMM_LOGE(COMM_UTILS, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     if (!IsRsaKeyPairExist(g_rsaKeyAlias)) {
@@ -124,6 +125,7 @@ int32_t SoftBusGetPublicKey(uint8_t *publicKey, uint32_t publicKeyLen)
 static BN_CTX *GetRsaBigNum(const BIGNUM *modNum, BIGNUM **base, BIGNUM **result, uint8_t **buf, int32_t *bufNum)
 {
     if (modNum == NULL || base == NULL || result == NULL || buf == NULL || bufNum == NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid param.");
         return NULL;
     }
     BN_CTX *ctx = BN_CTX_new();
@@ -157,6 +159,7 @@ static BN_CTX *GetRsaBigNum(const BIGNUM *modNum, BIGNUM **base, BIGNUM **result
 static int32_t EncryptByPublicKey(const uint8_t *src, uint32_t srcLen, const RSA *rsa, uint8_t *out, uint32_t outLen)
 {
     if (src == NULL || srcLen == 0 || rsa == NULL || out == NULL || outLen < SOFTBUS_RSA_ENCRYPT_LEN) {
+        COMM_LOGE(COMM_UTILS, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = SOFTBUS_ERR;
@@ -201,6 +204,7 @@ static int32_t DataToPublicKey(const uint8_t *bufKey, int32_t bufKeyLen, RSA **p
     BIO *pBio = NULL;
 
     if (bufKey == NULL || bufKeyLen < 0 || pubKey == NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     pBio = BIO_new(BIO_s_mem());
@@ -229,6 +233,7 @@ int32_t SoftBusRsaEncrypt(const uint8_t *srcData, uint32_t srcDataLen, PublicKey
 {
     if (srcData == NULL || srcDataLen == 0 || publicKey == NULL || publicKey->key == NULL || publicKey->len == 0 ||
         encryptedData == NULL || encryptedDataLen == NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     RSA *peerPubKey = NULL;
@@ -272,6 +277,7 @@ int32_t SoftBusRsaDecrypt(
     const uint8_t *srcData, uint32_t srcDataLen, uint8_t **decryptedData, uint32_t *decryptedDataLen)
 {
     if (srcData == NULL || srcDataLen == 0 || decryptedData == NULL || decryptedDataLen == NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     struct HksBlob encryptedBlob = { srcDataLen, (uint8_t *)srcData };
