@@ -1178,7 +1178,7 @@ static int32_t ProcessDisconnectRequest(struct WifiDirectCommand *command)
     struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(IF_NAME_P2P);
     CONN_CHECK_AND_RETURN_RET_LOGW(info, SOFTBUS_ERR, CONN_WIFI_DIRECT, "interface info is null");
     int32_t reuseCountOld = info->getInt(info, II_KEY_REUSE_COUNT, 0);
-    if (reuseCountOld == 0) {
+    if (reuseCountOld <= 0) {
         CONN_LOGI(CONN_WIFI_DIRECT, "reuseCountOld already 0, do not call RemoveLink");
         command->onSuccess(command, NULL);
         return SOFTBUS_OK;
