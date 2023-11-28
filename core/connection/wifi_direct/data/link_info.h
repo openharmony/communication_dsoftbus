@@ -45,6 +45,7 @@ enum LinkInfoKey {
     LI_KEY_STATUS = 17,
     LI_KEY_LOCAL_BASE_MAC = 18,
     LI_KEY_REMOTE_BASE_MAC = 19,
+    LI_KEY_IS_CLIENT = 20,
     LI_KEY_MAX,
 };
 
