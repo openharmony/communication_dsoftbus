@@ -20,6 +20,7 @@
 #include <unistd.h>
 
 #include "softbus_access_token_test.h"
+#include "softbus_bus_center.h"
 #include "discovery_service.h"
 
 using namespace testing::ext;
@@ -92,35 +93,27 @@ static void TestDeviceFound(const DeviceInfo *device)
     printf("[client]TestDeviceFound\n");
 }
 
-static void TestDiscoverFailed(int subscribeId, DiscoveryFailReason failReason)
+static void TestOnDiscoverResult(int32_t refreshId, RefreshResult reason)
 {
-    printf("[client]TestDiscoverFailed\n");
+    (void)refreshId;
+    (void)reason;
+    printf("[client]TestDiscoverResult\n");
 }
 
-static void TestDiscoverySuccess(int subscribeId)
+static void TestOnPublishResult(int publishId, PublishResult reason)
 {
-    printf("[client]TestDiscoverySuccess\n");
+    (void)publishId;
+    (void)reason;
+    printf("[client]TestPublishResult\n");
 }
 
-static void TestPublishSuccess(int publishId)
-{
-    printf("[client]TestPublishSuccess\n");
-}
-
-static void TestPublishFail(int publishId, PublishFailReason reason)
-{
-    printf("[client]TestPublishFail\n");
-}
-
-static IDiscoveryCallback g_subscribeCb = {
+static IRefreshCallback g_refreshCb = {
     .OnDeviceFound = TestDeviceFound,
-    .OnDiscoverFailed = TestDiscoverFailed,
-    .OnDiscoverySuccess = TestDiscoverySuccess
+    .OnDiscoverResult = TestOnDiscoverResult
 };
 
-static IPublishCallback g_publishCb = {
-    .OnPublishSuccess = TestPublishSuccess,
-    .OnPublishFail = TestPublishFail
+static IPublishCb g_publishCb = {
+    .OnPublishResult = TestOnPublishResult,
 };
 
 /**
@@ -136,7 +129,7 @@ HWTEST_F(DiscSdkOnlyL2Test, UnPublishServiceTest001, TestSize.Level2)
     int ret;
     int tmpId = GetPublishId();
 
-    ret = UnPublishService(g_pkgName, tmpId);
+    ret = StopPublishLNN(g_pkgName, tmpId);
     EXPECT_TRUE(ret != 0);
 }
 
@@ -154,10 +147,10 @@ HWTEST_F(DiscSdkOnlyL2Test, UnPublishServiceTest002, TestSize.Level2)
     int tmpId = GetPublishId();
 
     g_pInfo.publishId = tmpId;
-    PublishService(g_pkgName, &g_pInfo, &g_publishCb);
-    ret = UnPublishService(g_pkgName, tmpId);
+    PublishLNN(g_pkgName, &g_pInfo, &g_publishCb);
+    ret = StopPublishLNN(g_pkgName, tmpId);
     EXPECT_TRUE(ret == 0);
-    ret = UnPublishService(g_pkgName, tmpId);
+    ret = StopPublishLNN(g_pkgName, tmpId);
     EXPECT_TRUE(ret != 0);
 }
 
@@ -174,7 +167,7 @@ HWTEST_F(DiscSdkOnlyL2Test, StopDiscoveryTest001, TestSize.Level2)
     int ret;
     int tmpId = GetSubscribeId();
 
-    ret = StopDiscovery(g_pkgName, tmpId);
+    ret = StopRefreshLNN(g_pkgName, tmpId);
     EXPECT_TRUE(ret != 0);
 }
 
@@ -192,10 +185,10 @@ HWTEST_F(DiscSdkOnlyL2Test, StopDiscoveryTest002, TestSize.Level2)
     int tmpId = GetSubscribeId();
 
     g_sInfo.subscribeId = tmpId;
-    StartDiscovery(g_pkgName, &g_sInfo, &g_subscribeCb);
-    ret = StopDiscovery(g_pkgName, tmpId);
+    RefreshLNN(g_pkgName, &g_sInfo, &g_refreshCb);
+    ret = StopRefreshLNN(g_pkgName, tmpId);
     EXPECT_TRUE(ret == 0);
-    ret = StopDiscovery(g_pkgName, tmpId);
+    ret = StopRefreshLNN(g_pkgName, tmpId);
     EXPECT_TRUE(ret != 0);
 }
 } // namespace OHOS
