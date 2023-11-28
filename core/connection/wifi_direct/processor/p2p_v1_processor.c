@@ -1301,6 +1301,8 @@ static int32_t ProcessGetInterfaceInfoRequest(struct NegotiateMessage *msg)
             NegotiateMessageDelete(self->pendingRequestMsg);
             self->pendingRequestMsg = NULL;
         }
+        CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "post data failed");
+        ProcessSuccess(NULL);
         return ret;
     }
 
