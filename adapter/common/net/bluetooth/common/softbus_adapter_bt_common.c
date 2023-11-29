@@ -20,13 +20,13 @@
 #include "c_header/ohos_bt_def.h"
 #include "c_header/ohos_bt_gap.h"
 #include "c_header/ohos_bt_gatt.h"
+#include "comm_log.h"
 #include "securec.h"
 #include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 
-#define STATE_LISTENER_MAX_NUM 9
+#define STATE_LISTENER_MAX_NUM 18
 #define BR_STATE_CB_TRANSPORT 1
 
 typedef struct {
@@ -71,7 +71,7 @@ static SoftBusBtAddr ConvertBtAddr(const BdAddr *bdAddr)
 {
     SoftBusBtAddr btAddr = {0};
     if (memcpy_s(btAddr.addr, sizeof(btAddr.addr), bdAddr->addr, sizeof(bdAddr->addr)) != EOK) {
-        CLOGE("copy bdAddr fail");
+        COMM_LOGE(COMM_ADAPTER, "copy bdAddr fail");
     }
     return btAddr;
 }
@@ -92,7 +92,7 @@ static void SoftBusOnBtSateChanged(int32_t status)
 
 static void WrapperStateChangeCallback(const int transport, const int status)
 {
-    CLOGI("WrapperStateChangeCallback, transport=%d, status=%d", transport, status);
+    COMM_LOGI(COMM_ADAPTER, "WrapperStateChangeCallback, transport=%d, status=%d", transport, status);
     int st = ConvertBtState(transport, status);
     SoftBusOnBtSateChanged(st);
 }
@@ -100,11 +100,11 @@ static void WrapperStateChangeCallback(const int transport, const int status)
 static void WrapperAclStateChangedCallback(const BdAddr *bdAddr, GapAclState state, unsigned int reason)
 {
     if (bdAddr == NULL) {
-        CLOGE("WrapperAclStateChangedCallback addr is null");
+        COMM_LOGE(COMM_ADAPTER, "WrapperAclStateChangedCallback addr is null");
         return;
     }
 
-    CLOGI("WrapperAclStateChangedCallback, addr:%02X:%02X:***%02X, state=%d, reason=%u",
+    COMM_LOGI(COMM_ADAPTER, "WrapperAclStateChangedCallback, addr:%02X:%02X:***%02X, state=%d, reason=%u",
         bdAddr->addr[MAC_FIRST_INDEX], bdAddr->addr[MAC_ONE_INDEX], bdAddr->addr[MAC_FIVE_INDEX], state, reason);
     int listenerId;
     int aclState = ConvertAclState(state);
@@ -121,14 +121,14 @@ static void WrapperAclStateChangedCallback(const BdAddr *bdAddr, GapAclState sta
 static void WrapperPairRequestedCallback(const BdAddr *bdAddr, int transport)
 {
     if (bdAddr == NULL) {
-        CLOGE("WrapperPairRequestedCallback addr is null");
+        COMM_LOGE(COMM_ADAPTER, "WrapperPairRequestedCallback addr is null");
         return;
     }
 
-    CLOGI("WrapperPairRequestedCallback, addr:%02X:%02X:***%02X, transport=%d",
+    COMM_LOGI(COMM_ADAPTER, "WrapperPairRequestedCallback, addr:%02X:%02X:***%02X, transport=%d",
         bdAddr->addr[MAC_FIRST_INDEX], bdAddr->addr[MAC_ONE_INDEX], bdAddr->addr[MAC_FIVE_INDEX], transport);
     if (!PairRequestReply(bdAddr, transport, true)) {
-        CLOGE("PairRequestReply error");
+        COMM_LOGE(COMM_ADAPTER, "PairRequestReply error");
     }
 }
 
@@ -136,15 +136,15 @@ static void WrapperPairConfiremedCallback(const BdAddr *bdAddr, int transport, i
     int number)
 {
     if (bdAddr == NULL) {
-        CLOGE("WrapperPairConfirmedCallback addr is null");
+        COMM_LOGE(COMM_ADAPTER, "WrapperPairConfirmedCallback addr is null");
         return;
     }
 
-    CLOGI("WrapperPairConfirmedCallback, addr=%02X:%02X:***%02X, transport=%d, reqType:%d, number:%d",
+    COMM_LOGI(COMM_ADAPTER, "WrapperPairConfirmedCallback, addr=%02X:%02X:***%02X, transport=%d, reqType:%d, number:%d",
         bdAddr->addr[MAC_FIRST_INDEX], bdAddr->addr[MAC_ONE_INDEX], bdAddr->addr[MAC_FIVE_INDEX],
         transport, reqType, number);
     if (!SetDevicePairingConfirmation(bdAddr, transport, true)) {
-        CLOGE("SetDevicePairingConfirmation error");
+        COMM_LOGE(COMM_ADAPTER, "SetDevicePairingConfirmation error");
     }
 }
 

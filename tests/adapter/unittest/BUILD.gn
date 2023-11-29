@@ -78,34 +78,6 @@ if (defined(ohos_lite)) {
     }
   }
 
-  ohos_unittest("AdapterDsoftbusRsaCryptoTest") {
-    module_out_path = module_output_path
-    sources = [ "dsoftbus_rsa_crypto_test.cpp" ]
-    include_dirs = [
-      "$dsoftbus_root_path/adapter/common/include",
-      "$dsoftbus_root_path/core/common/include/",
-      "$dsoftbus_root_path/interfaces/kits/common",
-      "//third_party/bounds_checking_function/include",
-    ]
-    deps = [
-      "../../../adapter:softbus_adapter",
-      "//third_party/bounds_checking_function:libsec_static",
-      "//third_party/googletest:gtest_main",
-    ]
-    if (is_standard_system) {
-      external_deps = [
-        "c_utils:utils",
-        "hilog:libhilog",
-        "huks:libhukssdk",
-      ]
-    } else {
-      external_deps = [
-        "c_utils:utils",
-        "hilog:libhilog",
-      ]
-    }
-  }
-
   ohos_unittest("AdapterDsoftbusAesCryptoTest") {
     module_out_path = module_output_path
     sources = [ "dsoftbus_aes_crypto_test.cpp" ]
@@ -450,7 +422,6 @@ if (defined(ohos_lite)) {
       ":AdapterDsoftbusDfxTest",
       ":AdapterDsoftbusOtherTest",
       ":AdapterDsoftbusRangeTest",
-      ":AdapterDsoftbusRsaCryptoTest",
       ":AdapterDsoftbusSocketTest",
       ":AdapterWlanExtendTest",
       ":AdaptorDsoftbusCryptTest",

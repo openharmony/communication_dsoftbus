@@ -30,24 +30,24 @@ struct LinkManagerListener {
 
 struct LinkManager {
     struct InnerLink* (*getLinkByDevice)(const char *macString);
-    struct InnerLink* (*getLinkByTypeAndDevice)(enum WifiDirectConnectType connectType, const char *macString);
+    struct InnerLink* (*getLinkByTypeAndDevice)(enum WifiDirectLinkType linkType, const char *macString);
     struct InnerLink* (*getLinkByIp)(const char *ipString, bool isRemoteIp);
     struct InnerLink* (*getLinkById)(int32_t linkId);
     struct InnerLink* (*getLinkByUuid)(const char *uuid);
     int32_t (*getAllLinks)(struct InnerLink **linkArray, int32_t *linkArraySize);
     void (*notifyLinkChange)(struct InnerLink *link);
-    void (*removeLinksByConnectType)(enum WifiDirectConnectType connectType);
-    void (*refreshLinks)(enum WifiDirectConnectType connectType, int32_t clientDeviceSize, char *clientDevices[]);
+    void (*removeLinksByLinkType)(enum WifiDirectLinkType linkType);
+    void (*refreshLinks)(enum WifiDirectLinkType linkType, int32_t clientDeviceSize, char *clientDevices[]);
     void (*registerListener)(struct LinkManagerListener *listener);
     int32_t (*generateLinkId)(struct InnerLink *innerLink, int32_t requestId, int32_t pid);
     void (*recycleLinkId)(int32_t linkId, const char *remoteMac);
-    void (*setNegoChannelForLink)(struct WifiDirectNegotiateChannel *channel);
-    void  (*clearNegoChannelForLink)(const char *uuid, bool destroy);
-    void (*dump)(void);
-    bool (*checkAll)(enum WifiDirectConnectType type, const char *interface, bool (*checker)(struct InnerLink *));
+    void (*setNegotiateChannelForLink)(struct WifiDirectNegotiateChannel *channel);
+    void  (*clearNegotiateChannelForLink)(const char *uuid, bool destroy);
+    void (*dump)(int32_t fd);
+    bool (*checkAll)(enum WifiDirectLinkType type, const char *interface, bool (*checker)(struct InnerLink *));
 
     SoftBusMutex mutex;
-    ListNode linkLists[WIFI_DIRECT_CONNECT_TYPE_MAX]; // type/interface/remoteMac
+    ListNode linkLists[WIFI_DIRECT_LINK_TYPE_MAX]; // type/interface/remoteMac
     struct LinkManagerListener listener;
     int32_t currentLinkId;
     int32_t count;

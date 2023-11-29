@@ -33,12 +33,12 @@ extern "C" {
 #endif
 
 enum WifiDirectConnectType {
-    WIFI_DIRECT_CONNECT_TYPE_INVALID = -1,
-    WIFI_DIRECT_CONNECT_TYPE_WIFI_DIRECT = 0,
-    WIFI_DIRECT_CONNECT_TYPE_P2P = 1,
-    WIFI_DIRECT_CONNECT_TYPE_HML = 2,
-    WIFI_DIRECT_CONNECT_TYPE_UNKNOWN = 3,
-    WIFI_DIRECT_CONNECT_TYPE_MAX,
+    WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P,
+    WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML,
+
+    WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_P2P,
+    WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML,
+    WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML,
 };
 
 enum WifiDirectRole {
@@ -91,6 +91,9 @@ enum WifiDirectNegotiateCmdType {
 
     CMD_PC_GET_INTERFACE_INFO_REQ = 30,
     CMD_PC_GET_INTERFACE_INFO_RESP = 31,
+
+    CMD_RENEGOTIATE_REQ = 50,
+    CMD_RENEGOTIATE_RESP = 51,
 };
 
 enum WifiDirectEntityType {
@@ -108,11 +111,18 @@ enum P2pGroupConfigIndex {
     P2P_GROUP_CONFIG_INDEX_MAX,
 };
 
+enum WifiDirectLinkType {
+    WIFI_DIRECT_LINK_TYPE_INVALID = -1,
+    WIFI_DIRECT_LINK_TYPE_P2P,
+    WIFI_DIRECT_LINK_TYPE_HML,
+    WIFI_DIRECT_LINK_TYPE_MAX,
+};
+
 struct WifiDirectLink {
     int32_t linkId;
     char localIp[IP_ADDR_STR_LEN];
     char remoteIp[IP_ADDR_STR_LEN];
-    enum WifiDirectConnectType connectType;
+    enum WifiDirectLinkType linkType;
 };
 
 struct WifiDirectNegotiateChannel;
@@ -127,6 +137,7 @@ struct WifiDirectConnectInfo {
     char remoteMac[MAC_ADDR_STR_LEN];
     bool isNetworkDelegate;
     int32_t linkId;
+    uint32_t bandWidth;
 };
 
 struct WifiDirectConnectCallback {

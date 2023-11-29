@@ -61,6 +61,10 @@ bool AddBoolToJsonObject(cJSON *json, const char * const string, bool value);
 bool GetJsonObjectInt32Item(const cJSON *json, const char * const string, int32_t *target);
 
 char *GetDynamicStringItemByJsonObject(const cJSON * const json, const char * const string, uint32_t limit);
+
+bool AddIntArrayToJsonObject(cJSON *json, const char *string, const int32_t *array, int32_t arrayLen);
+
+bool GetJsonObjectIntArrayItem(const cJSON *json, const char *string, int32_t *array, int32_t arrayLen);
 #ifdef __cplusplus
 #if __cplusplus
 }

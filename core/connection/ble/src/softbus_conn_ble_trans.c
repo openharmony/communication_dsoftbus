@@ -372,7 +372,8 @@ static int32_t BleCtrlMsgSerializeByJson(BleCtlMessageSerializationContext ctx, 
     if (ctx.method == METHOD_NOTIFY_REQUEST) {
         if (!AddNumberToJsonObject(json, CTRL_MSG_KEY_METHOD, CTRL_MSG_METHOD_NOTIFY_REQUEST) ||
             !AddNumberToJsonObject(json, CTRL_MSG_KEY_DELTA, ctx.referenceRequest.delta) ||
-            !AddNumberToJsonObject(json, CTRL_MSG_KEY_REF_NUM, ctx.referenceRequest.referenceNumber)) {
+            !AddNumberToJsonObject(json, CTRL_MSG_KEY_REF_NUM, ctx.referenceRequest.referenceNumber) ||
+            !AddNumber16ToJsonObject(json, CTRL_MSG_KEY_CHALLENGE, ctx.challengeCode)) {
             cJSON_Delete(json);
             return SOFTBUS_CREATE_JSON_ERR;
         }
@@ -553,7 +554,7 @@ int32_t ConnBleInitTransModule(ConnBleTransEventListener *listener)
     CONN_CHECK_AND_RETURN_RET_LOGW(status == SOFTBUS_OK, status, CONN_INIT,
         "init ble trans failed: init send queue failed, err=%d", status);
 
-    status = ConnStartActionAsync(NULL, BleSendTask);
+    status = ConnStartActionAsync(NULL, BleSendTask, NULL);
     CONN_CHECK_AND_RETURN_RET_LOGW(status == SOFTBUS_OK, status, CONN_INIT,
         "init ble trans failed: start send task failed, err=%d", status);
     g_transEventListener = *listener;

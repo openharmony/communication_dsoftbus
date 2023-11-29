@@ -321,10 +321,6 @@ int32_t TransProxyPackMessage(ProxyMessageHead *msg, int64_t authId, ProxyDataIn
     if (msg == NULL || dataInfo == NULL || dataInfo->inData == NULL || dataInfo->inData == 0) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (msg->type != PROXYCHANNEL_MSG_TYPE_NORMAL) {
-        PrintAnonymousPacket(TRANS_CTRL,
-            "TransProxyPackMessage, payload: ", (const char *)dataInfo->inData);
-    }
 
     int32_t ret;
     if ((msg->cipher & ENCRYPTED) == 0) {
@@ -582,11 +578,11 @@ int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanI
     cJSON *root = 0;
     AppInfo *appInfo = &(chanInfo->appInfo);
     if (appInfo == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     root = cJSON_ParseWithLength(msg, len);
     if (root == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_PARSE_JSON_ERR;
     }
 
     if (!GetJsonObjectStringItem(root, JSON_KEY_IDENTITY, chanInfo->identity, sizeof(chanInfo->identity)) ||
@@ -594,7 +590,7 @@ int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanI
                                  sizeof(appInfo->peerData.deviceId))) {
         TRANS_LOGE(TRANS_CTRL, "fail to get json item");
         cJSON_Delete(root);
-        return SOFTBUS_ERR;
+        return SOFTBUS_PARSE_JSON_ERR;
     }
     if (!GetJsonObjectNumberItem(root, JSON_KEY_MTU_SIZE, (int32_t *)&(appInfo->peerData.dataConfig))) {
         TRANS_LOGE(TRANS_CTRL, "peer dataconfig is null.");
@@ -606,7 +602,7 @@ int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanI
     if (appType == SOFTBUS_ERR) {
         TRANS_LOGE(TRANS_CTRL, "fail to get app type");
         cJSON_Delete(root);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
     }
     appInfo->appType = (AppType)appType;
     if (appInfo->appType == APP_TYPE_NORMAL) {
@@ -685,7 +681,7 @@ static int32_t TransProxyUnpackNormalHandshakeMsg(cJSON *root, AppInfo *appInfo,
                                  sizeof(appInfo->peerData.pkgName)) ||
         !GetJsonObjectStringItem(root, JSON_KEY_SESSION_KEY, sessionKey, keyLen)) {
         TRANS_LOGE(TRANS_CTRL, "Failed to get handshake msg APP_TYPE_NORMAL");
-        return SOFTBUS_ERR;
+        return SOFTBUS_PARSE_JSON_ERR;
     }
     if (!GetJsonObjectNumberItem(root, JSON_KEY_ENCRYPT, &appInfo->encrypt) ||
         !GetJsonObjectNumberItem(root, JSON_KEY_ALGORITHM, &appInfo->algorithm) ||
@@ -710,12 +706,12 @@ static int32_t TransProxyUnpackNormalHandshakeMsg(cJSON *root, AppInfo *appInfo,
         &len, (uint8_t *)sessionKey, strlen(sessionKey));
     if (len != sizeof(appInfo->sessionKey) || ret != 0) {
         TRANS_LOGE(TRANS_CTRL, "decode session fail ret=%d ", ret);
-        return SOFTBUS_ERR;
+        return SOFTBUS_DECRYPT_ERR;
     }
     if (UnpackPackHandshakeMsgForFastData(appInfo, root) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "unpack fast data failed");
         SoftBusFree((void *)appInfo->fastTransData);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_PROXY_UNPACK_FAST_DATA_FAILED;
     }
     return SOFTBUS_OK;
 }
@@ -724,12 +720,12 @@ static int32_t TransProxyUnpackAuthHandshakeMsg(cJSON *root, AppInfo *appInfo)
 {
     if (!GetJsonObjectStringItem(root, JSON_KEY_REQUEST_ID, appInfo->reqId, REQ_ID_SIZE_MAX)) {
         TRANS_LOGE(TRANS_CTRL, "Failed to get handshake msg REQUEST_ID");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_PROXY_HANDSHAKE_GET_REQUEST_FAILED;
     }
     if (!GetJsonObjectStringItem(root, JSON_KEY_PKG_NAME,
         appInfo->peerData.pkgName, sizeof(appInfo->peerData.pkgName))) {
         TRANS_LOGE(TRANS_CTRL, "Failed to get handshake msg pkgName");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_PROXY_HANDSHAKE_GET_PKG_FAILED;
     }
     return SOFTBUS_OK;
 }
@@ -738,14 +734,14 @@ static int32_t TransProxyUnpackInnerHandshakeMsg(cJSON *root, AppInfo *appInfo, 
 {
     if (!GetJsonObjectStringItem(root, JSON_KEY_SESSION_KEY, sessionKey, keyLen)) {
         TRANS_LOGE(TRANS_CTRL, "Failed to get handshake msg");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_PROXY_HANDSHAKE_GET_SESSIONKEY_FAILED;
     }
     size_t len = 0;
     int32_t ret = SoftBusBase64Decode((uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey),
         &len, (uint8_t *)sessionKey, strlen(sessionKey));
     if (len != sizeof(appInfo->sessionKey) || ret != 0) {
         TRANS_LOGE(TRANS_CTRL, "decode session fail ret=%d ", ret);
-        return SOFTBUS_ERR;
+        return SOFTBUS_DECRYPT_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -754,7 +750,7 @@ int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, in
 {
     cJSON *root = cJSON_ParseWithLength(msg, len);
     if (root == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_PARSE_JSON_ERR;
     }
     char sessionKey[BASE64KEY] = {0};
     AppInfo *appInfo = &(chan->appInfo);
@@ -769,23 +765,27 @@ int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, in
                                  sizeof(appInfo->myData.sessionName))) {
         TRANS_LOGE(TRANS_CTRL, "Failed to get handshake msg");
         cJSON_Delete(root);
-        return SOFTBUS_ERR;
+        return SOFTBUS_PARSE_JSON_ERR;
     }
     
     if (!GetJsonObjectNumberItem(root, JSON_KEY_MTU_SIZE, (int32_t *)&(appInfo->peerData.dataConfig))) {
         TRANS_LOGE(TRANS_CTRL, "peer dataconfig is null.");
     }
 
+    int32_t ret = SOFTBUS_ERR;
     if (appInfo->appType == APP_TYPE_NORMAL) {
-        if (TransProxyUnpackNormalHandshakeMsg(root, appInfo, sessionKey, BASE64KEY) != SOFTBUS_OK) {
+        ret = TransProxyUnpackNormalHandshakeMsg(root, appInfo, sessionKey, BASE64KEY);
+        if (ret != SOFTBUS_OK) {
             goto ERR_EXIT;
         }
     } else if (appInfo->appType == APP_TYPE_AUTH) {
-        if (TransProxyUnpackAuthHandshakeMsg(root, appInfo) != SOFTBUS_OK) {
+        ret = TransProxyUnpackAuthHandshakeMsg(root, appInfo);
+        if (ret != SOFTBUS_OK) {
             goto ERR_EXIT;
         }
     } else {
-        if (TransProxyUnpackInnerHandshakeMsg(root, appInfo, sessionKey, BASE64KEY) != SOFTBUS_OK) {
+        ret = TransProxyUnpackInnerHandshakeMsg(root, appInfo, sessionKey, BASE64KEY);
+        if (ret != SOFTBUS_OK) {
             goto ERR_EXIT;
         }
     }
@@ -799,7 +799,7 @@ int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, in
     return SOFTBUS_OK;
 ERR_EXIT:
     cJSON_Delete(root);
-    return SOFTBUS_ERR;
+    return ret;
 }
 
 char *TransProxyPackIdentity(const char *identity)

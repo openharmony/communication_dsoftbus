@@ -14,7 +14,7 @@
  */
 
 #include "lnn_heartbeat_ctrl.h"
-
+#include "lnn_heartbeat_utils.h"
 #include "lnn_log.h"
 #include "softbus_errcode.h"
 
@@ -58,6 +58,13 @@ void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type)
     LNN_LOGI(LNN_HEART_BEAT, "heartbeat stub update send info");
 }
 
+void LnnHbOnTrustedRelationChanged(int32_t groupType)
+{
+    (void)groupType;
+
+    LNN_LOGI(LNN_HEART_BEAT, "heartbeat stub process auth OnDeviceBound");
+}
+
 void LnnHbOnTrustedRelationIncreased(int32_t groupType)
 {
     (void)groupType;
@@ -78,4 +85,18 @@ int32_t LnnInitHeartbeat(void)
 
 void LnnDeinitHeartbeat(void)
 {
+}
+
+SoftBusScreenState GetScreenState(void)
+{
+    return SOFTBUS_SCREEN_UNKNOWN;
+}
+
+int32_t LnnShiftLNNGearWithoutPkgName(const char *callerId, const GearMode *mode,
+    LnnHeartbeatStrategyType strategyType)
+{
+    (void)callerId;
+    (void)mode;
+    (void)strategyType;
+    return SOFTBUS_NOT_IMPLEMENT;
 }

@@ -17,6 +17,7 @@
 #include "common_list.h"
 #include "disc_ble_dispatcher.h"
 #include "disc_coap.h"
+#include "disc_event.h"
 #include "disc_log.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
@@ -88,6 +89,41 @@ typedef struct {
     char *pkgName;
 } IdContainer;
 
+static void UpdateDiscEventByDeviceInfo(DiscEventExtra *discEventExtra, const DeviceInfo *device)
+{
+    if (discEventExtra == NULL || device == NULL) {
+        DISC_LOGI(DISC_CONTROL, "discEventExtra or device is null");
+        return;
+    }
+    if (device->addrNum <= CONNECTION_ADDR_WLAN || device->addrNum > CONNECTION_ADDR_MAX) {
+        DISC_LOGI(DISC_CONTROL, "unknow device info");
+        return;
+    }
+    uint32_t index = device->addrNum - 1;
+    ConnectionAddr addr = device->addr[index];
+    switch (addr.type) {
+        case CONNECTION_ADDR_BR:
+            discEventExtra->peerBrMac = addr.info.br.brMac;
+            break;
+        case CONNECTION_ADDR_BLE:
+            discEventExtra->peerBleMac = addr.info.ble.bleMac;
+            break;
+        case CONNECTION_ADDR_WLAN:
+        case CONNECTION_ADDR_ETH:
+            discEventExtra->peerIp = addr.info.ip.ip;
+            break;
+        default:
+            DISC_LOGI(DISC_CONTROL, "unknow param type!");
+            break;
+    }
+    char deviceType[DISC_MAX_DEVICE_NAME_LEN] = { 0 };
+    if (sprintf_s(deviceType, DISC_MAX_DEVICE_NAME_LEN + 1, "%d", device->devType) < 0) {
+        DISC_LOGI(DISC_CONTROL, "sprintf_s fail, devType=%d", device->devType);
+        return;
+    }
+    discEventExtra->peerDeviceType = deviceType;
+}
+
 static void DfxRecordStartDiscoveryDevice(DiscInfo *infoNode)
 {
     infoNode->statistics.startTime = SoftBusGetSysTimeMs();
@@ -99,10 +135,16 @@ static void DfxRecordStartDiscoveryDevice(DiscInfo *infoNode)
 static void DfxRecordDeviceFound(DiscInfo *infoNode, const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
 {
     DISC_LOGI(DISC_CONTROL, "record device found");
+    DiscEventExtra discEventExtra = {
+        .discType = addtions->medium, .discMode = infoNode->mode, .result = EVENT_STAGE_RESULT_OK
+    };
+    UpdateDiscEventByDeviceInfo(&discEventExtra, device);
     if (infoNode->statistics.repTimes == 0) {
         uint64_t costTime = SoftBusGetSysTimeMs() - infoNode->statistics.startTime;
         SoftbusRecordFirstDiscTime((SoftBusDiscMedium)addtions->medium, costTime);
+        discEventExtra.costTime = costTime;
     }
+    DISC_EVENT(EVENT_SCENE_SCAN, EVENT_STAGE_SCAN_END, discEventExtra);
     infoNode->statistics.repTimes++;
     infoNode->statistics.devNum++;
 }
@@ -237,6 +279,9 @@ static void InnerDeviceFound(DiscInfo *infoNode, const DeviceInfo *device,
                                                 const InnerDeviceInfoAddtions *additions)
 {
     if (IsInnerModule(infoNode) == false) {
+        DiscEventExtra discEventExtra = { .discMode = infoNode->mode, .result = EVENT_STAGE_RESULT_OK };
+        UpdateDiscEventByDeviceInfo(&discEventExtra, device);
+        DISC_EVENT(EVENT_SCENE_SCAN, EVENT_STAGE_SCAN_END, discEventExtra);
         (void)infoNode->item->callback.serverCb.OnServerDeviceFound(infoNode->item->packageName, device, additions);
         return;
     }
@@ -1030,13 +1075,14 @@ int32_t DiscMgrInit(void)
     g_discCoapInterface = DiscCoapInit(&g_discMgrMediumCb);
     g_discBleInterface = DiscBleInit(&g_discMgrMediumCb);
     DISC_CHECK_AND_RETURN_RET_LOGE(g_discBleInterface != NULL || g_discCoapInterface != NULL,
-                                  SOFTBUS_ERR, DISC_INIT, "ble and coap both init failed");
+                                   SOFTBUS_DISCOVER_MANAGER_INIT_FAIL, DISC_INIT, "ble and coap both init failed");
 
     g_publishInfoList = CreateSoftBusList();
-    DISC_CHECK_AND_RETURN_RET_LOGE(g_publishInfoList != NULL, SOFTBUS_ERR, DISC_INIT, "init publish info list failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(g_publishInfoList != NULL, SOFTBUS_DISCOVER_MANAGER_INIT_FAIL, DISC_INIT,
+                                   "init publish info list failed");
     g_discoveryInfoList = CreateSoftBusList();
-    DISC_CHECK_AND_RETURN_RET_LOGE(g_discoveryInfoList != NULL, SOFTBUS_ERR, DISC_INIT,
-        "init discovery info list failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(g_discoveryInfoList != NULL, SOFTBUS_DISCOVER_MANAGER_INIT_FAIL, DISC_INIT,
+                                   "init discovery info list failed");
 
     for (int32_t i = 0; i < CAPABILITY_MAX_BITNUM; i++) {
         ListInit(&g_capabilityList[i]);

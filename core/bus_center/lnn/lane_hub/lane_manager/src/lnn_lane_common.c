@@ -71,6 +71,20 @@ static int32_t P2pInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo,
     profile->phyChannel = linkInfo->linkInfo.p2p.channel;
     return SOFTBUS_OK;
 }
+
+static int32_t HmlInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)
+{
+    connInfo->type = LANE_HML;
+    if (memcpy_s(&connInfo->connInfo.p2p, sizeof(P2pConnInfo),
+        &linkInfo->linkInfo.p2p.connInfo, sizeof(P2pConnInfo)) != EOK) {
+        return SOFTBUS_ERR;
+    }
+    profile->linkType = LANE_HML;
+    profile->bw = linkInfo->linkInfo.p2p.bw;
+    profile->phyChannel = linkInfo->linkInfo.p2p.channel;
+    return SOFTBUS_OK;
+}
+
 static int32_t P2pReuseInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)
 {
     connInfo->type = LANE_P2P_REUSE;
@@ -107,16 +121,8 @@ static int32_t Wlan5GInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connIn
 
 static int32_t BleDirectInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)
 {
-    if (memcpy_s(connInfo->connInfo.bleDirect.nodeIdHash, NODEID_SHORT_HASH_LEN,
-        linkInfo->linkInfo.bleDirect.nodeIdHash, NODEID_SHORT_HASH_LEN) != EOK) {
-        return SOFTBUS_ERR;
-    }
-    if (memcpy_s(connInfo->connInfo.bleDirect.localUdidHash, UDID_SHORT_HASH_LEN,
-        linkInfo->linkInfo.bleDirect.localUdidHash, UDID_SHORT_HASH_LEN) != EOK) {
-        return SOFTBUS_ERR;
-    }
-    if (memcpy_s(connInfo->connInfo.bleDirect.peerUdidHash, SHA_256_HASH_LEN,
-        linkInfo->linkInfo.bleDirect.peerUdidHash, SHA_256_HASH_LEN) != EOK) {
+    if (strcpy_s(connInfo->connInfo.bleDirect.networkId, NETWORK_ID_BUF_LEN,
+        linkInfo->linkInfo.bleDirect.networkId) != EOK) {
         return SOFTBUS_ERR;
     }
     connInfo->type = LANE_BLE_DIRECT;
@@ -145,6 +151,7 @@ static LinkInfoProc g_funcList[LANE_LINK_TYPE_BUTT] = {
     [LANE_BR] = BrInfoProc,
     [LANE_BLE] = BleInfoProc,
     [LANE_P2P] = P2pInfoProc,
+    [LANE_HML] = HmlInfoProc,
     [LANE_WLAN_2P4G] = Wlan2P4GInfoProc,
     [LANE_WLAN_5G] = Wlan5GInfoProc,
     [LANE_P2P_REUSE] = P2pReuseInfoProc,

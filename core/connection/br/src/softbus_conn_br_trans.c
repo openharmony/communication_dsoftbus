@@ -462,7 +462,7 @@ int32_t ConnBrTransMuduleInit(SppSocketDriver *sppDriver, ConnBrTransEventListen
     CONN_CHECK_AND_RETURN_RET_LOGW(status == SOFTBUS_OK, status, CONN_INIT,
         "init br trans module failed: init br send queue failed, error=%d", status);
 
-    status = ConnStartActionAsync(NULL, SendHandlerLoop);
+    status = ConnStartActionAsync(NULL, SendHandlerLoop, NULL);
     if (status != SOFTBUS_OK) {
         return status;
     }

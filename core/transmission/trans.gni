@@ -85,3 +85,11 @@ if (defined(ohos_lite)) {
       [ "//third_party/bounds_checking_function:libsec_shared" ]
   trans_session_external_deps += [ "c_utils:utils" ]
 }
+
+if (dsoftbus_feature_wifi_notify == true &&
+    softbus_communication_wifi_feature == true) {
+  trans_session_src += [ "$dsoftbus_root_path/core/transmission/session/src/softbus_scenario_manager.c" ]
+  trans_session_external_deps += [ "wifi:wifi_sdk" ]
+} else {
+  trans_session_src += [ "$dsoftbus_root_path/core/transmission/session/src/softbus_scenario_manager_virtual.c" ]
+}
