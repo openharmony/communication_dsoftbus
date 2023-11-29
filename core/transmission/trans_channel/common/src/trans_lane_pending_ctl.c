@@ -347,6 +347,26 @@ static void TransGetQosInfo(const SessionParam *param, QosInfo *qosInfo, bool *i
     }
 }
 
+static void TransGetBleMac(const SessionParam *param, LaneRequestOption *requestOption)
+{
+    bool needBleMac = false;
+    for (int32_t i = 0; i < param->attr->linkTypeNum; ++i) {
+        if (param->attr->linkType[i] == LINK_TYPE_BLE) {
+            needBleMac = true;
+            break;
+        }
+    }
+    if (needBleMac) {
+        if (LnnGetRemoteStrInfo(requestOption->requestInfo.trans.networkId, STRING_KEY_BLE_MAC,
+                requestOption->requestInfo.trans.peerBleMac, BT_MAC_LEN) != SOFTBUS_OK) {
+            if (strcpy_s(requestOption->requestInfo.trans.peerBleMac, BT_MAC_LEN, "") != EOK) {
+                TRANS_LOGE(TRANS_SVC, "strcpy fail");
+            }
+            TRANS_LOGE(TRANS_SVC, "requestOption get ble mac fail.");
+        }
+    }
+}
+
 static int32_t GetRequestOptionBySessionParam(const SessionParam *param, LaneRequestOption *requestOption,
     bool *isQosLane)
 {
@@ -379,7 +399,8 @@ static int32_t GetRequestOptionBySessionParam(const SessionParam *param, LaneReq
     if (info != NULL && LnnHasDiscoveryType(info, DISCOVERY_TYPE_LSA)) {
         requestOption->requestInfo.trans.acceptableProtocols |= LNN_PROTOCOL_NIP;
     }
-
+    // ble mac is used when linktype is LINK_TYPE_BLE
+    TransGetBleMac(param, requestOption);
     int32_t uid;
     int32_t ret = TransGetUidAndPid(param->sessionName, &uid, &(requestOption->requestInfo.trans.pid));
     if (ret != SOFTBUS_OK) {
