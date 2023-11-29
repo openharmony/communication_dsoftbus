@@ -615,6 +615,7 @@ int32_t ClientDeleteSessionServer(SoftBusSecType type, const char *sessionName)
 
 int32_t ClientDeleteSession(int32_t sessionId)
 {
+    TRANS_LOGD(TRANS_SDK, "sessionId=%d", sessionId);
     if (sessionId < 0) {
         return SOFTBUS_ERR;
     }
