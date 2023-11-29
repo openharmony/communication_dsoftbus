@@ -538,6 +538,11 @@ static void ReadSessionAttrs(MessageParcel &data, SessionAttribute *getAttr)
 
 static void ReadQosInfo(MessageParcel& data, SessionParam &param)
 {
+    param.isQosLane = data.ReadBool();
+    if (!param.isQosLane) {
+        return;
+    }
+
     param.qosCount = data.ReadUint32();
     QosTV *qosInfo = nullptr;
     if (param.qosCount > 0) {
