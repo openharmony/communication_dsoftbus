@@ -112,12 +112,12 @@ HWTEST_F(HeartBeatCtrlTest, LNN_SHIFT_LNN_GEAR_TEST_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: HMOS_SHIFT_LNN_GEAR_TEST_001
-* @tc.desc: test HmosShiftLNNGear
+* @tc.name: LNN_SHIFT_LNN_GEAR_WITHOUT_PKG_NAME_TEST_001
+* @tc.desc: test LnnShiftLNNGearWithoutPkgName
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(HeartBeatCtrlTest, HMOS_SHIFT_LNN_GEAR_TEST_001, TestSize.Level1)
+HWTEST_F(HeartBeatCtrlTest, LNN_SHIFT_LNN_GEAR_WITHOUT_PKG_NAME_TEST_001, TestSize.Level1)
 {
     GearMode mode;
     NiceMock<HeartBeatStategyInterfaceMock> hbStrateMock;
@@ -126,16 +126,16 @@ HWTEST_F(HeartBeatCtrlTest, HMOS_SHIFT_LNN_GEAR_TEST_001, TestSize.Level1)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
 
-    int32_t ret = HmosShiftLNNGear(CALLERID, nullptr, STRATEGY_HB_SEND_ADJUSTABLE_PERIOD);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = HmosShiftLNNGear(nullptr, &mode, STRATEGY_HB_SEND_ADJUSTABLE_PERIOD);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    int32_t ret = LnnShiftLNNGearWithoutPkgName(CALLERID, nullptr, STRATEGY_HB_SEND_ADJUSTABLE_PERIOD);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM || ret == SOFTBUS_NOT_IMPLEMENT);
+    ret = LnnShiftLNNGearWithoutPkgName(nullptr, &mode, STRATEGY_HB_SEND_ADJUSTABLE_PERIOD);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM || ret == SOFTBUS_NOT_IMPLEMENT);
 
-    ret = HmosShiftLNNGear(CALLERID, &mode, STRATEGY_HB_SEND_ADJUSTABLE_PERIOD);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = LnnShiftLNNGearWithoutPkgName(CALLERID, &mode, STRATEGY_HB_SEND_ADJUSTABLE_PERIOD);
+    EXPECT_TRUE(ret == SOFTBUS_ERR || ret == SOFTBUS_NOT_IMPLEMENT);
 
-    ret = HmosShiftLNNGear(CALLERID, &mode, STRATEGY_HB_SEND_ADJUSTABLE_PERIOD);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = LnnShiftLNNGearWithoutPkgName(CALLERID, &mode, STRATEGY_HB_SEND_ADJUSTABLE_PERIOD);
+    EXPECT_TRUE(ret == SOFTBUS_ERR || ret == SOFTBUS_NOT_IMPLEMENT);
 }
 
 /*

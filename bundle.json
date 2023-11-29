@@ -108,6 +108,7 @@
         "test": [
           "//foundation/communication/dsoftbus/tests/adapter:fuzztest",
           "//foundation/communication/dsoftbus/tests/adapter:unittest",
+          "//foundation/communication/dsoftbus/tests/core/adapter:unittest",
           "//foundation/communication/dsoftbus/tests/core/authentication:fuzztest",
           "//foundation/communication/dsoftbus/tests/core/authentication:unittest",
           "//foundation/communication/dsoftbus/tests/core/bus_center:unittest",
@@ -131,6 +132,7 @@
           "//foundation/communication/dsoftbus/tests/sdk/transmission:benchmarktest",
           "//foundation/communication/dsoftbus/tests/sdk/transmission:integration_test",
           "//foundation/communication/dsoftbus/tests/sdk/frame/common:unittest",
+          "//foundation/communication/dsoftbus/tests/sdk/frame/standard:unittest",
           "//foundation/communication/dsoftbus/tests/sdk/frame:fuzztest"
         ]
       }

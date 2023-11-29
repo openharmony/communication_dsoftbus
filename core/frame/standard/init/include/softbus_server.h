@@ -70,6 +70,8 @@ public:
         const GearMode *mode) override;
     int Dump(int fd, const std::vector<std::u16string> &args) override;
     int32_t GetBusCenterExObj(sptr<IRemoteObject> &object) override;
+    int32_t EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos,
+        uint32_t qosCount) override;
 
 protected:
     void OnStart() override;

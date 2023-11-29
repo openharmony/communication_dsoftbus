@@ -33,6 +33,7 @@ extern "C" {
 #define LOG_TAG_MAX_LEN       16
 #define MODULE_DOMAIN_MAX_LEN 32
 #define LOG_LINE_MAX_LENGTH   512
+#define NSTACKX_LOG_DOMAIN    0xd0057ff
 #define DOMAIN_ID_TEST        0xd000f00
 #define FILE_NAME             (__builtin_strrchr("/" __FILE__, '/') + 1)
 
@@ -54,8 +55,10 @@ typedef struct {
     char tag[LOG_TAG_MAX_LEN];
 } SoftBusLogLabel;
 
-void SoftBusLogInnerImpl(SoftBusDfxLogLevel level, SoftBusLogLabel label, const char *fileName, int lineNum,
+void SoftBusLogInnerImpl(SoftBusDfxLogLevel level, SoftBusLogLabel label, const char *fileName, int32_t lineNum,
     const char *funName, const char *fmt, ...);
+
+void NstackxLogInnerImpl(const char *moduleName, uint32_t logLevel, const char *fmt, ...);
 
 #define CHECK_AND_RETURN_RET_LOG_INNER(cond, ret, log, label, fmt, ...) \
     do {                                                                \

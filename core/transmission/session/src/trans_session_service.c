@@ -15,6 +15,7 @@
 
 #include "trans_session_service.h"
 
+#include "anonymizer.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"

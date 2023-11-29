@@ -20,7 +20,6 @@
 
 #include "bus_center_info_key.h"
 #include "softbus_bus_center.h"
-#include "bus_center_adapter.h"
 
 #ifdef __cplusplus
 extern "C" {

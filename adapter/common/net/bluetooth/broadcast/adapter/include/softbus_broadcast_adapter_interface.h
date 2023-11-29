@@ -17,7 +17,7 @@
  * @file softbus_broadcast_adapter_interface.h
  * @brief Different broadcast protocol stacks adapt layer interfaces
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 
@@ -30,10 +30,12 @@
 extern "C"{
 #endif
 
+#define MEDIUM_MAX_NUM 2
+
 /**
  * @brief Defines the broadcast callback function.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 typedef struct {
@@ -46,58 +48,51 @@ typedef struct {
 /**
  * @brief Defines the broadcast scan callback function.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 typedef struct {
     void (*OnStartScanCallback)(int32_t scanId, int32_t status);
     void (*OnStopScanCallback)(int32_t scanId, int32_t status);
-    void (*OnReportScanDataCallback)(int32_t scanId, const SoftBusBleScanResult *reportData);
+    void (*OnReportScanDataCallback)(const SoftBusBcScanResult *reportData);
 } SoftbusScanCallback;
 
 /**
  * @brief Defines Different broadcast protocol stacks adapt layer interfaces
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
-struct SoftbusBroadcastMediumInterface {
-    int32_t (*InitBroadcast)(void);
-    int32_t (*DeInitBroadcast)(void);
+typedef struct{
+    int32_t (*Init)(void);
+    int32_t (*DeInit)(void);
     int32_t (*RegisterBroadcaster)(int32_t *advId, const SoftbusBroadcastCallback *cb);
     int32_t (*UnRegisterBroadcaster)(int32_t advId);
-    int32_t (*RegisterScanListener)(int32_t *scanerId, const SoftbusScanCallback *cb);
-    int32_t (*UnRegisterScanListener)(int32_t scanerId);
+    int32_t (*RegisterScanListener)(int32_t *scannerId, const SoftbusScanCallback *cb);
+    int32_t (*UnRegisterScanListener)(int32_t scannerId);
     int32_t (*StartBroadcasting)(int32_t advId, const SoftbusBroadcastParam *param, const SoftbusBroadcastData *bcData,
         const SoftbusBroadcastData *rspData);
-    int32_t (*UpdateBroadcasting)(int32_t advId, const SoftbusBroadcastParam *param, const SoftbusBroadcastData *bcData,
-        const SoftbusBroadcastData *rspData);
-    int32_t (*SetBroadcastingData)(int32_t advId, const SoftbusBroadcastData *bcData,
-        const SoftbusBroadcastData *rspData);
     int32_t (*StopBroadcasting)(int32_t advId);
-    int32_t (*StartScan)(int32_t scanerId, const SoftBusBcScanParams *param);
-    int32_t (*StopScan)(int32_t scanerId);
-    int32_t (*SetScanFilter)(int32_t scanerId, const SoftBusBcScanFilter *scanFilter, uint8_t filterSize);
-    int32_t (*GetScanFilter)(int32_t scanerId, const SoftBusBcScanFilter *scanFilter, uint8_t *filterSize);
-    int32_t (*QueryBroadcastStatus)(int32_t advId, int32_t *status);
-};
+    int32_t (*StartScan)(int32_t scannerId, const SoftBusBcScanParams *param, const SoftBusBcScanFilter *scanFilter,
+        uint8_t filterSize);
+    int32_t (*StopScan)(int32_t scannerId);
+} SoftbusBroadcastMediumInterface;
 
 /**
  * @brief Defines interface functions for registering different media
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
+int32_t RegisterBroadcastMediumFunction(SoftbusMediumType type, const SoftbusBroadcastMediumInterface *interface);
 
-int32_t RegisterBroadcastMediumFunction(enum SoftbusMediumType type,
-    const struct SoftbusBroadcastMediumInterface *interface);
 /**
  * @brief Defines interface functions for unregistering different media
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
-int32_t UnRegisterBroadcastMediumFunction(enum SoftbusMediumType type);
+int32_t UnRegisterBroadcastMediumFunction(SoftbusMediumType type);
 
 #ifdef __cplusplus
 }

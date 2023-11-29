@@ -48,11 +48,11 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
             .linkType = channel->linkType,
             .channelId = channel->channelId,
             .costTime = (int32_t)timediff,
-            .result = STAGE_RESULT_OK,
+            .result = EVENT_STAGE_RESULT_OK,
             .callerPkg = pkgName,
             .socketName = sessionName
         };
-        TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_OPEN_CHANNEL_END, extra);
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     }
     SoftbusRecordOpenSessionKpi(pkgName, channel->linkType, SOFTBUS_EVT_OPEN_SESSION_SUCC, timediff);
     SoftbusHitraceStop();

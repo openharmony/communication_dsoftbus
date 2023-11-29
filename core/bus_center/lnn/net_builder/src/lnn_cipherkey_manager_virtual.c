@@ -63,3 +63,26 @@ bool IsCipherManagerFindKey(const char *udid)
     (void)udid;
     return false;
 }
+
+int32_t LnnLoadLocalBroadcastCipherKey(void)
+{
+    return SOFTBUS_OK;
+}
+
+int32_t LnnGetLocalBroadcastCipherKey(BroadcastCipherKey *broadcastKey)
+{
+    (void)broadcastKey;
+    return SOFTBUS_OK;
+}
+
+int32_t LnnSaveLocalBroadcastCipherKey(const BroadcastCipherKey *broadcastKey)
+{
+    (void)broadcastKey;
+    return SOFTBUS_OK;
+}
+
+int32_t LnnUpdateLocalBroadcastCipherKey(BroadcastCipherKey *broadcastKey)
+{
+    (void)broadcastKey;
+    return SOFTBUS_OK;
+}

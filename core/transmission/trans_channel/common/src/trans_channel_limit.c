@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "anonymizer.h"
 #include "softbus_def.h"
 #include "trans_log.h"
 

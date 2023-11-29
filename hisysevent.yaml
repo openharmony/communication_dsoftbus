@@ -148,7 +148,7 @@ CONNECTION_BEHAVIOR:
   PEER_PORT: { type: STRING, desc: peer device port }
 
 IPC_BEHAVIOR:
-  __BASE: {type: BEHAVIOR, level: MINOR, desc: SOFTBUS IPC BEHAVIOR DOTTING EVENT}
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: softbus ipc behavior dotting event }
   ORG_PKG: {type: STRING, desc: business package name }
   FUNC: {type: STRING, desc: fuction name}
   BIZ_SCENE: {type: INT32, desc: business scene }

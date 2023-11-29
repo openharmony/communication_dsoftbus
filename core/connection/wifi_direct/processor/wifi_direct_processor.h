@@ -26,6 +26,8 @@ enum WifiDirectProcessorType {
     WIFI_DIRECT_PROCESSOR_TYPE_P2P_V1 = 0,
     WIFI_DIRECT_PROCESSOR_TYPE_P2P_V2 = 1,
     WIFI_DIRECT_PROCESSOR_TYPE_HML = 2,
+    WIFI_DIRECT_PROCESSOR_TYPE_TRIGGER_P2P = 3,
+    WIFI_DIRECT_PROCESSOR_TYPE_TRIGGER_HML = 4,
     WIFI_DIRECT_PROCESSOR_TYPE_MAX
 };
 
@@ -33,7 +35,7 @@ struct NegotiateMessage;
 struct InnerLink;
 struct WifiDirectCommand;
 
-#define PROCESSOR_BASE                                                                                            \
+#define WIFI_DIRECT_PROCESSOR_BASE                                                                                \
     int32_t (*createLink)(struct WifiDirectConnectInfo *connectInfo);                                             \
     int32_t (*reuseLink)(struct WifiDirectConnectInfo *connectInfo, struct InnerLink *innerLink);                 \
     int32_t (*disconnectLink)(struct WifiDirectConnectInfo *connectInfo, struct InnerLink *innerLink);            \
@@ -43,14 +45,15 @@ struct WifiDirectCommand;
     bool (*isMessageNeedPending)(enum WifiDirectNegotiateCmdType cmd, struct NegotiateMessage *msg);              \
     void (*onReversal)(enum WifiDirectNegotiateCmdType cmd, struct NegotiateMessage *msg);                        \
     void (*resetContext)(void);                                                                                   \
+    int32_t (*prejudgeAvailability)(const char *remoteNetworkId);                                                 \
                                                                                                                   \
     char *name;                                                                                                   \
     int32_t timerId;                                                                                              \
     struct WifiDirectCommand *activeCommand;                                                                      \
-    struct WifiDirectCommand *passiveCommand;
+    struct WifiDirectCommand *passiveCommand
 
 struct WifiDirectProcessor {
-    PROCESSOR_BASE;
+    WIFI_DIRECT_PROCESSOR_BASE;
 };
 
 #ifdef __cplusplus

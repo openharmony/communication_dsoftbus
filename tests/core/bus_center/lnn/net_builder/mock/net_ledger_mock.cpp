@@ -36,6 +36,7 @@ NetLedgerMock::SetupDefaultResult()
     ON_CALL(*this, LnnSetP2pRole).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(*this, LnnSetP2pMac).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(*this, LnnSetP2pGoMac).WillByDefault(Return(SOFTBUS_OK));
+    ON_CALL(*this, LnnSetWifiDirectAddr).WillByDefault(Return(SOFTBUS_OK));
 }
 
 static NetLedgerInterface *GetNetLedgerInterface()
@@ -62,6 +63,11 @@ int32_t LnnSetP2pGoMac(NodeInfo *info, const char *goMac)
 int32_t LnnGetAllOnlineAndMetaNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
 {
     return GetNetLedgerInterface()->LnnGetAllOnlineAndMetaNodeInfo(info, infoNum);
+}
+
+int32_t LnnSetWifiDirectAddr(NodeBasicInfo **info, int32_t *wifiDirectAddr)
+{
+    return GetNetLedgerInterface()->LnnSetWifiDirectAddr(info, wifiDirectAddr);
 }
 }
 }

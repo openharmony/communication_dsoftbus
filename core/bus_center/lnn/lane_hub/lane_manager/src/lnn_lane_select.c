@@ -297,17 +297,24 @@ static bool GetLaneScore(const char *networkId, LaneLinkType linkType, uint16_t 
 int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *request,
     LanePreferredLinkList *recommendList)
 {
+    LNN_LOGI(LNN_LANE, "SelectExpectLanesByQos enter");
     if ((networkId == NULL) || (request == NULL) || (recommendList == NULL)) {
         return SOFTBUS_INVALID_PARAM;
     }
     if (!LnnGetOnlineStateById(networkId, CATEGORY_NETWORK_ID)) {
+        char *anonyNetworkId = NULL;
+        Anonymize(networkId, &anonyNetworkId);
+        LNN_LOGE(LNN_LANE, "device not online, cancel selectLane by qos, networkId=%s", anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
         return SOFTBUS_ERR;
     }
     LanePreferredLinkList laneLinkList = {0};
     if (request->qosRequire.minBW == 0 && request->qosRequire.maxLaneLatency == 0 &&
         request->qosRequire.minLaneLatency == 0) {
+        LNN_LOGI(LNN_LANE, "select lane by default linkList");
         SelectByDefaultLink(networkId, request, laneLinkList.linkType, &(laneLinkList.linkTypeNum));
     } else {
+        LNN_LOGI(LNN_LANE, "select lane by qos require");
         if (DecideAvailableLane(networkId, request, &laneLinkList) != SOFTBUS_OK) {
             return SOFTBUS_ERR;
         }

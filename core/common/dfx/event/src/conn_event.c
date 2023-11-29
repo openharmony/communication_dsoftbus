@@ -17,8 +17,11 @@
 
 #include "softbus_event.h"
 
-void ConnEventInner(int32_t scene, int32_t stage, const char *func, int32_t line, ConnEventExtra extra)
+void ConnEventInner(int32_t scene, int32_t stage, const char *func, int32_t line, ConnEventExtra *extra)
 {
+    if (extra == NULL) {
+        return;
+    }
     SoftbusEventForm form = {
         .eventName = CONN_EVENT_NAME,
         .scene = scene,
@@ -27,5 +30,5 @@ void ConnEventInner(int32_t scene, int32_t stage, const char *func, int32_t line
         .line = line,
         .connExtra = extra,
     };
-    SoftbusEventInner(EVENT_MODULE_CONN, form);
+    SoftbusEventInner(EVENT_MODULE_CONN, &form);
 }

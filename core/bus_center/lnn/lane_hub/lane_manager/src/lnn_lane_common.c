@@ -121,16 +121,8 @@ static int32_t Wlan5GInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connIn
 
 static int32_t BleDirectInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)
 {
-    if (memcpy_s(connInfo->connInfo.bleDirect.nodeIdHash, NODEID_SHORT_HASH_LEN,
-        linkInfo->linkInfo.bleDirect.nodeIdHash, NODEID_SHORT_HASH_LEN) != EOK) {
-        return SOFTBUS_ERR;
-    }
-    if (memcpy_s(connInfo->connInfo.bleDirect.localUdidHash, UDID_SHORT_HASH_LEN,
-        linkInfo->linkInfo.bleDirect.localUdidHash, UDID_SHORT_HASH_LEN) != EOK) {
-        return SOFTBUS_ERR;
-    }
-    if (memcpy_s(connInfo->connInfo.bleDirect.peerUdidHash, SHA_256_HASH_LEN,
-        linkInfo->linkInfo.bleDirect.peerUdidHash, SHA_256_HASH_LEN) != EOK) {
+    if (strcpy_s(connInfo->connInfo.bleDirect.networkId, NETWORK_ID_BUF_LEN,
+        linkInfo->linkInfo.bleDirect.networkId) != EOK) {
         return SOFTBUS_ERR;
     }
     connInfo->type = LANE_BLE_DIRECT;

@@ -18,14 +18,17 @@
 #include <securec.h>
 #include <string.h>
 
+#include "anonymizer.h"
 #include "common_list.h"
 #include "lnn_async_callback_utils.h"
+#include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_assign.h"
 #include "lnn_lane_common.h"
 #include "lnn_lane_def.h"
 #include "lnn_lane_interface.h"
 #include "lnn_lane_link.h"
 #include "lnn_lane_model.h"
+#include "lnn_lane_query.h"
 #include "lnn_lane_score.h"
 #include "lnn_lane_select.h"
 #include "lnn_log.h"
@@ -277,15 +280,25 @@ static int32_t LnnRequestLaneByQos(uint32_t laneId, const LaneRequestOption *req
     const ILaneListener *listener)
 {
     if (RequestInfoCheck(request, listener) == false) {
+        LNN_LOGE(LNN_LANE, "lane requestInfo by qos invalid");
         return SOFTBUS_ERR;
     }
     if (g_laneObject[request->type] == NULL) {
+        LNN_LOGE(LNN_LANE, "laneType=%d is not supported", request->type);
         return SOFTBUS_ERR;
     }
+    LNN_LOGI(LNN_LANE, "laneRequestByQos, laneId=%u, laneType=%d, transType=%d, "
+        "minBW=%u, maxLaneLatency=%u, minLaneLatency=%u",
+        laneId, request->type, request->requestInfo.trans.transType,
+        request->requestInfo.trans.qosRequire.minBW,
+        request->requestInfo.trans.qosRequire.maxLaneLatency,
+        request->requestInfo.trans.qosRequire.minLaneLatency);
     int32_t result = g_laneObject[request->type]->allocLaneByQos(laneId, request, listener);
     if (result != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "alloc lane by qos fail, laneId=%u, result=%d", laneId, result);
         return SOFTBUS_ERR;
     }
+    LNN_LOGI(LNN_LANE, "request lane by qos success, laneId=%u", laneId);
     return SOFTBUS_OK;
 }
 
@@ -342,12 +355,21 @@ int32_t LnnFreeLane(uint32_t laneId)
     return SOFTBUS_OK;
 }
 
-QueryResult LnnQueryLaneResource(const LaneQueryInfo *queryInfo)
+int32_t LnnQueryLaneResource(const LaneQueryInfo *queryInfo, const QosInfo *qosInfo)
 {
-    if (queryInfo == NULL) {
-        return QUERY_RESULT_REQUEST_ILLEGAL;
+    if (queryInfo == NULL || qosInfo == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
     }
-    return QUERY_RESULT_OK;
+
+    if (!LnnGetOnlineStateById(queryInfo->networkId, CATEGORY_NETWORK_ID)) {
+        char *anonyNetworkId = NULL;
+        Anonymize(queryInfo->networkId, &anonyNetworkId);
+        LNN_LOGE(LNN_LANE, "device not online, cancel query peerNetworkId:%s", anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
+        return SOFTBUS_NETWORK_NODE_OFFLINE;
+    }
+    return QueryLaneResource(queryInfo, qosInfo);
 }
 
 static void LaneInitChannelRatingDelay(void *para)

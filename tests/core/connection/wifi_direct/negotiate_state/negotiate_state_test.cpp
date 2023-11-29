@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
-#include "softbus_log_old.h"
+#include "conn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 #include "softbus_json_utils.h"
@@ -58,7 +58,7 @@ void NegotiateStateTest::TearDown(void) {}
 */
 HWTEST_F(NegotiateStateTest, NegotiateStateTest001, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "NegotiateStateTest, NegotiateStateTest001, Start");
+    CONN_LOGI(CONN_WIFI_DIRECT, "NegotiateStateTest, NegotiateStateTest001, Start");
     struct WifiDirectNegotiator* negotiator = GetWifiDirectNegotiator();
     struct ProcessingState* self = GetProcessingState(negotiator);
     struct WifiDirectProcessor *processor =
@@ -73,7 +73,7 @@ HWTEST_F(NegotiateStateTest, NegotiateStateTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_ERR);
     ret = self->handleNegotiateMessageFromRemote(processor, CMD_CTRL_CHL_HANDSHAKE, msg);
     EXPECT_NE(ret, SOFTBUS_OK);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "NegotiateStateTest, NegotiateStateTest001, End");
+    CONN_LOGI(CONN_WIFI_DIRECT, "NegotiateStateTest, NegotiateStateTest001, End");
 };
 
 /* waiting_connect_request_state.c */
@@ -85,7 +85,7 @@ HWTEST_F(NegotiateStateTest, NegotiateStateTest001, TestSize.Level1)
 */
 HWTEST_F(NegotiateStateTest, NegotiateStateTest002, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "NegotiateStateTest, NegotiateStateTest002, Start");
+    CONN_LOGI(CONN_WIFI_DIRECT, "NegotiateStateTest, NegotiateStateTest002, Start");
     struct WifiDirectNegotiator* negotiator = GetWifiDirectNegotiator();
     struct WaitingConnectRequestState* self = GetWaitingConnectRequestState(negotiator);
     struct WifiDirectProcessor *processor =
@@ -98,7 +98,7 @@ HWTEST_F(NegotiateStateTest, NegotiateStateTest002, TestSize.Level1)
     EXPECT_NE(ret, SOFTBUS_OK);
     ret = self->handleNegotiateMessageFromRemote(processor, CMD_INVALID, msg);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "NegotiateStateTest, NegotiateStateTest002, End");
+    CONN_LOGI(CONN_WIFI_DIRECT, "NegotiateStateTest, NegotiateStateTest002, End");
 };
 
 /* waiting_connect_response_state.c */
@@ -110,7 +110,7 @@ HWTEST_F(NegotiateStateTest, NegotiateStateTest002, TestSize.Level1)
 */
 HWTEST_F(NegotiateStateTest, NegotiateStateTest003, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "NegotiateStateTest, NegotiateStateTest003, Start");
+    CONN_LOGI(CONN_WIFI_DIRECT, "NegotiateStateTest, NegotiateStateTest003, Start");
     struct WifiDirectNegotiator* negotiator = GetWifiDirectNegotiator();
     struct WaitingConnectResponseState* self = GetWaitingConnectResponseState(negotiator);
     struct WifiDirectProcessor *processor =
@@ -123,7 +123,7 @@ HWTEST_F(NegotiateStateTest, NegotiateStateTest003, TestSize.Level1)
     EXPECT_NE(ret, SOFTBUS_OK);
     ret = self->handleNegotiateMessageFromRemote(processor, CMD_INVALID, msg);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "NegotiateStateTest, NegotiateStateTest003, End");
+    CONN_LOGI(CONN_WIFI_DIRECT, "NegotiateStateTest, NegotiateStateTest003, End");
 };
 
 /* available_state.c */
@@ -135,7 +135,7 @@ HWTEST_F(NegotiateStateTest, NegotiateStateTest003, TestSize.Level1)
 */
 HWTEST_F(NegotiateStateTest, NegotiateStateTest004, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "NegotiateStateTest, NegotiateStateTest004, Start");
+    CONN_LOGI(CONN_WIFI_DIRECT, "NegotiateStateTest, NegotiateStateTest004, Start");
     struct WifiDirectNegotiator* negotiator = GetWifiDirectNegotiator();
     struct AvailableState* self = GetAvailableState(negotiator);
     struct WifiDirectProcessor *processor =
@@ -146,6 +146,6 @@ HWTEST_F(NegotiateStateTest, NegotiateStateTest004, TestSize.Level1)
     EXPECT_NE(ret, SOFTBUS_OK);
     ret = self->handleNegotiateMessageFromRemote(processor, CMD_INVALID, msg);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "NegotiateStateTest, NegotiateStateTest004, End");
+    CONN_LOGI(CONN_WIFI_DIRECT, "NegotiateStateTest, NegotiateStateTest004, End");
 };
 } // namespace OHOS
