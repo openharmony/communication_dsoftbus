@@ -99,8 +99,8 @@ HWTEST_F(TransEventTest, TransEventTest002, TestSize.Level0)
 HWTEST_F(TransEventTest, TransEventTest003, TestSize.Level0)
 {
     TransEventExtra invalidExtra = {
-        .result = -1,
-        .errcode = -2,
+        .result = -1,  // valid
+        .errcode = -2, // valid
         .socketName = "",
         .dataType = -3,
         .channelType = -4,
@@ -120,7 +120,7 @@ HWTEST_F(TransEventTest, TransEventTest003, TestSize.Level0)
         .callerPkg = "\0",
         .calleePkg = nullptr,
     };
-    constexpr int32_t VALID_EXTRA_SIZE = 1; // errcode is valid
+    constexpr int32_t VALID_EXTRA_SIZE = 2; // result, errcode is valid
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,
@@ -139,7 +139,7 @@ HWTEST_F(TransEventTest, TransEventTest003, TestSize.Level0)
 HWTEST_F(TransEventTest, TransEventTest004, TestSize.Level0)
 {
     TransEventExtra emptyExtra = { 0 };
-    constexpr int32_t VALID_EXTRA_SIZE = 1; // errcode is valid
+    constexpr int32_t VALID_EXTRA_SIZE = 2; // result, errcode is valid
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,

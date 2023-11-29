@@ -959,7 +959,8 @@ static void NotifyServerClosed(GattServiceType serviceId, int32_t status)
     }
     // if service type is unkown, notify all stopping services stoped
     for (int32_t i = 0; i < GATT_SERVICE_MAX; i++) {
-        CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_serviceContextLock) == SOFTBUS_OK, CONN_BLE, "try to lock failed");
+        CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_serviceContextLock) == SOFTBUS_OK, CONN_BLE,
+            "try to lock failed");
         enum GattServerState state = g_serviceContext[i].serverState.state;
         (void)SoftBusMutexUnlock(&g_serviceContextLock);
         if (state >= BLE_SERVER_STATE_SERVICE_STOPPING && state < BLE_SERVER_STATE_SERVICE_DELETED) {

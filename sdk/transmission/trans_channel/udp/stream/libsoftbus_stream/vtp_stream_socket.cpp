@@ -215,7 +215,7 @@ int VtpStreamSocket::HandleFillpFrameStats(int fd, const FtEventCbkInfo *info)
     } else {
         TRANS_LOGE(TRANS_STREAM, "StreamReceiver for fd=%d is empty in the map", fd);
     }
-    return 0;
+    return SOFTBUS_OK;
 }
 
 int VtpStreamSocket::HandleRipplePolicy(int fd, const FtEventCbkInfo *info)
@@ -240,7 +240,7 @@ int VtpStreamSocket::HandleRipplePolicy(int fd, const FtEventCbkInfo *info)
         TRANS_LOGE(TRANS_STREAM,
             "OnRippleStats streamReceiver for fd=%d is empty in the map", fd);
     }
-    return 0;
+    return SOFTBUS_OK;
 }
 
 #ifdef FILLP_SUPPORT_BW_DET
@@ -323,7 +323,7 @@ int VtpStreamSocket::FillpStatistics(int fd, const FtEventCbkInfo *info)
         return -1;
     }
 #endif
-    return 0;
+    return SOFTBUS_OK;
 }
 
 void VtpStreamSocket::FillpAppStatistics()
@@ -934,7 +934,7 @@ int VtpStreamSocket::EpollTimeout(int fd, int timeout)
             }
 
             if (events[i].events & SPUNGE_EPOLLIN) {
-                return 0;
+                return SOFTBUS_OK;
             }
         }
     }
@@ -958,7 +958,7 @@ int VtpStreamSocket::SetSocketEpollMode(int fd)
     }
 
     TRANS_LOGI(TRANS_STREAM, "SetNonBlockMode success");
-    return 0;
+    return SOFTBUS_OK;
 }
 
 void VtpStreamSocket::InsertBufferLength(int num, int length, uint8_t *output) const

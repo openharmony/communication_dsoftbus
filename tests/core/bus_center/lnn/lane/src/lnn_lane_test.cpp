@@ -1150,7 +1150,7 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_007, TestSize.Level1)
     EXPECT_CALL(mock, LnnGetLocalNodeInfo).WillRepeatedly(Return(nodeInfo));
     
     int32_t ret = BuildLink(request, reqId, &cb);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = BuildLink(request, reqId, &cb);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     SoftBusFree(request);

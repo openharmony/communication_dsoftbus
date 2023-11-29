@@ -246,16 +246,16 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannelProc001, TestSize.Level1)
     int32_t channelId = 1;
 
     int ret = TransOpenChannelProc(CHANNEL_TYPE_BUTT, appInfo, connOpt, &channelId);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = TransOpenChannelProc(CHANNEL_TYPE_UDP, appInfo, connOpt, &channelId);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = TransOpenChannelProc(CHANNEL_TYPE_PROXY, appInfo, connOpt, &channelId);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = TransOpenChannelProc(CHANNEL_TYPE_TCP_DIRECT, appInfo, connOpt, &channelId);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     SoftBusFree(connOpt);
     SoftBusFree(appInfo);

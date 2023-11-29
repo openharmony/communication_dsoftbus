@@ -1316,15 +1316,17 @@ char *PackDeviceInfoMessage(int32_t linkType, SoftBusVersion version, bool isMet
         JSON_Delete(json);
         return NULL;
     }
-    int64_t authId = AuthDeviceGetLatestIdByUuid(remoteUuid, (AuthLinkType)linkType);
-    if (authId == AUTH_INVALID_ID) {
-        AUTH_LOGW(AUTH_FSM, "get auth id fail");
-    }
-    AuthManager *manager = GetAuthManagerByAuthId(authId);
-    if (manager != NULL) {
-        PackWifiDirectInfo(json, info, manager->udid);
-        SoftBusFree(manager);
-        AUTH_LOGI(AUTH_FSM, "pack wifi direct info done");
+    if (!isMetaAuth) {
+        int64_t authId = AuthDeviceGetLatestIdByUuid(remoteUuid, (AuthLinkType)linkType);
+        if (authId == AUTH_INVALID_ID) {
+            AUTH_LOGW(AUTH_FSM, "get auth id fail");
+        }
+        AuthManager *manager = GetAuthManagerByAuthId(authId);
+        if (manager != NULL) {
+            PackWifiDirectInfo(json, info, manager->udid);
+            DelAuthManager(manager, false);
+            AUTH_LOGI(AUTH_FSM, "pack wifi direct info done");
+        }
     }
 
     char *msg = JSON_PrintUnformatted(json);

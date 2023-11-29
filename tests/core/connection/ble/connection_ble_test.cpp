@@ -24,7 +24,6 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
-#include "softbus_log_old.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_ble_send_queue.h"
 #include "softbus_conn_ble_trans.h"
@@ -162,7 +161,7 @@ HWTEST_F(ConnectionBleTest, TransTest003, TestSize.Level1)
 */
 HWTEST_F(ConnectionBleTest, QueueTest001, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     SendQueueNode queueNode;
 
     ret = ConnBleInitSendQueue();
@@ -199,7 +198,7 @@ HWTEST_F(ConnectionBleTest, QueueTest001, TestSize.Level1)
 */
 HWTEST_F(ConnectionBleTest, QueueTest002, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     void *msg = nullptr;
     SendQueueNode queueNode;
 

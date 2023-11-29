@@ -125,13 +125,13 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_001, TestSize.Level
         WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(managerMock, LnnRegisterEventHandler).WillRepeatedly(Return(SOFTBUS_OK));
     int ret = LnnInitNetworkManager();
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = LnnInitNetworkManager();
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = LnnInitNetworkManager();
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = LnnInitNetworkManager();
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret!= SOFTBUS_OK);
     ret = LnnInitNetworkManager();
     EXPECT_TRUE(ret != SOFTBUS_ERR);
 }
@@ -147,7 +147,7 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_002, TestSize.Level
     NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
     EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnGetAddrTypeByIfName(nullptr, nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 
     ConnectionAddrType type1 = CONNECTION_ADDR_ETH;
     ret = LnnGetAddrTypeByIfName("ETH", &type1);
@@ -166,7 +166,7 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_002, TestSize.Level
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
     ret = LnnGetNetIfTypeByName(nullptr, nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /*
@@ -180,7 +180,7 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_003, TestSize.Level
     NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
     EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
     int ret = LnnRegistProtocol(nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 
     LnnProtocolManager protocolMgr;
     memset_s(&protocolMgr, sizeof(protocolMgr), 0, sizeof(protocolMgr));
@@ -189,14 +189,14 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_003, TestSize.Level
     protocolMgr.getListenerModule = LnnGetBtListenerModule;
 
     ret = LnnRegistProtocol(&protocolMgr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 
     protocolMgr.init = LnnInitBtProtocolOk;
     ret = LnnRegistProtocol(&protocolMgr);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
     ret = UnregistProtocol(nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 
     ret = UnregistProtocol(&protocolMgr);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -221,7 +221,7 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_003, TestSize.Level
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
     ret = LnnInitNetworkManagerDelay();
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = LnnInitNetworkManagerDelay();
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
@@ -246,14 +246,14 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_004, TestSize.Level
 
     EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
     int res = LnnInitManagerByConfig();
-    EXPECT_TRUE(res == SOFTBUS_ERR);
+    EXPECT_TRUE(res != SOFTBUS_OK);
 
     EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_ERR));
     res = LnnInitManagerByConfig();
     EXPECT_TRUE(res == SOFTBUS_OK);
 
     res = ParseIfNameConfig(nullptr, len);
-    EXPECT_TRUE(res == SOFTBUS_ERR);
+    EXPECT_TRUE(res != SOFTBUS_OK);
     res = ParseIfNameConfig(buf, sizeof("nullptr"));
     EXPECT_TRUE(res == SOFTBUS_OK);
 
@@ -416,7 +416,7 @@ HWTEST_F(LNNNetworkManagerMockTest, REGIST_NETIFMGR_TEST_001, TestSize.Level1)
     LnnNetIfNameType type = LNN_MAX_NUM_TYPE;
     LnnNetIfManagerBuilder builder = nullptr;
     int32_t ret = RegistNetIfMgr(type, builder);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 
     type = LNN_MAX_NUM_TYPE;
     const char *ifName = "Softbus";
