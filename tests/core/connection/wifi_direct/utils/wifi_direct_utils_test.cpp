@@ -16,8 +16,6 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 #include <string>
-#include <errno.h>
-#include <string.h>
 
 #include "wifi_direct_defines.h"
 #include "conn_log.h"
@@ -410,7 +408,7 @@ HWTEST_F(WifiDirectUtilsTest, testDirectUtilsTest011, TestSize.Level1)
     ipv4->address = TEST_DATA1;
     ipv4->prefixLength = MIN_NUM;
     char ipString[16] = {};
-    size_t ipStringSize = sizeof(ipString)/ sizeof(ipString[0]);
+    size_t ipStringSize = sizeof(ipString) / sizeof(ipString[0]);
 
     int32_t ret = WifiDirectIpv4ToString(nullptr, ipString, ipStringSize);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -423,7 +421,7 @@ HWTEST_F(WifiDirectUtilsTest, testDirectUtilsTest011, TestSize.Level1)
     ret = WifiDirectIpv4ToString(ipv4, ipString, ipStringSize1);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 
-    ipStringSize = sizeof(ipString)/ sizeof(ipString[0]);
+    ipStringSize = sizeof(ipString) / sizeof(ipString[0]);
     ret = WifiDirectIpv4ToString(ipv4, ipString, ipStringSize);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(ipv4);
@@ -444,11 +442,12 @@ HWTEST_F(WifiDirectUtilsTest, testDirectUtilsTest012, TestSize.Level1)
     uint8_t data[16] = {};
     size_t dataLen = 4;
 
-    int32_t ret = WifiDirectIpv4InfoToBytes((const struct WifiDirectIpv4Info *)ipv4, ipv4Count, data, &dataLen);
+    int32_t ret = WifiDirectIpv4InfoToBytes
+                (static_cast<const struct WifiDirectIpv4Info *>(ipv4), ipv4Count, data, &dataLen);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 
-    size_t dataLen1 = sizeof(data)/ sizeof(data[0]);
-    ret = WifiDirectIpv4InfoToBytes((const struct WifiDirectIpv4Info *)ipv4, ipv4Count, data, &dataLen1);
+    size_t dataLen1 = sizeof(data) / sizeof(data[0]);
+    ret = WifiDirectIpv4InfoToBytes(static_cast<const struct WifiDirectIpv4Info *>(ipv4), ipv4Count, data, &dataLen1);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(ipv4);
 };
@@ -546,11 +545,11 @@ HWTEST_F(WifiDirectUtilsTest, DirectNetworkUtilsTest002, TestSize.Level1)
 
     char channelListString[16] = {'a', 'b', 'c', 'a', 'b', 'c', 'a', 'b', 'c', 'a', 'b', 'c', 'a', 'b', 'c'};
     int32_t channelArray1[] = {CHANNEL_2G_FIRST, CHANNEL_2G_LAST, CHANNEL_5G_FIRST, CHANNEL_5G_LAST};
-    channelNum = (size_t)257;
+    channelNum = static_cast<size_t>(257);
     int32_t ret1 = GetWifiDirectNetWorkUtils()->stringToChannelList(channelListString, channelArray1, &channelNum);
     EXPECT_EQ(ret1, SOFTBUS_INVALID_PARAM);
 
-    channelNum = (size_t)256;
+    channelNum = static_cast<size_t>256;
     ret1 = GetWifiDirectNetWorkUtils()->stringToChannelList(nullptr, channelArray1, &channelNum);
     EXPECT_EQ(ret1, SOFTBUS_OK);
     
