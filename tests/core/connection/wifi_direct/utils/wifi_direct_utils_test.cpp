@@ -759,7 +759,7 @@ HWTEST_F(WifiDirectUtilsTest, DirectWorkQueueTest001, TestSize.Level1)
 HWTEST_F(WifiDirectUtilsTest, DirectWorkQueueTest002, TestSize.Level1)
 {
     WorkFunction data;
-    memset_s(&data, sizeof(WorkFunction), 0, sizeof(WorkFunction));
+    (void)memset_s(&data, sizeof(WorkFunction), 0, sizeof(WorkFunction));
     int64_t delayTimeMs = 1000;
     int32_t ret = CallMethodAsync(data, nullptr, delayTimeMs);
     EXPECT_EQ(ret, SOFTBUS_OK);
