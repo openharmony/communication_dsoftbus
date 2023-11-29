@@ -416,7 +416,7 @@ HWTEST_F(WifiDirectUtilsTest, testDirectUtilsTest011, TestSize.Level1)
     ret = WifiDirectIpv4ToString(ipv4, nullptr, ipStringSize);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    strcpy_s(ipString, "192.168.0.1");
+    strcpy_s(ipString, ipStringSize, "192.168.0.1");
     size_t ipStringSize1 = 1;
     ret = WifiDirectIpv4ToString(ipv4, ipString, ipStringSize1);
     EXPECT_EQ(ret, SOFTBUS_ERR);
@@ -549,7 +549,7 @@ HWTEST_F(WifiDirectUtilsTest, DirectNetworkUtilsTest002, TestSize.Level1)
     int32_t ret1 = GetWifiDirectNetWorkUtils()->stringToChannelList(channelListString, channelArray1, &channelNum);
     EXPECT_EQ(ret1, SOFTBUS_INVALID_PARAM);
 
-    channelNum = static_cast<size_t>256;
+    channelNum = static_cast<size_t>(256);
     ret1 = GetWifiDirectNetWorkUtils()->stringToChannelList(nullptr, channelArray1, &channelNum);
     EXPECT_EQ(ret1, SOFTBUS_OK);
     
