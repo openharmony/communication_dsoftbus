@@ -87,7 +87,7 @@ void WifiDirectUtilsTest::TearDown(void) {}
 /* wifi_direct_perf_recorder.c */
 /*
 * @tc.name: testDirectUtilsTest001
-* @tc.desc: test 
+* @tc.desc: test WifiDirectPerfRecorder structMem
 * @tc.type: FUNC
 * @tc.require: AR000I9Q40
 */
@@ -267,7 +267,7 @@ HWTEST_F(WifiDirectUtilsTest, testDirectUtilsTest005, TestSize.Level1)
     struct WifiDirectIpv4Info *ipv4 = static_cast<struct WifiDirectIpv4Info *>(SoftBusCalloc(sizeof(*ipv4)));
     size_t size = INVALID_DATA_LEN;
 
-    ret = self->getLocalIpv4InfoArray(ipv4, &size); 
+    ret = self->getLocalIpv4InfoArray(ipv4, &size);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(ipv4);
     CONN_LOGI(CONN_WIFI_DIRECT, "WifiDirectUtilsTest, testDirectUtilsTest005, End");
@@ -410,7 +410,7 @@ HWTEST_F(WifiDirectUtilsTest, testDirectUtilsTest011, TestSize.Level1)
     ipv4->address = TEST_DATA1;
     ipv4->prefixLength = MIN_NUM;
     char ipString[16] = {};
-    size_t ipStringSize = sizeof(ipString)/sizeof(ipString[0]);
+    size_t ipStringSize = sizeof(ipString)/ sizeof(ipString[0]);
 
     int32_t ret = WifiDirectIpv4ToString(nullptr, ipString, ipStringSize);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -418,11 +418,12 @@ HWTEST_F(WifiDirectUtilsTest, testDirectUtilsTest011, TestSize.Level1)
     ret = WifiDirectIpv4ToString(ipv4, nullptr, ipStringSize);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    strcpy(ipString, "192.168.0.1");
-    ret = WifiDirectIpv4ToString(ipv4, ipString, (size_t)1);
+    strcpy_s(ipString, "192.168.0.1");
+    size_t ipStringSize1 = 1;
+    ret = WifiDirectIpv4ToString(ipv4, ipString, ipStringSize1);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 
-    ipStringSize = sizeof(ipString)/sizeof(ipString[0]);
+    ipStringSize = sizeof(ipString)/ sizeof(ipString[0]);
     ret = WifiDirectIpv4ToString(ipv4, ipString, ipStringSize);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(ipv4);
@@ -446,7 +447,7 @@ HWTEST_F(WifiDirectUtilsTest, testDirectUtilsTest012, TestSize.Level1)
     int32_t ret = WifiDirectIpv4InfoToBytes((const struct WifiDirectIpv4Info *)ipv4, ipv4Count, data, &dataLen);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 
-    size_t dataLen1 = sizeof(data)/sizeof(data[0]);
+    size_t dataLen1 = sizeof(data)/ sizeof(data[0]);
     ret = WifiDirectIpv4InfoToBytes((const struct WifiDirectIpv4Info *)ipv4, ipv4Count, data, &dataLen1);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(ipv4);
@@ -602,7 +603,7 @@ HWTEST_F(WifiDirectUtilsTest, DirectNetworkUtilsTest003, TestSize.Level1)
 
 /*
 * @tc.name: DirectNetworkUtilsTest004
-* @tc.desc: test splitString 
+* @tc.desc: test splitString
 * @tc.type: FUNC
 * @tc.require: AR000I9Q40
 */
@@ -611,7 +612,7 @@ HWTEST_F(WifiDirectUtilsTest, DirectNetworkUtilsTest004, TestSize.Level1)
     struct WifiDirectConnectParams params;
     (void)memset_s(&params, sizeof(WifiDirectConnectParams), 0, sizeof(WifiDirectConnectParams));
     const char strConfig[] = "00:2A:3B:4C:5D:67";
-    strcpy_s(params.groupConfig,sizeof(params.groupConfig),strConfig);
+    strcpy_s(params.groupConfig, sizeof(params.groupConfig), strConfig);
     char *configs[P2P_GROUP_CONFIG_INDEX_MAX];
     size_t configsSize = P2P_GROUP_CONFIG_INDEX_MAX;
     int32_t ret = GetWifiDirectNetWorkUtils()->splitString(params.groupConfig, (char *)"\n", configs, &configsSize);
@@ -663,7 +664,7 @@ HWTEST_F(WifiDirectUtilsTest, DirectNetworkUtilsTest005, TestSize.Level1)
 
 /*
 * @tc.name: DirectNetworkUtilsTest006
-* @tc.desc: test getInterfaceIpString 
+* @tc.desc: test getInterfaceIpString
 * @tc.type: FUNC
 * @tc.require: AR000I9Q40
 */
@@ -692,7 +693,7 @@ HWTEST_F(WifiDirectUtilsTest, DirectNetworkUtilsTest006, TestSize.Level1)
 /*wifi_direct_perf_recorder.c*/
 /*
 * @tc.name: DirectPerfRecorderTest001
-* @tc.desc: test splitString 
+* @tc.desc: test WifiDirectPerfRecorder structMem
 * @tc.type: FUNC
 * @tc.require: AR000I9Q40
 */
@@ -716,7 +717,7 @@ HWTEST_F(WifiDirectUtilsTest, DirectPerfRecorderTest001, TestSize.Level1)
 /*wifi_direct_timer_list.c*/
 /*
 * @tc.name: DirectTimerListTest001
-* @tc.desc: test splitString 
+* @tc.desc: test stopTimer
 * @tc.type: FUNC
 * @tc.require: AR000I9Q40
 */
