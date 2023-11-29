@@ -19,9 +19,9 @@ import("../../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/discovery"
 
-ohos_unittest("DiscSoftBusBleTest") {
+ohos_unittest("DiscDistributedBleTest") {
   module_out_path = module_output_path
-  sources = [ "disc_ble_softbus_test.cpp" ]
+  sources = [ "disc_ble_distributed_test.cpp" ]
 
   include_dirs = [
     "$dsoftbus_root_path/core/common/include",
@@ -75,5 +75,5 @@ ohos_unittest("DiscSoftBusBleTest") {
 
 group("unittest") {
   testonly = true
-  deps = [ ":DiscSoftBusBleTest" ]
+  deps = [ ":DiscDistributedBleTest" ]
 }

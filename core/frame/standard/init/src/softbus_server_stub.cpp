@@ -133,6 +133,7 @@ void SoftBusServerStub::InitMemberFuncMap()
     memberFuncMap_[SERVER_NOTIFY_AUTH_SUCCESS] = &SoftBusServerStub::NotifyAuthSuccessInner;
     memberFuncMap_[SERVER_CLOSE_CHANNEL] = &SoftBusServerStub::CloseChannelInner;
     memberFuncMap_[SERVER_SESSION_SENDMSG] = &SoftBusServerStub::SendMessageInner;
+    memberFuncMap_[SERVER_EVALUATE_QOS] = &SoftBusServerStub::EvaluateQosInner;
     memberFuncMap_[SERVER_JOIN_LNN] = &SoftBusServerStub::JoinLNNInner;
     memberFuncMap_[SERVER_JOIN_METANODE] = &SoftBusServerStub::JoinMetaNodeInner;
     memberFuncMap_[SERVER_LEAVE_LNN] = &SoftBusServerStub::LeaveLNNInner;
@@ -202,7 +203,6 @@ void SoftBusServerStub::InitMemberPermissionMap()
 int32_t SoftBusServerStub::OnRemoteRequest(uint32_t code,
     MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    COMM_LOGI(COMM_SVC, "SoftBusServerStub::OnReceived, code = %u", code);
     SoftbusRecordCalledApiCnt(code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         COMM_LOGE(COMM_SVC, "SOFTBUS_SERVER_NOT_INIT ReadInterfaceToken failed!");
@@ -538,6 +538,11 @@ static void ReadSessionAttrs(MessageParcel &data, SessionAttribute *getAttr)
 
 static void ReadQosInfo(MessageParcel& data, SessionParam &param)
 {
+    param.isQosLane = data.ReadBool();
+    if (!param.isQosLane) {
+        return;
+    }
+
     param.qosCount = data.ReadUint32();
     QosTV *qosInfo = nullptr;
     if (param.qosCount > 0) {
@@ -707,6 +712,45 @@ int32_t SoftBusServerStub::SendMessageInner(MessageParcel &data, MessageParcel &
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "SendMessage write reply failed!");
         return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::EvaluateQosInner(MessageParcel &data, MessageParcel &reply)
+{
+    const char *peerNetworkId = data.ReadCString();
+    if (peerNetworkId == nullptr) {
+        COMM_LOGE(COMM_SVC, "EvaluateQos read peerNetworkId failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+
+    int32_t dataTypeNumber;
+    if (!data.ReadInt32(dataTypeNumber)) {
+        COMM_LOGE(COMM_SVC, "EvaluateQos read dataType failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+
+    TransDataType dataType = static_cast<TransDataType>(dataTypeNumber);
+    if (dataType < DATA_TYPE_MESSAGE || dataType >= DATA_TYPE_BUTT) {
+        COMM_LOGE(COMM_SVC, "EvaluateQos read dataType failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+
+    uint32_t qosCount;
+    if (!data.ReadUint32(qosCount)) {
+        COMM_LOGE(COMM_SVC, "EvaluateQos read qosCount failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+
+    QosTV *qos = nullptr;
+    if (qosCount > 0) {
+        qos = (QosTV*)data.ReadBuffer(sizeof(QosTV) * qosCount);
+    }
+
+    int32_t retReply = EvaluateQos(peerNetworkId, dataType, qos, qosCount);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "EvaluateQos write reply failed!");
+        return SOFTBUS_IPC_ERR;
     }
     return SOFTBUS_OK;
 }

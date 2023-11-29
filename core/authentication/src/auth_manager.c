@@ -36,7 +36,6 @@
 
 #define MAX_AUTH_VALID_PERIOD              (30 * 60 * 1000L)            /* 30 mins */
 #define SCHEDULE_UPDATE_SESSION_KEY_PERIOD ((5 * 60 + 30) * 60 * 1000L) /* 5 hour 30 mins */
-#define BLE_CONNECTION_CLOSE_DELAY         (10 * 1000L)
 #define FLAG_REPLY 1
 #define FLAG_ACTIVE 0
 #define RETRY_REGDATA_TIMES    3
@@ -376,7 +375,7 @@ static int32_t GetAuthConnInfoByUuid(const char *uuid, AuthLinkType type, AuthCo
     if (auth == NULL) {
         AUTH_LOGI(AUTH_CONN, "auth not found by uuid, connType=%d", type);
         ReleaseAuthLock();
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_NOT_FOUND;
     }
     *connInfo = auth->connInfo;
     ReleaseAuthLock();
@@ -587,12 +586,12 @@ int32_t AuthManagerGetSessionKey(int64_t authSeq, const AuthSessionInfo *info, S
         PrintAuthConnInfo(&info->connInfo);
         AUTH_LOGI(AUTH_FSM, "auth manager not found, connType=%d", info->connInfo.type);
         ReleaseAuthLock();
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_NOT_FOUND;
     }
     if (GetSessionKeyByIndex(&auth->sessionKeyList, TO_INT32(authSeq), sessionKey) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "GetSessionKeyByIndex fail");
         ReleaseAuthLock();
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_GET_SESSION_KEY_FAIL;
     }
     ReleaseAuthLock();
     return SOFTBUS_OK;
@@ -826,7 +825,7 @@ static int32_t ComplementConnectionInfoIfNeed(AuthManager *auth, const char *udi
         return SOFTBUS_OK;
     }
     if (udid == NULL || strlen(udid) == 0) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = SoftBusGenerateStrHash((unsigned char *)udid, strlen(udid),
         (unsigned char *)auth->connInfo.info.bleInfo.deviceIdHash);
@@ -927,8 +926,8 @@ void AuthManagerSetAuthFinished(int64_t authSeq, const AuthSessionInfo *info)
         if (info->connInfo.info.bleInfo.protocol == BLE_GATT &&
             IsFeatureSupport(localFeature, BIT_BLE_ONLINE_REUSE_CAPABILITY) &&
             IsFeatureSupport(info->nodeInfo.feature, BIT_BLE_ONLINE_REUSE_CAPABILITY)) {
-            AUTH_LOGI(AUTH_FSM, "support ble reuse, will disconnect after 10s");
-            BleDisconnectDelay(info->connId, BLE_CONNECTION_CLOSE_DELAY);
+            AUTH_LOGI(AUTH_FSM, "support ble reuse, will disconnect after %ds", info->nodeInfo.bleConnCloseDelayTime);
+            BleDisconnectDelay(info->connId, info->nodeInfo.bleConnCloseDelayTime);
         } else {
             AUTH_LOGI(AUTH_FSM, "ble disconn now");
             DisconnectAuthDevice((uint64_t *)&info->connId);
@@ -1310,23 +1309,23 @@ static int32_t TryGetBrConnInfo(const char *uuid, AuthConnInfo *connInfo)
     char networkId[NETWORK_ID_BUF_LEN] = { 0 };
     if (LnnGetNetworkIdByUuid(uuid, networkId, sizeof(networkId)) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "get networkdId by uuid fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_GET_BR_CONN_INFO_FAIL;
     }
 
     uint32_t local, remote;
     if (LnnGetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t *)&local) != SOFTBUS_OK ||
         LnnGetRemoteNumInfo(networkId, NUM_KEY_NET_CAP, (int32_t *)&remote) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "get NET_CAP fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_GET_BR_CONN_INFO_FAIL;
     }
     if (((local & (1 << BIT_BR)) == 0) || ((remote & (1 << BIT_BR)) == 0)) {
         AUTH_LOGI(AUTH_CONN, "can't support BR");
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_GET_BR_CONN_INFO_FAIL;
     }
     if (LnnGetRemoteStrInfo(networkId, STRING_KEY_BT_MAC, connInfo->info.brInfo.brMac, BT_MAC_LEN) != SOFTBUS_OK ||
         connInfo->info.brInfo.brMac[0] == '\0') {
         AUTH_LOGE(AUTH_CONN, "get bt mac fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_GET_BR_CONN_INFO_FAIL;
     }
     connInfo->type = AUTH_LINK_TYPE_BR;
     return SOFTBUS_OK;
@@ -1396,7 +1395,7 @@ int32_t AuthDeviceOpenConn(const AuthConnInfo *info, uint32_t requestId, const A
             return StartVerifyDevice(requestId, info, NULL, callback, true);
         default:
             AUTH_LOGE(AUTH_CONN, "unknown connType: %d", info->type);
-            return SOFTBUS_ERR;
+            return SOFTBUS_INVALID_PARAM;
     }
     return SOFTBUS_OK;
 }
@@ -1449,7 +1448,7 @@ int32_t AuthDevicePostTransData(int64_t authId, const AuthTransData *dataInfo)
         AUTH_LOGE(AUTH_CONN, "post trans data fail");
         SoftBusFree(encData);
         DelAuthManager(auth, false);
-        return SOFTBUS_ERR;
+        return SOFTBUS_AUTH_SEND_FAIL;
     }
     SoftBusFree(encData);
     DelAuthManager(auth, false);

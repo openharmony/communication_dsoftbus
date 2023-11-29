@@ -66,7 +66,6 @@ IC_DECLARE_KEY_PROPERTIES(LinkInfo, LI_KEY_MAX) = {
     IC_KEY_PROPERTY(LI_KEY_LOCAL_BASE_MAC, LI_TAG_LOCAL_BASE_MAC, "LOCAL_BASE_MAC", STRING, MAC_ADDR_FLAG),
     IC_KEY_PROPERTY(LI_KEY_REMOTE_BASE_MAC, LI_TAG_REMOTE_BASE_MAC, "REMOTE_BASE_MAC", STRING, MAC_ADDR_FLAG),
     IC_KEY_PROPERTY(LI_KEY_IS_CLIENT, LI_TAG_IS_CLIENT, "IS_CLIENT", BOOLEAN, 0),
-
 };
 
 /* private method forward declare */
@@ -270,6 +269,7 @@ void LinkInfoConstructor(struct LinkInfo* self)
 
 void LinkInfoDestructor(struct LinkInfo* self)
 {
+    CONN_CHECK_AND_RETURN_LOGW(self != NULL, CONN_WIFI_DIRECT, "self is null");
     InfoContainerDestructor((struct InfoContainer *)self, LI_KEY_MAX);
 }
 
@@ -287,9 +287,8 @@ void LinkInfoConstructorWithNameAndMode(struct LinkInfo* self, const char *local
 struct LinkInfo* LinkInfoNew(void)
 {
     struct LinkInfo *self = (struct LinkInfo *)SoftBusCalloc(sizeof(*self));
-    if (self) {
-        LinkInfoConstructor(self);
-    }
+    CONN_CHECK_AND_RETURN_RET_LOGE(self != NULL, NULL, CONN_WIFI_DIRECT, "self is null");
+    LinkInfoConstructor(self);
 
     return self;
 }
@@ -298,9 +297,8 @@ struct LinkInfo* LinkInfoNewWithNameAndMode(const char *localName, const char *r
                                             uint32_t localMode, uint32_t remoteMod)
 {
     struct LinkInfo *self = (struct LinkInfo *)SoftBusCalloc(sizeof(*self));
-    if (self) {
-        LinkInfoConstructorWithNameAndMode(self, localName, remoteName, localMode, remoteMod);
-    }
+    CONN_CHECK_AND_RETURN_RET_LOGE(self != NULL, NULL, CONN_WIFI_DIRECT, "self is null");
+    LinkInfoConstructorWithNameAndMode(self, localName, remoteName, localMode, remoteMod);
 
     return self;
 }

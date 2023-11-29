@@ -24,6 +24,7 @@
 #include "bus_center_manager.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_ble_lpdevice.h"
+#include "lnn_cipherkey_manager.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_decision_db.h"
 #include "lnn_device_info.h"
@@ -31,6 +32,7 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_utils.h"
+#include "lnn_link_finder.h"
 #include "lnn_log.h"
 #include "lnn_net_builder.h"
 #include "lnn_sync_item_info.h"
@@ -392,6 +394,9 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
     ReportLnnResultEvt(connFsm, retCode);
     if (retCode == SOFTBUS_OK && connInfo->nodeInfo != NULL) {
         report = LnnAddOnlineNode(connInfo->nodeInfo);
+        if (LnnInsertLinkFinderInfo(networkId) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "insert rpa info fail.");
+        }
         if (LnnUpdateGroupType(connInfo->nodeInfo) != SOFTBUS_OK) {
             LNN_LOGI(LNN_BUILDER, "update grouptype fail");
         }
@@ -548,6 +553,28 @@ static void TryCancelJoinProcedure(LnnConnectionFsm *connFsm)
     }
 }
 
+static int32_t LnnRecoveryBroadcastKey()
+{
+    BroadcastCipherKey broadcastKey;
+    (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
+    if (LnnGetLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get local info failed");
+        return SOFTBUS_ERR;
+    }
+    if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_KEY, broadcastKey.cipherInfo.key,
+        SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "set key failed");
+        return SOFTBUS_ERR;
+    }
+    
+    if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_IV, broadcastKey.cipherInfo.iv,
+        BROADCAST_IV_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "set iv failed");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
 {
     int32_t rc;
@@ -579,7 +606,8 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
         LNN_LOGI(LNN_BUILDER, "join udidHash = %s", udidHash);
         if (ret == EOK) {
             if (LnnRetrieveDeviceInfo(udidHash, &deviceInfo) == SOFTBUS_OK &&
-                AuthRestoreAuthManager(udidHash, &authConn, connInfo->requestId, &deviceInfo, &authId) == SOFTBUS_OK) {
+                AuthRestoreAuthManager(udidHash, &authConn, connInfo->requestId, &deviceInfo, &authId) == SOFTBUS_OK &&
+                LnnRecoveryBroadcastKey() == SOFTBUS_OK) {
                 LnnGetVerifyCallback()->onVerifyPassed(connInfo->requestId, authId, &deviceInfo);
                 return SOFTBUS_OK;
             }
@@ -626,11 +654,14 @@ int32_t OnJoinMetaNode(MetaJoinRequestNode *metaJoinNode, CustomData *customData
 
 static int32_t LnnFillConnInfo(LnnConntionInfo *connInfo)
 {
+    bool isAuthServer = false;
     SoftBusVersion version;
     NodeInfo *nodeInfo = connInfo->nodeInfo;
     nodeInfo->discoveryType = 1 << (uint32_t)LnnConvAddrTypeToDiscType(connInfo->addr.type);
     nodeInfo->authSeqNum = connInfo->authId;
-    nodeInfo->authChannelId[connInfo->addr.type] = (int32_t)connInfo->authId;
+    (void)AuthGetServerSide(connInfo->authId, &isAuthServer);
+    nodeInfo->authChannelId[connInfo->addr.type][isAuthServer ? AUTH_AS_SERVER_SIDE : AUTH_AS_CLIENT_SIDE] =
+        (int32_t)connInfo->authId;
     nodeInfo->relation[connInfo->addr.type]++;
     if (AuthGetVersion(connInfo->authId, &version) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "fill version fail");

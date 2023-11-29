@@ -35,6 +35,7 @@ typedef struct {
     const char *peerDeviceId;
     const char *groupId;
     const SessionAttribute *attr;
+    bool isQosLane;
     QosTV qos[QOS_TYPE_BUTT];
     uint32_t qosCount;
 } SessionParam;

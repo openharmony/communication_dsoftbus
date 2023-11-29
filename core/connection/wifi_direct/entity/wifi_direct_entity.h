@@ -24,11 +24,10 @@ extern "C" {
 #endif
 
 struct WifiDirectConnectParams {
-    int32_t freq;
+    int32_t frequency;
     bool isNeedDhcp;
     bool isWideBandSupported;
     bool isProxyEnable;
-    enum WifiDirectConnectType connectType;
 
     char remoteMac[MAC_ADDR_STR_LEN];
     char groupConfig[GROUP_CONFIG_STR_LEN];

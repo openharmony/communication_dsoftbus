@@ -24,10 +24,13 @@
 #include "parameter.h"
 #include "lnn_log.h"
 #include "lnn_settingdata_event_monitor.h"
+#include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_log.h"
 #include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_feature_config.h"
+#include "softbus_utils.h"
 
 #define DEFAULT_DEVICE_NAME "OpenHarmony"
 
@@ -46,6 +49,39 @@ static TypeInfo g_typeConvertMap[] = {
     {GET_TYPE_IPCAMERA, TYPE_IPCAMERA},
     {GET_TYPE_2IN1, TYPE_2IN1},
 };
+
+static int32_t SoftBusGetBleMacAddr(char *macStr, uint32_t len)
+{
+    int32_t bleMacRefreshSwitch;
+    if (SoftbusGetConfig(SOFTBUS_INT_BLE_MAC_AUTO_REFRESH_SWITCH,
+        (unsigned char *)(&bleMacRefreshSwitch), sizeof(bleMacRefreshSwitch)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "get ble mac refresh switch from config file fail");
+        return SOFTBUS_ERR;
+    }
+    /* ble mac not periodic refresh, return error if get ble mac fail */
+    if (bleMacRefreshSwitch == 0) {
+        int32_t ret;
+        SoftBusBtAddr mac = {0};
+
+        if (len != BT_MAC_LEN) {
+            return SOFTBUS_INVALID_PARAM;
+        }
+        ret = SoftBusGetBtMacAddr(&mac);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_STATE, "get ble mac addr fail");
+            return ret;
+        }
+        ret = ConvertReverseBtMacToStr(macStr, len, mac.addr, sizeof(mac.addr));
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_STATE, "convert bt mac to str fail");
+            return ret;
+        }
+        return SOFTBUS_OK;
+    }
+    /* ble mac periodic refresh, return SOFTBUS_OK */
+    (void)memset_s(macStr, len, 0, len);
+    return SOFTBUS_OK;
+}
 
 static int32_t SoftBusConvertDeviceType(const char *inBuf, char *outBuf, uint32_t outLen)
 {
@@ -99,6 +135,12 @@ int32_t GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len)
                 }
             } else {
                 LNN_LOGE(LNN_STATE, "GetDeviceType failed");
+                return SOFTBUS_ERR;
+            }
+            break;
+        case COMM_DEVICE_KEY_BLE_MAC:
+            if (SoftBusGetBleMacAddr(value, len) != SOFTBUS_OK) {
+                LNN_LOGE(LNN_STATE, "get ble mac addr failed!");
                 return SOFTBUS_ERR;
             }
             break;

@@ -103,7 +103,7 @@ static bool Unmarshalling(struct WifiConfigInfo *self, struct WifiDirectProtocol
         enum WifiConfigInfoKey key = GetKeyFromKeyProperty(&keyProperty);
         CONN_CHECK_AND_RETURN_RET_LOGW(key < WC_KEY_MAX, false, CONN_WIFI_DIRECT, "key out of range, tag=%d",
             keyProperty.tag);
-        if (!data || !size) {
+        if ((data == NULL) || (size == 0)) {
             continue;
         }
         if (key == WC_KEY_IGNORE) {

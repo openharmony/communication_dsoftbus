@@ -17,7 +17,7 @@
  * @file softbus_broadcast_adapter_type.h
  * @brief Declare functions and constants for the soft bus broadcast adaptation
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 
@@ -33,33 +33,38 @@ extern "C"{
 /**
  * @brief Defines mac address length
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 #define SOFTBUS_ADDR_MAC_LEN 6
 
 /**
+ * @brief Defines different broadcast media protocol stacks
+ *
+ * @since 4.1
+ * @version 1.0
+ */
+typedef enum {
+    BROADCAST_MEDIUM_TYPE_BLE,
+    BROADCAST_MEDIUM_TYPE_SLE,
+    BROADCAST_MEDIUM_TYPE_BUTT,
+} SoftbusMediumType;
+
+/**
  * @brief Defines the broadcast data information
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 typedef struct {
-    uint16_t uuidLen;
-    uint16_t serviceLen;
-    uint8_t *uuid;
-    uint8_t *serviceData;
-    uint16_t companyId;
-    uint16_t manufacturerDataLen;
-    uint8_t *manufacturerData;
-    uint8_t flag;
-    uint8_t rsv[3]; // Reserved
+    uint16_t rawDataLen;
+    uint8_t *rawData;
 } SoftbusBroadcastData;
 
 /**
  * @brief Defines mac address information
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 typedef struct {
@@ -69,7 +74,7 @@ typedef struct {
 /**
  * @brief Defines the device information returned by <b>SoftbusBroadcastCallback</b>.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 typedef struct {
@@ -83,12 +88,12 @@ typedef struct {
     uint8_t addrType;
     SoftbusMacAddr addr;
     SoftbusBroadcastData data;
-} SoftBusBleScanResult;
+} SoftBusBcScanResult;
 
 /**
  * @brief Defines the broadcast parameters
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 typedef struct {
@@ -107,7 +112,7 @@ typedef struct {
 /**
  * @brief Defines broadcast scan filters
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 typedef struct {
@@ -128,7 +133,7 @@ typedef struct {
 /**
  * @brief Defines broadcast scan parameters
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 typedef struct {

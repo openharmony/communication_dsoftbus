@@ -20,14 +20,14 @@ module_output_path = "dsoftbus/common/dfx"
 ohos_unittest("SoftBusDfxLogTest") {
   module_out_path = module_output_path
   sources = [
-    "auth_log_test.cpp",
-    "comm_log_test.cpp",
-    "conn_log_test.cpp",
-    "disc_log_test.cpp",
-    "lnn_log_test.cpp",
     "mock/hilog_mock.cpp",
-    "softbus_log_test.cpp",
-    "trans_log_test.cpp",
+    "src/auth_log_test.cpp",
+    "src/comm_log_test.cpp",
+    "src/conn_log_test.cpp",
+    "src/disc_log_test.cpp",
+    "src/lnn_log_test.cpp",
+    "src/softbus_log_test.cpp",
+    "src/trans_log_test.cpp",
   ]
   include_dirs = [
     "$dsoftbus_dfx_path/interface/include",
@@ -35,6 +35,7 @@ ohos_unittest("SoftBusDfxLogTest") {
     "//third_party/bounds_checking_function/include",
   ]
   deps = [
+    "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
     "$dsoftbus_dfx_path/log:softbus_dfx_log",
     "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/googletest:gmock",

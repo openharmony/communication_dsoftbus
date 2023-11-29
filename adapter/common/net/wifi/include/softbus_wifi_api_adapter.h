@@ -150,6 +150,7 @@ int32_t SoftBusGetCurrentGroup(SoftBusWifiP2pGroupInfo *groupInfo);
 bool SoftBusHasWifiDirectCapability(void);
 bool SoftBusIsWifiTripleMode(void);
 char* SoftBusGetWifiInterfaceCoexistCap(void);
+bool SoftBusIsWifiActive(void);
 
 #ifdef __cplusplus
 }
