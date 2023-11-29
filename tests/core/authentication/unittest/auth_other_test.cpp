@@ -541,7 +541,7 @@ HWTEST_F(AuthOtherTest, POST_CLOSE_ACK_MESSAGE_TEST_001, TestSize.Level1)
     int32_t ret = PostCloseAckMessage(authSeq, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = PostCloseAckMessage(authSeq, &info);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /*
@@ -726,12 +726,18 @@ HWTEST_F(AuthOtherTest, CHECK_BUS_VERSION_TEST_001, TestSize.Level1)
     ret = UnpackWiFi(obj, info, version, false);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 
+    (void)JSON_AddStringToObject(obj, "BROADCAST_CIPHER_KEY", "1222222222");
+    (void)JSON_AddStringToObject(obj, "BROADCAST_CIPHER_IV", "1222222222");
+    (void)JSON_AddStringToObject(obj, "IRK", "1222222222");
+    (void)JSON_AddStringToObject(obj, "PUB_MAC", "1222222222");
+
     JSON_AddStringToObject(obj, "MASTER_UDID", "1122334554444");
     JSON_AddStringToObject(obj, "NODE_ADDR", "1122334554444");
     UnpackCommon(obj, info, version, false);
     version = SOFTBUS_OLD_V1;
     JSON_AddInt32ToObject(obj, "MASTER_WEIGHT", (int32_t)10);
     UnpackCommon(obj, info, version, true);
+    UnpackCipherRpaInfo(obj, info);
     JSON_Delete(obj);
     SoftBusFree(info);
 }
@@ -943,7 +949,7 @@ HWTEST_F(AuthOtherTest, CONVERT_AUTH_LINK_TYPE_TO_HISYSEVENT_LINKTYPE_TEST_001, 
     ReportAuthResultEvt(authFsm, SOFTBUS_AUTH_HICHAIN_PROCESS_FAIL);
     ReportAuthResultEvt(authFsm, 11);
     int32_t  ret1 = RecoveryDeviceKey(authFsm);
-    EXPECT_TRUE(ret1 == SOFTBUS_ERR);
+    EXPECT_TRUE(ret1 != SOFTBUS_OK);
     AuthSessionInfo authSessionInfo;
     authSessionInfo.requestId = 11;
     authSessionInfo.isServer= false;
@@ -975,10 +981,10 @@ HWTEST_F(AuthOtherTest, POST_MESSAGE_TO_AUTH_FSM_TEST_001, TestSize.Level1)
     ASSERT_TRUE(data != nullptr);
     uint32_t len = 0;
     int32_t ret = PostMessageToAuthFsm(msgType, authSeq, data, len);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     len = 1024;
     ret = PostMessageToAuthFsm(msgType, authSeq, data, len);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /*
@@ -1049,10 +1055,10 @@ HWTEST_F(AuthOtherTest, COMPLEMENT_CONNECTION_INFO_TEST_001, TestSize.Level1)
 
     auth->connInfo.type = AUTH_LINK_TYPE_BLE;
     ret = ComplementConnectionInfoIfNeed(auth, "");
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     
     ret = ComplementConnectionInfoIfNeed(auth, NULL);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
 /*

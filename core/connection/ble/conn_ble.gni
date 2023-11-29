@@ -15,7 +15,7 @@ import("../../../adapter/common/net/bluetooth/net_bluetooth.gni")
 import("../../../dsoftbus.gni")
 
 native_source_path = rebase_path("$dsoftbus_root_path")
-conn_ble_dir = "dsoftbus_enhance/core/connection/ble/src"
+conn_ble_dir = "dsoftbus_enhance/core/connection/ble_direct"
 enhanced_conn_ble = exec_script("$dsoftbus_root_path/check_sub_module.py",
                                 [
                                   "$native_source_path",
@@ -73,9 +73,11 @@ if (!support_bluetooth) {
       "$dsoftbus_root_path/core/common/include",
     ]
     if (enhanced_conn_ble == true) {
-      ble_connection_src += [ "$dsoftbus_root_path/dsoftbus_enhance/core/connection/ble/src/softbus_conn_ble_direct_conn.c" ]
-      ble_connection_inc +=
-          [ "$dsoftbus_root_path/dsoftbus_enhance/core/connection/ble/include" ]
+      import(
+          "../../../dsoftbus_enhance/core/connection/ble_direct/ble_direct.gni")
+
+      ble_connection_src += ble_direct_connection_src
+      ble_connection_inc += ble_direct_connection_inc
     } else {
       ble_connection_src += [ "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_direct_virtual.c" ]
     }

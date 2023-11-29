@@ -42,7 +42,7 @@ static void UpdateInnerLink(struct WifiDirectP2pGroupInfo *groupInfo)
         CONN_LOGI(CONN_WIFI_DIRECT, "groupOwnerMac=%s", WifiDirectAnonymizeMac(groupOwnerMac));
 
         struct InnerLink link;
-        InnerLinkConstructorWithArgs(&link, WIFI_DIRECT_CONNECT_TYPE_P2P, true, IF_NAME_P2P, groupOwnerMac);
+        InnerLinkConstructorWithArgs(&link, WIFI_DIRECT_LINK_TYPE_P2P, IF_NAME_P2P, groupOwnerMac);
         link.putInt(&link, IL_KEY_STATE, INNER_LINK_STATE_CONNECTED);
         link.putInt(&link, IL_KEY_FREQUENCY, groupInfo->frequency);
         GetLinkManager()->notifyLinkChange(&link);
@@ -62,7 +62,7 @@ static void UpdateInnerLink(struct WifiDirectP2pGroupInfo *groupInfo)
                                                       clientDevices[i], MAC_ADDR_STR_LEN);
         CONN_LOGI(CONN_WIFI_DIRECT, "remoteMac=%s", WifiDirectAnonymizeMac(clientDevices[i]));
         struct InnerLink newLink;
-        InnerLinkConstructorWithArgs(&newLink, WIFI_DIRECT_CONNECT_TYPE_P2P, false, IF_NAME_P2P, clientDevices[i]);
+        InnerLinkConstructorWithArgs(&newLink, WIFI_DIRECT_LINK_TYPE_P2P, IF_NAME_P2P, clientDevices[i]);
         newLink.putInt(&newLink, IL_KEY_STATE, INNER_LINK_STATE_CONNECTED);
         newLink.putRawData(&newLink, IL_KEY_LOCAL_IPV4, localIpv4, sizeof(*localIpv4));
         newLink.putInt(&newLink, IL_KEY_FREQUENCY, groupInfo->frequency);
@@ -70,14 +70,14 @@ static void UpdateInnerLink(struct WifiDirectP2pGroupInfo *groupInfo)
         InnerLinkDestructor(&newLink);
     }
 
-    GetLinkManager()->refreshLinks(WIFI_DIRECT_CONNECT_TYPE_P2P, clientDeviceSize, clientDevices);
+    GetLinkManager()->refreshLinks(WIFI_DIRECT_LINK_TYPE_P2P, clientDeviceSize, clientDevices);
 }
 
 static void HandleP2pConnectionChanged(const struct P2pBroadcastParam *param)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     if (param->p2pLinkInfo.connectState == P2P_DISCONNECTED) {
-        GetLinkManager()->removeLinksByConnectType(WIFI_DIRECT_CONNECT_TYPE_P2P);
+        GetLinkManager()->removeLinksByLinkType(WIFI_DIRECT_LINK_TYPE_P2P);
         return;
     }
 

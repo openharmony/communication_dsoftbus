@@ -22,18 +22,18 @@
 extern "C" {
 #endif
 
-#define BIT_NUM_OF_BYTE         8
-#define DIGEST_SHA256           1
-#define DIGEST_SHA384           2
-#define DIGEST_SHA512           3
-#define RANDOM_LENGTH           8
+typedef struct {
+    const uint8_t *key;
+    uint32_t len;
+} PublicKey;
+
 #define SOFTBUS_RSA_LEN         2048
 #define SOFTBUS_RSA_ENCRYPT_LEN (SOFTBUS_RSA_LEN / 8)
 #define SOFTBUS_RSA_PUB_KEY_LEN (SOFTBUS_RSA_ENCRYPT_LEN + 38)
 
 int32_t SoftbusGetPublicKey(uint8_t *publicKey, uint32_t publicKeyLen);
-int32_t SoftbusRsaEncrypt(const uint8_t *srcData, uint32_t srcDataLen, const uint8_t *publicKey,
-    uint8_t **encryptedData, uint32_t *encryptedDataLen);
+int32_t SoftbusRsaEncrypt(const uint8_t *srcData, uint32_t srcDataLen, PublicKey *publicKey, uint8_t **encryptedData,
+    uint32_t *encryptedDataLen);
 int32_t SoftbusRsaDecrypt(
     const uint8_t *srcData, uint32_t srcDataLen, uint8_t **decryptedData, uint32_t *decryptedDataLen);
 

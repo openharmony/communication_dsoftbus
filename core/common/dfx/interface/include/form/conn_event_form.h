@@ -20,14 +20,18 @@
 
 #include "event_form_enum.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
-    SCENE_CONNECT = 1,
+    EVENT_SCENE_CONNECT = 1,
 } ConnEventScene;
 
 typedef enum {
-    STAGE_CONNECT_START = 1,
-    STAGE_CONNECT_INVOKE_PROTOCOL = 2,
-    STAGE_CONNECT_END = 3,
+    EVENT_STAGE_CONNECT_START = 1,
+    EVENT_STAGE_CONNECT_INVOKE_PROTOCOL = 2,
+    EVENT_STAGE_CONNECT_END = 3,
 } ConnEventConnectStage;
 
 typedef struct {
@@ -45,7 +49,6 @@ typedef struct {
     int32_t load;              // CHLOAD
     int32_t frequency;         // FREQ
     const char *peerIp;        // PEER_IP
-    const char *peerNetworkId; // PEER_NETID
     const char *peerBrMac;     // PEER_BR_MAC
     const char *peerBleMac;    // PEER_BLE_MAC
     const char *peerWifiMac;   // PEER_WIFI_MAC
@@ -54,4 +57,31 @@ typedef struct {
     const char *calleePkg;     // TO_CALL_PKG
 } ConnEventExtra;
 
+typedef enum {
+    ALARM_SCENE_CONN_RESERVED = 1,
+} ConnAlarmScene;
+
+typedef struct {
+    int32_t errcode;
+} ConnAlarmExtra;
+
+typedef enum {
+    STATS_SCENE_CONN_RESERVED = 1,
+} ConnStatsScene;
+
+typedef struct {
+    int32_t reserved;
+} ConnStatsExtra;
+
+typedef enum {
+    AUDIT_SCENE_CONN_RESERVED = 1,
+} ConnAuditScene;
+
+typedef struct {
+    int32_t reserved;
+} ConnAuditExtra;
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 #endif // CONN_EVENT_FORM_H

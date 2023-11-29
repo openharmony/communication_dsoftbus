@@ -17,6 +17,7 @@
 #define WIFI_DIRECT_CONNECT_COMMAND_H
 
 #include "wifi_direct_command.h"
+#include "softbus_conn_interface.h"
 
 #ifdef __cplusplus
 extern "C" {

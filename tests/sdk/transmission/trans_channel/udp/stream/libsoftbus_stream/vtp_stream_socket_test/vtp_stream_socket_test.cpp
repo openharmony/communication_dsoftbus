@@ -498,6 +498,8 @@ HWTEST_F(VtpStreamSocketTest, SetStreamHeaderSize001, TestSize.Level1)
     value->type_ = STRING_TYPE;
     PrintOptionInfo(type, *value);
 
+    value->type_ = UNKNOWN;
+    PrintOptionInfo(type, *value);
 
     if (value != nullptr) {
         SoftBusFree(value);
@@ -1055,4 +1057,62 @@ HWTEST_F(VtpStreamSocketTest, SetSocketEpollMode001, TestSize.Level1)
     EXPECT_EQ(-1, ret);
 }
 
+/**
+ * @tc.name: ConvertStreamFrameInfo2FrameInfoTest001
+ * @tc.desc: ConvertStreamFrameInfo2FrameInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(VtpStreamSocketTest, ConvertStreamFrameInfo2FrameInfoTest001, TestSize.Level1)
+{
+    FrameInfo frameInfo;
+    Communication::SoftBus::StreamFrameInfo streamFrameInfo = {
+        .streamId = 0,
+        .seqNum = 1,
+        .level = 1,
+        .frameType = FrameType::RADIO_MAX,
+        .seqSubNum = 1,
+        .bitMap = 1,
+        .bitrate = 0,
+    };
+
+    ConvertStreamFrameInfo2FrameInfo(&frameInfo, &streamFrameInfo);
+    EXPECT_TRUE(1);
+}
+
+/**
+ * @tc.name: AddStreamSocketLockTest001
+ * @tc.desc: AddStreamSocketLock
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(VtpStreamSocketTest, AddStreamSocketLockTest001, TestSize.Level1)
+{
+    std::mutex streamLock;
+
+    VtpStreamSocket::AddStreamSocketLock(1, streamLock); // test add
+    VtpStreamSocket::AddStreamSocketLock(1, streamLock); // test find exist
+
+    VtpStreamSocket::RemoveStreamSocketLock(1); // test find case
+    VtpStreamSocket::RemoveStreamSocketLock(1); // test removed case
+    EXPECT_TRUE(1);
+}
+
+/**
+ * @tc.name: AddStreamSocketListenerTest001
+ * @tc.desc: AddStreamSocketListener
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(VtpStreamSocketTest, AddStreamSocketListenerTest001, TestSize.Level1)
+{
+    std::shared_ptr<VtpStreamSocket> streamListener = std::make_shared<VtpStreamSocket>();
+
+    VtpStreamSocket::AddStreamSocketListener(1, streamListener); // test add
+    VtpStreamSocket::AddStreamSocketListener(1, streamListener); // test find exist
+
+    VtpStreamSocket::RemoveStreamSocketListener(1); // test find case
+    VtpStreamSocket::RemoveStreamSocketListener(1); // test removed case
+    EXPECT_TRUE(1);
+}
 } // OHOS

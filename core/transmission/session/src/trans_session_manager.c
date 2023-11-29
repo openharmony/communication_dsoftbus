@@ -15,6 +15,7 @@
 
 #include "trans_session_manager.h"
 
+#include "anonymizer.h"
 #include "lnn_lane_link.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
@@ -270,7 +271,7 @@ int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
     }
     if (g_sessionServerList == NULL) {
         TRANS_LOGE(TRANS_CTRL, "not init");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
 
     if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
@@ -297,7 +298,7 @@ int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
     TRANS_LOGE(TRANS_CTRL, "err: sessionName=%s", tmpName);
     AnonymizeFree(tmpName);
-    return SOFTBUS_ERR;
+    return SOFTBUS_TRANS_GET_PID_FAILED;
 }
 
 static void TransListDelete(ListNode *sessionServerList)

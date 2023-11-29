@@ -236,6 +236,19 @@
     ]
   },
   {
+    "SESSION_NAME": "com.huawei.pcassistant.*",
+    "REGEXP": "true",
+    "DEVID": "NETWORKID",
+    "SEC_LEVEL": "public",
+    "APP_INFO": [
+      {
+        "PKG_NAME": "ohos.InterConnection.device_collaboration_service",
+        "TYPE": "native_app",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
     "SESSION_NAME": "CastPlus*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
@@ -307,6 +320,36 @@
       {
         "PKG_NAME": "ohos.distributedhardware.devicemanager.adapter",
         "TYPE": "native_app",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
+    "SESSION_NAME": "com.huawei.*CastPlusDiscoveryModule",
+    "REGEXP": "true",
+    "DEVID": "UDID",
+    "APP_INFO": [
+      {
+        "PKG_NAME": "ohos.distributedhardware.devicemanager",
+        "TYPE": "native_app",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
+    "SESSION_NAME": "com.huawei.profile-session",
+    "REGEXP": "true",
+    "DEVID": "UDID",
+    "SEC_LEVEL": "public",
+    "APP_INFO": [
+      {
+        "PKG_NAME": "com.huawei.device_profile_adapter",
+        "TYPE": "system_app",
+        "ACTIONS": "create,open"
+      },
+      {
+        "PKG_NAME": "com.huawei.profile",
+        "TYPE": "system_app",
         "ACTIONS": "create,open"
       }
     ]

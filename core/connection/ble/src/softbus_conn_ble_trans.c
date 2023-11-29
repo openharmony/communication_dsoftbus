@@ -372,7 +372,8 @@ static int32_t BleCtrlMsgSerializeByJson(BleCtlMessageSerializationContext ctx, 
     if (ctx.method == METHOD_NOTIFY_REQUEST) {
         if (!AddNumberToJsonObject(json, CTRL_MSG_KEY_METHOD, CTRL_MSG_METHOD_NOTIFY_REQUEST) ||
             !AddNumberToJsonObject(json, CTRL_MSG_KEY_DELTA, ctx.referenceRequest.delta) ||
-            !AddNumberToJsonObject(json, CTRL_MSG_KEY_REF_NUM, ctx.referenceRequest.referenceNumber)) {
+            !AddNumberToJsonObject(json, CTRL_MSG_KEY_REF_NUM, ctx.referenceRequest.referenceNumber) ||
+            !AddNumber16ToJsonObject(json, CTRL_MSG_KEY_CHALLENGE, ctx.challengeCode)) {
             cJSON_Delete(json);
             return SOFTBUS_CREATE_JSON_ERR;
         }

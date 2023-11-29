@@ -119,9 +119,8 @@ int32_t ConnGattClientConnect(ConnBleConnection *connection)
     ConnEventExtra extra = {
         .peerBleMac = connection->addr,
         .connectionId = (int32_t)connection->connectionId,
-        .result = STAGE_RESULT_OK
-    };
-    CONN_EVENT(SCENE_CONNECT, STAGE_CONNECT_INVOKE_PROTOCOL, extra);
+        .result = EVENT_STAGE_RESULT_OK };
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_INVOKE_PROTOCOL, extra);
     status = SoftbusGattcConnect(underlayerHandle, &binaryAddr);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "client connect %u failed: underlayer connect failed, err=%d", connection->connectionId,
@@ -666,15 +665,14 @@ static void BleGattcNotificationReceiveCallback(int32_t underlayerHandle, SoftBu
     GattServiceType serviceId = SOFTBUS_GATT_SERVICE;
     ConnBleConnection *connection = ConnBleGetConnectionByHandle(underlayerHandle, CONN_SIDE_CLIENT, BLE_GATT);
     if (connection == NULL) {
-        CONN_LOGE(CONN_BLE, "connection not exist, handle=%d", underlayerHandle);
         serviceId = LEGACY_GATT_SERVICE;
         connection = LegacyBleGetConnectionByHandle(underlayerHandle, CONN_SIDE_CLIENT);
-        return;
     }
+    CONN_CHECK_AND_RETURN_LOGE(connection != NULL, CONN_BLE, "connection not exist");
     if (status != SOFTBUS_OK) {
         CONN_LOGW(CONN_BLE, "notification receive failed: status error, connId=%u, handle=%d, status=%d",
             connection->connectionId, underlayerHandle, status);
-        ConnBleReturnConnection(&connection);
+        ReturnConnection(serviceId, connection);
         return;
     }
 
@@ -698,10 +696,9 @@ static void BleGattcNotificationReceiveCallback(int32_t underlayerHandle, SoftBu
     } else {
         value = SoftBusCalloc(sizeof(uint8_t) * param->dataLen);
         valueLen = param->dataLen;
-        CONN_CHECK_AND_RETURN_LOG(value != NULL, "legacy malloc value failed, connId=%u, dataLen=%u",
-            connection->connectionId, valueLen);
-        if (memcpy_s(value, valueLen, param->data, valueLen) != EOK) {
-            CONN_LOGE(CONN_BLE, "legacy memcpy failed, connId=%u, dataLen=%u", connection->connectionId, valueLen);
+        if (value == NULL || memcpy_s(value, valueLen, param->data, valueLen) != EOK) {
+            CONN_LOGE(CONN_BLE, "legacy calloc or memcpy failed, connId=%u, dataLen=%u",
+                connection->connectionId, valueLen);
             SoftBusFree(value);
             ReturnConnection(serviceId, connection);
             return;
@@ -883,6 +880,7 @@ int32_t ConnGattInitClientModule(SoftBusLooper *looper, const ConnBleClientEvent
 
     g_bleGattClientAsyncHandler.handler.looper = looper;
     int32_t status = RegisterClientListener(listener, serviceId);
-    CONN_CHECK_AND_RETURN_RET_LOG(status == SOFTBUS_OK, SOFTBUS_INVALID_PARAM, "register client listener failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(status == SOFTBUS_OK, SOFTBUS_INVALID_PARAM, CONN_BLE,
+        "register client listener failed");
     return SOFTBUS_OK;
 }

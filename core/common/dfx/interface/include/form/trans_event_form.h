@@ -25,23 +25,23 @@ extern "C" {
 #endif
 
 typedef enum {
-    SCENE_OPEN_CHANNEL = 1,
-    SCENE_CLOSE_CHANNEL_ACTIVE = 2,
-    SCENE_CLOSE_CHANNEL_PASSIVE = 3,
-    SCENE_CLOSE_CHANNEL_TIMEOUT = 4,
+    EVENT_SCENE_OPEN_CHANNEL = 1,
+    EVENT_SCENE_CLOSE_CHANNEL_ACTIVE = 2,
+    EVENT_SCENE_CLOSE_CHANNEL_PASSIVE = 3,
+    EVENT_SCENE_CLOSE_CHANNEL_TIMEOUT = 4,
 } TransEventScene;
 
 typedef enum {
-    STAGE_OPEN_CHANNEL_START = 1,
-    STAGE_SELECT_LANE = 2,
-    STAGE_START_CONNECT = 3,
-    STAGE_HANDSHAKE_START = 4,
-    STAGE_HANDSHAKE_REPLY = 5,
-    STAGE_OPEN_CHANNEL_END = 6,
+    EVENT_STAGE_OPEN_CHANNEL_START = 1,
+    EVENT_STAGE_SELECT_LANE = 2,
+    EVENT_STAGE_START_CONNECT = 3,
+    EVENT_STAGE_HANDSHAKE_START = 4,
+    EVENT_STAGE_HANDSHAKE_REPLY = 5,
+    EVENT_STAGE_OPEN_CHANNEL_END = 6,
 } TransEventOpenChannelStage;
 
 typedef enum {
-    STAGE_CLOSE_CHANNEL = 1,
+    EVENT_STAGE_CLOSE_CHANNEL = 1,
 } TransEventCloseChannelStage;
 
 typedef struct {
@@ -66,6 +66,30 @@ typedef struct {
     const char *callerPkg;     // HOST_PKG
     const char *calleePkg;     // TO_CALL_PKG
 } TransEventExtra;
+
+typedef enum {
+    ALARM_SCENE_TRANS_RESERVED = 1,
+} TransAlarmScene;
+
+typedef struct {
+    int32_t errcode;
+} TransAlarmExtra;
+
+typedef enum {
+    STATS_SCENE_TRANS_RESERVED = 1,
+} TransStatsScene;
+
+typedef struct {
+    int32_t reserved;
+} TransStatsExtra;
+
+typedef enum {
+    AUDIT_SCENE_TRANS_RESERVED = 1,
+} TransAuditScene;
+
+typedef struct {
+    int32_t reserved;
+} TransAuditExtra;
 
 #ifdef __cplusplus
 }

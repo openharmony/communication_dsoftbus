@@ -25,20 +25,22 @@
 #include "hilog/log.h"
 #endif
 
-static void SoftBusLogExtraInfoFormat(char **str, const char *fileName, int lineNum, const char *funName)
+#define NSTACKX_LOG_LEVEL_CONVERT_BASE 8
+
+static void SoftBusLogExtraInfoFormat(char *line, const char *fileName, int lineNum, const char *funName)
 {
-    (void)sprintf_s(*str, LOG_LINE_MAX_LENGTH + 1, "[%s:%d] %s# ", fileName, lineNum, funName);
+    (void)sprintf_s(line, LOG_LINE_MAX_LENGTH + 1, "[%s:%d] %s# ", fileName, lineNum, funName);
 }
 
-static void SoftBusLogPrint(const char *buf, SoftBusDfxLogLevel level, unsigned int domain, const char *tag)
+static void SoftBusLogPrint(const char *line, SoftBusDfxLogLevel level, uint32_t domain, const char *tag)
 {
 #ifdef SOFTBUS_PRINTF
     (void)level;
     (void)domain;
     (void)tag;
-    printf("%s\n", buf);
+    printf("%s\n", line);
 #else
-    (void)HiLogPrint(LOG_CORE, (LogLevel)level, domain, tag, "%{public}s", buf);
+    (void)HiLogPrint(LOG_CORE, (LogLevel)level, domain, tag, "%{public}s", line);
 #endif
 }
 
@@ -46,20 +48,29 @@ void SoftBusLogInnerImpl(SoftBusDfxLogLevel level, SoftBusLogLabel label, const 
     const char *funName, const char *fmt, ...)
 {
     uint32_t pos;
-    va_list args;
-    char *str = (char *)malloc(LOG_LINE_MAX_LENGTH + 1);
-    if (str == NULL) {
-        return; // Do not print log here
-    }
-    SoftBusLogExtraInfoFormat(&str, fileName, lineNum, funName);
-    pos = strlen(str);
-    if (memset_s(&args, sizeof(va_list), 0, sizeof(va_list)) != EOK) {
-        free(str);
-        return; // Do not print log here
-    }
+    va_list args = { 0 };
+    char line[LOG_LINE_MAX_LENGTH + 1] = { 0 };
+    SoftBusLogExtraInfoFormat(line, fileName, lineNum, funName);
+    pos = strlen(line);
     va_start(args, fmt);
-    (void)vsprintf_s(&str[pos], LOG_LINE_MAX_LENGTH + 1, fmt, args);
+    int32_t ret = vsprintf_s(&line[pos], sizeof(line) - pos, fmt, args);
     va_end(args);
-    SoftBusLogPrint(str, level, label.domain, label.tag);
-    free(str);
+    if (ret < 0) {
+        return; // Do not print log here
+    }
+    SoftBusLogPrint(line, level, label.domain, label.tag);
+}
+
+void NstackxLogInnerImpl(const char *moduleName, uint32_t logLevel, const char *fmt, ...)
+{
+    SoftBusDfxLogLevel level = NSTACKX_LOG_LEVEL_CONVERT_BASE - logLevel;
+    va_list args = { 0 };
+    char line[LOG_LINE_MAX_LENGTH + 1] = { 0 };
+    va_start(args, fmt);
+    int32_t ret = vsprintf_s(line, sizeof(line), fmt, args);
+    va_end(args);
+    if (ret < 0) {
+        return; // Do not print log here
+    }
+    SoftBusLogPrint(line, level, NSTACKX_LOG_DOMAIN, moduleName);
 }

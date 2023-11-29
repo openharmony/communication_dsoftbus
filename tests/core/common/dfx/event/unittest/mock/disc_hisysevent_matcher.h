@@ -122,10 +122,13 @@ MATCHER_P2(DiscInvalidParamArrayMatcher, inExtra, validSize, "disc invalid param
     params += SOFTBUS_ASSIGNER_SIZE; // Skip softbus params, they are matched by SoftbusParamArrayMatcher
     auto extra = static_cast<DiscEventExtra>(inExtra);
     int32_t index = 0;
-    int32_t errcodeIndex = 1;
-    EXPECT_STREQ(params[index].name, g_discAssigners[errcodeIndex].name);
-    EXPECT_EQ(params[index].t, g_discAssigners[errcodeIndex].type);
-    EXPECT_EQ(params[index].v.i32, extra.errcode);
+    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
+    EXPECT_EQ(params[index].v.i32, ((extra.result < 0) ? (-extra.result) : extra.result));
+    ++index;
+    EXPECT_STREQ(params[index].name, g_discAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_discAssigners[index].type);
+    EXPECT_EQ(params[index].v.i32, ((extra.errcode < 0) ? (-extra.errcode) : extra.errcode));
     EXPECT_EQ(++index, validSize);
     return true;
 }

@@ -34,6 +34,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
+#include "softbus_hisysevt_transreporter.h"
 #include "softbus_proxychannel_callback.h"
 #include "softbus_proxychannel_control.h"
 #include "softbus_proxychannel_listener.h"
@@ -115,12 +116,12 @@ static int32_t TransProxyUpdateAckInfo(ProxyChannelInfo *info)
 {
     if (g_proxyChannelList == NULL || info == NULL) {
         TRANS_LOGE(TRANS_CTRL, "g_proxyChannelList or item is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
 
     ProxyChannelInfo *item = NULL;
@@ -719,9 +720,10 @@ void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg)
         TransEventExtra extra = {
             .channelId = info->myId,
             .peerChannelId = info->peerId,
-            .errcode = errCode
+            .errcode = errCode,
+            .result = EVENT_STAGE_RESULT_FAILED
         };
-        TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_HANDSHAKE_REPLY, extra);
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
         TransProxyProcessErrMsg(info, errCode);
         SoftBusFree(info);
         return;
@@ -836,7 +838,7 @@ static int32_t TransProxyFillDataConfig(AppInfo *appInfo)
 {
     if (appInfo == NULL) {
         TRANS_LOGE(TRANS_CTRL, "appInfo is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (appInfo->appType == APP_TYPE_AUTH) {
         appInfo->businessType = BUSINESS_TYPE_BYTE;
@@ -850,7 +852,7 @@ static int32_t TransProxyFillDataConfig(AppInfo *appInfo)
         if (TransGetLocalConfig(CHANNEL_TYPE_PROXY, appInfo->businessType, &localDataConfig) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "get local config failed, businessType=%d",
                 appInfo->businessType);
-            return SOFTBUS_ERR;
+            return SOFTBUS_GET_CONFIG_VAL_ERR;
         }
         appInfo->myData.dataConfig = MIN(localDataConfig, appInfo->peerData.dataConfig);
         TRANS_LOGI(TRANS_CTRL, "fill dataConfig=%u succ", appInfo->myData.dataConfig);
@@ -1059,9 +1061,9 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
         TransEventExtra extra = {
             .channelId = msg->msgHead.myId,
             .peerChannelId = msg->msgHead.peerId,
-            .result = STAGE_RESULT_OK
+            .result = EVENT_STAGE_RESULT_OK
         };
-        TRANS_EVENT(SCENE_CLOSE_CHANNEL_PASSIVE, STAGE_CLOSE_CHANNEL, extra);
+        TRANS_EVENT(EVENT_SCENE_CLOSE_CHANNEL_PASSIVE, EVENT_STAGE_CLOSE_CHANNEL, extra);
         OnProxyChannelClosed(info->channelId, &(info->appInfo));
         (void)TransProxyCloseConnChannelReset(msg->connId, (info->isServer == 0));
     }
@@ -1246,17 +1248,19 @@ void TransProxyOpenProxyChannelSuccess(int32_t chanId)
         TRANS_LOGE(TRANS_CTRL, "disconnect device channelId=%d", chanId);
         return;
     }
-
-    if (TransProxyHandshake(chan) == SOFTBUS_ERR) {
+    chan->appInfo.connectedStart = GetSoftbusRecordTimeMillis();
+    int32_t ret = TransProxyHandshake(chan);
+    if (ret != SOFTBUS_OK) {
         TransEventExtra extra = {
             .channelId = chanId,
             .connectionId = chan->connId,
-            .errcode = SOFTBUS_TRANS_HANDSHAKE_ERROR
+            .errcode = ret,
+            .result = EVENT_STAGE_RESULT_FAILED
         };
-        TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_HANDSHAKE_START, extra);
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_START, extra);
         (void)TransProxyCloseConnChannel(chan->connId);
         TRANS_LOGE(TRANS_CTRL, "channelId=%d shake hand err.", chanId);
-        TransProxyOpenProxyChannelFail(chan->channelId, &(chan->appInfo), SOFTBUS_TRANS_HANDSHAKE_ERROR);
+        TransProxyOpenProxyChannelFail(chan->channelId, &(chan->appInfo), ret);
         TransProxyDelChanByChanId(chanId);
     }
     SoftBusFree(chan);
@@ -1273,7 +1277,7 @@ int32_t TransProxyOpenProxyChannel(AppInfo *appInfo, const ConnectOption *connIn
 {
     if (appInfo == NULL || connInfo == NULL || channelId == NULL) {
         TRANS_LOGE(TRANS_CTRL, "open normal channel: invalid para");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     if (connInfo->type == CONNECT_TCP) {
@@ -1327,10 +1331,10 @@ static void TransProxyTimerItemProc(const ListNode *proxyProcList)
             TransEventExtra extra = {
                 .channelId = removeNode->channelId,
                 .connectionId = (int32_t)connId,
-                .result = STAGE_RESULT_OK,
+                .result = EVENT_STAGE_RESULT_OK,
                 .socketName = removeNode->appInfo.myData.sessionName
             };
-            TRANS_EVENT(SCENE_CLOSE_CHANNEL_TIMEOUT, STAGE_CLOSE_CHANNEL, extra);
+            TRANS_EVENT(EVENT_SCENE_CLOSE_CHANNEL_TIMEOUT, EVENT_STAGE_CLOSE_CHANNEL, extra);
         } else if (status == PROXY_CHANNEL_STATUS_HANDSHAKE_TIMEOUT) {
             connId = removeNode->connId;
             TransProxyPostOpenFailMsgToLoop(removeNode, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);

@@ -39,10 +39,10 @@ typedef struct {
     const char *orgPkg;    // ORG_PKG
     const char *func;      // FUNC
     union {
-        ConnEventExtra connExtra;
-        DiscEventExtra discExtra;
-        LnnEventExtra lnnExtra;
-        TransEventExtra transExtra;
+        ConnEventExtra *connExtra;
+        DiscEventExtra *discExtra;
+        LnnEventExtra *lnnExtra;
+        TransEventExtra *transExtra;
     };
 } SoftbusEventForm;
 
