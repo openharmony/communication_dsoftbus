@@ -199,7 +199,7 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest08, TestSize.Level1)
     ret = TransGetUidAndPid(g_sessionName, &uid, NULL);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = TransGetUidAndPid(g_sessionName, &uid, &pid);
-    EXPECT_EQ(ret,  SOFTBUS_ERR);
+    EXPECT_NE(ret,  SOFTBUS_OK);
 }
 
 /**

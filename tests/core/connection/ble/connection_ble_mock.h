@@ -20,6 +20,7 @@
 #include <mutex>
 #include "cJSON.h"
 
+#include "conn_log.h"
 #include "disc_interface.h"
 #include "message_handler.h"
 #include "softbus_adapter_bt_common.h"
@@ -37,7 +38,7 @@ public:
     virtual int32_t ConvertBtMacToBinary(const char *strMac, uint32_t strMacLen, uint8_t *binMac,
         uint32_t binMacLen) = 0;
     virtual int32_t SoftbusGattcConnect(int32_t clientId, SoftBusBtAddr *addr) = 0;
-    virtual int32_t SoftbusBleGattcDisconnect(int32_t clientId, bool refreshGatt) = 0;
+    virtual int BleGattcDisconnect(int clientId) = 0;
     virtual int SoftBusGattsAddService(SoftBusBtUuid srvcUuid, bool isPrimary, int number) = 0;
     virtual int SoftBusGattsStopService(int srvcHandle) = 0;
     virtual int SoftBusGattsDisconnect(SoftBusBtAddr btAddr, int connId) = 0;
@@ -53,7 +54,7 @@ public:
     MOCK_METHOD3(AddNumberToJsonObject, bool (cJSON *, const char * const, int));
     MOCK_METHOD4(ConvertBtMacToBinary, int32_t (const char *, uint32_t, uint8_t *, uint32_t));
     MOCK_METHOD2(SoftbusGattcConnect, int32_t (int32_t, SoftBusBtAddr *));
-    MOCK_METHOD2(SoftbusBleGattcDisconnect, int32_t (int32_t, bool));
+    MOCK_METHOD1(BleGattcDisconnect, int (int));
     MOCK_METHOD3(SoftBusGattsAddService, int (SoftBusBtUuid, bool, int));
     MOCK_METHOD1(SoftBusGattsStopService, int (int));
     MOCK_METHOD2(SoftBusGattsDisconnect, int (SoftBusBtAddr, int));
