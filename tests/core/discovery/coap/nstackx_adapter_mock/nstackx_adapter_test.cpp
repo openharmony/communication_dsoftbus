@@ -49,7 +49,7 @@ HWTEST_F(NstackxAdapterTest, DiscCoapRegisterServiceData002, TestSize.Level1)
     EXPECT_CALL(adapterMock, NSTACKX_RegisterServiceData(NotNull())).WillRepeatedly(Return(!SOFTBUS_OK));
 
     uint32_t dataLen = 0;
-    EXPECT_EQ(DiscCoapRegisterServiceData(nullptr, dataLen), SOFTBUS_ERR);
+    EXPECT_EQ(DiscCoapRegisterServiceData(nullptr, dataLen, 0), SOFTBUS_ERR);
     DISC_LOGI(DISC_TEST, "DiscCoapRegisterServiceData002 end ----");
 }
 }

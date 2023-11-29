@@ -172,7 +172,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest003, TestSize.Level1)
     ASSERT_TRUE(ret == SOFTBUS_OK);
 
     ret = TransAddUdpChannel(Channel);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = TransDelUdpChannel(invalidId);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = TransDelUdpChannel(Channel->info.myData.channelId);

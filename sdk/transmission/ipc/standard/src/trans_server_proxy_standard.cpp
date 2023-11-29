@@ -18,6 +18,7 @@
 #include "ipc_skeleton.h"
 #include "ipc_types.h"
 
+#include "anonymizer.h"
 #include "message_parcel.h"
 #include "softbus_errcode.h"
 #include "softbus_server_ipc_interface_code.h"
@@ -215,6 +216,15 @@ static bool TransWriteSessionAttrs(const SessionAttribute *attrs, MessageParcel 
 
 static bool WriteQosInfo(const SessionParam *param, MessageParcel &data)
 {
+    if (!data.WriteBool(param->isQosLane)) {
+        TRANS_LOGE(TRANS_SDK, "OpenSession write qos flag failed!");
+        return false;
+    }
+
+    if (!param->isQosLane) {
+        return true;
+    }
+
     if (!data.WriteUint32(param->qosCount)) {
         TRANS_LOGE(TRANS_SDK, "OpenSession write count of qos failed!");
         return false;
@@ -758,6 +768,58 @@ int32_t TransServerProxy::GetSoftbusSpecObject(sptr<IRemoteObject> &object)
     if (ret == SOFTBUS_OK) {
         object = reply.ReadRemoteObject();
     }
+    return ret;
+}
+
+int32_t TransServerProxy::EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos, uint32_t qosCount)
+{
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "remote is null");
+        return SOFTBUS_IPC_ERR;
+    }
+    MessageParcel data;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TRANS_LOGE(TRANS_SDK, "EvaluateQos write InterfaceToken failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+
+    if (!data.WriteCString(peerNetworkId)) {
+        TRANS_LOGE(TRANS_SDK, "EvaluateQos write peerNetworkId failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+
+    if (!data.WriteInt32(dataType)) {
+        TRANS_LOGE(TRANS_SDK, "EvaluateQos write dataType failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+
+    if (!data.WriteUint32(qosCount)) {
+        TRANS_LOGE(TRANS_SDK, "EvaluateQos write count of qos failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+
+    if (qosCount > 0) {
+        if (!data.WriteBuffer(qos, sizeof(QosTV) * qosCount)) {
+            TRANS_LOGE(TRANS_SDK, "EvaluateQos write qos info failed!");
+            return SOFTBUS_IPC_ERR;
+        }
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(SERVER_EVALUATE_QOS, data, reply, option);
+    if (ret != ERR_NONE) {
+        TRANS_LOGE(TRANS_SDK, "EvaluateQos request failed, ret=%{public}d", ret);
+        return SOFTBUS_IPC_ERR;
+    }
+
+    if (!reply.ReadInt32(ret)) {
+        TRANS_LOGE(TRANS_SDK, "EvaluateQos read ret failed");
+        return SOFTBUS_IPC_ERR;
+    }
+
     return ret;
 }
 } // namespace OHOS

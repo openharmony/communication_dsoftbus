@@ -30,6 +30,7 @@ public:
     virtual int32_t LnnSetP2pMac(NodeInfo *info, const char *p2pMac) = 0;
     virtual int32_t LnnSetP2pGoMac(NodeInfo *info, const char *goMac) = 0;
     virtual int32_t LnnGetAllOnlineAndMetaNodeInfo(NodeBasicInfo **info, int32_t *infoNum) = 0;
+    virtual int32_t LnnSetWifiDirectAddr(NodeInfo *info, const char *wifiDirectAddr) = 0;
 };
 class NetLedgerMock : public NetLedgerInterface {
 public:
@@ -39,6 +40,7 @@ public:
     MOCK_METHOD(int32_t, LnnSetP2pMac, (NodeInfo *, const char *), (override));
     MOCK_METHOD(int32_t, LnnSetP2pGoMac, (NodeInfo *, const char *), (override));
     MOCK_METHOD(int32_t, LnnGetAllOnlineAndMetaNodeInfo, (NodeBasicInfo **, int32_t *), (override));
+    MOCK_METHOD(int32_t, LnnSetWifiDirectAddr, (NodeInfo *, const char *), (override));
 
     void SetupDefaultResult();
 };

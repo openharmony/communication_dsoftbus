@@ -58,7 +58,7 @@ static int32_t BleDispatchPublishOption(const PublishOption *option, DiscoverMod
         default:
             DISC_LOGW(DISC_BLE, "dispatch publish action failed: unsupport type '%d', capability '%u'", type,
                 option->capabilityBitmap[0]);
-            return SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL;
+            return SOFTBUS_DISCOVER_BLE_DISPATCHER_FAIL;
     }
 }
 
@@ -80,7 +80,7 @@ static int32_t BleDispatchSubscribeOption(const SubscribeOption *option, Discove
         default:
             DISC_LOGW(DISC_BLE, "dispatch subcribe action failed: unsupport type '%d', capability '%u'", type,
                 option->capabilityBitmap[0]);
-            return SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL;
+            return SOFTBUS_DISCOVER_BLE_DISPATCHER_FAIL;
     }
 }
 

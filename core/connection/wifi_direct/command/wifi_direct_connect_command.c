@@ -25,6 +25,7 @@
 #include "data/inner_link.h"
 #include "data/link_manager.h"
 #include "data/resource_manager.h"
+#include "conn_event.h"
 
 static bool IsNeedRetry(struct WifiDirectCommand *base, int32_t reason)
 {
@@ -64,12 +65,13 @@ static int32_t ReuseLink(struct WifiDirectConnectCommand *command)
         return SOFTBUS_OK;
     }
 
-    enum WifiDirectConnectType connectType = link->getInt(link, IL_KEY_CONNECT_TYPE, WIFI_DIRECT_CONNECT_TYPE_HML);
+    enum WifiDirectLinkType linkType = link->getInt(link, IL_KEY_LINK_TYPE, WIFI_DIRECT_LINK_TYPE_HML);
     struct WifiDirectProcessor *processor =
-        GetWifiDirectDecisionCenter()->getProcessorByNegoChannelAndConnectType(connectInfo->negoChannel, connectType);
+        GetWifiDirectDecisionCenter()->getProcessorByNegoChannelAndLinkType(connectInfo->negoChannel, linkType);
 
     command->processor = processor;
     processor->activeCommand = (struct WifiDirectCommand *)command;
+    CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=%p", command);
     GetWifiDirectNegotiator()->currentProcessor = processor;
 
     return processor->reuseLink(connectInfo, link);
@@ -91,6 +93,7 @@ static int32_t OpenLink(struct WifiDirectConnectCommand *command)
 
     command->processor = processor;
     processor->activeCommand = (struct WifiDirectCommand *)command;
+    CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=%p", command);
     GetWifiDirectNegotiator()->currentProcessor = processor;
 
     return processor->createLink(connectInfo);
@@ -116,8 +119,8 @@ static void OnSuccess(struct WifiDirectCommand *base, struct NegotiateMessage *m
         CONN_LOGW(CONN_WIFI_DIRECT, " no inner link");
         base->onFailure(base, ERROR_NO_CONTEXT);
         GetWifiDirectNegotiator()->resetContext();
-        GetResourceManager()->dump();
-        GetLinkManager()->dump();
+        GetResourceManager()->dump(0);
+        GetLinkManager()->dump(0);
         return;
     }
 
@@ -131,9 +134,15 @@ static void OnSuccess(struct WifiDirectCommand *base, struct NegotiateMessage *m
         CONN_LOGI(CONN_WIFI_DIRECT, "call onConnectSuccess");
         self->callback.onConnectSuccess(requestId, &link);
     }
+    ConnEventExtra extra = {
+        .requestId = self->connectInfo.requestId,
+        .linkType = CONNECT_P2P,
+        .result = EVENT_STAGE_RESULT_OK
+    };
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
     GetWifiDirectNegotiator()->resetContext();
-    GetResourceManager()->dump();
-    GetLinkManager()->dump();
+    GetResourceManager()->dump(0);
+    GetLinkManager()->dump(0);
 }
 
 static void OnFailure(struct WifiDirectCommand *base, int32_t reason)
@@ -151,10 +160,27 @@ static void OnFailure(struct WifiDirectCommand *base, int32_t reason)
         CONN_LOGI(CONN_WIFI_DIRECT, "call onConnectFailure");
         self->callback.onConnectFailure(self->connectInfo.requestId, reason);
     }
-
+    ConnEventExtra extra = {
+        .requestId = self->connectInfo.requestId,
+        .linkType = CONNECT_P2P,
+        .result = EVENT_STAGE_RESULT_FAILED,
+        .errcode = reason
+    };
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
     GetWifiDirectNegotiator()->resetContext();
-    GetResourceManager()->dump();
-    GetLinkManager()->dump();
+    GetResourceManager()->dump(0);
+    GetLinkManager()->dump(0);
+}
+
+static struct WifiDirectCommand* Duplicate(struct WifiDirectCommand *base)
+{
+    struct WifiDirectConnectCommand *self = (struct WifiDirectConnectCommand *)base;
+    struct WifiDirectConnectCommand *copy =
+        (struct WifiDirectConnectCommand *)WifiDirectConnectCommandNew(&self->connectInfo, &self->callback);
+    if (copy != NULL) {
+        copy->times = self->times;
+    }
+    return (struct WifiDirectCommand *)copy;
 }
 
 void WifiDirectConnectCommandConstructor(struct WifiDirectConnectCommand *self,
@@ -166,6 +192,7 @@ void WifiDirectConnectCommandConstructor(struct WifiDirectConnectCommand *self,
     self->execute = ExecuteConnection;
     self->onSuccess = OnSuccess;
     self->onFailure = OnFailure;
+    self->duplicate = Duplicate;
     self->deleteSelf = WifiDirectConnectCommandDelete;
     *(&self->connectInfo) = *connectInfo;
     if (connectInfo->negoChannel != NULL) {

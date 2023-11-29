@@ -25,8 +25,8 @@ extern "C" {
 #endif
 
 // max adv and scan limit
-#define ADV_MAX_NUM 9
-#define SCAN_MAX_NUM 9
+#define ADV_MAX_NUM 16
+#define SCAN_MAX_NUM 16
 
 // Bluetooth scan duty cycle, unit: ms
 #define SOFTBUS_BLE_SCAN_INTERVAL_P2 3000
@@ -192,6 +192,9 @@ int SoftBusReleaseAdvChannel(int advId);
 int SoftBusSetAdvData(int advId, const SoftBusBleAdvData *data);
 
 int SoftBusStartAdv(int advId, const SoftBusBleAdvParams *param);
+
+int SoftBusStartAdvEx(int advId, const SoftBusBleAdvParams *param,
+    int (*startAdvEx)(int *, const SoftBusBleAdvParams *, const SoftBusBleAdvData *));
 
 int SoftBusStopAdv(int advId);
 

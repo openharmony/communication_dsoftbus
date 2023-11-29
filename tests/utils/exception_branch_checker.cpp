@@ -14,55 +14,49 @@
  */
 
 #include "exception_branch_checker.h"
-#include "softbus_log_old.h"
+#include "softbus_log.h"
 #include "securec.h"
 
-static constexpr int32_t LOG_BUF_LEN = 512;
-static const char *g_logName[SOFTBUS_LOG_MODULE_MAX] = {
-    "AUTH", "TRAN", "CONN", "LNN", "DISC", "COMM"
-};
+#if defined(__LITEOS_M__)
+#define SOFTBUS_PRINTF
+#include "log.h"
+#else
+#include "hilog/log.h"
+#endif
 
-void SoftBusLogImpl(SoftBusLogModule module, SoftBusLogLevel level, const char* funcName,
-    int lineNo, const char *fmt, ...)
+static void SoftBusLogExtraInfoFormat(char *line, const char *fileName, int lineNum, const char *funName)
 {
-    if (module >= SOFTBUS_LOG_MODULE_MAX) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "[COMM] log module exceed max");
-        return;
-    }
+    (void)sprintf_s(line, LOG_LINE_MAX_LENGTH + 1, "[%s:%d] %s# ", fileName, lineNum, funName);
+}
 
-    char buffer[LOG_BUF_LEN];
+static void SoftBusLogPrint(const char *buf, SoftBusDfxLogLevel level, unsigned int domain, const char *tag)
+{
+#ifdef SOFTBUS_PRINTF
+    (void)level;
+    (void)domain;
+    (void)tag;
+    printf("%s\n", buf);
+#else
+    (void)HiLogPrint(LOG_CORE, (LogLevel)level, domain, tag, "%{public}s", buf);
+#endif
+}
 
-    int usedLen = sprintf_s(buffer, LOG_BUF_LEN, "[%s][%s:%d] ", g_logName[module], funcName, lineNo);
-    if (usedLen < 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "[COMM] sprintf_s log error");
-        return;
-    }
+void SoftBusLogInnerImpl(SoftBusDfxLogLevel level, SoftBusLogLabel label, const char *fileName, int lineNum,
+    const char *funName, const char *fmt, ...)
+{
+    uint32_t pos;
+    va_list args = { 0 };
+    char buffer[LOG_LINE_MAX_LENGTH + 1] = { 0 };
 
-    va_list arg;
-    va_start(arg, fmt);
-    int ret = vsprintf_s(buffer + usedLen, LOG_BUF_LEN - usedLen, fmt, arg);
-    va_end(arg);
+    SoftBusLogExtraInfoFormat(buffer, fileName, lineNum, funName);
+    pos = strlen(buffer);
+    va_start(args, fmt);
+    int32_t ret = vsprintf_s(&buffer[pos], sizeof(buffer) - pos, fmt, args);
     if (ret < 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "[COMM] vsprintf_s log error");
         return;
     }
-
-    switch (level) {
-        case SOFTBUS_LOG_DBG:
-            HILOG_DEBUG(SOFTBUS_HILOG_ID, "%{public}s", buffer);
-            break;
-        case SOFTBUS_LOG_INFO:
-            HILOG_INFO(SOFTBUS_HILOG_ID, "%{public}s", buffer);
-            break;
-        case SOFTBUS_LOG_WARN:
-            HILOG_WARN(SOFTBUS_HILOG_ID, "%{public}s", buffer);
-            break;
-        case SOFTBUS_LOG_ERROR:
-            HILOG_ERROR(SOFTBUS_HILOG_ID, "%{public}s", buffer);
-            break;
-        default:
-            break;
-    }
+    va_end(args);
+    SoftBusLogPrint(buffer, level, label.domain, label.tag);
 
     auto *checker = ExceptionBranchChecker::GetCurrentInstance();
     if (checker != nullptr) {
@@ -89,7 +83,6 @@ ExceptionBranchChecker::~ExceptionBranchChecker()
 void ExceptionBranchChecker::WriteLog(const std::string& log)
 {
     if (log.find(matchBranch_) != std::string::npos) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "[Unit Test] exception branch match !!");
         isMatched_ = true;
     }
 }

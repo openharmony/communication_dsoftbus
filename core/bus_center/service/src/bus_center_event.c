@@ -22,10 +22,13 @@
 #include "bus_center_decision_center.h"
 #include "bus_center_manager.h"
 #include "lnn_bus_center_ipc.h"
+#include "lnn_cipherkey_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_network_id.h"
+#include "lnn_p2p_info.h"
 #include "message_handler.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
@@ -63,7 +66,7 @@ static int32_t PostMessageToHandlerDelay(SoftBusMessage *msg, uint64_t delayMill
     if (g_notifyHandler.looper->PostMessage == NULL || g_notifyHandler.looper->PostMessageDelay == NULL) {
         LNN_LOGE(LNN_EVENT, "invalid looper");
         FreeMessage(msg);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (delayMillis == 0) {
         g_notifyHandler.looper->PostMessage(g_notifyHandler.looper, msg);
@@ -252,6 +255,46 @@ void LnnNotifyDeviceVerified(const char *udid)
     RemoveNotifyMessage(NOTIFY_NETWORKID_UPDATE);
 }
 
+static void UpdateBroadcastInfo()
+{
+    BroadcastCipherKey broadcastKey;
+    (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
+    if (LnnGetLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "get local info failed.");
+        return;
+    }
+    if (SoftBusGetSysTimeMs() < broadcastKey.endTime) {
+        LNN_LOGE(LNN_EVENT, "the broadcastKey don't need to update.");
+        return;
+    }
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, broadcastKey.udid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "get udid fail");
+        return;
+    }
+    if (SoftBusGenerateRandomArray(broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "generate broadcast key error.");
+        return;
+    }
+    if (SoftBusGenerateRandomArray(broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "generate broadcast iv error.");
+        return;
+    }
+    if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_KEY,
+        broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "set key error.");
+        return;
+    }
+    if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_IV,
+        broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "set iv error.");
+        return;
+    }
+    if (LnnUpdateLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "update local broadcast key failed");
+        return;
+    }
+}
+
 void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info)
 {
     LnnOnlineStateEventInfo eventInfo;
@@ -277,12 +320,24 @@ void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info)
     }
     if (!isOnline && onlineNodeNum == 0) {
         LNN_LOGI(LNN_EVENT, "no online devices, post networkId update event");
+        UpdateBroadcastInfo();
         RemoveNotifyMessage(NOTIFY_NETWORKID_UPDATE);
         (void)PostNotifyMessageDelay(NOTIFY_NETWORKID_UPDATE, NETWORK_ID_UPDATE_DELAY_TIME);
     }
     if (isOnline) {
         LNN_LOGI(LNN_EVENT, "online process, remove networkId update event");
         RemoveNotifyMessage(NOTIFY_NETWORKID_UPDATE);
+    } else {
+        char peerUdid[UDID_BUF_LEN] = {0};
+        if (LnnGetRemoteStrInfo(info->networkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN)
+            != SOFTBUS_OK) {
+            LNN_LOGE(LNN_EVENT, "get udid error");
+            return;
+        }
+        if (UpdateLocalPtkIfValid(peerUdid) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_EVENT, "leave lnn update fail");
+            return;
+        }
     }
 }
 

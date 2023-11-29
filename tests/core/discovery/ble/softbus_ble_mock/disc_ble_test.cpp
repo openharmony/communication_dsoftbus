@@ -52,7 +52,7 @@ public:
 
     static inline std::string g_customCapData = "name=Bill";
     static inline DeviceInfo g_foundDeviceInfo;
-    static constexpr char FOUND_DEVICE_ID[] = "d01559bb";
+    static constexpr char FOUND_DEVICE_ID[] = "e831f7630b7619ae";
 };
 
 static void OnDeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
@@ -454,8 +454,6 @@ HWTEST_F(DiscBleTest, ReceiveActiveDiscoveryPacket001, TestSize.Level1)
 
     BleMock::InjectActiveConPacket();
     EXPECT_EQ(bleMock.GetAsyncAdvertiseResult(), true);
-
-    BleMock::InjectActiveConPacket();
     DISC_LOGI(DISC_TEST, "ReceiveActiveDiscoveryPacket001 end ----");
 }
 

@@ -92,7 +92,7 @@ static struct InfoContainerKeyProperty type##KeyProperties[max]
     void* (*getRawData)(struct type *self, size_t key, size_t *size, void *defaultValue);           \
                                                                                                     \
     /* debug */                                                                                     \
-    void (*dump)(struct type *self);                                                                \
+    void (*dump)(struct type *self, int32_t fd);                                                    \
                                                                                                     \
     bool (*isEmpty)(struct type *self);                                                             \
     void (*remove)(struct type *self, size_t key);                                                  \

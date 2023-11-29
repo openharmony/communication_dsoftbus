@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "anonymizer.h"
 #include "client_bus_center_manager.h"
 #include "client_trans_channel_manager.h"
 #include "client_trans_file_listener.h"
@@ -1491,6 +1492,7 @@ int32_t ClientDeleteSocketSession(int32_t sessionId)
             // delete session server if session server is empty
             if (IsListEmpty(&serverNode->sessionList)) {
                 ListDelete(&(serverNode->node));
+                g_clientSessionServerList->cnt--;
             }
             (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
             return SOFTBUS_OK;
@@ -1707,6 +1709,7 @@ int32_t ClientIpcOpenSession(int32_t sessionId, const QosTV *qos, uint32_t qosCo
         .peerDeviceId = sessionNode->info.peerDeviceId,
         .groupId = "reserved",
         .attr = &tmpAttr,
+        .isQosLane = true,
     };
 
     param.qosCount = qosCount;

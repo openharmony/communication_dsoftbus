@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "anonymizer.h"
 #include "client_trans_session_adapter.h"
 #include "socket.h"
 #include "softbus_adapter_mem.h"
@@ -20,6 +21,7 @@
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
 #include "trans_log.h"
+#include "trans_server_proxy.h"
 
 static int32_t CheckSocketInfoIsValid(const SocketInfo *info)
 {
@@ -54,8 +56,8 @@ int32_t Socket(SocketInfo info)
     Anonymize(info.name, &anonyOutMy);
     Anonymize(info.peerName, &anonyOutPeer);
     TRANS_LOGI(TRANS_SDK, "Socket: mySessionName=%s, peerSessionName=%s", anonyOutMy, anonyOutPeer);
-    SoftBusFree(anonyOutMy);
-    SoftBusFree(anonyOutPeer);
+    AnonymizeFree(anonyOutMy);
+    AnonymizeFree(anonyOutPeer);
 
     ret = CreateSocket(info.pkgName, info.name);
     if (ret != SOFTBUS_OK) {
@@ -95,4 +97,14 @@ int32_t Bind(int32_t socket, const QosTV qos[], uint32_t len, const ISocketListe
 void Shutdown(int32_t socket)
 {
     ClientShutdown(socket);
+}
+
+int32_t EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos, uint32_t qosCount)
+{
+    if (!IsValidString(peerNetworkId, DEVICE_ID_SIZE_MAX) || dataType >= DATA_TYPE_BUTT || qosCount >= QOS_TYPE_BUTT) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    return ServerIpcEvaluateQos(peerNetworkId, dataType, qos, qosCount);
 }

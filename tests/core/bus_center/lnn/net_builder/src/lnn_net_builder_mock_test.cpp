@@ -100,6 +100,7 @@ HWTEST_F(LNNNetBuilderMockTest, LNN_INIT_NET_BUILDER_TEST_001, TestSize.Level1)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnGenLocalUuid(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(NetBuilderMock, LnnGenLocalIrk(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnSetLocalStrInfo(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_TRUE(LnnInitNetBuilder() == SOFTBUS_ERR);
     EXPECT_TRUE(LnnInitNetBuilder() == SOFTBUS_ERR);
@@ -123,9 +124,12 @@ HWTEST_F(LNNNetBuilderMockTest, CONFIG_LOCAL_LEDGER_TEST_001, TestSize.Level1)
     EXPECT_CALL(NetBuilderMock, LnnGenLocalUuid(_, _))
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(NetBuilderMock, LnnGenLocalIrk(_, _))
+        .WillOnce(Return(SOFTBUS_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnSetLocalStrInfo(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_TRUE(ConifgLocalLedger() == SOFTBUS_ERR);
-    EXPECT_TRUE(ConifgLocalLedger() == SOFTBUS_ERR);
+    EXPECT_TRUE(ConifgLocalLedger() != SOFTBUS_OK);
+    EXPECT_TRUE(ConifgLocalLedger() != SOFTBUS_OK);
     EXPECT_TRUE(ConifgLocalLedger() == SOFTBUS_OK);
 }
 
@@ -229,8 +233,8 @@ HWTEST_F(LNNNetBuilderMockTest, LNN_UPDATE_NODE_ADDR_TEST_001, TestSize.Level1)
     EXPECT_CALL(NetBuilderMock, LnnGetAllOnlineNodeInfo(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnNotifyNodeAddressChanged(_, _, _)).WillRepeatedly(Return());
     EXPECT_TRUE(LnnUpdateNodeAddr(nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnUpdateNodeAddr(NODE_NETWORK_ID) == SOFTBUS_ERR);
-    EXPECT_TRUE(LnnUpdateNodeAddr(NODE_NETWORK_ID) == SOFTBUS_ERR);
+    EXPECT_TRUE(LnnUpdateNodeAddr(NODE_NETWORK_ID) != SOFTBUS_OK);
+    EXPECT_TRUE(LnnUpdateNodeAddr(NODE_NETWORK_ID) != SOFTBUS_OK);
     EXPECT_TRUE(LnnUpdateNodeAddr(NODE_NETWORK_ID) == SOFTBUS_OK);
     EXPECT_TRUE(LnnUpdateNodeAddr(NODE_NETWORK_ID) == SOFTBUS_OK);
 }
@@ -347,8 +351,8 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_ON_AUTH_META_VERIFY_FAILED_TEST_001, Tes
 {
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, MetaNodeNotifyJoinResult(_, _, _)).WillRepeatedly(Return());
-    EXPECT_TRUE(ProcessOnAuthMetaVerifyFailed(nullptr) == SOFTBUS_ERR);
-    EXPECT_TRUE(ProcessOnAuthMetaVerifyPassed(nullptr) == SOFTBUS_ERR);
+    EXPECT_TRUE(ProcessOnAuthMetaVerifyFailed(nullptr) != SOFTBUS_OK);
+    EXPECT_TRUE(ProcessOnAuthMetaVerifyPassed(nullptr) != SOFTBUS_OK);
 }
 
 /*
@@ -400,6 +404,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_ELETE_TEST_001, TestSize.Level1)
     EXPECT_CALL(NetBuilderMock, LnnRegSyncInfoHandler(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnGenLocalNetworkId(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnGenLocalUuid(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(NetBuilderMock, LnnGenLocalIrk(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnSetLocalStrInfo(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnSetLocalStrInfo(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnUnregSyncInfoHandler(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -462,8 +467,8 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_NODE_STATE_CHANGED_TEST_002, TestSize.Le
         .WillOnce(Return(SOFTBUS_OK))
         .WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_TRUE(ProcessNodeStateChanged(para) == SOFTBUS_OK);
-    EXPECT_TRUE(ProcessNodeStateChanged(para1) == SOFTBUS_ERR);
-    EXPECT_TRUE(ProcessNodeStateChanged(para2) == SOFTBUS_ERR);
+    EXPECT_TRUE(ProcessNodeStateChanged(para1) != SOFTBUS_OK);
+    EXPECT_TRUE(ProcessNodeStateChanged(para2) != SOFTBUS_OK);
     ListDelete(&connFsm->node);
     SoftBusFree(connFsm);
 }
@@ -515,7 +520,7 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_ELECT_NODE_OFFLINE_TEST_001, TestSize.Level1
     EXPECT_CALL(NetBuilderMock, LnnGetLocalStrInfo(_, _, _))
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_TRUE(TryElectMasterNodeOffline(&connFsm) == SOFTBUS_ERR);
+    EXPECT_TRUE(TryElectMasterNodeOffline(&connFsm) != SOFTBUS_OK);
     EXPECT_TRUE(TryElectMasterNodeOffline(&connFsm) == SOFTBUS_OK);
 }
 
@@ -542,10 +547,10 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_ELECT_NODE_ONLINE_TEST_001, TestSize.Level1)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnCompareNodeWeight(_, _, _, _)).WillRepeatedly(Return(0));
-    EXPECT_TRUE(TryElectMasterNodeOnline(&connFsm) == SOFTBUS_ERR);
-    EXPECT_TRUE(TryElectMasterNodeOnline(&connFsm) == SOFTBUS_ERR);
-    EXPECT_TRUE(TryElectMasterNodeOnline(&connFsm) == SOFTBUS_ERR);
-    EXPECT_TRUE(TryElectMasterNodeOnline(&connFsm) == SOFTBUS_ERR);
+    EXPECT_TRUE(TryElectMasterNodeOnline(&connFsm) != SOFTBUS_OK);
+    EXPECT_TRUE(TryElectMasterNodeOnline(&connFsm) != SOFTBUS_OK);
+    EXPECT_TRUE(TryElectMasterNodeOnline(&connFsm) != SOFTBUS_OK);
+    EXPECT_TRUE(TryElectMasterNodeOnline(&connFsm) != SOFTBUS_OK);
     EXPECT_TRUE(TryElectMasterNodeOnline(&connFsm) == SOFTBUS_OK);
 }
 
@@ -667,7 +672,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_DISCONNECT_TEST_001, TestSize.Lev
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_TRUE(ProcessDeviceDisconnect(nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(ProcessDeviceDisconnect(para) == SOFTBUS_ERR);
+    EXPECT_TRUE(ProcessDeviceDisconnect(para) != SOFTBUS_OK);
 }
 
 /*
@@ -702,11 +707,11 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_VERIFY_RESULT_TEST_001, TestSize.Level1)
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_TRUE(ProcessVerifyResult(nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(ProcessVerifyResult(para1) == SOFTBUS_ERR);
+    EXPECT_TRUE(ProcessVerifyResult(para1) != SOFTBUS_OK);
     VerifyResultMsgPara *msgPara2 = reinterpret_cast<VerifyResultMsgPara *>(SoftBusMalloc(sizeof(VerifyResultMsgPara)));
     msgPara2->nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
     void *para2 = reinterpret_cast<void *>(msgPara2);
-    EXPECT_TRUE(ProcessVerifyResult(para2) == SOFTBUS_ERR);
+    EXPECT_TRUE(ProcessVerifyResult(para2) != SOFTBUS_OK);
 }
 
 /*
@@ -1036,7 +1041,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_VERIFY_RESULT_TEST_002, TestSize.Level1)
     connFsm->connInfo.requestId = REQUEST_ID;
     connFsm->isDead = true;
     ListAdd(&g_netBuilder.fsmList, &connFsm->node);
-    EXPECT_TRUE(ProcessVerifyResult(para) == SOFTBUS_ERR);
+    EXPECT_TRUE(ProcessVerifyResult(para) != SOFTBUS_OK);
     ListDelete(&connFsm->node);
     SoftBusFree(connFsm);
 }
@@ -1656,7 +1661,7 @@ HWTEST_F(LNNNetBuilderMockTest, FIND_NODE_INFO_BY_RQUESTID_TEST_001, TestSize.Le
     ConnectionAddr addr;
     uint32_t requestId;
     int32_t ret = FindRequestIdByAddr(&addr, &requestId);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = FindRequestIdByAddr(&addr, &requestId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     NodeInfo *info = FindNodeInfoByRquestId(requestId);

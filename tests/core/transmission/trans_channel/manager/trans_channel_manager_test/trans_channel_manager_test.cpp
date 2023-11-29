@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -246,16 +246,16 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannelProc001, TestSize.Level1)
     int32_t channelId = 1;
 
     int ret = TransOpenChannelProc(CHANNEL_TYPE_BUTT, appInfo, connOpt, &channelId);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = TransOpenChannelProc(CHANNEL_TYPE_UDP, appInfo, connOpt, &channelId);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = TransOpenChannelProc(CHANNEL_TYPE_PROXY, appInfo, connOpt, &channelId);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = TransOpenChannelProc(CHANNEL_TYPE_TCP_DIRECT, appInfo, connOpt, &channelId);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     SoftBusFree(connOpt);
     SoftBusFree(appInfo);
@@ -585,5 +585,46 @@ HWTEST_F(TransChannelManagerTest, TransGetConnByChanId001, TestSize.Level1)
     channelType = CHANNEL_TYPE_PROXY + 1;
     int32_t ret = TransGetConnByChanId(channelId, channelType, &connId);
     EXPECT_EQ(SOFTBUS_ERR, ret);
+}
+
+/**
+ * @tc.name: FindConfigType001
+ * @tc.desc: FindConfigType001, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, FindConfigType001, TestSize.Level1)
+{
+    int32_t channelType = 0;
+    int32_t businessType = 0;
+
+    int32_t ret = FindConfigType(channelType, businessType);
+    EXPECT_EQ(SOFTBUS_CONFIG_TYPE_MAX, ret);
+
+    channelType = CHANNEL_TYPE_AUTH;
+    businessType = BUSINESS_TYPE_BYTE;
+    ret = FindConfigType(channelType, businessType);
+    EXPECT_EQ(SOFTBUS_INT_AUTH_MAX_BYTES_LENGTH, ret);
+}
+
+/**
+ * @tc.name: TransGetLocalConfig001
+ * @tc.desc: TransGetLocalConfig001, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, TransGetLocalConfig001, TestSize.Level1)
+{
+    int32_t channelType = 0;
+    int32_t businessType = 0;
+    uint32_t len = 0;
+
+    int32_t ret = TransGetLocalConfig(channelType, businessType, &len);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    channelType = CHANNEL_TYPE_AUTH;
+    businessType = BUSINESS_TYPE_BYTE;
+    ret = TransGetLocalConfig(channelType, businessType, &len);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 } // OHOS

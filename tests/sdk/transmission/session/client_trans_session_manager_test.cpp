@@ -768,7 +768,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest21, TestSiz
 HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest22, TestSize.Level1)
 {
     int32_t ret = ClientGetSessionSide(TRANS_TEST_SESSION_ID);
-    EXPECT_EQ(ret,  SOFTBUS_ERR);
+    EXPECT_NE(ret,  SOFTBUS_OK);
     ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     int32_t sessionId = 0;

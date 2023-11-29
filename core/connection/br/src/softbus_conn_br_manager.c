@@ -127,9 +127,10 @@ static void DfxRecordBrConnectFail(uint32_t reqId, uint32_t pId, ConnBrDevice *d
         .requestId = reqId,
         .linkType = CONNECT_BR,
         .costTime = costTime,
-        .errcode = reason
+        .errcode = reason,
+        .result = EVENT_STAGE_RESULT_FAILED
     };
-    CONN_EVENT(SCENE_CONNECT, STAGE_CONNECT_END, extra);
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
 }
 
 static void DfxRecordBrConnectSuccess(uint32_t pId, ConnBrConnection *connection, ConnectStatistics *statistics)
@@ -147,8 +148,8 @@ static void DfxRecordBrConnectSuccess(uint32_t pId, ConnBrConnection *connection
         .connectionId = connection->connectionId,
         .linkType = CONNECT_BR,
         .costTime = costTime,
-        .result = STAGE_RESULT_OK };
-    CONN_EVENT(SCENE_CONNECT, STAGE_CONNECT_END, extra);
+        .result = EVENT_STAGE_RESULT_OK };
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
 }
 
 static int32_t NewDevice(ConnBrDevice **outDevice, const char *addr)
@@ -426,9 +427,8 @@ static int32_t ConnectDeviceDirectly(ConnBrDevice *device, const char *anomizeAd
         ConnEventExtra extra = {
             .peerBrMac = device->addr,
             .connectionId = (int32_t)connection->connectionId,
-            .result = STAGE_RESULT_OK
-        };
-        CONN_EVENT(SCENE_CONNECT, STAGE_CONNECT_INVOKE_PROTOCOL, extra);
+            .result = EVENT_STAGE_RESULT_OK };
+        CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_INVOKE_PROTOCOL, extra);
         status = ConnBrConnect(connection);
         if (status != SOFTBUS_OK) {
             break;

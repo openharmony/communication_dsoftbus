@@ -149,41 +149,41 @@ HWTEST_F(DiscDistributedBleTest, TestScanFilter001, TestSize.Level1)
         .advData = advDataTest,
     };
     int32_t ret = ScanFilter(&testScanResultData);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     testScanResultData.dataStatus = SOFTBUS_BLE_DATA_COMPLETE;
     ret = ScanFilter(&testScanResultData);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     testScanResultData.advLen = POS_TLV + ADV_HEAD_LEN;
     testScanResultData.advData[POS_PACKET_LENGTH] = ADV_HEAD_LEN;
     ret = ScanFilter(&testScanResultData);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     testScanResultData.advData[POS_PACKET_LENGTH] = ADV_HEAD_LEN + RSP_HEAD_LEN - 1;
     ret = ScanFilter(&testScanResultData);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     testScanResultData.advLen = POS_PACKET_LENGTH + ADV_HEAD_LEN + RSP_HEAD_LEN + 1;
     testScanResultData.advData[POS_PACKET_LENGTH + ADV_HEAD_LEN + RSP_HEAD_LEN] = 1;
     ret = ScanFilter(&testScanResultData);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     testScanResultData.advLen = advLenTest;
     ret = ScanFilter(&testScanResultData);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     testScanResultData.advData[POS_UUID] = (uint8_t)(BLE_UUID & BYTE_MASK);
     ret = ScanFilter(&testScanResultData);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     testScanResultData.advData[POS_UUID + 1] = (uint8_t)((BLE_UUID >> BYTE_SHIFT_BIT) & BYTE_MASK);
     ret = ScanFilter(&testScanResultData);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     testScanResultData.advData[POS_VERSION + ADV_HEAD_LEN] = BLE_VERSION;
     ret = ScanFilter(&testScanResultData);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].capBitMap[0] = 0x1;
     ret = ScanFilter(&testScanResultData);
@@ -489,7 +489,7 @@ HWTEST_F(DiscDistributedBleTest, TestStopScaner001, TestSize.Level1)
     g_isScanning = true;
     g_bleListener.scanListenerId = SCAN_MAX_NUM;
     ret = StopScaner();
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     DiscSoftBusBleDeinit();
     DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestStopScaner001, End");

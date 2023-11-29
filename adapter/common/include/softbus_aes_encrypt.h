@@ -28,6 +28,7 @@ extern "C" {
 #define AES_SESSION_KEY_LENGTH 16
 #define AES_IV_LENGTH          16
 #define AES_GCM_TAG_LEN        16
+#define RANDOM_LENGTH          8
 #define TAG_LEN                16
 #define GCM_OVERHEAD_LEN       TAG_LEN
 
