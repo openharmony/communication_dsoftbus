@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
+import("../../../core/authentication/authentication.gni")
 import("../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/auth"
@@ -478,4 +479,9 @@ group("unittest") {
 group("fuzztest") {
   testonly = true
   deps = [ "fuzztest:fuzztest" ]
+  if (enhanced) {
+    deps += [
+      "$dsoftbus_root_path/dsoftbus_enhance/test/core/authentication:fuzztest",
+    ]
+  }
 }

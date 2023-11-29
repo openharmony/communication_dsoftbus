@@ -672,7 +672,6 @@ static void OnAuthDataRecv(int64_t authId, const AuthTransData *data)
     if (data->module != MODULE_P2P_LISTEN) {
         return;
     }
-    PrintAnonymousPacket(TRANS_CTRL, "OnAuthDataRecv data: ", (const char *)data->data);
 
     cJSON *json = cJSON_ParseWithLength((const char *)(data->data), data->len);
     if (json == NULL) {
@@ -771,7 +770,8 @@ int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
     int32_t *channelId)
 {
     TRANS_LOGI(TRANS_CTRL, "enter.");
-    if (appInfo == NULL || connInfo == NULL || channelId == NULL || connInfo->type != CONNECT_P2P) {
+    if (appInfo == NULL || connInfo == NULL || channelId == NULL ||
+        (connInfo->type != CONNECT_P2P && connInfo->type != CONNECT_HML)) {
         return SOFTBUS_INVALID_PARAM;
     }
     SessionConn *conn = NULL;

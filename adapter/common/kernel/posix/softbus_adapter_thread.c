@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "softbus_adapter_log.h"
+#include "comm_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -34,7 +34,7 @@ static pthread_mutex_t g_adapterStaticLock = PTHREAD_MUTEX_INITIALIZER;
 int32_t SoftBusMutexAttrInit(SoftBusMutexAttr *mutexAttr)
 {
     if (mutexAttr == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "mutexAttr is null");
+        COMM_LOGE(COMM_ADAPTER, "mutexAttr is null");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -45,23 +45,22 @@ int32_t SoftBusMutexAttrInit(SoftBusMutexAttr *mutexAttr)
 int32_t SoftBusMutexInit(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr)
 {
     if (pthread_mutex_lock(&g_adapterStaticLock) != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "mutex init : g_adapterStaticLock lock failed");
+        COMM_LOGE(COMM_ADAPTER, "mutex init : g_adapterStaticLock lock failed");
         return SOFTBUS_ERR;
     }
     if (mutex == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "mutex is null");
+        COMM_LOGE(COMM_ADAPTER, "mutex is null");
         (void)pthread_mutex_unlock(&g_adapterStaticLock);
         return SOFTBUS_INVALID_PARAM;
     }
     if ((void *)*mutex != NULL) {
-        HILOG_WARN(SOFTBUS_HILOG_ID, "mutex is already init");
         (void)pthread_mutex_unlock(&g_adapterStaticLock);
         return SOFTBUS_OK;
     }
     pthread_mutex_t *tempMutex;
     tempMutex = (pthread_mutex_t *)SoftBusCalloc(sizeof(pthread_mutex_t));
     if (tempMutex == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "tempMutex is null");
+        COMM_LOGE(COMM_ADAPTER, "tempMutex is null");
         (void)pthread_mutex_unlock(&g_adapterStaticLock);
         return SOFTBUS_INVALID_PARAM;
     }
@@ -83,7 +82,7 @@ int32_t SoftBusMutexInit(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr)
 
     ret = pthread_mutex_init(tempMutex, &attr);
     if (ret != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusMutexInit failed, ret[%{public}d]", ret);
+        COMM_LOGE(COMM_ADAPTER, "SoftBusMutexInit failed, ret[%d]", ret);
         SoftBusFree(tempMutex);
         tempMutex = NULL;
         (void)pthread_mutex_unlock(&g_adapterStaticLock);
@@ -98,14 +97,14 @@ int32_t SoftBusMutexInit(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr)
 int32_t SoftBusMutexLock(SoftBusMutex *mutex)
 {
     if ((mutex == NULL) || ((void *)(*mutex) == NULL)) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "mutex is null");
+        COMM_LOGE(COMM_ADAPTER, "mutex is null");
         return SOFTBUS_INVALID_PARAM;
     }
 
     int ret;
     ret = pthread_mutex_lock((pthread_mutex_t *)*mutex);
     if (ret != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusMutexLock failed, ret[%{public}d]", ret);
+        COMM_LOGE(COMM_ADAPTER, "SoftBusMutexLock failed, ret[%d]", ret);
         return SOFTBUS_LOCK_ERR;
     }
     return SOFTBUS_OK;
@@ -114,14 +113,14 @@ int32_t SoftBusMutexLock(SoftBusMutex *mutex)
 int32_t SoftBusMutexUnlock(SoftBusMutex *mutex)
 {
     if ((mutex == NULL) || ((void *)(*mutex) == NULL)) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "mutex is null");
+        COMM_LOGE(COMM_ADAPTER, "mutex is null");
         return SOFTBUS_INVALID_PARAM;
     }
 
     int ret;
     ret = pthread_mutex_unlock((pthread_mutex_t *)*mutex);
     if (ret != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusMutexUnlock failed, ret[%{public}d]", ret);
+        COMM_LOGE(COMM_ADAPTER, "SoftBusMutexUnlock failed, ret[%d]", ret);
         return SOFTBUS_LOCK_ERR;
     }
 
@@ -131,14 +130,14 @@ int32_t SoftBusMutexUnlock(SoftBusMutex *mutex)
 int32_t SoftBusMutexDestroy(SoftBusMutex *mutex)
 {
     if ((mutex == NULL) || ((void *)(*mutex) == NULL)) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "mutex is null");
+        COMM_LOGE(COMM_ADAPTER, "mutex is null");
         return SOFTBUS_INVALID_PARAM;
     }
 
     int ret;
     ret = pthread_mutex_destroy((pthread_mutex_t *)*mutex);
     if (ret != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusMutexDestroy failed, ret[%{public}d]", ret);
+        COMM_LOGE(COMM_ADAPTER, "SoftBusMutexDestroy failed, ret[%d]", ret);
         SoftBusFree((void *)*mutex);
         *mutex = (SoftBusMutex)NULL;
         return SOFTBUS_ERR;
@@ -153,7 +152,7 @@ int32_t SoftBusMutexDestroy(SoftBusMutex *mutex)
 int32_t SoftBusThreadAttrInit(SoftBusThreadAttr *threadAttr)
 {
     if (threadAttr == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "threadAttr is null");
+        COMM_LOGE(COMM_ADAPTER, "threadAttr is null");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -177,7 +176,7 @@ static int32_t SoftbusSetThreadPolicy(SoftBusThreadAttr *threadAttr, pthread_att
     } else if (threadAttr->policy == SOFTBUS_SCHED_RR) {
         pthread_attr_setschedpolicy(attr, SCHED_RR);
     } else {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "set policy error");
+        COMM_LOGE(COMM_ADAPTER, "set policy error");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -191,7 +190,7 @@ static int32_t SoftbusSetThreadDetachState(SoftBusThreadAttr *threadAttr, pthrea
     } else if (threadAttr->detachState == SOFTBUS_THREAD_DETACH) {
         pthread_attr_setdetachstate(attr, PTHREAD_CREATE_DETACHED);
     } else {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "set detachState error");
+        COMM_LOGE(COMM_ADAPTER, "set detachState error");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -247,25 +246,25 @@ static int32_t SoftBusConfTransPthreadAttr(SoftBusThreadAttr *threadAttr, pthrea
 {
     int ret;
     if ((threadAttr == NULL) || (attr == NULL)) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "threadAttr or attr is null");
+        COMM_LOGE(COMM_ADAPTER, "threadAttr or attr is null");
         return SOFTBUS_INVALID_PARAM;
     }
 
     ret = SoftbusSetThreadPolicy(threadAttr, attr);
     if (ret != SOFTBUS_OK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftbusSetThreadPolicy failed, ret[%{public}d]", ret);
+        COMM_LOGE(COMM_ADAPTER, "SoftbusSetThreadPolicy failed, ret[%d]", ret);
         return SOFTBUS_ERR;
     }
 
     ret = SoftbusSetThreadDetachState(threadAttr, attr);
     if (ret != SOFTBUS_OK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftbusSetThreadDetachState failed, ret[%{public}d]", ret);
+        COMM_LOGE(COMM_ADAPTER, "SoftbusSetThreadDetachState failed, ret[%d]", ret);
         return SOFTBUS_ERR;
     }
 
     ret = SoftbusSetThreadPeriority(threadAttr, attr);
     if (ret != SOFTBUS_OK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftbusSetThreadPeriority failed, ret[%{public}d]", ret);
+        COMM_LOGE(COMM_ADAPTER, "SoftbusSetThreadPeriority failed, ret[%d]", ret);
         return SOFTBUS_ERR;
     }
 
@@ -273,7 +272,7 @@ static int32_t SoftBusConfTransPthreadAttr(SoftBusThreadAttr *threadAttr, pthrea
     if (stackSize != 0) {
         ret = pthread_attr_setstacksize(attr, stackSize);
         if (ret != 0) {
-            HILOG_ERROR(SOFTBUS_HILOG_ID, "pthread_attr_setstacksize failed, ret[%{public}d]", ret);
+            COMM_LOGE(COMM_ADAPTER, "pthread_attr_setstacksize failed, ret[%d]", ret);
             return SOFTBUS_ERR;
         }
     }
@@ -285,12 +284,12 @@ int32_t SoftBusThreadCreate(SoftBusThread *thread, SoftBusThreadAttr *threadAttr
     void *(*threadEntry) (void *), void *arg)
 {
     if (thread == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "thread is null");
+        COMM_LOGE(COMM_ADAPTER, "thread is null");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (threadEntry == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "threadEntry is null");
+        COMM_LOGE(COMM_ADAPTER, "threadEntry is null");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -298,31 +297,31 @@ int32_t SoftBusThreadCreate(SoftBusThread *thread, SoftBusThreadAttr *threadAttr
     if (threadAttr == NULL) {
         ret = pthread_create((pthread_t *)thread, NULL, threadEntry, arg);
         if (ret != 0) {
-            HILOG_ERROR(SOFTBUS_HILOG_ID, "Thread create failed, ret[%{public}d]", ret);
+            COMM_LOGE(COMM_ADAPTER, "Thread create failed, ret[%d]", ret);
             return SOFTBUS_ERR;
         }
     } else {
         pthread_attr_t attr;
         ret = pthread_attr_init(&attr);
         if (ret != 0) {
-            HILOG_ERROR(SOFTBUS_HILOG_ID, "pthread_attr_init failed, ret[%{public}d]", ret);
+            COMM_LOGE(COMM_ADAPTER, "pthread_attr_init failed, ret[%d]", ret);
             return SOFTBUS_ERR;
         }
         ret = SoftBusConfTransPthreadAttr(threadAttr, &attr);
         if (ret != 0) {
-            HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusConfTransPthreadAttr failed, ret[%{public}d]", ret);
+            COMM_LOGE(COMM_ADAPTER, "SoftBusConfTransPthreadAttr failed, ret[%d]", ret);
             return SOFTBUS_ERR;
         }
         ret = pthread_create((pthread_t *)thread, &attr, threadEntry, arg);
         if (ret != 0) {
-            HILOG_ERROR(SOFTBUS_HILOG_ID, "Thread create failed, ret[%{public}d]", ret);
+            COMM_LOGE(COMM_ADAPTER, "Thread create failed, ret[%d]", ret);
             return SOFTBUS_ERR;
         }
 
         if (threadAttr->taskName != NULL) {
             ret = SoftBusThreadSetName(*thread, threadAttr->taskName);
             if (ret != 0) {
-                HILOG_ERROR(SOFTBUS_HILOG_ID, "Thread set name failed, ret[%{public}d]", ret);
+                COMM_LOGE(COMM_ADAPTER, "Thread set name failed, ret[%d]", ret);
                 return SOFTBUS_ERR;
             }
         }
@@ -334,13 +333,13 @@ int32_t SoftBusThreadCreate(SoftBusThread *thread, SoftBusThreadAttr *threadAttr
 int32_t SoftBusThreadJoin(SoftBusThread thread, void **value)
 {
     if (thread <= 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "thread is invalid");
+        COMM_LOGE(COMM_ADAPTER, "thread is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
     int32_t ret = pthread_join((pthread_t)thread, value);
     if (ret != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "Thread join failed, ret[%{public}d]", ret);
+        COMM_LOGE(COMM_ADAPTER, "Thread join failed, ret[%d]", ret);
         return SOFTBUS_ERR;
     }
 
@@ -350,22 +349,22 @@ int32_t SoftBusThreadJoin(SoftBusThread thread, void **value)
 int32_t SoftBusThreadSetName(SoftBusThread thread, const char *name)
 {
     if (thread <= 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "thread is invalid");
+        COMM_LOGE(COMM_ADAPTER, "thread is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (name == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "name is null");
+        COMM_LOGE(COMM_ADAPTER, "name is null");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (strlen(name) >= TASK_NAME_MAX_LEN) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "set thread name length >= TASK_NAME_MAX_LEN");
+        COMM_LOGE(COMM_ADAPTER, "set thread name length >= TASK_NAME_MAX_LEN");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = pthread_setname_np((pthread_t)thread, name);
     if (ret != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "Thread set name failed, ret[%{public}d]", ret);
+        COMM_LOGE(COMM_ADAPTER, "Thread set name failed, ret[%d]", ret);
         return SOFTBUS_ERR;
     }
 
@@ -381,29 +380,29 @@ SoftBusThread SoftBusThreadGetSelf(void)
 int32_t SoftBusCondInit(SoftBusCond *cond)
 {
     if (cond == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "cond is null");
+        COMM_LOGE(COMM_ADAPTER, "cond is null");
         return SOFTBUS_INVALID_PARAM;
     }
     pthread_condattr_t attr = {0};
     int ret = pthread_condattr_init(&attr);
     if (ret != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "pthread_condattr_init failed, ret[%{public}d]", ret);
+        COMM_LOGE(COMM_ADAPTER, "pthread_condattr_init failed, ret[%d]", ret);
         return SOFTBUS_ERR;
     }
     ret = pthread_condattr_setclock(&attr, CLOCK_MONOTONIC);
     if (ret != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "set clock failed, ret[%{public}d]", ret);
+        COMM_LOGE(COMM_ADAPTER, "set clock failed, ret[%d]", ret);
         return SOFTBUS_ERR;
     }
 
     pthread_cond_t *tempCond = (pthread_cond_t *)SoftBusCalloc(sizeof(pthread_cond_t));
     if (tempCond == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "tempCond is null");
+        COMM_LOGE(COMM_ADAPTER, "tempCond is null");
         return SOFTBUS_ERR;
     }
     ret = pthread_cond_init(tempCond, &attr);
     if (ret != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusCondInit failed, ret[%{public}d]", ret);
+        COMM_LOGE(COMM_ADAPTER, "SoftBusCondInit failed, ret[%d]", ret);
         SoftBusFree(tempCond);
         tempCond = NULL;
         return SOFTBUS_ERR;
@@ -416,14 +415,14 @@ int32_t SoftBusCondInit(SoftBusCond *cond)
 int32_t SoftBusCondSignal(SoftBusCond *cond)
 {
     if ((cond == NULL) || ((void *)(*cond) == NULL)) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "cond is null");
+        COMM_LOGE(COMM_ADAPTER, "cond is null");
         return SOFTBUS_INVALID_PARAM;
     }
 
     int ret;
     ret = pthread_cond_signal((pthread_cond_t *)*cond);
     if (ret != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusCondSignal failed, ret[%{public}d]", ret);
+        COMM_LOGE(COMM_ADAPTER, "SoftBusCondSignal failed, ret[%d]", ret);
         return SOFTBUS_ERR;
     }
 
@@ -433,14 +432,14 @@ int32_t SoftBusCondSignal(SoftBusCond *cond)
 int32_t SoftBusCondBroadcast(SoftBusCond *cond)
 {
     if ((cond == NULL) || ((void *)(*cond) == NULL)) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "cond is null");
+        COMM_LOGE(COMM_ADAPTER, "cond is null");
         return SOFTBUS_INVALID_PARAM;
     }
 
     int ret;
     ret = pthread_cond_broadcast((pthread_cond_t *)*cond);
     if (ret != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusCondBroadcast failed, ret[%{public}d]", ret);
+        COMM_LOGE(COMM_ADAPTER, "SoftBusCondBroadcast failed, ret[%d]", ret);
         return SOFTBUS_ERR;
     }
 
@@ -451,12 +450,12 @@ int32_t SoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, SoftBusSysTime *
 {
 #define USECTONSEC 1000
     if ((cond == NULL) || ((void *)(*cond) == NULL)) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "cond is null");
+        COMM_LOGE(COMM_ADAPTER, "cond is null");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if ((mutex == NULL) || ((void *)(*mutex) == NULL)) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "mutex is null");
+        COMM_LOGE(COMM_ADAPTER, "mutex is null");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -464,7 +463,7 @@ int32_t SoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, SoftBusSysTime *
     if (time == NULL) {
         ret = pthread_cond_wait((pthread_cond_t *)*cond, (pthread_mutex_t *)*mutex);
         if (ret != 0) {
-            HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusCondWait failed, ret[%{public}d]", ret);
+            COMM_LOGE(COMM_ADAPTER, "SoftBusCondWait failed, ret[%d]", ret);
             return SOFTBUS_ERR;
         }
     } else {
@@ -473,12 +472,12 @@ int32_t SoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, SoftBusSysTime *
         tv.tv_nsec = time->usec * USECTONSEC;
         ret = pthread_cond_timedwait((pthread_cond_t *)*cond, (pthread_mutex_t *)*mutex, &tv);
         if (ret == ETIMEDOUT) {
-            HILOG_DEBUG(SOFTBUS_HILOG_ID, "SoftBusCondTimedWait timeout, ret[%{public}d]", ret);
+            COMM_LOGD(COMM_ADAPTER, "SoftBusCondTimedWait timeout, ret[%d]", ret);
             return SOFTBUS_TIMOUT;
         }
 
         if (ret != 0) {
-            HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusCondTimedWait failed, ret[%{public}d]", ret);
+            COMM_LOGE(COMM_ADAPTER, "SoftBusCondTimedWait failed, ret[%d]", ret);
             return SOFTBUS_ERR;
         }
     }
@@ -489,14 +488,14 @@ int32_t SoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, SoftBusSysTime *
 int32_t SoftBusCondDestroy(SoftBusCond *cond)
 {
     if ((cond == NULL) || ((void *)(*cond) == NULL)) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "cond is null");
+        COMM_LOGE(COMM_ADAPTER, "cond is null");
         return SOFTBUS_INVALID_PARAM;
     }
 
     int ret;
     ret = pthread_cond_destroy((pthread_cond_t *)*cond);
     if (ret != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "SoftBusCondDestroy failed, ret[%{public}d]", ret);
+        COMM_LOGE(COMM_ADAPTER, "SoftBusCondDestroy failed, ret[%d]", ret);
         SoftBusFree((void *)*cond);
         *cond = (SoftBusCond)NULL;
         return SOFTBUS_ERR;

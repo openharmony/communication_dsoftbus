@@ -106,7 +106,7 @@ static bool IsValidLane(const char *networkId, LaneLinkType linkType, uint32_t e
         return false;
     }
     LinkAttribute *linkAttr = GetLinkAttrByLinkType(linkType);
-    if ((linkAttr == NULL) || (linkAttr->available != true)) {
+    if ((linkAttr == NULL) || (!linkAttr->available)) {
         return false;
     }
     if (linkAttr->IsEnable(networkId) != true) {
@@ -133,6 +133,8 @@ static char *GetLinkTypeStrng(LaneLinkType preferredLink)
             return "BLE";
         case LANE_P2P:
             return "P2P";
+        case LANE_HML:
+            return "HML";
         case LANE_WLAN_2P4G:
             return "WLAN 2.4G";
         case LANE_WLAN_5G:
@@ -268,5 +270,68 @@ int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
         recommendList->linkType[i] = resList[i];
     }
     *listNum = resNum;
+    return SOFTBUS_OK;
+}
+
+static int32_t LanePrioritization(LanePreferredLinkList *recommendList, const uint16_t *laneScore)
+{
+    (void)recommendList;
+    (void)laneScore;
+    return SOFTBUS_OK;
+}
+
+static bool GetLaneScore(const char *networkId, LaneLinkType linkType, uint16_t *score)
+{
+    if (!IsLinkTypeValid(linkType)) {
+        return false;
+    }
+    LinkAttribute *linkAttr = GetLinkAttrByLinkType(linkType);
+    if ((linkAttr == NULL) || (!linkAttr->available)) {
+        return false;
+    }
+    uint32_t expectedBw = 0;
+    score[linkType] = linkAttr->GetLinkScore(networkId, expectedBw);
+    return true;
+}
+
+int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *request,
+    LanePreferredLinkList *recommendList)
+{
+    LNN_LOGI(LNN_LANE, "SelectExpectLanesByQos enter");
+    if ((networkId == NULL) || (request == NULL) || (recommendList == NULL)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!LnnGetOnlineStateById(networkId, CATEGORY_NETWORK_ID)) {
+        char *anonyNetworkId = NULL;
+        Anonymize(networkId, &anonyNetworkId);
+        LNN_LOGE(LNN_LANE, "device not online, cancel selectLane by qos, networkId=%s", anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
+        return SOFTBUS_ERR;
+    }
+    LanePreferredLinkList laneLinkList = {0};
+    if (request->qosRequire.minBW == 0 && request->qosRequire.maxLaneLatency == 0 &&
+        request->qosRequire.minLaneLatency == 0) {
+        LNN_LOGI(LNN_LANE, "select lane by default linkList");
+        SelectByDefaultLink(networkId, request, laneLinkList.linkType, &(laneLinkList.linkTypeNum));
+    } else {
+        LNN_LOGI(LNN_LANE, "select lane by qos require");
+        if (DecideAvailableLane(networkId, request, &laneLinkList) != SOFTBUS_OK) {
+            return SOFTBUS_ERR;
+        }
+    }
+    recommendList->linkTypeNum = 0;
+    uint16_t laneScore[LANE_LINK_TYPE_BUTT] = {0};
+    for (uint32_t i = 0; i < laneLinkList.linkTypeNum; i++) {
+        if (!GetLaneScore(networkId, laneLinkList.linkType[i], laneScore)) {
+            continue;
+        }
+        recommendList->linkType[recommendList->linkTypeNum] = laneLinkList.linkType[i];
+        recommendList->linkTypeNum++;
+        DumpPreferredLink(laneLinkList.linkType[i], i);
+    }
+
+    if (LanePrioritization(recommendList, laneScore) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }

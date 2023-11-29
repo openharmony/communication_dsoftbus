@@ -34,10 +34,27 @@ typedef struct {
     int32_t (*getConnection)(const char *udid);
 } SoftBusBleConflictListener;
 
+typedef struct {
+    void (*conlictNotifyConnectResult)(int32_t requestId, uint32_t connectionId,
+        int32_t underlayerHandle, bool status);
+    void (*conlictNotifyDataReceive)(uint32_t connectionId, const uint8_t *data, uint32_t dataLen);
+    void (*conlictNotifyDisconnect)(uint32_t connectionId, int32_t status);
+} LegacyConflictEventListener;
+
 void SoftbusBleConflictRegisterListener(SoftBusBleConflictListener *listener);
 void SoftbusBleConflictNotifyConnectResult(int32_t requestId, int32_t underlayerHandle, bool status);
 void SoftbusBleConflictNotifyDateReceive(int32_t underlayerHandle, const uint8_t *data, uint32_t dataLen);
 void SoftbusBleConflictNotifyDisconnect(const char *addr, const char *udid);
+
+int32_t LegacyConflictReuseConnection(const char *address, const char *udid, uint32_t requestId,
+    uint32_t *connectionId);
+bool LegacyConflictPostBytes(int32_t underlayerHandle, uint8_t *data, uint32_t dataLen);
+void LegacyConflictDisconnect(int32_t handle, bool isForce);
+void LegacyConflictCancelOccupy(const char *udid);
+void LegacyConflictOccupy(const char *udid, int32_t timeout);
+int32_t LegacyConflictGetConnection(const char *udid);
+
+int32_t LegacyBleInitConflictModule(LegacyConflictEventListener *listener);
 
 #ifdef __cplusplus
 }

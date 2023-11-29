@@ -315,3 +315,47 @@ char *GetDynamicStringItemByJsonObject(const cJSON * const json, const char * co
     }
     return value;
 }
+
+bool AddIntArrayToJsonObject(cJSON *json, const char *string, const int32_t *array, int32_t arrayLen)
+{
+    if (json == NULL || string == NULL || array == NULL || arrayLen <= 0) {
+        return false;
+    }
+    cJSON *arrayObj = cJSON_CreateIntArray(array, arrayLen);
+    if (arrayObj == NULL) {
+        COMM_LOGE(COMM_EVENT, "Cannot create cJSON array object [%s]", string);
+        return true;
+    }
+    if (!cJSON_AddItemToObject((cJSON *)json, string, arrayObj)) {
+        cJSON_Delete(arrayObj);
+        return false;
+    }
+    return true;
+}
+
+bool GetJsonObjectIntArrayItem(const cJSON *json, const char *string, int32_t *array, int32_t arrayLen)
+{
+    if (json == NULL || string == NULL || array == NULL || arrayLen <= 0) {
+        return false;
+    }
+    cJSON *objValue = cJSON_GetObjectItem(json, string);
+    if (objValue == NULL) {
+        return false;
+    }
+    if (!cJSON_IsArray(objValue)) {
+        return false;
+    }
+    int size = cJSON_GetArraySize(objValue);
+    if (size > arrayLen) {
+        size = arrayLen;
+    }
+    uint32_t index = 0;
+    for (int32_t i = 0; i < size; i++) {
+        cJSON *item = cJSON_GetArrayItem(objValue, i);
+        if (!cJSON_IsNumber(item)) {
+            continue;
+        }
+        array[index++] = item->valueint;
+    }
+    return true;
+}

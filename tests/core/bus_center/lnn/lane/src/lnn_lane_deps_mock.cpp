@@ -16,7 +16,7 @@
 #include "lnn_lane_deps_mock.h"
 #include "softbus_error_code.h"
 
-const uint16_t SHA_HASH_LEN = 32;
+const static uint16_t SHA_HASH_LEN = 32;
 
 using namespace testing::ext;
 using namespace testing;
@@ -191,6 +191,10 @@ bool ConnBleDirectIsEnable(BleProtocolType protocol)
 int32_t TransProxyCloseProxyChannel(int32_t channelId)
 {
     return GetLaneDepsInterface()->TransProxyCloseProxyChannel(channelId);
+}
+LaneResource *LaneResourceIsExist(LaneResource *resourceItem)
+{
+    return GetLaneDepsInterface()->LaneResourceIsExist(resourceItem);
 }
 
 int64_t GetAuthIdByConnInfo(const AuthConnInfo *connInfo)

@@ -24,8 +24,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "comm_log.h"
 #include "softbus_adapter_errcode.h"
-#include "softbus_adapter_log.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 
@@ -45,14 +45,14 @@ static int32_t SoftBusCreateFile(const char *fileName)
             continue;
         }
         if (memcpy_s(dirPath, sizeof(dirPath), fileName, len) != EOK) {
-            HILOG_ERROR(SOFTBUS_HILOG_ID, "memory copy dir name failed");
+            COMM_LOGE(COMM_ADAPTER, "memory copy dir name failed");
             return SOFTBUS_ERR;
         }
         dirPath[len] = 0;
         if (access(dirPath, F_OK) != 0) {
             int32_t ret = mkdir(dirPath, S_IRWXU);
             if (ret != 0) {
-                HILOG_ERROR(SOFTBUS_HILOG_ID, "make dir failed, err code %{public}d", ret);
+                COMM_LOGE(COMM_ADAPTER, "make dir failed, err code %d", ret);
                 return SOFTBUS_ERR;
             }
         }
@@ -60,7 +60,7 @@ static int32_t SoftBusCreateFile(const char *fileName)
     }
     int32_t fd = open(fileName, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
     if (fd < 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "crate file failed, errno = %{public}d", errno);
+        COMM_LOGE(COMM_ADAPTER, "crate file failed, errno = %d", errno);
         return SOFTBUS_ERR;
     }
     close(fd);
@@ -70,12 +70,12 @@ static int32_t SoftBusCreateFile(const char *fileName)
 int32_t SoftBusReadFile(int32_t fd, void *readBuf, uint32_t maxLen)
 {
     if (readBuf == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "softbus read file [buff is null]");
+        COMM_LOGE(COMM_ADAPTER, "softbus read file [buff is null]");
         return SOFTBUS_INVALID_PARAM;
     }
     int64_t len = read(fd, readBuf, maxLen);
     if (len < 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "softbus read file fail : %s", strerror(errno));
+        COMM_LOGE(COMM_ADAPTER, "softbus read file fail : %s", strerror(errno));
     }
     return len;
 }
@@ -88,24 +88,24 @@ static int32_t ReadFullFile(const char *fileName, char *readBuf, uint32_t maxLen
 
     int32_t fd = open(fileName, O_RDONLY, S_IRUSR | S_IWUSR);
     if (fd < 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "ReadFile open file fail");
+        COMM_LOGE(COMM_ADAPTER, "ReadFile open file fail");
         return SOFTBUS_FILE_ERR;
     }
     int32_t fileLen = lseek(fd, 0, SEEK_END);
     if (fileLen <= 0 || fileLen > (int32_t)maxLen) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "ReadFile maxLen failed or over maxLen");
+        COMM_LOGE(COMM_ADAPTER, "ReadFile maxLen failed or over maxLen");
         close(fd);
         return SOFTBUS_FILE_ERR;
     }
     int32_t ret = lseek(fd, 0, SEEK_SET);
     if (ret < 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "ReadFile lseek file fail");
+        COMM_LOGE(COMM_ADAPTER, "ReadFile lseek file fail");
         close(fd);
         return SOFTBUS_FILE_ERR;
     }
     ret = read(fd, readBuf, fileLen);
     if (ret < 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "ReadFile read fail, ret=%{public}d", ret);
+        COMM_LOGE(COMM_ADAPTER, "ReadFile read fail, ret=%d", ret);
         close(fd);
         return SOFTBUS_FILE_ERR;
     }
@@ -131,17 +131,17 @@ int32_t SoftBusWriteFile(const char *fileName, const char *writeBuf, uint32_t le
         return SOFTBUS_FILE_ERR;
     }
     if (access(fileName, F_OK) != 0 && SoftBusCreateFile(fileName) != SOFTBUS_OK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "create file fail");
+        COMM_LOGE(COMM_ADAPTER, "create file fail");
         return SOFTBUS_FILE_ERR;
     }
     int32_t fd = open(fileName, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
     if (fd < 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "WriteFile open file fail");
+        COMM_LOGE(COMM_ADAPTER, "WriteFile open file fail");
         return SOFTBUS_FILE_ERR;
     }
     int32_t ret = write(fd, writeBuf, len);
     if (len > INT32_MAX || ret != (int32_t)len) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "WriteFile write fail");
+        COMM_LOGE(COMM_ADAPTER, "WriteFile write fail");
         close(fd);
         return SOFTBUS_FILE_ERR;
     }
@@ -157,7 +157,7 @@ int32_t SoftBusWriteFileFd(int32_t fd, const char *writeBuf, uint32_t len)
     }
     int32_t ret = write(fd, writeBuf, len);
     if (ret != (int32_t)len) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "WriteFileFd write fail");
+        COMM_LOGE(COMM_ADAPTER, "WriteFileFd write fail");
     }
     return ret;
 }
@@ -165,12 +165,12 @@ int32_t SoftBusWriteFileFd(int32_t fd, const char *writeBuf, uint32_t len)
 int32_t SoftBusOpenFile(const char *fileName, int32_t flags)
 {
     if (fileName == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "softbus open file [fileName is null]");
+        COMM_LOGE(COMM_ADAPTER, "softbus open file [fileName is null]");
         return SOFTBUS_INVALID_FD;
     }
     int32_t fd = open(fileName, flags);
     if (fd < 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "softbus open file [open fail], %s", strerror(errno));
+        COMM_LOGE(COMM_ADAPTER, "softbus open file [open fail], %s", strerror(errno));
         return SOFTBUS_INVALID_FD;
     }
     return fd;
@@ -179,12 +179,12 @@ int32_t SoftBusOpenFile(const char *fileName, int32_t flags)
 int32_t SoftBusOpenFileWithPerms(const char *fileName, int32_t flags, int32_t perms)
 {
     if (fileName == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "softbus open with perms file [fileName is null]");
+        COMM_LOGE(COMM_ADAPTER, "softbus open with perms file [fileName is null]");
         return SOFTBUS_INVALID_FD;
     }
     int32_t fd = open(fileName, flags, perms);
     if (fd < 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "softbus open with perms file [open fail], %s", strerror(errno));
+        COMM_LOGE(COMM_ADAPTER, "softbus open with perms file [open fail], %s", strerror(errno));
         return SOFTBUS_INVALID_FD;
     }
     return fd;
@@ -193,11 +193,11 @@ int32_t SoftBusOpenFileWithPerms(const char *fileName, int32_t flags, int32_t pe
 void SoftBusRemoveFile(const char *fileName)
 {
     if (fileName == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "softbus remove file [fileName is null]");
+        COMM_LOGE(COMM_ADAPTER, "softbus remove file [fileName is null]");
         return;
     }
     if (remove(fileName) != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "softbus remove file fail : %s", strerror(errno));
+        COMM_LOGE(COMM_ADAPTER, "softbus remove file fail : %s", strerror(errno));
         return;
     }
 }
@@ -205,11 +205,11 @@ void SoftBusRemoveFile(const char *fileName)
 void SoftBusCloseFile(int32_t fd)
 {
     if (fd <= SOFTBUS_INVALID_FD) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "softbus close file [fd is invalid]");
+        COMM_LOGE(COMM_ADAPTER, "softbus close file [fd is invalid]");
         return;
     }
     if (close(fd) != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "softbus remove file fail : %s", strerror(errno));
+        COMM_LOGE(COMM_ADAPTER, "softbus remove file fail : %s", strerror(errno));
         return;
     }
 }
@@ -217,12 +217,12 @@ void SoftBusCloseFile(int32_t fd)
 int64_t SoftBusPreadFile(int32_t fd, void *buf, uint64_t readBytes, uint64_t offset)
 {
     if (buf == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "softbus pread file [buff is null]");
+        COMM_LOGE(COMM_ADAPTER, "softbus pread file [buff is null]");
         return SOFTBUS_ERR;
     }
     int64_t len = pread(fd, buf, readBytes, offset);
     if (len < 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "softbus pread file fail : %s", strerror(errno));
+        COMM_LOGE(COMM_ADAPTER, "softbus pread file fail : %s", strerror(errno));
     }
     return len;
 }
@@ -230,12 +230,12 @@ int64_t SoftBusPreadFile(int32_t fd, void *buf, uint64_t readBytes, uint64_t off
 int64_t SoftBusPwriteFile(int32_t fd, const void *buf, uint64_t writeBytes, uint64_t offset)
 {
     if (buf == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "softbus pwrite file [buff is null]");
+        COMM_LOGE(COMM_ADAPTER, "softbus pwrite file [buff is null]");
         return SOFTBUS_ERR;
     }
     int64_t len = pwrite(fd, buf, writeBytes, offset);
     if (len < 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "softbus pwrite file fail : %s", strerror(errno));
+        COMM_LOGE(COMM_ADAPTER, "softbus pwrite file fail : %s", strerror(errno));
     }
     return len;
 }
@@ -243,13 +243,13 @@ int64_t SoftBusPwriteFile(int32_t fd, const void *buf, uint64_t writeBytes, uint
 int32_t SoftBusAccessFile(const char *pathName, int32_t mode)
 {
     if (pathName == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "softbus access path [pathName is null]");
+        COMM_LOGE(COMM_ADAPTER, "softbus access path [pathName is null]");
         return SOFTBUS_ERR;
     }
 
     int32_t ret = access(pathName, mode);
     if (ret != 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "softbus access path fail : %s", strerror(errno));
+        COMM_LOGE(COMM_ADAPTER, "softbus access path fail : %s", strerror(errno));
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -258,7 +258,7 @@ int32_t SoftBusAccessFile(const char *pathName, int32_t mode)
 int32_t SoftBusMakeDir(const char *pathName, int32_t mode)
 {
     if (pathName == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "softbus mkdir file [pathName is null]");
+        COMM_LOGE(COMM_ADAPTER, "softbus mkdir file [pathName is null]");
         return SOFTBUS_ERR;
     }
 
@@ -274,13 +274,13 @@ int32_t SoftBusMakeDir(const char *pathName, int32_t mode)
 int32_t SoftBusGetFileSize(const char *fileName, uint64_t *fileSize)
 {
     if ((fileName == NULL) || (fileSize == NULL)) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "softbus mkdir file [fileName or fileSize is null]");
+        COMM_LOGE(COMM_ADAPTER, "softbus mkdir file [fileName or fileSize is null]");
         return SOFTBUS_ERR;
     }
 
     struct stat statbuff;
     if (stat(fileName, &statbuff) < 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "stat file fail");
+        COMM_LOGE(COMM_ADAPTER, "stat file fail");
         return SOFTBUS_ERR;
     } else {
         *fileSize = statbuff.st_size;
@@ -292,13 +292,13 @@ int32_t SoftBusGetFileSize(const char *fileName, uint64_t *fileSize)
 char *SoftBusRealPath(const char *path, char *absPath)
 {
     if ((path == NULL) || (absPath == NULL)) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "softbus realpath [path or absPath is null]");
+        COMM_LOGE(COMM_ADAPTER, "softbus realpath [path or absPath is null]");
         return NULL;
     }
 
     char *realPath = NULL;
     if (realpath(path, absPath) == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "realpath failed, err[%s]", strerror(errno));
+        COMM_LOGE(COMM_ADAPTER, "realpath failed, err[%s]", strerror(errno));
         return NULL;
     } else {
         realPath = absPath;

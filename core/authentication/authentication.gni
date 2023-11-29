@@ -84,7 +84,10 @@ if (dsoftbus_feature_lnn_net) {
     "$authentication_path/src/virtual/auth_meta_manager_virtual.c",
   ]
 }
-auth_server_deps = [ "$dsoftbus_dfx_path/log:softbus_dfx_log" ]
+auth_server_deps = [
+  "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
+  "$dsoftbus_dfx_path/log:softbus_dfx_log",
+]
 
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {

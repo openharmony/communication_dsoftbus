@@ -51,9 +51,9 @@ int32_t SoftbusGattcConnect(int32_t clientId, SoftBusBtAddr *addr)
     return GetConnectionBleInterface()->SoftbusGattcConnect(clientId, addr);
 }
 
-int32_t SoftbusBleGattcDisconnect(int32_t clientId, bool refreshGatt)
+int BleGattcDisconnect(int clientId)
 {
-    return GetConnectionBleInterface()->SoftbusBleGattcDisconnect(clientId, refreshGatt);
+    return GetConnectionBleInterface()->BleGattcDisconnect(clientId);
 }
 
 int SoftBusGattsAddService(SoftBusBtUuid srvcUuid, bool isPrimary, int number)

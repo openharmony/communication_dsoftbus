@@ -1067,12 +1067,12 @@ static int32_t FileToFrame(SendListenerInfo *sendInfo, uint64_t frameNum,
             }
             fileOffset += len;
             remainedSendSize -= len;
+            sendInfo->totalInfo.bytesProcessed += len;
         }
         if (SendOneFrame(sendInfo, &fileFrame) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_FILE, "send one frame failed");
             goto EXIT_ERR;
         }
-        sendInfo->totalInfo.bytesProcessed += fileOffset;
         if (sendInfo->fileListener.fileCallback != NULL) {
             FileEvent event = {
                 .type = FILE_EVENT_SEND_PROCESS,
@@ -1219,11 +1219,6 @@ static bool IsValidFileString(const char *str[], uint32_t fileNum, uint32_t maxL
 
 static int32_t GetFileSize(const char *filePath, uint64_t *fileSize)
 {
-    if (CheckDestFilePathValid(filePath) == false) {
-        TRANS_LOGE(TRANS_SDK, "dest path is wrong");
-        return SOFTBUS_ERR;
-    }
-
     char *absPath = (char *)SoftBusCalloc(PATH_MAX + 1);
     if (absPath == NULL) {
         TRANS_LOGE(TRANS_SDK, "calloc absFullDir fail");
@@ -1717,9 +1712,10 @@ static int32_t CreateFileFromFrame(int32_t sessionId, int32_t channelId, const F
         goto EXIT_ERR;
     }
     if (recipient->fileListener.fileCallback != NULL) {
+        const char *fileList[] = { file->filePath };
         FileEvent event = {
             .type = FILE_EVENT_RECV_START,
-            .files = (const char**)&file->filePath,
+            .files = fileList,
             .fileCnt = 1,
             .bytesProcessed = file->fileSize,
             .bytesTotal = file->fileSize,
@@ -1915,9 +1911,10 @@ static int32_t WriteFrameToFile(int32_t sessionId, const FileFrame *fileFrame)
     }
     fileInfo->timeOut = 0;
     if (recipient->fileListener.fileCallback != NULL) {
+        const char *fileList[] = { fileInfo->filePath };
         FileEvent event = {
             .type = FILE_EVENT_RECV_PROCESS,
-            .files = (const char **)&fileInfo->filePath,
+            .files = fileList,
             .fileCnt = 1,
             .bytesProcessed = fileInfo->fileOffset,
             .bytesTotal = fileInfo->fileSize,
@@ -1994,9 +1991,10 @@ static int32_t ProcessFileListData(int32_t sessionId, const FileFrame *frame)
     }
     SetRecipientRecvState(recipient, TRANS_FILE_RECV_IDLE_STATE);
     if (recipient->fileListener.fileCallback != NULL) {
+        const char *fileList[] = { absRecvPath };
         FileEvent event = {
             .type = FILE_EVENT_RECV_FINISH,
-            .files = (const char **)&absRecvPath,
+            .files = fileList,
             .fileCnt = 1,
             .bytesProcessed = 0,
             .bytesTotal = 0,
@@ -2246,6 +2244,58 @@ int32_t ProcessRecvFileFrameData(int32_t sessionId, int32_t channelId, const Fil
         default:
             TRANS_LOGE(TRANS_FILE, "frame type is invalid sessionId=%d", sessionId);
             return SOFTBUS_ERR;
+    }
+    return ret;
+}
+
+int32_t ProcessFileFrameData(int32_t sessionId, int32_t channelId, const char *data, uint32_t len, int32_t type)
+{
+    FileFrame oneFrame;
+    oneFrame.frameType = type;
+    oneFrame.frameLength = len;
+    oneFrame.data = (uint8_t *)data;
+    return ProcessRecvFileFrameData(sessionId, channelId, &oneFrame);
+}
+
+static const char **GenerateRemoteFiles(const char *sFileList[], uint32_t fileCnt)
+{
+    const char **files = (const char **)SoftBusCalloc(sizeof(const char *) * fileCnt);
+    if (files == NULL) {
+        TRANS_LOGE(TRANS_SDK, "malloc *fileCnt oom");
+        return NULL;
+    }
+    for (uint32_t i = 0; i < fileCnt; i++) {
+        files[i] = TransGetFileName(sFileList[i]);
+        if (files[i] == NULL) {
+            TRANS_LOGE(TRANS_SDK, "GetFileName failed at index=%" PRIu32, i);
+            SoftBusFree(files);
+            return NULL;
+        }
+    }
+    return files;
+}
+
+int32_t TransProxyChannelSendFile(int32_t channelId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)
+{
+    if (sFileList == NULL || fileCnt == 0 || fileCnt > MAX_SEND_FILE_NUM) {
+        TRANS_LOGE(TRANS_SDK, "input para failed! fileCnt=%" PRIu32, fileCnt);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    const char **remoteFiles = NULL;
+    const char **generatedRemoteFiles = NULL;
+    if (dFileList == NULL) {
+        generatedRemoteFiles = GenerateRemoteFiles(sFileList, fileCnt);
+        if (generatedRemoteFiles == NULL) {
+            return SOFTBUS_ERR;
+        }
+        remoteFiles = generatedRemoteFiles;
+    } else {
+        remoteFiles = dFileList;
+    }
+    int32_t ret = ProxyChannelSendFile(channelId, sFileList, remoteFiles, fileCnt);
+    if (generatedRemoteFiles != NULL) {
+        SoftBusFree(generatedRemoteFiles);
+        generatedRemoteFiles = NULL;
     }
     return ret;
 }

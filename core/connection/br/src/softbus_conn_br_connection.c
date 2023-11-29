@@ -314,7 +314,7 @@ int32_t ConnBrConnect(ConnBrConnection *connection)
     CONN_CHECK_AND_RETURN_RET_LOGE(ctx != NULL, SOFTBUS_LOCK_ERR, CONN_BR,
         "br client connect: calloc failed, conn id=%u", connection->connectionId);
     ctx->connectionId = connection->connectionId;
-    int32_t status = ConnStartActionAsync(ctx, StartClientConnect);
+    int32_t status = ConnStartActionAsync(ctx, StartClientConnect, NULL);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BR, "start connect thread failed, conn id=%u, error=%d", connection->connectionId, status);
         SoftBusFree(ctx);
@@ -512,7 +512,7 @@ static void *ListenTask(void *arg)
                 continue;
             }
             ctx->socketHandle = socketHandle;
-            status = ConnStartActionAsync(ctx, StartServerServe);
+            status = ConnStartActionAsync(ctx, StartServerServe, NULL);
             if (status != SOFTBUS_OK) {
                 CONN_LOGE(CONN_BR, "start serve thread failed, trace id=%u, server id=%d, socket=%d, error=%d",
                     serverState->traceId, serverId, socketHandle, status);
@@ -549,7 +549,7 @@ int32_t ConnBrStartServer(void)
     }
     serverState->available = true;
     serverState->serverId = -1;
-    status = ConnStartActionAsync(serverState, ListenTask);
+    status = ConnStartActionAsync(serverState, ListenTask, NULL);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BR, "start br server failed: error=%d", status);
         (void)SoftBusMutexDestroy(&serverState->mutex);

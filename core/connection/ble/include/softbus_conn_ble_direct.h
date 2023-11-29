@@ -16,6 +16,15 @@
 #ifndef SOFTBUS_CONN_BLE_DIRECT_H
 #define SOFTBUS_CONN_BLE_DIRECT_H
 
-int32_t ConnBleDirectInit();
+#include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+int32_t ConnBleDirectInit(void);
+
+#ifdef __cplusplus
+}
+#endif
 #endif

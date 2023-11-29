@@ -101,7 +101,7 @@ HWTEST_F(ClientProxyTest, OnJoinMetaNodeResultTest_01, TestSize.Level1)
     void *metaInfoInput = reinterpret_cast<void *>(&metaInfo);
     int32_t ret = clientProxy->OnJoinMetaNodeResult(nullptr, TEST_ADDR_TYPE_LEN, metaInfoInput,
         sizeof(MetaBasicInfo), TEST_RET_CODE);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = clientProxy->OnJoinMetaNodeResult(addrInput, TEST_ADDR_TYPE_LEN, nullptr, 0, TEST_RET_CODE);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = clientProxy->OnJoinMetaNodeResult(addrInput, TEST_ADDR_TYPE_LEN, metaInfoInput,

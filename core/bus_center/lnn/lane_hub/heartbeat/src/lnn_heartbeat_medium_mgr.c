@@ -531,7 +531,9 @@ static int32_t HbMediumMgrRecvHigherWeight(const char *udidHash, int32_t weight,
     char *anonyMasterUdid = NULL;
     Anonymize(masterUdid, &anonyMasterUdid);
     LNN_LOGI(LNN_HEART_BEAT, "recv higher weight udidHash=%s, weight=%d, masterUdid=%s",
-        masterUdid, weight, anonyMasterUdid);
+        anonyUdid, weight, anonyMasterUdid);
+    AnonymizeFree(anonyUdid);
+    AnonymizeFree(anonyMasterUdid);
     return SOFTBUS_OK;
 }
 
