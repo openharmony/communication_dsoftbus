@@ -458,12 +458,12 @@ int32_t SoftbusAesCfbEncrypt(
         return SOFTBUS_MEM_ERR;
     }
     EncryptKey key = { cipherKey->key, cipherKey->keyLen };
-    (void)memset_s(cipherKey->key, cipherKey->keyLen, 0, cipherKey->keyLen);
     if (SoftBusGenerateHmacHash(&key, random, sizeof(random), result, SHA256_MAC_LEN) != SOFTBUS_OK) {
         COMM_LOGE(COMM_ADAPTER, "SslHmacSha256 failed.");
         SoftBusFree(encryptData);
         return SOFTBUS_ERR;
     }
+    (void)memset_s(cipherKey->key, cipherKey->keyLen, 0, cipherKey->keyLen);
     if (memcpy_s(cipherKey->key, cipherKey->keyLen, result, SHA256_MAC_LEN) != EOK) {
         COMM_LOGE(COMM_ADAPTER, "fill cipherKey->key failed!");
         SoftBusFree(encryptData);
