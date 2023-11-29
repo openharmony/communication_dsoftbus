@@ -222,7 +222,7 @@ static void ProcessNegotiateMessage(enum WifiDirectNegotiateCmdType cmd, struct 
         self->passiveCommand->deleteSelf(self->passiveCommand);
     }
     self->passiveCommand = command;
-    CONN_LOGI(CONN_WIFI_DIRECT, "passiveCommand=%p", command);
+    CONN_LOGI(CONN_WIFI_DIRECT, "passiveCommand=%d", command->type);
 
     switch (cmd) {
         case CMD_CONN_V1_REQ:
