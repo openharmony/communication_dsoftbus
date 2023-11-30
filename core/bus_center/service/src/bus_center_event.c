@@ -264,7 +264,7 @@ static void UpdateBroadcastInfo()
         return;
     }
     if (SoftBusGetSysTimeMs() < broadcastKey.endTime) {
-        LNN_LOGE(LNN_EVENT, "the broadcastKey don't need to update.");
+        LNN_LOGI(LNN_EVENT, "the broadcastKey don't need to update.");
         return;
     }
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, broadcastKey.udid, UDID_BUF_LEN) != SOFTBUS_OK) {
@@ -293,6 +293,7 @@ static void UpdateBroadcastInfo()
         LNN_LOGE(LNN_EVENT, "update local broadcast key failed");
         return;
     }
+    LNN_LOGI(LNN_EVENT, "update local broadcast key success!");
 }
 
 void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info)

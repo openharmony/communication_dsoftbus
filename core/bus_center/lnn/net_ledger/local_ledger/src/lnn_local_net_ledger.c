@@ -1510,6 +1510,7 @@ static int32_t LnnGenBroadcastCipherInfo(void)
         LNN_LOGE(LNN_LEDGER, "set iv error.");
         return SOFTBUS_ERR;
     }
+    LNN_LOGI(LNN_LEDGER, "generate BroadcastCipherInfo success!");
     return SOFTBUS_OK;
 }
 
@@ -1655,8 +1656,8 @@ int32_t LnnInitLocalLedger(void)
         LNN_LOGE(LNN_LEDGER, "first get udid fail, try again in one second");
     }
     if (LnnGenBroadcastCipherInfo() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "gen cipher fail");
-        return SOFTBUS_ERR;
+        LNN_LOGE(LNN_LEDGER, "generate cipher fail");
+        goto EXIT;
     }
 
     g_localNetLedger.status = LL_INIT_SUCCESS;
