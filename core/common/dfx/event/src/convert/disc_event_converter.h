@@ -81,6 +81,33 @@ static HiSysEventParamAssigner g_discAssigners[] = {
     // Modification Note: remember updating DISC_ASSIGNER_SIZE
 };
 
+#define DISC_ALARM_ASSIGNER(type, filedName, filed)                                                           \
+    static inline bool DiscAssigner##filedName(                                                               \
+        const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param) \
+    {                                                                                                         \
+        if (Assigner##type(form->discAlarmExtra->filed, &param) && CopyString(param->name, eventName)) {      \
+            param->t = paramType;                                                                             \
+            return true;                                                                                      \
+        }                                                                                                     \
+        return false;                                                                                         \
+    }
+
+DISC_ALARM_ASSIGNER(Errcode, AlarmResult, result)
+DISC_ALARM_ASSIGNER(Errcode, AlarmErrcode, errcode)
+DISC_ALARM_ASSIGNER(Int32, OriginalFreq, originalFreq)
+DISC_ALARM_ASSIGNER(Int32, AbnormalFreq, abnormalFreq)
+DISC_ALARM_ASSIGNER(Int32, Duration, duration)
+
+#define DISC_ALARM_ASSIGNER_SIZE 5 // Size of g_discAlarmAssigners
+static const HiSysEventParamAssigner g_discAlarmAssigners[] = {
+    { "STAGE_RES",        HISYSEVENT_INT32,  DiscAssignerAlarmResult     },
+    { "ERROR_CODE",       HISYSEVENT_INT32,  DiscAssignerAlarmErrcode    },
+    { "ORIGINAL_FREQ",    HISYSEVENT_INT32,  DiscAssignerOriginalFreq    },
+    { "ABNORMAL_FREQ",    HISYSEVENT_INT32,  DiscAssignerAbnormalFreq    },
+    { "DURATION",         HISYSEVENT_INT32,  DiscAssignerDuration        },
+    // Modification Note: remember updating LNN_ALARM_ASSIGNER_SIZE
+};
+
 static inline size_t ConvertDiscForm2Param(HiSysEventParam params[], size_t size, SoftbusEventForm *form)
 {
     size_t validSize = 0;
@@ -89,6 +116,21 @@ static inline size_t ConvertDiscForm2Param(HiSysEventParam params[], size_t size
     }
     for (size_t i = 0; i < size; ++i) {
         HiSysEventParamAssigner assigner = g_discAssigners[i];
+        if (assigner.Assign(assigner.name, assigner.type, form, &params[validSize])) {
+            ++validSize;
+        }
+    }
+    return validSize;
+}
+
+static inline size_t ConvertDiscAlarmForm2Param(HiSysEventParam params[], size_t size, SoftbusEventForm *form)
+{
+    size_t validSize = 0;
+    if (form == NULL || form->discAlarmExtra == NULL) {
+        return validSize;
+    }
+    for (size_t i = 0; i < size; ++i) {
+        HiSysEventParamAssigner assigner = g_discAlarmAssigners[i];
         if (assigner.Assign(assigner.name, assigner.type, form, &params[validSize])) {
             ++validSize;
         }

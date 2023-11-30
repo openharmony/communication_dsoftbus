@@ -29,3 +29,16 @@ void TransEventInner(int32_t scene, int32_t stage, const char *func, int32_t lin
     };
     SoftbusEventInner(EVENT_MODULE_TRANS, &form);
 }
+
+void TransAlarmInner(int32_t scene, int32_t type, const char *func, int32_t line, TransAlarmExtra *extra)
+{
+    SoftbusEventForm form = {
+        .eventName = (type == MANAGE_ALARM_TYPE) ? MANAGE_ALARM_EVENT_NAME : CONTROL_ALARM_EVENT_NAME,
+        .scene = scene,
+        .stage = SOFTBUS_DEFAULT_STAGE,
+        .func = func,
+        .line = line,
+        .transAlarmExtra = extra,
+    };
+    SoftbusEventInner(EVENT_MODULE_TRANS_ALARM, &form);
+}

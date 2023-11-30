@@ -32,3 +32,16 @@ void LnnEventInner(int32_t scene, int32_t stage, const char *func, int32_t line,
     };
     SoftbusEventInner(EVENT_MODULE_LNN, &form);
 }
+
+void LnnAlarmInner(int32_t scene, int32_t type, const char *func, int32_t line, LnnAlarmExtra *extra)
+{
+    SoftbusEventForm form = {
+        .eventName = (type == MANAGE_ALARM_TYPE) ? MANAGE_ALARM_EVENT_NAME : CONTROL_ALARM_EVENT_NAME,
+        .scene = scene,
+        .stage = SOFTBUS_DEFAULT_STAGE,
+        .func = func,
+        .line = line,
+        .lnnAlarmExtra = extra,
+    };
+    SoftbusEventInner(EVENT_MODULE_LNN_ALARM, &form);
+}

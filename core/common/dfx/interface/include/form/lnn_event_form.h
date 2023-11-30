@@ -71,6 +71,7 @@ typedef enum {
 
 typedef struct {
     int32_t errcode;
+    int32_t result;
 } LnnAlarmExtra;
 
 typedef enum {
