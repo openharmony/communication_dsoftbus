@@ -961,29 +961,38 @@ static int32_t LnnSelectDirectLink(const LinkRequest *request, uint32_t laneLink
         LNN_LOGE(LNN_LANE, "GetFeatureCap error");
         return SOFTBUS_ERR;
     }
+    int32_t ret = SOFTBUS_ERR;
     if (AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_WIFI, false) ||
         AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_BR, true) ||
         AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_BLE, true)) {
         if (!((local & (1 << BIT_BLE_TRIGGER_CONNECTION)) == 0) &&
             !((remote & (1 << BIT_BLE_TRIGGER_CONNECTION)) == 0)) {
-            LNN_LOGI(LNN_LANE, "open auth trigger to connect, local=%" PRIu64 ", remote=%" PRIu64, local, remote);
-            return OpenAuthTriggerToConn(request, laneLinkReqId, callback);
+            LNN_LOGI(LNN_LANE, "open auth trigger to connect, LnnReqId=%d", laneLinkReqId);
+            ret = OpenAuthTriggerToConn(request, laneLinkReqId, callback);
         }
-        LNN_LOGI(LNN_LANE, "open auth nego to connect, local=%" PRIu64 ", remote=%" PRIu64, local, remote);
-        return OpenAuthToConnP2p(request, laneLinkReqId, callback);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGI(LNN_LANE, "open active auth nego to connect, LnnReqId=%d", laneLinkReqId);
+            ret = OpenAuthToConnP2p(request, laneLinkReqId, callback);
+        }
     }
     if (!((local & (1 << BIT_BLE_TRIGGER_CONNECTION)) == 0) &&
-        !((remote & (1 << BIT_BLE_TRIGGER_CONNECTION)) == 0)) {
-        LNN_LOGI(LNN_LANE, "open ble trigger to connect, local=%" PRIu64 ", remote=%" PRIu64, local, remote);
-        return OpenBleTriggerToConn(request, laneLinkReqId, callback);
+        !((remote & (1 << BIT_BLE_TRIGGER_CONNECTION)) == 0) &&
+           ret != SOFTBUS_OK) {
+            LNN_LOGI(LNN_LANE, "open ble trigger to connect, LnnReqId=%d", laneLinkReqId);
+            ret = OpenBleTriggerToConn(request, laneLinkReqId, callback);
     }
 
-    if (((local & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) == 0) ||
-        ((remote & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) == 0)) {
-        LNN_LOGI(LNN_LANE, "open auth to connect p2p, local=%" PRIu64 ", remote=%" PRIu64, local, remote);
-        return OpenAuthToConnP2p(request, laneLinkReqId, callback);
+    if (((local & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) != 0) &&
+        ((remote & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) != 0) &&
+          ret != SOFTBUS_OK) {
+            LNN_LOGI(LNN_LANE, "open channel to connect p2p, LnnReqId=%d", laneLinkReqId);
+            ret = OpenProxyChannelToConnP2p(request, laneLinkReqId, callback);
     }
-    return SOFTBUS_OK;
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LANE, "open auth to connect p2p, LnnReqId=%d", laneLinkReqId);
+        ret = OpenAuthToConnP2p(request, laneLinkReqId, callback);
+    }
+    return ret;
 }
 
 int32_t LnnConnectP2p(const LinkRequest *request, uint32_t laneLinkReqId, const LaneLinkCb *callback)
@@ -1002,12 +1011,6 @@ int32_t LnnConnectP2p(const LinkRequest *request, uint32_t laneLinkReqId, const 
     if (LnnSelectDirectLink(request, laneLinkReqId, callback) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "select direct link fail");
         return SOFTBUS_ERR;
-    }
-    LNN_LOGI(LNN_LANE, "open channel to connect p2p");
-    int32_t ret = OpenProxyChannelToConnP2p(request, laneLinkReqId, callback);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "open channel to connect p2p failed, backward to auth", ret);
-        return OpenAuthToConnP2p(request, laneLinkReqId, callback);
     }
     return SOFTBUS_OK;
 }
