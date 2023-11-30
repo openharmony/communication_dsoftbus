@@ -108,6 +108,7 @@ char *PackRequest(const AppInfo *appInfo)
         return NULL;
     }
     if (!AddNumber16ToJsonObject(json, FIRST_DATA_SIZE, appInfo->fastTransDataSize)) {
+        cJSON_Delete(json);
         return NULL;
     }
     if (appInfo->fastTransDataSize > 0) {
@@ -292,6 +293,7 @@ char *PackReply(const AppInfo *appInfo)
     }
     if (!AddNumber16ToJsonObject(json, FIRST_DATA_SIZE, appInfo->fastTransDataSize)) {
         TRANS_LOGE(TRANS_CTRL, "Failed to add trans data size");
+        cJSON_Delete(json);
         return NULL;
     }
     if (appInfo->myData.apiVersion != API_V1) {
