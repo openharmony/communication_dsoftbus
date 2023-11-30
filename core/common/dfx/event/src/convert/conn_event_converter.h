@@ -79,6 +79,33 @@ static HiSysEventParamAssigner g_connAssigners[] = {
     // Modification Note: remember updating CONN_ASSIGNER_SIZE
 };
 
+#define CONN_ALARM_ASSIGNER(type, filedName, filed)                                                           \
+    static inline bool ConnAssigner##filedName(                                                               \
+        const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param) \
+    {                                                                                                         \
+        if (Assigner##type(form->connAlarmExtra->filed, &param) && CopyString(param->name, eventName)) {      \
+            param->t = paramType;                                                                             \
+            return true;                                                                                      \
+        }                                                                                                     \
+        return false;                                                                                         \
+    }
+
+CONN_ALARM_ASSIGNER(Errcode, AlarmResult, result)
+CONN_ALARM_ASSIGNER(Errcode, AlarmErrcode, errcode)
+CONN_ALARM_ASSIGNER(Int32, AlarmLinkType, linkType)
+CONN_ALARM_ASSIGNER(Int32, Duration, duration)
+CONN_ALARM_ASSIGNER(Int32, NetType, netType)
+
+#define CONN_ALARM_ASSIGNER_SIZE 5 // Size of g_transAlarmAssigners
+static const HiSysEventParamAssigner g_connAlarmAssigners[] = {
+    { "STAGE_RES",     HISYSEVENT_INT32,  ConnAssignerAlarmResult      },
+    { "ERROR_CODE",    HISYSEVENT_INT32,  ConnAssignerAlarmErrcode     },
+    { "LINK_TYPE",     HISYSEVENT_INT32,  ConnAssignerAlarmLinkType    },
+    { "DURATION",      HISYSEVENT_INT32,  ConnAssignerDuration         },
+    { "NET_TYPE",      HISYSEVENT_INT32,  ConnAssignerNetType     },
+    // Modification Note: remember updating CONN_ALARM_ASSIGNER_SIZE
+};
+
 static inline size_t ConvertConnForm2Param(HiSysEventParam params[], size_t size, SoftbusEventForm *form)
 {
     size_t validSize = 0;
@@ -87,6 +114,21 @@ static inline size_t ConvertConnForm2Param(HiSysEventParam params[], size_t size
     }
     for (size_t i = 0; i < size; ++i) {
         HiSysEventParamAssigner assigner = g_connAssigners[i];
+        if (assigner.Assign(assigner.name, assigner.type, form, &params[validSize])) {
+            ++validSize;
+        }
+    }
+    return validSize;
+}
+
+static inline size_t ConvertConnAlarmForm2Param(HiSysEventParam params[], size_t size, SoftbusEventForm *form)
+{
+    size_t validSize = 0;
+    if (form == NULL || form->connAlarmExtra == NULL) {
+        return validSize;
+    }
+    for (size_t i = 0; i < size; ++i) {
+        HiSysEventParamAssigner assigner = g_connAlarmAssigners[i];
         if (assigner.Assign(assigner.name, assigner.type, form, &params[validSize])) {
             ++validSize;
         }

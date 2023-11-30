@@ -23,13 +23,13 @@ extern "C" {
 #endif
 
 #define TRANS_EVENT(scene, stage, extra) TransEventInner(scene, stage, __FUNCTION__, __LINE__, &extra)
-#define TRANS_ALARM(scene, extra) TransAlarmInner(scene, __FUNCTION__, __LINE__, &extra)
+#define TRANS_ALARM(scene, type, extra) TransAlarmInner(scene, type, __FUNCTION__, __LINE__, &extra)
 #define TRANS_STATS(scene, extra) TransStatsInner(scene, __FUNCTION__, __LINE__, &extra)
 #define TRANS_AUDIT(scene, extra) TransAuditInner(scene, __FUNCTION__, __LINE__, &extra)
 
 /* For inner use only */
 void TransEventInner(int32_t scene, int32_t stage, const char *func, int32_t line, TransEventExtra *extra);
-void TransAlarmInner(int32_t scene, const char *func, int32_t line, TransAlarmExtra *extra);
+void TransAlarmInner(int32_t scene, int32_t type, const char *func, int32_t line, TransAlarmExtra *extra);
 void TransStatsInner(int32_t scene, const char *func, int32_t line, TransStatsExtra *extra);
 void TransAuditInner(int32_t scene, const char *func, int32_t line, TransAuditExtra *extra);
 

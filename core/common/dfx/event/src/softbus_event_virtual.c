@@ -27,7 +27,7 @@ void ConnEventInner(int32_t scene, int32_t stage, const char *func, int32_t line
     (void)extra;
 }
 
-void ConnAlarmInner(int32_t scene, const char *func, int32_t line, ConnAlarmExtra *extra)
+void ConnAlarmInner(int32_t scene, int32_t type, const char *func, int32_t line, ConnAlarmExtra *extra)
 {
     (void)scene;
     (void)func;
@@ -60,7 +60,7 @@ void DiscEventInner(int32_t scene, int32_t stage, const char *func, int32_t line
     (void)extra;
 }
 
-void DiscAlarmInner(int32_t scene, const char *func, int32_t line, DiscAlarmExtra *extra)
+void DiscAlarmInner(int32_t scene, int32_t type, const char *func, int32_t line, DiscAlarmExtra *extra)
 {
     (void)scene;
     (void)func;
@@ -93,7 +93,7 @@ void LnnEventInner(int32_t scene, int32_t stage, const char *func, int32_t line,
     (void)extra;
 }
 
-void LnnAlarmInner(int32_t scene, const char *func, int32_t line, LnnAlarmExtra *extra)
+void LnnAlarmInner(int32_t scene, int32_t type, const char *func, int32_t line, LnnAlarmExtra *extra)
 {
     (void)scene;
     (void)func;
@@ -126,7 +126,7 @@ void TransEventInner(int32_t scene, int32_t stage, const char *func, int32_t lin
     (void)extra;
 }
 
-void TransAlarmInner(int32_t scene, const char *func, int32_t line, TransAlarmExtra *extra)
+void TransAlarmInner(int32_t scene, int32_t type, const char *func, int32_t line, TransAlarmExtra *extra)
 {
     (void)scene;
     (void)func;

@@ -68,6 +68,10 @@ typedef enum {
 
 typedef struct {
     int32_t errcode;
+    int32_t result;
+    int32_t originalFreq;
+    int32_t abnormalFreq;
+    int32_t duration;
 } DiscAlarmExtra;
 
 typedef enum {
