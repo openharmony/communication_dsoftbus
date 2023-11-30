@@ -115,9 +115,9 @@ static void ShowSessionServer(void)
         Anonymize(pos->sessionName, &tmpName);
         TRANS_LOGI(TRANS_CTRL,
             "count=%d session server sessionName=%s is exist", count, tmpName);
+        AnonymizeFree(tmpName);
         count++;
     }
-    AnonymizeFree(tmpName);
 }
 
 int32_t TransSessionServerAddItem(SessionServer *newNode)
