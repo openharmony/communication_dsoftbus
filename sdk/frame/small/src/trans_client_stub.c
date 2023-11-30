@@ -19,12 +19,12 @@
 #include "ipc_skeleton.h"
 #include "softbus_errcode.h"
 #include "softbus_server_ipc_interface_code.h"
-#include "softbus_log_old.h"
+#include "trans_log.h"
 
 int32_t ClientOnChannelOpened(IpcIo *data, IpcIo *reply)
 {
     if (reply == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     size_t size = 0;
@@ -44,7 +44,7 @@ int32_t ClientOnChannelOpened(IpcIo *data, IpcIo *reply)
     channel.peerDeviceId = (char *)ReadString(data, &size);
     if (channel.groupId == NULL || channel.sessionKey == NULL || channel.peerSessionName == NULL ||
         channel.peerDeviceId == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "pointer null error.");
+        TRANS_LOGE(TRANS_CTRL, "pointer null error.");
         return SOFTBUS_ERR;
     }
     if (channel.channelType == CHANNEL_TYPE_TCP_DIRECT) {
@@ -65,7 +65,7 @@ int32_t ClientOnChannelOpened(IpcIo *data, IpcIo *reply)
     }
     int ret = TransOnChannelOpened(sessionName, &channel);
     if (ret < 0) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "TransOnChannelOpened fail, error code: %d.", ret);
+        TRANS_LOGE(TRANS_CTRL, "TransOnChannelOpened fail, errcode=%d.", ret);
     }
     return SOFTBUS_OK;
 }
@@ -73,7 +73,7 @@ int32_t ClientOnChannelOpened(IpcIo *data, IpcIo *reply)
 int32_t ClientOnChannelOpenfailed(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t channelId = 0;
@@ -89,7 +89,7 @@ int32_t ClientOnChannelOpenfailed(IpcIo *data, IpcIo *reply)
 int32_t ClientOnChannelClosed(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t channelId = 0;
@@ -103,7 +103,7 @@ int32_t ClientOnChannelClosed(IpcIo *data, IpcIo *reply)
 int32_t ClientOnChannelMsgreceived(IpcIo *data, IpcIo *reply)
 {
     if (data == NULL) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "%s:invalid param.", __func__);
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t channelId = 0;
