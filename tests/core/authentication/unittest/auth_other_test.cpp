@@ -698,6 +698,7 @@ HWTEST_F(AuthOtherTest, CHECK_BUS_VERSION_TEST_001, TestSize.Level1)
 
     NodeInfo *info = (NodeInfo*)SoftBusCalloc(sizeof(NodeInfo));
     if (info == NULL) {
+        JSON_Delete(obj);
         return;
     }
     (void)memset_s(info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
@@ -711,6 +712,7 @@ HWTEST_F(AuthOtherTest, CHECK_BUS_VERSION_TEST_001, TestSize.Level1)
         !JSON_AddInt32ToObject(obj, "SESSION_PORT", (int32_t)26) ||
         !JSON_AddInt32ToObject(obj, "PROXY_PORT", (int32_t)80) ||
         !JSON_AddStringToObject(obj, "DEV_IP", "127.0.0.1")) {
+        JSON_Delete(obj);
         return;
     }
     JSON_AddStringToObject(obj, BLE_OFFLINE_CODE, "10244");

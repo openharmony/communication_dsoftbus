@@ -187,6 +187,7 @@ int32_t LnnHichainInterfaceMock::getRelatedGroups1(
         !JSON_AddStringToObject(obj, "groupOwner", "com.hhhs.secueity") ||
         !JSON_AddInt32ToObject(obj, "groupType", 256) ||
         !JSON_AddInt32ToObject(obj, "groupVisibility", 26)) {
+        JSON_Delete(obj);
         return SOFTBUS_ERR;
     }
     char* jsons = JSON_PrintUnformatted(obj);
@@ -209,14 +210,17 @@ int32_t LnnHichainInterfaceMock::getTrustedDevices(
         return SOFTBUS_ERR;
     }
     if (!JSON_AddStringToObject(obj, "authId", "ABCDEDF00ABCDE0021DD55ACFF")) {
+        JSON_Delete(obj);
         return SOFTBUS_ERR;
     }
     char* jsons = JSON_PrintUnformatted(obj);
     *returnDevInfoVec = jsons;
     if (!is_return_true) {
         is_return_true = true;
+        JSON_Delete(obj);
         return SOFTBUS_ERR;
     }
+    JSON_Delete(obj);
     return SOFTBUS_OK;
 }
 
