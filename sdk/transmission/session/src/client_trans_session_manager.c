@@ -309,9 +309,9 @@ static void ShowClientSessionServer(void)
         Anonymize(pos->sessionName, &tmpName);
         TRANS_LOGE(TRANS_SDK,
             "count=%d client session server sessionName=%s is exist", count, tmpName);
+        AnonymizeFree(tmpName);
         count++;
     }
-    AnonymizeFree(tmpName);
 }
 
 int32_t ClientAddSessionServer(SoftBusSecType type, const char *pkgName, const char *sessionName,
@@ -1252,10 +1252,10 @@ int32_t ReCreateSessionServerToServer(void)
         Anonymize(serverNode->sessionName, &tmpName);
         TRANS_LOGI(TRANS_SDK, "sessionName=%s, pkgName=%s, ret=%d",
             tmpName, serverNode->pkgName, ret);
+        AnonymizeFree(tmpName);
     }
 
     (void)SoftBusMutexUnlock(&g_clientSessionServerList->lock);
-    AnonymizeFree(tmpName);
     TRANS_LOGI(TRANS_SDK, "ok");
     return SOFTBUS_OK;
 }
