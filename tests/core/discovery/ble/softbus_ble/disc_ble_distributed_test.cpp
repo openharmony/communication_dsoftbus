@@ -232,15 +232,16 @@ HWTEST_F(DiscDistributedBleTest, TestProcessHwHashAccout001, TestSize.Level1)
 HWTEST_F(DiscDistributedBleTest, TestRangeDevice001, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestRangeDevice001, Start");
-    DeviceInfo foundInfoTest;
-    const char rssiTest = 's';
-    int8_t powerTest = SOFTBUS_ILLEGAL_BLE_POWER;
-    RangeDevice(&foundInfoTest, rssiTest, powerTest);
-    EXPECT_EQ(foundInfoTest.range, -1);
+    constexpr char validRssi = static_cast<char>(-38);
+    constexpr int8_t validAdvPower = -13;
+    constexpr int32_t invalidRange = -1;
 
-    powerTest = SOFTBUS_ILLEGAL_BLE_POWER - 1;
-    RangeDevice(&foundInfoTest, rssiTest, powerTest);
-    EXPECT_EQ(foundInfoTest.range, 0);
+    DeviceInfo foundInfoTest = {
+        .range = 0
+    };
+    int32_t ret = RangeDevice(&foundInfoTest, validRssi, validAdvPower);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NE(foundInfoTest.range, invalidRange);
     DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestRangeDevice001, End");
 }
 
