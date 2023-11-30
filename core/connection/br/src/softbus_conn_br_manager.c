@@ -812,6 +812,7 @@ static void ReceivedControlData(ConnBrConnection *connection, const uint8_t *dat
     int32_t method = 0;
     if (!GetJsonObjectNumberItem(json, KEY_METHOD, &method)) {
         CONN_LOGE(CONN_BR, "parse method failed, conn id=%u", connection->connectionId);
+        cJSON_Delete(json);
         return;
     }
     CONN_LOGD(CONN_BR, "conn id=%u, method=%d", connection->connectionId, method);

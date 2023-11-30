@@ -890,6 +890,7 @@ static void ReceivedControlData(ConnBleConnection *connection, const uint8_t *da
     int32_t method = 0;
     if (!GetJsonObjectNumberItem(json, CTRL_MSG_KEY_METHOD, &method)) {
         CONN_LOGE(CONN_BLE, "connId:%u, parse method failed", connection->connectionId);
+        cJSON_Delete(json);
         return;
     }
     CONN_LOGD(CONN_BLE, "ble receive control data, connId=%u, method=%d", connection->connectionId, method);
