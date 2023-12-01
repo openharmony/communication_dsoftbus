@@ -28,6 +28,7 @@ extern "C" {
 
 typedef struct {
     char udid[UDID_BUF_LEN];
+    char uuid[UUID_BUF_LEN];
     uint64_t createTime;
     uint64_t endTime;
     char ptk[PTK_DEFAULT_LEN];
@@ -44,11 +45,12 @@ void LnnDeinitWifiDirect(void);
 int32_t LnnInitPtk(void);
 void LnnDeinitPtk(void);
 int32_t LnnGetLocalPtkByUdid(const char *udid, char *localPtk);
+int32_t LnnGetLocalPtkByUuid(const char *uuid, char *localPtk);
 void LnnLoadPtkInfo(void);
 int32_t LnnSyncPtk(char *networkId);
 int32_t UpdateLocalPtkIfValid(char *udid);
 int32_t LnnSetLocalPtkConn(char *udid);
-int32_t LnnGenerateLocalPtk(char *udid);
+int32_t LnnGenerateLocalPtk(char *udid, char *uuid);
 
 #ifdef __cplusplus
 }
