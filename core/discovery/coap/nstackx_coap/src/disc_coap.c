@@ -50,10 +50,10 @@ static int32_t RegisterAllCapBitmap(uint32_t capBitmapNum, const uint32_t inCapB
     uint32_t count)
 {
     if (info == NULL || capBitmapNum == 0 || capBitmapNum > CAPABILITY_NUM || count > MAX_CAP_NUM) {
-        DISC_LOGW(DISC_COAP, "invalid param.");
+        DISC_LOGE(DISC_COAP, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
-    DISC_CHECK_AND_RETURN_RET_LOGW((inCapBitmap[0] >> APPROACH_CAPABILITY_BITMAP) == 0, SOFTBUS_INVALID_PARAM,
+    DISC_CHECK_AND_RETURN_RET_LOGE((inCapBitmap[0] >> APPROACH_CAPABILITY_BITMAP) == 0, SOFTBUS_INVALID_PARAM,
         DISC_COAP, "CoAP not support approach capability");
 
     info->isUpdate = false;
@@ -78,10 +78,10 @@ static int32_t  UnregisterAllCapBitmap(uint32_t capBitmapNum, const uint32_t inC
     uint32_t count)
 {
     if (info == NULL || capBitmapNum == 0 || capBitmapNum > CAPABILITY_NUM || count > MAX_CAP_NUM) {
-        DISC_LOGW(DISC_COAP, "invalid param.");
+        DISC_LOGE(DISC_COAP, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
-    DISC_CHECK_AND_RETURN_RET_LOGW((inCapBitmap[0] >> APPROACH_CAPABILITY_BITMAP) == 0, SOFTBUS_INVALID_PARAM,
+    DISC_CHECK_AND_RETURN_RET_LOGE((inCapBitmap[0] >> APPROACH_CAPABILITY_BITMAP) == 0, SOFTBUS_INVALID_PARAM,
         DISC_COAP, "CoAP not support approach capability");
 
     info->isEmpty = true;
@@ -123,9 +123,9 @@ static void SetDiscCoapOption(DiscCoapOption *discCoapOption, DiscOption *option
 
 static int32_t Publish(const PublishOption *option, bool isActive)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGW(option != NULL && g_publishMgr != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP,
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL && g_publishMgr != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP,
         "invalid param");
-    DISC_CHECK_AND_RETURN_RET_LOGW(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
+    DISC_CHECK_AND_RETURN_RET_LOGE(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
         DISC_COAP, "invalid freq: %d", option->freq);
     if (option->ranging) {
         DISC_LOGW(DISC_COAP, "coap publish not support ranging, is it misuse? just ignore");
@@ -138,17 +138,17 @@ static int32_t Publish(const PublishOption *option, bool isActive)
     DISC_EVENT(EVENT_SCENE_SCAN, EVENT_STAGE_SCAN_START, discScanEventExtra);
     if (RegisterAllCapBitmap(CAPABILITY_NUM, option->capabilityBitmap, g_publishMgr, MAX_CAP_NUM) != SOFTBUS_OK) {
         SoftbusReportDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP, SOFTBUS_HISYSEVT_DISCOVER_COAP_MERGE_CAP_FAIL);
-        DISC_LOGW(DISC_COAP, "merge %s publish capability failed", isActive ? "active" : "passive");
+        DISC_LOGE(DISC_COAP, "merge %s publish capability failed", isActive ? "active" : "passive");
         goto REG_FAIL;
     }
     if (g_publishMgr->isUpdate && DiscCoapRegisterCapability(CAPABILITY_NUM, g_publishMgr->allCap) != SOFTBUS_OK) {
         SoftbusReportDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP, SOFTBUS_HISYSEVT_DISCOVER_COAP_REGISTER_CAP_FAIL);
-        DISC_LOGW(DISC_COAP, "register all capability to dfinder failed.");
+        DISC_LOGE(DISC_COAP, "register all capability to dfinder failed.");
         goto REG_FAIL;
     }
     if (DiscCoapRegisterServiceData(option->capabilityData, option->dataLen,
         option->capabilityBitmap[0]) != SOFTBUS_OK) {
-        DISC_LOGW(DISC_COAP, "register service data to dfinder failed.");
+        DISC_LOGE(DISC_COAP, "register service data to dfinder failed.");
         goto REG_FAIL;
     }
     if (DiscCoapRegisterCapabilityData(option->capabilityData, option->dataLen,
@@ -172,7 +172,7 @@ static int32_t Publish(const PublishOption *option, bool isActive)
         }
     }
     (void)SoftBusMutexUnlock(&(g_publishMgr->lock));
-    DISC_LOGW(DISC_COAP, "coap %s publish succ, allCap: %u", isActive ? "active" : "passive", g_publishMgr->allCap[0]);
+    DISC_LOGI(DISC_COAP, "coap %s publish succ, allCap: %u", isActive ? "active" : "passive", g_publishMgr->allCap[0]);
     return SOFTBUS_OK;
 REG_FAIL:
     discScanEventExtra.result = EVENT_STAGE_RESULT_FAILED;
@@ -200,11 +200,11 @@ static int32_t CoapStartScan(const PublishOption *option)
 
 static int32_t UnPublish(const PublishOption *option, bool isActive)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGW(option != NULL && g_publishMgr != NULL, SOFTBUS_INVALID_PARAM,
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL && g_publishMgr != NULL, SOFTBUS_INVALID_PARAM,
         DISC_COAP, "invalid param");
-    DISC_CHECK_AND_RETURN_RET_LOGW(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
+    DISC_CHECK_AND_RETURN_RET_LOGE(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
         DISC_COAP, "invalid freq: %d", option->freq);
-    DISC_CHECK_AND_RETURN_RET_LOGW(SoftBusMutexLock(&(g_publishMgr->lock)) == 0, SOFTBUS_LOCK_ERR, DISC_COAP,
+    DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&(g_publishMgr->lock)) == 0, SOFTBUS_LOCK_ERR, DISC_COAP,
         "%s unPublish mutex lock failed", isActive ? "active" : "passive");
 
     DiscEventExtra discScanEventExtra = { .scanType = COAP, .result = EVENT_STAGE_RESULT_OK };
@@ -273,9 +273,9 @@ static int32_t CoapStopScan(const PublishOption *option)
 
 static int32_t Discovery(const SubscribeOption *option, bool isActive)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGW(option != NULL && g_subscribeMgr != NULL, SOFTBUS_INVALID_PARAM,
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL && g_subscribeMgr != NULL, SOFTBUS_INVALID_PARAM,
         DISC_COAP, "invalid param");
-    DISC_CHECK_AND_RETURN_RET_LOGW(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
+    DISC_CHECK_AND_RETURN_RET_LOGE(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
         DISC_COAP, "invalid freq: %d", option->freq);
     DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&(g_subscribeMgr->lock)) == 0, SOFTBUS_LOCK_ERR, DISC_COAP,
         "%s discovery mutex lock failed", isActive ? "active" : "passive");
@@ -348,9 +348,9 @@ static int32_t CoapSubscribe(const SubscribeOption *option)
 
 static int32_t StopDisc(const SubscribeOption *option, bool isActive)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGW(option != NULL && g_subscribeMgr != NULL, SOFTBUS_INVALID_PARAM,
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL && g_subscribeMgr != NULL, SOFTBUS_INVALID_PARAM,
         DISC_COAP, "invalid param");
-    DISC_CHECK_AND_RETURN_RET_LOGW(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
+    DISC_CHECK_AND_RETURN_RET_LOGE(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
         DISC_COAP, "invalid freq: %d", option->freq);
     DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&(g_subscribeMgr->lock)) == 0, SOFTBUS_LOCK_ERR,
         DISC_COAP, "stop %s discovery mutex lock failed", isActive ? "active" : "passive");
@@ -453,7 +453,7 @@ static DiscCoapInfo *NewDiscCoapInfo(void)
 
 static void DeleteDiscCoapInfo(DiscCoapInfo *coapInfo)
 {
-    DISC_CHECK_AND_RETURN_LOGW(coapInfo != NULL, DISC_COAP, "coapInfo=NULL");
+    DISC_CHECK_AND_RETURN_LOGE(coapInfo != NULL, DISC_COAP, "coapInfo=NULL");
     (void)SoftBusMutexDestroy(&(coapInfo->lock));
     SoftBusFree(coapInfo);
 }
