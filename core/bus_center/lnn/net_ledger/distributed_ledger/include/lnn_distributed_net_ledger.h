@@ -86,6 +86,7 @@ int32_t LnnUpdateAccountInfo(const NodeInfo *info);
 int32_t LnnSetDLProxyPort(const char *id, IdCategory type, int32_t proxyPort);
 int32_t LnnSetDLSessionPort(const char *id, IdCategory type, int32_t sessionPort);
 int32_t LnnSetDLAuthPort(const char *id, IdCategory type, int32_t authPort);
+int32_t LnnSetDLP2pIp(const char *id, IdCategory type, const char *p2pIp);
 NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type);
 
 bool LnnSetDlPtk(const char *networkId, const char *remotePtk);

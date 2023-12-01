@@ -39,6 +39,7 @@
 #include "trans_tcp_direct_sessionconn.h"
 #include "wifi_direct_manager.h"
 #include "data_bus_native.h"
+#include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_link.h"
 #include "lnn_net_builder.h"
 #include "trans_event.h"
@@ -316,15 +317,51 @@ static int32_t NotifyChannelOpened(int32_t channelId)
                 TRANS_LOGE(TRANS_CTRL, "NotifyChannelOpened get local ip fail");
                 return SOFTBUS_TRANS_GET_LOCAL_IP_FAILED;
             }
+            if (LnnSetLocalStrInfo(STRING_KEY_WLAN_IP, myIp) != SOFTBUS_OK) {
+                TRANS_LOGW(TRANS_CTRL, "ServerSide wifi set local ip fail");
+            }
+            if (LnnSetDLP2pIp(conn.appInfo.peerData.deviceId, CATEGORY_UUID, conn.appInfo.peerData.addr) != SOFTBUS_OK) {
+                TRANS_LOGW(TRANS_CTRL, "ServerSide wifi set peer ip fail");
+            }
         } else if (conn.appInfo.routeType == WIFI_P2P) {
             if (GetWifiDirectManager()->getLocalIpByUuid(conn.appInfo.peerData.deviceId, myIp,
                 sizeof(myIp)) != SOFTBUS_OK) {
                 TRANS_LOGE(TRANS_CTRL, "NotifyChannelOpened get p2p ip fail");
                 return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
             }
+            if (LnnSetLocalStrInfo(STRING_KEY_P2P_IP, myIp) != SOFTBUS_OK) {
+                TRANS_LOGW(TRANS_CTRL, "ServerSide set local p2p ip fail");
+            }
+            if (LnnSetDLP2pIp(conn.appInfo.peerData.deviceId, CATEGORY_UUID, conn.appInfo.peerData.addr) != SOFTBUS_OK) {
+                TRANS_LOGW(TRANS_CTRL, "ServerSide set peer p2p ip fail");
+            }
         }
         info.myIp = myIp;
     } else {
+        if (conn.appInfo.routeType == WIFI_STA) {
+            if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, myIp, sizeof(myIp)) != SOFTBUS_OK) {
+                TRANS_LOGE(TRANS_CTRL, "NotifyChannelOpened get local ip fail");
+                return SOFTBUS_TRANS_GET_LOCAL_IP_FAILED;
+            }
+            if (LnnSetLocalStrInfo(STRING_KEY_WLAN_IP, myIp) != SOFTBUS_OK) {
+                TRANS_LOGW(TRANS_CTRL, "Client wifi set local ip fail");
+            }
+            if (LnnSetDLP2pIp(conn.appInfo.peerData.deviceId, CATEGORY_UUID, conn.appInfo.peerData.addr) != SOFTBUS_OK) {
+                TRANS_LOGW(TRANS_CTRL, "Client wifi set peer ip fail");
+            }
+        } else if (conn.appInfo.routeType == WIFI_P2P) {
+            if (GetWifiDirectManager()->getLocalIpByUuid(conn.appInfo.peerData.deviceId, myIp,
+                sizeof(myIp)) != SOFTBUS_OK) {
+                TRANS_LOGE(TRANS_CTRL, "NotifyChannelOpened get p2p ip fail");
+                return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
+            }
+            if (LnnSetLocalStrInfo(STRING_KEY_P2P_IP, myIp) != SOFTBUS_OK) {
+                TRANS_LOGW(TRANS_CTRL, "Client set local p2p ip fail");
+            }
+            if (LnnSetDLP2pIp(conn.appInfo.peerData.deviceId, CATEGORY_UUID, conn.appInfo.peerData.addr) != SOFTBUS_OK) {
+                TRANS_LOGW(TRANS_CTRL, "Client set peer p2p ip fail");
+            }
+        }
         info.myIp = conn.appInfo.myData.addr;
     }
     char buf[NETWORK_ID_BUF_LEN] = {0};
@@ -364,6 +401,7 @@ static int32_t NotifyChannelClosed(const AppInfo *appInfo, int32_t channelId)
     TRANS_LOGI(TRANS_CTRL, "channelId=%d, ret=%d", channelId, ret);
     return ret;
 }
+
 int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)
 {
     SessionConn conn;
