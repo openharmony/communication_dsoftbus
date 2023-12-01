@@ -1151,6 +1151,17 @@ static int32_t DlGetDeviceCipherInfoIv(const char *networkId, void *buf, uint32_
     return SOFTBUS_OK;
 }
 
+static int32_t DlGetNodeP2pIp(const char *networkId, void *buf, uint32_t len)
+{
+    NodeInfo *info = NULL;
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if (strcpy_s((char *)buf, len, info->p2pInfo.p2pIp) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "copy p2pIp to buf fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static DistributedLedgerKey g_dlKeyTable[] = {
     {STRING_KEY_HICE_VERSION, DlGetNodeSoftBusVersion},
     {STRING_KEY_DEV_UDID, DlGetDeviceUdid},
@@ -1168,6 +1179,7 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {STRING_KEY_OFFLINE_CODE, DlGetDeviceOfflineCode},
     {STRING_KEY_BLE_MAC, DlGetNodeBleMac},
     {STRING_KEY_WIFIDIRECT_ADDR, DlGetWifiDirectAddr},
+    {STRING_KEY_P2P_IP, DlGetNodeP2pIp},
     {NUM_KEY_META_NODE, DlGetAuthType},
     {NUM_KEY_SESSION_PORT, DlGetSessionPort},
     {NUM_KEY_AUTH_PORT, DlGetAuthPort},
@@ -2657,6 +2669,31 @@ int32_t LnnSetDLAuthPort(const char *id, IdCategory type, int32_t authPort)
         return SOFTBUS_NOT_FIND;
     }
     nodeInfo->connectInfo.authPort = authPort;
+    (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    return SOFTBUS_OK;
+}
+
+int32_t LnnSetDLP2pIp(const char *id, IdCategory type, const char *p2pIp)
+{
+    if (id == NULL || p2pIp == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    NodeInfo *nodeInfo = LnnGetNodeInfoById(id, type);
+    if (nodeInfo == NULL) {
+        LNN_LOGE(LNN_LEDGER, "get info fail");
+        (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return SOFTBUS_NOT_FIND;
+    }
+    if (strcpy_s(nodeInfo->p2pInfo.p2pIp, sizeof(nodeInfo->p2pInfo.p2pIp), p2pIp) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
+        (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return SOFTBUS_MEM_ERR;
+    }
     (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return SOFTBUS_OK;
 }
