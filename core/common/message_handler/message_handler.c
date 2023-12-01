@@ -146,7 +146,8 @@ static void *LoopTask(void *arg)
             if (looper->dumpable) {
                 COMM_LOGD(COMM_UTILS,
                     "LoopTask[%s], get message. handle=%s,what=%" PRId32 ",arg1=%" PRIu64 ",msgSize=%u,time=%" PRId64,
-                    context->name, msg->handler->name, msg->what, msg->arg1, context->msgSize, msg->time);
+                    context->name, msg->handler ? msg->handler->name : "null", msg->what, msg->arg1, context->msgSize,
+                    msg->time);
             }
         } else {
             SoftBusSysTime tv;
@@ -163,11 +164,11 @@ static void *LoopTask(void *arg)
         (void)SoftBusMutexUnlock(&context->lock);
         if (looper->dumpable) {
             COMM_LOGD(COMM_UTILS,
-                "LoopTask[%s], HandleMessage message. handle=%s,what=%" PRId32, context->name, msg->handler->name,
-                msg->what);
+                "LoopTask[%s], HandleMessage message. handle=%s,what=%" PRId32, context->name,
+                msg->handler ? msg->handler->name : "null", msg->what);
         }
 
-        if (msg->handler->HandleMessage != NULL) {
+        if (msg->handler != NULL && msg->handler->HandleMessage != NULL) {
             msg->handler->HandleMessage(msg);
         }
         if (looper->dumpable) {
