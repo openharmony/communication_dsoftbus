@@ -130,14 +130,12 @@ typedef struct {
     char masterUdid[UDID_BUF_LEN];
     char nodeAddress[SHORT_ADDRESS_MAX_LEN];
     char extData[EXTDATA_LEN];
-    uint8_t relation[CONNECTION_ADDR_MAX];
     int32_t masterWeight;
     ConnectRole role;
     ConnectStatus status;
     uint32_t netCapacity;
     uint32_t authCapacity;
     uint32_t discoveryType;
-    uint64_t heartbeatTimeStamp;
     DeviceBasicInfo deviceInfo;
     ConnectInfo connectInfo;
     int64_t authSeqNum;
@@ -160,7 +158,6 @@ typedef struct {
     int64_t bleVersion;
     uint64_t feature;
     int64_t bleStartTimestamp;
-    uint64_t onlinetTimestamp;
     int32_t wifiBuffSize;
     int32_t brBuffSize;
     int32_t stateVersion;
@@ -175,6 +172,9 @@ typedef struct {
     uint8_t staticCapability[STATIC_CAP_LEN];
     int32_t staticCapLen;
     char remotePtk[PTK_DEFAULT_LEN];
+    uint8_t relation[CONNECTION_ADDR_MAX];
+    uint64_t heartbeatTimeStamp;
+    uint64_t onlinetTimestamp;
 } NodeInfo;
 
 const char *LnnGetDeviceUdid(const NodeInfo *info);
