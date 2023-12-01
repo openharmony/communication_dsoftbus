@@ -91,6 +91,7 @@ typedef struct {
     int32_t staFrequency;
     char p2pMac[MAC_LEN]; // the mac of local p2p interface
     char goMac[MAC_LEN]; // the mac of p2p Go device, while local device as Gc role.
+    char p2pIp[IP_LEN];
 } P2pInfo;
 
 typedef struct {
