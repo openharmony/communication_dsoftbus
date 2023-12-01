@@ -1503,6 +1503,36 @@ static void FilterBrInfo(NodeInfo *info)
     info->authChannelId[CONNECTION_ADDR_BR][AUTH_AS_SERVER_SIDE] = 0;
 }
 
+static bool IsDeviceInfoChanged(NodeInfo *info)
+{
+    if (info == NULL) {
+        LNN_LOGI(LNN_LEDGER, "invalid param");
+        return false;
+    }
+    NodeInfo deviceInfo;
+    if (memset_s(&deviceInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memset_s basic fail!");
+        return false;
+    }
+    uint8_t udidHash[SHA_256_HASH_LEN] = {0};
+    char hashStr[SHORT_UDID_HASH_HEX_LEN + 1] = {0};
+    if (SoftBusGenerateStrHash((const unsigned char *)info->deviceInfo.deviceUdid,
+        strlen(info->deviceInfo.deviceUdid), udidHash) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LEDGER, "generate udidhash fail");
+        return false;
+    }
+    if (ConvertBytesToHexString(hashStr, SHORT_UDID_HASH_HEX_LEN + 1, udidHash,
+        SHORT_UDID_HASH_HEX_LEN / HEXIFY_UNIT_LEN) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LEDGER, "convert udidhash to hexstr fail");
+        return false;
+    }
+    if (LnnRetrieveDeviceInfo(hashStr, &deviceInfo) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LEDGER, "get deviceInfo by udidhash fail");
+        return false;
+    }
+    return memcmp(info, &deviceInfo, (size_t)&(((NodeInfo *)0)->relation)) != 0 ? true : false;
+}
+
 static void BleDirectlyOnlineProc(NodeInfo *info)
 {
     if (!LnnHasDiscoveryType(info, DISCOVERY_TYPE_BLE)) {
@@ -1549,9 +1579,12 @@ static void BleDirectlyOnlineProc(NodeInfo *info)
     if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR)) {
         FilterBrInfo(info);
     }
-    if (LnnSaveRemoteDeviceInfo(info) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "save remote devInfo fail");
-        return;
+    if (IsDeviceInfoChanged(info)) {
+        if (LnnSaveRemoteDeviceInfo(info) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "save remote devInfo fail");
+        }
+    } else {
+        LnnUpdateRemoteDeviceInfo(info);
     }
 }
 
