@@ -422,17 +422,17 @@ bool LnnGetOnlineStateById(const char *id, IdCategory type)
 NO_SANITIZE("cfi") int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info)
 {
     if (id == NULL || info == NULL) {
-        LLOGE("param error");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "param error");
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
-        LLOGE("lock mutex fail");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
     NodeInfo *nodeInfo = LnnGetNodeInfoById(id, type);
     if (nodeInfo == NULL) {
         (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
-        LLOGI("can not find target node");
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "can not find target node");
         return SOFTBUS_ERR;
     }
     if (memcpy_s(info, sizeof(NodeInfo), nodeInfo, sizeof(NodeInfo)) != EOK) {
