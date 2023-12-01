@@ -52,3 +52,10 @@ int32_t LnnStopScoring(void)
 {
     return SOFTBUS_OK;
 }
+
+int32_t LnnGetAllChannelScore(LnnChannelScore **scoreList, uint32_t *listSize)
+{
+    (void)scoreList;
+    (void)listSize;
+    return SOFTBUS_OK;
+}
