@@ -213,15 +213,15 @@ static int32_t CopyDeviceIdHashValue(DeviceWrapper *device, const uint8_t *data,
     return SOFTBUS_OK;
 }
 
-static int32_t CopyDeviceNameValue(DeviceWrapper *device, const uint8_t *data, uint32_t len, uint32_t remainLen)
+static int32_t CopyDeviceNameValue(DeviceWrapper *device, const uint8_t *data, uint32_t *len, uint32_t remainLen)
 {
     // TLV_VARIBALE_DATA_LEN indicate indefinite length
-    if (len == TLV_VARIABLE_DATA_LEN) {
-        uint32_t devNameLen = strlen((char *)data);
-        len = (devNameLen > remainLen) ? remainLen : devNameLen;
+    if (*len == TLV_VARIABLE_DATA_LEN) {
+        uint32_t devNameLen = strlen((char *)data) + 1; // +1 is device name end '\0'
+        *len = (devNameLen > remainLen) ? remainLen : devNameLen;
     }
     if (CopyValue(device->info->devName, DISC_MAX_DEVICE_NAME_LEN,
-        (void *)data, len, "TLV_TYPE_DEVICE_NAME") != SOFTBUS_OK) {
+        (void *)data, *len, "TLV_TYPE_DEVICE_NAME") != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "parse tlv copy device name value failed");
         return SOFTBUS_ERR;
     }
@@ -262,7 +262,7 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_
                 ret = ParseDeviceType(device, &data[curLen + 1], len);
                 break;
             case TLV_TYPE_DEVICE_NAME:
-                ret = CopyDeviceNameValue(device, &data[curLen + 1], len, dataLen - curLen - TL_LEN);
+                ret = CopyDeviceNameValue(device, &data[curLen + 1], &len, dataLen - curLen - TL_LEN);
                 break;
             case TLV_TYPE_CUST:
                 ret = CopyValue(device->info->custData, DISC_MAX_CUST_DATA_LEN,

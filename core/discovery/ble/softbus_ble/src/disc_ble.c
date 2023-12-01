@@ -799,7 +799,10 @@ static int32_t GetBroadcastData(DeviceInfo *info, int32_t advId, BroadcastData *
     if (advId == NON_ADV_ID) {
         AssembleNonOptionalTlv(info, broadcastData);
     }
-    (void)AssembleTLV(broadcastData, TLV_TYPE_DEVICE_NAME, (const void *)info->devName, strlen(info->devName) + 1);
+    if (AssembleTLV(broadcastData, TLV_TYPE_DEVICE_NAME, (const void *)info->devName,
+        strlen(info->devName) + 1) == SOFTBUS_OK) {
+        broadcastData->data.data[broadcastData->dataLen - 1] = '\0';
+    }
     DISC_LOGE(DISC_BLE, "broadcastData->dataLen=%d", broadcastData->dataLen);
     return SOFTBUS_OK;
 }
