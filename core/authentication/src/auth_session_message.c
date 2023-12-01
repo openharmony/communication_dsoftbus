@@ -818,11 +818,12 @@ static int32_t PackCipherRpaInfo(JsonObj *json, const NodeInfo *info)
     (void)JSON_AddStringToObject(json, BROADCAST_CIPHER_IV, (const char *)cipherIv);
     (void)JSON_AddStringToObject(json, IRK, (const char *)peerIrk);
     (void)JSON_AddStringToObject(json, PUB_MAC, (const char *)pubMac);
+    AUTH_LOGI(AUTH_FSM, "pack cipher and rpa info success!");
 
     BroadcastCipherKey broadcastKey;
     (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, broadcastKey.udid, UDID_BUF_LEN) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "get udid fail");
+    if (memcpy_s(broadcastKey.udid, UDID_BUF_LEN, info->deviceInfo.deviceUdid, UDID_BUF_LEN) != EOK) {
+        AUTH_LOGE(AUTH_FSM, "memcpy udid fail.");
         return SOFTBUS_ERR;
     }
     if (memcpy_s(broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH, info->cipherInfo.key, SESSION_KEY_LENGTH) != EOK) {
@@ -837,6 +838,7 @@ static int32_t PackCipherRpaInfo(JsonObj *json, const NodeInfo *info)
         AUTH_LOGE(AUTH_FSM, "update local broadcast key failed");
         return SOFTBUS_ERR;
     }
+    AUTH_LOGI(AUTH_FSM, "update broadcast cipher key success!");
     return SOFTBUS_OK;
 }
 
@@ -875,6 +877,7 @@ static void UnpackCipherRpaInfo(const JsonObj *json, NodeInfo *info)
         AUTH_LOGE(AUTH_FSM, "convert publicAddress to bytes fail.");
         return;
     }
+    AUTH_LOGI(AUTH_FSM, "unpack cipher and rpa info success!");
 }
 
 static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion version, bool isMetaAuth)
