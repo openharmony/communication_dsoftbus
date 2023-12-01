@@ -735,7 +735,7 @@ static int32_t OpenProxyChannelToConnP2p(const LinkRequest *request,
         .onChannelOpenFailed = OnProxyChannelOpenFailed,
     };
     int32_t requestId = TransProxyPipelineGenRequestId();
-    int32_t ret = AddConnRequestItem(0, 0, laneLinkReqId, request, requestId, callback);
+    int32_t ret = AddConnRequestItem(0, INVALID_P2P_REQUEST_ID, laneLinkReqId, request, requestId, callback);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "add new connect node failed");
         return ret;
@@ -761,7 +761,7 @@ static int32_t OpenAuthToConnP2p(const LinkRequest *request, uint32_t laneLinkRe
         return SOFTBUS_ERR;
     }
     uint32_t authRequestId = AuthGenRequestId();
-    int32_t ret = AddConnRequestItem(authRequestId, 0, laneLinkReqId, request, 0, callback);
+    int32_t ret = AddConnRequestItem(authRequestId, INVALID_P2P_REQUEST_ID, laneLinkReqId, request, 0, callback);
     LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, LNN_LANE, "add new connect node failed");
 
     AuthConnCallback cb = {
@@ -891,7 +891,7 @@ static int32_t OpenAuthTriggerToConn(const LinkRequest *request, uint32_t laneLi
         return SOFTBUS_ERR;
     }
     uint32_t authRequestId = AuthGenRequestId();
-    int32_t ret = AddConnRequestItem(authRequestId, 0, laneLinkReqId, request, 0, callback);
+    int32_t ret = AddConnRequestItem(authRequestId, INVALID_P2P_REQUEST_ID, laneLinkReqId, request, 0, callback);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "add new connect node failed");
         return SOFTBUS_ERR;
