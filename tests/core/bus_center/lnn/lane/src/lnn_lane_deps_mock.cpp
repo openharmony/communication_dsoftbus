@@ -93,6 +93,16 @@ NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type)
     return GetLaneDepsInterface()->LnnGetNodeInfoById(id, type);
 }
 
+int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info)
+{
+    return GetLaneDepsInterface()->LnnGetRemoteNodeInfoById(id, type, info);
+}
+
+bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type)
+{
+    return GetLaneDepsInterface()->LnnHasDiscoveryType(info, type);
+}
+
 const NodeInfo *LnnGetLocalNodeInfo(void)
 {
     return GetLaneDepsInterface()->LnnGetLocalNodeInfo();

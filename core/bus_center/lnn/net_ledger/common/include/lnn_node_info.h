@@ -50,7 +50,6 @@ typedef enum {
     DISCOVERY_TYPE_BLE,
     DISCOVERY_TYPE_BR,
     DISCOVERY_TYPE_P2P,
-    DISCOVERY_TYPE_LSA,
     DISCOVERY_TYPE_COUNT,
 } DiscoveryType;
 

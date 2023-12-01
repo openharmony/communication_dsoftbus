@@ -216,7 +216,7 @@ static int32_t LaneLinkOfWlan(uint32_t reqId, const LinkRequest *reqInfo, const 
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "can not get peer node");
         return SOFTBUS_ERR;
     }
-    if (!LnnHasDiscoveryType(&node, DISCOVERY_TYPE_WIFI) && !LnnHasDiscoveryType(&node, DISCOVERY_TYPE_LSA)) {
+    if (!LnnHasDiscoveryType(&node, DISCOVERY_TYPE_WIFI)) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "peer node is not wifi online");
         return SOFTBUS_ERR;
     }
