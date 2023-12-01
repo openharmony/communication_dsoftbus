@@ -770,7 +770,7 @@ static void ClientConnectTimeoutOnConnectingState(uint32_t connectionId, const c
         CONN_LOGE(CONN_BR, "addr=%s, conn id=%u, connecting device mismatch", anomizeAddress, connectionId);
         return;
     }
-    NotifyDeviceConnectResult(connectingDevice, NULL, false, SOFTBUS_CONN_BLE_CONNECT_TIMEOUT_ERR);
+    NotifyDeviceConnectResult(connectingDevice, NULL, false, SOFTBUS_CONN_BR_CONNECT_TIMEOUT_ERR);
     FreeDevice(connectingDevice);
     g_brManager.connecting = NULL;
     TransitionToState(BR_STATE_AVAILABLE);
