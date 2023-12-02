@@ -23,13 +23,13 @@ extern "C" {
 #endif
 
 #define LNN_EVENT(scene, stage, extra) LnnEventInner(scene, stage, __FUNCTION__, __LINE__, &extra)
-#define LNN_ALARM(scene, extra) LnnAlarmInner(scene, __FUNCTION__, __LINE__, &extra)
+#define LNN_ALARM(scene, type, extra) LnnAlarmInner(scene, type, __FUNCTION__, __LINE__, &extra)
 #define LNN_STATS(scene, extra) LnnStatsInner(scene, __FUNCTION__, __LINE__, &extra)
 #define LNN_AUDIT(scene, extra) LnnAuditInner(scene, __FUNCTION__, __LINE__, &extra)
 
 /* For inner use only */
 void LnnEventInner(int32_t scene, int32_t stage, const char *func, int32_t line, LnnEventExtra *extra);
-void LnnAlarmInner(int32_t scene, const char *func, int32_t line, LnnAlarmExtra *extra);
+void LnnAlarmInner(int32_t scene, int32_t type, const char *func, int32_t line, LnnAlarmExtra *extra);
 void LnnStatsInner(int32_t scene, const char *func, int32_t line, LnnStatsExtra *extra);
 void LnnAuditInner(int32_t scene, const char *func, int32_t line, LnnAuditExtra *extra);
 

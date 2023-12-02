@@ -20,6 +20,7 @@
 #include "convert/disc_event_converter.h"
 #include "convert/lnn_event_converter.h"
 #include "convert/trans_event_converter.h"
+#include "convert/stats_event_converter.h"
 #include "hisysevent_c.h"
 
 #define HISYSEVENT_WRITE_SUCCESS 0
@@ -89,6 +90,41 @@ static void WriteSoftbusEvent(SoftbusEventModule module, SoftbusEventForm *form)
             size_t transSize = ConvertTransForm2Param(transParams, TRANS_ASSIGNER_SIZE, form);
             WriteHiSysEvent(params, size, transParams, transSize, form);
             HiSysEventParamsFree(transParams, transSize);
+            break;
+        }
+        case EVENT_MODULE_TRANS_ALARM: {
+            HiSysEventParam alarmParams[TRANS_ALARM_ASSIGNER_SIZE] = { 0 };
+            size_t alarmSize = ConvertTransAlarmForm2Param(alarmParams, TRANS_ALARM_ASSIGNER_SIZE, form);
+            WriteHiSysEvent(params, size, alarmParams, alarmSize, form);
+            HiSysEventParamsFree(alarmParams, alarmSize);
+            break;
+        }
+        case EVENT_MODULE_CONN_ALARM: {
+            HiSysEventParam alarmParams[CONN_ALARM_ASSIGNER_SIZE] = { 0 };
+            size_t alarmSize = ConvertConnAlarmForm2Param(alarmParams, CONN_ALARM_ASSIGNER_SIZE, form);
+            WriteHiSysEvent(params, size, alarmParams, alarmSize, form);
+            HiSysEventParamsFree(alarmParams, alarmSize);
+            break;
+        }
+        case EVENT_MODULE_LNN_ALARM: {
+            HiSysEventParam alarmParams[LNN_ALARM_ASSIGNER_SIZE] = { 0 };
+            size_t alarmSize = ConvertLnnAlarmForm2Param(alarmParams, LNN_ALARM_ASSIGNER_SIZE, form);
+            WriteHiSysEvent(params, size, alarmParams, alarmSize, form);
+            HiSysEventParamsFree(alarmParams, alarmSize);
+            break;
+        }
+        case EVENT_MODULE_DISC_ALARM: {
+            HiSysEventParam alarmParams[DISC_ALARM_ASSIGNER_SIZE] = { 0 };
+            size_t alarmSize = ConvertDiscAlarmForm2Param(alarmParams, DISC_ALARM_ASSIGNER_SIZE, form);
+            WriteHiSysEvent(params, size, alarmParams, alarmSize, form);
+            HiSysEventParamsFree(alarmParams, alarmSize);
+            break;
+        }
+        case EVENT_MODULE_STATS: {
+            HiSysEventParam statsParams[STATS_ASSIGNER_SIZE] = { 0 };
+            size_t statsSize = ConvertStatsForm2Param(statsParams, STATS_ASSIGNER_SIZE, form);
+            WriteHiSysEvent(params, size, statsParams, statsSize, form);
+            HiSysEventParamsFree(statsParams, statsSize);
             break;
         }
         default: {

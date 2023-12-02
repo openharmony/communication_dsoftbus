@@ -63,6 +63,10 @@ typedef enum {
 
 typedef struct {
     int32_t errcode;
+    int32_t result;
+    int32_t linkType;
+    int32_t duration;
+    int32_t netType;
 } ConnAlarmExtra;
 
 typedef enum {

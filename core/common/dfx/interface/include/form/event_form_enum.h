@@ -20,11 +20,18 @@
 extern "C" {
 #endif
 
+#define SOFTBUS_DEFAULT_STAGE 1
+
 typedef enum {
     EVENT_STAGE_RESULT_OK = 1,
     EVENT_STAGE_RESULT_FAILED = 2,
     EVENT_STAGE_RESULT_CANCELED = 3,
 } SoftbusEventStageResult;
+
+typedef enum {
+    MANAGE_ALARM_TYPE = 1,
+    CONTROL_ALARM_TYPE = 2,
+} SoftbusAlarmEventType;
 
 #ifdef __cplusplus
 }

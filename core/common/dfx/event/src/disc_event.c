@@ -32,3 +32,16 @@ void DiscEventInner(int32_t scene, int32_t stage, const char *func, int32_t line
     };
     SoftbusEventInner(EVENT_MODULE_DISC, &form);
 }
+
+void DiscAlarmInner(int32_t scene, int32_t type, const char *func, int32_t line, DiscAlarmExtra *extra)
+{
+    SoftbusEventForm form = {
+        .eventName = (type == MANAGE_ALARM_TYPE) ? MANAGE_ALARM_EVENT_NAME : CONTROL_ALARM_EVENT_NAME,
+        .scene = scene,
+        .stage = SOFTBUS_DEFAULT_STAGE,
+        .func = func,
+        .line = line,
+        .discAlarmExtra = extra,
+    };
+    SoftbusEventInner(EVENT_MODULE_DISC_ALARM, &form);
+}

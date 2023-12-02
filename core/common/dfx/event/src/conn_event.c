@@ -32,3 +32,19 @@ void ConnEventInner(int32_t scene, int32_t stage, const char *func, int32_t line
     };
     SoftbusEventInner(EVENT_MODULE_CONN, &form);
 }
+
+void ConnAlarmInner(int32_t scene, int32_t type, const char *func, int32_t line, ConnAlarmExtra *extra)
+{
+    if (extra == NULL) {
+        return;
+    }
+    SoftbusEventForm form = {
+        .eventName = (type == MANAGE_ALARM_TYPE) ? MANAGE_ALARM_EVENT_NAME : CONTROL_ALARM_EVENT_NAME,
+        .scene = scene,
+        .stage = SOFTBUS_DEFAULT_STAGE,
+        .func = func,
+        .line = line,
+        .connAlarmExtra = extra,
+    };
+    SoftbusEventInner(EVENT_MODULE_CONN_ALARM, &form);
+}
