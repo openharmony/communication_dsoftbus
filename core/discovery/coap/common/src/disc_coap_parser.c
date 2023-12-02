@@ -33,8 +33,8 @@
 
 int32_t DiscCoapParseDeviceUdid(const char *raw, DeviceInfo *device)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGW(raw != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "raw string is NULL");
-    DISC_CHECK_AND_RETURN_RET_LOGW(device != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "device info is NULL");
+    DISC_CHECK_AND_RETURN_RET_LOGE(raw != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "raw string is NULL");
+    DISC_CHECK_AND_RETURN_RET_LOGE(device != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "device info is NULL");
 
     cJSON *udidJson = cJSON_Parse(raw);
     DISC_CHECK_AND_RETURN_RET_LOGE(udidJson != NULL, SOFTBUS_PARSE_JSON_ERR, DISC_COAP, "parse udid json failed");
