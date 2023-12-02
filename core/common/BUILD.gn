@@ -90,7 +90,6 @@ if (defined(ohos_lite)) {
       "dfx/hidumper_adapter/softbus_hidumper_buscenter_virtual.c",
       "dfx/hidumper_adapter/softbus_hidumper_disc_virtual.c",
       "dfx/hidumper_adapter/softbus_hidumper_conn_virtual.c",
-      "dfx/hidumper_adapter/softbus_hidumper_interface_virtual.c",
       "dfx/hisysevent_adapter/softbus_hisysevt_nstack_virtual.c",
     ]
     sources = common_utils_src
@@ -163,7 +162,6 @@ if (defined(ohos_lite)) {
     include_dirs += conn_common_inc + trans_common_inc
     dfx_source = [
       "dfx/hidumper_adapter/softbus_hidumper.c",
-      "dfx/hidumper_adapter/softbus_hidumper_interface.c",
       "dfx/hidumper_adapter/softbus_hidumper_disc.c",
       "dfx/hidumper_adapter/softbus_hidumper_conn.c",
       "dfx/hidumper_adapter/softbus_hidumper_nstack.c",
