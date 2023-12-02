@@ -38,6 +38,9 @@
 namespace OHOS {
 using namespace testing::ext;
 constexpr uint32_t TEST_DATA_LEN = 30;
+constexpr uint32_t BLE_CONNID = 196609;
+constexpr uint32_t BR_CONNID = 65570;
+constexpr uint32_t WIFI_CONNID = 131073;
 
 class AuthOtherTest : public testing::Test {
 public:
@@ -681,6 +684,19 @@ HWTEST_F(AuthOtherTest, UPDATE_AUTH_DEVICE_PRIORITY_TEST_001, TestSize.Level1)
     UpdateAuthDevicePriority(connId);
     connId = 0x3FFFFFFFF;
     UpdateAuthDevicePriority(connId);
+}
+
+/*
+ * @tc.name: UPDATE_AUTH_DEVICE_PRIORITY_TEST_002
+ * @tc.desc: update auth device priority test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, UPDATE_AUTH_DEVICE_PRIORITY_TEST_002, TestSize.Level1)
+{
+    UpdateAuthDevicePriority(BLE_CONNID);
+    UpdateAuthDevicePriority(BR_CONNID);
+    UpdateAuthDevicePriority(WIFI_CONNID);
 }
 
 /*
