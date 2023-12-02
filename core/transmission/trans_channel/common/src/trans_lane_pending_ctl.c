@@ -360,21 +360,12 @@ static void TransGetQosInfo(const SessionParam *param, QosInfo *qosInfo, bool *i
 
 static void TransGetBleMac(const SessionParam *param, LaneRequestOption *requestOption)
 {
-    bool needBleMac = false;
-    for (int32_t i = 0; i < param->attr->linkTypeNum; ++i) {
-        if (param->attr->linkType[i] == LINK_TYPE_BLE) {
-            needBleMac = true;
-            break;
+    if (LnnGetRemoteStrInfo(requestOption->requestInfo.trans.networkId, STRING_KEY_BLE_MAC,
+            requestOption->requestInfo.trans.peerBleMac, BT_MAC_LEN) != SOFTBUS_OK) {
+        if (strcpy_s(requestOption->requestInfo.trans.peerBleMac, BT_MAC_LEN, "") != EOK) {
+            TRANS_LOGE(TRANS_SVC, "strcpy fail");
         }
-    }
-    if (needBleMac) {
-        if (LnnGetRemoteStrInfo(requestOption->requestInfo.trans.networkId, STRING_KEY_BLE_MAC,
-                requestOption->requestInfo.trans.peerBleMac, BT_MAC_LEN) != SOFTBUS_OK) {
-            if (strcpy_s(requestOption->requestInfo.trans.peerBleMac, BT_MAC_LEN, "") != EOK) {
-                TRANS_LOGE(TRANS_SVC, "strcpy fail");
-            }
-            TRANS_LOGE(TRANS_SVC, "requestOption get ble mac fail.");
-        }
+        TRANS_LOGW(TRANS_SVC, "requestOption get ble mac fail.");
     }
 }
 
