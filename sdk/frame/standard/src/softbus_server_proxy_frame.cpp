@@ -17,7 +17,9 @@
 
 #include <mutex>
 #include "client_trans_session_manager.h"
+#include "bus_center_server_proxy.h"
 #include "comm_log.h"
+#include "disc_server_proxy.h"
 #include "ipc_skeleton.h"
 #include "iremote_broker.h"
 #include "iremote_object.h"
@@ -31,6 +33,7 @@
 #include "softbus_errcode.h"
 #include "softbus_server_ipc_interface_code.h"
 #include "softbus_server_proxy_standard.h"
+#include "trans_server_proxy.h"
 
 namespace {
 OHOS::sptr<OHOS::IRemoteObject> g_serverProxy = nullptr;
@@ -130,15 +133,21 @@ void ClientDeathProcTask(void)
         }
         g_serverProxy = nullptr;
     }
+    DiscServerProxyDeInit();
+    TransServerProxyDeInit();
+    BusCenterServerProxyDeInit();
+
     ClientCleanAllSessionWhenServerDeath();
 
-    while (g_serverProxy == nullptr) {
-        SoftBusSleepMs(g_waitServerInterval);
-        ServerProxyInit();
-        if (g_serverProxy != nullptr) {
+    while (true) {
+        if (ServerProxyInit() == SOFTBUS_OK) {
             break;
         }
+        SoftBusSleepMs(g_waitServerInterval);
     }
+    DiscServerProxyInit();
+    TransServerProxyInit();
+    BusCenterServerProxyInit();
     InnerRegisterService();
 }
 

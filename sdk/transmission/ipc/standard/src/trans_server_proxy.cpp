@@ -62,6 +62,7 @@ int32_t TransServerProxyInit(void)
 {
     std::lock_guard<std::mutex> lock(g_mutex);
     if (g_serverProxy != nullptr) {
+        TRANS_LOGI(TRANS_SDK, "Init success");
         return SOFTBUS_OK;
     }
 
@@ -80,6 +81,7 @@ int32_t TransServerProxyInit(void)
 
 void TransServerProxyDeInit(void)
 {
+    TRANS_LOGI(TRANS_SDK, "enter");
     if (g_serverProxy != nullptr) {
         delete g_serverProxy;
     }
