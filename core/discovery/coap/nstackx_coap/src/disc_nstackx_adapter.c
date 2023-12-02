@@ -75,9 +75,9 @@ EXIT:
 
 int32_t DiscCoapSendRsp(const DeviceInfo *deviceInfo, uint8_t bType)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGW(deviceInfo, SOFTBUS_INVALID_PARAM, DISC_COAP, "DiscRsp devInfo is null");
+    DISC_CHECK_AND_RETURN_RET_LOGE(deviceInfo, SOFTBUS_INVALID_PARAM, DISC_COAP, "DiscRsp devInfo is null");
     NSTACKX_ResponseSettings *settings = (NSTACKX_ResponseSettings *)SoftBusCalloc(sizeof(NSTACKX_ResponseSettings));
-    DISC_CHECK_AND_RETURN_RET_LOGW(settings, SOFTBUS_MALLOC_ERR, DISC_COAP, "malloc disc response settings failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(settings, SOFTBUS_MALLOC_ERR, DISC_COAP, "malloc disc response settings failed");
 
     if (FillRspSettings(settings, deviceInfo, bType) != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "fill nstackx response settings failed");
