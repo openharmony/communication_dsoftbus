@@ -24,6 +24,7 @@
 #include "softbus_conn_common.h"
 #include "softbus_feature_config.h"
 #include "softbus_utils.h"
+#include "conn_event.h"
 
 #define UUID "8ce255c0-200a-11e0-ac64-0800200c9a66"
 
@@ -143,6 +144,11 @@ static void *StartClientConnect(void *connectCtx)
         if (socketHandle == INVALID_SOCKET_HANDLE) {
             CONN_LOGE(CONN_BR, "underlayer bluetooth connect failed, conn id=%u, address=%s",
                 connection->connectionId, anomizeAddress);
+            ConnAlarmExtra extraAlarm = {
+                .linkType = CONNECT_BR,
+                .errcode = SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL,
+            };
+            CONN_ALARM(CONNECTION_FAIL_ALARM, MANAGE_ALARM_TYPE, extraAlarm);
             g_eventListener.onClientConnectFailed(connection->connectionId, SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL);
             break;
         }

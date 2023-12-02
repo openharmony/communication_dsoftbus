@@ -35,6 +35,7 @@
 #include "softbus_network_utils.h"
 #include "softbus_utils.h"
 #include "softbus_wifi_api_adapter.h"
+#include "trans_event.h"
 
 
 #define LNN_LINK_DEFAULT_SCORE 60    /* Indicates that scoring is not supported */
@@ -539,5 +540,12 @@ int32_t DecideAvailableLane(const char *networkId, const LaneSelectParam *reques
         recommendList->linkType[i] = linkList[i];
     }
     recommendList->linkTypeNum = linksNum;
+    if (linksNum == 0) {
+        TransAlarmExtra extra = {
+            .minBw = request->qosRequire.minBW,
+            .linkType = request->transType,
+        };
+        TRANS_ALARM(BANDWIDTH_INSUFFICIANT_ALARM, MANAGE_ALARM_TYPE, extra);
+    }
     return SOFTBUS_OK;
 }

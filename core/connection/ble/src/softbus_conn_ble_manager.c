@@ -188,6 +188,11 @@ static void DfxRecordBleConnectFail(
         .result = EVENT_STAGE_RESULT_FAILED
     };
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
+    ConnAlarmExtra extraAlarm = {
+        .linkType = CONNECT_BLE,
+        .errcode = reason,
+    };
+    CONN_ALARM(CONNECTION_FAIL_ALARM, MANAGE_ALARM_TYPE, extraAlarm);
 }
 
 static void DfxRecordBleConnectSuccess(uint32_t pId, ConnBleConnection *connection, ConnectStatistics *statistics)

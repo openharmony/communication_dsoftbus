@@ -422,6 +422,13 @@ int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)
         .result = EVENT_STAGE_RESULT_FAILED
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
+    TransAlarmExtra extraAlarm = {
+        .linkType = conn.appInfo.linkType,
+        .errcode = errCode,
+        .sessionName = conn.appInfo.myData.sessionName,
+    };
+    TRANS_ALARM(OPEN_SESSION_FAIL_ALARM, CONTROL_ALARM_TYPE, extraAlarm);
+    
     SoftbusRecordOpenSessionKpi(conn.appInfo.myData.pkgName,
         conn.appInfo.linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);
     char pkgName[PKG_NAME_SIZE_MAX] = {0};
