@@ -218,7 +218,7 @@ HWTEST_F(TransEventTest, TransEventTest006, TestSize.Level0)
 
 /**
  * @tc.name: TransEventTest007
- * @tc.desc: Test speed limit alarm
+ * @tc.desc: Test stats
  * @tc.type: FUNC
  * @tc.require: I8HA59
  */
@@ -228,13 +228,30 @@ HWTEST_F(TransEventTest, TransEventTest007, TestSize.Level0)
         .result = 1,
         .errcode = 2,
         .socketName = "testSocketName",
+        .dataType = 3,
+        .channelType = 4,
+        .laneId = 5,
+        .preferLinkType = 6,
+        .laneTransType = 7,
+        .channelId = 8,
+        .requestId = 9,
+        .connectionId = 10,
+        .linkType = 11,
+        .authId = 12,
+        .socketFd = 13,
+        .costTime = 14,
+        .channelScore = 15,
         .peerChannelId = 16,
         .btFlow = 17,
-        .peerNetworkId = "testNetworkId",
-        .callerPkg = "testCallerPkg",
-        .calleePkg = "testCalleePkg",
     };
+    constexpr int32_t VALID_EXTRA_SIZE = 18;
+    HiSysEventMock mock;
+    EXPECT_CALL(mock,
+        HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(TRANS_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR), _,
+            ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
+        .Times(1);
     TRANS_EVENT(EVENT_SCENE_BT_FLOW, SOFTBUS_DEFAULT_STAGE, validExtra);
+
 
     TransEventExtra validExtra1 = {
         .result = 1,
@@ -246,6 +263,12 @@ HWTEST_F(TransEventTest, TransEventTest007, TestSize.Level0)
         .callerPkg = "testCallerPkg",
         .calleePkg = "testCalleePkg",
     };
+    constexpr int32_t VALID_EXTRA_SIZE1 = 8;
+    HiSysEventMock mock1;
+    EXPECT_CALL(mock1,
+        HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(TRANS_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR), _,
+            ParamArraySizeMatcher(VALID_EXTRA_SIZE1)))
+        .Times(1);
     TRANS_EVENT(EVENT_SCENE_LANE_SCORE, SOFTBUS_DEFAULT_STAGE, validExtra1);
 
     TransEventExtra validExtra2 = {
@@ -256,36 +279,27 @@ HWTEST_F(TransEventTest, TransEventTest007, TestSize.Level0)
         .callerPkg = "testCallerPkg",
         .calleePkg = "testCalleePkg",
     };
+    constexpr int32_t VALID_EXTRA_SIZE2 = 6;
+    HiSysEventMock mock2;
+    EXPECT_CALL(mock2,
+        HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(TRANS_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR), _,
+            ParamArraySizeMatcher(VALID_EXTRA_SIZE2)))
+        .Times(1);
     TRANS_EVENT(EVENT_SCENE_DETECTION, SOFTBUS_DEFAULT_STAGE, validExtra2);
 
     TransEventExtra validExtra3 = {
         .result = 1,
         .errcode = 2,
-        .peerChannelId = 16,
         .peerNetworkId = "testNetworkId",
         .callerPkg = "testCallerPkg",
         .calleePkg = "testCalleePkg",
     };
+    constexpr int32_t VALID_EXTRA_SIZE3 = 5;
+    HiSysEventMock mock3;
+    EXPECT_CALL(mock3,
+        HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(TRANS_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR), _,
+            ParamArraySizeMatcher(VALID_EXTRA_SIZE3)))
+        .Times(1);
     TRANS_EVENT(EVENT_SCENE_ACTIVATION, SOFTBUS_DEFAULT_STAGE, validExtra3);
-
-    TransAlarmExtra validExtra4 = {
-        .result = 11,
-        .errcode = 22,
-        .duration = 7,
-        .curFlow = 100,
-        .limitFlow = 90,
-        .limitTime = 10,
-        .occupyRes = 11,
-        .syncType = 12,
-        .syncData = 13,
-        .retryCount = 14,
-        .retryReason = 15,
-        .occupyedName = "testOccupyName",
-        .permissionName = "testPermissionName",
-        .sessionName = "testSessionName",
-    };
-
-    TRANS_ALARM(SPEED_LIMIT_ALARM, CONTROL_ALARM_TYPE, validExtra4);
-
 }
 } // namespace OHOS
