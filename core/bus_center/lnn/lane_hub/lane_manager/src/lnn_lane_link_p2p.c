@@ -327,9 +327,11 @@ static int32_t GetP2pLinkReqParamByChannelRequetId(
         }
         wifiDirectInfo->bandWidth = item->p2pInfo.bandWidth;
         wifiDirectInfo->pid = item->laneRequestInfo.pid;
-        int32_t ret = strcpy_s(wifiDirectInfo->remoteNetworkId, sizeof(wifiDirectInfo->remoteNetworkId),
-                               item->laneRequestInfo.networkId);
-        LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, LNN_LANE, "copy networkId failed");
+        if (strcpy_s(wifiDirectInfo->remoteNetworkId, sizeof(wifiDirectInfo->remoteNetworkId),
+                    item->laneRequestInfo.networkId) != EOK) {
+            LNN_LOGE(LNN_LANE, "copy networkId failed");
+            return SOFTBUS_ERR;
+        }
         wifiDirectInfo->isNetworkDelegate = item->p2pInfo.networkDelegate;
         if (item->p2pInfo.p2pOnly) {
             wifiDirectInfo->connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P;
@@ -368,9 +370,11 @@ static int32_t GetP2pLinkReqParamByAuthId(uint32_t authRequestId, int32_t p2pReq
             return SOFTBUS_ERR;
         }
         wifiDirectInfo->pid = item->laneRequestInfo.pid;
-        int32_t ret = strcpy_s(wifiDirectInfo->remoteNetworkId, sizeof(wifiDirectInfo->remoteNetworkId),
-                               item->laneRequestInfo.networkId);
-        LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, LNN_LANE, "copy networkId failed");
+        if (strcpy_s(wifiDirectInfo->remoteNetworkId, sizeof(wifiDirectInfo->remoteNetworkId),
+                    item->laneRequestInfo.networkId) != EOK) {
+            LNN_LOGE(LNN_LANE, "copy networkId failed");
+            return SOFTBUS_ERR;
+        }
         wifiDirectInfo->bandWidth = item->p2pInfo.bandWidth;
         wifiDirectInfo->isNetworkDelegate = item->p2pInfo.networkDelegate;
         if (item->p2pInfo.p2pOnly) {
