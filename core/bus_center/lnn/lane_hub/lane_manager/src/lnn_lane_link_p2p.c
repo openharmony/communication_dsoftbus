@@ -330,6 +330,7 @@ static int32_t GetP2pLinkReqParamByChannelRequetId(
         if (strcpy_s(wifiDirectInfo->remoteNetworkId, sizeof(wifiDirectInfo->remoteNetworkId),
                     item->laneRequestInfo.networkId) != EOK) {
             LNN_LOGE(LNN_LANE, "copy networkId failed");
+            LinkUnlock();
             return SOFTBUS_ERR;
         }
         wifiDirectInfo->isNetworkDelegate = item->p2pInfo.networkDelegate;
@@ -373,6 +374,7 @@ static int32_t GetP2pLinkReqParamByAuthId(uint32_t authRequestId, int32_t p2pReq
         if (strcpy_s(wifiDirectInfo->remoteNetworkId, sizeof(wifiDirectInfo->remoteNetworkId),
                     item->laneRequestInfo.networkId) != EOK) {
             LNN_LOGE(LNN_LANE, "copy networkId failed");
+            LinkUnlock();
             return SOFTBUS_ERR;
         }
         wifiDirectInfo->bandWidth = item->p2pInfo.bandWidth;
