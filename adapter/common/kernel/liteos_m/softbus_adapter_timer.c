@@ -21,7 +21,8 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 
-#define MS_PER_SECOND 1000
+#define MS_PER_SECOND  1000
+#define US_PER_MSECOND 1000
 
 static TimerFunc g_timerfunc = NULL;
 
@@ -98,3 +99,15 @@ int32_t SoftBusGetTime(SoftBusSysTime *sysTime)
     return SOFTBUS_OK;
 }
 
+uint64_t SoftBusGetSysTimeMs(void)
+{
+    struct timeval time;
+    time.tv_sec = 0;
+    time.tv_usec = 0;
+    if (gettimeofday(&time, NULL) != 0) {
+        COMM_LOGI(COMM_ADAPTER, "get sys time fail");
+        return 0;
+    }
+    uint64_t ms = (uint64_t)time.tv_sec * MS_PER_SECOND + (uint64_t)time.tv_usec / US_PER_MSECOND;
+    return ms;
+}

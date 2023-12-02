@@ -80,10 +80,12 @@ if (defined(ohos_lite)) {
         "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
       ]
       if (board_name == "v200zr") {
+        include_dirs += [ "//third_party/json/include" ]
         sources = []
         sources = [
           "$softbus_adapter_common/dfx/softbus_adapter_hisysevent_mini.c",
           "$softbus_adapter_common/dfx/softbus_adapter_hitrace_virtual.c",
+          "$softbus_adapter_common/json/nlohmann/softbus_adapter_json.cpp",
           "$softbus_adapter_common/kernel/liteos_m/lnn_ip_utils_adapter.c",
           "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_mem.c",
           "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_timer.c",
@@ -91,6 +93,7 @@ if (defined(ohos_lite)) {
           "$softbus_adapter_common/kernel/posix/softbus_adapter_socket.c",
           "$softbus_adapter_common/kernel/posix/softbus_adapter_thread.c",
           "$softbus_adapter_common/log/softbus_adapter_log.c",
+          "$softbus_adapter_common/perf/softbus_adapter_perf.c",
           "$softbus_adapter_common/range/softbus_adapter_range.c",
           "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
         ]
