@@ -742,7 +742,7 @@ static int32_t OpenProxyChannelToConnP2p(const LinkRequest *request,
     }
     ret = TransProxyPipelineOpenChannel(requestId, request->peerNetworkId, &option, &channelCallback);
     if (ret != SOFTBUS_OK) {
-        DelConnRequestItem(0, 0);
+        DelConnRequestItem(0, INVALID_P2P_REQUEST_ID);
         LNN_LOGE(LNN_LANE, "open channel failed, ret=%d", ret);
         return ret;
     }
@@ -770,7 +770,7 @@ static int32_t OpenAuthToConnP2p(const LinkRequest *request, uint32_t laneLinkRe
     };
     if (AuthOpenConn(&connInfo, authRequestId, &cb, isMetaAuth) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "open auth conn fail");
-        DelConnRequestItem(authRequestId, 0);
+        DelConnRequestItem(authRequestId, INVALID_P2P_REQUEST_ID);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -903,7 +903,7 @@ static int32_t OpenAuthTriggerToConn(const LinkRequest *request, uint32_t laneLi
     };
     if (AuthOpenConn(&connInfo, authRequestId, &cb, isMetaAuth) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "open auth conn fail");
-        DelConnRequestItem(authRequestId, 0);
+        DelConnRequestItem(authRequestId, INVALID_P2P_REQUEST_ID);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
