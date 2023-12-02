@@ -748,15 +748,15 @@ static void PackCommP2pInfo(JsonObj *json, const NodeInfo *info)
     (void)JSON_AddInt32ToObject(json, STA_FREQUENCY, LnnGetStaFrequency(info));
 }
 
-static void PackWifiDirectInfo(JsonObj *json, const NodeInfo *info, const char *remoteUdid)
+static void PackWifiDirectInfo(JsonObj *json, const NodeInfo *info, const char *remoteUuid)
 {
-    if (json == NULL || remoteUdid == NULL) {
+    if (json == NULL || remoteUuid == NULL) {
         AUTH_LOGE(AUTH_FSM, "invalid param");
         return;
     }
     unsigned char encodePtk[PTK_ENCODE_LEN] = {0};
     char localPtk[PTK_DEFAULT_LEN] = {0};
-    if (LnnGetLocalPtkByUdid(remoteUdid, localPtk) != SOFTBUS_OK) {
+    if (LnnGetLocalPtkByUuid(remoteUuid, localPtk) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "get ptk by udid fail");
         return;
     }
@@ -1319,18 +1319,7 @@ char *PackDeviceInfoMessage(int32_t linkType, SoftBusVersion version, bool isMet
         JSON_Delete(json);
         return NULL;
     }
-    if (!isMetaAuth) {
-        int64_t authId = AuthDeviceGetLatestIdByUuid(remoteUuid, (AuthLinkType)linkType);
-        if (authId == AUTH_INVALID_ID) {
-            AUTH_LOGW(AUTH_FSM, "get auth id fail");
-        }
-        AuthManager *manager = GetAuthManagerByAuthId(authId);
-        if (manager != NULL) {
-            PackWifiDirectInfo(json, info, manager->udid);
-            DelAuthManager(manager, false);
-            AUTH_LOGI(AUTH_FSM, "pack wifi direct info done");
-        }
-    }
+    PackWifiDirectInfo(json, info, remoteUuid);
 
     char *msg = JSON_PrintUnformatted(json);
     if (msg == NULL) {
