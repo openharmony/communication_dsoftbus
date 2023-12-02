@@ -167,6 +167,11 @@ static void OnFailure(struct WifiDirectCommand *base, int32_t reason)
         .errcode = reason
     };
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
+    ConnAlarmExtra extraAlarm = {
+        .linkType = CONNECT_P2P,
+        .errcode = SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL,
+    };
+    CONN_ALARM(CONNECTION_FAIL_ALARM, MANAGE_ALARM_TYPE, extraAlarm);
     GetWifiDirectNegotiator()->resetContext();
     GetResourceManager()->dump(0);
     GetLinkManager()->dump(0);

@@ -44,21 +44,6 @@ typedef enum {
     EVENT_MODULE_STATS,
 } SoftbusEventModule;
 
-typedef enum {
-    NETWORK_INTERRUPTION_ALARM,
-    HEARTBEAT_BROADCAST_ALARM,
-    CONNECTION_FAIL_ALARM,
-    BANDWIDTH_INSUFFICIANT_ALARM,
-    DELAY_JITTER_ALARM,
-    NO_PERMISSION_ALARM,
-    SPEED_LIMIT_ALARM,
-    PREEMPTION_ALARM,
-    FORBID_BACKGROUND_SYNC_ALARM,
-    BUSINESS_CONFLICT_ALARM,
-    DELAY_FREQUENT_RETRY_ALARM,
-    OPEN_SESSION_FAIL_ALARM,
-} SoftbusAlarmEvent;
-
 void SoftbusEventInner(SoftbusEventModule module, SoftbusEventForm *form);
 
 #ifdef __cplusplus
