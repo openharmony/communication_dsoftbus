@@ -153,6 +153,7 @@ static void OnFailure(struct WifiDirectCommand *base, int32_t reason)
     if (IsNeedRetry(base, reason)) {
         CONN_LOGI(CONN_WIFI_DIRECT, "retry command");
         GetWifiDirectNegotiator()->retryCurrentCommand();
+        GetWifiDirectNegotiator()->resetContext();
         return;
     }
 
