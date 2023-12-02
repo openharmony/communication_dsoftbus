@@ -19,23 +19,41 @@
 int32_t SoftBusGenerateHmacHash(
     const EncryptKey *randomKey, const uint8_t *rootKey, uint32_t rootKeyLen, uint8_t *hash, uint32_t hashLen)
 {
+    (void)randomKey;
+    (void)rootKey;
+    (void)rootKeyLen;
+    (void)hash;
+    (void)hashLen;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t SoftbusAesCfbRootEncrypt(const AesInputData *inData, const EncryptKey *randomKey, EncryptKey *rootKey,
+int32_t SoftBusAesCfbRootEncrypt(const AesInputData *inData, const EncryptKey *randomKey, EncryptKey *rootKey,
     int32_t encMode, AesOutputData *outData)
 {
+    (void)inData;
+    (void)randomKey;
+    (void)rootKey;
+    (void)encMode;
+    (void)outData;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t SoftbusAesCfbEncrypt(
+int32_t SoftBusAesCfbEncrypt(
     const AesInputData *inData, AesCipherKey *cipherKey, int32_t encMode, AesOutputData *outData)
 {
+    (void)inData;
+    (void)cipherKey;
+    (void)encMode;
+    (void)outData;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t SoftbusAesGcmEncrypt(
+int32_t SoftBusAesGcmEncrypt(
     const AesInputData *inData, AesCipherKey *cipherKey, int32_t encMode, AesOutputData *outData)
 {
+    (void)inData;
+    (void)cipherKey;
+    (void)encMode;
+    (void)outData;
     return SOFTBUS_NOT_IMPLEMENT;
 }

@@ -16,19 +16,30 @@
 #include "softbus_rsa_encrypt.h"
 #include "softbus_errcode.h"
 
-int32_t SoftbusGetPublicKey(uint8_t *publicKey, uint32_t publicKeyLen)
+int32_t SoftBusGetPublicKey(uint8_t *publicKey, uint32_t publicKeyLen)
 {
+    (void)publicKey;
+    (void)publicKeyLen;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t SoftbusRsaEncrypt(const uint8_t *srcData, uint32_t srcDataLen, PublicKey *publicKey, uint8_t **encryptedData,
+int32_t SoftBusRsaEncrypt(const uint8_t *srcData, uint32_t srcDataLen, PublicKey *publicKey, uint8_t **encryptedData,
     uint32_t *encryptedDataLen)
 {
+    (void)srcData;
+    (void)srcDataLen;
+    (void)publicKey;
+    (void)encryptedData;
+    (void)encryptedDataLen;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t SoftbusRsaDecrypt(
+int32_t SoftBusRsaDecrypt(
     const uint8_t *srcData, uint32_t srcDataLen, uint8_t **decryptedData, uint32_t *decryptedDataLen)
 {
+    (void)srcData;
+    (void)srcDataLen;
+    (void)decryptedData;
+    (void)decryptedDataLen;
     return SOFTBUS_NOT_IMPLEMENT;
 }

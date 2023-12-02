@@ -84,6 +84,7 @@ static int32_t GenerateRsaKeyPair(void)
     struct HksParamSet *paramSet = NULL;
     if (ConstructKeyParamSet(&paramSet, g_generateParams, sizeof(g_generateParams) / sizeof(struct HksParam)) !=
         SOFTBUS_OK) {
+        COMM_LOGE(COMM_UTILS, "ConstructKeyParamSet failed.");
         return SOFTBUS_ERR;
     }
     if (HksGenerateKey(&g_rsaKeyAlias, paramSet, NULL) != HKS_SUCCESS) {
@@ -95,10 +96,10 @@ static int32_t GenerateRsaKeyPair(void)
     return SOFTBUS_OK;
 }
 
-int32_t SoftbusGetPublicKey(uint8_t *publicKey, uint32_t publicKeyLen)
+int32_t SoftBusGetPublicKey(uint8_t *publicKey, uint32_t publicKeyLen)
 {
     if (publicKey == NULL || publicKeyLen == 0) {
-        COMM_LOGE(COMM_UTILS, "invalid param");
+        COMM_LOGE(COMM_UTILS, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     if (!IsRsaKeyPairExist(g_rsaKeyAlias)) {
@@ -140,14 +141,11 @@ static BN_CTX *GetRsaBigNum(const BIGNUM *modNum, BIGNUM **base, BIGNUM **result
         BN_CTX_free(ctx);
         return NULL;
     }
-
     if (*buf != NULL) {
         OPENSSL_clear_free(*buf, *bufNum);
         *buf = NULL;
     }
-
     *buf = OPENSSL_malloc(*bufNum);
-
     if (*result == NULL || *buf == NULL) {
         BN_CTX_end(ctx);
         BN_CTX_free(ctx);
@@ -155,13 +153,13 @@ static BN_CTX *GetRsaBigNum(const BIGNUM *modNum, BIGNUM **base, BIGNUM **result
         *buf = NULL;
         return NULL;
     }
-
     return ctx;
 }
 
 static int32_t EncryptByPublicKey(const uint8_t *src, uint32_t srcLen, const RSA *rsa, uint8_t *out, uint32_t outLen)
 {
-    if (rsa == NULL || src == NULL || srcLen == 0 || out == NULL || outLen < SOFTBUS_RSA_ENCRYPT_LEN) {
+    if (src == NULL || srcLen == 0 || rsa == NULL || out == NULL || outLen < SOFTBUS_RSA_ENCRYPT_LEN) {
+        COMM_LOGE(COMM_UTILS, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = SOFTBUS_ERR;
@@ -173,38 +171,31 @@ static int32_t EncryptByPublicKey(const uint8_t *src, uint32_t srcLen, const RSA
 
     const BIGNUM *modNum = RSA_get0_n(rsa);
     const BIGNUM *exp = RSA_get0_e(rsa);
-
     if ((BN_num_bits(modNum) > OPENSSL_RSA_MAX_MODULUS_BITS) || (BN_ucmp(modNum, exp) <= 0) ||
         ((BN_num_bits(modNum) > OPENSSL_RSA_SMALL_MODULUS_BITS) && (BN_num_bits(exp) > OPENSSL_RSA_MAX_PUBEXP_BITS))) {
         return SOFTBUS_ERR;
     }
-
     do {
         ctx = GetRsaBigNum(modNum, &base, &result, &buf, &bufNum);
         if (ctx == NULL) {
             break;
         }
-
         const EVP_MD *md = EVP_sha256();
         const EVP_MD *mgf1md = EVP_sha1();
-
         ret = RSA_padding_add_PKCS1_OAEP_mgf1(buf, bufNum, src, srcLen, NULL, 0, md, mgf1md);
         if (ret <= 0 || BN_bin2bn(buf, bufNum, base) == NULL || BN_ucmp(base, modNum) >= 0) {
             break;
         }
-
         BN_mod_exp_mont(result, base, exp, modNum, ctx, NULL);
         ret = BN_bn2binpad(result, out, bufNum);
     } while (0);
-
     if (ctx != NULL) {
         BN_CTX_end(ctx);
         BN_CTX_free(ctx);
     }
     OPENSSL_clear_free(buf, bufNum);
     buf = NULL;
-
-    return SOFTBUS_OK;
+    return ret;
 }
 
 static int32_t DataToPublicKey(const uint8_t *bufKey, int32_t bufKeyLen, RSA **pubKey)
@@ -212,135 +203,118 @@ static int32_t DataToPublicKey(const uint8_t *bufKey, int32_t bufKeyLen, RSA **p
     int32_t res;
     BIO *pBio = NULL;
 
-    if ((bufKey == NULL) || (bufKeyLen < 0) || pubKey == NULL) {
-        COMM_LOGE(COMM_UTILS, "DataToPublicKey input param is null.");
+    if (bufKey == NULL || bufKeyLen < 0 || pubKey == NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
-
     pBio = BIO_new(BIO_s_mem());
     if (pBio == NULL) {
         COMM_LOGE(COMM_UTILS, "Bio data malloc failed.");
         return SOFTBUS_ERR;
     }
-
     res = BIO_write(pBio, bufKey, bufKeyLen);
     if (res <= 0) {
         COMM_LOGE(COMM_UTILS, "Bio data write failed.");
         BIO_free(pBio);
         return SOFTBUS_ERR;
     }
-
     *pubKey = d2i_RSA_PUBKEY_bio(pBio, NULL);
     if (*pubKey == NULL) {
         COMM_LOGE(COMM_UTILS, "Data transfer public key failed.");
         BIO_free(pBio);
         return SOFTBUS_ERR;
     }
-
     BIO_free(pBio);
-
     return SOFTBUS_OK;
 }
 
-int32_t SoftbusRsaEncrypt(const uint8_t *srcData, uint32_t srcDataLen, PublicKey *publicKey, uint8_t **encryptedData,
+int32_t SoftBusRsaEncrypt(const uint8_t *srcData, uint32_t srcDataLen, PublicKey *publicKey, uint8_t **encryptedData,
     uint32_t *encryptedDataLen)
 {
-    if (srcData == NULL || srcDataLen == 0 || publicKey == NULL || publicKey->key == NULL || encryptedData == NULL ||
-        encryptedDataLen == NULL) {
+    if (srcData == NULL || srcDataLen == 0 || publicKey == NULL || publicKey->key == NULL || publicKey->len == 0 ||
+        encryptedData == NULL || encryptedDataLen == NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
-    uint8_t *huksPublicKey = (uint8_t *)SoftBusCalloc(publicKey->len);
-    if (huksPublicKey == NULL) {
-        COMM_LOGE(COMM_UTILS, "huksPublicKey calloc failed.");
-        return SOFTBUS_MEM_ERR;
-    }
-    if (memcpy_s(huksPublicKey, publicKey->len, publicKey->key, publicKey->len) != EOK) {
-        COMM_LOGE(COMM_UTILS, "huksPublicKey memcpy_s failed.");
-        SoftBusFree(huksPublicKey);
-        return SOFTBUS_MEM_ERR;
-    }
     RSA *peerPubKey = NULL;
-    if (DataToPublicKey(huksPublicKey, publicKey->len, &peerPubKey) != SOFTBUS_OK) {
+    if (DataToPublicKey(publicKey->key, publicKey->len, &peerPubKey) != SOFTBUS_OK) {
         COMM_LOGE(COMM_UTILS, "DataToPublicKey failed.");
-        SoftBusFree(huksPublicKey);
         return SOFTBUS_ERR;
     }
     uint32_t cipherTextLen = SOFTBUS_RSA_ENCRYPT_LEN;
     uint8_t *cipherText = (uint8_t *)SoftBusCalloc(cipherTextLen);
     if (cipherText == NULL) {
-        COMM_LOGE(COMM_UTILS, "cipherText calloc failed.");
-        SoftBusFree(huksPublicKey);
+        RSA_free(peerPubKey);
         return SOFTBUS_MEM_ERR;
     }
     if (EncryptByPublicKey(srcData, srcDataLen, peerPubKey, cipherText, cipherTextLen) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_UTILS, "EVP_PKEY_encrypt failed.");
+        COMM_LOGE(COMM_UTILS, "EncryptByPublicKey failed.");
         RSA_free(peerPubKey);
-        SoftBusFree(huksPublicKey);
         SoftBusFree(cipherText);
-        return SOFTBUS_ERR;
+        return SOFTBUS_ENCRYPT_ERR;
     }
     *encryptedDataLen = cipherTextLen;
     *encryptedData = (uint8_t *)SoftBusCalloc(cipherTextLen);
     if (*encryptedData == NULL) {
-        COMM_LOGE(COMM_UTILS, "encrypted Data calloc fail.");
         RSA_free(peerPubKey);
-        SoftBusFree(huksPublicKey);
         SoftBusFree(cipherText);
         return SOFTBUS_MEM_ERR;
     }
     if (memcpy_s(*encryptedData, cipherTextLen, cipherText, cipherTextLen) != EOK) {
-        COMM_LOGE(COMM_UTILS, "encryptedData memcpy_s fail.");
+        COMM_LOGE(COMM_UTILS, "encryptedData memcpy_s failed.");
         RSA_free(peerPubKey);
-        SoftBusFree(huksPublicKey);
         SoftBusFree(cipherText);
         SoftBusFree(*encryptedData);
+        *encryptedData = NULL;
         return SOFTBUS_MEM_ERR;
     }
     RSA_free(peerPubKey);
-    SoftBusFree(huksPublicKey);
     SoftBusFree(cipherText);
     return SOFTBUS_OK;
 }
 
-int32_t SoftbusRsaDecrypt(
+int32_t SoftBusRsaDecrypt(
     const uint8_t *srcData, uint32_t srcDataLen, uint8_t **decryptedData, uint32_t *decryptedDataLen)
 {
     if (srcData == NULL || srcDataLen == 0 || decryptedData == NULL || decryptedDataLen == NULL) {
-        COMM_LOGE(COMM_UTILS, "invalid srcData");
+        COMM_LOGE(COMM_UTILS, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
-    COMM_LOGD(COMM_UTILS, "DecryptByPrivateKey invoked.");
     struct HksBlob encryptedBlob = { srcDataLen, (uint8_t *)srcData };
     struct HksParamSet *paramSet = NULL;
     if (ConstructKeyParamSet(&paramSet, g_decryptParams, sizeof(g_decryptParams) / sizeof(struct HksParam)) !=
         SOFTBUS_OK) {
+        COMM_LOGE(COMM_UTILS, "ConstructKeyParamSet failed.");
         return SOFTBUS_ERR;
     }
     struct HksBlob decryptedBlob = { .size = HKS_RSA_KEY_SIZE_4096,
         .data = (uint8_t *)(SoftBusCalloc(HKS_RSA_KEY_SIZE_4096)) };
     if (decryptedBlob.data == NULL) {
-        COMM_LOGE(COMM_UTILS, "decryptedBlob data calloc failed.");
+        COMM_LOGE(COMM_UTILS, "decryptedBlob.data calloc failed.");
+        HksFreeParamSet(&paramSet);
         return SOFTBUS_MEM_ERR;
     }
     if (HksDecrypt(&g_rsaKeyAlias, paramSet, &encryptedBlob, &decryptedBlob) != HKS_SUCCESS) {
         COMM_LOGE(COMM_UTILS, "HksDecrypt failed.");
         HksFreeParamSet(&paramSet);
         SoftBusFree(decryptedBlob.data);
-        return SOFTBUS_ERR;
+        return SOFTBUS_DECRYPT_ERR;
     }
     COMM_LOGD(COMM_UTILS, "HksDecrypt success.");
     *decryptedDataLen = decryptedBlob.size;
     *decryptedData = (uint8_t *)SoftBusCalloc(decryptedBlob.size);
     if (*decryptedData == NULL) {
-        COMM_LOGE(COMM_UTILS, "decrypted Data calloc fail");
+        COMM_LOGE(COMM_UTILS, "decryptedData calloc failed");
         HksFreeParamSet(&paramSet);
         SoftBusFree(decryptedBlob.data);
         return SOFTBUS_MEM_ERR;
     }
     if (memcpy_s(*decryptedData, decryptedBlob.size, decryptedBlob.data, decryptedBlob.size) != EOK) {
-        COMM_LOGE(COMM_UTILS, "decrypted Data memcpy_s fail");
+        COMM_LOGE(COMM_UTILS, "decryptedData memcpy_s failed");
         HksFreeParamSet(&paramSet);
         SoftBusFree(decryptedBlob.data);
+        SoftBusFree(*decryptedData);
+        *decryptedData = NULL;
         return SOFTBUS_MEM_ERR;
     }
     HksFreeParamSet(&paramSet);
