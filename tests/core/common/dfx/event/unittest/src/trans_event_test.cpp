@@ -76,6 +76,7 @@ HWTEST_F(TransEventTest, TransEventTest002, TestSize.Level0)
         .costTime = 14,
         .channelScore = 15,
         .peerChannelId = 16,
+        .btFlow = 17,
         .peerNetworkId = "testNetworkId",
         .callerPkg = "testCallerPkg",
         .calleePkg = "testCalleePkg",
@@ -116,6 +117,7 @@ HWTEST_F(TransEventTest, TransEventTest003, TestSize.Level0)
         .costTime = -14,
         .channelScore = -15,
         .peerChannelId = -16,
+        .btFlow = -17,
         .peerNetworkId = "",
         .callerPkg = "\0",
         .calleePkg = nullptr,
@@ -147,5 +149,143 @@ HWTEST_F(TransEventTest, TransEventTest004, TestSize.Level0)
             TransInvalidParamArrayMatcher(emptyExtra, VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
         .Times(1);
     TRANS_EVENT(EVENT_SCENE_CLOSE_CHANNEL_PASSIVE, EVENT_STAGE_CLOSE_CHANNEL, emptyExtra);
+}
+
+/**
+ * @tc.name: TransEventTest005
+ * @tc.desc: Test trans event form size
+ * @tc.type: FUNC
+ * @tc.require: I8HA59
+ */
+HWTEST_F(TransEventTest, TransEventTest005, TestSize.Level0)
+{
+    TransAlarmExtra extra = {
+        .result = 1,
+        .errcode = 2233,
+        .minBw = 32,
+        .linkType = 0, // invalid
+    };
+    constexpr int32_t VALID_EXTRA_SIZE = 3;
+
+    HiSysEventMock mock;
+    EXPECT_CALL(mock,
+        HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(CONTROL_ALARM_EVENT_NAME),
+            Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR), _, ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
+        .Times(1);
+    TRANS_ALARM(BANDWIDTH_INSUFFICIANT_ALARM, CONTROL_ALARM_TYPE, extra);
+}
+
+/**
+ * @tc.name: TransEventTest006
+ * @tc.desc: Test all valid trans event form items
+ * @tc.type: FUNC
+ * @tc.require: I8HA59
+ */
+HWTEST_F(TransEventTest, TransEventTest006, TestSize.Level0)
+{
+    TransAlarmExtra validExtra = {
+        .result = 1,
+        .errcode = 2,
+        .callerPid = 3,
+        .linkType = 4,
+        .minBw = 5,
+        .methodId = 6,
+        .duration = 7,
+        .curFlow = 8,
+        .limitFlow = 9,
+        .limitTime = 10,
+        .occupyRes = 11,
+        .syncType = 12,
+        .syncData = 13,
+        .retryCount = 14,
+        .retryReason = 15,
+        .conflictName = "conflictName",
+        .conflictedName = "conflictedName",
+        .occupyedName = "testOccupyName",
+        .permissionName = "testPermissionName",
+        .sessionName = "testSessionName",
+    };
+    constexpr int32_t VALID_EXTRA_SIZE = TRANS_ALARM_ASSIGNER_SIZE;
+
+    HiSysEventMock mock;
+    EXPECT_CALL(mock,
+        HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(MANAGE_ALARM_EVENT_NAME),
+            Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR), TransAlarmValidParamArrayMatcher(validExtra, VALID_EXTRA_SIZE),
+            ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
+        .Times(1);
+    TRANS_ALARM(BANDWIDTH_INSUFFICIANT_ALARM, MANAGE_ALARM_TYPE, validExtra);
+}
+
+/**
+ * @tc.name: TransEventTest007
+ * @tc.desc: Test speed limit alarm
+ * @tc.type: FUNC
+ * @tc.require: I8HA59
+ */
+HWTEST_F(TransEventTest, TransEventTest007, TestSize.Level0)
+{
+    TransEventExtra validExtra = {
+        .result = 1,
+        .errcode = 2,
+        .socketName = "testSocketName",
+        .peerChannelId = 16,
+        .btFlow = 17,
+        .peerNetworkId = "testNetworkId",
+        .callerPkg = "testCallerPkg",
+        .calleePkg = "testCalleePkg",
+    };
+    TRANS_EVENT(EVENT_SCENE_BT_FLOW, SOFTBUS_DEFAULT_STAGE, validExtra);
+
+    TransEventExtra validExtra1 = {
+        .result = 1,
+        .errcode = 2,
+        .socketName = "testSocketName",
+        .channelScore = 15,
+        .peerChannelId = 16,
+        .peerNetworkId = "testNetworkId",
+        .callerPkg = "testCallerPkg",
+        .calleePkg = "testCalleePkg",
+    };
+    TRANS_EVENT(EVENT_SCENE_LANE_SCORE, SOFTBUS_DEFAULT_STAGE, validExtra1);
+
+    TransEventExtra validExtra2 = {
+        .result = 1,
+        .errcode = 2,
+        .peerChannelId = 16,
+        .peerNetworkId = "testNetworkId",
+        .callerPkg = "testCallerPkg",
+        .calleePkg = "testCalleePkg",
+    };
+    TRANS_EVENT(EVENT_SCENE_DETECTION, SOFTBUS_DEFAULT_STAGE, validExtra2);
+
+    TransEventExtra validExtra3 = {
+        .result = 1,
+        .errcode = 2,
+        .peerChannelId = 16,
+        .peerNetworkId = "testNetworkId",
+        .callerPkg = "testCallerPkg",
+        .calleePkg = "testCalleePkg",
+    };
+    TRANS_EVENT(EVENT_SCENE_ACTIVATION, SOFTBUS_DEFAULT_STAGE, validExtra3);
+
+    TransAlarmExtra validExtra4 = {
+        .result = 11,
+        .errcode = 22,
+        .duration = 7,
+        .curFlow = 100,
+        .limitFlow = 90,
+        .limitTime = 10,
+        .occupyRes = 11,
+        .syncType = 12,
+        .syncData = 13,
+        .retryCount = 14,
+        .retryReason = 15,
+        .occupyedName = "testOccupyName",
+        .permissionName = "testPermissionName",
+        .sessionName = "testSessionName",
+    };
+
+    TRANS_ALARM(SPEED_LIMIT_ALARM, CONTROL_ALARM_TYPE, validExtra4);
+
 }
 } // namespace OHOS

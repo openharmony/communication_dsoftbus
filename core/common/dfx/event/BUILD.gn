@@ -62,6 +62,7 @@ if (defined(ohos_lite)) {
       "src/disc_event.c",
       "src/lnn_event.c",
       "src/softbus_event.c",
+      "src/stats_event.c",
       "src/trans_event.c",
     ]
     defines = [ "SOFTBUS_STANDARD_SYSTEM" ]
