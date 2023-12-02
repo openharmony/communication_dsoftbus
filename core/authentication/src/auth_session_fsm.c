@@ -599,7 +599,7 @@ static void HandleMsgSaveSessionKey(AuthFsm *authFsm, MessagePara *para)
         AUTH_LOGE(AUTH_FSM, "auth fsm[%" PRId64 "] save session key fail", authFsm->authSeq);
     }
     (void)memset_s(&sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
-    if (LnnGenerateLocalPtk(authFsm->info.udid) != SOFTBUS_OK) {
+    if (LnnGenerateLocalPtk(authFsm->info.udid, authFsm->info.uuid) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "generate ptk fail");
     }
     if (TrySyncDeviceInfo(authFsm->authSeq, &authFsm->info) != SOFTBUS_OK) {
