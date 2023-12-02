@@ -55,6 +55,7 @@
 
 #define RETURN_IF_GET_NODE_VALID(networkId, buf, info) do {                 \
         if ((networkId) == NULL || (buf) == NULL) {                        \
+            LNN_LOGE(LNN_LEDGER, "networkId or buf is invalid"); \
             return SOFTBUS_INVALID_PARAM;                               \
         }                                                               \
         (info) = LnnGetNodeInfoById((networkId), (CATEGORY_NETWORK_ID)); \
@@ -2108,6 +2109,7 @@ int32_t LnnGetRemoteNumInfo(const char *networkId, InfoKey key, int32_t *info)
     uint32_t i;
     int32_t ret;
     if (!IsValidString(networkId, ID_MAX_LEN)) {
+        LNN_LOGE(LNN_LEDGER, "networkId is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     if (info == NULL) {
