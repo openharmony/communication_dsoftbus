@@ -52,6 +52,14 @@ typedef struct {
     int8_t power;
 } DeviceWrapper;
 
+typedef enum {
+    HEART_BEAT = 0,
+    CAST_PLUS,
+    DV_KIT,
+    PC_COLLABORATION,
+    OSD
+} CustDataCapability;
+
 bool CheckBitMapEmpty(uint32_t capBitMapNum, const uint32_t *capBitMap);
 bool CheckCapBitMapExist(uint32_t capBitMapNum, const uint32_t *capBitMap, uint32_t pos);
 void SetCapBitMapPos(uint32_t capBitMapNum, uint32_t *capBitMap, uint32_t pos);

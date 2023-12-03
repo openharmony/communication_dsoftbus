@@ -28,11 +28,13 @@
 #include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_json_utils.h"
 #include "softbus_utils.h"
 
 #define DATA_TYPE_MASK 0xF0
 #define DATA_LENGTH_MASK 0x0F
 #define BYTE_SHIFT 4
+#define CUST_CAPABILITY_LEN 2
 
 #define MAC_BIT_ZERO 0
 #define MAC_BIT_ONE 1
@@ -241,6 +243,55 @@ static int32_t ParseDeviceType(DeviceWrapper *device, const uint8_t* data, const
     return SOFTBUS_OK;
 }
 
+static int32_t ParseCustData(DeviceWrapper *device, const uint8_t *data, const uint32_t len)
+{
+    if ((int32_t)data[0] != (int32_t)CAST_PLUS) {
+        DISC_LOGI(DISC_BLE, "not castPlus, just ignore");
+        return SOFTBUS_OK;
+    }
+    cJSON *custJson = cJSON_CreateObject();
+    DISC_CHECK_AND_RETURN_RET_LOGE(custJson != NULL, SOFTBUS_CREATE_JSON_ERR, DISC_BLE, "create cust json obj failed");
+
+    int32_t custLen = HEXIFY_LEN(len);
+    char *custString = SoftBusCalloc(sizeof(char) * custLen);
+    if (custString == NULL) {
+        DISC_LOGE(DISC_BLE, "calloc custString failed.");
+        cJSON_Delete(custJson);
+        return SOFTBUS_MEM_ERR;
+    }
+    if (ConvertBytesToUpperCaseHexString(custString, custLen, data, len) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_BLE, "ConvertBytesToUpperCaseHexString failed");
+        cJSON_Delete(custJson);
+        SoftBusFree(custString);
+        return SOFTBUS_ERR;
+    }
+
+    if (!AddStringToJsonObject(custJson, g_capabilityMap[CASTPLUS_CAPABILITY_BITMAP].capability,
+        &custString[CUST_CAPABILITY_LEN])) {
+        DISC_LOGE(DISC_BLE, "add string to json failed");
+        cJSON_Delete(custJson);
+        SoftBusFree(custString);
+        return SOFTBUS_PARSE_JSON_ERR;
+    }
+
+    char *custData = cJSON_PrintUnformatted(custJson);
+    cJSON_Delete(custJson);
+    if (custData == NULL) {
+        DISC_LOGE(DISC_BLE, "cJSON_PrintUnformatted failed");
+        SoftBusFree(custString);
+        return SOFTBUS_ERR;
+    }
+    if (memcpy_s(device->info->custData, DISC_MAX_CUST_DATA_LEN, custData, strlen(custData) + 1) != EOK) {
+        DISC_LOGE(DISC_BLE, "memcpy custData failed");
+        cJSON_free(custData);
+        SoftBusFree(custString);
+        return SOFTBUS_ERR;
+    }
+    cJSON_free(custData);
+    SoftBusFree(custString);
+    return SOFTBUS_OK;
+}
+
 static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_t dataLen)
 {
     uint32_t curLen = POS_TLV + ADV_HEAD_LEN;
@@ -265,8 +316,7 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_
                 ret = CopyDeviceNameValue(device, &data[curLen + 1], &len, dataLen - curLen - TL_LEN);
                 break;
             case TLV_TYPE_CUST:
-                ret = CopyValue(device->info->custData, DISC_MAX_CUST_DATA_LEN,
-                                (void *)&data[curLen + 1], len, "TLV_TYPE_CUST");
+                ret = ParseCustData(device, &data[curLen + 1], len);
                 break;
             case TLV_TYPE_BR_MAC:
                 ret = CopyBrAddrValue(device, &data[curLen + 1], len);
