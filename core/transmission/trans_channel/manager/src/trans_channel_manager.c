@@ -753,6 +753,7 @@ int32_t TransGetNameByChanId(const TransInfo *info, char *pkgName, char *session
     uint16_t pkgLen, uint16_t sessionNameLen)
 {
     if (info == NULL || pkgName == NULL || sessionName == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     switch ((ChannelType)info->channelType) {
