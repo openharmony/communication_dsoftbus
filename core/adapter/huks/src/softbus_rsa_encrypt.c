@@ -47,6 +47,7 @@ static struct HksParam g_decryptParams[] = {
     { .tag = HKS_TAG_PADDING,    .uint32Param = HKS_PADDING_OAEP       },
     { .tag = HKS_TAG_DIGEST,     .uint32Param = HKS_DIGEST_SHA256      },
     { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_ECB           },
+    { .tag = HKS_TAG_MGF_DIGEST, .uint32Param = HKS_DIGEST_SHA1        },
 };
 
 static bool IsRsaKeyPairExist(struct HksBlob Alias)
