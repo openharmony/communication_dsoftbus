@@ -250,6 +250,7 @@ int32_t TransProxyGetChanByChanId(int32_t chanId, ProxyChannelInfo *chan)
         }
     }
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
+    TRANS_LOGE(TRANS_CTRL, "proxy channel not found by chanId[%d]", chanId);
     return SOFTBUS_ERR;
 }
 
@@ -1585,21 +1586,26 @@ int32_t TransProxyGetNameByChanId(int32_t chanId, char *pkgName, char *sessionNa
     uint16_t pkgLen, uint16_t sessionLen)
 {
     if (pkgName == NULL || sessionName == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (chan == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "malloc err");
         return SOFTBUS_MALLOC_ERR;
     }
     if (TransProxyGetChanByChanId(chanId, chan) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get channel info by chanId[%d] failed", chanId);
         SoftBusFree(chan);
         return SOFTBUS_ERR;
     }
     if (TransProxyGetPkgName(chan->appInfo.myData.sessionName, pkgName, pkgLen) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get pkgName failed");
         SoftBusFree(chan);
         return SOFTBUS_ERR;
     }
     if (strcpy_s(sessionName, sessionLen, chan->appInfo.myData.sessionName) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "strcpy_s failed");
         SoftBusFree(chan);
         return SOFTBUS_MEM_ERR;
     }

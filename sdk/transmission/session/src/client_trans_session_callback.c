@@ -173,14 +173,14 @@ int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel
         }
         return ret;
     }
-
+    TRANS_LOGI(TRANS_SDK, "trigger session open callback");
     if ((sessionCallback.session.OnSessionOpened == NULL) ||
         (sessionCallback.session.OnSessionOpened(sessionId, SOFTBUS_OK) != SOFTBUS_OK)) {
         TRANS_LOGE(TRANS_SDK, "OnSessionOpened failed");
         (void)ClientDeleteSession(sessionId);
         return SOFTBUS_ERR;
     }
-    TRANS_LOGD(TRANS_SDK, "ok");
+    TRANS_LOGI(TRANS_SDK, "ok, sessionId=%d", sessionId);
     return SOFTBUS_OK;
 }
 
@@ -191,11 +191,12 @@ int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t channelType, int32_t
     SessionListenerAdapter sessionCallback;
     (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
     (void)GetSocketCallbackAdapterByChannelId(channelId, channelType, &sessionId, &sessionCallback);
+    TRANS_LOGI(TRANS_SDK, "trigger session open failed callback");
     if (sessionCallback.session.OnSessionOpened != NULL) {
         (void)sessionCallback.session.OnSessionOpened(sessionId, errCode);
     }
     (void)ClientDeleteSession(sessionId);
-    TRANS_LOGD(TRANS_SDK, "ok");
+    TRANS_LOGI(TRANS_SDK, "ok, sessionid=%d", sessionId);
     return SOFTBUS_OK;
 }
 
@@ -208,6 +209,7 @@ int32_t TransOnSessionClosed(int32_t channelId, int32_t channelType, ShutdownRea
     (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
     (void)GetSocketCallbackAdapterByChannelId(channelId, channelType, &sessionId, &sessionCallback);
 
+    TRANS_LOGI(TRANS_SDK, "trigger session close callback");
     if (sessionCallback.socket.OnShutdown != NULL) {
         sessionCallback.socket.OnShutdown(sessionId, reason);
     } else if (sessionCallback.session.OnSessionClosed != NULL) {
@@ -219,7 +221,7 @@ int32_t TransOnSessionClosed(int32_t channelId, int32_t channelType, ShutdownRea
         TRANS_LOGE(TRANS_SDK, "client delete session failed");
         return SOFTBUS_ERR;
     }
-    TRANS_LOGD(TRANS_SDK, "ok, sessionId=%d", sessionId);
+    TRANS_LOGI(TRANS_SDK, "ok, sessionId=%d", sessionId);
     return SOFTBUS_OK;
 }
 

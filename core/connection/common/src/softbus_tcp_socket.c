@@ -182,7 +182,7 @@ int32_t SetIpTos(int fd, uint32_t tos)
 {
     int rc = SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_IP, SOFTBUS_IP_TOS, &tos, sizeof(tos));
     if (rc != 0) {
-        CONN_LOGE(CONN_COMMON, "set tos failed");
+        CONN_LOGE(CONN_COMMON, "set tos failed, fd=%d", fd);
         return SOFTBUS_TCP_SOCKET_ERR;
     }
     return SOFTBUS_OK;
