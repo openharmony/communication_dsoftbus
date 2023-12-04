@@ -46,3 +46,8 @@ void LnnIpAddrChangeEventHandler(void)
 {
     LNN_LOGI(LNN_BUILDER, "LnnIpAddrChangeEventHandler virtual ok");
 }
+
+void EhLoginEventHandler(void)
+{
+    LNN_LOGI(LNN_BUILDER, "EH handle SOFTBUS_ACCOUNT_LOG_IN");
+}
