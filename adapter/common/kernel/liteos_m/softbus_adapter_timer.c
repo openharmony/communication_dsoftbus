@@ -17,11 +17,12 @@
 
 #include <sys/time.h>
 #include "cmsis_os2.h"
-#include "softbus_adapter_log.h"
+#include "comm_log.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 
-#define MS_PER_SECOND 1000
+#define MS_PER_SECOND  1000
+#define US_PER_MSECOND 1000
 
 static TimerFunc g_timerfunc = NULL;
 
@@ -43,39 +44,39 @@ void *SoftBusCreateTimer(void **timerId, unsigned int type)
 
     void *id = osTimerNew((osTimerFunc_t)HandleTimeoutAdapterFun, (osTimerType_t)type, NULL, NULL);
     if (id != NULL) {
-        HILOG_INFO(SOFTBUS_HILOG_ID, "create timer success");
+        COMM_LOGI(COMM_ADAPTER, "create timer success");
         return id;
     }
-    HILOG_ERROR(SOFTBUS_HILOG_ID, "create timer failed");
+    COMM_LOGE(COMM_ADAPTER, "create timer failed");
     return NULL;
 }
 
 int SoftBusStartTimer(void *timerId, unsigned int ms)
 {
     if (timerId == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "timerId is NULL");
+        COMM_LOGE(COMM_ADAPTER, "timerId is NULL");
         return SOFTBUS_ERR;
     }
     if (osTimerStart(timerId, ms * osKernelGetTickFreq() / MS_PER_SECOND) != osOK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "start timer failed");
+        COMM_LOGE(COMM_ADAPTER, "start timer failed");
         (void)osTimerDelete(timerId);
         return SOFTBUS_ERR;
     }
-    HILOG_INFO(SOFTBUS_HILOG_ID, "start timer success");
+    COMM_LOGI(COMM_ADAPTER, "start timer success");
     return SOFTBUS_OK;
 }
 
 int SoftBusDeleteTimer(void *timerId)
 {
     if (timerId == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "timerId is NULL");
+        COMM_LOGE(COMM_ADAPTER, "timerId is NULL");
         return SOFTBUS_ERR;
     }
     if (osTimerDelete(timerId) != osOK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "delete timer failed");
+        COMM_LOGE(COMM_ADAPTER, "delete timer failed");
         return SOFTBUS_ERR;
     }
-    HILOG_INFO(SOFTBUS_HILOG_ID, "delete timer success");
+    COMM_LOGI(COMM_ADAPTER, "delete timer success");
     return SOFTBUS_OK;
 }
 
@@ -88,7 +89,7 @@ int SoftBusSleepMs(unsigned int ms)
 int32_t SoftBusGetTime(SoftBusSysTime *sysTime)
 {
     if (sysTime == NULL) {
-        HILOG_INFO(SOFTBUS_HILOG_ID, "sysTime is null");
+        COMM_LOGI(COMM_ADAPTER, "sysTime is null");
         return SOFTBUS_INVALID_PARAM;
     }
     struct timeval time = {0};
@@ -98,3 +99,15 @@ int32_t SoftBusGetTime(SoftBusSysTime *sysTime)
     return SOFTBUS_OK;
 }
 
+uint64_t SoftBusGetSysTimeMs(void)
+{
+    struct timeval time;
+    time.tv_sec = 0;
+    time.tv_usec = 0;
+    if (gettimeofday(&time, NULL) != 0) {
+        COMM_LOGI(COMM_ADAPTER, "get sys time fail");
+        return 0;
+    }
+    uint64_t ms = (uint64_t)time.tv_sec * MS_PER_SECOND + (uint64_t)time.tv_usec / US_PER_MSECOND;
+    return ms;
+}

@@ -36,6 +36,7 @@ if (defined(ohos_lite)) {
   }
 
   common_include = [
+    "$dsoftbus_root_path/core/common/dfx/interface/include",
     "$dsoftbus_root_path/interfaces/kits",
     "$dsoftbus_root_path/interfaces/kits/common",
     "//base/startup/init/interfaces/innerkits/include/syspara",
@@ -79,10 +80,12 @@ if (defined(ohos_lite)) {
         "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
       ]
       if (board_name == "v200zr") {
+        include_dirs += [ "//third_party/json/include" ]
         sources = []
         sources = [
           "$softbus_adapter_common/dfx/softbus_adapter_hisysevent_mini.c",
           "$softbus_adapter_common/dfx/softbus_adapter_hitrace_virtual.c",
+          "$softbus_adapter_common/json/nlohmann/softbus_adapter_json.cpp",
           "$softbus_adapter_common/kernel/liteos_m/lnn_ip_utils_adapter.c",
           "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_mem.c",
           "$softbus_adapter_common/kernel/liteos_m/softbus_adapter_timer.c",
@@ -90,12 +93,16 @@ if (defined(ohos_lite)) {
           "$softbus_adapter_common/kernel/posix/softbus_adapter_socket.c",
           "$softbus_adapter_common/kernel/posix/softbus_adapter_thread.c",
           "$softbus_adapter_common/log/softbus_adapter_log.c",
+          "$softbus_adapter_common/perf/softbus_adapter_perf.c",
           "$softbus_adapter_common/range/softbus_adapter_range.c",
           "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
         ]
       }
 
-      deps = [ "$hilog_lite_deps_path" ]
+      deps = [
+        "$dsoftbus_dfx_path/log:softbus_dfx_log",
+        "$hilog_lite_deps_path",
+      ]
 
       if (dsoftbus_feature_encrypt == 0) {
         sources += [
@@ -139,6 +146,7 @@ if (defined(ohos_lite)) {
         "$softbus_adapter_config/spec_config/softbus_config_adapter.c",
       ]
       deps = [
+        "$dsoftbus_dfx_path/log:softbus_dfx_log",
         "$hilog_lite_deps_path",
         "//base/startup/init/interfaces/innerkits:libbegetutil",
         "//third_party/bounds_checking_function:libsec_shared",
@@ -166,6 +174,7 @@ if (defined(ohos_lite)) {
       "$softbus_adapter_common/include",
       "$softbus_adapter_common/include/OS_adapter_define/linux",
       "$dsoftbus_feature_product_config_path/spec_config",
+      "$dsoftbus_root_path/core/common/dfx/interface/include",
       "$dsoftbus_root_path/core/common/include",
       "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include",
     ]
@@ -180,6 +189,7 @@ if (defined(ohos_lite)) {
     branch_protector_ret = "pac_ret"
 
     include_dirs = [
+      "$dsoftbus_root_path/core/common/dfx/interface/include",
       "$dsoftbus_root_path/interfaces/kits",
       "$dsoftbus_root_path/interfaces/kits/common",
       "//commonlibrary/c_utils/base/include",
@@ -200,7 +210,10 @@ if (defined(ohos_lite)) {
       "$softbus_adapter_common/log/softbus_adapter_log.c",
       "$softbus_adapter_common/perf/softbus_adapter_perf.c",
     ]
-    public_deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
+    public_deps = [
+      "$dsoftbus_dfx_path/log:softbus_dfx_log",
+      "//third_party/bounds_checking_function:libsec_shared",
+    ]
     native_source_path = rebase_path("$dsoftbus_root_path")
 
     ble_enhanced_impl =

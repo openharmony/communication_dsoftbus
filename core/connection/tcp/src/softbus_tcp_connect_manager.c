@@ -469,6 +469,11 @@ static int32_t WrapperAddTcpConnInfo(const ConnectOption *option, const ConnectR
 static int32_t TcpOpenClientSocketErr(const ConnectOption *option, uint32_t requestId,
     ConnectStatistics *statistics, const ConnectResult *result)
 {
+    ConnAlarmExtra extraAlarm = {
+        .linkType = CONNECT_TCP,
+        .errcode = SOFTBUS_TCPCONNECTION_SOCKET_ERR,
+    };
+    CONN_ALARM(CONNECTION_FAIL_ALARM, MANAGE_ALARM_TYPE, extraAlarm);
     CONN_LOGE(CONN_COMMON, "OpenTcpClient failed.");
     result->OnConnectFailed(requestId, SOFTBUS_ERR);
     statistics->reqId = requestId;

@@ -55,6 +55,7 @@
 
 #define RETURN_IF_GET_NODE_VALID(networkId, buf, info) do {                 \
         if ((networkId) == NULL || (buf) == NULL) {                        \
+            LNN_LOGE(LNN_LEDGER, "networkId or buf is invalid"); \
             return SOFTBUS_INVALID_PARAM;                               \
         }                                                               \
         (info) = LnnGetNodeInfoById((networkId), (CATEGORY_NETWORK_ID)); \
@@ -1151,6 +1152,17 @@ static int32_t DlGetDeviceCipherInfoIv(const char *networkId, void *buf, uint32_
     return SOFTBUS_OK;
 }
 
+static int32_t DlGetNodeP2pIp(const char *networkId, void *buf, uint32_t len)
+{
+    NodeInfo *info = NULL;
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if (strcpy_s((char *)buf, len, info->p2pInfo.p2pIp) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "copy p2pIp to buf fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static DistributedLedgerKey g_dlKeyTable[] = {
     {STRING_KEY_HICE_VERSION, DlGetNodeSoftBusVersion},
     {STRING_KEY_DEV_UDID, DlGetDeviceUdid},
@@ -1168,6 +1180,7 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {STRING_KEY_OFFLINE_CODE, DlGetDeviceOfflineCode},
     {STRING_KEY_BLE_MAC, DlGetNodeBleMac},
     {STRING_KEY_WIFIDIRECT_ADDR, DlGetWifiDirectAddr},
+    {STRING_KEY_P2P_IP, DlGetNodeP2pIp},
     {NUM_KEY_META_NODE, DlGetAuthType},
     {NUM_KEY_SESSION_PORT, DlGetSessionPort},
     {NUM_KEY_AUTH_PORT, DlGetAuthPort},
@@ -1503,6 +1516,36 @@ static void FilterBrInfo(NodeInfo *info)
     info->authChannelId[CONNECTION_ADDR_BR][AUTH_AS_SERVER_SIDE] = 0;
 }
 
+static bool IsDeviceInfoChanged(NodeInfo *info)
+{
+    if (info == NULL) {
+        LNN_LOGI(LNN_LEDGER, "invalid param");
+        return false;
+    }
+    NodeInfo deviceInfo;
+    if (memset_s(&deviceInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memset_s basic fail!");
+        return false;
+    }
+    uint8_t udidHash[SHA_256_HASH_LEN] = {0};
+    char hashStr[SHORT_UDID_HASH_HEX_LEN + 1] = {0};
+    if (SoftBusGenerateStrHash((const unsigned char *)info->deviceInfo.deviceUdid,
+        strlen(info->deviceInfo.deviceUdid), udidHash) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LEDGER, "generate udidhash fail");
+        return false;
+    }
+    if (ConvertBytesToHexString(hashStr, SHORT_UDID_HASH_HEX_LEN + 1, udidHash,
+        SHORT_UDID_HASH_HEX_LEN / HEXIFY_UNIT_LEN) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LEDGER, "convert udidhash to hexstr fail");
+        return false;
+    }
+    if (LnnRetrieveDeviceInfo(hashStr, &deviceInfo) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LEDGER, "get deviceInfo by udidhash fail");
+        return false;
+    }
+    return memcmp(info, &deviceInfo, (size_t)&(((NodeInfo *)0)->relation)) != 0 ? true : false;
+}
+
 static void BleDirectlyOnlineProc(NodeInfo *info)
 {
     if (!LnnHasDiscoveryType(info, DISCOVERY_TYPE_BLE)) {
@@ -1549,9 +1592,12 @@ static void BleDirectlyOnlineProc(NodeInfo *info)
     if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR)) {
         FilterBrInfo(info);
     }
-    if (LnnSaveRemoteDeviceInfo(info) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "save remote devInfo fail");
-        return;
+    if (IsDeviceInfoChanged(info)) {
+        if (LnnSaveRemoteDeviceInfo(info) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "save remote devInfo fail");
+        }
+    } else {
+        LnnUpdateRemoteDeviceInfo(info);
     }
 }
 
@@ -2063,6 +2109,7 @@ int32_t LnnGetRemoteNumInfo(const char *networkId, InfoKey key, int32_t *info)
     uint32_t i;
     int32_t ret;
     if (!IsValidString(networkId, ID_MAX_LEN)) {
+        LNN_LOGE(LNN_LEDGER, "networkId is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     if (info == NULL) {
@@ -2624,6 +2671,31 @@ int32_t LnnSetDLAuthPort(const char *id, IdCategory type, int32_t authPort)
         return SOFTBUS_NOT_FIND;
     }
     nodeInfo->connectInfo.authPort = authPort;
+    (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    return SOFTBUS_OK;
+}
+
+int32_t LnnSetDLP2pIp(const char *id, IdCategory type, const char *p2pIp)
+{
+    if (id == NULL || p2pIp == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    NodeInfo *nodeInfo = LnnGetNodeInfoById(id, type);
+    if (nodeInfo == NULL) {
+        LNN_LOGE(LNN_LEDGER, "get info fail");
+        (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return SOFTBUS_NOT_FIND;
+    }
+    if (strcpy_s(nodeInfo->p2pInfo.p2pIp, sizeof(nodeInfo->p2pInfo.p2pIp), p2pIp) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
+        (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return SOFTBUS_MEM_ERR;
+    }
     (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return SOFTBUS_OK;
 }

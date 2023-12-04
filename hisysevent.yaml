@@ -82,11 +82,11 @@ DISCOVER_AUDIT:
   SCAN_CYCLE: { type: STRING, desc: scan duty cycle }
   SCAN_ID: { type: INT32, desc: scanner id }
   SCAN_LISTENER_ID: { type: INT32, desc: scanner listhener id }
-  SCAN_INTERCAL: { type: INT32, desc: scanner interval }
+  SCAN_INTERVAL: { type: INT32, desc: scanner interval }
   SCAN_WINDOW: { type: INT32, desc: scanner window }
   DISC_TYPE: { type: INT32, desc: discovery type }
   DISC_MODE: { type: INT32, desc: discovery mode }
-  FIRST_DISCOVERY_TIME: { type: INT32, desc: time consuming to discover for the first time }
+  FIRST_DISCOVERY_TIME: { type: INT64, desc: time consuming to discover for the first time }
   LOCAL_NET_ID: { type: STRING, desc: local device net id }
   LOCAL_UDID: { type: STRING, desc: local device udid }
   LOCAL_DEV_TYPE: { type: STRING, desc: local device type }
@@ -152,7 +152,8 @@ BUSCENTER_AUDIT:
   PEER_BR_MAC: { type: STRING, desc: peer device br mac }
   PEER_AUTH_PORT: { type: STRING, desc: peer puth port }
   PEER_UDID: { type: STRING, desc: peer device udid }
-  PEER_DEV_TYPE: { type: STRING, desc: peer device type }
+  PEER_DEV_TYPE: { type: INT32, desc: peer device type }
+  EXTRA: { type: STRING, desc: ectra information }
 
 TRANSPORT_BEHAVIOR:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: transport behavior }
@@ -209,6 +210,7 @@ TRANSPORT_AUDIT:
   COST_TIME: { type: INT32, desc: total cost time}
   CHAN_SCORE: { type: INT32, desc: channel score }
   CHAN_LIMIT: { type: INT32, desc: data limit }
+  EXTRA: { type: STRING, desc: ectra information }
 
 CONNECTION_BEHAVIOR:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: connection behavior }
@@ -255,11 +257,11 @@ CONNECTION_AUDIT:
   PEER_BR_MAC: { type: STRING, desc: peer device br mac }
   PEER_BLE_MAC: { type: STRING, desc: peer device ble mac }
   PEER_DEV_TYPE: { type: STRING, desc: peer device type }
-  PEER_WIFI_MAC: { type: STRING, desc: peer device wifi mac }
   PEER_UDID: { type: STRING, desc: peer device udid }
   CONN_PALOAD: { type: STRING, desc: paload data }
   LOCAL_DEV_NAME: { type: STRING, desc: local device name }
   PEER_IP: { type: STRING, desc: peer device ip }
+  EXTRA: { type: STRING, desc: ectra information }
 
 IPC_BEHAVIOR:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: softbus ipc behavior dotting event }

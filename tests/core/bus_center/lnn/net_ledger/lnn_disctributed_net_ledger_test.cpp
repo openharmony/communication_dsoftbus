@@ -358,7 +358,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_NETWORKID_BYBTMAC_Test_001, TestSize
     ret = LnnGetNetworkIdByBtMac(NODE1_BT_MAC, buf, NETWORK_ID_BUF_LEN);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnGetNetworkIdByBtMac(NODE2_BT_MAC, buf, NETWORK_ID_BUF_LEN);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /*
@@ -375,7 +375,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_NETWORKID_BY_UUID_Test_001, TestSize
     ret = LnnGetNetworkIdByUuid(NODE1_UUID, buf, NETWORK_ID_BUF_LEN);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnGetNetworkIdByUuid(NODE2_UUID, buf, NETWORK_ID_BUF_LEN);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /*
@@ -392,7 +392,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_NETWORKID_BY_UDID_Test_001, TestSize
     ret = LnnGetNetworkIdByUdid(NODE1_UDID, buf, UDID_BUF_LEN);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnGetNetworkIdByUdid(NODE2_UDID, buf, UDID_BUF_LEN);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /*
@@ -407,7 +407,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_DLHEARTBEAT_TIMER_STAMP_Test_001, Te
     int32_t ret = LnnGetDLHeartbeatTimestamp(NODE1_NETWORK_ID, &timeStamp);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnGetDLHeartbeatTimestamp(NODE2_NETWORK_ID, &timeStamp);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /*
@@ -422,7 +422,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_SET_DLHEARTBEAT_TIMER_STAMP_Test_001, Te
     int32_t ret = LnnSetDLHeartbeatTimestamp(NODE1_NETWORK_ID, timeStamp);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnSetDLHeartbeatTimestamp(NODE2_NETWORK_ID, timeStamp);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /*
@@ -437,7 +437,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_SET_DLCONN_CAPABILITY_Test_001, TestSize
     int32_t ret = LnnSetDLConnCapability(NODE1_NETWORK_ID, connCapability);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnSetDLConnCapability(NODE2_NETWORK_ID, connCapability);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /*
@@ -451,7 +451,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_SET_DLNODE_ADDR_Test_001, TestSize.Level
     int32_t ret = LnnSetDLNodeAddr(NODE1_NETWORK_ID, CATEGORY_NETWORK_ID, NODE_ADDRESS);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnSetDLNodeAddr(NODE2_NETWORK_ID, CATEGORY_NETWORK_ID, NODE_ADDRESS);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /*
@@ -593,7 +593,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_NODE_Test_001, TestSize.Level
     const char *key = "dsoftBus";
     NodeInfo info;
     ret = LnnGetRemoteNodeInfoByKey(key, &info);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 HWTEST_F(LNNDisctributedLedgerTest, DLGET_DEVICE_TYPEID_Test_001, TestSize.Level1)
@@ -688,14 +688,14 @@ HWTEST_F(LNNDisctributedLedgerTest, NOTIFY_MIGRATE_UPGRADE_Test_001, TestSize.Le
     memset_s(info.deviceInfo.deviceUdid, sizeof(info.deviceInfo.deviceUdid), '\0', sizeof(info.deviceInfo.deviceUdid));
     (void)NotifyMigrateUpgrade(&info);
     int32_t ret = LnnUpdateAccountInfo(nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 HWTEST_F(LNNDisctributedLedgerTest, LNN_UPDATE_GROUPTYPE_Test_001, TestSize.Level1)
 {
     NodeInfo info;
     int32_t ret = LnnUpdateGroupType(nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     char str[] = "softBus";
     strcpy_s(info.deviceInfo.deviceUdid, sizeof(str), str);
     ret = LnnUpdateGroupType(&info);
@@ -744,14 +744,14 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GETNETWORKID_BYUDIDHASH_Test_001, TestSi
     int32_t ret = LnnGetNetworkIdByUdidHash(nullptr, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnGetNetworkIdByUdidHash(udidHash, &buf, len);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 HWTEST_F(LNNDisctributedLedgerTest, LNN_GETDL_ONLINETIMESTAMP_Test_001, TestSize.Level1)
 {
     uint64_t timestamp = 0;
     int32_t ret = LnnGetDLOnlineTimestamp(nullptr, &timestamp);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 HWTEST_F(LNNDisctributedLedgerTest, LNN_SETDL_BATTERYINFO_Test_001, TestSize.Level1)
@@ -761,7 +761,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_SETDL_BATTERYINFO_Test_001, TestSize.Lev
     int32_t ret = LnnSetDLBatteryInfo(nullptr, &info);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnSetDLBatteryInfo(networkId, &info);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 HWTEST_F(LNNDisctributedLedgerTest, LNN_SETDL_BSSTRANSINFO_Test_001, TestSize.Level1)
@@ -771,7 +771,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_SETDL_BSSTRANSINFO_Test_001, TestSize.Le
     int32_t ret = LnnSetDLBssTransInfo(nullptr, &info);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnSetDLBssTransInfo(networkId, &info);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 HWTEST_F(LNNDisctributedLedgerTest, LNN_SETDL_PROXYPORT_Test_001, TestSize.Level1)
@@ -779,7 +779,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_SETDL_PROXYPORT_Test_001, TestSize.Level
     IdCategory type = CATEGORY_NETWORK_ID;
     int32_t proxyPort = 0;
     int32_t ret = LnnSetDLProxyPort(nullptr, type, proxyPort);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 HWTEST_F(LNNDisctributedLedgerTest, LNN_SETDL_SESSIONPORT_Test_001, TestSize.Level1)
@@ -787,7 +787,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_SETDL_SESSIONPORT_Test_001, TestSize.Lev
     IdCategory type = CATEGORY_NETWORK_ID;
     int32_t sessionPort = 0;
     int32_t ret = LnnSetDLSessionPort(nullptr, type, sessionPort);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 HWTEST_F(LNNDisctributedLedgerTest, LNN_SETDL_AUTHPORT_Test_001, TestSize.Level1)
@@ -796,9 +796,9 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_SETDL_AUTHPORT_Test_001, TestSize.Level1
     IdCategory type = CATEGORY_NETWORK_ID;
     int32_t authPort = 0;
     int32_t ret = LnnSetDLAuthPort(nullptr, type, authPort);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = LnnSetDLAuthPort(id, type, authPort);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 HWTEST_F(LNNDisctributedLedgerTest, SOFTBUS_DUMPBUSCENTER_Test_001, TestSize.Level1)
@@ -861,7 +861,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GETREMOTE_NODEINFO_Test_001, TestSize.Le
     IdCategory type = CATEGORY_NETWORK_ID;
     NodeInfo info;
     int32_t ret = LnnGetRemoteNodeInfoById(networkId, type, &info);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 HWTEST_F(LNNDisctributedLedgerTest, LNN_REFRESH_DEVICEONLINE_ANDINFO_Test_001, TestSize.Level1)

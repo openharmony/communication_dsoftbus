@@ -22,11 +22,11 @@
 extern "C" {
 #endif
 
-#define TRANS_ASSIGNER(type, filedName, filed)                                                                \
-    static inline bool TransAssigner##filedName(                                                              \
+#define TRANS_ASSIGNER(type, fieldName, field)                                                                \
+    static inline bool TransAssigner##fieldName(                                                              \
         const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param) \
     {                                                                                                         \
-        if (Assigner##type(form->transExtra->filed, &param) && CopyString(param->name, eventName)) {          \
+        if (Assigner##type(form->transExtra->field, &param) && CopyString(param->name, eventName)) {          \
             param->t = paramType;                                                                             \
             return true;                                                                                      \
         }                                                                                                     \
@@ -50,11 +50,12 @@ TRANS_ASSIGNER(Int32, SocketFd, socketFd)
 TRANS_ASSIGNER(Int32, CostTime, costTime)
 TRANS_ASSIGNER(Int32, ChannelScore, channelScore)
 TRANS_ASSIGNER(Int32, PeerChannelId, peerChannelId)
+TRANS_ASSIGNER(Int32, BtFlow, btFlow)
 TRANS_ASSIGNER(String, PeerNetworkId, peerNetworkId)
 TRANS_ASSIGNER(String, CallerPkg, callerPkg)
 TRANS_ASSIGNER(String, CalleePkg, calleePkg)
 
-#define TRANS_ASSIGNER_SIZE 20 // Size of g_transAssigners
+#define TRANS_ASSIGNER_SIZE 21 // Size of g_transAssigners
 static const HiSysEventParamAssigner g_transAssigners[] = {
     { "STAGE_RES",        HISYSEVENT_INT32,  TransAssignerResult        },
     { "ERROR_CODE",       HISYSEVENT_INT32,  TransAssignerErrcode       },
@@ -73,10 +74,68 @@ static const HiSysEventParamAssigner g_transAssigners[] = {
     { "COST_TIME",        HISYSEVENT_INT32,  TransAssignerCostTime      },
     { "CHAN_SCORE",       HISYSEVENT_INT32,  TransAssignerChannelScore  },
     { "PEER_CHAN_ID",     HISYSEVENT_INT32,  TransAssignerPeerChannelId },
+    { "BT_FLOW",          HISYSEVENT_INT32,  TransAssignerBtFlow        },
     { "PEER_NET_ID",      HISYSEVENT_STRING, TransAssignerPeerNetworkId },
     { "HOST_PKG",         HISYSEVENT_STRING, TransAssignerCallerPkg     },
     { "TO_CALL_PKG",      HISYSEVENT_STRING, TransAssignerCalleePkg     },
     // Modification Note: remember updating TRANS_ASSIGNER_SIZE
+};
+
+#define TRANS_ALARM_ASSIGNER(type, fieldName, field)                                                          \
+    static inline bool TransAssigner##fieldName(                                                              \
+        const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param) \
+    {                                                                                                         \
+        if (Assigner##type(form->transAlarmExtra->field, &param) && CopyString(param->name, eventName)) {     \
+            param->t = paramType;                                                                             \
+            return true;                                                                                      \
+        }                                                                                                     \
+        return false;                                                                                         \
+    }
+
+TRANS_ALARM_ASSIGNER(Errcode, AlarmResult, result)
+TRANS_ALARM_ASSIGNER(Errcode, AlarmReason, errcode)
+TRANS_ALARM_ASSIGNER(Int32, CallerPid, callerPid)
+TRANS_ALARM_ASSIGNER(Int32, AlarmLinkType, linkType)
+TRANS_ALARM_ASSIGNER(Int32, MinBw, minBw)
+TRANS_ALARM_ASSIGNER(Int32, MethodId, methodId)
+TRANS_ALARM_ASSIGNER(Int32, Duration, duration)
+TRANS_ALARM_ASSIGNER(Int32, CurFlow, curFlow)
+TRANS_ALARM_ASSIGNER(Int32, LimitFlow, limitFlow)
+TRANS_ALARM_ASSIGNER(Int32, LimitTime, limitTime)
+TRANS_ALARM_ASSIGNER(Int32, OccupyRes, occupyRes)
+TRANS_ALARM_ASSIGNER(Int32, SyncType, syncType)
+TRANS_ALARM_ASSIGNER(Int32, SyncData, syncData)
+TRANS_ALARM_ASSIGNER(Int32, RetryCount, retryCount)
+TRANS_ALARM_ASSIGNER(Int32, RetryReason, retryReason)
+TRANS_ALARM_ASSIGNER(String, ConflictName, conflictName)
+TRANS_ALARM_ASSIGNER(String, ConflictedName, conflictedName)
+TRANS_ALARM_ASSIGNER(String, OccupyedName, occupyedName)
+TRANS_ALARM_ASSIGNER(String, PermissionName, permissionName)
+TRANS_ALARM_ASSIGNER(String, AlarmSessionName, sessionName)
+
+#define TRANS_ALARM_ASSIGNER_SIZE 20 // Size of g_transAlarmAssigners
+static const HiSysEventParamAssigner g_transAlarmAssigners[] = {
+    { "STAGE_RES",         HISYSEVENT_INT32,  TransAssignerAlarmResult            },
+    { "ERROR_CODE",        HISYSEVENT_INT32,  TransAssignerAlarmReason            },
+    { "CALLER_PID",        HISYSEVENT_INT32,  TransAssignerCallerPid              },
+    { "LINK_TYPE",         HISYSEVENT_INT32,  TransAssignerAlarmLinkType          },
+    { "MIN_BW",            HISYSEVENT_INT32,  TransAssignerMinBw                  },
+    { "METHOD_ID",         HISYSEVENT_INT32,  TransAssignerMethodId               },
+    { "DURATION",          HISYSEVENT_INT32,  TransAssignerDuration               },
+    { "CUR_FLOW",          HISYSEVENT_INT32,  TransAssignerCurFlow                },
+    { "LIMIT_FLOW",        HISYSEVENT_INT32,  TransAssignerLimitFlow              },
+    { "LIMIT_TIME",        HISYSEVENT_INT32,  TransAssignerLimitTime              },
+    { "OCCUPY_RES",        HISYSEVENT_INT32,  TransAssignerOccupyRes              },
+    { "SYNC_TYPE",         HISYSEVENT_INT32,  TransAssignerSyncType               },
+    { "SYNC_DATA",         HISYSEVENT_INT32,  TransAssignerSyncData               },
+    { "RETRY_COUNT",       HISYSEVENT_INT32,  TransAssignerRetryCount             },
+    { "RETRY_REASON",      HISYSEVENT_INT32,  TransAssignerRetryReason            },
+    { "CONFLICT_NAME",     HISYSEVENT_STRING, TransAssignerConflictName           },
+    { "CONFLECTED_NAME",   HISYSEVENT_STRING, TransAssignerConflictedName         },
+    { "OCCUPYED_NAME",     HISYSEVENT_STRING, TransAssignerOccupyedName           },
+    { "PERMISSION_NAME",   HISYSEVENT_STRING, TransAssignerPermissionName         },
+    { "SESSION_NAME",      HISYSEVENT_STRING,  TransAssignerAlarmSessionName      },
+    // Modification Note: remember updating TRANS_ALARM_ASSIGNER_SIZE
 };
 
 static inline size_t ConvertTransForm2Param(HiSysEventParam params[], size_t size, SoftbusEventForm *form)
@@ -87,6 +146,21 @@ static inline size_t ConvertTransForm2Param(HiSysEventParam params[], size_t siz
     }
     for (size_t i = 0; i < size; ++i) {
         HiSysEventParamAssigner assigner = g_transAssigners[i];
+        if (assigner.Assign(assigner.name, assigner.type, form, &params[validSize])) {
+            ++validSize;
+        }
+    }
+    return validSize;
+}
+
+static inline size_t ConvertTransAlarmForm2Param(HiSysEventParam params[], size_t size, SoftbusEventForm *form)
+{
+    size_t validSize = 0;
+    if (form == NULL || form->transAlarmExtra == NULL) {
+        return validSize;
+    }
+    for (size_t i = 0; i < size; ++i) {
+        HiSysEventParamAssigner assigner = g_transAlarmAssigners[i];
         if (assigner.Assign(assigner.name, assigner.type, form, &params[validSize])) {
             ++validSize;
         }

@@ -71,6 +71,17 @@ static inline bool AssignerInt32(int32_t value, HiSysEventParam **param)
 }
 
 /* Used by ASSIGNER macros */
+static inline bool AssignerInt64(int64_t value, HiSysEventParam **param)
+{
+    if (value <= INVALID_INT_VALUE) {
+        (*param)->v.i64 = INVALID_INT_VALUE;
+        return false;
+    }
+    (*param)->v.i64 = value;
+    return true;
+}
+
+/* Used by ASSIGNER macros */
 static inline bool AssignerString(const char *value, HiSysEventParam **param)
 {
     if (value == NULL || strlen(value) == 0) {
@@ -87,11 +98,11 @@ static inline bool AssignerErrcode(int32_t value, HiSysEventParam **param)
     return true;
 }
 
-#define SOFTBUS_ASSIGNER(type, filedName, filed)                                                              \
-    static inline bool SoftbusAssigner##filedName(                                                            \
+#define SOFTBUS_ASSIGNER(type, fieldName, field)                                                              \
+    static inline bool SoftbusAssigner##fieldName(                                                            \
         const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param) \
     {                                                                                                         \
-        if (Assigner##type(form->filed, &param) && CopyString(param->name, eventName)) {                      \
+        if (Assigner##type(form->field, &param) && CopyString(param->name, eventName)) {                      \
             param->t = paramType;                                                                             \
             return true;                                                                                      \
         }                                                                                                     \

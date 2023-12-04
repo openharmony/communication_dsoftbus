@@ -28,9 +28,10 @@ int32_t UpdateLocalPtkIfValid(char *udid)
     return SOFTBUS_ERR;
 }
 
-int32_t LnnGenerateLocalPtk(char *udid)
+int32_t LnnGenerateLocalPtk(char *udid, char *uuid)
 {
     (void)udid;
+    (void)uuid;
     return SOFTBUS_OK;
 }
 
@@ -43,6 +44,13 @@ int32_t LnnSetLocalPtkConn(char *udid)
 int32_t LnnGetLocalPtkByUdid(const char *udid, char *localPtk)
 {
     (void)udid;
+    (void)localPtk;
+    return SOFTBUS_OK;
+}
+
+int32_t LnnGetLocalPtkByUuid(const char *uuid, char *localPtk)
+{
+    (void)uuid;
     (void)localPtk;
     return SOFTBUS_OK;
 }

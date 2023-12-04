@@ -222,7 +222,7 @@ static void ProcessNegotiateMessage(enum WifiDirectNegotiateCmdType cmd, struct 
         self->passiveCommand->deleteSelf(self->passiveCommand);
     }
     self->passiveCommand = command;
-    CONN_LOGI(CONN_WIFI_DIRECT, "passiveCommand=%p", command);
+    CONN_LOGI(CONN_WIFI_DIRECT, "passiveCommand=%d", command->type);
 
     switch (cmd) {
         case CMD_CONN_V1_REQ:
@@ -1175,13 +1175,20 @@ static int32_t ProcessConnectResponse(struct WifiDirectCommand *command)
 
 static int32_t ProcessDisconnectRequest(struct WifiDirectCommand *command)
 {
+    struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(IF_NAME_P2P);
+    CONN_CHECK_AND_RETURN_RET_LOGW(info, SOFTBUS_ERR, CONN_WIFI_DIRECT, "interface info is null");
+    int32_t reuseCountOld = info->getInt(info, II_KEY_REUSE_COUNT, 0);
+    if (reuseCountOld <= 0) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "reuseCountOld already 0, do not call RemoveLink");
+        command->onSuccess(command, NULL);
+        return SOFTBUS_OK;
+    }
+
     struct NegotiateMessage *msg = command->msg;
     char *remoteMac = msg->getString(msg, NM_KEY_MAC, "");
     int32_t ret = RemoveLink(remoteMac);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ERROR_REMOVE_LINK_FAILED, CONN_WIFI_DIRECT, "remove link failed");
 
-    struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(IF_NAME_P2P);
-    CONN_CHECK_AND_RETURN_RET_LOGW(info, SOFTBUS_ERR, CONN_WIFI_DIRECT, "interface info is null");
     int32_t reuseCount = info->getInt(info, II_KEY_REUSE_COUNT, 0);
     if (reuseCount > 0) {
         CONN_LOGI(CONN_WIFI_DIRECT, "reuseCount=%d", reuseCount);
@@ -1294,6 +1301,8 @@ static int32_t ProcessGetInterfaceInfoRequest(struct NegotiateMessage *msg)
             NegotiateMessageDelete(self->pendingRequestMsg);
             self->pendingRequestMsg = NULL;
         }
+        CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "post data failed");
+        ProcessSuccess(NULL);
         return ret;
     }
 

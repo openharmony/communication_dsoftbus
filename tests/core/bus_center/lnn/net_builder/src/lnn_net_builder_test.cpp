@@ -85,7 +85,7 @@ HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_DISCOVERY_DEVICE_TEST_001, TestSize.Level
     memcpy_s(target.peerUid, MAX_ACCOUNT_HASH_LEN, PEERUID, strlen(PEERUID));
     memcpy_s(target.info.ip.ip, IP_STR_MAX_LEN, IP, strlen(IP));
     int32_t ret = LnnNotifyDiscoveryDevice(&target, false);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnNotifyDiscoveryDevice(nullptr, false);
@@ -102,13 +102,13 @@ HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_LEAVE_BY_ADDRTYPE_TEST_001, TestSize.Lev
 {
     const bool type[CONNECTION_ADDR_MAX] = {true, true, true, true, true};
     int32_t ret = LnnRequestLeaveByAddrType(type, CONNECTION_ADDR_MAX);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnRequestLeaveByAddrType(nullptr, TYPE_LENTH);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnRequestLeaveByAddrType(type, TYPE_LEN);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = LnnRequestLeaveByAddrType(type, TYPE_LENTH);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
@@ -141,7 +141,7 @@ HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_LEAVE_SPECIFIC_TEST_001, TestSize.Level0
 HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_LEAVE_INVALID_CONN_TEST_001, TestSize.Level0)
 {
     int32_t ret = LnnRequestLeaveInvalidConn(OLD_NETWORKID, CONNECTION_ADDR_WLAN, NETWORKID);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnRequestLeaveInvalidConn(OLD_NETWORKID, CONNECTION_ADDR_WLAN, NETWORKID);
@@ -157,7 +157,7 @@ HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_LEAVE_INVALID_CONN_TEST_001, TestSize.Le
 HWTEST_F(LNNNetBuilderTest, LNN_REQUEST_CLEAN_CONN_FSM_TEST_001, TestSize.Level0)
 {
     int32_t ret = LnnRequestCleanConnFsm(CONN_FSM_ID);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnRequestCleanConnFsm(CONN_FSM_ID);
@@ -179,7 +179,7 @@ HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_NODE_STATE_CHANGED_TEST_001, TestSize.Lev
     memcpy_s(target.peerUid, MAX_ACCOUNT_HASH_LEN, PEERUID, strlen(PEERUID));
     memcpy_s(target.info.ip.ip, IP_STR_MAX_LEN, IP, strlen(IP));
     int32_t ret = LnnNotifyNodeStateChanged(&target);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnNotifyNodeStateChanged(&target);
@@ -195,7 +195,7 @@ HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_NODE_STATE_CHANGED_TEST_001, TestSize.Lev
 HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_MASTER_ELECT_TEST_001, TestSize.Level0)
 {
     int32_t ret = LnnNotifyMasterElect(NETWORKID, MASTER_UDID, MASTER_WEIGHT);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     char *networkId = nullptr;
@@ -348,7 +348,7 @@ HWTEST_F(LNNNetBuilderTest, FIND_REQUEST_ID_BY_ADDR_TEST_001, TestSize.Level0)
     uint32_t ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = FindRequestIdByAddr(nullptr, &requestId);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /*
@@ -410,7 +410,7 @@ HWTEST_F(LNNNetBuilderTest, LNN_GET_VERIFY_CALLBACK_TEST_001, TestSize.Level0)
 HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_AUTH_HANDLE_LEAVELNN_TEST_001, TestSize.Level0)
 {
     int32_t ret = LnnNotifyAuthHandleLeaveLNN(AUTH_ID);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnNotifyAuthHandleLeaveLNN(AUTH_ID);

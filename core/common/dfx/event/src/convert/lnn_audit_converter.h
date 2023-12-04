@@ -22,11 +22,11 @@
 extern "C" {
 #endif
 
-#define LNN_AUDIT_ASSIGNER(type, filedName, filed)                                                            \
-    static inline bool LnnAuditAssigner##filedName(                                                           \
+#define LNN_AUDIT_ASSIGNER(type, fieldName, field)                                                            \
+    static inline bool LnnAuditAssigner##fieldName(                                                           \
         const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param) \
     {                                                                                                         \
-        if (Assigner##type(form->lnnAuditExtra->filed, &param) && CopyString(param->name, eventName)) {       \
+        if (Assigner##type(form->lnnAuditExtra->field, &param) && CopyString(param->name, eventName)) {       \
             param->t = paramType;                                                                             \
             return true;                                                                                      \
         }                                                                                                     \
@@ -45,11 +45,12 @@ LNN_AUDIT_ASSIGNER(String, PeerBleMac, peerBleMac)
 LNN_AUDIT_ASSIGNER(String, PeerAuthPort, peerAuthPort)
 LNN_AUDIT_ASSIGNER(String, PeerUdid, peerUdid)
 LNN_AUDIT_ASSIGNER(String, PeerNetworkId, peerNetworkId)
-LNN_AUDIT_ASSIGNER(String, PeerDeviceType, peerDeviceType)
+LNN_AUDIT_ASSIGNER(Int32, PeerDeviceType, peerDeviceType)
+LNN_AUDIT_ASSIGNER(String, Extra, extra)
 LNN_AUDIT_ASSIGNER(String, CallerPkg, callerPkg)
 LNN_AUDIT_ASSIGNER(String, CalleePkg, calleePkg)
 
-#define LNN_AUDIT_ASSIGNER_SIZE 19 // Size of g_connAssigners
+#define LNN_AUDIT_ASSIGNER_SIZE 16 // Size of g_connAssigners
 static const HiSysEventParamAssigner g_lnnAuditAssigners[] = {
     { "ERROR_CODE",       HISYSEVENT_INT32,  LnnAuditAssignerErrcode          },
     { "AUDIT_TYPE",       HISYSEVENT_INT32,  LnnAuditAssignerAuditType        },
@@ -63,7 +64,8 @@ static const HiSysEventParamAssigner g_lnnAuditAssigners[] = {
     { "PEER_AUTH_PORT",   HISYSEVENT_INT32,  LnnAuditAssignerPeerAuthPort     },
     { "PEER_UDID",        HISYSEVENT_STRING, LnnAuditAssignerPeerUdid         },
     { "PEER_NET_ID",      HISYSEVENT_STRING, LnnAuditAssignerPeerNetworkId    },
-    { "PEER_DEV_TYPE",    HISYSEVENT_STRING,  LnnAuditAssignerPeerDeviceType   },
+    { "PEER_DEV_TYPE",    HISYSEVENT_STRING, LnnAuditAssignerPeerDeviceType   },
+    { "EXTRA",            HISYSEVENT_STRING, LnnAuditAssignerExtra            },
     { "HOST_PKG",         HISYSEVENT_STRING, LnnAuditAssignerCallerPkg        },
     { "TO_CALL_PKG",      HISYSEVENT_STRING, LnnAuditAssignerCalleePkg        },
     // Modification Note: remember updating LNN_AUDIT_ASSIGNER_SIZE

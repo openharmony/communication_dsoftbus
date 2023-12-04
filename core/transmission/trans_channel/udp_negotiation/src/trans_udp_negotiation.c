@@ -185,6 +185,14 @@ int32_t NotifyUdpChannelOpenFailed(const AppInfo *info, int32_t errCode)
         .result = EVENT_STAGE_RESULT_FAILED
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
+
+    TransAlarmExtra extraAlarm = {
+        .linkType = info->linkType,
+        .errcode = errCode,
+        .sessionName = info->myData.sessionName,
+    };
+    TRANS_ALARM(OPEN_SESSION_FAIL_ALARM, CONTROL_ALARM_TYPE, extraAlarm);
+
     SoftbusRecordOpenSessionKpi(info->myData.pkgName, info->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);
     int ret = g_channelCb->OnChannelOpenFailed(info->myData.pkgName, info->myData.pid,
         (int32_t)(info->myData.channelId), CHANNEL_TYPE_UDP, errCode);

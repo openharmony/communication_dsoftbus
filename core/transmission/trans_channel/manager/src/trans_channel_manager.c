@@ -89,10 +89,11 @@ static int32_t GenerateProxyChannelId()
     }
     for (uint32_t id = g_proxyIdMark + 1; id != g_proxyIdMark; id++) {
         id = id % MAX_PROXY_CHANNEL_ID_COUNT;
-        uint32_t index = id / (8 * sizeof(long));
-        uint32_t bit = id % (8 * sizeof(long));
+        uint32_t index = id / (BIT_NUM * sizeof(long));
+        uint32_t bit = id % (BIT_NUM * sizeof(long));
         if ((g_proxyChanIdBits[index] & (ID_USED << bit)) == ID_NOT_USED) {
             g_proxyChanIdBits[index] |= (ID_USED << bit);
+            g_proxyIdMark = id;
             SoftBusMutexUnlock(&g_myIdLock);
             return (int32_t)id + MAX_FD_ID;
         }

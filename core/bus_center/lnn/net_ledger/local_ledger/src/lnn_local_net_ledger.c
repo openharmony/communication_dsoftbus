@@ -1264,6 +1264,34 @@ static int32_t UpdateLocalCipherInfoIv(const void *id)
     return SOFTBUS_OK;
 }
 
+static int32_t LlGetP2pIp(void *buf, uint32_t len)
+{
+    if (buf == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (strcpy_s((char *)buf, len, info->p2pInfo.p2pIp) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t LlUpdateLocalP2pIp(const void *p2pIp)
+{
+    if (p2pIp == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (strcpy_s(info->p2pInfo.p2pIp, sizeof(info->p2pInfo.p2pIp), (const char *)p2pIp) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static LocalLedgerKey g_localKeyTable[] = {
     {STRING_KEY_HICE_VERSION, VERSION_MAX_LEN, LlGetNodeSoftBusVersion, NULL},
     {STRING_KEY_DEV_UDID, UDID_BUF_LEN, LlGetDeviceUdid, UpdateLocalDeviceUdid},
@@ -1287,6 +1315,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {STRING_KEY_EXTDATA, EXTDATA_LEN, LlGetExtData, LlUpdateLocalExtData},
     {STRING_KEY_BLE_MAC, MAC_LEN, LlGetBleMac, UpdateLocalBleMac},
     {STRING_KEY_WIFIDIRECT_ADDR, MAC_LEN, LlGetWifiDirectAddr, UpdateWifiDirectAddr},
+    {STRING_KEY_P2P_IP, IP_LEN, LlGetP2pIp, LlUpdateLocalP2pIp},
     {NUM_KEY_SESSION_PORT, -1, LlGetSessionPort, UpdateLocalSessionPort},
     {NUM_KEY_AUTH_PORT, -1, LlGetAuthPort, UpdateLocalAuthPort},
     {NUM_KEY_PROXY_PORT, -1, LlGetProxyPort, UpdateLocalProxyPort},
@@ -1510,6 +1539,7 @@ static int32_t LnnGenBroadcastCipherInfo(void)
         LNN_LOGE(LNN_LEDGER, "set iv error.");
         return SOFTBUS_ERR;
     }
+    LNN_LOGI(LNN_LEDGER, "generate BroadcastCipherInfo success!");
     return SOFTBUS_OK;
 }
 
@@ -1655,8 +1685,8 @@ int32_t LnnInitLocalLedger(void)
         LNN_LOGE(LNN_LEDGER, "first get udid fail, try again in one second");
     }
     if (LnnGenBroadcastCipherInfo() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "gen cipher fail");
-        return SOFTBUS_ERR;
+        LNN_LOGE(LNN_LEDGER, "generate cipher fail");
+        goto EXIT;
     }
 
     g_localNetLedger.status = LL_INIT_SUCCESS;

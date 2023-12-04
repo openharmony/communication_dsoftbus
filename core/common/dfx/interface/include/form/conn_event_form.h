@@ -63,6 +63,10 @@ typedef enum {
 
 typedef struct {
     int32_t errcode;
+    int32_t result;
+    int32_t linkType;
+    int32_t duration;
+    int32_t netType;
 } ConnAlarmExtra;
 
 typedef enum {
@@ -89,11 +93,11 @@ typedef struct {
     const char *peerBrMac;       // PEER_BR_MAC
     const char *peerBleMac;      // PEER_BLE_MAC
     const char *peerDeviceType;  // PEER_DEV_TYPE
-    const char *peerWifiMac;     // PEER_WIFI_MAC
     const char *peerUdid;        // PEER_UDID
     const char *connPaload;      // CONN_PALOAD
     const char *localDeviceName; // LOCAL_DEV_NAME
     const char *peerIp;          // PEER_IP
+    const char *extra;           // EXTRA
     const char *callerPkg;       // HOST_PKG
     const char *calleePkg;       // TO_CALL_PKG
 } ConnAuditExtra;

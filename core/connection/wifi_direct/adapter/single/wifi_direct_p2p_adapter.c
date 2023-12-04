@@ -247,7 +247,17 @@ static int32_t GetGroupInfo(struct WifiDirectP2pGroupInfo **groupInfoOut)
     groupInfo->clientDeviceSize = info->clientDevicesSize;
     ret = memcpy_s(groupInfo->interface, sizeof(groupInfo->interface), info->interface, sizeof(info->interface));
     if (ret != EOK) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "memcpy_s failed");
+        CONN_LOGE(CONN_WIFI_DIRECT, "copy interface failed");
+        SoftBusFree(info);
+        SoftBusFree(groupInfo);
+        *groupInfoOut = NULL;
+        return SOFTBUS_ERR;
+    }
+
+    ret = memcpy_s(groupInfo->groupOwner.address, MAC_ADDR_ARRAY_SIZE, info->owner.devAddr,
+                   sizeof(info->owner.devAddr));
+    if (ret != EOK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "copy mac failed");
         SoftBusFree(info);
         SoftBusFree(groupInfo);
         *groupInfoOut = NULL;

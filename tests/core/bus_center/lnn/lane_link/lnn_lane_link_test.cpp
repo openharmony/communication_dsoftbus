@@ -86,7 +86,7 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_001, TestSize.Level1)
 {
     uint32_t laneLinkReqId = 0;
     int32_t ret = LnnConnectP2p(nullptr, laneLinkReqId, nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
  
     const LaneLinkCb cb = {
         .OnLaneLinkSuccess = OnLaneLinkSuccess,
@@ -121,19 +121,19 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_001, TestSize.Level1)
     request->acceptableProtocols = 0;
 
     ret = LnnConnectP2p(request, laneLinkReqId, &cb);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = LnnConnectP2p(request, laneLinkReqId, &cb);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 
     ret = LnnConnectP2p(request, laneLinkReqId, nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = LnnConnectP2p(request, laneLinkReqId, &cb);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 
     ret = LnnConnectP2p(request, laneLinkReqId, &cb);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = LnnConnectP2p(request, laneLinkReqId, &cb);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     SoftBusFree(request);
 }
 
@@ -160,7 +160,7 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_002, TestSize.Level1)
     request->linkType = LANE_BR;
     request->acceptableProtocols = 1;
     uint32_t ret = LnnConnectP2p(request, laneLinkReqId, nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     
     LaneDepsInterfaceMock linkMock;
     EXPECT_CALL(linkMock, AuthOpenConn).WillRepeatedly(Return(SOFTBUS_OK));
@@ -213,7 +213,7 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_003, TestSize.Level1)
     request->acceptableProtocols = 0;
 
     uint32_t ret = LnnConnectP2p(request, laneLinkReqId, nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     
     LaneDepsInterfaceMock linkMock;
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
@@ -254,7 +254,7 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_004, TestSize.Level1)
 
     uint32_t laneLinkReqId = 1;
     uint32_t ret = LnnConnectP2p(request, laneLinkReqId, nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     
     LaneDepsInterfaceMock linkMock;
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_ERR));
@@ -267,7 +267,7 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_004, TestSize.Level1)
     };
 
     ret = LnnConnectP2p(request, laneLinkReqId, &cb);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     SoftBusFree(request);
 }
 

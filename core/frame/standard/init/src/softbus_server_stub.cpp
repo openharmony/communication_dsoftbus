@@ -198,6 +198,7 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_GET_ALL_META_NODE_INFO] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_SHIFT_LNN_GEAR] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_RIPPLE_STATS] = nullptr;
+    memberPermissionMap_[SERVER_GET_SOFTBUS_SPEC_OBJECT] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
 }
 
 int32_t SoftBusServerStub::OnRemoteRequest(uint32_t code,
@@ -358,6 +359,7 @@ int32_t SoftBusServerStub::UnPublishServiceInner(MessageParcel &data, MessagePar
 
 int32_t SoftBusServerStub::SoftbusRegisterServiceInner(MessageParcel &data, MessageParcel &reply)
 {
+    COMM_LOGI(COMM_SVC, "enter");
     auto remote = data.ReadRemoteObject();
     if (remote == nullptr) {
         COMM_LOGE(COMM_SVC, "SoftbusRegisterServiceInner read systemAbilityId failed!");
@@ -434,6 +436,7 @@ static int32_t CheckSessionName(const char* sessionName, pid_t callingUid)
 
 int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, MessageParcel &reply)
 {
+    COMM_LOGI(COMM_SVC, "enter");
     int32_t retReply;
     pid_t callingUid;
     pid_t callingPid;
@@ -475,6 +478,7 @@ EXIT:
 
 int32_t SoftBusServerStub::RemoveSessionServerInner(MessageParcel &data, MessageParcel &reply)
 {
+    COMM_LOGI(COMM_SVC, "enter");
     int32_t retReply;
     pid_t callingUid;
     pid_t callingPid;
@@ -538,6 +542,11 @@ static void ReadSessionAttrs(MessageParcel &data, SessionAttribute *getAttr)
 
 static void ReadQosInfo(MessageParcel& data, SessionParam &param)
 {
+    param.isQosLane = data.ReadBool();
+    if (!param.isQosLane) {
+        return;
+    }
+
     param.qosCount = data.ReadUint32();
     QosTV *qosInfo = nullptr;
     if (param.qosCount > 0) {
@@ -551,6 +560,7 @@ static void ReadQosInfo(MessageParcel& data, SessionParam &param)
 
 int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &reply)
 {
+    COMM_LOGI(COMM_SVC, "enter");
     int32_t retReply;
     SessionParam param;
     SessionAttribute getAttr;
@@ -606,6 +616,7 @@ EXIT:
 
 int32_t SoftBusServerStub::OpenAuthSessionInner(MessageParcel &data, MessageParcel &reply)
 {
+    COMM_LOGI(COMM_SVC, "enter");
     int32_t retReply;
     const char *sessionName = data.ReadCString();
     ConnectionAddr *addrInfo = (ConnectionAddr *)data.ReadRawData(sizeof(ConnectionAddr));
@@ -632,6 +643,7 @@ EXIT:
 
 int32_t SoftBusServerStub::NotifyAuthSuccessInner(MessageParcel &data, MessageParcel &reply)
 {
+    COMM_LOGI(COMM_SVC, "enter");
     int32_t channelId;
     int32_t channelType;
     if (!data.ReadInt32(channelId)) {
@@ -652,6 +664,7 @@ int32_t SoftBusServerStub::NotifyAuthSuccessInner(MessageParcel &data, MessagePa
 
 int32_t SoftBusServerStub::CloseChannelInner(MessageParcel &data, MessageParcel &reply)
 {
+    COMM_LOGI(COMM_SVC, "enter");
     int32_t channelId;
     if (!data.ReadInt32(channelId)) {
         COMM_LOGE(COMM_SVC, "CloseChannelInner read channel Id failed!");
@@ -713,6 +726,7 @@ int32_t SoftBusServerStub::SendMessageInner(MessageParcel &data, MessageParcel &
 
 int32_t SoftBusServerStub::EvaluateQosInner(MessageParcel &data, MessageParcel &reply)
 {
+    COMM_LOGI(COMM_SVC, "enter");
     const char *peerNetworkId = data.ReadCString();
     if (peerNetworkId == nullptr) {
         COMM_LOGE(COMM_SVC, "EvaluateQos read peerNetworkId failed!");
