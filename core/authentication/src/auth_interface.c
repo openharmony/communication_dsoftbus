@@ -405,9 +405,14 @@ int32_t AuthInit(void)
         .OnDisconnected = NotifyTransDisconnected,
     };
     int32_t ret = AuthDeviceInit(&callBack);
-    if (ret != SOFTBUS_OK) {
+    if (ret == SOFTBUS_ERR || ret == SOFTBUS_INVALID_PARAM) {
         AUTH_LOGE(AUTH_INIT, "auth device init failed");
-        return ret;
+        return SOFTBUS_ERR;
+    }
+    ret = RegHichainSaStatusListener();
+    if (ret != SOFTBUS_OK && ret != SOFTBUS_NOT_IMPLEMENT) {
+        AUTH_LOGE(AUTH_INIT, "regHichainSaStatusListener failed");
+        return SOFTBUS_ERR;
     }
     ret = CustomizedSecurityProtocolInit();
     if (ret != SOFTBUS_OK && ret != SOFTBUS_NOT_IMPLEMENT) {

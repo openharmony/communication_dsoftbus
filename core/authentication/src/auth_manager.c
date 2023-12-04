@@ -1726,7 +1726,7 @@ int32_t AuthDeviceInit(const AuthTransCallback *callback)
     ListInit(&g_authServerList);
     if (AuthCommonInit() != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_INIT, "AuthCommonInit fail");
-        return SOFTBUS_AUTH_INIT_FAIL;
+        return SOFTBUS_ERR;
     }
 
     AuthConnListener connListener = {
@@ -1737,9 +1737,14 @@ int32_t AuthDeviceInit(const AuthTransCallback *callback)
     if (AuthConnInit(&connListener) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_INIT, "AuthConnInit fail");
         AuthCommonDeinit();
-        return SOFTBUS_AUTH_INIT_FAIL;
+        return SOFTBUS_ERR;
     }
+    AUTH_LOGI(AUTH_INIT, "auth init succ");
+    return SOFTBUS_OK;
+}
 
+int32_t RegTrustListenerOnHichainSaStart(void)
+{
     TrustDataChangeListener trustListener = {
         .onGroupCreated = OnGroupCreated,
         .onGroupDeleted = OnGroupDeleted,
@@ -1752,7 +1757,7 @@ int32_t AuthDeviceInit(const AuthTransCallback *callback)
         return SOFTBUS_AUTH_INIT_FAIL;
     }
     g_regDataChangeListener = true;
-    AUTH_LOGI(AUTH_INIT, "auth init succ");
+    AUTH_LOGE(AUTH_INIT, "OnHichainSaStart add listener succ");
     return SOFTBUS_OK;
 }
 
@@ -1760,6 +1765,7 @@ void AuthDeviceDeinit(void)
 {
     AUTH_LOGI(AUTH_INIT, "auth deinit enter");
     UnregTrustDataChangeListener();
+    UnRegHichainSaStatusListener();
     DestroyAuthManagerList();
     ClearAuthRequest();
     AuthConnDeinit();
