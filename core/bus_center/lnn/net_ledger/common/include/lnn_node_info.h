@@ -175,6 +175,7 @@ typedef struct {
     char remotePtk[PTK_DEFAULT_LEN];
     uint8_t relation[CONNECTION_ADDR_MAX];
     uint64_t heartbeatTimeStamp;
+    uint64_t bleDirectTimeStamp;
     uint64_t onlinetTimestamp;
 } NodeInfo;
 

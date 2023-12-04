@@ -67,6 +67,8 @@ int32_t LnnGetBasicInfoByUdid(const char *udid, NodeBasicInfo *basicInfo);
 int32_t LnnGetDLHeartbeatTimestamp(const char *networkId, uint64_t *timestamp);
 int32_t LnnGetDLOnlineTimestamp(const char *networkId, uint64_t *timestamp);
 int32_t LnnSetDLHeartbeatTimestamp(const char *networkId, const uint64_t timestamp);
+int32_t LnnGetDLBleDirectTimestamp(const char *networkId, uint64_t *timestamp);
+int32_t LnnSetDLBleDirectTimestamp(const char *networkId, uint64_t timestamp);
 bool LnnGetOnlineStateById(const char *id, IdCategory type);
 int32_t LnnGetLnnRelation(const char *id, IdCategory type, uint8_t *relation, uint32_t len);
 int32_t LnnSetDLConnCapability(const char *networkId, uint32_t connCapability);
