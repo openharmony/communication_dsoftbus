@@ -33,6 +33,8 @@
 #include "softbus_conn_br_send_queue.h"
 #include "softbus_feature_config.c"
 
+#define SOFTBUS_CHARA_CONN_UUID        "00002B01-0000-1000-8000-00805F9B34FB"
+
 using namespace testing::ext;
 using namespace testing;
 
@@ -273,11 +275,17 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection003, TestSize.Level1)
 
 HWTEST_F(ConnectionBrConnectionTest, testBrConnection004, TestSize.Level1)
 {
-    const char *addr = "24:DA:33:6A:06:EC";
     int32_t result = 0;
     int32_t status = 0;
 
-    BrConnectStatusCallback(addr, result, status);
+    BdAddr addr = {
+        .addr = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66},
+    };
+    BtUuid uuid = {
+        .uuid = (char *)SOFTBUS_CHARA_CONN_UUID,
+        .uuidLen = strlen(SOFTBUS_CHARA_CONN_UUID),
+    };
+    BrConnectStatusCallback(&addr, uuid, result, status);
 }
 
 HWTEST_F(ConnectionBrConnectionTest, testBrConnection005, TestSize.Level1)

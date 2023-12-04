@@ -46,7 +46,7 @@ typedef struct tagSppSocketDriver {
     void (*Init)(const struct tagSppSocketDriver* this_p);
     int32_t (*OpenSppServer)(const char *name, int32_t nameLen, const char *uuid, int32_t isSecure);
     void (*CloseSppServer)(int32_t serverFd);
-    int32_t (*Connect)(const char *uuid, const BT_ADDR mac);
+    int32_t (*Connect)(const char *uuid, const BT_ADDR mac, void *connectCallback);
     int32_t (*DisConnect)(int32_t clientFd);
     bool (*IsConnected)(int32_t clientFd);
     int32_t (*Accept)(int32_t serverFd);
@@ -54,10 +54,6 @@ typedef struct tagSppSocketDriver {
     int32_t (*Read)(int32_t clientFd, uint8_t *buf, const int32_t length);
     int32_t (*GetRemoteDeviceInfo)(int32_t clientFd, const BluetoothRemoteDevice* device);
 } SppSocketDriver;
-
-typedef struct {
-    void (*ConnectStatusCallback)(const char *addr, int32_t result, int32_t status);
-} BrUnderlayerCallback;
 
 typedef struct {
     ListNode node;
@@ -129,7 +125,6 @@ typedef enum {
     CONN_BR_CONNECT_UNDERLAYER_COMPLETED,
 } ConnBrConnectUnderlayerStatusType;
 
-int SoftBusRegisterBrCallback(BrUnderlayerCallback *callback);
 SppSocketDriver *InitSppSocketDriver();
 bool IsAclConnected(const BT_ADDR mac);
 #ifdef __cplusplus
