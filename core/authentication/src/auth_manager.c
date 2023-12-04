@@ -892,6 +892,7 @@ void AuthManagerSetAuthFailed(int64_t authSeq, const AuthSessionInfo *info, int3
         DisconnectAuthDevice((uint64_t *)&info->connId);
     } else if (!info->isServer) {
         /* Bluetooth networking only the client to close the connection. */
+        UpdateAuthDevicePriority(info->connId);
         DisconnectAuthDevice((uint64_t *)&info->connId);
     }
 }

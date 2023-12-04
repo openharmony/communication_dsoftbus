@@ -62,36 +62,14 @@ void StreamMsgManagerTest::TearDownTestCase(void) { }
 HWTEST_F(StreamMsgManagerTest, SendTest001, TestSize.Level1)
 {
     std::shared_ptr<StreamMsgManager> streamMsgManger = std::make_shared<StreamMsgManager>();
+
     HistoryStats stats;
+
+    streamMsgManger->Update(stats);
+
+    streamMsgManger->Recv(stats);
+
     bool ret = streamMsgManger->Send(stats);
     EXPECT_EQ(ret, false);
-}
-
-/**
- * @tc.name: UpdateTest001
- * @tc.desc: Update
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(StreamMsgManagerTest, UpdateTest001, TestSize.Level1)
-{
-    std::shared_ptr<StreamMsgManager> streamMsgManger = std::make_shared<StreamMsgManager>();
-    HistoryStats stats;
-    streamMsgManger->Update(stats);
-    EXPECT_TRUE(1);
-}
-
-/**
- * @tc.name: RecvTest001
- * @tc.desc: Recv
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(StreamMsgManagerTest, RecvTest001, TestSize.Level1)
-{
-    std::shared_ptr<StreamMsgManager> streamMsgManger = std::make_shared<StreamMsgManager>();
-    HistoryStats stats;
-    streamMsgManger->Recv(stats);
-    EXPECT_TRUE(1);
 }
 } // namespace OHOS

@@ -66,6 +66,7 @@ int32_t TransProxyGetConnIdByChanId(int32_t channelId, int32_t *connId);
 int32_t TransProxyGetConnOptionByChanId(int32_t channelId, ConnectOption *connOpt);
 
 int32_t TransProxyGetAppInfoType(int16_t myId, const char *identity);
+int32_t TransProxySpecialUpdateChanInfo(ProxyChannelInfo *channelInfo);
 
 #ifdef __cplusplus
 }

@@ -75,9 +75,9 @@ EXIT:
 
 int32_t DiscCoapSendRsp(const DeviceInfo *deviceInfo, uint8_t bType)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGW(deviceInfo, SOFTBUS_INVALID_PARAM, DISC_COAP, "DiscRsp devInfo is null");
+    DISC_CHECK_AND_RETURN_RET_LOGE(deviceInfo, SOFTBUS_INVALID_PARAM, DISC_COAP, "DiscRsp devInfo is null");
     NSTACKX_ResponseSettings *settings = (NSTACKX_ResponseSettings *)SoftBusCalloc(sizeof(NSTACKX_ResponseSettings));
-    DISC_CHECK_AND_RETURN_RET_LOGW(settings, SOFTBUS_MALLOC_ERR, DISC_COAP, "malloc disc response settings failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(settings, SOFTBUS_MALLOC_ERR, DISC_COAP, "malloc disc response settings failed");
 
     if (FillRspSettings(settings, deviceInfo, bType) != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "fill nstackx response settings failed");
@@ -156,7 +156,7 @@ static void BroadcastRsp(uint8_t bType, DeviceInfo *deviceInfo)
 
 static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceCount)
 {
-    DISC_CHECK_AND_RETURN_LOGW(deviceList != NULL && deviceCount != 0, DISC_COAP, "invalid param.");
+    DISC_CHECK_AND_RETURN_LOGE(deviceList != NULL && deviceCount != 0, DISC_COAP, "invalid param.");
     DISC_LOGI(DISC_COAP, "Disc device found, count=%u", deviceCount);
     DeviceInfo *discDeviceInfo = (DeviceInfo *)SoftBusCalloc(sizeof(DeviceInfo));
     DISC_CHECK_AND_RETURN_LOGE(discDeviceInfo != NULL, DISC_COAP, "malloc device info failed.");
@@ -204,7 +204,7 @@ static NSTACKX_Parameter g_nstackxCallBack = {
 
 int32_t DiscCoapRegisterCb(const DiscInnerCallback *discCoapCb)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGW(discCoapCb != NULL && g_discCoapInnerCb != NULL, SOFTBUS_INVALID_PARAM,
+    DISC_CHECK_AND_RETURN_RET_LOGE(discCoapCb != NULL && g_discCoapInnerCb != NULL, SOFTBUS_INVALID_PARAM,
         DISC_COAP, "invalid param");
     if (memcpy_s(g_discCoapInnerCb, sizeof(DiscInnerCallback), discCoapCb, sizeof(DiscInnerCallback)) != EOK) {
         DISC_LOGE(DISC_COAP, "memcpy_s failed.");
@@ -215,7 +215,7 @@ int32_t DiscCoapRegisterCb(const DiscInnerCallback *discCoapCb)
 
 int32_t DiscCoapRegisterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[])
 {
-    DISC_CHECK_AND_RETURN_RET_LOGW(capabilityBitmapNum != 0, SOFTBUS_INVALID_PARAM,
+    DISC_CHECK_AND_RETURN_RET_LOGE(capabilityBitmapNum != 0, SOFTBUS_INVALID_PARAM,
         DISC_COAP, "capabilityBitmapNum=0");
 
     if (NSTACKX_RegisterCapability(capabilityBitmapNum, capabilityBitmap) != 0) {
@@ -226,7 +226,7 @@ int32_t DiscCoapRegisterCapability(uint32_t capabilityBitmapNum, uint32_t capabi
 
 int32_t DiscCoapSetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[])
 {
-    DISC_CHECK_AND_RETURN_RET_LOGW(capabilityBitmapNum != 0, SOFTBUS_INVALID_PARAM,
+    DISC_CHECK_AND_RETURN_RET_LOGE(capabilityBitmapNum != 0, SOFTBUS_INVALID_PARAM,
         DISC_COAP, "capabilityBitmapNum=0");
 
     if (NSTACKX_SetFilterCapability(capabilityBitmapNum, capabilityBitmap) != SOFTBUS_OK) {
@@ -337,10 +337,10 @@ static void FreeDiscSet(NSTACKX_DiscoverySettings *discSet)
 
 int32_t DiscCoapStartDiscovery(DiscCoapOption *option)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGW(option != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "option=NULL");
-    DISC_CHECK_AND_RETURN_RET_LOGW(option->mode >= ACTIVE_PUBLISH && option->mode <= ACTIVE_DISCOVERY,
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "option=NULL");
+    DISC_CHECK_AND_RETURN_RET_LOGE(option->mode >= ACTIVE_PUBLISH && option->mode <= ACTIVE_DISCOVERY,
         SOFTBUS_INVALID_PARAM, DISC_COAP, "option->mode is invalid");
-    DISC_CHECK_AND_RETURN_RET_LOGW(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
+    DISC_CHECK_AND_RETURN_RET_LOGE(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
         DISC_COAP, "invalid freq: %d", option->freq);
 
     NSTACKX_DiscoverySettings *discSet = (NSTACKX_DiscoverySettings *)SoftBusCalloc(sizeof(NSTACKX_DiscoverySettings));
@@ -398,7 +398,7 @@ GET_DEVICE_ID_END:
 
 static int32_t SetLocalDeviceInfo(void)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGW(g_localDeviceInfo != NULL, SOFTBUS_DISCOVER_COAP_NOT_INIT, DISC_COAP,
+    DISC_CHECK_AND_RETURN_RET_LOGE(g_localDeviceInfo != NULL, SOFTBUS_DISCOVER_COAP_NOT_INIT, DISC_COAP,
         "disc coap not init");
     (void)memset_s(g_localDeviceInfo, sizeof(NSTACKX_LocalDeviceInfo), 0, sizeof(NSTACKX_LocalDeviceInfo));
 
@@ -436,7 +436,7 @@ static int32_t SetLocalDeviceInfo(void)
 
 void DiscCoapUpdateLocalIp(LinkStatus status)
 {
-    DISC_CHECK_AND_RETURN_LOGW(status == LINK_STATUS_UP || status == LINK_STATUS_DOWN, DISC_COAP,
+    DISC_CHECK_AND_RETURN_LOGE(status == LINK_STATUS_UP || status == LINK_STATUS_DOWN, DISC_COAP,
         "invlaid link status, status=%d.", status);
     
     if (status == LINK_STATUS_DOWN) {

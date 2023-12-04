@@ -17,14 +17,15 @@
  * @file softbus_ble_gatt.h
  * @brief ble stack adapter
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 
 #ifndef SOFTBUS_BLE_GATT_H
 #define SOFTBUS_BLE_GATT_H
 
-#include "softbus_broadcast_adapter.h"
+#include "softbus_broadcast_adapter_interface.h"
+#include "softbus_broadcast_adapter_type.h"
 
 #ifdef __cplusplus
 extern "C"{

@@ -71,7 +71,7 @@ static int32_t ReuseLink(struct WifiDirectConnectCommand *command)
 
     command->processor = processor;
     processor->activeCommand = (struct WifiDirectCommand *)command;
-    CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=%p", command);
+    CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=%d", command->type);
     GetWifiDirectNegotiator()->currentProcessor = processor;
 
     return processor->reuseLink(connectInfo, link);
@@ -93,7 +93,7 @@ static int32_t OpenLink(struct WifiDirectConnectCommand *command)
 
     command->processor = processor;
     processor->activeCommand = (struct WifiDirectCommand *)command;
-    CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=%p", command);
+    CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=%d", command->type);
     GetWifiDirectNegotiator()->currentProcessor = processor;
 
     return processor->createLink(connectInfo);
@@ -153,6 +153,7 @@ static void OnFailure(struct WifiDirectCommand *base, int32_t reason)
     if (IsNeedRetry(base, reason)) {
         CONN_LOGI(CONN_WIFI_DIRECT, "retry command");
         GetWifiDirectNegotiator()->retryCurrentCommand();
+        GetWifiDirectNegotiator()->resetContext();
         return;
     }
 
@@ -167,6 +168,11 @@ static void OnFailure(struct WifiDirectCommand *base, int32_t reason)
         .errcode = reason
     };
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
+    ConnAlarmExtra extraAlarm = {
+        .linkType = CONNECT_P2P,
+        .errcode = SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL,
+    };
+    CONN_ALARM(CONNECTION_FAIL_ALARM, MANAGE_ALARM_TYPE, extraAlarm);
     GetWifiDirectNegotiator()->resetContext();
     GetResourceManager()->dump(0);
     GetLinkManager()->dump(0);

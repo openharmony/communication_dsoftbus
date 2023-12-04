@@ -748,15 +748,15 @@ static void PackCommP2pInfo(JsonObj *json, const NodeInfo *info)
     (void)JSON_AddInt32ToObject(json, STA_FREQUENCY, LnnGetStaFrequency(info));
 }
 
-static void PackWifiDirectInfo(JsonObj *json, const NodeInfo *info, const char *remoteUdid)
+static void PackWifiDirectInfo(JsonObj *json, const NodeInfo *info, const char *remoteUuid)
 {
-    if (json == NULL || remoteUdid == NULL) {
+    if (json == NULL || remoteUuid == NULL) {
         AUTH_LOGE(AUTH_FSM, "invalid param");
         return;
     }
     unsigned char encodePtk[PTK_ENCODE_LEN] = {0};
     char localPtk[PTK_DEFAULT_LEN] = {0};
-    if (LnnGetLocalPtkByUdid(remoteUdid, localPtk) != SOFTBUS_OK) {
+    if (LnnGetLocalPtkByUuid(remoteUuid, localPtk) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "get ptk by udid fail");
         return;
     }
@@ -818,11 +818,12 @@ static int32_t PackCipherRpaInfo(JsonObj *json, const NodeInfo *info)
     (void)JSON_AddStringToObject(json, BROADCAST_CIPHER_IV, (const char *)cipherIv);
     (void)JSON_AddStringToObject(json, IRK, (const char *)peerIrk);
     (void)JSON_AddStringToObject(json, PUB_MAC, (const char *)pubMac);
+    AUTH_LOGI(AUTH_FSM, "pack cipher and rpa info success!");
 
     BroadcastCipherKey broadcastKey;
     (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, broadcastKey.udid, UDID_BUF_LEN) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "get udid fail");
+    if (memcpy_s(broadcastKey.udid, UDID_BUF_LEN, info->deviceInfo.deviceUdid, UDID_BUF_LEN) != EOK) {
+        AUTH_LOGE(AUTH_FSM, "memcpy udid fail.");
         return SOFTBUS_ERR;
     }
     if (memcpy_s(broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH, info->cipherInfo.key, SESSION_KEY_LENGTH) != EOK) {
@@ -837,6 +838,7 @@ static int32_t PackCipherRpaInfo(JsonObj *json, const NodeInfo *info)
         AUTH_LOGE(AUTH_FSM, "update local broadcast key failed");
         return SOFTBUS_ERR;
     }
+    AUTH_LOGI(AUTH_FSM, "update broadcast cipher key success!");
     return SOFTBUS_OK;
 }
 
@@ -875,6 +877,7 @@ static void UnpackCipherRpaInfo(const JsonObj *json, NodeInfo *info)
         AUTH_LOGE(AUTH_FSM, "convert publicAddress to bytes fail.");
         return;
     }
+    AUTH_LOGI(AUTH_FSM, "unpack cipher and rpa info success!");
 }
 
 static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion version, bool isMetaAuth)
@@ -1316,16 +1319,7 @@ char *PackDeviceInfoMessage(int32_t linkType, SoftBusVersion version, bool isMet
         JSON_Delete(json);
         return NULL;
     }
-    int64_t authId = AuthDeviceGetLatestIdByUuid(remoteUuid, (AuthLinkType)linkType);
-    if (authId == AUTH_INVALID_ID) {
-        AUTH_LOGW(AUTH_FSM, "get auth id fail");
-    }
-    AuthManager *manager = GetAuthManagerByAuthId(authId);
-    if (manager != NULL) {
-        PackWifiDirectInfo(json, info, manager->udid);
-        SoftBusFree(manager);
-        AUTH_LOGI(AUTH_FSM, "pack wifi direct info done");
-    }
+    PackWifiDirectInfo(json, info, remoteUuid);
 
     char *msg = JSON_PrintUnformatted(json);
     if (msg == NULL) {

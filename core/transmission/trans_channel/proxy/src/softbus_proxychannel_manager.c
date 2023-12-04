@@ -188,6 +188,45 @@ static int32_t TransProxyAddChanItem(ProxyChannelInfo *chan)
     return SOFTBUS_OK;
 }
 
+int32_t TransProxySpecialUpdateChanInfo(ProxyChannelInfo *channelInfo)
+{
+    if (g_proxyChannelList == NULL || channelInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "g_proxyChannelList or channelInfo is NULL!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
+        return SOFTBUS_ERR;
+    }
+
+    ProxyChannelInfo *item = NULL;
+    ProxyChannelInfo *nextNode = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextNode, &g_proxyChannelList->list, ProxyChannelInfo, node) {
+        if (item->channelId == channelInfo->channelId) {
+            if (channelInfo->reqId != -1) {
+                item->reqId = channelInfo->reqId;
+            }
+            if (channelInfo->isServer != -1) {
+                item->isServer = channelInfo->isServer;
+            }
+            if (channelInfo->type != CONNECT_TYPE_MAX) {
+                item->type = channelInfo->type;
+            }
+            if (channelInfo->status != -1) {
+                item->status = channelInfo->status;
+            }
+            if (channelInfo->status == PROXY_CHANNEL_STATUS_HANDSHAKEING) {
+                item->connId = channelInfo->connId;
+            }
+            (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
+    return SOFTBUS_ERR;
+}
+
 int32_t TransProxyGetChanByChanId(int32_t chanId, ProxyChannelInfo *chan)
 {
     ProxyChannelInfo *item = NULL;

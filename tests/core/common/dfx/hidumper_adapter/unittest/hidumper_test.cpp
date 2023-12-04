@@ -22,11 +22,14 @@
 #include "softbus_hidumper_interface.h"
 #include "softbus_hidumper.h"
 #include "softbus_app_info.h"
-#include "softbus_hidumper_disc.h"
-#include "softbus_hidumper_conn.h"
+#include "softbus_hidumper_alarm.h"
 #include "softbus_hidumper_buscenter.h"
-#include "softbus_hidumper_trans.h"
+#include "softbus_hidumper_conn.h"
+#include "softbus_hidumper_disc.h"
 #include "softbus_hidumper_nstack.h"
+#include "softbus_hidumper_stats.h"
+#include "softbus_hidumper_trans.h"
+#include "softbus_hidumper_util.h"
 
 using namespace std;
 using namespace testing::ext;
@@ -41,6 +44,10 @@ using namespace testing::ext;
 #define BUSCENTER_DUMP_PROCESS_VALID_TEST_NUM 6
 #define BUSCENTER_DUMP_PROCESS_INVALID_TEST_NUM 5
 #define NSTACK_DUMP_PROCESS_VALID_TEST_NUM 4
+#define STATS_DUMP_PROCESS_VALID_TEST_NUM 2
+#define STATS_DUMP_PROCESS_INVALID_TEST_NUM 4
+#define ALARM_DUMP_PROCESS_VALID_TEST_NUM 2
+#define ALARM_DUMP_PROCESS_INVALID_TEST_NUM 4
 #define TEST_UID 101
 #define TEST_PID 202
 #define ERR_FD (-1)
@@ -540,6 +547,102 @@ HWTEST_F(HidumperTest, SoftBusDumpProcess007, TestSize.Level1)
         EXPECT_EQ(SOFTBUS_OK, ret);
     }
     COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusDumpProcess007, end");
+}
+
+/**
+ * @tc.name: SoftBusDumpProcess008
+ * @tc.desc: Verify SoftBusDumpProcess function, valid param, use stats hidumper cmd, return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HidumperTest, SoftBusDumpProcess008, TestSize.Level1)
+{
+    HiDumperArgvNode testValidStatsCmdArray[STATS_DUMP_PROCESS_VALID_TEST_NUM] = {
+        {TEST_FD_ZERO, TEST_ARGC_TWO, {"stats", "15min"}},
+        {TEST_FD_ZERO, TEST_ARGC_TWO, {"stats", "24h"}},
+    };
+    COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusDumpProcess008, Start");
+    int32_t ret;
+    for (int i = 0; i < STATS_DUMP_PROCESS_VALID_TEST_NUM; i++) {
+        ret = SoftBusDumpProcess(testValidStatsCmdArray[i].fd, testValidStatsCmdArray[i].argc,
+            testValidStatsCmdArray[i].argv);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+    }
+    COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusDumpProcess008, end");
+}
+
+/**
+ * @tc.name: SoftBusDumpProcess009
+ * @tc.desc: Verify SoftBusDumpProcess function, invalid param, use stats hidumper cmd, return SOFTBUS_ERR
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HidumperTest, SoftBusDumpProcess009, TestSize.Level1)
+{
+    HiDumperArgvNode testInValidStatsCmdArray[STATS_DUMP_PROCESS_INVALID_TEST_NUM] = {
+        {ERR_FD, TEST_ARGC_ONE, {"-h"}},
+        {TEST_FD_ZERO, ERR_ARGC, {"stats"}},
+        {ERR_FD, ERR_ARGC, {"stats", "-l"}},
+        {ERR_FD, TEST_ARGC_THREE, {"stats", "-l", "stats_var_test_1"}},
+    };
+    COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusDumpProcess009, Start");
+    int32_t ret;
+    for (int i = 0; i < NSTACK_DUMP_PROCESS_VALID_TEST_NUM; i++) {
+        ret = SoftBusDumpProcess(testInValidStatsCmdArray[i].fd, testInValidStatsCmdArray[i].argc,
+            testInValidStatsCmdArray[i].argv);
+        EXPECT_EQ(SOFTBUS_ERR, ret);
+    }
+    ret = SoftBusDumpProcess(0, 1, NULL);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+    COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusDumpProcess009, end");
+}
+
+/**
+ * @tc.name: SoftBusDumpProcess010
+ * @tc.desc: Verify SoftBusDumpProcess function, valid param, use alarm hidumper cmd, return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HidumperTest, SoftBusDumpProcess010, TestSize.Level1)
+{
+    HiDumperArgvNode testValidAlarmCmdArray[ALARM_DUMP_PROCESS_VALID_TEST_NUM] = {
+        {TEST_FD_ZERO, TEST_ARGC_TWO, {"alert", "control"}},
+        {TEST_FD_ZERO, TEST_ARGC_TWO, {"alert", "management"}},
+    };
+    COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusDumpProcess010, Start");
+    int32_t ret;
+    for (int i = 0; i < ALARM_DUMP_PROCESS_VALID_TEST_NUM; i++) {
+        ret = SoftBusDumpProcess(testValidAlarmCmdArray[i].fd, testValidAlarmCmdArray[i].argc,
+            testValidAlarmCmdArray[i].argv);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+    }
+    COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusDumpProcess010, end");
+}
+
+/**
+ * @tc.name: SoftBusDumpProcess011
+ * @tc.desc: Verify SoftBusDumpProcess function, invalid param, use alarm hidumper cmd, return SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HidumperTest, SoftBusDumpProcess011, TestSize.Level1)
+{
+    HiDumperArgvNode testInValidAlarmCmdArray[ALARM_DUMP_PROCESS_INVALID_TEST_NUM] = {
+        {ERR_FD, TEST_ARGC_ONE, {"-h"}},
+        {TEST_FD_ZERO, ERR_ARGC, {"alert"}},
+        {ERR_FD, ERR_ARGC, {"alert", "-l"}},
+        {ERR_FD, TEST_ARGC_THREE, {"alert", "-l", "alert_var_test_1"}},
+    };
+    COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusDumpProcess011, Start");
+    int32_t ret;
+    for (int i = 0; i < ALARM_DUMP_PROCESS_INVALID_TEST_NUM; i++) {
+        ret = SoftBusDumpProcess(testInValidAlarmCmdArray[i].fd, testInValidAlarmCmdArray[i].argc,
+            testInValidAlarmCmdArray[i].argv);
+        EXPECT_EQ(SOFTBUS_ERR, ret);
+    }
+    ret = SoftBusDumpProcess(0, 1, NULL);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+    COMM_LOGI(COMM_TEST, "HidumperTest, SoftBusDumpProcess011, end");
 }
 
 int32_t DumpHandlerTest1(int fd, int32_t argc, const char **argv)

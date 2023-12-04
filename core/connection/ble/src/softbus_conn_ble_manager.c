@@ -188,6 +188,11 @@ static void DfxRecordBleConnectFail(
         .result = EVENT_STAGE_RESULT_FAILED
     };
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
+    ConnAlarmExtra extraAlarm = {
+        .linkType = CONNECT_BLE,
+        .errcode = reason,
+    };
+    CONN_ALARM(CONNECTION_FAIL_ALARM, MANAGE_ALARM_TYPE, extraAlarm);
 }
 
 static void DfxRecordBleConnectSuccess(uint32_t pId, ConnBleConnection *connection, ConnectStatistics *statistics)
@@ -890,6 +895,7 @@ static void ReceivedControlData(ConnBleConnection *connection, const uint8_t *da
     int32_t method = 0;
     if (!GetJsonObjectNumberItem(json, CTRL_MSG_KEY_METHOD, &method)) {
         CONN_LOGE(CONN_BLE, "connId:%u, parse method failed", connection->connectionId);
+        cJSON_Delete(json);
         return;
     }
     CONN_LOGD(CONN_BLE, "ble receive control data, connId=%u, method=%d", connection->connectionId, method);

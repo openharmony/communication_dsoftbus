@@ -68,6 +68,10 @@ typedef enum {
 
 typedef struct {
     int32_t errcode;
+    int32_t result;
+    int32_t originalFreq;
+    int32_t abnormalFreq;
+    int32_t duration;
 } DiscAlarmExtra;
 
 typedef enum {
@@ -96,14 +100,14 @@ typedef struct {
     int32_t scanWindow;            // SCAN_WINDOW
     int32_t discType;              // DISC_TYPE
     int32_t discMode;              // DISC_MODE
-    int32_t firstDisCoverytime;    // FIRST_DISCOVERY_TIME
+    int64_t firstDisCoverytime;    // FIRST_DISCOVERY_TIME
     const char *localNetworkId;    // LOCAL_NET_ID
     const char *localUdid;         // LOCAL_UDID
     const char *localDeviceType;   // LOCAL_DEV_TYPE
     const char *localDeviceName;   // LOCAL_DEV_NAME
     int32_t localCapabilityBitmap; // LOCAL_CAPABILITY_BITMAP
     const char *localAccountHash;  // LOCAL_ACCOUNT_HSASH
-    const char *localCustTime;     // LOCAL_CUST_TIME
+    const char *localCustData;     // LOCAL_CUST_DATA
     const char *peerIp;            // PEER_IP
     const char *peerBrMac;         // PEER_BR_MAC
     const char *peerBleMac;        // PEER_BLE_MAC
@@ -115,7 +119,7 @@ typedef struct {
     const char *peerDeviceName;    // PEER_DEV_NAME
     int32_t peerCapabilityBitmap;  // PEER_CAPABILITY_BITMAP
     const char *peerAccountHash;   // PEER_ACCOUNT_HSASH
-    const char *peerCustTime;      // PEER_CUST_TIME
+    const char *peerCustData;      // PEER_CUST_DATA
     const char *errMsg;            // ERR_MSG
     const char *extra;             // EXTRA
     const char *callerPkg;         // HOST_PKG

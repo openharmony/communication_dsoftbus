@@ -38,6 +38,9 @@
 namespace OHOS {
 using namespace testing::ext;
 constexpr uint32_t TEST_DATA_LEN = 30;
+constexpr uint32_t BLE_CONNID = 196609;
+constexpr uint32_t BR_CONNID = 65570;
+constexpr uint32_t WIFI_CONNID = 131073;
 
 class AuthOtherTest : public testing::Test {
 public:
@@ -684,6 +687,19 @@ HWTEST_F(AuthOtherTest, UPDATE_AUTH_DEVICE_PRIORITY_TEST_001, TestSize.Level1)
 }
 
 /*
+ * @tc.name: UPDATE_AUTH_DEVICE_PRIORITY_TEST_002
+ * @tc.desc: update auth device priority test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, UPDATE_AUTH_DEVICE_PRIORITY_TEST_002, TestSize.Level1)
+{
+    UpdateAuthDevicePriority(BLE_CONNID);
+    UpdateAuthDevicePriority(BR_CONNID);
+    UpdateAuthDevicePriority(WIFI_CONNID);
+}
+
+/*
  * @tc.name: CHECK_BUS_VERSION_TEST_001
  * @tc.desc: check bus version test
  * @tc.type: FUNC
@@ -698,6 +714,7 @@ HWTEST_F(AuthOtherTest, CHECK_BUS_VERSION_TEST_001, TestSize.Level1)
 
     NodeInfo *info = (NodeInfo*)SoftBusCalloc(sizeof(NodeInfo));
     if (info == NULL) {
+        JSON_Delete(obj);
         return;
     }
     (void)memset_s(info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
@@ -711,6 +728,7 @@ HWTEST_F(AuthOtherTest, CHECK_BUS_VERSION_TEST_001, TestSize.Level1)
         !JSON_AddInt32ToObject(obj, "SESSION_PORT", (int32_t)26) ||
         !JSON_AddInt32ToObject(obj, "PROXY_PORT", (int32_t)80) ||
         !JSON_AddStringToObject(obj, "DEV_IP", "127.0.0.1")) {
+        JSON_Delete(obj);
         return;
     }
     JSON_AddStringToObject(obj, BLE_OFFLINE_CODE, "10244");

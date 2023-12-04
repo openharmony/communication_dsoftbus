@@ -33,8 +33,8 @@
 
 int32_t DiscCoapParseDeviceUdid(const char *raw, DeviceInfo *device)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGW(raw != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "raw string is NULL");
-    DISC_CHECK_AND_RETURN_RET_LOGW(device != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "device info is NULL");
+    DISC_CHECK_AND_RETURN_RET_LOGE(raw != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "raw string is NULL");
+    DISC_CHECK_AND_RETURN_RET_LOGE(device != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "device info is NULL");
 
     cJSON *udidJson = cJSON_Parse(raw);
     DISC_CHECK_AND_RETURN_RET_LOGE(udidJson != NULL, SOFTBUS_PARSE_JSON_ERR, DISC_COAP, "parse udid json failed");
@@ -59,10 +59,10 @@ int32_t DiscCoapParseDeviceUdid(const char *raw, DeviceInfo *device)
 
 void DiscCoapParseWifiIpAddr(const cJSON *data, DeviceInfo *device)
 {
-    DISC_CHECK_AND_RETURN_LOGW(data != NULL, DISC_COAP, "json data is NULL");
-    DISC_CHECK_AND_RETURN_LOGW(device != NULL, DISC_COAP, "device info is NULL");
+    DISC_CHECK_AND_RETURN_LOGE(data != NULL, DISC_COAP, "json data is NULL");
+    DISC_CHECK_AND_RETURN_LOGE(device != NULL, DISC_COAP, "device info is NULL");
     if (!GetJsonObjectStringItem(data, JSON_WLAN_IP, device->addr[0].info.ip.ip, sizeof(device->addr[0].info.ip.ip))) {
-        DISC_LOGW(DISC_COAP, "parse wifi ip address failed.");
+        DISC_LOGE(DISC_COAP, "parse wifi ip address failed.");
         return;
     }
     device->addrNum = 1;
@@ -104,11 +104,11 @@ static void ParseItemDataFromServiceData(char *serviceData, const char *key, cha
 
 int32_t DiscCoapParseServiceData(const cJSON *data, DeviceInfo *device)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGW(data != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "json data is NULL");
-    DISC_CHECK_AND_RETURN_RET_LOGW(device != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "device info is NULL");
+    DISC_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "json data is NULL");
+    DISC_CHECK_AND_RETURN_RET_LOGE(device != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "device info is NULL");
     char serviceData[MAX_SERVICE_DATA_LEN] = {0};
     if (!GetJsonObjectStringItem(data, JSON_SERVICE_DATA, serviceData, sizeof(serviceData))) {
-        DISC_LOGW(DISC_COAP, "parse service data failed.");
+        DISC_LOGE(DISC_COAP, "parse service data failed.");
         return SOFTBUS_ERR;
     }
     char serviceDataBak[MAX_SERVICE_DATA_LEN] = {0};
@@ -120,7 +120,7 @@ int32_t DiscCoapParseServiceData(const cJSON *data, DeviceInfo *device)
     ParseItemDataFromServiceData(serviceData, SERVICE_DATA_PORT, port, sizeof(port));
     int authPort = atoi(port);
     if (authPort > UINT16_MAX || authPort <= 0) {
-        DISC_LOGW(DISC_COAP, "not find auth port.");
+        DISC_LOGE(DISC_COAP, "not find auth port.");
         return SOFTBUS_ERR;
     }
     device->addr[0].info.ip.port = (uint16_t)authPort;
@@ -152,8 +152,8 @@ int32_t DiscCoapParseServiceData(const cJSON *data, DeviceInfo *device)
 
 void DiscCoapParseHwAccountHash(const cJSON *data, DeviceInfo *device)
 {
-    DISC_CHECK_AND_RETURN_LOGW(data != NULL, DISC_COAP, "json data is NULL");
-    DISC_CHECK_AND_RETURN_LOGW(device != NULL, DISC_COAP, "device info is NULL");
+    DISC_CHECK_AND_RETURN_LOGE(data != NULL, DISC_COAP, "json data is NULL");
+    DISC_CHECK_AND_RETURN_LOGE(device != NULL, DISC_COAP, "device info is NULL");
     char tmpAccount[MAX_ACCOUNT_HASH_LEN] = {0};
     if (!GetJsonObjectStringItem(data, JSON_HW_ACCOUNT, tmpAccount, MAX_ACCOUNT_HASH_LEN)) {
         DISC_LOGE(DISC_COAP, "parse accountId failed");

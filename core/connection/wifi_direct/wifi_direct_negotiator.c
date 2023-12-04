@@ -344,7 +344,7 @@ static void NegotiateSchedule(void)
         prevCommand->deleteSelf(prevCommand);
     }
     GetWifiDirectNegotiator()->currentCommand = nextCommand;
-    CONN_LOGI(CONN_WIFI_DIRECT, "currentCommand=%p", nextCommand);
+    CONN_LOGI(CONN_WIFI_DIRECT, "currentCommand=%d", nextCommand->type);
     nextCommand->execute(nextCommand);
 }
 

@@ -33,6 +33,7 @@ ohos_unittest("HidumperTest") {
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/common/dfx/hidumper_adapter:softbus_dfx_dump",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "//third_party/googletest:gtest_main",
   ]

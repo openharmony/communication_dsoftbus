@@ -98,7 +98,7 @@ HWTEST_F(LnnEventTest, LnnEventTest002, TestSize.Level0)
 HWTEST_F(LnnEventTest, LnnEventTest003, TestSize.Level0)
 {
     LnnEventExtra invalidExtra = {
-        .result = -1,
+        .result = -1,  // vaild
         .errcode = -2, // valid
         .connectionId = -3,
         .authType = -4,
@@ -118,7 +118,7 @@ HWTEST_F(LnnEventTest, LnnEventTest003, TestSize.Level0)
         .callerPkg = "\0",
         .calleePkg = nullptr,
     };
-    constexpr int32_t VALID_EXTRA_SIZE = 1; // errcode is valid
+    constexpr int32_t VALID_EXTRA_SIZE = 2; // result, errcode is valid
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,
@@ -137,7 +137,7 @@ HWTEST_F(LnnEventTest, LnnEventTest003, TestSize.Level0)
 HWTEST_F(LnnEventTest, LnnEventTest004, TestSize.Level0)
 {
     LnnEventExtra emptyExtra = { 0 };
-    constexpr int32_t VALID_EXTRA_SIZE = 1; // errcode is valid
+    constexpr int32_t VALID_EXTRA_SIZE = 2; // result, errcode is valid
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,

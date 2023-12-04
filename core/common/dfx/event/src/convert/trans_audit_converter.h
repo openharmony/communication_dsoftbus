@@ -22,11 +22,11 @@
 extern "C" {
 #endif
 
-#define TRANS_AUDIT_ASSIGNER(type, filedName, filed)                                                          \
-    static inline bool TransAuditAssigner##filedName(                                                         \
+#define TRANS_AUDIT_ASSIGNER(type, fieldName, field)                                                          \
+    static inline bool TransAuditAssigner##fieldName(                                                         \
         const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param) \
     {                                                                                                         \
-        if (Assigner##type(form->transAuditExtra->filed, &param) && CopyString(param->name, eventName)) {     \
+        if (Assigner##type(form->transAuditExtra->field, &param) && CopyString(param->name, eventName)) {     \
             param->t = paramType;                                                                             \
             return true;                                                                                      \
         }                                                                                                     \
@@ -54,10 +54,11 @@ TRANS_AUDIT_ASSIGNER(Int32, DataSeq, dataSeq)
 TRANS_AUDIT_ASSIGNER(Int32, CostTime, costTime)
 TRANS_AUDIT_ASSIGNER(Int32, ChannelScore, channelScore)
 TRANS_AUDIT_ASSIGNER(Int32, DataLimit, dataLimit)
+TRANS_AUDIT_ASSIGNER(String, Extra, extra)
 TRANS_AUDIT_ASSIGNER(String, CallerPkg, callerPkg)
 TRANS_AUDIT_ASSIGNER(String, CalleePkg, calleePkg)
 
-#define TRANS_AUDIT_ASSIGNER_SIZE 22 // Size of g_transAuditAssigners
+#define TRANS_AUDIT_ASSIGNER_SIZE 23 // Size of g_transAuditAssigners
 static const HiSysEventParamAssigner g_transAuditAssigners[] = {
     { "ERROR_CODE",       HISYSEVENT_INT32,  TransAuditAssignerErrcode       },
     { "AUDIT_TYPE",       HISYSEVENT_INT32,  TransAuditAssignerAuditType     },
@@ -80,6 +81,7 @@ static const HiSysEventParamAssigner g_transAuditAssigners[] = {
     { "COST_TIME",        HISYSEVENT_INT32,  TransAuditAssignerCostTime      },
     { "CHAN_SCORE",       HISYSEVENT_INT32,  TransAuditAssignerChannelScore  },
     { "DATA_LIMIT",       HISYSEVENT_INT32,  TransAuditAssignerDataLimit     },
+    { "EXTRA",            HISYSEVENT_STRING, TransAuditAssignerExtra         },
     { "HOST_PKG",         HISYSEVENT_STRING, TransAuditAssignerCallerPkg     },
     { "TO_CALL_PKG",      HISYSEVENT_STRING, TransAuditAssignerCalleePkg     },
     // Modification Note: remember updating TRANS_ASSIGNER_SIZE

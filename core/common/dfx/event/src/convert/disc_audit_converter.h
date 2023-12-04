@@ -22,11 +22,11 @@
 extern "C" {
 #endif
 
-#define DISC_AUDIT_ASSIGNER(type, filedName, filed)                                                           \
-    static inline bool DiscAuditAssigner##filedName(                                                          \
+#define DISC_AUDIT_ASSIGNER(type, fieldName, field)                                                           \
+    static inline bool DiscAuditAssigner##fieldName(                                                          \
         const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param) \
     {                                                                                                         \
-        if (Assigner##type(form->discAuditExtra->filed, &param) && CopyString(param->name, eventName)) {      \
+        if (Assigner##type(form->discAuditExtra->field, &param) && CopyString(param->name, eventName)) {      \
             param->t = paramType;                                                                             \
             return true;                                                                                      \
         }                                                                                                     \
@@ -46,14 +46,14 @@ DISC_AUDIT_ASSIGNER(Int32, ScanInterval, scanInterval)
 DISC_AUDIT_ASSIGNER(Int32, ScanWindow, scanWindow)
 DISC_AUDIT_ASSIGNER(Int32, DiscType, discType)
 DISC_AUDIT_ASSIGNER(Int32, DiscMode, discMode)
-DISC_AUDIT_ASSIGNER(Int32, FirstDisCoverytime, firstDisCoverytime)
+DISC_AUDIT_ASSIGNER(Int64, FirstDisCoverytime, firstDisCoverytime)
 DISC_AUDIT_ASSIGNER(String, LocalNetworkId, localNetworkId)
 DISC_AUDIT_ASSIGNER(String, LocalUdid, localUdid)
 DISC_AUDIT_ASSIGNER(String, LocalDeviceType, localDeviceType)
 DISC_AUDIT_ASSIGNER(String, LocalDeviceName, localDeviceName)
 DISC_AUDIT_ASSIGNER(Int32, LocalCapabilityBitmap, localCapabilityBitmap)
 DISC_AUDIT_ASSIGNER(String, LocalAccountHash, localAccountHash)
-DISC_AUDIT_ASSIGNER(String, LocalCustTime, localCustTime)
+DISC_AUDIT_ASSIGNER(String, LocalCustData, localCustData)
 DISC_AUDIT_ASSIGNER(String, PeerIp, peerIp)
 DISC_AUDIT_ASSIGNER(String, PeerBrMac, peerBrMac)
 DISC_AUDIT_ASSIGNER(String, PeerBleMac, peerBleMac)
@@ -65,12 +65,12 @@ DISC_AUDIT_ASSIGNER(String, PeerDeviceType, peerDeviceType)
 DISC_AUDIT_ASSIGNER(String, PeerDeviceName, peerDeviceName)
 DISC_AUDIT_ASSIGNER(Int32, PeerCapabilityBitmap, peerCapabilityBitmap)
 DISC_AUDIT_ASSIGNER(String, PeerAccountHash, peerAccountHash)
-DISC_AUDIT_ASSIGNER(String, PeerCustTime, peerCustTime)
+DISC_AUDIT_ASSIGNER(String, PeerCustData, peerCustData)
 DISC_AUDIT_ASSIGNER(String, ErrMsg, errMsg)
-DISC_AUDIT_ASSIGNER(Int32, Extra, extra)
+DISC_AUDIT_ASSIGNER(String, Extra, extra)
 DISC_AUDIT_ASSIGNER(String, CallerPkg, callerPkg)
 
-#define DISC_AUDIT_ASSIGNER_SIZE 21 // Size of g_discAssigners
+#define DISC_AUDIT_ASSIGNER_SIZE 36 // Size of g_discAssigners
 static HiSysEventParamAssigner g_discAuditAssigners[] = {
     { "ERROR_CODE",              HISYSEVENT_INT32,  DiscAuditAssignerErrcode              },
     { "AUDIT_TYPE",              HISYSEVENT_INT32,  DiscAuditAssignerAuditType            },
@@ -81,30 +81,32 @@ static HiSysEventParamAssigner g_discAuditAssigners[] = {
     { "SCAN_CYCLE",              HISYSEVENT_STRING, DiscAuditAssignerScanCycle            },
     { "SCAN_ID",                 HISYSEVENT_INT32,  DiscAuditAssignerScanId               },
     { "SCAN_LISTENER_ID",        HISYSEVENT_INT32,  DiscAuditAssignerScanListhenerId      },
-    { "SCAN_INTERCAL",           HISYSEVENT_INT32,  DiscAuditAssignerScanIntercal         },
+    { "SCAN_INTERVAL",           HISYSEVENT_INT32,  DiscAuditAssignerScanInterval         },
     { "SCAN_WINDOW",             HISYSEVENT_INT32,  DiscAuditAssignerScanWindow           },
     { "DISC_TYPE",               HISYSEVENT_INT32,  DiscAuditAssignerDiscType             },
     { "DISC_MODE",               HISYSEVENT_INT32,  DiscAuditAssignerDiscMode             },
-    { "FIRST_DISCOVERY_TIME",    HISYSEVENT_INT32,  DiscAuditAssignerFirstDisCoverytime   },
+    { "FIRST_DISCOVERY_TIME",    HISYSEVENT_INT64,  DiscAuditAssignerFirstDisCoverytime   },
     { "LOCAL_NET_ID",            HISYSEVENT_STRING, DiscAuditAssignerLocalNetworkId       },
     { "LOCAL_UDID",              HISYSEVENT_STRING, DiscAuditAssignerLocalUdid            },
     { "LOCAL_DEV_TYPE",          HISYSEVENT_STRING, DiscAuditAssignerLocalDeviceType      },
     { "LOCAL_DEV_NAME",          HISYSEVENT_STRING, DiscAuditAssignerLocalDeviceName      },
     { "LOCAL_CAPABILITY_BITMAP", HISYSEVENT_INT32,  DiscAuditAssignerLocalCapabilityBitmap},
+    { "LOCAL_ACCOUNT_HASH",      HISYSEVENT_STRING, DiscAuditAssignerLocalAccountHash     },
     { "LOCAL_CUST_DATA",         HISYSEVENT_STRING, DiscAuditAssignerLocalCustData        },
     { "PEER_IP",                 HISYSEVENT_STRING, DiscAuditAssignerPeerIp               },
     { "PEER_BR_MAC",             HISYSEVENT_STRING, DiscAuditAssignerPeerBrMac            },
     { "PEER_BLE_MAC",            HISYSEVENT_STRING, DiscAuditAssignerPeerBleMac           },
     { "PEER_WIFI_MAC",           HISYSEVENT_STRING, DiscAuditAssignerPeerWifiMac          },
-    { "PEER_PORT",               HISYSEVENT_INT32,  DiscAuditAssignerPeerPort             },
+    { "PEER_PORT",               HISYSEVENT_STRING, DiscAuditAssignerPeerPort             },
     { "PEER_UDID",               HISYSEVENT_STRING, DiscAuditAssignerPeerUdid             },
     { "PEER_NET_ID",             HISYSEVENT_STRING, DiscAuditAssignerPeerNetworkId        },
     { "PEER_DEV_TYPE",           HISYSEVENT_STRING, DiscAuditAssignerPeerDeviceType       },
     { "PEER_DEV_NAME",           HISYSEVENT_STRING, DiscAuditAssignerPeerDeviceName       },
     { "PEER_CAPABILITY_BITMAP",  HISYSEVENT_INT32,  DiscAuditAssignerPeerCapabilityBitmap },
+    { "PEER_ACCOUNT_HASH",       HISYSEVENT_STRING, DiscAuditAssignerPeerAccountHash      },
     { "PEER_CUST_DATA",          HISYSEVENT_STRING, DiscAuditAssignerPeerCustData         },
-    { "PEER_MSG",                HISYSEVENT_STRING, DiscAuditAssignerErrorMsg             },
-    { "EXTRA",                   HISYSEVENT_INT32,  DiscAuditAssignerExtra                },
+    { "ERR_MSG",                 HISYSEVENT_STRING, DiscAuditAssignerErrMsg               },
+    { "EXTRA",                   HISYSEVENT_STRING, DiscAuditAssignerExtra                },
     { "HOST_PKG",                HISYSEVENT_STRING, DiscAuditAssignerCallerPkg            },
     // Modification Note: remember updating DISC_AUDIT_ASSIGNER_SIZE
 };

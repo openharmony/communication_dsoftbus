@@ -139,5 +139,6 @@ int32_t LnnGenLocalIrk(unsigned char *irk, uint32_t len)
         (void)memset_s(locaIrk, LFINDER_IRK_LEN, 0, LFINDER_IRK_LEN);
         return SOFTBUS_ERR;
     }
+    LNN_LOGI(LNN_STATE, "get irk success!");
     return SOFTBUS_OK;
 }

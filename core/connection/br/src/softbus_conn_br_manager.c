@@ -770,7 +770,7 @@ static void ClientConnectTimeoutOnConnectingState(uint32_t connectionId, const c
         CONN_LOGE(CONN_BR, "addr=%s, conn id=%u, connecting device mismatch", anomizeAddress, connectionId);
         return;
     }
-    NotifyDeviceConnectResult(connectingDevice, NULL, false, SOFTBUS_CONN_BLE_CONNECT_TIMEOUT_ERR);
+    NotifyDeviceConnectResult(connectingDevice, NULL, false, SOFTBUS_CONN_BR_CONNECT_TIMEOUT_ERR);
     FreeDevice(connectingDevice);
     g_brManager.connecting = NULL;
     TransitionToState(BR_STATE_AVAILABLE);
@@ -812,6 +812,7 @@ static void ReceivedControlData(ConnBrConnection *connection, const uint8_t *dat
     int32_t method = 0;
     if (!GetJsonObjectNumberItem(json, KEY_METHOD, &method)) {
         CONN_LOGE(CONN_BR, "parse method failed, conn id=%u", connection->connectionId);
+        cJSON_Delete(json);
         return;
     }
     CONN_LOGD(CONN_BR, "conn id=%u, method=%d", connection->connectionId, method);

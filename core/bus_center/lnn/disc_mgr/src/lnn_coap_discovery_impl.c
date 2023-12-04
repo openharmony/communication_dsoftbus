@@ -47,7 +47,7 @@ static void DeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions 
     (void) addtions;
 
     if (device == NULL) {
-        DISC_LOGW(DISC_LNN, "device para is null");
+        DISC_LOGE(DISC_LNN, "device para is null");
         return;
     }
     (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
@@ -59,11 +59,11 @@ static void DeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions 
         return;
     }
     if (device->addr[0].type != CONNECTION_ADDR_WLAN && device->addr[0].type != CONNECTION_ADDR_ETH) {
-        DISC_LOGW(DISC_LNN, "discovery get invalid addrtype: %d", device->addr[0].type);
+        DISC_LOGE(DISC_LNN, "discovery get invalid addrtype: %d", device->addr[0].type);
         return;
     }
     if (device->addr[0].info.ip.port == 0) {
-        DISC_LOGW(DISC_LNN, "discovery get port is 0!");
+        DISC_LOGE(DISC_LNN, "discovery get port is 0!");
         return;
     }
     addr.type = device->addr[0].type;

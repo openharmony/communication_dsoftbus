@@ -22,11 +22,11 @@
 extern "C" {
 #endif
 
-#define CONN_AUDIT_ASSIGNER(type, filedName, filed)                                                           \
-    static inline bool ConnAuditAssigner##filedName(                                                          \
+#define CONN_AUDIT_ASSIGNER(type, fieldName, field)                                                           \
+    static inline bool ConnAuditAssigner##fieldName(                                                          \
         const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param) \
     {                                                                                                         \
-        if (Assigner##type(form->connAuditExtra->filed, &param) && CopyString(param->name, eventName)) {      \
+        if (Assigner##type(form->connAuditExtra->field, &param) && CopyString(param->name, eventName)) {      \
             param->t = paramType;                                                                             \
             return true;                                                                                      \
         }                                                                                                     \
@@ -44,15 +44,15 @@ CONN_AUDIT_ASSIGNER(String, Frequency, frequency)
 CONN_AUDIT_ASSIGNER(String, PeerBrMac, peerBrMac)
 CONN_AUDIT_ASSIGNER(String, PeerBleMac, peerBleMac)
 CONN_AUDIT_ASSIGNER(String, PeerDeviceType, peerDeviceType)
-CONN_AUDIT_ASSIGNER(String, PeerWifiMac, peerWifiMac)
 CONN_AUDIT_ASSIGNER(String, PeerUdid, peerUdid)
 CONN_AUDIT_ASSIGNER(String, ConnPaload, connPaload)
 CONN_AUDIT_ASSIGNER(String, LocalDeviceName, localDeviceName)
 CONN_AUDIT_ASSIGNER(String, PeerIp, peerIp)
+CONN_AUDIT_ASSIGNER(String, Extra, extra)
 CONN_AUDIT_ASSIGNER(String, CallerPkg, callerPkg)
 CONN_AUDIT_ASSIGNER(String, CalleePkg, calleePkg)
 
-#define CONN_AUDIT_ASSIGNER_SIZE 20 // Size of g_connAuditAssigners
+#define CONN_AUDIT_ASSIGNER_SIZE 18  // Size of g_connAuditAssigners
 static HiSysEventParamAssigner g_connAuditAssigners[] = {
     { "ERROR_CODE",     HISYSEVENT_INT32,  ConnAuditAssignerErrcode        },
     { "AUDIT_TYPE",     HISYSEVENT_INT32,  ConnAuditAssignerAuditType      },
@@ -65,11 +65,12 @@ static HiSysEventParamAssigner g_connAuditAssigners[] = {
     { "PEER_BR_MAC",    HISYSEVENT_STRING, ConnAuditAssignerPeerBrMac      },
     { "PEER_BLE_MAC",   HISYSEVENT_STRING, ConnAuditAssignerPeerBleMac     },
     { "PEER_DEV_TYPE",  HISYSEVENT_STRING, ConnAuditAssignerPeerDeviceType },
-    { "PEER_WIFI_MAC",  HISYSEVENT_STRING, ConnAuditAssignerPeerWifiMac    },
-    { "PEER_IP",        HISYSEVENT_STRING, ConnAuditAssignerPeerIp         },
+    { "PEER_UDID",      HISYSEVENT_STRING, ConnAuditAssignerPeerUdid       },
+    { "CONN_PALOAD",    HISYSEVENT_STRING, ConnAuditAssignerConnPaload     },
     { "LOCAL_DEV_NAME", HISYSEVENT_STRING, ConnAuditAssignerLocalDeviceName},
     { "PEER_IP",        HISYSEVENT_STRING, ConnAuditAssignerPeerIp         },
     { "HOST_PKG",       HISYSEVENT_STRING, ConnAuditAssignerCallerPkg      },
+    { "EXTRA",          HISYSEVENT_STRING, ConnAuditAssignerExtra          },
     { "TO_CALL_PKG",    HISYSEVENT_STRING, ConnAuditAssignerCalleePkg      },
     // Modification Note: remember updating CONN_AUDIT_ASSIGNER_SIZE
 };

@@ -34,6 +34,8 @@
 #define SESSION_NAME_PHONEPAD "com.huawei.pcassistant.phonepad-connect-channel"
 #define SESSION_NAME_CASTPLUS "CastPlusSessionName"
 #define SESSION_NAME_DISTRIBUTE_COMMUNICATION "com.huawei.boosterd.user"
+#define SESSION_NAME_ISHARE "IShare"
+#define ISHARE_MIN_NAME_LEN 6
 
 typedef struct {
     ListNode node;
@@ -322,6 +324,15 @@ static void TransformSessionPreferredToLanePreferred(const SessionParam *param,
     return;
 }
 
+static bool IsShareSession(const char *sessionName)
+{
+    if (strlen(sessionName) < ISHARE_MIN_NAME_LEN ||
+        strncmp(sessionName, SESSION_NAME_ISHARE, ISHARE_MIN_NAME_LEN) != 0) {
+        return false;
+    }
+    return true;
+}
+
 static void TransGetQosInfo(const SessionParam *param, QosInfo *qosInfo, bool *isQosLane)
 {
     *isQosLane = param->isQosLane;
@@ -347,6 +358,17 @@ static void TransGetQosInfo(const SessionParam *param, QosInfo *qosInfo, bool *i
     }
 }
 
+static void TransGetBleMac(const SessionParam *param, LaneRequestOption *requestOption)
+{
+    if (LnnGetRemoteStrInfo(requestOption->requestInfo.trans.networkId, STRING_KEY_BLE_MAC,
+            requestOption->requestInfo.trans.peerBleMac, BT_MAC_LEN) != SOFTBUS_OK) {
+        if (strcpy_s(requestOption->requestInfo.trans.peerBleMac, BT_MAC_LEN, "") != EOK) {
+            TRANS_LOGE(TRANS_SVC, "strcpy fail");
+        }
+        TRANS_LOGW(TRANS_SVC, "requestOption get ble mac fail.");
+    }
+}
+
 static int32_t GetRequestOptionBySessionParam(const SessionParam *param, LaneRequestOption *requestOption,
     bool *isQosLane)
 {
@@ -367,7 +389,7 @@ static int32_t GetRequestOptionBySessionParam(const SessionParam *param, LaneReq
         requestOption->requestInfo.trans.networkDelegate = true;
     }
     requestOption->requestInfo.trans.p2pOnly = false;
-    if (strcmp(param->sessionName, SESSION_NAME_DISTRIBUTE_COMMUNICATION) == 0) {
+    if (strcmp(param->sessionName, SESSION_NAME_DISTRIBUTE_COMMUNICATION) == 0 || IsShareSession(param->sessionName)) {
         requestOption->requestInfo.trans.p2pOnly = true;
     }
     requestOption->requestInfo.trans.transType = transType;
@@ -379,7 +401,8 @@ static int32_t GetRequestOptionBySessionParam(const SessionParam *param, LaneReq
     if (info != NULL && LnnHasDiscoveryType(info, DISCOVERY_TYPE_LSA)) {
         requestOption->requestInfo.trans.acceptableProtocols |= LNN_PROTOCOL_NIP;
     }
-
+    // ble mac is used when linktype is LINK_TYPE_BLE
+    TransGetBleMac(param, requestOption);
     int32_t uid;
     int32_t ret = TransGetUidAndPid(param->sessionName, &uid, &(requestOption->requestInfo.trans.pid));
     if (ret != SOFTBUS_OK) {
