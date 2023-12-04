@@ -174,21 +174,29 @@ static int32_t EncryptByPublicKey(const uint8_t *src, uint32_t srcLen, const RSA
     const BIGNUM *exp = RSA_get0_e(rsa);
     if ((BN_num_bits(modNum) > OPENSSL_RSA_MAX_MODULUS_BITS) || (BN_ucmp(modNum, exp) <= 0) ||
         ((BN_num_bits(modNum) > OPENSSL_RSA_SMALL_MODULUS_BITS) && (BN_num_bits(exp) > OPENSSL_RSA_MAX_PUBEXP_BITS))) {
+        COMM_LOGE(COMM_UTILS, "invalid param rsa.");
         return SOFTBUS_ERR;
     }
     do {
         ctx = GetRsaBigNum(modNum, &base, &result, &buf, &bufNum);
         if (ctx == NULL) {
+            COMM_LOGE(COMM_UTILS, "GetRsaBigNum failed.");
             break;
         }
         const EVP_MD *md = EVP_sha256();
         const EVP_MD *mgf1md = EVP_sha1();
         ret = RSA_padding_add_PKCS1_OAEP_mgf1(buf, bufNum, src, srcLen, NULL, 0, md, mgf1md);
         if (ret <= 0 || BN_bin2bn(buf, bufNum, base) == NULL || BN_ucmp(base, modNum) >= 0) {
+            COMM_LOGE(COMM_UTILS, "RSA_padding_add_PKCS1_OAEP_mgf1 failed or invalid BIGNUM param .");
             break;
         }
         BN_mod_exp_mont(result, base, exp, modNum, ctx, NULL);
         ret = BN_bn2binpad(result, out, bufNum);
+        if (ret < 0) {
+            COMM_LOGE(COMM_UTILS, "BN_bn2binpad failed.");
+            break;
+        }
+        ret = SOFTBUS_OK;
     } while (0);
     if (ctx != NULL) {
         BN_CTX_end(ctx);
