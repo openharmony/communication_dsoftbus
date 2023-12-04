@@ -476,5 +476,10 @@ int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info)
 {
     return GetNetLedgerInterface()->LnnGetLocalNumU64Info(key, info);
 }
+
+bool IsActiveOsAccountUnlocked(void)
+{
+    return GetNetLedgerInterface()->IsActiveOsAccountUnlocked();
+}
 }
 }

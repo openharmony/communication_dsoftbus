@@ -105,6 +105,9 @@ static bool IsMetaDeviceHeartbeatEnable(void)
 
 static bool IsHeartbeatEnable(void)
 {
+    if ((g_hbConditionState.lockState == SOFTBUS_SCREEN_LOCK_UNKNOWN) && IsActiveOsAccountUnlocked()) {
+        g_hbConditionState.lockState = SOFTBUS_SCREEN_UNLOCK;
+    }
     bool isBtOn = g_hbConditionState.btState == SOFTBUS_BLE_TURN_ON ||
         g_hbConditionState.btState == SOFTBUS_BR_TURN_ON;
     bool isScreenUnlock = g_hbConditionState.lockState == SOFTBUS_SCREEN_UNLOCK;
@@ -591,7 +594,7 @@ static void HbTryRecoveryNetwork(void)
     if (!LnnIsDefaultOhosAccount()) {
         g_hbConditionState.accountState = SOFTBUS_ACCOUNT_LOG_IN;
     }
-    if (IsScreenUnlock()) {
+    if (IsActiveOsAccountUnlocked()) {
         g_hbConditionState.lockState = SOFTBUS_SCREEN_UNLOCK;
     }
     TrustedReturnType ret = AuthHasTrustedRelation();

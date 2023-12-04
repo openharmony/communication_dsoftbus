@@ -685,7 +685,7 @@ int32_t LnnInitNetworkManagerDelay(void)
             }
         }
     }
-    if (IsScreenUnlock()) {
+    if (IsActiveOsAccountUnlocked()) {
         g_isUnLock = true;
     }
     RetryCheckOOBEState(NULL);
