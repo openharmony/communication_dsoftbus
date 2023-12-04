@@ -24,6 +24,7 @@
 #include "lnn_common_utils.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_fast_offline.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_log.h"
 #include "lnn_net_builder.h"
@@ -430,6 +431,7 @@ static void OnGroupCreated(const char *groupId, int32_t groupType)
     LnnUpdateOhosAccount();
     LnnHbOnTrustedRelationIncreased(groupType);
     RestartCoapDiscovery();
+    EhLoginEventHandler();
 }
 
 static void OnGroupDeleted(const char *groupId)
