@@ -501,6 +501,7 @@ static bool AuthParseDeviceKey(const char *deviceKey)
     int32_t arraySize = cJSON_GetArraySize(json);
     if (arraySize <= 0) {
         AUTH_LOGE(AUTH_KEY, "no valid deviceKey");
+        cJSON_Delete(json);
         return false;
     }
     AUTH_LOGD(AUTH_KEY, "jsonArray size:%d", arraySize);
