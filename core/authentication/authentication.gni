@@ -102,6 +102,9 @@ if (defined(ohos_lite)) {
           [ "//base/security/device_auth/services:deviceauth_sdk" ]
     }
   }
+  auth_server_src += [ "$authentication_path/src/virtual/auth_hichain_system_ability_monitor_virtual.c" ]
 } else {
   auth_server_inc += [ "//base/security/device_auth/interfaces/inner_api" ]
+  auth_server_src +=
+      [ "$authentication_path/src/auth_hichain_system_ability_monitor.cpp" ]
 }
