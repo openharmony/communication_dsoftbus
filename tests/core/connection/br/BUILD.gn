@@ -42,6 +42,7 @@ config("softbus_connection_br_test_config") {
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "//foundation/communication/bluetooth/interfaces/inner_api/include",
     "$dsoftbus_root_path/core/bus_center/service/include",
     "//third_party/googletest/googletest/include",
     "//third_party/googletest/googletest/src",
