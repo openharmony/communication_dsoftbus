@@ -27,6 +27,7 @@
       "syscap":[ "SystemCapability.Communication.SoftBus.Core" ],
       "features": [
         "dsoftbus_feature_conn_p2p",
+        "dsoftbus_feature_conn_legacy",
         "dsoftbus_feature_disc_ble",
         "dsoftbus_feature_conn_br",
         "dsoftbus_feature_conn_ble",
