@@ -41,17 +41,19 @@ int32_t LnnSetLocalPtkConn(char *udid)
     return SOFTBUS_OK;
 }
 
-int32_t LnnGetLocalPtkByUdid(const char *udid, char *localPtk)
+int32_t LnnGetLocalPtkByUdid(const char *udid, char *localPtk, uint32_t len)
 {
     (void)udid;
     (void)localPtk;
+    (void)len;
     return SOFTBUS_OK;
 }
 
-int32_t LnnGetLocalPtkByUuid(const char *uuid, char *localPtk)
+int32_t LnnGetLocalPtkByUuid(const char *uuid, char *localPtk, uint32_t len)
 {
     (void)uuid;
     (void)localPtk;
+    (void)len;
     return SOFTBUS_OK;
 }
 
