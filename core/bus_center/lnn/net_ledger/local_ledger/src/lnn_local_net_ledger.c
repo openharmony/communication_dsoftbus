@@ -1521,22 +1521,28 @@ static int32_t LnnGenBroadcastCipherInfo(void)
         return SOFTBUS_OK;
     }
 
-    unsigned char cipherKey[SESSION_KEY_LENGTH] = {0};
-    unsigned char cipherIv[BROADCAST_IV_LEN] = {0};
-    if (SoftBusGenerateRandomArray(cipherKey, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+    BroadcastCipherKey broadcastKey;
+    (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
+    if (SoftBusGenerateRandomArray(broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "generate broadcast key error.");
         return SOFTBUS_ERR;
     }
-    if (SoftBusGenerateRandomArray(cipherIv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
+    if (SoftBusGenerateRandomArray(broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "generate broadcast iv error.");
         return SOFTBUS_ERR;
     }
-    if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_KEY, cipherKey, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+    if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_KEY,
+        broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "set key error.");
         return SOFTBUS_ERR;
     }
-    if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_IV, cipherIv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
+    if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_IV,
+        broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "set iv error.");
+        return SOFTBUS_ERR;
+    }
+    if (LnnUpdateLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "update local broadcast key failed");
         return SOFTBUS_ERR;
     }
     LNN_LOGI(LNN_LEDGER, "generate BroadcastCipherInfo success!");
@@ -1686,7 +1692,6 @@ int32_t LnnInitLocalLedger(void)
     }
     if (LnnGenBroadcastCipherInfo() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "generate cipher fail");
-        goto EXIT;
     }
 
     g_localNetLedger.status = LL_INIT_SUCCESS;
