@@ -1729,21 +1729,19 @@ int32_t ClientIpcOpenSession(int32_t sessionId, const QosTV *qos, uint32_t qosCo
         .attr = &tmpAttr,
         .isQosLane = true,
     };
+    (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
 
     param.qosCount = qosCount;
     if (param.qosCount > 0 && memcpy_s(param.qos, sizeof(param.qos), qos, sizeof(QosTV) * qosCount) != EOK) {
-        (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
         TRANS_LOGE(TRANS_SDK, "memcpy qos failed");
         return SOFTBUS_MEM_ERR;
     }
 
     ret = ServerIpcOpenSession(&param, transInfo);
     if (ret != SOFTBUS_OK) {
-        (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
         TRANS_LOGE(TRANS_SDK, "open session ipc err: ret=%d", ret);
         return ret;
     }
-    (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     return SOFTBUS_OK;
 }
 
