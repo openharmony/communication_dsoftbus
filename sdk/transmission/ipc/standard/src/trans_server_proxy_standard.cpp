@@ -771,7 +771,8 @@ int32_t TransServerProxy::GetSoftbusSpecObject(sptr<IRemoteObject> &object)
     return ret;
 }
 
-int32_t TransServerProxy::EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos, uint32_t qosCount)
+int32_t TransServerProxy::EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos,
+    uint32_t qosCount)
 {
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
