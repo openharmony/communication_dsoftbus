@@ -22,11 +22,11 @@
 extern "C" {
 #endif
 
-#define LNN_ASSIGNER(type, filedName, filed)                                                                  \
-    static inline bool LnnAssigner##filedName(                                                                \
+#define LNN_ASSIGNER(type, fieldName, field)                                                                  \
+    static inline bool LnnAssigner##fieldName(                                                                \
         const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param) \
     {                                                                                                         \
-        if (Assigner##type(form->lnnExtra->filed, &param) && CopyString(param->name, eventName)) {            \
+        if (Assigner##type(form->lnnExtra->field, &param) && CopyString(param->name, eventName)) {            \
             param->t = paramType;                                                                             \
             return true;                                                                                      \
         }                                                                                                     \
@@ -78,11 +78,11 @@ static const HiSysEventParamAssigner g_lnnAssigners[] = {
 };
 
 
-#define LNN_ALARM_ASSIGNER(type, filedName, filed)                                                            \
-    static inline bool LnnAssigner##filedName(                                                                \
+#define LNN_ALARM_ASSIGNER(type, fieldName, field)                                                            \
+    static inline bool LnnAssigner##fieldName(                                                                \
         const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param) \
     {                                                                                                         \
-        if (Assigner##type(form->lnnAlarmExtra->filed, &param) && CopyString(param->name, eventName)) {       \
+        if (Assigner##type(form->lnnAlarmExtra->field, &param) && CopyString(param->name, eventName)) {       \
             param->t = paramType;                                                                             \
             return true;                                                                                      \
         }                                                                                                     \

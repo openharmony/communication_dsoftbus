@@ -49,6 +49,10 @@ typedef struct {
         ConnAlarmExtra *connAlarmExtra;
         LnnAlarmExtra *lnnAlarmExtra;
         DiscAlarmExtra *discAlarmExtra;
+        ConnAuditExtra *connAuditExtra;
+        DiscAuditExtra *discAuditExtra;
+        LnnAuditExtra *lnnAuditExtra;
+        TransAuditExtra *transAuditExtra;
     };
 } SoftbusEventForm;
 

@@ -13,13 +13,15 @@
  * limitations under the License.
  */
 
+#include "comm_log.h"
 #include "lnn_event.h"
 
 #include "softbus_event.h"
 
 void LnnEventInner(int32_t scene, int32_t stage, const char *func, int32_t line, LnnEventExtra *extra)
 {
-    if (extra == NULL) {
+    if (func == NULL || extra == NULL) {
+        COMM_LOGE(COMM_DFX, "func or extra is NUll");
         return;
     }
     SoftbusEventForm form = {
@@ -44,4 +46,20 @@ void LnnAlarmInner(int32_t scene, int32_t type, const char *func, int32_t line, 
         .lnnAlarmExtra = extra,
     };
     SoftbusEventInner(EVENT_MODULE_LNN_ALARM, &form);
+}
+
+void LnnAuditInner(int32_t scene, const char *func, int32_t line, LnnAuditExtra *extra)
+{
+    if (func == NULL || extra == NULL) {
+        COMM_LOGE(COMM_DFX, "func or extra is NUll");
+        return;
+    }
+    SoftbusEventForm form = {
+        .eventName = LNN_AUDIT_NAME,
+        .scene = scene,
+        .func = func,
+        .line = line,
+        .lnnAuditExtra = extra,
+    };
+    SoftbusAuditInner(EVENT_MODULE_LNN, &form);
 }

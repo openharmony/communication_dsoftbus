@@ -87,7 +87,22 @@ typedef enum {
 } LnnAuditScene;
 
 typedef struct {
-    int32_t reserved;
+    int32_t errcode;             // ERROR_CODE
+    SoftbusAuditType auditType;  // AUDIT_TYPE
+    int32_t connectionId;        // CONN_ID
+    int32_t authLinkType;        // AUTH_LINK_TYPE
+    int32_t authId;              // AUTH_ID
+    int32_t onlineNum;           // ONLINE_NUM
+    const char *peerIp;          // PEER_IP
+    const char *peerBrMac;       // PEER_BR_MAC
+    const char *peerBleMac;      // PEER_BLE_MAC
+    const char *peerAuthPort;    // PEER_AUTH_PORT
+    const char *peerUdid;        // PEER_UDID
+    const char *peerNetworkId;   // PEER_NETWORK_ID
+    int32_t peerDeviceType;      // PEER_DEV_TYPE
+    const char *extra;           // EXTRA
+    const char *callerPkg;       // HOST_PKG
+    const char *calleePkg;       // TO_CALL_PKG
 } LnnAuditExtra;
 
 #ifdef __cplusplus
