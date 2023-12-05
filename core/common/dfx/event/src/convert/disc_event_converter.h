@@ -22,11 +22,11 @@
 extern "C" {
 #endif
 
-#define DISC_ASSIGNER(type, filedName, filed)                                                                 \
-    static inline bool DiscAssigner##filedName(                                                               \
+#define DISC_ASSIGNER(type, fieldName, field)                                                                 \
+    static inline bool DiscAssigner##fieldName(                                                               \
         const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param) \
     {                                                                                                         \
-        if (Assigner##type(form->discExtra->filed, &param) && CopyString(param->name, eventName)) {           \
+        if (Assigner##type(form->discExtra->field, &param) && CopyString(param->name, eventName)) {           \
             param->t = paramType;                                                                             \
             return true;                                                                                      \
         }                                                                                                     \
@@ -81,11 +81,11 @@ static HiSysEventParamAssigner g_discAssigners[] = {
     // Modification Note: remember updating DISC_ASSIGNER_SIZE
 };
 
-#define DISC_ALARM_ASSIGNER(type, filedName, filed)                                                           \
-    static inline bool DiscAssigner##filedName(                                                               \
+#define DISC_ALARM_ASSIGNER(type, fieldName, field)                                                           \
+    static inline bool DiscAssigner##fieldName(                                                               \
         const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param) \
     {                                                                                                         \
-        if (Assigner##type(form->discAlarmExtra->filed, &param) && CopyString(param->name, eventName)) {      \
+        if (Assigner##type(form->discAlarmExtra->field, &param) && CopyString(param->name, eventName)) {      \
             param->t = paramType;                                                                             \
             return true;                                                                                      \
         }                                                                                                     \

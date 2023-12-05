@@ -22,11 +22,11 @@
 extern "C" {
 #endif
 
-#define STATS_ASSIGNER(type, filedName, filed)                                                                \
-    static inline bool StatsAssigner##filedName(                                                              \
+#define STATS_ASSIGNER(type, fieldName, field)                                                                \
+    static inline bool StatsAssigner##fieldName(                                                              \
         const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param) \
     {                                                                                                         \
-        if (Assigner##type(form->statsExtra->filed, &param) && CopyString(param->name, eventName)) {          \
+        if (Assigner##type(form->statsExtra->field, &param) && CopyString(param->name, eventName)) {          \
             param->t = paramType;                                                                             \
             return true;                                                                                      \
         }                                                                                                     \

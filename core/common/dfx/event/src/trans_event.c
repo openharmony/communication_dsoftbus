@@ -13,12 +13,17 @@
  * limitations under the License.
  */
 
+#include "comm_log.h"
 #include "trans_event.h"
 
 #include "softbus_event.h"
 
 void TransEventInner(int32_t scene, int32_t stage, const char *func, int32_t line, TransEventExtra *extra)
 {
+    if (func == NULL ||extra == NULL) {
+        COMM_LOGE(COMM_DFX, "func or extra is NUll");
+        return;
+    }
     SoftbusEventForm form = {
         .eventName = TRANS_EVENT_NAME,
         .scene = scene,
@@ -41,4 +46,20 @@ void TransAlarmInner(int32_t scene, int32_t type, const char *func, int32_t line
         .transAlarmExtra = extra,
     };
     SoftbusEventInner(EVENT_MODULE_TRANS_ALARM, &form);
+}
+
+void TransAuditInner(int32_t scene, const char *func, int32_t line, TransAuditExtra *extra)
+{
+    if (func == NULL || extra == NULL) {
+        COMM_LOGE(COMM_DFX, "func or extra is NUll");
+        return;
+    }
+    SoftbusEventForm form = {
+        .eventName = TRANS_AUDIT_NAME,
+        .scene = scene,
+        .func = func,
+        .line = line,
+        .transAuditExtra = extra,
+    };
+    SoftbusAuditInner(EVENT_MODULE_TRANS, &form);
 }

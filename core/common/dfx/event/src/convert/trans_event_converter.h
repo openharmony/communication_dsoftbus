@@ -22,11 +22,11 @@
 extern "C" {
 #endif
 
-#define TRANS_ASSIGNER(type, filedName, filed)                                                                \
-    static inline bool TransAssigner##filedName(                                                              \
+#define TRANS_ASSIGNER(type, fieldName, field)                                                                \
+    static inline bool TransAssigner##fieldName(                                                              \
         const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param) \
     {                                                                                                         \
-        if (Assigner##type(form->transExtra->filed, &param) && CopyString(param->name, eventName)) {          \
+        if (Assigner##type(form->transExtra->field, &param) && CopyString(param->name, eventName)) {          \
             param->t = paramType;                                                                             \
             return true;                                                                                      \
         }                                                                                                     \
@@ -81,11 +81,11 @@ static const HiSysEventParamAssigner g_transAssigners[] = {
     // Modification Note: remember updating TRANS_ASSIGNER_SIZE
 };
 
-#define TRANS_ALARM_ASSIGNER(type, filedName, filed)                                                          \
-    static inline bool TransAssigner##filedName(                                                              \
+#define TRANS_ALARM_ASSIGNER(type, fieldName, field)                                                          \
+    static inline bool TransAssigner##fieldName(                                                              \
         const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param) \
     {                                                                                                         \
-        if (Assigner##type(form->transAlarmExtra->filed, &param) && CopyString(param->name, eventName)) {     \
+        if (Assigner##type(form->transAlarmExtra->field, &param) && CopyString(param->name, eventName)) {     \
             param->t = paramType;                                                                             \
             return true;                                                                                      \
         }                                                                                                     \
