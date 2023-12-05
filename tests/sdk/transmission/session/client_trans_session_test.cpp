@@ -377,7 +377,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest05, TestSize.Level1)
     int ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = OpenSession(g_sessionName, g_sessionName, g_networkId, g_groupId, &g_sessionAttr);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, -1);
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
     ASSERT_TRUE(sessionParam != NULL);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
@@ -456,7 +456,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest07, TestSize.Level1)
         {.type = CONNECTION_ADDR_MAX}
     };
     int ret = IsValidAddrInfoArr(addrInfoArr, TRANS_TEST_ADDR_INFO_NUM);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, -1);
 }
 
 /**
@@ -689,7 +689,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest14, TestSize.Level1)
 HWTEST_F(TransClientSessionTest, TransClientSessionTest15, TestSize.Level1)
 {
     int32_t ret =  ClientGetSessionSide(TRANS_TEST_SESSION_ID);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, -1);
     int32_t sessionId = AddSessionServerAndSession(g_sessionName, CHANNEL_TYPE_BUTT, false);
     ASSERT_GT(sessionId, 0);
     ret =  GetSessionSide(sessionId);
