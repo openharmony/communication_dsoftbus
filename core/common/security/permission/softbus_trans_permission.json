@@ -366,5 +366,18 @@
         "ACTIONS":"create,open"
       }
     ]
+  },
+  {
+    "SESSION_NAME": "com.huawei.ohos.cardsde.channel-session",
+    "REGEXP": "true",
+    "DEVID": "NETWORKID",
+    "SEC_LEVEL": "public",
+    "APP_INFO": [
+      {
+        "TYPE": "native_app",
+        "PKG_NAME": "hmos.carservice.distributedengine",
+        "ACTIONS": "create,open"
+      }
+    ]
   }
 ]
