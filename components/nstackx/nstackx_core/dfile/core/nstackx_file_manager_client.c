@@ -202,10 +202,12 @@ int32_t GetEncryptedDataTarFrame(CryptPara *cryptPara, uint16_t fileId, FileList
     fileDataFrame->fileId = htons(fileId);
     fileDataFrame->blockSequence = htonl(targetSequence);
     if (AesGcmEncrypt(buffer->blockPayload, targetLenth, cryptPara, fileDataFrame->blockPayload, payLoadLen) == 0) {
+        DFILE_LOGE(TAG, "AesGcmEncrypt failed, %d-%d", targetLenth, payLoadLen);
         errCode = FILE_MANAGER_FILE_EOTHER;
     }
 
     if (memcpy_s(buffer, fileList->maxFrameLength, fileDataFrame, frameOffset + payLoadLen) != EOK) {
+        DFILE_LOGE(TAG, "memcpy error");
         errCode = FILE_MANAGER_FILE_EOTHER;
     }
     free(fileDataFrame);

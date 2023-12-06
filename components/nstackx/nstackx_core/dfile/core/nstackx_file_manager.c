@@ -26,7 +26,6 @@
 #include "nstackx_openssl.h"
 #endif
 #include "nstackx_util.h"
-#include "nstackx_dev.h"
 #include "securec.h"
 
 #define TAG "nStackXDFile"
@@ -88,7 +87,6 @@ void NotifyFileManagerMsg(const FileManager *fileManager, FileManagerMsgType msg
 void NotifyFileListMsg(const FileListTask *fileList, FileManagerMsgType msgType)
 {
     FileListMsgCtx *ctx = NULL;
-    uint64_t bytesTransferred;
     if (fileList == NULL) {
         DFILE_LOGE(TAG, "NotifyFileListMsg fileList error");
         return;
@@ -106,8 +104,7 @@ void NotifyFileListMsg(const FileListTask *fileList, FileManagerMsgType msgType)
             free(ctx);
             return;
         }
-        bytesTransferred = fileList->bytesTransferredLastRecord;
-        ctx->msg.transferUpdate.bytesTransferred = bytesTransferred;
+        ctx->msg.transferUpdate.bytesTransferred = fileList->bytesTransferredLastRecord;
         ctx->msg.transferUpdate.totalBytes = fileList->totalBytes;
         ctx->msg.transferUpdate.transId = fileList->transId;
     }
@@ -265,6 +262,7 @@ static FileListTask *PrepareOneTaskByStatus(FileManager *fileManager, uint32_t r
             } else if (runStatus == FILE_LIST_STATUS_STOP) {
                 ListRemoveNode(&fileList->list);
                 fileManager->taskList.size--;
+            } else {
             }
             isFound = NSTACKX_TRUE;
             break;
@@ -429,9 +427,6 @@ char *GetFullFilePath(const char *path, const char *fileName)
         fullPathLength = (uint32_t)(strlen(path) + sizeof(PATH_SEPARATOR) + strlen(fileName) + sizeof('\0'));
     }
 
-    if (fullPathLength == 0) {
-        return NULL;
-    }
     fullPath = (char *)calloc(fullPathLength, sizeof(char));
     if (fullPath == NULL) {
         DFILE_LOGE(TAG, "full path calloc error");
@@ -630,7 +625,7 @@ static int32_t WriteSingleBlockFrame(FileManager *fileManager, FileListTask *fil
 
     payLoad = blockFrame->fileDataFrame->blockPayload;
     uint32_t dataLen;
-    if (fileList->cryptPara.keylen > 0 && payloadLength > 0) {
+    if (fileList->cryptPara.keylen > 0) {
         buffer = (uint8_t *)calloc(payloadLength, 1);
         if (buffer == NULL) {
             fileList->errCode = FILE_MANAGER_ENOMEM;

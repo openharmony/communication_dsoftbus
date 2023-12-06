@@ -247,6 +247,7 @@ uint8_t IsCryptoIncluded(void)
 {
     return NSTACKX_TRUE;
 }
+
 uint8_t QueryCipherSupportByName(char *name)
 {
     int ret = mbedtls_version_check_feature(name);
@@ -257,4 +258,4 @@ uint8_t QueryCipherSupportByName(char *name)
     LOGI(TAG, "devices no support %s", name);
     return NSTACKX_FALSE;
 }
-#endif
+#endif // MBEDTLS_INCLUDED

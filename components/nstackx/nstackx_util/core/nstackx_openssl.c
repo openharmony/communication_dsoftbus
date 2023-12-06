@@ -99,6 +99,7 @@ uint32_t AesGcmEncryptVec(AesVec *vec, uint32_t vecNum, CryptPara *cryptPara, ui
     uint32_t retLen = 0;
     if (vecNum == 0 || outLen <= GCM_ADDED_LEN || cryptPara == NULL ||
         vec == NULL || outBuf == NULL) {
+        LOGE(TAG, "Invaid para");
         return 0;
     }
     if (InitEncryptCtx(cryptPara) != NSTACKX_EOK) {
@@ -189,6 +190,7 @@ uint32_t AesGcmDecrypt(uint8_t *inBuf, uint32_t inLen, CryptPara *cryptPara, uin
     uint8_t buffer[AES_BLOCK_SIZE];
     if (inLen <= GCM_ADDED_LEN || outLen < inLen - GCM_ADDED_LEN || cryptPara == NULL ||
         inBuf == NULL || outBuf == NULL) {
+        LOGE(TAG, "Invaid para");
         return 0;
     }
     cryptPara->ivLen = GCM_IV_LENGTH;
