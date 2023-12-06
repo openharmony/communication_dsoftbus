@@ -38,7 +38,11 @@ static int32_t SoftBusAlarmDumpHander(int fd, int32_t argc, const char **argv)
         return SOFTBUS_ERR;
     }
 
-    SoftBusAlarmEvtResult *result = SoftBusMalloc(sizeof(SoftBusAlarmEvtResult));
+    SoftBusAlarmEvtResult *result = (SoftBusAlarmEvtResult *)SoftBusMalloc(sizeof(SoftBusAlarmEvtResult));
+    if (result == NULL) {
+        SOFTBUS_DPRINTF(fd, "SoftBusAlarmDumpHander result malloc fail!\n");
+        return SOFTBUS_ERR;
+    }
     if (strcmp(argv[0], SOFTBUS_MANAGEMENT_ALARM_ORDER) == SOFTBUS_OK) {
         if (SoftBusQueryAlarmInfo(TWENTY_FOUR_HOURS, SOFTBUS_MANAGEMENT_ALARM_TYPE, result) != SOFTBUS_OK) {
             SOFTBUS_DPRINTF(fd, "SoftBusAlarmDumpHander query fail!\n");
@@ -67,6 +71,9 @@ static int32_t SoftBusAlarmDumpHander(int fd, int32_t argc, const char **argv)
     
     for (size_t i = 0; i < result->recordSize; i++) {
         AlarmRecord *record = &result->records[i];
+        if (record == NULL) {
+            continue;
+        }
         SOFTBUS_DPRINTF(fd, "Time=%s, Type=%d, Caller=%d, Link=%d, MinBw=%d, Method=%d, Permission=%s, Session=%s\n",
                         record->time, record->type, record->callerPid, record->linkType,
                         record->minBw, record->methodId, record->permissionName, record->sessionName);

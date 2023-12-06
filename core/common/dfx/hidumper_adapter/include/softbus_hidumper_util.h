@@ -28,9 +28,7 @@ extern "C" {
 
 #define SOFTBUS_ZERO 0
 #define SOFTBUS_ONE 1
-#define SOFTBUS_ALARM_INFO_LEN 100
-#define SOFTBUS_ALARM_NUM 1000
-#define SUCCESS_RATE_DETAIL_LEN 1000
+#define SOFTBUS_ALARM_TIME_LEN 26
 
 typedef enum {
     SOFTBUS_MANAGEMENT_ALARM_TYPE,
@@ -39,7 +37,7 @@ typedef enum {
 } SoftBusAlarmType;
 
 typedef struct {
-    char time[SOFTBUS_ALARM_INFO_LEN];
+    char time[SOFTBUS_ALARM_TIME_LEN];
     int32_t type;
     int32_t callerPid;
     int32_t linkType;
