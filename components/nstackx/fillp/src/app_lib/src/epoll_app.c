@@ -564,7 +564,7 @@ static FILLP_INT SpungeEpollCtlHandleAddEvent(
     struct FtSocket *epollSock,
     struct FtSocket *sock,
     FILLP_INT epFd,
-    struct EpItem *epi,
+    FILLP_CONST struct EpItem *epi,
     FILLP_CONST struct SpungeEpollEvent *event)
 {
     FILLP_INT error = 0;
