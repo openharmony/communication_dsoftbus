@@ -318,7 +318,7 @@
     "DEVID": "UUID",
     "APP_INFO": [
       {
-        "PKG_NAME": "ohos.distributedhardware.devicemanager.adapter",
+        "PKG_NAME": "ohos.distributedhardware.devicemanager",
         "TYPE": "native_app",
         "ACTIONS": "create,open"
       }
