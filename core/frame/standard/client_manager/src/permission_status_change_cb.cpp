@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,7 @@
 #include "comm_log.h"
 #include "permission_status_change_cb.h"
 #include "trans_client_proxy.h"
-#include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_server_ipc_interface_code.h"
 #include "message_parcel.h"
 
 namespace OHOS {

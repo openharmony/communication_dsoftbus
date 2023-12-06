@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,7 +30,6 @@
 #include "trans_session_manager.h"
 #include "trans_session_service.h"
 
-
 int32_t ServerCreateSessionServer(IpcIo *req, IpcIo *reply)
 {
     TRANS_LOGI(TRANS_CTRL, "ipc server pop");
@@ -40,7 +39,15 @@ int32_t ServerCreateSessionServer(IpcIo *req, IpcIo *reply)
     }
     uint32_t size;
     const char *pkgName = (const char*)ReadString(req, &size);
+    if (pkgName == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "ServerCreateSessionServer pkgName is null");
+        return SOFTBUS_ERR;
+    }
     const char *sessionName = (const char *)ReadString(req, &size);
+    if (sessionName == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "sessionName pkgName is null");
+        return SOFTBUS_ERR;
+    }
     int32_t callingUid = GetCallingUid();
     int32_t callingPid = GetCallingPid();
     if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, ACTION_CREATE) != SOFTBUS_OK) {
@@ -49,7 +56,7 @@ int32_t ServerCreateSessionServer(IpcIo *req, IpcIo *reply)
         return SOFTBUS_PERMISSION_DENIED;
     }
     int32_t ret = TransCreateSessionServer(pkgName, sessionName, callingUid, callingPid);
-    WriteInt32(reply, ret);
+    (void)WriteInt32(reply, ret);
     return ret;
 }
 
@@ -62,7 +69,15 @@ int32_t ServerRemoveSessionServer(IpcIo *req, IpcIo *reply)
     }
     uint32_t size;
     const char *pkgName = (const char*)ReadString(req, &size);
+    if (pkgName == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "ServerRemoveSessionServer pkgName is null");
+        return SOFTBUS_ERR;
+    }
     const char *sessionName = (const char *)ReadString(req, &size);
+    if (sessionName == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "ServerRemoveSessionServer sessionName is null");
+        return SOFTBUS_ERR;
+    }
     int32_t callingUid = GetCallingUid();
     int32_t callingPid = GetCallingPid();
     if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, ACTION_CREATE) != SOFTBUS_OK) {
@@ -77,7 +92,7 @@ int32_t ServerRemoveSessionServer(IpcIo *req, IpcIo *reply)
 
 static int32_t CheckOpenSessionPremission(const char *sessionName, const char *peerSessionName)
 {
-    char pkgName[PKG_NAME_SIZE_MAX];
+    char pkgName[PKG_NAME_SIZE_MAX] = {0};
     if (TransGetPkgNameBySessionName(sessionName, pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "TransGetPkgNameBySessionName failed");
         return SOFTBUS_INVALID_PARAM;
@@ -100,7 +115,7 @@ static int32_t CheckOpenSessionPremission(const char *sessionName, const char *p
 static void ServerReadSessionAttrs(IpcIo *req, SessionAttribute *getAttr)
 {
     if (getAttr == NULL || req == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "getAttr is NULL");
+        TRANS_LOGE(TRANS_CTRL, "getAttr and req is NULL");
         return;
     }
     LinkType *pGetArr = NULL;
@@ -186,7 +201,7 @@ int32_t ServerOpenSession(IpcIo *req, IpcIo *reply)
 
 int32_t ServerOpenAuthSession(IpcIo *req, IpcIo *reply)
 {
-    TRANS_LOGI(TRANS_CTRL, "ipc server pop");
+    TRANS_LOGD(TRANS_CTRL, "ipc server pop");
     if (req == NULL || reply == NULL) {
         TRANS_LOGW(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
@@ -252,14 +267,11 @@ int32_t ServerCloseChannel(IpcIo *req, IpcIo *reply)
     }
 
     int32_t ret;
-    TransInfo info;
     int32_t channelId = 0;
     int32_t channelType = 0;
     ReadInt32(req, &channelId);
     ReadInt32(req, &channelType);
 
-    info.channelId = channelId;
-    info.channelType = channelType;
     ret = TransCloseChannel(channelId, channelType);
 
     WriteInt32(reply, ret);
@@ -276,9 +288,9 @@ int32_t ServerSendSessionMsg(IpcIo *req, IpcIo *reply)
     int32_t channelId = 0;
     int32_t channelType = 0;
     int32_t msgType = 0;
-    ReadInt32(req, &channelId);
-    ReadInt32(req, &channelType);
-    ReadInt32(req, &msgType);
+    (void)ReadInt32(req, &channelId);
+    (void)ReadInt32(req, &channelType);
+    (void)ReadInt32(req, &msgType);
     uint32_t size = 0;
     ReadUint32(req, &size);
     const void *data = (const void *)ReadBuffer(req, size);
