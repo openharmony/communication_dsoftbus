@@ -34,17 +34,17 @@
 #define BIZ_STAGE_NAME "BIZ_STAGE"
 #define STAGE_RES_NAME "STAGE_RES"
 #define ONLINE_NUM_NAME "ONLINE_NUM"
-#define TIME_CONSUMING_NAME "TIME_CONSUMING"
+#define TIME_CONSUMING_NAME "COST_TIME"
 #define BT_FLOW_NAME "BT_FLOW"
 #define CALLER_PID_NAME "CALLER_PID"
 #define LINK_TYPE_NAME "LINK_TYPE"
 #define MIN_BW_NAME "MIN_BW"
 #define METHOD_ID_NAME "METHOD_ID"
-#define PERMISSION_NAME_NAME "PERMISSION_NAME"
-#define SESSION_NAME_NAME "SESSION_NAME"
+#define PERMISSION_NAME "PERMISSION_NAME"
+#define SESSION_NAME "SESSION_NAME"
 
 #define QUERY_EVENT_FULL_QUERY_PARAM (-1)
-#define MAX_NUM_OF_EVENT_RESULT 1000
+#define MAX_NUM_OF_EVENT_RESULT 100
 #define DAY_MINUTE (24 * 60)
 #define SEVEN_DAY_MINUTE (7 * DAY_MINUTE)
 #define DAY_TIME (24 * 60 * 60 * 1000)
@@ -93,6 +93,8 @@ typedef struct {
     int32_t delayTimeTotal;
     int32_t delayNum;
     int32_t btFlowTotal;
+    int32_t currentParaSessionNum;
+    int32_t maxParaSessionNum;
     int32_t laneScoreOverTimes;
     int32_t activityFailTotal;
     int32_t activitySuccessTotal;
@@ -145,11 +147,11 @@ static void GetLocalTime(char* time, uint64_t timestamp)
 {
     time_t t = (time_t)timestamp;
     struct tm* tmInfo = NULL;
-    tmInfo = gmtime(&t);
+    tmInfo = localtime(&t);
     if (tmInfo == NULL) {
         return;
     }
-    (void)strftime(time, SOFTBUS_ALARM_INFO_LEN, "%Y-%m-%d %H:%M:%S", tmInfo);
+    (void)strftime(time, SOFTBUS_ALARM_TIME_LEN, "%Y-%m-%d %H:%M:%S", tmInfo);
 }
 
 static void OnQueryConn(HiSysEventRecordC srcRecord[], size_t size)
@@ -189,18 +191,22 @@ static void LnnStats(int32_t scene, int32_t stage, int32_t stageRes)
 {
     if (scene == EVENT_SCENE_JOIN_LNN && stage == EVENT_STAGE_AUTH_DEVICE && stageRes == EVENT_STAGE_RESULT_OK) {
         g_lnnStatsInfo.authSuccessTotal++;
+        return;
     }
         
     if (scene == EVENT_SCENE_JOIN_LNN && stage == EVENT_STAGE_AUTH_DEVICE && stageRes == EVENT_STAGE_RESULT_FAILED) {
-        g_lnnStatsInfo.authSuccessTotal++;
+        g_lnnStatsInfo.authFailTotal++;
+        return;
     }
         
     if (scene == EVENT_SCENE_JOIN_LNN && stage == EVENT_STAGE_JOIN_LNN_END && stageRes == EVENT_STAGE_RESULT_OK) {
         g_lnnStatsInfo.joinLnnNum++;
+        return;
     }
 
     if (scene == EVENT_SCENE_LEAVE_LNN && stage == EVENT_STAGE_LEAVE_LNN_END && stageRes == EVENT_STAGE_RESULT_OK) {
         g_lnnStatsInfo.leaveLnnNum++;
+        return;
     }
 }
 
@@ -222,7 +228,7 @@ static void OnQueryLnn(HiSysEventRecordC srcRecord[], size_t size)
 
         LnnStats(scene, stage, stageRes);
         int32_t onlineMaxNum = g_lnnStatsInfo.onlineDevMaxNum;
-        int32_t onlineNum = GetInt32ValueByRecord(&srcRecord[i], STAGE_RES_NAME);
+        int32_t onlineNum = GetInt32ValueByRecord(&srcRecord[i], ONLINE_NUM_NAME);
         if (onlineNum != SOFTBUS_ERR) {
             g_lnnStatsInfo.onlineDevMaxNum = (onlineMaxNum > onlineNum) ? onlineMaxNum : onlineNum;
         }
@@ -238,34 +244,35 @@ static void OnCompleteLnn(int32_t reason, int32_t total)
 
 static void TransStats(int32_t scene, int32_t stage, int32_t stageRes)
 {
-    if (scene == EVENT_SCENE_CONNECT && stage == EVENT_STAGE_CONNECT_END &&
-        stageRes == EVENT_STAGE_RESULT_OK) {
+    if (scene == EVENT_SCENE_OPEN_CHANNEL && stage == EVENT_STAGE_START_CONNECT && stageRes == EVENT_STAGE_RESULT_OK) {
         g_transStatsInfo.openSessionSuccessTotal++;
+        return;
     }
 
-    if (scene == EVENT_SCENE_CONNECT && stage == EVENT_STAGE_CONNECT_END &&
+    if (scene == EVENT_SCENE_OPEN_CHANNEL && stage == EVENT_STAGE_START_CONNECT &&
         stageRes == EVENT_STAGE_RESULT_FAILED) {
         g_transStatsInfo.openSessionFailTotal++;
+        return;
     }
 
-    if (scene == EVENT_SCENE_ACTIVATION && stage == SOFTBUS_DEFAULT_STAGE &&
-        stageRes == EVENT_STAGE_RESULT_OK) {
+    if (scene == EVENT_SCENE_ACTIVATION && stage == SOFTBUS_DEFAULT_STAGE && stageRes == EVENT_STAGE_RESULT_OK) {
         g_transStatsInfo.activitySuccessTotal++;
+        return;
     }
 
-    if (scene == EVENT_SCENE_ACTIVATION && stage == SOFTBUS_DEFAULT_STAGE &&
-        stageRes == EVENT_STAGE_RESULT_FAILED) {
+    if (scene == EVENT_SCENE_ACTIVATION && stage == SOFTBUS_DEFAULT_STAGE && stageRes == EVENT_STAGE_RESULT_FAILED) {
         g_transStatsInfo.activityFailTotal++;
+        return;
     }
 
-    if (scene == EVENT_SCENE_LANE_SCORE && stage == SOFTBUS_DEFAULT_STAGE &&
-        stageRes == EVENT_STAGE_RESULT_OK) {
+    if (scene == EVENT_SCENE_LANE_SCORE && stage == SOFTBUS_DEFAULT_STAGE && stageRes == EVENT_STAGE_RESULT_OK) {
         g_transStatsInfo.laneScoreOverTimes++;
+        return;
     }
 
-    if (scene == EVENT_SCENE_DETECTION && stage == SOFTBUS_DEFAULT_STAGE &&
-        stageRes == EVENT_STAGE_RESULT_OK) {
+    if (scene == EVENT_SCENE_DETECTION && stage == SOFTBUS_DEFAULT_STAGE && stageRes == EVENT_STAGE_RESULT_OK) {
         g_transStatsInfo.detectionTimes++;
+        return;
     }
 }
 
@@ -286,6 +293,18 @@ static void OnQueryTrans(HiSysEventRecordC srcRecord[], size_t size)
         }
 
         TransStats(scene, stage, stageRes);
+        if (scene == EVENT_SCENE_OPEN_CHANNEL && stage == EVENT_STAGE_OPEN_CHANNEL_END &&
+            stageRes == EVENT_STAGE_RESULT_OK) {
+            g_transStatsInfo.currentParaSessionNum++;
+        }
+        if (scene == EVENT_SCENE_CLOSE_CHANNEL_ACTIVE && stage == EVENT_STAGE_CLOSE_CHANNEL &&
+            stageRes == EVENT_STAGE_RESULT_OK && g_transStatsInfo.currentParaSessionNum > 0) {
+            g_transStatsInfo.currentParaSessionNum--;
+        }
+        int32_t maxParaSessionNum = g_transStatsInfo.maxParaSessionNum;
+        g_transStatsInfo.maxParaSessionNum = (maxParaSessionNum > g_transStatsInfo.currentParaSessionNum) ?
+            maxParaSessionNum : g_transStatsInfo.currentParaSessionNum;
+
         int32_t timeConsuming = GetInt32ValueByRecord(&srcRecord[i], TIME_CONSUMING_NAME);
         if (timeConsuming != SOFTBUS_ERR) {
             g_transStatsInfo.delayTimeTotal += timeConsuming;
@@ -307,7 +326,7 @@ static void OnCompleteTrans(int32_t reason, int32_t total)
 
 static void OnQueryAlarm(HiSysEventRecordC srcRecord[], size_t size)
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "OnQueryManageAlarm start");
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "OnQueryAlarm start");
     if (SoftBusMutexLock(&g_alarmOnQueryLock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "alarm query lock fail");
         return;
@@ -341,12 +360,12 @@ static void OnQueryAlarm(HiSysEventRecordC srcRecord[], size_t size)
             record->methodId = methodId;
         }
 
-        char* permissionName = GetStringValueByRecord(&srcRecord[i], PERMISSION_NAME_NAME);
+        char* permissionName = GetStringValueByRecord(&srcRecord[i], PERMISSION_NAME);
         if (permissionName != NULL) {
             record->permissionName = permissionName;
         }
 
-        char* sessionName = GetStringValueByRecord(&srcRecord[i], SESSION_NAME_NAME);
+        char* sessionName = GetStringValueByRecord(&srcRecord[i], SESSION_NAME);
         if (sessionName != NULL) {
             record->sessionName = sessionName;
         }
@@ -358,7 +377,7 @@ static void OnQueryAlarm(HiSysEventRecordC srcRecord[], size_t size)
 
 static void OnCompleteAlarm(int32_t reason, int32_t total)
 {
-    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "OnCompleteAlarm4 start, reason is %d, total is %d", reason, total);
+    SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "OnCompleteAlarm start, reason is %d, total is %d", reason, total);
     g_isAlarmQueryEnd = true;
 }
 
@@ -398,6 +417,7 @@ static void SoftBusProcessStatsQueryData(SoftBusStatsResult* result)
     result->deviceOnlineNum = g_lnnStatsInfo.onlineDevMaxNum;
     result->deviceOnlineTimes = g_lnnStatsInfo.joinLnnNum;
     result->deviceOfflineTimes = g_lnnStatsInfo.leaveLnnNum;
+    result->maxParaSessionNum = g_transStatsInfo.maxParaSessionNum;
     result->laneScoreOverTimes = g_transStatsInfo.laneScoreOverTimes;
     result->detectionTimes = g_transStatsInfo.detectionTimes;
 
@@ -669,14 +689,17 @@ int32_t SoftBusHidumperUtilInit(void)
         return SOFTBUS_ERR;
     }
 
-    g_alarmEvtResult.records = SoftBusMalloc(sizeof(AlarmRecord) * SOFTBUS_ALARM_INFO_LEN);
+    g_alarmEvtResult.records = SoftBusMalloc(sizeof(AlarmRecord) * MAX_NUM_OF_EVENT_RESULT);
     if (g_alarmEvtResult.records == NULL) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "init alarm record fail");
         return SOFTBUS_ERR;
     }
     InitSoftBusQueryEventParam();
     g_isDumperInit = true;
-    return CreateAndQueryMsgDelay(GetLooper(LOOP_TYPE_DEFAULT), QueryStatisticInfoPeriod, DAY_TIME);
+    if (CreateAndQueryMsgDelay(GetLooper(LOOP_TYPE_DEFAULT), QueryStatisticInfoPeriod, DAY_TIME) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "CreateAndQueryMsgDelay fail");
+    }
+    return SOFTBUS_OK;
 }
 
 void SoftBusHidumperUtilDeInit(void)

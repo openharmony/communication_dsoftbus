@@ -39,7 +39,11 @@ static int32_t SoftBusStatsDumpHander(int fd, int32_t argc, const char **argv)
         return SOFTBUS_ERR;
     }
 
-    SoftBusStatsResult *result = SoftBusMalloc(sizeof(SoftBusStatsResult));
+    SoftBusStatsResult *result = (SoftBusStatsResult *)SoftBusMalloc(sizeof(SoftBusStatsResult));
+    if (result == NULL) {
+        SOFTBUS_DPRINTF(fd, "SoftBusStatsDumpHander result malloc fail!\n");
+        return SOFTBUS_ERR;
+    }
     if (strcmp(argv[0], SOFTBUS_FIFTEEN_MINUTES_STATS_ORDER) == SOFTBUS_OK) {
         if (SoftBusQueryStatsInfo(FIFTEEN_MINUTES, result) != SOFTBUS_OK) {
             SOFTBUS_DPRINTF(fd, "SoftBusStatsDumpHander query fail!\n");
