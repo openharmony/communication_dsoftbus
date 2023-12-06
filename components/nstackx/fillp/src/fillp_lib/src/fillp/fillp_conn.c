@@ -485,9 +485,7 @@ void FillpConnReqAckInput(struct FillpPcb *pcb, FILLP_CONST struct NetBuf *p)
         }
     }
 
-
     FillpSendConnConfirm(pcb, &reqAck);
-    return;
 }
 
 static FILLP_INT FillpInitNewPcbByNewConn(struct FtNetconn *newConn, FILLP_SIZE_T maxSendCache,
@@ -809,7 +807,6 @@ void FillpConnConfirmInput(struct FillpPcb *pcb, FILLP_CONST struct NetBuf *p, s
         return;
     }
     FillpProcessConnConfirm(pcb, p, confirm, conn, inst);
-    return;
 }
 
 void FillpHandleConnConfirmAckInput(struct FtSocket *sock, struct FtNetconn *conn, struct FillpPcb *pcb,
@@ -969,8 +966,6 @@ static void FillpCheckandcopyConfirmAckAddr(struct FillpPcb *fpcb,
 
     (void)memcpy_s(&spcb->localAddr, sizeof(struct sockaddr_in6), &confirmAck->remoteAddr,
         sizeof(struct sockaddr_in6));
-
-    return;
 }
 
 static FILLP_BOOL FillpCheckConfirmAckPar(struct FillpPcb *pcb, FILLP_CONST struct NetBuf *p)
@@ -1089,7 +1084,6 @@ void FillpConnConfirmAckInput(struct FillpPcb *pcb, FILLP_CONST struct NetBuf *p
     conn->clientFourHandshakeState = FILLP_CLIENT_FOUR_HANDSHAKE_STATE_CONFIRMACK_RCVED;
     FILLP_LOGDBG("FillpConnConfirmAckInput: fillp_sock_id:%d, initial_send_rate = %u", FILLP_GET_SOCKET(pcb)->index,
         pcb->send.flowControl.sendRate);
-    return;
 }
 
 static void ConnectingHandleFinInput(struct FillpPcb *pcb, struct FtSocket *sock,
@@ -1139,7 +1133,6 @@ static void FillpStateClosingHandleFinInput(struct FillpPcb *pcb, struct FtNetco
 
         *pcbFreed = FILLP_TRUE;
         SpungeConnClosed(conn);
-        return;
     }
 }
 
@@ -1180,7 +1173,6 @@ static void FillpFinInputTrace(FILLP_CONST struct FtSocket *sock, FILLP_CONST st
         FILLP_LM_FILLPMSGTRACE_OUTPUT_WITHOUT_FT_TRACE_ENABLE_FLAG(FILLP_TRACE_DIRECT_NETWORK, sock->traceHandle,
             sizeof(struct FillpPktFin), sock->index, fillpTrcDesc, (FILLP_CHAR *)(&tmpFinPkt));
     }
-    return;
 }
 
 static FILLP_INT FillpHandleFinFlagGet(FILLP_CONST struct NetBuf *p, struct FillpFinFlags *flags)
@@ -1342,7 +1334,6 @@ void FillpFinInput(struct FillpPcb *pcb, FILLP_CONST struct NetBuf *p, FILLP_BOO
     }
 
     FillpHandleFin(pcb, p, pcbFreed);
-    return;
 }
 
 static void FillpSendConnReqBuild(struct FillpPcb *pcb, struct FillpPktConnReq *req, FILLP_LLONG curTime)
@@ -1756,8 +1747,6 @@ void FillpSendConnConfirmAck(struct FillpPcb *pcb)
         pcb->statistics.debugPcb.connConfirmAckSend++;
         pcb->connTimestamp = SYS_ARCH_GET_CUR_TIME_LONGLONG();
     }
-
-    return;
 }
 
 static void FillpSendFinBuild(FILLP_CONST struct FillpPcb *pcb, struct FillpPktFin *req,
@@ -1897,18 +1886,7 @@ void FillpSendRst(struct FillpPcb *pcb, struct sockaddr *remoteAddr)
 }
 
 
-/* *****************************************************************************
-    Function       : FillpGenerateCookie
-
-    Description    : This function Generates the cookieContent for fillp on receiving
-                    Connection request from peer.
-
-    Input          :
-    Output         : NONE
-
-
-    Return         : FILLP_SUCCESS/FILLP_FAILURE
-***************************************************************************** */
+/* This function Generates the cookieContent for fillp on receiving Connection request from peer. */
 void FillpGenerateCookie(IN FILLP_CONST struct FillpPcb *pcb, IN struct FillpPktConnReq *req,
     IN FILLP_CONST struct sockaddr_in6 *remoteAddr, IN FILLP_UINT16 serverPort, OUT FillpCookieContent *stateCookie)
 {
@@ -2014,19 +1992,7 @@ static FILLP_INT  FillpValidateCookieHmac(FILLP_CONST struct FillpPcb *pcb, FILL
     return ERR_OK;
 }
 
-/* *****************************************************************************
-    Function       : FillpValidateCookie
-
-    Description    : This function validates the cookieContent from peer.
-
-    Input          :
-    Output         : NONE
-
-
-    Return         : FILLP_SUCCESS/FILLP_FAILURE
-    Modify         : Change prototype to include usClientPort
-
-***************************************************************************** */
+/* This function validates the cookieContent from peer. */
 FILLP_INT FillpValidateCookie(IN FILLP_CONST struct FillpPcb *pcb, IN FILLP_UINT16 serverPort,
     IN FILLP_CONST struct sockaddr_in6 *clientAddr, IN FILLP_CONST FillpCookieContent *stateCookie)
 {

@@ -102,8 +102,6 @@ static void SpungeEpollFreeResource(struct FtSocket *sock)
     (void)SYS_ARCH_ATOMIC_SET(&sock->sendEvent, 0);
     (void)SYS_ARCH_ATOMIC_SET(&sock->sendEventCount, 0);
     sock->errEvent = 0;
-
-    return;
 }
 
 void SpungeFreeAcceptBox(struct FtSocket *sock)
@@ -138,8 +136,6 @@ void SpungeIncFreeCntPostEagain(struct FtSocket *sock)
         FILLP_LOGERR("FAILED TO POST -- MSG_TYPE_FREE_SOCK_EAGAIN--- to CORE."
             "Socket leak can happen : Sock ID: %d\r\n", sock->index);
     }
-
-    return;
 }
 
 static void RecursiveRbTree(struct RbNode *node)
@@ -152,7 +148,6 @@ static void RecursiveRbTree(struct RbNode *node)
 
     if (node == FILLP_NULL_PTR) {
         FILLP_LOGERR("RecursiveRbTree: Inavild parameters passed.");
-
         return;
     }
 
@@ -186,8 +181,6 @@ static void RecursiveRbTree(struct RbNode *node)
     if (right != FILLP_NULL_PTR) {
         RecursiveRbTree(right);
     }
-
-    return;
 }
 
 /*
@@ -240,8 +233,8 @@ void SpungEpollClose(struct FtSocket *sock)
     (void)SYS_ARCH_RWSEM_WRPOST(&sock->sockConnSem);
 
     (void)FillpQueuePush(g_spunge->sockTable->freeQueqe, (void *)&sock, FILLP_FALSE, 1);
-    return;
 }
+
 static void SpungeCloseCBSocket(struct FtSocket *sock)
 {
     if ((FILLP_SOCKETCLOSE_CBK != FILLP_NULL_PTR) && (sock->isListenSock == FILLP_FALSE) &&
@@ -308,8 +301,6 @@ void SpungeFreeSock(struct FtSocket *sock)
 
     (void)FillpQueuePush(g_spunge->sockTable->freeQueqe, (void *)&sock, FILLP_FALSE, 1);
     (void)SYS_ARCH_RWSEM_WRPOST(&sock->sockConnSem);
-
-    return;
 }
 
 void SpungeShutdownSock(void *argSock, FILLP_INT how)
@@ -456,7 +447,6 @@ void SpungeCheckDisconn(void *argConn)
 
 TIMER_REPEAT:
     FillpEnableFinCheckTimer(pcb);
-    return;
 }
 
 void SpungeSendConnectMsg(void *argConn)
@@ -506,8 +496,6 @@ void SpungeSendConnectMsg(void *argConn)
         FILLP_PKT_TYPE_CONN_REQ, (void *)osSock->ioSock, (void *)conn->pcb, FILLP_NULL_PTR) == -1) {
         FILLP_LOGINF("send conn req fail for sockId:%d", sock->index);
     }
-
-    return;
 }
 
 void SpinstAddToPcbList(struct SpungeInstance *inst, struct HlistNode *node)
@@ -528,7 +516,6 @@ FillpQueue *SpungeAllocUnsendBox(struct SpungeInstance *inst)
 void SpungeFreeUnsendBox(struct FillpPcb *pcb)
 {
     FILLP_UNUSED_PARA(pcb);
-    return;
 }
 
 /* This function is called when the connection is sure closed

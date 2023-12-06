@@ -163,8 +163,6 @@ static void FillpSha256Compile(FillpSha256Ctx ctx[1])
     for (jdex = 0; jdex < FILLP_HASH_ARRAY_SZ; jdex++) {
         ctx->hash[jdex] += hash[jdex];
     }
-
-    return;
 }
 
 void FillpSha256Set(FillpSha256Ctx ctx[1])
@@ -175,8 +173,6 @@ void FillpSha256Set(FillpSha256Ctx ctx[1])
     if (err != EOK) {
         FILLP_LOGERR("FillpSha256Set memcpy_s hash failed : %d", err);
     }
-
-    return;
 }
 
 
@@ -212,8 +208,6 @@ void FillpSha256Upd(FillpSha256Ctx ctx[1], const FILLP_UINT8 data[], size_t len)
             FILLP_LOGERR("FillpSha256Upd memcpy_s 2 failed : %d, freeSize = %u, len = %zu", err, freeSize, len);
         }
     }
-
-    return;
 }
 
 void FillpSha256Fin(FillpSha256Ctx ctx[1], FILLP_UINT8 hashVal[], FILLP_UINT32 hashValLen)
@@ -256,8 +250,6 @@ void FillpSha256Fin(FillpSha256Ctx ctx[1], FILLP_UINT8 hashVal[], FILLP_UINT32 h
         shfBits = (FILLP_SHA_EIGHT_PAR * (~offset & FILLP_SHA_THREE_PAR));
         hashVal[offset] = (FILLP_UINT8)(ctx->hash[offset >> FILLP_SHA_TWO_PAR] >> shfBits);
     }
-
-    return;
 }
 
 
