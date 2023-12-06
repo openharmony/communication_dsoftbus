@@ -105,6 +105,7 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_001, TestSize.Level1)
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, LnnGetLocalNumU64Info).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(linkMock, CheckActiveConnection).WillRepeatedly(Return(true));
     EXPECT_CALL(linkMock, AuthDeviceCheckConnInfo)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -168,6 +169,7 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_002, TestSize.Level1)
     EXPECT_CALL(linkMock, AuthDeviceCheckConnInfo).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_CALL(linkMock, AuthGetPreferConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthGenRequestId).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, CheckActiveConnection).WillRepeatedly(Return(true));
     EXPECT_CALL(linkMock, LnnGetLocalNumU64Info)
         .WillRepeatedly(DoAll(SetArgPointee<1>(local), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info)
@@ -221,6 +223,7 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_003, TestSize.Level1)
     EXPECT_CALL(linkMock, LnnGetLocalNumU64Info).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, LnnGetRemoteNumInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthGetPreferConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, CheckActiveConnection).WillRepeatedly(Return(true));
     const LaneLinkCb cb = {
         .OnLaneLinkSuccess = OnLaneLinkSuccess,
         .OnLaneLinkFail = OnLaneLinkFail,
@@ -260,6 +263,7 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_004, TestSize.Level1)
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_CALL(linkMock, LnnGetRemoteNumInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthGetPreferConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, CheckActiveConnection).WillRepeatedly(Return(true));
     const LaneLinkCb cb = {
         .OnLaneLinkSuccess = OnLaneLinkSuccess,
         .OnLaneLinkFail = OnLaneLinkFail,
@@ -324,6 +328,7 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_006, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<1>(connInfo), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, GetAuthIdByConnInfo).WillRepeatedly(Return(5));
     EXPECT_CALL(linkMock, AuthGenRequestId).WillRepeatedly(Return(5));
+    EXPECT_CALL(linkMock, CheckActiveConnection).WillRepeatedly(Return(true));
     uint32_t ret = LnnConnectP2p(request, laneLinkReqId, &cb);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     LnnDisconnectP2p(network, request->pid, laneLinkReqId);

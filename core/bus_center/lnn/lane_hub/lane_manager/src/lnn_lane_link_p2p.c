@@ -31,6 +31,7 @@
 #include "lnn_network_manager.h"
 #include "lnn_node_info.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_network_utils.h"
@@ -497,15 +498,16 @@ static void NotifyLinkSucc(AsyncResultType type, int32_t requestId, LaneLinkInfo
     }
     newNode->p2pModuleLinkId = linkId;
     CopyLinkInfoToLinkedList(item, newNode);
-    ListNodeInsert(g_p2pLinkedList, &newNode->node);
+    ListTailInsert(g_p2pLinkedList, &newNode->node);
+    int32_t channelId = item->proxyChannelInfo.channelId;
     ListDelete(&item->node); // async request finish, delete nodeInfo;
     SoftBusFree(item);
     LinkUnlock();
     if (authId != INVAILD_AUTH_ID) {
         AuthCloseConn(authId);
     }
-    if (item->proxyChannelInfo.channelId > 0) {
-        TransProxyPipelineCloseChannelDelay(item->proxyChannelInfo.channelId);
+    if (channelId > 0) {
+        TransProxyPipelineCloseChannelDelay(channelId);
     }
 FAIL:
     if (cb.OnLaneLinkSuccess != NULL) {
@@ -623,7 +625,7 @@ static int32_t AddConnRequestItem(uint32_t authRequestId, int32_t p2pRequestId, 
         LNN_LOGE(LNN_LANE, "lock fail, add conn request fail");
         return SOFTBUS_LOCK_ERR;
     }
-    ListNodeInsert(g_p2pLinkList, &item->node);
+    ListTailInsert(g_p2pLinkList, &item->node);
     LinkUnlock();
     return SOFTBUS_OK;
 }
@@ -957,6 +959,18 @@ static int32_t OpenBleTriggerToConn(const LinkRequest *request, uint32_t laneLin
     return SOFTBUS_OK;
 }
 
+static bool CheckHasBrConnection(const char *peerNetWorkId)
+{
+    ConnectOption connOpt;
+    (void)memset_s(&connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    connOpt.type = CONNECT_BR;
+    if (LnnGetRemoteStrInfo(peerNetWorkId, STRING_KEY_BT_MAC, connOpt.brOption.brMac, BT_MAC_LEN) != SOFTBUS_OK ||
+        connOpt.brOption.brMac[0] == '\0') {
+        return false;
+    }
+    return CheckActiveConnection(&connOpt);
+}
+
 static int32_t LnnSelectDirectLink(const LinkRequest *request, uint32_t laneLinkReqId, const LaneLinkCb *callback)
 {
     char uuid[UUID_BUF_LEN] = { 0 };
@@ -990,7 +1004,10 @@ static int32_t LnnSelectDirectLink(const LinkRequest *request, uint32_t laneLink
             LNN_LOGI(LNN_LANE, "open ble trigger to connect, LnnReqId=%d", laneLinkReqId);
             ret = OpenBleTriggerToConn(request, laneLinkReqId, callback);
     }
-
+    if (CheckHasBrConnection(request->peerNetworkId) && ret != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LANE, "open new br auth to connect p2p, LnnReqId=%d", laneLinkReqId);
+        ret = OpenAuthToConnP2p(request, laneLinkReqId, callback);
+    }
     if (((local & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) != 0) &&
         ((remote & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) != 0) &&
           ret != SOFTBUS_OK) {
@@ -1046,6 +1063,7 @@ void LnnDisconnectP2p(const char *networkId, int32_t pid, uint32_t laneLinkReqId
             break;
         }
     }
+    LNN_LOGE(LNN_LANE, "pid:%d, laneId:%d, linkId:%d", pid, laneLinkReqId, linkId);
     if (!isNodeExist) {
         LNN_LOGE(LNN_LANE, "node isn't exist, ignore disconn request");
         LinkUnlock();
