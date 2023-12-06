@@ -35,6 +35,7 @@ static SoftBusList *g_sessionServerList = NULL;
 static int32_t TransSessionForEachShowInfo(int32_t fd)
 {
     if (g_sessionServerList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "session server list is empty");
         return SOFTBUS_ERR;
     }
 
@@ -47,7 +48,7 @@ static int32_t TransSessionForEachShowInfo(int32_t fd)
     LIST_FOR_EACH_ENTRY(pos, &g_sessionServerList->list, SessionServer, node) {
         SoftBusTransDumpRegisterSession(fd, pos->pkgName, pos->sessionName, pos->uid, pos->pid);
     }
-    
+
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
     return SOFTBUS_OK;
 }

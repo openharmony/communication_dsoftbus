@@ -29,7 +29,7 @@
         "TransOnUdpChannelQosEvent";
         "ServerIpcPublishLNN";
         "ClientDeleteSession";
-        "UnPublishServiceInner";
+        "UnpublishServiceInner";
         "ClientTransUdpMgrDeinit";
         "ServerIpcNotifyAuthSuccess";
         "ServerIpcLeaveLNN";
