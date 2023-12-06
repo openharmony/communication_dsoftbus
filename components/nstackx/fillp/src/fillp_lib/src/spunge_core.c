@@ -480,7 +480,7 @@ static int SpungeAllocInstRes(void)
         if (err == ERR_OK) {
             continue;
         }
-        FILLP_LOGERR("SpungeInstInit failed :: Instance number :: %u\r\n", i);
+        FILLP_LOGERR("SpungeInstInit failed :: Instance number :: %u", i);
 
         /* Release instances which are created success */
         if (i > 0) {
@@ -628,7 +628,7 @@ static FILLP_INT FtInitGlobalSockTable(void)
 {
     g_spunge->sockTable = SpungeCreateSockTable(g_spunge->resConf.maxSockNum);
     if (g_spunge->sockTable == FILLP_NULL_PTR) {
-        FILLP_LOGERR("Malloc g_spunge->sockTable failed\r\n");
+        FILLP_LOGERR("Malloc g_spunge->sockTable failed");
         return ERR_NORES;
     }
     return ERR_OK;
@@ -646,7 +646,7 @@ static FILLP_INT FtInitGlobalNetPool(void)
     g_spunge->netPool = DympCreatePool((FILLP_INT)netPoolInitSize, (int)g_spunge->resConf.maxConnNum,
         sizeof(struct FtNetconn), FILLP_TRUE, &itemOperaCb);
     if (g_spunge->netPool == FILLP_NULL_PTR) {
-        FILLP_LOGERR("Malloc g_spunge->netPool failed\r\n");
+        FILLP_LOGERR("Malloc g_spunge->netPool failed");
         return ERR_NORES;
     }
 
@@ -755,12 +755,12 @@ FILLP_INT FtInit(void)
     }
 
     if (SpungeCheckCallbacks() != ERR_OK) {
-        FILLP_LOGERR("User has not registered system callback functions \r\n");
+        FILLP_LOGERR("User has not registered system callback functions");
         return ERR_ADP_SYS_CALLBACK_NOT_REGISTERED;
     }
 
     if (SYS_ARCH_INIT() != ERR_OK) {
-        FILLP_LOGERR("SYS_ARCH_INIT ssp failed \r\n");
+        FILLP_LOGERR("SYS_ARCH_INIT ssp failed");
         return ERR_NORES;
     }
 
@@ -1390,7 +1390,6 @@ static void SpungeClearItemWaitTokenList(struct SpungeTokenBucke *stb)
         stb->waitPktCount = 0;
     }
     stb->fpcbCur = HLIST_FIRST(&(stb->tbFpcbLists));
-    return;
 }
 
 void SpungeCheckItemWaitTokenList(struct SpungeTokenBucke *stb)
@@ -1633,8 +1632,6 @@ void SpungePushRecvdDataToStack(void *arg)
     }
 
     FillpEnableDataBurstTimer(pcb);
-
-    return;
 }
 
 #ifdef __cplusplus

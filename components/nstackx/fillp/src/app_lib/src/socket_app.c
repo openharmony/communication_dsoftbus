@@ -627,7 +627,7 @@ static struct FillpPcbItem *SockRecvReqFpcbItemWithoutSem(struct FtSocket *sock,
         }
 
         if ((SOCK_IS_NONBLOCKING(sock) || ((FILLP_UINT32)flags & MSG_DONTWAIT))) {
-            FILLP_LOGDBG("fillp_sock_id:%d, Fail to get dat buffer to recv", sock->index);
+            FILLP_LOGDBG("fillp_sock_id:%d, Fail to get data buffer to recv", sock->index);
             break;
         }
         SOCK_RECV_CPU_PAUSE(); // To reduce cpu usage of send api
