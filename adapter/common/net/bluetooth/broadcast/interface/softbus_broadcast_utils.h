@@ -43,6 +43,7 @@ extern "C"{
 
 // adv broadcast head
 #define BC_HEAD_LEN             7
+#define BC_FLAG_LEN             3
 #define IDX_BC_FLAG_BYTE_LEN    0
 #define IDX_BC_FLAG_AD_TYPE     1
 #define IDX_BC_FLAG_AD_DATA     2

@@ -24,6 +24,7 @@
 #ifndef SOFTBUS_BROADCAST_TYPE_H
 #define SOFTBUS_BROADCAST_TYPE_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -37,6 +38,7 @@ extern "C"{
  * @version 1.0
  */
 #define BC_ADDR_MAC_LEN 6
+
 // Bluetooth scan duty cycle, unit: ms
 #define SOFTBUS_BC_SCAN_INTERVAL_P2 3000
 #define SOFTBUS_BC_SCAN_INTERVAL_P10 600
@@ -47,6 +49,13 @@ extern "C"{
 #define SOFTBUS_BC_SCAN_WINDOW_P25 60
 #define SOFTBUS_BC_SCAN_WINDOW_P100 1000
 
+/**
+ * @brief Defines the length of local name, the maximum length of complete local name is 30 bytes.
+ *
+ * @since 4.1
+ * @version 1.0
+ */
+#define BC_LOCAL_NAME_LEN_MAX 30
 /**
  * @brief Defines the broadcast service type.
  *
@@ -140,7 +149,7 @@ typedef enum {
     SOFTBUS_BC_DATA_COMPLETE = 0x00,
     SOFTBUS_BC_DATA_INCOMPLETE_MORE_TO_COME = 0x01,
     SOFTBUS_BC_DATA_INCOMPLETE_TRUNCATED = 0x02,
-} SoftBusScanResultDataStatus;
+} SoftBusBcScanResultDataStatus;
 
 typedef enum {
     SOFTBUS_BC_BT_STATE_TURNING_ON = 0x0,
@@ -152,18 +161,45 @@ typedef enum {
     SOFTBUS_BC_BR_STATE_TURNING_OFF,
     SOFTBUS_BC_BR_STATE_TURN_OFF
 } SoftBusBcStackState;
+
 /**
- * @brief Defines the broadcast data information
+ * @brief Defines the broadcast service type.
+ *
+ * @since 4.1
+ * @version 1.0
+ */
+typedef enum {
+    BC_DATA_TYPE_SERVICE, // The broadcast data type is service data.
+    BC_DATA_TYPE_MANUFACTURER, // The broadcast data type is manufacturer data.
+    BC_DATA_TYPE_BUTT,
+} BroadcastDataType;
+
+/**
+ * @brief Defines the broadcast data information.
  *
  * @since 4.1
  * @version 1.0
  */
 typedef struct {
-    uint16_t uuid;
-    uint16_t companyId;
+    BroadcastDataType type; // broadcast data type {@link BroadcastDataType}.
+    uint16_t id; // broadcast data id, uuid or company id.
     uint16_t payloadLen;
     uint8_t *payload; // if pointer defines rsp payload, pointer may be null
 } BroadcastPayload;
+
+/**
+ * @brief Defines the broadcast packet.
+ *
+ * @since 4.1
+ * @version 1.0
+ */
+typedef struct {
+    BroadcastPayload bcData;
+    BroadcastPayload rspData;
+    // By default, the flag behavior is supported. If the flag behavior is not supported, the value must be set to false
+    bool isSupportFlag;
+    uint8_t flag;
+} BroadcastPacket;
 
 /**
  * @brief Defines mac address information
@@ -191,8 +227,8 @@ typedef struct {
     int8_t rssi;
     uint8_t addrType;
     BcMacAddr addr;
-    BroadcastPayload bcData;
-    BroadcastPayload rspData;
+    uint8_t localName[BC_LOCAL_NAME_LEN_MAX];
+    BroadcastPacket packet;
 } BroadcastReportInfo;
 
 /**
@@ -223,16 +259,14 @@ typedef struct {
 typedef struct {
     int8_t *address;
     int8_t *deviceName;
-    uint32_t serviceUuidLength; // reserve
-    uint8_t *serviceUuid; // reserve
-    uint8_t *serviceUuidMask; // reserve
+    uint16_t serviceUuid;
     uint32_t serviceDataLength;
     uint8_t *serviceData;
     uint8_t *serviceDataMask;
+    uint16_t manufactureId;
     uint32_t manufactureDataLength;
     uint8_t *manufactureData;
     uint8_t *manufactureDataMask;
-    uint16_t manufactureId;
 } BcScanFilter;
 
 /**

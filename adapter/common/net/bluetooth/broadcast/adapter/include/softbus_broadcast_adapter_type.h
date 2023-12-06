@@ -24,6 +24,7 @@
 #ifndef SOFTBUS_BROADCAST_ADAPTER_TYPE_H
 #define SOFTBUS_BROADCAST_ADAPTER_TYPE_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -39,6 +40,14 @@ extern "C"{
 #define SOFTBUS_ADDR_MAC_LEN 6
 
 /**
+ * @brief Defines the length of local name, the maximum length of complete local name is 30 bytes.
+ *
+ * @since 4.1
+ * @version 1.0
+ */
+#define SOFTBUS_LOCAL_NAME_LEN_MAX 30
+
+/**
  * @brief Defines different broadcast media protocol stacks
  *
  * @since 4.1
@@ -51,14 +60,42 @@ typedef enum {
 } SoftbusMediumType;
 
 /**
+ * @brief Defines the broadcast service type.
+ *
+ * @since 4.1
+ * @version 1.0
+ */
+typedef enum {
+    BROADCAST_DATA_TYPE_SERVICE, // The broadcast data type is service data.
+    BROADCAST_DATA_TYPE_MANUFACTURER, // The broadcast data type is manufacturer data.
+    BROADCAST_DATA_TYPE_BUTT,
+} SoftbusBcDataType;
+
+/**
  * @brief Defines the broadcast data information
  *
  * @since 4.1
  * @version 1.0
  */
 typedef struct {
-    uint16_t rawDataLen;
-    uint8_t *rawData;
+    SoftbusBcDataType type; // broadcast data type {@link SoftbusBcDataType}.
+    uint16_t id; // broadcast data id, uuid or company id.
+    uint16_t payloadLen;
+    uint8_t *payload; // if pointer defines rsp payload, pointer may be null
+} SoftbusBroadcastPayload;
+
+/**
+ * @brief Defines the broadcast packet.
+ *
+ * @since 4.1
+ * @version 1.0
+ */
+typedef struct {
+    SoftbusBroadcastPayload bcData;
+    SoftbusBroadcastPayload rspData;
+    // By default, the flag behavior is supported. If the flag behavior is not supported, the value must be set to false
+    bool isSupportFlag;
+    uint8_t flag;
 } SoftbusBroadcastData;
 
 /**
@@ -87,6 +124,7 @@ typedef struct {
     int8_t rssi;
     uint8_t addrType;
     SoftbusMacAddr addr;
+    uint8_t localName[SOFTBUS_LOCAL_NAME_LEN_MAX];
     SoftbusBroadcastData data;
 } SoftBusBcScanResult;
 
@@ -118,16 +156,14 @@ typedef struct {
 typedef struct {
     int8_t *address;
     int8_t *deviceName;
-    uint32_t serviceUuidLength;
-    uint8_t *serviceUuid;
-    uint8_t *serviceUuidMask;
+    uint16_t serviceUuid;
     uint32_t serviceDataLength;
     uint8_t *serviceData;
     uint8_t *serviceDataMask;
+    uint16_t manufactureId;
     uint32_t manufactureDataLength;
     uint8_t *manufactureData;
     uint8_t *manufactureDataMask;
-    uint16_t manufactureId;
 } SoftBusBcScanFilter;
 
 /**

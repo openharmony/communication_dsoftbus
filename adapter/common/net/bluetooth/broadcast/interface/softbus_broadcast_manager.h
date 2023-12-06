@@ -136,8 +136,7 @@ int32_t UnRegisterScanListener(int32_t listenerId);
  *
  * @param bcId Indicates the service broadcast ID.
  * @param param Indicates the pointer to the service parameter information. For details, see {@link BroadcastParam}.
- * @param bcData Indicates the pointer to the service advertising data. For details, see {@link BroadcastData}.
- * @param rspData Indicates the pointer to the service broadcast respond data. For details, see {@link BroadcastData}.
+ * @param packet Indicates the pointer to the service advertising data. For details, see {@link BroadcastPacket}.
  *
  * @return Returns <b>SOFTBUS_OK</b> if the service starts the broadcast successfully.
  * returns any other value if the unregister fails.
@@ -145,16 +144,14 @@ int32_t UnRegisterScanListener(int32_t listenerId);
  * @since 4.1
  * @version 1.0
  */
-int32_t StartBroadcasting(int32_t bcId, const BroadcastParam *param, const BroadcastPayload *bcData,
-    const BroadcastPayload *rspData);
+int32_t StartBroadcasting(int32_t bcId, const BroadcastParam *param, const BroadcastPacket *packet);
 
 /**
  * @brief The service update broadcast data and parameters.
  *
  * @param bcId Indicates the service broadcast ID.
  * @param param Indicates the pointer to the service parameter information. For details, see {@link BroadcastParam}.
- * @param bcData Indicates the pointer to the service advertising data. For details, see {@link BroadcastData}.
- * @param rspData Indicates the pointer to the service broadcast respond data. For details, see {@link BroadcastData}.
+ * @param bcData Indicates the pointer to the service advertising data. For details, see {@link BroadcastPacket}.
  *
  * @return Returns <b>SOFTBUS_OK</b> if the service updates the broadcast successfully.
  * returns any other value if the service fails to update the broadcast.
@@ -162,9 +159,22 @@ int32_t StartBroadcasting(int32_t bcId, const BroadcastParam *param, const Broad
  * @since 4.1
  * @version 1.0
  */
-int32_t UpdateBroadcasting(int32_t bcId, const BroadcastParam *param, const BroadcastPayload *bcData,
-    const BroadcastPayload *rspData);
+int32_t UpdateBroadcasting(int32_t bcId, const BroadcastParam *param, const BroadcastPacket *packet);
 
+/**
+ * @brief The service set broadcast data.
+ *
+ * @param bcId Indicates the service broadcast ID.
+ * @param packet Indicates the pointer to the service advertising data. For details, see {@link BroadcastPacket}.
+ *
+ * @return Returns <b>SOFTBUS_OK</b> if the service starts the broadcast successfully.
+ * returns any other value if the unregister fails.
+ *
+ * @since 4.1
+ * @version 1.0
+ */
+
+int32_t SetBroadcastingData(int32_t bcId, const BroadcastPacket *packet);
 /**
  * @brief The service stop broadcast
  *

@@ -52,9 +52,9 @@ typedef struct {
  * @version 1.0
  */
 typedef struct {
-    void (*OnStartScanCallback)(int32_t scanId, int32_t status);
-    void (*OnStopScanCallback)(int32_t scanId, int32_t status);
-    void (*OnReportScanDataCallback)(const SoftBusBcScanResult *reportData);
+    void (*OnStartScanCallback)(int32_t scannerId, int32_t status);
+    void (*OnStopScanCallback)(int32_t scannerId, int32_t status);
+    void (*OnReportScanDataCallback)(int32_t scannerId, const SoftBusBcScanResult *reportData);
 } SoftbusScanCallback;
 
 /**
@@ -63,16 +63,16 @@ typedef struct {
  * @since 4.1
  * @version 1.0
  */
-typedef struct{
+typedef struct {
     int32_t (*Init)(void);
     int32_t (*DeInit)(void);
     int32_t (*RegisterBroadcaster)(int32_t *advId, const SoftbusBroadcastCallback *cb);
     int32_t (*UnRegisterBroadcaster)(int32_t advId);
     int32_t (*RegisterScanListener)(int32_t *scannerId, const SoftbusScanCallback *cb);
     int32_t (*UnRegisterScanListener)(int32_t scannerId);
-    int32_t (*StartBroadcasting)(int32_t advId, const SoftbusBroadcastParam *param, const SoftbusBroadcastData *bcData,
-        const SoftbusBroadcastData *rspData);
+    int32_t (*StartBroadcasting)(int32_t advId, const SoftbusBroadcastParam *param, const SoftbusBroadcastData *data);
     int32_t (*StopBroadcasting)(int32_t advId);
+    int32_t (*SetBroadcastingData)(int32_t advId, const SoftbusBroadcastData *data);
     int32_t (*StartScan)(int32_t scannerId, const SoftBusBcScanParams *param, const SoftBusBcScanFilter *scanFilter,
         uint8_t filterSize);
     int32_t (*StopScan)(int32_t scannerId);
