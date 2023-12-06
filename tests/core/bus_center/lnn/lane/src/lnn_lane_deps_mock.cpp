@@ -206,5 +206,11 @@ int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned 
 {
     return GetLaneDepsInterface()->SoftBusGenerateStrHash(str, len, hash);
 }
+
+bool CheckActiveConnection(const ConnectOption *option)
+{
+    return GetLaneDepsInterface()->CheckActiveConnection(option);
+}
+
 }
 } // namespace OHOS
