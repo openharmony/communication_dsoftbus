@@ -391,5 +391,18 @@
         "ACTIONS": "create,open"
       }
     ]
+  },
+  {
+    "SESSION_NAME": "com.huawei.harmonyos.security.devicesec",
+    "DEVID": "UDID",
+    "SEC_LEVEL": "public",
+    "APP_INFO": [
+      {
+        "TYPE": "native_app",
+        "UID": "3046",
+        "PKG_NAME": "ohos.dslm",
+        "ACTIONS": "create,open"
+      }
+    ]
   }
 ]
