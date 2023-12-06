@@ -171,7 +171,7 @@ typedef enum {
 typedef enum {
     BC_DATA_TYPE_SERVICE, // The broadcast data type is service data.
     BC_DATA_TYPE_MANUFACTURER, // The broadcast data type is manufacturer data.
-    SBC_DATA_TYPE_BUTT,
+    BC_DATA_TYPE_BUTT,
 } BroadcastDataType;
 
 /**
