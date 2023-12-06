@@ -277,7 +277,7 @@ static int32_t GetGroupInfo(struct WifiDirectP2pGroupInfo **groupInfoOut)
 static int32_t GetIpAddress(char *ipString, int32_t ipStringSize)
 {
     WifiP2pGroupInfo *groupInfo = (WifiP2pGroupInfo *)SoftBusCalloc(sizeof(*groupInfo));
-    CONN_CHECK_AND_RETURN_RET_LOGW(groupInfo, SOFTBUS_MALLOC_ERR, CONN_WIFI_DIRECT, "alloc group info failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(groupInfo, SOFTBUS_MALLOC_ERR, CONN_WIFI_DIRECT, "alloc group info failed");
 
     int32_t ret = GetCurrentGroup(groupInfo);
     if (ret != WIFI_SUCCESS) {
@@ -287,8 +287,8 @@ static int32_t GetIpAddress(char *ipString, int32_t ipStringSize)
     }
 
     char interface[INTERFACE_LENGTH];
-    int32_t res = memcpy_s(interface, sizeof(interface), groupInfo->interface, sizeof(groupInfo->interface));
-    if (res != EOK) {
+    (void)memset_s(interface, sizeof(interface), 0, sizeof(interface));
+    if (memcpy_s(interface, sizeof(interface), groupInfo->interface, sizeof(groupInfo->interface)) != EOK) {
         CONN_LOGE(CONN_WIFI_DIRECT, "memcpy_s failed");
         SoftBusFree(groupInfo);
         return SOFTBUS_ERR;
@@ -298,7 +298,7 @@ static int32_t GetIpAddress(char *ipString, int32_t ipStringSize)
 
     struct WifiDirectNetWorkUtils *netWorkUtils = GetWifiDirectNetWorkUtils();
     ret = netWorkUtils->getInterfaceIpString(interface, ipString, ipStringSize);
-    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get ip string failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get ip string failed");
     CONN_LOGI(CONN_WIFI_DIRECT, "ipString=%s", ipString);
     return SOFTBUS_OK;
 }
@@ -308,6 +308,7 @@ static int32_t GetMacAddress(char *macString, size_t macStringSize)
     struct WifiDirectNetWorkUtils *netWorkUtils = GetWifiDirectNetWorkUtils();
     uint8_t mac[MAC_ADDR_ARRAY_SIZE];
     size_t macSize = MAC_ADDR_ARRAY_SIZE;
+    (void)memset_s(mac, macSize, 0, macSize);
     if (netWorkUtils->getInterfaceMacAddr(IF_NAME_P2P, mac, &macSize) == SOFTBUS_OK) {
         netWorkUtils->macArrayToString(mac, macSize, macString, macStringSize);
         CONN_LOGI(CONN_WIFI_DIRECT, "p2p0");
@@ -357,6 +358,7 @@ static int32_t RequestGcIp(const char *macString, char *ipString, size_t ipStrin
 {
     uint8_t macArray[MAC_ADDR_ARRAY_SIZE];
     size_t macArraySize = MAC_ADDR_ARRAY_SIZE;
+    (void)memset_s(macArray, macArraySize, 0, macArraySize);
     struct WifiDirectNetWorkUtils *netWorkUtils = GetWifiDirectNetWorkUtils();
     int32_t ret = netWorkUtils->macStringToArray(macString, macArray, &macArraySize);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "mac to string failed");

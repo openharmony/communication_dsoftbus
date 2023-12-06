@@ -109,6 +109,7 @@ static bool MarshallingString(struct WifiDirectProtocol *protocol,
     if (key == II_KEY_DYNAMIC_MAC || key == II_KEY_BASE_MAC) {
         uint8_t mac[MAC_ADDR_ARRAY_SIZE];
         size_t macSize = sizeof(mac);
+        (void)memset_s(mac, macSize, 0, macSize);
         if (GetWifiDirectNetWorkUtils()->macStringToArray((char *)value, mac, &macSize) != SOFTBUS_OK) {
             CONN_LOGW(CONN_WIFI_DIRECT, "mac string to bytes failed");
             return false;
@@ -125,6 +126,7 @@ static bool UnmarshallingString(struct InterfaceInfo *self, size_t key, uint8_t 
 {
     if (key == II_KEY_DYNAMIC_MAC || key == II_KEY_BASE_MAC) {
         char macStr[MAC_ADDR_STR_LEN];
+        (void)memset_s(macStr, sizeof(macStr), 0, sizeof(macStr));
         if (GetWifiDirectNetWorkUtils()->macArrayToString(data, size, macStr, sizeof(macStr)) != SOFTBUS_OK) {
             CONN_LOGW(CONN_WIFI_DIRECT, "mac bytes to string failed");
             return false;
@@ -200,6 +202,7 @@ static bool Unmarshalling(struct InterfaceInfo *self, struct WifiDirectProtocol 
     size_t size = 0;
     uint8_t *data = NULL;
     struct InfoContainerKeyProperty keyProperty;
+    (void)memset_s(&keyProperty, sizeof(keyProperty), 0, sizeof(keyProperty));
     enum WifiDirectProtocolType protocolType = protocol->getType();
 
     while (protocol->readData(protocol, &keyProperty, &data, &size)) {
