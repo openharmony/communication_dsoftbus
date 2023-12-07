@@ -84,7 +84,6 @@ static bool IsLoopBackPacket(struct sockaddr_in *remoteAddr)
     }
     struct in_addr *localAddr = GetLocalIfaceIp(g_coapCtx.iface);
     if (remoteAddr->sin_addr.s_addr != localAddr->s_addr) {
-        DFINDER_LOGE(TAG, "is not loopback packet");
         return false;
     }
     DFINDER_LOGE(TAG, "drop loopback packet");
@@ -194,7 +193,7 @@ static int32_t CoapSendMsg(const CoapRequest *coapRequest, uint8_t isBroadcast)
     sockAddr.sin_family = AF_INET;
 
     int32_t fd = CoapCreateUdpClient(&sockAddr, isBroadcast);
-    if (fd <= 0) {
+    if (fd < 0) {
         DFINDER_LOGE(TAG, "Create coap udp client failed");
         return NSTACKX_EFAILED;
     }
@@ -309,7 +308,7 @@ static void CoAPEpollErrorHandle(void *data)
         return;
     }
     EpollTask *task = data;
-    if (task->taskfd <= 0) {
+    if (task->taskfd < 0) {
         return;
     }
     IncStatistics(STATS_SOCKET_ERROR);
@@ -367,7 +366,7 @@ CoapCtxType *CoapServerInit(const struct in_addr *ip, void *iface)
     }
 
     int32_t listenFd = CoapCreateUdpServer(COAP_SRV_DEFAULT_ADDR, COAP_SRV_DEFAULT_PORT);
-    if (listenFd <= 0) {
+    if (listenFd < 0) {
         DFINDER_LOGE(TAG, "get context failed");
         return NULL;
     }
