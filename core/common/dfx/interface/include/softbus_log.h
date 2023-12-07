@@ -55,7 +55,7 @@ typedef struct {
     char tag[LOG_TAG_MAX_LEN];
 } SoftBusLogLabel;
 
-void SoftBusLogInnerImpl(SoftBusDfxLogLevel level, SoftBusLogLabel label, const char *fileName, int lineNum,
+void SoftBusLogInnerImpl(SoftBusDfxLogLevel level, SoftBusLogLabel label, const char *fileName, int32_t lineNum,
     const char *funName, const char *fmt, ...);
 
 void NstackxLogInnerImpl(const char *moduleName, uint32_t logLevel, const char *fmt, ...);

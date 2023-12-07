@@ -85,6 +85,22 @@ HWTEST_F(NetBuilderTest, NET_BUILDER_GEN_ID_Test_002, TestSize.Level0)
 }
 
 /*
+* @tc.name: NET_BUILDER_GEN_ID_Test_003
+* @tc.desc: generate irk interface test
+* @tc.type: FUNC
+* @tc.require:
+ */
+HWTEST_F(NetBuilderTest, NET_BUILDER_GEN_ID_Test_003, TestSize.Level0)
+{
+    unsigned char irkFirst[LFINDER_IRK_LEN] = {0};
+    unsigned char irkSecond[LFINDER_IRK_LEN] = {0};
+
+    EXPECT_TRUE(LnnGenLocalIrk(irkFirst, LFINDER_IRK_LEN) == SOFTBUS_OK);
+    EXPECT_TRUE(LnnGenLocalIrk(irkSecond, LFINDER_IRK_LEN) == SOFTBUS_OK);
+    EXPECT_TRUE(memcmp(irkFirst, irkSecond, LFINDER_IRK_LEN) == 0);
+}
+
+/*
 * @tc.name: NET_BUILDER_CONNECTION_ADDR_Test_001
 * @tc.desc: connection address compare interface test
 * @tc.type: FUNC

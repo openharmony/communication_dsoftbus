@@ -267,8 +267,6 @@ void FillpMemFree(IN void *addr)
     if (addr != FILLP_NULL_PTR) {
         free(addr);
     }
-
-    return;
 }
 
 void *FillpMemChr(IN FILLP_CONST void *s, IN FILLP_INT c, IN FILLP_SIZE_T n)
@@ -356,7 +354,6 @@ FT_FD_SET FillpFuncCreateFdSet(void)
 void FillpFuncDestroyFdSet(IN FT_FD_SET destroyFdSet)
 {
     FillpMemFree(destroyFdSet);
-    return;
 }
 
 FILLP_INT32 FillpFuncCopyFdSet(IO FT_FD_SET dstFdSet, IN FT_FD_SET srcFdSet)
@@ -433,7 +430,7 @@ FILLP_INT FillpCreateThread(IN void *param, IO void *threadId)
 
 #define FillpSysArchGetCurTime(time) (*(time) = mach_absolute_time())
 
-FILLP_LLONG FillpSysArchTimeToLonglong(FillpSysArchTime *time)
+FILLP_LLONG FillpSysArchTimeToLonglong(FILLP_CONST FillpSysArchTime *time)
 {
     if (g_macTimeBaseInfo.denom == 0) {
         return 0;
@@ -446,7 +443,7 @@ FILLP_LLONG FillpSysArchTimeToLonglong(FillpSysArchTime *time)
 
 #define FillpSysArchGetCurTime(time) (void)clock_gettime(CLOCK_MONOTONIC, time)
 
-FILLP_LLONG FillpSysArchTimeToLonglong(FillpSysArchTime *ptime)
+FILLP_LLONG FillpSysArchTimeToLonglong(FILLP_CONST FillpSysArchTime *ptime)
 {
     FILLP_LLONG l_time = ((FILLP_LLONG)ptime->tv_sec) * FILLP_CONST_1M + (ptime->tv_nsec / FILLP_CONST_1K);
     return l_time;
@@ -465,10 +462,9 @@ void FillpSysArchGetCurTime(FillpSysArchTime *timeValue)
 {
     /* Windows 2000 and later. ---------------------------------- */
     QueryPerformanceCounter(&(timeValue->time));
-    return;
 }
 
-FILLP_LLONG FillpSysArchTimeToLonglong(FillpSysArchTime *timeValue)
+FILLP_LLONG FillpSysArchTimeToLonglong(FILLP_CONST FillpSysArchTime *timeValue)
 {
     if (g_fillpBasePerformanceFrequency.QuadPart == 0) {
         return 0;
@@ -618,7 +614,6 @@ FILLP_INT FillpSysArchCompAndWwap(
 void FillpSysSleepMs(IN FILLP_UINT timeValue) /* In Millseconds */
 {
     FILLP_ADP_SLEEP_MS(timeValue);
-    return;
 }
 
 FILLP_INT FillpSysSleepUs(IN FILLP_UINT timeValue) /* In micro seconds */
@@ -1348,7 +1343,6 @@ void FillpSysOsInit(IN void)
 void FillpSysOsInit(IN void)
 {
     FillpSysArchInitTime();
-    return;
 }
 #else
 #define FillpSysOsInit()

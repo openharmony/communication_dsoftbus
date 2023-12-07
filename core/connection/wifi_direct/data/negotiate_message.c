@@ -141,7 +141,7 @@ static bool Marshalling(struct NegotiateMessage *self, struct WifiDirectProtocol
         }
         size_t size = 0;
         uint8_t *value = self->get(self, key, &size, NULL);
-        if (!value || !size) {
+        if ((value == NULL) || (size == 0)) {
             continue;
         }
 
@@ -389,9 +389,8 @@ void NegotiateMessageDestructor(struct NegotiateMessage* self)
 struct NegotiateMessage* NegotiateMessageNew(void)
 {
     struct NegotiateMessage *self = (struct NegotiateMessage *)SoftBusCalloc(sizeof(*self));
-    if (self) {
-        NegotiateMessageConstructor(self);
-    }
+    CONN_CHECK_AND_RETURN_RET_LOGE(self != NULL, NULL, CONN_WIFI_DIRECT, "self is null");
+    NegotiateMessageConstructor(self);
 
     return self;
 }
@@ -405,10 +404,9 @@ void NegotiateMessageDelete(struct NegotiateMessage* self)
 struct NegotiateMessage* NegotiateMessageNewArray(size_t size)
 {
     struct NegotiateMessage *self = (struct NegotiateMessage *)SoftBusCalloc(sizeof(*self) * size);
-    if (self) {
-        for (size_t i = 0; i < size; i++) {
-            NegotiateMessageConstructor(self + i);
-        }
+    CONN_CHECK_AND_RETURN_RET_LOGE(self != NULL, NULL, CONN_WIFI_DIRECT, "self is null");
+    for (size_t i = 0; i < size; i++) {
+        NegotiateMessageConstructor(self + i);
     }
 
     return self;

@@ -166,6 +166,7 @@ typedef enum {
     NODE_KEY_BLE_OFFLINE_CODE,   /**< Ble offlinecode in string format */
     NODE_KEY_DATA_CHANGE_FLAG,   /**< Device info change flag in number format */
     NODE_KEY_NODE_ADDRESS,       /**< Node address in string format */
+    NODE_KEY_P2P_IP_ADDRESS,     /**<  P2P IP address in string format */
 } NodeDeviceInfoKey;
 
 /**

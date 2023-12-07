@@ -44,7 +44,7 @@ void ProcessCipherKeySyncInfo(const void *json, const char *networkId);
 int32_t LnnLoadLocalBroadcastCipherKey(void);
 int32_t LnnGetLocalBroadcastCipherKey(BroadcastCipherKey *broadcastKey);
 int32_t LnnSaveLocalBroadcastCipherKey(const BroadcastCipherKey *broadcastKey);
-int32_t LnnUpdateLocalBroadcastCipherKey(BroadcastCipherKey *broadcastCipherKey);
+int32_t LnnUpdateLocalBroadcastCipherKey(BroadcastCipherKey *broadcastKey);
 
 #ifdef __cplusplus
 }

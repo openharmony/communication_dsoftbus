@@ -110,8 +110,6 @@ void HlistDelete(struct Hlist *list, struct HlistNode *n)
     if (list->size > 0) {
         list->size--;
     }
-
-    return;
 }
 
 static __inline void HlistDelNode(struct HlistNode *n)

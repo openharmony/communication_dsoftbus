@@ -56,6 +56,7 @@ typedef struct {
     // SHOULD diff requests by protocol type
     BleProtocolType protocol;
     uint32_t requestId;
+    uint16_t challengeCode; /* for ble direct */
     ConnectResult result;
     ConnectStatistics statistics;
 } ConnBleRequest;
@@ -67,6 +68,7 @@ typedef struct {
     char udid[UDID_BUF_LEN];
     bool fastestConnectEnable;
     int32_t psm;
+    uint16_t challengeCode; /* for ble direct */
     ConnectResult result;
     ConnectStatistics statistics;
 } ConnBleConnectRequestContext;
@@ -121,7 +123,7 @@ ConnBleConnection *ConnBleGetConnectionByUdid(const char *addr, const char *udid
 // get connection with same udid and client side
 ConnBleConnection *ConnBleGetClientConnectionByUdid(const char *udid, BleProtocolType protocol);
 void ConnBleReturnConnection(ConnBleConnection **connection);
-void NotifyReusedConnected(uint32_t connectionId);
+void NotifyReusedConnected(uint32_t connectionId, uint16_t challengeCode);
 
 ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback);
 

@@ -307,7 +307,7 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyConnectDevice001, TestSize.Level
     uint32_t reqId = ConnGetNewRequestId(MODULE_PROXY_CHANNEL);
     int32_t ret = SOFTBUS_ERR;
     ret = TransProxyConnectDevice(&connInfo, reqId);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     connInfo.type = CONNECT_TYPE_MAX;
     ret = TransProxyConnectDevice(&connInfo, reqId);

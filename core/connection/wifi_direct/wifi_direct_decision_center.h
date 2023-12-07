@@ -32,8 +32,8 @@ struct WifiDirectDecisionCenter {
     struct WifiDirectProtocol* (*getProtocol)(struct WifiDirectNegotiateChannel *channel);
     void (*putProtocol)(struct WifiDirectProtocol *protocol);
     struct WifiDirectProcessor* (*getProcessorByNegoChannel)(struct WifiDirectNegotiateChannel *channel);
-    struct WifiDirectProcessor* (*getProcessorByNegoChannelAndConnectType)(struct WifiDirectNegotiateChannel *channel,
-                                                                           enum WifiDirectConnectType connectType);
+    struct WifiDirectProcessor* (*getProcessorByNegoChannelAndLinkType)(struct WifiDirectNegotiateChannel *channel,
+                                                                        enum WifiDirectLinkType linkType);
     struct WifiDirectProcessor* (*getProcessorByNegotiateMessage)(struct NegotiateMessage *msg);
 };
 

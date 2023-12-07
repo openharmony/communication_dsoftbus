@@ -940,14 +940,14 @@ HWTEST_F(DiscSdkBleTest, StartDiscoveryTest008, TestSize.Level1)
 }
 
 /**
- * @tc.name: UnpublishServiceTest001
+ * @tc.name: UnPublishService
  * @tc.desc: Extern module stop publishuse the wrong parameter.
  * @tc.in: Test module, Test number, Test levels.
  * @tc.out: Nonzero
  * @tc.type: FUNC
  * @tc.require: The UnPublishService operates normally.
  */
-HWTEST_F(DiscSdkBleTest, UnpublishServiceTest001, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, UnPublishServiceTest001, TestSize.Level1)
 {
     int ret;
     int tmpId = GetPublishId();
@@ -966,14 +966,14 @@ HWTEST_F(DiscSdkBleTest, UnpublishServiceTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: UnpublishServiceTest002
+ * @tc.name: UnPublishServiceTest002
  * @tc.desc: Extern module stop publishuse the normal parameter.
  * @tc.in: Test module, Test number, Test levels.
  * @tc.out: Zero
  * @tc.type: FUNC
  * @tc.require: The UnPublishService operates normally.
  */
-HWTEST_F(DiscSdkBleTest, UnpublishServiceTest002, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, UnPublishServiceTest002, TestSize.Level1)
 {
     int ret;
     int tmpId1 = GetPublishId();
@@ -991,14 +991,14 @@ HWTEST_F(DiscSdkBleTest, UnpublishServiceTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: UnpublishServiceTest003
+ * @tc.name: UnPublishServiceTest003
  * @tc.desc: Extern module stop publishrelease the same parameter again, perform two subscriptions.
  * @tc.in: Test module, Test number, Test levels.
  * @tc.out: Nonzero
  * @tc.type: FUNC
  * @tc.require: The UnPublishService operates normally.
  */
-HWTEST_F(DiscSdkBleTest, UnpublishServiceTest003, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, UnPublishServiceTest003, TestSize.Level1)
 {
     int ret;
     int tmpId = GetPublishId();
@@ -1012,14 +1012,14 @@ HWTEST_F(DiscSdkBleTest, UnpublishServiceTest003, TestSize.Level1)
 }
 
 /**
- * @tc.name: UnpublishServiceTest004
+ * @tc.name: UnPublishServiceTest004
  * @tc.desc: Extern module stop publish, use the normal parameter and different frequencies under active BLE.
  * @tc.in: Test module, Test number, Test levels.
  * @tc.out: Zero
  * @tc.type: FUNC
  * @tc.require: The UnPublishService operates normally.
  */
-HWTEST_F(DiscSdkBleTest, UnpublishServiceTest004, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, UnPublishServiceTest004, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -1053,14 +1053,14 @@ HWTEST_F(DiscSdkBleTest, UnpublishServiceTest004, TestSize.Level1)
 }
 
 /**
- * @tc.name: UnpublishServiceTest005
+ * @tc.name: UnPublishServiceTest005
  * @tc.desc: Extern module stop publish, use the normal parameter and different frequencies under passive BLE.
  * @tc.in: Test module, Test number, Test levels.
  * @tc.out: Zero
  * @tc.type: FUNC
  * @tc.require: The UnPublishService operates normally.
  */
-HWTEST_F(DiscSdkBleTest, UnpublishServiceTest005, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, UnPublishServiceTest005, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -1094,14 +1094,14 @@ HWTEST_F(DiscSdkBleTest, UnpublishServiceTest005, TestSize.Level1)
 }
 
 /**
- * @tc.name: UnpublishServiceTest006
+ * @tc.name: UnPublishServiceTest006
  * @tc.desc: Test active publish, verify correct parameter with passive mode,"BLE" medium and diff capability.
  * @tc.in: Test module, Test number, Test levels.
  * @tc.out: Zero
  * @tc.type: FUNC
  * @tc.require: The UnPublishService operates normally.
  */
-HWTEST_F(DiscSdkBleTest, UnpublishServiceTest006, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, UnPublishServiceTest006, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {
@@ -1155,14 +1155,14 @@ HWTEST_F(DiscSdkBleTest, UnpublishServiceTest006, TestSize.Level1)
 }
 
 /**
- * @tc.name: UnpublishServiceTest007
+ * @tc.name: UnPublishServiceTest007
  * @tc.desc: Test active publish, verify correct parameter with active mode,"BLE" medium and diff capability.
  * @tc.in: Test module, Test number, Test levels.
  * @tc.out: Zero
  * @tc.type: FUNC
  * @tc.require: The UnPublishService operates normally.
  */
-HWTEST_F(DiscSdkBleTest, UnpublishServiceTest007, TestSize.Level1)
+HWTEST_F(DiscSdkBleTest, UnPublishServiceTest007, TestSize.Level1)
 {
     int ret;
     PublishInfo testInfo = {

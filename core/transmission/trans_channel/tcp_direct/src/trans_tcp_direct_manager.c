@@ -229,14 +229,14 @@ static int32_t TransUpdAppInfo(AppInfo *appInfo, const ConnectOption *connInfo)
         if (LnnGetLocalStrInfo(STRING_KEY_NODE_ADDR, appInfo->myData.addr, sizeof(appInfo->myData.addr)) !=
             SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "TransUpdAppInfo get local nip fail");
-            return SOFTBUS_ERR;
+            return SOFTBUS_TRANS_GET_LOCAL_IP_FAILED;
         }
     } else {
         if (connInfo->type == CONNECT_TCP) {
             if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, appInfo->myData.addr, sizeof(appInfo->myData.addr)) !=
                 SOFTBUS_OK) {
                 TRANS_LOGE(TRANS_CTRL, "TransUpdAppInfo get local ip fail");
-                return SOFTBUS_ERR;
+                return SOFTBUS_TRANS_GET_LOCAL_IP_FAILED;
             }
         } else if ((connInfo->type == CONNECT_P2P_REUSE) || (connInfo->type == CONNECT_P2P)) {
             if (GetWifiDirectManager()->getLocalIpByUuid(appInfo->peerData.deviceId, appInfo->myData.addr,
@@ -255,14 +255,14 @@ int32_t TransOpenDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, 
     if (appInfo == NULL || connInfo == NULL || channelId == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-
-    if (TransUpdAppInfo((AppInfo *)appInfo, connInfo) != SOFTBUS_OK) {
+    int32_t ret = SOFTBUS_ERR;
+    ret = TransUpdAppInfo((AppInfo *)appInfo, connInfo);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "udp app fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
 
-    int32_t ret = SOFTBUS_ERR;
-    if (connInfo->type == CONNECT_P2P) {
+    if (connInfo->type == CONNECT_P2P || connInfo->type == CONNECT_HML) {
         appInfo->routeType = WIFI_P2P;
         ret = OpenP2pDirectChannel(appInfo, connInfo, channelId);
     } else if (connInfo->type == CONNECT_P2P_REUSE) {
@@ -277,7 +277,8 @@ int32_t TransOpenDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, 
         .channelType = CHANNEL_TYPE_TCP_DIRECT,
         .channelId = *channelId,
         .errcode = ret,
-        .socketName = appInfo->myData.sessionName
+        .socketName = appInfo->myData.sessionName,
+        .result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED
     };
 
     SessionConn conn;

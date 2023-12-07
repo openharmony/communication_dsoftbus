@@ -97,7 +97,7 @@ int32_t TransProxyHandshake(ProxyChannelInfo *info)
     if (info->appInfo.appType != APP_TYPE_AUTH) {
         if (SetCipherOfHandshakeMsg(info->channelId, &msgHead.cipher) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "set cipher fail");
-            return SOFTBUS_ERR;
+            return SOFTBUS_TRANS_PROXY_SET_CIPHER_FAILED;
         }
     }
     msgHead.myId = info->myId;
@@ -107,22 +107,22 @@ int32_t TransProxyHandshake(ProxyChannelInfo *info)
     payLoad = TransProxyPackHandshakeMsg(info);
     if (payLoad == NULL) {
         TRANS_LOGE(TRANS_CTRL, "pack handshake fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_PROXY_PACK_HANDSHAKE_ERR;
     }
     dataInfo.inData = (uint8_t *)payLoad;
     dataInfo.inLen = strlen(payLoad) + 1;
     if (TransProxyPackMessage(&msgHead, info->authId, &dataInfo) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "pack handshake head fail");
         cJSON_free(payLoad);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_PROXY_PACK_HANDSHAKE_HEAD_ERR;
     }
     cJSON_free(payLoad);
     dataInfo.inData = NULL;
-
-    if (TransProxyTransSendMsg(info->connId, dataInfo.outData, dataInfo.outLen,
-        CONN_HIGH, info->appInfo.myData.pid) != SOFTBUS_OK) {
+    int32_t ret = TransProxyTransSendMsg(info->connId, dataInfo.outData, dataInfo.outLen,
+        CONN_HIGH, info->appInfo.myData.pid);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "send handshake buf fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
     TransEventExtra extra = {
         .channelId = info->myId,
@@ -158,14 +158,14 @@ int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan, int32_t 
     }
     if (payLoad == NULL) {
         TRANS_LOGE(TRANS_CTRL, "pack handshake ack fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
     }
     dataInfo.inData = (uint8_t *)payLoad;
     dataInfo.inLen = strlen(payLoad) + 1;
     if (TransProxyPackMessage(&msgHead, chan->authId, &dataInfo) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "pack handshake ack head fail");
         cJSON_free(payLoad);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
     }
     cJSON_free(payLoad);
     if (TransProxyTransSendMsg(connId, dataInfo.outData, dataInfo.outLen,

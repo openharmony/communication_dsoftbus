@@ -18,6 +18,7 @@
 #include <securec.h>
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
+#include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
@@ -28,7 +29,7 @@
 #include "softbus_wifi_api_adapter.h"
 #include "wifi_direct_manager.h"
 
-#define QOS_MIN_BANDWIDTH (500 * 1024)
+#define QOS_MIN_BANDWIDTH (384 * 1024)
 #define QOS_P2P_ONLY_BANDWIDTH (160 * 1024 * 1024)
 
 typedef struct {
@@ -169,10 +170,20 @@ static int32_t BleLinkState(const char *networkId)
 
 static int32_t WlanLinkState(const char *networkId)
 {
-    int32_t local, remote;
     if (!SoftBusIsWifiActive()) {
         return SOFTBUS_WIFI_OFF;
     }
+    NodeInfo node;
+    (void)memset_s(&node, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &node) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get remote node info fail");
+        return SOFTBUS_ERR;
+    }
+    if (!LnnHasDiscoveryType(&node, DISCOVERY_TYPE_WIFI) && !LnnHasDiscoveryType(&node, DISCOVERY_TYPE_LSA)) {
+        LNN_LOGE(LNN_LANE, "peer node not wifi online");
+        return SOFTBUS_ERR;
+    }
+    int32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
         return SOFTBUS_ERR;
@@ -204,7 +215,7 @@ static int32_t P2pLinkState(const char *networkId)
         return SOFTBUS_P2P_NOT_SUPPORT;
     }
 
-    int32_t ret = GetWifiDirectManager()->prejudgeAvailability(networkId, WIFI_DIRECT_CONNECT_TYPE_P2P);
+    int32_t ret = GetWifiDirectManager()->prejudgeAvailability(networkId, WIFI_DIRECT_LINK_TYPE_P2P);
     if (ret == V1_ERROR_GC_CONNECTED_TO_ANOTHER_DEVICE) {
         return SOFTBUS_P2P_ROLE_CONFLICT;
     }
@@ -234,7 +245,7 @@ static int32_t HmlLinkState(const char *networkId)
         return SOFTBUS_HML_NOT_SUPPORT;
     }
 
-    int32_t ret = GetWifiDirectManager()->prejudgeAvailability(networkId, WIFI_DIRECT_CONNECT_TYPE_HML);
+    int32_t ret = GetWifiDirectManager()->prejudgeAvailability(networkId, WIFI_DIRECT_LINK_TYPE_HML);
     if (ret == ERROR_LOCAL_THREE_VAP_CONFLICT) {
         return SOFTBUS_HML_THREE_VAP_CONFLIC;
     }

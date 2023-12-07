@@ -83,7 +83,6 @@ ohos_unittest("DiscManagerMockTest") {
   include_dirs += test_utils_inc
 
   deps = [
-    "$dsoftbus_dfx_path/log:softbus_dfx_log",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "//third_party/googletest:gmock",

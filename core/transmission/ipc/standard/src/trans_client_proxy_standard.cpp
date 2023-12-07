@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -104,39 +104,69 @@ int32_t TransClientProxy::OnChannelOpened(const char *sessionName, const Channel
         return SOFTBUS_ERR;
     }
     if (!data.WriteCString(channel->groupId)) {
-        TRANS_LOGE(TRANS_CTRL, "write addr failed");
+        TRANS_LOGE(TRANS_CTRL, "write groupId failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteUint32(channel->keyLen)) {
-        TRANS_LOGE(TRANS_CTRL, "write addr type length failed");
+        TRANS_LOGE(TRANS_CTRL, "write keyLen failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteRawData(channel->sessionKey, channel->keyLen)) {
-        TRANS_LOGE(TRANS_CTRL, "write addr failed");
+        TRANS_LOGE(TRANS_CTRL, "write sessionKey and keyLen failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteCString(channel->peerSessionName)) {
-        TRANS_LOGE(TRANS_CTRL, "write addr failed");
+        TRANS_LOGE(TRANS_CTRL, "write peerSessionName failed");
         return SOFTBUS_ERR;
     }
     if (!data.WriteCString(channel->peerDeviceId)) {
-        TRANS_LOGE(TRANS_CTRL, "write addr failed");
+        TRANS_LOGE(TRANS_CTRL, "write peerDeviceId failed");
         return SOFTBUS_ERR;
     }
-    data.WriteInt32(channel->businessType);
+    if (!data.WriteInt32(channel->businessType)) {
+        TRANS_LOGE(TRANS_CTRL, "write businessType failed");
+        return SOFTBUS_ERR;
+    }
     if (channel->channelType == CHANNEL_TYPE_UDP) {
-        data.WriteCString(channel->myIp);
-        data.WriteInt32(channel->streamType);
-        data.WriteBool(channel->isUdpFile);
+        if (!data.WriteCString(channel->myIp)) {
+            TRANS_LOGE(TRANS_CTRL, "write myIp failed");
+            return SOFTBUS_ERR;
+        }
+        if (!data.WriteInt32(channel->streamType)) {
+            TRANS_LOGE(TRANS_CTRL, "write streamType failed");
+            return SOFTBUS_ERR;
+        }
+        if (!data.WriteBool(channel->isUdpFile)) {
+            TRANS_LOGE(TRANS_CTRL, "write isUdpFile failed");
+            return SOFTBUS_ERR;
+        }
         if (!channel->isServer) {
-            data.WriteInt32(channel->peerPort);
-            data.WriteCString(channel->peerIp);
+            if (!data.WriteInt32(channel->peerPort)) {
+                TRANS_LOGE(TRANS_CTRL, "write peerPort failed");
+                return SOFTBUS_ERR;
+            }
+            if (!data.WriteCString(channel->peerIp)) {
+                TRANS_LOGE(TRANS_CTRL, "write peerIp failed");
+                return SOFTBUS_ERR;
+            }
         }
     }
-    data.WriteInt32(channel->routeType);
-    data.WriteInt32(channel->encrypt);
-    data.WriteInt32(channel->algorithm);
-    data.WriteInt32(channel->crc);
+    if (!data.WriteInt32(channel->routeType)) {
+        TRANS_LOGE(TRANS_CTRL, "write route type failed");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(channel->encrypt)) {
+        TRANS_LOGE(TRANS_CTRL, "write encrypt failed");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(channel->algorithm)) {
+        TRANS_LOGE(TRANS_CTRL, "write algorithm failed");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(channel->crc)) {
+        TRANS_LOGE(TRANS_CTRL, "write crc failed");
+        return SOFTBUS_ERR;
+    }
     if (!data.WriteUint32(channel->dataConfig)) {
         TRANS_LOGE(TRANS_CTRL, "write data config failed");
         return SOFTBUS_ERR;
@@ -301,6 +331,7 @@ int32_t TransClientProxy::OnChannelMsgReceived(int32_t channelId, int32_t channe
 
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
+    TRANS_LOGD(TRANS_CTRL, "SendRequest start");
     int32_t ret = remote->SendRequest(CLIENT_ON_CHANNEL_MSGRECEIVED, data, reply, option);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "OnChannelMsgReceived send request failed, ret=%{public}d",

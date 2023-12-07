@@ -17,13 +17,14 @@
  * @file softbus_broadcast_type.h
  * @brief Declare constants for the softbus broadcast.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 
 #ifndef SOFTBUS_BROADCAST_TYPE_H
 #define SOFTBUS_BROADCAST_TYPE_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -33,18 +34,35 @@ extern "C"{
 /**
  * @brief Defines mac address length
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 #define BC_ADDR_MAC_LEN 6
 
+// Bluetooth scan duty cycle, unit: ms
+#define SOFTBUS_BC_SCAN_INTERVAL_P2 3000
+#define SOFTBUS_BC_SCAN_INTERVAL_P10 600
+#define SOFTBUS_BC_SCAN_INTERVAL_P25 240
+#define SOFTBUS_BC_SCAN_INTERVAL_P100 1000
+#define SOFTBUS_BC_SCAN_WINDOW_P2 60
+#define SOFTBUS_BC_SCAN_WINDOW_P10 60
+#define SOFTBUS_BC_SCAN_WINDOW_P25 60
+#define SOFTBUS_BC_SCAN_WINDOW_P100 1000
+
+/**
+ * @brief Defines the length of local name, the maximum length of complete local name is 30 bytes.
+ *
+ * @since 4.1
+ * @version 1.0
+ */
+#define BC_LOCAL_NAME_LEN_MAX 30
 /**
  * @brief Defines the broadcast service type.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
-enum BaseServiceType {
+typedef enum {
     SRV_TYPE_HB, // The service type is heart beat.
     SRV_TYPE_CONN, // The service type is connection.
     SRV_TYPE_TRANS_MSG, // The service type is transmission message.
@@ -52,30 +70,141 @@ enum BaseServiceType {
     SRV_TYPE_SHARE, // The service type is share discovery.
     SRV_TYPE_APPROACH, // The service type is approach discovery.
     SRV_TYPE_BUTT,
-};
+} BaseServiceType;
+
+typedef enum {
+    SOFTBUS_BC_STATUS_SUCCESS = 0x00,
+    SOFTBUS_BC_STATUS_FAIL,
+    SOFTBUS_BC_STATUS_NOT_READY,
+    SOFTBUS_BC_STATUS_NOMEM,
+    SOFTBUS_BC_STATUS_BUSY,
+    SOFTBUS_BC_STATUS_DONE,
+    SOFTBUS_BC_STATUS_UNSUPPORTED,
+    SOFTBUS_BC_STATUS_PARM_INVALID,
+    SOFTBUS_BC_STATUS_UNHANDLED,
+    SOFTBUS_BC_STATUS_AUTH_FAILURE,
+    SOFTBUS_BC_STATUS_RMT_DEV_DOWN,
+    SOFTBUS_BC_STATUS_AUTH_REJECTED
+} SoftBusBcStatus;
+
+typedef enum {
+    SOFTBUS_BC_EVT_NON_CONNECTABLE_NON_SCANNABLE = 0x00,
+    SOFTBUS_BC_EVT_NON_CONNECTABLE_NON_SCANNABLE_DIRECTED = 0x04,
+    SOFTBUS_BC_EVT_CONNECTABLE = 0x01,
+    SOFTBUS_BC_EVT_CONNECTABLE_DIRECTED = 0x05,
+    SOFTBUS_BC_EVT_SCANNABLE = 0x02,
+    SOFTBUS_BC_EVT_SCANNABLE_DIRECTED = 0x06,
+    SOFTBUS_BC_EVT_LEGACY_NON_CONNECTABLE = 0x10,
+    SOFTBUS_BC_EVT_LEGACY_SCANNABLE = 0x12,
+    SOFTBUS_BC_EVT_LEGACY_CONNECTABLE = 0x13,
+    SOFTBUS_BC_EVT_LEGACY_CONNECTABLE_DIRECTED = 0x15,
+    SOFTBUS_BC_EVT_LEGACY_SCAN_RSP_TO_ADV_SCAN = 0x1A,
+    SOFTBUS_BC_EVT_LEGACY_SCAN_RSP_TO_ADV = 0x1B
+} SoftBusBcScanResultEvtType;
+
+typedef enum {
+    SOFTBUS_BC_PUBLIC_DEVICE_ADDRESS = 0x00,
+    SOFTBUS_BC_RANDOM_DEVICE_ADDRESS = 0x01,
+    SOFTBUS_BC_PUBLIC_IDENTITY_ADDRESS = 0x02,
+    SOFTBUS_BC_RANDOM_STATIC_IDENTITY_ADDRESS = 0x03,
+    SOFTBUS_BC_UNRESOLVABLE_RANDOM_DEVICE_ADDRESS = 0xFE,
+    SOFTBUS_BC_NO_ADDRESS = 0xFF,
+} SoftBusBcScanResultAddrType;
+
+typedef enum {
+    SOFTBUS_BC_SCAN_TYPE_PASSIVE = 0x00,
+    SOFTBUS_BC_SCAN_TYPE_ACTIVE,
+} SoftBusBcScanType;
+
+typedef enum {
+    SOFTBUS_BC_SCAN_PHY_NO_PACKET = 0x00,
+    SOFTBUS_BC_SCAN_PHY_1M = 0x01,
+    SOFTBUS_BC_SCAN_PHY_2M = 0x02,
+    SOFTBUS_BC_SCAN_PHY_CODED = 0x03
+} SoftBusBcScanResultPhyType;
+
+typedef enum {
+    SOFTBUS_BC_SCAN_FILTER_POLICY_ACCEPT_ALL = 0x00,
+    SOFTBUS_BC_SCAN_FILTER_POLICY_ONLY_WHITE_LIST,
+    SOFTBUS_BC_SCAN_FILTER_POLICY_ACCEPT_ALL_AND_RPA,
+    SOFTBUS_BC_SCAN_FILTER_POLICY_ONLY_WHITE_LIST_AND_RPA
+} SoftBusBcScanFilterPolicy;
+
+typedef enum {
+    SOFTBUS_BC_ADV_IND = 0x00,
+    SOFTBUS_BC_ADV_DIRECT_IND_HIGH = 0x01,
+    SOFTBUS_BC_ADV_SCAN_IND = 0x02,
+    SOFTBUS_BC_ADV_NONCONN_IND = 0x03,
+    SOFTBUS_BC_ADV_DIRECT_IND_LOW  = 0x04,
+} SoftBusBcAdvType;
+
+typedef enum {
+    SOFTBUS_BC_ADV_FILTER_ALLOW_SCAN_ANY_CON_ANY = 0x00,
+    SOFTBUS_BC_ADV_FILTER_ALLOW_SCAN_WLST_CON_ANY = 0x01,
+    SOFTBUS_BC_ADV_FILTER_ALLOW_SCAN_ANY_CON_WLST = 0x02,
+    SOFTBUS_BC_ADV_FILTER_ALLOW_SCAN_WLST_CON_WLST = 0x03,
+} SoftBusBcAdvFilter;
+
+typedef enum {
+    SOFTBUS_BC_DATA_COMPLETE = 0x00,
+    SOFTBUS_BC_DATA_INCOMPLETE_MORE_TO_COME = 0x01,
+    SOFTBUS_BC_DATA_INCOMPLETE_TRUNCATED = 0x02,
+} SoftBusBcScanResultDataStatus;
+
+typedef enum {
+    SOFTBUS_BC_BT_STATE_TURNING_ON = 0x0,
+    SOFTBUS_BC_BT_STATE_TURN_ON,
+    SOFTBUS_BC_BT_STATE_TURNING_OFF,
+    SOFTBUS_BC_BT_STATE_TURN_OFF,
+    SOFTBUS_BC_BR_STATE_TURNING_ON,
+    SOFTBUS_BC_BR_STATE_TURN_ON,
+    SOFTBUS_BC_BR_STATE_TURNING_OFF,
+    SOFTBUS_BC_BR_STATE_TURN_OFF
+} SoftBusBcStackState;
 
 /**
- * @brief Defines the broadcast data information
+ * @brief Defines the broadcast service type.
  *
- * @since 1.0
+ * @since 4.1
+ * @version 1.0
+ */
+typedef enum {
+    BC_DATA_TYPE_SERVICE, // The broadcast data type is service data.
+    BC_DATA_TYPE_MANUFACTURER, // The broadcast data type is manufacturer data.
+    BC_DATA_TYPE_BUTT,
+} BroadcastDataType;
+
+/**
+ * @brief Defines the broadcast data information.
+ *
+ * @since 4.1
  * @version 1.0
  */
 typedef struct {
-    uint16_t uuidLen;
-    uint16_t serviceLen;
-    uint8_t *uuid;
-    uint8_t *serviceData;
-    uint16_t companyId;
-    uint16_t manufacturerDataLen;
-    uint8_t *manufacturerData;
+    BroadcastDataType type; // broadcast data type {@link BroadcastDataType}.
+    uint16_t id; // broadcast data id, uuid or company id.
+    uint16_t payloadLen;
+    uint8_t *payload; // if pointer defines rsp payload, pointer may be null
+} BroadcastPayload;
+
+/**
+ * @brief Defines the broadcast packet.
+ *
+ * @since 4.1
+ * @version 1.0
+ */
+typedef struct {
+    BroadcastPayload bcData;
+    BroadcastPayload rspData;
+    // By default, the flag behavior is supported. If the flag behavior is not supported, the value must be set to false
+    bool isSupportFlag;
     uint8_t flag;
-    uint8_t rsv[3]; // Reserved
-} BroadcastData;
+} BroadcastPacket;
 
 /**
  * @brief Defines mac address information
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 typedef struct {
@@ -85,7 +214,7 @@ typedef struct {
 /**
  * @brief Defines the device information returned by <b>SoftbusBroadcastCallback</b>.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 typedef struct {
@@ -98,13 +227,14 @@ typedef struct {
     int8_t rssi;
     uint8_t addrType;
     BcMacAddr addr;
-    BroadcastData data;
+    uint8_t localName[BC_LOCAL_NAME_LEN_MAX];
+    BroadcastPacket packet;
 } BroadcastReportInfo;
 
 /**
  * @brief Defines the broadcast parameters
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 typedef struct {
@@ -123,28 +253,26 @@ typedef struct {
 /**
  * @brief Defines broadcast scan filters
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 typedef struct {
     int8_t *address;
     int8_t *deviceName;
-    uint32_t serviceUuidLength;
-    uint8_t *serviceUuid;
-    uint8_t *serviceUuidMask;
+    uint16_t serviceUuid;
     uint32_t serviceDataLength;
     uint8_t *serviceData;
     uint8_t *serviceDataMask;
+    uint16_t manufactureId;
     uint32_t manufactureDataLength;
     uint8_t *manufactureData;
     uint8_t *manufactureDataMask;
-    uint16_t manufactureId;
 } BcScanFilter;
 
 /**
  * @brief Defines broadcast scan parameters
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 typedef struct {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -164,6 +164,10 @@ int32_t TransSetSocketFileListener(const char *sessionName, SocketFileCallbackFu
     if (sessionName == NULL || fileCallback == NULL) {
         TRANS_LOGE(TRANS_SDK, "[client]%s invalid param.", __func__);
         return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_fileListener == NULL) {
+        TRANS_LOGE(TRANS_FILE, "file listener hasn't init.");
+        return SOFTBUS_TRANS_FILE_LISTENER_NOT_INIT;
     }
     if (SoftBusMutexLock(&(g_fileListener->lock)) != 0) {
         TRANS_LOGE(TRANS_SDK, "file delete lock failed");

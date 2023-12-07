@@ -113,6 +113,7 @@ FILLP_INT SockGetSockOpt(
     if ((optLen == FILLP_NULL_PTR) || (optVal == FILLP_NULL_PTR)) {
         (void)SYS_ARCH_RWSEM_RDPOST(&sock->sockConnSem);
         SET_ERRNO(FILLP_EFAULT);
+        FILLP_LOGERR("SockGetSockOpt: optLen or optVal NULL");
         return -1;
     }
 
@@ -293,24 +294,24 @@ FILLP_INT SockSetSockOpt(
 {
     struct FtSocket *sock = FILLP_NULL_PTR;
     struct SockOsSocket *osSock = FILLP_NULL_PTR;
-    FillpErrorType err;
+    FillpErrorType err = -1;
 
     FILLP_LOGINF("SockSetSockOpt: sock = %d", sockIndex);
 
     if (optVal == FILLP_NULL_PTR) {
         SET_ERRNO(FILLP_EFAULT);
-        return -1;
+        return err;
     }
 
     if ((level == SOL_SOCKET) && ((optName == SO_SNDBUF) || (optName == SO_RCVBUF))) {
         FILLP_LOGERR("SockSetSockOpt: sock = %d invalid param optName=%d", sockIndex, optName);
         SET_ERRNO(FILLP_EOPNOTSUPP);
-        return -1;
+        return err;
     }
 
     sock = SockApiGetAndCheck(sockIndex);
     if (sock == FILLP_NULL_PTR) {
-        return -1;
+        return err;
     }
 
     if (level == IPPROTO_FILLP) {
@@ -321,7 +322,6 @@ FILLP_INT SockSetSockOpt(
             err = osSock->ioSock->ops->setsockopt(osSock->ioSock, level, optName, optVal, optLen);
         } else {
             SET_ERRNO(FILLP_EINVAL);
-            err = -1;
         }
     }
 

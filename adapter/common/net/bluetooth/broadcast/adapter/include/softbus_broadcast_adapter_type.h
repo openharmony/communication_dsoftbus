@@ -17,13 +17,14 @@
  * @file softbus_broadcast_adapter_type.h
  * @brief Declare functions and constants for the soft bus broadcast adaptation
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 
 #ifndef SOFTBUS_BROADCAST_ADAPTER_TYPE_H
 #define SOFTBUS_BROADCAST_ADAPTER_TYPE_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -33,45 +34,74 @@ extern "C"{
 /**
  * @brief Defines mac address length
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 #define SOFTBUS_ADDR_MAC_LEN 6
 
 /**
- * @brief Defines different broadcast media protocol stacks
+ * @brief Defines the length of local name, the maximum length of complete local name is 30 bytes.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
-enum SoftbusMediumType {
+#define SOFTBUS_LOCAL_NAME_LEN_MAX 30
+
+/**
+ * @brief Defines different broadcast media protocol stacks
+ *
+ * @since 4.1
+ * @version 1.0
+ */
+typedef enum {
     BROADCAST_MEDIUM_TYPE_BLE,
     BROADCAST_MEDIUM_TYPE_SLE,
     BROADCAST_MEDIUM_TYPE_BUTT,
-};
+} SoftbusMediumType;
+
+/**
+ * @brief Defines the broadcast service type.
+ *
+ * @since 4.1
+ * @version 1.0
+ */
+typedef enum {
+    BROADCAST_DATA_TYPE_SERVICE, // The broadcast data type is service data.
+    BROADCAST_DATA_TYPE_MANUFACTURER, // The broadcast data type is manufacturer data.
+    BROADCAST_DATA_TYPE_BUTT,
+} SoftbusBcDataType;
 
 /**
  * @brief Defines the broadcast data information
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 typedef struct {
-    uint16_t uuidLen;
-    uint16_t serviceLen;
-    uint8_t *uuid;
-    uint8_t *serviceData;
-    uint16_t companyId;
-    uint16_t manufacturerDataLen;
-    uint8_t *manufacturerData;
+    SoftbusBcDataType type; // broadcast data type {@link SoftbusBcDataType}.
+    uint16_t id; // broadcast data id, uuid or company id.
+    uint16_t payloadLen;
+    uint8_t *payload; // if pointer defines rsp payload, pointer may be null
+} SoftbusBroadcastPayload;
+
+/**
+ * @brief Defines the broadcast packet.
+ *
+ * @since 4.1
+ * @version 1.0
+ */
+typedef struct {
+    SoftbusBroadcastPayload bcData;
+    SoftbusBroadcastPayload rspData;
+    // By default, the flag behavior is supported. If the flag behavior is not supported, the value must be set to false
+    bool isSupportFlag;
     uint8_t flag;
-    uint8_t rsv[3]; // Reserved
 } SoftbusBroadcastData;
 
 /**
  * @brief Defines mac address information
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 typedef struct {
@@ -81,7 +111,7 @@ typedef struct {
 /**
  * @brief Defines the device information returned by <b>SoftbusBroadcastCallback</b>.
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 typedef struct {
@@ -94,13 +124,14 @@ typedef struct {
     int8_t rssi;
     uint8_t addrType;
     SoftbusMacAddr addr;
+    uint8_t localName[SOFTBUS_LOCAL_NAME_LEN_MAX];
     SoftbusBroadcastData data;
-} SoftBusBleScanResult;
+} SoftBusBcScanResult;
 
 /**
  * @brief Defines the broadcast parameters
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 typedef struct {
@@ -119,28 +150,26 @@ typedef struct {
 /**
  * @brief Defines broadcast scan filters
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 typedef struct {
     int8_t *address;
     int8_t *deviceName;
-    uint32_t serviceUuidLength;
-    uint8_t *serviceUuid;
-    uint8_t *serviceUuidMask;
+    uint16_t serviceUuid;
     uint32_t serviceDataLength;
     uint8_t *serviceData;
     uint8_t *serviceDataMask;
+    uint16_t manufactureId;
     uint32_t manufactureDataLength;
     uint8_t *manufactureData;
     uint8_t *manufactureDataMask;
-    uint16_t manufactureId;
 } SoftBusBcScanFilter;
 
 /**
  * @brief Defines broadcast scan parameters
  *
- * @since 1.0
+ * @since 4.1
  * @version 1.0
  */
 typedef struct {

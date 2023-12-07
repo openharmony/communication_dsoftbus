@@ -16,6 +16,9 @@
 #ifndef LNN_LANE_SCORE_H
 #define LNN_LANE_SCORE_H
 
+#define CHAN_5G_LIST_LEN 256
+#define CHAN_2P4G_LIST_LEN 13
+
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -29,12 +32,18 @@ typedef struct {
     bool isConnected;
 } LnnWlanLinkedInfo;
 
+typedef struct {
+    int32_t channelId;
+    int32_t score;
+} LnnChannelScore;
+
 int32_t LnnInitScore(void);
 void LnnDeinitScore(void);
 int32_t LnnGetCurrChannelScore(int32_t channelId);
 int32_t LnnStartScoring(int32_t interval);
 int32_t LnnStopScoring(void);
 int32_t LnnGetWlanLinkedInfo(LnnWlanLinkedInfo *info);
+int32_t LnnGetAllChannelScore(LnnChannelScore **scoreList, uint32_t *listSize);
 
 #ifdef __cplusplus
 }

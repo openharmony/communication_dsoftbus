@@ -66,16 +66,19 @@ static void DelAuthChannelInfoByAuthId(int32_t authId);
 static int32_t GetAuthChannelInfoByChanId(int32_t channelId, AuthChannelInfo *dstInfo)
 {
     if (dstInfo == NULL || g_authChannelList == NULL) {
+        TRANS_LOGE(TRANS_SVC, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (SoftBusMutexLock(&g_authChannelList->lock) != 0) {
+        TRANS_LOGE(TRANS_SVC, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
     AuthChannelInfo *info = NULL;
     LIST_FOR_EACH_ENTRY(info, &g_authChannelList->list, AuthChannelInfo, node) {
         if (info->appInfo.myData.channelId == channelId) {
             if (memcpy_s(dstInfo, sizeof(AuthChannelInfo), info, sizeof(AuthChannelInfo)) != EOK) {
+                TRANS_LOGE(TRANS_SVC, "memcpy_s failed");
                 (void)SoftBusMutexUnlock(&g_authChannelList->lock);
                 return SOFTBUS_MEM_ERR;
             }
@@ -565,16 +568,19 @@ int32_t TransAuthGetNameByChanId(int32_t chanId, char *pkgName, char *sessionNam
     uint16_t pkgLen, uint16_t sessionLen)
 {
     if (pkgName == NULL || sessionName == NULL) {
+        TRANS_LOGE(TRANS_SVC, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
     AuthChannelInfo info;
     if (GetAuthChannelInfoByChanId(chanId, &info) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "get channel info by chanId[%d] failed", chanId);
         return SOFTBUS_ERR;
     }
 
     if (memcpy_s(pkgName, pkgLen, info.appInfo.myData.pkgName, PKG_NAME_SIZE_MAX) != EOK ||
         memcpy_s(sessionName, sessionLen, info.appInfo.myData.sessionName, SESSION_NAME_SIZE_MAX) != EOK) {
+        TRANS_LOGE(TRANS_SVC, "memcpy_s failed");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -704,7 +710,7 @@ EXIT_ERR:
 int32_t TransOpenAuthMsgChannel(const char *sessionName, const ConnectOption *connOpt,
     int32_t *channelId, const char *reqId)
 {
-    if (connOpt == NULL || channelId == NULL || connOpt->type != CONNECT_TCP) {
+    if (connOpt == NULL || channelId == NULL || connOpt->type != CONNECT_TCP || g_authChannelList == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
     AuthChannelInfo *channel = CreateAuthChannelInfo(sessionName, true);
@@ -727,18 +733,27 @@ int32_t TransOpenAuthMsgChannel(const char *sessionName, const ConnectOption *co
         return SOFTBUS_ERR;
     }
     channel->authId = authId;
+    if (SoftBusMutexLock(&g_authChannelList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "SoftBusMutexLock failed");
+        AuthCloseChannel(channel->authId);
+        SoftBusFree(channel);
+        return SOFTBUS_LOCK_ERR;
+    }
     if (AddAuthChannelInfo(channel) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "AddAuthChannelInfo failed");
         AuthCloseChannel(channel->authId);
         SoftBusFree(channel);
+        (void)SoftBusMutexUnlock(&g_authChannelList->lock);
         return SOFTBUS_ERR;
     }
     if (TransPostAuthChannelMsg(&channel->appInfo, authId, AUTH_CHANNEL_REQ) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "TransPostAuthRequest failed");
         AuthCloseChannel(channel->authId);
         DelAuthChannelInfoByChanId(*channelId);
+        (void)SoftBusMutexUnlock(&g_authChannelList->lock);
         return SOFTBUS_ERR;
     }
+    (void)SoftBusMutexUnlock(&g_authChannelList->lock);
     return SOFTBUS_OK;
 }
 

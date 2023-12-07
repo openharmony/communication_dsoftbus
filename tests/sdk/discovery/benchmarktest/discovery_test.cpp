@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #include "accesstoken_kit.h"
 #include "discovery_service.h"
 #include "nativetoken_kit.h"
+#include "softbus_bus_center.h"
 #include "token_setproc.h"
 
 namespace OHOS {
@@ -114,118 +115,116 @@ static PublishInfo g_pInfo = {
 static void TestDeviceFound(const DeviceInfo *device)
 {}
 
-static void TestDiscoverFailed(int subscribeId, DiscoveryFailReason failReason)
+static void TestDiscoverResult(int32_t refreshId, RefreshResult reason)
 {}
 
-static void TestDiscoverySuccess(int subscribeId)
+static void TestPublishResult(int publishId, PublishResult reason)
 {}
 
-static void TestPublishSuccess(int publishId)
-{}
-
-static void TestPublishFail(int publishId, PublishFailReason reason)
-{}
-
-static IDiscoveryCallback g_subscribeCb = {
+static IRefreshCallback g_refreshCb = {
     .OnDeviceFound = TestDeviceFound,
-    .OnDiscoverFailed = TestDiscoverFailed,
-    .OnDiscoverySuccess = TestDiscoverySuccess
+    .OnDiscoverResult = TestDiscoverResult
 };
 
-static IPublishCallback g_publishCb = {
-    .OnPublishSuccess = TestPublishSuccess,
-    .OnPublishFail = TestPublishFail
+static IPublishCb g_publishCb = {
+    .OnPublishResult = TestPublishResult
 };
 
 /**
- * @tc.name: PublishServiceTestCase
+ * @tc.name: PublishLNNTestCase
  * @tc.desc: PublishService Performance Testing
  * @tc.type: FUNC
  * @tc.require: PublishService normal operation
  */
-BENCHMARK_F(DiscoveryTest, PublishServiceTestCase)(benchmark::State &state)
+BENCHMARK_F(DiscoveryTest, PublishLNNTestCase)(benchmark::State &state)
 {
     while (state.KeepRunning()) {
         g_pInfo.publishId = GetPublishId();
         state.ResumeTiming();
-        int ret = PublishService(g_pkgName, &g_pInfo, &g_publishCb);
+        int ret = PublishLNN(g_pkgName, &g_pInfo, &g_publishCb);
         if (ret != 0) {
-            state.SkipWithError("PublishServiceTestCase failed.");
+            state.SkipWithError("PublishLNNTestCase failed.");
         }
         state.PauseTiming();
-        ret = UnPublishService(g_pkgName, g_pInfo.publishId);
+        ret = StopPublishLNN(g_pkgName, g_pInfo.publishId);
+        if (ret != 0) {
+            state.SkipWithError("StopPublishLNNTestCase failed.");
+        }
     }
 }
-BENCHMARK_REGISTER_F(DiscoveryTest, PublishServiceTestCase);
+BENCHMARK_REGISTER_F(DiscoveryTest, PublishLNNTestCase);
 
 /**
- * @tc.name: UnPublishServiceTestCase
+ * @tc.name: StopPublishLNNTestCase
  * @tc.desc: UnPublishService Performance Testing
  * @tc.type: FUNC
  * @tc.require: UnPublishService normal operation
  */
-BENCHMARK_F(DiscoveryTest, UnPublishServiceTestCase)(benchmark::State &state)
+BENCHMARK_F(DiscoveryTest, StopPublishLNNTestCase)(benchmark::State &state)
 {
     while (state.KeepRunning()) {
         g_pInfo.publishId = GetPublishId();
         state.PauseTiming();
-        int ret = PublishService(g_pkgName, &g_pInfo, &g_publishCb);
+        int ret = PublishLNN(g_pkgName, &g_pInfo, &g_publishCb);
         if (ret != 0) {
-            state.SkipWithError("UnPublishServiceTestCase failed.");
+            state.SkipWithError("PublishLNNTestCase failed.");
         }
         state.ResumeTiming();
-        ret = UnPublishService(g_pkgName, g_pInfo.publishId);
+        ret = StopPublishLNN(g_pkgName, g_pInfo.publishId);
         if (ret != 0) {
-            state.SkipWithError("UnPublishServiceTestCase failed.");
+            state.SkipWithError("StopPublishLNNTestCase failed.");
         }
     }
 }
-BENCHMARK_REGISTER_F(DiscoveryTest, UnPublishServiceTestCase);
+BENCHMARK_REGISTER_F(DiscoveryTest, StopPublishLNNTestCase);
 
 /**
- * @tc.name: StartDiscoveryTestCase
+ * @tc.name: RefreshLNNTestCase
  * @tc.desc: StartDiscovery Performance Testing
  * @tc.type: FUNC
  * @tc.require: StartDiscovery normal operation
  */
-BENCHMARK_F(DiscoveryTest, StartDiscoveryTestCase)(benchmark::State &state)
+BENCHMARK_F(DiscoveryTest, RefreshLNNTestCase)(benchmark::State &state)
 {
     while (state.KeepRunning()) {
         g_sInfo.subscribeId = GetSubscribeId();
         state.ResumeTiming();
-        int ret = StartDiscovery(g_pkgName, &g_sInfo, &g_subscribeCb);
+        int ret = RefreshLNN(g_pkgName, &g_sInfo, &g_refreshCb);
         if (ret != 0) {
-            state.SkipWithError("StartDiscoveryTestCase failed.");
+            state.SkipWithError("RefreshLNNTestCase failed.");
         }
         state.PauseTiming();
-        ret = StopDiscovery(g_pkgName, g_sInfo.subscribeId);
+        ret = StopRefreshLNN(g_pkgName, g_sInfo.subscribeId);
+        if (ret != 0) {
+            state.SkipWithError("StoptRefreshLNNTestCase failed.");
+        }
     }
 }
-BENCHMARK_REGISTER_F(DiscoveryTest, StartDiscoveryTestCase);
+BENCHMARK_REGISTER_F(DiscoveryTest, RefreshLNNTestCase);
 
 /**
- * @tc.name: StopDiscoveryTestCase
+ * @tc.name: StoptRefreshLNNTestCase
  * @tc.desc: StoptDiscovery Performance Testing
  * @tc.type: FUNC
  * @tc.require: StoptDiscovery normal operation
  */
-BENCHMARK_F(DiscoveryTest, StoptDiscoveryTestCase)(benchmark::State &state)
+BENCHMARK_F(DiscoveryTest, StoptRefreshLNNTestCase)(benchmark::State &state)
 {
     while (state.KeepRunning()) {
         g_sInfo.subscribeId = GetSubscribeId();
         state.PauseTiming();
-        int ret = StartDiscovery(g_pkgName, &g_sInfo, &g_subscribeCb);
+        int ret = RefreshLNN(g_pkgName, &g_sInfo, &g_refreshCb);
         if (ret != 0) {
-            state.SkipWithError("StoptDiscoveryTestCase failed.");
+            state.SkipWithError("RefreshLNNTestCase failed.");
         }
         state.ResumeTiming();
-        ret = StopDiscovery(g_pkgName, g_sInfo.subscribeId);
+        ret = StopRefreshLNN(g_pkgName, g_sInfo.subscribeId);
         if (ret != 0) {
-            state.SkipWithError("StoptDiscoveryTestCase failed.");
+            state.SkipWithError("StoptRefreshLNNTestCase failed.");
         }
     }
 }
-BENCHMARK_REGISTER_F(DiscoveryTest, StoptDiscoveryTestCase);
+BENCHMARK_REGISTER_F(DiscoveryTest, StoptRefreshLNNTestCase);
 }
 
 // Run the benchmark

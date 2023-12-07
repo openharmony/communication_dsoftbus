@@ -89,6 +89,10 @@ public:
     virtual int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info) = 0;
     virtual int32_t LnnRegisterBleLpDeviceMediumMgr(void) = 0;
     virtual int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info) = 0;
+    virtual int32_t LnnSetWifiDirectAddr(NodeInfo *info, const char *wifiDirectAddr);
+    virtual const char *LnnGetWifiDirectAddr(const NodeInfo *info) = 0;
+    virtual bool LnnSetDLWifiDirectAddr(const char *networkId, const char *addr) = 0;
+    virtual bool IsActiveOsAccountUnlocked(void) = 0;
 };
 class LnnNetLedgertInterfaceMock : public LnnNetLedgerInterface {
 public:
@@ -104,6 +108,7 @@ public:
     MOCK_METHOD1(LnnConvertIdToDeviceType, char *(uint16_t));
     MOCK_METHOD1(LnnGetP2pRole, int32_t (const NodeInfo *));
     MOCK_METHOD1(LnnGetP2pMac, const char *(const NodeInfo *));
+    MOCK_METHOD1(LnnGetWifiDirectAddr,  const char *(const NodeInfo *));
     MOCK_METHOD1(LnnGetSupportedProtocols, uint64_t (const NodeInfo *));
     MOCK_METHOD2(LnnConvertDeviceTypeToId, int32_t (const char *, uint16_t *));
     MOCK_METHOD2(LnnGetLocalNumInfo, int32_t (InfoKey, int32_t *));
@@ -115,9 +120,11 @@ public:
     MOCK_METHOD5(LnnConvertDlId, int32_t (const char *, IdCategory, IdCategory, char *, uint32_t));
     MOCK_METHOD2(LnnSetDLDeviceInfoName, bool (const char *, const char *));
     MOCK_METHOD2(LnnSetDLP2pInfo, bool (const char *, const P2pInfo *));
+    MOCK_METHOD2(LnnSetDLWifiDirectAddr, bool (const char *, const char *addr));
     MOCK_METHOD2(LnnSetP2pRole, int32_t (NodeInfo *, int32_t));
     MOCK_METHOD2(LnnSetP2pMac, int32_t (NodeInfo *, const char *));
     MOCK_METHOD2(LnnSetP2pGoMac, int32_t (NodeInfo *, const char *));
+    MOCK_METHOD2(LnnSetWifiDirectAddr, int32_t (NodeInfo *, const char *));
     MOCK_METHOD2(LnnGetAllOnlineAndMetaNodeInfo, int32_t (NodeBasicInfo **, int32_t *));
     MOCK_METHOD2(LnnGetAllOnlineNodeInfo, int32_t (NodeBasicInfo **, int32_t *));
     MOCK_METHOD1(LnnIsLSANode, bool(const NodeBasicInfo *));
@@ -150,6 +157,7 @@ public:
     MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t (const char *id, IdCategory type, NodeInfo *info));
     MOCK_METHOD0(LnnRegisterBleLpDeviceMediumMgr, int32_t (void));
     MOCK_METHOD2(LnnGetLocalNumU64Info, int32_t(InfoKey, uint64_t *));
+    MOCK_METHOD0(IsActiveOsAccountUnlocked, bool (void));
     static int32_t ActionOfLnnGetAllOnline(NodeBasicInfo **info, int32_t *infoNum);
     static int32_t ActionOfLnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
         char *dstIdBuf, uint32_t dstIdBufLen);

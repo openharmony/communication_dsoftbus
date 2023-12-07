@@ -129,7 +129,7 @@ HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_META_NODE_UID_TEST_001, TestSize.Level1)
     const char *networkId = nullptr;
     char *udid = nullptr;
     int32_t ret = LnnGetMetaNodeUdidByNetworkId(networkId, udid);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_META_NODE_UID_TEST_002, TestSize.Level1)
@@ -155,7 +155,7 @@ HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_META_NODE_INFO_TEST_001, TestSize.Level1
     const char *networkId = nullptr;
     MetaNodeInfo *nodeInfo = nullptr;
     int32_t ret = LnnGetMetaNodeInfoByNetworkId(networkId, nodeInfo);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 HWTEST_F(LNNMetaNodeLedgerTest, LNN_GET_META_NODE_INFO_TEST_002, TestSize.Level1)

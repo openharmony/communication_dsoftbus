@@ -331,6 +331,21 @@ int32_t ConvertBtMacToStr(char *strMac, uint32_t strMacLen, const uint8_t *binMa
     return SOFTBUS_OK;
 }
 
+int32_t ConvertReverseBtMacToStr(char *strMac, uint32_t strMacLen, const uint8_t *binMac, uint32_t binMacLen)
+{
+    int32_t ret;
+    if (strMac == NULL || strMacLen < BT_MAC_LEN || binMac == NULL || binMacLen < BT_ADDR_LEN) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    ret = snprintf_s(strMac, strMacLen, strMacLen - 1, "%02x:%02x:%02x:%02x:%02x:%02x",
+        binMac[MAC_BIT_FIVE], binMac[MAC_BIT_FOUR], binMac[MAC_BIT_THREE],
+        binMac[MAC_BIT_TWO], binMac[MAC_BIT_ONE], binMac[MAC_BIT_ZERO]);
+    if (ret < 0) {
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t ConvertBtMacToU64(const char *strMac, uint32_t strMacLen, uint64_t *u64Mac)
 {
     if (strMac == NULL || strMacLen < BT_MAC_LEN || u64Mac == NULL) {
@@ -454,9 +469,6 @@ void SignalingMsgPrint(const char *distinguish, unsigned char *data, unsigned ch
     }
     if (module == SOFTBUS_LOG_DISC) {
         SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "[signaling]:%s, len:%d, data:%s",
-                   distinguish, dataLen, signalingMsgBuf);
-    } else if (module == SOFTBUS_LOG_CONN) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "[signaling]:%s, len:%d, data:%s",
                    distinguish, dataLen, signalingMsgBuf);
     }
 }

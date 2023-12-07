@@ -1075,13 +1075,14 @@ int32_t DiscMgrInit(void)
     g_discCoapInterface = DiscCoapInit(&g_discMgrMediumCb);
     g_discBleInterface = DiscBleInit(&g_discMgrMediumCb);
     DISC_CHECK_AND_RETURN_RET_LOGE(g_discBleInterface != NULL || g_discCoapInterface != NULL,
-                                  SOFTBUS_ERR, DISC_INIT, "ble and coap both init failed");
+                                   SOFTBUS_DISCOVER_MANAGER_INIT_FAIL, DISC_INIT, "ble and coap both init failed");
 
     g_publishInfoList = CreateSoftBusList();
-    DISC_CHECK_AND_RETURN_RET_LOGE(g_publishInfoList != NULL, SOFTBUS_ERR, DISC_INIT, "init publish info list failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(g_publishInfoList != NULL, SOFTBUS_DISCOVER_MANAGER_INIT_FAIL, DISC_INIT,
+                                   "init publish info list failed");
     g_discoveryInfoList = CreateSoftBusList();
-    DISC_CHECK_AND_RETURN_RET_LOGE(g_discoveryInfoList != NULL, SOFTBUS_ERR, DISC_INIT,
-        "init discovery info list failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(g_discoveryInfoList != NULL, SOFTBUS_DISCOVER_MANAGER_INIT_FAIL, DISC_INIT,
+                                   "init discovery info list failed");
 
     for (int32_t i = 0; i < CAPABILITY_MAX_BITNUM; i++) {
         ListInit(&g_capabilityList[i]);

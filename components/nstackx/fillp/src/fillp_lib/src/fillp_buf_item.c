@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
-#include "mem_pool.h"
+#include "lf_ring.h"
+#include "queue.h"
+#include "log.h"
 #include "fillp.h"
 #include "dympool.h"
 #include "fillp_buf_item.h"

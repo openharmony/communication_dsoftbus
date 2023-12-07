@@ -192,11 +192,11 @@ int32_t LnnGetMetaNodeUdidByNetworkId(const char *networkId, char *udid)
     int32_t ret = SOFTBUS_ERR;
     if (networkId == NULL) {
         LNN_LOGE(LNN_LEDGER, "LnnGetMetaNodeInfoByNetworkId: para is invalid");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&g_metaNodeList->lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "LnnGetMetaNodeInfoByNetworkId: lock failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     LIST_FOR_EACH_ENTRY(item, &g_metaNodeList->list, MetaNodeStorageInfo, node) {
         if (strcmp(item->info.metaNodeId, networkId) != 0) {
@@ -204,7 +204,7 @@ int32_t LnnGetMetaNodeUdidByNetworkId(const char *networkId, char *udid)
         }
         if (strcpy_s(udid, UDID_BUF_LEN, item->info.configInfo.udid) != EOK) {
             LNN_LOGE(LNN_LEDGER, "meta node udid copy error");
-            ret = SOFTBUS_ERR;
+            ret = SOFTBUS_STRCPY_ERR;
             break;
         }
         ret = SOFTBUS_OK;
@@ -223,11 +223,11 @@ int32_t LnnGetMetaNodeInfoByNetworkId(const char *networkId, MetaNodeInfo *nodeI
     int32_t ret = SOFTBUS_ERR;
     if (networkId == NULL) {
         LNN_LOGE(LNN_LEDGER, "LnnGetMetaNodeInfoByNetworkId: para is invalid");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&g_metaNodeList->lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "LnnGetMetaNodeInfoByNetworkId: lock failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     LIST_FOR_EACH_ENTRY(item, &g_metaNodeList->list, MetaNodeStorageInfo, node) {
         if (strcmp(item->info.metaNodeId, networkId) != 0) {
@@ -235,7 +235,7 @@ int32_t LnnGetMetaNodeInfoByNetworkId(const char *networkId, MetaNodeInfo *nodeI
         }
         if (memcpy_s(nodeInfo, sizeof(MetaNodeInfo), &item->info, sizeof(MetaNodeInfo)) != EOK) {
             LNN_LOGE(LNN_LEDGER, "memcpy reply fail");
-            ret = SOFTBUS_ERR;
+            ret = SOFTBUS_MEM_ERR;
             break;
         }
         ret = SOFTBUS_OK;

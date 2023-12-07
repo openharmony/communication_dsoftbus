@@ -136,8 +136,6 @@ void SpungeDelEpInstFromFtSocket(struct FtSocket *sock, FILLP_INT epFd)
     if (sock->associatedEpollInstanceIdx > 0) {
         sock->associatedEpollInstanceIdx--;
     }
-
-    return;
 }
 
 #ifdef __cplusplus

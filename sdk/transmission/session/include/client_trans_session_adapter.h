@@ -17,37 +17,15 @@
 #define CLIENT_TRANS_SESSION_ADAPTER_H
 
 #include <stdint.h>
-#include "trans_type.h"
+#include "socket.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef struct {
-    char *buf;     /**< Pointer to the buffer for storing the stream data */
-    int bufLen;    /**< Length of the buffer */
-} StreamDataAdapt; /* same as StreamData */
-
-typedef enum {
-    QOS_SATISFIED_ADAPT,     /**< Feedback on satisfied quality */
-    QOS_NOT_SATISFIED_ADAPT, /**< Feedback on not satisfied quality */
-} QoSEventAdapt;             /* same as QoSEvent */
-
-typedef struct {
-    void (*OnBind)(int32_t socket, PeerSocketInfo info);
-    void (*OnShutdown)(int32_t socket, ShutdownReason reason);
-    void (*OnBytes)(int32_t socket, const void *data, uint32_t dataLen);
-    void (*OnMessage)(int32_t socket, const void *data, uint32_t dataLen);
-    void (*OnStream)(int32_t socket, const StreamDataAdapt *data, const StreamDataAdapt *ext,
-        const StreamFrameInfo *param);
-    void (*OnFile)(int32_t socket, FileEvent *event);
-    void (*OnQos)(int32_t socket, QoSEventAdapt eventId, const QosTV *qos, uint32_t qosCount);
-} ISocketListenerAdapt; /* same as ISocketListener */
-
 int32_t CreateSocket(const char *pkgName, const char *sessionName);
 int32_t ClientAddSocket(const SocketInfo *info, int32_t *sessionId);
-int32_t ClientListen(int32_t socket, const QosTV qos[], uint32_t len, const ISocketListenerAdapt *listener);
-int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t len, const ISocketListenerAdapt *listener);
+int32_t ClientListen(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener);
+int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener);
 void ClientShutdown(int32_t socket);
 #ifdef __cplusplus
 }

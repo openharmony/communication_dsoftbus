@@ -54,7 +54,6 @@ fillp_source = [
   "src/public/src/fillp_os.c",
   "src/public/src/lf_ring.c",
   "src/public/src/log.c",
-  "src/public/src/mem_pool.c",
   "src/public/src/rb_tree.c",
   "src/public/src/skiplist.c",
   "src/public/src/socket_common.c",

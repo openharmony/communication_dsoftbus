@@ -17,6 +17,7 @@
 #define CLIENT_TRANS_SESSION_MANAGER_H
 
 #include "session.h"
+#include "socket.h"
 #include "softbus_def.h"
 #include "softbus_trans_def.h"
 #include "client_trans_session_adapter.h"
@@ -65,8 +66,9 @@ typedef struct {
 } SessionInfo;
 
 typedef struct {
+    bool isSocketListener;
     ISessionListener session;
-    ISocketListenerAdapt socket;
+    ISocketListener socket;
 } SessionListenerAdapter;
 
 typedef struct {
@@ -158,7 +160,7 @@ int32_t ClientDeleteSocketSession(int32_t sessionId);
 
 int32_t ClientAddSocketSession(const SessionParam *param, int32_t *sessionId, bool *isEnabled);
 
-int32_t ClientSetListenerBySessionId(int32_t sessionId, const ISocketListenerAdapt *listener);
+int32_t ClientSetListenerBySessionId(int32_t sessionId, const ISocketListener *listener);
 
 int32_t ClientIpcOpenSession(int32_t sessionId, const QosTV *qos, uint32_t qosCount, TransInfo *transInfo);
 

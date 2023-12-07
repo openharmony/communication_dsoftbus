@@ -24,6 +24,9 @@
 #include "softbus_conn_common.h"
 #include "softbus_feature_config.h"
 #include "softbus_utils.h"
+#include "c_header/ohos_bt_def.h"
+#include "c_header/ohos_bt_socket.h"
+#include "conn_event.h"
 
 #define UUID "8ce255c0-200a-11e0-ac64-0800200c9a66"
 
@@ -88,22 +91,27 @@ static int32_t LoopRead(uint32_t connectionId, int32_t socketHandle)
     return status;
 }
 
-static void BrConnectStatusCallback(const char *addr, int32_t result, int32_t status)
+static void BrConnectStatusCallback(const BdAddr *bdAddr, BtUuid uuid, int32_t status, int32_t result)
 {
+    char copyMac[BT_MAC_LEN] = { 0 };
+    int32_t ret = ConvertBtMacToStr(copyMac, BT_MAC_LEN, bdAddr->addr, sizeof(bdAddr->addr));
+    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_BR, "convert mac failed, result=%d, status=%d", result, status);
+
+    char anomizeAddress[BT_MAC_LEN] = { 0 };
+    ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, copyMac, BT_MAC_LEN);
+
     uint64_t u64Mac = 0;
-    if (result != SOFTBUS_OK && ConvertBtMacToU64(addr, BT_MAC_LEN, &u64Mac) == SOFTBUS_OK) {
-        ConnPostMsgToLooper(&g_brConnectionAsyncHandler, MSG_CONNECTION_REPORT_CONNECT_EXCEPTION,
-            u64Mac, result, NULL, 0);
+    if (result != SOFTBUS_OK && ConvertBtMacToU64(copyMac, BT_MAC_LEN, &u64Mac) == SOFTBUS_OK) {
+        ConnPostMsgToLooper(
+            &g_brConnectionAsyncHandler, MSG_CONNECTION_REPORT_CONNECT_EXCEPTION, u64Mac, result, NULL, 0);
     }
-    ConnBrConnection *connection = ConnBrGetConnectionByAddr(addr, CONN_SIDE_CLIENT);
-    if (connection == NULL) {
-        CONN_LOGE(CONN_BR, "connection not exist, addr %02X:%02X:***%02X, result = %d, status = %d",
-            addr[MAC_FIRST_INDEX], addr[MAC_ONE_INDEX], addr[MAC_FIVE_INDEX], result, status);
-        return;
-    }
+
+    ConnBrConnection *connection = ConnBrGetConnectionByAddr(copyMac, CONN_SIDE_CLIENT);
+    CONN_CHECK_AND_RETURN_LOGE(connection != NULL, CONN_BR, "connection not exist, mac=%s, result=%d, status=%d",
+        anomizeAddress, result, status);
     BrUnderlayerStatus *callbackStatus = (BrUnderlayerStatus *)SoftBusCalloc(sizeof(BrUnderlayerStatus));
     if (callbackStatus == NULL) {
-        CONN_LOGE(CONN_BR, "calloc failed, connection id = %u", connection->connectionId);
+        CONN_LOGE(CONN_BR, "calloc failed, mac=%s, result=%d, status=%d", anomizeAddress, result, status);
         ConnBrReturnConnection(&connection);
         return;
     }
@@ -111,7 +119,7 @@ static void BrConnectStatusCallback(const char *addr, int32_t result, int32_t st
     callbackStatus->status = status;
     callbackStatus->result = result;
     ListAdd(&connection->connectProcessStatus->list, &callbackStatus->node);
-    CONN_LOGD(CONN_BR, "br on client connected callback, connection id = %u, result = %d, status = %d",
+    CONN_LOGD(CONN_BR, "br on connect calback, mac=%s, connId=%d, result=%d, status=%d", anomizeAddress,
         connection->connectionId, result, status);
     ConnBrReturnConnection(&connection);
 }
@@ -139,10 +147,18 @@ static void *StartClientConnect(void *connectCtx)
             g_eventListener.onClientConnectFailed(connection->connectionId, SOFTBUS_CONN_BR_INVALID_ADDRESS_ERR);
             break;
         }
-        int32_t socketHandle = g_sppDriver->Connect(UUID, binaryAddr);
+        BtSocketConnectionCallback callback = {
+            .connStateCb = BrConnectStatusCallback,
+        };
+        int32_t socketHandle = g_sppDriver->Connect(UUID, binaryAddr, &callback);
         if (socketHandle == INVALID_SOCKET_HANDLE) {
             CONN_LOGE(CONN_BR, "underlayer bluetooth connect failed, conn id=%u, address=%s",
                 connection->connectionId, anomizeAddress);
+            ConnAlarmExtra extraAlarm = {
+                .linkType = CONNECT_BR,
+                .errcode = SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL,
+            };
+            CONN_ALARM(CONNECTION_FAIL_ALARM, MANAGE_ALARM_TYPE, extraAlarm);
             g_eventListener.onClientConnectFailed(connection->connectionId, SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL);
             break;
         }
@@ -718,12 +734,6 @@ int32_t ConnBrConnectionMuduleInit(SoftBusLooper *looper, SppSocketDriver *sppDr
     int32_t status = InitProperty();
     CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, SOFTBUS_INVALID_PARAM, CONN_INIT,
         "br connection init failed: init property failed");
-    static BrUnderlayerCallback brConnectionCallback = {
-        .ConnectStatusCallback = BrConnectStatusCallback,
-    };
-    status = SoftBusRegisterBrCallback(&brConnectionCallback);
-    CONN_CHECK_AND_RETURN_RET_LOGW(status == SOFTBUS_OK, SOFTBUS_INVALID_PARAM, CONN_INIT,
-        "br connection init failed: register callback failed");
     g_brConnectionAsyncHandler.handler.looper = looper;
     g_sppDriver = sppDriver;
     g_eventListener = *listener;

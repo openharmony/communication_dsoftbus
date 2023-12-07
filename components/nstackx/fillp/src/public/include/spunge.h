@@ -16,7 +16,7 @@
 #ifndef SPUNGE_H
 #define SPUNGE_H
 #include "sockets.h"
-#include "mem_pool.h"
+#include "lf_ring.h"
 #include "queue.h"
 #include "hlist.h"
 #include "log.h"

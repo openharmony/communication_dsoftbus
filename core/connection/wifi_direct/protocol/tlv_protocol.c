@@ -162,7 +162,6 @@ static bool WriteTlvData(struct WifiDirectTlvProtocol *self, struct InfoContaine
     return true;
 }
 
-
 bool WifiDirectTlvProtocolConstructor(struct WifiDirectTlvProtocol *self)
 {
     self->format.tagSize = 0;

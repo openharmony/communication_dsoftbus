@@ -15,13 +15,14 @@
 
 #include "lnn_ip_utils_adapter.h"
 
+#include "comm_log.h"
 #include "lwip/netif.h"
 #include "softbus_adapter_mem.h"
 
 int32_t GetNetworkIpByIfName(const char *ifName, char *ip, char *netmask, uint32_t len)
 {
     if (ifName == NULL || ip == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "ifName or ip buffer is NULL!");
+        COMM_LOGE(COMM_ADAPTER, "ifName or ip buffer is NULL!");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -33,7 +34,7 @@ int32_t GetNetworkIpByIfName(const char *ifName, char *ip, char *netmask, uint32
 
     netif = netif_find(ifName);
     if (netif == NULL) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "netif is NULL!");
+        COMM_LOGE(COMM_ADAPTER, "netif is NULL!");
         return SOFTBUS_ERR;
     }
 #ifdef HISPARK_PEGASUS_USE_NETIF_GET_ADDR
@@ -44,13 +45,13 @@ int32_t GetNetworkIpByIfName(const char *ifName, char *ip, char *netmask, uint32
 #endif
     ipStr = ip4addr_ntoa(ipAddr);
     if (strncpy_s(ip, len, ipStr, strlen(ipStr)) != EOK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "copy ip failed!");
+        COMM_LOGE(COMM_ADAPTER, "copy ip failed!");
         return SOFTBUS_ERR;
     }
     if (netmask != NULL) {
         netMaskStr = ip4addr_ntoa(netMask);
         if (strncpy_s(netmask, len, netMaskStr, strlen(netMaskStr)) != EOK) {
-            HILOG_ERROR(SOFTBUS_HILOG_ID, "copy netmask failed!");
+            COMM_LOGE(COMM_ADAPTER, "copy netmask failed!");
             return SOFTBUS_ERR;
         }
     }
