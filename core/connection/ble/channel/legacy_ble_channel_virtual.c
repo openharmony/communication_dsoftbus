@@ -27,6 +27,7 @@ ConnBleConnection *LegacyBleCreateConnection(const char *addr, ConnSideType side
         CONN_CHECK_AND_RETURN_RET_LOGE(g_connection != NULL, NULL, CONN_NEARBY, "ble connection calloc failed");
         g_connection->side = side;
         g_connection->underlayerHandle = underlayerHandle;
+        g_connection->serviceId = LEGACY_GATT_SERVICE;
     }
     return g_connection;
 }
@@ -53,4 +54,5 @@ void LegacyBleReturnConnection(ConnBleConnection **connection)
 void LegacyBleRemoveConnection(ConnBleConnection *connection)
 {
     SoftBusFree(g_connection);
+    g_connection = NULL;
 }

@@ -665,6 +665,10 @@ static int32_t BleConnDescriptorAddMsgHandler(DescriptorAddMsgContext *ctx)
         return SOFTBUS_LOCK_ERR;
     }
     GattServiceType serviceId = FindServiceByServiceHandle(ctx->srvcHandle);
+    if (serviceId == GATT_SERVICE_TYPE_UNKOWN) {
+        CONN_LOGE(CONN_BLE, "not find serviceId by handle");
+        return SOFTBUS_CONN_BLE_UNDERLAY_DESCRIPTOR_ADD_FAIL;
+    }
     g_serviceContext[serviceId].serverState.connDescriptorHandle = ctx->descriptorHandle;
     (void)SoftBusMutexUnlock(&g_serviceContextLock);
     rc = UpdateBleServerStateInOrder(BLE_SERVER_STATE_CONN_DISCRIPTOR_ADDING,
@@ -1260,17 +1264,18 @@ static void BleRequestWriteCallback(SoftBusGattWriteRequest writeCbPara)
     if (writeCbPara.needRsp) {
         BleSendGattRsp(&writeCbPara);
     }
-    GattServiceType serviceId = FindServiceByDescriptorHandle(writeCbPara.attrHandle);
-    CONN_CHECK_AND_RETURN_LOGE(serviceId == GATT_SERVICE_TYPE_UNKOWN, CONN_BLE, "ignore despriptor notify");
+    CONN_CHECK_AND_RETURN_LOGE(FindServiceByDescriptorHandle(writeCbPara.attrHandle) == GATT_SERVICE_TYPE_UNKOWN,
+        CONN_BLE, "ignore despriptor notify");
     int32_t underlayerHandle = writeCbPara.connId;
+    GattServiceType serviceId = SOFTBUS_GATT_SERVICE;
     ConnBleConnection *connection = ConnBleGetConnectionByHandle(underlayerHandle, CONN_SIDE_SERVER, BLE_GATT);
     if (connection == NULL) {
+        serviceId = LEGACY_GATT_SERVICE;
         connection = LegacyBleGetConnectionByHandle(underlayerHandle, CONN_SIDE_SERVER);
     }
     CONN_CHECK_AND_RETURN_LOGE(connection != NULL, CONN_BLE, "not find conn by underlayer handle");
     CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_serviceContextLock) == SOFTBUS_OK, CONN_BLE, "try to lock failed");
 
-    serviceId = connection->serviceId;
     bool isConnCharacteristic = true;
     if (writeCbPara.attrHandle == g_serviceContext[serviceId].serverState.netCharacteristicHandle) {
         isConnCharacteristic = false;
