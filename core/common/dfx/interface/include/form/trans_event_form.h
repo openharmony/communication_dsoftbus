@@ -109,24 +109,37 @@ typedef struct {
 
 typedef enum {
     AUDIT_SCENE_OPEN_SESSION = 1,
-    AUDIT_SCENE_SEND_FILE = 2,
-    AUDIT_SCENE_SEND_BYTES = 3,
-    AUDIT_SCENE_SEND_MSG = 4,
-    AUDIT_SCENE_SEND_STREAM = 5,
+    AUDIT_SCENE_SEND_FILE,
+    AUDIT_SCENE_SEND_BYTES,
+    AUDIT_SCENE_SEND_MSG,
+    AUDIT_SCENE_SEND_STREAM,
 } TransAuditScene;
 
+typedef enum {
+    TRANS_AUDIT_CONTINUE = 1,
+    TRANS_AUDIT_DISCONTINUE,
+    TRANS_AUDIT_TRY_AGAIN,
+} TransAuditResult;
+
 typedef struct {
+    const char *hostPkg;         // HOST_PKG
+    int32_t result;              // RESULT
     int32_t errcode;             // ERROR_CODE
     SoftbusAuditType auditType;  // AUDIT_TYPE
-    const char *sessionName;     // SESSION_NAME
-    const char *peerDeviceId;    // PEER_DEVICE_ID
-    int32_t channelId;           // CHAN_ID
-    int32_t peerChannelId;       // PEER_CHAN_ID
+    const char *localIp;         // LOCAL_IP
+    const char *localPort;       // LOCAL_PORT
+    const char *localDevId;      // LOCAL_DEV_ID
+    int32_t localDevType;        // LOCAL_DEV_TYPE
+    const char *localSessName;   // LOCAL_SESS_NAME
+    int32_t localChannelId;      // LOCAL_CHANNEL_ID
+    const char *peerIp;          // PEER_IP
+    const char *peerPort;        // PEER_PORT
+    const char *peerDevId;       // PEER_DEV_ID
+    int32_t peerDevType;         // PEER_DEV_TYPE
+    const char *peerSessName;    // PEER_SESS_NAME
+    int32_t peerChannelId;       // PEER_CHANNEL_ID
     int32_t channelType;         // LOGIC_CHAN_TYPE
-    int32_t laneId;              // LANE_ID
     int32_t authId;              // AUTH_ID
-    int32_t preferLinkType;      // PREFER_LINK_TYPE
-    int32_t laneTransType;       // LANE_TRANS_TYPE
     int32_t reqId;               // REQ_ID
     int32_t linkType;            // LINK_TYPE
     int32_t connId;              // CONN_ID
@@ -135,11 +148,8 @@ typedef struct {
     int32_t dataLen;             // DATA_LENGTH
     int32_t dataSeq;             // DATA_SEQ
     int32_t costTime;            // TIME_CONSUMING
-    int32_t channelScore;        // CHAN_SCORE
-    int32_t dataLimit;           // DATA_LIMIT
-    const char *extra;           // EXTRA
-    const char *callerPkg;       // HOST_PKG
-    const char *calleePkg;       // TO_CALL_PKG
+    int32_t dataTraffic;         // DATA_TRAFFIC
+    int32_t reqCount;            // REQ_COUNT
 } TransAuditExtra;
 
 #ifdef __cplusplus

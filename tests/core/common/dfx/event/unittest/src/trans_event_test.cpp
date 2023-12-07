@@ -302,4 +302,76 @@ HWTEST_F(TransEventTest, TransEventTest007, TestSize.Level0)
         .Times(1);
     TRANS_EVENT(EVENT_SCENE_ACTIVATION, SOFTBUS_DEFAULT_STAGE, validExtra3);
 }
+
+/**
+ * @tc.name: TransEventTest008
+ * @tc.desc: Test trans event form size
+ * @tc.type: FUNC
+ * @tc.require: I8HA59
+ */
+HWTEST_F(TransEventTest, TransEventTest008, TestSize.Level0)
+{
+    TransAuditExtra extra = {
+        .hostPkg = "a.b.c.transSudit",
+        .result = 2,
+        .errcode = 9527,
+        .auditType = AUDIT_EVENT_MSG_ERROR,
+    };
+    constexpr int32_t VALID_EXTRA_SIZE = 3;
+
+    HiSysEventMock mock;
+    EXPECT_CALL(mock,
+        HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(TRANS_AUDIT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR), _,
+            ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
+        .Times(1);
+    TRANS_AUDIT(AUDIT_SCENE_OPEN_SESSION, extra);
+}
+
+/**
+ * @tc.name: TransEventTest009
+ * @tc.desc: Test all valid trans event form items
+ * @tc.type: FUNC
+ * @tc.require: I8HA59
+ */
+HWTEST_F(TransEventTest, TransEventTest009, TestSize.Level0)
+{
+    TransAuditExtra validExtra = {
+        .hostPkg = "a.b.c.transAudit",
+        .result = 1,
+        .errcode = 9527,
+        .auditType = AUDIT_EVENT_MSG_ERROR,
+        .localIp = "*1.123",
+        .localPort = "3435",
+        .localDevId = "*A1B2C3456789",
+        .localDevType = 2,
+        .localSessName = "mySessionName",
+        .localChannelId = 1025,
+        .peerIp = "*1.124",
+        .peerPort = "3436",
+        .peerDevId = "*B1C2D345679",
+        .peerDevType = 2,
+        .peerSessName = "youSessionName",
+        .peerChannelId = 15,
+        .channelType = 16,
+        .authId = 1314520,
+        .reqId = 321,
+        .linkType = 2,
+        .connId = 302234,
+        .socketFd = 223,
+        .dataType = 3,
+        .dataLen = 256,
+        .dataSeq = 41,
+        .costTime = 500,
+        .dataTraffic = 4096,
+        .reqCount = 3,
+    };
+    constexpr int32_t VALID_EXTRA_SIZE = TRANS_AUDIT_ASSIGNER_SIZE;
+
+    HiSysEventMock mock;
+    EXPECT_CALL(mock,
+        HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(TRANS_AUDIT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR),
+            TransAuditValidParamArrayMatcher(validExtra, VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
+        .Times(1);
+    TRANS_AUDIT(AUDIT_SCENE_OPEN_SESSION, validExtra);
+}
 } // namespace OHOS

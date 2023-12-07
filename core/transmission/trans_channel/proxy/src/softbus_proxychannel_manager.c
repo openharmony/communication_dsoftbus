@@ -764,12 +764,28 @@ void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg)
             .result = EVENT_STAGE_RESULT_FAILED
         };
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
+        TransAuditExtra auditMsgExtra = {
+            .result = TRANS_AUDIT_DISCONTINUE,
+            .errcode = errCode,
+            .auditType = AUDIT_EVENT_MSG_ERROR,
+            .localChannelId = info->myId,
+            .peerChannelId = info->peerId,
+        };
+        TRANS_AUDIT(AUDIT_SCENE_OPEN_SESSION, auditMsgExtra);
         TransProxyProcessErrMsg(info, errCode);
         SoftBusFree(info);
         return;
     }
     uint16_t fastDataSize = 0;
     if (TransProxyUnpackHandshakeAckMsg(msg->data, info, msg->dateLen, &fastDataSize) != SOFTBUS_OK) {
+        TransAuditExtra auditPacketExtra = {
+            .result = TRANS_AUDIT_DISCONTINUE,
+            .errcode = errCode,
+            .auditType = AUDIT_EVENT_PACKETS_ERROR,
+            .localChannelId = info->myId,
+            .peerChannelId = info->peerId,
+        };
+        TRANS_AUDIT(AUDIT_SCENE_OPEN_SESSION, auditPacketExtra);
         SoftBusFree(info);
         TRANS_LOGE(TRANS_CTRL, "UnpackHandshakeAckMsg fail");
         return;
@@ -913,6 +929,12 @@ static int32_t TransProxyFillChannelInfo(const ProxyMessage *msg, ProxyChannelIn
 {
     int32_t ret = TransProxyUnpackHandshakeMsg(msg->data, chan, msg->dateLen);
     if (ret != SOFTBUS_OK) {
+        TransAuditExtra extra = {
+            .result = TRANS_AUDIT_DISCONTINUE,
+            .errcode = ret,
+            .auditType = AUDIT_EVENT_PACKETS_ERROR,
+        };
+        TRANS_AUDIT(AUDIT_SCENE_OPEN_SESSION, extra);
         TRANS_LOGE(TRANS_CTRL, "UnpackHandshakeMsg fail.");
         return ret;
     }
