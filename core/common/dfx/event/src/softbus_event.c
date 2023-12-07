@@ -170,7 +170,7 @@ static void WriteSoftbusAudit(SoftbusEventModule module, SoftbusEventForm *form)
             break;
         }
         case EVENT_MODULE_LNN: {
-            HiSysEventParam lnnParams[LNN_ASSIGNER_SIZE] = { 0 };
+            HiSysEventParam lnnParams[LNN_AUDIT_ASSIGNER_SIZE] = { 0 };
             size_t lnnSize = ConvertLnnAuditForm2Param(lnnParams, form);
             WriteHiSysEvent(params, size, lnnParams, lnnSize, form);
             HiSysEventParamsFree(lnnParams, lnnSize);
