@@ -89,7 +89,7 @@ static int32_t GenerateProxyChannelId()
         return SOFTBUS_ERR;
     }
 
-    if (g_channelIdCount == MAX_PROXY_CHANNEL_ID_COUNT) {
+    if (g_channelIdCount >= MAX_PROXY_CHANNEL_ID_COUNT) {
         TRANS_LOGE(TRANS_CTRL, "No more channel Ids(1024) can be applied");
         return INVALID_CHANNEL_ID;
     }
