@@ -41,10 +41,7 @@ public:
     int32_t OnChannelQosEvent(int32_t channelId, int32_t channelType, int32_t eventId, int32_t tvCount,
         const QosTv *tvList) override;
     int32_t OnJoinLNNResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode) override;
-    int32_t OnJoinMetaNodeResult(void *addr, uint32_t addrTypeLen, void *metaInfo, uint32_t infoLen,
-        int retCode) override;
     int32_t OnLeaveLNNResult(const char *networkId, int retCode) override;
-    int32_t OnLeaveMetaNodeResult(const char *networkId, int retCode) override;
     int32_t OnNodeOnlineStateChanged(const char *pkgName, bool isOnline, void *info, uint32_t infoTypeLen) override;
     int32_t OnNodeBasicInfoChanged(const char *pkgName, void *info, uint32_t infoTypeLen, int32_t type) override;
     int32_t OnTimeSyncResult(const void *info, uint32_t infoTypeLen, int32_t retCode) override;
@@ -65,9 +62,7 @@ private:
     int32_t OnChannelMsgReceivedInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnChannelQosEventInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnJoinLNNResultInner(MessageParcel &data, MessageParcel &reply);
-    int32_t OnJoinMetaNodeResultInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnLeaveLNNResultInner(MessageParcel &data, MessageParcel &reply);
-    int32_t OnLeaveMetaNodeResultInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnNodeOnlineStateChangedInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnNodeBasicInfoChangedInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnTimeSyncResultInner(MessageParcel &data, MessageParcel &reply);

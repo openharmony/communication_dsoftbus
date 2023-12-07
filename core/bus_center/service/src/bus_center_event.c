@@ -378,12 +378,6 @@ void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t re
     LnnIpcNotifyJoinResult(addr, sizeof(ConnectionAddr), networkId, retCode);
 }
 
-void MetaNodeNotifyJoinResult(ConnectionAddr *addr, MetaBasicInfo *metaInfo, int32_t retCode)
-{
-    LNN_LOGI(LNN_EVENT, "notify join MetaNode result=%d", retCode);
-    MetaNodeIpcNotifyJoinResult(addr, sizeof(ConnectionAddr), metaInfo, retCode);
-}
-
 void LnnNotifyLeaveResult(const char *networkId, int32_t retCode)
 {
     if (networkId == NULL) {
@@ -392,16 +386,6 @@ void LnnNotifyLeaveResult(const char *networkId, int32_t retCode)
     }
     LNN_LOGI(LNN_EVENT, "notify leave LNN result %d", retCode);
     LnnIpcNotifyLeaveResult(networkId, retCode);
-}
-
-void MetaNodeNotifyLeaveResult(const char *networkId, int32_t retCode)
-{
-    if (networkId == NULL) {
-        LNN_LOGW(LNN_EVENT, "networkId = null");
-        return;
-    }
-    LNN_LOGI(LNN_EVENT, "notify leave MetaNode result=%d", retCode);
-    MetaNodeIpcNotifyLeaveResult(networkId, retCode);
 }
 
 void LnnNotifyLnnRelationChanged(const char *udid, ConnectionAddrType type, uint8_t relation,

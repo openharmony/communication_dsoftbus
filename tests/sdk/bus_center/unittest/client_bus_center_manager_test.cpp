@@ -125,33 +125,6 @@ HWTEST_F(ClientBusCentManagerTest, JOIN_LNN_INNER_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: JOIN_META_NODE_INNER_Test_001
-* @tc.desc: join meta node inner test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(ClientBusCentManagerTest, JOIN_META_NODE_INNER_Test_001, TestSize.Level1)
-{
-    OnJoinMetaNodeResult cb = nullptr;
-    ConnectionAddr target;
-    (void)memset_s(&target, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
-    target.type = CONNECTION_ADDR_BLE;
-    (void)strcpy_s(target.info.ble.bleMac, BT_MAC_LEN, NODE1_BLE_MAC);
-    ClientBusCenterManagerInterfaceMock busCentManagerMock;
-    EXPECT_CALL(busCentManagerMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyInit()).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
-    EXPECT_TRUE(BusCenterClientInit() == SOFTBUS_OK);
-    EXPECT_CALL(busCentManagerMock, ServerIpcJoinMetaNode(_, _, _, _))
-        .WillOnce(Return(SOFTBUS_ERR))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_TRUE(JoinMetaNodeInner(nullptr, &target, nullptr, cb) == SOFTBUS_ERR);
-    EXPECT_TRUE(JoinMetaNodeInner(nullptr, &target, nullptr, cb) == SOFTBUS_OK);
-    EXPECT_TRUE(JoinMetaNodeInner(nullptr, &target, nullptr, nullptr) == SOFTBUS_ALREADY_EXISTED);
-    BusCenterClientDeinit();
-}
-
-/*
 * @tc.name: LEAVE_LNN_INNER_Test_001
 * @tc.desc: leave lnn inner test
 * @tc.type: FUNC
@@ -171,29 +144,6 @@ HWTEST_F(ClientBusCentManagerTest, LEAVE_LNN_INNER_Test_001, TestSize.Level1)
     EXPECT_TRUE(LeaveLNNInner(nullptr, NODE1_NETWORK_ID, cb) == SOFTBUS_ERR);
     EXPECT_TRUE(LeaveLNNInner(nullptr, NODE1_NETWORK_ID, cb) == SOFTBUS_OK);
     EXPECT_TRUE(LeaveLNNInner(nullptr, NODE1_NETWORK_ID, nullptr) == SOFTBUS_ERR);
-    BusCenterClientDeinit();
-}
-
-/*
-* @tc.name: LEAVE_META_NODE_INNER_Test_001
-* @tc.desc: leave meta node inner test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(ClientBusCentManagerTest, LEAVE_META_NODE_INNER_Test_001, TestSize.Level1)
-{
-    OnLeaveMetaNodeResult cb = nullptr;
-    ClientBusCenterManagerInterfaceMock busCentManagerMock;
-    EXPECT_CALL(busCentManagerMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyInit()).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
-    EXPECT_TRUE(BusCenterClientInit() == SOFTBUS_OK);
-    EXPECT_CALL(busCentManagerMock, ServerIpcLeaveMetaNode(_, _))
-        .WillOnce(Return(SOFTBUS_ERR))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_TRUE(LeaveMetaNodeInner(nullptr, NODE1_NETWORK_ID, cb) == SOFTBUS_ERR);
-    EXPECT_TRUE(LeaveMetaNodeInner(nullptr, NODE1_NETWORK_ID, cb) == SOFTBUS_OK);
-    EXPECT_TRUE(LeaveMetaNodeInner(nullptr, NODE1_NETWORK_ID, nullptr) == SOFTBUS_ERR);
     BusCenterClientDeinit();
 }
 
@@ -518,51 +468,6 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ONJOIN_RESULT_Test_001, TestSize.Level1)
     BusCenterClientDeinit();
 }
 
-static void OnJoinMetaNodeResultCb(ConnectionAddr *addr, MetaBasicInfo *metaInfo, int32_t retCode)
-{
-    (void)addr;
-    (void)metaInfo;
-    (void)retCode;
-    printf("on call join meta node result cb\n");
-}
-
-/*
-* @tc.name: META_NODE_ONJOIN_RESULT_Test_001
-* @tc.desc: meta node on join result test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(ClientBusCentManagerTest, META_NODE_ONJOIN_RESULT_Test_001, TestSize.Level1)
-{
-    int32_t retCode = 0;
-    ConnectionAddr addr;
-    (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
-    addr.type = CONNECTION_ADDR_BR;
-    (void)strcpy_s(addr.info.ip.ip, IP_STR_MAX_LEN, NODE1_IP);
-    addr.info.ip.port = NODE1_PORT;
-    MetaBasicInfo metaInfo;
-    (void)memset_s(&metaInfo, sizeof(MetaBasicInfo), 0, sizeof(MetaBasicInfo));
-    (void)strcpy_s(metaInfo.metaNodeId, NETWORK_ID_BUF_LEN, NODE1_NETWORK_ID);
-    EXPECT_TRUE(MetaNodeOnJoinResult(nullptr, nullptr, retCode) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(MetaNodeOnJoinResult(reinterpret_cast<void *>(&addr),
-        reinterpret_cast<void *>(&metaInfo), retCode) == SOFTBUS_OK);
-    ClientBusCenterManagerInterfaceMock busCentManagerMock;
-    EXPECT_CALL(busCentManagerMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyInit()).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
-    EXPECT_TRUE(BusCenterClientInit() == SOFTBUS_OK);
-    EXPECT_TRUE(MetaNodeOnJoinResult(reinterpret_cast<void *>(&addr),
-        reinterpret_cast<void *>(&metaInfo), retCode) == SOFTBUS_OK);
-    EXPECT_CALL(busCentManagerMock, ServerIpcJoinMetaNode(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_TRUE(JoinMetaNodeInner(nullptr, &addr, nullptr, OnJoinMetaNodeResultCb) == SOFTBUS_OK);
-    EXPECT_TRUE(MetaNodeOnJoinResult(reinterpret_cast<void *>(&addr),
-        reinterpret_cast<void *>(&metaInfo), retCode) == SOFTBUS_OK);
-    EXPECT_TRUE(JoinMetaNodeInner(nullptr, &addr, nullptr, nullptr) == SOFTBUS_OK);
-    EXPECT_TRUE(MetaNodeOnJoinResult(reinterpret_cast<void *>(&addr),
-        reinterpret_cast<void *>(&metaInfo), retCode) == SOFTBUS_OK);
-    BusCenterClientDeinit();
-}
-
 static void OnLeaveResultCb(const char *networkId, int32_t retCode)
 {
     (void)networkId;
@@ -592,39 +497,6 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ON_LEAVE_RESULT_Test_001, TestSize.Level1
     EXPECT_TRUE(LnnOnLeaveResult(NODE1_NETWORK_ID, retCode) == SOFTBUS_OK);
     EXPECT_TRUE(LeaveLNNInner(nullptr, NODE1_NETWORK_ID, nullptr) == SOFTBUS_OK);
     EXPECT_TRUE(LnnOnLeaveResult(NODE1_NETWORK_ID, retCode) == SOFTBUS_OK);
-    BusCenterClientDeinit();
-}
-
-
-static void MetaNodeOnLeaveResultCb(const char *networkId, int32_t retCode)
-{
-    (void)networkId;
-    (void)retCode;
-    printf("on call meta node leave result cb\n");
-}
-
-/*
-* @tc.name: META_NODE_ON_LEAVE_RESULT_Test_001
-* @tc.desc: meta node on leave result test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(ClientBusCentManagerTest, META_NODE_ON_LEAVE_RESULT_Test_001, TestSize.Level1)
-{
-    int32_t retCode = 0;
-    ClientBusCenterManagerInterfaceMock busCentManagerMock;
-    EXPECT_CALL(busCentManagerMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_TRUE(MetaNodeOnLeaveResult(nullptr, retCode) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(MetaNodeOnLeaveResult(NODE1_NETWORK_ID, retCode) == SOFTBUS_OK);
-    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyInit()).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
-    EXPECT_TRUE(BusCenterClientInit() == SOFTBUS_OK);
-    EXPECT_TRUE(MetaNodeOnLeaveResult(NODE1_NETWORK_ID, retCode) == SOFTBUS_OK);
-    EXPECT_CALL(busCentManagerMock, ServerIpcLeaveMetaNode(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_TRUE(LeaveMetaNodeInner(nullptr, NODE1_NETWORK_ID, MetaNodeOnLeaveResultCb) == SOFTBUS_OK);
-    EXPECT_TRUE(MetaNodeOnLeaveResult(NODE1_NETWORK_ID, retCode) == SOFTBUS_OK);
-    EXPECT_TRUE(LeaveMetaNodeInner(nullptr, NODE1_NETWORK_ID, nullptr) == SOFTBUS_OK);
-    EXPECT_TRUE(MetaNodeOnLeaveResult(NODE1_NETWORK_ID, retCode) == SOFTBUS_OK);
     BusCenterClientDeinit();
 }
 

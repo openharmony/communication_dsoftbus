@@ -80,19 +80,9 @@ int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeL
     return GetBusCenterManagerInterface()->ServerIpcJoinLNN(pkgName, addr, addrTypeLen);
 }
 
-int32_t ServerIpcJoinMetaNode(const char *pkgName, void *addr, CustomData *customData, unsigned int addrTypeLen)
-{
-    return GetBusCenterManagerInterface()->ServerIpcJoinMetaNode(pkgName, addr, customData, addrTypeLen);
-}
-
 int32_t ServerIpcLeaveLNN(const char *pkgName, const char *networkId)
 {
     return GetBusCenterManagerInterface()->ServerIpcLeaveLNN(pkgName, networkId);
-}
-
-int32_t ServerIpcLeaveMetaNode(const char *pkgName, const char *networkId)
-{
-    return GetBusCenterManagerInterface()->ServerIpcLeaveMetaNode(pkgName, networkId);
 }
 
 int32_t ServerIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy, int32_t period)

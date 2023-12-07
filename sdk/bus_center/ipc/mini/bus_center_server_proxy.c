@@ -59,25 +59,9 @@ int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeL
     return LnnIpcServerJoin(pkgName, 0, addr, addrTypeLen);
 }
 
-int32_t ServerIpcJoinMetaNode(const char *pkgName, void *addr, CustomData *customData, unsigned int addrTypeLen)
-{
-    (void)pkgName;
-    (void)addr;
-    (void)customData;
-    (void)addrTypeLen;
-    return SOFTBUS_OK;
-}
-
 int32_t ServerIpcLeaveLNN(const char *pkgName, const char *networkId)
 {
     return LnnIpcServerLeave(pkgName, 0, networkId);
-}
-
-int32_t ServerIpcLeaveMetaNode(const char *pkgName, const char *networkId)
-{
-    (void)pkgName;
-    (void)networkId;
-    return SOFTBUS_OK;
 }
 
 int32_t ServerIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy, int32_t period)

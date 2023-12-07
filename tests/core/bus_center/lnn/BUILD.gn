@@ -252,78 +252,6 @@ ohos_unittest("LedgerLaneHubTest") {
   ]
 }
 
-ohos_unittest("LNNBusCenterIpcTest") {
-  module_out_path = module_output_path
-  sources = [ "ipc/lnn_bus_center_ipc_test.cpp" ]
-  include_dirs = bus_center_unittest_dirs
-  deps = bus_center_unittest_deps
-
-  if (is_standard_system) {
-    external_deps = [
-      "c_utils:utils",
-      "device_auth:deviceauth_sdk",
-      "hilog:libhilog",
-    ]
-  } else {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  }
-  external_deps += [
-    "huks:libhukssdk",
-    "ipc:ipc_core",
-  ]
-}
-
-ohos_unittest("BusCenterClientProxyTest") {
-  module_out_path = module_output_path
-  sources = [ "ipc/bus_center_client_proxy_test.cpp" ]
-  include_dirs = bus_center_unittest_dirs
-  deps = bus_center_unittest_deps
-
-  if (is_standard_system) {
-    external_deps = [
-      "c_utils:utils",
-      "device_auth:deviceauth_sdk",
-      "hilog:libhilog",
-    ]
-  } else {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  }
-  external_deps += [
-    "huks:libhukssdk",
-    "ipc:ipc_core",
-  ]
-}
-
-ohos_unittest("BusCenterClientProxyStandardTest") {
-  module_out_path = module_output_path
-  sources = [ "ipc/bus_center_client_proxy_standard_test.cpp" ]
-  include_dirs = bus_center_unittest_dirs
-  deps = bus_center_unittest_deps
-
-  if (is_standard_system) {
-    external_deps = [
-      "c_utils:utils",
-      "device_auth:deviceauth_sdk",
-      "hilog:libhilog",
-    ]
-  } else {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  }
-  external_deps += [
-    "huks:libhukssdk",
-    "ipc:ipc_core",
-  ]
-}
-
 ohos_unittest("LNNNetBuilderTest") {
   module_out_path = module_output_path
   sources = [ "net_builder/src/lnn_net_builder_test.cpp" ]
@@ -1763,11 +1691,8 @@ if (!defined(ohos_lite) && enhanced_test) {
 group("unittest") {
   testonly = true
   deps = [
-    ":BusCenterClientProxyStandardTest",
-    ":BusCenterClientProxyTest",
     ":LNNBatteryInfoTest",
     ":LNNBtNetworkImplMockTest",
-    ":LNNBusCenterIpcTest",
     ":LNNConnectionFsmMockTest",
     ":LNNConnectionFsmTest",
     ":LNNDeviceNameInfoTest",
@@ -1811,6 +1736,8 @@ group("unittest") {
       "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/lnn/net_builder/cipherkey:unittest",
       "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/lnn/net_builder/fast_offline:unittest",
       "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/lnn/unittest:unittest",
+      "$dsoftbus_root_path/dsoftbus_enhance/test/core/bus_center/test:unittest",
+      "$dsoftbus_root_path/dsoftbus_enhance/test/sdk/bus_center:unittest",
     ]
   }
 }

@@ -218,27 +218,6 @@ int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb)
     return JoinLNNInner(pkgName, target, cb);
 }
 
-int32_t JoinMetaNode(const char *pkgName, ConnectionAddr *target, CustomData *customData, OnJoinMetaNodeResult cb)
-{
-    if (pkgName == NULL || customData == NULL || cb == NULL) {
-        LNN_LOGE(LNN_STATE, "params are NULL");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    int32_t ret = CommonInit(pkgName);
-    if (ret != SOFTBUS_OK) {
-        return ret;
-    }
-    if (target != NULL && target->type == CONNECTION_ADDR_SESSION) {
-        ret = ClientGetChannelBySessionId(target->info.session.sessionId, &target->info.session.channelId,
-            &target->info.session.type, NULL);
-        if (ret != SOFTBUS_OK) {
-            LNN_LOGE(LNN_STATE, "get channel error");
-            return ret;
-        }
-    }
-    return JoinMetaNodeInner(pkgName, target, customData, cb);
-}
-
 int32_t LeaveLNN(const char *pkgName, const char *networkId, OnLeaveLNNResult cb)
 {
     if (!IsValidString(networkId, NETWORK_ID_BUF_LEN) || cb == NULL || !IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1)) {
@@ -246,15 +225,6 @@ int32_t LeaveLNN(const char *pkgName, const char *networkId, OnLeaveLNNResult cb
         return SOFTBUS_INVALID_PARAM;
     }
     return LeaveLNNInner(pkgName, networkId, cb);
-}
-
-int32_t LeaveMetaNode(const char *pkgName, const char *networkId, OnLeaveMetaNodeResult cb)
-{
-    if (!IsValidString(networkId, NETWORK_ID_BUF_LEN) || cb == NULL || !IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1)) {
-        LNN_LOGE(LNN_STATE, "networkId or cb is NULL");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    return LeaveMetaNodeInner(pkgName, networkId, cb);
 }
 
 int32_t RegNodeDeviceStateCb(const char *pkgName, INodeStateCb *callback)

@@ -29,9 +29,7 @@ int BusCenterClientInit(void);
 void BusCenterClientDeinit(void);
 
 int32_t JoinLNNInner(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb);
-int32_t JoinMetaNodeInner(const char *pkgName, ConnectionAddr *target, CustomData *customData, OnJoinMetaNodeResult cb);
 int32_t LeaveLNNInner(const char *pkgName, const char *networkId, OnLeaveLNNResult cb);
-int32_t LeaveMetaNodeInner(const char *pkgName, const char *networkId, OnLeaveMetaNodeResult cb);
 int32_t RegNodeDeviceStateCbInner(const char *pkgName, INodeStateCb *callback);
 int32_t UnregNodeDeviceStateCbInner(INodeStateCb *callback);
 int32_t GetAllNodeDeviceInfoInner(const char *pkgName, NodeBasicInfo **info, int32_t *infoNum);
@@ -53,9 +51,7 @@ int32_t ShiftLNNGearInner(const char *pkgName, const char *callerId, const char 
     const GearMode *mode);
 
 int32_t LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode);
-int32_t MetaNodeOnJoinResult(void *addr, void *metaInfo, int32_t retCode);
 int32_t LnnOnLeaveResult(const char *networkId, int32_t retCode);
-int32_t MetaNodeOnLeaveResult(const char *networkId, int32_t retCode);
 int32_t LnnOnNodeOnlineStateChanged(const char *pkgName, bool isOnline, void *info);
 int32_t LnnOnNodeBasicInfoChanged(const char *pkgName, void *info, int32_t type);
 int32_t LnnOnTimeSyncResult(const void *info, int retCode);
