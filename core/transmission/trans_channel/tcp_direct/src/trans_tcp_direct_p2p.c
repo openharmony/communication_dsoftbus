@@ -716,6 +716,7 @@ static void OnP2pVerifyMsgReceived(int32_t channelId, const char *data, uint32_t
     } else {
         TRANS_LOGE(TRANS_CTRL, "invalid msgType=%lld", msgType);
     }
+    cJSON_Delete(json);
 }
 
 void OnP2pVerifyChannelClosed(int32_t channelId)
@@ -770,7 +771,8 @@ int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
     int32_t *channelId)
 {
     TRANS_LOGI(TRANS_CTRL, "enter.");
-    if (appInfo == NULL || connInfo == NULL || channelId == NULL || connInfo->type != CONNECT_P2P) {
+    if (appInfo == NULL || connInfo == NULL || channelId == NULL ||
+        (connInfo->type != CONNECT_P2P && connInfo->type != CONNECT_HML)) {
         return SOFTBUS_INVALID_PARAM;
     }
     SessionConn *conn = NULL;

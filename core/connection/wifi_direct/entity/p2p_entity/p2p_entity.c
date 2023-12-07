@@ -38,7 +38,7 @@ static void OnClientJoinTimeout(void *data);
 static int32_t CreateServer(struct WifiDirectConnectParams *params)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "freq=%d isNeedDhcp=%d isWideBandSupported=%d ifName=%s peerMac=%s",
-          params->freq, params->isNeedDhcp, params->isWideBandSupported, params->interface,
+          params->frequency, params->isNeedDhcp, params->isWideBandSupported, params->interface,
           WifiDirectAnonymizeMac(params->remoteMac));
 
     struct P2pEntity *self = GetP2pEntity();
@@ -306,13 +306,14 @@ static void OnClientJoinTimeout(void *data)
     client = NULL;
 
     struct WifiDirectConnectParams params;
-    strcpy_s(params.interface, sizeof(params.interface), IF_NAME_P2P);
+    int32_t ret = strcpy_s(params.interface, sizeof(params.interface), IF_NAME_P2P);
+    CONN_CHECK_AND_RETURN_LOGE(ret == EOK, CONN_WIFI_DIRECT, "copy interface failed");
 
-    int32_t ret = Disconnect(&params);
+    ret = Disconnect(&params);
     CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "disconnect failed");
 
     struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(IF_NAME_P2P);
-    if (info) {
+    if (info != NULL) {
         info->decreaseRefCount(info);
     }
 }

@@ -20,14 +20,18 @@
 
 #include "event_form_enum.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
-    SCENE_CONNECT = 1,
+    EVENT_SCENE_CONNECT = 1,
 } ConnEventScene;
 
 typedef enum {
-    STAGE_CONNECT_START = 1,
-    STAGE_CONNECT_INVOKE_PROTOCOL = 2,
-    STAGE_CONNECT_END = 3,
+    EVENT_STAGE_CONNECT_START = 1,
+    EVENT_STAGE_CONNECT_INVOKE_PROTOCOL = 2,
+    EVENT_STAGE_CONNECT_END = 3,
 } ConnEventConnectStage;
 
 typedef struct {
@@ -45,7 +49,6 @@ typedef struct {
     int32_t load;              // CHLOAD
     int32_t frequency;         // FREQ
     const char *peerIp;        // PEER_IP
-    const char *peerNetworkId; // PEER_NETID
     const char *peerBrMac;     // PEER_BR_MAC
     const char *peerBleMac;    // PEER_BLE_MAC
     const char *peerWifiMac;   // PEER_WIFI_MAC
@@ -54,4 +57,52 @@ typedef struct {
     const char *calleePkg;     // TO_CALL_PKG
 } ConnEventExtra;
 
+typedef enum {
+    ALARM_SCENE_CONN_RESERVED = 1,
+} ConnAlarmScene;
+
+typedef struct {
+    int32_t errcode;
+    int32_t result;
+    int32_t linkType;
+    int32_t duration;
+    int32_t netType;
+} ConnAlarmExtra;
+
+typedef enum {
+    STATS_SCENE_CONN_RESERVED = 1,
+} ConnStatsScene;
+
+typedef struct {
+    int32_t reserved;
+} ConnStatsExtra;
+
+typedef enum {
+    AUDIT_SCENE_CONN_RESERVED = 1,
+} ConnAuditScene;
+
+typedef struct {
+    int32_t errcode;             // ERROR_CODE
+    SoftbusAuditType auditType;  // AUDIT_TYPE
+    int32_t connectionId;        // CONN_ID
+    int32_t requestId;           // REQ_ID
+    int32_t linkType;            // LINK_TYPE
+    int32_t expectRole;          // EXPECT_ROLE
+    int32_t costTime;            // COST_TIME
+    const char *frequency;       // FREQ
+    const char *peerBrMac;       // PEER_BR_MAC
+    const char *peerBleMac;      // PEER_BLE_MAC
+    const char *peerDeviceType;  // PEER_DEV_TYPE
+    const char *peerUdid;        // PEER_UDID
+    const char *connPaload;      // CONN_PALOAD
+    const char *localDeviceName; // LOCAL_DEV_NAME
+    const char *peerIp;          // PEER_IP
+    const char *extra;           // EXTRA
+    const char *callerPkg;       // HOST_PKG
+    const char *calleePkg;       // TO_CALL_PKG
+} ConnAuditExtra;
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 #endif // CONN_EVENT_FORM_H

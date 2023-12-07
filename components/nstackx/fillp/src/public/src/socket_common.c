@@ -43,8 +43,6 @@ void EpollUpdateEpEvent(struct EpItem *epi)
     } else {
         epi->revents &= (FILLP_UINT32)(~SPUNGE_EPOLLOUT);
     }
-
-    return;
 }
 
 /**
@@ -85,8 +83,6 @@ void EpollEventCallback(struct FtSocket *sock, FILLP_UINT32 upEvent)
     }
 
     (void)SYS_ARCH_SEM_POST(&sock->epollTaskListLock);
-
-    return;
 }
 
 struct GlobalAppResource g_appResource = {

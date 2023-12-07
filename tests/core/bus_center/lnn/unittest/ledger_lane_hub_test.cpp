@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
+#include "bus_center_adapter.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "client_bus_center_manager.h"

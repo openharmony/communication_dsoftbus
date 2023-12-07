@@ -38,11 +38,11 @@ SoftBusLogSysType SoftBusGetLogSysType(void)
     char value[PROP_USER_TYPE_VALUE_LEN] = {0};
     int32_t ret = GetParameter(PROP_USER_TYPE, "", value, sizeof(value));
     if (ret < 0) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "GetProp: [%{public}s] fail(ret=%{public}d)", PROP_USER_TYPE, ret);
+        COMM_LOGE(COMM_ADAPTER, "GetProp: [%s] fail(ret=%d)", PROP_USER_TYPE, ret);
         return SOFTBUS_LOG_SYS_UNKNOWN;
     }
     isUserTypeObtained = true;
-    HILOG_INFO(SOFTBUS_HILOG_ID, "GetProp: [%{public}s]: [%{public}s]", PROP_USER_TYPE, value);
+    COMM_LOGI(COMM_ADAPTER, "GetProp: [%s]: [%s]", PROP_USER_TYPE, value);
 
     // is beta or not: 1 china release, 3 china beta, 5 oversea beta, 6 oversea release
     if (atoi(value) == PROP_USER_TYPE_CHANA_BETA) {
@@ -56,17 +56,17 @@ SoftBusLogSysType SoftBusGetLogSysType(void)
 void SoftBusGenHiviewHash(const char *deviceId, char *buf, uint32_t size)
 {
     if (deviceId == nullptr || buf == NULL || size < HiView::DEFAULT_TRUNCATED_LENGTH) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "HiView::genTruncatedHash invalid param");
+        COMM_LOGE(COMM_ADAPTER, "HiView::genTruncatedHash invalid param");
         return;
     }
     std::string input(deviceId);
     std::string hash = HiView::GenTruncatedHash(input, HiView::ALGORITHM_SHA_256, HiView::DEFAULT_TRUNCATED_LENGTH);
     if (hash.empty()) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "HiView::genTruncatedHash return empty hash");
+        COMM_LOGE(COMM_ADAPTER, "HiView::genTruncatedHash return empty hash");
         return;
     }
     if (strcpy_s(buf, size, hash.c_str()) != EOK) {
-        HILOG_ERROR(SOFTBUS_HILOG_ID, "HiView::genTruncatedHash strcpy_s fail");
+        COMM_LOGE(COMM_ADAPTER, "HiView::genTruncatedHash strcpy_s fail");
         return;
     }
 }

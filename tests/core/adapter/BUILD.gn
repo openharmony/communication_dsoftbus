@@ -25,6 +25,7 @@ ohos_unittest("AdapterDsoftbusRsaCryptoTest") {
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/adapter/huks/include",
     "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/common/dfx/interface/include",
     "$dsoftbus_root_path/interfaces/kits/common",
     "//third_party/bounds_checking_function/include",
   ]

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -153,8 +153,15 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenedTest001, TestSize.Level0)
 HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenFailedTest001, TestSize.Level0)
 {
     int32_t ret;
-
-    ret = ClientIpcOnChannelOpenFailed(g_pkgName, TEST_CHANNELID, TEST_CHANNELTYPE, TEST_ERR_CODE, TEST_PID);
+    ChannelMsg data = {
+        .msgChannelId = TEST_CHANNELID,
+        .msgChannelType = TEST_CHANNELTYPE,
+        .msgPid = TEST_PID,
+        .msgPkgName = g_pkgName,
+        .msgUuid = nullptr,
+        .msgUdid = nullptr
+    };
+    ret = ClientIpcOnChannelOpenFailed(&data, TEST_ERR_CODE);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     static const uint32_t SOFTBUS_SA_ID = 4700;
@@ -165,7 +172,15 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenFailedTest001, TestSize.Lev
     ASSERT_TRUE(abilityDeath != nullptr);
     ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(g_pkgName, remoteObject, abilityDeath, TEST_PID);
     ASSERT_TRUE(ret == SOFTBUS_OK);
-    ret = ClientIpcOnChannelOpenFailed(g_pkgName, TEST_CHANNELID, TEST_CHANNELTYPE, TEST_ERR_CODE, TEST_PID);
+    ChannelMsg msg = {
+        .msgChannelId = TEST_CHANNELID,
+        .msgChannelType = TEST_CHANNELTYPE,
+        .msgPid = TEST_PID,
+        .msgPkgName = g_pkgName,
+        .msgUuid = nullptr,
+        .msgUdid = nullptr
+    };
+    ret = ClientIpcOnChannelOpenFailed(&msg, TEST_ERR_CODE);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -180,7 +195,13 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelLinkDownTest001, TestSize.Level
     int32_t ret;
     char networkId[] = "ABCDEFG";
 
-    ret = ClientIpcOnChannelLinkDown(g_pkgName, networkId, NULL, NULL, NULL, TEST_REMOTE_TYPE, TEST_PID);
+    ChannelMsg data = {
+        .msgPid = TEST_PID,
+        .msgPkgName = g_pkgName,
+        .msgUuid = nullptr,
+        .msgUdid = nullptr
+    };
+    ret = ClientIpcOnChannelLinkDown(&data, networkId, NULL, TEST_REMOTE_TYPE);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     static const uint32_t SOFTBUS_SA_ID = 4700;
@@ -191,7 +212,13 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelLinkDownTest001, TestSize.Level
     ASSERT_TRUE(abilityDeath != nullptr);
     ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(g_pkgName, remoteObject, abilityDeath, TEST_PID);
     ASSERT_TRUE(ret == SOFTBUS_OK);
-    ret = ClientIpcOnChannelLinkDown(g_pkgName, networkId, NULL, NULL, NULL, TEST_REMOTE_TYPE, TEST_PID);
+    ChannelMsg msg = {
+        .msgPid = TEST_PID,
+        .msgPkgName = g_pkgName,
+        .msgUuid = nullptr,
+        .msgUdid = nullptr
+    };
+    ret = ClientIpcOnChannelLinkDown(&msg, networkId, NULL, TEST_REMOTE_TYPE);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -205,7 +232,15 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelClosedTest001, TestSize.Level0)
 {
     int32_t ret;
 
-    ret = ClientIpcOnChannelClosed(g_pkgName, TEST_CHANNELID, TEST_CHANNELTYPE, TEST_PID);
+    ChannelMsg data = {
+        .msgChannelId = TEST_CHANNELID,
+        .msgChannelType = TEST_CHANNELTYPE,
+        .msgPid = TEST_PID,
+        .msgPkgName = g_pkgName,
+        .msgUuid = nullptr,
+        .msgUdid = nullptr
+    };
+    ret = ClientIpcOnChannelClosed(&data);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     static const uint32_t SOFTBUS_SA_ID = 4700;
@@ -216,7 +251,15 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelClosedTest001, TestSize.Level0)
     ASSERT_TRUE(abilityDeath != nullptr);
     ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(g_pkgName, remoteObject, abilityDeath, TEST_PID);
     ASSERT_TRUE(ret == SOFTBUS_OK);
-    ret = ClientIpcOnChannelClosed(g_pkgName, TEST_CHANNELID, TEST_CHANNELTYPE, TEST_PID);
+    ChannelMsg msg = {
+        .msgChannelId = TEST_CHANNELID,
+        .msgChannelType = TEST_CHANNELTYPE,
+        .msgPid = TEST_PID,
+        .msgPkgName = g_pkgName,
+        .msgUuid = nullptr,
+        .msgUdid = nullptr
+    };
+    ret = ClientIpcOnChannelClosed(&msg);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -236,7 +279,15 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelMsgReceivedTest001, TestSize.Le
     receiveData.dataLen = TEST_LEN;
     receiveData.dataType = TEST_DATA_TYPE;
 
-    ret = ClientIpcOnChannelMsgReceived(g_pkgName, TEST_CHANNELID, TEST_CHANNELTYPE, &receiveData, TEST_PID);
+    ChannelMsg data = {
+        .msgChannelId = TEST_CHANNELID,
+        .msgChannelType = TEST_CHANNELTYPE,
+        .msgPid = TEST_PID,
+        .msgPkgName = g_pkgName,
+        .msgUuid = nullptr,
+        .msgUdid = nullptr
+    };
+    ret = ClientIpcOnChannelMsgReceived(&data, &receiveData);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     static const uint32_t SOFTBUS_SA_ID = 4700;
@@ -247,7 +298,15 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelMsgReceivedTest001, TestSize.Le
     ASSERT_TRUE(abilityDeath != nullptr);
     ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(g_pkgName, remoteObject, abilityDeath, TEST_PID);
     ASSERT_TRUE(ret == SOFTBUS_OK);
-    ret = ClientIpcOnChannelMsgReceived(g_pkgName, TEST_CHANNELID, TEST_CHANNELTYPE, &receiveData, TEST_PID);
+    ChannelMsg msg = {
+        .msgChannelId = TEST_CHANNELID,
+        .msgChannelType = TEST_CHANNELTYPE,
+        .msgPid = TEST_PID,
+        .msgPkgName = g_pkgName,
+        .msgUuid = nullptr,
+        .msgUdid = nullptr
+    };
+    ret = ClientIpcOnChannelMsgReceived(&msg, &receiveData);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 

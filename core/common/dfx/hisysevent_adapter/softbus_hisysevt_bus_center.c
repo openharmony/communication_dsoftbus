@@ -772,7 +772,7 @@ int32_t SoftBusReportBusCenterFaultEvt(SoftBusFaultEvtInfo *info)
         COMM_LOGE(COMM_EVENT, "alloc bus center fault evt report msg fail");
         return SOFTBUS_ERR;
     }
-    info->errorCode = GetErrorCodeEx(info->errorCode, SOFTBUS_MOD_LNN);
+    info->errorCode = GetErrorCodeEx(info->errorCode);
     SoftBusCreateBusCenterFaultMsg(msg, info);
     int ret = SoftbusWriteHisEvt(msg);
     SoftbusFreeEvtReporMsg(msg);

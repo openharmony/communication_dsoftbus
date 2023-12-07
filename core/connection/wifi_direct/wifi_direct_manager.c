@@ -14,8 +14,11 @@
  */
 
 #include "wifi_direct_manager.h"
+
+#include "anonymizer.h"
 #include "securec.h"
 #include "softbus_error_code.h"
+#include "softbus_hidumper_conn.h"
 #include "lnn_distributed_net_ledger.h"
 #include "wifi_direct_negotiator.h"
 #include "wifi_direct_role_option.h"
@@ -51,7 +54,7 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *connectInfo, struct W
         .expectRole = connectInfo->expectApiRole,
         .peerIp = connectInfo->remoteMac
     };
-    CONN_EVENT(SCENE_CONNECT, STAGE_CONNECT_START, extra);
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_START, extra);
     char uuid[UUID_BUF_LEN] = {0};
     (void)connectInfo->negoChannel->getDeviceId(connectInfo->negoChannel, uuid, sizeof(uuid));
     int32_t ret = GetWifiDirectRoleOption()->getExpectedRole(connectInfo->remoteNetworkId, connectInfo->connectType,
@@ -73,7 +76,8 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *connectInfo, struct W
     GetWifiDirectCommandManager()->enqueueCommand(command);
     ret = GetWifiDirectNegotiator()->processNextCommand();
     extra.errcode = ret;
-    CONN_EVENT(SCENE_CONNECT, STAGE_CONNECT_INVOKE_PROTOCOL, extra);
+    extra.result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_INVOKE_PROTOCOL, extra);
     return ret;
 }
 
@@ -157,7 +161,7 @@ static int32_t GetLocalIpByUuid(const char *uuid, char *localIp, int32_t localIp
     return innerLink->getLocalIpString(innerLink, localIp, localIpSize);
 }
 
-static int32_t PrejudgeAvailability(const char *remoteNetworkId, enum WifiDirectConnectType connectType)
+static int32_t PrejudgeAvailability(const char *remoteNetworkId, enum WifiDirectLinkType connectType)
 {
     return GetWifiDirectNegotiator()->prejudgeAvailability(remoteNetworkId, connectType);
 }
@@ -210,7 +214,7 @@ static void OnRemoteP2pDisable(const char *networkId)
         return;
     }
     AnonymizeFree(anonymizedNetworkId);
-    GetLinkManager()->clearNegoChannelForLink(uuid, true);
+    GetLinkManager()->clearNegotiateChannelForLink(uuid, true);
 }
 
 /* private method implement */
@@ -321,6 +325,27 @@ static void OnInnerLinkChange(struct InnerLink *innerLink, bool isStateChange)
     AnonymizeFree(anonymizedRemoteUuid);
 }
 
+static int32_t WifiDirectDumperCallbackForShow(int32_t fd)
+{
+    GetResourceManager()->dump(fd);
+    GetLinkManager()->dump(fd);
+    return SOFTBUS_OK;
+}
+
+static int32_t WifiDirectDumperCallbackForSetFeature(int32_t fd)
+{
+    g_manager.feature = true;
+    dprintf(fd, "set feature=%d\n", g_manager.feature);
+    return SOFTBUS_OK;
+}
+
+static int32_t WifiDirectDumperCallbackForClearFeature(int32_t fd)
+{
+    g_manager.feature = false;
+    dprintf(fd, "set feature=%d\n", g_manager.feature);
+    return SOFTBUS_OK;
+}
+
 int32_t WifiDirectManagerInit(void)
 {
     CONN_LOGI(CONN_INIT, "init enter");
@@ -337,6 +362,16 @@ int32_t WifiDirectManagerInit(void)
     ListInit(&g_manager.callbackList);
     SetLnnInfo(IF_NAME_P2P);
     SetLnnInfo(IF_NAME_HML);
+
+    if (SoftBusRegConnVarDump("WifiDirectShow", WifiDirectDumperCallbackForShow) != SOFTBUS_OK) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "add dumper callback failed");
+    }
+    if (SoftBusRegConnVarDump("WifiDirectSet", WifiDirectDumperCallbackForSetFeature) != SOFTBUS_OK) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "add dumper callback failed");
+    }
+    if (SoftBusRegConnVarDump("WifiDirectClear", WifiDirectDumperCallbackForClearFeature) != SOFTBUS_OK) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "add dumper callback failed");
+    }
 
     return SOFTBUS_OK;
 }

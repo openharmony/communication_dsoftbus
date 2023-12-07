@@ -40,7 +40,11 @@ ohos_fuzztest("SoftBusHiDumperFuzzTest") {
     "-fstack-protector-strong",
   ]
 
-  deps = [ "$dsoftbus_root_path/core/common:softbus_utils" ]
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/common/dfx/hidumper_adapter:softbus_dfx_dump",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+  ]
 
   if (is_standard_system) {
     external_deps = [ "hilog:libhilog" ]

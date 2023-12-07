@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef SOFTBUS_SERVER_DATA_H
-#define SOFTBUS_SERVER_DATA_H
+#ifndef SOFTBUS_CLIENT_INFO_MANAGER_H
+#define SOFTBUS_CLIENT_INFO_MANAGER_H
 
 #include <map>
 #include <mutex>

@@ -34,6 +34,7 @@ ohos_unittest("SoftBusMessageOpenChannelTest") {
     "//third_party/cJSON",
     "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/core/transmission/trans_channel/auth/include",
+    "$dsoftbus_root_path/core/transmission/common/src",
     "$dsoftbus_root_path/adapter/common/kernel/posix",
   ]
 

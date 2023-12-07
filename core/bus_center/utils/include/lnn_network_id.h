@@ -24,6 +24,7 @@ extern "C" {
 
 int32_t LnnGenLocalNetworkId(char *networkId, uint32_t len);
 int32_t LnnGenLocalUuid(char *uuid, uint32_t len);
+int32_t LnnGenLocalIrk(unsigned char *irk, uint32_t len);
 
 #ifdef __cplusplus
 }

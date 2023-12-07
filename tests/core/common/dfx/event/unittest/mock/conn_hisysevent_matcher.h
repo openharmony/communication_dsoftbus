@@ -86,10 +86,6 @@ MATCHER_P2(ConnValidParamArrayMatcher, inExtra, validSize, "conn valid param arr
     ++index;
     EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
     EXPECT_EQ(params[index].t, g_connAssigners[index].type);
-    EXPECT_STREQ(params[index].v.s, extra.peerNetworkId);
-    ++index;
-    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
     EXPECT_STREQ(params[index].v.s, extra.peerBrMac);
     ++index;
     EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
@@ -122,10 +118,13 @@ MATCHER_P2(ConnInvalidParamArrayMatcher, inExtra, validSize, "conn invalid param
     params += SOFTBUS_ASSIGNER_SIZE; // Skip softbus params, they are matched by SoftbusParamArrayMatcher
     auto extra = static_cast<ConnEventExtra>(inExtra);
     int32_t index = 0;
-    int32_t errcodeIndex = 1;
-    EXPECT_STREQ(params[index].name, g_connAssigners[errcodeIndex].name);
-    EXPECT_EQ(params[index].t, g_connAssigners[errcodeIndex].type);
-    EXPECT_EQ(params[index].v.i32, extra.errcode);
+    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
+    EXPECT_EQ(params[index].v.i32, ((extra.result < 0) ? (-extra.result) : extra.result));
+    ++index;
+    EXPECT_STREQ(params[index].name, g_connAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_connAssigners[index].type);
+    EXPECT_EQ(params[index].v.i32, ((extra.errcode < 0) ? (-extra.errcode) : extra.errcode));
     EXPECT_EQ(++index, validSize);
     return true;
 }

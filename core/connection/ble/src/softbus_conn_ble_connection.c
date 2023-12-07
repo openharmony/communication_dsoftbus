@@ -170,7 +170,7 @@ void ConnBleFreeConnection(ConnBleConnection *connection)
 static GattService *CreateGattService(void)
 {
     GattService *gattService = SoftBusCalloc(sizeof(GattService));
-    CONN_CHECK_AND_RETURN_RET_LOG(gattService != NULL, NULL, "calloc gatt service failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(gattService != NULL, NULL, CONN_BLE, "calloc gatt service failed");
     SoftBusBtUuid serviceUuid = {
         .uuid = SOFTBUS_SERVICE_UUID,
         .uuidLen = strlen(SOFTBUS_SERVICE_UUID),
@@ -325,7 +325,7 @@ static void OnDisconnectedDataFinished(uint32_t connectionId, int32_t error)
 }
 
 
-int32_t ConnBleUpdateConnectionRc(ConnBleConnection *connection, int32_t delta)
+int32_t ConnBleUpdateConnectionRc(ConnBleConnection *connection, uint16_t challengeCode, int32_t delta)
 {
     int32_t status = SoftBusMutexLock(&connection->lock);
     if (status != SOFTBUS_OK) {
@@ -339,8 +339,9 @@ int32_t ConnBleUpdateConnectionRc(ConnBleConnection *connection, int32_t delta)
         connection->state = BLE_CONNECTION_STATE_NEGOTIATION_CLOSING;
     }
     (void)SoftBusMutexUnlock(&connection->lock);
-    CONN_LOGI(CONN_BLE, "ble notify refrence, connId=%u, handle=%d, side=%d, delta=%d, after update, localRc=%d,",
-        connection->connectionId, underlayerHandle, connection->side, delta, localRc);
+    CONN_LOGI(CONN_BLE, "ble notify refrence, connId=%u, handle=%d, side=%d, delta=%d, challenge=%u, "
+        "after update, localRc=%d,",
+        connection->connectionId, underlayerHandle, connection->side, delta, challengeCode, localRc);
 
     if (localRc <= 0) {
         if ((featureBitSet & (1 << BLE_FEATURE_SUPPORT_REMOTE_DISCONNECT)) == 0) {
@@ -362,6 +363,7 @@ int32_t ConnBleUpdateConnectionRc(ConnBleConnection *connection, int32_t delta)
             .delta = delta,
             .referenceNumber = localRc,
         },
+        .challengeCode = challengeCode,
     };
     uint8_t *data = NULL;
     uint32_t dataLen = 0;
@@ -384,11 +386,15 @@ int32_t ConnBleOnReferenceRequest(ConnBleConnection *connection, const cJSON *js
 {
     int32_t delta = 0;
     int32_t peerRc = 0;
+    uint16_t challengeCode = 0;
     if (!GetJsonObjectSignedNumberItem(json, CTRL_MSG_KEY_DELTA, &delta) ||
         !GetJsonObjectSignedNumberItem(json, CTRL_MSG_KEY_REF_NUM, &peerRc)) {
         CONN_LOGE(CONN_BLE, "connId=%u, parse delta or reference number fields failed, delta=%d, peer reference "
             "count=%d", connection->connectionId, delta, peerRc);
         return SOFTBUS_PARSE_JSON_ERR;
+    }
+    if (!GetJsonObjectNumber16Item(json, CTRL_MSG_KEY_CHALLENGE, &challengeCode)) {
+        CONN_LOGW(CONN_BLE, "connId=%u, old version NOT have KEY_CHALLENGE field", connection->connectionId);
     }
 
     int32_t status = SoftBusMutexLock(&connection->lock);
@@ -399,8 +405,8 @@ int32_t ConnBleOnReferenceRequest(ConnBleConnection *connection, const cJSON *js
     connection->connectionRc += delta;
     int32_t localRc = connection->connectionRc;
 
-    CONN_LOGI(CONN_BLE, "ble received reference request, connId=%u, delta=%d, peerRef=%d, localRc=%d",
-        connection->connectionId, delta, peerRc, localRc);
+    CONN_LOGI(CONN_BLE, "ble received reference request, connId=%u, delta=%d, peerRef=%d, localRc=%d, challenge=%u",
+        connection->connectionId, delta, peerRc, localRc, challengeCode);
     if (peerRc > 0) {
         if (connection->state == BLE_CONNECTION_STATE_NEGOTIATION_CLOSING) {
             ConnRemoveMsgFromLooper(&g_bleConnectionAsyncHandler, MSG_CONNECTION_WAIT_NEGOTIATION_CLOSING_TIMEOUT,
@@ -409,7 +415,7 @@ int32_t ConnBleOnReferenceRequest(ConnBleConnection *connection, const cJSON *js
             g_connectionListener.onConnectionResume(connection->connectionId);
         }
         (void)SoftBusMutexUnlock(&connection->lock);
-        NotifyReusedConnected(connection->connectionId);
+        NotifyReusedConnected(connection->connectionId, challengeCode);
         return SOFTBUS_OK;
     }
     if (localRc <= 0) {
@@ -429,6 +435,7 @@ int32_t ConnBleOnReferenceRequest(ConnBleConnection *connection, const cJSON *js
             .referenceNumber = localRc,
             .delta = 0,
         },
+        .challengeCode = challengeCode,
     };
     uint8_t *data = NULL;
     uint32_t dataLen = 0;

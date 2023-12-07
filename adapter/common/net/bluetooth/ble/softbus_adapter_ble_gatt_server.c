@@ -16,10 +16,10 @@
 
 #include "securec.h"
 
+#include "conn_log.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 #include "softbus_type_def.h"
 
 #include "c_header/ohos_bt_def.h"
@@ -44,7 +44,7 @@ int CheckGattsStatus(void)
         return SOFTBUS_ERR;
     }
     while (g_halRegFlag == 0) {
-        CLOGE("ble hal registerring");
+        CONN_LOGE(CONN_BLE, "ble hal registerring");
         static int tryTimes = WAIT_HAL_REG_RETRY;
         if (tryTimes > 0) {
             SoftBusSleepMs(WAIT_HAL_REG_TIME);
@@ -120,7 +120,7 @@ int SoftBusGattsStartService(int srvcHandle)
     if (CheckGattsStatus() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-    CLOGI("BLEINFOPRTINT:BleGattsStartService(%d, %d)", g_halServerId, srvcHandle);
+    CONN_LOGI(CONN_BLE, "BLEINFOPRTINT:BleGattsStartService(%d, %d)", g_halServerId, srvcHandle);
     if (BleGattsStartService(g_halServerId, srvcHandle) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
@@ -132,7 +132,7 @@ int SoftBusGattsStopService(int srvcHandle)
     if (CheckGattsStatus() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-    CLOGI("BLEINFOPRTINT:SoftBusGattsStopService(%d, %d)", g_halServerId, srvcHandle);
+    CONN_LOGI(CONN_BLE, "BLEINFOPRTINT:SoftBusGattsStopService(%d, %d)", g_halServerId, srvcHandle);
     if (BleGattsStopService(g_halServerId, srvcHandle) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
@@ -157,10 +157,10 @@ int SoftBusGattsConnect(SoftBusBtAddr btAddr)
     }
     BdAddr addr;
     if (memcpy_s(addr.addr, BT_ADDR_LEN, btAddr.addr, BT_ADDR_LEN) != EOK) {
-        CLOGE("memcpy fail");
+        CONN_LOGE(CONN_BLE, "memcpy fail");
         return SOFTBUS_ERR;
     }
-    CLOGI("BleGattsConnect start");
+    CONN_LOGI(CONN_BLE, "BleGattsConnect start");
     if (BleGattsConnect(g_halServerId, addr) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
@@ -174,10 +174,10 @@ int SoftBusGattsDisconnect(SoftBusBtAddr btAddr, int connId)
     }
     BdAddr addr;
     if (memcpy_s(addr.addr, BT_ADDR_LEN, btAddr.addr, BT_ADDR_LEN) != EOK) {
-        CLOGE("memcpy fail");
+        CONN_LOGE(CONN_BLE, "memcpy fail");
         return SOFTBUS_ERR;
     }
-    CLOGI("BleGattsDisconnect start");
+    CONN_LOGI(CONN_BLE, "BleGattsDisconnect start");
     if (BleGattsDisconnect(g_halServerId, addr, connId) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
@@ -204,7 +204,7 @@ int SoftBusGattsSendResponse(SoftBusGattsResponse *param)
 
 int SoftBusGattsSendNotify(SoftBusGattsNotify *param)
 {
-    CLOGI("SoftBusGattsSendNotify enter");
+    CONN_LOGI(CONN_BLE, "SoftBusGattsSendNotify enter");
     if (CheckGattsStatus() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
@@ -215,10 +215,10 @@ int SoftBusGattsSendNotify(SoftBusGattsNotify *param)
         .valueLen = param->valueLen,
         .value = param->value
     };
-    CLOGI("SoftBusGattsSendNotify call BleGattsSendIndication halconnId:%d attrHandle:%d confirm:%d",
+    CONN_LOGI(CONN_BLE, "SoftBusGattsSendNotify call BleGattsSendIndication halconnId:%d attrHandle:%d confirm:%d",
         notify.connectId, notify.attrHandle, notify.confirm);
     if (BleGattsSendIndication(g_halServerId, &notify) != SOFTBUS_OK) {
-        CLOGE("SoftBusGattsSendNotify failed");
+        CONN_LOGE(CONN_BLE, "SoftBusGattsSendNotify failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -226,30 +226,30 @@ int SoftBusGattsSendNotify(SoftBusGattsNotify *param)
 
 static void BleRegisterServerCallback(int status, int serverId, BtUuid *appUuid)
 {
-    CLOGI("BleRegisterServerCallback status=%d severId=%d", status, serverId);
+    CONN_LOGI(CONN_BLE, "BleRegisterServerCallback status=%d severId=%d", status, serverId);
     if ((appUuid == NULL) || (appUuid->uuid == NULL)) {
-        CLOGE("BleRegisterServerCallback appUuid is null");
+        CONN_LOGE(CONN_BLE, "BleRegisterServerCallback appUuid is null");
         return;
     }
 
     if (memcmp(appUuid->uuid, SOFTBUS_APP_UUID, appUuid->uuidLen) != 0) {
-        CLOGE("BleRegisterServerCallback unknown uuid");
+        CONN_LOGE(CONN_BLE, "BleRegisterServerCallback unknown uuid");
         return;
     }
 
     if (status != SOFTBUS_OK) {
-        CLOGE("BleRegisterServerCallback failed, status=%d", status);
+        CONN_LOGE(CONN_BLE, "BleRegisterServerCallback failed, status=%d", status);
         g_halRegFlag = -1;
     } else {
         g_halRegFlag = 1;
         g_halServerId = serverId;
-        CLOGI("BLEINFOPRTINT:BleRegisterServerCallback g_halServerId:%d)", g_halServerId);
+        CONN_LOGI(CONN_BLE, "BLEINFOPRTINT:BleRegisterServerCallback g_halServerId:%d)", g_halServerId);
     }
 }
 
 static void BleConnectServerCallback(int connId, int serverId, const BdAddr *bdAddr)
 {
-    CLOGI("ConnectServerCallback is coming, connId=%d serverId=%d\n", connId, serverId);
+    CONN_LOGI(CONN_BLE, "ConnectServerCallback is coming, connId=%d serverId=%d\n", connId, serverId);
     if (serverId != g_halServerId) {
         return;
     }
@@ -258,7 +258,7 @@ static void BleConnectServerCallback(int connId, int serverId, const BdAddr *bdA
 
 static void BleDisconnectServerCallback(int connId, int serverId, const BdAddr *bdAddr)
 {
-    CLOGI("DisconnectServerCallback is coming, connId=%d severId=%d", connId, serverId);
+    CONN_LOGI(CONN_BLE, "DisconnectServerCallback is coming, connId=%d severId=%d", connId, serverId);
     if (serverId != g_halServerId) {
         return;
     }
@@ -268,11 +268,11 @@ static void BleDisconnectServerCallback(int connId, int serverId, const BdAddr *
 static void BleServiceAddCallback(int status, int serverId, BtUuid *uuid, int srvcHandle)
 {
     (void)serverId;
-    CLOGI("ServiceAddCallback srvcHandle=%d\n", srvcHandle);
+    CONN_LOGI(CONN_BLE, "ServiceAddCallback srvcHandle=%d\n", srvcHandle);
     if (serverId != g_halServerId) {
         return;
     }
-    CLOGI("BLEINFOPRTINT:BleServiceAddCallback srvcHandle:%d)", srvcHandle);
+    CONN_LOGI(CONN_BLE, "BLEINFOPRTINT:BleServiceAddCallback srvcHandle:%d)", srvcHandle);
     g_gattsCallback->ServiceAddCallback(status, (SoftBusBtUuid *)uuid, srvcHandle);
 }
 
@@ -281,45 +281,46 @@ static void BleIncludeServiceAddCallback(int status, int serverId, int srvcHandl
 {
     (void)serverId;
     (void)srvcHandle;
-    CLOGI("IncludeServiceAddCallback srvcHandle=%d,includeSrvcHandle=%d\n", srvcHandle, includeSrvcHandle);
+    CONN_LOGI(CONN_BLE, "IncludeServiceAddCallback srvcHandle=%d,includeSrvcHandle=%d\n", srvcHandle,
+        includeSrvcHandle);
 }
 
 static void BleCharacteristicAddCallback(int status, int serverId, BtUuid *uuid, int srvcHandle,
     int characteristicHandle)
 {
-    CLOGI("CharacteristicAddCallback srvcHandle=%d,charHandle=%d\n", srvcHandle, characteristicHandle);
+    CONN_LOGI(CONN_BLE, "CharacteristicAddCallback srvcHandle=%d,charHandle=%d\n", srvcHandle, characteristicHandle);
     if (serverId != g_halServerId) {
-        CLOGE("bad server id");
+        CONN_LOGE(CONN_BLE, "bad server id");
         return;
     }
-    CLOGI("BLEINFOPRTINT:BleCharacteristicAddCallback characteristicHandle:%d)", characteristicHandle);
+    CONN_LOGI(CONN_BLE, "BLEINFOPRTINT:BleCharacteristicAddCallback characteristicHandle:%d)", characteristicHandle);
     g_gattsCallback->CharacteristicAddCallback(status, (SoftBusBtUuid *)uuid, srvcHandle, characteristicHandle);
 }
 
 static void BleDescriptorAddCallback(int status, int serverId, BtUuid *uuid,
     int srvcHandle, int descriptorHandle)
 {
-    CLOGI("DescriptorAddCallback srvcHandle=%d,descriptorHandle=%d", srvcHandle, descriptorHandle);
+    CONN_LOGI(CONN_BLE, "DescriptorAddCallback srvcHandle=%d,descriptorHandle=%d", srvcHandle, descriptorHandle);
     if (serverId != g_halServerId) {
         return;
     }
-    CLOGI("BLEINFOPRTINT:BleDescriptorAddCallback descriptorHandle:%d)", descriptorHandle);
+    CONN_LOGI(CONN_BLE, "BLEINFOPRTINT:BleDescriptorAddCallback descriptorHandle:%d)", descriptorHandle);
     g_gattsCallback->DescriptorAddCallback(status, (SoftBusBtUuid *)uuid, srvcHandle, descriptorHandle);
 }
 
 static void BleServiceStartCallback(int status, int serverId, int srvcHandle)
 {
-    CLOGI("ServiceStartCallback serverId=%d,srvcHandle=%d\n", serverId, srvcHandle);
+    CONN_LOGI(CONN_BLE, "ServiceStartCallback serverId=%d,srvcHandle=%d\n", serverId, srvcHandle);
     if (serverId != g_halServerId) {
         return;
     }
-    CLOGI("BLEINFOPRTINT:BleServiceStartCallback srvcHandle:%d)", srvcHandle);
+    CONN_LOGI(CONN_BLE, "BLEINFOPRTINT:BleServiceStartCallback srvcHandle:%d)", srvcHandle);
     g_gattsCallback->ServiceStartCallback(status, srvcHandle);
 }
 
 static void BleServiceStopCallback(int status, int serverId, int srvcHandle)
 {
-    CLOGI("ServiceStopCallback serverId=%d,srvcHandle=%d\n", serverId, srvcHandle);
+    CONN_LOGI(CONN_BLE, "ServiceStopCallback serverId=%d,srvcHandle=%d\n", serverId, srvcHandle);
     if (serverId != g_halServerId) {
         return;
     }
@@ -328,7 +329,7 @@ static void BleServiceStopCallback(int status, int serverId, int srvcHandle)
 
 static void BleServiceDeleteCallback(int status, int serverId, int srvcHandle)
 {
-    CLOGI("ServiceDeleteCallback serverId=%d,srvcHandle=%d\n", serverId, srvcHandle);
+    CONN_LOGI(CONN_BLE, "ServiceDeleteCallback serverId=%d,srvcHandle=%d\n", serverId, srvcHandle);
     if (serverId != g_halServerId) {
         return;
     }
@@ -337,7 +338,7 @@ static void BleServiceDeleteCallback(int status, int serverId, int srvcHandle)
 
 static void BleRequestReadCallback(BtReqReadCbPara readCbPara)
 {
-    CLOGI("RequestReadCallback transId=%d, attrHandle=%d\n", readCbPara.transId, readCbPara.attrHandle);
+    CONN_LOGI(CONN_BLE, "RequestReadCallback transId=%d, attrHandle=%d\n", readCbPara.transId, readCbPara.attrHandle);
     SoftBusGattReadRequest req = {
         .connId = readCbPara.connId,
         .transId = readCbPara.transId,
@@ -351,7 +352,8 @@ static void BleRequestReadCallback(BtReqReadCbPara readCbPara)
 
 static void BleRequestWriteCallback(BtReqWriteCbPara writeCbPara)
 {
-    CLOGI("RequestWriteCallback transId=%d, attrHandle=%d\n", writeCbPara.transId, writeCbPara.attrHandle);
+    CONN_LOGI(CONN_BLE, "RequestWriteCallback transId=%d, attrHandle=%d\n", writeCbPara.transId,
+        writeCbPara.attrHandle);
     SoftBusGattWriteRequest req = {
         .connId = writeCbPara.connId,
         .transId = writeCbPara.transId,
@@ -368,19 +370,19 @@ static void BleRequestWriteCallback(BtReqWriteCbPara writeCbPara)
 
 static void BleResponseConfirmationCallback(int status, int handle)
 {
-    CLOGI("ResponseConfirmationCallback status=%d, handle=%d\n", status, handle);
+    CONN_LOGI(CONN_BLE, "ResponseConfirmationCallback status=%d, handle=%d\n", status, handle);
     g_gattsCallback->ResponseConfirmationCallback(status, handle);
 }
 
 static void BleIndicationSentCallback(int connId, int status)
 {
-    CLOGI("IndicationSentCallback status=%d, connId=%d\n", status, connId);
+    CONN_LOGI(CONN_BLE, "IndicationSentCallback status=%d, connId=%d\n", status, connId);
     g_gattsCallback->NotifySentCallback(connId, status);
 }
 
 static void BleMtuChangeCallback(int connId, int mtu)
 {
-    CLOGI("MtuChangeCallback connId=%d, mtu=%d\n", connId, mtu);
+    CONN_LOGI(CONN_BLE, "MtuChangeCallback connId=%d, mtu=%d\n", connId, mtu);
     g_gattsCallback->MtuChangeCallback(connId, mtu);
 }
 
@@ -407,17 +409,17 @@ static int GattsRegisterHalCallback(void)
 int SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback)
 {
     if (callback == NULL) {
-        CLOGE("SoftBusRegisterGattsCallbacks fail:nullptr");
+        CONN_LOGE(CONN_BLE, "SoftBusRegisterGattsCallbacks fail:nullptr");
         return SOFTBUS_BLECONNECTION_REG_GATTS_CALLBACK_FAIL;
     }
     if (g_gattsCallback != NULL) {
-        CLOGW("SoftBusRegisterGattsCallbacks register again");
+        CONN_LOGW(CONN_BLE, "SoftBusRegisterGattsCallbacks register again");
     } else {
         g_gattsCallback = callback;
     }
     int ret = GattsRegisterHalCallback();
     if (ret != SOFTBUS_OK) {
-        CLOGE("SoftBusRegisterGattsCallbacks GattsRegisterCallbacks failed:%d", ret);
+        CONN_LOGE(CONN_BLE, "SoftBusRegisterGattsCallbacks GattsRegisterCallbacks failed:%d", ret);
         return SOFTBUS_BLECONNECTION_REG_GATTS_CALLBACK_FAIL;
     }
     if (g_halRegFlag == -1) {
@@ -428,7 +430,7 @@ int SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback)
         ret = BleGattsRegister(uuid);
         if (ret != SOFTBUS_OK) {
             g_halRegFlag = -1;
-            CLOGE("BleGattsRegister failed%d", ret);
+            CONN_LOGE(CONN_BLE, "BleGattsRegister failed%d", ret);
             return SOFTBUS_BLECONNECTION_REG_GATTS_CALLBACK_FAIL;
         }
     }
@@ -438,15 +440,15 @@ int SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback)
 void SoftBusUnRegisterGattsCallbacks(void)
 {
     if (g_gattsCallback == NULL) {
-        CLOGI("no need to unregist gatts callback.");
+        CONN_LOGI(CONN_BLE, "no need to unregist gatts callback.");
         return;
     }
     if (g_halRegFlag == -1) {
-        CLOGI("no need to unregist gatt server.");
+        CONN_LOGI(CONN_BLE, "no need to unregist gatt server.");
         return;
     }
     if (BleGattsUnRegister(g_halServerId) != SOFTBUS_OK) {
-        CLOGE("BleGattsUnRegister error.");
+        CONN_LOGE(CONN_BLE, "BleGattsUnRegister error.");
         return;
     }
     g_halServerId = -1;

@@ -22,10 +22,16 @@
 extern "C" {
 #endif
 
-#define CONN_EVENT(scene, stage, extra) ConnEventInner(scene, stage, __FUNCTION__, __LINE__, extra)
+#define CONN_EVENT(scene, stage, extra) ConnEventInner(scene, stage, __FUNCTION__, __LINE__, &extra)
+#define CONN_ALARM(scene, type, extra) ConnAlarmInner(scene, type, __FUNCTION__, __LINE__, &extra)
+#define CONN_STATS(scene, extra) ConnStatsInner(scene, __FUNCTION__, __LINE__, &extra)
+#define CONN_AUDIT(scene, extra) ConnAuditInner(scene, __FUNCTION__, __LINE__, &extra)
 
 /* For inner use only */
-void ConnEventInner(int32_t scene, int32_t stage, const char *func, int32_t line, ConnEventExtra extra);
+void ConnEventInner(int32_t scene, int32_t stage, const char *func, int32_t line, ConnEventExtra *extra);
+void ConnAlarmInner(int32_t scene, int32_t type, const char *func, int32_t line, ConnAlarmExtra *extra);
+void ConnStatsInner(int32_t scene, const char *func, int32_t line, ConnStatsExtra *extra);
+void ConnAuditInner(int32_t scene, const char *func, int32_t line, ConnAuditExtra *extra);
 
 #ifdef __cplusplus
 }

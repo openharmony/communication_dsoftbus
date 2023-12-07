@@ -15,6 +15,7 @@
 
 #include "trans_session_service.h"
 
+#include "anonymizer.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
@@ -132,7 +133,7 @@ int32_t TransOpenSession(const SessionParam *param, TransInfo *info)
     if (!IsValidString(param->sessionName, SESSION_NAME_SIZE_MAX) ||
         !IsValidString(param->peerSessionName, SESSION_NAME_SIZE_MAX) ||
         !IsValidString(param->peerDeviceId, DEVICE_ID_SIZE_MAX) ||
-        param->qosCount > QOS_TYPE_BUTT) {
+        (param->isQosLane && param->qosCount > QOS_TYPE_BUTT)) {
         return SOFTBUS_INVALID_PARAM;
     }
     if (param->groupId == NULL || strlen(param->groupId) >= GROUP_ID_SIZE_MAX) {

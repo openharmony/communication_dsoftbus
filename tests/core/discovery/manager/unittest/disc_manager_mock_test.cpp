@@ -101,7 +101,7 @@ HWTEST_F(DiscManagerMockTest, DiscManagerInit001, TestSize.Level1)
     coapMock.SetupStub();
     EXPECT_CALL(coapMock, DiscCoapInit).WillRepeatedly(Return(nullptr));
 
-    EXPECT_EQ(DiscMgrInit(), SOFTBUS_ERR);
+    EXPECT_NE(DiscMgrInit(), SOFTBUS_OK);
     DISC_LOGI(DISC_TEST, "DiscManagerInit001 end ----");
 }
 

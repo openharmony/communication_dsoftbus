@@ -46,6 +46,7 @@ if (dsoftbus_feature_ex_kits) {
   disc_coap_src += [ "$dsoftbus_root_path/core/discovery/coap/nstackx_coap/src/disc_coap_capability.c" ]
 }
 disc_coap_deps = [
+  "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
   "$dsoftbus_dfx_path/log:softbus_dfx_log",
   "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",
 ]

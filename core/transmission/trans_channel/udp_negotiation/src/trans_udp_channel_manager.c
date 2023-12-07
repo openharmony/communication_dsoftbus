@@ -146,7 +146,7 @@ int32_t TransAddUdpChannel(UdpChannelInfo *channel)
 {
     if (g_udpChannelMgr == NULL) {
         TRANS_LOGE(TRANS_INIT, "udp channel manager hasn't init.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
 
     if (channel == NULL) {
@@ -165,7 +165,7 @@ int32_t TransAddUdpChannel(UdpChannelInfo *channel)
             TRANS_LOGE(TRANS_CTRL, "udp channel has exited. channelId=%" PRId64,
                 channel->info.myData.channelId);
             (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
-            return SOFTBUS_ERR;
+            return SOFTBUS_TRANS_UDP_CHANNEL_ALREADY_EXIST;
         }
     }
     ListInit(&(channel->node));

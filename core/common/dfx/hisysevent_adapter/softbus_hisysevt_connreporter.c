@@ -562,11 +562,7 @@ int32_t SoftbusRecordConnResult(uint32_t pId, SoftBusConnType connType, SoftBusC
     record->mConnFailTime += costTime;
     record->mConnFailCount++;
     SoftBusMutexUnlock(&g_connResApiLock);
-    if (connType == SOFTBUS_HISYSEVT_CONN_TYPE_BR) {
-        errCode = GetErrorCodeEx(errCode, SOFTBUS_HISYSEVT_CONN_TYPE_BR);
-    } else {
-        errCode = GetErrorCodeEx(errCode, SOFTBUS_MOD_CONNECT);
-    }
+    errCode = GetErrorCodeEx(errCode);
     COMM_CHECK_AND_RETURN_RET_LOGE(SoftbusReportConnFault(connType, errCode, pkgName) == SOFTBUS_OK, SOFTBUS_ERR,
                                   COMM_EVENT, "report conn fault event fail!");
     return SOFTBUS_OK;

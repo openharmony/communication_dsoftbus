@@ -63,7 +63,7 @@ static int32_t CreateServer(struct P2pEntityState *self, struct WifiDirectConnec
     CONN_CHECK_AND_RETURN_RET_LOGW(params, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "params is null");
     SetLinkAttr(params);
     struct WifiDirectP2pAdapter *adapter = GetWifiDirectP2pAdapter();
-    int32_t ret = adapter->createGroup(params->freq, params->isWideBandSupported);
+    int32_t ret = adapter->createGroup(params->frequency, params->isWideBandSupported);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "p2p create group failed");
 
     GetP2pEntity()->changeState(P2P_ENTITY_STATE_GROUP_CREATING);

@@ -26,7 +26,7 @@ extern "C" {
 #endif
 
 enum InnerLinkKey {
-    IL_KEY_CONNECT_TYPE = 1,
+    IL_KEY_LINK_TYPE = 1,
     IL_KEY_STATE = 2,
     IL_KEY_LOCAL_INTERFACE = 3,
     IL_KEY_LOCAL_BASE_MAC = 4,
@@ -36,14 +36,12 @@ enum InnerLinkKey {
     IL_KEY_REMOTE_BASE_MAC = 8,
     IL_KEY_REMOTE_DYNAMIC_MAC = 9,
     IL_KEY_REMOTE_IPV4 = 10,
-    IL_KEY_IS_CLIENT = 11,
-    IL_KEY_IS_BEING_USED_BY_LOCAL = 12,
-    IL_KEY_IS_BEING_USED_BY_REMOTE = 13,
-    IL_KEY_IS_SOURCE = 14,
-    IL_KEY_FREQUENCY = 15,
-    IL_KEY_STATE_CHANGE_TIME = 16,
-    IL_KEY_DEVICE_ID = 17,
-    IL_KEY_NEGO_CHANNEL = 18,
+    IL_KEY_IS_BEING_USED_BY_LOCAL = 11,
+    IL_KEY_IS_BEING_USED_BY_REMOTE = 12,
+    IL_KEY_FREQUENCY = 13,
+    IL_KEY_STATE_CHANGE_TIME = 14,
+    IL_KEY_DEVICE_ID = 15,
+    IL_KEY_NEGO_CHANNEL = 16,
 
     IL_KEY_MAX
 };
@@ -72,18 +70,16 @@ struct InnerLink {
     bool (*containId)(struct InnerLink *self, int32_t linkId);
     void (*setState)(struct InnerLink *self, enum InnerLinkState state);
     bool (*isProtected)(struct InnerLink *self);
-    void (*dumpLinkId)(struct InnerLink *self);
+    void (*dumpLinkId)(struct InnerLink *self, int32_t fd);
 
     /* for link manager */
     ListNode node;
     int32_t reference;
-    enum WifiDirectProcessorType processorType;
-
     ListNode idList;
 };
 
 void InnerLinkConstructor(struct InnerLink *self);
-void InnerLinkConstructorWithArgs(struct InnerLink *self, enum WifiDirectConnectType type, bool isClient,
+void InnerLinkConstructorWithArgs(struct InnerLink *self, enum WifiDirectLinkType type,
                                   const char *localInterface, const char *remoteMac);
 void InnerLinkDestructor(struct InnerLink *self);
 struct InnerLink* InnerLinkNew(void);

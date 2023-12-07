@@ -38,6 +38,7 @@ void LnnDeinitFastOffline(void);
 int32_t LnnSendNotTrustedInfo(const NotTrustedDelayInfo *info, uint32_t num, LnnSyncInfoMsgComplete complete);
 int32_t LnnBleFastOfflineOnceBegin(void);
 void LnnIpAddrChangeEventHandler(void);
+void EhLoginEventHandler(void);
 
 #ifdef __cplusplus
 }

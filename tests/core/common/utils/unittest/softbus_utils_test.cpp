@@ -21,6 +21,11 @@
 using namespace testing::ext;
 
 namespace OHOS {
+constexpr uint32_t ERROR_CODE_SUB_SYSTEM_INDEX = 21;
+constexpr uint32_t ERROR_CODE_MODULE_INDEX = 16;
+constexpr uint32_t ERROR_CODE_SUB_SYSTEM_AND = 0x1FE00000;
+constexpr uint32_t ERROR_CODE_MODULE_AND = 0x1F0000;
+
 class SoftBusUtilsTest : public testing::Test {
 public:
     static void SetUpTestCase(void) {}
@@ -323,5 +328,83 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToStr_002, TestSize.Leve
 
     const char *expect = "65:66:67:68:69:6a";
     EXPECT_STREQ(expect, strMac);
+}
+
+/**
+ * @tc.name: SoftBusUtilsTest_SoftbusErrorCodeStandard_001
+ * @tc.desc: Test softbus event error code.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_SoftbusErrorCodeStandard_001, TestSize.Level1)
+{
+    uint32_t errorCode = -SOFTBUS_PUBLIC_ERR_BASE;
+    EXPECT_EQ(((errorCode & ERROR_CODE_SUB_SYSTEM_AND) >> ERROR_CODE_SUB_SYSTEM_INDEX), SOFTBUS_SUB_SYSTEM);
+    EXPECT_EQ(((errorCode & ERROR_CODE_MODULE_AND) >> ERROR_CODE_MODULE_INDEX), PUBLIC_SUB_MODULE_CODE);
+}
+
+/**
+ * @tc.name: SoftBusUtilsTest_SoftbusErrorCodeStandard_002
+ * @tc.desc: Test disc event error code.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_SoftbusErrorCodeStandard_002, TestSize.Level1)
+{
+    uint32_t errorCode = -SOFTBUS_DISCOVER_ERR_BASE;
+    EXPECT_EQ(((errorCode & ERROR_CODE_SUB_SYSTEM_AND) >> ERROR_CODE_SUB_SYSTEM_INDEX), SOFTBUS_SUB_SYSTEM);
+    EXPECT_EQ(((errorCode & ERROR_CODE_MODULE_AND) >> ERROR_CODE_MODULE_INDEX), DISC_SUB_MODULE_CODE);
+}
+
+/**
+ * @tc.name: SoftBusUtilsTest_SoftbusErrorCodeStandard_003
+ * @tc.desc: Test conn event error code.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_SoftbusErrorCodeStandard_003, TestSize.Level1)
+{
+    uint32_t errorCode = -SOFTBUS_CONN_ERR_BASE;
+    EXPECT_EQ(((errorCode & ERROR_CODE_SUB_SYSTEM_AND) >> ERROR_CODE_SUB_SYSTEM_INDEX), SOFTBUS_SUB_SYSTEM);
+    EXPECT_EQ(((errorCode & ERROR_CODE_MODULE_AND) >> ERROR_CODE_MODULE_INDEX), CONN_SUB_MODULE_CODE);
+}
+
+/**
+ * @tc.name: SoftBusUtilsTest_SoftbusErrorCodeStandard_004
+ * @tc.desc: Test auth event error code.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_SoftbusErrorCodeStandard_004, TestSize.Level1)
+{
+    uint32_t errorCode = -SOFTBUS_AUTH_ERR_BASE;
+    EXPECT_EQ(((errorCode & ERROR_CODE_SUB_SYSTEM_AND) >> ERROR_CODE_SUB_SYSTEM_INDEX), SOFTBUS_SUB_SYSTEM);
+    EXPECT_EQ(((errorCode & ERROR_CODE_MODULE_AND) >> ERROR_CODE_MODULE_INDEX), AUTH_SUB_MODULE_CODE);
+}
+
+/**
+ * @tc.name: SoftBusUtilsTest_SoftbusErrorCodeStandard_005
+ * @tc.desc: Test lnn event error code.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_SoftbusErrorCodeStandard_005, TestSize.Level1)
+{
+    uint32_t errorCode = -SOFTBUS_NETWORK_ERR_BASE;
+    EXPECT_EQ(((errorCode & ERROR_CODE_SUB_SYSTEM_AND) >> ERROR_CODE_SUB_SYSTEM_INDEX), SOFTBUS_SUB_SYSTEM);
+    EXPECT_EQ(((errorCode & ERROR_CODE_MODULE_AND) >> ERROR_CODE_MODULE_INDEX), LNN_SUB_MODULE_CODE);
+}
+
+/**
+ * @tc.name: SoftBusUtilsTest_SoftbusErrorCodeStandard_006
+ * @tc.desc: Test trans event error code.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_SoftbusErrorCodeStandard_006, TestSize.Level1)
+{
+    uint32_t errorCode = -SOFTBUS_TRANS_ERR_BASE;
+    EXPECT_EQ(((errorCode & ERROR_CODE_SUB_SYSTEM_AND) >> ERROR_CODE_SUB_SYSTEM_INDEX), SOFTBUS_SUB_SYSTEM);
+    EXPECT_EQ(((errorCode & ERROR_CODE_MODULE_AND) >> ERROR_CODE_MODULE_INDEX), TRANS_SUB_MODULE_CODE);
 }
 } // namespace OHOS

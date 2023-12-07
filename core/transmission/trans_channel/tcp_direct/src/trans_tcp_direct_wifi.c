@@ -45,13 +45,13 @@ static int32_t AddTcpConnAndSessionInfo(int32_t newchannelId, int32_t fd, Sessio
     if (TransTdcAddSessionConn(newConn) != SOFTBUS_OK) {
         TransSrvDelDataBufNode(newchannelId);
         SoftBusFree(newConn);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_ADD_SESSION_CONN_FAILED;
     }
     if (AddTrigger(module, newConn->appInfo.fd, WRITE_TRIGGER) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "OpenTcpDirectChannel add trigger fail");
         TransDelSessionConnById(newConn->channelId);
         TransSrvDelDataBufNode(newchannelId);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_ADD_TRIGGER_FAILED;
     }
     return SOFTBUS_OK;
 }
@@ -90,7 +90,7 @@ int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
         module = LnnGetProtocolListenerModule(connInfo->socketOption.protocol, LNN_LISTENER_MODE_DIRECT);
     }
     if (module == UNUSE_BUTT) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_TCP_UNUSE_LISTENER_MODE;
     }
 
     SessionConn *newConn = CreateNewSessinConn(module, false);
@@ -111,14 +111,14 @@ int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
     if (newConn->authId == AUTH_INVALID_ID) {
         SoftBusFree(newConn);
         TRANS_LOGE(TRANS_CTRL, "get authId fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED;
     }
 
     int32_t fd = ConnOpenClientSocket(connInfo, BIND_ADDR_ALL, true);
     if (fd < 0) {
         SoftBusFree(newConn);
         TRANS_LOGE(TRANS_CTRL, "connect fail");
-        return SOFTBUS_CONN_FAIL;
+        return fd;
     }
     newConn->appInfo.fd = fd;
 

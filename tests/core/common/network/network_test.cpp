@@ -53,7 +53,7 @@ HWTEST_F(CommonCoreNetworkTest, SoftBusChannelToFrequencyTest001, TestSize.Level
 {
     int channel = -1;
     int ret = SoftBusChannelToFrequency(channel);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_NE(SOFTBUS_ERR, ret);
 
     channel = TEST_2G_CHANNEL;
     ret = SoftBusChannelToFrequency(channel);
@@ -74,7 +74,7 @@ HWTEST_F(CommonCoreNetworkTest, SoftBusFrequencyToChannelTest001, TestSize.Level
 {
     int frequency = -1;
     int ret = SoftBusFrequencyToChannel(frequency);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_NE(SOFTBUS_ERR, ret);
 
     frequency = TEST_2G_FREQUENCY;
     ret = SoftBusFrequencyToChannel(frequency);

@@ -204,80 +204,77 @@
 
 **3、传输**
 
-1.  创建会话服务，并设置会话相关回调，用户可在回调中处理打开/关闭和消息接收事件。
+1.  创建Socket。
 
     ```C
-    // 会话管理回调
     typedef struct {
-        int (*OnSessionOpened)(int sessionId, int result);
-        void (*OnSessionClosed)(int sessionId);
-        void (*OnBytesReceived)(int sessionId, const void *data, unsigned int dataLen);
-        void (*OnMessageReceived)(int sessionId, const void *data, unsigned int dataLen);
-        void (*OnStreamReceived)(int sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param);
-        void (*OnQosEvent)(int sessionId, int eventId, int tvCount, const QosTv *tvList);
-    } ISessionListener;
+        char *name;                 // 本端Socket名称
+        char *peerName;             // 对端Socket名称
+        char *peerNetworkId;        // 对端Socket的网络ID
+        char *pkgName;              // 调用者包名
+        TransDataType dataType;     // 传输的数据类型，需要与发送方法一致
+    } SocketInfo;
     
-    // 创建会话服务
-    int CreateSessionServer(const char *pkgName, const char *sessionName, const ISessionListener* listener);
+    // 创建Socket
+    int32_t Socket(SocketInfo info);
     ```
 
-2.  [可选] 如果需要完成文件的发送和接收，可以注册文件传输回调， 用户可在回调中处理文件发送/接收事件。
+2.  服务端启动监听，客户端进行绑定。
 
     ```C
-    // 文件发送回调
+    // Socket回调函数
     typedef struct {
-        int (*OnSendFileProcess)(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal);
-        int (*OnSendFileFinished)(int sessionId, const char *firstFile);
-        void (*OnFileTransError)(int sessionId);
-    } IFileSendListener;
+        void (*OnBind)(int32_t socket, PeerSocketInfo info);
+        void (*OnShutdown)(int32_t socket, ShutdownReason reason);
+        void (*OnBytes)(int32_t socket, const void *data, uint32_t dataLen);
+        void (*OnMessage)(int32_t socket, const void *data, uint32_t dataLen);
+        void (*OnStream)(int32_t socket, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param);
+        void (*OnFile)(int32_t socket, FileEvent *event);
+        void (*OnQos)(int32_t socket, QoSEvent eventId, const QosTV *qos, uint32_t qosCount);
+    } ISocketListener;
 
-    // 注册文件发送回调
-    int SetFileSendListener(const char *pkgName, const char *sessionName, const IFileSendListener *sendListener);
+    typedef enum {
+        QOS_TYPE_MIN_BW,            // 最小带宽
+        QOS_TYPE_MAX_LATENCY,       // 最大建链时延
+        QOS_TYPE_MIN_LATENCY,       // 最小建链时延
+        QOS_TYPE_MAX_WAIT_TIMEOUT,  // 最大超时时间
+        QOS_TYPE_MAX_BUFFER,        // 最大缓存
+        QOS_TYPE_FIRST_PACKAGE,     // 首包大小
+        QOS_TYPE_MAX_IDLE_TIMEOUT,  // 最大空闲时间
+        QOS_TYPE_TRANS_RELIABILITY, // 传输可靠性
+        QOS_TYPE_BUTT,
+    } QosType;
 
-    // 文件接收回调
     typedef struct {
-        int (*OnReceiveFileStarted)(int sessionId, const char *files, int fileCnt);
-        int (*OnReceiveFileProcess)(int sessionId, const char *firstFile, uint64_t bytesUpload, uint64_t bytesTotal);
-        void (*OnReceiveFileFinished)(int sessionId, const char *files, int fileCnt);
-        void (*OnFileTransError)(int sessionId);
-    } IFileReceiveListener;
+        QosType qos;
+        int32_t value;
+    } QosTV;
 
-    // 注册文件接收回调
-    int SetFileReceiveListener(const char *pkgName, const char *sessionName,const IFileReceiveListener *recvListener, const char *rootDir);
+    // 监听Socket，由服务端开启。
+    int32_t Listen(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener);
+
+    // 绑定Socket，由客户端开启。
+    int32_t Bind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener);
     ```
 
-3.  创建会话，用于收发数据。
-
-    ```C
-    // 创建会话
-    int OpenSession(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId, const char *groupId, const SessionAttribute* attr);
-    ```
-
-4. 通过sessionId向对端设备发送数据。
+4. 通过Socket向对端设备发送数据。
 
     ```C
     // 发送字节数据
-    int SendBytes(int sessionId, const void *data, unsigned int len);
+    int32_t SendBytes(int32_t socket, const void *data, uint32_t len);
     // 发送消息数据
-    int SendMessage(int sessionId, const void *data, unsigned int len);
+    int32_t SendMessage(int32_t socket, const void *data, uint32_t len);
     // 发送流数据
-    int SendStream(int sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param);
+    int32_t SendStream(int32_t socket, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param);
     // 发送文件
-    int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt);
+    int32_t SendFile(int32_t socket, const char *sFileList[], const char *dFileList[], uint32_t fileCnt);
     ```
 
-5. 通过sessionId关闭会话。
+5. 关闭Socket。
 
     ```C
-    // 关闭会话
-    void CloseSession(int sessionId);
-    ```
-
-6. 删除会话服务。
-
-    ```C
-    // 删除会话服务
-    int RemoveSessionServer(const char *pkgName, const char *sessionName);
+    // 关闭Socket
+    void Shutdown(int32_t socket);
     ```
 
 ## 相关仓<a name="section1371113476307"></a>

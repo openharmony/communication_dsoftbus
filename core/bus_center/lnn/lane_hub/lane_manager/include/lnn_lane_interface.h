@@ -80,9 +80,7 @@ typedef struct {
 
 typedef struct {
     BleProtocolType protoType;
-    char nodeIdHash[NODEID_SHORT_HASH_LEN];
-    char localUdidHash[UDID_SHORT_HASH_LEN];
-    char peerUdidHash[SHA_256_HASH_LEN];
+    char networkId[NETWORK_ID_BUF_LEN];
 } BleDirectConnInfo;
 
 typedef struct {
@@ -132,7 +130,6 @@ typedef enum {
 typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];
     LaneTransType transType;
-    uint32_t expectedBw;
 } LaneQueryInfo;
 
 typedef struct {
@@ -170,7 +167,7 @@ typedef struct {
 } LaneRequestOption;
 
 typedef struct {
-    QueryResult (*lnnQueryLaneResource)(const LaneQueryInfo *queryInfo);
+    int32_t (*lnnQueryLaneResource)(const LaneQueryInfo *queryInfo, const QosInfo *qosInfo);
     uint32_t (*applyLaneId)(LaneType type);
     int32_t (*lnnRequestLane)(uint32_t laneId, const LaneRequestOption *request, const ILaneListener *listener);
     int32_t (*lnnFreeLane)(uint32_t laneId);
@@ -178,7 +175,7 @@ typedef struct {
 
 LnnLaneManager* GetLaneManager(void);
 
-QueryResult LnnQueryLaneResource(const LaneQueryInfo *queryInfo);
+int32_t LnnQueryLaneResource(const LaneQueryInfo *queryInfo, const QosInfo *qosInfo);
 uint32_t ApplyLaneId(LaneType type);
 int32_t LnnRequestLane(uint32_t laneId, const LaneRequestOption *request, const ILaneListener *listener);
 int32_t LnnFreeLane(uint32_t laneId);

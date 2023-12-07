@@ -31,6 +31,7 @@ int32_t DiscCoapParseDeviceUdid(const char *raw, DeviceInfo *device);
 void DiscCoapParseWifiIpAddr(const cJSON *data, DeviceInfo *device);
 int32_t DiscCoapParseServiceData(const cJSON *data, DeviceInfo *device);
 void DiscCoapParseHwAccountHash(const cJSON *data, DeviceInfo *device);
+int32_t DiscCoapFillServiceData(uint32_t capability, const char *capabilityData, uint32_t dataLen, char *outData);
 
 #ifdef __cplusplus
 }

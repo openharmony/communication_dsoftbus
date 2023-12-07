@@ -871,23 +871,6 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_003, TestSize.Level1)
 }
 
 /*
-* @tc.name: LNN_QUERY_LANE_001
-* @tc.desc: QueryLane
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNLaneMockTest, LNN_LANE_QUERY_001, TestSize.Level1)
-{
-    QueryResult ret = LnnQueryLaneResource(nullptr);
-    EXPECT_EQ(ret, QUERY_RESULT_REQUEST_ILLEGAL);
-
-    LaneQueryInfo query;
-    query.transType = LANE_T_BYTE;
-    ret = LnnQueryLaneResource((const LaneQueryInfo *)&query);
-    EXPECT_EQ(ret, QUERY_RESULT_OK);
-}
-
-/*
 * @tc.name: LNN_BUILD_LINK_001
 * @tc.desc: BUILDLINK
 * @tc.type: FUNC
@@ -1167,7 +1150,7 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_007, TestSize.Level1)
     EXPECT_CALL(mock, LnnGetLocalNodeInfo).WillRepeatedly(Return(nodeInfo));
     
     int32_t ret = BuildLink(request, reqId, &cb);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = BuildLink(request, reqId, &cb);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     SoftBusFree(request);

@@ -19,6 +19,7 @@
 #include <securec.h>
 #include <unistd.h>
 
+#include "anonymizer.h"
 #include "client_trans_pending.h"
 #include "client_trans_proxy_file_manager.h"
 #include "client_trans_session_manager.h"

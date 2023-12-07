@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,7 +57,7 @@ static BOOL Initialize(Service *service, Identity identity)
 {
     if (service == NULL) {
         COMM_LOGE(COMM_SVC, "invalid param");
-        return TRUE;
+        return FALSE;
     }
 
     SoftbusSamgrService *samgrService = (SoftbusSamgrService *)service;
@@ -96,7 +96,7 @@ typedef struct DeathCbArg {
 static void ClientDeathCb(void *arg)
 {
     if (arg == NULL) {
-        COMM_LOGE(COMM_SVC, "package name is NULL.");
+        COMM_LOGE(COMM_SVC, "arg is NULL.");
         return;
     }
     DeathCbArg* argStrcut = (DeathCbArg*)arg;
@@ -112,9 +112,9 @@ static void ClientDeathCb(void *arg)
     SoftBusFree(argStrcut->pkgName);
     SoftBusFree(argStrcut);
     SvcIdentity sid = {0};
-    sid.handle = svcId.handle;
-    sid.token = svcId.token;
-    sid.cookie = svcId.cookie;
+    sid.handle = (int32_t)svcId.handle;
+    sid.token = (uintptr_t)svcId.token;
+    sid.cookie = (uintptr_t)svcId.cookie;
     ReleaseSvc(sid);
 }
 
@@ -127,9 +127,8 @@ static int32_t ServerRegisterService(IpcIo *req, IpcIo *reply)
 
     const char *name = (const char*)ReadString(req, &len);
     SvcIdentity svc;
-    bool value = ReadRemoteObject(req, &svc);
-    if (!value || name == NULL || len == 0) {
-        COMM_LOGE(COMM_SVC, "get data fail");
+    if ((name == NULL) || (len == 0)) {
+        COMM_LOGE(COMM_SVC, "ServerRegisterService read name or len fail");
         goto EXIT;
     }
     int32_t callingUid = GetCallingUid();
@@ -137,13 +136,15 @@ static int32_t ServerRegisterService(IpcIo *req, IpcIo *reply)
         COMM_LOGE(COMM_SVC, "ServerRegisterService no permission.");
         goto EXIT;
     }
+    bool value = ReadRemoteObject(req, &svc);
+
     svcId.handle = svc.handle;
     svcId.token = svc.token;
     svcId.cookie = svc.cookie;
 
     char *pkgName = (char *)SoftBusMalloc(len + 1);
     if (pkgName == NULL) {
-        COMM_LOGE(COMM_SVC, "softbus malloc failed!");
+        COMM_LOGE(COMM_SVC, "softbus pkgName malloc failed!");
         goto EXIT;
     }
     if (strcpy_s(pkgName, len + 1, name) != EOK) {
@@ -154,7 +155,7 @@ static int32_t ServerRegisterService(IpcIo *req, IpcIo *reply)
 
     DeathCbArg *argStrcut = (DeathCbArg*)SoftBusMalloc(sizeof(DeathCbArg));
     if (argStrcut == NULL) {
-        COMM_LOGE(COMM_SVC, "softbus malloc failed!");
+        COMM_LOGE(COMM_SVC, "softbus argStrcut malloc failed!");
         SoftBusFree(pkgName);
         goto EXIT;
     }
@@ -175,7 +176,7 @@ typedef struct {
     int32_t (*func)(IpcIo *req, IpcIo *reply);
 } ServerInvokeCmd;
 
-ServerInvokeCmd g_serverInvokeCmdTbl[] = {
+const ServerInvokeCmd g_serverInvokeCmdTbl[] = {
     { MANAGE_REGISTER_SERVICE, ServerRegisterService },
     { SERVER_PUBLISH_SERVICE, ServerPublishService },
     { SERVER_UNPUBLISH_SERVICE, ServerUnPublishService },

@@ -15,11 +15,7 @@ import("../dsoftbus_dfx.gni")
 
 dsoftbus_root_path = "../../../.."
 
-softbus_log_src = [
-  "src/softbus_log.c",
-  "src/trans_log.c",
-  "$dsoftbus_dfx_path/anonymize/src/anonymizer.c",
-]
+softbus_log_src = [ "src/softbus_log.c" ]
 
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {

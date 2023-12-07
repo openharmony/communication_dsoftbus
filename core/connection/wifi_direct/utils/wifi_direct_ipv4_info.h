@@ -31,7 +31,7 @@ struct WifiDirectIpv4Info {
 };
 
 int32_t WifiDirectIpStringToIpv4(const char *ipString, struct WifiDirectIpv4Info *ipv4);
-int32_t WifiDirectIpv4ToString(struct WifiDirectIpv4Info *ipv4, char *ipString, size_t ipStringSize);
+int32_t WifiDirectIpv4ToString(const struct WifiDirectIpv4Info *ipv4, char *ipString, size_t ipStringSize);
 
 int32_t WifiDirectIpv4InfoToBytes(const struct WifiDirectIpv4Info *ipv4, size_t ipv4Count,
                                   uint8_t *data, size_t *dataLen);

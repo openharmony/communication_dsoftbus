@@ -37,7 +37,7 @@ struct ResourceManager {
     int32_t (*getAllInterfacesSimpleInfo)(struct InterfaceInfo **infoArray, int32_t *infoArraySize);
     int32_t (*getAllInterfacesInfo)(struct InterfaceInfo **infoArray, int32_t *infoArraySize);
     int32_t (*getAllInterfacesNameAndMac)(struct InterfaceInfo **infoArray, int32_t *infoArraySize);
-    void (*dump)(void);
+    void (*dump)(int32_t fd);
 
     SoftBusMutex mutex;
     struct ListNode interfaces;

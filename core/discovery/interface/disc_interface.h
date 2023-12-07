@@ -90,7 +90,6 @@ void DiscMgrDeathCallback(const char *pkgName);
  * For details, see {@link DiscInnerCallback}.
  * @return <b>SOFTBUS_INVALID_PARAM</b> if any parameter is null or invalid.
  * @return <b>SOFTBUS_DISCOVER_MANAGER_NOT_INIT</b> if the Intelligent Soft Bus server fails to be initialized.
- * @return <b>SOFTBUS_DISCOVER_MANAGER_INVALID_MODULE</b> if mouble id is null or invalid.
  * @return <b>SOFTBUS_MEM_ERR</b> if Memcpy failed.
  * @return <b>SOFTBUS_LOCK_ERR</b> if Mutex lock failed.
  * @return <b>SOFTBUS_DISCOVER_MANAGER_DUPLICATE_PARAM</b> if duplicate info.
@@ -108,7 +107,6 @@ int32_t DiscSetDiscoverCallback(DiscModule moduleId, const DiscInnerCallback *ca
  * For details, see {@link PublishInfo}.
  * @return <b>SOFTBUS_INVALID_PARAM</b> if any parameter is null or invalid.
  * @return <b>SOFTBUS_DISCOVER_MANAGER_NOT_INIT</b> if the Intelligent Soft Bus server fails to be initialized.
- * @return <b>SOFTBUS_DISCOVER_MANAGER_INVALID_MODULE</b> if mouble id is null or invalid.
  * @return <b>SOFTBUS_DISCOVER_MANAGER_INFO_NOT_CREATE</b> if the creation of the information node fails.
  * @return <b>SOFTBUS_MEM_ERR</b> if Memcpy failed.
  * @return <b>SOFTBUS_LOCK_ERR</b> if Mutex lock failed.
@@ -127,7 +125,6 @@ int32_t DiscPublish(DiscModule moduleId, const PublishInfo *info);
  * For details, see {@link PublishInfo}.
  * @return <b>SOFTBUS_INVALID_PARAM</b> if any parameter is null or invalid.
  * @return <b>SOFTBUS_DISCOVER_MANAGER_NOT_INIT</b> if the Intelligent Soft Bus server fails to be initialized.
- * @return <b>SOFTBUS_DISCOVER_MANAGER_INVALID_MODULE</b> if mouble id is null or invalid.
  * @return <b>SOFTBUS_DISCOVER_MANAGER_INFO_NOT_CREATE</b> if the creation of the information node fails.
  * @return <b>SOFTBUS_MEM_ERR</b> if Memcpy failed.
  * @return <b>SOFTBUS_LOCK_ERR</b> if Mutex lock failed.
@@ -146,7 +143,6 @@ int32_t DiscStartScan(DiscModule moduleId, const PublishInfo *info);
  * @param[in] publishId the publish ID which will be stopped.
  * @return <b>SOFTBUS_INVALID_PARAM</b> if any parameter is null or invalid.
  * @return <b>SOFTBUS_DISCOVER_MANAGER_NOT_INIT</b> if the Intelligent Soft Bus server fails to be initialized.
- * @return <b>SOFTBUS_DISCOVER_MANAGER_INVALID_MODULE</b> if mouble id is null or invalid.
  * @return <b>SOFTBUS_DISCOVER_MANAGER_INFO_NOT_DELETE</b> if info node delete failed.
  * @return <b>SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL</b> if InnerFunction failed.
  * @return <b>SOFTBUS_OK</b> if the stop publish is successful.
@@ -162,7 +158,6 @@ int32_t DiscUnpublish(DiscModule moduleId, int32_t publishId);
  * For details, see {@link SubscribeInfo}.
  * @return <b>SOFTBUS_INVALID_PARAM</b> Invalid moduleId or info parameter.
  * @return <b>SOFTBUS_DISCOVER_MANAGER_NOT_INIT</b> Discovery manager is not initialised.
- * @return <b>SOFTBUS_DISCOVER_MANAGER_INVALID_MODULE</b> Module to string failed.
  * @return <b>SOFTBUS_DISCOVER_MANAGER_INFO_NOT_CREATE</b> InfoNode create failed.
  * @return <b>SOFTBUS_MEM_ERR</b> Memcpy failed.
  * @return <b>SOFTBUS_LOCK_ERR</b> Mutex lock failed.
@@ -181,7 +176,6 @@ int32_t DiscStartAdvertise(DiscModule moduleId, const SubscribeInfo *info);
  * For details, see {@link SubscribeInfo}.
  * @return <b>SOFTBUS_INVALID_PARAM</b> Invalid moduleId or info parameter.
  * @return <b>SOFTBUS_DISCOVER_MANAGER_NOT_INIT</b> Discovery manager is not initialised.
- * @return <b>SOFTBUS_DISCOVER_MANAGER_INVALID_MODULE</b> Module to string failed.
  * @return <b>SOFTBUS_DISCOVER_MANAGER_INFO_NOT_CREATE</b> InfoNode create failed.
  * @return <b>SOFTBUS_MEM_ERR</b> Memcpy failed.
  * @return <b>SOFTBUS_LOCK_ERR</b> Mutex lock failed.
@@ -200,7 +194,6 @@ int32_t DiscSubscribe(DiscModule moduleId, const SubscribeInfo *info);
  * @param[in] subscribeId the subscribe ID which will be stop broadcast.
  * @return <b>SOFTBUS_INVALID_PARAM</b> Invalid moduleId or info parameter.
  * @return <b>SOFTBUS_DISCOVER_MANAGER_NOT_INIT</b> Discovery manager is not initialised.
- * @return <b>SOFTBUS_DISCOVER_MANAGER_INVALID_MODULE</b> Module to string failed.
  * @return <b>SOFTBUS_DISCOVER_MANAGER_INFO_NOT_DELETE</b> InfoNode delete failed.
  * @return <b>SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL</b> InnerFunction failed.
  * @return <b>SOFTBUS_OK</b> Stop discover successfully.

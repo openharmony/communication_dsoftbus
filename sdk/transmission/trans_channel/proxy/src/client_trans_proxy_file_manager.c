@@ -1555,6 +1555,31 @@ void ClientDeleteRecvFileList(int32_t sessionId)
     (void)DelRecipient(sessionId);
 }
 
+static int32_t UpdateFileReceivePath(int32_t sessionId, FileListener *fileListener)
+{
+    if (fileListener->fileCallback == NULL) {
+        return SOFTBUS_OK;
+    }
+    FileEvent event = {
+        .type = FILE_EVENT_RECV_UPDATE_PATH,
+        .files = NULL,
+        .fileCnt = 0,
+        .bytesProcessed = 0,
+        .bytesTotal = 0,
+        .UpdateRecvPath = NULL,
+    };
+    fileListener->fileCallback(sessionId, &event);
+    if (event.UpdateRecvPath == NULL) {
+        TRANS_LOGE(TRANS_FILE, "failed to obtain the file receive path");
+        return SOFTBUS_ERR;
+    }
+    if (strcpy_s(fileListener->rootDir, FILE_RECV_ROOT_DIR_SIZE_MAX, event.UpdateRecvPath()) != EOK) {
+        TRANS_LOGE(TRANS_FILE, "failed to strcpy the file receive path");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static FileRecipientInfo *CreateNewRecipient(int32_t sessionId, int32_t channelId)
 {
     FileRecipientInfo *info = NULL;
@@ -1586,6 +1611,13 @@ static FileRecipientInfo *CreateNewRecipient(int32_t sessionId, int32_t channelI
         SoftBusFree(info);
         return NULL;
     }
+
+    if (UpdateFileReceivePath(sessionId, &info->fileListener) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_FILE, "failed to get rootDir");
+        SoftBusFree(info);
+        return NULL;
+    }
+
     ListInit(&info->node);
     info->objRefCount = 1;
     info->recvFileInfo.fileFd = INVALID_FD;

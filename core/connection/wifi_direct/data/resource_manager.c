@@ -85,7 +85,7 @@ static void NotifyInterfaceInfoChange(struct InterfaceInfo *info)
     CONN_CHECK_AND_RETURN_LOGW(strlen(name) > 0, CONN_WIFI_DIRECT, "name is emtpy");
     SoftBusMutexLock(&self->mutex);
     struct InterfaceInfo *old = self->getInterfaceInfo(name);
-    if (!old) {
+    if (old == NULL) {
         struct InterfaceInfo *newInfo = InterfaceInfoNew();
         CONN_CHECK_AND_RETURN_LOGW(newInfo, CONN_WIFI_DIRECT, "new interface failed");
         newInfo->deepCopy(newInfo, info);
@@ -102,7 +102,7 @@ static void NotifyInterfaceInfoChange(struct InterfaceInfo *info)
         size_t size = 0;
         size_t count = 0;
         void *data = info->get(info, key, &size, &count);
-        if (data) {
+        if (data != NULL) {
             if (property->flag == CONTAINER_FLAG) {
                 old->putContainer(old, key, data, size);
             } else if (property->flag == CONTAINER_ARRAY_FLAG) {
@@ -126,7 +126,7 @@ static void NotifyInterfaceInfoChange(struct InterfaceInfo *info)
 static void AddUsingInterfaceToList(ListNode *list, const char *interface)
 {
     struct CombinationEntry *entry = SoftBusCalloc(sizeof(*entry));
-    if (entry) {
+    if (entry != NULL) {
         ListInit(&entry->node);
         int32_t ret = strcpy_s(entry->interface, sizeof(entry->interface), interface);
         if (ret != EOK) {
@@ -153,7 +153,7 @@ static ListNode* GetUsingInterfaces(bool forShare)
     }
 
     struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(IF_NAME_P2P);
-    if (info) {
+    if (info != NULL) {
         enum WifiDirectApiRole myRole =
             (enum WifiDirectApiRole)info->getInt(info, II_KEY_WIFI_DIRECT_ROLE, WIFI_DIRECT_API_ROLE_NONE);
         if (myRole == WIFI_DIRECT_API_ROLE_GC || myRole == WIFI_DIRECT_API_ROLE_GO) {
@@ -162,7 +162,7 @@ static ListNode* GetUsingInterfaces(bool forShare)
     }
 
     info = GetResourceManager()->getInterfaceInfo(IF_NAME_HML);
-    if (info) {
+    if (info != NULL) {
         enum WifiDirectApiRole myRole =
             (enum WifiDirectApiRole)info->getInt(info, II_KEY_WIFI_DIRECT_ROLE, WIFI_DIRECT_API_ROLE_NONE);
         if (myRole == WIFI_DIRECT_API_ROLE_HML) {
@@ -189,7 +189,7 @@ static bool IsStationAndHmlDBAC(void)
     int32_t staFreq = GetWifiDirectP2pAdapter()->getStationFrequency();
     int32_t hmlFreq = -1;
     struct InterfaceInfo *hmlInfo = GetResourceManager()->getInterfaceInfo(IF_NAME_HML);
-    if (hmlInfo) {
+    if (hmlInfo != NULL) {
         enum WifiDirectApiRole hmlRole = hmlInfo->getInt(hmlInfo, II_KEY_WIFI_DIRECT_ROLE, WIFI_DIRECT_API_ROLE_NONE);
         if (hmlRole == WIFI_DIRECT_API_ROLE_HML) {
             hmlFreq = hmlInfo->getInt(hmlInfo, II_KEY_CENTER_20M, -1);
@@ -227,7 +227,7 @@ static bool IsInterfaceAvailable(const char *interface, bool forShare)
     }
 
     ListNode *usingInterfaces = GetUsingInterfaces(forShare);
-    if (usingInterfaces) {
+    if (usingInterfaces != NULL) {
         AddUsingInterfaceToList(usingInterfaces, interface);
         bool ret = GetWifiDirectCoexistRule()->isCombinationAvailable(usingInterfaces);
         FreeUsingInterfaces(usingInterfaces);
@@ -328,7 +328,7 @@ static int32_t GetAllInterfacesNameAndMac(struct InterfaceInfo **infoArray, int3
     return SOFTBUS_OK;
 }
 
-static void Dump(void)
+static void Dump(int32_t fd)
 {
     struct ResourceManager *self = GetResourceManager();
     CONN_CHECK_AND_RETURN_LOGW(self->isInited, CONN_WIFI_DIRECT, "not inited");
@@ -336,7 +336,7 @@ static void Dump(void)
 
     SoftBusMutexLock(&self->mutex);
     LIST_FOR_EACH_ENTRY(interfaceInfo, &self->interfaces, struct InterfaceInfo, node) {
-        interfaceInfo->dump(interfaceInfo);
+        interfaceInfo->dump(interfaceInfo, fd);
     }
     SoftBusMutexUnlock(&self->mutex);
 }
@@ -349,7 +349,7 @@ static int32_t InitInterfaceInfo(const char *interface)
     info.putName(&info, interface);
 
     CONN_LOGI(CONN_INIT, "interface %s", interface);
-    if (!strcmp(interface, IF_NAME_P2P)) {
+    if (strcmp(interface, IF_NAME_P2P) == 0) {
         char macString[MAC_ADDR_STR_LEN];
         int32_t ret = GetWifiDirectP2pAdapter()->getMacAddress(macString, sizeof(macString));
         if (ret == SOFTBUS_OK) {
@@ -375,7 +375,7 @@ static int32_t InitInterfaceInfo(const char *interface)
         return SOFTBUS_OK;
     }
 
-    if (!strcmp(interface, IF_NAME_HML)) {
+    if (strcmp(interface, IF_NAME_HML) == 0) {
         info.putInt(&info, II_KEY_CONNECT_CAPABILITY, WIFI_DIRECT_API_ROLE_HML);
         InterfaceInfoDestructor(&info);
         return SOFTBUS_OK;
@@ -494,7 +494,7 @@ int32_t ResourceManagerInit(void)
     ret = InitWifiDirectInfo();
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_INIT, "init interface info failed");
 
-    g_manager.dump();
+    g_manager.dump(0);
     return SOFTBUS_OK;
 }
 

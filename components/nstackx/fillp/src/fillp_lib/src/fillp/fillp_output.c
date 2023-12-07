@@ -46,7 +46,6 @@ static void FillpMoveRedundantItemToUnrecvList(struct FillpPcb *pcb)
         }
         item = (struct FillpPcbItem *)SkipListPopValue(&sendPcb->redunList);
     }
-    return;
 }
 
 static struct FillpPcbItem *FillpGetSendItem(struct FillpSendPcb *sendPcb, struct FillpPcb *pcb)

@@ -41,7 +41,7 @@ int32_t PublishServiceInner(const char *packageName, const PublishInfo *info, co
     return SOFTBUS_OK;
 }
 
-int32_t UnPublishServiceInner(const char *packageName, int32_t publishId)
+int32_t UnpublishServiceInner(const char *packageName, int32_t publishId)
 {
     int32_t ret = ServerIpcUnPublishService(packageName, publishId);
     if (ret != SOFTBUS_OK) {

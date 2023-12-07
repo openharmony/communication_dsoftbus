@@ -46,7 +46,6 @@ if (defined(ohos_lite)) {
     build_type = "static_library"
   } else {
     diff_deps = [
-      "$dsoftbus_dfx_path/log:softbus_dfx_log",
       "$hilog_lite_deps_path",
       "//build/lite/config/component/cJSON:cjson_shared",
     ]
@@ -89,7 +88,6 @@ if (defined(ohos_lite)) {
       "dfx/hidumper_adapter/softbus_hidumper_buscenter_virtual.c",
       "dfx/hidumper_adapter/softbus_hidumper_disc_virtual.c",
       "dfx/hidumper_adapter/softbus_hidumper_conn_virtual.c",
-      "dfx/hidumper_adapter/softbus_hidumper_interface_virtual.c",
       "dfx/hisysevent_adapter/softbus_hisysevt_nstack_virtual.c",
     ]
     sources = common_utils_src
@@ -110,6 +108,8 @@ if (defined(ohos_lite)) {
       defines += [ "SOFTBUS_SMALL_SYSTEM" ]
     }
     deps = [
+      "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
+      "$dsoftbus_dfx_path/event:softbus_dfx_event",
       "$dsoftbus_dfx_path/log:softbus_dfx_log",
       "$dsoftbus_root_path/adapter:softbus_adapter",
     ]
@@ -161,7 +161,6 @@ if (defined(ohos_lite)) {
     include_dirs += conn_common_inc + trans_common_inc
     dfx_source = [
       "dfx/hidumper_adapter/softbus_hidumper.c",
-      "dfx/hidumper_adapter/softbus_hidumper_interface.c",
       "dfx/hidumper_adapter/softbus_hidumper_disc.c",
       "dfx/hidumper_adapter/softbus_hidumper_conn.c",
       "dfx/hidumper_adapter/softbus_hidumper_nstack.c",
@@ -181,6 +180,7 @@ if (defined(ohos_lite)) {
 
     public_configs = [ ":dsoftbus_utils_interface_L2" ]
     public_deps = [
+      "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
       "$dsoftbus_dfx_path/event:softbus_dfx_event",
       "$dsoftbus_dfx_path/log:softbus_dfx_log",
       "$dsoftbus_root_path/adapter:softbus_adapter",
