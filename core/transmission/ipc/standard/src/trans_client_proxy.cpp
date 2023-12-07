@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,10 @@ using namespace OHOS;
 
 static sptr<TransClientProxy> GetClientProxy(const char *pkgName, int32_t pid)
 {
+    if (pkgName == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "pkgName is null");
+        return nullptr;
+    }
     sptr<IRemoteObject> clientObject = SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxy(pkgName, pid);
     sptr<TransClientProxy> clientProxy = new (std::nothrow) TransClientProxy(clientObject);
     return clientProxy;
@@ -56,25 +60,29 @@ int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName,
     return clientProxy->OnChannelOpened(sessionName, channel);
 }
 
-int32_t ClientIpcOnChannelOpenFailed(const char *pkgName, int32_t channelId, int32_t channelType,
-    int32_t errCode, int32_t pid)
+int32_t ClientIpcOnChannelOpenFailed(ChannelMsg *data, int32_t errCode)
 {
-    sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName, pid);
+    if (data == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "ClientIpcOnChannelOpenFailed data is nullptr!");
+        return SOFTBUS_ERR;
+    }
+    sptr<TransClientProxy> clientProxy = GetClientProxy(data->msgPkgName, data->msgPid);
     if (clientProxy == nullptr) {
         TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr!");
         return SOFTBUS_ERR;
     }
-    clientProxy->OnChannelOpenFailed(channelId, channelType, errCode);
+    clientProxy->OnChannelOpenFailed(data->msgChannelId, data->msgChannelType, errCode);
     return SOFTBUS_OK;
 }
 
-int32_t ClientIpcOnChannelLinkDown(const char *pkgName, const char *networkId, const char *uuid,
-    const char *udid, const char *peerIp, int32_t routeType, int32_t pid)
+int32_t ClientIpcOnChannelLinkDown(ChannelMsg *data, const char *networkId, const char *peerIp, int32_t routeType)
 {
-    (void)uuid;
-    (void)udid;
+    if (data == nullptr || networkId == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "ClientIpcOnChannelLinkDown data or networkId is nullptr!");
+        return SOFTBUS_ERR;
+    }
     (void)peerIp;
-    sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName, pid);
+    sptr<TransClientProxy> clientProxy = GetClientProxy(data->msgPkgName, data->msgPid);
     if (clientProxy == nullptr) {
         TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr!");
         return SOFTBUS_ERR;
@@ -83,28 +91,34 @@ int32_t ClientIpcOnChannelLinkDown(const char *pkgName, const char *networkId, c
     return SOFTBUS_OK;
 }
 
-int32_t ClientIpcOnChannelClosed(const char *pkgName, int32_t channelId, int32_t channelType,
-    int32_t pid)
+int32_t ClientIpcOnChannelClosed(ChannelMsg *data)
 {
-    sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName, pid);
+    if (data == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "ClientIpcOnChannelClosed data is nullptr!");
+        return SOFTBUS_ERR;
+    }
+    sptr<TransClientProxy> clientProxy = GetClientProxy(data->msgPkgName, data->msgPid);
     if (clientProxy == nullptr) {
         TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr!");
         return SOFTBUS_ERR;
     }
-    clientProxy->OnChannelClosed(channelId, channelType);
+    clientProxy->OnChannelClosed(data->msgChannelId, data->msgChannelType);
     return SOFTBUS_OK;
 }
 
-int32_t ClientIpcOnChannelMsgReceived(const char *pkgName, int32_t channelId, int32_t channelType,
-    TransReceiveData *receiveData, int32_t pid)
+int32_t ClientIpcOnChannelMsgReceived(ChannelMsg *data, TransReceiveData *receiveData)
 {
-    sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName, pid);
+    if (data == nullptr || receiveData == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "ClientIpcOnChannelMsgReceived data or receiveData is nullptr!");
+        return SOFTBUS_ERR;
+    }
+    sptr<TransClientProxy> clientProxy = GetClientProxy(data->msgPkgName, data->msgPid);
     if (clientProxy == nullptr) {
         TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr!");
         return SOFTBUS_ERR;
     }
-    clientProxy->OnChannelMsgReceived(channelId, channelType, receiveData->data, receiveData->dataLen,
-        receiveData->dataType);
+    clientProxy->OnChannelMsgReceived(data->msgChannelId, data->msgChannelType,
+        receiveData->data, receiveData->dataLen, receiveData->dataType);
     return SOFTBUS_OK;
 }
 

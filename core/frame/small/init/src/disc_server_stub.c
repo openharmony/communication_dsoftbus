@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,10 @@ int32_t ServerPublishService(IpcIo *req, IpcIo *reply)
     size_t len;
     unsigned char *capabilityData = NULL;
     const char *pkgName = (const char*)ReadString(req, &len);
+    if (pkgName == NULL) {
+        COMM_LOGE(COMM_SVC, "ServerPublishService pkgName is null");
+        return SOFTBUS_ERR;
+    }
     PublishSerializer *info = (PublishSerializer*)ReadRawData(req, sizeof(PublishSerializer));
     if (info == NULL) {
         COMM_LOGE(COMM_SVC, "ipc pop is null.");
@@ -70,11 +74,15 @@ int32_t ServerUnPublishService(IpcIo *req, IpcIo *reply)
     COMM_LOGI(COMM_SVC, "unpublish service ipc server pop.");
     size_t len;
     const char *pkgName = (const char*)ReadString(req, &len);
+    if (pkgName == NULL) {
+        COMM_LOGE(COMM_SVC, "ServerUnPublishService read pkgName failed!");
+        return SOFTBUS_IPC_ERR;
+    }
     int32_t publishId;
     ReadInt32(req, &publishId);
     int32_t callingUid = GetCallingUid();
     if (!CheckDiscPermission(callingUid, pkgName)) {
-        COMM_LOGE(COMM_SVC, "publish service no permission.");
+        COMM_LOGE(COMM_SVC, "unpublish service no permission.");
         return SOFTBUS_PERMISSION_DENIED;
     }
     int32_t ret = DiscIpcUnPublishService(pkgName, publishId);
@@ -87,7 +95,7 @@ int32_t ServerUnPublishService(IpcIo *req, IpcIo *reply)
 
 int32_t ServerStartDiscovery(IpcIo *req, IpcIo *reply)
 {
-    COMM_LOGI(COMM_SVC, "start discovery ipc server pop.");
+    COMM_LOGD(COMM_SVC, "start discovery ipc server pop.");
     size_t len;
     unsigned char *capabilityData = NULL;
     const char *pkgName = (const char *)ReadString(req, &len);
@@ -113,7 +121,7 @@ int32_t ServerStartDiscovery(IpcIo *req, IpcIo *reply)
     };
     int32_t callingUid = GetCallingUid();
     if (!CheckDiscPermission(callingUid, pkgName)) {
-        COMM_LOGE(COMM_SVC, "publish service no permission.");
+        COMM_LOGE(COMM_SVC, "start discovery no permission.");
         return SOFTBUS_PERMISSION_DENIED;
     }
     int32_t ret = DiscIpcStartDiscovery(pkgName, &subscribeInfo);
@@ -133,7 +141,7 @@ int32_t ServerStopDiscovery(IpcIo *req, IpcIo *reply)
     ReadInt32(req, &subscribeId);
     int32_t callingUid = GetCallingUid();
     if (!CheckDiscPermission(callingUid, pkgName)) {
-        COMM_LOGE(COMM_SVC, "publish service no permission.");
+        COMM_LOGE(COMM_SVC, "stop discovery no permission.");
         return SOFTBUS_PERMISSION_DENIED;
     }
     int32_t ret = DiscIpcStopDiscovery(pkgName, subscribeId);
