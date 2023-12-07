@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,13 +26,13 @@
 #include "softbus_conn_interface.h"
 #include "softbus_disc_server.h"
 #include "softbus_errcode.h"
+#include "softbus_hidumper_interface.h"
 #include "softbus_qos.h"
 #include "softbus_server_death_recipient.h"
 #include "softbus_server_frame.h"
 #include "system_ability_definition.h"
 #include "trans_channel_manager.h"
 #include "trans_session_service.h"
-#include "softbus_hidumper_interface.h"
 #include "trans_spec_object.h"
 #include "lnn_lane_interface.h"
 
@@ -61,37 +61,33 @@ SoftBusServer::SoftBusServer(int32_t saId, bool runOnCreate) : SystemAbility(saI
 
 int32_t SoftBusServer::StartDiscovery(const char *pkgName, const SubscribeInfo *info)
 {
-    int32_t ret = DiscIpcStartDiscovery(pkgName, info);
-    return ret;
+    return DiscIpcStartDiscovery(pkgName, info);
 }
 
 int32_t SoftBusServer::StopDiscovery(const char *pkgName, int subscribeId)
 {
-    int32_t ret = DiscIpcStopDiscovery(pkgName, subscribeId);
-    return ret;
+    return DiscIpcStopDiscovery(pkgName, subscribeId);
 }
 
 int32_t SoftBusServer::PublishService(const char *pkgName, const PublishInfo *info)
 {
-    int32_t ret = DiscIpcPublishService(pkgName, (PublishInfo *)info);
-    return ret;
+    return DiscIpcPublishService(pkgName, (PublishInfo *)(info));
 }
 
 int32_t SoftBusServer::UnPublishService(const char *pkgName, int publishId)
 {
-    int32_t ret = DiscIpcUnPublishService(pkgName, publishId);
-    return ret;
+    return DiscIpcUnPublishService(pkgName, publishId);
 }
 
 int32_t SoftBusServer::SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject> &object)
 {
     if (clientPkgName == nullptr || object == nullptr) {
         COMM_LOGE(COMM_SVC, "package name or object is nullptr");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     int32_t pid = (int32_t)(OHOS::IPCSkeleton::GetCallingPid());
     if (SoftbusClientInfoManager::GetInstance().SoftbusClientIsExist(clientPkgName, pid)) {
-        COMM_LOGW(COMM_SVC, "softbus client is exist.");
+        COMM_LOGW(COMM_SVC, "softbus client is exist");
         return SOFTBUS_OK;
     }
     sptr<IRemoteObject::DeathRecipient> abilityDeath = new (std::nothrow) SoftBusDeathRecipient();
@@ -133,6 +129,7 @@ int32_t SoftBusServer::OpenSession(const SessionParam *param, TransInfo *info)
 int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo)
 {
     if (sessionName == nullptr || addrInfo == nullptr) {
+        COMM_LOGE(COMM_SVC, "session name or addrinfo is nullptr");
         return SOFTBUS_INVALID_PARAM;
     }
     ConnectOption connOpt;
@@ -142,6 +139,7 @@ int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const Connection
         case CONNECT_TCP:
             if (memcpy_s(connOpt.socketOption.addr, sizeof(connOpt.socketOption.addr), addrInfo->info.ip.ip, IP_LEN) !=
                 EOK) {
+                COMM_LOGE(COMM_SVC, "connect TCP memory error");
                 return SOFTBUS_MEM_ERR;
             }
             connOpt.socketOption.port = static_cast<int32_t>(addrInfo->info.ip.port);
@@ -149,10 +147,12 @@ int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const Connection
             break;
         case CONNECT_BLE:
             if (memcpy_s(connOpt.bleOption.bleMac, BT_MAC_LEN, addrInfo->info.ble.bleMac, BT_MAC_LEN) != EOK) {
+                COMM_LOGE(COMM_SVC, "connect BLE memory error");
                 return SOFTBUS_MEM_ERR;
             }
             if (memcpy_s(connOpt.bleOption.deviceIdHash, sizeof(connOpt.bleOption.deviceIdHash),
                 addrInfo->info.ble.udidHash, sizeof(addrInfo->info.ble.udidHash)) != EOK) {
+                COMM_LOGE(COMM_SVC, "connect BLE memory error");
                 return SOFTBUS_MEM_ERR;
             }
             connOpt.bleOption.protocol = addrInfo->info.ble.protocol;
@@ -161,10 +161,12 @@ int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const Connection
             break;
         case CONNECT_BR:
             if (memcpy_s(connOpt.brOption.brMac, BT_MAC_LEN, addrInfo->info.br.brMac, BT_MAC_LEN) != EOK) {
+                COMM_LOGE(COMM_SVC, "connect BR memory error");
                 return SOFTBUS_MEM_ERR;
             }
             break;
         default:
+            COMM_LOGE(COMM_SVC, "connect type error");
             return SOFTBUS_ERR;
     }
     return TransOpenAuthChannel(sessionName, &connOpt, "");
@@ -319,8 +321,7 @@ int SoftBusServer::Dump(int fd, const std::vector<std::u16string> &args)
         argv[i] = argsStr[i].c_str();
     }
 
-    int nRet = SoftBusDumpProcess(fd, argc, argv);
-    return nRet;
+    return SoftBusDumpProcess(fd, argc, argv);
 }
 
 void SoftBusServer::OnStart()

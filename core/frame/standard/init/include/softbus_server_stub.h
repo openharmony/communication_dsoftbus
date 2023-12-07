@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,7 +34,7 @@ private:
     int32_t StartDiscoveryInner(MessageParcel &data, MessageParcel &reply);
     int32_t StopDiscoveryInner(MessageParcel &data, MessageParcel &reply);
     int32_t PublishServiceInner(MessageParcel &data, MessageParcel &reply);
-    int32_t UnPublishServiceInner(MessageParcel &data, MessageParcel &reply);
+    int32_t UnpublishServiceInner(MessageParcel &data, MessageParcel &reply);
     int32_t SoftbusRegisterServiceInner(MessageParcel &data, MessageParcel &reply);
 
     int32_t CreateSessionServerInner(MessageParcel &data, MessageParcel &reply);
@@ -77,9 +77,9 @@ private:
     void InitMemberFuncMap();
     void InitMemberPermissionMap();
 
-    using SoftBusServerStubFunc =
+    using SoftbusServerStubFunc =
         int32_t (SoftBusServerStub::*)(MessageParcel &data, MessageParcel &reply);
-    std::map<uint32_t, SoftBusServerStubFunc> memberFuncMap_;
+    std::map<uint32_t, SoftbusServerStubFunc> memberFuncMap_;
     std::map<uint32_t, const char*> memberPermissionMap_;
 };
 } // namespace OHOS
