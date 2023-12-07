@@ -19,13 +19,6 @@
 #include "disc_nstackx_adapter.h"
 #include "softbus_errcode.h"
 
-int32_t DiscCoapParseExtendServiceData(const cJSON *data, DeviceInfo *device)
-{
-    (void)data;
-    (void)device;
-    return SOFTBUS_OK;
-}
-
 int32_t DiscCoapAssembleCapData(uint32_t capability, const char *capabilityData, uint32_t dataLen, char *outData)
 {
     (void)capability;
@@ -33,19 +26,6 @@ int32_t DiscCoapAssembleCapData(uint32_t capability, const char *capabilityData,
     (void)dataLen;
     (void)outData;
     return SOFTBUS_FUNC_NOT_SUPPORT;
-}
-
-void DiscVerifyBroadcastType(DeviceInfo *device, uint8_t bType)
-{
-    if (DiscCoapSendRsp(device, bType) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_COAP, "send response failed for bType(%u)", bType);
-    }
-}
-
-void DiscCheckBtype(DeviceInfo *device, uint8_t bType)
-{
-    (void)device;
-    (void)bType;
 }
 
 void DiscFillBtype(uint32_t capability, uint32_t allCap, NSTACKX_DiscoverySettings *discSet)
@@ -67,4 +47,31 @@ void DiscFillBtype(uint32_t capability, uint32_t allCap, NSTACKX_DiscoverySettin
             discSet->businessType = (uint8_t)NSTACKX_BUSINESS_TYPE_NULL;
             break;
     }
+}
+
+int32_t DiscCoapProcessDeviceInfo(const NSTACKX_DeviceInfo *nstackxInfo, DeviceInfo *devInfo,
+    const DiscInnerCallback *discCb)
+{
+    DISC_CHECK_AND_RETURN_RET_LOGE(nstackxInfo != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "nstackx devInfo is NULL");
+    DISC_CHECK_AND_RETURN_RET_LOGE(devInfo != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "devInfo is NULL");
+    DISC_CHECK_AND_RETURN_RET_LOGE(discCb != NULL && discCb->OnDeviceFound != NULL,
+        SOFTBUS_INVALID_PARAM, DISC_COAP, "discCb is NULL");
+
+    InnerDeviceInfoAddtions addtions = {
+        .medium = COAP,
+    };
+    if (nstackxInfo->discoveryType == NSTACKX_DISCOVERY_TYPE_ACTIVE ||
+        nstackxInfo->mode == PUBLISH_MODE_PROACTIVE) {
+        DISC_LOGI(DISC_COAP, "DiscFound: devName=%s, netIf=%s", devInfo->devName, nstackxInfo->networkName);
+        discCb->OnDeviceFound(devInfo, &addtions);
+        return SOFTBUS_OK;
+    }
+
+    uint8_t bType = nstackxInfo->businessType;
+    DISC_LOGI(DISC_COAP, "DiscRecv: broadcast from %s, bType=%u", devInfo->devName, bType);
+    if (bType != NSTACKX_BUSINESS_TYPE_NULL && DiscCoapSendRsp(devInfo, bType) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_COAP, "send response failed");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
 }
