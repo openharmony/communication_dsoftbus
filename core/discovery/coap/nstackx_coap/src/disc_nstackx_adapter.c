@@ -394,7 +394,7 @@ static int32_t SetLocalDeviceInfo(void)
         DISC_LOGE(DISC_COAP, "get local device type failed.");
         return SOFTBUS_ERR;
     }
-    g_localDeviceInfo->deviceType = (uint8_t)deviceType;
+    g_localDeviceInfo->deviceType = (uint32_t)deviceType;
     g_localDeviceInfo->businessType = (uint8_t)NSTACKX_BUSINESS_TYPE_NULL;
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, g_localDeviceInfo->name, sizeof(g_localDeviceInfo->name)) !=
             SOFTBUS_OK ||
