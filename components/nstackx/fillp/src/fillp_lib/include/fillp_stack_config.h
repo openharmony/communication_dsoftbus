@@ -38,6 +38,5 @@ FILLP_INT32 FtValidateConfigParams(IN FILLP_CONST FillpGlobalConfigsSt *globalRe
 }
 #endif
 
-
-#endif
+#endif /* FILLP_STACK_CONFIG_H */
 

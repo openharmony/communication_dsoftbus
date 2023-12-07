@@ -98,8 +98,6 @@ void SkiplistDestroy(struct SkipList *list)
 
     (void)memset_s(list->hnode, sizeof(list->hnode), 0, sizeof(list->hnode));
     (void)memset_s(list->tnode, sizeof(list->tnode), 0, sizeof(list->tnode));
-
-    return;
 }
 
 /*******************************************************************************

@@ -231,7 +231,6 @@ static void FillpBuildPktDataOptions(FILLP_CONST struct FillpPcb *pcb,
 
     *(FILLP_UINT16 *)(dataOptionAddr) = FILLP_HTONS(offset);
     FILLP_UNUSED_PARA(pcb);
-    return;
 }
 
 static void FillpBuildDataPkt(struct FillpPcb *pcb, struct FillpPcbItem *item)
@@ -274,8 +273,6 @@ static void FillpBuildDataPkt(struct FillpPcb *pcb, struct FillpPcbItem *item)
 
     FILLP_LM_TRACE_SEND_MSG(sock->traceFlag, FILLP_TRACE_DIRECT_NETWORK, sock->traceHandle, FILLP_HLEN, sock->index,
         fillpTrcDesc, (FILLP_CHAR *)pktHdr);
-
-    return;
 }
 
 static void UpdateStatisticsWhenSendOne(struct FillpStatisticsPcb *stats, FILLP_UINT32 bufLen)
@@ -348,8 +345,6 @@ static void FillpAddToPktSeqHash(FILLP_CONST struct FillpPcb *pcb, struct FillpP
 {
     struct Hlist *list = &pcb->send.pktSeqMap.hashMap[item->pktNum & pcb->send.pktSeqMap.hashModSize];
     HlistAddTail(list, &item->pktSeqMapNode);
-
-    return;
 }
 
 static FILLP_INT FillpItemRetrans(struct FillpPcbItem *item, struct FillpPcb *fpcb, struct FillpSendPcb *sendPcb)
@@ -454,8 +449,6 @@ void FillpSendAdhocpackToDetectRtt(struct FillpPcb *pcb)
 
     ftSock = FILLP_GET_SOCKET(pcb);
     FillpBuildAndSendPack(pcb, ftSock, &pack, sizeof(struct FillpPktPack) - FILLP_HLEN);
-
-    return;
 }
 
 static void FillpSetSimplePack(FILLP_CONST struct FillpPcb *pcb, struct FillpPktPack *pack,

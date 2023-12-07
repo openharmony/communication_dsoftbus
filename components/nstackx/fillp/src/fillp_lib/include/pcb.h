@@ -18,7 +18,8 @@
 
 #include "fillp_os.h"
 #include "fillp/fillp_pcb.h"
-#include "mem_pool.h"
+#include "lf_ring.h"
+#include "log.h"
 #include "queue.h"
 #include "hlist.h"
 
@@ -94,4 +95,4 @@ void SpungePcbSetDirectlySend(struct SpungePcb *pcb, FILLP_INT directlySend);
 }
 #endif
 
-#endif
+#endif /* PCB_H */

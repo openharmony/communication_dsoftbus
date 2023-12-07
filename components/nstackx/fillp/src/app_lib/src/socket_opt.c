@@ -120,6 +120,7 @@ FILLP_INT SockGetSockOpt(
         if (*optLen < (FILLP_INT)sizeof(int)) {
             (void)SYS_ARCH_RWSEM_RDPOST(&sock->sockConnSem);
             SET_ERRNO(FILLP_EINVAL);
+            FILLP_LOGERR("SockGetSockOpt: optLen or optVal NULL");
             return -1;
         }
 

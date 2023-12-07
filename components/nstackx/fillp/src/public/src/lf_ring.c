@@ -83,7 +83,6 @@ void FillpLfRingInit(struct FillpLfRing *ring, char *name, size_t size)
     ring->prodSafe = FILLP_TRUE;
 
     (void)memset_s(ring->name, sizeof(ring->name), '\0', sizeof(ring->name));
-    return;
 }
 
 void FillpLfRingSetProdSafe(struct FillpLfRing *ring, FILLP_BOOL safe)
