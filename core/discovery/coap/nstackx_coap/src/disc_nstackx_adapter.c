@@ -104,9 +104,8 @@ static int32_t ParseReservedInfo(const NSTACKX_DeviceInfo *nstackxDevice, Device
 
     DiscCoapParseWifiIpAddr(reserveInfo, device);
     DiscCoapParseHwAccountHash(reserveInfo, device);
-    (void)DiscCoapParseServiceData(reserveInfo, device);
-    if (DiscCoapParseExtendServiceData(reserveInfo, device) != SOFTBUS_OK) {
-        DISC_LOGW(DISC_COAP, "parse extend service data failed");
+    if (DiscCoapParseServiceData(reserveInfo, device) != SOFTBUS_OK) {
+        DISC_LOGW(DISC_COAP, "parse service data failed");
     }
     cJSON_Delete(reserveInfo);
     return SOFTBUS_OK;
@@ -145,25 +144,12 @@ static int32_t ParseDiscDevInfo(const NSTACKX_DeviceInfo *nstackxDevInfo, Device
     return SOFTBUS_OK;
 }
 
-static void BroadcastRsp(uint8_t bType, DeviceInfo *deviceInfo)
-{
-    if (bType == NSTACKX_BUSINESS_TYPE_NULL) {
-        DISC_LOGI(DISC_COAP, "receive a discovery broadcast from %s, do not need report", deviceInfo->devName);
-        return;
-    }
-    DiscVerifyBroadcastType(deviceInfo, bType);
-}
-
 static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceCount)
 {
     DISC_CHECK_AND_RETURN_LOGE(deviceList != NULL && deviceCount != 0, DISC_COAP, "invalid param.");
     DISC_LOGI(DISC_COAP, "Disc device found, count=%u", deviceCount);
     DeviceInfo *discDeviceInfo = (DeviceInfo *)SoftBusCalloc(sizeof(DeviceInfo));
     DISC_CHECK_AND_RETURN_LOGE(discDeviceInfo != NULL, DISC_COAP, "malloc device info failed.");
-
-    InnerDeviceInfoAddtions addtions = {
-        .medium = COAP,
-    };
 
     for (uint32_t i = 0; i < deviceCount; i++) {
         const NSTACKX_DeviceInfo *nstackxDeviceInfo = deviceList + i;
@@ -179,17 +165,9 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
             continue;
         }
 
-        if (nstackxDeviceInfo->discoveryType == NSTACKX_DISCOVERY_TYPE_ACTIVE ||
-            nstackxDeviceInfo->mode == PUBLISH_MODE_PROACTIVE) {
-            DISC_LOGI(DISC_COAP, "Disc device found, devName=%s, localNetIfName=%s", discDeviceInfo->devName,
-                nstackxDeviceInfo->networkName);
-            DiscCheckBtype(discDeviceInfo, nstackxDeviceInfo->businessType);
-            if (g_discCoapInnerCb != NULL && g_discCoapInnerCb->OnDeviceFound != NULL) {
-                g_discCoapInnerCb->OnDeviceFound(discDeviceInfo, &addtions);
-            }
-            continue;
+        if (DiscCoapProcessDeviceInfo(nstackxDeviceInfo, discDeviceInfo, g_discCoapInnerCb) != SOFTBUS_OK) {
+            DISC_LOGW(DISC_COAP, "DiscRecv: process device info failed");
         }
-        BroadcastRsp(nstackxDeviceInfo->businessType, discDeviceInfo);
     }
 
     SoftBusFree(discDeviceInfo);

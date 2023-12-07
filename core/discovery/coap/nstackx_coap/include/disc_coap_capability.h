@@ -17,6 +17,8 @@
 #define DISC_COAP_CAPABILITY_H
 
 #include "nstackx.h"
+
+#include "disc_interface.h"
 #include "softbus_common.h"
 #include "softbus_json_utils.h"
 
@@ -24,11 +26,10 @@
 extern "C" {
 #endif
 
-int32_t DiscCoapParseExtendServiceData(const cJSON *data, DeviceInfo *device);
 int32_t DiscCoapAssembleCapData(uint32_t capability, const char *capabilityData, uint32_t dataLen, char *outData);
-void DiscVerifyBroadcastType(DeviceInfo *device, uint8_t bType);
-void DiscCheckBtype(DeviceInfo *device, uint8_t bType);
 void DiscFillBtype(uint32_t capability, uint32_t allCap, NSTACKX_DiscoverySettings *discSet);
+int32_t DiscCoapProcessDeviceInfo(const NSTACKX_DeviceInfo *nstackxInfo, DeviceInfo *devInfo,
+    const DiscInnerCallback *discCb);
 
 #ifdef __cplusplus
 }
