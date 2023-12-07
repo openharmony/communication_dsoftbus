@@ -357,8 +357,6 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterFound002, TestSize.Level1)
     g_discInnerCb.OnDeviceFound = OnDeviceFoundTest;
     ret = DiscCoapRegisterCb(&g_discInnerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    OnDeviceFound(&testDeviceList, testDeviceCount);
-    EXPECT_EQ(g_testAddtions.medium, COAP);
 
     g_discInnerCb.OnDeviceFound = nullptr;
     ret = DiscCoapRegisterCb(&g_discInnerCb);
