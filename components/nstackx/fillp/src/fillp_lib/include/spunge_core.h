@@ -17,8 +17,9 @@
 #define SPUNGE_CORE_H
 #include "fillpinc.h"
 #include "spunge.h"
-#include "mem_pool.h"
+#include "lf_ring.h"
 #include "queue.h"
+#include "log.h"
 #include "hlist.h"
 #include "pcb.h"
 #include "spunge_mem.h"

@@ -119,4 +119,4 @@ void FillpFrameRx(struct FillpFrameHandle *h, const struct FillpPcbItem *item);
 }
 #endif
 
-#endif
+#endif /* FILLP_FRAME_H */

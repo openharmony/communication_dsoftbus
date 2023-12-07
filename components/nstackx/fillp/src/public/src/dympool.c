@@ -105,8 +105,6 @@ void DympDestroyPool(DympoolType *pool)
     }
 
     SpungeFree(pool, SPUNGE_ALLOC_TYPE_MALLOC);
-
-    return;
 }
 
 void DympSetConsSafe(DympoolType *pool, FILLP_BOOL safe)

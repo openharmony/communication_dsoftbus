@@ -37,4 +37,4 @@ void FillbufItemPoolSetConflictSafe(void *pool, FILLP_BOOL consSafe, FILLP_BOOL 
 }
 #endif
 
-#endif
+#endif /* FILLP_BUFITEM_H */

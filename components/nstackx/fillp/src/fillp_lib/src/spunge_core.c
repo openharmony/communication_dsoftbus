@@ -411,18 +411,21 @@ static FILLP_INT SpungeSysCallRegisted(void)
     ret = FillpValidateFuncPtr(&g_fillpOsBasicLibFun, sizeof(FillpSysLibBasicCallbackFuncSt));
     if (ret != ERR_OK) {
         SET_ERRNO(FILLP_EINVAL);
+        FILLP_LOGERR("FillpValidateFuncPtr g_fillpOsBasicLibFun failed");
         return ret;
     }
 
     ret = FillpValidateFuncPtr(&g_fillpOsSemLibFun, sizeof(FillpSysLibSemCallbackFuncSt));
     if (ret != ERR_OK) {
         SET_ERRNO(FILLP_EINVAL);
+        FILLP_LOGERR("FillpValidateFuncPtr g_fillpOsSemLibFun failed");
         return ret;
     }
 
     ret = FillpValidateFuncPtr(&g_fillpOsSocketLibFun, sizeof(FillpSysLibSockCallbackFuncSt));
     if (ret != ERR_OK) {
         SET_ERRNO(FILLP_EINVAL);
+        FILLP_LOGERR("FillpValidateFuncPtr g_fillpOsSocketLibFun failed");
         return ret;
     }
 
@@ -440,7 +443,6 @@ static void FtFreeEpollResource(void)
         DympDestroyPool(g_spunge->eventpollPool);
         g_spunge->eventpollPool = FILLP_NULL_PTR;
     }
-    return;
 }
 
 static FILLP_INT FtAllocateEpollResource(void)
@@ -583,7 +585,6 @@ void FtGlobalTimerInit(struct SpungeInstance *inst)
     inst->macTimerNode.interval = FILLP_KEY_REFRESH_TIME;
     FillpTimingWheelAddTimer(&inst->timingWheel, (SYS_ARCH_GET_CUR_TIME_LONGLONG() + inst->macTimerNode.interval),
         &inst->macTimerNode);
-    return;
 }
 
 static FILLP_INT SpungeCheckCallbacks(void)
@@ -916,8 +917,6 @@ void SpungeHandleMsgCycle(struct SpungeInstance *inst)
             (void)SYS_ARCH_SEM_POST(&msg->syncSem);
         }
     }
-
-    return;
 }
 
 static void SpungeLoopCheckUnsendBox(struct SpungeInstance *inst)
@@ -1050,7 +1049,6 @@ void FillpServerRecvRateAdjustment(struct SpungeInstance *inst, FILLP_UINT32 cal
         *connRecvCalLimit = inst->rateControl.recv.maxRate;
     }
     /* End of rate adjustment for Data receiving at server side */
-    return;
 }
 
 void FillpServerSendRateAdjustment(struct SpungeInstance *inst, FILLP_UINT32 calcSendTotalRate, FILLP_INT realSendConn,
@@ -1103,7 +1101,6 @@ void FillpServerSendRateAdjustment(struct SpungeInstance *inst, FILLP_UINT32 cal
     }
 
     /* End of rate adjustment for Data receiving at server side */
-    return;
 }
 
 void FillpCalculateFairness(struct SpungeInstance *inst)
@@ -1167,8 +1164,6 @@ void FillpCalculateFairness(struct SpungeInstance *inst)
         pcb->rateControl.send.curMaxRateLimitation = connSendCalLimit;
         pcb->fpcb.send.flowControl.sendRateLimit = pcb->rateControl.send.curMaxRateLimitation;
     }
-
-    return;
 }
 
 FILLP_BOOL FillpKillCore(void)
@@ -1474,8 +1469,6 @@ void SpungeInitTokenBucket(struct SpungeInstance *inst)
     FILLP_LOGINF("limite rate:%u, timer_interval:%u, maxPktSize:%u", stb->rate, stb->tockenTimerNode.interval,
         stb->maxPktSize);
     SpungeEnableTokenTimer(stb);
-
-    return;
 }
 
 void SpungeTokenBucketAddFpcb(struct FillpPcb *fpcb)

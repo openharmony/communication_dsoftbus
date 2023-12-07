@@ -70,7 +70,6 @@ static void FillpChangePackInteval(struct FillpPcb *pcb)
         FillpEnablePackTimer(pcb);
         pcb->packState = FILLP_PACK_STATE_NORMAL;
     }
-    return;
 }
 
 static FILLP_INT FillpProcessDataOptions(FillpDataOption *dataOption, struct FillpPcb *pcb, struct FillpPcbItem *item)
@@ -187,7 +186,6 @@ static void FillpProcessItemData(struct FillpPcb *pcb, struct FillpPcbItem *item
     } else {
         FillpDataToStack(pcb, item);
     }
-    return;
 }
 
 static void FillpDataInput(struct FillpPcb *pcb, struct FillpPcbItem *item)
@@ -265,7 +263,6 @@ static void ProcessPcbItem(struct FillpPcb *pcb, FILLP_CONST struct NetBuf *buf,
             pcb->recv.recvList.nodeNum, pcb->recv.recvBoxPlaceInOrder.nodeNum,
             FillpQueueValidOnes(pcb->recv.recvBox), pcb->mpRecvSize, pcb->recv.curItemCount);
     }
-    return;
 }
 
 static void FillpHdlDataInput(struct FillpPcb *pcb, FILLP_CONST struct NetBuf *buf)
@@ -361,7 +358,6 @@ static void FillpNackInputTrace(FILLP_CONST struct FtSocket *sock, FILLP_CONST s
         FILLP_LM_FILLPMSGTRACE_OUTPUT_WITHOUT_FT_TRACE_ENABLE_FLAG(FILLP_TRACE_DIRECT_NETWORK, sock->traceHandle,
             sizeof(struct FillpPktNack), sock->index, fillpTrcDesc, (FILLP_CHAR *)(&tmpNack));
     }
-    return;
 }
 
 static FILLP_INT FillpGetSeqFromPktSeqHash(FILLP_UINT32 pktNum, FILLP_CONST struct FillpHashLlist *mapList,
@@ -568,8 +564,6 @@ static void FillpPackInputSendMsgTrace(FILLP_CONST struct FillpPcb *pcb, FILLP_C
         FILLP_LM_FILLPMSGTRACE_OUTPUT_WITHOUT_FT_TRACE_ENABLE_FLAG(FILLP_TRACE_DIRECT_NETWORK, ftSock->traceHandle,
             (FILLP_UINT32)traceMsgLen, FILLP_GET_SOCKET(pcb)->index, fillpTrcDesc, (FILLP_CHAR *)(&tmpPack));
     }
-
-    return;
 }
 
 static FILLP_BOOL FillpCheckPackNumber(struct FillpPcb *pcb, struct FillpPktPack *pack,
@@ -809,7 +803,6 @@ static void FillpPackInput(struct FillpPcb *pcb, FILLP_CONST struct NetBuf *p)
 
     FillpPackInputLog(pcb);
     FillpFcPackInput(pcb, pack);
-    return;
 }
 
 static void FillpHdlConnect(struct FillpPcb *pcb, FILLP_CONST struct NetBuf *buf, struct SpungeInstance *inst,
