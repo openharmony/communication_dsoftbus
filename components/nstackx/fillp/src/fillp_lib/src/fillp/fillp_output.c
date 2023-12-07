@@ -283,8 +283,7 @@ static void UpdateStatisticsWhenSendOne(struct FillpStatisticsPcb *stats, FILLP_
     stats->traffic.totalSendBytes += bufLen;
 
     stats->appFcStastics.periodSendPkts++;
-    stats->appFcStastics.periodSendBits =
-    stats->appFcStastics.periodSendBits + (FILLP_ULLONG)FILLP_FC_VAL_IN_BITS(((FILLP_ULLONG)bufLen));
+    stats->appFcStastics.periodSendBits += (FILLP_ULLONG)FILLP_FC_VAL_IN_BITS(((FILLP_ULLONG)bufLen));
 }
 
 static FillpErrorType FillpAddtoListBySeqNum(struct Hlist *list, struct FillpPcbItem *item)

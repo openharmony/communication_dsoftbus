@@ -1337,7 +1337,6 @@ void FillpSysOsInit(IN void)
     g_fillpMacSelf = mach_task_self();
     host_get_clock_service(g_fillpMacSelf, SYSTEM_CLOCK, &g_sclock);
     (void)mach_timebase_info(&g_macTimeBaseInfo);
-    return;
 }
 #elif defined(FILLP_WIN32)
 void FillpSysOsInit(IN void)
@@ -1352,7 +1351,6 @@ void FillpSysOsInit(IN void)
 void FillpSysOsDeinit(IN void)
 {
     mach_port_deallocate(g_fillpMacSelf, g_sclock);
-    return;
 }
 #else
 void FillpSysOsDeinit(IN void)
@@ -1412,8 +1410,7 @@ static void FillpRegBasicFun(void)
 
     Output       :None
 
-    Return       : Fillp_SUCCESS - Success
-                       ERROR CODES    - Failure
+    Return       :None
  *******************************************************************************/
 void FillpRegLibSysFunc(IN void)
 {

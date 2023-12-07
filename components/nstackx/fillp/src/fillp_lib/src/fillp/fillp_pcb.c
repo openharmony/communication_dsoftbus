@@ -503,7 +503,6 @@ static void FillpPcbRemoveRecv(struct FillpPcb *fpcb)
     HLIST_INIT(&(pcb->nackList));
 
     (void)SYS_ARCH_SEM_DESTROY(&pcb->recvSem);
-    return;
 }
 
 void FillpPcbSendFc(struct FillpPcb *fpcb)
@@ -627,7 +626,6 @@ static void FillpPcbRemoveSend(struct FillpPcb *fpcb)
 #ifdef SOCK_SEND_SEM
     SYS_ARCH_SEM_DESTROY(&pcb->sendSem);
 #endif /* SOCK_SEND_SEM */
-    return;
 }
 
 void FillpPcbRemoveTimers(struct FillpPcb *fpcb)
@@ -731,7 +729,6 @@ void FillpRemovePcb(struct FillpPcb *pcb)
 
     pcb->isFinAckReceived = FILLP_FALSE;
     pcb->resInited = FILLP_FALSE;
-    return;
 }
 
 FILLP_UINT32 FillpGetSendpcbUnackListPktNum(struct FillpSendPcb *pcb)
