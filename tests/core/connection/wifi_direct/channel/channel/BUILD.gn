@@ -12,43 +12,40 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("../../../../dsoftbus.gni")
+import("../../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/connection"
-dsoftbus_root_path = "../../../.."
+dsoftbus_root_path = "../../../../.."
 softbus_adapter_common = "${dsoftbus_root_path}/adapter/common"
 
-ohos_unittest("WifiDirectTest") {
+ohos_unittest("WifiDirectChannelTest") {
   module_out_path = module_output_path
 
   include_dirs = [
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/connection/manager",
+    "$softbus_adapter_common/include",
     "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/connection/common/include",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/core/connection/manager",
+    "$dsoftbus_root_path/core/connection/tcp/include",
     "$dsoftbus_root_path/core/connection/wifi_direct/processor",
+    "$dsoftbus_root_path/tests/core/connection/wifi_direct/processor",
+    "$dsoftbus_root_path/core/connection/wifi_direct/command",
     "$dsoftbus_root_path/core/connection/wifi_direct/data",
-    "$dsoftbus_root_path/core/connection/wifi_direct/utils",
     "$dsoftbus_root_path/core/connection/wifi_direct/protocol",
     "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single",
     "$dsoftbus_root_path/core/connection/wifi_direct",
-    "$dsoftbus_root_path/core/connection/wifi_direct/negotiate_state",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/connection/wifi_direct/channel",
     "$dsoftbus_root_path/core/common/softbus_property/include",
-    "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
-    "$dsoftbus_root_path/core/bus_center/interface",
     "//third_party/googletest/googletest/include",
     "//third_party/googletest/googletest/src",
     "//third_party/bounds_checking_function/include",
-    "//foundation/communication/wifi/wifi/interfaces/kits/c",
-    "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single",
-    "$dsoftbus_root_path/core/connection/wifi_direct/channel",
-    "$dsoftbus_root_path/core/connection/wifi_direct/entity",
-    "$dsoftbus_root_path/interfaces/kits/common",
-    "$softbus_adapter_common/include",
   ]
-
+  sources = [ "default_negotiate_channel_test.cpp" ]
   deps = [
-    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "//third_party/bounds_checking_function:libsec_shared",
@@ -60,28 +57,9 @@ ohos_unittest("WifiDirectTest") {
     "c_utils:utils",
     "hilog:libhilog",
   ]
-  sources = [
-    "wifi_direct_coexist_rule_test.cpp",
-    "wifi_direct_command_manage_test.cpp",
-    "wifi_direct_initiator_test.cpp",
-    "wifi_direct_ip_manager_test.cpp",
-    "wifi_direct_negotiator_test.cpp",
-    "wifi_direct_role_negotiator_test.cpp",
-    "wifi_direct_role_option_test.cpp",
-    "wifi_direct_test.cpp",
-  ]
 }
 
 group("unittest") {
   testonly = true
-  deps = [
-    ":WifiDirectTest",
-    "adapter/single:unittest",
-    "channel:unittest",
-    "data:unittest",
-    "negotiate_state:unittest",
-    "processor:unittest",
-    "protocol:unittest",
-    "utils:unittest",
-  ]
+  deps = [ ":WifiDirectChannelTest" ]
 }
