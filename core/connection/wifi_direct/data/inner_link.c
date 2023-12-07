@@ -142,11 +142,12 @@ static bool Unmarshalling(struct InnerLink *self, struct WifiDirectProtocol *pro
     size_t size = 0;
     uint8_t *data = NULL;
     struct InfoContainerKeyProperty keyProperty;
+    (void)memset_s(&keyProperty, sizeof(keyProperty), 0, sizeof(keyProperty));
 
     while (protocol->readData(protocol, &keyProperty, &data, &size)) {
         bool ret = true;
         enum InnerLinkKey key = GetKeyFromKeyProperty(&keyProperty);
-        CONN_CHECK_AND_RETURN_RET_LOGW(key < IL_KEY_MAX, false, CONN_WIFI_DIRECT, "key out of range, tag=%d",
+        CONN_CHECK_AND_RETURN_RET_LOGE(key < IL_KEY_MAX, false, CONN_WIFI_DIRECT, "key out of range, tag=%d",
             keyProperty.tag);
 
         enum InfoContainerEntryType type = keyProperty.type;
@@ -221,6 +222,7 @@ static int32_t GetRemoteIpString(struct InnerLink *self, char *ipString, int32_t
 static void PutLocalIpString(struct InnerLink *self, const char *ipString)
 {
     struct WifiDirectIpv4Info ipv4;
+    (void)memset_s(&ipv4, sizeof(ipv4), 0, sizeof(ipv4));
     int32_t ret = WifiDirectIpStringToIpv4(ipString, &ipv4);
     CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "ip to ipv4 failed");
     self->putRawData(self, IL_KEY_LOCAL_IPV4, &ipv4, sizeof(ipv4));
@@ -229,6 +231,7 @@ static void PutLocalIpString(struct InnerLink *self, const char *ipString)
 static void PutRemoteIpString(struct InnerLink *self, const char *ipString)
 {
     struct WifiDirectIpv4Info ipv4;
+    (void)memset_s(&ipv4, sizeof(ipv4), 0, sizeof(ipv4));
     int32_t ret = WifiDirectIpStringToIpv4(ipString, &ipv4);
     CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "ip to ipv4 failed");
     self->putRawData(self, IL_KEY_REMOTE_IPV4, &ipv4, sizeof(ipv4));
