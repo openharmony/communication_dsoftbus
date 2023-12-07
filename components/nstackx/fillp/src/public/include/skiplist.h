@@ -15,7 +15,8 @@
 
 #ifndef SKIPLIST_H
 #define SKIPLIST_H
-#include "mem_pool.h"
+#include "lf_ring.h"
+#include "queue.h"
 #include "log.h"
 
 #ifdef __cplusplus

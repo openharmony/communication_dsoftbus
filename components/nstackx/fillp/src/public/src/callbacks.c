@@ -1343,7 +1343,6 @@ void FillpSysOsInit(IN void)
 void FillpSysOsInit(IN void)
 {
     FillpSysArchInitTime();
-    return;
 }
 #else
 #define FillpSysOsInit()

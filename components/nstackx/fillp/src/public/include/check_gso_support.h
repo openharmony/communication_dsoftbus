@@ -29,4 +29,4 @@ extern FILLP_INT g_gsoSupport;
 
 void CheckGSOSupport(void);
 #endif
-#endif
+#endif /* CHECK_GSO_SUPPORT_H */

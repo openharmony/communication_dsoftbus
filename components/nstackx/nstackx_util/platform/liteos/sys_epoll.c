@@ -778,21 +778,20 @@ static void EpollSetFdHandle(EpollSet *epollSetPtr, void *param, int32_t fd)
 
 static void EpollSetTraverse(EpollSet *epollSetPtr, EpollTraverseFunc func, void *param)
 {
-    int32_t i, fd;
-
 #ifdef __LITEOS__
 #ifdef FDSETSAFESET
-    for (i = 0; i <= (epollSetPtr->maxfd - LWIP_SOCKET_OFFSET) / BYTE_BITS_NUM; i++) {
+    for (int32_t i = 0; i <= (epollSetPtr->maxfd - LWIP_SOCKET_OFFSET) / BYTE_BITS_NUM; i++) {
         uint8_t bits = epollSetPtr->exceptfds.fd_bits[i];
 #else
-    for (i = LWIP_SOCKET_OFFSET / NFDBITS; i <= epollSetPtr->maxfd / NFDBITS; i++) {
+    for (int32_t i = LWIP_SOCKET_OFFSET / NFDBITS; i <= epollSetPtr->maxfd / NFDBITS; i++) {
         unsigned long bits = epollSetPtr->exceptfds.fds_bits[i];
 #endif
 #else
-    for (i = LWIP_SOCKET_OFFSET / __NFDBITS; i <= epollSetPtr->maxfd / __NFDBITS; i++) {
+    for (int32_t i = LWIP_SOCKET_OFFSET / __NFDBITS; i <= epollSetPtr->maxfd / __NFDBITS; i++) {
         unsigned long bits = (unsigned long)(__FDS_BITS(&(epollSetPtr->exceptfds))[i]);
 #endif
         while (bits != 0) {
+            int32_t fd;
             int32_t bitIdx = RearZeroBitNum(bits);
 #ifdef __LITEOS__
 #ifdef FDSETSAFESET

@@ -47,8 +47,6 @@ static void FillpRbRotateLeft(struct RbNode *x, struct RbRoot *root)
     /* link x and y */
     y->rbLeft = x;
     x->rbParent = y;
-
-    return;
 }
 
 
@@ -80,8 +78,6 @@ static void FillpRbRotateRight(struct RbNode *x, struct RbRoot *root)
     /* link x and y */
     y->rbRight = x;
     x->rbParent = y;
-
-    return;
 }
 
 static struct RbNode *EqualRight(struct RbNode *x, struct RbRoot *root)
@@ -148,8 +144,6 @@ void FillpRbInsertColor(struct RbNode *x, struct RbRoot *root)
     }
 
     root->rbNode->color = RB_BLACK;
-
-    return;
 }
 
 static int FillpRbEraseColorAtLeft(struct RbNode **x, struct RbNode **parent, struct RbRoot *root)
@@ -250,8 +244,6 @@ static void FillpRbEraseColor(struct RbNode *x, struct RbNode *parent, struct Rb
     if (x != FILLP_NULL_PTR) {
         x->color = RB_BLACK;
     }
-
-    return;
 }
 
 static void FillpRbEraseLowlvlNode(struct RbNode *node, struct RbRoot *root)
@@ -341,8 +333,6 @@ void FillpRbErase(struct RbNode *node, struct RbRoot *root)
     if (color == RB_BLACK) {
         FillpRbEraseColor(childNode, parentNode, root);
     }
-
-    return;
 }
 
 
