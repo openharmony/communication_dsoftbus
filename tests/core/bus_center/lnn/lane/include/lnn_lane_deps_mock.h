@@ -44,6 +44,8 @@ public:
         const AuthConnCallback *callback, bool isMeta) = 0;
     virtual int SoftBusFrequencyToChannel(int frequency) = 0;
     virtual NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type) = 0;
+    virtual int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info) = 0;
+    virtual bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type) = 0;
     virtual const NodeInfo *LnnGetLocalNodeInfo(void) = 0;
     virtual int32_t P2pLinkGetRequestId(void) = 0;
     virtual void AuthCloseConn(int64_t authId) = 0;
@@ -66,6 +68,8 @@ public:
     MOCK_METHOD2(LnnGetLocalNumInfo, int32_t (InfoKey, int32_t*));
     MOCK_METHOD3(LnnGetRemoteNumInfo, int32_t (const char*, InfoKey, int32_t*));
     MOCK_METHOD2(LnnGetNodeInfoById, NodeInfo* (const char*, IdCategory));
+    MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t (const char*, IdCategory, NodeInfo*));
+    MOCK_METHOD2(LnnHasDiscoveryType, bool (const NodeInfo*, DiscoveryType));
     MOCK_METHOD0(LnnGetLocalNodeInfo, NodeInfo * ());
     MOCK_METHOD0(P2pLinkGetRequestId, int32_t ());
     MOCK_METHOD1(AuthCloseConn, void (int64_t));
