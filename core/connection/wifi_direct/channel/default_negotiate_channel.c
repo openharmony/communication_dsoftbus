@@ -154,8 +154,9 @@ static void SetP2pMac(struct WifiDirectNegotiateChannel *base, const char *p2pMa
 static bool IsP2pChannel(struct WifiDirectNegotiateChannel *base)
 {
     AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(connInfo), 0, sizeof(connInfo));
     int32_t ret = AuthGetConnInfo(((struct DefaultNegotiateChannel *)base)->authId, &connInfo);
-    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, false, CONN_WIFI_DIRECT, "get auth conn info failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, false, CONN_WIFI_DIRECT, "get auth conn info failed");
     return connInfo.type == AUTH_LINK_TYPE_P2P;
 }
 
@@ -230,6 +231,7 @@ int32_t OpenDefaultNegotiateChannel(const char *remoteIp, int32_t remotePort,
         isMeta);
 
     AuthConnInfo authConnInfo;
+    (void)memset_s(&authConnInfo, sizeof(authConnInfo), 0, sizeof(authConnInfo));
     authConnInfo.type = AUTH_LINK_TYPE_P2P;
     authConnInfo.info.ipInfo.port = remotePort;
     if (isMeta) {
