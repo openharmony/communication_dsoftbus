@@ -109,3 +109,13 @@ DiscoveryBleDispatcherInterface *DiscApproachBleInit(DiscInnerCallback *discInne
 void DiscApproachBleDeinit(void)
 {
 }
+
+int32_t DiscApproachBleEventInit(void)
+{
+    return SOFTBUS_OK;
+}
+
+void DiscApproachBleEventDeinit(void)
+{
+}
+
