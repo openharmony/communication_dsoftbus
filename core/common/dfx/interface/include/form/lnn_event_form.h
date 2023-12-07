@@ -19,6 +19,7 @@
 #include <stdint.h>
 
 #include "event_form_enum.h"
+#include "softbus_common.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -83,26 +84,49 @@ typedef struct {
 } LnnStatsExtra;
 
 typedef enum {
-    AUDIT_SCENE_LNN_RESERVED = 1,
+    AUDIT_SCENE_DECRYPT_CONN_DATA = 1,
+    AUDIT_SCENE_DECRYPT_DEV_INFO_MSG = 2,
+    AUDIT_SCENE_HANDLE_MSG_DEV_ID = 3,
+    AUDIT_SCENE_HANDLE_MSG_DEV_INFO = 4,
+    AUDIT_SCENE_HANDLE_MSG_AUTH_DATA = 5,
 } LnnAuditScene;
 
+typedef enum {
+    AUDIT_DECRYPT_FAIL_END_AUTH = 1,
+    AUDIT_HANDLE_MSG_FAIL_END_AUTH = 2,
+} LnnAuditProcessResult;
+
 typedef struct {
-    int32_t errcode;             // ERROR_CODE
-    SoftbusAuditType auditType;  // AUDIT_TYPE
-    int32_t connectionId;        // CONN_ID
-    int32_t authLinkType;        // AUTH_LINK_TYPE
-    int32_t authId;              // AUTH_ID
-    int32_t onlineNum;           // ONLINE_NUM
-    const char *peerIp;          // PEER_IP
-    const char *peerBrMac;       // PEER_BR_MAC
-    const char *peerBleMac;      // PEER_BLE_MAC
-    const char *peerAuthPort;    // PEER_AUTH_PORT
-    const char *peerUdid;        // PEER_UDID
-    const char *peerNetworkId;   // PEER_NETWORK_ID
-    int32_t peerDeviceType;      // PEER_DEV_TYPE
-    const char *extra;           // EXTRA
-    const char *callerPkg;       // HOST_PKG
-    const char *calleePkg;       // TO_CALL_PKG
+    int32_t result;               // RESULT
+    int32_t errCode;              // ERROR_CODE
+    SoftbusAuditType auditType;   // AUDIT_TYPE
+    int32_t connId;               // CONN_ID
+    int32_t authLinkType;         // AUTH_LINK_TYPE
+    int32_t authRequestId;        // AUTH_REQUEST_ID
+    int32_t onlineNum;            // ONLINE_NUM
+    const char hostPkg[DISC_MAX_DEVICE_NAME_LEN];  // HOST_PKG
+    const char localIp[IP_STR_MAX_LEN];            // LOCAL_IP
+    const char localBrMac[BT_MAC_LEN];             // LOCAL_BR_MAC
+    const char localBleMac[BT_MAC_LEN];            // LOCAL_BLE_MAC
+    const char localUdid[UDID_BUF_LEN];            // LOCAL_UDID
+    const char localNetworkId[NETWORK_ID_BUF_LEN]; // LOCAL_NETWORK_ID
+    const char localDevName[DISC_MAX_DEVICE_NAME_LEN]; // LOCAL_DEV_NAME
+    const char peerIp[IP_STR_MAX_LEN];                 // PEER_IP
+    const char peerBrMac[BT_MAC_LEN];                  // PEER_BR_MAC
+    const char peerBleMac[BT_MAC_LEN];                 // PEER_BLE_MAC
+    const char peerUdid[UDID_BUF_LEN];                 // PEER_UDID
+    const char peerNetworkId[NETWORK_ID_BUF_LEN];      // PEER_NETWORK_ID
+    const char peerDevName[DISC_MAX_DEVICE_NAME_LEN];  // PEER_DEV_NAME
+    int32_t localAuthPort;       // LOCAL_AUTH_PORT
+    int32_t localProxyPort;      // LOCAL_PROXY_PORT
+    int32_t localSessionPort;    // LOCAL_SESSION_PORT
+    int32_t localDevType;        // LOCAL_DEV_TYPE
+    int32_t peerAuthPort;        // PEER_AUTH_PORT
+    int32_t peerProxyPort;       // PEER_PROXY_PORT
+    int32_t peerSessionPort;     // PEER_SESSION_PORT
+    int32_t peerDevType;         // PEER_DEV_TYPE
+    int32_t attackTimes;         // ATTACK_TIMES
+    int32_t beAttackedPort;      // BE_ATTACKED_PORT
 } LnnAuditExtra;
 
 #ifdef __cplusplus

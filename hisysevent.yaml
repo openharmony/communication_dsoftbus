@@ -139,23 +139,40 @@ BUSCENTER_BEHAVIOR:
 
 BUSCENTER_AUDIT:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: bus center audit behavior }
+  BIZ_SCENE: {type: INT32, desc: business scene }
+  BIZ_STAGE: {type: INT32, desc: business stage }
   ORG_PKG: {type: STRING, desc: organization module name }
   FUNC: {type: STRING, desc: current function name }
   HOST_PKG: {type: STRING, desc: host module name }
-  TO_CALL_PKG: {type: STRING, desc: to call module name }
-  BIZ_SCENE: {type: INT32, desc: business scene }
-  ERROR_CODE: { type: INT32, desc: error code }
+  RESULT: {type: INT32, desc: deal result }
+  ERROR_CODE: {type: INT32, desc: error code }
   AUDIT_TYPE: {type: INT32, desc: audit type }
-  CONN_ID: { type: INT32, desc: connection id }
-  AUTH_LINK_TYPE: { type: INT32, desc: auth link type }
-  AUTH_ID: { type: INT32, desc: auth id }
-  ONLINE_NUM: { type: INT32, desc: current online device num }
-  PEER_IP: { type: STRING, desc: peer device ip }
-  PEER_BR_MAC: { type: STRING, desc: peer device br mac }
-  PEER_AUTH_PORT: { type: STRING, desc: peer puth port }
-  PEER_UDID: { type: STRING, desc: peer device udid }
-  PEER_DEV_TYPE: { type: INT32, desc: peer device type }
-  EXTRA: { type: STRING, desc: ectra information }
+  CONN_ID: {type: INT32, desc: connection id }
+  AUTH_LINK_TYPE: {type: INT32, desc: auth link type }
+  AUTH_REQUEST_ID: {type: INT32, desc: auth request id }
+  ONLINE_NUM: {type: INT32, desc: current online device num }
+  LOCAL_IP: {type: STRING, desc: local device ip }
+  LOCAL_BR_MAC: {type: STRING, desc: local device br mac }
+  LOCAL_BLE_MAC: {type: STRING, desc: local device ble mac }
+  LOCAL_UDID: {type: STRING, desc: local device udid }
+  LOCAL_NETWORK_ID: {type: STRING, desc: local device network id }
+  LOCAL_DEV_NAME: {type: STRING, desc: local device name }
+  PEER_IP: {type: STRING, desc: peer device ip }
+  PEER_BR_MAC: {type: STRING, desc: peer device br mac }
+  PEER_BLE_MAC: {type: STRING, desc: peer device ble mac }
+  PEER_UDID: {type: STRING, desc: peer device udid }
+  PEER_NETWORK_ID: {type: STRING, desc: peer device network id }
+  PEER_DEV_NAME: {type: STRING, desc: peer device name }
+  LOCAL_AUTH_PORT: {type: INT32, desc: local device auth port}
+  LOCAL_PROXY_PORT: {type: INT32, desc: local device proxy port }
+  LOCAL_SESSION_PORT: {type: INT32, desc: local device session port }
+  LOCAL_DEV_TYPE: {type: INT32, desc: local device type }
+  PEER_AUTH_PORT: {type: INT32, desc: peer device auth port }
+  PEER_PROXY_PORT: {type: INT32, desc: peer device proxy port }
+  PEER_SESSION_PORT: {type: INT32, desc: peer device session port }
+  PEER_DEV_TYPE: {type: INT32, desc: peer device type }
+  ATTACK_TIMES: {type: INT32, desc: attack times }
+  BE_ATTACKED_PORT: {type: INT32, desc: be attacked port }
 
 TRANSPORT_BEHAVIOR:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: transport behavior }

@@ -146,4 +146,54 @@ HWTEST_F(LnnEventTest, LnnEventTest004, TestSize.Level0)
         .Times(1);
     LNN_EVENT(EVENT_SCENE_LEAVE_LNN, EVENT_STAGE_LEAVE_LNN_END, emptyExtra);
 }
+
+/**
+ * @tc.name: LnnAuditTest001
+ * @tc.desc: Test lnn audit form size
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LnnEventTest, LnnAuditTest001, TestSize.Level0)
+{
+    LnnAuditExtra extra = {
+        .result = AUDIT_DECRYPT_FAIL_END_AUTH,
+        .errCode = 2233,
+        .auditType = AUDIT_EVENT_MSG_ERROR,
+        .connId = 123,
+        .authLinkType = 2,
+        .authRequestId = 10,
+        .onlineNum = 2,
+        .hostPkg = "testHostPkg",
+        .localIp = "127.0.0.0",
+        .localBrMac = "12:22:23:33:33:91",
+        .localBleMac = "91:33:33:23:22:12",
+        .localUdid = "aassddffgghhhh",
+        .localNetworkId = "aassddffgghhhh",
+        .localDevName = "Openharmony001",
+        .peerIp = "127.1.1.1",
+        .peerBrMac = "22:33:44:55:66:77",
+        .peerBleMac = "77:66:55:44:33:22",
+        .peerUdid = "aassddffgghhhh",
+        .peerNetworkId = "aassddffgghhhh",
+        .peerDevName = "Openharmony002",
+        .localAuthPort = 1,
+        .localProxyPort = 2,
+        .localSessionPort = 3,
+        .localDevType = 127,
+        .peerAuthPort = 4,
+        .peerProxyPort = 5,
+        .peerSessionPort = 6,
+        .peerDevType = 128,
+        .attackTimes = 10000,
+        .beAttackedPort = 25,
+    };
+    constexpr int32_t VALID_EXTRA_SIZE = 30; // result, errcode is valid
+
+    HiSysEventMock mock;
+    EXPECT_CALL(mock,
+        HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(LNN_AUDIT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR),
+            LnnAuditValidParamArrayMatcher(extra, VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE - 1)))
+        .Times(1);
+    LNN_AUDIT(AUDIT_SCENE_DECRYPT_CONN_DATA, extra);
+}
 } // namespace OHOS
