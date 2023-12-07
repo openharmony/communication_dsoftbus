@@ -13,27 +13,70 @@
  * limitations under the License.
  */
 
+#include "connection_ble_mock.h"
+
 #include <cstdio>
 #include <cstring>
+
 #include <gtest/gtest.h>
 #include <securec.h>
-#include "connection_ble_mock.h"
+
 #include "common_list.h"
+#include "conn_log.h"
 #include "softbus_conn_interface.h"
 #include "softbus_conn_manager.h"
+#include "softbus_adapter_ble_gatt_server.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
-#include "softbus_log_old.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_bt_common.h"
 #include "softbus_conn_ble_server.h"
-#include "softbus_conn_ble_server.c"
-#include "softbus_conn_ble_client.c"
-#include "softbus_conn_ble_manager.c"
+#include "softbus_conn_ble_client.h"
+#include "softbus_conn_ble_manager.h"
+#include "softbus_conn_ble_connection.h"
 
 using namespace testing::ext;
 using namespace testing;
+using namespace std;
 namespace OHOS {
+
+SoftBusGattsCallback *g_callback = nullptr;
+
+extern "C" int SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback)
+{
+    g_callback = callback;
+    return SOFTBUS_OK;
+}
+
+extern "C"  GattService *CreateService(void)
+{
+    char array[16];
+    GattService *gattService = (GattService *)SoftBusCalloc(sizeof(GattService));
+    CONN_CHECK_AND_RETURN_RET_LOGE(gattService != NULL, NULL, CONN_BLE, "calloc gatt service failed");
+    SoftBusBtUuid serviceUuid = {
+        .uuid = array,
+        .uuidLen = sizeof(array)/sizeof(array[0]),
+    };
+    SoftBusBtUuid connCharacteristicUuid = {
+        .uuid = array,
+        .uuidLen = sizeof(array)/sizeof(array[0]),
+    };
+    SoftBusBtUuid netUuid = {
+        .uuid = array,
+        .uuidLen = sizeof(array)/sizeof(array[0]),
+    };
+    SoftBusBtUuid descriptorUuid = {
+        .uuid = array,
+        .uuidLen = sizeof(array)/sizeof(array[0]),
+    };
+    gattService->serviceUuid = serviceUuid;
+    gattService->connCharacteristicUuid = connCharacteristicUuid;
+    gattService->netUuid = netUuid;
+    gattService->descriptorUuid = descriptorUuid;
+    return gattService;
+}
+
 class ServiceConnectionTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -58,16 +101,19 @@ void ServiceConnectionTest::SetUpTestCase()
 */
 HWTEST_F(ServiceConnectionTest, ServiceConnection001, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
+    GattService *service = CreateService();
+    EXPECT_NE(service, nullptr);
+    GattServiceType serviceId = SOFTBUS_GATT_SERVICE;
     NiceMock<ConnectionBleInterfaceMock> bleMock;
-    EXPECT_CALL(bleMock, SoftBusGattsAddService).WillRepeatedly(Return(SOFTBUS_ERR));
-    ret = ConnGattServerStartService();
+    EXPECT_CALL(bleMock, SoftBusGattsAddService(_, _, _)).WillRepeatedly(Return(SOFTBUS_ERR));
+    ret = ConnGattServerStartService(service, serviceId);
     EXPECT_EQ(SOFTBUS_CONN_BLE_UNDERLAY_SERVER_ADD_SERVICE_ERR, ret);
 }
 
 /*
 * @tc.name: ServiceConnection002
-* @tc.desc: Test BleGattcNotificationReceiveCallback.
+* @tc.desc: Test ConnGattServerStopService.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
@@ -75,16 +121,16 @@ HWTEST_F(ServiceConnectionTest, ServiceConnection001, TestSize.Level1)
 */
 HWTEST_F(ServiceConnectionTest, ServiceConnection002, TestSize.Level1)
 {
-    int32_t underlayerHandle = 1;
-    SoftBusBtAddr addr = {
-        .addr = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66}
-    };
-    BleConnectServerCallback(underlayerHandle, &addr);
+    int32_t ret;
+    NiceMock<ConnectionBleInterfaceMock> bleMock;
+    EXPECT_CALL(bleMock, SoftBusGattsStopService).WillRepeatedly(Return(SOFTBUS_ERR));
+    ret = ConnGattServerStopService(SOFTBUS_GATT_SERVICE);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /*
 * @tc.name: ServiceConnection003
-* @tc.desc: Test ConnGattServerStopService.
+* @tc.desc: Test ConnGattServerDisconnect.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
@@ -92,39 +138,7 @@ HWTEST_F(ServiceConnectionTest, ServiceConnection002, TestSize.Level1)
 */
 HWTEST_F(ServiceConnectionTest, ServiceConnection003, TestSize.Level1)
 {
-    int ret;
-    NiceMock<ConnectionBleInterfaceMock> bleMock;
-    EXPECT_CALL(bleMock, SoftBusGattsStopService).WillRepeatedly(Return(SOFTBUS_ERR));
-    ret = ConnGattServerStopService();
-    EXPECT_EQ(SOFTBUS_OK, ret);
-}
-
-/*
-* @tc.name: ServiceConnection004
-* @tc.desc: Test BleServiceDeleteMsgHandler.
-* @tc.in: Test module, Test number, Test Levels.
-* @tc.out: Zero
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(ServiceConnectionTest, ServiceConnection004, TestSize.Level1)
-{
-    CommonStatusMsgContext ctx;
-    ctx.status = -1;
-    BleServiceDeleteMsgHandler(&ctx);
-}
-
-/*
-* @tc.name: ServiceConnection005
-* @tc.desc: Test ConnGattServerDisconnect.
-* @tc.in: Test module, Test number, Test Levels.
-* @tc.out: Zero
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(ServiceConnectionTest, ServiceConnection005, TestSize.Level1)
-{
-    int ret;
+    int32_t ret;
     ConnBleConnection connection;
     NiceMock<ConnectionBleInterfaceMock> bleMock;
 
@@ -158,115 +172,37 @@ HWTEST_F(ServiceConnectionTest, ServiceConnection005, TestSize.Level1)
 }
 
 /*
-* @tc.name: ServiceConnection006
-* @tc.desc: Test BleRequestWriteCallback.
-* @tc.in: Test module, Test number, Test Levels.
-* @tc.out: Zero
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(ServiceConnectionTest, ServiceConnection006, TestSize.Level1)
-{
-    SoftBusGattWriteRequest writeCbPara;
-
-    writeCbPara.needRsp = true;
-    BleRequestWriteCallback(writeCbPara);
-
-    writeCbPara.needRsp = false;
-    writeCbPara.attrHandle = -1;
-    BleRequestWriteCallback(writeCbPara);
-
-    writeCbPara.needRsp = false;
-    writeCbPara.attrHandle = 1;
-    writeCbPara.connId = 1;
-    BleRequestWriteCallback(writeCbPara);
-}
-
-/*
-* @tc.name: ServiceConnection007
-* @tc.desc: Test UpdateBleServerStateInOrder.
-* @tc.in: Test module, Test number, Test Levels.
-* @tc.out: Zero
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(ServiceConnectionTest, ServiceConnection007, TestSize.Level1)
-{
-    int ret;
-
-    ret = UpdateBleServerStateInOrder(BLE_SERVER_STATE_SERVICE_ADDING, BLE_SERVER_STATE_SERVICE_ADDING);
-    EXPECT_EQ(SOFTBUS_CONN_BLE_SERVER_STATE_UNEXPECTED_ERR, ret);
-
-    ret = UpdateBleServerStateInOrder(BLE_SERVER_STATE_INITIAL, BLE_SERVER_STATE_SERVICE_ADDING);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-}
-
-/*
-* @tc.name: ServiceConnection008
+* @tc.name: ServiceConnection004
 * @tc.desc: Test ConnGattServerConnect.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ServiceConnectionTest, ServiceConnection008, TestSize.Level1)
+HWTEST_F(ServiceConnectionTest, ServiceConnection004, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
+    SoftBusGattWriteRequest writeCbPara;
     ConnBleConnection connection;
-
     (void)memset_s(&connection, sizeof(ConnBleConnection), 0, sizeof(ConnBleConnection));
+    writeCbPara.needRsp = true;
+    g_callback->RequestWriteCallback(writeCbPara);
     ret = ConnGattServerConnect(&connection);
     EXPECT_EQ(SOFTBUS_LOCK_ERR, ret);
-
+    
+    writeCbPara.needRsp = false;
+    writeCbPara.attrHandle = -1;
+    g_callback->RequestWriteCallback(writeCbPara);
     ret = SoftBusMutexInit(&connection.lock, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
-
+    
+    writeCbPara.needRsp = false;
+    writeCbPara.attrHandle = 1;
+    writeCbPara.connId = 1;
+    g_callback->RequestWriteCallback(writeCbPara);
     connection.underlayerHandle = INVALID_UNDERLAY_HANDLE;
     ret = ConnGattServerConnect(&connection);
     EXPECT_EQ(SOFTBUS_ERR, ret);
-}
-
-/*
-* @tc.name: ServiceConnection009
-* @tc.desc: Test BleCompareGattServerLooperEventFunc.
-* @tc.in: Test module, Test number, Test Levels.
-* @tc.out: Zero
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(ServiceConnectionTest, ServiceConnection009, TestSize.Level1)
-{
-    int ret;
-    SoftBusMessage msg;
-    SoftBusMessage args;
-
-    msg.what = MSG_SERVER_WAIT_MTU_TIMEOUT;
-    args.what = MSG_SERVER_WAIT_DICONNECT_TIMEOUT;
-    ret = BleCompareGattServerLooperEventFunc(&msg, (void *)(&args));
-    EXPECT_EQ(COMPARE_FAILED, ret);
-
-
-    msg.what = MSG_SERVER_WAIT_DICONNECT_TIMEOUT;
-    args.what = MSG_SERVER_WAIT_DICONNECT_TIMEOUT;
-    msg.arg1 = 10;
-    args.arg1 = 10;
-    ret = BleCompareGattServerLooperEventFunc(&msg, (void *)(&args));
-    EXPECT_EQ(COMPARE_SUCCESS, ret);
-
-    msg.what = MSG_SERVER_WAIT_DICONNECT_TIMEOUT;
-    args.what = MSG_SERVER_WAIT_DICONNECT_TIMEOUT;
-    msg.arg1 = 9;
-    args.arg1 = 10;
-    ret = BleCompareGattServerLooperEventFunc(&msg, (void *)(&args));
-    EXPECT_EQ(COMPARE_FAILED, ret);
-
-    msg.what = MSG_SERVER_WAIT_START_SERVER_TIMEOUT;
-    args.what = MSG_SERVER_WAIT_START_SERVER_TIMEOUT;
-    args.arg1 = 0;
-    args.arg2 = 0;
-    args.obj = nullptr;
-    ret = BleCompareGattServerLooperEventFunc(&msg, (void *)(&args));
-    EXPECT_EQ(COMPARE_SUCCESS, ret);
 }
 
 /*
@@ -279,7 +215,7 @@ HWTEST_F(ServiceConnectionTest, ServiceConnection009, TestSize.Level1)
 */
 HWTEST_F(ServiceConnectionTest, ClientConnection001, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     ConnBleConnection connection;
     NiceMock<ConnectionBleInterfaceMock> bleMock;
 
@@ -305,7 +241,7 @@ HWTEST_F(ServiceConnectionTest, ClientConnection001, TestSize.Level1)
 
 /*
 * @tc.name: ClientConnection002
-* @tc.desc: Test BleGattcConnStateCallback.
+* @tc.desc: Test SwitchNotifacatedHandler.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
@@ -313,180 +249,7 @@ HWTEST_F(ServiceConnectionTest, ClientConnection001, TestSize.Level1)
 */
 HWTEST_F(ServiceConnectionTest, ClientConnection002, TestSize.Level1)
 {
-    int32_t underlayerHandle = 1;
-    int32_t state = SOFTBUS_BT_CONNECT;
-    int32_t status = 0;
-
-    BleGattcConnStateCallback(underlayerHandle, state, status);
-    state = SOFTBUS_BT_STATUS_SUCCESS;
-    BleGattcConnStateCallback(underlayerHandle, state, status);
-}
-
-/*
-* @tc.name: ClientConnection003
-* @tc.desc: Test ConnectedMsgHandler.
-* @tc.in: Test module, Test number, Test Levels.
-* @tc.out: Zero
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(ServiceConnectionTest, ClientConnection003, TestSize.Level1)
-{
-    CommonStatusContext ctx;
-    ConnBleConnection connection;
-    NiceMock<ConnectionBleInterfaceMock> bleMock;
-
-    ctx.underlayerHandle = 1;
-    ctx.status = 0;
-    SoftBusMutexDestroy(&g_bleManager.connections->lock);
-    ConnectedMsgHandler(&ctx);
-    ctx.status = -1;
-    ctx.underlayerHandle = 1;
-    connection.underlayerHandle = 1;
-    SoftBusMutexInit(&g_bleManager.connections->lock, nullptr);
-    ListInit(&g_bleManager.connections->list);
-    ListTailInsert(&g_bleManager.prevents->list, &connection.node);
-    ConnectedMsgHandler(&ctx);
-}
-
-/*
-* @tc.name: ClientConnection004
-* @tc.desc: Test RetrySearchService.
-* @tc.in: Test module, Test number, Test Levels.
-* @tc.out: Zero
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(ServiceConnectionTest, ClientConnection004, TestSize.Level1)
-{
-    int ret;
-    ConnBleConnection connection;
-    RetrySearchServiceReason reason;
-    connection.state = BLE_CONNECTION_STATE_MTU_SETTING;
-    reason = BLE_CLIENT_REGISTER_NOTIFICATION_ERR;
-    connection.retrySearchServiceCnt = -1;
-    connection.underlayerHandle = 1;
-    NiceMock<ConnectionBleInterfaceMock> bleMock;
-
-    SoftBusMutexInit(&connection.lock, nullptr);
-    ret = RetrySearchService(&connection, reason);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
-
-    SoftBusMutexInit(&connection.lock, nullptr);
-    connection.state = BLE_CONNECTION_STATE_CONNECTED;
-    reason = BLE_CLIENT_REGISTER_NOTIFICATION_ERR;
-    connection.retrySearchServiceCnt = 0;
-    connection.underlayerHandle = 1;
-    EXPECT_CALL(bleMock, SoftbusGattcRefreshServices).WillRepeatedly(Return(SOFTBUS_ERR));
-    ret = RetrySearchService(&connection, reason);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
-
-    SoftBusMutexInit(&connection.lock, nullptr);
-    connection.state = BLE_CONNECTION_STATE_CONNECTED;
-    reason = BLE_CLIENT_REGISTER_NOTIFICATION_ERR;
-    connection.retrySearchServiceCnt = 0;
-    connection.underlayerHandle = 1;
-    EXPECT_CALL(bleMock, SoftbusGattcRefreshServices).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(bleMock, SoftbusGattcSearchServices).WillRepeatedly(Return(SOFTBUS_ERR));
-    ret = RetrySearchService(&connection, reason);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
-
-    SoftBusMutexInit(&connection.lock, nullptr);
-    connection.state = BLE_CONNECTION_STATE_CONNECTED;
-    reason = BLE_CLIENT_REGISTER_NOTIFICATION_ERR;
-    connection.retrySearchServiceCnt = 0;
-    connection.underlayerHandle = 1;
-    EXPECT_CALL(bleMock, SoftbusGattcRefreshServices).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(bleMock, SoftbusGattcSearchServices).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = RetrySearchService(&connection, reason);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-}
-
-/*
-* @tc.name: ClientConnection005
-* @tc.desc: Test SearchedMsgHandler.
-* @tc.in: Test module, Test number, Test Levels.
-* @tc.out: Zero
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(ServiceConnectionTest, ClientConnection005, TestSize.Level1)
-{
-    CommonStatusContext ctx;
-
-    ctx.underlayerHandle = -1;
-    ctx.status = 0;
-    SearchedMsgHandler(&ctx);
-
-    ctx.underlayerHandle = 1;
-    ctx.status = -1;
-    SearchedMsgHandler(&ctx);
-}
-
-/*
-* @tc.name: ClientConnection006
-* @tc.desc: Test SwitchNotifacatedHandler.
-* @tc.in: Test module, Test number, Test Levels.
-* @tc.out: Zero
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(ServiceConnectionTest, ClientConnection006, TestSize.Level1)
-{
-    int ret;
-    ConnBleConnectionState state;
-    CommonStatusContext ctx;
-    ConnBleConnection connection;
-    NiceMock<ConnectionBleInterfaceMock> bleMock;
-
-    state = BLE_CONNECTION_STATE_CONN_NOTIFICATING;
-    ctx.underlayerHandle = 1;
-    connection.state = BLE_CONNECTION_STATE_CONN_NOTIFICATED;
-    SoftBusMutexInit(&connection.lock, nullptr);
-    ret = SwitchNotifacatedHandler(state, &ctx, &connection);
-    EXPECT_EQ(SOFTBUS_CONN_BLE_CLIENT_STATE_UNEXPECTED_ERR, ret);
-
-    state = BLE_CONNECTION_STATE_CONN_NOTIFICATING;
-    ctx.underlayerHandle = -1;
-    connection.state = BLE_CONNECTION_STATE_CONN_NOTIFICATING;
-    connection.retrySearchServiceCnt = 0;
-    connection.underlayerHandle = 1;
-    SoftBusMutexInit(&connection.lock, nullptr);
-    EXPECT_CALL(bleMock, SoftbusGattcRefreshServices).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(bleMock, SoftbusGattcSearchServices).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = SwitchNotifacatedHandler(state, &ctx, &connection);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    state = BLE_CONNECTION_STATE_CONN_NOTIFICATING;
-    ctx.underlayerHandle = 1;
-    connection.state = BLE_CONNECTION_STATE_CONN_NOTIFICATING;
-    connection.retrySearchServiceCnt = 0;
-    connection.underlayerHandle = 1;
-    SoftBusMutexInit(&connection.lock, nullptr);
-    ret = SwitchNotifacatedHandler(state, &ctx, &connection);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    state = BLE_CONNECTION_STATE_NET_NOTIFICATING;
-    ctx.underlayerHandle = -1;
-    connection.state = BLE_CONNECTION_STATE_NET_NOTIFICATING;
-    connection.retrySearchServiceCnt = 0;
-    connection.underlayerHandle = 1;
-    SoftBusMutexInit(&connection.lock, nullptr);
-    ret = SwitchNotifacatedHandler(state, &ctx, &connection);
-    EXPECT_EQ(SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_CONFIGURE_MTU_ERR, ret);
-}
-
-/*
-* @tc.name: ClientConnection007
-* @tc.desc: Test SwitchNotifacatedHandler.
-* @tc.in: Test module, Test number, Test Levels.
-* @tc.out: Zero
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(ServiceConnectionTest, ClientConnection007, TestSize.Level1)
-{
-    int ret;
+    int32_t ret;
     ConnBleConnection connection;
     bool grace = true;
     bool refreshGatt = true;
@@ -504,29 +267,29 @@ HWTEST_F(ServiceConnectionTest, ClientConnection007, TestSize.Level1)
     connection.underlayerHandle = 1;
     connection.connectionId = 1;
     SoftBusMutexInit(&connection.lock, nullptr);
-    EXPECT_CALL(bleMock, SoftbusBleGattcDisconnect).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(bleMock, BleGattcDisconnect).WillRepeatedly(Return(SOFTBUS_ERR));
     ret = ConnGattClientDisconnect(&connection, grace, refreshGatt);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_GATTC_INTERFACE_FAILED, ret);
 
     connection.underlayerHandle = 1;
     connection.connectionId = 1;
     SoftBusMutexInit(&connection.lock, nullptr);
-    EXPECT_CALL(bleMock, SoftbusBleGattcDisconnect).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(bleMock, BleGattcDisconnect).WillRepeatedly(Return(SOFTBUS_OK));
     ret = ConnGattClientDisconnect(&connection, grace, refreshGatt);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /*
-* @tc.name: ClientConnection008
+* @tc.name: ClientConnection003
 * @tc.desc: Test ConnGattClientUpdatePriority.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: Zero
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(ServiceConnectionTest, ClientConnection008, TestSize.Level1)
+HWTEST_F(ServiceConnectionTest, ClientConnection003, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     ConnBleConnection connection;
     ConnectBlePriority priority;
     NiceMock<ConnectionBleInterfaceMock> bleMock;
@@ -547,62 +310,5 @@ HWTEST_F(ServiceConnectionTest, ClientConnection008, TestSize.Level1)
     SoftBusMutexInit(&connection.lock, nullptr);
     ret = ConnGattClientUpdatePriority(&connection, priority);
     EXPECT_EQ(SOFTBUS_ERR, ret);
-}
-
-/*
-* @tc.name: ClientConnection009
-* @tc.desc: Test ConnGattClientUpdatePriority.
-* @tc.in: Test module, Test number, Test Levels.
-* @tc.out: Zero
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(ServiceConnectionTest, ClientConnection009, TestSize.Level1)
-{
-    int32_t underlayerHandle = 1;
-    int32_t status = -1;
-    SoftBusGattcNotify param;
-    BleGattcNotificationReceiveCallback(underlayerHandle, &param, status);
-
-    underlayerHandle = 1;
-    status = 0;
-    param.data = nullptr;
-    param.dataLen = 0;
-    BleGattcNotificationReceiveCallback(underlayerHandle, &param, status);
-}
-
-HWTEST_F(ServiceConnectionTest, ClientConnection0010, TestSize.Level1)
-{
-    int ret;
-    SoftBusMessage msg;
-    SoftBusMessage args;
-
-    msg.what = MSG_CLIENT_NOTIFICATED;
-    args.what = MSG_CLIENT_DISCONNECTED;
-    ret = BleCompareGattClientLooperEventFunc(&msg, (void *)(&args));
-    EXPECT_EQ(COMPARE_FAILED, ret);
-
-
-    msg.what = MSG_CLIENT_WAIT_DISCONNECT_TIMEOUT;
-    args.what = MSG_CLIENT_WAIT_DISCONNECT_TIMEOUT;
-    msg.arg1 = 10;
-    args.arg1 = 10;
-    ret = BleCompareGattClientLooperEventFunc(&msg, (void *)(&args));
-    EXPECT_EQ(COMPARE_SUCCESS, ret);
-
-    msg.what = MSG_CLIENT_WAIT_DISCONNECT_TIMEOUT;
-    args.what = MSG_CLIENT_WAIT_DISCONNECT_TIMEOUT;
-    msg.arg1 = 9;
-    args.arg1 = 10;
-    ret = BleCompareGattClientLooperEventFunc(&msg, (void *)(&args));
-    EXPECT_EQ(COMPARE_FAILED, ret);
-
-    msg.what = MSG_CLIENT_DISCONNECTED;
-    args.what = MSG_CLIENT_DISCONNECTED;
-    args.arg1 = 0;
-    args.arg2 = 0;
-    args.obj = nullptr;
-    ret = BleCompareGattClientLooperEventFunc(&msg, (void *)(&args));
-    EXPECT_EQ(COMPARE_SUCCESS, ret);
 }
 }

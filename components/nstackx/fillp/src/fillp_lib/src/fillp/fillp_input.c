@@ -498,7 +498,6 @@ static void FillpNackInput(struct FillpPcb *pcb, FILLP_CONST struct NetBuf *p)
     }
     pcb->statistics.debugPcb.nackRcv++;
     FillpFcNackInput(pcb, nack);
-    return;
 }
 
 static FILLP_BOOL FillpCheckPackInput(struct FillpPcb *pcb, FILLP_CONST struct NetBuf *p)

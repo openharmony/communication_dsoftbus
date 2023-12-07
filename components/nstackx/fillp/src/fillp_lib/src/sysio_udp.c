@@ -417,8 +417,6 @@ static void SysioAddPcbUdp(void *argSock, void *argPcb)
 {
     FILLP_UNUSED_PARA(argSock);
     FILLP_UNUSED_PARA(argPcb);
-
-    return;
 }
 
 
@@ -543,7 +541,7 @@ static void SysioConnectedUdp(void *argSock, void *argOsSock)
         FILLP_LOGDBG("UDP Connect success!!!!");
         udpSock->connected = FILLP_TRUE;
     } else {
-        FILLP_LOGINF("UDP Connect Failure !!!!");
+        FILLP_LOGERR("UDP Connect Failure !!!!");
     }
 }
 

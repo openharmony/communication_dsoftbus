@@ -27,7 +27,7 @@ extern "C" {
 
 #define SA_DATA_SIZE (14)
 
-#ifdef __aarch64__
+#if (defined(__aarch64__) || defined(__x86_64__))
 #define ADDR_IN_RESER_SIZE (4)
 #else
 #define ADDR_IN_RESER_SIZE (8)

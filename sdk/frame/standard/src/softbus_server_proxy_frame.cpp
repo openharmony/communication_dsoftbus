@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,9 @@
 
 #include <mutex>
 #include "client_trans_session_manager.h"
+#include "bus_center_server_proxy.h"
 #include "comm_log.h"
+#include "disc_server_proxy.h"
 #include "ipc_skeleton.h"
 #include "iremote_broker.h"
 #include "iremote_object.h"
@@ -31,12 +33,11 @@
 #include "softbus_errcode.h"
 #include "softbus_server_ipc_interface_code.h"
 #include "softbus_server_proxy_standard.h"
-
-using namespace OHOS;
+#include "trans_server_proxy.h"
 
 namespace {
-sptr<IRemoteObject> g_serverProxy = nullptr;
-sptr<IRemoteObject::DeathRecipient> g_clientDeath = nullptr;
+OHOS::sptr<OHOS::IRemoteObject> g_serverProxy = nullptr;
+OHOS::sptr<OHOS::IRemoteObject::DeathRecipient> g_clientDeath = nullptr;
 std::mutex g_mutex;
 uint32_t g_waitServerInterval = 2;
 uint32_t g_getSystemAbilityId = 2;
@@ -49,7 +50,8 @@ static int InnerRegisterService(void)
         COMM_LOGE(COMM_SDK, "g_serverProxy is nullptr!");
         return SOFTBUS_INVALID_PARAM;
     }
-    sptr<SoftBusServerProxyFrame> serverProxyFrame = new (std::nothrow) SoftBusServerProxyFrame(g_serverProxy);
+    OHOS::sptr<OHOS::SoftBusServerProxyFrame> serverProxyFrame =
+        new (std::nothrow) OHOS::SoftBusServerProxyFrame(g_serverProxy);
     if (serverProxyFrame == nullptr) {
         COMM_LOGE(COMM_SDK, "serverProxyFrame is nullptr!");
         return SOFTBUS_INVALID_PARAM;
@@ -75,18 +77,18 @@ static int InnerRegisterService(void)
     return SOFTBUS_OK;
 }
 
-static sptr<IRemoteObject> GetSystemAbility()
+static OHOS::sptr<OHOS::IRemoteObject> GetSystemAbility()
 {
-    MessageParcel data;
+    OHOS::MessageParcel data;
 
     if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
         return nullptr;
     }
 
     data.WriteInt32(SOFTBUS_SERVER_SA_ID_INNER);
-    MessageParcel reply;
-    MessageOption option;
-    sptr<IRemoteObject> samgr = IPCSkeleton::GetContextObject();
+    OHOS::MessageParcel reply;
+    OHOS::MessageOption option;
+    OHOS::sptr<OHOS::IRemoteObject> samgr = OHOS::IPCSkeleton::GetContextObject();
     if (samgr == nullptr) {
         COMM_LOGE(COMM_EVENT, "Get samgr failed!");
         return nullptr;
@@ -108,7 +110,8 @@ static int32_t ServerProxyInit(void)
             COMM_LOGE(COMM_SDK, "Get remote softbus object failed!\n");
             return SOFTBUS_ERR;
         }
-        g_clientDeath = sptr<IRemoteObject::DeathRecipient>(new (std::nothrow) SoftBusClientDeathRecipient());
+        g_clientDeath =
+            OHOS::sptr<OHOS::IRemoteObject::DeathRecipient>(new (std::nothrow) OHOS::SoftBusClientDeathRecipient());
         if (g_clientDeath == nullptr) {
             COMM_LOGE(COMM_SDK, "DeathRecipient object is nullptr\n");
             return SOFTBUS_ERR;
@@ -130,15 +133,21 @@ void ClientDeathProcTask(void)
         }
         g_serverProxy = nullptr;
     }
+    DiscServerProxyDeInit();
+    TransServerProxyDeInit();
+    BusCenterServerProxyDeInit();
+
     ClientCleanAllSessionWhenServerDeath();
 
-    while (g_serverProxy == nullptr) {
-        SoftBusSleepMs(g_waitServerInterval);
-        ServerProxyInit();
-        if (g_serverProxy != nullptr) {
+    while (true) {
+        if (ServerProxyInit() == SOFTBUS_OK) {
             break;
         }
+        SoftBusSleepMs(g_waitServerInterval);
     }
+    DiscServerProxyInit();
+    TransServerProxyInit();
+    BusCenterServerProxyInit();
     InnerRegisterService();
 }
 
@@ -157,7 +166,8 @@ int ClientRegisterService(const char *pkgName)
         COMM_LOGE(COMM_SDK, "g_serverProxy is nullptr!");
         return SOFTBUS_INVALID_PARAM;
     }
-    sptr<SoftBusServerProxyFrame> serverProxyFrame = new (std::nothrow) SoftBusServerProxyFrame(g_serverProxy);
+    OHOS::sptr<OHOS::SoftBusServerProxyFrame> serverProxyFrame =
+        new (std::nothrow) OHOS::SoftBusServerProxyFrame(g_serverProxy);
     if (serverProxyFrame == nullptr) {
         COMM_LOGE(COMM_SDK, "serverProxyFrame is nullptr!");
         return SOFTBUS_INVALID_PARAM;

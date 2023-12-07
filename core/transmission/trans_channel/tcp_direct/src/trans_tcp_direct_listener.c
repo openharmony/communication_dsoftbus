@@ -70,7 +70,7 @@ static int32_t StartVerifySession(SessionConn *conn)
     TRANS_LOGI(TRANS_CTRL, "enter.");
     if (SoftBusGenerateSessionKey(conn->appInfo.sessionKey, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "Generate SessionKey failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_TCP_GENERATE_SESSIONKEY_FAILED;
     }
     SetSessionKeyByChanId(conn->channelId, conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey));
 
@@ -78,7 +78,7 @@ static int32_t StartVerifySession(SessionConn *conn)
     uint32_t cipherFlag = FLAG_WIFI;
     if (GetCipherFlagByAuthId(conn->authId, &cipherFlag, &isAuthServer)) {
         TRANS_LOGE(TRANS_CTRL, "get cipher flag failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_GET_CIPHER_FAILED;
     }
     uint64_t seq = TransTdcGetNewSeqId();
     if (isAuthServer) {
@@ -88,7 +88,7 @@ static int32_t StartVerifySession(SessionConn *conn)
     char *bytes = PackRequest(&conn->appInfo);
     if (bytes == NULL) {
         TRANS_LOGE(TRANS_CTRL, "Pack Request failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_PACK_REQUEST_FAILED;
     }
     TdcPacketHead packetHead = {
         .magicNumber = MAGIC_NUMBER,
@@ -100,10 +100,11 @@ static int32_t StartVerifySession(SessionConn *conn)
     if (conn->isMeta) {
         packetHead.flags |= FLAG_AUTH_META;
     }
-    if (TransTdcPostBytes(conn->channelId, &packetHead, bytes) != SOFTBUS_OK) {
+    int32_t ret = TransTdcPostBytes(conn->channelId, &packetHead, bytes);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "TransTdc post bytes failed");
         cJSON_free(bytes);
-        return SOFTBUS_ERR;
+        return ret;
     }
     cJSON_free(bytes);
     TRANS_LOGI(TRANS_CTRL, "ok");
@@ -209,9 +210,10 @@ static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channel
         TransEventExtra extra = {
             .channelId = channelId,
             .socketFd = fd,
-            .errcode = ret
+            .errcode = ret,
+            .result = EVENT_STAGE_RESULT_FAILED
         };
-        TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_HANDSHAKE_REPLY, extra);
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
         DelTrigger(module, fd, READ_TRIGGER);
         ConnShutdownSocket(fd);
         NotifyChannelOpenFailed(channelId, ret);
@@ -228,7 +230,7 @@ static int32_t TdcOnDataEvent(ListenerModule module, int events, int fd)
     SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
     if (conn == NULL) {
         TRANS_LOGE(TRANS_CTRL, "OnDataEvent malloc fail.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     if (GetSessionConnByFd(fd, conn) == NULL || conn->appInfo.fd != fd) {
         TRANS_LOGE(TRANS_CTRL, "fd=%d is not exist tdc info. appfd=%d", fd, conn->appInfo.fd);
@@ -239,7 +241,7 @@ static int32_t TdcOnDataEvent(ListenerModule module, int events, int fd)
         }
         SoftBusFree(conn);
         ConnShutdownSocket(fd);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_FD;
     }
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(conn->channelId + ID_OFFSET));
     int32_t ret = SOFTBUS_ERR;
@@ -263,9 +265,10 @@ static int32_t TdcOnDataEvent(ListenerModule module, int events, int fd)
             .socketFd = fd,
             .channelId = conn->channelId,
             .authId = conn->authId,
-            .errcode = ret
+            .errcode = ret,
+            .result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED
         };
-        TRANS_EVENT(SCENE_OPEN_CHANNEL, STAGE_HANDSHAKE_START, extra);
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_START, extra);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "start verify session fail.");
             DelTrigger(conn->listenMod, fd, READ_TRIGGER);

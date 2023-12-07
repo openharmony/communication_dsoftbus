@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,6 +61,10 @@ static sptr<IRemoteObject> GetSystemAbility()
 int32_t DiscServerProxyInit(void)
 {
     std::lock_guard<std::mutex> lock(g_mutex);
+    if (g_serverProxy != nullptr) {
+        DISC_LOGI(DISC_INIT, "Init success");
+        return SOFTBUS_OK;
+    }
     sptr<IRemoteObject> object = GetSystemAbility();
     if (object == nullptr) {
         DISC_LOGE(DISC_INIT, "Get remote softbus object failed!\n");
@@ -76,6 +80,7 @@ int32_t DiscServerProxyInit(void)
 
 void DiscServerProxyDeInit(void)
 {
+    DISC_LOGI(DISC_INIT, "enter");
     delete g_serverProxy;
     g_serverProxy = nullptr;
 }

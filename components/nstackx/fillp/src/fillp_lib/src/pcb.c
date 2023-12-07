@@ -35,7 +35,7 @@ static FILLP_INT SpungePcbRecv(void *argConn, void **buf, FILLP_INT count)
     struct FtSocket *sock = (struct FtSocket *)conn->sock;
     FillpErrorType err = FillpQueuePush(conn->pcb->fpcb.recv.recvBox, buf, FILLP_TRUE, (FILLP_UINT)count);
     if (err) {
-        FILLP_LOGERR("SpungePcbRecv: FillpQueuePush failed. sockId =%d \r\n", sock->index);
+        FILLP_LOGERR("SpungePcbRecv: FillpQueuePush failed. sockId =%d", sock->index);
 
         return err;
     }
@@ -295,8 +295,7 @@ void SpungePcbRemove(struct SpungePcb *pcb)
     struct FtNetconn *conn = FILLP_NULL_PTR;
     struct SockOsSocket *osSock = FILLP_NULL_PTR;
     if (pcb == FILLP_NULL_PTR) {
-        FILLP_LOGERR("SpungePcbRemove: Invalid parameters passed \r\n");
-
+        FILLP_LOGERR("SpungePcbRemove: Invalid parameters passed");
         return;
     }
 
@@ -312,8 +311,6 @@ void SpungePcbRemove(struct SpungePcb *pcb)
     }
 
     SpungeFree(pcb, SPUNGE_ALLOC_TYPE_CALLOC);
-
-    return;
 }
 
 #ifdef __cplusplus

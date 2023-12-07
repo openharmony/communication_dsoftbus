@@ -33,7 +33,7 @@ enum P2pV1ProcessorState {
 };
 
 struct P2pV1Processor {
-    PROCESSOR_BASE;
+    WIFI_DIRECT_PROCESSOR_BASE;
 
     enum P2pV1ProcessorState currentState;
     struct InnerLink *currentInnerLink;

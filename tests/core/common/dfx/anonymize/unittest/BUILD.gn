@@ -19,12 +19,13 @@ module_output_path = "dsoftbus/common/dfx"
 
 ohos_unittest("SoftBusDfxAnonymizeTest") {
   module_out_path = module_output_path
-  sources = [ "anonymizer_test.cpp" ]
+  sources = [ "src/anonymizer_test.cpp" ]
   include_dirs = [
     "$dsoftbus_dfx_path/interface/include",
     "//third_party/bounds_checking_function/include",
   ]
   deps = [
+    "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
     "$dsoftbus_dfx_path/log:softbus_dfx_log",
     "//third_party/bounds_checking_function:libsec_shared",
   ]

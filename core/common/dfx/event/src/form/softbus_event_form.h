@@ -20,6 +20,7 @@
 #include "form/disc_event_form.h"
 #include "form/lnn_event_form.h"
 #include "form/trans_event_form.h"
+#include "form/stats_event_form.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,10 +40,19 @@ typedef struct {
     const char *orgPkg;    // ORG_PKG
     const char *func;      // FUNC
     union {
-        ConnEventExtra connExtra;
-        DiscEventExtra discExtra;
-        LnnEventExtra lnnExtra;
-        TransEventExtra transExtra;
+        ConnEventExtra *connExtra;
+        DiscEventExtra *discExtra;
+        LnnEventExtra *lnnExtra;
+        TransEventExtra *transExtra;
+        StatsEventExtra *statsExtra;
+        TransAlarmExtra *transAlarmExtra;
+        ConnAlarmExtra *connAlarmExtra;
+        LnnAlarmExtra *lnnAlarmExtra;
+        DiscAlarmExtra *discAlarmExtra;
+        ConnAuditExtra *connAuditExtra;
+        DiscAuditExtra *discAuditExtra;
+        LnnAuditExtra *lnnAuditExtra;
+        TransAuditExtra *transAuditExtra;
     };
 } SoftbusEventForm;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <algorithm>
+
 #include "comm_log.h"
 #include "softbus_client_info_manager.h"
 #include "permission_status_change_cb.h"
@@ -21,8 +23,8 @@
 #include "softbus_server.h"
 
 namespace OHOS {
-typedef std::pair<std::unordered_multimap<std::string, ClientObjPair>::iterator,
-    std::unordered_multimap<std::string, ClientObjPair>::iterator> ClientObjRange;
+typedef std::pair<std::unordered_multimap<std::string, ClientObjPair>::const_iterator,
+    std::unordered_multimap<std::string, ClientObjPair>::const_iterator> ClientObjRange;
 
 SoftbusClientInfoManager &SoftbusClientInfoManager::GetInstance()
 {
@@ -35,9 +37,9 @@ int32_t SoftbusClientInfoManager::SoftbusAddService(const std::string &pkgName, 
 {
     if (pkgName.empty() || object == nullptr || abilityDeath == nullptr) {
         COMM_LOGE(COMM_SVC, "package name, object or abilityDeath is nullptr\n");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
-    COMM_LOGE(COMM_SVC, "mark-- add SoftbusAddService, pid=%d, pkgname=%s", pid, pkgName.c_str());
+    COMM_LOGI(COMM_SVC, "add SoftbusAddService, pid=%d, pkgname=%s", pid, pkgName.c_str());
     std::lock_guard<std::recursive_mutex> autoLock(clientObjectMapLock_);
     std::pair<sptr<IRemoteObject>, sptr<IRemoteObject::DeathRecipient>> clientObject(object, abilityDeath);
     ClientObjPair clientObjPair(pid, clientObject);
@@ -55,9 +57,9 @@ int32_t SoftbusClientInfoManager::SoftbusRemoveService(const sptr<IRemoteObject>
 {
     if (object == nullptr) {
         COMM_LOGE(COMM_SVC, "RemoveService object is nullptr\n");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
-    COMM_LOGE(COMM_SVC, "mark-- SoftbusRemoveService, pid=%d, pkgname=%s", pid, pkgName.c_str());
+    COMM_LOGI(COMM_SVC, "SoftbusRemoveService, pid=%d, pkgname=%s", pid, pkgName.c_str());
     std::lock_guard<std::recursive_mutex> autoLock(clientObjectMapLock_);
     for (auto iter = clientObjectMap_.begin(); iter != clientObjectMap_.end(); ++iter) {
         if (iter->second.second.first == object) {
@@ -85,12 +87,11 @@ sptr<IRemoteObject> SoftbusClientInfoManager::GetSoftbusClientProxy(const std::s
 sptr<IRemoteObject> SoftbusClientInfoManager::GetSoftbusClientProxy(const std::string &pkgName, int32_t pid)
 {
     std::lock_guard<std::recursive_mutex> autoLock(clientObjectMapLock_);
-    COMM_LOGE(COMM_SVC, "mark--GetSoftbusClientProxy, pid=%d, pkgname=%s", pid, pkgName.c_str());
+    COMM_LOGI(COMM_SVC, "GetSoftbusClientProxy, pid=%d, pkgname=%s", pid, pkgName.c_str());
     ClientObjRange range = clientObjectMap_.equal_range(pkgName);
-    for (auto iter = range.first; iter != range.second; iter++) {
-        if (pid == iter->second.first) {
-            return iter->second.second.first;
-        }
+    auto iter = std::find_if(range.first, range.second, [&pid](auto iter) {return pid == iter.second.first;});
+    if (iter != range.second) {
+        return iter->second.second.first;
     }
     COMM_LOGE(COMM_SVC, "GetSoftbusClientProxy with pid is nullptr\n");
     return nullptr;
@@ -109,7 +110,7 @@ bool SoftbusClientInfoManager::SoftbusClientIsExist(const std::string &pkgName, 
 {
     std::lock_guard<std::recursive_mutex> autoLock(clientObjectMapLock_);
     ClientObjRange range = clientObjectMap_.equal_range(pkgName);
-    for (auto iter = range.first; iter != range.second; iter++) {
+    for (auto &iter = range.first; iter != range.second; iter++) {
         if (pid == iter->second.first) {
             return true;
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,7 +56,7 @@ char *PackError(int errCode, const char *errDesc)
 
 static int PackFirstData(const AppInfo *appInfo, cJSON *json)
 {
-    TRANS_LOGI(TRANS_CTRL, "begin to pack first data");
+    TRANS_LOGD(TRANS_CTRL, "begin to pack first data");
     uint8_t *encodeFastData = (uint8_t *)SoftBusMalloc(BASE64_FAST_DATA_LEN);
     if (encodeFastData == NULL) {
         TRANS_LOGE(TRANS_CTRL, "malloc encode fast data fail.");
@@ -79,7 +79,7 @@ static int PackFirstData(const AppInfo *appInfo, cJSON *json)
     int32_t ret = SoftBusBase64Encode(encodeFastData, BASE64_FAST_DATA_LEN, &fastDataSize,
         (const unsigned char *)buf, outLen);
     if (ret != 0) {
-        TRANS_LOGE(TRANS_CTRL, "mbedtls base64 encode failed.");
+        TRANS_LOGE(TRANS_CTRL, "base64 encode failed.");
         SoftBusFree(encodeFastData);
         SoftBusFree(buf);
         return SOFTBUS_ERR;
@@ -108,6 +108,7 @@ char *PackRequest(const AppInfo *appInfo)
         return NULL;
     }
     if (!AddNumber16ToJsonObject(json, FIRST_DATA_SIZE, appInfo->fastTransDataSize)) {
+        cJSON_Delete(json);
         return NULL;
     }
     if (appInfo->fastTransDataSize > 0) {
@@ -132,7 +133,7 @@ char *PackRequest(const AppInfo *appInfo)
         !AddNumberToJsonObject(json, UID, appInfo->myData.uid) ||
         !AddNumberToJsonObject(json, PID, appInfo->myData.pid) ||
         !AddStringToJsonObject(json, SESSION_KEY, (char*)encodeSessionKey) ||
-        !AddNumberToJsonObject(json, MTU_SIZE, appInfo->myData.dataConfig)) {
+        !AddNumberToJsonObject(json, MTU_SIZE, (int)appInfo->myData.dataConfig)) {
         cJSON_Delete(json);
         return NULL;
     }
@@ -180,6 +181,7 @@ static int UnpackFirstData(AppInfo *appInfo, const cJSON *json)
         appInfo->fastTransData = (uint8_t *)SoftBusMalloc(appInfo->fastTransDataSize + FAST_TDC_EXT_DATA_SIZE);
         if (appInfo->fastTransData == NULL) {
             TRANS_LOGE(TRANS_CTRL, "malloc fast data fail.");
+            SoftBusFree(encodeFastData);
             return SOFTBUS_ERR;
         }
         int32_t ret = SoftBusBase64Decode((unsigned char *)appInfo->fastTransData, appInfo->fastTransDataSize +
@@ -187,6 +189,7 @@ static int UnpackFirstData(AppInfo *appInfo, const cJSON *json)
         if (ret != 0) {
             TRANS_LOGE(TRANS_CTRL, "mbedtls decode failed.");
             SoftBusFree((void *)appInfo->fastTransData);
+            appInfo->fastTransData = NULL;
             SoftBusFree(encodeFastData);
             return SOFTBUS_ERR;
         }
@@ -292,6 +295,7 @@ char *PackReply(const AppInfo *appInfo)
     }
     if (!AddNumber16ToJsonObject(json, FIRST_DATA_SIZE, appInfo->fastTransDataSize)) {
         TRANS_LOGE(TRANS_CTRL, "Failed to add trans data size");
+        cJSON_Delete(json);
         return NULL;
     }
     if (appInfo->myData.apiVersion != API_V1) {
@@ -303,8 +307,12 @@ char *PackReply(const AppInfo *appInfo)
             return NULL;
         }
     }
-    (void)AddNumberToJsonObject(json, MY_HANDLE_ID, appInfo->myHandleId);
-    (void)AddNumberToJsonObject(json, PEER_HANDLE_ID, appInfo->peerHandleId);
+    if (!AddNumberToJsonObject(json, MY_HANDLE_ID, appInfo->myHandleId) ||
+        !AddNumberToJsonObject(json, PEER_HANDLE_ID, appInfo->peerHandleId)) {
+        TRANS_LOGE(TRANS_CTRL, "Failed to add items");
+        cJSON_Delete(json);
+        return NULL;
+    }
     char *data = cJSON_PrintUnformatted(json);
     if (data == NULL) {
         TRANS_LOGE(TRANS_CTRL, "cJSON_PrintUnformatted failed");
@@ -360,12 +368,13 @@ int UnpackReply(const cJSON *msg, AppInfo *appInfo, uint16_t *fastDataSize)
 
 int UnpackReplyErrCode(const cJSON *msg, int32_t *errCode)
 {
-    if ((msg == NULL) && (errCode == NULL)) {
+    if ((msg == NULL) || (errCode == NULL)) {
         TRANS_LOGW(TRANS_CTRL, "invalid param");
         return SOFTBUS_ERR;
     }
 
     if (!GetJsonObjectInt32Item(msg, ERR_CODE, errCode)) {
+        TRANS_LOGW(TRANS_CTRL, "unpack reply faild");
         return SOFTBUS_ERR;
     }
 
@@ -400,6 +409,10 @@ static void PackTcpFastDataPacketHead(TcpFastDataPacketHead *data)
 char *TransTdcPackFastData(const AppInfo *appInfo, uint32_t *outLen)
 {
 #define MAGIC_NUMBER 0xBABEFACE
+    if ((appInfo == NULL) || (outLen == NULL)) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
+        return NULL;
+    }
     uint32_t dataLen = appInfo->fastTransDataSize + OVERHEAD_LEN;
     char *buf = (char *)SoftBusMalloc(dataLen + FAST_DATA_HEAD_SIZE);
     if (buf == NULL) {

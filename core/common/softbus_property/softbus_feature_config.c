@@ -31,9 +31,11 @@
 #ifdef SOFTBUS_STANDARD_SYSTEM
 #define CONN_BR_MAX_DATA_LENGTH (40 * 1000)
 #define CONN_COC_MAX_DATA_LENGTH (40 * 1000)
+#define CONN_BLE_CLOSE_DELAY (10 * 1000)
 #else
 #define CONN_BR_MAX_DATA_LENGTH 4096
 #define CONN_COC_MAX_DATA_LENGTH 4096
+#define CONN_BLE_CLOSE_DELAY (30 * 1000)
 #endif
 
 #define CONN_RFCOM_SEND_MAX_LEN 990
@@ -70,6 +72,7 @@
 #define DEFAULT_PROXY_MAX_BYTES_LEN (4 * 1024 * 1024)
 #define DEFAULT_PROXY_MAX_MESSAGE_LEN (1 * 1024)
 #define DEFAULT_IS_SUPPORT_TCP_PROXY 1
+#define DEFAULT_BLE_MAC_AUTO_REFRESH 1
 #elif defined SOFTBUS_SMALL_SYSTEM
 #define DEFAULT_NEW_BYTES_LEN (1 * 1024 * 1024)
 #define DEFAULT_NEW_MESSAGE_LEN (4 * 1024)
@@ -80,6 +83,7 @@
 #define DEFAULT_PROXY_MAX_BYTES_LEN (4 * 1024)
 #define DEFAULT_PROXY_MAX_MESSAGE_LEN (1 * 1024)
 #define DEFAULT_IS_SUPPORT_TCP_PROXY 1
+#define DEFAULT_BLE_MAC_AUTO_REFRESH 1
 #else
 #define DEFAULT_NEW_BYTES_LEN (4 * 1024)
 #define DEFAULT_NEW_MESSAGE_LEN (4 * 1024)
@@ -90,6 +94,7 @@
 #define DEFAULT_PROXY_MAX_BYTES_LEN (2 * 1024)
 #define DEFAULT_PROXY_MAX_MESSAGE_LEN (1 * 1024)
 #define DEFAULT_IS_SUPPORT_TCP_PROXY 1
+#define DEFAULT_BLE_MAC_AUTO_REFRESH 0
 #endif
 
 typedef struct {
@@ -113,6 +118,8 @@ typedef struct {
     uint64_t supportFeature;
     int32_t connCocMaxDataLen;
     int32_t connCocSendMtu;
+    int32_t connBleCloseDelayTime;
+    int32_t bleMacAutoRefreshSwitch;
 } ConfigItem;
 
 typedef struct {
@@ -142,6 +149,8 @@ ConfigItem g_config = {
     LNN_SUPPORT_FEATURE,
     CONN_COC_MAX_DATA_LENGTH,
     CONN_COC_SEND_MTU_LEN,
+    CONN_BLE_CLOSE_DELAY,
+    DEFAULT_BLE_MAC_AUTO_REFRESH,
 };
 
 typedef struct {
@@ -321,6 +330,16 @@ ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
         SOFTBUS_INT_CONN_COC_SEND_MTU,
         (unsigned char *)&(g_config.connCocSendMtu),
         sizeof(g_config.connCocSendMtu)
+    },
+    {
+        SOFTBUS_INT_CONN_BLE_CLOSE_DELAY_TIME,
+        (unsigned char *)&(g_config.connBleCloseDelayTime),
+        sizeof(g_config.connBleCloseDelayTime)
+    },
+    {
+        SOFTBUS_INT_BLE_MAC_AUTO_REFRESH_SWITCH,
+        (unsigned char *)&(g_config.bleMacAutoRefreshSwitch),
+        sizeof(g_config.bleMacAutoRefreshSwitch)
     },
 };
 

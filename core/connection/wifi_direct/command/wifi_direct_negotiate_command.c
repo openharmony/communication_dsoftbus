@@ -34,8 +34,8 @@ static void OnNegotiateComplete(struct WifiDirectCommand *base, struct Negotiate
     (void)base;
     (void)msg;
     GetWifiDirectNegotiator()->resetContext();
-    GetResourceManager()->dump();
-    GetLinkManager()->dump();
+    GetResourceManager()->dump(0);
+    GetLinkManager()->dump(0);
 }
 
 static void OnFailure(struct WifiDirectCommand *base, int32_t reason)
@@ -44,8 +44,8 @@ static void OnFailure(struct WifiDirectCommand *base, int32_t reason)
     (void)base;
     (void)reason;
     GetWifiDirectNegotiator()->resetContext();
-    GetResourceManager()->dump();
-    GetLinkManager()->dump();
+    GetResourceManager()->dump(0);
+    GetLinkManager()->dump(0);
 }
 
 void WifiDirectNegotiateCommandConstructor(struct WifiDirectNegotiateCommand *self, int32_t cmdType,

@@ -87,6 +87,7 @@ int32_t AuthDeviceGetDeviceUuid(int64_t authId, char *uuid, uint16_t size);
 int32_t AuthDeviceGetVersion(int64_t authId, SoftBusVersion *version);
 int32_t AuthDeviceGetServerSide(int64_t authId, bool *isServer);
 int32_t AuthDeviceInit(const AuthTransCallback *callback);
+int32_t RegTrustListenerOnHichainSaStart(void);
 void AuthDeviceDeinit(void);
 
 #ifdef __cplusplus

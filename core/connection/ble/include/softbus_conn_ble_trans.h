@@ -29,6 +29,7 @@ extern "C" {
 #define CTRL_MSG_KEY_METHOD            "KEY_METHOD"
 #define CTRL_MSG_KEY_DELTA             "KEY_DELTA"
 #define CTRL_MSG_KEY_REF_NUM           "KEY_REF_NUM"
+#define CTRL_MSG_KEY_CHALLENGE         "KEY_CHALLENGE"
 #define CTRL_MSG_METHOD_NOTIFY_REQUEST 1
 
 typedef struct {
@@ -65,6 +66,7 @@ typedef struct {
             int32_t referenceNumber;
         } referenceRequest;
     };
+    uint16_t challengeCode;
 } BleCtlMessageSerializationContext;
 
 typedef struct {

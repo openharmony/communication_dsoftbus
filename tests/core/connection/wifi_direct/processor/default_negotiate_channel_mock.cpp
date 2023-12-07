@@ -15,9 +15,9 @@
 #include "default_negotiate_channel_mock.h"
 
 #include "securec.h"
+#include "conn_log.h"
 #include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_log_old.h"
 
 static int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
 {
@@ -114,7 +114,7 @@ struct DefaultNegotiateChannel* DefaultNegotiateChannelNew(int64_t authId)
 {
     struct DefaultNegotiateChannel *self = (struct DefaultNegotiateChannel *)SoftBusCalloc(sizeof(*self));
     if (!self) {
-        CLOGE("malloc failed");
+        CONN_LOGE(CONN_WIFI_DIRECT, "malloc failed");
         return nullptr;
     }
     DefaultNegotiateChannelConstructor(self, authId);

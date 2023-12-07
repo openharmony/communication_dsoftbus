@@ -344,7 +344,7 @@ bool AddIntArrayToJsonObject(cJSON *json, const char *string, const int32_t *arr
     cJSON *arrayObj = cJSON_CreateIntArray(array, arrayLen);
     if (arrayObj == NULL) {
         COMM_LOGE(COMM_EVENT, "Cannot create cJSON array object [%s]", string);
-        return true;
+        return false;
     }
     if (!cJSON_AddItemToObject((cJSON *)json, string, arrayObj)) {
         cJSON_Delete(arrayObj);
@@ -374,6 +374,9 @@ bool GetJsonObjectIntArrayItem(const cJSON *json, const char *string, int32_t *a
     uint32_t index = 0;
     for (int32_t i = 0; i < size; i++) {
         cJSON *item = cJSON_GetArrayItem(objValue, i);
+        if (item == NULL) {
+            return false;
+        }
         if (!cJSON_IsNumber(item)) {
             continue;
         }

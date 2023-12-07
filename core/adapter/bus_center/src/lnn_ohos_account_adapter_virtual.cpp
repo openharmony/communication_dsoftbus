@@ -31,3 +31,8 @@ int32_t GetActiveOsAccountIds(void)
 {
     return ACCOUNT_ID;
 }
+
+bool IsActiveOsAccountUnlocked(void)
+{
+    return true;
+}

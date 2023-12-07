@@ -46,7 +46,6 @@ void FillpMacTimerExpire(
     }
 
     macInfo->switchOverTime = (FILLP_ULLONG)curTime;
-    return;
 }
 
 

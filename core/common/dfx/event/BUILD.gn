@@ -15,15 +15,30 @@ import("../dsoftbus_dfx.gni")
 
 dsoftbus_root_path = "../../../.."
 
-softbus_event_src = [
-  "src/conn_event.c",
-  "src/disc_event.c",
-  "src/lnn_event.c",
-  "src/softbus_event.c",
-  "src/trans_event.c",
-]
+if (defined(ohos_lite)) {
+  if (ohos_kernel_type == "liteos_m") {
+    build_type = "static_library"
+  } else {
+    build_type = "shared_library"
+  }
+  config("dsoftbus_event_interface_lite") {
+    include_dirs = [
+      "$dsoftbus_dfx_path/interface/include",
+      "$dsoftbus_root_path/interfaces/kits/common",
+    ]
+    cflags = ohos_lite_cflags
+    cflags_cc = ohos_lite_cflags
+  }
 
-if (!defined(ohos_lite)) {
+  target(build_type, "softbus_dfx_event") {
+    include_dirs = [
+      "$dsoftbus_dfx_path/interface/include",
+      "$dsoftbus_root_path/interfaces/kits/common",
+    ]
+    sources = [ "src/softbus_event_virtual.c" ]
+    public_configs = [ ":dsoftbus_event_interface_lite" ]
+  }
+} else {
   config("dsoftbus_event_interface_std") {
     include_dirs = [
       "$dsoftbus_dfx_path/interface/include",
@@ -42,7 +57,14 @@ if (!defined(ohos_lite)) {
       "//third_party/bounds_checking_function/include",
       "src",
     ]
-    sources = softbus_event_src
+    sources = [
+      "src/conn_event.c",
+      "src/disc_event.c",
+      "src/lnn_event.c",
+      "src/softbus_event.c",
+      "src/stats_event.c",
+      "src/trans_event.c",
+    ]
     defines = [ "SOFTBUS_STANDARD_SYSTEM" ]
     defines += [ "__STDC_FORMAT_MACROS" ]
     if (is_asan) {
@@ -51,6 +73,7 @@ if (!defined(ohos_lite)) {
 
     public_configs = [ ":dsoftbus_event_interface_std" ]
     deps = [
+      "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
       "$dsoftbus_dfx_path/log:softbus_dfx_log",
       "//third_party/bounds_checking_function:libsec_shared",
     ]
