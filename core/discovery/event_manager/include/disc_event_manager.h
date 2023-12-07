@@ -13,22 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef DISC_APPROACH_BLE_H
-#define DISC_APPROACH_BLE_H
+#ifndef DISC_EVENT_MANAGER_H
+#define DISC_EVENT_MANAGER_H
 
-#include "disc_ble_dispatcher.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
-#endif /* __cplusplus */
+#endif
 
-DiscoveryBleDispatcherInterface *DiscApproachBleInit(DiscInnerCallback *discInnerCb);
-void DiscApproachBleDeinit(void);
-int32_t DiscApproachBleEventInit(void);
-void DiscApproachBleEventDeinit(void);
+int32_t DiscEventManagerInit(void);
+void DiscEventManagerDeinit(void);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* DISC_APPROACH_BLE_H */
+#endif /* DISC_EVENT_MANAGER_H */
+
