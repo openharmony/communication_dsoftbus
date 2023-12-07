@@ -24,11 +24,9 @@
 #include "softbus_utils.h"
 
 #define JSON_WLAN_IP      "wifiIpAddr"
-#define JSON_SERVICE_DATA "serviceData"
 #define JSON_HW_ACCOUNT   "hwAccountHashVal"
 #define JSON_KEY_CAST_PLUS "castPlus"
 
-#define MAX_SERVICE_DATA_LEN 64
 #define HEX_HASH_LEN 16
 
 int32_t DiscCoapParseDeviceUdid(const char *raw, DeviceInfo *device)
@@ -72,81 +70,67 @@ void DiscCoapParseWifiIpAddr(const cJSON *data, DeviceInfo *device)
     AnonymizeFree(anonymizedStr);
 }
 
-static void ParseItemDataFromServiceData(char *serviceData, const char *key, char *targetStr, uint32_t len)
+int32_t DiscCoapParseKeyValueStr(const char *src, const char *key, char *outValue, uint32_t outLen)
 {
-    const char *itemDelimit = ",";
-    const char *keyStr = NULL;
-    char *valueStr = NULL;
-    char *itemStr = NULL;
-    char *saveItemPtr = NULL;
-    itemStr = strtok_s(serviceData, itemDelimit, &saveItemPtr);
-    while (itemStr != NULL) {
-        valueStr = strchr(itemStr, ':');
-        if (valueStr == NULL) {
-            DISC_LOGW(DISC_COAP, "invalid service data item=%s", itemStr);
-            itemStr = strtok_s(NULL, itemDelimit, &saveItemPtr);
+    DISC_CHECK_AND_RETURN_RET_LOGE(src != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "src is NULL");
+    DISC_CHECK_AND_RETURN_RET_LOGE(key != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "key is NULL");
+    DISC_CHECK_AND_RETURN_RET_LOGE(outValue != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "outValue is NULL");
+    DISC_CHECK_AND_RETURN_RET_LOGE(strlen(src) < DISC_MAX_CUST_DATA_LEN, SOFTBUS_INVALID_PARAM, DISC_COAP,
+        "src len(%u) >= max len(%u)", strlen(src), DISC_MAX_CUST_DATA_LEN);
+
+    char tmpSrc[DISC_MAX_CUST_DATA_LEN] = {0};
+    if (memcpy_s(tmpSrc, DISC_MAX_CUST_DATA_LEN, src, strlen(src)) != EOK) {
+        DISC_LOGE(DISC_COAP, "copy src failed");
+        return SOFTBUS_MEM_ERR;
+    }
+
+    const char *delimiter = ",";
+    char *curValue = NULL;
+    char *remainStr = NULL;
+    char *curStr = strtok_s(tmpSrc, delimiter, &remainStr);
+    while (curStr != NULL) {
+        curValue = strchr(curStr, ':');
+        if (curValue == NULL) {
+            DISC_LOGW(DISC_COAP, "invalid kvStr item: %s", curStr);
+            curStr = strtok_s(NULL, delimiter, &remainStr);
             continue;
         }
-        *valueStr = '\0';
-        valueStr++;
-        keyStr = itemStr;
-        if (!strcmp(keyStr, key)) {
-            if (strcpy_s(targetStr, len, valueStr) != EOK) {
-                DISC_LOGE(DISC_COAP, "strpcy_s failed.");
-                break;
-            }
-            return;
+
+        *curValue = '\0';
+        curValue++;
+        if (strcmp((const char *)curStr, key) != 0) {
+            curStr = strtok_s(NULL, delimiter, &remainStr);
+            continue;
         }
-        itemStr = strtok_s(NULL, itemDelimit, &saveItemPtr);
+        if (strcpy_s(outValue, outLen, curValue) != EOK) {
+            DISC_LOGE(DISC_COAP, "copy value failed");
+            return SOFTBUS_STRCPY_ERR;
+        }
+        return SOFTBUS_OK;
     }
-    DISC_LOGI(DISC_COAP, "not find key in service data.");
+    DISC_LOGE(DISC_COAP, "cannot find the key: %s", key);
+    return SOFTBUS_ERR;
 }
 
 int32_t DiscCoapParseServiceData(const cJSON *data, DeviceInfo *device)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "json data is NULL");
     DISC_CHECK_AND_RETURN_RET_LOGE(device != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "device info is NULL");
+
     char serviceData[MAX_SERVICE_DATA_LEN] = {0};
     if (!GetJsonObjectStringItem(data, JSON_SERVICE_DATA, serviceData, sizeof(serviceData))) {
         DISC_LOGE(DISC_COAP, "parse service data failed.");
         return SOFTBUS_ERR;
     }
-    char serviceDataBak[MAX_SERVICE_DATA_LEN] = {0};
-    if (memcpy_s(serviceDataBak, MAX_SERVICE_DATA_LEN, serviceData, MAX_SERVICE_DATA_LEN) != EOK) {
-        DISC_LOGE(DISC_COAP, "copy service data bak failed.");
-        return SOFTBUS_ERR;
-    }
     char port[MAX_PORT_STR_LEN] = {0};
-    ParseItemDataFromServiceData(serviceData, SERVICE_DATA_PORT, port, sizeof(port));
-    int authPort = atoi(port);
+    int32_t ret = DiscCoapParseKeyValueStr(serviceData, SERVICE_DATA_PORT, port, MAX_PORT_STR_LEN);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, DISC_COAP, "parse service data failed");
+    uint32_t authPort = atoi(port);
     if (authPort > UINT16_MAX || authPort <= 0) {
-        DISC_LOGE(DISC_COAP, "not find auth port.");
+        DISC_LOGE(DISC_COAP, "the auth port(%u) is invalid", authPort);
         return SOFTBUS_ERR;
     }
     device->addr[0].info.ip.port = (uint16_t)authPort;
-
-    char castData[MAX_SERVICE_DATA_LEN] = {0};
-    ParseItemDataFromServiceData(serviceDataBak, JSON_KEY_CAST_PLUS, castData, sizeof(castData));
-    if (strlen(castData) == 0) {
-        // no cast data, just return ok
-        return SOFTBUS_OK;
-    }
-    cJSON *castJson = cJSON_CreateObject();
-    DISC_CHECK_AND_RETURN_RET_LOGE(castJson != NULL, SOFTBUS_CREATE_JSON_ERR, DISC_COAP, "create cast json failed");
-    if (!AddStringToJsonObject(castJson, JSON_KEY_CAST_PLUS, castData)) {
-        DISC_LOGE(DISC_COAP, "add cast data failed");
-        cJSON_Delete(castJson);
-        return SOFTBUS_CREATE_JSON_ERR;
-    }
-    char *castStr = cJSON_PrintUnformatted(castJson);
-    cJSON_Delete(castJson);
-
-    if (strcpy_s(device->custData, strlen(castStr) + 1, castStr) != EOK) {
-        DISC_LOGE(DISC_COAP, "copy cast data failed");
-        cJSON_free(castStr);
-        return SOFTBUS_STRCPY_ERR;
-    }
-    cJSON_free(castStr);
     return SOFTBUS_OK;
 }
 
