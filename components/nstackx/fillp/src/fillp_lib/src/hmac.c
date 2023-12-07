@@ -62,8 +62,6 @@ static void FillpCleanSedata(void *ptr, size_t len, struct SpungeInstance *pcbIn
     }
 
     pcbInst->cleanseDataCtr = (FILLP_UINT8)ctr;
-
-    return;
 }
 
 void FillpHmacSha256Init(OUT FillpHmacSha256 ctx[1], IN FILLP_UINT8 *key, FILLP_UINT32 klen,
@@ -122,8 +120,6 @@ void FillpHmacSha256Init(OUT FillpHmacSha256 ctx[1], IN FILLP_UINT8 *key, FILLP_
     FillpCleanSedata((void *)tk, sizeof(tk), pcbInst);
     FillpCleanSedata((void *)keyIpad, sizeof(keyIpad), pcbInst);
     FillpCleanSedata((void *)keyOpad, sizeof(keyOpad), pcbInst);
-
-    return;
 }
 
 
@@ -147,8 +143,6 @@ void FillpHmacSha256Update(IO FillpHmacSha256 ctx[1], FILLP_CONST FILLP_UINT8 *d
     } else {
         FillpSha256Upd(tempCtx->hashki, data, dlen);
     }
-
-    return;
 }
 
 void FillpHmacSha256Final(IO FillpHmacSha256 ctx[1],
@@ -168,8 +162,6 @@ void FillpHmacSha256Final(IO FillpHmacSha256 ctx[1],
     FillpSha256Fin(tempCtx->hashki, digest, size);
     FillpSha256Upd(tempCtx->hashko, digest, size);
     FillpSha256Fin(tempCtx->hashko, digest, size);
-
-    return;
 }
 
 

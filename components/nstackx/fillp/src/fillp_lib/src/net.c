@@ -42,7 +42,6 @@ static void NetconnFreeOsSocket(struct SockOsSocket *osSock, struct SpungeInstan
         HlistDelete(&curInst->osSockist, &osSock->osListNode);
         SpungeFree(osSock, SPUNGE_ALLOC_TYPE_CALLOC);
     }
-    return;
 }
 
 
@@ -50,7 +49,6 @@ void NetconnSetSock(struct FtSocket *sock, struct FtNetconn *conn)
 {
     sock->netconn = conn;
     conn->sock = (void *)sock;
-    return;
 }
 
 void NetconnSetSendCacheSize(struct FtNetconn *conn, FILLP_UINT32 cacheSize)
@@ -154,7 +152,6 @@ void FillpNetconnDestroy(struct FtNetconn *conn)
     int i;
     if (conn == FILLP_NULL_PTR) {
         FILLP_LOGERR("FillpNetconnDestroy: Invalid paramaters passed\r\n");
-
         return;
     }
 
@@ -173,7 +170,6 @@ void FillpNetconnDestroy(struct FtNetconn *conn)
     }
 
     DympFree(conn);
-    return;
 }
 
 static FILLP_BOOL FillpErrIsFatal(FILLP_INT err)
@@ -271,7 +267,6 @@ void FillpNetconnSetState(struct FtNetconn *conn, FILLP_UINT8 state)
             SpungeTokenBucketDelFpcb(&conn->pcb->fpcb);
         }
     }
-    return;
 }
 
 #ifdef __cplusplus

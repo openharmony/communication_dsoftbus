@@ -80,9 +80,7 @@ typedef struct {
 
 typedef struct {
     BleProtocolType protoType;
-    char nodeIdHash[NODEID_SHORT_HASH_LEN];
-    char localUdidHash[UDID_SHORT_HASH_LEN];
-    char peerUdidHash[SHA_256_HASH_LEN];
+    char networkId[NETWORK_ID_BUF_LEN];
 } BleDirectConnInfo;
 
 typedef struct {

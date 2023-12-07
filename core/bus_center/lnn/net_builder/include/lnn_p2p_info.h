@@ -17,16 +17,40 @@
 #define LNN_P2P_INFO_H
 
 #include <stdint.h>
+
+#include "common_list.h"
 #include "lnn_node_info.h"
+#include "softbus_json_utils.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+typedef struct {
+    char udid[UDID_BUF_LEN];
+    char uuid[UUID_BUF_LEN];
+    uint64_t createTime;
+    uint64_t endTime;
+    char ptk[PTK_DEFAULT_LEN];
+    ListNode node;
+} LocalPtkList;
+
 int32_t LnnInitP2p(void);
 void LnnDeinitP2p(void);
 int32_t LnnInitLocalP2pInfo(NodeInfo *info);
 int32_t LnnSyncP2pInfo(void);
+int32_t LnnSyncWifiDirectAddr(void);
+int32_t LnnInitWifiDirect(void);
+void LnnDeinitWifiDirect(void);
+int32_t LnnInitPtk(void);
+void LnnDeinitPtk(void);
+int32_t LnnGetLocalPtkByUdid(const char *udid, char *localPtk, uint32_t len);
+int32_t LnnGetLocalPtkByUuid(const char *uuid, char *localPtk, uint32_t len);
+void LnnLoadPtkInfo(void);
+int32_t LnnSyncPtk(char *networkId);
+int32_t UpdateLocalPtkIfValid(char *udid);
+int32_t LnnSetLocalPtkConn(char *udid);
+int32_t LnnGenerateLocalPtk(char *udid, char *uuid);
 
 #ifdef __cplusplus
 }

@@ -29,6 +29,10 @@ typedef enum {
     EVENT_SCENE_CLOSE_CHANNEL_ACTIVE = 2,
     EVENT_SCENE_CLOSE_CHANNEL_PASSIVE = 3,
     EVENT_SCENE_CLOSE_CHANNEL_TIMEOUT = 4,
+    EVENT_SCENE_BT_FLOW = 5,
+    EVENT_SCENE_LANE_SCORE = 6,
+    EVENT_SCENE_ACTIVATION = 7,
+    EVENT_SCENE_DETECTION = 8,
 } TransEventScene;
 
 typedef enum {
@@ -62,6 +66,7 @@ typedef struct {
     int32_t costTime;          // TIME_CONSUMING
     int32_t channelScore;      // CHAN_SCORE
     int32_t peerChannelId;     // PEER_CHAN_ID
+    int32_t btFlow;            // BT_FLOW
     const char *peerNetworkId; // PEER_NET_ID
     const char *callerPkg;     // HOST_PKG
     const char *calleePkg;     // TO_CALL_PKG
@@ -73,6 +78,25 @@ typedef enum {
 
 typedef struct {
     int32_t errcode;
+    int32_t result;
+    int32_t callerPid;
+    int32_t linkType;
+    int32_t minBw;
+    int32_t methodId;
+    int32_t duration;
+    int32_t curFlow;
+    int32_t limitFlow;
+    int32_t limitTime;
+    int32_t occupyRes;
+    int32_t syncType;
+    int32_t syncData;
+    int32_t retryCount;
+    int32_t retryReason;
+    const char *conflictName;
+    const char *conflictedName;
+    const char *occupyedName;
+    const char *permissionName;
+    const char *sessionName;
 } TransAlarmExtra;
 
 typedef enum {
@@ -84,11 +108,38 @@ typedef struct {
 } TransStatsExtra;
 
 typedef enum {
-    AUDIT_SCENE_TRANS_RESERVED = 1,
+    AUDIT_SCENE_OPEN_SESSION = 1,
+    AUDIT_SCENE_SEND_FILE = 2,
+    AUDIT_SCENE_SEND_BYTES = 3,
+    AUDIT_SCENE_SEND_MSG = 4,
+    AUDIT_SCENE_SEND_STREAM = 5,
 } TransAuditScene;
 
 typedef struct {
-    int32_t reserved;
+    int32_t errcode;             // ERROR_CODE
+    SoftbusAuditType auditType;  // AUDIT_TYPE
+    const char *sessionName;     // SESSION_NAME
+    const char *peerDeviceId;    // PEER_DEVICE_ID
+    int32_t channelId;           // CHAN_ID
+    int32_t peerChannelId;       // PEER_CHAN_ID
+    int32_t channelType;         // LOGIC_CHAN_TYPE
+    int32_t laneId;              // LANE_ID
+    int32_t authId;              // AUTH_ID
+    int32_t preferLinkType;      // PREFER_LINK_TYPE
+    int32_t laneTransType;       // LANE_TRANS_TYPE
+    int32_t reqId;               // REQ_ID
+    int32_t linkType;            // LINK_TYPE
+    int32_t connId;              // CONN_ID
+    int32_t socketFd;            // SOCKET_FD
+    int32_t dataType;            // DATA_TYPE
+    int32_t dataLen;             // DATA_LENGTH
+    int32_t dataSeq;             // DATA_SEQ
+    int32_t costTime;            // TIME_CONSUMING
+    int32_t channelScore;        // CHAN_SCORE
+    int32_t dataLimit;           // DATA_LIMIT
+    const char *extra;           // EXTRA
+    const char *callerPkg;       // HOST_PKG
+    const char *calleePkg;       // TO_CALL_PKG
 } TransAuditExtra;
 
 #ifdef __cplusplus

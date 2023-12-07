@@ -106,6 +106,7 @@ public:
         void *para, uint64_t delayMillis);
     virtual SoftBusLooper *GetLooper(int looper);
     virtual int32_t ConnDisconnectDeviceAllConn(const ConnectOption *option);
+    virtual int32_t LnnGenLocalIrk(unsigned char *irk, uint32_t len);
     virtual int32_t LnnGenLocalUuid(char *uuid, uint32_t len);
     virtual int32_t LnnGenLocalNetworkId(char *networkId, uint32_t len);
     virtual int32_t LnnSetDLNodeAddr(const char *id, IdCategory type, const char *addr);
@@ -114,6 +115,8 @@ public:
     virtual int32_t LnnSetDLAuthPort(const char *id, IdCategory type, int32_t authPort);
     virtual int32_t LnnInitP2p(void);
     virtual void LnnDeinitP2p(void);
+    virtual int32_t LnnInitWifiDirect(void);
+    virtual void LnnDeinitWifiDirect(void);
     virtual int32_t LnnInitNetworkInfo(void);
     virtual int32_t LnnInitDevicename(void);
     virtual int32_t LnnInitSyncInfoManager(void);
@@ -201,6 +204,7 @@ public:
     MOCK_METHOD1(GetLooper, SoftBusLooper * (int));
     MOCK_METHOD1(ConnDisconnectDeviceAllConn, int32_t (const ConnectOption *));
     MOCK_METHOD2(LnnGenLocalUuid, int32_t (char *, uint32_t));
+    MOCK_METHOD2(LnnGenLocalIrk, int32_t (unsigned char *, uint32_t));
     MOCK_METHOD2(LnnGenLocalNetworkId, int32_t (char *, uint32_t));
     MOCK_METHOD3(LnnSetDLNodeAddr, int32_t (const char *, IdCategory, const char *));
     MOCK_METHOD3(LnnSetDLProxyPort, int32_t (const char *, IdCategory, int32_t));
@@ -208,6 +212,8 @@ public:
     MOCK_METHOD3(LnnSetDLAuthPort, int32_t (const char *, IdCategory, int32_t));
     MOCK_METHOD0(LnnInitP2p, int32_t ());
     MOCK_METHOD0(LnnDeinitP2p, void ());
+    MOCK_METHOD0(LnnInitWifiDirect, int32_t ());
+    MOCK_METHOD0(LnnDeinitWifiDirect, void ());
     MOCK_METHOD0(LnnInitNetworkInfo, int32_t ());
     MOCK_METHOD0(LnnInitDevicename, int32_t ());
     MOCK_METHOD0(LnnInitSyncInfoManager, int32_t ());

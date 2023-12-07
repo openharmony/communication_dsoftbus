@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -346,6 +346,16 @@ int32_t DiscServerProxy::RippleStats(int32_t channelId, int32_t channelType, con
     (void)channelId;
     (void)channelType;
     (void)data;
+    return SOFTBUS_OK;
+}
+
+int32_t DiscServerProxy::EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos,
+    uint32_t qosCount)
+{
+    (void)peerNetworkId;
+    (void)dataType;
+    (void)qos;
+    (void)qosCount;
     return SOFTBUS_OK;
 }
 } // namespace OHOS

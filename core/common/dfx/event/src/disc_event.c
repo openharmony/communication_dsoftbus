@@ -13,12 +13,17 @@
  * limitations under the License.
  */
 
+#include "comm_log.h"
 #include "disc_event.h"
 
 #include "softbus_event.h"
 
-void DiscEventInner(int32_t scene, int32_t stage, const char *func, int32_t line, DiscEventExtra extra)
+void DiscEventInner(int32_t scene, int32_t stage, const char *func, int32_t line, DiscEventExtra *extra)
 {
+    if (func == NULL || extra == NULL) {
+        COMM_LOGE(COMM_DFX, "func or extra is NUll");
+        return;
+    }
     SoftbusEventForm form = {
         .eventName = DISC_EVENT_NAME,
         .scene = scene,
@@ -27,5 +32,34 @@ void DiscEventInner(int32_t scene, int32_t stage, const char *func, int32_t line
         .line = line,
         .discExtra = extra,
     };
-    SoftbusEventInner(EVENT_MODULE_DISC, form);
+    SoftbusEventInner(EVENT_MODULE_DISC, &form);
+}
+
+void DiscAlarmInner(int32_t scene, int32_t type, const char *func, int32_t line, DiscAlarmExtra *extra)
+{
+    SoftbusEventForm form = {
+        .eventName = (type == MANAGE_ALARM_TYPE) ? MANAGE_ALARM_EVENT_NAME : CONTROL_ALARM_EVENT_NAME,
+        .scene = scene,
+        .stage = SOFTBUS_DEFAULT_STAGE,
+        .func = func,
+        .line = line,
+        .discAlarmExtra = extra,
+    };
+    SoftbusEventInner(EVENT_MODULE_DISC_ALARM, &form);
+}
+
+void DiscAuditInner(int32_t scene, const char *func, int32_t line, DiscAuditExtra *extra)
+{
+    if (func == NULL || extra == NULL) {
+        COMM_LOGE(COMM_DFX, "func or extra is NUll");
+        return;
+    }
+    SoftbusEventForm form = {
+        .eventName = DISC_AUDIT_NAME,
+        .scene = scene,
+        .func = func,
+        .line = line,
+        .discAuditExtra = extra,
+    };
+    SoftbusAuditInner(EVENT_MODULE_DISC, &form);
 }

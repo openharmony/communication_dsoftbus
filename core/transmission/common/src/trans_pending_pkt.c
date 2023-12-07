@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,9 +40,19 @@ enum PackageStatus {
 
 static SoftBusList *g_pendingList[PENDING_TYPE_BUTT] = {NULL, NULL};
 
-int32_t PendingInit(int type)
+static int32_t IsPendingListTypeLegal(int type)
 {
     if (type < PENDING_TYPE_PROXY || type >= PENDING_TYPE_BUTT) {
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t PendingInit(int type)
+{
+    int32_t ret = IsPendingListTypeLegal(type);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "type=%d illegal.", type);
         return SOFTBUS_ERR;
     }
 
@@ -55,7 +65,9 @@ int32_t PendingInit(int type)
 
 void PendingDeinit(int type)
 {
-    if (type < PENDING_TYPE_PROXY || type >= PENDING_TYPE_BUTT) {
+    int32_t ret = IsPendingListTypeLegal(type);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "type=%d illegal.", type);
         return;
     }
 
@@ -100,7 +112,9 @@ static void ReleasePendingItem(PendingPktInfo *item)
 
 int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type)
 {
-    if (type < PENDING_TYPE_PROXY || type >= PENDING_TYPE_BUTT) {
+    int32_t result = IsPendingListTypeLegal(type);
+    if (result != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "type=%d illegal.", type);
         return SOFTBUS_ERR;
     }
 
@@ -156,14 +170,15 @@ int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type)
 
 int32_t SetPendingPacket(int32_t channelId, int32_t seqNum, int type)
 {
-    if (type < PENDING_TYPE_PROXY || type >= PENDING_TYPE_BUTT) {
+    int32_t ret = IsPendingListTypeLegal(type);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "type=%d illegal.", type);
         return SOFTBUS_ERR;
     }
 
     SoftBusList *pendingList = g_pendingList[type];
     if (pendingList == NULL) {
-        TRANS_LOGE(TRANS_SVC, "pendind list not exist");
+        TRANS_LOGE(TRANS_INIT, "pending type=%d list not inited.", type);
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexLock(&pendingList->lock) != SOFTBUS_OK) {
@@ -185,12 +200,15 @@ int32_t SetPendingPacket(int32_t channelId, int32_t seqNum, int type)
 
 int32_t DelPendingPacket(int32_t channelId, int type)
 {
-    if (type < PENDING_TYPE_PROXY || type >= PENDING_TYPE_BUTT) {
+    int32_t ret = IsPendingListTypeLegal(type);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "type=%d illegal.", type);
         return SOFTBUS_ERR;
     }
 
     SoftBusList *pendingList = g_pendingList[type];
     if (pendingList == NULL) {
+        TRANS_LOGE(TRANS_INIT, "pending type=%d list not inited.", type);
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexLock(&pendingList->lock) != SOFTBUS_OK) {

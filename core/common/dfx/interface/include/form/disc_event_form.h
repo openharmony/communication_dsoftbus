@@ -68,6 +68,10 @@ typedef enum {
 
 typedef struct {
     int32_t errcode;
+    int32_t result;
+    int32_t originalFreq;
+    int32_t abnormalFreq;
+    int32_t duration;
 } DiscAlarmExtra;
 
 typedef enum {
@@ -83,7 +87,44 @@ typedef enum {
 } DiscAuditScene;
 
 typedef struct {
-    int32_t reserved;
+    const char *callerPkg;         // HOST_PKG
+    int32_t result;                // RESULT
+    int32_t errcode;               // ERROR_CODE
+    SoftbusAuditType auditType;    // AUDIT_TYPE
+    int32_t broadcastType;         // BROADCAST_TYPE
+    int32_t broadcastFreq;         // BROADCAST_FREQ
+    int32_t advCount;              // ADV_COUNT
+    int32_t advDuration;           // ADV_DURATION
+    int32_t scanInterval;          // SCAN_INTERVAL
+    int32_t scanWindow;            // SCAN_WINDOW
+    int32_t discMode;              // DISC_MODE
+    int32_t mediumType;            // MEDIUM_TYPE
+    int32_t advChannel;            // ADV_CHANNEL
+    int32_t scanType;              // SCAN_TYPE
+    int32_t scanId;                // SCAN_ID
+    int32_t scanListenerId;        // SCAN_LISTENER_ID
+    const char *localUdid;         // LOCAL_UDID
+    const char *localDeviceName;   // LOCAL_DEV_NAME
+    const char *localDeviceType;   // LOCAL_DEV_TYPE
+    const char *localAccountHash;  // LOCAL_ACCOUNT_HASH
+    int32_t localCapabilityBitmap; // LOCAL_CAPABILITY_BITMAP
+    const char *localCustData;     // LOCAL_CUST_DATA
+    const char *localIp;           // LOCAL_IP
+    int32_t localPort;             // LOCAL_PORT
+    const char *localBrMac;        // LOCAL_BR_MAC
+    const char *localBleMac;       // LOCAL_BLE_MAC
+    const char *peerUdid;          // PEER_UDID
+    const char *peerDeviceName;    // PEER_DEV_NAME
+    const char *peerDeviceType;    // PEER_DEV_TYPE
+    const char *peerAccountHash;   // PEER_ACCOUNT_HASH
+    int32_t peerCapabilityBitmap;  // PEER_CAPABILITY_BITMAP
+    const char *peerCustData;      // PEER_CUST_DATA
+    const char *peerIp;            // PEER_IP
+    int32_t peerPort;              // PEER_PORT
+    const char *peerBrMac;         // PEER_BR_MAC
+    const char *peerBleMac;        // PEER_BLE_MAC
+    const char *errMsg;            // ERR_MSG
+    const char *additionalInfo;    // ADDITIONAL_INFO
 } DiscAuditExtra;
 
 #ifdef __cplusplus

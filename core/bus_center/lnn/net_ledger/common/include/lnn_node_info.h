@@ -32,6 +32,10 @@ extern "C" {
 #define OFFLINE_CODE_LEN 32
 #define OFFLINE_CODE_BYTE_SIZE 4
 #define EXTDATA_LEN 8
+#define PTK_DEFAULT_LEN 32
+#define STATIC_CAP_LEN 100
+#define STATIC_CAP_STR_LEN 201
+#define PTK_ENCODE_LEN 45
 
 #define LNN_RELATION_MASK 0x03
 #define WIFI_CFG_INFO_MAX_LEN 512
@@ -87,6 +91,7 @@ typedef struct {
     int32_t staFrequency;
     char p2pMac[MAC_LEN]; // the mac of local p2p interface
     char goMac[MAC_LEN]; // the mac of p2p Go device, while local device as Gc role.
+    char p2pIp[IP_LEN];
 } P2pInfo;
 
 typedef struct {
@@ -126,14 +131,12 @@ typedef struct {
     char masterUdid[UDID_BUF_LEN];
     char nodeAddress[SHORT_ADDRESS_MAX_LEN];
     char extData[EXTDATA_LEN];
-    uint8_t relation[CONNECTION_ADDR_MAX];
     int32_t masterWeight;
     ConnectRole role;
     ConnectStatus status;
     uint32_t netCapacity;
     uint32_t authCapacity;
     uint32_t discoveryType;
-    uint64_t heartbeatTimeStamp;
     DeviceBasicInfo deviceInfo;
     ConnectInfo connectInfo;
     int64_t authSeqNum;
@@ -156,7 +159,6 @@ typedef struct {
     int64_t bleVersion;
     uint64_t feature;
     int64_t bleStartTimestamp;
-    uint64_t onlinetTimestamp;
     int32_t wifiBuffSize;
     int32_t brBuffSize;
     int32_t stateVersion;
@@ -166,6 +168,15 @@ typedef struct {
     int64_t networkIdTimestamp;
     RpaInfo rpaInfo;
     BroadcastCipherInfo cipherInfo;
+    int32_t bleMacRefreshSwitch;
+    int32_t bleConnCloseDelayTime;
+    uint8_t staticCapability[STATIC_CAP_LEN];
+    int32_t staticCapLen;
+    char remotePtk[PTK_DEFAULT_LEN];
+    uint8_t relation[CONNECTION_ADDR_MAX];
+    uint64_t heartbeatTimeStamp;
+    uint64_t bleDirectTimeStamp;
+    uint64_t onlinetTimestamp;
 } NodeInfo;
 
 const char *LnnGetDeviceUdid(const NodeInfo *info);
@@ -178,6 +189,8 @@ bool LnnIsNodeOnline(const NodeInfo *info);
 void LnnSetNodeConnStatus(NodeInfo *info, ConnectStatus status);
 const char *LnnGetBtMac(const NodeInfo *info);
 void LnnSetBtMac(NodeInfo *info, const char *mac);
+const char *LnnGetBleMac(const NodeInfo *info);
+void LnnSetBleMac(NodeInfo *info, const char *mac);
 const char *LnnGetWiFiIp(const NodeInfo *info);
 void LnnSetWiFiIp(NodeInfo *info, const char *ip);
 const char *LnnGetNetIfName(const NodeInfo *info);
@@ -206,7 +219,11 @@ int32_t LnnSetP2pGoMac(NodeInfo *info, const char *goMac);
 const char *LnnGetP2pGoMac(const NodeInfo *info);
 uint64_t LnnGetSupportedProtocols(const NodeInfo *info);
 int32_t LnnSetSupportedProtocols(NodeInfo *info, uint64_t protocols);
-
+int32_t LnnSetStaticCapability(NodeInfo *info, uint8_t *cap, uint32_t len);
+int32_t LnnGetStaticCapability(NodeInfo *info, uint8_t *cap, uint32_t len);
+int32_t LnnSetPtk(NodeInfo *info, const char *remotePtk);
+int32_t LnnSetWifiDirectAddr(NodeInfo *info, const char *wifiDirectAddr);
+const char *LnnGetWifiDirectAddr(const NodeInfo *info);
 #ifdef __cplusplus
 }
 #endif

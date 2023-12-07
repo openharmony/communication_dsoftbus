@@ -21,43 +21,51 @@
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
 #include "trans_log.h"
+#include "trans_server_proxy.h"
 
 static int32_t CheckSocketInfoIsValid(const SocketInfo *info)
 {
-    if (!IsValidString(info->pkgName, PKG_NAME_SIZE_MAX - 1) || !IsValidString(info->name, SESSION_NAME_SIZE_MAX - 1) ||
-        info->dataType >= DATA_TYPE_BUTT) {
-        TRANS_LOGE(TRANS_SDK, "CheckSocketInfoIsValid invalid param");
+    if (!IsValidString(info->name, SESSION_NAME_SIZE_MAX) || !IsValidString(info->pkgName, PKG_NAME_SIZE_MAX)) {
+        TRANS_LOGE(TRANS_SDK, "invalid name or package name of socket");
         return SOFTBUS_INVALID_PARAM;
     }
 
+    if (info->peerName != NULL && !IsValidString(info->peerName, SESSION_NAME_SIZE_MAX)) {
+        TRANS_LOGE(TRANS_SDK, "invalid peerName of socket");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (info->peerNetworkId != NULL && !IsValidString(info->peerNetworkId, DEVICE_ID_SIZE_MAX)) {
+        TRANS_LOGE(TRANS_SDK, "invalid peerNetworkId of socket");
+        return SOFTBUS_INVALID_PARAM;
+    }
     return SOFTBUS_OK;
 }
 
-static bool IsValidSocketListener(const ISocketListener *listener)
+static void PrintSocketInfo(const SocketInfo *info)
 {
-    if ((listener != NULL) && (listener->OnShutdown != NULL)) {
-        return true;
-    }
-    TRANS_LOGE(TRANS_SDK, "invalid ISocketListener");
-    return false;
+    char *tmpMyName = NULL;
+    char *tmpPeerName = NULL;
+    char *tmpPkgName = NULL;
+    Anonymize(info->name, &tmpMyName);
+    Anonymize(info->peerName, &tmpPeerName);
+    Anonymize(info->pkgName, &tmpPkgName);
+    TRANS_LOGI(TRANS_SDK, "Socket: mySessionName=%s, peerSessionName=%s, pkgName=%s, dataType=%d",
+        tmpMyName, tmpPeerName, tmpPkgName, info->dataType);
+    AnonymizeFree(tmpMyName);
+    AnonymizeFree(tmpPeerName);
+    AnonymizeFree(tmpPkgName);
 }
 
 int32_t Socket(SocketInfo info)
 {
     int32_t ret = CheckSocketInfoIsValid(&info);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "Socket invalid param, ret=%d.", ret);
-        return SOFTBUS_INVALID_PARAM;
+        TRANS_LOGW(TRANS_SDK, "invalid SocketInfo");
+        return ret;
     }
 
-    char *anonyOutMy = NULL;
-    char *anonyOutPeer = NULL;
-    Anonymize(info.name, &anonyOutMy);
-    Anonymize(info.peerName, &anonyOutPeer);
-    TRANS_LOGI(TRANS_SDK, "Socket: mySessionName=%s, peerSessionName=%s", anonyOutMy, anonyOutPeer);
-    AnonymizeFree(anonyOutMy);
-    AnonymizeFree(anonyOutPeer);
-
+    PrintSocketInfo(&info);
     ret = CreateSocket(info.pkgName, info.name);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "CreateSocket failed, ret=%d.", ret);
@@ -75,25 +83,31 @@ int32_t Socket(SocketInfo info)
     return secoketFd;
 }
 
-int32_t Listen(int32_t socket, const QosTV qos[], uint32_t len, const ISocketListener *listener)
+int32_t Listen(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener)
 {
-    if (!IsValidSocketListener(listener) || qos == NULL || len > QOS_TYPE_BUTT) {
-        TRANS_LOGE(TRANS_SDK, "invalid listener");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    return ClientListen(socket, qos, len, (const ISocketListenerAdapt *)listener);
+    TRANS_LOGI(TRANS_SDK, "Listen: socket=%d", socket);
+    return ClientListen(socket, qos, qosCount, listener);
 }
 
-int32_t Bind(int32_t socket, const QosTV qos[], uint32_t len, const ISocketListener *listener)
+int32_t Bind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener)
 {
-    if (!IsValidSocketListener(listener) || qos == NULL || len > QOS_TYPE_BUTT) {
-        TRANS_LOGE(TRANS_SDK, "invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    return ClientBind(socket, qos, len, (const ISocketListenerAdapt *)listener);
+    TRANS_LOGI(TRANS_SDK, "Bind: socket=%d", socket);
+    return ClientBind(socket, qos, qosCount, listener);
 }
 
 void Shutdown(int32_t socket)
 {
+    TRANS_LOGI(TRANS_SDK, "Shutdown: socket=%d", socket);
     ClientShutdown(socket);
+}
+
+int32_t EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos, uint32_t qosCount)
+{
+    if (!IsValidString(peerNetworkId, DEVICE_ID_SIZE_MAX) || dataType >= DATA_TYPE_BUTT ||
+        (qos == NULL && qosCount != 0) || (qosCount >= QOS_TYPE_BUTT)) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    return ServerIpcEvaluateQos(peerNetworkId, dataType, qos, qosCount);
 }

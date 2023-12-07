@@ -251,6 +251,11 @@ const char *LnnGetP2pMac(const NodeInfo *info)
     return GetNetLedgerInterface()->LnnGetP2pMac(info);
 }
 
+const char *LnnGetWifiDirectAddr(const NodeInfo *info)
+{
+    return GetNetLedgerInterface()->LnnGetWifiDirectAddr(info);
+}
+
 uint64_t LnnGetSupportedProtocols(const NodeInfo *info)
 {
     return GetNetLedgerInterface()->LnnGetSupportedProtocols(info);
@@ -303,6 +308,11 @@ int32_t LnnSetP2pGoMac(NodeInfo *info, const char *goMac)
     return GetNetLedgerInterface()->LnnSetP2pGoMac(info, goMac);
 }
 
+int32_t LnnSetWifiDirectAddr(NodeInfo *info, const char *wifiDirectAddr)
+{
+    return GetNetLedgerInterface()->LnnSetWifiDirectAddr(info, wifiDirectAddr);
+}
+
 int32_t LnnGetAllOnlineAndMetaNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
 {
     return GetNetLedgerInterface()->LnnGetAllOnlineAndMetaNodeInfo(info, infoNum);
@@ -351,6 +361,11 @@ int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info)
 bool LnnSetDLP2pInfo(const char *networkId, const P2pInfo *info)
 {
     return GetNetLedgerInterface()->LnnSetDLP2pInfo(networkId, info);
+}
+
+bool LnnSetDLWifiDirectAddr(const char *networkId, const char *addr)
+{
+    return GetNetLedgerInterface()->LnnSetDLWifiDirectAddr(networkId, addr);
 }
 
 bool LnnIsNodeOnline(const NodeInfo *info)
@@ -460,6 +475,11 @@ int32_t LnnRegisterBleLpDeviceMediumMgr(void)
 int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info)
 {
     return GetNetLedgerInterface()->LnnGetLocalNumU64Info(key, info);
+}
+
+bool IsActiveOsAccountUnlocked(void)
+{
+    return GetNetLedgerInterface()->IsActiveOsAccountUnlocked();
 }
 }
 }

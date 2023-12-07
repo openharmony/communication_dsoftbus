@@ -63,7 +63,7 @@ static FILLP_INT FillpInitSendpcbUnackList(struct FillpSendPcb *pcb)
     pcb->unackList.hashMap =
         (struct Hlist *)SpungeAlloc(pcb->unackList.size, sizeof(struct Hlist), SPUNGE_ALLOC_TYPE_CALLOC);
     if (pcb->unackList.hashMap == FILLP_NULL_PTR) {
-        FILLP_LOGERR("Failed to allocate memory for hash map \r\n");
+        FILLP_LOGERR("Failed to allocate memory for hash map");
 
         SkiplistDestroy(&pcb->unrecvList);
         return ERR_NOBUFS;
@@ -132,26 +132,26 @@ static FILLP_INT InitSendPcbSimplePar(struct FillpPcb *fpcb)
     struct FillpSendPcb *pcb = &fpcb->send;
     FILLP_INT ret;
     if (fpcb->mpSendSize == 0) {
-        FILLP_LOGERR("FillpInitSendpcb:fpcb->mpSendSize is zero \r\n");
+        FILLP_LOGERR("FillpInitSendpcb:fpcb->mpSendSize is zero");
         return ERR_NOBUFS;
     }
 
     ret = SkiplistInit(&pcb->unrecvList, FillpSkiplistCmp);
     if (ret != ERR_OK) {
-        FILLP_LOGERR("FillpInitSendpcb:SkiplistInit fails \r\n");
+        FILLP_LOGERR("FillpInitSendpcb:SkiplistInit fails");
         return ERR_COMM;
     }
 
     ret = SkiplistInit(&pcb->itemWaitTokenLists, FillpSkiplistCmp);
     if (ret != ERR_OK) {
-        FILLP_LOGERR("SkiplistInit redunList fails \r\n");
+        FILLP_LOGERR("SkiplistInit redunList fails");
         SkiplistDestroy(&pcb->unrecvList);
         return ERR_COMM;
     }
 
     ret = SkiplistInit(&pcb->redunList, FillpSkiplistCmp);
     if (ret != ERR_OK) {
-        FILLP_LOGERR("SkiplistInit redunList fails \r\n");
+        FILLP_LOGERR("SkiplistInit redunList fails");
         SkiplistDestroy(&pcb->unrecvList);
         SkiplistDestroy(&pcb->itemWaitTokenLists);
         return ERR_COMM;
@@ -271,7 +271,7 @@ static FILLP_INT FillpInitSendpcb(struct FillpPcb *fpcb)
 #ifdef SOCK_SEND_SEM
     ret = SYS_ARCH_SEM_INIT(&pcb->sendSem, (FILLP_ULONG)initCacheSize);
     if (ret != FILLP_OK) {
-        FILLP_LOGERR("FillpInitSendpcb:SYS_ARCH_SEM_INIT fails \r\n");
+        FILLP_LOGERR("FillpInitSendpcb:SYS_ARCH_SEM_INIT fails");
 
         SpungeFree(pcb->unackList.hashMap, SPUNGE_ALLOC_TYPE_CALLOC);
         pcb->unackList.hashMap = FILLP_NULL_PTR;
@@ -443,8 +443,6 @@ static void FillpInitStastics(struct FillpPcb *fpcb)
     pcb->appFcStastics.periodSendPktLossHighPrecision = 0;
     pcb->appFcStastics.periodSendBits = 0;
     pcb->appFcStastics.periodSendRateBps = 0;
-
-    return;
 }
 
 static void FillpPcbFreeRecvItemArray(struct FillpRecvPcb *pcb)
@@ -632,15 +630,6 @@ static void FillpPcbRemoveSend(struct FillpPcb *fpcb)
     return;
 }
 
-static void FillpPcbRemoveStastics(struct FillpPcb *fpcb)
-{
-    struct FillpStatisticsPcb *pcb = &fpcb->statistics;
-
-    (void)pcb;
-
-    return;
-}
-
 void FillpPcbRemoveTimers(struct FillpPcb *fpcb)
 {
     /* Remove if any send/pack timer is running on this socket */
@@ -737,7 +726,6 @@ void FillpRemovePcb(struct FillpPcb *pcb)
 
     FillpPcbRemoveRecv(pcb);
     FillpPcbRemoveSend(pcb);
-    FillpPcbRemoveStastics(pcb);
     FillpPcbRemoveTimers(pcb);
     FillpFcDeinit(pcb);
 

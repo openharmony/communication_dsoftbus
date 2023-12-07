@@ -20,12 +20,12 @@
 #include <securec.h>
 
 #include "common_list.h"
+#include "conn_log.h"
 #include "softbus_conn_interface.h"
 #include "softbus_conn_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
-#include "softbus_log_old.h"
 
 static const uint32_t CONN_HEAD_SIZE = 24;
 static const char *TEST_BLE_MAC = "11:22:33:44:55:66";
@@ -109,15 +109,13 @@ void ConnectionBleSwitchTest::TearDown(void)
 */
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger001, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     int reqId;
     ConnectCallback connCb;
     ConnectResult connRet;
     ConnPostData data;
     ConnectOption info;
     const char *str = "send msg local2\r\n";
-    printf("test begin testConnmanger003 \r\n");
-
     connCb.OnConnected = ConnectedCB;
     connCb.OnDisconnected = DisConnectCB;
     connCb.OnDataReceived = DataReceivedCB;
@@ -125,7 +123,6 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     info.type = CONNECT_BLE;
     (void)memcpy_s(info.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
-    printf("bleMac: %s\n", info.bleOption.bleMac);
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
     reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
@@ -164,7 +161,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger001, TestSize.Level1)
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger002, TestSize.Level1)
 {
     int reqId = 1;
-    int ret;
+    int32_t ret;
     ConnectCallback connCb;
     ConnectOption optionInfo;
     ConnectionInfo info;
@@ -178,7 +175,6 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger002, TestSize.Level1)
 
     optionInfo.type = CONNECT_BLE;
     (void)memcpy_s(optionInfo.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
-    printf("bleMac: %s\n", optionInfo.bleOption.bleMac);
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
     reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
@@ -190,11 +186,8 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger002, TestSize.Level1)
         ret = ConnDisconnectDeviceAllConn(&optionInfo);
         g_connId = 0;
         EXPECT_EQ(SOFTBUS_OK, ret);
-        printf("testConnmanger006 ConnDisconnectDeviceAllConn\r\n");
     }
-    printf("testConnmanger006 ConnUnSetConnectCallback\r\n");
     ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
-    printf("testConnmanger006 ConnUnSetConnectCallback end 11\r\n");
 };
 
 /*
@@ -207,14 +200,13 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger002, TestSize.Level1)
 */
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger003, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     int reqId;
     ConnectCallback connCb;
     ConnectResult connRet;
     ConnPostData data;
     ConnectOption info;
     const char *str = "send msg local2\r\n";
-    printf("test begin testConnmanger007 \r\n");
 
     connCb.OnConnected = ConnectedCB;
     connCb.OnDisconnected = DisConnectCB;
@@ -223,7 +215,6 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger003, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     info.type = CONNECT_BLE;
     (void)memcpy_s(info.bleOption.bleMac, BT_MAC_LEN, TEST_BLE_MAC, BT_MAC_LEN);
-    printf("brMac: %s\n", info.bleOption.bleMac);
     connRet.OnConnectFailed = ConnectFailedCB;
     connRet.OnConnectSuccessed = ConnectSuccessedCB;
     reqId = ConnGetNewRequestId(MODULE_TRUST_ENGINE);
@@ -265,7 +256,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger003, TestSize.Level1)
 */
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger004, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     ConnectCallback connCb;
     ConnectOption optionInfo;
     ConnectionInfo info;
@@ -315,7 +306,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger004, TestSize.Level1)
 */
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger005, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     ConnectCallback connCb;
     ConnectResult connRet;
     ConnPostData data;
@@ -371,7 +362,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger005, TestSize.Level1)
 */
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger006, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     ConnectCallback connCb;
     ConnectResult connRet;
     ConnPostData data;
@@ -431,7 +422,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger006, TestSize.Level1)
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger007, TestSize.Level1)
 {
     int req1 = 1, req2 = 1;
-    int ret;
+    int32_t ret;
     ConnectCallback connCb;
     ConnectOption optionInfo;
     ConnectionInfo info;
@@ -476,7 +467,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger007, TestSize.Level1)
 */
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger008, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     int reqId;
     ConnectCallback connCb;
     ConnectResult connRet;
@@ -538,7 +529,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger008, TestSize.Level1)
 */
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger009, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     ConnectCallback connCb;
     ConnectOption optionInfo;
     ConnectionInfo info;
@@ -589,7 +580,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger009, TestSize.Level1)
 */
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger010, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     ConnectCallback connCb;
     ConnectResult connRet;
     ConnPostData data;
@@ -652,7 +643,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger010, TestSize.Level1)
 */
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger0011, TestSize.Level1)
 {
-    int ret;
+    int32_t ret;
     ConnectCallback connCb;
     ConnectOption optionInfo;
     ConnectResult connRet;
@@ -721,9 +712,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger0012, TestSize.Level1)
 */
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger0013, TestSize.Level1)
 {
-    int ret;
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "testConnmanger0013");
-    ret = ConnTypeIsSupport(CONNECT_BLE);
+    int32_t ret = ConnTypeIsSupport(CONNECT_BLE);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -735,8 +724,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger0013, TestSize.Level1)
 */
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger0014, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "testConnmanger0014");
-    int ret = ConnSetConnectCallback(static_cast<ConnModule>(0), nullptr);
+    int32_t ret = ConnSetConnectCallback(static_cast<ConnModule>(0), nullptr);
     ASSERT_TRUE(ret != SOFTBUS_OK);
     ret = ConnConnectDevice(nullptr, 0, nullptr);
     ASSERT_TRUE(ret != SOFTBUS_OK);
@@ -758,12 +746,11 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger0014, TestSize.Level1)
 */
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger0015, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "testConnmanger0015");
     ConnectCallback connCb;
     connCb.OnConnected = ConnectedCB;
     connCb.OnDisconnected = DisConnectCB;
     connCb.OnDataReceived = DataReceivedCB;
-    int ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    int32_t ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
     g_connId = 0;
@@ -779,12 +766,11 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger0015, TestSize.Level1)
 */
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger0016, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "testConnmanger0016");
     ConnectCallback connCb;
     connCb.OnConnected = ConnectedCB;
     connCb.OnDisconnected = DisConnectCB;
     connCb.OnDataReceived = DataReceivedCB;
-    int ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    int32_t ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     LocalListenerInfo info;
@@ -807,8 +793,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger0016, TestSize.Level1)
 */
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger0017, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "testConnmanger0017");
-    int ret = ConnTypeIsSupport(CONNECT_P2P);
+    int32_t ret = ConnTypeIsSupport(CONNECT_P2P);
     EXPECT_EQ(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT, ret);
 }
 
@@ -822,8 +807,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger0017, TestSize.Level1)
 */
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger0018, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "testConnmanger0018");
-    int ret = ConnTypeIsSupport(CONNECT_BR);
+    int32_t ret = ConnTypeIsSupport(CONNECT_BR);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -837,8 +821,7 @@ HWTEST_F(ConnectionBleSwitchTest, testConnmanger0018, TestSize.Level1)
 */
 HWTEST_F(ConnectionBleSwitchTest, testConnmanger0019, TestSize.Level1)
 {
-    SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_INFO, "testConnmanger0019");
-    int ret = ConnTypeIsSupport(CONNECT_TCP);
+    int32_t ret = ConnTypeIsSupport(CONNECT_TCP);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 }

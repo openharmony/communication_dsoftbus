@@ -19,6 +19,7 @@
 #include "c_header/ohos_bt_def.h"
 #include "c_header/ohos_bt_gap.h"
 #include "c_header/ohos_bt_spp.h"
+#include "c_header/ohos_bt_socket.h"
 #include "securec.h"
 #include "conn_log.h"
 #include "softbus_adapter_mem.h"
@@ -56,16 +57,16 @@ static void CloseSppServer(int32_t serverFd)
     SppServerClose(serverFd);
 }
 
-static int32_t Connect(const char *uuid, const BT_ADDR mac)
+static int32_t Connect(const char *uuid, const BT_ADDR mac, void *connectCallback)
 {
     if (mac == NULL) {
         return SOFTBUS_ERR;
     }
-    BtCreateSocketPara socketPara;
+    BluetoothCreateSocketPara socketPara;
     (void)memset_s((char *)&socketPara, sizeof(socketPara), 0, sizeof(socketPara));
     socketPara.uuid.uuid = (char *)uuid;
     socketPara.uuid.uuidLen = strlen(uuid);
-    socketPara.socketType = OHOS_SPP_SOCKET_RFCOMM;
+    socketPara.socketType = OHOS_SOCKET_SPP_RFCOMM;
     socketPara.isEncrypt = IS_BR_ENCRYPT;
 
     BdAddr bdAddr;
@@ -74,9 +75,10 @@ static int32_t Connect(const char *uuid, const BT_ADDR mac)
         CONN_LOGE(CONN_BR, "Connect memcpy_s failed");
         return SOFTBUS_ERR;
     }
-    int ret = SppConnect(&socketPara, &bdAddr);
-    if (ret == BT_SPP_INVALID_ID) {
-        CONN_LOGE(CONN_BR, "[BT_SPP_INVALID_ID]");
+    const int socketPsmValue = -1;
+    int ret = SocketConnectEx(&socketPara, &bdAddr, socketPsmValue, (BtSocketConnectionCallback *)connectCallback);
+    if (ret < 0) {
+        CONN_LOGE(CONN_BR, "connect failed,ret=%d", ret);
         return SOFTBUS_ERR;
     }
     CONN_LOGI(CONN_BR, "SppConnect ok clientId: %d", ret);
@@ -159,10 +161,4 @@ SppSocketDriver *InitSppSocketDriver()
     CONN_LOGI(CONN_INIT, "[InitSppSocketDriver]");
     Init(&g_sppSocketDriver);
     return &g_sppSocketDriver;
-}
-
-int SoftBusRegisterBrCallback(BrUnderlayerCallback *callback)
-{
-    (void)callback;
-    return SOFTBUS_OK;
 }

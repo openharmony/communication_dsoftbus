@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <vector>
+
 #include "lnn_log.h"
 #include "lnn_ohos_account_adapter.h"
 #include "ohos_account_kits.h"
@@ -92,4 +94,22 @@ int32_t GetActiveOsAccountIds(void)
     }
     LNN_LOGI(LNN_STATE, "GetActiveOsAccountIds id=%d", accountId[0]);
     return accountId[0];
+}
+
+bool IsActiveOsAccountUnlocked(void)
+{
+    int32_t osAccountId = GetActiveOsAccountIds();
+    if (osAccountId == SOFTBUS_ERR) {
+        LNN_LOGE(LNN_STATE, "accountId is invalid");
+        return false;
+    }
+    LNN_LOGI(LNN_STATE, "current active os accountId=%d", osAccountId);
+    bool isUnlocked = false;
+    OHOS::ErrCode res = OHOS::AccountSA::OsAccountManager::IsOsAccountVerified(osAccountId, isUnlocked);
+    if (res != OHOS::ERR_OK) {
+        LNN_LOGE(LNN_STATE, "check account verify status failed,res=%d accountId=%d", res, osAccountId);
+        return false;
+    }
+    LNN_LOGI(LNN_STATE, "account verified status=%d, accountId=%d", isUnlocked, osAccountId);
+    return isUnlocked;
 }

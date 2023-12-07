@@ -61,6 +61,10 @@ static sptr<IRemoteObject> GetSystemAbility()
 int32_t BusCenterServerProxyInit(void)
 {
     std::lock_guard<std::mutex> lock(g_mutex);
+    if (g_serverProxy != nullptr) {
+        LNN_LOGI(LNN_INIT, "Init success");
+        return SOFTBUS_OK;
+    }
     sptr<IRemoteObject> object = GetSystemAbility();
     if (object == nullptr) {
         LNN_LOGE(LNN_EVENT, "Get remote softbus object failed");
@@ -76,6 +80,7 @@ int32_t BusCenterServerProxyInit(void)
 
 void BusCenterServerProxyDeInit(void)
 {
+    LNN_LOGI(LNN_EVENT, "enter");
     delete g_serverProxy;
     g_serverProxy = nullptr;
 }

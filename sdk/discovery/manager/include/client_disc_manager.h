@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,7 +67,7 @@ int32_t PublishServiceInner(const char *packageName, const PublishInfo *info, co
  * @return <b>SOFTBUS_OK</b> The internal unpublishing function is successful,
  * and the party cannot publish its own information.
  */
-int32_t UnPublishServiceInner(const char *packageName, int32_t publishId);
+int32_t UnpublishServiceInner(const char *packageName, int32_t publishId);
 
 /**
  * @brief Internal discovery service. Other devices can be discovered.

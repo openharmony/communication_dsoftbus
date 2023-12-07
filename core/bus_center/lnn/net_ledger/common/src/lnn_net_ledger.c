@@ -29,6 +29,7 @@
 #include "lnn_log.h"
 #include "lnn_meta_node_ledger.h"
 #include "lnn_meta_node_interface.h"
+#include "lnn_p2p_info.h"
 #include "lnn_device_info_recovery.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
@@ -37,6 +38,10 @@
 
 int32_t LnnInitNetLedger(void)
 {
+    if (LnnInitHuksInterface() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "init huks interface fail");
+        return SOFTBUS_ERR;
+    }
     if (LnnInitLocalLedger() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init local net ledger fail!");
         return SOFTBUS_ERR;
@@ -47,10 +52,6 @@ int32_t LnnInitNetLedger(void)
     }
     if (LnnInitMetaNodeLedger() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init meta node ledger fail");
-        return SOFTBUS_ERR;
-    }
-    if (LnnInitHuksInterface() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "init huks interface fail");
         return SOFTBUS_ERR;
     }
     if (LnnInitMetaNodeExtLedger() != SOFTBUS_OK) {
@@ -98,6 +99,7 @@ static void LnnRestoreLocalDeviceInfo()
         return;
     }
     LoadBleBroadcastKey();
+    LnnLoadPtkInfo();
     LnnLoadLocalBroadcastCipherKey();
     LNN_LOGI(LNN_LEDGER, "load remote deviceInfo devicekey success");
 }
@@ -154,6 +156,8 @@ static int32_t LnnGetNodeKeyInfoLocal(const char *networkId, int key, uint8_t *i
             return LnnGetLocalNum16Info(NUM_KEY_DATA_CHANGE_FLAG, (int16_t *)info);
         case NODE_KEY_NODE_ADDRESS:
             return LnnGetLocalStrInfo(STRING_KEY_NODE_ADDR, (char *)info, infoLen);
+        case NODE_KEY_P2P_IP_ADDRESS:
+            return LnnGetLocalStrInfo(STRING_KEY_P2P_IP, (char *)info, infoLen);
         default:
             LNN_LOGE(LNN_LEDGER, "invalid node key type=%d", key);
             return SOFTBUS_ERR;
@@ -187,6 +191,8 @@ static int32_t LnnGetNodeKeyInfoRemote(const char *networkId, int key, uint8_t *
             return LnnGetRemoteNum16Info(networkId, NUM_KEY_DATA_CHANGE_FLAG, (int16_t *)info);
         case NODE_KEY_NODE_ADDRESS:
             return LnnGetRemoteStrInfo(networkId, STRING_KEY_NODE_ADDR, (char *)info, infoLen);
+        case NODE_KEY_P2P_IP_ADDRESS:
+            return LnnGetRemoteStrInfo(networkId, STRING_KEY_P2P_IP, (char *)info, infoLen);
         default:
             LNN_LOGE(LNN_LEDGER, "invalid node key type=%d", key);
             return SOFTBUS_ERR;
@@ -260,6 +266,8 @@ int32_t LnnGetNodeKeyInfoLen(int32_t key)
             return DATA_CHANGE_FLAG_BUF_LEN;
         case NODE_KEY_NODE_ADDRESS:
             return SHORT_ADDRESS_MAX_LEN;
+        case NODE_KEY_P2P_IP_ADDRESS:
+            return IP_LEN;
         default:
             LNN_LOGE(LNN_LEDGER, "invalid node key type=%d", key);
             return SOFTBUS_ERR;

@@ -337,6 +337,7 @@ int32_t SoftBusClientStub::OnChannelLinkDownInner(MessageParcel &data, MessagePa
         COMM_LOGE(COMM_SDK, "OnChannelLinkDownInner read networkId failed!");
         return SOFTBUS_ERR;
     }
+    COMM_LOGD(COMM_SDK, "SDK OnChannelMsgReceived");
     int32_t routeType;
     if (!data.ReadInt32(routeType)) {
         COMM_LOGE(COMM_SDK, "OnChannelLinkDownInner read routeType failed!");

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -68,6 +68,8 @@ public:
         const GearMode *mode) override;
     int Dump(int fd, const std::vector<std::u16string> &args) override;
     int32_t GetBusCenterExObj(sptr<IRemoteObject> &object) override;
+    int32_t EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos,
+        uint32_t qosCount) override;
 
 protected:
     void OnStart() override;

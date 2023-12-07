@@ -35,6 +35,7 @@ static SoftBusList *g_sessionServerList = NULL;
 static int32_t TransSessionForEachShowInfo(int32_t fd)
 {
     if (g_sessionServerList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "session server list is empty");
         return SOFTBUS_ERR;
     }
 
@@ -47,7 +48,7 @@ static int32_t TransSessionForEachShowInfo(int32_t fd)
     LIST_FOR_EACH_ENTRY(pos, &g_sessionServerList->list, SessionServer, node) {
         SoftBusTransDumpRegisterSession(fd, pos->pkgName, pos->sessionName, pos->uid, pos->pid);
     }
-    
+
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
     return SOFTBUS_OK;
 }
@@ -115,9 +116,9 @@ static void ShowSessionServer(void)
         Anonymize(pos->sessionName, &tmpName);
         TRANS_LOGI(TRANS_CTRL,
             "count=%d session server sessionName=%s is exist", count, tmpName);
+        AnonymizeFree(tmpName);
         count++;
     }
-    AnonymizeFree(tmpName);
 }
 
 int32_t TransSessionServerAddItem(SessionServer *newNode)
@@ -271,7 +272,7 @@ int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
     }
     if (g_sessionServerList == NULL) {
         TRANS_LOGE(TRANS_CTRL, "not init");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
 
     if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
@@ -298,7 +299,7 @@ int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
     TRANS_LOGE(TRANS_CTRL, "err: sessionName=%s", tmpName);
     AnonymizeFree(tmpName);
-    return SOFTBUS_ERR;
+    return SOFTBUS_TRANS_GET_PID_FAILED;
 }
 
 static void TransListDelete(ListNode *sessionServerList)

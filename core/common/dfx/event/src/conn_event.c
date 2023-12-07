@@ -13,12 +13,17 @@
  * limitations under the License.
  */
 
+#include "comm_log.h"
 #include "conn_event.h"
 
 #include "softbus_event.h"
 
-void ConnEventInner(int32_t scene, int32_t stage, const char *func, int32_t line, ConnEventExtra extra)
+void ConnEventInner(int32_t scene, int32_t stage, const char *func, int32_t line, ConnEventExtra *extra)
 {
+    if (func == NULL || extra == NULL) {
+        COMM_LOGE(COMM_DFX, "func or extra is NUll");
+        return;
+    }
     SoftbusEventForm form = {
         .eventName = CONN_EVENT_NAME,
         .scene = scene,
@@ -27,5 +32,37 @@ void ConnEventInner(int32_t scene, int32_t stage, const char *func, int32_t line
         .line = line,
         .connExtra = extra,
     };
-    SoftbusEventInner(EVENT_MODULE_CONN, form);
+    SoftbusEventInner(EVENT_MODULE_CONN, &form);
+}
+
+void ConnAlarmInner(int32_t scene, int32_t type, const char *func, int32_t line, ConnAlarmExtra *extra)
+{
+    if (extra == NULL) {
+        return;
+    }
+    SoftbusEventForm form = {
+        .eventName = (type == MANAGE_ALARM_TYPE) ? MANAGE_ALARM_EVENT_NAME : CONTROL_ALARM_EVENT_NAME,
+        .scene = scene,
+        .stage = SOFTBUS_DEFAULT_STAGE,
+        .func = func,
+        .line = line,
+        .connAlarmExtra = extra,
+    };
+    SoftbusEventInner(EVENT_MODULE_CONN_ALARM, &form);
+}
+
+void ConnAuditInner(int32_t scene, const char *func, int32_t line, ConnAuditExtra *extra)
+{
+    if (func == NULL || extra == NULL) {
+        COMM_LOGE(COMM_DFX, "func or extra is NUll");
+        return;
+    }
+    SoftbusEventForm form = {
+        .eventName = CONN_AUDIT_NAME,
+        .scene = scene,
+        .func = func,
+        .line = line,
+        .connAuditExtra = extra,
+    };
+    SoftbusAuditInner(EVENT_MODULE_CONN, &form);
 }

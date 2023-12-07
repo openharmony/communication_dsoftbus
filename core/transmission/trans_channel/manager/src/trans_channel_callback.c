@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,7 +69,15 @@ static int32_t TransServerOnChannelClosed(const char *pkgName, int32_t pid, int3
         TRANS_LOGW(TRANS_CTRL, "delete lane object failed.");
     }
     NotifyQosChannelClosed(channelId, channelType);
-    if (ClientIpcOnChannelClosed(pkgName, channelId, channelType, pid) != SOFTBUS_OK) {
+    ChannelMsg data = {
+        .msgChannelId = channelId,
+        .msgChannelType = channelType,
+        .msgPid = pid,
+        .msgPkgName = pkgName,
+        .msgUuid = NULL,
+        .msgUdid = NULL
+    };
+    if (ClientIpcOnChannelClosed(&data) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "client ipc on channel close fail");
         return SOFTBUS_ERR;
     }
@@ -86,7 +94,15 @@ static int32_t TransServerOnChannelOpenFailed(const char *pkgName, int32_t pid, 
         TRANS_LOGW(TRANS_CTRL, "delete lane object failed.");
     }
     NotifyQosChannelClosed(channelId, channelType);
-    if (ClientIpcOnChannelOpenFailed(pkgName, channelId, channelType, errCode, pid) != SOFTBUS_OK) {
+    ChannelMsg data = {
+        .msgChannelId = channelId,
+        .msgChannelType = channelType,
+        .msgPid = pid,
+        .msgPkgName = pkgName,
+        .msgUuid = NULL,
+        .msgUdid = NULL
+    };
+    if (ClientIpcOnChannelOpenFailed(&data, errCode) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "client ipc on channel open fail");
         return SOFTBUS_ERR;
     }
@@ -102,8 +118,16 @@ static int32_t TransServerOnMsgReceived(const char *pkgName, int32_t pid, int32_
     if (pkgName == NULL || receiveData == NULL || receiveData->data == NULL || receiveData->dataLen == 0) {
         return SOFTBUS_INVALID_PARAM;
     }
-
-    if (ClientIpcOnChannelMsgReceived(pkgName, channelId, channelType, receiveData, pid) != SOFTBUS_OK) {
+    
+    ChannelMsg data = {
+        .msgChannelId = channelId,
+        .msgChannelType = channelType,
+        .msgPid = pid,
+        .msgPkgName = pkgName,
+        .msgUuid = NULL,
+        .msgUdid = NULL
+    };
+    if (ClientIpcOnChannelMsgReceived(&data, receiveData) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get pkg name fail");
         return SOFTBUS_ERR;
     }
@@ -143,7 +167,13 @@ int32_t TransServerOnChannelLinkDown(const char *pkgName, int32_t pid, const cha
     }
     TRANS_LOGW(TRANS_CTRL, "TransServerOnChannelLinkDown: pkgName=%s", pkgName);
 
-    if (ClientIpcOnChannelLinkDown(pkgName, networkId, uuid, udid, peerIp, routeType, pid) != SOFTBUS_OK) {
+    ChannelMsg data = {
+        .msgPid = pid,
+        .msgPkgName = pkgName,
+        .msgUuid = uuid,
+        .msgUdid = udid
+    };
+    if (ClientIpcOnChannelLinkDown(&data, networkId, peerIp, routeType) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "client ipc on channel link down fail");
         return SOFTBUS_ERR;
     }

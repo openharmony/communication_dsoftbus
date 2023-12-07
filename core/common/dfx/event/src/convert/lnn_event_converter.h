@@ -22,18 +22,18 @@
 extern "C" {
 #endif
 
-#define LNN_ASSIGNER(type, filedName, filed)                                                                  \
-    static inline bool LnnAssigner##filedName(                                                                \
-        const char eventName[], HiSysEventParamType paramType, SoftbusEventForm form, HiSysEventParam *param) \
+#define LNN_ASSIGNER(type, fieldName, field)                                                                  \
+    static inline bool LnnAssigner##fieldName(                                                                \
+        const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param) \
     {                                                                                                         \
-        if (Assigner##type(form.lnnExtra.filed, &param) && CopyString(param->name, eventName)) {              \
+        if (Assigner##type(form->lnnExtra->field, &param) && CopyString(param->name, eventName)) {            \
             param->t = paramType;                                                                             \
             return true;                                                                                      \
         }                                                                                                     \
         return false;                                                                                         \
     }
 
-LNN_ASSIGNER(Int32, Result, result)
+LNN_ASSIGNER(Errcode, Result, result)
 LNN_ASSIGNER(Errcode, Errcode, errcode)
 LNN_ASSIGNER(Int32, ConnectionId, connectionId)
 LNN_ASSIGNER(Int32, AuthType, authType)
@@ -55,7 +55,7 @@ LNN_ASSIGNER(String, CalleePkg, calleePkg)
 
 #define LNN_ASSIGNER_SIZE 19 // Size of g_connAssigners
 static const HiSysEventParamAssigner g_lnnAssigners[] = {
-    {"STAGE_RES",         HISYSEVENT_INT32,  LnnAssignerResult           },
+    { "STAGE_RES",        HISYSEVENT_INT32,  LnnAssignerResult           },
     { "ERROR_CODE",       HISYSEVENT_INT32,  LnnAssignerErrcode          },
     { "CONN_ID",          HISYSEVENT_INT32,  LnnAssignerConnectionId     },
     { "AUTH_TYPE",        HISYSEVENT_INT32,  LnnAssignerAuthType         },
@@ -74,18 +74,59 @@ static const HiSysEventParamAssigner g_lnnAssigners[] = {
     { "PEER_DEV_TYPE",    HISYSEVENT_INT32,  LnnAssignerPeerDeviceType   },
     { "HOST_PKG",         HISYSEVENT_STRING, LnnAssignerCallerPkg        },
     { "TO_CALL_PKG",      HISYSEVENT_STRING, LnnAssignerCalleePkg        },
- // Modification Note: remember updating LNN_ASSIGNER_SIZE
+    // Modification Note: remember updating LNN_ASSIGNER_SIZE
 };
 
-static inline void ConvertLnnForm2Param(HiSysEventParam params[], size_t size, SoftbusEventForm form)
+
+#define LNN_ALARM_ASSIGNER(type, fieldName, field)                                                            \
+    static inline bool LnnAssigner##fieldName(                                                                \
+        const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param) \
+    {                                                                                                         \
+        if (Assigner##type(form->lnnAlarmExtra->field, &param) && CopyString(param->name, eventName)) {       \
+            param->t = paramType;                                                                             \
+            return true;                                                                                      \
+        }                                                                                                     \
+        return false;                                                                                         \
+    }
+
+LNN_ALARM_ASSIGNER(Errcode, AlarmResult, result)
+
+#define LNN_ALARM_ASSIGNER_SIZE 1 // Size of g_lnnAlarmAssigners
+static const HiSysEventParamAssigner g_lnnAlarmAssigners[] = {
+    { "STAGE_RES",        HISYSEVENT_INT32,  LnnAssignerAlarmResult        },
+    // Modification Note: remember updating LNN_ALARM_ASSIGNER_SIZE
+};
+
+static inline size_t ConvertLnnForm2Param(HiSysEventParam params[], size_t size, SoftbusEventForm *form)
 {
+    size_t validSize = 0;
+    if (form == NULL || form->lnnExtra == NULL) {
+        return validSize;
+    }
     for (size_t i = 0; i < size; ++i) {
         HiSysEventParamAssigner assigner = g_lnnAssigners[i];
-        if (!assigner.Assign(assigner.name, assigner.type, form, &params[i])) {
-            COMM_LOGE(COMM_DFX, "assign event fail, name=%s", assigner.name);
+        if (assigner.Assign(assigner.name, assigner.type, form, &params[validSize])) {
+            ++validSize;
         }
     }
+    return validSize;
 }
+
+static inline size_t ConvertLnnAlarmForm2Param(HiSysEventParam params[], size_t size, SoftbusEventForm *form)
+{
+    size_t validSize = 0;
+    if (form == NULL || form->lnnAlarmExtra == NULL) {
+        return validSize;
+    }
+    for (size_t i = 0; i < size; ++i) {
+        HiSysEventParamAssigner assigner = g_lnnAlarmAssigners[i];
+        if (assigner.Assign(assigner.name, assigner.type, form, &params[validSize])) {
+            ++validSize;
+        }
+    }
+    return validSize;
+}
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

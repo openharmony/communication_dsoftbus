@@ -40,8 +40,8 @@
  * @since 2.0
  * @version 2.0
  */
-#ifndef SOFTBUS_SOCKET_H
-#define SOFTBUS_SOCKET_H
+#ifndef SOCKET_H
+#define SOCKET_H
 
 #include <stdint.h>
 #include "trans_type.h"
@@ -185,7 +185,7 @@ int32_t Socket(SocketInfo info);
  * @since 2.0
  * @version 2.0
  */
-int32_t Listen(int32_t socket, const QosTV qos[], uint32_t len, const ISocketListener *listener);
+int32_t Listen(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener);
 
 /**
  * @brief Binds a socket, which is called by client.
@@ -204,7 +204,7 @@ int32_t Listen(int32_t socket, const QosTV qos[], uint32_t len, const ISocketLis
  * @since 2.0
  * @version 2.0
  */
-int32_t Bind(int32_t socket, const QosTV qos[], uint32_t len, const ISocketListener *listener);
+int32_t Bind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener);
 
 /**
  * @example sendbytes_message_demo.c
@@ -297,7 +297,20 @@ int32_t SendFile(int32_t socket, const char *sFileList[], const char *dFileList[
  */
 void Shutdown(int32_t socket);
 
+/**
+ * @brief Evaluate quality of service.
+ *
+ * @param peerNetworkId Indicates the pointer to the remote device ID.
+ * @param dataType Indicates the type of data.
+ * @param qos Indicates the expected quality of service.
+ * @param qosLen Indicates the number of qos
+ *
+ * @return Returns no value.
+ * @since 2.0
+ * @version 2.0
+ */
+int32_t EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos, uint32_t qosCount);
 #ifdef __cplusplus
 }
 #endif
-#endif // SOFTBUS_SOCKET_H
+#endif // SOCKET_H

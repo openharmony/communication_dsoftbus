@@ -223,6 +223,7 @@ static int32_t GetListenerByModuleId(ConnModule moduleId, ConnListenerNode *node
     ConnListenerNode *listenerNode = NULL;
 
     if (g_listenerList == NULL) {
+        CONN_LOGE(CONN_COMMON, "listener list is null");
         return SOFTBUS_ERR;
     }
     int ret = SOFTBUS_OK;
@@ -249,6 +250,7 @@ static int32_t AddListener(ConnModule moduleId, const ConnectCallback *callback)
     ConnListenerNode *listNode = NULL;
 
     if (g_listenerList == NULL) {
+        CONN_LOGE(CONN_COMMON, "listener list is null");
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexLock(&g_listenerList->lock) != 0) {
@@ -373,7 +375,7 @@ static void RecordStartTime(const ConnectOption *info)
                 return;
             }
             conInfo.bleInfo.protocol = info->bleOption.protocol;
-            conInfo.bleInfo.psm = info->bleDirectOption.psm;
+            conInfo.bleInfo.psm = info->bleOption.psm;
             break;
         case CONNECT_TCP:
             if (memcpy_s(&conInfo.socketInfo.addr, MAX_SOCKET_ADDR_LEN, info->socketOption.addr, MAX_SOCKET_ADDR_LEN) !=
@@ -416,7 +418,7 @@ void ConnManagerConnected(uint32_t connectionId, const ConnectionInfo *info)
 
     int32_t num = GetAllListener(&node);
     if (num == 0 || node == NULL) {
-        CONN_LOGE(CONN_COMMON, "get node failed connId %u", connectionId);
+        CONN_LOGE(CONN_COMMON, "get node failed connId=%u", connectionId);
         return;
     }
 
@@ -436,7 +438,7 @@ void ConnManagerReusedConnected(uint32_t connectionId, const ConnectionInfo *inf
 
     int32_t num = GetAllListener(&node);
     if (num == 0 || node == NULL) {
-        CONN_LOGE(CONN_COMMON, "get node failed connId %u", connectionId);
+        CONN_LOGE(CONN_COMMON, "get node failed connId=%u", connectionId);
         return;
     }
 
@@ -458,6 +460,7 @@ void ConnManagerDisconnected(uint32_t connectionId, const ConnectionInfo *info)
 
     int32_t num = GetAllListener(&node);
     if (num == 0 || node == NULL) {
+        CONN_LOGE(CONN_COMMON, "get node failed connId=%u", connectionId);
         return;
     }
     for (int32_t i = 0; i < num; i++) {
@@ -471,14 +474,17 @@ void ConnManagerDisconnected(uint32_t connectionId, const ConnectionInfo *info)
 int32_t ConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback)
 {
     if (ModuleCheck(moduleId) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_COMMON, "module check failed moduleId=%d", moduleId);
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (callback == NULL) {
+        CONN_LOGE(CONN_COMMON, "callback is null");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if ((callback->OnConnected == NULL) || (callback->OnDisconnected == NULL) || (callback->OnDataReceived == NULL)) {
+        CONN_LOGE(CONN_COMMON, "callback member is null");
         return SOFTBUS_INVALID_PARAM;
     }
     return AddListener(moduleId, callback);

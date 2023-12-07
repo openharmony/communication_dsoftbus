@@ -1,0 +1,65 @@
+# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+import("../../../../../dsoftbus.gni")
+
+module_output_path = "dsoftbus/connection"
+dsoftbus_root_path = "../../../../.."
+softbus_adapter_common = "${dsoftbus_root_path}/adapter/common"
+
+ohos_unittest("WifiDirectChannelTest") {
+  module_out_path = module_output_path
+
+  include_dirs = [
+    "$dsoftbus_root_path/core/common/include",
+    "$softbus_adapter_common/include",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/connection/common/include",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/core/connection/manager",
+    "$dsoftbus_root_path/core/connection/tcp/include",
+    "$dsoftbus_root_path/core/connection/wifi_direct/processor",
+    "$dsoftbus_root_path/tests/core/connection/wifi_direct/processor",
+    "$dsoftbus_root_path/core/connection/wifi_direct/command",
+    "$dsoftbus_root_path/core/connection/wifi_direct/data",
+    "$dsoftbus_root_path/core/connection/wifi_direct/protocol",
+    "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single",
+    "$dsoftbus_root_path/core/connection/wifi_direct",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/connection/wifi_direct/channel",
+    "$dsoftbus_root_path/core/common/softbus_property/include",
+    "//third_party/googletest/googletest/include",
+    "//third_party/googletest/googletest/src",
+    "//third_party/bounds_checking_function/include",
+  ]
+  sources = [ "default_negotiate_channel_test.cpp" ]
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+    "//third_party/bounds_checking_function:libsec_shared",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+group("unittest") {
+  testonly = true
+  deps = [ ":WifiDirectChannelTest" ]
+}

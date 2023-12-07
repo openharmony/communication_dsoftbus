@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,6 +55,8 @@ public:
     int32_t QosReport(int32_t channelId, int32_t chanType, int32_t appType, int32_t quality) override;
     int32_t StreamStats(int32_t channelId, int32_t channelType, const StreamSendStats *data) override;
     int32_t RippleStats(int32_t channelId, int32_t channelType, const TrafficStats *data) override;
+    int32_t EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos,
+        uint32_t qosCount) override;
 private:
     static inline BrokerDelegator<DiscServerProxy> delegator_;
 };

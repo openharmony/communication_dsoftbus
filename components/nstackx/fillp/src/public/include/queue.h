@@ -92,8 +92,6 @@ static __inline void FillpQueueInit(FillpQueue *q, char *name, size_t size, FILL
 
     q->allocType = allocType;
     q->size = size;
-
-    return;
 }
 
 static __inline FillpQueue *FillpQueueCreate(char *name, size_t size, FILLP_INT allocType)

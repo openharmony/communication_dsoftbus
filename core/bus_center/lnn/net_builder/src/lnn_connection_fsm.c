@@ -572,6 +572,7 @@ static int32_t LnnRecoveryBroadcastKey()
         LNN_LOGE(LNN_BUILDER, "set iv failed");
         return SOFTBUS_ERR;
     }
+    LNN_LOGI(LNN_BUILDER, "recovery broadcastKey success!");
     return SOFTBUS_OK;
 }
 

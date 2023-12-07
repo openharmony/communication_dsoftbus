@@ -132,7 +132,7 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest02, TestSize.Level1)
     connOpt->type = CONNECT_TYPE_MAX;
     int32_t channelId = 0;
     int32_t ret = TransOpenUdpChannel(appInfo, connOpt, &channelId);
-    EXPECT_EQ(ret,  SOFTBUS_ERR);
+    EXPECT_NE(ret,  SOFTBUS_OK);
     SoftBusFree(appInfo);
     SoftBusFree(connOpt);
 }
@@ -163,7 +163,7 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest03, TestSize.Level1)
     connOpt->socketOption.port = TEST_SOCKET_PORT;
     int32_t channelId = 0;
     ret = TransOpenUdpChannel(appInfo, connOpt, &channelId);
-    EXPECT_EQ(ret,  SOFTBUS_ERR);
+    EXPECT_NE(ret,  SOFTBUS_OK);
     ret = TransDelUdpChannel(TEST_CHANNEL_ID);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     SoftBusFree(appInfo);
@@ -189,7 +189,7 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest04, TestSize.Level1)
     connOpt->socketOption.port = TEST_SOCKET_PORT;
     int32_t channelId = 0;
     int32_t ret = TransOpenUdpChannel(appInfo, connOpt, &channelId);
-    EXPECT_EQ(ret,  SOFTBUS_ERR);
+    EXPECT_NE(ret,  SOFTBUS_OK);
     SoftBusFree(appInfo);
     SoftBusFree(connOpt);
 }
@@ -203,7 +203,7 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest04, TestSize.Level1)
 HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest05, TestSize.Level1)
 {
     int32_t ret = TransCloseUdpChannel(TEST_CHANNEL_ID);
-    EXPECT_EQ(ret,  SOFTBUS_ERR);
+    EXPECT_NE(ret,  SOFTBUS_OK);
     UdpChannelInfo *newChannel = (UdpChannelInfo*)SoftBusCalloc(sizeof(UdpChannelInfo));
     EXPECT_TRUE(newChannel != NULL);
     (void)memset_s(newChannel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
@@ -212,9 +212,9 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest05, TestSize.Level1)
     ret = TransAddUdpChannel(newChannel);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = TransCloseUdpChannel(TEST_CHANNEL_ID);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_NE(ret,  SOFTBUS_OK);
     ret = TransDelUdpChannel(TEST_CHANNEL_ID);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_NE(ret,  SOFTBUS_OK);
 }
 
 /**
@@ -294,7 +294,7 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest09, TestSize.Level1)
                        g_sessionName);
     EXPECT_EQ(res, EOK);
     int32_t ret = NotifyUdpQosEvent(appInfo, INVALID_EVENT_ID, 0, NULL);
-    EXPECT_EQ(ret,  SOFTBUS_ERR);
+    EXPECT_NE(ret,  SOFTBUS_OK);
     SoftBusFree(appInfo);
 }
 
@@ -315,7 +315,7 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest10, TestSize.Level1)
                    g_sessionName);
     EXPECT_EQ(res, EOK);
     int32_t ret = NotifyUdpQosEvent(appInfo, INVALID_EVENT_ID, 0, NULL);
-    EXPECT_EQ(ret,  SOFTBUS_ERR);
+    EXPECT_NE(ret,  SOFTBUS_OK);
     RemoveSessionServer(g_pkgName, g_sessionName);
     SoftBusFree(appInfo);
 }

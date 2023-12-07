@@ -313,15 +313,15 @@ HWTEST_F(TransServerTcpDirectTest, TdcOnDataEvent001, TestSize.Level1)
     ASSERT_EQ(ret, EOK);
 
     ret = TestAddSessionConn(true);
-    ASSERT_EQ(ret, SOFTBUS_MALLOC_ERR);
+    ASSERT_EQ(ret, SOFTBUS_ERR);
 
     ret = TestAddSessionConn(true);
-    ASSERT_EQ(ret, SOFTBUS_MALLOC_ERR);
+    ASSERT_EQ(ret, SOFTBUS_ERR);
 
     TestDelSessionConnNode(TRANS_TEST_CHCANNEL_ID);
 
     ret = TestAddSessionConn(true);
-    ASSERT_EQ(ret, SOFTBUS_MALLOC_ERR);
+    ASSERT_EQ(ret, SOFTBUS_ERR);
 }
 
 /**

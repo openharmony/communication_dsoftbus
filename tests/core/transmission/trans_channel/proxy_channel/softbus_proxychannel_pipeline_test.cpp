@@ -34,6 +34,7 @@
 #include "softbus_utils.h"
 #include "trans_channel_callback.h"
 #include "trans_channel_manager.h"
+#include "trans_log.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -118,7 +119,7 @@ void SoftbusProxyChannelPipelineTest::TearDownTestCase(void)
 
 static void OnProxyChannelOpened(int32_t channelRequestId, int32_t channelId)
 {
-    LLOGI("channelRequestId=%d, channelId=%d", channelRequestId, channelId);
+    TRANS_LOGI(TRANS_TEST, "channelRequestId=%d, channelId=%d", channelRequestId, channelId);
     (void)channelRequestId;
     (void)channelId;
 }

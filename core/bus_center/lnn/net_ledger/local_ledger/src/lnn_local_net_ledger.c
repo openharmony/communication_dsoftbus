@@ -24,6 +24,7 @@
 #include "anonymizer.h"
 #include "bus_center_adapter.h"
 #include "bus_center_manager.h"
+#include "lnn_cipherkey_manager.h"
 #include "lnn_device_info_recovery.h"
 #include "lnn_log.h"
 #include "lnn_ohos_account.h"
@@ -144,6 +145,25 @@ static int32_t LlGetExtData(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t LlGetBleMac(void *buf, uint32_t len)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    const char *mac = NULL;
+    if (buf == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    mac = LnnGetBleMac(info);
+    if (mac == NULL) {
+        LNN_LOGE(LNN_LEDGER, "get ble mac fail.");
+        return SOFTBUS_ERR;
+    }
+    if (strcpy_s((char *)buf, len, mac) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "STR COPY ERROR!");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t LlGetUuid(void *buf, uint32_t len)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
@@ -185,6 +205,25 @@ static int32_t LlGetDeviceType(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t LlGetWifiDirectAddr(void *buf, uint32_t len)
+{
+    const char *wifiDirectAddr = NULL;
+    if (buf == NULL || len < MAC_LEN) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    wifiDirectAddr = LnnGetWifiDirectAddr(&g_localNetLedger.localInfo);
+    if (wifiDirectAddr == NULL) {
+        LNN_LOGE(LNN_LEDGER, "get wifidirect addr fail");
+        return SOFTBUS_ERR;
+    }
+    if (strncpy_s((char *)buf, len, wifiDirectAddr, strlen(wifiDirectAddr)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "copy wifidirect addr failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t LlGetAccount(void *buf, uint32_t len)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
@@ -211,6 +250,15 @@ static int32_t LlUpdateAccount(const void *buf)
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
+}
+
+static int32_t UpdateWifiDirectAddr(const void *wifiDirectAddr)
+{
+    if (wifiDirectAddr == NULL) {
+        LNN_LOGE(LNN_LEDGER, "para error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return LnnSetWifiDirectAddr(&g_localNetLedger.localInfo, (char *)wifiDirectAddr);
 }
 
 static int32_t UpdateLocalDeviceType(const void *buf)
@@ -725,6 +773,10 @@ static int32_t InitConnectInfo(ConnectInfo *info)
         return SOFTBUS_INVALID_PARAM;
     }
     // get mac addr
+    if (GetCommonDevInfo(COMM_DEVICE_KEY_BLE_MAC, info->bleMacAddr, MAC_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get ble mac fail!");
+        return SOFTBUS_ERR;
+    }
     return GetCommonDevInfo(COMM_DEVICE_KEY_BT_MAC, info->macAddr, MAC_LEN);
 }
 
@@ -826,6 +878,16 @@ static int32_t LlUpdateLocalOffLineCode(const void *id)
 static int32_t LlUpdateLocalExtData(const void *id)
 {
     return ModifyId((char *)g_localNetLedger.localInfo.extData, EXTDATA_LEN, (char *)id);
+}
+
+static int32_t UpdateLocalBleMac(const void *mac)
+{
+    if (mac == NULL) {
+        LNN_LOGE(LNN_LEDGER, "para error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    LnnSetBleMac(&g_localNetLedger.localInfo, (char *)mac);
+    return SOFTBUS_OK;
 }
 
 static int32_t UpdateLocalUuid(const void *id)
@@ -1052,6 +1114,50 @@ void LnnUpdateStateVersion()
     return UpdateStateVersionAndStore();
 }
 
+static int32_t LlGetStaticCapLen(void *buf, uint32_t len)
+{
+    if (buf == NULL || len > sizeof(int32_t)) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((int64_t *)buf) = g_localNetLedger.localInfo.staticCapLen;
+    return SOFTBUS_OK;
+}
+
+static int32_t LlUpdateStaticCapLen(const void *len)
+{
+    if (len == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid length");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    g_localNetLedger.localInfo.staticCapLen = *(int32_t *)len;
+    return SOFTBUS_OK;
+}
+
+int32_t LlUpdateStaticCapability(const void *staticCap)
+{
+    if (staticCap == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    return LnnSetStaticCapability(info, (uint8_t *)staticCap, info->staticCapLen);
+}
+
+int32_t LlGetStaticCapability(void *buf, uint32_t len)
+{
+    if (buf == NULL || len > STATIC_CAP_LEN) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (LnnGetStaticCapability(info, (uint8_t *)buf, len) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get static cap fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t LlGetIrk(void *buf, uint32_t len)
 {
     if (buf == NULL || len == 0) {
@@ -1066,7 +1172,7 @@ static int32_t LlGetIrk(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetPubMac(void *buf, uint32_t len)
+static int32_t LlGetPubMac(void *buf, uint32_t len)
 {
     if (buf == NULL || len == 0) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
@@ -1080,7 +1186,7 @@ static int32_t DlGetPubMac(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetCipherInfoKey(void *buf, uint32_t len)
+static int32_t LlGetCipherInfoKey(void *buf, uint32_t len)
 {
     if (buf == NULL || len == 0) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
@@ -1094,7 +1200,7 @@ static int32_t DlGetCipherInfoKey(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t DlGetCipherInfoIv(void *buf, uint32_t len)
+static int32_t LlGetCipherInfoIv(void *buf, uint32_t len)
 {
     if (buf == NULL || len == 0) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
@@ -1158,6 +1264,34 @@ static int32_t UpdateLocalCipherInfoIv(const void *id)
     return SOFTBUS_OK;
 }
 
+static int32_t LlGetP2pIp(void *buf, uint32_t len)
+{
+    if (buf == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (strcpy_s((char *)buf, len, info->p2pInfo.p2pIp) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t LlUpdateLocalP2pIp(const void *p2pIp)
+{
+    if (p2pIp == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (strcpy_s(info->p2pInfo.p2pIp, sizeof(info->p2pInfo.p2pIp), (const char *)p2pIp) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static LocalLedgerKey g_localKeyTable[] = {
     {STRING_KEY_HICE_VERSION, VERSION_MAX_LEN, LlGetNodeSoftBusVersion, NULL},
     {STRING_KEY_DEV_UDID, UDID_BUF_LEN, LlGetDeviceUdid, UpdateLocalDeviceUdid},
@@ -1179,6 +1313,9 @@ static LocalLedgerKey g_localKeyTable[] = {
     {STRING_KEY_P2P_GO_MAC, MAC_LEN, LlGetP2pGoMac, UpdateP2pGoMac},
     {STRING_KEY_OFFLINE_CODE, OFFLINE_CODE_LEN, LlGetOffLineCode, LlUpdateLocalOffLineCode},
     {STRING_KEY_EXTDATA, EXTDATA_LEN, LlGetExtData, LlUpdateLocalExtData},
+    {STRING_KEY_BLE_MAC, MAC_LEN, LlGetBleMac, UpdateLocalBleMac},
+    {STRING_KEY_WIFIDIRECT_ADDR, MAC_LEN, LlGetWifiDirectAddr, UpdateWifiDirectAddr},
+    {STRING_KEY_P2P_IP, IP_LEN, LlGetP2pIp, LlUpdateLocalP2pIp},
     {NUM_KEY_SESSION_PORT, -1, LlGetSessionPort, UpdateLocalSessionPort},
     {NUM_KEY_AUTH_PORT, -1, LlGetAuthPort, UpdateLocalAuthPort},
     {NUM_KEY_PROXY_PORT, -1, LlGetProxyPort, UpdateLocalProxyPort},
@@ -1194,11 +1331,13 @@ static LocalLedgerKey g_localKeyTable[] = {
     {NUM_KEY_DATA_CHANGE_FLAG, sizeof(int16_t), L1GetNodeDataChangeFlag, UpdateNodeDataChangeFlag},
     {NUM_KEY_ACCOUNT_LONG, sizeof(int64_t), LocalGetNodeAccountId, LocalUpdateNodeAccountId},
     {NUM_KEY_BLE_START_TIME, sizeof(int64_t), LocalGetNodeBleStartTime, LocalUpdateBleStartTime},
+    {NUM_KEY_STATIC_CAP_LEN, sizeof(int32_t), LlGetStaticCapLen, LlUpdateStaticCapLen},
     {BYTE_KEY_IRK, LFINDER_IRK_LEN, LlGetIrk, UpdateLocalIrk},
-    {BYTE_KEY_PUB_MAC, LFINDER_MAC_ADDR_LEN, DlGetPubMac, UpdateLocalPubMac},
-    {BYTE_KEY_BROADCAST_CIPHER_KEY, SESSION_KEY_LENGTH, DlGetCipherInfoKey, UpdateLocalCipherInfoKey},
-    {BYTE_KEY_BROADCAST_CIPHER_IV, BROADCAST_IV_LEN, DlGetCipherInfoIv, UpdateLocalCipherInfoIv},
+    {BYTE_KEY_PUB_MAC, LFINDER_MAC_ADDR_LEN, LlGetPubMac, UpdateLocalPubMac},
+    {BYTE_KEY_BROADCAST_CIPHER_KEY, SESSION_KEY_LENGTH, LlGetCipherInfoKey, UpdateLocalCipherInfoKey},
+    {BYTE_KEY_BROADCAST_CIPHER_IV, BROADCAST_IV_LEN, LlGetCipherInfoIv, UpdateLocalCipherInfoIv},
     {BYTE_KEY_ACCOUNT_HASH, SHA_256_HASH_LEN, LlGetAccount, LlUpdateAccount},
+    {BYTE_KEY_STATIC_CAPABILITY, STATIC_CAP_LEN, LlGetStaticCapability, LlUpdateStaticCapability},
 };
 
 int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
@@ -1361,19 +1500,46 @@ static int32_t LnnFirstGetUdid(void)
 
 static int32_t LnnGenBroadcastCipherInfo(void)
 {
-    unsigned char cipherKey[SESSION_KEY_LENGTH] = {0};
-    if (SoftBusGenerateRandomArray(cipherKey, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "generate broadcast key error.");
-        return SOFTBUS_ERR;
+    if (LnnLoadLocalBroadcastCipherKey() == SOFTBUS_OK) {
+        BroadcastCipherKey broadcastKey;
+        (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
+        if (LnnGetLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "get local info failed.");
+            return SOFTBUS_ERR;
+        }
+        if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_KEY,
+            broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "set key error.");
+            return SOFTBUS_ERR;
+        }
+        if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_IV,
+            broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "set iv error.");
+            return SOFTBUS_ERR;
+        }
+        LNN_LOGI(LNN_LEDGER, "load BroadcastCipherInfo success!");
+        return SOFTBUS_OK;
     }
-    LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_KEY, cipherKey, SESSION_KEY_LENGTH);
 
+    unsigned char cipherKey[SESSION_KEY_LENGTH] = {0};
     unsigned char cipherIv[BROADCAST_IV_LEN] = {0};
-    if (SoftBusGenerateRandomArray(cipherIv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "generate broadcast iv error.");
+    if (SoftBusGenerateRandomArray(cipherKey, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "generate broadcast key error.");
         return SOFTBUS_ERR;
     }
-    LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_IV, cipherIv, BROADCAST_IV_LEN);
+    if (SoftBusGenerateRandomArray(cipherIv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "generate broadcast iv error.");
+        return SOFTBUS_ERR;
+    }
+    if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_KEY, cipherKey, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "set key error.");
+        return SOFTBUS_ERR;
+    }
+    if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_IV, cipherIv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "set iv error.");
+        return SOFTBUS_ERR;
+    }
+    LNN_LOGI(LNN_LEDGER, "generate BroadcastCipherInfo success!");
     return SOFTBUS_OK;
 }
 
@@ -1519,8 +1685,8 @@ int32_t LnnInitLocalLedger(void)
         LNN_LOGE(LNN_LEDGER, "first get udid fail, try again in one second");
     }
     if (LnnGenBroadcastCipherInfo() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "gen cipher fail");
-        return SOFTBUS_ERR;
+        LNN_LOGE(LNN_LEDGER, "generate cipher fail");
+        goto EXIT;
     }
 
     g_localNetLedger.status = LL_INIT_SUCCESS;

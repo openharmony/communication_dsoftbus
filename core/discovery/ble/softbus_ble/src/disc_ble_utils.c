@@ -28,11 +28,13 @@
 #include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_json_utils.h"
 #include "softbus_utils.h"
 
 #define DATA_TYPE_MASK 0xF0
 #define DATA_LENGTH_MASK 0x0F
 #define BYTE_SHIFT 4
+#define CUST_CAPABILITY_LEN 2
 
 #define MAC_BIT_ZERO 0
 #define MAC_BIT_ONE 1
@@ -113,8 +115,12 @@ uint16_t DiscBleGetDeviceType(void)
     return typeId;
 }
 
-int32_t DiscBleGetDeviceIdHash(uint8_t *devIdHash)
+int32_t DiscBleGetDeviceIdHash(uint8_t *devIdHash, uint32_t len)
 {
+    if (devIdHash == NULL || len > DISC_MAX_DEVICE_ID_LEN) {
+        DISC_LOGE(DISC_BLE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
     char udid[DISC_MAX_DEVICE_ID_LEN] = {0};
     char hashResult[SHA_HASH_LEN] = {0};
     int32_t ret = DiscBleGetDeviceUdid(udid, sizeof(udid));
@@ -127,8 +133,11 @@ int32_t DiscBleGetDeviceIdHash(uint8_t *devIdHash)
         DISC_LOGE(DISC_BLE, "GenerateStrHash failed");
         return ret;
     }
-
-    if (memcpy_s(devIdHash, DISC_MAX_DEVICE_ID_LEN, hashResult, SHORT_DEVICE_ID_HASH_LENGTH) != EOK) {
+    if (memset_s(devIdHash, len, 0, len) != EOK) {
+        DISC_LOGE(DISC_BLE, "memset devIdHash failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (memcpy_s(devIdHash, len, hashResult, SHORT_DEVICE_ID_HASH_LENGTH) != EOK) {
         DISC_LOGE(DISC_BLE, "copy device id hash failed");
         return SOFTBUS_MEM_ERR;
     }
@@ -137,12 +146,16 @@ int32_t DiscBleGetDeviceIdHash(uint8_t *devIdHash)
 
 int32_t DiscBleGetShortUserIdHash(uint8_t *hashStr, uint32_t len)
 {
+    if (hashStr == NULL || len > SHORT_USER_ID_HASH_LEN) {
+        DISC_LOGE(DISC_BLE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
     uint8_t account[SHA_256_HASH_LEN] = {0};
     if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, account, SHA_256_HASH_LEN) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "DiscBleGetShortUserIdHash get local user id failed");
         return SOFTBUS_ERR;
     }
-    if (len > SHORT_USER_ID_HASH_LEN || memcpy_s(hashStr, len, account, len) != EOK) {
+    if (memcpy_s(hashStr, len, account, len) != EOK) {
         DISC_LOGE(DISC_BLE, "DiscBleGetShortUserIdHash memcpy_s failed");
         return SOFTBUS_ERR;
     }
@@ -213,15 +226,15 @@ static int32_t CopyDeviceIdHashValue(DeviceWrapper *device, const uint8_t *data,
     return SOFTBUS_OK;
 }
 
-static int32_t CopyDeviceNameValue(DeviceWrapper *device, const uint8_t *data, uint32_t len, uint32_t remainLen)
+static int32_t CopyDeviceNameValue(DeviceWrapper *device, const uint8_t *data, uint32_t *len, uint32_t remainLen)
 {
     // TLV_VARIBALE_DATA_LEN indicate indefinite length
-    if (len == TLV_VARIABLE_DATA_LEN) {
-        uint32_t devNameLen = strlen((char *)data);
-        len = (devNameLen > remainLen) ? remainLen : devNameLen;
+    if (*len == TLV_VARIABLE_DATA_LEN) {
+        uint32_t devNameLen = strlen((char *)data) + 1; // +1 is device name end '\0'
+        *len = (devNameLen > remainLen) ? remainLen : devNameLen;
     }
     if (CopyValue(device->info->devName, DISC_MAX_DEVICE_NAME_LEN,
-        (void *)data, len, "TLV_TYPE_DEVICE_NAME") != SOFTBUS_OK) {
+        (void *)data, *len, "TLV_TYPE_DEVICE_NAME") != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "parse tlv copy device name value failed");
         return SOFTBUS_ERR;
     }
@@ -238,6 +251,55 @@ static int32_t ParseDeviceType(DeviceWrapper *device, const uint8_t* data, const
     if (len == DEVICE_TYPE_LEN) {
         device->info->devType = (recvDevType[1] << ONE_BYTE_LENGTH) | recvDevType[0];
     }
+    return SOFTBUS_OK;
+}
+
+static int32_t ParseCustData(DeviceWrapper *device, const uint8_t *data, const uint32_t len)
+{
+    if ((int32_t)data[0] != (int32_t)CAST_PLUS) {
+        DISC_LOGI(DISC_BLE, "not castPlus, just ignore");
+        return SOFTBUS_OK;
+    }
+    cJSON *custJson = cJSON_CreateObject();
+    DISC_CHECK_AND_RETURN_RET_LOGE(custJson != NULL, SOFTBUS_CREATE_JSON_ERR, DISC_BLE, "create cust json obj failed");
+
+    int32_t custLen = HEXIFY_LEN(len);
+    char *custString = SoftBusCalloc(sizeof(char) * custLen);
+    if (custString == NULL) {
+        DISC_LOGE(DISC_BLE, "calloc custString failed.");
+        cJSON_Delete(custJson);
+        return SOFTBUS_MEM_ERR;
+    }
+    if (ConvertBytesToUpperCaseHexString(custString, custLen, data, len) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_BLE, "ConvertBytesToUpperCaseHexString failed");
+        cJSON_Delete(custJson);
+        SoftBusFree(custString);
+        return SOFTBUS_ERR;
+    }
+
+    if (!AddStringToJsonObject(custJson, g_capabilityMap[CASTPLUS_CAPABILITY_BITMAP].capability,
+        &custString[CUST_CAPABILITY_LEN])) {
+        DISC_LOGE(DISC_BLE, "add string to json failed");
+        cJSON_Delete(custJson);
+        SoftBusFree(custString);
+        return SOFTBUS_PARSE_JSON_ERR;
+    }
+
+    char *custData = cJSON_PrintUnformatted(custJson);
+    cJSON_Delete(custJson);
+    if (custData == NULL) {
+        DISC_LOGE(DISC_BLE, "cJSON_PrintUnformatted failed");
+        SoftBusFree(custString);
+        return SOFTBUS_ERR;
+    }
+    if (memcpy_s(device->info->custData, DISC_MAX_CUST_DATA_LEN, custData, strlen(custData) + 1) != EOK) {
+        DISC_LOGE(DISC_BLE, "memcpy custData failed");
+        cJSON_free(custData);
+        SoftBusFree(custString);
+        return SOFTBUS_ERR;
+    }
+    cJSON_free(custData);
+    SoftBusFree(custString);
     return SOFTBUS_OK;
 }
 
@@ -262,11 +324,10 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_
                 ret = ParseDeviceType(device, &data[curLen + 1], len);
                 break;
             case TLV_TYPE_DEVICE_NAME:
-                ret = CopyDeviceNameValue(device, &data[curLen + 1], len, dataLen - curLen - TL_LEN);
+                ret = CopyDeviceNameValue(device, &data[curLen + 1], &len, dataLen - curLen - TL_LEN);
                 break;
             case TLV_TYPE_CUST:
-                ret = CopyValue(device->info->custData, DISC_MAX_CUST_DATA_LEN,
-                                (void *)&data[curLen + 1], len, "TLV_TYPE_CUST");
+                ret = ParseCustData(device, &data[curLen + 1], len);
                 break;
             case TLV_TYPE_BR_MAC:
                 ret = CopyBrAddrValue(device, &data[curLen + 1], len);
