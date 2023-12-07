@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,8 @@
 #include "softbus_error_code.h"
 #include "softbus_hisysevt_discreporter.h"
 #include "softbus_utils.h"
+
+#define DUMP_STR_LEN 256
 
 static bool g_isInited = false;
 
@@ -512,6 +514,29 @@ static DiscInfo *CreateDiscInfoForSubscribe(const SubscribeInfo *info)
     return infoNode;
 }
 
+static void DumpDiscInfoList(const DiscItem *itemNode)
+{
+    char dumpStr[DUMP_STR_LEN] = {0};
+    int32_t dumpStrPos = 0;
+    int32_t itemStrLen = 0;
+    DiscInfo *infoNode = NULL;
+
+    LIST_FOR_EACH_ENTRY(infoNode, &(itemNode->InfoList), DiscInfo, node) {
+        itemStrLen = sprintf_s(&dumpStr[dumpStrPos], DUMP_STR_LEN - dumpStrPos, "%d,", infoNode->id);
+        if (itemStrLen <= 0) {
+            DISC_LOGI(DISC_CONTROL, "info id:%s", dumpStr);
+            dumpStrPos = 0;
+            itemStrLen = sprintf_s(&dumpStr[dumpStrPos], DUMP_STR_LEN - dumpStrPos, "%d,", infoNode->id);
+            DISC_CHECK_AND_RETURN_LOGW(itemStrLen > 0, DISC_CONTROL, "sprintf_s failed");
+        }
+        dumpStrPos += itemStrLen;
+    }
+
+    if (dumpStrPos > 0) {
+        DISC_LOGI(DISC_CONTROL, "info id:%s", dumpStr);
+    }
+}
+
 static int32_t AddDiscInfoToList(SoftBusList *serviceList, const char *packageName, const InnerCallback *cb,
                                  DiscInfo *info, ServiceType type)
 {
@@ -520,12 +545,16 @@ static int32_t AddDiscInfoToList(SoftBusList *serviceList, const char *packageNa
         return SOFTBUS_LOCK_ERR;
     }
 
+    DISC_LOGI(DISC_CONTROL, "packageName=%s, id=%d", packageName, info->id);
+
     DiscItem *itemNode = NULL;
     bool exist = false;
     LIST_FOR_EACH_ENTRY(itemNode, &(serviceList->list), DiscItem, node) {
         if (strcmp(itemNode->packageName, packageName) != 0) {
             continue;
         }
+
+        DumpDiscInfoList(itemNode);
 
         DiscInfo *infoNode = NULL;
         LIST_FOR_EACH_ENTRY(infoNode, &(itemNode->InfoList), DiscInfo, node) {
@@ -583,14 +612,17 @@ static DiscInfo *RemoveInfoFromList(SoftBusList *serviceList, const char *packag
         return NULL;
     }
 
+    DISC_LOGI(DISC_CONTROL, "packageName=%s, id=%d", packageName, id);
+
     bool isIdExist = false;
     DiscItem *itemNode = NULL;
     DiscInfo *infoNode = NULL;
-
     LIST_FOR_EACH_ENTRY(itemNode, &(serviceList->list), DiscItem, node) {
         if (strcmp(itemNode->packageName, packageName) != 0) {
             continue;
         }
+
+        DumpDiscInfoList(itemNode);
 
         if (itemNode->infoNum == 0) {
             serviceList->cnt--;

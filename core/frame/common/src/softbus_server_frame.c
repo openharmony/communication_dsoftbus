@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "comm_log.h"
+#include "disc_event_manager.h"
 #include "lnn_bus_center_ipc.h"
 #include "message_handler.h"
 #include "wifi_direct_initiator.h"
@@ -43,6 +44,7 @@ int __attribute__((weak)) ServerStubInit(void)
 
 static void ServerModuleDeinit(void)
 {
+    DiscEventManagerDeinit();
     DiscServerDeinit();
     ConnServerDeinit();
     TransServerDeinit();
@@ -97,6 +99,11 @@ void InitSoftBusServer(void)
 
     if (TransServerInit() == SOFTBUS_ERR) {
         COMM_LOGE(COMM_SVC, "softbus trans server init failed.");
+        goto ERR_EXIT;
+    }
+
+    if (DiscEventManagerInit() != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus disc event manager init failed.");
         goto ERR_EXIT;
     }
 

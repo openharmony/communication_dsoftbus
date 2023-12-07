@@ -181,7 +181,7 @@ DiscoveryFuncInterface *DiscBleInit(DiscInnerCallback *discInnerCb)
 
     DiscoveryBleDispatcherInterface *approachInterface = DiscApproachBleInit(discInnerCb);
     if (approachInterface == NULL) {
-        DISC_LOGE(DISC_INIT, "DiscShareBleInit err");
+        DISC_LOGE(DISC_INIT, "DiscApproachBleInit err");
         return NULL;
     }
     g_dispatchers[g_dispatcherSize++] = approachInterface;
