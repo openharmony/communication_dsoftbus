@@ -95,4 +95,4 @@ extern "C" {
 }
 #endif /* __cplusplus */
 
-#endif
+#endif /* FILLP_PDT_FC_MIRACAST_H */

@@ -30,8 +30,6 @@ void EpDelRdlnode(struct EventPoll *ep, struct EpItem *epi)
     }
 
     HlistDelete(&ep->rdList, &epi->rdlNode);
-
-    return;
 }
 
 /**
