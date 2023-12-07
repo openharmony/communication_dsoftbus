@@ -165,9 +165,9 @@ static void WifiStateEventHandler(const LnnEventBasicInfo *info)
             (void)LnnSetNetCapability(&netCapability, BIT_WIFI_24G);
             break;
         case SOFTBUS_WIFI_ENABLED:
-            (void)LnnClearNetCapability(&netCapability, BIT_WIFI);
-            (void)LnnClearNetCapability(&netCapability, BIT_WIFI_24G);
-            (void)LnnClearNetCapability(&netCapability, BIT_WIFI_5G);
+            (void)LnnSetNetCapability(&netCapability, BIT_WIFI);
+            (void)LnnSetNetCapability(&netCapability, BIT_WIFI_24G);
+            (void)LnnSetNetCapability(&netCapability, BIT_WIFI_5G);
             (void)LnnSetNetCapability(&netCapability, BIT_WIFI_P2P);
             isSend = true;
             break;

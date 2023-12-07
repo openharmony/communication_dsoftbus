@@ -54,6 +54,7 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info);
 ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int32_t authId);
 void LnnRemoveNode(const char *udid);
 NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type);
+int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info);
 bool LnnSetDLDeviceInfoName(const char *udid, const char *name);
 bool LnnSetDLP2pInfo(const char *networkId, const P2pInfo *info);
 const char *LnnConvertDLidToUdid(const char *id, IdCategory type);

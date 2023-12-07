@@ -419,6 +419,30 @@ bool LnnGetOnlineStateById(const char *id, IdCategory type)
     return state;
 }
 
+NO_SANITIZE("cfi") int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info)
+{
+    if (id == NULL || info == NULL) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "param error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    NodeInfo *nodeInfo = LnnGetNodeInfoById(id, type);
+    if (nodeInfo == NULL) {
+        (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "can not find target node");
+        return SOFTBUS_ERR;
+    }
+    if (memcpy_s(info, sizeof(NodeInfo), nodeInfo, sizeof(NodeInfo)) != EOK) {
+        (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return SOFTBUS_MEM_ERR;
+    }
+    (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    return SOFTBUS_OK;
+}
+
 static int32_t DlGetDeviceUuid(const char *networkId, void *buf, uint32_t len)
 {
     NodeInfo *info = NULL;
