@@ -81,12 +81,34 @@ static int32_t GenerateTdcChannelId()
     return channelId;
 }
 
+static bool CheckChannelIdBits()
+{
+    bool ret = true;
+    int32_t len = MAX_PROXY_CHANNEL_ID_COUNT / BIT_NUM / sizeof(long);
+    unsigned long *ptr = g_proxyChanIdBits;
+#define ALL_CHANNEL_BITS 0xFFFFFFFF
+    for (int32_t i = 0; i < len; i++) {
+        if (*(ptr + i) != ALL_CHANNEL_BITS) {
+            ret = false;
+            break;
+        }      
+    }
+
+    return ret;
+}
+
 static int32_t GenerateProxyChannelId()
 {
     if (SoftBusMutexLock(&g_myIdLock) != 0) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
+
+    if (CheckChannelIdBits()) {
+        TRANS_LOGE(TRANS_CTRL, "No more channel Ids(1024) can be applied");
+        return INVALID_CHANNEL_ID;
+    }
+
     for (uint32_t id = g_proxyIdMark + 1; id != g_proxyIdMark; id++) {
         id = id % MAX_PROXY_CHANNEL_ID_COUNT;
         uint32_t index = id / (BIT_NUM * sizeof(long));
