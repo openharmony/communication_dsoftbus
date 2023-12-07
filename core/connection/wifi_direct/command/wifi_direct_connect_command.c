@@ -113,10 +113,13 @@ static void ExecuteConnection(struct WifiDirectCommand *base)
 
 static void OnSuccess(struct WifiDirectCommand *base, struct NegotiateMessage *msg)
 {
+    struct InnerLink *innerLink = NULL;
     struct WifiDirectConnectCommand *self = (struct WifiDirectConnectCommand *)base;
-    struct InnerLink *innerLink = msg->get(msg, NM_KEY_INNER_LINK, NULL, NULL);
+    if (msg != NULL) {
+        innerLink = msg->get(msg, NM_KEY_INNER_LINK, NULL, NULL);
+    }
     if (innerLink == NULL) {
-        CONN_LOGW(CONN_WIFI_DIRECT, " no inner link");
+        CONN_LOGW(CONN_WIFI_DIRECT, "no inner link");
         base->onFailure(base, ERROR_NO_CONTEXT);
         GetWifiDirectNegotiator()->resetContext();
         GetResourceManager()->dump(0);
