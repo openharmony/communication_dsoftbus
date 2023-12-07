@@ -13,22 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef DISC_APPROACH_BLE_H
-#define DISC_APPROACH_BLE_H
+#include "disc_approach_ble.h"
+#include "disc_event_manager.h"
+#include "disc_log.h"
+#include "softbus_error_code.h"
 
-#include "disc_ble_dispatcher.h"
+int32_t DiscEventManagerInit(void)
+{
+    int32_t ret = DiscApproachBleEventInit();
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_INIT, "init approach ble event failed");
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
-DiscoveryBleDispatcherInterface *DiscApproachBleInit(DiscInnerCallback *discInnerCb);
-void DiscApproachBleDeinit(void);
-int32_t DiscApproachBleEventInit(void);
-void DiscApproachBleEventDeinit(void);
-
-#ifdef __cplusplus
+    DISC_LOGI(DISC_INIT, "disc event manager init succ");
+    return SOFTBUS_OK;
 }
-#endif /* __cplusplus */
 
-#endif /* DISC_APPROACH_BLE_H */
+void DiscEventManagerDeinit(void)
+{
+    DiscApproachBleEventDeinit();
+}
+
