@@ -842,6 +842,7 @@ static int32_t ProcessConnectRequestAsGo(struct NegotiateMessage *msg, enum Wifi
 
     ret = SendConnectResponseAsGo(msg, &link, info);
     InnerLinkDestructor(&link);
+    ProcessSuccess(NULL, false);
     return ret;
 }
 
