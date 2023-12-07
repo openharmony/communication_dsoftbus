@@ -1228,7 +1228,7 @@ static bool BleIsConcern(uint32_t capability)
 static int32_t UpdateAdvertiserDeviceInfo(int32_t adv)
 {
     DiscBleAdvertiser *advertiser = &g_bleAdvertiser[adv];
-    if (advertiser->isAdvertising && GetNeedUpdateAdvertiser(adv)) {
+    if (advertiser->isAdvertising) {
         if (UpdateAdvertiser(adv) == SOFTBUS_OK) {
             DISC_LOGI(DISC_BLE, "update device info success");
             return SOFTBUS_OK;
