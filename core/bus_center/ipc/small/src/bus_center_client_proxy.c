@@ -98,17 +98,6 @@ int32_t ClientOnJoinLNNResult(const char *pkgName, void *addr, uint32_t addrType
     return SOFTBUS_OK;
 }
 
-int32_t ClientOnJoinMetaNodeResult(const char *pkgName, void *addr, uint32_t addrTypeLen,
-    MetaBasicInfo *metaInfo, int32_t retCode)
-{
-    (void)pkgName;
-    (void)addr;
-    (void)addrTypeLen;
-    (void)metaInfo;
-    (void)retCode;
-    return SOFTBUS_OK;
-}
-
 int32_t ClientOnLeaveLNNResult(const char *pkgName, const char *networkId, int retCode)
 {
     LNN_LOGI(LNN_EVENT, "enter");
@@ -134,14 +123,6 @@ int32_t ClientOnLeaveLNNResult(const char *pkgName, const char *networkId, int r
         LNN_LOGE(LNN_EVENT, "SendRequest fail=%d", ans);
         return SOFTBUS_ERR;
     }
-    return SOFTBUS_OK;
-}
-
-int32_t ClientOnLeaveMetaNodeResult(const char *pkgName, const char *networkId, int retCode)
-{
-    (void)pkgName;
-    (void)networkId;
-    (void)retCode;
     return SOFTBUS_OK;
 }
 

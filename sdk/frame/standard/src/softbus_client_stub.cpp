@@ -57,12 +57,8 @@ SoftBusClientStub::SoftBusClientStub()
         &SoftBusClientStub::OnChannelQosEventInner;
     memberFuncMap_[CLIENT_ON_JOIN_RESULT] =
         &SoftBusClientStub::OnJoinLNNResultInner;
-    memberFuncMap_[CLIENT_ON_JOIN_METANODE_RESULT] =
-        &SoftBusClientStub::OnJoinMetaNodeResultInner;
     memberFuncMap_[CLIENT_ON_LEAVE_RESULT] =
         &SoftBusClientStub::OnLeaveLNNResultInner;
-    memberFuncMap_[CLIENT_ON_LEAVE_METANODE_RESULT] =
-        &SoftBusClientStub::OnLeaveMetaNodeResultInner;
     memberFuncMap_[CLIENT_ON_NODE_ONLINE_STATE_CHANGED] =
         &SoftBusClientStub::OnNodeOnlineStateChangedInner;
     memberFuncMap_[CLIENT_ON_NODE_BASIC_INFO_CHANGED] =
@@ -485,43 +481,6 @@ int32_t SoftBusClientStub::OnJoinLNNResultInner(MessageParcel &data, MessageParc
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusClientStub::OnJoinMetaNodeResultInner(MessageParcel &data, MessageParcel &reply)
-{
-    uint32_t addrTypeLen;
-    uint32_t infoLen;
-    void *addr = nullptr;
-    if (!data.ReadUint32(addrTypeLen) || (addrTypeLen != 0 && addrTypeLen != sizeof(ConnectionAddr))) {
-        COMM_LOGE(COMM_SDK, "OnJoinMetaNodeResultInner read addrTypeLen:%d failed!", addrTypeLen);
-        return SOFTBUS_ERR;
-    }
-    if (addrTypeLen != 0) {
-        addr = (void *)data.ReadRawData(addrTypeLen);
-        if (addr == nullptr) {
-            COMM_LOGE(COMM_SDK, "OnJoinMetaNodeResultInner read addr failed!");
-            return SOFTBUS_ERR;
-        }
-    }
-    if (!data.ReadUint32(infoLen) || (infoLen != 0 && infoLen != sizeof(MetaBasicInfo))) {
-        COMM_LOGE(COMM_SDK, "OnJoinMetaNodeResultInner read infoLen:%d failed!", infoLen);
-        return SOFTBUS_ERR;
-    }
-    void *metaInfo = (void *)data.ReadRawData(infoLen);
-    if (metaInfo == nullptr) {
-        COMM_LOGE(COMM_SDK, "OnJoinMetaNodeResultInner read metaInfo failed!");
-        return SOFTBUS_ERR;
-    }
-    int32_t retCode;
-    if (!data.ReadInt32(retCode)) {
-        COMM_LOGE(COMM_SDK, "OnJoinMetaNodeResultInner read retCode failed!");
-        return SOFTBUS_ERR;
-    }
-    int32_t retReply = OnJoinMetaNodeResult(addr, addrTypeLen, metaInfo, infoLen, retCode);
-    if (retReply != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SDK, "OnJoinMetaNodeResultInner notify join result failed!");
-    }
-    return SOFTBUS_OK;
-}
-
 int32_t SoftBusClientStub::OnLeaveLNNResultInner(MessageParcel &data, MessageParcel &reply)
 {
     const char *networkId = data.ReadCString();
@@ -537,25 +496,6 @@ int32_t SoftBusClientStub::OnLeaveLNNResultInner(MessageParcel &data, MessagePar
     int32_t retReply = OnLeaveLNNResult(networkId, retCode);
     if (retReply != SOFTBUS_OK) {
         COMM_LOGE(COMM_SDK, "OnLeaveLNNResultInner notify leave result failed!");
-    }
-    return SOFTBUS_OK;
-}
-
-int32_t SoftBusClientStub::OnLeaveMetaNodeResultInner(MessageParcel &data, MessageParcel &reply)
-{
-    const char *networkId = data.ReadCString();
-    if (networkId == nullptr) {
-        COMM_LOGE(COMM_SDK, "OnLeaveMetaNodeResultInner read networkId failed!");
-        return SOFTBUS_ERR;
-    }
-    int32_t retCode;
-    if (!data.ReadInt32(retCode)) {
-        COMM_LOGE(COMM_SDK, "OnLeaveMetaNodeResultInner read retCode failed!");
-        return SOFTBUS_ERR;
-    }
-    int32_t retReply = OnLeaveMetaNodeResult(networkId, retCode);
-    if (retReply != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SDK, "OnLeaveMetaNodeResultInner notify leave result failed!");
     }
     return SOFTBUS_OK;
 }
@@ -703,22 +643,9 @@ int32_t SoftBusClientStub::OnJoinLNNResult(void *addr, uint32_t addrTypeLen, con
     return LnnOnJoinResult(addr, networkId, retCode);
 }
 
-int32_t SoftBusClientStub::OnJoinMetaNodeResult(void *addr, uint32_t addrTypeLen, void *metaInfo, uint32_t infoLen,
-    int retCode)
-{
-    (void)addrTypeLen;
-    (void)infoLen;
-    return MetaNodeOnJoinResult(addr, metaInfo, retCode);
-}
-
 int32_t SoftBusClientStub::OnLeaveLNNResult(const char *networkId, int retCode)
 {
     return LnnOnLeaveResult(networkId, retCode);
-}
-
-int32_t SoftBusClientStub::OnLeaveMetaNodeResult(const char *networkId, int retCode)
-{
-    return MetaNodeOnLeaveResult(networkId, retCode);
 }
 
 int32_t SoftBusClientStub::OnNodeOnlineStateChanged(const char *pkgName, bool isOnline,

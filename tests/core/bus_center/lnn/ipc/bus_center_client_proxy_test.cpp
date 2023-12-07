@@ -45,40 +45,4 @@ void BusCenterClientProxyTest::SetUp()
 void BusCenterClientProxyTest::TearDown()
 {
 }
-
-/*
-* @tc.name: CLIENT_ON_JOIN_META_NODE_RESULT_Test_001
-* @tc.desc: client on join meta node result test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(BusCenterClientProxyTest, CLIENT_ON_JOIN_META_NODE_RESULT_Test_001, TestSize.Level1)
-{
-    void *addr = nullptr;
-    MetaBasicInfo *metaInfo = nullptr;
-    uint32_t addrTypeLen = TEST_DATA_LEN;
-    int32_t retCode = 0;
-    int32_t ret;
-    ret = ClientOnJoinMetaNodeResult(nullptr, addr, addrTypeLen, metaInfo, retCode);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-}
-
-/*
-* @tc.name: CLIENT_ON_LEAVE_META_NODE_RESULT_Test_001
-* @tc.desc: client on leave meta node result test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(BusCenterClientProxyTest, CLIENT_ON_LEAVE_META_NODE_RESULT_Test_001, TestSize.Level0)
-{
-    const char *pkgName = "000";
-    const char *networkId = "1234";
-    int32_t retCode = 0;
-    int32_t ret;
-
-    ret = ClientOnLeaveMetaNodeResult(nullptr, 0, networkId, retCode);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-    ret = ClientOnLeaveMetaNodeResult(pkgName, 0, networkId, retCode);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-}
 } // namespace OHOS

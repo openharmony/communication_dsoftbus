@@ -98,11 +98,7 @@ public:
     virtual void LnnNotifyAllTypeOffline(ConnectionAddrType type);
     virtual int32_t SoftBusGetTime(SoftBusSysTime *sysTime);
     virtual int32_t AuthGetConnInfo(int64_t authId, AuthConnInfo *connInfo);
-    virtual void MetaNodeNotifyJoinResult(ConnectionAddr *addr,
-        MetaBasicInfo *metaInfo, int32_t retCode);
     virtual void LnnNotifyLeaveResult(const char *networkId, int32_t retCode);
-    virtual int32_t MetaNodeIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen,
-        MetaBasicInfo *metaInfo, int32_t retCode);
     virtual int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type);
     virtual int32_t LnnSendNotTrustedInfo(const NotTrustedDelayInfo *info, uint32_t num,
         LnnSyncInfoMsgComplete complete);
@@ -133,7 +129,6 @@ public:
     virtual int32_t LnnUnregSyncInfoHandler(LnnSyncInfoType type, LnnSyncInfoMsgHandler handler);
     virtual int32_t LnnStopConnectionFsm(LnnConnectionFsm *connFsm, LnnConnectionFsmStopCallback callback);
     virtual void LnnDeinitFastOffline(void);
-    virtual int32_t OnJoinMetaNode(MetaJoinRequestNode *mateJoinNode, CustomData *customData);
     virtual int32_t LnnSendNewNetworkOnlineToConnFsm(LnnConnectionFsm *connFsm);
     virtual int32_t LnnSendAuthResultMsgToConnFsm(LnnConnectionFsm *connFsm, int32_t retCode);
     virtual int32_t LnnSendDisconnectMsgToConnFsm(LnnConnectionFsm *connFsm);
@@ -142,7 +137,6 @@ public:
     virtual int32_t LnnSendSyncOfflineFinishToConnFsm(LnnConnectionFsm *connFsm);
     virtual int32_t LnnGetLocalWeight(void);
     virtual void AuthMetaReleaseVerify(int64_t authId);
-    virtual void MetaNodeNotifyLeaveResult(const char *networkId, int32_t retCode);
     virtual int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm);
     virtual void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode);
     virtual void LnnDestroyConnectionFsm(LnnConnectionFsm *connFsm);
@@ -203,9 +197,7 @@ public:
     MOCK_METHOD1(LnnNotifyAllTypeOffline, void (ConnectionAddrType));
     MOCK_METHOD1(SoftBusGetTime, int32_t (SoftBusSysTime *));
     MOCK_METHOD2(AuthGetConnInfo, int32_t (int64_t, AuthConnInfo *));
-    MOCK_METHOD3(MetaNodeNotifyJoinResult, void (ConnectionAddr *, MetaBasicInfo *, int32_t));
     MOCK_METHOD2(LnnNotifyLeaveResult, void (const char *, int32_t));
-    MOCK_METHOD4(MetaNodeIpcNotifyJoinResult, int32_t (void *, uint32_t, MetaBasicInfo *, int32_t));
     MOCK_METHOD2(LnnGetAddrTypeByIfName, int32_t (const char *, ConnectionAddrType *));
     MOCK_METHOD3(LnnSendNotTrustedInfo, int32_t (const NotTrustedDelayInfo *, uint32_t, LnnSyncInfoMsgComplete));
     MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t (SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
@@ -234,7 +226,6 @@ public:
     MOCK_METHOD2(LnnUnregSyncInfoHandler, int32_t (LnnSyncInfoType, LnnSyncInfoMsgHandler));
     MOCK_METHOD2(LnnStopConnectionFsm, int32_t (LnnConnectionFsm *, LnnConnectionFsmStopCallback));
     MOCK_METHOD0(LnnDeinitFastOffline, void ());
-    MOCK_METHOD2(OnJoinMetaNode, int32_t (MetaJoinRequestNode *, CustomData *));
     MOCK_METHOD1(LnnSendNewNetworkOnlineToConnFsm, int32_t (LnnConnectionFsm *));
     MOCK_METHOD2(LnnSendAuthResultMsgToConnFsm, int32_t (LnnConnectionFsm *, int32_t));
     MOCK_METHOD1(LnnSendDisconnectMsgToConnFsm, int32_t (LnnConnectionFsm *));
@@ -243,7 +234,6 @@ public:
     MOCK_METHOD1(LnnSendSyncOfflineFinishToConnFsm, int32_t (LnnConnectionFsm *));
     MOCK_METHOD0(LnnGetLocalWeight, int32_t ());
     MOCK_METHOD1(AuthMetaReleaseVerify, void (int64_t));
-    MOCK_METHOD2(MetaNodeNotifyLeaveResult, void (const char *, int32_t));
     MOCK_METHOD1(LnnSendJoinRequestToConnFsm, int32_t (LnnConnectionFsm *));
     MOCK_METHOD3(LnnNotifyJoinResult, void (ConnectionAddr *, const char *, int32_t));
     MOCK_METHOD1(LnnDestroyConnectionFsm, void (LnnConnectionFsm *));

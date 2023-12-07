@@ -91,18 +91,6 @@ static void InitHbSpecificConditionState(void)
     }
 }
 
-static bool IsMetaDeviceHeartbeatEnable(void)
-{
-    bool isBtOn = g_hbConditionState.btState == SOFTBUS_BLE_TURN_ON ||
-        g_hbConditionState.btState == SOFTBUS_BR_TURN_ON;
-    bool isScreenUnlock = g_hbConditionState.lockState == SOFTBUS_SCREEN_UNLOCK;
-    bool isBackground = g_hbConditionState.backgroundState == SOFTBUS_USER_BACKGROUND;
-    bool isNightMode = g_hbConditionState.nightModeState == SOFTBUS_NIGHT_MODE_ON;
-    bool isOOBEEnd = g_hbConditionState.OOBEState == SOFTBUS_OOBE_END;
-
-    return g_hbConditionState.heartbeatEnable && isBtOn && isScreenUnlock && !isBackground && !isNightMode && isOOBEEnd;
-}
-
 static bool IsHeartbeatEnable(void)
 {
     if ((g_hbConditionState.lockState == SOFTBUS_SCREEN_LOCK_UNKNOWN) && IsActiveOsAccountUnlocked()) {
@@ -158,22 +146,6 @@ static void HbIpAddrChangeEventHandler(const LnnEventBasicInfo *info)
     }
 }
 
-static void HbOfflineAllMetaNode(void)
-{
-    int32_t infoNum = MAX_META_NODE_NUM;
-    MetaNodeInfo infos[MAX_META_NODE_NUM];
-
-    if (LnnGetAllMetaNodeInfo(infos, &infoNum) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "get all meta node err");
-        return;
-    }
-    for (int32_t i = 0; i < infoNum; i++) {
-        if (MetaNodeServerLeave(infos[i].metaNodeId) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_HEART_BEAT, "offline meta node err, metaNodeId=%s", infos[i].metaNodeId);
-        }
-    }
-}
-
 static void HbSendCheckOffLineMessage(LnnHeartbeatType hbType)
 {
     int32_t i, infoNum;
@@ -201,10 +173,6 @@ static void HbSendCheckOffLineMessage(LnnHeartbeatType hbType)
 
 static void HbConditionChanged(bool isOnlySetState)
 {
-    if (!IsMetaDeviceHeartbeatEnable()) {
-        LNN_LOGI(LNN_HEART_BEAT, "metaNode device heartbeat disabled, set all MetaDevice offline");
-        HbOfflineAllMetaNode();
-    }
     bool isEnable = IsHeartbeatEnable();
     if (g_enableState == isEnable) {
         LNN_LOGI(LNN_HEART_BEAT, "ctrl ignore same enable request, is enable=%d", isEnable);
