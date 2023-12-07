@@ -18,6 +18,8 @@
 #include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_proxychannel_pipeline.h"
+#include "auth_interface.h"
+#include "bus_center_manager.h"
 #include "wifi_direct_manager.h"
 #include "utils/wifi_direct_work_queue.h"
 
@@ -81,8 +83,14 @@ static int32_t GetDeviceId(struct WifiDirectNegotiateChannel *base, char *device
 static int32_t GetP2pMac(struct WifiDirectNegotiateChannel *base, char *p2pMac, size_t p2pMacSize)
 {
     struct FastConnectNegotiateChannel *self = (struct FastConnectNegotiateChannel*)base;
-    int32_t ret = strcpy_s(p2pMac, p2pMacSize, self->p2pMac);
-    CONN_CHECK_AND_RETURN_RET_LOGW(ret == EOK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "copy p2p mac failed");
+    char uuid[UUID_BUF_LEN] = {0};
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
+    int32_t ret = self->getDeviceId(base, uuid, sizeof(uuid));
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get uuid id failed");
+    ret = LnnGetNetworkIdByUuid(uuid, networkId, sizeof(networkId));
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get network id failed");
+    ret = LnnGetRemoteStrInfo(networkId, STRING_KEY_P2P_MAC, p2pMac, p2pMacSize);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get remote p2p mac failed");
     return SOFTBUS_OK;
 }
 
