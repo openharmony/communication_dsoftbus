@@ -115,8 +115,12 @@ uint16_t DiscBleGetDeviceType(void)
     return typeId;
 }
 
-int32_t DiscBleGetDeviceIdHash(uint8_t *devIdHash)
+int32_t DiscBleGetDeviceIdHash(uint8_t *devIdHash, uint32_t len)
 {
+    if (devIdHash == NULL || len > DISC_MAX_DEVICE_ID_LEN) {
+        DISC_LOGE(DISC_BLE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
     char udid[DISC_MAX_DEVICE_ID_LEN] = {0};
     char hashResult[SHA_HASH_LEN] = {0};
     int32_t ret = DiscBleGetDeviceUdid(udid, sizeof(udid));
@@ -129,8 +133,11 @@ int32_t DiscBleGetDeviceIdHash(uint8_t *devIdHash)
         DISC_LOGE(DISC_BLE, "GenerateStrHash failed");
         return ret;
     }
-
-    if (memcpy_s(devIdHash, DISC_MAX_DEVICE_ID_LEN, hashResult, SHORT_DEVICE_ID_HASH_LENGTH) != EOK) {
+    if (memset_s(devIdHash, len, 0, len) != EOK) {
+        DISC_LOGE(DISC_BLE, "memset devIdHash failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (memcpy_s(devIdHash, len, hashResult, SHORT_DEVICE_ID_HASH_LENGTH) != EOK) {
         DISC_LOGE(DISC_BLE, "copy device id hash failed");
         return SOFTBUS_MEM_ERR;
     }
@@ -139,12 +146,16 @@ int32_t DiscBleGetDeviceIdHash(uint8_t *devIdHash)
 
 int32_t DiscBleGetShortUserIdHash(uint8_t *hashStr, uint32_t len)
 {
+    if (hashStr == NULL || len > SHORT_USER_ID_HASH_LEN) {
+        DISC_LOGE(DISC_BLE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
     uint8_t account[SHA_256_HASH_LEN] = {0};
     if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, account, SHA_256_HASH_LEN) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "DiscBleGetShortUserIdHash get local user id failed");
         return SOFTBUS_ERR;
     }
-    if (len > SHORT_USER_ID_HASH_LEN || memcpy_s(hashStr, len, account, len) != EOK) {
+    if (memcpy_s(hashStr, len, account, len) != EOK) {
         DISC_LOGE(DISC_BLE, "DiscBleGetShortUserIdHash memcpy_s failed");
         return SOFTBUS_ERR;
     }

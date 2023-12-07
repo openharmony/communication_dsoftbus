@@ -627,7 +627,7 @@ static int32_t GetConDeviceInfo(DeviceInfo *info)
         DISC_LOGE(DISC_BLE, "all capbit is zero");
         return SOFTBUS_ERR;
     }
-    if (DiscBleGetDeviceIdHash((uint8_t *)info->devId) != SOFTBUS_OK) {
+    if (DiscBleGetDeviceIdHash((uint8_t *)info->devId, DISC_MAX_DEVICE_ID_LEN) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "get deviceId failed");
     }
     if (DiscBleGetDeviceName(info->devName) != SOFTBUS_OK) {
@@ -653,7 +653,7 @@ static int32_t GetConDeviceInfo(DeviceInfo *info)
 static int32_t GetNonDeviceInfo(DeviceInfo *info)
 {
     (void)memset_s(info, sizeof(DeviceInfo), 0x0, sizeof(DeviceInfo));
-    if (DiscBleGetDeviceIdHash((uint8_t *)info->devId) != SOFTBUS_OK) {
+    if (DiscBleGetDeviceIdHash((uint8_t *)info->devId, DISC_MAX_DEVICE_ID_LEN) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "get deviceId failed");
     }
     if (DiscBleGetDeviceName(info->devName) != SOFTBUS_OK) {
@@ -784,7 +784,7 @@ static int32_t GetBroadcastData(DeviceInfo *info, int32_t advId, BroadcastData *
     broadcastData->data.data[POS_CAPABLITY_EXTENSION] = 0x0;
     broadcastData->dataLen = POS_TLV;
     char deviceIdHash[SHORT_DEVICE_ID_HASH_LENGTH + 1] = {0};
-    if (DiscBleGetDeviceIdHash((uint8_t *)deviceIdHash) != SOFTBUS_OK) {
+    if (DiscBleGetDeviceIdHash((uint8_t *)deviceIdHash, SHORT_DEVICE_ID_HASH_LENGTH + 1) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "get deviceId Hash failed");
     }
     (void)AssembleTLV(broadcastData, TLV_TYPE_DEVICE_ID_HASH, (const void *)deviceIdHash,
