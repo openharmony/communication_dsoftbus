@@ -32,6 +32,39 @@
 
 #define TWENTY_FOUR_HOURS (24 * 60)
 
+static void SoftBusGetAlarmInfo(int fd, AlarmRecord *record)
+{
+    SOFTBUS_DPRINTF(fd, "Time=%s, Type=%d", record->time, record->type);
+    if (record->errorCode > 0) {
+        SOFTBUS_DPRINTF(fd, ", ErrorCode=%d", record->errorCode);
+    }
+
+    if (record->callerPid > 0) {
+        SOFTBUS_DPRINTF(fd, ", CallerPid=%d", record->callerPid);
+    }
+
+    if (record->linkType > 0) {
+        SOFTBUS_DPRINTF(fd, ", LinkType=%d", record->linkType);
+    }
+
+    if (record->minBw > 0) {
+        SOFTBUS_DPRINTF(fd, ", MinBw=%d", record->minBw);
+    }
+
+    if (record->methodId > 0) {
+        SOFTBUS_DPRINTF(fd, ", MethodId=%d", record->minBw);
+    }
+
+    if (record->permissionName != NULL) {
+        SOFTBUS_DPRINTF(fd, ", PermissionName=%s", record->permissionName);
+    }
+
+    if (record->sessionName != NULL) {
+        SOFTBUS_DPRINTF(fd, ", SessionName=%s", record->sessionName);
+    }
+    SOFTBUS_DPRINTF(fd, "\n");
+}
+
 static int32_t SoftBusAlarmDumpHander(int fd, int32_t argc, const char **argv)
 {
     if (fd < 0 || argc != 1 || argv == NULL) {
@@ -74,9 +107,7 @@ static int32_t SoftBusAlarmDumpHander(int fd, int32_t argc, const char **argv)
         if (record == NULL) {
             continue;
         }
-        SOFTBUS_DPRINTF(fd, "Time=%s, Type=%d, Caller=%d, Link=%d, MinBw=%d, Method=%d, Permission=%s, Session=%s\n",
-                        record->time, record->type, record->callerPid, record->linkType,
-                        record->minBw, record->methodId, record->permissionName, record->sessionName);
+        SoftBusGetAlarmInfo(fd, record);
     }
     
     SoftBusFree(result);

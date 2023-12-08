@@ -269,6 +269,7 @@ static AppInfo *GetAppInfo(const SessionParam *param)
     appInfo->autoCloseTime = 0;
     appInfo->myHandleId = -1;
     appInfo->peerHandleId = -1;
+    appInfo->timeStart = GetSoftbusRecordTimeMillis();
 
     TRANS_LOGD(TRANS_CTRL, "GetAppInfo ok");
     return appInfo;
@@ -471,6 +472,11 @@ EXIT_ERR:
     extra.costTime = GetSoftbusRecordTimeMillis() - timeStart;
     extra.result = EVENT_STAGE_RESULT_FAILED;
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
+    TransAlarmExtra extraAlarm = {
+        .errcode = ret,
+        .sessionName = appInfo->myData.sessionName,
+    };
+    TRANS_ALARM(OPEN_SESSION_FAIL_ALARM, CONTROL_ALARM_TYPE, extraAlarm);
     if (appInfo->fastTransData != NULL) {
         SoftBusFree((void*)appInfo->fastTransData);
     }
@@ -495,6 +501,7 @@ static AppInfo *GetAuthAppInfo(const char *mySessionName)
     appInfo->autoCloseTime = 0;
     appInfo->businessType = BUSINESS_TYPE_BYTE;
     appInfo->channelType = CHANNEL_TYPE_AUTH;
+    appInfo->timeStart = GetSoftbusRecordTimeMillis();
     if (TransGetUidAndPid(mySessionName, &appInfo->myData.uid, &appInfo->myData.pid) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "GetAuthAppInfo GetUidAndPid failed");
         goto EXIT_ERR;

@@ -34,6 +34,7 @@
 #include "softbus_server.h"
 #include "softbus_server_frame.h"
 #include "trans_channel_manager.h"
+#include "trans_event.h"
 #include "trans_session_manager.h"
 
 #ifdef SUPPORT_BUNDLENAME
@@ -222,6 +223,13 @@ int32_t SoftBusServerStub::OnRemoteRequest(uint32_t code,
             (CheckAndRecordAccessToken(permission) != PERMISSION_GRANTED)) {
             SoftbusReportPermissionFaultEvt(code);
             COMM_LOGE(COMM_SVC, "access token permission %s denied!", permission);
+            pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+            TransAlarmExtra extra = {
+                .methodId = (int32_t)code,
+                .callerPid = (int32_t)callingPid,
+                .permissionName = permission,
+            };
+            TRANS_ALARM(NO_PERMISSION_ALARM, CONTROL_ALARM_TYPE, extra);
             return SOFTBUS_ACCESS_TOKEN_DENIED;
         }
     }
