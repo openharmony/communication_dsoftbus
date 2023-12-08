@@ -37,6 +37,7 @@
 #define TIME_CONSUMING_NAME "COST_TIME"
 #define BT_FLOW_NAME "BT_FLOW"
 #define CALLER_PID_NAME "CALLER_PID"
+#define ERROR_CODE_NAME "ERROR_CODE"
 #define LINK_TYPE_NAME "LINK_TYPE"
 #define MIN_BW_NAME "MIN_BW"
 #define METHOD_ID_NAME "METHOD_ID"
@@ -244,13 +245,15 @@ static void OnCompleteLnn(int32_t reason, int32_t total)
 
 static void TransStats(int32_t scene, int32_t stage, int32_t stageRes)
 {
-    if (scene == EVENT_SCENE_OPEN_CHANNEL && stage == EVENT_STAGE_START_CONNECT && stageRes == EVENT_STAGE_RESULT_OK) {
+    if (scene == EVENT_SCENE_OPEN_CHANNEL && stage == EVENT_STAGE_OPEN_CHANNEL_END
+        && stageRes == EVENT_STAGE_RESULT_OK) {
         g_transStatsInfo.openSessionSuccessTotal++;
+        g_transStatsInfo.currentParaSessionNum++;
         return;
     }
 
-    if (scene == EVENT_SCENE_OPEN_CHANNEL && stage == EVENT_STAGE_START_CONNECT &&
-        stageRes == EVENT_STAGE_RESULT_FAILED) {
+    if (scene == EVENT_SCENE_OPEN_CHANNEL && stage == EVENT_STAGE_OPEN_CHANNEL_END
+        && stageRes == EVENT_STAGE_RESULT_FAILED) {
         g_transStatsInfo.openSessionFailTotal++;
         return;
     }
@@ -293,10 +296,6 @@ static void OnQueryTrans(HiSysEventRecordC srcRecord[], size_t size)
         }
 
         TransStats(scene, stage, stageRes);
-        if (scene == EVENT_SCENE_OPEN_CHANNEL && stage == EVENT_STAGE_OPEN_CHANNEL_END &&
-            stageRes == EVENT_STAGE_RESULT_OK) {
-            g_transStatsInfo.currentParaSessionNum++;
-        }
         if (scene == EVENT_SCENE_CLOSE_CHANNEL_ACTIVE && stage == EVENT_STAGE_CLOSE_CHANNEL &&
             stageRes == EVENT_STAGE_RESULT_OK && g_transStatsInfo.currentParaSessionNum > 0) {
             g_transStatsInfo.currentParaSessionNum--;
@@ -343,6 +342,11 @@ static void OnQueryAlarm(HiSysEventRecordC srcRecord[], size_t size)
         int32_t callerPid = GetInt32ValueByRecord(&srcRecord[i], CALLER_PID_NAME);
         if (callerPid != SOFTBUS_ERR) {
             record->callerPid = callerPid;
+        }
+
+        int32_t errorCode = GetInt32ValueByRecord(&srcRecord[i], ERROR_CODE_NAME);
+        if (errorCode != SOFTBUS_ERR) {
+            record->errorCode = errorCode;
         }
 
         int32_t linkType = GetInt32ValueByRecord(&srcRecord[i], LINK_TYPE_NAME);
@@ -395,10 +399,9 @@ static void SoftBusEventQueryInfo(int time, HiSysEventQueryParam* queryParam)
 static void SoftBusProcessStatsQueryData(SoftBusStatsResult* result)
 {
     result->btFlow = g_transStatsInfo.btFlowTotal;
+    result->successRate = 0;
     int32_t total = g_transStatsInfo.openSessionSuccessTotal + g_transStatsInfo.openSessionFailTotal;
-    if (total == 0) {
-        result->successRate = 0;
-    } else {
+    if (total != 0) {
         result->successRate = (1.0 * g_transStatsInfo.openSessionSuccessTotal) / total;
     }
 
@@ -407,10 +410,9 @@ static void SoftBusProcessStatsQueryData(SoftBusStatsResult* result)
         result->sessionSuccessDuration = g_transStatsInfo.delayTimeTotal / g_transStatsInfo.delayNum;
     }
 
+    result->activityRate = 0;
     int32_t activityTotal = g_transStatsInfo.activityFailTotal + g_transStatsInfo.activitySuccessTotal;
-    if (activityTotal == 0) {
-        result->activityRate = 0;
-    } else {
+    if (activityTotal != 0) {
         result->activityRate = (1.0 * g_transStatsInfo.activitySuccessTotal) / activityTotal;
     }
 
@@ -483,6 +485,12 @@ int32_t SoftBusQueryAlarmInfo(int time, int type, SoftBusAlarmEvtResult* result)
     }
     if (SoftBusMutexLock(&g_alarmQueryLock) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "QueryAlarmInfo fail,lock fail");
+        return SOFTBUS_ERR;
+    }
+    g_alarmEvtResult.recordSize = 0;
+    if (memset_s(g_alarmEvtResult.records, sizeof(AlarmRecord) * MAX_NUM_OF_EVENT_RESULT, 0,
+        sizeof(AlarmRecord) * MAX_NUM_OF_EVENT_RESULT) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "memset g_alarmEvtResult records fail!");
         return SOFTBUS_ERR;
     }
     SoftBusEventQueryInfo(time, &g_queryAlarmParam[type]);

@@ -51,7 +51,7 @@ static int32_t SoftBusStatsDumpHander(int fd, int32_t argc, const char **argv)
             return SOFTBUS_ERR;
         }
         SOFTBUS_DPRINTF(fd, "SoftBus 15min Statistics:\n");
-        SOFTBUS_DPRINTF(fd, "BT traffic = %dkb\n", result->btFlow);
+        SOFTBUS_DPRINTF(fd, "BT traffic = NA\n");
         SOFTBUS_DPRINTF(fd, "Connection success rate = %f\n", result->successRate);
         SOFTBUS_DPRINTF(fd, "Maximun concurrent number = %d\n", result->maxParaSessionNum);
         SOFTBUS_DPRINTF(fd, "Service delay threshold = %dms\n", result->sessionSuccessDuration);
@@ -65,13 +65,13 @@ static int32_t SoftBusStatsDumpHander(int fd, int32_t argc, const char **argv)
             return SOFTBUS_ERR;
         }
         SOFTBUS_DPRINTF(fd, "SoftBus 24h Statistics:\n");
-        SOFTBUS_DPRINTF(fd, "BT traffic = %dkb\n", result->btFlow);
+        SOFTBUS_DPRINTF(fd, "BT traffic = NA\n");
         SOFTBUS_DPRINTF(fd, "Connection success rate = %f\n", result->successRate);
-        SOFTBUS_DPRINTF(fd, "Act rate =  %f\n", result->activityRate);
+        SOFTBUS_DPRINTF(fd, "Act rate =  NA\n");
         SOFTBUS_DPRINTF(fd, "Maximun online number = %d\n", result->deviceOnlineNum);
         SOFTBUS_DPRINTF(fd, "Online times = %d\n", result->deviceOnlineTimes);
         SOFTBUS_DPRINTF(fd, "Offine times = %d\n", result->deviceOfflineTimes);
-        SOFTBUS_DPRINTF(fd, "Keepalive detection times = %d\n", result->detectionTimes);
+        SOFTBUS_DPRINTF(fd, "Keepalive detection times = NA\n");
     } else {
         SOFTBUS_DPRINTF(fd, "SoftBusStatsDumpHander invalid param!\n");
         SoftBusFree(result);
