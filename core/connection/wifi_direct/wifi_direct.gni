@@ -42,7 +42,7 @@ if (dsoftbus_feature_conn_p2p == true &&
     "$dsoftbus_root_path/core/connection/wifi_direct/wifi_direct_role_option.c",
     "$dsoftbus_root_path/core/connection/wifi_direct/channel/default_negotiate_channel.c",
     "$dsoftbus_root_path/core/connection/wifi_direct/channel/fast_connect_negotiate_channel.c",
-    "$dsoftbus_root_path/core/connection/wifi_direct/command/wifi_direct_command_manager.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/command/wifi_direct_command_manager.cpp",
     "$dsoftbus_root_path/core/connection/wifi_direct/command/wifi_direct_connect_command.c",
     "$dsoftbus_root_path/core/connection/wifi_direct/command/wifi_direct_disconnect_command.c",
     "$dsoftbus_root_path/core/connection/wifi_direct/command/wifi_direct_negotiate_command.c",

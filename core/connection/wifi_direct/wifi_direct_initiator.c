@@ -15,12 +15,10 @@
 
 #include "wifi_direct_initiator.h"
 #include "softbus_error_code.h"
-#include "wifi_direct_defines.h"
 #include "wifi_direct_manager.h"
 #include "wifi_direct_negotiator.h"
 #include "broadcast_receiver.h"
 #include "broadcast_handler.h"
-#include "command/wifi_direct_command_manager.h"
 #include "conn_log.h"
 #include "channel/default_negotiate_channel.h"
 #include "channel/fast_connect_negotiate_channel.h"
@@ -32,7 +30,6 @@
 typedef int32_t (*WifiDirectSubInitFunc)(void);
 
 static WifiDirectSubInitFunc g_subInitFunctions[] = {
-    WifiDirectCommandManagerInit,
     WifiDirectWorkQueueInit,
     WifiDirectTimerListInit,
     DefaultNegotiateChannelInit,

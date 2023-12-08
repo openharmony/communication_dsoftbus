@@ -27,13 +27,9 @@ extern "C" {
 struct WifiDirectCommandManager {
     void (*enqueueCommand)(struct WifiDirectCommand *command);
     struct WifiDirectCommand* (*dequeueCommand)(void);
-
-    struct ListNode commands;
-    SoftBusMutex mutex;
 };
 
 struct WifiDirectCommandManager* GetWifiDirectCommandManager(void);
-int32_t WifiDirectCommandManagerInit(void);
 
 #ifdef __cplusplus
 }

@@ -36,9 +36,10 @@ enum WifiDirectCommandType {
     void (*execute)(struct WifiDirectCommand *base);                                              \
     void (*onSuccess)(struct WifiDirectCommand *base, struct NegotiateMessage *msg);              \
     void (*onFailure)(struct WifiDirectCommand *base, int32_t reason);                            \
+    void (*onTimeout)(struct WifiDirectCommand *base);                                            \
     struct WifiDirectCommand* (*duplicate)(struct WifiDirectCommand *base);                       \
     void (*deleteSelf)(struct WifiDirectCommand *base);                                           \
-    ListNode node;                                                                                \
+    int32_t timerId;                                                                              \
     enum WifiDirectCommandType type;                                                              \
     struct WifiDirectProcessor *processor; \
     struct NegotiateMessage *msg
