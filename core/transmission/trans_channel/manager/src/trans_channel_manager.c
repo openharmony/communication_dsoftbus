@@ -121,6 +121,8 @@ void ReleaseProxyChannelId(int32_t channelId)
     }
     if (g_channelIdCount >= ID_USED) {
         g_channelIdCount--;
+    } else {
+        TRANS_LOGE(TRANS_CTRL, "g_channelIdCount error");
     }
     uint32_t id = (uint32_t)channelId - MAX_FD_ID;
     uint32_t dex = id / (8 * sizeof(long));
