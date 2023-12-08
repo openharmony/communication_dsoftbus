@@ -148,4 +148,6 @@ HWTEST_F(ConnEventTest, ConnEventTest004, TestSize.Level0)
         .Times(1);
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_START, emptyExtra);
 }
+
+
 } // namespace OHOS

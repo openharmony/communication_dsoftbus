@@ -258,10 +258,16 @@ CONNECTION_AUDIT:
   PEER_BLE_MAC: { type: STRING, desc: peer device ble mac }
   PEER_DEV_TYPE: { type: STRING, desc: peer device type }
   PEER_UDID: { type: STRING, desc: peer device udid }
-  CONN_PALOAD: { type: STRING, desc: paload data }
+  CONN_PAYLOAD: { type: STRING, desc: payload data }
   LOCAL_DEV_NAME: { type: STRING, desc: local device name }
   PEER_IP: { type: STRING, desc: peer device ip }
-  EXTRA: { type: STRING, desc: ectra information }
+  CONN_TIMES: { type: INT32, desc: connect times }
+  LOCAL_BR_MAC: { type: STRING, desc: local br mac }
+  LOCAL_BLE_MAC: { type: STRING, desc: local ble mac }
+  LOCAL_UDID: { type: STRING, desc: local ble udid }
+  LOCAL_IP: { type: STRING, desc: loca ip }
+  PEER_PORT: { type: STRING, desc: peer port }
+  LOCAL_PORT: { type: STRING, desc: local port }
 
 IPC_BEHAVIOR:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: softbus ipc behavior dotting event }

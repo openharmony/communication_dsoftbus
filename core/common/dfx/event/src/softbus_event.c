@@ -156,7 +156,7 @@ static void WriteSoftbusAudit(SoftbusEventModule module, SoftbusEventForm *form)
     size_t size = ConvertSoftbusForm2Param(params, SOFTBUS_ASSIGNER_SIZE, form);
     switch (module) {
         case EVENT_MODULE_CONN: {
-            HiSysEventParam connParams[CONN_ASSIGNER_SIZE] = { 0 };
+            HiSysEventParam connParams[CONN_AUDIT_ASSIGNER_SIZE] = { 0 };
             size_t connSize = ConvertConnAuditForm2Param(connParams, form);
             WriteHiSysEvent(params, size, connParams, connSize, form);
             HiSysEventParamsFree(connParams, connSize);
