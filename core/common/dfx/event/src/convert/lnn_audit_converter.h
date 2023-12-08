@@ -33,41 +33,69 @@ extern "C" {
         return false;                                                                                         \
     }
 
-LNN_AUDIT_ASSIGNER(Errcode, Errcode, errcode)
-LNN_AUDIT_ASSIGNER(Int32, AuditType, auditType)
-LNN_AUDIT_ASSIGNER(Int32, ConnectionId, connectionId)
-LNN_AUDIT_ASSIGNER(Int32, AuthLinkType, authLinkType)
-LNN_AUDIT_ASSIGNER(Int32, AuthId, authId)
-LNN_AUDIT_ASSIGNER(Int32, OnlineNum, onlineNum)
+LNN_AUDIT_ASSIGNER(Int32,   Result, result)
+LNN_AUDIT_ASSIGNER(Errcode, ErrCode, errCode)
+LNN_AUDIT_ASSIGNER(Int32,  AuditType, auditType)
+LNN_AUDIT_ASSIGNER(Int32,  ConnectionId, connId)
+LNN_AUDIT_ASSIGNER(Int32,  AuthLinkType, authLinkType)
+LNN_AUDIT_ASSIGNER(Int32,  AuthRequestId, authRequestId)
+LNN_AUDIT_ASSIGNER(Int32,  OnlineNum, onlineNum)
+LNN_AUDIT_ASSIGNER(String, HostPkg, hostPkg)
+LNN_AUDIT_ASSIGNER(String, LocalIp, localIp)
+LNN_AUDIT_ASSIGNER(String, LocalBrMac, localBrMac)
+LNN_AUDIT_ASSIGNER(String, LocalBleMac, localBleMac)
+LNN_AUDIT_ASSIGNER(String, LocalUdid, localUdid)
+LNN_AUDIT_ASSIGNER(String, LocalNetworkId, localNetworkId)
+LNN_AUDIT_ASSIGNER(String, LocalDevName, localDevName)
 LNN_AUDIT_ASSIGNER(String, PeerIp, peerIp)
+LNN_AUDIT_ASSIGNER(String, PeerUdid, peerUdid)
 LNN_AUDIT_ASSIGNER(String, PeerBrMac, peerBrMac)
 LNN_AUDIT_ASSIGNER(String, PeerBleMac, peerBleMac)
-LNN_AUDIT_ASSIGNER(String, PeerAuthPort, peerAuthPort)
-LNN_AUDIT_ASSIGNER(String, PeerUdid, peerUdid)
 LNN_AUDIT_ASSIGNER(String, PeerNetworkId, peerNetworkId)
-LNN_AUDIT_ASSIGNER(Int32, PeerDeviceType, peerDeviceType)
-LNN_AUDIT_ASSIGNER(String, Extra, extra)
-LNN_AUDIT_ASSIGNER(String, CallerPkg, callerPkg)
-LNN_AUDIT_ASSIGNER(String, CalleePkg, calleePkg)
+LNN_AUDIT_ASSIGNER(String, PeerDevName, peerDevName)
+LNN_AUDIT_ASSIGNER(Int32, LocalAuthPort, localAuthPort)
+LNN_AUDIT_ASSIGNER(Int32, LocalProxyPort, localProxyPort)
+LNN_AUDIT_ASSIGNER(Int32, LocalSessionPort, localSessionPort)
+LNN_AUDIT_ASSIGNER(Int32, LocalDevType, localDevType)
+LNN_AUDIT_ASSIGNER(Int32, PeerAuthPort, peerAuthPort)
+LNN_AUDIT_ASSIGNER(Int32, PeerProxyPort, peerProxyPort)
+LNN_AUDIT_ASSIGNER(Int32, PeerSessionPort, peerSessionPort)
+LNN_AUDIT_ASSIGNER(Int32, PeerDevType, peerDevType)
+LNN_AUDIT_ASSIGNER(Int32, AttackTimes, attackTimes)
+LNN_AUDIT_ASSIGNER(Int32, BeAttackedPort, beAttackedPort)
 
-#define LNN_AUDIT_ASSIGNER_SIZE 16 // Size of g_connAssigners
+#define LNN_AUDIT_ASSIGNER_SIZE 30 // Size of g_lnnAuditAssigners
 static const HiSysEventParamAssigner g_lnnAuditAssigners[] = {
-    { "ERROR_CODE",       HISYSEVENT_INT32,  LnnAuditAssignerErrcode          },
-    { "AUDIT_TYPE",       HISYSEVENT_INT32,  LnnAuditAssignerAuditType        },
-    { "CONN_ID",          HISYSEVENT_INT32,  LnnAuditAssignerConnectionId     },
-    { "AUTH_LINK_TYPE",   HISYSEVENT_INT32,  LnnAuditAssignerAuthLinkType     },
-    { "AUTH_ID",          HISYSEVENT_INT32,  LnnAuditAssignerAuthId           },
-    { "ONLINE_NUM",       HISYSEVENT_INT32,  LnnAuditAssignerOnlineNum        },
-    { "PEER_IP",          HISYSEVENT_STRING, LnnAuditAssignerPeerIp           },
-    { "PEER_BR_MAC",      HISYSEVENT_STRING, LnnAuditAssignerPeerBrMac        },
-    { "PEER_BLE_MAC",     HISYSEVENT_STRING, LnnAuditAssignerPeerBleMac       },
-    { "PEER_AUTH_PORT",   HISYSEVENT_INT32,  LnnAuditAssignerPeerAuthPort     },
-    { "PEER_UDID",        HISYSEVENT_STRING, LnnAuditAssignerPeerUdid         },
-    { "PEER_NET_ID",      HISYSEVENT_STRING, LnnAuditAssignerPeerNetworkId    },
-    { "PEER_DEV_TYPE",    HISYSEVENT_STRING, LnnAuditAssignerPeerDeviceType   },
-    { "EXTRA",            HISYSEVENT_STRING, LnnAuditAssignerExtra            },
-    { "HOST_PKG",         HISYSEVENT_STRING, LnnAuditAssignerCallerPkg        },
-    { "TO_CALL_PKG",      HISYSEVENT_STRING, LnnAuditAssignerCalleePkg        },
+    { "RESULT",             HISYSEVENT_INT32,  LnnAuditAssignerResult           },
+    { "ERROR_CODE",         HISYSEVENT_INT32,  LnnAuditAssignerErrCode          },
+    { "AUDIT_TYPE",         HISYSEVENT_INT32,  LnnAuditAssignerAuditType        },
+    { "CONN_ID",            HISYSEVENT_INT32,  LnnAuditAssignerConnectionId     },
+    { "AUTH_LINK_TYPE",     HISYSEVENT_INT32,  LnnAuditAssignerAuthLinkType     },
+    { "AUTH_REQUEST_ID",    HISYSEVENT_INT32,  LnnAuditAssignerAuthRequestId    },
+    { "ONLINE_NUM",         HISYSEVENT_INT32,  LnnAuditAssignerOnlineNum        },
+    { "HOST_PKG",           HISYSEVENT_STRING, LnnAuditAssignerHostPkg          },
+    { "LOCAL_IP",           HISYSEVENT_STRING, LnnAuditAssignerLocalIp          },
+    { "LOCAL_BR_MAC",       HISYSEVENT_STRING, LnnAuditAssignerLocalBrMac       },
+    { "LOCAL_BLE_MAC",      HISYSEVENT_STRING, LnnAuditAssignerLocalBleMac      },
+    { "LOCAL_UDID",         HISYSEVENT_STRING, LnnAuditAssignerLocalUdid        },
+    { "LOCAL_NETWORK_ID",   HISYSEVENT_STRING, LnnAuditAssignerLocalNetworkId   },
+    { "LOCAL_DEV_NAME",     HISYSEVENT_STRING, LnnAuditAssignerLocalDevName     },
+    { "PEER_IP",            HISYSEVENT_STRING, LnnAuditAssignerPeerIp           },
+    { "PEER_BR_MAC",        HISYSEVENT_STRING, LnnAuditAssignerPeerBrMac        },
+    { "PEER_BLE_MAC",       HISYSEVENT_STRING, LnnAuditAssignerPeerBleMac       },
+    { "PEER_UDID",          HISYSEVENT_STRING, LnnAuditAssignerPeerUdid         },
+    { "PEER_NETWORK_ID",    HISYSEVENT_STRING, LnnAuditAssignerPeerNetworkId    },
+    { "PEER_DEV_NAME",      HISYSEVENT_STRING, LnnAuditAssignerPeerDevName      },
+    { "LOCAL_AUTH_PORT",    HISYSEVENT_INT32,  LnnAuditAssignerLocalAuthPort    },
+    { "LOCAL_PROXY_PORT",   HISYSEVENT_INT32,  LnnAuditAssignerLocalProxyPort   },
+    { "LOCAL_SESSION_PORT", HISYSEVENT_INT32,  LnnAuditAssignerLocalSessionPort },
+    { "LOCAL_DEV_TYPE",     HISYSEVENT_INT32,  LnnAuditAssignerLocalDevType     },
+    { "PEER_AUTH_PORT",     HISYSEVENT_INT32,  LnnAuditAssignerPeerAuthPort     },
+    { "PEER_PROXY_PORT",    HISYSEVENT_INT32,  LnnAuditAssignerPeerProxyPort    },
+    { "PEER_SESSION_PORT",  HISYSEVENT_INT32,  LnnAuditAssignerPeerSessionPort  },
+    { "PEER_DEV_TYPE",      HISYSEVENT_INT32,  LnnAuditAssignerPeerDevType      },
+    { "ATTACK_TIMES",       HISYSEVENT_INT32,  LnnAuditAssignerAttackTimes      },
+    { "BE_ATTACKED_PORT",   HISYSEVENT_INT32,  LnnAuditAssignerBeAttackedPort   },
     // Modification Note: remember updating LNN_AUDIT_ASSIGNER_SIZE
 };
 

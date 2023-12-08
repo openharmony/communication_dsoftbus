@@ -25,6 +25,7 @@
 #include "auth_manager.h"
 #include "auth_request.h"
 #include "auth_session_message.h"
+#include "bus_center_manager.h"
 #include "lnn_event.h"
 #include "softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
@@ -460,6 +461,86 @@ static int32_t RecoveryDeviceKey(AuthFsm *authFsm)
     return AuthSessionHandleAuthFinish(authFsm->authSeq);
 }
 
+static void LnnAuditSetPeerDevInfo(LnnAuditExtra *lnnAuditExtra, AuthSessionInfo *info)
+{
+    if (lnnAuditExtra == NULL || info == NULL) {
+        AUTH_LOGI(AUTH_FSM, "lnnAuditExtra or info is null");
+        return;
+    }
+    switch (info->connInfo.type) {
+        case AUTH_LINK_TYPE_BR:
+            if (strcpy_s((char *)lnnAuditExtra->peerBrMac, BT_MAC_LEN, info->connInfo.info.brInfo.brMac) != EOK) {
+                AUTH_LOGI(AUTH_FSM, "BR MAC COPY ERROR");
+            }
+            break;
+        case AUTH_LINK_TYPE_BLE:
+            if (strcpy_s((char *)lnnAuditExtra->peerBleMac, BT_MAC_LEN, info->connInfo.info.bleInfo.bleMac) != EOK) {
+                AUTH_LOGI(AUTH_FSM, "BLE MAC COPY ERROR");
+            }
+            break;
+        case AUTH_LINK_TYPE_WIFI:
+        case AUTH_LINK_TYPE_P2P:
+            if (strcpy_s((char *)lnnAuditExtra->peerIp, IP_STR_MAX_LEN, info->connInfo.info.ipInfo.ip) != EOK) {
+                AUTH_LOGI(AUTH_FSM, "IP COPY ERROR");
+            }
+            lnnAuditExtra->peerAuthPort = info->connInfo.info.ipInfo.port;
+            break;
+        default:
+            AUTH_LOGI(AUTH_FSM, "unknow param type!");
+            break;
+    }
+}
+
+static void LnnAuditSetLocalDevInfo(LnnAuditExtra *lnnAuditExtra)
+{
+    if (lnnAuditExtra == NULL) {
+        AUTH_LOGI(AUTH_FSM, "lnnAuditExtra is null");
+        return;
+    }
+    (void)LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, (char *)lnnAuditExtra->localIp, IP_LEN);
+    (void)LnnGetLocalStrInfo(STRING_KEY_BT_MAC, (char *)lnnAuditExtra->localBrMac, MAC_LEN);
+    (void)LnnGetLocalStrInfo(STRING_KEY_BLE_MAC, (char *)lnnAuditExtra->localBleMac, MAC_LEN);
+    (void)LnnGetLocalStrInfo(STRING_KEY_NETWORKID, (char *)lnnAuditExtra->localNetworkId, NETWORK_ID_BUF_LEN);
+    (void)LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, (char *)lnnAuditExtra->localDevName, DEVICE_NAME_BUF_LEN);
+    (void)LnnGetLocalNumInfo(NUM_KEY_AUTH_PORT, &lnnAuditExtra->localAuthPort);
+    (void)LnnGetLocalNumInfo(NUM_KEY_PROXY_PORT, &lnnAuditExtra->localProxyPort);
+    (void)LnnGetLocalNumInfo(NUM_KEY_SESSION_PORT, &lnnAuditExtra->localSessionPort);
+    (void)LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &lnnAuditExtra->localDevType);
+    char udid[UDID_BUF_LEN] = {0};
+    uint8_t udidHash[SHA_256_HASH_LEN] = {0};
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UUID_BUF_LEN) == SOFTBUS_OK) {
+        AUTH_LOGI(AUTH_FSM, "get local udid fail");
+        return;
+    }
+    int32_t ret = SoftBusGenerateStrHash((const unsigned char *)udid, strlen(udid), udidHash);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGI(AUTH_FSM, "generate udid hash fail");
+        return;
+    }
+    if (ConvertBytesToUpperCaseHexString((char *)lnnAuditExtra->localUdid, SHA_256_HEX_HASH_LEN,
+        udidHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        AUTH_LOGI(AUTH_FSM, "convert hash to upper hex str fail");
+    }
+}
+
+static void BuildLnnAuditEvent(LnnAuditExtra *lnnAuditExtra, AuthSessionInfo *info, int32_t result,
+    int32_t errCode, SoftbusAuditType auditType)
+{
+    if (lnnAuditExtra == NULL || info == NULL) {
+        AUTH_LOGI(AUTH_FSM, "lnnAuditExtra or info is null");
+        return;
+    }
+    (void)LnnAuditSetPeerDevInfo(lnnAuditExtra, info);
+    (void)LnnAuditSetLocalDevInfo(lnnAuditExtra);
+    lnnAuditExtra->result = result;
+    lnnAuditExtra->errCode = errCode;
+    lnnAuditExtra->auditType = auditType;
+    lnnAuditExtra->connId = info->connId;
+    lnnAuditExtra->authLinkType = info->connInfo.type;
+    lnnAuditExtra->authRequestId = info->requestId;
+    (void)LnnGetAllOnlineNodeNum(&(lnnAuditExtra->onlineNum));
+}
+
 static int32_t ClientSetExchangeIdType(AuthFsm *authFsm)
 {
     AuthSessionInfo *info = &authFsm->info;
@@ -479,6 +560,10 @@ static void HandleMsgRecvDeviceId(AuthFsm *authFsm, MessagePara *para)
     do {
         if (ProcessDeviceIdMessage(info, para->data, para->len) != SOFTBUS_OK) {
             ret = SOFTBUS_AUTH_SYNC_DEVID_FAIL;
+            LnnAuditExtra lnnAuditExtra = {0};
+            BuildLnnAuditEvent(&lnnAuditExtra, info, AUDIT_HANDLE_MSG_FAIL_END_AUTH,
+                ret, AUDIT_EVENT_PACKETS_ERROR);
+            LNN_AUDIT(AUDIT_SCENE_HANDLE_MSG_DEV_ID, lnnAuditExtra);
             break;
         }
         if (info->isServer) {
@@ -557,6 +642,10 @@ static void HandleMsgRecvAuthData(AuthFsm *authFsm, MessagePara *para)
         lnnEventExtra.result = EVENT_STAGE_RESULT_FAILED;
         lnnEventExtra.errcode = ret;
         LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_EXCHANGE_CIPHER, lnnEventExtra);
+        LnnAuditExtra lnnAuditExtra = {0};
+        BuildLnnAuditEvent(&lnnAuditExtra, &authFsm->info, AUDIT_HANDLE_MSG_FAIL_END_AUTH,
+            ret, AUDIT_EVENT_PACKETS_ERROR);
+        LNN_AUDIT(AUDIT_SCENE_HANDLE_MSG_AUTH_DATA, lnnAuditExtra);
         AUTH_LOGE(AUTH_FSM, "process hichain data fail");
         if (!authFsm->info.isAuthFinished) {
             CompleteAuthSession(authFsm, SOFTBUS_AUTH_HICHAIN_PROCESS_FAIL);
@@ -708,6 +797,10 @@ static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, MessagePara *para)
         lnnEventExtra.result = EVENT_STAGE_RESULT_FAILED;
         lnnEventExtra.errcode = SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL;
         LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_EXCHANGE_DEVICE_INFO, lnnEventExtra);
+        LnnAuditExtra lnnAuditExtra = {0};
+        BuildLnnAuditEvent(&lnnAuditExtra, info, AUDIT_HANDLE_MSG_FAIL_END_AUTH,
+            SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL, AUDIT_EVENT_PACKETS_ERROR);
+        LNN_AUDIT(AUDIT_SCENE_HANDLE_MSG_DEV_INFO, lnnAuditExtra);
         AUTH_LOGE(AUTH_FSM, "process device info msg fail");
         CompleteAuthSession(authFsm, SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL);
         return;
