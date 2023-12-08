@@ -189,6 +189,7 @@
     "SESSION_NAME": "ohos.msdp.spatialawareness.*",
     "REGEXP": "true",
     "DEVID": "UUID",
+    "SEC_LEVEL": "public",
     "APP_INFO": [
       {
         "TYPE": "system_app",
