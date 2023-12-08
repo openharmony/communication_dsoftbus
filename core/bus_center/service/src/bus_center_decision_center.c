@@ -60,7 +60,7 @@ static void LeaveSpecificBrBleNetwork(const char *addr)
         LNN_LOGW(LNN_STATE, "leave br network failed, ret=%d", ret);
     }
 
-    ret = LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_BR);
+    ret = LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_BLE);
     if (ret != SOFTBUS_OK) {
         LNN_LOGW(LNN_STATE, "leave ble nework failed, ret=%d", ret);
     }
