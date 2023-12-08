@@ -100,6 +100,13 @@ void *LnnMapGet(const Map *map, const char *key);
  */
 int32_t LnnMapErase(Map *map, const char *key);
 
+/**
+ * get map size
+ *
+ * @param : map Map see details in type Map
+ */
+uint32_t MapGetSize(Map *map);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -241,10 +241,16 @@ int32_t LnnMapErase(Map *map, const char *key)
     return SOFTBUS_ERR;
 }
 
+/**
+ * get map size
+ *
+ * @param : map Map see details in type Map
+ */
 uint32_t MapGetSize(Map *map)
 {
     return (map == NULL) ? 0 : map->nodeSize;
 }
+
 /**
  * initialize map
  *

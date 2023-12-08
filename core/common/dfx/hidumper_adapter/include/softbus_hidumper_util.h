@@ -40,6 +40,7 @@ typedef struct {
     char time[SOFTBUS_ALARM_TIME_LEN];
     int32_t type;
     int32_t callerPid;
+    int32_t errorCode;
     int32_t linkType;
     int32_t minBw;
     int32_t methodId;

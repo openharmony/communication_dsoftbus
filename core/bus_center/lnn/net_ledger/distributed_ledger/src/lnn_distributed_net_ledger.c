@@ -1638,8 +1638,6 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
 
     udid = LnnGetDeviceUdid(info);
     map = &g_distributedNetLedger.distributedInfo;
-    LnnEventExtra lnnEventExtra = { .result = EVENT_STAGE_RESULT_OK };
-    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, lnnEventExtra);
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail!");
         return REPORT_NONE;
@@ -1692,6 +1690,9 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
             OnlinePreventBrConnection(info);
         }
         InsertToProfile(info);
+        LnnEventExtra lnnEventExtra = { .result = EVENT_STAGE_RESULT_OK,
+            .onlineNum = (int32_t)MapGetSize(&map->udidMap) };
+        LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, lnnEventExtra);
         return REPORT_ONLINE;
     }
     if (isMigrateEvent) {
@@ -1803,8 +1804,6 @@ ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int3
         LNN_LOGE(LNN_LEDGER, "lock mutex fail!");
         return REPORT_NONE;
     }
-    LnnEventExtra lnnEventExtra = { .result = EVENT_STAGE_RESULT_OK };
-    LNN_EVENT(EVENT_SCENE_LEAVE_LNN, EVENT_STAGE_LEAVE_LNN_END, lnnEventExtra);
     info = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
     if (info == NULL) {
         LNN_LOGE(LNN_LEDGER, "PARA ERROR!");
@@ -1840,6 +1839,8 @@ ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int3
         return REPORT_NONE;
     }
     LnnCleanNodeInfo(info);
+    LnnEventExtra lnnEventExtra = { .result = EVENT_STAGE_RESULT_OK, .onlineNum = (int32_t)MapGetSize(&map->udidMap) };
+    LNN_EVENT(EVENT_SCENE_LEAVE_LNN, EVENT_STAGE_LEAVE_LNN_END, lnnEventExtra);
     return REPORT_OFFLINE;
 }
 
