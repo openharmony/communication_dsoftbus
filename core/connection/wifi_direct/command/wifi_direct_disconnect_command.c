@@ -95,7 +95,7 @@ static void ExecuteDisconnection(struct WifiDirectCommand *base)
 {
     struct WifiDirectDisconnectCommand *self = (struct WifiDirectDisconnectCommand *)base;
     self->times++;
-    CONN_LOGI(CONN_WIFI_DIRECT, "times=%d", self->times);
+    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%d times=%d", self->connectInfo.requestId, self->times);
 
     int32_t ret = CloseLink(self);
     if (ret != SOFTBUS_OK) {
@@ -103,7 +103,7 @@ static void ExecuteDisconnection(struct WifiDirectCommand *base)
     }
 }
 
-static void OnSuccess(struct WifiDirectCommand *base, struct NegotiateMessage *msg)
+static void OnDisconnectSuccess(struct WifiDirectCommand *base, struct NegotiateMessage *msg)
 {
     (void)msg;
     struct WifiDirectDisconnectCommand *self = (struct WifiDirectDisconnectCommand *)base;
@@ -120,7 +120,7 @@ static void OnSuccess(struct WifiDirectCommand *base, struct NegotiateMessage *m
     GetLinkManager()->dump(0);
 }
 
-static void OnFailure(struct WifiDirectCommand *base, int32_t reason)
+static void OnDisconnectFailure(struct WifiDirectCommand *base, int32_t reason)
 {
     struct WifiDirectDisconnectCommand *self = (struct WifiDirectDisconnectCommand *)base;
     CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%d linkId=%d reason=%d", self->connectInfo.requestId,
@@ -135,6 +135,17 @@ static void OnFailure(struct WifiDirectCommand *base, int32_t reason)
     GetWifiDirectNegotiator()->resetContext();
     GetResourceManager()->dump(0);
     GetLinkManager()->dump(0);
+}
+
+static void OnDisconnectTimeout(struct WifiDirectCommand *base)
+{
+    struct WifiDirectDisconnectCommand *self = (struct WifiDirectDisconnectCommand *)base;
+    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%d linkId=%d reason=%d", self->connectInfo.requestId,
+              self->connectInfo.linkId, ERROR_WIFI_DIRECT_COMMAND_WAIT_TIMEOUT);
+    if (self->callback.onDisconnectFailure != NULL) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "call onDisconnectFailure");
+        self->callback.onDisconnectFailure(self->connectInfo.requestId, ERROR_WIFI_DIRECT_COMMAND_WAIT_TIMEOUT);
+    }
 }
 
 static struct WifiDirectCommand* Duplicate(struct WifiDirectCommand *base)
@@ -153,10 +164,11 @@ void WifiDirectDisconnectCommandConstructor(struct WifiDirectDisconnectCommand *
                                             struct WifiDirectConnectCallback *callback)
 {
     self->type = COMMAND_TYPE_DISCONNECT;
-    ListInit(&self->node);
+    self->timerId = TIMER_ID_INVALID;
     self->execute = ExecuteDisconnection;
-    self->onSuccess = OnSuccess;
-    self->onFailure = OnFailure;
+    self->onSuccess = OnDisconnectSuccess;
+    self->onFailure = OnDisconnectFailure;
+    self->onTimeout = OnDisconnectTimeout;
     self->duplicate = Duplicate;
     self->deleteSelf = WifiDirectDisconnectCommandDelete;
     *(&self->connectInfo) = *connectInfo;

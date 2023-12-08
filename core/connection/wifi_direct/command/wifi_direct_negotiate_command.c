@@ -38,7 +38,7 @@ static void OnNegotiateComplete(struct WifiDirectCommand *base, struct Negotiate
     GetLinkManager()->dump(0);
 }
 
-static void OnFailure(struct WifiDirectCommand *base, int32_t reason)
+static void OnNegotiateFailure(struct WifiDirectCommand *base, int32_t reason)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     (void)base;
@@ -48,14 +48,20 @@ static void OnFailure(struct WifiDirectCommand *base, int32_t reason)
     GetLinkManager()->dump(0);
 }
 
+static void OnNegotiateTimeout(struct WifiDirectCommand *base)
+{
+    (void)base;
+}
+
 void WifiDirectNegotiateCommandConstructor(struct WifiDirectNegotiateCommand *self, int32_t cmdType,
                                            struct NegotiateMessage *msg)
 {
     self->type = COMMAND_TYPE_MESSAGE;
-    ListInit(&self->node);
+    self->timerId = TIMER_ID_INVALID;
     self->execute = ExecuteProcessRemoteNegotiateMessage;
     self->onSuccess = OnNegotiateComplete;
-    self->onFailure = OnFailure;
+    self->onFailure = OnNegotiateFailure;
+    self->onTimeout = OnNegotiateTimeout;
     self->deleteSelf = WifiDirectNegotiateCommandDelete;
     self->msg = msg;
     self->cmdType = cmdType;
