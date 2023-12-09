@@ -755,13 +755,7 @@ static void Init(const ILaneIdStateListener *listener)
         LNN_LOGE(LNN_LANE, "init looper fail");
         return;
     }
-    if (PostReliabilityTimeMessage() != SOFTBUS_OK) {
-        return;
-    }
-    if (InitLaneReliability() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "init laneReliability fail");
-        return;
-    }
+
     if (SoftBusMutexInit(&g_transLaneMutex, NULL) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "transLane mutex init fail");
         return;
@@ -775,6 +769,14 @@ static void Init(const ILaneIdStateListener *listener)
     ListInit(&g_requestList->list);
     ListInit(&g_multiLinkList);
     g_laneIdCallback = (ILaneIdStateListener *)listener;
+    if (PostReliabilityTimeMessage() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "post Reliability Time Message failed");
+        return;
+    }
+    if (InitLaneReliability() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "init laneReliability fail");
+        return;
+    }
 }
 
 static void Deinit(void)
