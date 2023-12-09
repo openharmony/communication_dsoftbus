@@ -59,6 +59,7 @@ static int32_t g_allocTdcChannelId = MAX_PROXY_CHANNEL_ID;
 static SoftBusMutex g_myIdLock;
 static unsigned long g_proxyChanIdBits[MAX_PROXY_CHANNEL_ID_COUNT / BIT_NUM / sizeof(long)] = {0};
 static uint32_t g_proxyIdMark = 0;
+static uint32_t g_channelIdCount = 0;
 
 typedef struct {
     int32_t channelType;
@@ -87,6 +88,12 @@ static int32_t GenerateProxyChannelId()
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
+
+    if (g_channelIdCount >= MAX_PROXY_CHANNEL_ID_COUNT) {
+        TRANS_LOGE(TRANS_CTRL, "No more channel Ids(1024) can be applied");
+        return INVALID_CHANNEL_ID;
+    }
+
     for (uint32_t id = g_proxyIdMark + 1; id != g_proxyIdMark; id++) {
         id = id % MAX_PROXY_CHANNEL_ID_COUNT;
         uint32_t index = id / (BIT_NUM * sizeof(long));
@@ -94,6 +101,7 @@ static int32_t GenerateProxyChannelId()
         if ((g_proxyChanIdBits[index] & (ID_USED << bit)) == ID_NOT_USED) {
             g_proxyChanIdBits[index] |= (ID_USED << bit);
             g_proxyIdMark = id;
+            g_channelIdCount++;
             SoftBusMutexUnlock(&g_myIdLock);
             return (int32_t)id + MAX_FD_ID;
         }
@@ -110,6 +118,11 @@ void ReleaseProxyChannelId(int32_t channelId)
     if (SoftBusMutexLock(&g_myIdLock) != 0) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail");
         return;
+    }
+    if (g_channelIdCount >= ID_USED) {
+        g_channelIdCount--;
+    } else {
+        TRANS_LOGE(TRANS_CTRL, "g_channelIdCount error");
     }
     uint32_t id = (uint32_t)channelId - MAX_FD_ID;
     uint32_t dex = id / (8 * sizeof(long));
