@@ -76,7 +76,6 @@ static TransLaneList *g_requestList = NULL;
 static SoftBusHandler g_laneLoopHandler;
 static ILaneIdStateListener *g_laneIdCallback = NULL;
 
-
 static int32_t Lock(void)
 {
     return SoftBusMutexLock(&g_transLaneMutex);
@@ -123,7 +122,8 @@ static void LinkSuccess(uint32_t laneId, const LaneLinkInfo *linkInfo)
     (void)memset_s(&resourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
     if (memcpy_s(linkParam, sizeof(LaneLinkInfo), linkInfo, sizeof(LaneLinkInfo)) != EOK) {
         SoftBusFree(linkParam);
-        LNN_LOGE(LNN_LANE, "linkParam memcpy_s fail");
+        LNN_LOGE(LNN_LANE, "linkParam memcpy fail, laneId=%u", laneId);
+        (void)LnnLanePostMsgToHandler(MSG_TYPE_LANE_LINK_FAIL, laneId, SOFTBUS_MEM_ERR, NULL, 0);
         return;
     }
     linkParam->laneId = laneId;
@@ -133,11 +133,13 @@ static void LinkSuccess(uint32_t laneId, const LaneLinkInfo *linkInfo)
     if (ConvertToLaneResource(linkParam, &resourceItem) != SOFTBUS_OK) {
         SoftBusFree(linkParam);
         LNN_LOGE(LNN_LANE, "convert to laneResource fail, laneId=%u", laneId);
+        (void)LnnLanePostMsgToHandler(MSG_TYPE_LANE_LINK_FAIL, laneId, SOFTBUS_ERR, NULL, 0);
         return;
     }
     if (AddLinkInfoItem(linkParam) != SOFTBUS_OK || AddLaneResourceItem(&resourceItem) != SOFTBUS_OK) {
         SoftBusFree(linkParam);
         LNN_LOGE(LNN_LANE, "add linkInfo item fail, laneId=%u", laneId);
+        (void)LnnLanePostMsgToHandler(MSG_TYPE_LANE_LINK_FAIL, laneId, SOFTBUS_ERR, NULL, 0);
         return;
     }
     if (LnnLanePostMsgToHandler(MSG_TYPE_LANE_LINK_SUCCESS, laneId, 0, linkParam, 0) != SOFTBUS_OK) {
@@ -231,7 +233,7 @@ static TransReqInfo *CreateRequestNode(uint32_t laneId, const TransOption *optio
 {
     TransReqInfo *newNode = (TransReqInfo *)SoftBusCalloc(sizeof(TransReqInfo));
     if (newNode == NULL) {
-        LNN_LOGE(LNN_LANE, "CreateRequestNode malloc fail");
+        LNN_LOGE(LNN_LANE, "malloc fail");
         return NULL;
     }
     if (memcpy_s(&newNode->listener, sizeof(ILaneListener), listener, sizeof(ILaneListener)) != EOK) {
@@ -268,7 +270,7 @@ static void DeleteRequestNode(uint32_t laneId)
 static int32_t StartTriggerLink(uint32_t laneId, TransOption *transRequest, const ILaneListener *listener,
     LanePreferredLinkList *recommendLinkList)
 {
-    LNN_LOGI(LNN_LANE, "StartTriggerLink enter");
+    LNN_LOGI(LNN_LANE, "enter");
     TransReqInfo *newItem = CreateRequestNode(laneId, transRequest, listener);
     if (newItem == NULL) {
         return SOFTBUS_ERR;
@@ -286,7 +288,6 @@ static int32_t StartTriggerLink(uint32_t laneId, TransOption *transRequest, cons
     }
     return SOFTBUS_OK;
 }
-
 
 static int32_t AllocLane(uint32_t laneId, const LaneRequestOption *request, const ILaneListener *listener)
 {
@@ -356,7 +357,7 @@ static int32_t Alloc(uint32_t laneId, const LaneRequestOption *request, const IL
         SoftBusFree(recommendLinkList);
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_LANE, "select lane link success, linkNum=%d", listNum);
+    LNN_LOGI(LNN_LANE, "select lane link success, linkNum=%d, laneId=%u", listNum, laneId);
     TransReqInfo *newItem = CreateRequestNode(laneId, transRequest, listener);
     if (newItem == NULL) {
         SoftBusFree(recommendLinkList);
@@ -427,7 +428,7 @@ static int32_t Free(uint32_t laneId)
     ConvertToLaneResource(&laneLinkInfo, &laneResourceInfo);
     bool isDelayDestroy = false;
     DelLaneResourceItemWithDelay(&laneResourceInfo, laneId, &isDelayDestroy);
-    LNN_LOGI(LNN_LANE, "delayDestroy is %s", isDelayDestroy ? "true" : "false");
+    LNN_LOGI(LNN_LANE, "laneId=%u, delayDestroy is %s", laneId, isDelayDestroy ? "true" : "false");
     if (isDelayDestroy) {
         return SOFTBUS_OK;
     }
@@ -505,7 +506,7 @@ static void NotifyLaneAllocSuccess(uint32_t laneId, const LaneLinkInfo *info)
     if (BindLaneIdToProfile(laneId, &profile) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "bind laneId to profile fail");
     }
-    LNN_LOGI(LNN_LANE, "Notify laneAlloc succ, laneId=%d, linkType=%d", laneId, info->type);
+    LNN_LOGI(LNN_LANE, "Notify laneAlloc succ, laneId=%u, linkType=%d", laneId, info->type);
     reqInfo.listener.OnLaneRequestSuccess(laneId, &connInfo);
     UpdateLinkType(laneId, info->type);
     LaneGenerateParam param;
@@ -522,7 +523,7 @@ static void NotifyLaneAllocFail(uint32_t laneId, int32_t reason)
     if (GetLaneReqInfo(laneId, &reqInfo) != SOFTBUS_OK) {
         return;
     }
-    LNN_LOGE(LNN_LANE, "Notify laneAlloc fail, laneId=%d, reason=%d", laneId, reason);
+    LNN_LOGE(LNN_LANE, "Notify laneAlloc fail, laneId=%u, reason=%d", laneId, reason);
     reqInfo.listener.OnLaneRequestFail(laneId, reason);
     if (Lock() != SOFTBUS_OK) {
         return;
@@ -639,6 +640,8 @@ static void LaneLinkFail(SoftBusMessage *msg)
     LaneLinkNodeInfo *nodeInfo = GetLaneLinkNodeWithoutLock(laneId);
     if (nodeInfo == NULL) {
         Unlock();
+        LNN_LOGE(LNN_LANE, "laneId=%u, getLinkNode fail", laneId);
+        NotifyLaneAllocFail(laneId, reason);
         return;
     }
     if ((reason >= ERROR_WIFI_DIRECT_END && reason <= ERROR_WIFI_DIRECT_START) ||
