@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "device_profile_listener.h"
 #include "anonymizer.h"
 #include "auth_common.h"
 #include "auth_connection.h"
@@ -26,7 +27,9 @@
 #include "auth_session_fsm.h"
 #include "auth_session_message.h"
 #include "bus_center_manager.h"
+#include "lnn_async_callback_utils.h"
 #include "lnn_heartbeat_ctrl.h"
+#include "lnn_app_bind_interface.h"
 #include "lnn_decision_db.h"
 #include "softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
@@ -40,6 +43,7 @@
 #define FLAG_ACTIVE 0
 #define RETRY_REGDATA_TIMES    3
 #define RETRY_REGDATA_MILLSECONDS    300
+#define DELAY_REG_DP_TIME 10000
 
 static ListNode g_authClientList = { &g_authClientList, &g_authClientList };
 static ListNode g_authServerList = { &g_authServerList, &g_authServerList };
@@ -1714,6 +1718,15 @@ int32_t AuthDeviceGetVersion(int64_t authId, SoftBusVersion *version)
     return SOFTBUS_OK;
 }
 
+static void RegisterToDpDelay(void *para)
+{
+    DeviceProfileChangeListener deviceProfileChangeListener = {
+        .onDeviceProfileAdd = OnDeviceBound,
+        .onDeviceProfileDeleted = OnDeviceNotTrusted,
+    };
+    RegisterToDp(&deviceProfileChangeListener);
+}
+
 int32_t AuthDeviceInit(const AuthTransCallback *callback)
 {
     AUTH_LOGI(AUTH_INIT, "auth init enter");
@@ -1738,6 +1751,11 @@ int32_t AuthDeviceInit(const AuthTransCallback *callback)
         AUTH_LOGE(AUTH_INIT, "AuthConnInit fail");
         AuthCommonDeinit();
         return SOFTBUS_ERR;
+    }
+    if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), RegisterToDpDelay, NULL, DELAY_REG_DP_TIME) !=
+        SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_INIT, "delay registertoDp failed");
+        return SOFTBUS_AUTH_INIT_FAIL;
     }
     AUTH_LOGI(AUTH_INIT, "auth init succ");
     return SOFTBUS_OK;
