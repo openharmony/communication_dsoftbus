@@ -67,6 +67,8 @@ void LNNTransLaneMockTest::TearDown()
 */
 HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_001, TestSize.Level1)
 {
+    LaneDepsInterfaceMock mock;
+    EXPECT_CALL(mock, StartBaseClient).WillRepeatedly(Return(SOFTBUS_OK));
     LaneInterface *transObj = TransLaneGetInstance();
     EXPECT_TRUE(transObj != nullptr);
     transObj->Init(nullptr);
@@ -91,6 +93,8 @@ HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_001, TestSize.Level1)
 */
 HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_002, TestSize.Level1)
 {
+    LaneDepsInterfaceMock mock;
+    EXPECT_CALL(mock, StartBaseClient).WillRepeatedly(Return(SOFTBUS_OK));
     TransLaneDepsInterfaceMock laneMock;
     LaneInterface *transObj = TransLaneGetInstance();
     EXPECT_TRUE(transObj != nullptr);
@@ -135,6 +139,8 @@ HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_002, TestSize.Level1)
 */
 HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_003, TestSize.Level1)
 {
+    LaneDepsInterfaceMock mock;
+    EXPECT_CALL(mock, StartBaseClient).WillRepeatedly(Return(SOFTBUS_OK));
     TransLaneDepsInterfaceMock laneMock;
     LaneInterface *transObj = TransLaneGetInstance();
     EXPECT_TRUE(transObj != nullptr);
