@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LNN_LANE_RELIABLITY_H
-#define LNN_LANE_RELIABLITY_H
+#ifndef LNN_LANE_RELIABILITY_H
+#define LNN_LANE_RELIABILITY_H
 
 #include "lnn_lane_link.h"
 
@@ -22,9 +22,10 @@
 extern "C" {
 #endif
 
-bool LaneDetectReliablity(const LaneResource *resourceItem);
-
+int32_t LaneDetectReliability(uint32_t lnnReqId, const LaneLinkInfo *resourceItem, const LaneLinkCb *callback);
 int32_t LaneDetectFload(const LaneResource *resourceItem);
+int32_t InitLaneReliability(void);
+void NotifyDetectTimeout(uint32_t detectId);
 
 #ifdef __cplusplus
 }

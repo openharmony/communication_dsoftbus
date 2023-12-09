@@ -207,6 +207,11 @@ int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned 
     return GetLaneDepsInterface()->SoftBusGenerateStrHash(str, len, hash);
 }
 
+int32_t StartBaseClient(ListenerModule module, const SoftbusBaseListener *listener)
+{
+    return GetLaneDepsInterface()->StartBaseClient(module, listener);
+}
+
 bool CheckActiveConnection(const ConnectOption *option)
 {
     return GetLaneDepsInterface()->CheckActiveConnection(option);

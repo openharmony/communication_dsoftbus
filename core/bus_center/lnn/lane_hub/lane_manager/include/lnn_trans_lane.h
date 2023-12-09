@@ -28,12 +28,17 @@ typedef enum {
     MSG_TYPE_LANE_LINK_FAIL,
     MSG_TYPE_LANE_LINK_EXCEPTION,
     MSG_TYPE_DELAY_DESTROY_LINK,
+    MSG_TYPE_LANE_DETECT_TIMEOUT,
+    MSG_TYPE_RELIABILITY_TIME,
 } LaneMsgType;
 
 LaneInterface *TransLaneGetInstance(void);
 int32_t GetQosInfoByLaneId(uint32_t laneId, QosInfo *qosOpt);
 int32_t LnnLanePostMsgToHandler(int32_t msgType, uint64_t param1, uint64_t param2,
     void *obj, uint64_t delayMillis);
+int32_t PostDetectTimeoutMessage(uint32_t detectId, uint64_t delayMillis);
+int32_t PostReliabilityTimeMessage(void);
+void RemoveDetectTimeoutMessage(uint32_t detectId);
 
 #ifdef __cplusplus
 }

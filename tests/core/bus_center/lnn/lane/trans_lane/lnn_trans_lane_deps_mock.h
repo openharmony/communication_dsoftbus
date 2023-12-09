@@ -22,6 +22,7 @@
 #include "lnn_lane_link.h"
 #include "lnn_lane_model.h"
 #include "lnn_lane_select.h"
+#include "lnn_lane_reliability.h"
 
 namespace OHOS {
 class TransLaneDepsInterface {
@@ -44,9 +45,10 @@ public:
     virtual int32_t DelLinkInfoItem(uint32_t laneId) = 0;
     virtual int32_t FindLaneLinkInfoByLaneId(uint32_t laneId, LaneLinkInfo *linkInfoitem) = 0;
     virtual int32_t ConvertToLaneResource(const LaneLinkInfo *linkInfo, LaneResource *laneResourceInfo) = 0;
-    virtual int32_t DelLaneResourceItemWithDelayDestroy(LaneResource *resourceItem, uint32_t laneId,
+    virtual int32_t DelLaneResourceItemWithDelay(LaneResource *resourceItem, uint32_t laneId,
         bool *isDelayDestroy) = 0;
     virtual void FreeLaneId(uint32_t laneId) = 0;
+    virtual void HandleLaneReliabilityTime(void) = 0;
 };
 
 class TransLaneDepsInterfaceMock : public TransLaneDepsInterface {
@@ -66,9 +68,10 @@ public:
     MOCK_METHOD1(DelLinkInfoItem, int32_t (uint32_t laneId));
     MOCK_METHOD2(FindLaneLinkInfoByLaneId, int32_t (uint32_t laneId, LaneLinkInfo *linkInfoitem));
     MOCK_METHOD2(ConvertToLaneResource, int32_t (const LaneLinkInfo *linkInfo, LaneResource *laneResourceInfo));
-    MOCK_METHOD3(DelLaneResourceItemWithDelayDestroy, int32_t (LaneResource *resourceItem, uint32_t laneId,
+    MOCK_METHOD3(DelLaneResourceItemWithDelay, int32_t (LaneResource *resourceItem, uint32_t laneId,
         bool *isDelayDestroy));
     MOCK_METHOD1(FreeLaneId, void (uint32_t laneId));
+    MOCK_METHOD0(HandleLaneReliabilityTime, void ());
 };
 } // namespace OHOS
 #endif // LNN_TRANS_LANE_DEPS_MOCK_H
