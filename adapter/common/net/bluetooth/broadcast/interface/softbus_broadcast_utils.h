@@ -57,6 +57,8 @@ extern "C"{
 #define BC_FLAG_AD_DATA         0x2
 
 // broadcast type
+#define SHORTENED_LOCAL_NAME_BC_TYPE    0x08
+#define LOCAL_NAME_BC_TYPE       0x09
 #define SERVICE_BC_TYPE          0x16
 #define MANUFACTURE_BC_TYPE      0xFF
 
