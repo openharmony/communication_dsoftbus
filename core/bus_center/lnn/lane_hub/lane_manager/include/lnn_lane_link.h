@@ -93,8 +93,7 @@ typedef struct {
         BleDirectInfo bleDirect;
     } linkInfo;
     bool isReliable;
-    bool isTimeValid;
-    uint32_t timeOut;
+    uint32_t laneTimeliness;
     uint32_t laneScore;
     uint32_t laneFload;
     uint32_t laneRef;
@@ -117,13 +116,15 @@ void LaneAddP2pAddress(const char *networkId, const char *ipAddr, uint16_t port)
 void LaneAddP2pAddressByIp(const char *ipAddr, uint16_t port);
 void LaneUpdateP2pAddressByIp(const char *ipAddr, const char *networkId);
 
+int32_t FindLaneResourceByLinkInfo(const LaneLinkInfo *linkInfoItem, LaneResource *laneResourceItem);
 int32_t AddLaneResourceItem(const LaneResource *resourceItem);
 int32_t DelLaneResourceItem(const LaneResource *resourceItem);
 int32_t AddLinkInfoItem(const LaneLinkInfo *linkInfoItem);
 int32_t DelLinkInfoItem(uint32_t laneId);
 int32_t FindLaneLinkInfoByLaneId(uint32_t laneId, LaneLinkInfo *linkInfoitem);
 int32_t ConvertToLaneResource(const LaneLinkInfo *linkInfo, LaneResource *laneResourceInfo);
-int32_t DelLaneResourceItemWithDelayDestroy(LaneResource *resourceItem, uint32_t laneId, bool *isDelayDestroy);
+int32_t DelLaneResourceItemWithDelay(LaneResource *resourceItem, uint32_t laneId, bool *isDelayDestroy);
+void HandleLaneReliabilityTime(void);
 
 #ifdef __cplusplus
 }

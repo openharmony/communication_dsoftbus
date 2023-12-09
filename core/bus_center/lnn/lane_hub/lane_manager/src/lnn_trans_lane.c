@@ -35,8 +35,9 @@
 #include "softbus_utils.h"
 #include "softbus_protocol_def.h"
 #include "wifi_direct_error_code.h"
+#include "lnn_lane_reliability.h"
 
-#define DELAY_DESTROY_LANE_TIME 5000
+#define DETECT_LANE_TIMELINESS 2000
 
 typedef struct {
     ListNode node;
@@ -126,6 +127,9 @@ static void LinkSuccess(uint32_t laneId, const LaneLinkInfo *linkInfo)
         return;
     }
     linkParam->laneId = laneId;
+    resourceItem.laneRef = 1;
+    resourceItem.laneTimeliness = 0;
+    resourceItem.isReliable = true;
     if (ConvertToLaneResource(linkParam, &resourceItem) != SOFTBUS_OK) {
         SoftBusFree(linkParam);
         LNN_LOGE(LNN_LANE, "convert to laneResource fail, laneId=%u", laneId);
@@ -422,7 +426,7 @@ static int32_t Free(uint32_t laneId)
     FindLaneLinkInfoByLaneId(laneId, &laneLinkInfo);
     ConvertToLaneResource(&laneLinkInfo, &laneResourceInfo);
     bool isDelayDestroy = false;
-    DelLaneResourceItemWithDelayDestroy(&laneResourceInfo, laneId, &isDelayDestroy);
+    DelLaneResourceItemWithDelay(&laneResourceInfo, laneId, &isDelayDestroy);
     LNN_LOGI(LNN_LANE, "delayDestroy is %s", isDelayDestroy ? "true" : "false");
     if (isDelayDestroy) {
         return SOFTBUS_OK;
@@ -676,10 +680,23 @@ static void HandleDelayDestroyLink(SoftBusMessage *msg)
         LNN_LOGE(LNN_LANE, "invalid msg->obj");
         return;
     }
-    uint32_t laneId = msg->arg1;
-    bool isDelayDestroy = msg->arg2;
+    uint32_t laneId = (uint32_t)msg->arg1;
+    bool isDelayDestroy = (bool)msg->arg2;
     LaneResource *resourceItem = (LaneResource*)msg->obj;
     FreeLaneLink(laneId, resourceItem, isDelayDestroy);
+}
+
+static void HandleDetectTimeout(SoftBusMessage *msg)
+{
+    uint32_t detectId = (uint32_t)msg->arg1;
+    LNN_LOGE(LNN_LANE, "lane detect timeout detect=%d", detectId);
+    NotifyDetectTimeout(detectId);
+}
+
+static void HandleReliabilityTime(SoftBusMessage *msg)
+{
+    HandleLaneReliabilityTime();
+    (void)LnnLanePostMsgToHandler(MSG_TYPE_RELIABILITY_TIME, 0, 0, NULL, DETECT_LANE_TIMELINESS);
 }
 
 static void MsgHandler(SoftBusMessage *msg)
@@ -702,6 +719,12 @@ static void MsgHandler(SoftBusMessage *msg)
             break;
         case MSG_TYPE_DELAY_DESTROY_LINK:
             HandleDelayDestroyLink(msg);
+            break;
+        case MSG_TYPE_LANE_DETECT_TIMEOUT:
+            HandleDetectTimeout(msg);
+            break;
+        case MSG_TYPE_RELIABILITY_TIME:
+            HandleReliabilityTime(msg);
             break;
         default:
             LNN_LOGE(LNN_LANE, "msg type=%d cannot found", msg->what);
@@ -730,6 +753,13 @@ static void Init(const ILaneIdStateListener *listener)
     }
     if (InitLooper() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "init looper fail");
+        return;
+    }
+    if (PostReliabilityTimeMessage() != SOFTBUS_OK) {
+        return;
+    }
+    if (InitLaneReliability() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "init laneReliability fail");
         return;
     }
     if (SoftBusMutexInit(&g_transLaneMutex, NULL) != SOFTBUS_OK) {
@@ -799,4 +829,35 @@ int32_t GetQosInfoByLaneId(uint32_t laneId, QosInfo *qosOpt)
     }
     Unlock();
     return SOFTBUS_ERR;
+}
+
+int32_t PostDetectTimeoutMessage(uint32_t detectId, uint64_t delayMillis)
+{
+    LNN_LOGI(LNN_LANE, "post timeout message, detect=%d", detectId);
+    return LnnLanePostMsgToHandler(MSG_TYPE_LANE_DETECT_TIMEOUT, detectId, 0, NULL, delayMillis);
+}
+
+static int32_t RemoveDetectTimeout(const SoftBusMessage *msg, void *data)
+{
+    uint32_t *detectId = (uint32_t *)data;
+    if (msg->what != MSG_TYPE_LANE_DETECT_TIMEOUT) {
+        return SOFTBUS_ERR;
+    }
+    if (msg->arg1 == *detectId) {
+        LNN_LOGE(LNN_LANE, "remove detect detect=%d timeout message success", *detectId);
+        return SOFTBUS_OK;
+    }
+    return SOFTBUS_ERR;
+}
+
+void RemoveDetectTimeoutMessage(uint32_t detectId)
+{
+    LNN_LOGE(LNN_LANE, "remove detect timeout message detect=%d", detectId);
+    g_laneLoopHandler.looper->RemoveMessageCustom(g_laneLoopHandler.looper, &g_laneLoopHandler,
+        RemoveDetectTimeout, &detectId);
+}
+
+int32_t PostReliabilityTimeMessage(void)
+{
+    return LnnLanePostMsgToHandler(MSG_TYPE_RELIABILITY_TIME, 0, 0, NULL, DETECT_LANE_TIMELINESS);
 }

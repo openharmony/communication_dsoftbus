@@ -33,6 +33,7 @@
 #include "lnn_lane_select.h"
 #include "lnn_log.h"
 #include "lnn_trans_lane.h"
+#include "lnn_lane_reliability.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"

@@ -49,7 +49,7 @@ if (dsoftbus_feature_lnn_net) {
     "$core_lane_hub_path/lane_manager/src/lnn_lane_query.c",
     "$core_lane_hub_path/lane_manager/src/lnn_select_rule.c",
     "$core_lane_hub_path/lane_manager/src/lnn_trans_lane.c",
-    "$core_lane_hub_path/lane_manager/src/lnn_lane_reliablity.c",
+    "$core_lane_hub_path/lane_manager/src/lnn_lane_reliability.c",
   ]
 
   if (enhanced) {

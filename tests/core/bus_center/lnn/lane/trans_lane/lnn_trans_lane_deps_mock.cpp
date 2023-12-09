@@ -96,13 +96,20 @@ int32_t ConvertToLaneResource(const LaneLinkInfo *linkInfo, LaneResource *laneRe
 {
     return GetTransLaneIf()->ConvertToLaneResource(linkInfo, laneResourceInfo);
 }
-int32_t DelLaneResourceItemWithDelayDestroy(LaneResource *resourceItem, uint32_t laneId, bool *isDelayDestroy)
+
+int32_t DelLaneResourceItemWithDelay(LaneResource *resourceItem, uint32_t laneId, bool *isDelayDestroy)
 {
-    return GetTransLaneIf()->DelLaneResourceItemWithDelayDestroy(resourceItem, laneId, isDelayDestroy);
+    return GetTransLaneIf()->DelLaneResourceItemWithDelay(resourceItem, laneId, isDelayDestroy);
 }
+
 void FreeLaneId(uint32_t laneId)
 {
     return GetTransLaneIf()->FreeLaneId(laneId);
+}
+
+void HandleLaneReliabilityTime(void)
+{
+    return GetTransLaneIf()->HandleLaneReliabilityTime();
 }
 }
 } // namespace OHOS
