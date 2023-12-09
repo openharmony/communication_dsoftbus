@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include <securec.h>
 #include <string.h>
 
+#include "client_bus_center_manager.h"
 #include "client_trans_session_manager.h"
 #include "lnn_log.h"
 #include "softbus_adapter_mem.h"
@@ -172,7 +173,7 @@ int32_t GetLocalNodeDeviceInfo(const char *pkgName, NodeBasicInfo *info)
 int32_t GetNodeKeyInfo(const char *pkgName, const char *networkId, NodeDeviceInfoKey key,
     uint8_t *info, int32_t infoLen)
 {
-    if (pkgName == NULL) {
+    if (pkgName == NULL || infoLen <= 0) {
         LNN_LOGE(LNN_STATE, "pkgName is null");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -184,7 +185,10 @@ int32_t GetNodeKeyInfo(const char *pkgName, const char *networkId, NodeDeviceInf
     if (ret != SOFTBUS_OK) {
         return ret;
     }
-    (void)memset_s(info, infoLen, 0, infoLen);
+    if (memset_s(info, infoLen, 0, infoLen) != EOK) {
+        LNN_LOGE(LNN_STATE, "memset nodekey info failed");
+        return SOFTBUS_MEM_ERR;
+    }
     return GetNodeKeyInfoInner(pkgName, networkId, key, info, infoLen);
 }
 
