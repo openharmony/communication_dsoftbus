@@ -46,5 +46,5 @@ declare_args() {
   dsoftbus_feature_ex_kits = false
   dsoftbus_feature_proxy_file = true
 
-  dsoftbus_feature_wifi_notify = true
+  dsoftbus_feature_wifi_notify = false
 }

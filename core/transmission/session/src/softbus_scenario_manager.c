@@ -440,7 +440,7 @@ static void ScenarioManagerDoNotifyIfNeed(ScenarioManager *manager,
     if (notify) {
         TRANS_LOGI(TRANS_CTRL,
             "current businessType of finalType is %d", item->finalType);
-        const char* ifaceName = ScenarioManagerFindIfaceNameByLocalMac(item->localMac);
+        const char* ifaceName = "chba";
         // do notify here
         NotifyWifi(ifaceName, item->localMac, item->peerMac, item->finalType, info->businessType);
     }
