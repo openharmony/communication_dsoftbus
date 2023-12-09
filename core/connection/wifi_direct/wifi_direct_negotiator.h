@@ -32,19 +32,13 @@ struct NegotiateMessage;
 struct WifiDirectProtocol;
 struct WifiDirectProcessor;
 
-struct NegotiatorContext {
-    char currentRemoteMac[MAC_ADDR_STR_LEN];
-    char currentRemoteDeviceId[UUID_BUF_LEN];
-    struct WifiDirectProcessor *currentProcessor;
-    struct WifiDirectCommand *currentCommand;
-};
-
 struct WifiDirectNegotiator {
     bool (*isRetryErrorCode)(int32_t reason);
     int32_t (*processNextCommand)(void);
     int32_t (*retryCurrentCommand)(void);
     bool (*isBusy)(void);
     void (*resetContext)(void);
+    void (*updateCurrentRemoteDeviceId)(struct WifiDirectNegotiateChannel *channel);
 
     int32_t (*postData)(struct NegotiateMessage *sendMsg);
     int32_t (*handleMessageFromProcessor)(struct NegotiateMessage *msg);
