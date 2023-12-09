@@ -16,6 +16,7 @@
 #include "disc_ble_dispatcher.h"
 #include "disc_approach_ble.h"
 #include "disc_ble.h"
+#include "disc_event.h"
 #include "disc_log.h"
 #include "disc_manager.h"
 #include "disc_share_ble.h"
@@ -48,6 +49,15 @@ static int32_t BleDispatchPublishOption(const PublishOption *option, DiscoverMod
     if (interface == NULL) {
         DISC_LOGE(DISC_BLE, "dispatch publish action failed: no implement support capability '%u'",
             option->capabilityBitmap[0]);
+        DiscAuditExtra extra = {
+            .result = DISC_AUDIT_DISCONTINUE,
+            .errcode = SOFTBUS_ERR,
+            .auditType = AUDIT_EVENT_MSG_ERROR,
+            .discMode = mode,
+            .broadcastFreq = option->freq,
+            .localCapabilityBitmap = option->capabilityBitmap[0],
+        };
+        DISC_AUDIT(AUDIT_SCENE_BLE_PUBLISH, extra);
         return SOFTBUS_ERR;
     }
     switch (type) {
@@ -70,6 +80,15 @@ static int32_t BleDispatchSubscribeOption(const SubscribeOption *option, Discove
     if (interface == NULL) {
         DISC_LOGE(DISC_BLE, "dispatch subcribe action failed: no implement support capability '%u'",
             option->capabilityBitmap[0]);
+        DiscAuditExtra extra = {
+            .result = DISC_AUDIT_DISCONTINUE,
+            .errcode = SOFTBUS_ERR,
+            .auditType = AUDIT_EVENT_MSG_ERROR,
+            .discMode = mode,
+            .broadcastFreq = option->freq,
+            .localCapabilityBitmap = option->capabilityBitmap[0],
+        };
+        DISC_AUDIT(AUDIT_SCENE_BLE_SUBSCRIBE, extra);
         return SOFTBUS_ERR;
     }
     switch (type) {
