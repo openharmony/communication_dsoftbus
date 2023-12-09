@@ -71,7 +71,19 @@ typedef struct {
 
 typedef enum {
     STATS_SCENE_CONN_RESERVED = 1,
+    STATS_SCENE_CONN_BT_POST_FAILED,
+    STATS_SCENE_CONN_BT_RECV_FAILED,
+    STATS_SCENE_CONN_WIFI_CONN_FAILED,
+    STATS_SCENE_CONN_WIFI_SEND_FAILED,
+    STATS_SCENE_CONN_WIFI_POST_FAILED,
+    STATS_SCENE_CONN_WIFI_RECV_FAILED,
 } ConnStatsScene;
+
+typedef enum {
+    CONN_RESULT_OK = 0,
+    CONN_RESULT_DISCONNECTED,
+    CONN_RESULT_REFUSED,
+} ConnResult;
 
 typedef struct {
     int32_t reserved;
@@ -89,17 +101,24 @@ typedef struct {
     int32_t linkType;            // LINK_TYPE
     int32_t expectRole;          // EXPECT_ROLE
     int32_t costTime;            // COST_TIME
+    int32_t connectTimes;        // CONN_TIMES
     const char *frequency;       // FREQ
     const char *peerBrMac;       // PEER_BR_MAC
+    const char *localBrMac;      // LOCAL_BR_MAC
     const char *peerBleMac;      // PEER_BLE_MAC
+    const char *localBleMac;     // LOCAL_BLE_MAC
     const char *peerDeviceType;  // PEER_DEV_TYPE
     const char *peerUdid;        // PEER_UDID
-    const char *connPaload;      // CONN_PALOAD
+    const char *localUdid;       // LOCAL_UDID
+    const char *connPayload;     // CONN_PAYLOAD
     const char *localDeviceName; // LOCAL_DEV_NAME
     const char *peerIp;          // PEER_IP
+    const char *localIp;         // LOCAL_IP
     const char *extra;           // EXTRA
     const char *callerPkg;       // HOST_PKG
     const char *calleePkg;       // TO_CALL_PKG
+    const char *peerPort;        // PEER_PORT
+    const char *localPort;       // LOCAL_PORT
 } ConnAuditExtra;
 
 #ifdef __cplusplus

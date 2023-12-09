@@ -685,6 +685,12 @@ static void BleGattcNotificationReceiveCallback(int32_t underlayerHandle, SoftBu
     } else {
         CONN_LOGE(CONN_BLE, "notification receive failed: not NET or CONN characteristic, connId=%u, handle=%d",
             connection->connectionId, underlayerHandle);
+        ConnAuditExtra extra = {
+            .auditType = AUDIT_EVENT_MSG_ERROR,
+            .connectionId = connection->connectionId,
+            .errcode = SOFTBUS_CONN_BLE_RECV_MSG_ERROR,
+        };
+        CONN_AUDIT(STATS_SCENE_CONN_BT_RECV_FAILED, extra);
         ReturnConnection(serviceId, connection);
         return;
     }

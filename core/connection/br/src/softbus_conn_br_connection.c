@@ -151,7 +151,7 @@ static void *StartClientConnect(void *connectCtx)
             .connStateCb = BrConnectStatusCallback,
         };
         int32_t socketHandle = g_sppDriver->Connect(UUID, binaryAddr, &callback);
-        if (socketHandle == INVALID_SOCKET_HANDLE) {
+        if (socketHandle <= INVALID_SOCKET_HANDLE) {
             CONN_LOGE(CONN_BR, "underlayer bluetooth connect failed, conn id=%u, address=%s",
                 connection->connectionId, anomizeAddress);
             ConnAlarmExtra extraAlarm = {
