@@ -41,9 +41,9 @@
 #include "softbus_network_utils.h"
 #include "softbus_protocol_def.h"
 #include "softbus_utils.h"
-#include "softbus_def.h"
 
 #define DELAY_DESTROY_LANE_TIME 5000
+#define LANE_RELIABILITY_TIME 4
 
 typedef int32_t (*LaneLinkByType)(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback);
 
@@ -159,11 +159,10 @@ static int32_t CreateResourceItem(const LaneResource *inputResource, LaneResourc
     }
     outputResource->type = inputResource->type;
     outputResource->isReliable = inputResource->isReliable;
-    outputResource->isTimeValid = inputResource->isTimeValid;
-    outputResource->timeOut = 0;
+    outputResource->laneTimeliness = inputResource->laneTimeliness;
     outputResource->laneScore = inputResource->laneScore;
     outputResource->laneFload = inputResource->laneFload;
-    outputResource->laneRef = 1;
+    outputResource->laneRef = inputResource->laneRef;
     return SOFTBUS_OK;
 }
 
@@ -189,6 +188,7 @@ int32_t AddLaneResourceItem(const LaneResource *inputResource)
     LaneResource* item = LaneResourceIsExist(resourceItem);
     if (item != NULL) {
         item->laneRef++;
+        item->isReliable = true;
         SoftBusFree(resourceItem);
     } else {
         ListAdd(&g_laneResourceList, &resourceItem->node);
@@ -197,7 +197,7 @@ int32_t AddLaneResourceItem(const LaneResource *inputResource)
     return SOFTBUS_OK;
 }
 
-int32_t DelLaneResourceItemWithDelayDestroy(LaneResource *resourceItem, uint32_t laneId, bool *isDelayDestroy)
+int32_t DelLaneResourceItemWithDelay(LaneResource *resourceItem, uint32_t laneId, bool *isDelayDestroy)
 {
     if (resourceItem == NULL || isDelayDestroy == NULL) {
         LNN_LOGE(LNN_LANE, "resourceItem or isDelayDestroy is nullptr");
@@ -246,6 +246,23 @@ int32_t DelLaneResourceItem(const LaneResource *resourceItem)
     }
     LaneUnlock();
     return SOFTBUS_OK;
+}
+
+void HandleLaneReliabilityTime(void)
+{
+    if (LaneLock() != SOFTBUS_OK) {
+        return;
+    }
+    LaneResource *item = NULL;
+    LaneResource *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResourceList, LaneResource, node) {
+        item->laneTimeliness++;
+        if (item->laneTimeliness >= LANE_RELIABILITY_TIME) {
+            item->laneTimeliness = 0;
+            item->isReliable = false;
+        }
+    }
+    LaneUnlock();
 }
 
 static int32_t CreateLinkInfoItem(const LaneLinkInfo *inputLinkInfo, LaneLinkInfo *outputLinkInfo)
@@ -443,6 +460,32 @@ int32_t ConvertToLaneResource(const LaneLinkInfo *linkInfo, LaneResource *laneRe
             LNN_LOGE(LNN_LANE, "curr linkInfo type=%d is not supported", linkInfo->type);
             return SOFTBUS_ERR;
     }
+    return SOFTBUS_OK;
+}
+
+int32_t FindLaneResourceByLinkInfo(const LaneLinkInfo *linkInfoItem, LaneResource *laneResourceItem)
+{
+    if (linkInfoItem == NULL || laneResourceItem == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    LaneResource laneResourceInfo;
+    (void)memset_s(&laneResourceInfo, sizeof(LaneResource), 0, sizeof(LaneResource));
+    if (ConvertToLaneResource(linkInfoItem, &laneResourceInfo) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    if (LaneLock() != SOFTBUS_OK) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    LaneResource* item = LaneResourceIsExist(&laneResourceInfo);
+    if (item == NULL) {
+        LaneUnlock();
+        return SOFTBUS_ERR;
+    }
+    if (CreateResourceItem(item, laneResourceItem) != SOFTBUS_OK) {
+        LaneUnlock();
+        return SOFTBUS_ERR;
+    }
+    LaneUnlock();
     return SOFTBUS_OK;
 }
 
