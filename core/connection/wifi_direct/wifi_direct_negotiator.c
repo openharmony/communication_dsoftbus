@@ -74,8 +74,7 @@ static int32_t HandleMessageFromProcessor(struct NegotiateMessage *msg)
     if (msg) {
         struct WifiDirectNegotiateChannel *channel = msg->getPointer(msg, NM_KEY_NEGO_CHANNEL, NULL);
         CONN_CHECK_AND_RETURN_RET_LOGW(channel != NULL, SOFTBUS_ERR, CONN_WIFI_DIRECT, "channel is null");
-        (void)channel->getDeviceId(channel, self->currentRemoteDeviceId,
-                                   sizeof(self->currentRemoteDeviceId));
+        self->updateCurrentRemoteDeviceId(channel);
         ret = self->postData(msg);
     }
     return ret;
@@ -273,7 +272,6 @@ static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *ch
         return;
     }
 
-    channel->getDeviceId(channel, self->currentRemoteDeviceId, sizeof(self->currentRemoteDeviceId));
     struct WifiDirectProcessor *processor = GetWifiDirectDecisionCenter()->getProcessorByNegotiateMessage(msg);
     struct WifiDirectCommand *command = WifiDirectNegotiateCommandNew(cmdType, msg);
     if (command == NULL) {
@@ -301,6 +299,7 @@ static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *ch
         CONN_LOGI(CONN_WIFI_DIRECT, "queue negotiate command");
         GetWifiDirectCommandManager()->enqueueCommand(command);
     } else {
+        self->updateCurrentRemoteDeviceId(channel);
         processor->processNegotiateMessage(cmdType, command);
     }
 }
@@ -411,6 +410,13 @@ static void ResetContext(void)
         self->currentProcessor = NULL;
     }
     self->processNextCommand();
+}
+
+static void UpdateCurrentRemoteDeviceId(struct WifiDirectNegotiateChannel *channel)
+{
+    CONN_CHECK_AND_RETURN_LOGE(channel != NULL, CONN_WIFI_DIRECT, "channel is null");
+    struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
+    (void)channel->getDeviceId(channel, self->currentRemoteDeviceId, sizeof(self->currentRemoteDeviceId));
 }
 
 static bool IsNeedDelayForPostData(struct NegotiateMessage *msg)
@@ -563,6 +569,7 @@ static struct WifiDirectNegotiator g_negotiator = {
     .isRetryErrorCode = IsRetryErrorCode,
     .isBusy = IsBusy,
     .resetContext = ResetContext,
+    .updateCurrentRemoteDeviceId = UpdateCurrentRemoteDeviceId,
     .handleMessageFromProcessor = HandleMessageFromProcessor,
     .onNegotiateChannelDataReceived = OnNegotiateChannelDataReceived,
     .onNegotiateChannelDisconnected = OnNegotiateChannelDisconnected,
