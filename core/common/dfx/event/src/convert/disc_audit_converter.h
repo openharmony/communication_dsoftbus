@@ -111,9 +111,12 @@ static HiSysEventParamAssigner g_discAuditAssigners[] = {
     { "PEER_BLE_MAC",               HISYSEVENT_STRING,      DiscAuditAssignerPeerBleMac             },
     { "ERR_MSG",                    HISYSEVENT_STRING,      DiscAuditAssignerErrMsg                 },
     { "ADDITIONAL_INFO",            HISYSEVENT_STRING,      DiscAuditAssignerAdditionalInfo         },
+    // Modification Note: remember updating DISC_AUDIT_ASSIGNER_SIZE
 };
 
-static const size_t DISC_AUDIT_ASSIGNER_SIZE = sizeof(g_discAuditAssigners) / sizeof(HiSysEventParamAssigner);
+#define DISC_AUDIT_ASSIGNER_SIZE 38 // Array size of g_discAuditAssigners
+
+static const size_t DISC_AUDIT_ASSIGNER_COUNT = sizeof(g_discAuditAssigners) / sizeof(HiSysEventParamAssigner);
 
 static inline size_t ConvertDiscAuditForm2Param(HiSysEventParam params[], SoftbusEventForm *form)
 {
@@ -121,7 +124,7 @@ static inline size_t ConvertDiscAuditForm2Param(HiSysEventParam params[], Softbu
     if (form == NULL || form->discExtra == NULL) {
         return validSize;
     }
-    for (size_t i = 0; i < DISC_AUDIT_ASSIGNER_SIZE; ++i) {
+    for (size_t i = 0; i < DISC_AUDIT_ASSIGNER_COUNT; ++i) {
         HiSysEventParamAssigner assigner = g_discAuditAssigners[i];
         if (assigner.Assign(assigner.name, assigner.type, form, &params[validSize])) {
             ++validSize;
