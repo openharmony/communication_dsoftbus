@@ -824,7 +824,6 @@ void FillpDebugCmdSocketConfigRes(FILLP_CONST void  *content)
 
     if (content == FILLP_NULL_PTR) {
         FILLP_LOGERR("Input pointer is NULL");
-
         return;
     }
 

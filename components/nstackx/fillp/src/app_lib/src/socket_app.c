@@ -1571,17 +1571,13 @@ FILLP_INT SockGetsockname(FILLP_INT sockIndex, struct sockaddr *name, socklen_t 
             if (*nameLen > (socklen_t)addrSize) {
                 *nameLen = (socklen_t)addrSize;
             }
-            if (memcpy_s(name, *nameLen, &(sock->netconn->pcb->localAddr), *nameLen) != EOK) {
-                err = -1;
-            }
+            (void)memcpy_s(name, *nameLen, &(sock->netconn->pcb->localAddr), *nameLen);
         } else if (sock->sockAddrType == AF_INET6) {
             addrSize = sizeof(struct sockaddr_in6);
             if (*nameLen > (socklen_t)addrSize) {
                 *nameLen = (socklen_t)addrSize;
             }
-            if (memcpy_s(name, *nameLen, &(sock->netconn->pcb->localAddr), *nameLen) != EOK) {
-                err = -1;
-            }
+            (void)memcpy_s(name, *nameLen, &(sock->netconn->pcb->localAddr), *nameLen);
         }
     } else {
         osSock = NETCONN_GET_OSSOCK(sock->netconn, sock->inst->instIndex);
@@ -1632,17 +1628,13 @@ FILLP_INT SockGetpeername(FILLP_INT sockIndex, struct sockaddr *name, socklen_t 
         if (*nameLen > (socklen_t)addrSize) {
             *nameLen = (socklen_t)addrSize;
         }
-        if (memcpy_s(name, *nameLen, &(sock->netconn->pcb->remoteAddr), *nameLen) != EOK) {
-            err = -1;
-        }
+        (void)memcpy_s(name, *nameLen, &(sock->netconn->pcb->remoteAddr), *nameLen);
     } else if (sock->sockAddrType == AF_INET6) {
         addrSize = sizeof(struct sockaddr_in6);
         if (*nameLen > (socklen_t)addrSize) {
             *nameLen = (socklen_t)addrSize;
         }
-        if (memcpy_s(name, *nameLen, &(sock->netconn->pcb->remoteAddr), *nameLen) != EOK) {
-            err = -1;
-        }
+        (void)memcpy_s(name, *nameLen, &(sock->netconn->pcb->remoteAddr), *nameLen);
     }
 
     (void)SYS_ARCH_RWSEM_RDPOST(&sock->sockConnSem);

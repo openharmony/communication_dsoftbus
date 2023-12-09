@@ -80,8 +80,6 @@ static void EpRbtreeInsert(struct EventPoll *ep, struct EpItem *epi)
     *p = &epi->rbn;
 
     FillpRbInsertColor(&epi->rbn, &ep->rbr);
-
-    return;
 }
 
 /*
@@ -96,8 +94,6 @@ static void EpollAddToSockWaitList(struct FtSocket *sock, struct EpItem *epi)
     }
     HlistAddTail(&sock->epTaskList, &epi->sockWaitNode);
     (void)SYS_ARCH_SEM_POST(&sock->epollTaskListLock);
-
-    return;
 }
 
 /* Check and triggle the event when do epoll ctl */

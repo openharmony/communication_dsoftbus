@@ -589,8 +589,7 @@ void FtGlobalTimerInit(struct SpungeInstance *inst)
 
 static FILLP_INT SpungeCheckCallbacks(void)
 {
-    FILLP_INT ret = SpungeSysCallRegisted();
-    return ret;
+    return SpungeSysCallRegisted();
 }
 
 static FILLP_INT FtInitGlobalUdpIo(void)

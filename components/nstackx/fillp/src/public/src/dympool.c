@@ -23,7 +23,7 @@ DympoolType *DympCreatePool(int initSize, int maxSize, int itemSize, FILLP_BOOL 
 {
     DympoolType *pool = FILLP_NULL_PTR;
     if ((initSize <= 0) || (maxSize <= 0) || (itemSize <= 0)) {
-        FILLP_LOGERR("Error to crate pool initSize:%d,maxSize:%d,itemSize:%d", initSize, maxSize, itemSize);
+        FILLP_LOGERR("Error to create pool initSize:%d,maxSize:%d,itemSize:%d", initSize, maxSize, itemSize);
         return FILLP_NULL_PTR;
     }
 

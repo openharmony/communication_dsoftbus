@@ -129,8 +129,6 @@ void InitGlobalResourceDefault(void)
     g_resource.fcMultiNumStep = FILLP_FLOW_CONTROL_MULTI_NUM_STEP_EXT;
     g_resource.fcNightyPercentVal = FILLP_FC_NINETY_PERCENT_VAL_EXT;
     g_resource.fullCpuUseThresholdRate = FILLP_DEFAULT_BFULL_CPU_THRESHOLD_RATE_EXT;
-
-    return;
 }
 #ifdef __cplusplus
 }
