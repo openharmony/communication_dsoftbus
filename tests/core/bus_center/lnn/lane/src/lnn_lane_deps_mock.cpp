@@ -217,5 +217,15 @@ bool CheckActiveConnection(const ConnectOption *option)
     return GetLaneDepsInterface()->CheckActiveConnection(option);
 }
 
+int32_t ConnOpenClientSocket(const ConnectOption *option, const char *bindAddr, bool isNonBlock)
+{
+    return GetLaneDepsInterface()->ConnOpenClientSocket(option, bindAddr, isNonBlock);
+}
+
+int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
+{
+    return GetLaneDepsInterface()->AddTrigger(module, fd, trigger);
+}
+
 }
 } // namespace OHOS
