@@ -1,141 +1,142 @@
 {
-    "name": "@ohos/dsoftbus",
-    "version": "4.0.2",
-    "description": "dsoftbus",
-    "publishAs": "code-segment",
-    "segment": {
-      "destPath": "foundation/communication/dsoftbus"
+  "name": "@ohos/dsoftbus",
+  "version": "4.0.2",
+  "description": "dsoftbus",
+  "publishAs": "code-segment",
+  "segment": {
+    "destPath": "foundation/communication/dsoftbus"
+  },
+  "dirs": {},
+  "scripts": {},
+  "author": {},
+  "homePage": "https://gitee.com/openharmony",
+  "repository": "https://gitee.com/openharmony/communication_dsoftbus",
+  "supplier":"Organization: OpenHarmony",
+  "license": "Apache License 2.0",
+  "component": {
+    "name": "dsoftbus",
+    "subsystem": "communication",
+    "adapted_system_type": [
+      "mini",
+      "small",
+      "standard"
+    ],
+    "hisysevent_config": [
+      "//foundation/communication/dsoftbus/hisysevent.yaml"
+    ],
+    "syscap":[ "SystemCapability.Communication.SoftBus.Core" ],
+    "features": [
+      "dsoftbus_feature_conn_p2p",
+      "dsoftbus_feature_conn_legacy",
+      "dsoftbus_feature_disc_ble",
+      "dsoftbus_feature_conn_br",
+      "dsoftbus_feature_conn_ble",
+      "dsoftbus_feature_lnn_net",
+      "dsoftbus_feature_trans_udp_stream",
+      "dsoftbus_feature_trans_udp_file",
+      "dsoftbus_get_devicename",
+      "dsoftbus_feature_product_config_path",
+      "dsoftbus_feature_ifname_prefix",
+      "dsoftbus_feature_lnn_wifiservice_dependence",
+      "dsoftbus_standard_feature_dfinder_support_multi_nif",
+      "dsoftbus_feature_protocol_newip",
+      "dsoftbus_feature_ex_kits",
+      "dsoftbus_feature_wifi_notify"
+    ],
+    "rom": "3000KB",
+    "ram": "40MB",
+    "deps": {
+      "components": [
+        "ability_base",
+        "ability_runtime",
+        "access_token",
+        "bluetooth",
+        "bundle_framework",
+        "common_event_service",
+        "data_share",
+        "device_auth",
+        "device_info_manager",
+        "drivers_interface_wlan",
+        "hisysevent",
+        "hitrace",
+        "hilog",
+        "huks",
+        "init",
+        "ipc",
+        "os_account",
+        "relational_store",
+        "c_utils",
+        "safwk",
+        "samgr",
+        "wifi",
+        "wifi_enhance",
+        "netmanager_base"
+      ],
+      "third_party": [
+        "bounds_checking_function",
+        "cJSON",
+        "libcoap",
+        "mbedtls",
+        "openssl",
+        "sqlite"
+      ]
     },
-    "dirs": {},
-    "scripts": {},
-    "author": {},
-    "homePage": "https://gitee.com/openharmony",
-    "repository": "https://gitee.com/openharmony/communication_dsoftbus",
-    "supplier":"Organization: OpenHarmony",
-    "license": "Apache License 2.0",
-    "component": {
-      "name": "dsoftbus",
-      "subsystem": "communication",
-      "adapted_system_type": [
-        "mini",
-        "small",
-        "standard"
-      ],
-      "hisysevent_config": [
-        "//foundation/communication/dsoftbus/hisysevent.yaml"
-      ],
-      "syscap":[ "SystemCapability.Communication.SoftBus.Core" ],
-      "features": [
-        "dsoftbus_feature_conn_p2p",
-        "dsoftbus_feature_conn_legacy",
-        "dsoftbus_feature_disc_ble",
-        "dsoftbus_feature_conn_br",
-        "dsoftbus_feature_conn_ble",
-        "dsoftbus_feature_lnn_net",
-        "dsoftbus_feature_trans_udp_stream",
-        "dsoftbus_feature_trans_udp_file",
-        "dsoftbus_get_devicename",
-        "dsoftbus_feature_product_config_path",
-        "dsoftbus_feature_ifname_prefix",
-        "dsoftbus_feature_lnn_wifiservice_dependence",
-        "dsoftbus_standard_feature_dfinder_support_multi_nif",
-        "dsoftbus_feature_protocol_newip",
-        "dsoftbus_feature_ex_kits",
-        "dsoftbus_feature_wifi_notify"
-      ],
-      "rom": "3000KB",
-      "ram": "40MB",
-      "deps": {
-        "components": [
-          "ability_base",
-          "ability_runtime",
-          "access_token",
-          "bluetooth",
-          "bundle_framework",
-          "common_event_service",
-          "data_share",
-          "device_auth",
-          "drivers_interface_wlan",
-          "hisysevent",
-          "hitrace",
-          "hilog",
-          "huks",
-          "init",
-          "ipc",
-          "os_account",
-          "relational_store",
-          "c_utils",
-          "safwk",
-          "samgr",
-          "wifi",
-          "wifi_enhance",
-          "netmanager_base"
+    "build": {
+      "group_type":{
+        "base_group":[],
+        "fwk_group":[
+          "//foundation/communication/dsoftbus/sdk:softbus_client"
         ],
-        "third_party": [
-          "bounds_checking_function",
-          "cJSON",
-          "libcoap",
-          "mbedtls",
-          "openssl",
-          "sqlite"
+        "service_group":[
+          "//foundation/communication/dsoftbus/core:softbus_server",
+          "//foundation/communication/dsoftbus/core/frame/standard/sa_profile:softbus_sa_profile"
         ]
       },
-      "build": {
-        "group_type":{
-          "base_group":[],
-          "fwk_group":[
-            "//foundation/communication/dsoftbus/sdk:softbus_client"
-          ],
-          "service_group":[
-            "//foundation/communication/dsoftbus/core:softbus_server",
-            "//foundation/communication/dsoftbus/core/frame/standard/sa_profile:softbus_sa_profile"
-          ]
-        },
-        "inner_kits": [
-          {
-            "name": "//foundation/communication/dsoftbus/sdk:softbus_client",
-            "header": {
-              "header_files": [
-                "bus_center/softbus_bus_center.h",
-                "common/softbus_common.h",
-                "common/softbus_error_code.h",
-                "discovery/discovery_service.h",
-                "transport/session.h"
-              ],
-              "header_base": "//foundation/communication/dsoftbus/interfaces/kits"
-            }
+      "inner_kits": [
+        {
+          "name": "//foundation/communication/dsoftbus/sdk:softbus_client",
+          "header": {
+            "header_files": [
+              "bus_center/softbus_bus_center.h",
+              "common/softbus_common.h",
+              "common/softbus_error_code.h",
+              "discovery/discovery_service.h",
+              "transport/session.h"
+            ],
+            "header_base": "//foundation/communication/dsoftbus/interfaces/kits"
           }
-        ],
-        "test": [
-          "//foundation/communication/dsoftbus/tests/adapter:fuzztest",
-          "//foundation/communication/dsoftbus/tests/adapter:unittest",
-          "//foundation/communication/dsoftbus/tests/core/adapter:unittest",
-          "//foundation/communication/dsoftbus/tests/core/authentication:fuzztest",
-          "//foundation/communication/dsoftbus/tests/core/authentication:unittest",
-          "//foundation/communication/dsoftbus/tests/core/bus_center:unittest",
-          "//foundation/communication/dsoftbus/tests/core/common:fuzztest",
-          "//foundation/communication/dsoftbus/tests/core/common:unittest",
-          "//foundation/communication/dsoftbus/tests/core/connection:fuzztest",
-          "//foundation/communication/dsoftbus/tests/core/connection:unittest",
-          "//foundation/communication/dsoftbus/tests/core/discovery:unittest",
-          "//foundation/communication/dsoftbus/tests/core/discovery:fuzztest",
-          "//foundation/communication/dsoftbus/tests/core/frame:fuzztest",
-          "//foundation/communication/dsoftbus/tests/core/transmission:unittest",
-          "//foundation/communication/dsoftbus/tests/core/transmission:fuzztest",
-          "//foundation/communication/dsoftbus/tests/sdk/bus_center:fuzztest",
-          "//foundation/communication/dsoftbus/tests/sdk/bus_center:unittest",
-          "//foundation/communication/dsoftbus/tests/sdk/discovery:fuzztest",
-          "//foundation/communication/dsoftbus/tests/sdk/discovery:unittest",
-          "//foundation/communication/dsoftbus/tests/sdk/transmission:fuzztest",
-          "//foundation/communication/dsoftbus/tests/sdk/transmission:unittest",
-          "//foundation/communication/dsoftbus/tests/sdk/bus_center:benchmarktest",
-          "//foundation/communication/dsoftbus/tests/sdk/discovery:benchmarktest",
-          "//foundation/communication/dsoftbus/tests/sdk/transmission:benchmarktest",
-          "//foundation/communication/dsoftbus/tests/sdk/transmission:integration_test",
-          "//foundation/communication/dsoftbus/tests/sdk/frame/common:unittest",
-          "//foundation/communication/dsoftbus/tests/sdk/frame/standard:unittest",
-          "//foundation/communication/dsoftbus/tests/sdk/frame:fuzztest"
-        ]
-      }
+        }
+      ],
+      "test": [
+        "//foundation/communication/dsoftbus/tests/adapter:fuzztest",
+        "//foundation/communication/dsoftbus/tests/adapter:unittest",
+        "//foundation/communication/dsoftbus/tests/core/adapter:unittest",
+        "//foundation/communication/dsoftbus/tests/core/authentication:fuzztest",
+        "//foundation/communication/dsoftbus/tests/core/authentication:unittest",
+        "//foundation/communication/dsoftbus/tests/core/bus_center:unittest",
+        "//foundation/communication/dsoftbus/tests/core/common:fuzztest",
+        "//foundation/communication/dsoftbus/tests/core/common:unittest",
+        "//foundation/communication/dsoftbus/tests/core/connection:fuzztest",
+        "//foundation/communication/dsoftbus/tests/core/connection:unittest",
+        "//foundation/communication/dsoftbus/tests/core/discovery:unittest",
+        "//foundation/communication/dsoftbus/tests/core/discovery:fuzztest",
+        "//foundation/communication/dsoftbus/tests/core/frame:fuzztest",
+        "//foundation/communication/dsoftbus/tests/core/transmission:unittest",
+        "//foundation/communication/dsoftbus/tests/core/transmission:fuzztest",
+        "//foundation/communication/dsoftbus/tests/sdk/bus_center:fuzztest",
+        "//foundation/communication/dsoftbus/tests/sdk/bus_center:unittest",
+        "//foundation/communication/dsoftbus/tests/sdk/discovery:fuzztest",
+        "//foundation/communication/dsoftbus/tests/sdk/discovery:unittest",
+        "//foundation/communication/dsoftbus/tests/sdk/transmission:fuzztest",
+        "//foundation/communication/dsoftbus/tests/sdk/transmission:unittest",
+        "//foundation/communication/dsoftbus/tests/sdk/bus_center:benchmarktest",
+        "//foundation/communication/dsoftbus/tests/sdk/discovery:benchmarktest",
+        "//foundation/communication/dsoftbus/tests/sdk/transmission:benchmarktest",
+        "//foundation/communication/dsoftbus/tests/sdk/transmission:integration_test",
+        "//foundation/communication/dsoftbus/tests/sdk/frame/common:unittest",
+        "//foundation/communication/dsoftbus/tests/sdk/frame/standard:unittest",
+        "//foundation/communication/dsoftbus/tests/sdk/frame:fuzztest"
+      ]
     }
   }
+}
