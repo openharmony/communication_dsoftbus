@@ -190,25 +190,13 @@ BROADCAST_FAIL:
 
 static int32_t CoapPublish(const PublishOption *option)
 {
-    int32_t ret = Publish(option, true);
-    if (ret != SOFTBUS_OK) {
-        DiscAuditExtra extra = {
-            .result = DISC_AUDIT_DISCONTINUE,
-            .errcode = ret,
-            .auditType = AUDIT_EVENT_MSG_ERROR,
-            .discMode = DISCOVER_MODE_ACTIVE,
-            .broadcastFreq = option->freq,
-            .localCapabilityBitmap = option->capabilityBitmap[0],
-        };
-        DISC_AUDIT(AUDIT_SCENE_COAP_PUBLISH, extra);
-    }
-    return ret;
+    return Publish(option, true);
 }
 
 static int32_t CoapStartScan(const PublishOption *option)
 {
     int32_t ret = Publish(option, false);
-    if (ret != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK && option != NULL) {
         DiscAuditExtra extra = {
             .result = DISC_AUDIT_DISCONTINUE,
             .errcode = ret,
@@ -363,7 +351,7 @@ static int32_t Discovery(const SubscribeOption *option, bool isActive)
 static int32_t CoapStartAdvertise(const SubscribeOption *option)
 {
     int32_t ret = Discovery(option, true);
-    if (ret != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK && option != NULL) {
         DiscAuditExtra extra = {
             .result = DISC_AUDIT_DISCONTINUE,
             .errcode = ret,
@@ -379,19 +367,7 @@ static int32_t CoapStartAdvertise(const SubscribeOption *option)
 
 static int32_t CoapSubscribe(const SubscribeOption *option)
 {
-    int32_t ret = Discovery(option, false);
-    if (ret != SOFTBUS_OK) {
-        DiscAuditExtra extra = {
-            .result = DISC_AUDIT_DISCONTINUE,
-            .errcode = ret,
-            .auditType = AUDIT_EVENT_MSG_ERROR,
-            .discMode = DISCOVER_MODE_PASSIVE,
-            .broadcastFreq = option->freq,
-            .localCapabilityBitmap = option->capabilityBitmap[0],
-        };
-        DISC_AUDIT(AUDIT_SCENE_COAP_DISCOVERY, extra);
-    }
-    return ret;
+    return Discovery(option, false);
 }
 
 static int32_t StopDisc(const SubscribeOption *option, bool isActive)
