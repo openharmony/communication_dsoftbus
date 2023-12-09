@@ -92,6 +92,13 @@ typedef enum {
     ASYNC_RESULT_CHANNEL,
 } AsyncResultType;
 
+typedef enum {
+    GUIDE_TYPE_BLE = 1,
+    GUIDE_TYPE_EXIST_AUTH,
+    GUIDE_TYPE_BLE_CONN,
+    GUIDE_TYPE_NEW_AUTH,
+} WifiDirectGuideType;
+
 static ListNode *g_p2pLinkList = NULL; // process p2p link request
 static ListNode *g_p2pLinkedList = NULL; // process p2p unlink request
 static SoftBusMutex g_p2pLinkMutex;
@@ -223,6 +230,25 @@ static void DelP2pLinkedItem(uint32_t authReqId)
     P2pLinkedList *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, g_p2pLinkedList, P2pLinkedList, node) {
         if (item->auth.requestId == authReqId) {
+            ListDelete(&item->node);
+            SoftBusFree(item);
+            break;
+        }
+    }
+    LinkUnlock();
+}
+
+static void DelP2pLinkedItemByLaneId(uint32_t laneId)
+{
+    if (LinkLock() != 0) {
+        LNN_LOGE(LNN_LANE, "lock fail");
+        return;
+    }
+    P2pLinkedList *item = NULL;
+    P2pLinkedList *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, g_p2pLinkedList, P2pLinkedList, node) {
+        if (item->laneLinkReqId == laneId) {
+            LNN_LOGI(LNN_LANE, "delete linkedItem, laneId=%u", laneId);
             ListDelete(&item->node);
             SoftBusFree(item);
             break;
@@ -689,8 +715,7 @@ static int32_t OpenAuthToDisconnP2p(const char *networkId, uint32_t laneLinkReqI
         .onConnOpenFailed = OnConnOpenFailedForDisconnect
     };
     if (AuthOpenConn(&connInfo, authRequestId, &cb, isMetaAuth) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "open auth conn fail");
-        DelConnRequestItem(authRequestId, 0);
+        LNN_LOGE(LNN_LANE, "open auth conn fail, laneId=%u", laneLinkReqId);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -1005,7 +1030,7 @@ static int32_t LnnSelectDirectLink(const LinkRequest *request, uint32_t laneLink
             ret = OpenBleTriggerToConn(request, laneLinkReqId, callback);
     }
     if (CheckHasBrConnection(request->peerNetworkId) && ret != SOFTBUS_OK) {
-        LNN_LOGI(LNN_LANE, "open new br auth to connect p2p, LnnReqId=%d", laneLinkReqId);
+        LNN_LOGI(LNN_LANE, "open new br auth to connect p2p, laneId=%u", laneLinkReqId);
         ret = OpenAuthToConnP2p(request, laneLinkReqId, callback);
     }
     if (((local & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) != 0) &&
@@ -1063,9 +1088,9 @@ void LnnDisconnectP2p(const char *networkId, int32_t pid, uint32_t laneLinkReqId
             break;
         }
     }
-    LNN_LOGE(LNN_LANE, "pid:%d, laneId:%d, linkId:%d", pid, laneLinkReqId, linkId);
+    LNN_LOGI(LNN_LANE, "pid:%d, laneId:%u, linkId:%d", pid, laneLinkReqId, linkId);
     if (!isNodeExist) {
-        LNN_LOGE(LNN_LANE, "node isn't exist, ignore disconn request");
+        LNN_LOGE(LNN_LANE, "node isn't exist, ignore disconn request, laneId=%u", laneLinkReqId);
         LinkUnlock();
         return;
     }
@@ -1077,6 +1102,7 @@ void LnnDisconnectP2p(const char *networkId, int32_t pid, uint32_t laneLinkReqId
     LinkUnlock();
     if (OpenAuthToDisconnP2p(networkId, laneLinkReqId) != SOFTBUS_OK) {
         DisconnectP2pWithoutAuthConn(pid, mac, linkId);
+        DelP2pLinkedItemByLaneId(laneLinkReqId);
     }
     return;
 }
