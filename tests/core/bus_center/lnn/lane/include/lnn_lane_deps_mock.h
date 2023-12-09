@@ -30,6 +30,7 @@
 #include "softbus_conn_interface.h"
 #include "softbus_network_utils.h"
 #include "lnn_physical_subnet_manager.h"
+#include "softbus_base_listener.h"
 
 namespace OHOS {
 class LaneDepsInterface {
@@ -69,6 +70,7 @@ public:
 
     virtual int64_t GetAuthIdByConnInfo(const AuthConnInfo *connInfo) = 0;
     virtual int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash) = 0;
+    virtual int32_t StartBaseClient(ListenerModule module, const SoftbusBaseListener *listener) = 0;
     virtual bool CheckActiveConnection(const ConnectOption *option) = 0;
 };
 
@@ -106,6 +108,7 @@ public:
     MOCK_METHOD1(LaneResourceIsExist, LaneResource* (LaneResource *));
     MOCK_METHOD1(GetAuthIdByConnInfo, int64_t(const AuthConnInfo *));
     MOCK_METHOD3(SoftBusGenerateStrHash, int32_t (const unsigned char *, uint32_t, unsigned char *));
+    MOCK_METHOD2(StartBaseClient, int32_t (ListenerModule module, const SoftbusBaseListener *listener));
     MOCK_METHOD1(CheckActiveConnection, bool (const ConnectOption *));
 
     void SetDefaultResult(void);

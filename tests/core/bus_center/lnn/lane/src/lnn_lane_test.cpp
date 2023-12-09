@@ -33,7 +33,7 @@
 #include "softbus_adapter_thread.h"
 #include "softbus_error_code.h"
 #include "softbus_wifi_api_adapter.h"
-#include "lnn_lane_reliablity.h"
+#include "lnn_lane_reliability.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -1262,22 +1262,6 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_EXPECT_LANES_BY_QOS_002, TestSize.Level1)
 }
 
 /*
-* @tc.name: LANE_RELIABLITY_EXPLORE_001
-* @tc.desc: LANE RELIABLITY EXPLORE TEST
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNLaneMockTest, LANE_RELIABLITY_EXPLORE_001, TestSize.Level1)
-{
-    LaneResource resourceItem;
-    (void)memset_s(&resourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
-    resourceItem.laneRef = DEFAULT_LANE_RESOURCE_LANE_REF;
-    resourceItem.timeOut = DEFAULT_LANE_RESOURCE_TIMEOUT;
-    auto laneReliablityRet = LaneDetectReliablity(&resourceItem);
-    EXPECT_TRUE(laneReliablityRet);
-}
-
-/*
 * @tc.name: LANE_FLOAD_EXPLORE_001
 * @tc.desc: LANE FLOAD EXPLORE TEST
 * @tc.type: FUNC
@@ -1288,7 +1272,7 @@ HWTEST_F(LNNLaneMockTest, LANE_FLOAD_EXPLORE_001, TestSize.Level1)
     LaneResource resourceItem;
     (void)memset_s(&resourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
     resourceItem.laneRef = DEFAULT_LANE_RESOURCE_LANE_REF;
-    resourceItem.timeOut = DEFAULT_LANE_RESOURCE_TIMEOUT;
+    resourceItem.laneTimeliness = DEFAULT_LANE_RESOURCE_TIMEOUT;
     int32_t ret = LaneDetectFload(&resourceItem);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
