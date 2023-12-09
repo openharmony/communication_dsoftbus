@@ -35,6 +35,7 @@
 #include "processor/wifi_direct_processor_factory.h"
 #include "utils/wifi_direct_work_queue.h"
 #include "utils/wifi_direct_utils.h"
+#include "conn_event.h"
 
 #define RETRY_COMMAND_DELAY_MS 1000
 #define WAIT_POST_REQUEST_MS 450
@@ -257,10 +258,18 @@ static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *ch
 {
     struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
     SaveP2pChannel(channel);
-
+    channel->getDeviceId(channel, self->currentRemoteDeviceId, sizeof(self->currentRemoteDeviceId));
     struct NegotiateMessage *msg = GenerateNegotiateMessage(channel, data, len);
-    CONN_CHECK_AND_RETURN_LOGW(msg != NULL, CONN_WIFI_DIRECT, "unpack msg failed");
-
+    if (msg == NULL) {
+        ConnAuditExtra extra = {
+            .auditType = AUDIT_EVENT_MSG_ERROR,
+            .errcode = ERROR_WIFI_DIRECT_WRONG_NEGOTIATION_MSG,
+            .peerUdid = self->currentRemoteDeviceId,
+        };
+        CONN_AUDIT(STATS_SCENE_CONN_WIFI_RECV_FAILED, extra);
+        CONN_LOGW(CONN_WIFI_DIRECT, "unpack msg failed");
+        return;
+    }
     enum WifiDirectNegotiateCmdType cmdType = GetNegotiateCmdType(msg);
     if (cmdType == CMD_CTRL_CHL_HANDSHAKE) {
         CONN_LOGI(CONN_WIFI_DIRECT, "ignore CMD_CTRL_CHL_HANDSHAKE");

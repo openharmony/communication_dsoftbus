@@ -27,6 +27,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
+#include "conn_event.h"
 
 static SppSocketDriver *g_sppDriver = NULL;
 static ConnBrTransEventListener g_transEventListener = { 0 };
@@ -95,11 +96,23 @@ int32_t ConnBrTransReadOneFrame(uint32_t connectionId, int32_t socketHandle, Lim
         if (recvLen == BR_READ_SOCKET_CLOSED) {
             CONN_LOGW(CONN_BR, "br connection read return, connection id=%u, socket handle=%d, connection closed",
                 connectionId, socketHandle);
+            ConnAuditExtra extra = {
+                .auditType = AUDIT_EVENT_MSG_ERROR,
+                .connectionId = connectionId,
+                .errcode = SOFTBUS_CONN_BR_UNDERLAY_SOCKET_CLOSED,
+            };
+            CONN_AUDIT(STATS_SCENE_CONN_BT_RECV_FAILED, extra);
             return SOFTBUS_CONN_BR_UNDERLAY_SOCKET_CLOSED;
         }
         if (recvLen < 0) {
             CONN_LOGE(CONN_BR, "br connection read return, connection id=%u, socket handle=%d, error=%d", connectionId,
                 socketHandle, recvLen);
+            ConnAuditExtra extra = {
+                .auditType = AUDIT_EVENT_MSG_ERROR,
+                .connectionId = connectionId,
+                .errcode = SOFTBUS_CONN_BR_UNDERLAY_READ_FAIL,
+            };
+            CONN_AUDIT(STATS_SCENE_CONN_BT_RECV_FAILED, extra);
             return SOFTBUS_CONN_BR_UNDERLAY_READ_FAIL;
         }
         buffer->length += (uint32_t)recvLen;
