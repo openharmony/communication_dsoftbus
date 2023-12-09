@@ -114,6 +114,7 @@ static void DestroyLaneId(uint32_t laneId)
     if (Lock() != SOFTBUS_OK) {
         return;
     }
+    LNN_LOGD(LNN_LANE, "laneId=%u", laneId);
     uint32_t idIndex = randomId - 1;
     g_laneIdBitmap[idIndex >> ID_SHIFT_STEP] &= (~(IS_USED << (idIndex & ID_CALC_MASK)));
     Unlock();
@@ -327,14 +328,14 @@ int32_t LnnRequestLane(uint32_t laneId, const LaneRequestOption *request,
         return SOFTBUS_ERR;
     }
     int32_t result;
-    LNN_LOGI(LNN_LANE, "laneRequest, laneId %u, lane type %d, trans type is %d",
+    LNN_LOGI(LNN_LANE, "laneRequest, laneId=%u, lane type %d, trans type is %d",
         laneId, request->type, request->requestInfo.trans.transType);
     result = g_laneObject[request->type]->AllocLane(laneId, request, listener);
     if (result != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "alloc lane fail, result:%d", result);
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_LANE, "request lane success, lane:%u", laneId);
+    LNN_LOGI(LNN_LANE, "request lane success, laneId=%u", laneId);
     return SOFTBUS_OK;
 }
 
@@ -348,6 +349,7 @@ int32_t LnnFreeLane(uint32_t laneId)
     if (g_laneObject[laneType] == NULL) {
         return SOFTBUS_ERR;
     }
+    LNN_LOGD(LNN_LANE, "free, laneId=%u", laneId);
     int32_t result = g_laneObject[laneType]->FreeLane(laneId);
     if (result != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "freeLane fail, result:%d", result);
@@ -377,7 +379,7 @@ static void LaneInitChannelRatingDelay(void *para)
 {
     (void)para;
     if (LnnInitScore() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "[InitLane]init laneScoring fail");
+        LNN_LOGE(LNN_LANE, "init laneScoring fail");
         return;
     }
     if (LnnStartScoring(LANE_SCORING_INTERVAL) != SOFTBUS_OK) {
@@ -390,7 +392,7 @@ static int32_t LaneDelayInit(void)
     int32_t ret = LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), LaneInitChannelRatingDelay,
         NULL, CHANNEL_RATING_DELAY);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "laneDelayInit post channelRating msg fail");
+        LNN_LOGE(LNN_LANE, "post channelRating msg fail");
     }
     return ret;
 }
