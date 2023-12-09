@@ -103,7 +103,7 @@ static void ExecuteConnection(struct WifiDirectCommand *base)
 {
     struct WifiDirectConnectCommand *self = (struct WifiDirectConnectCommand *)base;
     self->times++;
-    CONN_LOGI(CONN_WIFI_DIRECT, "times=%d", self->times);
+    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%d times=%d", self->connectInfo.requestId, self->times);
 
     int32_t ret = OpenLink(self);
     if (ret != SOFTBUS_OK) {
@@ -111,7 +111,7 @@ static void ExecuteConnection(struct WifiDirectCommand *base)
     }
 }
 
-static void OnSuccess(struct WifiDirectCommand *base, struct NegotiateMessage *msg)
+static void OnConnectSuccess(struct WifiDirectCommand *base, struct NegotiateMessage *msg)
 {
     struct InnerLink *innerLink = NULL;
     struct WifiDirectConnectCommand *self = (struct WifiDirectConnectCommand *)base;
@@ -148,7 +148,7 @@ static void OnSuccess(struct WifiDirectCommand *base, struct NegotiateMessage *m
     GetLinkManager()->dump(0);
 }
 
-static void OnFailure(struct WifiDirectCommand *base, int32_t reason)
+static void OnConnectFailure(struct WifiDirectCommand *base, int32_t reason)
 {
     struct WifiDirectConnectCommand *self = (struct WifiDirectConnectCommand *)base;
     CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%d reason=%d", self->connectInfo.requestId, reason);
@@ -181,6 +181,15 @@ static void OnFailure(struct WifiDirectCommand *base, int32_t reason)
     GetLinkManager()->dump(0);
 }
 
+static void OnConnectTimeout(struct WifiDirectCommand *base)
+{
+    struct WifiDirectConnectCommand *self = (struct WifiDirectConnectCommand *)base;
+    if (self->callback.onConnectFailure != NULL) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "call onConnectFailure");
+        self->callback.onConnectFailure(self->connectInfo.requestId, ERROR_WIFI_DIRECT_COMMAND_WAIT_TIMEOUT);
+    }
+}
+
 static struct WifiDirectCommand* Duplicate(struct WifiDirectCommand *base)
 {
     struct WifiDirectConnectCommand *self = (struct WifiDirectConnectCommand *)base;
@@ -197,10 +206,11 @@ void WifiDirectConnectCommandConstructor(struct WifiDirectConnectCommand *self,
                                          struct WifiDirectConnectCallback *callback)
 {
     self->type = COMMAND_TYPE_CONNECT;
-    ListInit(&self->node);
+    self->timerId = TIMER_ID_INVALID;
     self->execute = ExecuteConnection;
-    self->onSuccess = OnSuccess;
-    self->onFailure = OnFailure;
+    self->onSuccess = OnConnectSuccess;
+    self->onFailure = OnConnectFailure;
+    self->onTimeout = OnConnectTimeout;
     self->duplicate = Duplicate;
     self->deleteSelf = WifiDirectConnectCommandDelete;
     *(&self->connectInfo) = *connectInfo;
