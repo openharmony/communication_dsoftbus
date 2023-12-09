@@ -23,8 +23,10 @@
 static void ExecuteProcessRemoteNegotiateMessage(struct WifiDirectCommand *base)
 {
     struct WifiDirectNegotiateCommand *self = (struct WifiDirectNegotiateCommand *)base;
-    GetWifiDirectNegotiator()->currentCommand = base;
-    GetWifiDirectNegotiator()->currentProcessor = base->processor;
+    struct WifiDirectNegotiator *negotiator = GetWifiDirectNegotiator();
+    negotiator->currentCommand = base;
+    negotiator->currentProcessor = base->processor;
+    negotiator->updateCurrentRemoteDeviceId(self->msg->getPointer(self->msg, NM_KEY_NEGO_CHANNEL, NULL));
     base->processor->processNegotiateMessage(self->cmdType, base);
 }
 
