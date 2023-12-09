@@ -83,8 +83,19 @@ typedef struct {
 } DiscStatsExtra;
 
 typedef enum {
-    AUDIT_SCENE_DISC_RESERVED = 1,
+    AUDIT_SCENE_BLE_PUBLISH = 1,
+    AUDIT_SCENE_BLE_SUBSCRIBE = 2,
+    AUDIT_SCENE_BLE_ADVERTISE = 3,
+    AUDIT_SCENE_BLE_SCAN = 4,
+    AUDIT_SCENE_COAP_PUBLISH = 5,
+    AUDIT_SCENE_COAP_DISCOVERY = 6,
 } DiscAuditScene;
+
+typedef enum {
+    DISC_AUDIT_CONTINUE = 1,
+    DISC_AUDIT_DISCONTINUE = 2,
+    DISC_AUDIT_TRY_AGAIN = 3,
+} DiscAuditResult;
 
 typedef struct {
     const char *callerPkg;         // HOST_PKG

@@ -163,7 +163,7 @@ static void WriteSoftbusAudit(SoftbusEventModule module, SoftbusEventForm *form)
             break;
         }
         case EVENT_MODULE_DISC: {
-            HiSysEventParam discParams[DISC_ASSIGNER_SIZE] = { 0 };
+            HiSysEventParam discParams[DISC_AUDIT_ASSIGNER_SIZE] = { 0 };
             size_t discSize = ConvertDiscAuditForm2Param(discParams, form);
             WriteHiSysEvent(params, size, discParams, discSize, form);
             HiSysEventParamsFree(discParams, discSize);
