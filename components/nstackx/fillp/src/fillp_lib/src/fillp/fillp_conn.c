@@ -643,7 +643,6 @@ static void FillpProcessConnConfirm(struct FillpPcb *pcb, FILLP_CONST struct Net
     struct FtNetconn *newConn = FillpNetconnAlloc(addr->sa_family, inst);
     if (newConn == FILLP_NULL_PTR) {
         FILLP_LOGERR("fillp_sock_id:%d Failed in allocate new netconn connection", sock->index);
-
         return;
     }
 
