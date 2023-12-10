@@ -152,7 +152,7 @@ static void RegisterToDpHelper(void)
 
 void RegisterToDp(DeviceProfileChangeListener *deviceProfilePara)
 {
-    if (deviceProfilePara == NULL) {
+    if (deviceProfilePara == nullptr) {
         AUTH_LOGE(AUTH_INIT, "invalid param!");
         return;
     }
