@@ -250,6 +250,13 @@ if (defined(ohos_lite)) {
         "samgr:samgr_proxy",
       ]
       if (!defined(global_parts_info) ||
+          defined(global_parts_info.deviceprofile_device_info_manager)) {
+        external_deps += [
+          "device_info_manager:distributed_device_profile_common",
+          "device_info_manager:distributed_device_profile_sdk",
+        ]
+      }
+      if (!defined(global_parts_info) ||
           defined(global_parts_info.bundlemanager_bundle_framework)) {
         external_deps += [ "bundle_framework:appexecfwk_core" ]
         cflags = [ "-DSUPPORT_BUNDLENAME" ]

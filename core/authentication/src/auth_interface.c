@@ -18,6 +18,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "auth_deviceprofile.h"
 #include "auth_device_common_key.h"
 #include "auth_hichain.h"
 #include "auth_hichain_adapter.h"
@@ -348,7 +349,8 @@ bool AuthIsPotentialTrusted(const DeviceInfo *device)
             device->accountHash[0], device->accountHash[1]);
         return true;
     }
-    if (IsPotentialTrustedDevice(ID_TYPE_DEVID, device->devId, false, false)) {
+    if (IsPotentialTrustedDevice(ID_TYPE_DEVID, device->devId, false, false) ||
+        IsPotentialTrustedDeviceDp(device->devId)) {
         AUTH_LOGD(AUTH_HICHAIN, "device is potential trusted, continue verify progress");
         return true;
     }
