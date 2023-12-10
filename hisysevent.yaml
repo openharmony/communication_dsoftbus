@@ -203,22 +203,27 @@ TRANSPORT_BEHAVIOR:
 
 TRANSPORT_AUDIT:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: transport audit behavior }
-  ORG_PKG: {type: STRING, desc: organization module name }
-  FUNC: {type: STRING, desc: current function name }
+  ORG_PKG: {type: STRING, desc: business module name }
+  FUNC: {type: STRING, desc: function name }
   HOST_PKG: {type: STRING, desc: host module name }
-  TO_CALL_PKG: {type: STRING, desc: to call module name }
   BIZ_SCENE: {type: INT32, desc: business scene }
+  RESULT: {type: INT32, desc: deal result }
   ERROR_CODE: { type: INT32, desc: error code }
   AUDIT_TYPE: {type: INT32, desc: audit type }
-  SESSION_NAME: {type: STRING, desc: session name }
-  PEER_DEV_ID: { type: INT32, desc: peer device id }
-  CHANNEL_ID: { type: INT32, desc: channel id }
+  LOCAL_IP: { type: STRING, desc: local device ip }
+  LOCAL_PORT: { type: STRING, desc: local device port }
+  LOCAL_DEV_ID: { type: STRING, desc: local device id }
+  LOCAL_DEV_TYPE: { type: INT32, desc: local device type }
+  LOCAL_SESS_NAME: { type: STRING, desc: local session name }
+  LOCAL_CHANNEL_ID: { type: INT32, desc: local channel id }
+  PEER_IP: { type: STRING, desc: peer device ip }
+  PEER_PORT: { type: STRING, desc: peer device port }
+  PEER_DEV_ID: { type: STRING, desc: peer device id }
+  PEER_DEV_TYPE: { type: INT32, desc: peer device type }
+  PEER_SESS_NAME: { type: STRING, desc: peer session name }
   PEER_CHANNEL_ID: { type: INT32, desc: peer channel id }
   CHANNEL_TYPE: { type: INT32, desc: channel type }
-  LANE_ID: { type: INT32, desc: lane id }
   AUTH_ID: { type: INT32, desc: auth id }
-  PREFER_LINK_TYPE: { type: INT32, desc: preferred link type }
-  LANE_TRANS_TYPE: { type: INT32, desc: transport lane data type }
   REQ_ID: { type: INT32, desc: request id }
   LINK_TYPE: { type: INT32, desc: link type }
   CONN_ID: { type: INT32, desc: connection id }
@@ -227,9 +232,8 @@ TRANSPORT_AUDIT:
   DATA_LEN: { type: INT32, desc: channel data length }
   DATA_SEQ: { type: INT32, desc: channel data seq }
   COST_TIME: { type: INT32, desc: total cost time}
-  CHAN_SCORE: { type: INT32, desc: channel score }
-  CHAN_LIMIT: { type: INT32, desc: data limit }
-  EXTRA: { type: STRING, desc: ectra information }
+  DATA_TRAFFIC: { type: INT32, desc: data traffic }
+  REQ_COUNT: { type: INT32, desc: request cpunt }
 
 CONNECTION_BEHAVIOR:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: connection behavior }

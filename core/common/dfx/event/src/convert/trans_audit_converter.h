@@ -33,17 +33,24 @@ extern "C" {
         return false;                                                                                         \
     }
 
+TRANS_AUDIT_ASSIGNER(String, HostPkg, hostPkg)
+TRANS_AUDIT_ASSIGNER(Int32, Result, result)
 TRANS_AUDIT_ASSIGNER(Errcode, Errcode, errcode)
 TRANS_AUDIT_ASSIGNER(Int32, AuditType, auditType)
-TRANS_AUDIT_ASSIGNER(String, SessionName, sessionName)
-TRANS_AUDIT_ASSIGNER(String, PeerDeviceId, peerDeviceId)
-TRANS_AUDIT_ASSIGNER(Int32, ChannelId, channelId)
+TRANS_AUDIT_ASSIGNER(String, LocalIp, localIp)
+TRANS_AUDIT_ASSIGNER(String, LocalPort, localPort)
+TRANS_AUDIT_ASSIGNER(String, LocalDevId, localDevId)
+TRANS_AUDIT_ASSIGNER(Int32, LocalDevType, localDevType)
+TRANS_AUDIT_ASSIGNER(String, LocalSessName, localSessName)
+TRANS_AUDIT_ASSIGNER(Int32, LocalChannelId, localChannelId)
+TRANS_AUDIT_ASSIGNER(String, PeerIp, peerIp)
+TRANS_AUDIT_ASSIGNER(String, PeerPort, peerPort)
+TRANS_AUDIT_ASSIGNER(String, PeerDevId, peerDevId)
+TRANS_AUDIT_ASSIGNER(Int32, PeerDevType, peerDevType)
+TRANS_AUDIT_ASSIGNER(String, PeerSessName, peerSessName)
 TRANS_AUDIT_ASSIGNER(Int32, PeerChannelId, peerChannelId)
 TRANS_AUDIT_ASSIGNER(Int32, ChannelType, channelType)
-TRANS_AUDIT_ASSIGNER(Int32, LaneId, laneId)
 TRANS_AUDIT_ASSIGNER(Int32, AuthId, authId)
-TRANS_AUDIT_ASSIGNER(Int32, PreferLinkType, preferLinkType)
-TRANS_AUDIT_ASSIGNER(Int32, LaneTransType, laneTransType)
 TRANS_AUDIT_ASSIGNER(Int32, ReqId, reqId)
 TRANS_AUDIT_ASSIGNER(Int32, LinkType, linkType)
 TRANS_AUDIT_ASSIGNER(Int32, ConnId, connId)
@@ -52,38 +59,39 @@ TRANS_AUDIT_ASSIGNER(Int32, DataType, dataType)
 TRANS_AUDIT_ASSIGNER(Int32, DataLen, dataLen)
 TRANS_AUDIT_ASSIGNER(Int32, DataSeq, dataSeq)
 TRANS_AUDIT_ASSIGNER(Int32, CostTime, costTime)
-TRANS_AUDIT_ASSIGNER(Int32, ChannelScore, channelScore)
-TRANS_AUDIT_ASSIGNER(Int32, DataLimit, dataLimit)
-TRANS_AUDIT_ASSIGNER(String, Extra, extra)
-TRANS_AUDIT_ASSIGNER(String, CallerPkg, callerPkg)
-TRANS_AUDIT_ASSIGNER(String, CalleePkg, calleePkg)
+TRANS_AUDIT_ASSIGNER(Int32, DataTraffic, dataTraffic)
+TRANS_AUDIT_ASSIGNER(Int32, ReqCount, reqCount)
 
-#define TRANS_AUDIT_ASSIGNER_SIZE 23 // Size of g_transAuditAssigners
+#define TRANS_AUDIT_ASSIGNER_SIZE 28 // Size of g_transAuditAssigners
 static const HiSysEventParamAssigner g_transAuditAssigners[] = {
-    { "ERROR_CODE",       HISYSEVENT_INT32,  TransAuditAssignerErrcode       },
-    { "AUDIT_TYPE",       HISYSEVENT_INT32,  TransAuditAssignerAuditType     },
-    { "SESSION_NAME",     HISYSEVENT_STRING, TransAuditAssignerSessionName   },
-    { "PEER_DEV_ID",      HISYSEVENT_STRING, TransAuditAssignerPeerDeviceId  },
-    { "CHANNEL_ID",       HISYSEVENT_INT32,  TransAuditAssignerChannelId     },
-    { "PEER_CHANNEL_ID",  HISYSEVENT_INT32,  TransAuditAssignerPeerChannelId },
-    { "CHANNEL_TYPE",     HISYSEVENT_INT32,  TransAuditAssignerChannelType   },
-    { "LANE_ID",          HISYSEVENT_INT32,  TransAuditAssignerLaneId        },
-    { "AUTH_ID",          HISYSEVENT_INT32,  TransAuditAssignerAuthId        },
-    { "PREFER_LINK_TYPE", HISYSEVENT_INT32,  TransAuditAssignerPreferLinkType},
-    { "LANE_TRANS_TYPE",  HISYSEVENT_INT32,  TransAuditAssignerLaneTransType },
-    { "REQ_ID",           HISYSEVENT_INT32,  TransAuditAssignerReqId         },
-    { "LINK_TYPE",        HISYSEVENT_INT32,  TransAuditAssignerLinkType      },
-    { "CONN_ID",          HISYSEVENT_INT32,  TransAuditAssignerConnId        },
-    { "SOCKET_FD",        HISYSEVENT_INT32,  TransAuditAssignerSocketFd      },
-    { "DATA_TYPE",        HISYSEVENT_INT32,  TransAuditAssignerDataType      },
-    { "DATA_LEN",         HISYSEVENT_INT32,  TransAuditAssignerDataLen       },
-    { "DATA_SEQ",         HISYSEVENT_INT32,  TransAuditAssignerDataSeq       },
-    { "COST_TIME",        HISYSEVENT_INT32,  TransAuditAssignerCostTime      },
-    { "CHAN_SCORE",       HISYSEVENT_INT32,  TransAuditAssignerChannelScore  },
-    { "DATA_LIMIT",       HISYSEVENT_INT32,  TransAuditAssignerDataLimit     },
-    { "EXTRA",            HISYSEVENT_STRING, TransAuditAssignerExtra         },
-    { "HOST_PKG",         HISYSEVENT_STRING, TransAuditAssignerCallerPkg     },
-    { "TO_CALL_PKG",      HISYSEVENT_STRING, TransAuditAssignerCalleePkg     },
+    { "HOST_PKG",         HISYSEVENT_STRING, TransAuditAssignerHostPkg        },
+    { "RESULT",           HISYSEVENT_INT32,  TransAuditAssignerResult         },
+    { "ERROR_CODE",       HISYSEVENT_INT32,  TransAuditAssignerErrcode        },
+    { "AUDIT_TYPE",       HISYSEVENT_INT32,  TransAuditAssignerAuditType      },
+    { "LOCAL_IP",         HISYSEVENT_STRING, TransAuditAssignerLocalIp        },
+    { "LOCAL_PORT",       HISYSEVENT_STRING, TransAuditAssignerLocalPort      },
+    { "LOCAL_DEV_ID",     HISYSEVENT_STRING, TransAuditAssignerLocalDevId     },
+    { "LOCAL_DEV_TYPE",   HISYSEVENT_INT32,  TransAuditAssignerLocalDevType   },
+    { "LOCAL_SESS_NAME",  HISYSEVENT_STRING, TransAuditAssignerLocalSessName  },
+    { "LOCAL_CHANNEL_ID", HISYSEVENT_INT32,  TransAuditAssignerLocalChannelId },
+    { "PEER_IP",          HISYSEVENT_STRING, TransAuditAssignerPeerIp         },
+    { "PEER_PORT",        HISYSEVENT_STRING, TransAuditAssignerPeerPort       },
+    { "PEER_DEV_ID",      HISYSEVENT_STRING, TransAuditAssignerPeerDevId      },
+    { "PEER_DEV_TYPE",    HISYSEVENT_INT32,  TransAuditAssignerPeerDevType    },
+    { "PEER_SESS_NAME",   HISYSEVENT_STRING, TransAuditAssignerPeerSessName   },
+    { "PEER_CHANNEL_ID",  HISYSEVENT_INT32,  TransAuditAssignerPeerChannelId  },
+    { "CHANNEL_TYPE",     HISYSEVENT_INT32,  TransAuditAssignerChannelType    },
+    { "AUTH_ID",          HISYSEVENT_INT32,  TransAuditAssignerAuthId         },
+    { "REQ_ID",           HISYSEVENT_INT32,  TransAuditAssignerReqId          },
+    { "LINK_TYPE",        HISYSEVENT_INT32,  TransAuditAssignerLinkType       },
+    { "CONN_ID",          HISYSEVENT_INT32,  TransAuditAssignerConnId         },
+    { "SOCKET_FD",        HISYSEVENT_INT32,  TransAuditAssignerSocketFd       },
+    { "DATA_TYPE",        HISYSEVENT_INT32,  TransAuditAssignerDataType       },
+    { "DATA_LEN",         HISYSEVENT_INT32,  TransAuditAssignerDataLen        },
+    { "DATA_SEQ",         HISYSEVENT_INT32,  TransAuditAssignerDataSeq        },
+    { "COST_TIME",        HISYSEVENT_INT32,  TransAuditAssignerCostTime       },
+    { "DATA_TRAFFIC",     HISYSEVENT_INT32,  TransAuditAssignerDataTraffic    },
+    { "REQ_COUNT",        HISYSEVENT_INT32,  TransAuditAssignerReqCount       },
     // Modification Note: remember updating TRANS_ASSIGNER_SIZE
 };
 
