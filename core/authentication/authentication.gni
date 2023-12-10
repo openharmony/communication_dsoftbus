@@ -104,7 +104,26 @@ if (defined(ohos_lite)) {
   }
   auth_server_src += [ "$authentication_path/src/virtual/auth_hichain_system_ability_monitor_virtual.c" ]
 } else {
-  auth_server_inc += [ "//base/security/device_auth/interfaces/inner_api" ]
+  auth_server_inc += [
+    "//base/security/device_auth/interfaces/inner_api",
+    "//foundation/deviceprofile/device_info_manager/interfaces/innerkits/core/include",
+    "//foundation/deviceprofile/device_info_manager/common/include/interfaces/",
+    "//foundation/deviceprofile/device_info_manager/common/include/constants",
+    "//foundation/deviceprofile/device_info_manager/common/include/utils",
+  ]
   auth_server_src +=
       [ "$authentication_path/src/auth_hichain_system_ability_monitor.cpp" ]
+}
+
+if (!defined(global_parts_info) ||
+    defined(global_parts_info.deviceprofile_device_info_manager)) {
+  auth_server_src += [
+    "$authentication_path/bind/auth_device_profile_listener.cpp",
+    "$authentication_path/src/auth_deviceprofile.cpp",
+  ]
+} else {
+  auth_server_src += [
+    "$authentication_path/bind/auth_device_profile_listener_virtual.cpp",
+    "$authentication_path/src/auth_deviceprofile_virtual.cpp",
+  ]
 }
