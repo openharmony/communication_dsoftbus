@@ -39,6 +39,9 @@ extern "C"{
  */
 #define SOFTBUS_ADDR_MAC_LEN 6
 
+#define SOFTBUS_IRK_LEN   16
+#define SOFTBUS_UDID_HASH_LEN 32
+
 /**
  * @brief Defines the length of local name, the maximum length of complete local name is 30 bytes.
  *
@@ -108,6 +111,11 @@ typedef struct {
     uint8_t addr[SOFTBUS_ADDR_MAC_LEN];
 } SoftbusMacAddr;
 
+typedef struct {
+    uint8_t uuidLen;
+    uint8_t *uuid;
+} SoftbusBroadcastUuid;
+
 /**
  * @brief Defines the device information returned by <b>SoftbusBroadcastCallback</b>.
  *
@@ -124,6 +132,7 @@ typedef struct {
     int8_t rssi;
     uint8_t addrType;
     SoftbusMacAddr addr;
+    int8_t *deviceName;
     uint8_t localName[SOFTBUS_LOCAL_NAME_LEN_MAX];
     SoftbusBroadcastData data;
 } SoftBusBcScanResult;
@@ -145,6 +154,9 @@ typedef struct {
     int32_t channelMap;
     int32_t duration;
     int8_t txPower;
+    bool isSupportRpa;
+    uint8_t ownIrk[SOFTBUS_IRK_LEN];
+    uint8_t ownUdidHash[SOFTBUS_UDID_HASH_LEN];
 } SoftbusBroadcastParam;
 
 /**
@@ -179,6 +191,18 @@ typedef struct {
     uint8_t scanPhy;
     uint8_t scanFilterPolicy;
 } SoftBusBcScanParams;
+
+typedef struct {
+    int32_t advHandle;
+    SoftbusBroadcastData advData;
+    SoftbusBroadcastParam advParam;
+} SoftBusLpBroadcastParam;
+
+typedef struct {
+    SoftBusBcScanParams scanParam;
+    SoftBusBcScanFilter *filter;
+    uint8_t filterSize;
+} SoftBusLpScanParam;
 
 #ifdef __cplusplus
 }
