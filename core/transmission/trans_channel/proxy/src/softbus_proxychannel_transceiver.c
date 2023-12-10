@@ -794,6 +794,15 @@ static void TransProxyOnDataReceived(
     int32_t ret = TransProxyParseMessage((char *)data, len, &msg);
     if (((ret == SOFTBUS_AUTH_NOT_FOUND) || (ret == SOFTBUS_DECRYPT_ERR)) &&
         (msg.msgHead.type == PROXYCHANNEL_MSG_TYPE_HANDSHAKE)) {
+        TransAuditExtra extra = {
+            .result = TRANS_AUDIT_DISCONTINUE,
+            .errcode = ret,
+            .auditType = AUDIT_EVENT_PACKETS_ERROR,
+            .connId = connectionId,
+            .dataSeq = seq,
+            .dataLen = len,
+        };
+        TRANS_AUDIT(AUDIT_SCENE_SEND_MSG, extra);
         if (TransProxySendBadKeyMessage(&msg) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "send bad key msg ret=%d", ret);
             return;

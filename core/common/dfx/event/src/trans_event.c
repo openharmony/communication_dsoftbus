@@ -57,6 +57,7 @@ void TransAuditInner(int32_t scene, const char *func, int32_t line, TransAuditEx
     SoftbusEventForm form = {
         .eventName = TRANS_AUDIT_NAME,
         .scene = scene,
+        .stage = SOFTBUS_DEFAULT_STAGE,
         .func = func,
         .line = line,
         .transAuditExtra = extra,
