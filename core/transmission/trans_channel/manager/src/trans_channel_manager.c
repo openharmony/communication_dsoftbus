@@ -487,6 +487,10 @@ EXIT_ERR:
     extra.result = EVENT_STAGE_RESULT_FAILED;
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     TransAlarmExtra extraAlarm = {
+        .conflictName = NULL,
+        .conflictedName = NULL,
+        .occupyedName = NULL,
+        .permissionName = NULL,
         .errcode = ret,
         .sessionName = appInfo->myData.sessionName,
     };
