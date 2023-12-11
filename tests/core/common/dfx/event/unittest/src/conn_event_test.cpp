@@ -149,5 +149,49 @@ HWTEST_F(ConnEventTest, ConnEventTest004, TestSize.Level0)
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_START, emptyExtra);
 }
 
+/**
+ * @tc.name: ConnEventTest001
+ * @tc.desc: Test conn event form size
+ * @tc.type: FUNC
+ * @tc.require: I8HA59
+ */
+HWTEST_F(ConnEventTest, ConnEventTest005, TestSize.Level0)
+{
+    ConnAuditExtra extra = {
+    	.errcode = 1000,
+        .auditType = AUDIT_EVENT_MSG_ERROR,
+        .connectionId = 222,
+        .requestId = 101,
+        .linkType = 1,
+        .expectRole = 9,
+        .costTime = 999,
+        .connectTimes = 3,
+        .frequency = "3999",
+        .peerBrMac = "11:22:33:44:55:66",
+        .localBrMac = "12:22:23:33:33:91",
+        .peerBleMac = "22:66:55:44:33:22",
+        .localBleMac = "91:33:33:23:22:12",
+        .peerDeviceType = "phone",
+        .peerUdid = "aassddffggh565",
+        .localUdid = "sqqqddffggh565",
+        .connPayload = "100/3/14/588",
+        .localDeviceName = "test_connection",
+        .peerIp = "127.1.1.1",
+        .localIp = "127.0.0.0",
+        .callerPkg = "nearby",
+        .calleePkg = "test_name",
+        .peerPort = "3512",
+        .localPort = "2484",
+    };
+
+    constexpr int32_t VALID_EXTRA_SIZE = 24;
+
+    HiSysEventMock mock;
+    EXPECT_CALL(mock,
+            HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(CONN_AUDIT_NAME), Eq(SOFTBUS_EVENT_TYPE_SECURITY),
+                ConnAuditValidParamArrayMatcher(extra, VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
+    .Times(1);
+    CONN_AUDIT(AUDIT_SCENE_CONN_RESERVED, extra);
+}
 
 } // namespace OHOS
