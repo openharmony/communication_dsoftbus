@@ -317,11 +317,11 @@ HWTEST_F(TransEventTest, TransEventTest008, TestSize.Level0)
         .errcode = 9527,
         .auditType = AUDIT_EVENT_MSG_ERROR,
     };
-    constexpr int32_t VALID_EXTRA_SIZE = 3;
+    constexpr int32_t VALID_EXTRA_SIZE = 4;
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,
-        HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(TRANS_AUDIT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR), _,
+        HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(TRANS_AUDIT_NAME), Eq(SOFTBUS_EVENT_TYPE_SECURITY), _,
             ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
         .Times(1);
     TRANS_AUDIT(AUDIT_SCENE_OPEN_SESSION, extra);
@@ -369,7 +369,7 @@ HWTEST_F(TransEventTest, TransEventTest009, TestSize.Level0)
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,
-        HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(TRANS_AUDIT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR),
+        HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(TRANS_AUDIT_NAME), Eq(SOFTBUS_EVENT_TYPE_SECURITY),
             TransAuditValidParamArrayMatcher(validExtra, VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
         .Times(1);
     TRANS_AUDIT(AUDIT_SCENE_OPEN_SESSION, validExtra);

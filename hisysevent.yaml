@@ -68,7 +68,7 @@ DISCOVER_BEHAVIOR:
   PEER_DEV_TYPE: { type: STRING, desc: peer device type }
 
 DISCOVER_AUDIT:
-  __BASE: {type: BEHAVIOR, level: MINOR, desc: discovery audit behavior }
+  __BASE: {type: SECURITY, level: CRITICAL, desc: discovery security audit }
   ORG_PKG: {type: STRING, desc: organization module name }
   FUNC: {type: STRING, desc: current function name }
   HOST_PKG: {type: STRING, desc: host module name }
@@ -138,7 +138,7 @@ BUSCENTER_BEHAVIOR:
   PEER_DEV_TYPE: { type: STRING, desc: peer device type }
 
 BUSCENTER_AUDIT:
-  __BASE: {type: BEHAVIOR, level: MINOR, desc: bus center audit behavior }
+  __BASE: {type: SECURITY, level: CRITICAL, desc: bus center security audit }
   BIZ_SCENE: {type: INT32, desc: business scene }
   BIZ_STAGE: {type: INT32, desc: business stage }
   ORG_PKG: {type: STRING, desc: organization module name }
@@ -202,7 +202,7 @@ TRANSPORT_BEHAVIOR:
   PEER_NET_ID: { type: STRING, desc: peer device net id }
 
 TRANSPORT_AUDIT:
-  __BASE: {type: BEHAVIOR, level: MINOR, desc: transport audit behavior }
+  __BASE: {type: SECURITY, level: CRITICAL, desc: transport recurity audit }
   ORG_PKG: {type: STRING, desc: business module name }
   FUNC: {type: STRING, desc: function name }
   HOST_PKG: {type: STRING, desc: host module name }
@@ -263,7 +263,7 @@ CONNECTION_BEHAVIOR:
   PEER_PORT: { type: STRING, desc: peer device port }
 
 CONNECTION_AUDIT:
-  __BASE: {type: BEHAVIOR, level: MINOR, desc: connection audit behavior }
+  __BASE: {type: SECURITY, level: CRITICAL, desc: connection security audit }
   ORG_PKG: {type: STRING, desc: organization module name }
   FUNC: {type: STRING, desc: current function name }
   HOST_PKG: {type: STRING, desc: host module name }
