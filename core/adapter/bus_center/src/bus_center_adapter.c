@@ -95,7 +95,7 @@ static int32_t SoftBusConvertDeviceType(const char *inBuf, char *outBuf, uint32_
     return SOFTBUS_ERR;
 }
 
-int32_t GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len)
+int32_t GetCommonDevInfo(CommonDeviceKey key, char *value, uint32_t len)
 {
     if (value == NULL) {
         LNN_LOGE(LNN_STATE, "para error");

@@ -76,4 +76,4 @@ void SoftBusRunPeriodicalTask(const char *name, void(*task)(void), uint64_t inte
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif
+#endif // SOFTBUS_ADAPTER_XCOLLIE_H

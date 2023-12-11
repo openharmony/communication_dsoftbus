@@ -70,7 +70,7 @@ int32_t SoftBusBase64Decode(unsigned char *dst, size_t dlen,
 
 int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash);
 
-int32_t SoftBusGenerateSessionKey(char* key, uint32_t len);
+int32_t SoftBusGenerateSessionKey(char *key, uint32_t len);
 
 int32_t SoftBusGenerateRandomArray(unsigned char *randStr, uint32_t len);
 

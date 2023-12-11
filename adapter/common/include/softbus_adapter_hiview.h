@@ -40,4 +40,4 @@ void SoftBusGenHiviewHash(const char *deviceId, char *buf, uint32_t size);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif
+#endif // SOFTBUS_ADAPTER_HIVIEW_H
