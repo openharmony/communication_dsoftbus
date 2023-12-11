@@ -57,7 +57,7 @@ static void CloseSppServer(int32_t serverFd)
     SppServerClose(serverFd);
 }
 
-static int32_t Connect(const char *uuid, const BT_ADDR mac, void *connectCallback)
+static int32_t ConnectByPort(const char *uuid, const BT_ADDR mac, const int socketPsmValue, void *connectCallback)
 {
     if (mac == NULL) {
         return SOFTBUS_ERR;
@@ -75,14 +75,18 @@ static int32_t Connect(const char *uuid, const BT_ADDR mac, void *connectCallbac
         CONN_LOGE(CONN_BR, "Connect memcpy_s failed");
         return SOFTBUS_ERR;
     }
-    const int socketPsmValue = -1;
     int ret = SocketConnectEx(&socketPara, &bdAddr, socketPsmValue, (BtSocketConnectionCallback *)connectCallback);
     if (ret < 0) {
         CONN_LOGE(CONN_BR, "connect failed,ret=%d", ret);
         return SOFTBUS_ERR;
     }
-    CONN_LOGI(CONN_BR, "SppConnect ok clientId: %d", ret);
+    CONN_LOGI(CONN_BR, "SocketConnectEx ok clientId: %d", ret);
     return ret;
+}
+
+static int32_t Connect(const char *uuid, const BT_ADDR mac, void *connectCallback)
+{
+    return ConnectByPort(uuid, mac, -1 ,connectCallback);
 }
 
 static int32_t DisConnect(int32_t clientFd)
@@ -136,18 +140,24 @@ static int32_t GetRemoteDeviceInfo(int32_t clientFd, const BluetoothRemoteDevice
 
     return SOFTBUS_OK;
 }
+static int32_t GetSppServerPort(int serverId)
+{
+    return SocketGetScn(serverId);
+}
 
 static SppSocketDriver g_sppSocketDriver = {
     .Init = Init,
     .OpenSppServer = OpenSppServer,
     .CloseSppServer = CloseSppServer,
     .Connect = Connect,
+    .ConnectByPort = ConnectByPort,
     .DisConnect = DisConnect,
     .IsConnected = IsConnected,
     .Accept = Accept,
     .Write = Write,
     .Read = Read,
-    .GetRemoteDeviceInfo = GetRemoteDeviceInfo
+    .GetRemoteDeviceInfo = GetRemoteDeviceInfo,
+    .GetSppServerPort = GetSppServerPort
 };
 
 bool IsAclConnected(const BT_ADDR mac)
