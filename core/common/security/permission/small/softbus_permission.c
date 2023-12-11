@@ -93,15 +93,18 @@ int32_t CheckTransPermission(pid_t callingUid, pid_t callingPid,
 int32_t CheckTransSecLevel(const char *mySessionName, const char *peerSessionName)
 {
     if (mySessionName == NULL || peerSessionName == NULL) {
+        COMM_LOGI(COMM_PERM, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     if (strcmp(mySessionName, peerSessionName) == 0) {
         return SOFTBUS_OK;
     }
     if (!PermIsSecLevelPublic(mySessionName)) {
+        COMM_LOGI(COMM_PERM, "mySessionName isn't seclevel");
         return SOFTBUS_PERMISSION_DENIED;
     }
     if (!PermIsSecLevelPublic(peerSessionName)) {
+        COMM_LOGI(COMM_PERM, "peerSessionName isn't seclevel");
         return SOFTBUS_PERMISSION_DENIED;
     }
     return SOFTBUS_OK;

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "comm_log.h"
 #include "softbus_queue.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
@@ -31,9 +32,11 @@ extern "C" {
 int32_t QueueInit(LockFreeQueue* queue, uint32_t unitNum)
 {
     if (queue == NULL) {
+        COMM_LOGE(COMM_UTILS, "queue is null");
         return QUEUE_INVAL;
     }
     if (!IS_POWER_OF_2(unitNum)) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
         return QUEUE_INVAL;
     }
 
@@ -58,9 +61,11 @@ int32_t QueueSizeCalc(uint32_t unitNum, uint32_t* queueSize)
     uint32_t size;
 
     if (queueSize == NULL) {
+        COMM_LOGE(COMM_UTILS, "queueSize is null");
         return QUEUE_INVAL;
     }
     if (unitNum > QUEUE_SIZE_MAX) {
+        COMM_LOGE(COMM_UTILS, "unitNum is invalid param unitNum=%u", unitNum);
         return QUEUE_INVAL;
     }
 
@@ -76,6 +81,7 @@ int32_t QueueCountGet(const LockFreeQueue* queue, uint32_t* count)
     uint32_t mask;
 
     if (queue == NULL || count == NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
         return QUEUE_INVAL;
     }
     producerTail = queue->producer.tail;
@@ -98,10 +104,12 @@ LockFreeQueue* CreateQueue(uint32_t unitNum)
     }
     LockFreeQueue *queue = (LockFreeQueue *)SoftBusCalloc(queueSize);
     if (queue == NULL) {
+        COMM_LOGE(COMM_UTILS, "SoftBusCalloc fail");
         return NULL;
     }
     ret = QueueInit(queue, unitNum);
     if (ret != 0) {
+        COMM_LOGE(COMM_UTILS, "QueueInit fail");
         SoftBusFree(queue);
         return NULL;
     }
