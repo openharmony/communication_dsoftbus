@@ -560,6 +560,8 @@ int32_t TransGetLaneInfo(const SessionParam *param, LaneConnInfo *connInfo, uint
 
     int32_t ret = TransGetLaneInfoByOption(isQosLane, &requestOption, connInfo, laneId);
     TransEventExtra extra = {
+        .calleePkg = NULL,
+        .callerPkg = NULL,
         .socketName = param->sessionName,
         .laneId = *laneId,
         .peerNetworkId = param->peerDeviceId,

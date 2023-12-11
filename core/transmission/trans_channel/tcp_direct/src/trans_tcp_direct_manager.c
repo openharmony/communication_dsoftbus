@@ -273,6 +273,9 @@ int32_t TransOpenDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, 
         ret = OpenTcpDirectChannel(appInfo, connInfo, channelId);
     }
     TransEventExtra extra = {
+        .peerNetworkId = NULL,
+        .calleePkg = NULL,
+        .callerPkg = NULL,
         .linkType = connInfo->type,
         .channelType = CHANNEL_TYPE_TCP_DIRECT,
         .channelId = *channelId,

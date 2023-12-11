@@ -412,6 +412,7 @@ int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)
     int64_t timeStart = conn.appInfo.timeStart;
     int64_t timediff = GetSoftbusRecordTimeMillis() - timeStart;
     TransEventExtra extra = {
+        .calleePkg = NULL,
         .callerPkg = conn.appInfo.myData.pkgName,
         .channelId = conn.appInfo.myData.channelId,
         .peerNetworkId = conn.appInfo.myData.deviceId,
@@ -550,6 +551,10 @@ static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *re
     int errCode = SOFTBUS_OK;
     if (UnpackReplyErrCode(reply, &errCode) == SOFTBUS_OK) {
         TransEventExtra extra = {
+            .socketName = NULL,
+            .peerNetworkId = NULL,
+            .calleePkg = NULL,
+            .callerPkg = NULL,
             .channelId = channelId,
             .errcode = errCode,
             .result = EVENT_STAGE_RESULT_FAILED
@@ -595,6 +600,10 @@ static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *re
         }
     }
     TransEventExtra extra = {
+        .socketName = NULL,
+        .peerNetworkId = NULL,
+        .calleePkg = NULL,
+        .callerPkg = NULL,
         .channelId = channelId,
         .result = EVENT_STAGE_RESULT_OK };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
