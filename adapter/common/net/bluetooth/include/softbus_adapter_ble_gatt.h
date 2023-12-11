@@ -185,6 +185,8 @@ int SoftBusStartScan(int listenerId, int scannerId, const SoftBusBleScanParams *
 
 int SoftBusStopScan(int listenerId, int scannerId);
 
+int SoftBusStopScanImmediately(int listenerId, int scannerId);
+
 int SoftBusGetAdvChannel(const SoftBusAdvCallback *callback, int *scannerId, bool isLpDeviceScan);
 
 int SoftBusReleaseAdvChannel(int advId);

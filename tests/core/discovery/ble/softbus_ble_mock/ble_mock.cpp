@@ -60,6 +60,11 @@ int SoftBusStopScan(int listenerId, int scannerId)
     return BleMock::GetMock()->SoftBusStopScan(listenerId, scannerId);
 }
 
+int SoftBusStopScanImmediately(int listenerId, int scannerId)
+{
+    return BleMock::GetMock()->SoftBusStopScanImmediately(listenerId, scannerId);
+}
+
 int SoftBusRemoveBtStateListener(int listenerId)
 {
     return BleMock::GetMock()->SoftBusRemoveBtStateListener(listenerId);
@@ -190,6 +195,20 @@ int32_t BleMock::ActionOfStartScan(int listenerId, int scannerId, const SoftBusB
 }
 
 int32_t BleMock::ActionOfStopScan(int listenerId, int scannerId)
+{
+    if (listenerId != SCAN_LISTENER_ID) {
+        return SOFTBUS_ERR;
+    }
+
+    isScanning = false;
+    if (scanListener && scanListener->OnScanStop) {
+        scanListener->OnScanStop(SCAN_LISTENER_ID, SOFTBUS_BT_STATUS_SUCCESS);
+    }
+    GetMock()->UpdateScanStateDone();
+    return SOFTBUS_OK;
+}
+
+int32_t BleMock::ActionOfStopScanImmediately(int listenerId, int scannerId)
 {
     if (listenerId != SCAN_LISTENER_ID) {
         return SOFTBUS_ERR;
@@ -470,6 +489,7 @@ void BleMock::SetupSuccessStub()
     EXPECT_CALL(*this, SoftBusStopAdv).WillRepeatedly(BleMock::ActionOfStopAdv);
     EXPECT_CALL(*this, SoftBusStartScan).WillRepeatedly(BleMock::ActionOfStartScan);
     EXPECT_CALL(*this, SoftBusStopScan).WillRepeatedly(BleMock::ActionOfStopScan);
+    EXPECT_CALL(*this, SoftBusStopScanImmediately).WillRepeatedly(BleMock::ActionOfStopScanImmediately);
     EXPECT_CALL(*this, SoftBusGetBtMacAddr(NotNull())).WillRepeatedly(BleMock::ActionOfGetBtMacAddr);
     EXPECT_CALL(*this, SoftBusRemoveBtStateListener).WillRepeatedly(BleMock::ActionOfRemoveBtStateListener);
     EXPECT_CALL(*this, BleGattLockInit).WillRepeatedly(BleMock::ActionOfBleGattLockInit);
