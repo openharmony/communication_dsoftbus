@@ -81,8 +81,7 @@ int32_t DiscServerProxyInit(void)
 void DiscServerProxyDeInit(void)
 {
     DISC_LOGI(DISC_INIT, "enter");
-    delete g_serverProxy;
-    g_serverProxy = nullptr;
+    g_serverProxy.clear();
 }
 
 int32_t ServerIpcPublishService(const char *pkgName, const PublishInfo *info)

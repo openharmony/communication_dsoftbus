@@ -82,10 +82,7 @@ int32_t TransServerProxyInit(void)
 void TransServerProxyDeInit(void)
 {
     TRANS_LOGI(TRANS_SDK, "enter");
-    if (g_serverProxy != nullptr) {
-        delete g_serverProxy;
-    }
-    g_serverProxy = nullptr;
+    g_serverProxy.clear();
 }
 
 int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionName)
