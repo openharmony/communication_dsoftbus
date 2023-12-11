@@ -1509,14 +1509,17 @@ static int32_t LnnGenBroadcastCipherInfo(void)
         }
         if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_KEY,
             broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+            (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
             LNN_LOGE(LNN_LEDGER, "set key error.");
             return SOFTBUS_ERR;
         }
         if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_IV,
             broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
+            (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
             LNN_LOGE(LNN_LEDGER, "set iv error.");
             return SOFTBUS_ERR;
         }
+        (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
         LNN_LOGI(LNN_LEDGER, "load BroadcastCipherInfo success!");
         return SOFTBUS_OK;
     }
