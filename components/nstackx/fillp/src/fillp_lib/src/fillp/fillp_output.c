@@ -86,13 +86,13 @@ static FILLP_BOOL FillpIsAskMoreBuf(struct FillpSendPcb *sendPcb, struct FillpPc
     if (askMoreRet <= 0) {
         return FILLP_FALSE;
     }
-    int inx = 0;
+    
     struct FtSocket *sock = FILLP_GET_SOCKET(pcb);
-    for (; inx < askMoreRet; inx++) {
 #ifdef SOCK_SEND_SEM
+    for (int inx = 0; inx < askMoreRet; inx++) {
         (void)SYS_ARCH_SEM_POST(&sendPcb->send_sem);
-#endif /* SOCK_SEND_SEM */
     }
+#endif /* SOCK_SEND_SEM */
     (void)SYS_ARCH_ATOMIC_INC(&sock->sendEventCount, askMoreRet);
     sendPcb->curItemCount = (FILLP_UINT32)DYMP_GET_CUR_SIZE(sendPcb->itemPool);
     FILLP_LOGDBG("Ask more buffer for send success, fillp_sock_id:%d", sock->index);

@@ -175,7 +175,6 @@ static void FillpInitTimingWheelTimeHand(struct FillpTimingWheelHand *hand, FILL
     hand->curTick = 0;
     hand->accuracy = accuracy;
     hand->curSlotTime = SYS_ARCH_GET_CUR_TIME_LONGLONG();
-    hand->curTick = 0;
     hand->handLength = accuracy * FILLP_TIMING_WHEEL_SLOT_NUM;
 
     for (i = 0; i < FILLP_TIMING_WHEEL_SLOT_NUM; i++) {

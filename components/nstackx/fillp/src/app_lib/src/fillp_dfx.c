@@ -493,7 +493,7 @@ static FILLP_INT FillpDumpShowSockResource(FILLP_INT sockIndex, void *softObj, F
         }
         return FILLP_FAILURE;
     }
-    
+
     FILLP_INT32 isOk = DoShowSockConfigRes(sockIndex, &sock->resConf, data, &len);
     (void)SYS_ARCH_RWSEM_RDPOST(&sock->sockConnSem);
     if (isOk != FILLP_SUCCESS) {

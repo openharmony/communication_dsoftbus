@@ -34,7 +34,6 @@ struct SockOsSocket *SpungeAllocSystemSocket(FILLP_INT domain, FILLP_INT type, F
     osSock = (struct SockOsSocket *)SpungeAlloc(1, sizeof(struct SockOsSocket), SPUNGE_ALLOC_TYPE_CALLOC);
     if (osSock == FILLP_NULL_PTR) {
         FILLP_LOGERR("Failed to allocate memory for os socket \r\n");
-
         return FILLP_NULL_PTR;
     }
 

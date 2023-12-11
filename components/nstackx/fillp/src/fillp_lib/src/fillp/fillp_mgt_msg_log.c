@@ -121,6 +121,7 @@ static FILLP_INT FillpExtParaCharacterFormat(FILLP_CONST struct FtNetconn *conn,
 {
     FILLP_INT ret = snprintf_s(buf, len, len - 1, "    characters: 0x%08X", conn->peerCharacters);
     if (ret < 0) {
+        FILLP_LOGERR("snprintf_s failed");
         return ret;
     }
     size_t formatLen = (FILLP_UINT32)ret;
@@ -129,6 +130,7 @@ static FILLP_INT FillpExtParaCharacterFormat(FILLP_CONST struct FtNetconn *conn,
     ret = FillpBitmapFormat(buf + formatLen, len - formatLen, conn->peerCharacters,
         characterStr, UTILS_ARRAY_LEN(characterStr));
     if (ret < 0) {
+        FILLP_LOGERR("FillpBitmapFormat failed");
         return ret;
     }
     formatLen += (FILLP_UINT32)ret;
@@ -140,6 +142,7 @@ static FILLP_INT FillpExtParaFcAlgFormat(FILLP_CONST struct FtNetconn *conn, FIL
 {
     FILLP_INT ret = snprintf_s(buf, len, len - 1, "    FC ALG: 0x%02X", conn->peerFcAlgs);
     if (ret < 0) {
+        FILLP_LOGERR("snprintf_s failed");
         return ret;
     }
     size_t formatLen = (FILLP_UINT32)ret;
@@ -148,6 +151,7 @@ static FILLP_INT FillpExtParaFcAlgFormat(FILLP_CONST struct FtNetconn *conn, FIL
     ret = FillpBitmapFormat(buf + formatLen, len - formatLen, conn->peerFcAlgs,
         fcAlgStr, UTILS_ARRAY_LEN(fcAlgStr));
     if (ret < 0) {
+        FILLP_LOGERR("FillpBitmapFormat failed");
         return ret;
     }
     formatLen += (FILLP_UINT32)ret;
@@ -169,6 +173,7 @@ static FILLP_INT FillpExtParaFormat(FILLP_CONST FILLP_UCHAR *extPara, FILLP_INT 
     struct FtNetconn conn;
     (void)memset_s(&conn, sizeof(struct FtNetconn), 0, sizeof(struct FtNetconn));
     if (FillpDecodeExtPara(extPara, extParaLen, &conn) != ERR_OK) {
+        FILLP_LOGERR("FillpDecodeExtPara failed");
         return -1;
     }
 
@@ -181,6 +186,7 @@ static FILLP_INT FillpExtParaFormat(FILLP_CONST FILLP_UCHAR *extPara, FILLP_INT 
 
         FILLP_INT ret = g_extParaFormatter[i](&conn, buf + formatLen, len - formatLen);
         if (ret < 0 || (FILLP_UINT32)ret > len - formatLen) {
+            FILLP_LOGERR("g_extParaFormatter failed");
             return -1;
         }
 
@@ -310,6 +316,7 @@ void FillpConnFinLog(FILLP_INT sockIndex, FILLP_CONST struct FillpPktFin *fin, F
     FILLP_CONST FILLP_CHAR *flagStr[] = { "WR", "RD", "ACK", "VERSION_MISMATCH" };
     FILLP_UINT32 flags = FILLP_NTOHS(fin->flag);
     if (FillpBitmapFormat(tmpBuf, sizeof(tmpBuf), flags, flagStr, UTILS_ARRAY_LEN(flagStr)) < 0) {
+        FILLP_LOGERR("FillpBitmapFormat failed");
         return;
     }
 

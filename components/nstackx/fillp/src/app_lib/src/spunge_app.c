@@ -87,7 +87,6 @@ struct FtSocket *SpungeAllocSock(FILLP_INT allocType)
 
     if ((g_spunge == FILLP_NULL_PTR) || (!g_spunge->hasInited) || (g_spunge->sockTable == FILLP_NULL_PTR)) {
         FILLP_LOGERR("FILLP Not yet Initialized");
-
         return FILLP_NULL_PTR;
     }
 

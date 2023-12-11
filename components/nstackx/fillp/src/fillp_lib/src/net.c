@@ -124,7 +124,6 @@ struct FtNetconn *FillpNetconnAlloc(FILLP_UINT16 domain, struct SpungeInstance *
     conn->pcb = SpungePcbNew(conn, inst);
     if (conn->pcb == FILLP_NULL_PTR) {
         FILLP_LOGERR("alloc spunge_pcb fail");
-
         DympFree(conn);
         return FILLP_NULL_PTR;
     }
