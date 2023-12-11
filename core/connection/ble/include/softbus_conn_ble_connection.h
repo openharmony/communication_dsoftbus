@@ -89,6 +89,7 @@ enum ConnBleDisconnectReason {
 enum ConnBleFeatureCapability {
     BLE_FEATURE_SUPPORT_REMOTE_DISCONNECT = 1,
     BLE_FEATURE_SUPPORT_DISCONNECT_BY_DEVICEID,
+    BLE_FEATURE_SUPPORT_SUPPORT_NETWORKID_BASICINFO_EXCAHNGE,
 };
 typedef uint32_t ConnBleFeatureBitSet;
 
