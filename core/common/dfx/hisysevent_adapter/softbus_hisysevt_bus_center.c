@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -493,7 +493,7 @@ static int32_t ReportDevDiscoveryRecordEvt(void)
             break;
         }
     } while (false);
-    SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReportMsg(msg);
     CleanDevDiscoveryRecord();
     return ret;
 }
@@ -629,7 +629,7 @@ static int32_t ReportAppDiscoveryRecordEvt(void)
                 break;
             }
         } while (false);
-        SoftbusFreeEvtReporMsg(msg);
+        SoftbusFreeEvtReportMsg(msg);
         if (ret != SOFTBUS_OK) {
             (void)SoftBusMutexUnlock(&g_appDiscLock);
             return ret;
@@ -775,7 +775,7 @@ int32_t SoftBusReportBusCenterFaultEvt(SoftBusFaultEvtInfo *info)
     info->errorCode = GetErrorCodeEx(info->errorCode);
     SoftBusCreateBusCenterFaultMsg(msg, info);
     int ret = SoftbusWriteHisEvt(msg);
-    SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReportMsg(msg);
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_EVENT, "sys evt write buscenter fault msg fail");
     }
@@ -948,7 +948,7 @@ int32_t SoftBusReportDevOnlineEvt(OnlineDeviceInfo *info, const char *udid)
     }
     SoftBusCreateEvtMsgByInfo(msg, info);
     int ret = SoftbusWriteHisEvt(msg);
-    SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReportMsg(msg);
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_EVENT, "sysevt write online device info msg fail");
     }
@@ -1250,7 +1250,7 @@ static int32_t ReportOnlineDurRecordEvt(void)
             break;
         }
     } while (false);
-    SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReportMsg(msg);
     CleanDevOnlineDurRecord();
     return ret;
 }
@@ -1317,7 +1317,7 @@ static int32_t ReportBusCenterRecordEvt(void)
             break;
         }
     }
-    SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReportMsg(msg);
     CleanBusCenterRecord();
     return ret;
 }
@@ -1385,7 +1385,7 @@ static int32_t ReportAuthResultRecordEvt(void)
             break;
         }
     }
-    SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReportMsg(msg);
     CleanAuthResultRecord();
     return ret;
 }

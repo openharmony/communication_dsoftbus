@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -324,7 +324,7 @@ static int32_t SoftBusReportFirstDiscDurationEvt(void)
     COMM_CHECK_AND_RETURN_RET_LOGE(msg != NULL, SOFTBUS_ERR, COMM_EVENT, "create reportMsg fail");
     for (int32_t i = SOFTBUS_HISYSEVT_DISC_MEDIUM_BLE; i < SOFTBUS_HISYSEVT_DISC_MEDIUM_BUTT; i++) {
         if (SoftBusMutexLock(&g_firstDiscTime[i].lock) != SOFTBUS_OK) {
-            SoftbusFreeEvtReporMsg(msg);
+            SoftbusFreeEvtReportMsg(msg);
             ClearFirstDiscTime();
             COMM_LOGE(COMM_EVENT, "lock first disc time fail");
             return SOFTBUS_LOCK_ERR;
@@ -336,27 +336,27 @@ static int32_t SoftBusReportFirstDiscDurationEvt(void)
         if (SoftBusCreateFirstDiscDurMsg(msg, i) != SOFTBUS_OK) {
             ClearFirstDiscTime();
             SoftBusMutexUnlock(&g_firstDiscTime[i].lock);
-            SoftbusFreeEvtReporMsg(msg);
+            SoftbusFreeEvtReportMsg(msg);
             COMM_LOGE(COMM_EVENT, "create first disc duration reportMsg fail");
             return SOFTBUS_ERR;
         }
         if (SoftbusWriteHisEvt(msg) != SOFTBUS_OK) {
             ClearFirstDiscTime();
             SoftBusMutexUnlock(&g_firstDiscTime[i].lock);
-            SoftbusFreeEvtReporMsg(msg);
+            SoftbusFreeEvtReportMsg(msg);
             COMM_LOGE(COMM_EVENT, "write first disc duration reportMsg fail");
             return SOFTBUS_ERR;
         }
         SoftBusMutexUnlock(&g_firstDiscTime[i].lock);
     }
-    SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReportMsg(msg);
     ClearFirstDiscTime();
     return SOFTBUS_OK;
 }
 
 static inline void FreeDiscDetailsMsg(SoftBusEvtReportMsg *msg)
 {
-    SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReportMsg(msg);
     ClearDiscDetails();
     (void)SoftBusMutexUnlock(&g_discDetailLock);
 }
@@ -395,7 +395,7 @@ static int32_t SoftBusReportDiscDetailsEvt(void)
 
 static inline void FreeDiscBleRssiMsg(SoftBusEvtReportMsg *msg)
 {
-    SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReportMsg(msg);
     ClearBleRssi();
     (void)SoftBusMutexUnlock(&g_bleRssiRangeLock);
 }
