@@ -151,7 +151,7 @@ void FillpNetconnDestroy(struct FtNetconn *conn)
 {
     int i;
     if (conn == FILLP_NULL_PTR) {
-        FILLP_LOGERR("FillpNetconnDestroy: Invalid paramaters passed\r\n");
+        FILLP_LOGERR("FillpNetconnDestroy: Invalid paramaters passed");
         return;
     }
 
