@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,6 +42,7 @@ int32_t SoftBusReadFullFile(const char *fileName, char *readBuf, uint32_t maxLen
     }
     int32_t ret = UtilsFileStat(fileName, &fileLen);
     if (ret < 0) {
+        COMM_LOGE(COMM_ADAPTER, "Read UtilsFileStat fail");
         UtilsFileClose(fd);
         return SOFTBUS_FILE_ERR;
     }
@@ -68,6 +69,10 @@ int32_t SoftBusReadFullFile(const char *fileName, char *readBuf, uint32_t maxLen
 
 int32_t SoftBusWriteFile(const char *fileName, const char *writeBuf, uint32_t len)
 {
+    if (fileName == NULL || writeBuf == NULL) {
+        COMM_LOGE(COMM_ADAPTER, "param is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
     int32_t ret;
     int32_t fd;
     fd = UtilsFileOpen(fileName, O_RDWR_FS | O_CREAT_FS | O_TRUNC_FS, 0);
@@ -77,7 +82,7 @@ int32_t SoftBusWriteFile(const char *fileName, const char *writeBuf, uint32_t le
     }
     ret = UtilsFileWrite(fd, writeBuf, len);
     if (ret != (int32_t)len) {
-        COMM_LOGE(COMM_ADAPTER, "UtilsFileOpen UtilsFileWrite fail");
+        COMM_LOGE(COMM_ADAPTER, "UtilsFileWrite fail");
         UtilsFileClose(fd);
         return SOFTBUS_FILE_ERR;
     }
@@ -111,13 +116,11 @@ int32_t SoftBusOpenFileWithPerms(const char *fileName, int32_t flags, int32_t pe
 void SoftBusRemoveFile(const char *fileName)
 {
     (void)fileName;
-    return;
 }
 
 void SoftBusCloseFile(int32_t fd)
 {
     (void)fd;
-    return;
 }
 
 int64_t SoftBusPreadFile(int32_t fd, void *buf, uint64_t readBytes, uint64_t offset)

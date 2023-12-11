@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,8 +79,7 @@ int32_t SoftBusSocketCreate(int32_t domain, int32_t type, int32_t protocol, int3
         COMM_LOGE(COMM_ADAPTER, "socketFd is null");
         return SOFTBUS_ADAPTER_INVALID_PARAM;
     }
-    int32_t ret;
-    ret = socket(domain, type, protocol);
+    int32_t ret = socket(domain, type, protocol);
     if (ret < 0) {
         COMM_LOGE(COMM_ADAPTER, "socket %s", strerror(errno));
         return SOFTBUS_ADAPTER_ERR;
@@ -113,7 +112,7 @@ int32_t SoftBusSocketGetOpt(int32_t socketFd, int32_t level, int32_t optName, vo
 
 int32_t SoftBusSocketGetError(int32_t socketFd)
 {
-    int err = 0;
+    int32_t err = 0;
     socklen_t errSize = sizeof(err);
     int32_t ret = getsockopt(socketFd, SOL_SOCKET, SO_ERROR, &err, &errSize);
     if (ret < 0) {
@@ -129,12 +128,12 @@ int32_t SoftBusSocketGetError(int32_t socketFd)
 
 static int32_t SoftBusAddrToSysAddr(const SoftBusSockAddr *softbusAddr, struct sockaddr *sysAddr, uint32_t len)
 {
-    if (len < sizeof(softbusAddr->saFamily)) {
-        COMM_LOGE(COMM_ADAPTER, "invalid len");
-        return SOFTBUS_ADAPTER_ERR;
-    }
     if ((softbusAddr == NULL) || (sysAddr == NULL)) {
         COMM_LOGE(COMM_ADAPTER, "invalid input");
+        return SOFTBUS_ADAPTER_ERR;
+    }
+    if (len < sizeof(softbusAddr->saFamily)) {
+        COMM_LOGE(COMM_ADAPTER, "invalid len");
         return SOFTBUS_ADAPTER_ERR;
     }
     if (memset_s(sysAddr, sizeof(struct sockaddr), 0, sizeof(struct sockaddr)) != EOK) {
@@ -173,7 +172,7 @@ int32_t SoftBusSocketGetLocalName(int32_t socketFd, SoftBusSockAddr *addr)
     }
     struct sockaddr sysAddr;
     uint32_t len = sizeof(struct sockaddr);
-    if (memset_s(&sysAddr, sizeof(struct sockaddr), 0, sizeof(struct sockaddr)) != EOK) {
+    if (memset_s(&sysAddr, len, 0, len) != EOK) {
         COMM_LOGE(COMM_ADAPTER, "get local name memset fail");
         return SOFTBUS_ADAPTER_ERR;
     }
@@ -215,7 +214,8 @@ int32_t SoftBusSocketGetPeerName(int32_t socketFd, SoftBusSockAddr *addr)
 
 int32_t SoftBusSocketBind(int32_t socketFd, SoftBusSockAddr *addr, int32_t addrLen)
 {
-    if (addrLen < 0) {
+    if (addr == NULL || addrLen < 0) {
+        COMM_LOGE(COMM_ADAPTER, "socket bind invalid input");
         return SOFTBUS_ADAPTER_ERR;
     }
     struct sockaddr sysAddr;
@@ -301,6 +301,10 @@ void SoftBusSocketFdSet(int32_t socketFd, SoftBusFdSet *set)
         COMM_LOGE(COMM_ADAPTER, "set is null");
         return;
     }
+    if (socketFd >= SOFTBUS_FD_SETSIZE) {
+        COMM_LOGE(COMM_ADAPTER, "socketFd %d is too big", socketFd);
+        return;
+    }
 
     FD_SET(socketFd, (fd_set *)set->fdsBits);
 }
@@ -319,6 +323,10 @@ int32_t SoftBusSocketFdIsset(int32_t socketFd, SoftBusFdSet *set)
 {
     if (set == NULL) {
         COMM_LOGE(COMM_ADAPTER, "set is null");
+        return 0;
+    }
+    if (socketFd >= SOFTBUS_FD_SETSIZE) {
+        COMM_LOGE(COMM_ADAPTER, "socketFd %d is too big", socketFd);
         return 0;
     }
 
@@ -479,6 +487,10 @@ int32_t SoftBusSocketClose(int32_t socketFd)
 
 int32_t SoftBusInetPtoN(int32_t af, const char *src, void *dst)
 {
+    if (src == NULL || dst == NULL) {
+        COMM_LOGE(COMM_ADAPTER, "src or dst is null");
+        return SOFTBUS_ADAPTER_ERR;
+    }
     int32_t ret = inet_pton(af, src, dst);
     if (ret == 1) {
         return SOFTBUS_ADAPTER_OK;
@@ -537,7 +549,6 @@ static void ProcByteOrder(uint8_t *value, int8_t size)
         return;
     }
     ShiftByte(value, size);
-    return;
 }
 
 uint16_t SoftBusHtoLs(uint16_t value)

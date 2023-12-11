@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,12 +21,10 @@
 #include <pthread.h>
 #include <sched.h>
 #include <securec.h>
-#include <stdio.h>
 #include <string.h>
 
 #include "comm_log.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_def.h"
 #include "softbus_errcode.h"
 
 static pthread_mutex_t g_adapterStaticLock = PTHREAD_MUTEX_INITIALIZER;
@@ -44,14 +42,13 @@ int32_t SoftBusMutexAttrInit(SoftBusMutexAttr *mutexAttr)
 
 int32_t SoftBusMutexInit(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr)
 {
+    if (mutex == NULL) {
+        COMM_LOGE(COMM_ADAPTER, "mutex is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (pthread_mutex_lock(&g_adapterStaticLock) != 0) {
         COMM_LOGE(COMM_ADAPTER, "mutex init : g_adapterStaticLock lock failed");
         return SOFTBUS_ERR;
-    }
-    if (mutex == NULL) {
-        COMM_LOGE(COMM_ADAPTER, "mutex is null");
-        (void)pthread_mutex_unlock(&g_adapterStaticLock);
-        return SOFTBUS_INVALID_PARAM;
     }
     if ((void *)*mutex != NULL) {
         (void)pthread_mutex_unlock(&g_adapterStaticLock);
@@ -65,7 +62,6 @@ int32_t SoftBusMutexInit(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    int ret;
     pthread_mutexattr_t attr;
     pthread_mutexattr_init(&attr);
     if (mutexAttr == NULL) {
@@ -80,7 +76,7 @@ int32_t SoftBusMutexInit(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr)
         pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
     }
 
-    ret = pthread_mutex_init(tempMutex, &attr);
+    int32_t ret = pthread_mutex_init(tempMutex, &attr);
     if (ret != 0) {
         COMM_LOGE(COMM_ADAPTER, "SoftBusMutexInit failed, ret[%d]", ret);
         SoftBusFree(tempMutex);
@@ -101,8 +97,7 @@ int32_t SoftBusMutexLock(SoftBusMutex *mutex)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    int ret;
-    ret = pthread_mutex_lock((pthread_mutex_t *)*mutex);
+    int32_t ret = pthread_mutex_lock((pthread_mutex_t *)*mutex);
     if (ret != 0) {
         COMM_LOGE(COMM_ADAPTER, "SoftBusMutexLock failed, ret[%d]", ret);
         return SOFTBUS_LOCK_ERR;
@@ -117,8 +112,7 @@ int32_t SoftBusMutexUnlock(SoftBusMutex *mutex)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    int ret;
-    ret = pthread_mutex_unlock((pthread_mutex_t *)*mutex);
+    int32_t ret = pthread_mutex_unlock((pthread_mutex_t *)*mutex);
     if (ret != 0) {
         COMM_LOGE(COMM_ADAPTER, "SoftBusMutexUnlock failed, ret[%d]", ret);
         return SOFTBUS_LOCK_ERR;
@@ -134,8 +128,7 @@ int32_t SoftBusMutexDestroy(SoftBusMutex *mutex)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    int ret;
-    ret = pthread_mutex_destroy((pthread_mutex_t *)*mutex);
+    int32_t ret = pthread_mutex_destroy((pthread_mutex_t *)*mutex);
     if (ret != 0) {
         COMM_LOGE(COMM_ADAPTER, "SoftBusMutexDestroy failed, ret[%d]", ret);
         SoftBusFree((void *)*mutex);
@@ -244,13 +237,12 @@ static int32_t SoftbusSetThreadPeriority(SoftBusThreadAttr *threadAttr, pthread_
 
 static int32_t SoftBusConfTransPthreadAttr(SoftBusThreadAttr *threadAttr, pthread_attr_t *attr)
 {
-    int ret;
     if ((threadAttr == NULL) || (attr == NULL)) {
         COMM_LOGE(COMM_ADAPTER, "threadAttr or attr is null");
         return SOFTBUS_INVALID_PARAM;
     }
 
-    ret = SoftbusSetThreadPolicy(threadAttr, attr);
+    int32_t ret = SoftbusSetThreadPolicy(threadAttr, attr);
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_ADAPTER, "SoftbusSetThreadPolicy failed, ret[%d]", ret);
         return SOFTBUS_ERR;
@@ -384,7 +376,7 @@ int32_t SoftBusCondInit(SoftBusCond *cond)
         return SOFTBUS_INVALID_PARAM;
     }
     pthread_condattr_t attr = {0};
-    int ret = pthread_condattr_init(&attr);
+    int32_t ret = pthread_condattr_init(&attr);
     if (ret != 0) {
         COMM_LOGE(COMM_ADAPTER, "pthread_condattr_init failed, ret[%d]", ret);
         return SOFTBUS_ERR;
@@ -419,8 +411,7 @@ int32_t SoftBusCondSignal(SoftBusCond *cond)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    int ret;
-    ret = pthread_cond_signal((pthread_cond_t *)*cond);
+    int32_t ret = pthread_cond_signal((pthread_cond_t *)*cond);
     if (ret != 0) {
         COMM_LOGE(COMM_ADAPTER, "SoftBusCondSignal failed, ret[%d]", ret);
         return SOFTBUS_ERR;
@@ -436,8 +427,7 @@ int32_t SoftBusCondBroadcast(SoftBusCond *cond)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    int ret;
-    ret = pthread_cond_broadcast((pthread_cond_t *)*cond);
+    int32_t ret = pthread_cond_broadcast((pthread_cond_t *)*cond);
     if (ret != 0) {
         COMM_LOGE(COMM_ADAPTER, "SoftBusCondBroadcast failed, ret[%d]", ret);
         return SOFTBUS_ERR;
@@ -459,7 +449,7 @@ int32_t SoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, SoftBusSysTime *
         return SOFTBUS_INVALID_PARAM;
     }
 
-    int ret;
+    int32_t ret;
     if (time == NULL) {
         ret = pthread_cond_wait((pthread_cond_t *)*cond, (pthread_mutex_t *)*mutex);
         if (ret != 0) {
@@ -492,8 +482,7 @@ int32_t SoftBusCondDestroy(SoftBusCond *cond)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    int ret;
-    ret = pthread_cond_destroy((pthread_cond_t *)*cond);
+    int32_t ret = pthread_cond_destroy((pthread_cond_t *)*cond);
     if (ret != 0) {
         COMM_LOGE(COMM_ADAPTER, "SoftBusCondDestroy failed, ret[%d]", ret);
         SoftBusFree((void *)*cond);
