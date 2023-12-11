@@ -14,17 +14,17 @@
  */
 
 #include "default_negotiate_channel.h"
-#include "securec.h"
-#include "common_list.h"
-#include "conn_log.h"
-#include "softbus_adapter_mem.h"
-#include "softbus_adapter_thread.h"
 #include "auth_interface.h"
 #include "auth_manager.h"
 #include "bus_center_manager.h"
-#include "wifi_direct_manager.h"
-#include "utils/wifi_direct_work_queue.h"
+#include "common_list.h"
+#include "conn_log.h"
+#include "securec.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_adapter_thread.h"
 #include "utils/wifi_direct_anonymous.h"
+#include "utils/wifi_direct_work_queue.h"
+#include "wifi_direct_manager.h"
 
 #define MAX_AUTH_DATA_LEN (1024 * 1024)
 
@@ -169,7 +169,7 @@ static bool IsMetaChannel(struct WifiDirectNegotiateChannel *base)
     return isMeta;
 }
 
-static struct WifiDirectNegotiateChannel* Duplicate(struct WifiDirectNegotiateChannel *base)
+static struct WifiDirectNegotiateChannel *Duplicate(struct WifiDirectNegotiateChannel *base)
 {
     struct DefaultNegotiateChannel *self = (struct DefaultNegotiateChannel *)base;
     struct DefaultNegotiateChannel *copy = DefaultNegotiateChannelNew(self->authId);
@@ -201,7 +201,7 @@ void DefaultNegotiateChannelDestructor(struct DefaultNegotiateChannel *self)
     (void)self;
 }
 
-struct DefaultNegotiateChannel* DefaultNegotiateChannelNew(int64_t authId)
+struct DefaultNegotiateChannel *DefaultNegotiateChannelNew(int64_t authId)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     struct DefaultNegotiateChannel *self = SoftBusCalloc(sizeof(*self));

@@ -14,17 +14,17 @@
  */
 
 #include "inner_link.h"
-#include <securec.h>
-#include <string.h>
 #include "conn_log.h"
-#include "softbus_error_code.h"
+#include "data/link_manager.h"
+#include "protocol/wifi_direct_protocol_factory.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
-#include "wifi_direct_types.h"
-#include "data/link_manager.h"
-#include "utils/wifi_direct_ipv4_info.h"
+#include "softbus_error_code.h"
 #include "utils/wifi_direct_anonymous.h"
-#include "protocol/wifi_direct_protocol_factory.h"
+#include "utils/wifi_direct_ipv4_info.h"
+#include "wifi_direct_types.h"
+#include <securec.h>
+#include <string.h>
 
 #define IL_TAG_CONNECT_TYPE 1
 #define IL_TAG_STATE 2
@@ -83,7 +83,7 @@ static size_t GetKeySize(void)
     return IL_KEY_MAX;
 }
 
-static const char* GetContainerName(void)
+static const char *GetContainerName(void)
 {
     return "InnerLink";
 }
@@ -425,7 +425,7 @@ void InnerLinkDestructor(struct InnerLink *self)
 }
 
 /* new and delete */
-struct InnerLink* InnerLinkNew(void)
+struct InnerLink *InnerLinkNew(void)
 {
     struct InnerLink *self = SoftBusCalloc(sizeof(*self));
     CONN_CHECK_AND_RETURN_RET_LOGE(self != NULL, NULL, CONN_WIFI_DIRECT, "self is null");
@@ -439,7 +439,7 @@ void InnerLinkDelete(struct InnerLink *self)
     SoftBusFree(self);
 }
 
-struct InnerLink* InnerLinkNewArray(size_t size)
+struct InnerLink *InnerLinkNewArray(size_t size)
 {
     struct InnerLink *self = (struct InnerLink *)SoftBusCalloc(sizeof(*self) * size);
     CONN_CHECK_AND_RETURN_RET_LOGE(self != NULL, NULL, CONN_WIFI_DIRECT, "self is null");

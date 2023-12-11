@@ -14,14 +14,14 @@
  */
 
 #include "softbus_tcp_socket.h"
-#include <fcntl.h>
-#include <securec.h>
 #include "conn_log.h"
 #include "softbus_adapter_errcode.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_conn_common.h"
 #include "softbus_errcode.h"
 #include "softbus_socket.h"
+#include <fcntl.h>
+#include <securec.h>
 
 #define M_BYTES               0x100000
 #define SEND_BUF_SIZE         (4 * M_BYTES) // 4M

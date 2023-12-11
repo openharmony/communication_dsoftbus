@@ -14,15 +14,15 @@
  */
 
 #include "interface_info.h"
-#include <string.h>
-#include "securec.h"
 #include "conn_log.h"
-#include "softbus_error_code.h"
 #include "protocol/wifi_direct_protocol.h"
-#include "utils/wifi_direct_network_utils.h"
-#include "utils/wifi_direct_ipv4_info.h"
-#include "utils/wifi_direct_utils.h"
+#include "securec.h"
+#include "softbus_error_code.h"
 #include "utils/wifi_direct_anonymous.h"
+#include "utils/wifi_direct_ipv4_info.h"
+#include "utils/wifi_direct_network_utils.h"
+#include "utils/wifi_direct_utils.h"
+#include <string.h>
 
 #define II_TAG_DYNAMIC_MAC 0
 #define II_TAG_INTERFACE_NAME 1
@@ -97,7 +97,7 @@ static size_t GetKeySize(void)
     return II_KEY_MAX;
 }
 
-static const char* GetContainerName(void)
+static const char *GetContainerName(void)
 {
     return "InterfaceInfo";
 }
@@ -251,7 +251,7 @@ static bool Unmarshalling(struct InterfaceInfo *self, struct WifiDirectProtocol 
     return true;
 }
 
-static char* GetName(struct InterfaceInfo *self)
+static char *GetName(struct InterfaceInfo *self)
 {
     return self->getString(self, II_KEY_INTERFACE_NAME, "");
 }
@@ -369,7 +369,7 @@ static bool UnmarshallingMacAddress(struct InterfaceInfo *self, enum InterfaceIn
 }
 
 /* constructor and destructor */
-void InterfaceInfoConstructor(struct InterfaceInfo* self)
+void InterfaceInfoConstructor(struct InterfaceInfo *self)
 {
     InfoContainerConstructor((struct InfoContainer *)self, InterfaceInfoKeyProperties, II_KEY_MAX);
 
@@ -392,19 +392,19 @@ void InterfaceInfoConstructor(struct InterfaceInfo* self)
     self->dumpFilter = false;
 }
 
-void InterfaceInfoConstructorWithName(struct InterfaceInfo* self, const char *name)
+void InterfaceInfoConstructorWithName(struct InterfaceInfo *self, const char *name)
 {
     InterfaceInfoConstructor(self);
     self->putName(self, name);
 }
 
-void InterfaceInfoDestructor(struct InterfaceInfo* self)
+void InterfaceInfoDestructor(struct InterfaceInfo *self)
 {
     InfoContainerDestructor((struct InfoContainer *)self, II_KEY_MAX);
 }
 
 /* new and delete */
-struct InterfaceInfo* InterfaceInfoNew(void)
+struct InterfaceInfo *InterfaceInfoNew(void)
 {
     struct InterfaceInfo *self = (struct InterfaceInfo *)SoftBusCalloc(sizeof(*self));
     CONN_CHECK_AND_RETURN_RET_LOGE(self != NULL, NULL, CONN_WIFI_DIRECT, "self is null");
@@ -413,13 +413,13 @@ struct InterfaceInfo* InterfaceInfoNew(void)
     return self;
 }
 
-void InterfaceInfoDelete(struct InterfaceInfo* self)
+void InterfaceInfoDelete(struct InterfaceInfo *self)
 {
     InterfaceInfoDestructor(self);
     SoftBusFree(self);
 }
 
-struct InterfaceInfo* InterfaceInfoNewArray(size_t size)
+struct InterfaceInfo *InterfaceInfoNewArray(size_t size)
 {
     struct InterfaceInfo *self = (struct InterfaceInfo *)SoftBusCalloc(sizeof(*self) * size);
     CONN_CHECK_AND_RETURN_RET_LOGE(self != NULL, NULL, CONN_WIFI_DIRECT, "self is null");

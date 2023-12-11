@@ -14,15 +14,15 @@
  */
 
 #include "resource_manager.h"
-#include "securec.h"
 #include "conn_log.h"
+#include "interface_info.h"
+#include "securec.h"
 #include "softbus_error_code.h"
 #include "softbus_json_utils.h"
-#include "interface_info.h"
-#include "wifi_direct_coexist_rule.h"
-#include "wifi_direct_p2p_adapter.h"
 #include "utils/wifi_direct_anonymous.h"
 #include "utils/wifi_direct_network_utils.h"
+#include "wifi_direct_coexist_rule.h"
+#include "wifi_direct_p2p_adapter.h"
 
 /* private method forward declare */
 static int32_t InitInterfaceInfo(const char *interface);
@@ -58,7 +58,7 @@ static int32_t InitWifiDirectInfo(void)
     return ret;
 }
 
-static struct InterfaceInfo* GetInterfaceInfo(const char *interface)
+static struct InterfaceInfo *GetInterfaceInfo(const char *interface)
 {
     struct ResourceManager *self = GetResourceManager();
     CONN_CHECK_AND_RETURN_RET_LOGW(self->isInited, NULL, CONN_WIFI_DIRECT, "not inited");
@@ -137,7 +137,7 @@ static void AddUsingInterfaceToList(ListNode *list, const char *interface)
     }
 }
 
-static ListNode* GetUsingInterfaces(bool forShare)
+static ListNode *GetUsingInterfaces(bool forShare)
 {
     ListNode *list = SoftBusCalloc(sizeof(*list));
     CONN_CHECK_AND_RETURN_RET_LOGE(list, NULL, CONN_WIFI_DIRECT, "malloc list failed");
@@ -498,7 +498,7 @@ int32_t ResourceManagerInit(void)
     return SOFTBUS_OK;
 }
 
-struct ResourceManager* GetResourceManager(void)
+struct ResourceManager *GetResourceManager(void)
 {
     return &g_manager;
 }
