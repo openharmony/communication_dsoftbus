@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,24 +18,20 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <securec.h>
-#include <signal.h>
 #include <sys/stat.h>
-#include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
 
 #include "comm_log.h"
 #include "softbus_adapter_errcode.h"
-#include "softbus_def.h"
 #include "softbus_errcode.h"
 
 static int32_t SoftBusCreateFile(const char *fileName)
 {
-    char dirPath[SOFTBUS_MAX_PATH_LEN] = {0};
-
     if (fileName == NULL) {
         return SOFTBUS_FILE_ERR;
     }
+    char dirPath[SOFTBUS_MAX_PATH_LEN] = {0};
 
     char *dir = (char *)fileName;
     while ((dir = strchr(dir, SOFTBUS_PATH_SEPRATOR)) != NULL) {
@@ -60,7 +56,7 @@ static int32_t SoftBusCreateFile(const char *fileName)
     }
     int32_t fd = open(fileName, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
     if (fd < 0) {
-        COMM_LOGE(COMM_ADAPTER, "crate file failed, errno = %d", errno);
+        COMM_LOGE(COMM_ADAPTER, "create file failed, errno = %d", errno);
         return SOFTBUS_ERR;
     }
     close(fd);
@@ -83,6 +79,7 @@ int32_t SoftBusReadFile(int32_t fd, void *readBuf, uint32_t maxLen)
 static int32_t ReadFullFile(const char *fileName, char *readBuf, uint32_t maxLen, int32_t *size)
 {
     if (fileName == NULL || readBuf == NULL || maxLen == 0 || size == NULL) {
+        COMM_LOGE(COMM_ADAPTER, "ReadFile fail param is invalid");
         return SOFTBUS_FILE_ERR;
     }
 
@@ -128,6 +125,7 @@ int32_t SoftBusReadFullFile(const char *fileName, char *readBuf, uint32_t maxLen
 int32_t SoftBusWriteFile(const char *fileName, const char *writeBuf, uint32_t len)
 {
     if (fileName == NULL || writeBuf == NULL || len == 0) {
+        COMM_LOGE(COMM_ADAPTER, "softbus write file para is invalid");
         return SOFTBUS_FILE_ERR;
     }
     if (access(fileName, F_OK) != 0 && SoftBusCreateFile(fileName) != SOFTBUS_OK) {
@@ -153,6 +151,7 @@ int32_t SoftBusWriteFile(const char *fileName, const char *writeBuf, uint32_t le
 int32_t SoftBusWriteFileFd(int32_t fd, const char *writeBuf, uint32_t len)
 {
     if (writeBuf == NULL || len == 0) {
+        COMM_LOGE(COMM_ADAPTER, "softbus write file fd para is invalid");
         return SOFTBUS_FILE_ERR;
     }
     int32_t ret = write(fd, writeBuf, len);
@@ -209,7 +208,7 @@ void SoftBusCloseFile(int32_t fd)
         return;
     }
     if (close(fd) != 0) {
-        COMM_LOGE(COMM_ADAPTER, "softbus remove file fail : %s", strerror(errno));
+        COMM_LOGE(COMM_ADAPTER, "softbus close file fail : %s", strerror(errno));
         return;
     }
 }
@@ -278,12 +277,12 @@ int32_t SoftBusGetFileSize(const char *fileName, uint64_t *fileSize)
         return SOFTBUS_ERR;
     }
 
-    struct stat statbuff;
-    if (stat(fileName, &statbuff) < 0) {
+    struct stat statBuff;
+    if (stat(fileName, &statBuff) < 0) {
         COMM_LOGE(COMM_ADAPTER, "stat file fail");
         return SOFTBUS_ERR;
     } else {
-        *fileSize = statbuff.st_size;
+        *fileSize = statBuff.st_size;
     }
 
     return SOFTBUS_OK;
