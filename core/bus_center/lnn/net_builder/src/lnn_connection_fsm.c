@@ -555,6 +555,10 @@ static void TryCancelJoinProcedure(LnnConnectionFsm *connFsm)
 
 static int32_t LnnRecoveryBroadcastKey()
 {
+    if (LnnLoadLocalBroadcastCipherKey() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "load BroadcastCipherInfo fail");
+        return SOFTBUS_ERR;
+    }
     BroadcastCipherKey broadcastKey;
     (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
     if (LnnGetLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
@@ -566,7 +570,6 @@ static int32_t LnnRecoveryBroadcastKey()
         LNN_LOGE(LNN_BUILDER, "set key failed");
         return SOFTBUS_ERR;
     }
-    
     if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_IV, broadcastKey.cipherInfo.iv,
         BROADCAST_IV_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "set iv failed");

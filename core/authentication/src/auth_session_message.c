@@ -789,35 +789,35 @@ static void PackWifiDirectInfo(JsonObj *json, const NodeInfo *info, const char *
 
 static int32_t PackCipherRpaInfo(JsonObj *json, const NodeInfo *info)
 {
-    unsigned char cipherKey[SESSION_KEY_STR_LEN] = {0};
-    unsigned char cipherIv[BROADCAST_IV_STR_LEN] = {0};
-    unsigned char peerIrk[LFINDER_IRK_STR_LEN] = {0};
-    unsigned char pubMac[LFINDER_MAC_ADDR_STR_LEN] = {0};
+    char cipherKey[SESSION_KEY_STR_LEN] = {0};
+    char cipherIv[BROADCAST_IV_STR_LEN] = {0};
+    char peerIrk[LFINDER_IRK_STR_LEN] = {0};
+    char pubMac[LFINDER_MAC_ADDR_STR_LEN] = {0};
 
-    if (ConvertBytesToHexString((char *)cipherKey, SESSION_KEY_STR_LEN,
+    if (ConvertBytesToHexString(cipherKey, SESSION_KEY_STR_LEN,
         info->cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "convert cipher key to string fail.");
         return SOFTBUS_ERR;
     }
-    if (ConvertBytesToHexString((char *)cipherIv, BROADCAST_IV_STR_LEN,
+    if (ConvertBytesToHexString(cipherIv, BROADCAST_IV_STR_LEN,
         info->cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "convert cipher iv to string fail.");
         return SOFTBUS_ERR;
     }
-    if (ConvertBytesToHexString((char *)peerIrk, LFINDER_IRK_STR_LEN,
+    if (ConvertBytesToHexString(peerIrk, LFINDER_IRK_STR_LEN,
         info->rpaInfo.peerIrk, LFINDER_IRK_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "convert peerIrk to string fail.");
         return SOFTBUS_ERR;
     }
-    if (ConvertBytesToHexString((char *)pubMac, LFINDER_MAC_ADDR_STR_LEN,
+    if (ConvertBytesToHexString(pubMac, LFINDER_MAC_ADDR_STR_LEN,
         info->rpaInfo.publicAddress, LFINDER_MAC_ADDR_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "convert publicAddress to string fail.");
         return SOFTBUS_ERR;
     }
-    (void)JSON_AddStringToObject(json, BROADCAST_CIPHER_KEY, (const char *)cipherKey);
-    (void)JSON_AddStringToObject(json, BROADCAST_CIPHER_IV, (const char *)cipherIv);
-    (void)JSON_AddStringToObject(json, IRK, (const char *)peerIrk);
-    (void)JSON_AddStringToObject(json, PUB_MAC, (const char *)pubMac);
+    (void)JSON_AddStringToObject(json, BROADCAST_CIPHER_KEY, cipherKey);
+    (void)JSON_AddStringToObject(json, BROADCAST_CIPHER_IV, cipherIv);
+    (void)JSON_AddStringToObject(json, IRK, peerIrk);
+    (void)JSON_AddStringToObject(json, PUB_MAC, pubMac);
     AUTH_LOGI(AUTH_FSM, "pack cipher and rpa info success!");
 
     BroadcastCipherKey broadcastKey;
@@ -945,7 +945,6 @@ static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion ve
 
     if (PackCipherRpaInfo(json, info) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "pack CipherRpaInfo of device key fail.");
-        return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }
