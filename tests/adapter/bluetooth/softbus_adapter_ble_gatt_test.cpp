@@ -323,6 +323,58 @@ HWTEST_F(AdapterBleGattTest, ScanLifecycle, TestSize.Level3)
 }
 
 /**
+ * @tc.name: AdapterBleGattTest_SoftBusStopScanImmediately
+ * @tc.desc: test stop ble scan immediately
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(AdapterBleGattTest, SoftBusStopScanImmediately, TestSize.Level3)
+{
+    MockBluetooth mocker;
+    int listenerId = -1;
+    int scannerId = -1;
+    auto result = PrepareScanListener(mocker, &listenerId, &scannerId);
+    ASSERT_TRUE(result);
+
+    auto filter = CreateScanFilter();
+    ASSERT_NE(filter, nullptr);
+    auto ret = SoftBusSetScanFilter(listenerId, filter, 1);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    SoftBusBleScanParams scanParam = {
+        .scanInterval = 60,
+        .scanWindow = 600,
+        .scanType = 1,
+        .scanPhy = 1,
+        .scanFilterPolicy = 0,
+    };
+
+    EXPECT_CALL(mocker, BleStartScanEx).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
+    ret = SoftBusStartScan(listenerId, scannerId, &scanParam);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ASSERT_TRUE(scanStartCtx.Expect(listenerId, SOFTBUS_BT_STATUS_SUCCESS));
+
+    const unsigned char scanDataExample[] = {0x02, 0x01, 0x02, 0x15, 0x16, 0xEE, 0xFD, 0x04, 0x05, 0x90, 0x00, 0x00,
+        0x04, 0x00, 0x18, 0x33, 0x39, 0x36, 0x62, 0x33, 0x61, 0x33, 0x31, 0x21, 0x00, 0x02, 0x0A, 0xEF, 0x03, 0xFF,
+        0x7D, 0x02};
+    BtScanResultData mockScanResult = {0};
+    mockScanResult.advLen = sizeof(scanDataExample);
+    mockScanResult.advData = (unsigned char *)scanDataExample;
+
+    SoftBusBleScanResult expectScanResult = {0};
+    expectScanResult.advLen = sizeof(scanDataExample);
+    expectScanResult.advData = (unsigned char *)scanDataExample;
+    ASSERT_FALSE(scanResultCtx.Expect(listenerId, &expectScanResult));
+
+    EXPECT_CALL(mocker, BleStopScan).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
+    ret = SoftBusStopScanImmediately(listenerId, scannerId);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ASSERT_TRUE(scanStopCtx.Expect(listenerId, SOFTBUS_BT_STATUS_SUCCESS));
+
+    ASSERT_EQ(SoftBusRemoveScanListener(listenerId), SOFTBUS_OK);
+}
+
+/**
  * @tc.name: AdapterBleGattTest_ScanResultCb
  * @tc.desc: test scan result callback
  * @tc.type: FUNC
