@@ -197,7 +197,7 @@ void SoftbusAuditInner(SoftbusEventModule module, SoftbusEventForm *form)
         return;
     }
     form->domain = SOFTBUS_EVENT_DOMAIN;
-    form->eventType = SOFTBUS_EVENT_TYPE_BEHAVIOR;
+    form->eventType = SOFTBUS_EVENT_TYPE_SECURITY;
     form->orgPkg = SOFTBUS_EVENT_PKG_NAME;
     WriteSoftbusAudit(module, form);
 }
