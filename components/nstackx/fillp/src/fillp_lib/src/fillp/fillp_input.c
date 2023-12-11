@@ -939,8 +939,6 @@ void FillpDoInput(struct FillpPcb *pcb, FILLP_CONST struct NetBuf *buf, struct S
         return;
     }
     FillpDoInputPktType(pcb, buf, inst, (FILLP_UINT16)FILLP_PKT_GET_TYPE(head->flag));
-
-    return;
 }
 
 #ifdef __cplusplus
