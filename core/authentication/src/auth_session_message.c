@@ -125,6 +125,7 @@
 #define WIFI_BUFF_SIZE "WIFI_BUFF_SIZE"
 #define BR_BUFF_SIZE "BR_BUFF_SIZE"
 #define FEATURE "FEATURE"
+#define CONN_SUB_FEATURE "CONN_SUB_FEATURE"
 #define META_NODE_INFO_OF_EAR "MetaNodeInfoOfEar"
 #define NEW_CONN_CAP "NEW_CONN_CAP"
 #define EXTDATA "EXTDATA"
@@ -933,6 +934,7 @@ static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion ve
         !JSON_AddInt32ToObject(json, WIFI_BUFF_SIZE, info->wifiBuffSize) ||
         !JSON_AddInt32ToObject(json, BR_BUFF_SIZE, info->brBuffSize) ||
         !JSON_AddInt64ToObject(json, FEATURE, info->feature) ||
+        !JSON_AddInt64ToObject(json, CONN_SUB_FEATURE, info->connSubFeature) ||
         !JSON_AddInt64ToObject(json, NEW_CONN_CAP, info->netCapacity)) {
         AUTH_LOGE(AUTH_FSM, "JSON_AddStringToObject fail");
         return SOFTBUS_ERR;
@@ -1035,6 +1037,7 @@ static void UnpackCommon(const JsonObj *json, NodeInfo *info, SoftBusVersion ver
     OptInt(json, WIFI_BUFF_SIZE, &info->wifiBuffSize, DEFAULT_WIFI_BUFF_SIZE);
     OptInt(json, BR_BUFF_SIZE, &info->wifiBuffSize, DEFAULT_BR_BUFF_SIZE);
     OptInt64(json, FEATURE, (int64_t *)&info->feature, 0);
+    OptInt64(json, CONN_SUB_FEATURE, (int64_t *)&info->connSubFeature, 0);
     //MetaNodeInfoOfEar
     OptString(json, EXTDATA, info->extData, EXTDATA_LEN, "");
     if (version == SOFTBUS_OLD_V1) {
