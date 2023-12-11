@@ -158,6 +158,7 @@ typedef struct {
     int64_t wifiVersion;
     int64_t bleVersion;
     uint64_t feature;
+    uint64_t connSubFeature;
     int64_t bleStartTimestamp;
     int32_t wifiBuffSize;
     int32_t brBuffSize;
