@@ -47,6 +47,7 @@ typedef struct {
     char udid[UDID_BUF_LEN];
     bool fastestConnectEnable;
     int32_t psm;
+    bool isSupportNetworkIdExchange;
     enum ConnBleDeviceState state;
     ListNode requests;
 } ConnBleDevice;
