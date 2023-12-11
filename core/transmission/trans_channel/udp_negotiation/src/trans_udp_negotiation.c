@@ -658,6 +658,8 @@ static void UdpOnAuthConnOpened(uint32_t requestId, int64_t authId)
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "neg fail");
         ProcessAbnormalUdpChannelState(&channel->info, SOFTBUS_TRANS_HANDSHAKE_ERROR, true);
+        extra.socketName = channel->info.myData.sessionName;
+        extra.channelId = channel->info.myData.channelId;
         SoftBusFree(channel);
         goto EXIT_ERR;
     }
@@ -666,9 +668,7 @@ static void UdpOnAuthConnOpened(uint32_t requestId, int64_t authId)
     TRANS_LOGD(TRANS_CTRL, "ok");
     return;
 EXIT_ERR:
-    extra.socketName = channel->info.myData.sessionName;
     extra.channelType = CHANNEL_TYPE_UDP;
-    extra.channelId = channel->info.myData.channelId;
     extra.requestId = requestId;
     extra.authId = authId;
     extra.errcode = ret;
