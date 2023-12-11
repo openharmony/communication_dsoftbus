@@ -542,6 +542,11 @@ int32_t DecideAvailableLane(const char *networkId, const LaneSelectParam *reques
     recommendList->linkTypeNum = linksNum;
     if (linksNum == 0) {
         TransAlarmExtra extra = {
+            .conflictName = NULL,
+            .conflictedName = NULL,
+            .occupyedName = NULL,
+            .permissionName = NULL,
+            .sessionName = NULL,
             .minBw = request->qosRequire.minBW,
             .linkType = request->transType,
         };

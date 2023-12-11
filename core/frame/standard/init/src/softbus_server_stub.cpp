@@ -226,6 +226,10 @@ int32_t SoftBusServerStub::OnRemoteRequest(uint32_t code,
             COMM_LOGE(COMM_SVC, "access token permission %s denied!", permission);
             pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
             TransAlarmExtra extra = {
+                .conflictName = NULL,
+                .conflictedName = NULL,
+                .occupyedName = NULL,
+                .sessionName = NULL,
                 .methodId = (int32_t)code,
                 .callerPid = (int32_t)callingPid,
                 .permissionName = permission,
