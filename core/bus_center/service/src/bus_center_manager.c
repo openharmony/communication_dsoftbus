@@ -233,9 +233,7 @@ void BusCenterServerDeinit(void)
     LnnDeinitNetworkManager();
     LnnDeinitEventMonitor();
     LnnDeinitBusCenterEvent();
-    DeinitNodeAddrAllocator();
     LnnDeinitDecisionCenter();
-    DeinitDecisionCenter();
     LnnDeinitNetLedger();
     DeinitDecisionCenter();
     LnnDeinitMetaNode();
