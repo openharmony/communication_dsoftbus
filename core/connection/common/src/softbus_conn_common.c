@@ -15,8 +15,8 @@
 
 #include "softbus_conn_common.h"
 
-#include "securec.h"
 #include "conn_log.h"
+#include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_common.h"

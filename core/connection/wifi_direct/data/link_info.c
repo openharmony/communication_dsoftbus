@@ -14,13 +14,13 @@
  */
 
 #include "link_info.h"
+#include "conn_log.h"
+#include "protocol/wifi_direct_protocol.h"
+#include "softbus_error_code.h"
+#include "utils/wifi_direct_ipv4_info.h"
+#include <cJSON.h>
 #include <securec.h>
 #include <string.h>
-#include <cJSON.h>
-#include "conn_log.h"
-#include "softbus_error_code.h"
-#include "protocol/wifi_direct_protocol.h"
-#include "utils/wifi_direct_ipv4_info.h"
 
 #define LI_TAG_LOCAL_INTERFACE 0
 #define LI_TAG_REMOTE_INTERFACE 1
@@ -78,7 +78,7 @@ static size_t GetKeySize(void)
     return LI_KEY_MAX;
 }
 
-static const char* GetContainerName(void)
+static const char *GetContainerName(void)
 {
     return "LinkInfo";
 }
@@ -200,7 +200,7 @@ static bool UnmarshallingPrimary(struct LinkInfo *self, enum LinkInfoKey key,
 
 #define BANDWIDTH_80M 0x03
 
-static cJSON* ToJsonObject(struct LinkInfo *self)
+static cJSON *ToJsonObject(struct LinkInfo *self)
 {
     cJSON *object = cJSON_CreateObject();
     if (!object) {
@@ -246,9 +246,8 @@ static void PutRemoteIpString(struct LinkInfo *self, const char *ipString)
     self->putRawData(self, LI_KEY_REMOTE_IPV4, &ipv4, sizeof(ipv4));
 }
 
-
 /* constructor and destructor */
-void LinkInfoConstructor(struct LinkInfo* self)
+void LinkInfoConstructor(struct LinkInfo *self)
 {
     InfoContainerConstructor((struct InfoContainer *)self, LinkInfoKeyProperties, LI_KEY_MAX);
 
@@ -267,7 +266,7 @@ void LinkInfoConstructor(struct LinkInfo* self)
     ListInit(&self->node);
 }
 
-void LinkInfoDestructor(struct LinkInfo* self)
+void LinkInfoDestructor(struct LinkInfo *self)
 {
     CONN_CHECK_AND_RETURN_LOGW(self != NULL, CONN_WIFI_DIRECT, "self is null");
     InfoContainerDestructor((struct InfoContainer *)self, LI_KEY_MAX);
@@ -284,7 +283,7 @@ void LinkInfoConstructorWithNameAndMode(struct LinkInfo* self, const char *local
 }
 
 /* new and delete */
-struct LinkInfo* LinkInfoNew(void)
+struct LinkInfo *LinkInfoNew(void)
 {
     struct LinkInfo *self = (struct LinkInfo *)SoftBusCalloc(sizeof(*self));
     CONN_CHECK_AND_RETURN_RET_LOGE(self != NULL, NULL, CONN_WIFI_DIRECT, "self is null");
@@ -303,7 +302,7 @@ struct LinkInfo* LinkInfoNewWithNameAndMode(const char *localName, const char *r
     return self;
 }
 
-void LinkInfoDelete(struct LinkInfo* self)
+void LinkInfoDelete(struct LinkInfo *self)
 {
     LinkInfoDestructor(self);
     SoftBusFree(self);

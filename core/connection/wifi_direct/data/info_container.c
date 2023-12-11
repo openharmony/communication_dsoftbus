@@ -17,13 +17,13 @@
 #include <string.h>
 
 #include "anonymizer.h"
-#include "securec.h"
 #include "conn_log.h"
-#include "softbus_errcode.h"
+#include "securec.h"
 #include "softbus_adapter_mem.h"
-#include "wifi_direct_types.h"
-#include "utils/wifi_direct_ipv4_info.h"
+#include "softbus_errcode.h"
 #include "utils/wifi_direct_anonymous.h"
+#include "utils/wifi_direct_ipv4_info.h"
+#include "wifi_direct_types.h"
 
 #define INT_ARRAY_BUFFER_LEN 128
 #define IPV4_INFO_ARRAY_BUFFER_LEN 256
@@ -172,7 +172,7 @@ static void PutContainerArray(struct InfoContainer *self, size_t key, struct Inf
     }
 }
 
-static void* Get(struct InfoContainer *self, size_t key, size_t *size, size_t *count)
+static void *Get(struct InfoContainer *self, size_t key, size_t *size, size_t *count)
 {
     if (size) {
         *size = self->entries[key].size;
@@ -225,7 +225,7 @@ static bool GetBoolean(struct InfoContainer *self, size_t key, bool defaultValue
     return defaultValue;
 }
 
-static void* GetPointer(struct InfoContainer *self, size_t key, void *defaultValue)
+static void *GetPointer(struct InfoContainer *self, size_t key, void *defaultValue)
 {
     void **value = self->get(self, key, NULL, NULL);
     if (value) {
@@ -234,7 +234,7 @@ static void* GetPointer(struct InfoContainer *self, size_t key, void *defaultVal
     return defaultValue;
 }
 
-static char* GetString(struct InfoContainer *self, size_t key, const char *defaultValue)
+static char *GetString(struct InfoContainer *self, size_t key, const char *defaultValue)
 {
     char *value = self->get(self, key, NULL, NULL);
     if (value) {
@@ -243,7 +243,7 @@ static char* GetString(struct InfoContainer *self, size_t key, const char *defau
     return (char *)defaultValue;
 }
 
-static int32_t* GetIntArray(struct InfoContainer *self, size_t key, size_t *arraySize, void *defaultValue)
+static int32_t *GetIntArray(struct InfoContainer *self, size_t key, size_t *arraySize, void *defaultValue)
 {
     size_t size = 0;
     int32_t *value = self->get(self, key, &size, NULL);
@@ -259,12 +259,12 @@ static void *GetContainer(struct InfoContainer *self, size_t key)
     return self->get(self, key, NULL, NULL);
 }
 
-static void* GetContainerArray(struct InfoContainer *self, size_t key, size_t *containerArraySize)
+static void *GetContainerArray(struct InfoContainer *self, size_t key, size_t *containerArraySize)
 {
     return self->get(self, key, NULL, containerArraySize);
 }
 
-static void* GetRawData(struct InfoContainer *self, size_t key, size_t *size, void *defaultValue)
+static void *GetRawData(struct InfoContainer *self, size_t key, size_t *size, void *defaultValue)
 {
     char *value = self->get(self, key, size, NULL);
     if (value) {
@@ -273,7 +273,7 @@ static void* GetRawData(struct InfoContainer *self, size_t key, size_t *size, vo
     return defaultValue;
 }
 
-static struct InfoContainerKeyProperty* GetKeyProperty(struct InfoContainer *self, uint32_t key)
+static struct InfoContainerKeyProperty *GetKeyProperty(struct InfoContainer *self, uint32_t key)
 {
     return self->keyProperties + key;
 }

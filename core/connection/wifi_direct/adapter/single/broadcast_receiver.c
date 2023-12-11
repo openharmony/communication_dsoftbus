@@ -14,13 +14,13 @@
  */
 
 #include "broadcast_receiver.h"
-#include <string.h>
-#include "securec.h"
 #include "conn_log.h"
-#include "softbus_error_code.h"
+#include "securec.h"
 #include "softbus_adapter_mem.h"
-#include "wifi_direct_p2p_adapter.h"
+#include "softbus_error_code.h"
 #include "utils/wifi_direct_work_queue.h"
+#include "wifi_direct_p2p_adapter.h"
+#include <string.h>
 
 struct ActionListenerNode {
     ListNode node;
@@ -68,7 +68,7 @@ static struct BroadcastReceiver g_broadcastReceiver = {
     .isInited = false,
 };
 
-struct BroadcastReceiver* GetBroadcastReceiver(void)
+struct BroadcastReceiver *GetBroadcastReceiver(void)
 {
     return &g_broadcastReceiver;
 }

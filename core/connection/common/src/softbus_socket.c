@@ -15,15 +15,15 @@
 
 #include "softbus_socket.h"
 
-#include <errno.h>
-#include <fcntl.h>
-#include <securec.h>
 #include "conn_log.h"
 #include "softbus_adapter_errcode.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_tcp_socket.h"
+#include <errno.h>
+#include <fcntl.h>
+#include <securec.h>
 
 #define MAX_SOCKET_TYPE 5
 #define SEND_BUF_SIZE   0x200000 // 2M

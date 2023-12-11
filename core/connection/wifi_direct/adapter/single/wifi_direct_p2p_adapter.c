@@ -14,17 +14,17 @@
  */
 
 #include "wifi_direct_p2p_adapter.h"
-#include "securec.h"
 #include "conn_log.h"
-#include "wifi_device.h"
-#include "wifi_p2p.h"
-#include "wifi_hid2d.h"
-#include "softbus_error_code.h"
-#include "softbus_adapter_mem.h"
-#include "softbus_adapter_crypto.h"
-#include "wifi_direct_defines.h"
-#include "utils/wifi_direct_network_utils.h"
 #include "data/resource_manager.h"
+#include "securec.h"
+#include "softbus_adapter_crypto.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_error_code.h"
+#include "utils/wifi_direct_network_utils.h"
+#include "wifi_device.h"
+#include "wifi_direct_defines.h"
+#include "wifi_hid2d.h"
+#include "wifi_p2p.h"
 
 #define DEFAULT_NET_MASK "255.255.255.0"
 
@@ -624,7 +624,7 @@ static struct WifiDirectP2pAdapter g_adapter = {
     .isThreeVapConflict = IsThreeVapConflict,
 };
 
-struct WifiDirectP2pAdapter* GetWifiDirectP2pAdapter(void)
+struct WifiDirectP2pAdapter *GetWifiDirectP2pAdapter(void)
 {
     return &g_adapter;
 }

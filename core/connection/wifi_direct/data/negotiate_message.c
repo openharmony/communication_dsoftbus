@@ -14,13 +14,13 @@
  */
 
 #include "negotiate_message.h"
-#include <securec.h>
-#include <string.h>
 #include "conn_log.h"
-#include "data/link_info.h"
 #include "data/interface_info.h"
+#include "data/link_info.h"
 #include "protocol/wifi_direct_protocol_factory.h"
 #include "utils/wifi_direct_utils.h"
+#include <securec.h>
+#include <string.h>
 
 #define NM_TAG_MSG_TYPE 0
 #define NM_TAG_SESSION_ID 1
@@ -128,7 +128,7 @@ static size_t GetKeySize(void)
     return NM_KEY_MAX;
 }
 
-static const char* GetContainerName(void)
+static const char *GetContainerName(void)
 {
     return "NegotiateMessage";
 }
@@ -365,9 +365,8 @@ static bool UnmarshallingLinkInfo(struct NegotiateMessage *self, struct WifiDire
     return true;
 }
 
-
 /* constructor and destructor */
-void NegotiateMessageConstructor(struct NegotiateMessage* self)
+void NegotiateMessageConstructor(struct NegotiateMessage *self)
 {
     InfoContainerConstructor((struct InfoContainer *)self, NegotiateMessageKeyProperties, NM_KEY_MAX);
     self->dumpFilter = false;
@@ -380,13 +379,13 @@ void NegotiateMessageConstructor(struct NegotiateMessage* self)
     self->destructor = NegotiateMessageDestructor;
 }
 
-void NegotiateMessageDestructor(struct NegotiateMessage* self)
+void NegotiateMessageDestructor(struct NegotiateMessage *self)
 {
     InfoContainerDestructor((struct InfoContainer *)self, NM_KEY_MAX);
 }
 
 /* new and delete */
-struct NegotiateMessage* NegotiateMessageNew(void)
+struct NegotiateMessage *NegotiateMessageNew(void)
 {
     struct NegotiateMessage *self = (struct NegotiateMessage *)SoftBusCalloc(sizeof(*self));
     CONN_CHECK_AND_RETURN_RET_LOGE(self != NULL, NULL, CONN_WIFI_DIRECT, "self is null");
@@ -395,13 +394,13 @@ struct NegotiateMessage* NegotiateMessageNew(void)
     return self;
 }
 
-void NegotiateMessageDelete(struct NegotiateMessage* self)
+void NegotiateMessageDelete(struct NegotiateMessage *self)
 {
     NegotiateMessageDestructor(self);
     SoftBusFree(self);
 }
 
-struct NegotiateMessage* NegotiateMessageNewArray(size_t size)
+struct NegotiateMessage *NegotiateMessageNewArray(size_t size)
 {
     struct NegotiateMessage *self = (struct NegotiateMessage *)SoftBusCalloc(sizeof(*self) * size);
     CONN_CHECK_AND_RETURN_RET_LOGE(self != NULL, NULL, CONN_WIFI_DIRECT, "self is null");
@@ -412,7 +411,7 @@ struct NegotiateMessage* NegotiateMessageNewArray(size_t size)
     return self;
 }
 
-void NegotiateMessageDeleteArray(struct NegotiateMessage* self, size_t size)
+void NegotiateMessageDeleteArray(struct NegotiateMessage *self, size_t size)
 {
     for (size_t i = 0; i < size; i++) {
         NegotiateMessageDestructor(self + i);

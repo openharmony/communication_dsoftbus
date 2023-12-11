@@ -14,10 +14,10 @@
  */
 #include "broadcast_handler.h"
 #include "conn_log.h"
-#include "softbus_error_code.h"
-#include "p2p_entity_broadcast_handler.h"
 #include "link_manager_broadcast_handler.h"
+#include "p2p_entity_broadcast_handler.h"
 #include "resource_manager_broadcast_handler.h"
+#include "softbus_error_code.h"
 
 int32_t BroadcastHandlerInit(void)
 {

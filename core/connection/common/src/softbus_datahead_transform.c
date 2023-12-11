@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 #include "softbus_datahead_transform.h"
-#include <sys/types.h>
-#include "softbus_log.h"
 #include "softbus_adapter_socket.h"
+#include "softbus_log.h"
+#include <sys/types.h>
 
 void PackConnPktHead(ConnPktHead *data)
 {

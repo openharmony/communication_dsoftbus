@@ -15,27 +15,27 @@
 
 #include "softbus_tcp_connect_manager.h"
 
-#include <stdio.h>
 #include <arpa/inet.h>
+#include <stdio.h>
 
-#include "securec.h"
+#include "conn_event.h"
 #include "conn_log.h"
+#include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_base_listener.h"
 #include "softbus_conn_interface.h"
 #include "softbus_conn_manager.h"
-#include "softbus_def.h"
 #include "softbus_datahead_transform.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
+#include "softbus_hidumper_conn.h"
+#include "softbus_hisysevt_connreporter.h"
 #include "softbus_socket.h"
 #include "softbus_type_def.h"
 #include "softbus_utils.h"
-#include "softbus_hidumper_conn.h"
-#include "softbus_hisysevt_connreporter.h"
-#include "conn_event.h"
 
 #define INVALID_DATA (-1)
 #define AUTH_P2P_KEEP_ALIVE_TIME 10

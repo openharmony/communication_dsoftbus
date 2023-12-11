@@ -14,14 +14,14 @@
  */
 
 #include "resource_manager_broadcast_handler.h"
-#include <string.h>
-#include "conn_log.h"
-#include "softbus_error_code.h"
 #include "broadcast_receiver.h"
-#include "wifi_direct_p2p_adapter.h"
 #include "channel/default_negotiate_channel.h"
+#include "conn_log.h"
 #include "data/resource_manager.h"
+#include "softbus_error_code.h"
 #include "utils/wifi_direct_anonymous.h"
+#include "wifi_direct_p2p_adapter.h"
+#include <string.h>
 
 static void HandleP2pStateChanged(enum P2pState state)
 {
