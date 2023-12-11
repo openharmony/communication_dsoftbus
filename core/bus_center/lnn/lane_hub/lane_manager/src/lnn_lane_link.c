@@ -25,6 +25,7 @@
 #include "lnn_lane_def.h"
 #include "lnn_lane_score.h"
 #include "lnn_lane_link_p2p.h"
+#include "lnn_lane_reliability.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_net_capability.h"
@@ -935,7 +936,12 @@ static int32_t LaneLinkOfWlan(uint32_t reqId, const LinkRequest *reqInfo, const 
         LNN_LOGE(LNN_LANE, "wlan is disconnected");
     }
     FillWlanLinkInfo(&linkInfo, is5GBand, channel, (uint16_t)port, protocol);
-    callback->OnLaneLinkSuccess(reqId, &linkInfo);
+
+    ret = LaneDetectReliability(reqId, &linkInfo, callback);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "lane detect reliability fail");
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 
