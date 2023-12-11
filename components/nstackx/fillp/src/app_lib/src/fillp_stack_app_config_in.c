@@ -247,7 +247,6 @@ static FILLP_INT32 FtAppSetKeepAliveTime(
             FillpErrorType ret = SpungePostMsg(sock->inst, (void *)sock, MSG_TYPE_SET_KEEP_ALIVE, FILLP_TRUE);
             if (ret != ERR_OK) {
                 FILLP_LOGERR("fillp_sock_id:%d Failed to set the keep alive time for system socket", sockIndex);
-
                 return ret;
             }
 
@@ -323,7 +322,6 @@ static FILLP_INT32 FtAppConfigSetTxBurst(
     configValue = *(FILLP_UINT16 *)value;
     if ((configValue == 0) || (configValue > FILLP_MAX_TX_RX_BURST)) {
         FILLP_LOGERR("fillp_sock_id:%d txBurst is invalid parameter!!!", sockIndex);
-
         return ERR_FAILURE;
     }
 

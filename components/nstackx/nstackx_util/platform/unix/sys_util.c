@@ -31,6 +31,7 @@ static const char *g_illegalPathHeadString[] = {
 uint8_t IsFileNameLegal(const char *fileName)
 {
     if (fileName == NULL || strlen(fileName) == 0) {
+        LOGE(TAG, "illegal filename");
         return NSTACKX_FALSE;
     }
 

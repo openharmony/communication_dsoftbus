@@ -41,7 +41,6 @@ void FillpMacTimerExpire(
 
     for (counter = 0; counter < FILLP_KEYSIZE; counter += (FILLP_UINT32)sizeof(FILLP_UINT32)) {
         macInfo->oldMacKey[counter] = macInfo->currentMacKey[counter];
-
         macInfo->currentMacKey[counter] = (FILLP_UINT8)FILLP_CRYPTO_RAND();
     }
 
