@@ -44,6 +44,7 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
     int64_t timediff = GetSoftbusRecordTimeMillis() - timeStart;
     if (!channel->isServer) {
         TransEventExtra extra = {
+            .calleePkg = NULL,
             .peerNetworkId = channel->peerDeviceId,
             .linkType = channel->linkType,
             .channelId = channel->channelId,

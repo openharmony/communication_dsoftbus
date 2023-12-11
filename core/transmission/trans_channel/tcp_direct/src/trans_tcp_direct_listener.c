@@ -208,6 +208,10 @@ static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channel
 {
     if (ret != SOFTBUS_OK) {
         TransEventExtra extra = {
+            .socketName = NULL,
+            .peerNetworkId = NULL,
+            .calleePkg = NULL,
+            .callerPkg = NULL,
             .channelId = channelId,
             .socketFd = fd,
             .errcode = ret,
@@ -262,6 +266,10 @@ static int32_t TdcOnDataEvent(ListenerModule module, int events, int fd)
         AddTrigger(conn->listenMod, fd, READ_TRIGGER);
         ret = StartVerifySession(conn);
         TransEventExtra extra = {
+            .socketName = NULL,
+            .peerNetworkId = NULL,
+            .calleePkg = NULL,
+            .callerPkg = NULL,
             .socketFd = fd,
             .channelId = conn->channelId,
             .authId = conn->authId,
