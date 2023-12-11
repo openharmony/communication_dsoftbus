@@ -198,6 +198,7 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_SHIFT_LNN_GEAR] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_RIPPLE_STATS] = nullptr;
     memberPermissionMap_[SERVER_GET_SOFTBUS_SPEC_OBJECT] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_GET_BUS_CENTER_EX_OBJ] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
 }
 
 int32_t SoftBusServerStub::OnRemoteRequest(uint32_t code,
