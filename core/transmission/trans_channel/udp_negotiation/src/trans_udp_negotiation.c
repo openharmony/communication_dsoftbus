@@ -175,6 +175,7 @@ int32_t NotifyUdpChannelOpenFailed(const AppInfo *info, int32_t errCode)
     int64_t timeStart = info->timeStart;
     int64_t timediff = GetSoftbusRecordTimeMillis() - timeStart;
     TransEventExtra extra = {
+        .calleePkg = NULL,
         .callerPkg = info->myData.pkgName,
         .channelId = info->myData.channelId,
         .peerNetworkId = info->myData.deviceId,
@@ -532,6 +533,10 @@ static void TransOnExchangeUdpInfoReply(int64_t authId, int64_t seq, const cJSON
     }
     TransUpdateUdpChannelInfo(seq, &(channel.info));
     TransEventExtra extra = {
+        .socketName = NULL,
+        .peerNetworkId = NULL,
+        .calleePkg = NULL,
+        .callerPkg = NULL,
         .channelId = channel.info.myData.channelId,
         .authId = authId,
         .result = EVENT_STAGE_RESULT_OK
@@ -624,6 +629,10 @@ static int32_t StartExchangeUdpInfo(UdpChannelInfo *channel, int64_t authId, int
         TRANS_LOGE(TRANS_CTRL, "set udp channel negotiation status neging failed.");
     }
     TransEventExtra extra = {
+        .socketName = NULL,
+        .peerNetworkId = NULL,
+        .calleePkg = NULL,
+        .callerPkg = NULL,
         .channelId = (int32_t)channel->info.myData.channelId,
         .authId = (int32_t)authId,
         .result = EVENT_STAGE_RESULT_OK
@@ -635,6 +644,10 @@ static int32_t StartExchangeUdpInfo(UdpChannelInfo *channel, int64_t authId, int
 static void UdpOnAuthConnOpened(uint32_t requestId, int64_t authId)
 {
     TransEventExtra extra = {
+        .socketName = NULL,
+        .peerNetworkId = NULL,
+        .calleePkg = NULL,
+        .callerPkg = NULL,
         .requestId = (int32_t)requestId,
         .authId = (int32_t)authId,
         .result = EVENT_STAGE_RESULT_OK
@@ -693,6 +706,9 @@ static void UdpOnAuthConnOpenFailed(uint32_t requestId, int32_t reason)
     }
     ProcessAbnormalUdpChannelState(&channel->info, SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED, true);
     TransEventExtra extra = {
+        .peerNetworkId = NULL,
+        .calleePkg = NULL,
+        .callerPkg = NULL,
         .socketName = channel->info.myData.sessionName,
         .channelType = CHANNEL_TYPE_UDP,
         .channelId = channel->info.myData.channelId,
@@ -771,6 +787,8 @@ static int32_t OpenAuthConnForUdpNegotiation(UdpChannelInfo *channel)
 
     int32_t ret = UdpOpenAuthConn(channel->info.peerData.deviceId, requestId, channelObj->isMeta);
     TransEventExtra extra = {
+        .calleePkg = NULL,
+        .callerPkg = NULL,
         .socketName = channel->info.myData.sessionName,
         .channelType = CHANNEL_TYPE_UDP,
         .channelId = channel->info.myData.channelId,

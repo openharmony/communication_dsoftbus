@@ -118,6 +118,10 @@ int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned
             break;
     }
     TransEventExtra extra = {
+        .socketName = NULL,
+        .peerNetworkId = NULL,
+        .calleePkg = NULL,
+        .callerPkg = NULL,
         .channelId = channelId,
         .costTime = GetSoftbusRecordTimeMillis() - appInfo->connectedStart,
         .errcode = ret,
@@ -142,6 +146,7 @@ int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int3
     }
     if (TransProxyGetChanByChanId(channelId, chan) == SOFTBUS_OK && !chan->isServer) {
         TransEventExtra extra = {
+            .calleePkg = NULL,
             .peerNetworkId = appInfo->peerData.deviceId,
             .linkType = appInfo->linkType,
             .channelId = channelId,

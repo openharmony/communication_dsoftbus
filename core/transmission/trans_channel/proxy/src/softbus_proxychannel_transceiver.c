@@ -557,6 +557,10 @@ void TransSetConnStateByReqId(uint32_t reqId, uint32_t connId, uint32_t state)
 static void TransOnConnectSuccessed(uint32_t requestId, uint32_t connectionId, const ConnectionInfo *connInfo)
 {
     TransEventExtra extra = {
+        .socketName = NULL,
+        .peerNetworkId = NULL,
+        .calleePkg = NULL,
+        .callerPkg = NULL,
         .requestId = (int32_t)requestId,
         .connectionId = (int32_t)connectionId,
         .result = EVENT_STAGE_RESULT_OK
