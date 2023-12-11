@@ -372,7 +372,6 @@ static void DeviceStateChangeProcess(char *udid, ConnectionAddrType type, bool i
             SoftBusFree(outUdid);
         }
     }
-    return;
 }
 
 static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, int32_t retCode)
