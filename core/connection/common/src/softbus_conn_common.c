@@ -202,7 +202,7 @@ int32_t WaitQueueLength(
             CONN_LOGE(CONN_COMMON, "wait get queue count fail");
             break;
         }
-        CONN_LOGI(CONN_COMMON, "queue count=%d", queueCount);
+        CONN_LOGD(CONN_COMMON, "queue count=%d", queueCount);
         if (queueCount < (maxLen - diffLen)) {
             break;
         }

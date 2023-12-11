@@ -124,7 +124,7 @@ static void *LoopTask(void *arg)
         }
 
         if (IsListEmpty(&context->msgHead)) {
-            COMM_LOGI(COMM_UTILS, "LoopTask[%s] wait msg list empty", context->name);
+            COMM_LOGD(COMM_UTILS, "LoopTask[%s] wait msg list empty", context->name);
             SoftBusCondWait(&context->cond, &context->lock, NULL);
             (void)SoftBusMutexUnlock(&context->lock);
             continue;
