@@ -302,6 +302,8 @@ static int32_t LaneDetectOnDataEvent(ListenerModule module, int32_t events, int3
         (void)memset_s(&requestItem, sizeof(LaneDetectInfo), 0, sizeof(LaneDetectInfo));
         if (GetLaneDetectInfoByWlanFd(fd, &requestItem) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LANE, "wlan detect info not found by fd=%d", fd);
+            (void)DelTrigger(LANE, fd, WRITE_TRIGGER);
+            ConnShutdownSocket(fd);
             return SOFTBUS_ERR;
         }
         LNN_LOGI(LNN_LANE, "wlan detect=%d fd=%d connect sueccess", requestItem.laneDetectId, fd);
