@@ -29,6 +29,7 @@ extern "C" {
 #define SOFTBUS_EVENT_DOMAIN        "DSOFTBUS"
 #define SOFTBUS_EVENT_PKG_NAME      "dsoftbus"
 #define SOFTBUS_EVENT_TYPE_BEHAVIOR 4
+#define SOFTBUS_EVENT_TYPE_SECURITY 3
 
 typedef struct {
     int32_t scene;     // BIZ_SCENE

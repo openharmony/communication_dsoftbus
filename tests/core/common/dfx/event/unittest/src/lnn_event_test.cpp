@@ -191,7 +191,7 @@ HWTEST_F(LnnEventTest, LnnAuditTest001, TestSize.Level0)
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,
-        HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(LNN_AUDIT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR),
+        HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(LNN_AUDIT_NAME), Eq(SOFTBUS_EVENT_TYPE_SECURITY),
             LnnAuditValidParamArrayMatcher(extra, VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE - 1)))
         .Times(1);
     LNN_AUDIT(AUDIT_SCENE_DECRYPT_CONN_DATA, extra);
