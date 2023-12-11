@@ -146,7 +146,7 @@ int32_t SoftBusSocketShutDown(int32_t socketFd, int32_t how);
 int32_t SoftBusSocketClose(int32_t socketFd);
 
 int32_t SoftBusInetPtoN(int32_t af, const char *src, void *dst);
-const char *SoftBusInetNtoP(int32_t af, const void* src, char *dst, int32_t size);
+const char *SoftBusInetNtoP(int32_t af, const void *src, char *dst, int32_t size);
 
 uint32_t SoftBusHtoNl(uint32_t hostlong);
 uint16_t SoftBusHtoNs(uint16_t hostshort);
@@ -174,4 +174,4 @@ int32_t SoftBusSocketGetError(int32_t socketFd);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif
+#endif // SOFTBUS_ADAPTER_SOCKET_H

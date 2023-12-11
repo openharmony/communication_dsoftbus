@@ -44,7 +44,6 @@ typedef enum {
     SOFTBUS_PRIORITY_HIGHEST
 } SoftBusThreadPriority;
 
-
 typedef struct {
     const char *taskName;
     int32_t policy;
@@ -93,4 +92,4 @@ int32_t SoftBusCondDestroy(SoftBusCond *cond);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif
+#endif // SOFTBUS_ADAPTER_THREAD_H
