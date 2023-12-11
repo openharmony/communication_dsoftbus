@@ -34,9 +34,9 @@ bool GetJsonObjectStringItem(const cJSON *json, const char * const string, char 
 
 bool GetJsonObjectNumber16Item(const cJSON *json, const char * const string, uint16_t *target);
 
-bool GetJsonObjectNumberItem(const cJSON *json, const char * const string, int *target);
+bool GetJsonObjectNumberItem(const cJSON *json, const char * const string, int32_t *target);
 
-bool GetJsonObjectSignedNumberItem(const cJSON *json, const char * const string, int *target);
+bool GetJsonObjectSignedNumberItem(const cJSON *json, const char * const string, int32_t *target);
 
 bool GetJsonObjectNumber64Item(const cJSON *json, const char * const string, int64_t *target);
 
@@ -52,7 +52,7 @@ bool AddStringArrayToJsonObject(cJSON *json, const char * const string, const ch
 
 bool AddNumber16ToJsonObject(cJSON *json, const char * const string, uint16_t num);
 
-bool AddNumberToJsonObject(cJSON *json, const char * const string, int num);
+bool AddNumberToJsonObject(cJSON *json, const char * const string, int32_t num);
 
 bool AddNumber64ToJsonObject(cJSON *json, const char * const string, int64_t num);
 

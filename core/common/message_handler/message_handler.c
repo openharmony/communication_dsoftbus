@@ -15,16 +15,13 @@
 
 #include "message_handler.h"
 
-#include <sys/time.h>
-#include <sys/types.h>
-
 #include "common_list.h"
 #include "comm_log.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
-#include "softbus_type_def.h"
+#include "softbus_error_code.h"
 
 #define LOOP_NAME_LEN 16
 #define TIME_THOUSANDS_MULTIPLIER 1000LL
@@ -406,6 +403,7 @@ static void LooperRemoveMessage(const SoftBusLooper *looper, const SoftBusHandle
 void SetLooperDumpable(SoftBusLooper *loop, bool dumpable)
 {
     if (loop == NULL) {
+        COMM_LOGE(COMM_UTILS, "loop is null");
         return;
     }
     loop->dumpable = dumpable;
@@ -419,16 +417,19 @@ SoftBusLooper *CreateNewLooper(const char *name)
     }
     SoftBusLooper *looper = (SoftBusLooper *)SoftBusCalloc(sizeof(SoftBusLooper));
     if (looper == NULL) {
+        COMM_LOGE(COMM_UTILS, "Looper SoftBusCalloc fail");
         return NULL;
     }
 
-    SoftBusLooperContext *context = SoftBusCalloc(sizeof(SoftBusLooperContext));
+    SoftBusLooperContext *context = (SoftBusLooperContext *)SoftBusCalloc(sizeof(SoftBusLooperContext));
     if (context == NULL) {
+        COMM_LOGE(COMM_UTILS, "Looper SoftBusCalloc fail");
         SoftBusFree(looper);
         return NULL;
     }
 
     if (memcpy_s(context->name, sizeof(context->name), name, strlen(name)) != EOK) {
+        COMM_LOGE(COMM_UTILS, "memcpy_s fail");
         SoftBusFree(looper);
         SoftBusFree(context);
         return NULL;
@@ -447,6 +448,7 @@ SoftBusLooper *CreateNewLooper(const char *name)
     looper->RemoveMessageCustom = LoopRemoveMessageCustom;
     int ret = StartNewLooperThread(looper);
     if (ret != 0) {
+        COMM_LOGE(COMM_UTILS, "start fail");
         SoftBusFree(looper);
         SoftBusFree(context);
         return NULL;
@@ -504,6 +506,7 @@ static void ReleaseLooper(const SoftBusLooper *looper)
 void DestroyLooper(SoftBusLooper *looper)
 {
     if (looper == NULL) {
+        COMM_LOGE(COMM_UTILS, "looper is null");
         return;
     }
 
@@ -556,11 +559,11 @@ int LooperInit(void)
     SoftBusLooper *looper = CreateNewLooper("BusCenter");
     if (!looper) {
         COMM_LOGE(COMM_UTILS, "init looper fail.");
-        return -1;
+        return SOFTBUS_ERR;
     }
     SetLooper(LOOP_TYPE_DEFAULT, looper);
     COMM_LOGI(COMM_UTILS, "init looper success.");
-    return 0;
+    return SOFTBUS_OK;
 }
 
 void LooperDeinit(void)

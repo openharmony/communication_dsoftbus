@@ -15,8 +15,8 @@
 
 #include <securec.h>
 #include <stdbool.h>
-#include <stdint.h>
 
+#include "comm_log.h"
 #include "softbus_common.h"
 #include "softbus_errcode.h"
 #include "softbus_config_adapter.h"
@@ -46,7 +46,7 @@
 #define CONN_TCP_MAX_CONN_NUM 30
 #define CONN_TCP_TIME_OUT 100
 #define MAX_NODE_STATE_CB_CNT 10
-#define MAX_LNN_CONNECTION_CNT 30 // TODO: restore after fix the problem of connection exceeding max limit
+#define MAX_LNN_CONNECTION_CNT 30
 #define LNN_SUPPORT_CAPBILITY 62
 #define LNN_SUPPORT_FEATURE     0x77CA
 #define AUTH_ABILITY_COLLECTION 0
@@ -347,9 +347,11 @@ int SoftbusSetConfig(ConfigType type, const unsigned char *val, uint32_t len)
 {
     if ((type >= SOFTBUS_CONFIG_TYPE_MAX) || (val == NULL) ||
         (len > g_configItems[type].len) || (type != g_configItems[type].type)) {
+        COMM_LOGW(COMM_DFX, "invalid param");
         return SOFTBUS_ERR;
     }
     if (memcpy_s(g_configItems[type].val, g_configItems[type].len, val, len) != EOK) {
+        COMM_LOGW(COMM_DFX, "memcpy_s fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -359,9 +361,11 @@ int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
 {
     if ((type >= SOFTBUS_CONFIG_TYPE_MAX) || (val == NULL) ||
         (len != g_configItems[type].len) || (type != g_configItems[type].type)) {
+        COMM_LOGW(COMM_DFX, "invalid param");
         return SOFTBUS_ERR;
     }
     if (memcpy_s((void*)val, len, g_configItems[type].val, g_configItems[type].len) != EOK) {
+        COMM_LOGW(COMM_DFX, "memcpy_s fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

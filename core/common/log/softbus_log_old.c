@@ -113,9 +113,11 @@ void SoftBusLogImpl(SoftBusLogModule module, SoftBusLogLevel level, const char* 
 const char *Anonymizes(const char *target, const uint8_t expectAnonymizedLength)
 {
     if (target == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Anonymizes target is null");
         return "NULL";
     }
     if (expectAnonymizedLength == 0) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "Anonymizes expectAnonymizedLength=0");
         return "BADLENGTH";
     }
     size_t targetLen = strlen(target);
@@ -219,6 +221,7 @@ void AnonyPacketPrintout(SoftBusLogModule module, const char *msg, const char *p
     size_t packetLen)
 {
     if (!GetSignalingMsgSwitch()) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "anonymize packet: GetSignalingMsgSwitch fail");
         return;
     }
     if (msg == NULL) {
@@ -255,6 +258,7 @@ void AnonyPacketPrintout(SoftBusLogModule module, const char *msg, const char *p
 const char *AnonyDevId(char **outName, const char *inName)
 {
     if (inName == NULL) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "inName is null.");
         return "null";
     }
     if (strlen(inName) < SESSION_NAME_DEVICE_ID_LEN) {

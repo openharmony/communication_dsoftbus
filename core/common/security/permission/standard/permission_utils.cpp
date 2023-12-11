@@ -15,12 +15,14 @@
 
 #include "permission_utils.h"
 
+#include "comm_log.h"
 #include "softbus_errcode.h"
 #include "softbus_log_old.h"
 
 extern "C" int32_t IsValidPkgName(int32_t uid, const char *pkgName)
 {
     if (pkgName == NULL) {
+        COMM_LOGI(COMM_PERM, "pkgName is null");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
