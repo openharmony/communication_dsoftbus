@@ -42,6 +42,7 @@ public:
 
     virtual int SoftBusStartScan(int listenerId, int scannerId, const SoftBusBleScanParams *param) = 0;
     virtual int SoftBusStopScan(int listenerId, int scannerId) = 0;
+    virtual int SoftBusStopScanImmediately(int listenerId, int scannerId) = 0;
 
     virtual int SoftBusStartAdv(int channel, const SoftBusBleAdvParams *param) = 0;
     virtual int SoftBusStopAdv(int channel) = 0;
@@ -85,6 +86,7 @@ public:
 
     MOCK_METHOD(int, SoftBusStartScan, (int listenerId, int scannerId, const SoftBusBleScanParams *param), (override));
     MOCK_METHOD(int, SoftBusStopScan, (int listenerId, int scannerId), (override));
+    MOCK_METHOD(int, SoftBusStopScanImmediately, (int listenerId, int scannerId), (override));
 
     MOCK_METHOD(int, SoftBusStartAdv, (int channel, const SoftBusBleAdvParams *param), (override));
     MOCK_METHOD(int, SoftBusStopAdv, (int channel), (override));
@@ -113,6 +115,7 @@ public:
     static int32_t ActionOfReleaseAdvChannel(int channel);
     static int32_t ActionOfStartScan(int listenerId, int scannerId, const SoftBusBleScanParams *param);
     static int32_t ActionOfStopScan(int listenerId, int scannerId);
+    static int32_t ActionOfStopScanImmediately(int listenerId, int scannerId);
     static int32_t ActionOfStartAdv(int channel, const SoftBusBleAdvParams *param);
     static int32_t ActionOfStopAdv(int channel);
     static int32_t ActionOfSetAdvDataForActiveDiscovery(int channel, const SoftBusBleAdvData *data);

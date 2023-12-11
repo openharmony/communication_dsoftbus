@@ -1065,6 +1065,58 @@ int SoftBusStopScan(int listenerId, int scannerId)
     return SOFTBUS_ERR;
 }
 
+int SoftBusStopScanImmediately(int listenerId, int scannerId)
+{
+    if (SoftBusMutexLock(&g_scanerLock) != 0) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    if (!CheckScanChannelInUsed(listenerId)) {
+        SoftBusMutexUnlock(&g_scanerLock);
+        return SOFTBUS_ERR;
+    }
+    if (!g_scanListener[listenerId].isScanning) {
+        SoftBusMutexUnlock(&g_scanerLock);
+        return SOFTBUS_OK;
+    }
+    if (BleOhosStatusToSoftBus(BleStopScan(scannerId)) != SOFTBUS_BT_STATUS_SUCCESS) {
+        DISC_LOGE(DISC_BLE, "ble stop scan immediately failed");
+        SoftBusMutexUnlock(&g_scanerLock);
+        return SOFTBUS_ERR;
+    }
+
+    g_scanListener[listenerId].isUsed = false;
+    uint8_t filterSize = 0;
+    BleScanNativeFilter *nativeFilter = NULL;
+    if (scannerId == g_scannerId) {
+        GetAllNativeScanFilter(listenerId, &nativeFilter, &filterSize);
+    } else {
+        SoftBusGetBurstScanFilter(listenerId, &nativeFilter, &filterSize);
+    }
+    DumpBleScanFilter(nativeFilter, filterSize);
+    DISC_LOGI(DISC_BLE, "listenerId:%d, scannerId:%d, filterSize:%u", listenerId, scannerId, filterSize);
+    int32_t status = SOFTBUS_BT_STATUS_SUCCESS;
+    if (filterSize != 0) {
+        BleScanConfigs scanConfig = { 0 };
+        SoftBusBleScanParams param = { 0 };
+        SetAndGetSuitableScanConfig(listenerId, &param, &scanConfig);
+        status = BleOhosStatusToSoftBus(BleStartScanEx(scannerId, &scanConfig, nativeFilter, filterSize));
+    }
+    SoftBusFree(nativeFilter);
+    g_scanListener[listenerId].isUsed = true;
+
+    g_scanListener[listenerId].isScanning = false;
+    if (g_scanListener[listenerId].listener != NULL &&
+        g_scanListener[listenerId].listener->OnScanStop != NULL) {
+        g_scanListener[listenerId].listener->OnScanStop(listenerId, status);
+    }
+    SoftBusMutexUnlock(&g_scanerLock);
+    if (status != SOFTBUS_BT_STATUS_SUCCESS) {
+        DISC_LOGE(DISC_BLE, "ble stop and rescan failed, status:%d", status);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int SoftBusReplaceAdvertisingAdv(int advId, const SoftBusBleAdvData *data)
 {
     if (data == NULL) {
