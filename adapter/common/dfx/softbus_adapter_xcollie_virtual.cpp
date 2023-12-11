@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,6 @@
 
 #include "softbus_adapter_xcollie.h"
 
-#include <cstdint>
-
 int32_t SoftBusSetWatchdogTimer(const char *name, uint32_t timeout, void(*func)(void*), void *args)
 {
     (void)name;
@@ -29,7 +27,6 @@ int32_t SoftBusSetWatchdogTimer(const char *name, uint32_t timeout, void(*func)(
 void SoftBusCancelWatchdogTimer(int32_t id)
 {
     (void)id;
-    return;
 }
 
 void SoftBusRunOneShotTask(const char *name, void(*task)(void), uint64_t delay)
@@ -37,7 +34,6 @@ void SoftBusRunOneShotTask(const char *name, void(*task)(void), uint64_t delay)
     (void)name;
     (void)task;
     (void)delay;
-    return;
 }
 
 void SoftBusRunPeriodicalTask(const char *name, void(*task)(void), uint64_t interval, uint64_t delay)
@@ -46,5 +42,4 @@ void SoftBusRunPeriodicalTask(const char *name, void(*task)(void), uint64_t inte
     (void)task;
     (void)interval;
     (void)delay;
-    return;
 }
