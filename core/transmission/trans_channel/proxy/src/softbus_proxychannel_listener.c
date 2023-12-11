@@ -132,6 +132,22 @@ int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned
     return ret;
 }
 
+static int32_t TransProxyGetChannelIsServer(int32_t channelId, int8_t *isServer)
+{
+    ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
+    if (chan == NULL) {
+        TRANS_LOGE(TRANS_MSG, "malloc in trans proxy send message. channelId=%d", channelId);
+        return SOFTBUS_MALLOC_ERR;
+    }
+    if (TransProxyGetChanByChanId(channelId, chan) != SOFTBUS_OK) {
+        SoftBusFree(chan);
+        return SOFTBUS_ERR;
+    }
+    *isServer = chan->isServer;
+    SoftBusFree(chan);
+    return SOFTBUS_OK;
+}
+
 int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int32_t errCode)
 {
     if (appInfo == NULL) {
@@ -139,12 +155,9 @@ int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int3
     }
     int64_t timeStart = appInfo->timeStart;
     int64_t timediff = GetSoftbusRecordTimeMillis() - timeStart;
-    ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
-    if (chan == NULL) {
-        TRANS_LOGE(TRANS_MSG, "malloc in trans proxy send message. channelId=%d", channelId);
-        return SOFTBUS_MALLOC_ERR;
-    }
-    if (TransProxyGetChanByChanId(channelId, chan) == SOFTBUS_OK && !chan->isServer) {
+    int8_t isServer;
+
+    if (TransProxyGetChannelIsServer(channelId, &isServer) == SOFTBUS_OK && !isServer) {
         TransEventExtra extra = {
             .calleePkg = NULL,
             .peerNetworkId = appInfo->peerData.deviceId,
@@ -158,13 +171,16 @@ int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int3
         };
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
         TransAlarmExtra extraAlarm = {
+            .conflictName = NULL,
+            .conflictedName = NULL,
+            .occupyedName = NULL,
+            .permissionName = NULL,
             .linkType = appInfo->linkType,
             .errcode = errCode,
             .sessionName = appInfo->myData.sessionName,
         };
         TRANS_ALARM(OPEN_SESSION_FAIL_ALARM, CONTROL_ALARM_TYPE, extraAlarm);
     }
-    SoftBusFree(chan);
     SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName, appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);
     TRANS_LOGI(TRANS_CTRL,
         "proxy channel openfailed: channelId=%d, appType=%d", channelId, appInfo->appType);
