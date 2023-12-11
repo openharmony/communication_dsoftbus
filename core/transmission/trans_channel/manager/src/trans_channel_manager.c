@@ -425,6 +425,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     AppInfo *appInfo = GetAppInfo(param);
     TRANS_CHECK_AND_RETURN_RET_LOGW(!(appInfo == NULL), INVALID_CHANNEL_ID, TRANS_CTRL, "GetAppInfo is null.");
     TransEventExtra extra = {
+        .calleePkg = NULL,
         .callerPkg = appInfo->myData.pkgName,
         .socketName = appInfo->myData.sessionName,
         .dataType = appInfo->businessType,
@@ -732,6 +733,10 @@ int32_t TransCloseChannel(int32_t channelId, int32_t channelType)
             break;
     }
     TransEventExtra extra = {
+        .socketName = NULL,
+        .peerNetworkId = NULL,
+        .calleePkg = NULL,
+        .callerPkg = NULL,
         .channelId = channelId,
         .channelType = channelType,
         .errcode = ret,

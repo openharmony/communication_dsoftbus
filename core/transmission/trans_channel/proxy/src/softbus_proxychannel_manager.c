@@ -758,6 +758,10 @@ void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg)
     int32_t errCode = SOFTBUS_OK;
     if (TransProxyUnPackHandshakeErrMsg(msg->data, &errCode, msg->dateLen) == SOFTBUS_OK) {
         TransEventExtra extra = {
+            .socketName = NULL,
+            .peerNetworkId = NULL,
+            .calleePkg = NULL,
+            .callerPkg = NULL,
             .channelId = info->myId,
             .peerChannelId = info->peerId,
             .errcode = errCode,
@@ -1121,6 +1125,10 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
         TransProxyOpenProxyChannelFail(info->channelId, &(info->appInfo), errCode);
     } else if (info->status == PROXY_CHANNEL_STATUS_COMPLETED) {
         TransEventExtra extra = {
+            .socketName = NULL,
+            .peerNetworkId = NULL,
+            .calleePkg = NULL,
+            .callerPkg = NULL,
             .channelId = msg->msgHead.myId,
             .peerChannelId = msg->msgHead.peerId,
             .result = EVENT_STAGE_RESULT_OK
@@ -1314,6 +1322,10 @@ void TransProxyOpenProxyChannelSuccess(int32_t chanId)
     int32_t ret = TransProxyHandshake(chan);
     if (ret != SOFTBUS_OK) {
         TransEventExtra extra = {
+            .socketName = NULL,
+            .peerNetworkId = NULL,
+            .calleePkg = NULL,
+            .callerPkg = NULL,
             .channelId = chanId,
             .connectionId = chan->connId,
             .errcode = ret,
@@ -1391,6 +1403,9 @@ static void TransProxyTimerItemProc(const ListNode *proxyProcList)
             TransProxyPostOpenClosedMsgToLoop(removeNode);
             TransProxyPostDisConnectMsgToLoop(connId);
             TransEventExtra extra = {
+                .peerNetworkId = NULL,
+                .calleePkg = NULL,
+                .callerPkg = NULL,
                 .channelId = removeNode->channelId,
                 .connectionId = (int32_t)connId,
                 .result = EVENT_STAGE_RESULT_OK,
