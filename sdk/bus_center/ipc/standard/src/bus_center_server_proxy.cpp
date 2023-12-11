@@ -81,8 +81,7 @@ int32_t BusCenterServerProxyInit(void)
 void BusCenterServerProxyDeInit(void)
 {
     LNN_LOGI(LNN_EVENT, "enter");
-    delete g_serverProxy;
-    g_serverProxy = nullptr;
+    g_serverProxy.clear();
 }
 
 int32_t ServerIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int32_t *infoNum)

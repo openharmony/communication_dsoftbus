@@ -131,7 +131,7 @@ void ClientDeathProcTask(void)
         if (g_serverProxy != nullptr && g_clientDeath != nullptr) {
             g_serverProxy->RemoveDeathRecipient(g_clientDeath);
         }
-        g_serverProxy = nullptr;
+        g_serverProxy.clear();
     }
     DiscServerProxyDeInit();
     TransServerProxyDeInit();
