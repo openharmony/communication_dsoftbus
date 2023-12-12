@@ -517,18 +517,16 @@ static void ConnBlePackCtrlMsgHeader(ConnPktHead *header, uint32_t dataLen)
 // GATT connection keep exchange 'udid' as keeping compatibility
 static int32_t SendBasicInfo(ConnBleConnection *connection)
 {
-    int32_t status = SOFTBUS_OK;
+    int32_t status = SOFTBUS_ERR;
     char devId[DEVID_BUFF_LEN] = { 0 };
-    switch (connection->protocol) {
-        case BLE_GATT:
-            status = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, devId, DEVID_BUFF_LEN);
-            break;
-        case BLE_COC:
-            status = LnnGetLocalStrInfo(STRING_KEY_NETWORKID, devId, DEVID_BUFF_LEN);
-            break;
-        default:
-            status = SOFTBUS_ERR;
-            break;
+    BleProtocolType protocol = connection->protocol;
+    ConnBleFeatureBitSet featureBitSet = connection->featureBitSet;
+    bool isSupportNetWorkIdExchange = (featureBitSet &
+        (1 << BLE_FEATURE_SUPPORT_SUPPORT_NETWORKID_BASICINFO_EXCAHNGE)) != 0;
+    if (protocol == BLE_COC || isSupportNetWorkIdExchange) {
+        status = LnnGetLocalStrInfo(STRING_KEY_NETWORKID, devId, DEVID_BUFF_LEN);
+    } else if (protocol == BLE_GATT) {
+        status = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, devId, DEVID_BUFF_LEN);
     }
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "get devid from net ledger failed, connId=%u, protocol=%d, err=%d",
@@ -550,11 +548,12 @@ static int32_t SendBasicInfo(ConnBleConnection *connection)
         return SOFTBUS_CREATE_JSON_ERR;
     }
     char *payload = NULL;
+    featureBitSet |= g_featureBitSet;
     do {
         if (!AddStringToJsonObject(json, BASIC_INFO_KEY_DEVID, devId) ||
             !AddNumberToJsonObject(json, BASIC_INFO_KEY_ROLE, connection->side) ||
             !AddNumberToJsonObject(json, BASIC_INFO_KEY_DEVTYPE, deviceType) ||
-            !AddNumberToJsonObject(json, BASIC_INFO_KEY_FEATURE, g_featureBitSet)) {
+            !AddNumberToJsonObject(json, BASIC_INFO_KEY_FEATURE, featureBitSet)) {
             CONN_LOGE(CONN_BLE, "add json info failed, connId=%u", connection->connectionId);
             status = SOFTBUS_CREATE_JSON_ERR;
             break;
@@ -644,25 +643,27 @@ static int32_t ParseBasicInfo(ConnBleConnection *connection, const uint8_t *data
         // fall through
     }
     cJSON_Delete(json);
-
+    bool isSupportNetWorkIdExchange = (feature &
+        (1 << BLE_FEATURE_SUPPORT_SUPPORT_NETWORKID_BASICINFO_EXCAHNGE)) != 0;
     int32_t status = SoftBusMutexLock(&connection->lock);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "try to lock connection failed, connId=%u, err=%d", connection->connectionId, status);
         return SOFTBUS_LOCK_ERR;
     }
-    if (connection->protocol == BLE_GATT) {
-        if (memcpy_s(connection->udid, UDID_BUF_LEN, devId, DEVID_BUFF_LEN) != EOK) {
-            (void)SoftBusMutexUnlock(&connection->lock);
-            CONN_LOGE(CONN_BLE, "memcpy_s udid failed, connId=%u", connection->connectionId);
-            return SOFTBUS_MEM_ERR;
-        }
-    } else {
+
+    if (connection->protocol == BLE_COC || isSupportNetWorkIdExchange) {
         if (memcpy_s(connection->networkId, NETWORK_ID_BUF_LEN, devId, DEVID_BUFF_LEN) != EOK) {
             (void)SoftBusMutexUnlock(&connection->lock);
             CONN_LOGE(CONN_BLE, "memcpy_s network id failed, connId=%u", connection->connectionId);
             return SOFTBUS_MEM_ERR;
         }
         ConnBleInnerComplementDeviceId(connection);
+    } else if (connection->protocol == BLE_GATT) {
+        if (memcpy_s(connection->udid, UDID_BUF_LEN, devId, DEVID_BUFF_LEN) != EOK) {
+            (void)SoftBusMutexUnlock(&connection->lock);
+            CONN_LOGE(CONN_BLE, "memcpy_s udid failed, connId=%u", connection->connectionId);
+            return SOFTBUS_MEM_ERR;
+        }
     }
     connection->featureBitSet = (ConnBleFeatureBitSet)feature;
     connection->state = BLE_CONNECTION_STATE_EXCHANGED_BASIC_INFO;
