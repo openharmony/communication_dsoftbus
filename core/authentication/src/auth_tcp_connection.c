@@ -183,7 +183,7 @@ static int32_t RecvPacketHead(ListenerModule module, int32_t fd, SocketPktHead *
 
 static uint8_t *RecvPacketData(int32_t fd, uint32_t len)
 {
-    uint8_t *data = (uint8_t *)SoftBusMalloc(len);
+    uint8_t *data = (uint8_t *)SoftBusCalloc(len);
     if (data == NULL) {
         AUTH_LOGE(AUTH_CONN, "malloc data buf fail.");
         return NULL;
@@ -281,7 +281,6 @@ static int32_t OnConnectEvent(ListenerModule module,
 
 static int32_t OnDataEvent(ListenerModule module, int32_t events, int32_t fd)
 {
-    (void)module;
     if (events == SOFTBUS_SOCKET_OUT) {
         return ProcessSocketOutEvent(module, fd);
     } else if (events == SOFTBUS_SOCKET_IN) {
@@ -329,6 +328,10 @@ void StopSocketListening(void)
 
 int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode)
 {
+    if (ip == NULL) {
+        AUTH_LOGE(AUTH_CONN, "ip is invalid param.");
+        return AUTH_INVALID_FD;
+    }
     char localIp[MAX_ADDR_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, MAX_ADDR_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "get local ip fail.");
@@ -371,6 +374,10 @@ int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode)
 int32_t NipSocketConnectDevice(ListenerModule module,
     const char *addr, int32_t port, bool isBlockMode)
 {
+    if (addr == NULL) {
+        AUTH_LOGE(AUTH_CONN, "addr is invalid param.");
+        return AUTH_INVALID_FD;
+    }
     ConnectOption option = {
         .type = CONNECT_TCP,
         .socketOption = {

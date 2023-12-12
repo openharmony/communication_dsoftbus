@@ -26,14 +26,14 @@ int32_t AuthMetaStartVerify(uint32_t connectionId, const uint8_t *key, uint32_t 
     (void)requestId;
     (void)callingPid;
     (void)callBack;
-    AUTH_LOGI(AUTH_INIT, "auth meta start verify");
+    AUTH_LOGI(AUTH_INIT, "auth meta not support verify");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
 void AuthMetaReleaseVerify(int64_t authId)
 {
     (void)authId;
-    AUTH_LOGI(AUTH_INIT, "auth meta release verify");
+    AUTH_LOGI(AUTH_INIT, "auth meta not support verify");
 }
 
 int32_t AuthMetaEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
@@ -157,12 +157,10 @@ int32_t AuthMetaInit(const AuthTransCallback *callback)
 void AuthMetaDeinit(void)
 {
     AUTH_LOGI(AUTH_INIT, "auth meta deinit");
-    return;
 }
 
 void DelAuthMetaManagerByPid(const char *pkgName, int32_t pid)
 {
     (void)pkgName;
     (void)pid;
-    return;
 }
