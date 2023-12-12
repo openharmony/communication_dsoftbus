@@ -86,7 +86,6 @@ static bool IsLoopBackPacket(struct sockaddr_in *remoteAddr)
     if (remoteAddr->sin_addr.s_addr != localAddr->s_addr) {
         return false;
     }
-    DFINDER_LOGE(TAG, "drop loopback packet");
     return true;
 }
 
