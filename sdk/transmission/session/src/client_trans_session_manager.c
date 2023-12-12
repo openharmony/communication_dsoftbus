@@ -1878,7 +1878,7 @@ int32_t ClientGetPeerSocketInfoById(int32_t sessionId, PeerSocketInfo *peerSocke
     }
 
     peerSocketInfo->name = sessionNode->info.peerSessionName;
-    peerSocketInfo->deviceId = sessionNode->info.peerDeviceId;
+    peerSocketInfo->networkId = sessionNode->info.peerDeviceId;
     peerSocketInfo->pkgName = serverNode->pkgName;
     peerSocketInfo->dataType = (TransDataType)sessionNode->info.flag;
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
