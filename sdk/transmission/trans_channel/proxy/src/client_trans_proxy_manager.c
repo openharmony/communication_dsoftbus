@@ -401,7 +401,7 @@ static void ClientTransProxySendSessionAck(int32_t channelId, int32_t seq)
         TRANS_LOGE(TRANS_SDK, "get proxy info err, channelId=%d", channelId);
         return;
     }
-
+    info.sequence = seq;
     if (TransProxyPackAndSendData(channelId, ack, PROXY_ACK_SIZE, &info, TRANS_SESSION_ACK) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "send ack err, seq=%d", seq);
     }
