@@ -246,7 +246,7 @@ int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const ch
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t bufferLen = AuthGetEncryptSize(packetHead->dataLen) + DC_MSG_PACKET_HEAD_SIZE;
-    char *buffer = (char *)SoftBusCalloc(bufferLen);
+    char *buffer = (char *)SoftBusMalloc(bufferLen);
     if (buffer == NULL) {
         TRANS_LOGE(TRANS_BYTES, "buffer malloc error.");
         return SOFTBUS_MALLOC_ERR;
