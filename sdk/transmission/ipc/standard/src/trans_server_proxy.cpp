@@ -241,7 +241,7 @@ int32_t ServerIpcEvaluateQos(const char *peerNetworkId, TransDataType dataType, 
         return SOFTBUS_NO_INIT;
     }
 
-    if (peerNetworkId == NULL || dataType >= DATA_TYPE_BUTT || qosCount >= QOS_TYPE_BUTT) {
+    if (peerNetworkId == NULL || dataType >= DATA_TYPE_BUTT || qosCount > QOS_TYPE_BUTT) {
         TRANS_LOGE(TRANS_SDK, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
