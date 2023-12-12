@@ -1636,9 +1636,9 @@ int32_t ClientSetListenerBySessionId(int32_t sessionId, const ISocketListener *l
     }
 
     if (sessionNode->role != SESSION_ROLE_INIT) {
-        (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
         TRANS_LOGE(TRANS_SDK, "%s:socket in use, current role:%d", __func__,
             sessionNode->role);
+        (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
         return SOFTBUS_TRANS_SOCKET_IN_USE;
     }
     ret = memcpy_s(&(serverNode->listener.socket), sizeof(ISocketListener), listener,
