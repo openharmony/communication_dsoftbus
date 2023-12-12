@@ -203,7 +203,7 @@ int32_t TransSetSocketFileListener(const char *sessionName, SocketFileCallbackFu
     fileNode->fileCallback = fileCallback;
     ListAdd(&(g_fileListener->list), &(fileNode->node));
     (void)SoftBusMutexUnlock(&(g_fileListener->lock));
-    TRANS_LOGI(TRANS_SDK, "send socket file listener ok:%s", sessionName);
+    TRANS_LOGI(TRANS_SDK, "set socket file listener ok:%s", sessionName);
     return SOFTBUS_OK;
 }
 
