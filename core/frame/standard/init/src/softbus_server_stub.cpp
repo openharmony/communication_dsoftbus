@@ -772,9 +772,18 @@ int32_t SoftBusServerStub::EvaluateQosInner(MessageParcel &data, MessageParcel &
         return SOFTBUS_IPC_ERR;
     }
 
-    QosTV *qos = nullptr;
+    if (qosCount > QOS_TYPE_BUTT) {
+        COMM_LOGE(COMM_SVC, "EvaluateQos invalid qosCount=%" PRIu32, qosCount);
+        return SOFTBUS_IPC_ERR;
+    }
+
+    const QosTV *qos = nullptr;
     if (qosCount > 0) {
-        qos = (QosTV*)data.ReadBuffer(sizeof(QosTV) * qosCount);
+        qos = (QosTV *)data.ReadBuffer(sizeof(QosTV) * qosCount);
+        if (qos == nullptr) {
+            COMM_LOGE(COMM_SVC, "EvaluateQos failed to read qos data");
+            return SOFTBUS_IPC_ERR;
+        }
     }
 
     int32_t retReply = EvaluateQos(peerNetworkId, dataType, qos, qosCount);
