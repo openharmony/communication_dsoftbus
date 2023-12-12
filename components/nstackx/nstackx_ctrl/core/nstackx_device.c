@@ -378,6 +378,9 @@ int32_t DiscConfigInner(const DFinderDiscConfig *discConfig)
 
 int32_t SetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[])
 {
+    if (!memcmp(capabilityBitmap, g_filterCapabilityBitmap, sizeof(uint32_t) * capabilityBitmapNum)) {
+        return NSTACKX_EOK;
+    }
     (void)memset_s(g_filterCapabilityBitmap, sizeof(g_filterCapabilityBitmap),
         0, sizeof(g_filterCapabilityBitmap));
     if (capabilityBitmapNum) {
