@@ -183,7 +183,7 @@ static int32_t RecvPacketHead(ListenerModule module, int32_t fd, SocketPktHead *
 
 static uint8_t *RecvPacketData(int32_t fd, uint32_t len)
 {
-    uint8_t *data = (uint8_t *)SoftBusMalloc(len);
+    uint8_t *data = (uint8_t *)SoftBusCalloc(len);
     if (data == NULL) {
         AUTH_LOGE(AUTH_CONN, "malloc data buf fail.");
         return NULL;
@@ -281,7 +281,6 @@ static int32_t OnConnectEvent(ListenerModule module,
 
 static int32_t OnDataEvent(ListenerModule module, int32_t events, int32_t fd)
 {
-    (void)module;
     if (events == SOFTBUS_SOCKET_OUT) {
         return ProcessSocketOutEvent(module, fd);
     } else if (events == SOFTBUS_SOCKET_IN) {
@@ -329,6 +328,10 @@ void StopSocketListening(void)
 
 int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode)
 {
+    if (ip == NULL) {
+        AUTH_LOGE(AUTH_CONN, "ip is invalid param.");
+        return AUTH_INVALID_FD;
+    }
     char localIp[MAX_ADDR_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, MAX_ADDR_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "get local ip fail.");
@@ -371,6 +374,10 @@ int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode)
 int32_t NipSocketConnectDevice(ListenerModule module,
     const char *addr, int32_t port, bool isBlockMode)
 {
+    if (addr == NULL) {
+        AUTH_LOGE(AUTH_CONN, "addr is invalid param.");
+        return AUTH_INVALID_FD;
+    }
     ConnectOption option = {
         .type = CONNECT_TCP,
         .socketOption = {
@@ -483,7 +490,8 @@ static void NotifyChannelDataReceived(int32_t channelId, const SocketPktHead *he
 {
     uint32_t i;
     AuthChannelListener *listener = NULL;
-    for (i = 0; i < sizeof(g_listener) / sizeof(InnerChannelListener); i++) {
+    uint32_t listenerLen = sizeof(g_listener) / sizeof(InnerChannelListener);
+    for (i = 0; i < listenerLen; i++) {
         if (g_listener[i].module == head->module) {
             listener = &g_listener[i].listener;
             break;
@@ -506,7 +514,8 @@ static void NotifyChannelDataReceived(int32_t channelId, const SocketPktHead *he
 static void NotifyChannelDisconnected(int32_t channelId)
 {
     uint32_t i;
-    for (i = 0; i < sizeof(g_listener) / sizeof(InnerChannelListener); i++) {
+    uint32_t listenerLen = sizeof(g_listener) / sizeof(InnerChannelListener);
+    for (i = 0; i < listenerLen; i++) {
         if (g_listener[i].listener.onDisconnected != NULL) {
             g_listener[i].listener.onDisconnected(channelId);
         }
@@ -520,7 +529,8 @@ int32_t RegAuthChannelListener(int32_t module, const AuthChannelListener *listen
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t i;
-    for (i = 0; i < sizeof(g_listener) / sizeof(InnerChannelListener); i++) {
+    uint32_t listenerLen = sizeof(g_listener) / sizeof(InnerChannelListener);
+    for (i = 0; i < listenerLen; i++) {
         if (g_listener[i].module == module) {
             g_listener[i].listener.onDataReceived = listener->onDataReceived;
             g_listener[i].listener.onDisconnected = listener->onDisconnected;
@@ -534,7 +544,8 @@ int32_t RegAuthChannelListener(int32_t module, const AuthChannelListener *listen
 void UnregAuthChannelListener(int32_t module)
 {
     uint32_t i;
-    for (i = 0; i < sizeof(g_listener) / sizeof(InnerChannelListener); i++) {
+    uint32_t listenerLen = sizeof(g_listener) / sizeof(InnerChannelListener);
+    for (i = 0; i < listenerLen; i++) {
         if (g_listener[i].module == module) {
             g_listener[i].listener.onDataReceived = NULL;
             g_listener[i].listener.onDisconnected = NULL;
