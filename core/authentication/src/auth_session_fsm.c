@@ -198,7 +198,8 @@ static AuthFsm *CreateAuthFsm(int64_t authSeq, uint32_t requestId, uint64_t conn
             }
         }
     }
-    if (sprintf_s(authFsm->fsmName, sizeof(authFsm->fsmName), "AuthFsm-%u", authFsm->id) == -1) {
+    if (sprintf_s(authFsm->fsmName, sizeof(authFsm->fsmName), "%s-%u",
+            BUSCENTER_AUTH_FSM_HANDLER_NAME, authFsm->id) == -1) {
         AUTH_LOGE(AUTH_FSM, "format auth fsm name fail");
         SoftBusFree(authFsm);
         return NULL;

@@ -2144,7 +2144,7 @@ int32_t LnnInitNetBuilder(void)
         LNN_LOGE(LNN_INIT, "get default looper fail");
         return SOFTBUS_ERR;
     }
-    g_netBuilder.handler.name = (char *)"NetBuilderHandler";
+    g_netBuilder.handler.name = (char *)BUSCENTER_NET_BUILDER_HANDLER_NAME;
     g_netBuilder.handler.looper = g_netBuilder.looper;
     g_netBuilder.handler.HandleMessage = NetBuilderMessageHandler;
     g_netBuilder.isInit = true;
