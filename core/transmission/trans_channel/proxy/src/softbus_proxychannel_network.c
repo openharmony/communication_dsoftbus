@@ -33,14 +33,13 @@ static INetworkingListenerEntry g_listeners[MAX_LISTENER_CNT] = { 0 };
 
 static INetworkingListenerEntry *FindListenerEntry(const char *sessionName)
 {
-    for (int32_t i = 0; i < SESSION_NAME_SIZE_MAX; i++) {
+    for (int32_t i = 0; i < MAX_LISTENER_CNT; i++) {
         if (strcmp(sessionName, g_listeners[i].sessionName) == 0) {
             return &g_listeners[i];
         }
     }
     return NULL;
 }
-
 
 int32_t NotifyNetworkingChannelOpened(
     const char *sessionName, int32_t channelId, const AppInfo *appInfo, unsigned char isServer)
@@ -58,7 +57,6 @@ int32_t NotifyNetworkingChannelOpened(
 
     return SOFTBUS_OK;
 }
-
 
 void NotifyNetworkingChannelOpenFailed(const char *sessionName, int32_t channelId, const char *networkId)
 {
@@ -88,7 +86,6 @@ void NotifyNetworkingMsgReceived(const char *sessionName, int32_t channelId, con
     }
     entry->listener.onMessageReceived(channelId, data, len);
 }
-
 
 int TransRegisterNetworkingChannelListener(const char *sessionName, const INetworkingListener *listener)
 {
