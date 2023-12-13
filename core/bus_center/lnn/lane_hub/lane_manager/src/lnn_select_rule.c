@@ -48,6 +48,7 @@
 #define WLAN_LATENCY            800
 #define P2P_LATENCY             1600
 #define HML_LATENCY             1000
+#define BLE_LATENCY             1500
 
 
 int32_t GetWlanLinkedFrequency(void)
@@ -393,6 +394,7 @@ static uint32_t g_laneLatency[LANE_LINK_TYPE_BUTT] = {
     [LANE_WLAN_2P4G] = WLAN_LATENCY,
     [LANE_WLAN_5G] = WLAN_LATENCY,
     [LANE_COC_DIRECT] = COC_DIRECT_LATENCY,
+    [LANE_BLE] = BLE_LATENCY,
 };
 
 static uint32_t g_laneBandWidth[BW_TYPE_BUTT][LANE_LINK_TYPE_BUTT + 1] = {
@@ -406,7 +408,7 @@ static uint32_t g_retryLaneList[BW_TYPE_BUTT][LANE_LINK_TYPE_BUTT + 1] = {
     [MIDDLE_BAND_WIDTH] = {LANE_HML, LANE_WLAN_5G, LANE_WLAN_2P4G, LANE_P2P,
         LANE_BR, LANE_LINK_TYPE_BUTT},
     [LOW_BAND_WIDTH] = {LANE_HML, LANE_WLAN_5G, LANE_WLAN_2P4G, LANE_P2P, LANE_COC_DIRECT,
-        LANE_BR, LANE_LINK_TYPE_BUTT},
+        LANE_BR, LANE_BLE, LANE_LINK_TYPE_BUTT},
 };
 
 static bool IsLinkTypeValid(LaneLinkType type)

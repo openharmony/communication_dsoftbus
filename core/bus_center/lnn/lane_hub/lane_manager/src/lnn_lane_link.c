@@ -703,6 +703,22 @@ static int32_t LaneLinkOfBleReuse(uint32_t reqId, const LinkRequest *reqInfo, co
     return LaneLinkOfBleReuseCommon(reqId, reqInfo, callback, BLE_GATT);
 }
 
+static int32_t LaneLinkSetBleMac(const LinkRequest *reqInfo, LaneLinkInfo *linkInfo)
+{
+    NodeInfo node;
+    (void)memset_s(&node, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(reqInfo->peerNetworkId, CATEGORY_NETWORK_ID, &node) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "can not find node");
+        return SOFTBUS_ERR;
+    }
+    if (node.bleMacRefreshSwitch == 0 && strlen(node.connectInfo.bleMacAddr) > 0) {
+        if (strcpy_s(linkInfo->linkInfo.ble.bleMac, BT_MAC_LEN, node.connectInfo.bleMacAddr) == EOK) {
+            return SOFTBUS_OK;
+        }
+    }
+    return SOFTBUS_ERR;
+}
+
 static int32_t LaneLinkOfBle(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
 {
     LaneLinkInfo linkInfo;
@@ -712,8 +728,10 @@ static int32_t LaneLinkOfBle(uint32_t reqId, const LinkRequest *reqInfo, const L
         return SOFTBUS_MEM_ERR;
     }
     if (strlen(linkInfo.linkInfo.ble.bleMac) == 0) {
-        LNN_LOGE(LNN_LANE, "get peerBleMac error");
-        return SOFTBUS_ERR;
+        if (LaneLinkSetBleMac(reqInfo, &linkInfo) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LANE, "get peerBleMac error");
+            return SOFTBUS_ERR;
+        }
     }
     char peerUdid[UDID_BUF_LEN] = {0};
     if (LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
