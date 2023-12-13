@@ -13,11 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef SOFTBUS_CLIENT_SERVICE_MANAGER_H
-#define SOFTBUS_CLIENT_SERVICE_MANAGER_H
+#ifndef SOFTBUS_CLIENT_DISC_MANAGER_H
+#define SOFTBUS_CLIENT_DISC_MANAGER_H
 
 #include "discovery_service.h"
-#include "stdint.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -142,4 +141,4 @@ void DiscClientOnPublishFail(int32_t publishId, PublishFailReason reason);
 }
 #endif
 
-#endif // SOFTBUS_CLIENT_SERVICE_MANAGER_H
+#endif // SOFTBUS_CLIENT_DISC_MANAGER_H
