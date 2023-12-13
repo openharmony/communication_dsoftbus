@@ -28,15 +28,6 @@ extern "C" {
  */
 void Anonymize(const char *plainStr, char **anonymizedStr);
 
-#ifndef __LITEOS_M__
-/**
- * Anonymize the plain packet.
- * @param packet The plain packet to be anonymized.
- * @param anonymizedStr The anonymized string.
- */
-void AnonymizePacket(const char *packet, char **anonymizedStr);
-#endif // __LITEOS_M__
-
 /**
  * Release the anonymized string.
  *
