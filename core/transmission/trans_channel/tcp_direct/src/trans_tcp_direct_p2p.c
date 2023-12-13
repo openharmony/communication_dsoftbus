@@ -159,7 +159,7 @@ static void NotifyP2pSessionConnClear(ListNode *sessionConnList)
         TransSrvDelDataBufNode(item->channelId);
         SoftBusFree(item);
     }
-    SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "p2psession conn clear finished");
+    TRANS_LOGI(TRANS_CTRL, "p2psession conn clear finished");
 }
 
 static void ClearP2pSessionConn(void)
@@ -519,7 +519,7 @@ static int32_t OnVerifyP2pRequest(int64_t authId, int64_t seq, const cJSON *json
 
     pManager = GetWifiDirectManager();
     if (pManager == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get wifidirectmanager fail");
+        TRANS_LOGE(TRANS_CTRL, "get wifidirectmanager fail");
     }
 
     if (pManager->getLocalIpByRemoteIp(peerIp, myIp, sizeof(myIp)) != SOFTBUS_OK) {
@@ -752,7 +752,7 @@ static void OnP2pVerifyMsgReceived(int32_t channelId, const char *data, uint32_t
     } else if (msgType == P2P_VERIFY_REPLY) {
         OnVerifyP2pReply(channelId, *(int64_t*)(data + sizeof(int64_t)), json);
     } else {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invalid msgType=%lld", msgType);
+        TRANS_LOGI(TRANS_CTRL, "invalid msgType=%lld", msgType);
     }
     cJSON_Delete(json);
 }
@@ -768,7 +768,7 @@ static int32_t StartVerifyP2pInfo(const AppInfo *appInfo, SessionConn *conn)
     int32_t newChannelId = conn->channelId;
     int32_t pipeLineChannelId = TransProxyPipelineGetChannelIdByNetworkId(appInfo->peerNetWorkId);
     if (pipeLineChannelId == INVALID_CHANNEL_ID) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "can not get channelid by networkid");
+        TRANS_LOGI(TRANS_CTRL, "can not get channelid by networkid");
         uint32_t requestId = AuthGenRequestId();
         conn->status = TCP_DIRECT_CHANNEL_STATUS_AUTH_CHANNEL;
         conn->requestId = requestId;
