@@ -15,7 +15,6 @@
 
 #include "disc_server_proxy.h"
 
-#include "softbus_def.h"
 #include "softbus_disc_server.h"
 #include "softbus_errcode.h"
 

@@ -16,15 +16,7 @@
 #ifndef CLIENT_DISC_SERVICE_H
 #define CLIENT_DISC_SERVICE_H
 
-#include "client_disc_manager.h"
-#include "stdint.h"
-
+#include "discovery_service.h"
 #ifdef __cplusplus
-extern "C" {
-#endif
-
-
-#ifdef __cplusplus
-}
 #endif
 #endif // CLIENT_DISC_SERVICE_H
