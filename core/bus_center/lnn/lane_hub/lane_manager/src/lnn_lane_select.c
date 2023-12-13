@@ -29,7 +29,7 @@
 #include "lnn_select_rule.h"
 #include "lnn_common_utils.h"
 
-#define INVALID_LINK -1
+#define INVALID_LINK (-1)
 
 static void GetFileDefaultLink(LaneLinkType *linkList, uint32_t *listNum)
 {
@@ -216,12 +216,13 @@ static int32_t PreProcLaneSelect(const char *networkId, const LaneSelectParam *r
     return SOFTBUS_OK;
 }
 
-static int32_t GetListScore(const char *networkId, uint32_t expectedBw, const LaneLinkType *resList, int32_t *resListScore, uint32_t resNum)
+static int32_t GetListScore(const char *networkId, uint32_t expectedBw, const LaneLinkType *resList,
+    int32_t *resListScore, uint32_t resNum)
 {
     for (uint32_t i = 0; i < resNum; ++i) {
         if (resList[i] < 0 || resList[i] >= LANE_LINK_TYPE_BUTT) {
             LNN_LOGE(LNN_LANE, "LaneLinkType i=%d is invalid, %d", i, resList[i]);
-            return SOFTBUS_ERR;
+            continue;
         }
         LinkAttribute *linkAttr = GetLinkAttrByLinkType(resList[i]);
         resListScore[resList[i]] = linkAttr->GetLinkScore(networkId, expectedBw);
@@ -251,7 +252,7 @@ static int32_t AdjustLanePriority(LaneLinkType *resList, int32_t *resListScore, 
         if (resList[i] == LANE_P2P) {
             idxP2p = i;
         } else if (resList[i] == LANE_WLAN_2P4G || resList[i] == LANE_WLAN_5G) {
-            idxWlan = i;
+            idxWlan = (idxWlan == LANE_LINK_TYPE_BUTT) ? i : idxWlan;
         }
     }
     if (resListScore[resList[idxWlan]] < UNACCEPT_SCORE && idxWlan < idxP2p) {
@@ -293,7 +294,7 @@ int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
         return SOFTBUS_ERR;
     }
     for (uint32_t i = 0; i < resNum; ++i) {
-        LNN_LOGI(LNN_LANE, "adjusted list : resList[%d]=%d, score=%d", i, resList[i], resListScore[resList[i]]);
+        LNN_LOGD(LNN_LANE, "adjusted list is LaneLinkType=%d, score=%d", resList[i], resListScore[resList[i]]);
     }
 
     recommendList->linkTypeNum = resNum;
