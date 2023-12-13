@@ -95,7 +95,7 @@ static bool HbHasActiveBrConnection(const char *networkId)
         LNN_LOGE(LNN_HEART_BEAT, "HB strcpy_s bt mac err");
         return false;
     }
-    if (ConvertBtMacToBinary(brMac, BT_ADDR_LEN, binaryAddr, BT_ADDR_LEN) != SOFTBUS_OK) {
+    if (ConvertBtMacToBinary(brMac, sizeof(brMac), binaryAddr, BT_ADDR_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB convert bt mac err");
         return false;
     }
