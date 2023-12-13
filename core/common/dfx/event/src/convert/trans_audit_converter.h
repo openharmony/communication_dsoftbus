@@ -26,7 +26,8 @@ extern "C" {
     static inline bool TransAuditAssigner##fieldName(                                                         \
         const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param) \
     {                                                                                                         \
-        if (Assigner##type(form->transAuditExtra->field, &param) && CopyString(param->name, eventName)) {     \
+        if (Assigner##type(form->transAuditExtra->field, &param) &&                                           \
+            CopyString(param->name, eventName, MAX_LENGTH_OF_PARAM_NAME)) {                                   \
             param->t = paramType;                                                                             \
             return true;                                                                                      \
         }                                                                                                     \
@@ -105,4 +106,4 @@ static inline size_t ConvertTransAuditForm2Param(HiSysEventParam params[], Softb
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif // TRANS_EVENT_CONVERTER_H
+#endif // TRANS_AUDIT_CONVERTER_H
