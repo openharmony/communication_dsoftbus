@@ -26,7 +26,8 @@ extern "C" {
     static inline bool StatsAssigner##fieldName(                                                              \
         const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param) \
     {                                                                                                         \
-        if (Assigner##type(form->statsExtra->field, &param) && CopyString(param->name, eventName)) {          \
+        if (Assigner##type(form->statsExtra->field, &param) &&                                                \
+            CopyString(param->name, eventName, MAX_LENGTH_OF_PARAM_NAME)) {                                   \
             param->t = paramType;                                                                             \
             return true;                                                                                      \
         }                                                                                                     \
@@ -82,4 +83,4 @@ static inline size_t ConvertStatsForm2Param(HiSysEventParam params[], size_t siz
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif // DISC_EVENT_CONVERTER_H
+#endif // STATS_EVENT_CONVERTER_H
