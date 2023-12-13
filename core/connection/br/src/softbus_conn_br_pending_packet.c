@@ -14,21 +14,15 @@
  */
 
 #include <stdbool.h>
-#include <stdint.h>
-#include <string.h>
 
 #include "softbus_conn_br_pending_packet.h"
 
 #include "common_list.h"
 #include "conn_log.h"
-#include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_br_connection.h"
 #include "softbus_conn_br_trans.h"
-#include "softbus_conn_manager.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
-#include "softbus_type_def.h"
 
 typedef struct {
     ListNode node;
@@ -117,6 +111,7 @@ int32_t ConnBrGetBrPendingPacket(uint32_t id, int64_t seq, uint32_t waitMillis, 
 {
 #define USECTONSEC 1000LL
     if (data == NULL || SoftBusMutexLock(&g_pendingLock) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BR, "Lock failed");
         return SOFTBUS_ERR;
     }
     PendingPacket *pending = NULL;
