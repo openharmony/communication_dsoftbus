@@ -92,7 +92,7 @@ static int32_t CoapUriParse(const char *uriString, coap_uri_t *uriPtr)
         return NSTACKX_EFAILED;
     }
 #ifdef DFINDER_SUPPORT_MULTI_COAP_SCHEME
-    if (localUri.scheme == COAP_URI_SCHEME_COAPS && !coap_dtls_is_supported()) {
+    if (!coap_dtls_is_supported() && localUri.scheme == COAP_URI_SCHEME_COAPS) {
         DFINDER_LOGE(TAG, "coap uri sheme coaps with no dtls support");
         return NSTACKX_EFAILED;
     }
@@ -114,13 +114,7 @@ static int32_t CoapUriParse(const char *uriString, coap_uri_t *uriPtr)
 static coap_pdu_t *CoapPackToPdu(const CoapRequest *coapRequest, const coap_uri_t *uriPtr, coap_session_t *session)
 {
     coap_pdu_t *pdu = NULL;
-    if (coapRequest == NULL) {
-        return NULL;
-    }
-    if (coapRequest->remoteUrl == NULL) {
-        return NULL;
-    }
-    if (session == NULL) {
+    if (coapRequest == NULL || coapRequest->remoteUrl == NULL || session == NULL) {
         return NULL;
     }
     pdu = coap_new_pdu(coapRequest->type, coapRequest->code, session);

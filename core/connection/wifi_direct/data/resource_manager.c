@@ -14,15 +14,15 @@
  */
 
 #include "resource_manager.h"
-#include "conn_log.h"
-#include "interface_info.h"
 #include "securec.h"
+#include "conn_log.h"
 #include "softbus_error_code.h"
 #include "softbus_json_utils.h"
-#include "utils/wifi_direct_anonymous.h"
-#include "utils/wifi_direct_network_utils.h"
+#include "interface_info.h"
 #include "wifi_direct_coexist_rule.h"
 #include "wifi_direct_p2p_adapter.h"
+#include "utils/wifi_direct_anonymous.h"
+#include "utils/wifi_direct_network_utils.h"
 
 /* private method forward declare */
 static int32_t InitInterfaceInfo(const char *interface);

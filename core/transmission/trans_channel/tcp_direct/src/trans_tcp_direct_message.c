@@ -424,6 +424,10 @@ int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     TransAlarmExtra extraAlarm = {
+        .conflictName = NULL,
+        .conflictedName = NULL,
+        .occupyedName = NULL,
+        .permissionName = NULL,
         .linkType = conn.appInfo.linkType,
         .errcode = errCode,
         .sessionName = conn.appInfo.myData.sessionName,

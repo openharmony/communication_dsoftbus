@@ -15,8 +15,8 @@
 #ifndef WIFI_DIRECT_INTERFACE_INFO_H
 #define WIFI_DIRECT_INTERFACE_INFO_H
 
-#include "common_list.h"
 #include "info_container.h"
+#include "common_list.h"
 
 #ifdef __cplusplus
 extern "C" {

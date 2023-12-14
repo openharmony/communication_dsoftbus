@@ -87,7 +87,7 @@ static int32_t HndPostServiceDiscoverInner(const uint8_t *buf, size_t size, char
     return NSTACKX_EOK;
 }
 
-void GetBuildCoapParam(const CoapPacket *pkt, const char *remoteUrl, const char *remoteIp, CoapBuildParam *param)
+static void GetBuildCoapParam(const CoapPacket *pkt, const char *remoteUrl, const char *remoteIp, CoapBuildParam *param)
 {
     param->remoteIp = remoteIp;
     param->uriPath = COAP_DEVICE_DISCOVER_URI;
@@ -260,10 +260,13 @@ static int32_t CoapPostServiceDiscoverEx()
     if (lwip_ioctl(fd, SIOCGIFBRDADDR, (char*)&ifr) < 0) {
         DFINDER_LOGE(TAG, "ioctl fail, errno = %d", errno);
         lwip_close(fd);
+        fd = -1;
         return NSTACKX_EFAILED;
     }
     lwip_close(fd);
+    fd = -1;
     if (inet_ntop(AF_INET, &(((struct sockaddr_in *)&(ifr.ifr_addr))->sin_addr), ipString, sizeof(ipString)) == NULL) {
+        DFINDER_LOGE(TAG, "convert address from binary to text failed");
         return NSTACKX_EFAILED;
     }
     CoapBuildParam param = {0};
@@ -468,10 +471,10 @@ int32_t CoapDiscoverInit(EpollDesc epollfd)
     (void)epollfd;
     if (g_discoverTimer == NULL) {
         g_discoverTimer = TimerStart(epollfd, 0, NSTACKX_FALSE, CoapServiceDiscoverTimerHandle, NULL);
-    }
-    if (g_discoverTimer == NULL) {
-        DFINDER_LOGE(TAG, "failed to start timer for service discover");
-        return NSTACKX_EFAILED;
+        if (g_discoverTimer == NULL) {
+            DFINDER_LOGE(TAG, "failed to start timer for service discover");
+            return NSTACKX_EFAILED;
+        }
     }
     CoapSoftBusInitMsgId();
     g_userRequest = NSTACKX_FALSE;

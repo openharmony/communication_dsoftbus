@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 #include "fast_connect_negotiate_channel.h"
+#include "securec.h"
+#include "conn_log.h"
+#include "softbus_error_code.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_proxychannel_pipeline.h"
 #include "auth_interface.h"
 #include "bus_center_manager.h"
-#include "conn_log.h"
-#include "securec.h"
-#include "softbus_adapter_mem.h"
-#include "softbus_error_code.h"
-#include "softbus_proxychannel_pipeline.h"
-#include "utils/wifi_direct_work_queue.h"
 #include "wifi_direct_manager.h"
+#include "utils/wifi_direct_work_queue.h"
 
 #define MAX_FAST_CONNECT_DATA_LEN 1024
 

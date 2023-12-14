@@ -261,10 +261,19 @@ static int32_t UpdateFileRecvPath(int32_t channelId, FileListener *fileListener,
             return SOFTBUS_ERR;
         }
 
-        if (strcpy_s(fileListener->rootDir, FILE_RECV_ROOT_DIR_SIZE_MAX, event.UpdateRecvPath()) != EOK) {
-            TRANS_LOGE(TRANS_SDK, "strcpy rootDir failed");
+        const char *rootDir = event.UpdateRecvPath();
+        char *absPath = realpath(rootDir, NULL);
+        if (absPath == NULL) {
+            TRANS_LOGE(TRANS_SDK, "rootDir=%s not exist, errno=%d.", (rootDir == NULL ? "null" : rootDir), errno);
             return SOFTBUS_ERR;
         }
+
+        if (strcpy_s(fileListener->rootDir, FILE_RECV_ROOT_DIR_SIZE_MAX, absPath) != EOK) {
+            TRANS_LOGE(TRANS_SDK, "strcpy rootDir failed");
+            SoftBusFree(absPath);
+            return SOFTBUS_ERR;
+        }
+        SoftBusFree(absPath);
     }
 
     if (NSTACKX_DFileSetStoragePath(fileSession, fileListener->rootDir) != SOFTBUS_OK) {

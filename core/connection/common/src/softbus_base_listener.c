@@ -35,6 +35,7 @@
 #define MAX_LISTEN_EVENTS 1024
 #define DEFAULT_BACKLOG   4
 #define FDARR_EXPAND_BASE 2
+#define SELECT_UNEXPECT_FAIL_RETRY_WAIT_MILLIS (3 * 1000)
 
 enum BaseListenerStatus {
     LISTENER_IDLE = 0,
@@ -982,7 +983,6 @@ static void ProcessSpecifiedListenerNodeEvent(SoftbusListenerNode *node, SoftBus
         return;
     }
 
-    // TODO: process listen fd exception, rebuild listen socket
     if (listenFd > 0 && SoftBusSocketFdIsset(listenFd, readSet)) {
         status =
             ProcessSpecifiedServerAcceptEvent(node->module, listenFd, connectType, socketIf, &listener, wakeupTrace);
@@ -1121,7 +1121,6 @@ static int32_t CollectWaitEventFdSet(SoftBusFdSet *readSet, SoftBusFdSet *writeS
 
 static void *SelectTask(void *arg)
 {
-#define SELECT_UNEXPECT_FAIL_RETRY_WAIT_MILLIS (3 * 1000)
     static int32_t wakeupTraceIdGenerator = 0;
 
     SelectThreadState *selectState = (SelectThreadState *)arg;

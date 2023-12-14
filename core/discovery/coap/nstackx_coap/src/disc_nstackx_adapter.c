@@ -252,9 +252,10 @@ int32_t DiscCoapRegisterCapabilityData(const unsigned char *capabilityData, uint
         // no capability data, no need to parse and register
         return SOFTBUS_OK;
     }
-    char *registerCapaData = (char *)SoftBusCalloc(dataLen);
+    char *registerCapaData = (char *)SoftBusCalloc(MAX_CAPABILITYDATA_LEN);
     DISC_CHECK_AND_RETURN_RET_LOGE(registerCapaData, SOFTBUS_MALLOC_ERR, DISC_COAP, "malloc capability data failed");
-    int32_t ret = DiscCoapAssembleCapData(capability, (const char *)capabilityData, dataLen, registerCapaData);
+    int32_t ret = DiscCoapAssembleCapData(capability, (const char *)capabilityData, dataLen, registerCapaData,
+        DISC_MAX_CUST_DATA_LEN);
     if (ret == SOFTBUS_FUNC_NOT_SUPPORT) {
         DISC_LOGI(DISC_COAP, "the capability(%u) not support yet", capability);
         SoftBusFree(registerCapaData);

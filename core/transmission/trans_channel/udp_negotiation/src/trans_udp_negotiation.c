@@ -188,6 +188,10 @@ int32_t NotifyUdpChannelOpenFailed(const AppInfo *info, int32_t errCode)
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
 
     TransAlarmExtra extraAlarm = {
+        .conflictName = NULL,
+        .conflictedName = NULL,
+        .occupyedName = NULL,
+        .permissionName = NULL,
         .linkType = info->linkType,
         .errcode = errCode,
         .sessionName = info->myData.sessionName,

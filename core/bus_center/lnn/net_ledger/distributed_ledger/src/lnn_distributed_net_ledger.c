@@ -2435,6 +2435,49 @@ int32_t LnnGetNetworkIdByUdidHash(const char *udidHash, char *buf, uint32_t len)
     return SOFTBUS_NOT_FIND;
 }
 
+int32_t LnnGetConnSubFeatureByUdidHashStr(const char *udidHashStr, uint64_t *connSubFeature)
+{
+    if (udidHashStr == NULL || udidHashStr[0] == '\0' || connSubFeature == NULL) {
+        LNN_LOGE(LNN_LEDGER, "para is empty");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    MapIterator *it = LnnMapInitIterator(&g_distributedNetLedger.distributedInfo.udidMap);
+    if (it == NULL) {
+        LNN_LOGE(LNN_LEDGER, "it is null");
+        (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return SOFTBUS_ERR;
+    }
+    unsigned char shortUdidHashStr[SHORT_UDID_HASH_HEX_LEN + 1] = {0};
+    while (LnnMapHasNext(it)) {
+        it = LnnMapNext(it);
+        if (it == NULL) {
+            (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+            return SOFTBUS_ERR;
+        }
+        NodeInfo *nodeInfo = (NodeInfo *)it->node->value;
+        if (LnnIsNodeOnline(nodeInfo)) {
+            if (GenerateStrHashAndConvertToHexString((const unsigned char *)nodeInfo->deviceInfo.deviceUdid,
+                SHORT_UDID_HASH_HEX_LEN, shortUdidHashStr, SHORT_UDID_HASH_HEX_LEN + 1) != SOFTBUS_OK) {
+                continue;
+            }
+            if (memcmp(shortUdidHashStr, udidHashStr, SHORT_UDID_HASH_HEX_LEN) != 0) {
+                continue;
+            }
+            *connSubFeature = nodeInfo->connSubFeature;
+            LnnMapDeinitIterator(it);
+            (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+            return SOFTBUS_OK;
+        }
+    }
+    LnnMapDeinitIterator(it);
+    (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    return SOFTBUS_NOT_FIND;
+}
+
 int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len)
 {
     if (!IsValidString(uuid, ID_MAX_LEN)) {

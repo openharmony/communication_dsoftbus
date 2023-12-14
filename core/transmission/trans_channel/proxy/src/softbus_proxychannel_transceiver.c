@@ -575,6 +575,10 @@ static void TransOnConnectSuccessed(uint32_t requestId, uint32_t connectionId, c
 static void TransOnConnectFailed(uint32_t requestId, int32_t reason)
 {
     TransEventExtra extra = {
+        .socketName = NULL,
+        .peerNetworkId = NULL,
+        .calleePkg = NULL,
+        .callerPkg = NULL,
         .requestId = requestId,
         .errcode = reason,
         .result = EVENT_STAGE_RESULT_FAILED
@@ -743,6 +747,9 @@ int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, const ConnectOption *c
         TransProxyDelChanByChanId(chanNewId);
     }
     TransEventExtra extra = {
+        .peerNetworkId = NULL,
+        .calleePkg = NULL,
+        .callerPkg = NULL,
         .socketName = appInfo->myData.sessionName,
         .channelType = CHANNEL_TYPE_PROXY,
         .channelId = chanNewId,
@@ -785,13 +792,11 @@ static void TransProxyOnDataReceived(
 
     TRANS_LOGI(TRANS_CTRL,
         "recv data connId=%u, moduleId=%d, seq=%" PRId64 " len=%d", connectionId, moduleId, seq, len);
-    if (data == NULL) {
+    if (data == NULL || moduleId != MODULE_PROXY_CHANNEL) {
         TRANS_LOGW(TRANS_CTRL, "invalid param");
         return;
     }
-    if (moduleId != MODULE_PROXY_CHANNEL) {
-        return;
-    }
+
     (void)memset_s(&msg, sizeof(ProxyMessage), 0, sizeof(ProxyMessage));
     msg.connId = connectionId;
 
@@ -799,6 +804,15 @@ static void TransProxyOnDataReceived(
     if (((ret == SOFTBUS_AUTH_NOT_FOUND) || (ret == SOFTBUS_DECRYPT_ERR)) &&
         (msg.msgHead.type == PROXYCHANNEL_MSG_TYPE_HANDSHAKE)) {
         TransAuditExtra extra = {
+            .hostPkg = NULL,
+            .localIp = NULL,
+            .localPort = NULL,
+            .localDevId = NULL,
+            .localSessName = NULL,
+            .peerIp = NULL,
+            .peerPort = NULL,
+            .peerDevId = NULL,
+            .peerSessName = NULL,
             .result = TRANS_AUDIT_DISCONTINUE,
             .errcode = ret,
             .auditType = AUDIT_EVENT_PACKETS_ERROR,

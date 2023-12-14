@@ -15,20 +15,20 @@
 
 #include "softbus_socket.h"
 
+#include <errno.h>
+#include <fcntl.h>
+#include <securec.h>
 #include "conn_log.h"
 #include "softbus_adapter_errcode.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_tcp_socket.h"
-#include <errno.h>
-#include <fcntl.h>
-#include <securec.h>
 
 #define MAX_SOCKET_TYPE 5
 #define SEND_BUF_SIZE   0x200000 // 2M
 #define RECV_BUF_SIZE   0x100000 // 1M
-#define USER_TIMEOUT_MS 2000000   // 2000000us
+#define USER_TIMEOUT_US 2000000   // 2000000us
 
 static const SocketInterface *g_socketInterfaces[MAX_SOCKET_TYPE] = { 0 };
 static SoftBusMutex g_socketsMutex;
@@ -205,10 +205,10 @@ ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_t len, int32_t time
     }
 
     if (timeout == 0) {
-        timeout = USER_TIMEOUT_MS;
+        timeout = USER_TIMEOUT_US;
     }
 
-    int err = WaitEvent(fd, SOFTBUS_SOCKET_OUT, USER_TIMEOUT_MS);
+    int err = WaitEvent(fd, SOFTBUS_SOCKET_OUT, USER_TIMEOUT_US);
     if (err <= 0) {
         CONN_LOGE(CONN_COMMON, "wait event error %d", err);
         return err;

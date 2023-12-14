@@ -19,12 +19,14 @@
 #include "disc_nstackx_adapter.h"
 #include "softbus_errcode.h"
 
-int32_t DiscCoapAssembleCapData(uint32_t capability, const char *capabilityData, uint32_t dataLen, char *outData)
+int32_t DiscCoapAssembleCapData(uint32_t capability, const char *capabilityData, uint32_t dataLen, char *outData,
+    uint32_t outLen)
 {
     (void)capability;
     (void)capabilityData;
     (void)dataLen;
     (void)outData;
+    (void)outLen;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 

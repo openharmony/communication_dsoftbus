@@ -14,10 +14,10 @@
  */
 
 #include "p2p_entity_broadcast_handler.h"
-#include "broadcast_receiver.h"
 #include "conn_log.h"
-#include "entity/p2p_entity/p2p_entity.h"
+#include "broadcast_receiver.h"
 #include "wifi_direct_p2p_adapter.h"
+#include "entity/p2p_entity/p2p_entity.h"
 
 static void HandleP2pStateChanged(enum P2pState state)
 {

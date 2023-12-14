@@ -769,6 +769,15 @@ void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg)
         };
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
         TransAuditExtra auditMsgExtra = {
+            .hostPkg = NULL,
+            .localIp = NULL,
+            .localPort = NULL,
+            .localDevId = NULL,
+            .localSessName = NULL,
+            .peerIp = NULL,
+            .peerPort = NULL,
+            .peerDevId = NULL,
+            .peerSessName = NULL,
             .result = TRANS_AUDIT_DISCONTINUE,
             .errcode = errCode,
             .auditType = AUDIT_EVENT_MSG_ERROR,
@@ -783,6 +792,15 @@ void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg)
     uint16_t fastDataSize = 0;
     if (TransProxyUnpackHandshakeAckMsg(msg->data, info, msg->dateLen, &fastDataSize) != SOFTBUS_OK) {
         TransAuditExtra auditPacketExtra = {
+            .hostPkg = NULL,
+            .localIp = NULL,
+            .localPort = NULL,
+            .localDevId = NULL,
+            .localSessName = NULL,
+            .peerIp = NULL,
+            .peerPort = NULL,
+            .peerDevId = NULL,
+            .peerSessName = NULL,
             .result = TRANS_AUDIT_DISCONTINUE,
             .errcode = errCode,
             .auditType = AUDIT_EVENT_PACKETS_ERROR,
@@ -934,6 +952,15 @@ static int32_t TransProxyFillChannelInfo(const ProxyMessage *msg, ProxyChannelIn
     int32_t ret = TransProxyUnpackHandshakeMsg(msg->data, chan, msg->dateLen);
     if (ret != SOFTBUS_OK) {
         TransAuditExtra extra = {
+            .hostPkg = NULL,
+            .localIp = NULL,
+            .localPort = NULL,
+            .localDevId = NULL,
+            .localSessName = NULL,
+            .peerIp = NULL,
+            .peerPort = NULL,
+            .peerDevId = NULL,
+            .peerSessName = NULL,
             .result = TRANS_AUDIT_DISCONTINUE,
             .errcode = ret,
             .auditType = AUDIT_EVENT_PACKETS_ERROR,

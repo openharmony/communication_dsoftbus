@@ -14,21 +14,21 @@
  */
 
 #include "entity/p2p_entity/p2p_entity.h"
-#include "conn_log.h"
-#include "data/resource_manager.h"
-#include "entity/p2p_entity/p2p_available_state.h"
-#include "entity/p2p_entity/p2p_group_connecting_state.h"
-#include "entity/p2p_entity/p2p_group_creating_state.h"
-#include "entity/p2p_entity/p2p_group_removing_state.h"
-#include "entity/p2p_entity/p2p_unavailable_state.h"
+#include <string.h>
 #include "securec.h"
-#include "softbus_adapter_mem.h"
+#include "conn_log.h"
 #include "softbus_error_code.h"
-#include "utils/wifi_direct_anonymous.h"
+#include "softbus_adapter_mem.h"
+#include "wifi_direct_p2p_adapter.h"
+#include "data/resource_manager.h"
 #include "utils/wifi_direct_timer_list.h"
 #include "utils/wifi_direct_work_queue.h"
-#include "wifi_direct_p2p_adapter.h"
-#include <string.h>
+#include "utils/wifi_direct_anonymous.h"
+#include "entity/p2p_entity/p2p_available_state.h"
+#include "entity/p2p_entity/p2p_unavailable_state.h"
+#include "entity/p2p_entity/p2p_group_creating_state.h"
+#include "entity/p2p_entity/p2p_group_connecting_state.h"
+#include "entity/p2p_entity/p2p_group_removing_state.h"
 
 /* private method forward declare */
 static void OnEntityTimeout(void *data);

@@ -14,17 +14,17 @@
  */
 
 #include "wifi_direct_p2p_adapter.h"
-#include "conn_log.h"
-#include "data/resource_manager.h"
 #include "securec.h"
-#include "softbus_adapter_crypto.h"
-#include "softbus_adapter_mem.h"
-#include "softbus_error_code.h"
-#include "utils/wifi_direct_network_utils.h"
+#include "conn_log.h"
 #include "wifi_device.h"
-#include "wifi_direct_defines.h"
-#include "wifi_hid2d.h"
 #include "wifi_p2p.h"
+#include "wifi_hid2d.h"
+#include "softbus_error_code.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_adapter_crypto.h"
+#include "wifi_direct_defines.h"
+#include "utils/wifi_direct_network_utils.h"
+#include "data/resource_manager.h"
 
 #define DEFAULT_NET_MASK "255.255.255.0"
 
@@ -160,7 +160,11 @@ static int32_t SetPeerWifiConfigInfo(const char *config)
     CONN_CHECK_AND_RETURN_RET_LOGW(peerCfg, SOFTBUS_MALLOC_ERR, CONN_WIFI_DIRECT, "malloc failed");
 
     int32_t ret = SoftBusBase64Decode(peerCfg, peerCfgLen, &decLen, (uint8_t *)config, configSize);
-    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "decode wifi cfg failed");
+    if (ret != SOFTBUS_OK) {
+        SoftBusFree(peerCfg);
+        CONN_LOGE(CONN_WIFI_DIRECT, "decode wifi cfg failed");
+        return SOFTBUS_ERR;
+    }
 
     ret = Hid2dSetPeerWifiCfgInfo(TYPE_OF_SET_PEER_CONFIG, (char *)peerCfg, (int32_t)decLen);
     SoftBusFree(peerCfg);
@@ -169,7 +173,7 @@ static int32_t SetPeerWifiConfigInfo(const char *config)
     return SOFTBUS_OK;
 }
 
-static int32_t SetPeerWifiConfigInfoV2(uint8_t *cfg, size_t size)
+static int32_t SetPeerWifiConfigInfoV2(const uint8_t *cfg, size_t size)
 {
     (void)cfg;
     (void)size;

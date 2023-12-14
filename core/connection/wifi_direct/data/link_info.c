@@ -14,13 +14,13 @@
  */
 
 #include "link_info.h"
-#include "conn_log.h"
-#include "protocol/wifi_direct_protocol.h"
-#include "softbus_error_code.h"
-#include "utils/wifi_direct_ipv4_info.h"
-#include <cJSON.h>
 #include <securec.h>
 #include <string.h>
+#include <cJSON.h>
+#include "conn_log.h"
+#include "softbus_error_code.h"
+#include "protocol/wifi_direct_protocol.h"
+#include "utils/wifi_direct_ipv4_info.h"
 
 #define LI_TAG_LOCAL_INTERFACE 0
 #define LI_TAG_REMOTE_INTERFACE 1
@@ -273,13 +273,13 @@ void LinkInfoDestructor(struct LinkInfo *self)
 }
 
 void LinkInfoConstructorWithNameAndMode(struct LinkInfo* self, const char *localName, const char *remoteName,
-                                        uint32_t localMode, uint32_t remoteMod)
+                                        uint32_t localMode, uint32_t remoteMode)
 {
     LinkInfoConstructor(self);
     self->putString(self, LI_KEY_LOCAL_INTERFACE, localName);
     self->putString(self, LI_KEY_REMOTE_INTERFACE, remoteName);
     self->putInt(self, LI_KEY_LOCAL_LINK_MODE, localMode);
-    self->putInt(self, LI_KEY_REMOTE_LINK_MODE, remoteMod);
+    self->putInt(self, LI_KEY_REMOTE_LINK_MODE, remoteMode);
 }
 
 /* new and delete */
@@ -293,11 +293,11 @@ struct LinkInfo *LinkInfoNew(void)
 }
 
 struct LinkInfo* LinkInfoNewWithNameAndMode(const char *localName, const char *remoteName,
-                                            uint32_t localMode, uint32_t remoteMod)
+                                            uint32_t localMode, uint32_t remoteMode)
 {
     struct LinkInfo *self = (struct LinkInfo *)SoftBusCalloc(sizeof(*self));
     CONN_CHECK_AND_RETURN_RET_LOGE(self != NULL, NULL, CONN_WIFI_DIRECT, "self is null");
-    LinkInfoConstructorWithNameAndMode(self, localName, remoteName, localMode, remoteMod);
+    LinkInfoConstructorWithNameAndMode(self, localName, remoteName, localMode, remoteMode);
 
     return self;
 }

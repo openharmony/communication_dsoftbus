@@ -14,17 +14,17 @@
  */
 
 #include "inner_link.h"
-#include "conn_log.h"
-#include "data/link_manager.h"
-#include "protocol/wifi_direct_protocol_factory.h"
-#include "softbus_adapter_mem.h"
-#include "softbus_adapter_timer.h"
-#include "softbus_error_code.h"
-#include "utils/wifi_direct_anonymous.h"
-#include "utils/wifi_direct_ipv4_info.h"
-#include "wifi_direct_types.h"
 #include <securec.h>
 #include <string.h>
+#include "conn_log.h"
+#include "softbus_error_code.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_adapter_timer.h"
+#include "wifi_direct_types.h"
+#include "data/link_manager.h"
+#include "utils/wifi_direct_ipv4_info.h"
+#include "utils/wifi_direct_anonymous.h"
+#include "protocol/wifi_direct_protocol_factory.h"
 
 #define IL_TAG_CONNECT_TYPE 1
 #define IL_TAG_STATE 2
