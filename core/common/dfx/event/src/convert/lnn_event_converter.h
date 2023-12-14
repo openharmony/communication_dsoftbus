@@ -26,7 +26,8 @@ extern "C" {
     static inline bool LnnAssigner##fieldName(                                                                \
         const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param) \
     {                                                                                                         \
-        if (Assigner##type(form->lnnExtra->field, &param) && CopyString(param->name, eventName)) {            \
+        if (Assigner##type(form->lnnExtra->field, &param) &&                                                  \
+            CopyString(param->name, eventName, MAX_LENGTH_OF_PARAM_NAME)) {                                   \
             param->t = paramType;                                                                             \
             return true;                                                                                      \
         }                                                                                                     \
@@ -77,12 +78,12 @@ static const HiSysEventParamAssigner g_lnnAssigners[] = {
     // Modification Note: remember updating LNN_ASSIGNER_SIZE
 };
 
-
 #define LNN_ALARM_ASSIGNER(type, fieldName, field)                                                            \
     static inline bool LnnAssigner##fieldName(                                                                \
         const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param) \
     {                                                                                                         \
-        if (Assigner##type(form->lnnAlarmExtra->field, &param) && CopyString(param->name, eventName)) {       \
+        if (Assigner##type(form->lnnAlarmExtra->field, &param) &&                                             \
+            CopyString(param->name, eventName, MAX_LENGTH_OF_PARAM_NAME)) {                                   \
             param->t = paramType;                                                                             \
             return true;                                                                                      \
         }                                                                                                     \
