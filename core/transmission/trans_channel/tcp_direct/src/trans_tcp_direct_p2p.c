@@ -75,10 +75,6 @@ static int32_t StartNewP2pListener(const char *ip, int32_t *port)
 
 static int32_t StartNewHmlListener(const char *ip, int32_t *port, ListenerModule *moudleType)
 {
-    if (moudleType == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "moudleType invalid");
-        return SOFTBUS_ERR;
-    }
     int32_t listenerPort = 0;
     LocalListenerInfo info;
     info.type = CONNECT_P2P;
