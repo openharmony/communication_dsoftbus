@@ -152,6 +152,9 @@ int32_t TransProxyPipelineOpenChannel(int32_t requestId, const char *networkId,
     const TransProxyPipelineChannelOption *option, const ITransProxyPipelineCallback *callback)
 {
     TRANS_LOGD(TRANS_CTRL, "enter.");
+    if (!IsValidString(networkId, ID_MAX_LEN)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
     TRANS_CHECK_AND_RETURN_RET_LOGW(networkId, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid network id");
     TRANS_CHECK_AND_RETURN_RET_LOGW(callback && callback->onChannelOpened && callback->onChannelOpenFailed,
         SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid callback");
@@ -231,6 +234,9 @@ int32_t TransProxyPipelineSendMessage(
 int32_t TransProxyPipelineGetChannelIdByNetworkId(const char *networkId)
 {
     TRANS_LOGD(TRANS_CTRL, "enter.");
+    if (!IsValidString(networkId, ID_MAX_LEN)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
     char uuid[UUID_BUF_LEN] = { 0 };
     int32_t ret = LnnGetRemoteStrInfo(networkId, STRING_KEY_UUID, uuid, sizeof(uuid));
     if (ret != SOFTBUS_OK) {
@@ -615,6 +621,7 @@ int32_t TransProxyPipelineInit(void)
     return SOFTBUS_OK;
 exit:
     if (channels != NULL) {
+        TRANS_LOGE(TRANS_INIT, "softbus list is not null.");
         DestroySoftBusList(channels);
     }
     g_manager.channels = NULL;
