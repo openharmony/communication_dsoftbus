@@ -520,6 +520,7 @@ static int32_t OnVerifyP2pRequest(int64_t authId, int64_t seq, const cJSON *json
     pManager = GetWifiDirectManager();
     if (pManager == NULL) {
         TRANS_LOGE(TRANS_CTRL, "get wifidirectmanager fail");
+        return SOFTBUS_ERR;
     }
 
     if (pManager->getLocalIpByRemoteIp(peerIp, myIp, sizeof(myIp)) != SOFTBUS_OK) {
