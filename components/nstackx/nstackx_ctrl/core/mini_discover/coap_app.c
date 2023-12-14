@@ -83,11 +83,10 @@ static bool IsLoopBackPacket(struct sockaddr_in *remoteAddr)
         return false;
     }
     struct in_addr *localAddr = GetLocalIfaceIp(g_coapCtx.iface);
-    if (remoteAddr->sin_addr.s_addr == localAddr->s_addr) {
-        DFINDER_LOGE(TAG, "drop loopback packet");
-        return true;
+    if (remoteAddr->sin_addr.s_addr != localAddr->s_addr) {
+        return false;
     }
-    return false;
+    return true;
 }
 
 static void HandleReadEvent(int32_t fd)
@@ -193,7 +192,8 @@ static int32_t CoapSendMsg(const CoapRequest *coapRequest, uint8_t isBroadcast)
     sockAddr.sin_family = AF_INET;
 
     int32_t fd = CoapCreateUdpClient(&sockAddr, isBroadcast);
-    if (fd == NSTACKX_EFAILED) {
+    if (fd < 0) {
+        DFINDER_LOGE(TAG, "Create coap udp client failed");
         return NSTACKX_EFAILED;
     }
 
@@ -325,14 +325,14 @@ static int32_t CoapCreateUdpServer(const char *ipAddr, int32_t port)
     socklen_t len = sizeof(localAddr);
     int32_t fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (fd < 0) {
-        return NSTACKX_FALSE;
+        return -1;
     }
 
     int32_t optVal = 1;
     if (setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &optVal, sizeof(optVal)) != 0) {
         DFINDER_LOGE(TAG, "set sock opt failed, errno = %d", errno);
         lwip_close(fd);
-        return NSTACKX_FALSE;
+        return -1;
     }
 
     (void)memset_s(&localAddr, sizeof(localAddr), 0, sizeof(localAddr));
@@ -342,12 +342,12 @@ static int32_t CoapCreateUdpServer(const char *ipAddr, int32_t port)
 
     if (bind(fd, (struct sockaddr *)&localAddr, len) == -1) {
         lwip_close(fd);
-        return NSTACKX_FALSE;
+        return -1;
     }
 
     if (getsockname(fd, (struct sockaddr *)&localAddr, &len) == -1) {
         lwip_close(fd);
-        return NSTACKX_FALSE;
+        return -1;
     }
     return fd;
 }
@@ -364,14 +364,14 @@ CoapCtxType *CoapServerInit(const struct in_addr *ip, void *iface)
         return NULL;
     }
 
-    g_coapCtx.listenFd = CoapCreateUdpServer(COAP_SRV_DEFAULT_ADDR, COAP_SRV_DEFAULT_PORT);
-    if (g_coapCtx.listenFd == -1) {
+    int32_t listenFd = CoapCreateUdpServer(COAP_SRV_DEFAULT_ADDR, COAP_SRV_DEFAULT_PORT);
+    if (listenFd < 0) {
         DFINDER_LOGE(TAG, "get context failed");
         return NULL;
     }
 
     uint32_t events = EPOLLIN | EPOLLERR;
-    g_coapCtx.task.taskfd = g_coapCtx.listenFd;
+    g_coapCtx.task.taskfd = listenFd;
     g_coapCtx.task.epollfd = epollFd;
     g_coapCtx.task.readHandle = CoAPEpollReadHandle;
     g_coapCtx.task.writeHandle = NULL;
@@ -399,7 +399,6 @@ void CoapServerDestroy(CoapCtxType *ctx, bool moduleDeinit)
     }
 
     (void)memset_s(&g_coapCtx, sizeof(g_coapCtx), 0, sizeof(g_coapCtx));
-    g_coapCtx.listenFd = -1;
     g_coapCtx.task.taskfd = -1;
 }
 

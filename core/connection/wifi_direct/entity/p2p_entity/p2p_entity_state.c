@@ -12,10 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "entity/p2p_entity/p2p_entity_state.h"
 #include "conn_log.h"
-#include "entity/p2p_entity/p2p_entity.h"
 #include "softbus_error_code.h"
+
+#include "entity/p2p_entity/p2p_entity_state.h"
+#include "entity/p2p_entity/p2p_entity.h"
 
 static void Enter(struct P2pEntityState *self)
 {

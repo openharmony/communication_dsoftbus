@@ -82,10 +82,7 @@ int32_t TransServerProxyInit(void)
 void TransServerProxyDeInit(void)
 {
     TRANS_LOGI(TRANS_SDK, "enter");
-    if (g_serverProxy != nullptr) {
-        delete g_serverProxy;
-    }
-    g_serverProxy = nullptr;
+    g_serverProxy.clear();
 }
 
 int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionName)
@@ -241,7 +238,7 @@ int32_t ServerIpcEvaluateQos(const char *peerNetworkId, TransDataType dataType, 
         return SOFTBUS_NO_INIT;
     }
 
-    if (peerNetworkId == NULL || dataType >= DATA_TYPE_BUTT || qosCount >= QOS_TYPE_BUTT) {
+    if (peerNetworkId == NULL || dataType >= DATA_TYPE_BUTT || qosCount > QOS_TYPE_BUTT) {
         TRANS_LOGE(TRANS_SDK, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }

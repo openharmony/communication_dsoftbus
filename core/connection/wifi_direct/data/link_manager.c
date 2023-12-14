@@ -18,16 +18,16 @@
 #include <string.h>
 
 #include "anonymizer.h"
-#include "broadcast_receiver.h"
-#include "channel/default_negotiate_channel.h"
-#include "channel/wifi_direct_negotiate_channel.h"
 #include "conn_log.h"
-#include "inner_link.h"
 #include "softbus_error_code.h"
-#include "utils/wifi_direct_anonymous.h"
+#include "inner_link.h"
+#include "broadcast_receiver.h"
+#include "wifi_direct_defines.h"
+#include "channel/wifi_direct_negotiate_channel.h"
+#include "channel/default_negotiate_channel.h"
 #include "utils/wifi_direct_ipv4_info.h"
 #include "utils/wifi_direct_work_queue.h"
-#include "wifi_direct_defines.h"
+#include "utils/wifi_direct_anonymous.h"
 #include "wifi_direct_ip_manager.h"
 
 /* private method forward declare */
@@ -281,7 +281,7 @@ static void RefreshLinks(enum WifiDirectLinkType linkType, int32_t clientDeviceS
     SoftBusMutexUnlock(&self->mutex);
 }
 
-static void RegisterListener(struct LinkManagerListener *listener)
+static void RegisterListener(const struct LinkManagerListener *listener)
 {
     GetLinkManager()->listener = *listener;
 }

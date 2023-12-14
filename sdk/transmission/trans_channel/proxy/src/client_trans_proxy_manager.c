@@ -252,7 +252,7 @@ int32_t ClientTransProxyDelChannelInfo(int32_t channelId)
     return SOFTBUS_ERR;
 }
 
-static ClientProxyChannelInfo* ClientTransProxyCreasteChannelInfo(const ChannelInfo *channel)
+static ClientProxyChannelInfo* ClientTransProxyCreateChannelInfo(const ChannelInfo *channel)
 {
     ClientProxyChannelInfo *info = (ClientProxyChannelInfo*)SoftBusMalloc(sizeof(ClientProxyChannelInfo));
     if (info == NULL) {
@@ -274,7 +274,7 @@ int32_t ClientTransProxyOnChannelOpened(const char *sessionName, const ChannelIn
         TRANS_LOGW(TRANS_SDK, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
-    int ret = ClientTransProxyAddChannelInfo(ClientTransProxyCreasteChannelInfo(channel));
+    int ret = ClientTransProxyAddChannelInfo(ClientTransProxyCreateChannelInfo(channel));
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "ClientTransProxyAddChannelInfo fail");
         return ret;
@@ -401,7 +401,7 @@ static void ClientTransProxySendSessionAck(int32_t channelId, int32_t seq)
         TRANS_LOGE(TRANS_SDK, "get proxy info err, channelId=%d", channelId);
         return;
     }
-
+    info.sequence = seq;
     if (TransProxyPackAndSendData(channelId, ack, PROXY_ACK_SIZE, &info, TRANS_SESSION_ACK) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "send ack err, seq=%d", seq);
     }

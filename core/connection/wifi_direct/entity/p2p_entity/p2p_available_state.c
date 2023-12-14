@@ -14,15 +14,15 @@
  */
 
 #include "entity/p2p_entity/p2p_available_state.h"
+#include <string.h>
+#include "securec.h"
 #include "conn_log.h"
+#include "softbus_error_code.h"
+#include "wifi_direct_p2p_adapter.h"
 #include "data/resource_manager.h"
 #include "entity/p2p_entity/p2p_entity.h"
-#include "securec.h"
-#include "softbus_error_code.h"
-#include "utils/wifi_direct_anonymous.h"
 #include "utils/wifi_direct_network_utils.h"
-#include "wifi_direct_p2p_adapter.h"
-#include <string.h>
+#include "utils/wifi_direct_anonymous.h"
 
 #define LINK_ATTR_STR_LEN 64
 

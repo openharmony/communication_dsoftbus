@@ -164,7 +164,7 @@ static int32_t CoapParseOptionsAndPayloadEx(CoapPacket *pkt, const uint8_t *buf,
     }
 
     pkt->payload.buffer = dataPos + 1;
-    pkt->payload.len = (uint32_t)(long)(end - (dataPos + 1));
+    pkt->payload.len = (uint32_t)(end - (dataPos + 1));
     return DISCOVERY_ERR_SUCCESS;
 }
 
@@ -503,8 +503,7 @@ static int32_t CoapAddToken(CoapPacket *pkt, const CoapBuffer *token, CoapReadWr
         if (pkt->protocol == COAP_UDP) {
             buf->readWriteBuf[0] = (char)((uint8_t)buf->readWriteBuf[0] | token->len);
         } else {
-            buf->readWriteBuf[BUF_OFFSET_BYTE2] = (char)((uint8_t)buf->readWriteBuf[BUF_OFFSET_BYTE2]
-                                                  | token->len);
+            buf->readWriteBuf[BUF_OFFSET_BYTE2] = (char)((uint8_t)buf->readWriteBuf[BUF_OFFSET_BYTE2] | token->len);
         }
 
         if (memcpy_s(&buf->readWriteBuf[buf->len], buf->size - buf->len, token->buffer, pkt->header.tokenLen) != EOK) {

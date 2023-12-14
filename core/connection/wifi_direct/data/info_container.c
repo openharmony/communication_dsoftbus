@@ -15,15 +15,16 @@
 #include "info_container.h"
 
 #include <string.h>
+#include "securec.h"
 
 #include "anonymizer.h"
 #include "conn_log.h"
-#include "securec.h"
-#include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
-#include "utils/wifi_direct_anonymous.h"
-#include "utils/wifi_direct_ipv4_info.h"
+#include "softbus_adapter_mem.h"
+
 #include "wifi_direct_types.h"
+#include "utils/wifi_direct_ipv4_info.h"
+#include "utils/wifi_direct_anonymous.h"
 
 #define INT_ARRAY_BUFFER_LEN 128
 #define IPV4_INFO_ARRAY_BUFFER_LEN 256
@@ -38,18 +39,20 @@ static void DeepCopy(struct InfoContainer *self, struct InfoContainer *other)
         size_t size = other->entries[key].size;
         size_t count = other->entries[key].count;
 
-        if (value) {
-            struct InfoContainerKeyProperty *keyProperty = other->getKeyProperty(other, key);
-            switch (keyProperty->flag) {
-                case CONTAINER_FLAG:
-                    self->putContainer(self, key, value, size);
-                    break;
-                case CONTAINER_ARRAY_FLAG:
-                    self->putContainerArray(self, key, value, count, size / count);
-                    break;
-                default:
-                    self->putRawData(self, key, value, size);
-            }
+        if (!value) {
+            continue;
+        }
+
+        struct InfoContainerKeyProperty *keyProperty = other->getKeyProperty(other, key);
+        switch (keyProperty->flag) {
+            case CONTAINER_FLAG:
+                self->putContainer(self, key, value, size);
+                break;
+            case CONTAINER_ARRAY_FLAG:
+                self->putContainerArray(self, key, value, count, size / count);
+                break;
+            default:
+                self->putRawData(self, key, value, size);
         }
     }
 }

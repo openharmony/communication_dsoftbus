@@ -14,18 +14,18 @@
  */
 
 #include "link_manager_broadcast_handler.h"
-#include "broadcast_receiver.h"
+#include <string.h>
+#include <securec.h>
 #include "conn_log.h"
+#include "softbus_error_code.h"
+#include "broadcast_receiver.h"
+#include "wifi_direct_p2p_adapter.h"
+#include "wifi_direct_decision_center.h"
 #include "data/link_manager.h"
 #include "data/resource_manager.h"
-#include "softbus_error_code.h"
-#include "utils/wifi_direct_anonymous.h"
-#include "utils/wifi_direct_ipv4_info.h"
 #include "utils/wifi_direct_network_utils.h"
-#include "wifi_direct_decision_center.h"
-#include "wifi_direct_p2p_adapter.h"
-#include <securec.h>
-#include <string.h>
+#include "utils/wifi_direct_ipv4_info.h"
+#include "utils/wifi_direct_anonymous.h"
 
 static void UpdateInnerLink(struct WifiDirectP2pGroupInfo *groupInfo)
 {

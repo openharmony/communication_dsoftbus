@@ -61,7 +61,7 @@ typedef struct {
  */
 typedef struct {
     char *name;             /**< Peer socket name */
-    char *deviceId;         /**< Peer network ID */
+    char *networkId;         /**< Peer network ID */
     char *pkgName;          /**< Peer package name */
     TransDataType dataType; /**< Data type of peer socket*/
 } PeerSocketInfo;

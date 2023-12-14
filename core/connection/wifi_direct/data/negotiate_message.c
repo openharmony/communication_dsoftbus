@@ -14,13 +14,13 @@
  */
 
 #include "negotiate_message.h"
-#include "conn_log.h"
-#include "data/interface_info.h"
-#include "data/link_info.h"
-#include "protocol/wifi_direct_protocol_factory.h"
-#include "utils/wifi_direct_utils.h"
 #include <securec.h>
 #include <string.h>
+#include "conn_log.h"
+#include "data/link_info.h"
+#include "data/interface_info.h"
+#include "protocol/wifi_direct_protocol_factory.h"
+#include "utils/wifi_direct_utils.h"
 
 #define NM_TAG_MSG_TYPE 0
 #define NM_TAG_SESSION_ID 1

@@ -14,15 +14,17 @@
  */
 
 #include "interface_info.h"
-#include "conn_log.h"
-#include "protocol/wifi_direct_protocol.h"
-#include "securec.h"
-#include "softbus_error_code.h"
-#include "utils/wifi_direct_anonymous.h"
-#include "utils/wifi_direct_ipv4_info.h"
-#include "utils/wifi_direct_network_utils.h"
-#include "utils/wifi_direct_utils.h"
+
 #include <string.h>
+#include "securec.h"
+
+#include "conn_log.h"
+#include "softbus_error_code.h"
+
+#include "protocol/wifi_direct_protocol.h"
+#include "utils/wifi_direct_network_utils.h"
+#include "utils/wifi_direct_ipv4_info.h"
+#include "utils/wifi_direct_utils.h"
 
 #define II_TAG_DYNAMIC_MAC 0
 #define II_TAG_INTERFACE_NAME 1

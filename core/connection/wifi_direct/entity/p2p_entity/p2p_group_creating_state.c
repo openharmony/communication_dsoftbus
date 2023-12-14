@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "entity/p2p_entity/p2p_group_creating_state.h"
 #include "conn_log.h"
+#include "entity/p2p_entity/p2p_group_creating_state.h"
 #include "entity/p2p_entity/p2p_entity.h"
 
 /* public interface */
