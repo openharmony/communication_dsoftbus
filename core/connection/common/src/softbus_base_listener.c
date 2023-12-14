@@ -1243,7 +1243,7 @@ static int32_t StartSelectThread(void)
         if (status != SOFTBUS_OK) {
             CONN_LOGE(CONN_COMMON, "start select thread failed: init lock failed, error=%d", status);
             CleanupSelectThreadState(&state);
-	    break;
+            break;
         }
         CONN_LOGI(CONN_COMMON, "start select thread success, trace id=%d, ctrl read fd=%d, ctrl write fd=%d",
             state->traceId, state->ctrlRfd, state->ctrlWfd);
