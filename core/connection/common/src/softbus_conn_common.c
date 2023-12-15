@@ -40,8 +40,8 @@ int32_t ConnStartActionAsync(void *arg, void *(*runnable)(void *), const char *t
     SoftBusThreadAttr attr;
     SoftBusThreadAttrInit(&attr);
     attr.taskName = taskName;
-    SoftBusThread ignore;
-    int32_t status = SoftBusThreadCreate(&ignore, &attr, runnable, arg);
+    SoftBusThread actionAsyncThread;
+    int32_t status = SoftBusThreadCreate(&actionAsyncThread, &attr, runnable, arg);
     return status;
 }
 
@@ -92,7 +92,7 @@ void ConvertAnonymizeSensitiveString(char *outAnomize, uint32_t anomizeLen, cons
     if (outAnomize == NULL || origin == NULL) {
         return;
     }
-    uint32_t originStrLen = strlen(origin);
+    uint32_t originStrLen = (uint32_t)strlen(origin);
     if (anomizeLen < originStrLen + 1) {
         return;
     }

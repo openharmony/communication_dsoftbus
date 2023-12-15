@@ -376,7 +376,7 @@ static struct P2pEntity g_entity = {
     .isConnectStateChangeReceived = false,
 };
 
-struct P2pEntity* GetP2pEntity(void)
+struct P2pEntity *GetP2pEntity(void)
 {
     if (!g_entity.isInited) {
         P2pEntityConstructor(&g_entity);

@@ -78,7 +78,7 @@ static size_t GetKeySize(void)
     return LI_KEY_MAX;
 }
 
-static const char* GetContainerName(void)
+static const char *GetContainerName(void)
 {
     return "LinkInfo";
 }
@@ -200,7 +200,7 @@ static bool UnmarshallingPrimary(struct LinkInfo *self, enum LinkInfoKey key,
 
 #define BANDWIDTH_80M 0x03
 
-static cJSON* ToJsonObject(struct LinkInfo *self)
+static cJSON *ToJsonObject(struct LinkInfo *self)
 {
     cJSON *object = cJSON_CreateObject();
     if (!object) {
@@ -246,9 +246,8 @@ static void PutRemoteIpString(struct LinkInfo *self, const char *ipString)
     self->putRawData(self, LI_KEY_REMOTE_IPV4, &ipv4, sizeof(ipv4));
 }
 
-
 /* constructor and destructor */
-void LinkInfoConstructor(struct LinkInfo* self)
+void LinkInfoConstructor(struct LinkInfo *self)
 {
     InfoContainerConstructor((struct InfoContainer *)self, LinkInfoKeyProperties, LI_KEY_MAX);
 
@@ -267,24 +266,24 @@ void LinkInfoConstructor(struct LinkInfo* self)
     ListInit(&self->node);
 }
 
-void LinkInfoDestructor(struct LinkInfo* self)
+void LinkInfoDestructor(struct LinkInfo *self)
 {
     CONN_CHECK_AND_RETURN_LOGW(self != NULL, CONN_WIFI_DIRECT, "self is null");
     InfoContainerDestructor((struct InfoContainer *)self, LI_KEY_MAX);
 }
 
 void LinkInfoConstructorWithNameAndMode(struct LinkInfo* self, const char *localName, const char *remoteName,
-                                        uint32_t localMode, uint32_t remoteMod)
+                                        uint32_t localMode, uint32_t remoteMode)
 {
     LinkInfoConstructor(self);
     self->putString(self, LI_KEY_LOCAL_INTERFACE, localName);
     self->putString(self, LI_KEY_REMOTE_INTERFACE, remoteName);
     self->putInt(self, LI_KEY_LOCAL_LINK_MODE, localMode);
-    self->putInt(self, LI_KEY_REMOTE_LINK_MODE, remoteMod);
+    self->putInt(self, LI_KEY_REMOTE_LINK_MODE, remoteMode);
 }
 
 /* new and delete */
-struct LinkInfo* LinkInfoNew(void)
+struct LinkInfo *LinkInfoNew(void)
 {
     struct LinkInfo *self = (struct LinkInfo *)SoftBusCalloc(sizeof(*self));
     CONN_CHECK_AND_RETURN_RET_LOGE(self != NULL, NULL, CONN_WIFI_DIRECT, "self is null");
@@ -294,16 +293,16 @@ struct LinkInfo* LinkInfoNew(void)
 }
 
 struct LinkInfo* LinkInfoNewWithNameAndMode(const char *localName, const char *remoteName,
-                                            uint32_t localMode, uint32_t remoteMod)
+                                            uint32_t localMode, uint32_t remoteMode)
 {
     struct LinkInfo *self = (struct LinkInfo *)SoftBusCalloc(sizeof(*self));
     CONN_CHECK_AND_RETURN_RET_LOGE(self != NULL, NULL, CONN_WIFI_DIRECT, "self is null");
-    LinkInfoConstructorWithNameAndMode(self, localName, remoteName, localMode, remoteMod);
+    LinkInfoConstructorWithNameAndMode(self, localName, remoteName, localMode, remoteMode);
 
     return self;
 }
 
-void LinkInfoDelete(struct LinkInfo* self)
+void LinkInfoDelete(struct LinkInfo *self)
 {
     LinkInfoDestructor(self);
     SoftBusFree(self);

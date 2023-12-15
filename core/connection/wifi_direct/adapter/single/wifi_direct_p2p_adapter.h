@@ -97,7 +97,7 @@ struct WifiDirectP2pAdapter {
 
     int32_t (*getInterfaceCoexistCap)(char **cap);
     int32_t (*getSelfWifiConfigInfoV2)(uint8_t *cfg, size_t *size);
-    int32_t (*setPeerWifiConfigInfoV2)(uint8_t *cfg, size_t size);
+    int32_t (*setPeerWifiConfigInfoV2)(const uint8_t *cfg, size_t size);
     int32_t (*getRecommendChannelV2)(const char *jsonString, char *result, size_t resultSize);
     int (*setConnectNotify)(const char *notify);
 

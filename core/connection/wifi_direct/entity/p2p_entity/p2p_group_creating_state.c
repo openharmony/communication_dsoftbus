@@ -126,7 +126,7 @@ static struct P2pGroupCreatingState g_state = {
 };
 
 /* class static method */
-struct P2pGroupCreatingState* GetP2pGroupCreatingState(void)
+struct P2pGroupCreatingState *GetP2pGroupCreatingState(void)
 {
     struct P2pGroupCreatingState *self = (struct P2pGroupCreatingState *)&g_state;
     if (!self->isInited) {

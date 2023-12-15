@@ -14,7 +14,7 @@
  */
 
 #include "softbus_tcp_socket.h"
-#include <fcntl.h>
+
 #include <securec.h>
 #include "conn_log.h"
 #include "softbus_adapter_errcode.h"
