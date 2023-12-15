@@ -58,7 +58,7 @@ static int32_t InitWifiDirectInfo(void)
     return ret;
 }
 
-static struct InterfaceInfo* GetInterfaceInfo(const char *interface)
+static struct InterfaceInfo *GetInterfaceInfo(const char *interface)
 {
     struct ResourceManager *self = GetResourceManager();
     CONN_CHECK_AND_RETURN_RET_LOGW(self->isInited, NULL, CONN_WIFI_DIRECT, "not inited");
@@ -137,7 +137,7 @@ static void AddUsingInterfaceToList(ListNode *list, const char *interface)
     }
 }
 
-static ListNode* GetUsingInterfaces(bool forShare)
+static ListNode *GetUsingInterfaces(bool forShare)
 {
     ListNode *list = SoftBusCalloc(sizeof(*list));
     CONN_CHECK_AND_RETURN_RET_LOGE(list, NULL, CONN_WIFI_DIRECT, "malloc list failed");
@@ -498,7 +498,7 @@ int32_t ResourceManagerInit(void)
     return SOFTBUS_OK;
 }
 
-struct ResourceManager* GetResourceManager(void)
+struct ResourceManager *GetResourceManager(void)
 {
     return &g_manager;
 }

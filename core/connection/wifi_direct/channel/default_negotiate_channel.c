@@ -169,7 +169,7 @@ static bool IsMetaChannel(struct WifiDirectNegotiateChannel *base)
     return isMeta;
 }
 
-static struct WifiDirectNegotiateChannel* Duplicate(struct WifiDirectNegotiateChannel *base)
+static struct WifiDirectNegotiateChannel *Duplicate(struct WifiDirectNegotiateChannel *base)
 {
     struct DefaultNegotiateChannel *self = (struct DefaultNegotiateChannel *)base;
     struct DefaultNegotiateChannel *copy = DefaultNegotiateChannelNew(self->authId);
@@ -201,7 +201,7 @@ void DefaultNegotiateChannelDestructor(struct DefaultNegotiateChannel *self)
     (void)self;
 }
 
-struct DefaultNegotiateChannel* DefaultNegotiateChannelNew(int64_t authId)
+struct DefaultNegotiateChannel *DefaultNegotiateChannelNew(int64_t authId)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     struct DefaultNegotiateChannel *self = SoftBusCalloc(sizeof(*self));

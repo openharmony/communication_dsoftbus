@@ -36,7 +36,7 @@ static void OnInnerLinkChange(struct InnerLink *innerLink, bool isStateChange);
 static void CloseP2pNegotiateChannel(struct InnerLink *innerLink);
 
 /* public interface */
-static struct InnerLink* GetLinkByDevice(const char *macString)
+static struct InnerLink *GetLinkByDevice(const char *macString)
 {
     struct LinkManager *self = GetLinkManager();
     CONN_CHECK_AND_RETURN_RET_LOGW(self->isInited, NULL, CONN_WIFI_DIRECT, "not inited");
@@ -50,7 +50,7 @@ static struct InnerLink* GetLinkByDevice(const char *macString)
     return NULL;
 }
 
-static struct InnerLink* GetLinkByTypeAndDevice(enum WifiDirectLinkType linkType, const char *macString)
+static struct InnerLink *GetLinkByTypeAndDevice(enum WifiDirectLinkType linkType, const char *macString)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(macString, NULL, CONN_WIFI_DIRECT, "mac is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(linkType < WIFI_DIRECT_LINK_TYPE_MAX, NULL, CONN_WIFI_DIRECT,
@@ -70,7 +70,7 @@ static struct InnerLink* GetLinkByTypeAndDevice(enum WifiDirectLinkType linkType
     return NULL;
 }
 
-static struct InnerLink* GetLinkByIp(const char *ipString, bool isRemoteIp)
+static struct InnerLink *GetLinkByIp(const char *ipString, bool isRemoteIp)
 {
     struct LinkManager *self = GetLinkManager();
     CONN_CHECK_AND_RETURN_RET_LOGW(self->isInited, NULL, CONN_WIFI_DIRECT, "not inited");
@@ -106,7 +106,7 @@ static struct InnerLink* GetLinkByIp(const char *ipString, bool isRemoteIp)
     return NULL;
 }
 
-static struct InnerLink* GetLinkById(int32_t linkId)
+static struct InnerLink *GetLinkById(int32_t linkId)
 {
     struct LinkManager *self = GetLinkManager();
     CONN_CHECK_AND_RETURN_RET_LOGW(self->isInited, NULL, CONN_WIFI_DIRECT, "not inited");
@@ -128,7 +128,7 @@ static struct InnerLink* GetLinkById(int32_t linkId)
     return NULL;
 }
 
-struct InnerLink* GetLinkByUuid(const char *uuid)
+struct InnerLink *GetLinkByUuid(const char *uuid)
 {
     struct LinkManager *self = GetLinkManager();
     CONN_CHECK_AND_RETURN_RET_LOGW(self->isInited, NULL, CONN_WIFI_DIRECT, "not inited");
@@ -281,7 +281,7 @@ static void RefreshLinks(enum WifiDirectLinkType linkType, int32_t clientDeviceS
     SoftBusMutexUnlock(&self->mutex);
 }
 
-static void RegisterListener(struct LinkManagerListener *listener)
+static void RegisterListener(const struct LinkManagerListener *listener)
 {
     GetLinkManager()->listener = *listener;
 }
@@ -430,7 +430,7 @@ static struct LinkManager g_manager = {
     .isInited = false,
 };
 
-struct LinkManager* GetLinkManager(void)
+struct LinkManager *GetLinkManager(void)
 {
     return &g_manager;
 }

@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "common_list.h"
+#include "conn_event.h"
 #include "conn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
@@ -29,11 +30,9 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
-#include "softbus_hisysevt_connreporter.h"
 #include "softbus_socket.h"
 #include "softbus_tcp_connect_manager.h"
 #include "softbus_utils.h"
-#include "conn_event.h"
 
 ConnectFuncInterface *g_connManager[CONNECT_TYPE_MAX] = { 0 };
 static SoftBusList *g_listenerList = NULL;
@@ -323,7 +322,6 @@ uint32_t ConnGetNewRequestId(ConnModule moduleId)
     (void)SoftBusMutexUnlock(&g_ReqLock);
     return reqId;
 }
-
 
 void ConnManagerRecvData(uint32_t connectionId, ConnModule moduleId, int64_t seq, char *data, int32_t len)
 {
