@@ -277,8 +277,7 @@ static int32_t StartP2pListener(const char *ip, int32_t *port)
         return SOFTBUS_ERR;
     }
     if (g_p2pSessionPort > 0 && strcmp(ip, g_p2pSessionIp) != 0) {
-        TRANS_LOGE(TRANS_CTRL, "param invalid, g_p2pSessionPort=%d, g_p2pSessionIp=%s",
-            g_p2pSessionPort, g_p2pSessionIp);
+        TRANS_LOGE(TRANS_CTRL, "param invalid");
         ClearP2pSessionConn();
         StopP2pSessionListener();
     }
@@ -296,7 +295,7 @@ static int32_t StartP2pListener(const char *ip, int32_t *port)
 
     g_p2pSessionPort = *port;
     if (strcpy_s(g_p2pSessionIp, sizeof(g_p2pSessionIp), ip) != EOK) {
-        TRANS_LOGE(TRANS_CTRL, "strcpy_s fail, g_p2pSessionIp=%s", g_p2pSessionIp);
+        TRANS_LOGE(TRANS_CTRL, "strcpy_s fail");
         StopP2pSessionListener();
         (void)SoftBusMutexUnlock(&g_p2pLock);
         return SOFTBUS_MEM_ERR;
@@ -514,13 +513,8 @@ static int32_t OnVerifyP2pRequest(int64_t authId, int64_t seq, const cJSON *json
     }
 
     pManager = GetWifiDirectManager();
-    if (pManager == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "get wifidirectmanager fail");
-        return SOFTBUS_ERR;
-    }
-
-    if (pManager->getLocalIpByRemoteIp == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "get LocalIpByRemoteIp fail");
+    if (pManager == NULL || pManager->getLocalIpByRemoteIp == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "get wifidirectmanager or get localipbyremoteip fail");
         return SOFTBUS_ERR;
     }
 
