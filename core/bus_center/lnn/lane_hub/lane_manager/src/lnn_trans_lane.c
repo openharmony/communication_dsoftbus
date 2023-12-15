@@ -692,7 +692,7 @@ static void HandleDelayDestroyLink(SoftBusMessage *msg)
 static void HandleDetectTimeout(SoftBusMessage *msg)
 {
     uint32_t detectId = (uint32_t)msg->arg1;
-    LNN_LOGE(LNN_LANE, "lane detect timeout detect=%d", detectId);
+    LNN_LOGE(LNN_LANE, "lane detect timeout detect=%u", detectId);
     NotifyDetectTimeout(detectId);
 }
 
@@ -838,7 +838,7 @@ int32_t GetQosInfoByLaneId(uint32_t laneId, QosInfo *qosOpt)
 
 int32_t PostDetectTimeoutMessage(uint32_t detectId, uint64_t delayMillis)
 {
-    LNN_LOGI(LNN_LANE, "post timeout message, detect=%d", detectId);
+    LNN_LOGI(LNN_LANE, "post timeout message, detect=%u", detectId);
     return LnnLanePostMsgToHandler(MSG_TYPE_LANE_DETECT_TIMEOUT, detectId, 0, NULL, delayMillis);
 }
 
@@ -849,7 +849,7 @@ static int32_t RemoveDetectTimeout(const SoftBusMessage *msg, void *data)
         return SOFTBUS_ERR;
     }
     if (msg->arg1 == *detectId) {
-        LNN_LOGE(LNN_LANE, "remove detect detect=%d timeout message success", *detectId);
+        LNN_LOGE(LNN_LANE, "remove detect detect=%u timeout message success", *detectId);
         return SOFTBUS_OK;
     }
     return SOFTBUS_ERR;
@@ -857,7 +857,7 @@ static int32_t RemoveDetectTimeout(const SoftBusMessage *msg, void *data)
 
 void RemoveDetectTimeoutMessage(uint32_t detectId)
 {
-    LNN_LOGE(LNN_LANE, "remove detect timeout message detect=%d", detectId);
+    LNN_LOGE(LNN_LANE, "remove detect timeout message detect=%u", detectId);
     g_laneLoopHandler.looper->RemoveMessageCustom(g_laneLoopHandler.looper, &g_laneLoopHandler,
         RemoveDetectTimeout, &detectId);
 }
