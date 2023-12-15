@@ -164,7 +164,8 @@ static void DestroySessionId(void)
     return;
 }
 
-static DestroySessionInfo *CreateDestroySessionNode(SessionInfo *sessionNode, const ClientSessionServer *server)
+NO_SANITIZE("cfi") static DestroySessionInfo *CreateDestroySessionNode(SessionInfo *sessionNode,
+    const ClientSessionServer *server)
 {
     DestroySessionInfo *destroyNode = (DestroySessionInfo *)SoftBusMalloc(sizeof(DestroySessionInfo));
     if (destroyNode == NULL) {
@@ -178,7 +179,7 @@ static DestroySessionInfo *CreateDestroySessionNode(SessionInfo *sessionNode, co
     return destroyNode;
 }
 
-static void ClientDestroySession(const ListNode *destroyList)
+NO_SANITIZE("cfi") static void ClientDestroySession(const ListNode *destroyList)
 {
     if (IsListEmpty(destroyList)) {
         TRANS_LOGE(TRANS_SDK, "destroyList is empty fail.");
