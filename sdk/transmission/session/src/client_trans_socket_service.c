@@ -104,7 +104,7 @@ void Shutdown(int32_t socket)
 int32_t EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos, uint32_t qosCount)
 {
     if (!IsValidString(peerNetworkId, DEVICE_ID_SIZE_MAX) || dataType >= DATA_TYPE_BUTT ||
-        (qos == NULL && qosCount != 0) || (qosCount >= QOS_TYPE_BUTT)) {
+        (qos == NULL && qosCount != 0) || (qosCount > QOS_TYPE_BUTT)) {
         TRANS_LOGE(TRANS_SDK, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }

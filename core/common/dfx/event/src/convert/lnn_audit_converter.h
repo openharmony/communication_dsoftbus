@@ -26,7 +26,8 @@ extern "C" {
     static inline bool LnnAuditAssigner##fieldName(                                                           \
         const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param) \
     {                                                                                                         \
-        if (Assigner##type(form->lnnAuditExtra->field, &param) && CopyString(param->name, eventName)) {       \
+        if (Assigner##type(form->lnnAuditExtra->field, &param) &&                                             \
+            CopyString(param->name, eventName, MAX_LENGTH_OF_PARAM_NAME)) {                                   \
             param->t = paramType;                                                                             \
             return true;                                                                                      \
         }                                                                                                     \
@@ -116,4 +117,4 @@ static inline size_t ConvertLnnAuditForm2Param(HiSysEventParam params[], Softbus
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif // LNN_EVENT_CONVERTER_H
+#endif // LNN_AUDIT_CONVERTER_H

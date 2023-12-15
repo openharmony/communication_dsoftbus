@@ -99,6 +99,12 @@ HWTEST_F(DiscLogTest, DiscLogTest001, TestSize.Level0)
     EXPECT_EQ(++authDomainBase, label.domain);
     EXPECT_STREQ("DiscUsbAdapter", label.tag);
 
+    EXPECT_EQ(++index, DISC_SDK);
+    label = DISC_LABELS[DISC_SDK];
+    EXPECT_EQ(DISC_SDK, label.label);
+    EXPECT_EQ(++authDomainBase, label.domain);
+    EXPECT_STREQ("DiscSdk", label.tag);
+
     EXPECT_EQ(++index, DISC_TEST);
     label = DISC_LABELS[DISC_TEST];
     EXPECT_EQ(DISC_TEST, label.label);
