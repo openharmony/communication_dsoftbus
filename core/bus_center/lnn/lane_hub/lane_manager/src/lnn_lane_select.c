@@ -329,7 +329,6 @@ static bool GetLaneScore(const char *networkId, LaneLinkType linkType, uint16_t 
 int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *request,
     LanePreferredLinkList *recommendList)
 {
-    LNN_LOGI(LNN_LANE, "SelectExpectLanesByQos enter");
     if ((networkId == NULL) || (request == NULL) || (recommendList == NULL)) {
         return SOFTBUS_INVALID_PARAM;
     }
@@ -355,11 +354,13 @@ int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *req
     uint16_t laneScore[LANE_LINK_TYPE_BUTT] = {0};
     for (uint32_t i = 0; i < laneLinkList.linkTypeNum; i++) {
         if (!GetLaneScore(networkId, laneLinkList.linkType[i], laneScore)) {
+            LNN_LOGE(LNN_LANE, "link=%d get lane score fail", laneLinkList.linkType[i]);
             continue;
         }
         recommendList->linkType[recommendList->linkTypeNum] = laneLinkList.linkType[i];
+        LNN_LOGI(LNN_LANE, "expect linklist the %u priority link=%d",
+            recommendList->linkTypeNum, laneLinkList.linkType[i]);
         recommendList->linkTypeNum++;
-        DumpPreferredLink(laneLinkList.linkType[i], i);
     }
 
     if (LanePrioritization(recommendList, laneScore) != SOFTBUS_OK) {
