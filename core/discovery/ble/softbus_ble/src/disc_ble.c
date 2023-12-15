@@ -529,17 +529,7 @@ static void BleScanResultCallback(int listenerId, const SoftBusBleScanResult *sc
     (void)listenerId;
     DISC_CHECK_AND_RETURN_LOGW(scanResultData != NULL, DISC_BLE, "scan result is null");
     DISC_CHECK_AND_RETURN_LOGW(scanResultData->advData != NULL, DISC_BLE, "scan result advData is null");
-    if (ScanFilter(scanResultData) != SOFTBUS_OK) {
-        DiscAuditExtra extra = {
-            .result = DISC_AUDIT_DISCONTINUE,
-            .errcode = SOFTBUS_ERR,
-            .auditType = AUDIT_EVENT_PACKETS_ERROR,
-            .scanListenerId = listenerId,
-        };
-        DISC_AUDIT(AUDIT_SCENE_BLE_SCAN, extra);
-        DISC_LOGE(DISC_BLE, "scan filter failed");
-        return;
-    }
+    DISC_CHECK_AND_RETURN_LOGE(ScanFilter(scanResultData) == SOFTBUS_OK, DISC_BLE, "scan filter failed");
 
     uint8_t *advData = scanResultData->advData;
     if (IsDistributedBusiness(advData)) {

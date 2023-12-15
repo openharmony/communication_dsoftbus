@@ -460,7 +460,10 @@ int OpenSessionSync(const char *mySessionName, const char *peerSessionName, cons
         .peerDeviceId = peerNetworkId,
         .groupId = groupId,
         .attr = attr,
+        .isQosLane = false,
+        .qosCount = 0,
     };
+    (void)memset_s(param.qos, sizeof(param.qos), 0, sizeof(param.qos));
 
     int32_t sessionId = INVALID_SESSION_ID;
     bool isEnabled = false;
@@ -945,14 +948,14 @@ int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t qosCount, const I
 
     int32_t ret = ClientSetListenerBySessionId(socket, listener);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGI(TRANS_SDK, "ClientBind set listener failed, ret=%d", ret);
+        TRANS_LOGE(TRANS_SDK, "ClientBind set listener failed, ret=%d", ret);
         return ret;
     }
 
     TransInfo transInfo;
     ret = ClientIpcOpenSession(socket, (QosTV *)qos, qosCount, &transInfo);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGI(TRANS_SDK, "ClientBind open session failed, ret=%d", ret);
+        TRANS_LOGE(TRANS_SDK, "ClientBind open session failed, ret=%d", ret);
         return ret;
     }
 
@@ -988,7 +991,7 @@ int32_t ClientListen(int32_t socket, const QosTV qos[], uint32_t qosCount, const
 
     int32_t ret = ClientSetListenerBySessionId(socket, listener);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGI(TRANS_SDK, "set listener failed: %d", ret);
+        TRANS_LOGE(TRANS_SDK, "set listener failed: %d", ret);
         return ret;
     }
 
@@ -1019,7 +1022,7 @@ void ClientShutdown(int32_t socket)
 
     ret = ClientTransCloseChannel(channelId, type);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGI(TRANS_SDK, "close channel err: ret=%d, channelId=%d, channeType=%d", ret,
+        TRANS_LOGE(TRANS_SDK, "close channel err: ret=%d, channelId=%d, channeType=%d", ret,
             channelId, type);
     }
 

@@ -1636,9 +1636,9 @@ int32_t ClientSetListenerBySessionId(int32_t sessionId, const ISocketListener *l
     }
 
     if (sessionNode->role != SESSION_ROLE_INIT) {
-        (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
         TRANS_LOGE(TRANS_SDK, "%s:socket in use, current role:%d", __func__,
             sessionNode->role);
+        (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
         return SOFTBUS_TRANS_SOCKET_IN_USE;
     }
     ret = memcpy_s(&(serverNode->listener.socket), sizeof(ISocketListener), listener,
@@ -1878,7 +1878,7 @@ int32_t ClientGetPeerSocketInfoById(int32_t sessionId, PeerSocketInfo *peerSocke
     }
 
     peerSocketInfo->name = sessionNode->info.peerSessionName;
-    peerSocketInfo->deviceId = sessionNode->info.peerDeviceId;
+    peerSocketInfo->networkId = sessionNode->info.peerDeviceId;
     peerSocketInfo->pkgName = serverNode->pkgName;
     peerSocketInfo->dataType = (TransDataType)sessionNode->info.flag;
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));

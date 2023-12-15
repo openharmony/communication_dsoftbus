@@ -15,33 +15,33 @@
 
 #include "client_disc_service.h"
 
+#include <stdbool.h>
 #include <string.h>
+#include "client_disc_manager.h"
 #include "disc_log.h"
 #include "softbus_client_frame_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_type_def.h"
-#include "stdbool.h"
 
 static int32_t PublishInfoCheck(const PublishInfo *info)
 {
     if ((info->mode != DISCOVER_MODE_PASSIVE) && (info->mode != DISCOVER_MODE_ACTIVE)) {
-        DISC_LOGE(DISC_ABILITY, "mode is invalid");
+        DISC_LOGE(DISC_SDK, "mode is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if ((info->medium < AUTO) || (info->medium > COAP)) {
-        DISC_LOGE(DISC_ABILITY, "medium is invalid");
+        DISC_LOGE(DISC_SDK, "medium is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if ((info->freq < LOW) || (info->freq > SUPER_HIGH)) {
-        DISC_LOGE(DISC_ABILITY, "freq is invalid");
+        DISC_LOGE(DISC_SDK, "freq is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if ((info->capabilityData == NULL) && (info->dataLen != 0)) {
-        DISC_LOGE(DISC_ABILITY, "data is invalid");
+        DISC_LOGE(DISC_SDK, "data is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -51,32 +51,31 @@ static int32_t PublishInfoCheck(const PublishInfo *info)
 
     if ((info->dataLen > MAX_CAPABILITYDATA_LEN) ||
         (strlen((char *)(info->capabilityData)) >= MAX_CAPABILITYDATA_LEN)) {
-        DISC_LOGE(DISC_ABILITY, "data exceeds the maximum length");
+        DISC_LOGE(DISC_SDK, "data exceeds the maximum length");
         return SOFTBUS_INVALID_PARAM;
     }
-    
     return SOFTBUS_OK;
 }
 
 static int32_t SubscribeInfoCheck(const SubscribeInfo *info)
 {
     if ((info->mode != DISCOVER_MODE_PASSIVE) && (info->mode != DISCOVER_MODE_ACTIVE)) {
-        DISC_LOGE(DISC_ABILITY, "mode is invalid");
+        DISC_LOGE(DISC_SDK, "mode is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if ((info->medium < AUTO) || (info->medium > COAP)) {
-        DISC_LOGE(DISC_ABILITY, "medium is invalid");
+        DISC_LOGE(DISC_SDK, "medium is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if ((info->freq < LOW) || (info->freq > SUPER_HIGH)) {
-        DISC_LOGE(DISC_ABILITY, "freq is invalid");
+        DISC_LOGE(DISC_SDK, "freq is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if ((info->capabilityData == NULL) && (info->dataLen != 0)) {
-        DISC_LOGE(DISC_ABILITY, "data is invalid");
+        DISC_LOGE(DISC_SDK, "data is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -86,7 +85,7 @@ static int32_t SubscribeInfoCheck(const SubscribeInfo *info)
 
     if ((info->dataLen > MAX_CAPABILITYDATA_LEN) ||
         (strlen((char *)(info->capabilityData)) >= MAX_CAPABILITYDATA_LEN)) {
-        DISC_LOGE(DISC_ABILITY, "data exceeds the maximum length");
+        DISC_LOGE(DISC_SDK, "data exceeds the maximum length");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -96,20 +95,22 @@ static int32_t SubscribeInfoCheck(const SubscribeInfo *info)
 int PublishService(const char *packageName, const PublishInfo *info, const IPublishCallback *cb)
 {
     if ((packageName == NULL) || (strlen(packageName) >= PKG_NAME_SIZE_MAX) || (info == NULL) || (cb == NULL)) {
+        DISC_LOGE(DISC_SDK, "invalid parameter:null");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (InitSoftBus(packageName) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_ABILITY, "init softbus err");
+        DISC_LOGE(DISC_SDK, "init softbus err");
         return SOFTBUS_DISCOVER_NOT_INIT;
     }
 
     if (CheckPackageName(packageName) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_ABILITY, "check packageName failed");
+        DISC_LOGE(DISC_SDK, "check packageName failed");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (PublishInfoCheck(info) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_SDK, "publish infoCheck failed");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -119,12 +120,12 @@ int PublishService(const char *packageName, const PublishInfo *info, const IPubl
 int UnPublishService(const char *packageName, int publishId)
 {
     if ((packageName == NULL) || (strlen(packageName) >= PKG_NAME_SIZE_MAX)) {
-        DISC_LOGE(DISC_ABILITY, "invalid packageName");
+        DISC_LOGE(DISC_SDK, "invalid packageName");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (CheckPackageName(packageName) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_ABILITY, "check packageName failed");
+        DISC_LOGE(DISC_SDK, "check packageName failed");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -134,17 +135,19 @@ int UnPublishService(const char *packageName, int publishId)
 int StartDiscovery(const char *packageName, const SubscribeInfo *info, const IDiscoveryCallback *cb)
 {
     if ((packageName == NULL) || (strlen(packageName) >= PKG_NAME_SIZE_MAX) || (info == NULL) || (cb == NULL)) {
+        DISC_LOGE(DISC_SDK, " invalid parameter:null");
         return SOFTBUS_INVALID_PARAM;
     }
     if (InitSoftBus(packageName) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_ABILITY, "init softbus err");
+        DISC_LOGE(DISC_SDK, "init softbus err");
         return SOFTBUS_DISCOVER_NOT_INIT;
     }
     if (CheckPackageName(packageName) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_ABILITY, "check packageName failed");
+        DISC_LOGE(DISC_SDK, "check packageName failed");
         return SOFTBUS_INVALID_PARAM;
     }
     if (SubscribeInfoCheck(info) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_SDK, "subscribe infoCheck failed");
         return SOFTBUS_INVALID_PARAM;
     }
     return StartDiscoveryInner(packageName, info, cb);
@@ -153,12 +156,12 @@ int StartDiscovery(const char *packageName, const SubscribeInfo *info, const IDi
 int StopDiscovery(const char *packageName, int subscribeId)
 {
     if ((packageName == NULL) || (strlen(packageName) >= PKG_NAME_SIZE_MAX)) {
-        DISC_LOGE(DISC_ABILITY, "invalid packageName");
+        DISC_LOGE(DISC_SDK, "invalid packageName:null");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (CheckPackageName(packageName) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_ABILITY, "check packageName failed");
+        DISC_LOGE(DISC_SDK, "check packageName failed");
         return SOFTBUS_INVALID_PARAM;
     }
 
