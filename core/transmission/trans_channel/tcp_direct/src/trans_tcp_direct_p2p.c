@@ -750,7 +750,7 @@ static void OnP2pVerifyMsgReceived(int32_t channelId, const char *data, uint32_t
     } else if (msgType == P2P_VERIFY_REPLY) {
         OnVerifyP2pReply(channelId, *(int64_t*)(data + sizeof(int64_t)), json);
     } else {
-        TRANS_LOGI(TRANS_CTRL, "invalid msgType=%lld", msgType);
+        TRANS_LOGE(TRANS_CTRL, "invalid msgType=%lld", msgType);
     }
     cJSON_Delete(json);
 }
