@@ -515,6 +515,8 @@ static int32_t OnVerifyP2pRequest(int64_t authId, int64_t seq, const cJSON *json
     pManager = GetWifiDirectManager();
     if (pManager == NULL || pManager->getLocalIpByRemoteIp == NULL) {
         TRANS_LOGE(TRANS_CTRL, "get wifidirectmanager or get localipbyremoteip fail");
+        SendVerifyP2pFailRsp(authId, seq, CODE_VERIFY_P2P, SOFTBUS_ERR,
+            "get wifidirectmanager or localip fail", isAuthLink);
         return SOFTBUS_ERR;
     }
 
