@@ -37,9 +37,9 @@ extern "C" {
 LNN_AUDIT_ASSIGNER(Int32,   Result, result)
 LNN_AUDIT_ASSIGNER(Errcode, ErrCode, errCode)
 LNN_AUDIT_ASSIGNER(Int32,  AuditType, auditType)
-LNN_AUDIT_ASSIGNER(Int32,  ConnectionId, connId)
+LNN_AUDIT_ASSIGNER(Uint64, ConnectionId, connId)
 LNN_AUDIT_ASSIGNER(Int32,  AuthLinkType, authLinkType)
-LNN_AUDIT_ASSIGNER(Int32,  AuthRequestId, authRequestId)
+LNN_AUDIT_ASSIGNER(Uint32, AuthRequestId, authRequestId)
 LNN_AUDIT_ASSIGNER(Int32,  OnlineNum, onlineNum)
 LNN_AUDIT_ASSIGNER(String, HostPkg, hostPkg)
 LNN_AUDIT_ASSIGNER(String, LocalIp, localIp)
@@ -70,9 +70,9 @@ static const HiSysEventParamAssigner g_lnnAuditAssigners[] = {
     { "RESULT",             HISYSEVENT_INT32,  LnnAuditAssignerResult           },
     { "ERROR_CODE",         HISYSEVENT_INT32,  LnnAuditAssignerErrCode          },
     { "AUDIT_TYPE",         HISYSEVENT_INT32,  LnnAuditAssignerAuditType        },
-    { "CONN_ID",            HISYSEVENT_INT32,  LnnAuditAssignerConnectionId     },
+    { "CONN_ID",            HISYSEVENT_UINT64, LnnAuditAssignerConnectionId     },
     { "AUTH_LINK_TYPE",     HISYSEVENT_INT32,  LnnAuditAssignerAuthLinkType     },
-    { "AUTH_REQUEST_ID",    HISYSEVENT_INT32,  LnnAuditAssignerAuthRequestId    },
+    { "AUTH_REQUEST_ID",    HISYSEVENT_UINT32, LnnAuditAssignerAuthRequestId    },
     { "ONLINE_NUM",         HISYSEVENT_INT32,  LnnAuditAssignerOnlineNum        },
     { "HOST_PKG",           HISYSEVENT_STRING, LnnAuditAssignerHostPkg          },
     { "LOCAL_IP",           HISYSEVENT_STRING, LnnAuditAssignerLocalIp          },
