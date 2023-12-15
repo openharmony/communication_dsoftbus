@@ -309,7 +309,8 @@ static ChannelType TransGetChannelType(const SessionParam *param, const LaneConn
     } else if (transType == LANE_T_FILE || transType == LANE_T_COMMON_VIDEO || transType == LANE_T_COMMON_VOICE ||
         transType == LANE_T_RAW_STREAM) {
         return CHANNEL_TYPE_UDP;
-    } else if ((transType == LANE_T_MSG) && (connInfo->type != LANE_P2P) && (connInfo->type != LANE_P2P_REUSE)) {
+    } else if ((transType == LANE_T_MSG) && (connInfo->type != LANE_P2P) && (connInfo->type != LANE_P2P_REUSE) &&
+        (connInfo->type != LANE_HML)) {
         return CHANNEL_TYPE_PROXY;
     }
     return CHANNEL_TYPE_TCP_DIRECT;
