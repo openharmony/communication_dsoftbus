@@ -68,7 +68,7 @@ static struct BroadcastReceiver g_broadcastReceiver = {
     .isInited = false,
 };
 
-struct BroadcastReceiver *GetBroadcastReceiver(void)
+struct BroadcastReceiver* GetBroadcastReceiver(void)
 {
     return &g_broadcastReceiver;
 }

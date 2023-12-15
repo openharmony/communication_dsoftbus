@@ -30,6 +30,7 @@ ohos_unittest("SoftBusDfxEventTest") {
   include_dirs = [
     "$dsoftbus_dfx_path/event/src",
     "$dsoftbus_dfx_path/interface/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "mock",
     "//third_party/bounds_checking_function/include",
   ]

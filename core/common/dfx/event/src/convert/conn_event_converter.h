@@ -26,7 +26,8 @@ extern "C" {
     static inline bool ConnAssigner##fieldName(                                                               \
         const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param) \
     {                                                                                                         \
-        if (Assigner##type(form->connExtra->field, &param) && CopyString(param->name, eventName)) {           \
+        if (Assigner##type(form->connExtra->field, &param) &&                                                 \
+            CopyString(param->name, eventName, MAX_LENGTH_OF_PARAM_NAME)) {                                   \
             param->t = paramType;                                                                             \
             return true;                                                                                      \
         }                                                                                                     \
@@ -83,7 +84,8 @@ static HiSysEventParamAssigner g_connAssigners[] = {
     static inline bool ConnAssigner##fieldName(                                                               \
         const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param) \
     {                                                                                                         \
-        if (Assigner##type(form->connAlarmExtra->field, &param) && CopyString(param->name, eventName)) {      \
+        if (Assigner##type(form->connAlarmExtra->field, &param) &&                                            \
+            CopyString(param->name, eventName, MAX_LENGTH_OF_PARAM_NAME)) {                                   \
             param->t = paramType;                                                                             \
             return true;                                                                                      \
         }                                                                                                     \

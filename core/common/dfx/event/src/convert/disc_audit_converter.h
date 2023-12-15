@@ -26,7 +26,8 @@ extern "C" {
     static inline bool DiscAuditAssigner##fieldName(                                                          \
         const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param) \
     {                                                                                                         \
-        if (Assigner##type(form->discAuditExtra->field, &param) && CopyString(param->name, eventName)) {      \
+        if (Assigner##type(form->discAuditExtra->field, &param) &&                                            \
+            CopyString(param->name, eventName, MAX_LENGTH_OF_PARAM_NAME)) {                                   \
             param->t = paramType;                                                                             \
             return true;                                                                                      \
         }                                                                                                     \
@@ -136,4 +137,4 @@ static inline size_t ConvertDiscAuditForm2Param(HiSysEventParam params[], Softbu
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif // DISC_EVENT_CONVERTER_H
+#endif // DISC_AUDIT_CONVERTER_H

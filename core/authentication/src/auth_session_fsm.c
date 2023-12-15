@@ -461,40 +461,40 @@ static int32_t RecoveryDeviceKey(AuthFsm *authFsm)
     return AuthSessionHandleAuthFinish(authFsm->authSeq);
 }
 
-static void LnnAuditSetPeerDevInfo(LnnAuditExtra *lnnAuditExtra, AuthSessionInfo *info)
+static void AuditReportSetPeerDevInfo(LnnAuditExtra *lnnAuditExtra, AuthSessionInfo *info)
 {
     if (lnnAuditExtra == NULL || info == NULL) {
-        AUTH_LOGI(AUTH_FSM, "lnnAuditExtra or info is null");
+        AUTH_LOGE(AUTH_FSM, "lnnAuditExtra or info is null");
         return;
     }
     switch (info->connInfo.type) {
         case AUTH_LINK_TYPE_BR:
             if (strcpy_s((char *)lnnAuditExtra->peerBrMac, BT_MAC_LEN, info->connInfo.info.brInfo.brMac) != EOK) {
-                AUTH_LOGI(AUTH_FSM, "BR MAC COPY ERROR");
+                AUTH_LOGE(AUTH_FSM, "BR MAC COPY ERROR");
             }
             break;
         case AUTH_LINK_TYPE_BLE:
             if (strcpy_s((char *)lnnAuditExtra->peerBleMac, BT_MAC_LEN, info->connInfo.info.bleInfo.bleMac) != EOK) {
-                AUTH_LOGI(AUTH_FSM, "BLE MAC COPY ERROR");
+                AUTH_LOGE(AUTH_FSM, "BLE MAC COPY ERROR");
             }
             break;
         case AUTH_LINK_TYPE_WIFI:
         case AUTH_LINK_TYPE_P2P:
             if (strcpy_s((char *)lnnAuditExtra->peerIp, IP_STR_MAX_LEN, info->connInfo.info.ipInfo.ip) != EOK) {
-                AUTH_LOGI(AUTH_FSM, "IP COPY ERROR");
+                AUTH_LOGE(AUTH_FSM, "IP COPY ERROR");
             }
             lnnAuditExtra->peerAuthPort = info->connInfo.info.ipInfo.port;
             break;
         default:
-            AUTH_LOGI(AUTH_FSM, "unknow param type!");
+            AUTH_LOGW(AUTH_FSM, "unknow param type!");
             break;
     }
 }
 
-static void LnnAuditSetLocalDevInfo(LnnAuditExtra *lnnAuditExtra)
+static void AuditReportSetLocalDevInfo(LnnAuditExtra *lnnAuditExtra)
 {
     if (lnnAuditExtra == NULL) {
-        AUTH_LOGI(AUTH_FSM, "lnnAuditExtra is null");
+        AUTH_LOGE(AUTH_FSM, "lnnAuditExtra is null");
         return;
     }
     (void)LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, (char *)lnnAuditExtra->localIp, IP_LEN);
@@ -508,18 +508,18 @@ static void LnnAuditSetLocalDevInfo(LnnAuditExtra *lnnAuditExtra)
     (void)LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &lnnAuditExtra->localDevType);
     char udid[UDID_BUF_LEN] = {0};
     uint8_t udidHash[SHA_256_HASH_LEN] = {0};
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UUID_BUF_LEN) == SOFTBUS_OK) {
-        AUTH_LOGI(AUTH_FSM, "get local udid fail");
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UUID_BUF_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "get local udid fail");
         return;
     }
     int32_t ret = SoftBusGenerateStrHash((const unsigned char *)udid, strlen(udid), udidHash);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGI(AUTH_FSM, "generate udid hash fail");
+        AUTH_LOGE(AUTH_FSM, "generate udid hash fail");
         return;
     }
     if (ConvertBytesToUpperCaseHexString((char *)lnnAuditExtra->localUdid, SHA_256_HEX_HASH_LEN,
         udidHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
-        AUTH_LOGI(AUTH_FSM, "convert hash to upper hex str fail");
+        AUTH_LOGE(AUTH_FSM, "convert hash to upper hex str fail");
     }
 }
 
@@ -527,11 +527,11 @@ static void BuildLnnAuditEvent(LnnAuditExtra *lnnAuditExtra, AuthSessionInfo *in
     int32_t errCode, SoftbusAuditType auditType)
 {
     if (lnnAuditExtra == NULL || info == NULL) {
-        AUTH_LOGI(AUTH_FSM, "lnnAuditExtra or info is null");
+        AUTH_LOGE(AUTH_FSM, "lnnAuditExtra or info is null");
         return;
     }
-    (void)LnnAuditSetPeerDevInfo(lnnAuditExtra, info);
-    (void)LnnAuditSetLocalDevInfo(lnnAuditExtra);
+    (void)AuditReportSetPeerDevInfo(lnnAuditExtra, info);
+    (void)AuditReportSetLocalDevInfo(lnnAuditExtra);
     lnnAuditExtra->result = result;
     lnnAuditExtra->errCode = errCode;
     lnnAuditExtra->auditType = auditType;
