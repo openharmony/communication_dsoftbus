@@ -545,7 +545,7 @@ static int32_t ClientSetExchangeIdType(AuthFsm *authFsm)
 {
     AuthSessionInfo *info = &authFsm->info;
     if (info->idType == EXCHANGE_FAIL) {
-        AUTH_LOGI(AUTH_FSM, "fsm switch to reauth due to not find networkId");
+        AUTH_LOGE(AUTH_FSM, "fsm switch to reauth due to not find networkId");
         info->idType = EXCHANHE_UDID;
         LnnFsmTransactState(&authFsm->fsm, g_states + STATE_SYNC_DEVICE_ID);
         return SOFTBUS_ERR;
@@ -553,7 +553,7 @@ static int32_t ClientSetExchangeIdType(AuthFsm *authFsm)
     return SOFTBUS_OK;
 }
 
-static void HandleMsgRecvDeviceId(AuthFsm *authFsm, MessagePara *para)
+static void HandleMsgRecvDeviceId(AuthFsm *authFsm, const MessagePara *para)
 {
     int32_t ret;
     AuthSessionInfo *info = &authFsm->info;
@@ -633,7 +633,7 @@ static bool SyncDevIdStateProcess(FsmStateMachine *fsm, int32_t msgType, void *p
     return true;
 }
 
-static void HandleMsgRecvAuthData(AuthFsm *authFsm, MessagePara *para)
+static void HandleMsgRecvAuthData(AuthFsm *authFsm, const MessagePara *para)
 {
     LnnEventExtra lnnEventExtra = {0};
     LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_EXCHANGE_CIPHER, lnnEventExtra);
@@ -655,7 +655,7 @@ static void HandleMsgRecvAuthData(AuthFsm *authFsm, MessagePara *para)
     }
 }
 
-static int32_t TrySyncDeviceInfo(int64_t authSeq, AuthSessionInfo *info)
+static int32_t TrySyncDeviceInfo(int64_t authSeq, const AuthSessionInfo *info)
 {
     switch (info->connInfo.type) {
         case AUTH_LINK_TYPE_WIFI:
@@ -674,7 +674,7 @@ static int32_t TrySyncDeviceInfo(int64_t authSeq, AuthSessionInfo *info)
     return SOFTBUS_ERR;
 }
 
-static void HandleMsgSaveSessionKey(AuthFsm *authFsm, MessagePara *para)
+static void HandleMsgSaveSessionKey(AuthFsm *authFsm, const MessagePara *para)
 {
     LnnEventExtra lnnEventExtra = { .result = EVENT_STAGE_RESULT_OK };
     LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_EXCHANGE_CIPHER, lnnEventExtra);
@@ -706,14 +706,14 @@ static void HandleMsgSaveSessionKey(AuthFsm *authFsm, MessagePara *para)
     LnnFsmTransactState(&authFsm->fsm, g_states + STATE_SYNC_DEVICE_INFO);
 }
 
-static void HandleMsgAuthError(AuthFsm *authFsm, MessagePara *para)
+static void HandleMsgAuthError(AuthFsm *authFsm, const MessagePara *para)
 {
     int32_t result = *((int32_t *)(para->data));
     AUTH_LOGE(AUTH_FSM, "auth fsm[%" PRId64"] handle hichain error, reason=%d", authFsm->authSeq, result);
     CompleteAuthSession(authFsm, SOFTBUS_AUTH_HICHAIN_AUTH_ERROR);
 }
 
-static void HandleMsgRecvDevInfoEarly(AuthFsm *authFsm, MessagePara *para)
+static void HandleMsgRecvDevInfoEarly(AuthFsm *authFsm, const MessagePara *para)
 {
     AUTH_LOGI(AUTH_FSM, "auth fsm[%" PRId64 "] recv device info early, save it", authFsm->authSeq);
     AuthSessionInfo *info = &authFsm->info;
@@ -789,7 +789,7 @@ static bool DeviceAuthStateProcess(FsmStateMachine *fsm, int32_t msgType, void *
     return true;
 }
 
-static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, MessagePara *para)
+static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, const MessagePara *para)
 {
     LnnEventExtra lnnEventExtra = { .result = EVENT_STAGE_RESULT_OK };
     AuthSessionInfo *info = &authFsm->info;
@@ -895,7 +895,7 @@ static bool SyncDevInfoStateProcess(FsmStateMachine *fsm, int32_t msgType, void 
     return true;
 }
 
-AuthFsm *GetAuthFsmByAuthSeq(int64_t authSeq)
+static AuthFsm *GetAuthFsmByAuthSeq(int64_t authSeq)
 {
     AuthFsm *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_authFsmList, AuthFsm, node) {
@@ -1008,7 +1008,7 @@ static void SetAuthStartTime(AuthFsm *authFsm)
 int32_t AuthSessionStartAuth(int64_t authSeq, uint32_t requestId,
     uint64_t connId, const AuthConnInfo *connInfo, bool isServer, bool isFastAuth)
 {
-    CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
+    AUTH_CHECK_AND_RETURN_RET_LOGE(connInfo != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "connInfo is NULL");
     if (!RequireAuthLock()) {
         return SOFTBUS_LOCK_ERR;
     }
@@ -1033,6 +1033,7 @@ int32_t AuthSessionStartAuth(int64_t authSeq, uint32_t requestId,
 int32_t AuthSessionProcessDevIdData(int64_t authSeq, const uint8_t *data, uint32_t len)
 {
     if (data == NULL) {
+        AUTH_LOGE(AUTH_FSM, "data is null");
         return SOFTBUS_INVALID_PARAM;
     }
     return PostMessageToAuthFsm(FSM_MSG_RECV_DEVICE_ID, authSeq, data, len);
@@ -1053,6 +1054,7 @@ int32_t AuthSessionPostAuthData(int64_t authSeq, const uint8_t *data, uint32_t l
 int32_t AuthSessionProcessAuthData(int64_t authSeq, const uint8_t *data, uint32_t len)
 {
     if (data == NULL) {
+        AUTH_LOGE(AUTH_FSM, "data is null");
         return SOFTBUS_INVALID_PARAM;
     }
     return PostMessageToAuthFsm(FSM_MSG_RECV_AUTH_DATA, authSeq, data, len);
@@ -1061,6 +1063,7 @@ int32_t AuthSessionProcessAuthData(int64_t authSeq, const uint8_t *data, uint32_
 int32_t AuthSessionGetUdid(int64_t authSeq, char *udid, uint32_t size)
 {
     if (udid == NULL) {
+        AUTH_LOGE(AUTH_FSM, "udid is null");
         return SOFTBUS_INVALID_PARAM;
     }
     AuthSessionInfo info = {0};
@@ -1077,6 +1080,7 @@ int32_t AuthSessionGetUdid(int64_t authSeq, char *udid, uint32_t size)
 int32_t AuthSessionSaveSessionKey(int64_t authSeq, const uint8_t *key, uint32_t len)
 {
     if (key == NULL) {
+        AUTH_LOGE(AUTH_FSM, "key is null");
         return SOFTBUS_INVALID_PARAM;
     }
     return PostMessageToAuthFsm(FSM_MSG_SAVE_SESSION_KEY, authSeq, key, len);
@@ -1095,6 +1099,7 @@ int32_t AuthSessionHandleAuthError(int64_t authSeq, int32_t reason)
 int32_t AuthSessionProcessDevInfoData(int64_t authSeq, const uint8_t *data, uint32_t len)
 {
     if (data == NULL) {
+        AUTH_LOGE(AUTH_FSM, "data is null");
         return SOFTBUS_INVALID_PARAM;
     }
     return PostMessageToAuthFsm(FSM_MSG_RECV_DEVICE_INFO, authSeq, data, len);
@@ -1103,6 +1108,7 @@ int32_t AuthSessionProcessDevInfoData(int64_t authSeq, const uint8_t *data, uint
 int32_t AuthSessionProcessCloseAck(int64_t authSeq, const uint8_t *data, uint32_t len)
 {
     if (data == NULL) {
+        AUTH_LOGE(AUTH_FSM, "data is null");
         return SOFTBUS_INVALID_PARAM;
     }
     return PostMessageToAuthFsm(FSM_MSG_RECV_CLOSE_ACK, authSeq, data, len);
@@ -1112,6 +1118,7 @@ int32_t AuthSessionProcessDevInfoDataByConnId(uint64_t connId, bool isServer, co
     uint32_t len)
 {
     if (data == NULL) {
+        AUTH_LOGE(AUTH_FSM, "data is null");
         return SOFTBUS_INVALID_PARAM;
     }
     return PostMessageToAuthFsmByConnId(FSM_MSG_RECV_DEVICE_INFO, connId, isServer, data, len);
@@ -1121,6 +1128,7 @@ int32_t AuthSessionProcessCloseAckByConnId(uint64_t connId, bool isServer, const
     uint32_t len)
 {
     if (data == NULL) {
+        AUTH_LOGE(AUTH_FSM, "data is null");
         return SOFTBUS_INVALID_PARAM;
     }
     return PostMessageToAuthFsmByConnId(FSM_MSG_RECV_CLOSE_ACK, connId, isServer, data, len);
@@ -1129,6 +1137,7 @@ int32_t AuthSessionProcessCloseAckByConnId(uint64_t connId, bool isServer, const
 int32_t AuthSessionHandleDeviceNotTrusted(const char *udid)
 {
     if (udid == NULL || udid[0] == '\0') {
+        AUTH_LOGE(AUTH_FSM, "invalid udid");
         return SOFTBUS_INVALID_PARAM;
     }
     if (!RequireAuthLock()) {
