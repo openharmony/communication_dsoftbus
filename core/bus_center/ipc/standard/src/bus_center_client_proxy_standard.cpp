@@ -78,7 +78,7 @@ int32_t BusCenterClientProxy::OnJoinLNNResult(void *addr, uint32_t addrTypeLen, 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         LNN_LOGE(LNN_EVENT, "remote is nullptr");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (addr == nullptr || (retCode == 0 && networkId == nullptr)) {
         LNN_LOGE(LNN_EVENT, "invalid parameters");
@@ -172,7 +172,7 @@ int32_t BusCenterClientProxy::OnLeaveLNNResult(const char *networkId, int retCod
     }
     if (networkId == nullptr) {
         LNN_LOGE(LNN_EVENT, "invalid parameters");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
@@ -205,7 +205,7 @@ int32_t BusCenterClientProxy::OnLeaveMetaNodeResult(const char *networkId, int r
     }
     if (networkId == nullptr) {
         LNN_LOGE(LNN_EVENT, "invalid parameters");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
@@ -239,11 +239,11 @@ int32_t BusCenterClientProxy::OnNodeOnlineStateChanged(const char *pkgName, bool
     }
     if (pkgName == nullptr) {
         LNN_LOGE(LNN_EVENT, "pkgName is nullptr");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (info == nullptr) {
         LNN_LOGE(LNN_EVENT, "invalid parameters");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
@@ -291,11 +291,11 @@ int32_t BusCenterClientProxy::OnNodeBasicInfoChanged(const char *pkgName, void *
     }
     if (pkgName == nullptr) {
         LNN_LOGE(LNN_EVENT, "pkgName is nullptr");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (info == nullptr) {
         LNN_LOGE(LNN_EVENT, "invalid parameters");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     MessageParcel data;
     LNN_LOGI(LNN_EVENT, "type: %d", type);
@@ -343,7 +343,7 @@ int32_t BusCenterClientProxy::OnTimeSyncResult(const void *info, uint32_t infoTy
     }
     if (info == nullptr) {
         LNN_LOGE(LNN_EVENT, "invalid parameters");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {

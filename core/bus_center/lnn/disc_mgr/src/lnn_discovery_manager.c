@@ -15,15 +15,12 @@
 
 #include "lnn_discovery_manager.h"
 
-#include <securec.h>
 #include <string.h>
 
 #include "disc_log.h"
-#include "disc_interface.h"
 #include "discovery_service.h"
 #include "lnn_coap_discovery_impl.h"
 #include "lnn_net_builder.h"
-#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_hisysevt_bus_center.h"
 

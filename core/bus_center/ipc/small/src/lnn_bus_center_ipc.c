@@ -15,7 +15,6 @@
 
 #include "lnn_bus_center_ipc.h"
 
-#include <pthread.h>
 #include <securec.h>
 #include <string.h>
 
@@ -58,7 +57,7 @@ int32_t LnnIpcInit (void)
     g_lnnRequestInfo.leaveLNNRequestInfo = NULL;
     if (SoftBusMutexInit(&g_lnnRequestInfo.lock, NULL) != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "lock init fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
 
     return SOFTBUS_OK;
@@ -76,6 +75,10 @@ static JoinLnnRequestInfo *FindJoinLNNRequest(ConnectionAddr *addr)
     JoinLnnRequestInfo *info = NULL;
     SoftBusList *list = g_lnnRequestInfo.joinLNNRequestInfo;
 
+    if (list == NULL) {
+        LNN_LOGE(LNN_EVENT, "request info list empty");
+        return NULL;
+    }
     LIST_FOR_EACH_ENTRY(info, &list->list, JoinLnnRequestInfo, node) {
         if (LnnIsSameConnectionAddr(addr, &info->addr, false)) {
             return info;
@@ -89,6 +92,10 @@ static LeaveLnnRequestInfo *FindLeaveLNNRequest(const char *networkId)
     LeaveLnnRequestInfo *info = NULL;
     SoftBusList *list = g_lnnRequestInfo.leaveLNNRequestInfo;
 
+    if (list == NULL) {
+        LNN_LOGE(LNN_EVENT, "request info list empty");
+        return NULL;
+    }
     LIST_FOR_EACH_ENTRY(info, &list->list, LeaveLnnRequestInfo, node) {
         if (strncmp(networkId, info->networkId, strlen(networkId)) == 0) {
             return info;
@@ -102,6 +109,10 @@ static bool IsRepeatJoinLNNRequest(const char *pkgName, const ConnectionAddr *ad
     JoinLnnRequestInfo *info = NULL;
     SoftBusList *list = g_lnnRequestInfo.joinLNNRequestInfo;
 
+    if (list == NULL) {
+        LNN_LOGE(LNN_EVENT, "request info list empty");
+        return SOFTBUS_ERR;
+    }
     LIST_FOR_EACH_ENTRY(info, &list->list, JoinLnnRequestInfo, node) {
         if (strncmp(pkgName, info->pkgName, strlen(pkgName)) != 0) {
             continue;
@@ -160,12 +171,12 @@ static int32_t AddLeaveLNNInfo(const char *pkgName, const char *networkId)
     if (strncpy_s(info->pkgName, PKG_NAME_SIZE_MAX, pkgName, strlen(pkgName)) != EOK) {
         LNN_LOGE(LNN_EVENT, "copy pkgName fail");
         SoftBusFree(info);
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     if (strncpy_s(info->networkId, NETWORK_ID_BUF_LEN, networkId, strlen(networkId)) != EOK) {
         LNN_LOGE(LNN_EVENT, "copy networkId fail");
         SoftBusFree(info);
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     ListAdd(&list->list, &info->node);
     list->cnt++;
@@ -178,7 +189,7 @@ static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *devic
     DeviceInfo newDevice;
     if (memcpy_s(&newDevice, sizeof(DeviceInfo), device, sizeof(DeviceInfo)) != EOK) {
         LNN_LOGE(LNN_EVENT, "copy new device info error");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     LnnRefreshDeviceOnlineStateAndDevIdInfo(pkgName, &newDevice, addtions);
     return ClientOnRefreshDeviceFound(pkgName, 0, &newDevice, sizeof(DeviceInfo));
