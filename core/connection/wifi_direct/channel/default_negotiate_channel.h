@@ -25,6 +25,8 @@ extern "C" {
 struct DefaultNegotiateChannel {
     WIFI_DIRECT_NEGOTIATE_CHANNEL_BASE;
 
+    int32_t (*postDataWithFlag)(struct DefaultNegotiateChannel *self, const uint8_t *data, size_t size, int32_t flag);
+
     int64_t authId;
     char p2pMac[MAC_ADDR_STR_LEN];
 };
@@ -43,7 +45,7 @@ int32_t OpenDefaultNegotiateChannel(const char *remoteIp, int32_t remotePort,
                                     struct WifiDirectNegotiateChannel *srcChannel,
                                     struct DefaultNegoChannelOpenCallback *callback);
 void CloseDefaultNegotiateChannel(struct DefaultNegotiateChannel *self);
-int32_t StartListeningForDefaultChannel(const char *localIp);
+int32_t StartListeningForDefaultChannel(const char *localIp, int32_t port);
 void StopListeningForDefaultChannel(void);
 
 int32_t DefaultNegotiateChannelInit(void);

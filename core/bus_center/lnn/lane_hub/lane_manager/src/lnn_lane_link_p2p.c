@@ -38,6 +38,7 @@
 #include "softbus_utils.h"
 #include "softbus_proxychannel_pipeline.h"
 #include "wifi_direct_manager.h"
+#include "utils/wifi_direct_utils.h"
 
 #include "lnn_trans_lane.h"
 #include "lnn_lane_interface.h"
@@ -966,8 +967,7 @@ static int32_t OpenBleTriggerToConn(const LinkRequest *request, uint32_t laneLin
     int32_t ret = AddConnRequestItem(0, wifiDirectInfo.requestId, laneLinkReqId, request, 0, callback);
     LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, LNN_LANE, "add new connect node failed");
     wifiDirectInfo.pid = request->pid;
-    wifiDirectInfo.connectType = request->linkType == LANE_P2P ?
-        WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_P2P : WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML;
+    wifiDirectInfo.connectType = WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML;
     ret = strcpy_s(wifiDirectInfo.remoteNetworkId, NETWORK_ID_BUF_LEN, request->peerNetworkId);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "copy networkId failed");
@@ -1019,8 +1019,8 @@ static int32_t LnnSelectDirectLink(const LinkRequest *request, uint32_t laneLink
     if (AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_WIFI, false) ||
         AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_BR, true) ||
         AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_BLE, true)) {
-        if (!((local & (1 << BIT_BLE_TRIGGER_CONNECTION)) == 0) &&
-            !((remote & (1 << BIT_BLE_TRIGGER_CONNECTION)) == 0)) {
+        if ((local & (1 << BIT_BLE_TRIGGER_CONNECTION)) != 0 && (remote & (1 << BIT_BLE_TRIGGER_CONNECTION)) != 0 &&
+            GetWifiDirectUtils()->supportHmlTwo()) {
             LNN_LOGI(LNN_LANE, "open auth trigger to connect, laneId=%u", laneLinkReqId);
             ret = OpenAuthTriggerToConn(request, laneLinkReqId, callback);
         }
@@ -1029,11 +1029,10 @@ static int32_t LnnSelectDirectLink(const LinkRequest *request, uint32_t laneLink
             ret = OpenAuthToConnP2p(request, laneLinkReqId, callback);
         }
     }
-    if (!((local & (1 << BIT_BLE_TRIGGER_CONNECTION)) == 0) &&
-        !((remote & (1 << BIT_BLE_TRIGGER_CONNECTION)) == 0) &&
-           ret != SOFTBUS_OK) {
-            LNN_LOGI(LNN_LANE, "open ble trigger to connect, laneId=%u", laneLinkReqId);
-            ret = OpenBleTriggerToConn(request, laneLinkReqId, callback);
+    if ((local & (1 << BIT_BLE_TRIGGER_CONNECTION)) != 0 && (remote & (1 << BIT_BLE_TRIGGER_CONNECTION)) != 0 &&
+        ret != SOFTBUS_OK && GetWifiDirectUtils()->supportHmlTwo()) {
+        LNN_LOGI(LNN_LANE, "open ble trigger to connect, laneId=%u", laneLinkReqId);
+        ret = OpenBleTriggerToConn(request, laneLinkReqId, callback);
     }
     if (CheckHasBrConnection(request->peerNetworkId) && ret != SOFTBUS_OK) {
         LNN_LOGI(LNN_LANE, "open new br auth to connect p2p, laneId=%u", laneLinkReqId);

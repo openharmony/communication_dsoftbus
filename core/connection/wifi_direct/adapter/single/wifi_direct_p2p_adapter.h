@@ -32,7 +32,6 @@ struct WifiDirectP2pDeviceInfo {
 };
 
 struct WifiDirectP2pGroupInfo {
-    bool isValid;
     bool isGroupOwner;
     int32_t frequency;
     char interface[P2P_INTERFACE_NAME_LEN];
@@ -102,12 +101,6 @@ struct WifiDirectP2pAdapter {
     int (*setConnectNotify)(const char *notify);
 
     int32_t (*getBaseMac)(const char *interface, uint32_t cap, char baseMac[], size_t baseMacLen);
-    bool (*addInterfaceMultiIps)(const char *interface, const char *localIp, uint8_t prefixLen);
-    bool (*deleteInterfaceMultiIps)(const char *interface, const char *localIp, uint8_t prefixLen);
-    bool (*addInterfaceStaticArp)(const char *interface, const char *remoteIp, const char *remoteMac);
-    bool (*deleteInterfaceStaticArp)(const char *interface, const char *remoteIp, const char *remoteMac);
-    int32_t (*getInterfaceStaticArp)(const char *interface, char *arpOutput[], int32_t *arpOutputLen);
-
     bool (*isThreeVapConflict)(void);
 };
 

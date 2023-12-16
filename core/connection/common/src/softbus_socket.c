@@ -18,8 +18,8 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <securec.h>
+
 #include "conn_log.h"
-#include "softbus_adapter_errcode.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -328,4 +328,37 @@ int32_t ConnGetPeerSocketAddr(int32_t fd, SocketAddr *socketAddr)
     }
     socketAddr->port = SoftBusNtoHs(addr.sinPort);
     return SOFTBUS_OK;
+}
+
+int32_t ConnPreAssignPort(void)
+{
+    int socketFd = -1;
+    int ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
+    if (ret < 0) {
+        CONN_LOGE(CONN_COMMON, "create socket failed, ret=%d", ret);
+        return SOFTBUS_ERR;
+    }
+    int reuse = 1;
+    ret = SoftBusSocketSetOpt(socketFd, SOL_SOCKET, SO_REUSEPORT, &reuse, sizeof(reuse));
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_COMMON, "set reuse port option failed");
+        SoftBusSocketClose(socketFd);
+        return SOFTBUS_ERR;
+    }
+    SoftBusSockAddrIn addr = {
+        .sinFamily = SOFTBUS_AF_INET,
+        .sinPort = 0,
+    };
+    ret = SoftBusInetPtoN(SOFTBUS_AF_INET, "0.0.0.0", &addr.sinAddr);
+    if (ret != SOFTBUS_ADAPTER_OK) {
+        CONN_LOGE(CONN_COMMON, "convert address to net order failed");
+        return SOFTBUS_ERR;
+    }
+
+    ret = SoftBusSocketBind(socketFd, (SoftBusSockAddr *)&addr, sizeof(SoftBusSockAddrIn));
+    if (ret != SOFTBUS_ADAPTER_OK) {
+        CONN_LOGE(CONN_COMMON, "bind address failed");
+        return SOFTBUS_ERR;
+    }
+    return socketFd;
 }

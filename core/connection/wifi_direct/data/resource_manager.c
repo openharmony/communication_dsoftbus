@@ -21,6 +21,7 @@
 #include "interface_info.h"
 #include "wifi_direct_coexist_rule.h"
 #include "wifi_direct_p2p_adapter.h"
+#include "utils/wifi_direct_utils.h"
 #include "utils/wifi_direct_anonymous.h"
 #include "utils/wifi_direct_network_utils.h"
 
@@ -244,6 +245,17 @@ static void RegisterListener(struct ResourceManagerListener *listener)
     GetResourceManager()->listener = *listener;
 }
 
+static bool IsAvailableByProperty(const char *interface, bool available)
+{
+    if (strcmp(interface, IF_NAME_HML) != 0) {
+        return available;
+    }
+    if (GetWifiDirectUtils()->supportHml()) {
+        return available;
+    }
+    return false;
+}
+
 static int32_t GetAllInterfacesSimpleInfo(struct InterfaceInfo **infoArray, int32_t *infoArraySize)
 {
     struct ResourceManager *self = GetResourceManager();
@@ -258,6 +270,7 @@ static int32_t GetAllInterfacesSimpleInfo(struct InterfaceInfo **infoArray, int3
     LIST_FOR_EACH_ENTRY(info, &self->interfaces, struct InterfaceInfo, node) {
         char *name = info->getName(info);
         bool isAvailable = self->isInterfaceAvailable(name, false);
+        isAvailable = IsAvailableByProperty(name, isAvailable);
         int32_t deviceCount = info->getInt(info, II_KEY_CONNECTED_DEVICE_COUNT, 0);
         CONN_LOGI(CONN_WIFI_DIRECT, "name=%s available=%d deviceCount=%d", name, isAvailable, deviceCount);
 
@@ -288,6 +301,7 @@ static int32_t GetAllInterfacesInfo(struct InterfaceInfo **infoArray, int32_t *i
         array[i].deepCopy(array + i, info);
         const char *name = array[i].getName(array + i);
         bool isAvailable = self->isInterfaceAvailable(name, false);
+        isAvailable = IsAvailableByProperty(name, isAvailable);
         array[i].putBoolean(array + i, II_KEY_IS_AVAILABLE, isAvailable);
         int32_t deviceCount = info->getInt(info, II_KEY_CONNECTED_DEVICE_COUNT, 0);
 

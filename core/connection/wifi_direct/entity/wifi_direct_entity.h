@@ -30,10 +30,13 @@ struct WifiDirectConnectParams {
     bool isProxyEnable;
 
     char remoteMac[MAC_ADDR_STR_LEN];
+    char remoteUuid[UUID_BUF_LEN];
     char groupConfig[GROUP_CONFIG_STR_LEN];
     char gcIp[IP_ADDR_STR_LEN];
     char interface[IF_NAME_LEN];
     struct LinkInfo *linkInfo;
+
+    char *extension;
 };
 
 enum EntityState {
@@ -61,7 +64,7 @@ enum EntityOperationEvent {
 };
 
 struct EntityListener {
-    void (*onOperationComplete)(int32_t event);
+    void (*onOperationComplete)(int32_t event, void *data);
     void (*onEntityChanged)(enum EntityState state);
 };
 
