@@ -263,6 +263,7 @@ void LinkInfoConstructor(struct LinkInfo *self)
     self->putLocalIpString = PutLocalIpString;
     self->putRemoteIpString = PutRemoteIpString;
 
+    self->dumpFilter = false;
     ListInit(&self->node);
 }
 

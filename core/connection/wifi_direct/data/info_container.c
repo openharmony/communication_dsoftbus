@@ -17,7 +17,6 @@
 #include <string.h>
 #include "securec.h"
 
-#include "anonymizer.h"
 #include "conn_log.h"
 #include "softbus_errcode.h"
 #include "softbus_adapter_mem.h"
@@ -289,10 +288,7 @@ static void DumpStringContentWithFd(struct InfoContainerKeyProperty *keyProperty
     } else if (keyProperty->flag & IP_ADDR_FLAG) {
         dprintf(fd, "%s=%s\n", keyProperty->content, WifiDirectAnonymizeIp(self->getString(self, key, "")));
     } else if (keyProperty->flag & DEVICE_ID_FLAG) {
-        char *anonymizedUuid;
-        Anonymize(self->getString(self, key, ""), &anonymizedUuid);
-        dprintf(fd, "%s=%s\n", keyProperty->content, anonymizedUuid);
-        AnonymizeFree(anonymizedUuid);
+        dprintf(fd, "%s=%s\n", keyProperty->content, WifiDirectAnonymizeDeviceId(self->getString(self, key, "")));
     } else {
         dprintf(fd, "%s=%s\n", keyProperty->content, self->getString(self, key, ""));
     }
@@ -307,10 +303,8 @@ static void DumpStringContent(struct InfoContainerKeyProperty *keyProperty, stru
         CONN_LOGI(CONN_WIFI_DIRECT, "%s=%s", keyProperty->content,
             WifiDirectAnonymizeIp(self->getString(self, key, "")));
     } else if (keyProperty->flag & DEVICE_ID_FLAG) {
-        char *anonymizedUuid;
-        Anonymize(self->getString(self, key, ""), &anonymizedUuid);
-        CONN_LOGI(CONN_WIFI_DIRECT, "%s=%s", keyProperty->content, anonymizedUuid);
-        AnonymizeFree(anonymizedUuid);
+        CONN_LOGI(CONN_WIFI_DIRECT, "%s=%s", keyProperty->content,
+                  WifiDirectAnonymizeDeviceId(self->getString(self, key, "")));
     } else {
         CONN_LOGI(CONN_WIFI_DIRECT, "%s=%s", keyProperty->content, self->getString(self, key, ""));
     }

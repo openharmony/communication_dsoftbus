@@ -12,21 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef WIFI_DIRECT_ANONYMOUS_H
-#define WIFI_DIRECT_ANONYMOUS_H
 
-#include "wifi_direct_types.h"
-#include "common_list.h"
+#include "wifi_direct_utils.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-const char* WifiDirectAnonymizeMac(const char *mac);
-const char* WifiDirectAnonymizeIp(const char *ip);
-const char* WifiDirectAnonymizeDeviceId(const char *deviceId);
-
-#ifdef __cplusplus
+static bool SupportHmlTwo()
+{
+    return false;
 }
-#endif
-#endif
+
+static struct WifiDirectUtils g_utils = {
+    .supportHmlTwo = SupportHmlTwo,
+};
+
+struct WifiDirectUtils* GetWifiDirectUtils(void)
+{
+    return &g_utils;
+}

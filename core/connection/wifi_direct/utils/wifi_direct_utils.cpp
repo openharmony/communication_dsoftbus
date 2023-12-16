@@ -15,15 +15,15 @@
 
 #include "wifi_direct_utils.h"
 #include <endian.h>
-#include <string.h>
-#include <ctype.h>
+#include <cstring>
+#include <cctype>
+#include "syspara/parameters.h"
 #include "securec.h"
 #include "conn_log.h"
 #include "wifi_direct_types.h"
 #include "data/link_info.h"
 
-#define HEX_DUMP_LINE_NUM 16
-#define PRINT_BUFFER_LEN 128
+static constexpr int32_t HEX_DUMP_LINE_NUM = 16;
 
 static enum WifiDirectRole TransferModeToRole(enum WifiDirectApiRole mode)
 {
@@ -47,13 +47,14 @@ static enum WifiDirectApiRole TransferRoleToPreferLinkMode(enum WifiDirectRole r
         case WIFI_DIRECT_ROLE_NONE:
             return WIFI_DIRECT_API_ROLE_NONE;
         case WIFI_DIRECT_ROLE_GC:
-            return WIFI_DIRECT_API_ROLE_GC | WIFI_DIRECT_API_ROLE_HML;
+            return static_cast<WifiDirectApiRole>(WIFI_DIRECT_API_ROLE_GC | WIFI_DIRECT_API_ROLE_HML);
         case WIFI_DIRECT_ROLE_GO:
-            return WIFI_DIRECT_API_ROLE_GO | WIFI_DIRECT_API_ROLE_HML;
+            return static_cast<WifiDirectApiRole>(WIFI_DIRECT_API_ROLE_GO | WIFI_DIRECT_API_ROLE_HML);
         case WIFI_DIRECT_ROLE_HML:
             return WIFI_DIRECT_API_ROLE_HML;
         default:
-            return WIFI_DIRECT_API_ROLE_GC | WIFI_DIRECT_API_ROLE_GO | WIFI_DIRECT_API_ROLE_HML;
+            return static_cast<WifiDirectApiRole>(WIFI_DIRECT_API_ROLE_GC | WIFI_DIRECT_API_ROLE_GO |
+                                                  WIFI_DIRECT_API_ROLE_HML);
     }
 }
 
@@ -110,40 +111,23 @@ static void HexDump(const char *banana, const uint8_t *data, size_t size)
 static void ShowLinkInfoList(const char *banana, ListNode *list)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "%s", banana);
-    struct LinkInfo *info = NULL;
+    struct LinkInfo *info = nullptr;
     LIST_FOR_EACH_ENTRY(info, list, struct LinkInfo, node) {
         CONN_LOGI(CONN_WIFI_DIRECT, "interface=%s mode=%d", info->getString(info, LI_KEY_LOCAL_INTERFACE, ""),
-              info->getInt(info, LI_KEY_LOCAL_LINK_MODE, -1));
-    }
-}
-
-static void PrintLargeString(const char *string)
-{
-    char buffer[PRINT_BUFFER_LEN + 1] = {0};
-    size_t stringLen = strlen(string);
-    size_t printLen = 0;
-    while (printLen < stringLen) {
-        size_t copyLen = MIN(PRINT_BUFFER_LEN, stringLen - printLen);
-        if (memcpy_s(buffer, copyLen, string + printLen, copyLen) != EOK) {
-            CONN_LOGW(CONN_WIFI_DIRECT, "buffer memcpy fail");
-            return;
-        }
-        buffer[copyLen] = 0;
-        printLen += copyLen;
-        CONN_LOGI(CONN_WIFI_DIRECT, "%s", buffer);
+                  info->getInt(info, LI_KEY_LOCAL_LINK_MODE, -1));
     }
 }
 
 static int32_t StrCompareIgnoreCase(const char *str1, const char *str2)
 {
     while (*str1 && *str2) {
-        int c1 = *str1;
-        int c2 = *str2;
-        if (isupper(c1)) {
-            c1 = c1 + 'a' - 'A';
+        int c1 = static_cast<int>(*str1);
+        int c2 = static_cast<int>(*str2);
+        if (std::isupper(c1)) {
+            c1 = c1 + static_cast<int>('a') - static_cast<int>('A');
         }
         if (isupper(c2)) {
-            c2 = c2 + 'a' - 'A';
+            c2 = c2 + static_cast<int>('a') - static_cast<int>('A');
         }
         if (c1 != c2) {
             return c1 - c2;
@@ -151,7 +135,21 @@ static int32_t StrCompareIgnoreCase(const char *str1, const char *str2)
         str1++;
         str2++;
     }
-    return *str1 - *str2;
+    return static_cast<int>(*str1) - static_cast<int>(*str2);
+}
+
+static bool SupportHml()
+{
+    bool support =  OHOS::system::GetBoolParameter("persist.sys.softbus.connect.hml", true);
+    CONN_LOGI(CONN_WIFI_DIRECT, "persist.sys.softbus.connect.hml=%d", support);
+    return support;
+}
+
+static bool SupportHmlTwo()
+{
+    bool support =  OHOS::system::GetBoolParameter("persist.sys.softbus.connect.hml_two", false);
+    CONN_LOGI(CONN_WIFI_DIRECT, "persist.sys.softbus.connect.hml_two=%d", support);
+    return support;
 }
 
 static struct WifiDirectUtils g_utils = {
@@ -161,8 +159,9 @@ static struct WifiDirectUtils g_utils = {
     .intToBytes = IntToBytes,
     .hexDump = HexDump,
     .showLinkInfoList = ShowLinkInfoList,
-    .printLargeString = PrintLargeString,
     .strCompareIgnoreCase = StrCompareIgnoreCase,
+    .supportHml = SupportHml,
+    .supportHmlTwo = SupportHmlTwo,
 };
 
 struct WifiDirectUtils* GetWifiDirectUtils(void)

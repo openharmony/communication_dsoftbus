@@ -34,13 +34,18 @@ enum WifiDirectProcessorType {
 struct NegotiateMessage;
 struct InnerLink;
 struct WifiDirectCommand;
+struct WifiDirectNegotiateChannel;
+struct WifiDirectTriggerChannel;
 
 #define WIFI_DIRECT_PROCESSOR_BASE                                                                                \
     int32_t (*createLink)(struct WifiDirectConnectInfo *connectInfo);                                             \
     int32_t (*reuseLink)(struct WifiDirectConnectInfo *connectInfo, struct InnerLink *innerLink);                 \
     int32_t (*disconnectLink)(struct WifiDirectConnectInfo *connectInfo, struct InnerLink *innerLink);            \
     void (*processNegotiateMessage)(enum WifiDirectNegotiateCmdType cmd, struct WifiDirectCommand *command);      \
-    void (*onOperationEvent)(int32_t result);                                                                     \
+    void (*onTriggerChannelDataReceived)(struct WifiDirectTriggerChannel *channel);                               \
+    void (*onDefaultTriggerChannelDataReceived)(struct WifiDirectNegotiateChannel *channel,                       \
+                                                const uint8_t *data, size_t len);                                 \
+    void (*onOperationEvent)(int32_t result, void *data);                                                         \
                                                                                                                   \
     bool (*isMessageNeedPending)(enum WifiDirectNegotiateCmdType cmd, struct NegotiateMessage *msg);              \
     void (*onReversal)(enum WifiDirectNegotiateCmdType cmd, struct NegotiateMessage *msg);                        \

@@ -200,7 +200,7 @@ static void OperationCompleteWorkHandler(void *data)
     int32_t *result = data;
     struct P2pEntity *self = GetP2pEntity();
     if (self->listener && self->listener->onOperationComplete) {
-        self->listener->onOperationComplete(*result);
+        self->listener->onOperationComplete(*result, NULL);
     }
     SoftBusFree(data);
 }
