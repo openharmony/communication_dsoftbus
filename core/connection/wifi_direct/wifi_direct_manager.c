@@ -15,11 +15,10 @@
 
 #include "wifi_direct_manager.h"
 
-#include "anonymizer.h"
 #include "securec.h"
 #include "softbus_error_code.h"
 #include "softbus_hidumper_conn.h"
-#include "lnn_distributed_net_ledger.h"
+#include "bus_center_manager.h"
 #include "wifi_direct_negotiator.h"
 #include "wifi_direct_role_option.h"
 #include "command/wifi_direct_connect_command.h"
@@ -46,35 +45,35 @@ static int32_t GetRequestId(void)
 
 static int32_t ConnectDevice(struct WifiDirectConnectInfo *connectInfo, struct WifiDirectConnectCallback *callback)
 {
-    CONN_CHECK_AND_RETURN_RET_LOGW(connectInfo && callback, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT,
-        "invalid parameters");
+    CONN_CHECK_AND_RETURN_RET_LOGW(connectInfo && callback, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "invalid param");
     ConnEventExtra extra = {
         .requestId = connectInfo->requestId,
         .linkType = connectInfo->connectType,
-        .expectRole = connectInfo->expectApiRole,
+        .expectRole = (int32_t)connectInfo->expectApiRole,
         .peerIp = connectInfo->remoteMac
     };
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_START, extra);
+
     char uuid[UUID_BUF_LEN] = {0};
-    (void)connectInfo->negoChannel->getDeviceId(connectInfo->negoChannel, uuid, sizeof(uuid));
-    int32_t ret = GetWifiDirectRoleOption()->getExpectedRole(connectInfo->remoteNetworkId, connectInfo->connectType,
-                                                             &connectInfo->expectApiRole, &connectInfo->isStrict);
+    int32_t ret = LnnGetRemoteStrInfo(connectInfo->remoteNetworkId, STRING_KEY_UUID, uuid, sizeof(uuid));
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "get uuid failed");
+    ret = GetWifiDirectRoleOption()->getExpectedRole(connectInfo->remoteNetworkId, connectInfo->connectType,
+                                                     &connectInfo->expectApiRole, &connectInfo->isStrict);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get expected role failed");
-    char *anonymizedUuid;
-    Anonymize(uuid, &anonymizedUuid);
     CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%d pid=%d type=%d expectRole=0x%x remoteMac=%s uuid=%s",
-          connectInfo->requestId, connectInfo->pid, connectInfo->connectType, connectInfo->expectApiRole,
-          WifiDirectAnonymizeMac(connectInfo->remoteMac), anonymizedUuid);
-    AnonymizeFree(anonymizedUuid);
+              connectInfo->requestId, connectInfo->pid, connectInfo->connectType, connectInfo->expectApiRole,
+              WifiDirectAnonymizeMac(connectInfo->remoteMac), WifiDirectAnonymizeDeviceId(uuid));
 
     GetWifiDirectPerfRecorder()->clear();
     GetWifiDirectPerfRecorder()->setPid(connectInfo->pid);
     GetWifiDirectPerfRecorder()->record(TP_P2P_CONNECT_START);
+
     struct WifiDirectCommand *command = WifiDirectConnectCommandNew(connectInfo, callback);
     CONN_CHECK_AND_RETURN_RET_LOGW(command, SOFTBUS_MALLOC_ERR, CONN_WIFI_DIRECT, "alloc connect command failed");
 
     GetWifiDirectCommandManager()->enqueueCommand(command);
     ret = GetWifiDirectNegotiator()->processNextCommand();
+
     extra.errcode = ret;
     extra.result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_INVOKE_PROTOCOL, extra);
@@ -83,18 +82,15 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *connectInfo, struct W
 
 static int32_t DisconnectDevice(struct WifiDirectConnectInfo *connectInfo, struct WifiDirectConnectCallback *callback)
 {
-    CONN_CHECK_AND_RETURN_RET_LOGW(connectInfo && callback, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT,
-        "invalid parameters");
+    CONN_CHECK_AND_RETURN_RET_LOGW(connectInfo != NULL && callback != NULL, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT,
+                                   "invalid param");
     char uuid[UUID_BUF_LEN] = {0};
     if (connectInfo->negoChannel) {
         (void)connectInfo->negoChannel->getDeviceId(connectInfo->negoChannel, uuid, sizeof(uuid));
     }
-    char *anonymizedUuid;
-    Anonymize(uuid, &anonymizedUuid);
     CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%d pid=%d type=%d remoteMac=%s linkId=%d uuid=%s",
-          connectInfo->requestId, connectInfo->pid, connectInfo->connectType,
-          WifiDirectAnonymizeMac(connectInfo->remoteMac), connectInfo->linkId, anonymizedUuid);
-    AnonymizeFree(anonymizedUuid);
+              connectInfo->requestId, connectInfo->pid, connectInfo->connectType,
+              WifiDirectAnonymizeMac(connectInfo->remoteMac), connectInfo->linkId, WifiDirectAnonymizeDeviceId(uuid));
 
     struct WifiDirectCommand *command = WifiDirectDisconnectCommandNew(connectInfo, callback);
     CONN_CHECK_AND_RETURN_RET_LOGW(command, SOFTBUS_MALLOC_ERR, CONN_WIFI_DIRECT, "alloc disconnect command failed");
@@ -141,14 +137,28 @@ static bool IsDeviceOnline(const char *remoteMac)
     return false;
 }
 
+#define GET_INNER_LINK_MAX_TIMES 6
+#define GET_INNER_LINK_WAIT_INTERVAL 50
+
 static int32_t GetLocalIpByRemoteIp(const char *remoteIp, char *localIp, int32_t localIpSize)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(remoteIp, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "remoteIp is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(localIp, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "localIp is null");
 
-    struct InnerLink *innerLink = GetLinkManager()->getLinkByIp(remoteIp, true);
-    CONN_CHECK_AND_RETURN_RET_LOGW(innerLink, SOFTBUS_ERR, CONN_WIFI_DIRECT, "not find inner link");
-    return innerLink->getLocalIpString(innerLink, localIp, localIpSize);
+    int32_t times = 0;
+    do {
+        struct InnerLink *innerLink = GetLinkManager()->getLinkByIp(remoteIp, true);
+        if (innerLink != NULL) {
+            return innerLink->getLocalIpString(innerLink, localIp, localIpSize);
+        }
+
+        times++;
+        CONN_LOGI(CONN_WIFI_DIRECT, "not find inner link, retry times=%d", times);
+        SoftBusSleepMs(GET_INNER_LINK_WAIT_INTERVAL);
+    } while (times < GET_INNER_LINK_MAX_TIMES);
+
+    CONN_LOGE(CONN_WIFI_DIRECT, "not find inner link");
+    return SOFTBUS_ERR;
 }
 
 static int32_t GetLocalIpByUuid(const char *uuid, char *localIp, int32_t localIpSize)
@@ -156,9 +166,22 @@ static int32_t GetLocalIpByUuid(const char *uuid, char *localIp, int32_t localIp
     CONN_CHECK_AND_RETURN_RET_LOGW(uuid, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "uuid is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(localIp, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "localIp is null");
 
-    struct InnerLink *innerLink = GetLinkManager()->getLinkByUuid(uuid);
-    CONN_CHECK_AND_RETURN_RET_LOGW(innerLink, SOFTBUS_ERR, CONN_WIFI_DIRECT, "not find inner link");
-    return innerLink->getLocalIpString(innerLink, localIp, localIpSize);
+    int32_t times = 0;
+    do {
+        for (enum WifiDirectLinkType linkType = 0; linkType < WIFI_DIRECT_LINK_TYPE_MAX; linkType++) {
+            struct InnerLink *innerLink = GetLinkManager()->getLinkByTypeAndUuid(linkType, uuid);
+            if (innerLink != NULL) {
+                return innerLink->getLocalIpString(innerLink, localIp, localIpSize);
+            }
+        }
+
+        times++;
+        CONN_LOGI(CONN_WIFI_DIRECT, "not find inner link, retry times=%d", times);
+        SoftBusSleepMs(GET_INNER_LINK_WAIT_INTERVAL);
+    } while (times < GET_INNER_LINK_MAX_TIMES);
+
+    CONN_LOGE(CONN_WIFI_DIRECT, "not find inner link");
+    return SOFTBUS_ERR;
 }
 
 static int32_t PrejudgeAvailability(const char *remoteNetworkId, enum WifiDirectLinkType connectType)
@@ -201,22 +224,6 @@ static void OnNegotiateChannelDisconnected(struct WifiDirectNegotiateChannel *ch
     GetWifiDirectNegotiator()->onNegotiateChannelDisconnected(channel);
 }
 
-static void OnRemoteP2pDisable(const char *networkId)
-{
-    char *anonymizedNetworkId;
-    Anonymize(networkId, &anonymizedNetworkId);
-    CONN_LOGD(CONN_WIFI_DIRECT, "networkId=%s", anonymizedNetworkId);
-    char uuid[UUID_BUF_LEN] = {0};
-    int32_t ret = LnnConvertDlId(networkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, sizeof(uuid));
-    if (ret != SOFTBUS_OK) {
-        CONN_LOGW(CONN_WIFI_DIRECT, "convert %s to uuid failed", anonymizedNetworkId);
-        AnonymizeFree(anonymizedNetworkId);
-        return;
-    }
-    AnonymizeFree(anonymizedNetworkId);
-    GetLinkManager()->clearNegotiateChannelForLink(uuid, true);
-}
-
 /* private method implement */
 /* static class method */
 static struct WifiDirectManager g_manager = {
@@ -234,7 +241,6 @@ static struct WifiDirectManager g_manager = {
 
     .onNegotiateChannelDataReceived = OnNegotiateChannelDataReceived,
     .onNegotiateChannelDisconnected = OnNegotiateChannelDisconnected,
-    .onRemoteP2pDisable = OnRemoteP2pDisable,
 
     .requestId = REQUEST_ID_INVALID,
     .myRole = WIFI_DIRECT_ROLE_NONE,
@@ -305,24 +311,21 @@ static void OnInnerLinkChange(struct InnerLink *innerLink, bool isStateChange)
         return;
     }
 
-    char *anonymizedRemoteUuid;
-    Anonymize(remoteUuid, &anonymizedRemoteUuid);
     if (state == INNER_LINK_STATE_CONNECTED) {
         CONN_LOGI(CONN_WIFI_DIRECT, "remoteMac=%s remoteUuid=%s online", WifiDirectAnonymizeMac(remoteMac),
-              anonymizedRemoteUuid);
+                  WifiDirectAnonymizeDeviceId(remoteUuid));
         if (self->listener.onDeviceOnLine) {
             self->listener.onDeviceOnLine(remoteMac, remoteIp, remoteUuid);
         }
     } else if (state == INNER_LINK_STATE_DISCONNECTED) {
         CONN_LOGI(CONN_WIFI_DIRECT, "remoteMac=%s remoteUuid=%s offline", WifiDirectAnonymizeMac(remoteMac),
-              anonymizedRemoteUuid);
+                  WifiDirectAnonymizeDeviceId(remoteUuid));
         if (self->listener.onDeviceOffLine) {
             self->listener.onDeviceOffLine(remoteMac, remoteIp, remoteUuid);
         }
     } else {
         CONN_LOGD(CONN_WIFI_DIRECT, "other state");
     }
-    AnonymizeFree(anonymizedRemoteUuid);
 }
 
 static int32_t WifiDirectDumperCallbackForShow(int32_t fd)

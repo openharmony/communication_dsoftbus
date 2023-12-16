@@ -58,13 +58,13 @@ static void OnNegotiateTimeout(struct WifiDirectCommand *base)
 void WifiDirectNegotiateCommandConstructor(struct WifiDirectNegotiateCommand *self, int32_t cmdType,
                                            struct NegotiateMessage *msg)
 {
-    self->type = COMMAND_TYPE_MESSAGE;
+    self->type = COMMAND_TYPE_NEGO_MESSAGE;
     self->timerId = TIMER_ID_INVALID;
     self->execute = ExecuteProcessRemoteNegotiateMessage;
     self->onSuccess = OnNegotiateComplete;
     self->onFailure = OnNegotiateFailure;
     self->onTimeout = OnNegotiateTimeout;
-    self->deleteSelf = WifiDirectNegotiateCommandDelete;
+    self->destructor = WifiDirectNegotiateCommandDelete;
     self->msg = msg;
     self->cmdType = cmdType;
 }

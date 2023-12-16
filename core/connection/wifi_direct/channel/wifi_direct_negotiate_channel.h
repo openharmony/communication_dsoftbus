@@ -22,13 +22,14 @@ extern "C" {
 #endif
 
 #define WIFI_DIRECT_NEGOTIATE_CHANNEL_BASE \
-    int32_t (*postData)(struct WifiDirectNegotiateChannel *base, const uint8_t *data, size_t size); \
-    int32_t (*getDeviceId)(struct WifiDirectNegotiateChannel *base, char *deviceId, size_t deviceIdSize); \
-    int32_t (*getP2pMac)(struct WifiDirectNegotiateChannel *base, char *p2pMac, size_t p2pMacSize); \
-    void (*setP2pMac)(struct WifiDirectNegotiateChannel *base, const char *p2pMac); \
-    bool (*isP2pChannel)(struct WifiDirectNegotiateChannel *base); \
-    bool (*isMetaChannel)(struct WifiDirectNegotiateChannel *base); \
-    struct WifiDirectNegotiateChannel* (*duplicate)(struct WifiDirectNegotiateChannel *base); \
+    int32_t (*postData)(struct WifiDirectNegotiateChannel *base, const uint8_t *data, size_t size);           \
+    int32_t (*getDeviceId)(struct WifiDirectNegotiateChannel *base, char *deviceId, size_t deviceIdSize);     \
+    int32_t (*getP2pMac)(struct WifiDirectNegotiateChannel *base, char *p2pMac, size_t p2pMacSize);           \
+    void (*setP2pMac)(struct WifiDirectNegotiateChannel *base, const char *p2pMac);                           \
+    bool (*isP2pChannel)(struct WifiDirectNegotiateChannel *base);                                            \
+    bool (*isMetaChannel)(struct WifiDirectNegotiateChannel *base);                                           \
+    bool (*equal)(struct WifiDirectNegotiateChannel *leftBase, struct WifiDirectNegotiateChannel *rightBase); \
+    struct WifiDirectNegotiateChannel* (*duplicate)(struct WifiDirectNegotiateChannel *base);                 \
     void (*destructor)(struct WifiDirectNegotiateChannel *base)
 
 struct WifiDirectNegotiateChannel {

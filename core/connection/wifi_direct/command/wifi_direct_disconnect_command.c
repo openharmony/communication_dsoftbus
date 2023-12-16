@@ -79,7 +79,7 @@ static int32_t CloseLink(struct WifiDirectDisconnectCommand *command)
 
     enum WifiDirectLinkType linkType = link->getInt(link, IL_KEY_LINK_TYPE, WIFI_DIRECT_LINK_TYPE_INVALID);
     struct WifiDirectProcessor *processor =
-        GetWifiDirectDecisionCenter()->getProcessorByNegoChannelAndLinkType(connectInfo->negoChannel, linkType);
+        GetWifiDirectDecisionCenter()->getProcessorByChannelAndLinkType(connectInfo->negoChannel, linkType);
     CONN_CHECK_AND_RETURN_RET_LOGW(processor, ERROR_WIFI_DIRECT_NO_SUITABLE_PROTOCOL, CONN_WIFI_DIRECT,
         "no suitable processor");
 
@@ -170,7 +170,7 @@ void WifiDirectDisconnectCommandConstructor(struct WifiDirectDisconnectCommand *
     self->onFailure = OnDisconnectFailure;
     self->onTimeout = OnDisconnectTimeout;
     self->duplicate = Duplicate;
-    self->deleteSelf = WifiDirectDisconnectCommandDelete;
+    self->destructor = WifiDirectDisconnectCommandDelete;
     *(&self->connectInfo) = *connectInfo;
     if (connectInfo->negoChannel != NULL) {
         self->connectInfo.negoChannel = connectInfo->negoChannel->duplicate(connectInfo->negoChannel);
