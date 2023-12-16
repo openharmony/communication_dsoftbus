@@ -33,7 +33,7 @@ struct LinkManager {
     struct InnerLink* (*getLinkByTypeAndDevice)(enum WifiDirectLinkType linkType, const char *macString);
     struct InnerLink* (*getLinkByIp)(const char *ipString, bool isRemoteIp);
     struct InnerLink* (*getLinkById)(int32_t linkId);
-    struct InnerLink* (*getLinkByUuid)(const char *uuid);
+    struct InnerLink* (*getLinkByTypeAndUuid)(enum WifiDirectLinkType linkType, const char *uuid);
     int32_t (*getAllLinks)(struct InnerLink **linkArray, int32_t *linkArraySize);
     void (*notifyLinkChange)(struct InnerLink *link);
     void (*removeLinksByLinkType)(enum WifiDirectLinkType linkType);
@@ -41,8 +41,8 @@ struct LinkManager {
     void (*registerListener)(const struct LinkManagerListener *listener);
     int32_t (*generateLinkId)(struct InnerLink *innerLink, int32_t requestId, int32_t pid);
     void (*recycleLinkId)(int32_t linkId, const char *remoteMac);
-    void (*setNegotiateChannelForLink)(struct WifiDirectNegotiateChannel *channel);
-    void  (*clearNegotiateChannelForLink)(const char *uuid, bool destroy);
+    void (*setNegotiateChannelForLink)(struct WifiDirectNegotiateChannel *channel, enum WifiDirectLinkType linkType);
+    void  (*clearNegotiateChannelForLink)(struct WifiDirectNegotiateChannel *channel);
     void (*dump)(int32_t fd);
     bool (*checkAll)(enum WifiDirectLinkType type, const char *interface, bool (*checker)(struct InnerLink *));
 

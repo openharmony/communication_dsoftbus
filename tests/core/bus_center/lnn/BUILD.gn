@@ -1397,6 +1397,7 @@ ohos_unittest("LNNLaneLinkTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_trans_lane.c",
     "$dsoftbus_root_path/core/connection/wifi_direct/channel/default_negotiate_channel_virtual.c",
     "$dsoftbus_root_path/core/connection/wifi_direct/channel/fast_connect_negotiate_channel_virtual.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/utils/wifi_direct_utils_virtual.c",
     "$dsoftbus_root_path/core/connection/wifi_direct/wifi_direct_manager_virtual.c",
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy/src/softbus_proxychannel_listener.c",
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy/src/softbus_proxychannel_pipeline.c",
