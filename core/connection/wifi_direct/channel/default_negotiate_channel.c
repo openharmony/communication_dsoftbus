@@ -90,11 +90,20 @@ static void OnAuthDataReceived(int64_t authId, const AuthTransData *data)
     }
 }
 
+static void AuthDisconnectedWorkHandler(struct WifiDirectNegotiateChannel *channel)
+{
+    GetWifiDirectNegotiator()->onNegotiateChannelDisconnected(channel);
+    channel->destructor(channel);
+}
+
 static void OnAuthDisconnected(int64_t authId)
 {
-    struct DefaultNegotiateChannel channel;
-    DefaultNegotiateChannelConstructor(&channel, authId);
-    GetWifiDirectNegotiator()->onNegotiateChannelDisconnected((struct WifiDirectNegotiateChannel *)&channel);
+    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(authId);
+    CONN_CHECK_AND_RETURN_LOGE(channel != NULL, CONN_WIFI_DIRECT, "create channel failed");
+    if (CallMethodAsync((WorkFunction)AuthDisconnectedWorkHandler, channel, 0) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "async failed");
+        DefaultNegotiateChannelDelete(channel);
+    }
 }
 
 static int64_t GenerateSequence(void)
