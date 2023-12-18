@@ -1052,9 +1052,9 @@ static void UnpackCommon(const JsonObj *json, NodeInfo *info, SoftBusVersion ver
     OptInt(json, NODE_WEIGHT, &info->masterWeight, DEFAULT_NODE_WEIGHT);
 
     //IS_SUPPORT_TCP_HEARTBEAT
-    OptInt64(json, NEW_CONN_CAP, (int64_t *)&info->netCapacity, -1);
+    OptInt(json, NEW_CONN_CAP, (int32_t *)&info->netCapacity, -1);
     if (info->netCapacity == (uint32_t)-1) {
-        (void)JSON_GetInt64FromOject(json, CONN_CAP, (int64_t *)&info->netCapacity);
+        (void)JSON_GetInt32FromOject(json, CONN_CAP, (int32_t *)&info->netCapacity);
     }
     OptInt(json, WIFI_BUFF_SIZE, &info->wifiBuffSize, DEFAULT_WIFI_BUFF_SIZE);
     OptInt(json, BR_BUFF_SIZE, &info->wifiBuffSize, DEFAULT_BR_BUFF_SIZE);
