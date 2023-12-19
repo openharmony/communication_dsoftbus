@@ -49,8 +49,7 @@ static SoftBusList *g_hmlListenerList = NULL;
 
 static int32_t StartNewP2pListener(const char *ip, int32_t *port)
 {
-    int32_t listenerPort = 0;
-
+    int32_t listenerPort;
     LocalListenerInfo info;
     info.type = CONNECT_P2P;
     (void)memset_s(info.socketOption.addr, sizeof(info.socketOption.addr), 0, sizeof(info.socketOption.addr));
