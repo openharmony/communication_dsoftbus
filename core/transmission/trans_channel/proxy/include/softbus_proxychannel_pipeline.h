@@ -56,6 +56,7 @@ int32_t TransProxyPipelineGetUuidByChannelId(int32_t channelId, char *uuid, uint
 int32_t TransProxyPipelineCloseChannel(int32_t channelId);
 int32_t TransProxyPipelineCloseChannelDelay(int32_t channelId);
 int32_t TransProxyPipelineInit(void);
+int32_t TransProxyReuseByChannelId(int32_t channelId);
 
 #ifdef __cplusplus
 }

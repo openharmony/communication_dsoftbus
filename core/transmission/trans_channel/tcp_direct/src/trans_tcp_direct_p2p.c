@@ -759,6 +759,12 @@ static int32_t StartVerifyP2pInfo(const AppInfo *appInfo, SessionConn *conn)
         conn->requestId = requestId;
         ret = OpenNewAuthConn(appInfo, conn, newChannelId, conn->requestId);
     } else {
+        ret = TransProxyReuseByChannelId(pipeLineChannelId);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "channelId=%d can't be repeated", pipeLineChannelId);
+            return SOFTBUS_ERR;
+        }
+        TransProxyPipelineCloseChannelDelay(pipeLineChannelId);
         conn->authId = AuthGetLatestIdByUuid(conn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_WIFI, false);
         if (conn->authId == AUTH_INVALID_ID) {
             conn->authId = AuthGetLatestIdByUuid(conn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_BR, false);
