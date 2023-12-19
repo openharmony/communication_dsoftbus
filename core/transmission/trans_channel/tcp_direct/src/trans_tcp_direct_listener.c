@@ -228,6 +228,56 @@ static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channel
     TransSrvDelDataBufNode(channelId);
 }
 
+static int32_t ProcessSocketInEvent(SessionConn *conn, int fd)
+{
+    int32_t ret = TransTdcSrvRecvData(conn->listenMod, conn->channelId);
+    TRANS_LOGE(TRANS_CTRL, "Trans Srv Recv Data ret=%d. ", ret);
+    if (ret == SOFTBUS_DATA_NOT_ENOUGH) {
+        return SOFTBUS_OK;
+    }
+    TransProcDataRes(conn->listenMod, ret, conn->channelId, fd);
+    return ret;
+}
+
+static int32_t ProcessSocketOutEvent(SessionConn *conn, int fd)
+{
+    int32_t ret = SOFTBUS_ERR;
+    if (conn->serverSide) {
+        return ret;
+    }
+    DelTrigger(conn->listenMod, fd, WRITE_TRIGGER);
+    AddTrigger(conn->listenMod, fd, READ_TRIGGER);
+    ret = StartVerifySession(conn);
+    TransEventExtra extra = { .socketName = NULL,
+        .peerNetworkId = NULL,
+        .calleePkg = NULL,
+        .callerPkg = NULL,
+        .socketFd = fd,
+        .channelId = conn->channelId,
+        .authId = conn->authId,
+        .errcode = ret,
+        .result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED };
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_START, extra);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "start verify session fail.");
+        DelTrigger(conn->listenMod, fd, READ_TRIGGER);
+        ConnShutdownSocket(fd);
+        NotifyChannelOpenFailed(conn->channelId, ret);
+        TransDelSessionConnById(conn->channelId);
+        TransSrvDelDataBufNode(conn->channelId);
+    }
+    return ret;
+}
+
+static void ProcessSocketSocketExceptionEvent(SessionConn *conn, int fd)
+{
+    TRANS_LOGE(TRANS_CTRL, "exception occurred.");
+    DelTrigger(conn->listenMod, fd, EXCEPT_TRIGGER);
+    ConnShutdownSocket(fd);
+    TransDelSessionConnById(conn->channelId);
+    TransSrvDelDataBufNode(conn->channelId);
+}
+
 static int32_t TdcOnDataEvent(ListenerModule module, int events, int fd)
 {
     (void)module;
@@ -250,47 +300,11 @@ static int32_t TdcOnDataEvent(ListenerModule module, int events, int fd)
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(conn->channelId + ID_OFFSET));
     int32_t ret = SOFTBUS_ERR;
     if (events == SOFTBUS_SOCKET_IN) {
-        ret = TransTdcSrvRecvData(conn->listenMod, conn->channelId);
-        TRANS_LOGE(TRANS_CTRL, "Trans Srv Recv Data ret=%d. ", ret);
-        if (ret == SOFTBUS_DATA_NOT_ENOUGH) {
-            SoftBusFree(conn);
-            return SOFTBUS_OK;
-        }
-        TransProcDataRes(conn->listenMod, ret, conn->channelId, fd);
+        ret = ProcessSocketInEvent(conn, fd);
     } else if (events == SOFTBUS_SOCKET_OUT) {
-        if (conn->serverSide == true) {
-            SoftBusFree(conn);
-            return ret;
-        }
-        DelTrigger(conn->listenMod, fd, WRITE_TRIGGER);
-        AddTrigger(conn->listenMod, fd, READ_TRIGGER);
-        ret = StartVerifySession(conn);
-        TransEventExtra extra = {
-            .socketName = NULL,
-            .peerNetworkId = NULL,
-            .calleePkg = NULL,
-            .callerPkg = NULL,
-            .socketFd = fd,
-            .channelId = conn->channelId,
-            .authId = conn->authId,
-            .errcode = ret,
-            .result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED
-        };
-        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_START, extra);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "start verify session fail.");
-            DelTrigger(conn->listenMod, fd, READ_TRIGGER);
-            ConnShutdownSocket(fd);
-            NotifyChannelOpenFailed(conn->channelId, ret);
-            TransDelSessionConnById(conn->channelId);
-            TransSrvDelDataBufNode(conn->channelId);
-        }
+        ret = ProcessSocketOutEvent(conn, fd);
     } else if (events == SOFTBUS_SOCKET_EXCEPTION) {
-        TRANS_LOGE(TRANS_CTRL, "exception occurred.");
-        DelTrigger(conn->listenMod, fd, EXCEPT_TRIGGER);
-        ConnShutdownSocket(fd);
-        TransDelSessionConnById(conn->channelId);
-        TransSrvDelDataBufNode(conn->channelId);
+        ProcessSocketSocketExceptionEvent(conn, fd);
     }
     SoftBusFree(conn);
     return ret;
