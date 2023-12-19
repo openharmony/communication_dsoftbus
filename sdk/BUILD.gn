@@ -119,6 +119,10 @@ target(build_type, "softbus_client") {
       ]
     }
     innerapi_tags = [ "platformsdk_indirect" ]
+    install_images = [
+      system_base_dir,
+      updater_base_dir,
+    ]
     part_name = "dsoftbus"
     subsystem_name = "communication"
   }

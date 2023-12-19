@@ -172,6 +172,10 @@ if (defined(ohos_lite)) {
       "//third_party/openssl:libcrypto_shared",
     ]
     innerapi_tags = [ "platformsdk_indirect" ]
+    install_images = [
+      system_base_dir,
+      updater_base_dir,
+    ]
     part_name = "dsoftbus"
     subsystem_name = "communication"
   }
