@@ -39,7 +39,6 @@
 #include "lnn_sync_item_info.h"
 #include "softbus_bus_center.h"
 #include "softbus_conn_interface.h"
-#include "lnn_ipc_utils.h"
 #include "lnn_meta_node_ledger.h"
 #include "lnn_time_sync_manager.h"
 #include "softbus_def.h"
