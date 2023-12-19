@@ -16,14 +16,11 @@
 #include "lnn_net_builder.h"
 
 #include <securec.h>
-#include <stdlib.h>
 #include <inttypes.h>
 
 #include "anonymizer.h"
 #include "auth_interface.h"
 #include "auth_request.h"
-#include "auth_request.h"
-#include "auth_hichain_adapter.h"
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
@@ -52,14 +49,13 @@
 #include "lnn_sync_info_manager.h"
 #include "lnn_sync_item_info.h"
 #include "lnn_topo_manager.h"
-#include "softbus_adapter_crypto.h"
-#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_crypto.h"
+#include "softbus_adapter_json.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_hisysevt_bus_center.h"
 #include "softbus_json_utils.h"
-#include "softbus_adapter_json.h"
 #include "softbus_utils.h"
 
 #define LNN_CONN_CAPABILITY_MSG_LEN 8
@@ -326,6 +322,7 @@ static bool IsNeedSyncElectMsg(const char *networkId)
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get RemoteNodeInfo by id fail");
         return false;
     }
     return LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_WIFI);
@@ -435,6 +432,7 @@ static bool TryPendingJoinRequest(const JoinLnnMsgPara *para, bool needReportFai
         return false;
     }
     if (!NeedPendingJoinRequest()) {
+        LNN_LOGE(LNN_BUILDER, "NeedPendingJoinRequest fail");
         return false;
     }
     request = (PendingJoinRequestNode *)SoftBusCalloc(sizeof(PendingJoinRequestNode));
@@ -454,7 +452,7 @@ static bool TryPendingJoinRequest(const JoinLnnMsgPara *para, bool needReportFai
 }
 
 static int32_t PostJoinRequestToConnFsm(LnnConnectionFsm *connFsm, const ConnectionAddr *addr,
-    const char* pkgName, bool isNeedConnect, bool needReportFailure)
+    const char *pkgName, bool isNeedConnect, bool needReportFailure)
 {
     int32_t rc = SOFTBUS_OK;
     bool isCreate = false;
@@ -495,8 +493,8 @@ static void TryRemovePendingJoinRequest(void)
             return;
         }
         ListDelete(&item->node);
-        if (PostJoinRequestToConnFsm(NULL, &item->addr, DEFAULT_PKG_NAME, true, item->needReportFailure)
-            != SOFTBUS_OK) {
+        if (PostJoinRequestToConnFsm(NULL, &item->addr, DEFAULT_PKG_NAME, true, item->needReportFailure) !=
+            SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "post pending join request failed");
         }
         LNN_LOGI(LNN_BUILDER, "remove a pending join request, peerAddr=%s", LnnPrintConnectionAddr(&item->addr));
@@ -786,7 +784,7 @@ static int32_t CreatePassiveConnectionFsm(const DeviceVerifyPassMsgPara *msgPara
 
 static int32_t ProcessDeviceVerifyPass(const void *para)
 {
-    int32_t rc;
+    int32_t rc = SOFTBUS_OK;
     LnnConnectionFsm *connFsm = NULL;
     const DeviceVerifyPassMsgPara *msgPara = (const DeviceVerifyPassMsgPara *)para;
 
@@ -830,7 +828,7 @@ static int32_t ProcessDeviceVerifyPass(const void *para)
 
 static int32_t ProcessDeviceDisconnect(const void *para)
 {
-    int32_t rc;
+    int32_t rc = SOFTBUS_OK;
     LnnConnectionFsm *connFsm = NULL;
     const int64_t *authId = (const int64_t *)para;
 
@@ -855,7 +853,6 @@ static int32_t ProcessDeviceDisconnect(const void *para)
             rc = SOFTBUS_ERR;
             break;
         }
-        rc = SOFTBUS_OK;
     } while (false);
     SoftBusFree((void *)authId);
     return rc;
@@ -1721,7 +1718,6 @@ static void OnReAuthVerifyPassed(uint32_t requestId, int64_t authId, const NodeI
         if (LnnSendAuthResultMsgToConnFsm(connFsm, SOFTBUS_OK) != SOFTBUS_OK) {
             connFsm->connInfo.nodeInfo = NULL;
             StopConnectionFsm(connFsm);
-            SoftBusFree(connFsm->connInfo.nodeInfo);
             LNN_LOGE(LNN_BUILDER,
                 "fsmId=%u post auth result to connection fsm fail=%" PRId64, connFsm->id, authId);
         }
