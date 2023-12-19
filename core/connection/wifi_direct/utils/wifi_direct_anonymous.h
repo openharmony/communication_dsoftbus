@@ -24,6 +24,7 @@ extern "C" {
 
 const char* WifiDirectAnonymizeMac(const char *mac);
 const char* WifiDirectAnonymizeIp(const char *ip);
+const char* WifiDirectAnonymizeDeviceId(const char *deviceId);
 
 #ifdef __cplusplus
 }

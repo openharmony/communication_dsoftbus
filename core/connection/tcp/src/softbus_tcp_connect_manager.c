@@ -16,9 +16,8 @@
 #include "softbus_tcp_connect_manager.h"
 
 #include <stdio.h>
-#include <arpa/inet.h>
-
 #include "securec.h"
+
 #include "conn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"

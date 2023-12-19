@@ -43,8 +43,8 @@ enum P2pEntityTimeoutEvent;
     int32_t (*removeLink)(struct P2pEntityState *self, struct WifiDirectConnectParams *params);                  \
     int32_t (*destroyServer)(struct P2pEntityState *self, struct WifiDirectConnectParams *params);               \
                                                                                                                  \
-    void (*handleTimeout)(struct P2pEntityState *self, enum P2pEntityTimeoutEvent event);                     \
-    void (*handleConnectionChange)(struct P2pEntityState *self, struct WifiDirectP2pGroupInfo *groupInfo);  \
+    void (*handleTimeout)(struct P2pEntityState *self, enum P2pEntityTimeoutEvent event);                        \
+    void (*handleConnectionChange)(struct P2pEntityState *self, struct WifiDirectP2pGroupInfo *groupInfo);       \
     void (*handleConnectStateChange)(struct P2pEntityState *self, enum WifiDirectP2pConnectState state);         \
                                                                                                                  \
     bool isInited;                                                                                               \

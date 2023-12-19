@@ -43,12 +43,12 @@ static int32_t GetAllClientIdentity(SvcIdentity *svc, int num)
 {
     if (svc == NULL || num == 0) {
         LNN_LOGE(LNN_EVENT, "invalid parameters");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     struct CommonScvId *svcId = (struct CommonScvId *)SoftBusMalloc(sizeof(struct CommonScvId) * num);
     if (svcId == NULL) {
         LNN_LOGE(LNN_EVENT, "malloc failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     (void)memset_s(svcId, sizeof(struct CommonScvId) * num, 0, sizeof(struct CommonScvId) * num);
     if (SERVER_GetAllClientIdentity(svcId, num) != SOFTBUS_OK) {
@@ -71,7 +71,7 @@ int32_t ClientOnJoinLNNResult(const char *pkgName, void *addr, uint32_t addrType
     LNN_LOGI(LNN_EVENT, "enter");
     if (pkgName == NULL || addr == NULL || (retCode == 0 && networkId == NULL)) {
         LNN_LOGE(LNN_EVENT, "invalid parameters");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN] = {0};
@@ -103,7 +103,7 @@ int32_t ClientOnLeaveLNNResult(const char *pkgName, const char *networkId, int r
     LNN_LOGI(LNN_EVENT, "enter");
     if (networkId == NULL) {
         LNN_LOGE(LNN_EVENT, "invalid parameters");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN];
@@ -131,7 +131,7 @@ int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoT
     LNN_LOGI(LNN_EVENT, "enter");
     if (info == NULL) {
         LNN_LOGE(LNN_EVENT, "invalid parameters");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN];
@@ -152,7 +152,7 @@ int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoT
     SvcIdentity *svc = (SvcIdentity *)SoftBusCalloc(sizeof(SvcIdentity) * num);
     if (svc == NULL) {
         LNN_LOGE(LNN_EVENT, "malloc failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     if (GetAllClientIdentity(svc, num) != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "get svc num failed");
@@ -179,7 +179,7 @@ int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t t
     LNN_LOGI(LNN_EVENT, "enter");
     if (info == NULL) {
         LNN_LOGE(LNN_EVENT, "invalid parameters");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN];
@@ -200,7 +200,7 @@ int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t t
     SvcIdentity *svc = (SvcIdentity *)SoftBusCalloc(sizeof(SvcIdentity) * num);
     if (svc == NULL) {
         LNN_LOGE(LNN_EVENT, "malloc failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     if (GetAllClientIdentity(svc, num) != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "get svc num failed.");
@@ -229,7 +229,7 @@ int32_t ClientOnTimeSyncResult(const char *pkgName, int32_t pid, const void *inf
     LNN_LOGI(LNN_EVENT, "enter");
     if (pkgName == NULL || info == NULL) {
         LNN_LOGE(LNN_EVENT, "invalid parameters");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN];
@@ -260,7 +260,7 @@ int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t pid, int32_t publi
     LNN_LOGI(LNN_EVENT, "enter");
     if (pkgName == NULL) {
         LNN_LOGE(LNN_EVENT, "invalid parameters");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN];
@@ -290,7 +290,7 @@ int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t pid, int32_t refre
     LNN_LOGI(LNN_EVENT, "enter");
     if (pkgName == NULL) {
         LNN_LOGE(LNN_EVENT, "invalid parameters");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN];
@@ -320,7 +320,7 @@ int32_t ClientOnRefreshDeviceFound(const char *pkgName, int32_t pid, const void 
     LNN_LOGI(LNN_EVENT, "enter.");
     if (pkgName == NULL || device == NULL) {
         LNN_LOGE(LNN_EVENT, "invalid parameters");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN_EX];

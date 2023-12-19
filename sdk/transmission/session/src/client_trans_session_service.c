@@ -423,7 +423,7 @@ void NotifyAuthSuccess(int sessionId)
 static int32_t CheckSessionIsOpened(int32_t sessionId)
 {
 #define SESSION_STATUS_CHECK_MAX_NUM 100
-#define SESSION_CHECK_PERIOD 80000
+#define SESSION_CHECK_PERIOD 200000
     int32_t i = 0;
     bool isEnable = false;
 

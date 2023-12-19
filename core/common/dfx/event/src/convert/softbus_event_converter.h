@@ -27,8 +27,8 @@
 extern "C" {
 #endif
 
-#define INVALID_INT_VALUE    0
-#define PARAM_STRING_MAX_LEN 256
+#define INVALID_INT_VALUE          0
+#define PARAM_STRING_VALUE_MAX_LEN 256
 
 typedef struct {
     char name[MAX_LENGTH_OF_PARAM_NAME];
@@ -36,24 +36,24 @@ typedef struct {
     bool (*Assign)(const char[], HiSysEventParamType, SoftbusEventForm *, HiSysEventParam *);
 } HiSysEventParamAssigner;
 
-static inline bool InitString(char **str)
+static inline bool InitString(char **str, size_t maxLen)
 {
-    *str = (char *)malloc(PARAM_STRING_MAX_LEN);
+    *str = (char *)malloc(maxLen);
     if (*str == NULL) {
         COMM_LOGE(COMM_DFX, "malloc param string fail");
         return false;
     }
-    if (memset_s(*str, PARAM_STRING_MAX_LEN + 1, 0, PARAM_STRING_MAX_LEN) != EOK) {
+    if (memset_s(*str, maxLen, 0, maxLen) != EOK) {
         COMM_LOGE(COMM_DFX, "memset_s param string fail");
         return false;
     }
     return true;
 }
 
-static inline bool CopyString(char *destName, const char *srcName)
+static inline bool CopyString(char *destName, const char *srcName, size_t maxLen)
 {
-    if (strcpy_s(destName, strlen(srcName) + 1, srcName) != EOK) {
-        COMM_LOGE(COMM_DFX, "strcpy_s param name fail, srcName=%s", srcName);
+    if (strcpy_s(destName, maxLen, srcName) != EOK) {
+        COMM_LOGE(COMM_DFX, "strcpy_s fail, srcName=%s, maxLen=%zu", srcName, maxLen);
         return false;
     }
     return true;
@@ -71,24 +71,14 @@ static inline bool AssignerInt32(int32_t value, HiSysEventParam **param)
 }
 
 /* Used by ASSIGNER macros */
-static inline bool AssignerInt64(int64_t value, HiSysEventParam **param)
-{
-    if (value <= INVALID_INT_VALUE) {
-        (*param)->v.i64 = INVALID_INT_VALUE;
-        return false;
-    }
-    (*param)->v.i64 = value;
-    return true;
-}
-
-/* Used by ASSIGNER macros */
 static inline bool AssignerString(const char *value, HiSysEventParam **param)
 {
     if (value == NULL || strlen(value) == 0) {
         (*param)->v.s = NULL;
         return false;
     }
-    return InitString(&(*param)->v.s) && CopyString((*param)->v.s, value);
+    return InitString(&(*param)->v.s, PARAM_STRING_VALUE_MAX_LEN) &&
+        CopyString((*param)->v.s, value, PARAM_STRING_VALUE_MAX_LEN);
 }
 
 /* Used by ASSIGNER macros */
@@ -98,15 +88,29 @@ static inline bool AssignerErrcode(int32_t value, HiSysEventParam **param)
     return true;
 }
 
-#define SOFTBUS_ASSIGNER(type, fieldName, field)                                                              \
-    static inline bool SoftbusAssigner##fieldName(                                                            \
-        const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param) \
-    {                                                                                                         \
-        if (Assigner##type(form->field, &param) && CopyString(param->name, eventName)) {                      \
-            param->t = paramType;                                                                             \
-            return true;                                                                                      \
-        }                                                                                                     \
-        return false;                                                                                         \
+/* Used by ASSIGNER macros */
+static inline bool AssignerUint64(uint64_t value, HiSysEventParam **param)
+{
+    (*param)->v.ui64 = value;
+    return true;
+}
+
+/* Used by ASSIGNER macros */
+static inline bool AssignerUint32(uint32_t value, HiSysEventParam **param)
+{
+    (*param)->v.ui32 = value;
+    return true;
+}
+
+#define SOFTBUS_ASSIGNER(type, fieldName, field)                                                                   \
+    static inline bool SoftbusAssigner##fieldName(                                                                 \
+        const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param)      \
+    {                                                                                                              \
+        if (Assigner##type(form->field, &param) && CopyString(param->name, eventName, MAX_LENGTH_OF_PARAM_NAME)) { \
+            param->t = paramType;                                                                                  \
+            return true;                                                                                           \
+        }                                                                                                          \
+        return false;                                                                                              \
     }
 
 SOFTBUS_ASSIGNER(Int32, Scene, scene)

@@ -50,6 +50,10 @@ static bool SetDataSource(struct WifiDirectProtocol *base, const uint8_t *data, 
     struct WifiDirectTlvProtocol *self = (struct WifiDirectTlvProtocol *)base;
     CONN_CHECK_AND_RETURN_RET_LOGW(data, false, CONN_WIFI_DIRECT, "data is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(size > 0 && size <= CAPACITY_MAX, false, CONN_WIFI_DIRECT, "size=%u invalid", size);
+
+    if (self->data != NULL) {
+        SoftBusFree(self->data);
+    }
     self->data = (uint8_t *)SoftBusMalloc(size);
     CONN_CHECK_AND_RETURN_RET_LOGE(self->data, false, CONN_WIFI_DIRECT, "alloc failed");
 

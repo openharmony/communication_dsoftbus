@@ -53,9 +53,10 @@ void CloseDefaultNegotiateChannel(struct DefaultNegotiateChannel *self)
     (void)self;
 }
 
-int32_t StartListeningForDefaultChannel(const char *localIp)
+int32_t StartListeningForDefaultChannel(const char *localIp, int32_t port)
 {
     (void)localIp;
+    (void)port;
     return 0;
 }
 
