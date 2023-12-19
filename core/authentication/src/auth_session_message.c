@@ -706,11 +706,33 @@ static int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo
     return SOFTBUS_OK;
 }
 
+static void GetAndSetLocalUnifiedName(JsonObj *json)
+{
+    char unified[DEVICE_NAME_BUF_LEN] = {0};
+    if (LnnGetUnifiedDeviceName(unified, DEVICE_NAME_BUF_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "get defaultDeviceName fail");
+        (void)JSON_AddStringToObject(json, UNIFIED_DEVICE_NAME, unified);
+        return;
+    }
+
+    if (strlen(unified) != 0) {
+        if (LnnSetLocalStrInfo(STRING_KEY_DEV_UNIFIED_NAME, unified) != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_FSM, "set device unifiedDefaultName fail");
+        }
+        AUTH_LOGI(AUTH_FSM, "unifed length is not zero, unified: %s", unified);
+    }
+    (void)JSON_AddStringToObject(json, UNIFIED_DEVICE_NAME, unified);
+}
+
 static int32_t PackCommonDevInfo(JsonObj *json, const NodeInfo *info, bool isMetaAuth)
 {
-    (void)JSON_AddStringToObject(json, UNIFIED_DEVICE_NAME, info->deviceInfo.unifiedName);
-    (void)JSON_AddStringToObject(json, SETTINGS_NICK_NAME, info->deviceInfo.nickName);
+    if (strlen(info->deviceInfo.unifiedName) == 0) {
+        GetAndSetLocalUnifiedName(json);
+    } else {
+        (void)JSON_AddStringToObject(json, UNIFIED_DEVICE_NAME, info->deviceInfo.unifiedName);
+    }
     (void)JSON_AddStringToObject(json, UNIFIED_DEFAULT_DEVICE_NAME, info->deviceInfo.unifiedDefaultName);
+    (void)JSON_AddStringToObject(json, SETTINGS_NICK_NAME, info->deviceInfo.nickName);
     if (!JSON_AddStringToObject(json, NETWORK_ID, info->networkId) ||
         !JSON_AddStringToObject(json, DEVICE_NAME, LnnGetDeviceName(&info->deviceInfo)) ||
         !JSON_AddStringToObject(json, DEVICE_TYPE, LnnConvertIdToDeviceType(info->deviceInfo.deviceTypeId)) ||
@@ -1350,10 +1372,12 @@ static void UpdatePeerDeviceName(NodeInfo *peerNodeInfo)
         LnnGetDeviceDisplayName(peerNodeInfo->deviceInfo.nickName,
             peerNodeInfo->deviceInfo.unifiedDefaultName, deviceName, DEVICE_NAME_BUF_LEN);
     }
+    AUTH_LOGD(AUTH_FSM, "peer tmpDeviceName: %s, deviceName: %s, unifiedName: %s, unifiedDefaultName: %s, nickName: %s",
+        deviceName, peerNodeInfo->deviceInfo.deviceName, peerNodeInfo->deviceInfo.unifiedName,
+        peerNodeInfo->deviceInfo.unifiedDefaultName, peerNodeInfo->deviceInfo.nickName);
     if (strlen(deviceName) != 0) {
         ret = strcpy_s(peerNodeInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, deviceName);
     }
-    AUTH_LOGD(AUTH_FSM, "peer deviceName=%s", peerNodeInfo->deviceInfo.deviceName);
     if (ret != EOK) {
         AUTH_LOGW(AUTH_FSM, "strcpy_s fail, use default name");
     }

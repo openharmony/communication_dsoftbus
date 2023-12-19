@@ -200,7 +200,7 @@ static void OperationCompleteWorkHandler(void *data)
     int32_t *result = data;
     struct P2pEntity *self = GetP2pEntity();
     if (self->listener && self->listener->onOperationComplete) {
-        self->listener->onOperationComplete(*result);
+        self->listener->onOperationComplete(*result, NULL);
     }
     SoftBusFree(data);
 }
@@ -376,7 +376,7 @@ static struct P2pEntity g_entity = {
     .isConnectStateChangeReceived = false,
 };
 
-struct P2pEntity* GetP2pEntity(void)
+struct P2pEntity *GetP2pEntity(void)
 {
     if (!g_entity.isInited) {
         P2pEntityConstructor(&g_entity);

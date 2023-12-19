@@ -24,6 +24,7 @@ if (defined(ohos_lite)) {
   config("dsoftbus_event_interface_lite") {
     include_dirs = [
       "$dsoftbus_dfx_path/interface/include",
+      "$dsoftbus_root_path/interfaces/kits/bus_center",
       "$dsoftbus_root_path/interfaces/kits/common",
     ]
     cflags = ohos_lite_cflags
@@ -33,6 +34,7 @@ if (defined(ohos_lite)) {
   target(build_type, "softbus_dfx_event") {
     include_dirs = [
       "$dsoftbus_dfx_path/interface/include",
+      "$dsoftbus_root_path/interfaces/kits/bus_center",
       "$dsoftbus_root_path/interfaces/kits/common",
     ]
     sources = [ "src/softbus_event_virtual.c" ]
@@ -42,6 +44,7 @@ if (defined(ohos_lite)) {
   config("dsoftbus_event_interface_std") {
     include_dirs = [
       "$dsoftbus_dfx_path/interface/include",
+      "$dsoftbus_root_path/interfaces/kits/bus_center",
       "$dsoftbus_root_path/interfaces/kits/common",
     ]
   }
@@ -53,6 +56,7 @@ if (defined(ohos_lite)) {
     }
     include_dirs = [
       "$dsoftbus_dfx_path/interface/include",
+      "$dsoftbus_root_path/interfaces/kits/bus_center",
       "$dsoftbus_root_path/interfaces/kits/common",
       "//third_party/bounds_checking_function/include",
       "src",

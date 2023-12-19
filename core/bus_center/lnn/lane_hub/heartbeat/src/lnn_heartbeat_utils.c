@@ -22,6 +22,8 @@
 #include "bus_center_manager.h"
 #include "lnn_device_info.h"
 #include "lnn_heartbeat_medium_mgr.h"
+#include "lnn_distributed_net_ledger.h"
+#include "lnn_node_info.h"
 #include "lnn_log.h"
 #include "wifi_direct_manager.h"
 
@@ -143,6 +145,21 @@ static bool HbHasActiveP2pConnection(const char *networkId)
     return isOnline;
 }
 
+static bool HbHasActiveHmlConnection(const char *networkId)
+{
+    NodeInfo info;
+    char myIp[IP_LEN] = {0};
+    if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &info) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "HB get node info fail");
+        return false;
+    }
+    if (GetWifiDirectManager()->getLocalIpByUuid(info.uuid, myIp, sizeof(myIp)) == SOFTBUS_OK) {
+        LNN_LOGI(LNN_HEART_BEAT, "HB get HML ip success");
+        return true;
+    }
+    return false;
+}
+
 bool LnnHasActiveConnection(const char *networkId, ConnectionAddrType addrType)
 {
     bool ret = false;
@@ -159,10 +176,10 @@ bool LnnHasActiveConnection(const char *networkId, ConnectionAddrType addrType)
             break;
         case CONNECTION_ADDR_BLE:
             ret = HbHasActiveBrConnection(networkId) || HbHasActiveBleConnection(networkId) ||
-                HbHasActiveP2pConnection(networkId);
+                HbHasActiveP2pConnection(networkId) || HbHasActiveHmlConnection(networkId);
             char *anonyNetworkId = NULL;
             Anonymize(networkId, &anonyNetworkId);
-            LNN_LOGI(LNN_HEART_BEAT, "HB networkId=%s has active BT/BLE/P2P connection=%s",
+            LNN_LOGI(LNN_HEART_BEAT, "HB networkId=%s has active BT/BLE/P2P/HML connection=%s",
                 anonyNetworkId, ret ? "true" : "false");
             AnonymizeFree(anonyNetworkId);
             return ret;

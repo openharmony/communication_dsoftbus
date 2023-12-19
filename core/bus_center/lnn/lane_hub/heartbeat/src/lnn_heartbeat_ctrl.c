@@ -23,6 +23,7 @@
 #include "bus_center_manager.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_common_utils.h"
+#include "lnn_decision_center.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_deviceinfo_to_profile.h"
 #include "lnn_heartbeat_strategy.h"
@@ -32,7 +33,6 @@
 #include "lnn_network_manager.h"
 #include "lnn_net_builder.h"
 #include "lnn_ohos_account.h"
-#include "lnn_decision_center.h"
 
 #include "softbus_adapter_ble_gatt.h"
 #include "softbus_adapter_bt_common.h"
@@ -208,7 +208,7 @@ static void HbConditionChanged(bool isOnlySetState)
 
 static uint64_t GettDisEnableBleDiscoveryTime(int64_t modeDuration)
 {
-    uint64_t timeout = 0L;
+    uint64_t timeout = 0ULL;
     if (modeDuration < MIN_DISABLE_BLE_DISCOVERY_TIME) {
         timeout = MIN_DISABLE_BLE_DISCOVERY_TIME;
     } else {
@@ -250,7 +250,6 @@ void LnnRequestBleDiscoveryProcess(int32_t strategy, int64_t timeout)
     } else {
         LNN_LOGE(LNN_HEART_BEAT, "error strategy=%d, not need to deal", strategy);
     }
-    return;
 }
 
 static void HbBtStateChangeEventHandler(const LnnEventBasicInfo *info)
@@ -416,7 +415,6 @@ static void HbScreenLockChangeEventHandler(const LnnEventBasicInfo *info)
     switch (lockState) {
         case SOFTBUS_SCREEN_UNLOCK:
             LNN_LOGI(LNN_HEART_BEAT, "handle SOFTBUS_SCREEN_UNLOCK");
-            // TODO: refactor update account process to boot complete event.
             LnnUpdateOhosAccount();
             HbConditionChanged(false);
             break;
@@ -571,7 +569,6 @@ static void HbTryRecoveryNetwork(void)
     } else if (ret == TRUSTED_RELATION_NO) {
         g_hbConditionState.hasTrustedRelation = false;
     }
-    // TODO: get and set nightState, backgroundState.
     LNN_LOGI(LNN_HEART_BEAT, "try to recovery heartbeat network, relation=%d",
         g_hbConditionState.hasTrustedRelation);
     HbConditionChanged(true);

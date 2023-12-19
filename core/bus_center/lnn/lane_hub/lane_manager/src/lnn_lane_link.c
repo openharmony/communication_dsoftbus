@@ -1034,8 +1034,8 @@ int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *
     }
     char *anonyNetworkId = NULL;
     Anonymize(reqInfo->peerNetworkId, &anonyNetworkId);
-    LNN_LOGI(LNN_LANE, "build link, linktype=%d, peerNetworkId=%s",
-        reqInfo->linkType, anonyNetworkId);
+    LNN_LOGI(LNN_LANE, "build link, linktype=%d, laneId=%u, peerNetworkId=%s",
+        reqInfo->linkType, reqId, anonyNetworkId);
     AnonymizeFree(anonyNetworkId);
     if (g_linkTable[reqInfo->linkType](reqId, reqInfo, callback) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "lane link is failed");

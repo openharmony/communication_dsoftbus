@@ -15,10 +15,8 @@
 
 #include "bus_center_manager.h"
 
-#include <securec.h>
 #include "disc_log.h"
 #include "softbus_adapter_perf.h"
-#include "softbus_def.h"
 #include "softbus_errcode.h"
 
 int32_t LnnPublishService(const char *pkgName, const PublishInfo *info, bool isInnerRequest)

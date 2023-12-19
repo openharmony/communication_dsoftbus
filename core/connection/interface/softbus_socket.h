@@ -80,6 +80,8 @@ int32_t ConnGetSocketError(int32_t fd);
 int32_t ConnGetLocalSocketPort(int32_t fd);
 int32_t ConnGetPeerSocketAddr(int32_t fd, SocketAddr *socketAddr);
 
+int32_t ConnPreAssignPort(void);
+
 #ifdef __cplusplus
 #if __cplusplus
 }
