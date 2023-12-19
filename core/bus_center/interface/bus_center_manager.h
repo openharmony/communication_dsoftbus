@@ -89,7 +89,7 @@ void SoftBusDumpBusCenterPrintInfo(int fd, NodeBasicInfo *nodeInfo);
 int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName);
 int32_t LnnServerLeave(const char *networkId, const char *pkgName);
 
-LnnLanesObject *LnnRequestLanesObject(const char *netWorkId, int32_t pid, LnnLaneProperty prop,
+LnnLanesObject *LnnRequestLanesObject(const char *networkId, int32_t pid, LnnLaneProperty prop,
     const LnnPreferredLinkList *list, uint32_t laneNum);
 void LnnReleaseLanesObject(LnnLanesObject *lanesObject);
 int32_t LnnGetLaneId(LnnLanesObject *lanesObject, uint32_t num);

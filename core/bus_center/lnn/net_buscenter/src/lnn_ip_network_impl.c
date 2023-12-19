@@ -14,8 +14,6 @@
  */
 
 #include <securec.h>
-#include <stdint.h>
-#include <stdio.h>
 #include <string.h>
 
 #include "anonymizer.h"
@@ -37,12 +35,8 @@
 #include "lnn_physical_subnet_manager.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_thread.h"
-#include "softbus_adapter_timer.h"
 #include "softbus_common.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
-#include "softbus_feature_config.h"
 #include "softbus_protocol_def.h"
 #include "trans_tcp_direct_listener.h"
 
@@ -60,6 +54,7 @@ static bool g_heartbeatEnable = false;
 static int32_t GetWifiServiceIpAddr(const char *ifName, char *ip, uint32_t size)
 {
     if (ifName == NULL || ip == NULL || size == 0) {
+        LNN_LOGE(LNN_BUILDER, "invalid parameter");
         return SOFTBUS_ERR;
     }
     if (strcmp(ifName, WLAN_IFNAME) != 0) {
@@ -145,7 +140,6 @@ static int32_t GetAvailableIpAddr(const char *ifName, char *ip, uint32_t size)
 
 static int32_t OpenAuthPort(void)
 {
-    int32_t port;
     char localIp[MAX_ADDR_LEN] = {0};
 
     int32_t authPort;
@@ -158,7 +152,7 @@ static int32_t OpenAuthPort(void)
         LNN_LOGE(LNN_BUILDER, "get local ip failed");
         return SOFTBUS_ERR;
     }
-    port = AuthStartListening(AUTH_LINK_TYPE_WIFI, localIp, authPort);
+    int32_t port = AuthStartListening(AUTH_LINK_TYPE_WIFI, localIp, authPort);
     if (port < 0) {
         LNN_LOGE(LNN_BUILDER, "AuthStartListening failed");
         return SOFTBUS_ERR;
@@ -322,7 +316,7 @@ static int32_t SetLocalIpInfo(const char *ipAddr, const char *ifName)
 static void LeaveOldIpNetwork(const char *ifCurrentName)
 {
     ConnectionAddrType type = CONNECTION_ADDR_MAX;
-    bool addrType[CONNECTION_ADDR_MAX] = {0};
+    bool addrType[CONNECTION_ADDR_MAX] = {false};
 
     if (LnnGetAddrTypeByIfName(ifCurrentName, &type) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "LnnGetAddrTypeByIfName failed ifName=%s", ifCurrentName);
@@ -480,9 +474,8 @@ static IpSubnetManagerEvent GetIpEventInOther(LnnPhysicalSubnet *subnet)
     int32_t ret = GetAvailableIpAddr(subnet->ifName, currentIfAddress, sizeof(currentIfAddress));
     if (ret == SOFTBUS_OK) {
         return IP_SUBNET_MANAGER_EVENT_IF_READY;
-    } else {
-        return subnet->status == LNN_SUBNET_SHUTDOWN ? IP_SUBNET_MANAGER_EVENT_IF_DOWN : IP_SUBNET_MANAGER_EVENT_MAX;
     }
+    return subnet->status == LNN_SUBNET_SHUTDOWN ? IP_SUBNET_MANAGER_EVENT_IF_DOWN : IP_SUBNET_MANAGER_EVENT_MAX;
 }
 
 static IpSubnetManagerEvent GetIpEventInRunning(LnnPhysicalSubnet *subnet)
@@ -674,7 +667,9 @@ static void WifiStateChangeEventHandler(const LnnEventBasicInfo *info)
             *status = IP_SUBNET_MANAGER_EVENT_IF_DOWN;
             (void)LnnVisitNetif(NotifyWlanAddressChanged, status);
         }
+        return;
     }
+    SoftBusFree(status);
 }
 
 int32_t LnnInitIpProtocol(struct LnnProtocolManager *self)
