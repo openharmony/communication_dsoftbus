@@ -39,7 +39,6 @@
 #include "softbus_errcode.h"
 #include "softbus_hidumper_disc.h"
 #include "softbus_hisysevt_discreporter.h"
-#include "softbus_log_old.h"
 #include "softbus_utils.h"
 
 #define BLE_PUBLISH 0x0
@@ -533,7 +532,6 @@ static void BleScanResultCallback(int listenerId, const SoftBusBleScanResult *sc
 
     uint8_t *advData = scanResultData->advData;
     if (IsDistributedBusiness(advData)) {
-        SignalingMsgPrint("ble rcv", advData, scanResultData->advLen, SOFTBUS_LOG_DISC);
         ProcessDistributePacket(scanResultData);
     } else {
         DISC_LOGI(DISC_BLE, "ignore other business");
@@ -857,7 +855,7 @@ static int32_t StartAdvertiser(int32_t adv)
         DestroyBleConfigAdvData(&advData);
         return SOFTBUS_ERR;
     }
-    SignalingMsgPrint("ble send", (uint8_t *)advData.advData, (uint8_t)advData.advLength, SOFTBUS_LOG_DISC);
+
     DiscEventExtra discEventExtra = { .broadcastType = BLE };
     DISC_EVENT(EVENT_SCENE_BROADCAST, EVENT_STAGE_BROADCAST, discEventExtra);
     if (SoftBusStartAdv(advertiser->channel, &advParam) != SOFTBUS_OK) {
