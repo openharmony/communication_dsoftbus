@@ -94,7 +94,7 @@ HWTEST_F(ClientProxyTest, OnLeaveLNNResultTest_01, TestSize.Level1)
     sptr<BusCenterClientProxy> clientProxy = new (std::nothrow) BusCenterClientProxy(remoteObject);
     ASSERT_TRUE(clientProxy != nullptr);
     int32_t ret = clientProxy->OnLeaveLNNResult(nullptr, TEST_RET_CODE);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = clientProxy->OnLeaveLNNResult(TEST_NETWORK_ID, TEST_RET_CODE);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
@@ -117,7 +117,7 @@ HWTEST_F(ClientProxyTest, OnNodeOnlineStateChangedTest_01, TestSize.Level1)
     char *addr = const_cast<char *>(TEST_ADDR);
     void *addrInput = reinterpret_cast<void *>(addr);
     int32_t ret = clientProxy->OnNodeOnlineStateChanged("test", isOnline, nullptr, TEST_ADDR_TYPE_LEN);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = clientProxy->OnNodeOnlineStateChanged("test", isOnline, addrInput, TEST_ADDR_TYPE_LEN);
     EXPECT_FALSE(ret == SOFTBUS_OK);
 }
@@ -139,7 +139,7 @@ HWTEST_F(ClientProxyTest, OnNodeBasicInfoChangedTest_01, TestSize.Level1)
     char *addr = const_cast<char *>(TEST_ADDR);
     void *addrInput = reinterpret_cast<void *>(addr);
     int32_t ret = clientProxy->OnNodeBasicInfoChanged("test", nullptr, TEST_ADDR_TYPE_LEN, TEST_TYPE);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = clientProxy->OnNodeBasicInfoChanged("test", addrInput, TEST_ADDR_TYPE_LEN, TEST_TYPE);
     EXPECT_FALSE(ret == SOFTBUS_OK);
 }
@@ -161,7 +161,7 @@ HWTEST_F(ClientProxyTest, OnTimeSyncResultTest_01, TestSize.Level1)
     char *addr = const_cast<char *>(TEST_ADDR);
     void *addrInput = reinterpret_cast<void *>(addr);
     int32_t ret = clientProxy->OnTimeSyncResult(nullptr, TEST_ADDR_TYPE_LEN, TEST_RET_CODE);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = clientProxy->OnTimeSyncResult(addrInput, TEST_ADDR_TYPE_LEN, TEST_RET_CODE);
     EXPECT_FALSE(ret == SOFTBUS_OK);
 }
