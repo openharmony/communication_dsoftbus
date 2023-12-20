@@ -16,12 +16,9 @@
 #include "auth_device_common_key.h"
 #include "softbus_errcode.h"
 
-#include <stdlib.h>
-#include <securec.h>
 
 void AuthLoadDeviceKey(void)
 {
-    return;
 }
 
 int32_t AuthInsertDeviceKey(const NodeInfo *deviceInfo, const AuthDeviceKeyInfo *deviceKey)
@@ -34,14 +31,12 @@ int32_t AuthInsertDeviceKey(const NodeInfo *deviceInfo, const AuthDeviceKeyInfo 
 void AuthRemoveDeviceKeyByUdid(const char *udidOrHash)
 {
     (void)udidOrHash;
-    return;
 }
 
 void AuthRemoveDeviceKey(const char *udidHash, int32_t keyType)
 {
     (void)udidHash;
     (void)keyType;
-    return;
 }
 
 int32_t AuthFindDeviceKey(const char *udidHash, int32_t keyType, AuthDeviceKeyInfo *deviceKey)
@@ -54,7 +49,6 @@ int32_t AuthFindDeviceKey(const char *udidHash, int32_t keyType, AuthDeviceKeyIn
 
 void AuthClearDeviceKey(void)
 {
-    return;
 }
 
 void AuthUpdateKeyIndex(const char *udidHash, int32_t keyType, int64_t index, bool isServer)
@@ -63,5 +57,4 @@ void AuthUpdateKeyIndex(const char *udidHash, int32_t keyType, int64_t index, bo
     (void)keyType;
     (void)index;
     (void)isServer;
-    return;
 }

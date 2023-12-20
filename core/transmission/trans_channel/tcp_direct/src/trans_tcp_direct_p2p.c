@@ -554,8 +554,10 @@ static int32_t ConnectTcpDirectPeer(const char *addr, int port)
     return ConnOpenClientSocket(&options, BIND_ADDR_ALL, true);
 }
 
-static int32_t AddHmlTrigger(int32_t fd, SessionConn *conn)
+static int32_t AddHmlTrigger(int32_t fd, const char *myAddr, int64_t seq)
 {
+    ListenerModule moudleType;
+    SessionConn *conn = NULL;
     if (SoftBusMutexLock(&g_hmlListenerList->lock) != 0) {
         TRANS_LOGE(TRANS_CTRL, "StartHmlListener lock fail");
         return SOFTBUS_LOCK_ERR;
@@ -563,14 +565,24 @@ static int32_t AddHmlTrigger(int32_t fd, SessionConn *conn)
     HmlListenerInfo *item = NULL;
     HmlListenerInfo *nextItem = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_hmlListenerList->list, HmlListenerInfo, node) {
-        if (strncmp(item->myIp, conn->appInfo.myData.addr, IP_LEN) == 0) {
+        if (strncmp(item->myIp, myAddr, IP_LEN) == 0) {
             if (AddTrigger(item->moudleType, fd, WRITE_TRIGGER) != SOFTBUS_OK) {
                 TRANS_LOGE(TRANS_CTRL, "fail");
                 (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
                 return SOFTBUS_ERR;
             }
-            conn->listenMod = item->moudleType;
+            moudleType = item->moudleType;
             (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
+            if (GetSessionConnLock() != SOFTBUS_OK) {
+                return SOFTBUS_LOCK_ERR;
+            }
+            conn = GetSessionConnByReq(seq);
+            if (conn == NULL) {
+                ReleaseSessonConnLock();
+                return SOFTBUS_NOT_FIND;
+            }
+            conn->listenMod = moudleType;
+            ReleaseSessonConnLock();
             return SOFTBUS_OK;
         }
     }
@@ -579,10 +591,10 @@ static int32_t AddHmlTrigger(int32_t fd, SessionConn *conn)
     return SOFTBUS_ERR;
 }
 
-static int32_t AddP2pOrHmlTrigger(int32_t fd, SessionConn *conn)
+static int32_t AddP2pOrHmlTrigger(int32_t fd, const char *myAddr, int64_t seq)
 {
-    if (strncmp(conn->appInfo.myData.addr, HML_IP_PREFIX, NETWORK_ID_LEN) == 0) {
-        return AddHmlTrigger(fd, conn);
+    if (strncmp(myAddr, HML_IP_PREFIX, NETWORK_ID_LEN) == 0) {
+        return AddHmlTrigger(fd, myAddr, seq);
     } else {
         if (AddTrigger(DIRECT_CHANNEL_SERVER_P2P, fd, WRITE_TRIGGER) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "fail");
@@ -599,6 +611,10 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
     int32_t ret = SOFTBUS_ERR;
     int32_t channelId = INVALID_CHANNEL_ID;
     int32_t fd = -1;
+    char peerNetworkId[DEVICE_ID_SIZE_MAX] = { 0 };
+    char peerAddr[IP_LEN] = { 0 };
+    char myAddr[IP_LEN] = { 0 };
+    int32_t peerPort = -1;
 
     if (GetSessionConnLock() != SOFTBUS_OK) {
         return SOFTBUS_LOCK_ERR;
@@ -613,31 +629,39 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
 
     ret = VerifyP2pUnPack(json, conn->appInfo.peerData.addr, IP_LEN, &conn->appInfo.peerData.port);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "unpack fail: ret=%d", ret);
         ReleaseSessonConnLock();
+        TRANS_LOGE(TRANS_CTRL, "unpack fail: ret=%d", ret);
         goto EXIT_ERR;
     }
     TRANS_LOGI(TRANS_CTRL, "peer wifi: peerPort=%d", conn->appInfo.peerData.port);
 
     fd = ConnectTcpDirectPeer(conn->appInfo.peerData.addr, conn->appInfo.peerData.port);
     if (fd <= 0) {
-        TRANS_LOGE(TRANS_CTRL, "conn fail: fd=%d", fd);
         ReleaseSessonConnLock();
+        TRANS_LOGE(TRANS_CTRL, "conn fail: fd=%d", fd);
         goto EXIT_ERR;
     }
     conn->appInfo.fd = fd;
     conn->status = TCP_DIRECT_CHANNEL_STATUS_CONNECTING;
+    if (strcpy_s(peerNetworkId, sizeof(peerNetworkId), conn->appInfo.peerNetWorkId) != EOK ||
+        strcpy_s(peerAddr, sizeof(peerAddr), conn->appInfo.peerData.addr) != EOK ||
+        strcpy_s(myAddr, sizeof(myAddr), conn->appInfo.myData.addr) != EOK) {
+        ReleaseSessonConnLock();
+        TRANS_LOGE(TRANS_CTRL, "strcpy_s failed!");
+        goto EXIT_ERR;
+    }
+    peerPort = conn->appInfo.peerData.port;
     ReleaseSessonConnLock();
 
     if (TransSrvAddDataBufNode(channelId, fd) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
-    if (AddP2pOrHmlTrigger(fd, conn) != SOFTBUS_OK) {
+    if (AddP2pOrHmlTrigger(fd, myAddr, seq) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "AddP2pOrHmlTrigger fail");
         goto EXIT_ERR;
     }
 
-    LaneAddP2pAddress(conn->appInfo.peerNetWorkId, conn->appInfo.peerData.addr, conn->appInfo.peerData.port);
+    LaneAddP2pAddress(peerNetworkId, peerAddr, peerPort);
 
     TRANS_LOGI(TRANS_CTRL, "end: fd=%d", fd);
     return SOFTBUS_OK;
@@ -735,6 +759,12 @@ static int32_t StartVerifyP2pInfo(const AppInfo *appInfo, SessionConn *conn)
         conn->requestId = requestId;
         ret = OpenNewAuthConn(appInfo, conn, newChannelId, conn->requestId);
     } else {
+        ret = TransProxyReuseByChannelId(pipeLineChannelId);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "channelId=%d can't be repeated", pipeLineChannelId);
+            return SOFTBUS_ERR;
+        }
+        TransProxyPipelineCloseChannelDelay(pipeLineChannelId);
         conn->authId = AuthGetLatestIdByUuid(conn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_WIFI, false);
         if (conn->authId == AUTH_INVALID_ID) {
             conn->authId = AuthGetLatestIdByUuid(conn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_BR, false);

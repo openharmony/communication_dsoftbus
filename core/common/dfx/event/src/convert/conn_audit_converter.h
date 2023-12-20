@@ -26,7 +26,8 @@ extern "C" {
     static inline bool ConnAuditAssigner##fieldName(                                                          \
         const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param) \
     {                                                                                                         \
-        if (Assigner##type(form->connAuditExtra->field, &param) && CopyString(param->name, eventName)) {      \
+        if (Assigner##type(form->connAuditExtra->field, &param) &&                                            \
+            CopyString(param->name, eventName, MAX_LENGTH_OF_PARAM_NAME)) {                                   \
             param->t = paramType;                                                                             \
             return true;                                                                                      \
         }                                                                                                     \
@@ -58,7 +59,6 @@ CONN_AUDIT_ASSIGNER(String, LocalUdid, localUdid)
 CONN_AUDIT_ASSIGNER(String, LocalIp, localIp)
 CONN_AUDIT_ASSIGNER(String, PeerPort, peerPort)
 CONN_AUDIT_ASSIGNER(String, LocalPort, localPort)
-
 
 #define CONN_AUDIT_ASSIGNER_SIZE 25 // Size of g_connAuditAssigners
 static HiSysEventParamAssigner g_connAuditAssigners[] = {
@@ -108,4 +108,4 @@ static inline size_t ConvertConnAuditForm2Param(HiSysEventParam params[], Softbu
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif // CONN_EVENT_CONVERTER_H
+#endif // CONN_AUDIT_CONVERTER_H

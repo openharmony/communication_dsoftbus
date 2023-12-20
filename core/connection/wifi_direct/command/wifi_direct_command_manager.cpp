@@ -31,7 +31,7 @@ static void CommandTimeoutHandler(struct WifiDirectCommand *command)
         g_commandQueue.remove(command);
     }
     command->onTimeout(command);
-    command->deleteSelf(command);
+    command->destructor(command);
 }
 
 static void EnqueueCommand(struct WifiDirectCommand *command)

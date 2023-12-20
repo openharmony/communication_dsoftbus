@@ -52,6 +52,7 @@ public:
 
 void LnnSettingDataEventMonitor::OnChange()
 {
+    LNN_LOGI(LNN_STATE, "device name change");
     if (g_eventHandler != nullptr) {
         g_eventHandler(DEVICE_NAME_TYPE_DEV_NAME, nullptr);
     }

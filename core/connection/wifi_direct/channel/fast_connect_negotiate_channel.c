@@ -107,7 +107,7 @@ static bool IsP2pChannel(struct WifiDirectNegotiateChannel *base)
     return false;
 }
 
-static struct WifiDirectNegotiateChannel* Duplicate(struct WifiDirectNegotiateChannel *base)
+static struct WifiDirectNegotiateChannel *Duplicate(struct WifiDirectNegotiateChannel *base)
 {
     struct FastConnectNegotiateChannel *self = (struct FastConnectNegotiateChannel*)base;
     struct FastConnectNegotiateChannel *copy = FastConnectNegotiateChannelNew(self->channelId);
@@ -140,7 +140,7 @@ void FastConnectNegotiateChannelDestructor(struct FastConnectNegotiateChannel *s
     (void)self;
 }
 
-struct FastConnectNegotiateChannel* FastConnectNegotiateChannelNew(int32_t channelId)
+struct FastConnectNegotiateChannel *FastConnectNegotiateChannelNew(int32_t channelId)
 {
     struct FastConnectNegotiateChannel *self = SoftBusCalloc(sizeof(*self));
     if (self) {

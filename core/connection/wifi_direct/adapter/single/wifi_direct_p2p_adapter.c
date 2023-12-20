@@ -160,7 +160,11 @@ static int32_t SetPeerWifiConfigInfo(const char *config)
     CONN_CHECK_AND_RETURN_RET_LOGW(peerCfg, SOFTBUS_MALLOC_ERR, CONN_WIFI_DIRECT, "malloc failed");
 
     int32_t ret = SoftBusBase64Decode(peerCfg, peerCfgLen, &decLen, (uint8_t *)config, configSize);
-    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "decode wifi cfg failed");
+    if (ret != SOFTBUS_OK) {
+        SoftBusFree(peerCfg);
+        CONN_LOGE(CONN_WIFI_DIRECT, "decode wifi cfg failed");
+        return SOFTBUS_ERR;
+    }
 
     ret = Hid2dSetPeerWifiCfgInfo(TYPE_OF_SET_PEER_CONFIG, (char *)peerCfg, (int32_t)decLen);
     SoftBusFree(peerCfg);
@@ -169,7 +173,7 @@ static int32_t SetPeerWifiConfigInfo(const char *config)
     return SOFTBUS_OK;
 }
 
-static int32_t SetPeerWifiConfigInfoV2(uint8_t *cfg, size_t size)
+static int32_t SetPeerWifiConfigInfoV2(const uint8_t *cfg, size_t size)
 {
     (void)cfg;
     (void)size;
@@ -530,51 +534,6 @@ static int32_t GetBaseMac(const char *interface, uint32_t cap, char baseMac[], s
     return SOFTBUS_ERR;
 }
 
-static bool AddInterfaceMultiIps(const char *interface, const char *localIp, uint8_t prefixLen)
-{
-    (void)interface;
-    (void)localIp;
-    (void)prefixLen;
-    CONN_LOGE(CONN_WIFI_DIRECT, "not supported");
-    return false;
-}
-
-static bool DeleteInterfaceMultiIps(const char *interface, const char *localIp, uint8_t prefixLen)
-{
-    (void)interface;
-    (void)localIp;
-    (void)prefixLen;
-    CONN_LOGE(CONN_WIFI_DIRECT, "not supported");
-    return false;
-}
-
-static bool AddInterfaceStaticArp(const char *interface, const char *remoteIp, const char *remoteMac)
-{
-    (void)interface;
-    (void)remoteIp;
-    (void)remoteMac;
-    CONN_LOGE(CONN_WIFI_DIRECT, "not supported");
-    return false;
-}
-
-static bool DeleteInterfaceStaticArp(const char *interface, const char *remoteIp, const char *remoteMac)
-{
-    (void)interface;
-    (void)remoteIp;
-    (void)remoteMac;
-    CONN_LOGE(CONN_WIFI_DIRECT, "not supported");
-    return false;
-}
-
-static int32_t GetInterfaceStaticArp(const char *interface, char *arpOutput[], int32_t *arpOutputLen)
-{
-    (void)interface;
-    (void)arpOutput;
-    (void)arpOutputLen;
-    CONN_LOGE(CONN_WIFI_DIRECT, "not supported");
-    return SOFTBUS_ERR;
-}
-
 static bool IsThreeVapConflict(void)
 {
     return false;
@@ -615,16 +574,10 @@ static struct WifiDirectP2pAdapter g_adapter = {
     .setConnectNotify = SetConnectNotify,
 
     .getBaseMac = GetBaseMac,
-    .addInterfaceMultiIps = AddInterfaceMultiIps,
-    .deleteInterfaceMultiIps = DeleteInterfaceMultiIps,
-    .addInterfaceStaticArp = AddInterfaceStaticArp,
-    .deleteInterfaceStaticArp = DeleteInterfaceStaticArp,
-    .getInterfaceStaticArp = GetInterfaceStaticArp,
-
     .isThreeVapConflict = IsThreeVapConflict,
 };
 
-struct WifiDirectP2pAdapter* GetWifiDirectP2pAdapter(void)
+struct WifiDirectP2pAdapter *GetWifiDirectP2pAdapter(void)
 {
     return &g_adapter;
 }

@@ -1427,8 +1427,6 @@ static void TransProxyTimerItemProc(const ListNode *proxyProcList)
                 (void)memcpy_s(resetMsg, sizeof(ProxyChannelInfo), removeNode, sizeof(ProxyChannelInfo));
                 TransProxyPostResetPeerMsgToLoop(resetMsg);
             }
-            TransProxyPostOpenClosedMsgToLoop(removeNode);
-            TransProxyPostDisConnectMsgToLoop(connId);
             TransEventExtra extra = {
                 .peerNetworkId = NULL,
                 .calleePkg = NULL,
@@ -1439,6 +1437,8 @@ static void TransProxyTimerItemProc(const ListNode *proxyProcList)
                 .socketName = removeNode->appInfo.myData.sessionName
             };
             TRANS_EVENT(EVENT_SCENE_CLOSE_CHANNEL_TIMEOUT, EVENT_STAGE_CLOSE_CHANNEL, extra);
+            TransProxyPostOpenClosedMsgToLoop(removeNode);
+            TransProxyPostDisConnectMsgToLoop(connId);
         } else if (status == PROXY_CHANNEL_STATUS_HANDSHAKE_TIMEOUT) {
             connId = removeNode->connId;
             TransProxyPostOpenFailMsgToLoop(removeNode, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
