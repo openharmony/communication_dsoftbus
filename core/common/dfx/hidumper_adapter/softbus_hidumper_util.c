@@ -29,7 +29,6 @@
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_event.h"
-#include "softbus_log_old.h"
 #include "stats_event.h"
 #include "hisysevent_manager_c.h"
 

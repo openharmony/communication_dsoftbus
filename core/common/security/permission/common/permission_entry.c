@@ -635,7 +635,7 @@ int32_t AddDynamicPermission(int32_t callingUid, int32_t callingPid, const char 
 
     SoftBusPermissionEntry *permissionEntry = (SoftBusPermissionEntry *)SoftBusCalloc(sizeof(SoftBusPermissionEntry));
     if (permissionEntry == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "AddDynamicPermission malloc failed!");
+        COMM_LOGE(COMM_PERM, "AddDynamicPermission malloc failed!");
         SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
         return SOFTBUS_MALLOC_ERR;
     }
