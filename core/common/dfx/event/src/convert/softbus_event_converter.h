@@ -27,8 +27,9 @@
 extern "C" {
 #endif
 
-#define INVALID_INT_VALUE          0
-#define PARAM_STRING_VALUE_MAX_LEN 256
+#define INVALID_INT_VALUE               0
+#define PARAM_STRING_VALUE_MAX_LEN      256
+#define PARAM_LONG_STRING_VALUE_MAX_LEN (256 * 1024)
 
 typedef struct {
     char name[MAX_LENGTH_OF_PARAM_NAME];
@@ -79,6 +80,17 @@ static inline bool AssignerString(const char *value, HiSysEventParam **param)
     }
     return InitString(&(*param)->v.s, PARAM_STRING_VALUE_MAX_LEN) &&
         CopyString((*param)->v.s, value, PARAM_STRING_VALUE_MAX_LEN);
+}
+
+/* Used by ASSIGNER macros */
+static inline bool AssignerLongString(const char *value, HiSysEventParam **param)
+{
+    if (value == NULL || strlen(value) == 0) {
+        (*param)->v.s = NULL;
+        return false;
+    }
+    return InitString(&(*param)->v.s, PARAM_LONG_STRING_VALUE_MAX_LEN) &&
+        CopyString((*param)->v.s, value, PARAM_LONG_STRING_VALUE_MAX_LEN);
 }
 
 /* Used by ASSIGNER macros */
