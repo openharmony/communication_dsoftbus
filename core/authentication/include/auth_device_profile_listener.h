@@ -24,7 +24,7 @@
 #include "service_profile.h"
 
 namespace OHOS {
-namespace AuthtoDp {
+namespace AuthToDeviceProfile {
 using namespace OHOS::DistributedDeviceProfile;
 
 class AuthDeviceProfileListener : public ProfileChangeListenerStub {
@@ -45,6 +45,6 @@ public:
     int32_t OnCharacteristicProfileUpdate(
         const CharacteristicProfile &oldProfile, const CharacteristicProfile &newProfile);
 };
-} // namespace AuthtoDp
+} // namespace AuthToDeviceProfile
 } // namespace OHOS
 #endif
