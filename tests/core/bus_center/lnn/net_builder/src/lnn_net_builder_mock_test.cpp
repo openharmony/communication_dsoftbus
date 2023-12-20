@@ -736,14 +736,11 @@ HWTEST_F(LNNNetBuilderMockTest, FIND_CONNECTION_FSM_TEST_001, TestSize.Level1)
     addr.type = CONNECTION_ADDR_BR;
     EXPECT_CALL(NetBuilderMock, LnnIsSameConnectionAddr(_, _, _)).WillOnce(Return(true));
     EXPECT_TRUE(FindConnectionFsmByAddr(&addr, false) != nullptr);
-    EXPECT_CALL(NetBuilderMock, LnnIsSameConnectionAddr(_, _, _)).WillOnce(Return(true));
     addr.type = CONNECTION_ADDR_BLE;
     EXPECT_CALL(NetBuilderMock, LnnIsSameConnectionAddr(_, _, _)).WillOnce(Return(false));
     EXPECT_TRUE(FindConnectionFsmByAddr(&addr, false) == nullptr);
-    EXPECT_CALL(NetBuilderMock, LnnIsSameConnectionAddr(_, _, _)).WillOnce(Return(false));
 
     EXPECT_TRUE(FindConnectionFsmByRequestId(REQUEST_ID) != nullptr);
-
     EXPECT_TRUE(FindConnectionFsmByRequestId(REQUEST_ID_ADD) == nullptr);
     EXPECT_TRUE(FindConnectionFsmByAuthId(AUTH_ID) != nullptr);
     EXPECT_TRUE(FindConnectionFsmByAuthId(AUTH_ID_ADD) == nullptr);
