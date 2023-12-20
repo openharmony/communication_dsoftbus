@@ -83,6 +83,9 @@ typedef enum {
     SHUTDOWN_REASON_RECV_FILE_ERR, /**< Shutdown for receiving file error */
     SHUTDOWN_REASON_RECV_DATA_ERR, /**< Shutdown for receiving data error */
     SHUTDOWN_REASON_UNEXPECTED,    /**< Shutdown for unexpected reason */
+    SHUTDOWN_REASON_SERVICE_DIED,  /**< Shutdown for death service */
+    SHUTDOWN_REASON_LNN_OFFLINE,   /**< Shutdown for offline */
+    SHUTDOWN_REASON_LINK_DOWN,     /**< Shutdown for link down */
 } ShutdownReason;
 
 /**

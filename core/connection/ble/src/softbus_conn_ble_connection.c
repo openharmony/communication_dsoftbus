@@ -485,7 +485,8 @@ void ConnBleRefreshIdleTimeout(ConnBleConnection *connection)
 
 void ConnBleInnerComplementDeviceId(ConnBleConnection *connection)
 {
-    if (connection == NULL || connection->protocol == BLE_GATT || strlen(connection->udid) != 0) {
+    if (strlen(connection->udid) != 0) {
+        CONN_LOGD(CONN_BLE, "udid already exist");
         return;
     }
     if (strlen(connection->networkId) == 0) {

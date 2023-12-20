@@ -83,7 +83,7 @@ static size_t GetKeySize(void)
     return IL_KEY_MAX;
 }
 
-static const char* GetContainerName(void)
+static const char *GetContainerName(void)
 {
     return "InnerLink";
 }
@@ -425,7 +425,7 @@ void InnerLinkDestructor(struct InnerLink *self)
 }
 
 /* new and delete */
-struct InnerLink* InnerLinkNew(void)
+struct InnerLink *InnerLinkNew(void)
 {
     struct InnerLink *self = SoftBusCalloc(sizeof(*self));
     CONN_CHECK_AND_RETURN_RET_LOGE(self != NULL, NULL, CONN_WIFI_DIRECT, "self is null");
@@ -439,7 +439,7 @@ void InnerLinkDelete(struct InnerLink *self)
     SoftBusFree(self);
 }
 
-struct InnerLink* InnerLinkNewArray(size_t size)
+struct InnerLink *InnerLinkNewArray(size_t size)
 {
     struct InnerLink *self = (struct InnerLink *)SoftBusCalloc(sizeof(*self) * size);
     CONN_CHECK_AND_RETURN_RET_LOGE(self != NULL, NULL, CONN_WIFI_DIRECT, "self is null");

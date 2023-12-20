@@ -16,6 +16,8 @@
 #include "wifi_direct_ip_manager.h"
 #include <string>
 #include <vector>
+#include <map>
+#include <set>
 #include "conn_log.h"
 #include "softbus_error_code.h"
 #include "utils/wifi_direct_ipv4_info.h"
@@ -25,9 +27,11 @@
 
 static constexpr int32_t HML_IP_NET_START = 1;
 static constexpr int32_t HML_IP_NET_END = 255;
-static constexpr const char *HML_IP_NET_PREFIX = "172.30.";
 static constexpr const char *HML_IP_SOURCE_SUFFIX = ".2";
 static constexpr const char *HML_IP_SINK_SUFFIX = ".1";
+
+static std::map<std::string, std::string> g_remoteArps;
+static std::set<std::pair<std::string, int32_t>> g_localIps;
 
 /* private method forward declare */
 static std::vector<std::string> GetHmlAllUsedIp(std::initializer_list<std::vector<WifiDirectIpv4Info>*> all);
@@ -64,9 +68,11 @@ static int32_t ConfigIp(const char *interface, struct WifiDirectIpv4Info *local,
 
     ret = AddInterfaceAddress(interface, localIp, local->prefixLength);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "add ip failed");
+    g_localIps.insert({localIp, local->prefixLength});
+
     ret = AddStaticArp(interface, remoteIp, remoteMac);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "add static arp failed");
-
+    g_remoteArps.insert({remoteIp, remoteMac});
     return SOFTBUS_OK;
 }
 
@@ -86,13 +92,31 @@ static void ReleaseIp(const char *interface, struct WifiDirectIpv4Info *local, s
 
     ret = DeleteInterfaceAddress(interface, localIp, local->prefixLength);
     CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "delete ip failed");
+    g_localIps.erase({localIp, local->prefixLength});
+
     ret = DeleteStaticArp(interface, remoteIp, remoteMac);
     CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "delete static arp failed");
+    g_remoteArps.erase(remoteIp);
 }
 
 static void ClearAllIps(const char *interface)
 {
     CONN_LOGD(CONN_WIFI_DIRECT, "%s", interface);
+    for (const auto &local : g_localIps) {
+        const auto *localIp = local.first.c_str();
+        if (DeleteInterfaceAddress(interface, localIp, local.second) != SOFTBUS_OK) {
+            CONN_LOGE(CONN_WIFI_DIRECT, "delete ip=%s failed", WifiDirectAnonymizeIp(localIp));
+        }
+    }
+
+    for (const auto &remote : g_remoteArps) {
+        const auto *remoteIp = remote.first.c_str();
+        const auto *remoteMac = remote.second.c_str();
+        if (DeleteStaticArp(interface, remoteIp, remoteMac) != SOFTBUS_OK) {
+            CONN_LOGE(CONN_WIFI_DIRECT, "delete arp (%s,%s) failed", WifiDirectAnonymizeIp(remoteIp),
+                      WifiDirectAnonymizeIp(remoteMac));
+        }
+    }
 }
 
 /* private method implement */

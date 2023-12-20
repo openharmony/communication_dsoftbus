@@ -26,7 +26,6 @@ int32_t RegAuthVerifyListener(const AuthVerifyListener *listener)
 
 void UnregAuthVerifyListener(void)
 {
-    return;
 }
 
 uint32_t AuthGenRequestId(void)

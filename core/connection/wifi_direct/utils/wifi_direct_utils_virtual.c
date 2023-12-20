@@ -13,29 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef SOFTBUS_DFX_ANONYMIZE_H
-#define SOFTBUS_DFX_ANONYMIZE_H
+#include "wifi_direct_utils.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-/**
- * Anonymize the sensitive plain text.
- *
- * @note Need to call {@link AnonymizeFree} to release anonymizedStr.
- * @param plainStr The plain string to be anonymized.
- * @param anonymizedStr The anonymized string.
- */
-void Anonymize(const char *plainStr, char **anonymizedStr);
-
-/**
- * Release the anonymized string.
- *
- * @param anonymizedStr The anonymized string.
- */
-void AnonymizeFree(char *anonymizedStr);
-
-#ifdef __cplusplus
+static bool SupportHmlTwo()
+{
+    return false;
 }
-#endif
-#endif // SOFTBUS_DFX_ANONYMIZE_H
+
+static struct WifiDirectUtils g_utils = {
+    .supportHmlTwo = SupportHmlTwo,
+};
+
+struct WifiDirectUtils* GetWifiDirectUtils(void)
+{
+    return &g_utils;
+}

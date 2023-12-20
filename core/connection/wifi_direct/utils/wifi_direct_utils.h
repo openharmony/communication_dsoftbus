@@ -30,8 +30,9 @@ struct WifiDirectUtils {
     void (*intToBytes)(uint32_t data, uint32_t len, uint8_t *out, uint32_t outSize);
     void (*hexDump)(const char *banana, const uint8_t *data, size_t size);
     void (*showLinkInfoList)(const char *banana, ListNode *list);
-    void (*printLargeString)(const char *string);
     int32_t (*strCompareIgnoreCase)(const char *str1, const char *str2);
+    bool (*supportHml)(void);
+    bool (*supportHmlTwo)(void);
 };
 
 struct WifiDirectUtils* GetWifiDirectUtils(void);

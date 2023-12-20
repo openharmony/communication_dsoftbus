@@ -40,6 +40,7 @@ typedef struct {
     int32_t channelId;
     ChannelType channelType;
     void (*OnSessionClosed)(int sessionId);
+    void (*OnShutdown)(int32_t socket, ShutdownReason reason);
 } DestroySessionInfo;
 
 int32_t CheckPermissionState(int32_t sessionId)
@@ -164,7 +165,8 @@ static void DestroySessionId(void)
     return;
 }
 
-static DestroySessionInfo *CreateDestroySessionNode(SessionInfo *sessionNode, const ClientSessionServer *server)
+NO_SANITIZE("cfi") static DestroySessionInfo *CreateDestroySessionNode(SessionInfo *sessionNode,
+    const ClientSessionServer *server)
 {
     DestroySessionInfo *destroyNode = (DestroySessionInfo *)SoftBusMalloc(sizeof(DestroySessionInfo));
     if (destroyNode == NULL) {
@@ -175,10 +177,11 @@ static DestroySessionInfo *CreateDestroySessionNode(SessionInfo *sessionNode, co
     destroyNode->channelId = sessionNode->channelId;
     destroyNode->channelType = sessionNode->channelType;
     destroyNode->OnSessionClosed = server->listener.session.OnSessionClosed;
+    destroyNode->OnShutdown = server->listener.socket.OnShutdown;
     return destroyNode;
 }
 
-static void ClientDestroySession(const ListNode *destroyList)
+NO_SANITIZE("cfi") static void ClientDestroySession(const ListNode *destroyList, ShutdownReason reason)
 {
     if (IsListEmpty(destroyList)) {
         TRANS_LOGE(TRANS_SDK, "destroyList is empty fail.");
@@ -193,6 +196,8 @@ static void ClientDestroySession(const ListNode *destroyList)
         (void)ClientTransCloseChannel(destroyNode->channelId, destroyNode->channelType);
         if (destroyNode->OnSessionClosed != NULL) {
             destroyNode->OnSessionClosed(id);
+        } else if (destroyNode->OnShutdown != NULL) {
+            destroyNode->OnShutdown(id, reason);
         }
         ListDelete(&(destroyNode->node));
         SoftBusFree(destroyNode);
@@ -248,7 +253,7 @@ void TransClientDeinit(void)
         DestroyClientSessionServer(serverNode, &destroyList);
     }
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-    ClientDestroySession(&destroyList);
+    ClientDestroySession(&destroyList, SHUTDOWN_REASON_LOCAL);
 
     DestroySoftBusList(g_clientSessionServerList);
     g_clientSessionServerList = NULL;
@@ -610,7 +615,7 @@ int32_t ClientDeleteSessionServer(SoftBusSecType type, const char *sessionName)
         }
     }
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-    (void)ClientDestroySession(&destroyList);
+    (void)ClientDestroySession(&destroyList, SHUTDOWN_REASON_LOCAL);
     return SOFTBUS_OK;
 }
 
@@ -1226,7 +1231,7 @@ static void ClientTransLnnOfflineProc(NodeBasicInfo *info)
         DestroyClientSessionByNetworkId(serverNode, info->networkId, ROUTE_TYPE_ALL, &destroyList);
     }
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-    (void)ClientDestroySession(&destroyList);
+    (void)ClientDestroySession(&destroyList, SHUTDOWN_REASON_LNN_OFFLINE);
     return;
 }
 
@@ -1290,7 +1295,7 @@ void ClientTransOnLinkDown(const char *networkId, int32_t routeType)
         DestroyClientSessionByNetworkId(serverNode, networkId, routeType, &destroyList);
     }
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-    (void)ClientDestroySession(&destroyList);
+    (void)ClientDestroySession(&destroyList, SHUTDOWN_REASON_LINK_DOWN);
     return;
 }
 
@@ -1393,7 +1398,7 @@ void ClientCleanAllSessionWhenServerDeath(void)
         }
     }
     (void)SoftBusMutexUnlock(&g_clientSessionServerList->lock);
-    (void)ClientDestroySession(&destroyList);
+    (void)ClientDestroySession(&destroyList, SHUTDOWN_REASON_SERVICE_DIED);
     TRANS_LOGI(TRANS_SDK, "client destroy session cnt=%d.", destroyCnt);
 }
 
