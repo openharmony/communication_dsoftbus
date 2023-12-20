@@ -301,7 +301,7 @@ int32_t ServerStopTimeSync(IpcIo *req, IpcIo *reply)
         LNN_LOGE(LNN_STATE, "ServerStopTimeSync no permission");
         return SOFTBUS_PERMISSION_DENIED;
     }
-    int32_t ret = LnnIpcStopTimeSync(pkgName, targetNetworkId);
+    int32_t ret = LnnIpcStopTimeSync(pkgName, targetNetworkId, 0);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "ServerStopTimeSync start time sync failed");
         return SOFTBUS_ERR;
