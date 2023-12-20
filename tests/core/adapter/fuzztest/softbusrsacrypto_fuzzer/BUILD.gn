@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,31 +11,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+#####################hydra-fuzz###################
 import("//build/test.gni")
-import("../../../dsoftbus.gni")
+import("../../../../../dsoftbus.gni")
 
-module_output_path = "dsoftbus/core"
-dsoftbus_root_path = "../../.."
+##############################fuzztest##########################################
 
-ohos_unittest("AdapterDsoftbusRsaCryptoTest") {
-  module_out_path = module_output_path
-  sources = [ "unittest/dsoftbus_rsa_crypto_test.cpp" ]
+dsoftbus_root_path = "../../../../.."
 
-  include_dirs = [
-    "$dsoftbus_root_path/adapter/common/include",
-    "$dsoftbus_root_path/core/adapter/huks/include",
-    "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/common/dfx/interface/include",
-    "$dsoftbus_root_path/interfaces/kits/common",
-    "//third_party/bounds_checking_function/include",
+ohos_fuzztest("SoftBusRsaCryptoFuzzTest") {
+  module_out_path = dsoftbus_fuzz_out_path
+  fuzz_config_file =
+      "$dsoftbus_root_path/tests/core/adapter/fuzztest/softbusrsacrypto_fuzzer"
+  include_dirs = [ "$dsoftbus_root_path/core/adapter/huks/include" ]
+
+  sources = [ "softbusrsacrypto_fuzzer.cpp" ]
+
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+    "-fstack-protector-strong",
   ]
 
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (is_standard_system) {
@@ -51,14 +54,4 @@ ohos_unittest("AdapterDsoftbusRsaCryptoTest") {
       "hilog:libhilog",
     ]
   }
-}
-
-group("unittest") {
-  testonly = true
-  deps = [ ":AdapterDsoftbusRsaCryptoTest" ]
-}
-
-group("fuzztest") {
-  testonly = true
-  deps = [ "fuzztest:fuzztest" ]
 }
