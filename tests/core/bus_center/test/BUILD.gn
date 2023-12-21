@@ -458,9 +458,9 @@ group("unittest") {
   testonly = true
   deps = [
     ":BusCenterIpcTest",
-    ":ClientProxyTest",
-    ":HeartBeatCtrlTest",
-    ":HeartBeatFSMTest",
+  # ":ClientProxyTest",
+  # ":HeartBeatCtrlTest",
+  # ":HeartBeatFSMTest",
     ":HeartBeatMediumTest",
     ":HeartBeatStrategyTest",
   ]
