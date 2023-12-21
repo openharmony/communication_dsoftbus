@@ -185,7 +185,7 @@ int64_t AuthGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer, bool
 }
 
 int32_t AuthRestoreAuthManager(const char *udidHash,
-    const AuthConnInfo *connInfo, int32_t requestId, NodeInfo *nodeInfo, int64_t *authId)
+    const AuthConnInfo *connInfo, uint32_t requestId, NodeInfo *nodeInfo, int64_t *authId)
 {
     if (udidHash == NULL || connInfo == NULL || nodeInfo == NULL || authId == NULL) {
         AUTH_LOGW(AUTH_CONN, "restore manager fail because para error");
