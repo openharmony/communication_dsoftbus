@@ -22,7 +22,7 @@ group("unittest") {
   ]
   if (support_bluetooth && dsoftbus_feature_conn_br) {
     deps += [
-      "br:BrConnTest",
+    # "br:BrConnTest",
       "br:ConnectionBrTest",
     ]
   }

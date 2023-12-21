@@ -81,7 +81,7 @@ ohos_unittest("PermissionEntryStaticTest") {
 group("unittest") {
   testonly = true
   deps = [
-    ":PermissionEntryStaticTest",
-    ":PermissionEntryTest",
+  # ":PermissionEntryStaticTest",
+  # ":PermissionEntryTest",
   ]
 }

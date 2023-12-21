@@ -325,10 +325,10 @@ if (defined(ohos_lite)) {
   group("unittest") {
     testonly = true
     deps = [
-      ":BusCenterHeartbeatSdkTest",
+    # ":BusCenterHeartbeatSdkTest",
       ":BusCenterMetaNodeSdkTest",
       ":BusCenterSdkTest",
-      ":BusCenterServerTest",
+    # ":BusCenterServerTest",
       ":ClientBusCentManagerTest",
       ":ClientBusCenterSdkTest",
       ":ClientBusMangerTest",

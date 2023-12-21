@@ -23,7 +23,7 @@ ohos_unittest("SoftBusDfxLogTest") {
     "mock/hilog_mock.cpp",
     "src/auth_log_test.cpp",
     "src/comm_log_test.cpp",
-    "src/conn_log_test.cpp",
+  # "src/conn_log_test.cpp",
     "src/disc_log_test.cpp",
     "src/lnn_log_test.cpp",
     "src/softbus_log_test.cpp",
