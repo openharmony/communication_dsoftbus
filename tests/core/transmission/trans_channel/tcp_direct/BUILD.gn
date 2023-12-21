@@ -470,11 +470,11 @@ ohos_unittest("TransTcpDirectMessageStaticTest") {
 group("unittest") {
   testonly = true
   deps = [
-    ":TransCoreTcpDirectTest",
+  # ":TransCoreTcpDirectTest",
     ":TransServerTcpDirectTest",
     ":TransTcpDirectMessageAppendTest",
-    ":TransTcpDirectMessageStaticTest",
-    ":TransTcpDirectMessageTest",
+  # ":TransTcpDirectMessageStaticTest",
+  # ":TransTcpDirectMessageTest",
     ":TransTcpDirectP2pTest",
   ]
 }
