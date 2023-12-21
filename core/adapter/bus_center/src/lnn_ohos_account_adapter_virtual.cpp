@@ -19,12 +19,15 @@
 
 int32_t GetOsAccountId(char *id, uint32_t idLen, uint32_t *len)
 {
+    (void)id;
+    (void)idLen;
+    (void)len;
     return SOFTBUS_OK;
 }
 
 int64_t GetCurrentAccount(void)
 {
-    return 0;
+    return SOFTBUS_OK;
 }
 
 int32_t GetActiveOsAccountIds(void)

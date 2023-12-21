@@ -75,25 +75,25 @@ static void Calculate(void)
 
     uint64_t start = self->timePoints[TP_P2P_CONNECT_START];
     uint64_t end = self->timePoints[TP_P2P_CONNECT_END];
-    if (end && start) {
+    if (end != 0 && start != 0) {
         self->timeCosts[TC_TOTAL] = end - start;
     }
 
     start = self->timePoints[TP_P2P_CREATE_GROUP_START];
     end = self->timePoints[TP_P2P_CREATE_GROUP_END];
-    if (end && start) {
+    if (end != 0 && start != 0) {
         self->timeCosts[TC_CREATE_GROUP] = end - start;
     }
 
     start = self->timePoints[TP_P2P_CONNECT_GROUP_START];
     end = self->timePoints[TP_P2P_CONNECT_GROUP_END];
-    if (end && start) {
+    if (end != 0 && start != 0) {
         self->timeCosts[TC_CONNECT_GROUP] = end - start;
     }
 
     start = self->timePoints[TP_P2P_GET_WIFI_CONFIG_START];
     end = self->timePoints[TP_P2P_GET_WIFI_CONFIG_END];
-    if (end && start) {
+    if (end != 0 && start != 0) {
         self->timeCosts[TC_GET_WIFI_CONFIG] = end - start;
     }
 

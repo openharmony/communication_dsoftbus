@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,6 @@
  */
 
 #include <stddef.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include <securec.h>
@@ -27,7 +26,6 @@
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_log.h"
 #include "softbus_common.h"
-#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_utils.h"
@@ -109,7 +107,7 @@ int32_t GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len)
     switch (key) {
         case COMM_DEVICE_KEY_DEVNAME:
             LNN_LOGI(LNN_STATE, "set default devicename in netledger init");
-            if (strncpy_s(value, len, DEFAULT_DEVICE_NAME, strlen(DEFAULT_DEVICE_NAME)) != EOK) {
+            if (strcpy_s(value, len, DEFAULT_DEVICE_NAME) != EOK) {
                 return SOFTBUS_ERR;
             }
             break;
