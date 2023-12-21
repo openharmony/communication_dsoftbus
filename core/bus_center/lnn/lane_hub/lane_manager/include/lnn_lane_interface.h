@@ -151,6 +151,7 @@ typedef struct {
     bool p2pOnly;
     ProtocolType acceptableProtocols;
     int32_t pid;
+    bool isWithQos;
     //OldInfo
     char peerBleMac[MAX_MAC_LEN];
     //'psm' is valid only when 'expectedlink' contains 'LANE_COC'
