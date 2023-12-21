@@ -380,8 +380,6 @@ int32_t ConnBleUpdateConnectionRc(ConnBleConnection *connection, uint16_t challe
 
 int32_t ConnBleOnReferenceRequest(ConnBleConnection *connection, const cJSON *json)
 {
-    CONN_CHECK_AND_RETURN_RET_LOGE(
-        json != NULL, SOFTBUS_INVALID_PARAM, "ble On Reference Reques faild, json is null");
     int32_t delta = 0;
     int32_t peerRc = 0;
     uint16_t challengeCode = 0;
