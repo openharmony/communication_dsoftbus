@@ -281,6 +281,99 @@ int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const ch
     return SOFTBUS_OK;
 }
 
+static void GetChannelInfoFromConn(ChannelInfo *info, SessionConn *conn, int32_t channelId)
+{
+    info->channelId = channelId;
+    info->channelType = CHANNEL_TYPE_TCP_DIRECT;
+    info->isServer = conn->serverSide;
+    info->isEnabled = true;
+    info->fd = conn->appInfo.fd;
+    info->sessionKey = conn->appInfo.sessionKey;
+    info->myHandleId = conn->appInfo.myHandleId;
+    info->peerHandleId = conn->appInfo.peerHandleId;
+    info->peerSessionName = conn->appInfo.peerData.sessionName;
+    info->groupId = conn->appInfo.groupId;
+    info->isEncrypt = true;
+    info->keyLen = SESSION_KEY_LENGTH;
+    info->peerUid = conn->appInfo.peerData.uid;
+    info->peerPid = conn->appInfo.peerData.pid;
+    info->routeType = conn->appInfo.routeType;
+    info->businessType = conn->appInfo.businessType;
+    info->autoCloseTime = conn->appInfo.autoCloseTime;
+    info->peerIp = conn->appInfo.peerData.addr;
+    info->peerPort = conn->appInfo.peerData.port;
+    info->linkType = conn->appInfo.linkType;
+    info->dataConfig = conn->appInfo.myData.dataConfig;
+}
+
+static int32_t GetServerSideIpInfo(SessionConn *conn, char *ip, uint32_t len)
+{
+    char myIp[IP_LEN] = { 0 };
+    if (conn->appInfo.routeType == WIFI_STA) {
+        if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, myIp, sizeof(myIp)) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "NotifyChannelOpened get local ip fail");
+            return SOFTBUS_TRANS_GET_LOCAL_IP_FAILED;
+        }
+        if (LnnSetLocalStrInfo(STRING_KEY_WLAN_IP, myIp) != SOFTBUS_OK) {
+            TRANS_LOGW(TRANS_CTRL, "ServerSide wifi set local ip fail");
+        }
+        if (LnnSetDLP2pIp(conn->appInfo.peerData.deviceId, CATEGORY_UUID, conn->appInfo.peerData.addr) != SOFTBUS_OK) {
+            TRANS_LOGW(TRANS_CTRL, "ServerSide wifi set peer ip fail");
+        }
+    } else if (conn->appInfo.routeType == WIFI_P2P) {
+        if (GetWifiDirectManager()->getLocalIpByUuid(conn->appInfo.peerData.deviceId, myIp, sizeof(myIp)) !=
+            SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "NotifyChannelOpened get p2p ip fail");
+            return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
+        }
+        if (LnnSetLocalStrInfo(STRING_KEY_P2P_IP, myIp) != SOFTBUS_OK) {
+            TRANS_LOGW(TRANS_CTRL, "ServerSide set local p2p ip fail");
+        }
+        if (LnnSetDLP2pIp(conn->appInfo.peerData.deviceId, CATEGORY_UUID, conn->appInfo.peerData.addr) != SOFTBUS_OK) {
+            TRANS_LOGW(TRANS_CTRL, "ServerSide set peer p2p ip fail");
+        }
+    }
+    if (strcpy_s(ip, len, myIp)) {
+        TRANS_LOGE(TRANS_CTRL, "copy str failed");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t GetClientSideIpInfo(SessionConn *conn, char *ip, uint32_t len)
+{
+    char myIp[IP_LEN] = { 0 };
+    if (conn->appInfo.routeType == WIFI_STA) {
+        if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, myIp, sizeof(myIp)) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "NotifyChannelOpened get local ip fail");
+            return SOFTBUS_TRANS_GET_LOCAL_IP_FAILED;
+        }
+        if (LnnSetLocalStrInfo(STRING_KEY_WLAN_IP, myIp) != SOFTBUS_OK) {
+            TRANS_LOGW(TRANS_CTRL, "Client wifi set local ip fail");
+        }
+        if (LnnSetDLP2pIp(conn->appInfo.peerData.deviceId, CATEGORY_UUID, conn->appInfo.peerData.addr) != SOFTBUS_OK) {
+            TRANS_LOGW(TRANS_CTRL, "Client wifi set peer ip fail");
+        }
+    } else if (conn->appInfo.routeType == WIFI_P2P) {
+        if (GetWifiDirectManager()->getLocalIpByUuid(conn->appInfo.peerData.deviceId, myIp, sizeof(myIp)) !=
+            SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "NotifyChannelOpened get p2p ip fail");
+            return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
+        }
+        if (LnnSetLocalStrInfo(STRING_KEY_P2P_IP, myIp) != SOFTBUS_OK) {
+            TRANS_LOGW(TRANS_CTRL, "Client set local p2p ip fail");
+        }
+        if (LnnSetDLP2pIp(conn->appInfo.peerData.deviceId, CATEGORY_UUID, conn->appInfo.peerData.addr) != SOFTBUS_OK) {
+            TRANS_LOGW(TRANS_CTRL, "Client set peer p2p ip fail");
+        }
+    }
+    if (strcpy_s(ip, len, conn->appInfo.myData.addr)) {
+        TRANS_LOGE(TRANS_CTRL, "copy str failed");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t NotifyChannelOpened(int32_t channelId)
 {
     SessionConn conn;
@@ -288,84 +381,18 @@ static int32_t NotifyChannelOpened(int32_t channelId)
         TRANS_LOGE(TRANS_CTRL, "notify channel open failed, get tdcInfo is null");
         return SOFTBUS_ERR;
     }
-    ChannelInfo info = {0};
-    info.channelId = channelId;
-    info.channelType = CHANNEL_TYPE_TCP_DIRECT;
-    info.isServer = conn.serverSide;
-    info.isEnabled = true;
-    info.fd = conn.appInfo.fd;
-    info.sessionKey = conn.appInfo.sessionKey;
-    info.myHandleId = conn.appInfo.myHandleId;
-    info.peerHandleId = conn.appInfo.peerHandleId;
-    info.peerSessionName = conn.appInfo.peerData.sessionName;
-    info.groupId = conn.appInfo.groupId;
-    info.isEncrypt = true;
-    info.keyLen = SESSION_KEY_LENGTH;
-    info.peerUid = conn.appInfo.peerData.uid;
-    info.peerPid = conn.appInfo.peerData.pid;
-    info.routeType = conn.appInfo.routeType;
-    info.businessType = conn.appInfo.businessType;
-    info.autoCloseTime = conn.appInfo.autoCloseTime;
-    info.peerIp = conn.appInfo.peerData.addr;
-    info.peerPort = conn.appInfo.peerData.port;
-    info.linkType = conn.appInfo.linkType;
-    info.dataConfig = conn.appInfo.myData.dataConfig;
-    char myIp[IP_LEN] = {0};
-    if (conn.serverSide) {
-        if (conn.appInfo.routeType == WIFI_STA) {
-            if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, myIp, sizeof(myIp)) != SOFTBUS_OK) {
-                TRANS_LOGE(TRANS_CTRL, "NotifyChannelOpened get local ip fail");
-                return SOFTBUS_TRANS_GET_LOCAL_IP_FAILED;
-            }
-            if (LnnSetLocalStrInfo(STRING_KEY_WLAN_IP, myIp) != SOFTBUS_OK) {
-                TRANS_LOGW(TRANS_CTRL, "ServerSide wifi set local ip fail");
-            }
-            if (LnnSetDLP2pIp(conn.appInfo.peerData.deviceId, CATEGORY_UUID, conn.appInfo.peerData.addr) != SOFTBUS_OK) {
-                TRANS_LOGW(TRANS_CTRL, "ServerSide wifi set peer ip fail");
-            }
-        } else if (conn.appInfo.routeType == WIFI_P2P) {
-            if (GetWifiDirectManager()->getLocalIpByUuid(conn.appInfo.peerData.deviceId, myIp,
-                sizeof(myIp)) != SOFTBUS_OK) {
-                TRANS_LOGE(TRANS_CTRL, "NotifyChannelOpened get p2p ip fail");
-                return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
-            }
-            if (LnnSetLocalStrInfo(STRING_KEY_P2P_IP, myIp) != SOFTBUS_OK) {
-                TRANS_LOGW(TRANS_CTRL, "ServerSide set local p2p ip fail");
-            }
-            if (LnnSetDLP2pIp(conn.appInfo.peerData.deviceId, CATEGORY_UUID, conn.appInfo.peerData.addr) != SOFTBUS_OK) {
-                TRANS_LOGW(TRANS_CTRL, "ServerSide set peer p2p ip fail");
-            }
-        }
-        info.myIp = myIp;
-    } else {
-        if (conn.appInfo.routeType == WIFI_STA) {
-            if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, myIp, sizeof(myIp)) != SOFTBUS_OK) {
-                TRANS_LOGE(TRANS_CTRL, "NotifyChannelOpened get local ip fail");
-                return SOFTBUS_TRANS_GET_LOCAL_IP_FAILED;
-            }
-            if (LnnSetLocalStrInfo(STRING_KEY_WLAN_IP, myIp) != SOFTBUS_OK) {
-                TRANS_LOGW(TRANS_CTRL, "Client wifi set local ip fail");
-            }
-            if (LnnSetDLP2pIp(conn.appInfo.peerData.deviceId, CATEGORY_UUID, conn.appInfo.peerData.addr) != SOFTBUS_OK) {
-                TRANS_LOGW(TRANS_CTRL, "Client wifi set peer ip fail");
-            }
-        } else if (conn.appInfo.routeType == WIFI_P2P) {
-            if (GetWifiDirectManager()->getLocalIpByUuid(conn.appInfo.peerData.deviceId, myIp,
-                sizeof(myIp)) != SOFTBUS_OK) {
-                TRANS_LOGE(TRANS_CTRL, "NotifyChannelOpened get p2p ip fail");
-                return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
-            }
-            if (LnnSetLocalStrInfo(STRING_KEY_P2P_IP, myIp) != SOFTBUS_OK) {
-                TRANS_LOGW(TRANS_CTRL, "Client set local p2p ip fail");
-            }
-            if (LnnSetDLP2pIp(conn.appInfo.peerData.deviceId, CATEGORY_UUID, conn.appInfo.peerData.addr) != SOFTBUS_OK) {
-                TRANS_LOGW(TRANS_CTRL, "Client set peer p2p ip fail");
-            }
-        }
-        info.myIp = conn.appInfo.myData.addr;
+    ChannelInfo info = { 0 };
+    GetChannelInfoFromConn(&info, &conn, channelId);
+    char myIp[IP_LEN] = { 0 };
+    int32_t ret = conn.serverSide ? GetServerSideIpInfo(&conn, myIp, IP_LEN) : GetClientSideIpInfo(&conn, myIp, IP_LEN);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get ip failed, ret = %d.", ret);
+        return ret;
     }
+    info.myIp = myIp;
+
     char buf[NETWORK_ID_BUF_LEN] = {0};
-    int32_t ret = LnnGetNetworkIdByUuid(conn.appInfo.peerData.deviceId, buf, NETWORK_ID_BUF_LEN);
+    ret = LnnGetNetworkIdByUuid(conn.appInfo.peerData.deviceId, buf, NETWORK_ID_BUF_LEN);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get info networkId fail.");
         return SOFTBUS_ERR;
