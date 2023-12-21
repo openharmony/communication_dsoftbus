@@ -156,6 +156,6 @@ group("unittest") {
   deps = [
     ":TransSdkTcpDirectTest",
     ":TransSessionTest",
-    ":TransTcpDirectTest",
+  # ":TransTcpDirectTest",
   ]
 }

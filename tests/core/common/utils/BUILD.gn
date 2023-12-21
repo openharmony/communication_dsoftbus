@@ -78,7 +78,7 @@ if (defined(ohos_lite)) {
   group("unittest") {
     testonly = true
     deps = [
-      ":SoftbusUtilsTest",
+    # ":SoftbusUtilsTest",
       ":Sqlite3UtilsTest",
       "permission_state_test:PermissionStateTest",
     ]

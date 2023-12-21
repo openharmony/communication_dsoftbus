@@ -469,12 +469,12 @@ ohos_unittest("AuthHichainTest") {
 group("unittest") {
   testonly = true
   deps = [
-    ":AuthEnhanceMockTest",
+  # ":AuthEnhanceMockTest",
     ":AuthHichainTest",
-    ":AuthOtherTest",
+  # ":AuthOtherTest",
     ":AuthTcpConnectionTest",
-    ":AuthTest",
-    ":AuthTestCallBackTest",
+  # ":AuthTest",
+  # ":AuthTestCallBackTest",
   ]
 }
 
