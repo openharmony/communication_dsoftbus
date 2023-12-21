@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,9 +22,8 @@
 #include "auth_hichain_adapter.h"
 #include "auth_log.h"
 #include "auth_session_fsm.h"
-#include "device_auth.h"
 #include "bus_center_manager.h"
-#include "device_auth_defines.h"
+#include "device_auth.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_json_utils.h"
@@ -181,6 +180,7 @@ static void OnGroupCreated(const char *groupInfo)
         return;
     }
     GroupInfo info;
+    (void)memset_s(&info, sizeof(GroupInfo), 0, sizeof(GroupInfo));
     if (ParseGroupInfo(groupInfo, &info) != SOFTBUS_OK) {
         return;
     }
@@ -209,6 +209,7 @@ static void OnGroupDeleted(const char *groupInfo)
         return;
     }
     GroupInfo info;
+    (void)memset_s(&info, sizeof(GroupInfo), 0, sizeof(GroupInfo));
     if (ParseGroupInfo(groupInfo, &info) != SOFTBUS_OK) {
         return;
     }
@@ -256,7 +257,7 @@ int32_t RegTrustDataChangeListener(const TrustDataChangeListener *listener)
 void UnregTrustDataChangeListener(void)
 {
     int32_t ret = UnregChangeListener(AUTH_APPID);
-    if (ret != 0) {
+    if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_HICHAIN, "hichain unRegDataChangeListener err=%d", ret);
     }
     (void)memset_s(&g_dataChangeListener, sizeof(TrustDataChangeListener), 0, sizeof(TrustDataChangeListener));
@@ -286,6 +287,7 @@ int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid)
 int32_t HichainProcessData(int64_t authSeq, const uint8_t *data, uint32_t len)
 {
     if (data == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "data is null");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = ProcessAuthData(authSeq, data, len, &g_hichainCallback);

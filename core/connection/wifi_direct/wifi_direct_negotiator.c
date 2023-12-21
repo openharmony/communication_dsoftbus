@@ -70,7 +70,7 @@ static int32_t HandleMessageFromProcessor(struct NegotiateMessage *msg)
     struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
 
     int32_t ret = SOFTBUS_OK;
-    if (msg) {
+    if (msg != NULL) {
         msg->dump(msg, 0);
         struct WifiDirectNegotiateChannel *channel = msg->getPointer(msg, NM_KEY_NEGO_CHANNEL, NULL);
         CONN_CHECK_AND_RETURN_RET_LOGW(channel != NULL, SOFTBUS_ERR, CONN_WIFI_DIRECT, "channel is null");
