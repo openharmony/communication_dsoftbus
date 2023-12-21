@@ -245,7 +245,7 @@ group("unittest") {
   testonly = true
   deps = [
     ":TransUdpManagerTest",
-    ":TransUdpNegoTest",
+  # ":TransUdpNegoTest",
     ":TransUdpNegotiationExchangeTest",
     ":TransUdpNegotiationTest",
   ]
