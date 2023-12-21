@@ -35,6 +35,8 @@ extern "C" {
 #define DSB() __asm__ volatile("dsb" ::: "memory")
 #ifdef __aarch64__
 #define DMB() __asm__ volatile("DMB ISHLD" : : : "memory")
+#elif defined(__riscv) && __riscv_xlen == 64
+#define DMB() __asm__ volatile("fence iorw,iorw" ::: "memory")
 #else
 #define DMB() __asm__ volatile("dmb" ::: "memory")
 #endif
