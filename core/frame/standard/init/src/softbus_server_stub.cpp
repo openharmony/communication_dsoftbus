@@ -17,6 +17,7 @@
 
 #include "accesstoken_kit.h"
 #include "access_token.h"
+#include "anonymizer.h"
 #include "comm_log.h"
 #include "discovery_service.h"
 #include "ipc_skeleton.h"
@@ -926,6 +927,9 @@ int32_t SoftBusServerStub::GetNodeKeyInfoInner(MessageParcel &data, MessageParce
         COMM_LOGE(COMM_SVC, "GetNodeKeyInfoInner read clientName or networkId failed!");
         return SOFTBUS_IPC_ERR;
     }
+    char *anonyNetworkId = nullptr;
+    Anonymize(networkId, &anonyNetworkId);
+    COMM_LOGI(COMM_SVC, "networkId = %s", anonyNetworkId);
     int32_t key;
     if (!data.ReadInt32(key)) {
         COMM_LOGE(COMM_SVC, "GetNodeKeyInfoInner read key failed!");
