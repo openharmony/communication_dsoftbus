@@ -748,6 +748,7 @@ ohos_unittest("LNNTopoManagerTest") {
   ]
 
   include_dirs = lnn_mock_test_include_dirs
+  include_dirs += [ "$dsoftbus_root_path/core/authentication/include" ]
   deps = lnn_mock_test_deps
 
   if (is_standard_system) {
@@ -1067,6 +1068,7 @@ ohos_unittest("LNNNetLedgerCommonTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
     "$dsoftbus_root_path/core/bus_center/monitor/include",
+    "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/dfx/interface/include",
     "$dsoftbus_root_path/adapter/common/include",
@@ -1136,6 +1138,7 @@ ohos_unittest("LNNDisctributedLedgerTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
     "$dsoftbus_root_path/core/bus_center/monitor/include",
+    "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/dfx/interface/include",
     "$dsoftbus_root_path/adapter/common/include",
@@ -1202,6 +1205,7 @@ ohos_unittest("LNNMetaNodeLedgerTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
     "$dsoftbus_root_path/core/bus_center/monitor/include",
+    "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/dfx/interface/include",
     "$dsoftbus_root_path/adapter/common/include",
