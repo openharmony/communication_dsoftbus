@@ -142,7 +142,7 @@ static int32_t NotifyOpenAuthChannelSuccess(const AppInfo *appInfo, bool isServe
     channelInfo.channelType = CHANNEL_TYPE_AUTH;
     channelInfo.isServer = isServer;
     channelInfo.isEnabled = true;
-    channelInfo.channelId = appInfo->myData.channelId;
+    channelInfo.channelId = (int32_t)appInfo->myData.channelId;
     channelInfo.peerDeviceId = (char *)appInfo->peerData.deviceId;
     channelInfo.peerSessionName = (char *)appInfo->peerData.sessionName;
     channelInfo.businessType = BUSINESS_TYPE_NOT_CARE;
@@ -184,8 +184,8 @@ static int32_t NotifyOnDataReceived(int32_t authId, const void *data, uint32_t l
     receiveData.dataLen = len;
     receiveData.dataType = TRANS_SESSION_BYTES;
 
-    return g_cb->OnDataReceived(channel.appInfo.myData.pkgName, channel.appInfo.myData.pid,
-        channel.appInfo.myData.channelId, CHANNEL_TYPE_AUTH, &receiveData);
+    return g_cb->OnDataReceived((const char *)(channel.appInfo.myData.pkgName), (int32_t)(channel.appInfo.myData.pid),
+        (int32_t)(channel.appInfo.myData.channelId), CHANNEL_TYPE_AUTH, &receiveData);
 }
 
 static int32_t CopyPeerAppInfo(AppInfo *recvAppInfo, AppInfo *channelAppInfo)

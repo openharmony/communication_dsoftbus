@@ -563,7 +563,7 @@ static int32_t TransClientUpdateTdcDataBufWInfo(int32_t channelId, char *recvBuf
         if (item->channelId != channelId) {
             continue;
         }
-        int32_t freeLen = (int32_t)(item->size) - (item->w - item->data);
+        int32_t freeLen = (int32_t)(item->size) - (int32_t)(item->w - item->data);
         if (recvLen > freeLen) {
             (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
             TRANS_LOGE(TRANS_SDK, "client tdc recvLen=%d override freeLen=%d.", recvLen, freeLen);
@@ -603,7 +603,7 @@ int32_t TransTdcRecvData(int32_t channelId)
         return SOFTBUS_ERR;
     }
 
-    int32_t recvLen = ConnRecvSocketData(fd, recvBuf, len, 0);
+    int32_t recvLen = (int32_t)ConnRecvSocketData(fd, recvBuf, len, 0);
     if (recvLen < 0) {
         SoftBusFree(recvBuf);
         TRANS_LOGE(TRANS_SDK, "client channelId=%d recv data failed,recvLen=%d.", channelId, recvLen);
