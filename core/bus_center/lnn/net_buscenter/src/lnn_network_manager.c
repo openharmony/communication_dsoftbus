@@ -531,6 +531,10 @@ static void NightModeChangeEventHandler(const LnnEventBasicInfo *info)
     if (g_nightOnCache == NULL) {
         LNN_LOGD(LNN_BUILDER, "init g_nightOnCache");
         g_nightOnCache = (ListNode *)SoftBusMalloc(sizeof(ListNode));
+        if (g_nightOnCache == NULL) {
+            LNN_LOGE(LNN_BUILDER, "malloc g_nightOnCache fail");
+            return;
+        }
         ListInit(g_nightOnCache);
     }
     const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
