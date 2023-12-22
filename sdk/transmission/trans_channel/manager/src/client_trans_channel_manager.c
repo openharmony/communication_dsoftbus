@@ -28,19 +28,23 @@ int32_t ClientTransChannelInit(void)
 {
     IClientSessionCallBack *cb = GetClientSessionCb();
     if (cb == NULL) {
+        TRANS_LOGE(TRANS_SDK, "get client session Cb failed.");
         return SOFTBUS_ERR;
     }
     if (TransTdcManagerInit(cb) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "trans tcp direct manager init failed.");
+        TRANS_LOGE(TRANS_SDK, "trans tcp manager init failed.");
         return SOFTBUS_ERR;
     }
     if (ClientTransAuthInit(cb) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "client trans auth init failed.");
         return SOFTBUS_ERR;
     }
     if (ClientTransProxyInit(cb) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "client trans proxy init failed.");
         return SOFTBUS_ERR;
     }
     if (ClientTransUdpMgrInit(cb) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "client trans udp mgr init failed.");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
