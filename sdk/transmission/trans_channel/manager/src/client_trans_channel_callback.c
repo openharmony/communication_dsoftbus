@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,6 @@
 
 #include "client_trans_auth_manager.h"
 #include "client_trans_proxy_manager.h"
-#include "client_trans_session_callback.h"
 #include "client_trans_session_manager.h"
 #include "client_trans_tcp_direct_manager.h"
 #include "client_trans_tcp_direct_callback.h"
@@ -111,6 +110,10 @@ int32_t TransOnChannelClosed(int32_t channelId, int32_t channelType, ShutdownRea
 int32_t TransOnChannelMsgReceived(int32_t channelId, int32_t channelType,
     const void *data, unsigned int len, SessionPktType type)
 {
+    if (data == NULL) {
+        TRANS_LOGE(TRANS_MSG, "param invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
     TRANS_LOGI(TRANS_MSG,
         "[client]: channelId=%d, channelType=%d.", channelId, channelType);
     switch (channelType) {
@@ -128,6 +131,10 @@ int32_t TransOnChannelMsgReceived(int32_t channelId, int32_t channelType,
 int32_t TransOnChannelQosEvent(int32_t channelId, int32_t channelType, int32_t eventId,
     int32_t tvCount, const QosTv *tvList)
 {
+    if (tvList == NULL) {
+        TRANS_LOGE(TRANS_MSG, "param invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
     TRANS_LOGI(TRANS_QOS,
         "[client] TransOnQosEvent: channelId=%d, channelType=%d eventId=%d.", channelId, channelType, eventId);
     switch (channelType) {
