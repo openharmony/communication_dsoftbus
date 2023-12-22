@@ -15,8 +15,8 @@
 
 #include "trans_tcp_direct_listener.h"
 
-#include <arpa/inet.h>
 #include <securec.h>
+
 #include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "softbus_adapter_crypto.h"
@@ -27,11 +27,11 @@
 #include "softbus_errcode.h"
 #include "softbus_message_open_channel.h"
 #include "softbus_socket.h"
+#include "trans_channel_manager.h"
+#include "trans_event.h"
+#include "trans_log.h"
 #include "trans_tcp_direct_message.h"
 #include "trans_tcp_direct_sessionconn.h"
-#include "trans_channel_manager.h"
-#include "trans_log.h"
-#include "trans_event.h"
 
 #define ID_OFFSET (1)
 
@@ -51,6 +51,10 @@ uint32_t SwitchAuthLinkTypeToFlagType(AuthLinkType type)
 
 int32_t GetCipherFlagByAuthId(int64_t authId, uint32_t *flag, bool *isAuthServer)
 {
+    if (flag == NULL || isAuthServer == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "param invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
     AuthConnInfo info;
     if (AuthGetServerSide(authId, isAuthServer) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get auth server side fail authId=%" PRId64, authId);
@@ -73,7 +77,6 @@ static int32_t StartVerifySession(SessionConn *conn)
         return SOFTBUS_TRANS_TCP_GENERATE_SESSIONKEY_FAILED;
     }
     SetSessionKeyByChanId(conn->channelId, conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey));
-
     bool isAuthServer = false;
     uint32_t cipherFlag = FLAG_WIFI;
     if (GetCipherFlagByAuthId(conn->authId, &cipherFlag, &isAuthServer)) {
@@ -84,7 +87,6 @@ static int32_t StartVerifySession(SessionConn *conn)
     if (isAuthServer) {
         seq |= AUTH_CONN_SERVER_SIDE;
     }
-
     char *bytes = PackRequest(&conn->appInfo);
     if (bytes == NULL) {
         TRANS_LOGE(TRANS_CTRL, "Pack Request failed");
@@ -131,14 +133,12 @@ static int32_t CreateSessionConnNode(ListenerModule module, int fd, int32_t chan
         module <= DIRECT_CHANNEL_SERVER_HML_END)) ? WIFI_P2P : WIFI_STA;
     conn->appInfo.routeType = (module == DIRECT_CHANNEL_SERVER_P2P) ? WIFI_P2P : WIFI_STA;
     conn->appInfo.peerData.port = clientAddr->socketOption.port;
-
     if (LnnGetLocalStrInfo(STRING_KEY_UUID, conn->appInfo.myData.deviceId, sizeof(conn->appInfo.myData.deviceId)) !=
         0) {
         TRANS_LOGE(TRANS_CTRL, "get local deviceId failed.");
         SoftBusFree(conn);
         return SOFTBUS_ERR;
     }
-
     if (strcpy_s(conn->appInfo.peerData.addr, sizeof(conn->appInfo.peerData.addr), clientAddr->socketOption.addr) !=
         EOK) {
         TRANS_LOGE(TRANS_CTRL, "copy ip to app info failed.");
@@ -153,13 +153,11 @@ static int32_t CreateSessionConnNode(ListenerModule module, int fd, int32_t chan
         SoftBusFree(conn);
         return SOFTBUS_MEM_ERR;
     }
-
     if (TransTdcAddSessionConn(conn) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "add session conn node failed.");
         SoftBusFree(conn);
         return SOFTBUS_ERR;
     }
-
     if (AddTrigger(conn->listenMod, fd, READ_TRIGGER) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "add trigger failed, delete session conn.");
         TransDelSessionConnById(chanId);
@@ -175,7 +173,6 @@ static int32_t TdcOnConnectEvent(ListenerModule module, int cfd, const ConnectOp
         TRANS_LOGW(TRANS_CTRL, "invalid param, cfd=%d", cfd);
         return SOFTBUS_INVALID_PARAM;
     }
-
     int32_t channelId = GenerateChannelId(true);
     int32_t ret = TransSrvAddDataBufNode(channelId, cfd); // fd != channelId
     if (ret != SOFTBUS_OK) {
@@ -183,7 +180,6 @@ static int32_t TdcOnConnectEvent(ListenerModule module, int cfd, const ConnectOp
         ConnShutdownSocket(cfd);
         return ret;
     }
-
     ret = CreateSessionConnNode(module, cfd, channelId, clientAddr);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "create session conn node fail, delete data buf node.");
@@ -207,6 +203,7 @@ static void CloseTcpDirectFd(int fd)
 static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channelId, int32_t fd)
 {
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGI(TRANS_CTRL, "unequal SOFTBUS_OK");
         TransEventExtra extra = {
             .socketName = NULL,
             .peerNetworkId = NULL,
