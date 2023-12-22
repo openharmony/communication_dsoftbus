@@ -634,7 +634,7 @@ static int32_t updataP2pLinkReq(P2pLinkReqList *p2pReqInfo, uint32_t laneLinkReq
         p2pReqInfo->p2pInfo.bandWidth = 0;
         p2pReqInfo->p2pInfo.isWithQos = false;
     }
-    LNN_LOGE(LNN_LANE, "wifidirect conn, bandWidth=%d isWithQos=%d laneId=%d",
+    LNN_LOGI(LNN_LANE, "wifidirect conn, bandWidth=%d isWithQos=%d laneId=%d",
         p2pReqInfo->p2pInfo.bandWidth, p2pReqInfo->p2pInfo.isWithQos, laneLinkReqId);
     return SOFTBUS_OK;
 }
