@@ -424,7 +424,7 @@ int32_t ClientTransProxyNotifySession(int32_t channelId,
             ClientTransProxySendSessionAck(channelId, seq);
             return g_sessionCb.OnDataReceived(channelId, CHANNEL_TYPE_PROXY, data, len, flags);
         case TRANS_SESSION_ACK:
-            return (int32_t)(ClientTransProxyProcSendMsgAck(channelId, data, len));
+            return ClientTransProxyProcSendMsgAck(channelId, data, (int32_t)len);
         case TRANS_SESSION_BYTES:
         case TRANS_SESSION_FILE_FIRST_FRAME:
         case TRANS_SESSION_FILE_ONGOINE_FRAME:
@@ -844,7 +844,7 @@ static int32_t ClientTransProxyPackBytes(int32_t channelId, ClientProxyDataInfo 
     pktHead->magicNumber = MAGIC_NUMBER;
     pktHead->seq = seq;
     pktHead->flags = flag;
-    pktHead->dataLen = (int32_t)((int32_t)dataInfo->outLen - sizeof(PacketHead));
+    pktHead->dataLen = (int32_t)dataInfo->outLen - (int32_t)(sizeof(PacketHead));
     ClientPackPacketHead(pktHead);
 
     return SOFTBUS_OK;
@@ -876,10 +876,10 @@ int32_t TransProxyPackAndSendData(int32_t channelId, const void *data, uint32_t 
         return SOFTBUS_ERR;
     }
 
-    int32_t sliceNum = (int32_t)((dataInfo.outLen + SLICE_LEN - 1) / SLICE_LEN);
+    int32_t sliceNum = ((int32_t)dataInfo.outLen + SLICE_LEN - 1) / SLICE_LEN;
     for (int i = 0; i < sliceNum; i++) {
-        int32_t dataLen = (int32_t)((i == (sliceNum - 1)) ? (dataInfo.outLen - i * SLICE_LEN) : SLICE_LEN);
-        int32_t offset = (int32_t)(i * SLICE_LEN);
+        int32_t dataLen = (i == (sliceNum - 1)) ? ((int32_t)dataInfo.outLen - i * SLICE_LEN) : SLICE_LEN;
+        int32_t offset = i * SLICE_LEN;
 
         uint8_t* sliceData = SoftBusMalloc(dataLen + sizeof(SliceHead));
         if (sliceData == NULL) {

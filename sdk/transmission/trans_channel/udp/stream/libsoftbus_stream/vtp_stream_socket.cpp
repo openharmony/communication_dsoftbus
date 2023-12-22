@@ -597,7 +597,7 @@ bool VtpStreamSocket::Send(std::unique_ptr<IStream> stream)
                 "encrypted failed, dataLen=%zd, encLen=%zd", len, encLen);
             return false;
         }
-        InsertBufferLength(len, FRAME_HEADER_LEN, reinterpret_cast<uint8_t *>(data.get()));
+        InsertBufferLength(reinterpret_cast<int>(len), FRAME_HEADER_LEN, reinterpret_cast<uint8_t *>(data.get()));
         len += FRAME_HEADER_LEN;
 
         FrameInfo frameInfo;
@@ -1061,7 +1061,7 @@ void VtpStreamSocket::DoStreamRecv()
             int decryptedLength = dataLength;
             auto decryptedBuffer = std::move(dataBuffer);
 
-            int plainDataLength = decryptedLength - GetEncryptOverhead();
+            int plainDataLength = decryptedLength - reinterpret_cast<int>(GetEncryptOverhead());
             if (plainDataLength <= 0) {
                 TRANS_LOGE(
                     TRANS_STREAM, "Decrypt failed, invalid decryptedLen=%zd", decryptedLength);
@@ -1087,7 +1087,7 @@ void VtpStreamSocket::DoStreamRecv()
             decode.DepacketizeBuffer(buffer, plainDataLength - sizeof(CommonHeader));
 
             extBuffer = decode.GetUserExt();
-            extLen = decode.GetUserExtSize();
+            extLen = reinterpret_cast<int>(decode.GetUserExtSize());
             info = decode.GetFrameInfo();
             dataBuffer = decode.GetData();
             dataLength = decode.GetDataLength();

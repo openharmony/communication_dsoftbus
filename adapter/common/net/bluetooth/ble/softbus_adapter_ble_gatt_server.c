@@ -173,6 +173,7 @@ int SoftBusGattsDisconnect(SoftBusBtAddr btAddr, int connId)
         return SOFTBUS_ERR;
     }
     BdAddr addr;
+    (void)memset_s(&addr, sizeof(BdAddr), 0, sizeof(BdAddr));
     if (memcpy_s(addr.addr, BT_ADDR_LEN, btAddr.addr, BT_ADDR_LEN) != EOK) {
         CONN_LOGE(CONN_BLE, "memcpy fail");
         return SOFTBUS_ERR;
@@ -424,6 +425,7 @@ int SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback)
     }
     if (g_halRegFlag == -1) {
         BtUuid uuid;
+        (void)memset_s(&uuid, sizeof(BtUuid), 0, sizeof(BtUuid));
         uuid.uuid = (char *)SOFTBUS_APP_UUID;
         uuid.uuidLen = sizeof(SOFTBUS_APP_UUID);
         g_halRegFlag = 0;
