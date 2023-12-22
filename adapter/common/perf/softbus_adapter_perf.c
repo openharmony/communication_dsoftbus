@@ -15,8 +15,6 @@
 
 #include "softbus_adapter_perf.h"
 
-#include "softbus_adapter_log.h"
-
 
 bool SoftBusIsRamTest(void)
 {
