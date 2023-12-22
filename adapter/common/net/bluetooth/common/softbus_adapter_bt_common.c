@@ -19,10 +19,8 @@
 
 #include "c_header/ohos_bt_def.h"
 #include "c_header/ohos_bt_gap.h"
-#include "c_header/ohos_bt_gatt.h"
 #include "comm_log.h"
 #include "securec.h"
-#include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 
@@ -46,7 +44,7 @@ static int ConvertBtState(int transport, int state)
         case OHOS_GAP_STATE_TURN_OFF:
             return (transport == BR_STATE_CB_TRANSPORT) ? SOFTBUS_BR_STATE_TURN_OFF : SOFTBUS_BT_STATE_TURN_OFF;
         default:
-            return -1;
+            return SOFTBUS_ERR;
     }
 }
 
@@ -64,7 +62,7 @@ static int ConvertAclState(GapAclState state)
         default:
             break;
     }
-    return -1;
+    return SOFTBUS_ERR;
 }
 
 static SoftBusBtAddr ConvertBtAddr(const BdAddr *bdAddr)
@@ -240,6 +238,10 @@ int SoftBusGetBtName(unsigned char *name, unsigned int *len)
 
 int SoftBusSetBtName(const char *name)
 {
+    if (name == NULL) {
+        COMM_LOGE(COMM_ADAPTER, "invalid parameter");
+        return SOFTBUS_ERR;
+    }
     if (SetLocalName((unsigned char *)name, strlen(name))) {
         return SOFTBUS_OK;
     }

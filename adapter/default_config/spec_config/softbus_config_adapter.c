@@ -18,6 +18,9 @@
 
 void SoftbusConfigAdapterInit(const ConfigSetProc *sets)
 {
+    if (sets == NULL) {
+        return;
+    }
     int32_t val = 0x1;
     sets->SetConfig(SOFTBUS_INT_AUTH_ABILITY_COLLECTION, (unsigned char *)&val, sizeof(val));
 }

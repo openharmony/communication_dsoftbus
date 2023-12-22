@@ -118,7 +118,7 @@ int32_t SoftBusRequestWlanChannelInfo(int32_t *channelId, uint32_t num)
         LNN_LOGI(LNN_STATE, "measuring channel");
         return SOFTBUS_OK;
     }
-    
+
     g_channelList.buff = (int32_t *)SoftBusCalloc(sizeof(int32_t) * num);
     if (g_channelList.buff == NULL) {
         LNN_LOGE(LNN_STATE, " SoftBusCalloc channelId fail");
