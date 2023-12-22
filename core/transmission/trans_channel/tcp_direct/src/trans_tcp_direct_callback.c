@@ -16,6 +16,7 @@
 #include "trans_tcp_direct_callback.h"
 
 #include <stddef.h>
+
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 
@@ -29,6 +30,7 @@ int32_t TransTdcSetCallBack(const IServerChannelCallBack *cb)
     g_channelCb = *cb;
     return SOFTBUS_OK;
 }
+
 int32_t TransTdcOnChannelOpened(const char *pkgName, int32_t pid, const char *sessionName,
     const ChannelInfo *channel)
 {

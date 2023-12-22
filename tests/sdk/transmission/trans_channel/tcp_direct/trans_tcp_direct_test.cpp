@@ -554,19 +554,19 @@ HWTEST_F(TransTcpDirectTest, TransTdcSetPendingPacketTest001, TestSize.Level0)
     int32_t seqNum = 1;
     int type = 1;
     int32_t ret = TransTdcSetPendingPacket(channelId, data, len);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
     ret = PendingInit(type);
     ASSERT_TRUE(ret == SOFTBUS_OK);
 
     ret = ProcPendingPacket(channelId, seqNum, type);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_NE(SOFTBUS_OK, ret);
     len = ACK_SIZE;
     channelId = INVALID_VALUE;
     ret = TransTdcSetPendingPacket(channelId, data, len);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
     channelId = 1;
     ret = TransTdcSetPendingPacket(channelId, data, len);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
     PendingDeinit(type);
 }
 
@@ -696,7 +696,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcessDataTest001, TestSize.Level0)
     info->fd = g_fd;
 
     int32_t ret = TransTdcProcessData(channelId);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
     IClientSessionCallBack *cb = GetClientSessionCb();
     ret = TransTdcManagerInit(cb);
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -705,7 +705,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcessDataTest001, TestSize.Level0)
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     ret = TransTdcProcessData(channelId);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
 
     ret = TransDataListInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -714,7 +714,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcessDataTest001, TestSize.Level0)
     ASSERT_EQ(ret, SOFTBUS_OK);
 
     ret = TransTdcProcessData(channelId);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     TransDataListDeinit();
     TransTdcManagerDeinit();

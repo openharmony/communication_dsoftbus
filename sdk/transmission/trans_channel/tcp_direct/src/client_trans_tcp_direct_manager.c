@@ -20,7 +20,6 @@
 #include "client_trans_tcp_direct_callback.h"
 #include "client_trans_tcp_direct_listener.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_base_listener.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_socket.h"
@@ -34,14 +33,22 @@
 
 static SoftBusList *g_tcpDirectChannelInfoList = NULL;
 
-TcpDirectChannelInfo *TransTdcGetInfoById(int32_t channelId, TcpDirectChannelInfo *info)
+static bool CheckInfoAndMutexLock(TcpDirectChannelInfo *info)
 {
     if (info == NULL) {
         TRANS_LOGE(TRANS_SDK, "param invalid.");
-        return NULL;
+        return false;
     }
     if (SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "lock failed");
+        return false;
+    }
+    return true;
+}
+
+TcpDirectChannelInfo *TransTdcGetInfoById(int32_t channelId, TcpDirectChannelInfo *info)
+{
+    if (!CheckInfoAndMutexLock(info)) {
         return NULL;
     }
 
@@ -60,12 +67,7 @@ TcpDirectChannelInfo *TransTdcGetInfoById(int32_t channelId, TcpDirectChannelInf
 
 TcpDirectChannelInfo *TransTdcGetInfoByIdWithIncSeq(int32_t channelId, TcpDirectChannelInfo *info)
 {
-    if (info == NULL) {
-        TRANS_LOGE(TRANS_SDK, "param invalid.");
-        return NULL;
-    }
-    if (SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "lock failed");
+    if (!CheckInfoAndMutexLock(info)) {
         return NULL;
     }
 
@@ -85,12 +87,7 @@ TcpDirectChannelInfo *TransTdcGetInfoByIdWithIncSeq(int32_t channelId, TcpDirect
 
 TcpDirectChannelInfo *TransTdcGetInfoByFd(int32_t fd, TcpDirectChannelInfo *info)
 {
-    if (info == NULL) {
-        TRANS_LOGE(TRANS_SDK, "param invalid.");
-        return NULL;
-    }
-    if (SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "lock failed");
+    if (!CheckInfoAndMutexLock(info)) {
         return NULL;
     }
 
@@ -153,6 +150,7 @@ static TcpDirectChannelInfo *TransGetNewTcpChannel(const ChannelInfo *channel)
     item->detail.channelType = channel->channelType;
     if (memcpy_s(item->detail.sessionKey, SESSION_KEY_LENGTH, channel->sessionKey, SESSION_KEY_LENGTH) != EOK) {
         SoftBusFree(item);
+        TRANS_LOGE(TRANS_SDK, "sessionKey copy failed");
         return NULL;
     }
     return item;

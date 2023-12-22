@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,15 +15,12 @@
 
 #include "wrapper_br_interface.h"
 
-#include "message_handler.h"
 #include "c_header/ohos_bt_def.h"
 #include "c_header/ohos_bt_gap.h"
 #include "c_header/ohos_bt_spp.h"
 #include "c_header/ohos_bt_socket.h"
-#include "securec.h"
 #include "conn_log.h"
-#include "softbus_adapter_mem.h"
-#include "softbus_def.h"
+#include "securec.h"
 #include "softbus_errcode.h"
 #include "string.h"
 
@@ -106,6 +103,7 @@ static int32_t Accept(int32_t serverFd)
     CONN_LOGI(CONN_BR, "[Accept remote device to connect, and serverFd = %d]", serverFd);
     int32_t ret = SppServerAccept(serverFd);
     if (ret == BT_SPP_INVALID_ID) {
+        CONN_LOGE(CONN_BR, "Accept spp server failed");
         return SOFTBUS_ERR;
     }
     return ret;

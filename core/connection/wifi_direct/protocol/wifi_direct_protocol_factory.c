@@ -20,7 +20,7 @@
 static struct WifiDirectTlvProtocol* NewWifiDirectTlvProtocol(void)
 {
     struct WifiDirectTlvProtocol *self = (struct WifiDirectTlvProtocol*)SoftBusCalloc(sizeof(*self));
-    if (self) {
+    if (self != NULL) {
         if (!WifiDirectTlvProtocolConstructor(self)) {
             SoftBusFree(self);
             self = NULL;
@@ -33,7 +33,7 @@ static struct WifiDirectTlvProtocol* NewWifiDirectTlvProtocol(void)
 static struct WifiDirectJsonProtocol* NewWifiDirectJsonProtocol(void)
 {
     struct WifiDirectJsonProtocol *self = (struct WifiDirectJsonProtocol*)SoftBusCalloc(sizeof(*self));
-    if (self) {
+    if (self != NULL) {
         if (!WifiDirectJsonProtocolConstructor(self)) {
             SoftBusFree(self);
             self = NULL;
