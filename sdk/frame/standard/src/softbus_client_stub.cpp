@@ -401,6 +401,10 @@ int32_t SoftBusClientStub::OnChannelMsgReceivedInner(MessageParcel &data, Messag
         return SOFTBUS_ERR;
     }
     char *infoData = (char *)SoftBusMalloc(len);
+    if (infoData == NULL) {
+        COMM_LOGE(COMM_SDK, "malloc infoData failed!");
+        return SOFTBUS_ERR;
+    }
     memcpy_s(infoData, len, dataInfo, len);
     int ret = OnChannelMsgReceived(channelId, channelType, infoData, len, type);
     SoftBusFree(infoData);
