@@ -28,6 +28,7 @@ struct WifiDirectWork {
 static void DeleteMessage(SoftBusMessage *msg)
 {
     SoftBusFree(msg->obj);
+    SoftBusFree(msg);
 }
 
 static SoftBusMessage* NewMessage(struct WifiDirectWork *work)
