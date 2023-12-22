@@ -235,7 +235,7 @@ static void DeConvertBitMap(unsigned int *dstCap, unsigned int *srcCap, int nums
             SoftbusBitmapSet(dstCap, bleCapability);
         }
     }
-    DISC_LOGI(DISC_BLE, "old= %u, new= %u", *srcCap, *dstCap);
+    DISC_LOGD(DISC_BLE, "old= %u, new= %u", *srcCap, *dstCap);
 }
 
 static void UpdateInfoManager(int adv, bool needUpdate)
@@ -314,25 +314,25 @@ static int32_t ScanFilter(const SoftBusBleScanResult *scanResultData)
 {
     uint32_t advLen = scanResultData->advLen;
     uint8_t *advData = scanResultData->advData;
-    DISC_CHECK_AND_RETURN_RET_LOGW(scanResultData->dataStatus == SOFTBUS_BLE_DATA_COMPLETE, SOFTBUS_INVALID_PARAM,
+    DISC_CHECK_AND_RETURN_RET_LOGD(scanResultData->dataStatus == SOFTBUS_BLE_DATA_COMPLETE, SOFTBUS_INVALID_PARAM,
         DISC_BLE, "dataStatus[%u] is invalid", scanResultData->dataStatus);
-    DISC_CHECK_AND_RETURN_RET_LOGW(advLen >= (POS_TLV + ADV_HEAD_LEN), SOFTBUS_INVALID_PARAM, DISC_BLE,
+    DISC_CHECK_AND_RETURN_RET_LOGD(advLen >= (POS_TLV + ADV_HEAD_LEN), SOFTBUS_INVALID_PARAM, DISC_BLE,
         "advLen[%u] is too short, less than adv header length", advLen);
 
     uint32_t broadcastAdvLen = advData[POS_PACKET_LENGTH];
-    DISC_CHECK_AND_RETURN_RET_LOGE(broadcastAdvLen >= (ADV_HEAD_LEN + RSP_HEAD_LEN - 1), SOFTBUS_INVALID_PARAM,
+    DISC_CHECK_AND_RETURN_RET_LOGD(broadcastAdvLen >= (ADV_HEAD_LEN + RSP_HEAD_LEN - 1), SOFTBUS_INVALID_PARAM,
         DISC_BLE, "broadcastAdvLen[%u] is too short, less than adv header length", broadcastAdvLen);
-    DISC_CHECK_AND_RETURN_RET_LOGE(advLen > (POS_PACKET_LENGTH + broadcastAdvLen + 1), SOFTBUS_INVALID_PARAM,
+    DISC_CHECK_AND_RETURN_RET_LOGD(advLen > (POS_PACKET_LENGTH + broadcastAdvLen + 1), SOFTBUS_INVALID_PARAM,
         DISC_BLE, "advLen[%u] is too short, less than adv packet length", advLen);
     uint32_t broadcastRspLen = advData[POS_PACKET_LENGTH + broadcastAdvLen + 1];
-    DISC_CHECK_AND_RETURN_RET_LOGE(advLen >= (POS_PACKET_LENGTH + broadcastAdvLen + 1 + broadcastRspLen + 1),
+    DISC_CHECK_AND_RETURN_RET_LOGD(advLen >= (POS_PACKET_LENGTH + broadcastAdvLen + 1 + broadcastRspLen + 1),
         SOFTBUS_INVALID_PARAM, DISC_BLE, "advLen[%u] is too short, less than adv+rsp packet length", advLen);
 
-    DISC_CHECK_AND_RETURN_RET_LOGE(advData[POS_UUID] == (uint8_t)(BLE_UUID & BYTE_MASK), SOFTBUS_INVALID_PARAM,
+    DISC_CHECK_AND_RETURN_RET_LOGD(advData[POS_UUID] == (uint8_t)(BLE_UUID & BYTE_MASK), SOFTBUS_INVALID_PARAM,
         DISC_BLE, "uuid low byte[%hhu] is invalid", advData[POS_UUID]);
-    DISC_CHECK_AND_RETURN_RET_LOGE(advData[POS_UUID + 1] == (uint8_t)((BLE_UUID >> BYTE_SHIFT_BIT) & BYTE_MASK),
+    DISC_CHECK_AND_RETURN_RET_LOGD(advData[POS_UUID + 1] == (uint8_t)((BLE_UUID >> BYTE_SHIFT_BIT) & BYTE_MASK),
         SOFTBUS_INVALID_PARAM, DISC_BLE, "uuid high byte[%hhu] is invalid", advData[POS_UUID + 1]);
-    DISC_CHECK_AND_RETURN_RET_LOGE(advData[POS_VERSION + ADV_HEAD_LEN] == BLE_VERSION, SOFTBUS_INVALID_PARAM,
+    DISC_CHECK_AND_RETURN_RET_LOGD(advData[POS_VERSION + ADV_HEAD_LEN] == BLE_VERSION, SOFTBUS_INVALID_PARAM,
         DISC_BLE, "adv version[%hhu] is invalid", advData[POS_VERSION + ADV_HEAD_LEN]);
 
     if (!CheckScanner()) {
@@ -529,7 +529,7 @@ static void BleScanResultCallback(int listenerId, const SoftBusBleScanResult *sc
     (void)listenerId;
     DISC_CHECK_AND_RETURN_LOGW(scanResultData != NULL, DISC_BLE, "scan result is null");
     DISC_CHECK_AND_RETURN_LOGW(scanResultData->advData != NULL, DISC_BLE, "scan result advData is null");
-    DISC_CHECK_AND_RETURN_LOGE(ScanFilter(scanResultData) == SOFTBUS_OK, DISC_BLE, "scan filter failed");
+    DISC_CHECK_AND_RETURN_LOGD(ScanFilter(scanResultData) == SOFTBUS_OK, DISC_BLE, "scan filter failed");
 
     uint8_t *advData = scanResultData->advData;
     if (IsDistributedBusiness(advData)) {
@@ -822,7 +822,7 @@ static void BuildAdvParam(SoftBusBleAdvParams *advParam)
 
 static int32_t StartAdvertiser(int32_t adv)
 {
-    DISC_LOGI(DISC_BLE, "enter");
+    DISC_LOGD(DISC_BLE, "enter");
     DiscBleAdvertiser *advertiser = &g_bleAdvertiser[adv];
     if (advertiser->isAdvertising) {
         if (GetNeedUpdateAdvertiser(adv)) {
@@ -1313,59 +1313,59 @@ static void DiscBleInitSubscribe(void)
 
 static void StartActivePublish(SoftBusMessage *msg)
 {
-    DISC_LOGI(DISC_BLE, "enter");
+    DISC_LOGD(DISC_BLE, "enter");
     (void)StartAdvertiser(NON_ADV_ID);
-    DISC_LOGI(DISC_BLE, "end");
+    DISC_LOGD(DISC_BLE, "end");
 }
 
 static void StartPassivePublish(SoftBusMessage *msg)
 {
-    DISC_LOGI(DISC_BLE, "enter");
+    DISC_LOGD(DISC_BLE, "enter");
     if (g_bleAdvertiser[NON_ADV_ID].isAdvertising) {
         DISC_LOGI(DISC_BLE, "UpdateAdvertiser %d", NON_ADV_ID);
         UpdateAdvertiser(NON_ADV_ID);
     }
     StartScaner();
-    DISC_LOGI(DISC_BLE, "end");
+    DISC_LOGD(DISC_BLE, "end");
 }
 
 static void StartActiveDiscovery(SoftBusMessage *msg)
 {
-    DISC_LOGI(DISC_BLE, "enter");
+    DISC_LOGD(DISC_BLE, "enter");
     if (StartAdvertiser(CON_ADV_ID) == SOFTBUS_OK) {
         StartScaner();
     }
-    DISC_LOGI(DISC_BLE, "end");
+    DISC_LOGD(DISC_BLE, "end");
 }
 
 static void StartPassiveDiscovery(SoftBusMessage *msg)
 {
-    DISC_LOGI(DISC_BLE, "enter");
+    DISC_LOGD(DISC_BLE, "enter");
     StartScaner();
-    DISC_LOGI(DISC_BLE, "end");
+    DISC_LOGD(DISC_BLE, "end");
 }
 
 static void Recovery(SoftBusMessage *msg)
 {
-    DISC_LOGI(DISC_BLE, "enter");
+    DISC_LOGD(DISC_BLE, "enter");
     (void)StartAdvertiser(CON_ADV_ID);
     (void)StartAdvertiser(NON_ADV_ID);
     StartScaner();
-    DISC_LOGI(DISC_BLE, "end");
+    DISC_LOGD(DISC_BLE, "end");
 }
 
 static void BleDiscTurnOff(SoftBusMessage *msg)
 {
-    DISC_LOGI(DISC_BLE, "enter");
+    DISC_LOGD(DISC_BLE, "enter");
     (void)StopAdvertiser(NON_ADV_ID);
     (void)StopAdvertiser(CON_ADV_ID);
     (void)StopScaner();
-    DISC_LOGI(DISC_BLE, "end");
+    DISC_LOGD(DISC_BLE, "end");
 }
 
 static int32_t ReplyPassiveNonBroadcast(void)
 {
-    DISC_LOGI(DISC_BLE, "enter");
+    DISC_LOGD(DISC_BLE, "enter");
     SoftBusMessage *msg = CreateBleHandlerMsg(REPLY_PASSIVE_NON_BROADCAST, 0, 0, NULL);
     if (msg == NULL) {
         return SOFTBUS_MALLOC_ERR;
@@ -1376,7 +1376,7 @@ static int32_t ReplyPassiveNonBroadcast(void)
 
 static int32_t MessageRemovePredicate(const SoftBusMessage *msg, void *args)
 {
-    DISC_LOGI(DISC_BLE, "enter");
+    DISC_LOGD(DISC_BLE, "enter");
     uintptr_t key = (uintptr_t)args;
     if (msg->what == PROCESS_TIME_OUT && msg->arg1 == key) {
         DISC_LOGI(DISC_BLE, "find key");
@@ -1413,7 +1413,7 @@ static int32_t MatchRecvMessage(const uint32_t *publishInfoMap, uint32_t *capBit
 
 static void StartTimeout(const char *key)
 {
-    DISC_LOGI(DISC_BLE, "enter");
+    DISC_LOGD(DISC_BLE, "enter");
     if (SoftBusMutexLock(&g_recvMessageInfo.lock) != 0) {
         DISC_LOGE(DISC_BLE, "lock failed");
         return;
@@ -1434,7 +1434,7 @@ static void StartTimeout(const char *key)
 
 static void RemoveTimeout(const char *key)
 {
-    DISC_LOGI(DISC_BLE, "enter");
+    DISC_LOGD(DISC_BLE, "enter");
     if (SoftBusMutexLock(&g_recvMessageInfo.lock) != 0) {
         DISC_LOGE(DISC_BLE, "lock failed");
         return;
@@ -1463,7 +1463,7 @@ static uint32_t RecvMsgAggregateCap(void)
 
 static int32_t AddRecvMessage(const char *key, const uint32_t *capBitMap, bool needBrMac)
 {
-    DISC_LOGI(DISC_BLE, "enter");
+    DISC_LOGD(DISC_BLE, "enter");
     if (SoftBusMutexLock(&g_recvMessageInfo.lock) != 0) {
         DISC_LOGE(DISC_BLE, "lock failed");
         return SOFTBUS_LOCK_ERR;
@@ -1506,7 +1506,7 @@ static int32_t AddRecvMessage(const char *key, const uint32_t *capBitMap, bool n
 
 static void RemoveRecvMessage(uint64_t key)
 {
-    DISC_LOGI(DISC_BLE, "enter");
+    DISC_LOGD(DISC_BLE, "enter");
     if (SoftBusMutexLock(&g_recvMessageInfo.lock) != 0) {
         DISC_LOGE(DISC_BLE, "lock failed");
         return;
@@ -1542,7 +1542,7 @@ static void ClearRecvMessage(void)
 
 static void ProcessTimeout(SoftBusMessage *msg)
 {
-    DISC_LOGI(DISC_BLE, "enter");
+    DISC_LOGD(DISC_BLE, "enter");
     RemoveRecvMessage(msg->arg1);
     UpdateAdvertiser(NON_ADV_ID);
 }
