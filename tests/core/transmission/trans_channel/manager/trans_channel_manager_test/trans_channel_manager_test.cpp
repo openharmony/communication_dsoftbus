@@ -197,29 +197,29 @@ HWTEST_F(TransChannelManagerTest, TransGetChannelType001, TestSize.Level1)
     ASSERT_TRUE(transInfo != nullptr);
     memset_s(transInfo, sizeof(TransInfo), 0, sizeof(TransInfo));
 
-    transInfo->channelType = TransGetChannelType(NULL, connInfo);
+    transInfo->channelType = TransGetChannelType(NULL, connInfo->type);
     EXPECT_EQ(CHANNEL_TYPE_BUTT, transInfo->channelType);
 
     connInfo->type = LANE_BR;
-    transInfo->channelType = TransGetChannelType(param, connInfo);
+    transInfo->channelType = TransGetChannelType(param, connInfo->type);
     EXPECT_EQ(CHANNEL_TYPE_PROXY, transInfo->channelType);
 
     connInfo->type = LANE_P2P;
     tmp = 2;
     param->attr = &g_sessionAttr[tmp];
-    transInfo->channelType = TransGetChannelType(param, connInfo);
+    transInfo->channelType = TransGetChannelType(param, connInfo->type);
     EXPECT_EQ(CHANNEL_TYPE_UDP, transInfo->channelType);
 
     tmp = 0;
     param->attr = &g_sessionAttr[tmp];
     connInfo->type = LANE_BR;
-    transInfo->channelType = TransGetChannelType(param, connInfo);
+    transInfo->channelType = TransGetChannelType(param, connInfo->type);
     EXPECT_EQ(CHANNEL_TYPE_PROXY, transInfo->channelType);
     connInfo->type = LANE_P2P;
 
     tmp = 1;
     param->attr = &g_sessionAttr[tmp];
-    transInfo->channelType = TransGetChannelType(param, connInfo);
+    transInfo->channelType = TransGetChannelType(param, connInfo->type);
     EXPECT_EQ(CHANNEL_TYPE_TCP_DIRECT, transInfo->channelType);
 
     SoftBusFree(param);
