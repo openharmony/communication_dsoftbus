@@ -1162,7 +1162,7 @@ int32_t ConnGattServerSend(ConnBleConnection *connection, const uint8_t *data, u
         .connectId = underlayerHandle,
         .attrHandle = GetBleAttrHandle(module, connection->serviceId),
         .confirm = 0,
-        .valueLen = dataLen,
+        .valueLen = (int)dataLen,
         .value = (char *)data,
     };
     return SoftBusGattsSendNotify(&notify);
@@ -1486,7 +1486,7 @@ int32_t ConnGattInitServerModule(SoftBusLooper *looper,
     CONN_CHECK_AND_RETURN_RET_LOGW(looper != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT,
         "init ble server failed, invalid param, looper is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(listener != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT,
-        "init ble server failed, invalid param, listener onServerStarted is null");
+        "init ble server failed, invalid param, listener is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(listener->onServerStarted != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT,
         "init ble server failed, invalid param, listener is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(listener->onServerClosed != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT,

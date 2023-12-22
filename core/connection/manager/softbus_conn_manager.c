@@ -337,7 +337,7 @@ void ConnManagerRecvData(uint32_t connectionId, ConnModule moduleId, int64_t seq
         "dispatch data failed: get module listener failed or not register, connection id=%u, module=%d, dataLen=%d, "
         "err=%d", connectionId, moduleId, len, status);
 
-    int32_t pktLen = len - sizeof(ConnPktHead);
+    int32_t pktLen = len - (int32_t)sizeof(ConnPktHead);
     char *pkt = data + sizeof(ConnPktHead);
     listener.callback.OnDataReceived(connectionId, moduleId, seq, pkt, pktLen);
 }
