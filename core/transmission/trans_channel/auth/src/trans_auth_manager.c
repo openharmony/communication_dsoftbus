@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,12 +65,12 @@ static void DelAuthChannelInfoByAuthId(int32_t authId);
 
 static int32_t GetAuthChannelInfoByChanId(int32_t channelId, AuthChannelInfo *dstInfo)
 {
-    if (dstInfo == NULL || g_authChannelList == NULL) {
+    if (g_authChannelList == NULL) {
         TRANS_LOGE(TRANS_SVC, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (SoftBusMutexLock(&g_authChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_authChannelList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
@@ -180,7 +180,7 @@ static int32_t NotifyOnDataReceived(int32_t authId, const void *data, uint32_t l
         return SOFTBUS_ERR;
     }
     TransReceiveData receiveData;
-    receiveData.data = (void*)data;
+    receiveData.data = (void *)data;
     receiveData.dataLen = len;
     receiveData.dataType = TRANS_SESSION_BYTES;
 
@@ -190,9 +190,6 @@ static int32_t NotifyOnDataReceived(int32_t authId, const void *data, uint32_t l
 
 static int32_t CopyPeerAppInfo(AppInfo *recvAppInfo, AppInfo *channelAppInfo)
 {
-    if (recvAppInfo == NULL || channelAppInfo == NULL) {
-        return SOFTBUS_INVALID_PARAM;
-    }
     if (memcpy_s(channelAppInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX,
             recvAppInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX) != EOK ||
         memcpy_s(recvAppInfo->myData.deviceId, DEVICE_ID_SIZE_MAX,
@@ -210,9 +207,6 @@ static int32_t CopyPeerAppInfo(AppInfo *recvAppInfo, AppInfo *channelAppInfo)
 
 static int32_t OnRequsetUpdateAuthChannel(int32_t authId, AppInfo *appInfo)
 {
-    if (appInfo == NULL) {
-        return SOFTBUS_INVALID_PARAM;
-    }
     AuthChannelInfo *item = NULL;
     if (SoftBusMutexLock(&g_authChannelList->lock) != 0) {
         return SOFTBUS_LOCK_ERR;
@@ -243,6 +237,7 @@ static int32_t OnRequsetUpdateAuthChannel(int32_t authId, AppInfo *appInfo)
     }
     if (CopyPeerAppInfo(appInfo, &item->appInfo) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "CopyPeerAppInfo failed");
+        ListDelete(&item->node);
         SoftBusFree(item);
         SoftBusMutexUnlock(&g_authChannelList->lock);
         return SOFTBUS_MEM_ERR;
@@ -258,7 +253,8 @@ static const ConfigTypeMap g_configTypeMap[] = {
 
 static int32_t FindConfigType(int32_t channelType, int32_t businessType)
 {
-    for (uint32_t i = 0; i < sizeof(g_configTypeMap) / sizeof(ConfigTypeMap); i++) {
+    uint32_t size = (uint32_t)(sizeof(g_configTypeMap) / sizeof(g_configTypeMap[0]));
+    for (uint32_t i = 0; i < size; i++) {
         if ((g_configTypeMap[i].channelType == channelType) && (g_configTypeMap[i].businessType == businessType)) {
             return g_configTypeMap[i].configType;
         }
@@ -294,6 +290,7 @@ static int32_t TransAuthFillDataConfig(AppInfo *appInfo)
     if (appInfo->peerData.dataConfig != 0) {
         uint32_t localDataConfig = 0;
         if (TransGetLocalConfig(CHANNEL_TYPE_AUTH, appInfo->businessType, &localDataConfig) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SVC, "get local config failed");
             return SOFTBUS_ERR;
         }
         appInfo->myData.dataConfig = MIN(localDataConfig, appInfo->peerData.dataConfig);
@@ -331,7 +328,7 @@ static void OnRecvAuthChannelRequest(int32_t authId, const char *data, int32_t l
     }
     ret = AuthGetUidAndPidBySessionName(appInfo.myData.sessionName, &appInfo.myData.uid, &appInfo.myData.pid);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "AuthGetUidAndPidBySessionName failed");
+        TRANS_LOGE(TRANS_SVC, "auth get id by sessionName failed");
         goto EXIT_ERR;
     }
     ret = TransAuthFillDataConfig(&appInfo);
@@ -417,9 +414,9 @@ static void OnRecvAuthChannelReply(int32_t authId, const char *data, int32_t len
     return;
 EXIT_ERR:
     AuthCloseChannel(authId);
-    DelAuthChannelInfoByChanId(info.appInfo.myData.channelId);
-    (void)NotifyOpenAuthChannelFailed(info.appInfo.myData.pkgName, info.appInfo.myData.pid,
-        info.appInfo.myData.channelId, ret);
+    DelAuthChannelInfoByChanId((int32_t)(info.appInfo.myData.channelId));
+    (void)NotifyOpenAuthChannelFailed((const char *)(info.appInfo.myData.pkgName),
+        (int32_t)(info.appInfo.myData.pid), (int32_t)(info.appInfo.myData.channelId), ret);
 }
 
 static void OnAuthChannelDataRecv(int32_t authId, const AuthChannelData *data)
@@ -430,9 +427,9 @@ static void OnAuthChannelDataRecv(int32_t authId, const AuthChannelData *data)
     }
 
     if (data->flag == AUTH_CHANNEL_REQ) {
-        OnRecvAuthChannelRequest(authId, (const char *)data->data, data->len);
+        OnRecvAuthChannelRequest(authId, (const char *)data->data, (int32_t)data->len);
     } else if (data->flag == AUTH_CHANNEL_REPLY) {
-        OnRecvAuthChannelReply(authId, (const char *)data->data, data->len);
+        OnRecvAuthChannelReply(authId, (const char *)data->data, (int32_t)data->len);
     } else {
         TRANS_LOGE(TRANS_SVC, "auth channel flags err, authId=%d", authId);
     }
@@ -456,9 +453,9 @@ static void OnDisconnect(int32_t authId)
         return;
     }
     TRANS_LOGI(TRANS_SVC, "recv authId=%d channel disconnect event.", authId);
-    DelAuthChannelInfoByChanId(dstInfo.appInfo.myData.channelId);
-    (void)NofifyCloseAuthChannel(dstInfo.appInfo.myData.pkgName, dstInfo.appInfo.myData.pid,
-        dstInfo.appInfo.myData.channelId);
+    DelAuthChannelInfoByChanId((int32_t)(dstInfo.appInfo.myData.channelId));
+    (void)NofifyCloseAuthChannel((const char *)dstInfo.appInfo.myData.pkgName,
+        (int32_t)dstInfo.appInfo.myData.pid, (int32_t)dstInfo.appInfo.myData.channelId);
 }
 
 static int32_t GetAppInfo(const char *sessionName, int32_t channelId, AppInfo *appInfo, bool isClient)
@@ -473,7 +470,7 @@ static int32_t GetAppInfo(const char *sessionName, int32_t channelId, AppInfo *a
     appInfo->myData.apiVersion = API_V2;
     appInfo->peerData.apiVersion = API_V2;
     appInfo->autoCloseTime = 0;
-    if ((!IsNoPkgNameSession(sessionName)) || (isClient)) {
+    if (!IsNoPkgNameSession(sessionName) || isClient) {
         if (TransGetUidAndPid(sessionName, &appInfo->myData.uid, &appInfo->myData.pid) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_SVC, "TransGetUidAndPid failed");
             return SOFTBUS_ERR;
@@ -489,10 +486,11 @@ static int32_t GetAppInfo(const char *sessionName, int32_t channelId, AppInfo *a
         return SOFTBUS_ERR;
     }
     if (strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), sessionName) != EOK) {
+        TRANS_LOGE(TRANS_SVC, "copy sessionName failed");
         return SOFTBUS_ERR;
     }
     appInfo->peerData.apiVersion = API_V2;
-    if (strcpy_s(appInfo->peerData.sessionName, sizeof(appInfo->peerData.sessionName), sessionName) != 0) {
+    if (strcpy_s(appInfo->peerData.sessionName, sizeof(appInfo->peerData.sessionName), sessionName) != EOK) {
         return SOFTBUS_ERR;
     }
     if (TransGetLocalConfig(appInfo->channelType, appInfo->businessType, &appInfo->myData.dataConfig) != SOFTBUS_OK) {
@@ -527,7 +525,7 @@ static void DelAuthChannelInfoByChanId(int32_t channelId)
     if (g_authChannelList == NULL) {
         return;
     }
-    if (SoftBusMutexLock(&g_authChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_authChannelList->lock) != SOFTBUS_OK) {
         return;
     }
     AuthChannelInfo *item = NULL;
@@ -548,7 +546,7 @@ static void DelAuthChannelInfoByAuthId(int32_t authId)
     if (g_authChannelList == NULL) {
         return;
     }
-    if (SoftBusMutexLock(&g_authChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_authChannelList->lock) != SOFTBUS_OK) {
         return;
     }
     AuthChannelInfo *item = NULL;
@@ -621,6 +619,8 @@ void TransAuthDeinit(void)
 {
     UnregAuthChannelListener(MODULE_AUTH_CHANNEL);
     UnregAuthChannelListener(MODULE_AUTH_MSG);
+    DestroySoftBusList(g_authChannelList);
+    g_authChannelList = NULL;
     g_cb = NULL;
 }
 
@@ -637,15 +637,15 @@ static int32_t TransPostAuthChannelMsg(const AppInfo *appInfo, int32_t authId, i
     }
     if (TransAuthChannelMsgPack(msg, appInfo) != SOFTBUS_OK) {
         cJSON_Delete(msg);
+        TRANS_LOGE(TRANS_SVC, "tran channel msg pack failed");
         return SOFTBUS_ERR;
     }
     char *data = cJSON_PrintUnformatted(msg);
+    cJSON_Delete(msg);
     if (data == NULL) {
         TRANS_LOGE(TRANS_SVC, "json failed");
-        cJSON_Delete(msg);
         return SOFTBUS_PARSE_JSON_ERR;
     }
-    cJSON_Delete(msg);
 
     AuthChannelData channelData = {
         .module = MODULE_AUTH_CHANNEL,
@@ -718,6 +718,7 @@ int32_t TransOpenAuthMsgChannel(const char *sessionName, const ConnectOption *co
         return SOFTBUS_ERR;
     }
     if (strcpy_s(channel->appInfo.reqId, REQ_ID_SIZE_MAX, reqId) != EOK) {
+        SoftBusFree(channel);
         TRANS_LOGE(TRANS_SVC, "TransOpenAuthMsgChannel strcpy_s reqId failed");
         return SOFTBUS_ERR;
     }
@@ -725,7 +726,7 @@ int32_t TransOpenAuthMsgChannel(const char *sessionName, const ConnectOption *co
         SoftBusFree(channel);
         return SOFTBUS_MEM_ERR;
     }
-    *channelId = channel->appInfo.myData.channelId;
+    *channelId = (int32_t)channel->appInfo.myData.channelId;
     int32_t authId = AuthOpenChannel(connOpt->socketOption.addr, connOpt->socketOption.port);
     if (authId < 0) {
         TRANS_LOGE(TRANS_SVC, "AuthOpenChannel failed");

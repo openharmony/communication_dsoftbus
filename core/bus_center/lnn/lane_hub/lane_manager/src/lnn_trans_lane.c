@@ -284,6 +284,7 @@ static int32_t StartTriggerLink(uint32_t laneId, TransOption *transRequest, cons
     if (newItem == NULL) {
         return SOFTBUS_ERR;
     }
+    newItem->info.isWithQos = true;
     if (Lock() != SOFTBUS_OK) {
         SoftBusFree(newItem);
         return SOFTBUS_ERR;
@@ -372,6 +373,7 @@ static int32_t Alloc(uint32_t laneId, const LaneRequestOption *request, const IL
         SoftBusFree(recommendLinkList);
         return SOFTBUS_ERR;
     }
+    newItem->info.isWithQos = false;
     if (Lock() != SOFTBUS_OK) {
         SoftBusFree(newItem);
         SoftBusFree(recommendLinkList);
@@ -837,9 +839,9 @@ LaneInterface *TransLaneGetInstance(void)
     return &g_transLaneObject;
 }
 
-int32_t GetQosInfoByLaneId(uint32_t laneId, QosInfo *qosOpt)
+int32_t GetTransOptionByLaneId(uint32_t laneId, TransOption *reqInfo)
 {
-    if (qosOpt == NULL || laneId == INVALID_LANE_ID) {
+    if (reqInfo == NULL || laneId == INVALID_LANE_ID) {
         return SOFTBUS_INVALID_PARAM;
     }
     if (Lock() != SOFTBUS_OK) {
@@ -848,7 +850,11 @@ int32_t GetQosInfoByLaneId(uint32_t laneId, QosInfo *qosOpt)
     TransReqInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_requestList->list, TransReqInfo, node) {
         if (item->laneId == laneId) {
-            *qosOpt = item->info.qosRequire;
+            if (memcpy_s(reqInfo, sizeof(TransOption), &item->info, sizeof(TransOption)) != EOK) {
+                LNN_LOGE(LNN_LANE, "memcpy TransReqInfo fail");
+                Unlock();
+                return SOFTBUS_ERR;
+            }
             Unlock();
             return SOFTBUS_OK;
         }

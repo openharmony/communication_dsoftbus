@@ -25,7 +25,6 @@
 #include "securec.h"
 #include "softbus_adapter_crypto.h"
 #include "stream_common.h"
-#include "softbus_hisysevt_nstack.h"
 
 namespace Communication {
 namespace SoftBus {

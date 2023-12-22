@@ -19,6 +19,7 @@
 
 #include "securec.h"
 #include "stream_common.h"
+#include "trans_log.h"
 
 namespace Communication {
 namespace SoftBus {
@@ -34,10 +35,12 @@ std::unique_ptr<IStream> IStream::MakeRawStream(StreamData &data, const StreamFr
 std::unique_ptr<IStream> IStream::MakeRawStream(const char *buf, ssize_t bufLen, const StreamFrameInfo &info, int scene)
 {
     if (scene != COMPATIBLE_SCENE && scene != SOFTBUS_SCENE) {
+        TRANS_LOGE(TRANS_STREAM, "scene invalid");
         return nullptr;
     }
 
     if (bufLen <= 0 || bufLen > MAX_STREAM_LEN) {
+        TRANS_LOGE(TRANS_STREAM, "bufLen invalid");
         return nullptr;
     }
 
@@ -47,6 +50,7 @@ std::unique_ptr<IStream> IStream::MakeRawStream(const char *buf, ssize_t bufLen,
         auto buffer = std::make_unique<char[]>(bufLen);
         auto ret = memcpy_s(buffer.get(), bufLen, buf, bufLen);
         if (ret != 0) {
+            TRANS_LOGE(TRANS_STREAM, "memcpy failed");
             return nullptr;
         }
         raw->InitStreamData(std::move(buffer), bufLen, nullptr, 0);
@@ -57,6 +61,7 @@ std::unique_ptr<IStream> IStream::MakeRawStream(const char *buf, ssize_t bufLen,
     auto buffer = std::make_unique<char[]>(bufLen + RawStreamData::FRAME_HEADER_LEN);
     auto ret = memcpy_s(buffer.get() + RawStreamData::FRAME_HEADER_LEN, bufLen, buf, bufLen);
     if (ret != 0) {
+        TRANS_LOGE(TRANS_STREAM, "memcpy failed");
         return nullptr;
     }
     RawStreamData::InsertBufferLength(bufLen, RawStreamData::FRAME_HEADER_LEN,
@@ -89,6 +94,10 @@ ssize_t RawStreamData::GetBufferLen() const
 
 void RawStreamData::InsertBufferLength(int num, int length, uint8_t *output)
 {
+    if (output == nullptr || length < 0) {
+        TRANS_LOGE(TRANS_STREAM, "param invalid");
+        return;
+    }
     for (int i = 0; i < length; i++) {
         output[length - 1 - i] = static_cast<unsigned int>(
             ((static_cast<unsigned int>(num) >> static_cast<unsigned int>(BYTE_TO_BIT * i))) & INT_TO_BYTE);
