@@ -33,7 +33,7 @@ typedef enum {
 } LaneMsgType;
 
 LaneInterface *TransLaneGetInstance(void);
-int32_t GetQosInfoByLaneId(uint32_t laneId, QosInfo *qosOpt);
+int32_t GetTransOptionByLaneId(uint32_t laneId, TransOption *reqInfo);
 int32_t LnnLanePostMsgToHandler(int32_t msgType, uint64_t param1, uint64_t param2,
     void *obj, uint64_t delayMillis);
 int32_t PostDetectTimeoutMessage(uint32_t detectId, uint64_t delayMillis);
