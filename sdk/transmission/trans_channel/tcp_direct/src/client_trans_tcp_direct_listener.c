@@ -17,18 +17,16 @@
 
 #include <stdbool.h>
 #include <unistd.h>
+#include <securec.h>
 
 #include "client_trans_tcp_direct_callback.h"
 #include "client_trans_tcp_direct_manager.h"
 #include "client_trans_tcp_direct_message.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_base_listener.h"
-#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_socket.h"
-#include "softbus_type_def.h"
 #include "trans_log.h"
-#include "trans_pending_pkt.h"
 
 typedef struct {
     SoftBusMutex lock;
@@ -49,7 +47,6 @@ static void TdcLockInit(void)
         }
         g_lock.lockInit = true;
     }
-    return;
 }
 static int32_t ClientTdcOnConnectEvent(ListenerModule module, int cfd,
     const ConnectOption *clientAddr)
@@ -64,6 +61,7 @@ static int32_t ClientTdcOnDataEvent(ListenerModule module, int events, int32_t f
 {
     (void)module;
     TcpDirectChannelInfo channel;
+    (void)memset_s(&channel, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
     if (TransTdcGetInfoByFd(fd, &channel) == NULL) {
         TRANS_LOGE(TRANS_SDK, "can not match fd. fd=%d", fd);
         return SOFTBUS_ERR;
@@ -73,6 +71,7 @@ static int32_t ClientTdcOnDataEvent(ListenerModule module, int events, int32_t f
         int32_t channelId = channel.channelId;
         int32_t ret = TransTdcRecvData(channelId);
         if (ret == SOFTBUS_DATA_NOT_ENOUGH) {
+            TRANS_LOGE(TRANS_SDK, "client channelId=%d process data fail, SOFTBUS_DATA_NOT_ENOUGH,", channelId);
             return SOFTBUS_OK;
         }
         if (ret != SOFTBUS_OK) {
@@ -117,6 +116,7 @@ int32_t TransTdcCreateListener(int32_t fd)
 void TransTdcReleaseFd(int32_t fd)
 {
     if (fd < 0) {
+        TRANS_LOGI(TRANS_SDK, "fd less than zero");
         return;
     }
     DelTrigger(DIRECT_CHANNEL_CLIENT, fd, READ_TRIGGER);
@@ -126,6 +126,7 @@ void TransTdcReleaseFd(int32_t fd)
 int32_t TransTdcStopRead(int32_t fd)
 {
     if (fd < 0) {
+        TRANS_LOGI(TRANS_SDK, "fd less than zero");
         return SOFTBUS_OK;
     }
     return DelTrigger(DIRECT_CHANNEL_CLIENT, fd, READ_TRIGGER);

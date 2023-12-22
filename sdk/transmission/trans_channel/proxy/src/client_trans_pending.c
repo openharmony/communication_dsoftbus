@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,17 +15,13 @@
 
 #include <inttypes.h>
 #include <stdbool.h>
-#include <stdint.h>
-#include <string.h>
 
 #include "client_trans_pending.h"
 
 #include "common_list.h"
-#include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_type_def.h"
 #include "trans_log.h"
 
 typedef struct {
@@ -40,13 +36,12 @@ typedef struct {
 
 static SoftBusMutex g_pendingLock;
 static LIST_HEAD(g_pendingList);
-static bool g_Init = false;
 
 #define USECTONSEC 1000LL
 
 int32_t InitPendingPacket(void)
 {
-    if (!g_Init && SoftBusMutexInit(&g_pendingLock, NULL) != 0) {
+    if (SoftBusMutexInit(&g_pendingLock, NULL) != 0) {
         return SOFTBUS_LOCK_ERR;
     }
     return SOFTBUS_OK;
@@ -119,6 +114,7 @@ EXIT:
 void DeletePendingPacket(uint32_t id, uint64_t seq)
 {
     if (SoftBusMutexLock(&g_pendingLock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "mutex lock fail");
         return;
     }
     PendingPacket *pending = NULL;
@@ -209,24 +205,27 @@ EXIT:
 int32_t SetPendingPacketData(uint32_t id, uint64_t seq, const TransPendData *data)
 {
     if (SoftBusMutexLock(&g_pendingLock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "SetBrPendingPacket lock fail");
+        TRANS_LOGE(TRANS_SDK, "mutex lock fail");
         return SOFTBUS_LOCK_ERR;
     }
     PendingPacket *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_pendingList, PendingPacket, node) {
         if (item->seq == seq && item->id == id) {
-            (void)SoftBusMutexLock(&item->lock);
+            if (SoftBusMutexLock(&item->lock) != SOFTBUS_OK) {
+                TRANS_LOGE(TRANS_SDK, "mutex lock fail");
+                return SOFTBUS_LOCK_ERR;
+            }
             item->finded = true;
             if (data != NULL) {
                 item->data.data = data->data;
                 item->data.len = data->len;
             }
             SoftBusCondSignal(&item->cond);
-            SoftBusMutexUnlock(&item->lock);
-            SoftBusMutexUnlock(&g_pendingLock);
+            (void)SoftBusMutexUnlock(&item->lock);
+            (void)SoftBusMutexUnlock(&g_pendingLock);
             return SOFTBUS_OK;
         }
     }
-    SoftBusMutexUnlock(&g_pendingLock);
+    (void)SoftBusMutexUnlock(&g_pendingLock);
     return SOFTBUS_ERR;
 }
