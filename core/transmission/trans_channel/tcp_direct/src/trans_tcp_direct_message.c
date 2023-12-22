@@ -22,31 +22,32 @@
 #include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "cJSON.h"
-#include "softbus_app_info.h"
+#include "data_bus_native.h"
+#include "lnn_distributed_net_ledger.h"
+#include "lnn_lane_link.h"
+#include "lnn_net_builder.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_thread.h"
 #include "softbus_adapter_socket.h"
+#include "softbus_adapter_thread.h"
+#include "softbus_app_info.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_hisysevt_transreporter.h"
 #include "softbus_message_open_channel.h"
 #include "softbus_socket.h"
 #include "softbus_tcp_socket.h"
+#include "trans_event.h"
 #include "trans_log.h"
 #include "trans_tcp_direct_callback.h"
 #include "trans_tcp_direct_manager.h"
 #include "trans_tcp_direct_sessionconn.h"
 #include "wifi_direct_manager.h"
-#include "data_bus_native.h"
-#include "lnn_distributed_net_ledger.h"
-#include "lnn_lane_link.h"
-#include "lnn_net_builder.h"
-#include "trans_event.h"
 
 #define MAX_PACKET_SIZE (64 * 1024)
 #define MIN_META_LEN 6
 #define META_SESSION "IShare"
+#define MAX_DATA_BUF 4096
 
 typedef struct {
     ListNode node;
@@ -76,6 +77,10 @@ static void PackTdcPacketHead(TdcPacketHead *data)
 
 static void UnpackTdcPacketHead(TdcPacketHead *data)
 {
+    if (data == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "param invalid");
+        return;
+    }
     data->magicNumber = SoftBusLtoHl(data->magicNumber);
     data->module = SoftBusLtoHl(data->module);
     data->seq = SoftBusLtoHll(data->seq);
@@ -90,6 +95,7 @@ int32_t TransSrvDataListInit(void)
     }
     g_tcpSrvDataList = CreateSoftBusList();
     if (g_tcpSrvDataList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "creat list failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -98,12 +104,14 @@ int32_t TransSrvDataListInit(void)
 static void TransSrvDestroyDataBuf(void)
 {
     if (g_tcpSrvDataList ==  NULL) {
+        TRANS_LOGE(TRANS_CTRL, "g_tcpSrvDataList is null");
         return;
     }
 
     ServerDataBuf *item = NULL;
     ServerDataBuf *next = NULL;
     if (SoftBusMutexLock(&g_tcpSrvDataList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "mutex lock failed");
         return;
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpSrvDataList->list, ServerDataBuf, node) {
@@ -113,13 +121,12 @@ static void TransSrvDestroyDataBuf(void)
         g_tcpSrvDataList->cnt--;
     }
     SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
-
-    return;
 }
 
 void TransSrvDataListDeinit(void)
 {
     if (g_tcpSrvDataList == NULL) {
+        TRANS_LOGI(TRANS_BYTES, "g_tcpSrvDataList is null");
         return;
     }
     TransSrvDestroyDataBuf();
@@ -129,7 +136,6 @@ void TransSrvDataListDeinit(void)
 
 int32_t TransSrvAddDataBufNode(int32_t channelId, int32_t fd)
 {
-#define MAX_DATA_BUF 4096
     ServerDataBuf *node = (ServerDataBuf *)SoftBusCalloc(sizeof(ServerDataBuf));
     if (node == NULL) {
         TRANS_LOGE(TRANS_CTRL, "create server data buf node fail.");
@@ -162,6 +168,7 @@ int32_t TransSrvAddDataBufNode(int32_t channelId, int32_t fd)
 void TransSrvDelDataBufNode(int channelId)
 {
     if (g_tcpSrvDataList ==  NULL) {
+        TRANS_LOGE(TRANS_BYTES, "g_tcpSrvDataList is null");
         return;
     }
 
@@ -220,6 +227,7 @@ static int32_t PackBytes(int32_t channelId, const char *data, TdcPacketHead *pac
 
     PackTdcPacketHead(packetHead);
     if (memcpy_s(buffer, bufLen, packetHead, sizeof(TdcPacketHead)) != EOK) {
+        TRANS_LOGE(TRANS_BYTES, "buffer copy fail");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -262,7 +270,6 @@ int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const ch
         SoftBusFree(buffer);
         return SOFTBUS_MALLOC_ERR;
     }
-
     if (GetSessionConnById(channelId, conn) == NULL) {
         TRANS_LOGE(TRANS_BYTES, "Get SessionConn fail");
         SoftBusFree(buffer);
@@ -317,7 +324,8 @@ static int32_t GetServerSideIpInfo(SessionConn *conn, char *ip, uint32_t len)
         if (LnnSetLocalStrInfo(STRING_KEY_WLAN_IP, myIp) != SOFTBUS_OK) {
             TRANS_LOGW(TRANS_CTRL, "ServerSide wifi set local ip fail");
         }
-        if (LnnSetDLP2pIp(conn->appInfo.peerData.deviceId, CATEGORY_UUID, conn->appInfo.peerData.addr) != SOFTBUS_OK) {
+        if (LnnSetDLP2pIp(conn->appInfo.peerData.deviceId, CATEGORY_UUID,
+            conn->appInfo.peerData.addr) != SOFTBUS_OK) {
             TRANS_LOGW(TRANS_CTRL, "ServerSide wifi set peer ip fail");
         }
     } else if (conn->appInfo.routeType == WIFI_P2P) {
@@ -329,7 +337,8 @@ static int32_t GetServerSideIpInfo(SessionConn *conn, char *ip, uint32_t len)
         if (LnnSetLocalStrInfo(STRING_KEY_P2P_IP, myIp) != SOFTBUS_OK) {
             TRANS_LOGW(TRANS_CTRL, "ServerSide set local p2p ip fail");
         }
-        if (LnnSetDLP2pIp(conn->appInfo.peerData.deviceId, CATEGORY_UUID, conn->appInfo.peerData.addr) != SOFTBUS_OK) {
+        if (LnnSetDLP2pIp(conn->appInfo.peerData.deviceId, CATEGORY_UUID,
+            conn->appInfo.peerData.addr) != SOFTBUS_OK) {
             TRANS_LOGW(TRANS_CTRL, "ServerSide set peer p2p ip fail");
         }
     }
@@ -351,7 +360,8 @@ static int32_t GetClientSideIpInfo(SessionConn *conn, char *ip, uint32_t len)
         if (LnnSetLocalStrInfo(STRING_KEY_WLAN_IP, myIp) != SOFTBUS_OK) {
             TRANS_LOGW(TRANS_CTRL, "Client wifi set local ip fail");
         }
-        if (LnnSetDLP2pIp(conn->appInfo.peerData.deviceId, CATEGORY_UUID, conn->appInfo.peerData.addr) != SOFTBUS_OK) {
+        if (LnnSetDLP2pIp(conn->appInfo.peerData.deviceId, CATEGORY_UUID,
+            conn->appInfo.peerData.addr) != SOFTBUS_OK) {
             TRANS_LOGW(TRANS_CTRL, "Client wifi set peer ip fail");
         }
     } else if (conn->appInfo.routeType == WIFI_P2P) {
@@ -363,7 +373,8 @@ static int32_t GetClientSideIpInfo(SessionConn *conn, char *ip, uint32_t len)
         if (LnnSetLocalStrInfo(STRING_KEY_P2P_IP, myIp) != SOFTBUS_OK) {
             TRANS_LOGW(TRANS_CTRL, "Client set local p2p ip fail");
         }
-        if (LnnSetDLP2pIp(conn->appInfo.peerData.deviceId, CATEGORY_UUID, conn->appInfo.peerData.addr) != SOFTBUS_OK) {
+        if (LnnSetDLP2pIp(conn->appInfo.peerData.deviceId, CATEGORY_UUID,
+            conn->appInfo.peerData.addr) != SOFTBUS_OK) {
             TRANS_LOGW(TRANS_CTRL, "Client set peer p2p ip fail");
         }
     }
@@ -469,8 +480,12 @@ int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)
         return SOFTBUS_ERR;
     }
 
-    if (conn.serverSide == false) {
+    if (!(conn.serverSide)) {
         AppInfoData *myData = &conn.appInfo.myData;
+        if (myData == NULL) {
+            TRANS_LOGE(TRANS_CTRL, "myData is null");
+            return SOFTBUS_INVALID_PARAM;
+        }
         int ret = TransTdcOnChannelOpenFailed(myData->pkgName, myData->pid, channelId, errCode);
         TRANS_LOGW(TRANS_CTRL, "channelId=%d, ret=%d", channelId, ret);
         return ret;
@@ -481,7 +496,7 @@ int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)
 static int TransTdcPostFisrtData(SessionConn *conn)
 {
     TRANS_LOGI(TRANS_CTRL, "enter.");
-    uint32_t outLen;
+    uint32_t outLen = 0;
     char *buf = TransTdcPackFastData(&(conn->appInfo), &outLen);
     if (buf == NULL) {
         TRANS_LOGE(TRANS_CTRL, "failed to pack bytes.");
@@ -504,7 +519,6 @@ static int TransTdcPostFisrtData(SessionConn *conn)
         return SOFTBUS_ERR;
     }
     SoftBusFree(buf);
-    buf = NULL;
     return SOFTBUS_OK;
 }
 
@@ -515,7 +529,8 @@ static const ConfigTypeMap g_configTypeMap[] = {
 
 static int32_t FindConfigType(int32_t channelType, int32_t businessType)
 {
-    for (uint32_t i = 0; i < sizeof(g_configTypeMap) / sizeof(ConfigTypeMap); i++) {
+    uint32_t size = (uint32_t)(sizeof(g_configTypeMap) / sizeof(ConfigTypeMap));
+    for (uint32_t i = 0; i < size; i++) {
         if ((g_configTypeMap[i].channelType == channelType) &&
             (g_configTypeMap[i].businessType == businessType)) {
             return g_configTypeMap[i].configType;
@@ -532,12 +547,11 @@ static int32_t TransGetLocalConfig(int32_t channelType, int32_t businessType, ui
             channelType, businessType);
         return SOFTBUS_INVALID_PARAM;
     }
-    uint32_t maxLen;
+    uint32_t maxLen = 0;
     if (SoftbusGetConfig(configType, (unsigned char *)&maxLen, sizeof(maxLen)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get config failed, configType=%d.", configType);
         return SOFTBUS_GET_CONFIG_VAL_ERR;
     }
-
     *len = maxLen;
     TRANS_LOGI(TRANS_CTRL, "get local config len=%d.", *len);
     return SOFTBUS_OK;
@@ -574,11 +588,11 @@ static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *re
     (void)seq;
     TRANS_LOGI(TRANS_CTRL, "channelId=%d", channelId);
     SessionConn conn;
+    (void)memset_s(&conn, sizeof(SessionConn), 0, sizeof(SessionConn));
     if (GetSessionConnById(channelId, &conn) == NULL) {
         TRANS_LOGE(TRANS_CTRL, "notify channel open failed, get tdcInfo is null");
         return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED;
     }
-
     int errCode = SOFTBUS_OK;
     if (UnpackReplyErrCode(reply, &errCode) == SOFTBUS_OK) {
         TransEventExtra extra = {
@@ -593,11 +607,11 @@ static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *re
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
         TRANS_LOGE(TRANS_CTRL, "receive err reply msg");
         if (NotifyChannelOpenFailed(channelId, errCode) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "channel open failed");
             return SOFTBUS_ERR;
         }
         return errCode;
     }
-
     uint16_t fastDataSize = 0;
     if (UnpackReply(reply, &conn.appInfo, &fastDataSize) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "UnpackReply failed");
@@ -617,6 +631,7 @@ static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *re
     if ((fastDataSize > 0 && (conn.appInfo.fastTransDataSize == fastDataSize)) || conn.appInfo.fastTransDataSize == 0) {
         ret = NotifyChannelOpened(channelId);
         if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "notify channel open failed");
             return SOFTBUS_ERR;
         }
     } else {
@@ -627,6 +642,7 @@ static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *re
         }
         ret = NotifyChannelOpened(channelId);
         if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "notify channel open failed");
             return ret;
         }
     }
@@ -643,7 +659,6 @@ static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *re
 }
 
 static inline int TransTdcPostReplyMsg(int32_t channelId, uint64_t seq, uint32_t flags, char *reply)
-
 {
     TdcPacketHead packetHead = {
         .magicNumber = MAGIC_NUMBER,
@@ -663,7 +678,6 @@ static int32_t OpenDataBusRequestReply(const AppInfo *appInfo, int32_t channelId
         TRANS_LOGE(TRANS_CTRL, "get pack reply err");
         return SOFTBUS_ERR;
     }
-
     int32_t ret = TransTdcPostReplyMsg(channelId, seq, flags, reply);
     cJSON_free(reply);
     return ret;
@@ -677,7 +691,6 @@ static int32_t OpenDataBusRequestError(int32_t channelId, uint64_t seq, char *er
         TRANS_LOGE(TRANS_CTRL, "get pack reply err");
         return SOFTBUS_ERR;
     }
-
     int32_t ret = TransTdcPostReplyMsg(channelId, seq, flags, reply);
     cJSON_free(reply);
     return ret;
@@ -709,10 +722,12 @@ static SessionConn* GetSessionConnFromDataBusRequest(int32_t channelId, const cJ
 {
     SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
     if (conn == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "conn calloc failed");
         return NULL;
     }
     if (GetSessionConnById(channelId, conn) == NULL) {
         SoftBusFree(conn);
+        TRANS_LOGE(TRANS_CTRL, "get session conn failed");
         return NULL;
     }
     if (UnpackRequest(request, &conn->appInfo) != SOFTBUS_OK) {
@@ -741,7 +756,6 @@ static void NotifyFastDataRecv(SessionConn *conn, int32_t channelId)
         return;
     }
     TRANS_LOGD(TRANS_CTRL, "ok");
-    return;
 }
 
 static int32_t TransTdcFillDataConfig(AppInfo *appInfo)
@@ -787,6 +801,7 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
     TRANS_LOGI(TRANS_CTRL, "channelId=%d, seq=%d.", channelId, seq);
     SessionConn *conn = GetSessionConnFromDataBusRequest(channelId, request);
     if (conn == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "conn is null");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -798,7 +813,6 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
         AnonymizeFree(tmpName);
         return SOFTBUS_TRANS_NOT_META_SESSION;
     }
-
     char *errDesc = NULL;
     int32_t errCode;
     int myHandleId;
@@ -808,21 +822,18 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
         errDesc = (char *)"Peer Device Session Not Create";
         goto ERR_EXIT;
     }
-
     if (GetUuidByChanId(channelId, conn->appInfo.peerData.deviceId, DEVICE_ID_SIZE_MAX) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "Get Uuid By ChanId failed.");
         errCode = SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
         errDesc = (char *)"Get Uuid By ChanId failed";
         goto ERR_EXIT;
     }
-
     if (TransTdcFillDataConfig(&conn->appInfo) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "fill data config failed.");
         errCode = SOFTBUS_INVALID_PARAM;
         errDesc = (char *)"fill data config failed";
         goto ERR_EXIT;
     }
-
     if (SetAppInfoById(channelId, &conn->appInfo) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "set app info by id failed.");
         errCode = SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
@@ -830,10 +841,10 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
         goto ERR_EXIT;
     }
 
-    OpenDataBusRequestOutSessionName(conn->appInfo.myData.sessionName, conn->appInfo.peerData.sessionName);
+    OpenDataBusRequestOutSessionName(conn->appInfo.myData.sessionName,
+        conn->appInfo.peerData.sessionName);
     TRANS_LOGI(TRANS_CTRL, "OpenDataBusRequest: myPid=%d, peerPid=%d",
         conn->appInfo.myData.pid, conn->appInfo.peerData.pid);
-
     if (NotifyChannelOpened(channelId) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "Notify App Channel Opened Failed");
         errCode = SOFTBUS_TRANS_UDP_SERVER_NOTIFY_APP_OPEN_FAILED;
@@ -845,6 +856,7 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
     }
     myHandleId = NotifyNearByUpdateHandleId(channelId);
     if (myHandleId != SOFTBUS_ERR) {
+        TRANS_LOGE(TRANS_CTRL, "update handId notify failed");
         conn->appInfo.myHandleId = myHandleId;
     }
     (void)SetAppInfoById(channelId, &conn->appInfo);
@@ -859,6 +871,7 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
     if (conn->appInfo.routeType == WIFI_P2P) {
         if (LnnGetNetworkIdByUuid(conn->appInfo.peerData.deviceId,
             conn->appInfo.peerNetWorkId, DEVICE_ID_SIZE_MAX) == SOFTBUS_OK) {
+            TRANS_LOGI(TRANS_CTRL, "get networkId by uuid");
             LaneUpdateP2pAddressByIp(conn->appInfo.peerData.addr, conn->appInfo.peerNetWorkId);
         }
     }
@@ -896,9 +909,9 @@ static int32_t ProcessMessage(int32_t channelId, uint32_t flags, uint64_t seq, c
 static ServerDataBuf *TransSrvGetDataBufNodeById(int32_t channelId)
 {
     if (g_tcpSrvDataList ==  NULL) {
+        TRANS_LOGE(TRANS_CTRL, "g_tcpSrvDataList is null");
         return NULL;
     }
-
     ServerDataBuf *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &(g_tcpSrvDataList->list), ServerDataBuf, node) {
         if (item->channelId == channelId) {
@@ -913,15 +926,14 @@ static int64_t GetAuthIdByChannelInfo(int32_t channelId, uint64_t seq, uint32_t 
 {
     int64_t authId = GetAuthIdByChanId(channelId);
     if (authId != AUTH_INVALID_ID) {
+        TRANS_LOGI(TRANS_CTRL, "authId is not AUTH_INVALID_ID");
         return authId;
     }
-
     AppInfo appInfo;
     if (GetAppInfoById(channelId, &appInfo) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get appInfo fail");
         return AUTH_INVALID_ID;
     }
-
     bool fromAuthServer = ((seq & AUTH_CONN_SERVER_SIDE) != 0);
     char uuid[UUID_BUF_LEN] = {0};
     if (GetWifiDirectManager()->getRemoteUuidByIp(appInfo.peerData.addr, uuid, sizeof(uuid)) != SOFTBUS_OK) {
@@ -1030,7 +1042,6 @@ static int32_t TransTdcSrvProcData(ListenerModule module, int32_t channelId)
         TRANS_LOGE(TRANS_CTRL, "srv can not get buf node.");
         return SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED;
     }
-
     uint32_t bufLen = node->w - node->data;
     if (bufLen < DC_MSG_PACKET_HEAD_SIZE) {
         SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
@@ -1070,12 +1081,10 @@ static int32_t TransTdcGetDataBufInfoByChannelId(int32_t channelId, int32_t *fd,
         TRANS_LOGW(TRANS_CTRL, "invalid param.");
         return SOFTBUS_ERR;
     }
-
     if (g_tcpSrvDataList == NULL) {
         TRANS_LOGE(TRANS_CTRL, "tcp srv data list empty.");
         return SOFTBUS_ERR;
     }
-
     if (SoftBusMutexLock(&g_tcpSrvDataList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock failed.");
         return SOFTBUS_ERR;
@@ -1108,7 +1117,6 @@ static int32_t TransTdcUpdateDataBufWInfo(int32_t channelId, char *recvBuf, int3
         TRANS_LOGE(TRANS_CTRL, "lock failed.");
         return SOFTBUS_ERR;
     }
-
     ServerDataBuf *item = NULL;
     ServerDataBuf *nextItem = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &(g_tcpSrvDataList->list), ServerDataBuf, node) {
@@ -1141,28 +1149,28 @@ int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId)
     int32_t fd = -1;
     size_t len = 0;
     if (TransTdcGetDataBufInfoByChannelId(channelId, &fd, &len) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get info failed");
         return SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED;
     }
     if (len == 0) {
         TRANS_LOGE(TRANS_CTRL, "trans channelId=%d free databuf less zero.", channelId);
         return SOFTBUS_TRANS_TCP_DATABUF_LESS_ZERO;
     }
-
     char *recvBuf = (char*)SoftBusCalloc(len);
     if (recvBuf == NULL) {
         TRANS_LOGE(TRANS_CTRL, "trans channelId=%d malloc len%zu failed..", channelId, len);
         return SOFTBUS_MALLOC_ERR;
     }
-
     int32_t recvLen = ConnRecvSocketData(fd, recvBuf, len, 0);
     if (recvLen < 0) {
         SoftBusFree(recvBuf);
         TRANS_LOGE(TRANS_CTRL, "channelId=%d recv tcp data fail,retLen=%d.", channelId, recvLen);
         return SOFTBUS_ERR;
     } else if (recvLen == 0) {
+        SoftBusFree(recvBuf);
+        TRANS_LOGE(TRANS_CTRL, "channelId=%d recv tcp data fail,retLen= 0.", channelId);
         return SOFTBUS_DATA_NOT_ENOUGH;
     }
-
     if (TransTdcUpdateDataBufWInfo(channelId, recvBuf, recvLen) != SOFTBUS_OK) {
         SoftBusFree(recvBuf);
         TRANS_LOGE(TRANS_CTRL, "channelId=%d update channel data buf failed.", channelId);
