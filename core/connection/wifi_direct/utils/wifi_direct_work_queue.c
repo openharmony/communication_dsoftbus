@@ -14,7 +14,7 @@
  */
 
 #include "wifi_direct_work_queue.h"
-#include <stdint.h>
+
 #include "conn_log.h"
 #include "message_handler.h"
 #include "softbus_error_code.h"
@@ -33,7 +33,7 @@ static void DeleteMessage(SoftBusMessage *msg)
 static SoftBusMessage* NewMessage(struct WifiDirectWork *work)
 {
     SoftBusMessage *msg = SoftBusCalloc(sizeof(*msg));
-    if (!msg) {
+    if (msg == NULL) {
         return msg;
     }
 
@@ -47,7 +47,7 @@ static void ScheduleWork(struct WifiDirectWork *work)
 {
     struct WifiDirectWorkQueue *self = GetWifiDirectWorkQueue();
     SoftBusMessage *msg = NewMessage(work);
-    if (msg) {
+    if (msg != NULL) {
         SoftBusLooper *looper = self->handler.looper;
         looper->PostMessage(looper, msg);
     }
@@ -57,7 +57,7 @@ static void ScheduleDelayWork(struct WifiDirectWork *work, int64_t timeMs)
 {
     struct WifiDirectWorkQueue *self = GetWifiDirectWorkQueue();
     SoftBusMessage *msg = NewMessage(work);
-    if (msg) {
+    if (msg != NULL) {
         SoftBusLooper *looper = self->handler.looper;
         looper->PostMessageDelay(looper, msg, timeMs);
     }
@@ -96,7 +96,7 @@ static struct WifiDirectWorkQueue g_queue = {
 struct WifiDirectWork* ObtainWifiDirectWork(WorkFunction function, void *data)
 {
     struct WifiDirectWork *work = SoftBusCalloc(sizeof(*work));
-    if (!work) {
+    if (work == NULL) {
         return work;
     }
 
@@ -130,7 +130,7 @@ int32_t WifiDirectWorkQueueInit(void)
 {
     CONN_LOGI(CONN_INIT, "init enter");
     SoftBusLooper *looper = CreateNewLooper("WDWQLooper");
-    if (!looper) {
+    if (looper == NULL) {
         CONN_LOGE(CONN_INIT, "create looper failed");
         return SOFTBUS_ERR;
     }
