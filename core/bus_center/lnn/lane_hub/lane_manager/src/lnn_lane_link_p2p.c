@@ -620,7 +620,7 @@ static void OnAuthConnOpenFailed(uint32_t authRequestId, int32_t reason)
     NotifyLinkFail(ASYNC_RESULT_AUTH, authRequestId, reason);
 }
 
-static int32_t updateP2pLinkReq(P2pLinkReqList *p2pReqInfo, uint32_t laneLinkReqId)
+static int32_t updataP2pLinkReq(P2pLinkReqList *p2pReqInfo, uint32_t laneLinkReqId)
 {
     TransOption reqInfo = {0};
     if (GetTransOptionByLaneId(laneLinkReqId, &reqInfo) != SOFTBUS_OK) {
@@ -656,7 +656,7 @@ static int32_t AddConnRequestItem(uint32_t authRequestId, int32_t p2pRequestId, 
         SoftBusFree(item);
         return SOFTBUS_MEM_ERR;
     }
-    if (updateP2pLinkReq(item, laneLinkReqId) != SOFTBUS_OK) {
+    if (updataP2pLinkReq(item, laneLinkReqId) != SOFTBUS_OK) {
         SoftBusFree(item);
         return SOFTBUS_ERR;
     }
