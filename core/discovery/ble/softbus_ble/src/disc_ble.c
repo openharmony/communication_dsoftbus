@@ -1046,13 +1046,14 @@ static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option
             continue;
         }
         if (info->capabilityData[pos] == NULL) {
-            info->capabilityData[pos] = (uint8_t *)SoftBusCalloc(CUST_DATA_MAX_LEN);
+            info->capabilityData[pos] = (uint8_t *)SoftBusCalloc(MAX_CAPABILITYDATA_LEN);
             if (info->capabilityData[pos] == NULL) {
                 return SOFTBUS_MALLOC_ERR;
             }
         }
-        if (memcpy_s(info->capabilityData[pos], CUST_DATA_MAX_LEN, custData, custDataLen) != EOK) {
+        if (memcpy_s(info->capabilityData[pos], MAX_CAPABILITYDATA_LEN, custData, custDataLen) != EOK) {
             SoftBusFree(info->capabilityData[pos]);
+            info->capabilityData[pos] = NULL;
             return SOFTBUS_MEM_ERR;
         }
         info->capDataLen[pos] = custDataLen;
