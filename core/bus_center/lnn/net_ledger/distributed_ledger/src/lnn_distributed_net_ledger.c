@@ -23,6 +23,7 @@
 
 #include "lnn_event.h"
 #include "anonymizer.h"
+#include "auth_deviceprofile.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_fast_offline.h"
 #include "lnn_lane_info.h"
@@ -1332,12 +1333,30 @@ int32_t LnnUpdateNetworkId(const NodeInfo *newInfo)
     return SOFTBUS_OK;
 }
 
+static void UpdateNewNodeAccountHash(NodeInfo *info)
+{
+    char accountString[LONG_TO_STRING_MAX_LEN] = {0};
+    if (sprintf_s(accountString, LONG_TO_STRING_MAX_LEN, "%" PRId64, info->accountId) == -1) {
+        LNN_LOGE(LNN_LEDGER, "long to string fail");
+        return;
+    }
+    LNN_LOGD(LNN_LEDGER, "account string:%s", accountString);
+    int ret = SoftBusGenerateStrHash((uint8_t *)accountString,
+        strlen(accountString), (unsigned char *)info->accountHash);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "account hash fail, ret:%d", ret);
+        return;
+    }
+}
+
 int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
 {
     const char *udid = NULL;
     DoubleHashMap *map = NULL;
     NodeInfo *oldInfo = NULL;
 
+    UpdateNewNodeAccountHash(newInfo);
+    UpdateDpSameAccount(newInfo->accountHash, newInfo->deviceInfo.deviceUdid);
     udid = LnnGetDeviceUdid(newInfo);
     map = &g_distributedNetLedger.distributedInfo;
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
@@ -1362,6 +1381,12 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_STRCPY_ERR;
     }
+    if (memcpy_s(oldInfo->accountHash, SHA_256_HASH_LEN, newInfo->accountHash, SHA_256_HASH_LEN) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "copy account hash failed");
+        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return SOFTBUS_ERR;
+    }
+    oldInfo->accountId = newInfo->accountId;
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return SOFTBUS_OK;
 }
@@ -1429,22 +1454,6 @@ int32_t LnnDeleteMetaInfo(const char *udid, ConnectionAddrType type)
     LNN_LOGI(LNN_LEDGER, "LnnDeleteMetaInfo success");
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return SOFTBUS_OK;
-}
-
-static void UpdateNewNodeAccountHash(NodeInfo *info)
-{
-    char accountString[LONG_TO_STRING_MAX_LEN] = {0};
-    if (sprintf_s(accountString, LONG_TO_STRING_MAX_LEN, "%" PRId64, info->accountId) == -1) {
-        LNN_LOGE(LNN_LEDGER, "long to string fail");
-        return;
-    }
-    LNN_LOGD(LNN_LEDGER, "account string:%s", accountString);
-    int ret = SoftBusGenerateStrHash((uint8_t *)accountString,
-        strlen(accountString), (unsigned char *)info->accountHash);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "account hash fail,ret:%d", ret);
-        return;
-    }
 }
 
 static void OnlinePreventBrConnection(const NodeInfo *info)
@@ -1682,6 +1691,7 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
     }
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     NodeOnlineProc(info);
+    UpdateDpSameAccount(info->accountHash, info->deviceInfo.deviceUdid);
     if (isNetworkChanged) {
         UpdateNetworkInfo(info->deviceInfo.deviceUdid);
     }

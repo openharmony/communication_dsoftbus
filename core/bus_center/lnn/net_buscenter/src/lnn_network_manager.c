@@ -440,6 +440,7 @@ static void OnGroupDeleted(const char *groupId)
     LNN_LOGD(LNN_BUILDER, "wifi handle OnGroupDeleted");
     LnnOnOhosAccountLogout();
     LnnHbOnTrustedRelationReduced();
+    RestartCoapDiscovery();
 }
 
 static void OnDeviceBound(const char *udid, const char *groupInfo)
