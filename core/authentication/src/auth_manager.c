@@ -607,7 +607,7 @@ static void NotifyDeviceVerifyPassed(int64_t authId, const NodeInfo *nodeInfo)
     if (auth == NULL) {
         return;
     }
-    if (auth->connInfo.type == AUTH_LINK_TYPE_P2P) {
+    if (auth->connInfo.type == AUTH_LINK_TYPE_P2P || auth->connInfo.type == AUTH_LINK_TYPE_ENHANCED_P2P) {
         /* P2P auth no need notify to LNN. */
         DelAuthManager(auth, false);
         return;
@@ -782,7 +782,8 @@ static void ReportAuthRequestPassed(uint32_t requestId, int64_t authId, const No
     do {
         if (CheckAuthConnCallback(&request.connCb)) {
             NotifyDeviceVerifyPassed(authId, nodeInfo);
-            if (request.connInfo.type == AUTH_LINK_TYPE_WIFI || request.connInfo.type == AUTH_LINK_TYPE_P2P) {
+            if (request.connInfo.type == AUTH_LINK_TYPE_WIFI || request.connInfo.type == AUTH_LINK_TYPE_P2P ||
+                request.connInfo.type == AUTH_LINK_TYPE_ENHANCED_P2P) {
                 PerformAuthConnCallback(request.requestId, SOFTBUS_OK, authId);
                 DelAuthRequest(request.requestId);
                 continue;
@@ -1210,7 +1211,8 @@ static void HandleDisconnectedEvent(const void *para)
         if (g_transCallback.OnDisconnected != NULL) {
             g_transCallback.OnDisconnected(authIds[i]);
         }
-        if (GetConnType(connId) == AUTH_LINK_TYPE_WIFI || GetConnType(connId) == AUTH_LINK_TYPE_P2P) {
+        if (GetConnType(connId) == AUTH_LINK_TYPE_WIFI || GetConnType(connId) == AUTH_LINK_TYPE_P2P ||
+            GetConnType(connId) == AUTH_LINK_TYPE_ENHANCED_P2P) {
             NotifyDeviceDisconnect(authIds[i]);
             DisconnectAuthDevice(&dupConnId);
             AuthManager inAuth = { .connId = dupConnId };
@@ -1393,6 +1395,7 @@ int32_t AuthDeviceOpenConn(const AuthConnInfo *info, uint32_t requestId, const A
         case AUTH_LINK_TYPE_BR:
         case AUTH_LINK_TYPE_BLE:
         case AUTH_LINK_TYPE_P2P:
+        case AUTH_LINK_TYPE_ENHANCED_P2P:
             authId = GetActiveAuthIdByConnInfo(info);
             if (authId != AUTH_INVALID_ID) {
                 return StartReconnectDevice(authId, info, requestId, callback);
@@ -1415,6 +1418,7 @@ void AuthDeviceCloseConn(int64_t authId)
     switch (auth->connInfo.type) {
         case AUTH_LINK_TYPE_WIFI:
         case AUTH_LINK_TYPE_P2P:
+        case AUTH_LINK_TYPE_ENHANCED_P2P:
             /* Do nothing. */
             break;
         case AUTH_LINK_TYPE_BR:

@@ -86,6 +86,8 @@ const char *GetConnTypeStr(uint64_t connId)
             return "ble";
         case AUTH_LINK_TYPE_P2P:
             return "p2p";
+        case AUTH_LINK_TYPE_ENHANCED_P2P:
+            return "enhanced_p2p";
         default:
             break;
     }
@@ -348,7 +350,7 @@ static void OnWiFiDataReceived(ListenerModule module, int32_t fd, const AuthData
     CHECK_NULL_PTR_RETURN_VOID(head);
     CHECK_NULL_PTR_RETURN_VOID(data);
 
-    if (module != AUTH && module != AUTH_P2P) {
+    if (module != AUTH && module != AUTH_P2P && module != AUTH_ENHANCED_P2P) {
         return;
     }
     bool fromServer = false;
@@ -615,6 +617,7 @@ int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnInfo *connInfo, Conn
             }
             __attribute__((fallthrough));
         case AUTH_LINK_TYPE_P2P:
+        case AUTH_LINK_TYPE_ENHANCED_P2P:
             ret = ConnectCommDevice(connInfo, requestId, sideType);
             break;
         default:
@@ -662,6 +665,7 @@ void DisconnectAuthDevice(uint64_t *connId)
             ConnDisconnectDevice(GetConnId(*connId));
             __attribute__((fallthrough));
         case AUTH_LINK_TYPE_P2P:
+        case AUTH_LINK_TYPE_ENHANCED_P2P:
             break;
         default:
             AUTH_LOGI(AUTH_CONN, "unknown connType");
@@ -681,6 +685,7 @@ int32_t PostAuthData(uint64_t connId, bool toServer, const AuthDataHead *head, c
         case AUTH_LINK_TYPE_BLE:
         case AUTH_LINK_TYPE_BR:
         case AUTH_LINK_TYPE_P2P:
+        case AUTH_LINK_TYPE_ENHANCED_P2P:
             return PostCommData(GetConnId(connId), toServer, head, data);
         default:
             AUTH_LOGI(AUTH_CONN, "unknown connType");
@@ -719,6 +724,33 @@ bool CheckActiveAuthConnection(const AuthConnInfo *connInfo)
     return CheckActiveConnection(&connOpt);
 }
 
+static int32_t AuthProcessWifiDirectParam(AuthLinkType type, const char *ip, int32_t port)
+{
+    ListenerModule moduleId;
+    if (type == AUTH_LINK_TYPE_P2P) {
+        moduleId = AUTH_P2P;
+    } else if (type == AUTH_LINK_TYPE_ENHANCED_P2P) {
+        moduleId = AUTH_ENHANCED_P2P;
+    } else {
+        AUTH_LOGE(AUTH_CONN, "auth link type=%d invalid.", type);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    LocalListenerInfo local = {
+        .type = CONNECT_TCP,
+        .socketOption = {
+            .addr = "",
+            .port = port,
+            .moduleId = moduleId,
+            .protocol = LNN_PROTOCOL_IP,
+        },
+    };
+    if (strcpy_s(local.socketOption.addr, sizeof(local.socketOption.addr), ip) != EOK) {
+        AUTH_LOGE(AUTH_CONN, "strcpy_s ip fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return ConnStartLocalListening(&local);
+}
+
 int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port)
 {
     if (ip == NULL) {
@@ -744,22 +776,10 @@ int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port)
             }
             return StartSocketListening(AUTH, &info);
         }
-        case AUTH_LINK_TYPE_P2P: {
-            LocalListenerInfo local = {
-                .type = CONNECT_TCP,
-                .socketOption = {
-                    .addr = "",
-                    .port = port,
-                    .moduleId = AUTH_P2P,
-                    .protocol = LNN_PROTOCOL_IP,
-                },
-            };
-            if (strcpy_s(local.socketOption.addr, sizeof(local.socketOption.addr), ip) != EOK) {
-                AUTH_LOGE(AUTH_CONN, "strcpy_s ip fail");
-                return SOFTBUS_MEM_ERR;
-            }
-            return ConnStartLocalListening(&local);
-        }
+        case AUTH_LINK_TYPE_P2P:
+            return AuthProcessWifiDirectParam(type, ip, port);
+        case AUTH_LINK_TYPE_ENHANCED_P2P:
+            return AuthProcessWifiDirectParam(type, ip, port);
         default:
             AUTH_LOGE(AUTH_CONN, "unsupport linkType=%d", type);
             break;
@@ -774,11 +794,13 @@ void AuthStopListening(AuthLinkType type)
         case AUTH_LINK_TYPE_WIFI:
             StopSocketListening();
             break;
-        case AUTH_LINK_TYPE_P2P: {
+        case AUTH_LINK_TYPE_P2P:
+        case AUTH_LINK_TYPE_ENHANCED_P2P: {
+            ListenerModule moduleId = (type == AUTH_LINK_TYPE_P2P) ? AUTH_P2P : AUTH_ENHANCED_P2P;
             LocalListenerInfo local = {
                 .type = CONNECT_TCP,
                 .socketOption = {
-                    .moduleId = AUTH_P2P,
+                    .moduleId = moduleId,
                     .protocol = LNN_PROTOCOL_IP,
                 },
             };
