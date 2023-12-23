@@ -396,8 +396,7 @@ typedef struct {
  */
 typedef struct {
     BcScanParams scanParam;
-    BcScanFilter *filter;
-    uint8_t filterSize;
+    int32_t listenerId;
 } LpScanParam;
 
 #ifdef __cplusplus

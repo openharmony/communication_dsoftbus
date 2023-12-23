@@ -15,19 +15,14 @@
 #include "softbus_conn_br_send_queue.h"
 
 #include <stdbool.h>
-#include <stdint.h>
-#include <string.h>
 
 #include "common_list.h"
 #include "conn_log.h"
-#include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_common.h"
 #include "softbus_conn_manager.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
 #include "softbus_queue.h"
-#include "softbus_type_def.h"
 
 static LIST_HEAD(g_brQueueList);
 static SoftBusMutex g_brQueueLock;

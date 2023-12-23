@@ -44,4 +44,4 @@ int32_t ClientTransTdcOnDataReceived(int32_t channelId,
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-#endif
+#endif //SOFTBUS_TCP_DIRECT_CALLBACK_H

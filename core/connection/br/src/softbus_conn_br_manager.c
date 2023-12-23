@@ -19,10 +19,8 @@
 
 #include "bus_center_decision_center.h"
 #include "conn_log.h"
-#include "lnn_distributed_net_ledger.h"
 #include "lnn_node_info.h"
 #include "message_handler.h"
-#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_conn_ble_manager.h"

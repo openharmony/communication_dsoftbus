@@ -137,7 +137,7 @@ void TransLaneMgrDeinit(void)
 int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LaneConnInfo *connInfo,
     uint32_t laneId, AppInfoData *myData)
 {
-    if (g_channelLaneList == NULL) {
+    if (g_channelLaneList == NULL || connInfo == NULL) {
         return SOFTBUS_ERR;
     }
 
@@ -167,10 +167,10 @@ int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LaneConnInfo
     TransLaneInfo *laneItem = NULL;
     LIST_FOR_EACH_ENTRY(laneItem, &(g_channelLaneList->list), TransLaneInfo, node) {
         if (laneItem->channelId == channelId && laneItem->channelType == channelType) {
-            TRANS_LOGI(TRANS_SVC,
-                "trans lane info has exited.channelId=%d, channelType=%d", channelId, channelType);
             SoftBusFree(newLane);
             (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
+            TRANS_LOGI(TRANS_SVC,
+                "trans lane info has existed.channelId=%d, channelType=%d", channelId, channelType);
             return SOFTBUS_ERR;
         }
     }

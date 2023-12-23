@@ -416,7 +416,7 @@ void ConnManagerConnected(uint32_t connectionId, const ConnectionInfo *info)
 
     int32_t num = GetAllListener(&node);
     if (num == 0 || node == NULL) {
-        CONN_LOGE(CONN_COMMON, "get node failed connId=%u", connectionId);
+        CONN_LOGE(CONN_COMMON, "get node failed, connId=%u", connectionId);
         return;
     }
 
@@ -436,7 +436,7 @@ void ConnManagerReusedConnected(uint32_t connectionId, const ConnectionInfo *inf
 
     int32_t num = GetAllListener(&node);
     if (num == 0 || node == NULL) {
-        CONN_LOGE(CONN_COMMON, "get node failed connId=%u", connectionId);
+        CONN_LOGE(CONN_COMMON, "get node failed, connId=%u", connectionId);
         return;
     }
 
@@ -458,7 +458,7 @@ void ConnManagerDisconnected(uint32_t connectionId, const ConnectionInfo *info)
 
     int32_t num = GetAllListener(&node);
     if (num == 0 || node == NULL) {
-        CONN_LOGE(CONN_COMMON, "get node failed connId=%u", connectionId);
+        CONN_LOGE(CONN_COMMON, "get node failed, connId=%u", connectionId);
         return;
     }
     for (int32_t i = 0; i < num; i++) {
@@ -472,7 +472,7 @@ void ConnManagerDisconnected(uint32_t connectionId, const ConnectionInfo *info)
 int32_t ConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback)
 {
     if (ModuleCheck(moduleId) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "module check failed moduleId=%d", moduleId);
+        CONN_LOGE(CONN_COMMON, "module check failed, moduleId=%d", moduleId);
         return SOFTBUS_INVALID_PARAM;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -168,4 +168,4 @@ static constexpr int MAX_STREAM_LEN = 2 * 1024 * 1024;
 } // namespace SoftBus
 } // namespace Communication
 
-#endif
+#endif //STREAM_COMMON_H
