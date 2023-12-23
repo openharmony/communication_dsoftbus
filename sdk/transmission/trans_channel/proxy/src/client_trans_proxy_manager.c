@@ -478,7 +478,7 @@ static int32_t ClientTransProxyProcessSessionData(int32_t channelId, const Packe
         return SOFTBUS_ERR;
     }
 
-    TRANS_LOGI(TRANS_SDK, "ProcessData debug: outlen=%d", dataInfo.outLen);
+    TRANS_LOGD(TRANS_SDK, "ProcessData debug: outlen=%d", dataInfo.outLen);
     if (ClientTransProxyNotifySession(channelId, (SessionPktType)dataHead->flags, dataHead->seq,
         (const char *)dataInfo.outData, dataInfo.outLen) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "process data err");
@@ -505,7 +505,7 @@ static int32_t ClientTransProxyNoSubPacketProc(int32_t channelId, const char *da
         TRANS_LOGE(TRANS_SDK, "invalid dataLen=%d", head->dataLen);
         return SOFTBUS_ERR;
     }
-    TRANS_LOGI(TRANS_SDK, "NoSubPacketProc dataLen=%d inputLen=%d", head->dataLen, len);
+    TRANS_LOGD(TRANS_SDK, "NoSubPacketProc dataLen=%d inputLen=%d", head->dataLen, len);
     if (head->dataLen + sizeof(PacketHead) != len) {
         TRANS_LOGE(TRANS_SDK, "dataLen error");
         return SOFTBUS_ERR;
@@ -731,7 +731,7 @@ static int32_t ClientTransProxySliceProc(int32_t channelId, const char *data, ui
 
     uint32_t dataLen = len - sizeof(SliceHead);
     if (headSlice.sliceNum == 1) { // no sub packets
-        TRANS_LOGI(TRANS_SDK, "no sub packets proc");
+        TRANS_LOGI(TRANS_SDK, "no sub packets proc, channelId=%d", channelId);
         return ClientTransProxyNoSubPacketProc(channelId, data + sizeof(SliceHead), dataLen);
     } else {
         TRANS_LOGI(TRANS_SDK, "sub packets proc sliceNum=%d", headSlice.sliceNum);
