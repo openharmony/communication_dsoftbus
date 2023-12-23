@@ -408,18 +408,16 @@ static int32_t FreeLaneLink(uint32_t laneId, LaneResource *laneResourceInfo, boo
     }
     TransReqInfo *item = NULL;
     TransReqInfo *next = NULL;
-    bool isLaneIdExist = false;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_requestList->list, TransReqInfo, node) {
         if (item->laneId == laneId) {
-            isLaneIdExist = true;
             ListDelete(&item->node);
             g_requestList->cnt--;
             Unlock();
             DelLinkInfoItem(laneId);
             if (isDelayDestroy) {
                 LNN_LOGI(LNN_LANE, "laneId=%u, delayDestroy finished", laneId);
-                SoftBusFree(laneResourceInfo);
                 DelLaneResourceItem(laneResourceInfo);
+                SoftBusFree(laneResourceInfo);
             }
             DestroyLink(item->info.networkId, laneId, item->type, item->info.pid);
             UnbindLaneId(laneId, item);
@@ -428,12 +426,10 @@ static int32_t FreeLaneLink(uint32_t laneId, LaneResource *laneResourceInfo, boo
             return SOFTBUS_OK;
         }
     }
-    if (!isLaneIdExist) {
-        DelLinkInfoItem(laneId);
-        if (isDelayDestroy) {
-            SoftBusFree(laneResourceInfo);
-            DelLaneResourceItem(laneResourceInfo);
-        }
+    DelLinkInfoItem(laneId);
+    if (isDelayDestroy) {
+        DelLaneResourceItem(laneResourceInfo);
+        SoftBusFree(laneResourceInfo);
     }
     Unlock();
     FreeLaneId(laneId);
