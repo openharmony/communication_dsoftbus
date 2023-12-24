@@ -1563,6 +1563,7 @@ static SessionInfo *CreateNewSocketSession(const SessionParam *param)
     session->role = SESSION_ROLE_INIT;
     session->isEnable = false;
     session->info.flag = param->attr->dataType;
+    session->info.streamType = param->attr->attr.streamAttr.streamType;
     session->isEncrypt = true;
     return session;
 }
@@ -1725,6 +1726,7 @@ int32_t ClientIpcOpenSession(int32_t sessionId, const QosTV *qos, uint32_t qosCo
     tmpAttr.fastTransData = NULL;
     tmpAttr.fastTransDataSize = 0;
     tmpAttr.dataType = sessionNode->info.flag;
+    tmpAttr.attr.streamAttr.streamType = sessionNode->info.streamType;
     tmpAttr.linkTypeNum = 0;
     SessionParam param = {
         .sessionName = serverNode->sessionName,
