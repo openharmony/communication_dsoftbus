@@ -16,6 +16,7 @@
 #include "softbus_server_stub.h"
 
 #include "accesstoken_kit.h"
+#include "access_control.h"
 #include "access_token.h"
 #include "comm_log.h"
 #include "discovery_service.h"
@@ -577,6 +578,14 @@ static void ReadQosInfo(MessageParcel& data, SessionParam &param)
     }
 }
 
+static void ReadSessionInfo(MessageParcel& data, SessionParam &param)
+{
+    param.sessionName = data.ReadCString();
+    param.peerSessionName = data.ReadCString();
+    param.peerDeviceId = data.ReadCString();
+    param.groupId = data.ReadCString();
+}
+
 int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &reply)
 {
     COMM_LOGI(COMM_SVC, "enter");
@@ -590,10 +599,7 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
     int64_t timeStart = 0;
     int64_t timediff = 0;
     SoftBusOpenSessionStatus isSucc = SOFTBUS_EVT_OPEN_SESSION_FAIL;
-    param.sessionName = data.ReadCString();
-    param.peerSessionName = data.ReadCString();
-    param.peerDeviceId = data.ReadCString();
-    param.groupId = data.ReadCString();
+    ReadSessionInfo(data, param);
     ReadSessionAttrs(data, &getAttr);
     param.attr = &getAttr;
     ReadQosInfo(data, param);
@@ -601,6 +607,10 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
     if (param.sessionName == nullptr || param.peerSessionName == nullptr || param.peerDeviceId == nullptr ||
         param.groupId == nullptr) {
         retReply = SOFTBUS_INVALID_PARAM;
+        goto EXIT;
+    }
+    if (TransCheckAccessControl(param.peerDeviceId) != SOFTBUS_OK) {
+        retReply = SOFTBUS_PERMISSION_DENIED;
         goto EXIT;
     }
     if (CheckOpenSessionPermission(&param) != SOFTBUS_OK) {
