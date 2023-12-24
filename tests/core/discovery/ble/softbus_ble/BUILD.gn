@@ -35,6 +35,7 @@ ohos_unittest("DiscDistributedBleTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$softbus_adapter_common/include",
     "$softbus_adapter_common/net/bluetooth/include",
+    "$softbus_adapter_common/net/bluetooth/broadcast/interface",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/connection/manager",
