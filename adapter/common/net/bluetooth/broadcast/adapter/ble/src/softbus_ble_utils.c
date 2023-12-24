@@ -28,49 +28,34 @@
 
 int32_t BtStatusToSoftBus(BtStatus btStatus)
 {
-    int32_t status;
     switch (btStatus) {
         case OHOS_BT_STATUS_SUCCESS:
-            status = SOFTBUS_BC_STATUS_SUCCESS;
-            break;
+            return SOFTBUS_BC_STATUS_SUCCESS;
         case OHOS_BT_STATUS_FAIL:
-            status = SOFTBUS_BC_STATUS_FAIL;
-            break;
+            return SOFTBUS_BC_STATUS_FAIL;
         case OHOS_BT_STATUS_NOT_READY:
-            status = SOFTBUS_BC_STATUS_NOT_READY;
-            break;
+            return SOFTBUS_BC_STATUS_NOT_READY;
         case OHOS_BT_STATUS_NOMEM:
-            status = SOFTBUS_BC_STATUS_NOMEM;
-            break;
+            return SOFTBUS_BC_STATUS_NOMEM;
         case OHOS_BT_STATUS_BUSY:
-            status = SOFTBUS_BC_STATUS_BUSY;
-            break;
+            return SOFTBUS_BC_STATUS_BUSY;
         case OHOS_BT_STATUS_DONE:
-            status = SOFTBUS_BC_STATUS_DONE;
-            break;
+            return SOFTBUS_BC_STATUS_DONE;
         case OHOS_BT_STATUS_UNSUPPORTED:
-            status = SOFTBUS_BC_STATUS_UNSUPPORTED;
-            break;
+            return SOFTBUS_BC_STATUS_UNSUPPORTED;
         case OHOS_BT_STATUS_PARM_INVALID:
-            status = SOFTBUS_BC_STATUS_PARM_INVALID;
-            break;
+            return SOFTBUS_BC_STATUS_PARM_INVALID;
         case OHOS_BT_STATUS_UNHANDLED:
-            status = SOFTBUS_BC_STATUS_UNHANDLED;
-            break;
+            return SOFTBUS_BC_STATUS_UNHANDLED;
         case OHOS_BT_STATUS_AUTH_FAILURE:
-            status = SOFTBUS_BC_STATUS_AUTH_FAILURE;
-            break;
+            return SOFTBUS_BC_STATUS_AUTH_FAILURE;
         case OHOS_BT_STATUS_RMT_DEV_DOWN:
-            status = SOFTBUS_BC_STATUS_RMT_DEV_DOWN;
-            break;
+            return SOFTBUS_BC_STATUS_RMT_DEV_DOWN;
         case OHOS_BT_STATUS_AUTH_REJECTED:
-            status = SOFTBUS_BC_STATUS_AUTH_REJECTED;
-            break;
+            return SOFTBUS_BC_STATUS_AUTH_REJECTED;
         default:
-            status = SOFTBUS_BC_STATUS_FAIL;
-            break;
+            return SOFTBUS_BC_STATUS_FAIL;
     }
-    return status;
 }
 
 static uint16_t SoftbusAdvDataTypeToBt(uint16_t advType)
@@ -398,6 +383,31 @@ uint8_t *AssembleRspData(const SoftbusBroadcastPayload *data, uint16_t *dataLen)
     return rspData;
 }
 
+static int32_t ParseFlag(const uint8_t *advData, uint8_t advLen, SoftBusBcScanResult *dst, uint8_t index)
+{
+    if (index + 1 >= advLen) {
+        DISC_LOGE(DISC_BLE_ADAPTER, "parse flag failed");
+        return SOFTBUS_ERR;
+    }
+    dst->data.flag = advData[index + 1];
+    dst->data.isSupportFlag = true;
+    return SOFTBUS_OK;
+}
+
+static int32_t ParseLocalName(const uint8_t *advData, uint8_t advLen, SoftBusBcScanResult *dst, uint8_t index,
+    uint8_t len)
+{
+    if (index + 1 >= advLen) {
+        DISC_LOGE(DISC_BLE_ADAPTER, "parse local name failed");
+        return SOFTBUS_ERR;
+    }
+    if (memcpy_s(dst->localName, sizeof(dst->localName), &advData[index + 1], len - 1) != EOK) {
+        DISC_LOGE(DISC_BLE_ADAPTER, "copy local name failed");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t ParseScanResult(const uint8_t *advData, uint8_t advLen, SoftBusBcScanResult *dst)
 {
     uint8_t index = 0;
@@ -412,20 +422,10 @@ int32_t ParseScanResult(const uint8_t *advData, uint8_t advLen, SoftBusBcScanRes
             break;
         }
         uint8_t type = advData[++index];
-        if (type == BC_FLAG_AD_TYPE) {
-            if (index + 1 >= advLen) {
-                DISC_LOGE(DISC_BLE_ADAPTER, "parse flag failed");
-                return SOFTBUS_ERR;
-            }
-            dst->data.flag = advData[index + 1];
-            dst->data.isSupportFlag = true;
+        if (type == BC_FLAG_AD_TYPE && ParseFlag(advData, advLen, dst, index) != SOFTBUS_OK) {
+            return SOFTBUS_ERR;
         } else if (type == SHORTENED_LOCAL_NAME_BC_TYPE || type == LOCAL_NAME_BC_TYPE) {
-            if (index + 1 >= advLen) {
-                DISC_LOGE(DISC_BLE_ADAPTER, "parse local name failed");
-                return SOFTBUS_ERR;
-            }
-            if (memcpy_s(dst->localName, sizeof(dst->localName), &advData[index + 1], len - 1) != EOK) {
-                DISC_LOGE(DISC_BLE_ADAPTER, "copy local name failed");
+            if (ParseLocalName(advData, advLen, dst, index, len) != SOFTBUS_OK) {
                 return SOFTBUS_ERR;
             }
         } else {
@@ -434,31 +434,20 @@ int32_t ParseScanResult(const uint8_t *advData, uint8_t advLen, SoftBusBcScanRes
                 DISC_LOGW(DISC_BLE_ADAPTER, "unsupported adv type: %u", type);
                 continue;
             }
-            uint16_t payloadLen = len - ID_LEN - 1;
-            if (payloadLen <= 0) {
+            data->payloadLen = len - ID_LEN - 1;
+            if (data->payloadLen <= 0 || index + ID_LEN + 1 >= advLen) {
                 DISC_LOGE(DISC_BLE_ADAPTER, "parse payload failed");
                 return SOFTBUS_ERR;
             }
-            uint8_t *payload = (uint8_t *)SoftBusCalloc(payloadLen);
-            if (payload == NULL) {
+            data->payload = (uint8_t *)SoftBusCalloc(data->payloadLen);
+            if (data->payload == NULL) {
                 DISC_LOGE(DISC_BLE_ADAPTER, "malloc payload failed");
                 return SOFTBUS_ERR;
             }
-            SoftbusBroadcastPayload *data;
-            if (!isRsp) {
-                data = &dst->data.bcData;
-            } else {
-                data = &dst->data.rspData;
-            }
+            SoftbusBroadcastPayload *data = isRsp ? &dst->data.rspData : &dst->data.bcData;
             isRsp = !isRsp;
             data->type = BtAdvTypeToSoftbus(type);
-            if (index + ID_LEN + 1 >= advLen) {
-                DISC_LOGE(DISC_BLE_ADAPTER, "parse id and payload failed");
-                return SOFTBUS_ERR;
-            }
             data->id = ((uint16_t)advData[index + ID_LEN] << BC_SHIFT_BIT) | (uint16_t)advData[index + ID_LEN - 1];
-            data->payloadLen = payloadLen;
-            data->payload = payload;
             if (memcpy_s(data->payload, data->payloadLen, &advData[index + ID_LEN + 1], data->payloadLen) != EOK) {
                 DISC_LOGE(DISC_BLE_ADAPTER, "copy payload failed");
             }
