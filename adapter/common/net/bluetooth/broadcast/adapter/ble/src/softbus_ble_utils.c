@@ -434,6 +434,7 @@ int32_t ParseScanResult(const uint8_t *advData, uint8_t advLen, SoftBusBcScanRes
                 DISC_LOGW(DISC_BLE_ADAPTER, "unsupported adv type: %u", type);
                 continue;
             }
+            SoftbusBroadcastPayload *data = isRsp ? &dst->data.rspData : &dst->data.bcData;
             data->payloadLen = len - ID_LEN - 1;
             if (data->payloadLen <= 0 || index + ID_LEN + 1 >= advLen) {
                 DISC_LOGE(DISC_BLE_ADAPTER, "parse payload failed");
@@ -444,7 +445,6 @@ int32_t ParseScanResult(const uint8_t *advData, uint8_t advLen, SoftBusBcScanRes
                 DISC_LOGE(DISC_BLE_ADAPTER, "malloc payload failed");
                 return SOFTBUS_ERR;
             }
-            SoftbusBroadcastPayload *data = isRsp ? &dst->data.rspData : &dst->data.bcData;
             isRsp = !isRsp;
             data->type = BtAdvTypeToSoftbus(type);
             data->id = ((uint16_t)advData[index + ID_LEN] << BC_SHIFT_BIT) | (uint16_t)advData[index + ID_LEN - 1];
