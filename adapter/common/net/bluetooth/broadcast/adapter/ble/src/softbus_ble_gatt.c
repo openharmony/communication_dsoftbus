@@ -730,10 +730,7 @@ static bool SetLpParam(const SoftBusLpBroadcastParam *bcParam, const SoftBusLpSc
     SoftBusFree(lpParam.rawData.advData);
     SoftBusFree(lpParam.rawData.rspData);
     DISC_LOGI(DISC_BLE_ADAPTER, "advHandle: %d, ret: %d", bcParam->advHandle, ret);
-    if (ret != OHOS_BT_STATUS_SUCCESS) {
-        return false;
-    }
-    return true;
+    return (ret == OHOS_BT_STATUS_SUCCESS) ? true : false;
 }
 
 static int32_t GetBroadcastHandle(int32_t advId, int32_t *bcHandle)
