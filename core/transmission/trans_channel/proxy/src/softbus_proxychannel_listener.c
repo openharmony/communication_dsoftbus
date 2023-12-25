@@ -66,7 +66,7 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
     info.algorithm = appInfo->algorithm;
     info.crc = appInfo->crc;
     info.routeType = appInfo->routeType;
-    info.businessType = appInfo->appType == APP_TYPE_AUTH ? BUSINESS_TYPE_NOT_CARE : appInfo->businessType;
+    info.businessType = (int32_t)(appInfo->appType == APP_TYPE_AUTH ? BUSINESS_TYPE_NOT_CARE : appInfo->businessType);
     info.autoCloseTime = appInfo->autoCloseTime;
     info.myHandleId = appInfo->myHandleId;
     info.peerHandleId = appInfo->peerHandleId;
