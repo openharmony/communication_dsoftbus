@@ -711,7 +711,7 @@ EXIT_ERR:
 NO_SANITIZE("cfi") int32_t TransOpenAuthMsgChannel(const char *sessionName, const ConnectOption *connOpt,
     int32_t *channelId, const char *reqId)
 {
-    if (connOpt == NULL || channelId == NULL || connOpt->type != CONNECT_TCP) {
+    if (connOpt == NULL || channelId == NULL || connOpt->type != CONNECT_TCP || g_authChannelList == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
     AuthChannelInfo *channel = CreateAuthChannelInfo(sessionName, true);
@@ -734,18 +734,27 @@ NO_SANITIZE("cfi") int32_t TransOpenAuthMsgChannel(const char *sessionName, cons
         return SOFTBUS_ERR;
     }
     channel->authId = authId;
+    if (SoftBusMutexLock(&g_authChannelList->lock) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SoftBusMutexLock failed");
+        AuthCloseChannel(channel->authId);
+        SoftBusFree(channel);
+        return SOFTBUS_LOCK_ERR;
+    }
     if (AddAuthChannelInfo(channel) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "AddAuthChannelInfo failed");
         AuthCloseChannel(channel->authId);
         SoftBusFree(channel);
+        (void)SoftBusMutexUnlock(&g_authChannelList->lock);
         return SOFTBUS_ERR;
     }
     if (TransPostAuthChannelMsg(&channel->appInfo, authId, AUTH_CHANNEL_REQ) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "TransPostAuthRequest failed");
         AuthCloseChannel(channel->authId);
         DelAuthChannelInfoByChanId(*channelId);
+        (void)SoftBusMutexUnlock(&g_authChannelList->lock);
         return SOFTBUS_ERR;
     }
+    (void)SoftBusMutexUnlock(&g_authChannelList->lock);
     return SOFTBUS_OK;
 }
 
