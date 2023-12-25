@@ -39,6 +39,7 @@ typedef enum {
 typedef struct {
     ListNode node;
     char pkgName[PKG_NAME_SIZE_MAX];
+    int32_t pid;
     TimeSyncAccuracy accuracy;
     TimeSyncPeriod period;
 } StartTimeSyncReq;
@@ -61,12 +62,14 @@ typedef struct {
 
 typedef struct {
     char pkgName[PKG_NAME_SIZE_MAX];
+    int32_t pid;
     char targetNetworkId[NETWORK_ID_BUF_LEN];
     TimeSyncAccuracy accuracy;
     TimeSyncPeriod period;
 } StartTimeSyncReqMsgPara;
 
 typedef struct {
+    int32_t pid;
     char pkgName[PKG_NAME_SIZE_MAX];
     char targetNetworkId[NETWORK_ID_BUF_LEN];
 } StopTimeSyncReqMsgPara;
@@ -165,12 +168,12 @@ static int32_t TryUpdateStartTimeSyncReq(TimeSyncReqInfo *info, const StartTimeS
     return SOFTBUS_OK;
 }
 
-static void RemoveStartTimeSyncReq(const TimeSyncReqInfo *info, const char *pkgName)
+static void RemoveStartTimeSyncReq(const TimeSyncReqInfo *info, const char *pkgName, int32_t pid)
 {
     StartTimeSyncReq *item = NULL;
 
     LIST_FOR_EACH_ENTRY(item, &info->startReqList, StartTimeSyncReq, node) {
-        if (strcmp(pkgName, item->pkgName) != 0) {
+        if (strcmp(pkgName, item->pkgName) != 0 || item->pid != pid) {
             continue;
         }
         ListDelete(&item->node);
@@ -224,7 +227,7 @@ static int32_t ProcessStartTimeSyncRequest(const StartTimeSyncReqMsgPara *para)
             if (LnnStartTimeSyncImpl(existInfo->targetNetworkId, existInfo->curAccuracy,
                 existInfo->curPeriod, &g_timeSyncImplCb) != SOFTBUS_OK) {
                 SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "start time sync fail");
-                RemoveStartTimeSyncReq(existInfo, para->pkgName);
+                RemoveStartTimeSyncReq(existInfo, para->pkgName, para->pid);
                 break;
             }
         }
@@ -290,7 +293,7 @@ static int32_t ProcessStopTimeSyncRequest(const StopTimeSyncReqMsgPara *para)
         SoftBusFree((void *)para);
         return SOFTBUS_ERR;
     }
-    RemoveStartTimeSyncReq(info, para->pkgName);
+    RemoveStartTimeSyncReq(info, para->pkgName, para->pid);
     TryUpdateTimeSyncReq(info);
     SoftBusFree((void *)para);
     return SOFTBUS_OK;
@@ -332,7 +335,7 @@ static void RemoveAllStartTimeSyncReq(TimeSyncReqInfo *info)
     StartTimeSyncReq *startTimeSyncNextItem = NULL;
 
     LIST_FOR_EACH_ENTRY_SAFE(startTimeSyncItem, startTimeSyncNextItem, &info->startReqList, StartTimeSyncReq, node) {
-        RemoveStartTimeSyncReq(info, startTimeSyncItem->pkgName);
+        RemoveStartTimeSyncReq(info, startTimeSyncItem->pkgName, startTimeSyncItem->pid);
     }
     (void)LnnStopTimeSyncImpl(info->targetNetworkId);
     ListDelete(&info->node);
@@ -526,7 +529,7 @@ int32_t LnnStartTimeSync(const char *pkgName, const char *targetNetworkId,
     return SOFTBUS_OK;
 }
 
-int32_t LnnStopTimeSync(const char *pkgName, const char *targetNetworkId)
+int32_t LnnStopTimeSync(const char *pkgName, const char *targetNetworkId, int32_t callingPid)
 {
     StopTimeSyncReqMsgPara *para = NULL;
 
@@ -543,6 +546,7 @@ int32_t LnnStopTimeSync(const char *pkgName, const char *targetNetworkId)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "malloc stop time sync request msg para fail");
         return SOFTBUS_MALLOC_ERR;
     }
+    para->pid = callingPid;
     if (strncpy_s(para->pkgName, PKG_NAME_SIZE_MAX, pkgName, strlen(pkgName)) != EOK ||
         strncpy_s(para->targetNetworkId, NETWORK_ID_BUF_LEN, targetNetworkId, strlen(targetNetworkId)) != EOK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "copy time sync request info fail");
