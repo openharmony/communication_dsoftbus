@@ -79,7 +79,6 @@ int32_t DecryptStorageData(uint8_t *dbKey, uint32_t len)
         LNN_LOGE(LNN_LEDGER, "calloc decrypt dbKey fail");
         return SOFTBUS_MEM_ERR;
     }
-    LNN_LOGI(LNN_LEDGER, "Decrypt, data len=%d", len);
     encryptData.size = len;
     encryptData.data = dbKey;
     int32_t ret;
@@ -89,7 +88,6 @@ int32_t DecryptStorageData(uint8_t *dbKey, uint32_t len)
             ret = SOFTBUS_ERR;
             break;
         }
-        LNN_LOGW(LNN_LEDGER, "decrypt dbKey log for audit");
         if (memcpy_s(dbKey, len, decryptData.data, decryptData.size) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "memcpy_s dbKey fail");
             ret = SOFTBUS_MEM_ERR;

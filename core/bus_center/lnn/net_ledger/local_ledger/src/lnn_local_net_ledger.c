@@ -398,7 +398,7 @@ static int32_t LlGetWlanIp(void *buf, uint32_t len)
     }
     char *anonyIp = NULL;
     Anonymize(ip, &anonyIp);
-    LNN_LOGI(LNN_LEDGER, "get LocalIp=%s", anonyIp);
+    LNN_LOGD(LNN_LEDGER, "get LocalIp=%s", anonyIp);
     AnonymizeFree(anonyIp);
     if (strncpy_s((char *)buf, len, ip, strlen(ip)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");

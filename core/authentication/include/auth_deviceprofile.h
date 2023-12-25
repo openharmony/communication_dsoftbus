@@ -12,7 +12,6 @@
  * See the License for the specific language governing permission and
  * limitations under the License.
  */
- 
 
 #ifndef AUTH_DEVICEPROFILE_H
 #define AUTH_DEVICEPROFILE_H
