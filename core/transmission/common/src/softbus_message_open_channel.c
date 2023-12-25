@@ -111,13 +111,12 @@ char *PackRequest(const AppInfo *appInfo)
         cJSON_Delete(json);
         return NULL;
     }
-    if (appInfo->fastTransDataSize > 0) {
-        if (PackFirstData(appInfo, json) != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "pack first data failed");
-            cJSON_Delete(json);
-            return NULL;
-        }
+    if (appInfo->fastTransDataSize > 0 && PackFirstData(appInfo, json) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "pack first data failed");
+        cJSON_Delete(json);
+        return NULL;
     }
+
     unsigned char encodeSessionKey[BASE64KEY] = {0};
     size_t keyLen = 0;
     int32_t ret = SoftBusBase64Encode(encodeSessionKey, BASE64KEY, &keyLen, (unsigned char*)appInfo->sessionKey,
@@ -126,26 +125,25 @@ char *PackRequest(const AppInfo *appInfo)
         cJSON_Delete(json);
         return NULL;
     }
-    if (!AddNumberToJsonObject(json, CODE, CODE_OPEN_CHANNEL) ||
+    bool addBRet = (!AddNumberToJsonObject(json, CODE, CODE_OPEN_CHANNEL) ||
         !AddNumberToJsonObject(json, API_VERSION, appInfo->myData.apiVersion) ||
         !AddStringToJsonObject(json, BUS_NAME, appInfo->peerData.sessionName) ||
         !AddStringToJsonObject(json, GROUP_ID, appInfo->groupId) ||
         !AddNumberToJsonObject(json, UID, appInfo->myData.uid) ||
         !AddNumberToJsonObject(json, PID, appInfo->myData.pid) ||
         !AddStringToJsonObject(json, SESSION_KEY, (char*)encodeSessionKey) ||
-        !AddNumberToJsonObject(json, MTU_SIZE, (int)appInfo->myData.dataConfig)) {
+        !AddNumberToJsonObject(json, MTU_SIZE, (int)appInfo->myData.dataConfig));
+    if (addBRet) {
         cJSON_Delete(json);
         return NULL;
     }
     char *authState = (char*)appInfo->myData.authState;
-    if (appInfo->myData.apiVersion != API_V1) {
-        if (!AddStringToJsonObject(json, PKG_NAME, appInfo->myData.pkgName) ||
-            !AddStringToJsonObject(json, CLIENT_BUS_NAME, appInfo->myData.sessionName) ||
-            !AddStringToJsonObject(json, AUTH_STATE, authState) ||
-            !AddNumberToJsonObject(json, MSG_ROUTE_TYPE, appInfo->routeType)) {
-            cJSON_Delete(json);
-            return NULL;
-        }
+    if (appInfo->myData.apiVersion != API_V1 && (!AddStringToJsonObject(json, PKG_NAME, appInfo->myData.pkgName) ||
+        !AddStringToJsonObject(json, CLIENT_BUS_NAME, appInfo->myData.sessionName) ||
+        !AddStringToJsonObject(json, AUTH_STATE, authState) ||
+        !AddNumberToJsonObject(json, MSG_ROUTE_TYPE, appInfo->routeType))) {
+        cJSON_Delete(json);
+        return NULL;
     }
     (void)AddNumberToJsonObject(json, BUSINESS_TYPE, appInfo->businessType);
     (void)AddNumberToJsonObject(json, AUTO_CLOSE_TIME, appInfo->autoCloseTime);

@@ -322,7 +322,6 @@ int32_t SoftBusThreadCreate(SoftBusThread *thread, SoftBusThreadAttr *threadAttr
             ret = SoftBusThreadSetName(*thread, threadAttr->taskName);
             if (ret != 0) {
                 COMM_LOGE(COMM_ADAPTER, "Thread set name failed, ret[%d]", ret);
-                return SOFTBUS_ERR;
             }
         }
     }

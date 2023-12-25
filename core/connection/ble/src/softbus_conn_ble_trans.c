@@ -27,7 +27,6 @@
 #include "softbus_conn_common.h"
 #include "softbus_datahead_transform.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
 
 static const int32_t MTU_HEADER_SIZE = 3;
 static const size_t BLE_TRANS_HEADER_SIZE = sizeof(BleTransHeader);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,15 +15,12 @@
 
 #include "wrapper_br_interface.h"
 
-#include "message_handler.h"
 #include "c_header/ohos_bt_def.h"
 #include "c_header/ohos_bt_gap.h"
 #include "c_header/ohos_bt_spp.h"
 #include "c_header/ohos_bt_socket.h"
-#include "securec.h"
 #include "conn_log.h"
-#include "softbus_adapter_mem.h"
-#include "softbus_def.h"
+#include "securec.h"
 #include "softbus_errcode.h"
 #include "string.h"
 
@@ -57,7 +54,7 @@ static void CloseSppServer(int32_t serverFd)
     SppServerClose(serverFd);
 }
 
-static int32_t Connect(const char *uuid, const BT_ADDR mac, void *connectCallback)
+static int32_t ConnectByPort(const char *uuid, const BT_ADDR mac, const int socketPsmValue, void *connectCallback)
 {
     if (mac == NULL) {
         return SOFTBUS_ERR;
@@ -75,14 +72,18 @@ static int32_t Connect(const char *uuid, const BT_ADDR mac, void *connectCallbac
         CONN_LOGE(CONN_BR, "Connect memcpy_s failed");
         return SOFTBUS_ERR;
     }
-    const int socketPsmValue = -1;
     int ret = SocketConnectEx(&socketPara, &bdAddr, socketPsmValue, (BtSocketConnectionCallback *)connectCallback);
     if (ret < 0) {
         CONN_LOGE(CONN_BR, "connect failed,ret=%d", ret);
         return SOFTBUS_ERR;
     }
-    CONN_LOGI(CONN_BR, "SppConnect ok clientId: %d", ret);
+    CONN_LOGI(CONN_BR, "SocketConnectEx ok clientId: %d", ret);
     return ret;
+}
+
+static int32_t Connect(const char *uuid, const BT_ADDR mac, void *connectCallback)
+{
+    return ConnectByPort(uuid, mac, -1 ,connectCallback);
 }
 
 static int32_t DisConnect(int32_t clientFd)
@@ -102,6 +103,7 @@ static int32_t Accept(int32_t serverFd)
     CONN_LOGI(CONN_BR, "[Accept remote device to connect, and serverFd = %d]", serverFd);
     int32_t ret = SppServerAccept(serverFd);
     if (ret == BT_SPP_INVALID_ID) {
+        CONN_LOGE(CONN_BR, "Accept spp server failed");
         return SOFTBUS_ERR;
     }
     return ret;
@@ -136,18 +138,24 @@ static int32_t GetRemoteDeviceInfo(int32_t clientFd, const BluetoothRemoteDevice
 
     return SOFTBUS_OK;
 }
+static int32_t GetSppServerPort(int serverId)
+{
+    return SocketGetScn(serverId);
+}
 
 static SppSocketDriver g_sppSocketDriver = {
     .Init = Init,
     .OpenSppServer = OpenSppServer,
     .CloseSppServer = CloseSppServer,
     .Connect = Connect,
+    .ConnectByPort = ConnectByPort,
     .DisConnect = DisConnect,
     .IsConnected = IsConnected,
     .Accept = Accept,
     .Write = Write,
     .Read = Read,
-    .GetRemoteDeviceInfo = GetRemoteDeviceInfo
+    .GetRemoteDeviceInfo = GetRemoteDeviceInfo,
+    .GetSppServerPort = GetSppServerPort
 };
 
 bool IsAclConnected(const BT_ADDR mac)

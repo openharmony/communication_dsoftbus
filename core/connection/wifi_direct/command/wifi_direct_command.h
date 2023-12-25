@@ -29,7 +29,9 @@ extern "C" {
 enum WifiDirectCommandType {
     COMMAND_TYPE_CONNECT = 0,
     COMMAND_TYPE_DISCONNECT = 1,
-    COMMAND_TYPE_MESSAGE = 2,
+    COMMAND_TYPE_NEGO_MESSAGE = 2,
+    COMMAND_TYPE_DEFAULT_TRIGGER_MESSAGE = 3,
+    COMMAND_TYPE_BLE_TRIGGER_MESSAGE = 4,
 };
 
 #define WIFI_DIRECT_COMMAND_BASE                                                                  \
@@ -38,8 +40,8 @@ enum WifiDirectCommandType {
     void (*onFailure)(struct WifiDirectCommand *base, int32_t reason);                            \
     void (*onTimeout)(struct WifiDirectCommand *base);                                            \
     struct WifiDirectCommand* (*duplicate)(struct WifiDirectCommand *base);                       \
-    void (*deleteSelf)(struct WifiDirectCommand *base);                                           \
     int32_t timerId;                                                                              \
+    void (*destructor)(struct WifiDirectCommand *base);                                           \
     enum WifiDirectCommandType type;                                                              \
     struct WifiDirectProcessor *processor; \
     struct NegotiateMessage *msg

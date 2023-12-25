@@ -63,12 +63,12 @@ struct LinkInfo {
 
 void LinkInfoConstructor(struct LinkInfo* self);
 void LinkInfoConstructorWithNameAndMode(struct LinkInfo* self, const char *localName, const char *remoteName,
-                                        uint32_t localMode, uint32_t remoteMod);
+                                        uint32_t localMode, uint32_t remoteMode);
 void LinkInfoDestructor(struct LinkInfo* self);
 
 struct LinkInfo* LinkInfoNew(void);
 struct LinkInfo* LinkInfoNewWithNameAndMode(const char *localName, const char *remoteName,
-                                            uint32_t localMode, uint32_t remoteMod);
+                                            uint32_t localMode, uint32_t remoteMode);
 void LinkInfoDelete(struct LinkInfo* self);
 
 #ifdef __cplusplus

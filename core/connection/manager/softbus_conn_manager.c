@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "common_list.h"
+#include "conn_event.h"
 #include "conn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
@@ -29,11 +30,9 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
-#include "softbus_hisysevt_connreporter.h"
 #include "softbus_socket.h"
 #include "softbus_tcp_connect_manager.h"
 #include "softbus_utils.h"
-#include "conn_event.h"
 
 ConnectFuncInterface *g_connManager[CONNECT_TYPE_MAX] = { 0 };
 static SoftBusList *g_listenerList = NULL;
@@ -324,7 +323,6 @@ uint32_t ConnGetNewRequestId(ConnModule moduleId)
     return reqId;
 }
 
-
 void ConnManagerRecvData(uint32_t connectionId, ConnModule moduleId, int64_t seq, char *data, int32_t len)
 {
     CONN_CHECK_AND_RETURN_LOGW(data != NULL, CONN_COMMON,
@@ -418,7 +416,7 @@ void ConnManagerConnected(uint32_t connectionId, const ConnectionInfo *info)
 
     int32_t num = GetAllListener(&node);
     if (num == 0 || node == NULL) {
-        CONN_LOGE(CONN_COMMON, "get node failed connId=%u", connectionId);
+        CONN_LOGE(CONN_COMMON, "get node failed, connId=%u", connectionId);
         return;
     }
 
@@ -438,7 +436,7 @@ void ConnManagerReusedConnected(uint32_t connectionId, const ConnectionInfo *inf
 
     int32_t num = GetAllListener(&node);
     if (num == 0 || node == NULL) {
-        CONN_LOGE(CONN_COMMON, "get node failed connId=%u", connectionId);
+        CONN_LOGE(CONN_COMMON, "get node failed, connId=%u", connectionId);
         return;
     }
 
@@ -460,7 +458,7 @@ void ConnManagerDisconnected(uint32_t connectionId, const ConnectionInfo *info)
 
     int32_t num = GetAllListener(&node);
     if (num == 0 || node == NULL) {
-        CONN_LOGE(CONN_COMMON, "get node failed connId=%u", connectionId);
+        CONN_LOGE(CONN_COMMON, "get node failed, connId=%u", connectionId);
         return;
     }
     for (int32_t i = 0; i < num; i++) {
@@ -474,7 +472,7 @@ void ConnManagerDisconnected(uint32_t connectionId, const ConnectionInfo *info)
 int32_t ConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback)
 {
     if (ModuleCheck(moduleId) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "module check failed moduleId=%d", moduleId);
+        CONN_LOGE(CONN_COMMON, "module check failed, moduleId=%d", moduleId);
         return SOFTBUS_INVALID_PARAM;
     }
 

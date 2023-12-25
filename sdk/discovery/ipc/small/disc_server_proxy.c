@@ -71,7 +71,7 @@ int ServerIpcPublishService(const char *pkgName, const PublishInfo *info)
 {
     DISC_LOGI(DISC_CONTROL, "publish service ipc client push.");
     if (pkgName == NULL || info == NULL) {
-        DISC_LOGE(DISC_CONTROL, "Invalid param");
+        DISC_LOGE(DISC_SDK, "Invalid param:null");
         return SOFTBUS_INVALID_PARAM;
     }
     if (g_serverProxy == NULL) {
@@ -81,7 +81,11 @@ int ServerIpcPublishService(const char *pkgName, const PublishInfo *info)
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    WriteString(&request, pkgName);
+    bool ret = WriteString(&request, pkgName);
+    if (!ret) {
+        DISC_LOGE(DISC_SDK, "Write pkgName failed");
+        return SOFTBUS_ERR;
+    }
     DiscSerializer serializer = {
         .dataLen = info->dataLen,
         .freq = info->freq,
@@ -92,13 +96,23 @@ int ServerIpcPublishService(const char *pkgName, const PublishInfo *info)
     PublishSerializer publishSerializer = {
         .commonSerializer = serializer
     };
-    bool ret = WriteRawData(&request, (void*)&publishSerializer, sizeof(PublishSerializer));
+    ret = WriteRawData(&request, (void*)&publishSerializer, sizeof(PublishSerializer));
     if (!ret) {
+        DISC_LOGE(DISC_SDK, "Write publish serializer failed");
         return SOFTBUS_ERR;
     }
-    WriteString(&request, info->capability);
+    
+    ret = WriteString(&request, info->capability);
+    if (!ret) {
+        DISC_LOGE(DISC_SDK, "Write capability failed");
+        return SOFTBUS_ERR;
+    }
     if (info->dataLen != 0) {
-        WriteString(&request, (const char *)(info->capabilityData));
+        ret = WriteString(&request, (const char *)(info->capabilityData));
+        if (!ret) {
+            DISC_LOGE(DISC_SDK, "Write capability Data failed");
+            return SOFTBUS_ERR;
+        }
     }
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_PUBLISH_SERVICE, &request, NULL, NULL);
@@ -113,18 +127,27 @@ int ServerIpcUnPublishService(const char *pkgName, int publishId)
 {
     DISC_LOGI(DISC_CONTROL, "unpublish service ipc client push.");
     if (pkgName == NULL) {
-        DISC_LOGE(DISC_CONTROL, "Invalid param");
+        DISC_LOGE(DISC_SDK, "Invalid param:null");
         return SOFTBUS_INVALID_PARAM;
     }
     if (g_serverProxy == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
 
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    WriteString(&request, pkgName);
-    WriteInt32(&request, publishId);
+    bool ret = WriteString(&request, pkgName);
+    if (!ret) {
+        DISC_LOGE(DISC_SDK, "Write pkgName failed");
+        return SOFTBUS_ERR;
+    }
+
+    ret = WriteInt32(&request, publishId);
+    if (!ret) {
+        DISC_LOGE(DISC_SDK, "Write publishId failed");
+        return SOFTBUS_ERR;
+    }
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_UNPUBLISH_SERVICE, &request, NULL, NULL);
     if (ans != SOFTBUS_OK) {
@@ -138,17 +161,21 @@ int ServerIpcStartDiscovery(const char *pkgName, const SubscribeInfo *info)
 {
     DISC_LOGI(DISC_CONTROL, "start discovery ipc client push.");
     if (pkgName == NULL || info == NULL) {
-        DISC_LOGE(DISC_CONTROL, "Invalid param");
+        DISC_LOGE(DISC_SDK, "Invalid param:null");
         return SOFTBUS_INVALID_PARAM;
     }
     if (g_serverProxy == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
 
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    WriteString(&request, pkgName);
+    bool ret = WriteString(&request, pkgName);
+    if (!ret) {
+        DISC_LOGE(DISC_SDK, "Write pkgName failed");
+        return SOFTBUS_ERR;
+    }   
     DiscSerializer serializer = {
         .dataLen = info->dataLen,
         .freq = info->freq,
@@ -161,13 +188,22 @@ int ServerIpcStartDiscovery(const char *pkgName, const SubscribeInfo *info)
         .isSameAccount = info->isSameAccount,
         .isWakeRemote = info->isWakeRemote
     };
-    bool ret = WriteRawData(&request, (void*)&subscribeSerializer, sizeof(SubscribeSerializer));
+    ret = WriteRawData(&request, (void*)&subscribeSerializer, sizeof(SubscribeSerializer));
     if (!ret) {
+        DISC_LOGE(DISC_SDK, "Write SubscribeSerializer failed");
         return SOFTBUS_ERR;
     }
-    WriteString(&request, info->capability);
+    ret = WriteString(&request, info->capability);
+    if (!ret) {
+        DISC_LOGE(DISC_SDK, "Write capability failed");
+        return SOFTBUS_ERR;
+    }   
     if (info->dataLen != 0) {
-        WriteString(&request, (const char *)(info->capabilityData));
+        ret = WriteString(&request, (const char *)(info->capabilityData));
+        if (!ret) {
+            DISC_LOGE(DISC_SDK, "Write capabilityData failed");
+            return SOFTBUS_ERR;
+        } 
     }
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_START_DISCOVERY, &request, NULL, NULL);
@@ -180,20 +216,28 @@ int ServerIpcStartDiscovery(const char *pkgName, const SubscribeInfo *info)
 
 int ServerIpcStopDiscovery(const char *pkgName, int subscribeId)
 {
-    DISC_LOGI(DISC_CONTROL, "stop discovery ipc client push.");
+    DISC_LOGI(DISC_SDK, "stop discovery ipc client push.");
     if (pkgName == NULL) {
-        DISC_LOGE(DISC_CONTROL, "Invalid param");
+        DISC_LOGE(DISC_SDK, "Invalid param:null");
         return SOFTBUS_INVALID_PARAM;
     }
     if (g_serverProxy == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
 
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
-    WriteString(&request, pkgName);
-    WriteInt32(&request, subscribeId);
+    bool ret = WriteString(&request, pkgName);
+    if (!ret) {
+        DISC_LOGE(DISC_SDK, "Write pkgName failed");
+        return SOFTBUS_ERR;
+    }  
+    ret = WriteInt32(&request, subscribeId);
+    if (!ret) {
+        DISC_LOGE(DISC_SDK, "Write subscribeId failed");
+        return SOFTBUS_ERR;
+    }
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_STOP_DISCOVERY, &request, NULL, NULL);
     if (ans != SOFTBUS_OK) {

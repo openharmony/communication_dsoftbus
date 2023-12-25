@@ -39,20 +39,24 @@ static sptr<IRemoteObject> GetSystemAbility()
     MessageParcel data;
 
     if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        DISC_LOGE(DISC_SDK, "Write INTERFACE_TOKEN failed!");
         return nullptr;
     }
     
-    data.WriteInt32(SOFTBUS_SERVER_SA_ID_INNER);
+    if (!data.WriteInt32(SOFTBUS_SERVER_SA_ID_INNER)) {
+        DISC_LOGE(DISC_SDK, "Write SERVER_SA_ID_INNER failed!");
+        return nullptr;
+    }
     MessageParcel reply;
     MessageOption option;
     sptr<IRemoteObject> samgr = IPCSkeleton::GetContextObject();
     if (samgr == nullptr) {
-        DISC_LOGE(DISC_CONTROL, "Get samgr failed!");
+        DISC_LOGE(DISC_SDK, "Get samgr failed!");
         return nullptr;
     }
     int32_t err = samgr->SendRequest(g_getSystemAbilityId, data, reply, option);
     if (err != 0) {
-        DISC_LOGE(DISC_CONTROL, "Get GetSystemAbility failed!");
+        DISC_LOGE(DISC_SDK, "Get GetSystemAbility failed!");
         return nullptr;
     }
     return reply.ReadRemoteObject();
@@ -67,12 +71,12 @@ int32_t DiscServerProxyInit(void)
     }
     sptr<IRemoteObject> object = GetSystemAbility();
     if (object == nullptr) {
-        DISC_LOGE(DISC_INIT, "Get remote softbus object failed!\n");
+        DISC_LOGE(DISC_INIT, "Get remote softbus object failed!");
         return SOFTBUS_ERR;
     }
     g_serverProxy = new (std::nothrow) DiscServerProxy(object);
     if (g_serverProxy == nullptr) {
-        DISC_LOGE(DISC_INIT, "Create disc server proxy failed!\n");
+        DISC_LOGE(DISC_INIT, "Create disc server proxy failed!");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -80,15 +84,13 @@ int32_t DiscServerProxyInit(void)
 
 void DiscServerProxyDeInit(void)
 {
-    DISC_LOGI(DISC_INIT, "enter");
-    delete g_serverProxy;
-    g_serverProxy = nullptr;
+    g_serverProxy.clear();
 }
 
 int32_t ServerIpcPublishService(const char *pkgName, const PublishInfo *info)
 {
     if (g_serverProxy == nullptr) {
-        DISC_LOGE(DISC_CONTROL, "softbus server g_serverProxy is nullptr!\n");
+        DISC_LOGE(DISC_SDK, "softbus server g_serverProxy is nullptr!");
         return SOFTBUS_ERR;
     }
     return g_serverProxy->PublishService(pkgName, info);
@@ -97,7 +99,7 @@ int32_t ServerIpcPublishService(const char *pkgName, const PublishInfo *info)
 int32_t ServerIpcUnPublishService(const char *pkgName, int32_t publishId)
 {
     if (g_serverProxy == nullptr) {
-        DISC_LOGE(DISC_CONTROL, "softbus server g_serverProxy is nullptr!\n");
+        DISC_LOGE(DISC_SDK, "softbus server g_serverProxy is nullptr!");
         return SOFTBUS_ERR;
     }
     int ret = g_serverProxy->UnPublishService(pkgName, publishId);
@@ -107,7 +109,7 @@ int32_t ServerIpcUnPublishService(const char *pkgName, int32_t publishId)
 int32_t ServerIpcStartDiscovery(const char *pkgName, const SubscribeInfo *info)
 {
     if (g_serverProxy == nullptr) {
-        DISC_LOGE(DISC_CONTROL, "softbus server g_serverProxy is nullptr!\n");
+        DISC_LOGE(DISC_SDK, "softbus server g_serverProxy is nullptr!");
         return SOFTBUS_ERR;
     }
     return g_serverProxy->StartDiscovery(pkgName, info);
@@ -116,7 +118,7 @@ int32_t ServerIpcStartDiscovery(const char *pkgName, const SubscribeInfo *info)
 int32_t ServerIpcStopDiscovery(const char *pkgName, int32_t subscribeId)
 {
     if (g_serverProxy == nullptr) {
-        DISC_LOGE(DISC_CONTROL, "softbus server g_serverProxy is nullptr!\n");
+        DISC_LOGE(DISC_SDK, "softbus server g_serverProxy is nullptr!");
         return SOFTBUS_ERR;
     }
     return g_serverProxy->StopDiscovery(pkgName, subscribeId);

@@ -468,7 +468,8 @@ static struct LoopConfigItem g_loopConfig[] = {
     {LOOP_TYPE_BR_SEND, NULL},
     {LOOP_TYPE_BR_RECV, NULL},
     {LOOP_TYPE_P2P, NULL},
-    {LOOP_TYPE_LANE, NULL}
+    {LOOP_TYPE_LANE, NULL},
+    {LOOP_TYPE_HANDLE_FILE, NULL}
 };
 
 SoftBusLooper *GetLooper(int type)
@@ -558,10 +559,17 @@ int LooperInit(void)
 {
     SoftBusLooper *looper = CreateNewLooper("BusCenter");
     if (!looper) {
-        COMM_LOGE(COMM_UTILS, "init looper fail.");
+        COMM_LOGE(COMM_UTILS, "init BusCenter looper fail.");
         return SOFTBUS_ERR;
     }
     SetLooper(LOOP_TYPE_DEFAULT, looper);
+    
+    SoftBusLooper *handleFileLooper = CreateNewLooper("HandleFile");
+    if (!handleFileLooper) {
+        COMM_LOGE(COMM_UTILS, "init HandleFile looper fail.");
+        return SOFTBUS_ERR;
+    }
+    SetLooper(LOOP_TYPE_HANDLE_FILE, handleFileLooper);
     COMM_LOGI(COMM_UTILS, "init looper success.");
     return SOFTBUS_OK;
 }

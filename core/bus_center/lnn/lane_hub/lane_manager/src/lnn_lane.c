@@ -349,7 +349,7 @@ int32_t LnnFreeLane(uint32_t laneId)
     if (g_laneObject[laneType] == NULL) {
         return SOFTBUS_ERR;
     }
-    LNN_LOGD(LNN_LANE, "free, laneId=%u", laneId);
+    LNN_LOGD(LNN_LANE, "free lane enter, laneId=%u", laneId);
     int32_t result = g_laneObject[laneType]->FreeLane(laneId);
     if (result != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "freeLane fail, result:%d", result);

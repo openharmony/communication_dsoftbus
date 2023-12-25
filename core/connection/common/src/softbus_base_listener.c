@@ -35,6 +35,7 @@
 #define MAX_LISTEN_EVENTS 1024
 #define DEFAULT_BACKLOG   4
 #define FDARR_EXPAND_BASE 2
+#define SELECT_UNEXPECT_FAIL_RETRY_WAIT_MILLIS (3 * 1000)
 
 enum BaseListenerStatus {
     LISTENER_IDLE = 0,
@@ -82,13 +83,14 @@ static int32_t ShutdownBaseListener(SoftbusListenerNode *node);
 static int32_t StartSelectThread(void);
 static int32_t StopSelectThread(void);
 static void WakeupSelectThread(void);
+static SoftbusListenerNode *CreateSpecifiedListenerModule(ListenerModule module);
 
 static SoftBusMutex g_listenerListLock = { 0 };
 static SoftbusListenerNode *g_listenerList[UNUSE_BUTT] = { 0 };
 static SoftBusMutex g_selectThreadStateLock = { 0 };
 static SelectThreadState *g_selectThreadState = NULL;
 
-static SoftbusListenerNode *GetListenerNode(ListenerModule module)
+static SoftbusListenerNode *GetListenerNodeCommon(ListenerModule module, bool create)
 {
     int32_t status = SoftBusMutexLock(&g_listenerListLock);
     CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, NULL, CONN_COMMON,
@@ -97,7 +99,13 @@ static SoftbusListenerNode *GetListenerNode(ListenerModule module)
     SoftbusListenerNode *node = g_listenerList[module];
     do {
         if (node == NULL) {
-            break;
+            if (create) {
+                node = CreateSpecifiedListenerModule(module);
+            }
+            if (node == NULL) {
+                break;
+            }
+            g_listenerList[module] = node;
         }
         status = SoftBusMutexLock(&node->lock);
         if (status != SOFTBUS_OK) {
@@ -111,6 +119,16 @@ static SoftbusListenerNode *GetListenerNode(ListenerModule module)
     } while (false);
     (void)SoftBusMutexUnlock(&g_listenerListLock);
     return node;
+}
+
+static SoftbusListenerNode *GetListenerNode(ListenerModule module)
+{
+    return GetListenerNodeCommon(module, false);
+}
+
+static SoftbusListenerNode *GetOrCreateListenerNode(ListenerModule module)
+{
+    return GetListenerNodeCommon(module, true);
 }
 
 static void RemoveListenerNode(SoftbusListenerNode *node)
@@ -195,31 +213,6 @@ static SoftbusListenerNode *CreateSpecifiedListenerModule(ListenerModule module)
     return node;
 }
 
-static int32_t CreateStaticModulesUnsafe(void)
-{
-    ListenerModule module = 0;
-    for (; module < LISTENER_MODULE_DYNAMIC_START; module++) {
-        SoftbusListenerNode *node = CreateSpecifiedListenerModule(module);
-        if (node == NULL) {
-            CONN_LOGW(CONN_COMMON, "create static module failed: create module listener node failed, module=%d",
-                module);
-            goto CLEANUP;
-        }
-        CONN_LOGI(CONN_COMMON, "create static module, create module listener node success, module=%d", module);
-        g_listenerList[module] = node;
-    }
-    return SOFTBUS_OK;
-CLEANUP:
-    for (ListenerModule i = module - 1; i >= 0; i--) {
-        SoftbusListenerNode *node = g_listenerList[i];
-        g_listenerList[i] = NULL;
-        // cleanup
-        ReturnListenerNode(&node);
-        CONN_LOGI(CONN_COMMON, "create static module failed: clean up listener node done, module=%d", module);
-    }
-    return SOFTBUS_ERR;
-}
-
 int32_t InitBaseListener(void)
 {
     // stop select thread need re-enter lock
@@ -253,7 +246,6 @@ int32_t InitBaseListener(void)
         return SOFTBUS_LOCK_ERR;
     }
     (void)memset_s(g_listenerList, sizeof(g_listenerList), 0, sizeof(g_listenerList));
-    status = CreateStaticModulesUnsafe();
     (void)SoftBusMutexUnlock(&g_listenerListLock);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_INIT, "init base listener failed: create static module listener failed, error=%d",
@@ -333,7 +325,7 @@ int32_t StartBaseClient(ListenerModule module, const SoftbusBaseListener *listen
 
     CONN_LOGI(CONN_COMMON, "receive start base client listener request, module=%d", module);
 
-    SoftbusListenerNode *node = GetListenerNode(module);
+    SoftbusListenerNode *node = GetOrCreateListenerNode(module);
     CONN_CHECK_AND_RETURN_RET_LOGW(node != NULL, SOFTBUS_NOT_FIND, CONN_COMMON,
         "start base client listener failed: get listener node failed, dynamic module forgot register "
                      "first? or static module start before base listener init? module=%d",
@@ -452,7 +444,7 @@ int32_t StartBaseListener(const LocalListenerInfo *info, const SoftbusBaseListen
 
     ListenerModule module = info->socketOption.moduleId;
     CONN_LOGI(CONN_COMMON, "receive start base listener request, module=%d", module);
-    SoftbusListenerNode *node = GetListenerNode(module);
+    SoftbusListenerNode *node = GetOrCreateListenerNode(module);
     CONN_CHECK_AND_RETURN_RET_LOGW(node != NULL, SOFTBUS_NOT_FIND, CONN_COMMON,
         "start base listener failed: get listener node failed, dynamic module should register first, module=%d",
         module);
@@ -982,7 +974,6 @@ static void ProcessSpecifiedListenerNodeEvent(SoftbusListenerNode *node, SoftBus
         return;
     }
 
-    // TODO: process listen fd exception, rebuild listen socket
     if (listenFd > 0 && SoftBusSocketFdIsset(listenFd, readSet)) {
         status =
             ProcessSpecifiedServerAcceptEvent(node->module, listenFd, connectType, socketIf, &listener, wakeupTrace);
@@ -1121,7 +1112,6 @@ static int32_t CollectWaitEventFdSet(SoftBusFdSet *readSet, SoftBusFdSet *writeS
 
 static void *SelectTask(void *arg)
 {
-#define SELECT_UNEXPECT_FAIL_RETRY_WAIT_MILLIS (3 * 1000)
     static int32_t wakeupTraceIdGenerator = 0;
 
     SelectThreadState *selectState = (SelectThreadState *)arg;

@@ -32,6 +32,7 @@ typedef enum {
     DISC_ABILITY,
     DISC_USB,
     DISC_USB_ADAPTER,
+    DISC_SDK,
     DISC_TEST,
 } DiscLogLabelEnum;
 
@@ -47,6 +48,7 @@ static const SoftBusLogLabel DISC_LABELS[MODULE_DOMAIN_MAX_LEN] = {
     { DISC_ABILITY,     0xd0057a7,      "DiscAbility"   },
     { DISC_USB,         0xd0057a8,      "DiscUsb"       },
     { DISC_USB_ADAPTER, 0xd0057a9,      "DiscUsbAdapter"},
+    { DISC_SDK,         0xd0057aa,      "DiscSdk"       },
     { DISC_TEST,        DOMAIN_ID_TEST, "DiscTest"      },
 };
 
@@ -56,10 +58,14 @@ static const SoftBusLogLabel DISC_LABELS[MODULE_DOMAIN_MAX_LEN] = {
 #define DISC_LOGI(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_INFO, DISC_LABELS[label], ##__VA_ARGS__)
 #define DISC_LOGD(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_DEBUG, DISC_LABELS[label], ##__VA_ARGS__)
 
+#define DISC_CHECK_AND_RETURN_RET_LOGD(cond, ret, label, fmt, ...) \
+    CHECK_AND_RETURN_RET_LOG_INNER(cond, ret, DISC_LOGD, label, fmt, ##__VA_ARGS__)
 #define DISC_CHECK_AND_RETURN_RET_LOGW(cond, ret, label, fmt, ...) \
     CHECK_AND_RETURN_RET_LOG_INNER(cond, ret, DISC_LOGW, label, fmt, ##__VA_ARGS__)
 #define DISC_CHECK_AND_RETURN_RET_LOGE(cond, ret, label, fmt, ...) \
     CHECK_AND_RETURN_RET_LOG_INNER(cond, ret, DISC_LOGE, label, fmt, ##__VA_ARGS__)
+#define DISC_CHECK_AND_RETURN_LOGD(cond, label, fmt, ...) \
+    CHECK_AND_RETURN_LOG_INNER(cond, DISC_LOGD, label, fmt, ##__VA_ARGS__)
 #define DISC_CHECK_AND_RETURN_LOGW(cond, label, fmt, ...) \
     CHECK_AND_RETURN_LOG_INNER(cond, DISC_LOGW, label, fmt, ##__VA_ARGS__)
 #define DISC_CHECK_AND_RETURN_LOGE(cond, label, fmt, ...) \

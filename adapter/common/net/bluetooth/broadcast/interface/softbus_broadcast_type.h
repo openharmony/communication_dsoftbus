@@ -32,7 +32,7 @@ extern "C"{
 #endif
 
 /**
- * @brief Defines mac address length
+ * @brief Defines mac address length.
  *
  * @since 4.1
  * @version 1.0
@@ -50,12 +50,29 @@ extern "C"{
 #define SOFTBUS_BC_SCAN_WINDOW_P100 1000
 
 /**
+ * @brief Defines the maxium lenght of irk information.
+ *
+ * @since 4.1
+ * @version 1.0
+ */
+#define BC_IRK_LEN   16
+
+/**
+ * @brief Defines the maxium lenght of udid hash information.
+ *
+ * @since 4.1
+ * @version 1.0
+ */
+#define BC_UDID_HASH_LEN 32
+
+/**
  * @brief Defines the length of local name, the maximum length of complete local name is 30 bytes.
  *
  * @since 4.1
  * @version 1.0
  */
 #define BC_LOCAL_NAME_LEN_MAX 30
+
 /**
  * @brief Defines the broadcast service type.
  *
@@ -69,9 +86,17 @@ typedef enum {
     SRV_TYPE_DIS, // The service type is distrubite discovery.
     SRV_TYPE_SHARE, // The service type is share discovery.
     SRV_TYPE_APPROACH, // The service type is approach discovery.
+    SRV_TYPE_SH, // The service type is sensorhub.
+    SRV_TYPE_FAST_OFFLINE, // The service type is fast offline.
     SRV_TYPE_BUTT,
 } BaseServiceType;
 
+/**
+ * @brief Defines the broadcast status type.
+ *
+ * @since 4.1
+ * @version 1.0
+ */
 typedef enum {
     SOFTBUS_BC_STATUS_SUCCESS = 0x00,
     SOFTBUS_BC_STATUS_FAIL,
@@ -87,6 +112,12 @@ typedef enum {
     SOFTBUS_BC_STATUS_AUTH_REJECTED
 } SoftBusBcStatus;
 
+/**
+ * @brief Defines the broadcast event type.
+ *
+ * @since 4.1
+ * @version 1.0
+ */
 typedef enum {
     SOFTBUS_BC_EVT_NON_CONNECTABLE_NON_SCANNABLE = 0x00,
     SOFTBUS_BC_EVT_NON_CONNECTABLE_NON_SCANNABLE_DIRECTED = 0x04,
@@ -102,6 +133,12 @@ typedef enum {
     SOFTBUS_BC_EVT_LEGACY_SCAN_RSP_TO_ADV = 0x1B
 } SoftBusBcScanResultEvtType;
 
+/**
+ * @brief Defines the broadcast mac type.
+ *
+ * @since 4.1
+ * @version 1.0
+ */
 typedef enum {
     SOFTBUS_BC_PUBLIC_DEVICE_ADDRESS = 0x00,
     SOFTBUS_BC_RANDOM_DEVICE_ADDRESS = 0x01,
@@ -111,11 +148,23 @@ typedef enum {
     SOFTBUS_BC_NO_ADDRESS = 0xFF,
 } SoftBusBcScanResultAddrType;
 
+/**
+ * @brief Defines the scan type.
+ *
+ * @since 4.1
+ * @version 1.0
+ */
 typedef enum {
     SOFTBUS_BC_SCAN_TYPE_PASSIVE = 0x00,
     SOFTBUS_BC_SCAN_TYPE_ACTIVE,
 } SoftBusBcScanType;
 
+/**
+ * @brief Defines the scan physics type.
+ *
+ * @since 4.1
+ * @version 1.0
+ */
 typedef enum {
     SOFTBUS_BC_SCAN_PHY_NO_PACKET = 0x00,
     SOFTBUS_BC_SCAN_PHY_1M = 0x01,
@@ -123,6 +172,12 @@ typedef enum {
     SOFTBUS_BC_SCAN_PHY_CODED = 0x03
 } SoftBusBcScanResultPhyType;
 
+/**
+ * @brief Defines the scan filter policy type.
+ *
+ * @since 4.1
+ * @version 1.0
+ */
 typedef enum {
     SOFTBUS_BC_SCAN_FILTER_POLICY_ACCEPT_ALL = 0x00,
     SOFTBUS_BC_SCAN_FILTER_POLICY_ONLY_WHITE_LIST,
@@ -130,6 +185,12 @@ typedef enum {
     SOFTBUS_BC_SCAN_FILTER_POLICY_ONLY_WHITE_LIST_AND_RPA
 } SoftBusBcScanFilterPolicy;
 
+/**
+ * @brief Defines the broadcast adv type.
+ *
+ * @since 4.1
+ * @version 1.0
+ */
 typedef enum {
     SOFTBUS_BC_ADV_IND = 0x00,
     SOFTBUS_BC_ADV_DIRECT_IND_HIGH = 0x01,
@@ -138,6 +199,12 @@ typedef enum {
     SOFTBUS_BC_ADV_DIRECT_IND_LOW  = 0x04,
 } SoftBusBcAdvType;
 
+/**
+ * @brief Defines the broadcast adv filter and allow scan type.
+ *
+ * @since 4.1
+ * @version 1.0
+ */
 typedef enum {
     SOFTBUS_BC_ADV_FILTER_ALLOW_SCAN_ANY_CON_ANY = 0x00,
     SOFTBUS_BC_ADV_FILTER_ALLOW_SCAN_WLST_CON_ANY = 0x01,
@@ -145,12 +212,24 @@ typedef enum {
     SOFTBUS_BC_ADV_FILTER_ALLOW_SCAN_WLST_CON_WLST = 0x03,
 } SoftBusBcAdvFilter;
 
+/**
+ * @brief Defines the broadcast data status.
+ *
+ * @since 4.1
+ * @version 1.0
+ */
 typedef enum {
     SOFTBUS_BC_DATA_COMPLETE = 0x00,
     SOFTBUS_BC_DATA_INCOMPLETE_MORE_TO_COME = 0x01,
     SOFTBUS_BC_DATA_INCOMPLETE_TRUNCATED = 0x02,
 } SoftBusBcScanResultDataStatus;
 
+/**
+ * @brief Defines the switch status of the ble and br.
+ *
+ * @since 4.1
+ * @version 1.0
+ */
 typedef enum {
     SOFTBUS_BC_BT_STATE_TURNING_ON = 0x0,
     SOFTBUS_BC_BT_STATE_TURN_ON,
@@ -212,6 +291,17 @@ typedef struct {
 } BcMacAddr;
 
 /**
+ * @brief Defines uuid information
+ *
+ * @since 4.1
+ * @version 1.0
+ */
+typedef struct {
+    uint8_t uuidLen;
+    int8_t *uuid;
+} BroadcastUuid;
+
+/**
  * @brief Defines the device information returned by <b>SoftbusBroadcastCallback</b>.
  *
  * @since 4.1
@@ -227,6 +317,7 @@ typedef struct {
     int8_t rssi;
     uint8_t addrType;
     BcMacAddr addr;
+    int8_t *deviceName;
     uint8_t localName[BC_LOCAL_NAME_LEN_MAX];
     BroadcastPacket packet;
 } BroadcastReportInfo;
@@ -248,6 +339,9 @@ typedef struct {
     int32_t channelMap;
     int32_t duration;
     int8_t txPower;
+    bool isSupportRpa;
+    uint8_t ownIrk[BC_IRK_LEN];
+    uint8_t ownUdidHash[BC_UDID_HASH_LEN];
 } BroadcastParam;
 
 /**
@@ -282,6 +376,29 @@ typedef struct {
     uint8_t scanPhy;
     uint8_t scanFilterPolicy;
 } BcScanParams;
+
+/**
+ * @brief Defines broadcast parameters of the low power chip.
+ *
+ * @since 4.1
+ * @version 1.0
+ */
+typedef struct {
+    int32_t bcHandle;
+    BroadcastPacket packet;
+    BroadcastParam bcParam;
+} LpBroadcastParam;
+
+/**
+ * @brief Defines scan parameters of the low power chip.
+ *
+ * @since 4.1
+ * @version 1.0
+ */
+typedef struct {
+    BcScanParams scanParam;
+    int32_t listenerId;
+} LpScanParam;
 
 #ifdef __cplusplus
 }

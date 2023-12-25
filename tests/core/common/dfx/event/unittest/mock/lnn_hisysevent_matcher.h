@@ -146,7 +146,7 @@ MATCHER_P2(LnnAuditValidParamArrayMatcher, inExtra, validSize, "lnn audit valid 
     ++index;
     EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
     EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.connId);
+    EXPECT_EQ(params[index].v.ui64, extra.connId);
     ++index;
     EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
     EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
@@ -154,7 +154,7 @@ MATCHER_P2(LnnAuditValidParamArrayMatcher, inExtra, validSize, "lnn audit valid 
     ++index;
     EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
     EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);
-    EXPECT_EQ(params[index].v.i32, extra.authRequestId);
+    EXPECT_EQ(params[index].v.ui32, extra.authRequestId);
     ++index;
     EXPECT_STREQ(params[index].name, g_lnnAuditAssigners[index].name);
     EXPECT_EQ(params[index].t, g_lnnAuditAssigners[index].type);

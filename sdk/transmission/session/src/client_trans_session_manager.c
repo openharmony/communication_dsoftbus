@@ -40,6 +40,7 @@ typedef struct {
     int32_t channelId;
     ChannelType channelType;
     void (*OnSessionClosed)(int sessionId);
+    void (*OnShutdown)(int32_t socket, ShutdownReason reason);
 } DestroySessionInfo;
 
 int32_t CheckPermissionState(int32_t sessionId)
@@ -164,7 +165,8 @@ static void DestroySessionId(void)
     return;
 }
 
-static DestroySessionInfo *CreateDestroySessionNode(SessionInfo *sessionNode, const ClientSessionServer *server)
+NO_SANITIZE("cfi") static DestroySessionInfo *CreateDestroySessionNode(SessionInfo *sessionNode,
+    const ClientSessionServer *server)
 {
     DestroySessionInfo *destroyNode = (DestroySessionInfo *)SoftBusMalloc(sizeof(DestroySessionInfo));
     if (destroyNode == NULL) {
@@ -175,13 +177,14 @@ static DestroySessionInfo *CreateDestroySessionNode(SessionInfo *sessionNode, co
     destroyNode->channelId = sessionNode->channelId;
     destroyNode->channelType = sessionNode->channelType;
     destroyNode->OnSessionClosed = server->listener.session.OnSessionClosed;
+    destroyNode->OnShutdown = server->listener.socket.OnShutdown;
     return destroyNode;
 }
 
-static void ClientDestroySession(const ListNode *destroyList)
+NO_SANITIZE("cfi") static void ClientDestroySession(const ListNode *destroyList, ShutdownReason reason)
 {
     if (IsListEmpty(destroyList)) {
-        TRANS_LOGE(TRANS_SDK, "destroyList is empty fail.");
+        TRANS_LOGD(TRANS_SDK, "destroyList is empty fail.");
         return;
     }
     DestroySessionInfo *destroyNode = NULL;
@@ -193,6 +196,8 @@ static void ClientDestroySession(const ListNode *destroyList)
         (void)ClientTransCloseChannel(destroyNode->channelId, destroyNode->channelType);
         if (destroyNode->OnSessionClosed != NULL) {
             destroyNode->OnSessionClosed(id);
+        } else if (destroyNode->OnShutdown != NULL) {
+            destroyNode->OnShutdown(id, reason);
         }
         ListDelete(&(destroyNode->node));
         SoftBusFree(destroyNode);
@@ -248,7 +253,7 @@ void TransClientDeinit(void)
         DestroyClientSessionServer(serverNode, &destroyList);
     }
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-    ClientDestroySession(&destroyList);
+    ClientDestroySession(&destroyList, SHUTDOWN_REASON_LOCAL);
 
     DestroySoftBusList(g_clientSessionServerList);
     g_clientSessionServerList = NULL;
@@ -610,7 +615,7 @@ int32_t ClientDeleteSessionServer(SoftBusSecType type, const char *sessionName)
         }
     }
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-    (void)ClientDestroySession(&destroyList);
+    (void)ClientDestroySession(&destroyList, SHUTDOWN_REASON_LOCAL);
     return SOFTBUS_OK;
 }
 
@@ -1226,7 +1231,7 @@ static void ClientTransLnnOfflineProc(NodeBasicInfo *info)
         DestroyClientSessionByNetworkId(serverNode, info->networkId, ROUTE_TYPE_ALL, &destroyList);
     }
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-    (void)ClientDestroySession(&destroyList);
+    (void)ClientDestroySession(&destroyList, SHUTDOWN_REASON_LNN_OFFLINE);
     return;
 }
 
@@ -1237,7 +1242,7 @@ static INodeStateCb g_transLnnCb = {
 
 int32_t ReCreateSessionServerToServer(void)
 {
-    TRANS_LOGI(TRANS_SDK, "enter.");
+    TRANS_LOGD(TRANS_SDK, "enter.");
     if (g_clientSessionServerList == NULL) {
         TRANS_LOGE(TRANS_INIT, "entry list  not init");
         return SOFTBUS_ERR;
@@ -1277,7 +1282,10 @@ void ClientTransOnLinkDown(const char *networkId, int32_t routeType)
     if (networkId == NULL || g_clientSessionServerList == NULL) {
         return;
     }
-    TRANS_LOGI(TRANS_SDK, "routeType=%d", routeType);
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
+    TRANS_LOGI(TRANS_SDK, "routeType=%d, networkId=%s", routeType, anonyNetworkId);
+    AnonymizeFree(anonyNetworkId);
 
     if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != 0) {
         TRANS_LOGE(TRANS_CTRL, "lock failed");
@@ -1290,7 +1298,7 @@ void ClientTransOnLinkDown(const char *networkId, int32_t routeType)
         DestroyClientSessionByNetworkId(serverNode, networkId, routeType, &destroyList);
     }
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-    (void)ClientDestroySession(&destroyList);
+    (void)ClientDestroySession(&destroyList, SHUTDOWN_REASON_LINK_DOWN);
     return;
 }
 
@@ -1393,7 +1401,7 @@ void ClientCleanAllSessionWhenServerDeath(void)
         }
     }
     (void)SoftBusMutexUnlock(&g_clientSessionServerList->lock);
-    (void)ClientDestroySession(&destroyList);
+    (void)ClientDestroySession(&destroyList, SHUTDOWN_REASON_SERVICE_DIED);
     TRANS_LOGI(TRANS_SDK, "client destroy session cnt=%d.", destroyCnt);
 }
 
@@ -1558,6 +1566,7 @@ static SessionInfo *CreateNewSocketSession(const SessionParam *param)
     session->role = SESSION_ROLE_INIT;
     session->isEnable = false;
     session->info.flag = param->attr->dataType;
+    session->info.streamType = param->attr->attr.streamAttr.streamType;
     session->isEncrypt = true;
     return session;
 }
@@ -1636,9 +1645,9 @@ int32_t ClientSetListenerBySessionId(int32_t sessionId, const ISocketListener *l
     }
 
     if (sessionNode->role != SESSION_ROLE_INIT) {
-        (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
         TRANS_LOGE(TRANS_SDK, "%s:socket in use, current role:%d", __func__,
             sessionNode->role);
+        (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
         return SOFTBUS_TRANS_SOCKET_IN_USE;
     }
     ret = memcpy_s(&(serverNode->listener.socket), sizeof(ISocketListener), listener,
@@ -1720,6 +1729,7 @@ int32_t ClientIpcOpenSession(int32_t sessionId, const QosTV *qos, uint32_t qosCo
     tmpAttr.fastTransData = NULL;
     tmpAttr.fastTransDataSize = 0;
     tmpAttr.dataType = sessionNode->info.flag;
+    tmpAttr.attr.streamAttr.streamType = sessionNode->info.streamType;
     tmpAttr.linkTypeNum = 0;
     SessionParam param = {
         .sessionName = serverNode->sessionName,
@@ -1878,7 +1888,7 @@ int32_t ClientGetPeerSocketInfoById(int32_t sessionId, PeerSocketInfo *peerSocke
     }
 
     peerSocketInfo->name = sessionNode->info.peerSessionName;
-    peerSocketInfo->deviceId = sessionNode->info.peerDeviceId;
+    peerSocketInfo->networkId = sessionNode->info.peerDeviceId;
     peerSocketInfo->pkgName = serverNode->pkgName;
     peerSocketInfo->dataType = (TransDataType)sessionNode->info.flag;
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));

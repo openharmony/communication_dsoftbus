@@ -18,6 +18,7 @@
 #include "conn_log.h"
 #include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
+#include "bus_center_manager.h"
 #include "wifi_direct_negotiator.h"
 #include "wifi_direct_decision_center.h"
 #include "channel/wifi_direct_negotiate_channel.h"
@@ -41,13 +42,16 @@ static int32_t ReuseLink(struct WifiDirectConnectCommand *command)
 {
     struct WifiDirectConnectInfo *connectInfo = &command->connectInfo;
     char remoteUuid[UUID_BUF_LEN] = {0};
-    int32_t ret = connectInfo->negoChannel->getDeviceId(connectInfo->negoChannel, remoteUuid, sizeof(remoteUuid));
+    int32_t ret = LnnGetRemoteStrInfo(connectInfo->remoteNetworkId, STRING_KEY_UUID, remoteUuid, sizeof(remoteUuid));
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "get remote uuid failed");
-    struct InnerLink *link = GetLinkManager()->getLinkByUuid(remoteUuid);
+    struct InnerLink *link = GetLinkManager()->getLinkByTypeAndUuid(WIFI_DIRECT_LINK_TYPE_HML, remoteUuid);
+    if (link == NULL) {
+        link = GetLinkManager()->getLinkByTypeAndUuid(WIFI_DIRECT_LINK_TYPE_P2P, remoteUuid);
+    }
     CONN_CHECK_AND_RETURN_RET_LOGW(link, SOFTBUS_ERR, CONN_WIFI_DIRECT, "link is null");
     enum InnerLinkState state = link->getInt(link, IL_KEY_STATE, INNER_LINK_STATE_DISCONNECTED);
     CONN_CHECK_AND_RETURN_RET_LOGW(state == INNER_LINK_STATE_CONNECTED, SOFTBUS_ERR, CONN_WIFI_DIRECT,
-        "link is not connected");
+                                   "link is not connected");
 
     struct WifiDirectIpv4Info *ipv4 = link->getRawData(link, IL_KEY_REMOTE_IPV4, NULL, NULL);
     CONN_CHECK_AND_RETURN_RET_LOGW(ipv4, SOFTBUS_ERR, CONN_WIFI_DIRECT, "ipv4 is null");
@@ -67,7 +71,7 @@ static int32_t ReuseLink(struct WifiDirectConnectCommand *command)
 
     enum WifiDirectLinkType linkType = link->getInt(link, IL_KEY_LINK_TYPE, WIFI_DIRECT_LINK_TYPE_HML);
     struct WifiDirectProcessor *processor =
-        GetWifiDirectDecisionCenter()->getProcessorByNegoChannelAndLinkType(connectInfo->negoChannel, linkType);
+        GetWifiDirectDecisionCenter()->getProcessorByChannelAndLinkType(connectInfo->negoChannel, linkType);
 
     command->processor = processor;
     processor->activeCommand = (struct WifiDirectCommand *)command;
@@ -86,10 +90,11 @@ static int32_t OpenLink(struct WifiDirectConnectCommand *command)
         return SOFTBUS_OK;
     }
 
+    struct WifiDirectDecisionCenter *decisionCenter = GetWifiDirectDecisionCenter();
     struct WifiDirectProcessor *processor =
-        GetWifiDirectDecisionCenter()->getProcessorByNegoChannel(connectInfo->negoChannel);
-    CONN_CHECK_AND_RETURN_RET_LOGW(processor, ERROR_WIFI_DIRECT_NO_SUITABLE_PROTOCOL, CONN_WIFI_DIRECT,
-        "no suitable processor");
+        decisionCenter->getProcessorByChannelAndConnectType(connectInfo->negoChannel, connectInfo->connectType);
+    CONN_CHECK_AND_RETURN_RET_LOGW(processor != NULL, ERROR_WIFI_DIRECT_NO_SUITABLE_PROTOCOL, CONN_WIFI_DIRECT,
+                                   "no suitable processor");
 
     command->processor = processor;
     processor->activeCommand = (struct WifiDirectCommand *)command;
@@ -212,7 +217,7 @@ void WifiDirectConnectCommandConstructor(struct WifiDirectConnectCommand *self,
     self->onFailure = OnConnectFailure;
     self->onTimeout = OnConnectTimeout;
     self->duplicate = Duplicate;
-    self->deleteSelf = WifiDirectConnectCommandDelete;
+    self->destructor = WifiDirectConnectCommandDelete;
     *(&self->connectInfo) = *connectInfo;
     if (connectInfo->negoChannel != NULL) {
         self->connectInfo.negoChannel = connectInfo->negoChannel->duplicate(connectInfo->negoChannel);

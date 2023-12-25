@@ -107,7 +107,7 @@ static int32_t GetAnonymizedIp(char *dstIp, size_t dstLen, char *srcIp)
     return IpAddrAnonymousFormat(dstIp, dstLen, (struct sockaddr *)&addr, sizeof(addr));
 }
 
-static cJSON* CheckAnonymizeJsonData(cJSON *data, const char * const jsonKey)
+static cJSON *CheckAnonymizeJsonData(cJSON *data, const char * const jsonKey)
 {
     cJSON *item = cJSON_GetObjectItemCaseSensitive(data, jsonKey);
     if (item == NULL) {
@@ -168,7 +168,7 @@ static int32_t AnonymizeIpJsonData(cJSON *data)
     return NSTACKX_EOK;
 }
 
-static cJSON* CheckJsonTypeFiled(cJSON *data, const char * const typeFiled)
+static cJSON *CheckJsonTypeFiled(cJSON *data, const char * const typeFiled)
 {
     cJSON *item = cJSON_GetObjectItemCaseSensitive(data, typeFiled);
     if (item == NULL) {

@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 #include "conn_log.h"
-#include "entity/p2p_entity/p2p_entity_state.h"
 #include "softbus_error_code.h"
+
+#include "entity/p2p_entity/p2p_entity_state.h"
 #include "entity/p2p_entity/p2p_entity.h"
 
 static void Enter(struct P2pEntityState *self)

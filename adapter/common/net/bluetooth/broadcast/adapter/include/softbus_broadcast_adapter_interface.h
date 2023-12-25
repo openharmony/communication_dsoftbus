@@ -55,6 +55,8 @@ typedef struct {
     void (*OnStartScanCallback)(int32_t scannerId, int32_t status);
     void (*OnStopScanCallback)(int32_t scannerId, int32_t status);
     void (*OnReportScanDataCallback)(int32_t scannerId, const SoftBusBcScanResult *reportData);
+    void (*OnScanStateChanged)(int32_t resultCode, bool isStartScan);
+    void (*OnLpDeviceInfoCallback)(const SoftbusBroadcastUuid *uuid, int32_t type, uint8_t *data, uint32_t dataSize);
 } SoftbusScanCallback;
 
 /**
@@ -73,9 +75,18 @@ typedef struct {
     int32_t (*StartBroadcasting)(int32_t advId, const SoftbusBroadcastParam *param, const SoftbusBroadcastData *data);
     int32_t (*StopBroadcasting)(int32_t advId);
     int32_t (*SetBroadcastingData)(int32_t advId, const SoftbusBroadcastData *data);
+    int32_t (*UpdateBroadcasting)(int32_t advId, const SoftbusBroadcastParam *param, const SoftbusBroadcastData *data);
     int32_t (*StartScan)(int32_t scannerId, const SoftBusBcScanParams *param, const SoftBusBcScanFilter *scanFilter,
-        uint8_t filterSize);
+        int32_t filterSize);
     int32_t (*StopScan)(int32_t scannerId);
+    bool (*IsLpDeviceAvailable)(void);
+    bool (*SetAdvFilterParam)(const SoftBusLpBroadcastParam *bcParam, const SoftBusLpScanParam *scanParam);
+    int32_t (*GetBroadcastHandle)(int32_t advId, int32_t *bcHandle);
+    int32_t (*EnableSyncDataToLpDevice)(void);
+    int32_t (*DisableSyncDataToLpDevice)(void);
+    int32_t (*SetScanReportChannelToLpDevice)(int32_t scannerId, bool enable);
+    int32_t (*SetLpDeviceParam)(int32_t duration, int32_t maxExtAdvEvents, int32_t window,
+        int32_t interval, int32_t bcHandle);
 } SoftbusBroadcastMediumInterface;
 
 /**
