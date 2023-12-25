@@ -876,10 +876,10 @@ int32_t TransProxyPackAndSendData(int32_t channelId, const void *data, uint32_t 
         return SOFTBUS_ERR;
     }
 
-    int32_t sliceNum = ((int32_t)dataInfo.outLen + SLICE_LEN - 1) / SLICE_LEN;
+    int32_t sliceNum = (int32_t)((dataInfo.outLen + SLICE_LEN - 1) / SLICE_LEN);
     for (int i = 0; i < sliceNum; i++) {
-        int32_t dataLen = (i == (sliceNum - 1)) ? ((int32_t)dataInfo.outLen - i * SLICE_LEN) : SLICE_LEN;
-        int32_t offset = i * SLICE_LEN;
+        int32_t dataLen = (int32_t)((i == (sliceNum - 1)) ? (dataInfo.outLen - i * SLICE_LEN) : SLICE_LEN);
+        int32_t offset = (int32_t)(i * SLICE_LEN);
 
         uint8_t* sliceData = SoftBusMalloc(dataLen + sizeof(SliceHead));
         if (sliceData == NULL) {
