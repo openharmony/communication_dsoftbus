@@ -173,16 +173,37 @@ int RemoveSessionServer(const char *pkgName, const char *sessionName)
 static int32_t CheckParamIsValid(const char *mySessionName, const char *peerSessionName,
     const char *peerNetworkId, const char *groupId, const SessionAttribute *attr)
 {
-    if (!IsValidString(mySessionName, SESSION_NAME_SIZE_MAX) ||
-        !IsValidString(peerSessionName, SESSION_NAME_SIZE_MAX) ||
-        !IsValidString(peerNetworkId, DEVICE_ID_SIZE_MAX) ||
-        (attr == NULL) ||
-        (attr->dataType >= TYPE_BUTT)) {
-        TRANS_LOGW(TRANS_SDK, "invalid param");
+    if (!IsValidString(mySessionName, SESSION_NAME_SIZE_MAX)) {
+        char *tmpMyName = NULL;
+        Anonymize(mySessionName, &tmpMyName);
+        TRANS_LOGE(TRANS_SDK, "invalid mySessionName: %s", tmpMyName);
+        AnonymizeFree(tmpMyName);
         return SOFTBUS_INVALID_PARAM;
     }
-
-    if (groupId == NULL || strlen(groupId) >= GROUP_ID_SIZE_MAX) {
+    if (!IsValidString(peerSessionName, SESSION_NAME_SIZE_MAX)) {
+        char *tmpPeerName = NULL;
+        Anonymize(peerSessionName, &tmpPeerName);
+        TRANS_LOGE(TRANS_SDK, "invalid peerSessionName: %s", tmpPeerName);
+        AnonymizeFree(tmpPeerName);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!IsValidString(peerNetworkId, DEVICE_ID_SIZE_MAX)) {
+        char *tmpPeerNetworkId = NULL;
+        Anonymize(peerNetworkId, &tmpPeerNetworkId);
+        TRANS_LOGE(TRANS_SDK, "invalid peerNetworkId: %s", tmpPeerNetworkId);
+        AnonymizeFree(tmpPeerNetworkId);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (attr == NULL) {
+        TRANS_LOGE(TRANS_SDK, "attr is NULL");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (groupId == NULL) {
+        TRANS_LOGE(TRANS_SDK, "groupId is NULL");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strlen(groupId) >= GROUP_ID_SIZE_MAX) {
+        TRANS_LOGE(TRANS_SDK, "groupId length is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -206,8 +227,7 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
 {
     int ret = CheckParamIsValid(mySessionName, peerSessionName, peerNetworkId, groupId, attr);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGW(TRANS_SDK, "invalid param, CheckParamIsValid ret=%d.", ret);
-        return SOFTBUS_INVALID_PARAM;
+        return ret;
     }
     PrintSessionName(mySessionName, peerSessionName);
     SessionAttribute *tmpAttr = (SessionAttribute *)SoftBusCalloc(sizeof(SessionAttribute));
@@ -452,8 +472,7 @@ int OpenSessionSync(const char *mySessionName, const char *peerSessionName, cons
 {
     int ret = CheckParamIsValid(mySessionName, peerSessionName, peerNetworkId, groupId, attr);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGW(TRANS_SDK, "invalid param");
-        return INVALID_SESSION_ID;
+        return ret;
     }
     PrintSessionName(mySessionName, peerSessionName);
 
