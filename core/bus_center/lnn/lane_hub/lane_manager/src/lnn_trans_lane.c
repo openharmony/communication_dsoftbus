@@ -95,7 +95,7 @@ static void Unlock(void)
     (void)SoftBusMutexUnlock(&g_transLaneMutex);
 }
 
-int32_t LnnLanePostMsgToHandler(int32_t msgType, uint64_t param1, uint64_t param2,
+static int32_t LnnLanePostMsgToHandler(int32_t msgType, uint64_t param1, uint64_t param2,
     void *obj, uint64_t delayMillis)
 {
     SoftBusMessage *msg = (SoftBusMessage *)SoftBusCalloc(sizeof(SoftBusMessage));
@@ -704,14 +704,14 @@ static void HandleDelayDestroyLink(SoftBusMessage *msg)
     uint32_t laneId = (uint32_t)msg->arg1;
     bool isDelayDestroy = (bool)msg->arg2;
     LaneResource *resourceItem = (LaneResource*)msg->obj;
-    LNN_LOGI(LNN_LANE, "handle delay destory message, laneId=%u", laneId);
+    LNN_LOGI(LNN_LANE, "handle delay destroy message, laneId=%u", laneId);
     FreeLaneLink(laneId, resourceItem, isDelayDestroy);
 }
 
 static void HandleDetectTimeout(SoftBusMessage *msg)
 {
     uint32_t detectId = (uint32_t)msg->arg1;
-    LNN_LOGE(LNN_LANE, "lane detect timeout detect=%u", detectId);
+    LNN_LOGI(LNN_LANE, "lane detect timeout detect=%u", detectId);
     NotifyDetectTimeout(detectId);
 }
 
@@ -880,7 +880,7 @@ static int32_t RemoveDetectTimeout(const SoftBusMessage *msg, void *data)
 
 void RemoveDetectTimeoutMessage(uint32_t detectId)
 {
-    LNN_LOGE(LNN_LANE, "remove detect timeout message detect=%u", detectId);
+    LNN_LOGI(LNN_LANE, "remove detect timeout message detect=%u", detectId);
     g_laneLoopHandler.looper->RemoveMessageCustom(g_laneLoopHandler.looper, &g_laneLoopHandler,
         RemoveDetectTimeout, &detectId);
 }
@@ -890,8 +890,8 @@ int32_t PostReliabilityTimeMessage(void)
     return LnnLanePostMsgToHandler(MSG_TYPE_RELIABILITY_TIME, 0, 0, NULL, DETECT_LANE_TIMELINESS);
 }
 
-int32_t PostDelayDestroyMessage(uint32_t laneId, LaneResource *resourseItem, uint64_t delayMillis)
+int32_t PostDelayDestroyMessage(uint32_t laneId, LaneResource *resourceItem, uint64_t delayMillis)
 {
-    LNN_LOGI(LNN_LANE, "post dely destory message, laneId=%u", laneId);
-    return LnnLanePostMsgToHandler(MSG_TYPE_DELAY_DESTROY_LINK, laneId, true, resourseItem, delayMillis);
+    LNN_LOGI(LNN_LANE, "post dely destroy message, laneId=%u", laneId);
+    return LnnLanePostMsgToHandler(MSG_TYPE_DELAY_DESTROY_LINK, laneId, true, resourceItem, delayMillis);
 }
