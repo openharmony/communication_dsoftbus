@@ -844,7 +844,7 @@ static int32_t ClientTransProxyPackBytes(int32_t channelId, ClientProxyDataInfo 
     pktHead->magicNumber = MAGIC_NUMBER;
     pktHead->seq = seq;
     pktHead->flags = flag;
-    pktHead->dataLen = (int32_t)dataInfo->outLen - (int32_t)(sizeof(PacketHead));
+    pktHead->dataLen = (int32_t)(dataInfo->outLen - sizeof(PacketHead));
     ClientPackPacketHead(pktHead);
 
     return SOFTBUS_OK;
