@@ -50,6 +50,7 @@ typedef enum {
     AUTH_LINK_TYPE_BR,
     AUTH_LINK_TYPE_BLE,
     AUTH_LINK_TYPE_P2P,
+    AUTH_LINK_TYPE_MAX,
 } AuthLinkType;
 
 typedef struct {

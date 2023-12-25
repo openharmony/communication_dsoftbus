@@ -27,14 +27,18 @@ struct NegotiateMessage;
 struct WifiDirectProtocol;
 struct WifiDirectProcessor;
 struct WifiDirectNegotiateChannel;
+struct WifiDirectTriggerChannel;
 
 struct WifiDirectDecisionCenter {
     struct WifiDirectProtocol* (*getProtocol)(struct WifiDirectNegotiateChannel *channel);
     void (*putProtocol)(struct WifiDirectProtocol *protocol);
-    struct WifiDirectProcessor* (*getProcessorByNegoChannel)(struct WifiDirectNegotiateChannel *channel);
-    struct WifiDirectProcessor* (*getProcessorByNegoChannelAndLinkType)(struct WifiDirectNegotiateChannel *channel,
-                                                                        enum WifiDirectLinkType linkType);
+    struct WifiDirectProcessor* (*getProcessorByChannelAndConnectType)(struct WifiDirectNegotiateChannel *channel,
+                                                                       enum WifiDirectConnectType connectType);
+    struct WifiDirectProcessor* (*getProcessorByChannelAndLinkType)(struct WifiDirectNegotiateChannel *channel,
+                                                                    enum WifiDirectLinkType linkType);
     struct WifiDirectProcessor* (*getProcessorByNegotiateMessage)(struct NegotiateMessage *msg);
+    struct WifiDirectProcessor* (*getTriggerProcessorByData)(const uint8_t *data, size_t len);
+    struct WifiDirectProcessor* (*getTriggerProcessorByChannel)(struct WifiDirectTriggerChannel *channel);
 };
 
 struct WifiDirectDecisionCenter *GetWifiDirectDecisionCenter(void);

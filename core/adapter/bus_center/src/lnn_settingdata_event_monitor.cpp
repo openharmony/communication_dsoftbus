@@ -38,10 +38,10 @@ namespace OHOS {
 namespace BusCenter {
 static const std::string SETTINGS_DATA_BASE_URI =
     "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true";
-static const std::string SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
-static const std::string SETTINGS_DATA_FIELD_KEYWORD = "KEYWORD";
-static const std::string SETTINGS_DATA_FIELD_VALUE = "VALUE";
-static const std::string PREDICATES_STRING = "settings.general.device_name";
+static constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
+static constexpr const char *SETTINGS_DATA_FIELD_KEYWORD = "KEYWORD";
+static constexpr const char *SETTINGS_DATA_FIELD_VALUE = "VALUE";
+static constexpr const char *PREDICATES_STRING = "settings.general.device_name";
 std::shared_ptr<DataShare::DataShareHelper> g_dataShareHelper;
 static const uint32_t SOFTBUS_SA_ID = 4700;
 
@@ -52,6 +52,7 @@ public:
 
 void LnnSettingDataEventMonitor::OnChange()
 {
+    LNN_LOGI(LNN_STATE, "device name change");
     if (g_eventHandler != nullptr) {
         g_eventHandler(DEVICE_NAME_TYPE_DEV_NAME, nullptr);
     }

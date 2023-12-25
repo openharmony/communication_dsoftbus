@@ -45,6 +45,7 @@
 #define ALL_GROUP_TYPE 0xF
 #define MAX_STATE_VERSION 0xFF
 #define SUPPORT_EXCHANGE_NETWORKID 1
+#define DEFAULT_CONN_SUB_FEATURE 1
 
 typedef struct {
     NodeInfo localInfo;
@@ -716,11 +717,12 @@ static int32_t InitLocalDeviceInfo(DeviceBasicInfo *info)
     if (LnnGetUnifiedDefaultDeviceName(info->unifiedDefaultName, DEVICE_NAME_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get unifiedDefaultName fail");
     }
-    LNN_LOGD(LNN_LEDGER, "info->unifiedDefaultName=%s", info->unifiedDefaultName);
     if (LnnGetSettingNickName(info->unifiedDefaultName, info->unifiedName,
         info->nickName, DEVICE_NAME_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get nick name fail");
     }
+    LNN_LOGD(LNN_LEDGER, "info->unifiedDefaultName: %s, unifiedName: %s, nickName: %s", info->unifiedDefaultName,
+        info->unifiedName, info->nickName);
     if (GetCommonDevInfo(COMM_DEVICE_KEY_DEVTYPE, devType, DEVICE_TYPE_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "GetCommonDevInfo: COMM_DEVICE_KEY_DEVTYPE failed");
         return SOFTBUS_ERR;
@@ -1509,14 +1511,17 @@ static int32_t LnnGenBroadcastCipherInfo(void)
         }
         if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_KEY,
             broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+            (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
             LNN_LOGE(LNN_LEDGER, "set key error.");
             return SOFTBUS_ERR;
         }
         if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_IV,
             broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
+            (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
             LNN_LOGE(LNN_LEDGER, "set iv error.");
             return SOFTBUS_ERR;
         }
+        (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
         LNN_LOGI(LNN_LEDGER, "load BroadcastCipherInfo success!");
         return SOFTBUS_OK;
     }
@@ -1654,6 +1659,7 @@ int32_t LnnInitLocalLedger(void)
     nodeInfo->netCapacity = LnnGetNetCapabilty();
     nodeInfo->authCapacity = SUPPORT_EXCHANGE_NETWORKID;
     nodeInfo->feature = LnnGetFeatureCapabilty();
+    nodeInfo->connSubFeature = DEFAULT_CONN_SUB_FEATURE;
     DeviceBasicInfo *deviceInfo = &nodeInfo->deviceInfo;
     if (InitOfflineCode(nodeInfo) != SOFTBUS_OK) {
         goto EXIT;

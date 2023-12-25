@@ -15,7 +15,6 @@
 
 #include "wifi_direct_processor_factory.h"
 #include "processor/p2p_v1_processor.h"
-#include "wifi_direct_negotiator.h"
 
 static struct WifiDirectProcessor* CreateProcessor(enum WifiDirectProcessorType type)
 {

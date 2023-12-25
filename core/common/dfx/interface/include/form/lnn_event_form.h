@@ -19,6 +19,7 @@
 #include <stdint.h>
 
 #include "event_form_enum.h"
+#include "softbus_bus_center.h"
 #include "softbus_common.h"
 
 #ifdef __cplusplus
@@ -100,9 +101,9 @@ typedef struct {
     int32_t result;               // RESULT
     int32_t errCode;              // ERROR_CODE
     SoftbusAuditType auditType;   // AUDIT_TYPE
-    int32_t connId;               // CONN_ID
+    uint64_t connId;              // CONN_ID
     int32_t authLinkType;         // AUTH_LINK_TYPE
-    int32_t authRequestId;        // AUTH_REQUEST_ID
+    uint32_t authRequestId;       // AUTH_REQUEST_ID
     int32_t onlineNum;            // ONLINE_NUM
     const char hostPkg[DISC_MAX_DEVICE_NAME_LEN];  // HOST_PKG
     const char localIp[IP_STR_MAX_LEN];            // LOCAL_IP
@@ -110,13 +111,13 @@ typedef struct {
     const char localBleMac[BT_MAC_LEN];            // LOCAL_BLE_MAC
     const char localUdid[UDID_BUF_LEN];            // LOCAL_UDID
     const char localNetworkId[NETWORK_ID_BUF_LEN]; // LOCAL_NETWORK_ID
-    const char localDevName[DISC_MAX_DEVICE_NAME_LEN]; // LOCAL_DEV_NAME
-    const char peerIp[IP_STR_MAX_LEN];                 // PEER_IP
-    const char peerBrMac[BT_MAC_LEN];                  // PEER_BR_MAC
-    const char peerBleMac[BT_MAC_LEN];                 // PEER_BLE_MAC
-    const char peerUdid[UDID_BUF_LEN];                 // PEER_UDID
-    const char peerNetworkId[NETWORK_ID_BUF_LEN];      // PEER_NETWORK_ID
-    const char peerDevName[DISC_MAX_DEVICE_NAME_LEN];  // PEER_DEV_NAME
+    const char localDevName[DEVICE_NAME_BUF_LEN];  // LOCAL_DEV_NAME
+    const char peerIp[IP_STR_MAX_LEN];             // PEER_IP
+    const char peerBrMac[BT_MAC_LEN];              // PEER_BR_MAC
+    const char peerBleMac[BT_MAC_LEN];             // PEER_BLE_MAC
+    const char peerUdid[UDID_BUF_LEN];             // PEER_UDID
+    const char peerNetworkId[NETWORK_ID_BUF_LEN];  // PEER_NETWORK_ID
+    const char peerDevName[DEVICE_NAME_BUF_LEN];   // PEER_DEV_NAME
     int32_t localAuthPort;       // LOCAL_AUTH_PORT
     int32_t localProxyPort;      // LOCAL_PROXY_PORT
     int32_t localSessionPort;    // LOCAL_SESSION_PORT

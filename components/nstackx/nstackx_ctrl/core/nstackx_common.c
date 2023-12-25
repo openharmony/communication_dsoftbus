@@ -193,12 +193,10 @@ static void ResetMainEpollTaskCount(uint8_t isBusy)
 
 static uint8_t IsBusyInterval(uint32_t eventCount, uint32_t timeMs)
 {
-    uint8_t retFlag;
+    uint8_t retFlag = NSTACKX_TRUE;
     if ((uint64_t)eventCount * EVENT_COUNT_RATE_INTERVAL <
         MAX_EVENT_PROCESS_NUM_PER_INTERVAL * (uint64_t)timeMs) {
         retFlag = NSTACKX_FALSE;
-    } else {
-        retFlag = NSTACKX_TRUE;
     }
 
     ResetMainEpollTaskCount(retFlag);
@@ -217,25 +215,26 @@ static void CalculateEventProcessRate(void)
     struct timespec now;
     ClockGetTime(CLOCK_MONOTONIC, &now);
     uint32_t measureElapse = GetTimeDiffMs(&now, &g_processRatePara.measureBefore);
-    if (measureElapse > EVENT_COUNT_RATE_INTERVAL) {
-        uint32_t totalCount = g_processRatePara.epollWaitEventCount + g_processRatePara.epollWaitTimeoutCount;
-        if (!IsBusyInterval(totalCount, measureElapse)) {
-            g_continuousBusyIntervals = 0;
-        } else {
-            DFINDER_LOGI(TAG, "main loop seems to be busy in the past interval. Timeout count %u, event count %u",
-                         g_processRatePara.epollWaitTimeoutCount, g_processRatePara.epollWaitEventCount);
-            g_continuousBusyIntervals++;
-            if (g_continuousBusyIntervals >= MAX_CONTINUOUS_BUSY_INTERVAL_NUM) {
-                DFINDER_LOGE(TAG, "main loop seems to be busy in the past %u intervals. notify user to restart",
-                             g_continuousBusyIntervals);
-                NotifyDFinderMsgRecver(DFINDER_ON_TOO_BUSY);
-                g_continuousBusyIntervals = 0;
-            }
-        }
-        g_processRatePara.epollWaitTimeoutCount = 0;
-        g_processRatePara.epollWaitEventCount = 0;
-        ClockGetTime(CLOCK_MONOTONIC, &g_processRatePara.measureBefore);
+    if (measureElapse <= EVENT_COUNT_RATE_INTERVAL) {
+        return;
     }
+    uint32_t totalCount = g_processRatePara.epollWaitEventCount + g_processRatePara.epollWaitTimeoutCount;
+    if (!IsBusyInterval(totalCount, measureElapse)) {
+        g_continuousBusyIntervals = 0;
+    } else {
+        DFINDER_LOGI(TAG, "main loop seems to be busy in the past interval. Timeout count %u, event count %u",
+                        g_processRatePara.epollWaitTimeoutCount, g_processRatePara.epollWaitEventCount);
+        g_continuousBusyIntervals++;
+        if (g_continuousBusyIntervals >= MAX_CONTINUOUS_BUSY_INTERVAL_NUM) {
+            DFINDER_LOGE(TAG, "main loop seems to be busy in the past %u intervals. notify user to restart",
+                            g_continuousBusyIntervals);
+            NotifyDFinderMsgRecver(DFINDER_ON_TOO_BUSY);
+            g_continuousBusyIntervals = 0;
+        }
+    }
+    g_processRatePara.epollWaitTimeoutCount = 0;
+    g_processRatePara.epollWaitEventCount = 0;
+    ClockGetTime(CLOCK_MONOTONIC, &g_processRatePara.measureBefore);
 }
 
 static void *NstackMainLoop(void *arg)

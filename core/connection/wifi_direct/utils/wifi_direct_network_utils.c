@@ -180,6 +180,10 @@ static int32_t GetInterfaceIpString(const char *interface, char *ipString, int32
 
 int32_t IpAddrToString(uint32_t addr, char *addrString, size_t addrStringSize)
 {
+    if (addrString == NULL) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "param invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
     addr = ntohl(addr);
     const char *ret = inet_ntop(AF_INET, &addr, addrString, addrStringSize);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret, SOFTBUS_ERR, CONN_WIFI_DIRECT, "inet_ntop failed");

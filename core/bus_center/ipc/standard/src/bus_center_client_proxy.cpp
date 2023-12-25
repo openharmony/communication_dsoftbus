@@ -52,7 +52,7 @@ int32_t ClientOnLeaveLNNResult(
 {
     if (pkgName == nullptr) {
         LNN_LOGE(LNN_EVENT, "pkgName is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
@@ -89,7 +89,7 @@ int32_t ClientOnTimeSyncResult(const char *pkgName, int32_t pid, const void *inf
 {
     if (pkgName == nullptr) {
         LNN_LOGE(LNN_EVENT, "pkgName is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
@@ -104,7 +104,7 @@ int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t pid, int32_t publi
 {
     if (pkgName == nullptr) {
         LNN_LOGE(LNN_EVENT, "pkgName is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
@@ -120,7 +120,7 @@ int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t pid, int32_t refre
 {
     if (pkgName == nullptr) {
         LNN_LOGE(LNN_EVENT, "pkgName is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {
@@ -136,7 +136,7 @@ int32_t ClientOnRefreshDeviceFound(
 {
     if (pkgName == nullptr) {
         LNN_LOGE(LNN_EVENT, "pkgName is null");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName, pid);
     if (clientProxy == nullptr) {

@@ -220,6 +220,7 @@ static int32_t NewRequest(ConnBleRequest **outRequest, const ConnBleConnectReque
 {
     ConnBleRequest *request = (ConnBleRequest *)SoftBusCalloc(sizeof(ConnBleRequest));
     if (request == NULL) {
+        CONN_LOGE(CONN_BLE, "request calloc faild");
         return SOFTBUS_MALLOC_ERR;
     }
     ListInit(&request->node);
@@ -236,6 +237,7 @@ static int32_t NewDevice(ConnBleDevice **outDevice, const ConnBleConnectRequestC
 {
     ConnBleDevice *device = (ConnBleDevice *)SoftBusCalloc(sizeof(ConnBleDevice));
     if (device == NULL) {
+        CONN_LOGE(CONN_BLE, "device calloc faild");
         return SOFTBUS_MALLOC_ERR;
     }
     ListInit(&device->node);
@@ -248,6 +250,11 @@ static int32_t NewDevice(ConnBleDevice **outDevice, const ConnBleConnectRequestC
     device->state = BLE_DEVICE_STATE_INIT;
     device->protocol = ctx->protocol;
     device->psm = ctx->psm;
+    uint64_t feature = 0;
+    if (LnnGetConnSubFeatureByUdidHashStr(ctx->udid, &feature) != SOFTBUS_OK) {
+        CONN_LOGD(CONN_BLE, "get connSubFeature failed");
+    }
+    device->isSupportNetworkIdExchange = feature == 1;
     ListInit(&device->requests);
     *outDevice = device;
     return SOFTBUS_OK;
@@ -270,6 +277,7 @@ static int32_t ConvertCtxToDevice(ConnBleDevice **outDevice, const ConnBleConnec
     ConnBleRequest *request = NULL;
     int32_t status = NewRequest(&request, ctx);
     if (status != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BLE, "newrequest is failed, err=%d", status);
         return status;
     }
     ConnBleDevice *device = NULL;
@@ -294,7 +302,9 @@ static int32_t BleConvert2ConnectionInfo(ConnBleConnection *connection, Connecti
     info->bleInfo.protocol = connection->protocol;
     info->bleInfo.psm = 0;
     int32_t status = SOFTBUS_OK;
-    if (connection->protocol == BLE_COC) {
+    bool isSupportNetWorkIdExchange = (connection->featureBitSet &
+        (1 << BLE_FEATURE_SUPPORT_SUPPORT_NETWORKID_BASICINFO_EXCAHNGE)) != 0;
+    if (connection->protocol == BLE_COC || isSupportNetWorkIdExchange) {
         info->bleInfo.psm = connection->psm;
         ConnBleInnerComplementDeviceId(connection);
         if (strlen(connection->udid) == 0) {
@@ -446,7 +456,8 @@ static int32_t BleConnectDeviceDirectly(ConnBleDevice *device, const char *anomi
     if (connection == NULL) {
         return SOFTBUS_CONN_BLE_INTERNAL_ERR;
     }
-
+    connection->featureBitSet = (device->isSupportNetworkIdExchange ?
+        (1 << BLE_FEATURE_SUPPORT_SUPPORT_NETWORKID_BASICINFO_EXCAHNGE) : 0);
     connection->psm = device->psm;
     char *address = NULL;
     do {

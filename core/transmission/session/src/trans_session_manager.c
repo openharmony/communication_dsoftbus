@@ -345,7 +345,10 @@ void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid, 
     if (networkId == NULL || g_sessionServerList == NULL) {
         return;
     }
-    TRANS_LOGI(TRANS_CTRL, "routeType=%d", routeType);
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
+    TRANS_LOGI(TRANS_CTRL, "routeType=%d, networkId=%s", routeType, anonyNetworkId);
+    AnonymizeFree(anonyNetworkId);
 
     ListNode sessionServerList = {0};
     ListInit(&sessionServerList);
