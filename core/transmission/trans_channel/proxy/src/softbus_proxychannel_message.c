@@ -52,7 +52,7 @@ static int32_t TransProxyParseMessageHead(char *data, int32_t len, ProxyMessage 
     ptr += sizeof(uint16_t);
     msg->msgHead.myId = (int16_t)SoftBusBEtoLEs(*(uint16_t *)ptr);
     msg->data = data + sizeof(ProxyMessageHead);
-    msg->dateLen = len - (int32_t)sizeof(ProxyMessageHead);
+    msg->dateLen = (int32_t)(len - sizeof(ProxyMessageHead));
     UnpackProxyMessageHead(&msg->msgHead);
 
     return SOFTBUS_OK;
