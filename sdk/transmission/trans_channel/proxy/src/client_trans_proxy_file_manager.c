@@ -732,6 +732,9 @@ static int32_t UnpackFileTransStartInfo(FileFrame *fileFrame, const FileRecipien
         // magic(4 byte) + dataLen(8 byte) + oneFrameLen(4 byte) + fileSize(8 byte) + fileName
         fileFrame->magic = (*(uint32_t *)(fileFrame->data));
         uint64_t dataLen = (*(uint64_t *)(fileFrame->data + FRAME_MAGIC_OFFSET));
+        if (FRAME_HEAD_LEN + dataLen != fileFrame->frameLength) {
+            return SOFTBUS_ERR;
+        }
         if (fileFrame->magic != FILE_MAGIC_NUMBER || dataLen < (FRAME_DATA_SEQ_OFFSET + sizeof(uint64_t))) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "start info fail magic 0X%X dataLen %" PRIu64,
                 fileFrame->magic, dataLen);
