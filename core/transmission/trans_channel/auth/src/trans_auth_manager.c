@@ -415,7 +415,7 @@ static void OnRecvAuthChannelReply(int32_t authId, const char *data, int32_t len
 EXIT_ERR:
     AuthCloseChannel(authId);
     DelAuthChannelInfoByChanId((int32_t)(info.appInfo.myData.channelId));
-    (void)NotifyOpenAuthChannelFailed((char *)(info.appInfo.myData.pkgName),
+    (void)NotifyOpenAuthChannelFailed((const char *)(info.appInfo.myData.pkgName),
         (int32_t)(info.appInfo.myData.pid), (int32_t)(info.appInfo.myData.channelId), ret);
 }
 
@@ -454,7 +454,7 @@ static void OnDisconnect(int32_t authId)
     }
     TRANS_LOGI(TRANS_SVC, "recv authId=%d channel disconnect event.", authId);
     DelAuthChannelInfoByChanId((int32_t)(dstInfo.appInfo.myData.channelId));
-    (void)NofifyCloseAuthChannel((char *)dstInfo.appInfo.myData.pkgName,
+    (void)NofifyCloseAuthChannel((const char *)dstInfo.appInfo.myData.pkgName,
         (int32_t)dstInfo.appInfo.myData.pid, (int32_t)dstInfo.appInfo.myData.channelId);
 }
 
