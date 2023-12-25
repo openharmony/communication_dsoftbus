@@ -179,6 +179,5 @@ bool LnnIsLinkReady(const char *iface)
     if (GetRtAttr(IFLA_RTA(info), infoDataLen, IFLA_CARRIER, &carrier, sizeof(uint8_t)) != SOFTBUS_OK) {
         return false;
     }
-    LNN_LOGI(LNN_BUILDER, "carrier result=%d", carrier);
     return carrier != 0;
 }
