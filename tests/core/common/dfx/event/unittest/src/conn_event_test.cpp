@@ -158,7 +158,7 @@ HWTEST_F(ConnEventTest, ConnEventTest004, TestSize.Level0)
 HWTEST_F(ConnEventTest, ConnEventTest005, TestSize.Level0)
 {
     ConnAuditExtra extra = {
-    	.errcode = 1000,
+        .errcode = 1000,
         .auditType = AUDIT_EVENT_MSG_ERROR,
         .connectionId = 222,
         .requestId = 101,
@@ -188,8 +188,8 @@ HWTEST_F(ConnEventTest, ConnEventTest005, TestSize.Level0)
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,
-            HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(CONN_AUDIT_NAME), Eq(SOFTBUS_EVENT_TYPE_SECURITY),
-                ConnAuditValidParamArrayMatcher(extra, VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
+        HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(CONN_AUDIT_NAME), Eq(SOFTBUS_EVENT_TYPE_SECURITY),
+            ConnAuditValidParamArrayMatcher(extra, VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
     .Times(1);
     CONN_AUDIT(AUDIT_SCENE_CONN_RESERVED, extra);
 }
