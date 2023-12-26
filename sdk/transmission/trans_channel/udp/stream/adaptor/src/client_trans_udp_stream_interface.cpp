@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,10 +18,8 @@
 #include <map>
 #include <mutex>
 #include <string>
-#include <sys/types.h>
 
 #include "securec.h"
-#include "softbus_adapter_crypto.h"
 #include "softbus_errcode.h"
 #include "stream_adaptor.h"
 #include "stream_adaptor_listener.h"
@@ -125,7 +123,6 @@ int32_t StartVtpStreamChannelServer(int32_t channelId, const VtpStreamOpenParam 
         return SOFTBUS_ERR;
     }
     TRANS_LOGI(TRANS_STREAM, "channelId=%d Start Channel Server.", channelId);
-    int32_t ret = SOFTBUS_ERR;
     auto it = g_adaptorMap.find(channelId);
     if (it != g_adaptorMap.end()) {
         TRANS_LOGE(TRANS_STREAM, "adaptor already existed!");
@@ -152,6 +149,7 @@ int32_t StartVtpStreamChannelServer(int32_t channelId, const VtpStreamOpenParam 
     ipPort.ip = param->myIp;
     ipPort.port = 0;
 
+    int32_t ret = SOFTBUS_ERR;
     ret = newAdaptor->GetStreamManager()->CreateStreamServerChannel(ipPort, Communication::SoftBus::VTP,
         param->type, newAdaptor->GetSessionKey());
     if (ret > 0) {

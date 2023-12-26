@@ -71,7 +71,7 @@ int32_t DiscBleGetDeviceIdHash(unsigned char *devIdHash, uint32_t len);
 int32_t DiscBleGetShortUserIdHash(unsigned char *hashStr, uint32_t len);
 
 int32_t AssembleTLV(BroadcastData *broadcastData, unsigned char dataType, const void *data, uint32_t dataLen);
-int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *info, const unsigned char *data, uint32_t dataLen);
+int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const uint8_t *data, uint32_t dataLen);
 
 #ifdef __cplusplus
 #if __cplusplus

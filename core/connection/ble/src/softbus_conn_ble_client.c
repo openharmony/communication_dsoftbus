@@ -15,7 +15,8 @@
 
 #include "softbus_conn_ble_client.h"
 
-#include "securec.h"
+#include <securec.h>
+
 #include "conn_log.h"
 #include "message_handler.h"
 #include "softbus_adapter_ble_gatt_client.h"
@@ -24,8 +25,6 @@
 #include "softbus_conn_ble_manager.h"
 #include "softbus_conn_common.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
-#include "softbus_type_def.h"
 #include "softbus_utils.h"
 #include "legacy_ble_channel.h"
 #include "conn_event.h"
@@ -400,6 +399,7 @@ static void BleGattcRegisterNotificationCallback(int32_t underlayerHandle, int32
         SoftBusFree(ctx);
     }
 }
+
 static int32_t SwitchNotifacatedHandler(
     enum ConnBleConnectionState state, const CommonStatusContext *ctx, ConnBleConnection *connection)
 {
@@ -422,6 +422,7 @@ static int32_t SwitchNotifacatedHandler(
     }
     return rc;
 }
+
 static void NotificatedMsgHandler(const CommonStatusContext *ctx)
 {
     GattServiceType serviceId = GATT_SERVICE_TYPE_UNKOWN;

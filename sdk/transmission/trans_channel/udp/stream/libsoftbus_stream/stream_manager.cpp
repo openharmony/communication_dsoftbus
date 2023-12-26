@@ -15,8 +15,10 @@
 
 #include "stream_manager.h"
 
-#include "session.h"
 #include "vtp_stream_socket.h"
+#include "softbus_error_code.h"
+
+#define INVALID_FD (-1)
 
 namespace Communication {
 namespace SoftBus {
@@ -51,7 +53,7 @@ int StreamManager::CreateStreamClientChannel(IpAndPort &local, IpAndPort remote,
         streamSocket = std::make_shared<VtpStreamSocket>();
     } else {
         TRANS_LOGE(TRANS_STREAM, "do not support protocol=%d", protocol);
-        return -1;
+        return INVALID_FD;
     }
 
     curProtocol_ = protocol;
@@ -61,13 +63,13 @@ int StreamManager::CreateStreamClientChannel(IpAndPort &local, IpAndPort remote,
         int scene = SOFTBUS_SCENE;
         if (!streamSocket->SetOption(SCENE, StreamAttr(scene))) {
             TRANS_LOGE(TRANS_STREAM, "set stream scene failed");
-            return -1;
+            return INVALID_FD;
         }
         TRANS_LOGI(TRANS_STREAM, "streamSocket CreateClient success, localPort=%d", local.port);
         return local.port;
     }
 
-    return 0;
+    return SOFTBUS_OK;
 }
 
 int StreamManager::CreateStreamServerChannel(IpAndPort &local, Proto protocol,
@@ -81,13 +83,13 @@ int StreamManager::CreateStreamServerChannel(IpAndPort &local, Proto protocol,
         streamSocket = std::make_shared<VtpStreamSocket>();
     } else {
         TRANS_LOGE(TRANS_STREAM, "do not support protocol=%d", protocol);
-        return -1;
+        return INVALID_FD;
     }
 
     curProtocol_ = protocol;
     if (!streamSocket->CreateServer(local, streamType, sessionKey)) {
         TRANS_LOGE(TRANS_STREAM, "create protocol=%d server error", protocol);
-        return -1;
+        return INVALID_FD;
     }
 
     socketMap_.insert(std::pair<Proto, std::shared_ptr<IStreamSocket>>(curProtocol_, streamSocket));
@@ -96,7 +98,7 @@ int StreamManager::CreateStreamServerChannel(IpAndPort &local, Proto protocol,
     int scene = SOFTBUS_SCENE;
     if (!streamSocket->SetOption(SCENE, StreamAttr(scene))) {
         TRANS_LOGE(TRANS_STREAM, "set stream scene failed");
-        return -1;
+        return INVALID_FD;
     }
     return local.port;
 }

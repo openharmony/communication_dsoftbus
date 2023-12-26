@@ -267,13 +267,13 @@ static void FreeDiscInfo(DiscInfo *info, const ServiceType type)
 static bool IsInnerModule(const DiscInfo *infoNode)
 {
     for (uint32_t i = 0; i < MODULE_MAX; i++) {
-        DISC_LOGI(DISC_CONTROL, "%s", infoNode->item->packageName);
+        DISC_LOGD(DISC_CONTROL, "%s", infoNode->item->packageName);
         if (strcmp(infoNode->item->packageName, g_discModuleMap[i]) == 0) {
-            DISC_LOGI(DISC_CONTROL, "true");
+            DISC_LOGD(DISC_CONTROL, "true");
             return true;
         }
     }
-    DISC_LOGI(DISC_CONTROL, "false");
+    DISC_LOGD(DISC_CONTROL, "false");
     return false;
 }
 

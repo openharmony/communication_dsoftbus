@@ -220,6 +220,7 @@ static int32_t NewRequest(ConnBleRequest **outRequest, const ConnBleConnectReque
 {
     ConnBleRequest *request = (ConnBleRequest *)SoftBusCalloc(sizeof(ConnBleRequest));
     if (request == NULL) {
+        CONN_LOGE(CONN_BLE, "request calloc faild");
         return SOFTBUS_MALLOC_ERR;
     }
     ListInit(&request->node);
@@ -236,6 +237,7 @@ static int32_t NewDevice(ConnBleDevice **outDevice, const ConnBleConnectRequestC
 {
     ConnBleDevice *device = (ConnBleDevice *)SoftBusCalloc(sizeof(ConnBleDevice));
     if (device == NULL) {
+        CONN_LOGE(CONN_BLE, "device calloc faild");
         return SOFTBUS_MALLOC_ERR;
     }
     ListInit(&device->node);
@@ -275,6 +277,7 @@ static int32_t ConvertCtxToDevice(ConnBleDevice **outDevice, const ConnBleConnec
     ConnBleRequest *request = NULL;
     int32_t status = NewRequest(&request, ctx);
     if (status != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BLE, "newrequest is failed, err=%d", status);
         return status;
     }
     ConnBleDevice *device = NULL;
