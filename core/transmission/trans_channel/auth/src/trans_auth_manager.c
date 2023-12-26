@@ -601,7 +601,6 @@ int32_t TransOpenAuthMsgChannel(const char *sessionName, const ConnectOption *co
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SoftBusMutexLock failed");
         AuthCloseChannel(channel->authId);
         SoftBusFree(channel);
-        (void)SoftBusMutexUnlock(&g_authChannelList->lock);
         return SOFTBUS_LOCK_ERR;
     }
     if (AddAuthChannelInfo(channel) != SOFTBUS_OK) {
@@ -618,6 +617,7 @@ int32_t TransOpenAuthMsgChannel(const char *sessionName, const ConnectOption *co
         (void)SoftBusMutexUnlock(&g_authChannelList->lock);
         return SOFTBUS_ERR;
     }
+    (void)SoftBusMutexUnlock(&g_authChannelList->lock);
     return SOFTBUS_OK;
 }
 
