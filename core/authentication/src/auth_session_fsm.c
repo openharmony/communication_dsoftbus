@@ -157,6 +157,49 @@ static bool IsNeedExchangeNetworkId(uint32_t feature, AuthCapability capaBit)
     return ((feature & (1 << (uint32_t)capaBit)) != 0);
 }
 
+static void AddUdidInfo(uint32_t requestId, bool isServer, AuthConnInfo *connInfo)
+{
+    if (isServer || connInfo->type != AUTH_LINK_TYPE_ENHANCED_P2P) {
+        AUTH_LOGD(AUTH_FSM, "is not server or enhancedP2p");
+        return;
+    }
+    AuthRequest request;
+    (void)memset_s(&request, sizeof(request), 0, sizeof(request));
+    if (GetAuthRequestNoLock(requestId, &request) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "get auth request fail");
+        return;
+    }
+    if (strcpy_s(connInfo->info.ipInfo.udid, UDID_BUF_LEN,
+        request.connInfo.info.ipInfo.udid) != EOK) {
+        AUTH_LOGE(AUTH_FSM, "strcpy udid fail");
+        return;
+    }
+}
+
+static int32_t ProcAuthFsm(uint32_t requestId, bool isServer, AuthFsm *authFsm)
+{
+    AuthRequest request;
+    NodeInfo nodeInfo;
+    (void)memset_s(&request, sizeof(request), 0, sizeof(request));
+    (void)memset_s(&nodeInfo, sizeof(nodeInfo), 0, sizeof(nodeInfo));
+    AddUdidInfo(requestId, isServer, &authFsm->info.connInfo);
+    if (authFsm->info.connInfo.type == AUTH_LINK_TYPE_BLE) {
+        if (GetAuthRequestNoLock(requestId, &request) != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_FSM, "get auth request fail");
+            return SOFTBUS_ERR;
+        }
+        char udidHash[SHORT_UDID_HASH_HEX_LEN + 1] = {0};
+        int32_t ret = ConvertBytesToHexString(udidHash, SHORT_UDID_HASH_HEX_LEN + 1,
+            (const unsigned char *)request.connInfo.info.bleInfo.deviceIdHash, SHORT_UDID_HASH_LEN);
+        if (ret == SOFTBUS_OK && LnnRetrieveDeviceInfo((const char *)udidHash, &nodeInfo) == SOFTBUS_OK &&
+            IsNeedExchangeNetworkId(nodeInfo.authCapacity, BIT_SUPPORT_EXCHANGE_NETWORKID)) {
+            AUTH_LOGI(AUTH_FSM, "LnnRetrieveDeviceInfo success");
+            authFsm->info.idType = EXCHANGE_NETWORKID;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
 static AuthFsm *CreateAuthFsm(int64_t authSeq, uint32_t requestId, uint64_t connId,
     const AuthConnInfo *connInfo, bool isServer)
 {
@@ -172,30 +215,11 @@ static AuthFsm *CreateAuthFsm(int64_t authSeq, uint32_t requestId, uint64_t conn
     authFsm->info.connId = connId;
     authFsm->info.connInfo = *connInfo;
     authFsm->info.version = SOFTBUS_NEW_V2;
-    NodeInfo nodeInfo;
-    AuthRequest request;
-    if (memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo)) != EOK ||
-        memset_s(&request, sizeof(NodeInfo), 0, sizeof(NodeInfo)) != EOK) {
-        AUTH_LOGE(AUTH_FSM, "memset fail.");
-        SoftBusFree(authFsm);
-        return NULL;
-    }
     authFsm->info.idType = EXCHANHE_UDID;
     if (!isServer) {
-        if (authFsm->info.connInfo.type == AUTH_LINK_TYPE_BLE) {
-            if (GetAuthRequestNoLock(requestId, &request) != SOFTBUS_OK) {
-                AUTH_LOGE(AUTH_FSM, "get auth request fail");
-                SoftBusFree(authFsm);
-                return NULL;
-            }
-            char udidHash[SHORT_UDID_HASH_HEX_LEN + 1] = {0};
-            int32_t ret = ConvertBytesToHexString(udidHash, SHORT_UDID_HASH_HEX_LEN + 1,
-                (const unsigned char *)request.connInfo.info.bleInfo.deviceIdHash, SHORT_UDID_HASH_LEN);
-            if (ret == SOFTBUS_OK && LnnRetrieveDeviceInfo((const char *)udidHash, &nodeInfo) == SOFTBUS_OK &&
-                IsNeedExchangeNetworkId(nodeInfo.authCapacity, BIT_SUPPORT_EXCHANGE_NETWORKID)) {
-                AUTH_LOGI(AUTH_FSM, "LnnRetrieveDeviceInfo success");
-                authFsm->info.idType = EXCHANGE_NETWORKID;
-            }
+        if (ProcAuthFsm(requestId, isServer, authFsm) != SOFTBUS_OK) {
+            SoftBusFree(authFsm);
+            return NULL;
         }
     }
     if (sprintf_s(authFsm->fsmName, sizeof(authFsm->fsmName), "AuthFsm-%u", authFsm->id) == -1) {
@@ -447,7 +471,12 @@ static int32_t RecoveryDeviceKey(AuthFsm *authFsm)
         AUTH_LOGE(AUTH_FSM, "convert bytes to string fail");
         return SOFTBUS_ERR;
     }
-    if (AuthFindDeviceKey(udidShortHash, authFsm->info.connInfo.type, &key) != SOFTBUS_OK) {
+    AuthLinkType linkType = authFsm->info.connInfo.type;
+    if (authFsm->info.connInfo.type == AUTH_LINK_TYPE_ENHANCED_P2P) {
+        // enhanced p2p reuse ble authKey
+        linkType = AUTH_LINK_TYPE_BLE;
+    }
+    if (AuthFindDeviceKey(udidShortHash, linkType, &key) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "find key fail, fastAuth error");
         return SOFTBUS_ERR;
     }
@@ -480,6 +509,7 @@ static void AuditReportSetPeerDevInfo(LnnAuditExtra *lnnAuditExtra, AuthSessionI
             break;
         case AUTH_LINK_TYPE_WIFI:
         case AUTH_LINK_TYPE_P2P:
+        case AUTH_LINK_TYPE_ENHANCED_P2P:
             if (strcpy_s((char *)lnnAuditExtra->peerIp, IP_STR_MAX_LEN, info->connInfo.info.ipInfo.ip) != EOK) {
                 AUTH_LOGE(AUTH_FSM, "IP COPY ERROR");
             }
@@ -667,6 +697,7 @@ static int32_t TrySyncDeviceInfo(int64_t authSeq, const AuthSessionInfo *info)
         case AUTH_LINK_TYPE_BR:
         case AUTH_LINK_TYPE_BLE:
         case AUTH_LINK_TYPE_P2P:
+        case AUTH_LINK_TYPE_ENHANCED_P2P:
             return PostDeviceInfoMessage(authSeq, info);
         default:
             break;
