@@ -150,12 +150,12 @@ static void NotifyRecvResult(int32_t sessionId, DFileMsgType msgType, const DFil
     switch (msgType) {
         case DFILE_ON_FILE_LIST_RECEIVED:
             if (listener->recvListener.OnReceiveFileStarted != NULL) {
-                listener->recvListener.OnReceiveFileStarted(sessionId, firstFile, fileNum);
+                listener->recvListener.OnReceiveFileStarted(sessionId, firstFile, (int)fileNum);
             }
             break;
         case DFILE_ON_FILE_RECEIVE_SUCCESS:
             if (listener->recvListener.OnReceiveFileFinished != NULL) {
-                listener->recvListener.OnReceiveFileFinished(sessionId, firstFile, fileNum);
+                listener->recvListener.OnReceiveFileFinished(sessionId, firstFile, (int)fileNum);
             }
             break;
         case DFILE_ON_FILE_RECEIVE_FAIL:

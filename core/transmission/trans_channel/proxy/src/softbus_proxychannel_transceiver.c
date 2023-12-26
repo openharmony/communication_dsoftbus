@@ -357,7 +357,7 @@ int32_t TransProxyTransSendMsg(uint32_t connectionId, uint8_t *buf, uint32_t len
     int32_t ret;
 
     data.module = MODULE_PROXY_CHANNEL;
-    data.seq = seq++;
+    data.seq = (int64_t)seq++;
     data.flag = priority;
     data.pid = pid;
     data.len = len;
