@@ -458,7 +458,7 @@ static void SendVerifyP2pFailRsp(int64_t authId, int64_t seq,
             return;
         }
         TransProxyPipelineSendMessage(
-            (int32_t)authId, (uint8_t *)sendMsg, strLen + sizeof(int64_t) + sizeof(int64_t), MSG_TYPE_IP_PORT_EXCHANGE);
+            authId, (uint8_t *)sendMsg, strLen + sizeof(int64_t) + sizeof(int64_t), MSG_TYPE_IP_PORT_EXCHANGE);
         SoftBusFree(sendMsg);
     }
     cJSON_free(reply);
@@ -487,7 +487,7 @@ static int32_t SendVerifyP2pRsp(int64_t authId, int32_t module, int32_t flag, in
             return SOFTBUS_ERR;
         }
         ret = TransProxyPipelineSendMessage(
-            (int32_t)authId, (uint8_t *)sendMsg, strLen + sizeof(int64_t) + sizeof(int64_t), MSG_TYPE_IP_PORT_EXCHANGE);
+            authId, (uint8_t *)sendMsg, strLen + sizeof(int64_t) + sizeof(int64_t), MSG_TYPE_IP_PORT_EXCHANGE);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "TransProxyPipelineSendMessage fail");
         }

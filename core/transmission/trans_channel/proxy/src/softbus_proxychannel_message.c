@@ -38,7 +38,7 @@ static int32_t TransProxyParseMessageHead(char *data, int32_t len, ProxyMessage 
     char *ptr = data;
     uint8_t firstByte = *ptr;
     ptr += sizeof(int8_t);
-    int8_t version = (int8_t)((firstByte >> VERSION_SHIFT) & FOUR_BIT_MASK);
+    int8_t version = (firstByte >> VERSION_SHIFT) & FOUR_BIT_MASK;
     msg->msgHead.type = firstByte & FOUR_BIT_MASK;
     if (version != VERSION || msg->msgHead.type >= PROXYCHANNEL_MSG_TYPE_MAX) {
         TRANS_LOGE(TRANS_CTRL, "parseMessage: unsupported message, version=%d, type=%d",
@@ -52,7 +52,7 @@ static int32_t TransProxyParseMessageHead(char *data, int32_t len, ProxyMessage 
     ptr += sizeof(uint16_t);
     msg->msgHead.myId = (int16_t)SoftBusBEtoLEs(*(uint16_t *)ptr);
     msg->data = data + sizeof(ProxyMessageHead);
-    msg->dateLen = (int32_t)(len - sizeof(ProxyMessageHead));
+    msg->dateLen = len - sizeof(ProxyMessageHead);
     UnpackProxyMessageHead(&msg->msgHead);
 
     return SOFTBUS_OK;
@@ -139,7 +139,7 @@ static int32_t TransProxyGetAuthConnInfo(uint32_t connId, AuthConnInfo *connInfo
                 return SOFTBUS_MEM_ERR;
             }
             connInfo->info.bleInfo.protocol = info.bleInfo.protocol;
-            connInfo->info.bleInfo.psm = (int32_t)info.bleInfo.psm;
+            connInfo->info.bleInfo.psm = info.bleInfo.psm;
             break;
         default:
             TRANS_LOGE(TRANS_CTRL, "unexpected conn type=%d.", info.type);
@@ -459,7 +459,7 @@ char *TransProxyPackHandshakeMsg(ProxyChannelInfo *info)
         !AddStringToJsonObject(root, JSON_KEY_DEVICE_ID, appInfo->myData.deviceId) ||
         !AddStringToJsonObject(root, JSON_KEY_SRC_BUS_NAME, appInfo->myData.sessionName) ||
         !AddStringToJsonObject(root, JSON_KEY_DST_BUS_NAME, appInfo->peerData.sessionName) ||
-        !AddNumberToJsonObject(root, JSON_KEY_MTU_SIZE, (int)appInfo->myData.dataConfig)) {
+        !AddNumberToJsonObject(root, JSON_KEY_MTU_SIZE, appInfo->myData.dataConfig)) {
         goto EXIT;
     }
     (void)cJSON_AddTrueToObject(root, JSON_KEY_HAS_PRIORITY);
@@ -519,7 +519,7 @@ char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan)
         return NULL;
     }
     if (appInfo->peerData.dataConfig != 0) {
-        if (!AddNumberToJsonObject(root, JSON_KEY_MTU_SIZE, (int)appInfo->myData.dataConfig)) {
+        if (!AddNumberToJsonObject(root, JSON_KEY_MTU_SIZE, appInfo->myData.dataConfig)) {
             cJSON_Delete(root);
             return NULL;
         }

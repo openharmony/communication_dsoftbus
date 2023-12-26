@@ -424,7 +424,7 @@ int32_t ClientTransProxyNotifySession(int32_t channelId,
             ClientTransProxySendSessionAck(channelId, seq);
             return g_sessionCb.OnDataReceived(channelId, CHANNEL_TYPE_PROXY, data, len, flags);
         case TRANS_SESSION_ACK:
-            return ClientTransProxyProcSendMsgAck(channelId, data, (int32_t)len);
+            return (int32_t)(ClientTransProxyProcSendMsgAck(channelId, data, len));
         case TRANS_SESSION_BYTES:
         case TRANS_SESSION_FILE_FIRST_FRAME:
         case TRANS_SESSION_FILE_ONGOINE_FRAME:
@@ -844,7 +844,7 @@ static int32_t ClientTransProxyPackBytes(int32_t channelId, ClientProxyDataInfo 
     pktHead->magicNumber = MAGIC_NUMBER;
     pktHead->seq = seq;
     pktHead->flags = flag;
-    pktHead->dataLen = (int32_t)(dataInfo->outLen - sizeof(PacketHead));
+    pktHead->dataLen = (int32_t)((int32_t)dataInfo->outLen - sizeof(PacketHead));
     ClientPackPacketHead(pktHead);
 
     return SOFTBUS_OK;

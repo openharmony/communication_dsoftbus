@@ -116,7 +116,7 @@ int32_t TransProxyPostPacketData(int32_t channelId, const unsigned char *data,
         return SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND;
     }
     TRANS_LOGI(TRANS_MSG, "send msg len=%d seq=%d flags=%d", len, seq, flags);
-    int32_t ret = TransProxyTransDataSendMsg(chanInfo, data, (int)len, flags);
+    int32_t ret = TransProxyTransDataSendMsg(chanInfo, data, len, flags);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_MSG, "TransProxyTransDataSendMsg fail ret=%d", ret);
     }
