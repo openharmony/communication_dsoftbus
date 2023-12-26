@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,6 @@
 #include <stdbool.h>
 #include "client_trans_file.h"
 #include "client_trans_file_listener.h"
-#include "client_trans_session_manager.h"
 #include "client_trans_stream.h"
 #include "nstackx_dfile.h"
 #include "securec.h"
@@ -99,7 +98,10 @@ int32_t TransGetUdpChannel(int32_t channelId, UdpChannel *channel)
         TRANS_LOGE(TRANS_INIT, "udp channel manager hasn't init.");
         return SOFTBUS_ERR;
     }
-
+    if (channel == NULL) {
+        TRANS_LOGE(TRANS_INIT, "param invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != 0) {
         TRANS_LOGE(TRANS_SDK, "lock failed");
         return SOFTBUS_LOCK_ERR;

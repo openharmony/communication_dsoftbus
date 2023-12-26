@@ -179,10 +179,12 @@ int32_t AddLaneResourceItem(const LaneResource *inputResource)
         return SOFTBUS_MALLOC_ERR;
     }
     if (CreateResourceItem(inputResource, resourceItem) != SOFTBUS_OK) {
+        SoftBusFree(resourceItem);
         LNN_LOGE(LNN_LANE, "create resourceItem fail");
         return SOFTBUS_ERR;
     }
     if (LaneLock() != SOFTBUS_OK) {
+        SoftBusFree(resourceItem);
         LNN_LOGE(LNN_LANE, "lane lock fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -198,6 +200,25 @@ int32_t AddLaneResourceItem(const LaneResource *inputResource)
     return SOFTBUS_OK;
 }
 
+static int32_t StartDelayDestroyLink(uint32_t laneId, LaneResource *item)
+{
+    LaneResource *resourceItem = (LaneResource *)SoftBusMalloc(sizeof(LaneResource));
+    if (resourceItem == NULL) {
+        LNN_LOGE(LNN_LANE, "resourceItem malloc fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    if (memcpy_s(resourceItem, sizeof(LaneResource), item, sizeof(LaneResource)) != EOK) {
+        LNN_LOGE(LNN_LANE, "memcpy LaneResource error");
+        SoftBusFree(resourceItem);
+        return SOFTBUS_MEM_ERR;
+    }
+    if (PostDelayDestroyMessage(laneId, resourceItem, DELAY_DESTROY_LANE_TIME) != SOFTBUS_OK) {
+        SoftBusFree(resourceItem);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t DelLaneResourceItemWithDelay(LaneResource *resourceItem, uint32_t laneId, bool *isDelayDestroy)
 {
     if (resourceItem == NULL || isDelayDestroy == NULL) {
@@ -210,9 +231,9 @@ int32_t DelLaneResourceItemWithDelay(LaneResource *resourceItem, uint32_t laneId
     }
     LaneResource* item = LaneResourceIsExist(resourceItem);
     if (item != NULL) {
+        LNN_LOGI(LNN_LANE, "link=%d ref=%d", item->type, item->laneRef);
         if (item->type == LANE_HML && item->laneRef == 1) {
-            if (LnnLanePostMsgToHandler(MSG_TYPE_DELAY_DESTROY_LINK, laneId, *isDelayDestroy, item,
-                DELAY_DESTROY_LANE_TIME) == SOFTBUS_OK) {
+            if (StartDelayDestroyLink(laneId, item) == SOFTBUS_OK) {
                 *isDelayDestroy = true;
                 LaneUnlock();
                 return SOFTBUS_OK;
@@ -324,10 +345,12 @@ int32_t AddLinkInfoItem(const LaneLinkInfo *inputLinkInfo)
         return SOFTBUS_MALLOC_ERR;
     }
     if (CreateLinkInfoItem(inputLinkInfo, linkInfoItem) != SOFTBUS_OK) {
+        SoftBusFree(linkInfoItem);
         LNN_LOGE(LNN_LANE, "create linkInfoItem fail");
         return SOFTBUS_ERR;
     }
     if (LaneLock() != SOFTBUS_OK) {
+        SoftBusFree(linkInfoItem);
         LNN_LOGE(LNN_LANE, "lane lock fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -703,6 +726,22 @@ static int32_t LaneLinkOfBleReuse(uint32_t reqId, const LinkRequest *reqInfo, co
     return LaneLinkOfBleReuseCommon(reqId, reqInfo, callback, BLE_GATT);
 }
 
+static int32_t LaneLinkSetBleMac(const LinkRequest *reqInfo, LaneLinkInfo *linkInfo)
+{
+    NodeInfo node;
+    (void)memset_s(&node, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(reqInfo->peerNetworkId, CATEGORY_NETWORK_ID, &node) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "can not find node");
+        return SOFTBUS_ERR;
+    }
+    if (node.bleMacRefreshSwitch == 0 && strlen(node.connectInfo.bleMacAddr) > 0) {
+        if (strcpy_s(linkInfo->linkInfo.ble.bleMac, BT_MAC_LEN, node.connectInfo.bleMacAddr) == EOK) {
+            return SOFTBUS_OK;
+        }
+    }
+    return SOFTBUS_ERR;
+}
+
 static int32_t LaneLinkOfBle(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
 {
     LaneLinkInfo linkInfo;
@@ -712,8 +751,10 @@ static int32_t LaneLinkOfBle(uint32_t reqId, const LinkRequest *reqInfo, const L
         return SOFTBUS_MEM_ERR;
     }
     if (strlen(linkInfo.linkInfo.ble.bleMac) == 0) {
-        LNN_LOGE(LNN_LANE, "get peerBleMac error");
-        return SOFTBUS_ERR;
+        if (LaneLinkSetBleMac(reqInfo, &linkInfo) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LANE, "get peerBleMac error");
+            return SOFTBUS_ERR;
+        }
     }
     char peerUdid[UDID_BUF_LEN] = {0};
     if (LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {

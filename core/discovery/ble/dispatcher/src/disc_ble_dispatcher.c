@@ -20,7 +20,6 @@
 #include "disc_log.h"
 #include "disc_manager.h"
 #include "disc_share_ble.h"
-#include "softbus_def.h"
 #include "softbus_errcode.h"
 
 #define DISPATCHER_SIZE 3

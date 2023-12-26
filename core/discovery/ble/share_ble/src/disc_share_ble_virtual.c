@@ -13,13 +13,10 @@
  * limitations under the License.
  */
 
-#include "disc_ble.h"
 #include "disc_ble_dispatcher.h"
 #include "disc_manager.h"
 #include "disc_share_ble.h"
-#include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "stddef.h"
 
 static int32_t Publish(const PublishOption *option)
 {

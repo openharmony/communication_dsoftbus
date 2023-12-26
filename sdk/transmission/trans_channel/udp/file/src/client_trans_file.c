@@ -23,7 +23,6 @@
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_utils.h"
 #include "trans_log.h"
 
 #define DEFAULT_KEY_LENGTH 32
@@ -91,15 +90,18 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
     TRANS_LOGI(TRANS_FILE, "send dfileId=%d type=%d", dfileId, msgType);
     if (msgData == NULL || msgType == DFILE_ON_BIND || msgType == DFILE_ON_SESSION_IN_PROGRESS ||
         msgType == DFILE_ON_SESSION_TRANSFER_RATE) {
+        TRANS_LOGE(TRANS_SDK, "param invalid");
         return;
     }
     UdpChannel udpChannel;
     (void)memset_s(&udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
     if (TransGetUdpChannelByFileId(dfileId, &udpChannel) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "trans get udp channel failed");
         return;
     }
     if (msgType == DFILE_ON_CONNECT_SUCCESS) {
         g_udpChannelMgrCb->OnUdpChannelOpened(udpChannel.channelId);
+        TRANS_LOGE(TRANS_SDK, "msgType failed");
         return;
     }
 
@@ -111,6 +113,7 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
 
     int32_t sessionId = -1;
     if (g_udpChannelMgrCb->OnFileGetSessionId(udpChannel.channelId, &sessionId) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get sessionId failed");
         return;
     }
 
@@ -132,13 +135,13 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
     } else {
         NotifySendResult(sessionId, msgType, msgData, &fileListener);
     }
-    return;
 }
 
 static void NotifyRecvResult(int32_t sessionId, DFileMsgType msgType, const DFileMsg *msgData,
     FileListener *listener)
 {
     if (msgData == NULL || listener == NULL) {
+        TRANS_LOGE(TRANS_SDK, "param invalid");
         return;
     }
 
@@ -206,21 +209,25 @@ static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFi
     TRANS_LOGI(TRANS_FILE, "recv dfileId=%d type=%d", dfileId, msgType);
     if (msgData == NULL || msgType == DFILE_ON_BIND || msgType == DFILE_ON_SESSION_IN_PROGRESS ||
         msgType == DFILE_ON_SESSION_TRANSFER_RATE) {
+        TRANS_LOGE(TRANS_SDK, "param invalid");
         return;
     }
     UdpChannel udpChannel;
     (void)memset_s(&udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
     if (TransGetUdpChannelByFileId(dfileId, &udpChannel) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get udp channel failed");
         return;
     }
 
     FileListener fileListener;
     (void)memset_s(&fileListener, sizeof(FileListener), 0, sizeof(FileListener));
     if (TransGetFileListener(udpChannel.info.mySessionName, &fileListener) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get listener failed");
         return;
     }
     int32_t sessionId = -1;
     if (g_udpChannelMgrCb->OnFileGetSessionId(udpChannel.channelId, &sessionId) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get sessionId failed");
         return;
     }
     if (msgType == DFILE_ON_CONNECT_FAIL || msgType == DFILE_ON_FATAL_ERROR) {
@@ -360,10 +367,12 @@ void TransCloseFileChannel(int32_t dfileId)
 void RegisterFileCb(const UdpChannelMgrCb *fileCb)
 {
     if (fileCb == NULL) {
+        TRANS_LOGE(TRANS_FILE, "param invalid");
         g_udpChannelMgrCb = NULL;
         return;
     }
     if (g_udpChannelMgrCb != NULL) {
+        TRANS_LOGE(TRANS_FILE, "g_udpChannelMgrCb is null");
         return;
     }
     g_udpChannelMgrCb = fileCb;

@@ -23,12 +23,11 @@
 #include "lnn_async_callback_utils.h"
 #include "lnn_event.h"
 #include "softbus_adapter_bt_common.h"
+#include "softbus_adapter_errcode.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
-#include "softbus_base_listener.h"
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
-#include "softbus_adapter_errcode.h"
 
 #define AUTH_CONN_DATA_HEAD_SIZE           24
 #define AUTH_CONN_CONNECT_TIMEOUT_MS       10000
@@ -101,9 +100,10 @@ int32_t GetFd(uint64_t connId)
 {
     return (int32_t)(connId & MASK_UINT64_L32);
 }
- 
+
 void UpdateFd(uint64_t *connId, int32_t id)
 {
+    CHECK_NULL_PTR_RETURN_VOID(connId);
     *connId &= MASK_UINT64_H32;
     *connId |= (((uint64_t)id) & MASK_UINT64_L32);
 }

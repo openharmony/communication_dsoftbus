@@ -62,7 +62,6 @@ static void AnonymizeUdid(const char *udid, char **anonymizedUdid)
     }
     if (memset_s(*anonymizedUdid, ANONYMIZED_UDID_LEN + 1, 0, ANONYMIZED_UDID_LEN + 1) != EOK) {
         COMM_LOGE(COMM_DFX, "memset_s *anonymizedStr fail");
-        free(*anonymizedUdid);
         return;
     }
     // Reserve 5 chars at head, concat with two wildcards, and 5 chars at tail
@@ -74,7 +73,6 @@ static void AnonymizeUdid(const char *udid, char **anonymizedUdid)
             (ANONYMIZED_UDID_LEN - RESERVED_LEN - strlen(WILDCARDS) + 1), (udid + strlen(udid) - RESERVED_LEN),
             RESERVED_LEN) != EOK) {
         COMM_LOGE(COMM_DFX, "strncpy_s *anonymizedUdid fail");
-        free(*anonymizedUdid);
     }
 }
 
@@ -88,12 +86,10 @@ static void AnonymizeMac(const char *mac, char **anonymizedMac)
     }
     if (memset_s(*anonymizedMac, anonymizedMacLen + 1, 0, anonymizedMacLen + 1) != EOK) {
         COMM_LOGE(COMM_DFX, "memset_s *anonymizedStr fail");
-        free(*anonymizedMac);
         return;
     }
     if (strcpy_s(*anonymizedMac, anonymizedMacLen + 1, mac) != EOK) {
         COMM_LOGE(COMM_DFX, "strcpy_s *anonymizedMac fail");
-        free(*anonymizedMac);
         return;
     }
     // Anonymize the forth and fifth parts of the mac address
@@ -113,12 +109,10 @@ static void AnonymizeIp(const char *ip, char **anonymizedIp)
     }
     if (memset_s(*anonymizedIp, anonymizedIpLen + 1, 0, anonymizedIpLen + 1) != EOK) {
         COMM_LOGE(COMM_DFX, "memset_s *anonymizedIp fail");
-        free(*anonymizedIp);
         return;
     }
     if (strcpy_s(*anonymizedIp, anonymizedIpLen + 1, ip) != EOK) {
         COMM_LOGE(COMM_DFX, "strcpy_s *anonymizedIp fail");
-        free(*anonymizedIp);
         return;
     }
     // Anonymize the last part of ip address
@@ -160,7 +154,6 @@ static void AnonymizeString(char **anonymizedStr, size_t length, const char *fmt
     va_end(args);
     if (ret < 0) {
         COMM_LOGE(COMM_DFX, "vsprintf_s *anonymizedStr fail");
-        free(*anonymizedStr);
     }
 }
 
