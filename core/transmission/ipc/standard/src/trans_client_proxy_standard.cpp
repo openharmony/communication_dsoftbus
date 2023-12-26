@@ -174,17 +174,23 @@ int32_t TransClientProxy::OnChannelOpened(const char *sessionName, const Channel
 
     MessageParcel reply;
     MessageOption option;
+    if (channel->channelType != CHANNEL_TYPE_UDP) {
+        option = { MessageOption::TF_ASYNC };
+    }
     int32_t ret = remote->SendRequest(CLIENT_ON_CHANNEL_OPENED, data, reply, option);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "OnChannelOpened send request failed, ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
-    int32_t serverRet;
-    if (!reply.ReadInt32(serverRet)) {
-        TRANS_LOGE(TRANS_CTRL, "OnChannelOpened read serverRet failed");
-        return SOFTBUS_ERR;
+    if (channel->channelType == CHANNEL_TYPE_UDP) {
+        int32_t serverRet = 0;
+        if (!reply.ReadInt32(serverRet)) {
+            TRANS_LOGE(TRANS_CTRL, "Udp type OnChannelOpened read serverRet failed");
+            return SOFTBUS_ERR;
+        }
+        return serverRet;
     }
-    return serverRet;
+    return SOFTBUS_OK;
 }
 
 int32_t TransClientProxy::OnChannelOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
@@ -280,7 +286,7 @@ int32_t TransClientProxy::OnChannelClosed(int32_t channelId, int32_t channelType
         return SOFTBUS_ERR;
     }
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option = { MessageOption::TF_ASYNC };
     int32_t ret = remote->SendRequest(CLIENT_ON_CHANNEL_CLOSED, data, reply, option);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "OnChannelClosed send request failed, ret=%{public}d", ret);
