@@ -144,12 +144,7 @@ int32_t SoftbusGattcUnRegister(int32_t clientId)
 
 int32_t SoftbusGattcConnect(int32_t clientId, SoftBusBtAddr *addr)
 {
-    if (addr == NULL) {
-        CONN_LOGE(CONN_BLE, "param invalid");
-        return SOFTBUS_INVALID_PARAM;
-    }
     BdAddr bdAddr;
-    (void)memset_s(&bdAddr, sizeof(BdAddr), 0, sizeof(BdAddr));
     if (memcpy_s(bdAddr.addr, OHOS_BD_ADDR_LEN, addr->addr, BT_ADDR_LEN) != EOK) {
         CONN_LOGE(CONN_BLE, "SoftbusGattcConnect memcpy error");
         return SOFTBUS_INVALID_PARAM;
@@ -211,13 +206,8 @@ int32_t SoftbusGattcGetService(int32_t clientId, SoftBusBtUuid *serverUuid)
 int32_t SoftbusGattcRegisterNotification(
     int32_t clientId, SoftBusBtUuid *serverUuid, SoftBusBtUuid *charaUuid, SoftBusBtUuid *descriptorUuid)
 {
-    if (charaUuid == NULL || serverUuid == NULL) {
-        CONN_LOGE(CONN_BLE, "param invalid");
-        return SOFTBUS_INVALID_PARAM;
-    }
     (void)descriptorUuid;
     BtGattCharacteristic btCharaUuid;
-    (void)memset_s(&btCharaUuid, sizeof(BtGattCharacteristic), 0, sizeof(BtGattCharacteristic));
     btCharaUuid.serviceUuid.uuid = serverUuid->uuid;
     btCharaUuid.serviceUuid.uuidLen = serverUuid->uuidLen;
     btCharaUuid.characteristicUuid.uuid = charaUuid->uuid;
@@ -247,7 +237,6 @@ int32_t SoftbusGattcWriteCharacteristic(int32_t clientId, SoftBusGattcData *clie
     }
     CONN_LOGI(CONN_BLE, "SoftbusGattcRegisterNotification clientId = %d", clientId);
     BtGattCharacteristic characteristic;
-    (void)memset_s(&characteristic, sizeof(BtGattCharacteristic), 0, sizeof(BtGattCharacteristic));
     characteristic.serviceUuid.uuid = clientData->serviceUuid.uuid;
     characteristic.serviceUuid.uuidLen = clientData->serviceUuid.uuidLen;
     characteristic.characteristicUuid.uuid = clientData->characterUuid.uuid;

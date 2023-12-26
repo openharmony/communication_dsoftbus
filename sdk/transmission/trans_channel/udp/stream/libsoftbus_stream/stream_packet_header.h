@@ -102,7 +102,7 @@ public:
     {
         char *pos = new (start + offset) char[size];
         if (ext_ != nullptr) {
-            auto extTlvAlignSize = HEADER_LEN + NUMS_LEN + AlignTo4Bytes(reinterpret_cast<int>(extLen_));
+            auto extTlvAlignSize = HEADER_LEN + NUMS_LEN + AlignTo4Bytes(extLen_);
             if (AddFrameExtData(pos + HEADER_LEN + NUMS_LEN) != 0) {
                 return -1;
             }
@@ -151,7 +151,7 @@ public:
             }
         }
 
-        checkSum_ = ntohl(*reinterpret_cast<uint32_t *>((reinterpret_cast<char *>(tmp) + AlignTo4Bytes(reinterpret_cast<int>(extLen_)))));
+        checkSum_ = ntohl(*reinterpret_cast<uint32_t *>((reinterpret_cast<char *>(tmp) + AlignTo4Bytes(extLen_))));
     }
 
     uint16_t GetTlvNums() const
@@ -210,7 +210,7 @@ private:
         *(pos++) = htons(extTlv.length);
 
         char *extPos = reinterpret_cast<char *>(pos);
-        int ret = memcpy_s(extPos, AlignTo4Bytes(reinterpret_cast<int>(extLen_)), ext_.get(), extLen_);
+        int ret = memcpy_s(extPos, AlignTo4Bytes(extLen_), ext_.get(), extLen_);
         if (ret != 0) {
             return -1;
         }

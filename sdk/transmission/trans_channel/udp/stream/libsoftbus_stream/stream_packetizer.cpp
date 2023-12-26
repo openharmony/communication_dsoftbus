@@ -35,7 +35,7 @@ ssize_t StreamPacketizer::CalculateExtSize(ssize_t extSize) const
     if (extSize > 0) {
         total += TwoLevelsTlv::HEADER_LEN + TwoLevelsTlv::NUMS_LEN;
         total += TwoLevelsTlv::HEADER_LEN + TwoLevelsTlv::NUMS_LEN;
-        total += Align((int)extSize, SHIFT);
+        total += Align(extSize, SHIFT);
         total += TwoLevelsTlv::CHECK_SUM_LEN;
     }
 
