@@ -618,7 +618,7 @@ static void BcLpDeviceInfoCallback(const SoftbusBroadcastUuid *uuid, int32_t typ
     for (uint32_t managerId = 0; managerId < SCAN_NUM_MAX; managerId++) {
         ScanManager *scanManager = &g_scanManager[managerId];
         if (!scanManager->isUsed || scanManager->scanCallback == NULL ||
-            scanManager->scanCallback->OnStopScanCallback == NULL) {
+            scanManager->scanCallback->OnLpDeviceInfoCallback == NULL) {
             continue;
         }
 
