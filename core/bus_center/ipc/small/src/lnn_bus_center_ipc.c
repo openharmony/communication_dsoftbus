@@ -299,9 +299,9 @@ NO_SANITIZE("cfi") int32_t LnnIpcStartTimeSync(const char *pkgName,  int32_t cal
     return LnnStartTimeSync(pkgName, callingPid, targetNetworkId, (TimeSyncAccuracy)accuracy, (TimeSyncPeriod)period);
 }
 
-NO_SANITIZE("cfi") int32_t LnnIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
+NO_SANITIZE("cfi") int32_t LnnIpcStopTimeSync(const char *pkgName, const char *targetNetworkId, int32_t callingPid)
 {
-    return LnnStopTimeSync(pkgName, targetNetworkId);
+    return LnnStopTimeSync(pkgName, targetNetworkId, callingPid);
 }
 
 NO_SANITIZE("cfi") int32_t LnnIpcPublishLNN(const char *pkgName, const PublishInfo *info)

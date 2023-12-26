@@ -287,7 +287,7 @@ int32_t ServerStopTimeSync(IpcIo *req, IpcIo *reply)
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerStopTimeSync no permission.");
         return SOFTBUS_PERMISSION_DENIED;
     }
-    int32_t ret = LnnIpcStopTimeSync(pkgName, targetNetworkId);
+    int32_t ret = LnnIpcStopTimeSync(pkgName, targetNetworkId, 0);
     if (ret != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "ServerStopTimeSync start time sync failed.");
         return SOFTBUS_ERR;
