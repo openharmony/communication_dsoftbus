@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -131,9 +131,11 @@ static int32_t CustomFunc(const SoftBusMessage *msg, void *param)
     CHECK_NULL_PTR_RETURN_VALUE(param, SOFTBUS_ERR);
     EventRemoveInfo *info = (EventRemoveInfo *)param;
     if (msg->what != (int32_t)info->event) {
+        AUTH_LOGE(AUTH_CONN, "msg->what and event inequality");
         return SOFTBUS_ERR;
     }
     if (info->cmpFunc == NULL) {
+        AUTH_LOGE(AUTH_CONN, "cmpFunc is null");
         return SOFTBUS_ERR;
     }
     return info->cmpFunc(msg->obj, info->param);
@@ -185,13 +187,16 @@ bool GetConfigSupportAsServer(void)
 uint8_t *DupMemBuffer(const uint8_t *buf, uint32_t size)
 {
     if (buf == NULL || size == 0) {
+        AUTH_LOGE(AUTH_CONN, "param err");
         return NULL;
     }
     uint8_t *dup = (uint8_t *)SoftBusMalloc(size);
     if (dup == NULL) {
+        AUTH_LOGE(AUTH_CONN, "malloc err");
         return NULL;
     }
     if (memcpy_s(dup, size, buf, size) != EOK) {
+        AUTH_LOGE(AUTH_CONN, "memcpy err");
         SoftBusFree(dup);
         return NULL;
     }
@@ -406,5 +411,6 @@ int32_t GetPeerUdidByNetworkId(const char *networkId, char *udid)
         }
         return SOFTBUS_OK;
     }
+    AUTH_LOGE(AUTH_CONN, "info or deviceUdid is null");
     return SOFTBUS_ERR;
 }

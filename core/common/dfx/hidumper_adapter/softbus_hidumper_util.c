@@ -205,11 +205,11 @@ static void GetLocalTime(char* time, uint64_t timestamp)
     (void)strftime(time, SOFTBUS_ALARM_TIME_LEN, "%Y-%m-%d %H:%M:%S", tmInfo);
 }
 
-static void ConnStatsLinkType(int32_t linkType, bool success)
+static void ConnStatsLinkType(int32_t linkTypePara, bool success)
 {
+    int32_t linkType = linkTypePara;
     if (linkType < CONNECT_TCP || linkType >= CONNECT_TYPE_MAX) {
-        COMM_LOGE(COMM_DFX, "linkType:%d is unexpected.", linkType);
-        return;
+        linkType = SOFTBUS_ZERO;
     }
     g_connStatsInfo.linkTypeTotal[linkType]++;
     if (success) {
@@ -253,11 +253,11 @@ static void OnCompleteConn(int32_t reason, int32_t total)
     g_isConnQueryEnd = true;
 }
 
-static void LnnStatsAuthLinkType(int32_t authLinkType, bool success)
+static void LnnStatsAuthLinkType(int32_t authLinkTypePara, bool success)
 {
+    int32_t authLinkType = authLinkTypePara;
     if (authLinkType < AUTH_LINK_TYPE_WIFI || authLinkType >= AUTH_LINK_TYPE_MAX) {
-        COMM_LOGE(COMM_DFX, "authLinkType:%d is unexpected.", authLinkType);
-        return;
+        authLinkType = SOFTBUS_ZERO;
     }
     g_lnnStatsInfo.authLinkTypeTotal[authLinkType]++;
     if (success) {
@@ -323,23 +323,11 @@ static void OnCompleteLnn(int32_t reason, int32_t total)
     g_isLnnQueryEnd = true;
 }
 
-static void TransStatsSuccessDetail(int32_t scene, int32_t stage, int32_t stageRes, const char *socketName,
-    int32_t linkType)
+static void TransStatsSuccessDetail(bool success, const char *socketName, int32_t linkTypePara)
 {
-    if (stageRes == EVENT_STAGE_RESULT_OK &&
-        (scene != EVENT_SCENE_OPEN_CHANNEL || stage != EVENT_STAGE_OPEN_CHANNEL_END)) {
-        return;
-    }
-    if (stageRes == EVENT_STAGE_RESULT_FAILED && scene != EVENT_SCENE_OPEN_CHANNEL) {
-        return;
-    }
-    if (socketName == NULL || strlen(socketName) == 0) {
-        COMM_LOGE(COMM_DFX, "socketName is NULL or length is 0");
-        return;
-    }
+    int linkType = linkTypePara;
     if (linkType < CONNECT_TCP || linkType >= CONNECT_TYPE_MAX) {
-        COMM_LOGE(COMM_DFX, "linkType:%d is unexpected.", linkType);
-        return;
+        linkType = SOFTBUS_ZERO;
     }
 
     char keyStr[SESSION_NAME_SIZE_MAX + 3] = {0};
@@ -358,27 +346,28 @@ static void TransStatsSuccessDetail(int32_t scene, int32_t stage, int32_t stageR
         TransStatsSuccessRateDetail newResult;
         newResult.successTotal = 0;
         newResult.total = 1;
-        if (stageRes == EVENT_STAGE_RESULT_OK) {
+        if (success) {
             newResult.successTotal = 1;
         }
         if (LnnMapSet(&g_transStatsInfo.sessionNameLinkTypeMap, keyStr, (const void *)&newResult,
             sizeof(TransStatsSuccessRateDetail)) != SOFTBUS_OK) {
-            COMM_LOGE(COMM_DFX, "insert socketName:%s fail", socketName);
+            COMM_LOGE(COMM_DFX, "insert keyStr:%s fail", keyStr);
         }
         TransMapUnlock();
         return;
     }
     data->total++;
-    if (stageRes == EVENT_STAGE_RESULT_OK) {
+    if (success) {
         data->successTotal++;
     }
     TransMapUnlock();
 }
 
-static void TransStats(int32_t scene, int32_t stage, int32_t stageRes)
+static void TransStats(int32_t scene, int32_t stage, int32_t stageRes, const char *socketName, int32_t linkType)
 {
     if (scene == EVENT_SCENE_OPEN_CHANNEL && stage == EVENT_STAGE_OPEN_CHANNEL_END
         && stageRes == EVENT_STAGE_RESULT_OK) {
+        TransStatsSuccessDetail(true, socketName, linkType);
         g_transStatsInfo.openSessionSuccessTotal++;
         g_transStatsInfo.currentParaSessionNum++;
         return;
@@ -386,6 +375,7 @@ static void TransStats(int32_t scene, int32_t stage, int32_t stageRes)
 
     if (scene == EVENT_SCENE_OPEN_CHANNEL && stage == EVENT_STAGE_OPEN_CHANNEL_END
         && stageRes == EVENT_STAGE_RESULT_FAILED) {
+        TransStatsSuccessDetail(false, socketName, linkType);
         g_transStatsInfo.openSessionFailTotal++;
         return;
     }
@@ -427,10 +417,9 @@ static void OnQueryTrans(HiSysEventRecordC srcRecord[], size_t size)
             continue;
         }
 
-        TransStats(scene, stage, stageRes);
         char* socketName = GetStringValueByRecord(&srcRecord[i], SOCKET_KEY_NAME);
         int32_t linkType = GetInt32ValueByRecord(&srcRecord[i], LINK_TYPE_NAME);
-        TransStatsSuccessDetail(scene, stage, stageRes, socketName, linkType);
+        TransStats(scene, stage, stageRes, socketName, linkType);
         cJSON_free(socketName);
         if (scene == EVENT_SCENE_CLOSE_CHANNEL_ACTIVE && stage == EVENT_STAGE_CLOSE_CHANNEL &&
             stageRes == EVENT_STAGE_RESULT_OK && g_transStatsInfo.currentParaSessionNum > 0) {
@@ -441,7 +430,7 @@ static void OnQueryTrans(HiSysEventRecordC srcRecord[], size_t size)
             maxParaSessionNum : g_transStatsInfo.currentParaSessionNum;
 
         int32_t timeConsuming = GetInt32ValueByRecord(&srcRecord[i], TIME_CONSUMING_NAME);
-        if (timeConsuming != SOFTBUS_ERR) {
+        if (timeConsuming != SOFTBUS_ERR && stageRes == EVENT_STAGE_RESULT_OK) {
             g_transStatsInfo.delayTimeTotal += timeConsuming;
             g_transStatsInfo.delayNum++;
         }
@@ -593,7 +582,7 @@ void FillConnSuccessRateDetail(cJSON *connObj)
         COMM_LOGE(COMM_DFX, "%s json is add to root fail", MODULE_NAME_CONN);
         return;
     }
-    for (int i = CONNECT_TCP; i < CONNECT_TYPE_MAX; i++) {
+    for (int i = SOFTBUS_ZERO; i < CONNECT_TYPE_MAX; i++) {
         float rate = 0;
         if (g_connStatsInfo.linkTypeTotal[i] > 0) {
             rate = 1.0 * g_connStatsInfo.linkTypeSuccessTotal[i] / g_connStatsInfo.linkTypeTotal[i] * RATE_HUNDRED;
@@ -615,7 +604,7 @@ void FillAuthSuccessRateDetail(cJSON *authObj)
         COMM_LOGE(COMM_DFX, "%s json is add to root fail", MODULE_NAME_AUTH);
         return;
     }
-    for (int i = AUTH_LINK_TYPE_WIFI; i < AUTH_LINK_TYPE_MAX; i++) {
+    for (int i = SOFTBUS_ZERO; i < AUTH_LINK_TYPE_MAX; i++) {
         float rate = 0;
         if (g_lnnStatsInfo.authLinkTypeTotal[i] > 0) {
             rate =
@@ -677,11 +666,11 @@ static void SoftBusProcessStatsQueryData(SoftBusStatsResult* result)
     result->laneScoreOverTimes = g_transStatsInfo.laneScoreOverTimes;
     result->detectionTimes = g_transStatsInfo.detectionTimes;
 
-    if (memset_s(&g_connStatsInfo, sizeof(g_connStatsInfo), 0, sizeof(g_connStatsInfo)) != SOFTBUS_OK) {
+    if (memset_s(&g_connStatsInfo, sizeof(g_connStatsInfo), 0, sizeof(g_connStatsInfo)) != EOK) {
         COMM_LOGE(COMM_DFX, "memset g_connStatsInfo fail!");
         return;
     }
-    if (memset_s(&g_lnnStatsInfo, sizeof(g_lnnStatsInfo), 0, sizeof(g_lnnStatsInfo)) != SOFTBUS_OK) {
+    if (memset_s(&g_lnnStatsInfo, sizeof(g_lnnStatsInfo), 0, sizeof(g_lnnStatsInfo)) != EOK) {
         COMM_LOGE(COMM_DFX, "memset g_lnnStatsInfo fail!");
         return;
     }
@@ -690,7 +679,7 @@ static void SoftBusProcessStatsQueryData(SoftBusStatsResult* result)
     }
     LnnMapDelete(&g_transStatsInfo.sessionNameLinkTypeMap);
     TransMapUnlock();
-    if (memset_s(&g_transStatsInfo, sizeof(g_transStatsInfo), 0, sizeof(g_transStatsInfo)) != SOFTBUS_OK) {
+    if (memset_s(&g_transStatsInfo, sizeof(g_transStatsInfo), 0, sizeof(g_transStatsInfo)) != EOK) {
         COMM_LOGE(COMM_DFX, "memset g_transStatsInfo fail!");
         return;
     }
@@ -766,8 +755,9 @@ int32_t SoftBusQueryAlarmInfo(int time, int type, SoftBusAlarmEvtResult* result)
     }
     g_alarmEvtResult.recordSize = 0;
     if (memset_s(g_alarmEvtResult.records, sizeof(AlarmRecord) * MAX_NUM_OF_EVENT_RESULT, 0,
-        sizeof(AlarmRecord) * MAX_NUM_OF_EVENT_RESULT) != SOFTBUS_OK) {
+        sizeof(AlarmRecord) * MAX_NUM_OF_EVENT_RESULT) != EOK) {
         COMM_LOGE(COMM_DFX, "memset g_alarmEvtResult records fail!");
+        (void)SoftBusMutexUnlock(&g_alarmQueryLock);
         return SOFTBUS_ERR;
     }
     SoftBusEventQueryInfo(time, &g_queryAlarmParam[type]);
@@ -824,10 +814,10 @@ static int32_t InitDumperUtilMutexLock(void)
 static void UpdateSysEventQueryParam(HiSysEventQueryParam* param, char* eventName)
 {
     HiSysEventQueryRule* queryRule = &param->queryRules[SOFTBUS_ZERO];
-    if (strcpy_s(queryRule->domain, MAX_LENGTH_OF_EVENT_DOMAIN, SOFTBUS_EVENT_DOMAIN) != SOFTBUS_OK) {
+    if (strcpy_s(queryRule->domain, MAX_LENGTH_OF_EVENT_DOMAIN, SOFTBUS_EVENT_DOMAIN) != EOK) {
         COMM_LOGE(COMM_DFX, "UpdateSysEventQueryParam  copy domain fail");
     }
-    if (strcpy_s(queryRule->eventList[SOFTBUS_ZERO], MAX_LENGTH_OF_EVENT_NAME, eventName) != SOFTBUS_OK) {
+    if (strcpy_s(queryRule->eventList[SOFTBUS_ZERO], MAX_LENGTH_OF_EVENT_NAME, eventName) != EOK) {
         COMM_LOGE(COMM_DFX, "UpdateSysEventQueryParam  copy domain fail");
     }
     queryRule->eventListSize = SOFTBUS_ONE;
@@ -835,7 +825,7 @@ static void UpdateSysEventQueryParam(HiSysEventQueryParam* param, char* eventNam
     param->eventSize = SOFTBUS_ONE;
 }
 
-static void InitSoftBusQueryEventParam()
+static void InitSoftBusQueryEventParam(void)
 {
     HiSysEventQueryParam* connParam = &g_queryStatsParam[SOFTBUS_CONNECTION_STATS_TYPE];
     UpdateSysEventQueryParam(connParam, CONN_EVENT_NAME);
@@ -962,7 +952,7 @@ static int32_t CreateAndQueryMsgDelay(SoftBusLooper* looper, HandleMessageFunc c
 static void QueryStatisticInfoPeriod(SoftBusMessage* msg)
 {
     QueryStatisticInfo(msg);
-    CreateAndQueryMsgDelay(GetLooper(LOOP_TYPE_DEFAULT), QueryStatisticInfoPeriod, DAY_TIME);
+    CreateAndQueryMsgDelay(GetLooper(LOOP_TYPE_HANDLE_FILE), QueryStatisticInfoPeriod, DAY_TIME);
 }
 
 int32_t SoftBusHidumperUtilInit(void)
@@ -982,7 +972,7 @@ int32_t SoftBusHidumperUtilInit(void)
     }
     InitSoftBusQueryEventParam();
     g_isDumperInit = true;
-    if (CreateAndQueryMsgDelay(GetLooper(LOOP_TYPE_DEFAULT), QueryStatisticInfoPeriod, DAY_TIME) != SOFTBUS_OK) {
+    if (CreateAndQueryMsgDelay(GetLooper(LOOP_TYPE_HANDLE_FILE), QueryStatisticInfoPeriod, DAY_TIME) != SOFTBUS_OK) {
         COMM_LOGE(COMM_DFX, "CreateAndQueryMsgDelay fail");
     }
     return SOFTBUS_OK;
@@ -1001,6 +991,7 @@ void SoftBusHidumperUtilDeInit(void)
     LnnMapDelete(&g_transStatsInfo.sessionNameLinkTypeMap);
     TransMapUnlock();
     SoftBusMutexDestroy(&g_transMapLock);
+    g_isTransMapInit = false;
     SoftBusMutexDestroy(&g_statsQueryLock);
     SoftBusMutexDestroy(&g_alarmQueryLock);
     SoftBusMutexDestroy(&g_connOnQueryLock);

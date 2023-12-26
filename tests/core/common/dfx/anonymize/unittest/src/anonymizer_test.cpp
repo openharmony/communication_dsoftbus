@@ -54,7 +54,7 @@ class AnonymizerTest : public testing::Test { };
 HWTEST_F(AnonymizerTest, AnonymizeTest001, TestSize.Level0)
 {
     const char *plainStr = nullptr;
-    char *anonymizedStr;
+    char *anonymizedStr = NULL;
     Anonymize(plainStr, &anonymizedStr);
     EXPECT_STREQ("NULL", anonymizedStr);
     AnonymizeFree(anonymizedStr);
@@ -69,7 +69,7 @@ HWTEST_F(AnonymizerTest, AnonymizeTest001, TestSize.Level0)
 HWTEST_F(AnonymizerTest, AnonymizeTest002, TestSize.Level0)
 {
     const char *plainStr = "a";
-    char *anonymizedStr;
+    char *anonymizedStr = NULL;
     Anonymize(plainStr, &anonymizedStr);
     EXPECT_STREQ("*", anonymizedStr);
     AnonymizeFree(anonymizedStr);
@@ -84,7 +84,7 @@ HWTEST_F(AnonymizerTest, AnonymizeTest002, TestSize.Level0)
 HWTEST_F(AnonymizerTest, AnonymizeTest003, TestSize.Level0)
 {
     const char *plainStr = "ab";
-    char *anonymizedStr;
+    char *anonymizedStr = NULL;
     Anonymize(plainStr, &anonymizedStr);
     EXPECT_STREQ("*b", anonymizedStr);
     AnonymizeFree(anonymizedStr);
@@ -99,7 +99,7 @@ HWTEST_F(AnonymizerTest, AnonymizeTest003, TestSize.Level0)
 HWTEST_F(AnonymizerTest, AnonymizeTest004, TestSize.Level0)
 {
     const char *plainStr = "abc";
-    char *anonymizedStr;
+    char *anonymizedStr = NULL;
     Anonymize(plainStr, &anonymizedStr);
     EXPECT_STREQ("*c", anonymizedStr);
     AnonymizeFree(anonymizedStr);
@@ -127,7 +127,7 @@ HWTEST_F(AnonymizerTest, AnonymizeTest005, TestSize.Level0)
 HWTEST_F(AnonymizerTest, AnonymizeTest006, TestSize.Level0)
 {
     const char *plainStr = "";
-    char *anonymizedStr;
+    char *anonymizedStr = NULL;
     Anonymize(plainStr, &anonymizedStr);
     EXPECT_STREQ("EMPTY", anonymizedStr);
     AnonymizeFree(anonymizedStr);
@@ -141,9 +141,10 @@ HWTEST_F(AnonymizerTest, AnonymizeTest006, TestSize.Level0)
  */
 HWTEST_F(AnonymizerTest, AnonymizeTest007, TestSize.Level0)
 {
-    char *anonymizedStr;
+    char *anonymizedStr = NULL;
     Anonymize(TEST_PLAIN_UDID, &anonymizedStr);
     EXPECT_STREQ(TEST_ANONYMIZED_UDID, anonymizedStr);
+    AnonymizeFree(anonymizedStr);
 
     Anonymize(TEST_PLAIN_UDID_CAPS, &anonymizedStr);
     EXPECT_STREQ(TEST_ANONYMIZED_UDID_CAPS, anonymizedStr);
@@ -158,15 +159,18 @@ HWTEST_F(AnonymizerTest, AnonymizeTest007, TestSize.Level0)
  */
 HWTEST_F(AnonymizerTest, AnonymizeTest008, TestSize.Level0)
 {
-    char *anonymizedStr;
+    char *anonymizedStr = NULL;
     Anonymize(TEST_PLAIN_MAC, &anonymizedStr);
     EXPECT_STREQ(TEST_ANONYMIZED_MAC, anonymizedStr);
+    AnonymizeFree(anonymizedStr);
 
     Anonymize(TEST_PLAIN_MAC_CAPS, &anonymizedStr);
     EXPECT_STREQ(TEST_ANONYMIZED_MAC_CAPS, anonymizedStr);
+    AnonymizeFree(anonymizedStr);
 
     Anonymize(TEST_PLAIN_MAC_COLON, &anonymizedStr);
     EXPECT_STREQ(TEST_ANONYMIZED_MAC_COLON, anonymizedStr);
+    AnonymizeFree(anonymizedStr);
 
     Anonymize(TEST_PLAIN_MAC_CAPS_COLON, &anonymizedStr);
     EXPECT_STREQ(TEST_ANONYMIZED_MAC_CAPS_COLON, anonymizedStr);
@@ -181,12 +185,14 @@ HWTEST_F(AnonymizerTest, AnonymizeTest008, TestSize.Level0)
  */
 HWTEST_F(AnonymizerTest, AnonymizeTest009, TestSize.Level0)
 {
-    char *anonymizedStr;
+    char *anonymizedStr = NULL;
     Anonymize(TEST_PLAIN_IP_ONE, &anonymizedStr);
     EXPECT_STREQ(TEST_ANONYMIZED_IP_ONE, anonymizedStr);
+    AnonymizeFree(anonymizedStr);
 
     Anonymize(TEST_PLAIN_IP_TWO, &anonymizedStr);
     EXPECT_STREQ(TEST_ANONYMIZED_IP_TWO, anonymizedStr);
+    AnonymizeFree(anonymizedStr);
 
     Anonymize(TEST_PLAIN_IP_THREE, &anonymizedStr);
     EXPECT_STREQ(TEST_ANONYMIZED_IP_THREE, anonymizedStr);

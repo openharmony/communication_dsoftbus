@@ -25,13 +25,12 @@
 #define SOFTBUS_BLE_GATT_H
 
 #include "softbus_broadcast_adapter_interface.h"
-#include "softbus_broadcast_adapter_type.h"
 
 #ifdef __cplusplus
 extern "C"{
 #endif
 
-void softbus_ble_adapter_init(void);
+void SoftbusBleAdapterInit(void);
 
 #ifdef __cplusplus
 }

@@ -362,6 +362,7 @@ static int32_t PackHandshakeMsgForFastData(AppInfo *appInfo, cJSON *root)
         char *buf = TransProxyPackFastData(appInfo, &outLen);
         if (buf == NULL) {
             TRANS_LOGE(TRANS_CTRL, "failed to pack bytes.");
+            SoftBusFree(encodeFastData);
             return SOFTBUS_ERR;
         }
         int32_t ret = SoftBusBase64Encode(encodeFastData, BASE64_FAST_DATA_LEN, &fastDataSize,
@@ -618,7 +619,7 @@ int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanI
     appInfo->algorithm = APP_INFO_ALGORITHM_AES_GCM_256;
     appInfo->crc = APP_INFO_FILE_FEATURES_NO_SUPPORT;
     int32_t appType = TransProxyGetAppInfoType(chanInfo->myId, chanInfo->identity);
-    if (appType == SOFTBUS_ERR) {
+    if (appType == SOFTBUS_ERR || appType == SOFTBUS_LOCK_ERR) {
         TRANS_LOGE(TRANS_CTRL, "fail to get app type");
         cJSON_Delete(root);
         return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;

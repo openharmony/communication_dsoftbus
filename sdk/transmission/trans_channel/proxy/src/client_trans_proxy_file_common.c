@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <stdbool.h>
@@ -28,7 +26,6 @@
 #include "softbus_adapter_timer.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_type_def.h"
 #include "trans_log.h"
 
 #pragma pack(push, 1)
@@ -69,7 +66,7 @@ int32_t GetAndCheckRealPath(const char *filePath, char *absPath)
         return SOFTBUS_ERR;
     }
 
-    int32_t pathLength = strlen(absPath);
+    int32_t pathLength = (int32_t)(strlen(absPath));
     if (pathLength > (MAX_FILE_PATH_NAME_LEN - 1)) {
         TRANS_LOGE(TRANS_FILE, "pathLength=%d is too large", pathLength);
         return SOFTBUS_ERR;
@@ -83,7 +80,7 @@ bool CheckDestFilePathValid(const char *destFile)
         TRANS_LOGE(TRANS_FILE, "destFile is null");
         return false;
     }
-    int32_t len = strlen(destFile);
+    int32_t len = (int32_t)(strlen(destFile));
     if ((len == 0) || (len > MAX_FILE_PATH_NAME_LEN) || (destFile[0] == PATH_SEPARATOR)) {
         TRANS_LOGE(TRANS_FILE, "destFile first char is '/'");
         return false;
@@ -183,7 +180,7 @@ const char *TransGetFileName(const char *path)
     }
 
     int i;
-    for (i = pathLength - 1; i >= 0; i--) {
+    for (i = (int)(pathLength - 1); i >= 0; i--) {
         if (path[i] == SOFTBUS_PATH_SEPRATOR) {
             i++;
             break;
@@ -294,7 +291,7 @@ int32_t FileLock(int32_t fd, int32_t type, bool isBlock)
         return SOFTBUS_ERR;
     }
     struct flock fl = {0};
-    fl.l_type = (type == SOFTBUS_F_RDLCK ? F_RDLCK : F_WRLCK);
+    fl.l_type = (short)(type == SOFTBUS_F_RDLCK ? F_RDLCK : F_WRLCK);
     fl.l_whence = SEEK_SET;
     fl.l_start = 0;
     fl.l_len = 0;

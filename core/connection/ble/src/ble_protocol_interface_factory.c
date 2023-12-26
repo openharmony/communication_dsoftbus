@@ -14,6 +14,7 @@
  */
 
 #include "ble_protocol_interface_factory.h"
+#include "conn_log.h"
 #include "softbus_common.h"
 #include "softbus_conn_ble_connection.h"
 #include "softbus_conn_ble_client.h"
@@ -38,6 +39,7 @@ static BleUnifyInterface g_bleUnifyInterface[BLE_PROTOCOL_MAX] = {
 const BleUnifyInterface *ConnBleGetUnifyInterface(BleProtocolType type)
 {
     if (type != BLE_GATT) {
+        CONN_LOGE(CONN_BLE, "Failed to return type.");
         return NULL;
     }
     return &g_bleUnifyInterface[type];

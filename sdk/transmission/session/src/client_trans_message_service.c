@@ -57,7 +57,7 @@ int CheckSendLen(int32_t channelId, int32_t channelType, unsigned int len, int32
 
 int SendBytes(int sessionId, const void *data, unsigned int len)
 {
-    TRANS_LOGI(TRANS_BYTES, "SendBytes: sessionId=%d", sessionId);
+    TRANS_LOGI(TRANS_BYTES, "sessionId=%d, len=%d", sessionId, len);
     if (data == NULL || len == 0) {
         TRANS_LOGW(TRANS_BYTES, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
@@ -98,7 +98,7 @@ int SendBytes(int sessionId, const void *data, unsigned int len)
 
 int SendMessage(int sessionId, const void *data, unsigned int len)
 {
-    TRANS_LOGE(TRANS_MSG, "SendMessage: sessionId=%d", sessionId);
+    TRANS_LOGI(TRANS_MSG, "sessionId=%d, len=%d", sessionId, len);
     if (data == NULL || len == 0) {
         TRANS_LOGW(TRANS_MSG, "Invalid param");
         return SOFTBUS_INVALID_PARAM;

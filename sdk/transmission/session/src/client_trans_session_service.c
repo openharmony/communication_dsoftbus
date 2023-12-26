@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +31,6 @@
 #include "inner_session.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_timer.h"
 #include "softbus_client_frame_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -174,16 +173,37 @@ int RemoveSessionServer(const char *pkgName, const char *sessionName)
 static int32_t CheckParamIsValid(const char *mySessionName, const char *peerSessionName,
     const char *peerNetworkId, const char *groupId, const SessionAttribute *attr)
 {
-    if (!IsValidString(mySessionName, SESSION_NAME_SIZE_MAX) ||
-        !IsValidString(peerSessionName, SESSION_NAME_SIZE_MAX) ||
-        !IsValidString(peerNetworkId, DEVICE_ID_SIZE_MAX) ||
-        (attr == NULL) ||
-        (attr->dataType >= TYPE_BUTT)) {
-        TRANS_LOGW(TRANS_SDK, "invalid param");
+    if (!IsValidString(mySessionName, SESSION_NAME_SIZE_MAX)) {
+        char *tmpMyName = NULL;
+        Anonymize(mySessionName, &tmpMyName);
+        TRANS_LOGE(TRANS_SDK, "invalid mySessionName: %s", tmpMyName);
+        AnonymizeFree(tmpMyName);
         return SOFTBUS_INVALID_PARAM;
     }
-
-    if (groupId == NULL || strlen(groupId) >= GROUP_ID_SIZE_MAX) {
+    if (!IsValidString(peerSessionName, SESSION_NAME_SIZE_MAX)) {
+        char *tmpPeerName = NULL;
+        Anonymize(peerSessionName, &tmpPeerName);
+        TRANS_LOGE(TRANS_SDK, "invalid peerSessionName: %s", tmpPeerName);
+        AnonymizeFree(tmpPeerName);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!IsValidString(peerNetworkId, DEVICE_ID_SIZE_MAX)) {
+        char *tmpPeerNetworkId = NULL;
+        Anonymize(peerNetworkId, &tmpPeerNetworkId);
+        TRANS_LOGE(TRANS_SDK, "invalid peerNetworkId: %s", tmpPeerNetworkId);
+        AnonymizeFree(tmpPeerNetworkId);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (attr == NULL) {
+        TRANS_LOGE(TRANS_SDK, "attr is NULL");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (groupId == NULL) {
+        TRANS_LOGE(TRANS_SDK, "groupId is NULL");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strlen(groupId) >= GROUP_ID_SIZE_MAX) {
+        TRANS_LOGE(TRANS_SDK, "groupId length is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -207,11 +227,9 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
 {
     int ret = CheckParamIsValid(mySessionName, peerSessionName, peerNetworkId, groupId, attr);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGW(TRANS_SDK, "invalid param, CheckParamIsValid ret=%d.", ret);
-        return SOFTBUS_INVALID_PARAM;
+        return ret;
     }
     PrintSessionName(mySessionName, peerSessionName);
-    TransInfo transInfo;
     SessionAttribute *tmpAttr = (SessionAttribute *)SoftBusCalloc(sizeof(SessionAttribute));
     if (tmpAttr == NULL) {
         TRANS_LOGE(TRANS_SDK, "SoftBusCalloc SessionAttribute failed");
@@ -249,6 +267,8 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
         return ret;
     }
 
+    TransInfo transInfo;
+    (void)memset_s(&transInfo, sizeof(TransInfo), 0, sizeof(TransInfo));
     ret = ServerIpcOpenSession(&param, &transInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "open session ipc err: ret=%d", ret);
@@ -273,15 +293,18 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
 static int32_t ConvertAddrStr(const char *addrStr, ConnectionAddr *addrInfo)
 {
     if (addrStr == NULL || addrInfo == NULL) {
+        TRANS_LOGE(TRANS_SDK, "param invalid");
         return SOFTBUS_INVALID_PARAM;
     }
 
     cJSON *obj = cJSON_Parse(addrStr);
     if (obj == NULL) {
+        TRANS_LOGE(TRANS_SDK, "cJSON_Parse fail");
         return SOFTBUS_PARSE_JSON_ERR;
     }
     if (memset_s(addrInfo, sizeof(ConnectionAddr), 0x0, sizeof(ConnectionAddr)) != EOK) {
         cJSON_Delete(obj);
+        TRANS_LOGE(TRANS_SDK, "memset_s info fail");
         return SOFTBUS_MEM_ERR;
     }
     int port;
@@ -314,6 +337,7 @@ static int32_t ConvertAddrStr(const char *addrStr, ConnectionAddr *addrInfo)
         return SOFTBUS_OK;
     }
     cJSON_Delete(obj);
+    TRANS_LOGE(TRANS_SDK, "addr convert fail");
     return SOFTBUS_ERR;
 }
 
@@ -448,12 +472,10 @@ int OpenSessionSync(const char *mySessionName, const char *peerSessionName, cons
 {
     int ret = CheckParamIsValid(mySessionName, peerSessionName, peerNetworkId, groupId, attr);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGW(TRANS_SDK, "invalid param");
-        return INVALID_SESSION_ID;
+        return ret;
     }
     PrintSessionName(mySessionName, peerSessionName);
 
-    TransInfo transInfo;
     SessionParam param = {
         .sessionName = mySessionName,
         .peerSessionName = peerSessionName,
@@ -479,6 +501,8 @@ int OpenSessionSync(const char *mySessionName, const char *peerSessionName, cons
         return ret;
     }
 
+    TransInfo transInfo;
+    (void)memset_s(&transInfo, sizeof(TransInfo), 0, sizeof(TransInfo));
     ret = ServerIpcOpenSession(&param, &transInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "open session ipc err: ret=%d", ret);
@@ -743,6 +767,10 @@ int ReadMaxSendBytesSize(int32_t channelId, int32_t type, void* value, uint32_t 
 
 int ReadMaxSendMessageSize(int32_t channelId, int32_t type, void* value, uint32_t valueSize)
 {
+    if (value == NULL) {
+        TRANS_LOGE(TRANS_SDK, "param invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (valueSize != sizeof(uint32_t)) {
         TRANS_LOGE(TRANS_SDK, "valueSize=%d, not match", valueSize);
         return SOFTBUS_INVALID_PARAM;
@@ -760,6 +788,10 @@ int ReadMaxSendMessageSize(int32_t channelId, int32_t type, void* value, uint32_
 
 int ReadSessionLinkType(int32_t channelId, int32_t type, void* value, uint32_t valueSize)
 {
+    if (value == NULL) {
+        TRANS_LOGE(TRANS_SDK, "param invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (valueSize != sizeof(uint32_t)) {
         TRANS_LOGE(TRANS_SDK, "valueSize=%d, not match", valueSize);
         return SOFTBUS_INVALID_PARAM;

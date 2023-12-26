@@ -119,7 +119,7 @@ int32_t SoftBusAlarmHiDumperInit(void)
     int32_t ret = SoftBusRegHiDumperHandler(SOFTBUS_ALARM_MODULE_NAME, SOFTBUS_ALARM_MODULE_HELP,
         &SoftBusAlarmDumpHander);
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_INIT, "SoftBusRegAlarmDumpCb registe fail");
+        COMM_LOGE(COMM_DFX, "SoftBusRegAlarmDumpCb registe fail");
     }
     return ret;
 }

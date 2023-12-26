@@ -17,7 +17,6 @@
 
 #include <securec.h>
 #include "auth_interface.h"
-#include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
 #include "softbus_adapter_mem.h"
@@ -84,7 +83,7 @@ void TransReqLanePendingDeinit(void)
 
 static int32_t TransDelLaneReqFromPendingList(uint32_t laneId)
 {
-    TRANS_LOGI(TRANS_SVC, "del tran request from pending laneId=%u.", laneId);
+    TRANS_LOGD(TRANS_SVC, "del tran request from pending laneId=%u.", laneId);
     if (g_reqLanePendingList == NULL) {
         TRANS_LOGE(TRANS_INIT, "lane request list hasn't init.");
         return SOFTBUS_ERR;
@@ -128,7 +127,6 @@ static int32_t TransAddLaneReqFromPendingList(uint32_t laneId)
     item->laneId = laneId;
     item->bSucc = false;
     item->isFinished = false;
-    (void)memset_s(&(item->connInfo), sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
 
     if (SoftBusMutexLock(&g_reqLanePendingList->lock) != SOFTBUS_OK) {
         SoftBusFree(item);
@@ -259,7 +257,7 @@ static LaneTransType GetStreamLaneType(int32_t streamType)
 
 LaneTransType TransGetLaneTransTypeBySession(const SessionParam *param)
 {
-    if (param == NULL) {
+    if (param == NULL || param->attr == NULL) {
         return LANE_T_BUTT;
     }
     int32_t type = param->attr->dataType;
@@ -518,10 +516,6 @@ int32_t TransGetLaneInfoByOption(bool isQosLane, const LaneRequestOption *reques
     }
 
     *laneId = GetLaneManager()->applyLaneId(LANE_TYPE_TRANS);
-    if (*laneId <= 0) {
-        TRANS_LOGE(TRANS_SVC, "trans apply lane failed.");
-        return SOFTBUS_ERR;
-    }
     if (TransAddLaneReqToPendingAndWaiting(isQosLane, *laneId, requestOption) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "trans add lane to pending list failed.");
         return SOFTBUS_ERR;

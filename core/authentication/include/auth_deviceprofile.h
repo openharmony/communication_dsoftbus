@@ -23,7 +23,7 @@ extern "C" {
 #endif
 #endif
 
-bool IsPotentialTrustedDeviceDp(const char *deviceId);
+bool IsPotentialTrustedDeviceDp(const char *deviceIdHash);
 
 #ifdef __cplusplus
 #if __cplusplus
