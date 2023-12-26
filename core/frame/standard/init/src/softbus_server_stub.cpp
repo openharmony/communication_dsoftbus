@@ -43,7 +43,6 @@
 #include "system_ability_definition.h"
 #endif
 
-
 using namespace OHOS::Security::AccessToken;
 
 namespace OHOS {
