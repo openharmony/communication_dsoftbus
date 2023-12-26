@@ -524,6 +524,24 @@ static int32_t BuildBroadcastReportInfo(const SoftBusBcScanResult *reportData, B
     return SOFTBUS_OK;
 }
 
+static bool CheckScanResultDataIsMatchApproach(const uint32_t managerId, BroadcastPayload *bcData)
+{
+    if (bcData->payload == NULL) {
+        return false;
+    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(bcData->type == BC_DATA_TYPE_SERVICE, false, DISC_BLE,
+                                   "type %d dismatch", bcData->type);
+
+    uint8_t filterSize = g_scanManager[managerId].filterSize;
+    for (uint8_t i = 0; i < filterSize; i++) {
+        BcScanFilter filter = g_scanManager[managerId].filter[i];
+        if (CheckServiceIsMatch(&filter, bcData)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 static void BcReportScanDataCallback(int32_t adapterScanId, const SoftBusBcScanResult *reportData)
 {
     DISC_LOGD(DISC_BLE, "enter.");
@@ -542,7 +560,9 @@ static void BcReportScanDataCallback(int32_t adapterScanId, const SoftBusBcScanR
         if (!scanManager->isUsed || !scanManager->isScanning || scanManager->filter == NULL ||
             scanManager->scanCallback == NULL || scanManager->scanCallback->OnReportScanDataCallback == NULL ||
             scanManager->adapterScanId != adapterScanId ||
-            !CheckScanResultDataIsMatch(managerId, &(bcInfo.packet.bcData))) {
+            !(CheckScanResultDataIsMatch(managerId, &(bcInfo.packet.bcData)) ||
+            (scanManager->srvType == SRV_TYPE_APPROACH &&
+            CheckScanResultDataIsMatchApproach(managerId, &(bcInfo.packet.rspData))))) {
             SoftBusMutexUnlock(&g_scanLock);
             continue;
         }
