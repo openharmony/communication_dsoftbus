@@ -44,11 +44,11 @@ void SoftBusTransDumpRunningSession(int fd, TransDumpLaneLinkType type, AppInfo*
     return;
 }
 
-int32_t SoftBusTransDumpHanderInit()
+int32_t SoftBusTransDumpHanderInit(void)
 {
     return SOFTBUS_OK;
 }
 
-void SoftBusHiDumperTransDeInit()
+void SoftBusHiDumperTransDeInit(void)
 {
 }

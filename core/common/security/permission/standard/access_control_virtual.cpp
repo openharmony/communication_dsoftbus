@@ -12,28 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "stdint.h"
+#include "access_control.h"
+#include "softbus_error_code.h"
 
-/**
- * @file softbus_ble_gatt.h
- * @brief ble stack adapter
- *
- * @since 4.1
- * @version 1.0
- */
-
-#ifndef SOFTBUS_BLE_GATT_H
-#define SOFTBUS_BLE_GATT_H
-
-#include "softbus_broadcast_adapter_interface.h"
-
-#ifdef __cplusplus
-extern "C"{
-#endif
-
-void SoftbusBleAdapterInit(void);
-
-#ifdef __cplusplus
+int32_t TransCheckAccessControl(const char *peerDeviceId)
+{
+    (void)peerDeviceId;
+    return SOFTBUS_OK;
 }
-#endif
-
-#endif /* SOFTBUS_BLE_GATT_H */

@@ -77,7 +77,7 @@ typedef struct {
     int32_t (*SetBroadcastingData)(int32_t advId, const SoftbusBroadcastData *data);
     int32_t (*UpdateBroadcasting)(int32_t advId, const SoftbusBroadcastParam *param, const SoftbusBroadcastData *data);
     int32_t (*StartScan)(int32_t scannerId, const SoftBusBcScanParams *param, const SoftBusBcScanFilter *scanFilter,
-        uint8_t filterSize);
+        int32_t filterSize);
     int32_t (*StopScan)(int32_t scannerId);
     bool (*IsLpDeviceAvailable)(void);
     bool (*SetAdvFilterParam)(const SoftBusLpBroadcastParam *bcParam, const SoftBusLpScanParam *scanParam);
