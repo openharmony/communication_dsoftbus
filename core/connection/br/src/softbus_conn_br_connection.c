@@ -492,7 +492,7 @@ static void *ListenTask(void *arg)
             serverState->serverId = -1;
         }
         (void)SoftBusMutexUnlock(&serverState->mutex);
-        int32_t serverId = g_sppDriver->OpenSppServer(name, strlen(name), UUID, 0);
+        int32_t serverId = g_sppDriver->OpenSppServer(name, (int32_t)strlen(name), UUID, 0);
         if (serverId == -1) {
             CONN_LOGE(CONN_BR, "open br server failed, trace id=%u, retry after %d ms", serverState->traceId,
                 BR_ACCEPET_WAIT_TIME);

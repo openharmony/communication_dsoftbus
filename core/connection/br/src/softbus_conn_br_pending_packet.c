@@ -235,7 +235,7 @@ int32_t ConnBrOnAckResponse(ConnBrConnection *connection, const cJSON *json)
         return SOFTBUS_PARSE_JSON_ERR;
     }
     CONN_LOGD(CONN_BR, "conn id=%u, peer window=%d, seq=%"PRId64, connection->connectionId, peerWindows, seq);
-    int32_t status = ConnBrSetBrPendingPacket(connection->connectionId, seq, NULL);
+    int32_t status = ConnBrSetBrPendingPacket(connection->connectionId, (int64_t)seq, NULL);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BR, "set br pending packet failed, conn id=%u, error=%d", connection->connectionId, status);
     }
