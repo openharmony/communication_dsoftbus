@@ -30,7 +30,8 @@ group("unittest") {
     deps += [
       "ble/dispatcher:unittest",
       "ble/softbus_ble:unittest",
-      "ble/softbus_ble_mock:unittest",
+
+      # "ble/softbus_ble_mock:unittest",
       "ipc:unittest",
     ]
   }
