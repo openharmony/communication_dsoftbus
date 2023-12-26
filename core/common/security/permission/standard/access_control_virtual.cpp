@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,30 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "stdint.h"
+#include "access_control.h"
+#include "softbus_error_code.h"
 
-#include "client_trans_file.h"
-#include "softbus_errcode.h"
-
-int32_t TransFileSchemaInit(void)
+int32_t TransCheckAccessControl(const char *peerDeviceId)
 {
-    return SOFTBUS_OK;
-}
-
-void TransFileSchemaDeinit(void)
-{
-}
-
-int32_t CheckFileSchema(int32_t sessionId, FileSchemaListener *fileSchemaListener)
-{
-    (void)sessionId;
-    (void)fileSchemaListener;
-    return SOFTBUS_OK;
-}
-
-int32_t SetSchemaCallback(FileSchema fileSchema, const char *sFileList[], uint32_t fileCnt)
-{
-    (void)fileSchema;
-    (void)sFileList;
-    (void)fileCnt;
+    (void)peerDeviceId;
     return SOFTBUS_OK;
 }

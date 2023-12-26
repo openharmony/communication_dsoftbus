@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -105,4 +105,4 @@ int32_t ProcessRecvFileFrameData(int32_t sessionId, int32_t channelId, const Fil
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif // CLIENT_TRANS_PROXY_FILE_MANAGER_H
