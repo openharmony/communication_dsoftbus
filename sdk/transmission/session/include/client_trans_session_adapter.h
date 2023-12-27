@@ -27,6 +27,7 @@ int32_t ClientAddSocket(const SocketInfo *info, int32_t *sessionId);
 int32_t ClientListen(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener);
 int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener);
 void ClientShutdown(int32_t socket);
+int32_t GetSocketMtuSize(int32_t socket, uint32_t *mtuSize);
 #ifdef __cplusplus
 }
 #endif
