@@ -504,13 +504,13 @@ HWTEST_F(TransLaneTest, TransLaneTest013, TestSize.Level1)
     (void)TransReqLanePendingInit();
 
     (void)memcpy_s(&requestOption.requestInfo, sizeof(TransOption), &trans, sizeof(TransOption));
-    ret = TransAddLaneReqToPendingAndWaiting(laneMgr,laneId, NULL);
+    ret = TransAddLaneReqToPendingAndWaiting(laneMgr, laneId, NULL);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    ret = TransAddLaneReqToPendingAndWaiting(laneMgr,laneId, &requestOption);
+    ret = TransAddLaneReqToPendingAndWaiting(laneMgr, laneId, &requestOption);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    ret = TransAddLaneReqToPendingAndWaiting(laneMgr,laneId, &requestOption);
+    ret = TransAddLaneReqToPendingAndWaiting(laneMgr, laneId, &requestOption);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     (void)TransDelLaneReqFromPendingList(laneId);
