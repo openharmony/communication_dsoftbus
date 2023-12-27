@@ -55,11 +55,11 @@ int32_t SoftbusClientInfoManager::SoftbusAddService(const std::string &pkgName, 
 int32_t SoftbusClientInfoManager::SoftbusRemoveService(const sptr<IRemoteObject> &object, std::string &pkgName,
     int32_t* pid)
 {
-    if (object == nullptr) {
+    if (object == nullptr || pid == nullptr) {
         COMM_LOGE(COMM_SVC, "RemoveService object is nullptr\n");
         return SOFTBUS_INVALID_PARAM;
     }
-    COMM_LOGI(COMM_SVC, "SoftbusRemoveService, pid=%d, pkgname=%s", pid, pkgName.c_str());
+
     std::lock_guard<std::recursive_mutex> autoLock(clientObjectMapLock_);
     for (auto iter = clientObjectMap_.begin(); iter != clientObjectMap_.end(); ++iter) {
         if (iter->second.second.first == object) {
@@ -70,6 +70,7 @@ int32_t SoftbusClientInfoManager::SoftbusRemoveService(const sptr<IRemoteObject>
             break;
         }
     }
+    COMM_LOGI(COMM_SVC, "SoftbusRemoveService, pid=%d, pkgname=%s", (*pid), pkgName.c_str());
     return SOFTBUS_OK;
 }
 
