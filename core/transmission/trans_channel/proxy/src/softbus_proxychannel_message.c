@@ -79,7 +79,10 @@ static void TransProxyPackMessageHead(ProxyMessageHead *msgHead, uint8_t *buf, u
 static int32_t GetRemoteUdidByBtMac(const char *peerMac, char *udid, int32_t len)
 {
     char networkId[NETWORK_ID_BUF_LEN] = {0};
-    TRANS_LOGI(TRANS_CTRL, "peerMac=%s", AnonymizesMac(peerMac));
+    char *tmpMac = NULL;
+    Anonymize(peerMac, &tmpMac);
+    TRANS_LOGI(TRANS_CTRL, "peerMac=%s", tmpMac);
+    AnonymizeFree(tmpMac);
     if (LnnGetNetworkIdByBtMac(peerMac, networkId, sizeof(networkId)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "LnnGetNetworkIdByBtMac fail");
         return SOFTBUS_NOT_FIND;
@@ -900,7 +903,7 @@ static int32_t TransProxyPackFastDataHead(ProxyDataInfo *dataInfo, const AppInfo
 {
 #define MAGIC_NUMBER 0xBABEFACE
     if (dataInfo == NULL || appInfo ==NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invaild param.");
+        TRANS_LOGE(TRANS_CTRL, "invaild param.");
         return SOFTBUS_ERR;
     }
     dataInfo->outLen = dataInfo->inLen + OVERHEAD_LEN + sizeof(PacketFastHead);
