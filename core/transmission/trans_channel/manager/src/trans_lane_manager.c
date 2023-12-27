@@ -213,10 +213,11 @@ int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType)
 
 void TransLaneMgrDeathCallback(const char *pkgName, int32_t pid)
 {
-    if (g_channelLaneList == NULL) {
+    if (pkgName == NULL || g_channelLaneList == NULL) {
         TRANS_LOGE(TRANS_INIT, "trans lane manager hasn't init.");
         return;
     }
+    TRANS_LOGW(TRANS_CTRL, "TransLaneMgrDeathCallback: pkgName=%s, pid=%d", pkgName, pid);
     if (SoftBusMutexLock(&(g_channelLaneList->lock)) != 0) {
         TRANS_LOGE(TRANS_SVC, "lock failed");
         return;
