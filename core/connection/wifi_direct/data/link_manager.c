@@ -353,7 +353,7 @@ static void ClearNegotiateChannelForLink(struct WifiDirectNegotiateChannel *chan
     for (size_t type = 0; type < WIFI_DIRECT_LINK_TYPE_MAX; type++) {
         LIST_FOR_EACH_ENTRY(target, &self->linkLists[type], struct InnerLink, node) {
             struct WifiDirectNegotiateChannel *targetChannel = target->getPointer(target, IL_KEY_NEGO_CHANNEL, NULL);
-            if (channel->equal(channel, targetChannel)) {
+            if ((targetChannel != NULL) && (channel->equal(channel, targetChannel))) {
                 CONN_LOGI(CONN_WIFI_DIRECT, "find");
                 found = true;
                 break;
