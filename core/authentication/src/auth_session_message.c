@@ -1371,10 +1371,6 @@ static int32_t UnpackDeviceInfoBtV1(const JsonObj *json, NodeInfo *info)
 
 char *PackDeviceInfoMessage(int32_t linkType, SoftBusVersion version, bool isMetaAuth, const char *remoteUuid)
 {
-    if (remoteUuid == NULL) {
-        AUTH_LOGE(AUTH_FSM, "remoteUuid is null");
-        return NULL;
-    }
     AUTH_LOGI(AUTH_FSM, "connType=%d", linkType);
     const NodeInfo *info = LnnGetLocalNodeInfo();
     if (info == NULL) {
