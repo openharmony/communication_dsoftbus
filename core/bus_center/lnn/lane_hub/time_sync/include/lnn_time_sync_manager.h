@@ -25,7 +25,7 @@ extern "C" {
 
 int32_t LnnStartTimeSync(const char *pkgName, int32_t callingPid, const char *targetNetworkId,
     TimeSyncAccuracy accuracy, TimeSyncPeriod period);
-int32_t LnnStopTimeSync(const char *pkgName, const char *targetNetworkId);
+int32_t LnnStopTimeSync(const char *pkgName, const char *targetNetworkId, int32_t callingPid);
 
 int32_t LnnInitTimeSync(void);
 void LnnDeinitTimeSync(void);
