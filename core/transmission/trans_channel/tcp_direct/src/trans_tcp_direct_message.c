@@ -1123,7 +1123,7 @@ static int32_t TransTdcUpdateDataBufWInfo(int32_t channelId, char *recvBuf, int3
         if (item->channelId != channelId) {
             continue;
         }
-        int32_t freeLen = (int32_t)(item->size - (item->w - item->data));
+        int32_t freeLen = (int32_t)(item->size) - (item->w - item->data);
         if (recvLen > freeLen) {
             (void)SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
             TRANS_LOGE(TRANS_CTRL,
@@ -1161,7 +1161,7 @@ int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId)
         TRANS_LOGE(TRANS_CTRL, "trans channelId=%d malloc len%zu failed..", channelId, len);
         return SOFTBUS_MALLOC_ERR;
     }
-    int32_t recvLen = (int32_t)ConnRecvSocketData(fd, recvBuf, len, 0);
+    int32_t recvLen = ConnRecvSocketData(fd, recvBuf, len, 0);
     if (recvLen < 0) {
         SoftBusFree(recvBuf);
         TRANS_LOGE(TRANS_CTRL, "channelId=%d recv tcp data fail,retLen=%d.", channelId, recvLen);
