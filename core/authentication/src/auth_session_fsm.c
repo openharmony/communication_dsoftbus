@@ -597,6 +597,11 @@ static void HandleMsgRecvDeviceId(AuthFsm *authFsm, const MessagePara *para)
             break;
         }
         if (info->isServer) {
+            if (info->connInfo.type == AUTH_LINK_TYPE_BLE && strlen(info->udid) != 0 &&
+                authFsm->info.connInfo.info.bleInfo.deviceIdHash[0] == '\0') {
+                (void)SoftBusGenerateStrHash((unsigned char *)info->udid, strlen(info->nodeInfo.deviceInfo.deviceUdid),
+                    (unsigned char *)authFsm->info.connInfo.info.bleInfo.deviceIdHash);
+            }
             if (PostDeviceIdMessage(authFsm->authSeq, info) != SOFTBUS_OK) {
                 ret = SOFTBUS_AUTH_SYNC_DEVID_FAIL;
                 break;
