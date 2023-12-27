@@ -22,6 +22,7 @@
 #include "comm_log.h"
 #include "form/softbus_event_form.h"
 #include "hisysevent_c.h"
+#include "anonymizer.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -91,6 +92,23 @@ static inline bool AssignerLongString(const char *value, HiSysEventParam **param
     }
     return InitString(&(*param)->v.s, PARAM_LONG_STRING_VALUE_MAX_LEN) &&
         CopyString((*param)->v.s, value, PARAM_LONG_STRING_VALUE_MAX_LEN);
+}
+
+/* Used by ASSIGNER macros */
+static inline bool AssignerAnonymizeString(const char *value, HiSysEventParam **param)
+{
+    if (value == NULL || strlen(value) == 0) {
+        (*param)->v.s = NULL;
+        return false;
+    }
+    if (!InitString(&(*param)->v.s, PARAM_LONG_STRING_VALUE_MAX_LEN)) {
+        return false;
+    }
+    char *anonyStr = NULL;
+    Anonymize(value, &anonyStr);
+    bool status = CopyString((*param)->v.s, value, PARAM_STRING_VALUE_MAX_LEN);
+    AnonymizeFree(anonyStr);
+    return status;
 }
 
 /* Used by ASSIGNER macros */
