@@ -929,6 +929,14 @@ int32_t SoftBusServerStub::GetNodeKeyInfoLen(int32_t key)
     return LnnGetNodeKeyInfoLen(key);
 }
 
+static void PrintNetworkId(const char *networkId)
+{
+    char *anonyNetworkId = nullptr;
+    Anonymize(networkId, &anonyNetworkId);
+    COMM_LOGI(COMM_SVC, "networkId = %s", anonyNetworkId);
+    AnonymizeFree(anonyNetworkId);
+}
+
 int32_t SoftBusServerStub::GetNodeKeyInfoInner(MessageParcel &data, MessageParcel &reply)
 {
     const char *clientName = data.ReadCString();
@@ -937,9 +945,7 @@ int32_t SoftBusServerStub::GetNodeKeyInfoInner(MessageParcel &data, MessageParce
         COMM_LOGE(COMM_SVC, "GetNodeKeyInfoInner read clientName or networkId failed!");
         return SOFTBUS_IPC_ERR;
     }
-    char *anonyNetworkId = nullptr;
-    Anonymize(networkId, &anonyNetworkId);
-    COMM_LOGI(COMM_SVC, "networkId = %s", anonyNetworkId);
+    PrintNetworkId(networkId);
     int32_t key;
     if (!data.ReadInt32(key)) {
         COMM_LOGE(COMM_SVC, "GetNodeKeyInfoInner read key failed!");
