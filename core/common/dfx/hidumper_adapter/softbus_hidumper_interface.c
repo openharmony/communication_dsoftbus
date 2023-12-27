@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 #include <string.h>
+#include "comm_log.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 #include "softbus_hidumper_alarm.h"
 #include "softbus_hidumper_stats.h"
 #include "softbus_hidumper_util.h"
@@ -24,7 +24,7 @@
 int32_t SoftBusDumpProcess(int fd, int32_t argc, const char **argv)
 {
     if (fd < 0 || argc < 0 || argv == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusDumpProcess: param invalid ");
+        COMM_LOGE(COMM_DFX, "SoftBusDumpProcess: param invalid ");
         return SOFTBUS_ERR;
     }
     return SoftBusDumpDispatch(fd, argc, argv);
@@ -33,17 +33,17 @@ int32_t SoftBusDumpProcess(int fd, int32_t argc, const char **argv)
 int32_t SoftBusHiDumperInit(void)
 {
     if (SoftBusAlarmHiDumperInit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "init Alarm HiDumper fail!");
+        COMM_LOGE(COMM_INIT, "init Alarm HiDumper fail!");
         return SOFTBUS_ERR;
     }
 
     if (SoftBusHidumperUtilInit() != SOFTBUS_OK || SoftBusHiDumperModuleInit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusHiDumperInit fail!");
+        COMM_LOGE(COMM_INIT, "SoftBusHiDumperInit fail!");
         return SOFTBUS_ERR;
     }
 
     if (SoftBusStatsHiDumperInit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "init Stats HiDumper fail!");
+        COMM_LOGE(COMM_INIT, "init Stats HiDumper fail!");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

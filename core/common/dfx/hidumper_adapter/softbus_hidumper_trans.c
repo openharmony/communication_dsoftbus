@@ -17,10 +17,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "comm_log.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
-#include "softbus_log_old.h"
 #include "softbus_utils.h"
 
 #define MAX_ID_LEN (10)
@@ -48,7 +48,7 @@ static LIST_HEAD(g_trans_var_list);
 int32_t SoftBusRegTransVarDump(const char *dumpVar, SoftBusVarDumpCb cb)
 {
     if (dumpVar == NULL || strlen(dumpVar) >= SOFTBUS_DUMP_VAR_NAME_LEN || cb == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegTransVarDump invalid param");
+        COMM_LOGE(COMM_DFX, "SoftBusRegTransVarDump invalid param");
         return SOFTBUS_ERR;
     }
     return SoftBusAddDumpVarToList(dumpVar, cb, &g_trans_var_list);
@@ -58,7 +58,7 @@ void SoftBusTransDumpRegisterSession(int fd, const char* pkgName, const char* se
     int uid, int pid)
 {
     if (fd < 0 || pkgName == NULL || sessionName == NULL || uid < 0 || pid < 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "param is invalid");
+        COMM_LOGE(COMM_DFX, "param is invalid");
         return;
     }
 
@@ -67,7 +67,7 @@ void SoftBusTransDumpRegisterSession(int fd, const char* pkgName, const char* se
     char uidStr[MAX_ID_LEN] = {0};
     char pidStr[MAX_ID_LEN] = {0};
     if (sprintf_s(uidArr, MAX_ID_LEN, "%d", uid) < 0 || sprintf_s(pidArr, MAX_ID_LEN, "%d", pid) < 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "set uidArr or pidArr failed");
+        COMM_LOGE(COMM_DFX, "set uidArr or pidArr failed");
         return;
     }
 
@@ -82,7 +82,7 @@ void SoftBusTransDumpRegisterSession(int fd, const char* pkgName, const char* se
 void SoftBusTransDumpRunningSession(int fd, TransDumpLaneLinkType type, AppInfo* appInfo)
 {
     if (fd < 0 || type < DUMPER_LANE_BR || type >= DUMPER_LANE_LINK_TYPE_BUTT || appInfo == NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "param is invalid");
+        COMM_LOGE(COMM_DFX, "param is invalid");
         return;
     }
 
@@ -105,7 +105,7 @@ void SoftBusTransDumpRunningSession(int fd, TransDumpLaneLinkType type, AppInfo*
 static int SoftBusTransDumpHandler(int fd, int argc, const char **argv)
 {
     if (fd < 0 || argv == NULL || argc < 0) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "param is invalid ");
+        COMM_LOGE(COMM_DFX, "param is invalid ");
         return SOFTBUS_ERR;
     }
     if (argc == 0 || ((argc == 1) && (strcmp(argv[0], "-h") == 0)) || (argc == 1 && strcmp(argv[0], "-l") == 0)) {
@@ -138,7 +138,7 @@ int32_t SoftBusTransDumpHandlerInit(void)
     int32_t ret = SoftBusRegHiDumperHandler((char*)MODULE_NAME_TRAN, (char*)SOFTBUS_TRANS_MODULE_HELP,
         &SoftBusTransDumpHandler);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "SoftBusTransDumpHander regist fail");
+        COMM_LOGE(COMM_INIT, "SoftBusTransDumpHander regist fail");
     }
     return ret;
 }
