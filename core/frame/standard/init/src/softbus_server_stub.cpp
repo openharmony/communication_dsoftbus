@@ -474,7 +474,7 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
         goto EXIT;
     }
 #ifdef SUPPORT_BUNDLENAME
-    pid_t callingUid;
+    pid_t callingUid = 0;
     callingUid = OHOS::IPCSkeleton::GetCallingUid();
     if (CheckSessionName(param.sessionName, callingUid) != SOFTBUS_OK) {
         retReply = SOFTBUS_PERMISSION_DENIED;
