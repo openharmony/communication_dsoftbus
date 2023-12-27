@@ -51,10 +51,10 @@ public:
         StreamFrameInfo tmpf = {0};
         auto uniptr = stream->GetBuffer();
         char *retbuf = uniptr.get();
-        int32_t buflen = (int32_t)(stream->GetBufferLen());
+        int32_t buflen = stream->GetBufferLen();
         auto extUniptr = stream->GetExtBuffer();
         char *extRetBuf = extUniptr.get();
-        int32_t extRetBuflen = (int32_t)(stream->GetExtBufferLen());
+        int32_t extRetBuflen = stream->GetExtBufferLen();
         StreamData retStreamData = {0};
         int32_t streamType = adaptor_->GetStreamType();
         std::unique_ptr<char[]> plainData = nullptr;

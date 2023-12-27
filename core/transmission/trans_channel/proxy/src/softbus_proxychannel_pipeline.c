@@ -592,16 +592,16 @@ static void TransProxyPipelineHandleMessage(SoftBusMessage *msg)
     TRANS_LOGD(TRANS_CTRL, "enter, messageType=%d", msg->what);
     switch (msg->what) {
         case LOOPER_MSG_TYPE_OPEN_CHANNEL:
-            InnerOpenProxyChannel((int32_t)msg->arg1);
+            InnerOpenProxyChannel(msg->arg1);
             break;
         case LOOPER_MSG_TYPE_DELEY_CLOSE_CHANNEL:
-            TransProxyPipelineCloseChannel((int32_t)msg->arg1);
+            TransProxyPipelineCloseChannel(msg->arg1);
             break;
         case LOOPER_MSG_TYPE_ON_CHANNEL_OPEN_FAILED:
-            InnerOnChannelOpenFailed((int32_t)msg->arg1);
+            InnerOnChannelOpenFailed(msg->arg1);
             break;
         case LOOPER_MSG_TYPE_ON_CHANNEL_OPENED:
-            InnerOnChannelOpened((int32_t)msg->arg1, (char *)msg->obj, (unsigned char)msg->arg2);
+            InnerOnChannelOpened(msg->arg1, (char *)msg->obj, msg->arg2);
             break;
         default:
             TRANS_LOGE(TRANS_CTRL, "unknown messageType=%d", msg->what);

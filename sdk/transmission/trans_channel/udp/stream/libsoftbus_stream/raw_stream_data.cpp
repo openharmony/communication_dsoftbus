@@ -64,7 +64,7 @@ std::unique_ptr<IStream> IStream::MakeRawStream(const char *buf, ssize_t bufLen,
         TRANS_LOGE(TRANS_STREAM, "memcpy failed");
         return nullptr;
     }
-    RawStreamData::InsertBufferLength(reinterpret_cast<int>(bufLen), RawStreamData::FRAME_HEADER_LEN,
+    RawStreamData::InsertBufferLength(bufLen, RawStreamData::FRAME_HEADER_LEN,
         reinterpret_cast<uint8_t *>(buffer.get()));
 
     raw->InitStreamData(std::move(buffer), bufLen + RawStreamData::FRAME_HEADER_LEN, nullptr, 0);

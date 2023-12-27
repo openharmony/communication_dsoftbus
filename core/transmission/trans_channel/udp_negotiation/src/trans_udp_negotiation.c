@@ -111,7 +111,7 @@ static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
     char networkId[NETWORK_ID_BUF_LEN] = {0};
     info.myHandleId = appInfo->myHandleId;
     info.peerHandleId = appInfo->peerHandleId;
-    info.channelId = (int32_t)appInfo->myData.channelId;
+    info.channelId = appInfo->myData.channelId;
     info.channelType = CHANNEL_TYPE_UDP;
     info.isServer = isServerSide;
     info.businessType = appInfo->businessType;
@@ -254,20 +254,20 @@ static int32_t AcceptUdpChannelAsServer(AppInfo *appInfo)
     int32_t udpPort = NotifyUdpChannelOpened(appInfo, true);
     if (udpPort <= 0) {
         TRANS_LOGE(TRANS_CTRL, "get udp listen port failed udpPort=%d.", udpPort);
-        ReleaseUdpChannelId((int32_t)appInfo->myData.channelId);
+        ReleaseUdpChannelId(appInfo->myData.channelId);
         return SOFTBUS_TRANS_UDP_SERVER_NOTIFY_APP_OPEN_FAILED;
     }
     appInfo->myData.port = udpPort;
     UdpChannelInfo *newChannel = NewUdpChannelByAppInfo(appInfo);
     if (newChannel == NULL) {
-        ReleaseUdpChannelId((int32_t)appInfo->myData.channelId);
+        ReleaseUdpChannelId(appInfo->myData.channelId);
         return SOFTBUS_MEM_ERR;
     }
     newChannel->seq = GenerateSeq(true);
     newChannel->status = UDP_CHANNEL_STATUS_INIT;
     if (TransAddUdpChannel(newChannel) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "add new udp channel failed.");
-        ReleaseUdpChannelId((int32_t)appInfo->myData.channelId);
+        ReleaseUdpChannelId(appInfo->myData.channelId);
         SoftBusFree(newChannel);
         return SOFTBUS_TRANS_UDP_SERVER_ADD_CHANNEL_FAILED;
     }
@@ -287,7 +287,7 @@ static int32_t AcceptUdpChannelAsClient(AppInfo *appInfo)
 static int32_t CloseUdpChannel(AppInfo *appInfo)
 {
     TRANS_LOGI(TRANS_CTRL, "process udp channel close state");
-    if (TransDelUdpChannel((int32_t)appInfo->myData.channelId) != SOFTBUS_OK) {
+    if (TransDelUdpChannel(appInfo->myData.channelId) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "delete udp channel failed.");
     }
     if (NotifyUdpChannelClosed(appInfo) != SOFTBUS_OK) {
@@ -496,10 +496,10 @@ static void ProcessAbnormalUdpChannelState(const AppInfo *info, int32_t errCode,
     }
     if (info->udpChannelOptType == TYPE_UDP_CHANNEL_OPEN) {
         (void)NotifyUdpChannelOpenFailed(info, errCode);
-        (void)TransDelUdpChannel((int32_t)info->myData.channelId);
+        (void)TransDelUdpChannel(info->myData.channelId);
     } else if (needClose) {
         NotifyUdpChannelClosed(info);
-        (void)TransDelUdpChannel((int32_t)info->myData.channelId);
+        (void)TransDelUdpChannel(info->myData.channelId);
     }
 }
 
@@ -779,7 +779,7 @@ static int32_t OpenAuthConnForUdpNegotiation(UdpChannelInfo *channel)
     if (GetUdpChannelLock() != SOFTBUS_OK) {
         return SOFTBUS_LOCK_ERR;
     }
-    UdpChannelInfo *channelObj = TransGetChannelObj((int32_t)channel->info.myData.channelId);
+    UdpChannelInfo *channelObj = TransGetChannelObj(channel->info.myData.channelId);
     if (channelObj == NULL) {
         ReleaseUdpChannelLock();
         return SOFTBUS_NOT_FIND;
