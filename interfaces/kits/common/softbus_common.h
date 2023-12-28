@@ -230,12 +230,12 @@ typedef enum  {
  */
 typedef enum {
     PROXY_TRANSMISION = 0, /**< Proxy Transmision */
-    PROXY_HEARTBEAT = 1,   /**< Proxy Heartbeat */
-    PROXY_HICAR,
-    PROXY_WEAR,
-    PROXY_SHARE,
-    PROXY_CASTPLUS,
-    CUSTOM_UNKNOWN,        /**< Proxy Unknown*/
+    PROXY_HEARTBEAT = 1, /**< Proxy Heartbeat */
+    PROXY_HICAR = 2,
+    PROXY_SHARE = 4,
+    PROXY_CASTPLUS = 5,
+    PROXY_WEAR = 7,
+    CUSTOM_UNKNOWN = 8, /**< Proxy Unknown*/
 } MetaNodeType;
 
 /**
