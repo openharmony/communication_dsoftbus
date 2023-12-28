@@ -18,6 +18,7 @@
 #include "discovery_service.h"
 #include "ipc_skeleton.h"
 #include "ipc_types.h"
+#include "regex.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_bus_center.h"
@@ -34,6 +35,13 @@
 #include "access_token.h"
 #include "privacy_kit.h"
 #include "softbus_hisysevt_transreporter.h"
+
+#ifdef SUPPORT_BUNDLENAME
+#include "bundle_mgr_interface.h"
+#include "bundle_mgr_proxy.h"
+#include "iservice_registry.h"
+#include "system_ability_definition.h"
+#endif
 
 using namespace OHOS::Security::AccessToken;
 
@@ -324,6 +332,61 @@ int32_t SoftBusServerStub::SoftbusRegisterServiceInner(MessageParcel &data, Mess
     return SOFTBUS_OK;
 }
 
+#ifdef SUPPORT_BUNDLENAME
+static bool IsObjectstoreDbSessionName(const char* sessionName)
+{
+#define OBJECTSTORE_DB_SESSION_NAME "objectstoreDB-*"
+    regex_t regComp;
+    if (regcomp(&regComp, OBJECTSTORE_DB_SESSION_NAME, REG_EXTENDED | REG_NOSUB) != 0) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "regcomp failed.");
+        regfree(&regComp);
+        return false;
+    }
+    bool compare = regexec(&regComp, sessionName, 0, NULL, 0) == 0;
+    regfree(&regComp);
+    return compare;
+}
+
+static int32_t GetBundleName(pid_t callingUid, std::string &bundleName)
+{
+    sptr<ISystemAbilityManager> systemAbilityManager =
+            SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    sptr<IRemoteObject> remoteObject =
+            systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (remoteObject == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to get bundle manager service.");
+        return SOFTBUS_ERR;
+    }
+    sptr<AppExecFwk::IBundleMgr> iBundleMgr = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
+    if (iBundleMgr == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "iface_cast failed");
+        return SOFTBUS_ERR;
+    }
+    if (iBundleMgr->GetNameForUid(callingUid, bundleName) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get bundleName failed");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t CheckSessionName(const char* sessionName, pid_t callingUid)
+{
+#define SESSION_NAME "objectstoreDB-"
+    if (IsObjectstoreDbSessionName(sessionName)) {
+        std::string bundleName;
+        if (GetBundleName(callingUid, bundleName) != 0) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get bundle name failed");
+            return SOFTBUS_ERR;
+        }
+        if (strcmp(bundleName.c_str(), sessionName + strlen(SESSION_NAME)) != 0) {
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "bundle name is different from session name");
+            return SOFTBUS_ERR;
+        }
+    }
+    return SOFTBUS_OK;
+}
+#endif
+
 int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, MessageParcel &reply)
 {
     int32_t retReply;
@@ -341,6 +404,14 @@ int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, Message
         retReply = SOFTBUS_PERMISSION_DENIED;
         goto EXIT;
     }
+
+#ifdef SUPPORT_BUNDLENAME
+    if (CheckSessionName(sessionName, callingUid) != SOFTBUS_OK) {
+        retReply = SOFTBUS_PERMISSION_DENIED;
+        goto EXIT;
+    }
+#endif
+
     retReply = CreateSessionServer(pkgName, sessionName);
 EXIT:
     if (!reply.WriteInt32(retReply)) {
@@ -402,6 +473,14 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
         retReply = SOFTBUS_PERMISSION_DENIED;
         goto EXIT;
     }
+#ifdef SUPPORT_BUNDLENAME
+    pid_t callingUid;
+    callingUid = OHOS::IPCSkeleton::GetCallingUid();
+    if (CheckSessionName(param.sessionName, callingUid) != SOFTBUS_OK) {
+        retReply = SOFTBUS_PERMISSION_DENIED;
+        goto EXIT;
+    }
+#endif
 
     timeStart = GetSoftbusRecordTimeMillis();
     retReply = OpenSession(&param, &(transSerializer.transInfo));
