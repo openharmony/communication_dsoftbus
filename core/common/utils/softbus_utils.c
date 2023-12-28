@@ -212,7 +212,7 @@ int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned
     uint32_t inLen)
 {
     if ((outBuf == NULL) || (inBuf == NULL) || (outBufLen < HEXIFY_LEN(inLen))) {
-        COMM_LOGE(COMM_UTILS, "outBufLen=%d inLen=%d", outBufLen, inLen);
+        COMM_LOGD(COMM_UTILS, "outBufLen=%d inLen=%d", outBufLen, inLen);
         return SOFTBUS_ERR;
     }
 
