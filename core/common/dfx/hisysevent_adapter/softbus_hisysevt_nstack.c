@@ -14,10 +14,10 @@
  */
 
 #include <securec.h>
+#include "comm_log.h"
 #include "fillpinc.h"
 #include "nstackx.h"
 #include "nstackx_dfile.h"
-#include "softbus_adapter_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -98,13 +98,13 @@ static int32_t CopyEventParamVal(SoftBusEvtParamType type, void *dst, const void
             break;
         case SOFTBUS_EVT_PARAMTYPE_STRING:
             if (strcpy_s(dst, SOFTBUS_HISYSEVT_PARAM_LEN, src) != EOK) {
-                LOG_ERR("softbus param string max %d, nstack param string %s",
+                COMM_LOGE(COMM_DFX, "softbus param string max %d, nstack param string %s",
                     SOFTBUS_HISYSEVT_PARAM_LEN, (char *)src);
                 return SOFTBUS_ERR;
             }
             break;
         default:
-            LOG_ERR("unknow param type");
+            COMM_LOGE(COMM_DFX, "unknow param type");
             return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -113,13 +113,13 @@ static int32_t CopyEventParamVal(SoftBusEvtParamType type, void *dst, const void
 static int32_t NstackEventParaToSoftBusEventPara(SoftBusEvtParam *dst, const NstackDfxEvtParam *src)
 {
     if (src->type >= SOFTBUS_EVT_PARAMTYPE_BUTT) {
-        LOG_ERR("softbus paramType max %d, nstack paramType %d",
+        COMM_LOGE(COMM_DFX, "softbus paramType max %d, nstack paramType %d",
             SOFTBUS_EVT_PARAMTYPE_BUTT, src->type);
         return SOFTBUS_ERR;
     }
     dst->paramType = (SoftBusEvtParamType)src->type;
     if (strcpy_s(dst->paramName, SOFTBUS_HISYSEVT_NAME_LEN, src->paramName) != EOK) {
-        LOG_ERR("softbus paramName max size %d, nstack paramName name %s",
+        COMM_LOGE(COMM_DFX, "softbus paramName max size %d, nstack paramName name %s",
             SOFTBUS_HISYSEVT_NAME_LEN, src->paramName);
         return SOFTBUS_ERR;
     }
@@ -132,16 +132,16 @@ static int32_t NstackEventParaToSoftBusEventPara(SoftBusEvtParam *dst, const Nst
 static int32_t NstackDfxEvtToSoftBusReportMsg(SoftBusEvtReportMsg *msg, const NstackDfxEvent *info)
 {
     if (strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, info->eventName) != EOK) {
-        LOG_ERR("eventName mismatch, nstack event name %s", info->eventName);
+        COMM_LOGE(COMM_DFX, "eventName mismatch, nstack event name %s", info->eventName);
         return SOFTBUS_ERR;
     }
     if (info->type >= SOFTBUS_EVT_TYPE_BUTT) {
-        LOG_ERR("eventType mismatch, nstack event type %d", info->type);
+        COMM_LOGE(COMM_DFX, "eventType mismatch, nstack event type %d", info->type);
         return SOFTBUS_ERR;
     }
     msg->evtType = (SoftBusEvtType)(info->type);
     if (info->paramNum != 0 && info->paramArray == NULL) {
-        LOG_ERR("param mismatch, nstack paramNum %u paramArray is NULL", info->paramNum);
+        COMM_LOGE(COMM_DFX, "param mismatch, nstack paramNum %u paramArray is NULL", info->paramNum);
         return SOFTBUS_ERR;
     }
     msg->paramNum = info->paramNum;
@@ -150,7 +150,7 @@ static int32_t NstackDfxEvtToSoftBusReportMsg(SoftBusEvtReportMsg *msg, const Ns
     }
     msg->paramArray = (SoftBusEvtParam *)SoftBusCalloc(msg->paramNum * sizeof(SoftBusEvtParam));
     if (msg->paramArray == NULL) {
-        LOG_ERR("SoftBusCalloc paramArray failed! paramNum %u", info->paramNum);
+        COMM_LOGE(COMM_DFX, "SoftBusCalloc paramArray failed! paramNum %u", info->paramNum);
         return SOFTBUS_ERR;
     }
     for (uint8_t i = 0; i < info->paramNum; i++) {
@@ -165,7 +165,7 @@ static void NstackHiEventCb(void *softObj, const NstackDfxEvent *info)
 {
     (void)softObj;
     if (info == NULL) {
-        LOG_ERR("info is NULL");
+        COMM_LOGE(COMM_DFX, "info is NULL");
         return;
     }
     SoftBusEvtReportMsg msg;
@@ -174,7 +174,7 @@ static void NstackHiEventCb(void *softObj, const NstackDfxEvent *info)
         if (msg.paramArray != NULL) {
             SoftBusFree(msg.paramArray);
         }
-        LOG_ERR("change NstackDfxEvent to SoftBusEvtReportMsg failed!");
+        COMM_LOGE(COMM_DFX, "change NstackDfxEvent to SoftBusEvtReportMsg failed!");
         return;
     }
     (void)SoftbusWriteHisEvt(&msg);
@@ -186,12 +186,12 @@ static void NstackHiEventCb(void *softObj, const NstackDfxEvent *info)
 void DstreamHiEventCb(void *softObj, const FillpDfxEvent *info)
 {
     if (softObj == NULL || info == NULL) {
-        LOG_ERR("param is NULL");
+        COMM_LOGE(COMM_DFX, "param is NULL");
         return;
     }
     NstackDfxEvent nstackInfo;
     if (memcpy_s(&nstackInfo, sizeof(NstackDfxEvent), info, sizeof(FillpDfxEvent)) != EOK) {
-        LOG_ERR("change FillpDfxEvent to NstackDfxEvent failed!");
+        COMM_LOGE(COMM_DFX, "change FillpDfxEvent to NstackDfxEvent failed!");
         return;
     }
     NstackHiEventCb(softObj, &nstackInfo);
@@ -201,7 +201,7 @@ static void DFileHiEventCb(void *softObj, const DFileEvent *info)
 {
     NstackDfxEvent nstackInfo;
     if (memcpy_s(&nstackInfo, sizeof(NstackDfxEvent), info, sizeof(DFileEvent)) != EOK) {
-        LOG_ERR("change DFileEvent to NstackDfxEvent failed!");
+        COMM_LOGE(COMM_DFX, "change DFileEvent to NstackDfxEvent failed!");
         return;
     }
     NstackHiEventCb(softObj, &nstackInfo);
@@ -212,7 +212,7 @@ static void DFinderHiEventCb(void *softObj, const DFinderEvent *info)
     NstackDfxEvent nstackInfo;
     if (memcpy_s(nstackInfo.eventName, sizeof(nstackInfo.eventName),
         info->eventName, sizeof(info->eventName)) != EOK) {
-        LOG_ERR("change DFinderEvent to NstackDfxEvent failed!");
+        COMM_LOGE(COMM_DFX, "change DFinderEvent to NstackDfxEvent failed!");
         return;
     }
 
@@ -227,7 +227,7 @@ void NstackInitHiEvent(void)
 {
     NSTACKX_DFileSetEventFunc(NULL, DFileHiEventCb);
     if (NSTACKX_DFinderSetEventFunc(NULL, DFinderHiEventCb) != 0) {
-        LOG_ERR("NSTACKX_DFinderSetEventFunc failed!");
+        COMM_LOGE(COMM_DFX, "NSTACKX_DFinderSetEventFunc failed!");
     }
 }
 #endif /* FILLP_ENHANCED */

@@ -29,7 +29,7 @@ static void SoftBusLogExtraInfoFormat(char *line, const char *fileName, int line
     (void)sprintf_s(line, LOG_LINE_MAX_LENGTH + 1, "[%s:%d] %s# ", fileName, lineNum, funName);
 }
 
-static void SoftBusLogPrint(const char *buf, SoftBusDfxLogLevel level, unsigned int domain, const char *tag)
+static void SoftBusLogPrint(const char *buf, SoftBusLogLevel level, unsigned int domain, const char *tag)
 {
 #ifdef SOFTBUS_PRINTF
     (void)level;
@@ -41,7 +41,7 @@ static void SoftBusLogPrint(const char *buf, SoftBusDfxLogLevel level, unsigned 
 #endif
 }
 
-void SoftBusLogInnerImpl(SoftBusDfxLogLevel level, SoftBusLogLabel label, const char *fileName, int lineNum,
+void SoftBusLogInnerImpl(SoftBusLogLevel level, SoftBusLogLabel label, const char *fileName, int lineNum,
     const char *funName, const char *fmt, ...)
 {
     uint32_t pos;

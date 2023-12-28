@@ -19,7 +19,7 @@
 
 #include "device_profile_listener.h"
 #include "lnn_app_bind_interface.h"
-#include "softbus_log_old.h"
+#include "auth_log.h"
 #include "softbus_errcode.h"
 #include "trust_device_profile.h"
 
@@ -47,13 +47,13 @@ static void OnDeviceBound(const char *udid, const char *groupInfo)
 {
     (void)udid;
     (void)groupInfo;
-    LLOGI("deviceBound success!");
+    AUTH_LOGI(AUTH_TEST, "deviceBound success!");
 }
 
 static void OnDeviceNotTrusted(const char *udid)
 {
     (void)udid;
-    LLOGI("device is not trusted!");
+    AUTH_LOGI(AUTH_TEST, "device is not trusted!");
 }
 
 static DeviceProfileChangeListener g_deviceProfilePara = {
