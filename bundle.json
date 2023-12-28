@@ -110,6 +110,7 @@
       "test": [
         "//foundation/communication/dsoftbus/tests/adapter:fuzztest",
         "//foundation/communication/dsoftbus/tests/adapter:unittest",
+        "//foundation/communication/dsoftbus/tests/core/adapter:fuzztest",
         "//foundation/communication/dsoftbus/tests/core/adapter:unittest",
         "//foundation/communication/dsoftbus/tests/core/authentication:fuzztest",
         "//foundation/communication/dsoftbus/tests/core/authentication:unittest",
