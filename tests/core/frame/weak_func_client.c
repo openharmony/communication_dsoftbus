@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
-#include "softbus_log_old.h"
+#include "comm_log.h"
 
 int OnStartDiscoveryWeak(const char *pkgName, const void *info)
 {
-    LOG_INFO("client OnStartDiscovery Strong pkgName = %s\n", pkgName);
+    COMM_LOGI(COMM_INIT, "client OnStartDiscovery Strong pkgName = %s", pkgName);
+    (void)info;
     return 0;
 }

@@ -17,9 +17,7 @@
 
 #include "auth_interface.h"
 #include "auth_log.h"
-#include "softbus_adapter_log.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_log_old.h"
 #include "softbus_adapter_json.h"
 
 using namespace testing;

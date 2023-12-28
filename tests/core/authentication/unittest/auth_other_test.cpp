@@ -22,6 +22,7 @@
 #include "auth_connection.c"
 #include "auth_interface.h"
 #include "auth_interface.c"
+#include "auth_log.h"
 #include "auth_manager.h"
 #include "auth_manager.c"
 #include "auth_session_fsm.h"
@@ -63,7 +64,6 @@ void AuthOtherTest::TearDownTestCase()
 
 void AuthOtherTest::SetUp()
 {
-    LOG_INFO("AuthOtherTest start.");
 }
 
 void AuthOtherTest::TearDown() {}

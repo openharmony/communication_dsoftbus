@@ -89,7 +89,6 @@ if (defined(ohos_lite)) {
     include_dirs += trans_common_inc
     sources = [
       "$dsoftbus_root_path/core/bus_center/utils/src/lnn_map.c",
-      "$dsoftbus_root_path/core/common/log/softbus_log_old.c",
       "$dsoftbus_root_path/core/common/message_handler/message_handler.c",
       "$dsoftbus_root_path/core/common/softbus_property/softbus_feature_config.c",
       "$dsoftbus_root_path/core/common/utils/softbus_utils.c",

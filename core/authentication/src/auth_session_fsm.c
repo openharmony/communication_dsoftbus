@@ -30,7 +30,6 @@
 #include "softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
-#include "softbus_log_old.h"
 
 #define AUTH_TIMEOUT_MS (10 * 1000)
 #define TO_AUTH_FSM(ptr) CONTAINER_OF(ptr, AuthFsm, fsm)

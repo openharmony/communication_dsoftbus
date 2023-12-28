@@ -24,7 +24,6 @@
 #include "lnn_log.h"
 #include "lnn_settingdata_event_monitor.h"
 #include "softbus_adapter_bt_common.h"
-#include "softbus_adapter_log.h"
 #include "softbus_common.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
