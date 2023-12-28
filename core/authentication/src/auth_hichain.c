@@ -28,6 +28,7 @@
 
 #define AUTH_APPID "softbus_auth"
 #define GROUPID_BUF_LEN 65
+#define ONTRANSMIT_MAX_DATA_BUFFER_LEN 5120 /* 5 × 1024 */
 
 typedef struct {
     char groupId[GROUPID_BUF_LEN];
@@ -72,6 +73,10 @@ static char *GenDeviceLevelParam(const char *udid, const char *uid, bool isClien
 NO_SANITIZE("cfi") static bool OnTransmit(int64_t authSeq, const uint8_t *data, uint32_t len)
 {
     ALOGI("hichain OnTransmit: authSeq=%" PRId64 ", len=%u.", authSeq, len);
+    if (len > ONTRANSMIT_MAX_DATA_BUFFER_LEN) {
+        SoftBusLog(SOFTBUS_LOG_AUTH, SOFTBUS_LOG_ERROR, "data len is invalid, len=%u", len);
+        return false;
+    }
     if (AuthSessionPostAuthData(authSeq, data, len) != SOFTBUS_OK) {
         ALOGE("hichain OnTransmit fail: authSeq=%" PRId64, authSeq);
         return false;
