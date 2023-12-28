@@ -22,7 +22,7 @@ namespace OHOS {
 void *g_laneLinkDepsInterface;
 LaneLinkDepsInterfaceMock::LaneLinkDepsInterfaceMock()
 {
-    g_laneDepsInterface = reinterpret_cast<void *>(this);
+    g_laneLinkDepsInterface = reinterpret_cast<void *>(this);
 }
 
 LaneLinkDepsInterfaceMock::~LaneLinkDepsInterfaceMock()
