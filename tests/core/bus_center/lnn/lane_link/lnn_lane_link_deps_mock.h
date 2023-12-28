@@ -33,7 +33,7 @@ class LaneLinkDepsInterfaceMock : public LaneLinkDepsInterface {
 public:
     LaneLinkDepsInterfaceMock();
     ~LaneLinkDepsInterfaceMock() override;
-    
+
     MOCK_METHOD2(GetTransOptionByLaneId, int32_t (uint32_t laneId, TransOption *reqInfo));
 };
 } // namespace OHOS

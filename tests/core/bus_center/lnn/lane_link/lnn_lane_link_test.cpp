@@ -336,7 +336,7 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_006, TestSize.Level1)
 
     LaneLinkDepsInterfaceMock laneLinkMock;
     EXPECT_CALL(laneLinkMock, GetTransOptionByLaneId).WillRepeatedly(Return(SOFTBUS_OK));
-    
+
     uint32_t ret = LnnConnectP2p(request, laneLinkReqId, &cb);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     LnnDisconnectP2p(network, request->pid, laneLinkReqId);
