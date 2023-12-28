@@ -21,6 +21,7 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane.h"
 #include "lnn_lane_link.h"
+#include "lnn_lane_reliability.h"
 #include "lnn_lane_select.h"
 #include "lnn_local_net_ledger.h"
 #include "message_handler.h"
@@ -31,6 +32,7 @@
 
 namespace OHOS {
 using namespace testing::ext;
+using namespace testing;
 constexpr char NODE_NETWORK_ID[] = "111122223333abcdef";
 constexpr char NODE_UDID[] = "123456ABCDEF";
 constexpr char NODE_BT_MAC[] = "b1:ab:cd:ef:aa:d7";
@@ -337,6 +339,8 @@ HWTEST_F(LaneTest, EXPECT_LANE_SELECT_BY_QOS_Test_002, TestSize.Level1)
 */
 HWTEST_F(LaneTest, LANE_LINK_Test_001, TestSize.Level1)
 {
+    ConnServerInit();
+    InitLaneReliability();
     LinkRequest reqInfo;
     (void)memset_s(&reqInfo, sizeof(LinkRequest), 0, sizeof(LinkRequest));
     int32_t ret = memcpy_s(reqInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID));
@@ -352,6 +356,7 @@ HWTEST_F(LaneTest, LANE_LINK_Test_001, TestSize.Level1)
     uint32_t requestId = 0x5A5A;
     ret = BuildLink(&reqInfo, requestId, &linkCb);
     EXPECT_TRUE(ret == SOFTBUS_OK);
+    ConnServerDeinit();
 }
 
 /*
