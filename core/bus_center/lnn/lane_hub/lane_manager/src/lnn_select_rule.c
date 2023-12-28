@@ -42,6 +42,7 @@
 #define LNN_ONLINETIME_OUT     10000 /*BLE connection reuse time*/
 
 #define LOW_BW                  (384 * 1024)
+#define MID_BW                  (30 * 1024 * 1024)
 #define HIGH_BW                 (160 * 1024 * 1024)
 #define COC_DIRECT_LATENCY      1200
 #define BR_LATENCY              2500
@@ -400,13 +401,16 @@ static int32_t g_laneLatency[LANE_LINK_TYPE_BUTT] = {
 
 static uint32_t g_laneBandWidth[BW_TYPE_BUTT][LANE_LINK_TYPE_BUTT + 1] = {
     [HIGH_BAND_WIDTH] = {LANE_P2P, LANE_LINK_TYPE_BUTT},
-    [MIDDLE_BAND_WIDTH] = {LANE_WLAN_5G, LANE_WLAN_2P4G, LANE_HML, LANE_LINK_TYPE_BUTT},
+    [MIDDLE_HIGH_BAND_WIDTH] = {LANE_HML, LANE_WLAN_5G, LANE_WLAN_2P4G, LANE_LINK_TYPE_BUTT},
+    [MIDDLE_LOW_BAND_WIDTH] = {LANE_WLAN_5G, LANE_WLAN_2P4G, LANE_HML, LANE_LINK_TYPE_BUTT},
     [LOW_BAND_WIDTH] = {LANE_WLAN_5G, LANE_WLAN_2P4G, LANE_HML, LANE_COC_DIRECT, LANE_LINK_TYPE_BUTT},
 };
 
 static uint32_t g_retryLaneList[BW_TYPE_BUTT][LANE_LINK_TYPE_BUTT + 1] = {
     [HIGH_BAND_WIDTH] = {LANE_P2P, LANE_WLAN_5G, LANE_WLAN_2P4G, LANE_LINK_TYPE_BUTT},
-    [MIDDLE_BAND_WIDTH] = {LANE_WLAN_5G, LANE_WLAN_2P4G, LANE_HML, LANE_P2P, LANE_BR,
+    [MIDDLE_HIGH_BAND_WIDTH] = {LANE_HML, LANE_WLAN_5G, LANE_WLAN_2P4G, LANE_P2P, LANE_BR,
+        LANE_LINK_TYPE_BUTT},
+    [MIDDLE_LOW_BAND_WIDTH] = {LANE_WLAN_5G, LANE_WLAN_2P4G, LANE_HML, LANE_P2P, LANE_BR,
         LANE_LINK_TYPE_BUTT},
     [LOW_BAND_WIDTH] = {LANE_WLAN_5G, LANE_WLAN_2P4G, LANE_HML, LANE_P2P, LANE_COC_DIRECT,
         LANE_BR, LANE_BLE, LANE_LINK_TYPE_BUTT},
@@ -452,6 +456,21 @@ static bool IsLaneFillMinLatency(uint32_t minLaneLatency, LaneLinkType linkType)
     return false;
 }
 
+static int32_t GetBwType(uint32_t bandWidth)
+{
+    int32_t bandWidthType;
+    if (bandWidth >= HIGH_BW) {
+        bandWidthType = HIGH_BAND_WIDTH;
+    } else if (bandWidth > MID_BW) {
+        bandWidthType = MIDDLE_HIGH_BAND_WIDTH;
+    } else if (bandWidth > LOW_BW) {
+        bandWidthType = MIDDLE_LOW_BAND_WIDTH;
+    } else {
+        bandWidthType = LOW_BAND_WIDTH;
+    }
+    return bandWidthType;
+}
+
 static void DecideOptimalLinks(const char *networkId, const LaneSelectParam *request,
     LaneLinkType *linkList, uint32_t *linksNum)
 {
@@ -461,14 +480,7 @@ static void DecideOptimalLinks(const char *networkId, const LaneSelectParam *req
         LNN_LOGI(LNN_LANE, "minLaneLatency is zero, cancel decide optimal link");
         return;
     }
-    int32_t bandWidthType;
-    if (minBandWidth >= HIGH_BW) {
-        bandWidthType = HIGH_BAND_WIDTH;
-    } else if (minBandWidth > LOW_BW) {
-        bandWidthType = MIDDLE_BAND_WIDTH;
-    } else {
-        bandWidthType = LOW_BAND_WIDTH;
-    }
+    int32_t bandWidthType = GetBwType(minBandWidth);
     LNN_LOGI(LNN_LANE, "decide optimal link, band width type=%ld, latency=%d", bandWidthType, minLaneLatency);
     for (uint32_t i = 0; i < (LANE_LINK_TYPE_BUTT + 1); i++) {
         if (g_laneBandWidth[bandWidthType][i] == LANE_LINK_TYPE_BUTT) {
@@ -514,14 +526,7 @@ static void DecideRetryLinks(const char *networkId, const LaneSelectParam *reque
 {
     uint32_t minBandWidth = request->qosRequire.minBW;
     uint32_t maxLaneLatency = request->qosRequire.maxLaneLatency;
-    int32_t bandWidthType;
-    if (minBandWidth >= HIGH_BW) {
-        bandWidthType = HIGH_BAND_WIDTH;
-    } else if (minBandWidth > LOW_BW) {
-        bandWidthType = MIDDLE_BAND_WIDTH;
-    } else {
-        bandWidthType = LOW_BAND_WIDTH;
-    }
+    int32_t bandWidthType = GetBwType(minBandWidth);
     if (maxLaneLatency == 0) {
         LNN_LOGI(LNN_LANE, "maxLaneLatency is zero, get all retry link");
         GetAllLinksWithBw(networkId, bandWidthType, request, linkList, linksNum);
