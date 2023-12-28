@@ -1306,7 +1306,6 @@ int32_t UpdateBroadcasting(int32_t bcId, const BroadcastParam *param, const Broa
 
 int32_t SetBroadcastingData(int32_t bcId, const BroadcastPacket *packet)
 {
-    DISC_LOGI(DISC_BLE, "enter.");
     DISC_CHECK_AND_RETURN_RET_LOGE(packet != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid param packet!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_ERR, DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->SetBroadcastingData != NULL,
@@ -1326,8 +1325,6 @@ int32_t SetBroadcastingData(int32_t bcId, const BroadcastPacket *packet)
         return SOFTBUS_ERR;
     }
 
-    DISC_LOGD(DISC_BLE, "replace BroadcastPacket srvType = %d, bcId = %d, adapterId = %d",
-              g_bcManager[bcId].srvType, bcId, g_bcManager[bcId].adapterBcId);
     SoftbusBroadcastData softbusBcData = {0};
     ret = BuildSoftbusBroadcastData(packet, &softbusBcData);
     if (ret != SOFTBUS_OK) {
@@ -1618,7 +1615,7 @@ bool BroadcastSetAdvDeviceParam(const LpBroadcastParam *bcParam, const LpScanPar
     CovertSoftBusBcScanFilters(scanFilter, filterNum, scanDstParam.filter);
 
     ret = g_interface[g_interfaceId]->SetAdvFilterParam(&bcDstParam, &scanDstParam);
-    if (ret != SOFTBUS_OK) {
+    if (!ret) {
         DISC_LOGE(DISC_BLE, "call from adapter fail!");
         SoftBusFree(scanDstParam.filter);
         ReleaseSoftbusBroadcastData(&bcDstParam.advData);
