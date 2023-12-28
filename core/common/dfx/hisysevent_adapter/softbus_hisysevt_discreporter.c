@@ -24,7 +24,7 @@
 #include "softbus_hisysevt_common.h"
 #include "softbus_utils.h"
 
-#define MODULE_NAME_MAX_LEN 33
+#define MODULE_NAME_MAX_LEN 65
 
 #define FIRST_DISC_DURATION_PARAM_NUM 10
 #define SOFT_BUS_VERSION_KEY "SOFT_BUS_VERSION"
