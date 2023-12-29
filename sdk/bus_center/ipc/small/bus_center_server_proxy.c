@@ -51,66 +51,128 @@ typedef struct {
     int32_t dataLen;
 } Reply;
 
+typedef int32_t (*ClientBusCenterFunIdHandler)(Reply *, IpcIo *, uint32_t);
+
+typedef struct {
+    int32_t funIdType;
+    ClientBusCenterFunIdHandler funIdHandler;
+} ClientBusCenterStateHandler;
+
+static int32_t OnOnlineNodeInfo(Reply *info, IpcIo *reply, uint32_t infoSize);
+static int32_t OnLocalDeviceInfo(Reply *info, IpcIo *reply, uint32_t infoSize);
+static int32_t OnNodeKeyInfo(Reply *info, IpcIo *reply, uint32_t infoSize);
+static int32_t OnActiveMetaNode(Reply *info, IpcIo *reply, uint32_t infoSize);
+static int32_t OnDeactiveMetaNode(Reply *info, IpcIo *reply, uint32_t infoSize);
+static int32_t OnAllMetaNode(Reply *info, IpcIo *reply, uint32_t infoSize);
+static int32_t OnShiftLnnGear(Reply *info, IpcIo *reply, uint32_t infoSize);
+static int32_t OnStartRefreshLnn(Reply *info, IpcIo *reply, uint32_t infoSize);
+static int32_t OnStartPublishLnn(Reply *info, IpcIo *reply, uint32_t infoSize);
+
+static ClientBusCenterStateHandler g_busCenterStateHandler[] = {
+    {GET_ALL_ONLINE_NODE_INFO, OnOnlineNodeInfo  },
+    { GET_LOCAL_DEVICE_INFO,   OnLocalDeviceInfo },
+    { GET_NODE_KEY_INFO,       OnNodeKeyInfo     },
+    { ACTIVE_META_NODE,        OnActiveMetaNode  },
+    { DEACTIVE_META_NODE,      OnDeactiveMetaNode},
+    { GET_ALL_META_NODE,       OnAllMetaNode     },
+    { SHIFT_LNN_GEAR,          OnShiftLnnGear    },
+    { START_REFRESH_LNN,       OnStartRefreshLnn },
+    { START_PUBLISH_LNN,       OnStartPublishLnn },
+};
+
 static IClientProxy *g_serverProxy = NULL;
 
-static int32_t ClientBusCenterResultCb(Reply* info, int ret, IpcIo *reply)
+static int32_t OnOnlineNodeInfo(Reply *info, IpcIo *reply, uint32_t infoSize)
+{
+    ReadInt32(reply, &(info->arg1));
+    if (info->arg1 > 0) {
+        ReadUint32(reply, &infoSize);
+        info->data = (void *)ReadBuffer(reply, infoSize);
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t OnLocalDeviceInfo(Reply *info, IpcIo *reply, uint32_t infoSize)
+{
+    ReadInt32(reply, &infoSize);
+    info->dataLen = infoSize;
+    info->data = (void *)ReadBuffer(reply, infoSize);
+    return SOFTBUS_OK;
+}
+
+static int32_t OnNodeKeyInfo(Reply *info, IpcIo *reply, uint32_t infoSize)
+{
+    ReadInt32(reply, &infoSize);
+    info->dataLen = infoSize;
+    info->data = (void *)ReadBuffer(reply, infoSize);
+    return SOFTBUS_OK;
+}
+
+static int32_t OnActiveMetaNode(Reply *info, IpcIo *reply, uint32_t infoSize)
+{
+    ReadInt32(reply, &(info->retCode));
+    if (info->retCode == SOFTBUS_OK) {
+        info->data = (void *)ReadString(reply, &infoSize);
+        if (infoSize != (NETWORK_ID_BUF_LEN - 1)) {
+            LNN_LOGE(LNN_EVENT, "invalid meta node id length=%d", infoSize);
+            return SOFTBUS_ERR;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t OnDeactiveMetaNode(Reply *info, IpcIo *reply, uint32_t infoSize)
+{
+    ReadInt32(reply, &(info->retCode));
+    return SOFTBUS_OK;
+}
+
+static int32_t OnAllMetaNode(Reply *info, IpcIo *reply, uint32_t infoSize)
+{
+    ReadInt32(reply, &(info->retCode));
+    if (info->retCode == SOFTBUS_OK) {
+        ReadInt32(reply, &(info->arg1));
+        if (info->arg1 > 0) {
+            ReadUint32(reply, &infoSize);
+            info->data = (void *)ReadBuffer(reply, infoSize);
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t OnShiftLnnGear(Reply *info, IpcIo *reply, uint32_t infoSize)
+{
+    ReadInt32(reply, &(info->retCode));
+    return SOFTBUS_OK;
+}
+
+static int32_t OnStartRefreshLnn(Reply *info, IpcIo *reply, uint32_t infoSize)
+{
+    ReadInt32(reply, &(info->retCode));
+    return SOFTBUS_OK;
+}
+
+static int32_t OnStartPublishLnn(Reply *info, IpcIo *reply, uint32_t infoSize)
+{
+    ReadInt32(reply, &(info->retCode));
+    return SOFTBUS_OK;
+}
+
+static int32_t ClientBusCenterResultCb(Reply *info, int ret, IpcIo *reply)
 {
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "ClientBusCenterResultCb failed. ret=%d", ret);
         return SOFTBUS_ERR;
     }
     uint32_t infoSize;
-    switch (info->id) {
-        case GET_ALL_ONLINE_NODE_INFO:
-            ReadInt32(reply, &(info->arg1));
-            if (info->arg1 > 0) {
-                ReadUint32(reply, &infoSize);
-                info->data = (void *)ReadBuffer(reply, infoSize);
-            }
-            break;
-        case GET_LOCAL_DEVICE_INFO:
-        case GET_NODE_KEY_INFO:
-            ReadInt32(reply, &infoSize);
-            info->dataLen = infoSize;
-            info->data = (void *)ReadBuffer(reply, infoSize);
-            break;
-        case ACTIVE_META_NODE:
-            ReadInt32(reply, &(info->retCode));
-            if (info->retCode == SOFTBUS_OK) {
-                info->data = (void *)ReadString(reply, &infoSize);
-                if (infoSize != (NETWORK_ID_BUF_LEN - 1)) {
-                    LNN_LOGE(LNN_EVENT, "invalid meta node id length=%d", infoSize);
-                    return SOFTBUS_ERR;
-                }
-            }
-            break;
-        case DEACTIVE_META_NODE:
-            ReadInt32(reply, &(info->retCode));
-            break;
-        case GET_ALL_META_NODE:
-            ReadInt32(reply, &(info->retCode));
-            if (info->retCode == SOFTBUS_OK) {
-                ReadInt32(reply, &(info->arg1));
-                if (info->arg1 > 0) {
-                    ReadUint32(reply, &infoSize);
-                    info->data = (void *)ReadBuffer(reply, infoSize);
-                }
-            }
-            break;
-        case SHIFT_LNN_GEAR:
-            ReadInt32(reply, &(info->retCode));
-            break;
-        case START_REFRESH_LNN:
-            ReadInt32(reply, &(info->retCode));
-            break;
-        case START_PUBLISH_LNN:
-            ReadInt32(reply, &(info->retCode));
-            break;
-        default:
-            LNN_LOGE(LNN_EVENT, "unknown funcId");
-            return SOFTBUS_ERR;
+    uint32_t count = sizeof(g_busCenterStateHandler) / sizeof(ClientBusCenterStateHandler);
+    for (uint32_t i = 0; i < count; i++) {
+        if (g_busCenterStateHandler[i].funIdType == info->id) {
+            return (g_busCenterStateHandler[i].funIdHandler)(&info, reply, infoSize);
+        }
     }
-    return SOFTBUS_OK;
+    LNN_LOGI(LNN_INIT, "funcId not exist");
+    return SOFTBUS_ERR;
 }
 
 int32_t BusCenterServerProxyInit(void)
