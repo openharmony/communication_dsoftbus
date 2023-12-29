@@ -63,6 +63,8 @@ static const SoftBusLogLabel TRANS_LABELS[MODULE_DOMAIN_MAX_LEN] = {
     CHECK_AND_RETURN_LOG_INNER(cond, TRANS_LOGW, label, fmt, ##__VA_ARGS__)
 #define TRANS_CHECK_AND_RETURN_LOGE(cond, label, fmt, ...) \
     CHECK_AND_RETURN_LOG_INNER(cond, TRANS_LOGE, label, fmt, ##__VA_ARGS__)
+#define TRANS_CHECK_AND_RETURN_LOGD(cond, label, fmt, ...) \
+    CHECK_AND_RETURN_LOG_INNER(cond, TRANS_LOGD, label, fmt, ##__VA_ARGS__)
 
 #ifdef __cplusplus
 }

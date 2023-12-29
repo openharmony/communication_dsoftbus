@@ -265,7 +265,7 @@ static int32_t OnConnectEvent(ListenerModule module,
         ConnShutdownSocket(cfd);
         return SOFTBUS_ERR;
     }
-    if (module != AUTH && module != AUTH_P2P) {
+    if (module != AUTH && module != AUTH_P2P && module != AUTH_ENHANCED_P2P) {
         AUTH_LOGI(AUTH_CONN, "newip auth process");
         if (RouteBuildServerAuthManager(cfd, clientAddr) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_CONN, "build auth manager fail.");

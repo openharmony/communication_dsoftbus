@@ -527,7 +527,7 @@ static int32_t LlGetNetCap(void *buf, uint32_t len)
     if (buf == NULL || len != LNN_COMMON_LEN) {
         return SOFTBUS_INVALID_PARAM;
     }
-    *((int32_t *)buf) = info->netCapacity;
+    *((int32_t *)buf) = (int32_t)info->netCapacity;
     return SOFTBUS_OK;
 }
 
@@ -547,7 +547,7 @@ static int32_t LlGetNetType(void *buf, uint32_t len)
     if (buf == NULL || len != LNN_COMMON_LEN) {
         return SOFTBUS_INVALID_PARAM;
     }
-    *((int32_t *)buf) = info->discoveryType;
+    *((int32_t *)buf) = (int32_t)info->discoveryType;
     return SOFTBUS_OK;
 }
 
@@ -674,7 +674,7 @@ static int32_t L1GetNodeDataChangeFlag(void *buf, uint32_t len)
     if (buf == NULL || len != DATA_CHANGE_FLAG_BUF_LEN) {
         return SOFTBUS_INVALID_PARAM;
     }
-    *((int16_t *)buf) = LnnGetDataChangeFlag(&g_localNetLedger.localInfo);
+    *((int16_t *)buf) = (int16_t)LnnGetDataChangeFlag(&g_localNetLedger.localInfo);
     return SOFTBUS_OK;
 }
 

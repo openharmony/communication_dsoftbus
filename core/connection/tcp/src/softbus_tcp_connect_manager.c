@@ -206,7 +206,7 @@ static int32_t TcpOnConnectEvent(ListenerModule module, int32_t cfd, const Conne
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (module == AUTH_P2P) {
+    if (module == AUTH_P2P || module == AUTH_ENHANCED_P2P) {
         CONN_LOGI(CONN_COMMON, "recv p2p conned %d", cfd);
         if (ConnSetTcpKeepAlive(cfd, AUTH_P2P_KEEP_ALIVE_TIME) != 0) {
             CONN_LOGE(CONN_COMMON, "set keepalive fail");

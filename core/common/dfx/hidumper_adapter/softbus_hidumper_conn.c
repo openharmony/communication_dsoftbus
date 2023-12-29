@@ -14,10 +14,10 @@
  */
 #include <stdio.h>
 #include <string.h>
+#include "comm_log.h"
 #include "softbus_errcode.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
-#include "softbus_log_old.h"
 #include "softbus_hidumper.h"
 #include "softbus_hidumper_conn.h"
 
@@ -29,7 +29,7 @@ static LIST_HEAD(g_conn_var_list);
 int32_t SoftBusRegConnVarDump(const char *dumpVar, SoftBusVarDumpCb cb)
 {
     if (dumpVar == NULL || strlen(dumpVar) >= SOFTBUS_DUMP_VAR_NAME_LEN || cb == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegConnVarDump invalid param");
+        COMM_LOGE(COMM_DFX, "SoftBusRegConnVarDump invalid param");
         return SOFTBUS_ERR;
     }
     return SoftBusAddDumpVarToList(dumpVar, cb, &g_conn_var_list);
@@ -75,7 +75,7 @@ int32_t SoftBusConnHiDumperInit(void)
     int32_t ret = SoftBusRegHiDumperHandler(SOFTBUS_CONN_MODULE_NAME, SOFTBUS_CONN_MODULE_HELP,
         &SoftBusConnDumpHander);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusConnDumpHander regist fail");
+        COMM_LOGE(COMM_INIT, "SoftBusConnDumpHander regist fail");
     }
     return ret;
 }

@@ -183,7 +183,7 @@ static SoftBusAppInfo *ProcessAppInfo(cJSON *object)
             COMM_LOGE(COMM_PERM, "pkgname is too long");
             goto EXIT;
         }
-        COMM_LOGI(COMM_PERM, "appInfo has no pkgname");
+        COMM_LOGD(COMM_PERM, "appInfo has no pkgname");
     }
     if (GetJsonObjectStringItem(object, APP_INFO_TYPE_STR, mapKey, TEMP_STR_MAX_LEN)) {
         appInfo->type = GetPeMapValue(mapKey);
@@ -276,14 +276,14 @@ static int32_t CompareString(const char *src, const char *dest, bool regexp)
             return SOFTBUS_PERMISSION_DENIED;
         }
         if (regexec(&regComp, dest, 0, NULL, 0) == 0) {
-            COMM_LOGI(COMM_PERM, "src:%s dest:%s", src, dest);
+            COMM_LOGD(COMM_PERM, "src:%s dest:%s", src, dest);
             regfree(&regComp);
             return SOFTBUS_OK;
         }
         regfree(&regComp);
     } else {
         if (strcmp(src, dest) == 0) {
-            COMM_LOGI(COMM_PERM, "src:%s dest:%s", src, dest);
+            COMM_LOGD(COMM_PERM, "src:%s dest:%s", src, dest);
             return SOFTBUS_OK;
         }
     }
@@ -553,7 +553,7 @@ bool PermIsSecLevelPublic(const char *sessionName)
         }
     }
     (void)SoftBusMutexUnlock(&g_permissionEntryList->lock);
-    COMM_LOGI(COMM_PERM, "PermIsSecLevelPublic: %s is %d", sessionName, ret);
+    COMM_LOGD(COMM_PERM, "PermIsSecLevelPublic: %s is %d", sessionName, ret);
     return ret;
 }
 
@@ -628,14 +628,14 @@ int32_t AddDynamicPermission(int32_t callingUid, int32_t callingPid, const char 
     }
 
     if (HaveGrantedPermission(sessionName)) {
-        COMM_LOGE(COMM_PERM, "dynamic permission already granted");
+        COMM_LOGD(COMM_PERM, "dynamic permission already granted");
         SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
         return SOFTBUS_OK;
     }
 
     SoftBusPermissionEntry *permissionEntry = (SoftBusPermissionEntry *)SoftBusCalloc(sizeof(SoftBusPermissionEntry));
     if (permissionEntry == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "AddDynamicPermission malloc failed!");
+        COMM_LOGE(COMM_PERM, "AddDynamicPermission malloc failed!");
         SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
         return SOFTBUS_MALLOC_ERR;
     }
@@ -652,7 +652,7 @@ int32_t AddDynamicPermission(int32_t callingUid, int32_t callingPid, const char 
     g_dynamicPermissionList->cnt++;
     SoftBusMutexUnlock(&g_dynamicPermissionList->lock);
 
-    COMM_LOGI(COMM_PERM, "%s dynamic permission granted", sessionName);
+    COMM_LOGD(COMM_PERM, "%s dynamic permission granted", sessionName);
     return SOFTBUS_OK;
 }
 

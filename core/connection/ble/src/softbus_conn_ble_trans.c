@@ -486,7 +486,7 @@ uint8_t *ConnCocTransRecv(uint32_t connectionId, LimitedBuffer *buffer, int32_t 
 
     buffer->length -= packLen;
     CONN_LOGI(CONN_BLE, "coc socket read limited buffer: left length=%d", buffer->length);
-    *outLen = packLen;
+    *outLen = (int32_t)packLen;
     return dataCopy;
 }
 

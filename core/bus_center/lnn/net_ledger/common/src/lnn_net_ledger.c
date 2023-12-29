@@ -237,7 +237,7 @@ int32_t LnnSetNodeDataChangeFlag(const char *networkId, uint16_t dataChangeFlag)
         isLocalNetworkId = true;
     }
     if (isLocalNetworkId) {
-        return LnnSetLocalNum16Info(NUM_KEY_DATA_CHANGE_FLAG, dataChangeFlag);
+        return LnnSetLocalNum16Info(NUM_KEY_DATA_CHANGE_FLAG, (int16_t)dataChangeFlag);
     }
     LNN_LOGE(LNN_LEDGER, "remote networkId");
     return SOFTBUS_ERR;

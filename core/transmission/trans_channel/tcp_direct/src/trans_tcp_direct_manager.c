@@ -193,7 +193,7 @@ void TransTdcDeathCallback(const char *pkgName, int32_t pid)
         TRANS_LOGE(TRANS_CTRL, "param invalid");
         return;
     }
-    TRANS_LOGW(TRANS_CTRL, "TransTdcDeathCallback: pkgName=%s", pkgName);
+    TRANS_LOGW(TRANS_CTRL, "TransTdcDeathCallback: pkgName=%s, pid=%d", pkgName, pid);
     SessionConn *item = NULL;
     SessionConn *nextItem = NULL;
     if (GetSessionConnLock() != SOFTBUS_OK) {
