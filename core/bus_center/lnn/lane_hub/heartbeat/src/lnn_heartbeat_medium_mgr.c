@@ -329,6 +329,21 @@ static bool IsLocalSupportBleDirectOnline()
     return true;
 }
 
+static void SetDeviceNetCapability(uint32_t *deviceInfoNetCapacity, HbRespData *hbResp)
+{
+    if ((hbResp == NULL) || (deviceInfoNetCapacity == NULL)) {
+        return false;
+    }
+    if ((hbResp->capabiltiy & ENABLE_WIFI_CAP) != 0) {
+        (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_WIFI);
+    }
+    if ((hbResp->capabiltiy & P2P_GO) != 0 || (hbResp->capabiltiy & P2P_GC)) {
+        (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_WIFI_P2P);
+    }
+    (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_BR);
+    (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_BLE);
+}
+
 static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp)
 {
     if (hbResp == NULL || hbResp->stateVersion == STATE_VERSION_INVALID) {
@@ -358,7 +373,7 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp)
         LNN_LOGI(LNN_HEART_BEAT, "don't support ble direct online because state version change");
         return true;
     }
-    AuthDeviceKeyInfo keyInfo = {0};
+    AuthDeviceKeyInfo keyInfo = { 0 };
     LNN_LOGI(LNN_HEART_BEAT, "AuthFindDeviceKey=%s", device->devId);
     if (AuthFindDeviceKey(device->devId, AUTH_LINK_TYPE_BLE, &keyInfo) != SOFTBUS_OK) {
         LNN_LOGI(LNN_HEART_BEAT, "don't support ble direct online because key not exist");
@@ -366,14 +381,7 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp)
     }
 
     // update capability
-    if ((hbResp->capabiltiy & ENABLE_WIFI_CAP) != 0) {
-        (void)LnnSetNetCapability(&deviceInfo.netCapacity, BIT_WIFI);
-    }
-    if ((hbResp->capabiltiy & P2P_GO) != 0 || (hbResp->capabiltiy & P2P_GC)) {
-        (void)LnnSetNetCapability(&deviceInfo.netCapacity, BIT_WIFI_P2P);
-    }
-    (void)LnnSetNetCapability(&deviceInfo.netCapacity, BIT_BR);
-    (void)LnnSetNetCapability(&deviceInfo.netCapacity, BIT_BLE);
+    SetDeviceNetCapability(&deviceInfo.netCapacity, hbResp);
     if ((ret = LnnUpdateRemoteDeviceInfo(&deviceInfo)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "don't support ble direct online because update device info fail ret:%d", ret);
         return true;
@@ -398,14 +406,31 @@ static bool HbIsRepeatedReAuthRequest(LnnHeartbeatRecvInfo *storedInfo, uint64_t
     return false;
 }
 
+static uint64_t GetNowTime()
+{
+    SoftBusSysTime times = { 0 };
+    SoftBusGetTime(&times);
+    return (uint64_t)times.sec * HB_TIME_FACTOR + (uint64_t)times.usec / HB_TIME_FACTOR;
+}
+
+static int32_t SoftBusNetNodeResult(DeviceInfo *device, bool isConnect)
+{
+    if (LnnNotifyDiscoveryDevice(device->addr, isConnect) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "mgr recv process notify device found fail");
+        return SOFTBUS_ERR;
+    }
+    if (isConnect) {
+        return SOFTBUS_NETWORK_NODE_OFFLINE;
+    } else {
+        return SOFTBUS_NETWORK_NODE_DIRECT_ONLINE;
+    }
+}
+
 static int32_t HbNotifyReceiveDevice(DeviceInfo *device, int32_t weight,
     int32_t masterWeight, LnnHeartbeatType hbType, bool isOnlineDirectly, HbRespData *hbResp)
 {
-    uint64_t nowTime;
     char *anonyUdid = NULL;
-    SoftBusSysTime times = {0};
-    SoftBusGetTime(&times);
-    nowTime = (uint64_t)times.sec * HB_TIME_FACTOR + (uint64_t)times.usec / HB_TIME_FACTOR;
+    uint64_t nowTime = GetNowTime();
     if (SoftBusMutexLock(&g_hbRecvList->lock) != 0) {
         LNN_LOGE(LNN_HEART_BEAT, "mgr lock recv info list fail");
         return SOFTBUS_LOCK_ERR;
@@ -465,15 +490,7 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, int32_t weight,
     LNN_LOGI(LNN_HEART_BEAT, "heartbeat(HB) find device, udidHash=%s, ConnectionAddrType=%02X, isConnect=%d",
         anonyUdid, device->addr[0].type, isConnect);
     AnonymizeFree(anonyUdid);
-    if (LnnNotifyDiscoveryDevice(device->addr, isConnect) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "mgr recv process notify device found fail");
-        return SOFTBUS_ERR;
-    }
-    if (isConnect) {
-        return SOFTBUS_NETWORK_NODE_OFFLINE;
-    } else {
-        return SOFTBUS_NETWORK_NODE_DIRECT_ONLINE;
-    }
+    return SoftBusNetNodeResult(device, isConnect);
 }
 
 static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, int32_t weight,
