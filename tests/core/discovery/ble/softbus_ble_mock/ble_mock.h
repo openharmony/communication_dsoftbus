@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,14 +17,16 @@
 #define BLE_MOCK_H
 
 #include <atomic>
-#include <mutex>
 #include <condition_variable>
 #include <gmock/gmock.h>
+#include <mutex>
 
-#include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_ble_gatt.h"
 #include "softbus_adapter_ble_gatt_client.h"
 #include "softbus_adapter_ble_gatt_server.h"
+#include "softbus_adapter_bt_common.h"
+#include "softbus_broadcast_manager.h"
+#include "softbus_broadcast_utils.h"
 
 class BleInterface {
 public:
@@ -32,28 +34,28 @@ public:
     virtual int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener) = 0;
     virtual int SoftBusRemoveBtStateListener(int listenerId) = 0;
 
-    virtual int SoftBusAddScanListener(const SoftBusScanListener *listener, int *scannerId, bool isLpDeviceScan) = 0;
-    virtual int SoftBusRemoveScanListener(int listenerId) = 0;
+    virtual int32_t InitBroadcastMgr() = 0;
+    virtual int32_t DeInitBroadcastMgr() = 0;
 
-    virtual int SoftBusSetScanFilter(int listenerId, SoftBusBleScanFilter *filter, uint8_t filterSize) = 0;
+    virtual int32_t RegisterScanListener(BaseServiceType type, int32_t *listenerId, const ScanCallback *cb) = 0;
+    virtual int32_t UnRegisterScanListener(int32_t listenerId) = 0;
 
-    virtual int SoftBusGetAdvChannel(const SoftBusAdvCallback *callback, int *scannerId, bool isLpDeviceScan) = 0;
-    virtual int SoftBusReleaseAdvChannel(int channel) = 0;
+    virtual int32_t SetScanFilter(int32_t listenerId, const BcScanFilter *scanFilter, uint8_t filterNum) = 0;
 
-    virtual int SoftBusStartScan(int listenerId, int scannerId, const SoftBusBleScanParams *param) = 0;
-    virtual int SoftBusStopScan(int listenerId, int scannerId) = 0;
-    virtual int SoftBusStopScanImmediately(int listenerId, int scannerId) = 0;
+    virtual int32_t RegisterBroadcaster(BaseServiceType type, int32_t *bcId, const BroadcastCallback *cb) = 0;
+    virtual int32_t UnRegisterBroadcaster(int32_t bcId) = 0;
 
-    virtual int SoftBusStartAdv(int channel, const SoftBusBleAdvParams *param) = 0;
-    virtual int SoftBusStopAdv(int channel) = 0;
+    virtual int32_t StartScan(int32_t listenerId, const BcScanParams *param) = 0;
+    virtual int32_t StopScan(int32_t listenerId) = 0;
 
-    virtual int SoftBusUpdateAdv(int channel, const SoftBusBleAdvData *data, const SoftBusBleAdvParams *param) = 0;
-    virtual int SoftBusSetAdvData(int channel, const SoftBusBleAdvData *data) = 0;
+    virtual int32_t StartBroadcasting(int32_t bcId, const BroadcastParam *param, const BroadcastPacket *packet) = 0;
+    virtual int32_t StopBroadcasting(int32_t bcId) = 0;
+
+    virtual int32_t UpdateBroadcasting(int32_t bcId, const BroadcastParam *param, const BroadcastPacket *packet) = 0;
+    virtual int32_t SetBroadcastingData(int32_t bcId, const BroadcastPacket *packet) = 0;
 
     virtual int SoftBusGetBtMacAddr(SoftBusBtAddr *mac) = 0;
     virtual int SoftBusGetBtState() = 0;
-
-    virtual int32_t SoftBusDeregisterScanCallbacks(int32_t scannerId) = 0;
 };
 
 class BleMock : public BleInterface {
@@ -67,35 +69,27 @@ public:
     ~BleMock();
 
     MOCK_METHOD(int, BleGattLockInit, (), (override));
-
     MOCK_METHOD(int, SoftBusAddBtStateListener, (const SoftBusBtStateListener *listener), (override));
     MOCK_METHOD(int, SoftBusRemoveBtStateListener, (int listenerId), (override));
-
-    MOCK_METHOD(int, SoftBusAddScanListener,
-        (const SoftBusScanListener *listener, int *scannerId, bool isLpDeviceScan), (override));
-    MOCK_METHOD(int, SoftBusRemoveScanListener, (int listenerId), (override));
-
-    MOCK_METHOD(int, SoftBusDeregisterScanCallbacks, (int32_t scannerId), (override));
-
-    MOCK_METHOD(int, SoftBusSetScanFilter, (int listenerId, SoftBusBleScanFilter *filter, uint8_t filterSize),
-                (override));
-
-    MOCK_METHOD(int, SoftBusGetAdvChannel, (const SoftBusAdvCallback *callback, int *scannerId, bool isLpDeviceScan),
+    MOCK_METHOD(int32_t, InitBroadcastMgr, (), (override));
+    MOCK_METHOD(int32_t, DeInitBroadcastMgr, (), (override));
+    MOCK_METHOD(
+        int32_t, RegisterScanListener, (BaseServiceType type, int32_t *listenerId, const ScanCallback *cb), (override));
+    MOCK_METHOD(int32_t, UnRegisterScanListener, (int32_t listenerId), (override));
+    MOCK_METHOD(
+        int32_t, SetScanFilter, (int32_t listenerId, const BcScanFilter *scanFilter, uint8_t filterNum), (override));
+    MOCK_METHOD(
+        int32_t, RegisterBroadcaster, (BaseServiceType type, int32_t *bcId, const BroadcastCallback *cb), (override));
+    MOCK_METHOD(int32_t, UnRegisterBroadcaster, (int32_t bcId), (override));
+    MOCK_METHOD(int32_t, StartScan, (int32_t listenerId, const BcScanParams *param), (override));
+    MOCK_METHOD(int32_t, StopScan, (int32_t listenerId), (override));
+    MOCK_METHOD(int32_t, StartBroadcasting, (int32_t bcId, const BroadcastParam *param, const BroadcastPacket *packet),
         (override));
-    MOCK_METHOD(int, SoftBusReleaseAdvChannel, (int channel), (override));
-
-    MOCK_METHOD(int, SoftBusStartScan, (int listenerId, int scannerId, const SoftBusBleScanParams *param), (override));
-    MOCK_METHOD(int, SoftBusStopScan, (int listenerId, int scannerId), (override));
-    MOCK_METHOD(int, SoftBusStopScanImmediately, (int listenerId, int scannerId), (override));
-
-    MOCK_METHOD(int, SoftBusStartAdv, (int channel, const SoftBusBleAdvParams *param), (override));
-    MOCK_METHOD(int, SoftBusStopAdv, (int channel), (override));
-
-    MOCK_METHOD(int, SoftBusSetAdvData, (int channel, const SoftBusBleAdvData *data), (override));
-    MOCK_METHOD(int, SoftBusUpdateAdv, (int channel, const SoftBusBleAdvData *data, const SoftBusBleAdvParams *param),
-                (override));
-
-    MOCK_METHOD(int, SoftBusGetBtMacAddr, (SoftBusBtAddr *mac), (override));
+    MOCK_METHOD(int32_t, StopBroadcasting, (int32_t bcId), (override));
+    MOCK_METHOD(int32_t, SetBroadcastingData, (int32_t bcId, const BroadcastPacket *packet), (override));
+    MOCK_METHOD(int32_t, UpdateBroadcasting, (int32_t bcId, const BroadcastParam *param, const BroadcastPacket *packet),
+        (override));
+    MOCK_METHOD(int, SoftBusGetBtMacAddr, (SoftBusBtAddr * mac), (override));
     MOCK_METHOD(int, SoftBusGetBtState, (), (override));
 
     void SetupSuccessStub();
@@ -107,24 +101,24 @@ public:
     static int32_t ActionOfBleGattLockInit();
     static int32_t ActionOfAddBtStateListener(const SoftBusBtStateListener *listener);
     static int32_t ActionOfRemoveBtStateListener(int listenerId);
-    static int32_t ActionOfAddScanListener(const SoftBusScanListener *listener, int *scannerId, bool isLpDeviceScan);
-    static int32_t ActionOfRemoveScanListener(int listenerId);
-    static int32_t ActionOfDeregisterScanCallbacks(int scannerId);
-    static int32_t ActionOfSetScanFilter(int listenerId, const SoftBusBleScanFilter *filter, uint8_t filterSize);
-    static int32_t ActionOfGetAdvChannel(const SoftBusAdvCallback *callback, int *scannerId, bool isLpDeviceScan);
-    static int32_t ActionOfReleaseAdvChannel(int channel);
-    static int32_t ActionOfStartScan(int listenerId, int scannerId, const SoftBusBleScanParams *param);
-    static int32_t ActionOfStopScan(int listenerId, int scannerId);
-    static int32_t ActionOfStopScanImmediately(int listenerId, int scannerId);
-    static int32_t ActionOfStartAdv(int channel, const SoftBusBleAdvParams *param);
-    static int32_t ActionOfStopAdv(int channel);
-    static int32_t ActionOfSetAdvDataForActiveDiscovery(int channel, const SoftBusBleAdvData *data);
-    static int32_t ActionOfUpdateAdvForActiveDiscovery(int channel, const SoftBusBleAdvData *data,
-                                                       const SoftBusBleAdvParams *param);
-    static int32_t ActionOfSetAdvDataForActivePublish(int channel, const SoftBusBleAdvData *data);
-    static int32_t ActionOfSetAdvDataForPassivePublish(int channel, const SoftBusBleAdvData *data);
-    static int32_t ActionOfUpdateAdvForPassivePublish(int channel, const SoftBusBleAdvData *data,
-                                                      const SoftBusBleAdvParams *param);
+    static int32_t ActionOfInitBroadcastMgr();
+    static int32_t ActionOfDeInitBroadcastMgr();
+    static int32_t ActionOfRegisterScanListener(BaseServiceType type, int32_t *listenerId, const ScanCallback *cb);
+    static int32_t ActionOfUnRegisterScanListener(int32_t listenerId);
+    static int32_t ActionOfSetScanFilter(int32_t listenerId, const BcScanFilter *scanFilter, uint8_t filterNum);
+    static int32_t ActionOfRegisterBroadcaster(BaseServiceType type, int32_t *bcId, const BroadcastCallback *cb);
+    static int32_t ActionOfUnRegisterBroadcaster(int32_t bcId);
+    static int32_t ActionOfStartScan(int32_t listenerId, const BcScanParams *param);
+    static int32_t ActionOfStopScan(int32_t listenerId);
+    static int32_t ActionOfStartBroadcasting(int32_t bcId, const BroadcastParam *param, const BroadcastPacket *packet);
+    static int32_t ActionOfStopBroadcasting(int32_t bcId);
+    static int32_t ActionOfSetAdvDataForActiveDiscovery(int32_t bcId, const BroadcastPacket *packet);
+    static int32_t ActionOfUpdateAdvForActiveDiscovery(
+        int32_t bcId, const BroadcastParam *param, const BroadcastPacket *packet);
+    static int32_t ActionOfSetAdvDataForActivePublish(int32_t bcId, const BroadcastPacket *packet);
+    static int32_t ActionOfSetAdvDataForPassivePublish(int32_t bcId, const BroadcastPacket *packet);
+    static int32_t ActionOfUpdateAdvForPassivePublish(
+        int32_t bcId, const BroadcastParam *param, const BroadcastPacket *packet);
     static int32_t ActionOfGetBtMacAddr(SoftBusBtAddr *mac);
     static int32_t ActionOfGetBtState();
 
@@ -142,56 +136,32 @@ public:
     static constexpr int SCAN_LISTENER_ID = 2;
     static constexpr int BLE_MSG_TIME_OUT_MS = 6000;
 
-    static inline const SoftBusScanListener *scanListener {};
+    static inline const ScanCallback *scanListener {};
     static inline const SoftBusBtStateListener *btStateListener {};
-    static inline const SoftBusAdvCallback *advCallback {};
+    static inline const BroadcastCallback *advCallback {};
     static inline bool isAdvertising {};
     static inline bool isScanning {};
     static inline bool btState {};
-    static inline uint8_t btMacAddr[] = {0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f };
+    static inline uint8_t btMacAddr[] = { 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f };
 
-    static inline uint8_t activeDiscoveryAdvData[] = {
-        0x02, 0x01, 0x02, 0x1B, 0x16, 0xEE, 0xFD, 0x04,
-        0x05, 0x90, 0x00, 0x01, 0x02, 0x00, 0x18, 0xE8,
-        0x31, 0xF7, 0x63, 0x0B, 0x76, 0x19, 0xAE, 0x21,
-        0x0E, 0x3A, 0x4D, 0x79, 0x20, 0x44, 0x65
-    };
-    static inline uint8_t activeDiscoveryAdvData2[] = {
-        0x02, 0x01, 0x02, 0x1B, 0x16, 0xEE, 0xFD, 0x04,
-        0x05, 0x90, 0x00, 0x01, 0x12, 0x00, 0x18, 0xE8,
-        0x31, 0xF7, 0x63, 0x0B, 0x76, 0x19, 0xAE, 0x21,
-        0x0E, 0x3A, 0x4D, 0x79, 0x20, 0x44, 0x65
-    };
-    static inline uint8_t activeDiscoveryRspData[] = {
-        0x08, 0xFF, 0x7D, 0x02, 0x76, 0x69, 0x63, 0x65,
-        0x00
-    };
+    static inline uint8_t activeDiscoveryAdvData[] = { 0x04, 0x05, 0x90, 0x00, 0x01, 0x02, 0x00, 0x18, 0xE8, 0x31, 0xF7,
+        0x63, 0x0B, 0x76, 0x19, 0xAE, 0x21, 0x0E, 0x3A, 0x4D, 0x79, 0x20, 0x44, 0x65 };
+    static inline uint8_t activeDiscoveryAdvData2[] = { 0x04, 0x05, 0x90, 0x00, 0x01, 0x12, 0x00, 0x18, 0xE8, 0x31,
+        0xF7, 0x63, 0x0B, 0x76, 0x19, 0xAE, 0x21, 0x0E, 0x3A, 0x4D, 0x79, 0x20, 0x44, 0x65 };
+    static inline uint8_t activeDiscoveryRspData[] = { 0x76, 0x69, 0x63, 0x65, 0x00 };
 
-    static inline uint8_t activePublishAdvData[] = {
-        0x02, 0x01, 0x02, 0x1B, 0x16, 0xEE, 0xFD, 0x04,
-        0x05, 0x10, 0x00, 0x01, 0x02, 0x00, 0x18, 0xE8,
-        0x31, 0xF7, 0x63, 0x0B, 0x76, 0x19, 0xAE, 0x21,
-        0x0E, 0x3A, 0x4D, 0x79, 0x20, 0x44, 0x65
-    };
-    static inline uint8_t activePublishRspData[] = {
-        0x08, 0xFF, 0x7D, 0x02, 0x76, 0x69, 0x63, 0x65,
-        0x00
-    };
+    static inline uint8_t activePublishAdvData[] = { 0x04, 0x05, 0x10, 0x00, 0x01, 0x02, 0x00, 0x18, 0xE8, 0x31, 0xF7,
+        0x63, 0x0B, 0x76, 0x19, 0xAE, 0x21, 0x0E, 0x3A, 0x4D, 0x79, 0x20, 0x44, 0x65 };
+    static inline uint8_t activePublishRspData[] = { 0x76, 0x69, 0x63, 0x65, 0x00 };
 
-    static inline uint8_t passivePublishAdvData[] = {
-        0x02, 0x01, 0x02, 0x1B, 0x16, 0xEE, 0xFD, 0x04,
-        0x05, 0x10, 0x00, 0x01, 0x02, 0x00, 0x18, 0xE8,
-        0x31, 0xF7, 0x63, 0x0B, 0x76, 0x19, 0xAE, 0x21,
-        0x0E, 0x56, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E
-    };
-    static inline uint8_t passivePublishRspData[] = {
-        0x0F, 0xFF, 0x7D, 0x02, 0x0F, 0x3A, 0x4D, 0x79,
-        0x20, 0x44, 0x65, 0x76, 0x69, 0x63, 0x65, 0x00
-    };
+    static inline uint8_t passivePublishAdvData[] = { 0x04, 0x05, 0x10, 0x00, 0x01, 0x02, 0x00, 0x18, 0xE8, 0x31, 0xF7,
+        0x63, 0x0B, 0x76, 0x19, 0xAE, 0x21, 0x0E, 0x56, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E };
+    static inline uint8_t passivePublishRspData[] = { 0x0F, 0x3A, 0x4D, 0x79, 0x20, 0x44, 0x65,
+        0x76, 0x69, 0x63, 0x65, 0x00 };
 
 private:
     static void HexDump(const uint8_t *data, uint32_t len);
-    static void ShowAdvData(int channel, const SoftBusBleAdvData *data);
+    static void ShowAdvData(int32_t bcId, const BroadcastPacket *packet);
 
     static inline std::atomic<BleMock*> mock = nullptr;
     static inline std::atomic_bool isAsyncAdvertiseSuccess;
