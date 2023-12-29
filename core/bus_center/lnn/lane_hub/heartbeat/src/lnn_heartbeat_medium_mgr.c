@@ -331,9 +331,6 @@ static bool IsLocalSupportBleDirectOnline()
 
 static void SetDeviceNetCapability(uint32_t *deviceInfoNetCapacity, HbRespData *hbResp)
 {
-    if ((hbResp == NULL) || (deviceInfoNetCapacity == NULL)) {
-        return false;
-    }
     if ((hbResp->capabiltiy & ENABLE_WIFI_CAP) != 0) {
         (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_WIFI);
     }
