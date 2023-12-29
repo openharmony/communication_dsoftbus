@@ -28,6 +28,7 @@
 #include "softbus_hisysevt_discreporter.h"
 #include "softbus_utils.h"
 
+#define DEVICE_TYPE_SIZE_MAX 3
 #define DUMP_STR_LEN 256
 
 static bool g_isInited = false;
@@ -91,39 +92,44 @@ typedef struct {
     char *pkgName;
 } IdContainer;
 
-static void UpdateDiscEventByDeviceInfo(DiscEventExtra *discEventExtra, const DeviceInfo *device)
+static void UpdateDiscEventAndReport(DiscEventExtra *extra, const DeviceInfo *device)
 {
-    if (discEventExtra == NULL || device == NULL) {
+    if (device == NULL) {
+        DISC_EVENT(EVENT_SCENE_SCAN, EVENT_STAGE_SCAN_END, *extra);
         DISC_LOGI(DISC_CONTROL, "discEventExtra or device is null");
         return;
     }
     if (device->addrNum <= CONNECTION_ADDR_WLAN || device->addrNum > CONNECTION_ADDR_MAX) {
+        DISC_EVENT(EVENT_SCENE_SCAN, EVENT_STAGE_SCAN_END, *extra);
         DISC_LOGI(DISC_CONTROL, "unknow device info");
         return;
     }
-    uint32_t index = device->addrNum - 1;
-    ConnectionAddr addr = device->addr[index];
-    switch (addr.type) {
-        case CONNECTION_ADDR_BR:
-            discEventExtra->peerBrMac = addr.info.br.brMac;
-            break;
-        case CONNECTION_ADDR_BLE:
-            discEventExtra->peerBleMac = addr.info.ble.bleMac;
-            break;
-        case CONNECTION_ADDR_WLAN:
-        case CONNECTION_ADDR_ETH:
-            discEventExtra->peerIp = addr.info.ip.ip;
-            break;
-        default:
-            DISC_LOGI(DISC_CONTROL, "unknow param type!");
-            break;
+
+    for (uint32_t i = 0; i < device->addrNum; i++) {
+        switch (device->addr[i].type) {
+            case CONNECTION_ADDR_BR:
+                extra->peerBrMac = device->addr[i].info.br.brMac;
+                break;
+            case CONNECTION_ADDR_BLE:
+                extra->peerBleMac = device->addr[i].info.ble.bleMac;
+                break;
+            case CONNECTION_ADDR_WLAN:
+                /* fall-through */
+            case CONNECTION_ADDR_ETH:
+                extra->peerIp = device->addr[i].info.ip.ip;
+                break;
+            default:
+                DISC_LOGI(DISC_CONTROL, "unknow param type!");
+                break;
+        }
     }
-    char deviceType[DISC_MAX_DEVICE_NAME_LEN] = { 0 };
-    if (sprintf_s(deviceType, DISC_MAX_DEVICE_NAME_LEN + 1, "%d", device->devType) < 0) {
-        DISC_LOGI(DISC_CONTROL, "sprintf_s fail, devType=%d", device->devType);
-        return;
+
+    extra->peerNetworkId = device->devId;
+    char deviceType[DEVICE_TYPE_SIZE_MAX + 1] = { 0 };
+    if (snprintf_s(deviceType, DEVICE_TYPE_SIZE_MAX + 1, DEVICE_TYPE_SIZE_MAX, "%03X", device->devType) >= 0) {
+        extra->peerDeviceType = deviceType;
     }
-    discEventExtra->peerDeviceType = deviceType;
+    DISC_EVENT(EVENT_SCENE_SCAN, EVENT_STAGE_SCAN_END, *extra);
 }
 
 static void DfxRecordStartDiscoveryDevice(DiscInfo *infoNode)
@@ -140,13 +146,12 @@ static void DfxRecordDeviceFound(DiscInfo *infoNode, const DeviceInfo *device, c
     DiscEventExtra discEventExtra = {
         .discType = addtions->medium, .discMode = infoNode->mode, .result = EVENT_STAGE_RESULT_OK
     };
-    UpdateDiscEventByDeviceInfo(&discEventExtra, device);
     if (infoNode->statistics.repTimes == 0) {
         uint64_t costTime = SoftBusGetSysTimeMs() - infoNode->statistics.startTime;
         SoftbusRecordFirstDiscTime((SoftBusDiscMedium)addtions->medium, costTime);
         discEventExtra.costTime = costTime;
     }
-    DISC_EVENT(EVENT_SCENE_SCAN, EVENT_STAGE_SCAN_END, discEventExtra);
+    UpdateDiscEventAndReport(&discEventExtra, device);
     infoNode->statistics.repTimes++;
     infoNode->statistics.devNum++;
 }
@@ -282,8 +287,7 @@ static void InnerDeviceFound(DiscInfo *infoNode, const DeviceInfo *device,
 {
     if (IsInnerModule(infoNode) == false) {
         DiscEventExtra discEventExtra = { .discMode = infoNode->mode, .result = EVENT_STAGE_RESULT_OK };
-        UpdateDiscEventByDeviceInfo(&discEventExtra, device);
-        DISC_EVENT(EVENT_SCENE_SCAN, EVENT_STAGE_SCAN_END, discEventExtra);
+        UpdateDiscEventAndReport(&discEventExtra, device);
         (void)infoNode->item->callback.serverCb.OnServerDeviceFound(infoNode->item->packageName, device, additions);
         return;
     }
