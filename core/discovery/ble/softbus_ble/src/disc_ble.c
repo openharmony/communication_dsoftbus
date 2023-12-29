@@ -41,7 +41,6 @@
 #include "softbus_errcode.h"
 #include "softbus_hidumper_disc.h"
 #include "softbus_hisysevt_discreporter.h"
-#include "softbus_log_old.h"
 #include "softbus_utils.h"
 
 #define BLE_PUBLISH 0x0
@@ -533,7 +532,7 @@ static void BleScanResultCallback(int listenerId, const BroadcastReportInfo *rep
 
     uint8_t *advData = reportInfo->packet.bcData.payload;
     if ((reportInfo->packet.bcData.id == BLE_UUID) && (advData[POS_BUSINESS] == DISTRIBUTE_BUSINESS)) {
-        SignalingMsgPrint("ble adv rcv", advData, reportInfo->packet.bcData.payloadLen, SOFTBUS_LOG_DISC);
+        SignalingMsgPrint("ble adv rcv", advData, reportInfo->packet.bcData.payloadLen, DISC_BLE);
         ProcessDistributePacket(reportInfo);
     } else {
         DISC_LOGI(DISC_BLE, "ignore other business");
@@ -857,7 +856,7 @@ static int32_t StartAdvertiser(int32_t adv)
     BuildAdvParam(&advParam);
 
     SignalingMsgPrint("ble adv send", (uint8_t *)packet.bcData.payload, (uint8_t)packet.bcData.payloadLen,
-        SOFTBUS_LOG_DISC);
+        DISC_BLE);
     DiscEventExtra discEventExtra = { .broadcastType = BLE };
     DISC_EVENT(EVENT_SCENE_BROADCAST, EVENT_STAGE_BROADCAST, discEventExtra);
 
@@ -1047,13 +1046,14 @@ static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option
             continue;
         }
         if (info->capabilityData[pos] == NULL) {
-            info->capabilityData[pos] = (uint8_t *)SoftBusCalloc(CUST_DATA_MAX_LEN);
+            info->capabilityData[pos] = (uint8_t *)SoftBusCalloc(MAX_CAPABILITYDATA_LEN);
             if (info->capabilityData[pos] == NULL) {
                 return SOFTBUS_MALLOC_ERR;
             }
         }
-        if (memcpy_s(info->capabilityData[pos], CUST_DATA_MAX_LEN, custData, custDataLen) != EOK) {
+        if (memcpy_s(info->capabilityData[pos], MAX_CAPABILITYDATA_LEN, custData, custDataLen) != EOK) {
             SoftBusFree(info->capabilityData[pos]);
+            info->capabilityData[pos] = NULL;
             return SOFTBUS_MEM_ERR;
         }
         info->capDataLen[pos] = custDataLen;

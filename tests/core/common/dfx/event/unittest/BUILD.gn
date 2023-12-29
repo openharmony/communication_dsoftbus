@@ -35,6 +35,7 @@ ohos_unittest("SoftBusDfxEventTest") {
     "//third_party/bounds_checking_function/include",
   ]
   deps = [
+    "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
     "$dsoftbus_dfx_path/event:softbus_dfx_event",
     "$dsoftbus_dfx_path/log:softbus_dfx_log",
     "//third_party/bounds_checking_function:libsec_shared",

@@ -28,7 +28,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #endif
-#include <coap3/utlist.h>
 #include <coap3/coap_session_internal.h>
 #include "nstackx_device.h"
 #include "nstackx_error.h"

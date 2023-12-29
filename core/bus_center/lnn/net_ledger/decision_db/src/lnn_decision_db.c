@@ -49,7 +49,7 @@ int32_t EncryptStorageData(uint8_t *dbKey, uint32_t len)
         LNN_LOGE(LNN_LEDGER, "calloc encrypt dbKey fail");
         return SOFTBUS_MEM_ERR;
     }
-    LNN_LOGI(LNN_LEDGER, "Encrypt, data len=%d", len);
+    LNN_LOGI(LNN_LEDGER, "Encrypt, data len=%u", len);
     plainData.size = len;
     plainData.data = dbKey;
     if (LnnEncryptDataByHuks(&g_keyAlias, &plainData, &encryptData) != SOFTBUS_OK) {
@@ -361,7 +361,7 @@ static int32_t GetTrustedDevInfoRecord(DbContext *ctx, const char *accountHexHas
         *num = 0;
         return SOFTBUS_ERR;
     }
-    *num = GetRecordNumByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)accountHexHash);
+    *((int32_t *)num) = GetRecordNumByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)accountHexHash);
     if (*num == 0) {
         LNN_LOGW(LNN_LEDGER, "get none trusted dev info");
         *udidArray = NULL;
@@ -373,7 +373,7 @@ static int32_t GetTrustedDevInfoRecord(DbContext *ctx, const char *accountHexHas
         return SOFTBUS_MALLOC_ERR;
     }
     if (QueryRecordByKey(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)accountHexHash,
-        (uint8_t **)udidArray, *num) != SOFTBUS_OK) {
+        (uint8_t **)udidArray, *((int32_t *)num)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "query udidArray failed");
         SoftBusFree(*udidArray);
         *udidArray = NULL;

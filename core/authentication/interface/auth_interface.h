@@ -50,6 +50,7 @@ typedef enum {
     AUTH_LINK_TYPE_BR,
     AUTH_LINK_TYPE_BLE,
     AUTH_LINK_TYPE_P2P,
+    AUTH_LINK_TYPE_ENHANCED_P2P,
     AUTH_LINK_TYPE_MAX,
 } AuthLinkType;
 
@@ -69,6 +70,7 @@ typedef struct {
             char ip[IP_LEN];
             int32_t port;
             int64_t authId; /* for open p2p auth conn */
+            char udid[UDID_BUF_LEN];
         } ipInfo;
     } info;
     char peerUid[MAX_ACCOUNT_HASH_LEN];
@@ -177,7 +179,7 @@ int32_t AuthGetGroupType(const char *udid, const char *uuid);
 int32_t AuthInit(void);
 void AuthDeinit(void);
 int32_t AuthRestoreAuthManager(const char *udidHash,
-    const AuthConnInfo *connInfo, int32_t requestId, NodeInfo *nodeInfo, int64_t *authId);
+    const AuthConnInfo *connInfo, uint32_t requestId, NodeInfo *nodeInfo, int64_t *authId);
 
 #ifdef __cplusplus
 #if __cplusplus

@@ -83,7 +83,7 @@ void TransReqLanePendingDeinit(void)
 
 static int32_t TransDelLaneReqFromPendingList(uint32_t laneId)
 {
-    TRANS_LOGI(TRANS_SVC, "del tran request from pending laneId=%u.", laneId);
+    TRANS_LOGD(TRANS_SVC, "del tran request from pending laneId=%u.", laneId);
     if (g_reqLanePendingList == NULL) {
         TRANS_LOGE(TRANS_INIT, "lane request list hasn't init.");
         return SOFTBUS_ERR;

@@ -77,7 +77,7 @@ HWTEST_F(TransEventTest, TransEventTest002, TestSize.Level0)
         .channelScore = 15,
         .peerChannelId = 16,
         .btFlow = 17,
-        .peerNetworkId = "testNetworkId",
+        .peerNetworkId = "a8ynvpdaihw1f6nknjd2hkfhxljxypkr6kvjsbhnhpp16974uo4fvsrpfa6t50fm",
         .callerPkg = "testCallerPkg",
         .calleePkg = "testCalleePkg",
     };

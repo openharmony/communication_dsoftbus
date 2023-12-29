@@ -524,6 +524,24 @@ static int32_t BuildBroadcastReportInfo(const SoftBusBcScanResult *reportData, B
     return SOFTBUS_OK;
 }
 
+static bool CheckScanResultDataIsMatchApproach(const uint32_t managerId, BroadcastPayload *bcData)
+{
+    if (bcData->payload == NULL) {
+        return false;
+    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(bcData->type == BC_DATA_TYPE_SERVICE, false, DISC_BLE,
+                                   "type %d dismatch", bcData->type);
+
+    uint8_t filterSize = g_scanManager[managerId].filterSize;
+    for (uint8_t i = 0; i < filterSize; i++) {
+        BcScanFilter filter = g_scanManager[managerId].filter[i];
+        if (CheckServiceIsMatch(&filter, bcData)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 static void BcReportScanDataCallback(int32_t adapterScanId, const SoftBusBcScanResult *reportData)
 {
     DISC_LOGD(DISC_BLE, "enter.");
@@ -542,7 +560,9 @@ static void BcReportScanDataCallback(int32_t adapterScanId, const SoftBusBcScanR
         if (!scanManager->isUsed || !scanManager->isScanning || scanManager->filter == NULL ||
             scanManager->scanCallback == NULL || scanManager->scanCallback->OnReportScanDataCallback == NULL ||
             scanManager->adapterScanId != adapterScanId ||
-            !CheckScanResultDataIsMatch(managerId, &(bcInfo.packet.bcData))) {
+            !(CheckScanResultDataIsMatch(managerId, &(bcInfo.packet.bcData)) ||
+            (scanManager->srvType == SRV_TYPE_APPROACH &&
+            CheckScanResultDataIsMatchApproach(managerId, &(bcInfo.packet.rspData))))) {
             SoftBusMutexUnlock(&g_scanLock);
             continue;
         }
@@ -598,7 +618,7 @@ static void BcLpDeviceInfoCallback(const SoftbusBroadcastUuid *uuid, int32_t typ
     for (uint32_t managerId = 0; managerId < SCAN_NUM_MAX; managerId++) {
         ScanManager *scanManager = &g_scanManager[managerId];
         if (!scanManager->isUsed || scanManager->scanCallback == NULL ||
-            scanManager->scanCallback->OnStopScanCallback == NULL) {
+            scanManager->scanCallback->OnLpDeviceInfoCallback == NULL) {
             continue;
         }
 
@@ -1286,7 +1306,6 @@ int32_t UpdateBroadcasting(int32_t bcId, const BroadcastParam *param, const Broa
 
 int32_t SetBroadcastingData(int32_t bcId, const BroadcastPacket *packet)
 {
-    DISC_LOGI(DISC_BLE, "enter.");
     DISC_CHECK_AND_RETURN_RET_LOGE(packet != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid param packet!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_ERR, DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->SetBroadcastingData != NULL,
@@ -1306,8 +1325,6 @@ int32_t SetBroadcastingData(int32_t bcId, const BroadcastPacket *packet)
         return SOFTBUS_ERR;
     }
 
-    DISC_LOGD(DISC_BLE, "replace BroadcastPacket srvType = %d, bcId = %d, adapterId = %d",
-              g_bcManager[bcId].srvType, bcId, g_bcManager[bcId].adapterBcId);
     SoftbusBroadcastData softbusBcData = {0};
     ret = BuildSoftbusBroadcastData(packet, &softbusBcData);
     if (ret != SOFTBUS_OK) {
@@ -1598,7 +1615,7 @@ bool BroadcastSetAdvDeviceParam(const LpBroadcastParam *bcParam, const LpScanPar
     CovertSoftBusBcScanFilters(scanFilter, filterNum, scanDstParam.filter);
 
     ret = g_interface[g_interfaceId]->SetAdvFilterParam(&bcDstParam, &scanDstParam);
-    if (ret != SOFTBUS_OK) {
+    if (!ret) {
         DISC_LOGE(DISC_BLE, "call from adapter fail!");
         SoftBusFree(scanDstParam.filter);
         ReleaseSoftbusBroadcastData(&bcDstParam.advData);

@@ -847,7 +847,7 @@ static int32_t DlGetNetCap(const char *networkId, void *buf, uint32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
-    *((int32_t *)buf) = info->netCapacity;
+    *((int32_t *)buf) = (int32_t)info->netCapacity;
     return SOFTBUS_OK;
 }
 
@@ -869,7 +869,7 @@ static int32_t DlGetNetType(const char *networkId, void *buf, uint32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
-    *((int32_t *)buf) = info->discoveryType;
+    *((int32_t *)buf) = (int32_t)info->discoveryType;
     return SOFTBUS_OK;
 }
 
@@ -1071,7 +1071,7 @@ static int32_t DlGetNodeDataChangeFlag(const char *networkId, void *buf, uint32_
         LNN_LOGE(LNN_LEDGER, "node is offline");
         return SOFTBUS_NETWORK_NODE_OFFLINE;
     }
-    *((int16_t *)buf) = LnnGetDataChangeFlag(info);
+    *((int16_t *)buf) = (int16_t)LnnGetDataChangeFlag(info);
     return SOFTBUS_OK;
 }
 

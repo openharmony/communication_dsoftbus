@@ -78,9 +78,9 @@ int32_t LnnStartTimeSync(const char *pkgName,
     return BusCenterIpcInterfaceInstance()->LnnStartTimeSync(pkgName, callingPid, targetNetworkId, accuracy, period);
 }
 
-int32_t LnnStopTimeSync(const char *pkgName, const char *targetNetworkId)
+int32_t LnnStopTimeSync(const char *pkgName, const char *targetNetworkId, int32_t callingPid)
 {
-    return BusCenterIpcInterfaceInstance()->LnnStopTimeSync(pkgName, targetNetworkId);
+    return BusCenterIpcInterfaceInstance()->LnnStopTimeSync(pkgName, targetNetworkId, callingPid);
 }
 
 int32_t LnnPublishService(const char *pkgName, const PublishInfo *info, bool isInnerRequest)
