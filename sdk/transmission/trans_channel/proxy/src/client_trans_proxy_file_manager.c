@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,18 @@
  * limitations under the License.
  */
 
+#include "client_trans_proxy_file_manager.h"
+
 #include <inttypes.h>
 #include <limits.h>
+#include <securec.h>
 #include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
 
-#include "client_trans_proxy_file_manager.h"
-
 #include "client_trans_pending.h"
-#include "client_trans_proxy_file_common.h"
 #include "client_trans_proxy_manager.h"
 #include "client_trans_session_manager.h"
-#include "securec.h"
 #include "softbus_adapter_errcode.h"
 #include "softbus_adapter_file.h"
 #include "softbus_adapter_mem.h"
@@ -34,62 +33,6 @@
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
 #include "trans_log.h"
-
-typedef struct {
-    const char **files;
-    uint32_t fileCnt;
-    uint64_t bytesProcessed;
-    uint64_t bytesTotal;
-} FilesInfo;
-
-typedef struct {
-    uint32_t seq;
-    int32_t fileFd;
-    int32_t fileStatus; /* 0: idle 1:busy */
-    uint64_t fileOffset;
-    uint64_t oneFrameLen;
-    uint32_t startSeq;
-    uint64_t seqResult;
-    uint32_t preStartSeq;
-    uint32_t preSeqResult;
-    uint64_t fileSize;
-    int32_t timeOut;
-    uint64_t checkSumCRC;
-    char filePath[MAX_FILE_PATH_NAME_LEN];
-} SingleFileInfo;
-
-typedef struct {
-    ListNode node;
-    int32_t sessionId;
-    int32_t channelId;
-    int32_t fileEncrypt;
-    int32_t algorithm;
-    int32_t crc;
-    int32_t result;
-    FileListener fileListener;
-    int32_t objRefCount;
-    int32_t recvState;
-    SingleFileInfo recvFileInfo;
-} FileRecipientInfo;
-
-typedef struct {
-    ListNode node;
-    int32_t channelId;
-    int32_t sessionId;
-    int32_t fd;
-    uint64_t fileSize;
-    uint64_t frameNum;
-    int32_t fileEncrypt;
-    int32_t algorithm;
-    int32_t crc;
-    uint32_t seq;
-    int32_t waitSeq;
-    int32_t waitTimeoutCount;
-    int32_t result;
-    uint64_t checkSumCRC;
-    FileListener fileListener;
-    FilesInfo totalInfo;
-} SendListenerInfo;
 
 static TransFileInfoLock g_sendFileInfoLock = {
     .lock = 0,
