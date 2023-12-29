@@ -714,10 +714,15 @@ int VtpStreamSocket::CreateAndBindSocket(IpAndPort &local)
     }
 
     // bind
-    sockaddr_in localSockAddr = {0};
+    sockaddr_in localSockAddr = { 0 };
+    char host[ADDR_MAX_SIZE];
     localSockAddr.sin_family = AF_INET;
     localSockAddr.sin_port = htons((short)local.port);
     localSockAddr.sin_addr.s_addr = inet_addr(local.ip.c_str());
+    localIpPort_.ip = SoftBusInetNtoP(AF_INET, &(localSockAddr.sin_addr), host, ADDR_MAX_SIZE);
+    if (!SetSocketBoundInner(sockFd, localIpPort_.ip)) {
+        TRANS_LOGE(TRANS_STREAM, "SetSocketBoundInner failed, errno= %d", FtGetErrno());
+    }
 
     socklen_t localAddrLen = sizeof(localSockAddr);
     int ret = FtBind(sockFd, reinterpret_cast<sockaddr *>(&localSockAddr), localAddrLen);
@@ -735,14 +740,9 @@ int VtpStreamSocket::CreateAndBindSocket(IpAndPort &local)
         return -1;
     }
 
-    char host[ADDR_MAX_SIZE];
     localIpPort_.port = static_cast<int32_t>(ntohs(localSockAddr.sin_port));
-    localIpPort_.ip = SoftBusInetNtoP(AF_INET, &(localSockAddr.sin_addr), host, ADDR_MAX_SIZE);
     local.port = localIpPort_.port;
 
-    if (!SetSocketBoundInner(sockFd, localIpPort_.ip)) {
-        TRANS_LOGE(TRANS_STREAM, "SetSocketBoundInner failed, errno= %d", FtGetErrno());
-    }
     return sockFd;
 }
 
