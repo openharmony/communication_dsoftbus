@@ -585,11 +585,6 @@ static int32_t PrejudgeAvailability(const char *remoteNetworkId, enum WifiDirect
     return SOFTBUS_OK;
 }
 
-static void OnWifiDirectAuthOpened(uint32_t requestId, int64_t authId)
-{
-    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%u authId=%zd", requestId, authId);
-}
-
 static struct EntityListener g_entityListener = {
     .onOperationComplete = OnOperationComplete,
     .onEntityChanged = OnEntityChanged,
@@ -610,7 +605,6 @@ static struct WifiDirectNegotiator g_negotiator = {
     .onDefaultTriggerChannelDataReceived = OnDefaultTriggerChannelDataReceived,
     .syncLnnInfo = SyncLnnInfo,
     .prejudgeAvailability = PrejudgeAvailability,
-    .onWifiDirectAuthOpened = OnWifiDirectAuthOpened,
 
     .currentCommand = NULL,
     .currentProcessor = NULL,

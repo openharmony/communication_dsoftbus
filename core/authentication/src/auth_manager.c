@@ -1348,7 +1348,8 @@ int32_t AuthDeviceGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo)
         AUTH_LOGE(AUTH_CONN, "invalid uuid or connInfo");
         return SOFTBUS_INVALID_PARAM;
     }
-    AuthLinkType linkList[] = { AUTH_LINK_TYPE_WIFI, AUTH_LINK_TYPE_BR, AUTH_LINK_TYPE_BLE };
+    AuthLinkType linkList[] = { AUTH_LINK_TYPE_ENHANCED_P2P, AUTH_LINK_TYPE_WIFI, AUTH_LINK_TYPE_BR,
+                                AUTH_LINK_TYPE_BLE };
     uint32_t linkTypeNum = sizeof(linkList) / sizeof(linkList[0]);
     for (uint32_t i = 0; i < linkTypeNum; i++) {
         if (GetAuthConnInfoByUuid(uuid, linkList[i], connInfo) != SOFTBUS_OK) {
@@ -1399,10 +1400,17 @@ int32_t AuthDeviceOpenConn(const AuthConnInfo *info, uint32_t requestId, const A
         case AUTH_LINK_TYPE_BR:
         case AUTH_LINK_TYPE_BLE:
         case AUTH_LINK_TYPE_P2P:
-        case AUTH_LINK_TYPE_ENHANCED_P2P:
             authId = GetActiveAuthIdByConnInfo(info);
             if (authId != AUTH_INVALID_ID) {
                 return StartReconnectDevice(authId, info, requestId, callback);
+            }
+            return StartVerifyDevice(requestId, info, NULL, callback, true);
+        case AUTH_LINK_TYPE_ENHANCED_P2P:
+            authId = GetActiveAuthIdByConnInfo(info);
+            if (authId != AUTH_INVALID_ID) {
+                AUTH_LOGI(AUTH_CONN, "reuse enhanced p2p authId=%" PRId64, authId);
+                callback->onConnOpened(requestId, authId);
+                break;
             }
             return StartVerifyDevice(requestId, info, NULL, callback, true);
         default:
