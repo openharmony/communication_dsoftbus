@@ -382,6 +382,7 @@
         "ClientGetPeerSocketInfoById";
         "TransSetSocketFileListener";
         "EvaluateQos";
+        "GetMtuSize";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;
