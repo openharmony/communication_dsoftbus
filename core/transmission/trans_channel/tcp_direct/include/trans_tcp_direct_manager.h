@@ -40,6 +40,7 @@ extern "C" {
 #define FLAG_BLE 4
 #define FLAG_P2P 8
 #define FLAG_AUTH_META 16
+#define FLAG_ENHANCE_P2P 32
 #define AUTH_CONN_SERVER_SIDE 0x01
 
 typedef struct {
