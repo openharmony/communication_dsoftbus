@@ -12,7 +12,7 @@
     ]
   },
   {
-    "SESSION_NAME": "distributeddata-default",
+    "SESSION_NAME": "distributeddata-default*",
     "REGEXP": "true",
     "DEVID": "UUID",
     "SEC_LEVEL": "public",
