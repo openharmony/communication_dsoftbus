@@ -842,7 +842,7 @@ static void PackWifiDirectInfo(JsonObj *json, const NodeInfo *info, const char *
     unsigned char encodePtk[PTK_ENCODE_LEN] = {0};
     char localPtk[PTK_DEFAULT_LEN] = {0};
     if (LnnGetLocalPtkByUuid(remoteUuid, localPtk, PTK_DEFAULT_LEN) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "get ptk by udid fail");
+        AUTH_LOGE(AUTH_FSM, "get ptk by uuid fail");
         return;
     }
     size_t keyLen = 0;

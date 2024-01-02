@@ -439,7 +439,6 @@ NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type)
             LNN_LOGE(LNN_LEDGER, "type error");
         }
     }
-    LNN_LOGE(LNN_LEDGER, "get node info by id failed");
     LnnMapDeinitIterator(it);
     return NULL;
 }
@@ -500,7 +499,7 @@ int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info
     NodeInfo *nodeInfo = LnnGetNodeInfoById(id, type);
     if (nodeInfo == NULL) {
         (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
-        LNN_LOGI(LNN_LEDGER, "can not find target node");
+        LNN_LOGE(LNN_LEDGER, "can not find target node");
         return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
     }
     if (memcpy_s(info, sizeof(NodeInfo), nodeInfo, sizeof(NodeInfo)) != EOK) {
@@ -550,6 +549,7 @@ bool LnnGetOnlineStateById(const char *id, IdCategory type)
     }
     NodeInfo *nodeInfo = LnnGetNodeInfoById(id, type);
     if (nodeInfo == NULL) {
+        LNN_LOGI(LNN_LEDGER, "can not find target node");
         (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return state;
     }
@@ -2852,7 +2852,6 @@ const NodeInfo *LnnGetOnlineNodeByUdidHash(const char *recvUdidHash)
         return NULL;
     }
     if (info == NULL || infoNum == 0) {
-        LNN_LOGI(LNN_LEDGER, "none online node");
         if (info != NULL) {
             SoftBusFree(info);
         }
@@ -2896,8 +2895,10 @@ void LnnRefreshDeviceOnlineStateAndDevIdInfo(const char *pkgName, DeviceInfo *de
 {
     (void)pkgName;
     RefreshDeviceOnlineStateInfo(device, addtions);
-    LNN_LOGI(LNN_LEDGER, "device found by medium=%d, udidhash=%s, online status=%d",
-        addtions->medium, device->devId, device->isOnline);
+    if (device->devId[0] != '\0') {
+        LNN_LOGI(LNN_LEDGER, "device found by medium=%d, udidhash=%s, online status=%d",
+            addtions->medium, device->devId, device->isOnline);
+    }
 }
 
 bool LnnSetDLWifiDirectAddr(const char *networkId, const char *addr)
