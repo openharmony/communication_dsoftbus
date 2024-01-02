@@ -144,7 +144,6 @@ static void HandleNotifyMessage(SoftBusMessage *msg)
             LNN_LOGE(LNN_EVENT, "unknown notify msgType=%d", msg->what);
             break;
     }
-    LNN_LOGI(LNN_EVENT, "finish notify msgType=%d", msg->what);
 }
 
 static void FreeNotifyMessage(SoftBusMessage *msg)
