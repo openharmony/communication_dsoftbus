@@ -49,11 +49,11 @@ static const SoftBusLogLabel TRANS_LABELS[MODULE_DOMAIN_MAX_LEN] = {
     { TRANS_TEST,   DOMAIN_ID_TEST, "TransTest"  },
 };
 
-#define TRANS_LOGF(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_FATAL, TRANS_LABELS[label], ##__VA_ARGS__)
-#define TRANS_LOGE(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_ERROR, TRANS_LABELS[label], ##__VA_ARGS__)
-#define TRANS_LOGW(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_WARN, TRANS_LABELS[label], ##__VA_ARGS__)
-#define TRANS_LOGI(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_INFO, TRANS_LABELS[label], ##__VA_ARGS__)
-#define TRANS_LOGD(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_DEBUG, TRANS_LABELS[label], ##__VA_ARGS__)
+#define TRANS_LOGF(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_FATAL, TRANS_LABELS[label], ##__VA_ARGS__)
+#define TRANS_LOGE(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_ERROR, TRANS_LABELS[label], ##__VA_ARGS__)
+#define TRANS_LOGW(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_WARN, TRANS_LABELS[label], ##__VA_ARGS__)
+#define TRANS_LOGI(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_INFO, TRANS_LABELS[label], ##__VA_ARGS__)
+#define TRANS_LOGD(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_DEBUG, TRANS_LABELS[label], ##__VA_ARGS__)
 
 #define TRANS_CHECK_AND_RETURN_RET_LOGW(cond, ret, label, fmt, ...) \
     CHECK_AND_RETURN_RET_LOG_INNER(cond, ret, TRANS_LOGW, label, fmt, ##__VA_ARGS__)

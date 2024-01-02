@@ -27,6 +27,7 @@
 #include <unistd.h>
 
 #include "common_list.h"
+#include "conn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_base_listener.h"
 #include "softbus_conn_interface.h"
@@ -34,7 +35,6 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
-#include "softbus_log_old.h"
 #include "softbus_tcp_connect_manager.h"
 #include "softbus_tcp_socket.h"
 #include "softbus_utils.h"
@@ -371,7 +371,7 @@ HWTEST_F(TcpManagerTest, testTcpManager008, TestSize.Level1)
     int32_t i = 0;
     if (SoftbusGetConfig(SOFTBUS_INT_CONN_TCP_MAX_CONN_NUM,
         (unsigned char*)&maxConnNum, sizeof(maxConnNum)) != SOFTBUS_OK) {
-        LOG_ERR("get maxConnNum fail");
+        CONN_LOGE(CONN_TEST, "get maxConnNum fail");
     }
     printf("maxConnNum: %d\n", maxConnNum);
     EXPECT_EQ(port, TcpStartListening(&info));
@@ -414,7 +414,7 @@ HWTEST_F(TcpManagerTest, testTcpManager009, TestSize.Level1)
     int maxDataLen;
     if (SoftbusGetConfig(SOFTBUS_INT_CONN_TCP_MAX_LENGTH,
         (unsigned char*)&maxDataLen, sizeof(maxDataLen)) != SOFTBUS_OK) {
-        LOG_ERR("get maxDataLen fail");
+        CONN_LOGE(CONN_TEST, "get maxDataLen fail");
     }
     printf("maxDataLen: %d\n", maxDataLen);
     ConnPktHead head = {0};

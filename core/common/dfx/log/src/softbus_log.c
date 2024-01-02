@@ -32,7 +32,7 @@ static void SoftBusLogExtraInfoFormat(char *line, const char *fileName, int line
     (void)sprintf_s(line, LOG_LINE_MAX_LENGTH + 1, "[%s:%d] %s# ", fileName, lineNum, funName);
 }
 
-static void SoftBusLogPrint(const char *line, SoftBusDfxLogLevel level, uint32_t domain, const char *tag)
+static void SoftBusLogPrint(const char *line, SoftBusLogLevel level, uint32_t domain, const char *tag)
 {
 #ifdef SOFTBUS_PRINTF
     (void)level;
@@ -44,7 +44,7 @@ static void SoftBusLogPrint(const char *line, SoftBusDfxLogLevel level, uint32_t
 #endif
 }
 
-void SoftBusLogInnerImpl(SoftBusDfxLogLevel level, SoftBusLogLabel label, const char *fileName, int lineNum,
+void SoftBusLogInnerImpl(SoftBusLogLevel level, SoftBusLogLabel label, const char *fileName, int lineNum,
     const char *funName, const char *fmt, ...)
 {
     uint32_t pos;
@@ -63,7 +63,7 @@ void SoftBusLogInnerImpl(SoftBusDfxLogLevel level, SoftBusLogLabel label, const 
 
 void NstackxLogInnerImpl(const char *moduleName, uint32_t logLevel, const char *fmt, ...)
 {
-    SoftBusDfxLogLevel level = NSTACKX_LOG_LEVEL_CONVERT_BASE - logLevel;
+    SoftBusLogLevel level = NSTACKX_LOG_LEVEL_CONVERT_BASE - logLevel;
     va_list args = { 0 };
     char line[LOG_LINE_MAX_LENGTH + 1] = { 0 };
     va_start(args, fmt);
