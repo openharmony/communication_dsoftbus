@@ -1545,6 +1545,7 @@ ohos_unittest("LNNDiscoveryInterfaceTest") {
     "$dsoftbus_root_path/core/authentication/src/auth_deviceprofile_virtual.cpp",
     "$dsoftbus_root_path/core/authentication/src/auth_hichain_adapter.c",
     "$dsoftbus_root_path/core/authentication/src/auth_interface.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/src/lnn_coap_adapter_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/src/lnn_discovery_interface.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_file_utils.c",
     "$dsoftbus_root_path/tests/core/authentication/unittest/auth_common_mock.cpp",
