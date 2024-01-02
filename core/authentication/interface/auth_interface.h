@@ -70,6 +70,7 @@ typedef struct {
             char ip[IP_LEN];
             int32_t port;
             int64_t authId; /* for open p2p auth conn */
+            ListenerModule moduleId; /* for open enhance p2p auth conn */
             char udid[UDID_BUF_LEN];
         } ipInfo;
     } info;
@@ -129,6 +130,9 @@ bool IsAuthHasTrustedRelation(void);
 
 int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port);
 void AuthStopListening(AuthLinkType type);
+
+int32_t AuthStartListeningForWifiDirect(AuthLinkType type, const char *ip, int32_t port, ListenerModule *moduleId);
+void AuthStopListeningForWifiDirect(AuthLinkType type, ListenerModule moduleId);
 
 typedef struct {
     int32_t module;

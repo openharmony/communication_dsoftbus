@@ -593,6 +593,15 @@ static void CloseP2pNegotiateChannel(struct InnerLink *innerLink)
     if (channel != NULL) {
         CONN_LOGD(CONN_WIFI_DIRECT, "enter");
         CloseDefaultNegotiateChannel(channel);
+        enum WifiDirectLinkType type = innerLink->getInt(innerLink, IL_KEY_LINK_TYPE, WIFI_DIRECT_LINK_TYPE_INVALID);
+        ListenerModule module = innerLink->getInt(innerLink, IL_KEY_LISTENER_MODULE_ID, -1);
+        if (module > 0) {
+            if (type == WIFI_DIRECT_LINK_TYPE_P2P) {
+                StopListeningForDefaultChannel(AUTH_LINK_TYPE_P2P, module);
+            } else if (type == WIFI_DIRECT_LINK_TYPE_HML) {
+                StopListeningForDefaultChannel(AUTH_LINK_TYPE_ENHANCED_P2P, module);
+            }
+        }
         DefaultNegotiateChannelDelete(channel);
         innerLink->remove(innerLink, IL_KEY_NEGO_CHANNEL);
     }
