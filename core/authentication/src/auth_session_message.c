@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,33 +20,33 @@
 
 #include "anonymizer.h"
 #include "auth_common.h"
-#include "auth_request.h"
 #include "auth_connection.h"
 #include "auth_device_common_key.h"
 #include "auth_hichain_adapter.h"
 #include "auth_interface.h"
 #include "auth_log.h"
 #include "auth_manager.h"
+#include "auth_request.h"
 #include "bus_center_manager.h"
 #include "lnn_cipherkey_manager.h"
 #include "lnn_common_utils.h"
+#include "lnn_compress.h"
 #include "lnn_event.h"
 #include "lnn_extdata_config.h"
-#include "lnn_local_net_ledger.h"
 #include "lnn_feature_capability.h"
+#include "lnn_local_net_ledger.h"
 #include "lnn_network_manager.h"
-#include "lnn_settingdata_event_monitor.h"
 #include "lnn_node_info.h"
+#include "lnn_settingdata_event_monitor.h"
+#include "softbus_adapter_json.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
-#include "softbus_def.h"
+#include "softbus_adapter_timer.h"
 #include "softbus_common.h"
 #include "softbus_config_type.h"
+#include "softbus_def.h"
 #include "softbus_feature_config.h"
 #include "softbus_json_utils.h"
-#include "lnn_compress.h"
-#include "softbus_adapter_json.h"
-#include "softbus_adapter_timer.h"
 #include "softbus_socket.h"
 
 /* DeviceId */
@@ -490,6 +490,32 @@ static void PackWifiSinglePassInfo(JsonObj *obj, const AuthSessionInfo *info)
     JSON_AddStringToObject(obj, DEV_IP_HASH_TAG, devIpHash);
 }
 
+static bool VerifySessionInfoIdType(const AuthSessionInfo *info, JsonObj *obj, char *networkId, char *udid)
+{
+    if (info->idType == EXCHANGE_NETWORKID) {
+        if (!JSON_AddStringToObject(obj, DEVICE_ID_TAG, networkId)) {
+            AUTH_LOGE(AUTH_FSM, "add msg body fail");
+            return false;
+        }
+        char *anonyNetworkId = NULL;
+        Anonymize(networkId, &anonyNetworkId);
+        AUTH_LOGI(AUTH_FSM, "exchangeIdType=%d, networkid=%s", info->idType, anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
+    } else {
+        if (!JSON_AddStringToObject(obj, DEVICE_ID_TAG, udid)) {
+            AUTH_LOGE(AUTH_FSM, "add msg body fail");
+            return false;
+        }
+        char *anonyUdid = NULL;
+        Anonymize(udid, &anonyUdid);
+        AUTH_LOGI(AUTH_FSM, "exchangeIdType=%d, udid=%s", info->idType, anonyUdid);
+        AnonymizeFree(anonyUdid);
+    }
+
+    AUTH_LOGI(AUTH_FSM, "session info verify succ.");
+    return true;
+}
+
 static char *PackDeviceIdJson(const AuthSessionInfo *info)
 {
     AUTH_LOGI(AUTH_FSM, "connType=%d", info->connInfo.type);
@@ -521,26 +547,9 @@ static char *PackDeviceIdJson(const AuthSessionInfo *info)
             return NULL;
         }
     }
-    if (info->idType == EXCHANGE_NETWORKID) {
-        if (!JSON_AddStringToObject(obj, DEVICE_ID_TAG, networkId)) {
-            AUTH_LOGE(AUTH_FSM, "add msg body fail");
-            JSON_Delete(obj);
-            return NULL;
-        }
-        char *anonyNetworkId = NULL;
-        Anonymize(networkId, &anonyNetworkId);
-        AUTH_LOGI(AUTH_FSM, "exchangeIdType=%d, networkid=%s", info->idType, anonyNetworkId);
-        AnonymizeFree(anonyNetworkId);
-    } else {
-        if (!JSON_AddStringToObject(obj, DEVICE_ID_TAG, udid)) {
-            AUTH_LOGE(AUTH_FSM, "add msg body fail");
-            JSON_Delete(obj);
-            return NULL;
-        }
-        char *anonyUdid = NULL;
-        Anonymize(udid, &anonyUdid);
-        AUTH_LOGI(AUTH_FSM, "exchangeIdType=%d, udid=%s", info->idType, anonyUdid);
-        AnonymizeFree(anonyUdid);
+    if (!VerifySessionInfoIdType(info, obj, networkId, udid)) {
+        JSON_Delete(obj);
+        return NULL;
     }
     if (!JSON_AddStringToObject(obj, DATA_TAG, uuid) || !JSON_AddInt32ToObject(obj, DATA_BUF_SIZE_TAG, PACKET_SIZE) ||
         !JSON_AddInt32ToObject(obj, SOFTBUS_VERSION_TAG, info->version) ||
