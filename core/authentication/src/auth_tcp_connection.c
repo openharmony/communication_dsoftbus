@@ -248,6 +248,14 @@ static int32_t ProcessSocketInEvent(ListenerModule module, int32_t fd)
     return SOFTBUS_OK;
 }
 
+static bool IsEnhanceP2pModuleId(ListenerModule moduleId)
+{
+    if (moduleId >= AUTH_ENHANCED_P2P_START && moduleId <= AUTH_ENHANCED_P2P_END) {
+        return true;
+    }
+    return false;
+}
+
 static int32_t OnConnectEvent(ListenerModule module,
     int32_t cfd, const ConnectOption *clientAddr)
 {
@@ -265,7 +273,7 @@ static int32_t OnConnectEvent(ListenerModule module,
         ConnShutdownSocket(cfd);
         return SOFTBUS_ERR;
     }
-    if (module != AUTH && module != AUTH_P2P && module != AUTH_ENHANCED_P2P) {
+    if (module != AUTH && module != AUTH_P2P && !IsEnhanceP2pModuleId(module)) {
         AUTH_LOGI(AUTH_CONN, "newip auth process");
         if (RouteBuildServerAuthManager(cfd, clientAddr) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_CONN, "build auth manager fail.");

@@ -366,7 +366,8 @@ static void PackFastAuth(JsonObj *obj, AuthSessionInfo *info, const NodeInfo *lo
         return;
     }
     AUTH_LOGD(AUTH_FSM, "udidHashHexStr=%s", udidHashHexStr);
-    if (!IsPotentialTrustedDevice(ID_TYPE_DEVID, (const char *)udidHashHexStr, false, false)) {
+    if (info->connInfo.type != AUTH_LINK_TYPE_ENHANCED_P2P &&
+        !IsPotentialTrustedDevice(ID_TYPE_DEVID, (const char *)udidHashHexStr, false, false)) {
         AUTH_LOGI(AUTH_FSM, "not potential trusted realtion, bypass fastAuthProc");
         info->isSupportFastAuth = false;
         return;
@@ -440,7 +441,8 @@ static void UnpackFastAuth(JsonObj *obj, AuthSessionInfo *info)
         AUTH_LOGE(AUTH_FSM, "udid hash bytes to hexString fail");
         return;
     }
-    if (!IsPotentialTrustedDevice(ID_TYPE_DEVID, (const char *)udidShortHash, false, false)) {
+    if (info->connInfo.type != AUTH_LINK_TYPE_ENHANCED_P2P &&
+        !IsPotentialTrustedDevice(ID_TYPE_DEVID, (const char *)udidShortHash, false, false)) {
         AUTH_LOGI(AUTH_FSM, "not potential trusted realtion, fastAuth not support");
         return;
     }

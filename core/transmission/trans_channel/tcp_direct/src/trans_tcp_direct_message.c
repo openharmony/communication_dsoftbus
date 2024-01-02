@@ -202,6 +202,9 @@ static AuthLinkType SwitchCipherTypeToAuthLinkType(uint32_t cipherFlag)
     if (cipherFlag & FLAG_P2P) {
         return AUTH_LINK_TYPE_P2P;
     }
+    if (cipherFlag & FLAG_ENHANCE_P2P) {
+        return AUTH_LINK_TYPE_ENHANCED_P2P;
+    }
     return AUTH_LINK_TYPE_WIFI;
 }
 
@@ -471,7 +474,7 @@ int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)
         .sessionName = conn.appInfo.myData.sessionName,
     };
     TRANS_ALARM(OPEN_SESSION_FAIL_ALARM, CONTROL_ALARM_TYPE, extraAlarm);
-    
+
     SoftbusRecordOpenSessionKpi(conn.appInfo.myData.pkgName,
         conn.appInfo.linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);
     char pkgName[PKG_NAME_SIZE_MAX] = {0};
