@@ -24,7 +24,6 @@
 #include "lnn_discovery_manager.c"
 #include "lnn_hichain_mock.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 
 namespace OHOS {
 using namespace testing;

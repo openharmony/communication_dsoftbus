@@ -14,11 +14,11 @@
  */
 
 #include "softbus_interface.h"
-#include "softbus_log_old.h"
+#include "comm_log.h"
 
 int StartDiscoveryWeak(const char *pkgName, const void *info)
 {
-    LOG_INFO("StartDiscovery Strong pkgName = %s\n", pkgName);
+    COMM_LOGI(COMM_INIT, "StartDiscovery Strong pkgName = %s", pkgName);
     GetClientProvideInterface()->onChannelOpened(pkgName, NULL);
     return 0;
 }
