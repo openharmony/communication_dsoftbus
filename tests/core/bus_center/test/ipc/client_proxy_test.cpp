@@ -21,7 +21,6 @@
 #include "if_system_ability_manager.h"
 #include "iremote_object.h"
 #include "iservice_registry.h"
-#include "softbus_adapter_log.h"
 #include "softbus_bus_center.h"
 #include "softbus_error_code.h"
 

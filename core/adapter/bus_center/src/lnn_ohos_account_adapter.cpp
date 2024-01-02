@@ -22,7 +22,7 @@
 #include "securec.h"
 #include "softbus_errcode.h"
 
-#define ACCOUNT_STRTOLL_BASE 10
+static const int32_t ACCOUNT_STRTOLL_BASE = 10;
 #define DEFAULT_ACCOUNT_NAME "ohosAnonymousName"
 
 int32_t GetOsAccountId(char *id, uint32_t idLen, uint32_t *len)

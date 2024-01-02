@@ -42,12 +42,12 @@ extern "C" {
     SoftBusLogInnerImpl(Level, Label, FILE_NAME, __LINE__, __FUNCTION__, Fmt, ##Args)
 
 typedef enum {
-    SOFTBUS_DFX_LOG_DEBUG = 3,
-    SOFTBUS_DFX_LOG_INFO = 4,
-    SOFTBUS_DFX_LOG_WARN = 5,
-    SOFTBUS_DFX_LOG_ERROR = 6,
-    SOFTBUS_DFX_LOG_FATAL = 7,
-} SoftBusDfxLogLevel;
+    SOFTBUS_LOG_DEBUG = 3,
+    SOFTBUS_LOG_INFO = 4,
+    SOFTBUS_LOG_WARN = 5,
+    SOFTBUS_LOG_ERROR = 6,
+    SOFTBUS_LOG_FATAL = 7,
+} SoftBusLogLevel;
 
 typedef struct {
     int32_t label;
@@ -55,7 +55,7 @@ typedef struct {
     char tag[LOG_TAG_MAX_LEN];
 } SoftBusLogLabel;
 
-void SoftBusLogInnerImpl(SoftBusDfxLogLevel level, SoftBusLogLabel label, const char *fileName, int32_t lineNum,
+void SoftBusLogInnerImpl(SoftBusLogLevel level, SoftBusLogLabel label, const char *fileName, int32_t lineNum,
     const char *funName, const char *fmt, ...);
 
 void NstackxLogInnerImpl(const char *moduleName, uint32_t logLevel, const char *fmt, ...);

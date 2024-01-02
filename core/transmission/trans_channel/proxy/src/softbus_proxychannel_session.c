@@ -17,11 +17,9 @@
 
 #include <securec.h>
 
-#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_socket.h"
-#include "softbus_adapter_thread.h"
 #include "softbus_conn_interface.h"
+#include "softbus_datahead_transform.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_property.h"
@@ -29,12 +27,7 @@
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_message.h"
 #include "softbus_proxychannel_transceiver.h"
-#include "softbus_socket.h"
-#include "softbus_transmission_interface.h"
-#include "softbus_utils.h"
-#include "softbus_datahead_transform.h"
 #include "trans_log.h"
-#include "trans_pending_pkt.h"
 
 #define TIME_OUT 10
 #define USECTONSEC 1000
@@ -47,6 +40,10 @@ int32_t TransProxyTransDataSendMsg(ProxyChannelInfo *chanInfo, const unsigned ch
 int32_t NotifyClientMsgReceived(const char *pkgName, int32_t pid, int32_t channelId,
     TransReceiveData *receiveData)
 {
+    if (pkgName == NULL) {
+        TRANS_LOGE(TRANS_MSG, "param invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
     int32_t ret = TransProxyOnMsgReceived(pkgName, pid, channelId, receiveData);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_MSG, "notify ret=%d", ret);
@@ -150,19 +147,23 @@ static char *TransProxyPackAppNormalMsg(const ProxyMessageHead *msg, const char 
 
     buf = (char*)SoftBusCalloc(bufLen);
     if (buf == NULL) {
+        TRANS_LOGE(TRANS_MSG, "buf calloc failed");
         return NULL;
     }
     if (memcpy_s(&proxyMessageHead, sizeof(ProxyMessageHead), msg, sizeof(ProxyMessageHead)) != EOK) {
+        TRANS_LOGE(TRANS_MSG, "message copy failed");
         SoftBusFree(buf);
         return NULL;
     }
     PackProxyMessageHead(&proxyMessageHead);
     if (memcpy_s(buf + connHeadLen, bufLen - connHeadLen, &proxyMessageHead, sizeof(ProxyMessageHead)) != EOK) {
+        TRANS_LOGE(TRANS_MSG, "buf copy failed");
         SoftBusFree(buf);
         return NULL;
     }
     dstLen = bufLen - connHeadLen - sizeof(ProxyMessageHead);
     if (memcpy_s(buf + connHeadLen + sizeof(ProxyMessageHead), dstLen, payLoad, datalen) != EOK) {
+        TRANS_LOGE(TRANS_MSG, "buf copy failed");
         SoftBusFree(buf);
         return NULL;
     }
@@ -200,6 +201,10 @@ static int32_t TransProxyTransNormalMsg(const ProxyChannelInfo *info, const char
 int32_t TransProxyTransDataSendMsg(ProxyChannelInfo *info, const unsigned char *payLoad,
     int payLoadLen, ProxyPacketType flag)
 {
+    if (info == NULL || payLoad == NULL) {
+        TRANS_LOGE(TRANS_MSG, "param invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if ((info->status != PROXY_CHANNEL_STATUS_COMPLETED && info->status != PROXY_CHANNEL_STATUS_KEEPLIVEING)) {
         TRANS_LOGE(TRANS_MSG, "status is err status=%d", info->status);
         return SOFTBUS_TRANS_PROXY_CHANNLE_STATUS_INVALID;
@@ -215,8 +220,8 @@ int32_t TransProxyTransDataSendMsg(ProxyChannelInfo *info, const unsigned char *
 int32_t TransOnNormalMsgReceived(const char *pkgName, int32_t pid, int32_t channelId,
     const char *data, uint32_t len)
 {
-    if (data == NULL) {
-        TRANS_LOGE(TRANS_MSG, "data null.");
+    if (data == NULL || pkgName == NULL) {
+        TRANS_LOGE(TRANS_MSG, "data or pkgname is null.");
         return SOFTBUS_ERR;
     }
     TRANS_LOGI(TRANS_MSG, "channelId= %d recv normal msg input len=%d, pid=%d", channelId, len, pid);

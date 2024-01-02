@@ -70,7 +70,7 @@ static int32_t HandleMessageFromProcessor(struct NegotiateMessage *msg)
     struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
 
     int32_t ret = SOFTBUS_OK;
-    if (msg) {
+    if (msg != NULL) {
         msg->dump(msg, 0);
         struct WifiDirectNegotiateChannel *channel = msg->getPointer(msg, NM_KEY_NEGO_CHANNEL, NULL);
         CONN_CHECK_AND_RETURN_RET_LOGW(channel != NULL, SOFTBUS_ERR, CONN_WIFI_DIRECT, "channel is null");
@@ -585,11 +585,6 @@ static int32_t PrejudgeAvailability(const char *remoteNetworkId, enum WifiDirect
     return SOFTBUS_OK;
 }
 
-static void OnWifiDirectAuthOpened(uint32_t requestId, int64_t authId)
-{
-    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%u authId=%zd", requestId, authId);
-}
-
 static struct EntityListener g_entityListener = {
     .onOperationComplete = OnOperationComplete,
     .onEntityChanged = OnEntityChanged,
@@ -610,7 +605,6 @@ static struct WifiDirectNegotiator g_negotiator = {
     .onDefaultTriggerChannelDataReceived = OnDefaultTriggerChannelDataReceived,
     .syncLnnInfo = SyncLnnInfo,
     .prejudgeAvailability = PrejudgeAvailability,
-    .onWifiDirectAuthOpened = OnWifiDirectAuthOpened,
 
     .currentCommand = NULL,
     .currentProcessor = NULL,

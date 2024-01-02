@@ -17,9 +17,9 @@
 
 #include <cstdlib>
 #include "hiview.h"
+#include "comm_log.h"
 #include "parameter.h"
 #include "securec.h"
-#include "softbus_adapter_log.h"
 #include "softbus_adapter_mem.h"
 
 #define PROP_USER_TYPE "ro.logsystem.usertype"

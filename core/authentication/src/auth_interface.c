@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -124,6 +124,10 @@ static void NotifyTransDisconnected(int64_t authId)
 int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback,
     bool isMeta)
 {
+    if (info == NULL || callback == NULL) {
+        AUTH_LOGE(AUTH_CONN, "info or callback is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (isMeta) {
         return AuthMetaOpenConn(info, requestId, callback);
     }
@@ -185,10 +189,10 @@ int64_t AuthGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer, bool
 }
 
 int32_t AuthRestoreAuthManager(const char *udidHash,
-    const AuthConnInfo *connInfo, int32_t requestId, NodeInfo *nodeInfo, int64_t *authId)
+    const AuthConnInfo *connInfo, uint32_t requestId, NodeInfo *nodeInfo, int64_t *authId)
 {
     if (udidHash == NULL || connInfo == NULL || nodeInfo == NULL || authId == NULL) {
-        AUTH_LOGW(AUTH_CONN, "restore manager fail because para error");
+        AUTH_LOGE(AUTH_CONN, "restore manager fail because para error");
         return SOFTBUS_ERR;
     }
     // get device key
@@ -367,7 +371,7 @@ TrustedReturnType AuthHasTrustedRelation(void)
         return TRUSTED_RELATION_IGNORE;
     }
     SoftBusFree(udidArray);
-    AUTH_LOGD(AUTH_CONN, "auth get trusted relation num=%d", num);
+    AUTH_LOGD(AUTH_CONN, "auth get trusted relation num=%u", num);
     return (num != 0) ? TRUSTED_RELATION_YES : TRUSTED_RELATION_NO;
 }
 

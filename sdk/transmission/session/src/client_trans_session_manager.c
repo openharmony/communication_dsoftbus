@@ -184,7 +184,7 @@ NO_SANITIZE("cfi") static DestroySessionInfo *CreateDestroySessionNode(SessionIn
 NO_SANITIZE("cfi") static void ClientDestroySession(const ListNode *destroyList, ShutdownReason reason)
 {
     if (IsListEmpty(destroyList)) {
-        TRANS_LOGE(TRANS_SDK, "destroyList is empty fail.");
+        TRANS_LOGD(TRANS_SDK, "destroyList is empty fail.");
         return;
     }
     DestroySessionInfo *destroyNode = NULL;
@@ -1242,7 +1242,7 @@ static INodeStateCb g_transLnnCb = {
 
 int32_t ReCreateSessionServerToServer(void)
 {
-    TRANS_LOGI(TRANS_SDK, "enter.");
+    TRANS_LOGD(TRANS_SDK, "enter.");
     if (g_clientSessionServerList == NULL) {
         TRANS_LOGE(TRANS_INIT, "entry list  not init");
         return SOFTBUS_ERR;
@@ -1282,7 +1282,10 @@ void ClientTransOnLinkDown(const char *networkId, int32_t routeType)
     if (networkId == NULL || g_clientSessionServerList == NULL) {
         return;
     }
-    TRANS_LOGI(TRANS_SDK, "routeType=%d", routeType);
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
+    TRANS_LOGI(TRANS_SDK, "routeType=%d, networkId=%s", routeType, anonyNetworkId);
+    AnonymizeFree(anonyNetworkId);
 
     if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != 0) {
         TRANS_LOGE(TRANS_CTRL, "lock failed");
@@ -1563,6 +1566,7 @@ static SessionInfo *CreateNewSocketSession(const SessionParam *param)
     session->role = SESSION_ROLE_INIT;
     session->isEnable = false;
     session->info.flag = param->attr->dataType;
+    session->info.streamType = param->attr->attr.streamAttr.streamType;
     session->isEncrypt = true;
     return session;
 }
@@ -1725,6 +1729,7 @@ int32_t ClientIpcOpenSession(int32_t sessionId, const QosTV *qos, uint32_t qosCo
     tmpAttr.fastTransData = NULL;
     tmpAttr.fastTransDataSize = 0;
     tmpAttr.dataType = sessionNode->info.flag;
+    tmpAttr.attr.streamAttr.streamType = sessionNode->info.streamType;
     tmpAttr.linkTypeNum = 0;
     SessionParam param = {
         .sessionName = serverNode->sessionName,

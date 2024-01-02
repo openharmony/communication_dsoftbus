@@ -102,7 +102,7 @@ static void WrapperAclStateChangedCallback(const BdAddr *bdAddr, GapAclState sta
         return;
     }
 
-    COMM_LOGI(COMM_ADAPTER, "WrapperAclStateChangedCallback, addr:%02X:%02X:***%02X, state=%d, reason=%u",
+    COMM_LOGD(COMM_ADAPTER, "WrapperAclStateChangedCallback, addr:%02X:%02X:***%02X, state=%d, reason=%u",
         bdAddr->addr[MAC_FIRST_INDEX], bdAddr->addr[MAC_ONE_INDEX], bdAddr->addr[MAC_FIVE_INDEX], state, reason);
     int listenerId;
     int aclState = ConvertAclState(state);
@@ -247,7 +247,6 @@ int SoftBusSetBtName(const char *name)
     }
     return SOFTBUS_ERR;
 }
-
 
 void SoftBusBtInit(void)
 {
