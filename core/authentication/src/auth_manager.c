@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "device_profile_listener.h"
 #include "anonymizer.h"
 #include "auth_common.h"
 #include "auth_connection.h"
@@ -26,7 +27,6 @@
 #include "auth_session_fsm.h"
 #include "auth_session_message.h"
 #include "bus_center_manager.h"
-#include "device_profile_listener.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_app_bind_interface.h"
 #include "lnn_decision_db.h"
@@ -517,31 +517,6 @@ static int64_t GetActiveAuthIdByConnInfo(const AuthConnInfo *connInfo)
     return authId;
 }
 
-static AuthManager *AuthManagerIsExist(int64_t authSeq, const AuthSessionInfo *info, bool *isNewCreated)
-{
-    AuthManager *auth = FindAuthManagerByConnInfo(&info->connInfo, info->isServer);
-    if (auth == NULL) {
-        auth = NewAuthManager(authSeq, info);
-        if (auth == NULL) {
-            AUTH_LOGE(AUTH_FSM, "new authManager create fail.");
-            return NULL;
-        }
-        *isNewCreated = true;
-    } else {
-        if (auth->connId != info->connId && auth->connInfo.type == AUTH_LINK_TYPE_WIFI) {
-            DisconnectAuthDevice(&auth->connId);
-            auth->hasAuthPassed = false;
-            AUTH_LOGI(AUTH_FSM, "auth manager may single device on line");
-        }
-    }
-    auth->connId = info->connId;
-    auth->lastAuthSeq = authSeq;
-    auth->lastVerifyTime = GetCurrentTimeMs();
-    auth->lastActiveTime = GetCurrentTimeMs();
-
-    AUTH_LOGI(AUTH_FSM, "auth manager exist.");
-    return auth;
-}
 
 int32_t AuthManagerSetSessionKey(int64_t authSeq, const AuthSessionInfo *info,
     const SessionKey *sessionKey, bool isConnect)
@@ -558,20 +533,33 @@ int32_t AuthManagerSetSessionKey(int64_t authSeq, const AuthSessionInfo *info,
         ReleaseAuthLock();
         return SOFTBUS_OK;
     }
-
     bool isNewCreated = false;
-    AuthManager *auth = AuthManagerIsExist(authSeq, info, &isNewCreated);
+    AuthManager *auth = FindAuthManagerByConnInfo(&info->connInfo, info->isServer);
     if (auth == NULL) {
-        AUTH_LOGE(AUTH_FSM, "auth manager does not exist.");
-        ReleaseAuthLock();
-        return SOFTBUS_ERR;
+        auth = NewAuthManager(authSeq, info);
+        if (auth == NULL) {
+            AUTH_LOGE(AUTH_FSM, "NewAuthManager fail");
+            ReleaseAuthLock();
+            return SOFTBUS_MALLOC_ERR;
+        }
+        isNewCreated = true;
+    } else {
+        if (auth->connId != info->connId && auth->connInfo.type == AUTH_LINK_TYPE_WIFI) {
+            DisconnectAuthDevice(&auth->connId);
+            auth->hasAuthPassed = false;
+            AUTH_LOGI(AUTH_FSM, "auth manager may single device on line");
+        }
     }
+    auth->connId = info->connId;
+    auth->lastAuthSeq = authSeq;
+    auth->lastVerifyTime = GetCurrentTimeMs();
+    auth->lastActiveTime = GetCurrentTimeMs();
     int32_t sessionKeyIndex = TO_INT32(authSeq);
     if ((info->isSupportFastAuth) && (info->version <= SOFTBUS_OLD_V2)) {
         sessionKeyIndex = TO_INT32(info->oldIndex);
     }
     if (AddSessionKey(&auth->sessionKeyList, sessionKeyIndex, sessionKey) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "failed to add a sessionkey");
+        AUTH_LOGE(AUTH_FSM, "AddSessionKey fail");
         if (isNewCreated) {
             DelAuthManager(auth, true);
         }
