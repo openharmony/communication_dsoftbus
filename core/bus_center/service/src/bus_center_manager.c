@@ -21,6 +21,7 @@
 #include "bus_center_event.h"
 #include "bus_center_decision_center.h"
 #include "lnn_async_callback_utils.h"
+#include "lnn_coap_discovery_impl.h"
 #include "lnn_decision_center.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_event_monitor.h"
@@ -141,6 +142,7 @@ static void BusCenterServerDelayInit(void *para)
             g_lnnLocalConfigInit.initDelayImpl[i].isInit = true;
         }
     }
+    LnnCoapConnectInit();
     if (ret != SOFTBUS_OK) {
         retry++;
         SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
@@ -237,5 +239,6 @@ void BusCenterServerDeinit(void)
     LnnDeinitNetLedger();
     DeinitDecisionCenter();
     LnnDeinitMetaNode();
+    LnnCoapConnectDeinit();
     LNN_LOGI(LNN_INIT, "bus center server deinit");
 }
