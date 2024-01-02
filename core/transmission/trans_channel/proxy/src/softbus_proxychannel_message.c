@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -445,15 +445,17 @@ char *TransProxyPackHandshakeErrMsg(int32_t errCode)
 
 char *TransProxyPackHandshakeMsg(ProxyChannelInfo *info)
 {
-    cJSON *root = cJSON_CreateObject();
+    cJSON *root = NULL;
+    SessionKeyBase64 sessionBase64;
+    char *buf = NULL;
+    AppInfo *appInfo = &(info->appInfo);
+    int32_t ret;
+
+    root = cJSON_CreateObject();
     if (root == NULL) {
         TRANS_LOGE(TRANS_CTRL, "create json object failed.");
         return NULL;
     }
-
-    int32_t ret;
-    AppInfo *appInfo = &(info->appInfo);
-    SessionKeyBase64 sessionBase64;
     (void)memset_s(&sessionBase64, sizeof(SessionKeyBase64), 0, sizeof(SessionKeyBase64));
     if (!AddNumberToJsonObject(root, JSON_KEY_TYPE, appInfo->appType) ||
         !AddStringToJsonObject(root, JSON_KEY_IDENTITY, info->identity) ||
@@ -464,8 +466,10 @@ char *TransProxyPackHandshakeMsg(ProxyChannelInfo *info)
         goto EXIT;
     }
     (void)cJSON_AddTrueToObject(root, JSON_KEY_HAS_PRIORITY);
+
     if (appInfo->appType == APP_TYPE_NORMAL) {
-        if (PackHandshakeMsgForNormal(&sessionBase64, appInfo, root) != SOFTBUS_OK) {
+        ret = PackHandshakeMsgForNormal(&sessionBase64, appInfo, root);
+        if (ret != SOFTBUS_OK) {
             goto EXIT;
         }
     } else if (appInfo->appType == APP_TYPE_AUTH) {
@@ -489,12 +493,11 @@ char *TransProxyPackHandshakeMsg(ProxyChannelInfo *info)
             goto EXIT;
         }
     }
-    cJSON_Delete(root);
-    return cJSON_PrintUnformatted(root);
 
+    buf = cJSON_PrintUnformatted(root);
 EXIT:
     cJSON_Delete(root);
-    return NULL;
+    return buf;
 }
 
 char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan)

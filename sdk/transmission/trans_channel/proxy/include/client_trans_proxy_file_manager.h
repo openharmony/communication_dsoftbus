@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,6 @@
 #include <stdint.h>
 
 #include "client_trans_file_listener.h"
-#include "client_trans_proxy_file_common.h"
 
 #ifdef __linux__
 #define MAX_SEND_FILE_NUM 10
@@ -96,62 +95,6 @@ typedef struct {
     uint32_t startSeq;
     uint32_t seqResult;
 } AckResponseData;
-
-typedef struct {
-    const char **files;
-    uint32_t fileCnt;
-    uint64_t bytesProcessed;
-    uint64_t bytesTotal;
-} FilesInfo;
-
-typedef struct {
-    uint32_t seq;
-    int32_t fileFd;
-    int32_t fileStatus; /* 0: idle 1:busy */
-    uint64_t fileOffset;
-    uint64_t oneFrameLen;
-    uint32_t startSeq;
-    uint64_t seqResult;
-    uint32_t preStartSeq;
-    uint32_t preSeqResult;
-    uint64_t fileSize;
-    int32_t timeOut;
-    uint64_t checkSumCRC;
-    char filePath[MAX_FILE_PATH_NAME_LEN];
-} SingleFileInfo;
-
-typedef struct {
-    ListNode node;
-    int32_t sessionId;
-    int32_t channelId;
-    int32_t fileEncrypt;
-    int32_t algorithm;
-    int32_t crc;
-    int32_t result;
-    FileListener fileListener;
-    int32_t objRefCount;
-    int32_t recvState;
-    SingleFileInfo recvFileInfo;
-} FileRecipientInfo;
-
-typedef struct {
-    ListNode node;
-    int32_t channelId;
-    int32_t sessionId;
-    int32_t fd;
-    uint64_t fileSize;
-    uint64_t frameNum;
-    int32_t fileEncrypt;
-    int32_t algorithm;
-    int32_t crc;
-    uint32_t seq;
-    int32_t waitSeq;
-    int32_t waitTimeoutCount;
-    int32_t result;
-    uint64_t checkSumCRC;
-    FileListener fileListener;
-    FilesInfo totalInfo;
-} SendListenerInfo;
 
 int32_t ClinetTransProxyFileManagerInit(void);
 void ClinetTransProxyFileManagerDeinit(void);
