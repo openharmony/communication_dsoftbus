@@ -50,6 +50,7 @@ typedef enum {
     LNN_EVENT_NETWORK_STATE_CHANGED,
     LNN_EVENT_SINGLE_NETWORK_OFFLINE,
     LNN_EVENT_NODE_HB_REPEAT_CYCLE,
+    LNN_EVENT_NETWORKID_CHANGED,
     LNN_EVENT_TYPE_MAX,
 } LnnEventType;
 
@@ -204,6 +205,11 @@ typedef struct {
     const char *udid;
 } LnnSingleNetworkOffLineEvent;
 
+typedef struct {
+    LnnEventBasicInfo basic;
+    char networkId[NETWORK_ID_BUF_LEN];
+} LnnNetworkIdChangedEvent;
+
 typedef void (*LnnEventHandler)(const LnnEventBasicInfo *info);
 
 int32_t LnnInitBusCenterEvent(void);
@@ -244,6 +250,8 @@ void LnnNotifyNodeAddressChanged(const char *addr, const char *networkId, bool i
 void LnnNotifyNetworkStateChanged(SoftBusNetworkState state);
 
 void LnnNotifySingleOffLineEvent(const ConnectionAddr *addr, NodeBasicInfo *basicInfo);
+
+void LnnNotifyNetworkIdChangeEvent(const char *networkId);
 void LnnNotifyHBRepeat(void);
 
 #ifdef __cplusplus
