@@ -21,11 +21,9 @@
 #include "softbus_conn_br_pending_packet.h"
 #include "softbus_conn_br_send_queue.h"
 #include "softbus_conn_common.h"
-#include "softbus_conn_interface.h"
 #include "softbus_conn_manager.h"
 #include "softbus_datahead_transform.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 #include "conn_event.h"
 
@@ -78,7 +76,7 @@ static uint8_t *BrRecvDataParse(uint32_t connectionId, LimitedBuffer *buffer, in
     CONN_LOGI(CONN_BR, "br receive data, connection id=%u, cached length=%u, payload (Len/Flg/Module/Seq)="
         "(%u/%d/%d/%" PRId64 ")", connectionId, buffer->length, packLen, head->flag, head->module, head->seq);
     buffer->length -= packLen;
-    *outLen = packLen;
+    *outLen = (int32_t)packLen;
     return dataCopy;
 }
 
@@ -91,8 +89,8 @@ int32_t ConnBrTransReadOneFrame(uint32_t connectionId, int32_t socketHandle, Lim
             *outData = data;
             return dataLen;
         }
-        int32_t recvLen =
-            g_sppDriver->Read(socketHandle, buffer->buffer + buffer->length, buffer->capacity - buffer->length);
+        int32_t recvLen = g_sppDriver->Read(
+                socketHandle, buffer->buffer + buffer->length, (int32_t)(buffer->capacity - buffer->length));
         if (recvLen == BR_READ_SOCKET_CLOSED) {
             CONN_LOGW(CONN_BR, "br connection read return, connection id=%u, socket handle=%d, connection closed",
                 connectionId, socketHandle);
@@ -125,7 +123,7 @@ int32_t BrTransSend(
     uint32_t waitWriteLen = dataLen;
     while (waitWriteLen > 0) {
         uint32_t len = waitWriteLen > mtu ? mtu : waitWriteLen;
-        int32_t writeLen = g_sppDriver->Write(socketHandle, data, len);
+        int32_t writeLen = g_sppDriver->Write(socketHandle, data, (int32_t)len);
         if (writeLen < 0) {
             CONN_LOGE(CONN_BR, "br connection %u send data failed: underlayer bluetooth write failed, socketHandle=%d, "
                   "mtu=%d, total len=%d, wait write len=%d, already write len=%d, error=%d",

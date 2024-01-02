@@ -15,7 +15,7 @@
 
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_log_old.h"
+#include "comm_log.h"
 
 #define CASE_ONE_WHAT 1
 #define CASE_TWO_WHAT 2
@@ -30,7 +30,7 @@
 
 static void NetworkingHandleMessage(const SoftBusMessage* msg)
 {
-    LOG_INFO("NetworkingHandleMessage msg what=%d", msg->what);
+    COMM_LOGI(COMM_TEST, "NetworkingHandleMessage msg what=%d", msg->what);
 }
 
 static SoftBusHandler g_networkingHandler = {
@@ -39,7 +39,7 @@ static SoftBusHandler g_networkingHandler = {
 
 static void CustomfreeMessage(SoftBusMessage* msg)
 {
-    LOG_INFO("CustomfreeMessage msg=%d", msg->what);
+    COMM_LOGI(COMM_TEST, "CustomfreeMessage msg=%d", msg->what);
     if (msg->what == CASE_FOUR_POST_DELAY) {
         SoftBusFree(msg->obj);
         SoftBusFree(msg);
@@ -50,20 +50,20 @@ void TestMessageHandler(void)
 {
     g_networkingHandler.looper = GetLooper(LOOP_TYPE_DEFAULT);
     g_networkingHandler.HandleMessage = NetworkingHandleMessage;
-    LOG_INFO("testHandler msg1");
+    COMM_LOGI(COMM_TEST, "testHandler msg1");
     SoftBusMessage* msg = SoftBusCalloc(sizeof(SoftBusMessage));
     if (msg == NULL) {
-        LOG_INFO("msg malloc fail");
+        COMM_LOGI(COMM_TEST, "msg malloc fail");
         return;
     }
     msg->what = CASE_ONE_WHAT;
     msg->arg1 = CASE_ARG;
     msg->handler = &g_networkingHandler;
     g_networkingHandler.looper->PostMessage(g_networkingHandler.looper, msg);
-    LOG_INFO("testHandler msg4");
+    COMM_LOGI(COMM_TEST, "testHandler msg4");
     SoftBusMessage* msg4 = SoftBusCalloc(sizeof(SoftBusMessage));
     if (msg4 == NULL) {
-        LOG_INFO("msg4 malloc fail");
+        COMM_LOGI(COMM_TEST, "msg4 malloc fail");
         return;
     }
     msg4->what = CASE_FOUR_WHAT;
@@ -72,14 +72,14 @@ void TestMessageHandler(void)
     msg4->FreeMessage = CustomfreeMessage;
     msg4->obj = SoftBusMalloc(CASE_FOUR_OBJ_SIZE);
     if (msg4->obj == NULL) {
-        LOG_INFO("msg4_obj malloc fail");
+        COMM_LOGI(COMM_TEST, "msg4_obj malloc fail");
         return;
     }
     g_networkingHandler.looper->PostMessageDelay(g_networkingHandler.looper, msg4, CASE_FOUR_POST_DELAY);
-    LOG_INFO("testHandler msg3");
+    COMM_LOGI(COMM_TEST, "testHandler msg3");
     SoftBusMessage* msg3 = SoftBusCalloc(sizeof(SoftBusMessage));
     if (msg3 == NULL) {
-        LOG_INFO("msg3 malloc fail");
+        COMM_LOGI(COMM_TEST, "msg3 malloc fail");
         return;
     }
     msg3->what = CASE_THREE_WHAT;
@@ -87,10 +87,10 @@ void TestMessageHandler(void)
     msg3->handler = &g_networkingHandler;
     g_networkingHandler.looper->PostMessageDelay(g_networkingHandler.looper, msg3, CASE_THREE_POST_DELAY);
     g_networkingHandler.looper->RemoveMessage(g_networkingHandler.looper, &g_networkingHandler, CASE_THREE_WHAT);
-    LOG_INFO("testHandler msg2");
+    COMM_LOGI(COMM_TEST, "testHandler msg2");
     SoftBusMessage* msg2 = SoftBusCalloc(sizeof(SoftBusMessage));
     if (msg2 == NULL) {
-        LOG_INFO("msg2 malloc fail");
+        COMM_LOGI(COMM_TEST, "msg2 malloc fail");
         return;
     }
     msg2->what = CASE_TWO_WHAT;

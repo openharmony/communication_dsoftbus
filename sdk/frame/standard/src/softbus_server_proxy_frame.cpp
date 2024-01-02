@@ -41,6 +41,8 @@ OHOS::sptr<OHOS::IRemoteObject::DeathRecipient> g_clientDeath = nullptr;
 std::mutex g_mutex;
 uint32_t g_waitServerInterval = 2;
 uint32_t g_getSystemAbilityId = 2;
+uint32_t g_printRequestFailedCount = 0;
+constexpr uint32_t g_printInterval = 200;
 const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 }
 
@@ -80,8 +82,8 @@ static int InnerRegisterService(void)
 static OHOS::sptr<OHOS::IRemoteObject> GetSystemAbility()
 {
     OHOS::MessageParcel data;
-
     if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        COMM_LOGE(COMM_EVENT, "write interface token failed!");
         return nullptr;
     }
 
@@ -95,7 +97,9 @@ static OHOS::sptr<OHOS::IRemoteObject> GetSystemAbility()
     }
     int32_t err = samgr->SendRequest(g_getSystemAbilityId, data, reply, option);
     if (err != 0) {
-        COMM_LOGE(COMM_EVENT, "Get GetSystemAbility failed!");
+        if ((++g_printRequestFailedCount) % g_printInterval == 0) {
+            COMM_LOGE(COMM_EVENT, "Get GetSystemAbility failed!");
+        }
         return nullptr;
     }
     return reply.ReadRemoteObject();
@@ -107,7 +111,6 @@ static int32_t ServerProxyInit(void)
     if (g_serverProxy == nullptr) {
         g_serverProxy = GetSystemAbility();
         if (g_serverProxy == nullptr) {
-            COMM_LOGE(COMM_SDK, "Get remote softbus object failed!\n");
             return SOFTBUS_ERR;
         }
         g_clientDeath =

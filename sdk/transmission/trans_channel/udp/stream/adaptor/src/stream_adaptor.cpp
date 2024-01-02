@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,6 @@
 #include <map>
 #include <mutex>
 #include <string>
-#include <sys/types.h>
 
 #include "client_trans_udp_stream_interface.h"
 #include "securec.h"
@@ -26,7 +25,6 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "stream_adaptor_listener.h"
-#include "stream_common.h"
 #include "trans_log.h"
 
 using namespace OHOS;
@@ -76,6 +74,10 @@ void StreamAdaptor::SetAliveState(bool state)
 void StreamAdaptor::InitAdaptor(int32_t channelId, const VtpStreamOpenParam *param, bool isServerSide,
     const IStreamListener *callback)
 {
+    if (param == nullptr) {
+        TRANS_LOGE(TRANS_STREAM, "param invalid");
+        return;
+    }
     auto adaptor = shared_from_this();
     auto adaptorListener = std::make_shared<StreamAdaptorListener>(adaptor);
     streamManager_ =  Communication::SoftBus::IStreamManager::GetInstance(nullptr, adaptorListener);
@@ -123,7 +125,8 @@ ssize_t StreamAdaptor::Encrypt(const void *in, ssize_t inLen, void *out, ssize_t
         return SOFTBUS_ERR;
     }
 
-    int ret = SoftBusEncryptData(&cipherKey, (unsigned char *)in, inLen, (unsigned char *)out, (unsigned int *)&outLen);
+    int ret = SoftBusEncryptData(&cipherKey, reinterpret_cast<const unsigned char *>(in), inLen,
+        reinterpret_cast<unsigned char *>(out), reinterpret_cast<unsigned int *>(&outLen));
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK || outLen != inLen + OVERHEAD_LEN) {
         TRANS_LOGE(TRANS_STREAM, "Encrypt Data fail. ret=%d", ret);
@@ -148,7 +151,8 @@ ssize_t StreamAdaptor::Decrypt(const void *in, ssize_t inLen, void *out, ssize_t
         TRANS_LOGE(TRANS_STREAM, "memcpy key error.");
         return SOFTBUS_ERR;
     }
-    int ret = SoftBusDecryptData(&cipherKey, (unsigned char *)in, inLen, (unsigned char *)out, (unsigned int *)&outLen);
+    int ret = SoftBusDecryptData(&cipherKey, reinterpret_cast<const unsigned char *>(in), inLen,
+        reinterpret_cast<unsigned char *>(out), reinterpret_cast<unsigned int *>(&outLen));
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_STREAM, "Decrypt Data fail. ret=%d ", ret);

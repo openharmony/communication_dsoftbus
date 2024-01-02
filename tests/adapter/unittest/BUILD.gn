@@ -339,7 +339,6 @@ if (defined(ohos_lite)) {
     module_out_path = module_output_path
     sources = [
       "$dsoftbus_root_path/adapter/common/kernel/liteos_m/softbus_adapter_mem.c",
-      "$dsoftbus_root_path/adapter/common/log/softbus_adapter_log.c",
       "$dsoftbus_root_path/core/common/message_handler/message_handler.c",
       "$dsoftbus_root_path/core/common/utils/softbus_utils.c",
       "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/network_mock.cpp",

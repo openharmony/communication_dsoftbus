@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,6 @@
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_message.h"
 #include "softbus_proxychannel_transceiver.h"
-#include "softbus_utils.h"
 #include "trans_log.h"
 #include "trans_event.h"
 
@@ -56,7 +55,7 @@ int32_t TransProxySendInnerMessage(ProxyChannelInfo *info, const char *payLoad,
 
 static int32_t SetCipherOfHandshakeMsg(uint32_t channelId, uint8_t *cipher)
 {
-    int64_t authId = TransProxyGetAuthId(channelId);
+    int64_t authId = TransProxyGetAuthId((int32_t)channelId);
     if (authId == AUTH_INVALID_ID) {
         TRANS_LOGE(TRANS_CTRL, "get authId fail");
         return SOFTBUS_ERR;
