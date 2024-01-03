@@ -152,6 +152,7 @@ void ClientDeathProcTask(void)
     TransServerProxyInit();
     BusCenterServerProxyInit();
     InnerRegisterService();
+    TransBroadCastReInit();
 }
 
 int32_t ClientStubInit(void)
