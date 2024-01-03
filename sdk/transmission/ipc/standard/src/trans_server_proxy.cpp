@@ -245,3 +245,9 @@ int32_t ServerIpcEvaluateQos(const char *peerNetworkId, TransDataType dataType, 
 
     return g_serverProxy->EvaluateQos(peerNetworkId, dataType, qos, qosCount);
 }
+
+void TransBroadCastReInit(void)
+{
+    TRANS_LOGI(TRANS_SDK, "server died, try to ReRegistereventLisenter");
+    TransBroadCastInit();
+}
