@@ -202,7 +202,7 @@ HWTEST_F(AuthOtherTest, HANDLE_CONN_CONNECT_RESULT_TEST_001, TestSize.Level1)
     HandleConnConnectResult(nullptr);
     HandleConnConnectResult(reinterpret_cast<void *>(&para));
 }
-
++fannina
 /*
  * @tc.name: ON_WIFI_DATA_RECEIVED_TEST_001
  * @tc.desc: on wifi data received test
