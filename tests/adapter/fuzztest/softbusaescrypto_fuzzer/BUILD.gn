@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,24 +12,19 @@
 # limitations under the License.
 
 #####################hydra-fuzz###################
-import("//build/config/features.gni")
-import("//build/ohos.gni")
 import("//build/test.gni")
-import("../../../../../../dsoftbus.gni")
+import("../../../../dsoftbus.gni")
 
 ##############################fuzztest##########################################
 
-dsoftbus_root_path = "../../../../../.."
+dsoftbus_root_path = "../../../.."
 
-ohos_fuzztest("SoftBusLogFuzzTest") {
+ohos_fuzztest("SoftBusAesCryptoFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
   fuzz_config_file =
-      "$dsoftbus_root_path/tests/core/common/log/fuzztest/softbuslog_fuzzer"
-  include_dirs = [
-    "$dsoftbus_root_path/adapter/common/include",
-    "$dsoftbus_root_path/core/common/include",
-    "//commonlibrary/c_utils/base/include",
-  ]
+      "$dsoftbus_root_path/tests/adapter/fuzztest/softbusaescrypto_fuzzer"
+  include_dirs = [ "$dsoftbus_root_path/adapter/common/include" ]
+
   cflags = [
     "-g",
     "-O0",
@@ -37,25 +32,15 @@ ohos_fuzztest("SoftBusLogFuzzTest") {
     "-fno-omit-frame-pointer",
     "-fstack-protector-strong",
   ]
-  sources = [ "softbuslog_fuzzer.cpp" ]
 
-  deps = [
-    "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/frame:softbus_server",
+  sources = [ "softbusaescrypto_fuzzer.cpp" ]
+
+  deps = [ "$dsoftbus_root_path/adapter:softbus_adapter" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
   ]
-
-  if (is_standard_system) {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  } else {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
-  }
 }
 
 ###############################################################################
@@ -63,7 +48,7 @@ group("fuzztest") {
   testonly = true
   deps = [
     # deps file
-    ":SoftBusLogFuzzTest",
+    ":SoftBusAesCryptoFuzzTest",
   ]
 }
 ###############################################################################

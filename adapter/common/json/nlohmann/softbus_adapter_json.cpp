@@ -21,6 +21,7 @@
 #include "softbus_adapter_mem.h"
 
 #define JSON_LOGE(fmt, ...) COMM_LOGE(COMM_ADAPTER, "[%s] " fmt, __FUNCTION__, ##__VA_ARGS__)
+#define JSON_LOGD(fmt, ...) COMM_LOGD(COMM_ADAPTER, "[%s] " fmt, __FUNCTION__, ##__VA_ARGS__)
 
 JsonObj *JSON_CreateObject(void)
 {
@@ -256,7 +257,7 @@ bool JSON_GetStringFromOject(const JsonObj *obj, const char *key, char *value, u
     }
     nlohmann::json item = (*json)[key];
     if (!item.is_string()) {
-        JSON_LOGE("cannot find or invalid [%s]", key);
+        JSON_LOGD("cannot find or invalid [%s]", key);
         return false;
     }
     std::string valueString = item.get<std::string>();

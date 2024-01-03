@@ -29,8 +29,6 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
-#include "token_setproc.h"
 
 using namespace OHOS::DistributedDeviceProfile;
 int32_t TransCheckAccessControl(const char *peerDeviceId)
@@ -40,9 +38,9 @@ int32_t TransCheckAccessControl(const char *peerDeviceId)
         return SOFTBUS_ERR;
     }
 
-    uint64_t firstCallingid = GetFirstCallerTokenID();
-    COMM_LOGI(COMM_PERM, "FirstCaller:%" PRIu64 "", firstCallingid);
-    if (firstCallingid == 0) {
+    int32_t firstCallingId = OHOS::IPCSkeleton::GetFirstTokenID();
+    COMM_LOGI(COMM_PERM, "FirstCaller:%d", firstCallingId);
+    if (firstCallingId == 0) {
         return SOFTBUS_OK;
     }
 
@@ -63,7 +61,7 @@ int32_t TransCheckAccessControl(const char *peerDeviceId)
     std::string active = std::to_string(static_cast<int>(Status::ACTIVE));
     std::vector<AccessControlProfile> profile;
     std::map<std::string, std::string> parms;
-    std::string firstTokenIdStr = std::to_string(firstCallingid);
+    std::string firstTokenIdStr = std::to_string(firstCallingId);
     parms.insert({{"tokenId", firstTokenIdStr}, {"trustDeviceId", deviceId}, {"status", active}});
 
     int32_t ret = DistributedDeviceProfileClient::GetInstance().GetAccessControlProfile(parms, profile);

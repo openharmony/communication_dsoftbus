@@ -999,6 +999,11 @@ void TransUdpChannelDeinit(void)
 
 void TransUdpDeathCallback(const char *pkgName, int32_t pid)
 {
+    if (pkgName == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "param invalid");
+        return;
+    }
+    TRANS_LOGW(TRANS_CTRL, "TransUdpDeathCallback: pkgName=%s, pid=%d", pkgName, pid);
     if (GetUdpChannelLock() != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock failed");
         return;

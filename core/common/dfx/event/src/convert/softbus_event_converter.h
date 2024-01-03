@@ -22,6 +22,7 @@
 #include "comm_log.h"
 #include "form/softbus_event_form.h"
 #include "hisysevent_c.h"
+#include "anonymizer.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -74,7 +75,7 @@ static inline bool AssignerInt32(int32_t value, HiSysEventParam **param)
 /* Used by ASSIGNER macros */
 static inline bool AssignerString(const char *value, HiSysEventParam **param)
 {
-    if (value == NULL || strlen(value) == 0) {
+    if (value == NULL || value[0] == '\0' || strnlen(value, PARAM_STRING_VALUE_MAX_LEN) == PARAM_STRING_VALUE_MAX_LEN) {
         (*param)->v.s = NULL;
         return false;
     }
@@ -85,12 +86,30 @@ static inline bool AssignerString(const char *value, HiSysEventParam **param)
 /* Used by ASSIGNER macros */
 static inline bool AssignerLongString(const char *value, HiSysEventParam **param)
 {
-    if (value == NULL || strlen(value) == 0) {
+    if (value == NULL || value[0] == '\0' || strnlen(value,
+        PARAM_LONG_STRING_VALUE_MAX_LEN) == PARAM_LONG_STRING_VALUE_MAX_LEN) {
         (*param)->v.s = NULL;
         return false;
     }
     return InitString(&(*param)->v.s, PARAM_LONG_STRING_VALUE_MAX_LEN) &&
         CopyString((*param)->v.s, value, PARAM_LONG_STRING_VALUE_MAX_LEN);
+}
+
+/* Used by ASSIGNER macros */
+static inline bool AssignerAnonymizeString(const char *value, HiSysEventParam **param)
+{
+    if (value == NULL || value[0] == '\0' || strnlen(value, PARAM_STRING_VALUE_MAX_LEN) == PARAM_STRING_VALUE_MAX_LEN) {
+        (*param)->v.s = NULL;
+        return false;
+    }
+    if (!InitString(&(*param)->v.s, PARAM_STRING_VALUE_MAX_LEN)) {
+        return false;
+    }
+    char *anonyStr = NULL;
+    Anonymize(value, &anonyStr);
+    bool status = CopyString((*param)->v.s, anonyStr, PARAM_STRING_VALUE_MAX_LEN);
+    AnonymizeFree(anonyStr);
+    return status;
 }
 
 /* Used by ASSIGNER macros */

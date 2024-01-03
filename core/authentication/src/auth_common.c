@@ -283,6 +283,12 @@ bool CompareConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool 
                 return true;
             }
             break;
+        case AUTH_LINK_TYPE_ENHANCED_P2P:
+            if (info2->type == AUTH_LINK_TYPE_ENHANCED_P2P && info1->info.ipInfo.port == info2->info.ipInfo.port &&
+                strcmp(info1->info.ipInfo.ip, info2->info.ipInfo.ip) == 0) {
+                return true;
+            }
+            break;
         default:
             AUTH_LOGE(AUTH_CONN, "unexpected connType=%d", info1->type);
             return false;
@@ -326,11 +332,31 @@ int32_t ConvertToConnectOption(const AuthConnInfo *connInfo, ConnectOption *opti
             option->socketOption.protocol = LNN_PROTOCOL_IP;
             option->socketOption.keepAlive = 1;
             break;
+        case AUTH_LINK_TYPE_ENHANCED_P2P:
+            option->type = CONNECT_TCP;
+            if (strcpy_s(option->socketOption.addr, sizeof(option->socketOption.addr), connInfo->info.ipInfo.ip) !=
+                EOK) {
+                AUTH_LOGE(AUTH_CONN, "copy ip fail");
+                return SOFTBUS_MEM_ERR;
+            }
+            option->socketOption.port = connInfo->info.ipInfo.port;
+            option->socketOption.moduleId = connInfo->info.ipInfo.moduleId;
+            option->socketOption.protocol = LNN_PROTOCOL_IP;
+            option->socketOption.keepAlive = 1;
+            break;
         default:
             AUTH_LOGE(AUTH_CONN, "unexpected connType=%d", connInfo->type);
             return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
+}
+
+static bool IsEnhanceP2pModuleId(ListenerModule moduleId)
+{
+    if (moduleId >= AUTH_ENHANCED_P2P_START && moduleId <= AUTH_ENHANCED_P2P_END) {
+        return true;
+    }
+    return false;
 }
 
 int32_t ConvertToAuthConnInfo(const ConnectionInfo *info, AuthConnInfo *connInfo)
@@ -343,7 +369,11 @@ int32_t ConvertToAuthConnInfo(const ConnectionInfo *info, AuthConnInfo *connInfo
                 AUTH_LOGW(AUTH_CONN, "only support LNN_PROTOCOL_IP");
                 return SOFTBUS_ERR;
             }
-            connInfo->type = AUTH_LINK_TYPE_P2P;
+            if (IsEnhanceP2pModuleId(info->socketInfo.moduleId)) {
+                connInfo->type = AUTH_LINK_TYPE_ENHANCED_P2P;
+            } else {
+                connInfo->type = AUTH_LINK_TYPE_P2P;
+            }
             connInfo->info.ipInfo.port = info->socketInfo.port;
             if (strcpy_s(connInfo->info.ipInfo.ip, IP_LEN, info->socketInfo.addr) != EOK) {
                 AUTH_LOGE(AUTH_CONN, "copy ip fail");

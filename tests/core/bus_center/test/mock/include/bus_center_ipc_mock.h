@@ -38,7 +38,7 @@ public:
     virtual int32_t LnnSetNodeDataChangeFlag(const char *networkId, uint16_t dataChangeFlag) = 0;
     virtual int32_t LnnStartTimeSync(const char *pkgName, int32_t callingPid, const char *targetNetworkId,
         TimeSyncAccuracy accuracy, TimeSyncPeriod period) = 0;
-    virtual int32_t LnnStopTimeSync(const char *pkgName, const char *targetNetworkId) = 0;
+    virtual int32_t LnnStopTimeSync(const char *pkgName, const char *targetNetworkId, int32_t callingPid) = 0;
     virtual int32_t LnnPublishService(const char *pkgName, const PublishInfo *info, bool isInnerRequest) = 0;
     virtual int32_t LnnUnPublishService(const char *pkgName, int32_t publishId, bool isInnerRequest) = 0;
     virtual int32_t LnnStartDiscDevice(
@@ -76,7 +76,7 @@ public:
     MOCK_METHOD4(LnnGetNodeKeyInfo, int32_t(const char *, int, uint8_t *, uint32_t));
     MOCK_METHOD2(LnnSetNodeDataChangeFlag, int32_t(const char *, uint16_t));
     MOCK_METHOD5(LnnStartTimeSync, int32_t(const char *, int32_t, const char *, TimeSyncAccuracy, TimeSyncPeriod));
-    MOCK_METHOD2(LnnStopTimeSync, int32_t(const char *, const char *));
+    MOCK_METHOD3(LnnStopTimeSync, int32_t(const char *, const char *, int32_t));
     MOCK_METHOD3(LnnPublishService, int32_t(const char *, const PublishInfo *, bool));
     MOCK_METHOD3(LnnUnPublishService, int32_t(const char *, int32_t, bool));
     MOCK_METHOD4(LnnStartDiscDevice, int32_t(const char *, const SubscribeInfo *, const InnerCallback *, bool));

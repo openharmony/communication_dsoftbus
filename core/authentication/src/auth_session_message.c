@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,33 +20,33 @@
 
 #include "anonymizer.h"
 #include "auth_common.h"
-#include "auth_request.h"
 #include "auth_connection.h"
 #include "auth_device_common_key.h"
 #include "auth_hichain_adapter.h"
 #include "auth_interface.h"
 #include "auth_log.h"
 #include "auth_manager.h"
+#include "auth_request.h"
 #include "bus_center_manager.h"
 #include "lnn_cipherkey_manager.h"
 #include "lnn_common_utils.h"
+#include "lnn_compress.h"
 #include "lnn_event.h"
 #include "lnn_extdata_config.h"
-#include "lnn_local_net_ledger.h"
 #include "lnn_feature_capability.h"
+#include "lnn_local_net_ledger.h"
 #include "lnn_network_manager.h"
-#include "lnn_settingdata_event_monitor.h"
 #include "lnn_node_info.h"
+#include "lnn_settingdata_event_monitor.h"
+#include "softbus_adapter_json.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
-#include "softbus_def.h"
+#include "softbus_adapter_timer.h"
 #include "softbus_common.h"
 #include "softbus_config_type.h"
+#include "softbus_def.h"
 #include "softbus_feature_config.h"
 #include "softbus_json_utils.h"
-#include "lnn_compress.h"
-#include "softbus_adapter_json.h"
-#include "softbus_adapter_timer.h"
 #include "softbus_socket.h"
 
 /* DeviceId */
@@ -257,21 +257,30 @@ static int32_t PackFastAuthValue(JsonObj *obj, AuthDeviceKeyInfo *deviceCommKey)
     return SOFTBUS_OK;
 }
 
+static bool GenerateUdidShortHash(const char *udid, char *udidHashBuf, uint32_t bufLen)
+{
+    uint8_t hash[SHA_256_HASH_LEN] = {0};
+    int ret = SoftBusGenerateStrHash((uint8_t *)udid, strlen(udid), hash);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "generate udidHash fail");
+        return false;
+    }
+    if (ConvertBytesToUpperCaseHexString(udidHashBuf, bufLen, hash, UDID_SHORT_HASH_LEN_TEMP) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "convert bytes to string fail");
+        return false;
+    }
+    return true;
+}
+
 static bool GetUdidOrShortHash(const AuthSessionInfo *info, char *udidBuf, uint32_t bufLen)
 {
+    if (!info->isServer && info->connInfo.type == AUTH_LINK_TYPE_ENHANCED_P2P) {
+        AUTH_LOGD(AUTH_FSM, "client(enhance p2p), use conninfo udid");
+        return GenerateUdidShortHash(info->connInfo.info.ipInfo.udid, udidBuf, bufLen);
+    }
     if (strlen(info->udid) != 0) {
         AUTH_LOGI(AUTH_FSM, "use info->udid build fastAuthInfo");
-        uint8_t hash[SHA_256_HASH_LEN] = {0};
-        int ret = SoftBusGenerateStrHash((uint8_t *)info->udid, strlen(info->udid), hash);
-        if (ret != SOFTBUS_OK) {
-            AUTH_LOGE(AUTH_FSM, "generate udidHash fail");
-            return false;
-        }
-        if (ConvertBytesToUpperCaseHexString(udidBuf, bufLen, hash, UDID_SHORT_HASH_LEN_TEMP) != SOFTBUS_OK) {
-            AUTH_LOGE(AUTH_FSM, "convert bytes to string fail");
-            return false;
-        }
-        return true;
+        return GenerateUdidShortHash(info->udid, udidBuf, bufLen);
     }
     if (info->connInfo.type == AUTH_LINK_TYPE_BLE) {
         AUTH_LOGI(AUTH_FSM, "use bleInfo deviceIdHash build fastAuthInfo");
@@ -284,6 +293,53 @@ static bool GetUdidOrShortHash(const AuthSessionInfo *info, char *udidBuf, uint3
     }
     AUTH_LOGD(AUTH_FSM, "udid len=%d, connInfo type=%d", strlen(info->udid), info->connInfo.type);
     return false;
+}
+
+static int32_t GetEnhancedP2pAuthKey(const char *udidHash, AuthSessionInfo *info, AuthDeviceKeyInfo *deviceKey)
+{
+    /* first, reuse ble authKey */
+    if (AuthFindDeviceKey(udidHash, AUTH_LINK_TYPE_BLE, deviceKey) == SOFTBUS_OK) {
+        AUTH_LOGD(AUTH_FSM, "get ble authKey succ");
+        return SOFTBUS_OK;
+    }
+    /* second, reuse wifi authKey */
+    int64_t authId = AuthGetLatestIdByUuid(info->uuid, AUTH_LINK_TYPE_WIFI, false);
+    if (authId == AUTH_INVALID_ID) {
+        AUTH_LOGE(AUTH_FSM, "get wifi authKey fail");
+        return SOFTBUS_ERR;
+    }
+    AuthManager *auth = GetAuthManagerByAuthId(authId);
+    int32_t index;
+    SessionKey sessionKey;
+    (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
+    if (GetLatestSessionKey(&auth->sessionKeyList, &index, &sessionKey) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "get key fail");
+        DelAuthManager(auth, false);
+        return SOFTBUS_ERR;
+    }
+    DelAuthManager(auth, false);
+    if (memcpy_s(deviceKey->deviceKey, SESSION_KEY_LENGTH,
+        sessionKey.value, sizeof(sessionKey.value)) != EOK) {
+        AUTH_LOGE(AUTH_FSM, "memcpy fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    deviceKey->keyLen = sessionKey.len;
+    /* wifi authKey not enable, associated with recoveryDeviceKey */
+    return SOFTBUS_ERR;
+}
+
+static int32_t GetFastAuthKey(const char *udidHash, AuthSessionInfo *info, AuthDeviceKeyInfo *deviceKey)
+{
+    if (info->connInfo.type == AUTH_LINK_TYPE_ENHANCED_P2P) {
+        AUTH_LOGI(AUTH_FSM, "get enhanced p2p fastAuth key");
+        return GetEnhancedP2pAuthKey(udidHash, info, deviceKey);
+    }
+    if (AuthFindDeviceKey(udidHash, info->connInfo.type, deviceKey) != SOFTBUS_OK) {
+        AUTH_LOGW(AUTH_FSM, "can't find common key, unsupport fastAuth");
+        info->isSupportFastAuth = false;
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
 }
 
 static void PackFastAuth(JsonObj *obj, AuthSessionInfo *info, const NodeInfo *localNodeInfo)
@@ -310,14 +366,14 @@ static void PackFastAuth(JsonObj *obj, AuthSessionInfo *info, const NodeInfo *lo
         return;
     }
     AUTH_LOGD(AUTH_FSM, "udidHashHexStr=%s", udidHashHexStr);
-    if (!IsPotentialTrustedDevice(ID_TYPE_DEVID, (const char *)udidHashHexStr, false, true)) {
+    if (info->connInfo.type != AUTH_LINK_TYPE_ENHANCED_P2P &&
+        !IsPotentialTrustedDevice(ID_TYPE_DEVID, (const char *)udidHashHexStr, false, false)) {
         AUTH_LOGI(AUTH_FSM, "not potential trusted realtion, bypass fastAuthProc");
         info->isSupportFastAuth = false;
         return;
     }
     AuthDeviceKeyInfo deviceCommKey = {0};
-    if (AuthFindDeviceKey(udidHashHexStr, info->connInfo.type, &deviceCommKey) != SOFTBUS_OK) {
-        AUTH_LOGW(AUTH_FSM, "can't find common key, unsupport fastAuth");
+    if (GetFastAuthKey(udidHashHexStr, info, &deviceCommKey) != SOFTBUS_OK) {
         info->isSupportFastAuth = false;
         return;
     }
@@ -385,14 +441,14 @@ static void UnpackFastAuth(JsonObj *obj, AuthSessionInfo *info)
         AUTH_LOGE(AUTH_FSM, "udid hash bytes to hexString fail");
         return;
     }
-    if (!IsPotentialTrustedDevice(ID_TYPE_DEVID, (const char *)udidShortHash, false, true)) {
+    if (info->connInfo.type != AUTH_LINK_TYPE_ENHANCED_P2P &&
+        !IsPotentialTrustedDevice(ID_TYPE_DEVID, (const char *)udidShortHash, false, false)) {
         AUTH_LOGI(AUTH_FSM, "not potential trusted realtion, fastAuth not support");
         return;
     }
     AuthDeviceKeyInfo deviceKey = {0};
-    /* find comm key use udid or udidShortHash */
-    if (AuthFindDeviceKey(udidShortHash, info->connInfo.type, &deviceKey) != SOFTBUS_OK) {
-        AUTH_LOGW(AUTH_FSM, "can't find common key, fastAuth not support");
+    if (GetFastAuthKey(udidShortHash, info, &deviceKey) != SOFTBUS_OK) {
+        AUTH_LOGW(AUTH_FSM, "can't find device key, fastAuth not support");
         return;
     }
     ParseFastAuthValue(info, encryptedFastAuth, &deviceKey);
@@ -434,6 +490,32 @@ static void PackWifiSinglePassInfo(JsonObj *obj, const AuthSessionInfo *info)
     JSON_AddStringToObject(obj, DEV_IP_HASH_TAG, devIpHash);
 }
 
+static bool VerifySessionInfoIdType(const AuthSessionInfo *info, JsonObj *obj, char *networkId, char *udid)
+{
+    if (info->idType == EXCHANGE_NETWORKID) {
+        if (!JSON_AddStringToObject(obj, DEVICE_ID_TAG, networkId)) {
+            AUTH_LOGE(AUTH_FSM, "add msg body fail");
+            return false;
+        }
+        char *anonyNetworkId = NULL;
+        Anonymize(networkId, &anonyNetworkId);
+        AUTH_LOGI(AUTH_FSM, "exchangeIdType=%d, networkid=%s", info->idType, anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
+    } else {
+        if (!JSON_AddStringToObject(obj, DEVICE_ID_TAG, udid)) {
+            AUTH_LOGE(AUTH_FSM, "add msg body fail");
+            return false;
+        }
+        char *anonyUdid = NULL;
+        Anonymize(udid, &anonyUdid);
+        AUTH_LOGI(AUTH_FSM, "exchangeIdType=%d, udid=%s", info->idType, anonyUdid);
+        AnonymizeFree(anonyUdid);
+    }
+
+    AUTH_LOGI(AUTH_FSM, "session info verify succ.");
+    return true;
+}
+
 static char *PackDeviceIdJson(const AuthSessionInfo *info)
 {
     AUTH_LOGI(AUTH_FSM, "connType=%d", info->connInfo.type);
@@ -465,26 +547,9 @@ static char *PackDeviceIdJson(const AuthSessionInfo *info)
             return NULL;
         }
     }
-    if (info->idType == EXCHANGE_NETWORKID) {
-        if (!JSON_AddStringToObject(obj, DEVICE_ID_TAG, networkId)) {
-            AUTH_LOGE(AUTH_FSM, "add msg body fail");
-            JSON_Delete(obj);
-            return NULL;
-        }
-        char *anonyNetworkId = NULL;
-        Anonymize(networkId, &anonyNetworkId);
-        AUTH_LOGI(AUTH_FSM, "exchangeIdType=%d, networkid=%s", info->idType, anonyNetworkId);
-        AnonymizeFree(anonyNetworkId);
-    } else {
-        if (!JSON_AddStringToObject(obj, DEVICE_ID_TAG, udid)) {
-            AUTH_LOGE(AUTH_FSM, "add msg body fail");
-            JSON_Delete(obj);
-            return NULL;
-        }
-        char *anonyUdid = NULL;
-        Anonymize(udid, &anonyUdid);
-        AUTH_LOGI(AUTH_FSM, "exchangeIdType=%d, udid=%s", info->idType, anonyUdid);
-        AnonymizeFree(anonyUdid);
+    if (!VerifySessionInfoIdType(info, obj, networkId, udid)) {
+        JSON_Delete(obj);
+        return NULL;
     }
     if (!JSON_AddStringToObject(obj, DATA_TAG, uuid) || !JSON_AddInt32ToObject(obj, DATA_BUF_SIZE_TAG, PACKET_SIZE) ||
         !JSON_AddInt32ToObject(obj, SOFTBUS_VERSION_TAG, info->version) ||
@@ -777,7 +842,7 @@ static void PackWifiDirectInfo(JsonObj *json, const NodeInfo *info, const char *
     unsigned char encodePtk[PTK_ENCODE_LEN] = {0};
     char localPtk[PTK_DEFAULT_LEN] = {0};
     if (LnnGetLocalPtkByUuid(remoteUuid, localPtk, PTK_DEFAULT_LEN) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "get ptk by udid fail");
+        AUTH_LOGE(AUTH_FSM, "get ptk by uuid fail");
         return;
     }
     size_t keyLen = 0;
@@ -1317,10 +1382,6 @@ static int32_t UnpackDeviceInfoBtV1(const JsonObj *json, NodeInfo *info)
 
 char *PackDeviceInfoMessage(int32_t linkType, SoftBusVersion version, bool isMetaAuth, const char *remoteUuid)
 {
-    if (remoteUuid == NULL) {
-        AUTH_LOGE(AUTH_FSM, "remoteUuid is null");
-        return NULL;
-    }
     AUTH_LOGI(AUTH_FSM, "connType=%d", linkType);
     const NodeInfo *info = LnnGetLocalNodeInfo();
     if (info == NULL) {

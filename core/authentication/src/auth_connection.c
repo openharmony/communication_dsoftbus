@@ -51,6 +51,8 @@ typedef struct {
 
 static ListNode g_connRequestList = { &g_connRequestList, &g_connRequestList };
 static AuthConnListener g_listener = { 0 };
+static bool g_enahnceP2pModuleIdStatics[AUTH_ENHANCED_P2P_NUM];
+
 void __attribute__((weak)) RouteBuildClientAuthManager(int32_t cfd)
 {
     (void)cfd;
@@ -58,6 +60,32 @@ void __attribute__((weak)) RouteBuildClientAuthManager(int32_t cfd)
 void __attribute__((weak)) RouteClearAuthChannelId(int32_t cfd)
 {
     (void)cfd;
+}
+
+static bool IsEnhanceP2pModuleId(ListenerModule moduleId)
+{
+    if (moduleId >= AUTH_ENHANCED_P2P_START && moduleId <= AUTH_ENHANCED_P2P_END) {
+        return true;
+    }
+    return false;
+}
+
+static ListenerModule AllocateWfiDirectListenerModuleId(void)
+{
+    for (int32_t i = 0; i < AUTH_ENHANCED_P2P_NUM; i++) {
+        if (!g_enahnceP2pModuleIdStatics[i]) {
+            g_enahnceP2pModuleIdStatics[i] = true;
+            return (ListenerModule)(AUTH_ENHANCED_P2P_START + i);
+        }
+    }
+    return (ListenerModule)SOFTBUS_ERR;
+}
+
+static void FreeWifiDirectListenerModuleId(ListenerModule moduleId)
+{
+    if (IsEnhanceP2pModuleId(moduleId)) {
+        g_enahnceP2pModuleIdStatics[moduleId - AUTH_ENHANCED_P2P_START] = false;
+    }
 }
 
 uint64_t GenConnId(int32_t connType, int32_t id)
@@ -85,6 +113,8 @@ const char *GetConnTypeStr(uint64_t connId)
             return "ble";
         case AUTH_LINK_TYPE_P2P:
             return "p2p";
+        case AUTH_LINK_TYPE_ENHANCED_P2P:
+            return "enhanced_p2p";
         default:
             break;
     }
@@ -348,7 +378,7 @@ static void OnWiFiDataReceived(ListenerModule module, int32_t fd, const AuthData
     CHECK_NULL_PTR_RETURN_VOID(head);
     CHECK_NULL_PTR_RETURN_VOID(data);
 
-    if (module != AUTH && module != AUTH_P2P) {
+    if (module != AUTH && module != AUTH_P2P && !IsEnhanceP2pModuleId(module)) {
         return;
     }
     bool fromServer = false;
@@ -615,6 +645,7 @@ int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnInfo *connInfo, Conn
             }
             __attribute__((fallthrough));
         case AUTH_LINK_TYPE_P2P:
+        case AUTH_LINK_TYPE_ENHANCED_P2P:
             ret = ConnectCommDevice(connInfo, requestId, sideType);
             break;
         default:
@@ -662,6 +693,7 @@ void DisconnectAuthDevice(uint64_t *connId)
             ConnDisconnectDevice(GetConnId(*connId));
             __attribute__((fallthrough));
         case AUTH_LINK_TYPE_P2P:
+        case AUTH_LINK_TYPE_ENHANCED_P2P:
             break;
         default:
             AUTH_LOGI(AUTH_CONN, "unknown connType");
@@ -681,6 +713,7 @@ int32_t PostAuthData(uint64_t connId, bool toServer, const AuthDataHead *head, c
         case AUTH_LINK_TYPE_BLE:
         case AUTH_LINK_TYPE_BR:
         case AUTH_LINK_TYPE_P2P:
+        case AUTH_LINK_TYPE_ENHANCED_P2P:
             return PostCommData(GetConnId(connId), toServer, head, data);
         default:
             AUTH_LOGI(AUTH_CONN, "unknown connType");
@@ -744,22 +777,6 @@ int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port)
             }
             return StartSocketListening(AUTH, &info);
         }
-        case AUTH_LINK_TYPE_P2P: {
-            LocalListenerInfo local = {
-                .type = CONNECT_TCP,
-                .socketOption = {
-                    .addr = "",
-                    .port = port,
-                    .moduleId = AUTH_P2P,
-                    .protocol = LNN_PROTOCOL_IP,
-                },
-            };
-            if (strcpy_s(local.socketOption.addr, sizeof(local.socketOption.addr), ip) != EOK) {
-                AUTH_LOGE(AUTH_CONN, "strcpy_s ip fail");
-                return SOFTBUS_MEM_ERR;
-            }
-            return ConnStartLocalListening(&local);
-        }
         default:
             AUTH_LOGE(AUTH_CONN, "unsupport linkType=%d", type);
             break;
@@ -774,21 +791,56 @@ void AuthStopListening(AuthLinkType type)
         case AUTH_LINK_TYPE_WIFI:
             StopSocketListening();
             break;
-        case AUTH_LINK_TYPE_P2P: {
-            LocalListenerInfo local = {
-                .type = CONNECT_TCP,
-                .socketOption = {
-                    .moduleId = AUTH_P2P,
-                    .protocol = LNN_PROTOCOL_IP,
-                },
-            };
-            if (ConnStopLocalListening(&local) != SOFTBUS_OK) {
-                AUTH_LOGE(AUTH_CONN, "ConnStopLocalListening fail");
-            }
-            break;
-        }
         default:
             AUTH_LOGE(AUTH_CONN, "unsupport linkType=%d", type);
             break;
+    }
+}
+
+int32_t AuthStartListeningForWifiDirect(AuthLinkType type, const char *ip, int32_t port, ListenerModule *moduleId)
+{
+    AUTH_CHECK_AND_RETURN_RET_LOGE(ip != NULL, SOFTBUS_INVALID_PARAM, AUTH_CONN, "ip is null");
+    AUTH_CHECK_AND_RETURN_RET_LOGE(moduleId != NULL, SOFTBUS_INVALID_PARAM, AUTH_CONN, "moduleId is null");
+
+    LocalListenerInfo local;
+    local.type = CONNECT_TCP;
+    local.socketOption.port = port;
+    local.socketOption.protocol = LNN_PROTOCOL_IP;
+    int32_t ret = strcpy_s(local.socketOption.addr, sizeof(local.socketOption.addr), ip);
+    AUTH_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_STRCPY_ERR, AUTH_CONN, "copy ip failed");
+
+    if (type == AUTH_LINK_TYPE_P2P) {
+        local.socketOption.moduleId = AUTH_P2P;
+    } else if (type == AUTH_LINK_TYPE_ENHANCED_P2P) {
+        local.socketOption.moduleId = AllocateWfiDirectListenerModuleId();
+        AUTH_CHECK_AND_RETURN_RET_LOGE(local.socketOption.moduleId > 0, SOFTBUS_ERR, AUTH_CONN,
+                                       "alloc listener module id failed");
+    } else {
+        AUTH_LOGE(AUTH_CONN, "type=%d invalid", type);
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t realPort = ConnStartLocalListening(&local);
+    AUTH_CHECK_AND_RETURN_RET_LOGE(realPort > 0, SOFTBUS_ERR, AUTH_CONN, "start local listening failed");
+    AUTH_LOGI(AUTH_CONN, "moduleId=%u port=%d", local.socketOption.moduleId, realPort);
+    *moduleId = local.socketOption.moduleId;
+    return realPort;
+}
+
+void AuthStopListeningForWifiDirect(AuthLinkType type, ListenerModule moduleId)
+{
+    AUTH_CHECK_AND_RETURN_LOGE(type == AUTH_LINK_TYPE_P2P || type == AUTH_LINK_TYPE_ENHANCED_P2P, AUTH_CONN,
+                               "type=%d invalid", type);
+    LocalListenerInfo local = {
+        .type = CONNECT_TCP,
+        .socketOption = {
+            .moduleId = moduleId,
+            .protocol = LNN_PROTOCOL_IP,
+        },
+    };
+
+    FreeWifiDirectListenerModuleId(moduleId);
+    if (ConnStopLocalListening(&local) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "ConnStopLocalListening fail");
     }
 }

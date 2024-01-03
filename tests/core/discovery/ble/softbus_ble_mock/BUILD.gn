@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -23,7 +23,6 @@ module_output_path = "dsoftbus/discovery"
 ohos_unittest("DiscBleTest") {
   module_out_path = module_output_path
   sources = [
-    "$dsoftbus_root_path/core/discovery/ble/approach_ble/src/disc_approach_ble_virtual.c",
     "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/disc_ble.c",
     "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/disc_ble_utils.c",
     "ble_mock.cpp",
@@ -33,31 +32,22 @@ ohos_unittest("DiscBleTest") {
   sources += test_utils_src
 
   include_dirs = [
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/discovery/ble/dispatcher/include",
-    "$dsoftbus_root_path/core/discovery/manager/include",
-    "$dsoftbus_root_path/core/discovery/interface",
-    "$dsoftbus_root_path/core/discovery/ble/approach_ble/include",
-    "$dsoftbus_root_path/core/discovery/ble/softbus_ble/include",
-    "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_root_path/interfaces/kits/discovery",
-    "$dsoftbus_root_path/interfaces/kits/bus_center",
-    "$softbus_adapter_common/include",
-    "$softbus_adapter_common/net/bluetooth/include",
-    "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/connection/interface",
-    "$dsoftbus_root_path/core/connection/manager",
-    "$dsoftbus_root_path/core/connection/tcp/include",
-    "$dsoftbus_root_path/core/connection/ble/include",
-    "$dsoftbus_root_path/core/connection/ble/src",
-    "$dsoftbus_root_path/core/bus_center/interface",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
-    "$dsoftbus_root_path/core/discovery/interface",
-    "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/ble/softbus_ble/include",
     "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
-    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$softbus_adapter_common/include",
+    "$softbus_adapter_common/net/bluetooth/broadcast/interface",
+    "$softbus_adapter_common/net/bluetooth/include",
     "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
   ]
   include_dirs += test_utils_inc

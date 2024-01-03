@@ -137,7 +137,7 @@ int32_t GetLatestSessionKey(const SessionKeyList *list, int32_t *index, SessionK
     }
     item->lastUseTime = GetCurrentTimeMs();
     *index = item->index;
-    AUTH_LOGI(AUTH_FSM, "get session key succ, index=%d.", item->index);
+    AUTH_LOGD(AUTH_FSM, "get session key succ, index=%d", item->index);
     return SOFTBUS_OK;
 }
 
@@ -155,7 +155,7 @@ int32_t GetSessionKeyByIndex(const SessionKeyList *list, int32_t index, SessionK
             return SOFTBUS_MEM_ERR;
         }
         item->lastUseTime = GetCurrentTimeMs();
-        AUTH_LOGI(AUTH_FSM, "get session key succ, index=%d", index);
+        AUTH_LOGD(AUTH_FSM, "get session key succ, index=%d", index);
         return SOFTBUS_OK;
     }
     AUTH_LOGE(AUTH_FSM, "session key not found, index=%d", index);

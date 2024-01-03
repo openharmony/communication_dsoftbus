@@ -390,7 +390,7 @@ int32_t JoinLNNInner(const char *pkgName, ConnectionAddr *target, OnJoinLNNResul
         }
         rc = ServerIpcJoinLNN(pkgName, target, sizeof(*target));
         if (rc != SOFTBUS_OK) {
-            LNN_LOGE(LNN_STATE, "request join lnn");
+            LNN_LOGE(LNN_STATE, "request join lnn failed, ret=%d", rc);
         } else {
             rc = AddJoinLNNCbItem(target, cb);
         }
@@ -420,7 +420,7 @@ int32_t LeaveLNNInner(const char *pkgName, const char *networkId, OnLeaveLNNResu
         }
         rc = ServerIpcLeaveLNN(pkgName, networkId);
         if (rc != SOFTBUS_OK) {
-            LNN_LOGE(LNN_STATE, "request leave lnn");
+            LNN_LOGE(LNN_STATE, "request leave lnn failed, ret=%d", rc);
         } else {
             rc = AddLeaveLNNCbItem(networkId, cb);
         }
@@ -546,7 +546,7 @@ int32_t StartTimeSyncInner(const char *pkgName, const char *targetNetworkId, Tim
         }
         rc = ServerIpcStartTimeSync(pkgName, targetNetworkId, accuracy, period);
         if (rc != SOFTBUS_OK) {
-            LNN_LOGE(LNN_STATE, "start time sync");
+            LNN_LOGE(LNN_STATE, "start time sync failed, ret=%d", rc);
         } else {
             rc = AddTimeSyncCbItem(targetNetworkId, cb);
         }
@@ -573,7 +573,7 @@ int32_t StopTimeSyncInner(const char *pkgName, const char *targetNetworkId)
     while ((item = FindTimeSyncCbItem(targetNetworkId, NULL)) != NULL) {
         rc = ServerIpcStopTimeSync(pkgName, targetNetworkId);
         if (rc != SOFTBUS_OK) {
-            LNN_LOGE(LNN_STATE, "stop time sync");
+            LNN_LOGE(LNN_STATE, "stop time sync failed, ret=%d", rc);
         } else {
             ListDelete(&item->node);
             SoftBusFree(item);

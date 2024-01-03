@@ -14,51 +14,31 @@
  */
 
 #include "adapter_bt_utils.h"
-#include "softbus_def.h"
+
+OhosStatusToSoftBus BleStatus[] = {
+    {OHOS_BT_STATUS_SUCCESS,            SOFTBUS_BT_STATUS_SUCCESS},
+    {OHOS_BT_STATUS_FAIL,               SOFTBUS_BT_STATUS_FAIL},
+    {OHOS_BT_STATUS_NOT_READY,          SOFTBUS_BT_STATUS_NOT_READY},
+    {OHOS_BT_STATUS_NOMEM,              SOFTBUS_BT_STATUS_NOMEM},
+    {OHOS_BT_STATUS_BUSY,               SOFTBUS_BT_STATUS_BUSY},
+    {OHOS_BT_STATUS_DONE,               SOFTBUS_BT_STATUS_DONE},
+    {OHOS_BT_STATUS_UNSUPPORTED,        SOFTBUS_BT_STATUS_UNSUPPORTED},
+    {OHOS_BT_STATUS_PARM_INVALID,       SOFTBUS_BT_STATUS_PARM_INVALID},
+    {OHOS_BT_STATUS_UNHANDLED,          SOFTBUS_BT_STATUS_UNHANDLED},
+    {OHOS_BT_STATUS_AUTH_FAILURE,       SOFTBUS_BT_STATUS_AUTH_FAILURE},
+    {OHOS_BT_STATUS_RMT_DEV_DOWN,       SOFTBUS_BT_STATUS_RMT_DEV_DOWN},
+    {OHOS_BT_STATUS_AUTH_REJECTED,      SOFTBUS_BT_STATUS_AUTH_REJECTED},
+};
 
 int32_t BleOhosStatusToSoftBus(BtStatus btStatus)
 {
-    int32_t status;
-    switch (btStatus) {
-        case OHOS_BT_STATUS_SUCCESS:
-            status = SOFTBUS_BT_STATUS_SUCCESS;
-            break;
-        case OHOS_BT_STATUS_FAIL:
-            status = SOFTBUS_BT_STATUS_FAIL;
-            break;
-        case OHOS_BT_STATUS_NOT_READY:
-            status = SOFTBUS_BT_STATUS_NOT_READY;
-            break;
-        case OHOS_BT_STATUS_NOMEM:
-            status = SOFTBUS_BT_STATUS_NOMEM;
-            break;
-        case OHOS_BT_STATUS_BUSY:
-            status = SOFTBUS_BT_STATUS_BUSY;
-            break;
-        case OHOS_BT_STATUS_DONE:
-            status = SOFTBUS_BT_STATUS_DONE;
-            break;
-        case OHOS_BT_STATUS_UNSUPPORTED:
-            status = SOFTBUS_BT_STATUS_UNSUPPORTED;
-            break;
-        case OHOS_BT_STATUS_PARM_INVALID:
-            status = SOFTBUS_BT_STATUS_PARM_INVALID;
-            break;
-        case OHOS_BT_STATUS_UNHANDLED:
-            status = SOFTBUS_BT_STATUS_UNHANDLED;
-            break;
-        case OHOS_BT_STATUS_AUTH_FAILURE:
-            status = SOFTBUS_BT_STATUS_AUTH_FAILURE;
-            break;
-        case OHOS_BT_STATUS_RMT_DEV_DOWN:
-            status = SOFTBUS_BT_STATUS_RMT_DEV_DOWN;
-            break;
-        case OHOS_BT_STATUS_AUTH_REJECTED:
-            status = SOFTBUS_BT_STATUS_AUTH_REJECTED;
-            break;
-        default:
-            status = SOFTBUS_BT_STATUS_FAIL;
-            break;
+    int32_t status = OHOS_BT_STATUS_FAIL;
+    const int len = sizeof(BleStatus) / sizeof(BleStatus[0]);
+    OhosStatusToSoftBus *ptr = BleStatus;
+
+    if (btStatus >= len) {
+        return status;
     }
-    return status;
+
+    return (ptr + btStatus)->softBusBtStatus;
 }

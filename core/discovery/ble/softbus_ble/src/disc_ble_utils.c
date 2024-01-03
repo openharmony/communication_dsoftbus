@@ -95,7 +95,7 @@ static int32_t DiscBleGetDeviceUdid(char *udid, uint32_t len)
 
 int32_t DiscBleGetDeviceName(char *deviceName)
 {
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, deviceName, DEVICE_NAME_BUF_LEN) != SOFTBUS_OK) {
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, deviceName, DISC_MAX_DEVICE_NAME_LEN) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "Get local device name failed.");
         return SOFTBUS_ERR;
     }

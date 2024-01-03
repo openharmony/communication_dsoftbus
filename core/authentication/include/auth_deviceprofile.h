@@ -12,7 +12,6 @@
  * See the License for the specific language governing permission and
  * limitations under the License.
  */
- 
 
 #ifndef AUTH_DEVICEPROFILE_H
 #define AUTH_DEVICEPROFILE_H
@@ -24,6 +23,7 @@ extern "C" {
 #endif
 
 bool IsPotentialTrustedDeviceDp(const char *deviceIdHash);
+void UpdateDpSameAccount(const char *accountHash, const char *deviceId);
 
 #ifdef __cplusplus
 #if __cplusplus
