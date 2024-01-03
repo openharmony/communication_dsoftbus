@@ -63,3 +63,18 @@ void DiscAuditInner(int32_t scene, const char *func, int32_t line, DiscAuditExtr
     };
     SoftbusAuditInner(EVENT_MODULE_DISC, &form);
 }
+
+void DiscEventExtraInit(DiscEventExtra *extra)
+{
+    extra->capabilityData = NULL;
+    extra->scanCycle = NULL;
+    extra->localNetworkId = NULL;
+    extra->peerIp = NULL;
+    extra->peerBrMac = NULL;
+    extra->peerBleMac = NULL;
+    extra->peerWifiMac = NULL;
+    extra->peerPort = NULL;
+    extra->peerNetworkId = NULL;
+    extra->peerDeviceType = NULL;
+    extra->callerPkg = NULL;
+}

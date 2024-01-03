@@ -48,6 +48,14 @@ DISCOVER_BEHAVIOR:
   BIZ_STAGE: {type: INT32, desc: business stage }
   STAGE_RES: {type: INT32, desc: stage result }
   ERROR_CODE: { type: INT32, desc: error code }
+  INIT_TYPE: { type: INT32, desc: init type }
+  SERVER_TYPE: { type: INT32, desc: server type }
+  INTERFACE_FUNC_TYPE: { type: INT32, desc: interface func type }
+  CAPABILITY_BIT: { type: INT32, desc: capability bit map }
+  CAPABILITY_DATA: { type: INT32, desc: capability data }
+  BLE_TURN_STATE: { type: INT32, desc: ble turn state }
+  IP_LINK_STATUS: { type: INT32, desc: ip link status }
+  COAP_CHANGE_TYPE: { type: INT32, desc: coap change type }
   BROADCAST_TYPE: { type: INT32, desc: broadcast type }
   BROADCAST_FREQ: { type: INT32, desc: broadcast frequency }
   SCAN_TYPE: { type: INT32, desc: scan type }
@@ -56,14 +64,11 @@ DISCOVER_BEHAVIOR:
   DISC_MODE: { type: INT32, desc: discovery mode }
   FIRST_DISCOVERY_TIME: { type: INT32, desc: time consuming to discover for the first time }
   LOCAL_NET_ID: { type: STRING, desc: local device net id }
-  LOCAL_UDID: { type: STRING, desc: local device udid }
-  LOCAL_DEV_TYPE: { type: STRING, desc: local device type }
   PEER_IP: { type: STRING, desc: peer device ip }
   PEER_BR_MAC: { type: STRING, desc: peer device br mac }
   PEER_BLE_MAC: { type: STRING, desc: peer device ble mac }
   PEER_WIFI_MAC: { type: STRING, desc: peer device wifi mac }
   PEER_PORT: { type: STRING, desc: peer device port }
-  PEER_UDID: { type: STRING, desc: peer device udid }
   PEER_NET_ID: { type: STRING, desc: peer device net id }
   PEER_DEV_TYPE: { type: STRING, desc: peer device type }
 
@@ -121,6 +126,9 @@ BUSCENTER_BEHAVIOR:
   BIZ_STAGE: {type: INT32, desc: business stage }
   STAGE_RES: {type: INT32, desc: stage result }
   ERROR_CODE: { type: INT32, desc: error code }
+  DISC_SERVER_TYPE: {type: INT32, desc: disc server type }
+  GEAR_CYCLE: {type: INT32, desc: gear cycle }
+  GEAR_DURATION: {type: INT32, desc: gear duration }
   CONN_ID: { type: INT32, desc: connection id }
   AUTH_TYPE: { type: INT32, desc: auth type }
   AUTH_ID: { type: INT32, desc: auth id }

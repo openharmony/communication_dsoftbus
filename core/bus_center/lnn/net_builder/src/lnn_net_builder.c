@@ -1854,7 +1854,7 @@ static JoinLnnMsgPara *CreateJoinLnnMsgPara(const ConnectionAddr *addr, const ch
     return para;
 }
 
-static void BuildLnnEvent(LnnEventExtra *lnnEventExtra, const ConnectionAddr *addr)
+static void BuildLnnEvent(LnnEventExtra *lnnEventExtra, ConnectionAddr *addr)
 {
     if (lnnEventExtra == NULL || addr == NULL) {
         LNN_LOGW(LNN_STATE, "lnnEventExtra or addr is null");
@@ -1868,13 +1868,32 @@ static void BuildLnnEvent(LnnEventExtra *lnnEventExtra, const ConnectionAddr *ad
             lnnEventExtra->peerBleMac = addr->info.ble.bleMac;
             break;
         case CONNECTION_ADDR_WLAN:
+            /* fall-through */
         case CONNECTION_ADDR_ETH:
             lnnEventExtra->peerIp = addr->info.ip.ip;
             break;
         default:
-            LNN_LOGE(LNN_BUILDER, "unknow param type!");
+            LNN_LOGE(LNN_BUILDER, "unknown param type!");
             break;
     }
+}
+
+static void DfxRecordLnnServerjoinEnd(ConnectionAddr *addr, const char *packageName, int32_t reason)
+{
+    LnnEventExtra extra = { 0 };
+    LnnEventExtraInit(&extra);
+    extra.errcode = reason;
+    extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+
+    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    if (packageName != NULL && IsValidString(packageName, PKG_NAME_SIZE_MAX - 1) && strncpy_s(pkgName,
+        PKG_NAME_SIZE_MAX, packageName, PKG_NAME_SIZE_MAX - 1) == EOK) {
+        extra.callerPkg = pkgName;
+    }
+    if (addr != NULL) {
+        BuildLnnEvent(&extra, addr);
+    }
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_START, extra);
 }
 
 static char *CreateNetworkIdMsgPara(const char *networkId)
@@ -2233,25 +2252,23 @@ int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName)
 
     LNN_LOGI(LNN_BUILDER, "enter!");
     if (g_netBuilder.isInit == false) {
+        DfxRecordLnnServerjoinEnd(addr, pkgName, SOFTBUS_NO_INIT);
         LNN_LOGE(LNN_BUILDER, "no init");
         return SOFTBUS_NO_INIT;
     }
     para = CreateJoinLnnMsgPara(addr, pkgName, true);
     if (para == NULL) {
+        DfxRecordLnnServerjoinEnd(addr, pkgName, SOFTBUS_MALLOC_ERR);
         LNN_LOGE(LNN_BUILDER, "prepare join lnn message fail");
         return SOFTBUS_MALLOC_ERR;
     }
-    LnnEventExtra lnnEventExtra = { .callerPkg = pkgName };
-    BuildLnnEvent(&lnnEventExtra, addr);
-    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_START, lnnEventExtra);
     if (PostMessageToHandler(MSG_TYPE_JOIN_LNN, para) != SOFTBUS_OK) {
-        lnnEventExtra.result = EVENT_STAGE_RESULT_FAILED;
-        lnnEventExtra.errcode = SOFTBUS_NETWORK_JOIN_LNN_START_ERR;
-        LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_START, lnnEventExtra);
+        DfxRecordLnnServerjoinEnd(addr, pkgName, SOFTBUS_NETWORK_LOOPER_ERR);
         LNN_LOGE(LNN_BUILDER, "post join lnn message fail");
         SoftBusFree(para);
         return SOFTBUS_NETWORK_LOOPER_ERR;
     }
+    DfxRecordLnnServerjoinEnd(addr, pkgName, SOFTBUS_OK);
     return SOFTBUS_OK;
 }
 
@@ -2270,12 +2287,7 @@ int32_t LnnServerLeave(const char *networkId, const char *pkgName)
         LNN_LOGE(LNN_BUILDER, "prepare leave lnn message fail");
         return SOFTBUS_MALLOC_ERR;
     }
-    LnnEventExtra lnnEventExtra = { .callerPkg = pkgName };
-    LNN_EVENT(EVENT_SCENE_LEAVE_LNN, EVENT_STAGE_LEAVE_LNN_START, lnnEventExtra);
     if (PostMessageToHandler(MSG_TYPE_LEAVE_LNN, para) != SOFTBUS_OK) {
-        lnnEventExtra.result = EVENT_STAGE_RESULT_FAILED;
-        lnnEventExtra.errcode = SOFTBUS_NETWORK_LEAVE_LNN_START_ERR;
-        LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_LEAVE_LNN_START, lnnEventExtra);
         LNN_LOGE(LNN_BUILDER, "post leave lnn message fail");
         SoftBusFree(para);
         return SOFTBUS_NETWORK_LOOPER_ERR;
@@ -2287,29 +2299,17 @@ int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, bool isNeedConnect)
 {
     JoinLnnMsgPara *para = NULL;
 
-    LnnEventExtra lnnEventExtra = {0};
-    BuildLnnEvent(&lnnEventExtra, addr);
-    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_START, lnnEventExtra);
     LNN_LOGI(LNN_BUILDER, "notify discovery device enter! isNeedConnect = %d", isNeedConnect);
     if (g_netBuilder.isInit == false) {
-        lnnEventExtra.result = EVENT_STAGE_RESULT_FAILED;
-        lnnEventExtra.errcode = SOFTBUS_NETWORK_JOIN_LNN_START_ERR;
-        LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_START, lnnEventExtra);
         LNN_LOGE(LNN_BUILDER, "no init");
         return SOFTBUS_NO_INIT;
     }
     para = CreateJoinLnnMsgPara(addr, DEFAULT_PKG_NAME, isNeedConnect);
     if (para == NULL) {
-        lnnEventExtra.result = EVENT_STAGE_RESULT_FAILED;
-        lnnEventExtra.errcode = SOFTBUS_NETWORK_JOIN_LNN_START_ERR;
-        LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_START, lnnEventExtra);
         LNN_LOGE(LNN_BUILDER, "malloc discovery device message fail");
         return SOFTBUS_MALLOC_ERR;
     }
     if (PostMessageToHandler(MSG_TYPE_DISCOVERY_DEVICE, para) != SOFTBUS_OK) {
-        lnnEventExtra.result = EVENT_STAGE_RESULT_FAILED;
-        lnnEventExtra.errcode = SOFTBUS_NETWORK_JOIN_LNN_START_ERR;
-        LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_START, lnnEventExtra);
         LNN_LOGE(LNN_BUILDER, "post notify discovery device message failed");
         SoftBusFree(para);
         return SOFTBUS_ERR;
@@ -2384,12 +2384,7 @@ void LnnSyncOfflineComplete(LnnSyncInfoType type, const char *networkId, const u
         LNN_LOGE(LNN_BUILDER, "prepare notify sync offline message fail");
         return;
     }
-    LnnEventExtra lnnEventExtra = {0};
-    LNN_EVENT(EVENT_SCENE_LEAVE_LNN, EVENT_STAGE_LEAVE_LNN_START, lnnEventExtra);
     if (PostMessageToHandler(MSG_TYPE_SYNC_OFFLINE_FINISH, para) != SOFTBUS_OK) {
-        lnnEventExtra.result = EVENT_STAGE_RESULT_FAILED;
-        lnnEventExtra.errcode = SOFTBUS_NETWORK_LEAVE_LNN_START_ERR;
-        LNN_EVENT(EVENT_SCENE_LEAVE_LNN, EVENT_STAGE_LEAVE_LNN_START, lnnEventExtra);
         LNN_LOGE(LNN_BUILDER, "post sync offline finish message failed");
         SoftBusFree(para);
     }
