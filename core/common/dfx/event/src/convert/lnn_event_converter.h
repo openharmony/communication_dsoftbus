@@ -36,6 +36,9 @@ extern "C" {
 
 LNN_ASSIGNER(Errcode, Result, result)
 LNN_ASSIGNER(Errcode, Errcode, errcode)
+LNN_ASSIGNER(Int32, DiscServerType, discServerType)
+LNN_ASSIGNER(Int32, GearCycle, gearCycle)
+LNN_ASSIGNER(Int32, GearDuration, gearDuration)
 LNN_ASSIGNER(Int32, ConnectionId, connectionId)
 LNN_ASSIGNER(Int32, AuthType, authType)
 LNN_ASSIGNER(Int32, AuthId, authId)
@@ -54,10 +57,13 @@ LNN_ASSIGNER(String, PeerDeviceType, peerDeviceType)
 LNN_ASSIGNER(String, CallerPkg, callerPkg)
 LNN_ASSIGNER(String, CalleePkg, calleePkg)
 
-#define LNN_ASSIGNER_SIZE 19 // Size of g_connAssigners
+#define LNN_ASSIGNER_SIZE 22 // Size of g_connAssigners
 static const HiSysEventParamAssigner g_lnnAssigners[] = {
     { "STAGE_RES",        HISYSEVENT_INT32,  LnnAssignerResult           },
     { "ERROR_CODE",       HISYSEVENT_INT32,  LnnAssignerErrcode          },
+    { "DISC_SERVER_TYPE", HISYSEVENT_INT32,  LnnAssignerDiscServerType   },
+    { "GEAR_CYCLE",       HISYSEVENT_INT32,  LnnAssignerGearCycle        },
+    { "GEAR_DURATION",    HISYSEVENT_INT32,  LnnAssignerGearDuration     },
     { "CONN_ID",          HISYSEVENT_INT32,  LnnAssignerConnectionId     },
     { "AUTH_TYPE",        HISYSEVENT_INT32,  LnnAssignerAuthType         },
     { "AUTH_ID",          HISYSEVENT_INT32,  LnnAssignerAuthId           },
@@ -69,10 +75,10 @@ static const HiSysEventParamAssigner g_lnnAssigners[] = {
     { "PEER_BR_MAC",      HISYSEVENT_STRING, LnnAssignerPeerBrMac        },
     { "PEER_BLE_MAC",     HISYSEVENT_STRING, LnnAssignerPeerBleMac       },
     { "PEER_WIFI_MAC",    HISYSEVENT_STRING, LnnAssignerPeerWifiMac      },
-    { "PEER_PORT",        HISYSEVENT_INT32,  LnnAssignerPeerPort         },
+    { "PEER_PORT",        HISYSEVENT_STRING, LnnAssignerPeerPort         },
     { "PEER_UDID",        HISYSEVENT_STRING, LnnAssignerPeerUdid         },
     { "PEER_NET_ID",      HISYSEVENT_STRING, LnnAssignerPeerNetworkId    },
-    { "PEER_DEV_TYPE",    HISYSEVENT_INT32,  LnnAssignerPeerDeviceType   },
+    { "PEER_DEV_TYPE",    HISYSEVENT_STRING, LnnAssignerPeerDeviceType   },
     { "HOST_PKG",         HISYSEVENT_STRING, LnnAssignerCallerPkg        },
     { "TO_CALL_PKG",      HISYSEVENT_STRING, LnnAssignerCalleePkg        },
     // Modification Note: remember updating LNN_ASSIGNER_SIZE

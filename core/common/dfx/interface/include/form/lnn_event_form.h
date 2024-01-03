@@ -27,27 +27,50 @@ extern "C" {
 #endif
 
 typedef enum {
-    EVENT_SCENE_JOIN_LNN = 1,
-    EVENT_SCENE_LEAVE_LNN = 2,
+    EVENT_SCENE_LNN = 1,
+    EVENT_SCENE_JOIN_LNN = 2,
+    EVENT_SCENE_LEAVE_LNN = 3,
 } LnnEventScene;
 
 typedef enum {
+    EVENT_STAGE_LNN_DISC_SDK = 1,
+    EVENT_STAGE_LNN_DISC_SERVICE = 2,
+    EVENT_STAGE_LNN_JOIN_SDK = 3,
+    EVENT_STAGE_LNN_LEAVE_SDK = 4,
+    EVENT_STAGE_LNN_REG_NODE = 5,
+    EVENT_STAGE_LNN_SHIFT_GEAR = 6,
+} LnnEventLnnStage;
+
+typedef enum {
     EVENT_STAGE_JOIN_LNN_START = 1,
-    EVENT_STAGE_AUTH_CONNECTION = 2,
-    EVENT_STAGE_AUTH_DEVICE = 3,
-    EVENT_STAGE_EXCHANGE_CIPHER = 4,
-    EVENT_STAGE_EXCHANGE_DEVICE_INFO = 5,
-    EVENT_STAGE_JOIN_LNN_END = 6,
+    EVENT_STAGE_AUTH = 2,
+    EVENT_STAGE_AUTH_CONNECTION = 3,
+    EVENT_STAGE_AUTH_DEVICE_ID_POST = 4,
+    EVENT_STAGE_AUTH_DEVICE_ID_PROCESS = 5,
+    EVENT_STAGE_AUTH_HICHAIN = 6,
+    EVENT_STAGE_AUTH_EXCHANGE_CIPHER = 7,
+    EVENT_STAGE_AUTH_DEVICE_INFO_POST = 8,
+    EVENT_STAGE_AUTH_DEVICE_INFO_PROCESS = 9,
+    EVENT_STAGE_JOIN_LNN_END = 10,
 } LnnEventJoinLnnStage;
 
 typedef enum {
-    EVENT_STAGE_LEAVE_LNN_START = 1,
-    EVENT_STAGE_LEAVE_LNN_END = 2,
+    EVENT_STAGE_LEAVE_LNN = 1,
 } LnnEventLeaveLnnStage;
+
+typedef enum {
+    DISC_SERVER_PUBLISH = 1,
+    DISC_SERVER_STOP_PUBLISH = 2,
+    DISC_SERVER_DISCOVERY = 3,
+    DISC_SERVER_STOP_DISCOVERY = 4,
+} LnnDiscServerType;
 
 typedef struct {
     int32_t result;             // STAGE_RES
     int32_t errcode;            // ERROR_CODE
+    int32_t discServerType;     // DISC_SERVER_TYPE
+    int32_t gearCycle;          // GEAR_CYCLE
+    int32_t gearDuration;       // GEAR_DURATION
     int32_t connectionId;       // CONN_ID
     int32_t authType;           // AUTH_TYPE
     int32_t authId;             // AUTH_ID
