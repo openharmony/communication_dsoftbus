@@ -396,9 +396,8 @@ void *SendHandlerLoop(void *arg)
     SendBrQueueNode *sendNode = NULL;
     while (true) {
         int32_t status = ConnBrDequeueBlock((void **)(&sendNode));
-        if (status != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BR, "ATTENTION UNEXPECTED ERROR! br send data failed: br dequeue send node failed, "
-                "error=%d", status);
+        if (status != SOFTBUS_OK || sendNode == NULL) {
+            CONN_LOGE(CONN_BR, "br dequeue send node failed, error=%d", status);
             continue;
         }
         ConnBrConnection *connection = ConnBrGetConnectionById(sendNode->connectionId);
