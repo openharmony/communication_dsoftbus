@@ -47,7 +47,7 @@ static bool g_isApCoexistSupported = false;
 static bool g_isWifiEnable = false;
 static bool g_isApEnable = false;
 
-static uint32_t ConvertMsgToCapability(uint32_t *capability, const uint8_t *msg, int32_t len)
+static uint32_t ConvertMsgToCapability(uint32_t *capability, const uint8_t *msg, uint32_t len)
 {
     if (capability == NULL || msg == NULL || len < BITS) {
         return SOFTBUS_ERR;
@@ -112,7 +112,7 @@ static void OnReceiveCapaSyncInfoMsg(LnnSyncInfoType type, const char *networkId
         return;
     }
     uint32_t capability = 0;
-    if (ConvertMsgToCapability(&capability, (const uint8_t *)msg, len) != SOFTBUS_OK) {
+    if (ConvertMsgToCapability(&capability, msg, len) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "convert msg to capability fail");
         return;
     }
@@ -202,8 +202,8 @@ static void SendNetCapabilityToRemote(uint32_t netCapability, uint32_t type)
 
 static void WifiStateProcess(uint32_t netCapability, bool isSend)
 {
-    LNN_LOGI(LNN_BUILDER, "wifi state change netCapability=%d, isSend=%d", netCapability, isSend);
-    if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, netCapability) != SOFTBUS_OK) {
+    LNN_LOGI(LNN_BUILDER, "wifi state change netCapability=%u, isSend=%d", netCapability, isSend);
+    if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t)netCapability) != SOFTBUS_OK) {
         return;
     }
     if (!isSend) {
@@ -339,7 +339,7 @@ static void BtStateChangeEventHandler(const LnnEventBasicInfo *info)
 
     LNN_LOGI(LNN_BUILDER, "bt state change netCapability=%d, isSend=%d",
         netCapability, isSend);
-    if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, netCapability) != SOFTBUS_OK) {
+    if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t)netCapability) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "set cap to local ledger fail");
         return;
     }

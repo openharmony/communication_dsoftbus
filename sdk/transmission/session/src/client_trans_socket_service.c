@@ -16,6 +16,7 @@
 #include "anonymizer.h"
 #include "client_trans_session_adapter.h"
 #include "socket.h"
+#include "inner_socket.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
@@ -110,4 +111,10 @@ int32_t EvaluateQos(const char *peerNetworkId, TransDataType dataType, const Qos
     }
 
     return ServerIpcEvaluateQos(peerNetworkId, dataType, qos, qosCount);
+}
+
+int32_t GetMtuSize(int32_t socket, uint32_t *mtuSize)
+{
+    TRANS_LOGI(TRANS_SDK, "GetMtuSize: socket=%d", socket);
+    return GetSocketMtuSize(socket, mtuSize);
 }

@@ -374,7 +374,7 @@ int32_t SoftBusGetCurrentGroup(SoftBusWifiP2pGroupInfo *groupInfo)
 {
     WifiP2pGroupInfo result;
     if (GetCurrentGroup(&result) != WIFI_SUCCESS) {
-        LNN_LOGE(LNN_STATE, "get SoftBusGetCurrentGroup failed");
+        LNN_LOGD(LNN_STATE, "get SoftBusGetCurrentGroup failed");
         return SOFTBUS_ERR;
     }
     if (memcpy_s(groupInfo, sizeof(SoftBusWifiP2pGroupInfo), &result, sizeof(WifiP2pGroupInfo)) != EOK) {

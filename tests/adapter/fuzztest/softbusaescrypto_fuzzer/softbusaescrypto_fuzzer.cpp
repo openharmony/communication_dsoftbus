@@ -20,7 +20,6 @@
 
 #include "comm_log.h"
 #include "softbus_adapter_crypto.h"
-#include "softbus_adapter_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 

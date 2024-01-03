@@ -22,6 +22,7 @@
 #include "auth_connection.c"
 #include "auth_interface.h"
 #include "auth_interface.c"
+#include "auth_log.h"
 #include "auth_manager.h"
 #include "auth_manager.c"
 #include "auth_session_fsm.h"
@@ -63,7 +64,6 @@ void AuthOtherTest::TearDownTestCase()
 
 void AuthOtherTest::SetUp()
 {
-    LOG_INFO("AuthOtherTest start.");
 }
 
 void AuthOtherTest::TearDown() {}
@@ -1034,7 +1034,7 @@ HWTEST_F(AuthOtherTest, AUTH_RESTORE_MANAGER_TEST_001, TestSize.Level1)
         return;
     }
     connInfo->type = AUTH_LINK_TYPE_BLE;
-    int32_t requestId = 1;
+    uint32_t requestId = 1;
     NodeInfo *nodeInfo = (NodeInfo*)SoftBusCalloc(sizeof(NodeInfo));
     ASSERT_TRUE(nodeInfo != nullptr);
     int64_t *authId = (int64_t *)malloc(sizeof(int64_t));

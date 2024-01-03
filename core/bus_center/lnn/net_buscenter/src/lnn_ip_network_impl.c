@@ -62,32 +62,18 @@ static int32_t GetWifiServiceIpAddr(const char *ifName, char *ip, uint32_t size)
     if (ifName == NULL || ip == NULL || size == 0) {
         return SOFTBUS_ERR;
     }
-    if (strcmp(ifName, WLAN_IFNAME) != 0) {
-        LNN_LOGE(LNN_BUILDER, "ifname isn't expected, ifname=%s", ifName);
-        return SOFTBUS_ERR;
-    }
-    if (GetWlanIpv4Addr(ip, size) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "get wlan ip addr from wifiservice fail");
-        return SOFTBUS_ERR;
-    }
-    if (strnlen(ip, size) == 0 || strnlen(ip, size) == size) {
-        LNN_LOGE(LNN_BUILDER, "get ipAddr fail, from wifiService");
-        return SOFTBUS_ERR;
-    }
-    if (strcmp(ip, LNN_LOOPBACK_IP) == 0 || strcmp(ip, "") == 0 || strcmp(ip, "0.0.0.0") == 0) {
-        return SOFTBUS_ERR;
-    }
+    (void)GetWlanIpv4Addr(ip, size);
     return SOFTBUS_OK;
 }
 
 static int32_t GetIpAddrFromNetlink(const char *ifName, char *ip, uint32_t size)
 {
     if (GetNetworkIpByIfName(ifName, ip, NULL, size) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "get network IP by ifName fail");
         return SOFTBUS_ERR;
     }
 
     if (strcmp(ip, LNN_LOOPBACK_IP) == 0 || strcmp(ip, "") == 0 || strcmp(ip, "0.0.0.0") == 0) {
+        LNN_LOGE(LNN_BUILDER, "invalid ip addr");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -97,7 +83,7 @@ static bool GetIpProcess(const char *ifName, char *ip, uint32_t size)
 {
     if (GetIpAddrFromNetlink(ifName, ip, size) != SOFTBUS_OK &&
         GetWifiServiceIpAddr(ifName, ip, size) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "get network IP by ifName fail");
+        LNN_LOGD(LNN_BUILDER, "get network IP by ifName fail");
         return false;
     }
     return true;

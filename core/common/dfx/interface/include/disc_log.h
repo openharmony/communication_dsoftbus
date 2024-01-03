@@ -52,11 +52,11 @@ static const SoftBusLogLabel DISC_LABELS[MODULE_DOMAIN_MAX_LEN] = {
     { DISC_TEST,        DOMAIN_ID_TEST, "DiscTest"      },
 };
 
-#define DISC_LOGF(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_FATAL, DISC_LABELS[label], ##__VA_ARGS__)
-#define DISC_LOGE(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_ERROR, DISC_LABELS[label], ##__VA_ARGS__)
-#define DISC_LOGW(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_WARN, DISC_LABELS[label], ##__VA_ARGS__)
-#define DISC_LOGI(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_INFO, DISC_LABELS[label], ##__VA_ARGS__)
-#define DISC_LOGD(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_DEBUG, DISC_LABELS[label], ##__VA_ARGS__)
+#define DISC_LOGF(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_FATAL, DISC_LABELS[label], ##__VA_ARGS__)
+#define DISC_LOGE(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_ERROR, DISC_LABELS[label], ##__VA_ARGS__)
+#define DISC_LOGW(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_WARN, DISC_LABELS[label], ##__VA_ARGS__)
+#define DISC_LOGI(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_INFO, DISC_LABELS[label], ##__VA_ARGS__)
+#define DISC_LOGD(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_DEBUG, DISC_LABELS[label], ##__VA_ARGS__)
 
 #define DISC_CHECK_AND_RETURN_RET_LOGD(cond, ret, label, fmt, ...) \
     CHECK_AND_RETURN_RET_LOG_INNER(cond, ret, DISC_LOGD, label, fmt, ##__VA_ARGS__)

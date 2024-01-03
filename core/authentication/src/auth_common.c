@@ -340,7 +340,7 @@ int32_t ConvertToConnectOption(const AuthConnInfo *connInfo, ConnectOption *opti
                 return SOFTBUS_MEM_ERR;
             }
             option->socketOption.port = connInfo->info.ipInfo.port;
-            option->socketOption.moduleId = AUTH_ENHANCED_P2P;
+            option->socketOption.moduleId = connInfo->info.ipInfo.moduleId;
             option->socketOption.protocol = LNN_PROTOCOL_IP;
             option->socketOption.keepAlive = 1;
             break;
@@ -349,6 +349,14 @@ int32_t ConvertToConnectOption(const AuthConnInfo *connInfo, ConnectOption *opti
             return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
+}
+
+static bool IsEnhanceP2pModuleId(ListenerModule moduleId)
+{
+    if (moduleId >= AUTH_ENHANCED_P2P_START && moduleId <= AUTH_ENHANCED_P2P_END) {
+        return true;
+    }
+    return false;
 }
 
 int32_t ConvertToAuthConnInfo(const ConnectionInfo *info, AuthConnInfo *connInfo)
@@ -361,7 +369,7 @@ int32_t ConvertToAuthConnInfo(const ConnectionInfo *info, AuthConnInfo *connInfo
                 AUTH_LOGW(AUTH_CONN, "only support LNN_PROTOCOL_IP");
                 return SOFTBUS_ERR;
             }
-            if (info->socketInfo.moduleId == AUTH_ENHANCED_P2P) {
+            if (IsEnhanceP2pModuleId(info->socketInfo.moduleId)) {
                 connInfo->type = AUTH_LINK_TYPE_ENHANCED_P2P;
             } else {
                 connInfo->type = AUTH_LINK_TYPE_P2P;

@@ -37,12 +37,11 @@ void DefaultNegotiateChannelDelete(struct DefaultNegotiateChannel *self)
     (void)self;
 }
 
-int32_t OpenDefaultNegotiateChannel(const char *remoteIp, int32_t remotePort,
+int32_t OpenDefaultNegotiateChannel(struct DefaultNegoChannelParam *param,
                                     struct WifiDirectNegotiateChannel *srcChannel,
                                     struct DefaultNegoChannelOpenCallback *callback)
 {
-    (void)remoteIp;
-    (void)remotePort;
+    (void)param;
     (void)srcChannel;
     (void)callback;
     return 0;
@@ -53,15 +52,19 @@ void CloseDefaultNegotiateChannel(struct DefaultNegotiateChannel *self)
     (void)self;
 }
 
-int32_t StartListeningForDefaultChannel(const char *localIp, int32_t port)
+int32_t StartListeningForDefaultChannel(AuthLinkType type, const char *localIp, int32_t port, ListenerModule *moduleId)
 {
+    (void)type;
     (void)localIp;
     (void)port;
+    (void)moduleId;
     return 0;
 }
 
-void StopListeningForDefaultChannel(void)
+void StopListeningForDefaultChannel(AuthLinkType type, ListenerModule moduleId)
 {
+    (void)type;
+    (void)moduleId;
 }
 
 int32_t DefaultNegotiateChannelInit(void)

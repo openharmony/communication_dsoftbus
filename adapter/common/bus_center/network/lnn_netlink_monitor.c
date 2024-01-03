@@ -172,7 +172,7 @@ static void *NetlinkMonitorThread(void *para)
         }
         nlh = (struct nlmsghdr *)buffer;
         while (NLMSG_OK(nlh, len) && nlh->nlmsg_type != NLMSG_DONE) {
-            LNN_LOGI(LNN_BUILDER, "nlmsg_type=%d", nlh->nlmsg_type);
+            LNN_LOGD(LNN_BUILDER, "nlmsg_type=%d", nlh->nlmsg_type);
             switch (nlh->nlmsg_type) {
                 case RTM_NEWADDR:
                 case RTM_DELADDR:
