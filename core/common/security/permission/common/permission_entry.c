@@ -488,7 +488,8 @@ SoftBusPermissionItem *CreatePermissionItem(int32_t permType, int32_t uid, int32
 
 int32_t CheckPermissionEntry(const char *sessionName, const SoftBusPermissionItem *pItem)
 {
-    if (sessionName == NULL || pItem == NULL || g_permissionEntryList == NULL) {
+    if (sessionName == NULL || pItem == NULL) {
+        COMM_LOGE(COMM_PERM, "INVALID PARAM");
         return SOFTBUS_INVALID_PARAM;
     }
     int permType;
@@ -496,6 +497,10 @@ int32_t CheckPermissionEntry(const char *sessionName, const SoftBusPermissionIte
     bool isDynamicPermission = CheckDBinder(sessionName);
     SoftBusList *permissionList = isDynamicPermission ? g_dynamicPermissionList : g_permissionEntryList;
 
+    if (permissionList == NULL) {
+        COMM_LOGE(COMM_PERM, "permissionList is NULL");
+        return SOFTBUS_INVALID_PARAM;
+    }
     (void)SoftBusMutexLock(&permissionList->lock);
     LIST_FOR_EACH_ENTRY(pe, &permissionList->list, SoftBusPermissionEntry, node) {
         if (CompareString(pe->sessionName, sessionName, pe->regexp) == SOFTBUS_OK) {
