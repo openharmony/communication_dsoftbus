@@ -65,7 +65,7 @@
 #define QUERY_RULES_MAX_NUM 10
 #define MAX_LENGTH_OF_EVENT_DOMAIN 17
 #define MAX_LENGTH_OF_EVENT_NAME 33
-#define MAX_LENGTH_OF_SUCCESS_RATE 50
+#define MAX_LENGTH_OF_SUCCESS_RATE 100
 
 typedef void (*HandleMessageFunc)(SoftBusMessage* msg);
 
@@ -103,7 +103,18 @@ typedef struct {
 typedef struct {
     int32_t total;
     int32_t successTotal;
+    int32_t delayNum;
+    int64_t delay;
 } TransStatsSuccessRateDetail;
+
+typedef struct {
+    int32_t scene;
+    int32_t stage;
+    int32_t stageRes;
+    char *socketName;
+    int32_t linkType;
+    int32_t delay;
+} TransStatsPara;
 
 typedef struct {
     int32_t openSessionFailTotal;
@@ -323,7 +334,17 @@ static void OnCompleteLnn(int32_t reason, int32_t total)
     g_isLnnQueryEnd = true;
 }
 
-static void TransStatsSuccessDetail(bool success, const char *socketName, int32_t linkTypePara)
+static void UpdateTransSuccessDetail(TransStatsSuccessRateDetail *res, int32_t delay)
+{
+    res->successTotal++;
+    if (delay < SOFTBUS_ZERO || delay > MINUTE_TIME) {
+        return;
+    }
+    res->delayNum++;
+    res->delay += delay;
+}
+
+static void TransStatsSuccessDetail(bool success, const char *socketName, int32_t linkTypePara, int32_t delay)
 {
     int linkType = linkTypePara;
     if (linkType < CONNECT_TCP || linkType >= CONNECT_TYPE_MAX) {
@@ -346,8 +367,10 @@ static void TransStatsSuccessDetail(bool success, const char *socketName, int32_
         TransStatsSuccessRateDetail newResult;
         newResult.successTotal = 0;
         newResult.total = 1;
+        newResult.delay = 0;
+        newResult.delayNum = 0;
         if (success) {
-            newResult.successTotal = 1;
+            UpdateTransSuccessDetail(&newResult, delay);
         }
         if (LnnMapSet(&g_transStatsInfo.sessionNameLinkTypeMap, keyStr, (const void *)&newResult,
             sizeof(TransStatsSuccessRateDetail)) != SOFTBUS_OK) {
@@ -358,16 +381,22 @@ static void TransStatsSuccessDetail(bool success, const char *socketName, int32_
     }
     data->total++;
     if (success) {
-        data->successTotal++;
+        UpdateTransSuccessDetail(data, delay);
     }
     TransMapUnlock();
 }
 
-static void TransStats(int32_t scene, int32_t stage, int32_t stageRes, const char *socketName, int32_t linkType)
+static void TransStats(TransStatsPara *transStatsPara)
 {
+    int32_t scene = transStatsPara->scene;
+    int32_t stage = transStatsPara->stage;
+    int32_t stageRes = transStatsPara->stageRes;
+    const char *socketName = transStatsPara->socketName;
+    int32_t linkType = transStatsPara->linkType;
+    int32_t delay = transStatsPara->delay;
     if (scene == EVENT_SCENE_OPEN_CHANNEL && stage == EVENT_STAGE_OPEN_CHANNEL_END
         && stageRes == EVENT_STAGE_RESULT_OK) {
-        TransStatsSuccessDetail(true, socketName, linkType);
+        TransStatsSuccessDetail(true, socketName, linkType, delay);
         g_transStatsInfo.openSessionSuccessTotal++;
         g_transStatsInfo.currentParaSessionNum++;
         return;
@@ -375,7 +404,7 @@ static void TransStats(int32_t scene, int32_t stage, int32_t stageRes, const cha
 
     if (scene == EVENT_SCENE_OPEN_CHANNEL && stage == EVENT_STAGE_OPEN_CHANNEL_END
         && stageRes == EVENT_STAGE_RESULT_FAILED) {
-        TransStatsSuccessDetail(false, socketName, linkType);
+        TransStatsSuccessDetail(false, socketName, linkType, delay);
         g_transStatsInfo.openSessionFailTotal++;
         return;
     }
@@ -417,9 +446,22 @@ static void OnQueryTrans(HiSysEventRecordC srcRecord[], size_t size)
             continue;
         }
 
+        int32_t timeConsuming = GetInt32ValueByRecord(&srcRecord[i], TIME_CONSUMING_NAME);
+        if (timeConsuming != SOFTBUS_ERR && stageRes == EVENT_STAGE_RESULT_OK && scene == EVENT_SCENE_OPEN_CHANNEL) {
+            g_transStatsInfo.delayTimeTotal += timeConsuming;
+            g_transStatsInfo.delayNum++;
+        }
         char* socketName = GetStringValueByRecord(&srcRecord[i], SOCKET_KEY_NAME);
         int32_t linkType = GetInt32ValueByRecord(&srcRecord[i], LINK_TYPE_NAME);
-        TransStats(scene, stage, stageRes, socketName, linkType);
+        TransStatsPara transStatsPara = {
+            .scene = scene,
+            .stage = stage,
+            .stageRes = stageRes,
+            .socketName = socketName,
+            .linkType = linkType,
+            .delay = timeConsuming
+        };
+        TransStats(&transStatsPara);
         cJSON_free(socketName);
         if (scene == EVENT_SCENE_CLOSE_CHANNEL_ACTIVE && stage == EVENT_STAGE_CLOSE_CHANNEL &&
             stageRes == EVENT_STAGE_RESULT_OK && g_transStatsInfo.currentParaSessionNum > 0) {
@@ -429,11 +471,6 @@ static void OnQueryTrans(HiSysEventRecordC srcRecord[], size_t size)
         g_transStatsInfo.maxParaSessionNum = (maxParaSessionNum > g_transStatsInfo.currentParaSessionNum) ?
             maxParaSessionNum : g_transStatsInfo.currentParaSessionNum;
 
-        int32_t timeConsuming = GetInt32ValueByRecord(&srcRecord[i], TIME_CONSUMING_NAME);
-        if (timeConsuming != SOFTBUS_ERR && stageRes == EVENT_STAGE_RESULT_OK) {
-            g_transStatsInfo.delayTimeTotal += timeConsuming;
-            g_transStatsInfo.delayNum++;
-        }
         int32_t btFlow = GetInt32ValueByRecord(&srcRecord[i], BT_FLOW_NAME);
         if (btFlow != SOFTBUS_ERR) {
             g_transStatsInfo.btFlowTotal += btFlow;
@@ -540,8 +577,8 @@ void GenerateTransSuccessRateString(MapIterator *it, char *res, uint64_t maxLen)
     if (quantity->total > 0) {
         rate = 1.0 * quantity->successTotal / quantity->total * RATE_HUNDRED;
     }
-    int32_t ret = sprintf_s(res, maxLen, "%s,%d,%d,%d,%2.2f", sessionName, linkType, quantity->total,
-        quantity->successTotal, rate);
+    int32_t ret = sprintf_s(res, maxLen, "%s,%d,%d,%d,%2.2f,%d,%lld", sessionName, linkType, quantity->total,
+        quantity->successTotal, rate, quantity->delayNum, quantity->delay);
     if (ret <= 0) {
         COMM_LOGE(COMM_DFX, "sprintf_s fail");
         return;

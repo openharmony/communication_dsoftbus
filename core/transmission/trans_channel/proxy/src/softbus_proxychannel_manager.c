@@ -1084,23 +1084,36 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
         (TransProxyAckHandshake(msg->connId, chan, ret) != SOFTBUS_OK)) {
         TRANS_LOGE(TRANS_CTRL, "ErrHandshake fail, connId=%u.", msg->connId);
     }
+    TransEventExtra extra = {
+        .calleePkg = NULL,
+        .callerPkg = NULL,
+        .peerNetworkId = NULL,
+        .channelId = chan->myId,
+        .peerChannelId = chan->peerId,
+        .socketName = chan->appInfo.myData.sessionName,
+        .authId = chan->authId,
+        .connectionId = chan->connId,
+        .linkType = chan->type
+    };
     if (ret != SOFTBUS_OK) {
         SoftBusFree(chan);
-        return;
+        goto EXIT_ERR;
     }
 
     TransCreateConnByConnId(msg->connId);
     if ((ret = TransProxyAddChanItem(chan)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "AddChanItem fail");
         SoftBusFree(chan);
-        return;
+        goto EXIT_ERR;
     }
 
+    extra.result = EVENT_STAGE_RESULT_OK;
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_START, extra);
     if ((ret = OnProxyChannelOpened(chan->channelId, &(chan->appInfo), PROXY_CHANNEL_SERVER)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "OnProxyChannelOpened  fail");
         (void)TransProxyCloseConnChannelReset(msg->connId, false);
         TransProxyDelChanByChanId(chan->channelId);
-        return;
+        goto EXIT_ERR;
     }
     if (chan->appInfo.fastTransData != NULL && chan->appInfo.fastTransDataSize > 0) {
         TransProxyFastDataRecv(chan);
@@ -1111,7 +1124,14 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
         TRANS_LOGE(TRANS_CTRL, "AckHandshake fail");
         OnProxyChannelClosed(chan->channelId, &(chan->appInfo));
         TransProxyDelChanByChanId(chan->channelId);
+        goto EXIT_ERR;
     }
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
+    return;
+EXIT_ERR:
+    extra.result = EVENT_STAGE_RESULT_FAILED;
+    extra.errcode = ret;
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
 }
 
 void TransProxyProcessResetMsg(const ProxyMessage *msg)
