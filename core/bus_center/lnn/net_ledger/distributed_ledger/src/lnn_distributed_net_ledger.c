@@ -1697,6 +1697,7 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
     }
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     NodeOnlineProc(info);
+    UpdateDpSameAccount(info->accountHash, info->deviceInfo.deviceUdid);
     if (infoAbility.isNetworkChanged) {
         UpdateNetworkInfo(info->deviceInfo.deviceUdid);
     }
