@@ -119,6 +119,7 @@ static void HandleNetworkUpdateMessage(SoftBusMessage *msg)
         return;
     }
     LnnSetLocalStrInfo(STRING_KEY_NETWORKID, networkId);
+    LnnNotifyNetworkIdChangeEvent(networkId);
     LNN_LOGD(LNN_EVENT, "offline exceted 5min, process networkId update event");
 }
 
@@ -143,7 +144,6 @@ static void HandleNotifyMessage(SoftBusMessage *msg)
             LNN_LOGE(LNN_EVENT, "unknown notify msgType=%d", msg->what);
             break;
     }
-    LNN_LOGI(LNN_EVENT, "finish notify msgType=%d", msg->what);
 }
 
 static void FreeNotifyMessage(SoftBusMessage *msg)
@@ -626,6 +626,21 @@ void LnnNotifySingleOffLineEvent(const ConnectionAddr *addr, NodeBasicInfo *basi
     event.uuid = "";
     event.networkId = basicInfo->networkId;
     NotifyEvent((const LnnEventBasicInfo *)&event);
+}
+
+void LnnNotifyNetworkIdChangeEvent(const char *networkId)
+{
+    if (networkId == NULL) {
+        LNN_LOGW(LNN_EVENT, "networkId is null");
+        return;
+    }
+    LnnNetworkIdChangedEvent eventInfo;
+    (void)memset_s(&eventInfo, sizeof(eventInfo), 0, sizeof(eventInfo));
+    eventInfo.basic.event = LNN_EVENT_NETWORKID_CHANGED;
+    if (strcpy_s(eventInfo.networkId, NETWORK_ID_BUF_LEN, networkId) != EOK) {
+        return;
+    }
+    NotifyEvent((LnnEventBasicInfo *)&eventInfo);
 }
 
 int32_t LnnInitBusCenterEvent(void)

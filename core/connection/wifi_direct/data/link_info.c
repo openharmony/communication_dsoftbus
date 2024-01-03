@@ -279,8 +279,8 @@ void LinkInfoConstructorWithNameAndMode(struct LinkInfo* self, const char *local
     LinkInfoConstructor(self);
     self->putString(self, LI_KEY_LOCAL_INTERFACE, localName);
     self->putString(self, LI_KEY_REMOTE_INTERFACE, remoteName);
-    self->putInt(self, LI_KEY_LOCAL_LINK_MODE, localMode);
-    self->putInt(self, LI_KEY_REMOTE_LINK_MODE, remoteMode);
+    self->putInt(self, LI_KEY_LOCAL_LINK_MODE, (int32_t)localMode);
+    self->putInt(self, LI_KEY_REMOTE_LINK_MODE, (int32_t)remoteMode);
 }
 
 /* new and delete */

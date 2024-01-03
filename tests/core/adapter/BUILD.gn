@@ -57,3 +57,8 @@ group("unittest") {
   testonly = true
   deps = [ ":AdapterDsoftbusRsaCryptoTest" ]
 }
+
+group("fuzztest") {
+  testonly = true
+  deps = [ "fuzztest:fuzztest" ]
+}

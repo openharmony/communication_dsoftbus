@@ -96,7 +96,7 @@ static void *LoopTask(void *arg)
         return NULL;
     }
 
-    COMM_LOGI(COMM_UTILS, "LoopTask[%s] running", context->name);
+    COMM_LOGD(COMM_UTILS, "LoopTask[%s] running", context->name);
 
     if (SoftBusMutexLock(&context->lock) != 0) {
         COMM_LOGE(COMM_UTILS, "lock failed");
@@ -454,7 +454,7 @@ SoftBusLooper *CreateNewLooper(const char *name)
         return NULL;
     }
     g_looperCnt++;
-    COMM_LOGI(COMM_UTILS, "[%s]wait looper start ok", context->name);
+    COMM_LOGD(COMM_UTILS, "[%s]wait looper start ok", context->name);
     return looper;
 }
 
@@ -570,7 +570,7 @@ int LooperInit(void)
         return SOFTBUS_ERR;
     }
     SetLooper(LOOP_TYPE_HANDLE_FILE, handleFileLooper);
-    COMM_LOGI(COMM_UTILS, "init looper success.");
+    COMM_LOGD(COMM_UTILS, "init looper success.");
     return SOFTBUS_OK;
 }
 

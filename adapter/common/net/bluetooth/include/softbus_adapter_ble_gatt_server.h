@@ -145,4 +145,4 @@ int SoftBusGattsSendNotify(SoftBusGattsNotify *param);
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-#endif
+#endif /* SOFTBUS_ADAPTER_BLE_GATT_SERVER_H */

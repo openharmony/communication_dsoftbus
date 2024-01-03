@@ -225,8 +225,8 @@ static enum WifiDirectNegotiateCmdType GetNegotiateCmdType(struct NegotiateMessa
     return cmdType;
 }
 
-static bool IsMessageNeedPending(struct WifiDirectNegotiator *self, enum WifiDirectNegotiateCmdType cmdType,
-                                 struct NegotiateMessage *msg)
+static bool IsMessageNeedPending(struct WifiDirectNegotiator *self, struct WifiDirectProcessor *processor,
+                                 enum WifiDirectNegotiateCmdType cmdType, struct NegotiateMessage *msg)
 {
     if (strlen(self->currentRemoteDeviceId) == 0) {
         CONN_LOGI(CONN_WIFI_DIRECT, "current remote deviceId is empty");
@@ -247,7 +247,7 @@ static bool IsMessageNeedPending(struct WifiDirectNegotiator *self, enum WifiDir
         return true;
     }
 
-    return self->currentProcessor->isMessageNeedPending(cmdType, msg);
+    return processor->isMessageNeedPending(cmdType, msg);
 }
 
 static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *channel, const uint8_t *data, size_t len)
@@ -296,15 +296,15 @@ static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *ch
         processor = self->currentProcessor;
     } else {
         command->processor = processor;
-        self->currentProcessor = processor;
-        CONN_LOGI(CONN_WIFI_DIRECT, "currentProcessor=%s", processor->name);
     }
 
-    if (IsMessageNeedPending(self, cmdType, msg)) {
+    if (IsMessageNeedPending(self, processor, cmdType, msg)) {
         CONN_LOGI(CONN_WIFI_DIRECT, "queue negotiate command");
         GetWifiDirectCommandManager()->enqueueCommand(command);
     } else {
         self->updateCurrentRemoteDeviceId(channel);
+        self->currentProcessor = processor;
+        CONN_LOGI(CONN_WIFI_DIRECT, "currentProcessor=%s", processor->name);
         processor->processNegotiateMessage(cmdType, command);
     }
 }
@@ -585,11 +585,6 @@ static int32_t PrejudgeAvailability(const char *remoteNetworkId, enum WifiDirect
     return SOFTBUS_OK;
 }
 
-static void OnWifiDirectAuthOpened(uint32_t requestId, int64_t authId)
-{
-    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%u authId=%zd", requestId, authId);
-}
-
 static struct EntityListener g_entityListener = {
     .onOperationComplete = OnOperationComplete,
     .onEntityChanged = OnEntityChanged,
@@ -610,7 +605,6 @@ static struct WifiDirectNegotiator g_negotiator = {
     .onDefaultTriggerChannelDataReceived = OnDefaultTriggerChannelDataReceived,
     .syncLnnInfo = SyncLnnInfo,
     .prejudgeAvailability = PrejudgeAvailability,
-    .onWifiDirectAuthOpened = OnWifiDirectAuthOpened,
 
     .currentCommand = NULL,
     .currentProcessor = NULL,

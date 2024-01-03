@@ -14,7 +14,6 @@
  */
 
 #include <stdlib.h>
-#include "securec.h"
 #include "softbus_errcode.h"
 #include "softbus_wifi_api_adapter.h"
 

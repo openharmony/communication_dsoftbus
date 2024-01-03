@@ -97,9 +97,9 @@ int32_t LnnIpcStartTimeSync(const char *pkgName, int32_t callingPid, const char 
     return LnnStartTimeSync(pkgName, callingPid, targetNetworkId, (TimeSyncAccuracy)accuracy, (TimeSyncPeriod)period);
 }
 
-int32_t LnnIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
+int32_t LnnIpcStopTimeSync(const char *pkgName, const char *targetNetworkId, int32_t callingPid)
 {
-    return LnnStopTimeSync(pkgName, targetNetworkId);
+    return LnnStopTimeSync(pkgName, targetNetworkId, callingPid);
 }
 
 int32_t LnnIpcPublishLNN(const char *pkgName, const PublishInfo *info)

@@ -789,10 +789,10 @@ static void DataReceived(ConnBrDataReceivedContext *ctx)
     if (head->module == MODULE_CONNECTION) {
         ReceivedControlData(connection, ctx->data + ConnGetHeadSize(), ctx->dataLen - ConnGetHeadSize());
     } else if (head->module == MODULE_NIP_BR_CHANNEL && head->seq == (int64_t)BR_NIP_SEQ) {
-        NipRecvDataFromBr(ctx->connectionId, (char *)ctx->data, ctx->dataLen);
+        NipRecvDataFromBr(ctx->connectionId, (char *)ctx->data, (int32_t)(ctx->dataLen));
     } else {
         g_connectCallback.OnDataReceived(
-            ctx->connectionId, (ConnModule)head->module, head->seq, (char *)ctx->data, ctx->dataLen);
+            ctx->connectionId, (ConnModule)head->module, head->seq, (char *)ctx->data, (int32_t)(ctx->dataLen));
     }
     SoftBusFree(ctx->data);
     ctx->data = NULL;

@@ -20,6 +20,7 @@
 #include <inttypes.h>
 
 #include "anonymizer.h"
+#include "auth_deviceprofile.h"
 #include "auth_interface.h"
 #include "auth_request.h"
 #include "auth_request.h"
@@ -28,6 +29,7 @@
 #include "bus_center_manager.h"
 #include "common_list.h"
 #include "lnn_async_callback_utils.h"
+#include "lnn_node_info.h"
 #include "lnn_battery_info.h"
 #include "lnn_cipherkey_manager.h"
 #include "lnn_connection_addr_utils.h"
@@ -524,6 +526,23 @@ static void RemovePendingRequestByAddrType(const bool *addrType, uint32_t typeLe
     }
 }
 
+static bool IsNeedWifiReauth(const char *networkId, const char *newAccountHash)
+{
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &info) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get node info fail");
+        return false;
+    }
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
+    LNN_LOGI(LNN_BUILDER, "peer networkId=%s accountHash [%02x%02x -> %02x%02x]",
+        anonyNetworkId, info.accountHash[0], info.accountHash[1],
+        newAccountHash[0], newAccountHash[1]);
+    AnonymizeFree(anonyNetworkId);
+    return memcmp(info.accountHash, newAccountHash, HB_SHORT_ACCOUNT_HASH_LEN) != 0;
+}
+
 static int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReportFailure, bool isShort)
 {
     LnnConnectionFsm *connFsm = NULL;
@@ -555,7 +574,19 @@ static int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReport
         }
     }
     LNN_LOGI(LNN_BUILDER, "addr same to before, peerAddr=%s", LnnPrintConnectionAddr(&para->addr));
+    ConnectionAddr addr = para->addr;
     SoftBusFree((void *)para);
+    if (addr.type != CONNECTION_ADDR_WLAN || !IsNeedWifiReauth(connFsm->connInfo.peerNetworkId, addr.peerUid)) {
+        LNN_LOGI(LNN_BUILDER, "account not change no need reauth");
+        return SOFTBUS_OK;
+    }
+    AuthConnInfo authConn;
+    uint32_t requestId = AuthGenRequestId();
+    (void)LnnConvertAddrToAuthConnInfo(&addr, &authConn);
+    if (AuthStartVerify(&authConn, requestId, LnnGetReAuthVerifyCallback(), false) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_BUILDER, "AuthStartVerify error");
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 
@@ -1704,6 +1735,10 @@ static void OnReAuthVerifyPassed(uint32_t requestId, int64_t authId, const NodeI
     if (connFsm != NULL && ((connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_JOIN_PASSIVE) == 0)) {
         if (info != NULL && LnnUpdateGroupType(info) == SOFTBUS_OK && LnnUpdateAccountInfo(info) == SOFTBUS_OK) {
             UpdateProfile(info);
+            NodeInfo nodeInfo;
+            (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+            (void)LnnGetRemoteNodeInfoById(info->deviceInfo.deviceUdid, CATEGORY_UDID, &nodeInfo);
+            UpdateDpSameAccount(nodeInfo.accountHash, nodeInfo.deviceInfo.deviceUdid);
             LNN_LOGI(LNN_BUILDER, "reauth finish and updateProfile");
         }
     } else {
