@@ -200,9 +200,9 @@ int32_t AddLaneResourceItem(const LaneResource *inputResource)
     return SOFTBUS_OK;
 }
 
-static int32_t StartDelayDestroyLink(uint32_t laneId, LaneResource *item)
+static int32_t StartDelayDestroyLink(uint32_t laneId, LaneResource* item)
 {
-    LaneResource *resourceItem = (LaneResource *)SoftBusMalloc(sizeof(LaneResource));
+    LaneResource* resourceItem = (LaneResource *)SoftBusMalloc(sizeof(LaneResource));
     if (resourceItem == NULL) {
         LNN_LOGE(LNN_LANE, "resourceItem malloc fail");
         return SOFTBUS_MALLOC_ERR;
@@ -261,6 +261,7 @@ int32_t DelLaneResourceItem(const LaneResource *resourceItem)
     }
     LaneResource* item = LaneResourceIsExist(resourceItem);
     if (item != NULL) {
+        LNN_LOGI(LNN_LANE, "link=%d ref=%d", item->type, item->laneRef);
         if ((--item->laneRef) == 0) {
             ListDelete(&item->node);
             SoftBusFree(item);
