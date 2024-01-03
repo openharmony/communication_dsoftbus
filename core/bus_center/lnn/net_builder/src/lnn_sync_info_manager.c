@@ -234,12 +234,35 @@ static void CloseUnusedChannel(void *para)
     (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
 }
 
+static void ResetOpenChannelInfo(int32_t channelId, unsigned char isServer, SyncChannelInfo *info)
+{
+    SyncInfoMsg *msg = NULL;
+    SyncInfoMsg *msgNext = NULL;
+
+    SoftBusGetTime(&info->accessTime);
+    if (isServer) {
+        if (info->serverChannelId != channelId && info->serverChannelId != INVALID_CHANNEL_ID) {
+            LNN_LOGD(LNN_BUILDER, "reset sync info server channel %d -> %d", info->serverChannelId, channelId);
+            (void)TransCloseNetWorkingChannel(info->serverChannelId);
+        }
+        info->serverChannelId = channelId;
+    } else {
+        info->isClientOpened = true;
+        if (info->clientChannelId != channelId && info->clientChannelId != INVALID_CHANNEL_ID) {
+            LNN_LOGD(LNN_BUILDER, "reset sync info client channel %d -> %d", info->clientChannelId, channelId);
+            (void)TransCloseNetWorkingChannel(info->clientChannelId);
+        }
+        info->clientChannelId = channelId;
+        LIST_FOR_EACH_ENTRY_SAFE(msg, msgNext, &info->syncMsgList, SyncInfoMsg, node) {
+            SendSyncInfoMsg(info, msg);
+        }
+    }
+}
+
 static int32_t OnChannelOpened(int32_t channelId, const char *peerUuid, unsigned char isServer)
 {
     char networkId[NETWORK_ID_BUF_LEN];
     SyncChannelInfo *info = NULL;
-    SyncInfoMsg *msg = NULL;
-    SyncInfoMsg *msgNext = NULL;
 
     LNN_LOGI(LNN_BUILDER, "channelId=%d, server=%u", channelId, isServer);
     if (LnnConvertDlId(peerUuid, CATEGORY_UUID, CATEGORY_NETWORK_ID, networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
@@ -269,15 +292,7 @@ static int32_t OnChannelOpened(int32_t channelId, const char *peerUuid, unsigned
         info->serverChannelId = channelId;
         ListNodeInsert(&g_syncInfoManager.channelInfoList, &info->node);
     } else {
-        if (isServer) {
-            info->serverChannelId = channelId;
-            SoftBusGetTime(&info->accessTime);
-        } else {
-            info->isClientOpened = true;
-            LIST_FOR_EACH_ENTRY_SAFE(msg, msgNext, &info->syncMsgList, SyncInfoMsg, node) {
-                SendSyncInfoMsg(info, msg);
-            }
-        }
+        ResetOpenChannelInfo(channelId, isServer, info);
     }
     (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
     return SOFTBUS_OK;
@@ -506,6 +521,27 @@ int32_t LnnUnregSyncInfoHandler(LnnSyncInfoType type, LnnSyncInfoMsgHandler hand
     return SOFTBUS_OK;
 }
 
+static void ResetSendSyncInfo(SyncChannelInfo *oldInfo, const SyncChannelInfo *newInfo, SyncInfoMsg *msg)
+{
+    if (oldInfo->clientChannelId == INVALID_CHANNEL_ID) {
+        oldInfo->clientChannelId = newInfo->clientChannelId;
+        oldInfo->accessTime = newInfo->accessTime;
+    } else {
+        if (oldInfo->clientChannelId != newInfo->clientChannelId && oldInfo->clientChannelId != INVALID_CHANNEL_ID) {
+            LNN_LOGD(LNN_BUILDER, "reset sync info send channel %d -> %d", oldInfo->clientChannelId,
+                newInfo->clientChannelId);
+            (void)TransCloseNetWorkingChannel(oldInfo->clientChannelId);
+            oldInfo->isClientOpened = false;
+            oldInfo->clientChannelId = newInfo->clientChannelId;
+        }
+        if (oldInfo->isClientOpened) {
+            SendSyncInfoMsg(oldInfo, msg);
+        } else {
+            LNN_LOGW(LNN_BUILDER, "send sync info client is not opened, channelId=%d", oldInfo->clientChannelId);
+        }
+    }
+}
+
 static int32_t SendSyncInfoByNewChannel(const char *networkId, SyncInfoMsg *msg)
 {
     SyncChannelInfo *info = CreateSyncChannelInfo(networkId);
@@ -535,15 +571,7 @@ static int32_t SendSyncInfoByNewChannel(const char *networkId, SyncInfoMsg *msg)
         ListNodeInsert(&g_syncInfoManager.channelInfoList, &info->node);
     } else {
         ListNodeInsert(&item->syncMsgList, &msg->node);
-        if (item->clientChannelId == INVALID_CHANNEL_ID) {
-            item->clientChannelId = info->clientChannelId;
-            item->accessTime = info->accessTime;
-        } else {
-            (void)TransCloseNetWorkingChannel(info->clientChannelId);
-            if (item->isClientOpened) {
-                SendSyncInfoMsg(item, msg);
-            }
-        }
+        ResetSendSyncInfo(item, info, msg);
         SoftBusFree(info);
     }
     (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
