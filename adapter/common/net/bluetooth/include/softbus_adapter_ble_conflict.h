@@ -19,8 +19,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "softbus_error_code.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
