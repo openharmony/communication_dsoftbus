@@ -17,14 +17,12 @@ import("../../../dsoftbus.gni")
 group("unittest") {
   testonly = true
   deps = [
-    "anonymize:unittest",
     "bitmap:unittest",
     "dfx/anonymize:unittest",
     "dfx/event:unittest",
     "dfx/hidumper_adapter/unittest:unittest",
     "dfx/hisysevent_adapter/unittest:unittest",
     "dfx/log:unittest",
-    "log:unittest",
     "network:unittest",
     "security/permission/common:unittest",
     "security/permission/standard:unittest",
@@ -39,7 +37,6 @@ group("fuzztest") {
     "dfx/hidumper_adapter/fuzztest:fuzztest",
     "dfx/hisysevent_adapter/fuzztest:fuzztest",
     "json_utils:fuzztest",
-    "log:fuzztest",
     "message_handler:fuzztest",
     "utils/fuzztest:fuzztest",
   ]

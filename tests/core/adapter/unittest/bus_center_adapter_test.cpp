@@ -22,7 +22,6 @@
 #include "softbus_adapter_file.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
-#include "softbus_adapter_log.h"
 
 using namespace std;
 using namespace testing::ext;

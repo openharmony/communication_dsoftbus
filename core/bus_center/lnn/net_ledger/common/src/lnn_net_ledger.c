@@ -20,6 +20,7 @@
 
 #include "anonymizer.h"
 #include "auth_device_common_key.h"
+#include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "lnn_cipherkey_manager.h"
 #include "lnn_decision_db.h"
@@ -92,6 +93,7 @@ static void LnnRestoreLocalDeviceInfo()
         if (LnnUpdateLocalNetworkId(info.networkId) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "set networkId fail");
         }
+        LnnNotifyNetworkIdChangeEvent(info.networkId);
     }
     AuthLoadDeviceKey();
     if (LnnLoadRemoteDeviceInfo() != SOFTBUS_OK) {
@@ -237,7 +239,7 @@ int32_t LnnSetNodeDataChangeFlag(const char *networkId, uint16_t dataChangeFlag)
         isLocalNetworkId = true;
     }
     if (isLocalNetworkId) {
-        return LnnSetLocalNum16Info(NUM_KEY_DATA_CHANGE_FLAG, dataChangeFlag);
+        return LnnSetLocalNum16Info(NUM_KEY_DATA_CHANGE_FLAG, (int16_t)dataChangeFlag);
     }
     LNN_LOGE(LNN_LEDGER, "remote networkId");
     return SOFTBUS_ERR;

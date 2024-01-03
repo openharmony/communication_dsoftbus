@@ -28,7 +28,8 @@ extern "C" {
 
 typedef enum {
     HIGH_BAND_WIDTH = 0,
-    MIDDLE_BAND_WIDTH,
+    MIDDLE_HIGH_BAND_WIDTH,
+    MIDDLE_LOW_BAND_WIDTH,
     LOW_BAND_WIDTH,
     BW_TYPE_BUTT,
 } BandWidthType;

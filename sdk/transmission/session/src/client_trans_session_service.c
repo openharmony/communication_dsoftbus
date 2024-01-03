@@ -1064,3 +1064,35 @@ void ClientShutdown(int32_t socket)
     }
     TRANS_LOGI(TRANS_SDK, "Shutdown ok: socket=%d", socket);
 }
+
+int32_t GetSocketMtuSize(int32_t socket, uint32_t *mtuSize)
+{
+    if (!IsValidSessionId(socket) || mtuSize == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t channelId = INVALID_CHANNEL_ID;
+    int32_t type = CHANNEL_TYPE_BUTT;
+    bool isEnable = false;
+    int32_t ret = ClientGetChannelBySessionId(socket, &channelId, &type, &isEnable);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get channel err, ret=%d.", ret);
+        return ret;
+    }
+
+    if (!isEnable) {
+        TRANS_LOGI(TRANS_SDK, "socket not enable");
+        return SOFTBUS_TRANS_SESSION_NO_ENABLE;
+    }
+
+    uint32_t dataConfig = INVALID_DATA_CONFIG;
+    if (ClientGetDataConfigByChannelId(channelId, type, &dataConfig) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get config failed.");
+        return SOFTBUS_GET_CONFIG_VAL_ERR;
+    }
+
+    *mtuSize = dataConfig;
+    TRANS_LOGI(TRANS_SDK, "get mtuSize success, socket=%d, mtu=%" PRIu32, socket, *mtuSize);
+    return SOFTBUS_OK;
+}

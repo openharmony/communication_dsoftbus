@@ -20,3 +20,9 @@ bool IsPotentialTrustedDeviceDp(const char *deviceIdHash)
     (void)deviceIdHash;
     return true;
 }
+
+void UpdateDpSameAccount(const char *accountHash, const char *deviceId)
+{
+    (void)accountHash;
+    (void)deviceId;
+}

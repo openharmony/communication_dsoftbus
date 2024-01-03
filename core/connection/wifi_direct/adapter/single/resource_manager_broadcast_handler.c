@@ -62,7 +62,7 @@ static void ResetInterfaceInfo(void)
     int32_t port = oldInfo->getInt(oldInfo, II_KEY_PORT, -1);
     if (port > 0) {
         CONN_LOGI(CONN_WIFI_DIRECT, "stop auth listening");
-        StopListeningForDefaultChannel();
+        StopListeningForDefaultChannel(AUTH_LINK_TYPE_P2P, AUTH_P2P);
     }
 
     struct InterfaceInfo info;

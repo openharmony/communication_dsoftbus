@@ -170,7 +170,7 @@ static int32_t ConnClientInit(void)
         COMM_LOGE(COMM_EVENT, "InitBaseListener failed!ret=%" PRId32 " \r\n", ret);
         return ret;
     }
-    COMM_LOGI(COMM_EVENT, "init conn client success");
+    COMM_LOGD(COMM_EVENT, "init conn client success");
     return ret;
 }
 

@@ -44,6 +44,8 @@ uint32_t SwitchAuthLinkTypeToFlagType(AuthLinkType type)
             return FLAG_BLE;
         case AUTH_LINK_TYPE_P2P:
             return FLAG_P2P;
+        case AUTH_LINK_TYPE_ENHANCED_P2P:
+            return FLAG_ENHANCE_P2P;
         default:
             return FLAG_WIFI;
     }

@@ -189,7 +189,7 @@ static int32_t CoapSendRequestEx(CoapCtxType *ctx, uint8_t coapType, const char 
     DFINDER_LOGD("MYCOAP", "send coap pdu mid: %d", coap_pdu_get_mid(pdu));
     DFINDER_MGT_REQ_LOG(&coapRequest);
     tid = coap_send(session, pdu);
-    if (tid == COAP_INVALID_TID) {
+    if (tid == COAP_INVALID_MID) {
         DFINDER_LOGE(TAG, "coap send failed");
         goto SESSION_RELEASE;
     }
@@ -983,7 +983,7 @@ int32_t CoapInitResources(coap_context_t *ctx)
         DFINDER_LOGE(TAG, "coap resource init discover failed");
         return NSTACKX_ENOMEM;
     }
-    coap_register_handler(r, COAP_REQUEST_POST, HndPostServiceDiscover);
+    coap_register_request_handler(r, COAP_REQUEST_POST, HndPostServiceDiscover);
     coap_resource_set_get_observable(r, NSTACKX_TRUE);
     coap_add_resource(ctx, r);
 
@@ -994,7 +994,7 @@ int32_t CoapInitResources(coap_context_t *ctx)
         (void)coap_delete_resource(ctx, r);
         return NSTACKX_ENOMEM;
     }
-    coap_register_handler(msg, COAP_REQUEST_POST, HndPostServiceMsg);
+    coap_register_request_handler(msg, COAP_REQUEST_POST, HndPostServiceMsg);
     coap_add_resource(ctx, msg);
     return NSTACKX_EOK;
 }
