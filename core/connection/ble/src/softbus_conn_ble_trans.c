@@ -505,7 +505,8 @@ void *BleSendTask(void *arg)
     SendQueueNode *sendNode = NULL;
     while (true) {
         int32_t status = ConnBleDequeueBlock((void **)(&sendNode));
-        if (status != SOFTBUS_OK) {
+        if (status != SOFTBUS_OK || sendNode == NULL) {
+            CONN_LOGW(CONN_BLE, "deque err=%d", status);
             SoftBusSleepMs(WAIT_TIME);
             continue;
         }
