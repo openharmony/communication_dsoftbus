@@ -1040,7 +1040,7 @@ static int32_t LnnSelectDirectLink(const LinkRequest *request, uint32_t laneLink
         AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_BR, true) ||
         AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_BLE, true)) {
         if ((local & (1 << BIT_BLE_TRIGGER_CONNECTION)) != 0 && (remote & (1 << BIT_BLE_TRIGGER_CONNECTION)) != 0 &&
-            GetWifiDirectUtils()->supportHmlTwo()) {
+            GetWifiDirectUtils()->supportHmlTwo() && request->linkType == LANE_HML) {
             LNN_LOGI(LNN_LANE, "open auth trigger to connect, laneId=%u", laneLinkReqId);
             ret = OpenAuthTriggerToConn(request, laneLinkReqId, callback);
         }
@@ -1050,7 +1050,7 @@ static int32_t LnnSelectDirectLink(const LinkRequest *request, uint32_t laneLink
         }
     }
     if ((local & (1 << BIT_BLE_TRIGGER_CONNECTION)) != 0 && (remote & (1 << BIT_BLE_TRIGGER_CONNECTION)) != 0 &&
-        ret != SOFTBUS_OK && GetWifiDirectUtils()->supportHmlTwo()) {
+        ret != SOFTBUS_OK && GetWifiDirectUtils()->supportHmlTwo() && request->linkType == LANE_HML) {
         LNN_LOGI(LNN_LANE, "open ble trigger to connect, laneId=%u", laneLinkReqId);
         ret = OpenBleTriggerToConn(request, laneLinkReqId, callback);
     }
