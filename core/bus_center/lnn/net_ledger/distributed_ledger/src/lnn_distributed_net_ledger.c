@@ -95,6 +95,18 @@ typedef struct {
     DistributedLedgerStatus status;
 } DistributedNetLedger;
 
+typedef struct {
+    bool isOffline;
+    bool oldWifiFlag;
+    bool oldBrFlag;
+    bool oldBleFlag;
+    bool isChanged;
+    bool isMigrateEvent;
+    bool isNetworkChanged;
+    bool newWifiFlag;
+    bool newBleBrFlag;
+} NodeInfoAbility;
+
 static DistributedNetLedger g_distributedNetLedger;
 
 static void UpdateNetworkInfo(const char *udid)
@@ -1619,62 +1631,42 @@ static void NodeOnlineProc(NodeInfo *info)
     BleDirectlyOnlineProc(&nodeInfo);
 }
 
-ReportCategory LnnAddOnlineNode(NodeInfo *info)
+static void GetNodeInfoDiscovery(NodeInfo *oldInfo, NodeInfo *info, NodeInfoAbility *infoAbility)
 {
-    // judge map
-    info->onlinetTimestamp = LnnUpTimeMs();
-    if (info == NULL) {
-        return REPORT_NONE;
-    }
-    const char *udid = NULL;
-    DoubleHashMap *map = NULL;
-    NodeInfo *oldInfo = NULL;
-    bool isOffline = true;
-    bool oldWifiFlag = false;
-    bool oldBrFlag = false;
-    bool oldBleFlag = false;
-    bool isChanged = false;
-    bool isMigrateEvent = false;
-    bool isNetworkChanged = false;
-    bool newWifiFlag = LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI);
-    bool newBleBrFlag = LnnHasDiscoveryType(info, DISCOVERY_TYPE_BLE)
-        || LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR);
-    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR)) {
-        LNN_LOGI(LNN_LEDGER, "DiscoveryType = BR.");
-        AddCnnCode(&g_distributedNetLedger.cnnCode.connectionCode, info->uuid, DISCOVERY_TYPE_BR,
-            info->authSeqNum);
-    }
-
-    udid = LnnGetDeviceUdid(info);
-    map = &g_distributedNetLedger.distributedInfo;
-    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
-        LNN_LOGE(LNN_LEDGER, "lock mutex fail!");
-        return REPORT_NONE;
-    }
-    oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
+    infoAbility->isOffline = true;
+    infoAbility->oldWifiFlag = false;
+    infoAbility->oldBrFlag = false;
+    infoAbility->oldBleFlag = false;
+    infoAbility->isChanged = false;
+    infoAbility->isMigrateEvent = false;
+    infoAbility->isNetworkChanged = false;
+    infoAbility->newWifiFlag = LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI);
+    infoAbility->newBleBrFlag =
+        LnnHasDiscoveryType(info, DISCOVERY_TYPE_BLE) || LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR);
     if (oldInfo != NULL) {
         info->metaInfo = oldInfo->metaInfo;
     }
     if (oldInfo != NULL && LnnIsNodeOnline(oldInfo)) {
         LNN_LOGI(LNN_LEDGER, "addOnlineNode find online node");
-        isOffline = false;
-        isChanged = IsNetworkIdChanged(info, oldInfo);
-        oldWifiFlag = LnnHasDiscoveryType(oldInfo, DISCOVERY_TYPE_WIFI);
-        oldBleFlag = LnnHasDiscoveryType(oldInfo, DISCOVERY_TYPE_BLE);
-        oldBrFlag = LnnHasDiscoveryType(oldInfo, DISCOVERY_TYPE_BR);
-        if ((oldBleFlag || oldBrFlag) && newWifiFlag) {
+        infoAbility->isOffline = false;
+        infoAbility->isChanged = IsNetworkIdChanged(info, oldInfo);
+        infoAbility->oldWifiFlag = LnnHasDiscoveryType(oldInfo, DISCOVERY_TYPE_WIFI);
+        infoAbility->oldBleFlag = LnnHasDiscoveryType(oldInfo, DISCOVERY_TYPE_BLE);
+        infoAbility->oldBrFlag = LnnHasDiscoveryType(oldInfo, DISCOVERY_TYPE_BR);
+        if ((infoAbility->oldBleFlag || infoAbility->oldBrFlag) && infoAbility->newWifiFlag) {
             NewWifiDiscovered(oldInfo, info);
-            isNetworkChanged = true;
-        } else if (oldWifiFlag && newBleBrFlag) {
+            infoAbility->isNetworkChanged = true;
+        } else if (infoAbility->oldWifiFlag && infoAbility->newBleBrFlag) {
             RetainOfflineCode(oldInfo, info);
             NewBrBleDiscovered(oldInfo, info);
-            isNetworkChanged = true;
+            infoAbility->isNetworkChanged = true;
         } else {
             RetainOfflineCode(oldInfo, info);
             LNN_LOGE(LNN_LEDGER, "flag error");
         }
-        if ((oldBleFlag || oldBrFlag) && !oldWifiFlag && newWifiFlag) {
-            isMigrateEvent = true;
+        if ((infoAbility->oldBleFlag || infoAbility->oldBrFlag) && !infoAbility->oldWifiFlag &&
+            infoAbility->newWifiFlag) {
+            infoAbility->isMigrateEvent = true;
         }
         // update lnn discovery type
         info->discoveryType |= oldInfo->discoveryType;
@@ -1682,6 +1674,29 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
         MergeLnnInfo(oldInfo, info);
         UpdateProfile(info);
     }
+}
+
+ReportCategory LnnAddOnlineNode(NodeInfo *info)
+{
+    // judge map
+    info->onlinetTimestamp = LnnUpTimeMs();
+    if (info == NULL) {
+        return REPORT_NONE;
+    }
+    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR)) {
+        LNN_LOGI(LNN_LEDGER, "DiscoveryType = BR.");
+        AddCnnCode(&g_distributedNetLedger.cnnCode.connectionCode, info->uuid, DISCOVERY_TYPE_BR, info->authSeqNum);
+    }
+
+    NodeInfoAbility infoAbility;
+    const char *udid = LnnGetDeviceUdid(info);
+    DoubleHashMap *map = &g_distributedNetLedger.distributedInfo;
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail!");
+        return REPORT_NONE;
+    }
+    NodeInfo *oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
+    GetNodeInfoDiscovery(oldInfo, info, &infoAbility);
     LnnSetNodeConnStatus(info, STATUS_ONLINE);
     LnnSetAuthTypeValue(&info->AuthTypeValue, ONLINE_HICHAIN);
     UpdateNewNodeAccountHash(info);
@@ -1692,11 +1707,11 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     NodeOnlineProc(info);
     UpdateDpSameAccount(info->accountHash, info->deviceInfo.deviceUdid);
-    if (isNetworkChanged) {
+    if (infoAbility.isNetworkChanged) {
         UpdateNetworkInfo(info->deviceInfo.deviceUdid);
     }
-    if (isOffline) {
-        if (!oldWifiFlag && !newWifiFlag && newBleBrFlag) {
+    if (infoAbility.isOffline) {
+        if (!infoAbility.oldWifiFlag && !infoAbility.newWifiFlag && infoAbility.newBleBrFlag) {
             OnlinePreventBrConnection(info);
         }
         InsertToProfile(info);
@@ -1705,10 +1720,10 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
         LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, lnnEventExtra);
         return REPORT_ONLINE;
     }
-    if (isMigrateEvent) {
+    if (infoAbility.isMigrateEvent) {
         NotifyMigrateUpgrade(info);
     }
-    if (isChanged) {
+    if (infoAbility.isChanged) {
         return REPORT_CHANGE;
     }
     return REPORT_NONE;
