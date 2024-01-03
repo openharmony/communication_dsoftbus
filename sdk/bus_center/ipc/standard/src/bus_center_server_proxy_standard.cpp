@@ -219,6 +219,24 @@ int32_t BusCenterServerProxy::LeaveLNN(const char *pkgName, const char *networkI
     return serverRet;
 }
 
+static bool WriteSendRequestMessage(const char *pkgName, MessageParcel *data, const uint32_t infoTypeLen)
+{
+    if (!data->WriteInterfaceToken(BusCenterServerProxy::GetDescriptor())) {
+        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed");
+        return false;
+    }
+    int32_t ret = data->WriteCString(pkgName);
+    if (!ret) {
+        LNN_LOGE(LNN_EVENT, "write client name failed");
+        return false;
+    }
+    if (!data->WriteUint32(infoTypeLen)) {
+        LNN_LOGE(LNN_EVENT, "write info type length failed");
+        return false;
+    }
+    return true;
+}
+
 int32_t BusCenterServerProxy::GetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int *infoNum)
 {
     if (info == nullptr || infoNum == nullptr) {
@@ -231,17 +249,7 @@ int32_t BusCenterServerProxy::GetAllOnlineNodeInfo(const char *pkgName, void **i
     }
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed");
-        return SOFTBUS_IPC_ERR;
-    }
-    int32_t ret = data.WriteCString(pkgName);
-    if (!ret) {
-        LNN_LOGE(LNN_EVENT, "write client name failed");
-        return SOFTBUS_IPC_ERR;
-    }
-    if (!data.WriteUint32(infoTypeLen)) {
-        LNN_LOGE(LNN_EVENT, "write info type length failed");
+    if (!WriteSendRequestMessage(pkgName, &data, infoTypeLen)) {
         return SOFTBUS_IPC_ERR;
     }
     MessageParcel reply;

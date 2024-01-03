@@ -594,6 +594,26 @@ static void IpAddrChangeEventHandler(const LnnEventBasicInfo *info)
     }
 }
 
+static bool WifiStateChangeWifiOrAp(const SoftBusWifiState wifiState)
+{
+    switch (wifiState) {
+        case SOFTBUS_WIFI_CONNECTED:
+            g_wifiConnected = true;
+            return true;
+        case SOFTBUS_WIFI_DISCONNECTED:
+            g_wifiConnected = false;
+            return true;
+        case SOFTBUS_AP_ENABLED:
+            g_apEnabled = true;
+            return true;
+        case SOFTBUS_AP_DISABLED:
+            g_apEnabled = false;
+            return true;
+        default:
+            return false;
+    }
+}
+
 static bool IsValidLocalIp(void)
 {
     char localIp[MAX_ADDR_LEN] = {0};
@@ -617,32 +637,16 @@ static void WifiStateChangeEventHandler(const LnnEventBasicInfo *info)
         LNN_LOGI(LNN_BUILDER, "g_heartbeatEnable not enable");
         return;
     }
-    bool beforeConnected = false;
-    bool currentConnected = false;
-    bool isValidIp = false;
     const LnnMonitorWlanStateChangedEvent *event = (const LnnMonitorWlanStateChangedEvent *)info;
     SoftBusWifiState wifiState = (SoftBusWifiState)event->status;
     LNN_LOGI(LNN_BUILDER, "wifi state change wifiState=%d", wifiState);
-    beforeConnected = g_apEnabled || g_wifiConnected;
-    switch (wifiState) {
-        case SOFTBUS_WIFI_CONNECTED:
-            g_wifiConnected = true;
-            break;
-        case SOFTBUS_WIFI_DISCONNECTED:
-            g_wifiConnected = false;
-            break;
-        case SOFTBUS_AP_ENABLED:
-             g_apEnabled = true;
-            break;
-        case SOFTBUS_AP_DISABLED:
-            g_apEnabled = false;
-            break;
-        default:
-            LNN_LOGI(LNN_BUILDER, "not interest wifi event");
-            return;
+    bool beforeConnected = g_apEnabled || g_wifiConnected;
+    if (!WifiStateChangeWifiOrAp(wifiState)) {
+        LNN_LOGI(LNN_BUILDER, "not interest wifi event");
+        return;
     }
-    currentConnected = g_apEnabled || g_wifiConnected;
-    isValidIp = IsValidLocalIp();
+    bool currentConnected = g_apEnabled || g_wifiConnected;
+    bool isValidIp = IsValidLocalIp();
     LNN_LOGI(LNN_BUILDER,
         "wifi or ap wifiConnected=%d, apEnabled=%d, beforeConnected=%d, currentConnected=%d, isValidIp=%d",
         g_wifiConnected, g_apEnabled, beforeConnected, currentConnected, isValidIp);
