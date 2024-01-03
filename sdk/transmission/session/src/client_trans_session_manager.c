@@ -1389,6 +1389,10 @@ void ClientCleanAllSessionWhenServerDeath(void)
             continue;
         }
         LIST_FOR_EACH_ENTRY_SAFE(sessionNode, nextSessionNode, &(serverNode->sessionList), SessionInfo, node) {
+            if (sessionNode->role == SESSION_ROLE_SERVER) {
+                TRANS_LOGD(TRANS_SDK, "cannot delete socket for listening, socket=%d", sessionNode->sessionId);
+                continue;
+            }
             DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, serverNode);
             if (destroyNode == NULL) {
                 continue;
