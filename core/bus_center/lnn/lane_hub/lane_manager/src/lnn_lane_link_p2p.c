@@ -903,7 +903,13 @@ static int32_t GetAuthTriggerLinkReqParamByAuthId(uint32_t authRequestId, int32_
             return SOFTBUS_ERR;
         }
         wifiDirectInfo->isNetworkDelegate = item->p2pInfo.networkDelegate;
-        wifiDirectInfo->connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML;
+        if (item->p2pInfo.isWithQos) {
+            wifiDirectInfo->connectType = ((item->laneRequestInfo.laneType == LANE_HML) ?
+                WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML : WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P);
+        } else {
+            wifiDirectInfo->connectType = item->p2pInfo.p2pOnly ? WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P :
+                WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML;
+        }
         item->p2pInfo.p2pRequestId = p2pRequestId;
         LinkUnlock();
         return SOFTBUS_OK;
@@ -974,6 +980,10 @@ static int32_t OpenAuthTriggerToConn(const LinkRequest *request, uint32_t laneLi
 
 static int32_t OpenBleTriggerToConn(const LinkRequest *request, uint32_t laneLinkReqId, const LaneLinkCb *callback)
 {
+    if (request->linkType == LANE_P2P) {
+        LNN_LOGI(LNN_LANE, "ble trigger not support p2p");
+        return SOFTBUS_ERR;
+    }
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     bool isMetaAuth = GetAuthType(request->peerNetworkId);
