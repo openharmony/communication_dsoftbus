@@ -76,7 +76,7 @@ int32_t DiscCoapParseKeyValueStr(const char *src, const char *key, char *outValu
     DISC_CHECK_AND_RETURN_RET_LOGE(key != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "key is NULL");
     DISC_CHECK_AND_RETURN_RET_LOGE(outValue != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "outValue is NULL");
     DISC_CHECK_AND_RETURN_RET_LOGE(strlen(src) < DISC_MAX_CUST_DATA_LEN, SOFTBUS_INVALID_PARAM, DISC_COAP,
-        "src len(%u) >= max len(%u)", strlen(src), DISC_MAX_CUST_DATA_LEN);
+        "src len(%zu) >= max len(%u)", strlen(src), DISC_MAX_CUST_DATA_LEN);
 
     char tmpSrc[DISC_MAX_CUST_DATA_LEN] = {0};
     if (memcpy_s(tmpSrc, DISC_MAX_CUST_DATA_LEN, src, strlen(src)) != EOK) {
@@ -162,7 +162,7 @@ int32_t DiscCoapFillServiceData(uint32_t capability, const char *capabilityData,
         return SOFTBUS_OK;
     }
     DISC_CHECK_AND_RETURN_RET_LOGE(strlen(capabilityData) == dataLen, SOFTBUS_INVALID_PARAM, DISC_COAP,
-        "capability data len(%u) != expected len(%u), data=%s", strlen(capabilityData), dataLen, capabilityData);
+        "capability data len(%zu) != expected len(%u), data=%s", strlen(capabilityData), dataLen, capabilityData);
 
     cJSON *json = cJSON_ParseWithLength(capabilityData, dataLen);
     DISC_CHECK_AND_RETURN_RET_LOGE(json != NULL, SOFTBUS_CREATE_JSON_ERR, DISC_COAP,

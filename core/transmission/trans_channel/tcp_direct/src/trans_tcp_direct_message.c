@@ -517,7 +517,7 @@ static int TransTdcPostFisrtData(SessionConn *conn)
     }
     ssize_t ret = ConnSendSocketData(conn->appInfo.fd, buf, outLen, 0);
     if (ret != (ssize_t)outLen) {
-        TRANS_LOGE(TRANS_CTRL, "failed to send tcp data. ret=%d", ret);
+        TRANS_LOGE(TRANS_CTRL, "failed to send tcp data. ret=%zd", ret);
         SoftBusFree(buf);
         return SOFTBUS_ERR;
     }
@@ -801,7 +801,7 @@ static bool IsMetaSession(const char *sessionName)
 
 static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t seq, const cJSON *request)
 {
-    TRANS_LOGI(TRANS_CTRL, "channelId=%d, seq=%d.", channelId, seq);
+    TRANS_LOGI(TRANS_CTRL, "channelId=%d, seq=%" PRIu64, channelId, seq);
     SessionConn *conn = GetSessionConnFromDataBusRequest(channelId, request);
     if (conn == NULL) {
         TRANS_LOGE(TRANS_CTRL, "conn is null");
@@ -1011,7 +1011,7 @@ static int32_t ProcessReceivedData(int32_t channelId)
     seq = pktHead->seq;
     flags = pktHead->flags;
 
-    TRANS_LOGI(TRANS_CTRL, "recv tdc packet, flags=%d, seq=%d", flags, seq);
+    TRANS_LOGI(TRANS_CTRL, "recv tdc packet, flags=%d, seq=%" PRIu64, flags, seq);
     if (DecryptMessage(channelId, pktHead, pktData, &data, &dataLen) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "srv process recv data: decrypt fail.");
         SoftBusMutexUnlock(&g_tcpSrvDataList->lock);

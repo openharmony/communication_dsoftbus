@@ -447,7 +447,7 @@ int32_t StrCmpIgnoreCase(const char *str1, const char *str2)
         }
     }
     if (str1[i] != '\0' || str2[i] != '\0') {
-        COMM_LOGE(COMM_UTILS, "str end != '\0'");
+        COMM_LOGE(COMM_UTILS, "str end != '\\0'");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -474,7 +474,7 @@ void SignalingMsgPrint(const char *distinguish, unsigned char *data, unsigned ch
     char signalingMsgBuf[BUF_HEX_LEN] = {0};
 
     if (!GetSignalingMsgSwitch()) {
-        COMM_LOGE(COMM_UTILS, "signalingMsgSwitch end != '\0'");
+        COMM_LOGE(COMM_UTILS, "signalingMsgSwitch end != '\\0'");
         return;
     }
     if (dataLen >= BUF_BYTE_LEN) {
@@ -483,7 +483,7 @@ void SignalingMsgPrint(const char *distinguish, unsigned char *data, unsigned ch
         ret = ConvertBytesToHexString(signalingMsgBuf, BUF_HEX_LEN + OFFSET, data, dataLen);
     }
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_UTILS, "intercept signaling msg faile");
+        COMM_LOGE(COMM_UTILS, "intercept signaling msg failed");
         return;
     }
 }

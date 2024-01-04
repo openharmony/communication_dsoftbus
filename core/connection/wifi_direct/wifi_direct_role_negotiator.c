@@ -73,7 +73,7 @@ static enum WifiDirectRole GetFinalRoleAsNone(enum WifiDirectRole peerRole, enum
 {
     if (peerRole == WIFI_DIRECT_ROLE_GO) {
         if (expectedRole == WIFI_DIRECT_ROLE_GC) {
-            CONN_LOGE(CONN_WIFI_DIRECT, "mismatched role, peerRole=%d expectRole=", peerRole, expectedRole);
+            CONN_LOGE(CONN_WIFI_DIRECT, "mismatched role, peerRole=%d expectRole=%d", peerRole, expectedRole);
             return ERROR_P2P_GC_AVAILABLE_WITH_MISMATCHED_ROLE;
         }
         return WIFI_DIRECT_ROLE_GC;

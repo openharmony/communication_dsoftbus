@@ -48,11 +48,19 @@ static const SoftBusLogLabel COMM_LABELS[MODULE_DOMAIN_MAX_LEN] = {
     { COMM_TEST,    DOMAIN_ID_TEST, "CommTest"   },
 };
 
-#define COMM_LOGF(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_FATAL, COMM_LABELS[label], ##__VA_ARGS__)
-#define COMM_LOGE(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_ERROR, COMM_LABELS[label], ##__VA_ARGS__)
-#define COMM_LOGW(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_WARN, COMM_LABELS[label], ##__VA_ARGS__)
-#define COMM_LOGI(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_INFO, COMM_LABELS[label], ##__VA_ARGS__)
-#define COMM_LOGD(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_DEBUG, COMM_LABELS[label], ##__VA_ARGS__)
+#ifdef SOFTBUS_STANDARD_SYSTEM
+#define COMM_LOGF(label, ...) SOFTBUS_LITE_LOGF_INNER(label, ##__VA_ARGS__)
+#define COMM_LOGE(label, ...) SOFTBUS_LITE_LOGE_INNER(label, ##__VA_ARGS__)
+#define COMM_LOGW(label, ...) SOFTBUS_LITE_LOGW_INNER(label, ##__VA_ARGS__)
+#define COMM_LOGI(label, ...) SOFTBUS_LITE_LOGI_INNER(label, ##__VA_ARGS__)
+#define COMM_LOGD(label, ...) SOFTBUS_LITE_LOGD_INNER(label, ##__VA_ARGS__)
+#else
+#define COMM_LOGF(label, ...) (void)SOFTBUS_LOG_INNER(LOG_FATAL, COMM_LABELS[label], ##__VA_ARGS__)
+#define COMM_LOGE(label, ...) (void)SOFTBUS_LOG_INNER(LOG_ERROR, COMM_LABELS[label], ##__VA_ARGS__)
+#define COMM_LOGW(label, ...) (void)SOFTBUS_LOG_INNER(LOG_WARN, COMM_LABELS[label], ##__VA_ARGS__)
+#define COMM_LOGI(label, ...) (void)SOFTBUS_LOG_INNER(LOG_INFO, COMM_LABELS[label], ##__VA_ARGS__)
+#define COMM_LOGD(label, ...) (void)SOFTBUS_LOG_INNER(LOG_DEBUG, COMM_LABELS[label], ##__VA_ARGS__)
+#endif // SOFTBUS_STANDARD_SYSTEM
 
 #define COMM_CHECK_AND_RETURN_RET_LOGW(cond, ret, label, fmt, ...) \
     CHECK_AND_RETURN_RET_LOG_INNER(cond, ret, COMM_LOGW, label, fmt, ##__VA_ARGS__)

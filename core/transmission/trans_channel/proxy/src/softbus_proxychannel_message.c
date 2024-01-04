@@ -398,7 +398,7 @@ static int32_t PackHandshakeMsgForNormal(SessionKeyBase64 *sessionBase64, AppInf
         TRANS_LOGE(TRANS_CTRL, "mbedtls_base64_encode FAIL ret=%d", ret);
         return ret;
     }
-    TRANS_LOGI(TRANS_CTRL, "mbedtls_base64_encode len=%d", sessionBase64->len);
+    TRANS_LOGI(TRANS_CTRL, "mbedtls_base64_encode len=%zu", sessionBase64->len);
     if (!AddNumberToJsonObject(root, JSON_KEY_UID, appInfo->myData.uid) ||
         !AddNumberToJsonObject(root, JSON_KEY_PID, appInfo->myData.pid) ||
         !AddStringToJsonObject(root, JSON_KEY_GROUP_ID, appInfo->groupId) ||

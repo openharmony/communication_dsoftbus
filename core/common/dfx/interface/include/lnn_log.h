@@ -50,11 +50,19 @@ static const SoftBusLogLabel LNN_LABELS[MODULE_DOMAIN_MAX_LEN] = {
     { LNN_TEST,       DOMAIN_ID_TEST, "LnnTest"     },
 };
 
-#define LNN_LOGF(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_FATAL, LNN_LABELS[label], ##__VA_ARGS__)
-#define LNN_LOGE(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_ERROR, LNN_LABELS[label], ##__VA_ARGS__)
-#define LNN_LOGW(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_WARN, LNN_LABELS[label], ##__VA_ARGS__)
-#define LNN_LOGI(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_INFO, LNN_LABELS[label], ##__VA_ARGS__)
-#define LNN_LOGD(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_DEBUG, LNN_LABELS[label], ##__VA_ARGS__)
+#ifndef SOFTBUS_STANDARD_SYSTEM
+#define LNN_LOGF(label, ...) SOFTBUS_LITE_LOGF_INNER(label, ##__VA_ARGS__)
+#define LNN_LOGE(label, ...) SOFTBUS_LITE_LOGE_INNER(label, ##__VA_ARGS__)
+#define LNN_LOGW(label, ...) SOFTBUS_LITE_LOGW_INNER(label, ##__VA_ARGS__)
+#define LNN_LOGI(label, ...) SOFTBUS_LITE_LOGI_INNER(label, ##__VA_ARGS__)
+#define LNN_LOGD(label, ...) SOFTBUS_LITE_LOGD_INNER(label, ##__VA_ARGS__)
+#else
+#define LNN_LOGF(label, ...) (void)SOFTBUS_LOG_INNER(LOG_FATAL, LNN_LABELS[label], ##__VA_ARGS__)
+#define LNN_LOGE(label, ...) (void)SOFTBUS_LOG_INNER(LOG_ERROR, LNN_LABELS[label], ##__VA_ARGS__)
+#define LNN_LOGW(label, ...) (void)SOFTBUS_LOG_INNER(LOG_WARN, LNN_LABELS[label], ##__VA_ARGS__)
+#define LNN_LOGI(label, ...) (void)SOFTBUS_LOG_INNER(LOG_INFO, LNN_LABELS[label], ##__VA_ARGS__)
+#define LNN_LOGD(label, ...) (void)SOFTBUS_LOG_INNER(LOG_DEBUG, LNN_LABELS[label], ##__VA_ARGS__)
+#endif // SOFTBUS_STANDARD_SYSTEM
 
 #define LNN_CHECK_AND_RETURN_RET_LOGW(cond, ret, label, fmt, ...) \
     CHECK_AND_RETURN_RET_LOG_INNER(cond, ret, LNN_LOGW, label, fmt, ##__VA_ARGS__)

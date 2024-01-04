@@ -84,12 +84,12 @@ static bool GetFeatureCap(const char *networkId, uint64_t *local, uint64_t *remo
 {
     int32_t ret = LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, local);
     if (ret != SOFTBUS_OK || *local < 0) {
-        LNN_LOGE(LNN_LANE, "LnnGetLocalNumInfo err, ret=%d, local=%d", ret, *local);
+        LNN_LOGE(LNN_LANE, "LnnGetLocalNumInfo err, ret=%d, local=%" PRIu64, ret, *local);
         return false;
     }
     ret = LnnGetRemoteNumU64Info(networkId, NUM_KEY_FEATURE_CAPA, remote);
     if (ret != SOFTBUS_OK || *remote < 0) {
-        LNN_LOGE(LNN_LANE, "LnnGetRemoteNumInfo err, ret=%d, remote=%d", ret, *remote);
+        LNN_LOGE(LNN_LANE, "LnnGetRemoteNumInfo err, ret=%d, remote=%" PRIu64, ret, *remote);
         return false;
     }
     return true;
@@ -224,7 +224,7 @@ static bool IsEnableP2pReuse(const char *networkId)
         return false;
     }
     if (((local & (1 << BIT_WIFI_P2P_REUSE)) == 0) || ((remote & (1 << BIT_WIFI_P2P_REUSE)) == 0)) {
-        LNN_LOGE(LNN_LANE, "p2p reuse capa disable, local:" PRIu64 ", remote:%"  PRIu64,
+        LNN_LOGE(LNN_LANE, "p2p reuse capa disable, local:%" PRIu64 ", remote:%"  PRIu64,
             local, remote);
         return false;
     }
@@ -442,7 +442,7 @@ static bool IsValidLane(const char *networkId, LaneLinkType linkType, LaneTransT
     bool isBt = (linkType == LANE_BR || linkType == LANE_BLE || linkType == LANE_BLE_DIRECT ||
                 linkType == LANE_BLE_REUSE || linkType == LANE_COC || linkType == LANE_COC_DIRECT);
     if (isStream && isBt) {
-        LNN_LOGE(LNN_LANE, "Bt not support stream datatype", linkType);
+        LNN_LOGE(LNN_LANE, "Bt not support stream datatype, link=%d", linkType);
         return false;
     }
     return true;
@@ -450,7 +450,7 @@ static bool IsValidLane(const char *networkId, LaneLinkType linkType, LaneTransT
 
 static bool IsLaneFillMinLatency(uint32_t minLaneLatency, LaneLinkType linkType)
 {
-    if (minLaneLatency >= g_laneLatency[linkType]) {
+    if (minLaneLatency >= (uint32_t)g_laneLatency[linkType]) {
         return true;
     }
     return false;
@@ -481,7 +481,7 @@ static void DecideOptimalLinks(const char *networkId, const LaneSelectParam *req
         return;
     }
     int32_t bandWidthType = GetBwType(minBandWidth);
-    LNN_LOGI(LNN_LANE, "decide optimal link, band width type=%ld, latency=%d", bandWidthType, minLaneLatency);
+    LNN_LOGI(LNN_LANE, "decide optimal link, band width type=%d, latency=%d", bandWidthType, minLaneLatency);
     for (uint32_t i = 0; i < (LANE_LINK_TYPE_BUTT + 1); i++) {
         if (g_laneBandWidth[bandWidthType][i] == LANE_LINK_TYPE_BUTT) {
             break;
@@ -539,7 +539,7 @@ static void DecideRetryLinks(const char *networkId, const LaneSelectParam *reque
     } else {
         retryTime = maxLaneLatency - request->qosRequire.minLaneLatency;
     }
-    LNN_LOGI(LNN_LANE, "decide retry link, band width type=%ld, retrytime=%d", bandWidthType, retryTime);
+    LNN_LOGI(LNN_LANE, "decide retry link, band width type=%d, retrytime=%d", bandWidthType, retryTime);
     for (uint32_t i = 0; i < (LANE_LINK_TYPE_BUTT + 1); i++) {
         if (g_retryLaneList[bandWidthType][i] == LANE_LINK_TYPE_BUTT) {
             break;

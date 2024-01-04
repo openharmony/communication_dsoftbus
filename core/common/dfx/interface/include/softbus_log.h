@@ -20,6 +20,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "hilog/log.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -35,28 +37,27 @@ extern "C" {
 #define LOG_LINE_MAX_LENGTH   512
 #define NSTACKX_LOG_DOMAIN    0xd0057ff
 #define DOMAIN_ID_TEST        0xd000f00
-#define FILE_NAME             (__builtin_strrchr("/" __FILE__, '/') + 1)
+
+#define FILE_NAME        (__builtin_strrchr("/" __FILE__, '/') + 1)
+#define FORMAT(fmt, ...) "[%{public}s:%{public}d] %{public}s# " fmt, FILE_NAME, __LINE__, __FUNCTION__, ##__VA_ARGS__
 
 /* For inner use only */
-#define SOFTBUS_LOG_INNER(Level, Label, Fmt, Args...) \
-    SoftBusLogInnerImpl(Level, Label, FILE_NAME, __LINE__, __FUNCTION__, Fmt, ##Args)
-
-typedef enum {
-    SOFTBUS_LOG_DEBUG = 3,
-    SOFTBUS_LOG_INFO = 4,
-    SOFTBUS_LOG_WARN = 5,
-    SOFTBUS_LOG_ERROR = 6,
-    SOFTBUS_LOG_FATAL = 7,
-} SoftBusLogLevel;
+#ifndef SOFTBUS_STANDARD_SYSTEM
+#define SOFTBUS_LITE_LOGF_INNER(label, ...) HILOG_FATAL(HILOG_MODULE_SOFTBUS, FORMAT(__VA_ARGS__))
+#define SOFTBUS_LITE_LOGE_INNER(label, ...) HILOG_ERROR(HILOG_MODULE_SOFTBUS, FORMAT(__VA_ARGS__))
+#define SOFTBUS_LITE_LOGW_INNER(label, ...) HILOG_WARN(HILOG_MODULE_SOFTBUS, FORMAT(__VA_ARGS__))
+#define SOFTBUS_LITE_LOGI_INNER(label, ...) HILOG_INFO(HILOG_MODULE_SOFTBUS, FORMAT(__VA_ARGS__))
+#define SOFTBUS_LITE_LOGD_INNER(label, ...) HILOG_DEBUG(HILOG_MODULE_SOFTBUS, FORMAT(__VA_ARGS__))
+#else
+#define SOFTBUS_LOG_INNER(level, label, ...) \
+    HILOG_IMPL(LOG_CORE, level, label.domain, label.tag, FORMAT(__VA_ARGS__))
+#endif // SOFTBUS_STANDARD_SYSTEM
 
 typedef struct {
     int32_t label;
     uint32_t domain;
     char tag[LOG_TAG_MAX_LEN];
 } SoftBusLogLabel;
-
-void SoftBusLogInnerImpl(SoftBusLogLevel level, SoftBusLogLabel label, const char *fileName, int32_t lineNum,
-    const char *funName, const char *fmt, ...);
 
 void NstackxLogInnerImpl(const char *moduleName, uint32_t logLevel, const char *fmt, ...);
 

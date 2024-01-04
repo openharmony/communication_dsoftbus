@@ -317,7 +317,7 @@ static int32_t ScanFilter(const BroadcastReportInfo *reportInfo)
 
     DISC_CHECK_AND_RETURN_RET_LOGE(reportInfo->dataStatus == SOFTBUS_BLE_DATA_COMPLETE, SOFTBUS_ERR, DISC_BLE,
         "dataStatus[%u] is invalid", reportInfo->dataStatus);
-    DISC_CHECK_AND_RETURN_RET_LOGE(advData != NULL, SOFTBUS_ERR, DISC_BLE, "advData is null", advLen);
+    DISC_CHECK_AND_RETURN_RET_LOGE(advData != NULL, SOFTBUS_ERR, DISC_BLE, "advData is null");
     DISC_CHECK_AND_RETURN_RET_LOGE(advLen >= POS_TLV, SOFTBUS_ERR, DISC_BLE,
         "advLen[%u] is too short, less than adv header length", advLen);
 

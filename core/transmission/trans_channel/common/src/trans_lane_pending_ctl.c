@@ -429,7 +429,7 @@ static int32_t TransSoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, uint
     SoftBusSysTime tv;
     tv.sec = usTime / CONVERSION_BASE / CONVERSION_BASE;
     tv.usec = usTime % (CONVERSION_BASE * CONVERSION_BASE);
-    TRANS_LOGI(TRANS_SVC, "start wait cond endSecond=%lld.", tv.sec);
+    TRANS_LOGI(TRANS_SVC, "start wait cond endSecond=%" PRId64, tv.sec);
     return SoftBusCondWait(cond, mutex, &tv);
 }
 
