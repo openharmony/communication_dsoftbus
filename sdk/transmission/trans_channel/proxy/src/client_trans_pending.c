@@ -213,6 +213,7 @@ int32_t SetPendingPacketData(uint32_t id, uint64_t seq, const TransPendData *dat
         if (item->seq == seq && item->id == id) {
             if (SoftBusMutexLock(&item->lock) != SOFTBUS_OK) {
                 TRANS_LOGE(TRANS_SDK, "mutex lock fail");
+                (void)SoftBusMutexUnlock(&g_pendingLock);
                 return SOFTBUS_LOCK_ERR;
             }
             item->finded = true;
