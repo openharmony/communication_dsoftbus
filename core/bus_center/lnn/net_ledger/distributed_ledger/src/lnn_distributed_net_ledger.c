@@ -302,7 +302,7 @@ static int32_t ConvertNodeInfoToBasicInfo(const NodeInfo *info, NodeBasicInfo *b
     return SOFTBUS_OK;
 }
 
-static bool isMetaNode(NodeInfo *info)
+static bool IsMetaNode(NodeInfo *info)
 {
     if (info == NULL) {
         return false;
@@ -331,7 +331,7 @@ static int32_t GetDLOnlineNodeNumLocked(int32_t *infoNum, bool isNeedMeta)
                 (*infoNum)++;
             }
         } else {
-            if (LnnIsNodeOnline(info) || isMetaNode(info)) {
+            if (LnnIsNodeOnline(info) || IsMetaNode(info)) {
                 (*infoNum)++;
             }
         }
@@ -364,7 +364,7 @@ static int32_t FillDLOnlineNodeInfoLocked(NodeBasicInfo *info, int32_t infoNum, 
                 ++i;
             }
         } else {
-            if (LnnIsNodeOnline(nodeInfo) || isMetaNode(nodeInfo)) {
+            if (LnnIsNodeOnline(nodeInfo) || IsMetaNode(nodeInfo)) {
                 ConvertNodeInfoToBasicInfo(nodeInfo, info + i);
                 ++i;
             }
@@ -1095,7 +1095,7 @@ static int32_t DlGetNodeTlvNegoFlag(const char *networkId, void *buf, uint32_t l
         return SOFTBUS_INVALID_PARAM;
     }
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
-    if (!LnnIsNodeOnline(info)) {
+    if (!LnnIsNodeOnline(info) && !IsMetaNode(info)) {
         LNN_LOGE(LNN_LEDGER, "node is offline");
         return SOFTBUS_NETWORK_NODE_OFFLINE;
     }
