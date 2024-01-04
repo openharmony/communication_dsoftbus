@@ -22,6 +22,7 @@
 #include "auth_log.h"
 #include "auth_manager.h"
 #include "iservice_registry.h"
+#include "lnn_async_callback_utils.h"
 #include "softbus_error_code.h"
 #include "system_ability_definition.h"
 #include "system_ability_status_change_stub.h"
@@ -48,11 +49,25 @@ SystemAbilityListener *SystemAbilityListener::GetInstance()
     return &saListener;
 }
 
+static void RetryRegTrustListener(void *para)
+{
+    (void)para;
+    if (RegTrustListenerOnHichainSaStart() != SOFTBUS_OK) {
+        AUTH_LOGI(AUTH_INIT, "retry reg hichain trust listener failed after 5s");
+    }
+}
+
 void SystemAbilityListener::OnAddSystemAbility(int32_t saId, const std::string &deviceId)
 {
     AUTH_LOGI(AUTH_INIT, "onSaStart saId=%d", saId);
     if (saId == DEVICE_AUTH_SERVICE_ID) {
-        (void)RegTrustListenerOnHichainSaStart();
+        int32_t ret = RegTrustListenerOnHichainSaStart();
+        if (ret != SOFTBUS_OK) {
+            const int delayRegHichainTime = 5000;
+            ret = LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), RetryRegTrustListener, nullptr,
+                delayRegHichainTime);
+            AUTH_LOGI(AUTH_INIT, "LnnAsyncCallbackDelayHelper ret=%d", ret);
+        }
     }
 }
 
