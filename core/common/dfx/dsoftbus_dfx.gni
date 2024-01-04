@@ -16,8 +16,7 @@ import("../../../dsoftbus.gni")
 dsoftbus_dfx_path = "$dsoftbus_core_path/common/dfx"
 
 if (defined(ohos_lite)) {
-  hilog_lite_include_path =
-      "//base/hiviewdfx/hilog_lite/interfaces/native/kits"
+  hilog_lite_include_path = "//base/hiviewdfx/hilog_lite/interfaces/native/kits"
   hilog_lite_deps_path =
       "//base/hiviewdfx/hilog_lite/frameworks/mini:hilog_lite"
   if (defined(board_toolchain_type)) {

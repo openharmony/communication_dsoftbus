@@ -21,7 +21,7 @@
 
 static void SoftBusLogPrint(const char *line, LogLevel level, uint32_t domain, const char *tag)
 {
-#ifndef SOFTBUS_STANDARD_SYSTEM
+#if defined(SOFTBUS_LITE_SYSTEM) || defined(SOFTBUS_SMALL_SYSTEM)
     (void)level;
     (void)domain;
     (void)tag;

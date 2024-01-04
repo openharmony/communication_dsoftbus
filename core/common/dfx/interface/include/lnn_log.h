@@ -50,7 +50,7 @@ static const SoftBusLogLabel LNN_LABELS[MODULE_DOMAIN_MAX_LEN] = {
     { LNN_TEST,       DOMAIN_ID_TEST, "LnnTest"     },
 };
 
-#ifndef SOFTBUS_STANDARD_SYSTEM
+#if defined(SOFTBUS_LITE_SYSTEM) || defined(SOFTBUS_SMALL_SYSTEM)
 #define LNN_LOGF(label, ...) SOFTBUS_LITE_LOGF_INNER(label, ##__VA_ARGS__)
 #define LNN_LOGE(label, ...) SOFTBUS_LITE_LOGE_INNER(label, ##__VA_ARGS__)
 #define LNN_LOGW(label, ...) SOFTBUS_LITE_LOGW_INNER(label, ##__VA_ARGS__)
@@ -62,7 +62,7 @@ static const SoftBusLogLabel LNN_LABELS[MODULE_DOMAIN_MAX_LEN] = {
 #define LNN_LOGW(label, ...) (void)SOFTBUS_LOG_INNER(LOG_WARN, LNN_LABELS[label], ##__VA_ARGS__)
 #define LNN_LOGI(label, ...) (void)SOFTBUS_LOG_INNER(LOG_INFO, LNN_LABELS[label], ##__VA_ARGS__)
 #define LNN_LOGD(label, ...) (void)SOFTBUS_LOG_INNER(LOG_DEBUG, LNN_LABELS[label], ##__VA_ARGS__)
-#endif // SOFTBUS_STANDARD_SYSTEM
+#endif // SOFTBUS_LITE_SYSTEM || SOFTBUS_SMALL_SYSTEM
 
 #define LNN_CHECK_AND_RETURN_RET_LOGW(cond, ret, label, fmt, ...) \
     CHECK_AND_RETURN_RET_LOG_INNER(cond, ret, LNN_LOGW, label, fmt, ##__VA_ARGS__)
