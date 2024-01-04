@@ -48,7 +48,7 @@ static const SoftBusLogLabel COMM_LABELS[MODULE_DOMAIN_MAX_LEN] = {
     { COMM_TEST,    DOMAIN_ID_TEST, "CommTest"   },
 };
 
-#ifdef SOFTBUS_STANDARD_SYSTEM
+#if defined(SOFTBUS_LITE_SYSTEM) || defined(SOFTBUS_SMALL_SYSTEM)
 #define COMM_LOGF(label, ...) SOFTBUS_LITE_LOGF_INNER(label, ##__VA_ARGS__)
 #define COMM_LOGE(label, ...) SOFTBUS_LITE_LOGE_INNER(label, ##__VA_ARGS__)
 #define COMM_LOGW(label, ...) SOFTBUS_LITE_LOGW_INNER(label, ##__VA_ARGS__)
@@ -60,7 +60,7 @@ static const SoftBusLogLabel COMM_LABELS[MODULE_DOMAIN_MAX_LEN] = {
 #define COMM_LOGW(label, ...) (void)SOFTBUS_LOG_INNER(LOG_WARN, COMM_LABELS[label], ##__VA_ARGS__)
 #define COMM_LOGI(label, ...) (void)SOFTBUS_LOG_INNER(LOG_INFO, COMM_LABELS[label], ##__VA_ARGS__)
 #define COMM_LOGD(label, ...) (void)SOFTBUS_LOG_INNER(LOG_DEBUG, COMM_LABELS[label], ##__VA_ARGS__)
-#endif // SOFTBUS_STANDARD_SYSTEM
+#endif // SOFTBUS_LITE_SYSTEM || SOFTBUS_SMALL_SYSTEM
 
 #define COMM_CHECK_AND_RETURN_RET_LOGW(cond, ret, label, fmt, ...) \
     CHECK_AND_RETURN_RET_LOG_INNER(cond, ret, COMM_LOGW, label, fmt, ##__VA_ARGS__)

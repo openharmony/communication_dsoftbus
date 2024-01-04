@@ -17,7 +17,7 @@ import("../../../../../../dsoftbus.gni")
 dsoftbus_root_path = "../../../../../.."
 
 config("stream_test") {
-  defines = [ "FILLP_LINUX" ]
+  defines += [ "FILLP_LINUX" ]
 }
 
 executable("dstream_adaptor_server_test") {

@@ -20,8 +20,10 @@ softbus_adapter_common = "${dsoftbus_root_path}/adapter/common"
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
     build_type = "static_library"
+    libsec_deps = "//third_party/bounds_checking_function:libsec_static"
   } else {
     build_type = "shared_library"
+    libsec_deps = "//third_party/bounds_checking_function:libsec_shared"
   }
   config("dsoftbus_dump_interface_lite") {
     include_dirs = [
@@ -52,6 +54,7 @@ if (defined(ohos_lite)) {
       "softbus_hidumper_trans_virtual.c",
       "softbus_hidumper_util_virtual.c",
     ]
+    deps = [ "$libsec_deps" ]
     public_configs = [ ":dsoftbus_event_interface_lite" ]
   }
 } else {
@@ -105,7 +108,6 @@ if (defined(ohos_lite)) {
       "softbus_hidumper_trans.c",
       "softbus_hidumper_util.c",
     ]
-    defines = [ "SOFTBUS_STANDARD_SYSTEM" ]
     defines += [ "__STDC_FORMAT_MACROS" ]
     if (is_asan) {
       defines += [ "ASAN_BUILD" ]

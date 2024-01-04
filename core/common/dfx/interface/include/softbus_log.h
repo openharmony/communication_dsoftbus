@@ -42,7 +42,7 @@ extern "C" {
 #define FORMAT(fmt, ...) "[%{public}s:%{public}d] %{public}s# " fmt, FILE_NAME, __LINE__, __FUNCTION__, ##__VA_ARGS__
 
 /* For inner use only */
-#ifndef SOFTBUS_STANDARD_SYSTEM
+#if defined(SOFTBUS_LITE_SYSTEM) || defined(SOFTBUS_SMALL_SYSTEM)
 #define SOFTBUS_LITE_LOGF_INNER(label, ...) HILOG_FATAL(HILOG_MODULE_SOFTBUS, FORMAT(__VA_ARGS__))
 #define SOFTBUS_LITE_LOGE_INNER(label, ...) HILOG_ERROR(HILOG_MODULE_SOFTBUS, FORMAT(__VA_ARGS__))
 #define SOFTBUS_LITE_LOGW_INNER(label, ...) HILOG_WARN(HILOG_MODULE_SOFTBUS, FORMAT(__VA_ARGS__))
@@ -51,7 +51,7 @@ extern "C" {
 #else
 #define SOFTBUS_LOG_INNER(level, label, ...) \
     HILOG_IMPL(LOG_CORE, level, label.domain, label.tag, FORMAT(__VA_ARGS__))
-#endif // SOFTBUS_STANDARD_SYSTEM
+#endif // SOFTBUS_LITE_SYSTEM || SOFTBUS_SMALL_SYSTEM
 
 typedef struct {
     int32_t label;

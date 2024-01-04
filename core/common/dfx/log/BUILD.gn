@@ -20,8 +20,10 @@ softbus_log_src = [ "src/softbus_log.c" ]
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
     build_type = "static_library"
+    libsec_deps = "//third_party/bounds_checking_function:libsec_static"
   } else {
     build_type = "shared_library"
+    libsec_deps = "//third_party/bounds_checking_function:libsec_shared"
   }
   config("dsoftbus_log_interface_lite") {
     include_dirs = [
@@ -37,9 +39,13 @@ if (defined(ohos_lite)) {
     include_dirs = [
       "$dsoftbus_dfx_path/interface/include",
       "$dsoftbus_root_path/interfaces/kits/common",
+      "//third_party/bounds_checking_function/include",
     ]
     sources = softbus_log_src
-    deps = [ "$hilog_lite_deps_path" ]
+    deps = [
+      "$hilog_lite_deps_path",
+      "$libsec_deps",
+    ]
     public_configs = [ ":dsoftbus_log_interface_lite" ]
   }
 } else {
@@ -61,7 +67,6 @@ if (defined(ohos_lite)) {
       "//third_party/bounds_checking_function/include",
     ]
     sources = softbus_log_src
-    defines = [ "SOFTBUS_STANDARD_SYSTEM" ]
     defines += [ "__STDC_FORMAT_MACROS" ]
     if (is_asan) {
       defines += [ "ASAN_BUILD" ]

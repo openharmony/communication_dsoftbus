@@ -38,7 +38,7 @@ ohos_executable("softbus_test") {
   configs = [ ":softbus_frame_test_config" ]
 
   if (is_standard_system) {
-    defines = [ "STANDARD_SYSTEM_ENABLE" ]
+    defines += [ "STANDARD_SYSTEM_ENABLE" ]
 
     deps = [ "$dsoftbus_root_path/sdk:softbus_client" ]
     part_name = "softbus_L2"
