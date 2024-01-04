@@ -80,7 +80,7 @@ static void IntToBytes(uint32_t data, uint32_t len, uint8_t *out, uint32_t outSi
 
 static void HexDump(const char *banana, const uint8_t *data, size_t size)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "%s size=%d", banana, size);
+    CONN_LOGI(CONN_WIFI_DIRECT, "%s size=%zu", banana, size);
     char line[64];
     int32_t pos = 0;
     bool isLastPrinted = false;

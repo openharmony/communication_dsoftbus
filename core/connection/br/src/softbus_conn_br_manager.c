@@ -662,7 +662,7 @@ static void ClientConnected(uint32_t connectionId)
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, connection->addr, BT_MAC_LEN);
     ConnBrDevice *connectingDevice = g_brManager.connecting;
     if (connectingDevice == NULL || StrCmpIgnoreCase(connectingDevice->addr, connection->addr) != 0) {
-        CONN_LOGE(CONN_BR, "no connecting device, conn id=%u, address=%d", connectionId, anomizeAddress);
+        CONN_LOGE(CONN_BR, "no connecting device, conn id=%u, address=%s", connectionId, anomizeAddress);
         ConnBrUpdateConnectionRc(connection, -1);
         ConnBrReturnConnection(&connection);
         return;

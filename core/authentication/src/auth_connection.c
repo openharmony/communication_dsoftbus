@@ -474,7 +474,7 @@ static void AsyncCallDeviceIdReceived(void *para)
     if (recvData == NULL) {
         return;
     }
-    AUTH_LOGI(AUTH_CONN, "Delay handle connectionId=%u, len=%d, from=%s",
+    AUTH_LOGI(AUTH_CONN, "Delay handle connectionId=%" PRIu64 ", len=%d, from=%s",
         recvData->connId, recvData->len, GetAuthSideStr(recvData->fromServer));
     NotifyDataReceived(recvData->connId, &recvData->connInfo, recvData->fromServer, &recvData->head, recvData->data);
     SoftBusFree(para);

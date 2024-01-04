@@ -136,7 +136,7 @@ static void ProcessLinkEvent(struct nlmsghdr *nlh)
         return;
     }
     if (type == LNN_NETIF_TYPE_ETH || type == LNN_NETIF_TYPE_WLAN) {
-        LNN_LOGW(LNN_BUILDER, "%s:link status changed, netifType=%d", RTA_DATA(tb[IFLA_IFNAME]), type);
+        LNN_LOGW(LNN_BUILDER, "%s:link status changed, netifType=%d", (const char *)RTA_DATA(tb[IFLA_IFNAME]), type);
         LnnNotifyAddressChangedEvent((const char *)RTA_DATA(tb[IFLA_IFNAME]));
     }
 }

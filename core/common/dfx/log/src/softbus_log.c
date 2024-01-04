@@ -16,54 +16,24 @@
 #include "softbus_log.h"
 
 #include <securec.h>
-#include <string.h>
-
-#if defined(__LITEOS_M__)
-#define SOFTBUS_PRINTF
-#include "log.h"
-#else
-#include "hilog/log.h"
-#endif
 
 #define NSTACKX_LOG_LEVEL_CONVERT_BASE 8
 
-static void SoftBusLogExtraInfoFormat(char *line, const char *fileName, int lineNum, const char *funName)
+static void SoftBusLogPrint(const char *line, LogLevel level, uint32_t domain, const char *tag)
 {
-    (void)sprintf_s(line, LOG_LINE_MAX_LENGTH + 1, "[%s:%d] %s# ", fileName, lineNum, funName);
-}
-
-static void SoftBusLogPrint(const char *line, SoftBusLogLevel level, uint32_t domain, const char *tag)
-{
-#ifdef SOFTBUS_PRINTF
+#ifndef SOFTBUS_STANDARD_SYSTEM
     (void)level;
     (void)domain;
     (void)tag;
     printf("%s\n", line);
 #else
-    (void)HiLogPrint(LOG_CORE, (LogLevel)level, domain, tag, "%{public}s", line);
+    (void)HiLogPrint(LOG_CORE, level, domain, tag, "%{public}s", line);
 #endif
-}
-
-void SoftBusLogInnerImpl(SoftBusLogLevel level, SoftBusLogLabel label, const char *fileName, int lineNum,
-    const char *funName, const char *fmt, ...)
-{
-    uint32_t pos;
-    va_list args = { 0 };
-    char line[LOG_LINE_MAX_LENGTH + 1] = { 0 };
-    SoftBusLogExtraInfoFormat(line, fileName, lineNum, funName);
-    pos = strlen(line);
-    va_start(args, fmt);
-    int32_t ret = vsprintf_s(&line[pos], sizeof(line) - pos, fmt, args);
-    va_end(args);
-    if (ret < 0) {
-        return; // Do not print log here
-    }
-    SoftBusLogPrint(line, level, label.domain, label.tag);
 }
 
 void NstackxLogInnerImpl(const char *moduleName, uint32_t logLevel, const char *fmt, ...)
 {
-    SoftBusLogLevel level = NSTACKX_LOG_LEVEL_CONVERT_BASE - logLevel;
+    LogLevel level = NSTACKX_LOG_LEVEL_CONVERT_BASE - logLevel;
     va_list args = { 0 };
     char line[LOG_LINE_MAX_LENGTH + 1] = { 0 };
     va_start(args, fmt);

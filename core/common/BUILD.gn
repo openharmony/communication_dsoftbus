@@ -166,7 +166,6 @@ if (defined(ohos_lite)) {
       "dfx/hidumper_adapter/softbus_hidumper_trans.c",
       "dfx/hidumper_adapter/softbus_hidumper_buscenter.c",
       "dfx/hisysevent_adapter/softbus_hisysevt_nstack.c",
-      "dfx/log/src/softbus_log.c",
     ]
     sources = common_utils_src + conn_common_src + trans_common_src + dfx_source
     sources += [ "$dsoftbus_root_path/core/common/utils/sqlite3_utils.c" ]

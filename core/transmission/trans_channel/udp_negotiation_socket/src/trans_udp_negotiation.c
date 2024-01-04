@@ -751,7 +751,7 @@ int32_t TransOpenUdpChannel(AppInfo *appInfo, const ConnectOption *connOpt, int3
     }
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(id + ID_OFFSET));
     TRANS_LOGI(TRANS_CTRL,
-        "SoftbusHitraceChainBegin: set HitraceId=%lx.", (uint64_t)(id + ID_OFFSET));
+        "SoftbusHitraceChainBegin: set HitraceId=%" PRIu64, (uint64_t)(id + ID_OFFSET));
     UdpChannelInfo *newChannel = NewUdpChannelByAppInfo(appInfo);
     if (newChannel == NULL) {
         TRANS_LOGE(TRANS_CTRL, "new udp channel failed.");

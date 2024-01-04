@@ -749,7 +749,7 @@ static void OnP2pVerifyMsgReceived(int32_t channelId, const char *data, uint32_t
     } else if (msgType == P2P_VERIFY_REPLY) {
         OnVerifyP2pReply(channelId, *(int64_t*)(data + sizeof(int64_t)), json);
     } else {
-        TRANS_LOGE(TRANS_CTRL, "invalid msgType=%lld", msgType);
+        TRANS_LOGE(TRANS_CTRL, "invalid msgType=%" PRId64, msgType);
     }
     cJSON_Delete(json);
 }
@@ -829,7 +829,7 @@ int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
     }
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(conn->channelId + ID_OFFSET));
     TRANS_LOGI(TRANS_CTRL,
-        "SoftbusHitraceChainBegin: set HitraceId=%lx.", (uint64_t)(conn->channelId + ID_OFFSET));
+        "SoftbusHitraceChainBegin: set HitraceId=%" PRIu64, (uint64_t)(conn->channelId + ID_OFFSET));
     (void)memcpy_s(&conn->appInfo, sizeof(AppInfo), appInfo, sizeof(AppInfo));
 
     ret = StartP2pListener(conn->appInfo.myData.addr, &conn->appInfo.myData.port);

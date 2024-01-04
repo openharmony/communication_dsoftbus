@@ -629,7 +629,7 @@ int32_t LnnInitNetworkManager(void)
         LNN_LOGE(LNN_BUILDER, "Get all protocol failed");
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_BUILDER, "set supported protocol to %" PRIu64 ".", type);
+    LNN_LOGI(LNN_BUILDER, "set supported protocol to %u", type);
     ret = LnnSetLocalNum64Info(NUM_KEY_TRANS_PROTOCOLS, (int64_t)type);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "set supported protocol failed,ret=%d", ret);

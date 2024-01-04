@@ -574,7 +574,7 @@ static int32_t TransClientUpdateTdcDataBufWInfo(int32_t channelId, char *recvBuf
         }
         item->w += recvLen;
         (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
-        TRANS_LOGI(TRANS_SDK, "client updata tdc data success", channelId);
+        TRANS_LOGI(TRANS_SDK, "client update tdc data success, channelId=%d", channelId);
         return SOFTBUS_OK;
     }
     (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
