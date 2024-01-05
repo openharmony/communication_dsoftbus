@@ -1333,7 +1333,7 @@ int32_t LnnUpdateNetworkId(const NodeInfo *newInfo)
     oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
     if (oldInfo == NULL) {
         LNN_LOGE(LNN_LEDGER, "no online node newInfo!");
-        SoftBusMutexLock(&g_distributedNetLedger.lock);
+        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_ERR;
     }
     if (strcpy_s(oldInfo->networkId, NETWORK_ID_BUF_LEN, newInfo->networkId) != EOK) {
