@@ -15,6 +15,13 @@
 
 #include "trans_spec_object_proxy.h"
 
+extern "C" {
+    void TransBroadCastInit(void)
+    {
+        return;
+    }
+}
+
 namespace OHOS {
 TransSpecObjectProxy::TransSpecObjectProxy(const sptr<IRemoteObject> &impl)
     :IRemoteProxy<ITransSpecObject>(impl)

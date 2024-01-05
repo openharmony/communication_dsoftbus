@@ -22,14 +22,11 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
       "$dsoftbus_root_path/core/bus_center/utils/include",
     ]
-    trans_ipc_proxy_sdk_src = [
-      "$dsoftbus_root_path/sdk/transmission/ipc/mini/trans_server_proxy.c",
-      "$dsoftbus_root_path/sdk/transmission/ipc/mini/trans_server_proxy_virtual.c",
-    ]
+    trans_ipc_proxy_sdk_src =
+        [ "$dsoftbus_root_path/sdk/transmission/ipc/mini/trans_server_proxy.c" ]
   } else {
     trans_ipc_proxy_sdk_src = [
       "$dsoftbus_root_path/sdk/transmission/ipc/small/trans_server_proxy.c",
-      "$dsoftbus_root_path/sdk/transmission/ipc/small/trans_server_proxy_virtual.c",
     ]
   }
 } else {
@@ -41,6 +38,5 @@ if (defined(ohos_lite)) {
   trans_ipc_proxy_sdk_src = [
     "$dsoftbus_root_path/sdk/transmission/ipc/$os_type/src/trans_server_proxy.cpp",
     "$dsoftbus_root_path/sdk/transmission/ipc/$os_type/src/trans_server_proxy_standard.cpp",
-    "$dsoftbus_root_path/sdk/transmission/ipc/$os_type/src/trans_server_proxy_virtual.cpp",
   ]
 }
