@@ -1670,7 +1670,7 @@ static void GetNodeInfoDiscovery(NodeInfo *oldInfo, NodeInfo *info, NodeInfoAbil
         }
         // update lnn discovery type
         info->discoveryType |= oldInfo->discoveryType;
-        info->heartbeatTimeStamp = oldInfo->heartbeatTimeStamp;
+        info->heartbeatTimestamp = oldInfo->heartbeatTimestamp;
         MergeLnnInfo(oldInfo, info);
         UpdateProfile(info);
     }
@@ -2584,7 +2584,7 @@ int32_t LnnGetDLHeartbeatTimestamp(const char *networkId, uint64_t *timestamp)
         (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_NOT_FIND;
     }
-    *timestamp = nodeInfo->heartbeatTimeStamp;
+    *timestamp = nodeInfo->heartbeatTimestamp;
     (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return SOFTBUS_OK;
 }
@@ -2601,7 +2601,7 @@ int32_t LnnSetDLHeartbeatTimestamp(const char *networkId, uint64_t timestamp)
         (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_NOT_FIND;
     }
-    nodeInfo->heartbeatTimeStamp = timestamp;
+    nodeInfo->heartbeatTimestamp = timestamp;
     (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return SOFTBUS_OK;
 }
@@ -2622,7 +2622,7 @@ int32_t LnnGetDLBleDirectTimestamp(const char *networkId, uint64_t *timestamp)
         (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_NOT_FIND;
     }
-    *timestamp = nodeInfo->bleDirectTimeStamp;
+    *timestamp = nodeInfo->bleDirectTimestamp;
     (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return SOFTBUS_OK;
 }
@@ -2639,7 +2639,7 @@ int32_t LnnSetDLBleDirectTimestamp(const char *networkId, uint64_t timestamp)
         (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_NOT_FIND;
     }
-    nodeInfo->bleDirectTimeStamp = timestamp;
+    nodeInfo->bleDirectTimestamp = timestamp;
     (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return SOFTBUS_OK;
 }
