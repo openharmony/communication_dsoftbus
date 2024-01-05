@@ -564,9 +564,9 @@ HWTEST_F(LNNDisctributedLedgerTest, IS_META_NODE_Test_001, TestSize.Level1)
 {
     NodeInfo info;
     info.metaInfo.isMetaNode = true;
-    bool ret = isMetaNode(nullptr);
+    bool ret = IsMetaNode(nullptr);
     EXPECT_TRUE(ret == false);
-    ret = isMetaNode(&info);
+    ret = IsMetaNode(&info);
     EXPECT_TRUE(ret == true);
 }
 
