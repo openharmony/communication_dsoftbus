@@ -914,7 +914,9 @@ void AuthManagerSetAuthFailed(int64_t authSeq, const AuthSessionInfo *info, int3
     }
     DelAuthManager(auth, false);
 
-    RemoveAuthManagerByConnInfo(&info->connInfo, info->isServer);
+    if (needDisconnect) {
+        RemoveAuthManagerByConnInfo(&info->connInfo, info->isServer);
+    }
     ReportAuthRequestFailed(info->requestId, reason);
     if (GetConnType(info->connId) == AUTH_LINK_TYPE_WIFI) {
         DisconnectAuthDevice((uint64_t *)&info->connId);
