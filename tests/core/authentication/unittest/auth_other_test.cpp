@@ -396,6 +396,25 @@ HWTEST_F(AuthOtherTest, AUTH_MANAGER_SET_AUTH_PASSED_TEST_001, TestSize.Level1)
 }
 
 /*
+ * @tc.name: AUTH_MANAGER_SET_AUTH_TIMEOUT_TEST_001
+ * @tc.desc: auth manager set auth timeout test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, AUTH_MANAGER_SET_AUTH_TIMEOUT_TEST_001, TestSize.Level1)
+{
+    int64_t authSeq = 0;
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    info->connInfo.type = AUTH_LINK_TYPE_WIFI;
+    int32_t reason = SOFTBUS_AUTH_TIMEOUT;
+    AuthManager *auth = NewAuthManager(authSeq, &info);
+    EXPECT_TRUE(auth != nullptr);
+    AuthManagerSetAuthFailed(authSeq, &info, reason);
+    DelAuthManager(auth, true);
+}
+
+/*
  * @tc.name: HANDLE_CONNECTION_DATA_TEST_001
  * @tc.desc: handle connection data test
  * @tc.type: FUNC
