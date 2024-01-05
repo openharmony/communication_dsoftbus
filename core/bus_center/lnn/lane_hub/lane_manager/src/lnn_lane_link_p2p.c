@@ -978,9 +978,30 @@ static int32_t OpenAuthTriggerToConn(const LinkRequest *request, uint32_t laneLi
     return SOFTBUS_OK;
 }
 
+static int32_t CheckTransReqInfo(const LinkRequest *request, uint32_t laneLinkReqId)
+{
+    TransOption reqInfo = {0};
+    if (GetTransOptionByLaneId(laneLinkReqId, &reqInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get TransReqInfo fail, laneId=%d", laneLinkReqId);
+        return SOFTBUS_ERR;
+    }
+    if (reqInfo.isWithQos) {
+        if (request->linkType == LANE_P2P) {
+            LNN_LOGE(LNN_LANE, "request linkType=%d", request->linkType);
+            return SOFTBUS_ERR;
+        }
+    } else {
+        if (request->p2pOnly) {
+            LNN_LOGE(LNN_LANE, "request p2pOnly=%d", request->p2pOnly);
+            return SOFTBUS_ERR;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t OpenBleTriggerToConn(const LinkRequest *request, uint32_t laneLinkReqId, const LaneLinkCb *callback)
 {
-    if (request->linkType == LANE_P2P) {
+    if (CheckTransReqInfo(request, laneLinkReqId) != SOFTBUS_OK) {
         LNN_LOGI(LNN_LANE, "ble trigger not support p2p");
         return SOFTBUS_ERR;
     }
