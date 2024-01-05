@@ -36,10 +36,10 @@ typedef struct {
 
 static SoftBusList *g_laneQosObserver;
 
-LnnLanesObject *LnnRequestLanesObject(const char *netWorkId, int32_t pid, LnnLaneProperty prop,
+LnnLanesObject *LnnRequestLanesObject(const char *networkId, int32_t pid, LnnLaneProperty prop,
     const LnnPreferredLinkList *linkList, uint32_t laneNum)
 {
-    if (prop < LNN_MESSAGE_LANE || prop >= LNN_LANE_PROPERTY_BUTT || netWorkId == NULL ||
+    if (prop < LNN_MESSAGE_LANE || prop >= LNN_LANE_PROPERTY_BUTT || networkId == NULL ||
         laneNum == 0 || laneNum > LNN_REQUEST_MAX_LANE_NUM) {
         LNN_LOGW(LNN_LANE, "param error, prop=%d, laneNum=%u", prop, laneNum);
         return NULL;
@@ -55,7 +55,7 @@ LnnLanesObject *LnnRequestLanesObject(const char *netWorkId, int32_t pid, LnnLan
     lanesObject->laneNum = laneNum;
 
     for (uint32_t i = 0; i < laneNum; i++) {
-        int32_t laneId = LnnGetRightLane(netWorkId, pid, prop, linkList);
+        int32_t laneId = LnnGetRightLane(networkId, pid, prop, linkList);
         if (laneId < 0) {
             LNN_LOGE(LNN_LANE, "LnnGetRightLane error. laneId=%d", laneId);
             lanesObject->laneNum = i;

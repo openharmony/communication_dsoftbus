@@ -24,7 +24,7 @@
 extern "C" {
 #endif
 
-int32_t LnnGetRightLane(const char *netWorkId, int32_t pid, LnnLaneProperty prop,
+int32_t LnnGetRightLane(const char *networkId, int32_t pid, LnnLaneProperty prop,
     const LnnPreferredLinkList *linkList);
 
 #ifdef __cplusplus

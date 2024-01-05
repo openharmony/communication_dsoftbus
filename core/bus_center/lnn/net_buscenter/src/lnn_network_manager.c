@@ -229,7 +229,7 @@ static void NetUserStateEventHandler(const LnnEventBasicInfo *info)
         LNN_LOGE(LNN_BUILDER, "wifi user background state change evt handler get invalid param");
         return;
     }
-    bool addrType[CONNECTION_ADDR_MAX] = {0};
+    bool addrType[CONNECTION_ADDR_MAX] = {false};
     const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
     SoftBusUserState userState = (SoftBusUserState)event->status;
     switch (userState) {

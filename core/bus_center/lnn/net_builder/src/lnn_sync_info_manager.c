@@ -28,7 +28,6 @@
 #include "softbus_adapter_thread.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_bus_center.h"
-#include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_transmission_interface.h"
@@ -261,7 +260,7 @@ static void ResetOpenChannelInfo(int32_t channelId, unsigned char isServer, Sync
 
 static int32_t OnChannelOpened(int32_t channelId, const char *peerUuid, unsigned char isServer)
 {
-    char networkId[NETWORK_ID_BUF_LEN];
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
     SyncChannelInfo *info = NULL;
 
     LNN_LOGI(LNN_BUILDER, "channelId=%d, server=%u", channelId, isServer);
@@ -316,7 +315,7 @@ static void OnChannelCloseCommon(SyncChannelInfo *info, int32_t channelId)
 
 static void OnChannelOpenFailed(int32_t channelId, const char *peerUuid)
 {
-    char networkId[NETWORK_ID_BUF_LEN];
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
     SyncChannelInfo *info = NULL;
 
     LNN_LOGI(LNN_BUILDER, "open channel fail channelId=%d", channelId);
@@ -610,19 +609,18 @@ static int32_t TrySendSyncInfoMsg(const char *networkId, SyncInfoMsg *msg)
 int32_t LnnSendSyncInfoMsg(LnnSyncInfoType type, const char *networkId,
     const uint8_t *msg, uint32_t len, LnnSyncInfoMsgComplete complete)
 {
-    SyncInfoMsg *syncMsg = NULL;
-    int32_t rc;
-
-    LNN_LOGI(LNN_BUILDER, "send sync info msg for type=%d, len=%d", type, len);
     if (type >= LNN_INFO_TYPE_COUNT || networkId == NULL || msg == NULL) {
         LNN_LOGE(LNN_BUILDER, "invalid sync info msg param");
         return SOFTBUS_INVALID_PARAM;
     }
+
+    SyncInfoMsg *syncMsg = NULL;
+    LNN_LOGI(LNN_BUILDER, "send sync info msg for type=%d, len=%d", type, len);
     syncMsg = CreateSyncInfoMsg(type, msg, len, complete);
     if (syncMsg == NULL) {
         return SOFTBUS_ERR;
     }
-    rc = TrySendSyncInfoMsg(networkId, syncMsg);
+    int32_t rc = TrySendSyncInfoMsg(networkId, syncMsg);
     if (rc != SOFTBUS_OK) {
         SoftBusFree(syncMsg);
     }

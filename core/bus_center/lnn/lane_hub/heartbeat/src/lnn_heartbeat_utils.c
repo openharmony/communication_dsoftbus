@@ -21,7 +21,6 @@
 #include "anonymizer.h"
 #include "bus_center_manager.h"
 #include "lnn_device_info.h"
-#include "lnn_heartbeat_medium_mgr.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_node_info.h"
 #include "lnn_log.h"
@@ -84,7 +83,8 @@ int32_t LnnConvertHbTypeToId(LnnHeartbeatType type)
 static bool HbHasActiveBrConnection(const char *networkId)
 {
     bool ret = false;
-    ConnectOption option = {0};
+    ConnectOption option;
+    (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     char brMac[BT_MAC_LEN] = {0};
 
     uint8_t binaryAddr[BT_ADDR_LEN] = {0};
@@ -109,7 +109,8 @@ static bool HbHasActiveBrConnection(const char *networkId)
 static bool HbHasActiveBleConnection(const char *networkId)
 {
     bool ret = false;
-    ConnectOption option = {0};
+    ConnectOption option;
+    (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     char udid[UDID_BUF_LEN] = {0};
     char udidHash[UDID_HASH_LEN] = {0};
 
