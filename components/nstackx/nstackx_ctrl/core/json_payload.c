@@ -361,7 +361,7 @@ static void ParseBusinessType(const cJSON *data, DeviceInfo *dev)
     item = cJSON_GetObjectItemCaseSensitive(data, JSON_BUSINESS_TYPE);
     if (item == NULL) {
         dev->businessType = NSTACKX_BUSINESS_TYPE_NULL;
-        DFINDER_LOGW(TAG, "Cannot get businessType json");
+        DFINDER_LOGD(TAG, "Cannot get businessType json");
         return;
     }
     if (!cJSON_IsNumber(item) || (item->valuedouble < 0)) {
@@ -377,7 +377,7 @@ static void ParseBusinessDataJsonData(const cJSON *data, DeviceInfo *dev, uint8_
     cJSON *item = NULL;
     item = cJSON_GetObjectItemCaseSensitive(data, JSON_BUSINESS_DATA);
     if (item == NULL) {
-        DFINDER_LOGE(TAG, "Cannot get businessData json");
+        DFINDER_LOGD(TAG, "Cannot get businessData json");
         return;
     }
     if (!cJSON_IsString(item)) {

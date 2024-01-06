@@ -82,7 +82,7 @@ public:
     {
         return &streamFrameInfo_;
     }
-    
+
 protected:
     std::unique_ptr<char[]> streamData_ = nullptr;
     ssize_t streamLen_ = 0;

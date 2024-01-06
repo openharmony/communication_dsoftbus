@@ -25,7 +25,6 @@
 #include "lnn_lane_link.h"
 #include "softbus_bus_center.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 #include "softbus_wifi_api_adapter.h"
 #include "wifi_direct_manager.h"
 

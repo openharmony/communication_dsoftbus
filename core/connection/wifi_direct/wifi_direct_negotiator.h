@@ -21,6 +21,7 @@
 #include "command/wifi_direct_command.h"
 #include "command/wifi_direct_connect_command.h"
 #include "command/wifi_direct_disconnect_command.h"
+#include "channel/wifi_direct_trigger_channel.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,10 +46,11 @@ struct WifiDirectNegotiator {
 
     void (*onNegotiateChannelDataReceived)(struct WifiDirectNegotiateChannel *channel, const uint8_t *data, size_t len);
     void (*onNegotiateChannelDisconnected)(struct WifiDirectNegotiateChannel *channel);
+    void (*onTriggerChannelDataReceived)(struct WifiDirectTriggerChannel *channel);
+    void (*onDefaultTriggerChannelDataReceived)(struct WifiDirectNegotiateChannel *channel, const uint8_t *data,
+                                                size_t len);
 
-    void (*onWifiDirectAuthOpened)(uint32_t requestId, int64_t authId);
     void (*syncLnnInfo)(struct InnerLink *innerLink);
-
     int32_t (*prejudgeAvailability)(const char *remoteNetworkId, enum WifiDirectLinkType linkType);
 
     char currentRemoteMac[MAC_ADDR_STR_LEN];

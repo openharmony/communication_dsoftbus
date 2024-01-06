@@ -15,13 +15,11 @@
 
 #include "lnn_lane_hub.h"
 
-#include "bus_center_event.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_lane.h"
 #include "lnn_lane_qos.h"
 #include "lnn_log.h"
 #include "lnn_time_sync_manager.h"
-#include "softbus_def.h"
 #include "softbus_errcode.h"
 
 

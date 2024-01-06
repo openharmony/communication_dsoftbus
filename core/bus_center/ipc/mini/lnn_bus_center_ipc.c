@@ -16,7 +16,6 @@
 #include "lnn_bus_center_ipc.h"
 
 #include <securec.h>
-#include <string.h>
 
 #include "bus_center_manager.h"
 #include "client_bus_center_manager.h"
@@ -26,7 +25,6 @@
 #include "lnn_meta_node_ledger.h"
 #include "lnn_time_sync_manager.h"
 #include "softbus_errcode.h"
-#include "softbus_def.h"
 
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
     const InnerDeviceInfoAddtions *addtions);
@@ -41,7 +39,7 @@ static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *devic
     DeviceInfo newDevice;
     if (memcpy_s(&newDevice, sizeof(DeviceInfo), device, sizeof(DeviceInfo)) != EOK) {
         LNN_LOGE(LNN_EVENT, "copy new device info error");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     LnnRefreshDeviceOnlineStateAndDevIdInfo(pkgName, &newDevice, addtions);
     LnnOnRefreshDeviceFound(&newDevice);
@@ -99,9 +97,9 @@ int32_t LnnIpcStartTimeSync(const char *pkgName, int32_t callingPid, const char 
     return LnnStartTimeSync(pkgName, callingPid, targetNetworkId, (TimeSyncAccuracy)accuracy, (TimeSyncPeriod)period);
 }
 
-int32_t LnnIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
+int32_t LnnIpcStopTimeSync(const char *pkgName, const char *targetNetworkId, int32_t callingPid)
 {
-    return LnnStopTimeSync(pkgName, targetNetworkId);
+    return LnnStopTimeSync(pkgName, targetNetworkId, callingPid);
 }
 
 int32_t LnnIpcPublishLNN(const char *pkgName, const PublishInfo *info)

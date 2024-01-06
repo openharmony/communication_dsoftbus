@@ -30,7 +30,6 @@ int32_t RegAuthChannelListener(int32_t module, const AuthChannelListener *listen
 void UnregAuthChannelListener(int32_t module)
 {
     (void)module;
-    return;
 }
 
 int32_t AuthOpenChannel(const char *ip, int32_t port)

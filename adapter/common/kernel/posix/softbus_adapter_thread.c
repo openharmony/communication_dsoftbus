@@ -97,7 +97,7 @@ int32_t SoftBusMutexInit(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr)
 int32_t SoftBusMutexLock(SoftBusMutex *mutex)
 {
     if ((mutex == NULL) || ((void *)(*mutex) == NULL)) {
-        COMM_LOGE(COMM_ADAPTER, "mutex is null");
+        COMM_LOGD(COMM_ADAPTER, "mutex is null");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -130,7 +130,7 @@ int32_t SoftBusMutexUnlock(SoftBusMutex *mutex)
 int32_t SoftBusMutexDestroy(SoftBusMutex *mutex)
 {
     if ((mutex == NULL) || ((void *)(*mutex) == NULL)) {
-        COMM_LOGE(COMM_ADAPTER, "mutex is null");
+        COMM_LOGD(COMM_ADAPTER, "mutex is null");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -322,7 +322,6 @@ int32_t SoftBusThreadCreate(SoftBusThread *thread, SoftBusThreadAttr *threadAttr
             ret = SoftBusThreadSetName(*thread, threadAttr->taskName);
             if (ret != 0) {
                 COMM_LOGE(COMM_ADAPTER, "Thread set name failed, ret[%d]", ret);
-                return SOFTBUS_ERR;
             }
         }
     }

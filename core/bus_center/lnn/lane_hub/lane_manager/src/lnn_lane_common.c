@@ -20,7 +20,6 @@
 #include "lnn_lane_def.h"
 #include "lnn_lane_interface.h"
 #include "lnn_lane_link.h"
-#include "lnn_lane_model.h"
 #include "lnn_log.h"
 #include "lnn_map.h"
 #include "message_handler.h"
@@ -47,10 +46,12 @@ static int32_t BleInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo,
     connInfo->type = LANE_BLE;
     if (memcpy_s(connInfo->connInfo.ble.bleMac, BT_MAC_LEN,
         linkInfo->linkInfo.ble.bleMac, BT_MAC_LEN) != EOK) {
+        LNN_LOGE(LNN_LANE, "memcpy btMac fail");
         return SOFTBUS_ERR;
     }
     if (memcpy_s(connInfo->connInfo.ble.deviceIdHash, UDID_HASH_LEN,
         linkInfo->linkInfo.ble.deviceIdHash, UDID_HASH_LEN) != EOK) {
+        LNN_LOGE(LNN_LANE, "memcpy udidHash fail");
         return SOFTBUS_ERR;
     }
     connInfo->connInfo.ble.protoType = linkInfo->linkInfo.ble.protoType;
@@ -64,6 +65,7 @@ static int32_t P2pInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo,
     connInfo->type = LANE_P2P;
     if (memcpy_s(&connInfo->connInfo.p2p, sizeof(P2pConnInfo),
         &linkInfo->linkInfo.p2p.connInfo, sizeof(P2pConnInfo)) != EOK) {
+        LNN_LOGE(LNN_LANE, "memcpy P2pConnInfo fail");
         return SOFTBUS_ERR;
     }
     profile->linkType = LANE_P2P;
@@ -77,6 +79,7 @@ static int32_t HmlInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo,
     connInfo->type = LANE_HML;
     if (memcpy_s(&connInfo->connInfo.p2p, sizeof(P2pConnInfo),
         &linkInfo->linkInfo.p2p.connInfo, sizeof(P2pConnInfo)) != EOK) {
+        LNN_LOGE(LNN_LANE, "memcpy P2pConnInfo fail");
         return SOFTBUS_ERR;
     }
     profile->linkType = LANE_HML;
@@ -98,6 +101,7 @@ static int32_t Wlan2P4GInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *conn
     connInfo->type = LANE_WLAN_2P4G;
     if (memcpy_s(&connInfo->connInfo.wlan, sizeof(WlanConnInfo),
         &linkInfo->linkInfo.wlan.connInfo, sizeof(WlanConnInfo)) != EOK) {
+        LNN_LOGE(LNN_LANE, "memcpy WlanConnInfo fail");
         return SOFTBUS_ERR;
     }
     profile->linkType = LANE_WLAN_2P4G;
@@ -111,6 +115,7 @@ static int32_t Wlan5GInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connIn
     connInfo->type = LANE_WLAN_5G;
     if (memcpy_s(&connInfo->connInfo.wlan, sizeof(WlanConnInfo),
         &linkInfo->linkInfo.wlan.connInfo, sizeof(WlanConnInfo)) != EOK) {
+        LNN_LOGE(LNN_LANE, "memcpy WlanConnInfo fail");
         return SOFTBUS_ERR;
     }
     profile->linkType = LANE_WLAN_5G;
@@ -123,6 +128,7 @@ static int32_t BleDirectInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *con
 {
     if (strcpy_s(connInfo->connInfo.bleDirect.networkId, NETWORK_ID_BUF_LEN,
         linkInfo->linkInfo.bleDirect.networkId) != EOK) {
+        LNN_LOGE(LNN_LANE, "memcpy networkId fail");
         return SOFTBUS_ERR;
     }
     connInfo->type = LANE_BLE_DIRECT;
@@ -136,10 +142,12 @@ static int32_t CocInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo,
     connInfo->type = LANE_COC;
     if (memcpy_s(connInfo->connInfo.ble.bleMac, BT_MAC_LEN,
         linkInfo->linkInfo.ble.bleMac, BT_MAC_LEN) != EOK) {
+        LNN_LOGE(LNN_LANE, "memcpy bleMac fail");
         return SOFTBUS_ERR;
     }
     if (memcpy_s(connInfo->connInfo.ble.deviceIdHash, UDID_HASH_LEN,
         linkInfo->linkInfo.ble.deviceIdHash, UDID_HASH_LEN) != EOK) {
+        LNN_LOGE(LNN_LANE, "memcpy deviceIdHash fail");
         return SOFTBUS_ERR;
     }
     connInfo->connInfo.ble.psm = linkInfo->linkInfo.ble.psm;

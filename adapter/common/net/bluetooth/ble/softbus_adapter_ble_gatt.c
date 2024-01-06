@@ -12,18 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "softbus_adapter_ble_gatt.h"
-
 #include "adapter_bt_utils.h"
 #include "c_header/ohos_bt_def.h"
 #include "c_header/ohos_bt_gap.h"
 #include "c_header/ohos_bt_gatt.h"
 #include "disc_log.h"
 #include "securec.h"
+#include "softbus_adapter_ble_gatt.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
-#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
 
@@ -52,12 +50,32 @@ typedef struct {
     int32_t scannerId;
 } ScanListener;
 
+typedef struct {
+    BleScanResultEvtType bleEvtType;
+    SoftBusBleScanResultEvtType softBusEvtType;
+} OhosBleEvtToSoftBusEvt;
+
+OhosBleEvtToSoftBusEvt g_bleEvtSoftBusEvt[] = {
+    {OHOS_BLE_EVT_NON_CONNECTABLE_NON_SCANNABLE,               SOFTBUS_BLE_EVT_NON_CONNECTABLE_NON_SCANNABLE},
+    {OHOS_BLE_EVT_NON_CONNECTABLE_NON_SCANNABLE_DIRECTED,      SOFTBUS_BLE_EVT_NON_CONNECTABLE_NON_SCANNABLE_DIRECTED},
+    {OHOS_BLE_EVT_CONNECTABLE,                                 SOFTBUS_BLE_EVT_CONNECTABLE},
+    {OHOS_BLE_EVT_CONNECTABLE_DIRECTED,                        SOFTBUS_BLE_EVT_CONNECTABLE_DIRECTED},
+    {OHOS_BLE_EVT_SCANNABLE,                                   SOFTBUS_BLE_EVT_SCANNABLE},
+    {OHOS_BLE_EVT_SCANNABLE_DIRECTED,                          SOFTBUS_BLE_EVT_SCANNABLE_DIRECTED},
+    {OHOS_BLE_EVT_LEGACY_NON_CONNECTABLE,                      SOFTBUS_BLE_EVT_LEGACY_NON_CONNECTABLE},
+    {OHOS_BLE_EVT_LEGACY_SCANNABLE,                            SOFTBUS_BLE_EVT_LEGACY_SCANNABLE},
+    {OHOS_BLE_EVT_LEGACY_CONNECTABLE,                          SOFTBUS_BLE_EVT_LEGACY_CONNECTABLE},
+    {OHOS_BLE_EVT_LEGACY_CONNECTABLE_DIRECTED,                 SOFTBUS_BLE_EVT_LEGACY_CONNECTABLE_DIRECTED},
+    {OHOS_BLE_EVT_LEGACY_SCAN_RSP_TO_ADV_SCAN,                 SOFTBUS_BLE_EVT_LEGACY_SCAN_RSP_TO_ADV_SCAN},
+    {OHOS_BLE_EVT_LEGACY_SCAN_RSP_TO_ADV,                      SOFTBUS_BLE_EVT_LEGACY_SCAN_RSP_TO_ADV},
+};
+
 static AdvChannel g_advChannel[ADV_MAX_NUM];
 static ScanListener g_scanListener[SCAN_MAX_NUM];
 
 static volatile bool g_lockInit = false;
-static SoftBusMutex g_advLock = {0};
-static SoftBusMutex g_scanerLock = {0};
+static SoftBusMutex g_advLock;
+static SoftBusMutex g_scanerLock;
 
 static volatile bool g_isRegCb = false;
 static volatile bool g_isLpDeviceRegCb = false;
@@ -70,24 +88,26 @@ static void OnBtStateChanged(int32_t listenerId, int32_t state)
     }
 
     DISC_LOGI(DISC_BLE, "receive bt turn off event, start reset bt adapter state...");
-    if (SoftBusMutexLock(&g_advLock) != 0) {
+    if (SoftBusMutexLock(&g_advLock) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "ATTENTION, try to get adv lock failed, something unexpected happened");
         return;
     }
     for (uint32_t index = 0; index < ADV_MAX_NUM; index++) {
         AdvChannel *advChannel = &g_advChannel[index];
-        if (advChannel->isUsed && advChannel->advId != -1) {
-            // ignore status code explicitedly, just to notify bt cleanup resources associated with this advertisement
-            (void)BleStopAdv(advChannel->advId);
-            advChannel->advId = -1;
-            advChannel->isAdvertising = false;
-            SoftBusCondBroadcast(&advChannel->cond);
-            advChannel->advCallback->AdvDisableCallback(index, SOFTBUS_BT_STATUS_SUCCESS);
+        if (advChannel->isUsed && advChannel->advId == -1) {
+            continue;
         }
+
+        // ignore status code explicitedly, just to notify bt cleanup resources associated with this advertisement
+        (void)BleStopAdv(advChannel->advId);
+        advChannel->advId = -1;
+        advChannel->isAdvertising = false;
+        SoftBusCondBroadcast(&advChannel->cond);
+        advChannel->advCallback->AdvDisableCallback(index, SOFTBUS_BT_STATUS_SUCCESS);
     }
     (void)SoftBusMutexUnlock(&g_advLock);
 
-    if (SoftBusMutexLock(&g_scanerLock) != 0) {
+    if (SoftBusMutexLock(&g_scanerLock) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "ATTENTION, try to get scan lock failed, something unexpected happened");
         return;
     }
@@ -121,34 +141,18 @@ int BleGattLockInit(void)
 
 static unsigned char ConvertScanEventType(unsigned char eventType)
 {
-    switch (eventType) {
-        case OHOS_BLE_EVT_NON_CONNECTABLE_NON_SCANNABLE:
-            return SOFTBUS_BLE_EVT_NON_CONNECTABLE_NON_SCANNABLE;
-        case OHOS_BLE_EVT_NON_CONNECTABLE_NON_SCANNABLE_DIRECTED:
-            return SOFTBUS_BLE_EVT_NON_CONNECTABLE_NON_SCANNABLE_DIRECTED;
-        case OHOS_BLE_EVT_CONNECTABLE:
-            return SOFTBUS_BLE_EVT_CONNECTABLE;
-        case OHOS_BLE_EVT_CONNECTABLE_DIRECTED:
-            return SOFTBUS_BLE_EVT_CONNECTABLE_DIRECTED;
-        case OHOS_BLE_EVT_SCANNABLE:
-            return SOFTBUS_BLE_EVT_SCANNABLE;
-        case OHOS_BLE_EVT_SCANNABLE_DIRECTED:
-            return SOFTBUS_BLE_EVT_SCANNABLE_DIRECTED;
-        case OHOS_BLE_EVT_LEGACY_NON_CONNECTABLE:
-            return SOFTBUS_BLE_EVT_LEGACY_NON_CONNECTABLE;
-        case OHOS_BLE_EVT_LEGACY_SCANNABLE:
-            return SOFTBUS_BLE_EVT_LEGACY_SCANNABLE;
-        case OHOS_BLE_EVT_LEGACY_CONNECTABLE:
-            return SOFTBUS_BLE_EVT_LEGACY_CONNECTABLE;
-        case OHOS_BLE_EVT_LEGACY_CONNECTABLE_DIRECTED:
-            return SOFTBUS_BLE_EVT_LEGACY_CONNECTABLE_DIRECTED;
-        case OHOS_BLE_EVT_LEGACY_SCAN_RSP_TO_ADV_SCAN:
-            return SOFTBUS_BLE_EVT_LEGACY_SCAN_RSP_TO_ADV_SCAN;
-        case OHOS_BLE_EVT_LEGACY_SCAN_RSP_TO_ADV:
-            return SOFTBUS_BLE_EVT_LEGACY_SCAN_RSP_TO_ADV;
-        default:
-            return SOFTBUS_BLE_EVT_NON_CONNECTABLE_NON_SCANNABLE;
+    int32_t status = SOFTBUS_BLE_EVT_NON_CONNECTABLE_NON_SCANNABLE;
+    int len = sizeof(g_bleEvtSoftBusEvt) / sizeof(g_bleEvtSoftBusEvt[0]);
+    OhosBleEvtToSoftBusEvt *ptr = g_bleEvtSoftBusEvt;
+
+    for (int i = 0; i < len; i++) {
+        if (eventType == (ptr + i)->bleEvtType) {
+            status = (ptr + i)->softBusEvtType;
+            break;
+        }
     }
+
+    return status;
 }
 
 static unsigned char ConvertScanPhyType(unsigned char phyType)
@@ -174,9 +178,7 @@ static unsigned char ConvertScanDataStatus(unsigned char dataStatus)
             return SOFTBUS_BLE_DATA_COMPLETE;
         case OHOS_BLE_DATA_INCOMPLETE_MORE_TO_COME:
             return SOFTBUS_BLE_DATA_INCOMPLETE_MORE_TO_COME;
-        case OHOS_BLE_DATA_INCOMPLETE_TRUNCATED:
-            return SOFTBUS_BLE_DATA_INCOMPLETE_TRUNCATED;
-        default:
+        default: // fall-through
             return SOFTBUS_BLE_DATA_INCOMPLETE_TRUNCATED;
     }
 }
@@ -194,9 +196,7 @@ static unsigned char ConvertScanAddrType(unsigned char addrType)
             return SOFTBUS_BLE_RANDOM_STATIC_IDENTITY_ADDRESS;
         case OHOS_BLE_UNRESOLVABLE_RANDOM_DEVICE_ADDRESS:
             return SOFTBUS_BLE_UNRESOLVABLE_RANDOM_DEVICE_ADDRESS;
-        case OHOS_BLE_NO_ADDRESS:
-            return SOFTBUS_BLE_NO_ADDRESS;
-        default:
+        default: // fall-through
             return SOFTBUS_BLE_NO_ADDRESS;
     }
 }
@@ -256,7 +256,7 @@ static void DumpBleScanFilter(BleScanNativeFilter *nativeFilter, uint8_t filterS
         }
         (void)ConvertBytesToHexString(serviceData, hexLen, (nativeFilter + filterSize)->serviceData, len);
         (void)ConvertBytesToHexString(serviceDataMask, hexLen, (nativeFilter + filterSize)->serviceDataMask, len);
-        DISC_LOGI(DISC_BLE, "BLE Scan Filter id:%d [serviceData:%s, serviceDataMask:%s]",
+        DISC_LOGI(DISC_BLE, "BLE Scan Filter id:%u [serviceData:%s, serviceDataMask:%s]",
             filterSize, serviceData, serviceDataMask);
         SoftBusFree(serviceData);
         SoftBusFree(serviceDataMask);
@@ -286,20 +286,25 @@ static void GetAllNativeScanFilter(int thisListenerId, BleScanNativeFilter **nat
         }
         uint8_t size = g_scanListener[index].filterSize;
         const SoftBusBleScanFilter *filter = g_scanListener[index].filter;
+        BleScanNativeFilter **nativeOffset = NULL;
+        const SoftBusBleScanFilter *filterOffset = NULL;
+
         while (size-- > 0) {
             nativeSize--;
-            (*nativeFilter + nativeSize)->address = (filter + size)->address;
-            (*nativeFilter + nativeSize)->deviceName = (filter + size)->deviceName;
-            (*nativeFilter + nativeSize)->manufactureData = (filter + size)->manufactureData;
-            (*nativeFilter + nativeSize)->manufactureDataLength = (filter + size)->manufactureDataLength;
-            (*nativeFilter + nativeSize)->manufactureDataMask = (filter + size)->manufactureDataMask;
-            (*nativeFilter + nativeSize)->manufactureId = (filter + size)->manufactureId;
-            (*nativeFilter + nativeSize)->serviceData = (filter + size)->serviceData;
-            (*nativeFilter + nativeSize)->serviceDataLength = (filter + size)->serviceDataLength;
-            (*nativeFilter + nativeSize)->serviceDataMask = (filter + size)->serviceDataMask;
-            (*nativeFilter + nativeSize)->serviceUuid = (filter + size)->serviceUuid;
-            (*nativeFilter + nativeSize)->serviceUuidLength = (filter + size)->serviceUuidLength;
-            (*nativeFilter + nativeSize)->serviceUuidMask = (filter + size)->serviceUuidMask;
+            *nativeOffset = *nativeFilter + nativeSize;
+            filterOffset = filter + size;
+            (*nativeOffset)->address = (filterOffset)->address;
+            (*nativeOffset)->deviceName = (filterOffset)->deviceName;
+            (*nativeOffset)->manufactureData = (filterOffset)->manufactureData;
+            (*nativeOffset)->manufactureDataLength = (filterOffset)->manufactureDataLength;
+            (*nativeOffset)->manufactureDataMask = (filterOffset)->manufactureDataMask;
+            (*nativeOffset)->manufactureId = (filterOffset)->manufactureId;
+            (*nativeOffset)->serviceData = (filterOffset)->serviceData;
+            (*nativeOffset)->serviceDataLength = (filterOffset)->serviceDataLength;
+            (*nativeOffset)->serviceDataMask = (filterOffset)->serviceDataMask;
+            (*nativeOffset)->serviceUuid = (filterOffset)->serviceUuid;
+            (*nativeOffset)->serviceUuidLength = (filterOffset)->serviceUuidLength;
+            (*nativeOffset)->serviceUuidMask = (filterOffset)->serviceUuidMask;
         }
     }
 }
@@ -309,22 +314,28 @@ static void SoftBusGetBurstScanFilter(int thisListenerId, BleScanNativeFilter **
     uint8_t size = g_scanListener[thisListenerId].filterSize;
     *nativeFilter = (BleScanNativeFilter *)SoftBusCalloc(sizeof(BleScanNativeFilter) * size);
     if (*nativeFilter == NULL) {
+        DISC_LOGE(DISC_BLE, "nativeFilter calloc addr fail");
         return;
     }
     const SoftBusBleScanFilter *filter = g_scanListener[thisListenerId].filter;
+    BleScanNativeFilter **nativeOffset = NULL;
+    const SoftBusBleScanFilter *filterOffset = NULL;
+
     while (size-- > 0) {
-        (*nativeFilter + size)->address = (filter + size)->address;
-        (*nativeFilter + size)->deviceName = (filter + size)->deviceName;
-        (*nativeFilter + size)->manufactureData = (filter + size)->manufactureData;
-        (*nativeFilter + size)->manufactureDataLength = (filter + size)->manufactureDataLength;
-        (*nativeFilter + size)->manufactureDataMask = (filter + size)->manufactureDataMask;
-        (*nativeFilter + size)->manufactureId = (filter + size)->manufactureId;
-        (*nativeFilter + size)->serviceData = (filter + size)->serviceData;
-        (*nativeFilter + size)->serviceDataLength = (filter + size)->serviceDataLength;
-        (*nativeFilter + size)->serviceDataMask = (filter + size)->serviceDataMask;
-        (*nativeFilter + size)->serviceUuid = (filter + size)->serviceUuid;
-        (*nativeFilter + size)->serviceUuidLength = (filter + size)->serviceUuidLength;
-        (*nativeFilter + size)->serviceUuidMask = (filter + size)->serviceUuidMask;
+        *nativeOffset = *nativeFilter + size;
+        filterOffset = filter + size;
+        (*nativeOffset)->address = (filterOffset)->address;
+        (*nativeOffset)->deviceName = (filterOffset)->deviceName;
+        (*nativeOffset)->manufactureData = (filterOffset)->manufactureData;
+        (*nativeOffset)->manufactureDataLength = (filterOffset)->manufactureDataLength;
+        (*nativeOffset)->manufactureDataMask = (filterOffset)->manufactureDataMask;
+        (*nativeOffset)->manufactureId = (filterOffset)->manufactureId;
+        (*nativeOffset)->serviceData = (filterOffset)->serviceData;
+        (*nativeOffset)->serviceDataLength = (filterOffset)->serviceDataLength;
+        (*nativeOffset)->serviceDataMask = (filterOffset)->serviceDataMask;
+        (*nativeOffset)->serviceUuid = (filterOffset)->serviceUuid;
+        (*nativeOffset)->serviceUuidLength = (filterOffset)->serviceUuidLength;
+        (*nativeOffset)->serviceUuidMask = (filterOffset)->serviceUuidMask;
     }
     *filterSize = g_scanListener[thisListenerId].filterSize;
 }
@@ -423,8 +434,7 @@ static void WrapperAdvEnableCallback(int advId, int status)
             advChannel->advCallback->AdvEnableCallback == NULL) {
             continue;
         }
-        DISC_LOGI(DISC_BLE, "WrapperAdvEnableCallback, inner-advId: %d, bt-advId: %d, "
-            "status: %d", index, advId, st);
+        DISC_LOGI(DISC_BLE, "inner-advId: %u, bt-advId: %d, status: %u", index, advId, st);
         if (st == SOFTBUS_BT_STATUS_SUCCESS) {
             advChannel->isAdvertising = true;
             SoftBusCondSignal(&advChannel->cond);
@@ -445,8 +455,7 @@ static void WrapperAdvDisableCallback(int advId, int status)
             advChannel->advCallback->AdvDisableCallback == NULL) {
             continue;
         }
-        DISC_LOGI(DISC_BLE, "WrapperAdvDisableCallback, inner-advId: %d, bt-advId: %d, "
-            "status: %d", index, advId, st);
+        DISC_LOGI(DISC_BLE, "inner-advId: %u, bt-advId: %d, status: %d", index, advId, st);
         if (st == SOFTBUS_BT_STATUS_SUCCESS) {
             advChannel->advId = -1;
             advChannel->isAdvertising = false;
@@ -468,8 +477,7 @@ static void WrapperAdvDataCallback(int advId, int status)
             advChannel->advCallback->AdvDataCallback == NULL) {
             continue;
         }
-        DISC_LOGI(DISC_BLE, "WrapperAdvDataCallback, inner-advId: %d, bt-advId: %d, "
-            "status: %d", index, advId, st);
+        DISC_LOGI(DISC_BLE, "inner-advId: %u, bt-advId: %d, status: %d", index, advId, st);
         advChannel->advCallback->AdvDataCallback(index, st);
         break;
     }
@@ -486,8 +494,7 @@ static void WrapperAdvUpdateCallback(int advId, int status)
             advChannel->advCallback->AdvUpdateCallback == NULL) {
             continue;
         }
-        DISC_LOGI(DISC_BLE, "WrapperAdvUpdateCallback, inner-advId: %d, bt-advId: %d, "
-            "status: %d", index, advId, st);
+        DISC_LOGI(DISC_BLE, "inner-advId: %u, bt-advId: %d, status: %d", index, advId, st);
         advChannel->advCallback->AdvUpdateCallback(index, st);
         break;
     }
@@ -504,10 +511,10 @@ static void WrapperScanResultCallback(BtScanResultData *scanResultdata)
     if (scanResultdata == NULL) {
         return;
     }
-    int listenerId;
+
     SoftBusBleScanResult sr;
     ConvertScanResult(scanResultdata, &sr);
-    for (listenerId = 0; listenerId < SCAN_MAX_NUM; listenerId++) {
+    for (int listenerId = 0; listenerId < SCAN_MAX_NUM; listenerId++) {
         SoftBusMutexLock(&g_scanerLock);
         ScanListener *scanListener = &g_scanListener[listenerId];
         if (!scanListener->isUsed || scanListener->listener == NULL || !scanListener->isScanning ||
@@ -535,8 +542,7 @@ static void WrapperLpDeviceInfoCallback(BtUuid *uuid, int32_t type, uint8_t *dat
 
 static void WrapperScanStateChangeCallback(int32_t resultCode, bool isStartScan)
 {
-    int32_t listenerId;
-    for (listenerId = 0; listenerId < SCAN_MAX_NUM; listenerId++) {
+    for (int32_t listenerId = 0; listenerId < SCAN_MAX_NUM; listenerId++) {
         SoftBusMutexLock(&g_scanerLock);
         ScanListener *scanListener = &g_scanListener[listenerId];
         if (!scanListener->isUsed || scanListener->listener == NULL || !scanListener->isScanning ||
@@ -595,7 +601,7 @@ static int RegisterBleGattCallback(int32_t *scannerId, bool isLpDeviceScan)
             return SOFTBUS_OK;
         }
         if (BleRegisterScanCallbacks(&g_softbusBleScanCb, scannerId) != 0) {
-            DISC_LOGE(DISC_BLE, "SH register sh scan callback failed");
+            DISC_LOGE(DISC_BLE, "SH register ble scan callback failed");
             return SOFTBUS_ERR;
         }
         g_isLpDeviceRegCb = true;
@@ -639,12 +645,12 @@ static int SetAdvData(int advId, const SoftBusBleAdvData *data)
     if (data->advLength != 0) {
         g_advChannel[advId].advData.advData = SoftBusCalloc(data->advLength);
         if (g_advChannel[advId].advData.advData == NULL) {
-            DISC_LOGE(DISC_BLE, "SetAdvData calloc advData failed");
+            DISC_LOGE(DISC_BLE, "calloc advData failed");
             return SOFTBUS_MALLOC_ERR;
         }
         if (memcpy_s(g_advChannel[advId].advData.advData, data->advLength,
             data->advData, data->advLength) != EOK) {
-            DISC_LOGE(DISC_BLE, "SetAdvData memcpy advData failed");
+            DISC_LOGE(DISC_BLE, "memcpy advData failed");
             SoftBusFree(g_advChannel[advId].advData.advData);
             g_advChannel[advId].advData.advData = NULL;
             return SOFTBUS_MEM_ERR;
@@ -653,14 +659,14 @@ static int SetAdvData(int advId, const SoftBusBleAdvData *data)
     if (data->scanRspLength != 0) {
         g_advChannel[advId].advData.scanRspData = SoftBusCalloc(data->scanRspLength);
         if (g_advChannel[advId].advData.scanRspData == NULL) {
-            DISC_LOGE(DISC_BLE, "SetAdvData calloc scanRspData failed");
+            DISC_LOGE(DISC_BLE, "calloc scanRspData failed");
             SoftBusFree(g_advChannel[advId].advData.advData);
             g_advChannel[advId].advData.advData = NULL;
             return SOFTBUS_MALLOC_ERR;
         }
         if (memcpy_s(g_advChannel[advId].advData.scanRspData, data->scanRspLength,
             data->scanRspData, data->scanRspLength) != EOK) {
-            DISC_LOGE(DISC_BLE, "SetAdvData memcpy scanRspData failed");
+            DISC_LOGE(DISC_BLE, "memcpy scanRspData failed");
             SoftBusFree(g_advChannel[advId].advData.advData);
             SoftBusFree(g_advChannel[advId].advData.scanRspData);
             g_advChannel[advId].advData.advData = NULL;
@@ -686,7 +692,7 @@ int SoftBusGetAdvChannel(const SoftBusAdvCallback *callback, int *scannerId, boo
     if (callback == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (SoftBusMutexLock(&g_advLock) != 0) {
+    if (SoftBusMutexLock(&g_advLock) != SOFTBUS_OK) {
         return SOFTBUS_LOCK_ERR;
     }
     if (RegisterBleGattCallback(scannerId, isLpDeviceScan) != SOFTBUS_OK) {
@@ -831,13 +837,12 @@ int SoftBusStopAdv(int advId)
         return SOFTBUS_ERR;
     }
     if (!g_advChannel[advId].isAdvertising) {
-        DISC_LOGI(DISC_BLE, "SoftBusStopAdv, adv %d is not advertising", advId);
+        DISC_LOGI(DISC_BLE, "adv %d is not advertising", advId);
         SoftBusMutexUnlock(&g_advLock);
         return SOFTBUS_OK;
     }
     int ret = BleStopAdv(g_advChannel[advId].advId);
-    DISC_LOGI(DISC_BLE, "SoftBusStopAdv, inner-advId: %d, "
-        "bt-advId: %d, ret: %d", advId, g_advChannel[advId].advId, ret);
+    DISC_LOGI(DISC_BLE, "inner-advId: %d, bt-advId: %d, ret: %d", advId, g_advChannel[advId].advId, ret);
     if (ret != OHOS_BT_STATUS_SUCCESS) {
         g_advChannel[advId].advCallback->AdvDisableCallback(advId, SOFTBUS_BT_STATUS_FAIL);
         SoftBusMutexUnlock(&g_advLock);
@@ -852,14 +857,17 @@ int SoftBusStopAdv(int advId)
 int SoftBusUpdateAdv(int advId, const SoftBusBleAdvData *data, const SoftBusBleAdvParams *param)
 {
     if (param == NULL || data == NULL) {
+        DISC_LOGE(DISC_BLE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     int ret = SoftBusStopAdv(advId);
     if (ret != SOFTBUS_OK) {
+        DISC_LOGE(DISC_BLE, "SoftBusStopAdv return failed, ret = %d", ret);
         return ret;
     }
     ret = SetAdvData(advId, data);
     if (ret != SOFTBUS_OK) {
+        DISC_LOGE(DISC_BLE, "SetAdvData return failed, ret = %d", ret);
         return ret;
     }
     return SoftBusStartAdv(advId, param);

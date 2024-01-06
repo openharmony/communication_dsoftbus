@@ -229,7 +229,7 @@ static void NetUserStateEventHandler(const LnnEventBasicInfo *info)
         LNN_LOGE(LNN_BUILDER, "wifi user background state change evt handler get invalid param");
         return;
     }
-    bool addrType[CONNECTION_ADDR_MAX] = {0};
+    bool addrType[CONNECTION_ADDR_MAX] = {false};
     const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
     SoftBusUserState userState = (SoftBusUserState)event->status;
     switch (userState) {
@@ -440,6 +440,7 @@ static void OnGroupDeleted(const char *groupId)
     LNN_LOGD(LNN_BUILDER, "wifi handle OnGroupDeleted");
     LnnOnOhosAccountLogout();
     LnnHbOnTrustedRelationReduced();
+    RestartCoapDiscovery();
 }
 
 static void OnDeviceBound(const char *udid, const char *groupInfo)
@@ -502,10 +503,14 @@ static void SaveBrNetworkDevices(void)
             continue;
         }
         if (!LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_BR)) {
-            LNN_LOGD(LNN_BUILDER, "night mode on: ignore no br network device.");
+            LNN_LOGE(LNN_BUILDER, "night mode on: ignore no br network device.");
             continue;
         }
         DeviceNightMode *modeInfo = (DeviceNightMode *)SoftBusMalloc(sizeof(DeviceNightMode));
+        if (modeInfo == NULL) {
+            LNN_LOGE(LNN_BUILDER, "mode info malloc fail.");
+            continue;
+        }
         if (strcpy_s(modeInfo->addrs.info.br.brMac, BT_MAC_LEN, nodeInfo.connectInfo.macAddr) != EOK) {
             LNN_LOGE(LNN_BUILDER, "night mode on: str copy fail.");
             SoftBusFree(modeInfo);
@@ -527,6 +532,10 @@ static void NightModeChangeEventHandler(const LnnEventBasicInfo *info)
     if (g_nightOnCache == NULL) {
         LNN_LOGD(LNN_BUILDER, "init g_nightOnCache");
         g_nightOnCache = (ListNode *)SoftBusMalloc(sizeof(ListNode));
+        if (g_nightOnCache == NULL) {
+            LNN_LOGE(LNN_BUILDER, "malloc g_nightOnCache fail");
+            return;
+        }
         ListInit(g_nightOnCache);
     }
     const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;

@@ -19,7 +19,6 @@
 
 #include "lnn_trans_lane.h"
 #include "anonymizer.h"
-#include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_def.h"
@@ -37,11 +36,8 @@
 #include "softbus_adapter_crypto.h"
 #include "softbus_conn_ble_connection.h"
 #include "softbus_conn_ble_manager.h"
-#include "softbus_def.h"
-#include "softbus_errcode.h"
 #include "softbus_network_utils.h"
 #include "softbus_protocol_def.h"
-#include "softbus_utils.h"
 
 #define DELAY_DESTROY_LANE_TIME 5000
 #define LANE_RELIABILITY_TIME 4
@@ -179,10 +175,12 @@ int32_t AddLaneResourceItem(const LaneResource *inputResource)
         return SOFTBUS_MALLOC_ERR;
     }
     if (CreateResourceItem(inputResource, resourceItem) != SOFTBUS_OK) {
+        SoftBusFree(resourceItem);
         LNN_LOGE(LNN_LANE, "create resourceItem fail");
         return SOFTBUS_ERR;
     }
     if (LaneLock() != SOFTBUS_OK) {
+        SoftBusFree(resourceItem);
         LNN_LOGE(LNN_LANE, "lane lock fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -198,6 +196,25 @@ int32_t AddLaneResourceItem(const LaneResource *inputResource)
     return SOFTBUS_OK;
 }
 
+static int32_t StartDelayDestroyLink(uint32_t laneId, LaneResource* item)
+{
+    LaneResource* resourceItem = (LaneResource *)SoftBusMalloc(sizeof(LaneResource));
+    if (resourceItem == NULL) {
+        LNN_LOGE(LNN_LANE, "resourceItem malloc fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    if (memcpy_s(resourceItem, sizeof(LaneResource), item, sizeof(LaneResource)) != EOK) {
+        LNN_LOGE(LNN_LANE, "memcpy LaneResource error");
+        SoftBusFree(resourceItem);
+        return SOFTBUS_MEM_ERR;
+    }
+    if (PostDelayDestroyMessage(laneId, resourceItem, DELAY_DESTROY_LANE_TIME) != SOFTBUS_OK) {
+        SoftBusFree(resourceItem);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t DelLaneResourceItemWithDelay(LaneResource *resourceItem, uint32_t laneId, bool *isDelayDestroy)
 {
     if (resourceItem == NULL || isDelayDestroy == NULL) {
@@ -210,9 +227,9 @@ int32_t DelLaneResourceItemWithDelay(LaneResource *resourceItem, uint32_t laneId
     }
     LaneResource* item = LaneResourceIsExist(resourceItem);
     if (item != NULL) {
+        LNN_LOGI(LNN_LANE, "link=%d ref=%d", item->type, item->laneRef);
         if (item->type == LANE_HML && item->laneRef == 1) {
-            if (LnnLanePostMsgToHandler(MSG_TYPE_DELAY_DESTROY_LINK, laneId, *isDelayDestroy, item,
-                DELAY_DESTROY_LANE_TIME) == SOFTBUS_OK) {
+            if (StartDelayDestroyLink(laneId, item) == SOFTBUS_OK) {
                 *isDelayDestroy = true;
                 LaneUnlock();
                 return SOFTBUS_OK;
@@ -240,6 +257,7 @@ int32_t DelLaneResourceItem(const LaneResource *resourceItem)
     }
     LaneResource* item = LaneResourceIsExist(resourceItem);
     if (item != NULL) {
+        LNN_LOGI(LNN_LANE, "link=%d ref=%d", item->type, item->laneRef);
         if ((--item->laneRef) == 0) {
             ListDelete(&item->node);
             SoftBusFree(item);
@@ -324,10 +342,12 @@ int32_t AddLinkInfoItem(const LaneLinkInfo *inputLinkInfo)
         return SOFTBUS_MALLOC_ERR;
     }
     if (CreateLinkInfoItem(inputLinkInfo, linkInfoItem) != SOFTBUS_OK) {
+        SoftBusFree(linkInfoItem);
         LNN_LOGE(LNN_LANE, "create linkInfoItem fail");
         return SOFTBUS_ERR;
     }
     if (LaneLock() != SOFTBUS_OK) {
+        SoftBusFree(linkInfoItem);
         LNN_LOGE(LNN_LANE, "lane lock fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -524,10 +544,15 @@ static void LaneInitP2pAddrList()
 
 void LaneDeleteP2pAddress(const char *networkId, bool isDestroy)
 {
-    P2pAddrNode* item = NULL;
-    P2pAddrNode* nextItem = NULL;
+    P2pAddrNode *item = NULL;
+    P2pAddrNode *nextItem = NULL;
 
-    if ((SoftBusMutexLock(&g_P2pAddrList.lock) != SOFTBUS_OK) || (networkId == NULL)) {
+    if (networkId == NULL) {
+        LNN_LOGE(LNN_LANE, "networkId invalid");
+        return;
+    }
+    if (SoftBusMutexLock(&g_P2pAddrList.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "SoftBusMutexLock fail");
         return;
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_P2pAddrList.list, P2pAddrNode, node) {
@@ -543,11 +568,16 @@ void LaneDeleteP2pAddress(const char *networkId, bool isDestroy)
 
 void LaneAddP2pAddress(const char *networkId, const char *ipAddr, uint16_t port)
 {
-    P2pAddrNode* item = NULL;
-    P2pAddrNode* nextItem = NULL;
+    if (networkId == NULL || ipAddr == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid parameter");
+        return;
+    }
+    P2pAddrNode *item = NULL;
+    P2pAddrNode *nextItem = NULL;
     bool find = false;
 
     if (SoftBusMutexLock(&g_P2pAddrList.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "SoftBusMutexLock fail");
         return;
     }
 
@@ -581,7 +611,7 @@ void LaneAddP2pAddress(const char *networkId, const char *ipAddr, uint16_t port)
             return;
         }
         p2pAddrNode->port = port;
-        p2pAddrNode->cnt--;
+        p2pAddrNode->cnt = 1;
         ListAdd(&g_P2pAddrList.list, &p2pAddrNode->node);
     }
 
@@ -590,8 +620,11 @@ void LaneAddP2pAddress(const char *networkId, const char *ipAddr, uint16_t port)
 
 void LaneAddP2pAddressByIp(const char *ipAddr, uint16_t port)
 {
-    P2pAddrNode* item = NULL;
-    P2pAddrNode* nextItem = NULL;
+    if (ipAddr == NULL) {
+        return;
+    }
+    P2pAddrNode *item = NULL;
+    P2pAddrNode *nextItem = NULL;
     bool find = false;
 
     if (SoftBusMutexLock(&g_P2pAddrList.lock) != SOFTBUS_OK) {
@@ -620,7 +653,7 @@ void LaneAddP2pAddressByIp(const char *ipAddr, uint16_t port)
         }
         p2pAddrNode->networkId[0] = 0;
         p2pAddrNode->port = port;
-        p2pAddrNode->cnt--;
+        p2pAddrNode->cnt = 1;
         ListAdd(&g_P2pAddrList.list, &p2pAddrNode->node);
     }
 
@@ -629,8 +662,12 @@ void LaneAddP2pAddressByIp(const char *ipAddr, uint16_t port)
 
 void LaneUpdateP2pAddressByIp(const char *ipAddr, const char *networkId)
 {
-    P2pAddrNode* item = NULL;
-    P2pAddrNode* nextItem = NULL;
+    if (ipAddr == NULL || networkId == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid parameter");
+        return;
+    }
+    P2pAddrNode *item = NULL;
+    P2pAddrNode *nextItem = NULL;
 
     if (SoftBusMutexLock(&g_P2pAddrList.lock) != SOFTBUS_OK) {
         return;
@@ -649,8 +686,8 @@ void LaneUpdateP2pAddressByIp(const char *ipAddr, const char *networkId)
 
 static bool LaneGetP2PReuseMac(const char *networkId, char *ipAddr, uint32_t maxLen, uint16_t *port)
 {
-    P2pAddrNode* item = NULL;
-    P2pAddrNode* nextItem = NULL;
+    P2pAddrNode *item = NULL;
+    P2pAddrNode *nextItem = NULL;
     if (SoftBusMutexLock(&g_P2pAddrList.lock) != SOFTBUS_OK) {
         return false;
     }
@@ -703,6 +740,22 @@ static int32_t LaneLinkOfBleReuse(uint32_t reqId, const LinkRequest *reqInfo, co
     return LaneLinkOfBleReuseCommon(reqId, reqInfo, callback, BLE_GATT);
 }
 
+static int32_t LaneLinkSetBleMac(const LinkRequest *reqInfo, LaneLinkInfo *linkInfo)
+{
+    NodeInfo node;
+    (void)memset_s(&node, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(reqInfo->peerNetworkId, CATEGORY_NETWORK_ID, &node) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "can not find node");
+        return SOFTBUS_ERR;
+    }
+    if (node.bleMacRefreshSwitch == 0 && strlen(node.connectInfo.bleMacAddr) > 0) {
+        if (strcpy_s(linkInfo->linkInfo.ble.bleMac, BT_MAC_LEN, node.connectInfo.bleMacAddr) == EOK) {
+            return SOFTBUS_OK;
+        }
+    }
+    return SOFTBUS_ERR;
+}
+
 static int32_t LaneLinkOfBle(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
 {
     LaneLinkInfo linkInfo;
@@ -712,8 +765,10 @@ static int32_t LaneLinkOfBle(uint32_t reqId, const LinkRequest *reqInfo, const L
         return SOFTBUS_MEM_ERR;
     }
     if (strlen(linkInfo.linkInfo.ble.bleMac) == 0) {
-        LNN_LOGE(LNN_LANE, "get peerBleMac error");
-        return SOFTBUS_ERR;
+        if (LaneLinkSetBleMac(reqInfo, &linkInfo) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LANE, "get peerBleMac error");
+            return SOFTBUS_ERR;
+        }
     }
     char peerUdid[UDID_BUF_LEN] = {0};
     if (LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
@@ -827,7 +882,8 @@ VisitNextChoice FindBestProtocol(const LnnPhysicalSubnet *subnet, void *priv)
 
 static ProtocolType LnnLaneSelectProtocol(LnnNetIfType ifType, const char *netWorkId, ProtocolType acceptableProtocols)
 {
-    NodeInfo remoteNodeInfo = {0};
+    NodeInfo remoteNodeInfo;
+    (void)memset_s(&remoteNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     int ret = LnnGetRemoteNodeInfoById(netWorkId, CATEGORY_NETWORK_ID, &remoteNodeInfo);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "no such network id");
@@ -1016,8 +1072,8 @@ int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *
     }
     char *anonyNetworkId = NULL;
     Anonymize(reqInfo->peerNetworkId, &anonyNetworkId);
-    LNN_LOGI(LNN_LANE, "build link, linktype=%d, peerNetworkId=%s",
-        reqInfo->linkType, anonyNetworkId);
+    LNN_LOGI(LNN_LANE, "build link, linktype=%d, laneId=%u, peerNetworkId=%s",
+        reqInfo->linkType, reqId, anonyNetworkId);
     AnonymizeFree(anonyNetworkId);
     if (g_linkTable[reqInfo->linkType](reqId, reqInfo, callback) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "lane link is failed");
@@ -1057,5 +1113,4 @@ int32_t InitLaneLink(void)
 void DeinitLaneLink(void)
 {
     LnnDestroyP2p();
-    return;
 }

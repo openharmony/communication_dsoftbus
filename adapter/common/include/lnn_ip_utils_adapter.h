@@ -25,7 +25,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "softbus_adapter_log.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 

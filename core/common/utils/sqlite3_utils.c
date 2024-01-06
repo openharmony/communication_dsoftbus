@@ -433,7 +433,7 @@ int32_t GetRecordNumByKey(DbContext *ctx, TableNameID id, uint8_t *data)
 }
 
 int32_t QueryRecordByKey(DbContext *ctx, TableNameID id, uint8_t *data,
-    uint8_t **replyInfo, int infoNum)
+    uint8_t **replyInfo, int32_t infoNum)
 {
     int32_t rc;
     int32_t num = 0;

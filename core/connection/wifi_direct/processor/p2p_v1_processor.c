@@ -15,11 +15,11 @@
 
 #include "p2p_v1_processor.h"
 #include <string.h>
-#include "anonymizer.h"
 #include "securec.h"
 #include "conn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
+#include "bus_center_manager.h"
 #include "wifi_direct_types.h"
 #include "wifi_direct_negotiate_channel.h"
 #include "command/wifi_direct_command.h"
@@ -111,13 +111,11 @@ static int32_t CreateLink(struct WifiDirectConnectInfo *connectInfo)
 
     int32_t ret = SOFTBUS_OK;
     char remoteDeviceId[UUID_BUF_LEN] = {0};
-    ret = connectInfo->negoChannel->getDeviceId(connectInfo->negoChannel, remoteDeviceId, sizeof(remoteDeviceId));
+    ret = LnnGetRemoteStrInfo(connectInfo->remoteNetworkId, STRING_KEY_UUID, remoteDeviceId, sizeof(remoteDeviceId));
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT,
-        "get remote device id failed");
-    char *anonymizedRemoteUuid;
-    Anonymize(remoteDeviceId, &anonymizedRemoteUuid);
-    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%d remoteDeviceId=%s", connectInfo->requestId, anonymizedRemoteUuid);
-    AnonymizeFree(anonymizedRemoteUuid);
+                                   "get remote device id failed");
+    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%d remoteDeviceId=%s", connectInfo->requestId,
+              WifiDirectAnonymizeDeviceId(remoteDeviceId));
 
     struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(IF_NAME_P2P);
     CONN_CHECK_AND_RETURN_RET_LOGW(info, V1_ERROR_IF_NOT_AVAILABLE, CONN_WIFI_DIRECT, "interface info is null");
@@ -219,7 +217,7 @@ static void ProcessNegotiateMessage(enum WifiDirectNegotiateCmdType cmd, struct 
     int32_t ret = SOFTBUS_OK;
     struct P2pV1Processor *self = GetP2pV1Processor();
     if (self->passiveCommand != NULL) {
-        self->passiveCommand->deleteSelf(self->passiveCommand);
+        self->passiveCommand->destructor(self->passiveCommand);
     }
     self->passiveCommand = command;
     CONN_LOGI(CONN_WIFI_DIRECT, "passiveCommand=%d", command->type);
@@ -256,7 +254,7 @@ static void ProcessNegotiateMessage(enum WifiDirectNegotiateCmdType cmd, struct 
     }
 }
 
-static void OnOperationEvent(int32_t event)
+static void OnOperationEvent(int32_t event, void *data)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "event=%d", event);
     bool reply = true;
@@ -295,12 +293,12 @@ static void ResetContext(void)
         self->currentInnerLink = NULL;
     }
     if (self->activeCommand != NULL) {
-        self->activeCommand->deleteSelf(self->activeCommand);
+        self->activeCommand->destructor(self->activeCommand);
         self->activeCommand = NULL;
         CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=NULL");
     }
     if (self->passiveCommand != NULL) {
-        self->passiveCommand->deleteSelf(self->passiveCommand);
+        self->passiveCommand->destructor(self->passiveCommand);
         self->passiveCommand = NULL;
         CONN_LOGI(CONN_WIFI_DIRECT, "passiveCommand=NULL");
     }
@@ -887,7 +885,7 @@ static int32_t ProcessConnectRequestAsGc(struct NegotiateMessage *msg, enum Wifi
     if (myRole == WIFI_DIRECT_ROLE_GC) {
         ret = ReuseP2p();
         CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, V1_ERROR_REUSE_FAILED, CONN_WIFI_DIRECT,
-                                       "V1_ERROR_REUSE_FAILED");
+            "V1_ERROR_REUSE_FAILED");
         ProcessSuccess(NULL, true);
         return SOFTBUS_OK;
     }
@@ -916,10 +914,7 @@ static int32_t ProcessNoAvailableInterface(struct NegotiateMessage *msg, enum Wi
     if (ret != SOFTBUS_OK) {
         return ERROR_P2P_GC_AVAILABLE_WITH_MISMATCHED_ROLE;
     }
-    char *anonymizedRemoteUuid;
-    Anonymize(remoteDeviceId, &anonymizedRemoteUuid);
-    CONN_LOGI(CONN_WIFI_DIRECT, "remoteDeviceId=%s", anonymizedRemoteUuid);
-    AnonymizeFree(anonymizedRemoteUuid);
+    CONN_LOGI(CONN_WIFI_DIRECT, "remoteDeviceId=%s", WifiDirectAnonymizeDeviceId(remoteDeviceId));
 
     ListNode *linkList = &GetLinkManager()->linkLists[WIFI_DIRECT_LINK_TYPE_P2P];
     struct InnerLink *link = NULL;
@@ -985,7 +980,7 @@ static int32_t ProcessConflictRequest(struct WifiDirectCommand *command)
             GetWifiDirectNegotiator()->postData(response);
             NegotiateMessageDelete(response);
         }
-        self->passiveCommand->deleteSelf(self->passiveCommand);
+        self->passiveCommand->destructor(self->passiveCommand);
         self->passiveCommand = NULL;
         CONN_LOGI(CONN_WIFI_DIRECT, "passiveCommand=NULL");
         return SOFTBUS_OK;
@@ -1332,7 +1327,8 @@ static void StartAuthListening(const char *localIp)
         return;
     }
 
-    port = StartListeningForDefaultChannel(localIp);
+    ListenerModule module = 0;
+    port = StartListeningForDefaultChannel(AUTH_LINK_TYPE_P2P, localIp, 0, &module);
     info->putInt(info, II_KEY_PORT, port);
 }
 
@@ -1355,14 +1351,13 @@ static void SendHandShakeToGoAsync(void *data)
     GetWifiDirectNegotiator()->postData(&handShakeInfo);
     NegotiateMessageDestructor(&handShakeInfo);
 
-    GetLinkManager()->setNegotiateChannelForLink((struct WifiDirectNegotiateChannel*)channel);
+    GetLinkManager()->setNegotiateChannelForLink((struct WifiDirectNegotiateChannel*)channel,
+                                                 WIFI_DIRECT_LINK_TYPE_P2P);
     channel->destructor(channel);
 }
 
 static void OnAuthConnectSuccess(uint32_t authRequestId, int64_t p2pAuthId)
 {
-    GetWifiDirectNegotiator()->onWifiDirectAuthOpened(authRequestId, p2pAuthId);
-
     struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(p2pAuthId);
     CONN_CHECK_AND_RETURN_LOGW(channel, CONN_WIFI_DIRECT, "new channel failed");
 
@@ -1383,14 +1378,22 @@ static void OpenAuthConnection(struct WifiDirectNegotiateChannel *channel, struc
     int32_t ret = link->getRemoteIpString(link, remoteIp, sizeof(remoteIp));
     CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get remote ip failed");
     char *remoteMac = link->getString(link, IL_KEY_REMOTE_BASE_MAC, "");
-    CONN_LOGI(CONN_WIFI_DIRECT, "remoteMac=%s remoteIp=%s remotePort=%d", WifiDirectAnonymizeMac(remoteMac),
-          WifiDirectAnonymizeIp(remoteIp), remotePort);
+    char *remoteUuid = link->getString(link, IL_KEY_DEVICE_ID, "");
+    CONN_LOGI(CONN_WIFI_DIRECT, "remoteMac=%s remoteUuid=%s remoteIp=%s remotePort=%d",
+              WifiDirectAnonymizeMac(remoteMac), WifiDirectAnonymizeDeviceId(remoteUuid),
+              WifiDirectAnonymizeIp(remoteIp), remotePort);
 
+    struct DefaultNegoChannelParam param = {
+        .type = AUTH_LINK_TYPE_P2P,
+        .remoteUuid = remoteUuid,
+        .remoteIp = remoteIp,
+        .remotePort = remotePort,
+    };
     struct DefaultNegoChannelOpenCallback callback = {
         .onConnectSuccess = OnAuthConnectSuccess,
         .onConnectFailure = OnAuthConnectFailure,
     };
-    ret = OpenDefaultNegotiateChannel(remoteIp, remotePort, channel, &callback);
+    ret = OpenDefaultNegotiateChannel(&param, channel, &callback);
     CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "open p2p auth failed");
 }
 
@@ -1484,9 +1487,9 @@ static int32_t OnConnectGroupComplete(int32_t event)
     GetWifiDirectPerfRecorder()->record(TP_P2P_CONNECT_GROUP_END);
     GetWifiDirectPerfRecorder()->calculate();
     CONN_CHECK_AND_RETURN_RET_LOGW(event == ENTITY_EVENT_P2P_CONNECT_COMPLETE, V1_ERROR_CONNECT_GROUP_FAILED,
-                                  CONN_WIFI_DIRECT, "connect group failed");
+                                   CONN_WIFI_DIRECT, "connect group failed");
     CONN_LOGI(CONN_WIFI_DIRECT, "connect group done, timeUsed=%zuMS",
-        GetWifiDirectPerfRecorder()->getTime(TC_CONNECT_GROUP));
+              GetWifiDirectPerfRecorder()->getTime(TC_CONNECT_GROUP));
 
     struct P2pV1Processor *self = GetP2pV1Processor();
     struct NegotiateMessage *msg = self->passiveCommand->msg;
@@ -1651,11 +1654,7 @@ static void SetInnerLinkDeviceId(struct NegotiateMessage *msg, struct InnerLink 
 
     char deviceId[UUID_BUF_LEN] = {0};
     channel->getDeviceId(channel, deviceId, sizeof(deviceId));
-    char *anonymizedUuid;
-    Anonymize(deviceId, &anonymizedUuid);
-    CONN_LOGI(CONN_WIFI_DIRECT, "deviceId=%s", anonymizedUuid);
-    AnonymizeFree(anonymizedUuid);
-
+    CONN_LOGI(CONN_WIFI_DIRECT, "deviceId=%s", WifiDirectAnonymizeDeviceId(deviceId));
     innerLink->putString(innerLink, IL_KEY_DEVICE_ID, deviceId);
 }
 

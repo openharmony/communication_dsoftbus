@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -137,15 +137,8 @@ int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPo
         return SOFTBUS_INVALID_PARAM;
     }
     if (channel->isServer) {
-        VtpStreamOpenParam p1 = {
-            "DSOFTBUS_STREAM",
-            channel->myIp,
-            NULL,
-            -1,
-            streamType,
-            (uint8_t*)channel->sessionKey,
-            channel->keyLen,
-        };
+        VtpStreamOpenParam p1 = { "DSOFTBUS_STREAM", channel->myIp,
+            NULL, -1, streamType, (uint8_t*)channel->sessionKey, channel->keyLen };
 
         int32_t port = StartVtpStreamChannelServer(channel->channelId, &p1, &g_streamCallcb);
         if (port <= 0) {
@@ -155,17 +148,10 @@ int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPo
         *streamPort = port;
         TRANS_LOGI(TRANS_STREAM, "stream server success, listen port=%d.", port);
     } else {
-        VtpStreamOpenParam p1 = {
-            "DSOFTBUS_STREAM",
-            channel->myIp,
-            channel->peerIp,
-            channel->peerPort,
-            streamType,
-            (uint8_t *)channel->sessionKey,
-            channel->keyLen,
-        };
+        VtpStreamOpenParam p1 = { "DSOFTBUS_STREAM", channel->myIp, channel->peerIp,
+            channel->peerPort, streamType, (uint8_t *)channel->sessionKey, channel->keyLen };
 
-        int ret = StartVtpStreamChannelClient(channel->channelId, &p1, &g_streamCallcb);
+        int32_t ret = StartVtpStreamChannelClient(channel->channelId, &p1, &g_streamCallcb);
         if (ret <= 0) {
             TRANS_LOGE(TRANS_STREAM, "start stream channel as client failed. ret=%d", ret);
             return SOFTBUS_TRANS_UDP_START_STREAM_CLIENT_FAILED;
@@ -182,6 +168,10 @@ int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPo
 
 int32_t TransSendStream(int32_t channelId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
 {
+    if (channelId < 0) {
+        TRANS_LOGE(TRANS_STREAM, "param faild");
+        return SOFTBUS_INVALID_PARAM;
+    }
     return SendVtpStream(channelId, data, ext, param);
 }
 

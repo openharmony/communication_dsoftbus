@@ -25,9 +25,54 @@ extern "C" {
 #endif
 
 typedef enum {
-    EVENT_SCENE_BROADCAST = 1,
-    EVENT_SCENE_SCAN = 2,
+    EVENT_SCENE_INIT = 1,
+    EVENT_SCENE_DISC = 2,
+    EVENT_SCENE_BLE = 3,
+    EVENT_SCENE_SHARE_BLE = 4,
+    EVENT_SCENE_APPROACH_BLE = 5,
+    EVENT_SCENE_COAP = 6,
+    EVENT_SCENE_BROADCAST = 7,
+    EVENT_SCENE_SCAN = 8,
 } DiscEventScene;
+
+typedef enum {
+    EVENT_STAGE_INIT = 1,
+    EVENT_STAGE_SOFTBUS_BLE_INIT = 2,
+    EVENT_STAGE_SHARE_BLE_INIT = 3,
+    EVENT_STAGE_APPROACH_BLE_INIT = 4,
+} DiscEventInitStage;
+
+typedef enum {
+    EVENT_STAGE_DISC_SDK = 1,
+    EVENT_STAGE_DISC_SERVICE = 2,
+    EVENT_STAGE_ADD_INFO = 3,
+    EVENT_STAGE_CALL_INTERFACE = 4,
+} DiscEventDiscStage;
+
+typedef enum {
+    EVENT_STAGE_BLE_PROCESS = 1,
+    EVENT_STAGE_BLE_HANDLER = 2,
+    EVENT_STAGE_STATE_TURN = 3,
+} DiscEventBleStage;
+
+typedef enum {
+    EVENT_STAGE_SHARE_BLE_PROCESS = 1,
+    EVENT_STAGE_SHARE_BLE_UPDATE_DEVICE = 2,
+} DiscEventShareBleStage;
+
+typedef enum {
+    EVENT_STAGE_APPROACH_BLE_PROCESS = 1,
+} DiscEventApproachBleStage;
+
+typedef enum {
+    EVENT_STAGE_COAP = 1,
+    EVENT_STAGE_UPDATE_IP = 2,
+    EVENT_STAGE_UPDATE_DEVICE = 3,
+    EVENT_STAGE_REGISTER = 4,
+    EVENT_STAGE_SET_FILTER = 5,
+    EVENT_STAGE_DISCOVERY_START = 6,
+    EVENT_STAGE_DISCOVERY_STOP = 7,
+} DiscEventCoapStage;
 
 typedef enum {
     EVENT_STAGE_BROADCAST = 1,
@@ -35,12 +80,28 @@ typedef enum {
 
 typedef enum {
     EVENT_STAGE_SCAN_START = 1,
-    EVENT_STAGE_SCAN_END = 2,
+    EVENT_STAGE_SCAN_RECV = 2,
+    EVENT_STAGE_SCAN_END = 3,
 } DiscEventScanStage;
+
+typedef enum {
+    SERVER_PUBLISH = 1,
+    SERVER_STOP_PUBLISH = 2,
+    SERVER_DISCOVERY = 3,
+    SERVER_STOP_DISCOVERY = 4,
+} DiscServerType;
 
 typedef struct {
     int32_t result;              // STAGE_RES
     int32_t errcode;             // ERROR_CODE
+    int32_t initType;            // INIT_TYPE
+    int32_t serverType;          // SERVER_TYPE
+    int32_t interFuncType;       // INTERFACE_FUNC_TYPE
+    int32_t capabilityBit;       // CAPABILITY_BIT
+    const char *capabilityData;  // CAPABILITY_DATA
+    int32_t bleTurnState;        // BLE_TURN_STATE
+    int32_t ipLinkStatus;        // IP_LINK_STATUS
+    int32_t coapChangeType;      // COAP_CHANGE_TYPE
     int32_t broadcastType;       // BROADCAST_TYPE
     int32_t broadcastFreq;       // BROADCAST_FREQ
     int32_t scanType;            // SCAN_TYPE
@@ -49,14 +110,11 @@ typedef struct {
     int32_t discMode;            // DISC_MODE
     int32_t costTime;            // FIRST_DISCOVERY_TIME
     const char *localNetworkId;  // LOCAL_NET_ID
-    const char *localUdid;       // LOCAL_UDID
-    const char *localDeviceType; // LOCAL_DEV_TYPE
     const char *peerIp;          // PEER_IP
     const char *peerBrMac;       // PEER_BR_MAC
     const char *peerBleMac;      // PEER_BLE_MAC
     const char *peerWifiMac;     // PEER_WIFI_MAC
     const char *peerPort;        // PEER_PORT
-    const char *peerUdid;        // PEER_UDID
     const char *peerNetworkId;   // PEER_NET_ID
     const char *peerDeviceType;  // PEER_DEV_TYPE
     const char *callerPkg;       // HOST_PKG

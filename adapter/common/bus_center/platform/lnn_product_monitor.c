@@ -17,7 +17,6 @@
 
 #include "bus_center_event.h"
 #include "lnn_log.h"
-#include "softbus_adapter_log.h"
 #include "softbus_errcode.h"
 #include "hdf_io_service_if.h"
 

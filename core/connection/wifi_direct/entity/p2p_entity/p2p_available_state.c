@@ -177,7 +177,7 @@ static struct P2pAvailableState g_state = {
 };
 
 /* class static method */
-struct P2pAvailableState* GetP2pAvailableState(void)
+struct P2pAvailableState *GetP2pAvailableState(void)
 {
     struct P2pAvailableState *self = (struct P2pAvailableState *)&g_state;
     if (!self->isInited) {

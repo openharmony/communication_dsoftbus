@@ -15,10 +15,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "comm_log.h"
 #include "softbus_errcode.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
-#include "softbus_log_old.h"
 #include "softbus_hidumper_disc.h"
 
 #define SOFTBUS_DISC_MODULE_NAME "disc"
@@ -29,7 +29,7 @@ static LIST_HEAD(g_disc_var_list);
 int32_t SoftBusRegDiscVarDump(char *dumpVar, SoftBusVarDumpCb cb)
 {
     if (dumpVar == NULL || strlen(dumpVar) >= SOFTBUS_DUMP_VAR_NAME_LEN || cb == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegDiscDumpCb invalid param");
+        COMM_LOGE(COMM_DFX, "SoftBusRegDiscDumpCb invalid param");
         return SOFTBUS_ERR;
     }
     return SoftBusAddDumpVarToList(dumpVar, cb, &g_disc_var_list);
@@ -38,7 +38,7 @@ int32_t SoftBusRegDiscVarDump(char *dumpVar, SoftBusVarDumpCb cb)
 static int32_t SoftBusDiscDumpHander(int fd, int32_t argc, const char **argv)
 {
     if (fd < 0 || argc < 0 || argv == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusDiscDumpHander invalid param");
+        COMM_LOGE(COMM_DFX, "SoftBusDiscDumpHander invalid param");
         return SOFTBUS_ERR;
     }
 
@@ -77,7 +77,7 @@ int32_t SoftBusDiscHiDumperInit(void)
     int32_t ret = SoftBusRegHiDumperHandler(SOFTBUS_DISC_MODULE_NAME, SOFTBUS_DISC_MODULE_HELP,
         &SoftBusDiscDumpHander);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegDiscDumpCb registe fail");
+        COMM_LOGE(COMM_INIT, "SoftBusRegDiscDumpCb registe fail");
     }
     return ret;
 }

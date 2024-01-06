@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -296,20 +296,21 @@ EXIT_ERR:
     return NULL;
 }
 
-static ChannelType TransGetChannelType(const SessionParam *param, const LaneConnInfo *connInfo)
+static ChannelType TransGetChannelType(const SessionParam *param, const int32_t type)
 {
     LaneTransType transType = TransGetLaneTransTypeBySession(param);
     if (transType == LANE_T_BUTT) {
         return CHANNEL_TYPE_BUTT;
     }
 
-    if (connInfo->type == LANE_BR || connInfo->type == LANE_BLE || connInfo->type == LANE_BLE_DIRECT ||
-        connInfo->type == LANE_COC || connInfo->type == LANE_COC_DIRECT) {
+    if (type == LANE_BR || type == LANE_BLE || type == LANE_BLE_DIRECT ||
+        type == LANE_COC || type == LANE_COC_DIRECT) {
         return CHANNEL_TYPE_PROXY;
     } else if (transType == LANE_T_FILE || transType == LANE_T_COMMON_VIDEO || transType == LANE_T_COMMON_VOICE ||
         transType == LANE_T_RAW_STREAM) {
         return CHANNEL_TYPE_UDP;
-    } else if ((transType == LANE_T_MSG) && (connInfo->type != LANE_P2P) && (connInfo->type != LANE_P2P_REUSE)) {
+    } else if ((transType == LANE_T_MSG) && (type != LANE_P2P) && (type != LANE_P2P_REUSE) &&
+        (type != LANE_HML)) {
         return CHANNEL_TYPE_PROXY;
     }
     return CHANNEL_TYPE_TCP_DIRECT;
@@ -382,11 +383,11 @@ static int TransGetLocalConfig(int32_t channelType, int32_t businessType, uint32
     return SOFTBUS_OK;
 }
 
-static void FillAppInfo(AppInfo *appInfo, ConnectOption *connOpt, const SessionParam *param,
-    TransInfo *transInfo, LaneConnInfo *connInfo)
+static void FillAppInfo(AppInfo *appInfo, const SessionParam *param,
+    TransInfo *transInfo, int32_t type)
 {
-    transInfo->channelType = TransGetChannelType(param, connInfo);
-    appInfo->linkType = connInfo->type;
+    transInfo->channelType = TransGetChannelType(param, type);
+    appInfo->linkType = type;
     appInfo->channelType = transInfo->channelType;
     (void)TransGetLocalConfig(appInfo->channelType, appInfo->businessType, &appInfo->myData.dataConfig);
 }
@@ -411,6 +412,10 @@ static void TransOpenChannelSetModule(int32_t channelType, ConnectOption *connOp
 
 int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
 {
+    if (param == NULL || transInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "param invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
     TRANS_LOGI(TRANS_CTRL, "server TransOpenChannel");
     int64_t timeStart = GetSoftbusRecordTimeMillis();
     transInfo->channelId = INVALID_CHANNEL_ID;
@@ -450,7 +455,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
             SOFTBUS_EVT_OPEN_SESSION_FAIL, GetSoftbusRecordTimeMillis() - timeStart);
         goto EXIT_ERR;
     }
-    FillAppInfo(appInfo, &connOpt, param, transInfo, &connInfo);
+    FillAppInfo(appInfo, param, transInfo, connInfo.type);
     TransOpenChannelSetModule(transInfo->channelType, &connOpt);
     TRANS_LOGI(TRANS_CTRL, "laneId=%u get channelType=%u.", laneId, transInfo->channelType);
     errCode = TransOpenChannelProc((ChannelType)transInfo->channelType, appInfo, &connOpt,
@@ -575,6 +580,7 @@ int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connO
         }
         if (strcpy_s(appInfo->reqId, REQ_ID_SIZE_MAX, reqId) != EOK) {
             TRANS_LOGE(TRANS_CTRL, "strcpy_s reqId failed");
+            SoftBusFree(appInfo);
             return INVALID_CHANNEL_ID;
         }
         if (TransProxyOpenProxyChannel(appInfo, connOpt, &channelId) != SOFTBUS_OK) {

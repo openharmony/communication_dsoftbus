@@ -15,8 +15,8 @@
 
 #include "trans_tcp_direct_listener.h"
 
-#include <arpa/inet.h>
 #include <securec.h>
+
 #include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "softbus_adapter_crypto.h"
@@ -27,11 +27,11 @@
 #include "softbus_errcode.h"
 #include "softbus_message_open_channel.h"
 #include "softbus_socket.h"
+#include "trans_channel_manager.h"
+#include "trans_event.h"
+#include "trans_log.h"
 #include "trans_tcp_direct_message.h"
 #include "trans_tcp_direct_sessionconn.h"
-#include "trans_channel_manager.h"
-#include "trans_log.h"
-#include "trans_event.h"
 
 #define ID_OFFSET (1)
 
@@ -44,6 +44,8 @@ uint32_t SwitchAuthLinkTypeToFlagType(AuthLinkType type)
             return FLAG_BLE;
         case AUTH_LINK_TYPE_P2P:
             return FLAG_P2P;
+        case AUTH_LINK_TYPE_ENHANCED_P2P:
+            return FLAG_ENHANCE_P2P;
         default:
             return FLAG_WIFI;
     }
@@ -51,6 +53,10 @@ uint32_t SwitchAuthLinkTypeToFlagType(AuthLinkType type)
 
 int32_t GetCipherFlagByAuthId(int64_t authId, uint32_t *flag, bool *isAuthServer)
 {
+    if (flag == NULL || isAuthServer == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "param invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
     AuthConnInfo info;
     if (AuthGetServerSide(authId, isAuthServer) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get auth server side fail authId=%" PRId64, authId);
@@ -73,7 +79,6 @@ static int32_t StartVerifySession(SessionConn *conn)
         return SOFTBUS_TRANS_TCP_GENERATE_SESSIONKEY_FAILED;
     }
     SetSessionKeyByChanId(conn->channelId, conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey));
-
     bool isAuthServer = false;
     uint32_t cipherFlag = FLAG_WIFI;
     if (GetCipherFlagByAuthId(conn->authId, &cipherFlag, &isAuthServer)) {
@@ -84,7 +89,6 @@ static int32_t StartVerifySession(SessionConn *conn)
     if (isAuthServer) {
         seq |= AUTH_CONN_SERVER_SIDE;
     }
-
     char *bytes = PackRequest(&conn->appInfo);
     if (bytes == NULL) {
         TRANS_LOGE(TRANS_CTRL, "Pack Request failed");
@@ -131,14 +135,12 @@ static int32_t CreateSessionConnNode(ListenerModule module, int fd, int32_t chan
         module <= DIRECT_CHANNEL_SERVER_HML_END)) ? WIFI_P2P : WIFI_STA;
     conn->appInfo.routeType = (module == DIRECT_CHANNEL_SERVER_P2P) ? WIFI_P2P : WIFI_STA;
     conn->appInfo.peerData.port = clientAddr->socketOption.port;
-
     if (LnnGetLocalStrInfo(STRING_KEY_UUID, conn->appInfo.myData.deviceId, sizeof(conn->appInfo.myData.deviceId)) !=
         0) {
         TRANS_LOGE(TRANS_CTRL, "get local deviceId failed.");
         SoftBusFree(conn);
         return SOFTBUS_ERR;
     }
-
     if (strcpy_s(conn->appInfo.peerData.addr, sizeof(conn->appInfo.peerData.addr), clientAddr->socketOption.addr) !=
         EOK) {
         TRANS_LOGE(TRANS_CTRL, "copy ip to app info failed.");
@@ -153,13 +155,11 @@ static int32_t CreateSessionConnNode(ListenerModule module, int fd, int32_t chan
         SoftBusFree(conn);
         return SOFTBUS_MEM_ERR;
     }
-
     if (TransTdcAddSessionConn(conn) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "add session conn node failed.");
         SoftBusFree(conn);
         return SOFTBUS_ERR;
     }
-
     if (AddTrigger(conn->listenMod, fd, READ_TRIGGER) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "add trigger failed, delete session conn.");
         TransDelSessionConnById(chanId);
@@ -175,7 +175,6 @@ static int32_t TdcOnConnectEvent(ListenerModule module, int cfd, const ConnectOp
         TRANS_LOGW(TRANS_CTRL, "invalid param, cfd=%d", cfd);
         return SOFTBUS_INVALID_PARAM;
     }
-
     int32_t channelId = GenerateChannelId(true);
     int32_t ret = TransSrvAddDataBufNode(channelId, cfd); // fd != channelId
     if (ret != SOFTBUS_OK) {
@@ -183,7 +182,6 @@ static int32_t TdcOnConnectEvent(ListenerModule module, int cfd, const ConnectOp
         ConnShutdownSocket(cfd);
         return ret;
     }
-
     ret = CreateSessionConnNode(module, cfd, channelId, clientAddr);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "create session conn node fail, delete data buf node.");
@@ -207,6 +205,7 @@ static void CloseTcpDirectFd(int fd)
 static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channelId, int32_t fd)
 {
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGI(TRANS_CTRL, "unequal SOFTBUS_OK");
         TransEventExtra extra = {
             .socketName = NULL,
             .peerNetworkId = NULL,
@@ -226,6 +225,56 @@ static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channel
     }
     TransDelSessionConnById(channelId);
     TransSrvDelDataBufNode(channelId);
+}
+
+static int32_t ProcessSocketInEvent(SessionConn *conn, int fd)
+{
+    int32_t ret = TransTdcSrvRecvData(conn->listenMod, conn->channelId);
+    TRANS_LOGE(TRANS_CTRL, "Trans Srv Recv Data ret=%d. ", ret);
+    if (ret == SOFTBUS_DATA_NOT_ENOUGH) {
+        return SOFTBUS_OK;
+    }
+    TransProcDataRes(conn->listenMod, ret, conn->channelId, fd);
+    return ret;
+}
+
+static int32_t ProcessSocketOutEvent(SessionConn *conn, int fd)
+{
+    int32_t ret = SOFTBUS_ERR;
+    if (conn->serverSide) {
+        return ret;
+    }
+    DelTrigger(conn->listenMod, fd, WRITE_TRIGGER);
+    AddTrigger(conn->listenMod, fd, READ_TRIGGER);
+    ret = StartVerifySession(conn);
+    TransEventExtra extra = { .socketName = NULL,
+        .peerNetworkId = NULL,
+        .calleePkg = NULL,
+        .callerPkg = NULL,
+        .socketFd = fd,
+        .channelId = conn->channelId,
+        .authId = conn->authId,
+        .errcode = ret,
+        .result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED };
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_START, extra);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "start verify session fail.");
+        DelTrigger(conn->listenMod, fd, READ_TRIGGER);
+        ConnShutdownSocket(fd);
+        NotifyChannelOpenFailed(conn->channelId, ret);
+        TransDelSessionConnById(conn->channelId);
+        TransSrvDelDataBufNode(conn->channelId);
+    }
+    return ret;
+}
+
+static void ProcessSocketSocketExceptionEvent(SessionConn *conn, int fd)
+{
+    TRANS_LOGE(TRANS_CTRL, "exception occurred.");
+    DelTrigger(conn->listenMod, fd, EXCEPT_TRIGGER);
+    ConnShutdownSocket(fd);
+    TransDelSessionConnById(conn->channelId);
+    TransSrvDelDataBufNode(conn->channelId);
 }
 
 static int32_t TdcOnDataEvent(ListenerModule module, int events, int fd)
@@ -250,47 +299,11 @@ static int32_t TdcOnDataEvent(ListenerModule module, int events, int fd)
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(conn->channelId + ID_OFFSET));
     int32_t ret = SOFTBUS_ERR;
     if (events == SOFTBUS_SOCKET_IN) {
-        ret = TransTdcSrvRecvData(conn->listenMod, conn->channelId);
-        TRANS_LOGE(TRANS_CTRL, "Trans Srv Recv Data ret=%d. ", ret);
-        if (ret == SOFTBUS_DATA_NOT_ENOUGH) {
-            SoftBusFree(conn);
-            return SOFTBUS_OK;
-        }
-        TransProcDataRes(conn->listenMod, ret, conn->channelId, fd);
+        ret = ProcessSocketInEvent(conn, fd);
     } else if (events == SOFTBUS_SOCKET_OUT) {
-        if (conn->serverSide == true) {
-            SoftBusFree(conn);
-            return ret;
-        }
-        DelTrigger(conn->listenMod, fd, WRITE_TRIGGER);
-        AddTrigger(conn->listenMod, fd, READ_TRIGGER);
-        ret = StartVerifySession(conn);
-        TransEventExtra extra = {
-            .socketName = NULL,
-            .peerNetworkId = NULL,
-            .calleePkg = NULL,
-            .callerPkg = NULL,
-            .socketFd = fd,
-            .channelId = conn->channelId,
-            .authId = conn->authId,
-            .errcode = ret,
-            .result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED
-        };
-        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_START, extra);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "start verify session fail.");
-            DelTrigger(conn->listenMod, fd, READ_TRIGGER);
-            ConnShutdownSocket(fd);
-            NotifyChannelOpenFailed(conn->channelId, ret);
-            TransDelSessionConnById(conn->channelId);
-            TransSrvDelDataBufNode(conn->channelId);
-        }
+        ret = ProcessSocketOutEvent(conn, fd);
     } else if (events == SOFTBUS_SOCKET_EXCEPTION) {
-        TRANS_LOGE(TRANS_CTRL, "exception occurred.");
-        DelTrigger(conn->listenMod, fd, EXCEPT_TRIGGER);
-        ConnShutdownSocket(fd);
-        TransDelSessionConnById(conn->channelId);
-        TransSrvDelDataBufNode(conn->channelId);
+        ProcessSocketSocketExceptionEvent(conn, fd);
     }
     SoftBusFree(conn);
     return ret;

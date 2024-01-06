@@ -306,6 +306,12 @@ enum WifiDirectErrorCode {
     /* Error code representing remote client join failed */
     ERROR_HML_CLIENT_JOIN_FAIL = ERROR_BASE - 6608,
 
+    /* Error code representing switch notify failed */
+    ERROR_HML_SWITCH_NOTIFY_FAIL = ERROR_BASE - 6609,
+
+    /* Error code representing switch notify failed */
+    ERROR_HML_RENEGO_TO_P2P = ERROR_BASE - 6610,
+
     /* Error code representing end position of wifi direct errors */
     ERROR_WIFI_DIRECT_END = ERROR_BASE - 6999,
 };

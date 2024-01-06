@@ -17,12 +17,12 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "comm_log.h"
 #include "softbus_errcode.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_hidumper.h"
 #include "softbus_hidumper_util.h"
-#include "softbus_log_old.h"
 
 #define SOFTBUS_CONTROL_ALARM_ORDER "control"
 #define SOFTBUS_MANAGEMENT_ALARM_ORDER "management"
@@ -119,7 +119,7 @@ int32_t SoftBusAlarmHiDumperInit(void)
     int32_t ret = SoftBusRegHiDumperHandler(SOFTBUS_ALARM_MODULE_NAME, SOFTBUS_ALARM_MODULE_HELP,
         &SoftBusAlarmDumpHander);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftBusRegAlarmDumpCb registe fail");
+        COMM_LOGE(COMM_DFX, "SoftBusRegAlarmDumpCb registe fail");
     }
     return ret;
 }

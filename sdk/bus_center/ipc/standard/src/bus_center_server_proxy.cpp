@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,8 +41,10 @@ static sptr<IRemoteObject> GetSystemAbility()
     if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
         return nullptr;
     }
-
-    data.WriteInt32(SOFTBUS_SERVER_SA_ID_INNER);
+    if (!data.WriteInt32(SOFTBUS_SERVER_SA_ID_INNER)) {
+        LNN_LOGE(LNN_EVENT, "write SOFTBUS_SERVER_SA_ID_INNER failed");
+        return nullptr;
+    }
     MessageParcel reply;
     MessageOption option;
     sptr<IRemoteObject> samgr = IPCSkeleton::GetContextObject();
@@ -81,6 +83,8 @@ int32_t BusCenterServerProxyInit(void)
 void BusCenterServerProxyDeInit(void)
 {
     LNN_LOGI(LNN_EVENT, "enter");
+    BusCenterExProxyDeInit();
+    std::lock_guard<std::mutex> lock(g_mutex);
     g_serverProxy.clear();
 }
 
@@ -92,7 +96,6 @@ int32_t ServerIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t
     }
     int ret = g_serverProxy->GetAllOnlineNodeInfo(pkgName, info, infoTypeLen, infoNum);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "GetAllOnlineNodeInfo get all online info failed");
         return ret;
     }
     return SOFTBUS_OK;
@@ -105,11 +108,7 @@ int32_t ServerIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t in
         return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->GetLocalDeviceInfo(pkgName, info, infoTypeLen);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "GetLocalDeviceInfo get local device info failed");
-        return ret;
-    }
-    return SOFTBUS_OK;
+    return ret;
 }
 
 int32_t ServerIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int key, unsigned char *buf, uint32_t len)
@@ -119,11 +118,7 @@ int32_t ServerIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int 
         return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->GetNodeKeyInfo(pkgName, networkId, key, buf, len);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "GetNodeKeyInfo get node key info failed");
-        return ret;
-    }
-    return SOFTBUS_OK;
+    return ret;
 }
 
 int32_t ServerIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag)
@@ -133,11 +128,7 @@ int32_t ServerIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkI
         return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->SetNodeDataChangeFlag(pkgName, networkId, dataChangeFlag);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "SetNodeDataChangeFlag get node key info failed");
-        return ret;
-    }
-    return SOFTBUS_OK;
+    return ret;
 }
 
 int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen)
@@ -147,11 +138,7 @@ int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeL
         return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->JoinLNN(pkgName, addr, addrTypeLen);
-    if (ret != 0) {
-        LNN_LOGE(LNN_EVENT, "JoinLNN failed");
-        return ret;
-    }
-    return SOFTBUS_OK;
+    return ret;
 }
 
 int32_t ServerIpcLeaveLNN(const char *pkgName, const char *networkId)
@@ -161,11 +148,7 @@ int32_t ServerIpcLeaveLNN(const char *pkgName, const char *networkId)
         return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->LeaveLNN(pkgName, networkId);
-    if (ret != 0) {
-        LNN_LOGE(LNN_EVENT, "LeaveLNN failed");
-        return ret;
-    }
-    return SOFTBUS_OK;
+    return ret;
 }
 
 int32_t ServerIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy, int32_t period)
@@ -175,11 +158,7 @@ int32_t ServerIpcStartTimeSync(const char *pkgName, const char *targetNetworkId,
         return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->StartTimeSync(pkgName, targetNetworkId, accuracy, period);
-    if (ret != 0) {
-        LNN_LOGE(LNN_EVENT, "StartTimeSync failed");
-        return ret;
-    }
-    return SOFTBUS_OK;
+    return ret;
 }
 
 int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
@@ -189,11 +168,7 @@ int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
         return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->StopTimeSync(pkgName, targetNetworkId);
-    if (ret != 0) {
-        LNN_LOGE(LNN_EVENT, "StopTimeSync failed");
-        return ret;
-    }
-    return SOFTBUS_OK;
+    return ret;
 }
 
 int32_t ServerIpcPublishLNN(const char *pkgName, const PublishInfo *info)
@@ -203,11 +178,7 @@ int32_t ServerIpcPublishLNN(const char *pkgName, const PublishInfo *info)
         return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->PublishLNN(pkgName, info);
-    if (ret != 0) {
-        LNN_LOGE(LNN_EVENT, "PublishLNN failed");
-        return ret;
-    }
-    return SOFTBUS_OK;
+    return ret;
 }
 
 int32_t ServerIpcStopPublishLNN(const char *pkgName, int32_t publishId)
@@ -217,11 +188,7 @@ int32_t ServerIpcStopPublishLNN(const char *pkgName, int32_t publishId)
         return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->StopPublishLNN(pkgName, publishId);
-    if (ret != 0) {
-        LNN_LOGE(LNN_EVENT, "StopPublishLNN failed");
-        return ret;
-    }
-    return SOFTBUS_OK;
+    return ret;
 }
 
 int32_t ServerIpcRefreshLNN(const char *pkgName, const SubscribeInfo *info)
@@ -231,9 +198,6 @@ int32_t ServerIpcRefreshLNN(const char *pkgName, const SubscribeInfo *info)
         return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->RefreshLNN(pkgName, info);
-    if (ret != 0) {
-        LNN_LOGE(LNN_EVENT, "RefreshLNN failed");
-    }
     return ret;
 }
 
@@ -244,9 +208,6 @@ int32_t ServerIpcStopRefreshLNN(const char *pkgName, int32_t refreshId)
         return SOFTBUS_SERVER_NOT_INIT;
     }
     int ret = g_serverProxy->StopRefreshLNN(pkgName, refreshId);
-    if (ret != 0) {
-        LNN_LOGE(LNN_EVENT, "StopRefreshLNN failed");
-    }
     return ret;
 }
 

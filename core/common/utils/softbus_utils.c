@@ -26,7 +26,6 @@
 #include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 
 
 #define MAC_BIT_ZERO 0
@@ -213,7 +212,7 @@ int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned
     uint32_t inLen)
 {
     if ((outBuf == NULL) || (inBuf == NULL) || (outBufLen < HEXIFY_LEN(inLen))) {
-        COMM_LOGE(COMM_UTILS, "outBufLen=%d inLen=%d", outBufLen, inLen);
+        COMM_LOGD(COMM_UTILS, "outBufLen=%d inLen=%d", outBufLen, inLen);
         return SOFTBUS_ERR;
     }
 
@@ -487,16 +486,12 @@ void SignalingMsgPrint(const char *distinguish, unsigned char *data, unsigned ch
         COMM_LOGE(COMM_UTILS, "intercept signaling msg faile");
         return;
     }
-    if (module == SOFTBUS_LOG_DISC) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "[signaling]:%s, len:%d, data:%s",
-                   distinguish, dataLen, signalingMsgBuf);
-    }
 }
 
 void MacInstead(char *data, uint32_t length, char delimiter)
 {
     if (length > MAX_MAC_LEN) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "MacInstead len is invalid");
+        COMM_LOGE(COMM_UTILS, "MacInstead len is invalid");
         return;
     }
     int delimiterCnt = 0;
@@ -516,7 +511,7 @@ void MacInstead(char *data, uint32_t length, char delimiter)
 void IpInstead(char *data, uint32_t length, char delimiter)
 {
     if (length > MAX_IP_LEN) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "IpInstead len is invalid");
+        COMM_LOGE(COMM_UTILS, "IpInstead len is invalid");
         return;
     }
     int delimiterCnt = 0;
@@ -536,7 +531,7 @@ void IpInstead(char *data, uint32_t length, char delimiter)
 void IdInstead(char *data, uint32_t length)
 {
     if (length > MAX_ID_LEN) {
-        SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_ERROR, "IdInstead len is invalid");
+        COMM_LOGE(COMM_UTILS, "IdInstead len is invalid");
         return;
     }
     uint32_t halfLen = length / GET_ID_HALF_LEN;

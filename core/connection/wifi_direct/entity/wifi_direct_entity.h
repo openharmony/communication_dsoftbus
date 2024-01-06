@@ -30,10 +30,13 @@ struct WifiDirectConnectParams {
     bool isProxyEnable;
 
     char remoteMac[MAC_ADDR_STR_LEN];
+    char remoteUuid[UUID_BUF_LEN];
     char groupConfig[GROUP_CONFIG_STR_LEN];
     char gcIp[IP_ADDR_STR_LEN];
     char interface[IF_NAME_LEN];
     struct LinkInfo *linkInfo;
+
+    char *extension;
 };
 
 enum EntityState {
@@ -57,11 +60,12 @@ enum EntityOperationEvent {
     ENTITY_EVENT_HML_REMOVE_COMPLETE,
     ENTITY_EVENT_HML_NOTIFY_COMPLETE,
     ENTITY_EVENT_HML_JOIN_COMPLETE,
+    ENTITY_EVENT_HML_SWITCH_NOTIFY_COMPLETE,
     ENTITY_EVENT_HML_END,
 };
 
 struct EntityListener {
-    void (*onOperationComplete)(int32_t event);
+    void (*onOperationComplete)(int32_t event, void *data);
     void (*onEntityChanged)(enum EntityState state);
 };
 
@@ -72,6 +76,7 @@ struct EntityListener {
     int32_t (*reuseLink)(struct WifiDirectConnectParams *params);                     \
     int32_t (*disconnect)(struct WifiDirectConnectParams *params);                    \
     int32_t (*destroyServer)(struct WifiDirectConnectParams *params);                 \
+    int32_t (*switchNotify)(struct WifiDirectConnectParams *params);                  \
     void (*notifyNewClientJoining)(struct WifiDirectConnectParams *params);           \
     void (*notifyNewClientJoinFail)(struct WifiDirectConnectParams *params);          \
     void (*cancelNewClientJoining)(struct WifiDirectConnectParams *params);           \

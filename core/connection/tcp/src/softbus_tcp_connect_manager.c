@@ -16,9 +16,8 @@
 #include "softbus_tcp_connect_manager.h"
 
 #include <stdio.h>
-#include <arpa/inet.h>
-
 #include "securec.h"
+
 #include "conn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
@@ -200,6 +199,14 @@ static void DelTcpConnNode(uint32_t connectionId)
     return;
 }
 
+static bool IsEnhanceP2pModuleId(ListenerModule moduleId)
+{
+    if (moduleId >= AUTH_ENHANCED_P2P_START && moduleId <= AUTH_ENHANCED_P2P_END) {
+        return true;
+    }
+    return false;
+}
+
 static int32_t TcpOnConnectEvent(ListenerModule module, int32_t cfd, const ConnectOption *clientAddr)
 {
     if (cfd < 0 || clientAddr == NULL) {
@@ -207,7 +214,7 @@ static int32_t TcpOnConnectEvent(ListenerModule module, int32_t cfd, const Conne
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (module == AUTH_P2P) {
+    if (module == AUTH_P2P || IsEnhanceP2pModuleId(module)) {
         CONN_LOGI(CONN_COMMON, "recv p2p conned %d", cfd);
         if (ConnSetTcpKeepAlive(cfd, AUTH_P2P_KEEP_ALIVE_TIME) != 0) {
             CONN_LOGE(CONN_COMMON, "set keepalive fail");

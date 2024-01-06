@@ -14,8 +14,6 @@
  */
 
 #include <securec.h>
-#include <stdint.h>
-#include <stdio.h>
 #include <string.h>
 
 #include "anonymizer.h"
@@ -37,12 +35,8 @@
 #include "lnn_physical_subnet_manager.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_thread.h"
-#include "softbus_adapter_timer.h"
 #include "softbus_common.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
-#include "softbus_feature_config.h"
 #include "softbus_protocol_def.h"
 #include "trans_tcp_direct_listener.h"
 
@@ -60,34 +54,21 @@ static bool g_heartbeatEnable = false;
 static int32_t GetWifiServiceIpAddr(const char *ifName, char *ip, uint32_t size)
 {
     if (ifName == NULL || ip == NULL || size == 0) {
+        LNN_LOGE(LNN_BUILDER, "invalid parameter");
         return SOFTBUS_ERR;
     }
-    if (strcmp(ifName, WLAN_IFNAME) != 0) {
-        LNN_LOGE(LNN_BUILDER, "ifname isn't expected, ifname=%s", ifName);
-        return SOFTBUS_ERR;
-    }
-    if (GetWlanIpv4Addr(ip, size) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "get wlan ip addr from wifiservice fail");
-        return SOFTBUS_ERR;
-    }
-    if (strnlen(ip, size) == 0 || strnlen(ip, size) == size) {
-        LNN_LOGE(LNN_BUILDER, "get ipAddr fail, from wifiService");
-        return SOFTBUS_ERR;
-    }
-    if (strcmp(ip, LNN_LOOPBACK_IP) == 0 || strcmp(ip, "") == 0 || strcmp(ip, "0.0.0.0") == 0) {
-        return SOFTBUS_ERR;
-    }
+    (void)GetWlanIpv4Addr(ip, size);
     return SOFTBUS_OK;
 }
 
 static int32_t GetIpAddrFromNetlink(const char *ifName, char *ip, uint32_t size)
 {
     if (GetNetworkIpByIfName(ifName, ip, NULL, size) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "get network IP by ifName fail");
         return SOFTBUS_ERR;
     }
 
     if (strcmp(ip, LNN_LOOPBACK_IP) == 0 || strcmp(ip, "") == 0 || strcmp(ip, "0.0.0.0") == 0) {
+        LNN_LOGE(LNN_BUILDER, "invalid ip addr");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -97,7 +78,7 @@ static bool GetIpProcess(const char *ifName, char *ip, uint32_t size)
 {
     if (GetIpAddrFromNetlink(ifName, ip, size) != SOFTBUS_OK &&
         GetWifiServiceIpAddr(ifName, ip, size) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "get network IP by ifName fail");
+        LNN_LOGD(LNN_BUILDER, "get network IP by ifName fail");
         return false;
     }
     return true;
@@ -145,7 +126,6 @@ static int32_t GetAvailableIpAddr(const char *ifName, char *ip, uint32_t size)
 
 static int32_t OpenAuthPort(void)
 {
-    int32_t port;
     char localIp[MAX_ADDR_LEN] = {0};
 
     int32_t authPort;
@@ -158,7 +138,7 @@ static int32_t OpenAuthPort(void)
         LNN_LOGE(LNN_BUILDER, "get local ip failed");
         return SOFTBUS_ERR;
     }
-    port = AuthStartListening(AUTH_LINK_TYPE_WIFI, localIp, authPort);
+    int32_t port = AuthStartListening(AUTH_LINK_TYPE_WIFI, localIp, authPort);
     if (port < 0) {
         LNN_LOGE(LNN_BUILDER, "AuthStartListening failed");
         return SOFTBUS_ERR;
@@ -322,7 +302,7 @@ static int32_t SetLocalIpInfo(const char *ipAddr, const char *ifName)
 static void LeaveOldIpNetwork(const char *ifCurrentName)
 {
     ConnectionAddrType type = CONNECTION_ADDR_MAX;
-    bool addrType[CONNECTION_ADDR_MAX] = {0};
+    bool addrType[CONNECTION_ADDR_MAX] = {false};
 
     if (LnnGetAddrTypeByIfName(ifCurrentName, &type) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "LnnGetAddrTypeByIfName failed ifName=%s", ifCurrentName);
@@ -480,9 +460,8 @@ static IpSubnetManagerEvent GetIpEventInOther(LnnPhysicalSubnet *subnet)
     int32_t ret = GetAvailableIpAddr(subnet->ifName, currentIfAddress, sizeof(currentIfAddress));
     if (ret == SOFTBUS_OK) {
         return IP_SUBNET_MANAGER_EVENT_IF_READY;
-    } else {
-        return subnet->status == LNN_SUBNET_SHUTDOWN ? IP_SUBNET_MANAGER_EVENT_IF_DOWN : IP_SUBNET_MANAGER_EVENT_MAX;
     }
+    return subnet->status == LNN_SUBNET_SHUTDOWN ? IP_SUBNET_MANAGER_EVENT_IF_DOWN : IP_SUBNET_MANAGER_EVENT_MAX;
 }
 
 static IpSubnetManagerEvent GetIpEventInRunning(LnnPhysicalSubnet *subnet)
@@ -608,6 +587,26 @@ static void IpAddrChangeEventHandler(const LnnEventBasicInfo *info)
     }
 }
 
+static bool WifiStateChangeWifiOrAp(const SoftBusWifiState wifiState)
+{
+    switch (wifiState) {
+        case SOFTBUS_WIFI_CONNECTED:
+            g_wifiConnected = true;
+            return true;
+        case SOFTBUS_WIFI_DISCONNECTED:
+            g_wifiConnected = false;
+            return true;
+        case SOFTBUS_AP_ENABLED:
+            g_apEnabled = true;
+            return true;
+        case SOFTBUS_AP_DISABLED:
+            g_apEnabled = false;
+            return true;
+        default:
+            return false;
+    }
+}
+
 static bool IsValidLocalIp(void)
 {
     char localIp[MAX_ADDR_LEN] = {0};
@@ -631,32 +630,16 @@ static void WifiStateChangeEventHandler(const LnnEventBasicInfo *info)
         LNN_LOGI(LNN_BUILDER, "g_heartbeatEnable not enable");
         return;
     }
-    bool beforeConnected = false;
-    bool currentConnected = false;
-    bool isValidIp = false;
     const LnnMonitorWlanStateChangedEvent *event = (const LnnMonitorWlanStateChangedEvent *)info;
     SoftBusWifiState wifiState = (SoftBusWifiState)event->status;
     LNN_LOGI(LNN_BUILDER, "wifi state change wifiState=%d", wifiState);
-    beforeConnected = g_apEnabled || g_wifiConnected;
-    switch (wifiState) {
-        case SOFTBUS_WIFI_CONNECTED:
-            g_wifiConnected = true;
-            break;
-        case SOFTBUS_WIFI_DISCONNECTED:
-            g_wifiConnected = false;
-            break;
-        case SOFTBUS_AP_ENABLED:
-             g_apEnabled = true;
-            break;
-        case SOFTBUS_AP_DISABLED:
-            g_apEnabled = false;
-            break;
-        default:
-            LNN_LOGI(LNN_BUILDER, "not interest wifi event");
-            return;
+    bool beforeConnected = g_apEnabled || g_wifiConnected;
+    if (!WifiStateChangeWifiOrAp(wifiState)) {
+        LNN_LOGI(LNN_BUILDER, "not interest wifi event");
+        return;
     }
-    currentConnected = g_apEnabled || g_wifiConnected;
-    isValidIp = IsValidLocalIp();
+    bool currentConnected = g_apEnabled || g_wifiConnected;
+    bool isValidIp = IsValidLocalIp();
     LNN_LOGI(LNN_BUILDER,
         "wifi or ap wifiConnected=%d, apEnabled=%d, beforeConnected=%d, currentConnected=%d, isValidIp=%d",
         g_wifiConnected, g_apEnabled, beforeConnected, currentConnected, isValidIp);
@@ -674,7 +657,9 @@ static void WifiStateChangeEventHandler(const LnnEventBasicInfo *info)
             *status = IP_SUBNET_MANAGER_EVENT_IF_DOWN;
             (void)LnnVisitNetif(NotifyWlanAddressChanged, status);
         }
+        return;
     }
+    SoftBusFree(status);
 }
 
 int32_t LnnInitIpProtocol(struct LnnProtocolManager *self)

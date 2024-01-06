@@ -65,12 +65,11 @@ static IServerDiscInnerCallback g_discInnerCb = {
 
 static bool IsRepeatJoinLNNRequest(const char *pkgName, int32_t callingPid, const ConnectionAddr *addr)
 {
-    std::vector<JoinLnnRequestInfo *>::iterator iter;
-    for (iter = g_joinLNNRequestInfo.begin(); iter != g_joinLNNRequestInfo.end(); ++iter) {
-        if (strncmp(pkgName, (*iter)->pkgName, strlen(pkgName)) != 0 || (*iter)->pid != callingPid) {
+    for (const auto &iter : g_joinLNNRequestInfo) {
+        if (strncmp(pkgName, (*iter).pkgName, strlen(pkgName)) != 0 || (*iter).pid != callingPid) {
             continue;
         }
-        if (LnnIsSameConnectionAddr(addr, &(*iter)->addr, false)) {
+        if (LnnIsSameConnectionAddr(addr, &(*iter).addr, false)) {
             return true;
         }
     }
@@ -96,12 +95,11 @@ static int32_t AddJoinLNNInfo(const char *pkgName, int32_t callingPid, const Con
 
 static bool IsRepeatLeaveLNNRequest(const char *pkgName, int32_t callingPid, const char *networkId)
 {
-    std::vector<LeaveLnnRequestInfo *>::iterator iter;
-    for (iter = g_leaveLNNRequestInfo.begin(); iter != g_leaveLNNRequestInfo.end(); ++iter) {
-        if (strncmp(pkgName, (*iter)->pkgName, strlen(pkgName)) != 0 || (*iter)->pid != callingPid) {
+    for (const auto &iter : g_leaveLNNRequestInfo) {
+        if (strncmp(pkgName, (*iter).pkgName, strlen(pkgName)) != 0 || (*iter).pid != callingPid) {
             continue;
         }
-        if (strncmp(networkId, (*iter)->networkId, strlen(networkId)) == 0) {
+        if (strncmp(networkId, (*iter).networkId, strlen(networkId)) == 0) {
             return true;
         }
     }
@@ -135,18 +133,15 @@ static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *devic
     DeviceInfo newDevice;
     if (memcpy_s(&newDevice, sizeof(DeviceInfo), device, sizeof(DeviceInfo)) != EOK) {
         LNN_LOGE(LNN_EVENT, "copy new device info error");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     std::lock_guard<std::mutex> autoLock(g_lock);
-    std::vector<RefreshLnnRequestInfo *>::iterator iter;
-    for (iter = g_refreshLnnRequestInfo.begin(); iter != g_refreshLnnRequestInfo.end();) {
-        if (strncmp(pkgName, (*iter)->pkgName, strlen(pkgName)) != 0) {
-            ++iter;
+    for (const auto &iter : g_refreshLnnRequestInfo) {
+        if (strncmp(pkgName, (*iter).pkgName, strlen(pkgName)) != 0) {
             continue;
         }
         LnnRefreshDeviceOnlineStateAndDevIdInfo(pkgName, &newDevice, addtions);
-        (void)ClientOnRefreshDeviceFound(pkgName, (*iter)->pid, &newDevice, sizeof(DeviceInfo));
-        ++iter;
+        (void)ClientOnRefreshDeviceFound(pkgName, (*iter).pid, &newDevice, sizeof(DeviceInfo));
     }
     return SOFTBUS_OK;
 }
@@ -228,9 +223,9 @@ int32_t LnnIpcStartTimeSync(const char *pkgName,  int32_t callingPid, const char
     return LnnStartTimeSync(pkgName, callingPid, targetNetworkId, (TimeSyncAccuracy)accuracy, (TimeSyncPeriod)period);
 }
 
-int32_t LnnIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
+int32_t LnnIpcStopTimeSync(const char *pkgName, const char *targetNetworkId, int32_t callingPid)
 {
-    return LnnStopTimeSync(pkgName, targetNetworkId);
+    return LnnStopTimeSync(pkgName, targetNetworkId, callingPid);
 }
 
 int32_t LnnIpcPublishLNN(const char *pkgName, const PublishInfo *info)
@@ -245,10 +240,9 @@ int32_t LnnIpcStopPublishLNN(const char *pkgName, int32_t publishId)
 
 static bool IsRepeatRfreshLnnRequest(const char *pkgName, int32_t callingPid)
 {
-    std::vector<RefreshLnnRequestInfo *>::iterator iter;
     std::lock_guard<std::mutex> autoLock(g_lock);
-    for (iter = g_refreshLnnRequestInfo.begin(); iter != g_refreshLnnRequestInfo.end(); ++iter) {
-        if (strncmp(pkgName, (*iter)->pkgName, strlen(pkgName)) == 0 && (*iter)->pid == callingPid) {
+    for (const auto &iter : g_refreshLnnRequestInfo) {
+        if (strncmp(pkgName, (*iter).pkgName, strlen(pkgName)) == 0 && (*iter).pid == callingPid) {
             return true;
         }
     }

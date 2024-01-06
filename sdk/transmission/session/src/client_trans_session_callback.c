@@ -134,7 +134,7 @@ static int32_t TransOnBindSuccess(int32_t sessionId, const ISocketListener *sock
     return SOFTBUS_OK;
 }
 
-int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel, SessionType flag)
+NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel, SessionType flag)
 {
     if ((sessionName == NULL) || (channel == NULL)) {
         TRANS_LOGW(TRANS_SDK, "Invalid param");
@@ -184,7 +184,7 @@ int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel
     return SOFTBUS_OK;
 }
 
-int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
+NO_SANITIZE("cfi") int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
 {
     TRANS_LOGI(TRANS_SDK, "channelId=%d, channelType=%d", channelId, channelType);
     int32_t sessionId = INVALID_SESSION_ID;
@@ -200,7 +200,7 @@ int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t channelType, int32_t
     return SOFTBUS_OK;
 }
 
-int32_t TransOnSessionClosed(int32_t channelId, int32_t channelType, ShutdownReason reason)
+NO_SANITIZE("cfi") int32_t TransOnSessionClosed(int32_t channelId, int32_t channelType, ShutdownReason reason)
 {
     TRANS_LOGI(TRANS_SDK, "channelId=%d, channelType=%d", channelId, channelType);
     int32_t sessionId = INVALID_SESSION_ID;
@@ -242,7 +242,8 @@ static int32_t ProcessReceivedFileData(int32_t sessionId, int32_t channelId, con
     return SOFTBUS_OK;
 }
 
-int32_t TransOnDataReceived(int32_t channelId, int32_t channelType, const void *data, uint32_t len, SessionPktType type)
+NO_SANITIZE("cfi") int32_t TransOnDataReceived(int32_t channelId, int32_t channelType,
+    const void *data, uint32_t len, SessionPktType type)
 {
     int32_t sessionId;
     SessionListenerAdapter sessionCallback;
@@ -289,7 +290,7 @@ int32_t TransOnDataReceived(int32_t channelId, int32_t channelType, const void *
     return SOFTBUS_OK;
 }
 
-int32_t TransOnOnStreamRecevied(int32_t channelId, int32_t channelType,
+NO_SANITIZE("cfi") int32_t TransOnOnStreamRecevied(int32_t channelId, int32_t channelType,
     const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
 {
     int32_t sessionId;
@@ -315,8 +316,8 @@ int32_t TransOnOnStreamRecevied(int32_t channelId, int32_t channelType,
     return SOFTBUS_OK;
 }
 
-int32_t TransOnQosEvent(int32_t channelId, int32_t channelType, int32_t eventId, int32_t tvCount,
-    const QosTv *tvList)
+NO_SANITIZE("cfi") int32_t TransOnQosEvent(int32_t channelId, int32_t channelType, int32_t eventId,
+    int32_t tvCount, const QosTv *tvList)
 {
     int32_t sessionId;
     ISessionListener listener = {0};

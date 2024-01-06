@@ -24,22 +24,18 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_assign.h"
 #include "lnn_lane_common.h"
-#include "lnn_lane_def.h"
 #include "lnn_lane_interface.h"
 #include "lnn_lane_link.h"
 #include "lnn_lane_model.h"
 #include "lnn_lane_query.h"
 #include "lnn_lane_score.h"
-#include "lnn_lane_select.h"
 #include "lnn_log.h"
 #include "lnn_trans_lane.h"
 #include "lnn_lane_reliability.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_utils.h"
 
 #define ID_SHIFT_STEP 5
 #define ID_CALC_MASK 0x1F
@@ -118,7 +114,6 @@ static void DestroyLaneId(uint32_t laneId)
     uint32_t idIndex = randomId - 1;
     g_laneIdBitmap[idIndex >> ID_SHIFT_STEP] &= (~(IS_USED << (idIndex & ID_CALC_MASK)));
     Unlock();
-    return;
 }
 
 static bool CheckListener(const ILaneIdStateListener *listener)
@@ -349,7 +344,7 @@ int32_t LnnFreeLane(uint32_t laneId)
     if (g_laneObject[laneType] == NULL) {
         return SOFTBUS_ERR;
     }
-    LNN_LOGD(LNN_LANE, "free, laneId=%u", laneId);
+    LNN_LOGD(LNN_LANE, "free lane enter, laneId=%u", laneId);
     int32_t result = g_laneObject[laneType]->FreeLane(laneId);
     if (result != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "freeLane fail, result:%d", result);

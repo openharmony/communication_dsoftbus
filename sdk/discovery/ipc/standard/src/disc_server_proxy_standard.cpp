@@ -30,20 +30,23 @@ static sptr<IRemoteObject> GetSystemAbility()
     MessageParcel data;
 
     if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        DISC_LOGE(DISC_SDK, "Write Interface token failed!");
         return nullptr;
     }
-
-    data.WriteInt32(SOFTBUS_SERVER_SA_ID_INNER);
+    if (!data.WriteInt32(SOFTBUS_SERVER_SA_ID_INNER)) {
+        DISC_LOGE(DISC_SDK, "Write inner failed!");
+        return nullptr;
+    }
     MessageParcel reply;
     MessageOption option;
     sptr<IRemoteObject> samgr = IPCSkeleton::GetContextObject();
     if (samgr == nullptr) {
-        DISC_LOGE(DISC_CONTROL, "Get samgr failed!");
+        DISC_LOGE(DISC_SDK, "samgr failed!");
         return nullptr;
     }
     int32_t err = samgr->SendRequest(g_getSystemAbilityId, data, reply, option);
     if (err != 0) {
-        DISC_LOGE(DISC_CONTROL, "Get GetSystemAbility failed!");
+        DISC_LOGE(DISC_SDK, "GetSystemAbility failed!");
         return nullptr;
     }
     return reply.ReadRemoteObject();
@@ -59,18 +62,45 @@ int32_t DiscServerProxy::StartDiscovery(const char *pkgName, const SubscribeInfo
 
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        DISC_LOGE(DISC_ABILITY, "StartDiscovery write InterfaceToken failed!");
+        DISC_LOGE(DISC_SDK, "StartDiscovery faceToken failed!");
         return SOFTBUS_ERR;
     }
-    data.WriteCString(pkgName);
-    data.WriteInt32(subInfo->subscribeId);
-    data.WriteInt32(subInfo->mode);
-    data.WriteInt32(subInfo->medium);
-    data.WriteInt32(subInfo->freq);
-    data.WriteBool(subInfo->isSameAccount);
-    data.WriteBool(subInfo->isWakeRemote);
-    data.WriteCString(subInfo->capability);
-    data.WriteUint32(subInfo->dataLen);
+    if (!data.WriteCString(pkgName)) {
+        DISC_LOGE(DISC_SDK, "StartDiscovery pkgName failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(subInfo->subscribeId)) {
+        DISC_LOGE(DISC_SDK, "StartDiscovery subInfo subscribeId failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(subInfo->mode)) {
+        DISC_LOGE(DISC_SDK, "StartDiscovery subInfo mode failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(subInfo->medium)) {
+        DISC_LOGE(DISC_SDK, "StartDiscovery subInfo medium failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(subInfo->freq)) {
+        DISC_LOGE(DISC_SDK, "StartDiscovery subInfo freq failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteBool(subInfo->isSameAccount)) {
+        DISC_LOGE(DISC_SDK, "StartDiscovery subInfo isSameAccount failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteBool(subInfo->isWakeRemote)) {
+        DISC_LOGE(DISC_SDK, "StartDiscovery subInfo isWakeRemote failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteCString(subInfo->capability)) {
+        DISC_LOGE(DISC_SDK, "StartDiscovery subInfo capability failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteUint32(subInfo->dataLen)) {
+        DISC_LOGE(DISC_SDK, "StartDiscovery subInfo dataLen failed!");
+        return SOFTBUS_ERR;
+    }
     if (subInfo->dataLen != 0) {
         data.WriteCString((char *)subInfo->capabilityData);
     }
@@ -78,13 +108,13 @@ int32_t DiscServerProxy::StartDiscovery(const char *pkgName, const SubscribeInfo
     MessageOption option;
     int32_t err = remote->SendRequest(SERVER_START_DISCOVERY, data, reply, option);
     if (err != 0) {
-        DISC_LOGE(DISC_ABILITY, "StartDiscovery send request failed!");
+        DISC_LOGE(DISC_SDK, "StartDiscovery send request failed!");
         return SOFTBUS_ERR;
     }
     int32_t serverRet = 0;
     int32_t ret = reply.ReadInt32(serverRet);
     if (!ret) {
-        DISC_LOGE(DISC_ABILITY, "StartDiscovery read serverRet failed!");
+        DISC_LOGE(DISC_SDK, "StartDiscovery read serverRet failed!");
         return SOFTBUS_ERR;
     }
     return serverRet;
@@ -100,24 +130,30 @@ int32_t DiscServerProxy::StopDiscovery(const char *pkgName, int subscribeId)
 
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        DISC_LOGE(DISC_ABILITY, "StopDiscovery write InterfaceToken failed!");
+        DISC_LOGE(DISC_SDK, "StopDiscovery failed!");
         return SOFTBUS_ERR;
     }
-    data.WriteCString(pkgName);
-    data.WriteInt32(subscribeId);
+    if (!data.WriteCString(pkgName)) {
+        DISC_LOGE(DISC_SDK, "StopDiscovery pkgName failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(subscribeId)) {
+        DISC_LOGE(DISC_SDK, "StopDiscovery subscribeId failed!");
+        return SOFTBUS_ERR;
+    }
 
     MessageParcel reply;
     MessageOption option;
     int32_t err = remote->SendRequest(SERVER_STOP_DISCOVERY, data, reply, option);
     DISC_LOGI(DISC_ABILITY, "StopDiscovery send request ret = %d!", err);
     if (err != 0) {
-        DISC_LOGE(DISC_ABILITY, "StopDiscovery send request failed!");
+        DISC_LOGE(DISC_SDK, "StopDiscovery send request failed!");
         return SOFTBUS_ERR;
     }
     int32_t serverRet = 0;
     int32_t ret = reply.ReadInt32(serverRet);
     if (!ret) {
-        DISC_LOGE(DISC_ABILITY, "StopDiscovery read serverRet failed!");
+        DISC_LOGE(DISC_SDK, "StopDiscovery read serverRet failed!");
         return SOFTBUS_ERR;
     }
     return serverRet;
@@ -133,16 +169,37 @@ int32_t DiscServerProxy::PublishService(const char *pkgName, const PublishInfo *
 
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        DISC_LOGE(DISC_ABILITY, "PublishService write InterfaceToken failed!");
+        DISC_LOGE(DISC_SDK, "PublishService write InterfaceToken failed!");
         return SOFTBUS_ERR;
     }
-    data.WriteCString(pkgName);
-    data.WriteInt32(pubInfo->publishId);
-    data.WriteInt32(pubInfo->mode);
-    data.WriteInt32(pubInfo->medium);
-    data.WriteInt32(pubInfo->freq);
-    data.WriteCString(pubInfo->capability);
-    data.WriteUint32(pubInfo->dataLen);
+    if (!data.WriteCString(pkgName)) {
+        DISC_LOGE(DISC_SDK, "PublishService write pkgName failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(pubInfo->publishId)) {
+        DISC_LOGE(DISC_SDK, "PublishService write publishId failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(pubInfo->mode)) {
+        DISC_LOGE(DISC_SDK, "PublishService write mode failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(pubInfo->medium)) {
+        DISC_LOGE(DISC_SDK, "PublishService write medium failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(pubInfo->freq)) {
+        DISC_LOGE(DISC_SDK, "PublishService write freq failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteCString(pubInfo->capability)) {
+        DISC_LOGE(DISC_SDK, "PublishService write capability failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteUint32(pubInfo->dataLen)) {
+        DISC_LOGE(DISC_SDK, "PublishService write dataLen failed!");
+        return SOFTBUS_ERR;
+    }
     if (pubInfo->dataLen != 0) {
         data.WriteCString((char *)pubInfo->capabilityData);
     }
@@ -151,13 +208,13 @@ int32_t DiscServerProxy::PublishService(const char *pkgName, const PublishInfo *
     int32_t err = remote->SendRequest(SERVER_PUBLISH_SERVICE, data, reply, option);
     DISC_LOGI(DISC_ABILITY, "PublishService send request ret = %d!", err);
     if (err != 0) {
-        DISC_LOGE(DISC_ABILITY, "PublishService send request failed!");
+        DISC_LOGE(DISC_SDK, "PublishService send request failed!");
         return SOFTBUS_ERR;
     }
     int32_t serverRet = 0;
     int32_t ret = reply.ReadInt32(serverRet);
     if (!ret) {
-        DISC_LOGE(DISC_ABILITY, "PublishService read serverRet failed!");
+        DISC_LOGE(DISC_SDK, "PublishService read serverRet failed!");
         return SOFTBUS_ERR;
     }
     return serverRet;
@@ -173,24 +230,30 @@ int32_t DiscServerProxy::UnPublishService(const char *pkgName, int publishId)
 
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        DISC_LOGE(DISC_ABILITY, "UnPublishService write InterfaceToken failed!");
+        DISC_LOGE(DISC_SDK, "UnPublishService failed!");
         return SOFTBUS_ERR;
     }
-    data.WriteCString(pkgName);
-    data.WriteInt32(publishId);
+    if (!data.WriteCString(pkgName)) {
+        DISC_LOGE(DISC_SDK, "UnPublishService pkgName failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(publishId)) {
+        DISC_LOGE(DISC_SDK, "UnPublishService publishId failed!");
+        return SOFTBUS_ERR;
+    }
 
     MessageParcel reply;
     MessageOption option;
     int32_t err = remote->SendRequest(SERVER_UNPUBLISH_SERVICE, data, reply, option);
-    DISC_LOGI(DISC_ABILITY, "UnPublishService send request ret = %d!", err);
+    DISC_LOGI(DISC_SDK, "UnPublishService send request ret = %d!", err);
     if (err != 0) {
-        DISC_LOGE(DISC_ABILITY, "UnPublishService send request failed!");
+        DISC_LOGE(DISC_SDK, "UnPublishService send request failed!");
         return SOFTBUS_ERR;
     }
     int32_t serverRet = 0;
     int32_t ret = reply.ReadInt32(serverRet);
     if (!ret) {
-        DISC_LOGE(DISC_ABILITY, "UnPublishService read serverRet failed!");
+        DISC_LOGE(DISC_SDK, "UnPublishService read serverRet failed!");
         return SOFTBUS_ERR;
     }
     return serverRet;

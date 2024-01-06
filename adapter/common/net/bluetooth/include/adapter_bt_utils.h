@@ -32,9 +32,14 @@ extern "C" {
 
 int32_t BleOhosStatusToSoftBus(BtStatus status);
 
+typedef struct {
+    BtStatus btStatus;
+    SoftBusBtStatus softBusBtStatus;
+} OhosStatusToSoftBus;
+
 #ifdef __cplusplus
 #if __cplusplus
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-#endif
+#endif /* ADAPTER_BT_UTILS_H */

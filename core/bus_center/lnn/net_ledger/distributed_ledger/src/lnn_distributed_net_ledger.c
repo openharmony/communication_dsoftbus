@@ -23,6 +23,7 @@
 
 #include "lnn_event.h"
 #include "anonymizer.h"
+#include "auth_deviceprofile.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_fast_offline.h"
 #include "lnn_lane_info.h"
@@ -51,6 +52,7 @@
 #define BLE_ADV_LOST_TIME 5000
 #define LONG_TO_STRING_MAX_LEN 21
 #define LNN_COMMON_LEN_64 8
+#define DEVICE_TYPE_SIZE_LEN 3
 #define SOFTBUS_BUSCENTER_DUMP_REMOTEDEVICEINFO "remote_device_info"
 
 #define RETURN_IF_GET_NODE_VALID(networkId, buf, info)                                \
@@ -97,6 +99,18 @@ typedef struct {
     SoftBusMutex lock;
     DistributedLedgerStatus status;
 } DistributedNetLedger;
+
+typedef struct {
+    bool isOffline;
+    bool oldWifiFlag;
+    bool oldBrFlag;
+    bool oldBleFlag;
+    bool isChanged;
+    bool isMigrateEvent;
+    bool isNetworkChanged;
+    bool newWifiFlag;
+    bool newBleBrFlag;
+} NodeInfoAbility;
 
 static DistributedNetLedger g_distributedNetLedger;
 
@@ -292,7 +306,7 @@ static int32_t ConvertNodeInfoToBasicInfo(const NodeInfo *info, NodeBasicInfo *b
     return SOFTBUS_OK;
 }
 
-static bool isMetaNode(NodeInfo *info)
+static bool IsMetaNode(NodeInfo *info)
 {
     if (info == NULL) {
         return false;
@@ -321,7 +335,7 @@ static int32_t GetDLOnlineNodeNumLocked(int32_t *infoNum, bool isNeedMeta)
                 (*infoNum)++;
             }
         } else {
-            if (LnnIsNodeOnline(info) || isMetaNode(info)) {
+            if (LnnIsNodeOnline(info) || IsMetaNode(info)) {
                 (*infoNum)++;
             }
         }
@@ -354,7 +368,7 @@ static int32_t FillDLOnlineNodeInfoLocked(NodeBasicInfo *info, int32_t infoNum, 
                 ++i;
             }
         } else {
-            if (LnnIsNodeOnline(nodeInfo) || isMetaNode(nodeInfo)) {
+            if (LnnIsNodeOnline(nodeInfo) || IsMetaNode(nodeInfo)) {
                 ConvertNodeInfoToBasicInfo(nodeInfo, info + i);
                 ++i;
             }
@@ -441,7 +455,6 @@ NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type)
             LNN_LOGE(LNN_LEDGER, "type error");
         }
     }
-    LNN_LOGE(LNN_LEDGER, "get node info by id failed");
     LnnMapDeinitIterator(it);
     return NULL;
 }
@@ -555,6 +568,7 @@ bool LnnGetOnlineStateById(const char *id, IdCategory type)
     }
     NodeInfo *nodeInfo = LnnGetNodeInfoById(id, type);
     if (nodeInfo == NULL) {
+        LNN_LOGI(LNN_LEDGER, "can not find target node");
         (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return state;
     }
@@ -853,7 +867,7 @@ static int32_t DlGetNetCap(const char *networkId, void *buf, uint32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
-    *((int32_t *)buf) = info->netCapacity;
+    *((int32_t *)buf) = (int32_t)info->netCapacity;
     return SOFTBUS_OK;
 }
 
@@ -875,7 +889,7 @@ static int32_t DlGetNetType(const char *networkId, void *buf, uint32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
-    *((int32_t *)buf) = info->discoveryType;
+    *((int32_t *)buf) = (int32_t)info->discoveryType;
     return SOFTBUS_OK;
 }
 
@@ -1076,7 +1090,7 @@ static int32_t DlGetNodeDataChangeFlag(const char *networkId, void *buf, uint32_
         LNN_LOGE(LNN_LEDGER, "node is offline");
         return SOFTBUS_NETWORK_NODE_OFFLINE;
     }
-    *((int16_t *)buf) = LnnGetDataChangeFlag(info);
+    *((int16_t *)buf) = (int16_t)LnnGetDataChangeFlag(info);
     return SOFTBUS_OK;
 }
 
@@ -1087,7 +1101,7 @@ static int32_t DlGetNodeTlvNegoFlag(const char *networkId, void *buf, uint32_t l
         return SOFTBUS_INVALID_PARAM;
     }
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
-    if (!LnnIsNodeOnline(info)) {
+    if (!LnnIsNodeOnline(info) && !IsMetaNode(info)) {
         LNN_LOGE(LNN_LEDGER, "node is offline");
         return SOFTBUS_NETWORK_NODE_OFFLINE;
     }
@@ -1337,12 +1351,30 @@ int32_t LnnUpdateNetworkId(const NodeInfo *newInfo)
     return SOFTBUS_OK;
 }
 
+static void UpdateNewNodeAccountHash(NodeInfo *info)
+{
+    char accountString[LONG_TO_STRING_MAX_LEN] = {0};
+    if (sprintf_s(accountString, LONG_TO_STRING_MAX_LEN, "%" PRId64, info->accountId) == -1) {
+        LNN_LOGE(LNN_LEDGER, "long to string fail");
+        return;
+    }
+    LNN_LOGD(LNN_LEDGER, "account string:%s", accountString);
+    int ret = SoftBusGenerateStrHash((uint8_t *)accountString,
+        strlen(accountString), (unsigned char *)info->accountHash);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "account hash fail, ret:%d", ret);
+        return;
+    }
+}
+
 int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
 {
     const char *udid = NULL;
     DoubleHashMap *map = NULL;
     NodeInfo *oldInfo = NULL;
 
+    UpdateNewNodeAccountHash(newInfo);
+    UpdateDpSameAccount(newInfo->accountHash, newInfo->deviceInfo.deviceUdid);
     udid = LnnGetDeviceUdid(newInfo);
     map = &g_distributedNetLedger.distributedInfo;
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
@@ -1367,6 +1399,12 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_STRCPY_ERR;
     }
+    if (memcpy_s(oldInfo->accountHash, SHA_256_HASH_LEN, newInfo->accountHash, SHA_256_HASH_LEN) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "copy account hash failed");
+        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return SOFTBUS_ERR;
+    }
+    oldInfo->accountId = newInfo->accountId;
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return SOFTBUS_OK;
 }
@@ -1434,22 +1472,6 @@ int32_t LnnDeleteMetaInfo(const char *udid, ConnectionAddrType type)
     LNN_LOGI(LNN_LEDGER, "LnnDeleteMetaInfo success");
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return SOFTBUS_OK;
-}
-
-static void UpdateNewNodeAccountHash(NodeInfo *info)
-{
-    char accountString[LONG_TO_STRING_MAX_LEN] = {0};
-    if (sprintf_s(accountString, LONG_TO_STRING_MAX_LEN, "%" PRId64, info->accountId) == -1) {
-        LNN_LOGE(LNN_LEDGER, "long to string fail");
-        return;
-    }
-    LNN_LOGD(LNN_LEDGER, "account string:%s", accountString);
-    int ret = SoftBusGenerateStrHash((uint8_t *)accountString,
-        strlen(accountString), (unsigned char *)info->accountHash);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "account hash fail,ret:%d", ret);
-        return;
-    }
 }
 
 static void OnlinePreventBrConnection(const NodeInfo *info)
@@ -1615,6 +1637,99 @@ static void NodeOnlineProc(NodeInfo *info)
     BleDirectlyOnlineProc(&nodeInfo);
 }
 
+static void GetNodeInfoDiscovery(NodeInfo *oldInfo, NodeInfo *info, NodeInfoAbility *infoAbility)
+{
+    infoAbility->isOffline = true;
+    infoAbility->oldWifiFlag = false;
+    infoAbility->oldBrFlag = false;
+    infoAbility->oldBleFlag = false;
+    infoAbility->isChanged = false;
+    infoAbility->isMigrateEvent = false;
+    infoAbility->isNetworkChanged = false;
+    infoAbility->newWifiFlag = LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI);
+    infoAbility->newBleBrFlag =
+        LnnHasDiscoveryType(info, DISCOVERY_TYPE_BLE) || LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR);
+    if (oldInfo != NULL) {
+        info->metaInfo = oldInfo->metaInfo;
+    }
+    if (oldInfo != NULL && LnnIsNodeOnline(oldInfo)) {
+        LNN_LOGI(LNN_LEDGER, "addOnlineNode find online node");
+        infoAbility->isOffline = false;
+        infoAbility->isChanged = IsNetworkIdChanged(info, oldInfo);
+        infoAbility->oldWifiFlag = LnnHasDiscoveryType(oldInfo, DISCOVERY_TYPE_WIFI);
+        infoAbility->oldBleFlag = LnnHasDiscoveryType(oldInfo, DISCOVERY_TYPE_BLE);
+        infoAbility->oldBrFlag = LnnHasDiscoveryType(oldInfo, DISCOVERY_TYPE_BR);
+        if ((infoAbility->oldBleFlag || infoAbility->oldBrFlag) && infoAbility->newWifiFlag) {
+            NewWifiDiscovered(oldInfo, info);
+            infoAbility->isNetworkChanged = true;
+        } else if (infoAbility->oldWifiFlag && infoAbility->newBleBrFlag) {
+            RetainOfflineCode(oldInfo, info);
+            NewBrBleDiscovered(oldInfo, info);
+            infoAbility->isNetworkChanged = true;
+        } else {
+            RetainOfflineCode(oldInfo, info);
+            LNN_LOGE(LNN_LEDGER, "flag error");
+        }
+        if ((infoAbility->oldBleFlag || infoAbility->oldBrFlag) && !infoAbility->oldWifiFlag &&
+            infoAbility->newWifiFlag) {
+            infoAbility->isMigrateEvent = true;
+        }
+        // update lnn discovery type
+        info->discoveryType |= oldInfo->discoveryType;
+        info->heartbeatTimestamp = oldInfo->heartbeatTimestamp;
+        MergeLnnInfo(oldInfo, info);
+        UpdateProfile(info);
+    }
+}
+
+static void DfxRecordLnnAddOnlineNodeEnd(NodeInfo *info, int32_t onlineNum, int32_t reason)
+{
+    LnnEventExtra extra = { 0 };
+    LnnEventExtraInit(&extra);
+    extra.onlineNum = onlineNum;
+    extra.errcode = reason;
+    extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+    if (info == NULL) {
+        LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, extra);
+        return;
+    }
+
+    char netWorkId[NETWORK_ID_BUF_LEN] = { 0 };
+    if (strncpy_s(netWorkId, NETWORK_ID_BUF_LEN, info->networkId, NETWORK_ID_BUF_LEN - 1) == EOK) {
+        extra.peerNetworkId = netWorkId;
+    }
+    char udidData[UDID_BUF_LEN] = { 0 };
+    if (strncpy_s(udidData, UDID_BUF_LEN, info->deviceInfo.deviceUdid, UDID_BUF_LEN - 1) == EOK) {
+        extra.peerUdid = udidData;
+    }
+    char bleMacAddr[MAC_LEN] = { 0 };
+    if (strncpy_s(bleMacAddr, MAC_LEN, info->deviceInfo.deviceUdid, MAC_LEN - 1) == EOK) {
+        extra.peerBleMac = bleMacAddr;
+    }
+    char deviceType[DEVICE_TYPE_SIZE_LEN + 1] = { 0 };
+    if (snprintf_s(deviceType, DEVICE_TYPE_SIZE_LEN + 1, DEVICE_TYPE_SIZE_LEN, "%03X",
+        info->deviceInfo.deviceTypeId) >= 0) {
+        extra.peerDeviceType = deviceType;
+    }
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, extra);
+}
+
+static void DfxRecordLnnSetNodeOfflineEnd(const char *udid, int32_t onlineNum, int32_t reason)
+{
+    LnnEventExtra extra = { 0 };
+    LnnEventExtraInit(&extra);
+    extra.onlineNum = onlineNum;
+    extra.errcode = reason;
+    extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+
+    char udidData[UDID_BUF_LEN] = { 0 };
+    if (udid != NULL && strnlen(udid, UDID_BUF_LEN) != UDID_BUF_LEN && strncpy_s(udidData,
+        UDID_BUF_LEN, udid, UDID_BUF_LEN - 1) == EOK) {
+        extra.peerUdid = udidData;
+    }
+    LNN_EVENT(EVENT_SCENE_LEAVE_LNN, EVENT_STAGE_LEAVE_LNN, extra);
+}
+
 ReportCategory LnnAddOnlineNode(NodeInfo *info)
 {
     // judge map
@@ -1622,62 +1737,20 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
     if (info == NULL) {
         return REPORT_NONE;
     }
-    const char *udid = NULL;
-    DoubleHashMap *map = NULL;
-    NodeInfo *oldInfo = NULL;
-    bool isOffline = true;
-    bool oldWifiFlag = false;
-    bool oldBrFlag = false;
-    bool oldBleFlag = false;
-    bool isChanged = false;
-    bool isMigrateEvent = false;
-    bool isNetworkChanged = false;
-    bool newWifiFlag = LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI);
-    bool newBleBrFlag = LnnHasDiscoveryType(info, DISCOVERY_TYPE_BLE)
-        || LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR);
     if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BR)) {
         LNN_LOGI(LNN_LEDGER, "DiscoveryType = BR.");
-        AddCnnCode(&g_distributedNetLedger.cnnCode.connectionCode, info->uuid, DISCOVERY_TYPE_BR,
-            info->authSeqNum);
+        AddCnnCode(&g_distributedNetLedger.cnnCode.connectionCode, info->uuid, DISCOVERY_TYPE_BR, info->authSeqNum);
     }
 
-    udid = LnnGetDeviceUdid(info);
-    map = &g_distributedNetLedger.distributedInfo;
+    NodeInfoAbility infoAbility;
+    const char *udid = LnnGetDeviceUdid(info);
+    DoubleHashMap *map = &g_distributedNetLedger.distributedInfo;
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail!");
         return REPORT_NONE;
     }
-    oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
-    if (oldInfo != NULL) {
-        info->metaInfo = oldInfo->metaInfo;
-    }
-    if (oldInfo != NULL && LnnIsNodeOnline(oldInfo)) {
-        LNN_LOGI(LNN_LEDGER, "addOnlineNode find online node");
-        isOffline = false;
-        isChanged = IsNetworkIdChanged(info, oldInfo);
-        oldWifiFlag = LnnHasDiscoveryType(oldInfo, DISCOVERY_TYPE_WIFI);
-        oldBleFlag = LnnHasDiscoveryType(oldInfo, DISCOVERY_TYPE_BLE);
-        oldBrFlag = LnnHasDiscoveryType(oldInfo, DISCOVERY_TYPE_BR);
-        if ((oldBleFlag || oldBrFlag) && newWifiFlag) {
-            NewWifiDiscovered(oldInfo, info);
-            isNetworkChanged = true;
-        } else if (oldWifiFlag && newBleBrFlag) {
-            RetainOfflineCode(oldInfo, info);
-            NewBrBleDiscovered(oldInfo, info);
-            isNetworkChanged = true;
-        } else {
-            RetainOfflineCode(oldInfo, info);
-            LNN_LOGE(LNN_LEDGER, "flag error");
-        }
-        if ((oldBleFlag || oldBrFlag) && !oldWifiFlag && newWifiFlag) {
-            isMigrateEvent = true;
-        }
-        // update lnn discovery type
-        info->discoveryType |= oldInfo->discoveryType;
-        info->heartbeatTimeStamp = oldInfo->heartbeatTimeStamp;
-        MergeLnnInfo(oldInfo, info);
-        UpdateProfile(info);
-    }
+    NodeInfo *oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
+    GetNodeInfoDiscovery(oldInfo, info, &infoAbility);
     LnnSetNodeConnStatus(info, STATUS_ONLINE);
     LnnSetAuthTypeValue(&info->AuthTypeValue, ONLINE_HICHAIN);
     UpdateNewNodeAccountHash(info);
@@ -1687,23 +1760,22 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
     }
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     NodeOnlineProc(info);
-    if (isNetworkChanged) {
+    UpdateDpSameAccount(info->accountHash, info->deviceInfo.deviceUdid);
+    if (infoAbility.isNetworkChanged) {
         UpdateNetworkInfo(info->deviceInfo.deviceUdid);
     }
-    if (isOffline) {
-        if (!oldWifiFlag && !newWifiFlag && newBleBrFlag) {
+    if (infoAbility.isOffline) {
+        if (!infoAbility.oldWifiFlag && !infoAbility.newWifiFlag && infoAbility.newBleBrFlag) {
             OnlinePreventBrConnection(info);
         }
         InsertToProfile(info);
-        LnnEventExtra lnnEventExtra = { .result = EVENT_STAGE_RESULT_OK,
-            .onlineNum = (int32_t)MapGetSize(&map->udidMap) };
-        LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, lnnEventExtra);
+        DfxRecordLnnAddOnlineNodeEnd(info, (int32_t)MapGetSize(&map->udidMap), SOFTBUS_OK);
         return REPORT_ONLINE;
     }
-    if (isMigrateEvent) {
+    if (infoAbility.isMigrateEvent) {
         NotifyMigrateUpgrade(info);
     }
-    if (isChanged) {
+    if (infoAbility.isChanged) {
         return REPORT_CHANGE;
     }
     return REPORT_NONE;
@@ -1844,8 +1916,7 @@ ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int3
         return REPORT_NONE;
     }
     LnnCleanNodeInfo(info);
-    LnnEventExtra lnnEventExtra = { .result = EVENT_STAGE_RESULT_OK, .onlineNum = (int32_t)MapGetSize(&map->udidMap) };
-    LNN_EVENT(EVENT_SCENE_LEAVE_LNN, EVENT_STAGE_LEAVE_LNN_END, lnnEventExtra);
+    DfxRecordLnnSetNodeOfflineEnd(udid, (int32_t)MapGetSize(&map->udidMap), SOFTBUS_OK);
     return REPORT_OFFLINE;
 }
 
@@ -2570,7 +2641,7 @@ int32_t LnnGetDLHeartbeatTimestamp(const char *networkId, uint64_t *timestamp)
         (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_NOT_FIND;
     }
-    *timestamp = nodeInfo->heartbeatTimeStamp;
+    *timestamp = nodeInfo->heartbeatTimestamp;
     (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return SOFTBUS_OK;
 }
@@ -2587,7 +2658,7 @@ int32_t LnnSetDLHeartbeatTimestamp(const char *networkId, uint64_t timestamp)
         (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_NOT_FIND;
     }
-    nodeInfo->heartbeatTimeStamp = timestamp;
+    nodeInfo->heartbeatTimestamp = timestamp;
     (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return SOFTBUS_OK;
 }
@@ -2608,7 +2679,7 @@ int32_t LnnGetDLBleDirectTimestamp(const char *networkId, uint64_t *timestamp)
         (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_NOT_FIND;
     }
-    *timestamp = nodeInfo->bleDirectTimeStamp;
+    *timestamp = nodeInfo->bleDirectTimestamp;
     (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return SOFTBUS_OK;
 }
@@ -2625,7 +2696,7 @@ int32_t LnnSetDLBleDirectTimestamp(const char *networkId, uint64_t timestamp)
         (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_NOT_FIND;
     }
-    nodeInfo->bleDirectTimeStamp = timestamp;
+    nodeInfo->bleDirectTimestamp = timestamp;
     (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return SOFTBUS_OK;
 }
@@ -2853,7 +2924,6 @@ const NodeInfo *LnnGetOnlineNodeByUdidHash(const char *recvUdidHash)
         return NULL;
     }
     if (info == NULL || infoNum == 0) {
-        LNN_LOGI(LNN_LEDGER, "none online node");
         if (info != NULL) {
             SoftBusFree(info);
         }
@@ -2897,8 +2967,10 @@ void LnnRefreshDeviceOnlineStateAndDevIdInfo(const char *pkgName, DeviceInfo *de
 {
     (void)pkgName;
     RefreshDeviceOnlineStateInfo(device, addtions);
-    LNN_LOGI(LNN_LEDGER, "device found by medium=%d, udidhash=%s, online status=%d",
-        addtions->medium, device->devId, device->isOnline);
+    if (device->devId[0] != '\0') {
+        LNN_LOGI(LNN_LEDGER, "device found by medium=%d, udidhash=%s, online status=%d",
+            addtions->medium, device->devId, device->isOnline);
+    }
 }
 
 bool LnnSetDLWifiDirectAddr(const char *networkId, const char *addr)
