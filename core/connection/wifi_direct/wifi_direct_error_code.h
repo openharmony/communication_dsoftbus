@@ -312,6 +312,9 @@ enum WifiDirectErrorCode {
     /* Error code representing switch notify failed */
     ERROR_HML_RENEGO_TO_P2P = ERROR_BASE - 6610,
 
+    /* Error code representing waiting hand shake timeout */
+    ERROR_HML_WAITING_HANDSHAKE_TIMEOUT = ERROR_BASE - 6611,
+
     /* Error code representing end position of wifi direct errors */
     ERROR_WIFI_DIRECT_END = ERROR_BASE - 6999,
 };
