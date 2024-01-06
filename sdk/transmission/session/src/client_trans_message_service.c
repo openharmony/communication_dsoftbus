@@ -75,13 +75,6 @@ int SendBytes(int sessionId, const void *data, unsigned int len)
     if (ClientGetChannelBySessionId(sessionId, &channelId, &channelType, &isEnable) != SOFTBUS_OK) {
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
     }
-    if (isEnable != true) {
-        return SOFTBUS_TRANS_SESSION_NO_ENABLE;
-    }
-
-    if (CheckSendLen(channelId, channelType, len, BUSINESS_TYPE_BYTE) != SOFTBUS_OK) {
-        return SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT;
-    }
 
     int32_t businessType = BUSINESS_TYPE_BUTT;
     if (ClientGetChannelBusinessTypeBySessionId(sessionId, &businessType) != SOFTBUS_OK) {
@@ -93,6 +86,14 @@ int SendBytes(int sessionId, const void *data, unsigned int len)
         return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
     }
 
+    int checkRet = CheckSendLen(channelId, channelType, len, BUSINESS_TYPE_BYTE);
+    if (checkRet != SOFTBUS_OK) {
+        return checkRet;
+    }
+
+    if (!isEnable) {
+        return SOFTBUS_TRANS_SESSION_NO_ENABLE;
+    }
     return ClientTransChannelSendBytes(channelId, channelType, data, len);
 }
 
@@ -115,13 +116,6 @@ int SendMessage(int sessionId, const void *data, unsigned int len)
     if (ClientGetChannelBySessionId(sessionId, &channelId, &channelType, &isEnable) != SOFTBUS_OK) {
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
     }
-    if (isEnable != true) {
-        return SOFTBUS_TRANS_SESSION_NO_ENABLE;
-    }
-
-    if (CheckSendLen(channelId, channelType, len, BUSINESS_TYPE_MESSAGE) != SOFTBUS_OK) {
-        return SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT;
-    }
 
     int32_t businessType = BUSINESS_TYPE_BUTT;
     if (ClientGetChannelBusinessTypeBySessionId(sessionId, &businessType) != SOFTBUS_OK) {
@@ -133,6 +127,14 @@ int SendMessage(int sessionId, const void *data, unsigned int len)
         return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
     }
 
+    int checkRet = CheckSendLen(channelId, channelType, len, BUSINESS_TYPE_MESSAGE);
+    if (checkRet != SOFTBUS_OK) {
+        return checkRet;
+    }
+
+    if (!isEnable) {
+        return SOFTBUS_TRANS_SESSION_NO_ENABLE;
+    }
     return ClientTransChannelSendMessage(channelId, channelType, data, len);
 }
 
@@ -157,9 +159,6 @@ int SendStream(int sessionId, const StreamData *data, const StreamData *ext, con
     if (type != CHANNEL_TYPE_UDP) {
         return SOFTBUS_TRANS_STREAM_ONLY_UDP_CHANNEL;
     }
-    if (isEnable != true) {
-        return SOFTBUS_TRANS_SESSION_NO_ENABLE;
-    }
 
     int32_t businessType = BUSINESS_TYPE_BUTT;
     if (ClientGetChannelBusinessTypeBySessionId(sessionId, &businessType) != SOFTBUS_OK) {
@@ -170,6 +169,9 @@ int SendStream(int sessionId, const StreamData *data, const StreamData *ext, con
         return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
     }
 
+    if (!isEnable) {
+        return SOFTBUS_TRANS_SESSION_NO_ENABLE;
+    }
     return ClientTransChannelSendStream(channelId, type, data, ext, param);
 }
 
@@ -216,7 +218,7 @@ int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], ui
         return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
     }
 
-    if (isEnable != true) {
+    if (!isEnable) {
         SoftBusFree(fileSchemaListener);
         return SOFTBUS_TRANS_SESSION_NO_ENABLE;
     }
