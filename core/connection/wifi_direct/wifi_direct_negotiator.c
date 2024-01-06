@@ -250,6 +250,28 @@ static bool IsMessageNeedPending(struct WifiDirectNegotiator *self, struct WifiD
     return processor->isMessageNeedPending(cmdType, msg);
 }
 
+static bool ProcessHandShake(enum WifiDirectNegotiateCmdType cmd, struct WifiDirectNegotiateChannel *channel,
+                             struct NegotiateMessage *msg)
+{
+    if (cmd != CMD_CTRL_CHL_HANDSHAKE) {
+        return false;
+    }
+
+    struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
+    if (self->currentProcessor != NULL && self->currentProcessor->processHandShake != NULL) {
+        self->currentProcessor->processHandShake(msg);
+    } else {
+        SaveP2pChannel(channel, msg);
+        CONN_LOGI(CONN_WIFI_DIRECT, "ignore CMD_CTRL_CHL_HANDSHAKE");
+    }
+    struct WifiDirectNegotiateChannel *msgChannel = msg->getPointer(msg, NM_KEY_NEGO_CHANNEL, NULL);
+    if (msgChannel != NULL) {
+        msgChannel->destructor(msgChannel);
+    }
+    NegotiateMessageDelete(msg);
+    return true;
+}
+
 static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *channel, const uint8_t *data, size_t len)
 {
     struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
@@ -265,14 +287,7 @@ static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *ch
         return;
     }
     enum WifiDirectNegotiateCmdType cmdType = GetNegotiateCmdType(msg);
-    if (cmdType == CMD_CTRL_CHL_HANDSHAKE) {
-        SaveP2pChannel(channel, msg);
-        CONN_LOGI(CONN_WIFI_DIRECT, "ignore CMD_CTRL_CHL_HANDSHAKE");
-        struct WifiDirectNegotiateChannel *msgChannel = msg->getPointer(msg, NM_KEY_NEGO_CHANNEL, NULL);
-        if (msgChannel != NULL) {
-            msgChannel->destructor(msgChannel);
-        }
-        NegotiateMessageDelete(msg);
+    if (ProcessHandShake(cmdType, channel, msg)) {
         return;
     }
 
