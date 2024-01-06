@@ -912,13 +912,22 @@ void AuthManagerSetAuthFailed(int64_t authSeq, const AuthSessionInfo *info, int3
     AUTH_LOGE(
         AUTH_FSM, "SetAuthFailed: authSeq=%" PRId64 ", requestId=%u, reason=%d", authSeq, info->requestId, reason);
     AuthManager *auth = GetAuthManagerByConnInfo(&info->connInfo, info->isServer);
-    if (auth != NULL && auth->hasAuthPassed) {
+    bool needDisconnect = true;
+    if (auth != NULL && reason == SOFTBUS_AUTH_TIMEOUT && info->connInfo.type == AUTH_LINK_TYPE_WIFI
+        && info->connInfo.info.ipInfo.port != auth->connInfo.info.ipInfo.port) {
+        AUTH_LOGE(AUTH_FSM, "auth manager port change, connType=%d, side=%s",
+            info->connInfo.type, GetAuthSideStr(info->isServer));
+        needDisconnect = false;
+    }
+    if (auth != NULL && auth->hasAuthPassed && needDisconnect) {
         AUTH_LOGE(AUTH_FSM, "update session key fail, authId=%" PRId64, auth->authId);
         NotifyDeviceDisconnect(auth->authId);
     }
     DelAuthManager(auth, false);
 
-    RemoveAuthManagerByConnInfo(&info->connInfo, info->isServer);
+    if (needDisconnect) {
+        RemoveAuthManagerByConnInfo(&info->connInfo, info->isServer);
+    }
     ReportAuthRequestFailed(info->requestId, reason);
     if (GetConnType(info->connId) == AUTH_LINK_TYPE_WIFI) {
         DisconnectAuthDevice((uint64_t *)&info->connId);
