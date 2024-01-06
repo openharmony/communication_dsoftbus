@@ -30,6 +30,7 @@
 #include "lnn_async_callback_utils.h"
 #include "lnn_app_bind_interface.h"
 #include "lnn_decision_db.h"
+#include "lnn_event.h"
 #include "lnn_feature_capability.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_net_builder.h"
@@ -702,6 +703,16 @@ static int32_t RetryRegTrustDataChangeListener()
     return SOFTBUS_ERR;
 }
 
+static void DfxRecordLnnAuthStart(const AuthConnInfo *connInfo)
+{
+    LnnEventExtra extra = { 0 };
+    LnnEventExtraInit(&extra);
+    if (connInfo != NULL) {
+        extra.lnnType = connInfo->type;
+    }
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH, extra);
+}
+
 static int32_t StartVerifyDevice(uint32_t requestId, const AuthConnInfo *connInfo, const AuthVerifyCallback *verifyCb,
     const AuthConnCallback *connCb, bool isFastAuth)
 {
@@ -1002,8 +1013,23 @@ static void HandleBleConnectResult(uint32_t requestId, int64_t authId, uint64_t 
     } while (FindAuthRequestByConnInfo(&request.connInfo, &request) == SOFTBUS_OK);
 }
 
+static void DfxRecordLnnConnectEnd(uint64_t connId, const AuthConnInfo *connInfo, int32_t reason)
+{
+    LnnEventExtra extra = { 0 };
+    LnnEventExtraInit(&extra);
+    extra.connectionId = (int32_t)connId;
+    extra.errcode = reason;
+    extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+
+    if (connInfo != NULL) {
+        extra.lnnType = connInfo->type;
+    }
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_CONNECTION, extra);
+}
+
 static void OnConnectResult(uint32_t requestId, uint64_t connId, int32_t result, const AuthConnInfo *connInfo)
 {
+    DfxRecordLnnConnectEnd(connId, connInfo, result);
     AUTH_LOGI(AUTH_CONN, "OnConnectResult: requestId=%u, result=%d", requestId, result);
     AuthRequest request;
     if (GetAuthRequest(requestId, &request) != SOFTBUS_OK) {
@@ -1270,6 +1296,7 @@ uint32_t AuthGenRequestId(void)
 int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
     const AuthVerifyCallback *callback, bool isFastAuth)
 {
+    DfxRecordLnnAuthStart(connInfo);
     if (connInfo == NULL || !CheckVerifyCallback(callback)) {
         AUTH_LOGE(AUTH_CONN, "invalid param");
         return SOFTBUS_INVALID_PARAM;
