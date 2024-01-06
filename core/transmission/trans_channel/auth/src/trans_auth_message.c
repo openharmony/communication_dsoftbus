@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,6 @@
 #include "trans_auth_message.h"
 
 #include "securec.h"
-#include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
@@ -40,7 +39,7 @@ int32_t TransAuthChannelMsgPack(cJSON *msg, const AppInfo *appInfo)
         !AddStringToJsonObject(msg, "SRC_BUS_NAME", appInfo->myData.sessionName) ||
         !AddStringToJsonObject(msg, "DST_BUS_NAME", appInfo->peerData.sessionName) ||
         !AddStringToJsonObject(msg, "REQ_ID", appInfo->reqId) ||
-        !AddNumberToJsonObject(msg, "MTU_SIZE", appInfo->myData.dataConfig)) {
+        !AddNumberToJsonObject(msg, "MTU_SIZE", (int)appInfo->myData.dataConfig)) {
         TRANS_LOGE(TRANS_SVC, "failed");
         return SOFTBUS_PARSE_JSON_ERR;
     }
@@ -81,7 +80,6 @@ int32_t TransAuthChannelMsgUnpack(const char *msg, AppInfo *appInfo, int32_t len
 int32_t TransAuthChannelErrorPack(int32_t errcode, const char *errMsg, char *cJsonStr,
     int32_t maxLen)
 {
-    (void)maxLen;
     if (errMsg == NULL || cJsonStr == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
@@ -97,16 +95,14 @@ int32_t TransAuthChannelErrorPack(int32_t errcode, const char *errMsg, char *cJs
         return SOFTBUS_PARSE_JSON_ERR;
     }
     char *data = cJSON_PrintUnformatted(obj);
+    cJSON_Delete(obj);
     if (data == NULL) {
-        cJSON_Delete(obj);
         return SOFTBUS_PARSE_JSON_ERR;
     }
-    if (memcpy_s(cJsonStr, ERR_MSG_MAX_LEN, data, strlen(data)) != EOK) {
-        cJSON_Delete(obj);
+    if (memcpy_s(cJsonStr, maxLen, data, strlen(data)) != EOK) {
         cJSON_free(data);
         return SOFTBUS_MEM_ERR;
     }
-    cJSON_Delete(obj);
     cJSON_free(data);
     return SOFTBUS_OK;
 }

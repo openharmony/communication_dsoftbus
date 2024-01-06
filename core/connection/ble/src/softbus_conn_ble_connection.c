@@ -20,9 +20,7 @@
 #include "conn_log.h"
 #include "bus_center_manager.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_conn_ble_client.h"
 #include "softbus_conn_ble_manager.h"
-#include "softbus_conn_ble_server.h"
 #include "softbus_conn_ble_trans.h"
 #include "softbus_conn_common.h"
 #include "softbus_datahead_transform.h"
@@ -98,7 +96,6 @@ ConnBleConnection *ConnBleCreateConnection(
         return NULL;
     }
     connection->sequence = 0;
-
     connection->buffer.seq = 0;
     connection->buffer.total = 0;
     ListInit(&connection->buffer.packets);
@@ -117,7 +114,6 @@ ConnBleConnection *ConnBleCreateConnection(
     // ble connection need exchange connection reference even if establish first time, so the init value is 0
     connection->connectionRc = 0;
     connection->objectRc = 1;
-
     connection->retrySearchServiceCnt = 0;
 
     SoftBusBtUuid serviceUuid = {
@@ -299,7 +295,7 @@ int32_t ConnBleDisconnectNow(ConnBleConnection *connection, enum ConnBleDisconne
     const BleUnifyInterface *interface = ConnBleGetUnifyInterface(connection->protocol);
     CONN_CHECK_AND_RETURN_RET_LOGW(interface != NULL, SOFTBUS_ERR, CONN_BLE,
         "ble connection disconnect failed, protocol not support");
-    CONN_LOGW(CONN_BLE, "receive ble disconnect now, connId=%u, side=%d, reason=%d", connection->connectionId,
+    CONN_LOGI(CONN_BLE, "receive ble disconnect now, connId=%u, side=%d, reason=%d", connection->connectionId,
         connection->side, reason);
     ConnRemoveMsgFromLooper(
         &g_bleConnectionAsyncHandler, MSG_CONNECTION_IDLE_DISCONNECT_TIMEOUT, connection->connectionId, 0, NULL);
@@ -310,7 +306,6 @@ int32_t ConnBleDisconnectNow(ConnBleConnection *connection, enum ConnBleDisconne
     }
     return interface->bleServerDisconnect(connection);
 }
-
 
 static void OnDisconnectedDataFinished(uint32_t connectionId, int32_t error)
 {
@@ -329,6 +324,7 @@ int32_t ConnBleUpdateConnectionRc(ConnBleConnection *connection, uint16_t challe
 {
     int32_t status = SoftBusMutexLock(&connection->lock);
     if (status != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BLE, "Lock faild, err=%d", status);
         return SOFTBUS_LOCK_ERR;
     }
     int32_t underlayerHandle = connection->underlayerHandle;
@@ -441,7 +437,7 @@ int32_t ConnBleOnReferenceRequest(ConnBleConnection *connection, const cJSON *js
     uint32_t dataLen = 0;
     int64_t seq = ConnBlePackCtlMessage(ctx, &data, &dataLen);
     if (seq < 0) {
-        CONN_LOGI(CONN_BLE, "connId=%u, pack reply message faild, err=%d", connection->connectionId, (int32_t)seq);
+        CONN_LOGE(CONN_BLE, "connId=%u, pack reply message faild, err=%d", connection->connectionId, (int32_t)seq);
         return (int32_t)seq;
     }
     status = ConnBlePostBytesInner(connection->connectionId, data, dataLen, 0, flag, MODULE_CONNECTION, seq, NULL);
@@ -487,7 +483,8 @@ void ConnBleRefreshIdleTimeout(ConnBleConnection *connection)
 
 void ConnBleInnerComplementDeviceId(ConnBleConnection *connection)
 {
-    if (connection->protocol == BLE_GATT || strlen(connection->udid) != 0) {
+    if (strlen(connection->udid) != 0) {
+        CONN_LOGD(CONN_BLE, "udid already exist");
         return;
     }
     if (strlen(connection->networkId) == 0) {
@@ -811,9 +808,8 @@ void BleOnServerStarted(BleProtocolType protocol, int32_t status)
         "on server start event handle failed, try to lock failed");
     g_serverCoordination.status[protocol] = status;
     g_serverCoordination.actual =
-        (g_serverCoordination.status[BLE_GATT] == SOFTBUS_OK && g_serverCoordination.status[BLE_COC] == SOFTBUS_OK ?
-                BLE_SERVER_STATE_STARTED :
-                BLE_SERVER_STATE_STOPPED);
+        ((g_serverCoordination.status[BLE_GATT] == SOFTBUS_OK) && (g_serverCoordination.status[BLE_COC] == SOFTBUS_OK ?
+                BLE_SERVER_STATE_STARTED : BLE_SERVER_STATE_STOPPED));
     if (g_serverCoordination.expect != g_serverCoordination.actual) {
         ConnPostMsgToLooper(&g_bleConnectionAsyncHandler, MSG_CONNECTION_RETRY_SERVER_STATE_CONSISTENT, 0, 0, NULL,
             RETRY_SERVER_STATE_CONSISTENT_MILLIS);
@@ -830,8 +826,7 @@ void BleOnServerClosed(BleProtocolType protocol, int32_t status)
     g_serverCoordination.status[protocol] = status;
     g_serverCoordination.actual =
         (g_serverCoordination.status[BLE_GATT] == SOFTBUS_OK && g_serverCoordination.status[BLE_COC] == SOFTBUS_OK ?
-                BLE_SERVER_STATE_STOPPED :
-                BLE_SERVER_STATE_STARTED);
+                BLE_SERVER_STATE_STOPPED : BLE_SERVER_STATE_STARTED);
     if (g_serverCoordination.expect != g_serverCoordination.actual) {
         ConnPostMsgToLooper(&g_bleConnectionAsyncHandler, MSG_CONNECTION_RETRY_SERVER_STATE_CONSISTENT, 0, 0, NULL,
             RETRY_SERVER_STATE_CONSISTENT_MILLIS);

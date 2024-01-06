@@ -26,7 +26,8 @@ extern "C" {
     static inline bool ConnAssigner##fieldName(                                                               \
         const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param) \
     {                                                                                                         \
-        if (Assigner##type(form->connExtra->field, &param) && CopyString(param->name, eventName)) {           \
+        if (Assigner##type(form->connExtra->field, &param) &&                                                 \
+            CopyString(param->name, eventName, MAX_LENGTH_OF_PARAM_NAME)) {                                   \
             param->t = paramType;                                                                             \
             return true;                                                                                      \
         }                                                                                                     \
@@ -46,10 +47,10 @@ CONN_ASSIGNER(Int32, CostTime, costTime)
 CONN_ASSIGNER(Int32, Rssi, rssi)
 CONN_ASSIGNER(Int32, Load, load)
 CONN_ASSIGNER(Int32, Frequency, frequency)
-CONN_ASSIGNER(String, PeerIp, peerIp)
-CONN_ASSIGNER(String, PeerBrMac, peerBrMac)
-CONN_ASSIGNER(String, PeerBleMac, peerBleMac)
-CONN_ASSIGNER(String, PeerWifiMac, peerWifiMac)
+CONN_ASSIGNER(AnonymizeString, PeerIp, peerIp)
+CONN_ASSIGNER(AnonymizeString, PeerBrMac, peerBrMac)
+CONN_ASSIGNER(AnonymizeString, PeerBleMac, peerBleMac)
+CONN_ASSIGNER(AnonymizeString, PeerWifiMac, peerWifiMac)
 CONN_ASSIGNER(String, PeerPort, peerPort)
 CONN_ASSIGNER(String, CallerPkg, callerPkg)
 CONN_ASSIGNER(String, CalleePkg, calleePkg)
@@ -83,7 +84,8 @@ static HiSysEventParamAssigner g_connAssigners[] = {
     static inline bool ConnAssigner##fieldName(                                                               \
         const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param) \
     {                                                                                                         \
-        if (Assigner##type(form->connAlarmExtra->field, &param) && CopyString(param->name, eventName)) {      \
+        if (Assigner##type(form->connAlarmExtra->field, &param) &&                                            \
+            CopyString(param->name, eventName, MAX_LENGTH_OF_PARAM_NAME)) {                                   \
             param->t = paramType;                                                                             \
             return true;                                                                                      \
         }                                                                                                     \

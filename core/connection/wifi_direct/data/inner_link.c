@@ -43,6 +43,8 @@
 #define IL_TAG_STATE_CHANGE_TIME 16
 #define IL_TAG_DEVICE_ID 17
 #define IL_TAG_AUTH_CONNECTION 18
+#define IL_TAG_LOCAL_PORT 19
+#define IL_TAG_LISTENER_MODULE_ID 20
 
 IC_DECLARE_KEY_PROPERTIES(InnerLink, IL_KEY_MAX) = {
     IC_KEY_PROPERTY(IL_KEY_LINK_TYPE, IL_TAG_CONNECT_TYPE, "CONNECT_TYPE", INT, DUMP_FLAG),
@@ -64,6 +66,8 @@ IC_DECLARE_KEY_PROPERTIES(InnerLink, IL_KEY_MAX) = {
     IC_KEY_PROPERTY(IL_KEY_STATE_CHANGE_TIME, IL_TAG_STATE_CHANGE_TIME, "STATE_CHANGE_TIME", LONG, 0),
     IC_KEY_PROPERTY(IL_KEY_DEVICE_ID, IL_TAG_DEVICE_ID, "DEVICE_ID", STRING, DEVICE_ID_FLAG | DUMP_FLAG),
     IC_KEY_PROPERTY(IL_KEY_NEGO_CHANNEL, IL_TAG_AUTH_CONNECTION, "AUTH_CONNECTION", AUTH_CONNECTION, 0),
+    IC_KEY_PROPERTY(IL_KEY_LOCAL_PORT, IL_TAG_LOCAL_PORT, "LOCAL_PORT", INT, 0),
+    IC_KEY_PROPERTY(IL_KEY_LISTENER_MODULE_ID, IL_TAG_LISTENER_MODULE_ID, "LISTENER_MODULE_ID", INT, 0),
 };
 
 struct LinkIdStruct {
@@ -83,7 +87,7 @@ static size_t GetKeySize(void)
     return IL_KEY_MAX;
 }
 
-static const char* GetContainerName(void)
+static const char *GetContainerName(void)
 {
     return "InnerLink";
 }
@@ -91,7 +95,7 @@ static const char* GetContainerName(void)
 static bool Marshalling(struct InnerLink *self, struct WifiDirectProtocol *protocol)
 {
     for (size_t key = 0; key < IL_KEY_MAX; key++) {
-        if (key == IL_KEY_DEVICE_ID) {
+        if (key == IL_KEY_DEVICE_ID || key == IL_KEY_LOCAL_PORT || key == IL_KEY_LISTENER_MODULE_ID) {
             continue;
         }
 
@@ -425,7 +429,7 @@ void InnerLinkDestructor(struct InnerLink *self)
 }
 
 /* new and delete */
-struct InnerLink* InnerLinkNew(void)
+struct InnerLink *InnerLinkNew(void)
 {
     struct InnerLink *self = SoftBusCalloc(sizeof(*self));
     CONN_CHECK_AND_RETURN_RET_LOGE(self != NULL, NULL, CONN_WIFI_DIRECT, "self is null");
@@ -439,7 +443,7 @@ void InnerLinkDelete(struct InnerLink *self)
     SoftBusFree(self);
 }
 
-struct InnerLink* InnerLinkNewArray(size_t size)
+struct InnerLink *InnerLinkNewArray(size_t size)
 {
     struct InnerLink *self = (struct InnerLink *)SoftBusCalloc(sizeof(*self) * size);
     CONN_CHECK_AND_RETURN_RET_LOGE(self != NULL, NULL, CONN_WIFI_DIRECT, "self is null");

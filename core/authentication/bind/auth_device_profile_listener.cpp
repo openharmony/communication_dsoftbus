@@ -23,7 +23,7 @@ static const uint32_t SOFTBUS_SA_ID = 4700;
 static DeviceProfileChangeListener g_deviceProfileChange = { 0 };
 
 namespace OHOS {
-namespace AuthtoDp {
+namespace AuthToDeviceProfile {
 using namespace OHOS::DistributedDeviceProfile;
 
 AuthDeviceProfileListener::AuthDeviceProfileListener()
@@ -147,7 +147,7 @@ static void RegisterToDpHelper(void)
     int32_t subscribeRes = DistributedDeviceProfileClient::GetInstance().SubscribeDeviceProfile(subscribeInfo);
     AUTH_LOGI(AUTH_INIT, "GetCharacteristicProfile subscribeRes %d", subscribeRes);
 }
-} // namespace AuthtoDp
+} // namespace AuthToDeviceProfile
 } // namespace OHOS
 
 void RegisterToDp(DeviceProfileChangeListener *deviceProfilePara)
@@ -157,5 +157,5 @@ void RegisterToDp(DeviceProfileChangeListener *deviceProfilePara)
         return;
     }
     g_deviceProfileChange = *deviceProfilePara;
-    OHOS::AuthtoDp::RegisterToDpHelper();
+    OHOS::AuthToDeviceProfile::RegisterToDpHelper();
 }

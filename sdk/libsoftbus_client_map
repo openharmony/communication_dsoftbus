@@ -215,6 +215,7 @@
         "TransOnChannelOpenFailed";
         "ProxyChannelSendFile";
         "ClientDeathProcTask";
+        "TransBroadCastReInit";
         "NotifyAuthSuccess";
         "GetPeerPidInner";
         "StartNStackXDFileClient";
@@ -382,6 +383,7 @@
         "ClientGetPeerSocketInfoById";
         "TransSetSocketFileListener";
         "EvaluateQos";
+        "GetMtuSize";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;

@@ -33,6 +33,8 @@ void LnnAlarmInner(int32_t scene, int32_t type, const char *func, int32_t line, 
 void LnnStatsInner(int32_t scene, const char *func, int32_t line, LnnStatsExtra *extra);
 void LnnAuditInner(int32_t scene, const char *func, int32_t line, LnnAuditExtra *extra);
 
+void LnnEventExtraInit(LnnEventExtra *extra);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

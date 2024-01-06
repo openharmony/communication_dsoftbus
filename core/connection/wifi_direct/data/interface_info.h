@@ -70,14 +70,14 @@ struct InterfaceInfo {
     struct ListNode node;
 };
 
-void InterfaceInfoConstructor(struct InterfaceInfo* self);
-void InterfaceInfoConstructorWithName(struct InterfaceInfo* self, const char *name);
-void InterfaceInfoDestructor(struct InterfaceInfo* self);
+void InterfaceInfoConstructor(struct InterfaceInfo *self);
+void InterfaceInfoConstructorWithName(struct InterfaceInfo *self, const char *name);
+void InterfaceInfoDestructor(struct InterfaceInfo *self);
 
-struct InterfaceInfo* InterfaceInfoNew(void);
-void InterfaceInfoDelete(struct InterfaceInfo* self);
-struct InterfaceInfo* InterfaceInfoNewArray(size_t size);
-void InterfaceInfoDeleteArray(struct InterfaceInfo* self, size_t size);
+struct InterfaceInfo *InterfaceInfoNew(void);
+void InterfaceInfoDelete(struct InterfaceInfo *self);
+struct InterfaceInfo *InterfaceInfoNewArray(size_t size);
+void InterfaceInfoDeleteArray(struct InterfaceInfo *self, size_t size);
 
 #ifdef __cplusplus
 }

@@ -16,13 +16,23 @@
 #include "conn_log.h"
 #include "softbus_adapter_mem.h"
 #include "wifi_direct_negotiator.h"
+#include "wifi_direct_decision_center.h"
 #include "channel/wifi_direct_negotiate_channel.h"
+#include "data/link_info.h"
 #include "data/link_manager.h"
 #include "data/resource_manager.h"
 
 static void ExecuteProcessRemoteNegotiateMessage(struct WifiDirectCommand *base)
 {
     struct WifiDirectNegotiateCommand *self = (struct WifiDirectNegotiateCommand *)base;
+    struct LinkInfo *linkInfo = self->msg->getContainer(self->msg, NM_KEY_LINK_INFO);
+    if (linkInfo != NULL) {
+        self->msg->remove(self->msg, NM_KEY_LINK_INFO);
+    }
+    struct WifiDirectProcessor *processor = GetWifiDirectDecisionCenter()->getProcessorByNegotiateMessage(self->msg);
+    if (processor != NULL) {
+        base->processor = processor;
+    }
     struct WifiDirectNegotiator *negotiator = GetWifiDirectNegotiator();
     negotiator->currentCommand = base;
     negotiator->currentProcessor = base->processor;
@@ -58,13 +68,13 @@ static void OnNegotiateTimeout(struct WifiDirectCommand *base)
 void WifiDirectNegotiateCommandConstructor(struct WifiDirectNegotiateCommand *self, int32_t cmdType,
                                            struct NegotiateMessage *msg)
 {
-    self->type = COMMAND_TYPE_MESSAGE;
+    self->type = COMMAND_TYPE_NEGO_MESSAGE;
     self->timerId = TIMER_ID_INVALID;
     self->execute = ExecuteProcessRemoteNegotiateMessage;
     self->onSuccess = OnNegotiateComplete;
     self->onFailure = OnNegotiateFailure;
     self->onTimeout = OnNegotiateTimeout;
-    self->deleteSelf = WifiDirectNegotiateCommandDelete;
+    self->destructor = WifiDirectNegotiateCommandDelete;
     self->msg = msg;
     self->cmdType = cmdType;
 }

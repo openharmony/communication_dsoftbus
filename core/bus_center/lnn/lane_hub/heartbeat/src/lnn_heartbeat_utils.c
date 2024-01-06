@@ -23,6 +23,8 @@
 #include "lnn_device_info.h"
 #include "lnn_feature_capability.h"
 #include "lnn_heartbeat_medium_mgr.h"
+#include "lnn_distributed_net_ledger.h"
+#include "lnn_node_info.h"
 #include "lnn_log.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
@@ -82,7 +84,8 @@ int32_t LnnConvertHbTypeToId(LnnHeartbeatType type)
 static bool HbHasActiveBrConnection(const char *networkId)
 {
     bool ret = false;
-    ConnectOption option = {0};
+    ConnectOption option;
+    (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     char brMac[BT_MAC_LEN] = {0};
     uint8_t binaryAddr[BT_ADDR_LEN] = {0};
 
@@ -95,7 +98,7 @@ static bool HbHasActiveBrConnection(const char *networkId)
         LNN_LOGE(LNN_HEART_BEAT, "HB strcpy_s bt mac err");
         return false;
     }
-    if (ConvertBtMacToBinary(brMac, BT_ADDR_LEN, binaryAddr, BT_ADDR_LEN) != SOFTBUS_OK) {
+    if (ConvertBtMacToBinary(brMac, sizeof(brMac), binaryAddr, BT_ADDR_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB convert bt mac err");
         return false;
     }
@@ -107,7 +110,8 @@ static bool HbHasActiveBrConnection(const char *networkId)
 static bool HbHasActiveBleConnection(const char *networkId)
 {
     bool ret = false;
-    ConnectOption option = {0};
+    ConnectOption option;
+    (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     char udid[UDID_BUF_LEN] = {0};
     char udidHash[UDID_HASH_LEN] = {0};
 
@@ -141,6 +145,21 @@ static bool HbHasActiveP2pConnection(const char *networkId)
     bool isOnline = GetWifiDirectManager()->isDeviceOnline(peerMac);
     LNN_LOGD(LNN_HEART_BEAT, "HB has active p2p connection=%s", isOnline ? "true" : "false");
     return isOnline;
+}
+
+static bool HbHasActiveHmlConnection(const char *networkId)
+{
+    NodeInfo info;
+    char myIp[IP_LEN] = {0};
+    if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &info) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "HB get node info fail");
+        return false;
+    }
+    if (GetWifiDirectManager()->getLocalIpByUuid(info.uuid, myIp, sizeof(myIp)) == SOFTBUS_OK) {
+        LNN_LOGI(LNN_HEART_BEAT, "HB get HML ip success");
+        return true;
+    }
+    return false;
 }
 
 bool LnnHasActiveConnection(const char *networkId, ConnectionAddrType addrType)

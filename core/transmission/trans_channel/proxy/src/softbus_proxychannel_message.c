@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,9 +27,7 @@
 #include "softbus_errcode.h"
 #include "softbus_json_utils.h"
 #include "softbus_message_open_channel.h"
-#include "softbus_proxychannel_callback.h"
 #include "softbus_proxychannel_manager.h"
-#include "softbus_proxychannel_transceiver.h"
 #include "softbus_utils.h"
 #include "trans_log.h"
 
@@ -81,7 +79,10 @@ static void TransProxyPackMessageHead(ProxyMessageHead *msgHead, uint8_t *buf, u
 static int32_t GetRemoteUdidByBtMac(const char *peerMac, char *udid, int32_t len)
 {
     char networkId[NETWORK_ID_BUF_LEN] = {0};
-    TRANS_LOGI(TRANS_CTRL, "peerMac=%s", AnonymizesMac(peerMac));
+    char *tmpMac = NULL;
+    Anonymize(peerMac, &tmpMac);
+    TRANS_LOGI(TRANS_CTRL, "peerMac=%s", tmpMac);
+    AnonymizeFree(tmpMac);
     if (LnnGetNetworkIdByBtMac(peerMac, networkId, sizeof(networkId)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "LnnGetNetworkIdByBtMac fail");
         return SOFTBUS_NOT_FIND;
@@ -262,6 +263,9 @@ int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg)
         msg->dateLen = (int32_t)decDataLen;
     } else {
         uint8_t *allocData = (uint8_t *)SoftBusCalloc((uint32_t)msg->dateLen);
+        if (allocData == NULL) {
+            return SOFTBUS_ERR;
+        }
         if (memcpy_s(allocData, msg->dateLen, msg->data, msg->dateLen) != EOK) {
             SoftBusFree(allocData);
             return SOFTBUS_ERR;
@@ -273,6 +277,10 @@ int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg)
 
 int32_t PackPlaintextMessage(ProxyMessageHead *msg, ProxyDataInfo *dataInfo)
 {
+    if (msg == NULL || dataInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
     uint32_t connHeadLen = ConnGetHeadSize();
     uint32_t size = PROXY_CHANNEL_HEAD_LEN + connHeadLen + dataInfo->inLen;
     uint8_t *buf = (uint8_t *)SoftBusCalloc(size);
@@ -283,6 +291,7 @@ int32_t PackPlaintextMessage(ProxyMessageHead *msg, ProxyDataInfo *dataInfo)
     TransProxyPackMessageHead(msg, buf + connHeadLen, PROXY_CHANNEL_HEAD_LEN);
     if (memcpy_s(buf + connHeadLen + PROXY_CHANNEL_HEAD_LEN, size - connHeadLen - PROXY_CHANNEL_HEAD_LEN,
         dataInfo->inData, dataInfo->inLen) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "plaint ext message memcpy fail.");
         SoftBusFree(buf);
         return SOFTBUS_MEM_ERR;
     }
@@ -353,6 +362,7 @@ static int32_t PackHandshakeMsgForFastData(AppInfo *appInfo, cJSON *root)
         char *buf = TransProxyPackFastData(appInfo, &outLen);
         if (buf == NULL) {
             TRANS_LOGE(TRANS_CTRL, "failed to pack bytes.");
+            SoftBusFree(encodeFastData);
             return SOFTBUS_ERR;
         }
         int32_t ret = SoftBusBase64Encode(encodeFastData, BASE64_FAST_DATA_LEN, &fastDataSize,
@@ -419,6 +429,7 @@ char *TransProxyPackHandshakeErrMsg(int32_t errCode)
 
     root = cJSON_CreateObject();
     if (root == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "create json object failed.");
         return NULL;
     }
 
@@ -434,16 +445,15 @@ char *TransProxyPackHandshakeErrMsg(int32_t errCode)
 
 char *TransProxyPackHandshakeMsg(ProxyChannelInfo *info)
 {
-    cJSON *root = NULL;
-    SessionKeyBase64 sessionBase64;
-    char *buf = NULL;
-    AppInfo *appInfo = &(info->appInfo);
-    int32_t ret;
-
-    root = cJSON_CreateObject();
+    cJSON *root = cJSON_CreateObject();
     if (root == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "create json object failed.");
         return NULL;
     }
+
+    int32_t ret;
+    AppInfo *appInfo = &(info->appInfo);
+    SessionKeyBase64 sessionBase64;
     (void)memset_s(&sessionBase64, sizeof(SessionKeyBase64), 0, sizeof(SessionKeyBase64));
     if (!AddNumberToJsonObject(root, JSON_KEY_TYPE, appInfo->appType) ||
         !AddStringToJsonObject(root, JSON_KEY_IDENTITY, info->identity) ||
@@ -454,10 +464,8 @@ char *TransProxyPackHandshakeMsg(ProxyChannelInfo *info)
         goto EXIT;
     }
     (void)cJSON_AddTrueToObject(root, JSON_KEY_HAS_PRIORITY);
-
     if (appInfo->appType == APP_TYPE_NORMAL) {
-        ret = PackHandshakeMsgForNormal(&sessionBase64, appInfo, root);
-        if (ret != SOFTBUS_OK) {
+        if (PackHandshakeMsgForNormal(&sessionBase64, appInfo, root) != SOFTBUS_OK) {
             goto EXIT;
         }
     } else if (appInfo->appType == APP_TYPE_AUTH) {
@@ -481,11 +489,12 @@ char *TransProxyPackHandshakeMsg(ProxyChannelInfo *info)
             goto EXIT;
         }
     }
+    cJSON_Delete(root);
+    return cJSON_PrintUnformatted(root);
 
-    buf = cJSON_PrintUnformatted(root);
 EXIT:
     cJSON_Delete(root);
-    return buf;
+    return NULL;
 }
 
 char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan)
@@ -494,11 +503,13 @@ char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan)
     char *buf = NULL;
     AppInfo *appInfo = &(chan->appInfo);
     if (appInfo == NULL || appInfo->appType == APP_TYPE_NOT_CARE) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
         return NULL;
     }
 
     root = cJSON_CreateObject();
     if (root == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "create json object failed.");
         return NULL;
     }
 
@@ -544,10 +555,12 @@ int32_t TransProxyUnPackHandshakeErrMsg(const char *msg, int *errCode, int32_t l
 {
     cJSON *root = cJSON_ParseWithLength(msg, len);
     if ((root == NULL) || (errCode == NULL)) {
+        TRANS_LOGE(TRANS_CTRL, "parse json failed.");
         return SOFTBUS_ERR;
     }
 
     if (!GetJsonObjectInt32Item(root, ERR_CODE, errCode)) {
+        TRANS_LOGE(TRANS_CTRL, "get errCode failed.");
         cJSON_Delete(root);
         return SOFTBUS_ERR;
     }
@@ -560,10 +573,12 @@ int32_t TransProxyUnPackRestErrMsg(const char *msg, int *errCode, int32_t len)
 {
     cJSON *root = cJSON_ParseWithLength(msg, len);
     if ((root == NULL) || (errCode == NULL)) {
+        TRANS_LOGE(TRANS_CTRL, "parse json failed.");
         return SOFTBUS_ERR;
     }
 
     if (!GetJsonObjectInt32Item(root, ERR_CODE, errCode) && !GetJsonObjectInt32Item(root, "ERR_CODE", errCode)) {
+        TRANS_LOGE(TRANS_CTRL, "get errCode failed.");
         cJSON_Delete(root);
         return SOFTBUS_ERR;
     }
@@ -578,10 +593,12 @@ int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanI
     cJSON *root = 0;
     AppInfo *appInfo = &(chanInfo->appInfo);
     if (appInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "appInfo is null.");
         return SOFTBUS_INVALID_PARAM;
     }
     root = cJSON_ParseWithLength(msg, len);
     if (root == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "parse json failed.");
         return SOFTBUS_PARSE_JSON_ERR;
     }
 
@@ -599,7 +616,7 @@ int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanI
     appInfo->algorithm = APP_INFO_ALGORITHM_AES_GCM_256;
     appInfo->crc = APP_INFO_FILE_FEATURES_NO_SUPPORT;
     int32_t appType = TransProxyGetAppInfoType(chanInfo->myId, chanInfo->identity);
-    if (appType == SOFTBUS_ERR) {
+    if (appType == SOFTBUS_ERR || appType == SOFTBUS_LOCK_ERR) {
         TRANS_LOGE(TRANS_CTRL, "fail to get app type");
         cJSON_Delete(root);
         return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
@@ -750,6 +767,7 @@ int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, in
 {
     cJSON *root = cJSON_ParseWithLength(msg, len);
     if (root == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "parse json failed.");
         return SOFTBUS_PARSE_JSON_ERR;
     }
     char sessionKey[BASE64KEY] = {0};
@@ -808,15 +826,18 @@ char *TransProxyPackIdentity(const char *identity)
     char *buf = NULL;
 
     if (identity == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
         return NULL;
     }
 
     root = cJSON_CreateObject();
     if (root == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "create json object failed.");
         return NULL;
     }
 
     if (!AddStringToJsonObject(root, JSON_KEY_IDENTITY, identity)) {
+        TRANS_LOGE(TRANS_CTRL, "add identity to json object failed.");
         cJSON_Delete(root);
         return NULL;
     }
@@ -832,6 +853,7 @@ int32_t TransProxyUnpackIdentity(const char *msg, char *identity, uint32_t ident
 
     root = cJSON_ParseWithLength(msg, len);
     if (root == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "parse json failed.");
         return SOFTBUS_ERR;
     }
 
@@ -878,6 +900,7 @@ static int32_t TransProxyPackFastDataHead(ProxyDataInfo *dataInfo, const AppInfo
 {
 #define MAGIC_NUMBER 0xBABEFACE
     if (dataInfo == NULL || appInfo ==NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invaild param.");
         return SOFTBUS_ERR;
     }
     dataInfo->outLen = dataInfo->inLen + OVERHEAD_LEN + sizeof(PacketFastHead);

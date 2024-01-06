@@ -19,7 +19,6 @@
 
 #include "lnn_log.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_def.h"
 #include "softbus_errcode.h"
 
 #define LNN_HUKS_MAX_UPDATE_TIMES 4
@@ -163,7 +162,7 @@ static int32_t UpdateLoopFinishByHuks(const struct HksBlob *handle, const struct
         SoftBusFree(outDataSeg.data);
         inDataSeg.data += LNN_HUKS_MAX_UPDATE_SIZE;
     }
-    LNN_LOGI(LNN_LEDGER, "out data size=%d, inDataSeg size=%d", outData->size, inDataSeg.size);
+    LNN_LOGD(LNN_LEDGER, "out data size=%d, inDataSeg size=%d", outData->size, inDataSeg.size);
     return LoopFinishByHuks(handle, paramSet, &inDataSeg, cur, &outData->size);
 }
 

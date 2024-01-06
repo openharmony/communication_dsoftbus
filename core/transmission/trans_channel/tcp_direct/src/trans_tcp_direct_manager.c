@@ -17,14 +17,12 @@
 
 #include <securec.h>
 
-#include "auth_interface.h"
-#include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_thread.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_socket.h"
+#include "trans_event.h"
 #include "trans_log.h"
 #include "trans_tcp_direct_callback.h"
 #include "trans_tcp_direct_message.h"
@@ -32,7 +30,6 @@
 #include "trans_tcp_direct_sessionconn.h"
 #include "trans_tcp_direct_wifi.h"
 #include "wifi_direct_manager.h"
-#include "trans_event.h"
 
 #define HANDSHAKE_TIMEOUT 19
 
@@ -43,7 +40,7 @@ static void OnSessionOpenFailProc(const SessionConn *node, int32_t errCode)
     if (node->serverSide == false) {
         if (TransTdcOnChannelOpenFailed(node->appInfo.myData.pkgName, node->appInfo.myData.pid,
             node->channelId, errCode) != SOFTBUS_OK) {
-            TRANS_LOGW(TRANS_CTRL, "notify channel open fail err");
+            TRANS_LOGE(TRANS_CTRL, "notify channel open fail err");
         }
     }
 
@@ -58,12 +55,11 @@ static void OnSessionOpenFailProc(const SessionConn *node, int32_t errCode)
 static void NotifyTdcChannelTimeOut(ListNode *tdcChannelList)
 {
     if (tdcChannelList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "param invalid");
         return;
     }
-
     SessionConn *item = NULL;
     SessionConn *nextItem = NULL;
-
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, tdcChannelList, SessionConn, node) {
         OnSessionOpenFailProc(item, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
         TransSrvDelDataBufNode(item->channelId);
@@ -77,9 +73,11 @@ static void TransTdcTimerProc(void)
     SessionConn *nextItem = NULL;
     SoftBusList *sessionList = GetSessionConnList();
     if (sessionList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "get session conn list failed");
         return;
     }
     if (GetSessionConnLock() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get session conn lock failed");
         return;
     }
 
@@ -105,6 +103,7 @@ static void TransTdcTimerProc(void)
 static void NotifyTdcChannelStopProc(ListNode *tdcChannelList)
 {
     if (tdcChannelList == NULL) {
+        TRANS_LOGE(TRANS_INIT, "param invalid");
         return;
     }
 
@@ -124,18 +123,17 @@ void TransTdcStopSessionProc(ListenerModule listenMod)
     TRANS_LOGD(TRANS_CTRL, "enter.");
     SessionConn *item = NULL;
     SessionConn *nextItem = NULL;
-
     SoftBusList *sessionList = GetSessionConnList();
     if (sessionList == NULL) {
+        TRANS_LOGE(TRANS_INIT, "get session conn list failed");
         return;
     }
     if (GetSessionConnLock() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_INIT, "get session conn lock failed");
         return;
     }
-
     ListNode tempTdcChannelList;
     ListInit(&tempTdcChannelList);
-
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &sessionList->list, SessionConn, node) {
         if (listenMod != item->listenMod) {
             continue;
@@ -146,13 +144,16 @@ void TransTdcStopSessionProc(ListenerModule listenMod)
         ListAdd(&tempTdcChannelList, &item->node);
     }
     ReleaseSessonConnLock();
-
     NotifyTdcChannelStopProc(&tempTdcChannelList);
     TRANS_LOGD(TRANS_CTRL, "ok");
 }
 
 int32_t TransTcpDirectInit(const IServerChannelCallBack *cb)
 {
+    if (cb == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "param invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
     int32_t ret = P2pDirectChannelInit();
     if (ret != SOFTBUS_OK) {
         if (ret != SOFTBUS_FUNC_NOT_SUPPORT) {
@@ -189,16 +190,19 @@ void TransTcpDirectDeinit(void)
 void TransTdcDeathCallback(const char *pkgName, int32_t pid)
 {
     if (pkgName == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "param invalid");
         return;
     }
-    TRANS_LOGW(TRANS_CTRL, "TransTdcDeathCallback: pkgName=%s", pkgName);
+    TRANS_LOGW(TRANS_CTRL, "TransTdcDeathCallback: pkgName=%s, pid=%d", pkgName, pid);
     SessionConn *item = NULL;
     SessionConn *nextItem = NULL;
     if (GetSessionConnLock() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get session conn lock failed");
         return;
     }
     SoftBusList *sessionList = GetSessionConnList();
     if (sessionList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "get session conn list failed");
         ReleaseSessonConnLock();
         return;
     }
@@ -221,10 +225,8 @@ static int32_t TransUpdAppInfo(AppInfo *appInfo, const ConnectOption *connInfo)
         TRANS_LOGE(TRANS_CTRL, "TransUpdAppInfo cpy fail");
         return SOFTBUS_MEM_ERR;
     }
-
     appInfo->routeType = connInfo->type == CONNECT_TCP ? WIFI_STA : WIFI_P2P;
     appInfo->protocol = connInfo->socketOption.protocol;
-
     if (connInfo->socketOption.protocol == LNN_PROTOCOL_NIP) {
         if (LnnGetLocalStrInfo(STRING_KEY_NODE_ADDR, appInfo->myData.addr, sizeof(appInfo->myData.addr)) !=
             SOFTBUS_OK) {
@@ -261,15 +263,16 @@ int32_t TransOpenDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, 
         TRANS_LOGE(TRANS_CTRL, "udp app fail");
         return ret;
     }
-
     if (connInfo->type == CONNECT_P2P || connInfo->type == CONNECT_HML) {
         appInfo->routeType = WIFI_P2P;
         ret = OpenP2pDirectChannel(appInfo, connInfo, channelId);
     } else if (connInfo->type == CONNECT_P2P_REUSE) {
         appInfo->routeType = WIFI_P2P_REUSE;
+        TRANS_LOGI(TRANS_CTRL, "goto WIFI_P2P_REUSE");
         ret = OpenTcpDirectChannel(appInfo, connInfo, channelId);
     } else {
         appInfo->routeType = WIFI_STA;
+        TRANS_LOGI(TRANS_CTRL, "goto WIFI_STA");
         ret = OpenTcpDirectChannel(appInfo, connInfo, channelId);
     }
     TransEventExtra extra = {
@@ -283,7 +286,6 @@ int32_t TransOpenDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, 
         .socketName = appInfo->myData.sessionName,
         .result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED
     };
-
     SessionConn conn;
     if (GetSessionConnById(*channelId, &conn) != NULL) {
         extra.authId = conn.authId;

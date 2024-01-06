@@ -55,6 +55,7 @@ struct PipelineChannelItem {
 
     // for channel opened context
     int32_t channelId;
+    int32_t ref;
     char uuid[UUID_BUF_LEN];
 };
 
@@ -113,6 +114,22 @@ static void TransProxyPipelineFreeMessage(SoftBusMessage *msg)
     SoftBusFree(msg);
 }
 
+int32_t TransProxyReuseByChannelId(int32_t channelId)
+{
+    TRANS_LOGD(TRANS_CTRL, "enter.");
+    TRANS_CHECK_AND_RETURN_RET_LOGW(SoftBusMutexLock(&g_manager.channels->lock) == SOFTBUS_OK,
+        SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock failed");
+    struct PipelineChannelItem *target = SearchChannelItemUnsafe(&channelId, CompareByChannelId);
+    if (target == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "channelId=%d not exist", channelId);
+        SoftBusMutexUnlock(&g_manager.channels->lock);
+        return SOFTBUS_NOT_FIND;
+    }
+    target->ref++;
+    SoftBusMutexUnlock(&g_manager.channels->lock);
+    return SOFTBUS_OK;
+}
+
 int32_t TransProxyPipelineGenRequestId(void)
 {
     static int32_t requestIdGenerator = 0;
@@ -152,6 +169,9 @@ int32_t TransProxyPipelineOpenChannel(int32_t requestId, const char *networkId,
     const TransProxyPipelineChannelOption *option, const ITransProxyPipelineCallback *callback)
 {
     TRANS_LOGD(TRANS_CTRL, "enter.");
+    if (!IsValidString(networkId, ID_MAX_LEN)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
     TRANS_CHECK_AND_RETURN_RET_LOGW(networkId, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid network id");
     TRANS_CHECK_AND_RETURN_RET_LOGW(callback && callback->onChannelOpened && callback->onChannelOpenFailed,
         SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid callback");
@@ -231,6 +251,9 @@ int32_t TransProxyPipelineSendMessage(
 int32_t TransProxyPipelineGetChannelIdByNetworkId(const char *networkId)
 {
     TRANS_LOGD(TRANS_CTRL, "enter.");
+    if (!IsValidString(networkId, ID_MAX_LEN)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
     char uuid[UUID_BUF_LEN] = { 0 };
     int32_t ret = LnnGetRemoteStrInfo(networkId, STRING_KEY_UUID, uuid, sizeof(uuid));
     if (ret != SOFTBUS_OK) {
@@ -272,19 +295,25 @@ int32_t TransProxyPipelineGetUuidByChannelId(int32_t channelId, char *uuid, uint
 
 int32_t TransProxyPipelineCloseChannel(int32_t channelId)
 {
-    TRANS_LOGD(TRANS_CTRL, "enter.");
+    TRANS_LOGI(TRANS_CTRL, "enter.");
     TRANS_CHECK_AND_RETURN_RET_LOGW(SoftBusMutexLock(&g_manager.channels->lock) == SOFTBUS_OK,
         SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock failed");
 
     struct PipelineChannelItem *target = SearchChannelItemUnsafe(&channelId, CompareByChannelId);
     if (target != NULL) {
-        ListDelete(&target->node);
-        g_manager.channels->cnt -= 1;
-        SoftBusFree(target);
+        target->ref--;
+        if (target->ref <= 0) {
+            ListDelete(&target->node);
+            g_manager.channels->cnt -= 1;
+            SoftBusFree(target);
+            SoftBusMutexUnlock(&g_manager.channels->lock);
+            TRANS_LOGW(TRANS_CTRL, "close channelId=%d", channelId);
+            return TransCloseNetWorkingChannel(channelId);
+        }
+        TRANS_LOGI(TRANS_CTRL, "channelId=%d ref=%d", channelId, target->ref);
     }
     SoftBusMutexUnlock(&g_manager.channels->lock);
-    TRANS_LOGW(TRANS_CTRL, "close channelId=%d", channelId);
-    return TransCloseNetWorkingChannel(channelId);
+    return SOFTBUS_OK;
 }
 
 int32_t TransProxyPipelineCloseChannelDelay(int32_t channelId)
@@ -552,6 +581,7 @@ static void InnerOpenProxyChannel(int32_t requestId)
         return;
     }
     target->channelId = channelId;
+    target->ref = 1;
     SoftBusMutexUnlock(&g_manager.channels->lock);
 }
 #ifdef  __cplusplus
@@ -615,6 +645,7 @@ int32_t TransProxyPipelineInit(void)
     return SOFTBUS_OK;
 exit:
     if (channels != NULL) {
+        TRANS_LOGE(TRANS_INIT, "softbus list is not null.");
         DestroySoftBusList(channels);
     }
     g_manager.channels = NULL;

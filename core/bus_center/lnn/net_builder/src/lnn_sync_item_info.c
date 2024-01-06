@@ -19,15 +19,13 @@
 
 #include "lnn_connection_addr_utils.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_net_builder.h"
 #include "lnn_sync_info_manager.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_def.h"
+#include "softbus_adapter_socket.h"
 #include "softbus_errcode.h"
 #include "softbus_wifi_api_adapter.h"
-#include "softbus_adapter_socket.h"
 
 #define CONN_CODE_SHIFT 16
 #define DISCOVERY_TYPE_MASK 0x7FFF
@@ -68,7 +66,6 @@ static int32_t WifiConnectToTargetAp(const unsigned char *targetBssid, const cha
 {
     SoftBusWifiDevConf *result = NULL;
     uint32_t wifiConfigSize;
-    int32_t retVal;
     SoftBusWifiDevConf targetDeviceConf;
     uint32_t i;
 
@@ -80,15 +77,9 @@ static int32_t WifiConnectToTargetAp(const unsigned char *targetBssid, const cha
     (void)memset_s(&targetDeviceConf, sizeof(SoftBusWifiDevConf), 0, sizeof(SoftBusWifiDevConf));
     (void)memset_s(result, sizeof(SoftBusWifiDevConf) * WIFI_MAX_CONFIG_SIZE, 0,
                    sizeof(SoftBusWifiDevConf) * WIFI_MAX_CONFIG_SIZE);
-    retVal = SoftBusGetWifiDeviceConfig(result, &wifiConfigSize);
-    if (retVal != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "Get wifi device config fail");
-        ResultClean(result);
-        return SOFTBUS_ERR;
-    }
-
-    if (wifiConfigSize > WIFI_MAX_CONFIG_SIZE) {
-        LNN_LOGE(LNN_BUILDER, "wifi device config size is invalid.");
+    int32_t retVal = SoftBusGetWifiDeviceConfig(result, &wifiConfigSize);
+    if (retVal != SOFTBUS_OK || wifiConfigSize > WIFI_MAX_CONFIG_SIZE) {
+        LNN_LOGE(LNN_BUILDER, "git config fail,retVal=%d,wifiConfigSize=%d", retVal, wifiConfigSize);
         ResultClean(result);
         return SOFTBUS_ERR;
     }

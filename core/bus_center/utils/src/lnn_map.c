@@ -20,6 +20,7 @@
 
 #include <securec.h>
 
+#include "lnn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -327,6 +328,9 @@ MapIterator *LnnMapInitIterator(Map *map)
  */
 bool LnnMapHasNext(MapIterator *it)
 {
+    if (it->map->nodeSize > HDF_MAP_KEY_MAX_SIZE) {
+        LNN_LOGW(LNN_STATE, "nodeSize is %d", it->map->nodeSize);
+    }
     return (it->nodeNum < it->map->nodeSize);
 }
 

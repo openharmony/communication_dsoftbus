@@ -124,8 +124,7 @@ static int32_t UpdateDeviceDbInDeviceList(const CoapCtxType *coapCtx, const Devi
     }
     // for non-automatic reply businessType, report each unicast received, even if the content is same
     if (!receiveBcast && (CheckBusinessTypeReplyUnicast(deviceInfo->businessType) != NSTACKX_EOK)) {
-        DeviceInfoNotify(deviceInfo);
-        return NSTACKX_EOK;
+        return updated ? DeviceInfoNotify(deviceInfo) : NSTACKX_EOK;
     }
     if (updated || forceUpdate) {
         DFINDER_LOGD(TAG, "updated is: %hhu, forceUpdate is: %hhu", updated, forceUpdate);

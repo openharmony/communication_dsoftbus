@@ -14,8 +14,8 @@
  */
 #include <stdio.h>
 #include <string.h>
+#include "comm_log.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 #include "softbus_hidumper.h"
 #include "fillpinc.h"
 #include "nstackx.h"
@@ -38,8 +38,7 @@ void SoftBufNstackDumpFunc(void *softObj, const char *data, uint32_t len)
     int fd = *(int *)softObj;
     size_t dataLen = strnlen(data, SOFTBUF_NSTACK_DUMP_BUF_LEN);
     if (dataLen == 0 || dataLen == SOFTBUF_NSTACK_DUMP_BUF_LEN || dataLen != len) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR,
-            "SoftBufNstackDumpFunc len error, data strlen %d, len %d.", dataLen, len);
+        COMM_LOGE(COMM_DFX, "SoftBufNstackDumpFunc len error, data strlen %d, len %d.", dataLen, len);
         return;
     }
     SOFTBUS_DPRINTF(fd, "%s", data);
@@ -48,12 +47,12 @@ void SoftBufNstackDumpFunc(void *softObj, const char *data, uint32_t len)
 static int32_t SoftBusNStackDstreamDumpHander(int fd, int32_t argc, const char **argv)
 {
     if (fd < 0 || argc < 0 || argv == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusNStackDstreamDumpHander invalid input");
+        COMM_LOGE(COMM_DFX, "SoftBusNStackDstreamDumpHander invalid input");
         return SOFTBUS_ERR;
     }
 #ifdef FILLP_ENHANCED
     if (FtDfxHiDumper((uint32_t)argc, argv, &fd, SoftBufNstackDumpFunc) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "call FtDfxHiDumper failed!");
+        COMM_LOGE(COMM_DFX, "call FtDfxHiDumper failed!");
         return SOFTBUS_ERR;
     }
 #endif
@@ -62,12 +61,12 @@ static int32_t SoftBusNStackDstreamDumpHander(int fd, int32_t argc, const char *
 static int32_t SoftBusNStackDfileDumpHander(int fd, int32_t argc, const char **argv)
 {
     if (fd < 0 || argc < 0 || argv == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusNStackDfileDumpHander invalid input");
+        COMM_LOGE(COMM_DFX, "SoftBusNStackDfileDumpHander invalid input");
         return SOFTBUS_ERR;
     }
 #ifdef FILLP_ENHANCED
     if (NSTACKX_DFileDump((uint32_t)argc, argv, &fd, SoftBufNstackDumpFunc) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "call NSTACKX_DFileDump failed!");
+        COMM_LOGE(COMM_DFX, "call NSTACKX_DFileDump failed!");
         return SOFTBUS_ERR;
     }
 #endif
@@ -76,12 +75,12 @@ static int32_t SoftBusNStackDfileDumpHander(int fd, int32_t argc, const char **a
 static int32_t SoftBusNStackDumpDfinderHander(int fd, int32_t argc, const char **argv)
 {
     if (fd < 0 || argc < 0 || argv == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "NSTACKX_DFinderDump invalid input!");
+        COMM_LOGE(COMM_DFX, "NSTACKX_DFinderDump invalid input!");
         return SOFTBUS_ERR;
     }
 #ifdef FILLP_ENHANCED
     if (NSTACKX_DFinderDump(argv, (uint32_t)argc, &fd, SoftBufNstackDumpFunc) != 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "call NSTACKX_DFinderDump failed!");
+        COMM_LOGE(COMM_DFX, "call NSTACKX_DFinderDump failed!");
         return SOFTBUS_ERR;
     }
 #endif
@@ -102,28 +101,28 @@ int32_t SoftBusNStackHiDumperInit(void)
     int32_t ret = SoftBusRegHiDumperHandler(SOFTBUS_DSTREAM_MODULE_NAME, SOFTBUS_DSTREAM_MODULE_HELP,
         &SoftBusNStackDstreamDumpHander);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusNStackHiDumperInit regist dstream handler fail");
+        COMM_LOGE(COMM_INIT, "SoftBusNStackHiDumperInit regist dstream handler fail");
         return ret;
     }
 
     ret = SoftBusRegHiDumperHandler(SOFTBUS_DFILE_MODULE_NAME, SOFTBUS_DFILE_MODULE_HELP,
         &SoftBusNStackDfileDumpHander);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusNStackHiDumperInit regist dstream handler fail");
+        COMM_LOGE(COMM_INIT, "SoftBusNStackHiDumperInit regist dstream handler fail");
         return ret;
     }
 
     ret = SoftBusRegHiDumperHandler(SOFTBUS_DFINDLER_MODULE_NAME, SOFTBUS_DFINDLER_MODULE_HELP,
         &SoftBusNStackDumpDfinderHander);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusNStackHiDumperInit regist dstream handler fail");
+        COMM_LOGE(COMM_INIT, "SoftBusNStackHiDumperInit regist dstream handler fail");
         return ret;
     }
 
     ret = SoftBusRegHiDumperHandler(SOFTBUS_DMSG_MODULE_NAME, SOFTBUS_DMSG_MODULE_HELP,
         &SoftBusNStackDmsgDumpHander);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusNStackHiDumperInit regist dstream handler fail");
+        COMM_LOGE(COMM_INIT, "SoftBusNStackHiDumperInit regist dstream handler fail");
         return ret;
     }
     return ret;

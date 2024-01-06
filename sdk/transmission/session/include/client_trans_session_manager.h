@@ -34,6 +34,7 @@ typedef struct {
     char peerDeviceId[DEVICE_ID_SIZE_MAX];
     char groupId[GROUP_ID_SIZE_MAX];
     int flag; // TYPE_MESSAGE & TYPE_BYTES & TYPE_FILE
+    int streamType;
 } SessionTag;
 
 typedef enum {
