@@ -18,7 +18,7 @@
 
 #include "softbus_broadcast_adapter_type.h"
 #include <securec.h>
-#include <string.h>
+#include <cstring>
 #include "gmock/gmock.h"
 
 class RecordCtx {

@@ -168,9 +168,9 @@ static SoftBusBcScanFilter *CreateScanFilter()
     unsigned char serviceData[] = {0xE, 0xE, 0xF, 0xF, 0x04, 0x05};
     int len = sizeof(serviceData);
 
-    SoftBusBcScanFilter *filter = (SoftBusBcScanFilter *)SoftBusCalloc(sizeof(SoftBusBcScanFilter));
-    unsigned char *serviceDataPtr = (unsigned char *)SoftBusCalloc(len);
-    unsigned char *serviceDataMaskPtr = (unsigned char *)SoftBusCalloc(len);
+    SoftBusBcScanFilter *filter = static_cast<SoftBusBcScanFilter *>(SoftBusCalloc(sizeof(SoftBusBcScanFilter)));
+    unsigned char *serviceDataPtr = static_cast<unsigned char *>(SoftBusCalloc(len));
+    unsigned char *serviceDataMaskPtr = static_cast<unsigned char *>(SoftBusCalloc(len));
     if (filter == nullptr || serviceDataPtr == nullptr || serviceDataMaskPtr == nullptr) {
         goto EXIT;
     }
@@ -479,7 +479,7 @@ bool ScanResultCtx::Update(int id, const SoftBusBcScanResult *scanResult)
         return false;
     }
     this->scanResult = *scanResult;
-    unsigned char *cpyAdvData = (unsigned char *)SoftBusCalloc(this->scanResult.data.bcData.payloadLen);
+    unsigned char *cpyAdvData = static_cast<unsigned char *>(SoftBusCalloc(this->scanResult.data.bcData.payloadLen));
     if (cpyAdvData == nullptr) {
         DISC_LOGE(DISC_BLE_ADAPTER, "malloc failed in OnReportScanDataCallback, can not save ctx, id: %d", id);
         return false;

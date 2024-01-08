@@ -20,7 +20,6 @@ group("unittest") {
     "bluetooth:unittest",
     "broadcast:unittest",
     "unittest:unittest",
-    "broadcast:unittest",
   ]
 }
 
