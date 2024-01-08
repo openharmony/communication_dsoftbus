@@ -25,15 +25,20 @@ static void SoftBusAdapterRangeFuzzTest(const uint8_t* data, size_t size)
         return;
     }
 
-    SoftBusRangeParam rangeParam;
+    SoftBusRangeParam rangeParam = {0};
     if (memcpy_s(&rangeParam, sizeof(SoftBusRangeParam), data, sizeof(SoftBusRangeParam)) != EOK) {
         return;
     }
 
-    int32_t range;
+    rangeParam.modelId[SOFTBUS_MODEL_ID_LEN - 1] = '\0';
+    rangeParam.subModelId[SOFTBUS_SUB_MODEL_ID_LEN - 1] = '\0';
+    rangeParam.newModelId[SOFTBUS_NEW_MODEL_ID_LEN - 1] = '\0';
+    rangeParam.identity[SOFTBUS_DEV_IDENTITY_LEN - 1] = '\0';
+
+    int32_t range = 0;
     SoftBusBleRange(&rangeParam, &range);
 
-    int8_t power;
+    int8_t power = 0;
     SoftBusGetBlePower(&power);
 }
 }
