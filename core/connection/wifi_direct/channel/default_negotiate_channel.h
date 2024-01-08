@@ -30,6 +30,7 @@ struct DefaultNegotiateChannel {
 
     int64_t authId;
     char p2pMac[MAC_ADDR_STR_LEN];
+    char remoteDeviceId[UUID_BUF_LEN];
 };
 
 void DefaultNegotiateChannelConstructor(struct DefaultNegotiateChannel *self, int64_t authId);
