@@ -294,7 +294,7 @@ static int32_t ConvertNodeInfoToBasicInfo(const NodeInfo *info, NodeBasicInfo *b
         return SOFTBUS_INVALID_PARAM;
     }
     if (strncpy_s(basic->deviceName, DEVICE_NAME_BUF_LEN, info->deviceInfo.deviceName,
-            strlen(info->deviceInfo.deviceName)) != EOK) {
+        strlen(info->deviceInfo.deviceName)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "strncpy_s name error!");
         return SOFTBUS_MEM_ERR;
     }
