@@ -836,23 +836,6 @@ static bool IsTimestampExceedLimit(uint64_t nowTime, uint64_t oldTimeStamp, LnnH
     return true;
 }
 
-static bool IsSupportBurstFeature(const char *networkId)
-{
-    uint64_t localFeature;
-    uint64_t peerFeature;
-
-    if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &localFeature) != SOFTBUS_OK ||
-        LnnGetRemoteNumU64Info(networkId, NUM_KEY_FEATURE_CAPA, &peerFeature) != SOFTBUS_OK) {
-        LNN_LOGI(LNN_HEART_BEAT, "get local or remote feature fail");
-        return false;
-    }
-    if (IsFeatureSupport(localFeature, BIT_BLE_SUPPORT_SENSORHUB_HEARTBEAT) &&
-        IsFeatureSupport(peerFeature, BIT_BLE_SUPPORT_SENSORHUB_HEARTBEAT)) {
-        return true;
-    }
-    return false;
-}
-
 static void CheckDevStatusByNetworkId(LnnHeartbeatFsm *hbFsm, const char *networkId, LnnCheckDevStatusMsgPara *msgPara,
     uint64_t nowTime)
 {
