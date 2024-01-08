@@ -19,6 +19,7 @@ group("unittest") {
   deps = [
     "bluetooth:unittest",
     "unittest:unittest",
+    "broadcast:unittest",
   ]
 }
 
