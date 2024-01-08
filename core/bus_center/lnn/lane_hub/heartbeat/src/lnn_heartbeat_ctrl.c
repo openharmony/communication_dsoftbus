@@ -57,9 +57,9 @@ typedef struct {
     bool isRequestDisable;
 } HbConditionState;
 
-static HbConditionState g_hbConditionState; // TODO: fix concurrent problem
-static int64_t g_lastScreenOnTime;
-static int64_t g_lastScreenOffTime;
+static HbConditionState g_hbConditionState;
+static int64_t g_lastScreenOnTime = 0;
+static int64_t g_lastScreenOffTime = 0;
 static bool g_enableState = false;
 static DcTask g_dcTask;
 
@@ -83,7 +83,7 @@ static void InitHbSpecificConditionState(void)
 {
     int32_t localDevTypeId = 0;
     if (LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId) != SOFTBUS_OK) {
-        localDevTypeId = 0;
+        return;
     }
     if (localDevTypeId == TYPE_WATCH_ID) {
         LNN_LOGD(LNN_INIT, "localDevTypeId=%d", localDevTypeId);
@@ -105,7 +105,7 @@ static bool IsHeartbeatEnable(void)
     bool isOOBEEnd = g_hbConditionState.OOBEState == SOFTBUS_OOBE_END;
 
     LNN_LOGI(LNN_HEART_BEAT,
-        "condition state: bt=%d, screenUnlock=%d, account=%d, trustedRelation=%d, background=%d, nightMode=%d, "
+        "HB condition state: bt=%d, screenUnlock=%d, account=%d, trustedRelation=%d, background=%d, nightMode=%d, "
         "OOBEEnd=%d, heartbeatEnable=%d, request=%d", isBtOn, isScreenUnlock, isLogIn,
         g_hbConditionState.hasTrustedRelation, isBackground, isNightMode, isOOBEEnd,
         g_hbConditionState.heartbeatEnable, !g_hbConditionState.isRequestDisable);
@@ -263,7 +263,7 @@ static void HbBtStateChangeEventHandler(const LnnEventBasicInfo *info)
     g_hbConditionState.btState = btState;
     switch (btState) {
         case SOFTBUS_BLE_TURN_ON:
-            LNN_LOGI(LNN_HEART_BEAT, "handle SOFTBUS_BLE_TURN_ON");
+            LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_BLE_TURN_ON");
             LnnUpdateHeartbeatInfo(UPDATE_BT_STATE_OPEN_INFO);
             HbConditionChanged(false);
             if (LnnStartHbByTypeAndStrategy(
@@ -272,7 +272,7 @@ static void HbBtStateChangeEventHandler(const LnnEventBasicInfo *info)
             }
             break;
         case SOFTBUS_BLE_TURN_OFF:
-            LNN_LOGI(LNN_HEART_BEAT, "handle SOFTBUS_BLE_TURN_OFF");
+            LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_BLE_TURN_OFF");
             LnnUpdateHeartbeatInfo(UPDATE_BT_STATE_CLOSE_INFO);
             HbConditionChanged(false);
             break;
@@ -367,7 +367,7 @@ static void HbScreenStateChangeEventHandler(const LnnEventBasicInfo *info)
     SoftBusGetTime(&time);
     nowTime = time.sec * HB_TIME_FACTOR + time.usec / HB_TIME_FACTOR;
     if (g_hbConditionState.screenState == SOFTBUS_SCREEN_ON && oldstate != SOFTBUS_SCREEN_ON) {
-        LNN_LOGI(LNN_HEART_BEAT, "handle SOFTBUS_SCREEN_ON");
+        LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_SCREEN_ON");
         HbRemoveCheckOffLineMessage(HEARTBEAT_TYPE_BLE_V1);
         HbChangeMediumParamByState(g_hbConditionState.screenState);
         g_lastScreenOnTime = nowTime;
@@ -386,7 +386,7 @@ static void HbScreenStateChangeEventHandler(const LnnEventBasicInfo *info)
         return;
     }
     if (g_hbConditionState.screenState == SOFTBUS_SCREEN_OFF && oldstate != SOFTBUS_SCREEN_OFF) {
-        LNN_LOGI(LNN_HEART_BEAT, "handle SOFTBUS_SCREEN_OFF");
+        LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_SCREEN_OFF");
         g_lastScreenOffTime = nowTime;
         if (LnnStopHeartBeatAdvByTypeNow(HEARTBEAT_TYPE_BLE_V1) != SOFTBUS_OK) {
             LNN_LOGE(LNN_HEART_BEAT, "ctrl disable ble heartbeat failed");
@@ -414,12 +414,12 @@ static void HbScreenLockChangeEventHandler(const LnnEventBasicInfo *info)
     LNN_LOGI(LNN_HEART_BEAT, "ScreenLock state: heartbeat=%d", g_hbConditionState.heartbeatEnable);
     switch (lockState) {
         case SOFTBUS_SCREEN_UNLOCK:
-            LNN_LOGI(LNN_HEART_BEAT, "handle SOFTBUS_SCREEN_UNLOCK");
+            LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_SCREEN_UNLOCK");
             LnnUpdateOhosAccount();
             HbConditionChanged(false);
             break;
         case SOFTBUS_SCREEN_LOCK:
-            LNN_LOGI(LNN_HEART_BEAT, "handle SOFTBUS_SCREEN_LOCK");
+            LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_SCREEN_LOCK");
             break;
         default:
             return;
@@ -437,11 +437,11 @@ static void HbAccountStateChangeEventHandler(const LnnEventBasicInfo *info)
     g_hbConditionState.accountState = accountState;
     switch (accountState) {
         case SOFTBUS_ACCOUNT_LOG_IN:
-            LNN_LOGI(LNN_HEART_BEAT, "handle SOFTBUS_ACCOUNT_LOG_IN");
+            LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_ACCOUNT_LOG_IN");
             HbConditionChanged(true);
             break;
         case SOFTBUS_ACCOUNT_LOG_OUT:
-            LNN_LOGI(LNN_HEART_BEAT, "handle SOFTBUS_ACCOUNT_LOG_OUT");
+            LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_ACCOUNT_LOG_OUT");
             HbConditionChanged(false);
             break;
         default:
@@ -456,11 +456,11 @@ static void HbHomeGroupStateChangeEventHandler(const LnnEventBasicInfo *info)
     LnnUpdateHeartbeatInfo(UPDATE_HB_NETWORK_INFO);
     switch (homeGroupState) {
         case SOFTBUS_HOME_GROUP_CHANGE:
-            LNN_LOGI(LNN_HEART_BEAT, "handle SOFTBUS_HOME_GROUP_CHANGE");
+            LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_HOME_GROUP_CHANGE");
             HbConditionChanged(false);
             break;
         case SOFTBUS_HOME_GROUP_LEAVE:
-            LNN_LOGI(LNN_HEART_BEAT, "handle SOFTBUS_HOME_GROUP_LEAVE");
+            LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_HOME_GROUP_LEAVE");
             break;
         default:
             return;
@@ -492,12 +492,12 @@ static void HbUserBackgroundEventHandler(const LnnEventBasicInfo *info)
     switch (userState) {
         case SOFTBUS_USER_FOREGROUND:
             g_hbConditionState.backgroundState = userState;
-            LNN_LOGI(LNN_HEART_BEAT, "handle SOFTBUS_USER_FOREGROUND");
+            LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_USER_FOREGROUND");
             HbConditionChanged(false);
             break;
         case SOFTBUS_USER_BACKGROUND:
             g_hbConditionState.backgroundState = userState;
-            LNN_LOGI(LNN_HEART_BEAT, "handle SOFTBUS_USER_BACKGROUND");
+            LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_USER_BACKGROUND");
             HbConditionChanged(false);
             break;
         default:
@@ -516,11 +516,11 @@ static void HbNightModeStateEventHandler(const LnnEventBasicInfo *info)
     g_hbConditionState.nightModeState = nightModeState;
     switch (nightModeState) {
         case SOFTBUS_NIGHT_MODE_ON:
-            LNN_LOGI(LNN_HEART_BEAT, "handle SOFTBUS_NIGHT_MODE_ON");
+            LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_NIGHT_MODE_ON");
             HbConditionChanged(false);
             break;
         case SOFTBUS_NIGHT_MODE_OFF:
-            LNN_LOGI(LNN_HEART_BEAT, "handle SOFTBUS_NIGHT_MODE_OFF");
+            LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_NIGHT_MODE_OFF");
             HbConditionChanged(false);
             break;
         default:
@@ -538,12 +538,12 @@ static void HbOOBEStateEventHandler(const LnnEventBasicInfo *info)
     SoftBusOOBEState state = (SoftBusOOBEState)event->status;
     switch (state) {
         case SOFTBUS_OOBE_RUNNING:
-            LNN_LOGI(LNN_HEART_BEAT, "handle SOFTBUS_OOBE_RUNNING");
+            LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_OOBE_RUNNING");
             g_hbConditionState.OOBEState = state;
             HbConditionChanged(false);
             break;
         case SOFTBUS_OOBE_END:
-            LNN_LOGI(LNN_HEART_BEAT, "handle SOFTBUS_OOBE_END");
+            LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_OOBE_END");
             g_hbConditionState.OOBEState = state;
             HbConditionChanged(false);
             break;
@@ -738,7 +738,7 @@ int32_t LnnShiftLNNGearWithoutPkgName(const char *callerId, const GearMode *mode
 
 void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type)
 {
-    LNN_LOGI(LNN_HEART_BEAT, "update heartbeat infoType-%d", type);
+    LNN_LOGI(LNN_HEART_BEAT, "update heartbeat infoType=%d", type);
     if (type == UPDATE_HB_ACCOUNT_INFO && !LnnIsDefaultOhosAccount()) {
         g_hbConditionState.accountState = SOFTBUS_ACCOUNT_LOG_IN;
         LNN_LOGI(LNN_HEART_BEAT, "account is login");
