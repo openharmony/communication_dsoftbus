@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "softbus_broadcast_type.h"
 #include "softbus_broadcast_utils.h"
 #include "softbus_error_code.h"
+#include <cstring>
 
 using namespace testing::ext;
 
@@ -271,7 +272,7 @@ HWTEST(SoftbusBleUtilsTest, AssembleRspData, TestSize.Level3)
 HWTEST(SoftbusBleUtilsTest, ParseScanResult, TestSize.Level3)
 {
     std::string advDataStr = "00150221d846b2018ce8791c4556256999a6e2ac4881130e";
-    uint8_t *advData = (uint8_t *)advDataStr.c_str();
+    uint8_t *advData = reinterpret_cast<uint8_t *>(const_cast<char *>(advDataStr.c_str()));
     uint8_t advLen = 23;
     SoftBusBcScanResult softBusBcScanResult = {};
     int32_t ret = ParseScanResult(advData, advLen, &softBusBcScanResult);
