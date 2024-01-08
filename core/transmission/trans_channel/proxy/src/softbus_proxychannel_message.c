@@ -814,9 +814,11 @@ int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, in
     }
 
     cJSON_Delete(root);
+    (void)memset_s(sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
     return SOFTBUS_OK;
 ERR_EXIT:
     cJSON_Delete(root);
+    (void)memset_s(sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
     return ret;
 }
 
