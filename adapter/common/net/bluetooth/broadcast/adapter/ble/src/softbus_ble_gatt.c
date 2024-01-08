@@ -423,7 +423,7 @@ static int32_t UnRegisterScanCallback(int32_t scannerId)
         SoftBusMutexUnlock(&g_scannerLock);
         return SOFTBUS_OK;
     }
-    int32_t ret = BleDeregisterScanCallbacks(g_scanChannel[scannerId].scannerId);
+    int ret = BleDeregisterScanCallbacks(g_scanChannel[scannerId].scannerId);
     DISC_LOGI(DISC_BLE_ADAPTER, "scannerId: %d, bt-scannerId: %d, result: %d",
         scannerId, g_scanChannel[scannerId].scannerId, ret);
     g_scanChannel[scannerId].scannerId = -1;
@@ -468,7 +468,7 @@ static int32_t StartBleAdv(int32_t advId, int *btAdvId, const SoftbusBroadcastPa
             return SOFTBUS_ERR;
         }
     }
-    int32_t ret = BleStartAdvEx(btAdvId, advRawData, advParam);
+    int ret = BleStartAdvEx(btAdvId, advRawData, advParam);
     SoftBusFree(advRawData.advData);
     SoftBusFree(advRawData.rspData);
     return (ret == OHOS_BT_STATUS_SUCCESS) ? SOFTBUS_OK : SOFTBUS_ERR;
@@ -531,7 +531,7 @@ static int32_t StopAdv(int32_t advId)
     }
     g_advChannel[advId].isAdvertising = false;
     SoftBusMutexUnlock(&g_advLock);
-    int32_t ret = BleStopAdv(btAdvId);
+    int ret = BleStopAdv(btAdvId);
     DISC_LOGI(DISC_BLE_ADAPTER, "advId: %d, bt-advId: %d, ret: %d", advId, btAdvId, ret);
     if (ret != OHOS_BT_STATUS_SUCCESS) {
         return SOFTBUS_ERR;
@@ -642,7 +642,7 @@ static int32_t StartScan(int32_t scannerId, const SoftBusBcScanParams *param, co
     BleScanConfigs scanConfig = {};
     scanConfig.scanMode = GetBtScanMode(param->scanInterval, param->scanWindow);
     scanConfig.phy = (int)param->scanPhy;
-    int32_t ret = BleStartScanEx(btScannerId, &scanConfig, nativeFilter, (uint32_t)filterSize);
+    int ret = BleStartScanEx(btScannerId, &scanConfig, nativeFilter, (uint32_t)filterSize);
     FreeBtFilter(nativeFilter, filterSize);
     DISC_LOGI(DISC_BLE_ADAPTER, "scannerId: %d, bt-scannerId: %d, ret: %d", scannerId, btScannerId, ret);
     if (SoftBusMutexLock(&g_scannerLock) != SOFTBUS_OK) {
@@ -676,7 +676,7 @@ static int32_t StopScan(int32_t scannerId)
     }
     g_scanChannel[scannerId].isScanning = false;
     SoftBusMutexUnlock(&g_scannerLock);
-    int32_t ret = BleStopScan(btScannerId);
+    int ret = BleStopScan(btScannerId);
     DISC_LOGI(DISC_BLE_ADAPTER, "stop scan, scannerId: %d, bt-scannerId: %d, ret: %d", scannerId, btScannerId, ret);
     if (ret != OHOS_BT_STATUS_SUCCESS) {
         return SOFTBUS_ERR;
@@ -686,8 +686,9 @@ static int32_t StopScan(int32_t scannerId)
 
 static bool IsLpAvailable(void)
 {
-    DISC_LOGI(DISC_BLE_ADAPTER, "is lp available");
-    return IsLpDeviceAvailable();
+    bool ret = IsLpDeviceAvailable();
+    DISC_LOGI(DISC_BLE_ADAPTER, "is lp available, ret: %d", ret);
+    return ret;
 }
 
 static bool SetLpParam(const SoftBusLpBroadcastParam *bcParam, const SoftBusLpScanParam *scanParam)
@@ -730,7 +731,7 @@ static bool SetLpParam(const SoftBusLpBroadcastParam *bcParam, const SoftBusLpSc
     lpParam.deliveryMode = LP_DELIVERY_MODE_REPLY;
     lpParam.advHandle = bcParam->advHandle;
     lpParam.duration = LP_ADV_DURATION_MS;
-    int32_t ret = SetLpDeviceParam(&lpParam);
+    int ret = SetLpDeviceParam(&lpParam);
     FreeBtFilter(lpParam.filter, scanParam->filterSize);
     SoftBusFree(lpParam.rawData.advData);
     SoftBusFree(lpParam.rawData.rspData);
@@ -751,21 +752,32 @@ static int32_t GetBroadcastHandle(int32_t advId, int32_t *bcHandle)
     }
     int32_t btAdvId = g_advChannel[advId].advId;
     SoftBusMutexUnlock(&g_advLock);
-    int32_t ret = GetAdvHandle(btAdvId, bcHandle);
+    int ret = GetAdvHandle(btAdvId, bcHandle);
     DISC_LOGI(DISC_BLE_ADAPTER, "advId: %d, bt-advId: %d, ret: %d", advId, btAdvId, ret);
-    return ret;
+    if (ret != OHOS_BT_STATUS_SUCCESS) {
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
 }
 
 static int32_t EnableSyncDataToLp(void)
 {
-    DISC_LOGI(DISC_BLE_ADAPTER, "enable sync data to lp");
-    return EnableSyncDataToLpDevice();
+    int ret = EnableSyncDataToLpDevice();
+    DISC_LOGI(DISC_BLE_ADAPTER, "enable sync data to lp, ret: %d", ret);
+    if (ret != OHOS_BT_STATUS_SUCCESS) {
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
 }
 
 static int32_t DisableSyncDataToLp(void)
 {
-    DISC_LOGI(DISC_BLE_ADAPTER, "disable sync data to lp");
-    return DisableSyncDataToLpDevice();
+    int ret = DisableSyncDataToLpDevice();
+    DISC_LOGI(DISC_BLE_ADAPTER, "disable sync data to lp, ret: %d", ret);
+    if (ret != OHOS_BT_STATUS_SUCCESS) {
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
 }
 
 static int32_t SetScanReportChannelToLp(int32_t scannerId, bool enable)
@@ -781,16 +793,23 @@ static int32_t SetScanReportChannelToLp(int32_t scannerId, bool enable)
     }
     int32_t btScannerId = g_scanChannel[scannerId].scannerId;
     SoftBusMutexUnlock(&g_scannerLock);
-    int32_t ret = SetScanReportChannelToLpDevice(btScannerId, enable);
+    int ret = SetScanReportChannelToLpDevice(btScannerId, enable);
     DISC_LOGI(DISC_BLE_ADAPTER, "scannerId: %d, bt-scannerId: %d, ret: %d", scannerId, btScannerId, ret);
-    return ret;
+    if (ret != OHOS_BT_STATUS_SUCCESS) {
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
 }
 
 static int32_t SetLpAdvParam(int32_t duration, int32_t maxExtAdvEvents, int32_t window,
     int32_t interval, int32_t bcHandle)
 {
-    DISC_LOGI(DISC_BLE_ADAPTER, "advHandle: %d", bcHandle);
-    return SetLpDeviceAdvParam(duration, maxExtAdvEvents, window, interval, bcHandle);
+    int ret = SetLpDeviceAdvParam(duration, maxExtAdvEvents, window, interval, bcHandle);
+    DISC_LOGI(DISC_BLE_ADAPTER, "advHandle: %d, ret: %d", bcHandle, ret);
+    if (ret != OHOS_BT_STATUS_SUCCESS) {
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
 }
 
 void SoftbusBleAdapterInit(void)
