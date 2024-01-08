@@ -407,7 +407,7 @@ int32_t ConvertToAuthConnInfo(const ConnectionInfo *info, AuthConnInfo *connInfo
 
 int32_t AuthCommonInit(void)
 {
-    g_authHandler.name = "AuthHandler";
+    g_authHandler.name = (char *)BUSCENTER_AUTH_HANDLER_NAME;
     g_authHandler.HandleMessage = HandleAuthMessage;
     g_authHandler.looper = GetLooper(LOOP_TYPE_DEFAULT);
 

@@ -62,7 +62,6 @@ static int32_t OnSetMediumParam(FsmStateMachine *fsm, int32_t msgType, void *par
 static int32_t OnUpdateSendInfo(FsmStateMachine *fsm, int32_t msgType, void *para);
 static int32_t OnScreeOffCheckDevStatus(FsmStateMachine *fsm, int32_t msgType, void *para);
 static int32_t OnReStartHbProcess(FsmStateMachine *fsm, int32_t msgType, void *para);
-static bool IsSupportBurstFeature(const char *newworkId);
 
 static LnnHeartbeatStateHandler g_hbNoneStateHandler[] = {
     {EVENT_HB_CHECK_DEV_STATUS, OnCheckDevStatus},
@@ -789,7 +788,7 @@ static int32_t ProcessLostHeartbeat(const char *networkId, ConnectionAddrType ad
         }
         return SOFTBUS_OK;
     }
-    if (IsSupportBurstFeature(networkId) && isWakeUp) {
+    if (LnnIsSupportBurstFeature(networkId) && isWakeUp) {
         LNN_LOGI(LNN_HEART_BEAT, "is support burst and is not wakeup, don't check");
         return SOFTBUS_OK;
     }
@@ -837,23 +836,6 @@ static bool IsTimestampExceedLimit(uint64_t nowTime, uint64_t oldTimeStamp, LnnH
     return true;
 }
 
-static bool IsSupportBurstFeature(const char *networkId)
-{
-    uint64_t localFeature;
-    uint64_t peerFeature;
-
-    if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &localFeature) != SOFTBUS_OK ||
-        LnnGetRemoteNumU64Info(networkId, NUM_KEY_FEATURE_CAPA, &peerFeature) != SOFTBUS_OK) {
-        LNN_LOGI(LNN_HEART_BEAT, "get local or remote feature fail");
-        return false;
-    }
-    if (IsFeatureSupport(localFeature, BIT_BLE_SUPPORT_SENSORHUB_HEARTBEAT) &&
-        IsFeatureSupport(peerFeature, BIT_BLE_SUPPORT_SENSORHUB_HEARTBEAT)) {
-        return true;
-    }
-    return false;
-}
-
 static void CheckDevStatusByNetworkId(LnnHeartbeatFsm *hbFsm, const char *networkId, LnnCheckDevStatusMsgPara *msgPara,
     uint64_t nowTime)
 {
@@ -898,8 +880,6 @@ static void CheckDevStatusByNetworkId(LnnHeartbeatFsm *hbFsm, const char *networ
     }
     if (ProcessLostHeartbeat(networkId, LnnConvertHbTypeToConnAddrType(hbType), msgPara->isWakeUp) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "process dev lost err, networkId=%s", anonyNetworkId);
-        AnonymizeFree(anonyNetworkId);
-        return;
     }
     AnonymizeFree(anonyNetworkId);
 }
@@ -940,7 +920,7 @@ static void CheckDevStatusForScreenOff(LnnHeartbeatFsm *hbFsm, const char *netwo
         return;
     }
     AnonymizeFree(anonyNetworkId);
-    if (IsSupportBurstFeature(networkId)) {
+    if (LnnIsSupportBurstFeature(networkId)) {
         LNN_LOGI(LNN_HEART_BEAT, "target device support burst, screen off don't need offline");
         return;
     }
@@ -1079,7 +1059,7 @@ static void DeinitHbFsmCallback(FsmStateMachine *fsm)
 
 static int32_t InitHeartbeatFsm(LnnHeartbeatFsm *hbFsm)
 {
-    if (sprintf_s(hbFsm->fsmName, HB_FSM_NAME_LEN, "LnnHbFsm-%u", hbFsm->id) == -1) {
+    if (sprintf_s(hbFsm->fsmName, HB_FSM_NAME_LEN, "%s-%u", BUSCENTER_HEARTBEAT_FSM_HANDLER_NAME, hbFsm->id) == -1) {
         LNN_LOGE(LNN_HEART_BEAT, "format fsm name fail");
         return SOFTBUS_ERR;
     }

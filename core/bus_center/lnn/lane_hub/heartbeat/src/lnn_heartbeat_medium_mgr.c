@@ -259,6 +259,7 @@ static LnnHeartbeatRecvInfo *HbGetStoredRecvInfo(const char *udidHash, Connectio
             SoftBusFree(item->device);
             SoftBusFree(item);
             g_hbRecvList->cnt--;
+            continue;
         }
         if (memcmp(item->device->devId, udidHash, DISC_MAX_DEVICE_ID_LEN) == 0 &&
             LnnConvAddrTypeToDiscType(item->device->addr[0].type) == LnnConvAddrTypeToDiscType(type)) {
@@ -389,8 +390,11 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp)
 
 static bool HbIsRepeatedReAuthRequest(LnnHeartbeatRecvInfo *storedInfo, uint64_t nowTime)
 {
-    if (storedInfo == NULL || nowTime - storedInfo->lastJoinLnnTime < HB_REAUTH_TIME) {
+    if (storedInfo == NULL) {
         return false;
+    }
+    if (nowTime - storedInfo->lastJoinLnnTime < HB_REAUTH_TIME) {
+        return true;
     }
     storedInfo->lastJoinLnnTime = nowTime;
     return false;
@@ -616,6 +620,7 @@ void LnnHbClearRecvList(void)
         SoftBusFree(item->device);
         SoftBusFree(item);
     }
+    g_hbRecvList->cnt = 0;
     (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
 }
 

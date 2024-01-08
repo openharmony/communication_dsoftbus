@@ -57,7 +57,6 @@ static LnnHeartbeatParamManager *g_hbParamMgr[HB_MAX_TYPE_COUNT] = {0};
 static int32_t SingleSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj);
 static int32_t FixedPeriodSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj);
 static int32_t AdjustablePeriodSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj);
-static bool IsSupportBurstFeature(const char *newtworkId);
 
 static LnnHeartbeatStrategyManager g_hbStrategyMgr[] = {
     [STRATEGY_HB_SEND_SINGLE] = {
@@ -679,22 +678,6 @@ int32_t LnnStartNewHbStrategyFsm(void)
     return SOFTBUS_OK;
 }
 
-static bool IsSupportBurstFeature(const char *networkId)
-{
-    uint64_t localFeature;
-    uint64_t peerFeature;
-    if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &localFeature) != SOFTBUS_OK ||
-        LnnGetRemoteNumU64Info(networkId, NUM_KEY_FEATURE_CAPA, &peerFeature) != SOFTBUS_OK) {
-        LNN_LOGI(LNN_HEART_BEAT, "get local or remote feature fail");
-        return false;
-    }
-    if (IsFeatureSupport(localFeature, BIT_BLE_SUPPORT_SENSORHUB_HEARTBEAT) &&
-        IsFeatureSupport(peerFeature, BIT_BLE_SUPPORT_SENSORHUB_HEARTBEAT)) {
-        return true;
-    }
-    return false;
-}
-
 int32_t LnnStartOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType)
 {
     GearMode mode = {0};
@@ -703,7 +686,7 @@ int32_t LnnStartOfflineTimingStrategy(const char *networkId, ConnectionAddrType 
     if (networkId == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (IsSupportBurstFeature(networkId)) {
+    if (LnnIsSupportBurstFeature(networkId)) {
         LNN_LOGI(LNN_HEART_BEAT, "target device support burst, dont't need post offline info");
         return SOFTBUS_OK;
     }
