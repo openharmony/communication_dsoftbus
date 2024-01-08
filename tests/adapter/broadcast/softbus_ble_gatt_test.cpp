@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -253,9 +253,9 @@ HWTEST_F(SoftbusBleGattTest, ScanLifecycle, TestSize.Level3)
     SoftBusBcScanParams scanParam = {
         .scanInterval = SOFTBUS_BC_SCAN_WINDOW_P10,
         .scanWindow = SOFTBUS_BC_SCAN_INTERVAL_P10,
-        .scanType = 1,
-        .scanPhy = 1,
-        .scanFilterPolicy = 0,
+        .scanType = SOFTBUS_BC_SCAN_TYPE_ACTIVE,
+        .scanPhy = SOFTBUS_BC_SCAN_PHY_1M,
+        .scanFilterPolicy = SOFTBUS_BC_SCAN_FILTER_POLICY_ACCEPT_ALL,
     };
 
     EXPECT_CALL(mocker, BleStartScanEx).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
@@ -286,9 +286,9 @@ HWTEST_F(SoftbusBleGattTest, ScanResultCb, TestSize.Level3)
     SoftBusBcScanParams scanParam = {
         .scanInterval = SOFTBUS_BC_SCAN_WINDOW_P10,
         .scanWindow = SOFTBUS_BC_SCAN_INTERVAL_P10,
-        .scanType = 1,
-        .scanPhy = 1,
-        .scanFilterPolicy = 0,
+        .scanType = SOFTBUS_BC_SCAN_TYPE_ACTIVE,
+        .scanPhy = SOFTBUS_BC_SCAN_PHY_1M,
+        .scanFilterPolicy = SOFTBUS_BC_SCAN_FILTER_POLICY_ACCEPT_ALL,
     };
 
     EXPECT_CALL(mocker, BleStartScanEx).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
