@@ -318,7 +318,8 @@ static int32_t LlGetDeviceName(void *buf, uint32_t len)
         LNN_LOGE(LNN_LEDGER, "get device name fail");
         return SOFTBUS_ERR;
     }
-    if (strncpy_s((char *)buf, len, deviceName, strlen(deviceName)) != EOK) {
+    uint32_t realyLen = len > strlen(deviceName) ? strlen(deviceName) : len -1;
+    if (strncpy_s((char *)buf, len, deviceName, realyLen) != EOK) {
         LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
         return SOFTBUS_MEM_ERR;
     }
