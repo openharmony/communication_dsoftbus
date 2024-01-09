@@ -414,8 +414,8 @@ static int32_t OpenAuthConn(const char *uuid, uint32_t reqId, bool isMeta)
     (void)memset_s(&auth, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     AuthConnCallback cb;
     (void)memset_s(&cb, sizeof(AuthConnCallback), 0, sizeof(AuthConnCallback));
-
-    if (AuthGetPreferConnInfo(uuid, &auth, isMeta) != SOFTBUS_OK) {
+    int32_t ret = AuthGetP2pConnInfo(uuid, &auth, isMeta);
+    if (ret != SOFTBUS_OK && AuthGetPreferConnInfo(uuid, &auth, isMeta) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get auth info fail");
         return SOFTBUS_ERR;
     }

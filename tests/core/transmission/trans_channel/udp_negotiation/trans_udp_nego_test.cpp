@@ -545,11 +545,11 @@ HWTEST_F(TransUdpNegoTest, UdpOpenAuthConn001, TestSize.Level1)
     string peerUdid = "normal peerUid";
     uint32_t requestId = 1;
     bool isMeta = false;
-    int32_t ret = UdpOpenAuthConn(peerUdid.c_str(), requestId, isMeta);
+    int32_t ret = UdpOpenAuthConn(peerUdid.c_str(), requestId, isMeta, 0);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     isMeta = true;
-    ret = UdpOpenAuthConn(peerUdid.c_str(), requestId, isMeta);
+    ret = UdpOpenAuthConn(peerUdid.c_str(), requestId, isMeta, 0);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
