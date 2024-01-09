@@ -1541,16 +1541,20 @@ static SessionInfo *CreateNewSocketSession(const SessionParam *param)
         return NULL;
     }
 
-    if (param->peerSessionName != NULL &&
-        strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, param->peerSessionName) != EOK) {
-        TRANS_LOGE(TRANS_SDK, "strcpy peerSessionName failed");
+    if (strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, param->peerSessionName) != EOK) {
+        char *anonySessionName = NULL;
+        Anonymize(param->peerSessionName, &anonySessionName);
+        TRANS_LOGI(TRANS_SDK, "strcpy peerName=%s failed", anonySessionName);
+        AnonymizeFree(anonySessionName);
         SoftBusFree(session);
         return NULL;
     }
 
-    if (param->peerDeviceId != NULL &&
-        strcpy_s(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX, param->peerDeviceId) != EOK) {
-        TRANS_LOGE(TRANS_SDK, "strcpy peerDeviceId failed");
+    if (strcpy_s(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX, param->peerDeviceId) != EOK) {
+        char *anonyNetworkId = NULL;
+        Anonymize(param->peerDeviceId, &anonyNetworkId);
+        TRANS_LOGI(TRANS_SDK, "strcpy peerDeviceId=%s failed", anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
         SoftBusFree(session);
         return NULL;
     }
@@ -1578,7 +1582,7 @@ static SessionInfo *CreateNewSocketSession(const SessionParam *param)
 int32_t ClientAddSocketSession(const SessionParam *param, int32_t *sessionId, bool *isEnabled)
 {
     if (param == NULL || param->sessionName == NULL || param->groupId == NULL || param->attr == NULL ||
-        sessionId == NULL) {
+        sessionId == NULL || param->peerSessionName == NULL || param->peerDeviceId == NULL) {
         TRANS_LOGE(TRANS_SDK, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -1684,7 +1688,13 @@ static int32_t CheckBindSocketInfo(const SessionInfo *session)
 {
     if (!IsValidString(session->info.peerSessionName, SESSION_NAME_SIZE_MAX) ||
         !IsValidString(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX)) {
-        TRANS_LOGE(TRANS_SDK, "invalid peerName or peerNetworkId");
+        char *anonySessionName = NULL;
+        char *anonyNetworkId = NULL;
+        Anonymize(session->info.peerSessionName, &anonySessionName);
+        Anonymize(session->info.peerDeviceId, &anonyNetworkId);
+        TRANS_LOGI(TRANS_SDK, "invalid peerName=%s or peerNetworkId=%s", anonySessionName, anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
+        AnonymizeFree(anonySessionName);
         return SOFTBUS_INVALID_PARAM;
     }
 
