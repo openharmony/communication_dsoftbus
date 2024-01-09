@@ -92,7 +92,7 @@ static void WifiDirectP2pConnectionChangeCallback(const WifiP2pLinkedInfo info)
     CONN_CHECK_AND_RETURN_LOGE(param != NULL, CONN_WIFI_DIRECT, "alloc failed");
 
     param->action = WIFI_P2P_CONNECTION_CHANGED_ACTION;
-    (void)memcpy_s(&param->p2pParam.p2pLinkInfo, sizeof(WifiP2pLinkedInfo), &info, sizeof(WifiP2pLinkedInfo));
+    param->p2pParam.p2pLinkInfo = info;
     param->p2pParam.groupInfo = NULL;
     (void)GetWifiDirectP2pAdapter()->getGroupInfo(&param->p2pParam.groupInfo);
 
