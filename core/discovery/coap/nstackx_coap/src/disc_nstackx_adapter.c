@@ -196,7 +196,8 @@ int32_t DiscCoapRegisterCapability(uint32_t capabilityBitmapNum, uint32_t capabi
     DISC_CHECK_AND_RETURN_RET_LOGE(capabilityBitmapNum != 0, SOFTBUS_INVALID_PARAM,
         DISC_COAP, "capabilityBitmapNum=0");
 
-    if (NSTACKX_RegisterCapability(capabilityBitmapNum, capabilityBitmap) != 0) {
+    if (NSTACKX_RegisterCapability(capabilityBitmapNum, capabilityBitmap) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_COAP, "NSTACKX Register Capability failed");
         return SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL;
     }
     return SOFTBUS_OK;
@@ -208,6 +209,7 @@ int32_t DiscCoapSetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capab
         DISC_COAP, "capabilityBitmapNum=0");
 
     if (NSTACKX_SetFilterCapability(capabilityBitmapNum, capabilityBitmap) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_COAP, "NSTACKX SetFilter Capability failed");
         SoftbusReportDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP, SOFTBUS_HISYSEVT_DISCOVER_COAP_SET_FILTER_CAP_FAIL);
         return SOFTBUS_DISCOVER_COAP_SET_FILTER_CAP_FAIL;
     }

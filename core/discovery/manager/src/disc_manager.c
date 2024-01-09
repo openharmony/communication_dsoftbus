@@ -323,7 +323,7 @@ static void DiscOnDeviceFound(const DeviceInfo *device, const InnerDeviceInfoAdd
             continue;
         }
 
-        if (SoftBusMutexLock(&(g_discoveryInfoList->lock)) != 0) {
+        if (SoftBusMutexLock(&(g_discoveryInfoList->lock)) != SOFTBUS_OK) {
             DISC_LOGE(DISC_CONTROL, "lock failed");
             return;
         }
@@ -478,7 +478,10 @@ static DiscInfo *CreateDiscInfoForPublish(const PublishInfo *info)
             SoftBusFree(infoNode);
             return NULL;
         }
-        (void)memcpy_s(option->capabilityData, info->dataLen, info->capabilityData, info->dataLen);
+        if (memcpy_s(option->capabilityData, info->dataLen, info->capabilityData, info->dataLen) != EOK) {
+            DISC_LOGE(DISC_CONTROL, "memcpy_s failed");
+            return NULL;
+        }
     }
 
     int32_t bitmap = TransferStringCapToBitmap(info->capability);
@@ -517,7 +520,10 @@ static DiscInfo *CreateDiscInfoForSubscribe(const SubscribeInfo *info)
             SoftBusFree(infoNode);
             return NULL;
         }
-        (void)memcpy_s(option->capabilityData, info->dataLen, info->capabilityData, info->dataLen);
+        if (memcpy_s(option->capabilityData, info->dataLen, info->capabilityData, info->dataLen) != EOK) {
+            DISC_LOGE(DISC_CONTROL, "memcpy_s failed");
+            return NULL;
+        }
     }
 
     int32_t bimap = TransferStringCapToBitmap(info->capability);
@@ -576,7 +582,7 @@ static void DfxRecordAddDiscInfoEnd(DiscInfo *info, const char *packageName, int
 static int32_t AddDiscInfoToList(SoftBusList *serviceList, const char *packageName, const InnerCallback *cb,
                                  DiscInfo *info, ServiceType type)
 {
-    if (SoftBusMutexLock(&(serviceList->lock)) != 0) {
+    if (SoftBusMutexLock(&(serviceList->lock)) != SOFTBUS_OK) {
         DfxRecordAddDiscInfoEnd(info, packageName, SOFTBUS_LOCK_ERR);
         DISC_LOGE(DISC_CONTROL, "lock failed");
         return SOFTBUS_LOCK_ERR;
@@ -781,7 +787,7 @@ static const char* TransferModuleIdToPackageName(DiscModule moduleId)
 
 static int32_t InnerSetDiscoveryCallback(const char *packageName, const DiscInnerCallback *cb)
 {
-    if (SoftBusMutexLock(&(g_discoveryInfoList->lock)) != 0) {
+    if (SoftBusMutexLock(&(g_discoveryInfoList->lock)) != SOFTBUS_OK) {
         DISC_LOGE(DISC_CONTROL, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
@@ -1054,6 +1060,7 @@ static IdContainer* CreateIdContainer(int32_t id, const char *pkgName)
 {
     IdContainer *container = SoftBusCalloc(sizeof(IdContainer));
     if (container == NULL) {
+        DISC_LOGE(DISC_CONTROL, "container calloc failed");
         return NULL;
     }
 
@@ -1063,11 +1070,13 @@ static IdContainer* CreateIdContainer(int32_t id, const char *pkgName)
     uint32_t nameLen = strlen(pkgName) + 1;
     container->pkgName = SoftBusCalloc(nameLen);
     if (container->pkgName == NULL) {
+        DISC_LOGE(DISC_CONTROL, "Container pkgName calloc failed");
         SoftBusFree(container);
         return NULL;
     }
 
     if (strcpy_s(container->pkgName, nameLen, pkgName) != EOK) {
+        DISC_LOGE(DISC_CONTROL, "strcpy_s failed");
         SoftBusFree(container);
         return NULL;
     }
@@ -1103,7 +1112,7 @@ static void RemoveDiscInfoByPackageName(SoftBusList *itemList, const ServiceType
     ListNode ids;
     ListInit(&ids);
 
-    if (SoftBusMutexLock(&itemList->lock) != 0) {
+    if (SoftBusMutexLock(&itemList->lock) != SOFTBUS_OK) {
         DISC_LOGE(DISC_CONTROL, "lock failed");
         return;
     }

@@ -17,7 +17,6 @@
 
 #include "disc_client_proxy.h"
 #include "disc_log.h"
-#include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_hisysevt_discreporter.h"
 
