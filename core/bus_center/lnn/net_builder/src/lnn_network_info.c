@@ -257,8 +257,6 @@ static void GetNetworkCapability(SoftBusWifiState wifiState, uint32_t *capabilit
                 if (!GetWifiDirectP2pAdapter()->isWifiP2pEnabled()) {
                     (void)LnnClearNetCapability(capability, BIT_WIFI_P2P);
                 }
-            } else if (!IsP2pAvailable(true)) {
-                (void)LnnClearNetCapability(capability, BIT_WIFI_P2P);
             }
             *needSync = true;
             break;
@@ -267,8 +265,6 @@ static void GetNetworkCapability(SoftBusWifiState wifiState, uint32_t *capabilit
             LnnSetNetworkCapability(capability);
             if (IsP2pAvailable(true)) {
                 (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
-            } else {
-                (void)LnnClearNetCapability(capability, BIT_WIFI_P2P);
             }
             *needSync = true;
             break;
@@ -276,8 +272,6 @@ static void GetNetworkCapability(SoftBusWifiState wifiState, uint32_t *capabilit
             g_isApEnable = false;
             if (IsP2pAvailable(false)) {
                 (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
-            } else {
-                (void)LnnClearNetCapability(capability, BIT_WIFI_P2P);
             }
             *needSync = true;
             break;
