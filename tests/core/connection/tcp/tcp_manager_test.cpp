@@ -250,7 +250,7 @@ HWTEST_F(TcpManagerTest, testTcpManager005, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
 
     info.type = CONNECT_TCP;
-    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_NOT_FIND, TcpStopListening(&info));
     EXPECT_EQ(SOFTBUS_ERR, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
     EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
@@ -635,7 +635,7 @@ HWTEST_F(TcpManagerTest, testTcpManager014, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
 
     info.type = CONNECT_TCP;
-    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_NOT_FIND, TcpStopListening(&info));
     EXPECT_EQ(port, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
     EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
@@ -663,7 +663,7 @@ HWTEST_F(TcpManagerTest, testTcpManager015, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
 
     info.type = CONNECT_TCP;
-    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_NOT_FIND, TcpStopListening(&info));
     EXPECT_EQ(port, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_ERR, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
@@ -692,7 +692,7 @@ HWTEST_F(TcpManagerTest, testTcpManager016, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
 
     info.type = CONNECT_TCP;
-    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_NOT_FIND, TcpStopListening(&info));
     EXPECT_EQ(port, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
     EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
@@ -720,7 +720,7 @@ HWTEST_F(TcpManagerTest, testTcpManager017, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
 
     info.type = CONNECT_TCP;
-    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_NOT_FIND, TcpStopListening(&info));
     EXPECT_EQ(port, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
     EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
@@ -748,7 +748,7 @@ HWTEST_F(TcpManagerTest, testTcpManager018, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
 
     info.type = CONNECT_TCP;
-    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_NOT_FIND, TcpStopListening(&info));
     EXPECT_EQ(port, TcpStartListening(&info));
     EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
     EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
