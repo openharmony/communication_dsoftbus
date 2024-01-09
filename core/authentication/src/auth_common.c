@@ -374,6 +374,7 @@ int32_t ConvertToAuthConnInfo(const ConnectionInfo *info, AuthConnInfo *connInfo
             } else {
                 connInfo->type = AUTH_LINK_TYPE_P2P;
             }
+            connInfo->info.ipInfo.moduleId = info->socketInfo.moduleId;
             connInfo->info.ipInfo.port = info->socketInfo.port;
             if (strcpy_s(connInfo->info.ipInfo.ip, IP_LEN, info->socketInfo.addr) != EOK) {
                 AUTH_LOGE(AUTH_CONN, "copy ip fail");
