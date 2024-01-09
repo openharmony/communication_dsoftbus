@@ -267,14 +267,14 @@ HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pRequestTest001, TestSize.Level1)
 
 /**
  * @tc.name: ConnectTcpDirectPeerTest004
- * @tc.desc: ConnectTcpDirectPeer, use the wrong parameter.
+ * @tc.desc: ConnectTcpDirectPeer, use the wrong parameter.sss
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(TransTcpDirectP2pTest, ConnectTcpDirectPeerTest001, TestSize.Level1)
 {
     int32_t ret = ConnectTcpDirectPeer(nullptr, g_port);
-    EXPECT_EQ(ret, INVALID_VALUE);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = ConnectTcpDirectPeer(g_addr, g_port);
     EXPECT_EQ(ret, SOFTBUS_ERR);
