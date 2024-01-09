@@ -743,13 +743,18 @@ static void TransCloseUdpChannelByRequestId(uint32_t requestId)
     TRANS_LOGD(TRANS_CTRL, "ok");
 }
 
-static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId, bool isMeta)
+static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId, bool isMeta, int32_t linkType)
 {
     AuthConnInfo auth;
     (void)memset_s(&auth, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     AuthConnCallback cb = {0};
-
-    int32_t ret = AuthGetPreferConnInfo(peerUdid, &auth, isMeta);
+    int32_t ret = SOFTBUS_ERR;
+    if (linkType == LANE_HML) {
+        ret = AuthGetP2pConnInfo(peerUdid, &auth, isMeta);
+    }
+    if (ret != SOFTBUS_OK) {
+        ret = AuthGetPreferConnInfo(peerUdid, &auth, isMeta);
+    }
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get info fail: ret=%d", ret);
         TransCloseUdpChannelByRequestId(requestId);
@@ -789,7 +794,8 @@ static int32_t OpenAuthConnForUdpNegotiation(UdpChannelInfo *channel)
     channelObj->isMeta = TransGetAuthTypeByNetWorkId(channel->info.peerNetWorkId);
     ReleaseUdpChannelLock();
 
-    int32_t ret = UdpOpenAuthConn(channel->info.peerData.deviceId, requestId, channelObj->isMeta);
+    int32_t ret = UdpOpenAuthConn(channel->info.peerData.deviceId, requestId, channelObj->isMeta,
+        channel->info.linkType);
     TransEventExtra extra = {
         .calleePkg = NULL,
         .callerPkg = NULL,
