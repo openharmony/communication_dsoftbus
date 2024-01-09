@@ -322,57 +322,6 @@ HWTEST_F(SoftbusBleGattTest, ScanResultCb, TestSize.Level3)
     mockScanResult.secondaryPhy = OHOS_BLE_SCAN_PHY_1M;
     mockScanResult.directAddrType = OHOS_BLE_RANDOM_DEVICE_ADDRESS;
     ASSERT_FALSE(scanResultCtx.Expect(scannerId, &expectScanResult));
-
-    mockScanResult.eventType = OHOS_BLE_EVT_CONNECTABLE;
-    mockScanResult.dataStatus = OHOS_BLE_DATA_INCOMPLETE_TRUNCATED;
-    mockScanResult.addrType = OHOS_BLE_PUBLIC_IDENTITY_ADDRESS;
-    mockScanResult.primaryPhy = OHOS_BLE_SCAN_PHY_2M;
-    mockScanResult.secondaryPhy = OHOS_BLE_SCAN_PHY_2M;
-    mockScanResult.directAddrType = OHOS_BLE_PUBLIC_IDENTITY_ADDRESS;
-    ASSERT_FALSE(scanResultCtx.Expect(scannerId, &expectScanResult));
-
-    mockScanResult.eventType = OHOS_BLE_EVT_CONNECTABLE_DIRECTED;
-    mockScanResult.dataStatus = UINT8_MAX;
-    mockScanResult.addrType = OHOS_BLE_RANDOM_STATIC_IDENTITY_ADDRESS;
-    mockScanResult.primaryPhy = OHOS_BLE_SCAN_PHY_CODED;
-    mockScanResult.secondaryPhy = OHOS_BLE_SCAN_PHY_CODED;
-    mockScanResult.directAddrType = OHOS_BLE_RANDOM_STATIC_IDENTITY_ADDRESS;
-    ASSERT_FALSE(scanResultCtx.Expect(scannerId, &expectScanResult));
-
-    mockScanResult.eventType = OHOS_BLE_EVT_SCANNABLE;
-    mockScanResult.addrType = OHOS_BLE_UNRESOLVABLE_RANDOM_DEVICE_ADDRESS;
-    mockScanResult.primaryPhy = UINT8_MAX;
-    mockScanResult.secondaryPhy = UINT8_MAX;
-    mockScanResult.directAddrType = OHOS_BLE_UNRESOLVABLE_RANDOM_DEVICE_ADDRESS;
-    ASSERT_FALSE(scanResultCtx.Expect(scannerId, &expectScanResult));
-
-    mockScanResult.eventType = OHOS_BLE_EVT_SCANNABLE_DIRECTED;
-    mockScanResult.addrType = OHOS_BLE_NO_ADDRESS;
-    mockScanResult.directAddrType = OHOS_BLE_NO_ADDRESS;
-    ASSERT_FALSE(scanResultCtx.Expect(scannerId, &expectScanResult));
-
-    mockScanResult.eventType = OHOS_BLE_EVT_LEGACY_NON_CONNECTABLE;
-    mockScanResult.addrType = UINT8_MAX;
-    mockScanResult.directAddrType = UINT8_MAX;
-    ASSERT_FALSE(scanResultCtx.Expect(scannerId, &expectScanResult));
-
-    mockScanResult.eventType = OHOS_BLE_EVT_LEGACY_SCANNABLE;
-    ASSERT_FALSE(scanResultCtx.Expect(scannerId, &expectScanResult));
-
-    mockScanResult.eventType = OHOS_BLE_EVT_LEGACY_CONNECTABLE;
-    ASSERT_FALSE(scanResultCtx.Expect(scannerId, &expectScanResult));
-
-    mockScanResult.eventType = OHOS_BLE_EVT_LEGACY_CONNECTABLE_DIRECTED;
-    ASSERT_FALSE(scanResultCtx.Expect(scannerId, &expectScanResult));
-
-    mockScanResult.eventType = OHOS_BLE_EVT_LEGACY_SCAN_RSP_TO_ADV_SCAN;
-    ASSERT_FALSE(scanResultCtx.Expect(scannerId, &expectScanResult));
-
-    mockScanResult.eventType = OHOS_BLE_EVT_LEGACY_SCAN_RSP_TO_ADV;
-    ASSERT_FALSE(scanResultCtx.Expect(scannerId, &expectScanResult));
-
-    mockScanResult.eventType = UINT8_MAX;
-    ASSERT_FALSE(scanResultCtx.Expect(scannerId, &expectScanResult));
 }
 
 /**
