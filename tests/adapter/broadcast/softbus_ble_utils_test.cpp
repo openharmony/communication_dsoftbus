@@ -271,8 +271,7 @@ HWTEST(SoftbusBleUtilsTest, AssembleRspData, TestSize.Level3)
  */
 HWTEST(SoftbusBleUtilsTest, ParseScanResult, TestSize.Level3)
 {
-    std::string advDataStr = "00112233445566";
-    uint8_t *advData = reinterpret_cast<uint8_t *>(const_cast<char *>(advDataStr.c_str()));
+    uint8_t *advData = (uint8_t *)"00112233445566";
     uint8_t advLen = 23;
     SoftBusBcScanResult softBusBcScanResult = {};
     int32_t ret = ParseScanResult(advData, advLen, &softBusBcScanResult);

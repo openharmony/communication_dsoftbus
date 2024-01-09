@@ -53,7 +53,6 @@ public:
     static StRecordCtx advDisableCtx;
     static StRecordCtx advDataCtx;
     static StRecordCtx advUpdateCtx;
-    // btInnerAdvId 模拟蓝牙生成的广播id
     static int btInnerAdvId;
 
     static void SetUpTestCase(void);
@@ -110,8 +109,6 @@ static void StubAdvDataCallback(int advId, int status)
     SoftbusBleGattTest::advDataCtx.Update(advId, status);
 }
 
-// Notice：考虑到BleStartAdvEx的回调需要异步触发，实现会导致专注点不在用来本身。这里不手动mock，
-// ！！！IMPORANT: 一定需要手动触发成功回调，否则回导致adapter状态异常！！！
 static int ActionSuccessBleStartAdvEx(int *advId, const StartAdvRawData rawData, BleAdvParams advParam)
 {
     static int advIdGenerator = 0;
@@ -352,7 +349,6 @@ HWTEST_F(SoftbusBleGattTest, AdvertiseLifecycle, TestSize.Level3)
     DISC_LOGI(DISC_BLE_ADAPTER, "start to StartBroadcasting");
     ASSERT_EQ(MockBluetooth::interface->StartBroadcasting(advId, &params, &data), SOFTBUS_OK);
     ASSERT_FALSE(advEnableCtx.Expect(advId, OHOS_BT_STATUS_SUCCESS));
-    // 模拟蓝牙广播成功回调, 广播成功会被再次回调, adapter状态才能恢复正常
     DISC_LOGI(DISC_BLE_ADAPTER, "start to advEnableCb");
     MockBluetooth::btGattCallback->advEnableCb(btInnerAdvId, OHOS_BT_STATUS_SUCCESS);
     ASSERT_TRUE(advEnableCtx.Expect(advId, OHOS_BT_STATUS_SUCCESS));
@@ -366,7 +362,6 @@ HWTEST_F(SoftbusBleGattTest, AdvertiseLifecycle, TestSize.Level3)
     ASSERT_EQ(MockBluetooth::interface->UpdateBroadcasting(advId, nullptr, &data), SOFTBUS_INVALID_PARAM);
     ASSERT_EQ(MockBluetooth::interface->UpdateBroadcasting(advId, &params, &data), SOFTBUS_OK);
     ASSERT_FALSE(advEnableCtx.Expect(advId, OHOS_BT_STATUS_SUCCESS));
-    // 模拟蓝牙广播成功回调, 广播成功会被再次回调, adapter状态才能恢复正常
     DISC_LOGI(DISC_BLE_ADAPTER, "start to advEnableCb");
     MockBluetooth::btGattCallback->advEnableCb(btInnerAdvId, OHOS_BT_STATUS_SUCCESS);
     ASSERT_TRUE(advEnableCtx.Expect(advId, OHOS_BT_STATUS_SUCCESS));
