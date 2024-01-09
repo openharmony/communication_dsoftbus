@@ -426,7 +426,7 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_
 int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const uint8_t *data, uint32_t dataLen)
 {
     DISC_CHECK_AND_RETURN_RET_LOGW(device != NULL && device->info != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE,
-        "device is invalid");
+        "device is null");
     BroadcastReportInfo *reportInfo = (BroadcastReportInfo *)data;
     DISC_CHECK_AND_RETURN_RET_LOGW(reportInfo != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "reportInfo=NULL is invalid");
     DISC_CHECK_AND_RETURN_RET_LOGW(dataLen == sizeof(BroadcastReportInfo), SOFTBUS_INVALID_PARAM, DISC_BLE,
