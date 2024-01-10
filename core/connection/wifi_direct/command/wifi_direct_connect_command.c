@@ -38,16 +38,30 @@ static bool IsNeedRetry(struct WifiDirectCommand *base, int32_t reason)
     return GetWifiDirectNegotiator()->isRetryErrorCode(reason);
 }
 
+static enum WifiDirectLinkType GetLinkType(enum WifiDirectConnectType connectType)
+{
+    switch (connectType) {
+        case WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P:
+            return WIFI_DIRECT_LINK_TYPE_P2P;
+        case WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML:
+        case WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML:
+        case WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML:
+            return WIFI_DIRECT_LINK_TYPE_HML;
+        default:
+            CONN_LOGE(CONN_WIFI_DIRECT, "connectType=%d invalid", connectType);
+            return WIFI_DIRECT_LINK_TYPE_INVALID;
+    }
+}
+
 static struct InnerLink *GetReuseLink(struct WifiDirectConnectCommand *command)
 {
     struct WifiDirectConnectInfo *connectInfo = &command->connectInfo;
     char remoteUuid[UUID_BUF_LEN] = {0};
     int32_t ret = LnnGetRemoteStrInfo(connectInfo->remoteNetworkId, STRING_KEY_UUID, remoteUuid, sizeof(remoteUuid));
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, NULL, CONN_WIFI_DIRECT, "get remote uuid failed");
-    struct InnerLink *link = GetLinkManager()->getLinkByTypeAndUuid(WIFI_DIRECT_LINK_TYPE_HML, remoteUuid);
-    if (link == NULL) {
-        link = GetLinkManager()->getLinkByTypeAndUuid(WIFI_DIRECT_LINK_TYPE_P2P, remoteUuid);
-    }
+
+    enum WifiDirectLinkType linkType = GetLinkType(connectInfo->connectType);
+    struct InnerLink *link = GetLinkManager()->getLinkByTypeAndUuid(linkType, remoteUuid);
     CONN_CHECK_AND_RETURN_RET_LOGW(link != NULL, NULL, CONN_WIFI_DIRECT, "link is null");
     enum InnerLinkState state = link->getInt(link, IL_KEY_STATE, INNER_LINK_STATE_DISCONNECTED);
     CONN_CHECK_AND_RETURN_RET_LOGW(state == INNER_LINK_STATE_CONNECTED, NULL, CONN_WIFI_DIRECT,

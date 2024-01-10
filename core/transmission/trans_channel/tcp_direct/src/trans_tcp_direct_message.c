@@ -332,7 +332,7 @@ static int32_t GetServerSideIpInfo(SessionConn *conn, char *ip, uint32_t len)
             TRANS_LOGW(TRANS_CTRL, "ServerSide wifi set peer ip fail");
         }
     } else if (conn->appInfo.routeType == WIFI_P2P) {
-        if (GetWifiDirectManager()->getLocalIpByUuid(conn->appInfo.peerData.deviceId, myIp, sizeof(myIp)) !=
+        if (GetWifiDirectManager()->getLocalIpByRemoteIp(conn->appInfo.peerData.addr, myIp, sizeof(myIp)) !=
             SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "NotifyChannelOpened get p2p ip fail");
             return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
@@ -368,7 +368,7 @@ static int32_t GetClientSideIpInfo(SessionConn *conn, char *ip, uint32_t len)
             TRANS_LOGW(TRANS_CTRL, "Client wifi set peer ip fail");
         }
     } else if (conn->appInfo.routeType == WIFI_P2P) {
-        if (GetWifiDirectManager()->getLocalIpByUuid(conn->appInfo.peerData.deviceId, myIp, sizeof(myIp)) !=
+        if (GetWifiDirectManager()->getLocalIpByRemoteIp(conn->appInfo.peerData.addr, myIp, sizeof(myIp)) !=
             SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "NotifyChannelOpened get p2p ip fail");
             return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
