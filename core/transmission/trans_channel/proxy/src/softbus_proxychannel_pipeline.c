@@ -172,6 +172,10 @@ int32_t TransProxyPipelineOpenChannel(int32_t requestId, const char *networkId,
     if (!IsValidString(networkId, ID_MAX_LEN)) {
         return SOFTBUS_INVALID_PARAM;
     }
+    if (option == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "option invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
     TRANS_CHECK_AND_RETURN_RET_LOGW(networkId, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid network id");
     TRANS_CHECK_AND_RETURN_RET_LOGW(callback && callback->onChannelOpened && callback->onChannelOpenFailed,
         SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid callback");
@@ -338,6 +342,10 @@ int32_t TransProxyPipelineCloseChannelDelay(int32_t channelId)
 
 int32_t InnerSaveChannel(int32_t channelId, const char *uuid)
 {
+    if (uuid == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid uuid");
+        return SOFTBUS_INVALID_PARAM;
+    }
     TRANS_CHECK_AND_RETURN_RET_LOGW(SoftBusMutexLock(&g_manager.channels->lock) == SOFTBUS_OK,
         SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock failed");
     struct PipelineChannelItem *item = (struct PipelineChannelItem *)SoftBusCalloc(sizeof(struct PipelineChannelItem));
@@ -361,6 +369,10 @@ int32_t InnerSaveChannel(int32_t channelId, const char *uuid)
 static int TransProxyPipelineOnChannelOpened(int32_t channelId, const char *uuid, unsigned char isServer)
 {
     TRANS_LOGD(TRANS_CTRL, "enter.");
+    if (uuid == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid uuid");
+        return SOFTBUS_INVALID_PARAM;
+    }
     char *clone = (char *)SoftBusCalloc(UUID_BUF_LEN);
     if (clone == NULL || strcpy_s(clone, UUID_BUF_LEN, uuid) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "copy uuid failed, channelId=%d", channelId);
