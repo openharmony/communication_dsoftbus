@@ -17,12 +17,12 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "comm_log.h"
 #include "softbus_errcode.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_hidumper.h"
 #include "softbus_hidumper_util.h"
-#include "softbus_log_old.h"
 
 #define SOFTBUS_FIFTEEN_MINUTES_STATS_ORDER "15min"
 #define SOFTBUS_TWENTY_FOUR_HOURS_STATS_ORDER "24h"
@@ -39,7 +39,7 @@ static int32_t SoftBusStatsDumpHander(int fd, int32_t argc, const char **argv)
         return SOFTBUS_ERR;
     }
 
-    SoftBusStatsResult *result = (SoftBusStatsResult *)SoftBusMalloc(sizeof(SoftBusStatsResult));
+    SoftBusStatsResult *result = MallocSoftBusStatsResult(sizeof(SoftBusStatsResult));
     if (result == NULL) {
         SOFTBUS_DPRINTF(fd, "SoftBusStatsDumpHander result malloc fail!\n");
         return SOFTBUS_ERR;
@@ -47,7 +47,7 @@ static int32_t SoftBusStatsDumpHander(int fd, int32_t argc, const char **argv)
     if (strcmp(argv[0], SOFTBUS_FIFTEEN_MINUTES_STATS_ORDER) == SOFTBUS_OK) {
         if (SoftBusQueryStatsInfo(FIFTEEN_MINUTES, result) != SOFTBUS_OK) {
             SOFTBUS_DPRINTF(fd, "SoftBusStatsDumpHander query fail!\n");
-            SoftBusFree(result);
+            FreeSoftBusStatsResult(result);
             return SOFTBUS_ERR;
         }
         SOFTBUS_DPRINTF(fd, "SoftBus 15min Statistics:\n");
@@ -60,7 +60,7 @@ static int32_t SoftBusStatsDumpHander(int fd, int32_t argc, const char **argv)
         SOFTBUS_DPRINTF(fd, "Channel score exceeded times = %d\n", result->laneScoreOverTimes);
     } else if (strcmp(argv[0], SOFTBUS_TWENTY_FOUR_HOURS_STATS_ORDER) == SOFTBUS_OK) {
         if (SoftBusQueryStatsInfo(TWENTY_FOUR_HOURS, result) != SOFTBUS_OK) {
-            SoftBusFree(result);
+            FreeSoftBusStatsResult(result);
             SOFTBUS_DPRINTF(fd, "SoftBusStatsDumpHander query fail!\n");
             return SOFTBUS_ERR;
         }
@@ -74,11 +74,11 @@ static int32_t SoftBusStatsDumpHander(int fd, int32_t argc, const char **argv)
         SOFTBUS_DPRINTF(fd, "Keepalive detection times = NA\n");
     } else {
         SOFTBUS_DPRINTF(fd, "SoftBusStatsDumpHander invalid param!\n");
-        SoftBusFree(result);
+        FreeSoftBusStatsResult(result);
         return SOFTBUS_ERR;
     }
     
-    SoftBusFree(result);
+    FreeSoftBusStatsResult(result);
     return SOFTBUS_OK;
 }
 
@@ -87,7 +87,7 @@ int32_t SoftBusStatsHiDumperInit(void)
     int32_t ret = SoftBusRegHiDumperHandler(SOFTBUS_STATS_MODULE_NAME, SOFTBUS_STATS_MODULE_HELP,
         &SoftBusStatsDumpHander);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "SoftBusRegStatsDumpCb registe fail");
+        COMM_LOGE(COMM_DFX, "SoftBusRegStatsDumpCb registe fail");
     }
     return ret;
 }

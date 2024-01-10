@@ -15,9 +15,7 @@
 
 #include "auth_hichain_adapter.h"
 
-#include <stdlib.h>
 #include <string.h>
-#include <securec.h>
 
 #include "auth_common.h"
 #include "auth_hichain.h"
@@ -81,6 +79,8 @@ int32_t RegChangeListener(const char *appId, DataChangeListener *listener)
 
 int32_t UnregChangeListener(const char *appId)
 {
+    AUTH_CHECK_AND_RETURN_RET_LOGE(appId != NULL, SOFTBUS_INVALID_PARAM, AUTH_HICHAIN,
+        "appId is null");
     const DeviceGroupManager *gmInstance = GetGmInstance();
     AUTH_CHECK_AND_RETURN_RET_LOGE(gmInstance != NULL, SOFTBUS_ERR, AUTH_HICHAIN,
         "hichain GetGmInstance failed");
@@ -286,6 +286,7 @@ uint32_t HichainGetJoinedGroups(int32_t groupType)
 
 void CancelRequest(int64_t authReqId, const char *appId)
 {
+    AUTH_CHECK_AND_RETURN_LOGE(appId != NULL, AUTH_HICHAIN, "appId is null");
     if (g_hichain == NULL) {
         g_hichain = InitHichain();
     }

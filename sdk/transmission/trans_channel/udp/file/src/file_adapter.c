@@ -20,7 +20,6 @@
 
 #include "softbus_adapter_errcode.h"
 #include "softbus_adapter_socket.h"
-#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_socket.h"
 #include "trans_log.h"
@@ -38,7 +37,7 @@ static int SetReuseAddr(int fd, int on)
 static int SetReusePort(int fd, int on)
 {
     int rc = SoftBusSocketSetOpt(fd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_REUSEPORT, &on, sizeof(on));
-    if (rc != 0) {
+    if (rc != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "fd=%d set SO_REUSEPORT error", fd);
         return SOFTBUS_ERR;
     }

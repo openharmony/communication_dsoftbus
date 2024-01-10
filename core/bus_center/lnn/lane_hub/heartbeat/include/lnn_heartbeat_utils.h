@@ -119,6 +119,7 @@ bool LnnCheckSupportedHbType(LnnHeartbeatType *srcType, LnnHeartbeatType *dstTyp
 int32_t LnnGetShortAccountHash(uint8_t *accountHash, uint32_t len);
 int32_t LnnGenerateHexStringHash(const unsigned char *str, char *hashStr, uint32_t len);
 int32_t LnnGenerateBtMacHash(const char *btMac, int32_t brMacLen, char *brMacHash, int32_t hashLen);
+bool LnnIsSupportBurstFeature(const char *networkId);
 void LnnDumpLocalBasicInfo(void);
 
 #ifdef __cplusplus

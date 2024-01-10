@@ -126,12 +126,7 @@ HWTEST_F(DiscDistributedBleTest, TestCheckScanner001, TestSize.Level1)
 
 /*
  * @tc.name: TestScanFilter001
- * @tc.desc: Test ScanFilter should return SOFTBUS_ERR
- *           when given not SOFTBUS_BLE_DATA_COMPLETE testScanResultData.dataStatus
- *           should return SOFTBUS_ERR when don't suit the appointed lenth testScanResultData.advLen
- *           should return SOFTBUS_ERR when don't suit the appointed value testScanResultData.advData
- *           should return SOFTBUS_OK when given 0x1 one of g_bleInfoManager[0],[1],[2].capBitMap[0]
- *           and have correct testScanResultData
+ * @tc.desc: Test ScanFilter should return SOFTBUS_ERR when given invalid reportInfo
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -141,56 +136,138 @@ HWTEST_F(DiscDistributedBleTest, TestScanFilter001, TestSize.Level1)
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
-    uint8_t advDataTest[INT32_MAX_BIT_NUM];
-    uint32_t advLenTest = sizeof(advDataTest);
-    SoftBusBleScanResult testScanResultData{
-        .dataStatus = SOFTBUS_BLE_DATA_INCOMPLETE_MORE_TO_COME,
-        .advLen = POS_TLV,
-        .advData = advDataTest,
-    };
-    int32_t ret = ScanFilter(&testScanResultData);
+    BroadcastReportInfo reportInfo = {0};
+
+    // when not reportInfo->dataStatus == SOFTBUS_BLE_DATA_COMPLETE
+    reportInfo.dataStatus = SOFTBUS_BLE_DATA_INCOMPLETE_MORE_TO_COME;
+    int32_t ret = ScanFilter(&reportInfo);
     EXPECT_NE(ret, SOFTBUS_OK);
 
-    testScanResultData.dataStatus = SOFTBUS_BLE_DATA_COMPLETE;
-    ret = ScanFilter(&testScanResultData);
+    // when not advData != NULL
+    reportInfo.dataStatus = SOFTBUS_BLE_DATA_COMPLETE;
+    ret = ScanFilter(&reportInfo);
     EXPECT_NE(ret, SOFTBUS_OK);
 
-    testScanResultData.advLen = POS_TLV + ADV_HEAD_LEN;
-    testScanResultData.advData[POS_PACKET_LENGTH] = ADV_HEAD_LEN;
-    ret = ScanFilter(&testScanResultData);
+    // when not advLen >= POS_TLV
+    uint8_t payload[POS_TLV] = {0};
+    reportInfo.packet.bcData.payload = &payload[0];
+    reportInfo.packet.bcData.payloadLen = POS_TLV - 1;
+    ret = ScanFilter(&reportInfo);
     EXPECT_NE(ret, SOFTBUS_OK);
 
-    testScanResultData.advData[POS_PACKET_LENGTH] = ADV_HEAD_LEN + RSP_HEAD_LEN - 1;
-    ret = ScanFilter(&testScanResultData);
+    // when not rspData != NULL
+    reportInfo.packet.bcData.payloadLen = POS_TLV;
+    ret = ScanFilter(&reportInfo);
     EXPECT_NE(ret, SOFTBUS_OK);
 
-    testScanResultData.advLen = POS_PACKET_LENGTH + ADV_HEAD_LEN + RSP_HEAD_LEN + 1;
-    testScanResultData.advData[POS_PACKET_LENGTH + ADV_HEAD_LEN + RSP_HEAD_LEN] = 1;
-    ret = ScanFilter(&testScanResultData);
+    // when not rspLen > 0
+    reportInfo.packet.rspData.payload = &payload[0];
+    reportInfo.packet.rspData.payloadLen = -1;
+    ret = ScanFilter(&reportInfo);
     EXPECT_NE(ret, SOFTBUS_OK);
-
-    testScanResultData.advLen = advLenTest;
-    ret = ScanFilter(&testScanResultData);
-    EXPECT_NE(ret, SOFTBUS_OK);
-
-    testScanResultData.advData[POS_UUID] = (uint8_t)(BLE_UUID & BYTE_MASK);
-    ret = ScanFilter(&testScanResultData);
-    EXPECT_NE(ret, SOFTBUS_OK);
-
-    testScanResultData.advData[POS_UUID + 1] = (uint8_t)((BLE_UUID >> BYTE_SHIFT_BIT) & BYTE_MASK);
-    ret = ScanFilter(&testScanResultData);
-    EXPECT_NE(ret, SOFTBUS_OK);
-
-    testScanResultData.advData[POS_VERSION + ADV_HEAD_LEN] = BLE_VERSION;
-    ret = ScanFilter(&testScanResultData);
-    EXPECT_NE(ret, SOFTBUS_OK);
-
-    g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].capBitMap[0] = 0x1;
-    ret = ScanFilter(&testScanResultData);
-    EXPECT_EQ(ret, SOFTBUS_OK);
 
     DiscSoftBusBleDeinit();
     DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestScanFilter001, End");
+}
+
+/*
+ * @tc.name: TestScanFilter002
+ * @tc.desc: Test ScanFilter should return SOFTBUS_ERR when given invalid reportInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscDistributedBleTest, TestScanFilter002, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestScanFilter002, Start");
+    g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
+    ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
+
+    uint8_t payload[POS_TLV] = {0};
+    BroadcastReportInfo reportInfo = {
+        .dataStatus = SOFTBUS_BLE_DATA_COMPLETE,
+        .packet = {
+            .bcData = {
+                .payload = &payload[0],
+                .payloadLen = POS_TLV,
+            },
+            .rspData = {
+                .payload = &payload[0],
+                .payloadLen = POS_TLV,
+            },
+        },
+    };
+
+    // when not reportInfo->packet.bcData.type == BC_DATA_TYPE_SERVICE
+    reportInfo.packet.bcData.type = BC_DATA_TYPE_MANUFACTURER;
+    int32_t ret = ScanFilter(&reportInfo);
+    EXPECT_NE(ret, SOFTBUS_OK);
+
+    // when not reportInfo->packet.bcData.id == BLE_UUID
+    reportInfo.packet.bcData.type = BC_DATA_TYPE_SERVICE;
+    reportInfo.packet.bcData.id = BLE_UUID + 1;
+    ret = ScanFilter(&reportInfo);
+    EXPECT_NE(ret, SOFTBUS_OK);
+
+    // when not advData[POS_VERSION] == BLE_VERSION
+    reportInfo.packet.bcData.id = BLE_UUID;
+    reportInfo.packet.bcData.payload[POS_VERSION] = BLE_VERSION + 1;
+    ret = ScanFilter(&reportInfo);
+    EXPECT_NE(ret, SOFTBUS_OK);
+
+    // when not reportInfo->packet.rspData.type == BC_DATA_TYPE_SERVICE
+    reportInfo.packet.bcData.payload[POS_VERSION] = BLE_VERSION;
+    reportInfo.packet.rspData.type = BC_DATA_TYPE_MANUFACTURER;
+    ret = ScanFilter(&reportInfo);
+    EXPECT_NE(ret, SOFTBUS_OK);
+
+    // when not reportInfo->packet.rspData.id == COMPANY_ID
+    reportInfo.packet.rspData.type = BC_DATA_TYPE_SERVICE;
+    reportInfo.packet.rspData.id = COMPANY_ID + 1;
+    ret = ScanFilter(&reportInfo);
+    EXPECT_NE(ret, SOFTBUS_OK);
+
+    DiscSoftBusBleDeinit();
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestScanFilter002, End");
+}
+
+/*
+ * @tc.name: TestScanFilter003
+ * @tc.desc: Test ScanFilter should return SOFTBUS_OK when given valid reportInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscDistributedBleTest, TestScanFilter003, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestScanFilter003, Start");
+    g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
+    ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
+
+    uint8_t payload[POS_TLV] = {0};
+    BroadcastReportInfo reportInfo = {
+        .dataStatus = SOFTBUS_BLE_DATA_COMPLETE,
+        .packet = {
+            .bcData = {
+                .payload = &payload[0],
+                .payloadLen = POS_TLV,
+                .type = BC_DATA_TYPE_SERVICE,
+                .id = BLE_UUID,
+            },
+            .rspData = {
+                .payload = &payload[0],
+                .payloadLen = POS_TLV,
+                .type = BC_DATA_TYPE_MANUFACTURER,
+                .id = COMPANY_ID,
+            },
+        },
+    };
+    reportInfo.packet.bcData.payload[POS_VERSION] = BLE_VERSION;
+    g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].capBitMap[0] = 0x1;
+
+    int32_t ret = ScanFilter(&reportInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    DiscSoftBusBleDeinit();
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestScanFilter003, End");
 }
 
 /*
@@ -310,16 +387,19 @@ HWTEST_F(DiscDistributedBleTest, TestBuildBleConfigAdvData001, TestSize.Level1)
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
-    SoftBusBleAdvData advDataTest;
-    BroadcastData broadcastDataTest;
-    int32_t ret = BuildBleConfigAdvData(nullptr, &broadcastDataTest);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = BuildBleConfigAdvData(&advDataTest, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    BroadcastPacket broadcastPacket = {};
+    BroadcastData broadcastData = {};
 
-    broadcastDataTest.dataLen = ADV_DATA_MAX_LEN;
-    ret = BuildBleConfigAdvData(&advDataTest, &broadcastDataTest);
-    EXPECT_EQ(advDataTest.scanRspData[POS_RSP_TYPE], RSP_TYPE);
+    broadcastData.dataLen = ADV_DATA_MAX_LEN;
+    int32_t ret = BuildBleConfigAdvData(&broadcastPacket, &broadcastData);
+    EXPECT_EQ(broadcastPacket.rspData.type, 0);
+    EXPECT_EQ(broadcastPacket.rspData.id, 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    broadcastData.dataLen = ADV_DATA_MAX_LEN + 1;
+    ret = BuildBleConfigAdvData(&broadcastPacket, &broadcastData);
+    EXPECT_EQ(broadcastPacket.rspData.type, BC_DATA_TYPE_MANUFACTURER);
+    EXPECT_EQ(broadcastPacket.rspData.id, COMPANY_ID);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     DiscSoftBusBleDeinit();
@@ -353,103 +433,6 @@ HWTEST_F(DiscDistributedBleTest, TestGetBroadcastData001, TestSize.Level1)
 }
 
 /*
- * @tc.name: TestStartAdvertiser001
- * @tc.desc: Test StartAdvertiser should return SOFTBUS_OK when given true/false g_bleAdvertiser[adv].isAdvertising
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DiscDistributedBleTest, TestStartAdvertiser001, TestSize.Level1)
-{
-    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestStartAdvertiser001, Start");
-    g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
-    ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
-
-    int32_t adv = CON_ADV_ID;
-    g_bleAdvertiser[adv].isAdvertising = true;
-    g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].needUpdate = true;
-    g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].needUpdate = true;
-    int32_t ret = StartAdvertiser(adv);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    g_bleAdvertiser[adv].isAdvertising = true;
-    g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].needUpdate = false;
-    g_bleInfoManager[BLE_SUBSCRIBE | BLE_PASSIVE].needUpdate = false;
-    ret = StartAdvertiser(adv);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    g_bleAdvertiser[adv].isAdvertising = false;
-    g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].capBitMap[0] = 0x1;
-    ret = StartAdvertiser(adv);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].capBitMap[0] = 0x0;
-    ret = StartAdvertiser(adv);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    DiscSoftBusBleDeinit();
-    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestStartAdvertiser001, End");
-}
-
-/*
- * @tc.name: TestStopAdvertiser001
- * @tc.desc: Test StopAdvertiser should return SOFTBUS_OK when given CON_ADV_ID/NON_ADV_ID adv
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DiscDistributedBleTest, TestStopAdvertiser001, TestSize.Level1)
-{
-    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestStopAdvertiser001, Start");
-    g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
-    ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
-
-    int32_t adv = CON_ADV_ID;
-    g_bleAdvertiser[adv].isAdvertising = true;
-    int32_t ret = StopAdvertiser(adv);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    g_bleAdvertiser[adv].isAdvertising = false;
-    ret = StopAdvertiser(adv);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    adv = NON_ADV_ID;
-    g_bleAdvertiser[adv].isAdvertising = true;
-    ret = StopAdvertiser(adv);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    g_bleAdvertiser[adv].isAdvertising = false;
-    ret = StopAdvertiser(adv);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    DiscSoftBusBleDeinit();
-    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestStopAdvertiser001, End");
-}
-
-/*
- * @tc.name: TestUpdateAdvertiser001
- * @tc.desc: Test UpdateAdvertiser should return SOFTBUS_OK when given 1/0 g_bleInfoManager[2].capBitMap[0]
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DiscDistributedBleTest, TestUpdateAdvertiser001, TestSize.Level1)
-{
-    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestUpdateAdvertiser001, Start");
-    g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
-    ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
-
-    int32_t adv = CON_ADV_ID;
-    g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].capBitMap[0] = 0x1;
-    int32_t ret = UpdateAdvertiser(adv);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].capBitMap[0] = 0x0;
-    ret = UpdateAdvertiser(adv);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    DiscSoftBusBleDeinit();
-    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestUpdateAdvertiser001, End");
-}
-
-/*
  * @tc.name: TestGetScannerParam001
  * @tc.desc: Test GetScannerParam should return SOFTBUS_OK when given valid param
  * @tc.type: FUNC
@@ -461,9 +444,9 @@ HWTEST_F(DiscDistributedBleTest, TestGetScannerParam001, TestSize.Level1)
     g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
-    int32_t freqTest = 0;
-    SoftBusBleScanParams scanParamTest;
-    int32_t ret = GetScannerParam(freqTest, &scanParamTest);
+    int32_t freq = LOW;
+    BcScanParams scanParam;
+    int32_t ret = GetScannerParam(freq, &scanParam);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     DiscSoftBusBleDeinit();

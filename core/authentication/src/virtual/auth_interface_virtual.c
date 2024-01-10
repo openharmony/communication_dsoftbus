@@ -120,6 +120,14 @@ int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isM
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
+{
+    (void)uuid;
+    (void)connInfo;
+    (void)isMeta;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
 int64_t AuthGetLatestIdByUuid(const char *uuid, AuthLinkType type, bool isMeta)
 {
     (void)uuid;

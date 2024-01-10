@@ -20,10 +20,6 @@
 #include "nstackx_util.h"
 #include "securec.h"
 
-#define TAG "nStackXCongestion"
-
-#define WIFI_BITRATE_ACCURACY 1000
-#define WIFI_SIGNAL_MINIMUM (-100)
 #define WIFI_QDISC_LENGTH 1000
 
 #define WIFI_STA_INFO_FAKE_RX_RATE 216

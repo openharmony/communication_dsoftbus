@@ -87,13 +87,13 @@ int SendVtpStreamTest(VtpStreamOpenParam *p1, VtpStreamOpenParam *p2, const IStr
     }
 
     int ret = StartVtpStreamChannelClient(CHANNELID, p1, callback);
-    if (ret ==SOFTBUS_ERR) {
+    if (ret == SOFTBUS_ERR) {
         return SOFTBUS_ERR;
     }
     printf("[client]:StartChannelClient ret:%d\n", ret);
 
     ret = StartVtpStreamChannelClient(CHANNELID2, p2, callback);
-    if (ret ==SOFTBUS_ERR) {
+    if (ret == SOFTBUS_ERR) {
         return SOFTBUS_ERR;
     }
     printf("[client]:StartChannelClient ret:%d\n", ret);

@@ -28,6 +28,14 @@ typedef struct SoftBusHandler SoftBusHandler;
 typedef struct SoftBusLooperContext SoftBusLooperContext;
 typedef struct SoftBusLooper SoftBusLooper;
 
+#define BUSCENTER_NET_BUILDER_HANDLER_NAME   "NetBuilderHandler"
+#define BUSCENTER_CONN_FSM_HANDLER_NAME      "LnnConnFsm"
+#define BUSCENTER_AUTH_HANDLER_NAME          "AuthHandler"
+#define BUSCENTER_AUTH_FSM_HANDLER_NAME      "AuthFsm"
+#define BUSCENTER_HEARTBEAT_FSM_HANDLER_NAME "LnnHbFsm"
+#define BUSCENTER_META_NODE_HANDLER_NAME     "MetaNodeHandler"
+#define BUSCENTER_NOTIFY_HANDLER_NAME        "NotifyHandler"
+
 struct SoftBusLooper {
     SoftBusLooperContext *context;
     bool dumpable;
@@ -64,7 +72,8 @@ enum LooperType {
     LOOP_TYPE_BR_SEND,
     LOOP_TYPE_BR_RECV,
     LOOP_TYPE_P2P,
-    LOOP_TYPE_LANE
+    LOOP_TYPE_LANE,
+    LOOP_TYPE_HANDLE_FILE
 };
 
 SoftBusLooper *GetLooper(int looper);

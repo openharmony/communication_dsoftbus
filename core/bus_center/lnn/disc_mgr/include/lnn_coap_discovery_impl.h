@@ -40,6 +40,14 @@ int32_t LnnStartCoapDiscovery(void);
 
 int32_t LnnStopCoapDiscovery(void);
 
+void LnnDestroyCoapConnectList(void);
+
+void LnnCoapConnect(const char *ip);
+
+void LnnCoapConnectInit(void);
+
+void LnnCoapConnectDeinit(void);
+
 #ifdef __cplusplus
 #if __cplusplus
 }

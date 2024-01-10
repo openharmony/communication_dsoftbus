@@ -16,7 +16,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "softbus_log_old.h"
+#include "comm_log.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_hidumper.h"
@@ -30,7 +30,7 @@ static LIST_HEAD(g_busCenter_var_list);
 int32_t SoftBusRegBusCenterVarDump(char *dumpVar, SoftBusVarDumpCb cb)
 {
     if (dumpVar == NULL || strlen(dumpVar) >= SOFTBUS_DUMP_VAR_NAME_LEN || cb == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegBusCenterVarDump invalid param");
+        COMM_LOGE(COMM_DFX, "SoftBusRegBusCenterVarDump invalid param");
         return SOFTBUS_ERR;
     }
     return SoftBusAddDumpVarToList(dumpVar, cb, &g_busCenter_var_list);
@@ -77,7 +77,7 @@ int32_t SoftBusHiDumperBusCenterInit(void)
     int32_t ret = SoftBusRegHiDumperHandler(
         SOFTBUS_BUSCENTER_MODULE_NAME, SOFTBUS_CONN_MODULE_HELP, &SoftBusBusCenterDumpHander);
     if (ret != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusBusCenterDumpHander regist fail");
+        COMM_LOGE(COMM_INIT, "SoftBusBusCenterDumpHander regist fail");
     }
     return ret;
 }

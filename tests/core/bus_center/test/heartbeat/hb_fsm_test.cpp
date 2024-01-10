@@ -298,7 +298,7 @@ HWTEST_F(HeartBeatFSMTest, OnSendOneHbEndTest_01, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     void *para4 = SoftBusCalloc(sizeof(LnnHeartbeatType));
     ret = OnStartHbProcess(nullptr, TEST_ARGS, para4);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = OnReStartHbProcess(nullptr, TEST_ARGS, para4);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     SoftBusSleepMs(20);

@@ -66,7 +66,7 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
     info.algorithm = appInfo->algorithm;
     info.crc = appInfo->crc;
     info.routeType = appInfo->routeType;
-    info.businessType = appInfo->appType == APP_TYPE_AUTH ? BUSINESS_TYPE_NOT_CARE : appInfo->businessType;
+    info.businessType = (int32_t)(appInfo->appType == APP_TYPE_AUTH ? BUSINESS_TYPE_NOT_CARE : appInfo->businessType);
     info.autoCloseTime = appInfo->autoCloseTime;
     info.myHandleId = appInfo->myHandleId;
     info.peerHandleId = appInfo->peerHandleId;
@@ -258,11 +258,11 @@ static int32_t TransProxyGetAppInfo(const char *sessionName, const char *peerNet
         TRANS_LOGE(TRANS_CTRL, "get local uuid fail ret=%d", ret);
         return SOFTBUS_ERR;
     }
-    if (strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), sessionName) != 0) {
+    if (strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), sessionName) != EOK) {
         return SOFTBUS_ERR;
     }
     appInfo->peerData.apiVersion = API_V2;
-    if (strcpy_s(appInfo->peerData.sessionName, sizeof(appInfo->peerData.sessionName), sessionName) != 0) {
+    if (strcpy_s(appInfo->peerData.sessionName, sizeof(appInfo->peerData.sessionName), sessionName) != EOK) {
         return SOFTBUS_ERR;
     }
 

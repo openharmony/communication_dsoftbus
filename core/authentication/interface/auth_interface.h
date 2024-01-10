@@ -50,6 +50,8 @@ typedef enum {
     AUTH_LINK_TYPE_BR,
     AUTH_LINK_TYPE_BLE,
     AUTH_LINK_TYPE_P2P,
+    AUTH_LINK_TYPE_ENHANCED_P2P,
+    AUTH_LINK_TYPE_MAX,
 } AuthLinkType;
 
 typedef struct {
@@ -68,6 +70,8 @@ typedef struct {
             char ip[IP_LEN];
             int32_t port;
             int64_t authId; /* for open p2p auth conn */
+            ListenerModule moduleId; /* for open enhance p2p auth conn */
+            char udid[UDID_BUF_LEN];
         } ipInfo;
     } info;
     char peerUid[MAX_ACCOUNT_HASH_LEN];
@@ -127,6 +131,9 @@ bool IsAuthHasTrustedRelation(void);
 int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port);
 void AuthStopListening(AuthLinkType type);
 
+int32_t AuthStartListeningForWifiDirect(AuthLinkType type, const char *ip, int32_t port, ListenerModule *moduleId);
+void AuthStopListeningForWifiDirect(AuthLinkType type, ListenerModule moduleId);
+
 typedef struct {
     int32_t module;
     int32_t flag;
@@ -150,6 +157,7 @@ int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthCon
 int32_t AuthPostTransData(int64_t authId, const AuthTransData *dataInfo);
 void AuthCloseConn(int64_t authId);
 int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta);
+int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta);
 void AuthDeleteStoredAuthKey(const char *udid, int32_t discoveryType);
 int32_t AuthGetLatestAuthSeqList(const char *udid, int64_t *seqList, uint32_t num);
 void AuthDeleteStoredAuthKey(const char *udid, int32_t discoveryType);
@@ -176,7 +184,7 @@ int32_t AuthGetGroupType(const char *udid, const char *uuid);
 int32_t AuthInit(void);
 void AuthDeinit(void);
 int32_t AuthRestoreAuthManager(const char *udidHash,
-    const AuthConnInfo *connInfo, int32_t requestId, NodeInfo *nodeInfo, int64_t *authId);
+    const AuthConnInfo *connInfo, uint32_t requestId, NodeInfo *nodeInfo, int64_t *authId);
 
 #ifdef __cplusplus
 #if __cplusplus

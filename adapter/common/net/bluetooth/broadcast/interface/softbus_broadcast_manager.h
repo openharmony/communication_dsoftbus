@@ -246,7 +246,7 @@ int32_t SetScanFilter(int32_t listenerId, const BcScanFilter *scanFilter, uint8_
  * @since 4.1
  * @version 1.0
  */
-int32_t GetScanFilter(int32_t listenerId, const BcScanFilter *scanFilter, uint8_t *filterNum);
+int32_t GetScanFilter(int32_t listenerId, BcScanFilter **scanFilter, uint8_t *filterNum);
 
 /**
  * @brief Check whether available resources are available by using the bcid

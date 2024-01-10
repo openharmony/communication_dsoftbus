@@ -18,10 +18,10 @@
 #include <string.h>
 #include <securec.h>
 
+#include "comm_log.h"
 #include "common_list.h"
 #include "softbus_errcode.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_log_old.h"
 #include "softbus_hidumper_buscenter.h"
 #include "softbus_hidumper_conn.h"
 #include "softbus_hidumper_disc.h"
@@ -33,7 +33,7 @@ static LIST_HEAD(g_hidumperhander_list);
 void SoftBusDumpShowHelp(int fd)
 {
     if (fd < 0) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "fd is invalid.");
+        COMM_LOGE(COMM_DFX, "fd is invalid.");
         return;
     }
 
@@ -62,7 +62,7 @@ void SoftBusDumpShowHelp(int fd)
 void SoftBusDumpErrInfo(int fd, const char *argv)
 {
     if (fd < 0 || argv == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "param is invalid.");
+        COMM_LOGE(COMM_DFX, "param is invalid.");
         return;
     }
     SOFTBUS_DPRINTF(fd, "the command %s is invalid, please input again!\n", argv);
@@ -71,7 +71,7 @@ void SoftBusDumpErrInfo(int fd, const char *argv)
 void SoftBusDumpSubModuleHelp(int fd, char *moduleName, ListNode *varList)
 {
     if (fd < 0 || moduleName == NULL || varList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "param is invalid.");
+        COMM_LOGE(COMM_DFX, "param is invalid.");
         return;
     }
     SOFTBUS_DPRINTF(fd, "Usage: hidumper -s 4700 -a \" %s [Option] \n", moduleName);
@@ -90,11 +90,11 @@ static SoftBusDumpVarNode *SoftBusCreateDumpVarNode(const char *varName, SoftBus
 {
     SoftBusDumpVarNode *varNode = (SoftBusDumpVarNode *)SoftBusCalloc(sizeof(SoftBusDumpVarNode));
     if (varNode == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusCreateDumpVarNode malloc fail.");
+        COMM_LOGE(COMM_DFX, "SoftBusCreateDumpVarNode malloc fail.");
         return NULL;
     }
     if (strcpy_s(varNode->varName, SOFTBUS_DUMP_VAR_NAME_LEN, varName) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusCreateDumpVarNode set varName  %s fail.", varName);
+        COMM_LOGE(COMM_DFX, "SoftBusCreateDumpVarNode set varName  %s fail.", varName);
         SoftBusFree(varNode);
         return NULL;
     }
@@ -107,13 +107,13 @@ static SoftBusDumpVarNode *SoftBusCreateDumpVarNode(const char *varName, SoftBus
 int32_t SoftBusAddDumpVarToList(const char *dumpVar, SoftBusVarDumpCb cb, ListNode *varList)
 {
     if (dumpVar == NULL || strlen(dumpVar) >= SOFTBUS_DUMP_VAR_NAME_LEN || cb == NULL || varList == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegDiscDumpCb invalid param");
+        COMM_LOGE(COMM_DFX, "SoftBusRegDiscDumpCb invalid param");
         return SOFTBUS_ERR;
     }
 
     SoftBusDumpVarNode *varNode = SoftBusCreateDumpVarNode(dumpVar, cb);
     if (varNode == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegDiscDumpCb node create fail");
+        COMM_LOGE(COMM_DFX, "SoftBusRegDiscDumpCb node create fail");
         return SOFTBUS_ERR;
     }
     varNode->dumpCallback = cb;
@@ -140,17 +140,17 @@ static HandlerNode *CreateHiDumperHandlerNode(char *moduleName, char *helpInfo, 
 {
     HandlerNode *handlerNode = (HandlerNode *)SoftBusCalloc(sizeof(HandlerNode));
     if (handlerNode == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "CreateHiDumperHandlerNode malloc fail.");
+        COMM_LOGE(COMM_DFX, "CreateHiDumperHandlerNode malloc fail.");
         return NULL;
     }
 
     if (strcpy_s(handlerNode->moduleName, SOFTBUS_MODULE_NAME_LEN, moduleName) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "CreateHiDumperHandlerNode get moduleName fail.");
+        COMM_LOGE(COMM_DFX, "CreateHiDumperHandlerNode get moduleName fail.");
         SoftBusFree(handlerNode);
         return NULL;
     }
     if (strcpy_s(handlerNode->helpInfo, SOFTBUS_MODULE_HELP_LEN, helpInfo) != EOK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "CreateHiDumperHandlerNode get helpInfo fail");
+        COMM_LOGE(COMM_DFX, "CreateHiDumperHandlerNode get helpInfo fail");
         SoftBusFree(handlerNode);
         return NULL;
     }
@@ -174,13 +174,13 @@ int32_t SoftBusRegHiDumperHandler(char *moduleName, char *helpInfo, DumpHandlerF
 {
     if (moduleName == NULL || strlen(moduleName) >= SOFTBUS_MODULE_NAME_LEN || helpInfo == NULL ||
         strlen(helpInfo) >= SOFTBUS_MODULE_HELP_LEN || handler == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegHiDumperHandler invalid param");
+        COMM_LOGE(COMM_DFX, "SoftBusRegHiDumperHandler invalid param");
         return SOFTBUS_ERR;
     }
 
     HandlerNode *handlerNode = CreateHiDumperHandlerNode(moduleName, helpInfo, handler);
     if (handlerNode == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusRegHiDumperHandler node create fail");
+        COMM_LOGE(COMM_DFX, "SoftBusRegHiDumperHandler node create fail");
         return SOFTBUS_ERR;
     }
     ListTailInsert(&g_hidumperhander_list, &handlerNode->node);
@@ -190,7 +190,7 @@ int32_t SoftBusRegHiDumperHandler(char *moduleName, char *helpInfo, DumpHandlerF
 int32_t SoftBusDumpDispatch(int fd, int32_t argc, const char **argv)
 {
     if (fd < 0 || argc < 0 || argv == NULL) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "SoftBusDumpProcess: param invalid ");
+        COMM_LOGE(COMM_DFX, "SoftBusDumpProcess: param invalid ");
         return SOFTBUS_ERR;
     }
 
@@ -226,27 +226,27 @@ int32_t SoftBusDumpDispatch(int fd, int32_t argc, const char **argv)
 int32_t SoftBusHiDumperModuleInit(void)
 {
     if (SoftBusDiscHiDumperInit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "init Disc HiDumper fail!");
+        COMM_LOGE(COMM_INIT, "init Disc HiDumper fail!");
         return SOFTBUS_ERR;
     }
 
     if (SoftBusConnHiDumperInit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "init Conn HiDumper fail!");
+        COMM_LOGE(COMM_INIT, "init Conn HiDumper fail!");
         return SOFTBUS_ERR;
     }
 
     if (SoftBusNStackHiDumperInit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "init NStack HiDumper fail!");
+        COMM_LOGE(COMM_INIT, "init NStack HiDumper fail!");
         return SOFTBUS_ERR;
     }
 
     if (SoftBusHiDumperBusCenterInit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "init BusCenter HiDumper fail!");
+        COMM_LOGE(COMM_INIT, "init BusCenter HiDumper fail!");
         return SOFTBUS_ERR;
     }
 
     if (SoftBusTransDumpHandlerInit() != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_CONN, SOFTBUS_LOG_ERROR, "init Trans HiDumper fail!");
+        COMM_LOGE(COMM_INIT, "init Trans HiDumper fail!");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

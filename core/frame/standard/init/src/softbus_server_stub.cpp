@@ -16,7 +16,9 @@
 #include "softbus_server_stub.h"
 
 #include "accesstoken_kit.h"
+#include "access_control.h"
 #include "access_token.h"
+#include "anonymizer.h"
 #include "comm_log.h"
 #include "discovery_service.h"
 #include "ipc_skeleton.h"
@@ -399,7 +401,6 @@ static bool IsObjectstoreDbSessionName(const char* sessionName)
     regex_t regComp;
     if (regcomp(&regComp, OBJECTSTORE_DB_SESSION_NAME, REG_EXTENDED | REG_NOSUB) != 0) {
         COMM_LOGE(COMM_SVC, "regcomp failed.");
-        regfree(&regComp);
         return false;
     }
     bool compare = (regexec(&regComp, sessionName, 0, NULL, 0) == 0);
@@ -577,6 +578,14 @@ static void ReadQosInfo(MessageParcel& data, SessionParam &param)
     }
 }
 
+static void ReadSessionInfo(MessageParcel& data, SessionParam &param)
+{
+    param.sessionName = data.ReadCString();
+    param.peerSessionName = data.ReadCString();
+    param.peerDeviceId = data.ReadCString();
+    param.groupId = data.ReadCString();
+}
+
 int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &reply)
 {
     COMM_LOGI(COMM_SVC, "enter");
@@ -590,10 +599,7 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
     int64_t timeStart = 0;
     int64_t timediff = 0;
     SoftBusOpenSessionStatus isSucc = SOFTBUS_EVT_OPEN_SESSION_FAIL;
-    param.sessionName = data.ReadCString();
-    param.peerSessionName = data.ReadCString();
-    param.peerDeviceId = data.ReadCString();
-    param.groupId = data.ReadCString();
+    ReadSessionInfo(data, param);
     ReadSessionAttrs(data, &getAttr);
     param.attr = &getAttr;
     ReadQosInfo(data, param);
@@ -601,6 +607,10 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
     if (param.sessionName == nullptr || param.peerSessionName == nullptr || param.peerDeviceId == nullptr ||
         param.groupId == nullptr) {
         retReply = SOFTBUS_INVALID_PARAM;
+        goto EXIT;
+    }
+    if (TransCheckAccessControl(param.peerDeviceId) != SOFTBUS_OK) {
+        retReply = SOFTBUS_PERMISSION_DENIED;
         goto EXIT;
     }
     if (CheckOpenSessionPermission(&param) != SOFTBUS_OK) {
@@ -918,6 +928,14 @@ int32_t SoftBusServerStub::GetNodeKeyInfoLen(int32_t key)
     return LnnGetNodeKeyInfoLen(key);
 }
 
+static void PrintNetworkId(const char *networkId)
+{
+    char *anonyNetworkId = nullptr;
+    Anonymize(networkId, &anonyNetworkId);
+    COMM_LOGI(COMM_SVC, "networkId = %s", anonyNetworkId);
+    AnonymizeFree(anonyNetworkId);
+}
+
 int32_t SoftBusServerStub::GetNodeKeyInfoInner(MessageParcel &data, MessageParcel &reply)
 {
     const char *clientName = data.ReadCString();
@@ -926,6 +944,7 @@ int32_t SoftBusServerStub::GetNodeKeyInfoInner(MessageParcel &data, MessageParce
         COMM_LOGE(COMM_SVC, "GetNodeKeyInfoInner read clientName or networkId failed!");
         return SOFTBUS_IPC_ERR;
     }
+    PrintNetworkId(networkId);
     int32_t key;
     if (!data.ReadInt32(key)) {
         COMM_LOGE(COMM_SVC, "GetNodeKeyInfoInner read key failed!");

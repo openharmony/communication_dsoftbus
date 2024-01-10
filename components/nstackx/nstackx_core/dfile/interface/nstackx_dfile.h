@@ -383,7 +383,7 @@ typedef void (*DFileEventFunc)(void *softObj, const DFileEvent *info);
 NSTACKX_EXPORT void NSTACKX_DFileSetEventFunc(void *softObj, DFileEventFunc func);
 
 typedef void (*DFileLogCallback)(const char *moduleName, uint32_t logLevel, const char *format, ...);
- 
+
 /*
  * Set the DFile log implementation
  */

@@ -50,6 +50,7 @@ public:
     virtual void AuthCloseConn(int64_t authId) = 0;
     virtual int32_t AuthPostTransData(int64_t authId, const AuthTransData *dataInfo) = 0;
     virtual int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
+    virtual int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
 
     virtual int64_t AuthGetLatestIdByUuid(const char *uuid, bool isIpConnection, bool isMeta) = 0;
     virtual int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer, bool isMeta) = 0;
@@ -111,6 +112,7 @@ public:
     MOCK_METHOD1(AuthCloseConn, void (int64_t));
     MOCK_METHOD2(AuthPostTransData, int32_t (int64_t, const AuthTransData *));
     MOCK_METHOD3(AuthGetPreferConnInfo, int32_t (const char *, AuthConnInfo *, bool));
+    MOCK_METHOD3(AuthGetP2pConnInfo, int32_t (const char *, AuthConnInfo *, bool));
 
     MOCK_METHOD3(AuthGetLatestIdByUuid, int64_t (const char *, AuthLinkType, bool));
     MOCK_METHOD3(AuthGetIdByConnInfo, int64_t (const AuthConnInfo *, bool, bool));

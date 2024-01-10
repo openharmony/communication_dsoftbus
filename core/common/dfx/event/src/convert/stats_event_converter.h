@@ -45,7 +45,7 @@ STATS_ASSIGNER(Int32, DeviceOfflineTimes, deviceOfflineTimes)
 STATS_ASSIGNER(Int32, LaneScoreOverTimes, laneScoreOverTimes)
 STATS_ASSIGNER(Int32, ActivationRate, activationRate)
 STATS_ASSIGNER(Int32, DetectionTimes, detectionTimes)
-STATS_ASSIGNER(String, SuccessRateDetail, successRateDetail)
+STATS_ASSIGNER(LongString, SuccessRateDetail, successRateDetail)
 
 #define STATS_ASSIGNER_SIZE 12 // Size of g_statsAssigners
 static HiSysEventParamAssigner g_statsAssigners[] = {

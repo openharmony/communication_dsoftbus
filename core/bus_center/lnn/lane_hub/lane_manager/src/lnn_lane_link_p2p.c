@@ -62,6 +62,7 @@ typedef struct {
     bool networkDelegate;
     bool p2pOnly;
     uint32_t bandWidth;
+    bool isWithQos;
 } P2pRequestInfo;
 
 typedef struct {
@@ -124,7 +125,11 @@ static int32_t GetPreferAuthConnInfo(const char *networkId, AuthConnInfo *connIn
         LNN_LOGE(LNN_LANE, "get peer uuid fail");
         return SOFTBUS_ERR;
     }
-    return AuthGetPreferConnInfo(uuid, connInfo, isMetaAuth);
+    int32_t ret = AuthGetP2pConnInfo(uuid, connInfo, isMetaAuth);
+    if (ret != SOFTBUS_OK) {
+        ret = AuthGetPreferConnInfo(uuid, connInfo, isMetaAuth);
+    }
+    return ret;
 }
 
 static bool GetChannelAuthType(const char *peerNetWorkId)
@@ -362,11 +367,12 @@ static int32_t GetP2pLinkReqParamByChannelRequetId(
             return SOFTBUS_ERR;
         }
         wifiDirectInfo->isNetworkDelegate = item->p2pInfo.networkDelegate;
-        if (item->p2pInfo.p2pOnly) {
-            wifiDirectInfo->connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P;
-        } else {
+        if (item->p2pInfo.isWithQos) {
             wifiDirectInfo->connectType = ((item->laneRequestInfo.laneType == LANE_HML) ?
                 WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML : WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P);
+        } else {
+            wifiDirectInfo->connectType = item->p2pInfo.p2pOnly ? WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P :
+                WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML;
         }
         item->p2pInfo.p2pRequestId = p2pRequestId;
         item->proxyChannelInfo.channelId = channelId;
@@ -407,11 +413,12 @@ static int32_t GetP2pLinkReqParamByAuthId(uint32_t authRequestId, int32_t p2pReq
         }
         wifiDirectInfo->bandWidth = item->p2pInfo.bandWidth;
         wifiDirectInfo->isNetworkDelegate = item->p2pInfo.networkDelegate;
-        if (item->p2pInfo.p2pOnly) {
-            wifiDirectInfo->connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P;
-        } else {
+        if (item->p2pInfo.isWithQos) {
             wifiDirectInfo->connectType = ((item->laneRequestInfo.laneType == LANE_HML) ?
                 WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML : WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P);
+        } else {
+            wifiDirectInfo->connectType = item->p2pInfo.p2pOnly ? WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P :
+                WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML;
         }
         item->p2pInfo.p2pRequestId = p2pRequestId;
         LinkUnlock();
@@ -617,6 +624,25 @@ static void OnAuthConnOpenFailed(uint32_t authRequestId, int32_t reason)
     NotifyLinkFail(ASYNC_RESULT_AUTH, authRequestId, reason);
 }
 
+static int32_t updataP2pLinkReq(P2pLinkReqList *p2pReqInfo, uint32_t laneLinkReqId)
+{
+    TransOption reqInfo = {0};
+    if (GetTransOptionByLaneId(laneLinkReqId, &reqInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get TransReqInfo fail, laneId=%d", laneLinkReqId);
+        return SOFTBUS_ERR;
+    }
+    if (reqInfo.isWithQos) {
+        p2pReqInfo->p2pInfo.bandWidth = reqInfo.qosRequire.minBW;
+        p2pReqInfo->p2pInfo.isWithQos = true;
+    } else {
+        p2pReqInfo->p2pInfo.bandWidth = 0;
+        p2pReqInfo->p2pInfo.isWithQos = false;
+    }
+    LNN_LOGI(LNN_LANE, "wifidirect conn, bandWidth=%d isWithQos=%d laneId=%d",
+        p2pReqInfo->p2pInfo.bandWidth, p2pReqInfo->p2pInfo.isWithQos, laneLinkReqId);
+    return SOFTBUS_OK;
+}
+
 static int32_t AddConnRequestItem(uint32_t authRequestId, int32_t p2pRequestId, uint32_t laneLinkReqId,
     const LinkRequest *request, int32_t channelRequestId, const LaneLinkCb *callback)
 {
@@ -634,11 +660,9 @@ static int32_t AddConnRequestItem(uint32_t authRequestId, int32_t p2pRequestId, 
         SoftBusFree(item);
         return SOFTBUS_MEM_ERR;
     }
-    QosInfo qosOpt = {0};
-    if (GetQosInfoByLaneId(laneLinkReqId, &qosOpt) != SOFTBUS_OK) {
-        item->p2pInfo.bandWidth = 0;
-    } else {
-        item->p2pInfo.bandWidth = qosOpt.minBW;
+    if (updataP2pLinkReq(item, laneLinkReqId) != SOFTBUS_OK) {
+        SoftBusFree(item);
+        return SOFTBUS_ERR;
     }
     item->laneRequestInfo.laneLinkReqId = laneLinkReqId;
     item->laneRequestInfo.pid = request->pid;
@@ -883,7 +907,13 @@ static int32_t GetAuthTriggerLinkReqParamByAuthId(uint32_t authRequestId, int32_
             return SOFTBUS_ERR;
         }
         wifiDirectInfo->isNetworkDelegate = item->p2pInfo.networkDelegate;
-        wifiDirectInfo->connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML;
+        if (item->p2pInfo.isWithQos) {
+            wifiDirectInfo->connectType = ((item->laneRequestInfo.laneType == LANE_HML) ?
+                WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML : WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P);
+        } else {
+            wifiDirectInfo->connectType = item->p2pInfo.p2pOnly ? WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P :
+                WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML;
+        }
         item->p2pInfo.p2pRequestId = p2pRequestId;
         LinkUnlock();
         return SOFTBUS_OK;
@@ -952,8 +982,33 @@ static int32_t OpenAuthTriggerToConn(const LinkRequest *request, uint32_t laneLi
     return SOFTBUS_OK;
 }
 
+static int32_t CheckTransReqInfo(const LinkRequest *request, uint32_t laneLinkReqId)
+{
+    TransOption reqInfo = {0};
+    if (GetTransOptionByLaneId(laneLinkReqId, &reqInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get TransReqInfo fail, laneId=%d", laneLinkReqId);
+        return SOFTBUS_ERR;
+    }
+    if (reqInfo.isWithQos) {
+        if (request->linkType == LANE_P2P) {
+            LNN_LOGE(LNN_LANE, "request linkType=%d", request->linkType);
+            return SOFTBUS_ERR;
+        }
+    } else {
+        if (request->p2pOnly) {
+            LNN_LOGE(LNN_LANE, "request p2pOnly=%d", request->p2pOnly);
+            return SOFTBUS_ERR;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t OpenBleTriggerToConn(const LinkRequest *request, uint32_t laneLinkReqId, const LaneLinkCb *callback)
 {
+    if (CheckTransReqInfo(request, laneLinkReqId) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LANE, "ble trigger not support p2p");
+        return SOFTBUS_ERR;
+    }
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     bool isMetaAuth = GetAuthType(request->peerNetworkId);

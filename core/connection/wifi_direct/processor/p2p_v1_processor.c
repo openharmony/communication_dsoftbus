@@ -781,7 +781,7 @@ static struct NegotiateMessage* BuildNegotiateResult(enum WifiDirectErrorCode re
 
 static int32_t SendConnectResponseAsGo(struct NegotiateMessage *msg, struct InnerLink *link, struct InterfaceInfo *info)
 {
-    char remoteIp[IP_ADDR_STR_LEN];
+    char remoteIp[IP_ADDR_STR_LEN] = {0};
     char *remoteMac = msg->getString(msg, NM_KEY_GC_MAC, "");
     int32_t ret = GetWifiDirectP2pAdapter()->requestGcIp(remoteMac, remoteIp, sizeof(remoteIp));
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ERROR_P2P_APPLY_GC_IP_FAIL, CONN_WIFI_DIRECT,
@@ -1327,7 +1327,8 @@ static void StartAuthListening(const char *localIp)
         return;
     }
 
-    port = StartListeningForDefaultChannel(localIp, 0);
+    ListenerModule module = 0;
+    port = StartListeningForDefaultChannel(AUTH_LINK_TYPE_P2P, localIp, 0, &module);
     info->putInt(info, II_KEY_PORT, port);
 }
 
@@ -1357,8 +1358,6 @@ static void SendHandShakeToGoAsync(void *data)
 
 static void OnAuthConnectSuccess(uint32_t authRequestId, int64_t p2pAuthId)
 {
-    GetWifiDirectNegotiator()->onWifiDirectAuthOpened(authRequestId, p2pAuthId);
-
     struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(p2pAuthId);
     CONN_CHECK_AND_RETURN_LOGW(channel, CONN_WIFI_DIRECT, "new channel failed");
 
@@ -1379,14 +1378,22 @@ static void OpenAuthConnection(struct WifiDirectNegotiateChannel *channel, struc
     int32_t ret = link->getRemoteIpString(link, remoteIp, sizeof(remoteIp));
     CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get remote ip failed");
     char *remoteMac = link->getString(link, IL_KEY_REMOTE_BASE_MAC, "");
-    CONN_LOGI(CONN_WIFI_DIRECT, "remoteMac=%s remoteIp=%s remotePort=%d", WifiDirectAnonymizeMac(remoteMac),
-          WifiDirectAnonymizeIp(remoteIp), remotePort);
+    char *remoteUuid = link->getString(link, IL_KEY_DEVICE_ID, "");
+    CONN_LOGI(CONN_WIFI_DIRECT, "remoteMac=%s remoteUuid=%s remoteIp=%s remotePort=%d",
+              WifiDirectAnonymizeMac(remoteMac), WifiDirectAnonymizeDeviceId(remoteUuid),
+              WifiDirectAnonymizeIp(remoteIp), remotePort);
 
+    struct DefaultNegoChannelParam param = {
+        .type = AUTH_LINK_TYPE_P2P,
+        .remoteUuid = remoteUuid,
+        .remoteIp = remoteIp,
+        .remotePort = remotePort,
+    };
     struct DefaultNegoChannelOpenCallback callback = {
         .onConnectSuccess = OnAuthConnectSuccess,
         .onConnectFailure = OnAuthConnectFailure,
     };
-    ret = OpenDefaultNegotiateChannel(remoteIp, remotePort, channel, &callback);
+    ret = OpenDefaultNegotiateChannel(&param, channel, &callback);
     CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "open p2p auth failed");
 }
 
