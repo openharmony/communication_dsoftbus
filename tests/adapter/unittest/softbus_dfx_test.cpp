@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -353,7 +353,7 @@ HWTEST_F(AdapterDsoftbusDfxTest, SoftbusWriteHisEvtTest031, TestSize.Level1)
     SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(paramNum);
     int32_t ret = SoftbusWriteHisEvt(msg);
     EXPECT_EQ(SOFTBUS_ERR, ret);
-    SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReportMsg(msg);
 }
 
 /*
@@ -367,7 +367,7 @@ HWTEST_F(AdapterDsoftbusDfxTest, SoftbusCreateEvtReportMsgTest001, TestSize.Leve
     int32_t paramNum = -1;
     SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(paramNum);
     EXPECT_EQ(nullptr, msg);
-    SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReportMsg(msg);
 }
 
 /*
@@ -381,7 +381,7 @@ HWTEST_F(AdapterDsoftbusDfxTest, SoftbusCreateEvtReportMsgTest002, TestSize.Leve
     int32_t paramNum = SOFTBUS_EVT_PARAM_ZERO;
     SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(paramNum);
     EXPECT_EQ(nullptr, msg);
-    SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReportMsg(msg);
 }
 
 /*
@@ -395,7 +395,7 @@ HWTEST_F(AdapterDsoftbusDfxTest, SoftbusCreateEvtReportMsgTest003, TestSize.Leve
     int32_t paramNum = INT32_MAX;
     SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(paramNum);
     EXPECT_EQ(nullptr, msg);
-    SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReportMsg(msg);
 }
 
 /*
@@ -410,7 +410,7 @@ HWTEST_F(AdapterDsoftbusDfxTest, SoftbusCreateEvtReportMsgTest004, TestSize.Leve
     SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(paramNum);
     EXPECT_EQ(nullptr, msg);
     // free nullptr message
-    SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReportMsg(msg);
 }
 
 /*
@@ -424,7 +424,7 @@ HWTEST_F(AdapterDsoftbusDfxTest, SoftbusCreateEvtReportMsgTest005, TestSize.Leve
     int32_t paramNum = SOFTBUS_EVT_PARAM_ONE;
     SoftBusEvtReportMsg* msg = SoftbusCreateEvtReportMsg(paramNum);
     EXPECT_NE(nullptr, msg);
-    SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReportMsg(msg);
 }
 
 }

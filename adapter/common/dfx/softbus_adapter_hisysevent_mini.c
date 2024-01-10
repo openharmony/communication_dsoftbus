@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,13 +17,13 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_hisysevent.h"
 
-int32_t SoftbusWriteHisEvt(SoftBusEvtReportMsg* reportMsg)
+int32_t SoftbusWriteHisEvt(SoftBusEvtReportMsg *reportMsg)
 {
     (void)reportMsg;
     return 0;
 }
 
-void SoftbusFreeEvtReporMsg(SoftBusEvtReportMsg* msg)
+void SoftbusFreeEvtReportMsg(SoftBusEvtReportMsg *msg)
 {
     if (msg == NULL) {
         return;
@@ -36,22 +36,22 @@ void SoftbusFreeEvtReporMsg(SoftBusEvtReportMsg* msg)
     SoftBusFree(msg);
 }
 
-SoftBusEvtReportMsg* SoftbusCreateEvtReportMsg(int32_t paramNum)
+SoftBusEvtReportMsg *SoftbusCreateEvtReportMsg(int32_t paramNum)
 {
     if (paramNum <= SOFTBUS_EVT_PARAM_ZERO || paramNum >= SOFTBUS_EVT_PARAM_BUTT) {
         COMM_LOGE(COMM_ADAPTER, "param is invalid");
         return NULL;
     }
 
-    SoftBusEvtReportMsg *msg = (SoftBusEvtReportMsg*)SoftBusMalloc(sizeof(SoftBusEvtReportMsg));
+    SoftBusEvtReportMsg *msg = (SoftBusEvtReportMsg *)SoftBusCalloc(sizeof(SoftBusEvtReportMsg));
     if (msg == NULL) {
         COMM_LOGE(COMM_ADAPTER, "report msg is null");
         return NULL;
     }
 
-    msg->paramArray = (SoftBusEvtParam*)SoftBusMalloc(sizeof(SoftBusEvtParam) * paramNum);
+    msg->paramArray = (SoftBusEvtParam *)SoftBusCalloc(sizeof(SoftBusEvtParam) * paramNum);
     if (msg->paramArray == NULL) {
-        SoftbusFreeEvtReporMsg(msg);
+        SoftbusFreeEvtReportMsg(msg);
         return NULL;
     }
     return msg;
