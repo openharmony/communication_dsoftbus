@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -257,7 +257,11 @@ static void DuplicateNodeStateCbList(ListNode *list)
             LNN_LOGE(LNN_STATE, "malloc node state callback item fail");
             continue;
         }
-        (void)strncpy_s(copyItem->pkgName, PKG_NAME_SIZE_MAX, item->pkgName, PKG_NAME_SIZE_MAX - 1);
+        if (strncpy_s(copyItem->pkgName, PKG_NAME_SIZE_MAX, item->pkgName, PKG_NAME_SIZE_MAX - 1) != EOK) {
+            LNN_LOGE(LNN_STATE, "copy pkgName fail");
+            SoftBusFree(copyItem);
+            continue;
+        }
         ListInit(&copyItem->node);
         copyItem->cb = item->cb;
         ListAdd(list, &copyItem->node);
@@ -291,15 +295,16 @@ static void DuplicateTimeSyncResultCbList(ListNode *list, const char *networkId)
 
 void BusCenterClientDeinit(void)
 {
-    if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "lock in deinit");
+        return;
     }
     ClearJoinLNNList();
     ClearLeaveLNNList();
     ClearTimeSyncList(&g_busCenterClient.timeSyncCbList);
     ClearNodeStateCbList(&g_busCenterClient.nodeStateCbList);
     g_busCenterClient.nodeStateCbListCnt = 0;
-    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
+    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "unlock in deinit");
     }
     BusCenterServerProxyDeInit();
@@ -372,14 +377,19 @@ int32_t SetNodeDataChangeFlagInner(const char *pkgName, const char *networkId, u
 
 int32_t JoinLNNInner(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb)
 {
+    if (target == NULL) {
+        LNN_LOGE(LNN_STATE, "target is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
     int32_t rc;
 
     if (!g_busCenterClient.isInit) {
-        LNN_LOGE(LNN_STATE, "join lnn not init");
+        LNN_LOGE(LNN_STATE, "buscenter client not init");
         return SOFTBUS_NO_INIT;
     }
-    if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "lock join lnn cb list in join");
+        return SOFTBUS_LOCK_ERR;
     }
 
     do {
@@ -390,12 +400,12 @@ int32_t JoinLNNInner(const char *pkgName, ConnectionAddr *target, OnJoinLNNResul
         }
         rc = ServerIpcJoinLNN(pkgName, target, sizeof(*target));
         if (rc != SOFTBUS_OK) {
-            LNN_LOGE(LNN_STATE, "request join lnn");
+            LNN_LOGE(LNN_STATE, "request join lnn failed, ret=%d", rc);
         } else {
             rc = AddJoinLNNCbItem(target, cb);
         }
     } while (false);
-    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
+    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "unlock join lnn cb list in join");
     }
     return rc;
@@ -403,14 +413,19 @@ int32_t JoinLNNInner(const char *pkgName, ConnectionAddr *target, OnJoinLNNResul
 
 int32_t LeaveLNNInner(const char *pkgName, const char *networkId, OnLeaveLNNResult cb)
 {
+    if (networkId == NULL) {
+        LNN_LOGE(LNN_STATE, "networkId is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
     int32_t rc;
 
     if (!g_busCenterClient.isInit) {
-        LNN_LOGE(LNN_STATE, "leave lnn not init");
+        LNN_LOGE(LNN_STATE, "buscenter client not init");
         return SOFTBUS_NO_INIT;
     }
-    if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "lock leave lnn cb list in leave");
+        return SOFTBUS_LOCK_ERR;
     }
     rc = SOFTBUS_ERR;
     do {
@@ -420,12 +435,12 @@ int32_t LeaveLNNInner(const char *pkgName, const char *networkId, OnLeaveLNNResu
         }
         rc = ServerIpcLeaveLNN(pkgName, networkId);
         if (rc != SOFTBUS_OK) {
-            LNN_LOGE(LNN_STATE, "request leave lnn");
+            LNN_LOGE(LNN_STATE, "request leave lnn failed, ret=%d", rc);
         } else {
             rc = AddLeaveLNNCbItem(networkId, cb);
         }
     } while (false);
-    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
+    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "unlock leave lnn cb list in leave");
     }
     return rc;
@@ -457,6 +472,10 @@ static bool IsSameNodeStateCb(const INodeStateCb *callback1, const INodeStateCb 
 
 int32_t RegNodeDeviceStateCbInner(const char *pkgName, INodeStateCb *callback)
 {
+    if (callback == NULL) {
+        LNN_LOGE(LNN_STATE, "callback is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
     NodeStateCallbackItem *item = NULL;
     int32_t rc = SOFTBUS_ERR;
 
@@ -465,11 +484,12 @@ int32_t RegNodeDeviceStateCbInner(const char *pkgName, INodeStateCb *callback)
         return SOFTBUS_INVALID_PARAM;
     }
     if (!g_busCenterClient.isInit) {
-        LNN_LOGE(LNN_STATE, "reg node state cb not init");
+        LNN_LOGE(LNN_STATE, "buscenter client not init");
         return SOFTBUS_NO_INIT;
     }
-    if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "lock node state cb list in reg");
+        return SOFTBUS_LOCK_ERR;
     }
     LIST_FOR_EACH_ENTRY(item, &g_busCenterClient.nodeStateCbList, NodeStateCallbackItem, node) {
         if (IsSameNodeStateCb(&item->cb, callback)) {
@@ -494,7 +514,7 @@ int32_t RegNodeDeviceStateCbInner(const char *pkgName, INodeStateCb *callback)
         g_busCenterClient.nodeStateCbListCnt++;
         rc = SOFTBUS_OK;
     } while (false);
-    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
+    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "unlock node state cb list");
     }
     return rc;
@@ -502,15 +522,20 @@ int32_t RegNodeDeviceStateCbInner(const char *pkgName, INodeStateCb *callback)
 
 int32_t UnregNodeDeviceStateCbInner(INodeStateCb *callback)
 {
+    if (callback == NULL) {
+        LNN_LOGE(LNN_STATE, "callback is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
     NodeStateCallbackItem *item = NULL;
     NodeStateCallbackItem *next = NULL;
 
     if (!g_busCenterClient.isInit) {
-        LNN_LOGE(LNN_STATE, "unreg node state cb not init");
+        LNN_LOGE(LNN_STATE, "buscenter client not init");
         return SOFTBUS_NO_INIT;
     }
-    if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "lock node state cb list in unreg");
+        return SOFTBUS_LOCK_ERR;
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_busCenterClient.nodeStateCbList, NodeStateCallbackItem, node) {
         if (IsSameNodeStateCb(&item->cb, callback)) {
@@ -520,7 +545,7 @@ int32_t UnregNodeDeviceStateCbInner(INodeStateCb *callback)
             break;
         }
     }
-    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
+    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "unlock node state cb list in unreg");
     }
     return SOFTBUS_OK;
@@ -529,16 +554,17 @@ int32_t UnregNodeDeviceStateCbInner(INodeStateCb *callback)
 int32_t StartTimeSyncInner(const char *pkgName, const char *targetNetworkId, TimeSyncAccuracy accuracy,
     TimeSyncPeriod period, ITimeSyncCb *cb)
 {
-    int32_t rc;
+    int32_t rc = SOFTBUS_ERR;
 
     if (!g_busCenterClient.isInit) {
-        LNN_LOGE(LNN_STATE, "start time sync not init");
+        LNN_LOGE(LNN_STATE, "buscenter client not init");
         return SOFTBUS_NO_INIT;
     }
-    if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "lock time sync cb list");
+        return SOFTBUS_LOCK_ERR;
     }
-    rc = SOFTBUS_ERR;
+    
     do {
         if (FindTimeSyncCbItem(targetNetworkId, cb) != NULL) {
             LNN_LOGE(LNN_STATE, "repeat request from %s, StopTimeSync first!", pkgName);
@@ -546,12 +572,12 @@ int32_t StartTimeSyncInner(const char *pkgName, const char *targetNetworkId, Tim
         }
         rc = ServerIpcStartTimeSync(pkgName, targetNetworkId, accuracy, period);
         if (rc != SOFTBUS_OK) {
-            LNN_LOGE(LNN_STATE, "start time sync");
+            LNN_LOGE(LNN_STATE, "start time sync failed, ret=%d", rc);
         } else {
             rc = AddTimeSyncCbItem(targetNetworkId, cb);
         }
     } while (false);
-    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
+    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "unlock time sync cb list");
     }
     return rc;
@@ -559,27 +585,28 @@ int32_t StartTimeSyncInner(const char *pkgName, const char *targetNetworkId, Tim
 
 int32_t StopTimeSyncInner(const char *pkgName, const char *targetNetworkId)
 {
-    int32_t rc;
+    int32_t rc = SOFTBUS_ERR;
     TimeSyncCallbackItem *item = NULL;
 
     if (!g_busCenterClient.isInit) {
-        LNN_LOGE(LNN_STATE, "stop time sync cb list not init");
+        LNN_LOGE(LNN_STATE, "buscenter client not init");
         return SOFTBUS_NO_INIT;
     }
-    if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "lock time sync cb list");
+        return SOFTBUS_LOCK_ERR;
     }
-    rc = SOFTBUS_ERR;
+    
     while ((item = FindTimeSyncCbItem(targetNetworkId, NULL)) != NULL) {
         rc = ServerIpcStopTimeSync(pkgName, targetNetworkId);
         if (rc != SOFTBUS_OK) {
-            LNN_LOGE(LNN_STATE, "stop time sync");
+            LNN_LOGE(LNN_STATE, "stop time sync failed, ret=%d", rc);
         } else {
             ListDelete(&item->node);
             SoftBusFree(item);
         }
     }
-    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
+    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "unlock time sync cb list");
     }
     return rc;
@@ -652,26 +679,29 @@ int32_t LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode)
         return SOFTBUS_INVALID_PARAM;
     }
     if (!g_busCenterClient.isInit) {
+        LNN_LOGE(LNN_STATE, "buscenter client not init");
         return SOFTBUS_ERR;
     }
 
-    if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "lock join lnn cb list in join result");
+        return SOFTBUS_LOCK_ERR;
     }
     while ((item = FindJoinLNNCbItem((ConnectionAddr *)addr, NULL)) != NULL) {
         ListDelete(&item->node);
-        if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
+        if (SoftBusMutexUnlock(&g_busCenterClient.lock) != SOFTBUS_OK) {
             LNN_LOGE(LNN_STATE, "unlock join lnn cb list in join result");
         }
         if (item->cb != NULL) {
             item->cb(connAddr, networkId, retCode);
         }
         SoftBusFree(item);
-        if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
+        if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
             LNN_LOGE(LNN_STATE, "lock join lnn cb list in join result");
+            return SOFTBUS_LOCK_ERR;
         }
     }
-    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
+    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "unlock join lnn cb list in join result");
     }
     return SOFTBUS_OK;
@@ -686,27 +716,29 @@ int32_t LnnOnLeaveResult(const char *networkId, int32_t retCode)
         return SOFTBUS_INVALID_PARAM;
     }
     if (!g_busCenterClient.isInit) {
-        LNN_LOGE(LNN_STATE, "leave cb not init");
+        LNN_LOGE(LNN_STATE, "buscenter client not init");
         return SOFTBUS_ERR;
     }
 
-    if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "lock leave lnn cb list fail");
+        return SOFTBUS_LOCK_ERR;
     }
     while ((item = FindLeaveLNNCbItem(networkId, NULL)) != NULL) {
         ListDelete(&item->node);
-        if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
+        if (SoftBusMutexUnlock(&g_busCenterClient.lock) != SOFTBUS_OK) {
             LNN_LOGE(LNN_STATE, "unlock leave lnn cb list fail");
         }
         if (item->cb != NULL) {
             item->cb(networkId, retCode);
         }
         SoftBusFree(item);
-        if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
+        if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
             LNN_LOGE(LNN_STATE, "lock leave lnn cb list fail");
+            return SOFTBUS_LOCK_ERR;
         }
     }
-    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
+    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "unlock leave lnn cb list fail");
     }
     return SOFTBUS_OK;
@@ -722,15 +754,17 @@ int32_t LnnOnNodeOnlineStateChanged(const char *pkgName, bool isOnline, void *in
         return SOFTBUS_INVALID_PARAM;
     }
     if (!g_busCenterClient.isInit) {
+        LNN_LOGE(LNN_STATE, "buscenter client not init");
         return SOFTBUS_ERR;
     }
 
-    if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "lock node state cb list in notify");
+        return SOFTBUS_LOCK_ERR;
     }
     ListInit(&dupList);
     DuplicateNodeStateCbList(&dupList);
-    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
+    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "unlock node state cb list in notify");
     }
     LIST_FOR_EACH_ENTRY(item, &dupList, NodeStateCallbackItem, node) {
@@ -761,6 +795,7 @@ int32_t LnnOnNodeBasicInfoChanged(const char *pkgName, void *info, int32_t type)
         return SOFTBUS_INVALID_PARAM;
     }
     if (!g_busCenterClient.isInit) {
+        LNN_LOGE(LNN_STATE, "buscenter client not init");
         return SOFTBUS_ERR;
     }
 
@@ -769,12 +804,13 @@ int32_t LnnOnNodeBasicInfoChanged(const char *pkgName, void *info, int32_t type)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "lock node basic info cb list in notify");
+        return SOFTBUS_LOCK_ERR;
     }
     ListInit(&dupList);
     DuplicateNodeStateCbList(&dupList);
-    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
+    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "unlock node basic info cb list in notify");
     }
     LIST_FOR_EACH_ENTRY(item, &dupList, NodeStateCallbackItem, node) {
@@ -798,16 +834,17 @@ int32_t LnnOnTimeSyncResult(const void *info, int retCode)
         return SOFTBUS_INVALID_PARAM;
     }
     if (!g_busCenterClient.isInit) {
-        LNN_LOGE(LNN_STATE, "time sync cb not init");
+        LNN_LOGE(LNN_STATE, "buscenter client not init");
         return SOFTBUS_ERR;
     }
 
-    if (SoftBusMutexLock(&g_busCenterClient.lock) != 0) {
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "lock time sync cb list in time sync result");
+        return SOFTBUS_LOCK_ERR;
     }
     ListInit(&dupList);
     DuplicateTimeSyncResultCbList(&dupList, basicInfo->target.targetNetworkId);
-    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != 0) {
+    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "unlock time sync cb list in time sync result");
     }
     LIST_FOR_EACH_ENTRY(item, &dupList, TimeSyncCallbackItem, node) {

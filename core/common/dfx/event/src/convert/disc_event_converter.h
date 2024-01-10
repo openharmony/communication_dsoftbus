@@ -36,6 +36,14 @@ extern "C" {
 
 DISC_ASSIGNER(Errcode, Result, result)
 DISC_ASSIGNER(Errcode, Errcode, errcode)
+DISC_ASSIGNER(Int32, InitType, initType)
+DISC_ASSIGNER(Int32, ServerType, serverType)
+DISC_ASSIGNER(Int32, InterFuncType, interFuncType)
+DISC_ASSIGNER(Int32, CapabilityBit, capabilityBit)
+DISC_ASSIGNER(String, CapabilityData, capabilityData)
+DISC_ASSIGNER(Int32, BleTurnState, bleTurnState)
+DISC_ASSIGNER(Int32, IpLinkStatus, ipLinkStatus)
+DISC_ASSIGNER(Int32, CoapChangeType, coapChangeType)
 DISC_ASSIGNER(Int32, BroadcastType, broadcastType)
 DISC_ASSIGNER(Int32, BroadcastFreq, broadcastFreq)
 DISC_ASSIGNER(Int32, ScanType, scanType)
@@ -44,22 +52,27 @@ DISC_ASSIGNER(Int32, DiscType, discType)
 DISC_ASSIGNER(Int32, DiscMode, discMode)
 DISC_ASSIGNER(Int32, CostTime, costTime)
 DISC_ASSIGNER(AnonymizeString, LocalNetworkId, localNetworkId)
-DISC_ASSIGNER(AnonymizeString, LocalUdid, localUdid)
-DISC_ASSIGNER(String, LocalDeviceType, localDeviceType)
 DISC_ASSIGNER(AnonymizeString, PeerIp, peerIp)
 DISC_ASSIGNER(AnonymizeString, PeerBrMac, peerBrMac)
 DISC_ASSIGNER(AnonymizeString, PeerBleMac, peerBleMac)
 DISC_ASSIGNER(AnonymizeString, PeerWifiMac, peerWifiMac)
 DISC_ASSIGNER(String, PeerPort, peerPort)
-DISC_ASSIGNER(AnonymizeString, PeerUdid, peerUdid)
 DISC_ASSIGNER(AnonymizeString, PeerNetworkId, peerNetworkId)
 DISC_ASSIGNER(String, PeerDeviceType, peerDeviceType)
 DISC_ASSIGNER(String, CallerPkg, callerPkg)
 
-#define DISC_ASSIGNER_SIZE 21 // Size of g_discAssigners
+#define DISC_ASSIGNER_SIZE 26 // Size of g_discAssigners
 static HiSysEventParamAssigner g_discAssigners[] = {
     { "STAGE_RES",            HISYSEVENT_INT32,  DiscAssignerResult         },
     { "ERROR_CODE",           HISYSEVENT_INT32,  DiscAssignerErrcode        },
+    { "INIT_TYPE",            HISYSEVENT_INT32,  DiscAssignerInitType       },
+    { "SERVER_TYPE",          HISYSEVENT_INT32,  DiscAssignerServerType     },
+    { "INTERFACE_FUNC_TYPE",  HISYSEVENT_INT32,  DiscAssignerInterFuncType  },
+    { "CAPABILITY_BIT",       HISYSEVENT_INT32,  DiscAssignerCapabilityBit  },
+    { "CAPABILITY_DATA",      HISYSEVENT_STRING, DiscAssignerCapabilityData },
+    { "BLE_TURN_STATE",       HISYSEVENT_INT32,  DiscAssignerBleTurnState   },
+    { "IP_LINK_STATUS",       HISYSEVENT_INT32,  DiscAssignerIpLinkStatus   },
+    { "COAP_CHANGE_TYPE",     HISYSEVENT_INT32,  DiscAssignerCoapChangeType },
     { "BROADCAST_TYPE",       HISYSEVENT_INT32,  DiscAssignerBroadcastType  },
     { "BROADCAST_FREQ",       HISYSEVENT_INT32,  DiscAssignerBroadcastFreq  },
     { "SCAN_TYPE",            HISYSEVENT_INT32,  DiscAssignerScanType       },
@@ -68,14 +81,11 @@ static HiSysEventParamAssigner g_discAssigners[] = {
     { "DISC_MODE",            HISYSEVENT_INT32,  DiscAssignerDiscMode       },
     { "FIRST_DISCOVERY_TIME", HISYSEVENT_INT32,  DiscAssignerCostTime       },
     { "LOCAL_NET_ID",         HISYSEVENT_STRING, DiscAssignerLocalNetworkId },
-    { "LOCAL_UDID",           HISYSEVENT_STRING, DiscAssignerLocalUdid      },
-    { "LOCAL_DEV_TYPE",       HISYSEVENT_INT32,  DiscAssignerLocalDeviceType},
     { "PEER_IP",              HISYSEVENT_STRING, DiscAssignerPeerIp         },
     { "PEER_BR_MAC",          HISYSEVENT_STRING, DiscAssignerPeerBrMac      },
     { "PEER_BLE_MAC",         HISYSEVENT_STRING, DiscAssignerPeerBleMac     },
     { "PEER_WIFI_MAC",        HISYSEVENT_STRING, DiscAssignerPeerWifiMac    },
     { "PEER_PORT",            HISYSEVENT_INT32,  DiscAssignerPeerPort       },
-    { "PEER_UDID",            HISYSEVENT_STRING, DiscAssignerPeerUdid       },
     { "PEER_NET_ID",          HISYSEVENT_STRING, DiscAssignerPeerNetworkId  },
     { "PEER_DEV_TYPE",        HISYSEVENT_STRING, DiscAssignerPeerDeviceType },
     { "HOST_PKG",             HISYSEVENT_STRING, DiscAssignerCallerPkg      },

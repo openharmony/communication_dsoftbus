@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,14 +16,15 @@
 #include "softbus_adapter_hiview.h"
 
 #include <cstdlib>
+
 #include "hiview.h"
 #include "comm_log.h"
 #include "parameter.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 
-#define PROP_USER_TYPE "ro.logsystem.usertype"
-#define PROP_USER_TYPE_VALUE_LEN 8
+#define PROP_USER_TYPE            "ro.logsystem.usertype"
+#define PROP_USER_TYPE_VALUE_LEN  8
 #define PROP_USER_TYPE_CHANA_BETA 3
 
 SoftBusLogSysType SoftBusGetLogSysType(void)
@@ -35,7 +36,7 @@ SoftBusLogSysType SoftBusGetLogSysType(void)
         return userType;
     }
 
-    char value[PROP_USER_TYPE_VALUE_LEN] = {0};
+    char value[PROP_USER_TYPE_VALUE_LEN] = { 0 };
     int32_t ret = GetParameter(PROP_USER_TYPE, "", value, sizeof(value));
     if (ret < 0) {
         COMM_LOGE(COMM_ADAPTER, "GetProp: [%s] fail(ret=%d)", PROP_USER_TYPE, ret);
@@ -56,7 +57,7 @@ SoftBusLogSysType SoftBusGetLogSysType(void)
 void SoftBusGenHiviewHash(const char *deviceId, char *buf, uint32_t size)
 {
     if (deviceId == nullptr || buf == NULL || size < HiView::DEFAULT_TRUNCATED_LENGTH) {
-        COMM_LOGE(COMM_ADAPTER, "HiView::genTruncatedHash invalid param");
+        COMM_LOGE(COMM_ADAPTER, "invalid param");
         return;
     }
     std::string input(deviceId);

@@ -781,7 +781,7 @@ static struct NegotiateMessage* BuildNegotiateResult(enum WifiDirectErrorCode re
 
 static int32_t SendConnectResponseAsGo(struct NegotiateMessage *msg, struct InnerLink *link, struct InterfaceInfo *info)
 {
-    char remoteIp[IP_ADDR_STR_LEN];
+    char remoteIp[IP_ADDR_STR_LEN] = {0};
     char *remoteMac = msg->getString(msg, NM_KEY_GC_MAC, "");
     int32_t ret = GetWifiDirectP2pAdapter()->requestGcIp(remoteMac, remoteIp, sizeof(remoteIp));
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ERROR_P2P_APPLY_GC_IP_FAIL, CONN_WIFI_DIRECT,

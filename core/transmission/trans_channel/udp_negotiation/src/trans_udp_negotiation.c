@@ -473,7 +473,7 @@ static int32_t ParseRequestAppInfo(int64_t authId, const cJSON *msg, AppInfo *ap
         }
     } else {
         appInfo->routeType = WIFI_P2P;
-        if (GetWifiDirectManager()->getLocalIpByUuid(appInfo->peerData.deviceId, localIp,
+        if (GetWifiDirectManager()->getLocalIpByRemoteIp(appInfo->peerData.addr, localIp,
                 sizeof(localIp)) != SOFTBUS_OK) {
                 TRANS_LOGE(TRANS_CTRL, "get p2p ip failed.");
                 return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
@@ -767,13 +767,18 @@ static void TransCloseUdpChannelByRequestId(uint32_t requestId)
     TRANS_LOGD(TRANS_CTRL, "ok");
 }
 
-static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId, bool isMeta)
+static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId, bool isMeta, int32_t linkType)
 {
     AuthConnInfo auth;
     (void)memset_s(&auth, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     AuthConnCallback cb = {0};
-
-    int32_t ret = AuthGetPreferConnInfo(peerUdid, &auth, isMeta);
+    int32_t ret = SOFTBUS_ERR;
+    if (linkType == LANE_HML) {
+        ret = AuthGetP2pConnInfo(peerUdid, &auth, isMeta);
+    }
+    if (ret != SOFTBUS_OK) {
+        ret = AuthGetPreferConnInfo(peerUdid, &auth, isMeta);
+    }
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get info fail: ret=%d", ret);
         TransCloseUdpChannelByRequestId(requestId);
@@ -813,6 +818,8 @@ static int32_t OpenAuthConnForUdpNegotiation(UdpChannelInfo *channel)
     channelObj->isMeta = TransGetAuthTypeByNetWorkId(channel->info.peerNetWorkId);
     ReleaseUdpChannelLock();
 
+    int32_t ret = UdpOpenAuthConn(channel->info.peerData.deviceId, requestId, channelObj->isMeta,
+        channel->info.linkType);
     TransEventExtra extra = {
         .calleePkg = NULL,
         .callerPkg = NULL,
@@ -823,7 +830,6 @@ static int32_t OpenAuthConnForUdpNegotiation(UdpChannelInfo *channel)
         .peerNetworkId = channel->info.peerNetWorkId
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, extra);
-    int32_t ret = UdpOpenAuthConn(channel->info.peerData.deviceId, requestId, channelObj->isMeta);
     if (ret != SOFTBUS_OK) {
         extra.errcode = ret;
         extra.result = EVENT_STAGE_RESULT_FAILED;
@@ -863,11 +869,6 @@ static int32_t PrepareAppInfoForUdpOpen(const ConnectOption *connOpt, AppInfo *a
         case CONNECT_P2P_REUSE:
             appInfo->udpConnType = UDP_CONN_TYPE_P2P;
             appInfo->routeType = WIFI_P2P;
-            if (GetWifiDirectManager()->getLocalIpByUuid(appInfo->peerData.deviceId, appInfo->myData.addr,
-                sizeof(appInfo->myData.addr)) != SOFTBUS_OK) {
-                TRANS_LOGE(TRANS_CTRL, "get p2p ip fail");
-                return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
-            }
             appInfo->protocol = connOpt->socketOption.protocol;
             break;
         default:

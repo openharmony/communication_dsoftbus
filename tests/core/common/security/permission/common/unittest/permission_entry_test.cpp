@@ -73,7 +73,7 @@ HWTEST_F(PermissionEntryTest, LoadPermissionJsonTest001, TestSize.Level0)
     int32_t ret;
 
     ret = LoadPermissionJson(NULL);
-    EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /**

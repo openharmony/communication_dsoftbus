@@ -35,10 +35,10 @@ void LnnDeinitLaneHub(void)
 {
 }
 
-LnnLanesObject *LnnRequestLanesObject(const char *netWorkId, int32_t pid, LnnLaneProperty prop,
+LnnLanesObject *LnnRequestLanesObject(const char *networkId, int32_t pid, LnnLaneProperty prop,
     const LnnPreferredLinkList *list, uint32_t laneNum)
 {
-    (void)netWorkId;
+    (void)networkId;
     (void)pid;
     (void)prop;
     (void)list;

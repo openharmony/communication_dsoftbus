@@ -61,12 +61,15 @@ HWTEST_F(LnnEventTest, LnnEventTest002, TestSize.Level0)
     LnnEventExtra validExtra = {
         .result = 1,
         .errcode = 2,
-        .connectionId = 3,
-        .authType = 4,
-        .authId = 5,
-        .lnnType = 6,
-        .onlineNum = 7,
-        .peerDeviceAbility = 8,
+        .discServerType = 3,
+        .gearCycle = 4,
+        .gearDuration = 5,
+        .connectionId = 6,
+        .authType = 7,
+        .authId = 8,
+        .lnnType = 9,
+        .onlineNum = 10,
+        .peerDeviceAbility = 11,
         .peerDeviceInfo = "testPeerDeviceInfo",
         .peerIp = "10.11.12.1",
         .peerBrMac = "dd:15:bc:b9:f2:04",
@@ -100,12 +103,15 @@ HWTEST_F(LnnEventTest, LnnEventTest003, TestSize.Level0)
     LnnEventExtra invalidExtra = {
         .result = -1,  // vaild
         .errcode = -2, // valid
-        .connectionId = -3,
-        .authType = -4,
-        .authId = -5,
-        .lnnType = -6,
-        .onlineNum = -7,
-        .peerDeviceAbility = -8,
+        .discServerType = -3,
+        .gearCycle = -4,
+        .gearDuration = -5,
+        .connectionId = -6,
+        .authType = -7,
+        .authId = -8,
+        .lnnType = -9,
+        .onlineNum = -10,
+        .peerDeviceAbility = -11,
         .peerDeviceInfo = "",
         .peerIp = "",
         .peerBrMac = "",
@@ -125,7 +131,7 @@ HWTEST_F(LnnEventTest, LnnEventTest003, TestSize.Level0)
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(LNN_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR),
             LnnInvalidParamArrayMatcher(invalidExtra, VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
         .Times(1);
-    LNN_EVENT(EVENT_SCENE_LEAVE_LNN, EVENT_STAGE_LEAVE_LNN_START, invalidExtra);
+    LNN_EVENT(EVENT_SCENE_LEAVE_LNN, EVENT_STAGE_LEAVE_LNN, invalidExtra);
 }
 
 /**
@@ -144,7 +150,7 @@ HWTEST_F(LnnEventTest, LnnEventTest004, TestSize.Level0)
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(LNN_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR),
             LnnInvalidParamArrayMatcher(emptyExtra, VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
         .Times(1);
-    LNN_EVENT(EVENT_SCENE_LEAVE_LNN, EVENT_STAGE_LEAVE_LNN_END, emptyExtra);
+    LNN_EVENT(EVENT_SCENE_LEAVE_LNN, EVENT_STAGE_LEAVE_LNN, emptyExtra);
 }
 
 /**

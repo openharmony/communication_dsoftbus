@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,6 @@
 
 #include <securec.h>
 
-#include "device_profile_listener.h"
 #include "anonymizer.h"
 #include "auth_common.h"
 #include "auth_connection.h"
@@ -27,9 +26,11 @@
 #include "auth_session_fsm.h"
 #include "auth_session_message.h"
 #include "bus_center_manager.h"
+#include "device_profile_listener.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_app_bind_interface.h"
 #include "lnn_decision_db.h"
+#include "lnn_event.h"
 #include "lnn_feature_capability.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_net_builder.h"
@@ -517,6 +518,31 @@ static int64_t GetActiveAuthIdByConnInfo(const AuthConnInfo *connInfo)
     return authId;
 }
 
+static AuthManager *AuthManagerIsExist(int64_t authSeq, const AuthSessionInfo *info, bool *isNewCreated)
+{
+    AuthManager *auth = FindAuthManagerByConnInfo(&info->connInfo, info->isServer);
+    if (auth == NULL) {
+        auth = NewAuthManager(authSeq, info);
+        if (auth == NULL) {
+            AUTH_LOGE(AUTH_FSM, "new authManager create fail.");
+            return NULL;
+        }
+        *isNewCreated = true;
+    } else {
+        if (auth->connId != info->connId && auth->connInfo.type == AUTH_LINK_TYPE_WIFI) {
+            DisconnectAuthDevice(&auth->connId);
+            auth->hasAuthPassed = false;
+            AUTH_LOGI(AUTH_FSM, "auth manager may single device on line");
+        }
+    }
+    auth->connId = info->connId;
+    auth->lastAuthSeq = authSeq;
+    auth->lastVerifyTime = GetCurrentTimeMs();
+    auth->lastActiveTime = GetCurrentTimeMs();
+
+    AUTH_LOGI(AUTH_FSM, "auth manager exist.");
+    return auth;
+}
 
 int32_t AuthManagerSetSessionKey(int64_t authSeq, const AuthSessionInfo *info,
     const SessionKey *sessionKey, bool isConnect)
@@ -533,33 +559,20 @@ int32_t AuthManagerSetSessionKey(int64_t authSeq, const AuthSessionInfo *info,
         ReleaseAuthLock();
         return SOFTBUS_OK;
     }
+
     bool isNewCreated = false;
-    AuthManager *auth = FindAuthManagerByConnInfo(&info->connInfo, info->isServer);
+    AuthManager *auth = AuthManagerIsExist(authSeq, info, &isNewCreated);
     if (auth == NULL) {
-        auth = NewAuthManager(authSeq, info);
-        if (auth == NULL) {
-            AUTH_LOGE(AUTH_FSM, "NewAuthManager fail");
-            ReleaseAuthLock();
-            return SOFTBUS_MALLOC_ERR;
-        }
-        isNewCreated = true;
-    } else {
-        if (auth->connId != info->connId && auth->connInfo.type == AUTH_LINK_TYPE_WIFI) {
-            DisconnectAuthDevice(&auth->connId);
-            auth->hasAuthPassed = false;
-            AUTH_LOGI(AUTH_FSM, "auth manager may single device on line");
-        }
+        AUTH_LOGE(AUTH_FSM, "auth manager does not exist.");
+        ReleaseAuthLock();
+        return SOFTBUS_ERR;
     }
-    auth->connId = info->connId;
-    auth->lastAuthSeq = authSeq;
-    auth->lastVerifyTime = GetCurrentTimeMs();
-    auth->lastActiveTime = GetCurrentTimeMs();
     int32_t sessionKeyIndex = TO_INT32(authSeq);
     if ((info->isSupportFastAuth) && (info->version <= SOFTBUS_OLD_V2)) {
         sessionKeyIndex = TO_INT32(info->oldIndex);
     }
     if (AddSessionKey(&auth->sessionKeyList, sessionKeyIndex, sessionKey) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "AddSessionKey fail");
+        AUTH_LOGE(AUTH_FSM, "failed to add a sessionkey");
         if (isNewCreated) {
             DelAuthManager(auth, true);
         }
@@ -688,6 +701,16 @@ static int32_t RetryRegTrustDataChangeListener()
         (void)SoftBusSleepMs(RETRY_REGDATA_MILLSECONDS);
     }
     return SOFTBUS_ERR;
+}
+
+static void DfxRecordLnnAuthStart(const AuthConnInfo *connInfo)
+{
+    LnnEventExtra extra = { 0 };
+    LnnEventExtraInit(&extra);
+    if (connInfo != NULL) {
+        extra.lnnType = connInfo->type;
+    }
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH, extra);
 }
 
 static int32_t StartVerifyDevice(uint32_t requestId, const AuthConnInfo *connInfo, const AuthVerifyCallback *verifyCb,
@@ -889,13 +912,22 @@ void AuthManagerSetAuthFailed(int64_t authSeq, const AuthSessionInfo *info, int3
     AUTH_LOGE(
         AUTH_FSM, "SetAuthFailed: authSeq=%" PRId64 ", requestId=%u, reason=%d", authSeq, info->requestId, reason);
     AuthManager *auth = GetAuthManagerByConnInfo(&info->connInfo, info->isServer);
-    if (auth != NULL && auth->hasAuthPassed) {
+    bool needDisconnect = true;
+    if (auth != NULL && reason == SOFTBUS_AUTH_TIMEOUT && info->connInfo.type == AUTH_LINK_TYPE_WIFI
+        && info->connInfo.info.ipInfo.port != auth->connInfo.info.ipInfo.port) {
+        AUTH_LOGE(AUTH_FSM, "auth manager port change, connType=%d, side=%s",
+            info->connInfo.type, GetAuthSideStr(info->isServer));
+        needDisconnect = false;
+    }
+    if (auth != NULL && auth->hasAuthPassed && needDisconnect) {
         AUTH_LOGE(AUTH_FSM, "update session key fail, authId=%" PRId64, auth->authId);
         NotifyDeviceDisconnect(auth->authId);
     }
     DelAuthManager(auth, false);
 
-    RemoveAuthManagerByConnInfo(&info->connInfo, info->isServer);
+    if (needDisconnect) {
+        RemoveAuthManagerByConnInfo(&info->connInfo, info->isServer);
+    }
     ReportAuthRequestFailed(info->requestId, reason);
     if (GetConnType(info->connId) == AUTH_LINK_TYPE_WIFI) {
         DisconnectAuthDevice((uint64_t *)&info->connId);
@@ -990,8 +1022,23 @@ static void HandleBleConnectResult(uint32_t requestId, int64_t authId, uint64_t 
     } while (FindAuthRequestByConnInfo(&request.connInfo, &request) == SOFTBUS_OK);
 }
 
+static void DfxRecordLnnConnectEnd(uint64_t connId, const AuthConnInfo *connInfo, int32_t reason)
+{
+    LnnEventExtra extra = { 0 };
+    LnnEventExtraInit(&extra);
+    extra.connectionId = (int32_t)connId;
+    extra.errcode = reason;
+    extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+
+    if (connInfo != NULL) {
+        extra.lnnType = connInfo->type;
+    }
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_CONNECTION, extra);
+}
+
 static void OnConnectResult(uint32_t requestId, uint64_t connId, int32_t result, const AuthConnInfo *connInfo)
 {
+    DfxRecordLnnConnectEnd(connId, connInfo, result);
     AUTH_LOGI(AUTH_CONN, "OnConnectResult: requestId=%u, result=%d", requestId, result);
     AuthRequest request;
     if (GetAuthRequest(requestId, &request) != SOFTBUS_OK) {
@@ -1258,6 +1305,7 @@ uint32_t AuthGenRequestId(void)
 int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
     const AuthVerifyCallback *callback, bool isFastAuth)
 {
+    DfxRecordLnnAuthStart(connInfo);
     if (connInfo == NULL || !CheckVerifyCallback(callback)) {
         AUTH_LOGE(AUTH_CONN, "invalid param");
         return SOFTBUS_INVALID_PARAM;
@@ -1348,8 +1396,7 @@ int32_t AuthDeviceGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo)
         AUTH_LOGE(AUTH_CONN, "invalid uuid or connInfo");
         return SOFTBUS_INVALID_PARAM;
     }
-    AuthLinkType linkList[] = { AUTH_LINK_TYPE_ENHANCED_P2P, AUTH_LINK_TYPE_WIFI, AUTH_LINK_TYPE_BR,
-                                AUTH_LINK_TYPE_BLE };
+    AuthLinkType linkList[] = { AUTH_LINK_TYPE_WIFI, AUTH_LINK_TYPE_BR, AUTH_LINK_TYPE_BLE };
     uint32_t linkTypeNum = sizeof(linkList) / sizeof(linkList[0]);
     for (uint32_t i = 0; i < linkTypeNum; i++) {
         if (GetAuthConnInfoByUuid(uuid, linkList[i], connInfo) != SOFTBUS_OK) {
@@ -1366,6 +1413,19 @@ int32_t AuthDeviceGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo)
     }
     AUTH_LOGI(AUTH_CONN, "no active auth, try br connection");
     return TryGetBrConnInfo(uuid, connInfo);
+}
+
+int32_t AuthDeviceGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo)
+{
+    if (uuid == NULL || uuid[0] == '\0' || connInfo == NULL) {
+        AUTH_LOGE(AUTH_CONN, "invalid uuid or connInfo");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = GetAuthConnInfoByUuid(uuid, AUTH_LINK_TYPE_ENHANCED_P2P, connInfo);
+    if (ret == SOFTBUS_OK) {
+        AUTH_LOGI(AUTH_CONN, "select auth type: %d", AUTH_LINK_TYPE_ENHANCED_P2P);
+    }
+    return ret;
 }
 
 bool AuthDeviceCheckConnInfo(const char *uuid, AuthLinkType type, bool checkConnection)

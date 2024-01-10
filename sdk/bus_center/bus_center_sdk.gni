@@ -80,6 +80,7 @@ if (defined(ohos_lite)) {
     bus_center_manager_sdk_inc +=
         [ "$dsoftbus_root_path/core/bus_center/extend/include" ]
     bus_center_manager_sdk_src += [ "$dsoftbus_root_path/core/bus_center/extend/src/bus_center_ex_obj_proxy.cpp" ]
+    bus_center_manager_sdk_src += [ "$dsoftbus_root_path/sdk/bus_center/ipc/$os_type/src/bus_center_server_proxy_virtual.cpp" ]
   }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,17 +16,14 @@
 #include "softbus_adapter_timer.h"
 
 #include <errno.h>
-#include <fcntl.h>
 #include <signal.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <sys/time.h>
 #include <time.h>
 #include <unistd.h>
 
 #include "comm_log.h"
 #include "securec.h"
-#include "softbus_adapter_socket.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 
@@ -36,19 +33,19 @@
 
 static unsigned int g_timerType;
 
-static TimerFunc g_timerfunc = NULL;
+static TimerFunc g_timerFunc = NULL;
 
 static void HandleTimeoutAdapterFun(union sigval para)
 {
     (void)para;
-    if (g_timerfunc != NULL) {
-        g_timerfunc();
+    if (g_timerFunc != NULL) {
+        g_timerFunc();
     }
 }
 
 void SetTimerFunc(TimerFunc func)
 {
-    g_timerfunc = func;
+    g_timerFunc = func;
 }
 
 void *SoftBusCreateTimer(void **timerId, unsigned int type)
@@ -150,6 +147,5 @@ uint64_t SoftBusGetSysTimeMs(void)
         COMM_LOGI(COMM_ADAPTER, "get sys time fail");
         return 0;
     }
-    uint64_t ms = (uint64_t)time.tv_sec * MS_PER_SECOND + (uint64_t)time.tv_usec / US_PER_MSECOND;
-    return ms;
+    return (uint64_t)time.tv_sec * MS_PER_SECOND + (uint64_t)time.tv_usec / US_PER_MSECOND;
 }

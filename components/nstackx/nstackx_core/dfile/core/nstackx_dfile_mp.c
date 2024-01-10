@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#include "nstackx_dfile_send.h"
 #include "nstackx_dfile_mp.h"
+#include "nstackx_dfile_log.h"
+#include "nstackx_dfile_send.h"
 #include "nstackx_dfile_transfer.h"
 #include "nstackx_file_manager.h"
-#include "nstackx_dfile_log.h"
-#include "nstackx_dfile_dfx.h"
 #include "securec.h"
+
 #define TAG "nStackXDfileMp"
 
 int32_t DFileSocketRecvSP(DFileSession *session)
@@ -101,6 +101,7 @@ int32_t CreateSenderThread(DFileSession *session)
 
     para = malloc(sizeof(SenderThreadPara));
     if (para == NULL) {
+        DFILE_LOGE(TAG, "Failed to allocate memory for SenderThreadPara");
         return NSTACKX_ENOMEM;
     }
     para->session = session;

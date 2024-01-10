@@ -39,6 +39,18 @@ MATCHER_P2(LnnValidParamArrayMatcher, inExtra, validSize, "lnn valid param array
     ++index;
     EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
     EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
+    EXPECT_EQ(params[index].v.i32, extra.discServerType);
+    ++index;
+    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
+    EXPECT_EQ(params[index].v.i32, extra.gearCycle);
+    ++index;
+    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
+    EXPECT_EQ(params[index].v.i32, extra.gearDuration);
+    ++index;
+    EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_lnnAssigners[index].type);
     EXPECT_EQ(params[index].v.i32, extra.connectionId);
     ++index;
     EXPECT_STREQ(params[index].name, g_lnnAssigners[index].name);

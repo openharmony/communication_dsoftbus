@@ -317,7 +317,7 @@ int GetBtScanMode(uint16_t scanInterval, uint16_t scanWindow)
         return OHOS_BLE_SCAN_MODE_OP_P2_60_3000;
     }
     if (scanInterval == SOFTBUS_BC_SCAN_INTERVAL_P10 && scanWindow == SOFTBUS_BC_SCAN_WINDOW_P10) {
-        return OHOS_BLE_SCAN_MODE_OP_P10_60_600;
+        return OHOS_BLE_SCAN_MODE_OP_P10_30_300;
     }
     if (scanInterval == SOFTBUS_BC_SCAN_INTERVAL_P25 && scanWindow == SOFTBUS_BC_SCAN_WINDOW_P25) {
         return OHOS_BLE_SCAN_MODE_OP_P25_60_240;
@@ -456,20 +456,4 @@ int32_t ParseScanResult(const uint8_t *advData, uint8_t advLen, SoftBusBcScanRes
         index += len;
     }
     return SOFTBUS_OK;
-}
-
-void DumpSoftbusAdapterData(const char *description, uint8_t *data, uint16_t len)
-{
-    DISC_CHECK_AND_RETURN_LOGE(description != NULL, DISC_BLE_ADAPTER, "data is null!");
-    DISC_CHECK_AND_RETURN_LOGE(len != 0, DISC_BLE_ADAPTER, "len is 0!");
-    DISC_CHECK_AND_RETURN_LOGE(data != NULL, DISC_BLE_ADAPTER, "data is null!");
-
-    int32_t hexLen = HEXIFY_LEN(len);
-    char *softbusData = (char *)SoftBusCalloc(sizeof(char) * hexLen);
-    DISC_CHECK_AND_RETURN_LOGE(softbusData != NULL, DISC_BLE_ADAPTER, "malloc failed!");
-
-    (void)ConvertBytesToHexString(softbusData, hexLen, data, len);
-    DISC_LOGI(DISC_BLE_ADAPTER, "%s softbusData:%s", description, softbusData);
-
-    SoftBusFree(softbusData);
 }

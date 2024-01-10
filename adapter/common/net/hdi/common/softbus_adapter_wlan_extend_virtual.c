@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include <stdlib.h>
-#include "securec.h"
 #include "softbus_adapter_wlan_extend.h"
 #include "softbus_errcode.h"
 

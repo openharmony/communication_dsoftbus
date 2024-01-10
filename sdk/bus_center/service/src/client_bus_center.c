@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,9 @@
 #include <securec.h>
 #include <string.h>
 
+#include "client_bus_center_manager.h"
 #include "client_trans_session_manager.h"
+#include "lnn_event.h"
 #include "lnn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_client_frame_manager.h"
@@ -135,6 +137,80 @@ static int32_t SubscribeInfoCheck(const SubscribeInfo *info)
     return SOFTBUS_OK;
 }
 
+static void DfxRecordSdkJoinLnnEnd(const char *packageName, int32_t reason)
+{
+    LnnEventExtra extra = { 0 };
+    LnnEventExtraInit(&extra);
+    extra.errcode = reason;
+    extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+
+    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    if (packageName != NULL && IsValidString(packageName, PKG_NAME_SIZE_MAX - 1) && strncpy_s(pkgName,
+        PKG_NAME_SIZE_MAX, packageName, PKG_NAME_SIZE_MAX - 1) == EOK) {
+        extra.callerPkg = pkgName;
+    }
+    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_JOIN_SDK, extra);
+}
+
+static void DfxRecordSdkLeaveLnnEnd(const char *packageName, int32_t reason)
+{
+    LnnEventExtra extra = { 0 };
+    LnnEventExtraInit(&extra);
+    extra.errcode = reason;
+    extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+
+    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    if (packageName != NULL && IsValidString(packageName, PKG_NAME_SIZE_MAX - 1) && strncpy_s(pkgName,
+        PKG_NAME_SIZE_MAX, packageName, PKG_NAME_SIZE_MAX - 1) == EOK) {
+        extra.callerPkg = pkgName;
+    }
+    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_LEAVE_SDK, extra);
+}
+
+static void DfxRecordSdkShiftGearStart(const char *packageName, const GearMode *mode)
+{
+    LnnEventExtra extra = { 0 };
+    LnnEventExtraInit(&extra);
+    if (mode != NULL) {
+        extra.gearCycle = mode->cycle;
+        extra.gearDuration = mode->duration;
+    }
+    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    if (packageName != NULL && IsValidString(packageName, PKG_NAME_SIZE_MAX - 1) && strncpy_s(pkgName,
+        PKG_NAME_SIZE_MAX, packageName, PKG_NAME_SIZE_MAX - 1) == EOK) {
+        extra.callerPkg = pkgName;
+    }
+    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_SHIFT_GEAR, extra);
+}
+
+static void DfxRecordLnnDiscServerEnd(int32_t serverType, const char *packageName, int32_t reason)
+{
+    LnnEventExtra extra = { 0 };
+    LnnEventExtraInit(&extra);
+    extra.discServerType = serverType;
+    extra.errcode = reason;
+    extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+
+    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    if (packageName != NULL && IsValidString(packageName, PKG_NAME_SIZE_MAX - 1) && strncpy_s(pkgName,
+        PKG_NAME_SIZE_MAX, packageName, PKG_NAME_SIZE_MAX - 1) == EOK) {
+        extra.callerPkg = pkgName;
+    }
+    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_DISC_SDK, extra);
+}
+
+static void DfxRecordRegNodeStart(const char *packageName)
+{
+    LnnEventExtra extra = { 0 };
+    LnnEventExtraInit(&extra);
+    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    if (packageName != NULL && IsValidString(packageName, PKG_NAME_SIZE_MAX - 1) && strncpy_s(pkgName,
+        PKG_NAME_SIZE_MAX, packageName, PKG_NAME_SIZE_MAX - 1) == EOK) {
+        extra.callerPkg = pkgName;
+    }
+    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_REG_NODE, extra);
+}
+
 int32_t GetAllNodeDeviceInfo(const char *pkgName, NodeBasicInfo **info, int32_t *infoNum)
 {
     if (pkgName == NULL || info == NULL || infoNum == NULL) {
@@ -172,7 +248,7 @@ int32_t GetLocalNodeDeviceInfo(const char *pkgName, NodeBasicInfo *info)
 int32_t GetNodeKeyInfo(const char *pkgName, const char *networkId, NodeDeviceInfoKey key,
     uint8_t *info, int32_t infoLen)
 {
-    if (pkgName == NULL) {
+    if (pkgName == NULL || infoLen <= 0) {
         LNN_LOGE(LNN_STATE, "pkgName is null");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -184,7 +260,10 @@ int32_t GetNodeKeyInfo(const char *pkgName, const char *networkId, NodeDeviceInf
     if (ret != SOFTBUS_OK) {
         return ret;
     }
-    (void)memset_s(info, infoLen, 0, infoLen);
+    if (memset_s(info, infoLen, 0, infoLen) != EOK) {
+        LNN_LOGE(LNN_STATE, "memset nodekey info failed");
+        return SOFTBUS_MEM_ERR;
+    }
     return GetNodeKeyInfoInner(pkgName, networkId, key, info, infoLen);
 }
 
@@ -208,27 +287,35 @@ int32_t SetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16
 int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb)
 {
     if (pkgName == NULL || target == NULL || cb == NULL) {
+        DfxRecordSdkJoinLnnEnd(pkgName, SOFTBUS_INVALID_PARAM);
         LNN_LOGE(LNN_STATE, "params are NULL");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = CommonInit(pkgName);
     if (ret != SOFTBUS_OK) {
+        DfxRecordSdkJoinLnnEnd(pkgName, ret);
         return ret;
     }
-    return JoinLNNInner(pkgName, target, cb);
+    ret = JoinLNNInner(pkgName, target, cb);
+    DfxRecordSdkJoinLnnEnd(pkgName, ret);
+    return ret;
 }
 
 int32_t LeaveLNN(const char *pkgName, const char *networkId, OnLeaveLNNResult cb)
 {
     if (!IsValidString(networkId, NETWORK_ID_BUF_LEN) || cb == NULL || !IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1)) {
+        DfxRecordSdkLeaveLnnEnd(pkgName, SOFTBUS_INVALID_PARAM);
         LNN_LOGE(LNN_STATE, "networkId or cb is NULL");
         return SOFTBUS_INVALID_PARAM;
     }
-    return LeaveLNNInner(pkgName, networkId, cb);
+    int32_t ret = LeaveLNNInner(pkgName, networkId, cb);
+    DfxRecordSdkLeaveLnnEnd(pkgName, ret);
+    return ret;
 }
 
 int32_t RegNodeDeviceStateCb(const char *pkgName, INodeStateCb *callback)
 {
+    DfxRecordRegNodeStart(pkgName);
     if (pkgName == NULL || IsValidNodeStateCb(callback) == false) {
         LNN_LOGE(LNN_STATE, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
@@ -280,59 +367,77 @@ int32_t StopTimeSync(const char *pkgName, const char *targetNetworkId)
 int32_t PublishLNN(const char *pkgName, const PublishInfo *info, const IPublishCb *cb)
 {
     if (pkgName == NULL || info == NULL || cb == NULL) {
+        DfxRecordLnnDiscServerEnd(DISC_SERVER_PUBLISH, pkgName, SOFTBUS_INVALID_PARAM);
         LNN_LOGE(LNN_STATE, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = CommonInit(pkgName);
     if (ret != SOFTBUS_OK) {
+        DfxRecordLnnDiscServerEnd(DISC_SERVER_PUBLISH, pkgName, ret);
         return ret;
     }
     if (PublishInfoCheck(info) != SOFTBUS_OK) {
+        DfxRecordLnnDiscServerEnd(DISC_SERVER_PUBLISH, pkgName, SOFTBUS_INVALID_PARAM);
         return SOFTBUS_INVALID_PARAM;
     }
-    return PublishLNNInner(pkgName, info, cb);
+    ret = PublishLNNInner(pkgName, info, cb);
+    DfxRecordLnnDiscServerEnd(DISC_SERVER_PUBLISH, pkgName, ret);
+    return ret;
 }
 
 int32_t StopPublishLNN(const char *pkgName, int32_t publishId)
 {
     if (pkgName == NULL) {
+        DfxRecordLnnDiscServerEnd(DISC_SERVER_STOP_PUBLISH, pkgName, SOFTBUS_INVALID_PARAM);
         LNN_LOGE(LNN_STATE, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = CommonInit(pkgName);
     if (ret != SOFTBUS_OK) {
+        DfxRecordLnnDiscServerEnd(DISC_SERVER_STOP_PUBLISH, pkgName, ret);
         return ret;
     }
-    return StopPublishLNNInner(pkgName, publishId);
+    ret = StopPublishLNNInner(pkgName, publishId);
+    DfxRecordLnnDiscServerEnd(DISC_SERVER_STOP_PUBLISH, pkgName, ret);
+    return ret;
 }
 
 int32_t RefreshLNN(const char *pkgName, const SubscribeInfo *info, const IRefreshCallback *cb)
 {
     if (pkgName == NULL || info == NULL || cb == NULL) {
+        DfxRecordLnnDiscServerEnd(DISC_SERVER_DISCOVERY, pkgName, SOFTBUS_INVALID_PARAM);
         LNN_LOGE(LNN_STATE, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = CommonInit(pkgName);
     if (ret != SOFTBUS_OK) {
+        DfxRecordLnnDiscServerEnd(DISC_SERVER_DISCOVERY, pkgName, ret);
         return ret;
     }
     if (SubscribeInfoCheck(info) != SOFTBUS_OK) {
+        DfxRecordLnnDiscServerEnd(DISC_SERVER_DISCOVERY, pkgName, SOFTBUS_INVALID_PARAM);
         return SOFTBUS_INVALID_PARAM;
     }
-    return RefreshLNNInner(pkgName, info, cb);
+    ret = RefreshLNNInner(pkgName, info, cb);
+    DfxRecordLnnDiscServerEnd(DISC_SERVER_DISCOVERY, pkgName, ret);
+    return ret;
 }
 
 int32_t StopRefreshLNN(const char *pkgName, int32_t refreshId)
 {
     if (pkgName == NULL) {
+        DfxRecordLnnDiscServerEnd(DISC_SERVER_STOP_DISCOVERY, pkgName, SOFTBUS_INVALID_PARAM);
         LNN_LOGE(LNN_STATE, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = CommonInit(pkgName);
     if (ret != SOFTBUS_OK) {
+        DfxRecordLnnDiscServerEnd(DISC_SERVER_STOP_DISCOVERY, pkgName, ret);
         return ret;
     }
-    return StopRefreshLNNInner(pkgName, refreshId);
+    ret = StopRefreshLNNInner(pkgName, refreshId);
+    DfxRecordLnnDiscServerEnd(DISC_SERVER_STOP_DISCOVERY, pkgName, ret);
+    return ret;
 }
 
 int32_t ActiveMetaNode(const char *pkgName, const MetaNodeConfigInfo *info, char *metaNodeId)
@@ -376,6 +481,7 @@ int32_t GetAllMetaNodeInfo(const char *pkgName, MetaNodeInfo *infos, int32_t *in
 
 int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode)
 {
+    DfxRecordSdkShiftGearStart(pkgName, mode);
     if (pkgName == NULL || callerId == NULL || mode == NULL) {
         LNN_LOGE(LNN_STATE, "invalid shift lnn gear para");
         return SOFTBUS_INVALID_PARAM;

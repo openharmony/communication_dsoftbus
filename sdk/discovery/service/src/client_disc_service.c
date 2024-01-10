@@ -15,13 +15,18 @@
 
 #include "client_disc_service.h"
 
+#include <securec.h>
 #include <stdbool.h>
 #include <string.h>
+
 #include "client_disc_manager.h"
+#include "disc_event.h"
 #include "disc_log.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_client_frame_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_utils.h"
 
 static int32_t PublishInfoCheck(const PublishInfo *info)
 {
@@ -92,78 +97,115 @@ static int32_t SubscribeInfoCheck(const SubscribeInfo *info)
     return SOFTBUS_OK;
 }
 
+static void DfxRecordDiscServerEnd(int32_t serverType, int32_t reason, const char *packageName)
+{
+    DiscEventExtra extra = { 0 };
+    DiscEventExtraInit(&extra);
+    extra.serverType = serverType;
+    extra.errcode = reason;
+    extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+
+    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    if (packageName != NULL && IsValidString(packageName, PKG_NAME_SIZE_MAX - 1) && strncpy_s(pkgName,
+        PKG_NAME_SIZE_MAX, packageName, PKG_NAME_SIZE_MAX - 1) == EOK) {
+        extra.callerPkg = pkgName;
+    }
+    DISC_EVENT(EVENT_SCENE_DISC, EVENT_STAGE_DISC_SDK, extra);
+}
+
 int PublishService(const char *packageName, const PublishInfo *info, const IPublishCallback *cb)
 {
     if ((packageName == NULL) || (strlen(packageName) >= PKG_NAME_SIZE_MAX) || (info == NULL) || (cb == NULL)) {
+        DfxRecordDiscServerEnd(SERVER_PUBLISH, SOFTBUS_INVALID_PARAM, packageName);
         DISC_LOGE(DISC_SDK, "invalid parameter:null");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (InitSoftBus(packageName) != SOFTBUS_OK) {
+        DfxRecordDiscServerEnd(SERVER_PUBLISH, SOFTBUS_DISCOVER_NOT_INIT, packageName);
         DISC_LOGE(DISC_SDK, "init softbus err");
         return SOFTBUS_DISCOVER_NOT_INIT;
     }
 
     if (CheckPackageName(packageName) != SOFTBUS_OK) {
+        DfxRecordDiscServerEnd(SERVER_PUBLISH, SOFTBUS_INVALID_PARAM, packageName);
         DISC_LOGE(DISC_SDK, "check packageName failed");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (PublishInfoCheck(info) != SOFTBUS_OK) {
+        DfxRecordDiscServerEnd(SERVER_PUBLISH, SOFTBUS_INVALID_PARAM, packageName);
         DISC_LOGE(DISC_SDK, "publish infoCheck failed");
         return SOFTBUS_INVALID_PARAM;
     }
 
-    return PublishServiceInner(packageName, info, cb);
+    int32_t ret = PublishServiceInner(packageName, info, cb);
+    DfxRecordDiscServerEnd(SERVER_PUBLISH, ret, packageName);
+    return ret;
 }
 
 int UnPublishService(const char *packageName, int publishId)
 {
     if ((packageName == NULL) || (strlen(packageName) >= PKG_NAME_SIZE_MAX)) {
+        DfxRecordDiscServerEnd(SERVER_STOP_PUBLISH, SOFTBUS_INVALID_PARAM, packageName);
         DISC_LOGE(DISC_SDK, "invalid packageName");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (CheckPackageName(packageName) != SOFTBUS_OK) {
+        DfxRecordDiscServerEnd(SERVER_STOP_PUBLISH, SOFTBUS_INVALID_PARAM, packageName);
         DISC_LOGE(DISC_SDK, "check packageName failed");
         return SOFTBUS_INVALID_PARAM;
     }
 
-    return UnpublishServiceInner(packageName, publishId);
+    int32_t ret = UnpublishServiceInner(packageName, publishId);
+    DfxRecordDiscServerEnd(SERVER_STOP_PUBLISH, ret, packageName);
+    return ret;
 }
 
 int StartDiscovery(const char *packageName, const SubscribeInfo *info, const IDiscoveryCallback *cb)
 {
     if ((packageName == NULL) || (strlen(packageName) >= PKG_NAME_SIZE_MAX) || (info == NULL) || (cb == NULL)) {
+        DfxRecordDiscServerEnd(SERVER_DISCOVERY, SOFTBUS_INVALID_PARAM, packageName);
         DISC_LOGE(DISC_SDK, " invalid parameter:null");
         return SOFTBUS_INVALID_PARAM;
     }
     if (InitSoftBus(packageName) != SOFTBUS_OK) {
+        DfxRecordDiscServerEnd(SERVER_DISCOVERY, SOFTBUS_DISCOVER_NOT_INIT, packageName);
         DISC_LOGE(DISC_SDK, "init softbus err");
         return SOFTBUS_DISCOVER_NOT_INIT;
     }
     if (CheckPackageName(packageName) != SOFTBUS_OK) {
+        DfxRecordDiscServerEnd(SERVER_DISCOVERY, SOFTBUS_INVALID_PARAM, packageName);
         DISC_LOGE(DISC_SDK, "check packageName failed");
         return SOFTBUS_INVALID_PARAM;
     }
     if (SubscribeInfoCheck(info) != SOFTBUS_OK) {
+        DfxRecordDiscServerEnd(SERVER_DISCOVERY, SOFTBUS_INVALID_PARAM, packageName);
         DISC_LOGE(DISC_SDK, "subscribe infoCheck failed");
         return SOFTBUS_INVALID_PARAM;
     }
-    return StartDiscoveryInner(packageName, info, cb);
+
+    int32_t ret = StartDiscoveryInner(packageName, info, cb);
+    DfxRecordDiscServerEnd(SERVER_DISCOVERY, ret, packageName);
+    return ret;
 }
 
 int StopDiscovery(const char *packageName, int subscribeId)
 {
     if ((packageName == NULL) || (strlen(packageName) >= PKG_NAME_SIZE_MAX)) {
+        DfxRecordDiscServerEnd(SERVER_STOP_DISCOVERY, SOFTBUS_INVALID_PARAM, packageName);
         DISC_LOGE(DISC_SDK, "invalid packageName:null");
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (CheckPackageName(packageName) != SOFTBUS_OK) {
+        DfxRecordDiscServerEnd(SERVER_STOP_DISCOVERY, SOFTBUS_INVALID_PARAM, packageName);
         DISC_LOGE(DISC_SDK, "check packageName failed");
         return SOFTBUS_INVALID_PARAM;
     }
 
-    return StopDiscoveryInner(packageName, subscribeId);
+    int32_t ret = StopDiscoveryInner(packageName, subscribeId);
+    DfxRecordDiscServerEnd(SERVER_STOP_DISCOVERY, ret, packageName);
+    return ret;
 }

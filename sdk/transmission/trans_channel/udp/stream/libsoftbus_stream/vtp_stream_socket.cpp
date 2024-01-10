@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -565,7 +565,7 @@ bool VtpStreamSocket::Send(std::unique_ptr<IStream> stream)
         }
     }
 
-    int ret = -1;
+    int32_t ret = -1;
     std::unique_ptr<char[]> data = nullptr;
     ssize_t len = 0;
 
@@ -588,13 +588,11 @@ bool VtpStreamSocket::Send(std::unique_ptr<IStream> stream)
             return false;
         }
         len = packet.GetPacketLen() + GetEncryptOverhead();
-        TRANS_LOGD(TRANS_STREAM,
-            "packetLen=%zd, encryptOverhead=%zd", packet.GetPacketLen(), GetEncryptOverhead());
+        TRANS_LOGD(TRANS_STREAM, "packetLen=%zd, encryptOverhead=%zd", packet.GetPacketLen(), GetEncryptOverhead());
         data = std::make_unique<char[]>(len + FRAME_HEADER_LEN);
         ssize_t encLen = Encrypt(plainData.get(), packet.GetPacketLen(), data.get() + FRAME_HEADER_LEN, len);
         if (encLen != len) {
-            TRANS_LOGE(TRANS_STREAM,
-                "encrypted failed, dataLen=%zd, encLen=%zd", len, encLen);
+            TRANS_LOGE(TRANS_STREAM, "encrypted failed, dataLen=%zd, encLen=%zd", len, encLen);
             return false;
         }
         InsertBufferLength(len, FRAME_HEADER_LEN, reinterpret_cast<uint8_t *>(data.get()));

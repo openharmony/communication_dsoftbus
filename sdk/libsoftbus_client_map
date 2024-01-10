@@ -215,6 +215,7 @@
         "TransOnChannelOpenFailed";
         "ProxyChannelSendFile";
         "ClientDeathProcTask";
+        "TransBroadCastReInit";
         "NotifyAuthSuccess";
         "GetPeerPidInner";
         "StartNStackXDFileClient";

@@ -317,13 +317,8 @@ static void HandleConnConnectCmd(const void *para)
         AUTH_LOGE(AUTH_CONN, "invalid connType=%d", info->connInfo.type);
         return;
     }
-    LnnEventExtra lnnEventExtra = {0};
-    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_CONNECTION, lnnEventExtra);
     int32_t fd = SocketConnectDevice(info->connInfo.info.ipInfo.ip, info->connInfo.info.ipInfo.port, false);
     if (fd < 0) {
-        lnnEventExtra.result = EVENT_STAGE_RESULT_FAILED;
-        lnnEventExtra.errcode = SOFTBUS_AUTH_CONN_START_ERR;
-        LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_CONNECTION, lnnEventExtra);
         AUTH_LOGE(AUTH_CONN, "SocketConnectDevice fail");
         RemoveConnConnectTimeout(info->requestId);
         NotifyClientConnected(info->requestId, 0, SOFTBUS_AUTH_CONN_FAIL, NULL);
@@ -346,8 +341,6 @@ static void HandleConnConnectResult(const void *para)
     uint64_t connId = GenConnId(AUTH_LINK_TYPE_WIFI, fd);
     RemoveConnConnectTimeout(item->requestId);
     NotifyClientConnected(item->requestId, connId, SOFTBUS_OK, &item->connInfo);
-    LnnEventExtra lnnEventExtra = { .connectionId = connId, .result = EVENT_STAGE_RESULT_OK };
-    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_CONNECTION, lnnEventExtra);
     DelConnRequest(item);
 }
 
@@ -524,8 +517,6 @@ static void OnCommConnectSucc(uint32_t requestId, uint32_t connectionId, const C
     RemoveConnConnectTimeout(requestId);
     uint64_t connId = GenConnId(connInfo.type, connectionId);
     NotifyClientConnected(requestId, connId, SOFTBUS_OK, &connInfo);
-    LnnEventExtra lnnEventExtra = { .connectionId = (int32_t)connId, .result = EVENT_STAGE_RESULT_OK };
-    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_CONNECTION, lnnEventExtra);
 }
 
 static void OnCommConnectFail(uint32_t requestId, int32_t reason)
@@ -533,8 +524,6 @@ static void OnCommConnectFail(uint32_t requestId, int32_t reason)
     AUTH_LOGI(AUTH_CONN, "requestId=%u, reason=%d", requestId, reason);
     RemoveConnConnectTimeout(requestId);
     NotifyClientConnected(requestId, 0, SOFTBUS_CONN_FAIL, NULL);
-    LnnEventExtra lnnEventExtra = { .errcode = reason, .result = EVENT_STAGE_RESULT_FAILED };
-    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_CONNECTION, lnnEventExtra);
 }
 
 static int32_t ConnectCommDevice(const AuthConnInfo *info, uint32_t requestId, ConnSideType sideType)
@@ -553,17 +542,22 @@ static int32_t ConnectCommDevice(const AuthConnInfo *info, uint32_t requestId, C
         .OnConnectSuccessed = OnCommConnectSucc,
         .OnConnectFailed = OnCommConnectFail,
     };
-    LnnEventExtra lnnEventExtra = {0};
-    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_CONNECTION, lnnEventExtra);
     ret = ConnConnectDevice(&option, requestId, &result);
     if (ret != SOFTBUS_OK) {
-        lnnEventExtra.result = EVENT_STAGE_RESULT_FAILED;
-        lnnEventExtra.errcode = ret;
-        LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_CONNECTION, lnnEventExtra);
         AUTH_LOGE(AUTH_CONN, "ConnConnectDevice fail=%d", ret);
         return ret;
     }
     return SOFTBUS_OK;
+}
+
+static void DfxRecordLnnConnectStart(const AuthConnInfo *connInfo)
+{
+    LnnEventExtra extra = { 0 };
+    LnnEventExtraInit(&extra);
+    if (connInfo != NULL) {
+        extra.lnnType = connInfo->type;
+    }
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_CONNECTION, extra);
 }
 
 static int32_t PostCommData(uint32_t connectionId, bool toServer, const AuthDataHead *head, const uint8_t *data)
@@ -621,6 +615,7 @@ void AuthConnDeinit(void)
 
 int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnInfo *connInfo, ConnSideType sideType)
 {
+    DfxRecordLnnConnectStart(connInfo);
     CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
     AUTH_LOGI(AUTH_CONN, "requestId=%u, connType=%d, sideType=%d", requestId,
         connInfo->type, sideType);

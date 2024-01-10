@@ -318,7 +318,8 @@ static int32_t LlGetDeviceName(void *buf, uint32_t len)
         LNN_LOGE(LNN_LEDGER, "get device name fail");
         return SOFTBUS_ERR;
     }
-    if (strncpy_s((char *)buf, len, deviceName, strlen(deviceName)) != EOK) {
+    uint32_t realyLen = len > strlen(deviceName) ? strlen(deviceName) : len -1;
+    if (strncpy_s((char *)buf, len, deviceName, realyLen) != EOK) {
         LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
         return SOFTBUS_MEM_ERR;
     }
@@ -398,7 +399,7 @@ static int32_t LlGetWlanIp(void *buf, uint32_t len)
     }
     char *anonyIp = NULL;
     Anonymize(ip, &anonyIp);
-    LNN_LOGI(LNN_LEDGER, "get LocalIp=%s", anonyIp);
+    LNN_LOGD(LNN_LEDGER, "get LocalIp=%s", anonyIp);
     AnonymizeFree(anonyIp);
     if (strncpy_s((char *)buf, len, ip, strlen(ip)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
@@ -1639,6 +1640,34 @@ int32_t SoftBusDumpBusCenterLocalDeviceInfo(int fd)
     return SOFTBUS_OK;
 }
 
+static int32_t LnnInitLocalNodeInfo(NodeInfo *nodeInfo)
+{
+    if (InitOfflineCode(nodeInfo) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    if (strcpy_s(nodeInfo->nodeAddress, sizeof(nodeInfo->nodeAddress), NODE_ADDR_LOOPBACK) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "fail:strncpy_s fail");
+        return SOFTBUS_ERR;
+    }
+    if (InitLocalDeviceInfo(&nodeInfo->deviceInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "init local device info error");
+        return SOFTBUS_ERR;
+    }
+    if (InitLocalVersionType(nodeInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "init local version type error");
+        return SOFTBUS_ERR;
+    }
+    if (InitConnectInfo(&nodeInfo->connectInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "init local connect info error");
+        return SOFTBUS_ERR;
+    }
+    if (LnnInitLocalP2pInfo(nodeInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "init local p2p info error");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t LnnInitLocalLedger(void)
 {
     NodeInfo *nodeInfo = NULL;
@@ -1660,33 +1689,14 @@ int32_t LnnInitLocalLedger(void)
     nodeInfo->authCapacity = SUPPORT_EXCHANGE_NETWORKID;
     nodeInfo->feature = LnnGetFeatureCapabilty();
     nodeInfo->connSubFeature = DEFAULT_CONN_SUB_FEATURE;
-    DeviceBasicInfo *deviceInfo = &nodeInfo->deviceInfo;
-    if (InitOfflineCode(nodeInfo) != SOFTBUS_OK) {
-        goto EXIT;
-    }
-    if (strcpy_s(nodeInfo->nodeAddress, sizeof(nodeInfo->nodeAddress), NODE_ADDR_LOOPBACK) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "fail:strncpy_s fail");
-        goto EXIT;
-    }
-    if (InitLocalDeviceInfo(deviceInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "init local device info error");
-        goto EXIT;
-    }
-    if (InitLocalVersionType(nodeInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "init local version type error");
-        goto EXIT;
-    }
-    if (InitConnectInfo(&nodeInfo->connectInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "init local connect info error");
-        goto EXIT;
+    if (LnnInitLocalNodeInfo(nodeInfo) != SOFTBUS_OK) {
+        g_localNetLedger.status = LL_INIT_FAIL;
+        return SOFTBUS_ERR;
     }
     if (SoftBusMutexInit(&g_localNetLedger.lock, NULL) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "mutex init fail");
-        goto EXIT;
-    }
-    if (LnnInitLocalP2pInfo(nodeInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "init local p2p info error");
-        goto EXIT;
+        g_localNetLedger.status = LL_INIT_FAIL;
+        return SOFTBUS_ERR;
     }
     if (SoftBusRegBusCenterVarDump(
         (char *)SOFTBUS_BUSCENTER_DUMP_LOCALDEVICEINFO, &SoftBusDumpBusCenterLocalDeviceInfo) != SOFTBUS_OK) {
@@ -1699,12 +1709,8 @@ int32_t LnnInitLocalLedger(void)
     if (LnnGenBroadcastCipherInfo() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "generate cipher fail");
     }
-
     g_localNetLedger.status = LL_INIT_SUCCESS;
     return SOFTBUS_OK;
-EXIT:
-    g_localNetLedger.status = LL_INIT_FAIL;
-    return SOFTBUS_ERR;
 }
 
 int32_t LnnInitLocalLedgerDelay(void)

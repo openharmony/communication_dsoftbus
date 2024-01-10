@@ -43,6 +43,8 @@ static int32_t ProcessQdiscInfoInner(struct rtattr *tb[], int32_t parent)
         len = NlMin((int32_t)RTA_PAYLOAD(tbs[TCA_STATS_QUEUE]), (int32_t)sizeof(q));
         if (memcpy_s(&q, len, RTA_DATA(tbs[TCA_STATS_QUEUE]), len) == NSTACKX_EOK) {
             return q.qlen;
+        } else {
+            LOGE(TAG, "memcpy_s failed");
         }
     }
 
