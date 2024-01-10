@@ -315,9 +315,10 @@ NO_SANITIZE("cfi") void TransProxyChanProcessByReqId(int32_t reqId, uint32_t con
 static void TransProxyCloseProxyOtherRes(int32_t channelId, const ProxyChannelInfo *info)
 {
     uint32_t connId = info->connId;
+    bool isServer = (info->isServer != 1);
     TransProxyPostResetPeerMsgToLoop(info);
 
-    if (info->isServer != 1) {
+    if (isServer) {
         TransProxyPostDisConnectMsgToLoop(connId);
     }
 }
