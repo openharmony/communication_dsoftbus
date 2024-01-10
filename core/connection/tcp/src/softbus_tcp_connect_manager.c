@@ -789,7 +789,7 @@ static int TcpConnectInfoDump(int fd)
         SOFTBUS_DPRINTF(fd, "SocketInfo                        :\n");
         DataMasking(itemNode->info.socketInfo.addr, MAX_SOCKET_ADDR_LEN, MAC_DELIMITER, addr);
         SOFTBUS_DPRINTF(fd, "SocketInfo addr                   : %s\n", addr);
-        SOFTBUS_DPRINTF(fd, "SocketInfo protocol               : %"PRIu64"\n", itemNode->info.socketInfo.protocol);
+        SOFTBUS_DPRINTF(fd, "SocketInfo protocol               : %u\n", itemNode->info.socketInfo.protocol);
         SOFTBUS_DPRINTF(fd, "SocketInfo port                   : %d\n", itemNode->info.socketInfo.port);
         SOFTBUS_DPRINTF(fd, "SocketInfo fd                     : %d\n", itemNode->info.socketInfo.fd);
         SOFTBUS_DPRINTF(fd, "SocketInfo moduleId               : %d\n", itemNode->info.socketInfo.moduleId);

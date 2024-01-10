@@ -514,8 +514,8 @@ void *BleSendTask(void *arg)
         if (connection == NULL) {
             CONN_LOGE(CONN_BLE, "connection is not exist, connId=%u, pid=%d, payload "
                   "(Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 ")",
-                sendNode->connectionId, sendNode->dataLen, sendNode->pid, sendNode->dataLen, sendNode->flag,
-                sendNode->module, sendNode->seq);
+                sendNode->connectionId, sendNode->pid, sendNode->dataLen, sendNode->flag, sendNode->module,
+                sendNode->seq);
             FreeSendNode(sendNode);
             continue;
         }

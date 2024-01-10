@@ -164,7 +164,8 @@ static bool Marshalling(struct InterfaceInfo *self, struct WifiDirectProtocol *p
         struct InfoContainerKeyProperty *keyProperty = self->keyProperties + key;
         if (protocolType == WIFI_DIRECT_PROTOCOL_TLV && (key == II_KEY_BASE_MAC || key == II_KEY_DYNAMIC_MAC)) {
             ret = MarshallingMacAddress(self, protocol, key);
-            CONN_CHECK_AND_RETURN_RET_LOGW(ret, false, CONN_WIFI_DIRECT, "mac address marshalling failed, key=%d", key);
+            CONN_CHECK_AND_RETURN_RET_LOGW(
+                ret, false, CONN_WIFI_DIRECT, "mac address marshalling failed, key=%zu", key);
             continue;
         }
 
@@ -193,7 +194,7 @@ static bool Marshalling(struct InterfaceInfo *self, struct WifiDirectProtocol *p
                 break;
         }
 
-        CONN_CHECK_AND_RETURN_RET_LOGW(ret, false, CONN_WIFI_DIRECT, "marshalling failed, key=%d", key);
+        CONN_CHECK_AND_RETURN_RET_LOGW(ret, false, CONN_WIFI_DIRECT, "marshalling failed, key=%zu", key);
     }
 
     return true;
@@ -362,7 +363,7 @@ static bool MarshallingMacAddress(struct InterfaceInfo *self, struct WifiDirectP
 
 static bool UnmarshallingMacAddress(struct InterfaceInfo *self, enum InterfaceInfoKey key, uint8_t *data, size_t size)
 {
-    CONN_CHECK_AND_RETURN_RET_LOGW(size == MAC_ADDR_ARRAY_SIZE, false, CONN_WIFI_DIRECT, "size=%d is invalid", size);
+    CONN_CHECK_AND_RETURN_RET_LOGW(size == MAC_ADDR_ARRAY_SIZE, false, CONN_WIFI_DIRECT, "size=%zu is invalid", size);
     char address[MAC_ADDR_STR_LEN] = {0};
     int32_t ret = GetWifiDirectNetWorkUtils()->macArrayToString(data, size, address, sizeof(address));
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, false, CONN_WIFI_DIRECT, "mac array to string failed");

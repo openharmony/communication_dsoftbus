@@ -256,7 +256,7 @@ static int64_t PackReadFileData(FileFrame *fileFrame, uint64_t readLength, uint6
 {
     int64_t len = SoftBusPreadFile(info->fd, fileFrame->fileData + FRAME_DATA_SEQ_OFFSET, readLength, fileOffset);
     if (len <= 0) {
-        TRANS_LOGE(TRANS_FILE, "pread src file failed. ret=%d.", len);
+        TRANS_LOGE(TRANS_FILE, "pread src file failed. ret=%" PRId64, len);
         return len;
     }
     if (info->crc == APP_INFO_FILE_FEATURES_SUPPORT) {
@@ -289,7 +289,7 @@ static int64_t PackReadFileRetransData(FileFrame *fileFrame, uint32_t seq, uint6
 {
     int64_t len = SoftBusPreadFile(info->fd, fileFrame->fileData + FRAME_DATA_SEQ_OFFSET, readLength, fileOffset);
     if (len <= 0) {
-        TRANS_LOGE(TRANS_FILE, "pread src file failed. ret=%d", len);
+        TRANS_LOGE(TRANS_FILE, "pread src file failed. ret=%" PRId64, len);
         return len;
     }
     uint64_t dataLen = len + FRAME_DATA_SEQ_OFFSET;

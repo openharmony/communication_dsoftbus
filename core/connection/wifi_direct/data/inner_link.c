@@ -351,7 +351,7 @@ static bool IsProtected(struct InnerLink *self)
 
     uint64_t currentTime = SoftBusGetSysTimeMs();
     uint64_t *changeTime = self->getRawData(self, IL_KEY_STATE_CHANGE_TIME, NULL, NULL);
-    CONN_LOGI(CONN_WIFI_DIRECT, "changeTime=%zu curTime=%zu", *changeTime, currentTime);
+    CONN_LOGI(CONN_WIFI_DIRECT, "changeTime=%" PRIu64 " curTime=%" PRIu64, *changeTime, currentTime);
     if (currentTime && currentTime - PROTECT_DURATION_MS < *changeTime) {
         return true;
     }

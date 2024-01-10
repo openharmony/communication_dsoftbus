@@ -267,7 +267,7 @@ static ssize_t OnRecvData(int32_t fd, char *buf, size_t len, int timeout, int fl
         CONN_LOGE(CONN_COMMON, "recv data fail, peer close connection, fd=%d", fd);
         rc = -1;
     } else if (rc < 0) {
-        CONN_LOGE(CONN_COMMON, "recv data fail fd[%d] errno[%d], rc[%d]", fd, errno, rc);
+        CONN_LOGE(CONN_COMMON, "recv data fail fd[%d] errno[%d], rc[%zd]", fd, errno, rc);
         rc = -1;
     }
     return rc;

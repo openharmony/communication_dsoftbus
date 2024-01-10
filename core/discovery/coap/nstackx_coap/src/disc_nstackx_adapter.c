@@ -505,7 +505,6 @@ int32_t DiscNstackxInit(void)
         return SOFTBUS_DISCOVER_COAP_INIT_FAIL;
     }
 
-    NSTACKX_DFinderRegisterLog(NstackxLogInnerImpl);
     if (NSTACKX_Init(&g_nstackxCallBack) != SOFTBUS_OK) {
         DeinitLocalInfo();
         return SOFTBUS_DISCOVER_COAP_INIT_FAIL;

@@ -41,12 +41,14 @@ if (defined(ohos_lite)) {
     diff_deps = [
       "$hilog_lite_deps_path",
       "//build/lite/config/component/cJSON:cjson_static",
+      "//third_party/bounds_checking_function:libsec_static",
     ]
     build_type = "static_library"
   } else {
     diff_deps = [
       "$hilog_lite_deps_path",
       "//build/lite/config/component/cJSON:cjson_shared",
+      "//third_party/bounds_checking_function:libsec_shared",
     ]
     build_type = "shared_library"
   }
@@ -99,10 +101,10 @@ if (defined(ohos_lite)) {
       ]
     }
     if (ohos_kernel_type == "liteos_m") {
-      defines = [ "SOFTBUS_MINI_SYSTEM" ]
+      defines += [ "SOFTBUS_MINI_SYSTEM" ]
       defines += [ "__STDC_FORMAT_MACROS" ]
     } else {
-      defines = [ "DEFAULT_STORAGE_PATH=\"/storage/data\"" ]
+      defines += [ "DEFAULT_STORAGE_PATH=\"/storage/data\"" ]
       defines += [ "__STDC_FORMAT_MACROS" ]
       defines += [ "SOFTBUS_SMALL_SYSTEM" ]
     }
@@ -166,12 +168,10 @@ if (defined(ohos_lite)) {
       "dfx/hidumper_adapter/softbus_hidumper_trans.c",
       "dfx/hidumper_adapter/softbus_hidumper_buscenter.c",
       "dfx/hisysevent_adapter/softbus_hisysevt_nstack.c",
-      "dfx/log/src/softbus_log.c",
     ]
     sources = common_utils_src + conn_common_src + trans_common_src + dfx_source
     sources += [ "$dsoftbus_root_path/core/common/utils/sqlite3_utils.c" ]
-    defines = [ "DEFAULT_STORAGE_PATH=\"/data/service/el1/public\"" ]
-    defines += [ "SOFTBUS_STANDARD_SYSTEM" ]
+    defines += [ "DEFAULT_STORAGE_PATH=\"/data/service/el1/public\"" ]
     defines += [ "__STDC_FORMAT_MACROS" ]
     if (is_asan) {
       defines += [ "ASAN_BUILD" ]

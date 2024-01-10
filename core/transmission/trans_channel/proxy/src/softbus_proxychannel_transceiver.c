@@ -649,7 +649,7 @@ int32_t TransProxyConnExistProc(ProxyConnInfo *conn, ProxyChannelInfo *chan, int
     }
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(chanNewId + ID_OFFSET));
     TRANS_LOGI(TRANS_CTRL,
-        "SoftbusHitraceChainBegin: set hitraceId=%lx.", (uint64_t)(chanNewId + ID_OFFSET));
+        "SoftbusHitraceChainBegin: set hitraceId=%" PRIu64, (uint64_t)(chanNewId + ID_OFFSET));
     ConnectType type = conn->connInfo.type;
     if (conn->state == PROXY_CHANNEL_STATUS_PYH_CONNECTING) {
         ProxyChannelInfo channelInfo = {
@@ -699,7 +699,7 @@ static int32_t TransProxyOpenNewConnChannel(
 {
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(channelId + ID_OFFSET));
     TRANS_LOGI(TRANS_CTRL,
-        "SoftbusHitraceChainBegin: set hitraceId=%lx.", (uint64_t)(channelId + ID_OFFSET));
+        "SoftbusHitraceChainBegin: set hitraceId=%" PRIu64, (uint64_t)(channelId + ID_OFFSET));
     uint32_t reqId = ConnGetNewRequestId(MODULE_PROXY_CHANNEL);
     ProxyChannelInfo channelInfo = {
         .channelId = channelId,

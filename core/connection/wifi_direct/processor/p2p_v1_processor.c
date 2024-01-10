@@ -1029,7 +1029,7 @@ static int32_t ProcessConnectRequest(struct WifiDirectCommand *command)
 
     char *remoteConfig = msg->getString(msg, NM_KEY_SELF_WIFI_CONFIG, "");
     if (strlen(remoteConfig) != 0) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "remoteConfigSize=%d", strlen(remoteConfig));
+        CONN_LOGI(CONN_WIFI_DIRECT, "remoteConfigSize=%zu", strlen(remoteConfig));
         ret = GetWifiDirectP2pAdapter()->setPeerWifiConfigInfo(remoteConfig);
         CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "set wifi cfg failed");
     }
@@ -1421,7 +1421,7 @@ static int32_t OnCreateGroupComplete(int32_t event)
     GetWifiDirectPerfRecorder()->calculate();
     CONN_CHECK_AND_RETURN_RET_LOGW(event == ENTITY_EVENT_P2P_CREATE_COMPLETE, V1_ERROR_CREATE_GROUP_FAILED,
                                   CONN_WIFI_DIRECT, "create group failed");
-    CONN_LOGI(CONN_WIFI_DIRECT, "create group done, timeUsed=%zuMS",
+    CONN_LOGI(CONN_WIFI_DIRECT, "create group done, timeUsed=%" PRIu64 "MS",
         GetWifiDirectPerfRecorder()->getTime(TC_CREATE_GROUP));
 
     struct P2pV1Processor *self = GetP2pV1Processor();
@@ -1488,7 +1488,7 @@ static int32_t OnConnectGroupComplete(int32_t event)
     GetWifiDirectPerfRecorder()->calculate();
     CONN_CHECK_AND_RETURN_RET_LOGW(event == ENTITY_EVENT_P2P_CONNECT_COMPLETE, V1_ERROR_CONNECT_GROUP_FAILED,
                                    CONN_WIFI_DIRECT, "connect group failed");
-    CONN_LOGI(CONN_WIFI_DIRECT, "connect group done, timeUsed=%zuMS",
+    CONN_LOGI(CONN_WIFI_DIRECT, "connect group done, timeUsed=%" PRIu64 "MS",
               GetWifiDirectPerfRecorder()->getTime(TC_CONNECT_GROUP));
 
     struct P2pV1Processor *self = GetP2pV1Processor();

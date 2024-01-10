@@ -1171,7 +1171,7 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
         (void)TransProxyCloseConnChannelReset(msg->connId, (info->isServer == 0));
     }
     if ((msg->msgHead.cipher & BAD_CIPHER) == BAD_CIPHER) {
-        TRANS_LOGE(TRANS_CTRL, "clear bad key authId=%d keyIndex=%d",
+        TRANS_LOGE(TRANS_CTRL, "clear bad key authId=%" PRId64 " keyIndex=%d",
             msg->authId, msg->keyIndex);
         RemoveAuthSessionKeyByIndex(msg->authId, msg->keyIndex);
     }
