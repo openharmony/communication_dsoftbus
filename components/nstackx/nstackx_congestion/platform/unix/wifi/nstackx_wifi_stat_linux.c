@@ -248,8 +248,6 @@ int32_t GetStationHandler(struct nl_msg *msg, HandleParam *handleParam)
 {
     NLA_PUT(msg, NL80211_ATTR_MAC, ETH_ALEN, handleParam->mac);
     return 0;
-nla_put_failure:
-    return -ENOBUFS;
 }
 
 int32_t GetWifiStaInfo(const NLDevInfo nlDevInfo, WifiStationInfo *wifiStationInfo)

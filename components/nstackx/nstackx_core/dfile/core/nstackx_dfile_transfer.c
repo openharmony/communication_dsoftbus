@@ -20,7 +20,6 @@
 #include "nstackx_dfile.h"
 #include "nstackx_dfile_frame.h"
 #include "nstackx_dfile_session.h"
-#include "nstackx_dfile_mp.h"
 #include "nstackx_error.h"
 #include "nstackx_file_manager.h"
 #include "nstackx_list.h"
@@ -73,7 +72,8 @@ static const char *GetSendStateMessage(DFileSendState state)
         [STATE_SEND_FILE_FAIL] = "send file fail",
     };
 
-    for (uint32_t i = 0; i < sizeof(message) / sizeof(message[0]); i++) {
+    uint32_t msgLen = sizeof(message) / sizeof(message[0]);
+    for (uint32_t i = 0; i < msgLen; i++) {
         if (state == i) {
             return message[i];
         }
@@ -95,7 +95,8 @@ static const char *GetReceiveStateMessage(DFileReceiveState state)
         [STATE_RECEIVE_FILE_FAIL] = "receive file fail",
     };
 
-    for (uint32_t i = 0; i < sizeof(message) / sizeof(message[0]); i++) {
+    uint32_t msgLen = sizeof(message) / sizeof(message[0]);
+    for (uint32_t i = 0; i < msgLen; i++) {
         if (state == i) {
             return message[i];
         }
@@ -424,7 +425,6 @@ static void FileManagerTransMsgHandler(uint16_t fileId, FileManagerMsgType msgTy
 static int32_t StartFileManagerSenderTask(DFileTrans *dFileTrans)
 {
     FileListMsgPara msgPara;
-    uint32_t i;
     FileList *fileList = dFileTrans->fileList;
     uint16_t fileNum = FileListGetNum(fileList);
     SendFileListInfo sendFileListInfo;
@@ -439,6 +439,7 @@ static int32_t StartFileManagerSenderTask(DFileTrans *dFileTrans)
         DFILE_LOGE(TAG, "too many files: %u", fileNum);
         return NSTACKX_ENOMEM;
     }
+    uint32_t i;
     for (i = 0; i < FileListGetNum(fileList); i++) {
         sendFileListInfo.fileList[i] = fileList->list[i].fullFileName;
         sendFileListInfo.fileSize[i] = fileList->list[i].fileSize;
@@ -563,7 +564,6 @@ static void WaitForFileTransferDoneFrame(DFileTrans *dFileTrans, DFileSendState 
     /* Need to re-send data block. */
     if (!FileManagerIsLastBlockRead(dFileTrans->fileManager, dFileTrans->transId)) {
         *nextState = STATE_SEND_FILE_DATA_ONGOING;
-        return;
     }
 }
 
@@ -635,7 +635,7 @@ static void SetSendState(DFileTrans *dFileTrans, DFileSendState nextState)
 
     if ((nextState == STATE_SEND_FILE_DONE || nextState == STATE_SEND_FILE_FAIL) &&
         dFileTrans->fileManagerTaskStarted) {
-        DFILE_LOGI(TAG, "transId: %u, Send state: %s -> %s", dFileTrans->transId, 
+        DFILE_LOGI(TAG, "transId: %u, Send state: %s -> %s", dFileTrans->transId,
                 GetSendStateMessage(dFileTrans->sendState),GetSendStateMessage(nextState));
         if (FileManagerStopTask(dFileTrans->fileManager, dFileTrans->transId, FILE_LIST_TRANSFER_FINISH) !=
             NSTACKX_EOK) {
@@ -696,7 +696,6 @@ static void ReceiveFileHeaderOngoing(DFileTrans *dFileTrans, DFileReceiveState *
     uint8_t timeout = (GetElapseTime(&dFileTrans->ts) >= dFileTrans->timeout) ? NSTACKX_TRUE : NSTACKX_FALSE;
     if (dFileTrans->allFileNameReceived || timeout) {
         *nextState = STATE_SEND_FILE_HEADER_CONFIRM;
-        return;
     }
 }
 
@@ -1015,7 +1014,6 @@ static void WaitForFileTransferDoneAck(DFileTrans *dFileTrans, DFileReceiveState
         *nextState = STATE_SEND_FILE_TRANSFER_DONE;
         DFILE_LOGI(TAG, "transId %u enter WaitForFileTransferDoneAck and next state is STATE_SEND_FILE_TRANSFER_DONE",
              dFileTrans->transId);
-        return;
     }
 }
 
