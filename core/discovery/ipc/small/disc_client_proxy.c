@@ -45,6 +45,7 @@ int32_t ClientIpcOnDeviceFound(const char *pkgName, const DeviceInfo *device, co
     IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN_EX, 0);
     bool ret = WriteRawData(&io, (const void*)device, sizeof(DeviceInfo));
     if (!ret) {
+        DISC_LOGE(DISC_CONTROL, "Write DeviceInfo failed.");
         return SOFTBUS_ERR;
     }
     SvcIdentity svc = {0};
@@ -69,8 +70,16 @@ int32_t ClientIpcOnDiscoverFailed(const char *pkgName, int subscribeId, int fail
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN, 0);
-    WriteInt32(&io, subscribeId);
-    WriteInt32(&io, failReason);
+    bool ret = WriteInt32(&io, subscribeId);
+    if (!ret) {
+        DISC_LOGE(DISC_CONTROL, "Write subscribeId failed.");
+        return SOFTBUS_ERR;
+    }
+    ret = WriteInt32(&io, failReason);
+    if (!ret) {
+        DISC_LOGE(DISC_CONTROL, "Write failReason failed.");
+        return SOFTBUS_ERR;
+    }
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
         DISC_LOGE(DISC_CONTROL, "on discovery failed callback get svc failed.");
@@ -93,7 +102,11 @@ int32_t ClientIpcDiscoverySuccess(const char *pkgName, int subscribeId)
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN, 0);
-    WriteInt32(&io, subscribeId);
+    bool ret = WriteInt32(&io, subscribeId);
+    if (!ret) {
+        DISC_LOGE(DISC_CONTROL, "Write subscribeId failed.");
+        return SOFTBUS_ERR;
+    }
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
         DISC_LOGE(DISC_CONTROL, "on discovery success callback get svc failed.");
@@ -116,7 +129,11 @@ int32_t ClientIpcOnPublishSuccess(const char *pkgName, int publishId)
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN, 0);
-    WriteInt32(&io, publishId);
+    bool ret = WriteInt32(&io, publishId);
+    if (!ret) {
+        DISC_LOGE(DISC_CONTROL, "Write publishId failed.");
+        return SOFTBUS_ERR;
+    }
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
         DISC_LOGE(DISC_CONTROL, "on publish success callback get svc failed.");
@@ -139,8 +156,16 @@ int32_t ClientIpcOnPublishFail(const char *pkgName, int publishId, int reason)
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN, 0);
-    WriteInt32(&io, publishId);
-    WriteInt32(&io, reason);
+    bool ret = WriteInt32(&io, publishId);
+    if (!ret) {
+        DISC_LOGE(DISC_CONTROL, "Write publishId failed.");
+        return SOFTBUS_ERR;
+    }
+    ret = WriteInt32(&io, reason);
+    if (!ret) {
+        DISC_LOGE(DISC_CONTROL, "Write reason failed.");
+        return SOFTBUS_ERR;
+    }
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
         DISC_LOGE(DISC_CONTROL, "on publish failed callback get svc failed.");
