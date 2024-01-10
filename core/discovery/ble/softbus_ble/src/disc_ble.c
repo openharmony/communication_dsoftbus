@@ -770,7 +770,7 @@ static void AssembleNonOptionalTlv(DeviceInfo *info, BroadcastData *broadcastDat
         if (SoftBusGetBlePower(&power) == SOFTBUS_OK) {
             if (AssembleTLV(broadcastData, TLV_TYPE_RANGE_POWER, (const void *)&power, RANGE_POWER_TYPE_LEN) !=
                 SOFTBUS_OK) {
-                DISC_LOGE(DISC_BLE, "Assem RANGE_POWER_TYPE_LEN failed");
+                DISC_LOGE(DISC_BLE, "Assemble RANGE_POWER_TYPE failed");
                 return;
             }
         }
