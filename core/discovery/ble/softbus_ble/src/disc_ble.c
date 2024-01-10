@@ -1401,11 +1401,9 @@ static void Recovery(SoftBusMessage *msg)
     DISC_LOGD(DISC_BLE, "enter");
     if (StartAdvertiser(CON_ADV_ID) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "Start CON_ADV_ID failed");
-        return;
     }
     if (StartAdvertiser(NON_ADV_ID) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "Start NON_ADV_ID failed");
-        return;
     }
     StartScaner();
     DISC_LOGD(DISC_BLE, "end");
@@ -1416,15 +1414,12 @@ static void BleDiscTurnOff(SoftBusMessage *msg)
     DISC_LOGD(DISC_BLE, "enter");
     if (StopAdvertiser(NON_ADV_ID) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "Stop NON_ADV_ID failed");
-        return;
     }
     if (StopAdvertiser(CON_ADV_ID) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "Stop CON_ADV_ID failed");
-        return;
     }
     if (StopScaner() != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "Stop failed");
-        return;
     }
     DISC_LOGD(DISC_BLE, "end");
 }
