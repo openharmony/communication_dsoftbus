@@ -272,6 +272,23 @@ static bool ProcessHandShake(enum WifiDirectNegotiateCmdType cmd, struct WifiDir
     return true;
 }
 
+static void ProcessNegotiateMessageWhenProcessorInvalid(struct NegotiateMessage *msg)
+{
+    struct WifiDirectNegotiateChannel *channel = msg->getPointer(msg, NM_KEY_NEGO_CHANNEL, NULL);
+    CONN_CHECK_AND_RETURN_LOGE(channel != NULL, CONN_WIFI_DIRECT, "channel is null");
+    struct NegotiateMessage *response = NegotiateMessageNew();
+    CONN_CHECK_AND_RETURN_LOGE(response != NULL, CONN_WIFI_DIRECT, "malloc response failed");
+    response->putInt(response, NM_KEY_MSG_TYPE, CMD_CONN_V2_RESP_3);
+    response->putInt(response, NM_KEY_SESSION_ID, msg->getInt(msg, NM_KEY_SESSION_ID, -1));
+    response->putInt(response, NM_KEY_RESULT_CODE, ERROR_WIFI_DIRECT_NO_SUITABLE_PROCESSOR);
+    response->putPointer(response, NM_KEY_NEGO_CHANNEL, (void **)&channel);
+
+    if (GetWifiDirectNegotiator()->postData(response) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "send response failed");
+    }
+    NegotiateMessageDelete(response);
+}
+
 static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *channel, const uint8_t *data, size_t len)
 {
     struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
@@ -302,7 +319,8 @@ static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *ch
     if (processor == NULL) {
         CONN_LOGE(CONN_WIFI_DIRECT, "processor is null");
         if (self->currentProcessor == NULL) {
-            CONN_LOGW(CONN_WIFI_DIRECT, "currentProcessor is null, ignore this message");
+            CONN_LOGW(CONN_WIFI_DIRECT, "currentProcessor is null");
+            ProcessNegotiateMessageWhenProcessorInvalid(msg);
             NegotiateMessageDelete(msg);
             return;
         }
