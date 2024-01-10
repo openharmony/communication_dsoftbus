@@ -1908,3 +1908,18 @@ int32_t ClientGetPeerSocketInfoById(int32_t sessionId, PeerSocketInfo *peerSocke
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     return SOFTBUS_OK;
 }
+
+bool IsSessionExceedLimit()
+{
+    if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != 0) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return true;
+    }
+    if (g_sessionIdNum >= MAX_SESSION_ID) {
+        (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+        TRANS_LOGE(TRANS_SDK, "sessionId num exceed limit.");
+        return true;
+    }
+    (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+    return false;
+}
