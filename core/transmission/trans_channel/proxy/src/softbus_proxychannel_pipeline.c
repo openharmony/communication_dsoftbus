@@ -245,6 +245,7 @@ int32_t TransProxyPipelineSendMessage(
         SoftBusFree(sendData);
         return SOFTBUS_ERR;
     }
+    SoftBusFree(sendData);
     return SOFTBUS_OK;
 }
 
