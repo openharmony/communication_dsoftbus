@@ -15,8 +15,9 @@
 
 #include "anonymizer.h"
 #include "client_trans_session_adapter.h"
-#include "socket.h"
+#include "client_trans_session_manager.h"
 #include "inner_socket.h"
+#include "socket.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
@@ -93,6 +94,9 @@ int32_t Listen(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISock
 int32_t Bind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener)
 {
     TRANS_LOGI(TRANS_SDK, "Bind: socket=%d", socket);
+    if (IsSessionExceedLimit()) {
+        return SOFTBUS_TRANS_SESSION_CNT_EXCEEDS_LIMIT;
+    }
     return ClientBind(socket, qos, qosCount, listener);
 }
 

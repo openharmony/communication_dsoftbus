@@ -148,20 +148,22 @@ static int32_t TransSetUdpChannelEnable(int32_t channelId, bool isEnable)
     return SOFTBUS_ERR;
 }
 
-static void OnUdpChannelOpened(int32_t channelId)
+static int32_t OnUdpChannelOpened(int32_t channelId)
 {
     UdpChannel channel;
     if (memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel)) != EOK) {
         TRANS_LOGE(TRANS_SDK, "on udp channel opened memset failed.");
-        return;
+        return SOFTBUS_ERR;
     }
-    if (TransGetUdpChannel(channelId, &channel) != SOFTBUS_OK) {
+    int ret = TransGetUdpChannel(channelId, &channel);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "get udp channelId=%d failed.", channelId);
-        return;
+        return ret;
     }
-    if (TransSetUdpChannelEnable(channelId, true) != SOFTBUS_OK) {
+    ret = TransSetUdpChannelEnable(channelId, true);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "set udp channelId=%d enable failed.", channelId);
-        return;
+        return ret;
     }
     SessionType type = TYPE_BUTT;
     switch (channel.businessType) {
@@ -173,7 +175,7 @@ static void OnUdpChannelOpened(int32_t channelId)
             break;
         default:
             TRANS_LOGE(TRANS_SDK, "unsupport businessType=%d.", channel.businessType);
-            return;
+            return SOFTBUS_ERR;
     }
     ChannelInfo info = {0};
     info.channelId = channel.channelId;
@@ -187,8 +189,9 @@ static void OnUdpChannelOpened(int32_t channelId)
     info.routeType = channel.routeType;
     info.businessType = channel.businessType;
     if ((g_sessionCb != NULL) && (g_sessionCb->OnSessionOpened != NULL)) {
-        g_sessionCb->OnSessionOpened(channel.info.mySessionName, &info, type);
+        return g_sessionCb->OnSessionOpened(channel.info.mySessionName, &info, type);
     }
+    return SOFTBUS_ERR;
 }
 
 static UdpChannel *ConvertChannelInfoToUdpChannel(const char *sessionName, const ChannelInfo *channel)
