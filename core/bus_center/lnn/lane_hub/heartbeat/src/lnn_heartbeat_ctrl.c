@@ -634,6 +634,9 @@ int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType ad
     LNN_LOGI(LNN_HEART_BEAT, "heartbeat(HB) start offline countdown, networkId=%s, timeStamp=%" PRIu64,
         anonyNetworkId, timeStamp);
     AnonymizeFree(anonyNetworkId);
+    if (SoftBusGetBtState() == BLE_ENABLE) {
+        g_hbConditionState.btState = SOFTBUS_BR_TURN_ON;
+    }
     return SOFTBUS_OK;
 }
 
