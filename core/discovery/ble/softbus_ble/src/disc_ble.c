@@ -818,6 +818,7 @@ static int32_t GetBroadcastData(DeviceInfo *info, int32_t advId, BroadcastData *
         AssembleNonOptionalTlv(info, broadcastData);
     }
     (void)AssembleTLV(broadcastData, TLV_TYPE_DEVICE_NAME, (const void *)info->devName, strlen(info->devName) + 1);
+
     DISC_LOGE(DISC_BLE, "broadcastData->dataLen=%d", broadcastData->dataLen);
     return SOFTBUS_OK;
 }
