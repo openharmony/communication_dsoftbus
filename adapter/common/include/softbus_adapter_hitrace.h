@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,7 @@ typedef enum SoftbusHiTraceIdValid {
     SOFTBUS_HITRACE_ID_VALID = 1,
 } SoftbusHiTraceIdValid;
 
-void SoftbusHitraceStart(int32_t flags, uint64_t chainId);
+void SoftbusHitraceStart(uint32_t flags, uint64_t chainId);
 void SoftbusHitraceStop(void);
 
 #ifdef __cplusplus

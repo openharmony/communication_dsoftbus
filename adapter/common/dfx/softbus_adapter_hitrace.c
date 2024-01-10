@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,10 +18,10 @@
 #include "hitrace/tracechain.h"
 #include "softbus_adapter_crypto.h"
 
-void SoftbusHitraceStart(int32_t flags, uint64_t chainId)
+void SoftbusHitraceStart(uint32_t flags, uint64_t chainId)
 {
     HiTraceIdStruct pId = HiTraceChainGetId();
-    pId.valid = (uint32_t)flags;
+    pId.valid = flags;
     pId.chainId = chainId > 0 ? chainId : (uint64_t)SoftBusCryptoRand();
     HiTraceChainSetId(&pId);
 }
