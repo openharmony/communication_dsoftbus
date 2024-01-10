@@ -298,7 +298,6 @@ int32_t BusCenterClientProxy::OnNodeBasicInfoChanged(const char *pkgName, void *
         return SOFTBUS_INVALID_PARAM;
     }
     MessageParcel data;
-    LNN_LOGI(LNN_EVENT, "type: %d", type);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         LNN_LOGE(LNN_EVENT, "write InterfaceToken failed!");
         return SOFTBUS_ERR;

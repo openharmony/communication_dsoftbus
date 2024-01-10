@@ -384,12 +384,15 @@ static int TransGetLocalConfig(int32_t channelType, int32_t businessType, uint32
 }
 
 static void FillAppInfo(AppInfo *appInfo, const SessionParam *param,
-    TransInfo *transInfo, int32_t type)
+    TransInfo *transInfo, LaneConnInfo *connInfo)
 {
-    transInfo->channelType = TransGetChannelType(param, type);
-    appInfo->linkType = type;
+    transInfo->channelType = TransGetChannelType(param, connInfo->type);
+    appInfo->linkType = connInfo->type;
     appInfo->channelType = transInfo->channelType;
     (void)TransGetLocalConfig(appInfo->channelType, appInfo->businessType, &appInfo->myData.dataConfig);
+    if (strcpy_s(appInfo->myData.addr, IP_LEN, connInfo->connInfo.p2p.localIp) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "copy local ip failed");
+    }
 }
 
 static void TransOpenChannelSetModule(int32_t channelType, ConnectOption *connOpt)
@@ -458,7 +461,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     }
     appInfo->connectType = connOpt.type;
     extra.linkType = connOpt.type;
-    FillAppInfo(appInfo, param, transInfo, connInfo.type);
+    FillAppInfo(appInfo, param, transInfo, &connInfo);
     TransOpenChannelSetModule(transInfo->channelType, &connOpt);
     TRANS_LOGI(TRANS_CTRL, "laneId=%u get channelType=%u.", laneId, transInfo->channelType);
     errCode = TransOpenChannelProc((ChannelType)transInfo->channelType, appInfo, &connOpt,

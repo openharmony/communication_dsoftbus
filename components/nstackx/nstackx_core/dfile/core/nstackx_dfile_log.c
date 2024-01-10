@@ -12,21 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #include "nstackx_dfile_log.h"
-#include <stdint.h>
 #include <securec.h>
-#include "nstackx_error.h"
- 
+
 #define TAG "nStackXDFile"
 
 static uint32_t g_dfileLogLevel = DFILE_LOG_LEVEL_INFO;
- 
+
 uint32_t GetDFileLogLevel(void)
 {
     return g_dfileLogLevel;
 }
- 
+
 void SetDFileLogLevel(uint32_t logLevel)
 {
     if (logLevel >= DFILE_LOG_LEVEL_END) {

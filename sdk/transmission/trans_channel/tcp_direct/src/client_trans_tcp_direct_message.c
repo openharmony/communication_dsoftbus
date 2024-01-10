@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -385,7 +385,6 @@ static int32_t TransTdcProcessData(int32_t channelId)
     }
 
     if (SoftBusMutexLock(&g_tcpDataList->lock) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "lock failed.");
         return SOFTBUS_ERR;
     }
     ClientDataBuf *node = TransGetDataBufNodeById(channelId);
@@ -398,8 +397,7 @@ static int32_t TransTdcProcessData(int32_t channelId)
     int32_t seqNum = pktHead->seq;
     uint32_t flag = pktHead->flags;
     uint32_t dataLen = pktHead->dataLen;
-    TRANS_LOGE(TRANS_SDK, "channelId=%d data has all received, dataLen=%u",
-        channelId, dataLen);
+    TRANS_LOGE(TRANS_SDK, "channelId=%d data has all received, dataLen=%u", channelId, dataLen);
     char *plain = (char *)SoftBusCalloc(dataLen - OVERHEAD_LEN);
     if (plain == NULL) {
         TRANS_LOGE(TRANS_SDK, "malloc fail.");

@@ -175,9 +175,24 @@ static DiscoveryFuncInterface g_discBleFrameFuncInterface = {
     .UpdateLocalDeviceInfo = BleDispatchUpdateLocalDeviceInfo,
 };
 
+static void DfxRecordBleInitEnd(int32_t stage, int32_t reason)
+{
+    DiscEventExtra extra = { 0 };
+    DiscEventExtraInit(&extra);
+    extra.initType = BLE + 1;
+    extra.errcode = reason;
+    extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+    DISC_EVENT(EVENT_SCENE_INIT, stage, extra);
+
+    if (stage != EVENT_STAGE_INIT && reason != SOFTBUS_OK) {
+        DISC_EVENT(EVENT_SCENE_INIT, EVENT_STAGE_INIT, extra);
+    }
+}
+
 DiscoveryFuncInterface *DiscBleInit(DiscInnerCallback *discInnerCb)
 {
     if (discInnerCb == NULL) {
+        DfxRecordBleInitEnd(EVENT_STAGE_INIT, SOFTBUS_INVALID_PARAM);
         DISC_LOGW(DISC_INIT, "discInnerCb err");
         return NULL;
     }
@@ -185,25 +200,32 @@ DiscoveryFuncInterface *DiscBleInit(DiscInnerCallback *discInnerCb)
     g_dispatcherSize = 0;
     DiscoveryBleDispatcherInterface *softbusInterface = DiscSoftBusBleInit(discInnerCb);
     if (softbusInterface == NULL) {
+        DfxRecordBleInitEnd(EVENT_STAGE_SOFTBUS_BLE_INIT, SOFTBUS_DISCOVER_MANAGER_INIT_FAIL);
         DISC_LOGE(DISC_INIT, "DiscSoftBusBleInit err");
         return NULL;
     }
     g_dispatchers[g_dispatcherSize++] = softbusInterface;
+    DfxRecordBleInitEnd(EVENT_STAGE_SOFTBUS_BLE_INIT, SOFTBUS_OK);
 
     DiscoveryBleDispatcherInterface *shareInterface = DiscShareBleInit(discInnerCb);
     if (shareInterface == NULL) {
+        DfxRecordBleInitEnd(EVENT_STAGE_SHARE_BLE_INIT, SOFTBUS_DISCOVER_MANAGER_INIT_FAIL);
         DISC_LOGE(DISC_INIT, "DiscShareBleInit err");
         return NULL;
     }
     g_dispatchers[g_dispatcherSize++] = shareInterface;
+    DfxRecordBleInitEnd(EVENT_STAGE_SHARE_BLE_INIT, SOFTBUS_OK);
 
     DiscoveryBleDispatcherInterface *approachInterface = DiscApproachBleInit(discInnerCb);
     if (approachInterface == NULL) {
+        DfxRecordBleInitEnd(EVENT_STAGE_APPROACH_BLE_INIT, SOFTBUS_DISCOVER_MANAGER_INIT_FAIL);
         DISC_LOGE(DISC_INIT, "DiscApproachBleInit err");
         return NULL;
     }
     g_dispatchers[g_dispatcherSize++] = approachInterface;
+    DfxRecordBleInitEnd(EVENT_STAGE_APPROACH_BLE_INIT, SOFTBUS_OK);
 
+    DfxRecordBleInitEnd(EVENT_STAGE_INIT, SOFTBUS_OK);
     return &g_discBleFrameFuncInterface;
 }
 

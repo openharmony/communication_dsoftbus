@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,15 +14,14 @@
  */
 #include "softbus_adapter_hisysevent.h"
 
-#include <string>
-#include <sstream>
 #include <securec.h>
+#include <sstream>
+
 #include "comm_log.h"
-#include "softbus_error_code.h"
+#include "hisysevent_c.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
-#include "message_handler.h"
-#include "hisysevent_c.h"
+#include "softbus_error_code.h"
 
 static const char *g_domain = "DSOFTBUS";
 static bool g_init_lock = false;
@@ -71,8 +70,8 @@ static int32_t ConvertEventParam(SoftBusEvtParam *srcParam, HiSysEventParam *dst
             break;
         case SOFTBUS_EVT_PARAMTYPE_STRING:
             dstParam->t = HISYSEVENT_STRING;
-            dstParam->v.s = (char *)SoftBusCalloc(sizeof(char) * SOFTBUS_HISYSEVT_PARAM_LEN);
-            if (dstParam->v.s == NULL) {
+            dstParam->v.s = reinterpret_cast<char *>(SoftBusCalloc(sizeof(char) * SOFTBUS_HISYSEVT_PARAM_LEN));
+            if (dstParam->v.s == nullptr) {
                 COMM_LOGE(COMM_ADAPTER, "ConvertEventParam: SoftBusMalloc fail");
                 return SOFTBUS_ERR;
             }
@@ -84,8 +83,8 @@ static int32_t ConvertEventParam(SoftBusEvtParam *srcParam, HiSysEventParam *dst
             break;
         case SOFTBUS_EVT_PARAMTYPE_UINT32_ARRAY:
             dstParam->t = HISYSEVENT_UINT32_ARRAY;
-            dstParam->v.array = (uint32_t *)SoftBusCalloc(arraySize);
-            if (dstParam->v.array == NULL) {
+            dstParam->v.array = reinterpret_cast<uint32_t *>(SoftBusCalloc(arraySize));
+            if (dstParam->v.array == nullptr) {
                 COMM_LOGE(COMM_ADAPTER, "ConvertEventParam: SoftBusMalloc fail");
                 return SOFTBUS_ERR;
             }
@@ -124,9 +123,9 @@ static int32_t ConvertMsgToHiSysEvent(SoftBusEvtReportMsg *msg)
 static void HiSysEventParamDeInit(uint32_t size)
 {
     for (uint32_t i = 0; i < size; i++) {
-        if (g_dstParam[i].t == HISYSEVENT_STRING && g_dstParam[i].v.s != NULL) {
+        if (g_dstParam[i].t == HISYSEVENT_STRING && g_dstParam[i].v.s != nullptr) {
             SoftBusFree(g_dstParam[i].v.s);
-            g_dstParam[i].v.s = NULL;
+            g_dstParam[i].v.s = nullptr;
         }
     }
 }
@@ -156,7 +155,7 @@ static HiSysEventEventType ConvertMsgType(SoftBusEvtType type)
 
 static void InitHisEvtMutexLock()
 {
-    if (SoftBusMutexInit(&g_dfx_lock, NULL) != SOFTBUS_OK) {
+    if (SoftBusMutexInit(&g_dfx_lock, nullptr) != SOFTBUS_OK) {
         COMM_LOGE(COMM_ADAPTER, "init HisEvtMutexLock fail");
         return;
     }
@@ -168,7 +167,7 @@ extern "C" {
 #endif
 #endif
 
-int32_t SoftbusWriteHisEvt(SoftBusEvtReportMsg* reportMsg)
+int32_t SoftbusWriteHisEvt(SoftBusEvtReportMsg *reportMsg)
 {
     if (reportMsg == nullptr) {
         return SOFTBUS_ERR;
@@ -182,14 +181,14 @@ int32_t SoftbusWriteHisEvt(SoftBusEvtReportMsg* reportMsg)
         return SOFTBUS_LOCK_ERR;
     }
     ConvertMsgToHiSysEvent(reportMsg);
-    OH_HiSysEvent_Write(g_domain, reportMsg->evtName, ConvertMsgType(reportMsg->evtType),
-        g_dstParam, reportMsg->paramNum);
+    OH_HiSysEvent_Write(
+        g_domain, reportMsg->evtName, ConvertMsgType(reportMsg->evtType), g_dstParam, reportMsg->paramNum);
     HiSysEventParamDeInit(reportMsg->paramNum);
     (void)SoftBusMutexUnlock(&g_dfx_lock);
     return SOFTBUS_OK;
 }
 
-void SoftbusFreeEvtReporMsg(SoftBusEvtReportMsg* msg)
+void SoftbusFreeEvtReportMsg(SoftBusEvtReportMsg *msg)
 {
     if (msg == nullptr) {
         return;
@@ -201,20 +200,20 @@ void SoftbusFreeEvtReporMsg(SoftBusEvtReportMsg* msg)
     SoftBusFree(msg);
 }
 
-SoftBusEvtReportMsg* SoftbusCreateEvtReportMsg(int32_t paramNum)
+SoftBusEvtReportMsg *SoftbusCreateEvtReportMsg(int32_t paramNum)
 {
     if (paramNum <= SOFTBUS_EVT_PARAM_ZERO || paramNum >= SOFTBUS_EVT_PARAM_BUTT) {
         COMM_LOGE(COMM_ADAPTER, "param is invalid");
         return nullptr;
     }
-    SoftBusEvtReportMsg *msg = (SoftBusEvtReportMsg*)SoftBusMalloc(sizeof(SoftBusEvtReportMsg));
+    SoftBusEvtReportMsg *msg = reinterpret_cast<SoftBusEvtReportMsg *>(SoftBusCalloc(sizeof(SoftBusEvtReportMsg)));
     if (msg == nullptr) {
         COMM_LOGE(COMM_ADAPTER, "report msg is null");
         return nullptr;
     }
-    msg->paramArray = (SoftBusEvtParam*)SoftBusMalloc(sizeof(SoftBusEvtParam) * paramNum);
+    msg->paramArray = reinterpret_cast<SoftBusEvtParam *>(SoftBusCalloc(sizeof(SoftBusEvtParam) * paramNum));
     if (msg->paramArray == nullptr) {
-        SoftbusFreeEvtReporMsg(msg);
+        SoftbusFreeEvtReportMsg(msg);
         return nullptr;
     }
     return msg;

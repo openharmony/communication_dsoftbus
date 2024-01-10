@@ -69,6 +69,7 @@ int32_t AuthDeviceOpenConn(const AuthConnInfo *info, uint32_t requestId, const A
 int32_t AuthDevicePostTransData(int64_t authId, const AuthTransData *dataInfo);
 void AuthDeviceCloseConn(int64_t authId);
 int32_t AuthDeviceGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo);
+int32_t AuthDeviceGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo);
 /*check whether AUTH device is exist or not*/
 bool AuthDeviceCheckConnInfo(const char* uuid, AuthLinkType type, bool checkConnection);
 

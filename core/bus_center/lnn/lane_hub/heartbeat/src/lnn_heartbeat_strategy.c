@@ -27,10 +27,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_adapter_timer.h"
-#include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_utils.h"
-#include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
 #include "bus_center_manager.h"
 
@@ -42,7 +39,7 @@ typedef struct {
     const char *callerId;
     ListNode node;
     GearMode mode;
-    int64_t lifetimeStamp; // unit is milliseconds
+    int64_t lifeTimestamp; // unit is milliseconds
 } GearModeStorageInfo;
 
 typedef struct {
@@ -60,7 +57,6 @@ static LnnHeartbeatParamManager *g_hbParamMgr[HB_MAX_TYPE_COUNT] = {0};
 static int32_t SingleSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj);
 static int32_t FixedPeriodSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj);
 static int32_t AdjustablePeriodSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj);
-static bool IsSupportBurstFeature(const char *newtworkId);
 
 static LnnHeartbeatStrategyManager g_hbStrategyMgr[] = {
     [STRATEGY_HB_SEND_SINGLE] = {
@@ -98,9 +94,9 @@ static void DumpGearModeSettingList(int64_t nowTime, const ListNode *gearModeLis
             break;
         }
         LNN_LOGD(LNN_HEART_BEAT, "DumpGearModeSettingList count:%d [callerId=%s, cycle=%d, "
-            "duration=%d, wakeupFlag=%d, lifetimeStamp=%" PRId64 ", needClean:%s]", dumpCount, info->callerId,
-            info->mode.cycle, info->mode.duration, info->mode.wakeupFlag, info->lifetimeStamp,
-            info->lifetimeStamp != HB_GEARMODE_LIFETIME_PERMANENT && info->lifetimeStamp <= nowTime ? "true" : "false");
+            "duration=%d, wakeupFlag=%d, lifeTimestamp=%" PRId64 ", needClean:%s]", dumpCount, info->callerId,
+            info->mode.cycle, info->mode.duration, info->mode.wakeupFlag, info->lifeTimestamp,
+            info->lifeTimestamp != HB_GEARMODE_LIFETIME_PERMANENT && info->lifeTimestamp <= nowTime ? "true" : "false");
     }
 }
 
@@ -120,7 +116,7 @@ static int32_t GetGearModeFromSettingList(GearMode *mode, const ListNode *gearMo
             LNN_LOGD(LNN_HEART_BEAT, "HB get Gearmode from setting list is empty");
             return SOFTBUS_NETWORK_HEARTBEAT_EMPTY_LIST;
         }
-        if (info->lifetimeStamp < nowTime && info->lifetimeStamp != HB_GEARMODE_LIFETIME_PERMANENT) {
+        if (info->lifeTimestamp < nowTime && info->lifeTimestamp != HB_GEARMODE_LIFETIME_PERMANENT) {
             ListDelete(&info->node);
             SoftBusFree((void *)info->callerId);
             SoftBusFree(info);
@@ -222,9 +218,9 @@ static int32_t FirstSetGearModeByCallerId(const char *callerId, int64_t nowTime,
         return SOFTBUS_ERR;
     }
     if (strcmp(callerId, HB_DEFAULT_CALLER_ID) == 0) {
-        info->lifetimeStamp = HB_GEARMODE_LIFETIME_PERMANENT;
+        info->lifeTimestamp = HB_GEARMODE_LIFETIME_PERMANENT;
     } else {
-        info->lifetimeStamp = nowTime + mode->duration * HB_TIME_FACTOR;
+        info->lifeTimestamp = nowTime + mode->duration * HB_TIME_FACTOR;
     }
     ListAdd(list, &info->node);
     return SOFTBUS_OK;
@@ -264,7 +260,7 @@ int32_t LnnSetGearModeBySpecificType(const char *callerId, const GearMode *mode,
             (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
             return SOFTBUS_MEM_ERR;
         }
-        info->lifetimeStamp = nowTime + mode->duration * HB_TIME_FACTOR;
+        info->lifeTimestamp = nowTime + mode->duration * HB_TIME_FACTOR;
         (void)SoftBusMutexUnlock(&g_hbStrategyMutex);
         return SOFTBUS_OK;
     }
@@ -682,22 +678,6 @@ int32_t LnnStartNewHbStrategyFsm(void)
     return SOFTBUS_OK;
 }
 
-static bool IsSupportBurstFeature(const char *networkId)
-{
-    uint64_t localFeature;
-    uint64_t peerFeature;
-    if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &localFeature) != SOFTBUS_OK ||
-        LnnGetRemoteNumU64Info(networkId, NUM_KEY_FEATURE_CAPA, &peerFeature) != SOFTBUS_OK) {
-        LNN_LOGI(LNN_HEART_BEAT, "get local or remote feature fail");
-        return false;
-    }
-    if (IsFeatureSupport(localFeature, BIT_BLE_SUPPORT_SENSORHUB_HEARTBEAT) &&
-        IsFeatureSupport(peerFeature, BIT_BLE_SUPPORT_SENSORHUB_HEARTBEAT)) {
-        return true;
-    }
-    return false;
-}
-
 int32_t LnnStartOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType)
 {
     GearMode mode = {0};
@@ -706,7 +686,7 @@ int32_t LnnStartOfflineTimingStrategy(const char *networkId, ConnectionAddrType 
     if (networkId == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    if (IsSupportBurstFeature(networkId)) {
+    if (LnnIsSupportBurstFeature(networkId)) {
         LNN_LOGI(LNN_HEART_BEAT, "target device support burst, dont't need post offline info");
         return SOFTBUS_OK;
     }

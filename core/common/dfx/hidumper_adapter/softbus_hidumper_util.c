@@ -278,13 +278,13 @@ static void LnnStatsAuthLinkType(int32_t authLinkTypePara, bool success)
 
 static void LnnStats(int32_t scene, int32_t stage, int32_t stageRes, int32_t authLinkType)
 {
-    if (scene == EVENT_SCENE_JOIN_LNN && stage == EVENT_STAGE_AUTH_DEVICE && stageRes == EVENT_STAGE_RESULT_OK) {
+    if (scene == EVENT_SCENE_JOIN_LNN && stage == EVENT_STAGE_AUTH && stageRes == EVENT_STAGE_RESULT_OK) {
         g_lnnStatsInfo.authSuccessTotal++;
         LnnStatsAuthLinkType(authLinkType, true);
         return;
     }
         
-    if (scene == EVENT_SCENE_JOIN_LNN && stage == EVENT_STAGE_AUTH_DEVICE && stageRes == EVENT_STAGE_RESULT_FAILED) {
+    if (scene == EVENT_SCENE_JOIN_LNN && stage == EVENT_STAGE_AUTH && stageRes == EVENT_STAGE_RESULT_FAILED) {
         g_lnnStatsInfo.authFailTotal++;
         LnnStatsAuthLinkType(authLinkType, false);
         return;
@@ -295,7 +295,7 @@ static void LnnStats(int32_t scene, int32_t stage, int32_t stageRes, int32_t aut
         return;
     }
 
-    if (scene == EVENT_SCENE_LEAVE_LNN && stage == EVENT_STAGE_LEAVE_LNN_END && stageRes == EVENT_STAGE_RESULT_OK) {
+    if (scene == EVENT_SCENE_LEAVE_LNN && stage == EVENT_STAGE_LEAVE_LNN && stageRes == EVENT_STAGE_RESULT_OK) {
         g_lnnStatsInfo.leaveLnnNum++;
         return;
     }

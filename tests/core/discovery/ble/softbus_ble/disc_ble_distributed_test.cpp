@@ -255,7 +255,7 @@ HWTEST_F(DiscDistributedBleTest, TestScanFilter003, TestSize.Level1)
             .rspData = {
                 .payload = &payload[0],
                 .payloadLen = POS_TLV,
-                .type = BC_DATA_TYPE_SERVICE,
+                .type = BC_DATA_TYPE_MANUFACTURER,
                 .id = COMPANY_ID,
             },
         },

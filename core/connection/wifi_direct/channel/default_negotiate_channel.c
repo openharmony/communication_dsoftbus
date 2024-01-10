@@ -139,7 +139,15 @@ static int32_t PostDataWithFlag(struct DefaultNegotiateChannel *self, const uint
 
 static int32_t GetDeviceId(struct WifiDirectNegotiateChannel *base, char *deviceId, size_t deviceIdSize)
 {
-    int32_t ret = AuthGetDeviceUuid(((struct DefaultNegotiateChannel *)base)->authId, deviceId, deviceIdSize);
+    int32_t ret = SOFTBUS_OK;
+    struct DefaultNegotiateChannel *self = (struct DefaultNegotiateChannel *)base;
+    if (strlen(self->remoteDeviceId) != 0) {
+        ret = strcpy_s(deviceId, deviceIdSize, self->remoteDeviceId);
+        CONN_CHECK_AND_RETURN_RET_LOGW(ret == EOK, SOFTBUS_STRCPY_ERR, CONN_WIFI_DIRECT, "copy device id failed");
+        return SOFTBUS_OK;
+    }
+
+    ret = AuthGetDeviceUuid(((struct DefaultNegotiateChannel *)base)->authId, deviceId, deviceIdSize);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get device id failed");
     return ret;
 }
@@ -203,6 +211,12 @@ static struct WifiDirectNegotiateChannel *Duplicate(struct WifiDirectNegotiateCh
     CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     struct DefaultNegotiateChannel *self = (struct DefaultNegotiateChannel *)base;
     struct DefaultNegotiateChannel *copy = DefaultNegotiateChannelNew(self->authId);
+    int32_t ret = strcpy_s(copy->remoteDeviceId, UUID_BUF_LEN, self->remoteDeviceId);
+    if (ret != EOK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "copy remote device id failed");
+        DefaultNegotiateChannelDelete(copy);
+        return NULL;
+    }
     return (struct WifiDirectNegotiateChannel*)copy;
 }
 
@@ -226,6 +240,9 @@ void DefaultNegotiateChannelConstructor(struct DefaultNegotiateChannel *self, in
     self->equal = Equal;
     self->duplicate = Duplicate;
     self->destructor = Destructor;
+
+    int32_t ret = AuthGetDeviceUuid(self->authId, self->remoteDeviceId, UUID_BUF_LEN);
+    CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get device id failed");
 }
 
 void DefaultNegotiateChannelDestructor(struct DefaultNegotiateChannel *self)

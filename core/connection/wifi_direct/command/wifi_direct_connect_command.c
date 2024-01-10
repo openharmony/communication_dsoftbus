@@ -38,24 +38,42 @@ static bool IsNeedRetry(struct WifiDirectCommand *base, int32_t reason)
     return GetWifiDirectNegotiator()->isRetryErrorCode(reason);
 }
 
-static int32_t ReuseLink(struct WifiDirectConnectCommand *command)
+static enum WifiDirectLinkType GetLinkType(enum WifiDirectConnectType connectType)
+{
+    switch (connectType) {
+        case WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P:
+            return WIFI_DIRECT_LINK_TYPE_P2P;
+        case WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML:
+        case WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML:
+        case WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML:
+            return WIFI_DIRECT_LINK_TYPE_HML;
+        default:
+            CONN_LOGE(CONN_WIFI_DIRECT, "connectType=%d invalid", connectType);
+            return WIFI_DIRECT_LINK_TYPE_INVALID;
+    }
+}
+
+static struct InnerLink *GetReuseLink(struct WifiDirectConnectCommand *command)
 {
     struct WifiDirectConnectInfo *connectInfo = &command->connectInfo;
     char remoteUuid[UUID_BUF_LEN] = {0};
     int32_t ret = LnnGetRemoteStrInfo(connectInfo->remoteNetworkId, STRING_KEY_UUID, remoteUuid, sizeof(remoteUuid));
-    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "get remote uuid failed");
-    struct InnerLink *link = GetLinkManager()->getLinkByTypeAndUuid(WIFI_DIRECT_LINK_TYPE_HML, remoteUuid);
-    if (link == NULL) {
-        link = GetLinkManager()->getLinkByTypeAndUuid(WIFI_DIRECT_LINK_TYPE_P2P, remoteUuid);
-    }
-    CONN_CHECK_AND_RETURN_RET_LOGW(link, SOFTBUS_ERR, CONN_WIFI_DIRECT, "link is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, NULL, CONN_WIFI_DIRECT, "get remote uuid failed");
+
+    enum WifiDirectLinkType linkType = GetLinkType(connectInfo->connectType);
+    struct InnerLink *link = GetLinkManager()->getLinkByTypeAndUuid(linkType, remoteUuid);
+    CONN_CHECK_AND_RETURN_RET_LOGW(link != NULL, NULL, CONN_WIFI_DIRECT, "link is null");
     enum InnerLinkState state = link->getInt(link, IL_KEY_STATE, INNER_LINK_STATE_DISCONNECTED);
-    CONN_CHECK_AND_RETURN_RET_LOGW(state == INNER_LINK_STATE_CONNECTED, SOFTBUS_ERR, CONN_WIFI_DIRECT,
-                                   "link is not connected");
-
+    CONN_CHECK_AND_RETURN_RET_LOGW(state == INNER_LINK_STATE_CONNECTED, NULL, CONN_WIFI_DIRECT,
+                                   "state=%d not connected", state);
     struct WifiDirectIpv4Info *ipv4 = link->getRawData(link, IL_KEY_REMOTE_IPV4, NULL, NULL);
-    CONN_CHECK_AND_RETURN_RET_LOGW(ipv4, SOFTBUS_ERR, CONN_WIFI_DIRECT, "ipv4 is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ipv4 != NULL, NULL, CONN_WIFI_DIRECT, "ipv4 is null");
+    return link;
+}
 
+static int32_t ReuseLink(struct WifiDirectConnectCommand *command, struct InnerLink *link)
+{
+    struct WifiDirectConnectInfo *connectInfo = &command->connectInfo;
     bool isBeingUsedByLocal = link->getBoolean(link, IL_KEY_IS_BEING_USED_BY_LOCAL, false);
     CONN_LOGI(CONN_WIFI_DIRECT, "isBeingUsedByLocal=%d", isBeingUsedByLocal);
 
@@ -84,10 +102,10 @@ static int32_t ReuseLink(struct WifiDirectConnectCommand *command)
 static int32_t OpenLink(struct WifiDirectConnectCommand *command)
 {
     struct WifiDirectConnectInfo *connectInfo = &command->connectInfo;
-
-    CONN_LOGI(CONN_WIFI_DIRECT, "try reuse link");
-    if (ReuseLink(command) == SOFTBUS_OK) {
-        return SOFTBUS_OK;
+    struct InnerLink *link = GetReuseLink(command);
+    if (link != NULL) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "reuse link");
+        return ReuseLink(command, link);
     }
 
     struct WifiDirectDecisionCenter *decisionCenter = GetWifiDirectDecisionCenter();

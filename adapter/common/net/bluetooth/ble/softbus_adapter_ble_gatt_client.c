@@ -21,7 +21,6 @@
 #include "conn_log.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "softbus_type_def.h"
 
 #include "c_header/ohos_bt_def.h"
 #include "c_header/ohos_bt_gatt_client.h"
@@ -36,7 +35,7 @@ static void GattcConnectionStateChangedCallback(int clientId, int connectionStat
 {
     CONN_LOGI(CONN_BLE, "StateChangedCallback id=%d, state=%d, status=%d", clientId, connectionState, status);
     if (connectionState != OHOS_STATE_CONNECTED && connectionState != OHOS_STATE_DISCONNECTED) {
-        CONN_LOGI(CONN_BLE, "GattcConnectionStateChangedCallback ignore");
+        CONN_LOGI(CONN_BLE, "connectionState = %d, ignore", connectionState);
         return;
     }
 
@@ -46,6 +45,11 @@ static void GattcConnectionStateChangedCallback(int clientId, int connectionStat
 
 static void GattcConnectParaUpdateCallback(int clientId, int interval, int latency, int timeout, int status)
 {
+    (void)clientId;
+    (void)interval;
+    (void)latency;
+    (void)timeout;
+    (void)status;
     CONN_LOGI(CONN_BLE, "ParaUpdateCallback");
 }
 
@@ -57,22 +61,26 @@ static void GattcSearchServiceCompleteCallback(int clientId, int status)
 
 static void GattcReadCharacteristicCallback(int clientId, BtGattReadData *readData, int status)
 {
+    (void)readData;
     CONN_LOGI(CONN_BLE, "ReadCharacteristicCallback, id=%d, status=%d", clientId, status);
 }
 
 
 static void GattcWriteCharacteristicCallback(int clientId, BtGattCharacteristic *characteristic, int status)
 {
+    (void)characteristic;
     CONN_LOGI(CONN_BLE, "WriteCharacteristicCallback, id=%d, status=%d", clientId, status);
 }
 
 static void GattcReadDescriptorCallback(int clientId, BtGattReadData *readData, int status)
 {
+    (void)readData;
     CONN_LOGI(CONN_BLE, "ReadDescriptorCallback, id=%d, status=%d", clientId, status);
 }
 
 static void GattcWriteDescriptorCallback(int clientId, BtGattDescriptor *descriptor, int status)
 {
+    (void)descriptor;
     CONN_LOGI(CONN_BLE, "WriteDescriptorCallback, id=%d, status=%d", clientId, status);
 }
 
@@ -90,8 +98,8 @@ static void GattcRegisterNotificationCallback(int clientId, int status)
 
 static void GattcNotificationCallback(int clientId, BtGattReadData *notifyData, int status)
 {
-    CONN_LOGI(CONN_BLE, "GattcNotificationCallback, id=%d, status=%d", clientId, status);
     if (notifyData == NULL) {
+        CONN_LOGE(CONN_BLE, "invalid param");
         return;
     }
     SoftBusGattcNotify notify;
@@ -100,12 +108,16 @@ static void GattcNotificationCallback(int clientId, BtGattReadData *notifyData, 
     notify.data = notifyData->data;
     notify.charaUuid.uuid = notifyData->attribute.characteristic.characteristicUuid.uuid;
 
-    CONN_LOGI(CONN_BLE, "GattcNotificationCallback, id=%d, status=%d", clientId, status);
+    CONN_LOGI(CONN_BLE, "id=%d, status=%d", clientId, status);
     g_softBusGattcCallback->NotificationReceiveCallback(clientId, &notify, status);
 }
 
 void SoftbusGattcRegisterCallback(SoftBusGattcCallback *cb)
 {
+    if (cb == NULL) {
+        CONN_LOGE(CONN_BLE, "invalid param");
+        return;
+    }
     g_btGattClientCallbacks.ConnectionStateCb = GattcConnectionStateChangedCallback;
     g_btGattClientCallbacks.connectParaUpdateCb = GattcConnectParaUpdateCallback;
     g_btGattClientCallbacks.searchServiceCompleteCb = GattcSearchServiceCompleteCallback;
@@ -146,13 +158,13 @@ int32_t SoftbusGattcConnect(int32_t clientId, SoftBusBtAddr *addr)
 {
     BdAddr bdAddr;
     if (memcpy_s(bdAddr.addr, OHOS_BD_ADDR_LEN, addr->addr, BT_ADDR_LEN) != EOK) {
-        CONN_LOGE(CONN_BLE, "SoftbusGattcConnect memcpy error");
+        CONN_LOGE(CONN_BLE, "memcpy error");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t status = BleOhosStatusToSoftBus(
         BleGattcConnect(clientId, &g_btGattClientCallbacks, &bdAddr, false, OHOS_BT_TRANSPORT_TYPE_LE));
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "BleGattcConnect error");
+        CONN_LOGE(CONN_BLE, "BleGattcConnect error status = %d", status);
         return SOFTBUS_GATTC_INTERFACE_FAILED;
     }
 
@@ -171,7 +183,7 @@ int32_t SoftbusBleGattcDisconnect(int32_t clientId, bool refreshGatt)
 
 int32_t SoftbusGattcSearchServices(int32_t clientId)
 {
-    CONN_LOGI(CONN_BLE, "SoftbusGattcSearchServices %d", clientId);
+    CONN_LOGI(CONN_BLE, "input param %d", clientId);
     int32_t status = BleOhosStatusToSoftBus(BleGattcSearchServices(clientId));
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "BleGattcSearchServices error, status = %d", status);
@@ -182,14 +194,14 @@ int32_t SoftbusGattcSearchServices(int32_t clientId)
 
 int32_t SoftbusGattcRefreshServices(int32_t clientId)
 {
-    CONN_LOGI(CONN_BLE, "SoftbusGattcRefreshServices %d", clientId);
+    CONN_LOGI(CONN_BLE, "input param %d", clientId);
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t SoftbusGattcGetService(int32_t clientId, SoftBusBtUuid *serverUuid)
 {
     if (clientId <= 0) {
-        CONN_LOGE(CONN_BLE, "SoftbusGattcGetService invalid param");
+        CONN_LOGE(CONN_BLE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     BtUuid btUuid;
@@ -214,7 +226,7 @@ int32_t SoftbusGattcRegisterNotification(
     btCharaUuid.characteristicUuid.uuidLen = charaUuid->uuidLen;
     int32_t status = BleOhosStatusToSoftBus(BleGattcRegisterNotification(clientId, btCharaUuid, true));
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "BleGattcRegisterNotification error");
+        CONN_LOGE(CONN_BLE, "BleGattcRegisterNotification error status = %d", status);
         return SOFTBUS_GATTC_INTERFACE_FAILED;
     }
     return SOFTBUS_OK;
@@ -222,6 +234,11 @@ int32_t SoftbusGattcRegisterNotification(
 
 int32_t SoftbusGattcConfigureMtuSize(int32_t clientId, int mtuSize)
 {
+    if (clientId <= 0) {
+        CONN_LOGE(CONN_BLE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
     if (BleGattcConfigureMtuSize(clientId, mtuSize) != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "BleGattcConfigureMtuSize error");
         return SOFTBUS_GATTC_INTERFACE_FAILED;
@@ -232,10 +249,10 @@ int32_t SoftbusGattcConfigureMtuSize(int32_t clientId, int mtuSize)
 int32_t SoftbusGattcWriteCharacteristic(int32_t clientId, SoftBusGattcData *clientData)
 {
     if (clientId <= 0 || clientData == NULL) {
-        CONN_LOGE(CONN_BLE, "SoftbusGattcWriteCharacteristic invalid param");
+        CONN_LOGE(CONN_BLE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    CONN_LOGI(CONN_BLE, "SoftbusGattcRegisterNotification clientId = %d", clientId);
+    CONN_LOGI(CONN_BLE, "clientId = %d", clientId);
     BtGattCharacteristic characteristic;
     characteristic.serviceUuid.uuid = clientData->serviceUuid.uuid;
     characteristic.serviceUuid.uuidLen = clientData->serviceUuid.uuidLen;
@@ -243,7 +260,7 @@ int32_t SoftbusGattcWriteCharacteristic(int32_t clientId, SoftBusGattcData *clie
     characteristic.characteristicUuid.uuidLen = clientData->characterUuid.uuidLen;
     if (BleGattcWriteCharacteristic(clientId, characteristic, OHOS_GATT_WRITE_NO_RSP, clientData->valueLen,
             (const char *)clientData->value) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "SoftbusGattcWriteCharacteristic error");
+        CONN_LOGE(CONN_BLE, " error");
         return SOFTBUS_GATTC_INTERFACE_FAILED;
     }
     return SOFTBUS_OK;
@@ -266,7 +283,7 @@ int32_t SoftbusGattcSetFastestConn(int32_t clientId)
 int32_t SoftbusGattcSetPriority(int32_t clientId, SoftBusBtAddr *addr, SoftbusBleGattPriority priority)
 {
     if (clientId <= 0 || addr == NULL) {
-        CONN_LOGE(CONN_BLE, "invalid param, '%d'", clientId);
+        CONN_LOGE(CONN_BLE, "invalid param, '%d'or addr is null", clientId);
         return SOFTBUS_INVALID_PARAM;
     }
     BdAddr bdAddr = { 0 };

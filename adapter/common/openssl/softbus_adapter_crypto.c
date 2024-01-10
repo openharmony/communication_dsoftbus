@@ -61,6 +61,10 @@ static EVP_CIPHER *GetCtrAlgorithmByKeyLen(uint32_t keyLen)
 
 static int32_t OpensslEvpInit(EVP_CIPHER_CTX **ctx, const AesGcmCipherKey *cipherkey, bool mode)
 {
+    if (cipherkey == NULL) {
+        COMM_LOGE(COMM_ADAPTER, "Encrypt invalid para.");
+        return SOFTBUS_INVALID_PARAM;
+    }
     EVP_CIPHER *cipher = GetGcmAlgorithmByKeyLen(cipherkey->keyLen);
     if (cipher == NULL) {
         COMM_LOGE(COMM_ADAPTER, "get cipher fail.");
@@ -463,6 +467,7 @@ uint32_t SoftBusCryptoRand(void)
     int32_t len = SoftBusReadFile(fd, &value, sizeof(uint32_t));
     if (len < 0) {
         COMM_LOGE(COMM_ADAPTER, "CryptoRand read file fail");
+        SoftBusCloseFile(fd);
         return 0;
     }
     SoftBusCloseFile(fd);

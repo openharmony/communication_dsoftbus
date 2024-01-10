@@ -401,7 +401,6 @@ static bool IsObjectstoreDbSessionName(const char* sessionName)
     regex_t regComp;
     if (regcomp(&regComp, OBJECTSTORE_DB_SESSION_NAME, REG_EXTENDED | REG_NOSUB) != 0) {
         COMM_LOGE(COMM_SVC, "regcomp failed.");
-        regfree(&regComp);
         return false;
     }
     bool compare = (regexec(&regComp, sessionName, 0, NULL, 0) == 0);

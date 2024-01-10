@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,33 +20,33 @@
 
 #include "anonymizer.h"
 #include "auth_common.h"
-#include "auth_request.h"
 #include "auth_connection.h"
 #include "auth_device_common_key.h"
 #include "auth_hichain_adapter.h"
 #include "auth_interface.h"
 #include "auth_log.h"
 #include "auth_manager.h"
+#include "auth_request.h"
 #include "bus_center_manager.h"
 #include "lnn_cipherkey_manager.h"
 #include "lnn_common_utils.h"
+#include "lnn_compress.h"
 #include "lnn_event.h"
 #include "lnn_extdata_config.h"
-#include "lnn_local_net_ledger.h"
 #include "lnn_feature_capability.h"
+#include "lnn_local_net_ledger.h"
 #include "lnn_network_manager.h"
-#include "lnn_settingdata_event_monitor.h"
 #include "lnn_node_info.h"
+#include "lnn_settingdata_event_monitor.h"
+#include "softbus_adapter_json.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
-#include "softbus_def.h"
+#include "softbus_adapter_timer.h"
 #include "softbus_common.h"
 #include "softbus_config_type.h"
+#include "softbus_def.h"
 #include "softbus_feature_config.h"
 #include "softbus_json_utils.h"
-#include "lnn_compress.h"
-#include "softbus_adapter_json.h"
-#include "softbus_adapter_timer.h"
 #include "softbus_socket.h"
 
 /* DeviceId */
@@ -490,6 +490,32 @@ static void PackWifiSinglePassInfo(JsonObj *obj, const AuthSessionInfo *info)
     JSON_AddStringToObject(obj, DEV_IP_HASH_TAG, devIpHash);
 }
 
+static bool VerifySessionInfoIdType(const AuthSessionInfo *info, JsonObj *obj, char *networkId, char *udid)
+{
+    if (info->idType == EXCHANGE_NETWORKID) {
+        if (!JSON_AddStringToObject(obj, DEVICE_ID_TAG, networkId)) {
+            AUTH_LOGE(AUTH_FSM, "add msg body fail");
+            return false;
+        }
+        char *anonyNetworkId = NULL;
+        Anonymize(networkId, &anonyNetworkId);
+        AUTH_LOGI(AUTH_FSM, "exchangeIdType=%d, networkid=%s", info->idType, anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
+    } else {
+        if (!JSON_AddStringToObject(obj, DEVICE_ID_TAG, udid)) {
+            AUTH_LOGE(AUTH_FSM, "add msg body fail");
+            return false;
+        }
+        char *anonyUdid = NULL;
+        Anonymize(udid, &anonyUdid);
+        AUTH_LOGI(AUTH_FSM, "exchangeIdType=%d, udid=%s", info->idType, anonyUdid);
+        AnonymizeFree(anonyUdid);
+    }
+
+    AUTH_LOGI(AUTH_FSM, "session info verify succ.");
+    return true;
+}
+
 static char *PackDeviceIdJson(const AuthSessionInfo *info)
 {
     AUTH_LOGI(AUTH_FSM, "connType=%d", info->connInfo.type);
@@ -521,26 +547,9 @@ static char *PackDeviceIdJson(const AuthSessionInfo *info)
             return NULL;
         }
     }
-    if (info->idType == EXCHANGE_NETWORKID) {
-        if (!JSON_AddStringToObject(obj, DEVICE_ID_TAG, networkId)) {
-            AUTH_LOGE(AUTH_FSM, "add msg body fail");
-            JSON_Delete(obj);
-            return NULL;
-        }
-        char *anonyNetworkId = NULL;
-        Anonymize(networkId, &anonyNetworkId);
-        AUTH_LOGI(AUTH_FSM, "exchangeIdType=%d, networkid=%s", info->idType, anonyNetworkId);
-        AnonymizeFree(anonyNetworkId);
-    } else {
-        if (!JSON_AddStringToObject(obj, DEVICE_ID_TAG, udid)) {
-            AUTH_LOGE(AUTH_FSM, "add msg body fail");
-            JSON_Delete(obj);
-            return NULL;
-        }
-        char *anonyUdid = NULL;
-        Anonymize(udid, &anonyUdid);
-        AUTH_LOGI(AUTH_FSM, "exchangeIdType=%d, udid=%s", info->idType, anonyUdid);
-        AnonymizeFree(anonyUdid);
+    if (!VerifySessionInfoIdType(info, obj, networkId, udid)) {
+        JSON_Delete(obj);
+        return NULL;
     }
     if (!JSON_AddStringToObject(obj, DATA_TAG, uuid) || !JSON_AddInt32ToObject(obj, DATA_BUF_SIZE_TAG, PACKET_SIZE) ||
         !JSON_AddInt32ToObject(obj, SOFTBUS_VERSION_TAG, info->version) ||
@@ -833,7 +842,7 @@ static void PackWifiDirectInfo(JsonObj *json, const NodeInfo *info, const char *
     unsigned char encodePtk[PTK_ENCODE_LEN] = {0};
     char localPtk[PTK_DEFAULT_LEN] = {0};
     if (LnnGetLocalPtkByUuid(remoteUuid, localPtk, PTK_DEFAULT_LEN) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "get ptk by udid fail");
+        AUTH_LOGE(AUTH_FSM, "get ptk by uuid fail");
         return;
     }
     size_t keyLen = 0;
@@ -1105,9 +1114,9 @@ static void UnpackCommon(const JsonObj *json, NodeInfo *info, SoftBusVersion ver
     OptInt(json, NODE_WEIGHT, &info->masterWeight, DEFAULT_NODE_WEIGHT);
 
     // IS_SUPPORT_TCP_HEARTBEAT
-    OptInt64(json, NEW_CONN_CAP, (int64_t *)&info->netCapacity, -1);
+    OptInt(json, NEW_CONN_CAP, (int32_t *)&info->netCapacity, -1);
     if (info->netCapacity == (uint32_t)-1) {
-        (void)JSON_GetInt64FromOject(json, CONN_CAP, (int64_t *)&info->netCapacity);
+        (void)JSON_GetInt32FromOject(json, CONN_CAP, (int32_t *)&info->netCapacity);
     }
     OptInt(json, WIFI_BUFF_SIZE, &info->wifiBuffSize, DEFAULT_WIFI_BUFF_SIZE);
     OptInt(json, BR_BUFF_SIZE, &info->wifiBuffSize, DEFAULT_BR_BUFF_SIZE);
@@ -1539,8 +1548,24 @@ static int32_t PostDeviceIdNew(int64_t authSeq, const AuthSessionInfo *info)
     return SOFTBUS_OK;
 }
 
+static void DfxRecordLnnPostDeviceIdStart(int64_t authSeq)
+{
+    LnnEventExtra extra = { 0 };
+    LnnEventExtraInit(&extra);
+    extra.authId = (int32_t)authSeq;
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_DEVICE_ID_POST, extra);
+}
+
+static void DfxRecordLnnProcessDeviceIdStart(void)
+{
+    LnnEventExtra extra = { 0 };
+    LnnEventExtraInit(&extra);
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_DEVICE_ID_PROCESS, extra);
+}
+
 int32_t PostDeviceIdMessage(int64_t authSeq, const AuthSessionInfo *info)
 {
+    DfxRecordLnnPostDeviceIdStart(authSeq);
     AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "info is NULL");
     if (info->version == SOFTBUS_OLD_V1) {
         return PostDeviceIdV1(authSeq, info);
@@ -1551,6 +1576,7 @@ int32_t PostDeviceIdMessage(int64_t authSeq, const AuthSessionInfo *info)
 
 int32_t ProcessDeviceIdMessage(AuthSessionInfo *info, const uint8_t *data, uint32_t len)
 {
+    DfxRecordLnnProcessDeviceIdStart();
     AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "info is NULL");
     AUTH_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "data is NULL");
     if ((info->connInfo.type != AUTH_LINK_TYPE_WIFI) && (len == DEVICE_ID_STR_LEN) && (info->isServer)) {
@@ -1576,8 +1602,25 @@ static void GetSessionKeyList(int64_t authSeq, const AuthSessionInfo *info, Sess
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
 }
 
+static void DfxRecordLnnPostDeviceInfoStart(int64_t authSeq)
+{
+    LnnEventExtra extra = { 0 };
+    LnnEventExtraInit(&extra);
+    extra.authId = (int32_t)authSeq;
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_DEVICE_INFO_POST, extra);
+}
+
+static void DfxRecordLnnProcessDeviceInfoStart(int64_t authSeq)
+{
+    LnnEventExtra extra = { 0 };
+    LnnEventExtraInit(&extra);
+    extra.authId = (int32_t)authSeq;
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_DEVICE_INFO_PROCESS, extra);
+}
+
 int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
 {
+    DfxRecordLnnPostDeviceInfoStart(authSeq);
     AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "info is NULL");
     char *msg = PackDeviceInfoMessage(info->connInfo.type, info->version, false, info->uuid);
     if (msg == NULL) {
@@ -1629,12 +1672,7 @@ int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
         .flag = compressFlag,
         .len = dataLen,
     };
-    LnnEventExtra lnnEventExtra = {0};
-    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_EXCHANGE_DEVICE_INFO, lnnEventExtra);
     if (PostAuthData(info->connId, !info->isServer, &head, data) != SOFTBUS_OK) {
-        lnnEventExtra.result = EVENT_STAGE_RESULT_FAILED;
-        lnnEventExtra.errcode = SOFTBUS_AUTH_EXCHANGE_DEVICE_INFO_START_ERR;
-        LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_EXCHANGE_DEVICE_INFO, lnnEventExtra);
         AUTH_LOGE(AUTH_FSM, "post device info fail");
         SoftBusFree(data);
         return SOFTBUS_AUTH_SEND_FAIL;
@@ -1645,6 +1683,7 @@ int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
 
 int32_t ProcessDeviceInfoMessage(int64_t authSeq, AuthSessionInfo *info, const uint8_t *data, uint32_t len)
 {
+    DfxRecordLnnProcessDeviceInfoStart(authSeq);
     AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "info is NULL");
     AUTH_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "data is NULL");
     uint8_t *msg = NULL;

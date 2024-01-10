@@ -15,9 +15,7 @@
 
 #include "nstackx_log.h"
 
-#include <errno.h>
 #include "securec.h"
-#include "nstackx_util.h"
 #include "nstackx_error.h"
 #define TAG "nStackXLog"
 static uint32_t g_logLevel = NSTACKX_LOG_LEVEL_INFO;
@@ -28,7 +26,7 @@ static void DefaultLogImpl(const char *tag, uint32_t level, const char *format, 
     SYSTEMTIME st = {0};
 
     GetLocalTime(&st);
-    printf("%02d-%02d %02d:%02d:%02d.%03d %d %d %d %s: ", st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond,
+    printf("%02u-%02u %02u:%02u:%02u.%03u %d %d %d %s: ", st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond,
            st.wMilliseconds, GetCurrentProcessId(), GetCurrentThreadId(), level, tag);
     vprintf(format, args);
 }

@@ -54,7 +54,7 @@ typedef enum {
 #define NETWORK_ID_UPDATE_DELAY_TIME (60 * 60 * 1000 * 24) // 24 hour
 
 static BusCenterEventCtrl g_eventCtrl;
-static SoftBusHandler g_notifyHandler = {"NotifyHandler", NULL, NULL};
+static SoftBusHandler g_notifyHandler = { BUSCENTER_NOTIFY_HANDLER_NAME, NULL, NULL };
 
 static int32_t PostMessageToHandlerDelay(SoftBusMessage *msg, uint64_t delayMillis)
 {
@@ -144,7 +144,6 @@ static void HandleNotifyMessage(SoftBusMessage *msg)
             LNN_LOGE(LNN_EVENT, "unknown notify msgType=%d", msg->what);
             break;
     }
-    LNN_LOGI(LNN_EVENT, "finish notify msgType=%d", msg->what);
 }
 
 static void FreeNotifyMessage(SoftBusMessage *msg)
@@ -313,8 +312,11 @@ void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info)
         LNN_LOGW(LNN_EVENT, "info = null");
         return;
     }
-    LNN_LOGI(LNN_EVENT, "notify node %s %s",
-        info->deviceName, (isOnline == true) ? "online" : "offline");
+    char *anonyNetworkId = NULL;
+    Anonymize(info->networkId, &anonyNetworkId);
+    LNN_LOGI(LNN_EVENT, "notify node %s %s, networkId=%s", info->deviceName,
+        (isOnline == true) ? "online" : "offline", anonyNetworkId);
+    AnonymizeFree(anonyNetworkId);
     SetDefaultQdisc();
     (void)PostNotifyMessage(NOTIFY_ONLINE_STATE_CHANGED, (uint64_t)isOnline, info);
     eventInfo.basic.event = LNN_EVENT_NODE_ONLINE_STATE_CHANGED;

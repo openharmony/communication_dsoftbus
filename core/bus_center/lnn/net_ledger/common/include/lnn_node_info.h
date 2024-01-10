@@ -175,8 +175,8 @@ typedef struct {
     int32_t staticCapLen;
     char remotePtk[PTK_DEFAULT_LEN];
     uint8_t relation[CONNECTION_ADDR_MAX];
-    uint64_t heartbeatTimeStamp;
-    uint64_t bleDirectTimeStamp;
+    uint64_t heartbeatTimestamp;
+    uint64_t bleDirectTimestamp;
     uint64_t onlinetTimestamp;
 } NodeInfo;
 

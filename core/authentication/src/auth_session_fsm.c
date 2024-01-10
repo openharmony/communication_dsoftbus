@@ -221,7 +221,8 @@ static AuthFsm *CreateAuthFsm(int64_t authSeq, uint32_t requestId, uint64_t conn
             return NULL;
         }
     }
-    if (sprintf_s(authFsm->fsmName, sizeof(authFsm->fsmName), "AuthFsm-%u", authFsm->id) == -1) {
+    if (sprintf_s(authFsm->fsmName, sizeof(authFsm->fsmName), "%s-%u",
+        BUSCENTER_AUTH_FSM_HANDLER_NAME, authFsm->id) == -1) {
         AUTH_LOGE(AUTH_FSM, "format auth fsm name fail");
         SoftBusFree(authFsm);
         return NULL;
@@ -624,13 +625,8 @@ static void HandleMsgRecvDeviceId(AuthFsm *authFsm, const MessagePara *para)
             Anonymize(info->udid, &anonyUdid);
             AUTH_LOGI(AUTH_FSM, "start auth send udid=%s", anonyUdid);
             AnonymizeFree(anonyUdid);
-            LnnEventExtra lnnEventExtra = { .authId = authFsm->authSeq };
-            LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_DEVICE, lnnEventExtra);
             if (HichainStartAuth(authFsm->authSeq, info->udid, info->connInfo.peerUid) != SOFTBUS_OK) {
                 ret = SOFTBUS_AUTH_HICHAIN_AUTH_FAIL;
-                lnnEventExtra.result = EVENT_STAGE_RESULT_FAILED;
-                lnnEventExtra.errcode = SOFTBUS_AUTH_START_ERR;
-                LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_DEVICE, lnnEventExtra);
                 break;
             }
         }
@@ -669,13 +665,8 @@ static bool SyncDevIdStateProcess(FsmStateMachine *fsm, int32_t msgType, void *p
 
 static void HandleMsgRecvAuthData(AuthFsm *authFsm, const MessagePara *para)
 {
-    LnnEventExtra lnnEventExtra = {0};
-    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_EXCHANGE_CIPHER, lnnEventExtra);
     int32_t ret = HichainProcessData(authFsm->authSeq, para->data, para->len);
     if (ret != SOFTBUS_OK) {
-        lnnEventExtra.result = EVENT_STAGE_RESULT_FAILED;
-        lnnEventExtra.errcode = ret;
-        LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_EXCHANGE_CIPHER, lnnEventExtra);
         LnnAuditExtra lnnAuditExtra = {0};
         BuildLnnAuditEvent(&lnnAuditExtra, &authFsm->info, AUDIT_HANDLE_MSG_FAIL_END_AUTH,
             ret, AUDIT_EVENT_PACKETS_ERROR);
@@ -711,8 +702,6 @@ static int32_t TrySyncDeviceInfo(int64_t authSeq, const AuthSessionInfo *info)
 
 static void HandleMsgSaveSessionKey(AuthFsm *authFsm, const MessagePara *para)
 {
-    LnnEventExtra lnnEventExtra = { .result = EVENT_STAGE_RESULT_OK };
-    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_EXCHANGE_CIPHER, lnnEventExtra);
     SessionKey sessionKey = {.len = para->len};
     if (memcpy_s(sessionKey.value, sizeof(sessionKey.value), para->data, para->len) != EOK) {
         AUTH_LOGE(AUTH_FSM, "copy session key fail.");
@@ -778,8 +767,6 @@ static void HandleMsgAuthFinish(AuthFsm *authFsm, MessagePara *para)
 {
     (void)para;
     AuthSessionInfo *info = &authFsm->info;
-    LnnEventExtra lnnEventExtra = { .authId = (int32_t)authFsm->authSeq, .result = EVENT_STAGE_RESULT_OK };
-    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_DEVICE, lnnEventExtra);
     AUTH_LOGI(AUTH_FSM, "auth fsm[%" PRId64"] hichain finished, devInfo|closeAck=%d|%d",
         authFsm->authSeq, info->isNodeInfoReceived, info->isCloseAckReceived);
     info->isAuthFinished = true;
@@ -826,12 +813,8 @@ static bool DeviceAuthStateProcess(FsmStateMachine *fsm, int32_t msgType, void *
 
 static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, const MessagePara *para)
 {
-    LnnEventExtra lnnEventExtra = { .result = EVENT_STAGE_RESULT_OK };
     AuthSessionInfo *info = &authFsm->info;
     if (ProcessDeviceInfoMessage(authFsm->authSeq, info, para->data, para->len) != SOFTBUS_OK) {
-        lnnEventExtra.result = EVENT_STAGE_RESULT_FAILED;
-        lnnEventExtra.errcode = SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL;
-        LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_EXCHANGE_DEVICE_INFO, lnnEventExtra);
         LnnAuditExtra lnnAuditExtra = {0};
         BuildLnnAuditEvent(&lnnAuditExtra, info, AUDIT_HANDLE_MSG_FAIL_END_AUTH,
             SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL, AUDIT_EVENT_PACKETS_ERROR);
@@ -842,8 +825,6 @@ static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, const MessagePara *para)
     }
     info->isNodeInfoReceived = true;
 
-    lnnEventExtra.peerDeviceAbility = info->nodeInfo.netCapacity;
-    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_EXCHANGE_DEVICE_INFO, lnnEventExtra);
     if (info->connInfo.type == AUTH_LINK_TYPE_WIFI) {
         info->isCloseAckReceived = true; /* WiFi auth no need close ack, set true directly */
         if (!info->isServer) {

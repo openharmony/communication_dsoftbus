@@ -952,33 +952,34 @@ int32_t ConnGattServerStopService(GattServiceType serviceId)
 
     int32_t status = SOFTBUS_OK;
     do {
-        if (state == BLE_SERVER_STATE_SERVICE_STARTED) {
-            status = SoftBusGattsStopService(serviceHandle);
-            if (status != SOFTBUS_OK) {
-                CONN_LOGE(CONN_BLE, "underlayer stop service failed, err=%d", status);
-                status = SOFTBUS_CONN_BLE_UNDERLAY_SERVICE_STOP_ERR;
-                break;
-            }
-            status = UpdateBleServerStateInOrder(BLE_SERVER_STATE_SERVICE_STARTED,
-                BLE_SERVER_STATE_SERVICE_STOPPING, serviceId);
-            if (status != SOFTBUS_OK) {
-                CONN_LOGE(CONN_BLE, "update server state failed, err=%d", status);
-                break;
-            }
-        } else {
+        if (state != BLE_SERVER_STATE_SERVICE_STARTED) {
             status = SoftBusGattsDeleteService(serviceHandle);
             if (status != SOFTBUS_OK) {
-                CONN_LOGE(CONN_BLE, "underlayer delete service failed, err=%d", status);
-                break;
+                CONN_LOGE(CONN_BLE, "delete service failed, err=%d", status);
+                status = SOFTBUS_CONN_BLE_UNDERLAY_SERVICE_DELETE_ERR;
             }
+            break;
+        }
+        status = SoftBusGattsStopService(serviceHandle);
+        if (status != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BLE, "stop service failed, err=%d", status);
+            status = SOFTBUS_CONN_BLE_UNDERLAY_SERVICE_STOP_ERR;
+            break;
+        }
+        status = UpdateBleServerStateInOrder(BLE_SERVER_STATE_SERVICE_STARTED,
+            BLE_SERVER_STATE_SERVICE_STOPPING, serviceId);
+        if (status != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BLE, "update state failed, err=%d", status);
         }
     } while (false);
 
     if (status != SOFTBUS_OK) {
         ConnRemoveMsgFromLooper(&g_bleGattServerAsyncHandler, MSG_SERVER_WAIT_START_SERVER_TIMEOUT, serviceId, 0, NULL);
         ResetServerState(serviceId);
-        
         g_serverEventListener[serviceId].onServerClosed(BLE_GATT, status);
+        if (status != SOFTBUS_CONN_BLE_UNDERLAY_SERVICE_DELETE_ERR) {
+            SoftBusGattsDeleteService(serviceHandle);
+        }
         status = SOFTBUS_OK;
     }
     return status;
@@ -1045,8 +1046,8 @@ static void BleServiceStopMsgHandler(CommonStatusMsgContext *ctx)
         rc = UpdateBleServerStateInOrder(BLE_SERVER_STATE_SERVICE_STOPPING,
             BLE_SERVER_STATE_SERVICE_STOPPED, serviceId);
         if (rc != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BLE, "update server state failed, err=%d", rc);
-            break;
+            // invoke to delete service even if the update fails
+            CONN_LOGW(CONN_BLE, "update server state failed, err=%d", rc);
         }
         rc = SoftBusGattsDeleteService(ctx->srvcHandle);
         if (rc != SOFTBUS_OK) {
