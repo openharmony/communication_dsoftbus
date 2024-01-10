@@ -648,7 +648,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, FindConfigTypeTest002, TestSize.Level1
 HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcProcessDataConfigTest001, TestSize.Level1)
 {
     int32_t ret = TransTdcProcessDataConfig(NULL);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     AppInfo *appInfo = TestSetAppInfo();
     ASSERT_TRUE(appInfo != nullptr);

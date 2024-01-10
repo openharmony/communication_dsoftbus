@@ -70,7 +70,7 @@ static int32_t HandleMessageFromProcessor(struct NegotiateMessage *msg)
     struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
 
     int32_t ret = SOFTBUS_OK;
-    if (msg) {
+    if (msg != NULL) {
         msg->dump(msg, 0);
         struct WifiDirectNegotiateChannel *channel = msg->getPointer(msg, NM_KEY_NEGO_CHANNEL, NULL);
         CONN_CHECK_AND_RETURN_RET_LOGW(channel != NULL, SOFTBUS_ERR, CONN_WIFI_DIRECT, "channel is null");
@@ -225,8 +225,8 @@ static enum WifiDirectNegotiateCmdType GetNegotiateCmdType(struct NegotiateMessa
     return cmdType;
 }
 
-static bool IsMessageNeedPending(struct WifiDirectNegotiator *self, enum WifiDirectNegotiateCmdType cmdType,
-                                 struct NegotiateMessage *msg)
+static bool IsMessageNeedPending(struct WifiDirectNegotiator *self, struct WifiDirectProcessor *processor,
+                                 enum WifiDirectNegotiateCmdType cmdType, struct NegotiateMessage *msg)
 {
     if (strlen(self->currentRemoteDeviceId) == 0) {
         CONN_LOGI(CONN_WIFI_DIRECT, "current remote deviceId is empty");
@@ -247,7 +247,29 @@ static bool IsMessageNeedPending(struct WifiDirectNegotiator *self, enum WifiDir
         return true;
     }
 
-    return self->currentProcessor->isMessageNeedPending(cmdType, msg);
+    return processor->isMessageNeedPending(cmdType, msg);
+}
+
+static bool ProcessHandShake(enum WifiDirectNegotiateCmdType cmd, struct WifiDirectNegotiateChannel *channel,
+                             struct NegotiateMessage *msg)
+{
+    if (cmd != CMD_CTRL_CHL_HANDSHAKE) {
+        return false;
+    }
+
+    struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
+    if (self->currentProcessor != NULL && self->currentProcessor->processHandShake != NULL) {
+        self->currentProcessor->processHandShake(msg);
+    } else {
+        SaveP2pChannel(channel, msg);
+        CONN_LOGI(CONN_WIFI_DIRECT, "ignore CMD_CTRL_CHL_HANDSHAKE");
+    }
+    struct WifiDirectNegotiateChannel *msgChannel = msg->getPointer(msg, NM_KEY_NEGO_CHANNEL, NULL);
+    if (msgChannel != NULL) {
+        msgChannel->destructor(msgChannel);
+    }
+    NegotiateMessageDelete(msg);
+    return true;
 }
 
 static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *channel, const uint8_t *data, size_t len)
@@ -265,14 +287,7 @@ static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *ch
         return;
     }
     enum WifiDirectNegotiateCmdType cmdType = GetNegotiateCmdType(msg);
-    if (cmdType == CMD_CTRL_CHL_HANDSHAKE) {
-        SaveP2pChannel(channel, msg);
-        CONN_LOGI(CONN_WIFI_DIRECT, "ignore CMD_CTRL_CHL_HANDSHAKE");
-        struct WifiDirectNegotiateChannel *msgChannel = msg->getPointer(msg, NM_KEY_NEGO_CHANNEL, NULL);
-        if (msgChannel != NULL) {
-            msgChannel->destructor(msgChannel);
-        }
-        NegotiateMessageDelete(msg);
+    if (ProcessHandShake(cmdType, channel, msg)) {
         return;
     }
 
@@ -296,15 +311,15 @@ static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *ch
         processor = self->currentProcessor;
     } else {
         command->processor = processor;
-        self->currentProcessor = processor;
-        CONN_LOGI(CONN_WIFI_DIRECT, "currentProcessor=%s", processor->name);
     }
 
-    if (IsMessageNeedPending(self, cmdType, msg)) {
+    if (IsMessageNeedPending(self, processor, cmdType, msg)) {
         CONN_LOGI(CONN_WIFI_DIRECT, "queue negotiate command");
         GetWifiDirectCommandManager()->enqueueCommand(command);
     } else {
         self->updateCurrentRemoteDeviceId(channel);
+        self->currentProcessor = processor;
+        CONN_LOGI(CONN_WIFI_DIRECT, "currentProcessor=%s", processor->name);
         processor->processNegotiateMessage(cmdType, command);
     }
 }
@@ -326,8 +341,7 @@ static void OnTriggerChannelDataReceived(struct WifiDirectTriggerChannel *channe
     struct WifiDirectProcessor *processor = GetWifiDirectDecisionCenter()->getTriggerProcessorByChannel(channel);
     CONN_CHECK_AND_RETURN_LOGW(processor != NULL, CONN_WIFI_DIRECT, "trigger processor is null");
 
-    GetWifiDirectNegotiator()->currentProcessor = processor;
-    CONN_LOGI(CONN_WIFI_DIRECT, "currentProcessor=%s", processor->name);
+    CONN_LOGI(CONN_WIFI_DIRECT, "processor=%s", processor->name);
     processor->onTriggerChannelDataReceived(channel);
 }
 
@@ -336,8 +350,7 @@ static void OnDefaultTriggerChannelDataReceived(struct WifiDirectNegotiateChanne
 {
     struct WifiDirectProcessor *processor = GetWifiDirectDecisionCenter()->getTriggerProcessorByData(data, len);
     CONN_CHECK_AND_RETURN_LOGW(processor != NULL, CONN_WIFI_DIRECT, "trigger processor is null");
-    GetWifiDirectNegotiator()->currentProcessor = processor;
-    CONN_LOGI(CONN_WIFI_DIRECT, "currentProcessor=%s", processor->name);
+    CONN_LOGI(CONN_WIFI_DIRECT, "processor=%s", processor->name);
     processor->onDefaultTriggerChannelDataReceived(channel, data, len);
 }
 
@@ -585,11 +598,6 @@ static int32_t PrejudgeAvailability(const char *remoteNetworkId, enum WifiDirect
     return SOFTBUS_OK;
 }
 
-static void OnWifiDirectAuthOpened(uint32_t requestId, int64_t authId)
-{
-    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%u authId=%zd", requestId, authId);
-}
-
 static struct EntityListener g_entityListener = {
     .onOperationComplete = OnOperationComplete,
     .onEntityChanged = OnEntityChanged,
@@ -610,7 +618,6 @@ static struct WifiDirectNegotiator g_negotiator = {
     .onDefaultTriggerChannelDataReceived = OnDefaultTriggerChannelDataReceived,
     .syncLnnInfo = SyncLnnInfo,
     .prejudgeAvailability = PrejudgeAvailability,
-    .onWifiDirectAuthOpened = OnWifiDirectAuthOpened,
 
     .currentCommand = NULL,
     .currentProcessor = NULL,

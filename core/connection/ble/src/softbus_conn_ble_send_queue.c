@@ -14,8 +14,6 @@
  */
 
 #include <stdbool.h>
-#include <stdint.h>
-#include <string.h>
 
 #include "common_list.h"
 #include "securec.h"
@@ -25,9 +23,7 @@
 #include "softbus_conn_common.h"
 #include "softbus_conn_manager.h"
 #include "softbus_def.h"
-#include "softbus_errcode.h"
 #include "softbus_queue.h"
-#include "softbus_type_def.h"
 
 static LIST_HEAD(g_bleQueueList);
 static SoftBusMutex g_bleQueueLock;
@@ -87,6 +83,7 @@ int32_t ConnBleEnqueueNonBlock(const void *msg)
     SendQueueNode *queueNode = (SendQueueNode *)msg;
     int32_t priority = GetPriority(queueNode->flag);
     if (SoftBusMutexLock(&g_bleQueueLock) != EOK) {
+        CONN_LOGE(CONN_BLE, "Lock failed");
         return SOFTBUS_LOCK_ERR;
     }
     bool isListEmpty = true;
@@ -139,6 +136,7 @@ int32_t ConnBleDequeueBlock(void **msg)
     ConnectionQueue *item = NULL;
     ConnectionQueue *next = NULL;
     if (msg == NULL) {
+        CONN_LOGE(CONN_BLE, "msg is null");
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&g_bleQueueLock) != EOK) {
@@ -182,9 +180,11 @@ int32_t ConnBleDequeueBlock(void **msg)
 int32_t ConnBleInitSendQueue(void)
 {
     if (SoftBusMutexInit(&g_bleQueueLock, NULL) != 0) {
+        CONN_LOGE(CONN_INIT, "Mutex Init failed");
         return SOFTBUS_ERR;
     }
     if (SoftBusCondInit(&g_sendWaitCond) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_INIT, "cond Init failed");
         (void)SoftBusMutexDestroy(&g_bleQueueLock);
         return SOFTBUS_ERR;
     }

@@ -20,7 +20,6 @@
 #include <securec.h>
 
 #include "lnn_log.h"
-#include "softbus_def.h"
 #include "softbus_errcode.h"
 
 bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type)

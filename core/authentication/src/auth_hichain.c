@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,9 +22,9 @@
 #include "auth_hichain_adapter.h"
 #include "auth_log.h"
 #include "auth_session_fsm.h"
-#include "device_auth.h"
 #include "bus_center_manager.h"
-#include "device_auth_defines.h"
+#include "device_auth.h"
+#include "lnn_event.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_json_utils.h"
@@ -32,6 +32,7 @@
 #define AUTH_APPID "softbus_auth"
 #define GROUPID_BUF_LEN 65
 #define KEY_LENGTH 16 /* Note: WinPc's special nearby only support 128 bits key */
+#define ONTRANSMIT_MAX_DATA_BUFFER_LEN 5120 /* 5 × 1024 */
 
 typedef struct {
     char groupId[GROUPID_BUF_LEN];
@@ -75,6 +76,8 @@ static char *GenDeviceLevelParam(const char *udid, const char *uid, bool isClien
 
 static bool OnTransmit(int64_t authSeq, const uint8_t *data, uint32_t len)
 {
+    AUTH_CHECK_AND_RETURN_RET_LOGE(len <= ONTRANSMIT_MAX_DATA_BUFFER_LEN, false, AUTH_HICHAIN,
+        "data len is invalid, len=%u", len);
     AUTH_LOGI(AUTH_HICHAIN, "hichain OnTransmit: authSeq=%" PRId64 ", len=%u", authSeq, len);
     if (AuthSessionPostAuthData(authSeq, data, len) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_HICHAIN, "hichain OnTransmit fail: authSeq=%" PRId64, authSeq);
@@ -83,20 +86,43 @@ static bool OnTransmit(int64_t authSeq, const uint8_t *data, uint32_t len)
     return true;
 }
 
+static void DfxRecordLnnExchangekeyEnd(int64_t authSeq, int32_t reason)
+{
+    LnnEventExtra extra = { 0 };
+    LnnEventExtraInit(&extra);
+    extra.authId = (int32_t)authSeq;
+    extra.errcode = reason;
+    extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_EXCHANGE_CIPHER, extra);
+}
+
 static void OnSessionKeyReturned(int64_t authSeq, const uint8_t *sessionKey, uint32_t sessionKeyLen)
 {
     AUTH_LOGI(AUTH_HICHAIN, "hichain OnSessionKeyReturned: authSeq=%" PRId64 ", len=%u", authSeq, sessionKeyLen);
     if (sessionKey == NULL || sessionKeyLen > SESSION_KEY_LENGTH) {
+        DfxRecordLnnExchangekeyEnd(authSeq, SOFTBUS_AUTH_GET_SESSION_KEY_FAIL);
         AUTH_LOGW(AUTH_HICHAIN, "invalid sessionKey");
         return;
     }
+    DfxRecordLnnExchangekeyEnd(authSeq, SOFTBUS_OK);
     (void)AuthSessionSaveSessionKey(authSeq, sessionKey, sessionKeyLen);
+}
+
+static void DfxRecordLnnAuthEnd(int64_t authSeq, int32_t reason)
+{
+    LnnEventExtra extra = { 0 };
+    LnnEventExtraInit(&extra);
+    extra.authId = (int32_t)authSeq;
+    extra.errcode = reason;
+    extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH, extra);
 }
 
 static void OnFinish(int64_t authSeq, int operationCode, const char *returnData)
 {
     (void)operationCode;
     (void)returnData;
+    DfxRecordLnnAuthEnd(authSeq, SOFTBUS_OK);
     AUTH_LOGI(AUTH_HICHAIN, "hichain OnFinish: authSeq=%" PRId64, authSeq);
     (void)AuthSessionHandleAuthFinish(authSeq);
 }
@@ -105,6 +131,7 @@ static void OnError(int64_t authSeq, int operationCode, int errCode, const char 
 {
     (void)operationCode;
     (void)errorReturn;
+    DfxRecordLnnAuthEnd(authSeq, errCode);
     AUTH_LOGE(AUTH_HICHAIN, "hichain OnError: authSeq=%" PRId64 ", errCode=%d", authSeq, errCode);
     (void)AuthSessionHandleAuthError(authSeq, SOFTBUS_AUTH_HICHAIN_AUTH_ERROR);
 }
@@ -181,6 +208,7 @@ static void OnGroupCreated(const char *groupInfo)
         return;
     }
     GroupInfo info;
+    (void)memset_s(&info, sizeof(GroupInfo), 0, sizeof(GroupInfo));
     if (ParseGroupInfo(groupInfo, &info) != SOFTBUS_OK) {
         return;
     }
@@ -209,6 +237,7 @@ static void OnGroupDeleted(const char *groupInfo)
         return;
     }
     GroupInfo info;
+    (void)memset_s(&info, sizeof(GroupInfo), 0, sizeof(GroupInfo));
     if (ParseGroupInfo(groupInfo, &info) != SOFTBUS_OK) {
         return;
     }
@@ -231,6 +260,16 @@ static void OnDeviceNotTrusted(const char *udid)
     if (g_dataChangeListener.onDeviceNotTrusted != NULL) {
         g_dataChangeListener.onDeviceNotTrusted(udid);
     }
+}
+
+static void DfxRecordLnnStartHichainEnd(int64_t authSeq, int32_t reason)
+{
+    LnnEventExtra extra = { 0 };
+    LnnEventExtraInit(&extra);
+    extra.authId = (int32_t)authSeq;
+    extra.errcode = reason;
+    extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_HICHAIN, extra);
 }
 
 int32_t RegTrustDataChangeListener(const TrustDataChangeListener *listener)
@@ -256,7 +295,7 @@ int32_t RegTrustDataChangeListener(const TrustDataChangeListener *listener)
 void UnregTrustDataChangeListener(void)
 {
     int32_t ret = UnregChangeListener(AUTH_APPID);
-    if (ret != 0) {
+    if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_HICHAIN, "hichain unRegDataChangeListener err=%d", ret);
     }
     (void)memset_s(&g_dataChangeListener, sizeof(TrustDataChangeListener), 0, sizeof(TrustDataChangeListener));
@@ -265,19 +304,23 @@ void UnregTrustDataChangeListener(void)
 int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid)
 {
     if (udid == NULL || uid == NULL) {
+        DfxRecordLnnStartHichainEnd(authSeq, SOFTBUS_INVALID_PARAM);
         AUTH_LOGE(AUTH_HICHAIN, "udid/uid is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     char *authParams = GenDeviceLevelParam(udid, uid, true);
     if (authParams == NULL) {
+        DfxRecordLnnStartHichainEnd(authSeq, SOFTBUS_ERR);
         AUTH_LOGE(AUTH_HICHAIN, "generate auth param fail");
         return SOFTBUS_ERR;
     }
     if (AuthDevice(authSeq, authParams, &g_hichainCallback) == SOFTBUS_OK) {
+        DfxRecordLnnStartHichainEnd(authSeq, SOFTBUS_OK);
         AUTH_LOGI(AUTH_HICHAIN, "hichain call authDevice succ");
         cJSON_free(authParams);
         return SOFTBUS_OK;
     }
+    DfxRecordLnnStartHichainEnd(authSeq, SOFTBUS_AUTH_START_ERR);
     AUTH_LOGE(AUTH_HICHAIN, "hichain call authDevice failed");
     cJSON_free(authParams);
     return SOFTBUS_AUTH_START_ERR;
@@ -286,6 +329,7 @@ int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid)
 int32_t HichainProcessData(int64_t authSeq, const uint8_t *data, uint32_t len)
 {
     if (data == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "data is null");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = ProcessAuthData(authSeq, data, len, &g_hichainCallback);

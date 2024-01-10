@@ -33,6 +33,8 @@ void DiscAlarmInner(int32_t scene, int32_t type, const char *func, int32_t line,
 void DiscStatsInner(int32_t scene, const char *func, int32_t line, DiscStatsExtra *extra);
 void DiscAuditInner(int32_t scene, const char *func, int32_t line, DiscAuditExtra *extra);
 
+void DiscEventExtraInit(DiscEventExtra *extra);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

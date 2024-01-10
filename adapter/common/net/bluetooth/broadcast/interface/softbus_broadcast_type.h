@@ -41,11 +41,11 @@ extern "C"{
 
 // Bluetooth scan duty cycle, unit: ms
 #define SOFTBUS_BC_SCAN_INTERVAL_P2 3000
-#define SOFTBUS_BC_SCAN_INTERVAL_P10 600
+#define SOFTBUS_BC_SCAN_INTERVAL_P10 300
 #define SOFTBUS_BC_SCAN_INTERVAL_P25 240
 #define SOFTBUS_BC_SCAN_INTERVAL_P100 1000
 #define SOFTBUS_BC_SCAN_WINDOW_P2 60
-#define SOFTBUS_BC_SCAN_WINDOW_P10 60
+#define SOFTBUS_BC_SCAN_WINDOW_P10 30
 #define SOFTBUS_BC_SCAN_WINDOW_P25 60
 #define SOFTBUS_BC_SCAN_WINDOW_P100 1000
 
@@ -87,6 +87,7 @@ typedef enum {
     SRV_TYPE_SHARE, // The service type is share discovery.
     SRV_TYPE_APPROACH, // The service type is approach discovery.
     SRV_TYPE_SH, // The service type is sensorhub.
+    SRV_TYPE_FAST_OFFLINE, // The service type is fast offline.
     SRV_TYPE_BUTT,
 } BaseServiceType;
 
@@ -396,8 +397,7 @@ typedef struct {
  */
 typedef struct {
     BcScanParams scanParam;
-    BcScanFilter *filter;
-    uint8_t filterSize;
+    int32_t listenerId;
 } LpScanParam;
 
 #ifdef __cplusplus

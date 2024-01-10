@@ -90,6 +90,7 @@ static bool ReadData(struct WifiDirectProtocol *base, struct InfoContainerKeyPro
         return false;
     }
     if (self->size - self->readPos < self->format.tagSize + self->format.lengthSize) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "size sub readPos invalid");
         return false;
     }
 

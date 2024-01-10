@@ -47,7 +47,7 @@ static bool g_isApCoexistSupported = false;
 static bool g_isWifiEnable = false;
 static bool g_isApEnable = false;
 
-static uint32_t ConvertMsgToCapability(uint32_t *capability, const uint8_t *msg, int32_t len)
+static uint32_t ConvertMsgToCapability(uint32_t *capability, const uint8_t *msg, uint32_t len)
 {
     if (capability == NULL || msg == NULL || len < BITS) {
         return SOFTBUS_ERR;
@@ -112,7 +112,7 @@ static void OnReceiveCapaSyncInfoMsg(LnnSyncInfoType type, const char *networkId
         return;
     }
     uint32_t capability = 0;
-    if (ConvertMsgToCapability(&capability, (const uint8_t *)msg, len) != SOFTBUS_OK) {
+    if (ConvertMsgToCapability(&capability, msg, len) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "convert msg to capability fail");
         return;
     }
@@ -202,8 +202,8 @@ static void SendNetCapabilityToRemote(uint32_t netCapability, uint32_t type)
 
 static void WifiStateProcess(uint32_t netCapability, bool isSend)
 {
-    LNN_LOGI(LNN_BUILDER, "wifi state change netCapability=%d, isSend=%d", netCapability, isSend);
-    if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, netCapability) != SOFTBUS_OK) {
+    LNN_LOGI(LNN_BUILDER, "wifi state change netCapability=%u, isSend=%d", netCapability, isSend);
+    if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t)netCapability) != SOFTBUS_OK) {
         return;
     }
     if (!isSend) {
@@ -221,50 +221,50 @@ static bool IsP2pAvailable(bool isApSwitchOn)
     return g_isWifiDirectSupported && (g_isApCoexistSupported || !isApSwitchOn || isTripleMode) && g_isWifiEnable;
 }
 
+static void LnnSetNetworkCapability(uint32_t *capability)
+{
+    (void)LnnSetNetCapability(capability, BIT_WIFI);
+    (void)LnnSetNetCapability(capability, BIT_WIFI_5G);
+    (void)LnnSetNetCapability(capability, BIT_WIFI_24G);
+}
+
+static void LnnClearNetworkCapability(uint32_t *capability)
+{
+    (void)LnnClearNetCapability(capability, BIT_WIFI);
+    (void)LnnClearNetCapability(capability, BIT_WIFI_5G);
+    (void)LnnClearNetCapability(capability, BIT_WIFI_24G);
+}
+
 static void GetNetworkCapability(SoftBusWifiState wifiState, uint32_t *capability, bool *needSync)
 {
     switch (wifiState) {
         case SOFTBUS_WIFI_OBTAINING_IPADDR:
-            (void)LnnSetNetCapability(capability, BIT_WIFI);
-            (void)LnnSetNetCapability(capability, BIT_WIFI_5G);
-            (void)LnnSetNetCapability(capability, BIT_WIFI_24G);
+            LnnSetNetworkCapability(capability);
             break;
         case SOFTBUS_WIFI_ENABLED:
             g_isWifiEnable = true;
-            (void)LnnSetNetCapability(capability, BIT_WIFI);
-            (void)LnnSetNetCapability(capability, BIT_WIFI_24G);
-            (void)LnnSetNetCapability(capability, BIT_WIFI_5G);
+            LnnSetNetworkCapability(capability);
             (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
             *needSync = true;
             break;
         case SOFTBUS_WIFI_CONNECTED:
-            (void)LnnSetNetCapability(capability, BIT_WIFI);
-            (void)LnnSetNetCapability(capability, BIT_WIFI_5G);
-            (void)LnnSetNetCapability(capability, BIT_WIFI_24G);
+            LnnSetNetworkCapability(capability);
             break;
         case SOFTBUS_WIFI_DISABLED:
             g_isWifiEnable = false;
             if (!g_isApEnable) {
-                (void)LnnClearNetCapability(capability, BIT_WIFI);
-                (void)LnnClearNetCapability(capability, BIT_WIFI_5G);
-                (void)LnnClearNetCapability(capability, BIT_WIFI_24G);
+                LnnClearNetworkCapability(capability);
                 if (!GetWifiDirectP2pAdapter()->isWifiP2pEnabled()) {
                     (void)LnnClearNetCapability(capability, BIT_WIFI_P2P);
                 }
-            } else if (!IsP2pAvailable(true)) {
-                (void)LnnClearNetCapability(capability, BIT_WIFI_P2P);
             }
             *needSync = true;
             break;
         case SOFTBUS_AP_ENABLED:
             g_isApEnable = true;
-            (void)LnnSetNetCapability(capability, BIT_WIFI);
-            (void)LnnSetNetCapability(capability, BIT_WIFI_24G);
-            (void)LnnSetNetCapability(capability, BIT_WIFI_5G);
+            LnnSetNetworkCapability(capability);
             if (IsP2pAvailable(true)) {
                 (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
-            } else {
-                (void)LnnClearNetCapability(capability, BIT_WIFI_P2P);
             }
             *needSync = true;
             break;
@@ -272,8 +272,6 @@ static void GetNetworkCapability(SoftBusWifiState wifiState, uint32_t *capabilit
             g_isApEnable = false;
             if (IsP2pAvailable(false)) {
                 (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
-            } else {
-                (void)LnnClearNetCapability(capability, BIT_WIFI_P2P);
             }
             *needSync = true;
             break;
@@ -335,7 +333,7 @@ static void BtStateChangeEventHandler(const LnnEventBasicInfo *info)
 
     LNN_LOGI(LNN_BUILDER, "bt state change netCapability=%d, isSend=%d",
         netCapability, isSend);
-    if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, netCapability) != SOFTBUS_OK) {
+    if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t)netCapability) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "set cap to local ledger fail");
         return;
     }

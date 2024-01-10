@@ -63,6 +63,7 @@ static void DeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions 
     }
     if (device->addr[0].info.ip.port == 0) {
         DISC_LOGE(DISC_LNN, "discovery get port is 0!");
+        LnnCoapConnect(device->addr[0].info.ip.ip);
         return;
     }
     addr.type = device->addr[0].type;
@@ -123,6 +124,7 @@ int32_t LnnStartCoapDiscovery(void)
     InnerCallback callback = {
         .innerCb = g_discCb,
     };
+    LnnDestroyCoapConnectList();
     return LnnStartDiscDevice(NULL, &subscribeInfo, &callback, true);
 }
 

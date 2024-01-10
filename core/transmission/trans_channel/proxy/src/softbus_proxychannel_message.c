@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,7 +79,10 @@ static void TransProxyPackMessageHead(ProxyMessageHead *msgHead, uint8_t *buf, u
 static int32_t GetRemoteUdidByBtMac(const char *peerMac, char *udid, int32_t len)
 {
     char networkId[NETWORK_ID_BUF_LEN] = {0};
-    TRANS_LOGI(TRANS_CTRL, "peerMac=%s", AnonymizesMac(peerMac));
+    char *tmpMac = NULL;
+    Anonymize(peerMac, &tmpMac);
+    TRANS_LOGI(TRANS_CTRL, "peerMac=%s", tmpMac);
+    AnonymizeFree(tmpMac);
     if (LnnGetNetworkIdByBtMac(peerMac, networkId, sizeof(networkId)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "LnnGetNetworkIdByBtMac fail");
         return SOFTBUS_NOT_FIND;
@@ -359,6 +362,7 @@ static int32_t PackHandshakeMsgForFastData(AppInfo *appInfo, cJSON *root)
         char *buf = TransProxyPackFastData(appInfo, &outLen);
         if (buf == NULL) {
             TRANS_LOGE(TRANS_CTRL, "failed to pack bytes.");
+            SoftBusFree(encodeFastData);
             return SOFTBUS_ERR;
         }
         int32_t ret = SoftBusBase64Encode(encodeFastData, BASE64_FAST_DATA_LEN, &fastDataSize,
@@ -441,17 +445,15 @@ char *TransProxyPackHandshakeErrMsg(int32_t errCode)
 
 char *TransProxyPackHandshakeMsg(ProxyChannelInfo *info)
 {
-    cJSON *root = NULL;
-    SessionKeyBase64 sessionBase64;
-    char *buf = NULL;
-    AppInfo *appInfo = &(info->appInfo);
-    int32_t ret;
-
-    root = cJSON_CreateObject();
+    cJSON *root = cJSON_CreateObject();
     if (root == NULL) {
         TRANS_LOGE(TRANS_CTRL, "create json object failed.");
         return NULL;
     }
+
+    int32_t ret;
+    AppInfo *appInfo = &(info->appInfo);
+    SessionKeyBase64 sessionBase64;
     (void)memset_s(&sessionBase64, sizeof(SessionKeyBase64), 0, sizeof(SessionKeyBase64));
     if (!AddNumberToJsonObject(root, JSON_KEY_TYPE, appInfo->appType) ||
         !AddStringToJsonObject(root, JSON_KEY_IDENTITY, info->identity) ||
@@ -462,10 +464,8 @@ char *TransProxyPackHandshakeMsg(ProxyChannelInfo *info)
         goto EXIT;
     }
     (void)cJSON_AddTrueToObject(root, JSON_KEY_HAS_PRIORITY);
-
     if (appInfo->appType == APP_TYPE_NORMAL) {
-        ret = PackHandshakeMsgForNormal(&sessionBase64, appInfo, root);
-        if (ret != SOFTBUS_OK) {
+        if (PackHandshakeMsgForNormal(&sessionBase64, appInfo, root) != SOFTBUS_OK) {
             goto EXIT;
         }
     } else if (appInfo->appType == APP_TYPE_AUTH) {
@@ -489,11 +489,12 @@ char *TransProxyPackHandshakeMsg(ProxyChannelInfo *info)
             goto EXIT;
         }
     }
+    cJSON_Delete(root);
+    return cJSON_PrintUnformatted(root);
 
-    buf = cJSON_PrintUnformatted(root);
 EXIT:
     cJSON_Delete(root);
-    return buf;
+    return NULL;
 }
 
 char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan)
@@ -615,7 +616,7 @@ int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanI
     appInfo->algorithm = APP_INFO_ALGORITHM_AES_GCM_256;
     appInfo->crc = APP_INFO_FILE_FEATURES_NO_SUPPORT;
     int32_t appType = TransProxyGetAppInfoType(chanInfo->myId, chanInfo->identity);
-    if (appType == SOFTBUS_ERR) {
+    if (appType == SOFTBUS_ERR || appType == SOFTBUS_LOCK_ERR) {
         TRANS_LOGE(TRANS_CTRL, "fail to get app type");
         cJSON_Delete(root);
         return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
@@ -813,9 +814,11 @@ int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, in
     }
 
     cJSON_Delete(root);
+    (void)memset_s(sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
     return SOFTBUS_OK;
 ERR_EXIT:
     cJSON_Delete(root);
+    (void)memset_s(sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
     return ret;
 }
 
@@ -899,7 +902,7 @@ static int32_t TransProxyPackFastDataHead(ProxyDataInfo *dataInfo, const AppInfo
 {
 #define MAGIC_NUMBER 0xBABEFACE
     if (dataInfo == NULL || appInfo ==NULL) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "invaild param.");
+        TRANS_LOGE(TRANS_CTRL, "invaild param.");
         return SOFTBUS_ERR;
     }
     dataInfo->outLen = dataInfo->inLen + OVERHEAD_LEN + sizeof(PacketFastHead);

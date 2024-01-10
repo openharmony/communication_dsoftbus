@@ -14,12 +14,15 @@
  */
 #include "disc_ble_utils.h"
 
+#include <locale.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <wchar.h>
 
 #include "bus_center_manager.h"
 #include "cJSON.h"
 #include "disc_ble_constant.h"
+#include "softbus_broadcast_type.h"
 #include "disc_log.h"
 #include "lnn_device_info.h"
 #include "securec.h"
@@ -35,6 +38,8 @@
 #define DATA_LENGTH_MASK 0x0F
 #define BYTE_SHIFT 4
 #define CUST_CAPABILITY_LEN 2
+#define WIDE_CHAR_MAX_LEN 8
+#define WIDE_STR_MAX_LEN 128
 
 #define MAC_BIT_ZERO 0
 #define MAC_BIT_ONE 1
@@ -94,7 +99,7 @@ static int32_t DiscBleGetDeviceUdid(char *udid, uint32_t len)
 
 int32_t DiscBleGetDeviceName(char *deviceName)
 {
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, deviceName, DEVICE_NAME_BUF_LEN) != SOFTBUS_OK) {
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, deviceName, DISC_MAX_DEVICE_NAME_LEN) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "Get local device name failed.");
         return SOFTBUS_ERR;
     }
@@ -162,6 +167,68 @@ int32_t DiscBleGetShortUserIdHash(uint8_t *hashStr, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t SetLocale(char **localeBefore)
+{
+    *localeBefore = setlocale(LC_CTYPE, NULL);
+    if (*localeBefore == NULL) {
+        DISC_LOGW(DISC_BLE, "get locale failed");
+    }
+
+    char *localeAfter = setlocale(LC_CTYPE, "C.UTF-8");
+    return (localeAfter != NULL) ? SOFTBUS_OK : SOFTBUS_ERR;
+}
+
+static void RestoreLocale(const char *localeBefore)
+{
+    if (setlocale(LC_CTYPE, localeBefore) == NULL) {
+        DISC_LOGW(DISC_BLE, "restore locale failed");
+    }
+}
+
+// Calculate the truncated length in wide characters, ensuring that the truncation is performed in wide character
+static int32_t CalculateMbsTruncateSize(const char *multiByteStr, uint32_t capacity, uint32_t *truncatedSize)
+{
+    size_t multiByteStrLen = strlen(multiByteStr);
+    if (multiByteStrLen == 0) {
+        *truncatedSize = 0;
+        return SOFTBUS_OK;
+    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(multiByteStrLen <= WIDE_STR_MAX_LEN, SOFTBUS_INVALID_PARAM, DISC_BLE,
+        "multi byte str too long: %zu", multiByteStrLen);
+
+    char *localeBefore = NULL;
+    int32_t ret = SetLocale(&localeBefore);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, DISC_BLE, "set locale failed");
+
+    // convert multi byte str to wide str
+    wchar_t wideStr[WIDE_STR_MAX_LEN] = {0};
+    size_t numConverted = mbstowcs(wideStr, multiByteStr, multiByteStrLen);
+    if (numConverted <= 0) {
+        DISC_LOGE(DISC_BLE, "mbstowcs failed");
+        RestoreLocale(localeBefore);
+        return SOFTBUS_ERR;
+    }
+
+    // truncate wide str until <= capacity
+    uint32_t truncateTotal = 0;
+    int32_t truncateIndex = numConverted - 1;
+    char multiByteChar[WIDE_CHAR_MAX_LEN] = {0};
+    while (capacity < multiByteStrLen - truncateTotal && truncateIndex >= 0) {
+        int32_t truncateCharLen = wctomb(multiByteChar, wideStr[truncateIndex]);
+        if (truncateCharLen <= 0) {
+            DISC_LOGE(DISC_BLE, "wctomb failed on %d w_char", truncateIndex);
+            RestoreLocale(localeBefore);
+            return SOFTBUS_ERR;
+        }
+        truncateTotal += (uint32_t)truncateCharLen;
+        truncateIndex--;
+    }
+
+    *truncatedSize = (multiByteStrLen >= truncateTotal) ? (multiByteStrLen - truncateTotal) : 0;
+    RestoreLocale(localeBefore);
+    return SOFTBUS_OK;
+}
+
 int32_t AssembleTLV(BroadcastData *broadcastData, uint8_t dataType, const void *value,
     uint32_t dataLen)
 {
@@ -178,6 +245,13 @@ int32_t AssembleTLV(BroadcastData *broadcastData, uint8_t dataType, const void *
     remainLen -= 1;
 
     uint32_t validLen = (dataLen > remainLen) ? remainLen : dataLen;
+    if (dataType == TLV_TYPE_DEVICE_NAME) {
+        if (CalculateMbsTruncateSize((const char *)value, remainLen - 1, &validLen) != SOFTBUS_OK) {
+            DISC_LOGE(DISC_BLE, "truncate device name failed, validLen: %u remainLen: %u", validLen, remainLen);
+            return SOFTBUS_ERR;
+        }
+        broadcastData->data.data[broadcastData->dataLen + validLen] = '\0';
+    }
     if (memcpy_s(&(broadcastData->data.data[broadcastData->dataLen]), validLen, value, validLen) != EOK) {
         DISC_LOGE(DISC_BLE, "assemble tlv memcpy failed");
         return SOFTBUS_MEM_ERR;
@@ -305,7 +379,7 @@ static int32_t ParseCustData(DeviceWrapper *device, const uint8_t *data, const u
 
 static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_t dataLen)
 {
-    uint32_t curLen = POS_TLV + ADV_HEAD_LEN;
+    uint32_t curLen = 0;
     int32_t ret = SOFTBUS_OK;
     while (curLen < dataLen) {
         uint8_t type = (data[curLen] & DATA_TYPE_MASK) >> BYTE_SHIFT;
@@ -353,50 +427,49 @@ int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const uint8_t *data, 
 {
     DISC_CHECK_AND_RETURN_RET_LOGW(device != NULL && device->info != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE,
         "device is invalid");
-    DISC_CHECK_AND_RETURN_RET_LOGW(data != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "data=NULL is invalid");
-    DISC_CHECK_AND_RETURN_RET_LOGW(dataLen != 0, SOFTBUS_INVALID_PARAM, DISC_BLE, "dataLen=0 is invalid");
+    BroadcastReportInfo *reportInfo = (BroadcastReportInfo *)data;
+    DISC_CHECK_AND_RETURN_RET_LOGW(reportInfo != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "reportInfo=NULL is invalid");
+    DISC_CHECK_AND_RETURN_RET_LOGW(dataLen == sizeof(BroadcastReportInfo), SOFTBUS_INVALID_PARAM, DISC_BLE,
+        "bcData.payload=NULL is invalid");
+    DISC_CHECK_AND_RETURN_RET_LOGW(
+        reportInfo->packet.bcData.payload != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "payload=NULL is invalid");
+    uint16_t bcLen = reportInfo->packet.bcData.payloadLen;
+    uint16_t rspLen = reportInfo->packet.rspData.payloadLen;
+    if (bcLen > ADV_DATA_MAX_LEN || bcLen < POS_TLV || rspLen > RESP_DATA_MAX_LEN) {
+        DISC_LOGE(DISC_BLE, "get discovery adv data fail");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    uint8_t *serviceData = reportInfo->packet.bcData.payload;
     if (memcpy_s(device->info->accountHash, SHORT_USER_ID_HASH_LEN,
-        &data[POS_USER_ID_HASH + ADV_HEAD_LEN], SHORT_USER_ID_HASH_LEN) != EOK) {
+        &serviceData[POS_USER_ID_HASH], SHORT_USER_ID_HASH_LEN) != EOK) {
         DISC_LOGE(DISC_BLE, "copy accountHash failed");
         return SOFTBUS_MEM_ERR;
     }
-    device->info->capabilityBitmap[0] = data[POS_CAPABLITY + ADV_HEAD_LEN];
-    // ble scan data consists of multiple ADStructures
-    // ADStructure format: <length (1 octet)> <type (1 octet)> <data(length octect - 1)>
-    // More info about ADStructure, please ref Generic Access Profile Specification
-    // We only use Flag(0x01) + ServiceData(0x16) + Manufacture(0xff) in order, so we should join them together
-    // before parse
-    uint32_t scanRspPtr = 0;
-    uint32_t scanRspTlvLen = 0;
-    uint32_t nextAdsPtr = FLAG_BYTE_LEN + 1 + data[POS_PACKET_LENGTH] + 1;
-    while (nextAdsPtr + 1 < dataLen) {
-        if (data[nextAdsPtr + 1] == RSP_TYPE) {
-            scanRspPtr = nextAdsPtr;
-            DISC_CHECK_AND_RETURN_RET_LOGE(data[scanRspPtr] >= (RSP_HEAD_LEN - 1), SOFTBUS_ERR, DISC_BLE,
-                "rspLen[%hhu] is less than rsp head length", data[scanRspPtr]);
-            scanRspTlvLen = data[scanRspPtr] - (RSP_HEAD_LEN - 1);
-            DISC_CHECK_AND_RETURN_RET_LOGE(scanRspPtr + data[scanRspPtr] + 1 <= dataLen, SOFTBUS_ERR, DISC_BLE,
-                "curScanLen(%u) > dataLen(%u)", scanRspPtr + data[scanRspPtr] + 1, dataLen);
-            break;
-        }
-        nextAdsPtr += data[nextAdsPtr] + 1;
+    device->info->capabilityBitmap[0] = serviceData[POS_CAPABLITY];
+
+    uint32_t bcTlvLen = reportInfo->packet.bcData.payloadLen - POS_TLV;
+
+    if (bcTlvLen == 0) {
+        return SOFTBUS_OK;
     }
-    uint32_t advLen = FLAG_BYTE_LEN + 1 + data[POS_PACKET_LENGTH] + 1;
-    uint8_t *copyData = SoftBusCalloc(advLen + scanRspTlvLen + 1);
+    uint8_t *copyData = SoftBusCalloc(bcTlvLen + rspLen);
     DISC_CHECK_AND_RETURN_RET_LOGE(copyData != NULL, SOFTBUS_MEM_ERR, DISC_BLE, "malloc failed.");
-    if (memcpy_s(copyData, advLen, data, advLen) != EOK) {
-        DISC_LOGE(DISC_BLE, "memcpy_s adv failed, advLen: %u", advLen);
+    if (memcpy_s(copyData, bcTlvLen, &serviceData[POS_TLV], bcTlvLen) != EOK) {
+        DISC_LOGE(DISC_BLE, "memcpy_s adv failed, bcTlvLen: %u", bcTlvLen);
         SoftBusFree(copyData);
         return SOFTBUS_MEM_ERR;
     }
-    if (scanRspTlvLen != 0) {
-        if (memcpy_s(copyData + advLen, scanRspTlvLen, data + scanRspPtr + RSP_HEAD_LEN, scanRspTlvLen) != EOK) {
-            DISC_LOGE(DISC_BLE, "memcpy_s scan resp failed, advLen: %u, scanRspTlvLen: %u.", advLen, scanRspTlvLen);
+
+    if (rspLen > 0 && reportInfo->packet.rspData.payload != NULL) {
+        if (memcpy_s(copyData + bcTlvLen, rspLen, reportInfo->packet.rspData.payload, rspLen) != EOK) {
+            DISC_LOGE(DISC_BLE, "memcpy_s rsp data failed, rspLen: %u", rspLen);
             SoftBusFree(copyData);
             return SOFTBUS_MEM_ERR;
         }
     }
-    int32_t ret = ParseRecvTlvs(device, copyData, advLen + scanRspTlvLen);
+
+    int32_t ret = ParseRecvTlvs(device, copyData, bcTlvLen + rspLen);
     SoftBusFree(copyData);
     return ret;
 }

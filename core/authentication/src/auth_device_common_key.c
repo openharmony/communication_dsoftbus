@@ -25,10 +25,9 @@
 #include "lnn_secure_storage.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_thread.h"
-#include "softbus_json_utils.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
+#include "softbus_json_utils.h"
 #include "softbus_utils.h"
 
 #define UDID_SHORT_HASH 8
@@ -402,6 +401,10 @@ void AuthRemoveDeviceKey(const char *udidHash, int32_t keyType)
 
 void AuthRemoveDeviceKeyByUdid(const char *udidOrHash)
 {
+    if (udidOrHash == NULL) {
+        AUTH_LOGE(AUTH_KEY, "param err");
+        return;
+    }
     char *anonyUdid = NULL;
     Anonymize(udidOrHash, &anonyUdid);
     AUTH_LOGE(AUTH_KEY, "remove device key, udid=%s", anonyUdid);
@@ -418,7 +421,7 @@ void AuthRemoveDeviceKeyByUdid(const char *udidOrHash)
     }
     while (LnnMapHasNext(it)) {
         it = LnnMapNext(it);
-        if (it ==NULL || it->node->value == NULL) {
+        if (it == NULL || it->node == NULL) {
             break;
         }
         AuthDeviceCommonKey *deviceKey = (AuthDeviceCommonKey *)it->node->value;
@@ -464,6 +467,7 @@ int32_t AuthFindDeviceKey(const char *udidHash, int32_t keyType, AuthDeviceKeyIn
         return SOFTBUS_ERR;
     }
     if (KeyLock() != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_KEY, "keyLock fail");
         return SOFTBUS_ERR;
     }
     AuthDeviceCommonKey *data = (AuthDeviceCommonKey *)LnnMapGet(&g_deviceKeyMap, (const char *)keyStr);
@@ -500,7 +504,7 @@ static bool AuthParseDeviceKey(const char *deviceKey)
     }
     int32_t arraySize = cJSON_GetArraySize(json);
     if (arraySize <= 0) {
-        AUTH_LOGE(AUTH_KEY, "no valid deviceKey");
+        AUTH_LOGE(AUTH_KEY, "invalid deviceKey log");
         cJSON_Delete(json);
         return false;
     }
@@ -521,7 +525,7 @@ static bool AuthParseDeviceKey(const char *deviceKey)
 void AuthUpdateKeyIndex(const char *udidHash, int32_t keyType, int64_t index, bool isServer)
 {
     if (udidHash == NULL) {
-        AUTH_LOGW(AUTH_KEY, "update fail");
+        AUTH_LOGE(AUTH_KEY, "udidiHash log update fail");
         return;
     }
     char keyStr[MAP_KEY_LEN] = {0};
@@ -534,6 +538,10 @@ void AuthUpdateKeyIndex(const char *udidHash, int32_t keyType, int64_t index, bo
         return;
     }
     AuthDeviceCommonKey *data = (AuthDeviceCommonKey *)LnnMapGet(&g_deviceKeyMap, (const char *)keyStr);
+    if (data == NULL) {
+        AUTH_LOGE(AUTH_KEY, "data is nullptr");
+        return;
+    }
     data->keyInfo.keyIndex = index;
     data->keyInfo.isServerSide = isServer;
     KeyUnlock();
@@ -566,7 +574,7 @@ void AuthLoadDeviceKey(void)
     AUTH_LOGD(AUTH_KEY, "load deviceKey finish");
 }
 
-void AUthClearDeviceKey(void)
+void AuthClearDeviceKey(void)
 {
     /*need aging mechanism*/
     LnnMapDelete(&g_deviceKeyMap);

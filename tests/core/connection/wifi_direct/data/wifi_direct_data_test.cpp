@@ -34,7 +34,6 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
-#include "softbus_log_old.h"
 
 #define ZERO_NUM 0
 #define ONE_NUM 1

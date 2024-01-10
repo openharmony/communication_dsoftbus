@@ -205,3 +205,19 @@ if (lk_enhanced) {
   bus_center_server_inc +=
       [ "$dsoftbus_root_path/core/adapter/bus_center/include" ]
 }
+
+lnn_coap_dep_dir = "dsoftbus_enhance/core/bus_center/lnn/disc_mgr"
+lnn_disc_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                                [
+                                  "$native_source_path",
+                                  "$lnn_coap_dep_dir",
+                                ],
+                                "value")
+
+if (dsoftbus_feature_lnn_net && lnn_disc_enhanced) {
+  disc_mgr_enhance_path =
+      "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/disc_mgr"
+  bus_center_server_src += [ "$disc_mgr_enhance_path/src/lnn_coap_adapter.c" ]
+} else {
+  bus_center_server_src += [ "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/src/lnn_coap_adapter_virtual.c" ]
+}

@@ -52,7 +52,7 @@ TRANS_ASSIGNER(Int32, CostTime, costTime)
 TRANS_ASSIGNER(Int32, ChannelScore, channelScore)
 TRANS_ASSIGNER(Int32, PeerChannelId, peerChannelId)
 TRANS_ASSIGNER(Int32, BtFlow, btFlow)
-TRANS_ASSIGNER(String, PeerNetworkId, peerNetworkId)
+TRANS_ASSIGNER(AnonymizeString, PeerNetworkId, peerNetworkId)
 TRANS_ASSIGNER(String, CallerPkg, callerPkg)
 TRANS_ASSIGNER(String, CalleePkg, calleePkg)
 

@@ -208,6 +208,7 @@ static int32_t WlanDetectReliability(uint32_t lnnReqId, const LaneLinkInfo *lane
     }
     infoItem->linkInfo.wlanDetect.wlanFd = fd;
     if (SoftBusMutexLock(&g_laneDetectList.lock) != SOFTBUS_OK) {
+        ConnShutdownSocket(fd);
         SoftBusFree(infoItem);
         return SOFTBUS_LOCK_ERR;
     }
@@ -215,6 +216,7 @@ static int32_t WlanDetectReliability(uint32_t lnnReqId, const LaneLinkInfo *lane
     ListTailInsert(&g_laneDetectList.list, &infoItem->node);
     SoftBusMutexUnlock(&g_laneDetectList.lock);
     if (AddLaneTriggerAndTimeOut(fd, infoItem->laneDetectId) != SOFTBUS_OK) {
+        ConnShutdownSocket(fd);
         DelLaneDetectInfo(infoItem->laneDetectId);
         LNN_LOGI(LNN_LANE, "wlan add trigger and timrout msg fail, lnnReqId=%u", infoItem->laneDetectId);
         return SOFTBUS_ERR;

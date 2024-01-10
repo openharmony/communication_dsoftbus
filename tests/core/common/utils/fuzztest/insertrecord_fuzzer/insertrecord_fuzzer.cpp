@@ -21,7 +21,6 @@
 #include <unistd.h>
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
-#include "softbus_log_old.h"
 
 namespace OHOS {
     static constexpr size_t MAX_BUFFER_LEN = 100;

@@ -95,7 +95,7 @@ void LNNDisctributedLedgerTest::SetUp()
     (void)strncpy_s(info.networkId, NETWORK_ID_BUF_LEN, NODE1_NETWORK_ID, strlen(NODE1_NETWORK_ID));
     (void)strncpy_s(info.connectInfo.macAddr, MAC_LEN, NODE1_BT_MAC, strlen(NODE1_BT_MAC));
     info.authSeq[0] = AUTH_SEQ;
-    info.heartbeatTimeStamp = TIME_STAMP;
+    info.heartbeatTimestamp = TIME_STAMP;
     EXPECT_TRUE(REPORT_ONLINE == LnnAddOnlineNode(&info));
 }
 
@@ -564,9 +564,9 @@ HWTEST_F(LNNDisctributedLedgerTest, IS_META_NODE_Test_001, TestSize.Level1)
 {
     NodeInfo info;
     info.metaInfo.isMetaNode = true;
-    bool ret = isMetaNode(nullptr);
+    bool ret = IsMetaNode(nullptr);
     EXPECT_TRUE(ret == false);
-    ret = isMetaNode(&info);
+    ret = IsMetaNode(&info);
     EXPECT_TRUE(ret == true);
 }
 

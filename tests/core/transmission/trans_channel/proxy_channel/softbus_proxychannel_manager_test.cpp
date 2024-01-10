@@ -394,7 +394,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetAppInfoByChanIdTest002, Te
     AppInfo* appInfo = NULL;
 
     ret = TransProxyGetAppInfoByChanId(chanId, appInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     chanId = TEST_MESSAGE_CHANNEL_ID;
     EXPECT_NE(SOFTBUS_OK, ret);

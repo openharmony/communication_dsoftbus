@@ -48,6 +48,53 @@ WifiServiceMonitor::WifiServiceMonitor(const CommonEventSubscribeInfo &subscribe
 {
 }
 
+static void SetSoftBusWifiConnState(const int code, SoftBusWifiState *state)
+{
+    switch (code) {
+        case int(OHOS::Wifi::ConnState::OBTAINING_IPADDR):
+            *state = SOFTBUS_WIFI_OBTAINING_IPADDR;
+            break;
+        case int(OHOS::Wifi::ConnState::CONNECTED):
+            *state = SOFTBUS_WIFI_CONNECTED;
+            break;
+        case int(OHOS::Wifi::ConnState::DISCONNECTED):
+            *state = SOFTBUS_WIFI_DISCONNECTED;
+            break;
+        default: {
+            break;
+        }
+    }
+}
+
+static void SetSoftBusWifiUseState(const int code, SoftBusWifiState *state)
+{
+    switch (code) {
+        case int(OHOS::Wifi::WifiState::DISABLED):
+            *state = SOFTBUS_WIFI_DISABLED;
+            break;
+        case int(OHOS::Wifi::WifiState::ENABLED):
+            *state = SOFTBUS_WIFI_ENABLED;
+            break;
+        default: {
+            break;
+        }
+    }
+}
+
+static void SetSoftBusWifiHotSpotState(const int code, SoftBusWifiState *state)
+{
+    switch (code) {
+        case int(OHOS::Wifi::ApState::AP_STATE_STARTED):
+            *state = SOFTBUS_AP_ENABLED;
+            break;
+        case int(OHOS::Wifi::ApState::AP_STATE_CLOSED):
+            *state = SOFTBUS_AP_DISABLED;
+            break;
+        default: {
+            break;
+        }
+    }
+}
 void WifiServiceMonitor::OnReceiveEvent(const CommonEventData &data)
 {
     int code = data.GetCode();
@@ -55,46 +102,13 @@ void WifiServiceMonitor::OnReceiveEvent(const CommonEventData &data)
     SoftBusWifiState state = SOFTBUS_WIFI_UNKNOWN;
     LNN_LOGI(LNN_BUILDER, "notify wifiservice event=%s, code=%d", action.c_str(), code);
     if (action == CommonEventSupport::COMMON_EVENT_WIFI_CONN_STATE) {
-        switch (code) {
-            case int(OHOS::Wifi::ConnState::OBTAINING_IPADDR):
-                state = SOFTBUS_WIFI_OBTAINING_IPADDR;
-                break;
-            case int(OHOS::Wifi::ConnState::CONNECTED):
-                state = SOFTBUS_WIFI_CONNECTED;
-                break;
-            case int(OHOS::Wifi::ConnState::DISCONNECTED):
-                state = SOFTBUS_WIFI_DISCONNECTED;
-                break;
-            default: {
-                break;
-            }
-        }
+        SetSoftBusWifiConnState(code, &state);
     }
     if (action == CommonEventSupport::COMMON_EVENT_WIFI_POWER_STATE) {
-        switch (code) {
-            case int(OHOS::Wifi::WifiState::DISABLED):
-                state = SOFTBUS_WIFI_DISABLED;
-                break;
-            case int(OHOS::Wifi::WifiState::ENABLED):
-                state = SOFTBUS_WIFI_ENABLED;
-                break;
-            default: {
-                break;
-            }
-        }
+        SetSoftBusWifiUseState(code, &state);
     }
     if (action == CommonEventSupport::COMMON_EVENT_WIFI_HOTSPOT_STATE) {
-        switch (code) {
-            case int(OHOS::Wifi::ApState::AP_STATE_STARTED):
-                state = SOFTBUS_AP_ENABLED;
-                break;
-            case int(OHOS::Wifi::ApState::AP_STATE_CLOSED):
-                state = SOFTBUS_AP_DISABLED;
-                break;
-            default: {
-                break;
-            }
-        }
+        SetSoftBusWifiHotSpotState(code, &state);
     }
     if (state != SOFTBUS_WIFI_UNKNOWN) {
         LnnNotifyWlanStateChangeEvent(state);

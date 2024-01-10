@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,6 +40,7 @@ typedef struct {
     int32_t channelId;
     ChannelType channelType;
     void (*OnSessionClosed)(int sessionId);
+    void (*OnShutdown)(int32_t socket, ShutdownReason reason);
 } DestroySessionInfo;
 
 int32_t CheckPermissionState(int32_t sessionId)
@@ -176,13 +177,14 @@ NO_SANITIZE("cfi") static DestroySessionInfo *CreateDestroySessionNode(SessionIn
     destroyNode->channelId = sessionNode->channelId;
     destroyNode->channelType = sessionNode->channelType;
     destroyNode->OnSessionClosed = server->listener.session.OnSessionClosed;
+    destroyNode->OnShutdown = server->listener.socket.OnShutdown;
     return destroyNode;
 }
 
-NO_SANITIZE("cfi") static void ClientDestroySession(const ListNode *destroyList)
+NO_SANITIZE("cfi") static void ClientDestroySession(const ListNode *destroyList, ShutdownReason reason)
 {
     if (IsListEmpty(destroyList)) {
-        TRANS_LOGE(TRANS_SDK, "destroyList is empty fail.");
+        TRANS_LOGD(TRANS_SDK, "destroyList is empty fail.");
         return;
     }
     DestroySessionInfo *destroyNode = NULL;
@@ -194,6 +196,8 @@ NO_SANITIZE("cfi") static void ClientDestroySession(const ListNode *destroyList)
         (void)ClientTransCloseChannel(destroyNode->channelId, destroyNode->channelType);
         if (destroyNode->OnSessionClosed != NULL) {
             destroyNode->OnSessionClosed(id);
+        } else if (destroyNode->OnShutdown != NULL) {
+            destroyNode->OnShutdown(id, reason);
         }
         ListDelete(&(destroyNode->node));
         SoftBusFree(destroyNode);
@@ -249,7 +253,7 @@ void TransClientDeinit(void)
         DestroyClientSessionServer(serverNode, &destroyList);
     }
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-    ClientDestroySession(&destroyList);
+    ClientDestroySession(&destroyList, SHUTDOWN_REASON_LOCAL);
 
     DestroySoftBusList(g_clientSessionServerList);
     g_clientSessionServerList = NULL;
@@ -611,7 +615,7 @@ int32_t ClientDeleteSessionServer(SoftBusSecType type, const char *sessionName)
         }
     }
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-    (void)ClientDestroySession(&destroyList);
+    (void)ClientDestroySession(&destroyList, SHUTDOWN_REASON_LOCAL);
     return SOFTBUS_OK;
 }
 
@@ -1227,7 +1231,7 @@ static void ClientTransLnnOfflineProc(NodeBasicInfo *info)
         DestroyClientSessionByNetworkId(serverNode, info->networkId, ROUTE_TYPE_ALL, &destroyList);
     }
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-    (void)ClientDestroySession(&destroyList);
+    (void)ClientDestroySession(&destroyList, SHUTDOWN_REASON_LNN_OFFLINE);
     return;
 }
 
@@ -1238,7 +1242,7 @@ static INodeStateCb g_transLnnCb = {
 
 int32_t ReCreateSessionServerToServer(void)
 {
-    TRANS_LOGI(TRANS_SDK, "enter.");
+    TRANS_LOGD(TRANS_SDK, "enter.");
     if (g_clientSessionServerList == NULL) {
         TRANS_LOGE(TRANS_INIT, "entry list  not init");
         return SOFTBUS_ERR;
@@ -1278,7 +1282,10 @@ void ClientTransOnLinkDown(const char *networkId, int32_t routeType)
     if (networkId == NULL || g_clientSessionServerList == NULL) {
         return;
     }
-    TRANS_LOGI(TRANS_SDK, "routeType=%d", routeType);
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
+    TRANS_LOGI(TRANS_SDK, "routeType=%d, networkId=%s", routeType, anonyNetworkId);
+    AnonymizeFree(anonyNetworkId);
 
     if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != 0) {
         TRANS_LOGE(TRANS_CTRL, "lock failed");
@@ -1291,7 +1298,7 @@ void ClientTransOnLinkDown(const char *networkId, int32_t routeType)
         DestroyClientSessionByNetworkId(serverNode, networkId, routeType, &destroyList);
     }
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-    (void)ClientDestroySession(&destroyList);
+    (void)ClientDestroySession(&destroyList, SHUTDOWN_REASON_LINK_DOWN);
     return;
 }
 
@@ -1382,6 +1389,10 @@ void ClientCleanAllSessionWhenServerDeath(void)
             continue;
         }
         LIST_FOR_EACH_ENTRY_SAFE(sessionNode, nextSessionNode, &(serverNode->sessionList), SessionInfo, node) {
+            if (sessionNode->role == SESSION_ROLE_SERVER) {
+                TRANS_LOGD(TRANS_SDK, "cannot delete socket for listening, socket=%d", sessionNode->sessionId);
+                continue;
+            }
             DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, serverNode);
             if (destroyNode == NULL) {
                 continue;
@@ -1394,7 +1405,7 @@ void ClientCleanAllSessionWhenServerDeath(void)
         }
     }
     (void)SoftBusMutexUnlock(&g_clientSessionServerList->lock);
-    (void)ClientDestroySession(&destroyList);
+    (void)ClientDestroySession(&destroyList, SHUTDOWN_REASON_SERVICE_DIED);
     TRANS_LOGI(TRANS_SDK, "client destroy session cnt=%d.", destroyCnt);
 }
 
@@ -1530,16 +1541,20 @@ static SessionInfo *CreateNewSocketSession(const SessionParam *param)
         return NULL;
     }
 
-    if (param->peerSessionName != NULL &&
-        strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, param->peerSessionName) != EOK) {
-        TRANS_LOGE(TRANS_SDK, "strcpy peerSessionName failed");
+    if (strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, param->peerSessionName) != EOK) {
+        char *anonySessionName = NULL;
+        Anonymize(param->peerSessionName, &anonySessionName);
+        TRANS_LOGI(TRANS_SDK, "strcpy peerName=%s failed", anonySessionName);
+        AnonymizeFree(anonySessionName);
         SoftBusFree(session);
         return NULL;
     }
 
-    if (param->peerDeviceId != NULL &&
-        strcpy_s(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX, param->peerDeviceId) != EOK) {
-        TRANS_LOGE(TRANS_SDK, "strcpy peerDeviceId failed");
+    if (strcpy_s(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX, param->peerDeviceId) != EOK) {
+        char *anonyNetworkId = NULL;
+        Anonymize(param->peerDeviceId, &anonyNetworkId);
+        TRANS_LOGI(TRANS_SDK, "strcpy peerDeviceId=%s failed", anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
         SoftBusFree(session);
         return NULL;
     }
@@ -1559,6 +1574,7 @@ static SessionInfo *CreateNewSocketSession(const SessionParam *param)
     session->role = SESSION_ROLE_INIT;
     session->isEnable = false;
     session->info.flag = param->attr->dataType;
+    session->info.streamType = param->attr->attr.streamAttr.streamType;
     session->isEncrypt = true;
     return session;
 }
@@ -1566,7 +1582,7 @@ static SessionInfo *CreateNewSocketSession(const SessionParam *param)
 int32_t ClientAddSocketSession(const SessionParam *param, int32_t *sessionId, bool *isEnabled)
 {
     if (param == NULL || param->sessionName == NULL || param->groupId == NULL || param->attr == NULL ||
-        sessionId == NULL) {
+        sessionId == NULL || param->peerSessionName == NULL || param->peerDeviceId == NULL) {
         TRANS_LOGE(TRANS_SDK, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -1672,7 +1688,13 @@ static int32_t CheckBindSocketInfo(const SessionInfo *session)
 {
     if (!IsValidString(session->info.peerSessionName, SESSION_NAME_SIZE_MAX) ||
         !IsValidString(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX)) {
-        TRANS_LOGE(TRANS_SDK, "invalid peerName or peerNetworkId");
+        char *anonySessionName = NULL;
+        char *anonyNetworkId = NULL;
+        Anonymize(session->info.peerSessionName, &anonySessionName);
+        Anonymize(session->info.peerDeviceId, &anonyNetworkId);
+        TRANS_LOGI(TRANS_SDK, "invalid peerName=%s or peerNetworkId=%s", anonySessionName, anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
+        AnonymizeFree(anonySessionName);
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -1721,6 +1743,7 @@ int32_t ClientIpcOpenSession(int32_t sessionId, const QosTV *qos, uint32_t qosCo
     tmpAttr.fastTransData = NULL;
     tmpAttr.fastTransDataSize = 0;
     tmpAttr.dataType = sessionNode->info.flag;
+    tmpAttr.attr.streamAttr.streamType = sessionNode->info.streamType;
     tmpAttr.linkTypeNum = 0;
     SessionParam param = {
         .sessionName = serverNode->sessionName,

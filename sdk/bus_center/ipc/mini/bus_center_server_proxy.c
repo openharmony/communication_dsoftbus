@@ -71,7 +71,7 @@ int32_t ServerIpcStartTimeSync(const char *pkgName, const char *targetNetworkId,
 
 int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
 {
-    return LnnIpcStopTimeSync(pkgName, targetNetworkId);
+    return LnnIpcStopTimeSync(pkgName, targetNetworkId, 0);
 }
 
 int32_t ServerIpcPublishLNN(const char *pkgName, const PublishInfo *info)

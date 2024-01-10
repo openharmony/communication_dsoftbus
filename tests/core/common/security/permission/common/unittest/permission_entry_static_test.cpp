@@ -124,7 +124,7 @@ HWTEST_F(PermissionEntrystaticTest, CompareStringTest001, TestSize.Level0)
     int32_t ret;
 
     ret = CompareString(NULL, NULL, true);
-    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = CompareString(g_pkgName, g_pkgName, true);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -231,12 +231,12 @@ HWTEST_F(PermissionEntrystaticTest, GetPermTypeTest002, TestSize.Level0)
 
     appInfo->type = NUM;
     ret = GetPermType(appInfo, pItem);
-    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     appInfo->type = NUM;
     pItem->permType = NUM;
     ret = GetPermType(appInfo, pItem);
-    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /**

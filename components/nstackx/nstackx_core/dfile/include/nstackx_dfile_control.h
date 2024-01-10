@@ -28,4 +28,4 @@ void DFileReceiverControlHandle(DFileSession *session);
 }
 #endif
 
-#endif
+#endif //NSTACKX_DFILE_CONTROL_H

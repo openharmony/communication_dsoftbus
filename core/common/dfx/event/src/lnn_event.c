@@ -63,3 +63,18 @@ void LnnAuditInner(int32_t scene, const char *func, int32_t line, LnnAuditExtra 
     };
     SoftbusAuditInner(EVENT_MODULE_LNN, &form);
 }
+
+void LnnEventExtraInit(LnnEventExtra *extra)
+{
+    extra->peerDeviceInfo = NULL;
+    extra->peerIp = NULL;
+    extra->peerBrMac = NULL;
+    extra->peerBleMac = NULL;
+    extra->peerWifiMac = NULL;
+    extra->peerPort = NULL;
+    extra->peerUdid = NULL;
+    extra->peerNetworkId = NULL;
+    extra->peerDeviceType = NULL;
+    extra->callerPkg = NULL;
+    extra->calleePkg = NULL;
+}

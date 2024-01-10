@@ -19,9 +19,9 @@
 #include "conn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
-#include "auth_interface.h"
 #include "auth_manager.h"
 #include "bus_center_manager.h"
+#include "lnn_distributed_net_ledger.h"
 #include "wifi_direct_negotiator.h"
 #include "utils/wifi_direct_work_queue.h"
 #include "utils/wifi_direct_anonymous.h"
@@ -90,11 +90,20 @@ static void OnAuthDataReceived(int64_t authId, const AuthTransData *data)
     }
 }
 
+static void AuthDisconnectedWorkHandler(struct WifiDirectNegotiateChannel *channel)
+{
+    GetWifiDirectNegotiator()->onNegotiateChannelDisconnected(channel);
+    channel->destructor(channel);
+}
+
 static void OnAuthDisconnected(int64_t authId)
 {
-    struct DefaultNegotiateChannel channel;
-    DefaultNegotiateChannelConstructor(&channel, authId);
-    GetWifiDirectNegotiator()->onNegotiateChannelDisconnected((struct WifiDirectNegotiateChannel *)&channel);
+    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(authId);
+    CONN_CHECK_AND_RETURN_LOGE(channel != NULL, CONN_WIFI_DIRECT, "create channel failed");
+    if (CallMethodAsync((WorkFunction)AuthDisconnectedWorkHandler, channel, 0) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "async failed");
+        DefaultNegotiateChannelDelete(channel);
+    }
 }
 
 static int64_t GenerateSequence(void)
@@ -124,13 +133,21 @@ static int32_t PostDataWithFlag(struct DefaultNegotiateChannel *self, const uint
     };
 
     CONN_CHECK_AND_RETURN_RET_LOGE(AuthPostTransData(self->authId, &dataInfo) == SOFTBUS_OK, SOFTBUS_ERR,
-                                  CONN_WIFI_DIRECT, "post data failed");
+                                   CONN_WIFI_DIRECT, "post data failed");
     return SOFTBUS_OK;
 }
 
 static int32_t GetDeviceId(struct WifiDirectNegotiateChannel *base, char *deviceId, size_t deviceIdSize)
 {
-    int32_t ret = AuthGetDeviceUuid(((struct DefaultNegotiateChannel *)base)->authId, deviceId, deviceIdSize);
+    int32_t ret = SOFTBUS_OK;
+    struct DefaultNegotiateChannel *self = (struct DefaultNegotiateChannel *)base;
+    if (strlen(self->remoteDeviceId) != 0) {
+        ret = strcpy_s(deviceId, deviceIdSize, self->remoteDeviceId);
+        CONN_CHECK_AND_RETURN_RET_LOGW(ret == EOK, SOFTBUS_STRCPY_ERR, CONN_WIFI_DIRECT, "copy device id failed");
+        return SOFTBUS_OK;
+    }
+
+    ret = AuthGetDeviceUuid(((struct DefaultNegotiateChannel *)base)->authId, deviceId, deviceIdSize);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get device id failed");
     return ret;
 }
@@ -194,6 +211,12 @@ static struct WifiDirectNegotiateChannel *Duplicate(struct WifiDirectNegotiateCh
     CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     struct DefaultNegotiateChannel *self = (struct DefaultNegotiateChannel *)base;
     struct DefaultNegotiateChannel *copy = DefaultNegotiateChannelNew(self->authId);
+    int32_t ret = strcpy_s(copy->remoteDeviceId, UUID_BUF_LEN, self->remoteDeviceId);
+    if (ret != EOK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "copy remote device id failed");
+        DefaultNegotiateChannelDelete(copy);
+        return NULL;
+    }
     return (struct WifiDirectNegotiateChannel*)copy;
 }
 
@@ -217,6 +240,9 @@ void DefaultNegotiateChannelConstructor(struct DefaultNegotiateChannel *self, in
     self->equal = Equal;
     self->duplicate = Duplicate;
     self->destructor = Destructor;
+
+    int32_t ret = AuthGetDeviceUuid(self->authId, self->remoteDeviceId, UUID_BUF_LEN);
+    CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get device id failed");
 }
 
 void DefaultNegotiateChannelDestructor(struct DefaultNegotiateChannel *self)
@@ -240,28 +266,40 @@ void DefaultNegotiateChannelDelete(struct DefaultNegotiateChannel *self)
     SoftBusFree(self);
 }
 
-int32_t OpenDefaultNegotiateChannel(const char *remoteIp, int32_t remotePort,
+int32_t OpenDefaultNegotiateChannel(struct DefaultNegoChannelParam *param,
                                     struct WifiDirectNegotiateChannel *srcChannel,
                                     struct DefaultNegoChannelOpenCallback *callback)
 {
-    CONN_CHECK_AND_RETURN_RET_LOGW(remoteIp != NULL, SOFTBUS_ERR, CONN_WIFI_DIRECT, "remoteIp is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(param != NULL, SOFTBUS_ERR, CONN_WIFI_DIRECT, "param is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(param->remoteUuid != NULL, SOFTBUS_ERR, CONN_WIFI_DIRECT, "remoteUuid is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(param->remoteIp != NULL, SOFTBUS_ERR, CONN_WIFI_DIRECT, "remoteIp is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(callback != NULL, SOFTBUS_ERR, CONN_WIFI_DIRECT, "callback is null");
+
     bool isMeta = false;
     if ((srcChannel != NULL) && (srcChannel->isMetaChannel != NULL)) {
         isMeta = srcChannel->isMetaChannel(srcChannel);
     }
-    CONN_LOGI(CONN_WIFI_DIRECT, "remoteIp=%s remotePort=%d isMeta=%d", WifiDirectAnonymizeIp(remoteIp), remotePort,
-        isMeta);
+    CONN_LOGI(CONN_WIFI_DIRECT, "remoteUuid=%s remoteIp=%s remotePort=%d isMeta=%d",
+              WifiDirectAnonymizeDeviceId(param->remoteUuid), WifiDirectAnonymizeIp(param->remoteIp),
+              param->remotePort, isMeta);
+
+    const char *remoteUdid = LnnConvertDLidToUdid(param->remoteUuid, CATEGORY_UUID);
+    CONN_CHECK_AND_RETURN_RET_LOGE(remoteUdid != NULL && strlen(remoteUdid) != 0, SOFTBUS_ERR, CONN_WIFI_DIRECT,
+                                   "get remote udid failed");
+    CONN_LOGI(CONN_WIFI_DIRECT, "remoteUdid=%s", WifiDirectAnonymizeDeviceId(remoteUdid));
 
     AuthConnInfo authConnInfo;
     (void)memset_s(&authConnInfo, sizeof(authConnInfo), 0, sizeof(authConnInfo));
-    authConnInfo.type = AUTH_LINK_TYPE_P2P;
-    authConnInfo.info.ipInfo.port = remotePort;
+    authConnInfo.type = param->type;
+    authConnInfo.info.ipInfo.port = param->remotePort;
+    authConnInfo.info.ipInfo.moduleId = param->localModuleId;
     if (isMeta) {
         authConnInfo.info.ipInfo.authId = ((struct DefaultNegotiateChannel*)srcChannel)->authId;
     }
-    int32_t ret = strcpy_s(authConnInfo.info.ipInfo.ip, sizeof(authConnInfo.info.ipInfo.ip), remoteIp);
+    int32_t ret = strcpy_s(authConnInfo.info.ipInfo.ip, sizeof(authConnInfo.info.ipInfo.ip), param->remoteIp);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == EOK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "copy ip failed");
+    ret = strcpy_s(authConnInfo.info.ipInfo.udid, UDID_BUF_LEN, remoteUdid);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "copy udid failed");
 
     AuthConnCallback authConnCallback = {
         .onConnOpened = callback->onConnectSuccess,
@@ -280,14 +318,16 @@ void CloseDefaultNegotiateChannel(struct DefaultNegotiateChannel *self)
     AuthCloseConn(self->authId);
 }
 
-int32_t StartListeningForDefaultChannel(const char *localIp, int32_t port)
+int32_t StartListeningForDefaultChannel(AuthLinkType type, const char *localIp, int32_t port, ListenerModule *moduleId)
 {
-    int32_t ret = AuthStartListening(AUTH_LINK_TYPE_P2P, localIp, port);
-    CONN_LOGI(CONN_WIFI_DIRECT, "localIp=%s port=%d", WifiDirectAnonymizeIp(localIp), ret);
+    int32_t ret = AuthStartListeningForWifiDirect(type, localIp, port, moduleId);
+    CONN_LOGI(CONN_WIFI_DIRECT, "type=%d localIp=%s port=%d moduleId=%d",
+              type, WifiDirectAnonymizeIp(localIp), ret, *moduleId);
     return ret;
 }
 
-void StopListeningForDefaultChannel(void)
+void StopListeningForDefaultChannel(AuthLinkType type, ListenerModule moduleId)
 {
-    AuthStopListening(AUTH_LINK_TYPE_P2P);
+    CONN_LOGI(CONN_WIFI_DIRECT, "type=%d moduleId=%d", type, moduleId);
+    AuthStopListeningForWifiDirect(type, moduleId);
 }

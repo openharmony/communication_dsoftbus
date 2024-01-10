@@ -48,11 +48,11 @@ static const SoftBusLogLabel CONN_LABELS[MODULE_DOMAIN_MAX_LEN] = {
     {CONN_TEST,         DOMAIN_ID_TEST, "ConnTest"},
 };
 
-#define CONN_LOGF(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_FATAL, CONN_LABELS[label], ##__VA_ARGS__)
-#define CONN_LOGE(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_ERROR, CONN_LABELS[label], ##__VA_ARGS__)
-#define CONN_LOGW(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_WARN, CONN_LABELS[label], ##__VA_ARGS__)
-#define CONN_LOGI(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_INFO, CONN_LABELS[label], ##__VA_ARGS__)
-#define CONN_LOGD(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_DFX_LOG_DEBUG, CONN_LABELS[label], ##__VA_ARGS__)
+#define CONN_LOGF(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_FATAL, CONN_LABELS[label], ##__VA_ARGS__)
+#define CONN_LOGE(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_ERROR, CONN_LABELS[label], ##__VA_ARGS__)
+#define CONN_LOGW(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_WARN, CONN_LABELS[label], ##__VA_ARGS__)
+#define CONN_LOGI(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_INFO, CONN_LABELS[label], ##__VA_ARGS__)
+#define CONN_LOGD(label, ...) (void)SOFTBUS_LOG_INNER(SOFTBUS_LOG_DEBUG, CONN_LABELS[label], ##__VA_ARGS__)
 
 #define CONN_CHECK_AND_RETURN_RET_LOGW(cond, ret, label, fmt, ...) \
     CHECK_AND_RETURN_RET_LOG_INNER(cond, ret, CONN_LOGW, label, fmt, ##__VA_ARGS__)

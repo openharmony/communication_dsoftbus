@@ -28,7 +28,6 @@
 #include "softbus_adapter_thread.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_bus_center.h"
-#include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_transmission_interface.h"
@@ -234,12 +233,35 @@ static void CloseUnusedChannel(void *para)
     (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
 }
 
-static int32_t OnChannelOpened(int32_t channelId, const char *peerUuid, unsigned char isServer)
+static void ResetOpenChannelInfo(int32_t channelId, unsigned char isServer, SyncChannelInfo *info)
 {
-    char networkId[NETWORK_ID_BUF_LEN];
-    SyncChannelInfo *info = NULL;
     SyncInfoMsg *msg = NULL;
     SyncInfoMsg *msgNext = NULL;
+
+    SoftBusGetTime(&info->accessTime);
+    if (isServer) {
+        if (info->serverChannelId != channelId && info->serverChannelId != INVALID_CHANNEL_ID) {
+            LNN_LOGD(LNN_BUILDER, "reset sync info server channel %d -> %d", info->serverChannelId, channelId);
+            (void)TransCloseNetWorkingChannel(info->serverChannelId);
+        }
+        info->serverChannelId = channelId;
+    } else {
+        info->isClientOpened = true;
+        if (info->clientChannelId != channelId && info->clientChannelId != INVALID_CHANNEL_ID) {
+            LNN_LOGD(LNN_BUILDER, "reset sync info client channel %d -> %d", info->clientChannelId, channelId);
+            (void)TransCloseNetWorkingChannel(info->clientChannelId);
+        }
+        info->clientChannelId = channelId;
+        LIST_FOR_EACH_ENTRY_SAFE(msg, msgNext, &info->syncMsgList, SyncInfoMsg, node) {
+            SendSyncInfoMsg(info, msg);
+        }
+    }
+}
+
+static int32_t OnChannelOpened(int32_t channelId, const char *peerUuid, unsigned char isServer)
+{
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
+    SyncChannelInfo *info = NULL;
 
     LNN_LOGI(LNN_BUILDER, "channelId=%d, server=%u", channelId, isServer);
     if (LnnConvertDlId(peerUuid, CATEGORY_UUID, CATEGORY_NETWORK_ID, networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
@@ -269,15 +291,7 @@ static int32_t OnChannelOpened(int32_t channelId, const char *peerUuid, unsigned
         info->serverChannelId = channelId;
         ListNodeInsert(&g_syncInfoManager.channelInfoList, &info->node);
     } else {
-        if (isServer) {
-            info->serverChannelId = channelId;
-            SoftBusGetTime(&info->accessTime);
-        } else {
-            info->isClientOpened = true;
-            LIST_FOR_EACH_ENTRY_SAFE(msg, msgNext, &info->syncMsgList, SyncInfoMsg, node) {
-                SendSyncInfoMsg(info, msg);
-            }
-        }
+        ResetOpenChannelInfo(channelId, isServer, info);
     }
     (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
     return SOFTBUS_OK;
@@ -301,7 +315,7 @@ static void OnChannelCloseCommon(SyncChannelInfo *info, int32_t channelId)
 
 static void OnChannelOpenFailed(int32_t channelId, const char *peerUuid)
 {
-    char networkId[NETWORK_ID_BUF_LEN];
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
     SyncChannelInfo *info = NULL;
 
     LNN_LOGI(LNN_BUILDER, "open channel fail channelId=%d", channelId);
@@ -506,6 +520,27 @@ int32_t LnnUnregSyncInfoHandler(LnnSyncInfoType type, LnnSyncInfoMsgHandler hand
     return SOFTBUS_OK;
 }
 
+static void ResetSendSyncInfo(SyncChannelInfo *oldInfo, const SyncChannelInfo *newInfo, SyncInfoMsg *msg)
+{
+    if (oldInfo->clientChannelId == INVALID_CHANNEL_ID) {
+        oldInfo->clientChannelId = newInfo->clientChannelId;
+        oldInfo->accessTime = newInfo->accessTime;
+    } else {
+        if (oldInfo->clientChannelId != newInfo->clientChannelId && oldInfo->clientChannelId != INVALID_CHANNEL_ID) {
+            LNN_LOGD(LNN_BUILDER, "reset sync info send channel %d -> %d", oldInfo->clientChannelId,
+                newInfo->clientChannelId);
+            (void)TransCloseNetWorkingChannel(oldInfo->clientChannelId);
+            oldInfo->isClientOpened = false;
+            oldInfo->clientChannelId = newInfo->clientChannelId;
+        }
+        if (oldInfo->isClientOpened) {
+            SendSyncInfoMsg(oldInfo, msg);
+        } else {
+            LNN_LOGW(LNN_BUILDER, "send sync info client is not opened, channelId=%d", oldInfo->clientChannelId);
+        }
+    }
+}
+
 static int32_t SendSyncInfoByNewChannel(const char *networkId, SyncInfoMsg *msg)
 {
     SyncChannelInfo *info = CreateSyncChannelInfo(networkId);
@@ -535,15 +570,7 @@ static int32_t SendSyncInfoByNewChannel(const char *networkId, SyncInfoMsg *msg)
         ListNodeInsert(&g_syncInfoManager.channelInfoList, &info->node);
     } else {
         ListNodeInsert(&item->syncMsgList, &msg->node);
-        if (item->clientChannelId == INVALID_CHANNEL_ID) {
-            item->clientChannelId = info->clientChannelId;
-            item->accessTime = info->accessTime;
-        } else {
-            (void)TransCloseNetWorkingChannel(info->clientChannelId);
-            if (item->isClientOpened) {
-                SendSyncInfoMsg(item, msg);
-            }
-        }
+        ResetSendSyncInfo(item, info, msg);
         SoftBusFree(info);
     }
     (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
@@ -582,19 +609,18 @@ static int32_t TrySendSyncInfoMsg(const char *networkId, SyncInfoMsg *msg)
 int32_t LnnSendSyncInfoMsg(LnnSyncInfoType type, const char *networkId,
     const uint8_t *msg, uint32_t len, LnnSyncInfoMsgComplete complete)
 {
-    SyncInfoMsg *syncMsg = NULL;
-    int32_t rc;
-
-    LNN_LOGI(LNN_BUILDER, "send sync info msg for type=%d, len=%d", type, len);
     if (type >= LNN_INFO_TYPE_COUNT || networkId == NULL || msg == NULL) {
         LNN_LOGE(LNN_BUILDER, "invalid sync info msg param");
         return SOFTBUS_INVALID_PARAM;
     }
+
+    SyncInfoMsg *syncMsg = NULL;
+    LNN_LOGI(LNN_BUILDER, "send sync info msg for type=%d, len=%d", type, len);
     syncMsg = CreateSyncInfoMsg(type, msg, len, complete);
     if (syncMsg == NULL) {
         return SOFTBUS_ERR;
     }
-    rc = TrySendSyncInfoMsg(networkId, syncMsg);
+    int32_t rc = TrySendSyncInfoMsg(networkId, syncMsg);
     if (rc != SOFTBUS_OK) {
         SoftBusFree(syncMsg);
     }

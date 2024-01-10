@@ -30,6 +30,7 @@
 #include "lnn_device_info.h"
 #include "lnn_device_info_recovery.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_event.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_link_finder.h"
@@ -374,17 +375,43 @@ static void DeviceStateChangeProcess(char *udid, ConnectionAddrType type, bool i
     }
 }
 
+static void SetLnnConnNodeInfo(
+    LnnConntionInfo *connInfo, const char *networkId, LnnConnectionFsm *connFsm, int32_t retCode)
+{
+    ReportCategory report;
+    uint64_t localFeature;
+    (void)LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &localFeature);
+    uint8_t relation[CONNECTION_ADDR_MAX] = { 0 };
+    report = LnnAddOnlineNode(connInfo->nodeInfo);
+    if (LnnInsertLinkFinderInfo(networkId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "insert rpa info fail.");
+    }
+    if (LnnUpdateGroupType(connInfo->nodeInfo) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_BUILDER, "update grouptype fail");
+    }
+    LNN_LOGI(LNN_BUILDER, "peer feature=%" PRIu64 ", local=%" PRIu64 "", connInfo->nodeInfo->feature, localFeature);
+    if (IsFeatureSupport(connInfo->nodeInfo->feature, BIT_BLE_SUPPORT_SENSORHUB_HEARTBEAT) &&
+        IsFeatureSupport(localFeature, BIT_BLE_SUPPORT_SENSORHUB_HEARTBEAT)) {
+        DeviceStateChangeProcess(connInfo->nodeInfo->deviceInfo.deviceUdid, connInfo->addr.type, true);
+    }
+    NotifyJoinResult(connFsm, networkId, retCode);
+    ReportResult(connInfo->nodeInfo->deviceInfo.deviceUdid, report);
+    connInfo->flag |= LNN_CONN_INFO_FLAG_ONLINE;
+    LnnNotifyNodeStateChanged(&connInfo->addr);
+    LnnOfflineTimingByHeartbeat(networkId, connInfo->addr.type);
+    LnnGetLnnRelation(networkId, CATEGORY_NETWORK_ID, relation, CONNECTION_ADDR_MAX);
+    LnnNotifyLnnRelationChanged(
+        connInfo->nodeInfo->deviceInfo.deviceUdid, connInfo->addr.type, relation[connInfo->addr.type], true);
+}
+
 static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, int32_t retCode)
 {
     LnnConntionInfo *connInfo = &connFsm->connInfo;
+
     if (connInfo == NULL) {
         LNN_LOGE(LNN_BUILDER, "CompleteJoinLNN connInfo is NULL");
         return;
     }
-    ReportCategory report;
-    uint64_t localFeature;
-    (void)LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &localFeature);
-    uint8_t relation[CONNECTION_ADDR_MAX] = {0};
     SetWatchdogFlag(true);
     LnnFsmRemoveMessage(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN_TIMEOUT);
     if (IsDeviceTypePc(connInfo->nodeInfo)) {
@@ -392,27 +419,7 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
     }
     ReportLnnResultEvt(connFsm, retCode);
     if (retCode == SOFTBUS_OK && connInfo->nodeInfo != NULL) {
-        report = LnnAddOnlineNode(connInfo->nodeInfo);
-        if (LnnInsertLinkFinderInfo(networkId) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "insert rpa info fail.");
-        }
-        if (LnnUpdateGroupType(connInfo->nodeInfo) != SOFTBUS_OK) {
-            LNN_LOGI(LNN_BUILDER, "update grouptype fail");
-        }
-        LNN_LOGI(LNN_BUILDER, "peer feature=%" PRIu64 ", local=%" PRIu64 "",
-            connInfo->nodeInfo->feature, localFeature);
-        if (IsFeatureSupport(connInfo->nodeInfo->feature, BIT_BLE_SUPPORT_SENSORHUB_HEARTBEAT) &&
-            IsFeatureSupport(localFeature, BIT_BLE_SUPPORT_SENSORHUB_HEARTBEAT)) {
-            DeviceStateChangeProcess(connInfo->nodeInfo->deviceInfo.deviceUdid, connInfo->addr.type, true);
-        }
-        NotifyJoinResult(connFsm, networkId, retCode);
-        ReportResult(connInfo->nodeInfo->deviceInfo.deviceUdid, report);
-        connInfo->flag |= LNN_CONN_INFO_FLAG_ONLINE;
-        LnnNotifyNodeStateChanged(&connInfo->addr);
-        LnnOfflineTimingByHeartbeat(networkId, connInfo->addr.type);
-        LnnGetLnnRelation(networkId, CATEGORY_NETWORK_ID, relation, CONNECTION_ADDR_MAX);
-        LnnNotifyLnnRelationChanged(connInfo->nodeInfo->deviceInfo.deviceUdid, connInfo->addr.type,
-            relation[connInfo->addr.type], true);
+        SetLnnConnNodeInfo(connInfo, networkId, connFsm, retCode);
     } else if (retCode != SOFTBUS_OK) {
         NotifyJoinResult(connFsm, networkId, retCode);
         AuthHandleLeaveLNN(connInfo->authId);
@@ -835,6 +842,9 @@ static bool CleanInvalidConnStateProcess(FsmStateMachine *fsm, int32_t msgType, 
 
 static void OnlineStateEnter(FsmStateMachine *fsm)
 {
+    LnnEventExtra extra = { 0 };
+    LnnEventExtraInit(&extra);
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, extra);
     LnnConnectionFsm *connFsm = NULL;
 
     if (!CheckStateMsgCommonArgs(fsm)) {
@@ -938,6 +948,9 @@ static int32_t SyncBrOffline(const LnnConnectionFsm *connFsm)
 
 static void LeavingStateEnter(FsmStateMachine *fsm)
 {
+    LnnEventExtra extra = { 0 };
+    LnnEventExtraInit(&extra);
+    LNN_EVENT(EVENT_SCENE_LEAVE_LNN, EVENT_STAGE_LEAVE_LNN, extra);
     LnnConnectionFsm *connFsm = NULL;
     int32_t rc;
     LnnConntionInfo *connInfo = NULL;
@@ -1028,7 +1041,8 @@ static int32_t InitConnectionStateMachine(LnnConnectionFsm *connFsm)
 {
     int32_t i;
 
-    if (sprintf_s(connFsm->fsmName, LNN_CONNECTION_FSM_NAME_LEN, "LnnConnFsm-%u", connFsm->id) == -1) {
+    if (sprintf_s(connFsm->fsmName, LNN_CONNECTION_FSM_NAME_LEN, "%s-%u", BUSCENTER_CONN_FSM_HANDLER_NAME,
+        connFsm->id) == -1) {
         LNN_LOGE(LNN_BUILDER, "format lnn connection fsm name failed");
         return SOFTBUS_ERR;
     }

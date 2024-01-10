@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -131,9 +131,11 @@ static int32_t CustomFunc(const SoftBusMessage *msg, void *param)
     CHECK_NULL_PTR_RETURN_VALUE(param, SOFTBUS_ERR);
     EventRemoveInfo *info = (EventRemoveInfo *)param;
     if (msg->what != (int32_t)info->event) {
+        AUTH_LOGE(AUTH_CONN, "msg->what and event inequality");
         return SOFTBUS_ERR;
     }
     if (info->cmpFunc == NULL) {
+        AUTH_LOGE(AUTH_CONN, "cmpFunc is null");
         return SOFTBUS_ERR;
     }
     return info->cmpFunc(msg->obj, info->param);
@@ -185,13 +187,16 @@ bool GetConfigSupportAsServer(void)
 uint8_t *DupMemBuffer(const uint8_t *buf, uint32_t size)
 {
     if (buf == NULL || size == 0) {
+        AUTH_LOGE(AUTH_CONN, "param err");
         return NULL;
     }
     uint8_t *dup = (uint8_t *)SoftBusMalloc(size);
     if (dup == NULL) {
+        AUTH_LOGE(AUTH_CONN, "malloc err");
         return NULL;
     }
     if (memcpy_s(dup, size, buf, size) != EOK) {
+        AUTH_LOGE(AUTH_CONN, "memcpy err");
         SoftBusFree(dup);
         return NULL;
     }
@@ -278,6 +283,12 @@ bool CompareConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool 
                 return true;
             }
             break;
+        case AUTH_LINK_TYPE_ENHANCED_P2P:
+            if (info2->type == AUTH_LINK_TYPE_ENHANCED_P2P && info1->info.ipInfo.port == info2->info.ipInfo.port &&
+                strcmp(info1->info.ipInfo.ip, info2->info.ipInfo.ip) == 0) {
+                return true;
+            }
+            break;
         default:
             AUTH_LOGE(AUTH_CONN, "unexpected connType=%d", info1->type);
             return false;
@@ -321,11 +332,31 @@ int32_t ConvertToConnectOption(const AuthConnInfo *connInfo, ConnectOption *opti
             option->socketOption.protocol = LNN_PROTOCOL_IP;
             option->socketOption.keepAlive = 1;
             break;
+        case AUTH_LINK_TYPE_ENHANCED_P2P:
+            option->type = CONNECT_TCP;
+            if (strcpy_s(option->socketOption.addr, sizeof(option->socketOption.addr), connInfo->info.ipInfo.ip) !=
+                EOK) {
+                AUTH_LOGE(AUTH_CONN, "copy ip fail");
+                return SOFTBUS_MEM_ERR;
+            }
+            option->socketOption.port = connInfo->info.ipInfo.port;
+            option->socketOption.moduleId = connInfo->info.ipInfo.moduleId;
+            option->socketOption.protocol = LNN_PROTOCOL_IP;
+            option->socketOption.keepAlive = 1;
+            break;
         default:
             AUTH_LOGE(AUTH_CONN, "unexpected connType=%d", connInfo->type);
             return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
+}
+
+static bool IsEnhanceP2pModuleId(ListenerModule moduleId)
+{
+    if (moduleId >= AUTH_ENHANCED_P2P_START && moduleId <= AUTH_ENHANCED_P2P_END) {
+        return true;
+    }
+    return false;
 }
 
 int32_t ConvertToAuthConnInfo(const ConnectionInfo *info, AuthConnInfo *connInfo)
@@ -338,7 +369,12 @@ int32_t ConvertToAuthConnInfo(const ConnectionInfo *info, AuthConnInfo *connInfo
                 AUTH_LOGW(AUTH_CONN, "only support LNN_PROTOCOL_IP");
                 return SOFTBUS_ERR;
             }
-            connInfo->type = AUTH_LINK_TYPE_P2P;
+            if (IsEnhanceP2pModuleId(info->socketInfo.moduleId)) {
+                connInfo->type = AUTH_LINK_TYPE_ENHANCED_P2P;
+            } else {
+                connInfo->type = AUTH_LINK_TYPE_P2P;
+            }
+            connInfo->info.ipInfo.moduleId = info->socketInfo.moduleId;
             connInfo->info.ipInfo.port = info->socketInfo.port;
             if (strcpy_s(connInfo->info.ipInfo.ip, IP_LEN, info->socketInfo.addr) != EOK) {
                 AUTH_LOGE(AUTH_CONN, "copy ip fail");
@@ -372,7 +408,7 @@ int32_t ConvertToAuthConnInfo(const ConnectionInfo *info, AuthConnInfo *connInfo
 
 int32_t AuthCommonInit(void)
 {
-    g_authHandler.name = "AuthHandler";
+    g_authHandler.name = (char *)BUSCENTER_AUTH_HANDLER_NAME;
     g_authHandler.HandleMessage = HandleAuthMessage;
     g_authHandler.looper = GetLooper(LOOP_TYPE_DEFAULT);
 
@@ -406,5 +442,6 @@ int32_t GetPeerUdidByNetworkId(const char *networkId, char *udid)
         }
         return SOFTBUS_OK;
     }
+    AUTH_LOGE(AUTH_CONN, "info or deviceUdid is null");
     return SOFTBUS_ERR;
 }

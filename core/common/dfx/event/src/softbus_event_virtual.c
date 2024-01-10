@@ -84,6 +84,11 @@ void DiscAuditInner(int32_t scene, const char *func, int32_t line, DiscAuditExtr
     (void)extra;
 }
 
+void DiscEventExtraInit(DiscEventExtra *extra)
+{
+    (void)extra;
+}
+
 void LnnEventInner(int32_t scene, int32_t stage, const char *func, int32_t line, LnnEventExtra *extra)
 {
     (void)scene;
@@ -114,6 +119,11 @@ void LnnAuditInner(int32_t scene, const char *func, int32_t line, LnnAuditExtra 
     (void)scene;
     (void)func;
     (void)line;
+    (void)extra;
+}
+
+void LnnEventExtraInit(LnnEventExtra *extra)
+{
     (void)extra;
 }
 
