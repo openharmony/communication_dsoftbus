@@ -43,7 +43,7 @@ void DiscClientProxy::OnDeviceFound(const DeviceInfo *deviceInfo)
     }
     MessageParcel reply;
     MessageOption option { MessageOption::TF_ASYNC };
-    DISC_CHECK_AND_RETURN_LOGE(remote->SendRequest(CLIENT_DISCOVERY_DEVICE_FOUND, data, reply, option) == 0,
+    DISC_CHECK_AND_RETURN_LOGE(remote->SendRequest(CLIENT_DISCOVERY_DEVICE_FOUND, data, reply, option) == SOFTBUS_OK,
         DISC_CONTROL, "send request failed");
 }
 
@@ -61,7 +61,7 @@ void DiscClientProxy::OnDiscoverFailed(int subscribeId, int reason)
     }
     MessageParcel reply;
     MessageOption option { MessageOption::TF_ASYNC };
-    DISC_CHECK_AND_RETURN_LOGE(remote->SendRequest(CLIENT_DISCOVERY_FAIL, data, reply, option) == 0,
+    DISC_CHECK_AND_RETURN_LOGE(remote->SendRequest(CLIENT_DISCOVERY_FAIL, data, reply, option) == SOFTBUS_OK,
         DISC_CONTROL, "send request failed");
 }
 
@@ -78,7 +78,7 @@ void DiscClientProxy::OnDiscoverySuccess(int subscribeId)
     }
     MessageParcel reply;
     MessageOption option { MessageOption::TF_ASYNC };
-    DISC_CHECK_AND_RETURN_LOGE(remote->SendRequest(CLIENT_DISCOVERY_SUCC, data, reply, option) == 0,
+    DISC_CHECK_AND_RETURN_LOGE(remote->SendRequest(CLIENT_DISCOVERY_SUCC, data, reply, option) == SOFTBUS_OK,
         DISC_CONTROL, "send request failed");
 }
 
@@ -113,7 +113,7 @@ void DiscClientProxy::OnPublishFail(int publishId, int reason)
     }
     MessageParcel reply;
     MessageOption option{MessageOption::TF_ASYNC};
-    DISC_CHECK_AND_RETURN_LOGE(remote->SendRequest(CLIENT_PUBLISH_FAIL, data, reply, option) == 0,
+    DISC_CHECK_AND_RETURN_LOGE(remote->SendRequest(CLIENT_PUBLISH_FAIL, data, reply, option) == SOFTBUS_OK,
         DISC_CONTROL, "send request failed");
 }
 }
