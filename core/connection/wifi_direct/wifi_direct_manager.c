@@ -170,7 +170,7 @@ static int32_t GetLocalIpByUuid(const char *uuid, char *localIp, int32_t localIp
     do {
         for (enum WifiDirectLinkType linkType = 0; linkType < WIFI_DIRECT_LINK_TYPE_MAX; linkType++) {
             struct InnerLink *innerLink = GetLinkManager()->getLinkByTypeAndUuid(linkType, uuid);
-            if (innerLink != NULL) {
+            if (innerLink != NULL && innerLink->getInt(innerLink, IL_KEY_STATE, -1) == INNER_LINK_STATE_CONNECTED) {
                 return innerLink->getLocalIpString(innerLink, localIp, localIpSize);
             }
         }

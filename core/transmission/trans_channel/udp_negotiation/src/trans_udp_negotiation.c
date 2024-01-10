@@ -472,7 +472,7 @@ static int32_t ParseRequestAppInfo(int64_t authId, const cJSON *msg, AppInfo *ap
         }
     } else {
         appInfo->routeType = WIFI_P2P;
-        if (GetWifiDirectManager()->getLocalIpByUuid(appInfo->peerData.deviceId, localIp,
+        if (GetWifiDirectManager()->getLocalIpByRemoteIp(appInfo->peerData.addr, localIp,
                 sizeof(localIp)) != SOFTBUS_OK) {
                 TRANS_LOGE(TRANS_CTRL, "get p2p ip failed.");
                 return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
@@ -840,11 +840,6 @@ static int32_t PrepareAppInfoForUdpOpen(const ConnectOption *connOpt, AppInfo *a
         case CONNECT_P2P_REUSE:
             appInfo->udpConnType = UDP_CONN_TYPE_P2P;
             appInfo->routeType = WIFI_P2P;
-            if (GetWifiDirectManager()->getLocalIpByUuid(appInfo->peerData.deviceId, appInfo->myData.addr,
-                sizeof(appInfo->myData.addr)) != SOFTBUS_OK) {
-                TRANS_LOGE(TRANS_CTRL, "get p2p ip fail");
-                return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
-            }
             appInfo->protocol = connOpt->socketOption.protocol;
             break;
         default:
