@@ -1364,7 +1364,6 @@ static void StartActivePublish(SoftBusMessage *msg)
     DISC_LOGD(DISC_BLE, "enter");
     if (StartAdvertiser(NON_ADV_ID) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "Start msg failed");
-        return;
     }
     DISC_LOGD(DISC_BLE, "end");
 }
