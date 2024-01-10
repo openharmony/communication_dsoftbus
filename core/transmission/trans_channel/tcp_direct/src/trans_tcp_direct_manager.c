@@ -240,12 +240,6 @@ static int32_t TransUpdAppInfo(AppInfo *appInfo, const ConnectOption *connInfo)
                 TRANS_LOGE(TRANS_CTRL, "TransUpdAppInfo get local ip fail");
                 return SOFTBUS_TRANS_GET_LOCAL_IP_FAILED;
             }
-        } else if ((connInfo->type == CONNECT_P2P_REUSE) || (connInfo->type == CONNECT_P2P)) {
-            if (GetWifiDirectManager()->getLocalIpByUuid(appInfo->peerData.deviceId, appInfo->myData.addr,
-                sizeof(appInfo->myData.addr)) != SOFTBUS_OK) {
-                TRANS_LOGE(TRANS_CTRL, "TransUpdAppInfo get p2p ip fail");
-                return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
-            }
         }
     }
     return SOFTBUS_OK;
