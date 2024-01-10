@@ -455,13 +455,13 @@ static void DumpWithFd(struct InfoContainer *self, int32_t fd)
             ((struct InfoContainer *)item)->dump(item, fd);
             dprintf(fd, "[%s] <<\n", keyProperty->content);
         } else if (keyProperty->flag == CONTAINER_ARRAY_FLAG) {
-            dprintf(fd, "[%s] count=%d >>\n", keyProperty->content, itemCount);
+            dprintf(fd, "[%s] count=%zu >>\n", keyProperty->content, itemCount);
             size_t itemSize = totalSize / itemCount;
             for (size_t i = 0; i < itemCount; i++) {
                 struct InfoContainer *container = (struct InfoContainer *)((uint8_t *) item + itemSize * i);
                 container->dump(container, fd);
             }
-            dprintf(fd, "[%s] count=%d <<\n", keyProperty->content, itemCount);
+            dprintf(fd, "[%s] count=%zu <<\n", keyProperty->content, itemCount);
         } else {
             DumpContentWithFd(keyProperty, self, key, item, totalSize, fd);
         }
@@ -494,13 +494,13 @@ static void Dump(struct InfoContainer *self, int32_t fd)
             ((struct InfoContainer *)item)->dump(item, fd);
             CONN_LOGI(CONN_WIFI_DIRECT, "[%s] <<", keyProperty->content);
         } else if (keyProperty->flag == CONTAINER_ARRAY_FLAG) {
-            CONN_LOGI(CONN_WIFI_DIRECT, "[%s] count=%d >>", keyProperty->content, itemCount);
+            CONN_LOGI(CONN_WIFI_DIRECT, "[%s] count=%zu >>", keyProperty->content, itemCount);
             size_t itemSize = totalSize / itemCount;
             for (size_t i = 0; i < itemCount; i++) {
                 struct InfoContainer *container = (struct InfoContainer *)((uint8_t *) item + itemSize * i);
                 container->dump(container, fd);
             }
-            CONN_LOGI(CONN_WIFI_DIRECT, "[%s] count=%d <<", keyProperty->content, itemCount);
+            CONN_LOGI(CONN_WIFI_DIRECT, "[%s] count=%zu <<", keyProperty->content, itemCount);
         } else {
             DumpContent(keyProperty, self, key, item, totalSize);
         }

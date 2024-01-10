@@ -1143,7 +1143,7 @@ int32_t ClientGetSessionCallbackByName(const char *sessionName, ISessionListener
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     char *tmpName = NULL;
     Anonymize(sessionName, &tmpName);
-    TRANS_LOGE(TRANS_SDK, "not found by sessionName=%S", tmpName);
+    TRANS_LOGE(TRANS_SDK, "not found by sessionName=%s", tmpName);
     AnonymizeFree(tmpName);
     return SOFTBUS_ERR;
 }

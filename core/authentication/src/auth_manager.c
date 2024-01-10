@@ -312,7 +312,7 @@ void RemoveAuthSessionKeyByIndex(int64_t authId, int32_t index)
     ReleaseAuthLock();
     AuthRemoveDeviceKey(udid, type);
     if ((ret == SOFTBUS_OK) && (connType != CONNECTION_ADDR_MAX) && (keyClear)) {
-        AUTH_LOGI(AUTH_CONN, "authId=%d key clear empty, Lnn offline" PRId64, authId);
+        AUTH_LOGI(AUTH_CONN, "key clear empty, Lnn offline, authId=%" PRId64, authId);
         LnnRequestLeaveSpecific(networkId, connType);
     }
 }
@@ -963,7 +963,7 @@ void AuthManagerSetAuthFinished(int64_t authSeq, const AuthSessionInfo *info)
         uint64_t localFeature;
         int32_t ret = LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &localFeature);
         if (ret != SOFTBUS_OK) {
-            AUTH_LOGE(AUTH_FSM, "ret = %d, local = %d", ret, localFeature);
+            AUTH_LOGE(AUTH_FSM, "ret = %d, local = %" PRIu64, ret, localFeature);
             return;
         }
         if (info->connInfo.info.bleInfo.protocol == BLE_GATT &&

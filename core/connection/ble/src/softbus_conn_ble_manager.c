@@ -630,7 +630,7 @@ static void BleClientConnected(uint32_t connectionId)
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, connection->addr, BT_MAC_LEN);
     ConnBleDevice *connectingDevice = g_bleManager.connecting;
     if (connectingDevice == NULL || StrCmpIgnoreCase(connectingDevice->addr, connection->addr) != 0) {
-        CONN_LOGE(CONN_BLE, "there is no connecting device, is it connected after timeout? connId=%u, addr=%d",
+        CONN_LOGE(CONN_BLE, "there is no connecting device, is it connected after timeout? connId=%u, addr=%s",
             connectionId, anomizeAddress);
         ConnBleUpdateConnectionRc(connection, 0, -1);
         ConnBleReturnConnection(&connection);
@@ -1821,7 +1821,7 @@ static int32_t ConflictReuseConnection(const char *address, const char *udid, ui
     size_t udidLen = strlen(udid);
     if (memcpy_s(ctx->addr, BT_MAC_LEN - 1, address, addressLen) != EOK ||
         memcpy_s(ctx->udid, UDID_BUF_LEN - 1, udid, udidLen) != EOK) {
-        CONN_LOGE(CONN_BLE, "memcpy_s address or udid failed, address len=%u, udid len=%u, reqId=%u, addr=%s, "
+        CONN_LOGE(CONN_BLE, "memcpy_s address or udid failed, address len=%zu, udid len=%zu, reqId=%u, addr=%s, "
             "udid=%s", addressLen, udidLen, requestId, anomizeAddress, anomizeUdid);
         SoftBusFree(ctx);
         SoftBusFree(waitResult);
@@ -1925,7 +1925,7 @@ static void ConflictOccupy(const char *udid, int32_t timeout)
         }
         size_t udidLen = strlen(udid);
         if (memcpy_s(copyUdid, UDID_BUF_LEN - 1, udid, udidLen) != EOK) {
-            CONN_LOGE(CONN_BLE, "memcpy_s udid failed, source len=%u, destination len=%u, udid=%s",
+            CONN_LOGE(CONN_BLE, "memcpy_s udid failed, source len=%zu, destination len=%u, udid=%s",
                 udidLen, UDID_BUF_LEN, anomizeUdid);
             SoftBusFree(copyUdid);
             break;
@@ -1952,7 +1952,7 @@ static void ConflictOccupy(const char *udid, int32_t timeout)
             break;
         }
         if (memcpy_s(prevent->udid, UDID_BUF_LEN - 1, udid, udidLen) != EOK) {
-            CONN_LOGE(CONN_BLE, "memcpy_s udid to prevent object failed, source length=%u, destination len=%u, "
+            CONN_LOGE(CONN_BLE, "memcpy_s udid to prevent object failed, source length=%zu, destination len=%u, "
                 "udid=%s", udidLen, UDID_BUF_LEN, anomizeUdid);
             SoftBusFree(copyUdid);
             SoftBusFree(prevent);

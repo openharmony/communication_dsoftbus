@@ -868,12 +868,12 @@ static int32_t GetFeatureCap(const char *networkId, uint64_t *local, uint64_t *r
 {
     int32_t ret = LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, local);
     if (ret != SOFTBUS_OK || *local < 0) {
-        LNN_LOGE(LNN_LANE, "LnnGetLocalNumInfo err, ret = %d, local = %d", ret, *local);
+        LNN_LOGE(LNN_LANE, "LnnGetLocalNumInfo err, ret = %d, local = %" PRIu64, ret, *local);
         return SOFTBUS_ERR;
     }
     ret = LnnGetRemoteNumU64Info(networkId, NUM_KEY_FEATURE_CAPA, remote);
     if (ret != SOFTBUS_OK || *remote < 0) {
-        LNN_LOGE(LNN_LANE, "LnnGetRemoteNumInfo err, ret = %d, remote = %d", ret, *remote);
+        LNN_LOGE(LNN_LANE, "LnnGetRemoteNumInfo err, ret = %d, remote = %" PRIu64, ret, *remote);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

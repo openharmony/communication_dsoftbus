@@ -89,7 +89,7 @@ static int32_t GetStationFrequencyWithFilter(void)
         int32_t channelArray[CHANNEL_ARRAY_NUM_MAX];
         size_t channelArraySize = CHANNEL_ARRAY_NUM_MAX;
         ret = GetChannel5GListIntArray(channelArray, &channelArraySize);
-        CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get channel list failed", ret);
+        CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get channel list failed");
 
         int32_t channel = netWorkUtils->frequencyToChannel(frequency);
         if (netWorkUtils->isInChannelList(channel, channelArray, channelArraySize)) {
