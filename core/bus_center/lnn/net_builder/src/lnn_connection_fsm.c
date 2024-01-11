@@ -1046,8 +1046,7 @@ static int32_t InitConnectionStateMachine(LnnConnectionFsm *connFsm)
 {
     int32_t i;
 
-    if (sprintf_s(connFsm->fsmName, LNN_CONNECTION_FSM_NAME_LEN, "%s-%u", BUSCENTER_CONN_FSM_HANDLER_NAME,
-        connFsm->id) == -1) {
+    if (sprintf_s(connFsm->fsmName, LNN_CONNECTION_FSM_NAME_LEN, "LnnConnFsm-%u", connFsm->id) == -1) {
         LNN_LOGE(LNN_BUILDER, "format lnn connection fsm name failed");
         return SOFTBUS_ERR;
     }
