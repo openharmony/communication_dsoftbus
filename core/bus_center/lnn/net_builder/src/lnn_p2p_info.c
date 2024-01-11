@@ -196,7 +196,7 @@ static void ProcessSyncP2pInfo(void *para)
             continue;
         }
         if (LnnSendSyncInfoMsg(LNN_INFO_TYPE_P2P_INFO, info[i].networkId, (uint8_t *)msg, len, NULL) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "sync p2p info to %s fail", info[i].deviceName);
+            LNN_LOGE(LNN_BUILDER, "sync p2p info fail. deviceName=%{public}s", info[i].deviceName);
         }
     }
     cJSON_free(msg);
@@ -238,7 +238,7 @@ static void ProcessSyncWifiDirectAddr(void *para)
         if (LnnSendSyncInfoMsg(LNN_INFO_TYPE_WIFI_DIRECT, info[i].networkId, (uint8_t *)msg, len, NULL) != SOFTBUS_OK) {
             char *anonyNetworkId = NULL;
             Anonymize(info[i].networkId, &anonyNetworkId);
-            LNN_LOGE(LNN_BUILDER, "sync wifidirect addr to %s fail", anonyNetworkId);
+            LNN_LOGE(LNN_BUILDER, "sync wifidirect addr fail. anonyNetworkId=%{public}s", anonyNetworkId);
             AnonymizeFree(anonyNetworkId);
         }
     }
@@ -249,7 +249,7 @@ static void ProcessSyncWifiDirectAddr(void *para)
 
 static void OnReceiveP2pSyncInfoMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len)
 {
-    LNN_LOGI(LNN_BUILDER, "Recv p2p info, type=%d, len=%d", type, len);
+    LNN_LOGI(LNN_BUILDER, "Recv p2p info, type=%{public}d, len=%{public}d", type, len);
     if (type != LNN_INFO_TYPE_P2P_INFO) {
         return;
     }
@@ -268,7 +268,7 @@ static void OnReceiveP2pSyncInfoMsg(LnnSyncInfoType type, const char *networkId,
 
 static void OnReceiveWifiDirectSyncAddr(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len)
 {
-    LNN_LOGI(LNN_BUILDER, "Recv wifidirect addr, type=%d, len=%d", type, len);
+    LNN_LOGI(LNN_BUILDER, "Recv wifidirect addr, type=%{public}d, len=%{public}d", type, len);
     if (type != LNN_INFO_TYPE_WIFI_DIRECT) {
         LNN_LOGI(LNN_BUILDER, "lnnsyncinfo type is null");
         return;
@@ -291,7 +291,7 @@ int32_t LnnSyncP2pInfo(void)
 {
     int32_t rc = LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), ProcessSyncP2pInfo, NULL);
     if (rc != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "async p2p info fail, rc=%d", rc);
+        LNN_LOGE(LNN_BUILDER, "async p2p info fail, rc=%{public}d", rc);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -301,7 +301,7 @@ int32_t LnnSyncWifiDirectAddr(void)
 {
     int32_t rc = LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), ProcessSyncWifiDirectAddr, NULL);
     if (rc != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "async wifidirect addr fail, rc=%d", rc);
+        LNN_LOGE(LNN_BUILDER, "async wifidirect addr fail, rc=%{public}d", rc);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

@@ -39,7 +39,7 @@ static int32_t CheckSoftBusSysPermission(int32_t callingUid)
         COMM_LOGE(COMM_PERM, "softbus CheckPermission fail");
         return SOFTBUS_PERMISSION_DENIED;
     }
-    COMM_LOGI(COMM_PERM, "CheckSoftBusSysPermission uid:%d success", callingUid);
+    COMM_LOGI(COMM_PERM, "CheckSoftBusSysPermission success. uid=%{public}d", callingUid);
     return SOFTBUS_OK;
 }
 

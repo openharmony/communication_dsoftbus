@@ -43,7 +43,7 @@ static const GroupAuthManager *InitHichain(void)
 {
     int32_t ret = InitDeviceAuthService();
     if (ret != 0) {
-        AUTH_LOGE(AUTH_INIT, "hichain InitDeviceAuthService failed err=%d", ret);
+        AUTH_LOGE(AUTH_INIT, "hichain InitDeviceAuthService failed err=%{public}d", ret);
         return NULL;
     }
     const GroupAuthManager *gaIns = GetGaInstance();
@@ -72,7 +72,7 @@ int32_t RegChangeListener(const char *appId, DataChangeListener *listener)
 
     int32_t ret = gmInstance->regDataChangeListener(appId, listener);
     AUTH_CHECK_AND_RETURN_RET_LOGE(ret == 0, SOFTBUS_ERR, AUTH_HICHAIN,
-        "hichain regDataChangeListener failed=%d", ret);
+        "hichain regDataChangeListener failed=%{public}d", ret);
 
     return SOFTBUS_OK;
 }
@@ -86,7 +86,7 @@ int32_t UnregChangeListener(const char *appId)
         "hichain GetGmInstance failed");
     int32_t ret = gmInstance->unRegDataChangeListener(appId);
     AUTH_CHECK_AND_RETURN_RET_LOGE(ret == 0, SOFTBUS_ERR, AUTH_HICHAIN,
-        "hichain unRegDataChangeListener failed=%d", ret);
+        "hichain unRegDataChangeListener failed=%{public}d", ret);
 
     return SOFTBUS_OK;
 }
@@ -103,14 +103,15 @@ int32_t AuthDevice(int64_t authReqId, const char *authParams, const DeviceAuthCa
     for (int32_t i = 1; i < RETRY_TIMES; i++) {
         int32_t ret = g_hichain->authDevice(ANY_OS_ACCOUNT, authReqId, authParams, cb);
         if (ret == HC_SUCCESS) {
-            AUTH_LOGI(AUTH_HICHAIN, "hichain call authDevice success, times=%d", i);
+            AUTH_LOGI(AUTH_HICHAIN, "hichain call authDevice success, times=%{public}d", i);
             return SOFTBUS_OK;
         }
         if (ret != HC_ERR_INVALID_PARAMS) {
-            AUTH_LOGE(AUTH_HICHAIN, "hichain call authDevice failed, err=%d", ret);
+            AUTH_LOGE(AUTH_HICHAIN, "hichain call authDevice failed, err=%{public}d", ret);
             return SOFTBUS_ERR;
         }
-        AUTH_LOGW(AUTH_HICHAIN, "hichain retry call authDevice, current retry times=%d, err=%d", i, ret);
+        AUTH_LOGW(AUTH_HICHAIN,
+            "hichain retry call authDevice, current retry times=%{public}d, err=%{public}d", i, ret);
         (void)SoftBusSleepMs(RETRY_MILLSECONDS);
     }
     return SOFTBUS_ERR;
@@ -126,7 +127,8 @@ int32_t ProcessAuthData(int64_t authSeq, const uint8_t *data, uint32_t len, Devi
     AUTH_CHECK_AND_RETURN_RET_LOGE(g_hichain != NULL, SOFTBUS_ERR, AUTH_HICHAIN, "hichain not initialized");
 
     int32_t ret = g_hichain->processData(authSeq, data, len, cb);
-    AUTH_CHECK_AND_RETURN_RET_LOGE(ret == 0, SOFTBUS_ERR, AUTH_HICHAIN, "hichain processData failed: %d", ret);
+    AUTH_CHECK_AND_RETURN_RET_LOGE(ret == 0, SOFTBUS_ERR, AUTH_HICHAIN,
+        "hichain processData failed. ret=%{public}d", ret);
 
     return SOFTBUS_OK;
 }

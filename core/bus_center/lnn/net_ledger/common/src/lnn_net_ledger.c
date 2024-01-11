@@ -77,7 +77,7 @@ static void LnnRestoreLocalDeviceInfo()
         (void)LnnGetLocalDevInfo(&info);
         char *anonyNetworkId = NULL;
         Anonymize(info.networkId, &anonyNetworkId);
-        LNN_LOGI(LNN_LEDGER, "load local deviceInfo success, networkId=%s", anonyNetworkId);
+        LNN_LOGI(LNN_LEDGER, "load local deviceInfo success, networkId=%{public}s", anonyNetworkId);
         int64_t accountId = 0;
         AnonymizeFree(anonyNetworkId);
         if (LnnGetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, &accountId) == SOFTBUS_OK) {
@@ -85,7 +85,7 @@ static void LnnRestoreLocalDeviceInfo()
                 info.stateVersion++;
             }
         }
-        LNN_LOGI(LNN_LEDGER, "load local deviceInfo stateVersion=%d", info.stateVersion);
+        LNN_LOGI(LNN_LEDGER, "load local deviceInfo stateVersion=%{public}d", info.stateVersion);
         if (LnnSetLocalNumInfo(NUM_KEY_STATE_VERSION, info.stateVersion) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "set state version fail");
         }
@@ -160,7 +160,7 @@ static int32_t LnnGetNodeKeyInfoLocal(const char *networkId, int key, uint8_t *i
         case NODE_KEY_P2P_IP_ADDRESS:
             return LnnGetLocalStrInfo(STRING_KEY_P2P_IP, (char *)info, infoLen);
         default:
-            LNN_LOGE(LNN_LEDGER, "invalid node key type=%d", key);
+            LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
             return SOFTBUS_ERR;
     }
 }
@@ -195,7 +195,7 @@ static int32_t LnnGetNodeKeyInfoRemote(const char *networkId, int key, uint8_t *
         case NODE_KEY_P2P_IP_ADDRESS:
             return LnnGetRemoteStrInfo(networkId, STRING_KEY_P2P_IP, (char *)info, infoLen);
         default:
-            LNN_LOGE(LNN_LEDGER, "invalid node key type=%d", key);
+            LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
             return SOFTBUS_ERR;
     }
 }
@@ -270,7 +270,7 @@ int32_t LnnGetNodeKeyInfoLen(int32_t key)
         case NODE_KEY_P2P_IP_ADDRESS:
             return IP_LEN;
         default:
-            LNN_LOGE(LNN_LEDGER, "invalid node key type=%d", key);
+            LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
             return SOFTBUS_ERR;
     }
 }

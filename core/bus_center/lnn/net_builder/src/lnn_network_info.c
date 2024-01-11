@@ -60,7 +60,7 @@ static uint32_t ConvertMsgToCapability(uint32_t *capability, const uint8_t *msg,
 
 static void PostNetchangedInfo(const char *networkId, ConnectionAddrType type)
 {
-    LNN_LOGI(LNN_BUILDER, "start post offline, conntype=%d", type);
+    LNN_LOGI(LNN_BUILDER, "start post offline, conntype=%{public}d", type);
     if (LnnRequestLeaveSpecific(networkId, type) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "send request to NetBuilder fail");
     }
@@ -101,7 +101,7 @@ static void UpdateNetworkInfo(const char *udid)
 
 static void OnReceiveCapaSyncInfoMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len)
 {
-    LNN_LOGI(LNN_BUILDER, "Recv capability infoType=%d, len: %d", type, len);
+    LNN_LOGI(LNN_BUILDER, "Recv capability info. type=%{public}d, len=%{public}d", type, len);
     if (type != LNN_INFO_TYPE_CAPABILITY) {
         return;
     }
@@ -116,7 +116,7 @@ static void OnReceiveCapaSyncInfoMsg(LnnSyncInfoType type, const char *networkId
         LNN_LOGE(LNN_BUILDER, "convert msg to capability fail");
         return;
     }
-    LNN_LOGI(LNN_BUILDER, "capability=%d", capability);
+    LNN_LOGI(LNN_BUILDER, "capability=%{public}d", capability);
     // update ledger
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
@@ -193,7 +193,8 @@ static void SendNetCapabilityToRemote(uint32_t netCapability, uint32_t type)
         }
         if (IsNeedToSend(&nodeInfo, type)) {
             int32_t ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, netInfo[i].networkId, msg, MSG_LEN, NULL);
-            LNN_LOGE(LNN_BUILDER, "sync network info ret=%d to %s.", ret, netInfo[i].deviceName);
+            LNN_LOGE(LNN_BUILDER,
+                "sync network info ret=%{public}d, deviceName=%{public}s.", ret, netInfo[i].deviceName);
         }
     }
     SoftBusFree(netInfo);
@@ -202,7 +203,7 @@ static void SendNetCapabilityToRemote(uint32_t netCapability, uint32_t type)
 
 static void WifiStateProcess(uint32_t netCapability, bool isSend)
 {
-    LNN_LOGI(LNN_BUILDER, "wifi state change netCapability=%u, isSend=%d", netCapability, isSend);
+    LNN_LOGI(LNN_BUILDER, "wifi state change. netCapability=%{public}u, isSend=%{public}d", netCapability, isSend);
     if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t)netCapability) != SOFTBUS_OK) {
         return;
     }
@@ -293,7 +294,7 @@ static void WifiStateEventHandler(const LnnEventBasicInfo *info)
         LNN_LOGE(LNN_BUILDER, "wifi state handler get capability fail from local.");
         return;
     }
-    LNN_LOGI(LNN_BUILDER, "WifiStateEventHandler WifiState=%d", wifiState);
+    LNN_LOGI(LNN_BUILDER, "WifiStateEventHandler WifiState=%{public}d", wifiState);
     if (g_wifiState == wifiState) {
         return;
     }
@@ -316,7 +317,7 @@ static void BtStateChangeEventHandler(const LnnEventBasicInfo *info)
     const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
     SoftBusBtState btState = (SoftBusBtState)event->status;
     bool isSend = false;
-    LNN_LOGI(LNN_BUILDER, "bt state change btState=%d", btState);
+    LNN_LOGI(LNN_BUILDER, "bt state change btState=%{public}d", btState);
     switch (btState) {
         case SOFTBUS_BR_TURN_ON:
             (void)LnnSetNetCapability(&netCapability, BIT_BR);
@@ -331,7 +332,7 @@ static void BtStateChangeEventHandler(const LnnEventBasicInfo *info)
             return;
     }
 
-    LNN_LOGI(LNN_BUILDER, "bt state change netCapability=%d, isSend=%d",
+    LNN_LOGI(LNN_BUILDER, "bt state change. netCapability=%{public}d, isSend=%{public}d",
         netCapability, isSend);
     if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t)netCapability) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "set cap to local ledger fail");
@@ -358,7 +359,7 @@ static bool IsSupportApCoexist(const char *coexistCap)
     for (int i = 0; i < cJSON_GetArraySize(coexistObj); i++) {
         cJSON *subItems = cJSON_GetArrayItem(coexistObj, i);
         if (!cJSON_IsArray(subItems)) {
-            LNN_LOGE(LNN_BUILDER, "item %d is not array", i);
+            LNN_LOGE(LNN_BUILDER, "item is not array, i=%{public}d", i);
             continue;
         }
 
@@ -374,11 +375,11 @@ static bool IsSupportApCoexist(const char *coexistCap)
 
             enum WifiDirectApiRole mode = WIFI_DIRECT_API_ROLE_NONE;
             if (!GetJsonObjectInt32Item(subItem, "MODE", (int32_t *)&mode)) {
-                LNN_LOGE(LNN_BUILDER, "%s get mode failed", interface);
+                LNN_LOGE(LNN_BUILDER, "interface get mode failed. interface=%{public}s", interface);
                 continue;
             }
 
-            LNN_LOGI(LNN_BUILDER, "interface=%s mode=%d", interface, mode);
+            LNN_LOGI(LNN_BUILDER, "interface=%{public}s, mode=%{public}d", interface, mode);
             if ((mode & WIFI_DIRECT_API_ROLE_AP)) {
                 apCap = true;
             } else if ((mode & WIFI_DIRECT_API_ROLE_GC) || (mode & WIFI_DIRECT_API_ROLE_GO)) {
@@ -400,10 +401,10 @@ static void InitWifiDirectCapability(void)
     g_isWifiDirectSupported = SoftBusHasWifiDirectCapability();
     char *coexistCap = SoftBusGetWifiInterfaceCoexistCap();
     LNN_CHECK_AND_RETURN_LOGE(coexistCap, LNN_INIT, "coexistCap is null");
-    LNN_LOGI(LNN_BUILDER, "coexistCap=%s", coexistCap);
+    LNN_LOGI(LNN_BUILDER, "coexistCap=%{public}s", coexistCap);
     g_isApCoexistSupported = IsSupportApCoexist(coexistCap);
     SoftBusFree(coexistCap);
-    LNN_LOGI(LNN_BUILDER, "g_isWifiDirectSupported=%d g_isApCoexistSupported=%d",
+    LNN_LOGI(LNN_BUILDER, "g_isWifiDirectSupported=%{public}d, g_isApCoexistSupported=%{public}d",
         g_isWifiDirectSupported, g_isApCoexistSupported);
 }
 

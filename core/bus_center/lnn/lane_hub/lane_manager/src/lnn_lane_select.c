@@ -84,7 +84,7 @@ static int32_t GetLaneDefaultLink(LaneTransType transType, LaneLinkType *optLink
             GetStreamDefaultLink(defaultLink, &index);
             break;
         default:
-            LNN_LOGE(LNN_LANE, "lane type=%d is not supported", transType);
+            LNN_LOGE(LNN_LANE, "lane type is not supported. type=%{public}d", transType);
             return SOFTBUS_ERR;
     }
     *linkNum = 0;
@@ -151,7 +151,7 @@ static char *GetLinkTypeStrng(LaneLinkType preferredLink)
 
 static void DumpPreferredLink(LaneLinkType preferredLink, uint32_t priority)
 {
-    LNN_LOGD(LNN_LANE, "the %u priority link=%s", priority, GetLinkTypeStrng(preferredLink));
+    LNN_LOGD(LNN_LANE, "priority=%{public}u, linkType=%{public}s", priority, GetLinkTypeStrng(preferredLink));
 }
 
 static void SelectByPreferredLink(const char *networkId, const LaneSelectParam *request,
@@ -209,7 +209,7 @@ static int32_t PreProcLaneSelect(const char *networkId, const LaneSelectParam *r
     if (!LnnGetOnlineStateById(networkId, CATEGORY_NETWORK_ID)) {
         char *anonyNetworkId = NULL;
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGE(LNN_LANE, "device not online, cancel selectLane, networkId=%s", anonyNetworkId);
+        LNN_LOGE(LNN_LANE, "device not online, cancel selectLane, networkId=%{public}s", anonyNetworkId);
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_ERR;
     }
@@ -221,12 +221,12 @@ static int32_t GetListScore(const char *networkId, uint32_t expectedBw, const La
 {
     for (uint32_t i = 0; i < resNum; ++i) {
         if (resList[i] < 0 || resList[i] >= LANE_LINK_TYPE_BUTT) {
-            LNN_LOGE(LNN_LANE, "LaneLinkType i=%d is invalid, %d", i, resList[i]);
+            LNN_LOGE(LNN_LANE, "LaneLinkType is invalid, i=%{public}d, resList[i]=%{public}d", i, resList[i]);
             continue;
         }
         LinkAttribute *linkAttr = GetLinkAttrByLinkType(resList[i]);
         resListScore[resList[i]] = linkAttr->GetLinkScore(networkId, expectedBw);
-        LNN_LOGI(LNN_LANE, "LaneLinkType=%d, Score=%d",
+        LNN_LOGI(LNN_LANE, "LaneLinkType=%{public}d, Score=%{public}d",
             resList[i], resListScore[resList[i]]);
     }
     return SOFTBUS_OK;
@@ -270,7 +270,8 @@ static int32_t AdjustLanePriority(const char *networkId, const LaneSelectParam *
         }
     }
     for (uint32_t k = 0; k < resNum; ++k) {
-        LNN_LOGD(LNN_LANE, "adjusted linklist , priority link=%d, score=%d", resList[k], resListScore[resList[k]]);
+        LNN_LOGD(LNN_LANE, "adjusted linklist, priority link=%{public}d, score=%{public}d", resList[k],
+            resListScore[resList[k]]);
     }
     return SOFTBUS_OK;
 }
@@ -318,7 +319,7 @@ int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *req
     if (!LnnGetOnlineStateById(networkId, CATEGORY_NETWORK_ID)) {
         char *anonyNetworkId = NULL;
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGE(LNN_LANE, "device not online, cancel selectLane by qos, networkId=%s", anonyNetworkId);
+        LNN_LOGE(LNN_LANE, "device not online, cancel selectLane by qos, networkId=%{public}s", anonyNetworkId);
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_ERR;
     }
@@ -336,7 +337,7 @@ int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *req
     recommendList->linkTypeNum = 0;
     for (uint32_t i = 0; i < laneLinkList.linkTypeNum; i++) {
         recommendList->linkType[recommendList->linkTypeNum] = laneLinkList.linkType[i];
-        LNN_LOGI(LNN_LANE, "expect linklist the %u priority link=%d",
+        LNN_LOGI(LNN_LANE, "expect linklist linkTypeNum=%{public}u, priorityLinkType=%{public}d",
             recommendList->linkTypeNum, laneLinkList.linkType[i]);
         recommendList->linkTypeNum++;
     }

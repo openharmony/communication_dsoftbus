@@ -31,7 +31,7 @@ static bool IsPassDuplicateCheck(SeqVerifyInfo *seqVerifyInfo, int32_t recvSeq)
     uint32_t offset = (uint32_t)(seqVerifyInfo->maxSeq - recvSeq);
     uint64_t isRepeat = seqVerifyInfo->recvBitmap & (0x1UL << offset);
     if (isRepeat) {
-        COMM_LOGI(COMM_VERIFY, "duplicated package seq[%d].", recvSeq);
+        COMM_LOGI(COMM_VERIFY, "duplicated package seq. recvSeq=%{public}d", recvSeq);
         return false;
     }
     seqVerifyInfo->recvBitmap |= (0x1UL << offset);
@@ -46,7 +46,7 @@ static bool IsPassOverMaxCheck(SeqVerifyInfo *seqVerifyInfo, int32_t recvSeq)
     }
 
     if (recvSeq - seqVerifyInfo->minSeq >= MAX_SEQ_BIAS) {
-        COMM_LOGE(COMM_VERIFY, "seq bias reach max[%d].", MAX_SEQ_BIAS);
+        COMM_LOGE(COMM_VERIFY, "seq bias reach max. MAX_SEQ_BIAS=%{public}d", MAX_SEQ_BIAS);
         return false;
     }
     uint32_t seqOffset = (uint32_t)(recvSeq - seqVerifyInfo->maxSeq + 1);
@@ -155,7 +155,7 @@ static bool IsPassFlipNegativeCheck(SeqVerifyInfo *seqVerifyInfo, int32_t recvSe
 bool IsPassSeqCheck(SeqVerifyInfo *seqVerifyInfo, int32_t recvSeq)
 {
     if (seqVerifyInfo == NULL) {
-        COMM_LOGE(COMM_VERIFY, "%s:invalid param.", __func__);
+        COMM_LOGE(COMM_VERIFY, "invalid param.");
         return false;
     }
     bool isDifferentSign = IsDifferentSign(seqVerifyInfo->minSeq, seqVerifyInfo->maxSeq);

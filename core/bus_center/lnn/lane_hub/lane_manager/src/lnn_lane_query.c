@@ -102,7 +102,7 @@ static int32_t GetLaneResource(LaneTransType transType, LaneLinkType *optLink, u
             GetStreamLaneLink(defaultLink, &index, isHighBand);
             break;
         default:
-            LNN_LOGE(LNN_LANE, "lane type=%d is not supported", transType);
+            LNN_LOGE(LNN_LANE, "lane type is not supported, transType=%{public}d", transType);
             return SOFTBUS_ERR;
     }
     *linkNum = 0;
@@ -118,12 +118,12 @@ static bool GetNetCap(const char *networkId, int32_t *local, int32_t *remote)
 {
     int32_t ret = LnnGetLocalNumInfo(NUM_KEY_NET_CAP, local);
     if (ret != SOFTBUS_OK || *local < 0) {
-        LNN_LOGE(LNN_LANE, "LnnGetLocalNumInfo err, ret = %d, local = %d", ret, *local);
+        LNN_LOGE(LNN_LANE, "LnnGetLocalNumInfo err, ret=%{public}d, local=%{public}d", ret, *local);
         return false;
     }
     ret = LnnGetRemoteNumInfo(networkId, NUM_KEY_NET_CAP, remote);
     if (ret != SOFTBUS_OK || *remote < 0) {
-        LNN_LOGE(LNN_LANE, "LnnGetRemoteNumInfo err, ret = %d, remote = %d", ret, *remote);
+        LNN_LOGE(LNN_LANE, "LnnGetRemoteNumInfo err, ret=%{public}d, remote=%{public}d", ret, *remote);
         return false;
     }
     return true;
@@ -137,14 +137,14 @@ static int32_t BrLinkState(const char *networkId)
         return SOFTBUS_ERR;
     }
     if (!(local & (1 << BIT_BR))) {
-        LNN_LOGE(LNN_LANE, "local bluetooth close, local=%d", local);
+        LNN_LOGE(LNN_LANE, "local bluetooth close, local=%{public}d", local);
         return SOFTBUS_BLUETOOTH_OFF;
     }
     if (!(remote & (1 << BIT_BR))) {
-        LNN_LOGE(LNN_LANE, "remote bluetooth close, remote=%d", remote);
+        LNN_LOGE(LNN_LANE, "remote bluetooth close, remote=%{public}d", remote);
         return SOFTBUS_BLUETOOTH_OFF;
     }
-    LNN_LOGI(LNN_LANE, "br link ok, local=%d, remote=%d", local, remote);
+    LNN_LOGI(LNN_LANE, "br link ok, local=%{public}d, remote=%{public}d", local, remote);
     return SOFTBUS_OK;
 }
 
@@ -156,14 +156,14 @@ static int32_t BleLinkState(const char *networkId)
         return SOFTBUS_ERR;
     }
     if (!(local & (1 << BIT_BLE))) {
-        LNN_LOGE(LNN_LANE, "local bluetooth close, local=%d", local);
+        LNN_LOGE(LNN_LANE, "local bluetooth close, local=%{public}d", local);
         return SOFTBUS_BLUETOOTH_OFF;
     }
     if (!(remote & (1 << BIT_BLE))) {
-        LNN_LOGE(LNN_LANE, "remote bluetooth close, remote=%d", remote);
+        LNN_LOGE(LNN_LANE, "remote bluetooth close, remote=%{public}d", remote);
         return SOFTBUS_BLUETOOTH_OFF;
     }
-    LNN_LOGI(LNN_LANE, "ble link ok, local=%d, remote=%d", local, remote);
+    LNN_LOGI(LNN_LANE, "ble link ok, local=%{public}d, remote=%{public}d", local, remote);
     return SOFTBUS_OK;
 }
 
@@ -188,14 +188,14 @@ static int32_t WlanLinkState(const char *networkId)
         return SOFTBUS_ERR;
     }
     if (!(local & (1 << BIT_WIFI))) {
-        LNN_LOGE(LNN_LANE, "local wifi close, local=%d", local);
+        LNN_LOGE(LNN_LANE, "local wifi close, local=%{public}d", local);
         return SOFTBUS_WIFI_DISCONNECT;
     }
     if (!(remote & (1 << BIT_WIFI))) {
-        LNN_LOGE(LNN_LANE, "remote wifi close, remote=%d", remote);
+        LNN_LOGE(LNN_LANE, "remote wifi close, remote=%{public}d", remote);
         return SOFTBUS_WIFI_DISCONNECT;
     }
-    LNN_LOGI(LNN_LANE, "wifi link ok, local=%d, remote=%d", local, remote);
+    LNN_LOGI(LNN_LANE, "wifi link ok, local=%{public}d, remote=%{public}d", local, remote);
     return SOFTBUS_OK;
 }
 
@@ -210,7 +210,7 @@ static int32_t P2pLinkState(const char *networkId)
         return SOFTBUS_ERR;
     }
     if (((local & (1 << BIT_WIFI_P2P)) == 0) || ((remote & (1 << BIT_WIFI_P2P)) == 0)) {
-        LNN_LOGE(LNN_LANE, "p2p capa disable, local=%d, remote=%d", local, remote);
+        LNN_LOGE(LNN_LANE, "p2p capa disable, local=%{public}d, remote=%{public}d", local, remote);
         return SOFTBUS_P2P_NOT_SUPPORT;
     }
 
@@ -263,15 +263,15 @@ static LinkState g_linkState[LANE_LINK_TYPE_BUTT] = {
 static int32_t IsValidLaneLink(const char *networkId, LaneLinkType linkType)
 {
     if ((linkType < 0) || (linkType >= LANE_LINK_TYPE_BUTT)) {
-        LNN_LOGE(LNN_LANE, "invalid linkType=%d", linkType);
+        LNN_LOGE(LNN_LANE, "invalid linkType=%{public}d", linkType);
         return SOFTBUS_INVALID_PARAM;
     }
     if (!g_linkState[linkType].available) {
-        LNN_LOGE(LNN_LANE, "invalid QueryLink, linkType=%d", linkType);
+        LNN_LOGE(LNN_LANE, "invalid QueryLink, linkType=%{public}d", linkType);
         return SOFTBUS_ERR;
     }
     if (g_linkState[linkType].QueryLink == NULL) {
-        LNN_LOGE(LNN_LANE, "invalid QueryLink, linkType=%d", linkType);
+        LNN_LOGE(LNN_LANE, "invalid QueryLink, linkType=%{public}d", linkType);
         return SOFTBUS_ERR;
     }
     return g_linkState[linkType].QueryLink(networkId);
@@ -310,7 +310,7 @@ static int32_t QueryByRequireLink(const LaneQueryInfo *queryInfo, const QosInfo 
     for (uint32_t i = 0; i < linkNum; i++) {
         ret = IsValidLaneLink(queryInfo->networkId, optLink[i]);
         if (ret == SOFTBUS_OK) {
-            LNN_LOGI(LNN_LANE, "high require get enable Link, linktype=%d", optLink[i]);
+            LNN_LOGI(LNN_LANE, "high require get enable Link, linktype=%{public}d", optLink[i]);
             return ret;
         }
     }
@@ -330,7 +330,7 @@ static int32_t QueryByDefaultLink(const LaneQueryInfo *queryInfo)
     for (uint32_t i = 0; i < linkNum; i++) {
         ret = IsValidLaneLink(queryInfo->networkId, optLink[i]);
         if (ret == SOFTBUS_OK) {
-            LNN_LOGI(LNN_LANE, "default get enable Link, linktype=%d", optLink[i]);
+            LNN_LOGI(LNN_LANE, "default get enable Link, linktype=%{public}d", optLink[i]);
             return ret;
         }
     }
@@ -345,11 +345,11 @@ int32_t QueryLaneResource(const LaneQueryInfo *queryInfo, const QosInfo *qosInfo
     }
     int32_t ret = SOFTBUS_ERR;
     if (qosInfo->minBW > 0) {
-        LNN_LOGI(LNN_LANE, "Query lane by prefer linklist, transType=%d, minBW=%d",
+        LNN_LOGI(LNN_LANE, "Query lane by prefer linklist, transType=%{public}d, minBW=%{public}d",
             queryInfo->transType, qosInfo->minBW);
         ret = QueryByRequireLink(queryInfo, qosInfo);
     } else {
-        LNN_LOGI(LNN_LANE, "Query lane by default linklist, transType=%d", queryInfo->transType);
+        LNN_LOGI(LNN_LANE, "Query lane by default linklist, transType=%{public}d", queryInfo->transType);
         ret = QueryByDefaultLink(queryInfo);
     }
     return ret;

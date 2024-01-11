@@ -47,7 +47,9 @@ static uint32_t GetAuthRequestWaitNum(const AuthRequest *request)
             continue;
         }
         if (request->addTime - item->addTime < AUTH_REQUEST_TIMTOUR) {
-            AUTH_LOGD(AUTH_CONN, "requestId=%u addr same to requestId=%u", request->requestId, item->requestId);
+            AUTH_LOGD(AUTH_CONN,
+                "The two request addr are same. requestId1=%{public}u, requestId2=%{public}u",
+                request->requestId, item->requestId);
             num++;
             continue;
         }
@@ -170,7 +172,7 @@ void DelAuthRequest(uint32_t requestId)
         ReleaseAuthLock();
         return;
     }
-    AUTH_LOGD(AUTH_CONN, "del auth request requestId=%u", requestId);
+    AUTH_LOGD(AUTH_CONN, "del auth request requestId=%{public}u", requestId);
     ListDelete(&item->node);
     SoftBusFree(item);
     ReleaseAuthLock();

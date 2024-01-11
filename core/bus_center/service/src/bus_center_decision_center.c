@@ -57,12 +57,12 @@ static void LeaveSpecificBrBleNetwork(const char *addr)
 
     int32_t ret = LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_BR);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGW(LNN_STATE, "leave br network failed, ret=%d", ret);
+        LNN_LOGW(LNN_STATE, "leave br network failed, ret=%{public}d", ret);
     }
 
     ret = LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_BLE);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGW(LNN_STATE, "leave ble nework failed, ret=%d", ret);
+        LNN_LOGW(LNN_STATE, "leave ble nework failed, ret=%{public}d", ret);
     }
     LNN_LOGI(LNN_STATE, "leave br and ble network finished");
 }
@@ -85,7 +85,8 @@ static void HandleBrConnectException(const ConnectOption *option, int32_t errorC
 
     if (target != NULL) {
         target->count++;
-        LNN_LOGD(LNN_STATE, "exception connect info: errorCode=%d, count=%d", target->errorCode, target->count);
+        LNN_LOGD(LNN_STATE,
+            "exception connect info: errorCode=%{public}d, count=%{public}d", target->errorCode, target->count);
         if ((target->errorCode == HCI_ERR_BR_CONN_PAGE_TIMEOUT && target->count >= BR_PAGETIMEOUT_OFFLINE_COUNT) ||
             (target->errorCode == HCI_ERR_BR_CONN_PEER_NOT_SUPORT_SDP_RECODE &&
             target->count >= BR_SDP_NOT_SUPORT_OFFLINE_COUNT)) {
@@ -110,7 +111,7 @@ static void HandleBrConnectException(const ConnectOption *option, int32_t errorC
     connInfo->errorCode = errorCode;
     connInfo->count = 1;
 
-    LNN_LOGD(LNN_STATE, "exception connect info: errorCode=%d, count=1", errorCode);
+    LNN_LOGD(LNN_STATE, "exception connect info: errorCode=%{public}d, count=1", errorCode);
     ListAdd(&g_exceptionConnMgr.connections->list, &connInfo->node);
     g_exceptionConnMgr.connections->cnt++;
 }
@@ -134,13 +135,13 @@ void LnnDCReportConnectException(const ConnectOption *option, int32_t errorCode)
     LNN_CHECK_AND_RETURN_LOGE(g_exceptionConnMgr.initFlag && g_exceptionConnMgr.connections != NULL,
         LNN_STATE, "decision center not init yet");
     SoftBusMutexLock(&g_exceptionConnMgr.connections->lock);
-    LNN_LOGI(LNN_STATE, "connType=%d, error code=%d", option->type, errorCode);
+    LNN_LOGI(LNN_STATE, "connType=%{public}d, errorCode=%{public}d", option->type, errorCode);
     switch (option->type) {
         case CONNECT_BR:
             HandleBrConnectException(option, errorCode);
             break;
         default:
-            LNN_LOGW(LNN_STATE, "undefined connType=%d", option->type);
+            LNN_LOGW(LNN_STATE, "undefined connType=%{public}d", option->type);
             break;
     }
     SoftBusMutexUnlock(&g_exceptionConnMgr.connections->lock);
@@ -152,13 +153,13 @@ void LnnDCClearConnectException(const ConnectOption *option)
     LNN_CHECK_AND_RETURN_LOGE(g_exceptionConnMgr.initFlag && g_exceptionConnMgr.connections != NULL,
         LNN_STATE, "decision center not init yet");
     SoftBusMutexLock(&g_exceptionConnMgr.connections->lock);
-    LNN_LOGI(LNN_STATE, "conn type:%d", option->type);
+    LNN_LOGI(LNN_STATE, "connType=%{public}d", option->type);
     switch (option->type) {
         case CONNECT_BR:
             ClearBrConnectException(option);
             break;
         default:
-            LNN_LOGW(LNN_STATE, "undefined connType=%d", option->type);
+            LNN_LOGW(LNN_STATE, "undefined connType=%{public}d", option->type);
             break;
     }
     SoftBusMutexUnlock(&g_exceptionConnMgr.connections->lock);
@@ -169,7 +170,8 @@ void LnnDCProcessOnlineState(bool isOnline, const NodeBasicInfo *info)
     LNN_CHECK_AND_RETURN_LOGW(info != NULL, LNN_STATE, " info is NULL");
     char *anonyNetworkId = NULL;
     Anonymize(info->networkId, &anonyNetworkId);
-    LNN_LOGI(LNN_STATE, "onlineState=%s, networkId=%s", (isOnline ? "online" : "offline"), anonyNetworkId);
+    LNN_LOGI(LNN_STATE,
+        "onlineState=%{public}s, networkId=%{public}s", (isOnline ? "online" : "offline"), anonyNetworkId);
     if (isOnline) {
         LNN_LOGD(LNN_LEDGER, "ignore for online");
         AnonymizeFree(anonyNetworkId);
@@ -178,7 +180,7 @@ void LnnDCProcessOnlineState(bool isOnline, const NodeBasicInfo *info)
 
     NodeInfo nodeInfo = { 0 };
     if (LnnGetRemoteNodeInfoById(info->networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "can not get remote nodeinfo by networkId=%s", anonyNetworkId);
+        LNN_LOGE(LNN_STATE, "can not get remote nodeinfo. networkId=%{public}s", anonyNetworkId);
         AnonymizeFree(anonyNetworkId);
         return;
     }

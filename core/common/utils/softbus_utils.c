@@ -142,7 +142,7 @@ int32_t ConvertBytesToUpperCaseHexString(char *outBuf, uint32_t outBufLen, const
     uint32_t inLen)
 {
     if ((outBuf == NULL) || (inBuf == NULL) || (outBufLen < HEXIFY_LEN(inLen))) {
-        COMM_LOGE(COMM_UTILS, "invalid param, inlen:%u, outBufLen:%u", inLen, outBufLen);
+        COMM_LOGE(COMM_UTILS, "invalid param, inlen=%{public}u, outBufLen=%{public}u", inLen, outBufLen);
         return SOFTBUS_ERR;
     }
 
@@ -188,7 +188,7 @@ int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen, const
         } else if ((c >= 'A') && (c <= 'F')) {
             c -= 'A' - DEC_MAX_NUM;
         } else {
-            COMM_LOGE(COMM_UTILS, "HexToString Error! %c", c);
+            COMM_LOGE(COMM_UTILS, "HexToString Error! inBuf=%{public}c", c);
             return SOFTBUS_ERR;
         }
         unsigned char c2 = *inBuf++;
@@ -199,7 +199,7 @@ int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen, const
         } else if ((c2 >= 'A') && (c2 <= 'F')) {
             c2 -= 'A' - DEC_MAX_NUM;
         } else {
-            COMM_LOGE(COMM_UTILS, "HexToString Error! %c2", c2);
+            COMM_LOGE(COMM_UTILS, "HexToString Error! inBuf2=%{public}c", c2);
             return SOFTBUS_ERR;
         }
         *outBuf++ = (c << HEX_MAX_BIT_NUM) | c2;
@@ -212,7 +212,7 @@ int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned
     uint32_t inLen)
 {
     if ((outBuf == NULL) || (inBuf == NULL) || (outBufLen < HEXIFY_LEN(inLen))) {
-        COMM_LOGD(COMM_UTILS, "outBufLen=%d inLen=%d", outBufLen, inLen);
+        COMM_LOGD(COMM_UTILS, "outBufLen=%{public}d, inLen=%{public}d", outBufLen, inLen);
         return SOFTBUS_ERR;
     }
 
@@ -582,13 +582,13 @@ int32_t GenerateStrHashAndConvertToHexString(const unsigned char *str, uint32_t 
     }
     ret = SoftBusGenerateStrHash(str, strlen((char *)str), hashResult);
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_UTILS, "generate str hash fail, ret=%d", ret);
+        COMM_LOGE(COMM_UTILS, "generate str hash fail, ret=%{public}d", ret);
         return ret;
     }
     ret = ConvertBytesToHexString((char *)hashStr, hashStrLen, (const unsigned char *)hashResult,
         len / HEXIFY_UNIT_LEN);
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_UTILS, "convert bytes to str hash fail, ret=%d", ret);
+        COMM_LOGE(COMM_UTILS, "convert bytes to str hash fail, ret=%{public}d", ret);
         return ret;
     }
     return SOFTBUS_OK;

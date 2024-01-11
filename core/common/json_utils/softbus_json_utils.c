@@ -30,17 +30,17 @@ int32_t GetStringItemByJsonObject(const cJSON *json, const char * const string, 
     }
     cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
     if (item == NULL || !cJSON_IsString(item)) {
-        COMM_LOGD(COMM_UTILS, "Cannot find or invalid [%s]", string);
+        COMM_LOGD(COMM_UTILS, "Cannot find or invalid string. string=%{public}s", string);
         return SOFTBUS_ERR;
     }
     uint32_t length = strlen(item->valuestring);
     if (length >= targetLen) {
-        COMM_LOGE(COMM_UTILS, "the length [%d] is to long for [%s]", length, string);
+        COMM_LOGE(COMM_UTILS, "the length is to long. length=%{public}d, string=%{public}s", length, string);
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = strcpy_s(target, targetLen, item->valuestring);
     if (ret != EOK) {
-        COMM_LOGE(COMM_UTILS, "strcpy error %d\n", ret);
+        COMM_LOGE(COMM_UTILS, "strcpy error. ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -55,17 +55,17 @@ bool GetJsonObjectStringItem(const cJSON *json, const char * const string, char 
     }
     cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
     if (item == NULL || !cJSON_IsString(item)) {
-        COMM_LOGD(COMM_UTILS, "Cannot find or invalid [%s]", string);
+        COMM_LOGD(COMM_UTILS, "Cannot find or invalid string. string=%{public}s", string);
         return false;
     }
     uint32_t length = strlen(item->valuestring);
     if (length >= targetLen) {
-        COMM_LOGE(COMM_UTILS, "the length [%d] is to long for [%s]", length, string);
+        COMM_LOGE(COMM_UTILS, "the length is to long. length=%{public}d, string=%{public}s", length, string);
         return false;
     }
     int32_t ret = strcpy_s(target, targetLen, item->valuestring);
     if (ret != EOK) {
-        COMM_LOGE(COMM_UTILS, "strcpy error %d\n", ret);
+        COMM_LOGE(COMM_UTILS, "strcpy error. ret=%{public}d", ret);
         return false;
     }
     return true;
@@ -79,7 +79,7 @@ bool GetJsonObjectNumberItem(const cJSON *json, const char * const string, int32
     }
     cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
     if (item == NULL || !cJSON_IsNumber(item) || (item->valuedouble < 0)) {
-        COMM_LOGD(COMM_UTILS, "Cannot find or invalid [%s]", string);
+        COMM_LOGD(COMM_UTILS, "Cannot find or invalid string. string=%{public}s", string);
         return false;
     }
     *target = (int32_t)item->valuedouble;
@@ -94,7 +94,7 @@ bool GetJsonObjectSignedNumberItem(const cJSON *json, const char * const string,
     }
     cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
     if (item == NULL || !cJSON_IsNumber(item)) {
-        COMM_LOGD(COMM_UTILS, "Cannot find or invalid [%s]", string);
+        COMM_LOGD(COMM_UTILS, "Cannot find or invalid string. string=%{public}s", string);
         return false;
     }
     *target = (int32_t)item->valuedouble;
@@ -109,7 +109,7 @@ bool GetJsonObjectDoubleItem(const cJSON *json, const char * const string, doubl
     }
     cJSON* item = cJSON_GetObjectItemCaseSensitive(json, string);
     if (item == NULL || !cJSON_IsNumber(item)) {
-        COMM_LOGD(COMM_UTILS, "Cannot find or invalid [%s]", string);
+        COMM_LOGD(COMM_UTILS, "Cannot find or invalid string. string=%{public}s", string);
         return false;
     }
     *target = item->valuedouble;
@@ -124,7 +124,7 @@ bool GetJsonObjectNumber16Item(const cJSON *json, const char * const string, uin
     }
     cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
     if (item == NULL || !cJSON_IsNumber(item) || (item->valuedouble < 0)) {
-        COMM_LOGD(COMM_UTILS, "Cannot find or invalid [%s]", string);
+        COMM_LOGD(COMM_UTILS, "Cannot find or invalid string. string=%{public}s", string);
         return false;
     }
     *target = (uint16_t)item->valuedouble;
@@ -139,7 +139,7 @@ bool GetJsonObjectNumber64Item(const cJSON *json, const char * const string, int
     }
     cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
     if (item == NULL || !cJSON_IsNumber(item) || (item->valuedouble < 0)) {
-        COMM_LOGD(COMM_UTILS, "Cannot find or invalid [%s]", string);
+        COMM_LOGD(COMM_UTILS, "Cannot find or invalid string. string=%{public}s", string);
         return false;
     }
     *target = (int64_t)item->valuedouble;
@@ -154,7 +154,7 @@ bool GetJsonObjectSignedNumber64Item(const cJSON *json, const char * const strin
     }
     cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
     if (item == NULL || !cJSON_IsNumber(item)) {
-        COMM_LOGD(COMM_UTILS, "Cannot find or invalid [%s]", string);
+        COMM_LOGD(COMM_UTILS, "Cannot find or invalid string. string=%{public}s", string);
         return false;
     }
     *target = (int64_t)item->valuedouble;
@@ -169,7 +169,7 @@ bool GetJsonObjectInt32Item(const cJSON *json, const char * const string, int32_
     }
     cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
     if (item == NULL || !cJSON_IsNumber(item)) {
-        COMM_LOGD(COMM_UTILS, "Cannot find or invalid [%s]", string);
+        COMM_LOGD(COMM_UTILS, "Cannot find or invalid string. string=%{public}s", string);
         return false;
     }
     *target = (int32_t)item->valuedouble;
@@ -184,7 +184,7 @@ bool GetJsonObjectBoolItem(const cJSON *json, const char * const string, bool *t
     }
     cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
     if (item == NULL || !cJSON_IsBool(item)) {
-        COMM_LOGD(COMM_UTILS, "Cannot find or invalid [%s]", string);
+        COMM_LOGD(COMM_UTILS, "Cannot find or invalid string. string=%{public}s", string);
         return false;
     }
     *target = (bool)item->valueint;
@@ -199,7 +199,7 @@ bool AddStringToJsonObject(cJSON *json, const char * const string, const char *v
     }
     cJSON *item = cJSON_CreateString(value);
     if (item == NULL) {
-        COMM_LOGD(COMM_UTILS, "Cannot create cJSON string object [%s]", string);
+        COMM_LOGD(COMM_UTILS, "Cannot create cJSON string object. string=%{public}s", string);
         return false;
     }
     if (!cJSON_AddItemToObject(json, string, item)) {
@@ -217,12 +217,12 @@ bool AddStringArrayToJsonObject(cJSON *json, const char * const string, const ch
 
     cJSON *item = cJSON_CreateStringArray(strings, count);
     if (item == NULL) {
-        COMM_LOGE(COMM_EVENT, "Cannot create cJSON string array object [%s]", string);
+        COMM_LOGE(COMM_EVENT, "Cannot create cJSON string array object. string=%{public}s", string);
         return false;
     }
 
     if (!cJSON_AddItemToObject(json, string, item)) {
-        COMM_LOGE(COMM_EVENT, "Cannot add string array object to json [%s]", string);
+        COMM_LOGE(COMM_EVENT, "Cannot add string array object to json. string=%{public}s", string);
         cJSON_Delete(item);
         return false;
     }
@@ -237,11 +237,11 @@ bool AddNumber16ToJsonObject(cJSON *json, const char * const string, uint16_t nu
     }
     cJSON *item = cJSON_CreateNumber((double)num);
     if (item == NULL) {
-        COMM_LOGE(COMM_UTILS, "Cannot create cJSON number object [%s]", string);
+        COMM_LOGE(COMM_UTILS, "Cannot create cJSON number object. string=%{public}s", string);
         return false;
     }
     if (!cJSON_AddItemToObject(json, string, item)) {
-        COMM_LOGE(COMM_UTILS, "Cannot add num object to json [%s]", string);
+        COMM_LOGE(COMM_UTILS, "Cannot add num object to json. string=%{public}s", string);
         cJSON_Delete(item);
         return false;
     }
@@ -256,11 +256,11 @@ bool AddNumberToJsonObject(cJSON *json, const char * const string, int32_t num)
     }
     cJSON *item = cJSON_CreateNumber((double)num);
     if (item == NULL) {
-        COMM_LOGE(COMM_UTILS, "Cannot create cJSON number object [%s]", string);
+        COMM_LOGE(COMM_UTILS, "Cannot create cJSON number object. string=%{public}s", string);
         return false;
     }
     if (!cJSON_AddItemToObject(json, string, item)) {
-        COMM_LOGE(COMM_UTILS, "Cannot add num object to json [%s]", string);
+        COMM_LOGE(COMM_UTILS, "Cannot add num object to json. string=%{public}s", string);
         cJSON_Delete(item);
         return false;
     }
@@ -275,11 +275,11 @@ bool AddNumber64ToJsonObject(cJSON *json, const char * const string, int64_t num
     }
     cJSON *item = cJSON_CreateNumber((double)num);
     if (item == NULL) {
-        COMM_LOGE(COMM_UTILS, "Cannot create cJSON number object [%s]", string);
+        COMM_LOGE(COMM_UTILS, "Cannot create cJSON number object. string=%{public}s", string);
         return false;
     }
     if (!cJSON_AddItemToObject(json, string, item)) {
-        COMM_LOGE(COMM_UTILS, "Cannot add num64 object to json [%s]", string);
+        COMM_LOGE(COMM_UTILS, "Cannot add num64 object to json. string=%{public}s", string);
         cJSON_Delete(item);
         return false;
     }
@@ -294,11 +294,11 @@ bool AddBoolToJsonObject(cJSON *json, const char * const string, bool value)
     }
     cJSON *item = cJSON_CreateBool(value);
     if (item == NULL) {
-        COMM_LOGE(COMM_UTILS, "Cannot create cJSON bool object [%s]", string);
+        COMM_LOGE(COMM_UTILS, "Cannot create cJSON bool object. string=%{public}s", string);
         return false;
     }
     if (!cJSON_AddItemToObject(json, string, item)) {
-        COMM_LOGE(COMM_UTILS, "Cannot add bool object to json [%s]", string);
+        COMM_LOGE(COMM_UTILS, "Cannot add bool object to json. string=%{public}s", string);
         cJSON_Delete(item);
         return false;
     }
@@ -314,21 +314,23 @@ char *GetDynamicStringItemByJsonObject(const cJSON * const json, const char * co
 
     cJSON *item = cJSON_GetObjectItemCaseSensitive(json, string);
     if (item == NULL || !cJSON_IsString(item)) {
-        COMM_LOGD(COMM_EVENT, "Cannot find or invalid [%s]", string);
+        COMM_LOGD(COMM_EVENT, "Cannot find or invalid string. string=%{public}s", string);
         return NULL;
     }
     uint32_t length = strlen(item->valuestring);
     if (length > limit) {
-        COMM_LOGE(COMM_EVENT, "key [%s] length [%u] is large than limit [%u]", string, length, limit);
+        COMM_LOGE(COMM_EVENT,
+            "key length is large than limit. string=%{public}s, length=%{public}u, limit=%{public}u", string, length,
+            limit);
         return NULL;
     }
     char *value = SoftBusCalloc(length + 1);
     if (value == NULL) {
-        COMM_LOGE(COMM_EVENT, "malloc failed, length [%u]", length);
+        COMM_LOGE(COMM_EVENT, "malloc failed, length=%{public}u", length);
         return NULL;
     }
     if (strcpy_s(value, length + 1, item->valuestring) != EOK) {
-        COMM_LOGE(COMM_EVENT, "copy failed, length [%u]", length);
+        COMM_LOGE(COMM_EVENT, "copy failed, length=%{public}u", length);
         SoftBusFree(value);
         return NULL;
     }
@@ -343,7 +345,7 @@ bool AddIntArrayToJsonObject(cJSON *json, const char *string, const int32_t *arr
     }
     cJSON *arrayObj = cJSON_CreateIntArray(array, arrayLen);
     if (arrayObj == NULL) {
-        COMM_LOGE(COMM_EVENT, "Cannot create cJSON array object [%s]", string);
+        COMM_LOGE(COMM_EVENT, "Cannot create cJSON array object. string=%{public}s", string);
         return false;
     }
     if (!cJSON_AddItemToObject((cJSON *)json, string, arrayObj)) {
@@ -361,7 +363,7 @@ bool GetJsonObjectIntArrayItem(const cJSON *json, const char *string, int32_t *a
     }
     cJSON *objValue = cJSON_GetObjectItem(json, string);
     if (objValue == NULL) {
-        COMM_LOGE(COMM_EVENT, "Cannot create cJSON objValue [%s]", string);
+        COMM_LOGE(COMM_EVENT, "Cannot create cJSON objValue. string=%{public}s", string);
         return false;
     }
     if (!cJSON_IsArray(objValue)) {

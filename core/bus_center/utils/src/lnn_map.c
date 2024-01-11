@@ -329,7 +329,7 @@ MapIterator *LnnMapInitIterator(Map *map)
 bool LnnMapHasNext(MapIterator *it)
 {
     if (it->map->nodeSize > HDF_MAP_KEY_MAX_SIZE) {
-        LNN_LOGW(LNN_STATE, "nodeSize is %d", it->map->nodeSize);
+        LNN_LOGW(LNN_STATE, "nodeSize=%{public}d", it->map->nodeSize);
     }
     return (it->nodeNum < it->map->nodeSize);
 }

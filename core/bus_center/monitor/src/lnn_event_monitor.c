@@ -60,7 +60,7 @@ int32_t LnnInitEventMonitor(void)
             continue;
         }
         if (g_monitorImplInit[i]() != SOFTBUS_OK) {
-            LNN_LOGE(LNN_INIT, "init event monitor impl(%u) failed", i);
+            LNN_LOGE(LNN_INIT, "init event monitor impl failed. i=%{public}u", i);
             return SOFTBUS_ERR;
         }
     }
