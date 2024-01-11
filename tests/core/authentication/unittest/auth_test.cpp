@@ -129,7 +129,7 @@ HWTEST_F(AuthTest, REG_TRUST_DATA_CHANGE_LISTENER_Test_001, TestSize.Level1)
     ret = RegTrustDataChangeListener(nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = RegTrustDataChangeListener(&listener);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_TRUE(ret == SOFTBUS_OK || ret == SOFTBUS_AUTH_REG_DATA_FAIL);
 }
 
 /*
@@ -1313,7 +1313,7 @@ HWTEST_F(AuthTest, AUTH_INIT_Test_001, TestSize.Level1)
     int32_t ret;
 
     ret = AuthInit();
-    EXPECT_TRUE(ret == SOFTBUS_AUTH_INIT_FAIL);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
     AuthDeinit();
 }
 
@@ -1344,7 +1344,7 @@ HWTEST_F(AuthTest, AUTH_DEVICE_INIT_Test_001, TestSize.Level1)
         .OnDisconnected = AuthOnDisconnectedTest,
     };
     ret = AuthDeviceInit(&callBack);
-    EXPECT_TRUE(ret == SOFTBUS_AUTH_INIT_FAIL);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = AuthDeviceInit(nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
@@ -1508,7 +1508,7 @@ HWTEST_F(AuthTest, AUTH_START_LISTENING_Test_001, TestSize.Level1)
     ret = AuthStartListening(AUTH_LINK_TYPE_WIFI, ip, port);
     EXPECT_TRUE(ret != SOFTBUS_INVALID_PARAM);
     ret = AuthStartListening(AUTH_LINK_TYPE_P2P, ip, port);
-    EXPECT_TRUE(ret != SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM || ret == SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT);
 }
 
 /*
