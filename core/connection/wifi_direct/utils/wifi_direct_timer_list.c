@@ -45,7 +45,7 @@ static void WorkHandler(void *data)
 {
     struct WifiDirectTimerList *self = GetWifiDirectTimerList();
     struct WifiDirectTimerStruct *timerStruct = data;
-    CONN_LOGI(CONN_WIFI_DIRECT, "timerId=%d", timerStruct->timerId);
+    CONN_LOGI(CONN_WIFI_DIRECT, "timerId=%{public}d", timerStruct->timerId);
     timerStruct->handler(timerStruct->data);
 
     if (timerStruct->flag == TIMER_FLAG_ONE_SHOOT) {
@@ -83,7 +83,7 @@ static int32_t StartTimer(TimeoutHandler handler, int64_t timeoutMs, enum WifiDi
     timerStruct->timeoutMs = timeoutMs;
     timerStruct->flag = flag;
     timerStruct->data = data;
-    CONN_LOGI(CONN_WIFI_DIRECT, "timerId=%d", timerStruct->timerId);
+    CONN_LOGI(CONN_WIFI_DIRECT, "timerId=%{public}d", timerStruct->timerId);
 
     struct WifiDirectWorkQueue *queue = GetWifiDirectWorkQueue();
     struct WifiDirectWork *work = ObtainWifiDirectWork(WorkHandler, timerStruct);
@@ -104,7 +104,7 @@ static int32_t StartTimer(TimeoutHandler handler, int64_t timeoutMs, enum WifiDi
 
 static void* StopTimer(int32_t timeId)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "timerId=%d", timeId);
+    CONN_LOGI(CONN_WIFI_DIRECT, "timerId=%{public}d", timeId);
     struct WifiDirectTimerList *self = GetWifiDirectTimerList();
     struct WifiDirectTimerStruct *timerStruct = NULL;
     SoftBusMutexLock(&self->mutex);

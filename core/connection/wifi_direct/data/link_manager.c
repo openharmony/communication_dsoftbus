@@ -91,7 +91,7 @@ static struct InnerLink *GetLinkByIp(const char *ipString, bool isRemoteIp)
             }
 
             if (!strcmp(ipString, targetIpString)) {
-                CONN_LOGD(CONN_WIFI_DIRECT, "find target %s inner link for %s",
+                CONN_LOGD(CONN_WIFI_DIRECT, "find target inner link. mac=%{public}s, ip=%{public}s",
                       WifiDirectAnonymizeMac(mac), WifiDirectAnonymizeIp(ipString));
                 SoftBusMutexUnlock(&self->mutex);
                 return target;
@@ -100,7 +100,7 @@ static struct InnerLink *GetLinkByIp(const char *ipString, bool isRemoteIp)
     }
     SoftBusMutexUnlock(&self->mutex);
 
-    CONN_LOGD(CONN_WIFI_DIRECT, "not find for %s", WifiDirectAnonymizeIp(ipString));
+    CONN_LOGD(CONN_WIFI_DIRECT, "not find. ip=%{public}s", WifiDirectAnonymizeIp(ipString));
     return NULL;
 }
 
@@ -114,7 +114,7 @@ static struct InnerLink *GetLinkById(int32_t linkId)
     for (size_t type = 0; type < WIFI_DIRECT_LINK_TYPE_MAX; type++) {
         LIST_FOR_EACH_ENTRY(target, &self->linkLists[type], struct InnerLink, node) {
             if (target->containId(target, linkId)) {
-                CONN_LOGD(CONN_WIFI_DIRECT, "find for linkId=%d", linkId);
+                CONN_LOGD(CONN_WIFI_DIRECT, "find for linkId=%{public}d", linkId);
                 SoftBusMutexUnlock(&self->mutex);
                 return target;
             }
@@ -122,7 +122,7 @@ static struct InnerLink *GetLinkById(int32_t linkId)
     }
     SoftBusMutexUnlock(&self->mutex);
 
-    CONN_LOGD(CONN_WIFI_DIRECT, "not find for linkId=%d", linkId);
+    CONN_LOGD(CONN_WIFI_DIRECT, "not find for linkId=%{public}d", linkId);
     return NULL;
 }
 
@@ -139,7 +139,8 @@ static struct InnerLink* GetLinkByTypeAndUuid(enum WifiDirectLinkType linkType, 
                 target->getInt(target, IL_KEY_LINK_TYPE, WIFI_DIRECT_LINK_TYPE_INVALID);
             const char *linkUuid = target->getString(target, IL_KEY_DEVICE_ID, "");
             if (itemLinkType == linkType && StrCmpIgnoreCase(linkUuid, uuid) == SOFTBUS_OK) {
-                CONN_LOGI(CONN_WIFI_DIRECT, "find type=%d uuid=%s", linkType, WifiDirectAnonymizeDeviceId(uuid));
+                CONN_LOGI(CONN_WIFI_DIRECT, "find type=%{public}d, uuid=%{public}s", linkType,
+                    WifiDirectAnonymizeDeviceId(uuid));
                 SoftBusMutexUnlock(&self->mutex);
                 return target;
             }
@@ -147,7 +148,7 @@ static struct InnerLink* GetLinkByTypeAndUuid(enum WifiDirectLinkType linkType, 
     }
     SoftBusMutexUnlock(&self->mutex);
 
-    CONN_LOGI(CONN_WIFI_DIRECT, "not find for uuid=%s", WifiDirectAnonymizeDeviceId(uuid));
+    CONN_LOGI(CONN_WIFI_DIRECT, "not find for uuid=%{public}s", WifiDirectAnonymizeDeviceId(uuid));
     return NULL;
 }
 
@@ -156,7 +157,7 @@ static int32_t GetAllLinks(struct InnerLink **linkArray, int32_t *linkArraySize)
     struct LinkManager *self = GetLinkManager();
     CONN_CHECK_AND_RETURN_RET_LOGW(self->isInited, SOFTBUS_ERR, CONN_WIFI_DIRECT, "not inited");
 
-    CONN_LOGI(CONN_WIFI_DIRECT, "count=%d", self->count);
+    CONN_LOGI(CONN_WIFI_DIRECT, "count=%{public}d", self->count);
     if (self->count <= 0) {
         *linkArray = NULL;
         *linkArraySize = 0;
@@ -262,7 +263,8 @@ static void RefreshLinks(enum WifiDirectLinkType linkType, int32_t clientDeviceS
             }
         }
         if (!found) {
-            CONN_LOGD(CONN_WIFI_DIRECT, "remove remoteMac=%s type=%d", WifiDirectAnonymizeMac(remoteMac), linkType);
+            CONN_LOGD(CONN_WIFI_DIRECT, "remove remoteMac=%{public}s, type=%{public}d",
+                WifiDirectAnonymizeMac(remoteMac), linkType);
             if (linkType == WIFI_DIRECT_LINK_TYPE_HML) {
                 ReleaseLinkIp(link);
             }
@@ -332,7 +334,8 @@ static void SetNegotiateChannelForLink(struct WifiDirectNegotiateChannel *channe
     (void)channel->getDeviceId(channel, uuid, sizeof(uuid));
 
     struct InnerLink *target = self->getLinkByTypeAndUuid(linkType, uuid);
-    CONN_CHECK_AND_RETURN_LOGW(target, CONN_WIFI_DIRECT, "uuid=%s failed", WifiDirectAnonymizeDeviceId(uuid));
+    CONN_CHECK_AND_RETURN_LOGW(target, CONN_WIFI_DIRECT,
+        "failed uuid=%{public}s", WifiDirectAnonymizeDeviceId(uuid));
 
     struct WifiDirectNegotiateChannel *channelOld = target->getPointer(target, IL_KEY_NEGO_CHANNEL, NULL);
     if (channelOld != NULL) {
@@ -399,7 +402,7 @@ static bool CheckAll(enum WifiDirectLinkType type, const char *interface, bool (
     SoftBusMutexLock(&self->mutex);
     LIST_FOR_EACH_ENTRY(innerLink, &self->linkLists[type], struct InnerLink, node) {
         const char *linkInterface = innerLink->getString(innerLink, IL_KEY_LOCAL_INTERFACE, "");
-        CONN_LOGD(CONN_WIFI_DIRECT, "check %s", linkInterface);
+        CONN_LOGD(CONN_WIFI_DIRECT, "check linkInterface=%{public}s", linkInterface);
         if (!strcmp(interface, linkInterface) && !checker(innerLink)) {
             result = false;
             break;
@@ -545,8 +548,8 @@ static void AdjustIfRemoteMacChange(struct InnerLink *innerLink)
     LIST_FOR_EACH_ENTRY(target, &self->linkLists[type], struct InnerLink, node) {
         char *targetDeviceId = target->getString(target, IL_KEY_DEVICE_ID, "");
         char *targetRemoteMac = target->getString(target, IL_KEY_REMOTE_BASE_MAC, "");
-        CONN_LOGI(CONN_WIFI_DIRECT, "remoteMac=%s targetRemoteMac=%s", WifiDirectAnonymizeMac(remoteMac),
-              WifiDirectAnonymizeMac(targetRemoteMac));
+        CONN_LOGI(CONN_WIFI_DIRECT, "remoteMac=%{public}s, targetRemoteMac=%{public}s",
+            WifiDirectAnonymizeMac(remoteMac), WifiDirectAnonymizeMac(targetRemoteMac));
         if (strlen(remoteMac) != 0 && strlen(targetRemoteMac) != 0 &&
             StrCmpIgnoreCase(remoteMac, targetRemoteMac) != SOFTBUS_OK &&
             StrCmpIgnoreCase(deviceId, targetDeviceId) == SOFTBUS_OK) {

@@ -51,7 +51,7 @@ static int32_t SplitString(char *input, char *splitter, char **outputArray, size
 
 static int32_t ChannelToFrequency(int32_t channel)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "channel=%d", channel);
+    CONN_LOGI(CONN_WIFI_DIRECT, "channel=%{public}d", channel);
     if (channel >= CHANNEL_2G_FIRST && channel <= CHANNEL_2G_LAST) {
         return (channel - CHANNEL_2G_FIRST) * FREQUENCY_STEP + FREQUENCY_2G_FIRST;
     } else if (channel >= CHANNEL_5G_FIRST && channel <= CHANNEL_5G_LAST) {
@@ -152,7 +152,7 @@ static int32_t GetInterfaceIpString(const char *interface, char *ipString, int32
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(interface, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "interface is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(ipString, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "ipString is null");
-    CONN_LOGI(CONN_WIFI_DIRECT, "interface=%s", interface);
+    CONN_LOGI(CONN_WIFI_DIRECT, "interface=%{public}s", interface);
 
     int32_t socketFd = socket(AF_INET, SOCK_DGRAM, 0);
     CONN_CHECK_AND_RETURN_RET_LOGW(socketFd >= 0, SOFTBUS_ERR, CONN_WIFI_DIRECT, "open socket failed");
@@ -168,7 +168,7 @@ static int32_t GetInterfaceIpString(const char *interface, char *ipString, int32
 
     ret = ioctl(socketFd, SIOCGIFADDR, &request);
     close(socketFd);
-    CONN_CHECK_AND_RETURN_RET_LOGW(ret >= 0, SOFTBUS_ERR, CONN_WIFI_DIRECT, "get ifr conf failed ret=%d", ret);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret >= 0, SOFTBUS_ERR, CONN_WIFI_DIRECT, "get ifr conf failed ret=%{public}d", ret);
 
     struct sockaddr_in *sockAddrIn = (struct sockaddr_in *)&request.ifr_addr;
     if (!inet_ntop(sockAddrIn->sin_family, &sockAddrIn->sin_addr, ipString, ipStringSize)) {
@@ -257,7 +257,7 @@ static int32_t GetLocalIpv4InfoArray(struct WifiDirectIpv4Info *info, size_t *si
 {
     struct ifaddrs *ifAddr = NULL;
     if (getifaddrs(&ifAddr) == -1) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "getifaddrs failed, errno: %d", errno);
+        CONN_LOGE(CONN_WIFI_DIRECT, "getifaddrs failed, errno=%{public}d", errno);
         return SOFTBUS_ERR;
     }
 
@@ -276,8 +276,8 @@ static int32_t GetLocalIpv4InfoArray(struct WifiDirectIpv4Info *info, size_t *si
         addr = (struct sockaddr_in *)ifa->ifa_netmask;
         info[count].prefixLength = IP_MASK_MAX - (ffs((int32_t)ntohl(addr->sin_addr.s_addr)) - 1);
 
-        CONN_LOGI(CONN_WIFI_DIRECT, "name=%s %s/%hhu", ifa->ifa_name, WifiDirectAnonymizeIp(addrString),
-            info[count].prefixLength);
+        CONN_LOGI(CONN_WIFI_DIRECT, "name=%{public}s, ifa_name=%{public}s, WifiDirectAnonymizeIp=%{public}hhu",
+            ifa->ifa_name, WifiDirectAnonymizeIp(addrString), info[count].prefixLength);
         count++;
     }
 
@@ -301,7 +301,7 @@ static int32_t GetInterfaceMacAddr(const char *ifName, uint8_t *macAddrArray, si
     close(fd);
 
     if (ret != 0) {
-        CONN_LOGW(CONN_WIFI_DIRECT, "ioctl get hw addr failed ret=%d", ret);
+        CONN_LOGW(CONN_WIFI_DIRECT, "ioctl get hw addr failed ret=%{public}d", ret);
         close(fd);
         return SOFTBUS_ERR;
     }

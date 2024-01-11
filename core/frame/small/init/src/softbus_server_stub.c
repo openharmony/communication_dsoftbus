@@ -211,7 +211,7 @@ const ServerInvokeCmd g_serverInvokeCmdTbl[] = {
 
 static int32_t Invoke(IServerProxy *iProxy, int funcId, void *origin, IpcIo *req, IpcIo *reply)
 {
-    COMM_LOGI(COMM_SVC, "RECEIVE FUNCID:%d", funcId);
+    COMM_LOGI(COMM_SVC, "RECEIVE FUNCID. funcId=%{public}d", funcId);
     if (GetServerIsInit() == false) {
         COMM_LOGE(COMM_SVC, "server not init");
         WriteInt32(reply, SOFTBUS_SERVER_NOT_INIT);
@@ -223,7 +223,7 @@ static int32_t Invoke(IServerProxy *iProxy, int funcId, void *origin, IpcIo *req
             return g_serverInvokeCmdTbl[i].func(req, reply);
         }
     }
-    COMM_LOGE(COMM_SVC, "not support func[%d]", funcId);
+    COMM_LOGE(COMM_SVC, "not support func. funcId=%{public}d", funcId);
     return SOFTBUS_ERR;
 }
 
@@ -264,6 +264,6 @@ static void Init(void)
     sleep(WAIT_FOR_SERVER);
     SAMGR_GetInstance()->RegisterService((Service *)&g_samgrService);
     SAMGR_GetInstance()->RegisterDefaultFeatureApi(SOFTBUS_SERVICE, GET_IUNKNOWN(g_samgrService));
-    COMM_LOGI(COMM_SVC, "Init success %s", SOFTBUS_SERVICE);
+    COMM_LOGI(COMM_SVC, "Init success SOFTBUS_SERVICE=%{public}s", SOFTBUS_SERVICE);
 }
 SYSEX_SERVICE_INIT(Init);

@@ -46,7 +46,7 @@ static enum WifiDirectRole GetFinalRoleAsGo(enum WifiDirectRole peerRole, enum W
         return WIFI_DIRECT_ROLE_GO;
     }
 
-    CONN_LOGE(CONN_WIFI_DIRECT, "peeRole=%d invalid", peerRole);
+    CONN_LOGE(CONN_WIFI_DIRECT, "peeRole invalid. peeRole=%{public}d ", peerRole);
     return ERROR_INVALID_INPUT_PARAMETERS;
 }
 
@@ -73,7 +73,8 @@ static enum WifiDirectRole GetFinalRoleAsNone(enum WifiDirectRole peerRole, enum
 {
     if (peerRole == WIFI_DIRECT_ROLE_GO) {
         if (expectedRole == WIFI_DIRECT_ROLE_GC) {
-            CONN_LOGE(CONN_WIFI_DIRECT, "mismatched role, peerRole=%d expectRole=%d", peerRole, expectedRole);
+            CONN_LOGE(CONN_WIFI_DIRECT,
+                "mismatched role, peerRole=%{public}d, expectRole=%{public}d", peerRole, expectedRole);
             return ERROR_P2P_GC_AVAILABLE_WITH_MISMATCHED_ROLE;
         }
         return WIFI_DIRECT_ROLE_GC;
@@ -92,7 +93,7 @@ static enum WifiDirectRole GetFinalRoleAsNone(enum WifiDirectRole peerRole, enum
         return WIFI_DIRECT_ROLE_GC;
     }
 
-    CONN_LOGE(CONN_WIFI_DIRECT, "peeRole=%d invalid", peerRole);
+    CONN_LOGE(CONN_WIFI_DIRECT, "peeRole invalid. peeRole=%{public}d ", peerRole);
     return SOFTBUS_INVALID_PARAM;
 }
 
@@ -100,8 +101,11 @@ static enum WifiDirectRole GetFinalRoleWithPeerExpectedRole(enum WifiDirectRole 
                                                             enum WifiDirectRole expectedRole, const char *localGoMac,
                                                             const char *remoteGoMac)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "myRole=%d peerRole=%d expectedRole=%d localGoMac=%s remoteGoMac=%s",
-          myRole, peerRole, expectedRole, WifiDirectAnonymizeMac(localGoMac), WifiDirectAnonymizeMac(remoteGoMac));
+    CONN_LOGI(CONN_WIFI_DIRECT,
+        "myRole=%{public}d, peerRole=%{public}d, expectedRole=%{public}d, localGoMac=%{public}s, "
+        "remoteGoMac=%{public}s",
+        myRole, peerRole, expectedRole, WifiDirectAnonymizeMac(localGoMac),
+        WifiDirectAnonymizeMac(remoteGoMac));
     if (myRole == WIFI_DIRECT_ROLE_GO) {
         return GetFinalRoleAsGo(peerRole, expectedRole, localGoMac, remoteGoMac);
     } else if (myRole == WIFI_DIRECT_ROLE_GC) {
@@ -109,7 +113,7 @@ static enum WifiDirectRole GetFinalRoleWithPeerExpectedRole(enum WifiDirectRole 
     } else if (myRole == WIFI_DIRECT_ROLE_NONE) {
         return GetFinalRoleAsNone(peerRole, expectedRole);
     } else {
-        CONN_LOGE(CONN_WIFI_DIRECT, "myRole=%d invalid", myRole);
+        CONN_LOGE(CONN_WIFI_DIRECT, "myRole invalid. myRole=%{public}d", myRole);
         return SOFTBUS_INVALID_PARAM;
     }
 }
