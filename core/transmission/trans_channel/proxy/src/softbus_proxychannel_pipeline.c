@@ -121,7 +121,7 @@ int32_t TransProxyReuseByChannelId(int32_t channelId)
         SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock failed");
     struct PipelineChannelItem *target = SearchChannelItemUnsafe(&channelId, CompareByChannelId);
     if (target == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "channelId=%d not exist", channelId);
+        TRANS_LOGE(TRANS_CTRL, "channel not exist. channelId=%{public}d", channelId);
         SoftBusMutexUnlock(&g_manager.channels->lock);
         return SOFTBUS_NOT_FIND;
     }
@@ -140,7 +140,7 @@ int32_t TransProxyPipelineRegisterListener(TransProxyPipelineMsgType type, const
 {
     TRANS_LOGD(TRANS_CTRL, "enter.");
     TRANS_CHECK_AND_RETURN_RET_LOGW(type == MSG_TYPE_P2P_NEGO || type == MSG_TYPE_IP_PORT_EXCHANGE,
-        SOFTBUS_INVALID_PARAM, TRANS_CTRL, "type=%d is invalid", type);
+        SOFTBUS_INVALID_PARAM, TRANS_CTRL, "type is invalid. type=%{public}d", type);
     TRANS_CHECK_AND_RETURN_RET_LOGW(listener && listener->onDataReceived && listener->onDisconnected,
         SOFTBUS_INVALID_PARAM, TRANS_CTRL, "listen is invalid");
 
@@ -148,7 +148,7 @@ int32_t TransProxyPipelineRegisterListener(TransProxyPipelineMsgType type, const
         TRANS_CTRL, "lock failed");
     for (int32_t i = 0; i < MSG_CNT; i++) {
         if (g_manager.listeners[i].type == type) {
-            TRANS_LOGW(TRANS_CTRL, "type=%d repeat register listener, overwrite it", type);
+            TRANS_LOGW(TRANS_CTRL, "repeat register listener, overwrite it. type=%{public}d", type);
             g_manager.listeners[i].listener = *listener;
             SoftBusMutexUnlock(&g_manager.lock);
             return SOFTBUS_OK;
@@ -160,7 +160,7 @@ int32_t TransProxyPipelineRegisterListener(TransProxyPipelineMsgType type, const
             return SOFTBUS_OK;
         }
     }
-    TRANS_LOGE(TRANS_CTRL, "type=%d register listener failed: no position", type);
+    TRANS_LOGE(TRANS_CTRL, "register listener failed: no position. type=%{public}d", type);
     SoftBusMutexUnlock(&g_manager.lock);
     return SOFTBUS_ERR;
 }
@@ -188,12 +188,12 @@ int32_t TransProxyPipelineOpenChannel(int32_t requestId, const char *networkId,
     }
     struct PipelineChannelItem *item = (struct PipelineChannelItem *)SoftBusCalloc(sizeof(struct PipelineChannelItem));
     if (item == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "malloc item failed, reqId=%d", requestId);
+        TRANS_LOGE(TRANS_CTRL, "malloc item failed, reqId=%{public}d", requestId);
         return SOFTBUS_MEM_ERR;
     }
     item->requestId = requestId;
     if (strcpy_s(item->networkId, NETWORK_ID_BUF_LEN, networkId) != EOK) {
-        TRANS_LOGE(TRANS_CTRL, "strcpy_s network id failed, reqId=%d", requestId);
+        TRANS_LOGE(TRANS_CTRL, "strcpy_s network id failed, reqId=%{public}d", requestId);
         SoftBusFree(item);
         return SOFTBUS_STRCPY_ERR;
     }
@@ -203,7 +203,7 @@ int32_t TransProxyPipelineOpenChannel(int32_t requestId, const char *networkId,
 
     struct SoftBusMessage *msg = (struct SoftBusMessage *)SoftBusCalloc(sizeof(SoftBusMessage));
     if (msg == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "malloc msg failed, reqId=%d", requestId);
+        TRANS_LOGE(TRANS_CTRL, "malloc msg failed, reqId=%{public}d", requestId);
         SoftBusFree(item);
         return SOFTBUS_MEM_ERR;
     }
@@ -214,7 +214,7 @@ int32_t TransProxyPipelineOpenChannel(int32_t requestId, const char *networkId,
 
     int32_t ret = SoftBusMutexLock(&g_manager.channels->lock);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock channels failed, reqId=%d, ret=%d", requestId, ret);
+        TRANS_LOGE(TRANS_CTRL, "lock channels failed, reqId=%{public}d, ret=%{public}d", requestId, ret);
         SoftBusFree(item);
         SoftBusFree(msg);
         return SOFTBUS_LOCK_ERR;
@@ -234,7 +234,7 @@ int32_t TransProxyPipelineSendMessage(
     TRANS_LOGD(TRANS_CTRL, "enter.");
     TRANS_CHECK_AND_RETURN_RET_LOGW(data, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "data is invalid");
     TRANS_CHECK_AND_RETURN_RET_LOGW(type == MSG_TYPE_P2P_NEGO || type == MSG_TYPE_IP_PORT_EXCHANGE,
-        SOFTBUS_INVALID_PARAM, TRANS_CTRL, "type=%d is invalid", type);
+        SOFTBUS_INVALID_PARAM, TRANS_CTRL, "type is invalid. ype=%{public}d ", type);
 
     char *sendData = (char *)SoftBusCalloc(dataLen + sizeof(uint32_t));
     TRANS_CHECK_AND_RETURN_RET_LOGW(sendData, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "malloc send data failed");
@@ -262,7 +262,7 @@ int32_t TransProxyPipelineGetChannelIdByNetworkId(const char *networkId)
     char uuid[UUID_BUF_LEN] = { 0 };
     int32_t ret = LnnGetRemoteStrInfo(networkId, STRING_KEY_UUID, uuid, sizeof(uuid));
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get remote uuid by network id fail, ret=%d", ret);
+        TRANS_LOGE(TRANS_CTRL, "get remote uuid by network id fail, ret=%{public}d", ret);
         return INVALID_CHANNEL_ID;
     }
 
@@ -286,7 +286,7 @@ int32_t TransProxyPipelineGetUuidByChannelId(int32_t channelId, char *uuid, uint
         SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock failed");
     struct PipelineChannelItem *target = SearchChannelItemUnsafe(&channelId, CompareByChannelId);
     if (target == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "channelId=%d not exist", channelId);
+        TRANS_LOGE(TRANS_CTRL, "channelId not exist. channelId=%{public}d", channelId);
         SoftBusMutexUnlock(&g_manager.channels->lock);
         return SOFTBUS_NOT_FIND;
     }
@@ -312,10 +312,10 @@ int32_t TransProxyPipelineCloseChannel(int32_t channelId)
             g_manager.channels->cnt -= 1;
             SoftBusFree(target);
             SoftBusMutexUnlock(&g_manager.channels->lock);
-            TRANS_LOGW(TRANS_CTRL, "close channelId=%d", channelId);
+            TRANS_LOGW(TRANS_CTRL, "close channelId=%{public}d", channelId);
             return TransCloseNetWorkingChannel(channelId);
         }
-        TRANS_LOGI(TRANS_CTRL, "channelId=%d ref=%d", channelId, target->ref);
+        TRANS_LOGI(TRANS_CTRL, "channelId=%{public}d, ref=%{public}d", channelId, target->ref);
     }
     SoftBusMutexUnlock(&g_manager.channels->lock);
     return SOFTBUS_OK;
@@ -326,10 +326,10 @@ int32_t TransProxyPipelineCloseChannelDelay(int32_t channelId)
 #define DELAY_CLOSE_CHANNEL_MS 3000
     TRANS_LOGD(TRANS_CTRL, "enter.");
     TRANS_CHECK_AND_RETURN_RET_LOGW(channelId != INVALID_CHANNEL_ID, SOFTBUS_INVALID_PARAM,
-        TRANS_CTRL, "invalid channelId=%d", channelId);
+        TRANS_CTRL, "invalid channelId=%{public}d", channelId);
     struct SoftBusMessage *msg = (struct SoftBusMessage *)SoftBusCalloc(sizeof(SoftBusMessage));
     if (msg == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "malloc msg failed, channelId=%d", channelId);
+        TRANS_LOGE(TRANS_CTRL, "malloc msg failed, channelId=%{public}d", channelId);
         return SOFTBUS_MEM_ERR;
     }
     msg->what = LOOPER_MSG_TYPE_DELEY_CLOSE_CHANNEL;
@@ -375,13 +375,13 @@ static int TransProxyPipelineOnChannelOpened(int32_t channelId, const char *uuid
     }
     char *clone = (char *)SoftBusCalloc(UUID_BUF_LEN);
     if (clone == NULL || strcpy_s(clone, UUID_BUF_LEN, uuid) != EOK) {
-        TRANS_LOGE(TRANS_CTRL, "copy uuid failed, channelId=%d", channelId);
+        TRANS_LOGE(TRANS_CTRL, "copy uuid failed, channelId=%{public}d", channelId);
         SoftBusFree(clone);
         return SOFTBUS_MEM_ERR;
     }
     struct SoftBusMessage *msg = (struct SoftBusMessage *)SoftBusCalloc(sizeof(SoftBusMessage));
     if (msg == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "malloc msg failed, channelId=%d", channelId);
+        TRANS_LOGE(TRANS_CTRL, "malloc msg failed, channelId=%{public}d", channelId);
         SoftBusFree(clone);
         return SOFTBUS_MEM_ERR;
     }
@@ -409,14 +409,14 @@ static void InnerOnChannelOpened(int32_t channelId, const char *uuid, unsigned c
     }
     int32_t ret = SoftBusMutexLock(&g_manager.channels->lock);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock channels failed, channelId=%d, ret=%d", channelId, ret);
+        TRANS_LOGE(TRANS_CTRL, "lock channels failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
         TransCloseNetWorkingChannel(channelId);
         return;
     }
 
     struct PipelineChannelItem *target = SearchChannelItemUnsafe(&channelId, CompareByChannelId);
     if (target == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "channelId=%d not found", channelId);
+        TRANS_LOGE(TRANS_CTRL, "channelId not found. channelId=%{public}d", channelId);
         SoftBusMutexUnlock(&g_manager.channels->lock);
         TransCloseNetWorkingChannel(channelId);
         return;
@@ -427,7 +427,7 @@ static void InnerOnChannelOpened(int32_t channelId, const char *uuid, unsigned c
         .onChannelOpenFailed = target->callback.onChannelOpenFailed,
     };
     if (strcpy_s(target->uuid, UUID_BUF_LEN, uuid) != EOK) {
-        TRANS_LOGE(TRANS_CTRL, "strcpy uuid failed, channelId=%d", channelId);
+        TRANS_LOGE(TRANS_CTRL, "strcpy uuid failed, channelId=%{public}d", channelId);
         ListDelete(&target->node);
         SoftBusFree(target);
         g_manager.channels->cnt -= 1;
@@ -450,7 +450,7 @@ static void TransProxyPipelineOnChannelOpenFailed(int32_t channelId, const char 
     TRANS_LOGD(TRANS_CTRL, "enter.");
     struct SoftBusMessage *msg = (struct SoftBusMessage *)SoftBusCalloc(sizeof(SoftBusMessage));
     if (msg == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "malloc msg failed, channelId=%d", channelId);
+        TRANS_LOGE(TRANS_CTRL, "malloc msg failed, channelId=%{public}d", channelId);
         return;
     }
     msg->what = LOOPER_MSG_TYPE_ON_CHANNEL_OPEN_FAILED;
@@ -465,13 +465,13 @@ static void InnerOnChannelOpenFailed(int32_t channelId)
     TRANS_LOGD(TRANS_CTRL, "enter.");
     int32_t ret = SoftBusMutexLock(&g_manager.channels->lock);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock channels failed, channelId=%d, ret=%d", channelId, ret);
+        TRANS_LOGE(TRANS_CTRL, "lock channels failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
         return;
     }
 
     struct PipelineChannelItem *target = SearchChannelItemUnsafe(&channelId, CompareByChannelId);
     if (target == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "channelId=%d not found", channelId);
+        TRANS_LOGE(TRANS_CTRL, "channelId not found. channelId=%{public}d", channelId);
         SoftBusMutexUnlock(&g_manager.channels->lock);
         return;
     }
@@ -493,7 +493,7 @@ static void TransProxyPipelineOnChannelClosed(int32_t channelId)
     struct PipelineChannelItem *target = NULL;
     int32_t ret = SoftBusMutexLock(&g_manager.channels->lock);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock channels failed, channelId=%d, ret=%d", channelId, ret);
+        TRANS_LOGE(TRANS_CTRL, "lock channels failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
         goto exit;
     }
     target = SearchChannelItemUnsafe(&channelId, CompareByChannelId);
@@ -515,7 +515,7 @@ static void TransProxyPipelineOnMessageReceived(int32_t channelId, const char *d
 {
     TRANS_LOGD(TRANS_CTRL, "enter.");
     TRANS_CHECK_AND_RETURN_LOGW(data, TRANS_CTRL, "data is invalid");
-    TRANS_CHECK_AND_RETURN_LOGW(len > sizeof(uint32_t), TRANS_CTRL, "len=%d is too short", len);
+    TRANS_CHECK_AND_RETURN_LOGW(len > sizeof(uint32_t), TRANS_CTRL, "len is too short. len=%{public}d", len);
 
     uint32_t msgType = *(uint32_t *)data;
     struct ListenerItem *target = NULL;
@@ -527,7 +527,7 @@ static void TransProxyPipelineOnMessageReceived(int32_t channelId, const char *d
     }
 
     if (target == NULL || target->listener.onDataReceived == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "not listener for msgType=%u", msgType);
+        TRANS_LOGE(TRANS_CTRL, "not listener for msgType=%{public}u", msgType);
         return;
     }
     target->listener.onDataReceived(channelId, data + sizeof(uint32_t), len - sizeof(uint32_t));
@@ -538,12 +538,12 @@ static void InnerOpenProxyChannel(int32_t requestId)
     TRANS_LOGD(TRANS_CTRL, "enter.");
     int32_t ret = SoftBusMutexLock(&g_manager.channels->lock);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock channels failed, reqId=%d, ret=%d", requestId, ret);
+        TRANS_LOGE(TRANS_CTRL, "lock channels failed, reqId=%{public}d, ret=%{public}d", requestId, ret);
         return;
     }
     struct PipelineChannelItem *target = SearchChannelItemUnsafe(&requestId, CompareByRequestId);
     if (target == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "reqId=%d not found", requestId);
+        TRANS_LOGE(TRANS_CTRL, "channel not found. reqId=%{public}d", requestId);
         SoftBusMutexUnlock(&g_manager.channels->lock);
         return;
     }
@@ -557,7 +557,7 @@ static void InnerOpenProxyChannel(int32_t requestId)
     }
     char networkId[NETWORK_ID_BUF_LEN] = { 0 };
     if (strcpy_s(networkId, sizeof(networkId), target->networkId) != EOK) {
-        TRANS_LOGE(TRANS_CTRL, "strcpy_s failed, reqId=%d", requestId);
+        TRANS_LOGE(TRANS_CTRL, "strcpy_s failed, reqId=%{public}d", requestId);
         ListDelete(&target->node);
         g_manager.channels->cnt -= 1;
         SoftBusFree(target);
@@ -571,12 +571,13 @@ static void InnerOpenProxyChannel(int32_t requestId)
     int32_t channelId = TransOpenNetWorkingChannel(SESSION_NAME, networkId, &preferred);
     ret = SoftBusMutexLock(&g_manager.channels->lock);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock channels failed, channelId=%d,  ret=%d", channelId, ret);
+        TRANS_LOGE(TRANS_CTRL, "lock channels failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
         return;
     }
     target = SearchChannelItemUnsafe(&requestId, CompareByRequestId);
     if (target == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "open proxy session failed, reqId=%d, channelId=%d", requestId, channelId);
+        TRANS_LOGE(TRANS_CTRL,
+            "open proxy session failed, reqId=%{public}d, channelId=%{public}d", requestId, channelId);
         SoftBusMutexUnlock(&g_manager.channels->lock);
         if (channelId != INVALID_CHANNEL_ID) {
             TransCloseNetWorkingChannel(channelId);
@@ -585,7 +586,7 @@ static void InnerOpenProxyChannel(int32_t requestId)
     }
     callback.onChannelOpenFailed = target->callback.onChannelOpenFailed;
     if (channelId == INVALID_CHANNEL_ID) {
-        TRANS_LOGE(TRANS_CTRL, "open proxy channel failed, reqId=%d", requestId);
+        TRANS_LOGE(TRANS_CTRL, "open proxy channel failed, reqId=%{public}d", requestId);
         ListDelete(&target->node);
         g_manager.channels->cnt -= 1;
         SoftBusFree(target);
@@ -602,7 +603,7 @@ extern "C" {
 #endif
 static void TransProxyPipelineHandleMessage(SoftBusMessage *msg)
 {
-    TRANS_LOGD(TRANS_CTRL, "enter, messageType=%d", msg->what);
+    TRANS_LOGD(TRANS_CTRL, "enter, messageType=%{public}d", msg->what);
     switch (msg->what) {
         case LOOPER_MSG_TYPE_OPEN_CHANNEL:
             InnerOpenProxyChannel(msg->arg1);
@@ -617,7 +618,7 @@ static void TransProxyPipelineHandleMessage(SoftBusMessage *msg)
             InnerOnChannelOpened(msg->arg1, (char *)msg->obj, msg->arg2);
             break;
         default:
-            TRANS_LOGE(TRANS_CTRL, "unknown messageType=%d", msg->what);
+            TRANS_LOGE(TRANS_CTRL, "unknown messageType=%{public}d", msg->what);
             break;
     }
 }

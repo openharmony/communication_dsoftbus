@@ -131,7 +131,7 @@ static bool Marshalling(struct InnerLink *self, struct WifiDirectProtocol *proto
                     break;
                 }
             default:
-                CONN_LOGI(CONN_WIFI_DIRECT, "no need to pack for type=%d", keyProperty->type);
+                CONN_LOGI(CONN_WIFI_DIRECT, "no need to pack for type=%{public}d", keyProperty->type);
                 continue;
         }
 
@@ -151,7 +151,7 @@ static bool Unmarshalling(struct InnerLink *self, struct WifiDirectProtocol *pro
     while (protocol->readData(protocol, &keyProperty, &data, &size)) {
         bool ret = true;
         enum InnerLinkKey key = GetKeyFromKeyProperty(&keyProperty);
-        CONN_CHECK_AND_RETURN_RET_LOGE(key < IL_KEY_MAX, false, CONN_WIFI_DIRECT, "key out of range, tag=%d",
+        CONN_CHECK_AND_RETURN_RET_LOGE(key < IL_KEY_MAX, false, CONN_WIFI_DIRECT, "key out of range, tag=%{public}d",
             keyProperty.tag);
 
         enum InfoContainerEntryType type = keyProperty.type;
@@ -186,10 +186,10 @@ static bool Unmarshalling(struct InnerLink *self, struct WifiDirectProtocol *pro
             }
                 break;
             default:
-                CONN_LOGI(CONN_WIFI_DIRECT, "no need to unpack for type=%d", type);
+                CONN_LOGI(CONN_WIFI_DIRECT, "no need to unpack for type=%{public}d", type);
                 continue;
         }
-        CONN_CHECK_AND_RETURN_RET_LOGW(ret, false, CONN_WIFI_DIRECT, "unmarshalling failed key=%d", key);
+        CONN_CHECK_AND_RETURN_RET_LOGW(ret, false, CONN_WIFI_DIRECT, "unmarshalling failed key=%{public}d", key);
     }
 
     return true;
@@ -244,7 +244,7 @@ static void PutRemoteIpString(struct InnerLink *self, const char *ipString)
 static void IncreaseReference(struct InnerLink *self)
 {
     self->reference++;
-    CONN_LOGI(CONN_WIFI_DIRECT, "reference=%d IS_BEING_USED_BY_LOCAL=true", self->reference);
+    CONN_LOGI(CONN_WIFI_DIRECT, " IS_BEING_USED_BY_LOCAL=true, reference=%{public}d", self->reference);
     self->putBoolean(self, IL_KEY_IS_BEING_USED_BY_LOCAL, true);
 }
 
@@ -254,7 +254,7 @@ static void DecreaseReference(struct InnerLink *self)
         self->reference--;
     }
 
-    CONN_LOGI(CONN_WIFI_DIRECT, "reference=%d", self->reference);
+    CONN_LOGI(CONN_WIFI_DIRECT, "reference=%{public}d", self->reference);
     if (self->reference == 0) {
         self->putBoolean(self, IL_KEY_IS_BEING_USED_BY_LOCAL, false);
         CONN_LOGI(CONN_WIFI_DIRECT, "IS_BEING_USED_BY_LOCAL=false");
@@ -324,9 +324,10 @@ static void DumpLinkId(struct InnerLink *self, int32_t fd)
         return;
     }
     struct LinkIdStruct *item = NULL;
-    CONN_LOGI(CONN_WIFI_DIRECT, "reference=%d", self->reference);
+    CONN_LOGI(CONN_WIFI_DIRECT, "reference=%{public}d", self->reference);
     LIST_FOR_EACH_ENTRY(item, &self->idList, struct LinkIdStruct, node) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "linkId=%d requestId=%d pid=%d", item->id, item->requestId, item->pid);
+        CONN_LOGI(CONN_WIFI_DIRECT,
+            "linkId=%{public}d, requestId=%{public}d, pid=%{public}d", item->id, item->requestId, item->pid);
     }
 }
 
@@ -345,13 +346,13 @@ static bool IsProtected(struct InnerLink *self)
 {
     enum InnerLinkState state = (enum InnerLinkState)self->getInt(self, IL_KEY_STATE, INNER_LINK_STATE_INVALID);
     if (state != INNER_LINK_STATE_CONNECTED) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "state=%d", state);
+        CONN_LOGI(CONN_WIFI_DIRECT, "state=%{public}d", state);
         return false;
     }
 
     uint64_t currentTime = SoftBusGetSysTimeMs();
     uint64_t *changeTime = self->getRawData(self, IL_KEY_STATE_CHANGE_TIME, NULL, NULL);
-    CONN_LOGI(CONN_WIFI_DIRECT, "changeTime=%" PRIu64 " curTime=%" PRIu64, *changeTime, currentTime);
+    CONN_LOGI(CONN_WIFI_DIRECT, "changeTime=%{public}" PRIu64 ", curTime=%{public}" PRIu64, *changeTime, currentTime);
     if (currentTime && currentTime - PROTECT_DURATION_MS < *changeTime) {
         return true;
     }

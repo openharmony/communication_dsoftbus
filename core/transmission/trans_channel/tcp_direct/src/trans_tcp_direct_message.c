@@ -225,7 +225,7 @@ static int32_t PackBytes(int32_t channelId, const char *data, TdcPacketHead *pac
     }
     packetHead->dataLen = encDataLen;
 
-    TRANS_LOGI(TRANS_BYTES, "PackBytes: flag=0x%x, seq=%" PRIu64,
+    TRANS_LOGI(TRANS_BYTES, "PackBytes: flag=0x%{public}x, seq=%{public}" PRIu64,
         packetHead->flags, packetHead->seq);
 
     PackTdcPacketHead(packetHead);
@@ -241,7 +241,7 @@ static void SendFailToFlushDevice(SessionConn *conn)
     if (conn->appInfo.routeType == WIFI_STA) {
         char *tmpId = NULL;
         Anonymize(conn->appInfo.peerData.deviceId, &tmpId);
-        TRANS_LOGE(TRANS_CTRL, "send data fail, do Authflushdevice deviceId=%s", tmpId);
+        TRANS_LOGE(TRANS_CTRL, "send data fail, do Authflushdevice deviceId=%{public}s", tmpId);
         AnonymizeFree(tmpId);
         if (AuthFlushDevice(conn->appInfo.peerData.deviceId) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "tcp flush failed, wifi will offline");
@@ -400,7 +400,7 @@ static int32_t NotifyChannelOpened(int32_t channelId)
     char myIp[IP_LEN] = { 0 };
     int32_t ret = conn.serverSide ? GetServerSideIpInfo(&conn, myIp, IP_LEN) : GetClientSideIpInfo(&conn, myIp, IP_LEN);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get ip failed, ret = %d.", ret);
+        TRANS_LOGE(TRANS_CTRL, "get ip failed, ret=%{public}d.", ret);
         return ret;
     }
     info.myIp = myIp;
@@ -439,7 +439,7 @@ static int32_t NotifyChannelClosed(const AppInfo *appInfo, int32_t channelId)
 {
     AppInfoData myData = appInfo->myData;
     int ret = TransTdcOnChannelClosed(myData.pkgName, myData.pid, channelId);
-    TRANS_LOGI(TRANS_CTRL, "channelId=%d, ret=%d", channelId, ret);
+    TRANS_LOGI(TRANS_CTRL, "channelId=%{public}d, ret=%{public}d", channelId, ret);
     return ret;
 }
 
@@ -490,7 +490,7 @@ int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)
             return SOFTBUS_INVALID_PARAM;
         }
         int ret = TransTdcOnChannelOpenFailed(myData->pkgName, myData->pid, channelId, errCode);
-        TRANS_LOGW(TRANS_CTRL, "channelId=%d, ret=%d", channelId, ret);
+        TRANS_LOGW(TRANS_CTRL, "channelId=%{public}d, ret=%{public}d", channelId, ret);
         return ret;
     }
     return SOFTBUS_OK;
@@ -506,7 +506,7 @@ static int TransTdcPostFisrtData(SessionConn *conn)
         return SOFTBUS_ENCRYPT_ERR;
     }
     if (outLen != conn->appInfo.fastTransDataSize + FAST_TDC_EXT_DATA_SIZE) {
-        TRANS_LOGE(TRANS_CTRL, "pack bytes len error, outLen=%d", outLen);
+        TRANS_LOGE(TRANS_CTRL, "pack bytes len error, outLen=%{public}d", outLen);
         SoftBusFree(buf);
         return SOFTBUS_ENCRYPT_ERR;
     }
@@ -517,7 +517,7 @@ static int TransTdcPostFisrtData(SessionConn *conn)
     }
     ssize_t ret = ConnSendSocketData(conn->appInfo.fd, buf, outLen, 0);
     if (ret != (ssize_t)outLen) {
-        TRANS_LOGE(TRANS_CTRL, "failed to send tcp data. ret=%zd", ret);
+        TRANS_LOGE(TRANS_CTRL, "failed to send tcp data. ret=%{public}zd", ret);
         SoftBusFree(buf);
         return SOFTBUS_ERR;
     }
@@ -546,17 +546,17 @@ static int32_t TransGetLocalConfig(int32_t channelType, int32_t businessType, ui
 {
     ConfigType configType = (ConfigType)FindConfigType(channelType, businessType);
     if (configType == SOFTBUS_CONFIG_TYPE_MAX) {
-        TRANS_LOGE(TRANS_CTRL, "Invalid channelType=%d, businessType=%d",
+        TRANS_LOGE(TRANS_CTRL, "Invalid channelType=%{public}d, businessType=%{public}d",
             channelType, businessType);
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t maxLen = 0;
     if (SoftbusGetConfig(configType, (unsigned char *)&maxLen, sizeof(maxLen)) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get config failed, configType=%d.", configType);
+        TRANS_LOGE(TRANS_CTRL, "get config failed, configType=%{public}d.", configType);
         return SOFTBUS_GET_CONFIG_VAL_ERR;
     }
     *len = maxLen;
-    TRANS_LOGI(TRANS_CTRL, "get local config len=%d.", *len);
+    TRANS_LOGI(TRANS_CTRL, "get local config len=%{public}d.", *len);
     return SOFTBUS_OK;
 }
 
@@ -567,29 +567,29 @@ static int32_t TransTdcProcessDataConfig(AppInfo *appInfo)
         return SOFTBUS_INVALID_PARAM;
     }
     if (appInfo->businessType != BUSINESS_TYPE_MESSAGE && appInfo->businessType != BUSINESS_TYPE_BYTE) {
-        TRANS_LOGI(TRANS_CTRL, "invalid businessType=%d", appInfo->businessType);
+        TRANS_LOGI(TRANS_CTRL, "invalid businessType=%{public}d", appInfo->businessType);
         return SOFTBUS_OK;
     }
     if (appInfo->peerData.dataConfig != 0) {
         appInfo->myData.dataConfig = MIN(appInfo->myData.dataConfig, appInfo->peerData.dataConfig);
-        TRANS_LOGI(TRANS_CTRL, "process dataConfig=%u succ", appInfo->myData.dataConfig);
+        TRANS_LOGI(TRANS_CTRL, "process dataConfig succ. dataConfig=%{public}u", appInfo->myData.dataConfig);
         return SOFTBUS_OK;
     }
     ConfigType configType = appInfo->businessType == BUSINESS_TYPE_BYTE ?
         SOFTBUS_INT_MAX_BYTES_LENGTH : SOFTBUS_INT_MAX_MESSAGE_LENGTH;
     if (SoftbusGetConfig(configType, (unsigned char *)&appInfo->myData.dataConfig,
         sizeof(appInfo->myData.dataConfig)) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get config failed, configType=%d", configType);
+        TRANS_LOGE(TRANS_CTRL, "get config failed, configType=%{public}d", configType);
         return SOFTBUS_ERR;
     }
-    TRANS_LOGI(TRANS_CTRL, "process dataConfig=%d", appInfo->myData.dataConfig);
+    TRANS_LOGI(TRANS_CTRL, "process dataConfig=%{public}d", appInfo->myData.dataConfig);
     return SOFTBUS_OK;
 }
 
 static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *reply)
 {
     (void)seq;
-    TRANS_LOGI(TRANS_CTRL, "channelId=%d", channelId);
+    TRANS_LOGI(TRANS_CTRL, "channelId=%{public}d", channelId);
     SessionConn conn;
     (void)memset_s(&conn, sizeof(SessionConn), 0, sizeof(SessionConn));
     if (GetSessionConnById(channelId, &conn) == NULL) {
@@ -715,7 +715,7 @@ static void OpenDataBusRequestOutSessionName(const char *mySessionName, const ch
     char *tmpPeerName = NULL;
     Anonymize(mySessionName, &tmpMyName);
     Anonymize(peerSessionName, &tmpPeerName);
-    TRANS_LOGI(TRANS_CTRL, "OpenDataBusRequest: mySessionName=%s, peerSessionName=%s",
+    TRANS_LOGI(TRANS_CTRL, "OpenDataBusRequest: mySessionName=%{public}s, peerSessionName=%{public}s",
         tmpMyName, tmpPeerName);
     AnonymizeFree(tmpMyName);
     AnonymizeFree(tmpPeerName);
@@ -768,7 +768,7 @@ static int32_t TransTdcFillDataConfig(AppInfo *appInfo)
         return SOFTBUS_ERR;
     }
     if (appInfo->businessType != BUSINESS_TYPE_BYTE && appInfo->businessType != BUSINESS_TYPE_MESSAGE) {
-        TRANS_LOGI(TRANS_CTRL, "invalid businessType=%d", appInfo->businessType);
+        TRANS_LOGI(TRANS_CTRL, "invalid businessType=%{public}d", appInfo->businessType);
         return SOFTBUS_OK;
     }
     if (appInfo->peerData.dataConfig != 0) {
@@ -777,17 +777,17 @@ static int32_t TransTdcFillDataConfig(AppInfo *appInfo)
             return SOFTBUS_ERR;
         }
         appInfo->myData.dataConfig = MIN(localDataConfig, appInfo->peerData.dataConfig);
-        TRANS_LOGI(TRANS_CTRL, "fill dataConfig=%u succ", appInfo->myData.dataConfig);
+        TRANS_LOGI(TRANS_CTRL, "fill dataConfig succ. dataConfig=%{public}u", appInfo->myData.dataConfig);
         return SOFTBUS_OK;
     }
     ConfigType configType = appInfo->businessType == BUSINESS_TYPE_BYTE ?
         SOFTBUS_INT_MAX_BYTES_LENGTH : SOFTBUS_INT_MAX_MESSAGE_LENGTH;
     if (SoftbusGetConfig(configType, (unsigned char *)&appInfo->myData.dataConfig,
         sizeof(appInfo->myData.dataConfig)) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get config failed, configType=%d", configType);
+        TRANS_LOGE(TRANS_CTRL, "get config failed, configType=%{public}d", configType);
         return SOFTBUS_ERR;
     }
-    TRANS_LOGI(TRANS_CTRL, "fill dataConfig=%d", appInfo->myData.dataConfig);
+    TRANS_LOGI(TRANS_CTRL, "fill dataConfig=%{public}d", appInfo->myData.dataConfig);
     return SOFTBUS_OK;
 }
 
@@ -801,7 +801,7 @@ static bool IsMetaSession(const char *sessionName)
 
 static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t seq, const cJSON *request)
 {
-    TRANS_LOGI(TRANS_CTRL, "channelId=%d, seq=%" PRIu64, channelId, seq);
+    TRANS_LOGI(TRANS_CTRL, "channelId=%{public}d, seq=%{public}" PRIu64, channelId, seq);
     SessionConn *conn = GetSessionConnFromDataBusRequest(channelId, request);
     if (conn == NULL) {
         TRANS_LOGE(TRANS_CTRL, "conn is null");
@@ -812,7 +812,7 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
         char *tmpName = NULL;
         Anonymize(conn->appInfo.myData.sessionName, &tmpName);
         TRANS_LOGI(TRANS_CTRL,
-            "Request denied: sessionName=%s is not a meta session", tmpName);
+            "Request denied: session is not a meta session. sessionName=%{public}s", tmpName);
         AnonymizeFree(tmpName);
         return SOFTBUS_TRANS_NOT_META_SESSION;
     }
@@ -846,7 +846,7 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
 
     OpenDataBusRequestOutSessionName(conn->appInfo.myData.sessionName,
         conn->appInfo.peerData.sessionName);
-    TRANS_LOGI(TRANS_CTRL, "OpenDataBusRequest: myPid=%d, peerPid=%d",
+    TRANS_LOGI(TRANS_CTRL, "OpenDataBusRequest: myPid=%{public}d, peerPid=%{public}d",
         conn->appInfo.myData.pid, conn->appInfo.peerData.pid);
     if (NotifyChannelOpened(channelId) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "Notify App Channel Opened Failed");
@@ -905,7 +905,7 @@ static int32_t ProcessMessage(int32_t channelId, uint32_t flags, uint64_t seq, c
         ret = OpenDataBusRequest(channelId, flags, seq, json);
     }
     cJSON_Delete(json);
-    TRANS_LOGI(TRANS_CTRL, "ret=[%d]", ret);
+    TRANS_LOGI(TRANS_CTRL, "ret=%{public}d", ret);
     return ret;
 }
 
@@ -950,7 +950,7 @@ static int64_t GetAuthIdByChannelInfo(int32_t channelId, uint64_t seq, uint32_t 
     }
 
     AuthLinkType linkType = SwitchCipherTypeToAuthLinkType(cipherFlag);
-    TRANS_LOGI(TRANS_CTRL, "get auth linkType=%d flag=0x%x", linkType, cipherFlag);
+    TRANS_LOGI(TRANS_CTRL, "get auth linkType=%{public}d, flag=0x%{public}x", linkType, cipherFlag);
     bool isAuthMeta = (cipherFlag & FLAG_AUTH_META) ? true : false;
     return AuthGetIdByUuid(uuid, linkType, !fromAuthServer, isAuthMeta);
 }
@@ -1011,7 +1011,7 @@ static int32_t ProcessReceivedData(int32_t channelId)
     seq = pktHead->seq;
     flags = pktHead->flags;
 
-    TRANS_LOGI(TRANS_CTRL, "recv tdc packet, flags=%d, seq=%" PRIu64, flags, seq);
+    TRANS_LOGI(TRANS_CTRL, "recv tdc packet, flags=%{public}d, seq=%{public}" PRIu64, flags, seq);
     if (DecryptMessage(channelId, pktHead, pktData, &data, &dataLen) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "srv process recv data: decrypt fail.");
         SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
@@ -1063,13 +1063,14 @@ static int32_t TransTdcSrvProcData(ListenerModule module, int32_t channelId)
     uint32_t dataLen = pktHead->dataLen;
     if (dataLen > node->size - DC_MSG_PACKET_HEAD_SIZE) {
         SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
-        TRANS_LOGE(TRANS_CTRL, "srv out of recv dataLen=%d", dataLen);
+        TRANS_LOGE(TRANS_CTRL, "srv out of recv dataLen=%{public}d", dataLen);
         return SOFTBUS_TRANS_UNPACK_PACKAGE_HEAD_FAILED;
     }
 
     if (bufLen < dataLen + DC_MSG_PACKET_HEAD_SIZE) {
         SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
-        TRANS_LOGE(TRANS_CTRL, "srv data not enough, recv next time.bufLen=%d dataLen=%d headLen=%d",
+        TRANS_LOGE(TRANS_CTRL,
+            "srv data not enough, recv next time. bufLen=%{public}d, dataLen=%{public}d, headLen=%{public}d",
             bufLen, dataLen, DC_MSG_PACKET_HEAD_SIZE);
         return SOFTBUS_DATA_NOT_ENOUGH;
     }
@@ -1102,7 +1103,7 @@ static int32_t TransTdcGetDataBufInfoByChannelId(int32_t channelId, int32_t *fd,
         }
     }
     (void)SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
-    TRANS_LOGI(TRANS_CTRL, "trans tdc channelId=%d data buf not found.", channelId);
+    TRANS_LOGI(TRANS_CTRL, "trans tdc data buf not found. channelId=%{public}d", channelId);
     return SOFTBUS_ERR;
 }
 
@@ -1130,12 +1131,12 @@ static int32_t TransTdcUpdateDataBufWInfo(int32_t channelId, char *recvBuf, int3
         if (recvLen > freeLen) {
             (void)SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
             TRANS_LOGE(TRANS_CTRL,
-                "trans tdc recvLen=%d override freeLen=%d.", recvLen, freeLen);
+                "trans tdc. recvLen=%{public}d, freeLen=%{public}d.", recvLen, freeLen);
             return SOFTBUS_ERR;
         }
         if (memcpy_s(item->w, recvLen, recvBuf, recvLen) != EOK) {
             (void)SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
-            TRANS_LOGE(TRANS_CTRL, "trans tdc channelId=%d memcpy failed.", channelId);
+            TRANS_LOGE(TRANS_CTRL, "trans tdc memcpy failed. channelId=%{public}d", channelId);
             return SOFTBUS_ERR;
         }
         item->w += recvLen;
@@ -1143,7 +1144,7 @@ static int32_t TransTdcUpdateDataBufWInfo(int32_t channelId, char *recvBuf, int3
         return SOFTBUS_OK;
     }
     (void)SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
-    TRANS_LOGE(TRANS_CTRL, "trans update tdc channelId=%d databuf not found.", channelId);
+    TRANS_LOGE(TRANS_CTRL, "trans update tdc databuf not found. channelId=%{public}d", channelId);
     return SOFTBUS_ERR;
 }
 
@@ -1156,27 +1157,27 @@ int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId)
         return SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED;
     }
     if (len == 0) {
-        TRANS_LOGE(TRANS_CTRL, "trans channelId=%d free databuf less zero.", channelId);
+        TRANS_LOGE(TRANS_CTRL, "trans free databuf less zero. channelId=%{public}d", channelId);
         return SOFTBUS_TRANS_TCP_DATABUF_LESS_ZERO;
     }
     char *recvBuf = (char*)SoftBusCalloc(len);
     if (recvBuf == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "trans channelId=%d malloc len%zu failed..", channelId, len);
+        TRANS_LOGE(TRANS_CTRL, "trans malloc failed. channelId=%{public}d, len%{public}zu", channelId, len);
         return SOFTBUS_MALLOC_ERR;
     }
     int32_t recvLen = ConnRecvSocketData(fd, recvBuf, len, 0);
     if (recvLen < 0) {
         SoftBusFree(recvBuf);
-        TRANS_LOGE(TRANS_CTRL, "channelId=%d recv tcp data fail,retLen=%d.", channelId, recvLen);
+        TRANS_LOGE(TRANS_CTRL, " recv tcp data fail, channelId=%{public}d, retLen=%{public}d.", channelId, recvLen);
         return SOFTBUS_ERR;
     } else if (recvLen == 0) {
         SoftBusFree(recvBuf);
-        TRANS_LOGE(TRANS_CTRL, "channelId=%d recv tcp data fail,retLen= 0.", channelId);
+        TRANS_LOGE(TRANS_CTRL, "recv tcp data fail, retLen=0, channelId=%{public}d", channelId);
         return SOFTBUS_DATA_NOT_ENOUGH;
     }
     if (TransTdcUpdateDataBufWInfo(channelId, recvBuf, recvLen) != SOFTBUS_OK) {
         SoftBusFree(recvBuf);
-        TRANS_LOGE(TRANS_CTRL, "channelId=%d update channel data buf failed.", channelId);
+        TRANS_LOGE(TRANS_CTRL, "update channel data buf failed. channelId=%{public}d", channelId);
         return SOFTBUS_TRANS_UPDATE_DATA_BUF_FAILED;
     }
     SoftBusFree(recvBuf);

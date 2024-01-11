@@ -88,7 +88,7 @@ static void SaveP2pChannel(struct WifiDirectNegotiateChannel *channel, struct Ne
 
     enum WifiDirectLinkType linkType = WIFI_DIRECT_LINK_TYPE_P2P;
     char *ip = msg->getString(msg, NM_KEY_IP, "");
-    CONN_LOGI(CONN_WIFI_DIRECT, "ip=%s", WifiDirectAnonymizeIp(ip));
+    CONN_LOGI(CONN_WIFI_DIRECT, "ip=%{public}s", WifiDirectAnonymizeIp(ip));
     if (strstr(ip, HML_IP_NET_PREFIX) != NULL) {
         linkType = WIFI_DIRECT_LINK_TYPE_HML;
     }
@@ -96,10 +96,11 @@ static void SaveP2pChannel(struct WifiDirectNegotiateChannel *channel, struct Ne
     char remoteUuid[UUID_BUF_LEN] = {0};
     int32_t ret = channel->getDeviceId(channel, remoteUuid, sizeof(remoteUuid));
     CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get remote uuid failed");
-    CONN_LOGI(CONN_WIFI_DIRECT, "linkType=%d remoteUuid=%s", linkType, WifiDirectAnonymizeDeviceId(remoteUuid));
+    CONN_LOGI(CONN_WIFI_DIRECT,
+        "linkType=%{public}d, remoteUuid=%{public}s", linkType, WifiDirectAnonymizeDeviceId(remoteUuid));
     struct InnerLink *link = GetLinkManager()->getLinkByTypeAndUuid(linkType, remoteUuid);
     if (link == NULL) {
-        CONN_LOGW(CONN_WIFI_DIRECT, "no link for %s", WifiDirectAnonymizeDeviceId(remoteUuid));
+        CONN_LOGW(CONN_WIFI_DIRECT, "no link. remoteUuid=%{public}s", WifiDirectAnonymizeDeviceId(remoteUuid));
         return;
     }
 
@@ -119,9 +120,9 @@ static int32_t UnpackData(struct WifiDirectNegotiateChannel *channel, const uint
         "no suitable protocol");
 
     if (protocol->getType() == WIFI_DIRECT_PROTOCOL_JSON) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "WIFI_DIRECT_PROTOCOL_JSON size=%zd", size);
+        CONN_LOGI(CONN_WIFI_DIRECT, "WIFI_DIRECT_PROTOCOL_JSON size=%{public}zd", size);
     } else if (protocol->getType() == WIFI_DIRECT_PROTOCOL_TLV) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "WIFI_DIRECT_PROTOCOL_TLV size=%zd", size);
+        CONN_LOGI(CONN_WIFI_DIRECT, "WIFI_DIRECT_PROTOCOL_TLV size=%{public}zd", size);
     }
 
     struct ProtocolFormat format = { TLV_TAG_SIZE, TLV_LENGTH_SIZE2 };
@@ -200,7 +201,7 @@ static void DumpCommandString(enum WifiDirectNegotiateCmdType cmdType, const cha
 
     for (uint32_t i = 0 ; i < ARRAY_SIZE(cmdStringMap); i++) {
         if (cmdStringMap[i].cmd == cmdType) {
-            CONN_LOGI(CONN_WIFI_DIRECT, "cmd=%s remoteDeviceId=%s", cmdStringMap[i].string,
+            CONN_LOGI(CONN_WIFI_DIRECT, "cmd=%{public}s, remoteDeviceId=%{public}s", cmdStringMap[i].string,
                       WifiDirectAnonymizeDeviceId(remoteDeviceId));
             break;
         }
@@ -239,8 +240,8 @@ static bool IsMessageNeedPending(struct WifiDirectNegotiator *self, struct WifiD
     char remoteDeviceId[UUID_BUF_LEN] = {0};
     int32_t ret = channel->getDeviceId(channel, remoteDeviceId, sizeof(remoteDeviceId));
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, true, CONN_WIFI_DIRECT, "get device id failed");
-    CONN_LOGI(CONN_WIFI_DIRECT, "currentRemote=%s msgRemote=%s",
-              WifiDirectAnonymizeDeviceId(self->currentRemoteDeviceId), WifiDirectAnonymizeDeviceId(remoteDeviceId));
+    CONN_LOGI(CONN_WIFI_DIRECT, "currentRemote=%{public}s, msgRemote=%{public}s",
+        WifiDirectAnonymizeDeviceId(self->currentRemoteDeviceId), WifiDirectAnonymizeDeviceId(remoteDeviceId));
 
     if (GetWifiDirectUtils()->strCompareIgnoreCase(remoteDeviceId, self->currentRemoteDeviceId) != 0) {
         CONN_LOGI(CONN_WIFI_DIRECT, "mis deviceId");
@@ -319,7 +320,7 @@ static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *ch
     } else {
         self->updateCurrentRemoteDeviceId(channel);
         self->currentProcessor = processor;
-        CONN_LOGI(CONN_WIFI_DIRECT, "currentProcessor=%s", processor->name);
+        CONN_LOGI(CONN_WIFI_DIRECT, "currentProcessor=%{public}s", processor->name);
         processor->processNegotiateMessage(cmdType, command);
     }
 }
@@ -331,7 +332,7 @@ static void OnNegotiateChannelDisconnected(struct WifiDirectNegotiateChannel *ch
     }
     char uuid[UUID_BUF_LEN] = {0};
     channel->getDeviceId(channel, uuid, sizeof(uuid));
-    CONN_LOGD(CONN_WIFI_DIRECT, "uuid=%s", WifiDirectAnonymizeDeviceId(uuid));
+    CONN_LOGD(CONN_WIFI_DIRECT, "uuid=%{public}s", WifiDirectAnonymizeDeviceId(uuid));
     GetLinkManager()->clearNegotiateChannelForLink(channel);
 }
 
@@ -341,7 +342,7 @@ static void OnTriggerChannelDataReceived(struct WifiDirectTriggerChannel *channe
     struct WifiDirectProcessor *processor = GetWifiDirectDecisionCenter()->getTriggerProcessorByChannel(channel);
     CONN_CHECK_AND_RETURN_LOGW(processor != NULL, CONN_WIFI_DIRECT, "trigger processor is null");
 
-    CONN_LOGI(CONN_WIFI_DIRECT, "processor=%s", processor->name);
+    CONN_LOGI(CONN_WIFI_DIRECT, "processor=%{public}s", processor->name);
     processor->onTriggerChannelDataReceived(channel);
 }
 
@@ -350,7 +351,7 @@ static void OnDefaultTriggerChannelDataReceived(struct WifiDirectNegotiateChanne
 {
     struct WifiDirectProcessor *processor = GetWifiDirectDecisionCenter()->getTriggerProcessorByData(data, len);
     CONN_CHECK_AND_RETURN_LOGW(processor != NULL, CONN_WIFI_DIRECT, "trigger processor is null");
-    CONN_LOGI(CONN_WIFI_DIRECT, "processor=%s", processor->name);
+    CONN_LOGI(CONN_WIFI_DIRECT, "processor=%{public}s", processor->name);
     processor->onDefaultTriggerChannelDataReceived(channel, data, len);
 }
 
@@ -365,7 +366,7 @@ static void OnOperationComplete(int32_t event, void *data)
 
 static void OnEntityChanged(enum EntityState state)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "state=%d", state);
+    CONN_LOGI(CONN_WIFI_DIRECT, "state=%{public}d", state);
 }
 
 static void NegotiateSchedule(void)
@@ -379,7 +380,7 @@ static void NegotiateSchedule(void)
         prevCommand->destructor(prevCommand);
     }
     GetWifiDirectNegotiator()->currentCommand = nextCommand;
-    CONN_LOGI(CONN_WIFI_DIRECT, "currentCommand=%d", nextCommand->type);
+    CONN_LOGI(CONN_WIFI_DIRECT, "currentCommand=%{public}d", nextCommand->type);
     nextCommand->execute(nextCommand);
 }
 
@@ -511,9 +512,9 @@ static int32_t PostData(struct NegotiateMessage *msg)
     }
 
     if (protocol->getType() == WIFI_DIRECT_PROTOCOL_TLV) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "WIFI_DIRECT_PROTOCOL_TLV size=%zd", size);
+        CONN_LOGI(CONN_WIFI_DIRECT, "WIFI_DIRECT_PROTOCOL_TLV size=%{public}zd", size);
     } else if (protocol->getType() == WIFI_DIRECT_PROTOCOL_JSON) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "WIFI_DIRECT_PROTOCOL_JSON size=%zd", size);
+        CONN_LOGI(CONN_WIFI_DIRECT, "WIFI_DIRECT_PROTOCOL_JSON size=%{public}zd", size);
     }
 
     int32_t ret = channel->postData(channel, buffer, size);
@@ -522,7 +523,8 @@ static int32_t PostData(struct NegotiateMessage *msg)
         "ERROR_POST_DATA_FAILED");
 
     if (IsNeedDelayForPostData(msg)) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "wait %dms for p2p auth to send data", WAIT_POST_REQUEST_MS);
+        CONN_LOGI(CONN_WIFI_DIRECT, "wait for p2p auth to send data. WAIT_POST_REQUEST_MS=%{public}dms",
+            WAIT_POST_REQUEST_MS);
         SoftBusSleepMs(WAIT_POST_REQUEST_MS);
     }
     return SOFTBUS_OK;

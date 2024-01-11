@@ -21,7 +21,7 @@
 
 static void HandleP2pStateChanged(enum P2pState state)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "state=%d", state);
+    CONN_LOGI(CONN_WIFI_DIRECT, "state=%{public}d", state);
     enum EntityState entityState;
     if (state == P2P_STATE_STARTED) {
         entityState = ENTITY_STATE_AVAILABLE;

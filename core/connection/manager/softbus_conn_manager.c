@@ -111,7 +111,7 @@ static ConnTimeNode *GetConnTimeNode(const ConnectionInfo *info)
     LIST_FOR_EACH_ENTRY(listNode, &g_connTimeList->list, ConnTimeNode, node) {
         if (listNode != NULL) {
             if (CompareConnectInfo(&listNode->info, info) == SOFTBUS_OK) {
-                CONN_LOGD(CONN_COMMON, "find connect info success, ConnectType=%d", listNode->info.type);
+                CONN_LOGD(CONN_COMMON, "find connect info success, ConnectType=%{public}d", listNode->info.type);
                 (void)SoftBusMutexUnlock(&g_connTimeList->lock);
                 return listNode;
             }
@@ -138,7 +138,7 @@ static void FreeConnTimeNode(ConnTimeNode *timeNode)
     LIST_FOR_EACH_ENTRY_SAFE(removeNode, next, &g_connTimeList->list, ConnTimeNode, node) {
         if (removeNode->info.type == timeNode->info.type) {
             if (CompareConnectInfo(&removeNode->info, &timeNode->info) == SOFTBUS_OK) {
-                CONN_LOGD(CONN_COMMON, "find connect info success, ConnectType=%d", removeNode->info.type);
+                CONN_LOGD(CONN_COMMON, "find connect info success, ConnectType=%{public}d", removeNode->info.type);
                 ListDelete(&(removeNode->node));
                 break;
             }
@@ -163,19 +163,19 @@ static int32_t ModuleCheck(ConnModule moduleId)
             return SOFTBUS_OK;
         }
     }
-    CONN_LOGW(CONN_COMMON, "check module fail %d", moduleId);
+    CONN_LOGW(CONN_COMMON, "check module fail. moduleId=%{public}d", moduleId);
     return SOFTBUS_ERR;
 }
 
 static int32_t ConnTypeCheck(ConnectType type)
 {
     if (type >= CONNECT_TYPE_MAX) {
-        CONN_LOGW(CONN_COMMON, "type is over max %d", type);
+        CONN_LOGW(CONN_COMMON, "type is over max. type=%{public}d", type);
         return SOFTBUS_CONN_INVALID_CONN_TYPE;
     }
 
     if (g_connManager[type] == NULL) {
-        CONN_LOGE(CONN_COMMON, "type is %d", type);
+        CONN_LOGE(CONN_COMMON, "type=%{public}d", type);
         return SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT;
     }
     return SOFTBUS_OK;
@@ -326,16 +326,18 @@ uint32_t ConnGetNewRequestId(ConnModule moduleId)
 void ConnManagerRecvData(uint32_t connectionId, ConnModule moduleId, int64_t seq, char *data, int32_t len)
 {
     CONN_CHECK_AND_RETURN_LOGW(data != NULL, CONN_COMMON,
-        "dispatch data failed: data is null, connection id=%u, module=%d", connectionId, moduleId);
+        "dispatch data failed: data is null, connectionId=%{public}u, module=%{public}d", connectionId, moduleId);
     CONN_CHECK_AND_RETURN_LOGW(len > (int32_t)sizeof(ConnPktHead), CONN_COMMON,
-        "dispatch data failed: data length less than connection header size, connection id=%u, module=%d, dataLen=%d",
+        "dispatch data failed: data length less than connection header size, "
+        "connectionId=%{public}u, module=%{public}d, dataLen=%{public}d",
         connectionId, moduleId, len);
 
     ConnListenerNode listener = { 0 };
     int32_t status = GetListenerByModuleId(moduleId, &listener);
     CONN_CHECK_AND_RETURN_LOGW(status == SOFTBUS_OK, CONN_COMMON,
-        "dispatch data failed: get module listener failed or not register, connection id=%u, module=%d, dataLen=%d, "
-        "err=%d", connectionId, moduleId, len, status);
+        "dispatch data failed: get module listener failed or not register, "
+        "connectionId=%{public}u, module=%{public}d, dataLen=%{public}d, err=%{public}d",
+        connectionId, moduleId, len, status);
 
     int32_t pktLen = len - (int32_t)sizeof(ConnPktHead);
     char *pkt = data + sizeof(ConnPktHead);
@@ -416,7 +418,7 @@ void ConnManagerConnected(uint32_t connectionId, const ConnectionInfo *info)
 
     int32_t num = GetAllListener(&node);
     if (num == 0 || node == NULL) {
-        CONN_LOGE(CONN_COMMON, "get node failed, connId=%u", connectionId);
+        CONN_LOGE(CONN_COMMON, "get node failed, connId=%{public}u", connectionId);
         return;
     }
 
@@ -436,7 +438,7 @@ void ConnManagerReusedConnected(uint32_t connectionId, const ConnectionInfo *inf
 
     int32_t num = GetAllListener(&node);
     if (num == 0 || node == NULL) {
-        CONN_LOGE(CONN_COMMON, "get node failed, connId=%u", connectionId);
+        CONN_LOGE(CONN_COMMON, "get node failed, connId=%{public}u", connectionId);
         return;
     }
 
@@ -458,7 +460,7 @@ void ConnManagerDisconnected(uint32_t connectionId, const ConnectionInfo *info)
 
     int32_t num = GetAllListener(&node);
     if (num == 0 || node == NULL) {
-        CONN_LOGE(CONN_COMMON, "get node failed, connId=%u", connectionId);
+        CONN_LOGE(CONN_COMMON, "get node failed, connId=%{public}u", connectionId);
         return;
     }
     for (int32_t i = 0; i < num; i++) {
@@ -472,7 +474,7 @@ void ConnManagerDisconnected(uint32_t connectionId, const ConnectionInfo *info)
 int32_t ConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback)
 {
     if (ModuleCheck(moduleId) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "module check failed, moduleId=%d", moduleId);
+        CONN_LOGE(CONN_COMMON, "module check failed, moduleId=%{public}d", moduleId);
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -506,7 +508,7 @@ int32_t ConnConnectDevice(const ConnectOption *info, uint32_t requestId, const C
     }
 
     if (ConnTypeCheck(info->type) != SOFTBUS_OK) {
-        CONN_LOGW(CONN_COMMON, "connect type is err %d", info->type);
+        CONN_LOGW(CONN_COMMON, "connect type is err. type=%{public}d", info->type);
         return SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT;
     }
 
@@ -538,7 +540,7 @@ int32_t ConnGetTypeByConnectionId(uint32_t connectionId, ConnectType *type)
     ConnectType temp;
     temp = (connectionId >> CONNECT_TYPE_SHIFT);
     if (ConnTypeCheck(temp) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "connectionId type is err %u", temp);
+        CONN_LOGE(CONN_COMMON, "connectionId type is err. type=%{public}u", temp);
         return SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT;
     }
     *type = temp;
@@ -669,13 +671,13 @@ int32_t ConnServerInit(void)
 
     int32_t ret = ConnInitSockets();
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_INIT, "ConnInitSockets failed!ret=%" PRId32 " \r\n", ret);
+        CONN_LOGE(CONN_INIT, "ConnInitSockets failed! ret=%{public}" PRId32 " \r\n", ret);
         return ret;
     }
 
     ret = InitBaseListener();
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_INIT, "InitBaseListener failed!ret=%" PRId32 " \r\n", ret);
+        CONN_LOGE(CONN_INIT, "InitBaseListener failed! ret=%{public}" PRId32 " \r\n", ret);
         return ret;
     }
 
@@ -752,7 +754,7 @@ bool CheckActiveConnection(const ConnectOption *info)
     }
 
     if (ConnTypeCheck(info->type) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "connect type is err %d", info->type);
+        CONN_LOGE(CONN_COMMON, "connect type is err. type=%{public}d", info->type);
         return false;
     }
 

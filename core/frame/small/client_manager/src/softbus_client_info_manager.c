@@ -53,7 +53,7 @@ int SERVER_RegisterService(const char *name, const struct CommonScvId *svcId)
         COMM_LOGE(COMM_SVC, "invalid param");
         return SOFTBUS_ERR;
     }
-    COMM_LOGI(COMM_SVC, "new client register:%s", name);
+    COMM_LOGI(COMM_SVC, "new client register=%{public}s", name);
 
     if (g_clientInfoList == NULL) {
         COMM_LOGE(COMM_SVC, "not init");
@@ -178,7 +178,7 @@ void SERVER_UnregisterService(const char *name)
         COMM_LOGE(COMM_SVC, "lock failed");
         return;
     }
-    COMM_LOGE(COMM_SVC, "client service %s died, remove it from softbus server", name);
+    COMM_LOGE(COMM_SVC, "client service died, remove it from softbus server. name=%{public}s", name);
     SoftBusClientInfoNode *clientInfo = NULL;
     LIST_FOR_EACH_ENTRY(clientInfo, &g_clientInfoList->list, SoftBusClientInfoNode, node) {
         if (strcmp(clientInfo->name, name) == 0) {

@@ -66,7 +66,8 @@ static void Record(enum TimePointType type)
     CONN_CHECK_AND_RETURN_LOGW(type >= 0 && type < TP_MAX, CONN_WIFI_DIRECT, "type invalid");
     uint64_t currentMs = SoftBusGetSysTimeMs();
     GetWifiDirectPerfRecorder()->timePoints[type] = currentMs;
-    CONN_LOGI(CONN_WIFI_DIRECT, "%s=%" PRIu64, GetTimePointTypeString(type), currentMs);
+    CONN_LOGI(CONN_WIFI_DIRECT,
+        "timePointType=%{public}s, currentMs=%{public}" PRIu64, GetTimePointTypeString(type), currentMs);
 }
 
 static void Calculate(void)
@@ -103,8 +104,8 @@ static void Calculate(void)
     }
 
     CONN_LOGI(CONN_WIFI_DIRECT,
-        "pid=%d total=%" PRIu64 "MS create=%" PRIu64 "MS connect=%" PRIu64 "MS wifiConfig=%" PRIu64
-        "MS negotiate=%" PRIu64 "MS",
+        "pid=%{public}d, total=%{public}" PRIu64 "MS, create=%{public}" PRIu64 "MS, connect=%{public}" PRIu64 "MS, "
+        "wifiConfig=%{public}" PRIu64 "MS, negotiate=%{public}" PRIu64 "MS",
         self->pid, self->timeCosts[TC_TOTAL], self->timeCosts[TC_CREATE_GROUP], self->timeCosts[TC_CONNECT_GROUP],
         self->timeCosts[TC_GET_WIFI_CONFIG], self->timeCosts[TC_NEGOTIATE]);
 }

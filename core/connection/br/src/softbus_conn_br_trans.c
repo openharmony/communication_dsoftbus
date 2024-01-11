@@ -41,40 +41,45 @@ static uint8_t *BrRecvDataParse(uint32_t connectionId, LimitedBuffer *buffer, in
     UnpackConnPktHead(head);
     if ((uint32_t)(head->magic) != MAGIC_NUMBER) {
         buffer->length = 0;
-        CONN_LOGE(CONN_BR, "recv unknown data: conn id=%u, magic 0x%x", connectionId, head->magic);
+        CONN_LOGE(CONN_BR, "recv unknown data: conn id=%{public}u, magic 0x%{public}x", connectionId, head->magic);
         return NULL;
     }
     if (buffer->capacity - pktHeadLen < head->len) {
         buffer->length = 0;
-        CONN_LOGE(CONN_BR, "recv data too big: conn id=%u, module=%d, seq=%" PRId64", datalen=%d",
+        CONN_LOGE(CONN_BR,
+            "recv data too big: connId=%{public}u, module=%{public}d, seq=%{public}" PRId64", datalen=%{public}d",
             connectionId, head->module, head->seq, head->len);
         return NULL;
     }
     uint32_t packLen = head->len + sizeof(ConnPktHead);
     if (buffer->length < packLen) {
-        CONN_LOGI(CONN_BR, "recv incomplete packet, conn id=%u", connectionId);
+        CONN_LOGI(CONN_BR, "recv incomplete packet, connId=%{public}u", connectionId);
         return NULL;
     }
     uint8_t *dataCopy = (uint8_t *)SoftBusCalloc(packLen);
     if (dataCopy == NULL) {
-        CONN_LOGE(CONN_BR, "connection %u parse data failed: calloc failed, retry next time, packLen=%u", connectionId,
-            packLen);
+        CONN_LOGE(CONN_BR,
+            "parse data failed: calloc failed, retry next time, connId=%{public}u, packLen=%{public}u",
+            connectionId, packLen);
         return NULL;
     }
     if (memcpy_s(dataCopy, packLen, buffer->buffer, packLen) != EOK) {
-        CONN_LOGE(CONN_BR, "connection %u parse data failed: memcpy_s failed, retry next time, packLen=%u, "
-            "bufferLen=%u", connectionId, packLen, buffer->length);
+        CONN_LOGE(CONN_BR,
+            "parse data failed: memcpy_s failed, retry next time, "
+            "connId=%{public}u, packLen=%{public}u, bufferLen=%{public}u", connectionId, packLen, buffer->length);
         SoftBusFree(dataCopy);
         return NULL;
     }
     if (buffer->length > packLen &&
         memmove_s(buffer->buffer, buffer->length, buffer->buffer + packLen, buffer->length - packLen) != EOK) {
-        CONN_LOGE(CONN_BR, "connection %u parse data failed: memmove_s failed, retry next time", connectionId);
+        CONN_LOGE(CONN_BR, "parse data failed: memmove_s failed, retry next time. connId=%{public}u, ", connectionId);
         SoftBusFree(dataCopy);
         return NULL;
     }
-    CONN_LOGI(CONN_BR, "br receive data, connection id=%u, cached length=%u, payload (Len/Flg/Module/Seq)="
-        "(%u/%d/%d/%" PRId64 ")", connectionId, buffer->length, packLen, head->flag, head->module, head->seq);
+    CONN_LOGI(CONN_BR,
+        "br receive data, connId=%{public}u, cachedLength=%{public}u, "
+        "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
+        connectionId, buffer->length, packLen, head->flag, head->module, head->seq);
     buffer->length -= packLen;
     *outLen = (int32_t)packLen;
     return dataCopy;
@@ -92,7 +97,8 @@ int32_t ConnBrTransReadOneFrame(uint32_t connectionId, int32_t socketHandle, Lim
         int32_t recvLen = g_sppDriver->Read(
                 socketHandle, buffer->buffer + buffer->length, (int32_t)(buffer->capacity - buffer->length));
         if (recvLen == BR_READ_SOCKET_CLOSED) {
-            CONN_LOGW(CONN_BR, "br connection read return, connection id=%u, socket handle=%d, connection closed",
+            CONN_LOGW(CONN_BR,
+                "br connection read return, connection closed. connId=%{public}u, socketHandle=%{public}d",
                 connectionId, socketHandle);
             ConnAuditExtra extra = {
                 .auditType = AUDIT_EVENT_MSG_ERROR,
@@ -103,8 +109,9 @@ int32_t ConnBrTransReadOneFrame(uint32_t connectionId, int32_t socketHandle, Lim
             return SOFTBUS_CONN_BR_UNDERLAY_SOCKET_CLOSED;
         }
         if (recvLen < 0) {
-            CONN_LOGE(CONN_BR, "br connection read return, connection id=%u, socket handle=%d, error=%d", connectionId,
-                socketHandle, recvLen);
+            CONN_LOGE(CONN_BR,
+                "br connection read return, connectionId=%{public}u, socketHandle=%{public}d, error=%{public}d",
+                connectionId, socketHandle, recvLen);
             ConnAuditExtra extra = {
                 .auditType = AUDIT_EVENT_MSG_ERROR,
                 .connectionId = connectionId,
@@ -125,8 +132,10 @@ int32_t BrTransSend(
         uint32_t len = waitWriteLen > mtu ? mtu : waitWriteLen;
         int32_t writeLen = g_sppDriver->Write(socketHandle, data, (int32_t)len);
         if (writeLen < 0) {
-            CONN_LOGE(CONN_BR, "br connection %u send data failed: underlayer bluetooth write failed, socketHandle=%d, "
-                  "mtu=%d, total len=%d, wait write len=%d, already write len=%d, error=%d",
+            CONN_LOGE(CONN_BR,
+                "br send data failed: underlayer bluetooth write failed, connId=%{public}u, "
+                "socketHandle=%{public}d, mtu=%{public}d, totalLen=%{public}d, waitWriteLen=%{public}d, "
+                "alreadyWriteLen=%{public}d, error=%{public}d",
                 connectionId, socketHandle, mtu, dataLen, waitWriteLen, dataLen - waitWriteLen, writeLen);
             return SOFTBUS_CONN_BR_UNDERLAY_WRITE_FAIL;
         }
@@ -192,7 +201,8 @@ int64_t ConnBrPackCtlMessage(BrCtlMessageSerializationContext ctx, uint8_t **out
     uint32_t dataLen = 0;
     int32_t ret = SerializeByJson(ctx, &data, &dataLen);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "br connecion %u pack ctl message failed: serialize json bytes failed, method: %d",
+        CONN_LOGE(CONN_BR,
+            "br pack ctl message failed: serialize json bytes failed, connId=%{public}u, method=%{public}d",
             ctx.connectionId, ctx.method);
         return ret;
     }
@@ -212,14 +222,16 @@ int64_t ConnBrPackCtlMessage(BrCtlMessageSerializationContext ctx, uint8_t **out
     head.len = dataLen;
     PackConnPktHead(&head);
     if (memcpy_s(buf, bufLen, &head, headSize) != EOK) {
-        CONN_LOGE(CONN_BR, "br connecion %u pack ctl message failed: memcpy connection header failed, method: %d",
+        CONN_LOGE(CONN_BR,
+            "br pack ctl message failed: memcpy connection header failed, connId=%{public}u, method=%{public}d",
             ctx.connectionId, ctx.method);
         cJSON_free(data);
         SoftBusFree(buf);
         return SOFTBUS_MEM_ERR;
     }
     if (memcpy_s(buf + headSize, bufLen - headSize, data, dataLen) != EOK) {
-        CONN_LOGE(CONN_BR, "br connecion %u pack ctl message failed: memcpy ctl message bytes failed, method: %d",
+        CONN_LOGE(CONN_BR,
+            "br pack ctl message failed: memcpy ctl message bytes failed, connId=%{public}u, method=%{public}d",
             ctx.connectionId, ctx.method);
         cJSON_free(data);
         SoftBusFree(buf);
@@ -243,13 +255,14 @@ int32_t ConnBrPostBytes(
     uint32_t connectionId, uint8_t *data, uint32_t len, int32_t pid, int32_t flag, int32_t module, int64_t seq)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(data != NULL, SOFTBUS_INVALID_PARAM, CONN_BR,
-        "br post bytes failed: invalid param, data is null, connectionId=%u, pid=%d, "
-        "payload (Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 ")",
+        "br post bytes failed: invalid param, data is null, connectionId=%{public}u, pid=%{public}d, "
+        "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
         connectionId, pid, len, flag, module, seq);
 
     if (len == 0 || len > MAX_DATA_LEN) {
-        CONN_LOGW(CONN_BR, "br post bytes failed, invalid param, data len is 0, connection id=%u, pid=%d, "
-              "payload (Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 ")",
+        CONN_LOGW(CONN_BR,
+            "br post bytes failed, invalid param, data len is 0, connectionId=%{public}u, pid=%{public}d, "
+            "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
             connectionId, pid, len, flag, module, seq);
         SoftBusFree(data);
         return SOFTBUS_INVALID_PARAM;
@@ -257,16 +270,16 @@ int32_t ConnBrPostBytes(
 
     ConnBrConnection *connection = ConnBrGetConnectionById(connectionId);
     if (connection == NULL) {
-        CONN_LOGE(CONN_BR, "br post bytes failed: connection is not exist, connection id=%u, pid=%d, "
-              "payload (Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 ")",
+        CONN_LOGE(CONN_BR, "br post bytes failed: connection is not exist, connectionId=%{public}u, pid=%{public}d, "
+              "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
             connectionId, pid, len, flag, module, seq);
         SoftBusFree(data);
         return SOFTBUS_CONN_BR_CONNECTION_NOT_EXIST_ERR;
     }
     int32_t status = SoftBusMutexLock(&connection->lock);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "br post bytes failed: try to lock failed, connection id=%u, pid=%d, "
-              "payload (Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 "), error=%d",
+        CONN_LOGE(CONN_BR, "br post bytes failed: try to lock failed, connectionId=%{public}u, pid=%{public}d, "
+              "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 ", error=%{public}d",
             connectionId, pid, len, flag, module, seq, status);
         ConnBrReturnConnection(&connection);
         SoftBusFree(data);
@@ -276,8 +289,9 @@ int32_t ConnBrPostBytes(
     (void)SoftBusMutexUnlock(&connection->lock);
     ConnBrReturnConnection(&connection);
     if (state != BR_CONNECTION_STATE_CONNECTED && module != MODULE_CONNECTION) {
-        CONN_LOGE(CONN_BR, "br post bytes failed: connection is not ready, state=%d, connection id=%u, pid=%d, "
-              "payload (Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 ")",
+        CONN_LOGE(CONN_BR,
+            "br post bytes failed: connection is not ready, state=%{public}d, connId=%{public}u, pid=%{public}d, "
+            "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
             state, connectionId, pid, len, flag, module, seq);
         SoftBusFree(data);
         return SOFTBUS_CONN_BR_CONNECTION_NOT_READY_ERR;
@@ -285,8 +299,8 @@ int32_t ConnBrPostBytes(
 
     SendBrQueueNode *node = (SendBrQueueNode *)SoftBusCalloc(sizeof(SendBrQueueNode));
     if (node == NULL) {
-        CONN_LOGE(CONN_BR, "br post bytes failed: calloc queue node failed, connection id=%u, pid=%d, "
-              "payload (Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 ")",
+        CONN_LOGE(CONN_BR, "br post bytes failed: calloc queue node failed, connectionId=%{public}u, pid=%{public}d, "
+              "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
             connectionId, pid, len, flag, module, seq);
         SoftBusFree(data);
         return SOFTBUS_MEM_ERR;
@@ -301,14 +315,15 @@ int32_t ConnBrPostBytes(
     node->isInner = (pid == 0);
     status = ConnBrEnqueueNonBlock((const void *)node);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "br post bytes failed: enqueue failed, error=%d, connection id=%u, pid=%d, "
-              "payload (Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 ")",
+        CONN_LOGE(CONN_BR,
+            "br post bytes failed: enqueue failed, error=%{public}d, connId=%{public}u, pid=%{public}d, "
+            "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
             status, connectionId, pid, len, flag, module, seq);
         FreeSendNode(node);
         return status;
     }
-    CONN_LOGI(CONN_BR, "br post bytes: receive post byte request, connection id=%u, pid=%d, "
-          "payload (Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 ")",
+    CONN_LOGI(CONN_BR, "br post bytes: receive post byte request, connId=%{public}u, pid=%{public}d, "
+          "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
         connectionId, pid, len, flag, module, seq);
     return SOFTBUS_OK;
 }
@@ -330,14 +345,17 @@ static int32_t SendAckUnsafe(const ConnBrConnection *connection)
     uint32_t dataLen = 0;
     int64_t ctrlMsgSeq = ConnBrPackCtlMessage(ctx, &data, &dataLen);
     if (ctrlMsgSeq < 0) {
-        CONN_LOGW(CONN_BR, "br send ack failed: pack message failed, connection id=%u, window=%d, seq=%" PRId64 ", "
-            "error=%d", connection->connectionId, connection->window, connection->sequence, (int32_t)ctrlMsgSeq);
+        CONN_LOGW(CONN_BR,
+            "br send ack failed: pack message failed, connId=%{public}u, window=%{public}d, seq=%{public}" PRId64
+            ", error=%{public}d",
+            connection->connectionId, connection->window, connection->sequence, (int32_t)ctrlMsgSeq);
         return (int32_t)ctrlMsgSeq;
     }
     int32_t status = ConnBrCreateBrPendingPacket(connection->connectionId, connection->sequence);
     if (status != SOFTBUS_OK) {
-        CONN_LOGW(CONN_BR, "br send ack failed: create pending failed, connection id=%u, window=%d, seq=%" PRId64 ", "
-            "error=%d", connection->connectionId, connection->window, connection->sequence, status);
+        CONN_LOGW(CONN_BR,
+            "br send ack failed: create pending failed, connId=%{public}u, window=%{public}d, seq=%{public}" PRId64
+            ", error=%{public}d", connection->connectionId, connection->window, connection->sequence, status);
         SoftBusFree(data);
         return status;
     }
@@ -345,7 +363,9 @@ static int32_t SendAckUnsafe(const ConnBrConnection *connection)
     if (status != SOFTBUS_OK) {
         ConnBrDelBrPendingPacket(connection->connectionId, connection->sequence);
     }
-    CONN_LOGI(CONN_BR, "br send ack, connection id=%u, payload (Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 "), error=%d",
+    CONN_LOGI(CONN_BR,
+        "br send ack, connectionId=%{public}u, Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}"
+        PRId64 ", error=%{public}d",
         connection->connectionId, dataLen, flag, MODULE_CONNECTION, ctrlMsgSeq, status);
     SoftBusFree(data);
     return status;
@@ -354,7 +374,7 @@ static int32_t SendAckUnsafe(const ConnBrConnection *connection)
 static void WaitAck(ConnBrConnection *connection)
 {
     CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&connection->lock) == SOFTBUS_OK, CONN_BR,
-        "wait ack failed: try to lock failed, connection id=%u", connection->connectionId);
+        "wait ack failed: try to lock failed, connectionId=%{public}u", connection->connectionId);
     int64_t waitSequence = connection->waitSequence;
     SoftBusMutexUnlock(&connection->lock);
 
@@ -363,7 +383,7 @@ static void WaitAck(ConnBrConnection *connection)
     SoftBusFree(ignore);
 
     CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&connection->lock) == SOFTBUS_OK, CONN_BR,
-        "wait ack failed: try to lock failed after pending, connection id=%u", connection->connectionId);
+        "wait ack failed: try to lock failed after pending, connectionId=%{public}u", connection->connectionId);
     switch (ret) {
         case SOFTBUS_ALREADY_TRIGGERED:
             connection->ackTimeoutCount = 0;
@@ -397,12 +417,12 @@ void *SendHandlerLoop(void *arg)
     while (true) {
         int32_t status = ConnBrDequeueBlock((void **)(&sendNode));
         if (status != SOFTBUS_OK || sendNode == NULL) {
-            CONN_LOGE(CONN_BR, "br dequeue send node failed, error=%d", status);
+            CONN_LOGE(CONN_BR, "br dequeue send node failed, error=%{public}d", status);
             continue;
         }
         ConnBrConnection *connection = ConnBrGetConnectionById(sendNode->connectionId);
         if (connection == NULL) {
-            CONN_LOGE(CONN_BR, "br send data failed: connection is not exist, connection id=%u",
+            CONN_LOGE(CONN_BR, "br send data failed: connection is not exist, connectionId=%{public}u",
                 sendNode->connectionId);
             g_transEventListener.onPostByteFinshed(sendNode->connectionId, sendNode->len, sendNode->pid, sendNode->flag,
                 sendNode->module, sendNode->seq, SOFTBUS_CONN_BR_CONNECTION_NOT_EXIST_ERR);
@@ -411,7 +431,8 @@ void *SendHandlerLoop(void *arg)
         }
 
         if (SoftBusMutexLock(&connection->lock) != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BR, "br send data failed: try to lock failed, connection id=%u", sendNode->connectionId);
+            CONN_LOGE(CONN_BR,
+                "br send data failed: try to lock failed, connectionId=%{public}u", sendNode->connectionId);
             g_transEventListener.onPostByteFinshed(sendNode->connectionId, sendNode->len, sendNode->pid, sendNode->flag,
                 sendNode->module, sendNode->seq, SOFTBUS_LOCK_ERR);
             ConnBrReturnConnection(&connection);
@@ -421,7 +442,7 @@ void *SendHandlerLoop(void *arg)
 
         int32_t sockerHandle = connection->socketHandle;
         if (sockerHandle == INVALID_SOCKET_HANDLE) {
-            CONN_LOGE(CONN_BR, "br send data failed: invalid socket, connection id=%u", sendNode->connectionId);
+            CONN_LOGE(CONN_BR, "br send data failed: invalid socket, connectionId=%{public}u", sendNode->connectionId);
             (void)SoftBusMutexUnlock(&connection->lock);
             ConnBrReturnConnection(&connection);
             g_transEventListener.onPostByteFinshed(sendNode->connectionId, sendNode->len, sendNode->pid, sendNode->flag,
@@ -446,7 +467,7 @@ void *SendHandlerLoop(void *arg)
         }
         status = BrTransSend(connection->connectionId, sockerHandle, connection->mtu, sendNode->data, sendNode->len);
         ConnBrReturnConnection(&connection);
-        CONN_LOGI(CONN_BR, "br send data, connection id=%u, status=%d", sendNode->connectionId, status);
+        CONN_LOGI(CONN_BR, "br send data, connId=%{public}u, status=%{public}d", sendNode->connectionId, status);
         g_transEventListener.onPostByteFinshed(sendNode->connectionId, sendNode->len, sendNode->pid, sendNode->flag,
             sendNode->module, sendNode->seq, status);
         FreeSendNode(sendNode);
@@ -470,7 +491,7 @@ int32_t ConnBrTransMuduleInit(SppSocketDriver *sppDriver, ConnBrTransEventListen
 
     int32_t status = ConnBrInnerQueueInit();
     CONN_CHECK_AND_RETURN_RET_LOGW(status == SOFTBUS_OK, status, CONN_INIT,
-        "init br trans module failed: init br send queue failed, error=%d", status);
+        "init br trans module failed: init br send queue failed, error=%{public}d", status);
 
     status = ConnStartActionAsync(NULL, SendHandlerLoop, NULL);
     if (status != SOFTBUS_OK) {

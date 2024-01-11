@@ -105,7 +105,7 @@ int32_t SoftBusServer::SoftbusRegisterService(const char *clientPkgName, const s
         COMM_LOGE(COMM_SVC, "softbus add client service failed");
         return SOFTBUS_ERR;
     }
-    COMM_LOGI(COMM_SVC, "softbus register service success %s", clientPkgName);
+    COMM_LOGI(COMM_SVC, "softbus register service success. clientPkgName=%{public}s", clientPkgName);
     return SOFTBUS_OK;
 }
 

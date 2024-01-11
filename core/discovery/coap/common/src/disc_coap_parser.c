@@ -44,14 +44,14 @@ int32_t DiscCoapParseDeviceUdid(const char *raw, DeviceInfo *device)
     }
     char *anonymizedStr;
     Anonymize(tmpUdid, &anonymizedStr);
-    DISC_LOGI(DISC_COAP, "devId=%s", anonymizedStr);
+    DISC_LOGI(DISC_COAP, "devId=%{public}s", anonymizedStr);
     AnonymizeFree(anonymizedStr);
     cJSON_Delete(udidJson);
 
     int32_t ret = GenerateStrHashAndConvertToHexString((const unsigned char *)tmpUdid, HEX_HASH_LEN,
         (unsigned char *)device->devId, HEX_HASH_LEN + 1);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, DISC_COAP,
-        "generate udid hex hash failed, ret=%d", ret);
+        "generate udid hex hash failed, ret=%{public}d", ret);
     return SOFTBUS_OK;
 }
 
@@ -66,7 +66,7 @@ void DiscCoapParseWifiIpAddr(const cJSON *data, DeviceInfo *device)
     device->addrNum = 1;
     char *anonymizedStr;
     Anonymize(device->addr[0].info.ip.ip, &anonymizedStr);
-    DISC_LOGI(DISC_COAP, "ip=%s", anonymizedStr);
+    DISC_LOGI(DISC_COAP, "ip=%{public}s", anonymizedStr);
     AnonymizeFree(anonymizedStr);
 }
 
@@ -76,7 +76,7 @@ int32_t DiscCoapParseKeyValueStr(const char *src, const char *key, char *outValu
     DISC_CHECK_AND_RETURN_RET_LOGE(key != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "key is NULL");
     DISC_CHECK_AND_RETURN_RET_LOGE(outValue != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "outValue is NULL");
     DISC_CHECK_AND_RETURN_RET_LOGE(strlen(src) < DISC_MAX_CUST_DATA_LEN, SOFTBUS_INVALID_PARAM, DISC_COAP,
-        "src len(%zu) >= max len(%u)", strlen(src), DISC_MAX_CUST_DATA_LEN);
+        "src len >= max len. srcLen=%{public}zu, maxLen=%{public}u", strlen(src), DISC_MAX_CUST_DATA_LEN);
 
     char tmpSrc[DISC_MAX_CUST_DATA_LEN] = {0};
     if (memcpy_s(tmpSrc, DISC_MAX_CUST_DATA_LEN, src, strlen(src)) != EOK) {
@@ -91,7 +91,7 @@ int32_t DiscCoapParseKeyValueStr(const char *src, const char *key, char *outValu
     while (curStr != NULL) {
         curValue = strchr(curStr, ':');
         if (curValue == NULL) {
-            DISC_LOGW(DISC_COAP, "invalid kvStr item: %s", curStr);
+            DISC_LOGW(DISC_COAP, "invalid kvStr item: curStr=%{public}s", curStr);
             curStr = strtok_s(NULL, delimiter, &remainStr);
             continue;
         }
@@ -108,7 +108,7 @@ int32_t DiscCoapParseKeyValueStr(const char *src, const char *key, char *outValu
         }
         return SOFTBUS_OK;
     }
-    DISC_LOGE(DISC_COAP, "cannot find the key: %s", key);
+    DISC_LOGE(DISC_COAP, "cannot find the key: key=%{public}s", key);
     return SOFTBUS_ERR;
 }
 
@@ -126,7 +126,7 @@ int32_t DiscCoapParseServiceData(const cJSON *data, DeviceInfo *device)
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, DISC_COAP, "parse service data failed");
     uint32_t authPort = atoi(port);
     if (authPort > UINT16_MAX || authPort <= 0) {
-        DISC_LOGE(DISC_COAP, "the auth port(%u) is invalid", authPort);
+        DISC_LOGE(DISC_COAP, "the auth port is invalid. authPort=%{public}u", authPort);
         return SOFTBUS_ERR;
     }
     device->addr[0].info.ip.port = (uint16_t)authPort;
@@ -145,7 +145,7 @@ void DiscCoapParseHwAccountHash(const cJSON *data, DeviceInfo *device)
 
     int32_t ret = SoftBusGenerateStrHash((const unsigned char *)tmpAccount, strlen(tmpAccount),
         (unsigned char *)device->accountHash);
-    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "generate account hash failed, ret=%d", ret);
+    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "generate account hash failed, ret=%{public}d", ret);
 }
 
 int32_t DiscCoapFillServiceData(uint32_t capability, const char *capabilityData, uint32_t dataLen, char *outData)
@@ -161,7 +161,8 @@ int32_t DiscCoapFillServiceData(uint32_t capability, const char *capabilityData,
         return SOFTBUS_OK;
     }
     DISC_CHECK_AND_RETURN_RET_LOGE(strlen(capabilityData) == dataLen, SOFTBUS_INVALID_PARAM, DISC_COAP,
-        "capability data len(%zu) != expected len(%u), data=%s", strlen(capabilityData), dataLen, capabilityData);
+        "capabilityDataLen != expectedLen. capabilityDataLen=%{public}zu, expectedLen%{public}u, data=%{public}s",
+        strlen(capabilityData), dataLen, capabilityData);
 
     cJSON *json = cJSON_ParseWithLength(capabilityData, dataLen);
     DISC_CHECK_AND_RETURN_RET_LOGE(json != NULL, SOFTBUS_CREATE_JSON_ERR, DISC_COAP,

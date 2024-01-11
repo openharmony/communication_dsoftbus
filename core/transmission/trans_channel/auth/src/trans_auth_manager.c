@@ -266,17 +266,17 @@ static int TransGetLocalConfig(int32_t channelType, int32_t businessType, uint32
 {
     ConfigType configType = (ConfigType)FindConfigType(channelType, businessType);
     if (configType == SOFTBUS_CONFIG_TYPE_MAX) {
-        TRANS_LOGE(TRANS_SVC, "Invalid channelType=%d businessType=%d",
+        TRANS_LOGE(TRANS_SVC, "Invalid channelType=%{public}d, businessType=%{public}d",
             channelType, businessType);
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t maxLen;
     if (SoftbusGetConfig(configType, (unsigned char *)&maxLen, sizeof(maxLen)) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "get fail configType=%d", configType);
+        TRANS_LOGE(TRANS_SVC, "get fail configType=%{public}d", configType);
         return SOFTBUS_GET_CONFIG_VAL_ERR;
     }
     *len = maxLen;
-    TRANS_LOGI(TRANS_SVC, "get appinfo local config len=%d", *len);
+    TRANS_LOGI(TRANS_SVC, "get appinfo local config len=%{public}d", *len);
     return SOFTBUS_OK;
 }
 
@@ -294,17 +294,17 @@ static int32_t TransAuthFillDataConfig(AppInfo *appInfo)
             return SOFTBUS_ERR;
         }
         appInfo->myData.dataConfig = MIN(localDataConfig, appInfo->peerData.dataConfig);
-        TRANS_LOGI(TRANS_SVC, "fill dataConfig=%u succ", appInfo->myData.dataConfig);
+        TRANS_LOGI(TRANS_SVC, "fill dataConfig succ. dataConfig=%{public}u", appInfo->myData.dataConfig);
         return SOFTBUS_OK;
     }
     ConfigType configType = appInfo->businessType == BUSINESS_TYPE_BYTE ?
         SOFTBUS_INT_AUTH_MAX_BYTES_LENGTH : SOFTBUS_INT_AUTH_MAX_MESSAGE_LENGTH;
     if (SoftbusGetConfig(configType, (unsigned char *)&appInfo->myData.dataConfig,
         sizeof(appInfo->myData.dataConfig)) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "get config failed, configType=%d", configType);
+        TRANS_LOGE(TRANS_SVC, "get config failed, configType=%{public}d", configType);
         return SOFTBUS_ERR;
     }
-    TRANS_LOGI(TRANS_SVC, "fill dataConfig=%d", appInfo->myData.dataConfig);
+    TRANS_LOGI(TRANS_SVC, "fill dataConfig=%{public}d", appInfo->myData.dataConfig);
     return SOFTBUS_OK;
 }
 
@@ -367,22 +367,22 @@ static int32_t TransAuthProcessDataConfig(AppInfo *appInfo)
         return SOFTBUS_ERR;
     }
     if (appInfo->businessType != BUSINESS_TYPE_MESSAGE && appInfo->businessType != BUSINESS_TYPE_BYTE) {
-        TRANS_LOGI(TRANS_SVC, "invalid businessType=%d", appInfo->businessType);
+        TRANS_LOGI(TRANS_SVC, "invalid businessType=%{public}d", appInfo->businessType);
         return SOFTBUS_OK;
     }
     if (appInfo->peerData.dataConfig != 0) {
         appInfo->myData.dataConfig = MIN(appInfo->myData.dataConfig, appInfo->peerData.dataConfig);
-        TRANS_LOGI(TRANS_SVC, "process dataConfig=%u succ", appInfo->myData.dataConfig);
+        TRANS_LOGI(TRANS_SVC, "process dataConfig succ. dataConfig=%{public}u", appInfo->myData.dataConfig);
         return SOFTBUS_OK;
     }
     ConfigType configType = appInfo->businessType == BUSINESS_TYPE_BYTE ?
         SOFTBUS_INT_AUTH_MAX_BYTES_LENGTH : SOFTBUS_INT_AUTH_MAX_MESSAGE_LENGTH;
     if (SoftbusGetConfig(configType, (unsigned char *)&appInfo->myData.dataConfig,
         sizeof(appInfo->myData.dataConfig)) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "get config failed, configType=%d", configType);
+        TRANS_LOGE(TRANS_SVC, "get config failed, configType=%{public}d", configType);
         return SOFTBUS_ERR;
     }
-    TRANS_LOGI(TRANS_SVC, "process dataConfig=%d", appInfo->myData.dataConfig);
+    TRANS_LOGI(TRANS_SVC, "process dataConfig=%{public}d", appInfo->myData.dataConfig);
     return SOFTBUS_OK;
 }
 
@@ -431,7 +431,7 @@ static void OnAuthChannelDataRecv(int32_t authId, const AuthChannelData *data)
     } else if (data->flag == AUTH_CHANNEL_REPLY) {
         OnRecvAuthChannelReply(authId, (const char *)data->data, (int32_t)data->len);
     } else {
-        TRANS_LOGE(TRANS_SVC, "auth channel flags err, authId=%d", authId);
+        TRANS_LOGE(TRANS_SVC, "auth channel flags err, authId=%{public}d", authId);
     }
 }
 
@@ -441,7 +441,7 @@ static void OnAuthMsgDataRecv(int32_t authId, const AuthChannelData *data)
         return;
     }
     if (NotifyOnDataReceived(authId, data->data, data->len) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "authId=%d recv MODULE_AUTH_MSG err", authId);
+        TRANS_LOGE(TRANS_SVC, "recv MODULE_AUTH_MSG err. authId=%{public}d", authId);
     }
 }
 
@@ -449,10 +449,10 @@ static void OnDisconnect(int32_t authId)
 {
     AuthChannelInfo dstInfo;
     if (GetChannelInfoByAuthId(authId, &dstInfo) != EOK) {
-        TRANS_LOGE(TRANS_SVC, "authId=%d channel already removed", authId);
+        TRANS_LOGE(TRANS_SVC, "channel already removed. authId=%{public}d", authId);
         return;
     }
-    TRANS_LOGI(TRANS_SVC, "recv authId=%d channel disconnect event.", authId);
+    TRANS_LOGI(TRANS_SVC, "recv channel disconnect event. authId=%{public}d", authId);
     DelAuthChannelInfoByChanId((int32_t)(dstInfo.appInfo.myData.channelId));
     (void)NofifyCloseAuthChannel((const char *)dstInfo.appInfo.myData.pkgName,
         (int32_t)dstInfo.appInfo.myData.pid, (int32_t)dstInfo.appInfo.myData.channelId);
@@ -572,7 +572,7 @@ int32_t TransAuthGetNameByChanId(int32_t chanId, char *pkgName, char *sessionNam
 
     AuthChannelInfo info;
     if (GetAuthChannelInfoByChanId(chanId, &info) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "get channel info by chanId[%d] failed", chanId);
+        TRANS_LOGE(TRANS_SVC, "get channel info by chanId failed. chanId=%{public}d", chanId);
         return SOFTBUS_ERR;
     }
 
@@ -811,7 +811,7 @@ int32_t TransAuthGetConnOptionByChanId(int32_t channelId, ConnectOption *connOpt
 {
     AuthChannelInfo chanInfo;
     if (GetAuthChannelInfoByChanId(channelId, &chanInfo) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "get auth channel info by channelId=%d fail", channelId);
+        TRANS_LOGE(TRANS_SVC, "get auth channel info by channelId fail. channelId=%{public}d", channelId);
         return SOFTBUS_ERR;
     }
 
@@ -836,7 +836,7 @@ int32_t TransNotifyAuthDataSuccess(int32_t channelId, const ConnectOption *connO
     ConnectionAddr addr;
     (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
     if (!LnnConvertOptionToAddr(&addr, connOpt, CONNECTION_ADDR_WLAN)) {
-        TRANS_LOGE(TRANS_SVC, "channelId=%d convert addr fail.", channelId);
+        TRANS_LOGE(TRANS_SVC, "channelId convert addr fail. channelId=%{public}d", channelId);
         return SOFTBUS_ERR;
     }
     return LnnNotifyDiscoveryDevice(&addr, true);

@@ -235,7 +235,7 @@ static void DeConvertBitMap(unsigned int *dstCap, unsigned int *srcCap, int nums
             SoftbusBitmapSet(dstCap, bleCapability);
         }
     }
-    DISC_LOGD(DISC_BLE, "old= %u, new= %u", *srcCap, *dstCap);
+    DISC_LOGD(DISC_BLE, "old=%{public}u, new=%{public}u", *srcCap, *dstCap);
 }
 
 static void UpdateInfoManager(int adv, bool needUpdate)
@@ -272,7 +272,7 @@ static void BleAdvEnableCallback(int channel, int status)
         for (int32_t i = 0; i < NUM_ADVERTISER; i++) {
             if (g_bleAdvertiser[i].channel == channel) {
                 g_bleAdvertiser[i].isAdvertising = true;
-                DISC_LOGI(DISC_BLE, "enable ble advertiser adv=%d", i);
+                DISC_LOGI(DISC_BLE, "enable ble advertiser adv=%{public}d", i);
             }
         }
     }
@@ -284,7 +284,7 @@ static void BleAdvDisableCallback(int channel, int status)
         for (int32_t i = 0; i < NUM_ADVERTISER; i++) {
             if (g_bleAdvertiser[i].channel == channel) {
                 g_bleAdvertiser[i].isAdvertising = false;
-                DISC_LOGI(DISC_BLE, "disable ble advertiser adv=%d", i);
+                DISC_LOGI(DISC_BLE, "disable ble advertiser adv=%{public}d", i);
             }
         }
     }
@@ -292,12 +292,12 @@ static void BleAdvDisableCallback(int channel, int status)
 
 static void BleAdvDataCallback(int channel, int status)
 {
-    DISC_LOGI(DISC_BLE, "channel=%d status=%d", channel, status);
+    DISC_LOGI(DISC_BLE, "channel=%{public}d, status=%{public}d", channel, status);
 }
 
 static void BleAdvUpdateCallback(int channel, int status)
 {
-    DISC_LOGI(DISC_BLE, "channel=%d status=%d", channel, status);
+    DISC_LOGI(DISC_BLE, "channel=%{public}d, status=%{public}d", channel, status);
 }
 
 static bool CheckScanner(void)
@@ -319,22 +319,22 @@ static int32_t ScanFilter(const BroadcastReportInfo *reportInfo)
     uint8_t *advData = reportInfo->packet.bcData.payload;
 
     DISC_CHECK_AND_RETURN_RET_LOGE(reportInfo->dataStatus == SOFTBUS_BLE_DATA_COMPLETE, SOFTBUS_ERR, DISC_BLE,
-        "dataStatus[%u] is invalid", reportInfo->dataStatus);
+        "dataStatus is invalid. dataStatus=%{public}u", reportInfo->dataStatus);
     DISC_CHECK_AND_RETURN_RET_LOGE(advData != NULL, SOFTBUS_ERR, DISC_BLE, "advData is null");
     DISC_CHECK_AND_RETURN_RET_LOGE(advLen >= POS_TLV, SOFTBUS_ERR, DISC_BLE,
-        "advLen[%u] is too short, less than adv header length", advLen);
+        "advLen is too short, less than adv header length. advLen=%{public}u", advLen);
 
     DISC_CHECK_AND_RETURN_RET_LOGE(reportInfo->packet.bcData.type == BC_DATA_TYPE_SERVICE, SOFTBUS_ERR, DISC_BLE,
-        "type [%u] is invalid", reportInfo->packet.bcData.type);
+        "type is invalid. type=%{public}u", reportInfo->packet.bcData.type);
     DISC_CHECK_AND_RETURN_RET_LOGE(reportInfo->packet.bcData.id == BLE_UUID, SOFTBUS_ERR, DISC_BLE,
-        "uuid [%u] is invalid", reportInfo->packet.bcData.id);
+        "uuid is invalid. id=%{public}u", reportInfo->packet.bcData.id);
     DISC_CHECK_AND_RETURN_RET_LOGE(advData[POS_VERSION] == BLE_VERSION, SOFTBUS_ERR, DISC_BLE,
-        "adv version[%hhu] is invalid", advData[POS_VERSION]);
+        "adv version is invalid. advVersion=%{public}hhu", advData[POS_VERSION]);
     if (reportInfo->packet.rspData.payload != NULL && reportInfo->packet.rspData.payloadLen != 0) {
-        DISC_CHECK_AND_RETURN_RET_LOGE(reportInfo->packet.rspData.type == BC_DATA_TYPE_MANUFACTURER, SOFTBUS_ERR, DISC_BLE,
-            "type [%u] is invalid", reportInfo->packet.rspData.type);
+        DISC_CHECK_AND_RETURN_RET_LOGE(reportInfo->packet.rspData.type == BC_DATA_TYPE_MANUFACTURER, SOFTBUS_ERR,
+            DISC_BLE, "type is invalid. type=%{public}u", reportInfo->packet.rspData.type);
         DISC_CHECK_AND_RETURN_RET_LOGE(reportInfo->packet.rspData.id == COMPANY_ID, SOFTBUS_ERR, DISC_BLE,
-            "companyId [%u] is invalid", reportInfo->packet.rspData.id);
+            "companyId is invalid. companyId=%{public}u", reportInfo->packet.rspData.id);
     }
 
     if (!CheckScanner()) {
@@ -444,7 +444,7 @@ static int32_t RangeDevice(DeviceInfo *device, char rssi, int8_t power)
 
         int ret = SoftBusBleRange(&param, &range);
         if (ret != SOFTBUS_OK) {
-            DISC_LOGE(DISC_BLE, "range device failed, ret=%d", ret);
+            DISC_LOGE(DISC_BLE, "range device failed, ret=%{public}d", ret);
             range = -1;
             // range failed should report device continually
         }
@@ -492,7 +492,8 @@ static void ProcessDisNonPacket(const BroadcastReportInfo *reportInfo, char rssi
         uint32_t tempCap = 0;
         DeConvertBitMap(&tempCap, foundInfo->capabilityBitmap, foundInfo->capabilityBitmapNum);
         if (tempCap == 0) {
-            DISC_LOGE(DISC_BLE, "unsupported ble capability %d", foundInfo->capabilityBitmap[0]);
+            DISC_LOGE(DISC_BLE, "unsupported ble capability. capabilityBitmap=%{public}d",
+                foundInfo->capabilityBitmap[0]);
             return;
         }
         foundInfo->capabilityBitmap[0] = tempCap;
@@ -509,7 +510,7 @@ static void ProcessDistributePacket(const BroadcastReportInfo *reportInfo)
     DeviceInfo foundInfo;
 
     if (advData == NULL || advLen <= POS_BUSINESS_EXTENSION) {
-        DISC_LOGE(DISC_BLE, "scan report data null,len=[%d]", advLen);
+        DISC_LOGE(DISC_BLE, "scan report data null, len=%{public}d", advLen);
         return;
     }
     (void)memset_s(&foundInfo, sizeof(foundInfo), 0, sizeof(foundInfo));
@@ -742,7 +743,7 @@ static int32_t BuildBleConfigAdvData(BroadcastPacket *packet, const BroadcastDat
         return SOFTBUS_MEM_ERR;
     }
 
-    DISC_LOGI(DISC_BLE, "packet->rspData.payloadLen=%d", packet->rspData.payloadLen);
+    DISC_LOGI(DISC_BLE, "packet->rspData.payloadLen=%{public}d", packet->rspData.payloadLen);
     return SOFTBUS_OK;
 }
 
@@ -819,7 +820,7 @@ static int32_t GetBroadcastData(DeviceInfo *info, int32_t advId, BroadcastData *
     }
     (void)AssembleTLV(broadcastData, TLV_TYPE_DEVICE_NAME, (const void *)info->devName, strlen(info->devName) + 1);
 
-    DISC_LOGE(DISC_BLE, "broadcastData->dataLen=%d", broadcastData->dataLen);
+    DISC_LOGE(DISC_BLE, "broadcastData->dataLen=%{public}d", broadcastData->dataLen);
     return SOFTBUS_OK;
 }
 
@@ -860,7 +861,7 @@ static int32_t StartAdvertiser(int32_t adv)
     }
     int32_t ret = advertiser->GetDeviceInfo(&advertiser->deviceInfo);
     if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "advertiser adv:%d GetConDeviceInfo failed", adv);
+        DISC_LOGE(DISC_BLE, "advertiser GetConDeviceInfo failed. adv=%{public}d", adv);
         return StopAdvertiser(adv);
     }
     BroadcastData broadcastData;
@@ -882,7 +883,7 @@ static int32_t StartAdvertiser(int32_t adv)
     if (StartBroadcasting(advertiser->channel, &advParam, &packet) != SOFTBUS_OK) {
         DfxRecordAdevertiserEnd(adv, SOFTBUS_DISCOVER_START_BROADCAST_FAIL);
         DestroyBleConfigAdvData(&packet);
-        DISC_LOGE(DISC_BLE, "start adv adv=%d failed", adv);
+        DISC_LOGE(DISC_BLE, "start adv failed, adv=%{public}d", adv);
         return SOFTBUS_DISCOVER_START_BROADCAST_FAIL;
     }
     DfxRecordAdevertiserEnd(adv, SOFTBUS_OK);
@@ -895,11 +896,11 @@ static int32_t StopAdvertiser(int32_t adv)
 {
     DiscBleAdvertiser *advertiser = &g_bleAdvertiser[adv];
     if (!advertiser->isAdvertising) {
-        DISC_LOGI(DISC_BLE, "advertiser adv adv=%d is already stopped.", adv);
+        DISC_LOGI(DISC_BLE, "advertiser adv is already stopped. adv=%{public}d", adv);
         return SOFTBUS_OK;
     }
     if (StopBroadcasting(advertiser->channel) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "stop advertiser advId=%d failed.", adv);
+        DISC_LOGE(DISC_BLE, "stop advertiser failed. advId=%{public}d", adv);
     }
     if (adv == NON_ADV_ID) {
         if (SoftBusMutexLock(&g_recvMessageInfo.lock) != SOFTBUS_OK) {
@@ -917,7 +918,7 @@ static int32_t UpdateAdvertiser(int32_t adv)
     DiscBleAdvertiser *advertiser = &g_bleAdvertiser[adv];
     int32_t ret = advertiser->GetDeviceInfo(&advertiser->deviceInfo);
     if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "advertiser adv=%d GetConDeviceInfo failed", adv);
+        DISC_LOGE(DISC_BLE, "advertiser adv GetConDeviceInfo failed. adv=%{public}d", adv);
         return StopAdvertiser(adv);
     }
     BroadcastData broadcastData = {};
@@ -1139,7 +1140,7 @@ static int32_t ProcessBleInfoManager(bool isStart, uint8_t publishFlags, uint8_t
     if (isStart) {
         int32_t status = RegisterCapability(&g_bleInfoManager[index], &regOption);
         if (status != SOFTBUS_OK) {
-            DISC_LOGE(DISC_BLE, "RegisterCapability failed, err=%d", status);
+            DISC_LOGE(DISC_BLE, "RegisterCapability failed, err=%{public}d", status);
             SoftBusMutexUnlock(&g_bleInfoLock);
             return SOFTBUS_DISCOVER_BLE_REGISTER_CAP_FAIL;
         }
@@ -1149,7 +1150,10 @@ static int32_t ProcessBleInfoManager(bool isStart, uint8_t publishFlags, uint8_t
 
     uint32_t newCap = g_bleInfoManager[index].capBitMap[0];
     int32_t newRangingRefCount = g_bleInfoManager[index].rangingRefCnt;
-    DISC_LOGI(DISC_BLE, "ble discovery request summary, action: (%d, %d, %d) cap: %d->%d, ref ranging count: %d->%d",
+    DISC_LOGI(DISC_BLE, "ble discovery request summary, "
+                        "action: isStart=%{public}d, publishFlags=%{public}d, activeFlags=%{public}d, "
+                        "oldCap=%{public}d, newCap=%{public}d, "
+                        "oldRangingRefCount=%{public}d, newRangingRefCount=%{public}d",
           isStart, publishFlags, activeFlags, oldCap, newCap, oldRangingRefCount, newRangingRefCount);
 
     SoftBusMutexUnlock(&g_bleInfoLock);
@@ -1318,12 +1322,13 @@ static int32_t InitAdvertiser(void)
         return SOFTBUS_ERR;
     }
     if (conChannel < 0 || nonChannel < 0) {
-        DISC_LOGE(DISC_INIT, "register broadcaster con[%d]-non[%d] fail", conChannel, nonChannel);
+        DISC_LOGE(DISC_INIT, "register broadcaster fail. conChannel=%{public}d, nonChannel=%{public}d",
+            conChannel, nonChannel);
         (void)UnRegisterBroadcaster(conChannel);
         (void)UnRegisterBroadcaster(nonChannel);
         return SOFTBUS_ERR;
     }
-    DISC_LOGI(DISC_INIT, "conChannel=%d nonChannel=%d", conChannel, nonChannel);
+    DISC_LOGI(DISC_INIT, "conChannel=%{public}d, nonChannel=%{public}d", conChannel, nonChannel);
 
     for (uint32_t i = 0; i < NUM_ADVERTISER; i++) {
         g_bleAdvertiser[i].isAdvertising = false;
@@ -1369,7 +1374,7 @@ static void StartPassivePublish(SoftBusMessage *msg)
 {
     DISC_LOGD(DISC_BLE, "enter");
     if (g_bleAdvertiser[NON_ADV_ID].isAdvertising) {
-        DISC_LOGI(DISC_BLE, "UpdateAdvertiser %d", NON_ADV_ID);
+        DISC_LOGI(DISC_BLE, "UpdateAdvertiser NON_ADV_ID=%{public}d", NON_ADV_ID);
         UpdateAdvertiser(NON_ADV_ID);
     }
     StartScaner();
@@ -1461,7 +1466,7 @@ static int32_t MatchRecvMessage(const uint32_t *publishInfoMap, uint32_t *capBit
         return SOFTBUS_ERR;
     }
     RecvMessage *msg = NULL;
-    DISC_LOGI(DISC_BLE, "recv message cnt=%d", g_recvMessageInfo.numNeedResp);
+    DISC_LOGI(DISC_BLE, "recv message cnt=%{public}d", g_recvMessageInfo.numNeedResp);
     LIST_FOR_EACH_ENTRY(msg, &g_recvMessageInfo.node, RecvMessage, node) {
         for (uint32_t index = 0; index < len; index++) {
             capBitMap[index] = msg->capBitMap[index] & publishInfoMap[index];
@@ -1680,7 +1685,7 @@ static void DiscBleMsgHandler(SoftBusMessage *msg)
             BleDiscTurnOff(msg);
             break;
         default:
-            DISC_LOGW(DISC_BLE, "wrong msg what=%d", msg->what);
+            DISC_LOGW(DISC_BLE, "wrong msg what=%{public}d", msg->what);
             break;
     }
 }

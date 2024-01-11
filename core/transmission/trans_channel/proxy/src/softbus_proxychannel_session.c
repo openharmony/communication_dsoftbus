@@ -46,7 +46,7 @@ int32_t NotifyClientMsgReceived(const char *pkgName, int32_t pid, int32_t channe
     }
     int32_t ret = TransProxyOnMsgReceived(pkgName, pid, channelId, receiveData);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_MSG, "notify ret=%d", ret);
+        TRANS_LOGE(TRANS_MSG, "notify ret=%{public}d", ret);
     }
     return ret;
 }
@@ -107,18 +107,18 @@ int32_t TransProxyPostPacketData(int32_t channelId, const unsigned char *data,
     }
     ProxyChannelInfo *chanInfo = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (chanInfo == NULL) {
-        TRANS_LOGE(TRANS_MSG, "malloc in channelId=%d", channelId);
+        TRANS_LOGE(TRANS_MSG, "malloc in channelId=%{public}d", channelId);
         return SOFTBUS_MALLOC_ERR;
     }
     if (TransProxyGetSendMsgChanInfo(channelId, chanInfo) != SOFTBUS_OK) {
         SoftBusFree(chanInfo);
-        TRANS_LOGE(TRANS_MSG, "can not find proxy channel channelId=%d", channelId);
+        TRANS_LOGE(TRANS_MSG, "can not find proxy channel channelId=%{public}d", channelId);
         return SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND;
     }
-    TRANS_LOGI(TRANS_MSG, "send msg len=%d seq=%d flags=%d", len, seq, flags);
+    TRANS_LOGI(TRANS_MSG, "send msg len=%{public}d, seq=%{public}d, flags=%{public}d", len, seq, flags);
     int32_t ret = TransProxyTransDataSendMsg(chanInfo, data, len, flags);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_MSG, "TransProxyTransDataSendMsg fail ret=%d", ret);
+        TRANS_LOGE(TRANS_MSG, "TransProxyTransDataSendMsg fail. ret=%{public}d", ret);
     }
 
     if (ConnGetTypeByConnectionId(chanInfo->connId, &type) != SOFTBUS_OK) {
@@ -206,7 +206,7 @@ int32_t TransProxyTransDataSendMsg(ProxyChannelInfo *info, const unsigned char *
         return SOFTBUS_INVALID_PARAM;
     }
     if ((info->status != PROXY_CHANNEL_STATUS_COMPLETED && info->status != PROXY_CHANNEL_STATUS_KEEPLIVEING)) {
-        TRANS_LOGE(TRANS_MSG, "status is err status=%d", info->status);
+        TRANS_LOGE(TRANS_MSG, "status is err status=%{public}d", info->status);
         return SOFTBUS_TRANS_PROXY_CHANNLE_STATUS_INVALID;
     }
     if (info->appInfo.appType == APP_TYPE_INNER) {
@@ -224,7 +224,8 @@ int32_t TransOnNormalMsgReceived(const char *pkgName, int32_t pid, int32_t chann
         TRANS_LOGE(TRANS_MSG, "data or pkgname is null.");
         return SOFTBUS_ERR;
     }
-    TRANS_LOGI(TRANS_MSG, "channelId= %d recv normal msg input len=%d, pid=%d", channelId, len, pid);
+    TRANS_LOGI(TRANS_MSG, "channelId=%{public}d recv normal msg input len=%{public}d, pid=%{public}d", channelId, len,
+        pid);
     TransReceiveData receiveData;
     receiveData.data = (void*)data;
     receiveData.dataLen = len;
