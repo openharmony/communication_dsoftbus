@@ -124,7 +124,7 @@ int32_t ServerIpcOpenSession(const SessionParam *param, TransInfo *info)
     }
     int ret = g_serverProxy->OpenSession(param, info);
     if (ret < SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "OpenSession failed! ret=%d.", ret);
+        TRANS_LOGE(TRANS_SDK, "OpenSession failed! ret=%{public}d.", ret);
         return ret;
     }
     return ret;

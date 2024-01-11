@@ -62,7 +62,7 @@ void *SoftBusCreateTimer(void **timerId, unsigned int type)
 
     g_timerType = type;
     if (timer_create(CLOCK_REALTIME, &envent, timerId) != 0) {
-        COMM_LOGE(COMM_ADAPTER, "timer create error, errno code: [%d]", errno);
+        COMM_LOGE(COMM_ADAPTER, "timer create error, errnoCode=%{public}d", errno);
         return NULL;
     }
 
@@ -88,7 +88,7 @@ int SoftBusStartTimer(void *timerId, unsigned int tickets)
     }
 
     if (timer_settime(timerId, 0, &value, NULL) != 0) {
-        COMM_LOGE(COMM_ADAPTER, "timer start error, errno code: [%d]", errno);
+        COMM_LOGE(COMM_ADAPTER, "timer start error, errnoCode=%{public}d", errno);
         return SOFTBUS_ERR;
     }
 
@@ -103,7 +103,7 @@ int SoftBusDeleteTimer(void *timerId)
     }
 
     if (timer_delete(timerId) != 0) {
-        COMM_LOGE(COMM_ADAPTER, "timer delete err, errno code: [%d]", errno);
+        COMM_LOGE(COMM_ADAPTER, "timer delete err, errnoCode=%{public}d", errno);
         return SOFTBUS_ERR;
     }
 

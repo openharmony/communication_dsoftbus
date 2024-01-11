@@ -45,14 +45,14 @@ int StreamManager::CreateStreamClientChannel(IpAndPort &local, IpAndPort remote,
     int streamType, std::pair<uint8_t*, uint32_t> sessionKey)
 {
     TRANS_LOGI(TRANS_STREAM,
-        "Start to create client channel, localPort=%d, remotePort=%d, proto=%d",
+        "Start to create client channel, localPort=%{public}d, remotePort=%{public}d, proto=%{public}d",
         local.port, remote.port, protocol);
 
     std::shared_ptr<IStreamSocket> streamSocket = nullptr;
     if (protocol == VTP) {
         streamSocket = std::make_shared<VtpStreamSocket>();
     } else {
-        TRANS_LOGE(TRANS_STREAM, "do not support protocol=%d", protocol);
+        TRANS_LOGE(TRANS_STREAM, "do not support protocol=%{public}d", protocol);
         return INVALID_FD;
     }
 
@@ -65,7 +65,7 @@ int StreamManager::CreateStreamClientChannel(IpAndPort &local, IpAndPort remote,
             TRANS_LOGE(TRANS_STREAM, "set stream scene failed");
             return INVALID_FD;
         }
-        TRANS_LOGI(TRANS_STREAM, "streamSocket CreateClient success, localPort=%d", local.port);
+        TRANS_LOGI(TRANS_STREAM, "streamSocket CreateClient success, localPort=%{public}d", local.port);
         return local.port;
     }
 
@@ -76,19 +76,19 @@ int StreamManager::CreateStreamServerChannel(IpAndPort &local, Proto protocol,
     int streamType, std::pair<uint8_t*, uint32_t> sessionKey)
 {
     TRANS_LOGI(TRANS_STREAM,
-        "Start to create server channel, localPort=%d, protocol=%d", local.port, protocol);
+        "Start to create server channel, localPort=%{public}d, protocol=%{public}d", local.port, protocol);
 
     std::shared_ptr<IStreamSocket> streamSocket = nullptr;
     if (protocol == VTP) {
         streamSocket = std::make_shared<VtpStreamSocket>();
     } else {
-        TRANS_LOGE(TRANS_STREAM, "do not support protocol=%d", protocol);
+        TRANS_LOGE(TRANS_STREAM, "do not support protocol=%{public}d", protocol);
         return INVALID_FD;
     }
 
     curProtocol_ = protocol;
     if (!streamSocket->CreateServer(local, streamType, sessionKey)) {
-        TRANS_LOGE(TRANS_STREAM, "create protocol=%d server error", protocol);
+        TRANS_LOGE(TRANS_STREAM, "create server error. protocol=%{public}d", protocol);
         return INVALID_FD;
     }
 
@@ -110,7 +110,7 @@ bool StreamManager::DestroyStreamDataChannel()
         auto streamSocket = it->second;
         streamSocket->DestroyStreamSocket();
         socketMap_.erase(it);
-        TRANS_LOGI(TRANS_STREAM, "curProtocol=%d  success", curProtocol_);
+        TRANS_LOGI(TRANS_STREAM, "curProtocol=%{public}d  success", curProtocol_);
         return true;
     }
     return false;
@@ -123,7 +123,7 @@ bool StreamManager::Send(std::unique_ptr<IStream> data)
         auto streamSocket = it->second;
         return streamSocket->Send(std::move(data));
     }
-    TRANS_LOGE(TRANS_STREAM, "do not found curProtocol=%d", curProtocol_);
+    TRANS_LOGE(TRANS_STREAM, "do not found curProtocol=%{public}d", curProtocol_);
     return false;
 }
 
@@ -162,7 +162,7 @@ void StreamManager::SetStreamRecvListener(std::shared_ptr<IStreamManagerListener
     if (it != socketMap_.end()) {
         auto streamSocket = it->second;
         streamSocket->SetStreamListener(socketListener_);
-        TRANS_LOGI(TRANS_STREAM, "curProtocol=%d success", curProtocol_);
+        TRANS_LOGI(TRANS_STREAM, "success curProtocol=%{public}d", curProtocol_);
     }
 }
 } // namespace SoftBus

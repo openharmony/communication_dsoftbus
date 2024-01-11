@@ -1018,10 +1018,10 @@ HWTEST_F(DiscSoftBusBleTest, BleIsConcern002, TestSize.Level1)
 */
 HWTEST_F(DiscSoftBusBleTest, DiscSoftbusBleInit001, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "DiscSoftBusBleTest,DiscSoftbusBleInit001,Start");
+    DISC_LOGI(DISC_TEST, "DiscSoftBusBleTest, DiscSoftbusBleInit001, Start");
     auto *ret = DiscSoftBusBleInit(nullptr);
     EXPECT_EQ(ret, nullptr);
-    DISC_LOGI(DISC_TEST, "DiscSoftBusBleTest,DiscSoftbusBleInit001,End");
+    DISC_LOGI(DISC_TEST, "DiscSoftBusBleTest, DiscSoftbusBleInit001, End");
 }
 
 /*

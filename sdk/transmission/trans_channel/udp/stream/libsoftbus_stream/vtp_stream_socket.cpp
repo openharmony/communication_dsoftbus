@@ -49,15 +49,15 @@ void PrintOptionInfo(int type, const StreamAttr &value)
     switch (value.GetType()) {
         case INT_TYPE:
             TRANS_LOGI(TRANS_STREAM,
-                "Int option: type=%d, value=%d", type, value.GetIntValue());
+                "Int option: type=%{public}d, value=%{public}d", type, value.GetIntValue());
             break;
         case BOOL_TYPE:
             TRANS_LOGI(TRANS_STREAM,
-                "Bool option: type=%d, value=%d", type, value.GetBoolValue());
+                "Bool option: type=%{public}d, value=%{public}d", type, value.GetBoolValue());
             break;
         case STRING_TYPE:
             TRANS_LOGD(TRANS_STREAM,
-                "String option: type=%d, value=%s", type, value.GetStrValue().c_str());
+                "String option: type=%{public}d, value=%{public}s", type, value.GetStrValue().c_str());
             break;
         default:
             TRANS_LOGE(TRANS_STREAM, "Wrong StreamAttr!");
@@ -87,7 +87,7 @@ void VtpStreamSocket::AddStreamSocketLock(int fd, std::mutex &streamsocketlock)
 {
     std::lock_guard<std::mutex> guard(g_streamSocketLockMapLock_);
     if (!g_streamSocketLockMap.empty() && g_streamSocketLockMap.find(fd) != g_streamSocketLockMap.end()) {
-        TRANS_LOGE(TRANS_STREAM, "streamsocketlock for fd=%d already exists", fd);
+        TRANS_LOGE(TRANS_STREAM, "streamsocketlock for the fd already exists. fd=%{public}d", fd);
         return;
     }
 
@@ -98,7 +98,7 @@ void VtpStreamSocket::AddStreamSocketListener(int fd, std::shared_ptr<VtpStreamS
 {
     std::lock_guard<std::mutex> guard(g_streamSocketMapLock_);
     if (!g_streamSocketMap.empty() && g_streamSocketMap.find(fd) != g_streamSocketMap.end()) {
-        TRANS_LOGE(TRANS_STREAM, "streamreceiver for fd=%d already exists", fd);
+        TRANS_LOGE(TRANS_STREAM, "streamreceiver for the fd already exists. fd=%{public}d", fd);
         return;
     }
 
@@ -110,10 +110,10 @@ void VtpStreamSocket::RemoveStreamSocketLock(int fd)
     std::lock_guard<std::mutex> guard(g_streamSocketLockMapLock_);
     if (g_streamSocketLockMap.find(fd) != g_streamSocketLockMap.end()) {
         g_streamSocketLockMap.erase(fd);
-        TRANS_LOGE(TRANS_STREAM, "Remove streamsocketlock for fd=%d success", fd);
+        TRANS_LOGE(TRANS_STREAM, "Remove streamsocketlock for the fd success. fd=%{public}d", fd);
     } else {
         TRANS_LOGE(TRANS_STREAM,
-            "Streamsocketlock for fd=%d not exist in the map", fd);
+            "Streamsocketlock for the fd not exist in the map. fd=%{public}d", fd);
     }
 }
 
@@ -122,9 +122,9 @@ void VtpStreamSocket::RemoveStreamSocketListener(int fd)
     std::lock_guard<std::mutex> guard(g_streamSocketMapLock_);
     if (g_streamSocketMap.find(fd) != g_streamSocketMap.end()) {
         g_streamSocketMap.erase(fd);
-        TRANS_LOGI(TRANS_STREAM, "Remove streamreceiver for fd=%d success", fd);
+        TRANS_LOGI(TRANS_STREAM, "Remove streamreceiver for the fd success. fd=%{public}d", fd);
     } else {
-        TRANS_LOGE(TRANS_STREAM, "Streamreceiver for fd=%d not exist in the map", fd);
+        TRANS_LOGE(TRANS_STREAM, "Streamreceiver for the fd not exist in the map. fd=%{public}d", fd);
     }
 }
 
@@ -215,7 +215,7 @@ int VtpStreamSocket::HandleFillpFrameStats(int fd, const FtEventCbkInfo *info)
             TRANS_LOGE(TRANS_STREAM, "streamReceiver_ is nullptr");
         }
     } else {
-        TRANS_LOGE(TRANS_STREAM, "StreamReceiver for fd=%d is empty in the map", fd);
+        TRANS_LOGE(TRANS_STREAM, "StreamReceiver for the fd is empty in the map. fd=%{public}d", fd);
     }
     return SOFTBUS_OK;
 }
@@ -244,7 +244,7 @@ int VtpStreamSocket::HandleRipplePolicy(int fd, const FtEventCbkInfo *info)
         }
     } else {
         TRANS_LOGE(TRANS_STREAM,
-            "OnRippleStats streamReceiver for fd=%d is empty in the map", fd);
+            "OnRippleStats streamReceiver for the fd is empty in the map. fd=%{public}d", fd);
     }
     return SOFTBUS_OK;
 }
@@ -258,22 +258,22 @@ void VtpStreamSocket::FillSupportDet(int fd, const FtEventCbkInfo *info, QosTv *
     }
     if (info->evt == FT_EVT_BW_DET) {
         TRANS_LOGI(TRANS_STREAM,
-            "[Metric Return]: Fillp bandwidth information of socket fd=%d is returned", fd);
+            "[Metric Return]: Fillp bandwidth information of socket fd=%{public}d is returned", fd);
         TRANS_LOGI(TRANS_STREAM,
-            "[Metric Return]: Changed amount of current available bandwidth=%d", info->info.bwInfo.bwStat);
+            "[Metric Return]: Changed amount of current available bandwidth=%{public}d", info->info.bwInfo.bwStat);
         TRANS_LOGI(TRANS_STREAM,
-            "[Metric Return]: Current bandwidth for receiving data rate=%d kbps", info->info.bwInfo.rate);
+            "[Metric Return]: Current bandwidth for receiving data rate=%{public}d kbps", info->info.bwInfo.rate);
         metricList->type = BANDWIDTH_ESTIMATE_VALUE;
         metricList->info.bandwidthInfo.trend = info->info.bwInfo.bwStat;
         metricList->info.bandwidthInfo.rate = info->info.bwInfo.rate;
     }
     if (info->evt == FT_EVT_JITTER_DET) {
         TRANS_LOGI(TRANS_STREAM,
-            "[Metric Return]: Fillp connection quality information of socket fd=%d is returned", fd);
+            "[Metric Return]: Fillp connection quality information of socket fd=%{public}d is returned", fd);
         TRANS_LOGI(TRANS_STREAM,
-            "[Metric Return]: Predeicted network condition jitterLevel=%d", info->info.jitterInfo.jitterLevel);
+            "[Metric Return]: Predeicted network condition jitterLevel=%{public}d", info->info.jitterInfo.jitterLevel);
         TRANS_LOGI(TRANS_STREAM,
-            "[Metric Return]: Current available receiving buffer time=%d ms", info->info.jitterInfo.bufferTime);
+            "[Metric Return]: Current available receiving buffer time=%{public}d ms", info->info.jitterInfo.bufferTime);
         metricList->type = JITTER_DETECTION_VALUE;
         metricList->info.jitterInfo.jitterLevel = info->info.jitterInfo.jitterLevel;
         metricList->info.jitterInfo.bufferTime = info->info.jitterInfo.bufferTime;
@@ -318,10 +318,10 @@ int VtpStreamSocket::FillpStatistics(int fd, const FtEventCbkInfo *info)
                     itListener->second->OnQosEvent(eventId, tvCount, &metricList);
                 }).detach();
             } else {
-                TRANS_LOGE(TRANS_STREAM, "StreamReceiver for fd=%d is empty in the map", fd);
+                TRANS_LOGE(TRANS_STREAM, "StreamReceiver for fd=%{public}d is empty in the map", fd);
             }
         } else {
-            TRANS_LOGE(TRANS_STREAM, "StreamSocketLock for fd=%d is empty in the map", fd);
+            TRANS_LOGE(TRANS_STREAM, "StreamSocketLock for fd=%{public}d is empty in the map", fd);
         }
     } else {
         TRANS_LOGE(TRANS_STREAM,
@@ -364,22 +364,24 @@ void VtpStreamSocket::FillpAppStatistics()
         metricList.info.appStatistics.periodSendRateBps = fillpPcbStats.appFcStastics.periodSendRateBps;
 
         TRANS_LOGI(TRANS_STREAM,
-            "Succeed to get fillp statistics information for streamfd=%d", streamFd_);
+            "Succeed to get fillp statistics information for streamfd=%{public}d", streamFd_);
         TRANS_LOGI(TRANS_STREAM,
-            "[Metric Return]: periodRtt=%d", fillpPcbStats.appFcStastics.periodRtt);
+            "[Metric Return]: periodRtt=%{public}d", fillpPcbStats.appFcStastics.periodRtt);
 
         std::lock_guard<std::mutex> guard(streamSocketLock_);
 
         if (streamReceiver_ != nullptr) {
             TRANS_LOGI(TRANS_STREAM,
-                "[Metric Notify]: Fillp traffic statistics information of socket streamfd=%d is notified", streamFd_);
+                "[Metric Notify]: Fillp traffic statistics information of socket is notified. streamfd=%{public}d",
+                streamFd_);
             streamReceiver_->OnQosEvent(eventId, tvCount, &metricList);
         } else {
-            TRANS_LOGE(TRANS_STREAM, "StreamReceiver for streamFd=%d is empty", streamFd_);
+            TRANS_LOGE(TRANS_STREAM, "StreamReceiver for the streamFd is empty. streamFd=%{public}d", streamFd_);
         }
     } else {
         TRANS_LOGE(TRANS_STREAM,
-            "Fail to get fillp statistics information for streamfd=%d, errno=%d", streamFd_, FtGetErrno());
+            "Fail to get fillp statistics information for the streamfd. streamfd=%{public}d, errno=%{public}d",
+            streamFd_, FtGetErrno());
     }
 }
 
@@ -387,7 +389,7 @@ bool VtpStreamSocket::CreateClient(IpAndPort &local, int streamType, std::pair<u
 {
     int fd = CreateAndBindSocket(local);
     if (fd == -1) {
-        TRANS_LOGE(TRANS_STREAM, "CreateAndBindSocket failed, errno=%d", FtGetErrno());
+        TRANS_LOGE(TRANS_STREAM, "CreateAndBindSocket failed, errno=%{public}d", FtGetErrno());
         DestroyStreamSocket();
         return false;
     }
@@ -408,7 +410,7 @@ bool VtpStreamSocket::CreateClient(IpAndPort &local, int streamType, std::pair<u
 
     SetDefaultConfig(fd);
     TRANS_LOGI(TRANS_STREAM,
-        "Success to create a client socket fd=%d of streamType=%d", fd, streamType);
+        "Success to create a client socket. fd=%{public}d, streamType=%{public}d", fd, streamType);
     return true;
 }
 
@@ -437,21 +439,21 @@ bool VtpStreamSocket::CreateServer(IpAndPort &local, int streamType, std::pair<u
     TRANS_LOGD(TRANS_STREAM, "enter.");
     listenFd_ = CreateAndBindSocket(local);
     if (listenFd_ == -1) {
-        TRANS_LOGE(TRANS_STREAM, "create listenFd failed, errno=%d", FtGetErrno());
+        TRANS_LOGE(TRANS_STREAM, "create listenFd failed, errno=%{public}d", FtGetErrno());
         DestroyStreamSocket();
         return false;
     }
 
     bool ret = FtListen(listenFd_, MAX_CONNECTION_VALUE);
     if (ret) {
-        TRANS_LOGE(TRANS_STREAM, "FtListen failed, ret=%d errno=%d", ret, FtGetErrno());
+        TRANS_LOGE(TRANS_STREAM, "FtListen failed, ret=%{public}d, errno=%{public}d", ret, FtGetErrno());
         DestroyStreamSocket();
         return false;
     }
 
     epollFd_ = FtEpollCreate();
     if (epollFd_ < 0) {
-        TRANS_LOGE(TRANS_STREAM, "Failed to create epoll fd errno=%d", FtGetErrno());
+        TRANS_LOGE(TRANS_STREAM, "Failed to create epoll fd errno=%{public}d", FtGetErrno());
         DestroyStreamSocket();
         return false;
     }
@@ -468,7 +470,8 @@ bool VtpStreamSocket::CreateServer(IpAndPort &local, int streamType, std::pair<u
 
     CreateServerProcessThread();
     TRANS_LOGI(TRANS_STREAM,
-        "CreateServer end, listenFd=%d, epollFd=%d, streamType=%d", listenFd_, epollFd_, streamType_);
+        "CreateServer end, listenFd=%{public}d, epollFd=%{public}d, streamType=%{public}d", listenFd_, epollFd_,
+        streamType_);
     return true;
 }
 
@@ -518,7 +521,7 @@ bool VtpStreamSocket::Connect(const IpAndPort &remote)
     }
 
     TRANS_LOGD(TRANS_STREAM,
-        "Connect to server remotePort=%d", remote.port);
+        "Connect to server remotePort=%{public}d", remote.port);
     remoteIpPort_ = remote;
 
     struct sockaddr_in remoteSockAddr;
@@ -528,20 +531,20 @@ bool VtpStreamSocket::Connect(const IpAndPort &remote)
 
     int ret = FtConnect(streamFd_, reinterpret_cast<struct sockaddr *>(&remoteSockAddr), sizeof(remoteSockAddr));
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_STREAM, "FtConnect failed, ret=%d, errno=%d", ret, FtGetErrno());
+        TRANS_LOGE(TRANS_STREAM, "FtConnect failed, ret=%{public}d, errno=%{public}d", ret, FtGetErrno());
         DestroyStreamSocket();
         return false;
     }
 
     epollFd_ = FtEpollCreate();
     if (epollFd_ < 0) {
-        TRANS_LOGE(TRANS_STREAM, "Failed to create epoll fd errno=%d", FtGetErrno());
+        TRANS_LOGE(TRANS_STREAM, "Failed to create epoll fd errno=%{public}d", FtGetErrno());
         DestroyStreamSocket();
         return false;
     }
 
     if (SetSocketEpollMode(streamFd_) != ERR_OK) {
-        TRANS_LOGE(TRANS_STREAM, "SetSocketEpollMode failed, streamFd=%d", streamFd_);
+        TRANS_LOGE(TRANS_STREAM, "SetSocketEpollMode failed, streamFd=%{public}d", streamFd_);
         DestroyStreamSocket();
         return false;
     }
@@ -554,7 +557,8 @@ bool VtpStreamSocket::Connect(const IpAndPort &remote)
 
 bool VtpStreamSocket::Send(std::unique_ptr<IStream> stream)
 {
-    TRANS_LOGD(TRANS_STREAM, "send in..., streamType=%d, dataSize=%zd, extSize=%zd", streamType_,
+    TRANS_LOGD(TRANS_STREAM,
+        "send in... streamType=%{public}d, dataSize=%{public}zd, extSize=%{public}zd", streamType_,
         stream->GetBufferLen(), stream->GetExtBufferLen());
 
     if (!isBlocked_) {
@@ -588,11 +592,12 @@ bool VtpStreamSocket::Send(std::unique_ptr<IStream> stream)
             return false;
         }
         len = packet.GetPacketLen() + GetEncryptOverhead();
-        TRANS_LOGD(TRANS_STREAM, "packetLen=%zd, encryptOverhead=%zd", packet.GetPacketLen(), GetEncryptOverhead());
+        TRANS_LOGD(TRANS_STREAM, "packetLen=%{public}zd, encryptOverhead=%{public}zd", packet.GetPacketLen(),
+            GetEncryptOverhead());
         data = std::make_unique<char[]>(len + FRAME_HEADER_LEN);
         ssize_t encLen = Encrypt(plainData.get(), packet.GetPacketLen(), data.get() + FRAME_HEADER_LEN, len);
         if (encLen != len) {
-            TRANS_LOGE(TRANS_STREAM, "encrypted failed, dataLen=%zd, encLen=%zd", len, encLen);
+            TRANS_LOGE(TRANS_STREAM, "encrypted failed, dataLen=%{public}zd, encLen=%{public}zd", len, encLen);
             return false;
         }
         InsertBufferLength(len, FRAME_HEADER_LEN, reinterpret_cast<uint8_t *>(data.get()));
@@ -604,11 +609,11 @@ bool VtpStreamSocket::Send(std::unique_ptr<IStream> stream)
     }
 
     if (ret == -1) {
-        TRANS_LOGE(TRANS_STREAM, "send failed, errno=%d", FtGetErrno());
+        TRANS_LOGE(TRANS_STREAM, "send failed, errno=%{public}d", FtGetErrno());
         return false;
     }
 
-    TRANS_LOGI(TRANS_STREAM, "send out..., streamType=%d, len=%zd", streamType_, len);
+    TRANS_LOGI(TRANS_STREAM, "send out..., streamType=%{public}d, len=%{public}zd", streamType_, len);
     return true;
 }
 
@@ -617,13 +622,13 @@ bool VtpStreamSocket::SetOption(int type, const StreamAttr &value)
     PrintOptionInfo(type, value);
     auto it = optFuncMap_.find(type);
     if (it == optFuncMap_.end()) {
-        TRANS_LOGW(TRANS_STREAM, "not found type=%d", type);
+        TRANS_LOGW(TRANS_STREAM, "not found type=%{public}d", type);
         return false;
     }
 
     if (value.GetType() != it->second.valueType) {
         TRANS_LOGW(TRANS_STREAM,
-            "type=%d, valueType=%d", value.GetType(), it->second.valueType);
+            "type=%{public}d, valueType=%{public}d", value.GetType(), it->second.valueType);
         return false;
     }
 
@@ -657,7 +662,7 @@ StreamAttr VtpStreamSocket::GetOption(int type) const
     if (it != optFuncMap_.end()) {
         MyGetFunc get = it->second.get;
         if (get == nullptr) {
-            TRANS_LOGE(TRANS_STREAM, "Can not get option type=%d", type);
+            TRANS_LOGE(TRANS_STREAM, "Can not get option type=%{public}d", type);
             return std::move(StreamAttr());
         }
         if (type == NON_BLOCK) {
@@ -707,7 +712,7 @@ int VtpStreamSocket::CreateAndBindSocket(IpAndPort &local)
 
     int sockFd = FtSocket(AF_INET, SOCK_STREAM, IPPROTO_FILLP);
     if (sockFd == -1) {
-        TRANS_LOGE(TRANS_STREAM, "FtSocket failed, errno=%d", FtGetErrno());
+        TRANS_LOGE(TRANS_STREAM, "FtSocket failed, errno=%{public}d", FtGetErrno());
         return -1;
     }
 
@@ -719,21 +724,21 @@ int VtpStreamSocket::CreateAndBindSocket(IpAndPort &local)
     localSockAddr.sin_addr.s_addr = inet_addr(local.ip.c_str());
     localIpPort_.ip = SoftBusInetNtoP(AF_INET, &(localSockAddr.sin_addr), host, ADDR_MAX_SIZE);
     if (!SetSocketBoundInner(sockFd, localIpPort_.ip)) {
-        TRANS_LOGE(TRANS_STREAM, "SetSocketBoundInner failed, errno= %d", FtGetErrno());
+        TRANS_LOGE(TRANS_STREAM, "SetSocketBoundInner failed, errno=%{public}d", FtGetErrno());
     }
 
     socklen_t localAddrLen = sizeof(localSockAddr);
     int ret = FtBind(sockFd, reinterpret_cast<sockaddr *>(&localSockAddr), localAddrLen);
     if (ret == -1) {
         FtClose(sockFd);
-        TRANS_LOGE(TRANS_STREAM, "FtBind failed, errno=%d", FtGetErrno());
+        TRANS_LOGE(TRANS_STREAM, "FtBind failed, errno=%{public}d", FtGetErrno());
         return -1;
     }
 
-    // 获取port
+    // 闁兼儳鍢茶ぐ鍣媜rt
     ret = FtGetSockName(sockFd, reinterpret_cast<sockaddr *>(&localSockAddr), &localAddrLen);
     if (ret != ERR_OK) {
-        TRANS_LOGE(TRANS_STREAM, "getsockname error ret=%d, errno=%d", ret, FtGetErrno());
+        TRANS_LOGE(TRANS_STREAM, "getsockname error ret=%{public}d, errno=%{public}d", ret, FtGetErrno());
         FtClose(sockFd);
         return -1;
     }
@@ -760,11 +765,12 @@ bool VtpStreamSocket::EnableBwEstimationAlgo(int streamFd, bool isServer) const
     }
     if (errBwDet < 0) {
         TRANS_LOGE(TRANS_STREAM,
-            "Fail to enable bandwidth estimation algorithm for streamFd=%d, errno%d", streamFd, FtGetErrno());
+            "Fail to enable bandwidth estimation algorithm for streamFd=%{public}d, errno%{public}d",
+            streamFd, FtGetErrno());
         return true;
     } else {
         TRANS_LOGE(TRANS_STREAM,
-            "Success to enable bandwidth estimation algorithm for stream=Fd%d", streamFd);
+            "Success to enable bandwidth estimation algorithm for stream=Fd%{public}d", streamFd);
         return false;
     }
 #else
@@ -779,11 +785,11 @@ bool VtpStreamSocket::EnableJitterDetectionAlgo(int streamFd) const
     auto errCQE = FtSetSockOpt(streamFd, IPPROTO_FILLP, FILLP_SOCK_CQE_ALGO, &enableCQE, sizeof(enableCQE));
     if (errCQE < 0) {
         TRANS_LOGE(TRANS_STREAM,
-            "Fail to enable CQE algorithm for streamFd=%d, errno=%d", streamFd, FtGetErrno());
+            "Fail to enable CQE algorithm for streamFd=%{public}d, errno=%{public}d", streamFd, FtGetErrno());
         return true;
     } else {
         TRANS_LOGE(TRANS_STREAM,
-            "Success to enable CQE algorithm for streamFd=%d", streamFd);
+            "Success to enable CQE algorithm for streamFd=%{public}d", streamFd);
         return false;
     }
 #else
@@ -797,10 +803,10 @@ bool VtpStreamSocket::EnableDirectlySend(int streamFd) const
     FILLP_INT ret = FtSetSockOpt(streamFd, IPPROTO_FILLP, FILLP_SOCK_DIRECTLY_SEND, &enable, sizeof(enable));
     if (ret < 0) {
         TRANS_LOGE(TRANS_STREAM,
-            "Fail to enable direct send for streamFd=%d, errno=%d", streamFd, FtGetErrno());
+            "Fail to enable direct send for streamFd=%{public}d, rrno=%{public}d", streamFd, FtGetErrno());
         return false;
     }
-    TRANS_LOGI(TRANS_STREAM, "Success to enable direct send for streamFd=%d", streamFd);
+    TRANS_LOGI(TRANS_STREAM, "Success to enable direct send for streamFd=%{public}d", streamFd);
     return true;
 }
 
@@ -810,10 +816,10 @@ bool VtpStreamSocket::EnableSemiReliable(int streamFd) const
     FILLP_INT ret = FtSetSockOpt(streamFd, IPPROTO_FILLP, FILLP_SEMI_RELIABLE, &enable, sizeof(enable));
     if (ret < 0) {
         TRANS_LOGE(TRANS_STREAM,
-            "Fail to enable direct send for streamFd=%d, errno=%d", streamFd, FtGetErrno());
+            "Fail to enable direct send for streamFd=%{public}d, errno=%{public}d", streamFd, FtGetErrno());
         return false;
     }
-    TRANS_LOGI(TRANS_STREAM, "Success to enable direct send for streamFd=%d", streamFd);
+    TRANS_LOGI(TRANS_STREAM, "Success to enable direct send for streamFd=%{public}d", streamFd);
     return true;
 }
 
@@ -833,19 +839,19 @@ void VtpStreamSocket::RegisterMetricCallback(bool isServer)
     if (isServer) {
         if (regStatisticsRet == 0) {
             TRANS_LOGI(TRANS_STREAM,
-                "Success to register the stream callback function at server side with streamFd=%d", streamFd_);
+                "Success to register the stream callback function at server side. streamFd=%{public}d", streamFd_);
         } else {
             TRANS_LOGE(TRANS_STREAM,
-                "Fail to register the stream callback function at server side with streamFd=%d, errno=%d",
+                "Fail to register the stream callback function at server side. streamFd=%{public}d, errno=%{public}d",
                 streamFd_, regStatisticsRet);
         }
     } else {
         if (regStatisticsRet == 0) {
             TRANS_LOGI(TRANS_STREAM,
-                "Success to register the stream callback function at client side with streamFd=%d", streamFd_);
+                "Success to register the stream callback function at client side. streamFd=%{public}d", streamFd_);
         } else {
             TRANS_LOGE(TRANS_STREAM,
-                "Fail to register the stream callback function at client side with streamFd=%d, errno=%d",
+                "Fail to register the stream callback function at client side. streamFd=%{public}d, errno=%{public}d",
                 streamFd_, regStatisticsRet);
         }
     }
@@ -856,9 +862,9 @@ bool VtpStreamSocket::Accept()
     TRANS_LOGD(TRANS_STREAM, "enter.");
 
     auto fd = FtAccept(listenFd_, nullptr, nullptr);
-    TRANS_LOGI(TRANS_STREAM, "accept streamFd:%d", fd);
+    TRANS_LOGI(TRANS_STREAM, "accept streamFd=%{public}d", fd);
     if (fd == -1) {
-        TRANS_LOGE(TRANS_STREAM, "errno=%d", FtGetErrno());
+        TRANS_LOGE(TRANS_STREAM, "errno=%{public}d", FtGetErrno());
         return false;
     }
 
@@ -866,7 +872,7 @@ bool VtpStreamSocket::Accept()
     socklen_t remoteAddrLen = sizeof(remoteAddr);
     auto ret = FtGetPeerName(fd, &remoteAddr, &remoteAddrLen);
     if (ret != ERR_OK) {
-        TRANS_LOGE(TRANS_STREAM, "get name failed, fd=%d", fd);
+        TRANS_LOGE(TRANS_STREAM, "get name failed, fd=%{public}d", fd);
         FtClose(fd);
         return false;
     }
@@ -883,11 +889,11 @@ bool VtpStreamSocket::Accept()
     }
 
     TRANS_LOGD(TRANS_STREAM,
-        "Accept a client remotePort=%d", remoteIpPort_.port);
+        "Accept a client remotePort=%{public}d", remoteIpPort_.port);
     SetDefaultConfig(fd);
 
     if (SetSocketEpollMode(fd) != ERR_OK) {
-        TRANS_LOGE(TRANS_STREAM, "SetSocketEpollMode failed, fd=%d", fd);
+        TRANS_LOGE(TRANS_STREAM, "SetSocketEpollMode failed, fd=%{public}d", fd);
         FtClose(fd);
         return false;
     }
@@ -923,7 +929,7 @@ int VtpStreamSocket::EpollTimeout(int fd, int timeout)
         FILLP_INT fdNum = FtEpollWait(epollFd_, events, MAX_EPOLL_NUM, timeout);
         if (fdNum <= 0) {
             TRANS_LOGE(TRANS_STREAM,
-                "FtEpollWait failed, ret=%d, errno=%d", fdNum, FtGetErrno());
+                "FtEpollWait failed, ret=%{public}d, errno=%{public}d", fdNum, FtGetErrno());
             return -FtGetErrno();
         }
 
@@ -934,7 +940,7 @@ int VtpStreamSocket::EpollTimeout(int fd, int timeout)
 
             if (events[i].events & (SPUNGE_EPOLLHUP | SPUNGE_EPOLLERR)) {
                 TRANS_LOGE(TRANS_STREAM,
-                    "EpollTimeout, something may be wrong in this socket, fd=%d, events=%u", fd,
+                    "EpollTimeout, something may be wrong in this socket, fd=%{public}d, events=%{public}u", fd,
                     (unsigned int)events[i].events);
                 return -1;
             }
@@ -949,7 +955,7 @@ int VtpStreamSocket::EpollTimeout(int fd, int timeout)
 int VtpStreamSocket::SetSocketEpollMode(int fd)
 {
     if (!SetNonBlockMode(fd, StreamAttr(true))) {
-        TRANS_LOGE(TRANS_STREAM, "SetNonBlockMode failed, errno=%d", FtGetErrno());
+        TRANS_LOGE(TRANS_STREAM, "SetNonBlockMode failed, errno=%{public}d", FtGetErrno());
         return -1;
     }
 
@@ -959,7 +965,7 @@ int VtpStreamSocket::SetSocketEpollMode(int fd)
 
     auto ret = FtEpollCtl(epollFd_, SPUNGE_EPOLL_CTL_ADD, fd, &event);
     if (ret != ERR_OK) {
-        TRANS_LOGE(TRANS_STREAM, "FtEpollCtl failed, ret=%d, errno=%d", ret, FtGetErrno());
+        TRANS_LOGE(TRANS_STREAM, "FtEpollCtl failed, ret=%{public}d, errno=%{public}d", ret, FtGetErrno());
         return ret;
     }
 
@@ -980,20 +986,21 @@ std::unique_ptr<IStream> VtpStreamSocket::MakeStreamData(StreamData &data, const
     std::unique_ptr<IStream> stream = nullptr;
     switch (streamType_) {
         case VIDEO_SLICE_STREAM:
-            TRANS_LOGD(TRANS_STREAM, "do not support VIDEO_SLICE_STREAM streamType=%d", streamType_);
+            TRANS_LOGD(TRANS_STREAM, "do not support VIDEO_SLICE_STREAM streamType=%{public}d", streamType_);
             break;
         case COMMON_VIDEO_STREAM:
         case COMMON_AUDIO_STREAM:
             TRANS_LOGD(TRANS_STREAM,
-                "streamType=%d, seqNum=%d, streamId=%d", streamType_, info.seqNum, info.streamId);
+                "streamType=%{public}d, seqNum=%{public}d, streamId=%{public}d",
+                streamType_, info.seqNum, info.streamId);
             stream = IStream::MakeCommonStream(data, info);
             break;
         case RAW_STREAM:
-            TRANS_LOGD(TRANS_STREAM, "streamType=%d", streamType_);
+            TRANS_LOGD(TRANS_STREAM, "streamType=%{public}d", streamType_);
             stream = IStream::MakeRawStream(data, info);
             break;
         default:
-            TRANS_LOGE(TRANS_STREAM, "do not support streamType=%d", streamType_);
+            TRANS_LOGE(TRANS_STREAM, "do not support streamType=%{public}d", streamType_);
             break;
     }
     if (stream == nullptr) {
@@ -1019,10 +1026,10 @@ int VtpStreamSocket::RecvStreamLen()
             len = FtRecv(streamFd_, buffer.get(), hdrSize, 0);
         } while (len <= 0 && (FtGetErrno() == EINTR || FtGetErrno() == FILLP_EAGAIN));
     }
-    TRANS_LOGD(TRANS_STREAM, "recv frame header, len=%d, scene=%d", len, scene_);
+    TRANS_LOGD(TRANS_STREAM, "recv frame header, len=%{public}d, scene=%{public}d", len, scene_);
 
     if (len <= 0) {
-        TRANS_LOGE(TRANS_STREAM, "len invalid,len=%d", len);
+        TRANS_LOGE(TRANS_STREAM, "len invalid, len=%{public}d", len);
         return -1;
     }
 
@@ -1047,11 +1054,11 @@ void VtpStreamSocket::DoStreamRecv()
         TRANS_LOGD(TRANS_STREAM, "recv stream");
         dataLength = VtpStreamSocket::RecvStreamLen();
         if (dataLength <= 0 || dataLength > MAX_STREAM_LEN) {
-            TRANS_LOGE(TRANS_STREAM, "read frame length error, dataLength=%d", dataLength);
+            TRANS_LOGE(TRANS_STREAM, "read frame length error, dataLength=%{public}d", dataLength);
             break;
         }
         TRANS_LOGD(TRANS_STREAM,
-            "recv a new frame, dataLen=%d, streamType=%d", dataLength, streamType_);
+            "recv a new frame, dataLen=%{public}d, streamType=%{public}d", dataLength, streamType_);
         dataBuffer = VtpStreamSocket::RecvStream(dataLength);
 
         if (streamType_ == COMMON_VIDEO_STREAM || streamType_ == COMMON_AUDIO_STREAM) {
@@ -1062,21 +1069,21 @@ void VtpStreamSocket::DoStreamRecv()
             int plainDataLength = decryptedLength - GetEncryptOverhead();
             if (plainDataLength <= 0) {
                 TRANS_LOGE(
-                    TRANS_STREAM, "Decrypt failed, invalid decryptedLen=%zd", decryptedLength);
+                    TRANS_STREAM, "Decrypt failed, invalid decryptedLen=%{public}zd", decryptedLength);
                 break;
             }
             std::unique_ptr<char[]> plainData = std::make_unique<char[]>(plainDataLength);
             ssize_t decLen = Decrypt(decryptedBuffer.get(), decryptedLength, plainData.get(), plainDataLength);
             if (decLen != plainDataLength) {
                 TRANS_LOGE(TRANS_STREAM,
-                    "Decrypt failed, dataLen=%d, decryptedLen=%zd", plainDataLength, decLen);
+                    "Decrypt failed, dataLen=%{public}d, decryptedLen=%{public}zd", plainDataLength, decLen);
                 break;
             }
             auto header = plainData.get();
             StreamDepacketizer decode(streamType_);
             if (plainDataLength < static_cast<int>(sizeof(CommonHeader))) {
                 TRANS_LOGE(TRANS_STREAM,
-                    "failed, plainDataLen=%d, CommonHeader=%u", plainDataLength, sizeof(CommonHeader));
+                    "failed, plainDataLen=%{public}d, CommonHeader=%{public}u", plainDataLength, sizeof(CommonHeader));
                 break;
             }
             decode.DepacketizeHeader(header);
@@ -1091,7 +1098,7 @@ void VtpStreamSocket::DoStreamRecv()
             dataLength = decode.GetDataLength();
             if (dataLength <= 0) {
                 TRANS_LOGE(TRANS_STREAM,
-                    "common depacketize error, dataLen=%d", dataLength);
+                    "common depacketize error, dataLen=%{public}d", dataLength);
                 break;
             }
         }
@@ -1104,7 +1111,7 @@ void VtpStreamSocket::DoStreamRecv()
         }
 
         TRANS_LOGD(TRANS_STREAM,
-            "recv frame done, dataLen=%d, streamType=%d", dataLength, streamType_);
+            "recv frame done, dataLen=%{public}d, streamType=%{public}d", dataLength, streamType_);
 
         if (streamType_ == RAW_STREAM && scene_ == COMPATIBLE_SCENE) {
             std::lock_guard<std::mutex> guard(streamSocketLock_);
@@ -1116,7 +1123,7 @@ void VtpStreamSocket::DoStreamRecv()
 
         PutStream(std::move(stream));
         TRANS_LOGD(TRANS_STREAM,
-            "put frame done, dataLen=%d, streamType=%d", dataLength, streamType_);
+            "put frame done, dataLen=%{public}d, streamType=%{public}d", dataLength, streamType_);
     }
     TRANS_LOGI(TRANS_STREAM, "recv thread exit");
 }
@@ -1136,7 +1143,7 @@ std::unique_ptr<char[]> VtpStreamSocket::RecvStream(int dataLength)
         }
 
         if (ret == -1) {
-            TRANS_LOGE(TRANS_STREAM, "read frame failed, errno=%d", FtGetErrno());
+            TRANS_LOGE(TRANS_STREAM, "read frame failed, errno=%{public}d", FtGetErrno());
             return nullptr;
         }
 
@@ -1185,11 +1192,11 @@ bool VtpStreamSocket::SetIpTos(int fd, const StreamAttr &tos)
 {
     auto tmp = tos.GetIntValue();
     if (FtSetSockOpt(fd, IPPROTO_IP, IP_TOS, &tmp, sizeof(tmp)) != ERR_OK) {
-        TRANS_LOGE(TRANS_STREAM, "SetIpTos wrong! fd=%d, errno=%d", fd, FtGetErrno());
+        TRANS_LOGE(TRANS_STREAM, "SetIpTos wrong! fd=%{public}d, errno=%{public}d", fd, FtGetErrno());
         return false;
     }
 
-    TRANS_LOGI(TRANS_STREAM, "Success to set ip tos: fd=%d, tos=%d", fd, tmp);
+    TRANS_LOGI(TRANS_STREAM, "Success to set ip tos: fd=%{public}d, tos=%{public}d", fd, tmp);
     return true;
 }
 
@@ -1200,7 +1207,7 @@ StreamAttr VtpStreamSocket::GetIpTos(int type) const
     int size = sizeof(tos);
 
     if (FtGetSockOpt(streamFd_, IPPROTO_IP, IP_TOS, &tos, &size) != ERR_OK) {
-        TRANS_LOGE(TRANS_STREAM, "FtGetSockOpt errno=%d", FtGetErrno());
+        TRANS_LOGE(TRANS_STREAM, "FtGetSockOpt errno=%{public}d", FtGetErrno());
         return std::move(StreamAttr());
     }
 
@@ -1225,7 +1232,7 @@ bool VtpStreamSocket::SetSocketBoundInner(int fd, std::string ip) const
     struct ifaddrs *ifList = nullptr;
     if (getifaddrs(&ifList) < 0) {
         TRANS_LOGE(TRANS_STREAM,
-            "get interface address return errno=%d (%s)", errno, strerror(errno));
+            "get interface address return errno=%{public}d, strerror=%{public}s", errno, strerror(errno));
         return false;
     }
 
@@ -1242,7 +1249,7 @@ bool VtpStreamSocket::SetSocketBoundInner(int fd, std::string ip) const
         std::string devName(ifa->ifa_name);
         if (strcmp(boundIp.c_str(), SoftBusInetNtoP(AF_INET, &(((struct sockaddr_in *)ifa->ifa_addr)->sin_addr),
             host, ADDR_MAX_SIZE)) == 0) {
-            TRANS_LOGI(TRANS_STREAM, "current use interface ifName=%s to bind to socket", ifa->ifa_name);
+            TRANS_LOGI(TRANS_STREAM, "current use interface to bind to socket. ifName=%{public}s", ifa->ifa_name);
             auto err = FtSetSockOpt(fd, SOL_SOCKET, SO_BINDTODEVICE, devName.c_str(), devName.size());
             if (err < 0) {
                 TRANS_LOGE(TRANS_STREAM, "fail to set socket binding to device");
@@ -1271,7 +1278,7 @@ bool VtpStreamSocket::SetVtpStackConfigDelayed(int type, const StreamAttr &value
     if (streamFd_ == -1) {
         configCv_.wait(lock, [this] { return streamFd_ != -1; });
     }
-    TRANS_LOGI(TRANS_STREAM, "set vtp stack config, streamFd=%d", streamFd_);
+    TRANS_LOGI(TRANS_STREAM, "set vtp stack config, streamFd=%{public}d", streamFd_);
     return SetVtpStackConfig(type, value);
 }
 
@@ -1293,12 +1300,12 @@ bool VtpStreamSocket::SetVtpStackConfig(int type, const StreamAttr &value)
         int ret = FtConfigSet(type, &intVal, &streamFd_);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_STREAM,
-                "FtConfigSet failed, type=%d, errno=%d", type, FtGetErrno());
+                "FtConfigSet failed, type=%{public}d, errno=%{public}d", type, FtGetErrno());
             return false;
         }
 
         TRANS_LOGI(TRANS_STREAM,
-            "setVtpConfig type=%d success, streamFd=%d, value=%d", type, streamFd_, intVal);
+            "setVtpConfig success, type=%{public}d, streamFd=%{public}d, value=%{public}d", type, streamFd_, intVal);
         return true;
     }
 
@@ -1307,12 +1314,12 @@ bool VtpStreamSocket::SetVtpStackConfig(int type, const StreamAttr &value)
         int ret = FtConfigSet(type, &flag, &streamFd_);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_STREAM,
-                "FtConfigSet failed, type=%d, errno=%d", type, FtGetErrno());
+                "FtConfigSet failed, type=%{public}d, errno=%{public}d", type, FtGetErrno());
             return false;
         }
 
         TRANS_LOGI(TRANS_STREAM,
-            "setVtpConfig type=%d success, streamFd=%d, flag=%d", type, streamFd_, flag);
+            "setVtpConfig success, streamFd=%{public}d, flag=%{public}d, type=%{public}d", type, streamFd_, flag);
         return true;
     }
 
@@ -1327,7 +1334,7 @@ StreamAttr VtpStreamSocket::GetVtpStackConfig(int type) const
     int ret = FtConfigGet(type, &intVal, &configFd);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_STREAM,
-            "FtConfigGet failed, type=%d, errno=%d", type, FtGetErrno());
+            "FtConfigGet failed, type=%{public}d, errno=%{public}d", type, FtGetErrno());
         return std::move(StreamAttr());
     }
 
@@ -1363,7 +1370,7 @@ bool VtpStreamSocket::SetNonBlockMode(int fd, const StreamAttr &value)
 {
     FILLP_INT flags = FtFcntl(fd, F_GETFL, 0);
     if (flags < 0) {
-        TRANS_LOGE(TRANS_STREAM, "failed to get FtFcntl, flags=%d", flags);
+        TRANS_LOGE(TRANS_STREAM, "failed to get FtFcntl, flags=%{public}d", flags);
         flags = 0;
     }
     bool nonBlock = value.GetBoolValue();
@@ -1373,11 +1380,11 @@ bool VtpStreamSocket::SetNonBlockMode(int fd, const StreamAttr &value)
 
     FILLP_INT res = FtFcntl(fd, F_SETFL, flags);
     if (res < 0) {
-        TRANS_LOGE(TRANS_STREAM, "failed to set FtFcntl, res=%d", res);
+        TRANS_LOGE(TRANS_STREAM, "failed to set FtFcntl, res=%{public}d", res);
         return false;
     }
 
-    TRANS_LOGI(TRANS_STREAM, "Successfully to set fd=%d nonBlock=%d", fd, nonBlock);
+    TRANS_LOGI(TRANS_STREAM, "Successfully to set fd=%{public}d, nonBlock=%{public}d", fd, nonBlock);
     return true;
 }
 
@@ -1431,11 +1438,11 @@ bool VtpStreamSocket::SetStreamScene(int type, const StreamAttr &value)
 {
     static_cast<void>(type);
     if (value.GetType() != INT_TYPE) {
-        TRANS_LOGE(TRANS_STREAM, "value.GetType=%d", value.GetType());
+        TRANS_LOGE(TRANS_STREAM, "value.GetType=%{public}d", value.GetType());
         return false;
     }
     scene_ = value.GetIntValue();
-    TRANS_LOGI(TRANS_STREAM, "Set scene=%d", scene_);
+    TRANS_LOGI(TRANS_STREAM, "Set scene=%{public}d", scene_);
     return true;
 }
 
@@ -1443,11 +1450,11 @@ bool VtpStreamSocket::SetStreamHeaderSize(int type, const StreamAttr &value)
 {
     static_cast<void>(type);
     if (value.GetType() != INT_TYPE) {
-        TRANS_LOGE(TRANS_STREAM, "value.GetType=%d", value.GetType());
+        TRANS_LOGE(TRANS_STREAM, "value.GetType=%{public}d", value.GetType());
         return false;
     }
     streamHdrSize_ = value.GetIntValue();
-    TRANS_LOGI(TRANS_STREAM, "Set headerSize=%d", streamHdrSize_);
+    TRANS_LOGI(TRANS_STREAM, "Set headerSize=%{public}d", streamHdrSize_);
     return true;
 }
 
@@ -1456,7 +1463,7 @@ void VtpStreamSocket::NotifyStreamListener()
     while (isStreamRecv_) {
         int streamNum = GetStreamNum();
         if (streamNum >= STREAM_BUFFER_THRESHOLD) {
-            TRANS_LOGW(TRANS_STREAM, "Too many data in receiver, streamNum=%d", streamNum);
+            TRANS_LOGW(TRANS_STREAM, "Too many data in receiver, streamNum=%{public}d", streamNum);
         }
 
         auto stream = TakeStream();
@@ -1502,7 +1509,7 @@ ssize_t VtpStreamSocket::Encrypt(const void *in, ssize_t inLen, void *out, ssize
     int ret = SoftBusEncryptData(&cipherKey, (unsigned char *)in, inLen, (unsigned char *)out, (unsigned int *)&outLen);
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK || outLen != inLen + OVERHEAD_LEN) {
-        TRANS_LOGE(TRANS_STREAM, "Encrypt Data fail. ret=%d", ret);
+        TRANS_LOGE(TRANS_STREAM, "Encrypt Data fail. ret=%{public}d", ret);
         return SOFTBUS_ENCRYPT_ERR;
     }
     return outLen;
@@ -1529,7 +1536,7 @@ ssize_t VtpStreamSocket::Decrypt(const void *in, ssize_t inLen, void *out, ssize
     int ret = SoftBusDecryptData(&cipherKey, (unsigned char *)in, inLen, (unsigned char *)out, (unsigned int *)&outLen);
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_STREAM, "Decrypt Data fail. ret=%d ", ret);
+        TRANS_LOGE(TRANS_STREAM, "Decrypt Data fail. ret=%{public}d ", ret);
         return SOFTBUS_DECRYPT_ERR;
     }
 

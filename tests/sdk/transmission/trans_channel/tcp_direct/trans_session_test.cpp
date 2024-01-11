@@ -65,13 +65,13 @@ void TransSessionTest::TearDownTestCase(void)
 }
 static int OnSessionOpened(int sessionId, int result)
 {
-    TRANS_LOGI(TRANS_TEST, "session opened,sesisonId=%d", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session opened, sesisonId=%{public}d", sessionId);
     return SOFTBUS_OK;
 }
 
 static void OnSessionClosed(int sessionId)
 {
-    TRANS_LOGI(TRANS_TEST, "session closed, sessionId=%d", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session closed, sessionId=%{public}d", sessionId);
 }
 
 static ISessionListener g_sessionlistener = {

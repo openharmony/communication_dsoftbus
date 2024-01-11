@@ -30,7 +30,7 @@
 
 static void NetworkingHandleMessage(const SoftBusMessage* msg)
 {
-    COMM_LOGI(COMM_TEST, "NetworkingHandleMessage msg what=%d", msg->what);
+    COMM_LOGI(COMM_TEST, "NetworkingHandleMessage msg what=%{public}d", msg->what);
 }
 
 static SoftBusHandler g_networkingHandler = {
@@ -39,7 +39,7 @@ static SoftBusHandler g_networkingHandler = {
 
 static void CustomfreeMessage(SoftBusMessage* msg)
 {
-    COMM_LOGI(COMM_TEST, "CustomfreeMessage msg=%d", msg->what);
+    COMM_LOGI(COMM_TEST, "CustomfreeMessage msg=%{public}d", msg->what);
     if (msg->what == CASE_FOUR_POST_DELAY) {
         SoftBusFree(msg->obj);
         SoftBusFree(msg);

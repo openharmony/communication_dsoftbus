@@ -586,12 +586,12 @@ bool ScanResultCtx::Update(int id, const SoftBusBleScanResult *scanResult)
     this->scanResult = *scanResult;
     unsigned char *cpyAdvData = (unsigned char *)SoftBusCalloc(this->scanResult.advLen);
     if (cpyAdvData == nullptr) {
-        CONN_LOGE(CONN_BLE, "malloc failed in OnScanResult, can not save ctx, id: %d", id);
+        CONN_LOGE(CONN_BLE, "malloc failed in OnScanResult, can not save ctx, id=%{public}d", id);
         return false;
     }
 
     if (memcpy_s(cpyAdvData, this->scanResult.advLen, scanResult->advData, scanResult->advLen) != EOK) {
-        CONN_LOGE(CONN_BLE, "malloc failed in OnScanResult, can not save ctx, id: %d", id);
+        CONN_LOGE(CONN_BLE, "malloc failed in OnScanResult, can not save ctx, id=%{public}d", id);
         SoftBusFree(cpyAdvData);
         return false;
     }

@@ -106,9 +106,9 @@ TcpDirectChannelInfo *TransTdcGetInfoByFd(int32_t fd, TcpDirectChannelInfo *info
 
 void TransTdcCloseChannel(int32_t channelId)
 {
-    TRANS_LOGI(TRANS_SDK, "Close tdc Channel, channelId=%d.", channelId);
+    TRANS_LOGI(TRANS_SDK, "Close tdc Channel, channelId=%{public}d.", channelId);
     if (ServerIpcCloseChannel(channelId, CHANNEL_TYPE_TCP_DIRECT) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "close server tdc channelId=%d err.", channelId);
+        TRANS_LOGE(TRANS_SDK, "close server tdc channelId=%{public}d err.", channelId);
     }
 
     TcpDirectChannelInfo *item = NULL;
@@ -125,12 +125,12 @@ void TransTdcCloseChannel(int32_t channelId)
             item = NULL;
             (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
             DelPendingPacket(channelId, PENDING_TYPE_DIRECT);
-            TRANS_LOGI(TRANS_SDK, "Delete tdc channelId=%d item success.", channelId);
+            TRANS_LOGI(TRANS_SDK, "Delete tdc item success. channelId=%{public}d", channelId);
             return;
         }
     }
 
-    TRANS_LOGE(TRANS_SDK, "Target channelId=%d item not exist.", channelId);
+    TRANS_LOGE(TRANS_SDK, "Target item not exist. channelId=%{public}d", channelId);
     (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
 }
 
@@ -165,7 +165,7 @@ static int32_t ClientTransCheckTdcChannelExist(int32_t channelId)
     TcpDirectChannelInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &(g_tcpDirectChannelInfoList->list), TcpDirectChannelInfo, node) {
         if (item->channelId == channelId) {
-            TRANS_LOGE(TRANS_SDK, "tcp direct channelId=%d already exist.", channelId);
+            TRANS_LOGE(TRANS_SDK, "tcp direct already exist. channelId=%{public}d", channelId);
             (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
             return SOFTBUS_ERR;
         }
@@ -176,7 +176,7 @@ static int32_t ClientTransCheckTdcChannelExist(int32_t channelId)
 
 static void TransTdcDelChannelInfo(int32_t channelId)
 {
-    TRANS_LOGI(TRANS_SDK, "Delete tdc channelId=%d.", channelId);
+    TRANS_LOGI(TRANS_SDK, "Delete tdc channelId=%{public}d.", channelId);
 
     TcpDirectChannelInfo *item = NULL;
     TcpDirectChannelInfo *nextNode = NULL;
@@ -195,12 +195,12 @@ static void TransTdcDelChannelInfo(int32_t channelId)
             SoftBusFree(item);
             item = NULL;
             (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
-            TRANS_LOGI(TRANS_SDK, "Delete tdc channelId=%d item success.", channelId);
+            TRANS_LOGI(TRANS_SDK, "Delete tdc item success. channelId=%{public}d", channelId);
             return;
         }
     }
 
-    TRANS_LOGE(TRANS_SDK, "Target channelId=%d item not exist.", channelId);
+    TRANS_LOGE(TRANS_SDK, "Target item not exist. channelId=%{public}d", channelId);
     (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
 }
 
@@ -215,25 +215,25 @@ int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo
     }
     TcpDirectChannelInfo *item = TransGetNewTcpChannel(channel);
     if (item == NULL) {
-        TRANS_LOGE(TRANS_SDK, "get new channelId=%d err.", channel->channelId);
+        TRANS_LOGE(TRANS_SDK, "get new tcp channel err. channelId=%{public}d", channel->channelId);
         return SOFTBUS_ERR;
     }
     if (TransAddDataBufNode(channel->channelId, channel->fd) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK,
-            "add channelId=%d fd=%d data buf node fail.", channel->channelId, channel->fd);
+            "add data buf node fail. channelId=%{public}d, fd=%{public}d", channel->channelId, channel->fd);
         SoftBusFree(item);
         return SOFTBUS_ERR;
     }
     if (TransTdcCreateListener(channel->fd) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "trans tdc fd=%d create listener failed.", channel->fd);
+        TRANS_LOGE(TRANS_SDK, "trans tdc create listener failed. fd=%{public}d", channel->fd);
         goto EXIT_ERR;
     }
     if (ConnSetTcpKeepAlive(channel->fd, HEART_TIME) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "ConnSetTcpKeepAlive failed, fd=%d.", channel->fd);
+        TRANS_LOGE(TRANS_SDK, "ConnSetTcpKeepAlive failed, fd=%{public}d.", channel->fd);
         goto EXIT_ERR;
     }
     if (ConnSetTcpUserTimeOut(channel->fd, USER_TIME_OUT) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "ConnSetTcpUserTimeOut failed, fd=%d.", channel->fd);
+        TRANS_LOGE(TRANS_SDK, "ConnSetTcpUserTimeOut failed, fd=%{public}d.", channel->fd);
         goto EXIT_ERR;
     }
     if (SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock) != SOFTBUS_OK) {
@@ -300,7 +300,7 @@ int32_t TransTdcGetSessionKey(int32_t channelId, char *key, unsigned int len)
     }
     TcpDirectChannelInfo channel;
     if (TransTdcGetInfoById(channelId, &channel) == NULL) {
-        TRANS_LOGE(TRANS_SDK, "get tdc channelId=%d info failed.", channelId);
+        TRANS_LOGE(TRANS_SDK, "get tdc info failed. channelId=%{public}d", channelId);
         return SOFTBUS_ERR;
     }
     if (memcpy_s(key, len, channel.detail.sessionKey, SESSION_KEY_LENGTH) != EOK) {
@@ -318,7 +318,7 @@ int32_t TransTdcGetHandle(int32_t channelId, int *handle)
     }
     TcpDirectChannelInfo channel;
     if (TransTdcGetInfoById(channelId, &channel) == NULL) {
-        TRANS_LOGE(TRANS_SDK, "get tdc channelId=%d info failed.", channelId);
+        TRANS_LOGE(TRANS_SDK, "get tdc info failed. channelId=%{public}d", channelId);
         return SOFTBUS_ERR;
     }
     *handle = channel.detail.fd;
@@ -329,7 +329,7 @@ int32_t TransDisableSessionListener(int32_t channelId)
 {
     TcpDirectChannelInfo channel;
     if (TransTdcGetInfoById(channelId, &channel) == NULL) {
-        TRANS_LOGE(TRANS_SDK, "get tdc channelId=%d info failed.", channelId);
+        TRANS_LOGE(TRANS_SDK, "get tdc info failed. channelId=%{public}d", channelId);
         return SOFTBUS_ERR;
     }
     if (channel.detail.fd < 0) {
