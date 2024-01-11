@@ -19,27 +19,27 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
-#include "connection_br_mock.h"
 #include "common_list.h"
+#include "connection_br_mock.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_conn_br_pending_packet.h"
 #include "softbus_conn_br_connection.c"
 #include "softbus_conn_br_manager.c"
+#include "softbus_conn_br_pending_packet.h"
+#include "softbus_conn_br_send_queue.h"
 #include "softbus_conn_interface.h"
 #include "softbus_conn_manager.h"
 #include "softbus_errcode.h"
-#include "softbus_feature_config.h"
-#include "softbus_conn_br_send_queue.h"
 #include "softbus_feature_config.c"
+#include "softbus_feature_config.h"
 
-#define SOFTBUS_CHARA_CONN_UUID        "00002B01-0000-1000-8000-00805F9B34FB"
-#define DATASIZE 256
+#define SOFTBUS_CHARA_CONN_UUID "00002B01-0000-1000-8000-00805F9B34FB"
+#define DATASIZE                256
 
 using namespace testing::ext;
 using namespace testing;
 
 namespace OHOS {
-int32_t GetRemoteDeviceInfo(int32_t clientFd, const BluetoothRemoteDevice* device)
+int32_t GetRemoteDeviceInfo(int32_t clientFd, const BluetoothRemoteDevice *device)
 {
     (void)device;
     return clientFd;
@@ -96,7 +96,7 @@ void MessageDelay(const SoftBusLooper *looper, SoftBusMessage *msg, uint64_t del
 }
 
 void RvMessageCustom(const SoftBusLooper *looper, const SoftBusHandler *handler,
-    int32_t (*customFunc)(const SoftBusMessage*, void*), void *args)
+    int32_t (*customFunc)(const SoftBusMessage *, void *), void *args)
 {
     (void)looper;
     (void)handler;
@@ -180,10 +180,8 @@ void reset(int32_t reason)
 
 class ConnectionBrConnectionTest : public testing::Test {
 public:
-    ConnectionBrConnectionTest()
-    {}
-    ~ConnectionBrConnectionTest()
-    {}
+    ConnectionBrConnectionTest() { }
+    ~ConnectionBrConnectionTest() { }
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp();
@@ -196,20 +194,17 @@ void ConnectionBrConnectionTest::SetUpTestCase(void)
     ConnServerInit();
 }
 
-void ConnectionBrConnectionTest::TearDownTestCase(void)
-{}
+void ConnectionBrConnectionTest::TearDownTestCase(void) { }
 
-void ConnectionBrConnectionTest::SetUp(void)
-{}
+void ConnectionBrConnectionTest::SetUp(void) { }
 
-void ConnectionBrConnectionTest::TearDown(void)
-{}
+void ConnectionBrConnectionTest::TearDown(void) { }
 
 HWTEST_F(ConnectionBrConnectionTest, testBrConnection001, TestSize.Level1)
 {
     int ret;
     ConnBrConnection connection;
-    const cJSON *json =nullptr;
+    const cJSON *json = nullptr;
     NiceMock<ConnectionBrInterfaceMock> brMock;
 
     EXPECT_CALL(brMock, GetJsonObjectSignedNumberItem).WillRepeatedly(Return(false));
@@ -438,14 +433,14 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection013, TestSize.Level1)
 
     val = MAX_BR_READ_BUFFER_CAPACITY + 1;
     g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len = 4;
-    memcpy_s((void*)(g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].val),
+    memcpy_s((void *)(g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].val),
         g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len, (void *)(&val), sizeof(int));
     ret = InitProperty();
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     val = MAX_BR_READ_BUFFER_CAPACITY;
     g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len = 4;
-    memcpy_s((void*)(g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].val),
+    memcpy_s((void *)(g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].val),
         g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len, (void *)(&val), sizeof(int));
     g_configItems[SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN].len = 0;
     ret = InitProperty();
@@ -453,22 +448,22 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection013, TestSize.Level1)
 
     val = MAX_BR_READ_BUFFER_CAPACITY;
     g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len = 4;
-    memcpy_s((void*)(g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].val),
+    memcpy_s((void *)(g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].val),
         g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len, (void *)(&val), sizeof(int));
     mtu = MAX_BR_MTU_SIZE + 1;
     g_configItems[SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN].len = 4;
-    memcpy_s((void*)(g_configItems[SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN].val),
+    memcpy_s((void *)(g_configItems[SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN].val),
         g_configItems[SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN].len, (void *)(&mtu), sizeof(int));
     ret = InitProperty();
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     val = MAX_BR_READ_BUFFER_CAPACITY;
     g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len = 4;
-    memcpy_s((void*)(g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].val),
+    memcpy_s((void *)(g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].val),
         g_configItems[SOFTBUS_INT_CONN_BR_MAX_DATA_LENGTH].len, (void *)(&val), sizeof(int));
     mtu = MAX_BR_MTU_SIZE;
     g_configItems[SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN].len = 4;
-    memcpy_s((void*)(g_configItems[SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN].val),
+    memcpy_s((void *)(g_configItems[SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN].val),
         g_configItems[SOFTBUS_INT_CONN_RFCOM_SEND_MAX_LEN].len, (void *)(&mtu), sizeof(int));
     ret = InitProperty();
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -489,8 +484,8 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager001, TestSize.Level1)
 HWTEST_F(ConnectionBrConnectionTest, testBrManager002, TestSize.Level1)
 {
     uint32_t pId = 0;
-    ConnBrConnection *connection = static_cast<ConnBrConnection*>(SoftBusMalloc(sizeof(ConnBrConnection)));
-    if(connection == nullptr) {
+    ConnBrConnection *connection = static_cast<ConnBrConnection *>(SoftBusMalloc(sizeof(ConnBrConnection)));
+    if (connection == nullptr) {
         return;
     }
     connection->connectionId = 1;
@@ -511,7 +506,6 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager003, TestSize.Level1)
     int32_t reason = 0;
     ConnBrRequest request;
 
-
     request.requestId = 0;
     request.requestId = 0;
     request.result.OnConnectFailed = OnConnectFailed;
@@ -519,7 +513,6 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager003, TestSize.Level1)
     ListInit(&device.requests);
     ListAdd(&device.requests, &request.node);
     NotifyDeviceConnectResult(&device, nullptr, isReuse, reason);
-
 
     (void)strcpy_s(device.addr, BT_MAC_LEN, "24:DA:33:6A:06:EC");
     ListInit(&device.requests);
@@ -619,7 +612,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager008, TestSize.Level1)
     ConnBrDevice *device;
     const char *anomizeAddress;
     ConnBrDevice conn;
-    ConnBrDevice  connBr;
+    ConnBrDevice connBr;
 
     device = (ConnBrDevice *)SoftBusCalloc(sizeof(*device));
     device->state = BR_DEVICE_STATE_INIT;
@@ -750,7 +743,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager013, TestSize.Level1)
     g_connectCallback.OnConnected = OnConnected;
     g_brManager.connecting = nullptr;
 
-    it = (ConnBrDevice *)SoftBusCalloc(sizeof(*it ));
+    it = (ConnBrDevice *)SoftBusCalloc(sizeof(*it));
     ListInit(&g_brManager.waitings);
     (void)strcpy_s(it->addr, BT_MAC_LEN, "abcde");
     ListTailInsert(&g_brManager.waitings, &it->node);
@@ -955,28 +948,26 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager022, TestSize.Level1)
 
 HWTEST_F(ConnectionBrConnectionTest, testBrManager023, TestSize.Level1)
 {
-    ConnBrConnection *connection = static_cast<ConnBrConnection*>(SoftBusMalloc(sizeof(ConnBrConnection)));
-    if(connection == nullptr) {
+    ConnBrConnection *connection = static_cast<ConnBrConnection *>(SoftBusMalloc(sizeof(ConnBrConnection)));
+    if (connection == nullptr) {
         return;
     }
     connection->connectionId = 0;
-    char data[DATASIZE] = {
-        "{\
+    char data[DATASIZE] = { "{\
             \"ESSION_KEY\": \"sdadad\",\
             \"ENCRYPT\": 30,\
             \"MY_HANDLE_ID\": 22,\
             \"PEER_HANDLE_ID\": 25,\
-        }"
-    };
+        }" };
     NiceMock<ConnectionBrInterfaceMock> brMock;
 
     ReceivedControlData(connection, NULL, 0);
 
     EXPECT_CALL(brMock, GetJsonObjectNumberItem).WillRepeatedly(Return(false));
-    ReceivedControlData(connection, (uint8_t*)data, DATASIZE);
+    ReceivedControlData(connection, (uint8_t *)data, DATASIZE);
 
     EXPECT_CALL(brMock, GetJsonObjectNumberItem).WillRepeatedly(Return(true));
-    ReceivedControlData(connection, (uint8_t*)data, DATASIZE);
+    ReceivedControlData(connection, (uint8_t *)data, DATASIZE);
     SoftBusFree(connection);
 }
 
@@ -1338,4 +1329,4 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager039, TestSize.Level1)
     state = SOFTBUS_BR_STATE_TURN_OFF;
     OnBtStateChanged(listenerId, state);
 }
-}
+} // namespace OHOS
