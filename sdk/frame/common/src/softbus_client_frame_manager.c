@@ -163,13 +163,13 @@ static int32_t ConnClientInit(void)
 {
     int32_t ret = ConnInitSockets();
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_EVENT, "ConnInitSockets failed!ret=%{public}d", ret);
+        COMM_LOGE(COMM_EVENT, "ConnInitSockets failed! ret=%{public}d", ret);
         return ret;
     }
 
     ret = InitBaseListener();
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_EVENT, "InitBaseListener failed!ret=%{public}d", ret);
+        COMM_LOGE(COMM_EVENT, "InitBaseListener failed! ret=%{public}d", ret);
         return ret;
     }
     COMM_LOGD(COMM_EVENT, "init conn client success");

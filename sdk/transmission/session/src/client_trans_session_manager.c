@@ -1545,7 +1545,7 @@ static SessionInfo *CreateNewSocketSession(const SessionParam *param)
         strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, param->peerSessionName) != EOK) {
         char *anonySessionName = NULL;
         Anonymize(param->peerSessionName, &anonySessionName);
-        TRANS_LOGI(TRANS_SDK, "strcpy peerName=%s failed, peerNameLen=%d",
+        TRANS_LOGI(TRANS_SDK, "strcpy peerName failed, peerName=%{public}s, peerNameLen=%{public}zu",
             anonySessionName, strlen(param->peerSessionName));
         AnonymizeFree(anonySessionName);
         SoftBusFree(session);
@@ -1556,7 +1556,7 @@ static SessionInfo *CreateNewSocketSession(const SessionParam *param)
         strcpy_s(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX, param->peerDeviceId) != EOK) {
         char *anonyNetworkId = NULL;
         Anonymize(param->peerDeviceId, &anonyNetworkId);
-        TRANS_LOGI(TRANS_SDK, "strcpy peerDeviceId=%s failed, peerDeviceIdLen=%d",
+        TRANS_LOGI(TRANS_SDK, "strcpy peerDeviceId failed, peerDeviceId=%{public}s, peerDeviceIdLen=%{public}zu",
             anonyNetworkId, strlen(param->peerDeviceId));
         AnonymizeFree(anonyNetworkId);
         SoftBusFree(session);
@@ -1695,9 +1695,9 @@ static int32_t CheckBindSocketInfo(const SessionInfo *session)
         char *anonyNetworkId = NULL;
         Anonymize(session->info.peerSessionName, &anonySessionName);
         Anonymize(session->info.peerDeviceId, &anonyNetworkId);
-        TRANS_LOGI(TRANS_SDK, "invalid peerName=%s peerNameLen=%d or peerNetworkId=%s, peerNetworkIdLen=%d",
-            anonySessionName, strlen(session->info.peerSessionName),
-            anonyNetworkId, strlen(session->info.peerDeviceId));
+        TRANS_LOGI(TRANS_SDK, "invalid peerName=%{public}s, peerNameLen=%{public}zu, peerNetworkId=%{public}s, "
+                              "peerNetworkIdLen=%{public}zu", anonySessionName,
+            strlen(session->info.peerSessionName), anonyNetworkId, strlen(session->info.peerDeviceId));
         AnonymizeFree(anonyNetworkId);
         AnonymizeFree(anonySessionName);
         return SOFTBUS_INVALID_PARAM;
