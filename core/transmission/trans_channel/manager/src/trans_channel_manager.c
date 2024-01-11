@@ -437,7 +437,8 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         .callerPkg = appInfo->myData.pkgName,
         .socketName = appInfo->myData.sessionName,
         .dataType = appInfo->businessType,
-        .peerNetworkId = appInfo->peerNetWorkId
+        .peerNetworkId = appInfo->peerNetWorkId,
+        .result = EVENT_STAGE_RESULT_OK
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_START, extra);
     errCode = TransGetLaneInfo(param, &connInfo, &laneId);
@@ -458,6 +459,8 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
             SOFTBUS_EVT_OPEN_SESSION_FAIL, GetSoftbusRecordTimeMillis() - timeStart);
         goto EXIT_ERR;
     }
+    appInfo->connectType = connOpt.type;
+    extra.linkType = connOpt.type;
     FillAppInfo(appInfo, param, transInfo, &connInfo);
     TransOpenChannelSetModule(transInfo->channelType, &connOpt);
     TRANS_LOGI(TRANS_CTRL, "laneId=%u get channelType=%u.", laneId, transInfo->channelType);
@@ -566,34 +569,52 @@ EXIT_ERR:
 int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connOpt,
     const char *reqId)
 {
+    TransEventExtra extra = {
+        .calleePkg = NULL,
+        .callerPkg = NULL,
+        .socketName = NULL,
+        .peerNetworkId = NULL,
+        .channelType = CHANNEL_TYPE_AUTH,
+        .result = EVENT_STAGE_RESULT_OK
+    };
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_START, extra);
     int32_t channelId = INVALID_CHANNEL_ID;
     if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) || connOpt == NULL) {
-        return channelId;
+        goto EXIT_ERR;
     }
-
+    extra.socketName = sessionName;
+    extra.linkType = connOpt->type;
     if (connOpt->type == CONNECT_TCP) {
         if (TransOpenAuthMsgChannel(sessionName, connOpt, &channelId, reqId) != SOFTBUS_OK) {
-            return INVALID_CHANNEL_ID;
+            goto EXIT_ERR;
         }
     } else if (connOpt->type == CONNECT_BR || connOpt->type == CONNECT_BLE) {
         AppInfo *appInfo = GetAuthAppInfo(sessionName);
         if (appInfo == NULL) {
             TRANS_LOGE(TRANS_CTRL, "GetAuthAppInfo failed");
-            return INVALID_CHANNEL_ID;
+            goto EXIT_ERR;
         }
+        appInfo->connectType = connOpt->type;
         if (strcpy_s(appInfo->reqId, REQ_ID_SIZE_MAX, reqId) != EOK) {
             TRANS_LOGE(TRANS_CTRL, "strcpy_s reqId failed");
             SoftBusFree(appInfo);
-            return INVALID_CHANNEL_ID;
+            goto EXIT_ERR;
         }
         if (TransProxyOpenProxyChannel(appInfo, connOpt, &channelId) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "proxy channel err");
             SoftBusFree(appInfo);
-            return INVALID_CHANNEL_ID;
+            goto EXIT_ERR;
         }
         SoftBusFree(appInfo);
+    } else {
+        goto EXIT_ERR;
     }
     return channelId;
+EXIT_ERR:
+    extra.result = EVENT_STAGE_RESULT_FAILED;
+    extra.errcode = SOFTBUS_ERR;
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
+    return INVALID_CHANNEL_ID;
 }
 
 static uint32_t MergeStatsInterval(const uint32_t *data, uint32_t left, uint32_t right)

@@ -414,6 +414,7 @@ static int32_t NotifyChannelOpened(int32_t channelId)
     info.peerDeviceId = buf;
     info.timeStart = conn.appInfo.timeStart;
     info.linkType = conn.appInfo.linkType;
+    info.connectType = conn.appInfo.connectType;
     char pkgName[PKG_NAME_SIZE_MAX] = {0};
     if (TransTdcGetPkgName(conn.appInfo.myData.sessionName, pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get pkg name fail.");
@@ -456,14 +457,18 @@ int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)
         .calleePkg = NULL,
         .callerPkg = conn.appInfo.myData.pkgName,
         .channelId = conn.appInfo.myData.channelId,
-        .peerNetworkId = conn.appInfo.myData.deviceId,
+        .peerNetworkId = conn.appInfo.peerNetWorkId,
         .socketName = conn.appInfo.myData.sessionName,
-        .linkType = conn.appInfo.linkType,
+        .linkType = conn.appInfo.connectType,
         .costTime = timediff,
         .errcode = errCode,
         .result = EVENT_STAGE_RESULT_FAILED
     };
-    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
+    if (!conn.serverSide) {
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
+    } else {
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_OPEN_CHANNEL_END, extra);
+    }
     TransAlarmExtra extraAlarm = {
         .conflictName = NULL,
         .conflictedName = NULL,
@@ -808,6 +813,17 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
         return SOFTBUS_INVALID_PARAM;
     }
 
+    TransEventExtra extra = {
+        .socketName = conn->appInfo.myData.sessionName,
+        .peerNetworkId = NULL,
+        .calleePkg = NULL,
+        .callerPkg = NULL,
+        .channelId = channelId,
+        .peerChannelId = conn->appInfo.peerData.channelId,
+        .socketFd = conn->appInfo.fd,
+        .result = EVENT_STAGE_RESULT_OK
+    };
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_START, extra);
     if ((flags & FLAG_AUTH_META) != 0 && !IsMetaSession(conn->appInfo.myData.sessionName)) {
         char *tmpName = NULL;
         Anonymize(conn->appInfo.myData.sessionName, &tmpName);
@@ -869,6 +885,9 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
         (void)NotifyChannelClosed(&conn->appInfo, channelId);
         SoftBusFree(conn);
         return SOFTBUS_ERR;
+    } else {
+        extra.result = EVENT_STAGE_RESULT_OK;
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
     }
 
     if (conn->appInfo.routeType == WIFI_P2P) {
