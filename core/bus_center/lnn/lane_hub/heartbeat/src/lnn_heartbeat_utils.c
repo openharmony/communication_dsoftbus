@@ -103,7 +103,7 @@ static bool HbHasActiveBrConnection(const char *networkId)
         return false;
     }
     ret = CheckActiveConnection(&option);
-    LNN_LOGD(LNN_HEART_BEAT, "HB has active bt connection=%s", ret ? "true" : "false");
+    LNN_LOGD(LNN_HEART_BEAT, "HB has active bt connection=%{public}s", ret ? "true" : "false");
     return ret;
 }
 
@@ -130,7 +130,7 @@ static bool HbHasActiveBleConnection(const char *networkId)
         return false;
     }
     ret = CheckActiveConnection(&option);
-    LNN_LOGD(LNN_HEART_BEAT, "HB has active ble connection=%s", ret ? "true" : "false");
+    LNN_LOGD(LNN_HEART_BEAT, "HB has active ble connection=%{public}s", ret ? "true" : "false");
     return ret;
 }
 
@@ -143,7 +143,7 @@ static bool HbHasActiveP2pConnection(const char *networkId)
         return false;
     }
     bool isOnline = GetWifiDirectManager()->isDeviceOnline(peerMac);
-    LNN_LOGD(LNN_HEART_BEAT, "HB has active p2p connection=%s", isOnline ? "true" : "false");
+    LNN_LOGD(LNN_HEART_BEAT, "HB has active p2p connection=%{public}s", isOnline ? "true" : "false");
     return isOnline;
 }
 
@@ -185,7 +185,9 @@ bool LnnHasActiveConnection(const char *networkId, ConnectionAddrType addrType)
             hasHmlConn = HbHasActiveHmlConnection(networkId);
             char *anonyNetworkId = NULL;
             Anonymize(networkId, &anonyNetworkId);
-            LNN_LOGI(LNN_HEART_BEAT, "HB networkId=%s check active connection BR|BLE|P2P|HML=%d|%d|%d|%d",
+            LNN_LOGI(LNN_HEART_BEAT,
+                "HB check active connection networkId=%{public}s, "
+                "BR=%{public}d, BLE=%{public}d, P2P=%{public}d, HML=%{public}d",
                 anonyNetworkId, hasBrConn, hasBleConn, hasP2pConn, hasHmlConn);
             AnonymizeFree(anonyNetworkId);
             return hasBrConn || hasBleConn || hasP2pConn || hasHmlConn;
@@ -222,7 +224,7 @@ static bool VisitCheckSupportedHbType(LnnHeartbeatType *typeSet, LnnHeartbeatTyp
     LnnHeartbeatType *dstType = (LnnHeartbeatType *)data;
 
     if ((eachType & *dstType) == 0) {
-        LNN_LOGE(LNN_HEART_BEAT, "HB not support hbType=%d completely", *dstType);
+        LNN_LOGE(LNN_HEART_BEAT, "HB not support hbType=%{public}d completely", *dstType);
         return false;
     }
     return true;
@@ -248,12 +250,12 @@ int32_t LnnGenerateHexStringHash(const unsigned char *str, char *hashStr, uint32
     }
     ret = SoftBusGenerateStrHash(str, strlen((char *)str), hashResult);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "HB generate str hash fail, ret=%d", ret);
+        LNN_LOGE(LNN_HEART_BEAT, "HB generate str hash fail, ret=%{public}d", ret);
         return ret;
     }
     ret = ConvertBytesToHexString(hashStr, len + 1, hashResult, len / HEXIFY_UNIT_LEN);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "HB convert bytes to str hash fail ret=%d", ret);
+        LNN_LOGE(LNN_HEART_BEAT, "HB convert bytes to str hash fail, ret=%{public}d", ret);
         return ret;
     }
     return SOFTBUS_OK;
@@ -275,7 +277,7 @@ int32_t LnnGetShortAccountHash(uint8_t *accountHash, uint32_t len)
         LNN_LOGI(LNN_HEART_BEAT, "HB get accountHash memcpy_s fail");
         return SOFTBUS_MEM_ERR;
     }
-    LNN_LOGD(LNN_HEART_BEAT, "HB get accountHash [%02x %02x]", accountHash[0], accountHash[1]);
+    LNN_LOGD(LNN_HEART_BEAT, "HB get accountHash=[%{public}02x, %{public}02x]", accountHash[0], accountHash[1]);
     return SOFTBUS_OK;
 }
 
@@ -308,7 +310,7 @@ int32_t LnnGenerateBtMacHash(const char *btMac, int32_t brMacLen, char *brMacHas
     }
     char *anonyMac = NULL;
     Anonymize(brMacUpper, &anonyMac);
-    LNN_LOGI(LNN_HEART_BEAT, "upper BrMac=**:**:**:**:%s", anonyMac);
+    LNN_LOGI(LNN_HEART_BEAT, "upper BrMac=**:**:**:**:%{public}s", anonyMac);
     AnonymizeFree(anonyMac);
     if (SoftBusGenerateStrHash((const unsigned char *)brMacUpper, strlen(brMacUpper), (unsigned char *)hash)) {
         LNN_LOGE(LNN_HEART_BEAT, "Generate brMac hash fail");
@@ -325,7 +327,7 @@ int32_t LnnGenerateBtMacHash(const char *btMac, int32_t brMacLen, char *brMacHas
     }
     char *anonyUdid = NULL;
     Anonymize(brMacHash, &anonyUdid);
-    LNN_LOGI(LNN_HEART_BEAT, "brmacHash=%s", anonyUdid);
+    LNN_LOGI(LNN_HEART_BEAT, "brmacHash=%{public}s", anonyUdid);
     AnonymizeFree(anonyUdid);
     return SOFTBUS_OK;
 }
@@ -364,7 +366,8 @@ void LnnDumpLocalBasicInfo(void)
     (void)LnnGetLocalDeviceInfo(&localInfo);
     Anonymize(udidShortHash, &anonyUdidHash);
     Anonymize(localInfo.networkId, &anonyNetworkId);
-    LNN_LOGW(LNN_HEART_BEAT, "local DeviceInfo [udidShortHash=%s, networkId=%s", anonyUdidHash, anonyNetworkId);
+    LNN_LOGW(LNN_HEART_BEAT, "local DeviceInfo udidShortHash=%{public}s, networkId=%{public}s",
+        anonyUdidHash, anonyNetworkId);
     AnonymizeFree(anonyUdidHash);
     AnonymizeFree(anonyNetworkId);
     const char *devTypeStr = LnnConvertIdToDeviceType(localInfo.deviceTypeId);
@@ -375,8 +378,9 @@ void LnnDumpLocalBasicInfo(void)
     Anonymize(localIp, &anonyIp);
     Anonymize(localBtMac, &anonyBtMac);
     Anonymize(localP2PMac, &anonyP2pMac);
-    LNN_LOGI(LNN_HEART_BEAT, "devType=%s, deviceTypeId=%hu, deviceName=%s, ip=%s, brMac=%s, p2pMac=%s, "
-        "onlineNodeNum=%d]", devTypeStr, localInfo.deviceTypeId, localInfo.deviceName,
+    LNN_LOGI(LNN_HEART_BEAT, "devType=%{public}s, deviceTypeId=%{public}hu, deviceName=%{public}s, ip=%{public}s, "
+                             "brMac=%{public}s, p2pMac=%{public}s, onlineNodeNum=%{public}d",
+        devTypeStr, localInfo.deviceTypeId, localInfo.deviceName,
         anonyIp, anonyBtMac, anonyP2pMac, onlineNodeNum);
     AnonymizeFree(anonyIp);
     AnonymizeFree(anonyBtMac);

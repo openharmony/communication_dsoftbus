@@ -55,7 +55,7 @@ static inline bool InitString(char **str, size_t maxLen)
 static inline bool CopyString(char *destName, const char *srcName, size_t maxLen)
 {
     if (strcpy_s(destName, maxLen, srcName) != EOK) {
-        COMM_LOGE(COMM_DFX, "strcpy_s fail, srcName=%s, maxLen=%zu", srcName, maxLen);
+        COMM_LOGE(COMM_DFX, "strcpy_s fail, srcName=%{public}s, maxLen=%{public}zu", srcName, maxLen);
         return false;
     }
     return true;

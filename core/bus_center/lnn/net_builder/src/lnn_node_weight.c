@@ -71,7 +71,7 @@ int32_t LnnGetLocalWeight(void)
         default:
             break;
     }
-    LNN_LOGD(LNN_BUILDER, "generate local weight=%d", weight);
+    LNN_LOGD(LNN_BUILDER, "generate local weight=%{public}d", weight);
     isGenWeight = true;
     return weight;
 }

@@ -139,14 +139,14 @@ static int32_t ExecuteSql(DbContext *ctx, const char *sql, uint32_t len, BindPar
     }
     rc = sqlite3_prepare_v2(ctx->db, sql, len, &ctx->stmt, NULL);
     if (rc != SQLITE_OK || ctx->stmt == NULL) {
-        COMM_LOGE(COMM_UTILS, "sqlite3_prepare_v2 failed, %s", sqlite3_errmsg(ctx->db));
+        COMM_LOGE(COMM_UTILS, "sqlite3_prepare_v2 failed, errmsg=%{public}s", sqlite3_errmsg(ctx->db));
         return sqlite3_errcode(ctx->db);
     }
     paraNum = sqlite3_bind_parameter_count(ctx->stmt);
     if (paraNum <= 0) {
         rc = sqlite3_step(ctx->stmt);
         if (rc != SQLITE_ROW && rc != SQLITE_DONE) {
-            COMM_LOGE(COMM_UTILS, "sqlite3_step <= 0 failed, %s", sqlite3_errmsg(ctx->db));
+            COMM_LOGE(COMM_UTILS, "sqlite3_step <= 0 failed, errmsg=%{public}s", sqlite3_errmsg(ctx->db));
         }
         return rc;
     }
@@ -165,7 +165,7 @@ static int32_t ExecuteSql(DbContext *ctx, const char *sql, uint32_t len, BindPar
     }
     rc = sqlite3_step(ctx->stmt);
     if (rc != SQLITE_ROW && rc != SQLITE_DONE) {
-        COMM_LOGE(COMM_UTILS, "sqlite3_step > 0 failed, %s", sqlite3_errmsg(ctx->db));
+        COMM_LOGE(COMM_UTILS, "sqlite3_step > 0 failed, errmsg=%{public}s", sqlite3_errmsg(ctx->db));
     }
     return rc;
 }
@@ -181,7 +181,7 @@ static int32_t QueryData(DbContext *ctx, const char *sql, uint32_t len, BindPara
     } else {
         ctx->state |= DB_STATE_QUERYING;
     }
-    COMM_LOGD(COMM_UTILS, "QueryData done, state: %d", ctx->state);
+    COMM_LOGD(COMM_UTILS, "QueryData done, state=%{public}d", ctx->state);
     return rc;
 }
 
@@ -195,7 +195,7 @@ static int32_t QueryDataNext(DbContext *ctx)
         (void)sqlite3_finalize(ctx->stmt);
         ctx->stmt = NULL;
     }
-    COMM_LOGD(COMM_UTILS, "QueryDataNext done, state: %d", ctx->state);
+    COMM_LOGD(COMM_UTILS, "QueryDataNext done, state=%{public}d", ctx->state);
     return rc;
 }
 
@@ -237,7 +237,7 @@ int32_t OpenDatabase(DbContext **ctx)
     rc = sqlite3_open_v2(DATABASE_NAME, &sqlite, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE |
         SQLITE_OPEN_NOMUTEX, NULL);
     if (rc != SQLITE_OK || sqlite == NULL) {
-        COMM_LOGE(COMM_UTILS, "sqlite3_open_v2 fail: %s", sqlite3_errmsg(sqlite));
+        COMM_LOGE(COMM_UTILS, "sqlite3_open_v2 fail: errmsg=%{public}s", sqlite3_errmsg(sqlite));
         (void)sqlite3_close_v2(sqlite);
         return SOFTBUS_ERR;
     }
@@ -279,7 +279,7 @@ int32_t CreateTable(DbContext *ctx, TableNameID id)
     }
     rc = sqlite3_exec(ctx->db, sql, NULL, NULL, &errMsg);
     if (rc != SQLITE_OK && errMsg != NULL) {
-        COMM_LOGE(COMM_UTILS, "sqlite_exec fail: %s", errMsg);
+        COMM_LOGE(COMM_UTILS, "sqlite_exec fail: errmsg=%{public}s", errMsg);
         sqlite3_free(errMsg);
     }
     return rc == SQLITE_OK ? SOFTBUS_OK : SOFTBUS_ERR;
@@ -475,7 +475,7 @@ int32_t OpenTransaction(DbContext *ctx)
         return SOFTBUS_INVALID_PARAM;
     }
     if ((ctx->state & DB_STATE_TRANSACTION) != 0) {
-        COMM_LOGE(COMM_UTILS, "already open the transaction: %d", ctx->state);
+        COMM_LOGE(COMM_UTILS, "already open the transaction: state=%{public}d", ctx->state);
         return SOFTBUS_OK;
     }
     rc = ExecuteSql(ctx, SQL_BEGIN_TRANSACTION, strlen(SQL_BEGIN_TRANSACTION), NULL, NULL);
@@ -501,7 +501,7 @@ int32_t CloseTransaction(DbContext *ctx, CloseTransactionType type)
         return SOFTBUS_INVALID_PARAM;
     }
     if ((ctx->state & DB_STATE_TRANSACTION) == 0) {
-        COMM_LOGE(COMM_UTILS, "the transaction already closed: %d", ctx->state);
+        COMM_LOGE(COMM_UTILS, "the transaction already closed: state=%{public}d", ctx->state);
         return SOFTBUS_OK;
     }
     if (type == CLOSE_TRANS_ROLLBACK) {
@@ -530,7 +530,7 @@ int32_t EncryptedDb(DbContext *ctx, const uint8_t *password, uint32_t len)
     }
     rc = sqlite3_key(ctx->db, password, len);
     if (rc != SQLITE_OK) {
-        COMM_LOGE(COMM_UTILS, "config key failed: %s", sqlite3_errmsg(ctx->db));
+        COMM_LOGE(COMM_UTILS, "config key failed: errmsg=%{public}s", sqlite3_errmsg(ctx->db));
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -546,7 +546,7 @@ int32_t UpdateDbPassword(DbContext *ctx, const uint8_t *password, uint32_t len)
     }
     rc = sqlite3_rekey(ctx->db, password, len);
     if (rc != SQLITE_OK) {
-        COMM_LOGE(COMM_UTILS, "update key failed: %s", sqlite3_errmsg(ctx->db));
+        COMM_LOGE(COMM_UTILS, "update key failed: errmsg=%{public}s", sqlite3_errmsg(ctx->db));
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -562,7 +562,7 @@ int32_t BindParaInt(DbContext *ctx, int32_t idx, int32_t value)
     }
     rc = sqlite3_bind_int(ctx->stmt, idx, value);
     if (rc != SQLITE_OK) {
-        COMM_LOGE(COMM_UTILS, "sqlite3_bind_int failed: %s", sqlite3_errmsg(ctx->db));
+        COMM_LOGE(COMM_UTILS, "sqlite3_bind_int failed: errmsg=%{public}s", sqlite3_errmsg(ctx->db));
     }
     return rc;
 }
@@ -577,7 +577,7 @@ int32_t BindParaInt64(DbContext *ctx, int32_t idx, int64_t value)
     }
     rc = sqlite3_bind_int64(ctx->stmt, idx, value);
     if (rc != SQLITE_OK) {
-        COMM_LOGE(COMM_UTILS, "sqlite3_bind_int64 failed: %s", sqlite3_errmsg(ctx->db));
+        COMM_LOGE(COMM_UTILS, "sqlite3_bind_int64 failed: errmsg=%{public}s", sqlite3_errmsg(ctx->db));
     }
     return rc;
 }
@@ -592,7 +592,7 @@ int32_t BindParaText(DbContext *ctx, int32_t idx, const char *value, uint32_t va
     }
     rc = sqlite3_bind_text(ctx->stmt, idx, value, valueLen, SQLITE_STATIC);
     if (rc != SQLITE_OK) {
-        COMM_LOGE(COMM_UTILS, "sqlite3_bind_text failed: %s", sqlite3_errmsg(ctx->db));
+        COMM_LOGE(COMM_UTILS, "sqlite3_bind_text failed: errmsg=%{public}s", sqlite3_errmsg(ctx->db));
     }
     return rc;
 }
@@ -607,7 +607,7 @@ int32_t BindParaDouble(DbContext *ctx, int32_t idx, double value)
     }
     rc = sqlite3_bind_double(ctx->stmt, idx, value);
     if (rc != SQLITE_OK) {
-        COMM_LOGE(COMM_UTILS, "sqlite3_bind_double failed: %s", sqlite3_errmsg(ctx->db));
+        COMM_LOGE(COMM_UTILS, "sqlite3_bind_double failed: errmsg=%{public}s", sqlite3_errmsg(ctx->db));
     }
     return rc;
 }
@@ -619,7 +619,7 @@ int32_t GetQueryResultColCount(DbContext *ctx, int32_t *count)
         return SOFTBUS_INVALID_PARAM;
     }
     if ((ctx->state & DB_STATE_QUERYING) == 0) {
-        COMM_LOGE(COMM_UTILS, "the query already closed: %d", ctx->state);
+        COMM_LOGE(COMM_UTILS, "the query already closed: state=%{public}d", ctx->state);
         return SOFTBUS_ERR;
     }
     *count = sqlite3_column_count(ctx->stmt);
@@ -635,7 +635,7 @@ int32_t GetQueryResultColText(DbContext *ctx, int32_t iCol, char *text, uint32_t
         return SOFTBUS_INVALID_PARAM;
     }
     if ((ctx->state & DB_STATE_QUERYING) == 0) {
-        COMM_LOGE(COMM_UTILS, "the query already closed: %d", ctx->state);
+        COMM_LOGE(COMM_UTILS, "the query already closed: state=%{public}d", ctx->state);
         return SOFTBUS_ERR;
     }
     if (sqlite3_column_type(ctx->stmt, iCol) != SQLITE_TEXT) {
@@ -657,7 +657,7 @@ int32_t GetQueryResultColInt(DbContext *ctx, int32_t iCol, int32_t *value)
         return SOFTBUS_INVALID_PARAM;
     }
     if ((ctx->state & DB_STATE_QUERYING) == 0) {
-        COMM_LOGE(COMM_UTILS, "the query already closed: %d", ctx->state);
+        COMM_LOGE(COMM_UTILS, "the query already closed: state=%{public}d", ctx->state);
         return SOFTBUS_ERR;
     }
     if (sqlite3_column_type(ctx->stmt, iCol) != SQLITE_INTEGER) {
@@ -675,7 +675,7 @@ int32_t GetQueryResultColInt64(DbContext *ctx, int32_t iCol, int64_t *value)
         return SOFTBUS_INVALID_PARAM;
     }
     if ((ctx->state & DB_STATE_QUERYING) == 0) {
-        COMM_LOGE(COMM_UTILS, "the query already closed: %d", ctx->state);
+        COMM_LOGE(COMM_UTILS, "the query already closed: state=%{public}d", ctx->state);
         return SOFTBUS_ERR;
     }
     if (sqlite3_column_type(ctx->stmt, iCol) != SQLITE_INTEGER) {
@@ -693,7 +693,7 @@ int32_t GetQueryResultColDouble(DbContext *ctx, int32_t iCol, double *value)
         return SOFTBUS_INVALID_PARAM;
     }
     if ((ctx->state & DB_STATE_QUERYING) == 0) {
-        COMM_LOGE(COMM_UTILS, "the query already closed: %d", ctx->state);
+        COMM_LOGE(COMM_UTILS, "the query already closed: state=%{public}d", ctx->state);
         return SOFTBUS_ERR;
     }
     if (sqlite3_column_type(ctx->stmt, iCol) != SQLITE_FLOAT) {

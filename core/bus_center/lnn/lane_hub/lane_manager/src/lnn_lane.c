@@ -110,7 +110,7 @@ static void DestroyLaneId(uint32_t laneId)
     if (Lock() != SOFTBUS_OK) {
         return;
     }
-    LNN_LOGD(LNN_LANE, "laneId=%u", laneId);
+    LNN_LOGD(LNN_LANE, "laneId=%{public}u", laneId);
     uint32_t idIndex = randomId - 1;
     g_laneIdBitmap[idIndex >> ID_SHIFT_STEP] &= (~(IS_USED << (idIndex & ID_CALC_MASK)));
     Unlock();
@@ -256,7 +256,7 @@ static bool RequestInfoCheck(const LaneRequestOption *request, const ILaneListen
         return false;
     }
     if ((request->type >= LANE_TYPE_BUTT) || (request->type < 0)) {
-        LNN_LOGE(LNN_LANE, "laneType[%d] is invalid", request->type);
+        LNN_LOGE(LNN_LANE, "laneType is invalid. type=%{public}d", request->type);
         return false;
     }
     return true;
@@ -281,21 +281,21 @@ static int32_t LnnRequestLaneByQos(uint32_t laneId, const LaneRequestOption *req
         return SOFTBUS_ERR;
     }
     if (g_laneObject[request->type] == NULL) {
-        LNN_LOGE(LNN_LANE, "laneType=%d is not supported", request->type);
+        LNN_LOGE(LNN_LANE, "laneType is not supported. laneType=%{public}d", request->type);
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_LANE, "laneRequestByQos, laneId=%u, laneType=%d, transType=%d, "
-        "minBW=%u, maxLaneLatency=%u, minLaneLatency=%u",
+    LNN_LOGI(LNN_LANE, "laneRequestByQos, laneId=%{public}u, laneType=%{public}d, transType=%{public}d, "
+        "minBW=%{public}u, maxLaneLatency=%{public}u, minLaneLatency=%{public}u",
         laneId, request->type, request->requestInfo.trans.transType,
         request->requestInfo.trans.qosRequire.minBW,
         request->requestInfo.trans.qosRequire.maxLaneLatency,
         request->requestInfo.trans.qosRequire.minLaneLatency);
     int32_t result = g_laneObject[request->type]->allocLaneByQos(laneId, request, listener);
     if (result != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "alloc lane by qos fail, laneId=%u, result=%d", laneId, result);
+        LNN_LOGE(LNN_LANE, "alloc lane by qos fail, laneId=%{public}u, result=%{public}d", laneId, result);
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_LANE, "request lane by qos success, laneId=%u", laneId);
+    LNN_LOGI(LNN_LANE, "request lane by qos success, laneId=%{public}u", laneId);
     return SOFTBUS_OK;
 }
 
@@ -319,18 +319,18 @@ int32_t LnnRequestLane(uint32_t laneId, const LaneRequestOption *request,
         return SOFTBUS_ERR;
     }
     if (g_laneObject[request->type] == NULL) {
-        LNN_LOGE(LNN_LANE, "lane type[%d] is not supported", request->type);
+        LNN_LOGE(LNN_LANE, "lane type is not supported. type=%{public}d", request->type);
         return SOFTBUS_ERR;
     }
     int32_t result;
-    LNN_LOGI(LNN_LANE, "laneRequest, laneId=%u, lane type %d, trans type is %d",
+    LNN_LOGI(LNN_LANE, "laneRequest, laneId=%{public}u, laneType=%{public}d, transType=%{public}d",
         laneId, request->type, request->requestInfo.trans.transType);
     result = g_laneObject[request->type]->AllocLane(laneId, request, listener);
     if (result != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "alloc lane fail, result:%d", result);
+        LNN_LOGE(LNN_LANE, "alloc lane fail, result=%{public}d", result);
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_LANE, "request lane success, laneId=%u", laneId);
+    LNN_LOGI(LNN_LANE, "request lane success, laneId=%{public}u", laneId);
     return SOFTBUS_OK;
 }
 
@@ -344,10 +344,10 @@ int32_t LnnFreeLane(uint32_t laneId)
     if (g_laneObject[laneType] == NULL) {
         return SOFTBUS_ERR;
     }
-    LNN_LOGD(LNN_LANE, "free lane enter, laneId=%u", laneId);
+    LNN_LOGD(LNN_LANE, "free lane enter, laneId=%{public}u", laneId);
     int32_t result = g_laneObject[laneType]->FreeLane(laneId);
     if (result != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "freeLane fail, result:%d", result);
+        LNN_LOGE(LNN_LANE, "freeLane fail, result=%{public}d", result);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -363,7 +363,7 @@ int32_t LnnQueryLaneResource(const LaneQueryInfo *queryInfo, const QosInfo *qosI
     if (!LnnGetOnlineStateById(queryInfo->networkId, CATEGORY_NETWORK_ID)) {
         char *anonyNetworkId = NULL;
         Anonymize(queryInfo->networkId, &anonyNetworkId);
-        LNN_LOGE(LNN_LANE, "device not online, cancel query peerNetworkId:%s", anonyNetworkId);
+        LNN_LOGE(LNN_LANE, "device not online, cancel query peerNetworkId=%{public}s", anonyNetworkId);
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_NETWORK_NODE_OFFLINE;
     }

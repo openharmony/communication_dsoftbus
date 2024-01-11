@@ -92,7 +92,7 @@ int32_t ClientOnJoinLNNResult(const char *pkgName, void *addr, uint32_t addrType
     option.flags = TF_OP_ASYNC;
     int32_t ans = SendRequest(svc, CLIENT_ON_JOIN_RESULT, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "SendRequest failed=%d", ans);
+        LNN_LOGE(LNN_EVENT, "SendRequest failed, ans=%{public}d", ans);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -120,7 +120,7 @@ int32_t ClientOnLeaveLNNResult(const char *pkgName, const char *networkId, int r
     option.flags = TF_OP_ASYNC;
     int32_t ans = SendRequest(svc, CLIENT_ON_LEAVE_RESULT, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "SendRequest fail=%d", ans);
+        LNN_LOGE(LNN_EVENT, "SendRequest failed, ans=%{public}d", ans);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -165,7 +165,7 @@ int32_t ClinetOnNodeOnlineStateChanged(bool isOnline, void *info, uint32_t infoT
     for (i = 0; i < num; i++) {
         int32_t ans = SendRequest(svc[i], CLIENT_ON_NODE_ONLINE_STATE_CHANGED, &io, NULL, option, NULL);
         if (ans != SOFTBUS_OK) {
-            LNN_LOGE(LNN_EVENT, "SendRequest failed=%d", ans);
+            LNN_LOGE(LNN_EVENT, "SendRequest failed, ans=%{public}d", ans);
             SoftBusFree(svc);
             return SOFTBUS_ERR;
         }
@@ -213,7 +213,7 @@ int32_t ClinetOnNodeBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t t
     for (i = 0; i < num; i++) {
         int32_t ans = SendRequest(svc[i], CLIENT_ON_NODE_BASIC_INFO_CHANGED, &io, NULL, option, NULL);
         if (ans != SOFTBUS_OK) {
-            LNN_LOGE(LNN_EVENT, "SendRequest failed=%d", ans);
+            LNN_LOGE(LNN_EVENT, "SendRequest failed, ans=%{public}d", ans);
             SoftBusFree(svc);
             return SOFTBUS_ERR;
         }
@@ -247,7 +247,7 @@ int32_t ClientOnTimeSyncResult(const char *pkgName, int32_t pid, const void *inf
     option.flags = TF_OP_ASYNC;
     int32_t ans = SendRequest(svc, CLIENT_ON_TIME_SYNC_RESULT, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "SendRequest failed=%d", ans);
+        LNN_LOGE(LNN_EVENT, "SendRequest failed, ans=%{public}d", ans);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -277,7 +277,7 @@ int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t pid, int32_t publi
     option.flags = TF_OP_ASYNC;
     int32_t ans = SendRequest(svc, CLIENT_ON_PUBLISH_LNN_RESULT, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "SendRequest failed=%d", ans);
+        LNN_LOGE(LNN_EVENT, "SendRequest failed, ans=%{public}d", ans);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -307,7 +307,7 @@ int32_t ClientOnRefreshLNNResult(const char *pkgName, int32_t pid, int32_t refre
     option.flags = TF_OP_ASYNC;
     int32_t ans = SendRequest(svc, CLIENT_ON_REFRESH_LNN_RESULT, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "SendRequest failed=%d", ans);
+        LNN_LOGE(LNN_EVENT, "SendRequest failed, ans=%{public}d", ans);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -337,7 +337,7 @@ int32_t ClientOnRefreshDeviceFound(const char *pkgName, int32_t pid, const void 
     option.flags = TF_OP_ASYNC;
     int32_t ans = SendRequest(svc, CLIENT_ON_REFRESH_DEVICE_FOUND, &io, NULL, option, NULL);
     if (ans != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "SendRequest failed=%d", ans);
+        LNN_LOGE(LNN_EVENT, "SendRequest failed, ans=%{public}d", ans);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
