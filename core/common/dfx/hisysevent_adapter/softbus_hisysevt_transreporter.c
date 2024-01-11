@@ -854,7 +854,7 @@ void SoftbusReportTransErrorEvt(int32_t errcode)
     SoftbusFreeEvtReportMsg(msg);
 
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_EVENT, "Sys Evt Witre ErrCode %d FAIL!", errcode);
+        COMM_LOGE(COMM_EVENT, "Sys Evt Witre FAIL! errCode=%{public}d", errcode);
     }
 }
 
@@ -874,7 +874,7 @@ void SoftbusReportTransInfoEvt(const char *infoMsg)
     SoftbusFreeEvtReportMsg(msg);
 
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_EVENT, "Sys Evt Witre ErrMsg %s FAIL!", infoMsg);
+        COMM_LOGE(COMM_EVENT, "Sys Evt Witre FAIL! errMsg=%{public}s", infoMsg);
     }
 }
 

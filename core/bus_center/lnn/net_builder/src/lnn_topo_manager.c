@@ -203,7 +203,7 @@ static void ClearTopoTable(void)
                 char *anonyPeerUdid = NULL;
                 Anonymize(item->udid, &anonyUdid);
                 Anonymize(info->peerUdid, &anonyPeerUdid);
-                LNN_LOGI(LNN_BUILDER, "delete topo info, local=%s, peer=%s",
+                LNN_LOGI(LNN_BUILDER, "delete topo info, local=%{public}s, peer=%{public}s",
                     anonyUdid, anonyPeerUdid);
                 AnonymizeFree(anonyUdid);
                 AnonymizeFree(anonyPeerUdid);
@@ -362,7 +362,7 @@ static int32_t UpdateLocalTopo(const char *udid, const char *peerUdid, const uin
         char *anonyPeerUdid = NULL;
         Anonymize(udid, &anonyUdid);
         Anonymize(peerUdid, &anonyPeerUdid);
-        LNN_LOGI(LNN_BUILDER, "add topo info: local=%s peer=%s", anonyUdid, anonyPeerUdid);
+        LNN_LOGI(LNN_BUILDER, "add topo info: local=%{public}s peer=%{public}s", anonyUdid, anonyPeerUdid);
         AnonymizeFree(anonyUdid);
         AnonymizeFree(anonyPeerUdid);
     } else {
@@ -379,7 +379,7 @@ static int32_t UpdateLocalTopo(const char *udid, const char *peerUdid, const uin
             char *anonyPeerUdid = NULL;
             Anonymize(topoItem->udid, &anonyUdid);
             Anonymize(topoInfo->peerUdid, &anonyPeerUdid);
-            LNN_LOGI(LNN_BUILDER, "delete topo info: local=%s peer=%s", anonyUdid, anonyPeerUdid);
+            LNN_LOGI(LNN_BUILDER, "delete topo info: local=%{public}s peer=%{public}s", anonyUdid, anonyPeerUdid);
             AnonymizeFree(anonyUdid);
             AnonymizeFree(anonyPeerUdid);
             ListDelete(&topoInfo->node);
@@ -440,7 +440,7 @@ static void TryCorrectRelation(const char *networkId, const char *udid, const ch
         LNN_LOGI(LNN_BUILDER, "relation are ok, no need correct");
         return;
     }
-    LNN_LOGI(LNN_BUILDER, "relation not right and notify update=%d",
+    LNN_LOGI(LNN_BUILDER, "relation not right and notify update=%{public}d",
         HasRelation(correctRelation, CONNECTION_ADDR_MAX));
     msg = PackOneLnnRelation(udid, peerUdid, correctRelation, CONNECTION_ADDR_MAX);
     if (msg == NULL) {
@@ -508,7 +508,7 @@ static void OnReceiveTopoUpdateMsg(LnnSyncInfoType type, const char *networkId, 
     cJSON *json = NULL;
     int32_t topoMsgType, seq, complete;
 
-    LNN_LOGI(LNN_BUILDER, "recv topo update msg, type=%d, len=%d", type, len);
+    LNN_LOGI(LNN_BUILDER, "recv topo update msg, type=%{public}d, len=%{public}d", type, len);
     if (type != LNN_INFO_TYPE_TOPO_UPDATE) {
         return;
     }
@@ -525,7 +525,7 @@ static void OnReceiveTopoUpdateMsg(LnnSyncInfoType type, const char *networkId, 
         cJSON_Delete(json);
         return;
     }
-    LNN_LOGI(LNN_BUILDER, "topoMsgType=%d, seq=%d, complete=%d", topoMsgType, seq, complete);
+    LNN_LOGI(LNN_BUILDER, "topoMsgType=%{public}d, seq=%{public}d, complete=%{public}d", topoMsgType, seq, complete);
     if (topoMsgType != TOPO_MSG_TYPE_UPDATE || complete != TOPO_MSG_FLAG_COMPLETE) {
         cJSON_Delete(json);
         return;

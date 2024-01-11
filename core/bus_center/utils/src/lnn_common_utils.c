@@ -61,7 +61,7 @@ int32_t LnnEncryptAesGcm(AesGcmInputParam *in, int32_t keyIndex, uint8_t **out, 
     int32_t ret = SoftBusEncryptData(&cipherKey, in->data, in->dataLen, encData, &encDataLen);
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "SoftBusEncryptData fail=%d", ret);
+        LNN_LOGE(LNN_STATE, "SoftBusEncryptData fail=%{public}d", ret);
         SoftBusFree(encData);
         return SOFTBUS_ENCRYPT_ERR;
     }
@@ -90,7 +90,7 @@ int32_t LnnDecryptAesGcm(AesGcmInputParam *in, uint8_t **out, uint32_t *outLen)
     int32_t ret = SoftBusDecryptData(&cipherKey, in->data, in->dataLen, decData, &decDataLen);
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "SoftBusDecryptData fail=%d", ret);
+        LNN_LOGE(LNN_STATE, "SoftBusDecryptData fail=%{public}d", ret);
         SoftBusFree(decData);
         return SOFTBUS_ENCRYPT_ERR;
     }

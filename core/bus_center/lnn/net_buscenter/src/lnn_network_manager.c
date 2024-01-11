@@ -138,7 +138,7 @@ static LnnNetIfMgr *NetifMgrFactory(LnnNetIfNameType type, const char *ifName)
         return NULL;
     }
     if (g_netifBuilders[type] == NULL) {
-        LNN_LOGE(LNN_BUILDER, "netif type=%d not supportted", type);
+        LNN_LOGE(LNN_BUILDER, "netif type not supported. type=%{public}d", type);
         return NULL;
     }
     LnnNetIfMgr *netifMgr = g_netifBuilders[type](ifName);
@@ -155,7 +155,7 @@ static int32_t ParseIfNameConfig(char *buf, uint32_t bufLen)
     char *value1 = NULL;
     char *value2 = NULL;
     if (buf == NULL || bufLen == 0) {
-        LNN_LOGE(LNN_BUILDER, "parameters invaild");
+        LNN_LOGE(LNN_BUILDER, "parameters invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     char *key = strtok_s(buf, LNN_DELIMITER_OUTSIDE, &outerPtr);
@@ -165,10 +165,10 @@ static int32_t ParseIfNameConfig(char *buf, uint32_t bufLen)
 
         LnnNetIfMgr *netIfMgr = NetifMgrFactory((LnnNetIfNameType)atoi(value1), value2);
         if (netIfMgr != NULL) {
-            LNN_LOGW(LNN_BUILDER, "Create netif mgr [%s],[%s]", value1, value2);
+            LNN_LOGW(LNN_BUILDER, "Create netif mgr. value1=%{public}s, value2=%{public}s", value1, value2);
             ListTailInsert(&g_netIfNameList, &netIfMgr->node);
         } else {
-            LNN_LOGE(LNN_BUILDER, "Create netif mgr failed,[%s],[%s]", value1, value2);
+            LNN_LOGE(LNN_BUILDER, "Create netif mgr failed, value1=%{public}s, value2=%{public}s", value1, value2);
         }
         key = strtok_s(NULL, LNN_DELIMITER_OUTSIDE, &outerPtr);
     }
@@ -330,11 +330,11 @@ int32_t LnnRegistProtocol(LnnProtocolManager *protocolMgr)
         if (protocolMgr->init != NULL) {
             ret = protocolMgr->init(protocolMgr);
             if (ret != SOFTBUS_OK) {
-                LNN_LOGE(LNN_BUILDER, "init network protocol failed! ret=%d", ret);
+                LNN_LOGE(LNN_BUILDER, "init network protocol failed! ret=%{public}d", ret);
                 break;
             }
         } else {
-            LNN_LOGW(LNN_BUILDER, "network protocol (supportedNetif=%u) have no init",
+            LNN_LOGW(LNN_BUILDER, "network protocol have no init. supportedNetif=%{public}u",
                 protocolMgr->supportedNetif);
         }
         g_networkProtocols[i] = protocolMgr;
@@ -593,25 +593,25 @@ int32_t LnnInitNetworkManager(void)
 
     int32_t ret = LnnInitManagerByConfig();
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "Read net config failed,ret=%d", ret);
+        LNN_LOGE(LNN_BUILDER, "Read net config failed, ret=%{public}d", ret);
         return ret;
     }
     // Regist default protocols
     ret = RegistIPProtocolManager();
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "regist ip protocol manager failed,ret=%d", ret);
+        LNN_LOGE(LNN_BUILDER, "regist ip protocol manager failed, ret=%{public}d", ret);
         return ret;
     }
     LNN_LOGI(LNN_BUILDER, "IP protocol registed.");
     ret = RegistBtProtocolManager();
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "regist bt protocol manager failed,ret=%d", ret);
+        LNN_LOGE(LNN_BUILDER, "regist bt protocol manager failed, ret=%{public}d", ret);
         return ret;
     }
     LNN_LOGI(LNN_BUILDER, "BT protocol registed.");
     ret = RegistNewIPProtocolManager();
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "regist newip protocol manager failed,ret=%d", ret);
+        LNN_LOGE(LNN_BUILDER, "regist newip protocol manager failed, ret=%{public}d", ret);
         return ret;
     }
     ret = RegGroupChangeListener(&g_groupChangeListener);
@@ -621,7 +621,7 @@ int32_t LnnInitNetworkManager(void)
     }
     ret = LnnInitPhysicalSubnetManager();
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "init subnet manager failed,ret=%d", ret);
+        LNN_LOGE(LNN_BUILDER, "init subnet manager failed, ret=%{public}d", ret);
         return ret;
     }
     ProtocolType type = 0;
@@ -629,10 +629,10 @@ int32_t LnnInitNetworkManager(void)
         LNN_LOGE(LNN_BUILDER, "Get all protocol failed");
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_BUILDER, "set supported protocol to %u", type);
+    LNN_LOGI(LNN_BUILDER, "set supported protocol type. type=%{public}u", type);
     ret = LnnSetLocalNum64Info(NUM_KEY_TRANS_PROTOCOLS, (int64_t)type);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "set supported protocol failed,ret=%d", ret);
+        LNN_LOGE(LNN_BUILDER, "set supported protocol failed, ret=%{public}d", ret);
         return ret;
     }
     if (LnnRegisterEventHandler(LNN_EVENT_NIGHT_MODE_CHANGED, NightModeChangeEventHandler) != SOFTBUS_OK) {
@@ -666,7 +666,7 @@ static void RetryCheckOOBEState(void *para)
         LNN_LOGI(LNN_BUILDER, "wifi handle SOFTBUS_OOBE_END");
         LnnNotifyOOBEStateChangeEvent(SOFTBUS_OOBE_END);
     } else {
-        LNN_LOGD(LNN_BUILDER, "check OOBE again after a delay of %" PRIu64 " ms", LNN_CHECK_OOBE_DELAY_LEN);
+        LNN_LOGD(LNN_BUILDER, "check OOBE again after a delay. delay=%{public}" PRIu64 "ms", LNN_CHECK_OOBE_DELAY_LEN);
         LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), RetryCheckOOBEState, NULL, LNN_CHECK_OOBE_DELAY_LEN);
     }
 }
@@ -689,10 +689,10 @@ int32_t LnnInitNetworkManagerDelay(void)
             if ((g_networkProtocols[i]->supportedNetif & item->type) != 0) {
                 int32_t ret = g_networkProtocols[i]->enable(g_networkProtocols[i], item);
                 if (ret != SOFTBUS_OK) {
-                    LNN_LOGE(LNN_INIT, "enable protocol=%d for netif %s failed", i,
+                    LNN_LOGE(LNN_INIT, "enable for netif failed. protocol=%{public}d, ifName=%{public}s", i,
                         item->ifName);
                 }
-                LNN_LOGI(LNN_INIT, "enable protocol=%d for netif %s success", i, item->ifName);
+                LNN_LOGI(LNN_INIT, "enable for netif success. protocol=%{public}d, ifName=%{public}s", i, item->ifName);
             }
         }
     }
@@ -711,7 +711,9 @@ bool LnnIsAutoNetWorkingEnabled(void)
         LNN_LOGE(LNN_BUILDER, "Cannot get autoNetworkingSwitch from config file");
         return true;
     }
-    LNN_LOGI(LNN_BUILDER, "wifi condition state:config=%d, background=%d, nightMode=%d, OOBEEnd=%d, unlock=%d",
+    LNN_LOGI(LNN_BUILDER,
+        "wifi condition state:config=%{public}d, background=%{public}d, nightMode=%{public}d, OOBEEnd=%{public}d, "
+        "unlock=%{public}d",
         isConfigEnabled, g_backgroundState == SOFTBUS_USER_BACKGROUND, g_isNightMode, g_isOOBEEnd, g_isUnLock);
     return isConfigEnabled && (g_backgroundState == SOFTBUS_USER_FOREGROUND) && !g_isNightMode &&
         g_isOOBEEnd && g_isUnLock;
@@ -814,11 +816,11 @@ ListenerModule LnnGetProtocolListenerModule(ProtocolType protocol, ListenerMode 
 {
     struct FindProtocolByTypeRequest request = {.protocol = protocol, .manager = NULL};
     if (LnnVisitProtocol(FindProtocolByType, &request)) {
-        LNN_LOGE(LNN_BUILDER, "not such protocol! protocolId=%d", protocol);
+        LNN_LOGE(LNN_BUILDER, "not such protocol! protocolId=%{public}d", protocol);
         return UNUSE_BUTT;
     }
     if (request.manager == NULL || request.manager->getListenerModule == NULL) {
-        LNN_LOGE(LNN_BUILDER, "protocol manager is null, protocolId=%d", protocol);
+        LNN_LOGE(LNN_BUILDER, "protocol manager is null, protocolId=%{public}d", protocol);
         return UNUSE_BUTT;
     }
     return request.manager->getListenerModule(mode);

@@ -116,7 +116,7 @@ int32_t SoftBusGetPublicKey(uint8_t *publicKey, uint32_t publicKeyLen)
         COMM_LOGE(COMM_UTILS, "HksExportPubKey failed.");
         return SOFTBUS_ERR;
     }
-    COMM_LOGD(COMM_UTILS, "X509 public key size is: %u.", publicKeyBlob.size);
+    COMM_LOGD(COMM_UTILS, "public key is X509, size=%{public}u.", publicKeyBlob.size);
     if (memcpy_s(publicKey, publicKeyBlob.size, publicKeyBlob.data, publicKeyBlob.size) != EOK) {
         return SOFTBUS_ERR;
     }

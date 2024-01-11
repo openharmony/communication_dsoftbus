@@ -47,11 +47,11 @@ bool IsPotentialTrustedDeviceDp(const char *deviceIdHash)
         LNN_LOGE(LNN_STATE, "deviceIdHash is null");
         return false;
     }
-    LNN_LOGI(LNN_STATE, "IsPotentialTrustedDeviceDp deviceIdHash=%s", deviceIdHash);
+    LNN_LOGI(LNN_STATE, "IsPotentialTrustedDeviceDp deviceIdHash=%{public}s", deviceIdHash);
     std::vector<OHOS::DistributedDeviceProfile::TrustDeviceProfile> trustDevices;
     int32_t ret = DpClient::GetInstance().GetAllTrustDeviceProfile(trustDevices);
     if (ret != OHOS::DistributedDeviceProfile::DP_SUCCESS || trustDevices.empty()) {
-        LNN_LOGE(LNN_STATE, "GetAllTrustDeviceProfile ret=%d, size=%d", ret, trustDevices.size());
+        LNN_LOGE(LNN_STATE, "GetAllTrustDeviceProfile ret=%{public}d, size=%{public}d", ret, trustDevices.size());
         return false;
     }
     for (const auto &trustDevice : trustDevices) {
@@ -61,7 +61,7 @@ bool IsPotentialTrustedDeviceDp(const char *deviceIdHash)
         }
         char *anonyUdid = nullptr;
         Anonymize(trustDevice.GetDeviceId().c_str(), &anonyUdid);
-        LNN_LOGI(LNN_STATE, "udid=%s", anonyUdid);
+        LNN_LOGI(LNN_STATE, "udid=%{public}s", anonyUdid);
         AnonymizeFree(anonyUdid);
         uint8_t udidHash[SHA_256_HASH_LEN] = {0};
         char hashStr[CUST_UDID_LEN + 1] = {0};
@@ -92,10 +92,10 @@ static bool IsSameAccount(const std::string accountHashStr)
         return false;
     }
     if (memcmp(localAccountHash, accountHashStr.c_str(), ACCOUNT_HASH_SHORT_LEN) == 0 && !LnnIsDefaultOhosAccount()) {
-        LNN_LOGI(LNN_STATE, "accountHash:%02x%02x is same", localAccountHash[0], localAccountHash[1]);
+        LNN_LOGI(LNN_STATE, "accountHash=%{public}02x%{public}02x is same", localAccountHash[0], localAccountHash[1]);
         return true;
     }
-    LNN_LOGI(LNN_STATE, "local accountHash:%02x%02x, peer accountHash:%02x%02x",
+    LNN_LOGI(LNN_STATE, "localAccountHash=%{public}02x%{public}02x, peeraccountHash=%{public}02x%{public}02x",
         localAccountHash[0], localAccountHash[1], accountHashStr[0], accountHashStr[1]);
     return false;
 }
@@ -114,7 +114,7 @@ static int32_t GenerateDpAccesserAndAccessee(OHOS::DistributedDeviceProfile::Acc
     OHOS::AccountSA::OhosAccountInfo accountInfo;
     OHOS::ErrCode ret = OHOS::AccountSA::OhosAccountKits::GetInstance().GetOhosAccountInfo(accountInfo);
     if (ret != OHOS::ERR_OK || accountInfo.uid_.empty()) {
-        LNN_LOGE(LNN_STATE, "getOhosAccountInfo fail ret=%d", ret);
+        LNN_LOGE(LNN_STATE, "getOhosAccountInfo fail ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     accesser.SetAccesserAccountId(accountInfo.uid_);
@@ -127,7 +127,7 @@ static void InsertDpSameAccount(const std::string udid)
     std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> aclProfiles;
     int32_t ret = DpClient::GetInstance().GetAllAccessControlProfile(aclProfiles);
     if (ret != OHOS::DistributedDeviceProfile::DP_NOT_FIND_DATA && ret != OHOS::DistributedDeviceProfile::DP_SUCCESS) {
-        LNN_LOGE(LNN_STATE, "getAllAccessControlProfile failed, ret=%d", ret);
+        LNN_LOGE(LNN_STATE, "getAllAccessControlProfile failed, ret=%{public}d", ret);
         return;
     }
     for (const auto &aclProfile : aclProfiles) {
@@ -157,12 +157,12 @@ static void InsertDpSameAccount(const std::string udid)
     accessControlProfile.SetAccessee(accessee);
     ret = DpClient::GetInstance().PutAccessControlProfile(accessControlProfile);
     if (ret != OHOS::DistributedDeviceProfile::DP_SUCCESS) {
-        LNN_LOGE(LNN_STATE, "putAccessControlProfile failed, ret=%d", ret);
+        LNN_LOGE(LNN_STATE, "putAccessControlProfile failed, ret=%{public}d", ret);
         return;
     }
     char *anonyUdid = nullptr;
     Anonymize(udid.c_str(), &anonyUdid);
-    LNN_LOGI(LNN_STATE, "insert dp same account succ, udid=%s", anonyUdid);
+    LNN_LOGI(LNN_STATE, "insert dp same account succ, udid=%{public}s", anonyUdid);
     AnonymizeFree(anonyUdid);
 }
 
