@@ -1059,7 +1059,7 @@ static void DeinitHbFsmCallback(FsmStateMachine *fsm)
 
 static int32_t InitHeartbeatFsm(LnnHeartbeatFsm *hbFsm)
 {
-    if (sprintf_s(hbFsm->fsmName, HB_FSM_NAME_LEN, "%s-%u", BUSCENTER_HEARTBEAT_FSM_HANDLER_NAME, hbFsm->id) == -1) {
+    if (sprintf_s(hbFsm->fsmName, HB_FSM_NAME_LEN, "LnnHbFsm-%u", hbFsm->id) == -1) {
         LNN_LOGE(LNN_HEART_BEAT, "format fsm name fail");
         return SOFTBUS_ERR;
     }

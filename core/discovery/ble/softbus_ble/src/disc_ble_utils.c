@@ -453,7 +453,7 @@ int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const uint8_t *data, 
     if (bcTlvLen == 0) {
         return SOFTBUS_OK;
     }
-    uint8_t *copyData = SoftBusCalloc(bcTlvLen + rspLen);
+    uint8_t *copyData = SoftBusCalloc(bcTlvLen + rspLen + 1); // calloc 1 bytes to add tail 0
     DISC_CHECK_AND_RETURN_RET_LOGE(copyData != NULL, SOFTBUS_MEM_ERR, DISC_BLE, "malloc failed.");
     if (memcpy_s(copyData, bcTlvLen, &serviceData[POS_TLV], bcTlvLen) != EOK) {
         DISC_LOGE(DISC_BLE, "memcpy_s adv failed, bcTlvLen: %u", bcTlvLen);

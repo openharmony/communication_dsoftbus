@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "string.h"
 #include "anonymizer.h"
 #include "client_trans_session_adapter.h"
 #include "socket.h"
@@ -32,12 +33,20 @@ static int32_t CheckSocketInfoIsValid(const SocketInfo *info)
     }
 
     if (info->peerName != NULL && !IsValidString(info->peerName, SESSION_NAME_SIZE_MAX)) {
-        TRANS_LOGE(TRANS_SDK, "invalid peerName of socket");
+        char *anonySessionName = NULL;
+        Anonymize(info->peerName, &anonySessionName);
+        TRANS_LOGI(TRANS_SDK, "strcpy peerName=%s failed, peerNameLen=%d",
+            anonySessionName, strlen(info->peerName));
+        AnonymizeFree(anonySessionName);
         return SOFTBUS_INVALID_PARAM;
     }
 
     if (info->peerNetworkId != NULL && !IsValidString(info->peerNetworkId, DEVICE_ID_SIZE_MAX)) {
-        TRANS_LOGE(TRANS_SDK, "invalid peerNetworkId of socket");
+        char *anonyNetworkId = NULL;
+        Anonymize(info->peerNetworkId, &anonyNetworkId);
+        TRANS_LOGI(TRANS_SDK, "strcpy peerNetworkId=%s failed, peerNetworkIdLen=%d",
+            anonyNetworkId, strlen(info->peerNetworkId));
+        AnonymizeFree(anonyNetworkId);
         return SOFTBUS_INVALID_PARAM;
     }
     return SOFTBUS_OK;

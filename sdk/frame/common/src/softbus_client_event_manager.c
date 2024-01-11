@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,6 @@
 #include "softbus.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
-#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
 
@@ -42,7 +41,7 @@ int EventClientInit(void)
     }
 
     if (g_observerList != NULL) {
-        SoftBusFree(g_observerList);
+        DestroySoftBusList(g_observerList);
     }
     g_observerList = CreateSoftBusList();
     if (g_observerList == NULL) {
@@ -88,7 +87,7 @@ int RegisterEventCallback(enum SoftBusEvent event, EventCallback cb, void *userD
         return SOFTBUS_ERR;
     }
 
-    if (SoftBusMutexLock(&g_observerList->lock) != 0) {
+    if (SoftBusMutexLock(&g_observerList->lock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_SDK, "lock failed");
         return SOFTBUS_ERR;
     }
@@ -130,14 +129,13 @@ void CLIENT_NotifyObserver(enum SoftBusEvent event, void *arg, unsigned int argL
     }
 
     Observer *observer = NULL;
-    if (SoftBusMutexLock(&g_observerList->lock) != 0) {
+    if (SoftBusMutexLock(&g_observerList->lock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_SDK, "lock failed");
         return;
     }
 
     LIST_FOR_EACH_ENTRY(observer, &g_observerList->list, Observer, node) {
-        if ((observer->event == event) &&
-            (observer->callback != NULL) &&
+        if ((observer->event == event) && (observer->callback != NULL) &&
             (observer->callback(arg, argLen, observer->userData) != SOFTBUS_OK)) {
             COMM_LOGE(COMM_SDK, "execute callback failed. event=%{public}d", event);
         }
