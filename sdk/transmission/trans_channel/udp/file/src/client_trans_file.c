@@ -314,9 +314,16 @@ int32_t TransOnFileChannelOpened(const char *sessionName, const ChannelInfo *cha
             TRANS_LOGE(TRANS_FILE, "start file channel as server failed");
             return SOFTBUS_ERR;
         }
-        g_udpChannelMgrCb->OnUdpChannelOpened(channel->channelId);
+        if (g_udpChannelMgrCb->OnUdpChannelOpened(channel->channelId) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_FILE, "udp channel open failed.");
+            NSTACKX_DFileClose(fileSession);
+            *filePort = 0;
+            return SOFTBUS_ERR;
+        }
         if (UpdateFileRecvPath(channel->channelId, &fileListener, fileSession)) {
             TRANS_LOGE(TRANS_FILE, "update receive file path failed");
+            NSTACKX_DFileClose(fileSession);
+            *filePort = 0;
             return SOFTBUS_ERR;
         }
     } else {
