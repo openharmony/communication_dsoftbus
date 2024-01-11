@@ -490,6 +490,9 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager002, TestSize.Level1)
 {
     uint32_t pId = 0;
     ConnBrConnection *connection = static_cast<ConnBrConnection*>(SoftBusMalloc(sizeof(ConnBrConnection)));
+    if(connection == nullptr) {
+        return;
+    }
     connection->connectionId = 1;
 
     ConnectStatistics statistics;
@@ -953,6 +956,9 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager022, TestSize.Level1)
 HWTEST_F(ConnectionBrConnectionTest, testBrManager023, TestSize.Level1)
 {
     ConnBrConnection *connection = static_cast<ConnBrConnection*>(SoftBusMalloc(sizeof(ConnBrConnection)));
+    if(connection == nullptr) {
+        return;
+    }
     connection->connectionId = 0;
     char data[DATASIZE] = {
         "{\
