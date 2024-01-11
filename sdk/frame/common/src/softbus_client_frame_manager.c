@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,13 +64,13 @@ static bool CheckPkgNameInfo(const char *pkgName)
 
 static int32_t AddClientPkgName(const char *pkgName)
 {
+    if (!CheckPkgNameInfo(pkgName)) {
+        COMM_LOGE(COMM_SDK, "check PkgNameInfo invalid.");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (SoftBusMutexLock(&g_pkgNameLock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_SDK, "lock init failed");
         return SOFTBUS_LOCK_ERR;
-    }
-    if (CheckPkgNameInfo(pkgName) == false) {
-        SoftBusMutexUnlock(&g_pkgNameLock);
-        return SOFTBUS_INVALID_PARAM;
     }
     PkgNameInfo *info = (PkgNameInfo *)SoftBusCalloc(sizeof(PkgNameInfo));
     if (info == NULL) {
@@ -112,10 +112,12 @@ static void DelClientPkgName(const char *pkgName)
 
 static int32_t ClientRegisterPkgName(const char *pkgName)
 {
-    if (AddClientPkgName(pkgName) != SOFTBUS_OK) {
-        return SOFTBUS_MEM_ERR;
+    int32_t ret = AddClientPkgName(pkgName);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SDK, "AddClientPkgName failed. ret=%{public}d", ret);
+        return ret;
     }
-    int32_t ret = ClientRegisterService(pkgName);
+    ret = ClientRegisterService(pkgName);
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_SDK, "ClientRegisterService failed. ret=%{public}d", ret);
         DelClientPkgName(pkgName);
@@ -161,13 +163,13 @@ static int32_t ConnClientInit(void)
 {
     int32_t ret = ConnInitSockets();
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_EVENT, "ConnInitSockets failed!ret=%{public}" PRId32 " \r\n", ret);
+        COMM_LOGE(COMM_EVENT, "ConnInitSockets failed!ret=%{public}d", ret);
         return ret;
     }
 
     ret = InitBaseListener();
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_EVENT, "InitBaseListener failed!ret=%{public}" PRId32 " \r\n", ret);
+        COMM_LOGE(COMM_EVENT, "InitBaseListener failed!ret=%{public}d", ret);
         return ret;
     }
     COMM_LOGD(COMM_EVENT, "init conn client success");
@@ -177,17 +179,17 @@ static int32_t ConnClientInit(void)
 static int32_t ClientModuleInit(void)
 {
     SoftbusConfigInit();
-    if (EventClientInit() == SOFTBUS_ERR) {
+    if (EventClientInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_SDK, "init event manager failed");
         goto ERR_EXIT;
     }
 
-    if (BusCenterClientInit() == SOFTBUS_ERR) {
+    if (BusCenterClientInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_SDK, "init bus center failed");
         goto ERR_EXIT;
     }
 
-    if (DiscClientInit() == SOFTBUS_ERR) {
+    if (DiscClientInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_SDK, "init service manager failed");
         goto ERR_EXIT;
     }
@@ -197,7 +199,7 @@ static int32_t ClientModuleInit(void)
         goto ERR_EXIT;
     }
 
-    if (TransClientInit() == SOFTBUS_ERR) {
+    if (TransClientInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_SDK, "init trans manager failed");
         goto ERR_EXIT;
     }
@@ -220,7 +222,7 @@ int32_t InitSoftBus(const char *pkgName)
         COMM_LOGE(COMM_SDK, "lock init pkgName failed");
         return SOFTBUS_LOCK_ERR;
     }
-    if ((g_isInited == false) && (SoftBusMutexInit(&g_isInitedLock, NULL) != SOFTBUS_OK)) {
+    if ((!g_isInited) && (SoftBusMutexInit(&g_isInitedLock, NULL) != SOFTBUS_OK)) {
         COMM_LOGE(COMM_SDK, "lock init failed");
         return SOFTBUS_LOCK_ERR;
     }
@@ -228,7 +230,7 @@ int32_t InitSoftBus(const char *pkgName)
         COMM_LOGE(COMM_SDK, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
-    if (g_isInited == true) {
+    if (g_isInited) {
         (void)ClientRegisterPkgName(pkgName);
         SoftBusMutexUnlock(&g_isInitedLock);
         return SOFTBUS_OK;

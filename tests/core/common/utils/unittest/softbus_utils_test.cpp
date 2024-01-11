@@ -134,7 +134,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertHexStringToBytes_001, TestSiz
     const char *inBuf = "41424344";
     uint32_t inLen = 8;
     int32_t ret = ConvertHexStringToBytes(outBuf, outBufLen, inBuf, inLen);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     unsigned char outBufArray[5] = "\0";
     outBuf = outBufArray;
@@ -142,14 +142,14 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertHexStringToBytes_001, TestSiz
     inBuf = NULL;
     inLen = 0;
     ret = ConvertHexStringToBytes(outBuf, outBufLen, inBuf, inLen);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     outBuf = outBufArray;
     outBufLen = 5;
     inBuf = "414243444";
     inLen = 9;
     ret = ConvertHexStringToBytes(outBuf, outBufLen, inBuf, inLen);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     outBuf = outBufArray;
     outBufLen = 5;
