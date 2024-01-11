@@ -51,7 +51,8 @@ static void PrintSocketInfo(const SocketInfo *info)
     Anonymize(info->name, &tmpMyName);
     Anonymize(info->peerName, &tmpPeerName);
     Anonymize(info->pkgName, &tmpPkgName);
-    TRANS_LOGI(TRANS_SDK, "Socket: mySessionName=%s, peerSessionName=%s, pkgName=%s, dataType=%d",
+    TRANS_LOGI(TRANS_SDK,
+        "Socket: mySessionName=%{public}s, peerSessionName=%{public}s, pkgName=%{public}s, dataType=%{public}d",
         tmpMyName, tmpPeerName, tmpPkgName, info->dataType);
     AnonymizeFree(tmpMyName);
     AnonymizeFree(tmpPeerName);
@@ -69,36 +70,36 @@ int32_t Socket(SocketInfo info)
     PrintSocketInfo(&info);
     ret = CreateSocket(info.pkgName, info.name);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "CreateSocket failed, ret=%d.", ret);
+        TRANS_LOGE(TRANS_SDK, "CreateSocket failed, ret=%{public}d.", ret);
         return ret;
     }
 
     int32_t secoketFd = INVALID_SESSION_ID;
     ret = ClientAddSocket(&info, &secoketFd);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "add socket failed, ret=%d.", ret);
+        TRANS_LOGE(TRANS_SDK, "add socket failed, ret=%{public}d.", ret);
         return ret;
     }
 
-    TRANS_LOGI(TRANS_SDK, "create socket ok, socket=%d", secoketFd);
+    TRANS_LOGI(TRANS_SDK, "create socket ok, socket=%{public}d", secoketFd);
     return secoketFd;
 }
 
 int32_t Listen(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener)
 {
-    TRANS_LOGI(TRANS_SDK, "Listen: socket=%d", socket);
+    TRANS_LOGI(TRANS_SDK, "Listen: socket=%{public}d", socket);
     return ClientListen(socket, qos, qosCount, listener);
 }
 
 int32_t Bind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener)
 {
-    TRANS_LOGI(TRANS_SDK, "Bind: socket=%d", socket);
+    TRANS_LOGI(TRANS_SDK, "Bind: socket=%{public}d", socket);
     return ClientBind(socket, qos, qosCount, listener);
 }
 
 void Shutdown(int32_t socket)
 {
-    TRANS_LOGI(TRANS_SDK, "Shutdown: socket=%d", socket);
+    TRANS_LOGI(TRANS_SDK, "Shutdown: socket=%{public}d", socket);
     ClientShutdown(socket);
 }
 
@@ -115,6 +116,6 @@ int32_t EvaluateQos(const char *peerNetworkId, TransDataType dataType, const Qos
 
 int32_t GetMtuSize(int32_t socket, uint32_t *mtuSize)
 {
-    TRANS_LOGI(TRANS_SDK, "GetMtuSize: socket=%d", socket);
+    TRANS_LOGI(TRANS_SDK, "GetMtuSize: socket=%{public}d", socket);
     return GetSocketMtuSize(socket, mtuSize);
 }

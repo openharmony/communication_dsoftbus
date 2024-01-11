@@ -79,7 +79,7 @@ static int32_t GetSessionCallbackByChannelId(int32_t channelId, int32_t channelT
     }
     int32_t ret = ClientGetSessionIdByChannelId(channelId, channelType, sessionId);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "get sessionId failed, channelId=%d", channelId);
+        TRANS_LOGE(TRANS_SDK, "get sessionId failed, channelId=%{public}d", channelId);
         return SOFTBUS_ERR;
     }
     ret = ClientGetSessionCallbackById(*sessionId, listener);
@@ -100,7 +100,7 @@ static int32_t GetSocketCallbackAdapterByChannelId(int32_t channelId, int32_t ch
 
     int32_t ret = ClientGetSessionIdByChannelId(channelId, channelType, sessionId);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "get sessionId failed, channelId [%d]", channelId);
+        TRANS_LOGE(TRANS_SDK, "get sessionId failed, channelId=%{public}d", channelId);
         return SOFTBUS_ERR;
     }
     ret = ClientGetSessionCallbackAdapterById(*sessionId, sessionCallback);
@@ -130,7 +130,7 @@ static int32_t TransOnBindSuccess(int32_t sessionId, const ISocketListener *sock
     }
 
     (void)socketCallback->OnBind(sessionId, info);
-    TRANS_LOGI(TRANS_SDK, "OnBind success, client socket:%d", sessionId);
+    TRANS_LOGI(TRANS_SDK, "OnBind success, client socket=%{public}d", sessionId);
     return SOFTBUS_OK;
 }
 
@@ -142,8 +142,10 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const C
     }
     char *tmpName = NULL;
     Anonymize(sessionName, &tmpName);
-    TRANS_LOGI(TRANS_SDK, "TransOnSessionOpened: sessionName=%s, flag=%d, isServer=%d, type=%d, crc=%d", tmpName, flag,
-        channel->isServer, channel->routeType, channel->crc);
+    TRANS_LOGI(TRANS_SDK,
+        "TransOnSessionOpened: sessionName=%{public}s, flag=%{public}d, isServer=%{public}d, type=%{public}d, "
+        "crc=%{public}d",
+        tmpName, flag, channel->isServer, channel->routeType, channel->crc);
     AnonymizeFree(tmpName);
 
     SessionListenerAdapter sessionCallback;
@@ -180,13 +182,13 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const C
         (void)ClientDeleteSession(sessionId);
         return SOFTBUS_ERR;
     }
-    TRANS_LOGI(TRANS_SDK, "ok, sessionId=%d", sessionId);
+    TRANS_LOGI(TRANS_SDK, "ok, sessionId=%{public}d", sessionId);
     return SOFTBUS_OK;
 }
 
 NO_SANITIZE("cfi") int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
 {
-    TRANS_LOGI(TRANS_SDK, "channelId=%d, channelType=%d", channelId, channelType);
+    TRANS_LOGI(TRANS_SDK, "channelId=%{public}d, channelType=%{public}d", channelId, channelType);
     int32_t sessionId = INVALID_SESSION_ID;
     SessionListenerAdapter sessionCallback;
     (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
@@ -196,13 +198,13 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t c
         (void)sessionCallback.session.OnSessionOpened(sessionId, errCode);
     }
     (void)ClientDeleteSession(sessionId);
-    TRANS_LOGI(TRANS_SDK, "ok, sessionid=%d", sessionId);
+    TRANS_LOGI(TRANS_SDK, "ok, sessionid=%{public}d", sessionId);
     return SOFTBUS_OK;
 }
 
 NO_SANITIZE("cfi") int32_t TransOnSessionClosed(int32_t channelId, int32_t channelType, ShutdownReason reason)
 {
-    TRANS_LOGI(TRANS_SDK, "channelId=%d, channelType=%d", channelId, channelType);
+    TRANS_LOGI(TRANS_SDK, "channelId=%{public}d, channelType=%{public}d", channelId, channelType);
     int32_t sessionId = INVALID_SESSION_ID;
     int32_t ret;
     SessionListenerAdapter sessionCallback;
@@ -221,7 +223,7 @@ NO_SANITIZE("cfi") int32_t TransOnSessionClosed(int32_t channelId, int32_t chann
         TRANS_LOGE(TRANS_SDK, "client delete session failed");
         return SOFTBUS_ERR;
     }
-    TRANS_LOGI(TRANS_SDK, "ok, sessionId=%d", sessionId);
+    TRANS_LOGI(TRANS_SDK, "ok, sessionId=%{public}d", sessionId);
     return SOFTBUS_OK;
 }
 

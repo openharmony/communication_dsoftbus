@@ -1553,12 +1553,12 @@ HWTEST_F(AuthTest, CHECK_VERIFY_CALLBACK_Test_001, TestSize.Level1)
 
 static void OnConnOpenedTest(uint32_t requestId, int64_t authId)
 {
-    AUTH_LOGI(AUTH_TEST, "requestId=%d, authId=%" PRId64, requestId, authId);
+    AUTH_LOGI(AUTH_TEST, "requestId=%{public}d, authId=%{public}" PRId64, requestId, authId);
 }
 
 static void OnConnOpenFailedTest(uint32_t requestId, int32_t reason)
 {
-    AUTH_LOGI(AUTH_TEST, "requestId=%d, reason=%d", requestId, reason);
+    AUTH_LOGI(AUTH_TEST, "requestId=%{public}d, reason=%{public}d", requestId, reason);
 }
 /*
  * @tc.name: CHECK_AUTH_CONN_CALLBACK_Test_001

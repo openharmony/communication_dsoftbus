@@ -65,7 +65,7 @@ int32_t ClientOnChannelOpened(IpcIo *data, IpcIo *reply)
     }
     int ret = TransOnChannelOpened(sessionName, &channel);
     if (ret < 0) {
-        TRANS_LOGE(TRANS_CTRL, "TransOnChannelOpened fail, errcode=%d.", ret);
+        TRANS_LOGE(TRANS_CTRL, "TransOnChannelOpened fail, errcode=%{public}d.", ret);
     }
     return SOFTBUS_OK;
 }

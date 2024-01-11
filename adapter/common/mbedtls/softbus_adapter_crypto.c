@@ -130,7 +130,7 @@ static int32_t MbedAesGcmDecrypt(const AesGcmCipherKey *cipherkey, const unsigne
     int32_t ret = mbedtls_gcm_setkey(&aesContext, MBEDTLS_CIPHER_ID_AES, cipherkey->key,
         cipherkey->keyLen * KEY_BITS_UNIT);
     if (ret != 0) {
-        COMM_LOGE(COMM_ADAPTER, "Decrypt mbedtls_gcm_setkey fail\n");
+        COMM_LOGE(COMM_ADAPTER, "Decrypt mbedtls_gcm_setkey fail.");
         mbedtls_gcm_free(&aesContext);
         return SOFTBUS_DECRYPT_ERR;
     }
@@ -139,7 +139,7 @@ static int32_t MbedAesGcmDecrypt(const AesGcmCipherKey *cipherkey, const unsigne
     ret = mbedtls_gcm_auth_decrypt(&aesContext, cipherTextSize - OVERHEAD_LEN, cipherkey->iv,
         GCM_IV_LEN, NULL, 0, cipherText + actualPlainLen + GCM_IV_LEN, TAG_LEN, cipherText + GCM_IV_LEN, plain);
     if (ret != 0) {
-        COMM_LOGE(COMM_ADAPTER, "[TRANS] Decrypt mbedtls_gcm_auth_decrypt fail.[%d]\n", ret);
+        COMM_LOGE(COMM_ADAPTER, "[TRANS] Decrypt mbedtls_gcm_auth_decrypt fail. ret=%{public}d", ret);
         mbedtls_gcm_free(&aesContext);
         return SOFTBUS_DECRYPT_ERR;
     }
@@ -151,7 +151,7 @@ static int32_t MbedAesGcmDecrypt(const AesGcmCipherKey *cipherkey, const unsigne
 static int32_t HandleError(mbedtls_cipher_context_t *ctx, const char *buf)
 {
     if (buf != NULL) {
-        COMM_LOGE(COMM_ADAPTER, "%s", buf);
+        COMM_LOGE(COMM_ADAPTER, "buf=%{public}s", buf);
     }
     if (ctx != NULL) {
         mbedtls_cipher_free(ctx);
@@ -230,7 +230,7 @@ int32_t SoftBusGenerateRandomArray(unsigned char *randStr, uint32_t len)
         ret = mbedtls_ctr_drbg_seed(&ctrDrbg, mbedtls_entropy_func, &entropy, NULL, 0);
         if (ret != 0) {
             SoftBusMutexUnlock(&g_randomLock);
-            COMM_LOGE(COMM_ADAPTER, "gen random seed error, ret[%d]", ret);
+            COMM_LOGE(COMM_ADAPTER, "gen random seed error, ret=%{public}d", ret);
             return SOFTBUS_ERR;
         }
         initFlag = true;
@@ -244,7 +244,7 @@ int32_t SoftBusGenerateRandomArray(unsigned char *randStr, uint32_t len)
     ret = mbedtls_ctr_drbg_random(&ctrDrbg, randStr, len);
     SoftBusMutexUnlock(&g_randomLock);
     if (ret != 0) {
-        COMM_LOGE(COMM_ADAPTER, "gen random error, ret[%d]", ret);
+        COMM_LOGE(COMM_ADAPTER, "gen random error, ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

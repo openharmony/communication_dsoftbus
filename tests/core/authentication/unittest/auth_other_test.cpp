@@ -448,12 +448,12 @@ HWTEST_F(AuthOtherTest, HANDLE_CONNECTION_DATA_TEST_001, TestSize.Level1)
 
 static void OnConnOpenedTest(uint32_t requestId, int64_t authId)
 {
-    AUTH_LOGI(AUTH_TEST, "OnConnOpenedTest: requestId = %d, authId = %" PRId64 ".", requestId, authId);
+    AUTH_LOGI(AUTH_TEST, "OnConnOpenedTest: requestId=%{public}d, authId=%{public}" PRId64 ".", requestId, authId);
 }
 
 static void OnConnOpenFailedTest(uint32_t requestId, int32_t reason)
 {
-    AUTH_LOGI(AUTH_TEST, "OnConnOpenFailedTest: requestId = %d, reason = %d.", requestId, reason);
+    AUTH_LOGI(AUTH_TEST, "OnConnOpenFailedTest: requestId=%{public}d, reason=%{public}d.", requestId, reason);
 }
 
 /*

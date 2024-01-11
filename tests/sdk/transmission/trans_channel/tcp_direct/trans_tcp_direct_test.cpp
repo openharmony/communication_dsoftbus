@@ -94,23 +94,23 @@ void TransTcpDirectTest::TearDownTestCase(void)
 
 static int OnSessionOpened(int sessionId, int result)
 {
-    TRANS_LOGI(TRANS_TEST, "session opened,sessionId= %d", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session opened, sessionId=%{public}d", sessionId);
     return SOFTBUS_OK;
 }
 
 static void OnSessionClosed(int sessionId)
 {
-    TRANS_LOGI(TRANS_TEST, "session closed, sessionId= %d", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session closed, sessionId=%{public}d", sessionId);
 }
 
 static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
 {
-    TRANS_LOGI(TRANS_TEST, "session bytes received, sessionId= %d", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session bytes received, sessionId=%{public}d", sessionId);
 }
 
 static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
 {
-    TRANS_LOGI(TRANS_TEST, "session msg received, sessionId=%d", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session msg received, sessionId=%{public}d", sessionId);
 }
 
 static ISessionListener g_sessionlistener = {

@@ -27,8 +27,9 @@ void StreamDepacketizer::DepacketizeHeader(const char *header)
         header_.Depacketize(ptr);
 
         TRANS_LOGD(TRANS_STREAM,
-            "streamPktHeader version=%d, subVersion=%d, extFlag=%d, streamType=%d, marker=%d, flag=%d"
-            "streamId=%d (%x), timestamp=%u (%x), dataLen=%u (%x), seqNum=%d (%x), subSeqNum=%d (%x)",
+            "streamPktHeader version=%{public}d, subVersion=%{public}d, extFlag=%{public}d, streamType=%{public}d, "
+            "marker=%{public}d, flag=%{public}d, streamId=%{public}d(%{public}x), timestamp=%{public}u(%{public}x), "
+            "dataLen=%{public}u(%{public}x), seqNum=%{public}d(%{public}x), subSeqNum=%{public}d(%{public}x)",
             header_.GetVersion(), header_.GetSubVersion(), header_.GetExtFlag(), header_.GetStreamType(),
             header_.GetMarker(), header_.GetFlag(), header_.GetStreamId(), header_.GetStreamId(),
             header_.GetTimestamp(), header_.GetTimestamp(), header_.GetDataLen(), header_.GetDataLen(),
@@ -42,9 +43,8 @@ void StreamDepacketizer::DepacketizeBuffer(char *buffer, uint32_t bufferSize)
     uint32_t tlvTotalLen = 0;
     if (header_.GetExtFlag() != 0) {
         tlvs_.Depacketize(ptr, bufferSize);
-        TRANS_LOGI(TRANS_STREAM,
-            "TLV version=%d, num=%d, extLen=%zd, checksum=%u", tlvs_.GetVersion(), tlvs_.GetTlvNums(),
-            tlvs_.GetExtLen(), tlvs_.GetCheckSum());
+        TRANS_LOGI(TRANS_STREAM, "TLV version=%{public}d, num=%{public}d, extLen=%{public}zd, checksum=%{public}u",
+            tlvs_.GetVersion(), tlvs_.GetTlvNums(), tlvs_.GetExtLen(), tlvs_.GetCheckSum());
 
         tlvTotalLen = tlvs_.GetCheckSum() + sizeof(tlvs_.GetCheckSum());
         ptr += tlvTotalLen;
@@ -52,22 +52,22 @@ void StreamDepacketizer::DepacketizeBuffer(char *buffer, uint32_t bufferSize)
 
     dataLength_ = static_cast<int>(header_.GetDataLen() - tlvTotalLen);
     if (dataLength_ <= 0 || dataLength_ > MAX_STREAM_LEN) {
-        TRANS_LOGE(TRANS_STREAM,
-            "error, header dataLen=%u, tlvTotalLen=%u", header_.GetDataLen(), tlvTotalLen);
+        TRANS_LOGE(
+            TRANS_STREAM,
+            "error. headerDataLen=%{public}u, tlvTotalLen=%{public}u", header_.GetDataLen(), tlvTotalLen);
         return;
     }
 
     int remain = static_cast<int>(bufferSize - (ptr - buffer));
     if (remain < dataLength_) {
-        TRANS_LOGE(TRANS_STREAM,
-            "Data out of bounds, remain=%d, dataLen=%d", remain, dataLength_);
+        TRANS_LOGE(TRANS_STREAM, "Data out of bounds, remain=%{public}d, dataLen=%{public}d", remain, dataLength_);
         return;
     }
 
     data_ = std::make_unique<char[]>(dataLength_);
     auto ret = memcpy_s(data_.get(), dataLength_, ptr, dataLength_);
     if (ret != 0) {
-        TRANS_LOGE(TRANS_STREAM, "Failed to memcpy data_, ret=%d", ret);
+        TRANS_LOGE(TRANS_STREAM, "Failed to memcpy data_, ret=%{public}d", ret);
         dataLength_ = -1;
     }
 }

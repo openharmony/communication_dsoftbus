@@ -62,7 +62,7 @@ int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel
 int32_t TransOnChannelOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
 {
     TRANS_LOGE(TRANS_SDK,
-        "[client]: channelId=%d, channelType=%d, errCode=%d.",
+        "[client]: channelId=%{public}d, channelType=%{public}d, errCode=%{public}d",
         channelId, channelType, errCode);
     switch (channelType) {
         case CHANNEL_TYPE_AUTH:
@@ -92,7 +92,7 @@ int32_t TransOnChannelLinkDown(const char *networkId, int32_t routeType)
 int32_t TransOnChannelClosed(int32_t channelId, int32_t channelType, ShutdownReason reason)
 {
     TRANS_LOGI(TRANS_SDK,
-        "[client]: channelId=%d, channelType=%d.", channelId, channelType);
+        "[client]: channelId=%{public}d, channelType=%{public}d", channelId, channelType);
     switch (channelType) {
         case CHANNEL_TYPE_AUTH:
             return ClientTransAuthOnChannelClosed(channelId, reason);
@@ -115,7 +115,7 @@ int32_t TransOnChannelMsgReceived(int32_t channelId, int32_t channelType,
         return SOFTBUS_INVALID_PARAM;
     }
     TRANS_LOGI(TRANS_MSG,
-        "[client]: channelId=%d, channelType=%d.", channelId, channelType);
+        "[client]: channelId=%{public}d, channelType=%{public}d", channelId, channelType);
     switch (channelType) {
         case CHANNEL_TYPE_AUTH:
             return ClientTransAuthOnDataReceived(channelId, data, len, type);
@@ -136,7 +136,8 @@ int32_t TransOnChannelQosEvent(int32_t channelId, int32_t channelType, int32_t e
         return SOFTBUS_INVALID_PARAM;
     }
     TRANS_LOGI(TRANS_QOS,
-        "[client] TransOnQosEvent: channelId=%d, channelType=%d eventId=%d.", channelId, channelType, eventId);
+        "[client] TransOnQosEvent: channelId=%{public}d, channelType=%{public}d, eventId=%{public}d", channelId,
+        channelType, eventId);
     switch (channelType) {
         case CHANNEL_TYPE_UDP:
             return TransOnUdpChannelQosEvent(channelId, eventId, tvCount, tvList);

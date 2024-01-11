@@ -59,7 +59,7 @@ int32_t SoftBusReadFullFile(const char *fileName, char *readBuf, uint32_t maxLen
     }
     ret = UtilsFileRead(fd, readBuf, maxLen);
     if (ret < 0) {
-        COMM_LOGE(COMM_ADAPTER, "Read UtilsFileRead, ret=%d", ret);
+        COMM_LOGE(COMM_ADAPTER, "Read UtilsFileRead, ret=%{public}d", ret);
         UtilsFileClose(fd);
         return SOFTBUS_FILE_ERR;
     }

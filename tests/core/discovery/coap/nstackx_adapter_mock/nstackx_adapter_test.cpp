@@ -43,7 +43,7 @@ HWTEST_F(NstackxAdapterTest, DiscCoapRegisterServiceData002, TestSize.Level1)
     DISC_LOGI(DISC_TEST, "DiscCoapRegisterServiceData002 begin ----");
     DiscNstackxInit();
     int32_t ret = LnnInitLocalLedger();
-    DISC_LOGI(DISC_TEST, "LnnInitLocalLedger called  ret = %d", ret);
+    DISC_LOGI(DISC_TEST, "LnnInitLocalLedger called  ret=%{public}d", ret);
 
     AdapterMock adapterMock;
     EXPECT_CALL(adapterMock, NSTACKX_RegisterServiceData(NotNull())).WillRepeatedly(Return(!SOFTBUS_OK));
