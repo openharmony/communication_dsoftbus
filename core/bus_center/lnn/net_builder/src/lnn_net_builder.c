@@ -49,6 +49,7 @@
 #include "lnn_p2p_info.h"
 #include "lnn_physical_subnet_manager.h"
 #include "lnn_sync_info_manager.h"
+#include "lnn_ohos_account.h"
 #include "lnn_sync_item_info.h"
 #include "lnn_topo_manager.h"
 #include "softbus_adapter_mem.h"
@@ -524,8 +525,12 @@ static void RemovePendingRequestByAddrType(const bool *addrType, uint32_t typeLe
     }
 }
 
-static bool IsNeedWifiReauth(const char *networkId, const char *newAccountHash)
+static bool IsNeedWifiReauth(const char *networkId, const char *newAccountHash, int32_t len)
 {
+    if (LnnIsDefaultOhosAccount()) {
+        LNN_LOGE(LNN_BUILDER, "local account is default");
+        return false;
+    }
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &info) != SOFTBUS_OK) {
@@ -537,6 +542,24 @@ static bool IsNeedWifiReauth(const char *networkId, const char *newAccountHash)
     LNN_LOGI(LNN_BUILDER, "peer networkId=%{public}s, accountHash:%{public}02x%{public}02x->%{public}02x%{public}02x",
         anonyNetworkId, info.accountHash[0], info.accountHash[1], newAccountHash[0], newAccountHash[1]);
     AnonymizeFree(anonyNetworkId);
+    uint8_t defaultAccountHash[SHA_256_HASH_LEN] = {0};
+    const char *defaultUserId = "0";
+    if (SoftBusGenerateStrHash((const unsigned char *)defaultUserId, strlen(defaultUserId), defaultAccountHash) !=
+        SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "generate default str hash fail");
+        return false;
+    }
+    bool isNullAccount = true;
+    for (uint32_t i = 0; i < len; ++i) {
+        if (newAccountHash[i] != 0) {
+            isNullAccount = false;
+            break;
+        }
+    }
+    if (isNullAccount || memcmp(newAccountHash, defaultAccountHash, HB_SHORT_ACCOUNT_HASH_LEN) == 0) {
+        LNN_LOGE(LNN_BUILDER, "accountHash is null or account is default");
+        return false;
+    }
     return memcmp(info.accountHash, newAccountHash, HB_SHORT_ACCOUNT_HASH_LEN) != 0;
 }
 
@@ -573,7 +596,8 @@ static int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReport
     LNN_LOGI(LNN_BUILDER, "addr same to before, peerAddr=%{public}s", LnnPrintConnectionAddr(&para->addr));
     ConnectionAddr addr = para->addr;
     SoftBusFree((void *)para);
-    if (addr.type != CONNECTION_ADDR_WLAN || !IsNeedWifiReauth(connFsm->connInfo.peerNetworkId, addr.peerUid)) {
+    if (addr.type != CONNECTION_ADDR_WLAN ||
+        !IsNeedWifiReauth(connFsm->connInfo.peerNetworkId, addr.peerUid, MAX_ACCOUNT_HASH_LEN)) {
         LNN_LOGI(LNN_BUILDER, "account not change no need reauth");
         return SOFTBUS_OK;
     }
