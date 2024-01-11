@@ -94,10 +94,10 @@ static int32_t GetRemoteUdidByBtMac(const char *peerMac, char *udid, int32_t len
     return SOFTBUS_OK;
 }
 
-static int32_t GetRemoteBtMacByUdidHash(const char *udidHash, char *brMac, int32_t len)
+static int32_t GetRemoteBtMacByUdidHash(const uint8_t *udidHash, uint32_t udidHashLen, char *brMac, int32_t len)
 {
     char networkId[NETWORK_ID_BUF_LEN] = {0};
-    if (LnnGetNetworkIdByUdidHash(udidHash, networkId, sizeof(networkId)) != SOFTBUS_OK) {
+    if (LnnGetNetworkIdByUdidHash(udidHash, udidHashLen, networkId, sizeof(networkId)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "LnnGetNetworkIdByUdidHash fail");
         return SOFTBUS_NOT_FIND;
     }
@@ -170,7 +170,8 @@ static int32_t ConvertBrConnInfo2BleConnInfo(AuthConnInfo *connInfo)
 static int32_t ConvertBleConnInfo2BrConnInfo(AuthConnInfo *connInfo)
 {
     char brMac[BT_MAC_LEN] = {0};
-    if (GetRemoteBtMacByUdidHash((char*)connInfo->info.bleInfo.deviceIdHash, brMac, BT_MAC_LEN) != SOFTBUS_OK) {
+    if (GetRemoteBtMacByUdidHash(connInfo->info.bleInfo.deviceIdHash, UDID_HASH_LEN,
+        brMac, BT_MAC_LEN) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get btmac by udid fail");
         return SOFTBUS_ERR;
     }

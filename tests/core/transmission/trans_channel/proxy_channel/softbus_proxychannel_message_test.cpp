@@ -909,8 +909,8 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyGetRemoteTest001, TestSize.Le
     int32_t ret = GetRemoteUdidByBtMac(brMac, udid, UDID_BUF_LEN);
     EXPECT_NE(SOFTBUS_OK, ret);
 
-    char deviceIdHash[UDID_HASH_LEN] = {0};
-    ret = GetRemoteBtMacByUdidHash(deviceIdHash, brMac, BT_MAC_LEN);
+    uint8_t deviceIdHash[UDID_HASH_LEN] = {0};
+    ret = GetRemoteBtMacByUdidHash(deviceIdHash, UDID_HASH_LEN, brMac, BT_MAC_LEN);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
