@@ -137,6 +137,7 @@ static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
     info.autoCloseTime = appInfo->autoCloseTime;
     info.timeStart = appInfo->timeStart;
     info.linkType = appInfo->linkType;
+    info.connectType = appInfo->connectType;
     int32_t ret = g_channelCb->GetPkgNameBySessionName(appInfo->myData.sessionName,
         (char*)appInfo->myData.pkgName, PKG_NAME_SIZE_MAX);
     if (ret != SOFTBUS_OK) {
@@ -180,7 +181,7 @@ int32_t NotifyUdpChannelOpenFailed(const AppInfo *info, int32_t errCode)
         .channelId = info->myData.channelId,
         .peerNetworkId = info->myData.deviceId,
         .socketName = info->myData.sessionName,
-        .linkType = info->linkType,
+        .linkType = info->connectType,
         .costTime = timediff,
         .errcode = errCode,
         .result = EVENT_STAGE_RESULT_FAILED
@@ -556,11 +557,25 @@ static void TransOnExchangeUdpInfoRequest(int64_t authId, int64_t seq, const cJS
     (void)memset_s(&info, sizeof(info), 0, sizeof(info));
     char* errDesc = NULL;
 
+    TransEventExtra extra = {
+        .calleePkg = NULL,
+        .callerPkg = NULL,
+        .socketName = NULL,
+        .peerNetworkId = NULL,
+        .channelType = CHANNEL_TYPE_UDP,
+        .authId = authId
+    };
     int32_t ret = ParseRequestAppInfo(authId, msg, &info);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get appinfo failed. ret=%{public}d", ret);
         errDesc = (char *)"peer device session name not create";
         goto ERR_EXIT;
+    }
+    if (info.udpChannelOptType == TYPE_UDP_CHANNEL_OPEN) {
+        extra.socketName = info.myData.sessionName;
+        extra.peerChannelId = info.peerData.channelId;
+        extra.result = EVENT_STAGE_RESULT_OK;
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_START, extra);
     }
     ret = ProcessUdpChannelState(&info, true);
     if (ret != SOFTBUS_OK) {
@@ -576,9 +591,18 @@ static void TransOnExchangeUdpInfoRequest(int64_t authId, int64_t seq, const cJS
         ProcessAbnormalUdpChannelState(&info, ret, false);
         goto ERR_EXIT;
     }
+    if (info.udpChannelOptType == TYPE_UDP_CHANNEL_OPEN) {
+        extra.result = EVENT_STAGE_RESULT_OK;
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
+    }
     return;
 
 ERR_EXIT:
+    if (extra.socketName != NULL && info.udpChannelOptType == TYPE_UDP_CHANNEL_OPEN) {
+        extra.result = EVENT_STAGE_RESULT_FAILED;
+        extra.errcode = ret;
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
+    }
     if (SendReplyErrInfo(ret, errDesc, authId, seq) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "send reply error info failed.");
     }
@@ -806,8 +830,7 @@ static int32_t OpenAuthConnForUdpNegotiation(UdpChannelInfo *channel)
         .channelType = CHANNEL_TYPE_UDP,
         .channelId = channel->info.myData.channelId,
         .requestId = requestId,
-        .peerNetworkId = channel->info.peerData.deviceId,
-        .result = EVENT_STAGE_RESULT_OK
+        .peerNetworkId = channel->info.peerNetWorkId
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, extra);
     if (ret != SOFTBUS_OK) {

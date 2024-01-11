@@ -26,9 +26,11 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
+#include "softbus_hisysevt_transreporter.h"
 #include "softbus_utils.h"
 #include "trans_auth_message.h"
 #include "trans_channel_limit.h"
+#include "trans_event.h"
 #include "trans_session_manager.h"
 #include "trans_channel_manager.h"
 #include "trans_log.h"
@@ -153,6 +155,8 @@ static int32_t NotifyOpenAuthChannelSuccess(const AppInfo *appInfo, bool isServe
     channelInfo.autoCloseTime = appInfo->autoCloseTime;
     channelInfo.reqId = (char*)appInfo->reqId;
     channelInfo.dataConfig = appInfo->myData.dataConfig;
+    channelInfo.timeStart = appInfo->timeStart;
+    channelInfo.connectType = appInfo->connectType;
     return g_cb->OnChannelOpened(appInfo->myData.pkgName, appInfo->myData.pid,
         appInfo->myData.sessionName, &channelInfo);
 }
@@ -314,6 +318,14 @@ static void OnRecvAuthChannelRequest(int32_t authId, const char *data, int32_t l
         return;
     }
 
+    TransEventExtra extra = {
+        .peerNetworkId = NULL,
+        .calleePkg = NULL,
+        .callerPkg = NULL,
+        .socketName = NULL,
+        .channelType = CHANNEL_TYPE_AUTH,
+        .authId = authId
+    };
     AppInfo appInfo;
     int32_t ret = TransAuthChannelMsgUnpack(data, &appInfo, len);
     if (ret != SOFTBUS_OK) {
@@ -321,6 +333,8 @@ static void OnRecvAuthChannelRequest(int32_t authId, const char *data, int32_t l
         TransPostAuthChannelErrMsg(authId, ret, "unpackRequest");
         goto EXIT_ERR;
     }
+    extra.socketName = appInfo.myData.sessionName;
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_START, extra);
     if (!CheckSessionNameValidOnAuthChannel(appInfo.myData.sessionName)) {
         TRANS_LOGE(TRANS_SVC, "check auth channel pkginfo invalid.");
         TransPostAuthChannelErrMsg(authId, ret, "check msginfo failed");
@@ -342,6 +356,9 @@ static void OnRecvAuthChannelRequest(int32_t authId, const char *data, int32_t l
         TransPostAuthChannelErrMsg(authId, ret, "unpackRequest");
         goto EXIT_ERR;
     }
+    extra.result = EVENT_STAGE_RESULT_OK;
+    extra.channelId = appInfo.myData.channelId;
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_START, extra);
     ret = NotifyOpenAuthChannelSuccess(&appInfo, true);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "NotifyOpenAuthChannelSuccess failed");
@@ -354,8 +371,14 @@ static void OnRecvAuthChannelRequest(int32_t authId, const char *data, int32_t l
         TransPostAuthChannelErrMsg(authId, ret, "send reply failed");
         goto EXIT_ERR;
     }
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
     return;
 EXIT_ERR:
+    if (extra.socketName != NULL) {
+        extra.result = EVENT_STAGE_RESULT_FAILED;
+        extra.errcode = ret;
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
+    }
     DelAuthChannelInfoByAuthId(authId);
     AuthCloseChannel(authId);
 }
@@ -396,6 +419,17 @@ static void OnRecvAuthChannelReply(int32_t authId, const char *data, int32_t len
         TRANS_LOGE(TRANS_SVC, "can not find channel info by auth id");
         return;
     }
+    TransEventExtra extra = {
+        .peerNetworkId = NULL,
+        .calleePkg = NULL,
+        .callerPkg = NULL,
+        .socketName = info.appInfo.myData.sessionName,
+        .channelId = info.appInfo.myData.channelId,
+        .channelType = CHANNEL_TYPE_AUTH,
+        .authId = authId,
+        .linkType = info.connOpt.type
+    };
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
     int32_t ret = TransAuthChannelMsgUnpack(data, &info.appInfo, len);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "unpackReply failed");
@@ -406,6 +440,8 @@ static void OnRecvAuthChannelReply(int32_t authId, const char *data, int32_t len
         TRANS_LOGE(TRANS_SVC, "ProcessDataConfig failed");
         goto EXIT_ERR;
     }
+    extra.result = EVENT_STAGE_RESULT_OK;
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
     ret = NotifyOpenAuthChannelSuccess(&info.appInfo, false);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "NotifyOpenAuthChannelSuccess failed");
@@ -413,6 +449,9 @@ static void OnRecvAuthChannelReply(int32_t authId, const char *data, int32_t len
     }
     return;
 EXIT_ERR:
+    extra.result = EVENT_STAGE_RESULT_FAILED;
+    extra.errcode = ret;
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     AuthCloseChannel(authId);
     DelAuthChannelInfoByChanId((int32_t)(info.appInfo.myData.channelId));
     (void)NotifyOpenAuthChannelFailed((const char *)(info.appInfo.myData.pkgName),
@@ -727,12 +766,27 @@ int32_t TransOpenAuthMsgChannel(const char *sessionName, const ConnectOption *co
         return SOFTBUS_MEM_ERR;
     }
     *channelId = (int32_t)channel->appInfo.myData.channelId;
+    channel->appInfo.timeStart = GetSoftbusRecordTimeMillis();
+    channel->appInfo.connectType = connOpt->type;
+    TransEventExtra extra = {
+        .peerNetworkId = NULL,
+        .calleePkg = NULL,
+        .callerPkg = NULL,
+        .socketName = sessionName,
+        .channelId = *channelId,
+        .channelType = CHANNEL_TYPE_AUTH,
+        .linkType = connOpt->type
+    };
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, extra);
     int32_t authId = AuthOpenChannel(connOpt->socketOption.addr, connOpt->socketOption.port);
     if (authId < 0) {
         TRANS_LOGE(TRANS_SVC, "AuthOpenChannel failed");
         SoftBusFree(channel);
         return SOFTBUS_ERR;
     }
+    extra.result = EVENT_STAGE_RESULT_OK;
+    extra.authId = authId;
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, extra);
     channel->authId = authId;
     if (SoftBusMutexLock(&g_authChannelList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "SoftBusMutexLock failed");
@@ -747,6 +801,8 @@ int32_t TransOpenAuthMsgChannel(const char *sessionName, const ConnectOption *co
         (void)SoftBusMutexUnlock(&g_authChannelList->lock);
         return SOFTBUS_ERR;
     }
+    extra.result = 0;
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_START, extra);
     if (TransPostAuthChannelMsg(&channel->appInfo, authId, AUTH_CHANNEL_REQ) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "TransPostAuthRequest failed");
         AuthCloseChannel(channel->authId);
@@ -754,6 +810,8 @@ int32_t TransOpenAuthMsgChannel(const char *sessionName, const ConnectOption *co
         (void)SoftBusMutexUnlock(&g_authChannelList->lock);
         return SOFTBUS_ERR;
     }
+    extra.result = EVENT_STAGE_RESULT_OK;
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_START, extra);
     (void)SoftBusMutexUnlock(&g_authChannelList->lock);
     return SOFTBUS_OK;
 }

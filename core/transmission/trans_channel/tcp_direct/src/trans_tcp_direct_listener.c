@@ -177,20 +177,36 @@ static int32_t TdcOnConnectEvent(ListenerModule module, int cfd, const ConnectOp
     }
     int32_t channelId = GenerateChannelId(true);
     int32_t ret = TransSrvAddDataBufNode(channelId, cfd); // fd != channelId
+    TransEventExtra extra = {
+        .socketName = NULL,
+        .peerNetworkId = NULL,
+        .calleePkg = NULL,
+        .callerPkg = NULL,
+        .socketFd = cfd,
+        .channelId = channelId
+    };
     if (ret != SOFTBUS_OK) {
+        extra.result = EVENT_STAGE_RESULT_FAILED;
+        extra.errcode = ret;
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_START_CONNECT, extra);
         TRANS_LOGE(TRANS_CTRL, "create srv data buf node failed.");
         ConnShutdownSocket(cfd);
         return ret;
     }
     ret = CreateSessionConnNode(module, cfd, channelId, clientAddr);
     if (ret != SOFTBUS_OK) {
+        extra.result = EVENT_STAGE_RESULT_FAILED;
+        extra.errcode = ret;
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_START_CONNECT, extra);
         TRANS_LOGE(TRANS_CTRL, "create session conn node fail, delete data buf node.");
         TransSrvDelDataBufNode(channelId);
         ConnShutdownSocket(cfd);
         return ret;
     }
-    TRANS_LOGI(TRANS_CTRL, "tdc conn event cfd=%{public}d, channelId=%{public}d, module=%{public}d.", cfd, channelId,
-        module);
+    extra.result = EVENT_STAGE_RESULT_OK;
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_START_CONNECT, extra);
+    TRANS_LOGI(TRANS_CTRL,
+        "tdc conn event cfd=%{public}d, channelId=%{public}d, module=%{public}d", cfd, channelId, module);
     return SOFTBUS_OK;
 }
 
@@ -217,7 +233,12 @@ static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channel
             .errcode = ret,
             .result = EVENT_STAGE_RESULT_FAILED
         };
-        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
+        SessionConn conn;
+        if (GetSessionConnById(channelId, &conn) == NULL || !conn.serverSide) {
+            TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
+        } else {
+            TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
+        }
         DelTrigger(module, fd, READ_TRIGGER);
         ConnShutdownSocket(fd);
         NotifyChannelOpenFailed(channelId, ret);
