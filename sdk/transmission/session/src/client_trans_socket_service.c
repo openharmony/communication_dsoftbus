@@ -35,7 +35,7 @@ static int32_t CheckSocketInfoIsValid(const SocketInfo *info)
     if (info->peerName != NULL && !IsValidString(info->peerName, SESSION_NAME_SIZE_MAX)) {
         char *anonySessionName = NULL;
         Anonymize(info->peerName, &anonySessionName);
-        TRANS_LOGI(TRANS_SDK, "strcpy peerName=%s failed, peerNameLen=%d",
+        TRANS_LOGI(TRANS_SDK, "strcpy peerName failed, peerName=%{public}s, peerNameLen=%{public}zu",
             anonySessionName, strlen(info->peerName));
         AnonymizeFree(anonySessionName);
         return SOFTBUS_INVALID_PARAM;
@@ -44,7 +44,7 @@ static int32_t CheckSocketInfoIsValid(const SocketInfo *info)
     if (info->peerNetworkId != NULL && !IsValidString(info->peerNetworkId, DEVICE_ID_SIZE_MAX)) {
         char *anonyNetworkId = NULL;
         Anonymize(info->peerNetworkId, &anonyNetworkId);
-        TRANS_LOGI(TRANS_SDK, "strcpy peerNetworkId=%s failed, peerNetworkIdLen=%d",
+        TRANS_LOGI(TRANS_SDK, "strcpy peerNetworkId failed, peerNetworkId=%{public}s, peerNetworkIdLen=%{public}zu",
             anonyNetworkId, strlen(info->peerNetworkId));
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_INVALID_PARAM;

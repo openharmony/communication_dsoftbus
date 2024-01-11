@@ -302,7 +302,7 @@ void SoftBusSocketFdSet(int32_t socketFd, SoftBusFdSet *set)
         return;
     }
     if (socketFd >= SOFTBUS_FD_SETSIZE) {
-        COMM_LOGE(COMM_ADAPTER, "socketFd %d is too big", socketFd);
+        COMM_LOGE(COMM_ADAPTER, "socketFd is too big. socketFd=%{public}d", socketFd);
         return;
     }
 
@@ -326,7 +326,7 @@ int32_t SoftBusSocketFdIsset(int32_t socketFd, SoftBusFdSet *set)
         return 0;
     }
     if (socketFd >= SOFTBUS_FD_SETSIZE) {
-        COMM_LOGE(COMM_ADAPTER, "socketFd %d is too big", socketFd);
+        COMM_LOGE(COMM_ADAPTER, "socketFd is too big. socketFd=%{public}d", socketFd);
         return 0;
     }
 
