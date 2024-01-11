@@ -21,6 +21,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_hisysevt_transreporter.h"
 #include "softbus_socket.h"
 #include "trans_event.h"
 #include "trans_log.h"
@@ -37,6 +38,25 @@ static void OnSessionOpenFailProc(const SessionConn *node, int32_t errCode)
 {
     TRANS_LOGW(TRANS_CTRL, "OnSesssionOpenFailProc: channelId=%d, side=%d, status=%d",
         node->channelId, node->serverSide, node->status);
+    int64_t timeStart = node->appInfo.timeStart;
+    int64_t timeDiff = GetSoftbusRecordTimeMillis() - timeStart;
+    TransEventExtra extra = {
+        .calleePkg = NULL,
+        .callerPkg = node->appInfo.myData.pkgName,
+        .channelId = node->appInfo.myData.channelId,
+        .peerChannelId = node->appInfo.peerData.channelId,
+        .peerNetworkId = node->appInfo.peerNetWorkId,
+        .socketName = node->appInfo.myData.sessionName,
+        .linkType = node->appInfo.connectType,
+        .costTime = (int32_t)timeDiff,
+        .errcode = errCode,
+        .result = EVENT_STAGE_RESULT_FAILED
+    };
+    if (!node->serverSide) {
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
+    } else {
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_OPEN_CHANNEL_END, extra);
+    }
     if (node->serverSide == false) {
         if (TransTdcOnChannelOpenFailed(node->appInfo.myData.pkgName, node->appInfo.myData.pid,
             node->channelId, errCode) != SOFTBUS_OK) {
