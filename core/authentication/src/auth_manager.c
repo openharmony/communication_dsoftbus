@@ -1444,7 +1444,7 @@ int32_t AuthDeviceGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo)
     }
     int32_t ret = GetAuthConnInfoByUuid(uuid, AUTH_LINK_TYPE_ENHANCED_P2P, connInfo);
     if (ret == SOFTBUS_OK) {
-        AUTH_LOGI(AUTH_CONN, "select auth type: %d", AUTH_LINK_TYPE_ENHANCED_P2P);
+        AUTH_LOGI(AUTH_CONN, "select auth type=%{public}d", AUTH_LINK_TYPE_ENHANCED_P2P);
     }
     return ret;
 }
