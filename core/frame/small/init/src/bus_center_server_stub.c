@@ -52,7 +52,7 @@ int32_t ServerJoinLNN(IpcIo *req, IpcIo *reply)
     uint32_t addrTypeLen;
     ReadUint32(req, &addrTypeLen);
     if (addrTypeLen != sizeof(ConnectionAddr)) {
-        LNN_LOGE(LNN_STATE, "ServerJoinLNN read addrTypeLen=%d failed", addrTypeLen);
+        LNN_LOGE(LNN_STATE, "ServerJoinLNN read addrTypeLen=%{public}d failed", addrTypeLen);
         return SOFTBUS_ERR;
     }
     void *addr = (void *)ReadBuffer(req, addrTypeLen);
@@ -210,7 +210,8 @@ int32_t ServerGetNodeKeyInfo(IpcIo *req, IpcIo *reply)
     int32_t len;
     ReadInt32(req, &len);
     if (len < infoLen) {
-        LNN_LOGE(LNN_STATE, "GetNodeKeyInfoInner read len is invalid param, len=%d, infoLen=%d", len, infoLen);
+        LNN_LOGE(LNN_STATE, "GetNodeKeyInfoInner read len is invalid param, len=%{public}d, infoLen=%{public}d", len,
+            infoLen);
         return SOFTBUS_ERR;
     }
     void *buf = SoftBusCalloc(infoLen);
@@ -513,7 +514,7 @@ int32_t ServerDeactiveMetaNode(IpcIo *req, IpcIo *reply)
     const char *pkgName = (const char*)ReadString(req, &size);
     const char *metaNodeId = (const char*)ReadString(req, &size);
     if (metaNodeId == NULL || size != (NETWORK_ID_BUF_LEN - 1)) {
-        LNN_LOGE(LNN_STATE, "ServerDeactiveMetaNode read meta node id failed, size=%d", size);
+        LNN_LOGE(LNN_STATE, "ServerDeactiveMetaNode read meta node id failed, size=%{public}d", size);
         WriteInt32(reply, SOFTBUS_INVALID_PARAM);
         return SOFTBUS_ERR;
     }

@@ -100,7 +100,7 @@ int TransRegisterNetworkingChannelListener(const char *sessionName, const INetwo
         }
     }
     if (unuse == -1) {
-        TRANS_LOGE(TRANS_CTRL, "exceed maxlisten=%d listener registered", MAX_LISTENER_CNT);
+        TRANS_LOGE(TRANS_CTRL, "exceed max listener registered. maxlisten=%{public}d", MAX_LISTENER_CNT);
         return SOFTBUS_ERR;
     }
 

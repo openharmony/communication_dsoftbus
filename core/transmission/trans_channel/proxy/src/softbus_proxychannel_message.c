@@ -41,7 +41,7 @@ static int32_t TransProxyParseMessageHead(char *data, int32_t len, ProxyMessage 
     int8_t version = (firstByte >> VERSION_SHIFT) & FOUR_BIT_MASK;
     msg->msgHead.type = firstByte & FOUR_BIT_MASK;
     if (version != VERSION || msg->msgHead.type >= PROXYCHANNEL_MSG_TYPE_MAX) {
-        TRANS_LOGE(TRANS_CTRL, "parseMessage: unsupported message, version=%d, type=%d",
+        TRANS_LOGE(TRANS_CTRL, "parseMessage: unsupported message, version=%{public}d, type=%{public}d",
             version, msg->msgHead.type);
         return SOFTBUS_ERR;
     }
@@ -81,7 +81,7 @@ static int32_t GetRemoteUdidByBtMac(const char *peerMac, char *udid, int32_t len
     char networkId[NETWORK_ID_BUF_LEN] = {0};
     char *tmpMac = NULL;
     Anonymize(peerMac, &tmpMac);
-    TRANS_LOGI(TRANS_CTRL, "peerMac=%s", tmpMac);
+    TRANS_LOGI(TRANS_CTRL, "peerMac=%{public}s", tmpMac);
     AnonymizeFree(tmpMac);
     if (LnnGetNetworkIdByBtMac(peerMac, networkId, sizeof(networkId)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "LnnGetNetworkIdByBtMac fail");
@@ -112,7 +112,7 @@ static int32_t TransProxyGetAuthConnInfo(uint32_t connId, AuthConnInfo *connInfo
 {
     ConnectionInfo info = {0};
     if (ConnGetConnectionInfo(connId, &info) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "ConnGetConnectionInfo fail, connId=%u", connId);
+        TRANS_LOGE(TRANS_CTRL, "ConnGetConnectionInfo fail, connId=%{public}u", connId);
         return SOFTBUS_ERR;
     }
     switch (info.type) {
@@ -145,7 +145,7 @@ static int32_t TransProxyGetAuthConnInfo(uint32_t connId, AuthConnInfo *connInfo
             connInfo->info.bleInfo.psm = info.bleInfo.psm;
             break;
         default:
-            TRANS_LOGE(TRANS_CTRL, "unexpected conn type=%d.", info.type);
+            TRANS_LOGE(TRANS_CTRL, "unexpected conn type=%{public}d.", info.type);
             return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -186,10 +186,10 @@ static int64_t GetAuthIdByHandshakeMsg(uint32_t connId, uint8_t cipher)
 {
     AuthConnInfo connInfo;
     if (TransProxyGetAuthConnInfo(connId, &connInfo) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get connInfo fail connId=%d", connId);
+        TRANS_LOGE(TRANS_CTRL, "get connInfo fail connId=%{public}d", connId);
         return AUTH_INVALID_ID;
     }
-    TRANS_LOGI(TRANS_CTRL, "cipher=%d, connInfo type=%d", cipher, connInfo.type);
+    TRANS_LOGI(TRANS_CTRL, "cipher=%{public}d, connInfoType=%{public}d", cipher, connInfo.type);
     bool isBle = ((cipher & USE_BLE_CIPHER) != 0);
     if (isBle && connInfo.type == AUTH_LINK_TYPE_BR) {
         if (ConvertBrConnInfo2BleConnInfo(&connInfo) != SOFTBUS_OK) {
@@ -212,7 +212,7 @@ int32_t GetBrMacFromConnInfo(uint32_t connId, char *peerBrMac, uint32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
     if (TransProxyGetAuthConnInfo(connId, &connInfo) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get connInfo fail connId=%d", connId);
+        TRANS_LOGE(TRANS_CTRL, "get connInfo fail connId=%{public}d", connId);
         return SOFTBUS_ERR;
     }
     if (strcpy_s(peerBrMac, len, connInfo.info.brInfo.brMac) != EOK) {
@@ -225,7 +225,7 @@ int32_t GetBrMacFromConnInfo(uint32_t connId, char *peerBrMac, uint32_t len)
 int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg)
 {
     if (len <= PROXY_CHANNEL_HEAD_LEN) {
-        TRANS_LOGE(TRANS_CTRL, "parseMessage: invalid message len=%d", len);
+        TRANS_LOGE(TRANS_CTRL, "parseMessage: invalid message len=%{public}d", len);
         return SOFTBUS_ERR;
     }
     if (TransProxyParseMessageHead(data, len, msg) != SOFTBUS_OK) {
@@ -236,14 +236,14 @@ int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg)
     if (isEncrypted) {
         if (msg->msgHead.type == PROXYCHANNEL_MSG_TYPE_HANDSHAKE) {
             TRANS_LOGI(TRANS_CTRL,
-                "prxoy recv handshake cipher=0x%02x", msg->msgHead.cipher);
+                "prxoy recv handshake cipher=0x%{public}02x", msg->msgHead.cipher);
             msg->authId = GetAuthIdByHandshakeMsg(msg->connId, msg->msgHead.cipher);
         } else {
             msg->authId = TransProxyGetAuthId(msg->msgHead.myId);
         }
         if (msg->authId == AUTH_INVALID_ID) {
             TRANS_LOGE(TRANS_CTRL,
-                "get authId for decrypt fail, connId=%d, myChannelId=%d, type=%d",
+                "get authId for decrypt fail, connId=%{public}d, myChannelId=%{public}d, type=%{public}d",
                 msg->connId, msg->msgHead.myId, msg->msgHead.type);
             return SOFTBUS_AUTH_NOT_FOUND;
         }
@@ -285,7 +285,7 @@ int32_t PackPlaintextMessage(ProxyMessageHead *msg, ProxyDataInfo *dataInfo)
     uint32_t size = PROXY_CHANNEL_HEAD_LEN + connHeadLen + dataInfo->inLen;
     uint8_t *buf = (uint8_t *)SoftBusCalloc(size);
     if (buf == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "malloc proxy buf fail, myChannelId=%d", msg->myId);
+        TRANS_LOGE(TRANS_CTRL, "malloc proxy buf fail, myChannelId=%{public}d", msg->myId);
         return SOFTBUS_MALLOC_ERR;
     }
     TransProxyPackMessageHead(msg, buf + connHeadLen, PROXY_CHANNEL_HEAD_LEN);
@@ -303,13 +303,13 @@ int32_t PackPlaintextMessage(ProxyMessageHead *msg, ProxyDataInfo *dataInfo)
 static int32_t PackEncryptedMessage(ProxyMessageHead *msg, int64_t authId, ProxyDataInfo *dataInfo)
 {
     if (authId == AUTH_INVALID_ID) {
-        TRANS_LOGE(TRANS_CTRL, "invalid authId, myChannelId=%d", msg->myId);
+        TRANS_LOGE(TRANS_CTRL, "invalid authId, myChannelId=%{public}d", msg->myId);
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t size = ConnGetHeadSize() + PROXY_CHANNEL_HEAD_LEN + AuthGetEncryptSize(dataInfo->inLen);
     uint8_t *buf = (uint8_t *)SoftBusCalloc(size);
     if (buf == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "malloc enc buf fail, myChannelId=%d", msg->myId);
+        TRANS_LOGE(TRANS_CTRL, "malloc enc buf fail, myChannelId=%{public}d", msg->myId);
         return SOFTBUS_MALLOC_ERR;
     }
     TransProxyPackMessageHead(msg, buf + ConnGetHeadSize(), PROXY_CHANNEL_HEAD_LEN);
@@ -317,7 +317,7 @@ static int32_t PackEncryptedMessage(ProxyMessageHead *msg, int64_t authId, Proxy
     uint32_t encDataLen = size - ConnGetHeadSize() - PROXY_CHANNEL_HEAD_LEN;
     if (AuthEncrypt(authId, dataInfo->inData, dataInfo->inLen, encData, &encDataLen) != SOFTBUS_OK) {
         SoftBusFree(buf);
-        TRANS_LOGE(TRANS_CTRL, "pack msg encrypt fail, myChannelId=%d", msg->myId);
+        TRANS_LOGE(TRANS_CTRL, "pack msg encrypt fail, myChannelId=%{public}d", msg->myId);
         return SOFTBUS_ENCRYPT_ERR;
     }
     dataInfo->outData = buf;
@@ -338,7 +338,7 @@ int32_t TransProxyPackMessage(ProxyMessageHead *msg, int64_t authId, ProxyDataIn
         ret = PackEncryptedMessage(msg, authId, dataInfo);
     }
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "pack proxy msg fail, myChannelId=%d", msg->myId);
+        TRANS_LOGE(TRANS_CTRL, "pack proxy msg fail, myChannelId=%{public}d", msg->myId);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -395,10 +395,10 @@ static int32_t PackHandshakeMsgForNormal(SessionKeyBase64 *sessionBase64, AppInf
         sizeof(sessionBase64->sessionKeyBase64), &(sessionBase64->len),
         (unsigned char *)appInfo->sessionKey, sizeof(appInfo->sessionKey));
     if (ret != 0) {
-        TRANS_LOGE(TRANS_CTRL, "mbedtls_base64_encode FAIL ret=%d", ret);
+        TRANS_LOGE(TRANS_CTRL, "mbedtls_base64_encode FAIL ret=%{public}d", ret);
         return ret;
     }
-    TRANS_LOGI(TRANS_CTRL, "mbedtls_base64_encode len=%zu", sessionBase64->len);
+    TRANS_LOGI(TRANS_CTRL, "mbedtls_base64_encode len=%{public}zu", sessionBase64->len);
     if (!AddNumberToJsonObject(root, JSON_KEY_UID, appInfo->myData.uid) ||
         !AddNumberToJsonObject(root, JSON_KEY_PID, appInfo->myData.pid) ||
         !AddStringToJsonObject(root, JSON_KEY_GROUP_ID, appInfo->groupId) ||
@@ -482,7 +482,7 @@ char *TransProxyPackHandshakeMsg(ProxyChannelInfo *info)
         ret = SoftBusBase64Encode((uint8_t *)sessionBase64.sessionKeyBase64, sizeof(sessionBase64.sessionKeyBase64),
             &(sessionBase64.len), (uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey));
         if (ret != 0) {
-            TRANS_LOGE(TRANS_CTRL, "mbedtls_base64_encode FAIL ret=%d", ret);
+            TRANS_LOGE(TRANS_CTRL, "mbedtls_base64_encode FAIL ret=%{public}d", ret);
             goto EXIT;
         }
         if (!AddStringToJsonObject(root, JSON_KEY_SESSION_KEY, sessionBase64.sessionKeyBase64)) {
@@ -722,7 +722,7 @@ static int32_t TransProxyUnpackNormalHandshakeMsg(cJSON *root, AppInfo *appInfo,
     int32_t ret = SoftBusBase64Decode((uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey),
         &len, (uint8_t *)sessionKey, strlen(sessionKey));
     if (len != sizeof(appInfo->sessionKey) || ret != 0) {
-        TRANS_LOGE(TRANS_CTRL, "decode session fail ret=%d ", ret);
+        TRANS_LOGE(TRANS_CTRL, "decode session fail ret=%{public}d", ret);
         return SOFTBUS_DECRYPT_ERR;
     }
     if (UnpackPackHandshakeMsgForFastData(appInfo, root) != SOFTBUS_OK) {
@@ -757,7 +757,7 @@ static int32_t TransProxyUnpackInnerHandshakeMsg(cJSON *root, AppInfo *appInfo, 
     int32_t ret = SoftBusBase64Decode((uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey),
         &len, (uint8_t *)sessionKey, strlen(sessionKey));
     if (len != sizeof(appInfo->sessionKey) || ret != 0) {
-        TRANS_LOGE(TRANS_CTRL, "decode session fail ret=%d ", ret);
+        TRANS_LOGE(TRANS_CTRL, "decode session fail ret=%{public}d", ret);
         return SOFTBUS_DECRYPT_ERR;
     }
     return SOFTBUS_OK;

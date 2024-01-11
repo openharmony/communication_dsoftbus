@@ -59,15 +59,15 @@ int32_t GetCipherFlagByAuthId(int64_t authId, uint32_t *flag, bool *isAuthServer
     }
     AuthConnInfo info;
     if (AuthGetServerSide(authId, isAuthServer) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get auth server side fail authId=%" PRId64, authId);
+        TRANS_LOGE(TRANS_CTRL, "get auth server side fail authId=%{public}" PRId64, authId);
         return SOFTBUS_ERR;
     }
     if (AuthGetConnInfo(authId, &info) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get authinfo fail authId=%" PRId64, authId);
+        TRANS_LOGE(TRANS_CTRL, "get authinfo fail authId=%{public}" PRId64, authId);
         return SOFTBUS_ERR;
     }
     *flag = SwitchAuthLinkTypeToFlagType(info.type);
-    TRANS_LOGI(TRANS_CTRL, "get auth link type=%d flag=0x%x", info.type, *flag);
+    TRANS_LOGI(TRANS_CTRL, "get auth link type=%{public}d, flag=0x%{public}x", info.type, *flag);
     return SOFTBUS_OK;
 }
 
@@ -172,7 +172,7 @@ static int32_t CreateSessionConnNode(ListenerModule module, int fd, int32_t chan
 static int32_t TdcOnConnectEvent(ListenerModule module, int cfd, const ConnectOption *clientAddr)
 {
     if (cfd < 0 || clientAddr == NULL) {
-        TRANS_LOGW(TRANS_CTRL, "invalid param, cfd=%d", cfd);
+        TRANS_LOGW(TRANS_CTRL, "invalid param, cfd=%{public}d", cfd);
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t channelId = GenerateChannelId(true);
@@ -189,7 +189,8 @@ static int32_t TdcOnConnectEvent(ListenerModule module, int cfd, const ConnectOp
         ConnShutdownSocket(cfd);
         return ret;
     }
-    TRANS_LOGI(TRANS_CTRL, "tdc conn event cfd=%d, channelId=%d, module=%d.", cfd, channelId, module);
+    TRANS_LOGI(TRANS_CTRL, "tdc conn event cfd=%{public}d, channelId=%{public}d, module=%{public}d.", cfd, channelId,
+        module);
     return SOFTBUS_OK;
 }
 
@@ -230,7 +231,7 @@ static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channel
 static int32_t ProcessSocketInEvent(SessionConn *conn, int fd)
 {
     int32_t ret = TransTdcSrvRecvData(conn->listenMod, conn->channelId);
-    TRANS_LOGE(TRANS_CTRL, "Trans Srv Recv Data ret=%d. ", ret);
+    TRANS_LOGE(TRANS_CTRL, "Trans Srv Recv Data ret=%{public}d. ", ret);
     if (ret == SOFTBUS_DATA_NOT_ENOUGH) {
         return SOFTBUS_OK;
     }
@@ -286,7 +287,7 @@ static int32_t TdcOnDataEvent(ListenerModule module, int events, int fd)
         return SOFTBUS_MALLOC_ERR;
     }
     if (GetSessionConnByFd(fd, conn) == NULL || conn->appInfo.fd != fd) {
-        TRANS_LOGE(TRANS_CTRL, "fd=%d is not exist tdc info. appfd=%d", fd, conn->appInfo.fd);
+        TRANS_LOGE(TRANS_CTRL, "fd=%{public}d is not exist tdc info. appfd=%{public}d", fd, conn->appInfo.fd);
         for (uint32_t i = DIRECT_CHANNEL_SERVER_P2P; i <= DIRECT_CHANNEL_SERVER_HML_END; i++) {
             DelTrigger(i, fd, READ_TRIGGER);
             DelTrigger(i, fd, WRITE_TRIGGER);
@@ -321,7 +322,7 @@ int32_t TransTdcStartSessionListener(ListenerModule module, const LocalListenerI
         .onDataEvent = TdcOnDataEvent
     };
 
-    TRANS_LOGI(TRANS_CTRL, "set listener for module=%d.", module);
+    TRANS_LOGI(TRANS_CTRL, "set listener for module=%{public}d.", module);
     int serverPort = StartBaseListener(info, &sessionListener);
     return serverPort;
 }

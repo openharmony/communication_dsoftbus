@@ -71,7 +71,7 @@ static int PackFirstData(const AppInfo *appInfo, cJSON *json)
         return SOFTBUS_ENCRYPT_ERR;
     }
     if (outLen != appInfo->fastTransDataSize + FAST_TDC_EXT_DATA_SIZE) {
-        TRANS_LOGE(TRANS_CTRL, "pack bytes len error, outlen=%d", outLen);
+        TRANS_LOGE(TRANS_CTRL, "pack bytes len error, outlen=%{public}d", outLen);
         SoftBusFree(buf);
         SoftBusFree(encodeFastData);
         return SOFTBUS_ENCRYPT_ERR;
@@ -163,7 +163,7 @@ static int UnpackFirstData(AppInfo *appInfo, const cJSON *json)
     if (!GetJsonObjectNumber16Item(json, FIRST_DATA_SIZE, &(appInfo->fastTransDataSize))) {
         appInfo->fastTransDataSize = 0;
     }
-    TRANS_LOGD(TRANS_CTRL, "fastDataSize=%d", appInfo->fastTransDataSize);
+    TRANS_LOGD(TRANS_CTRL, "fastDataSize=%{public}d", appInfo->fastTransDataSize);
     if (appInfo->fastTransDataSize > 0 && appInfo->fastTransDataSize <= MAX_FAST_DATA_LEN) {
         uint8_t *encodeFastData = (uint8_t *)SoftBusMalloc(BASE64_FAST_DATA_LEN);
         if (encodeFastData == NULL) {
@@ -237,7 +237,7 @@ int UnpackRequest(const cJSON *msg, AppInfo *appInfo)
         &len, (unsigned char *)sessionKey, strlen(sessionKey));
     (void)memset_s(sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
     if (len != SESSION_KEY_LENGTH) {
-        TRANS_LOGE(TRANS_CTRL, "Failed to decode sessionKey ret=%d, len=%zu", ret, len);
+        TRANS_LOGE(TRANS_CTRL, "Failed to decode sessionKey ret=%{public}d, len=%{public}zu", ret, len);
         return SOFTBUS_ERR;
     }
     if (apiVersion == API_V1) {
@@ -390,7 +390,7 @@ static int32_t TransTdcEncrypt(const char *sessionKey, const char *in, uint32_t 
     int32_t ret = SoftBusEncryptData(&cipherKey, (unsigned char*)in, inLen, (unsigned char*)out, outLen);
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "SoftBusEncryptData fail(ret=%d).", ret);
+        TRANS_LOGE(TRANS_CTRL, "SoftBusEncryptData fail. ret=%{public}d", ret);
         return SOFTBUS_ENCRYPT_ERR;
     }
     return SOFTBUS_OK;

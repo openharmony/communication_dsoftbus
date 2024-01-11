@@ -48,7 +48,7 @@ static enum WifiDirectLinkType GetLinkType(enum WifiDirectConnectType connectTyp
         case WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML:
             return WIFI_DIRECT_LINK_TYPE_HML;
         default:
-            CONN_LOGE(CONN_WIFI_DIRECT, "connectType=%d invalid", connectType);
+            CONN_LOGE(CONN_WIFI_DIRECT, "connectType invalid. connectType=%{public}d", connectType);
             return WIFI_DIRECT_LINK_TYPE_INVALID;
     }
 }
@@ -65,7 +65,7 @@ static struct InnerLink *GetReuseLink(struct WifiDirectConnectCommand *command)
     CONN_CHECK_AND_RETURN_RET_LOGW(link != NULL, NULL, CONN_WIFI_DIRECT, "link is null");
     enum InnerLinkState state = link->getInt(link, IL_KEY_STATE, INNER_LINK_STATE_DISCONNECTED);
     CONN_CHECK_AND_RETURN_RET_LOGW(state == INNER_LINK_STATE_CONNECTED, NULL, CONN_WIFI_DIRECT,
-                                   "state=%d not connected", state);
+                                   "state not connected. state=%{public}d", state);
     struct WifiDirectIpv4Info *ipv4 = link->getRawData(link, IL_KEY_REMOTE_IPV4, NULL, NULL);
     CONN_CHECK_AND_RETURN_RET_LOGW(ipv4 != NULL, NULL, CONN_WIFI_DIRECT, "ipv4 is null");
     return link;
@@ -75,7 +75,7 @@ static int32_t ReuseLink(struct WifiDirectConnectCommand *command, struct InnerL
 {
     struct WifiDirectConnectInfo *connectInfo = &command->connectInfo;
     bool isBeingUsedByLocal = link->getBoolean(link, IL_KEY_IS_BEING_USED_BY_LOCAL, false);
-    CONN_LOGI(CONN_WIFI_DIRECT, "isBeingUsedByLocal=%d", isBeingUsedByLocal);
+    CONN_LOGI(CONN_WIFI_DIRECT, "isBeingUsedByLocal=%{public}d", isBeingUsedByLocal);
 
     if (isBeingUsedByLocal) {
         CONN_LOGI(CONN_WIFI_DIRECT, "reuse success");
@@ -93,7 +93,7 @@ static int32_t ReuseLink(struct WifiDirectConnectCommand *command, struct InnerL
 
     command->processor = processor;
     processor->activeCommand = (struct WifiDirectCommand *)command;
-    CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=%d", command->type);
+    CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=%{public}d", command->type);
     GetWifiDirectNegotiator()->currentProcessor = processor;
 
     return processor->reuseLink(connectInfo, link);
@@ -116,7 +116,7 @@ static int32_t OpenLink(struct WifiDirectConnectCommand *command)
 
     command->processor = processor;
     processor->activeCommand = (struct WifiDirectCommand *)command;
-    CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=%d", command->type);
+    CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=%{public}d", command->type);
     GetWifiDirectNegotiator()->currentProcessor = processor;
 
     return processor->createLink(connectInfo);
@@ -126,7 +126,7 @@ static void ExecuteConnection(struct WifiDirectCommand *base)
 {
     struct WifiDirectConnectCommand *self = (struct WifiDirectConnectCommand *)base;
     self->times++;
-    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%d times=%d", self->connectInfo.requestId, self->times);
+    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}d, times=%{public}d", self->connectInfo.requestId, self->times);
 
     int32_t ret = OpenLink(self);
     if (ret != SOFTBUS_OK) {
@@ -154,7 +154,7 @@ static void OnConnectSuccess(struct WifiDirectCommand *base, struct NegotiateMes
     (void)memset_s(&link, sizeof(link), 0, sizeof(link));
     int32_t requestId = self->connectInfo.requestId;
     innerLink->getLink(innerLink, requestId, self->connectInfo.pid, &link);
-    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%d linkId=%d", requestId, link.linkId);
+    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}d, linkId=%{public}d", requestId, link.linkId);
 
     if (self->callback.onConnectSuccess != NULL) {
         CONN_LOGI(CONN_WIFI_DIRECT, "call onConnectSuccess");
@@ -174,7 +174,7 @@ static void OnConnectSuccess(struct WifiDirectCommand *base, struct NegotiateMes
 static void OnConnectFailure(struct WifiDirectCommand *base, int32_t reason)
 {
     struct WifiDirectConnectCommand *self = (struct WifiDirectConnectCommand *)base;
-    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%d reason=%d", self->connectInfo.requestId, reason);
+    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}d, reason=%{public}d", self->connectInfo.requestId, reason);
 
     if (IsNeedRetry(base, reason)) {
         CONN_LOGI(CONN_WIFI_DIRECT, "retry command");

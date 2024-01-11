@@ -22,7 +22,7 @@
 namespace OHOS {
 void PermissionStatusChangeCb::PermStateChangeCallback(PermStateChangeInfo& result)
 {
-    COMM_LOGI(COMM_PERM, "%{public}s changed.", result.permissionName.c_str());
+    COMM_LOGI(COMM_PERM, "permission changed. permissionName=%{public}s", result.permissionName.c_str());
     if (InformPermissionChange(result.permStateChangeType, this->pkgName.c_str(), pid) != SOFTBUS_OK) {
         COMM_LOGE(COMM_PERM, "InformPermissionChange fail");
     }
@@ -36,7 +36,7 @@ void RegisterDataSyncPermission(const uint32_t& callingTokenId,
     scopeInfo.tokenIDs = {callingTokenId};
     std::shared_ptr<PermissionStatusChangeCb> callbackPtr_ =
         std::make_shared<PermissionStatusChangeCb>(scopeInfo, pkgName, pid);
-    COMM_LOGI(COMM_PERM, "after tokenId:%{public}d register", callingTokenId);
+    COMM_LOGI(COMM_PERM, "after register. tokenId=%{public}d", callingTokenId);
     if (AccessTokenKit::RegisterPermStateChangeCallback(callbackPtr_) != SOFTBUS_OK) {
         COMM_LOGE(COMM_PERM, "RegisterPermStateChangeCallback failed.");
     }
