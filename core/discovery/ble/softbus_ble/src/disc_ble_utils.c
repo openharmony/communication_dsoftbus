@@ -216,7 +216,7 @@ static int32_t CalculateMbsTruncateSize(const char *multiByteStr, uint32_t capac
     while (capacity < multiByteStrLen - truncateTotal && truncateIndex >= 0) {
         int32_t truncateCharLen = wctomb(multiByteChar, wideStr[truncateIndex]);
         if (truncateCharLen <= 0) {
-            DISC_LOGE(DISC_BLE, "wctomb failed on %d w_char", truncateIndex);
+            DISC_LOGE(DISC_BLE, "wctomb failed on w_char. truncateIndex=%{public}d", truncateIndex);
             RestoreLocale(localeBefore);
             return SOFTBUS_ERR;
         }
@@ -247,7 +247,8 @@ int32_t AssembleTLV(BroadcastData *broadcastData, uint8_t dataType, const void *
     uint32_t validLen = (dataLen > remainLen) ? remainLen : dataLen;
     if (dataType == TLV_TYPE_DEVICE_NAME) {
         if (CalculateMbsTruncateSize((const char *)value, remainLen - 1, &validLen) != SOFTBUS_OK) {
-            DISC_LOGE(DISC_BLE, "truncate device name failed, validLen: %u remainLen: %u", validLen, remainLen);
+            DISC_LOGE(DISC_BLE,
+                "truncate device name failed, validLen=%{public}u, remainLen=%{public}u", validLen, remainLen);
             return SOFTBUS_ERR;
         }
         broadcastData->data.data[broadcastData->dataLen + validLen] = '\0';
@@ -264,7 +265,8 @@ int32_t AssembleTLV(BroadcastData *broadcastData, uint8_t dataType, const void *
 static int32_t CopyValue(void *dst, uint32_t dstLen, const void *src, uint32_t srcLen, const char *hint)
 {
     if (memcpy_s(dst, dstLen, src, srcLen) != EOK) {
-        DISC_LOGE(DISC_BLE, "parse tlv memcpy failed, tlvType: %s, tlvLen: %u, dstLen: %u", hint, srcLen, dstLen);
+        DISC_LOGE(DISC_BLE, "parse tlv memcpy failed, tlvType=%{public}s, tlvLen=%{public}u, dstLen=%{public}u",
+            hint, srcLen, dstLen);
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -280,7 +282,7 @@ static int32_t CopyBrAddrValue(DeviceWrapper *device, const uint8_t *src, uint32
         device->info->addrNum += 1;
         return SOFTBUS_OK;
     }
-    DISC_LOGE(DISC_BLE, "parse tlv convert br failed, tlvType: TLV_TYPE_BR_MAC, tlvLen: %u, dstLen: %d",
+    DISC_LOGE(DISC_BLE, "parse tlv convert br failed, tlvType=TLV_TYPE_BR_MAC, tlvLen=%{public}u, dstLen=%{public}d",
         srcLen, BT_MAC_LEN);
     return ret;
 }
@@ -386,7 +388,8 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_
         uint32_t len = (uint32_t)(data[curLen] & DATA_LENGTH_MASK);
         if (curLen + TL_LEN + len > dataLen || (len == TLV_VARIABLE_DATA_LEN && curLen + TL_LEN  >= dataLen)) {
             DISC_LOGE(DISC_BLE,
-                "unexperted advData: out of range, tlvType: %d, tlvLen: %u, current pos: %u, total pos: %u",
+                "unexperted advData: out of range, "
+                "tlvType=%{public}d, tlvLen=%{public}u, currentPos=%{public}u, totalPos=%{public}u",
                 type, len, curLen, dataLen);
             return SOFTBUS_ERR;
         }
@@ -411,7 +414,7 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_
                                 "TLV_TYPE_RANGE_POWER");
                 break;
             default:
-                DISC_LOGW(DISC_BLE, "Unknown TLV, tlvType: %d, tlvLen: %u, just skip", type, len);
+                DISC_LOGW(DISC_BLE, "Unknown TLV, just skip, tlvType=%{public}d, tlvLen=%{public}u", type, len);
                 break;
         }
         if (ret != SOFTBUS_OK) {
@@ -456,14 +459,14 @@ int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const uint8_t *data, 
     uint8_t *copyData = SoftBusCalloc(bcTlvLen + rspLen + 1); // calloc 1 bytes to add tail 0
     DISC_CHECK_AND_RETURN_RET_LOGE(copyData != NULL, SOFTBUS_MEM_ERR, DISC_BLE, "malloc failed.");
     if (memcpy_s(copyData, bcTlvLen, &serviceData[POS_TLV], bcTlvLen) != EOK) {
-        DISC_LOGE(DISC_BLE, "memcpy_s adv failed, bcTlvLen: %u", bcTlvLen);
+        DISC_LOGE(DISC_BLE, "memcpy_s adv failed, bcTlvLen=%{public}u", bcTlvLen);
         SoftBusFree(copyData);
         return SOFTBUS_MEM_ERR;
     }
 
     if (rspLen > 0 && reportInfo->packet.rspData.payload != NULL) {
         if (memcpy_s(copyData + bcTlvLen, rspLen, reportInfo->packet.rspData.payload, rspLen) != EOK) {
-            DISC_LOGE(DISC_BLE, "memcpy_s rsp data failed, rspLen: %u", rspLen);
+            DISC_LOGE(DISC_BLE, "memcpy_s rsp data failed, rspLen=%{public}u", rspLen);
             SoftBusFree(copyData);
             return SOFTBUS_MEM_ERR;
         }

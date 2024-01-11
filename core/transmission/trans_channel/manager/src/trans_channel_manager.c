@@ -248,7 +248,7 @@ static AppInfo *GetAppInfo(const SessionParam *param)
 {
     char *tmpId = NULL;
     Anonymize(param->peerDeviceId, &tmpId);
-    TRANS_LOGI(TRANS_CTRL, "GetAppInfo, deviceId=%s", tmpId);
+    TRANS_LOGI(TRANS_CTRL, "GetAppInfo, deviceId=%{public}s", tmpId);
     AnonymizeFree(tmpId);
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     if (appInfo == NULL) {
@@ -369,17 +369,17 @@ static int TransGetLocalConfig(int32_t channelType, int32_t businessType, uint32
 {
     ConfigType configType = (ConfigType)FindConfigType(channelType, businessType);
     if (configType == SOFTBUS_CONFIG_TYPE_MAX) {
-        TRANS_LOGE(TRANS_CTRL, "Invalid channelType=%d businessType=%d",
+        TRANS_LOGE(TRANS_CTRL, "Invalid channelType=%{public}d businessType=%{public}d",
             channelType, businessType);
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t maxLen;
     if (SoftbusGetConfig(configType, (unsigned char *)&maxLen, sizeof(maxLen)) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get fail configType=%d", configType);
+        TRANS_LOGE(TRANS_CTRL, "get fail configType=%{public}d", configType);
         return SOFTBUS_GET_CONFIG_VAL_ERR;
     }
     *len = maxLen;
-    TRANS_LOGI(TRANS_CTRL, "get appinfo local config len=%d", *len);
+    TRANS_LOGI(TRANS_CTRL, "get appinfo local config len=%{public}d", *len);
     return SOFTBUS_OK;
 }
 
@@ -410,7 +410,7 @@ static void TransOpenChannelSetModule(int32_t channelType, ConnectOption *connOp
     if (module != UNUSE_BUTT) {
         connOpt->socketOption.moduleId = module;
     }
-    TRANS_LOGI(TRANS_CTRL, "set nip moduleId=%d", connOpt->socketOption.moduleId);
+    TRANS_LOGI(TRANS_CTRL, "set nip moduleId=%{public}d", connOpt->socketOption.moduleId);
 }
 
 int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
@@ -450,7 +450,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     }
     Anonymize(param->sessionName, &tmpName);
     TRANS_LOGI(TRANS_CTRL,
-        "sessionName=%s, get laneId=%u, link type=%u.", tmpName, laneId, connInfo.type);
+        "sessionName=%{public}s, laneId=%{public}u, linkType=%{public}u.", tmpName, laneId, connInfo.type);
     AnonymizeFree(tmpName);
     errCode = TransGetConnectOptByConnInfo(&connInfo, &connOpt);
     if (errCode != SOFTBUS_OK) {
@@ -463,7 +463,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     extra.linkType = connOpt.type;
     FillAppInfo(appInfo, param, transInfo, &connInfo);
     TransOpenChannelSetModule(transInfo->channelType, &connOpt);
-    TRANS_LOGI(TRANS_CTRL, "laneId=%u get channelType=%u.", laneId, transInfo->channelType);
+    TRANS_LOGI(TRANS_CTRL, "laneId=%{public}u, channelType=%{public}u", laneId, transInfo->channelType);
     errCode = TransOpenChannelProc((ChannelType)transInfo->channelType, appInfo, &connOpt,
         &(transInfo->channelId));
     if (errCode != SOFTBUS_OK) {
@@ -488,7 +488,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         SoftBusFree((void*)appInfo->fastTransData);
     }
     SoftBusFree(appInfo);
-    TRANS_LOGI(TRANS_CTRL, "server TransOpenChannel ok: channelId=%d, channelType=%d",
+    TRANS_LOGI(TRANS_CTRL, "server TransOpenChannel ok: channelId=%{public}d, channelType=%{public}d",
         transInfo->channelId, transInfo->channelType);
     return SOFTBUS_OK;
 EXIT_ERR:
@@ -654,7 +654,7 @@ int32_t TransStreamStats(int32_t channelId, int32_t channelType, const StreamSen
         TRANS_LOGE(TRANS_STREAM, "get laneId fail, streamStatsInfo cannot be processed");
         return SOFTBUS_ERR;
     }
-    TRANS_LOGI(TRANS_STREAM, "transStreamStats channelId=%d, laneId=0x%x", channelId, laneId);
+    TRANS_LOGI(TRANS_STREAM, "transStreamStats channelId=%{public}d, laneId=0x%{public}x", channelId, laneId);
     LaneIdStatsInfo info;
     (void)memset_s(&info, sizeof(info), 0, sizeof(info));
     info.laneId = laneId;
@@ -684,12 +684,12 @@ int32_t TransRequestQos(int32_t channelId, int32_t chanType, int32_t appType, in
         LnnCancelQosOptimization(&laneId, 1);
         ret = SOFTBUS_OK;
     } else {
-        TRANS_LOGE(TRANS_QOS, "requestQos quality=%d invalid", quality);
+        TRANS_LOGE(TRANS_QOS, "requestQos invalid. quality=%{public}d", quality);
         ret = SOFTBUS_ERR;
     }
 
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_QOS, "request Qos fail,quality=%d, ret=%d", quality, ret);
+        TRANS_LOGE(TRANS_QOS, "request Qos fail, quality=%{public}d, ret=%{public}d", quality, ret);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -708,7 +708,7 @@ int32_t TransRippleStats(int32_t channelId, int32_t channelType, const TrafficSt
         TRANS_LOGE(TRANS_CTRL, "get laneId fail, streamStatsInfo cannot be processed");
         return SOFTBUS_ERR;
     }
-    TRANS_LOGI(TRANS_CTRL, "transRippleStats channelId=%d, laneId=0x%x", channelId, laneId);
+    TRANS_LOGI(TRANS_CTRL, "transRippleStats channelId=%{public}d, laneId=0x%{public}x", channelId, laneId);
     LnnRippleData rptdata;
     (void)memset_s(&rptdata, sizeof(rptdata), 0, sizeof(rptdata));
     if (memcpy_s(&rptdata.stats, sizeof(rptdata.stats), data->stats, sizeof(data->stats)) != EOK) {
@@ -732,11 +732,12 @@ int32_t TransNotifyAuthSuccess(int32_t channelId, int32_t channelType)
             break;
         default:
             ret = SOFTBUS_ERR;
-            TRANS_LOGE(TRANS_CTRL, "channelId=%d, channelType=%d invalid.", channelId, channelType);
+            TRANS_LOGE(TRANS_CTRL, "invalid. channelId=%{public}d, channelType=%{public}d.", channelId, channelType);
     }
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL,
-            "channelId=%d, channelType=%d,notfiy auth success ret=%d.", channelId, channelType, ret);
+            "notfiy auth success. channelId=%{public}d, channelType=%{public}d, ret=%{public}d",
+            channelId, channelType, ret);
         return ret;
     }
     return TransNotifyAuthDataSuccess(channelId, &connOpt);
@@ -744,7 +745,7 @@ int32_t TransNotifyAuthSuccess(int32_t channelId, int32_t channelType)
 
 int32_t TransCloseChannel(int32_t channelId, int32_t channelType)
 {
-    TRANS_LOGI(TRANS_CTRL, "close channel: channelId=%d, channelType=%d", channelId, channelType);
+    TRANS_LOGI(TRANS_CTRL, "close channel: channelId=%{public}d, channelType=%{public}d", channelId, channelType);
     int32_t ret = SOFTBUS_ERR;
     switch (channelType) {
         case CHANNEL_TYPE_PROXY:
@@ -783,7 +784,7 @@ int32_t TransCloseChannel(int32_t channelId, int32_t channelType)
 int32_t TransSendMsg(int32_t channelId, int32_t channelType, const void *data, uint32_t len,
     int32_t msgType)
 {
-    TRANS_LOGI(TRANS_MSG, "send msg: channelId=%d, channelType=%d", channelId, channelType);
+    TRANS_LOGI(TRANS_MSG, "send msg: channelId=%{public}d, channelType=%{public}d", channelId, channelType);
     int32_t ret = SOFTBUS_OK;
     switch (channelType) {
         case CHANNEL_TYPE_AUTH:
@@ -793,7 +794,8 @@ int32_t TransSendMsg(int32_t channelId, int32_t channelType, const void *data, u
             ret = TransProxyPostSessionData(channelId, (unsigned char*)data, len, (SessionPktType)msgType);
             break;
         default:
-            TRANS_LOGE(TRANS_MSG, "send msg: channelId=%d invalid channelType=%d", channelId, channelType);
+            TRANS_LOGE(TRANS_MSG,
+                "send msg invalid channelType. channelId=%{public}d, channelType=%{public}d", channelId, channelType);
             ret = SOFTBUS_TRANS_CHANNEL_TYPE_INVALID;
             break;
     }
@@ -849,11 +851,11 @@ int32_t TransGetAppInfoByChanId(int32_t channelId, int32_t channelType, AppInfo*
 int32_t TransGetConnByChanId(int32_t channelId, int32_t channelType, int32_t* connId)
 {
     if (channelType != CHANNEL_TYPE_PROXY) {
-        TRANS_LOGE(TRANS_CTRL, "channelType=%d error", channelType);
+        TRANS_LOGE(TRANS_CTRL, "channelType error. channelType=%{public}d", channelType);
         return SOFTBUS_ERR;
     }
     if (TransProxyGetConnIdByChanId(channelId, connId) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_MSG, "get proxy connId, channelId=%d", channelId);
+        TRANS_LOGE(TRANS_MSG, "get proxy connId, channelId=%{public}d", channelId);
         return SOFTBUS_TRANS_PROXY_SEND_CHANNELID_INVALID;
     }
     return SOFTBUS_OK;

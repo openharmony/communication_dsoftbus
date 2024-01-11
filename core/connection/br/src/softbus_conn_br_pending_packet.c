@@ -58,14 +58,14 @@ int32_t ConnBrCreateBrPendingPacket(uint32_t id, int64_t seq)
     PendingPacket *pending = NULL;
     LIST_FOR_EACH_ENTRY(pending, &g_pendingList, PendingPacket, node) {
         if (pending->id == id && pending->seq == seq) {
-            CONN_LOGW(CONN_BR, "PendingPacket exist, id=%u, seq=%" PRId64, id, seq);
+            CONN_LOGW(CONN_BR, "PendingPacket exist, id=%{public}u, seq=%{public}" PRId64, id, seq);
             (void)SoftBusMutexUnlock(&g_pendingLock);
             return SOFTBUS_ALREADY_EXISTED;
         }
     }
     pending = (PendingPacket *)SoftBusCalloc(sizeof(PendingPacket));
     if (pending == NULL) {
-        CONN_LOGE(CONN_BR, "calloc failed, id=%u, seq=%" PRId64, id, seq);
+        CONN_LOGE(CONN_BR, "calloc failed, id=%{public}u, seq=%{public}" PRId64, id, seq);
         (void)SoftBusMutexUnlock(&g_pendingLock);
         return SOFTBUS_MALLOC_ERR;
     }
@@ -188,20 +188,22 @@ int32_t ConnBrOnAckRequest(ConnBrConnection *connection, const cJSON *json)
     int64_t peerSeq = 0;
     if (!GetJsonObjectSignedNumberItem(json, KEY_WINDOWS, &peerWindows) ||
         !GetJsonObjectNumber64Item(json, KEY_ACK_SEQ_NUM, &peerSeq)) {
-        CONN_LOGE(CONN_BR, "parse window or seq failed, conn id=%u", connection->connectionId);
+        CONN_LOGE(CONN_BR, "parse window or seq failed, connId=%{public}u", connection->connectionId);
         return SOFTBUS_PARSE_JSON_ERR;
     }
 
     int32_t status = SoftBusMutexLock(&connection->lock);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "lock failed, conn id=%u, error=%d", connection->connectionId, status);
+        CONN_LOGE(CONN_BR, "lock failed, connId=%{public}u, error=%{public}d", connection->connectionId, status);
         return SOFTBUS_LOCK_ERR;
     }
 
     int32_t localWindows = connection->window;
     (void)SoftBusMutexUnlock(&connection->lock);
 
-    CONN_LOGD(CONN_BR, "connection %u ack request message: local window=%d, peer window=%d, peer seq=%" PRId64,
+    CONN_LOGD(CONN_BR,
+        "ack request message: connId=%{public}u, localWindow=%{public}d, peerWindow=%{public}d, "
+        "peerSeq=%{public}" PRId64,
         connection->connectionId, localWindows, peerWindows, peerSeq);
 
     int32_t flag = CONN_HIGH;
@@ -218,8 +220,10 @@ int32_t ConnBrOnAckRequest(ConnBrConnection *connection, const cJSON *json)
     uint32_t dataLen = 0;
     int64_t seq = ConnBrPackCtlMessage(ctx, &data, &dataLen);
     if (seq < 0) {
-        CONN_LOGE(CONN_BR, "pack msg failed: conn id=%u, local window=%d, peer window=%d, peer seq=%" PRId64 ", "
-            "error=%d", connection->connectionId, localWindows, peerWindows, peerSeq, (int32_t)seq);
+        CONN_LOGE(CONN_BR,
+            "pack msg failed: connId=%{public}u, localWindow=%{public}d, peeWindow=%{public}d, "
+            "peerSeq=%{public}" PRId64 ", error=%{public}d",
+            connection->connectionId, localWindows, peerWindows, peerSeq, (int32_t)seq);
         return (int32_t)seq;
     }
     return ConnBrPostBytes(connection->connectionId, data, dataLen, 0, flag, MODULE_CONNECTION, seq);
@@ -231,13 +235,15 @@ int32_t ConnBrOnAckResponse(ConnBrConnection *connection, const cJSON *json)
     uint64_t seq = 0;
     if (!GetJsonObjectSignedNumberItem(json, KEY_WINDOWS, &peerWindows) ||
         !GetJsonObjectNumber64Item(json, KEY_ACK_SEQ_NUM, (int64_t *)&seq)) {
-        CONN_LOGE(CONN_BR, "parse window or seq fields failed, conn id=%u", connection->connectionId);
+        CONN_LOGE(CONN_BR, "parse window or seq fields failed, connId=%{public}u", connection->connectionId);
         return SOFTBUS_PARSE_JSON_ERR;
     }
-    CONN_LOGD(CONN_BR, "conn id=%u, peer window=%d, seq=%"PRId64, connection->connectionId, peerWindows, seq);
+    CONN_LOGD(CONN_BR, "connId=%{public}u, peerWindow=%{public}d, seq=%{public}" PRId64, connection->connectionId,
+        peerWindows, seq);
     int32_t status = ConnBrSetBrPendingPacket(connection->connectionId, (int64_t)seq, NULL);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "set br pending packet failed, conn id=%u, error=%d", connection->connectionId, status);
+        CONN_LOGE(CONN_BR,
+            "set br pending packet failed, connId=%{public}u, error=%{public}d", connection->connectionId, status);
     }
     return status;
 }

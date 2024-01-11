@@ -225,7 +225,7 @@ int32_t SoftBusServerStub::OnRemoteRequest(uint32_t code,
         if ((permission != nullptr) &&
             (CheckAndRecordAccessToken(permission) != PERMISSION_GRANTED)) {
             SoftbusReportPermissionFaultEvt(code);
-            COMM_LOGE(COMM_SVC, "access token permission %s denied!", permission);
+            COMM_LOGE(COMM_SVC, "access token permission denied! permission=%{public}s", permission);
             pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
             TransAlarmExtra extra = {
                 .conflictName = NULL,
@@ -305,7 +305,7 @@ int32_t SoftBusServerStub::StopDiscoveryInner(MessageParcel &data, MessageParcel
     uint32_t code = SERVER_STOP_DISCOVERY;
     SoftbusRecordCalledApiInfo(pkgName, code);
     int32_t subscribeId = data.ReadInt32();
-    COMM_LOGI(COMM_SVC, "StopDiscoveryInner %s, %d!\n", pkgName, subscribeId);
+    COMM_LOGI(COMM_SVC, "StopDiscoveryInner pkgName=%{public}s, subscribeId=%{public}d!\n", pkgName, subscribeId);
     int32_t retReply = StopDiscovery(pkgName, subscribeId);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "StopDiscoveryInner write reply failed!");
@@ -662,7 +662,7 @@ int32_t SoftBusServerStub::OpenAuthSessionInner(MessageParcel &data, MessageParc
         goto EXIT;
     }
     retReply = OpenAuthSession(sessionName, addrInfo);
-    COMM_LOGI(COMM_SVC, "OpenAuthSession retReply:%d!", retReply);
+    COMM_LOGI(COMM_SVC, "OpenAuthSession retReply=%{public}d", retReply);
 EXIT:
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "OpenSessionInner write reply failed!");
@@ -783,7 +783,7 @@ int32_t SoftBusServerStub::EvaluateQosInner(MessageParcel &data, MessageParcel &
     }
 
     if (qosCount > QOS_TYPE_BUTT) {
-        COMM_LOGE(COMM_SVC, "EvaluateQos invalid qosCount=%" PRIu32, qosCount);
+        COMM_LOGE(COMM_SVC, "EvaluateQos invalid qosCount=%{public}" PRIu32, qosCount);
         return SOFTBUS_IPC_ERR;
     }
 
@@ -814,7 +814,7 @@ int32_t SoftBusServerStub::JoinLNNInner(MessageParcel &data, MessageParcel &repl
     }
     uint32_t addrTypeLen;
     if (!data.ReadUint32(addrTypeLen) || addrTypeLen != sizeof(ConnectionAddr)) {
-        COMM_LOGE(COMM_SVC, "SoftbusJoinLNNInner read addr type length:%d failed!", addrTypeLen);
+        COMM_LOGE(COMM_SVC, "SoftbusJoinLNNInner read addr type failed! length=%{public}d", addrTypeLen);
         return SOFTBUS_IPC_ERR;
     }
     void *addr = const_cast<void *>(reinterpret_cast<const void *>(
@@ -932,7 +932,7 @@ static void PrintNetworkId(const char *networkId)
 {
     char *anonyNetworkId = nullptr;
     Anonymize(networkId, &anonyNetworkId);
-    COMM_LOGI(COMM_SVC, "networkId = %s", anonyNetworkId);
+    COMM_LOGI(COMM_SVC, "networkId=%{public}s", anonyNetworkId);
     AnonymizeFree(anonyNetworkId);
 }
 
@@ -952,7 +952,7 @@ int32_t SoftBusServerStub::GetNodeKeyInfoInner(MessageParcel &data, MessageParce
     }
     int32_t infoLen = GetNodeKeyInfoLen(key);
     if (infoLen == SOFTBUS_ERR) {
-        COMM_LOGE(COMM_SVC, "GetNodeKeyInfoInner infolen failed!");
+        COMM_LOGE(COMM_SVC, "GetNodeKeyInfoInner info len failed!");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t len;
@@ -961,7 +961,8 @@ int32_t SoftBusServerStub::GetNodeKeyInfoInner(MessageParcel &data, MessageParce
         return SOFTBUS_IPC_ERR;
     }
     if (len < infoLen) {
-        COMM_LOGE(COMM_SVC, "GetNodeKeyInfoInner read len is invalid param, len:%d, infoLen:%d", len, infoLen);
+        COMM_LOGE(COMM_SVC, "GetNodeKeyInfoInner read len is invalid param, len=%{public}d, infoLen=%{public}d", len,
+            infoLen);
         return SOFTBUS_INVALID_PARAM;
     }
     void *buf = SoftBusCalloc(infoLen);
@@ -1160,7 +1161,7 @@ int32_t SoftBusServerStub::GrantPermissionInner(MessageParcel &data, MessageParc
     const char *sessionName = nullptr;
     int32_t ret = CheckDynamicPermission();
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "GrantPermissionInner check permission failed %d!", ret);
+        COMM_LOGE(COMM_SVC, "GrantPermissionInner check permission failed. ret=%{public}d!", ret);
         goto EXIT;
     }
 
@@ -1185,7 +1186,7 @@ int32_t SoftBusServerStub::RemovePermissionInner(MessageParcel &data, MessagePar
     const char *sessionName = nullptr;
     int32_t ret = CheckDynamicPermission();
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "RemovePermissionInner check permission failed %d!", ret);
+        COMM_LOGE(COMM_SVC, "RemovePermissionInner check permission failed. ret=%{public}d!", ret);
         goto EXIT;
     }
 

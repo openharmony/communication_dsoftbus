@@ -122,7 +122,7 @@ int32_t CallMethodAsync(WorkFunction function, void *data, int64_t delayTimeMs)
         return SOFTBUS_OK;
     }
 
-    CONN_LOGI(CONN_WIFI_DIRECT, "delayTimeMs=%" PRId64, delayTimeMs);
+    CONN_LOGI(CONN_WIFI_DIRECT, "delayTimeMs=%{public}"  PRId64, delayTimeMs);
     queue->scheduleDelayWork(work, delayTimeMs);
     return SOFTBUS_OK;
 }

@@ -98,7 +98,7 @@ SessionConn *GetSessionConnByRequestId(uint32_t requestId)
             return item;
         }
     }
-    TRANS_LOGE(TRANS_CTRL, "GetSessionConnByReqId fail: reqId=%u", requestId);
+    TRANS_LOGE(TRANS_CTRL, "GetSessionConnByReqId fail: reqId=%{public}u", requestId);
     return NULL;
 }
 
@@ -114,7 +114,7 @@ SessionConn *GetSessionConnByReq(int64_t req)
             return item;
         }
     }
-    TRANS_LOGE(TRANS_CTRL, "GetSessionConnByReqId fail: reqId=%" PRIu64, req);
+    TRANS_LOGE(TRANS_CTRL, "GetSessionConnByReqId fail: reqId=%{public}" PRIu64, req);
     return NULL;
 }
 
@@ -254,7 +254,7 @@ int64_t GetAuthIdByChanId(int32_t channelId)
 
 void TransDelSessionConnById(int32_t channelId)
 {
-    TRANS_LOGW(TRANS_CTRL, "channelId=%d", channelId);
+    TRANS_LOGW(TRANS_CTRL, "channelId=%{public}d", channelId);
     SessionConn *item = NULL;
     SessionConn *next = NULL;
     if (GetSessionConnLock() != SOFTBUS_OK) {
@@ -332,7 +332,7 @@ int32_t SetSessionConnStatusById(int32_t channelId, uint32_t status)
         }
     }
     ReleaseSessonConnLock();
-    TRANS_LOGE(TRANS_CTRL, "not find: channelId=%d", channelId);
+    TRANS_LOGE(TRANS_CTRL, "not find: channelId=%{public}d", channelId);
     return SOFTBUS_NOT_FIND;
 }
 
@@ -350,6 +350,6 @@ int32_t TcpTranGetAppInfobyChannelId(int32_t channelId, AppInfo* appInfo)
         }
     }
     ReleaseSessonConnLock();
-    TRANS_LOGE(TRANS_CTRL, "not find: channelId=%d", channelId);
+    TRANS_LOGE(TRANS_CTRL, "not find: channelId=%{public}d", channelId);
     return SOFTBUS_NOT_FIND;
 }

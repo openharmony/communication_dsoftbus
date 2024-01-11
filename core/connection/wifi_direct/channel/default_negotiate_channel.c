@@ -71,7 +71,7 @@ static void OnAuthDataReceived(int64_t authId, const AuthTransData *data)
 {
     CONN_CHECK_AND_RETURN_LOGW(data != NULL && data->data != NULL && data->len != 0, CONN_WIFI_DIRECT, "data invalid");
     CONN_CHECK_AND_RETURN_LOGW(data->len <= MAX_AUTH_DATA_LEN, CONN_WIFI_DIRECT, "data too large");
-    CONN_LOGI(CONN_WIFI_DIRECT, "len=%u", data->len);
+    CONN_LOGI(CONN_WIFI_DIRECT, "len=%{public}u", data->len);
 
     struct DataStruct *dataStruct = SoftBusCalloc(sizeof(struct DataStruct) + data->len);
     CONN_CHECK_AND_RETURN_LOGE(dataStruct, CONN_WIFI_DIRECT, "malloc failed");
@@ -279,14 +279,14 @@ int32_t OpenDefaultNegotiateChannel(struct DefaultNegoChannelParam *param,
     if ((srcChannel != NULL) && (srcChannel->isMetaChannel != NULL)) {
         isMeta = srcChannel->isMetaChannel(srcChannel);
     }
-    CONN_LOGI(CONN_WIFI_DIRECT, "remoteUuid=%s remoteIp=%s remotePort=%d isMeta=%d",
+    CONN_LOGI(CONN_WIFI_DIRECT, "remoteUuid=%{public}s, remoteIp=%{public}s, remotePort=%{public}d, isMeta=%{public}d",
               WifiDirectAnonymizeDeviceId(param->remoteUuid), WifiDirectAnonymizeIp(param->remoteIp),
               param->remotePort, isMeta);
 
     const char *remoteUdid = LnnConvertDLidToUdid(param->remoteUuid, CATEGORY_UUID);
     CONN_CHECK_AND_RETURN_RET_LOGE(remoteUdid != NULL && strlen(remoteUdid) != 0, SOFTBUS_ERR, CONN_WIFI_DIRECT,
                                    "get remote udid failed");
-    CONN_LOGI(CONN_WIFI_DIRECT, "remoteUdid=%s", WifiDirectAnonymizeDeviceId(remoteUdid));
+    CONN_LOGI(CONN_WIFI_DIRECT, "remoteUdid=%{public}s", WifiDirectAnonymizeDeviceId(remoteUdid));
 
     AuthConnInfo authConnInfo;
     (void)memset_s(&authConnInfo, sizeof(authConnInfo), 0, sizeof(authConnInfo));
@@ -321,13 +321,13 @@ void CloseDefaultNegotiateChannel(struct DefaultNegotiateChannel *self)
 int32_t StartListeningForDefaultChannel(AuthLinkType type, const char *localIp, int32_t port, ListenerModule *moduleId)
 {
     int32_t ret = AuthStartListeningForWifiDirect(type, localIp, port, moduleId);
-    CONN_LOGI(CONN_WIFI_DIRECT, "type=%d localIp=%s port=%d moduleId=%d",
+    CONN_LOGI(CONN_WIFI_DIRECT, "type=%{public}d, localIp=%{public}s, port=%{public}d, moduleId=%{public}d",
               type, WifiDirectAnonymizeIp(localIp), ret, *moduleId);
     return ret;
 }
 
 void StopListeningForDefaultChannel(AuthLinkType type, ListenerModule moduleId)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "type=%d moduleId=%d", type, moduleId);
+    CONN_LOGI(CONN_WIFI_DIRECT, "type=%{public}d, moduleId=%{public}d", type, moduleId);
     AuthStopListeningForWifiDirect(type, moduleId);
 }

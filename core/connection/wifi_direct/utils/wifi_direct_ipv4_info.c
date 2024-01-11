@@ -65,7 +65,8 @@ int32_t WifiDirectIpv4InfoToBytes(const struct WifiDirectIpv4Info *ipv4, size_t 
     size_t offset = 0;
     for (size_t i = 0; i < ipv4Count; i++) {
         if (offset + IPV4_INFO_BYTES_ARRAY_LEN > *dataLen) {
-            CONN_LOGW(CONN_WIFI_DIRECT, "[%zu] invalid data len: %zu, ipv4 count: %zu, offset: %zu",
+            CONN_LOGW(CONN_WIFI_DIRECT,
+                "i=%{public}zu, dataLen=%{public}zu, ipv4count=%{public}zu, offset=%{public}zu",
                   i, *dataLen, ipv4Count, offset);
             return SOFTBUS_ERR;
         }
@@ -83,14 +84,15 @@ void WifiDirectIpv4BytesToInfo(const uint8_t *ipv4Bytes, size_t ipv4BytesLen,
 {
     size_t offset = 0;
     if ((ipv4BytesLen % IPV4_INFO_BYTES_ARRAY_LEN) != 0) {
-        CONN_LOGW(CONN_WIFI_DIRECT, "invalid ip bytes len %zu", ipv4BytesLen);
+        CONN_LOGW(CONN_WIFI_DIRECT, "invalid ipv4BytesLen=%{public}zu", ipv4BytesLen);
         *ipv4Count = 0;
         return;
     }
 
     for (size_t i = 0; i + IPV4_INFO_BYTES_ARRAY_LEN <= ipv4BytesLen; i += IPV4_INFO_BYTES_ARRAY_LEN) {
         if (offset == *ipv4Count) {
-            CONN_LOGW(CONN_WIFI_DIRECT, "invalid ipv4 count: %zu, ipv4 bytes len: %zu", *ipv4Count, ipv4BytesLen);
+            CONN_LOGW(CONN_WIFI_DIRECT, "invalid ipv4Count=%{public}zu, ipv4BytesLen=%{public}zu", *ipv4Count,
+                ipv4BytesLen);
             *ipv4Count = 0;
             return;
         }
