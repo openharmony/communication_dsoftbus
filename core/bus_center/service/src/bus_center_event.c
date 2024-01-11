@@ -54,7 +54,7 @@ typedef enum {
 #define NETWORK_ID_UPDATE_DELAY_TIME (60 * 60 * 1000 * 24) // 24 hour
 
 static BusCenterEventCtrl g_eventCtrl;
-static SoftBusHandler g_notifyHandler = { BUSCENTER_NOTIFY_HANDLER_NAME, NULL, NULL };
+static SoftBusHandler g_notifyHandler = {"NotifyHandler", NULL, NULL};
 
 static int32_t PostMessageToHandlerDelay(SoftBusMessage *msg, uint64_t delayMillis)
 {
