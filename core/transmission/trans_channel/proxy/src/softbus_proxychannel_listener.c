@@ -77,6 +77,7 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
     }
     info.timeStart = appInfo->timeStart;
     info.linkType = appInfo->linkType;
+    info.connectType = appInfo->connectType;
 
     int32_t ret = SOFTBUS_ERR;
     if (appInfo->appType != APP_TYPE_AUTH) {
@@ -127,7 +128,11 @@ int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned
         .errcode = ret,
         .result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED
     };
-    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
+    if (!isServer) {
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
+    } else if (ret != SOFTBUS_OK) {
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_OPEN_CHANNEL_END, extra);
+    }
     TRANS_LOGI(TRANS_CTRL, "on open ret %d", ret);
     return ret;
 }
@@ -161,7 +166,7 @@ int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int3
         TransEventExtra extra = {
             .calleePkg = NULL,
             .peerNetworkId = appInfo->peerData.deviceId,
-            .linkType = appInfo->linkType,
+            .linkType = appInfo->connectType,
             .channelId = channelId,
             .costTime = timediff,
             .errcode = errCode,

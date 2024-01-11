@@ -110,6 +110,7 @@ typedef struct {
     int32_t transFlag;
     int64_t authSeq;
     int32_t linkType;
+    int32_t connectType;
     int32_t channelType;
     int32_t errorCode;
     int64_t timeStart;

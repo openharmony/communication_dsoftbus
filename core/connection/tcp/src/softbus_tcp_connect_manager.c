@@ -80,6 +80,15 @@ static void DfxRecordTcpConnectFail(uint32_t pId, ConnectOption *option, TcpConn
 
     CONN_LOGI(CONN_COMMON, "record tcp conn fail, connectTraceId=%u, reason=%d", statistics->connectTraceId, reason);
     uint64_t costTime = SoftBusGetSysTimeMs() - statistics->startTime;
+    ConnEventExtra extra = {
+        .linkType = CONNECT_TCP,
+        .errcode = reason,
+        .result = EVENT_STAGE_RESULT_FAILED
+    };
+    if (tcpInfo != NULL) {
+        extra.requestId = (int32_t)tcpInfo->requestId;
+    }
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
     SoftbusRecordConnResult(pId, SOFTBUS_HISYSEVT_CONN_TYPE_TCP, SOFTBUS_EVT_CONN_FAIL, costTime, reason);
 }
 
@@ -92,6 +101,15 @@ static void DfxRecordTcpConnectSuccess(uint32_t pId, TcpConnInfoNode *tcpInfo, C
 
     CONN_LOGI(CONN_COMMON, "record tcp conn success, connectTraceId=%u", statistics->connectTraceId);
     uint64_t costTime = SoftBusGetSysTimeMs() - statistics->startTime;
+    ConnEventExtra extra = {
+        .linkType = CONNECT_TCP,
+        .costTime = (int32_t)costTime,
+        .result = EVENT_STAGE_RESULT_OK
+    };
+    if (tcpInfo != NULL) {
+        extra.requestId = (int32_t)tcpInfo->requestId;
+    }
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
     SoftbusRecordConnResult(pId, SOFTBUS_HISYSEVT_CONN_TYPE_TCP, SOFTBUS_EVT_CONN_SUCC, costTime,
                             SOFTBUS_HISYSEVT_CONN_OK);
 }
