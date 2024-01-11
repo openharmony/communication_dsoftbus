@@ -33,6 +33,7 @@ typedef enum {
     EVENT_SCENE_LANE_SCORE = 6,
     EVENT_SCENE_ACTIVATION = 7,
     EVENT_SCENE_DETECTION = 8,
+    EVENT_SCENE_OPEN_CHANNEL_SERVER = 9,
 } TransEventScene;
 
 typedef enum {
