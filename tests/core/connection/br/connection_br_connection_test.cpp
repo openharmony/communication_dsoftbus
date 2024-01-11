@@ -497,6 +497,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager002, TestSize.Level1)
 
     DfxRecordBrConnectSuccess(pId, connection, nullptr);
     DfxRecordBrConnectSuccess(pId, connection, &statistics);
+    SoftBusFree(connection);
 }
 
 HWTEST_F(ConnectionBrConnectionTest, testBrManager003, TestSize.Level1)
@@ -970,6 +971,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager023, TestSize.Level1)
 
     EXPECT_CALL(brMock, GetJsonObjectNumberItem).WillRepeatedly(Return(true));
     ReceivedControlData(connection, (uint8_t*)data, DATASIZE);
+    SoftBusFree(connection);
 }
 
 HWTEST_F(ConnectionBrConnectionTest, testBrManager024, TestSize.Level1)
