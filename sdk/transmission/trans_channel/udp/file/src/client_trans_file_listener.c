@@ -162,7 +162,7 @@ int32_t TransSetFileSendListener(const char *sessionName, const IFileSendListene
 int32_t TransSetSocketFileListener(const char *sessionName, SocketFileCallbackFunc fileCallback)
 {
     if (sessionName == NULL || fileCallback == NULL) {
-        TRANS_LOGE(TRANS_SDK, "[client]%s invalid param.", __func__);
+        TRANS_LOGE(TRANS_SDK, "[client] invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     if (g_fileListener == NULL) {
@@ -203,7 +203,7 @@ int32_t TransSetSocketFileListener(const char *sessionName, SocketFileCallbackFu
     fileNode->fileCallback = fileCallback;
     ListAdd(&(g_fileListener->list), &(fileNode->node));
     (void)SoftBusMutexUnlock(&(g_fileListener->lock));
-    TRANS_LOGI(TRANS_SDK, "set socket file listener ok:%s", sessionName);
+    TRANS_LOGI(TRANS_SDK, "set socket file listener ok, sessionName=%{public}s", sessionName);
     return SOFTBUS_OK;
 }
 

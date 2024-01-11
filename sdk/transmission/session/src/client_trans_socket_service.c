@@ -36,7 +36,7 @@ static int32_t CheckSocketInfoIsValid(const SocketInfo *info)
     if (info->peerName != NULL && !IsValidString(info->peerName, SESSION_NAME_SIZE_MAX)) {
         char *anonySessionName = NULL;
         Anonymize(info->peerName, &anonySessionName);
-        TRANS_LOGI(TRANS_SDK, "strcpy peerName=%s failed, peerNameLen=%d",
+        TRANS_LOGI(TRANS_SDK, "strcpy peerName failed, peerName=%{public}s, peerNameLen=%{public}zu",
             anonySessionName, strlen(info->peerName));
         AnonymizeFree(anonySessionName);
         return SOFTBUS_INVALID_PARAM;
@@ -45,7 +45,7 @@ static int32_t CheckSocketInfoIsValid(const SocketInfo *info)
     if (info->peerNetworkId != NULL && !IsValidString(info->peerNetworkId, DEVICE_ID_SIZE_MAX)) {
         char *anonyNetworkId = NULL;
         Anonymize(info->peerNetworkId, &anonyNetworkId);
-        TRANS_LOGI(TRANS_SDK, "strcpy peerNetworkId=%s failed, peerNetworkIdLen=%d",
+        TRANS_LOGI(TRANS_SDK, "strcpy peerNetworkId failed, peerNetworkId=%{public}s, peerNetworkIdLen=%{public}zu",
             anonyNetworkId, strlen(info->peerNetworkId));
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_INVALID_PARAM;
@@ -61,7 +61,8 @@ static void PrintSocketInfo(const SocketInfo *info)
     Anonymize(info->name, &tmpMyName);
     Anonymize(info->peerName, &tmpPeerName);
     Anonymize(info->pkgName, &tmpPkgName);
-    TRANS_LOGI(TRANS_SDK, "Socket: mySessionName=%s, peerSessionName=%s, pkgName=%s, dataType=%d",
+    TRANS_LOGI(TRANS_SDK,
+        "Socket: mySessionName=%{public}s, peerSessionName=%{public}s, pkgName=%{public}s, dataType=%{public}d",
         tmpMyName, tmpPeerName, tmpPkgName, info->dataType);
     AnonymizeFree(tmpMyName);
     AnonymizeFree(tmpPeerName);
@@ -79,30 +80,30 @@ int32_t Socket(SocketInfo info)
     PrintSocketInfo(&info);
     ret = CreateSocket(info.pkgName, info.name);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "CreateSocket failed, ret=%d.", ret);
+        TRANS_LOGE(TRANS_SDK, "CreateSocket failed, ret=%{public}d.", ret);
         return ret;
     }
 
     int32_t secoketFd = INVALID_SESSION_ID;
     ret = ClientAddSocket(&info, &secoketFd);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "add socket failed, ret=%d.", ret);
+        TRANS_LOGE(TRANS_SDK, "add socket failed, ret=%{public}d.", ret);
         return ret;
     }
 
-    TRANS_LOGI(TRANS_SDK, "create socket ok, socket=%d", secoketFd);
+    TRANS_LOGI(TRANS_SDK, "create socket ok, socket=%{public}d", secoketFd);
     return secoketFd;
 }
 
 int32_t Listen(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener)
 {
-    TRANS_LOGI(TRANS_SDK, "Listen: socket=%d", socket);
+    TRANS_LOGI(TRANS_SDK, "Listen: socket=%{public}d", socket);
     return ClientListen(socket, qos, qosCount, listener);
 }
 
 int32_t Bind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener)
 {
-    TRANS_LOGI(TRANS_SDK, "Bind: socket=%d", socket);
+    TRANS_LOGI(TRANS_SDK, "Bind: socket=%{public}d", socket);
     if (IsSessionExceedLimit()) {
         return SOFTBUS_TRANS_SESSION_CNT_EXCEEDS_LIMIT;
     }
@@ -111,7 +112,7 @@ int32_t Bind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocket
 
 void Shutdown(int32_t socket)
 {
-    TRANS_LOGI(TRANS_SDK, "Shutdown: socket=%d", socket);
+    TRANS_LOGI(TRANS_SDK, "Shutdown: socket=%{public}d", socket);
     ClientShutdown(socket);
 }
 
@@ -128,6 +129,6 @@ int32_t EvaluateQos(const char *peerNetworkId, TransDataType dataType, const Qos
 
 int32_t GetMtuSize(int32_t socket, uint32_t *mtuSize)
 {
-    TRANS_LOGI(TRANS_SDK, "GetMtuSize: socket=%d", socket);
+    TRANS_LOGI(TRANS_SDK, "GetMtuSize: socket=%{public}d", socket);
     return GetSocketMtuSize(socket, mtuSize);
 }

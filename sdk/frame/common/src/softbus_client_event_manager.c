@@ -119,7 +119,7 @@ int RegisterEventCallback(enum SoftBusEvent event, EventCallback cb, void *userD
 void CLIENT_NotifyObserver(enum SoftBusEvent event, void *arg, unsigned int argLen)
 {
     if (!IsEventValid(event)) {
-        COMM_LOGE(COMM_SDK, "invalid event [%d]", event);
+        COMM_LOGE(COMM_SDK, "invalid event. event=%{public}d", event);
         return;
     }
 
@@ -137,7 +137,7 @@ void CLIENT_NotifyObserver(enum SoftBusEvent event, void *arg, unsigned int argL
     LIST_FOR_EACH_ENTRY(observer, &g_observerList->list, Observer, node) {
         if ((observer->event == event) && (observer->callback != NULL) &&
             (observer->callback(arg, argLen, observer->userData) != SOFTBUS_OK)) {
-            COMM_LOGE(COMM_SDK, "execute callback failed [%d]", event);
+            COMM_LOGE(COMM_SDK, "execute callback failed. event=%{public}d", event);
         }
     }
 

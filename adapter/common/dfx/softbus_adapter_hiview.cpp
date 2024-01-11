@@ -39,11 +39,11 @@ SoftBusLogSysType SoftBusGetLogSysType(void)
     char value[PROP_USER_TYPE_VALUE_LEN] = { 0 };
     int32_t ret = GetParameter(PROP_USER_TYPE, "", value, sizeof(value));
     if (ret < 0) {
-        COMM_LOGE(COMM_ADAPTER, "GetProp: [%s] fail(ret=%d)", PROP_USER_TYPE, ret);
+        COMM_LOGE(COMM_ADAPTER, "GetProp fail. userType=%{public}s, ret=%{public}d", PROP_USER_TYPE, ret);
         return SOFTBUS_LOG_SYS_UNKNOWN;
     }
     isUserTypeObtained = true;
-    COMM_LOGI(COMM_ADAPTER, "GetProp: [%s]: [%s]", PROP_USER_TYPE, value);
+    COMM_LOGI(COMM_ADAPTER, "userType=%{public}s, value=%{public}s", PROP_USER_TYPE, value);
 
     // is beta or not: 1 china release, 3 china beta, 5 oversea beta, 6 oversea release
     if (atoi(value) == PROP_USER_TYPE_CHANA_BETA) {

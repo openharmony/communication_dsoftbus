@@ -33,7 +33,7 @@ int32_t ClientOnJoinLNNResult(IpcIo *data, IpcIo *reply)
     uint32_t addrSize;
     ReadUint32(data, &addrSize);
     if (addrSize != sizeof(ConnectionAddr)) {
-        LNN_LOGE(LNN_EVENT, "read addrSize=%d failed", addrSize);
+        LNN_LOGE(LNN_EVENT, "read addr failed. addrSize=%{public}d", addrSize);
         return SOFTBUS_ERR;
     }
     void *addr = (void *)ReadBuffer(data, addrSize);
@@ -108,7 +108,7 @@ int32_t ClientOnNodeOnlineStateChanged(IpcIo *data, IpcIo *reply)
     ReadUint32(data, &infoSize);
     if (infoSize != sizeof(NodeBasicInfo)) {
         LNN_LOGE(LNN_EVENT,
-            "read infoSize=%d failed", infoSize);
+            "read basic info failed. infoSize=%{public}d", infoSize);
         return SOFTBUS_ERR;
     }
     void *info = (void *)ReadBuffer(data, infoSize);
@@ -137,7 +137,7 @@ int32_t ClientOnNodeBasicInfoChanged(IpcIo *data, IpcIo *reply)
     ReadUint32(data, &infoSize);
     if (infoSize != sizeof(NodeBasicInfo)) {
         LNN_LOGE(LNN_EVENT,
-            "read infoSize=%d failed", infoSize);
+            "read basic info failed. infoSize=%{public}d", infoSize);
         return SOFTBUS_ERR;
     }
     void *info = (void *)ReadBuffer(data, infoSize);
@@ -164,7 +164,7 @@ int32_t ClientOnTimeSyncResult(IpcIo *data, IpcIo *reply)
     uint32_t infoSize = 0;
     ReadUint32(data, &infoSize);
     if (infoSize != sizeof(TimeSyncResultInfo)) {
-        LNN_LOGE(LNN_EVENT, "read infoSize=%d failed", infoSize);
+        LNN_LOGE(LNN_EVENT, "read info failed. infoSize=%{public}d", infoSize);
         return SOFTBUS_ERR;
     }
     void *info = (void *)ReadBuffer(data, infoSize);
@@ -219,7 +219,7 @@ void ClientOnRefreshDeviceFound(IpcIo *data, IpcIo *reply)
     ReadUint32(data, &infoSize);
     if (infoSize != sizeof(DeviceInfo)) {
         LNN_LOGE(LNN_EVENT,
-            "read infoSize=%d failed", infoSize);
+            "read info failed. infoSize=%{public}d", infoSize);
         return;
     }
     void *info = (void *)ReadBuffer(data, infoSize);

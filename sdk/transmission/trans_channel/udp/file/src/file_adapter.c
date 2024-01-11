@@ -28,7 +28,7 @@ static int SetReuseAddr(int fd, int on)
 {
     int rc = SoftBusSocketSetOpt(fd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_REUSEADDR, &on, sizeof(on));
     if (rc != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_FILE, "fd=%d set SO_REUSEADDR error", fd);
+        TRANS_LOGE(TRANS_FILE, "set SO_REUSEADDR error. fd=%{public}d", fd);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -38,7 +38,7 @@ static int SetReusePort(int fd, int on)
 {
     int rc = SoftBusSocketSetOpt(fd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_REUSEPORT, &on, sizeof(on));
     if (rc != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_FILE, "fd=%d set SO_REUSEPORT error", fd);
+        TRANS_LOGE(TRANS_FILE, "set SO_REUSEPORT error. fd=%{public}d", fd);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -50,7 +50,7 @@ static int OpenTcpServer(const char *ip, int port)
     (void)memset_s(&addr, sizeof(addr), 0, sizeof(addr));
     int rc = SoftBusInetPtoN(SOFTBUS_AF_INET, ip, &addr.sinAddr);
     if (rc != SOFTBUS_ADAPTER_OK) {
-        TRANS_LOGE(TRANS_FILE, "rc=%d", rc);
+        TRANS_LOGE(TRANS_FILE, "rc=%{public}d", rc);
         return SOFTBUS_ERR;
     }
     addr.sinFamily = SOFTBUS_AF_INET;
@@ -59,7 +59,7 @@ static int OpenTcpServer(const char *ip, int port)
     int ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM | SOFTBUS_SOCK_NONBLOCK |
         SOFTBUS_SOCK_CLOEXEC, 0, &fd);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_FILE, "OpenTcpServer Create error, ret=%d.", ret);
+        TRANS_LOGE(TRANS_FILE, "OpenTcpServer Create error, ret=%{public}d.", ret);
         return SOFTBUS_ERR;
     }
 
@@ -67,7 +67,7 @@ static int OpenTcpServer(const char *ip, int port)
     (void)SetReusePort(fd, 1);
     rc = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketBind(fd, (SoftBusSockAddr *)&addr, sizeof(addr)));
     if (rc != SOFTBUS_ADAPTER_OK) {
-        TRANS_LOGE(TRANS_FILE, "OpenTcpServer Bind error, rc=%d.", rc);
+        TRANS_LOGE(TRANS_FILE, "OpenTcpServer Bind error, rc=%{public}d.", rc);
         ConnShutdownSocket(fd);
         return SOFTBUS_ERR;
     }

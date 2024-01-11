@@ -43,7 +43,7 @@ bool IsPathValid(char *filePath)
         return false;
     }
     if ((strlen(filePath) == 0) || (strlen(filePath) > (MAX_FILE_PATH_NAME_LEN - 1))) {
-        TRANS_LOGE(TRANS_FILE, "filePathSize=%d is wrong", (int32_t)strlen(filePath));
+        TRANS_LOGE(TRANS_FILE, "filePathSize is wrong. filePathSize=%{public}d", (int32_t)strlen(filePath));
         return false;
     }
 
@@ -68,7 +68,7 @@ int32_t GetAndCheckRealPath(const char *filePath, char *absPath)
 
     int32_t pathLength = (int32_t)(strlen(absPath));
     if (pathLength > (MAX_FILE_PATH_NAME_LEN - 1)) {
-        TRANS_LOGE(TRANS_FILE, "pathLength=%d is too large", pathLength);
+        TRANS_LOGE(TRANS_FILE, "pathLength is too large. pathLength=%{public}d", pathLength);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -204,7 +204,7 @@ int32_t FileListToBuffer(const char **destFile, uint32_t fileCnt, FileListBuffer
     for (uint32_t i = 0; i < fileCnt; i++) {
         size_t fileNameLength = strlen(destFile[i]);
         if (fileNameLength == 0 || fileNameLength > MAX_FILE_PATH_NAME_LEN) {
-            TRANS_LOGE(TRANS_FILE, "bad file name at index=%" PRIu32, i);
+            TRANS_LOGE(TRANS_FILE, "bad file name at index=%{public}" PRIu32, i);
             return SOFTBUS_INVALID_PARAM;
         } else {
             totalLength += fileNameLength;
@@ -297,10 +297,10 @@ int32_t FileLock(int32_t fd, int32_t type, bool isBlock)
     fl.l_len = 0;
     int32_t ret = fcntl(fd, isBlock ? F_SETLKW : F_SETLK, &fl);
     if (ret != 0 && !isBlock) {
-        TRANS_LOGE(TRANS_FILE, "lock file is blocked, file busy errno=%d", errno);
+        TRANS_LOGE(TRANS_FILE, "lock file is blocked, file busy errno=%{public}d", errno);
         return SOFTBUS_FILE_BUSY;
     }
-    TRANS_LOGE(TRANS_FILE, "file locked! ret=%d, errno=%d", ret, errno);
+    TRANS_LOGE(TRANS_FILE, "file locked! ret=%{public}d, errno=%{public}d", ret, errno);
     return SOFTBUS_OK;
 }
 
@@ -335,7 +335,7 @@ int32_t FileUnLock(int32_t fd)
     fl.l_start = 0;
     fl.l_len = 0;
     if (fcntl(fd, F_SETLK, &fl) < 0) {
-        TRANS_LOGE(TRANS_FILE, "unLock file failed, errno=%d", errno);
+        TRANS_LOGE(TRANS_FILE, "unLock file failed, errno=%{public}d", errno);
         return SOFTBUS_ERR;
     }
     TRANS_LOGE(TRANS_FILE, "unLock file success");

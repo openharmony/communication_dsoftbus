@@ -93,7 +93,7 @@ static void ExcuteChannelMeas(void)
             g_wlanChannelInfoCb->onFail(rc);
         }
         ReleaseMeasResources();
-        LNN_LOGE(LNN_STATE, "softbus StartChannelMeas fail ret = %d", rc);
+        LNN_LOGE(LNN_STATE, "softbus StartChannelMeas fail ret=%{public}d", rc);
         return;
     }
     g_channelList.measNum++;
@@ -162,7 +162,7 @@ static void GetOneChannelMeasResult(void *para)
             g_wlanChannelInfoCb->onFail(rc);
         }
         ReleaseMeasResources();
-        LNN_LOGE(LNN_STATE, "softbus GetChannelMeasResult failed ret = %d", rc);
+        LNN_LOGE(LNN_STATE, "softbus GetChannelMeasResult failed ret=%{public}d", rc);
         return;
     }
     (g_channelInfoList.buff + g_channelList.measNum-1)->channelId = measChannelResult.channelId;

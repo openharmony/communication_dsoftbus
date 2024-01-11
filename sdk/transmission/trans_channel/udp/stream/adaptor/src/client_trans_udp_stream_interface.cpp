@@ -67,11 +67,11 @@ int32_t SendVtpStream(int32_t channelId, const StreamData *inData, const StreamD
     if (adaptor->GetStreamType() == RAW_STREAM) {
         ssize_t dataLen = inData->bufLen + adaptor->GetEncryptOverhead();
         TRANS_LOGD(TRANS_STREAM,
-            "bufLen=%d, encryptOverhead=%zd", inData->bufLen, adaptor->GetEncryptOverhead());
+            "bufLen=%{public}d, encryptOverhead=%{public}zd", inData->bufLen, adaptor->GetEncryptOverhead());
         std::unique_ptr<char[]> data = std::make_unique<char[]>(dataLen);
         ssize_t encLen = adaptor->Encrypt(inData->buf, inData->bufLen, data.get(), dataLen, adaptor->GetSessionKey());
         if (encLen != dataLen) {
-            TRANS_LOGE(TRANS_STREAM, "encrypted failed, dataLen=%zd, encLen=%zd", dataLen, encLen);
+            TRANS_LOGE(TRANS_STREAM, "encrypted failed, dataLen=%{public}zd, encLen=%{public}zd", dataLen, encLen);
             return SOFTBUS_ERR;
         }
 
@@ -89,7 +89,7 @@ int32_t SendVtpStream(int32_t channelId, const StreamData *inData, const StreamD
         };
         int32_t ret = memcpy_s(data.buffer.get(), data.bufLen, inData->buf, inData->bufLen);
         if (ret != EOK) {
-            TRANS_LOGE(TRANS_STREAM, "Failed to memcpy data! ret=%d", ret);
+            TRANS_LOGE(TRANS_STREAM, "Failed to memcpy data! ret=%{public}d", ret);
             return SOFTBUS_ERR;
         }
         if (ext != nullptr && ext->bufLen > 0) {
@@ -97,7 +97,7 @@ int32_t SendVtpStream(int32_t channelId, const StreamData *inData, const StreamD
             data.extLen = ext->bufLen;
             ret = memcpy_s(data.extBuffer.get(), data.extLen, ext->buf, ext->bufLen);
             if (ret != EOK) {
-                TRANS_LOGE(TRANS_STREAM, "Failed to memcpy ext! ret=%d", ret);
+                TRANS_LOGE(TRANS_STREAM, "Failed to memcpy ext! ret=%{public}d", ret);
                 return SOFTBUS_ERR;
             }
         }
@@ -122,7 +122,7 @@ int32_t StartVtpStreamChannelServer(int32_t channelId, const VtpStreamOpenParam 
         TRANS_LOGE(TRANS_STREAM, "invalid channelId or pkgName");
         return SOFTBUS_ERR;
     }
-    TRANS_LOGI(TRANS_STREAM, "channelId=%d Start Channel Server.", channelId);
+    TRANS_LOGI(TRANS_STREAM, "Start Channel Server. channelId=%{public}d ", channelId);
     auto it = g_adaptorMap.find(channelId);
     if (it != g_adaptorMap.end()) {
         TRANS_LOGE(TRANS_STREAM, "adaptor already existed!");
@@ -168,7 +168,7 @@ int32_t StartVtpStreamChannelClient(int32_t channelId, const VtpStreamOpenParam 
         return SOFTBUS_ERR;
     }
 
-    TRANS_LOGI(TRANS_STREAM, "StartChannelClient channelId=%d.", channelId);
+    TRANS_LOGI(TRANS_STREAM, "StartChannelClient channelId=%{public}d.", channelId);
     auto it = g_adaptorMap.find(channelId);
     if (it != g_adaptorMap.end()) {
         TRANS_LOGE(TRANS_STREAM, "adaptor already existed!");
@@ -204,7 +204,7 @@ int32_t StartVtpStreamChannelClient(int32_t channelId, const VtpStreamOpenParam 
     if (ret > 0) {
         newAdaptor->SetAliveState(true);
     } else {
-        TRANS_LOGE(TRANS_STREAM, "CreateStreamClientChannel failed, ret=%d", ret);
+        TRANS_LOGE(TRANS_STREAM, "CreateStreamClientChannel failed, ret=%{public}d", ret);
         CloseVtpStreamChannel(channelId, param->pkgName);
     }
 
@@ -213,7 +213,7 @@ int32_t StartVtpStreamChannelClient(int32_t channelId, const VtpStreamOpenParam 
 
 int32_t CloseVtpStreamChannel(int32_t channelId, const char *pkgName)
 {
-    TRANS_LOGI(TRANS_STREAM, "close stream channelId=%d", channelId);
+    TRANS_LOGI(TRANS_STREAM, "close stream channelId=%{public}d", channelId);
     std::shared_ptr<StreamAdaptor> adaptor = nullptr;
 
     if (channelId < 0 || pkgName == nullptr) {

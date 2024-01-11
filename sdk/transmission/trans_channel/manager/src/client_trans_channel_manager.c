@@ -149,7 +149,7 @@ int32_t ClientTransChannelSendStream(int32_t channelId, int32_t type, const Stre
             ret = TransUdpChannelSendStream(channelId, data, ext, param);
             break;
         default:
-            TRANS_LOGE(TRANS_STREAM, "unsupport channelType=%d.", type);
+            TRANS_LOGE(TRANS_STREAM, "unsupport channelType=%{public}d.", type);
             return SOFTBUS_TRANS_CHANNEL_TYPE_INVALID;
     }
     return ret;
@@ -167,7 +167,7 @@ int32_t ClientTransChannelSendFile(int32_t channelId, int32_t type, const char *
             ret = TransProxyChannelSendFile(channelId, sFileList, dFileList, fileCnt);
             break;
         default:
-            TRANS_LOGE(TRANS_FILE, "unsupport channelType=%d.", type);
+            TRANS_LOGE(TRANS_FILE, "unsupport channelType=%{public}d.", type);
             return SOFTBUS_TRANS_CHANNEL_TYPE_INVALID;
     }
     return ret;

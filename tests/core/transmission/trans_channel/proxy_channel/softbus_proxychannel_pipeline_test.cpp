@@ -119,7 +119,7 @@ void SoftbusProxyChannelPipelineTest::TearDownTestCase(void)
 
 static void OnProxyChannelOpened(int32_t channelRequestId, int32_t channelId)
 {
-    TRANS_LOGI(TRANS_TEST, "channelRequestId=%d, channelId=%d", channelRequestId, channelId);
+    TRANS_LOGI(TRANS_TEST, "channelRequestId=%{public}d, channelId=%{public}d", channelRequestId, channelId);
     (void)channelRequestId;
     (void)channelId;
 }

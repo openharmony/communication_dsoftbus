@@ -119,9 +119,9 @@ static int ActionSuccessBleStartAdvEx(int *advId, const StartAdvRawData rawData,
 
 static int ActionSuccessBleStopAdv(int advId)
 {
-    DISC_LOGI(DISC_BLE_ADAPTER, "ActionSuccessBleStopAdv, advId: %d", advId);
+    DISC_LOGI(DISC_BLE_ADAPTER, "ActionSuccessBleStopAdv, advId=%{public}d", advId);
     MockBluetooth::btGattCallback->advDisableCb(advId, OHOS_BT_STATUS_SUCCESS);
-    DISC_LOGI(DISC_BLE_ADAPTER, "ActionSuccessBleStopAdv, advId: %d", advId);
+    DISC_LOGI(DISC_BLE_ADAPTER, "ActionSuccessBleStopAdv, advId=%{public}d", advId);
     return OHOS_BT_STATUS_SUCCESS;
 }
 
@@ -425,13 +425,13 @@ bool ScanResultCtx::Update(int id, const SoftBusBcScanResult *scanResult)
     this->scanResult = *scanResult;
     unsigned char *cpyAdvData = static_cast<unsigned char *>(SoftBusCalloc(this->scanResult.data.bcData.payloadLen));
     if (cpyAdvData == nullptr) {
-        DISC_LOGE(DISC_BLE_ADAPTER, "malloc failed in OnReportScanDataCallback, can not save ctx, id: %d", id);
+        DISC_LOGE(DISC_BLE_ADAPTER, "malloc failed in OnReportScanDataCallback, can not save ctx, id=%{public}d", id);
         return false;
     }
 
     if (memcpy_s(cpyAdvData, this->scanResult.data.bcData.payloadLen, scanResult->data.bcData.payload,
         scanResult->data.bcData.payloadLen) != EOK) {
-        DISC_LOGE(DISC_BLE_ADAPTER, "malloc failed in OnReportScanDataCallback, can not save ctx, id: %d", id);
+        DISC_LOGE(DISC_BLE_ADAPTER, "malloc failed in OnReportScanDataCallback, can not save ctx, id=%{public}d", id);
         SoftBusFree(cpyAdvData);
         return false;
     }
