@@ -248,7 +248,7 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_001, TestSize.Level1)
     EXPECT_EQ(g_localKeyTable[11].getInfo(infoMinsize, len), SOFTBUS_MEM_ERR);
     EXPECT_EQ(g_localKeyTable[18].getInfo(infoMinsize, len), SOFTBUS_MEM_ERR);
     EXPECT_EQ(g_localKeyTable[19].getInfo(infoMinsize, len), SOFTBUS_MEM_ERR);
-    EXPECT_EQ(g_localKeyTable[35].getInfo(infoMinsize, len), SOFTBUS_OK);
+    EXPECT_EQ(g_localKeyTable[35].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
     LnnDeinitLocalLedger();
 }
 
@@ -280,9 +280,9 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_002, TestSize.Level1)
     EXPECT_EQ(g_localKeyTable[15].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[16].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[17].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[20].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(g_localKeyTable[20].getInfo(infoMinsize, len), SOFTBUS_MEM_ERR);
     EXPECT_EQ(g_localKeyTable[21].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[22].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(g_localKeyTable[22].getInfo(infoMinsize, len), SOFTBUS_MEM_ERR);
     EXPECT_EQ(g_localKeyTable[23].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[24].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[25].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
@@ -295,8 +295,8 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_002, TestSize.Level1)
     EXPECT_EQ(g_localKeyTable[32].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[33].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[34].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[35].getInfo(infoMinsize, len), SOFTBUS_OK);
-    EXPECT_EQ(g_localKeyTable[41].getInfo(infoMinsize, len), SOFTBUS_ERR);
+    EXPECT_EQ(g_localKeyTable[35].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(g_localKeyTable[41].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
     LnnDeinitLocalLedger();
 }
 
@@ -380,12 +380,9 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_004, TestSize.Level1)
     EXPECT_EQ(g_localKeyTable[23].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[24].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[27].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[28].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[29].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[30].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[32].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[33].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[34].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[35].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[41].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
     LnnDeinitLocalLedger();

@@ -31,7 +31,7 @@ typedef struct {
         const StreamFrameInfo *param);
     int32_t (*OnFileGetSessionId)(int32_t channelId, int32_t *sessionId);
     void (*OnMessageReceived)(void);
-    void (*OnUdpChannelOpened)(int32_t channelId);
+    int32_t (*OnUdpChannelOpened)(int32_t channelId);
     void (*OnUdpChannelClosed)(int32_t channelId, ShutdownReason reason);
     void (*OnQosEvent)(int channelId, int eventId, int tvCount, const QosTv *tvList);
 } UdpChannelMgrCb;
