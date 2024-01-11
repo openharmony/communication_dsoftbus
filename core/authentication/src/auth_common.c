@@ -98,7 +98,7 @@ static void HandleAuthMessage(SoftBusMessage *msg)
     CHECK_NULL_PTR_RETURN_VOID(msg);
     EventHandler handler = (EventHandler)(uintptr_t)msg->arg1;
     if (handler == NULL) {
-        AUTH_LOGE(AUTH_CONN, "invalid event handler, event=%d", msg->what);
+        AUTH_LOGE(AUTH_CONN, "invalid event handler, event=%{public}d", msg->what);
         return;
     }
     handler(msg->obj);
@@ -112,7 +112,7 @@ int32_t PostAuthEvent(EventType event, EventHandler handler, const void *obj, ui
     }
     SoftBusMessage *msg = NewAuthMessage(obj, size);
     if (msg == NULL) {
-        AUTH_LOGE(AUTH_CONN, "malloc fail, event=%d", event);
+        AUTH_LOGE(AUTH_CONN, "malloc fail, event=%{public}d", event);
         return SOFTBUS_MALLOC_ERR;
     }
     msg->what = (int32_t)event;
@@ -179,7 +179,7 @@ bool GetConfigSupportAsServer(void)
     if (SoftbusGetConfig(SOFTBUS_INT_AUTH_ABILITY_COLLECTION, (uint8_t *)(&ability), sizeof(ability)) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "get auth ability from config file fail");
     }
-    AUTH_LOGI(AUTH_CONN, "auth ability=%u", ability);
+    AUTH_LOGI(AUTH_CONN, "auth ability=%{public}u", ability);
     return ((ability & AUTH_SUPPORT_AS_SERVER_MASK) != 0);
 }
 
@@ -290,7 +290,7 @@ bool CompareConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool 
             }
             break;
         default:
-            AUTH_LOGE(AUTH_CONN, "unexpected connType=%d", info1->type);
+            AUTH_LOGE(AUTH_CONN, "unexpected connType=%{public}d", info1->type);
             return false;
     }
     return false;
@@ -345,7 +345,7 @@ int32_t ConvertToConnectOption(const AuthConnInfo *connInfo, ConnectOption *opti
             option->socketOption.keepAlive = 1;
             break;
         default:
-            AUTH_LOGE(AUTH_CONN, "unexpected connType=%d", connInfo->type);
+            AUTH_LOGE(AUTH_CONN, "unexpected connType=%{public}d", connInfo->type);
             return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -400,7 +400,7 @@ int32_t ConvertToAuthConnInfo(const ConnectionInfo *info, AuthConnInfo *connInfo
             connInfo->info.bleInfo.psm = info->bleInfo.psm;
             break;
         default:
-            AUTH_LOGE(AUTH_CONN, "unexpected connType=%d", info->type);
+            AUTH_LOGE(AUTH_CONN, "unexpected connType=%{public}d", info->type);
             return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

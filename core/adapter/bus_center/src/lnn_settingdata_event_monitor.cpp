@@ -125,7 +125,7 @@ static int32_t GetDeviceNameFromDataShareHelper(char *deviceName, uint32_t len)
         LNN_LOGE(LNN_STATE, "strncpy_s fail.");
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_STATE, "GetDeviceNameFromDataShareHelper, deviceName=%s.", deviceName);
+    LNN_LOGI(LNN_STATE, "GetDeviceNameFromDataShareHelper, deviceName=%{public}s.", deviceName);
     return SOFTBUS_OK;
 }
 

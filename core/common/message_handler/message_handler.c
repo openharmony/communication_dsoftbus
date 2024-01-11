@@ -129,7 +129,7 @@ static void *LoopTask(void *arg)
         return NULL;
     }
 
-    COMM_LOGD(COMM_UTILS, "LoopTask[%s] running", context->name);
+    COMM_LOGD(COMM_UTILS, "LoopTask running. name=%{public}s", context->name);
 
     if (SoftBusMutexLock(&context->lock) != 0) {
         COMM_LOGE(COMM_UTILS, "lock failed");
@@ -146,7 +146,7 @@ static void *LoopTask(void *arg)
         }
         // wait
         if (context->stop == 1) {
-            COMM_LOGI(COMM_UTILS, "LoopTask[%s], stop ==1", context->name);
+            COMM_LOGI(COMM_UTILS, "LoopTask stop is 1. name=%{public}s", context->name);
             (void)SoftBusMutexUnlock(&context->lock);
             break;
         }
@@ -157,7 +157,7 @@ static void *LoopTask(void *arg)
         }
 
         if (IsListEmpty(&context->msgHead)) {
-            COMM_LOGD(COMM_UTILS, "LoopTask[%s] wait msg list empty", context->name);
+            COMM_LOGD(COMM_UTILS, "LoopTask wait msg list empty. name=%{public}s", context->name);
             SoftBusCondWait(&context->cond, &context->lock, NULL);
             (void)SoftBusMutexUnlock(&context->lock);
             continue;
@@ -175,7 +175,8 @@ static void *LoopTask(void *arg)
             context->msgSize--;
             if (looper->dumpable) {
                 COMM_LOG_SWITCH(IsNeedDumpHighLevel(msg->handler), COMM_UTILS,
-                    "LoopTask[%s], get message. handle=%s,what=%" PRId32 ",arg1=%" PRIu64 ",msgSize=%u,time=%" PRId64,
+                    "LoopTask get message. name=%{public}s, handle=%{public}s, what=%{public}" PRId32 ", arg1=%{public}"
+                    PRIu64 ", msgSize=%{public}u, time=%{public}" PRId64,
                     context->name, msg->handler ? msg->handler->name : "null", msg->what, msg->arg1, context->msgSize,
                     msg->time);
             }
@@ -194,8 +195,8 @@ static void *LoopTask(void *arg)
         (void)SoftBusMutexUnlock(&context->lock);
         if (looper->dumpable) {
             COMM_LOG_SWITCH(IsNeedDumpHighLevel(msg->handler), COMM_UTILS,
-                "LoopTask[%s], HandleMessage message. handle=%s,what=%" PRId32, context->name,
-                msg->handler ? msg->handler->name : "null", msg->what);
+                "LoopTask HandleMessage message. name=%{public}s, handle=%{public}s, what=%{public}" PRId32,
+                context->name, msg->handler ? msg->handler->name : "null", msg->what);
         }
 
         if (msg->handler != NULL && msg->handler->HandleMessage != NULL) {
@@ -205,7 +206,8 @@ static void *LoopTask(void *arg)
             // Don`t print msg->handler, msg->handler->HandleMessage() may remove handler,
             // so msg->handler maybe invalid pointer
             COMM_LOG_SWITCH(IsNeedDumpHighLevel(msg->handler), COMM_UTILS,
-                "LoopTask[%s], after HandleMessage message. what=%" PRId32 ",arg1=%" PRIu64,
+                "LoopTask after HandleMessage message. "
+                "name=%{public}s, what=%{public}" PRId32 ", arg1=%{public}" PRIu64,
                 context->name, msg->what, msg->arg1);
         }
         (void)SoftBusMutexLock(&context->lock);
@@ -215,7 +217,7 @@ static void *LoopTask(void *arg)
     }
     (void)SoftBusMutexLock(&context->lock);
     context->running = 0;
-    COMM_LOGI(COMM_UTILS, "LoopTask[%s], running =0", context->name);
+    COMM_LOGI(COMM_UTILS, "LoopTask running is 0. name=%{public}s", context->name);
     SoftBusCondBroadcast(&context->cond);
     SoftBusCondBroadcast(&context->condRunning);
     (void)SoftBusMutexUnlock(&context->lock);
@@ -248,7 +250,7 @@ static int StartNewLooperThread(SoftBusLooper *looper)
         return -1;
     }
 
-    COMM_LOGI(COMM_UTILS, "loop thread creating %s id %d", looper->context->name,
+    COMM_LOGI(COMM_UTILS, "loop thread creating. name=%{public}s, tid=%{public}d", looper->context->name,
         (int)(uintptr_t)tid);
     return 0;
 }
@@ -261,7 +263,7 @@ static void DumpLooperLocked(const SoftBusLooperContext *context, const SoftBusH
         SoftBusMessageNode *itemNode = LIST_ENTRY(item, SoftBusMessageNode, node);
         SoftBusMessage *msg = itemNode->msg;
         if (i > MAX_LOOPER_PRINT_CNT) {
-            COMM_LOGW(COMM_UTILS, "many messages left unprocessed, msgSize is %u",
+            COMM_LOGW(COMM_UTILS, "many messages left unprocessed, msgSize=%{public}u",
                 context->msgSize);
             break;
         }
@@ -269,7 +271,8 @@ static void DumpLooperLocked(const SoftBusLooperContext *context, const SoftBusH
             continue;
         }
         COMM_LOGD(COMM_UTILS,
-            "DumpLooper. i=%d,handler=%s,what=%" PRId32 ",arg1=%" PRIu64 " arg2=%" PRIu64 ", time=%" PRId64,
+            "DumpLooper. i=%{public}d, handler=%{public}s, what=%{public}" PRId32 ", arg1=%{public}" PRIu64 ", "
+            "arg2=%{public}" PRIu64 ", time=%{public}" PRId64,
             i, msg->handler->name, msg->what, msg->arg1, msg->arg2, msg->time);
 
         i++;
@@ -306,17 +309,18 @@ static void PostMessageAtTime(const SoftBusLooper *looper, SoftBusMessage *msgPo
 
     if (looper->dumpable) {
         COMM_LOG_SWITCH(IsNeedDumpHighLevel(msgPost->handler), COMM_UTILS,
-            "[%s]PostMessageAtTime what=%d time=% " PRId64 " us", looper->context->name, msgPost->what, msgPost->time);
+            "PostMessageAtTime name=%{public}s, what=%{public}d, time=%{public}" PRId64 "us", looper->context->name,
+            msgPost->what, msgPost->time);
     }
     if (msgPost->handler == NULL) {
         FreeSoftBusMsg(msgPost);
-        COMM_LOGE(COMM_UTILS, "[%s]PostMessageAtTime. msg handler is null",
+        COMM_LOGE(COMM_UTILS, "PostMessageAtTime. msg handler is null. name=%{public}s",
             looper->context->name);
         return;
     }
     SoftBusMessageNode *newNode = (SoftBusMessageNode *)SoftBusMalloc(sizeof(SoftBusMessageNode));
     if (newNode == NULL) {
-        COMM_LOGE(COMM_UTILS, "%s:oom", __func__);
+        COMM_LOGE(COMM_UTILS, "oom");
         FreeSoftBusMsg(msgPost);
         return;
     }
@@ -333,7 +337,7 @@ static void PostMessageAtTime(const SoftBusLooper *looper, SoftBusMessage *msgPo
         SoftBusFree(newNode);
         FreeSoftBusMsg(msgPost);
         (void)SoftBusMutexUnlock(&context->lock);
-        COMM_LOGE(COMM_UTILS, "[%s]PostMessageAtTime. running=%d,stop=1.",
+        COMM_LOGE(COMM_UTILS, "PostMessageAtTime stop is 1. name=%{public}s, running=%{public}d",
             context->name, context->running);
         return;
     }
@@ -354,7 +358,7 @@ static void PostMessageAtTime(const SoftBusLooper *looper, SoftBusMessage *msgPo
     }
     context->msgSize++;
     if (looper->dumpable) {
-        COMM_LOGD(COMM_UTILS, "[%s]PostMessageAtTime. insert", context->name);
+        COMM_LOGD(COMM_UTILS, "PostMessageAtTime insert. name=%{public}s", context->name);
         DumpLooperLocked(context, msgPost->handler);
     }
     SoftBusCondBroadcast(&context->cond);
@@ -417,8 +421,9 @@ static void LoopRemoveMessageCustom(const SoftBusLooper *looper, const SoftBusHa
         SoftBusMessage *msg = itemNode->msg;
         if (msg->handler == handler && customFunc(msg, args) == 0) {
             COMM_LOG_SWITCH(IsNeedDumpHighLevel(msg->handler), COMM_UTILS,
-                "[%s]LooperRemoveMessage. handler=%s, what=%d,arg1=%" PRIu64 ",time=%" PRId64, context->name,
-                handler->name, msg->what, msg->arg1, msg->time);
+                "LooperRemoveMessage. name=%{public}s, handler=%{public}s, what=%{public}d, arg1=%{public}" PRIu64 ", "
+                "time=%{public}" PRId64,
+                context->name, handler->name, msg->what, msg->arg1, msg->time);
             FreeSoftBusMsg(msg);
             ListDelete(&itemNode->node);
             SoftBusFree(itemNode);
@@ -446,7 +451,7 @@ void SetLooperDumpable(SoftBusLooper *loop, bool dumpable)
 SoftBusLooper *CreateNewLooper(const char *name)
 {
     if (g_looperCnt >= MAX_LOOPER_CNT) {
-        COMM_LOGE(COMM_UTILS, "Looper count:%u, exceeds the maximum", g_looperCnt);
+        COMM_LOGE(COMM_UTILS, "Looper exceeds the maximum, count=%{public}u,", g_looperCnt);
         return NULL;
     }
     SoftBusLooper *looper = (SoftBusLooper *)SoftBusCalloc(sizeof(SoftBusLooper));
@@ -488,7 +493,7 @@ SoftBusLooper *CreateNewLooper(const char *name)
         return NULL;
     }
     g_looperCnt++;
-    COMM_LOGD(COMM_UTILS, "[%s]wait looper start ok", context->name);
+    COMM_LOGD(COMM_UTILS, "wait looper start ok. name=%{public}s", context->name);
     return looper;
 }
 
@@ -549,14 +554,14 @@ void DestroyLooper(SoftBusLooper *looper)
     if (context != NULL) {
         (void)SoftBusMutexLock(&context->lock);
 
-        COMM_LOGI(COMM_UTILS, "[%s]set stop = 1", context->name);
+        COMM_LOGI(COMM_UTILS, "set stop 1. name=%{public}s", context->name);
         context->stop = 1;
 
         SoftBusCondBroadcast(&context->cond);
         (void)SoftBusMutexUnlock(&context->lock);
         while (1) {
             (void)SoftBusMutexLock(&context->lock);
-            COMM_LOGI(COMM_UTILS, "[%s] get running = %d", context->name, context->running);
+            COMM_LOGI(COMM_UTILS, "get. name=%{public}s, running=%{public}d", context->name, context->running);
             if (context->running == 0) {
                 (void)SoftBusMutexUnlock(&context->lock);
                 break;
@@ -574,7 +579,7 @@ void DestroyLooper(SoftBusLooper *looper)
             ListDelete(&itemNode->node);
             SoftBusFree(itemNode);
         }
-        COMM_LOGI(COMM_UTILS, "[%s] destroy", context->name);
+        COMM_LOGI(COMM_UTILS, "destroy. name=%{public}s", context->name);
         // destroy looper
         SoftBusCondDestroy(&context->cond);
         SoftBusCondDestroy(&context->condRunning);

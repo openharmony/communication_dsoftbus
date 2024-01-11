@@ -249,7 +249,7 @@ static void OnQueryConn(HiSysEventRecordC srcRecord[], size_t size)
 
 static void OnCompleteConn(int32_t reason, int32_t total)
 {
-    COMM_LOGI(COMM_DFX, "OnCompleteConn start, reason is %d, total is %d", reason, total);
+    COMM_LOGI(COMM_DFX, "OnCompleteConn start, reason=%{public}d, total=%{public}d", reason, total);
     g_isConnQueryEnd = true;
 }
 
@@ -319,7 +319,7 @@ static void OnQueryLnn(HiSysEventRecordC srcRecord[], size_t size)
 
 static void OnCompleteLnn(int32_t reason, int32_t total)
 {
-    COMM_LOGI(COMM_DFX, "OnCompleteLnn start, reason is %d, total is %d", reason, total);
+    COMM_LOGI(COMM_DFX, "OnCompleteLnn start, reason=%{public}d, total=%{public}d", reason, total);
     g_isLnnQueryEnd = true;
 }
 
@@ -351,7 +351,7 @@ static void TransStatsSuccessDetail(bool success, const char *socketName, int32_
         }
         if (LnnMapSet(&g_transStatsInfo.sessionNameLinkTypeMap, keyStr, (const void *)&newResult,
             sizeof(TransStatsSuccessRateDetail)) != SOFTBUS_OK) {
-            COMM_LOGE(COMM_DFX, "insert keyStr:%s fail", keyStr);
+            COMM_LOGE(COMM_DFX, "insert fail. keyStr=%{public}s", keyStr);
         }
         TransMapUnlock();
         return;
@@ -444,7 +444,7 @@ static void OnQueryTrans(HiSysEventRecordC srcRecord[], size_t size)
 
 static void OnCompleteTrans(int32_t reason, int32_t total)
 {
-    COMM_LOGI(COMM_DFX, "OnCompleteTrans start, reason is %d, total is %d", reason, total);
+    COMM_LOGI(COMM_DFX, "OnCompleteTrans start, reason=%{public}d, total=%{public}d", reason, total);
     g_isTransQueryEnd = true;
 }
 
@@ -506,7 +506,7 @@ static void OnQueryAlarm(HiSysEventRecordC srcRecord[], size_t size)
 
 static void OnCompleteAlarm(int32_t reason, int32_t total)
 {
-    COMM_LOGI(COMM_DFX, "OnCompleteAlarm start, reason is %d, total is %d", reason, total);
+    COMM_LOGI(COMM_DFX, "OnCompleteAlarm start, reason=%{public}d, total=%{public}d", reason, total);
     g_isAlarmQueryEnd = true;
 }
 
@@ -518,7 +518,7 @@ static void SoftBusEventQueryInfo(int time, HiSysEventQueryParam* queryParam)
     queryArg.maxEvents = queryParam->dataSize;
     
     int32_t ret = OH_HiSysEvent_Query(&queryArg, queryParam->queryRules, queryParam->eventSize, &queryParam->callback);
-    COMM_LOGI(COMM_DFX, "SoftBusHisEvtQuery result, reason is %d", ret);
+    COMM_LOGI(COMM_DFX, "SoftBusHisEvtQuery result, reason=%{public}d", ret);
 }
 
 void GenerateTransSuccessRateString(MapIterator *it, char *res, uint64_t maxLen)
@@ -551,7 +551,8 @@ void GenerateTransSuccessRateString(MapIterator *it, char *res, uint64_t maxLen)
 void FillTransSuccessRateDetail(cJSON *transObj)
 {
     if (transObj == NULL) {
-        COMM_LOGE(COMM_DFX, "%s json is add to root fail", MODULE_NAME_TRANS);
+        COMM_LOGE(COMM_DFX, "MODULE_NAME_TRANS json is add to root fail. MODULE_NAME_TRANS=%{public}s",
+            MODULE_NAME_TRANS);
         return;
     }
     if (TransMapLock() != SOFTBUS_OK) {
@@ -579,7 +580,7 @@ void FillTransSuccessRateDetail(cJSON *transObj)
 void FillConnSuccessRateDetail(cJSON *connObj)
 {
     if (connObj == NULL) {
-        COMM_LOGE(COMM_DFX, "%s json is add to root fail", MODULE_NAME_CONN);
+        COMM_LOGE(COMM_DFX, "MODULE_NAME_CONN json is add to root fail. MODULE_NAME_CONN=%{public}s", MODULE_NAME_CONN);
         return;
     }
     for (int i = SOFTBUS_ZERO; i < CONNECT_TYPE_MAX; i++) {
@@ -601,7 +602,7 @@ void FillConnSuccessRateDetail(cJSON *connObj)
 void FillAuthSuccessRateDetail(cJSON *authObj)
 {
     if (authObj == NULL) {
-        COMM_LOGE(COMM_DFX, "%s json is add to root fail", MODULE_NAME_AUTH);
+        COMM_LOGE(COMM_DFX, "MODULE_NAME_AUTH json is add to root fail. MODULE_NAME_AUTH=%{public}s", MODULE_NAME_AUTH);
         return;
     }
     for (int i = SOFTBUS_ZERO; i < AUTH_LINK_TYPE_MAX; i++) {
@@ -719,7 +720,7 @@ int32_t SoftBusQueryStatsInfo(int time, SoftBusStatsResult* result)
 {
     COMM_LOGI(COMM_DFX, "SoftBusQueryStatsInfo start");
     if (time <= SOFTBUS_ZERO || time > SEVEN_DAY_MINUTE) {
-        COMM_LOGE(COMM_DFX, "SoftBusQueryStatsInfo fail, time is %d", time);
+        COMM_LOGE(COMM_DFX, "SoftBusQueryStatsInfo fail, time=%{public}d", time);
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexLock(&g_statsQueryLock) != SOFTBUS_OK) {
@@ -742,15 +743,15 @@ int32_t SoftBusQueryAlarmInfo(int time, int type, SoftBusAlarmEvtResult* result)
 {
     COMM_LOGI(COMM_DFX, "SoftBusQueryAlarmInfo start");
     if (time <= SOFTBUS_ZERO || time > SEVEN_DAY_MINUTE) {
-        COMM_LOGE(COMM_DFX, "QueryAlarmInfo fail, time is %d", time);
+        COMM_LOGE(COMM_DFX, "QueryAlarmInfo fail, time=%{public}d", time);
         return SOFTBUS_ERR;
     }
     if (type < SOFTBUS_MANAGEMENT_ALARM_TYPE || type >= ALARM_UNUSE_BUTT) {
-        COMM_LOGE(COMM_DFX, "QueryAlarmInfo fail, type is %d", type);
+        COMM_LOGE(COMM_DFX, "QueryAlarmInfo fail, type=%{public}d", type);
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexLock(&g_alarmQueryLock) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_DFX, "QueryAlarmInfo fail,lock fail");
+        COMM_LOGE(COMM_DFX, "QueryAlarmInfo fail, lock fail");
         return SOFTBUS_ERR;
     }
     g_alarmEvtResult.recordSize = 0;

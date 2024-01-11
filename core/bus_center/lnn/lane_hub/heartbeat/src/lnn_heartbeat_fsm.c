@@ -155,7 +155,7 @@ static bool CheckHbFsmStateMsgArgs(const FsmStateMachine *fsm)
         return false;
     }
     if (hbFsm->state < STATE_HB_INDEX_MIN || hbFsm->state >= STATE_HB_INDEX_MAX) {
-        LNN_LOGE(LNN_HEART_BEAT, "fsmId=%d is in invalid state=%d", hbFsm->id, hbFsm->state);
+        LNN_LOGE(LNN_HEART_BEAT, "fsmId is in invalid. fsmId=%{public}d, state=%{public}d", hbFsm->id, hbFsm->state);
         return false;
     }
     return true;
@@ -163,7 +163,7 @@ static bool CheckHbFsmStateMsgArgs(const FsmStateMachine *fsm)
 
 static void FreeUnhandledHbMessage(int32_t msgType, void *para)
 {
-    LNN_LOGI(LNN_HEART_BEAT, "free unhandled msgType=%d", msgType);
+    LNN_LOGI(LNN_HEART_BEAT, "free unhandled msgType=%{public}d", msgType);
     if (msgType == EVENT_HB_UPDATE_SEND_INFO) {
         /* this event use pointer to transfer parameters */
         return;
@@ -193,13 +193,13 @@ static bool HbFsmStateProcessFunc(FsmStateMachine *fsm, int32_t msgType, void *p
         /* in this case, free the memory of para in eventHandler FUNC */
         ret = (stateHandler[i].eventHandler)(fsm, msgType, para);
         if (ret != SOFTBUS_OK) {
-            LNN_LOGE(LNN_HEART_BEAT, "FSM process hbType=%d fail, ret=%d", msgType, ret);
+            LNN_LOGE(LNN_HEART_BEAT, "FSM process hb fail, hbType=%{public}d, ret=%{public}d", msgType, ret);
             return false;
         }
-        LNN_LOGD(LNN_HEART_BEAT, "FSM process hbType=%d succ, state=%d", msgType, hbFsm->state);
+        LNN_LOGD(LNN_HEART_BEAT, "FSM process hb succ, hbType=%{public}d, state=%{public}d", msgType, hbFsm->state);
         return true;
     }
-    LNN_LOGD(LNN_HEART_BEAT, "no eventHandler hbType=%d in state=%d", msgType, hbFsm->state);
+    LNN_LOGD(LNN_HEART_BEAT, "no eventHandler in. hbType=%{public}d, state=%{public}d", msgType, hbFsm->state);
     FreeUnhandledHbMessage(msgType, para);
     return false;
 }
@@ -367,7 +367,7 @@ static void RemoveHbMsgByCustObj(LnnHeartbeatFsm *hbFsm, LnnHeartbeatEventType e
     };
     ret = LnnFsmRemoveMessageSpecific(&hbFsm->fsm, CustomFuncRemoveHbMsg, (void *)&removeMsg);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "fsmId=%d remove offline hbType=%d fail", hbFsm->id, evtType);
+        LNN_LOGE(LNN_HEART_BEAT, "remove offline fb fail. hbType=%{public}d, fsmId=%{public}d ", hbFsm->id, evtType);
     }
 }
 
@@ -432,7 +432,7 @@ static void HbMasterNodeStateEnter(FsmStateMachine *fsm)
     hbFsm->state = STATE_HB_MASTER_NODE_INDEX;
     LnnProcessSendOnceMsgPara *msgPara = (LnnProcessSendOnceMsgPara *)SoftBusMalloc(sizeof(LnnProcessSendOnceMsgPara));
     if (msgPara == NULL) {
-        LNN_LOGE(LNN_HEART_BEAT, "fsmId=%d enter master node malloc err", hbFsm->id);
+        LNN_LOGE(LNN_HEART_BEAT, "enter master node malloc err. fsmId=%{public}d", hbFsm->id);
         return;
     }
     msgPara->hbType = hbFsm->hbType;
@@ -444,7 +444,7 @@ static void HbMasterNodeStateEnter(FsmStateMachine *fsm)
         SoftBusFree(msgPara);
         return;
     }
-    LNN_LOGI(LNN_HEART_BEAT, "fsmId=%d perform as master node", hbFsm->id);
+    LNN_LOGI(LNN_HEART_BEAT, "perform as master node. fsmId=%{public}d", hbFsm->id);
 }
 
 static void HbMasterNodeStateExit(FsmStateMachine *fsm)
@@ -466,7 +466,7 @@ static void HbNormalNodeStateEnter(FsmStateMachine *fsm)
     LnnHeartbeatFsm *hbFsm = TO_HEARTBEAT_FSM(fsm);
     hbFsm->state = STATE_HB_NORMAL_NODE_INDEX;
     LnnRemoveProcessSendOnceMsg(hbFsm, hbFsm->hbType, STRATEGY_HB_SEND_FIXED_PERIOD);
-    LNN_LOGI(LNN_HEART_BEAT, "fsmId=%d perform as normal node", hbFsm->id);
+    LNN_LOGI(LNN_HEART_BEAT, "perform as normal node. fsmId=%{public}d", hbFsm->id);
 }
 
 static void HbNoneStateEnter(FsmStateMachine *fsm)
@@ -477,7 +477,7 @@ static void HbNoneStateEnter(FsmStateMachine *fsm)
     }
     LnnHeartbeatFsm *hbFsm = TO_HEARTBEAT_FSM(fsm);
     hbFsm->state = STATE_HB_NONE_INDEX;
-    LNN_LOGI(LNN_HEART_BEAT, "fsmId=%d perform none state", hbFsm->id);
+    LNN_LOGI(LNN_HEART_BEAT, "perform none state. fsmId=%{public}d", hbFsm->id);
 
     if (LnnHbMediumMgrStop(&hbFsm->hbType) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "stop medium manager fail");
@@ -526,8 +526,8 @@ static int32_t OnProcessSendOnce(FsmStateMachine *fsm, int32_t msgType, void *pa
             break;
         }
         if (ret != SOFTBUS_OK) {
-            LNN_LOGE(LNN_HEART_BEAT, "process send once fail, hbType=%d, strategyType=%d, "
-                "ret=%d", msgPara->hbType, msgPara->strategyType, ret);
+            LNN_LOGE(LNN_HEART_BEAT, "process send once fail, hbType=%{public}d, strategyType=%{public}d, "
+                "ret=%{public}d", msgPara->hbType, msgPara->strategyType, ret);
             break;
         }
         ret = SOFTBUS_OK;
@@ -672,7 +672,7 @@ static int32_t OnSetMediumParam(FsmStateMachine *fsm, int32_t msgType, void *par
     }
     ret = LnnHbMediumMgrSetParam((const LnnHeartbeatMediumParam *)para);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "set medium param process fail, ret=%d", ret);
+        LNN_LOGE(LNN_HEART_BEAT, "set medium param process fail, ret=%{public}d", ret);
     }
     SoftBusFree(para);
     return ret;
@@ -700,7 +700,7 @@ static void TryAsMasterNodeNextLoop(FsmStateMachine *fsm)
         LNN_LOGE(LNN_HEART_BEAT, "try as master node post msg fail");
         return;
     }
-    LNN_LOGI(LNN_HEART_BEAT, "try as master node in %" PRIu64 " msec", delayMillis);
+    LNN_LOGI(LNN_HEART_BEAT, "try as master node in delay time. delayMillis=%{public}" PRIu64 " msec", delayMillis);
 }
 
 static int32_t OnTransHbFsmState(FsmStateMachine *fsm, int32_t msgType, void *para)
@@ -749,7 +749,7 @@ static bool ProcOfflineWithoutSoftbus(const char *networkId, ConnectionAddrType 
         LNN_LOGW(LNN_HEART_BEAT, "can not find node");
         return false;
     }
-    LNN_LOGD(LNN_HEART_BEAT, "node deviceTypeId=%d", node.deviceInfo.deviceTypeId);
+    LNN_LOGD(LNN_HEART_BEAT, "node deviceTypeId=%{public}d", node.deviceInfo.deviceTypeId);
     if (node.deviceInfo.deviceTypeId == TYPE_PC_ID &&
         strcmp(node.networkId, node.deviceInfo.deviceUdid) == 0) {
         LNN_LOGI(LNN_HEART_BEAT, "remove node because lost heartbeat");
@@ -774,13 +774,13 @@ static int32_t ProcessLostHeartbeat(const char *networkId, ConnectionAddrType ad
     }
     if (!LnnGetOnlineStateById(networkId, CATEGORY_NETWORK_ID)) {
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGI(LNN_HEART_BEAT, "process dev lost is offline, networkId=%s", anonyNetworkId);
+        LNN_LOGI(LNN_HEART_BEAT, "process dev lost is offline, networkId=%{public}s", anonyNetworkId);
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_OK;
     }
     if (LnnHasActiveConnection(networkId, addrType)) {
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGD(LNN_HEART_BEAT, "process dev lost in next period, networkId=%s", anonyNetworkId);
+        LNN_LOGD(LNN_HEART_BEAT, "process dev lost in next period, networkId=%{public}s", anonyNetworkId);
         AnonymizeFree(anonyNetworkId);
         if (LnnOfflineTimingByHeartbeat(networkId, addrType) != SOFTBUS_OK) {
             LNN_LOGE(LNN_HEART_BEAT, "process dev lost start new offline timing err");
@@ -797,7 +797,8 @@ static int32_t ProcessLostHeartbeat(const char *networkId, ConnectionAddrType ad
     char *anonyUdidHash = NULL;
     Anonymize(udidHash, &anonyUdidHash);
     Anonymize(networkId, &anonyNetworkId);
-    LNN_LOGI(LNN_HEART_BEAT, "process dev lost, udidHash=%s, networkId=%s", anonyUdidHash, anonyNetworkId);
+    LNN_LOGI(LNN_HEART_BEAT, "process dev lost, udidHash=%{public}s, networkId=%{public}s",
+        anonyUdidHash, anonyNetworkId);
     AnonymizeFree(anonyNetworkId);
     AnonymizeFree(anonyUdidHash);
     if (LnnRequestLeaveSpecific(networkId, addrType) != SOFTBUS_OK) {
@@ -852,34 +853,35 @@ static void CheckDevStatusByNetworkId(LnnHeartbeatFsm *hbFsm, const char *networ
     discType = LnnConvAddrTypeToDiscType(LnnConvertHbTypeToConnAddrType(hbType));
     if (!LnnHasDiscoveryType(&nodeInfo, discType)) {
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGE(LNN_HEART_BEAT, "check dev status node networkId=%s doesn't have discType=%d",
+        LNN_LOGE(LNN_HEART_BEAT,
+            "check dev status node doesn't have discType. networkId=%{public}s, discType=%{public}d",
             anonyNetworkId, discType);
         AnonymizeFree(anonyNetworkId);
         return;
     }
     if (LnnGetDLHeartbeatTimestamp(networkId, &oldTimeStamp) != SOFTBUS_OK) {
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGE(LNN_HEART_BEAT, "check dev status get timestamp err, networkId=%s", anonyNetworkId);
+        LNN_LOGE(LNN_HEART_BEAT, "check dev status get timestamp err, networkId=%{public}s", anonyNetworkId);
         AnonymizeFree(anonyNetworkId);
         return;
     }
     if (!IsTimestampExceedLimit(nowTime, oldTimeStamp, hbType)) {
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGD(LNN_HEART_BEAT, "check dev status receive heartbeat in time, networkId=%s, "
-            "now=%" PRIu64 ", old=%" PRIu64, anonyNetworkId, nowTime, oldTimeStamp);
+        LNN_LOGD(LNN_HEART_BEAT, "check dev status receive heartbeat in time, networkId=%{public}s, "
+            "nowTime=%{public}" PRIu64 ", oldTimeStamp=%{public}" PRIu64, anonyNetworkId, nowTime, oldTimeStamp);
         AnonymizeFree(anonyNetworkId);
         return;
     }
     Anonymize(networkId, &anonyNetworkId);
-    LNN_LOGI(LNN_HEART_BEAT, "notify node lost heartbeat, networkId=%s, timestamp="
-        "%" PRIu64 ", now:%" PRIu64, anonyNetworkId, oldTimeStamp, nowTime);
+    LNN_LOGI(LNN_HEART_BEAT, "notify node lost heartbeat, networkId=%{public}s, oldTimeStamp=%{public}" PRIu64 ", "
+                             "nowTime=%{public}" PRIu64, anonyNetworkId, oldTimeStamp, nowTime);
     if (LnnStopOfflineTimingStrategy(networkId, LnnConvertHbTypeToConnAddrType(hbType)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "check dev status stop offline timing fail");
         AnonymizeFree(anonyNetworkId);
         return;
     }
     if (ProcessLostHeartbeat(networkId, LnnConvertHbTypeToConnAddrType(hbType), msgPara->isWakeUp) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "process dev lost err, networkId=%s", anonyNetworkId);
+        LNN_LOGE(LNN_HEART_BEAT, "process dev lost err, networkId=%{public}s", anonyNetworkId);
     }
     AnonymizeFree(anonyNetworkId);
 }
@@ -892,7 +894,7 @@ static void CheckDevStatusForScreenOff(LnnHeartbeatFsm *hbFsm, const char *netwo
     char *anonyNetworkId = NULL;
     if (LnnHasActiveConnection(networkId, LnnConvertHbTypeToConnAddrType(hbType))) {
         Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGD(LNN_HEART_BEAT, "process screen off dev lost in next period, networkId=%s", anonyNetworkId);
+        LNN_LOGD(LNN_HEART_BEAT, "process screen off dev lost in next period, networkId=%{public}s", anonyNetworkId);
         if (LnnStartScreenChangeOfflineTiming(networkId, LnnConvertHbTypeToConnAddrType(hbType)) != SOFTBUS_OK) {
             LNN_LOGE(LNN_HEART_BEAT, "process screen off dev lost start new offline timing err");
         }
@@ -912,10 +914,10 @@ static void CheckDevStatusForScreenOff(LnnHeartbeatFsm *hbFsm, const char *netwo
         return;
     }
     Anonymize(networkId, &anonyNetworkId);
-    LNN_LOGW(LNN_HEART_BEAT, "the screen has been closed for more than 2 cycles, networkId=%s, will offline",
+    LNN_LOGW(LNN_HEART_BEAT, "the screen has been closed for more than 2 cycles, will offline, networkId=%{public}s",
         anonyNetworkId);
     if (!LnnGetOnlineStateById(networkId, CATEGORY_NETWORK_ID)) {
-        LNN_LOGI(LNN_HEART_BEAT, "process dev lost is offline, networkId=%s", anonyNetworkId);
+        LNN_LOGI(LNN_HEART_BEAT, "process dev lost is offline, networkId=%{public}s", anonyNetworkId);
         AnonymizeFree(anonyNetworkId);
         return;
     }
@@ -1041,7 +1043,7 @@ void LnnDestroyHeartbeatFsm(LnnHeartbeatFsm *hbFsm)
         hbFsm->fsm.looper = NULL;
     }
     SoftBusFree(hbFsm);
-    LNN_LOGI(LNN_HEART_BEAT, "destroy heartbeat fsmId=%u", hbFsm->id);
+    LNN_LOGI(LNN_HEART_BEAT, "destroy heartbeat fsmId=%{public}u", hbFsm->id);
 }
 
 static void DeinitHbFsmCallback(FsmStateMachine *fsm)
@@ -1104,10 +1106,10 @@ int32_t LnnStartHeartbeatFsm(LnnHeartbeatFsm *hbFsm)
         return SOFTBUS_INVALID_PARAM;
     }
     if (LnnFsmStart(&hbFsm->fsm, g_hbState + STATE_HB_NONE_INDEX) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "start fsmId=%u failed", hbFsm->id);
+        LNN_LOGE(LNN_HEART_BEAT, "start fsm failed. fsmId=%{public}u", hbFsm->id);
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_HEART_BEAT, "fsmId(%u) is starting", hbFsm->id);
+    LNN_LOGI(LNN_HEART_BEAT, "fsm is starting. fsmId=%{public}u", hbFsm->id);
     return SOFTBUS_OK;
 }
 
@@ -1118,7 +1120,7 @@ int32_t LnnStopHeartbeatFsm(LnnHeartbeatFsm *hbFsm)
         return SOFTBUS_INVALID_PARAM;
     }
     if (LnnFsmStop(&hbFsm->fsm) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "stop fsmId(%u) failed", hbFsm->id);
+        LNN_LOGE(LNN_HEART_BEAT, "stop fsm failed. fsmId=%{public}u", hbFsm->id);
         return SOFTBUS_ERR;
     }
     return LnnFsmDeinit(&hbFsm->fsm);
@@ -1145,14 +1147,14 @@ int32_t LnnPostNextSendOnceMsgToHbFsm(LnnHeartbeatFsm *hbFsm, const LnnProcessSe
         return SOFTBUS_ERR;
     }
     LnnNotifyHBRepeat();
-    LNN_LOGD(LNN_HEART_BEAT, "post next loop msg, delayMillis: %" PRIu64, delayMillis);
+    LNN_LOGD(LNN_HEART_BEAT, "post next loop msg, delayMillis=%{public}" PRIu64, delayMillis);
     return SOFTBUS_OK;
 }
 
 int32_t LnnPostSendBeginMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type,
     bool wakeupFlag, LnnProcessSendOnceMsgPara *msgPara, uint64_t delayMillis)
 {
-    LNN_LOGD(LNN_HEART_BEAT, "LnnPostSendBeginMsgToHbFsm enter hbType=%d, isSyncData=%d",
+    LNN_LOGD(LNN_HEART_BEAT, "LnnPostSendBeginMsgToHbFsm enter hbType=%{public}d, isSyncData=%{public}d",
         type, msgPara->isSyncData);
     LnnHeartbeatSendBeginData *custData = NULL;
 
@@ -1187,7 +1189,7 @@ int32_t LnnPostSendEndMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatSendEndData
         LNN_LOGE(LNN_HEART_BEAT, "post send end msg get invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    LNN_LOGD(LNN_HEART_BEAT, "LnnPostSendEndMsgToHbFsm enter hbType=%d", custData->hbType);
+    LNN_LOGD(LNN_HEART_BEAT, "LnnPostSendEndMsgToHbFsm enter hbType=%{public}d", custData->hbType);
     dupData = (LnnHeartbeatSendEndData *)SoftBusCalloc(sizeof(LnnHeartbeatSendEndData));
     if (dupData == NULL) {
         LNN_LOGE(LNN_HEART_BEAT, "post send end msg malloc error");

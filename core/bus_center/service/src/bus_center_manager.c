@@ -112,7 +112,7 @@ static void ReadDelayConfig(void)
         LNN_LOGE(LNN_STATE, "get lnn delay init len fail, use default value");
         g_lnnLocalConfigInit.delayLen = DEFAULT_DELAY_LEN;
     }
-    LNN_LOGI(LNN_STATE, "lnn delay init len=%u", g_lnnLocalConfigInit.delayLen);
+    LNN_LOGI(LNN_STATE, "lnn delay init len=%{public}u", g_lnnLocalConfigInit.delayLen);
 }
 
 static void BusCenterServerDelayInit(void *para)
@@ -136,7 +136,7 @@ static void BusCenterServerDelayInit(void *para)
         }
         if (!g_lnnLocalConfigInit.initDelayImpl[i].isInit &&
             g_lnnLocalConfigInit.initDelayImpl[i].implInit() != SOFTBUS_OK) {
-            LNN_LOGE(LNN_STATE, "init delay impl(%u) failed", i);
+            LNN_LOGE(LNN_STATE, "init delay impl failed. i=%{public}u", i);
             ret = SOFTBUS_ERR;
         } else {
             g_lnnLocalConfigInit.initDelayImpl[i].isInit = true;

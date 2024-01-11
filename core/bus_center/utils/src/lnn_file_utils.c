@@ -73,9 +73,9 @@ int32_t LnnGetFullStoragePath(LnnFileId id, char *path, uint32_t len)
     }
     if (strncpy_s(path, len, g_storagePath, strlen(g_storagePath)) != EOK ||
         strncat_s(path, len, g_filePath[id].filePath, strlen(g_filePath[id].filePath)) != EOK) {
-        LNN_LOGE(LNN_STATE, "splice full path for %d fail", id);
+        LNN_LOGE(LNN_STATE, "splice full path fail. id=%{public}d", id);
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_STATE, "full path for %d is %s", id, path);
+    LNN_LOGI(LNN_STATE, "full path id=%{public}d, path=%{public}s", id, path);
     return SOFTBUS_OK;
 }

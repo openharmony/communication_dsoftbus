@@ -270,7 +270,7 @@ int32_t BusCenterClientProxy::OnNodeOnlineStateChanged(const char *pkgName, bool
     MessageOption option;
     int ret = remote->SendRequest(CLIENT_ON_NODE_ONLINE_STATE_CHANGED, data, reply, option);
     if (ret != 0) {
-        LNN_LOGE(LNN_EVENT, "send request fail=%d", ret);
+        LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     int32_t serverRet;
@@ -322,7 +322,7 @@ int32_t BusCenterClientProxy::OnNodeBasicInfoChanged(const char *pkgName, void *
     MessageOption option;
     int ret = remote->SendRequest(CLIENT_ON_NODE_BASIC_INFO_CHANGED, data, reply, option);
     if (ret != 0) {
-        LNN_LOGE(LNN_EVENT, "send request fail=%d", ret);
+        LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     int32_t serverRet;
@@ -365,7 +365,7 @@ int32_t BusCenterClientProxy::OnTimeSyncResult(const void *info, uint32_t infoTy
     MessageOption option;
     int ret = remote->SendRequest(CLIENT_ON_TIME_SYNC_RESULT, data, reply, option);
     if (ret != 0) {
-        LNN_LOGE(LNN_EVENT, "send request failed=%d", ret);
+        LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     int32_t serverRet;
@@ -400,7 +400,7 @@ void BusCenterClientProxy::OnPublishLNNResult(int32_t publishId, int32_t reason)
     MessageOption option;
     int ret = remote->SendRequest(CLIENT_ON_PUBLISH_LNN_RESULT, data, reply, option);
     if (ret != 0) {
-        LNN_LOGE(LNN_EVENT, "send request fail=%d", ret);
+        LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
     }
 }
 
@@ -428,7 +428,7 @@ void BusCenterClientProxy::OnRefreshLNNResult(int32_t refreshId, int32_t reason)
     MessageOption option;
     int ret = remote->SendRequest(CLIENT_ON_REFRESH_LNN_RESULT, data, reply, option);
     if (ret != 0) {
-        LNN_LOGE(LNN_EVENT, "send request fail=%d", ret);
+        LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
     }
 }
 
@@ -456,7 +456,7 @@ void BusCenterClientProxy::OnRefreshDeviceFound(const void *device, uint32_t dev
     MessageOption option;
     int ret = remote->SendRequest(CLIENT_ON_REFRESH_DEVICE_FOUND, data, reply, option);
     if (ret != 0) {
-        LNN_LOGE(LNN_EVENT, "send request fail=%d", ret);
+        LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
     }
 }
 } // namespace OHOS

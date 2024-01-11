@@ -51,14 +51,14 @@ static void DeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions 
     }
     (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
     // devId format is hex hash string here
-    DISC_LOGI(DISC_LNN, "DeviceFound devName:%s, devId:%s", device->devName, device->devId);
+    DISC_LOGI(DISC_LNN, "DeviceFound devName=%{public}s, devId=%{public}s", device->devName, device->devId);
     if (!AuthIsPotentialTrusted(device)) {
-        DISC_LOGW(DISC_LNN, "discovery device is not potential trusted, devId:%s, "
-            "accountHash:%02X%02X", device->devId, device->accountHash[0], device->accountHash[1]);
+        DISC_LOGW(DISC_LNN, "discovery device is not potential trusted, devId=%{public}s, "
+            "accountHash=%{public}02X%{public}02X", device->devId, device->accountHash[0], device->accountHash[1]);
         return;
     }
     if (device->addr[0].type != CONNECTION_ADDR_WLAN && device->addr[0].type != CONNECTION_ADDR_ETH) {
-        DISC_LOGE(DISC_LNN, "discovery get invalid addrtype: %d", device->addr[0].type);
+        DISC_LOGE(DISC_LNN, "discovery get invalid addrType=%{public}d", device->addr[0].type);
         return;
     }
     if (device->addr[0].info.ip.port == 0) {

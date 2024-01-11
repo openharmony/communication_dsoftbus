@@ -50,7 +50,7 @@ static int32_t OpenSppServer(const char *name, int32_t nameLen, const char *uuid
 
 static void CloseSppServer(int32_t serverFd)
 {
-    CONN_LOGI(CONN_BR, "[CloseServer Connect, and serverFd = %d]", serverFd);
+    CONN_LOGI(CONN_BR, "[CloseServer Connect, and serverFd=%{public}d]", serverFd);
     SppServerClose(serverFd);
 }
 
@@ -74,10 +74,10 @@ static int32_t ConnectByPort(const char *uuid, const BT_ADDR mac, const int sock
     }
     int ret = SocketConnectEx(&socketPara, &bdAddr, socketPsmValue, (BtSocketConnectionCallback *)connectCallback);
     if (ret < 0) {
-        CONN_LOGE(CONN_BR, "connect failed,ret=%d", ret);
+        CONN_LOGE(CONN_BR, "connect failed, ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
-    CONN_LOGI(CONN_BR, "SocketConnectEx ok clientId: %d", ret);
+    CONN_LOGI(CONN_BR, "SocketConnectEx ok. clientId=%{public}d", ret);
     return ret;
 }
 
@@ -88,19 +88,19 @@ static int32_t Connect(const char *uuid, const BT_ADDR mac, void *connectCallbac
 
 static int32_t DisConnect(int32_t clientFd)
 {
-    CONN_LOGI(CONN_BR, "[DisConnect, and clientFd = %d]", clientFd);
+    CONN_LOGI(CONN_BR, "[DisConnect, and clientFd=%{public}d]", clientFd);
     return SppDisconnect(clientFd);
 }
 
 static bool IsConnected(int32_t clientFd)
 {
-    CONN_LOGI(CONN_BR, "[get connected state from bt, clientFd = %d]", clientFd);
+    CONN_LOGI(CONN_BR, "[get connected state from bt, clientFd=%{public}d]", clientFd);
     return IsSppConnected(clientFd);
 }
 
 static int32_t Accept(int32_t serverFd)
 {
-    CONN_LOGI(CONN_BR, "[Accept remote device to connect, and serverFd = %d]", serverFd);
+    CONN_LOGI(CONN_BR, "[Accept remote device to connect, and serverFd=%{public}d]", serverFd);
     int32_t ret = SppServerAccept(serverFd);
     if (ret == BT_SPP_INVALID_ID) {
         CONN_LOGE(CONN_BR, "Accept spp server failed");
@@ -127,7 +127,7 @@ static int32_t Read(int32_t clientFd, uint8_t *buf, const int32_t len)
 
 static int32_t GetRemoteDeviceInfo(int32_t clientFd, const BluetoothRemoteDevice *device)
 {
-    CONN_LOGI(CONN_BR, "[to get remotedeviceinfo, clientFd = %d]", clientFd);
+    CONN_LOGI(CONN_BR, "[to get remotedeviceinfo, clientFd=%{public}d]", clientFd);
     BdAddr bdAddr;
     (void)memset_s((char *)&bdAddr, sizeof(bdAddr), 0, sizeof(bdAddr));
     (void)SppGetRemoteAddr(clientFd, &bdAddr);

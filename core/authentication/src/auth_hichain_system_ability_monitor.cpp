@@ -59,21 +59,21 @@ static void RetryRegTrustListener(void *para)
 
 void SystemAbilityListener::OnAddSystemAbility(int32_t saId, const std::string &deviceId)
 {
-    AUTH_LOGI(AUTH_INIT, "onSaStart saId=%d", saId);
+    AUTH_LOGI(AUTH_INIT, "onSaStart saId=%{public}d", saId);
     if (saId == DEVICE_AUTH_SERVICE_ID) {
         int32_t ret = RegTrustListenerOnHichainSaStart();
         if (ret != SOFTBUS_OK) {
             const int delayRegHichainTime = 5000;
             ret = LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), RetryRegTrustListener, nullptr,
                 delayRegHichainTime);
-            AUTH_LOGI(AUTH_INIT, "LnnAsyncCallbackDelayHelper ret=%d", ret);
+            AUTH_LOGI(AUTH_INIT, "LnnAsyncCallbackDelayHelper ret=%{public}d", ret);
         }
     }
 }
 
 void SystemAbilityListener::OnRemoveSystemAbility(int32_t saId, const std::string &deviceId)
 {
-    AUTH_LOGI(AUTH_INIT, "onRemove saId=%d", saId);
+    AUTH_LOGI(AUTH_INIT, "onRemove saId=%{public}d", saId);
 }
 } // namespace SaEventFwk
 } // namespace OHOS
@@ -92,7 +92,7 @@ int32_t RegHichainSaStatusListener(void)
     int32_t ret = samgrProxy->SubscribeSystemAbility(OHOS::DEVICE_AUTH_SERVICE_ID,
         OHOS::SaEventFwk::SystemAbilityListener::GetInstance());
     if (ret != OHOS::ERR_OK) {
-        AUTH_LOGE(AUTH_INIT, "subscribe hichain sa failed, ret=%d", ret);
+        AUTH_LOGE(AUTH_INIT, "subscribe hichain sa failed, ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     AUTH_LOGI(AUTH_INIT, "subscribe hichain sa succ");
@@ -116,7 +116,7 @@ int32_t UnRegHichainSaStatusListener(void)
     int32_t ret = samgrProxy->UnSubscribeSystemAbility(OHOS::DEVICE_AUTH_SERVICE_ID,
         OHOS::SaEventFwk::SystemAbilityListener::GetInstance());
     if (ret != OHOS::ERR_OK) {
-        AUTH_LOGE(AUTH_INIT, "unsubscribe hichain sa failed, ret=%d", ret);
+        AUTH_LOGE(AUTH_INIT, "unsubscribe hichain sa failed, ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     AUTH_LOGI(AUTH_INIT, "unsubscribe hichain sa succ");

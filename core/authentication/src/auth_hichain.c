@@ -77,10 +77,10 @@ static char *GenDeviceLevelParam(const char *udid, const char *uid, bool isClien
 static bool OnTransmit(int64_t authSeq, const uint8_t *data, uint32_t len)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(len <= ONTRANSMIT_MAX_DATA_BUFFER_LEN, false, AUTH_HICHAIN,
-        "data len is invalid, len=%u", len);
-    AUTH_LOGI(AUTH_HICHAIN, "hichain OnTransmit: authSeq=%" PRId64 ", len=%u", authSeq, len);
+        "data len is invalid, len=%{public}u", len);
+    AUTH_LOGI(AUTH_HICHAIN, "hichain OnTransmit: authSeq=%{public}" PRId64 ", len=%{public}u", authSeq, len);
     if (AuthSessionPostAuthData(authSeq, data, len) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_HICHAIN, "hichain OnTransmit fail: authSeq=%" PRId64, authSeq);
+        AUTH_LOGE(AUTH_HICHAIN, "hichain OnTransmit fail: authSeq=%{public}" PRId64, authSeq);
         return false;
     }
     return true;
@@ -98,7 +98,8 @@ static void DfxRecordLnnExchangekeyEnd(int64_t authSeq, int32_t reason)
 
 static void OnSessionKeyReturned(int64_t authSeq, const uint8_t *sessionKey, uint32_t sessionKeyLen)
 {
-    AUTH_LOGI(AUTH_HICHAIN, "hichain OnSessionKeyReturned: authSeq=%" PRId64 ", len=%u", authSeq, sessionKeyLen);
+    AUTH_LOGI(AUTH_HICHAIN, "hichain OnSessionKeyReturned: authSeq=%{public}" PRId64 ", len=%{public}u", authSeq,
+        sessionKeyLen);
     if (sessionKey == NULL || sessionKeyLen > SESSION_KEY_LENGTH) {
         DfxRecordLnnExchangekeyEnd(authSeq, SOFTBUS_AUTH_GET_SESSION_KEY_FAIL);
         AUTH_LOGW(AUTH_HICHAIN, "invalid sessionKey");
@@ -123,7 +124,7 @@ static void OnFinish(int64_t authSeq, int operationCode, const char *returnData)
     (void)operationCode;
     (void)returnData;
     DfxRecordLnnAuthEnd(authSeq, SOFTBUS_OK);
-    AUTH_LOGI(AUTH_HICHAIN, "hichain OnFinish: authSeq=%" PRId64, authSeq);
+    AUTH_LOGI(AUTH_HICHAIN, "hichain OnFinish: authSeq=%{public}" PRId64, authSeq);
     (void)AuthSessionHandleAuthFinish(authSeq);
 }
 
@@ -132,14 +133,15 @@ static void OnError(int64_t authSeq, int operationCode, int errCode, const char 
     (void)operationCode;
     (void)errorReturn;
     DfxRecordLnnAuthEnd(authSeq, errCode);
-    AUTH_LOGE(AUTH_HICHAIN, "hichain OnError: authSeq=%" PRId64 ", errCode=%d", authSeq, errCode);
+    AUTH_LOGE(AUTH_HICHAIN, "hichain OnError: authSeq=%{public}" PRId64 ", errCode=%{public}d", authSeq, errCode);
     (void)AuthSessionHandleAuthError(authSeq, SOFTBUS_AUTH_HICHAIN_AUTH_ERROR);
 }
 
 static char *OnRequest(int64_t authSeq, int operationCode, const char *reqParams)
 {
     (void)reqParams;
-    AUTH_LOGI(AUTH_HICHAIN, "hichain OnRequest: authSeq=%" PRId64 ", operationCode=%d", authSeq, operationCode);
+    AUTH_LOGI(AUTH_HICHAIN, "hichain OnRequest: authSeq=%{public}" PRId64 ", operationCode=%{public}d", authSeq,
+        operationCode);
     char udid[UDID_BUF_LEN] = {0};
     if (AuthSessionGetUdid(authSeq, udid, sizeof(udid)) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_HICHAIN, "get udid fail");
@@ -212,7 +214,7 @@ static void OnGroupCreated(const char *groupInfo)
     if (ParseGroupInfo(groupInfo, &info) != SOFTBUS_OK) {
         return;
     }
-    AUTH_LOGI(AUTH_HICHAIN, "hichain OnGroupCreated, type=%d", info.groupType);
+    AUTH_LOGI(AUTH_HICHAIN, "hichain OnGroupCreated, type=%{public}d", info.groupType);
     if (g_dataChangeListener.onGroupCreated != NULL) {
         g_dataChangeListener.onGroupCreated(info.groupId, (int32_t)info.groupType);
     }
@@ -241,7 +243,7 @@ static void OnGroupDeleted(const char *groupInfo)
     if (ParseGroupInfo(groupInfo, &info) != SOFTBUS_OK) {
         return;
     }
-    AUTH_LOGI(AUTH_HICHAIN, "hichain OnGroupDeleted, type=%d", info.groupType);
+    AUTH_LOGI(AUTH_HICHAIN, "hichain OnGroupDeleted, type=%{public}d", info.groupType);
     if (g_dataChangeListener.onGroupDeleted != NULL) {
         g_dataChangeListener.onGroupDeleted(info.groupId);
     }
@@ -255,7 +257,7 @@ static void OnDeviceNotTrusted(const char *udid)
     }
     char *anonyUdid = NULL;
     Anonymize(udid, &anonyUdid);
-    AUTH_LOGI(AUTH_HICHAIN, "hichain OnDeviceNotTrusted, udid=%s", anonyUdid);
+    AUTH_LOGI(AUTH_HICHAIN, "hichain OnDeviceNotTrusted, udid=%{public}s", anonyUdid);
     AnonymizeFree(anonyUdid);
     if (g_dataChangeListener.onDeviceNotTrusted != NULL) {
         g_dataChangeListener.onDeviceNotTrusted(udid);
@@ -296,7 +298,7 @@ void UnregTrustDataChangeListener(void)
 {
     int32_t ret = UnregChangeListener(AUTH_APPID);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_HICHAIN, "hichain unRegDataChangeListener err=%d", ret);
+        AUTH_LOGE(AUTH_HICHAIN, "hichain unRegDataChangeListener err=%{public}d", ret);
     }
     (void)memset_s(&g_dataChangeListener, sizeof(TrustDataChangeListener), 0, sizeof(TrustDataChangeListener));
 }
@@ -334,7 +336,7 @@ int32_t HichainProcessData(int64_t authSeq, const uint8_t *data, uint32_t len)
     }
     int32_t ret = ProcessAuthData(authSeq, data, len, &g_hichainCallback);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_HICHAIN, "hichain processData err=%d", ret);
+        AUTH_LOGE(AUTH_HICHAIN, "hichain processData err=%{public}d", ret);
         return ret;
     }
     return SOFTBUS_OK;

@@ -143,7 +143,7 @@ static int32_t SetMsgParamNameAndType(SoftBusEvtReportMsg *msg, SoftBusEvtParamS
         param = &msg->paramArray[i];
         param->paramType = paramSize[i].paramType;
         if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, paramSize[i].paramName) != EOK) {
-            COMM_LOGE(COMM_EVENT, "set msg strcpy_s param name %s fail", paramSize[i].paramName);
+            COMM_LOGE(COMM_EVENT, "set msg strcpy_s param name fail. paramName=%{public}s", paramSize[i].paramName);
             return SOFTBUS_ERR;
         }
     }
@@ -175,7 +175,8 @@ static int32_t SoftBusCreateFirstDiscDurMsg(SoftBusEvtReportMsg *msg, uint32_t m
 {
     errno_t errnoRet = strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_FIRST_DISC_DURATION);
     if (errnoRet != EOK) {
-        COMM_LOGE(COMM_EVENT, "strcpy evtname %s fail", STATISTIC_EVT_FIRST_DISC_DURATION);
+        COMM_LOGE(COMM_EVENT,
+            "strcpy evtname fail. STATISTIC_EVT_FIRST_DISC_DURATION=%{public}s", STATISTIC_EVT_FIRST_DISC_DURATION);
         return SOFTBUS_ERR;
     }
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
@@ -225,7 +226,7 @@ static int32_t AddDiscDetailNode(DiscDetailNode **discDetailNode, char *moduleNa
     DiscDetailNode *newNode = (DiscDetailNode *)SoftBusCalloc(sizeof(DiscDetailNode));
     COMM_CHECK_AND_RETURN_RET_LOGE(newNode != NULL, SOFTBUS_ERR, COMM_EVENT, "malloc fail");
     if (strcpy_s(newNode->moduleName, MODULE_NAME_MAX_LEN, moduleName) != EOK) {
-        COMM_LOGE(COMM_EVENT, "strcpy module name %s fail", moduleName);
+        COMM_LOGE(COMM_EVENT, "strcpy module name fail. moduleName=%{public}s", moduleName);
         SoftBusFree(newNode);
         return SOFTBUS_ERR;
     }
@@ -242,50 +243,53 @@ static int32_t AddDiscDetailNode(DiscDetailNode **discDetailNode, char *moduleNa
 static int32_t SoftBusCreateDiscDetailsMsg(SoftBusEvtReportMsg *msg, DiscDetailNode *discDetailItem)
 {
     errno_t errnoRet = strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_DISCOVERY_DETAILS);
-    COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT, "strcpy evtName %s fail",
-                                  STATISTIC_EVT_DISCOVERY_DETAILS);
+    COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT,
+        "strcpy evtName fail. STATISTIC_EVT_DISCOVERY_DETAILS=%{public}s", STATISTIC_EVT_DISCOVERY_DETAILS);
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
     msg->paramNum = DISCOVERY_DETAILS_PARAM_NUM;
 
     SoftBusEvtParam* param = &msg->paramArray[SOFTBUS_EVT_PARAM_ZERO];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_STRING;
     errnoRet = strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, MODULE_KEY);
-    COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT, "strcpy paramName %s fail", MODULE_KEY);
+    COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT,
+        "strcpy paramName fail. MODULE_KEY=%{public}s", MODULE_KEY);
     errnoRet = strcpy_s(param->paramValue.str, SOFTBUS_HISYSEVT_PARAM_LEN, discDetailItem->moduleName);
     COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT,
-        "strcpy moduleName %s fail", g_softbusVersion);
+        "strcpy moduleName fail. g_softbusVersion=%{public}s", g_softbusVersion);
 
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_ONE];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     errnoRet = strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, DISC_TYPE_KEY);
-    COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT, "strcpy paramName %s fail", DISC_TYPE_KEY);
+    COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT,
+        "strcpy paramName fail. DISC_TYPE_KEY=%{public}s", DISC_TYPE_KEY);
     param->paramValue.u32v = discDetailItem->discType;
 
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_TWO];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT64;
     errnoRet = strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, DURATION_KEY);
-    COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT, "strcpy paramName %s fail", DURATION_KEY);
+    COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT,
+        "strcpy paramName fail. DURATION_KEY=%{public}s", DURATION_KEY);
     param->paramValue.u64v = discDetailItem->duration;
 
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_THREE];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     errnoRet = strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, REPORT_TIMES_KEY);
     COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT,
-        "strcpy paramName %s fail", REPORT_TIMES_KEY);
+        "strcpy paramName fail. REPORT_TIMES_KEY=%{public}s", REPORT_TIMES_KEY);
     param->paramValue.u32v = discDetailItem->repTimes;
 
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_FOUR];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     errnoRet = strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, DEVICE_NUM_KEY);
     COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT,
-        "strcpy paramName %s fail", DEVICE_NUM_KEY);
+        "strcpy paramName fail. DEVICE_NUM_KEY=%{public}s", DEVICE_NUM_KEY);
     param->paramValue.u32v = discDetailItem->devNum;
 
     param = &msg->paramArray[SOFTBUS_EVT_PARAM_FIVE];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32;
     errnoRet = strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, DISC_TIMES_KEY);
     COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT,
-        "strcpy paramName %s fail", DISC_TIMES_KEY);
+        "strcpy paramName fail. DISC_TIMES_KEY=%{public}s", DISC_TIMES_KEY);
     param->paramValue.u32v = discDetailItem->discTimes;
     return SOFTBUS_OK;
 }
@@ -293,15 +297,16 @@ static int32_t SoftBusCreateDiscDetailsMsg(SoftBusEvtReportMsg *msg, DiscDetailN
 static int32_t SoftBusCreateDiscBleRssiMsg(SoftBusEvtReportMsg *msg)
 {
     errno_t errnoRet = strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_DISCOVERY_BLE_RSSI);
-    COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT, "strcpy evtname %s fail",
-                                  STATISTIC_EVT_DISCOVERY_BLE_RSSI);
+    COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT,
+        "strcpy evtname fail. STATISTIC_EVT_DISCOVERY_BLE_RSSI=%{public}s", STATISTIC_EVT_DISCOVERY_BLE_RSSI);
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
     msg->paramNum = DISCOVERY_BLE_RSSI_PARAM_NUM;
 
     SoftBusEvtParam* param = &msg->paramArray[SOFTBUS_EVT_PARAM_ZERO];
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32_ARRAY;
     errnoRet = strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, RANGE_ID_KEY);
-    COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT, "strcpy paramName %s fail", RANGE_ID_KEY);
+    COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT,
+        "strcpy paramName fail. RANGE_ID_KEY=%{public}s", RANGE_ID_KEY);
     for (int i = 0; i < SOFTBUS_HISYSEVT_PARAM_UINT32_ARRAY_SIZE; i++) {
         param->paramValue.u32a[i] = g_bleRssiRangeId[i];
     }
@@ -310,7 +315,7 @@ static int32_t SoftBusCreateDiscBleRssiMsg(SoftBusEvtReportMsg *msg)
     param->paramType = SOFTBUS_EVT_PARAMTYPE_UINT32_ARRAY;
     errnoRet = strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, RANGE_DATA_KEY);
     COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT,
-        "strcpy paramName %s fail", RANGE_DATA_KEY);
+        "strcpy paramName fail. RANGE_DATA_KEY=%{public}s", RANGE_DATA_KEY);
     for (int i = 0; i < SOFTBUS_HISYSEVT_PARAM_UINT32_ARRAY_SIZE; i++) {
         param->paramValue.u32a[i] = g_bleRssiRangeData[i];
     }

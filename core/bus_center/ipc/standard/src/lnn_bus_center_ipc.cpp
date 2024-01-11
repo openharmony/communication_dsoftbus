@@ -160,7 +160,7 @@ int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, ui
     }
     std::lock_guard<std::mutex> autoLock(g_lock);
     if (IsRepeatJoinLNNRequest(pkgName, callingPid, connAddr)) {
-        LNN_LOGE(LNN_EVENT, "repeat join lnn request pkgName=%s", pkgName);
+        LNN_LOGE(LNN_EVENT, "repeat join lnn request pkgName=%{public}s", pkgName);
         return SOFTBUS_ALREADY_EXISTED;
     }
     int32_t ret = LnnServerJoin(connAddr, pkgName);
@@ -178,7 +178,7 @@ int32_t LnnIpcServerLeave(const char *pkgName, int32_t callingPid, const char *n
     }
     std::lock_guard<std::mutex> autoLock(g_lock);
     if (IsRepeatLeaveLNNRequest(pkgName, callingPid, networkId)) {
-        LNN_LOGE(LNN_EVENT, "repeat leave lnn request pkgName=%s", pkgName);
+        LNN_LOGE(LNN_EVENT, "repeat leave lnn request pkgName=%{public}s", pkgName);
         return SOFTBUS_ALREADY_EXISTED;
     }
     int32_t ret = LnnServerLeave(networkId, pkgName);
@@ -192,7 +192,7 @@ int32_t LnnIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t in
     int *infoNum)
 {
     if (infoTypeLen != sizeof(NodeBasicInfo)) {
-        LNN_LOGE(LNN_EVENT, "infoTypeLen is invalid, infoTypeLen=%d", infoTypeLen);
+        LNN_LOGE(LNN_EVENT, "infoTypeLen is invalid, infoTypeLen=%{public}d", infoTypeLen);
         return SOFTBUS_INVALID_PARAM;
     }
     return LnnGetAllOnlineNodeInfo(reinterpret_cast<NodeBasicInfo **>(info), infoNum);
@@ -289,7 +289,7 @@ int32_t LnnIpcRefreshLNN(const char *pkgName, int32_t callingPid, const Subscrib
         return SOFTBUS_INVALID_PARAM;
     }
     if (IsRepeatRfreshLnnRequest(pkgName, callingPid)) {
-        LNN_LOGD(LNN_EVENT, "repeat refresh lnn request pkgName=%s", pkgName);
+        LNN_LOGD(LNN_EVENT, "repeat refresh lnn request pkgName=%{public}s", pkgName);
     } else {
         (void)AddRefreshLnnInfo(pkgName, callingPid, info->subscribeId);
     }
