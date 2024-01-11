@@ -99,7 +99,7 @@ bool RemoteObjectMock::GetResult(uint32_t code, const DeviceInfo *deviceInfo, in
 int RemoteObjectMock::ActionOfSendRequestForOnDeviceFound(uint32_t code, MessageParcel &data, MessageParcel &reply,
                                                           MessageOption &option)
 {
-    DISC_LOGI(DISC_TEST, "code=%u", code);
+    DISC_LOGI(DISC_TEST, "code=%{public}u", code);
     Get()->code_ = code;
     Get()->descriptor_ = data.ReadInterfaceToken();
     return memcpy_s(&Get()->deviceInfo_, sizeof(DeviceInfo), data.ReadBuffer(sizeof(DeviceInfo)), sizeof(DeviceInfo));
@@ -108,7 +108,7 @@ int RemoteObjectMock::ActionOfSendRequestForOnDeviceFound(uint32_t code, Message
 int RemoteObjectMock::ActionOfSendRequestForOnDiscoveryFailed(uint32_t code, MessageParcel &data, MessageParcel &reply,
                                                               MessageOption &option)
 {
-    DISC_LOGI(DISC_TEST, "code=%u", code);
+    DISC_LOGI(DISC_TEST, "code=%{public}u", code);
     Get()->code_ = code;
     Get()->descriptor_ = data.ReadInterfaceToken();
     Get()->subscribeId_ = data.ReadInt32();
@@ -119,7 +119,7 @@ int RemoteObjectMock::ActionOfSendRequestForOnDiscoveryFailed(uint32_t code, Mes
 int RemoteObjectMock::ActionOfSendRequestForOnDiscoverySuccess(uint32_t code, MessageParcel &data, MessageParcel &reply,
                                                                MessageOption &option)
 {
-    DISC_LOGI(DISC_TEST, "code=%u", code);
+    DISC_LOGI(DISC_TEST, "code=%{public}u", code);
     Get()->code_ = code;
     Get()->descriptor_ = data.ReadInterfaceToken();
     Get()->subscribeId_ = data.ReadInt32();
@@ -129,7 +129,7 @@ int RemoteObjectMock::ActionOfSendRequestForOnDiscoverySuccess(uint32_t code, Me
 int RemoteObjectMock::ActionOfSendRequestForOnPublishSuccess(uint32_t code, MessageParcel &data, MessageParcel &reply,
                                                              MessageOption &option)
 {
-    DISC_LOGI(DISC_TEST, "code=%u", code);
+    DISC_LOGI(DISC_TEST, "code=%{public}u", code);
     Get()->code_ = code;
     Get()->descriptor_ = data.ReadInterfaceToken();
     Get()->publishId_ = data.ReadInt32();
@@ -139,7 +139,7 @@ int RemoteObjectMock::ActionOfSendRequestForOnPublishSuccess(uint32_t code, Mess
 int RemoteObjectMock::ActionOfSendRequestForOnPublishFail(uint32_t code, MessageParcel &data, MessageParcel &reply,
                                                           MessageOption &option)
 {
-    DISC_LOGI(DISC_TEST, "code=%u", code);
+    DISC_LOGI(DISC_TEST, "code=%{public}u", code);
     Get()->code_ = code;
     Get()->descriptor_ = data.ReadInterfaceToken();
     Get()->publishId_ = data.ReadInt32();

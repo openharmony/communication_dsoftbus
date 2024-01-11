@@ -492,7 +492,7 @@ int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targ
     }
     size_t len = strnlen(callerId, CALLER_ID_MAX_LEN);
     if (len == 0 || len >= CALLER_ID_MAX_LEN) {
-        LNN_LOGE(LNN_STATE, "invalid shift lnn gear callerId len:%d", len);
+        LNN_LOGE(LNN_STATE, "invalid shift lnn gear callerId len=%{public}d", len);
         return SOFTBUS_INVALID_PARAM;
     }
     if (targetNetworkId != NULL &&

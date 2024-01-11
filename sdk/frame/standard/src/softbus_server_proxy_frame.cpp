@@ -180,6 +180,6 @@ int ClientRegisterService(const char *pkgName)
         SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
     }
 
-    COMM_LOGI(COMM_SDK, "%s softbus server register service success!\n", pkgName);
+    COMM_LOGI(COMM_SDK, "softbus server register service success! pkgName=%{public}s\n", pkgName);
     return SOFTBUS_OK;
 }

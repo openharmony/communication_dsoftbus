@@ -345,7 +345,7 @@ HWTEST_F(TransChannelManagerTest, MergeStatsInterval001, TestSize.Level1)
 
     destBitRate[FRAME_BIT_RATE_MEDIUM] = MergeStatsInterval(srcBitRate, FRAME_BIT_RATE_LT30M, FRAME_BIT_RATE_LT6M);
     EXPECT_EQ(0, (int)destBitRate[FRAME_BIT_RATE_MEDIUM]);
-    TRANS_LOGI(TRANS_TEST, "destBitRate[FRAME_BIT_RATE_MEDIUM] is %d",
+    TRANS_LOGI(TRANS_TEST, "destBitRate[FRAME_BIT_RATE_MEDIUM]=%{public}d",
         destBitRate[FRAME_BIT_RATE_MEDIUM]);
     ConvertStreamStats(src, dest);
 

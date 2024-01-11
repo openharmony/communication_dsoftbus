@@ -57,7 +57,7 @@ public:
 
 static void OnDeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
 {
-    DISC_LOGI(DISC_TEST, "OnDeviceFound: %s", device->devId);
+    DISC_LOGI(DISC_TEST, "OnDeviceFound, devId=%{public}s", device->devId);
     DiscBleTest::g_foundDeviceInfo = *device;
 }
 

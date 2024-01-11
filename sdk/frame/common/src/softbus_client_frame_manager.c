@@ -114,12 +114,12 @@ static int32_t ClientRegisterPkgName(const char *pkgName)
 {
     int32_t ret = AddClientPkgName(pkgName);
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SDK, "AddClientPkgName failed. ret = %d", ret);
+        COMM_LOGE(COMM_SDK, "AddClientPkgName failed. ret=%{public}d", ret);
         return ret;
     }
     ret = ClientRegisterService(pkgName);
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SDK, "ClientRegisterService failed. ret = %d", ret);
+        COMM_LOGE(COMM_SDK, "ClientRegisterService failed. ret=%{public}d", ret);
         DelClientPkgName(pkgName);
         return ret;
     }
@@ -163,13 +163,13 @@ static int32_t ConnClientInit(void)
 {
     int32_t ret = ConnInitSockets();
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_EVENT, "ConnInitSockets failed!ret=%d", ret);
+        COMM_LOGE(COMM_EVENT, "ConnInitSockets failed! ret=%{public}d", ret);
         return ret;
     }
 
     ret = InitBaseListener();
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_EVENT, "InitBaseListener failed!ret=%d", ret);
+        COMM_LOGE(COMM_EVENT, "InitBaseListener failed! ret=%{public}d", ret);
         return ret;
     }
     COMM_LOGD(COMM_EVENT, "init conn client success");

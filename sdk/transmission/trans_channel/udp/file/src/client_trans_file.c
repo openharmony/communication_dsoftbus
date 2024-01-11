@@ -87,7 +87,7 @@ static void NotifySocketSendResult(int32_t socket, DFileMsgType msgType, const D
 
 static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileMsg *msgData)
 {
-    TRANS_LOGI(TRANS_FILE, "send dfileId=%d type=%d", dfileId, msgType);
+    TRANS_LOGI(TRANS_FILE, "send dfileId=%{public}d type=%{public}d", dfileId, msgType);
     if (msgData == NULL || msgType == DFILE_ON_BIND || msgType == DFILE_ON_SESSION_IN_PROGRESS ||
         msgType == DFILE_ON_SESSION_TRANSFER_RATE) {
         TRANS_LOGE(TRANS_SDK, "param invalid");
@@ -126,7 +126,7 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
         } else if (fileListener.sendListener.OnFileTransError != NULL) {
             fileListener.sendListener.OnFileTransError(sessionId);
         }
-        TRANS_LOGI(TRANS_SDK, "OnFile error: %d", msgType);
+        TRANS_LOGI(TRANS_SDK, "OnFile error. msgType=%{public}d", msgType);
         TransOnUdpChannelClosed(udpChannel.channelId, SHUTDOWN_REASON_SEND_FILE_ERR);
         return;
     }
@@ -206,7 +206,7 @@ static void NotifySocketRecvResult(int32_t socket, DFileMsgType msgType, const D
 
 static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFileMsg *msgData)
 {
-    TRANS_LOGI(TRANS_FILE, "recv dfileId=%d type=%d", dfileId, msgType);
+    TRANS_LOGI(TRANS_FILE, "recv dfileId=%{public}d, type=%{public}d", dfileId, msgType);
     if (msgData == NULL || msgType == DFILE_ON_BIND || msgType == DFILE_ON_SESSION_IN_PROGRESS ||
         msgType == DFILE_ON_SESSION_TRANSFER_RATE) {
         TRANS_LOGE(TRANS_SDK, "param invalid");
@@ -271,7 +271,9 @@ static int32_t UpdateFileRecvPath(int32_t channelId, FileListener *fileListener,
         const char *rootDir = event.UpdateRecvPath();
         char *absPath = realpath(rootDir, NULL);
         if (absPath == NULL) {
-            TRANS_LOGE(TRANS_SDK, "rootDir=%s not exist, errno=%d.", (rootDir == NULL ? "null" : rootDir), errno);
+            TRANS_LOGE(TRANS_SDK,
+                "rootDir not exist, rootDir=%{public}s, errno=%{public}d.",
+                (rootDir == NULL ? "null" : rootDir), errno);
             return SOFTBUS_ERR;
         }
 
@@ -285,7 +287,7 @@ static int32_t UpdateFileRecvPath(int32_t channelId, FileListener *fileListener,
 
     if (NSTACKX_DFileSetStoragePath(fileSession, fileListener->rootDir) != SOFTBUS_OK) {
         NSTACKX_DFileClose(fileSession);
-        TRANS_LOGE(TRANS_SDK, "set storage path[%s] failed", fileListener->rootDir);
+        TRANS_LOGE(TRANS_SDK, "set storage path failed. rootDir=%{public}s", fileListener->rootDir);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -340,7 +342,7 @@ int32_t TransOnFileChannelOpened(const char *sessionName, const ChannelInfo *cha
 static void *TransCloseDFileProcTask(void *args)
 {
     int32_t *dfileId = (int32_t *)args;
-    TRANS_LOGI(TRANS_FILE, "rsync close dfileId=%d.", *dfileId);
+    TRANS_LOGI(TRANS_FILE, "rsync close dfileId=%{public}d.", *dfileId);
     NSTACKX_DFileClose(*dfileId);
     SoftBusFree(dfileId);
     return NULL;
@@ -348,24 +350,24 @@ static void *TransCloseDFileProcTask(void *args)
 
 void TransCloseFileChannel(int32_t dfileId)
 {
-    TRANS_LOGI(TRANS_FILE, "start close file channel, dfileId=%d.", dfileId);
+    TRANS_LOGI(TRANS_FILE, "start close file channel, dfileId=%{public}d.", dfileId);
     SoftBusThreadAttr threadAttr;
     SoftBusThread tid;
     int32_t ret = SoftBusThreadAttrInit(&threadAttr);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_FILE, "thread attr init failed, ret=%d.", ret);
+        TRANS_LOGE(TRANS_FILE, "thread attr init failed, ret=%{public}d.", ret);
         return;
     }
     int32_t *args = (int32_t *)SoftBusCalloc(sizeof(int32_t));
     if (args == NULL) {
-        TRANS_LOGE(TRANS_FILE, "close dfileId=%d calloc failed.", dfileId);
+        TRANS_LOGE(TRANS_FILE, "close dfile calloc failed. dfileId=%{public}d", dfileId);
         return;
     }
     *args = dfileId;
     threadAttr.detachState = SOFTBUS_THREAD_DETACH;
     ret = SoftBusThreadCreate(&tid, &threadAttr, TransCloseDFileProcTask, args);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_FILE, "create closedfile thread failed, ret=%d.", ret);
+        TRANS_LOGE(TRANS_FILE, "create closed file thread failed, ret=%{public}d.", ret);
         SoftBusFree(args);
         return;
     }

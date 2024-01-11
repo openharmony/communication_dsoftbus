@@ -317,7 +317,7 @@ int BusCenterClientInit(void)
         LNN_LOGE(LNN_INIT, "Cannot get NodeStateCbCount from config file");
         g_maxNodeStateCbCount = DEFAULT_NODE_STATE_CB_CNT;
     }
-    LNN_LOGI(LNN_INIT, "NodeStateCbCount=%u", g_maxNodeStateCbCount);
+    LNN_LOGI(LNN_INIT, "NodeStateCbCount=%{public}u", g_maxNodeStateCbCount);
 
     if (SoftBusMutexInit(&g_busCenterClient.lock, NULL) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "g_busCenterClient.lock init failed");
@@ -342,7 +342,7 @@ int32_t GetAllNodeDeviceInfoInner(const char *pkgName, NodeBasicInfo **info, int
 {
     int ret = ServerIpcGetAllOnlineNodeInfo(pkgName, (void **)info, sizeof(NodeBasicInfo), infoNum);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "Server GetAllOnlineNodeInfo failed, ret=%d", ret);
+        LNN_LOGE(LNN_STATE, "Server GetAllOnlineNodeInfo failed, ret=%{public}d", ret);
     }
     return ret;
 }
@@ -351,7 +351,7 @@ int32_t GetLocalNodeDeviceInfoInner(const char *pkgName, NodeBasicInfo *info)
 {
     int ret = ServerIpcGetLocalDeviceInfo(pkgName, info, sizeof(*info));
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "Server GetLocalNodeDeviceInfo failed, ret=%d", ret);
+        LNN_LOGE(LNN_STATE, "Server GetLocalNodeDeviceInfo failed, ret=%{public}d", ret);
     }
     return ret;
 }
@@ -361,7 +361,7 @@ int32_t GetNodeKeyInfoInner(const char *pkgName, const char *networkId, NodeDevi
 {
     int ret = ServerIpcGetNodeKeyInfo(pkgName, networkId, key, info, infoLen);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "Server GetNodeKeyInfo failed, ret=%d", ret);
+        LNN_LOGE(LNN_STATE, "Server GetNodeKeyInfo failed, ret=%{public}d", ret);
     }
     return ret;
 }
@@ -370,7 +370,7 @@ int32_t SetNodeDataChangeFlagInner(const char *pkgName, const char *networkId, u
 {
     int ret = ServerIpcSetNodeDataChangeFlag(pkgName, networkId, dataChangeFlag);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "Server SetNodeDataChangeFlag failed, ret=%d", ret);
+        LNN_LOGE(LNN_STATE, "Server SetNodeDataChangeFlag failed, ret=%{public}d", ret);
     }
     return ret;
 }
@@ -400,7 +400,7 @@ int32_t JoinLNNInner(const char *pkgName, ConnectionAddr *target, OnJoinLNNResul
         }
         rc = ServerIpcJoinLNN(pkgName, target, sizeof(*target));
         if (rc != SOFTBUS_OK) {
-            LNN_LOGE(LNN_STATE, "request join lnn failed, ret=%d", rc);
+            LNN_LOGE(LNN_STATE, "request join lnn failed, ret=%{public}d", rc);
         } else {
             rc = AddJoinLNNCbItem(target, cb);
         }
@@ -435,7 +435,7 @@ int32_t LeaveLNNInner(const char *pkgName, const char *networkId, OnLeaveLNNResu
         }
         rc = ServerIpcLeaveLNN(pkgName, networkId);
         if (rc != SOFTBUS_OK) {
-            LNN_LOGE(LNN_STATE, "request leave lnn failed, ret=%d", rc);
+            LNN_LOGE(LNN_STATE, "request leave lnn failed, ret=%{public}d", rc);
         } else {
             rc = AddLeaveLNNCbItem(networkId, cb);
         }
@@ -567,12 +567,12 @@ int32_t StartTimeSyncInner(const char *pkgName, const char *targetNetworkId, Tim
     
     do {
         if (FindTimeSyncCbItem(targetNetworkId, cb) != NULL) {
-            LNN_LOGE(LNN_STATE, "repeat request from %s, StopTimeSync first!", pkgName);
+            LNN_LOGE(LNN_STATE, "repeat pkgName request, StopTimeSync first! pkgName=%{public}s", pkgName);
             break;
         }
         rc = ServerIpcStartTimeSync(pkgName, targetNetworkId, accuracy, period);
         if (rc != SOFTBUS_OK) {
-            LNN_LOGE(LNN_STATE, "start time sync failed, ret=%d", rc);
+            LNN_LOGE(LNN_STATE, "start time sync failed, ret=%{public}d", rc);
         } else {
             rc = AddTimeSyncCbItem(targetNetworkId, cb);
         }
@@ -600,7 +600,7 @@ int32_t StopTimeSyncInner(const char *pkgName, const char *targetNetworkId)
     while ((item = FindTimeSyncCbItem(targetNetworkId, NULL)) != NULL) {
         rc = ServerIpcStopTimeSync(pkgName, targetNetworkId);
         if (rc != SOFTBUS_OK) {
-            LNN_LOGE(LNN_STATE, "stop time sync failed, ret=%d", rc);
+            LNN_LOGE(LNN_STATE, "stop time sync failed, ret=%{public}d", rc);
         } else {
             ListDelete(&item->node);
             SoftBusFree(item);
@@ -617,7 +617,7 @@ int32_t PublishLNNInner(const char *pkgName, const PublishInfo *info, const IPub
     g_busCenterClient.publishCb = *cb;
     int32_t ret = ServerIpcPublishLNN(pkgName, info);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "Server PublishLNNInner failed, ret = %d", ret);
+        LNN_LOGE(LNN_STATE, "Server PublishLNNInner failed, ret=%{public}d", ret);
     }
     return ret;
 }
@@ -626,7 +626,7 @@ int32_t StopPublishLNNInner(const char *pkgName, int32_t publishId)
 {
     int32_t ret = ServerIpcStopPublishLNN(pkgName, publishId);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "Server StopPublishLNNInner failed, ret = %d", ret);
+        LNN_LOGE(LNN_STATE, "Server StopPublishLNNInner failed, ret=%{public}d", ret);
     }
     return ret;
 }
@@ -636,7 +636,7 @@ int32_t RefreshLNNInner(const char *pkgName, const SubscribeInfo *info, const IR
     g_busCenterClient.refreshCb = *cb;
     int32_t ret = ServerIpcRefreshLNN(pkgName, info);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "Server RefreshLNNInner failed, ret = %d", ret);
+        LNN_LOGE(LNN_STATE, "Server RefreshLNNInner failed, ret=%{public}d", ret);
     }
     return ret;
 }
@@ -645,7 +645,7 @@ int32_t StopRefreshLNNInner(const char *pkgName, int32_t refreshId)
 {
     int32_t ret = ServerIpcStopRefreshLNN(pkgName, refreshId);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "Server StopRefreshLNNInner failed, ret = %d", ret);
+        LNN_LOGE(LNN_STATE, "Server StopRefreshLNNInner failed, ret=%{public}d", ret);
     }
     return ret;
 }
@@ -800,7 +800,7 @@ int32_t LnnOnNodeBasicInfoChanged(const char *pkgName, void *info, int32_t type)
     }
 
     if ((type < 0) || (type > TYPE_NETWORK_INFO)) {
-        LNN_LOGE(LNN_STATE, "OnNodeBasicInfoChanged invalid type: %d", type);
+        LNN_LOGE(LNN_STATE, "OnNodeBasicInfoChanged invalid type. type=%{public}d", type);
         return SOFTBUS_INVALID_PARAM;
     }
 

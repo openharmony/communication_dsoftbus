@@ -67,16 +67,16 @@ static void LnnOnBtStateChanged(int32_t listenerId, int32_t state)
     }
 
     if (*notifyState == SOFTBUS_BT_UNKNOWN) {
-        LNN_LOGD(LNN_STATE, "bt state changed but no need notify, btState=%d", btState);
+        LNN_LOGD(LNN_STATE, "bt state changed but no need notify, btState=%{public}d", btState);
         SoftBusFree(notifyState);
         return;
     }
-    LNN_LOGI(LNN_STATE, "async notify bt state changed, listenerId=%d, notifyState=%d",
+    LNN_LOGI(LNN_STATE, "async notify bt state changed, listenerId=%{public}d, notifyState=%{public}d",
         listenerId, *notifyState);
     int32_t ret = LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), LnnNotifyBtStateChangeEvent,
         (void *)notifyState);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "async notify bt state err, ret=%d", ret);
+        LNN_LOGE(LNN_STATE, "async notify bt state err, ret=%{public}d", ret);
         SoftBusFree(notifyState);
         return;
     }
@@ -102,7 +102,7 @@ static void LnnOnBtAclStateChanged(int32_t listenerId, const SoftBusBtAddr *addr
             LnnNotifyBtAclStateChangeEvent(btMac, SOFTBUS_BR_ACL_DISCONNECTED);
             break;
         default:
-            LNN_LOGD(LNN_STATE, "not support acl state=%d", aclState);
+            LNN_LOGD(LNN_STATE, "not support acl state=%{public}d", aclState);
             break;
     }
 }

@@ -256,7 +256,7 @@ static void DumpBleScanFilter(BleScanNativeFilter *nativeFilter, uint8_t filterS
         }
         (void)ConvertBytesToHexString(serviceData, hexLen, (nativeFilter + filterSize)->serviceData, len);
         (void)ConvertBytesToHexString(serviceDataMask, hexLen, (nativeFilter + filterSize)->serviceDataMask, len);
-        DISC_LOGI(DISC_BLE, "BLE Scan Filter id:%u [serviceData:%s, serviceDataMask:%s]",
+        DISC_LOGI(DISC_BLE, "BLE Scan Filter id=%{public}u, serviceData=%{public}s, serviceDataMask=%{public}s",
             filterSize, serviceData, serviceDataMask);
         SoftBusFree(serviceData);
         SoftBusFree(serviceDataMask);
@@ -434,7 +434,7 @@ static void WrapperAdvEnableCallback(int advId, int status)
             advChannel->advCallback->AdvEnableCallback == NULL) {
             continue;
         }
-        DISC_LOGI(DISC_BLE, "inner-advId: %u, bt-advId: %d, status: %u", index, advId, st);
+        DISC_LOGI(DISC_BLE, "inner-advId=%{public}u, bt-advId=%{public}d, status=%{public}u", index, advId, st);
         if (st == SOFTBUS_BT_STATUS_SUCCESS) {
             advChannel->isAdvertising = true;
             SoftBusCondSignal(&advChannel->cond);
@@ -455,7 +455,7 @@ static void WrapperAdvDisableCallback(int advId, int status)
             advChannel->advCallback->AdvDisableCallback == NULL) {
             continue;
         }
-        DISC_LOGI(DISC_BLE, "inner-advId: %u, bt-advId: %d, status: %d", index, advId, st);
+        DISC_LOGI(DISC_BLE, "inner-advId=%{public}u, bt-advId=%{public}d, status=%{public}d", index, advId, st);
         if (st == SOFTBUS_BT_STATUS_SUCCESS) {
             advChannel->advId = -1;
             advChannel->isAdvertising = false;
@@ -477,7 +477,7 @@ static void WrapperAdvDataCallback(int advId, int status)
             advChannel->advCallback->AdvDataCallback == NULL) {
             continue;
         }
-        DISC_LOGI(DISC_BLE, "inner-advId: %u, bt-advId: %d, status: %d", index, advId, st);
+        DISC_LOGI(DISC_BLE, "inner-advId=%{public}u, bt-advId=%{public}d, status=%{public}d", index, advId, st);
         advChannel->advCallback->AdvDataCallback(index, st);
         break;
     }
@@ -494,7 +494,7 @@ static void WrapperAdvUpdateCallback(int advId, int status)
             advChannel->advCallback->AdvUpdateCallback == NULL) {
             continue;
         }
-        DISC_LOGI(DISC_BLE, "inner-advId: %u, bt-advId: %d, status: %d", index, advId, st);
+        DISC_LOGI(DISC_BLE, "inner-advId=%{public}u, bt-advId=%{public}d, status=%{public}d", index, advId, st);
         advChannel->advCallback->AdvUpdateCallback(index, st);
         break;
     }
@@ -615,7 +615,7 @@ static bool CheckAdvChannelInUsed(int advId)
         return false;
     }
     if (!g_advChannel[advId].isUsed) {
-        DISC_LOGE(DISC_BLE, "advId %d is ready released", advId);
+        DISC_LOGE(DISC_BLE, "advId is ready released. advId=%{public}d", advId);
         return false;
     }
     return true;
@@ -627,7 +627,7 @@ static bool CheckScanChannelInUsed(int listenerId)
         return false;
     }
     if (!g_scanListener[listenerId].isUsed) {
-        DISC_LOGE(DISC_BLE, "listenerId %d is ready released", listenerId);
+        DISC_LOGE(DISC_BLE, "listenerId is ready released. listenerId=%{public}d", listenerId);
         return false;
     }
     return true;
@@ -769,7 +769,7 @@ static int OhosBleStartAdvEx(int *advId, const SoftBusBleAdvParams *param, const
     ConvertAdvData(data, &advData);
     int ret = BleStartAdvEx(&btAdvId, advData, dstParam);
     if (ret != OHOS_BT_STATUS_SUCCESS) {
-        DISC_LOGE(DISC_BLE, "BleStartAdvEx, bt-advId: %d, ret: %d", btAdvId, ret);
+        DISC_LOGE(DISC_BLE, "BleStartAdvEx, bt-advId=%{public}d, ret=%{public}d", btAdvId, ret);
         return SOFTBUS_ERR;
     }
     *advId = btAdvId;
@@ -795,7 +795,7 @@ int SoftBusStartAdvEx(int advId, const SoftBusBleAdvParams *param,
         return SOFTBUS_ERR;
     }
     if (g_advChannel[advId].isAdvertising) {
-        DISC_LOGW(DISC_BLE, "SoftBusStartAdv, wait condition inner-advId: %d", advId);
+        DISC_LOGW(DISC_BLE, "SoftBusStartAdv, wait condition inner-advId=%{public}d", advId);
         SoftBusSysTime absTime = {0};
         if (SoftBusGetTime(&absTime) != SOFTBUS_OK) {
             DISC_LOGE(DISC_BLE, "Softbus get time failed");
@@ -811,13 +811,14 @@ int SoftBusStartAdvEx(int advId, const SoftBusBleAdvParams *param,
         }
     }
     if (g_advChannel[advId].advId != -1) {
-        DISC_LOGE(DISC_BLE, "already assigned an advId %d", g_advChannel[advId].advId);
+        DISC_LOGE(DISC_BLE, "already assigned an advId. advId=%{public}d", g_advChannel[advId].advId);
         SoftBusMutexUnlock(&g_advLock);
         return SOFTBUS_ERR;
     }
 
     int ret = startAdvEx(&g_advChannel[advId].advId, param, &g_advChannel[advId].advData);
-    DISC_LOGI(DISC_BLE, "inner-advId: %d, bt-advId: %d, ret: %d", advId, g_advChannel[advId].advId, ret);
+    DISC_LOGI(DISC_BLE,
+        "inner-advId=%{public}d, bt-advId=%{public}d, ret=%{public}d", advId, g_advChannel[advId].advId, ret);
     if (ret != SOFTBUS_OK) {
         g_advChannel[advId].advCallback->AdvEnableCallback(advId, SOFTBUS_BT_STATUS_FAIL);
         SoftBusMutexUnlock(&g_advLock);
@@ -837,12 +838,13 @@ int SoftBusStopAdv(int advId)
         return SOFTBUS_ERR;
     }
     if (!g_advChannel[advId].isAdvertising) {
-        DISC_LOGI(DISC_BLE, "adv %d is not advertising", advId);
+        DISC_LOGI(DISC_BLE, "adv is not advertising. advId=%{public}d", advId);
         SoftBusMutexUnlock(&g_advLock);
         return SOFTBUS_OK;
     }
     int ret = BleStopAdv(g_advChannel[advId].advId);
-    DISC_LOGI(DISC_BLE, "inner-advId: %d, bt-advId: %d, ret: %d", advId, g_advChannel[advId].advId, ret);
+    DISC_LOGI(DISC_BLE,
+        "inner-advId=%{public}d, bt-advId=%{public}d, ret=%{public}d", advId, g_advChannel[advId].advId, ret);
     if (ret != OHOS_BT_STATUS_SUCCESS) {
         g_advChannel[advId].advCallback->AdvDisableCallback(advId, SOFTBUS_BT_STATUS_FAIL);
         SoftBusMutexUnlock(&g_advLock);
@@ -862,12 +864,12 @@ int SoftBusUpdateAdv(int advId, const SoftBusBleAdvData *data, const SoftBusBleA
     }
     int ret = SoftBusStopAdv(advId);
     if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "SoftBusStopAdv return failed, ret = %d", ret);
+        DISC_LOGE(DISC_BLE, "SoftBusStopAdv return failed, ret=%{public}d", ret);
         return ret;
     }
     ret = SetAdvData(advId, data);
     if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "SetAdvData return failed, ret = %d", ret);
+        DISC_LOGE(DISC_BLE, "SetAdvData return failed, ret=%{public}d", ret);
         return ret;
     }
     return SoftBusStartAdv(advId, param);
@@ -984,7 +986,7 @@ int SoftBusSetScanFilter(int listenerId, SoftBusBleScanFilter *filter, uint8_t f
         return SOFTBUS_LOCK_ERR;
     }
     if (!CheckScanChannelInUsed(listenerId)) {
-        DISC_LOGE(DISC_BLE, "ScanListener id:%d is not in use", listenerId);
+        DISC_LOGE(DISC_BLE, "ScanListener is not in useid, listenerId=%{public}d", listenerId);
         SoftBusMutexUnlock(&g_scanerLock);
         return SOFTBUS_ERR;
     }
@@ -1005,7 +1007,7 @@ int SoftBusStartScan(int listenerId, int scannerId, const SoftBusBleScanParams *
         return SOFTBUS_LOCK_ERR;
     }
     if (!CheckScanChannelInUsed(listenerId)) {
-        DISC_LOGE(DISC_BLE, "ScanListener id:%d is not in use", listenerId);
+        DISC_LOGE(DISC_BLE, "ScanListener is not in use, listenerId=%{public}d", listenerId);
         SoftBusMutexUnlock(&g_scanerLock);
         return SOFTBUS_ERR;
     }
@@ -1101,7 +1103,8 @@ int SoftBusStopScanImmediately(int listenerId, int scannerId)
         SoftBusGetBurstScanFilter(listenerId, &nativeFilter, &filterSize);
     }
     DumpBleScanFilter(nativeFilter, filterSize);
-    DISC_LOGI(DISC_BLE, "listenerId:%d, scannerId:%d, filterSize:%u", listenerId, scannerId, filterSize);
+    DISC_LOGI(DISC_BLE,
+        "listenerId=%{public}d, scannerId=%{public}d, filterSize=%{public}u", listenerId, scannerId, filterSize);
     int32_t status = SOFTBUS_BT_STATUS_SUCCESS;
     if (filterSize != 0) {
         BleScanConfigs scanConfig = { 0 };
@@ -1119,7 +1122,7 @@ int SoftBusStopScanImmediately(int listenerId, int scannerId)
     }
     SoftBusMutexUnlock(&g_scanerLock);
     if (status != SOFTBUS_BT_STATUS_SUCCESS) {
-        DISC_LOGE(DISC_BLE, "ble stop and rescan failed, status:%d", status);
+        DISC_LOGE(DISC_BLE, "ble stop and rescan failed, status=%{public}d", status);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -1139,17 +1142,17 @@ int SoftBusReplaceAdvertisingAdv(int advId, const SoftBusBleAdvData *data)
     }
     if (!g_advChannel[advId].isAdvertising) {
         SoftBusMutexUnlock(&g_advLock);
-        DISC_LOGE(DISC_BLE, "adv %d is not advertising", advId);
+        DISC_LOGE(DISC_BLE, "adv is not advertising. advId=%{public}d", advId);
         return SOFTBUS_ERR;
     }
     int btAdvId = g_advChannel[advId].advId;
     int ret = SetAdvData(advId, data);
     SoftBusMutexUnlock(&g_advLock);
     if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "SetAdvData failed, advId: %d, btadvId: %d", advId, btAdvId);
+        DISC_LOGE(DISC_BLE, "SetAdvData failed, advId=%{public}d, btadvId=%{public}d", advId, btAdvId);
         return SOFTBUS_ERR;
     }
-    DISC_LOGI(DISC_BLE, "BleSetAdvData, advId: %d, btadvId: %d", advId, btAdvId);
+    DISC_LOGI(DISC_BLE, "BleSetAdvData, advId=%{public}d, btadvId=%{public}d", advId, btAdvId);
     StartAdvRawData advData = {0};
     ConvertAdvData(data, &advData);
     ret = BleOhosStatusToSoftBus(BleSetAdvData(btAdvId, advData));

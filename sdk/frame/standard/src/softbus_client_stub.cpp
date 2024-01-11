@@ -78,7 +78,7 @@ SoftBusClientStub::SoftBusClientStub()
 int32_t SoftBusClientStub::OnRemoteRequest(uint32_t code,
     MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    COMM_LOGI(COMM_SDK, "SoftBusClientStub::OnReceived, code = %u", code);
+    COMM_LOGI(COMM_SDK, "SoftBusClientStub::OnReceived, code=%{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         COMM_LOGE(COMM_SDK, "SoftBusClientStub: ReadInterfaceToken faild!");
         return SOFTBUS_ERR;
@@ -325,7 +325,7 @@ int32_t SoftBusClientStub::OnChannelOpenFailedInner(MessageParcel &data, Message
     
     int32_t ret = OnChannelOpenFailed(channelId, channelType, errCode);
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SDK, "OnChannelOpenFailed failed! ret=%d.", ret);
+        COMM_LOGE(COMM_SDK, "OnChannelOpenFailed failed! ret=%{public}d.", ret);
     }
     return ret;
 }
@@ -436,7 +436,7 @@ int32_t SoftBusClientStub::OnChannelQosEventInner(MessageParcel &data, MessagePa
     }
     int32_t tvCount;
     if (!data.ReadInt32(tvCount) || tvCount <= 0) {
-        COMM_LOGE(COMM_SDK, "OnChannelQosEventInner read tv count:%d failed!", tvCount);
+        COMM_LOGE(COMM_SDK, "OnChannelQosEventInner read tv failed! count=%{public}d", tvCount);
         return SOFTBUS_ERR;
     }
     QosTv *tvList = (QosTv *)data.ReadRawData(sizeof(QosTv) * tvCount);
@@ -457,7 +457,7 @@ int32_t SoftBusClientStub::OnJoinLNNResultInner(MessageParcel &data, MessageParc
 {
     uint32_t addrTypeLen;
     if (!data.ReadUint32(addrTypeLen) || addrTypeLen != sizeof(ConnectionAddr)) {
-        COMM_LOGE(COMM_SDK, "OnJoinLNNResultInner read addr type length:%d failed!", addrTypeLen);
+        COMM_LOGE(COMM_SDK, "OnJoinLNNResultInner read addr type failed! length=%{public}d", addrTypeLen);
         return SOFTBUS_ERR;
     }
     void *addr = (void *)data.ReadRawData(addrTypeLen);
@@ -518,7 +518,7 @@ int32_t SoftBusClientStub::OnNodeOnlineStateChangedInner(MessageParcel &data, Me
     }
     uint32_t infoTypeLen;
     if (!data.ReadUint32(infoTypeLen) || infoTypeLen != sizeof(NodeBasicInfo)) {
-        COMM_LOGE(COMM_SDK, "OnNodeOnlineStateChangedInner read info type length:%d failed!", infoTypeLen);
+        COMM_LOGE(COMM_SDK, "OnNodeOnlineStateChangedInner read info type failed! length=%{public}d", infoTypeLen);
         return SOFTBUS_ERR;
     }
     void *info = (void *)data.ReadRawData(infoTypeLen);
@@ -546,10 +546,10 @@ int32_t SoftBusClientStub::OnNodeBasicInfoChangedInner(MessageParcel &data, Mess
         COMM_LOGE(COMM_SDK, "OnNodeBasicInfoChangedInner read type failed!");
         return SOFTBUS_ERR;
     }
-    COMM_LOGI(COMM_SDK, "OnNodeBasicInfoChangedInner type %d", type);
+    COMM_LOGI(COMM_SDK, "OnNodeBasicInfoChangedInner type. type=%{public}d", type);
     uint32_t infoTypeLen;
     if (!data.ReadUint32(infoTypeLen) || infoTypeLen != sizeof(NodeBasicInfo)) {
-        COMM_LOGE(COMM_SDK, "OnNodeBasicInfoChangedInner read info type length:%d failed!", infoTypeLen);
+        COMM_LOGE(COMM_SDK, "OnNodeBasicInfoChangedInner read failed! infoTypeLen=%{public}d", infoTypeLen);
         return SOFTBUS_ERR;
     }
     void *info = (void *)data.ReadRawData(infoTypeLen);
@@ -569,7 +569,7 @@ int32_t SoftBusClientStub::OnTimeSyncResultInner(MessageParcel &data, MessagePar
 {
     uint32_t infoTypeLen;
     if (!data.ReadUint32(infoTypeLen) || infoTypeLen != sizeof(TimeSyncResultInfo)) {
-        COMM_LOGE(COMM_SDK, "OnTimeSyncResultInner read info length:%d failed!", infoTypeLen);
+        COMM_LOGE(COMM_SDK, "OnTimeSyncResultInner read info failed! length=%{public}d", infoTypeLen);
         return SOFTBUS_ERR;
     }
     void *info = (void *)data.ReadRawData(infoTypeLen);
@@ -629,7 +629,7 @@ int32_t SoftBusClientStub::OnRefreshDeviceFoundInner(MessageParcel &data, Messag
 {
     uint32_t deviceLen;
     if (!data.ReadUint32(deviceLen) || deviceLen != sizeof(DeviceInfo)) {
-        COMM_LOGE(COMM_SDK, "OnRefreshDeviceFoundInner read info length:%d failed!", deviceLen);
+        COMM_LOGE(COMM_SDK, "OnRefreshDeviceFoundInner read info failed! length=%{public}d", deviceLen);
         return SOFTBUS_ERR;
     }
     void *device = (void *)data.ReadRawData(deviceLen);

@@ -111,7 +111,7 @@ static void ProcessAddrEvent(struct nlmsghdr *nlh)
         return;
     }
     if (type == LNN_NETIF_TYPE_ETH || type == LNN_NETIF_TYPE_WLAN) {
-        LNN_LOGE(LNN_BUILDER, "network addr changed, netifType=%d", type);
+        LNN_LOGE(LNN_BUILDER, "network addr changed, netifType=%{public}d", type);
         LnnNotifyAddressChangedEvent(ifName);
     }
 }
@@ -136,7 +136,8 @@ static void ProcessLinkEvent(struct nlmsghdr *nlh)
         return;
     }
     if (type == LNN_NETIF_TYPE_ETH || type == LNN_NETIF_TYPE_WLAN) {
-        LNN_LOGW(LNN_BUILDER, "%s:link status changed, netifType=%d", (const char *)RTA_DATA(tb[IFLA_IFNAME]), type);
+        LNN_LOGW(LNN_BUILDER, "link status changed, IFLA_IFNAME=%{public}s, netifType=%{public}d",
+            (const char *)RTA_DATA(tb[IFLA_IFNAME]), type);
         LnnNotifyAddressChangedEvent((const char *)RTA_DATA(tb[IFLA_IFNAME]));
     }
 }
@@ -172,7 +173,7 @@ static void *NetlinkMonitorThread(void *para)
         }
         nlh = (struct nlmsghdr *)buffer;
         while (NLMSG_OK(nlh, len) && nlh->nlmsg_type != NLMSG_DONE) {
-            LNN_LOGD(LNN_BUILDER, "nlmsg_type=%d", nlh->nlmsg_type);
+            LNN_LOGD(LNN_BUILDER, "nlmsg_type=%{public}d", nlh->nlmsg_type);
             switch (nlh->nlmsg_type) {
                 case RTM_NEWADDR:
                 case RTM_DELADDR:
