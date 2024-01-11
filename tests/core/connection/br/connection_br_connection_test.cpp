@@ -33,6 +33,7 @@
 #include "softbus_feature_config.c"
 
 #define SOFTBUS_CHARA_CONN_UUID        "00002B01-0000-1000-8000-00805F9B34FB"
+#define DATASIZE 256
 
 using namespace testing::ext;
 using namespace testing;
@@ -488,8 +489,11 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager001, TestSize.Level1)
 HWTEST_F(ConnectionBrConnectionTest, testBrManager002, TestSize.Level1)
 {
     uint32_t pId = 0;
-    ConnBrConnection *connection = nullptr;
+    ConnBrConnection *connection = static_cast<ConnBrConnection*>(SoftBusMalloc(sizeof(ConnBrConnection)));
+    connection->connectionId = 1;
+
     ConnectStatistics statistics;
+    (void)memset_s(&statistics, sizeof(statistics), 0, sizeof(statistics));
 
     DfxRecordBrConnectSuccess(pId, connection, nullptr);
     DfxRecordBrConnectSuccess(pId, connection, &statistics);
@@ -947,25 +951,25 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager022, TestSize.Level1)
 
 HWTEST_F(ConnectionBrConnectionTest, testBrManager023, TestSize.Level1)
 {
-    ConnBrConnection connection;
-    uint8_t data[] = {1, 2, 3};
-    uint32_t dataLen = 3;
-    cJSON *json = cJSON_CreateObject();
+    ConnBrConnection *connection = static_cast<ConnBrConnection*>(SoftBusMalloc(sizeof(ConnBrConnection)));
+    connection->connectionId = 0;
+    char data[DATASIZE] = {
+        "{\
+            \"ESSION_KEY\": \"sdadad\",\
+            \"ENCRYPT\": 30,\
+            \"MY_HANDLE_ID\": 22,\
+            \"PEER_HANDLE_ID\": 25,\
+        }"
+    };
     NiceMock<ConnectionBrInterfaceMock> brMock;
 
-    EXPECT_CALL(brMock, cJSON_ParseWithLength).WillRepeatedly(Return(nullptr));
-    connection.connectionId = 0;
-    ReceivedControlData(&connection, data, dataLen);
+    ReceivedControlData(connection, NULL, 0);
 
-    EXPECT_CALL(brMock, cJSON_ParseWithLength).WillRepeatedly(Return(json));
     EXPECT_CALL(brMock, GetJsonObjectNumberItem).WillRepeatedly(Return(false));
-    connection.connectionId = 0;
-    ReceivedControlData(&connection, data, dataLen);
+    ReceivedControlData(connection, (uint8_t*)data, DATASIZE);
 
-    EXPECT_CALL(brMock, cJSON_ParseWithLength).WillRepeatedly(Return(json));
     EXPECT_CALL(brMock, GetJsonObjectNumberItem).WillRepeatedly(Return(true));
-    connection.connectionId = 0;
-    ReceivedControlData(&connection, data, dataLen);
+    ReceivedControlData(connection, (uint8_t*)data, DATASIZE);
 }
 
 HWTEST_F(ConnectionBrConnectionTest, testBrManager024, TestSize.Level1)
