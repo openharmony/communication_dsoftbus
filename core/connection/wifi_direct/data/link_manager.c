@@ -345,26 +345,33 @@ static void SetNegotiateChannelForLink(struct WifiDirectNegotiateChannel *channe
     target->putPointer(target, IL_KEY_NEGO_CHANNEL, (void **)&channelNew);
 }
 
-static void ClearNegotiateChannelForLink(struct WifiDirectNegotiateChannel *channel)
+static struct InnerLink *FindInnerLinkByChannel(struct WifiDirectNegotiateChannel *channel)
 {
     struct LinkManager *self = GetLinkManager();
-    CONN_CHECK_AND_RETURN_LOGW(self->isInited, CONN_WIFI_DIRECT, "not inited");
-
-    SoftBusMutexLock(&self->mutex);
-    bool found = false;
     struct InnerLink *target = NULL;
     for (size_t type = 0; type < WIFI_DIRECT_LINK_TYPE_MAX; type++) {
         LIST_FOR_EACH_ENTRY(target, &self->linkLists[type], struct InnerLink, node) {
             struct WifiDirectNegotiateChannel *targetChannel = target->getPointer(target, IL_KEY_NEGO_CHANNEL, NULL);
             if ((targetChannel != NULL) && (channel->equal(channel, targetChannel))) {
                 CONN_LOGI(CONN_WIFI_DIRECT, "find");
-                found = true;
-                break;
+                return target;
             }
         }
     }
-    if (!found) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "not find");
+
+    CONN_LOGI(CONN_WIFI_DIRECT, "not find");
+    return NULL;
+}
+
+static void ClearNegotiateChannelForLink(struct WifiDirectNegotiateChannel *channel)
+{
+    struct LinkManager *self = GetLinkManager();
+    CONN_CHECK_AND_RETURN_LOGW(self->isInited, CONN_WIFI_DIRECT, "not inited");
+
+    int32_t ret = SoftBusMutexLock(&self->mutex);
+    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "mutex lock failed");
+    struct InnerLink *target = FindInnerLinkByChannel(channel);
+    if (target == NULL) {
         SoftBusMutexUnlock(&self->mutex);
         return;
     }
