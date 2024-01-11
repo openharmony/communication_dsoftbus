@@ -25,11 +25,6 @@ using testing::_;
 using testing::NotNull;
 
 /* implement related global function of BLE */
-int BleGattLockInit()
-{
-    return BleMock::GetMock()->BleGattLockInit();
-}
-
 int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
 {
     return BleMock::GetMock()->SoftBusAddBtStateListener(listener);
@@ -125,11 +120,6 @@ BleMock::BleMock()
 BleMock::~BleMock()
 {
     mock.store(nullptr);
-}
-
-int32_t BleMock::ActionOfBleGattLockInit()
-{
-    return SOFTBUS_OK;
 }
 
 int32_t BleMock::ActionOfInitBroadcastMgr()
@@ -476,7 +466,6 @@ bool BleMock::IsDeInitSuccess()
 
 void BleMock::SetupSuccessStub()
 {
-    EXPECT_CALL(*this, BleGattLockInit).WillRepeatedly(BleMock::ActionOfBleGattLockInit);
     EXPECT_CALL(*this, InitBroadcastMgr).WillRepeatedly(BleMock::ActionOfInitBroadcastMgr);
     EXPECT_CALL(*this, DeInitBroadcastMgr).WillRepeatedly(BleMock::ActionOfDeInitBroadcastMgr);
     EXPECT_CALL(*this, SoftBusGetBtState).WillRepeatedly(BleMock::ActionOfGetBtState);
