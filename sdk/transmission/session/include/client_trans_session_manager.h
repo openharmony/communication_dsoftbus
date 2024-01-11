@@ -172,6 +172,8 @@ int32_t ClientGetSessionCallbackAdapterByName(const char *sessionName, SessionLi
 int32_t ClientGetSessionCallbackAdapterById(int32_t sessionId, SessionListenerAdapter *callbackAdapter);
 
 int32_t ClientGetPeerSocketInfoById(int32_t sessionId, PeerSocketInfo *peerSocketInfo);
+
+bool IsSessionExceedLimit();
 #ifdef __cplusplus
 }
 #endif
