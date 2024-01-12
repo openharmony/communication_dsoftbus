@@ -567,7 +567,6 @@ static void BleOnStateChanged(int32_t listenerId, int32_t state)
     DiscEventExtra extra = { 0 };
     DiscEventExtraInit(&extra);
     extra.bleTurnState = state;
-    DISC_EVENT(EVENT_SCENE_BLE, EVENT_STAGE_STATE_TURN, extra);
     (void)listenerId;
     SoftBusMessage *msg = NULL;
     switch (state) {
@@ -843,7 +842,7 @@ static void DfxRecordAdevertiserEnd(int32_t adv, int32_t reason)
     extra.broadcastType = adv;
     extra.errcode = reason;
     extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
-    DISC_EVENT(EVENT_SCENE_BROADCAST, EVENT_STAGE_BROADCAST, extra);
+    DISC_EVENT(EVENT_SCENE_BLE, EVENT_STAGE_BROADCAST, extra);
 }
 
 static int32_t StartAdvertiser(int32_t adv)
@@ -965,7 +964,6 @@ static void DfxRecordScanEnd(int32_t reason)
     extra.scanType = BLE + 1;
     extra.errcode = reason;
     extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
-    DISC_EVENT(EVENT_SCENE_SCAN, EVENT_STAGE_SCAN_START, extra);
 }
 
 static void StartScaner(void)
@@ -1537,7 +1535,7 @@ static void DfxRecordAddRecvMsgEnd(const uint32_t *capBitMap, int32_t reason)
     if (capBitMap != NULL) {
         extra.capabilityBit = (int32_t)capBitMap[0];
     }
-    DISC_EVENT(EVENT_SCENE_SCAN, EVENT_STAGE_SCAN_RECV, extra);
+    DISC_EVENT(EVENT_SCENE_BLE, EVENT_STAGE_SCAN_RECV, extra);
 }
 
 static int32_t AddRecvMessage(const char *key, const uint32_t *capBitMap, bool needBrMac)
@@ -1639,7 +1637,6 @@ static void DfxRecordBleMsgHandlerStart(SoftBusMessage *msg)
     if (msg != NULL) {
         extra.interFuncType = msg->what + 1;
     }
-    DISC_EVENT(EVENT_SCENE_BLE, EVENT_STAGE_BLE_HANDLER, extra);
 }
 
 static void DiscBleMsgHandler(SoftBusMessage *msg)

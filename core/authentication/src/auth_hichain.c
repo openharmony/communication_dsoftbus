@@ -109,21 +109,21 @@ static void OnSessionKeyReturned(int64_t authSeq, const uint8_t *sessionKey, uin
     (void)AuthSessionSaveSessionKey(authSeq, sessionKey, sessionKeyLen);
 }
 
-static void DfxRecordLnnAuthEnd(int64_t authSeq, int32_t reason)
+static void DfxRecordLnnEndHichainEnd(int64_t authSeq, int32_t reason)
 {
     LnnEventExtra extra = { 0 };
     LnnEventExtraInit(&extra);
     extra.authId = (int32_t)authSeq;
     extra.errcode = reason;
     extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
-    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH, extra);
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_HICHAIN_END, extra);
 }
 
 static void OnFinish(int64_t authSeq, int operationCode, const char *returnData)
 {
     (void)operationCode;
     (void)returnData;
-    DfxRecordLnnAuthEnd(authSeq, SOFTBUS_OK);
+    DfxRecordLnnEndHichainEnd(authSeq, SOFTBUS_OK);
     AUTH_LOGI(AUTH_HICHAIN, "hichain OnFinish: authSeq=%{public}" PRId64, authSeq);
     (void)AuthSessionHandleAuthFinish(authSeq);
 }
@@ -132,7 +132,7 @@ static void OnError(int64_t authSeq, int operationCode, int errCode, const char 
 {
     (void)operationCode;
     (void)errorReturn;
-    DfxRecordLnnAuthEnd(authSeq, errCode);
+    DfxRecordLnnEndHichainEnd(authSeq, errCode);
     AUTH_LOGE(AUTH_HICHAIN, "hichain OnError: authSeq=%{public}" PRId64 ", errCode=%{public}d", authSeq, errCode);
     (void)AuthSessionHandleAuthError(authSeq, SOFTBUS_AUTH_HICHAIN_AUTH_ERROR);
 }
@@ -271,7 +271,6 @@ static void DfxRecordLnnStartHichainEnd(int64_t authSeq, int32_t reason)
     extra.authId = (int32_t)authSeq;
     extra.errcode = reason;
     extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
-    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_HICHAIN, extra);
 }
 
 int32_t RegTrustDataChangeListener(const TrustDataChangeListener *listener)
