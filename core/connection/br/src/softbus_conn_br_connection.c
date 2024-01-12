@@ -402,6 +402,27 @@ int32_t ConnBrDisconnectNow(ConnBrConnection *connection)
     return status;
 }
 
+static int32_t BrPostReplyMessage(uint32_t connectionId, int32_t localRc)
+{
+    int32_t flag = CONN_HIGH;
+    BrCtlMessageSerializationContext ctx = {
+        .connectionId = connectionId,
+        .flag = flag,
+        .method = BR_METHOD_NOTIFY_RESPONSE,
+        .referenceResponse = {
+            .referenceNumber = localRc,
+        },
+    };
+    uint8_t *data = NULL;
+    uint32_t dataLen = 0;
+    int64_t seq = ConnBrPackCtlMessage(ctx, &data, &dataLen);
+    if (seq < 0) {
+        CONN_LOGE(CONN_BR, "reply message faild, connectionId=%{public}u, ret=%{public}d", connectionId, (int32_t)seq);
+        return (int32_t)seq;
+    }
+    return ConnBrPostBytes(connectionId, data, dataLen, 0, flag, MODULE_CONNECTION, seq);
+}
+
 int32_t ConnBrOnReferenceRequest(ConnBrConnection *connection, const cJSON *json)
 {
     int32_t delta = 0;
@@ -431,6 +452,12 @@ int32_t ConnBrOnReferenceRequest(ConnBrConnection *connection, const cJSON *json
         (void)SoftBusMutexUnlock(&connection->lock);
         return SOFTBUS_OK;
     }
+    if (connection->state == BR_CONNECTION_STATE_NEGOTIATION_CLOSING) {
+        ConnRemoveMsgFromLooper(&g_brConnectionAsyncHandler, MSG_CONNECTION_WAIT_NEGOTIATION_CLOSING_TIMEOUT,
+                                connection->connectionId, 0, NULL);
+        connection->state = BR_CONNECTION_STATE_CONNECTED;
+        g_eventListener.onConnectionResume(connection->connectionId);
+    }
     if (localRc <= 0) {
         connection->state = BR_CONNECTION_STATE_CLOSING;
         (void)SoftBusMutexUnlock(&connection->lock);
@@ -438,25 +465,7 @@ int32_t ConnBrOnReferenceRequest(ConnBrConnection *connection, const cJSON *json
         return SOFTBUS_OK;
     }
     (void)SoftBusMutexUnlock(&connection->lock);
-
-    int32_t flag = CONN_HIGH;
-    BrCtlMessageSerializationContext ctx = {
-        .connectionId = connection->connectionId,
-        .flag = flag,
-        .method = BR_METHOD_NOTIFY_RESPONSE,
-        .referenceResponse = {
-            .referenceNumber = localRc,
-        },
-    };
-    uint8_t *data = NULL;
-    uint32_t dataLen = 0;
-    int64_t seq = ConnBrPackCtlMessage(ctx, &data, &dataLen);
-    if (seq < 0) {
-        CONN_LOGE(CONN_BR, "reply message faild, connectionId=%{public}u, ret=%{public}d", connection->connectionId,
-            (int32_t)seq);
-        return (int32_t)seq;
-    }
-    return ConnBrPostBytes(connection->connectionId, data, dataLen, 0, flag, MODULE_CONNECTION, seq);
+    return BrPostReplyMessage(connection->connectionId, localRc);
 }
 
 int32_t ConnBrOnReferenceResponse(ConnBrConnection *connection, const cJSON *json)
