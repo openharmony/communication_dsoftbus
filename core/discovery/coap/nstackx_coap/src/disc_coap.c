@@ -150,7 +150,6 @@ static void DfxRecordRegisterEnd(const unsigned char *capabilityData, uint32_t c
     extra.capabilityBit = (int32_t)capability;
     extra.errcode = reason;
     extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
-    DISC_EVENT(EVENT_SCENE_COAP, EVENT_STAGE_REGISTER, extra);
 }
 
 static void DfxRecordSetFilterEnd(uint32_t capability, int32_t reason)
@@ -176,7 +175,6 @@ static void DfxRecordStartDiscoveryEnd(DiscCoapOption *discCoapOption, int32_t r
         extra.broadcastFreq = discCoapOption->freq;
         extra.capabilityBit = (int32_t)discCoapOption->capability;
     }
-    DISC_EVENT(EVENT_SCENE_COAP, EVENT_STAGE_DISCOVERY_START, extra);
 }
 
 static void DfxRecordStopDiscoveryEnd(int32_t reason)
@@ -186,7 +184,6 @@ static void DfxRecordStopDiscoveryEnd(int32_t reason)
     extra.discType = COAP + 1;
     extra.errcode = reason;
     extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
-    DISC_EVENT(EVENT_SCENE_COAP, EVENT_STAGE_DISCOVERY_STOP, extra);
 }
 
 static int32_t Publish(const PublishOption *option, bool isActive)
@@ -486,7 +483,6 @@ static void CoapUpdateLocalIp(LinkStatus status)
     DiscEventExtraInit(&extra);
     extra.discType = COAP + 1;
     extra.ipLinkStatus = status + 1;
-    DISC_EVENT(EVENT_SCENE_COAP, EVENT_STAGE_UPDATE_IP, extra);
     DiscCoapUpdateLocalIp(status);
 }
 
@@ -496,7 +492,6 @@ static void CoapUpdateLocalDeviceInfo(InfoTypeChanged type)
     DiscEventExtraInit(&extra);
     extra.discType = COAP + 1;
     extra.coapChangeType = type + 1;
-    DISC_EVENT(EVENT_SCENE_COAP, EVENT_STAGE_UPDATE_DEVICE, extra);
 
     if (type == TYPE_LOCAL_DEVICE_NAME) {
         DiscCoapUpdateDevName();

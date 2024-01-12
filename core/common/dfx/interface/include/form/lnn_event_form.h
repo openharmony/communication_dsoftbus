@@ -47,11 +47,12 @@ typedef enum {
     EVENT_STAGE_AUTH_CONNECTION = 3,
     EVENT_STAGE_AUTH_DEVICE_ID_POST = 4,
     EVENT_STAGE_AUTH_DEVICE_ID_PROCESS = 5,
-    EVENT_STAGE_AUTH_HICHAIN = 6,
-    EVENT_STAGE_AUTH_EXCHANGE_CIPHER = 7,
-    EVENT_STAGE_AUTH_DEVICE_INFO_POST = 8,
-    EVENT_STAGE_AUTH_DEVICE_INFO_PROCESS = 9,
-    EVENT_STAGE_JOIN_LNN_END = 10,
+    EVENT_STAGE_AUTH_HICHAIN_START = 6,
+    EVENT_STAGE_AUTH_HICHAIN_END = 7,
+    EVENT_STAGE_AUTH_EXCHANGE_CIPHER = 8,
+    EVENT_STAGE_AUTH_DEVICE_INFO_POST = 9,
+    EVENT_STAGE_AUTH_DEVICE_INFO_PROCESS = 10,
+    EVENT_STAGE_JOIN_LNN_END = 11,
 } LnnEventJoinLnnStage;
 
 typedef enum {
@@ -68,12 +69,13 @@ typedef enum {
 typedef struct {
     int32_t result;             // STAGE_RES
     int32_t errcode;            // ERROR_CODE
+    int32_t authId;             // AUTH_ID
     int32_t discServerType;     // DISC_SERVER_TYPE
     int32_t gearCycle;          // GEAR_CYCLE
     int32_t gearDuration;       // GEAR_DURATION
     int32_t connectionId;       // CONN_ID
-    int32_t authType;           // AUTH_TYPE
-    int32_t authId;             // AUTH_ID
+    int32_t authLinkType;       // AUTH_LINK_TYPE
+    int32_t authCostTime;       // AUTH_COST_TIME
     int32_t lnnType;            // LNN_TYPE
     int32_t onlineNum;          // ONLINE_NUM
     int32_t peerDeviceAbility;  // PEER_DEV_ABILITY

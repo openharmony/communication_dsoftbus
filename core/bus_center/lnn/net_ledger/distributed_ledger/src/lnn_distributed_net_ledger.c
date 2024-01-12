@@ -1706,7 +1706,7 @@ static void DfxRecordLnnAddOnlineNodeEnd(NodeInfo *info, int32_t onlineNum, int3
         extra.peerUdid = udidData;
     }
     char bleMacAddr[MAC_LEN] = { 0 };
-    if (strncpy_s(bleMacAddr, MAC_LEN, info->deviceInfo.deviceUdid, MAC_LEN - 1) == EOK) {
+    if (strncpy_s(bleMacAddr, MAC_LEN, info->connectInfo.bleMacAddr, MAC_LEN - 1) == EOK) {
         extra.peerBleMac = bleMacAddr;
     }
     char deviceType[DEVICE_TYPE_SIZE_LEN + 1] = { 0 };
