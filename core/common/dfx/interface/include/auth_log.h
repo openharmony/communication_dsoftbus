@@ -41,17 +41,17 @@ static const SoftBusLogLabel AUTH_LABELS[MODULE_DOMAIN_MAX_LEN] = {
 };
 
 #if defined(SOFTBUS_LITE_SYSTEM) || defined(SOFTBUS_SMALL_SYSTEM)
-#define AUTH_LOGF(label, ...) SOFTBUS_LITE_LOGF_INNER(label, ##__VA_ARGS__)
-#define AUTH_LOGE(label, ...) SOFTBUS_LITE_LOGE_INNER(label, ##__VA_ARGS__)
-#define AUTH_LOGW(label, ...) SOFTBUS_LITE_LOGW_INNER(label, ##__VA_ARGS__)
-#define AUTH_LOGI(label, ...) SOFTBUS_LITE_LOGI_INNER(label, ##__VA_ARGS__)
-#define AUTH_LOGD(label, ...) SOFTBUS_LITE_LOGD_INNER(label, ##__VA_ARGS__)
+#define AUTH_LOGF(label, fmt, ...) SOFTBUS_LITE_LOGF_INNER(label, fmt, ##__VA_ARGS__)
+#define AUTH_LOGE(label, fmt, ...) SOFTBUS_LITE_LOGE_INNER(label, fmt, ##__VA_ARGS__)
+#define AUTH_LOGW(label, fmt, ...) SOFTBUS_LITE_LOGW_INNER(label, fmt, ##__VA_ARGS__)
+#define AUTH_LOGI(label, fmt, ...) SOFTBUS_LITE_LOGI_INNER(label, fmt, ##__VA_ARGS__)
+#define AUTH_LOGD(label, fmt, ...) SOFTBUS_LITE_LOGD_INNER(label, fmt, ##__VA_ARGS__)
 #else
-#define AUTH_LOGF(label, ...) (void)SOFTBUS_LOG_INNER(LOG_FATAL, AUTH_LABELS[label], ##__VA_ARGS__)
-#define AUTH_LOGE(label, ...) (void)SOFTBUS_LOG_INNER(LOG_ERROR, AUTH_LABELS[label], ##__VA_ARGS__)
-#define AUTH_LOGW(label, ...) (void)SOFTBUS_LOG_INNER(LOG_WARN, AUTH_LABELS[label], ##__VA_ARGS__)
-#define AUTH_LOGI(label, ...) (void)SOFTBUS_LOG_INNER(LOG_INFO, AUTH_LABELS[label], ##__VA_ARGS__)
-#define AUTH_LOGD(label, ...) (void)SOFTBUS_LOG_INNER(LOG_DEBUG, AUTH_LABELS[label], ##__VA_ARGS__)
+#define AUTH_LOGF(label, fmt, ...) SOFTBUS_LOG_INNER(LOG_FATAL, AUTH_LABELS[label], fmt, ##__VA_ARGS__)
+#define AUTH_LOGE(label, fmt, ...) SOFTBUS_LOG_INNER(LOG_ERROR, AUTH_LABELS[label], fmt, ##__VA_ARGS__)
+#define AUTH_LOGW(label, fmt, ...) SOFTBUS_LOG_INNER(LOG_WARN, AUTH_LABELS[label], fmt, ##__VA_ARGS__)
+#define AUTH_LOGI(label, fmt, ...) SOFTBUS_LOG_INNER(LOG_INFO, AUTH_LABELS[label], fmt, ##__VA_ARGS__)
+#define AUTH_LOGD(label, fmt, ...) SOFTBUS_LOG_INNER(LOG_DEBUG, AUTH_LABELS[label], fmt, ##__VA_ARGS__)
 #endif // SOFTBUS_LITE_SYSTEM || SOFTBUS_SMALL_SYSTEM
 
 #define AUTH_CHECK_AND_RETURN_RET_LOGW(cond, ret, label, fmt, ...) \
