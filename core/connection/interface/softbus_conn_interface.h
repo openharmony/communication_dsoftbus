@@ -60,6 +60,7 @@ typedef enum {
     CONNECT_P2P_REUSE,
     CONNECT_BLE_DIRECT,
     CONNECT_HML,
+    CONNECT_TRIGGER_HML,
     CONNECT_TYPE_MAX
 } ConnectType;
 

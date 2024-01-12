@@ -181,6 +181,22 @@ static void SetP2pMac(struct WifiDirectNegotiateChannel *base, const char *p2pMa
     CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "set auth p2p mac failed");
 }
 
+static enum WifiDirectNegotiateChannelType GetMediumType(struct WifiDirectNegotiateChannel *base)
+{
+    AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(connInfo), 0, sizeof(connInfo));
+    int32_t ret = AuthGetConnInfo(((struct DefaultNegotiateChannel *)base)->authId, &connInfo);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, NEGOTIATE_MAX, CONN_WIFI_DIRECT, "get auth conn info failed");
+    if (connInfo.type == AUTH_LINK_TYPE_WIFI) {
+        return NEGOTIATE_WIFI;
+    } else if (connInfo.type == AUTH_LINK_TYPE_BLE) {
+        return NEGOTIATE_BLE;
+    } else if (connInfo.type == AUTH_LINK_TYPE_BR) {
+        return NEGOTIATE_BR;
+    }
+    return NEGOTIATE_MAX;
+}
+
 static bool IsP2pChannel(struct WifiDirectNegotiateChannel *base)
 {
     AuthConnInfo connInfo;
@@ -236,6 +252,7 @@ void DefaultNegotiateChannelConstructor(struct DefaultNegotiateChannel *self, in
     self->getP2pMac = GetP2pMac;
     self->setP2pMac = SetP2pMac;
     self->isP2pChannel = IsP2pChannel;
+    self->getMediumType = GetMediumType;
     self->isMetaChannel = IsMetaChannel;
     self->equal = Equal;
     self->duplicate = Duplicate;

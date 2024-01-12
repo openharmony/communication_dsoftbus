@@ -107,6 +107,12 @@ static bool IsP2pChannel(struct WifiDirectNegotiateChannel *base)
     return false;
 }
 
+static enum WifiDirectNegotiateChannelType GetMediumType(struct WifiDirectNegotiateChannel *base)
+{
+    (void)base;
+    return NEGOTIATE_MAX;
+}
+
 static struct WifiDirectNegotiateChannel *Duplicate(struct WifiDirectNegotiateChannel *base)
 {
     struct FastConnectNegotiateChannel *self = (struct FastConnectNegotiateChannel*)base;
@@ -129,6 +135,7 @@ void FastConnectNegotiateChannelConstructor(struct FastConnectNegotiateChannel *
     self->getP2pMac = GetP2pMac;
     self->setP2pMac = SetP2pMac;
     self->isP2pChannel = IsP2pChannel;
+    self->getMediumType = GetMediumType;
     self->duplicate = Duplicate;
     self->destructor = Destructor;
 
