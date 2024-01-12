@@ -32,6 +32,7 @@
 #include "utils/wifi_direct_perf_recorder.h"
 #include "utils/wifi_direct_anonymous.h"
 #include "conn_event.h"
+#include "wifi_direct_statistic.h"
 
 /* public interface implement */
 static int32_t GetRequestId(void)
@@ -381,6 +382,9 @@ int32_t WifiDirectManagerInit(void)
     }
     if (SoftBusRegConnVarDump("WifiDirectClear", WifiDirectDumperCallbackForClearFeature) != SOFTBUS_OK) {
         CONN_LOGI(CONN_WIFI_DIRECT, "add dumper callback failed");
+    }
+    if (InitStatisticMutexLock() != SOFTBUS_OK) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "init statistic lock fail");
     }
 
     return SOFTBUS_OK;

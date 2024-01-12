@@ -31,6 +31,7 @@
 #include "softbus_event.h"
 #include "stats_event.h"
 #include "hisysevent_manager_c.h"
+#include "wifi_direct_statistic.h"
 
 #define BIZ_SCENE_NAME "BIZ_SCENE"
 #define BIZ_STAGE_NAME "BIZ_STAGE"
@@ -41,6 +42,11 @@
 #define CALLER_PID_NAME "CALLER_PID"
 #define ERROR_CODE_NAME "ERROR_CODE"
 #define LINK_TYPE_NAME "LINK_TYPE"
+#define BOOT_LINK_TYPE "BOOT_LINK_TYPE"
+#define IS_RENEGOTIATE "IS_RENEGOTIATE"
+#define IS_REUSE "IS_REUSE"
+#define NEGOTIATE_TIME "NEGOTIATE_TIME"
+#define LINK_TIME "LINK_TIME"
 #define MIN_BW_NAME "MIN_BW"
 #define METHOD_ID_NAME "METHOD_ID"
 #define PERMISSION_NAME "PERMISSION_NAME"
@@ -50,6 +56,7 @@
 #define MODULE_NAME_TRANS "trans"
 #define MODULE_NAME_CONN "conn"
 #define MODULE_NAME_AUTH "auth"
+#define MODULE_NAME_HML "hml"
 
 #define QUERY_EVENT_FULL_QUERY_PARAM (-1)
 #define MAX_NUM_OF_EVENT_RESULT 100
@@ -89,6 +96,14 @@ typedef struct {
     int32_t linkTypeTotal[CONNECT_TYPE_MAX];
     int32_t linkTypeSuccessTotal[CONNECT_TYPE_MAX];
 } ConnStatsInfo;
+
+typedef struct {
+    int32_t linkTotal[STATISTIC_BOOT_LINK_TYPE_NUM][STATISTIC_LINK_TYPE_NUM];
+    int32_t successTotal[STATISTIC_BOOT_LINK_TYPE_NUM][STATISTIC_LINK_TYPE_NUM];
+    int32_t negotiateTotal[STATISTIC_BOOT_LINK_TYPE_NUM][STATISTIC_LINK_TYPE_NUM];
+    int32_t linkTimeConsuming[STATISTIC_BOOT_LINK_TYPE_NUM][STATISTIC_LINK_TYPE_NUM];
+    int32_t negotiateTimeCosuming[STATISTIC_BOOT_LINK_TYPE_NUM][STATISTIC_LINK_TYPE_NUM];
+} ConnHmlInfo;
 
 typedef struct {
     int32_t authFailTotal;
@@ -148,6 +163,7 @@ static SoftBusMutex g_alarmOnQueryLock = {0};
 static SoftBusMutex g_transMapLock = {0};
 static bool g_isTransMapInit = false;
 static ConnStatsInfo g_connStatsInfo = {0, 0, {0}, {0}};
+static ConnHmlInfo g_connHmlStatsInfo = {0};
 static LnnStatsInfo g_lnnStatsInfo = {0, 0, {0}, {0}, 0, 0, 0};
 static TransStatsInfo g_transStatsInfo = {0};
 static SoftBusAlarmEvtResult g_alarmEvtResult = {0};
@@ -195,6 +211,16 @@ static int32_t GetInt32ValueByRecord(HiSysEventRecordC* record, char* name)
     return (int32_t)value;
 }
 
+static uint64_t GetUint64ValueByRecord(HiSysEventRecordC* record, char* name)
+{
+    uint64_t value;
+    int32_t res = OH_HiSysEvent_GetParamUint64Value(record, name, &value);
+    if (res != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    return value;
+}
+
 static char* GetStringValueByRecord(HiSysEventRecordC* record, char* name)
 {
     char* value;
@@ -228,6 +254,43 @@ static void ConnStatsLinkType(int32_t linkTypePara, bool success)
     }
 }
 
+static void FillConnHmlInfo(HiSysEventRecordC* record)
+{
+    int32_t isReuse = GetInt32ValueByRecord(record, IS_REUSE);
+    if (isReuse == 1) {
+        return;
+    }
+    int32_t linkType = GetInt32ValueByRecord(record, LINK_TYPE_NAME);
+    int32_t wifiDirectLinkType = 0;
+    if (linkType == CONNECT_P2P) {
+        wifiDirectLinkType = STATISTIC_P2P;
+    } else if (linkType == CONNECT_HML) {
+        wifiDirectLinkType = STATISTIC_HML;
+    } else if (linkType == CONNECT_TRIGGER_HML) {
+        wifiDirectLinkType = STATISTIC_TRIGGER_HML;
+    }
+    int32_t bootLinkType = GetInt32ValueByRecord(record, BOOT_LINK_TYPE);
+    int32_t isRenegotiate = GetInt32ValueByRecord(record, IS_RENEGOTIATE);
+    if (isRenegotiate == 1) {
+        bootLinkType = STATISTIC_RENEGOTIATE;
+    }
+    if (bootLinkType >= STATISTIC_BOOT_LINK_TYPE_NUM || bootLinkType < STATISTIC_NONE) {
+        return;
+    }
+    g_connHmlStatsInfo.linkTotal[bootLinkType][wifiDirectLinkType]++;
+    int32_t stageRes = GetInt32ValueByRecord(record, STAGE_RES_NAME);
+    if (stageRes == EVENT_STAGE_RESULT_OK) {
+        g_connHmlStatsInfo.successTotal[bootLinkType][wifiDirectLinkType]++;
+        g_connHmlStatsInfo.linkTimeConsuming[bootLinkType][wifiDirectLinkType] +=
+            GetUint64ValueByRecord(record, LINK_TIME);
+        uint64_t negotiateTime = GetUint64ValueByRecord(record, NEGOTIATE_TIME);
+        if (negotiateTime > 0) {
+            g_connHmlStatsInfo.negotiateTotal[bootLinkType][wifiDirectLinkType]++;
+            g_connHmlStatsInfo.negotiateTimeCosuming[bootLinkType][wifiDirectLinkType] += negotiateTime;
+        }
+    }
+}
+
 static void OnQueryConn(HiSysEventRecordC srcRecord[], size_t size)
 {
     COMM_LOGI(COMM_DFX, "OnQueryConn start");
@@ -253,6 +316,12 @@ static void OnQueryConn(HiSysEventRecordC srcRecord[], size_t size)
             stageRes == EVENT_STAGE_RESULT_FAILED) {
             g_connStatsInfo.connFailTotal++;
             ConnStatsLinkType(linkType, false);
+        }
+        if (scene == EVENT_SCENE_CONNECT && stage == EVENT_STAGE_CONNECT_END) {
+            int32_t linkType = GetInt32ValueByRecord(&srcRecord[i], LINK_TYPE_NAME);
+            if (linkType == CONNECT_P2P || linkType == CONNECT_HML || linkType == CONNECT_TRIGGER_HML) {
+                FillConnHmlInfo(&srcRecord[i]);
+            }
         }
     }
     (void)SoftBusMutexUnlock(&g_connOnQueryLock);
@@ -636,6 +705,33 @@ void FillConnSuccessRateDetail(cJSON *connObj)
     }
 }
 
+static void FillHmlDetail(cJSON *hmlObj)
+{
+    if (hmlObj == NULL) {
+        COMM_LOGE(COMM_DFX, "hml json is null");
+        return;
+    }
+    for (int i = STATISTIC_NONE; i < STATISTIC_BOOT_LINK_TYPE_NUM; i++) {
+        for (int j = STATISTIC_P2P; j < STATISTIC_LINK_TYPE_NUM; j++) {
+            if (g_connHmlStatsInfo.linkTotal[i][j] == 0) {
+                continue;
+            }
+            char detail[MAX_LENGTH_OF_SUCCESS_RATE] = {0};
+            int32_t res = sprintf_s(detail, sizeof(detail), "%d,%d,%d,%d,%d,%"PRIu64",%"PRIu64, i, j,
+                g_connHmlStatsInfo.linkTotal[i][j], g_connHmlStatsInfo.successTotal[i][j],
+                g_connHmlStatsInfo.negotiateTotal[i][j], g_connHmlStatsInfo.linkTimeConsuming[i][j],
+                g_connHmlStatsInfo.negotiateTimeCosuming[i][j]);
+            if (res <= 0) {
+                COMM_LOGE(COMM_DFX, "sprintf_s fail");
+                return;
+            }
+            COMM_LOGI(COMM_DFX, "hml statistic : %{public}s", detail);
+            cJSON_AddItemToArray(hmlObj, cJSON_CreateString(detail));
+        }
+    }
+    (void)memset_s(&g_connHmlStatsInfo, sizeof(g_connHmlStatsInfo), 0, sizeof(g_connHmlStatsInfo));
+}
+
 void FillAuthSuccessRateDetail(cJSON *authObj)
 {
     if (authObj == NULL) {
@@ -672,6 +768,8 @@ void FillSuccessRateDetail(SoftBusStatsResult *result)
     FillConnSuccessRateDetail(connObj);
     cJSON *authObj = cJSON_AddArrayToObject(root_obj, MODULE_NAME_AUTH);
     FillAuthSuccessRateDetail(authObj);
+    cJSON *hmlObj = cJSON_AddArrayToObject(root_obj, MODULE_NAME_HML);
+    FillHmlDetail(hmlObj);
     result->successRateDetail = cJSON_PrintUnformatted(root_obj);
     cJSON_Delete(root_obj);
 }
