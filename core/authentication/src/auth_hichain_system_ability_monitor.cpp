@@ -18,6 +18,7 @@
 #include <atomic>
 #include <cstdint>
 #include <string>
+#include <mutex>
 
 #include "auth_log.h"
 #include "auth_manager.h"
@@ -35,7 +36,7 @@ public:
     SystemAbilityListener &operator=(const SystemAbilityListener&) = delete;
 
     static std::atomic<bool> isReg;
-    static SystemAbilityListener *GetInstance();
+    static sptr<SystemAbilityListener> GetInstance();
 protected:
     void OnAddSystemAbility(int32_t saId, const std::string &deviceId) override;
     void OnRemoveSystemAbility(int32_t saId, const std::string &deviceId) override;
@@ -43,10 +44,17 @@ private:
     SystemAbilityListener() = default;
 };
 
-SystemAbilityListener *SystemAbilityListener::GetInstance()
+sptr<SystemAbilityListener> SystemAbilityListener::GetInstance()
 {
-    static SystemAbilityListener saListener;
-    return &saListener;
+    static sptr<SystemAbilityListener> instance;
+    static std::mutex instanceLock;
+    if (instance == nullptr) {
+        std::lock_guard<std::mutex> autoLock(instanceLock);
+        if (instance == nullptr) {
+            instance = new SystemAbilityListener();
+        }
+    }
+    return instance;
 }
 
 static void RetryRegTrustListener(void *para)
