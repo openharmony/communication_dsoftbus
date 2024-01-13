@@ -62,6 +62,9 @@ static struct InnerLink *GetReuseLink(struct WifiDirectConnectCommand *command)
 
     enum WifiDirectLinkType linkType = GetLinkType(connectInfo->connectType);
     struct InnerLink *link = GetLinkManager()->getLinkByTypeAndUuid(linkType, remoteUuid);
+    if (link == NULL) {
+        link = GetLinkManager()->getLinkByTypeAndUuid(WIFI_DIRECT_LINK_TYPE_P2P, remoteUuid);
+    }
     CONN_CHECK_AND_RETURN_RET_LOGW(link != NULL, NULL, CONN_WIFI_DIRECT, "link is null");
     enum InnerLinkState state = link->getInt(link, IL_KEY_STATE, INNER_LINK_STATE_DISCONNECTED);
     CONN_CHECK_AND_RETURN_RET_LOGW(state == INNER_LINK_STATE_CONNECTED, NULL, CONN_WIFI_DIRECT,
