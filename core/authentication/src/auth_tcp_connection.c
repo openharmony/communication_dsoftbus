@@ -20,6 +20,7 @@
 #include "auth_channel.h"
 #include "auth_common.h"
 #include "auth_log.h"
+#include "auth_meta_manager.h"
 #include "bus_center_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
@@ -31,14 +32,6 @@
 #define AUTH_PKT_HEAD_LEN 24
 #define AUTH_KEEP_ALIVE_TIME_INTERVAL (10 * 60)
 #define AUTH_SOCKET_MAX_DATA_LEN (64 * 1024)
-
-typedef struct {
-    int32_t magic;
-    int32_t module;
-    int64_t seq;
-    int32_t flag;
-    uint32_t len;
-} SocketPktHead;
 
 typedef struct {
     int32_t module;
@@ -151,6 +144,10 @@ static void NotifyDataReceived(ListenerModule module, int32_t fd,
 {
     if (pktHead->module == MODULE_AUTH_CHANNEL || pktHead->module == MODULE_AUTH_MSG) {
         NotifyChannelDataReceived(fd, pktHead, data);
+        return;
+    }
+    if (pktHead->module == MODULE_META_AUTH) {
+        AuthMetaNotifyDataReceived(fd, pktHead, data);
         return;
     }
     AuthDataHead head = {
