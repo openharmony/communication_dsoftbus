@@ -925,3 +925,27 @@ int32_t TransAuthGetAppInfoByChanId(int32_t channelId, AppInfo *appInfo)
     return SOFTBUS_ERR;
 }
 
+int32_t TransAuthGetConnIdByChanId(int32_t channelId, int32_t *connId)
+{
+    if ((g_authChannelList == NULL) || (connId == NULL)) {
+        TRANS_LOGE(TRANS_SVC, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (SoftBusMutexLock(&g_authChannelList->lock) != 0) {
+        TRANS_LOGE(TRANS_SVC, "get mutex lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    AuthChannelInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_authChannelList->list, AuthChannelInfo, node) {
+        if (item->appInfo.myData.channelId == channelId) {
+            *connId = item->authId;
+            (void)SoftBusMutexUnlock(&g_authChannelList->lock);
+            return SOFTBUS_OK;
+        }
+    }
+    SoftBusMutexUnlock(&g_authChannelList->lock);
+    TRANS_LOGE(TRANS_SVC, "get connid failed");
+    return SOFTBUS_ERR;
+}
