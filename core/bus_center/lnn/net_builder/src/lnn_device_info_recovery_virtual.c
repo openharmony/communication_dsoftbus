@@ -45,7 +45,7 @@ int32_t LnnSaveRemoteDeviceInfo(const NodeInfo *deviceInfo)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t LnnUpdateRemoteDeviceInfo(const NodeInfo *deviceInfo)
+int32_t LnnUpdateRemoteDeviceInfo(NodeInfo *deviceInfo)
 {
     (void)deviceInfo;
     return SOFTBUS_NOT_IMPLEMENT;
