@@ -118,6 +118,10 @@ static bool IsRemoteTlvSupported(struct WifiDirectNegotiateChannel *base)
     return channel->tlvFeature;
 }
 
+static bool IsLocalTlvSupported(struct WifiDirectNegotiateChannel *base)
+{
+    return false;
+}
 static int32_t GetDeviceId(struct WifiDirectNegotiateChannel *base, char *deviceId, size_t deviceIdSize)
 {
     int32_t ret = AuthGetDeviceUuid(((struct DefaultNegotiateChannel *)base)->authId, deviceId, deviceIdSize);
@@ -195,6 +199,7 @@ void DefaultNegotiateChannelConstructor(struct DefaultNegotiateChannel *self, in
     self->postData = PostData;
     self->getDeviceId = GetDeviceId;
     self->isRemoteTlvSupported = IsRemoteTlvSupported;
+    self->isLocalTlvSupported = IsLocalTlvSupported;
     self->getP2pMac = GetP2pMac;
     self->setP2pMac = SetP2pMac;
     self->isP2pChannel = IsP2pChannel;
