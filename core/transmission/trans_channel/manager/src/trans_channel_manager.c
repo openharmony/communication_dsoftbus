@@ -850,13 +850,23 @@ int32_t TransGetAppInfoByChanId(int32_t channelId, int32_t channelType, AppInfo*
 
 int32_t TransGetConnByChanId(int32_t channelId, int32_t channelType, int32_t* connId)
 {
-    if (channelType != CHANNEL_TYPE_PROXY) {
-        TRANS_LOGE(TRANS_CTRL, "channelType error. channelType=%{public}d", channelType);
-        return SOFTBUS_ERR;
+    int32_t ret;
+
+    switch (channelType) {
+        case CHANNEL_TYPE_PROXY:
+            ret = TransProxyGetConnIdByChanId(channelId, connId);
+            break;
+        case CHANNEL_TYPE_AUTH:
+            ret = TransAuthGetConnIdByChanId(channelId, connId);
+            break;
+        default:
+            TRANS_LOGE(TRANS_CTRL, "channelType=%{public}d error", channelType);
+            ret = SOFTBUS_ERR;
     }
-    if (TransProxyGetConnIdByChanId(channelId, connId) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_MSG, "get proxy connId, channelId=%{public}d", channelId);
-        return SOFTBUS_TRANS_PROXY_SEND_CHANNELID_INVALID;
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_MSG, "get connId failed, channelId=%{public}d, channelType=%{public}d",
+            channelId, channelType);
     }
-    return SOFTBUS_OK;
+
+    return ret;
 }
