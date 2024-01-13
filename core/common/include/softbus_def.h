@@ -76,6 +76,9 @@ extern "C" {
 
 #define MAX_UDP_CHANNEL_ID_COUNT 20
 
+#ifdef ARRAY_SIZE
+#undef ARRAY_SIZE
+#endif
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
 typedef struct {

@@ -20,7 +20,11 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#if defined(SOFTBUS_LITE_SYSTEM) || defined(SOFTBUS_SMALL_SYSTEM)
+#include "hilog_lite/log.h"
+#else
 #include "hilog/log.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,19 +42,25 @@ extern "C" {
 #define NSTACKX_LOG_DOMAIN    0xd0057ff
 #define DOMAIN_ID_TEST        0xd000f00
 
-#define FILE_NAME        (__builtin_strrchr("/" __FILE__, '/') + 1)
-#define FORMAT(fmt, ...) "[%{public}s:%{public}d] %{public}s# " fmt, FILE_NAME, __LINE__, __FUNCTION__, ##__VA_ARGS__
+#define FILE_NAME          (__builtin_strrchr("/" __FILE__, '/') + 1)
+#define PREFIX_FORMAT(fmt) "[%{public}s:%{public}d] %{public}s# " fmt
 
 /* For inner use only */
 #if defined(SOFTBUS_LITE_SYSTEM) || defined(SOFTBUS_SMALL_SYSTEM)
-#define SOFTBUS_LITE_LOGF_INNER(label, ...) HILOG_FATAL(HILOG_MODULE_SOFTBUS, FORMAT(__VA_ARGS__))
-#define SOFTBUS_LITE_LOGE_INNER(label, ...) HILOG_ERROR(HILOG_MODULE_SOFTBUS, FORMAT(__VA_ARGS__))
-#define SOFTBUS_LITE_LOGW_INNER(label, ...) HILOG_WARN(HILOG_MODULE_SOFTBUS, FORMAT(__VA_ARGS__))
-#define SOFTBUS_LITE_LOGI_INNER(label, ...) HILOG_INFO(HILOG_MODULE_SOFTBUS, FORMAT(__VA_ARGS__))
-#define SOFTBUS_LITE_LOGD_INNER(label, ...) HILOG_DEBUG(HILOG_MODULE_SOFTBUS, FORMAT(__VA_ARGS__))
+#define SOFTBUS_LITE_LOGF_INNER(label, fmt, ...) \
+    HILOG_FATAL(HILOG_MODULE_SOFTBUS, PREFIX_FORMAT(fmt), FILE_NAME, __LINE__, __FUNCTION__, ##__VA_ARGS__)
+#define SOFTBUS_LITE_LOGE_INNER(label, fmt, ...) \
+    HILOG_ERROR(HILOG_MODULE_SOFTBUS, PREFIX_FORMAT(fmt), FILE_NAME, __LINE__, __FUNCTION__, ##__VA_ARGS__)
+#define SOFTBUS_LITE_LOGW_INNER(label, fmt, ...) \
+    HILOG_WARN(HILOG_MODULE_SOFTBUS, PREFIX_FORMAT(fmt), FILE_NAME, __LINE__, __FUNCTION__, ##__VA_ARGS__)
+#define SOFTBUS_LITE_LOGI_INNER(label, fmt, ...) \
+    HILOG_INFO(HILOG_MODULE_SOFTBUS, PREFIX_FORMAT(fmt), FILE_NAME, __LINE__, __FUNCTION__, ##__VA_ARGS__)
+#define SOFTBUS_LITE_LOGD_INNER(label, fmt, ...) \
+    HILOG_DEBUG(HILOG_MODULE_SOFTBUS, PREFIX_FORMAT(fmt), FILE_NAME, __LINE__, __FUNCTION__, ##__VA_ARGS__)
 #else
-#define SOFTBUS_LOG_INNER(level, label, ...) \
-    HILOG_IMPL(LOG_CORE, level, label.domain, label.tag, FORMAT(__VA_ARGS__))
+#define SOFTBUS_LOG_INNER(level, label, fmt, ...)                                                         \
+    (void)HILOG_IMPL(LOG_CORE, level, label.domain, label.tag, PREFIX_FORMAT(fmt), FILE_NAME, __LINE__, \
+        __FUNCTION__, ##__VA_ARGS__)
 #endif // SOFTBUS_LITE_SYSTEM || SOFTBUS_SMALL_SYSTEM
 
 typedef struct {
