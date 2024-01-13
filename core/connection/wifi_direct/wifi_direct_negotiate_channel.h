@@ -30,7 +30,8 @@ extern "C" {
     bool (*isP2pChannel)(struct WifiDirectNegotiateChannel *base); \
     bool (*isMetaChannel)(struct WifiDirectNegotiateChannel *base); \
     struct WifiDirectNegotiateChannel* (*duplicate)(struct WifiDirectNegotiateChannel *base); \
-    void (*destructor)(struct WifiDirectNegotiateChannel *base)
+    void (*destructor)(struct WifiDirectNegotiateChannel *base); \
+    bool (*isLocalTlvSupported)(struct WifiDirectNegotiateChannel *base)
 
 struct WifiDirectNegotiateChannel {
     WIFI_DIRECT_NEGOTIATE_CHANNEL_BASE;
