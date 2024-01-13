@@ -47,7 +47,7 @@ static struct LinkInfo* CreateLinkInfo(struct NegotiateMessage *msg);
 static struct WifiDirectProtocol* GetProtocol(struct WifiDirectNegotiateChannel *channel)
 {
     enum WifiDirectProtocolType type = WIFI_DIRECT_PROTOCOL_TLV;
-    if (!channel->isRemoteTlvSupported(channel)) {
+    if (!channel->isRemoteTlvSupported(channel) || !channel->isLocalTlvSupported(channel)) {
         type = WIFI_DIRECT_PROTOCOL_JSON;
     }
     struct WifiDirectProtocolFactory *factory = GetWifiDirectProtocolFactory();
@@ -63,7 +63,7 @@ static void PutProtocol(struct WifiDirectProtocol *protocol)
 static struct WifiDirectProcessor* GetProcessorByNegoChannel(struct WifiDirectNegotiateChannel *channel)
 {
     enum WifiDirectProcessorType type = WIFI_DIRECT_PROCESSOR_TYPE_HML;
-    if (!channel->isRemoteTlvSupported(channel)) {
+    if (!channel->isRemoteTlvSupported(channel) || !channel->isLocalTlvSupported(channel)) {
         type = WIFI_DIRECT_PROCESSOR_TYPE_P2P_V1;
     }
 
@@ -75,7 +75,7 @@ static struct WifiDirectProcessor* GetProcessorByNegoChannelAndConnectType(struc
                                                                            enum WifiDirectConnectType connectType)
 {
     enum WifiDirectProcessorType type;
-    if (!channel->isRemoteTlvSupported(channel)) {
+    if (!channel->isRemoteTlvSupported(channel) || !channel->isLocalTlvSupported(channel)) {
         type = WIFI_DIRECT_PROCESSOR_TYPE_P2P_V1;
     } else if (connectType == WIFI_DIRECT_CONNECT_TYPE_P2P) {
         type = WIFI_DIRECT_PROCESSOR_TYPE_P2P_V2;
@@ -92,7 +92,7 @@ static struct WifiDirectProcessor* GetProcessorByNegotiateMessage(struct Negotia
     struct WifiDirectNegotiateChannel *channel = msg->getPointer(msg, NM_KEY_NEGO_CHANNEL, NULL);
     CONN_CHECK_AND_RETURN_RET_LOG(channel, NULL, "channel is null");
 
-    if (!channel->isRemoteTlvSupported(channel)) {
+    if (!channel->isRemoteTlvSupported(channel) || !channel->isLocalTlvSupported(channel)) {
         struct WifiDirectProcessor *processor =
             GetWifiDirectProcessorFactory()->createProcessor(WIFI_DIRECT_PROCESSOR_TYPE_P2P_V1);
         return processor;
