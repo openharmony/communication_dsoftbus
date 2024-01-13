@@ -395,14 +395,15 @@ static int32_t GetRequestOptionBySessionParam(const SessionParam *param, LaneReq
     requestOption->requestInfo.trans.acceptableProtocols = LNN_PROTOCOL_ALL ^ LNN_PROTOCOL_NIP;
     TransGetQosInfo(param, &requestOption->requestInfo.trans.qosRequire, isQosLane);
 
-    NodeInfo *info = LnnGetNodeInfoById(requestOption->requestInfo.trans.networkId, CATEGORY_NETWORK_ID);
-    if (info != NULL && LnnHasDiscoveryType(info, DISCOVERY_TYPE_LSA)) {
+    NodeInfo info;
+    int32_t ret = LnnGetRemoteNodeInfoById(requestOption->requestInfo.trans.networkId, CATEGORY_NETWORK_ID, &info);
+    if ((ret == SOFTBUS_OK) && LnnHasDiscoveryType(&info, DISCOVERY_TYPE_LSA)) {
         requestOption->requestInfo.trans.acceptableProtocols |= LNN_PROTOCOL_NIP;
     }
     // ble mac is used when linktype is LINK_TYPE_BLE
     TransGetBleMac(param, requestOption);
     int32_t uid;
-    int32_t ret = TransGetUidAndPid(param->sessionName, &uid, &(requestOption->requestInfo.trans.pid));
+    ret = TransGetUidAndPid(param->sessionName, &uid, &(requestOption->requestInfo.trans.pid));
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "transGetUidAndPid failed.");
         return ret;
