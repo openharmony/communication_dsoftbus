@@ -94,6 +94,7 @@ int SendBytes(int sessionId, const void *data, unsigned int len)
     if (!isEnable) {
         return SOFTBUS_TRANS_SESSION_NO_ENABLE;
     }
+    (void)ClientResetIdleTimeoutById(sessionId);
     return ClientTransChannelSendBytes(channelId, channelType, data, len);
 }
 
@@ -135,6 +136,7 @@ int SendMessage(int sessionId, const void *data, unsigned int len)
     if (!isEnable) {
         return SOFTBUS_TRANS_SESSION_NO_ENABLE;
     }
+    (void)ClientResetIdleTimeoutById(sessionId);
     return ClientTransChannelSendMessage(channelId, channelType, data, len);
 }
 
@@ -172,6 +174,7 @@ int SendStream(int sessionId, const StreamData *data, const StreamData *ext, con
     if (!isEnable) {
         return SOFTBUS_TRANS_SESSION_NO_ENABLE;
     }
+    (void)ClientResetIdleTimeoutById(sessionId);
     return ClientTransChannelSendStream(channelId, type, data, ext, param);
 }
 
@@ -223,5 +226,6 @@ int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], ui
         return SOFTBUS_TRANS_SESSION_NO_ENABLE;
     }
     SoftBusFree(fileSchemaListener);
+    (void)ClientResetIdleTimeoutById(sessionId);
     return ClientTransChannelSendFile(channelId, type, sFileList, dFileList, fileCnt);
 }

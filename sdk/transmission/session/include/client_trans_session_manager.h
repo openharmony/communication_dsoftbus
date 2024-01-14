@@ -46,13 +46,14 @@ typedef enum {
 
 typedef struct {
     ListNode node;
-    uint16_t timeout;
     int32_t sessionId;
     int32_t channelId;
     ChannelType channelType;
     SessionTag info;
     bool isServer;
     SessionRole role;
+    uint32_t maxIdleTime;
+    uint32_t timeout;
     bool isEnable;
     int32_t peerUid;
     int32_t peerPid;
@@ -165,7 +166,7 @@ int32_t ClientSetListenerBySessionId(int32_t sessionId, const ISocketListener *l
 
 int32_t ClientIpcOpenSession(int32_t sessionId, const QosTV *qos, uint32_t qosCount, TransInfo *transInfo);
 
-int32_t ClientSetSocketState(int32_t socket, SessionRole role);
+int32_t ClientSetSocketState(int32_t socket, uint32_t maxIdleTimeout, SessionRole role);
 
 int32_t ClientGetSessionCallbackAdapterByName(const char *sessionName, SessionListenerAdapter *callbackAdapter);
 
@@ -174,6 +175,8 @@ int32_t ClientGetSessionCallbackAdapterById(int32_t sessionId, SessionListenerAd
 int32_t ClientGetPeerSocketInfoById(int32_t sessionId, PeerSocketInfo *peerSocketInfo);
 
 bool IsSessionExceedLimit();
+
+int32_t ClientResetIdleTimeoutById(int32_t sessionId);
 #ifdef __cplusplus
 }
 #endif
