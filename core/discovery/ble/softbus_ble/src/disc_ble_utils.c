@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,6 +50,8 @@
 #define TLV_MAX_DATA_LEN 15
 #define TLV_VARIABLE_DATA_LEN 0
 
+static int32_t CalculateMbsTruncateSize(const char *multiByteStr, uint32_t capacity, uint32_t *truncatedSize);
+
 bool CheckBitMapEmpty(uint32_t capBitMapNum, const uint32_t *capBitMap)
 {
     for (uint32_t i = 0; i < capBitMapNum; i++) {
@@ -97,12 +99,25 @@ static int32_t DiscBleGetDeviceUdid(char *udid, uint32_t len)
     return SOFTBUS_OK;
 }
 
-int32_t DiscBleGetDeviceName(char *deviceName)
+int32_t DiscBleGetDeviceName(char *deviceName, uint32_t size)
 {
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, deviceName, DISC_MAX_DEVICE_NAME_LEN) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "Get local device name failed.");
+    DISC_CHECK_AND_RETURN_RET_LOGE(deviceName != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "device name is null");
+    DISC_CHECK_AND_RETURN_RET_LOGE(size != 0, SOFTBUS_INVALID_PARAM, DISC_BLE, "device name size is 0");
+
+    char localDevName[DEVICE_NAME_BUF_LEN] = {0};
+    int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, localDevName, sizeof(localDevName));
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, DISC_BLE, "get local device name failed");
+
+    uint32_t truncateLen = 0;
+    if (CalculateMbsTruncateSize((const char *)localDevName, size - 1, &truncateLen) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_BLE, "truncate device name failed");
         return SOFTBUS_ERR;
     }
+    if (memcpy_s(deviceName, size, localDevName, truncateLen) != EOK) {
+        DISC_LOGE(DISC_BLE, "copy local device name failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    deviceName[truncateLen] = '\0';
     return SOFTBUS_OK;
 }
 
