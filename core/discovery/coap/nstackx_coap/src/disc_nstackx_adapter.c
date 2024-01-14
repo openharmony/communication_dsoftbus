@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,11 @@
 
 #include "disc_nstackx_adapter.h"
 
+#include <locale.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <wchar.h>
 
 #include "nstackx.h"
 
@@ -39,6 +42,8 @@
 #define DISC_FREQ_COUNT_MASK   0xFFFF
 #define DISC_FREQ_DURATION_BIT 16
 #define DISC_USECOND           1000
+#define MULTI_BYTE_CHAR_LEN    8
+#define MAX_WIDE_STR_LEN       128
 
 #define NSTACKX_LOCAL_DEV_INFO "NstackxLocalDevInfo"
 
@@ -401,9 +406,7 @@ static int32_t SetLocalDeviceInfo(void)
     }
     g_localDeviceInfo->deviceType = (uint32_t)deviceType;
     g_localDeviceInfo->businessType = (uint8_t)NSTACKX_BUSINESS_TYPE_NULL;
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, g_localDeviceInfo->name, sizeof(g_localDeviceInfo->name)) !=
-            SOFTBUS_OK ||
-        LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, g_localDeviceInfo->localIfInfo[0].networkIpAddr,
+    if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, g_localDeviceInfo->localIfInfo[0].networkIpAddr,
             sizeof(g_localDeviceInfo->localIfInfo[0].networkIpAddr)) != SOFTBUS_OK ||
         LnnGetLocalStrInfo(STRING_KEY_HICE_VERSION, g_localDeviceInfo->version, sizeof(g_localDeviceInfo->version)) !=
             SOFTBUS_OK ||
@@ -440,14 +443,82 @@ void DiscCoapUpdateLocalIp(LinkStatus status)
         status == LINK_STATUS_UP ? "up" : "down", accountId == 0 ? "without" : "with");
     ret = NSTACKX_RegisterDeviceAn(g_localDeviceInfo, (uint64_t)accountId);
     DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "register local device info to dfinder failed");
+    DiscCoapUpdateDevName();
+}
+
+static int32_t SetLocale(char **localeBefore)
+{
+    *localeBefore = setlocale(LC_CTYPE, NULL);
+    if (*localeBefore == NULL) {
+        DISC_LOGW(DISC_COAP, "get locale failed");
+    }
+
+    char *localeAfter = setlocale(LC_CTYPE, "C.UTF-8");
+    return (localeAfter != NULL) ? SOFTBUS_OK : SOFTBUS_ERR;
+}
+
+static void RestoreLocale(const char *localeBefore)
+{
+    if (setlocale(LC_CTYPE, localeBefore) == NULL) {
+        DISC_LOGW(DISC_COAP, "restore locale failed");
+    }
+}
+
+static int32_t CalculateMbsTruncateSize(const char *multiByteStr, uint32_t capacity, uint32_t *truncatedSize)
+{
+    size_t multiByteStrLen = strlen(multiByteStr);
+    if (multiByteStrLen == 0) {
+        *truncatedSize = 0;
+        return SOFTBUS_OK;
+    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(multiByteStrLen <= MAX_WIDE_STR_LEN, SOFTBUS_INVALID_PARAM, DISC_COAP,
+        "multi byte str too long: %zu", multiByteStrLen);
+
+    char *localeBefore = NULL;
+    int32_t ret = SetLocale(&localeBefore);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, DISC_COAP, "set locale failed");
+
+    // convert multi byte str to wide str
+    wchar_t wideStr[MAX_WIDE_STR_LEN] = {0};
+    size_t numConverted = mbstowcs(wideStr, multiByteStr, multiByteStrLen);
+    if (numConverted <= 0) {
+        DISC_LOGE(DISC_COAP, "mbstowcs failed");
+        RestoreLocale(localeBefore);
+        return SOFTBUS_ERR;
+    }
+
+    uint32_t truncateTotal = 0;
+    int32_t truncateIndex = numConverted - 1;
+    char multiByteChar[MULTI_BYTE_CHAR_LEN] = {0};
+    while (capacity < multiByteStrLen - truncateTotal && truncateIndex >= 0) {
+        int32_t truncateCharLen = wctomb(multiByteChar, wideStr[truncateIndex]);
+        if (truncateCharLen <= 0) {
+            DISC_LOGE(DISC_COAP, "wctomb failed");
+            RestoreLocale(localeBefore);
+            return SOFTBUS_ERR;
+        }
+        truncateTotal += (uint32_t)truncateCharLen;
+        truncateIndex--;
+    }
+
+    *truncatedSize = (multiByteStrLen >= truncateTotal) ? (multiByteStrLen - truncateTotal) : 0;
+    RestoreLocale(localeBefore);
+    return SOFTBUS_OK;
 }
 
 void DiscCoapUpdateDevName(void)
 {
-    char localDevName[NSTACKX_MAX_DEVICE_NAME_LEN] = {0};
+    char localDevName[DEVICE_NAME_BUF_LEN] = {0};
     int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, localDevName, sizeof(localDevName));
     DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "get local device name failed, ret=%{public}d.", ret);
 
+    uint32_t truncateLen = 0;
+    if (CalculateMbsTruncateSize((const char *)localDevName, NSTACKX_MAX_DEVICE_NAME_LEN - 1, &truncateLen)
+        != SOFTBUS_OK) {
+        DISC_LOGE(DISC_COAP, "truncate device name failed");
+        return;
+    }
+    localDevName[truncateLen] = '\0';
     DISC_LOGI(DISC_COAP, "register new local device name. localDevName=%{public}s", localDevName);
     ret = NSTACKX_RegisterDeviceName(localDevName);
     DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "register local device name failed, ret=%{public}d.", ret);

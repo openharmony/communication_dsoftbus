@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -637,7 +637,7 @@ static int32_t GetConDeviceInfo(DeviceInfo *info)
     if (DiscBleGetDeviceIdHash((uint8_t *)info->devId, DISC_MAX_DEVICE_ID_LEN) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "get deviceId failed");
     }
-    if (DiscBleGetDeviceName(info->devName) != SOFTBUS_OK) {
+    if (DiscBleGetDeviceName(info->devName, sizeof(info->devName)) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "get deviceName failed");
     }
     info->devType = (DeviceType)DiscBleGetDeviceType();
@@ -664,7 +664,7 @@ static int32_t GetNonDeviceInfo(DeviceInfo *info)
         DISC_LOGE(DISC_BLE, "get deviceId failed");
     }
 
-    if (DiscBleGetDeviceName(info->devName) != SOFTBUS_OK) {
+    if (DiscBleGetDeviceName(info->devName, sizeof(info->devName)) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "get deviceName failed");
     }
     info->devType = (DeviceType)DiscBleGetDeviceType();
