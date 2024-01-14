@@ -273,6 +273,9 @@ int32_t AssembleTLV(BroadcastData *broadcastData, uint8_t dataType, const void *
         return SOFTBUS_MEM_ERR;
     }
     broadcastData->dataLen += validLen;
+    if (dataType == TLV_TYPE_DEVICE_NAME) {
+        broadcastData->dataLen += 1;
+    }
     return SOFTBUS_OK;
 }
 
