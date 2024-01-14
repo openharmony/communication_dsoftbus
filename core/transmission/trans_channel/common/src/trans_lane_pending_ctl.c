@@ -356,6 +356,7 @@ static void TransGetQosInfo(const SessionParam *param, QosInfo *qosInfo, bool *i
     }
 }
 
+#ifdef SOFTBUS_MINI_SYSTEM
 static void TransGetBleMac(const SessionParam *param, LaneRequestOption *requestOption)
 {
     if (LnnGetRemoteStrInfo(requestOption->requestInfo.trans.networkId, STRING_KEY_BLE_MAC,
@@ -366,6 +367,7 @@ static void TransGetBleMac(const SessionParam *param, LaneRequestOption *request
         TRANS_LOGW(TRANS_SVC, "requestOption get ble mac fail.");
     }
 }
+#endif
 
 static int32_t GetRequestOptionBySessionParam(const SessionParam *param, LaneRequestOption *requestOption,
     bool *isQosLane)
@@ -400,8 +402,10 @@ static int32_t GetRequestOptionBySessionParam(const SessionParam *param, LaneReq
     if ((ret == SOFTBUS_OK) && LnnHasDiscoveryType(&info, DISCOVERY_TYPE_LSA)) {
         requestOption->requestInfo.trans.acceptableProtocols |= LNN_PROTOCOL_NIP;
     }
-    // ble mac is used when linktype is LINK_TYPE_BLE
+#ifdef SOFTBUS_MINI_SYSTEM
+    // get ble mac only on mini system
     TransGetBleMac(param, requestOption);
+#endif
     int32_t uid;
     ret = TransGetUidAndPid(param->sessionName, &uid, &(requestOption->requestInfo.trans.pid));
     if (ret != SOFTBUS_OK) {
