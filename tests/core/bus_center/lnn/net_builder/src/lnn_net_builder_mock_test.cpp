@@ -18,9 +18,10 @@
 
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
-#include "lnn_net_builder.h"
-#include "lnn_net_builder.c"
 #include "lnn_net_builder_deps_mock.h"
+#include "lnn_net_builder.c"
+#include "lnn_net_builder.h"
+#include "softbus_adapter_bt_common.h"
 #include "softbus_common.h"
 #include "softbus_errcode.h"
 
@@ -102,6 +103,7 @@ HWTEST_F(LNNNetBuilderMockTest, LNN_INIT_NET_BUILDER_TEST_001, TestSize.Level1)
     EXPECT_CALL(NetBuilderMock, LnnGenLocalUuid(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnGenLocalIrk(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnSetLocalStrInfo(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(NetBuilderMock, SoftBusGetBtState()).WillRepeatedly(Return(BLE_ENABLE));
     EXPECT_TRUE(LnnInitNetBuilder() == SOFTBUS_ERR);
     EXPECT_TRUE(LnnInitNetBuilder() == SOFTBUS_ERR);
     EXPECT_TRUE(LnnInitNetBuilder() == SOFTBUS_ERR);
@@ -333,6 +335,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_ELETE_TEST_001, TestSize.Level1)
     EXPECT_CALL(NetBuilderMock, LnnSetLocalStrInfo(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnUnregSyncInfoHandler(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, GetLooper(_)).WillRepeatedly(Return(&loop));
+    EXPECT_CALL(NetBuilderMock, SoftBusGetBtState()).WillRepeatedly(Return(BLE_ENABLE));
     EXPECT_TRUE(ProcessMasterElect(nullptr) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnInitBusCenterEvent() == SOFTBUS_OK);
     EXPECT_TRUE(LnnInitNetBuilder() == SOFTBUS_OK);
