@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 #include <cstdint>
-#include <cstdlib>
 #include "access_control.h"
 #include "softbus_error_code.h"
 
