@@ -19,7 +19,6 @@ if (defined(ohos_lite)) {
   hilog_lite_include_path = "//base/hiviewdfx/hilog_lite/interfaces/native/kits"
   hilog_lite_deps_path =
       "//base/hiviewdfx/hilog_lite/frameworks/mini:hilog_lite"
-  utils_lite_include_path = "//commonlibrary/utils_lite/include"
   if (defined(board_toolchain_type)) {
     if (board_toolchain_type != "iccarm") {
       ohos_lite_cflags = [
