@@ -69,7 +69,6 @@ if (defined(ohos_lite)) {
       "src/stats_event.c",
       "src/trans_event.c",
     ]
-    defines += [ "SOFTBUS_STANDARD_SYSTEM" ]
     defines += [ "__STDC_FORMAT_MACROS" ]
     if (is_asan) {
       defines += [ "ASAN_BUILD" ]
