@@ -56,10 +56,10 @@ if (defined(global_parts_info) &&
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   if (ohos_kernel_type == "liteos_m") {
-    defines = [ "SOFTBUS_MINI_SYSTEM" ]
+    defines = [ "SOFTBUS_LITEOS_M" ]
     import("$softbus_adapter_config/feature_config/mini/config.gni")
   } else {
-    defines = [ "SOFTBUS_SMALL_SYSTEM" ]
+    defines = [ "SOFTBUS_LITEOS_A" ]
     import("$softbus_adapter_config/feature_config/small/config.gni")
   }
 } else {
@@ -68,7 +68,7 @@ if (defined(ohos_lite)) {
   } else {
     os_type = "standard"
   }
-  defines = [ "SOFTBUS_STANDARD_SYSTEM" ]
+  defines = [ "SOFTBUS_LINUX" ]
   import("//build/ohos.gni")
   import(
       "$dsoftbus_feature_product_config_path/feature_config/standard/config.gni")

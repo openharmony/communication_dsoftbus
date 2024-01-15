@@ -76,7 +76,9 @@ extern "C" {
 
 #define MAX_UDP_CHANNEL_ID_COUNT 20
 
+#ifndef ARRAY_SIZE
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+#endif
 
 typedef struct {
     SoftBusMutex lock;
