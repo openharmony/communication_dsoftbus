@@ -717,7 +717,7 @@ static void DfxRecordLnnAuthStart(const AuthConnInfo *connInfo)
     LnnEventExtra extra = { 0 };
     LnnEventExtraInit(&extra);
     if (connInfo != NULL) {
-        extra.lnnType = connInfo->type;
+        extra.authLinkType = connInfo->type;
     }
     LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH, extra);
 }
@@ -1044,7 +1044,7 @@ static void DfxRecordLnnConnectEnd(uint64_t connId, const AuthConnInfo *connInfo
     extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
 
     if (connInfo != NULL) {
-        extra.lnnType = connInfo->type;
+        extra.authLinkType = connInfo->type;
     }
     LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_CONNECTION, extra);
 }
