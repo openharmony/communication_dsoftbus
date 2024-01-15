@@ -132,6 +132,14 @@ int32_t BusCenterServerProxy::NotifyAuthSuccess(int32_t channelId, int32_t chann
     return SOFTBUS_OK;
 }
 
+int32_t BusCenterServerProxy::GetAndComparePid(int32_t pid, int32_t channelId, int32_t channelType)
+{
+    (void)pid;
+    (void)channelId;
+    (void)channelType;
+    return SOFTBUS_OK;
+}
+
 int32_t BusCenterServerProxy::CloseChannel(int32_t channelId, int32_t channelType)
 {
     (void)channelId;
