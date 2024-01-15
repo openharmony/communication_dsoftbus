@@ -44,6 +44,7 @@
 #include "trans_tcp_direct_sessionconn.h"
 #include "lnn_network_manager.h"
 #include "trans_event.h"
+#include "wifi_direct_manager.h"
 
 #define MIGRATE_ENABLE 2
 #define MIGRATE_SUPPORTED 1
@@ -390,8 +391,15 @@ static void FillAppInfo(AppInfo *appInfo, const SessionParam *param,
     appInfo->linkType = connInfo->type;
     appInfo->channelType = transInfo->channelType;
     (void)TransGetLocalConfig(appInfo->channelType, appInfo->businessType, &appInfo->myData.dataConfig);
-    if (strcpy_s(appInfo->myData.addr, IP_LEN, connInfo->connInfo.p2p.localIp) != EOK) {
-        TRANS_LOGE(TRANS_CTRL, "copy local ip failed");
+    if (connInfo->type == LANE_P2P || connInfo->type == LANE_HML) {
+        if (strcpy_s(appInfo->myData.addr, IP_LEN, connInfo->connInfo.p2p.localIp) != EOK) {
+            TRANS_LOGE(TRANS_CTRL, "copy local ip failed");
+        }
+    } else if (connInfo->type == LANE_P2P_REUSE) {
+        if (GetWifiDirectManager()->getLocalIpByRemoteIp(connInfo->connInfo.wlan.addr, appInfo->myData.addr, IP_LEN) !=
+            SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get local ip failed");
+        }
     }
 }
 
