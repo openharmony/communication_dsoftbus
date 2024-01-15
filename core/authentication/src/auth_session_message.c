@@ -1566,7 +1566,6 @@ static void DfxRecordLnnProcessDeviceIdStart(void)
 {
     LnnEventExtra extra = { 0 };
     LnnEventExtraInit(&extra);
-    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_DEVICE_ID_PROCESS, extra);
 }
 
 int32_t PostDeviceIdMessage(int64_t authSeq, const AuthSessionInfo *info)
@@ -1621,7 +1620,6 @@ static void DfxRecordLnnProcessDeviceInfoStart(int64_t authSeq)
     LnnEventExtra extra = { 0 };
     LnnEventExtraInit(&extra);
     extra.authId = (int32_t)authSeq;
-    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_DEVICE_INFO_PROCESS, extra);
 }
 
 int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)

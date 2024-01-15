@@ -306,6 +306,21 @@ static SoftBusLinkType ConvertAuthLinkTypeToHisysEvtLinkType(AuthLinkType type)
     }
 }
 
+static void DfxRecordLnnAuthEnd(AuthFsm *authFsm, uint64_t costTime, int32_t reason)
+{
+    LnnEventExtra extra = { 0 };
+    LnnEventExtraInit(&extra);
+    extra.errcode = reason;
+    extra.authCostTime = (int32_t)costTime;
+    extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+
+    if (authFsm != NULL) {
+        extra.authLinkType = authFsm->info.connInfo.type;
+        extra.authId = (int32_t)authFsm->authSeq;
+    }
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH, extra);
+}
+
 static void ReportAuthResultEvt(AuthFsm *authFsm, int32_t result)
 {
     AUTH_LOGE(AUTH_FSM, "report auth result evt enter");
@@ -315,6 +330,7 @@ static void ReportAuthResultEvt(AuthFsm *authFsm, int32_t result)
     }
     authFsm->statisticData.endAuthTime = LnnUpTimeMs();
     uint64_t costTime = authFsm->statisticData.endAuthTime - authFsm->statisticData.startAuthTime;
+    DfxRecordLnnAuthEnd(authFsm, costTime, result);
     AuthFailStage stage;
     switch (result) {
         case SOFTBUS_OK:

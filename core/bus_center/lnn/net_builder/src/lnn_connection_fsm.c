@@ -847,7 +847,6 @@ static void OnlineStateEnter(FsmStateMachine *fsm)
 {
     LnnEventExtra extra = { 0 };
     LnnEventExtraInit(&extra);
-    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, extra);
     LnnConnectionFsm *connFsm = NULL;
 
     if (!CheckStateMsgCommonArgs(fsm)) {
@@ -954,7 +953,6 @@ static void LeavingStateEnter(FsmStateMachine *fsm)
 {
     LnnEventExtra extra = { 0 };
     LnnEventExtraInit(&extra);
-    LNN_EVENT(EVENT_SCENE_LEAVE_LNN, EVENT_STAGE_LEAVE_LNN, extra);
     LnnConnectionFsm *connFsm = NULL;
     int32_t rc;
     LnnConntionInfo *connInfo = NULL;

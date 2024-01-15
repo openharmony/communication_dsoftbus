@@ -68,6 +68,7 @@ typedef struct {
 } SoftBusStatsResult;
 
 SoftBusStatsResult* MallocSoftBusStatsResult(unsigned int size);
+
 void FreeSoftBusStatsResult(SoftBusStatsResult* result);
 
 int32_t SoftBusQueryStatsInfo(int time, SoftBusStatsResult* result);

@@ -95,12 +95,12 @@ typedef struct {
 static void UpdateDiscEventAndReport(DiscEventExtra *extra, const DeviceInfo *device)
 {
     if (device == NULL) {
-        DISC_EVENT(EVENT_SCENE_SCAN, EVENT_STAGE_SCAN_END, *extra);
+        DISC_EVENT(EVENT_SCENE_DISC, EVENT_STAGE_DEVICE_FOUND, *extra);
         DISC_LOGI(DISC_CONTROL, "device info is null");
         return;
     }
     if (device->addrNum <= CONNECTION_ADDR_WLAN || device->addrNum > CONNECTION_ADDR_MAX) {
-        DISC_EVENT(EVENT_SCENE_SCAN, EVENT_STAGE_SCAN_END, *extra);
+        DISC_EVENT(EVENT_SCENE_DISC, EVENT_STAGE_DEVICE_FOUND, *extra);
         DISC_LOGI(DISC_CONTROL, "unknown device info");
         return;
     }
@@ -124,12 +124,11 @@ static void UpdateDiscEventAndReport(DiscEventExtra *extra, const DeviceInfo *de
         }
     }
 
-    extra->peerNetworkId = device->devId;
     char deviceType[DEVICE_TYPE_SIZE_MAX + 1] = { 0 };
     if (snprintf_s(deviceType, DEVICE_TYPE_SIZE_MAX + 1, DEVICE_TYPE_SIZE_MAX, "%03X", device->devType) >= 0) {
         extra->peerDeviceType = deviceType;
     }
-    DISC_EVENT(EVENT_SCENE_SCAN, EVENT_STAGE_SCAN_END, *extra);
+    DISC_EVENT(EVENT_SCENE_DISC, EVENT_STAGE_DEVICE_FOUND, *extra);
 }
 
 static void DfxRecordStartDiscoveryDevice(DiscInfo *infoNode)

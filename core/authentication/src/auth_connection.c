@@ -556,9 +556,8 @@ static void DfxRecordLnnConnectStart(const AuthConnInfo *connInfo)
     LnnEventExtra extra = { 0 };
     LnnEventExtraInit(&extra);
     if (connInfo != NULL) {
-        extra.lnnType = connInfo->type;
+        extra.authLinkType = connInfo->type;
     }
-    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_CONNECTION, extra);
 }
 
 static int32_t PostCommData(uint32_t connectionId, bool toServer, const AuthDataHead *head, const uint8_t *data)
