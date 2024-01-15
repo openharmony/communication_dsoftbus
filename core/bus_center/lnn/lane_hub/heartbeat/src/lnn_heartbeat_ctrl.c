@@ -34,9 +34,9 @@
 #include "lnn_net_builder.h"
 #include "lnn_ohos_account.h"
 
-#include "softbus_adapter_ble_gatt.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_broadcast_type.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_hisysevt_bus_center.h"
@@ -333,12 +333,12 @@ static void HbChangeMediumParamByState(SoftBusScreenState state)
     };
     switch (state) {
         case SOFTBUS_SCREEN_ON:
-            param.info.ble.scanInterval = SOFTBUS_BLE_SCAN_INTERVAL_P10;
-            param.info.ble.scanWindow = SOFTBUS_BLE_SCAN_WINDOW_P10;
+            param.info.ble.scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P10;
+            param.info.ble.scanWindow = SOFTBUS_BC_SCAN_WINDOW_P10;
             break;
         case SOFTBUS_SCREEN_OFF:
-            param.info.ble.scanInterval = SOFTBUS_BLE_SCAN_INTERVAL_P2;
-            param.info.ble.scanWindow = SOFTBUS_BLE_SCAN_WINDOW_P2;
+            param.info.ble.scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P2;
+            param.info.ble.scanWindow = SOFTBUS_BC_SCAN_WINDOW_P2;
             break;
         default:
             LNN_LOGD(LNN_HEART_BEAT, "ctrl reset ble scan medium param get invalid state");

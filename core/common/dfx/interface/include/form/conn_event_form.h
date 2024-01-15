@@ -55,6 +55,11 @@ typedef struct {
     const char *peerPort;      // PEER_PORT
     const char *callerPkg;     // HOST_PKG
     const char *calleePkg;     // TO_CALL_PKG
+    int32_t bootLinkType;      // BOOT_LINK_TYPE
+    int32_t isRenegotiate;     // IS_RENEGOTIATE
+    int32_t isReuse;           // IS_REUSE
+    uint64_t negotiateTime;    // NEGOTIATE_TIME_COSUMING
+    uint64_t linkTime;         // LINK_TIME_COSUMING
 } ConnEventExtra;
 
 typedef enum {
