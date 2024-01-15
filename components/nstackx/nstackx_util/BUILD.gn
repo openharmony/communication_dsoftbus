@@ -59,7 +59,6 @@ if (defined(ohos_lite)) {
         "$NSTACKX_ROOT/nstackx_core/",
         "//third_party/bounds_checking_function/include/",
         "$hilog_lite_include_path",
-        "$utils_lite_include_path",
       ]
       sources = [
         "core/nstackx_event.c",
@@ -101,7 +100,6 @@ if (defined(ohos_lite)) {
           "$NSTACKX_ROOT/nstackx_core/",
           "//third_party/bounds_checking_function/include/",
           "$hilog_lite_include_path",
-          "$utils_lite_include_path",
         ]
         sources = [
           "core/nstackx_dev.c",
@@ -140,7 +138,6 @@ if (defined(ohos_lite)) {
           "$NSTACKX_ROOT/nstackx_core/",
           "//third_party/bounds_checking_function/include/",
           "$hilog_lite_include_path",
-          "$utils_lite_include_path",
         ]
         sources = [
           "core/nstackx_dev.c",

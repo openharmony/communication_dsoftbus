@@ -49,17 +49,17 @@ static const SoftBusLogLabel CONN_LABELS[MODULE_DOMAIN_MAX_LEN] = {
 };
 
 #if defined(SOFTBUS_LITE_SYSTEM) || defined(SOFTBUS_SMALL_SYSTEM)
-#define CONN_LOGF(label, fmt, ...) SOFTBUS_LITE_LOGF_INNER(label, fmt, ##__VA_ARGS__)
-#define CONN_LOGE(label, fmt, ...) SOFTBUS_LITE_LOGE_INNER(label, fmt, ##__VA_ARGS__)
-#define CONN_LOGW(label, fmt, ...) SOFTBUS_LITE_LOGW_INNER(label, fmt, ##__VA_ARGS__)
-#define CONN_LOGI(label, fmt, ...) SOFTBUS_LITE_LOGI_INNER(label, fmt, ##__VA_ARGS__)
-#define CONN_LOGD(label, fmt, ...) SOFTBUS_LITE_LOGD_INNER(label, fmt, ##__VA_ARGS__)
+#define CONN_LOGF(label, ...) SOFTBUS_LITE_LOGF_INNER(label, ##__VA_ARGS__)
+#define CONN_LOGE(label, ...) SOFTBUS_LITE_LOGE_INNER(label, ##__VA_ARGS__)
+#define CONN_LOGW(label, ...) SOFTBUS_LITE_LOGW_INNER(label, ##__VA_ARGS__)
+#define CONN_LOGI(label, ...) SOFTBUS_LITE_LOGI_INNER(label, ##__VA_ARGS__)
+#define CONN_LOGD(label, ...) SOFTBUS_LITE_LOGD_INNER(label, ##__VA_ARGS__)
 #else
-#define CONN_LOGF(label, fmt, ...) SOFTBUS_LOG_INNER(LOG_FATAL, CONN_LABELS[label], fmt, ##__VA_ARGS__)
-#define CONN_LOGE(label, fmt, ...) SOFTBUS_LOG_INNER(LOG_ERROR, CONN_LABELS[label], fmt, ##__VA_ARGS__)
-#define CONN_LOGW(label, fmt, ...) SOFTBUS_LOG_INNER(LOG_WARN, CONN_LABELS[label], fmt, ##__VA_ARGS__)
-#define CONN_LOGI(label, fmt, ...) SOFTBUS_LOG_INNER(LOG_INFO, CONN_LABELS[label], fmt, ##__VA_ARGS__)
-#define CONN_LOGD(label, fmt, ...) SOFTBUS_LOG_INNER(LOG_DEBUG, CONN_LABELS[label], fmt, ##__VA_ARGS__)
+#define CONN_LOGF(label, ...) (void)SOFTBUS_LOG_INNER(LOG_FATAL, CONN_LABELS[label], ##__VA_ARGS__)
+#define CONN_LOGE(label, ...) (void)SOFTBUS_LOG_INNER(LOG_ERROR, CONN_LABELS[label], ##__VA_ARGS__)
+#define CONN_LOGW(label, ...) (void)SOFTBUS_LOG_INNER(LOG_WARN, CONN_LABELS[label], ##__VA_ARGS__)
+#define CONN_LOGI(label, ...) (void)SOFTBUS_LOG_INNER(LOG_INFO, CONN_LABELS[label], ##__VA_ARGS__)
+#define CONN_LOGD(label, ...) (void)SOFTBUS_LOG_INNER(LOG_DEBUG, CONN_LABELS[label], ##__VA_ARGS__)
 #endif // SOFTBUS_LITE_SYSTEM || SOFTBUS_SMALL_SYSTEM
 
 #define CONN_CHECK_AND_RETURN_RET_LOGW(cond, ret, label, fmt, ...) \
