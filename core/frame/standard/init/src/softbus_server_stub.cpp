@@ -232,8 +232,8 @@ int32_t SoftBusServerStub::OnRemoteRequest(uint32_t code,
                 .conflictedName = NULL,
                 .occupyedName = NULL,
                 .sessionName = NULL,
-                .methodId = (int32_t)code,
                 .callerPid = (int32_t)callingPid,
+                .methodId = (int32_t)code,
                 .permissionName = permission,
             };
             TRANS_ALARM(NO_PERMISSION_ALARM, CONTROL_ALARM_TYPE, extra);
