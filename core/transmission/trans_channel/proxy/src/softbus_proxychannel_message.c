@@ -452,6 +452,7 @@ char *TransProxyPackHandshakeMsg(ProxyChannelInfo *info)
     }
 
     int32_t ret;
+    char *buf = NULL;
     AppInfo *appInfo = &(info->appInfo);
     SessionKeyBase64 sessionBase64;
     (void)memset_s(&sessionBase64, sizeof(SessionKeyBase64), 0, sizeof(SessionKeyBase64));
@@ -489,12 +490,11 @@ char *TransProxyPackHandshakeMsg(ProxyChannelInfo *info)
             goto EXIT;
         }
     }
-    cJSON_Delete(root);
-    return cJSON_PrintUnformatted(root);
 
+    buf = cJSON_PrintUnformatted(root);
 EXIT:
     cJSON_Delete(root);
-    return NULL;
+    return buf;
 }
 
 char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan)

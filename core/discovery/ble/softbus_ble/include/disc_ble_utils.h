@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,7 +65,7 @@ bool CheckCapBitMapExist(uint32_t capBitMapNum, const uint32_t *capBitMap, uint3
 void SetCapBitMapPos(uint32_t capBitMapNum, uint32_t *capBitMap, uint32_t pos);
 void UnsetCapBitMapPos(uint32_t capBitMapNum, uint32_t *capBitMap, uint32_t pos);
 
-int32_t DiscBleGetDeviceName(char *deviceName);
+int32_t DiscBleGetDeviceName(char *deviceName, uint32_t size);
 uint16_t DiscBleGetDeviceType(void);
 int32_t DiscBleGetDeviceIdHash(unsigned char *devIdHash, uint32_t len);
 int32_t DiscBleGetShortUserIdHash(unsigned char *hashStr, uint32_t len);

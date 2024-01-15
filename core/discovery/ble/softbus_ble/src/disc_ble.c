@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,6 @@
 #include "lnn_ohos_account.h"
 #include "message_handler.h"
 #include "securec.h"
-#include "softbus_adapter_ble_gatt.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
@@ -318,7 +317,7 @@ static int32_t ScanFilter(const BroadcastReportInfo *reportInfo)
     uint32_t advLen = reportInfo->packet.bcData.payloadLen;
     uint8_t *advData = reportInfo->packet.bcData.payload;
 
-    DISC_CHECK_AND_RETURN_RET_LOGE(reportInfo->dataStatus == SOFTBUS_BLE_DATA_COMPLETE, SOFTBUS_ERR, DISC_BLE,
+    DISC_CHECK_AND_RETURN_RET_LOGE(reportInfo->dataStatus == SOFTBUS_BC_DATA_COMPLETE, SOFTBUS_ERR, DISC_BLE,
         "dataStatus is invalid. dataStatus=%{public}u", reportInfo->dataStatus);
     DISC_CHECK_AND_RETURN_RET_LOGE(advData != NULL, SOFTBUS_ERR, DISC_BLE, "advData is null");
     DISC_CHECK_AND_RETURN_RET_LOGE(advLen >= POS_TLV, SOFTBUS_ERR, DISC_BLE,
@@ -637,7 +636,7 @@ static int32_t GetConDeviceInfo(DeviceInfo *info)
     if (DiscBleGetDeviceIdHash((uint8_t *)info->devId, DISC_MAX_DEVICE_ID_LEN) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "get deviceId failed");
     }
-    if (DiscBleGetDeviceName(info->devName) != SOFTBUS_OK) {
+    if (DiscBleGetDeviceName(info->devName, sizeof(info->devName)) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "get deviceName failed");
     }
     info->devType = (DeviceType)DiscBleGetDeviceType();
@@ -664,7 +663,7 @@ static int32_t GetNonDeviceInfo(DeviceInfo *info)
         DISC_LOGE(DISC_BLE, "get deviceId failed");
     }
 
-    if (DiscBleGetDeviceName(info->devName) != SOFTBUS_OK) {
+    if (DiscBleGetDeviceName(info->devName, sizeof(info->devName)) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "get deviceName failed");
     }
     info->devType = (DeviceType)DiscBleGetDeviceType();
@@ -1759,7 +1758,7 @@ DiscoveryBleDispatcherInterface *DiscSoftBusBleInit(DiscInnerCallback *callback)
     g_discBleInnerCb = callback;
 
     if (SoftBusMutexInit(&g_recvMessageInfo.lock, NULL) != SOFTBUS_OK ||
-        SoftBusMutexInit(&g_bleInfoLock, NULL) != SOFTBUS_OK || BleGattLockInit() != SOFTBUS_OK) {
+        SoftBusMutexInit(&g_bleInfoLock, NULL) != SOFTBUS_OK) {
         DISC_LOGE(DISC_INIT, "init ble lock failed");
         return NULL;
     }

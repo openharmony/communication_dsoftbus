@@ -21,7 +21,6 @@
 #include <gmock/gmock.h>
 #include <mutex>
 
-#include "softbus_adapter_ble_gatt.h"
 #include "softbus_adapter_ble_gatt_client.h"
 #include "softbus_adapter_ble_gatt_server.h"
 #include "softbus_adapter_bt_common.h"
@@ -30,7 +29,6 @@
 
 class BleInterface {
 public:
-    virtual int BleGattLockInit() = 0;
     virtual int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener) = 0;
     virtual int SoftBusRemoveBtStateListener(int listenerId) = 0;
 
@@ -68,7 +66,6 @@ public:
     BleMock();
     ~BleMock();
 
-    MOCK_METHOD(int, BleGattLockInit, (), (override));
     MOCK_METHOD(int, SoftBusAddBtStateListener, (const SoftBusBtStateListener *listener), (override));
     MOCK_METHOD(int, SoftBusRemoveBtStateListener, (int listenerId), (override));
     MOCK_METHOD(int32_t, InitBroadcastMgr, (), (override));
@@ -98,7 +95,6 @@ public:
     bool GetAsyncAdvertiseResult();
     bool IsScanning();
 
-    static int32_t ActionOfBleGattLockInit();
     static int32_t ActionOfAddBtStateListener(const SoftBusBtStateListener *listener);
     static int32_t ActionOfRemoveBtStateListener(int listenerId);
     static int32_t ActionOfInitBroadcastMgr();

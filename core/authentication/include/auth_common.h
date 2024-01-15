@@ -90,6 +90,14 @@ typedef struct {
 } AuthDataHead;
 
 typedef struct {
+    int32_t magic;
+    int32_t module;
+    int64_t seq;
+    int32_t flag;
+    uint32_t len;
+} SocketPktHead;
+
+typedef struct {
     void (*OnDataReceived)(int64_t authId, const AuthDataHead *head, const uint8_t *data, uint32_t len);
     void (*OnDisconnected)(int64_t authId);
 } AuthTransCallback;
