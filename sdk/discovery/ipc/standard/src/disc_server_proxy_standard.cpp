@@ -301,6 +301,14 @@ int32_t DiscServerProxy::NotifyAuthSuccess(int32_t channelId, int32_t channelTyp
     return SOFTBUS_OK;
 }
 
+int32_t DiscServerProxy::GetAndComparePid(int32_t pid, int32_t channelId, int32_t channelType)
+{
+    (void)pid;
+    (void)channelId;
+    (void)channelType;
+    return SOFTBUS_OK;
+}
+
 int32_t DiscServerProxy::CloseChannel(int32_t channelId, int32_t channelType)
 {
     (void)channelId;
