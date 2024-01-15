@@ -19,21 +19,21 @@
 
 #define NSTACKX_LOG_LEVEL_CONVERT_BASE 8
 
-static void SoftBusLogPrint(const char *line, LogLevel level, uint32_t domain, const char *tag)
+static void SoftBusLogPrint(const char *line, uint32_t level, uint32_t domain, const char *tag)
 {
-#if defined(SOFTBUS_LITE_SYSTEM) || defined(SOFTBUS_SMALL_SYSTEM)
+#if defined(SOFTBUS_LITEOS_M)
     (void)level;
     (void)domain;
     (void)tag;
     printf("%s\n", line);
 #else
-    (void)HiLogPrint(LOG_CORE, level, domain, tag, "%{public}s", line);
+    (void)HiLogPrint(LOG_CORE, (LogLevel)level, domain, tag, "%{public}s", line);
 #endif
 }
 
 void NstackxLogInnerImpl(const char *moduleName, uint32_t logLevel, const char *fmt, ...)
 {
-    LogLevel level = NSTACKX_LOG_LEVEL_CONVERT_BASE - logLevel;
+    uint32_t level = NSTACKX_LOG_LEVEL_CONVERT_BASE - logLevel;
     va_list args = { 0 };
     char line[LOG_LINE_MAX_LENGTH + 1] = { 0 };
     va_start(args, fmt);
