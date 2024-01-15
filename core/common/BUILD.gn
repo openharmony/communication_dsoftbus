@@ -61,7 +61,6 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common/dfx/interface/include",
       "$softbus_adapter_common/include",
       "$hilog_lite_include_path",
-      "$utils_lite_include_path",
     ]
     include_dirs += conn_common_inc + trans_common_inc
     if (board_toolchain_type != "iccarm") {
