@@ -93,6 +93,7 @@ public:
     virtual const char *LnnGetWifiDirectAddr(const NodeInfo *info) = 0;
     virtual bool LnnSetDLWifiDirectAddr(const char *networkId, const char *addr) = 0;
     virtual bool IsActiveOsAccountUnlocked(void) = 0;
+    virtual int32_t GetActiveOsAccountIds(void) = 0;
 };
 class LnnNetLedgertInterfaceMock : public LnnNetLedgerInterface {
 public:
@@ -158,6 +159,7 @@ public:
     MOCK_METHOD0(LnnRegisterBleLpDeviceMediumMgr, int32_t (void));
     MOCK_METHOD2(LnnGetLocalNumU64Info, int32_t(InfoKey, uint64_t *));
     MOCK_METHOD0(IsActiveOsAccountUnlocked, bool (void));
+    MOCK_METHOD0(GetActiveOsAccountIds, int32_t (void));
     static int32_t ActionOfLnnGetAllOnline(NodeBasicInfo **info, int32_t *infoNum);
     static int32_t ActionOfLnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
         char *dstIdBuf, uint32_t dstIdBufLen);
