@@ -53,6 +53,8 @@ void TransChannelDeathCallback(const char *pkgName, int32_t pid);
 int32_t TransGetNameByChanId(const TransInfo *info, char *pkgName, char *sessionName,
     uint16_t pkgLen, uint16_t sessionNameLen);
 
+int32_t TransGetAndComparePid(int32_t pid, int32_t channelId, int32_t channelType);
+
 int32_t TransGetAppInfoByChanId(int32_t channelId, int32_t channelType, AppInfo* appInfo);
 
 int32_t TransGetConnByChanId(int32_t channelId, int32_t channelType, int32_t* connId);
