@@ -14,6 +14,52 @@
  */
 
 #include "exception_branch_checker.h"
+#include "hilog/log.h"
+#include "securec.h"
+
+#define MAX_LOG_LEN 1024
+#define PERMISSION_NUM 3
+
+namespace {
+std::vector<std::string> g_hilogPermissionList = {"{public}", "{private}", "{protect}"};
+
+void RemoveHilogModifiers(const char *fmt, char *modifiedFmt)
+{
+    std::string strTypeFmt = fmt;
+    std::string::size_type pos = 0;
+    for (int i = 0; i < PERMISSION_NUM; i++) {
+        while ((pos = strTypeFmt.find(g_hilogPermissionList[i], pos)) != std::string::npos) {
+            strTypeFmt.erase(pos, g_hilogPermissionList[i].length());
+        }
+    }
+    if (strcpy_s(modifiedFmt, strTypeFmt.length() + 1, strTypeFmt.c_str()) != EOK) {
+        return;
+    }
+}
+}
+
+int32_t HiLogPrint(LogType type, LogLevel level, unsigned int domain, const char *tag, const char *fmt, ...)
+{
+    va_list args = { 0 };
+    char buffer[MAX_LOG_LEN] = { 0 };
+    char modifiedFmt[MAX_LOG_LEN] = { 0 };
+
+    RemoveHilogModifiers(fmt, modifiedFmt);
+
+    va_start(args, fmt);
+    int32_t ret = vsprintf_s(&buffer[0], sizeof(buffer), modifiedFmt, args);
+    va_end(args);
+    if (ret < 0) {
+        return ret;
+    }
+
+    auto *checker = ExceptionBranchChecker::GetCurrentInstance();
+    if (checker != nullptr) {
+        checker->WriteLog(buffer);
+    }
+
+    return ret;
+}
 
 ExceptionBranchChecker* ExceptionBranchChecker::GetCurrentInstance()
 {
