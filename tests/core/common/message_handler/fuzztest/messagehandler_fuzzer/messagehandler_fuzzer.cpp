@@ -25,16 +25,10 @@ void DoMessageHandlerFuzz(const uint8_t *data, size_t size)
     (void)data;
     (void)size;
     SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
-    if (looper == nullptr) {
-        if (LooperInit() != 0) {
-            return;
-        }
-    }
-    SetLooper(LOOP_TYPE_DEFAULT, nullptr);
-    SetLooperDumpable(nullptr, true);
-    DumpLooper(nullptr);
-    DestroyLooper(nullptr);
-    LooperDeinit();
+    SetLooper(LOOP_TYPE_DEFAULT, looper);
+    SetLooperDumpable(looper, true);
+    DumpLooper(looper);
+    DestroyLooper(looper);
 }
 } // namespace OHOS
 
