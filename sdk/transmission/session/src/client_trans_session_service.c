@@ -173,21 +173,21 @@ int RemoveSessionServer(const char *pkgName, const char *sessionName)
 static int32_t CheckParamIsValid(const char *mySessionName, const char *peerSessionName,
     const char *peerNetworkId, const char *groupId, const SessionAttribute *attr)
 {
-    if (!IsValidString(mySessionName, SESSION_NAME_SIZE_MAX)) {
+    if (!IsValidString(mySessionName, SESSION_NAME_SIZE_MAX - 1)) {
         char *tmpMyName = NULL;
         Anonymize(mySessionName, &tmpMyName);
         TRANS_LOGE(TRANS_SDK, "invalid mySessionName. tmpMyName=%{public}s", tmpMyName);
         AnonymizeFree(tmpMyName);
         return SOFTBUS_INVALID_PARAM;
     }
-    if (!IsValidString(peerSessionName, SESSION_NAME_SIZE_MAX)) {
+    if (!IsValidString(peerSessionName, SESSION_NAME_SIZE_MAX - 1)) {
         char *tmpPeerName = NULL;
         Anonymize(peerSessionName, &tmpPeerName);
         TRANS_LOGE(TRANS_SDK, "invalid peerSessionName. tmpPeerName=%{public}s", tmpPeerName);
         AnonymizeFree(tmpPeerName);
         return SOFTBUS_INVALID_PARAM;
     }
-    if (!IsValidString(peerNetworkId, DEVICE_ID_SIZE_MAX)) {
+    if (!IsValidString(peerNetworkId, DEVICE_ID_SIZE_MAX - 1)) {
         char *tmpPeerNetworkId = NULL;
         Anonymize(peerNetworkId, &tmpPeerNetworkId);
         TRANS_LOGE(TRANS_SDK, "invalid peerNetworkId. tmpPeerNetworkId=%{public}s", tmpPeerNetworkId);

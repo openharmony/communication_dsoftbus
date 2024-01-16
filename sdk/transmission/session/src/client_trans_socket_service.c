@@ -28,12 +28,13 @@
 
 static int32_t CheckSocketInfoIsValid(const SocketInfo *info)
 {
-    if (!IsValidString(info->name, SESSION_NAME_SIZE_MAX) || !IsValidString(info->pkgName, PKG_NAME_SIZE_MAX)) {
+    if (!IsValidString(info->name, SESSION_NAME_SIZE_MAX - 1) ||
+        !IsValidString(info->pkgName, PKG_NAME_SIZE_MAX - 1)) {
         TRANS_LOGE(TRANS_SDK, "invalid name or package name of socket");
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (info->peerName != NULL && !IsValidString(info->peerName, SESSION_NAME_SIZE_MAX)) {
+    if (info->peerName != NULL && !IsValidString(info->peerName, SESSION_NAME_SIZE_MAX - 1)) {
         char *anonySessionName = NULL;
         Anonymize(info->peerName, &anonySessionName);
         TRANS_LOGI(TRANS_SDK, "strcpy peerName failed, peerName=%{public}s, peerNameLen=%{public}zu",
@@ -42,7 +43,7 @@ static int32_t CheckSocketInfoIsValid(const SocketInfo *info)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (info->peerNetworkId != NULL && !IsValidString(info->peerNetworkId, DEVICE_ID_SIZE_MAX)) {
+    if (info->peerNetworkId != NULL && !IsValidString(info->peerNetworkId, DEVICE_ID_SIZE_MAX - 1)) {
         char *anonyNetworkId = NULL;
         Anonymize(info->peerNetworkId, &anonyNetworkId);
         TRANS_LOGI(TRANS_SDK, "strcpy peerNetworkId failed, peerNetworkId=%{public}s, peerNetworkIdLen=%{public}zu",
