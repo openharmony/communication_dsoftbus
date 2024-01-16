@@ -706,6 +706,18 @@ int32_t SoftBusServerStub::CloseChannelInner(MessageParcel &data, MessageParcel 
         return SOFTBUS_ERR;
     }
 
+    int32_t callingPid;
+    if (!data.ReadInt32(callingPid)) {
+        COMM_LOGE(COMM_SVC, "CloseChannelInner read channel callingPid failed!");
+        return SOFTBUS_ERR;
+    }
+
+    int32_t checkResult = GetAndComparePid(callingPid, channelId, channelType);
+    if (checkResult != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "This pid:%d, can not close channel:%d", callingPid, channelId);
+        return SOFTBUS_ERR;
+    }
+
     int32_t retReply = CloseChannel(channelId, channelType);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "CloseChannelInner write reply failed!");
