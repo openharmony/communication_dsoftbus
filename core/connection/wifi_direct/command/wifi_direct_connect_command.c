@@ -97,8 +97,8 @@ static int32_t ReuseLink(struct WifiDirectConnectCommand *command, struct InnerL
 
     command->processor = processor;
     processor->activeCommand = (struct WifiDirectCommand *)command;
-    CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=%{public}d", command->type);
     GetWifiDirectNegotiator()->currentProcessor = processor;
+    CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=%d currentProcessor=%s", command->type,  processor->name);
 
     return processor->reuseLink(connectInfo, link);
 }
@@ -148,8 +148,8 @@ static int32_t OpenLink(struct WifiDirectConnectCommand *command)
 
     command->processor = processor;
     processor->activeCommand = (struct WifiDirectCommand *)command;
-    CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=%{public}d", command->type);
     GetWifiDirectNegotiator()->currentProcessor = processor;
+    CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=%d currentProcessor=%s", command->type,  processor->name);
 
     SetWifiDirectStatisticLinkStartTime(connectInfo->requestId);
     return processor->createLink(connectInfo);
