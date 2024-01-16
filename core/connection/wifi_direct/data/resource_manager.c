@@ -487,6 +487,7 @@ static struct ResourceManager g_manager = {
     .getInterfaceInfo = GetInterfaceInfo,
     .notifyInterfaceInfoChange = NotifyInterfaceInfoChange,
     .isInterfaceAvailable = IsInterfaceAvailable,
+    .isStationAndHmlDBAC = IsStationAndHmlDBAC,
     .registerListener = RegisterListener,
     .getAllInterfacesSimpleInfo = GetAllInterfacesSimpleInfo,
     .getAllInterfacesInfo = GetAllInterfacesInfo,
