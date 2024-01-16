@@ -282,9 +282,13 @@ ohos_unittest("HeartBeatUtilsTest") {
 ohos_unittest("HeartBeatCtrlTest") {
   module_out_path = module_output_path
   sources = [
+    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/src/lnn_decision_center_virtual.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_ctrl.c",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/src/lnn_net_ledger_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/net_buscenter/lnn_ip_network_impl_mock.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/distribute_net_ledger_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/test/heartbeat/hb_ctrl_test.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/test/mock/src/hb_ctrl_deps_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/test/mock/src/hb_strategy_mock.cpp",
   ]
 
@@ -323,13 +327,13 @@ ohos_unittest("HeartBeatCtrlTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/decision_center/include",
     "$dsoftbus_root_path/core/bus_center/ipc/include",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/net_buscenter",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
   ]
 
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
-    "$dsoftbus_root_path/core/frame:softbus_server",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
   ]

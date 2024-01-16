@@ -39,7 +39,16 @@ public:
         const AuthVerifyCallback *callback, bool isFastAuth) = 0;
     virtual AuthVerifyCallback *LnnGetReAuthVerifyCallback(void) = 0;
     virtual uint32_t AuthGenRequestId(void) = 0;
-    virtual int32_t LnnSetGearModeBySpecificType(const char *callerId, const GearMode *mode, LnnHeartbeatType type) = 0;
+    virtual int32_t LnnSetGearModeBySpecificType(const char *callerId, const GearMode *mode,
+        LnnHeartbeatType type) = 0;
+    virtual int32_t LnnEnableHeartbeatByType(LnnHeartbeatType type, bool isEnable) = 0;
+    virtual int32_t LnnStopHeartbeatByType(LnnHeartbeatType type) = 0;
+    virtual int32_t LnnHbStrategyInit(void) = 0;
+    virtual int32_t LnnUpdateSendInfoStrategy(LnnHeartbeatUpdateInfoType type) = 0;
+    virtual int32_t LnnStopScreenChangeOfflineTiming(const char *networkId, ConnectionAddrType addrType) = 0;
+    virtual int32_t LnnSetMediumParamBySpecificType(const LnnHeartbeatMediumParam *param) = 0;
+    virtual int32_t LnnStartScreenChangeOfflineTiming(const char *networkId, ConnectionAddrType addrType) = 0;
+    virtual int32_t LnnStopHeartBeatAdvByTypeNow(LnnHeartbeatType registedHbType) = 0;
 };
 class HeartBeatStategyInterfaceMock : public HeartBeatStategyInterface {
 public:
@@ -57,6 +66,14 @@ public:
     MOCK_METHOD0(LnnGetReAuthVerifyCallback, AuthVerifyCallback * (void));
     MOCK_METHOD0(AuthGenRequestId, uint32_t (void));
     MOCK_METHOD3(LnnSetGearModeBySpecificType, int32_t (const char *, const GearMode *, LnnHeartbeatType));
+    MOCK_METHOD2(LnnEnableHeartbeatByType, int32_t (LnnHeartbeatType, bool));
+    MOCK_METHOD1(LnnStopHeartbeatByType, int32_t (LnnHeartbeatType));
+    MOCK_METHOD0(LnnHbStrategyInit, int32_t (void));
+    MOCK_METHOD1(LnnUpdateSendInfoStrategy, int32_t (LnnHeartbeatUpdateInfoType));
+    MOCK_METHOD2(LnnStopScreenChangeOfflineTiming, int32_t (const char *, ConnectionAddrType));
+    MOCK_METHOD1(LnnSetMediumParamBySpecificType, int32_t (const LnnHeartbeatMediumParam *));
+    MOCK_METHOD2(LnnStartScreenChangeOfflineTiming, int32_t (const char *, ConnectionAddrType));
+    MOCK_METHOD1(LnnStopHeartBeatAdvByTypeNow, int32_t (LnnHeartbeatType));
 };
 } // namespace OHOS
-#endif // AUTH_CONNECTION_MOCK_H
+#endif // HEARTBEAT_STRATEGY_H
