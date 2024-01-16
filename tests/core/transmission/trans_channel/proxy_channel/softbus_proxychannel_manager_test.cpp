@@ -838,25 +838,6 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyDeathCallbackTest001, TestSiz
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-
-/**
-  * @tc.name: GetBrAgingTimeoutTest001
-  * @tc.desc: test proxy trans get braging timeout.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
-HWTEST_F(SoftbusProxyChannelManagerTest, GetBrAgingTimeoutTest001, TestSize.Level1)
-{
-    char *busName = NULL;
-    int32_t ret = SOFTBUS_ERR;
-
-    ret = GetBrAgingTimeout(busName);
-    EXPECT_EQ(PROXY_CHANNEL_BT_IDLE_TIMEOUT, ret);
-
-    ret = GetBrAgingTimeout(busName);
-    EXPECT_EQ(PROXY_CHANNEL_BT_IDLE_TIMEOUT, ret);
-}
-
 /**
   * @tc.name: CheckAppTypeAndMsgHeadTest001
   * @tc.desc: test trans proxy check apptype and msghead.

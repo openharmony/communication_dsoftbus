@@ -425,6 +425,14 @@ static void OnQosEvent(int channelId, int eventId, int tvCount, const QosTv *tvL
     g_sessionCb->OnQosEvent(channelId, CHANNEL_TYPE_UDP, eventId, tvCount, tvList);
 }
 
+static int32_t OnIdleTimeoutReset(int32_t sessionId)
+{
+    if ((g_sessionCb == NULL) || (g_sessionCb->OnIdleTimeoutReset == NULL)) {
+        return SOFTBUS_ERR;
+    }
+    return g_sessionCb->OnIdleTimeoutReset(sessionId);
+}
+
 static UdpChannelMgrCb g_udpChannelCb = {
     .OnStreamReceived = OnStreamReceived,
     .OnFileGetSessionId = OnFileGetSessionId,
@@ -432,6 +440,7 @@ static UdpChannelMgrCb g_udpChannelCb = {
     .OnUdpChannelOpened = OnUdpChannelOpened,
     .OnUdpChannelClosed = OnUdpChannelClosed,
     .OnQosEvent = OnQosEvent,
+    .OnIdleTimeoutReset = OnIdleTimeoutReset,
 };
 
 int32_t ClientTransUdpMgrInit(IClientSessionCallBack *callback)

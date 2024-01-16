@@ -130,6 +130,7 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
         TransOnUdpChannelClosed(udpChannel.channelId, SHUTDOWN_REASON_SEND_FILE_ERR);
         return;
     }
+    (void)g_udpChannelMgrCb->OnIdleTimeoutReset(sessionId);
     if (fileListener.fileCallback != NULL) {
         NotifySocketSendResult(sessionId, msgType, msgData, &fileListener);
     } else {
@@ -242,7 +243,7 @@ static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFi
         TransOnUdpChannelClosed(udpChannel.channelId, SHUTDOWN_REASON_RECV_FILE_ERR);
         return;
     }
-
+    (void)g_udpChannelMgrCb->OnIdleTimeoutReset(sessionId);
     if (fileListener.fileCallback != NULL) {
         NotifySocketRecvResult(sessionId, msgType, msgData, &fileListener);
     } else {

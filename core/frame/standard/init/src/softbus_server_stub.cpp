@@ -560,22 +560,40 @@ static void ReadSessionAttrs(MessageParcel &data, SessionAttribute *getAttr)
     }
 }
 
-static void ReadQosInfo(MessageParcel& data, SessionParam &param)
+static bool ReadQosInfo(MessageParcel& data, SessionParam &param)
 {
-    param.isQosLane = data.ReadBool();
+    if (!data.ReadBool(param.isQosLane)) {
+        COMM_LOGE(COMM_SVC, "failed to read isQosLane");
+        return false;
+    }
     if (!param.isQosLane) {
-        return;
+        return true;
     }
 
-    param.qosCount = data.ReadUint32();
-    QosTV *qosInfo = nullptr;
-    if (param.qosCount > 0) {
-        qosInfo = (QosTV*)data.ReadBuffer(sizeof(QosTV) * param.qosCount);
+    if (!data.ReadUint32(param.qosCount)) {
+        COMM_LOGE(COMM_SVC, "failed to read qosCount");
+        return false;
+    }
+    if (param.qosCount == 0) {
+        return true;
     }
 
-    if (param.qosCount <= QOS_TYPE_BUTT && qosInfo != nullptr) {
-        (void)memcpy_s(param.qos, sizeof(QosTV) * QOS_TYPE_BUTT, qosInfo, sizeof(QosTV) * param.qosCount);
+    if (param.qosCount > QOS_TYPE_BUTT) {
+        COMM_LOGE(COMM_SVC, "read invalid qosCount=%{public}" PRIu32, param.qosCount);
+        return false;
     }
+
+    const QosTV *qosInfo = (QosTV *)data.ReadBuffer(sizeof(QosTV) * param.qosCount);
+    if (qosInfo == nullptr) {
+        COMM_LOGE(COMM_SVC, "failed to read qos data");
+        return false;
+    }
+
+    if (memcpy_s(param.qos, sizeof(QosTV) * QOS_TYPE_BUTT, qosInfo, sizeof(QosTV) * param.qosCount) != EOK) {
+        COMM_LOGE(COMM_SVC, "failed memcpy qos info");
+        return false;
+    }
+    return true;
 }
 
 static void ReadSessionInfo(MessageParcel& data, SessionParam &param)
@@ -602,7 +620,10 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
     ReadSessionInfo(data, param);
     ReadSessionAttrs(data, &getAttr);
     param.attr = &getAttr;
-    ReadQosInfo(data, param);
+    if (!ReadQosInfo(data, param)) {
+        COMM_LOGE(COMM_SVC, "failed to read qos info");
+        return SOFTBUS_ERR;
+    }
 
     if (param.sessionName == nullptr || param.peerSessionName == nullptr || param.peerDeviceId == nullptr ||
         param.groupId == nullptr) {

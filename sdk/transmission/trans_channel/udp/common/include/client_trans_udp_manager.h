@@ -34,6 +34,7 @@ typedef struct {
     int32_t (*OnUdpChannelOpened)(int32_t channelId);
     void (*OnUdpChannelClosed)(int32_t channelId, ShutdownReason reason);
     void (*OnQosEvent)(int channelId, int eventId, int tvCount, const QosTv *tvList);
+    int32_t (*OnIdleTimeoutReset)(int32_t sessionId);
 } UdpChannelMgrCb;
 
 typedef struct {
