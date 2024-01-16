@@ -33,7 +33,7 @@ int32_t PublishServiceInner(const char *packageName, const PublishInfo *info, co
 
     int32_t ret = ServerIpcPublishService(packageName, info);
     if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_SDK, "Server PublishService failed, ret = %d", ret);
+        DISC_LOGE(DISC_SDK, "Server PublishService failed, ret=%{public}d", ret);
         return ret;
     }
 
@@ -44,7 +44,7 @@ int32_t UnpublishServiceInner(const char *packageName, int32_t publishId)
 {
     int32_t ret = ServerIpcUnPublishService(packageName, publishId);
     if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_SDK, "Server UnPublishService failed, ret = %d", ret);
+        DISC_LOGE(DISC_SDK, "Server UnPublishService failed, ret=%{public}d", ret);
         return ret;
     }
 
@@ -60,7 +60,7 @@ int32_t StartDiscoveryInner(const char *packageName, const SubscribeInfo *info, 
     g_discInfo->subscribeCb = *cb;
     int32_t ret = ServerIpcStartDiscovery(packageName, info);
     if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_SDK, "Server StartDiscovery failed, ret = %d", ret);
+        DISC_LOGE(DISC_SDK, "Server StartDiscovery failed, ret=%{public}d", ret);
         return ret;
     }
 
@@ -71,7 +71,7 @@ int32_t StopDiscoveryInner(const char *packageName, int32_t subscribeId)
 {
     int32_t ret = ServerIpcStopDiscovery(packageName, subscribeId);
     if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_SDK, "Server StopDiscovery failed, ret = %d", ret);
+        DISC_LOGE(DISC_SDK, "Server StopDiscovery failed, ret=%{public}d", ret);
         return ret;
     }
 
@@ -114,7 +114,7 @@ void DiscClientOnDeviceFound(const DeviceInfo *device)
         DISC_LOGE(DISC_SDK, "invalid parameter:null");
         return;
     }   
-    DISC_LOGI(DISC_SDK, "Sdk OnDeviceFound, capabilityBitmap = %d",
+    DISC_LOGI(DISC_SDK, "Sdk OnDeviceFound, capabilityBitmap=%{public}d",
         device->capabilityBitmap[0]);
     if (g_discInfo == NULL) {
         DISC_LOGE(DISC_SDK, "OnDeviceFound callback failed!");
@@ -125,7 +125,7 @@ void DiscClientOnDeviceFound(const DeviceInfo *device)
 
 void DiscClientOnDiscoverySuccess(int32_t subscribeId)
 {
-    DISC_LOGI(DISC_SDK, "Sdk OnDiscoverySuccess, subscribeId = %d", subscribeId);
+    DISC_LOGI(DISC_SDK, "Sdk OnDiscoverySuccess, subscribeId=%{public}d", subscribeId);
     if (g_discInfo == NULL) {
         DISC_LOGE(DISC_SDK, "OnDiscoverySuccess callback failed!");
         return;
@@ -135,7 +135,7 @@ void DiscClientOnDiscoverySuccess(int32_t subscribeId)
 
 void DiscClientOnDiscoverFailed(int32_t subscribeId, DiscoveryFailReason failReason)
 {
-    DISC_LOGI(DISC_SDK, "Sdk OnDiscoverFailed, subscribeId = %d", subscribeId);
+    DISC_LOGI(DISC_SDK, "Sdk OnDiscoverFailed, subscribeId=%{public}d", subscribeId);
     if (g_discInfo == NULL) {
         DISC_LOGE(DISC_SDK, "OnDiscoverFailed callback failed!");
         return;
@@ -145,7 +145,7 @@ void DiscClientOnDiscoverFailed(int32_t subscribeId, DiscoveryFailReason failRea
 
 void DiscClientOnPublishSuccess(int32_t publishId)
 {
-    DISC_LOGI(DISC_SDK, "Sdk OnPublishSuccess, publishId = %d", publishId);
+    DISC_LOGI(DISC_SDK, "Sdk OnPublishSuccess, publishId=%{public}d", publishId);
     if (g_discInfo == NULL) {
         DISC_LOGE(DISC_SDK, "OnPublishSuccess callback failed!");
         return;
@@ -155,7 +155,7 @@ void DiscClientOnPublishSuccess(int32_t publishId)
 
 void DiscClientOnPublishFail(int32_t publishId, PublishFailReason reason)
 {
-    DISC_LOGI(DISC_SDK, "Sdk OnPublishFail, publishId = %d", publishId);
+    DISC_LOGI(DISC_SDK, "Sdk OnPublishFail, publishId=%{public}d", publishId);
     if (g_discInfo == NULL) {
         DISC_LOGE(DISC_SDK, "OnPublishFail callback failed!");
         return;

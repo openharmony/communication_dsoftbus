@@ -41,7 +41,7 @@ LnnLanesObject *LnnRequestLanesObject(const char *networkId, int32_t pid, LnnLan
 {
     if (prop < LNN_MESSAGE_LANE || prop >= LNN_LANE_PROPERTY_BUTT || networkId == NULL ||
         laneNum == 0 || laneNum > LNN_REQUEST_MAX_LANE_NUM) {
-        LNN_LOGW(LNN_LANE, "param error, prop=%d, laneNum=%u", prop, laneNum);
+        LNN_LOGW(LNN_LANE, "param error, prop=%{public}d, laneNum=%{public}u", prop, laneNum);
         return NULL;
     }
     uint32_t memLen = sizeof(LnnLanesObject) + sizeof(int32_t) * laneNum;
@@ -57,7 +57,7 @@ LnnLanesObject *LnnRequestLanesObject(const char *networkId, int32_t pid, LnnLan
     for (uint32_t i = 0; i < laneNum; i++) {
         int32_t laneId = LnnGetRightLane(networkId, pid, prop, linkList);
         if (laneId < 0) {
-            LNN_LOGE(LNN_LANE, "LnnGetRightLane error. laneId=%d", laneId);
+            LNN_LOGE(LNN_LANE, "LnnGetRightLane error. laneId=%{public}d", laneId);
             lanesObject->laneNum = i;
             LnnReleaseLanesObject(lanesObject);
             return NULL;
@@ -83,7 +83,7 @@ void LnnReleaseLanesObject(LnnLanesObject *lanesObject)
 int32_t LnnGetLaneId(LnnLanesObject *lanesObject, uint32_t num)
 {
     if (lanesObject == NULL || num >= lanesObject->laneNum) {
-        LNN_LOGW(LNN_LANE, "param error. num=%u", num);
+        LNN_LOGW(LNN_LANE, "param error. num=%{public}u", num);
         return SOFTBUS_ERR;
     }
     return lanesObject->laneId[num];

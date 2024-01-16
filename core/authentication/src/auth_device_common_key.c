@@ -391,7 +391,7 @@ void AuthRemoveDeviceKey(const char *udidHash, int32_t keyType)
     }
     ret = LnnMapErase(&g_deviceKeyMap, (const char *)keyStr);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_KEY, "delete item fail ret=%d, keyStr=%s", ret, keyStr);
+        AUTH_LOGE(AUTH_KEY, "delete item fail ret=%{public}d, keyStr=%{public}s", ret, keyStr);
         KeyUnlock();
         return;
     }
@@ -407,7 +407,7 @@ void AuthRemoveDeviceKeyByUdid(const char *udidOrHash)
     }
     char *anonyUdid = NULL;
     Anonymize(udidOrHash, &anonyUdid);
-    AUTH_LOGE(AUTH_KEY, "remove device key, udid=%s", anonyUdid);
+    AUTH_LOGE(AUTH_KEY, "remove device key, udid=%{public}s", anonyUdid);
     AnonymizeFree(anonyUdid);
     bool isDeviceKeyMapChange = false;
     if (KeyLock() != SOFTBUS_OK) {
@@ -477,7 +477,8 @@ int32_t AuthFindDeviceKey(const char *udidHash, int32_t keyType, AuthDeviceKeyIn
         return SOFTBUS_ERR;
     }
     if (SoftBusGetSysTimeMs() > data->endTime) {
-        AUTH_LOGE(AUTH_KEY, "deviceKey has expired, force delete. currTime=%" PRId64", deviceKeyEndTime=%" PRId64".",
+        AUTH_LOGE(AUTH_KEY,
+            "deviceKey has expired, force delete. currTime=%{public}" PRId64 ", deviceKeyEndTime=%{public}" PRId64 "",
             SoftBusGetSysTimeMs(), data->endTime);
         ret = LnnMapErase(&g_deviceKeyMap, (const char *)keyStr);
         if (ret != SOFTBUS_OK) {
@@ -508,7 +509,7 @@ static bool AuthParseDeviceKey(const char *deviceKey)
         cJSON_Delete(json);
         return false;
     }
-    AUTH_LOGD(AUTH_KEY, "jsonArray size:%d", arraySize);
+    AUTH_LOGD(AUTH_KEY, "jsonArray size=%{public}d", arraySize);
     AuthDeviceCommonKey oldDeviceKey;
     for (int32_t i = 0; i < arraySize; i++) {
         cJSON *item = cJSON_GetArrayItem(json, i);
@@ -559,7 +560,7 @@ void AuthLoadDeviceKey(void)
         return;
     }
     if (deviceKey == NULL) {
-        AUTH_LOGE(AUTH_KEY, "load deviceKey fail,deviceKey is nullptr");
+        AUTH_LOGE(AUTH_KEY, "load deviceKey fail, deviceKey is nullptr");
         return;
     }
     if (deviceKeyLen == 0 || strlen(deviceKey) != deviceKeyLen) {

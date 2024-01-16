@@ -49,7 +49,8 @@ static bool SetDataSource(struct WifiDirectProtocol *base, const uint8_t *data, 
 {
     struct WifiDirectTlvProtocol *self = (struct WifiDirectTlvProtocol *)base;
     CONN_CHECK_AND_RETURN_RET_LOGW(data, false, CONN_WIFI_DIRECT, "data is null");
-    CONN_CHECK_AND_RETURN_RET_LOGW(size > 0 && size <= CAPACITY_MAX, false, CONN_WIFI_DIRECT, "size=%u invalid", size);
+    CONN_CHECK_AND_RETURN_RET_LOGW(size > 0 && size <= CAPACITY_MAX, false, CONN_WIFI_DIRECT,
+        "size invalid. size=%{public}zu", size);
 
     if (self->data != NULL) {
         SoftBusFree(self->data);
@@ -100,7 +101,7 @@ static bool ReadData(struct WifiDirectProtocol *base, struct InfoContainerKeyPro
     *size = GetWifiDirectUtils()->bytesToInt(self->data + self->readPos, self->format.lengthSize);
     self->readPos += self->format.lengthSize;
     if (self->readPos >= self->size || self->size - self->readPos < *size) {
-        CONN_LOGW(CONN_WIFI_DIRECT, "readPos=%zu is invalid", self->readPos);
+        CONN_LOGW(CONN_WIFI_DIRECT, "readPos is invalid. readPos=%{public}zu", self->readPos);
         return false;
     }
     *data = self->data + self->readPos;

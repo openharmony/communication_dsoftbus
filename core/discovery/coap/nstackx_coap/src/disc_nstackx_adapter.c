@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,11 @@
 
 #include "disc_nstackx_adapter.h"
 
+#include <locale.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <wchar.h>
 
 #include "nstackx.h"
 
@@ -39,6 +42,8 @@
 #define DISC_FREQ_COUNT_MASK   0xFFFF
 #define DISC_FREQ_DURATION_BIT 16
 #define DISC_USECOND           1000
+#define MULTI_BYTE_CHAR_LEN    8
+#define MAX_WIDE_STR_LEN       128
 
 #define NSTACKX_LOCAL_DEV_INFO "NstackxLocalDevInfo"
 
@@ -55,7 +60,7 @@ static int32_t FillRspSettings(NSTACKX_ResponseSettings *settings, const DeviceI
     char localNetifName[NET_IF_NAME_LEN] = {0};
     int32_t ret = LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, localNetifName, sizeof(localNetifName));
     if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_COAP, "get local network name from LNN failed, ret=%d", ret);
+        DISC_LOGE(DISC_COAP, "get local network name from LNN failed, ret=%{public}d", ret);
         goto EXIT;
     }
     if (strcpy_s(settings->localNetworkName, sizeof(settings->localNetworkName), localNetifName) != EOK) {
@@ -85,10 +90,10 @@ int32_t DiscCoapSendRsp(const DeviceInfo *deviceInfo, uint8_t bType)
         return SOFTBUS_ERR;
     }
 
-    DISC_LOGI(DISC_COAP, "send rsp with bType: %u", bType);
+    DISC_LOGI(DISC_COAP, "send rsp with bType=%{public}u", bType);
     int32_t ret = NSTACKX_SendDiscoveryRsp(settings);
     if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_COAP, "disc send response failed, ret=%d", ret);
+        DISC_LOGE(DISC_COAP, "disc send response failed, ret=%{public}d", ret);
     }
     SoftBusFree(settings->businessData);
     settings->businessData = NULL;
@@ -147,7 +152,7 @@ static int32_t ParseDiscDevInfo(const NSTACKX_DeviceInfo *nstackxDevInfo, Device
 static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceCount)
 {
     DISC_CHECK_AND_RETURN_LOGE(deviceList != NULL && deviceCount != 0, DISC_COAP, "invalid param.");
-    DISC_LOGI(DISC_COAP, "Disc device found, count=%u", deviceCount);
+    DISC_LOGI(DISC_COAP, "Disc device found, count=%{public}u", deviceCount);
     DeviceInfo *discDeviceInfo = (DeviceInfo *)SoftBusCalloc(sizeof(DeviceInfo));
     DISC_CHECK_AND_RETURN_LOGE(discDeviceInfo != NULL, DISC_COAP, "malloc device info failed.");
 
@@ -156,7 +161,8 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
         DISC_CHECK_AND_RETURN_LOGE(nstackxDeviceInfo, DISC_COAP, "device count from nstackx is invalid");
 
         if ((nstackxDeviceInfo->update & 0x1) == 0) {
-            DISC_LOGI(DISC_COAP, "duplicate device(%s) do not need report", nstackxDeviceInfo->deviceName);
+            DISC_LOGI(DISC_COAP, "duplicate device do not need report. deviceName=%{public}s",
+                nstackxDeviceInfo->deviceName);
             continue;
         }
         (void)memset_s(discDeviceInfo, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
@@ -196,7 +202,8 @@ int32_t DiscCoapRegisterCapability(uint32_t capabilityBitmapNum, uint32_t capabi
     DISC_CHECK_AND_RETURN_RET_LOGE(capabilityBitmapNum != 0, SOFTBUS_INVALID_PARAM,
         DISC_COAP, "capabilityBitmapNum=0");
 
-    if (NSTACKX_RegisterCapability(capabilityBitmapNum, capabilityBitmap) != 0) {
+    if (NSTACKX_RegisterCapability(capabilityBitmapNum, capabilityBitmap) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_COAP, "NSTACKX Register Capability failed");
         return SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL;
     }
     return SOFTBUS_OK;
@@ -208,6 +215,7 @@ int32_t DiscCoapSetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capab
         DISC_COAP, "capabilityBitmapNum=0");
 
     if (NSTACKX_SetFilterCapability(capabilityBitmapNum, capabilityBitmap) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_COAP, "NSTACKX SetFilter Capability failed");
         SoftbusReportDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP, SOFTBUS_HISYSEVT_DISCOVER_COAP_SET_FILTER_CAP_FAIL);
         return SOFTBUS_DISCOVER_COAP_SET_FILTER_CAP_FAIL;
     }
@@ -222,7 +230,7 @@ int32_t DiscCoapRegisterServiceData(const unsigned char *capabilityData, uint32_
     int32_t authPort = 0;
     int32_t ret = LnnGetLocalNumInfo(NUM_KEY_AUTH_PORT, &authPort);
     if (ret != SOFTBUS_OK) {
-        DISC_LOGW(DISC_COAP, "get auth port from lnn failed: %d", ret);
+        DISC_LOGW(DISC_COAP, "get auth port from lnn failed. ret=%{public}d", ret);
     }
 
     char serviceData[NSTACKX_MAX_SERVICE_DATA_LEN] = {0};
@@ -232,7 +240,8 @@ int32_t DiscCoapRegisterServiceData(const unsigned char *capabilityData, uint32_
     }
     // capabilityData can be NULL, it will be check in this func
     ret = DiscCoapFillServiceData(capability, (const char *)capabilityData, dataLen, g_capabilityData);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, DISC_COAP, "fill service data failed: %d", ret);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, DISC_COAP,
+        "fill service data failed. ret=%{public}d", ret);
 
     if (strlen(g_capabilityData) != 0 &&
         sprintf_s(serviceData, NSTACKX_MAX_SERVICE_DATA_LEN, "%s%s", serviceData, g_capabilityData) < 0) {
@@ -242,7 +251,7 @@ int32_t DiscCoapRegisterServiceData(const unsigned char *capabilityData, uint32_
 
     ret = NSTACKX_RegisterServiceData(serviceData);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, DISC_COAP,
-        "register service data to nstackx failed: %d", ret);
+        "register service data to nstackx failed. ret=%{public}d", ret);
     return SOFTBUS_OK;
 }
 
@@ -257,12 +266,12 @@ int32_t DiscCoapRegisterCapabilityData(const unsigned char *capabilityData, uint
     int32_t ret = DiscCoapAssembleCapData(capability, (const char *)capabilityData, dataLen, registerCapaData,
         DISC_MAX_CUST_DATA_LEN);
     if (ret == SOFTBUS_FUNC_NOT_SUPPORT) {
-        DISC_LOGI(DISC_COAP, "the capability(%u) not support yet", capability);
+        DISC_LOGI(DISC_COAP, "the capability not support yet. capability=%{public}u", capability);
         SoftBusFree(registerCapaData);
         return SOFTBUS_OK;
     }
     if (ret != SOFTBUS_OK) {
-        DISC_LOGE(DISC_COAP, "assemble the data of capability(%u) failed", capability);
+        DISC_LOGE(DISC_COAP, "assemble the data of capability failed. capability=%{public}u", capability);
         SoftBusFree(registerCapaData);
         return SOFTBUS_ERR;
     }
@@ -272,7 +281,7 @@ int32_t DiscCoapRegisterCapabilityData(const unsigned char *capabilityData, uint
         SoftBusFree(registerCapaData);
         return SOFTBUS_ERR;
     }
-    DISC_LOGI(DISC_COAP, "register extend service data to nstackx succ: %s", registerCapaData);
+    DISC_LOGI(DISC_COAP, "register extend service data to nstackx succ. registerCapaData=%{public}s", registerCapaData);
     SoftBusFree(registerCapaData);
     return SOFTBUS_OK;
 }
@@ -320,7 +329,7 @@ int32_t DiscCoapStartDiscovery(DiscCoapOption *option)
     DISC_CHECK_AND_RETURN_RET_LOGE(option->mode >= ACTIVE_PUBLISH && option->mode <= ACTIVE_DISCOVERY,
         SOFTBUS_INVALID_PARAM, DISC_COAP, "option->mode is invalid");
     DISC_CHECK_AND_RETURN_RET_LOGE(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
-        DISC_COAP, "invalid freq: %d", option->freq);
+        DISC_COAP, "invalid freq. freq=%{public}d", option->freq);
 
     NSTACKX_DiscoverySettings *discSet = (NSTACKX_DiscoverySettings *)SoftBusCalloc(sizeof(NSTACKX_DiscoverySettings));
     DISC_CHECK_AND_RETURN_RET_LOGE(discSet != NULL, SOFTBUS_MEM_ERR, DISC_COAP, "malloc disc settings failed");
@@ -397,9 +406,7 @@ static int32_t SetLocalDeviceInfo(void)
     }
     g_localDeviceInfo->deviceType = (uint32_t)deviceType;
     g_localDeviceInfo->businessType = (uint8_t)NSTACKX_BUSINESS_TYPE_NULL;
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, g_localDeviceInfo->name, sizeof(g_localDeviceInfo->name)) !=
-            SOFTBUS_OK ||
-        LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, g_localDeviceInfo->localIfInfo[0].networkIpAddr,
+    if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, g_localDeviceInfo->localIfInfo[0].networkIpAddr,
             sizeof(g_localDeviceInfo->localIfInfo[0].networkIpAddr)) != SOFTBUS_OK ||
         LnnGetLocalStrInfo(STRING_KEY_HICE_VERSION, g_localDeviceInfo->version, sizeof(g_localDeviceInfo->version)) !=
             SOFTBUS_OK ||
@@ -416,7 +423,7 @@ static int32_t SetLocalDeviceInfo(void)
 void DiscCoapUpdateLocalIp(LinkStatus status)
 {
     DISC_CHECK_AND_RETURN_LOGE(status == LINK_STATUS_UP || status == LINK_STATUS_DOWN, DISC_COAP,
-        "invlaid link status, status=%d.", status);
+        "invlaid link status, status=%{public}d.", status);
     
     if (status == LINK_STATUS_DOWN) {
         if (strcpy_s(g_localDeviceInfo->localIfInfo[0].networkIpAddr,
@@ -432,21 +439,89 @@ void DiscCoapUpdateLocalIp(LinkStatus status)
     int64_t accountId = 0;
     int32_t ret = LnnGetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, &accountId);
     DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "get local account failed");
-    DISC_LOGI(DISC_COAP, "link status[%s], register local device info %s account",
+    DISC_LOGI(DISC_COAP, "register local device info. status=%{public}s, accountInfo=%{public}s",
         status == LINK_STATUS_UP ? "up" : "down", accountId == 0 ? "without" : "with");
     ret = NSTACKX_RegisterDeviceAn(g_localDeviceInfo, (uint64_t)accountId);
     DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "register local device info to dfinder failed");
+    DiscCoapUpdateDevName();
+}
+
+static int32_t SetLocale(char **localeBefore)
+{
+    *localeBefore = setlocale(LC_CTYPE, NULL);
+    if (*localeBefore == NULL) {
+        DISC_LOGW(DISC_COAP, "get locale failed");
+    }
+
+    char *localeAfter = setlocale(LC_CTYPE, "C.UTF-8");
+    return (localeAfter != NULL) ? SOFTBUS_OK : SOFTBUS_ERR;
+}
+
+static void RestoreLocale(const char *localeBefore)
+{
+    if (setlocale(LC_CTYPE, localeBefore) == NULL) {
+        DISC_LOGW(DISC_COAP, "restore locale failed");
+    }
+}
+
+static int32_t CalculateMbsTruncateSize(const char *multiByteStr, uint32_t capacity, uint32_t *truncatedSize)
+{
+    size_t multiByteStrLen = strlen(multiByteStr);
+    if (multiByteStrLen == 0) {
+        *truncatedSize = 0;
+        return SOFTBUS_OK;
+    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(multiByteStrLen <= MAX_WIDE_STR_LEN, SOFTBUS_INVALID_PARAM, DISC_COAP,
+        "multi byte str too long: %zu", multiByteStrLen);
+
+    char *localeBefore = NULL;
+    int32_t ret = SetLocale(&localeBefore);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, DISC_COAP, "set locale failed");
+
+    // convert multi byte str to wide str
+    wchar_t wideStr[MAX_WIDE_STR_LEN] = {0};
+    size_t numConverted = mbstowcs(wideStr, multiByteStr, multiByteStrLen);
+    if (numConverted <= 0) {
+        DISC_LOGE(DISC_COAP, "mbstowcs failed");
+        RestoreLocale(localeBefore);
+        return SOFTBUS_ERR;
+    }
+
+    uint32_t truncateTotal = 0;
+    int32_t truncateIndex = numConverted - 1;
+    char multiByteChar[MULTI_BYTE_CHAR_LEN] = {0};
+    while (capacity < multiByteStrLen - truncateTotal && truncateIndex >= 0) {
+        int32_t truncateCharLen = wctomb(multiByteChar, wideStr[truncateIndex]);
+        if (truncateCharLen <= 0) {
+            DISC_LOGE(DISC_COAP, "wctomb failed");
+            RestoreLocale(localeBefore);
+            return SOFTBUS_ERR;
+        }
+        truncateTotal += (uint32_t)truncateCharLen;
+        truncateIndex--;
+    }
+
+    *truncatedSize = (multiByteStrLen >= truncateTotal) ? (multiByteStrLen - truncateTotal) : 0;
+    RestoreLocale(localeBefore);
+    return SOFTBUS_OK;
 }
 
 void DiscCoapUpdateDevName(void)
 {
-    char localDevName[NSTACKX_MAX_DEVICE_NAME_LEN] = {0};
+    char localDevName[DEVICE_NAME_BUF_LEN] = {0};
     int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, localDevName, sizeof(localDevName));
-    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "get local device name failed, ret=%d.", ret);
+    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "get local device name failed, ret=%{public}d.", ret);
 
-    DISC_LOGI(DISC_COAP, "register new local device name: %s", localDevName);
+    uint32_t truncateLen = 0;
+    if (CalculateMbsTruncateSize((const char *)localDevName, NSTACKX_MAX_DEVICE_NAME_LEN - 1, &truncateLen)
+        != SOFTBUS_OK) {
+        DISC_LOGE(DISC_COAP, "truncate device name failed");
+        return;
+    }
+    localDevName[truncateLen] = '\0';
+    DISC_LOGI(DISC_COAP, "register new local device name. localDevName=%{public}s", localDevName);
     ret = NSTACKX_RegisterDeviceName(localDevName);
-    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "register local device name failed, ret=%d.", ret);
+    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "register local device name failed, ret=%{public}d.", ret);
 }
 
 void DiscCoapUpdateAccount(void)
@@ -503,7 +578,6 @@ int32_t DiscNstackxInit(void)
         return SOFTBUS_DISCOVER_COAP_INIT_FAIL;
     }
 
-    NSTACKX_DFinderRegisterLog(NstackxLogInnerImpl);
     if (NSTACKX_Init(&g_nstackxCallBack) != SOFTBUS_OK) {
         DeinitLocalInfo();
         return SOFTBUS_DISCOVER_COAP_INIT_FAIL;

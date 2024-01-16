@@ -94,7 +94,7 @@ bool TransSessionServerIsExist(const char *sessionName)
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
         if (strcmp(pos->sessionName, sessionName) == 0) {
             Anonymize(sessionName, &tmpName);
-            TRANS_LOGW(TRANS_CTRL, "session server sessionName=%s is exist", tmpName);
+            TRANS_LOGW(TRANS_CTRL, "session server is exist. sessionName=%{public}s", tmpName);
             (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
             AnonymizeFree(tmpName);
             return true;
@@ -115,7 +115,7 @@ static void ShowSessionServer(void)
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
         Anonymize(pos->sessionName, &tmpName);
         TRANS_LOGI(TRANS_CTRL,
-            "count=%d session server sessionName=%s is exist", count, tmpName);
+            "session server is exist. count=%{public}d, sessionName=%{public}s", count, tmpName);
         AnonymizeFree(tmpName);
         count++;
     }
@@ -149,14 +149,14 @@ int32_t TransSessionServerAddItem(SessionServer *newNode)
         if (strcmp(pos->sessionName, newNode->sessionName) == 0) {
             Anonymize(newNode->sessionName, &tmpName);
             if ((pos->uid == newNode->uid) && (pos->pid == newNode->pid)) {
-                TRANS_LOGI(TRANS_CTRL, "session server sessionName=%s is exist",
+                TRANS_LOGI(TRANS_CTRL, "session server is exist, sessionName=%{public}s",
                     tmpName);
                 (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
                 AnonymizeFree(tmpName);
                 return SOFTBUS_SERVER_NAME_REPEATED;
             } else {
                 TRANS_LOGI(TRANS_CTRL,
-                    "sessionName=%s has been used by other processes", tmpName);
+                    "sessionName has been used by other processes. sessionName=%{public}s", tmpName);
                 (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
                 AnonymizeFree(tmpName);
                 return SOFTBUS_SERVER_NAME_USED;
@@ -197,7 +197,7 @@ int32_t TransSessionServerDelItem(const char *sessionName)
         g_sessionServerList->cnt--;
         char *tmpName = NULL;
         Anonymize(sessionName, &tmpName);
-        TRANS_LOGI(TRANS_CTRL, "destroy session server sessionName=%s", tmpName);
+        TRANS_LOGI(TRANS_CTRL, "destroy session server sessionName=%{public}s", tmpName);
         AnonymizeFree(tmpName);
     }
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
@@ -225,7 +225,7 @@ void TransDelItemByPackageName(const char *pkgName, int32_t pid)
         }
     }
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
-    TRANS_LOGI(TRANS_CTRL, "del pkgName=%s", pkgName);
+    TRANS_LOGI(TRANS_CTRL, "del pkgName=%{public}s", pkgName);
 }
 
 int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uint16_t len)
@@ -250,7 +250,7 @@ int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uin
             int32_t ret = strcpy_s(pkgName, len, pos->pkgName);
             (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
             if (ret != EOK) {
-                TRANS_LOGE(TRANS_CTRL, "strcpy_s error ret, ret=%d", ret);
+                TRANS_LOGE(TRANS_CTRL, "strcpy_s error ret, ret=%{public}d", ret);
                 return SOFTBUS_ERR;
             }
             return SOFTBUS_OK;
@@ -260,7 +260,7 @@ int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uin
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
     char *tmpName = NULL;
     Anonymize(sessionName, &tmpName);
-    TRANS_LOGE(TRANS_CTRL, "not found sessionName=%s.", tmpName);
+    TRANS_LOGE(TRANS_CTRL, "not found sessionName=%{public}s.", tmpName);
     AnonymizeFree(tmpName);
     return SOFTBUS_ERR;
 }
@@ -288,7 +288,7 @@ int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
         if (strcmp(pos->sessionName, sessionName) == 0) {
             *uid = pos->uid;
             *pid = pos->pid;
-            TRANS_LOGI(TRANS_CTRL, "sessionName=%s, uid=%d, pid=%d",
+            TRANS_LOGI(TRANS_CTRL, "sessionName=%{public}s, uid=%{public}d, pid=%{public}d",
                 tmpName, pos->uid, pos->pid);
             (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
             AnonymizeFree(tmpName);
@@ -297,7 +297,7 @@ int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
     }
 
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
-    TRANS_LOGE(TRANS_CTRL, "err: sessionName=%s", tmpName);
+    TRANS_LOGE(TRANS_CTRL, "err: sessionName=%{public}s", tmpName);
     AnonymizeFree(tmpName);
     return SOFTBUS_TRANS_GET_PID_FAILED;
 }
@@ -347,7 +347,7 @@ void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid, 
     }
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
-    TRANS_LOGI(TRANS_CTRL, "routeType=%d, networkId=%s", routeType, anonyNetworkId);
+    TRANS_LOGI(TRANS_CTRL, "routeType=%{public}d, networkId=%{public}s", routeType, anonyNetworkId);
     AnonymizeFree(anonyNetworkId);
 
     ListNode sessionServerList = {0};

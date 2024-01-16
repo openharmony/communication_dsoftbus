@@ -194,7 +194,8 @@ static bool Unmarshalling(struct NegotiateMessage *self, struct WifiDirectProtoc
         bool ret = false;
         enum NegotiateMessageKey key = GetKeyFromKeyProperty(&keyProperty);
         if (key == NM_KEY_MAX) {
-            CONN_LOGW(CONN_WIFI_DIRECT, "not support key, tag=%d context=%s", keyProperty.tag, keyProperty.content);
+            CONN_LOGW(CONN_WIFI_DIRECT, "not support key, tag=%{public}d, context=%{public}s", keyProperty.tag,
+                keyProperty.content);
             continue;
         }
 
@@ -238,7 +239,7 @@ static bool Unmarshalling(struct NegotiateMessage *self, struct WifiDirectProtoc
             default:
                 continue;
         }
-        CONN_CHECK_AND_RETURN_RET_LOGW(ret, false, CONN_WIFI_DIRECT, "unmarshalling failed key=%d", key);
+        CONN_CHECK_AND_RETURN_RET_LOGW(ret, false, CONN_WIFI_DIRECT, "unmarshalling failed key=%{public}d", key);
     }
 
     return true;

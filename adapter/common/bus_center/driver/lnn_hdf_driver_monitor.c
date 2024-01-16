@@ -61,19 +61,20 @@ static void ProcessLwipEvent(struct HdfSBuf *data)
     }
 
     if (eventData == NULL || eventDataSize != sizeof(LwipMonitorReportInfo)) {
-        LNN_LOGE(LNN_EVENT, "receive lwip monitor not correct size: %d<->%d", eventDataSize,
-            sizeof(LwipMonitorReportInfo));
+        LNN_LOGE(LNN_EVENT,
+            "receive lwip monitor not correct size: eventDataSize=%{public}d, LwipMonitorReportInfo=%{public}d",
+            eventDataSize, sizeof(LwipMonitorReportInfo));
         return;
     }
     const LwipMonitorReportInfo *info = (const LwipMonitorReportInfo *)eventData;
 
-    LNN_LOGI(LNN_EVENT, "receive lwip monitor event=%d for ifName=%s", info->event, info->ifName);
+    LNN_LOGI(LNN_EVENT, "receive lwip monitor event=%{public}d, ifName=%{public}s", info->event, info->ifName);
     if (LnnGetNetIfTypeByName(info->ifName, &type) != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "LnnGetNetIfTypeByName error");
         return;
     }
     if (type == LNN_NETIF_TYPE_ETH || type == LNN_NETIF_TYPE_WLAN) {
-        LNN_LOGI(LNN_EVENT, "network addr changed, netifType=%d", type);
+        LNN_LOGI(LNN_EVENT, "network addr changed, netifType=%{public}d", type);
         LnnNotifyAddressChangedEvent(info->ifName);
     }
 }
@@ -88,7 +89,7 @@ static int32_t OnReceiveDriverEvent(
 {
     (void)listener;
     (void)service;
-    LNN_LOGI(LNN_EVENT, "receive hdf moudle=%d event", moduleId);
+    LNN_LOGI(LNN_EVENT, "receive hdf event, moudle=%{public}d", moduleId);
     if (moduleId >= LNN_DRIVER_MODULE_MAX_INDEX) {
         return SOFTBUS_OK;
     }
@@ -116,13 +117,13 @@ static void DelayInitFunction(void *para)
     }
     g_driverCtrl.softbusService = HdfIoServiceBind(DRIVER_SERVICE_NAME);
     if (g_driverCtrl.softbusService == NULL) {
-        LNN_LOGE(LNN_INIT, "get hdf dsoftbus service fail:%d", retry);
+        LNN_LOGE(LNN_INIT, "get hdf dsoftbus service fail=%{public}d", retry);
         LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), DelayInitFunction, NULL, BIND_HDF_DELAY);
         ++retry;
         return;
     }
     rc = HdfDeviceRegisterEventListener(g_driverCtrl.softbusService, &g_driverCtrl.eventListener);
-    LNN_LOGI(LNN_INIT, "init hdf driver monitor=%d result=%d", retry, rc);
+    LNN_LOGI(LNN_INIT, "init hdf driver monitor=%{public}d, result=%{public}d", retry, rc);
     if (rc != SOFTBUS_OK) {
         HdfIoServiceRecycle(g_driverCtrl.softbusService);
         g_driverCtrl.softbusService = NULL;

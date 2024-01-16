@@ -27,6 +27,7 @@
 #include "data/link_manager.h"
 #include "data/resource_manager.h"
 #include "conn_event.h"
+#include "wifi_direct_statistic.h"
 
 static bool IsNeedRetry(struct WifiDirectCommand *base, int32_t reason)
 {
@@ -38,20 +39,37 @@ static bool IsNeedRetry(struct WifiDirectCommand *base, int32_t reason)
     return GetWifiDirectNegotiator()->isRetryErrorCode(reason);
 }
 
+static enum WifiDirectLinkType GetLinkType(enum WifiDirectConnectType connectType)
+{
+    switch (connectType) {
+        case WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P:
+            return WIFI_DIRECT_LINK_TYPE_P2P;
+        case WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML:
+        case WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML:
+        case WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML:
+            return WIFI_DIRECT_LINK_TYPE_HML;
+        default:
+            CONN_LOGE(CONN_WIFI_DIRECT, "connectType invalid. connectType=%{public}d", connectType);
+            return WIFI_DIRECT_LINK_TYPE_INVALID;
+    }
+}
+
 static struct InnerLink *GetReuseLink(struct WifiDirectConnectCommand *command)
 {
     struct WifiDirectConnectInfo *connectInfo = &command->connectInfo;
     char remoteUuid[UUID_BUF_LEN] = {0};
     int32_t ret = LnnGetRemoteStrInfo(connectInfo->remoteNetworkId, STRING_KEY_UUID, remoteUuid, sizeof(remoteUuid));
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, NULL, CONN_WIFI_DIRECT, "get remote uuid failed");
-    struct InnerLink *link = GetLinkManager()->getLinkByTypeAndUuid(WIFI_DIRECT_LINK_TYPE_HML, remoteUuid);
+
+    enum WifiDirectLinkType linkType = GetLinkType(connectInfo->connectType);
+    struct InnerLink *link = GetLinkManager()->getLinkByTypeAndUuid(linkType, remoteUuid);
     if (link == NULL) {
         link = GetLinkManager()->getLinkByTypeAndUuid(WIFI_DIRECT_LINK_TYPE_P2P, remoteUuid);
     }
     CONN_CHECK_AND_RETURN_RET_LOGW(link != NULL, NULL, CONN_WIFI_DIRECT, "link is null");
     enum InnerLinkState state = link->getInt(link, IL_KEY_STATE, INNER_LINK_STATE_DISCONNECTED);
     CONN_CHECK_AND_RETURN_RET_LOGW(state == INNER_LINK_STATE_CONNECTED, NULL, CONN_WIFI_DIRECT,
-                                   "state=%d not connected", state);
+                                   "state not connected. state=%{public}d", state);
     struct WifiDirectIpv4Info *ipv4 = link->getRawData(link, IL_KEY_REMOTE_IPV4, NULL, NULL);
     CONN_CHECK_AND_RETURN_RET_LOGW(ipv4 != NULL, NULL, CONN_WIFI_DIRECT, "ipv4 is null");
     return link;
@@ -61,7 +79,7 @@ static int32_t ReuseLink(struct WifiDirectConnectCommand *command, struct InnerL
 {
     struct WifiDirectConnectInfo *connectInfo = &command->connectInfo;
     bool isBeingUsedByLocal = link->getBoolean(link, IL_KEY_IS_BEING_USED_BY_LOCAL, false);
-    CONN_LOGI(CONN_WIFI_DIRECT, "isBeingUsedByLocal=%d", isBeingUsedByLocal);
+    CONN_LOGI(CONN_WIFI_DIRECT, "isBeingUsedByLocal=%{public}d", isBeingUsedByLocal);
 
     if (isBeingUsedByLocal) {
         CONN_LOGI(CONN_WIFI_DIRECT, "reuse success");
@@ -79,10 +97,36 @@ static int32_t ReuseLink(struct WifiDirectConnectCommand *command, struct InnerL
 
     command->processor = processor;
     processor->activeCommand = (struct WifiDirectCommand *)command;
-    CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=%d", command->type);
     GetWifiDirectNegotiator()->currentProcessor = processor;
+    CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=%d currentProcessor=%s", command->type,  processor->name);
 
     return processor->reuseLink(connectInfo, link);
+}
+
+static void SetWifiDirectStatisticType(struct WifiDirectConnectInfo *connectInfo)
+{
+    if (connectInfo == NULL || connectInfo->negoChannel == NULL) {
+        return;
+    }
+    if (connectInfo->connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P) {
+        SetWifiDirectStatisticLinkType(connectInfo->requestId, STATISTIC_P2P);
+    } else if (connectInfo->connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML) {
+        SetWifiDirectStatisticLinkType(connectInfo->requestId, STATISTIC_HML);
+    } else if (connectInfo->connectType == WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML) {
+        SetWifiDirectStatisticLinkType(connectInfo->requestId, STATISTIC_TRIGGER_HML);
+        SetWifiDirectStatisticBootLinkType(connectInfo->requestId, STATISTIC_NONE);
+        return;
+    } else if (connectInfo->connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML) {
+        SetWifiDirectStatisticLinkType(connectInfo->requestId, STATISTIC_TRIGGER_HML);
+    }
+    enum WifiDirectNegotiateChannelType type = connectInfo->negoChannel->getMediumType(connectInfo->negoChannel);
+    if (type == NEGOTIATE_WIFI) {
+        SetWifiDirectStatisticBootLinkType(connectInfo->requestId, STATISTIC_WLAN);
+    } else if (type == NEGOTIATE_BLE) {
+        SetWifiDirectStatisticBootLinkType(connectInfo->requestId, STATISTIC_BLE);
+    } else if (type == NEGOTIATE_BR) {
+        SetWifiDirectStatisticBootLinkType(connectInfo->requestId, STATISTIC_BR);
+    }
 }
 
 static int32_t OpenLink(struct WifiDirectConnectCommand *command)
@@ -91,9 +135,11 @@ static int32_t OpenLink(struct WifiDirectConnectCommand *command)
     struct InnerLink *link = GetReuseLink(command);
     if (link != NULL) {
         CONN_LOGI(CONN_WIFI_DIRECT, "reuse link");
+        SetWifiDirectStatisticReuse(connectInfo->requestId);
         return ReuseLink(command, link);
     }
 
+    SetWifiDirectStatisticType(connectInfo);
     struct WifiDirectDecisionCenter *decisionCenter = GetWifiDirectDecisionCenter();
     struct WifiDirectProcessor *processor =
         decisionCenter->getProcessorByChannelAndConnectType(connectInfo->negoChannel, connectInfo->connectType);
@@ -102,9 +148,10 @@ static int32_t OpenLink(struct WifiDirectConnectCommand *command)
 
     command->processor = processor;
     processor->activeCommand = (struct WifiDirectCommand *)command;
-    CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=%d", command->type);
     GetWifiDirectNegotiator()->currentProcessor = processor;
+    CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=%d currentProcessor=%s", command->type,  processor->name);
 
+    SetWifiDirectStatisticLinkStartTime(connectInfo->requestId);
     return processor->createLink(connectInfo);
 }
 
@@ -112,7 +159,7 @@ static void ExecuteConnection(struct WifiDirectCommand *base)
 {
     struct WifiDirectConnectCommand *self = (struct WifiDirectConnectCommand *)base;
     self->times++;
-    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%d times=%d", self->connectInfo.requestId, self->times);
+    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}d, times=%{public}d", self->connectInfo.requestId, self->times);
 
     int32_t ret = OpenLink(self);
     if (ret != SOFTBUS_OK) {
@@ -120,10 +167,38 @@ static void ExecuteConnection(struct WifiDirectCommand *base)
     }
 }
 
+static void FillConnEventExtra(int32_t requestId, ConnEventExtra *extra)
+{
+    extra->peerIp = NULL;
+    extra->peerBleMac = NULL;
+    extra->peerBrMac = NULL;
+    extra->peerWifiMac = NULL;
+    extra->peerPort = NULL;
+    extra->calleePkg = NULL;
+    extra->callerPkg = NULL;
+    extra->lnnType = NULL;
+    enum StatisticLinkType statisticLinkType = STATISTIC_LINK_TYPE_NUM;
+    GetWifiDirectStatisticLinkType(requestId, &statisticLinkType);
+    if (statisticLinkType == STATISTIC_P2P) {
+        extra->linkType = CONNECT_P2P;
+    } else if (statisticLinkType == STATISTIC_HML) {
+        extra->linkType = CONNECT_HML;
+    } else {
+        extra->linkType = CONNECT_TRIGGER_HML;
+    }
+    GetWifiDirectStatisticBootLinkType(requestId, &(extra->bootLinkType));
+    GetWifiDirectStatisticRenegotiate(requestId, &(extra->isRenegotiate));
+    GetWifiDirectStatisticReuse(requestId, &(extra->isReuse));
+    GetWifiDirectStatisticLinkTime(requestId, &(extra->linkTime));
+    GetWifiDirectStatisticNegotiateTime(requestId, &(extra->negotiateTime));
+    DestroyWifiDirectStatisticElement(requestId);
+}
+
 static void OnConnectSuccess(struct WifiDirectCommand *base, struct NegotiateMessage *msg)
 {
     struct InnerLink *innerLink = NULL;
     struct WifiDirectConnectCommand *self = (struct WifiDirectConnectCommand *)base;
+    SetWifiDirectStatisticLinkEndTime(self->connectInfo.requestId);
     if (msg != NULL) {
         innerLink = msg->get(msg, NM_KEY_INNER_LINK, NULL, NULL);
     }
@@ -140,7 +215,7 @@ static void OnConnectSuccess(struct WifiDirectCommand *base, struct NegotiateMes
     (void)memset_s(&link, sizeof(link), 0, sizeof(link));
     int32_t requestId = self->connectInfo.requestId;
     innerLink->getLink(innerLink, requestId, self->connectInfo.pid, &link);
-    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%d linkId=%d", requestId, link.linkId);
+    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}d, linkId=%{public}d", requestId, link.linkId);
 
     if (self->callback.onConnectSuccess != NULL) {
         CONN_LOGI(CONN_WIFI_DIRECT, "call onConnectSuccess");
@@ -148,9 +223,9 @@ static void OnConnectSuccess(struct WifiDirectCommand *base, struct NegotiateMes
     }
     ConnEventExtra extra = {
         .requestId = self->connectInfo.requestId,
-        .linkType = CONNECT_P2P,
         .result = EVENT_STAGE_RESULT_OK
     };
+    FillConnEventExtra(self->connectInfo.requestId, &extra);
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
     GetWifiDirectNegotiator()->resetContext();
     GetResourceManager()->dump(0);
@@ -160,7 +235,8 @@ static void OnConnectSuccess(struct WifiDirectCommand *base, struct NegotiateMes
 static void OnConnectFailure(struct WifiDirectCommand *base, int32_t reason)
 {
     struct WifiDirectConnectCommand *self = (struct WifiDirectConnectCommand *)base;
-    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%d reason=%d", self->connectInfo.requestId, reason);
+    SetWifiDirectStatisticLinkEndTime(self->connectInfo.requestId);
+    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}d, reason=%{public}d", self->connectInfo.requestId, reason);
 
     if (IsNeedRetry(base, reason)) {
         CONN_LOGI(CONN_WIFI_DIRECT, "retry command");
@@ -175,10 +251,10 @@ static void OnConnectFailure(struct WifiDirectCommand *base, int32_t reason)
     }
     ConnEventExtra extra = {
         .requestId = self->connectInfo.requestId,
-        .linkType = CONNECT_P2P,
         .result = EVENT_STAGE_RESULT_FAILED,
         .errcode = reason
     };
+    FillConnEventExtra(self->connectInfo.requestId, &extra);
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
     ConnAlarmExtra extraAlarm = {
         .linkType = CONNECT_P2P,

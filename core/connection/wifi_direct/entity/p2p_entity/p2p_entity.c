@@ -37,13 +37,14 @@ static void OnClientJoinTimeout(void *data);
 /* public interface */
 static int32_t CreateServer(struct WifiDirectConnectParams *params)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "freq=%d isNeedDhcp=%d isWideBandSupported=%d ifName=%s peerMac=%s",
-          params->frequency, params->isNeedDhcp, params->isWideBandSupported, params->interface,
-          WifiDirectAnonymizeMac(params->remoteMac));
+    CONN_LOGI(CONN_WIFI_DIRECT,
+        "freq=%{public}d, isNeedDhcp=%{public}d, isWideBandSupported=%{public}d, ifName=%{public}s, peerMac=%{public}s",
+        params->frequency, params->isNeedDhcp, params->isWideBandSupported, params->interface,
+        WifiDirectAnonymizeMac(params->remoteMac));
 
     struct P2pEntity *self = GetP2pEntity();
-    CONN_CHECK_AND_RETURN_RET_LOGW(self->currentStateType != P2P_ENTITY_STATE_UNAVAILABLE, SOFTBUS_ERR,
-        CONN_WIFI_DIRECT, "unavailable state");
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        self->currentStateType != P2P_ENTITY_STATE_UNAVAILABLE, SOFTBUS_ERR, CONN_WIFI_DIRECT, "unavailable state");
 
     return self->currentState->createServer(self->currentState, params);
 }
@@ -51,15 +52,15 @@ static int32_t CreateServer(struct WifiDirectConnectParams *params)
 static int32_t Connect(struct WifiDirectConnectParams *params)
 {
     struct P2pEntity *self = GetP2pEntity();
-    CONN_CHECK_AND_RETURN_RET_LOGW(self->currentStateType != P2P_ENTITY_STATE_UNAVAILABLE, SOFTBUS_ERR,
-        CONN_WIFI_DIRECT, "unavailable state");
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        self->currentStateType != P2P_ENTITY_STATE_UNAVAILABLE, SOFTBUS_ERR, CONN_WIFI_DIRECT, "unavailable state");
 
     self->isNeedDhcp = params->isNeedDhcp;
     int32_t ret = strcpy_s(self->interface, sizeof(self->interface), params->interface);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == EOK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "copy interface failed");
     ret = strcpy_s(self->gcIp, sizeof(self->gcIp), params->gcIp);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == EOK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "copy ip failed");
-    CONN_LOGI(CONN_WIFI_DIRECT, "gcIp=%s", WifiDirectAnonymizeIp(self->gcIp));
+    CONN_LOGI(CONN_WIFI_DIRECT, "gcIp=%{public}s", WifiDirectAnonymizeIp(self->gcIp));
     return self->currentState->connect(self->currentState, params);
 }
 
@@ -68,11 +69,11 @@ static int32_t ReuseLink(struct WifiDirectConnectParams *params)
     (void)params;
     CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     struct P2pEntity *self = GetP2pEntity();
-    CONN_CHECK_AND_RETURN_RET_LOGW(self->currentStateType != P2P_ENTITY_STATE_UNAVAILABLE, SOFTBUS_ERR,
-        CONN_WIFI_DIRECT, "unavailable state");
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        self->currentStateType != P2P_ENTITY_STATE_UNAVAILABLE, SOFTBUS_ERR, CONN_WIFI_DIRECT, "unavailable state");
     int32_t ret = GetWifiDirectP2pAdapter()->shareLinkReuse();
-    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ERROR_P2P_SHARE_LINK_REUSE_FAILED, CONN_WIFI_DIRECT,
-                                  "ERROR_P2P_SHARE_LINK_REUSE_FAILED");
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        ret == SOFTBUS_OK, ERROR_P2P_SHARE_LINK_REUSE_FAILED, CONN_WIFI_DIRECT, "ERROR_P2P_SHARE_LINK_REUSE_FAILED");
     return ret;
 }
 
@@ -80,13 +81,13 @@ static int32_t Disconnect(struct WifiDirectConnectParams *params)
 {
     CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     struct P2pEntity *self = GetP2pEntity();
-    CONN_CHECK_AND_RETURN_RET_LOGW(self->currentStateType != P2P_ENTITY_STATE_UNAVAILABLE, SOFTBUS_ERR,
-        CONN_WIFI_DIRECT, "unavailable state");
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        self->currentStateType != P2P_ENTITY_STATE_UNAVAILABLE, SOFTBUS_ERR, CONN_WIFI_DIRECT, "unavailable state");
 
     struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(params->interface);
     CONN_CHECK_AND_RETURN_RET_LOGW(info, SOFTBUS_ERR, CONN_WIFI_DIRECT, "interface info is null");
     int32_t reuseCount = info->getInt(info, II_KEY_REUSE_COUNT, -1);
-    CONN_LOGI(CONN_WIFI_DIRECT, "reuseCount=%d", reuseCount);
+    CONN_LOGI(CONN_WIFI_DIRECT, "reuseCount=%{public}d", reuseCount);
 
     if (reuseCount <= 1) {
         return self->currentState->removeLink(self->currentState, params);
@@ -100,14 +101,14 @@ static int32_t DestroyServer(struct WifiDirectConnectParams *params)
 {
     CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     struct P2pEntity *self = GetP2pEntity();
-    CONN_CHECK_AND_RETURN_RET_LOGW(self->currentStateType != P2P_ENTITY_STATE_UNAVAILABLE, SOFTBUS_ERR,
-        CONN_WIFI_DIRECT, "unavailable state");
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        self->currentStateType != P2P_ENTITY_STATE_UNAVAILABLE, SOFTBUS_ERR, CONN_WIFI_DIRECT, "unavailable state");
     return self->currentState->destroyServer(self->currentState, params);
 }
 
 static void NotifyNewClientJoining(struct WifiDirectConnectParams *params)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "remoteMac=%s", WifiDirectAnonymizeMac(params->remoteMac));
+    CONN_LOGI(CONN_WIFI_DIRECT, "remoteMac=%{public}s", WifiDirectAnonymizeMac(params->remoteMac));
     struct P2pEntity *self = GetP2pEntity();
     struct P2pEntityConnectingClient *client = SoftBusCalloc(sizeof(*client));
     CONN_CHECK_AND_RETURN_LOGE(client, CONN_WIFI_DIRECT, "malloc connecting client failed");
@@ -118,10 +119,10 @@ static void NotifyNewClientJoining(struct WifiDirectConnectParams *params)
     }
     ListTailInsert(&self->joiningClientList, &client->node);
     self->joiningClientCount++;
-    CONN_LOGI(CONN_WIFI_DIRECT, "joiningClientCount=%d", self->joiningClientCount);
+    CONN_LOGI(CONN_WIFI_DIRECT, "joiningClientCount=%{public}d", self->joiningClientCount);
 
-    client->timerId = GetWifiDirectTimerList()->startTimer(OnClientJoinTimeout, TIMEOUT_WAIT_CLIENT_JOIN_MS,
-                                                           TIMER_FLAG_ONE_SHOOT, client);
+    client->timerId = GetWifiDirectTimerList()->startTimer(
+        OnClientJoinTimeout, TIMEOUT_WAIT_CLIENT_JOIN_MS, TIMER_FLAG_ONE_SHOOT, client);
 }
 
 static void CancelNewClientJoining(struct WifiDirectConnectParams *params)
@@ -131,7 +132,7 @@ static void CancelNewClientJoining(struct WifiDirectConnectParams *params)
     struct P2pEntityConnectingClient *clientNext = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(client, clientNext, &self->joiningClientList, struct P2pEntityConnectingClient, node) {
         if (strcmp(client->remoteMac, params->remoteMac) == 0) {
-            CONN_LOGD(CONN_WIFI_DIRECT, "requestId=%d remoteMac=%s", client->requestId,
+            CONN_LOGD(CONN_WIFI_DIRECT, "requestId=%{public}d, remoteMac=%{public}s", client->requestId,
                 WifiDirectAnonymizeMac(client->remoteMac));
             GetWifiDirectTimerList()->stopTimer(client->timerId);
             ListDelete(&client->node);
@@ -140,7 +141,7 @@ static void CancelNewClientJoining(struct WifiDirectConnectParams *params)
             break;
         }
     }
-    CONN_LOGI(CONN_WIFI_DIRECT, "joiningClientCount=%d", self->joiningClientCount);
+    CONN_LOGI(CONN_WIFI_DIRECT, "joiningClientCount=%{public}d", self->joiningClientCount);
 }
 
 static void RegisterListener(struct EntityListener *listener)
@@ -169,7 +170,7 @@ static void ChangeState(enum P2pEntityStateType state)
     old->exit(old);
     new->enter(new);
 
-    CONN_LOGI(CONN_WIFI_DIRECT, "%s -> %s", old->name, new->name);
+    CONN_LOGI(CONN_WIFI_DIRECT, "name:%{public}s->%{public}s", old->name, new->name);
     self->currentState = new;
     self->currentStateType = state;
 }
@@ -207,7 +208,7 @@ static void OperationCompleteWorkHandler(void *data)
 
 static void NotifyOperationComplete(int32_t result)
 {
-    CONN_LOGD(CONN_WIFI_DIRECT, "result=%d", result);
+    CONN_LOGD(CONN_WIFI_DIRECT, "result=%{public}d", result);
     int32_t *resultPtr = SoftBusMalloc(sizeof(result));
     CONN_CHECK_AND_RETURN_LOGE(resultPtr, CONN_WIFI_DIRECT, "malloc result buffer failed");
     *resultPtr = result;
@@ -219,7 +220,7 @@ static void NotifyOperationComplete(int32_t result)
 
 static void Enable(bool enable, enum EntityState state)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enable=%d state=%d", enable, state);
+    CONN_LOGI(CONN_WIFI_DIRECT, "enable=%{public}d, state=%{public}d", enable, state);
     struct P2pEntity *self = GetP2pEntity();
     self->changeState(enable ? P2P_ENTITY_STATE_AVAILABLE : P2P_ENTITY_STATE_UNAVAILABLE);
 
@@ -231,14 +232,14 @@ static void Enable(bool enable, enum EntityState state)
 static void HandleConnectionChange(struct WifiDirectP2pGroupInfo *groupInfo)
 {
     struct P2pEntity *self = GetP2pEntity();
-    CONN_LOGI(CONN_WIFI_DIRECT, "currentState=%s", self->currentState->name);
+    CONN_LOGI(CONN_WIFI_DIRECT, "currentState=%{public}s", self->currentState->name);
     self->currentState->handleConnectionChange(self->currentState, groupInfo);
 }
 
 static void HandleConnectStateChange(enum WifiDirectP2pConnectState state)
 {
     struct P2pEntity *self = GetP2pEntity();
-    CONN_LOGI(CONN_WIFI_DIRECT, "currentState=%s state=%d", self->currentState->name, state);
+    CONN_LOGI(CONN_WIFI_DIRECT, "currentState=%{public}s, state=%{public}d", self->currentState->name, state);
     self->currentState->handleConnectStateChange(self->currentState, state);
 }
 
@@ -257,7 +258,7 @@ static void RemoveJoiningClient(const char *remoteMac)
 
     LIST_FOR_EACH_ENTRY_SAFE(client, clientNext, &self->joiningClientList, struct P2pEntityConnectingClient, node) {
         if (strcmp(remoteMac, client->remoteMac) == 0) {
-            CONN_LOGI(CONN_WIFI_DIRECT, "request=%d remoteMac=%s", client->requestId,
+            CONN_LOGI(CONN_WIFI_DIRECT, "request=%{public}d, remoteMac=%{public}s", client->requestId,
                 WifiDirectAnonymizeMac(client->remoteMac));
             GetWifiDirectTimerList()->stopTimer(client->timerId);
             ListDelete(&client->node);
@@ -265,7 +266,7 @@ static void RemoveJoiningClient(const char *remoteMac)
             self->joiningClientCount--;
         }
     }
-    CONN_LOGD(CONN_WIFI_DIRECT, "joiningClientCount=%d", self->joiningClientCount);
+    CONN_LOGD(CONN_WIFI_DIRECT, "joiningClientCount=%{public}d", self->joiningClientCount);
 }
 
 static void ClearJoiningClient(void)
@@ -275,14 +276,14 @@ static void ClearJoiningClient(void)
     struct P2pEntityConnectingClient *clientNext = NULL;
 
     LIST_FOR_EACH_ENTRY_SAFE(client, clientNext, &self->joiningClientList, struct P2pEntityConnectingClient, node) {
-        CONN_LOGD(CONN_WIFI_DIRECT, "requestId=%d remoteMac=%s", client->requestId,
+        CONN_LOGD(CONN_WIFI_DIRECT, "requestId=%{public}d, remoteMac=%{public}s", client->requestId,
             WifiDirectAnonymizeMac(client->remoteMac));
         GetWifiDirectTimerList()->stopTimer(client->timerId);
         ListDelete(&client->node);
         SoftBusFree(client);
         self->joiningClientCount--;
     }
-    CONN_LOGD(CONN_WIFI_DIRECT, "joiningClientCount=%d", self->joiningClientCount);
+    CONN_LOGD(CONN_WIFI_DIRECT, "joiningClientCount=%{public}d", self->joiningClientCount);
 }
 
 /* private method implement */
@@ -291,7 +292,7 @@ static void OnEntityTimeout(void *data)
     struct P2pEntity *self = GetP2pEntity();
     self->currentTimerId = TIMER_ID_INVALID;
     enum P2pEntityTimeoutEvent event = (intptr_t)data;
-    CONN_LOGD(CONN_WIFI_DIRECT, "event=%d", event);
+    CONN_LOGD(CONN_WIFI_DIRECT, "event=%{public}d", event);
     self->currentState->handleTimeout(self->currentState, event);
 }
 
@@ -301,8 +302,8 @@ static void OnClientJoinTimeout(void *data)
     ListDelete(&client->node);
     SoftBusFree(client);
     GetP2pEntity()->joiningClientCount--;
-    CONN_LOGD(CONN_WIFI_DIRECT, "requestId=%d remoteMac=%s joiningClientCount=%d", client->requestId,
-          WifiDirectAnonymizeMac(client->remoteMac), GetP2pEntity()->joiningClientCount);
+    CONN_LOGD(CONN_WIFI_DIRECT, "requestId=%{public}d, remoteMac=%{public}s, joiningClientCount=%{public}d",
+        client->requestId, WifiDirectAnonymizeMac(client->remoteMac), GetP2pEntity()->joiningClientCount);
     client = NULL;
 
     struct WifiDirectConnectParams params;
@@ -360,7 +361,7 @@ static void P2pEntityConstructor(struct P2pEntity *self)
     self->states[P2P_ENTITY_STATE_GROUP_CONNECTING] = (struct P2pEntityState *)GetP2pGroupConnectingState();
     self->states[P2P_ENTITY_STATE_GROUP_REMOVING] = (struct P2pEntityState *)GetP2pGroupRemovingState();
 
-    CONN_LOGI(CONN_WIFI_DIRECT, "currentStateType=%d", self->currentStateType);
+    CONN_LOGI(CONN_WIFI_DIRECT, "currentStateType=%{public}d", self->currentStateType);
     self->currentState = self->states[self->currentStateType];
 
     ListInit(&self->joiningClientList);

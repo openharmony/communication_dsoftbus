@@ -55,7 +55,7 @@ sptr<IRemoteObject> GetSystemAbility()
     }
     int32_t err = samgr->SendRequest(g_getSystemAbilityId, data, reply, option);
     if (err != 0) {
-        LNN_LOGE(LNN_EVENT, "GetSystemAbility failed=%d", err);
+        LNN_LOGE(LNN_EVENT, "GetSystemAbility failed=%{public}d", err);
         return nullptr;
     }
     return reply.ReadRemoteObject();
@@ -127,6 +127,14 @@ int32_t BusCenterServerProxy::OpenAuthSession(const char *sessionName, const Con
 
 int32_t BusCenterServerProxy::NotifyAuthSuccess(int32_t channelId, int32_t channelType)
 {
+    (void)channelId;
+    (void)channelType;
+    return SOFTBUS_OK;
+}
+
+int32_t BusCenterServerProxy::GetAndComparePid(int32_t pid, int32_t channelId, int32_t channelType)
+{
+    (void)pid;
     (void)channelId;
     (void)channelType;
     return SOFTBUS_OK;
@@ -409,7 +417,7 @@ int32_t BusCenterServerProxy::GetNodeKeyInfo(const char *pkgName, const char *ne
     int32_t infoLen;
     if (!reply.ReadInt32(infoLen) || infoLen <= 0 || static_cast<uint32_t>(infoLen) > len) {
         LNN_LOGE(LNN_EVENT,
-            "read infoLen failed, len:%d, infoLen:%d", len, infoLen);
+            "read infoLen failed, len=%{public}d, infoLen=%{public}d", len, infoLen);
         return SOFTBUS_IPC_ERR;
     }
     void *retBuf = const_cast<void *>(reply.ReadRawData(infoLen));
@@ -909,7 +917,7 @@ int32_t BusCenterServerProxy::GetBusCenterExObj(sptr<IRemoteObject> &object)
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_GET_BUS_CENTER_EX_OBJ, data, reply, option);
     if (ret != ERR_NONE) {
-        LNN_LOGE(LNN_EVENT, "send request failed, ret=%d", ret);
+        LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     if (!reply.ReadInt32(ret)) {

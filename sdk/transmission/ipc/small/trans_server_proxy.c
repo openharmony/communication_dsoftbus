@@ -33,19 +33,19 @@ static IClientProxy *g_serverProxy = NULL;
 static int ProxyCallback(IOwner owner, int code, IpcIo *reply)
 {
     if (code != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "publish service callback errCode=%d.", code);
+        TRANS_LOGE(TRANS_SDK, "publish service callback errCode=%{public}d.", code);
         return SOFTBUS_ERR;
     }
 
     ReadInt32(reply, (int *)owner);
-    TRANS_LOGI(TRANS_SDK, "publish service owner=%d.", *(int32_t*)owner);
+    TRANS_LOGI(TRANS_SDK, "publish service owner=%{public}d.", *(int32_t*)owner);
     return SOFTBUS_OK;
 }
 
 static int OpenSessionProxyCallback(IOwner owner, int code, IpcIo *reply)
 {
     if (code != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "publish service callback errCode=%d.", code);
+        TRANS_LOGE(TRANS_SDK, "publish service callback errCode=%{public}d.", code);
         return SOFTBUS_ERR;
     }
     uint32_t size;
@@ -82,7 +82,7 @@ int32_t TransServerProxyInit(void)
 
         int32_t ret = iUnknown->QueryInterface(iUnknown, CLIENT_PROXY_VER, (void **)&g_serverProxy);
         if (ret != EC_SUCCESS || g_serverProxy == NULL) {
-            TRANS_LOGE(TRANS_SDK, "QueryInterface failed ret=%d", ret);
+            TRANS_LOGE(TRANS_SDK, "QueryInterface failed ret=%{public}d", ret);
             SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
             continue;
         }
@@ -117,7 +117,7 @@ int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionNam
     }
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_CREATE_SESSION_SERVER, &request, &ret, ProxyCallback);
     if (ans != EC_SUCCESS) {
-        TRANS_LOGE(TRANS_SDK, "callback ret=%d", ret);
+        TRANS_LOGE(TRANS_SDK, "callback ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     return ret;
@@ -145,7 +145,7 @@ int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionNam
     }
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_REMOVE_SESSION_SERVER, &request, &ret, ProxyCallback);
     if (ans != EC_SUCCESS) {
-        TRANS_LOGE(TRANS_SDK, "callback ret=%d", ret);
+        TRANS_LOGE(TRANS_SDK, "callback ret=%{public}d", ret);
         return SOFTBUS_TRANS_PROXY_INVOKE_FAILED;
     }
     return ret;
@@ -224,7 +224,7 @@ int32_t ServerIpcOpenSession(const SessionParam *param, TransInfo *info)
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_OPEN_SESSION, &request,
         &transSerializer, OpenSessionProxyCallback);
     if (ans != EC_SUCCESS) {
-        TRANS_LOGE(TRANS_SDK, "callback ret=%d", transSerializer.ret);
+        TRANS_LOGE(TRANS_SDK, "callback ret=%{public}d", transSerializer.ret);
         return SOFTBUS_TRANS_PROXY_INVOKE_FAILED;
     }
     info->channelId = transSerializer.transInfo.channelId;
@@ -251,7 +251,7 @@ int32_t ServerIpcOpenAuthSession(const char *sessionName, const ConnectionAddr *
     }
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_OPEN_AUTH_SESSION, &request, &ret, ProxyCallback);
     if (ans != EC_SUCCESS) {
-        TRANS_LOGE(TRANS_SDK, "callback ret=%d", ret);
+        TRANS_LOGE(TRANS_SDK, "callback ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     return ret;
@@ -272,7 +272,7 @@ int32_t ServerIpcNotifyAuthSuccess(int32_t channelId, int32_t channelType)
     }
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_NOTIFY_AUTH_SUCCESS, &request, &ret, ProxyCallback);
     if (ans != EC_SUCCESS) {
-        TRANS_LOGE(TRANS_SDK, "callback ret [%d]", ret);
+        TRANS_LOGE(TRANS_SDK, "callback ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     return ret;
@@ -295,7 +295,7 @@ int32_t ServerIpcCloseChannel(int32_t channelId, int32_t channelType)
     }
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_CLOSE_CHANNEL, &request, &ret, ProxyCallback);
     if (ans != EC_SUCCESS) {
-        TRANS_LOGE(TRANS_SDK, "callback ret [%d]", ret);
+        TRANS_LOGE(TRANS_SDK, "callback ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     return ret;
@@ -329,7 +329,7 @@ int32_t ServerIpcSendMessage(int32_t channelId, int32_t channelType, const void 
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_SESSION_SENDMSG, &request, &ret, ProxyCallback);
     SoftBusFree(ipcData);
     if (ans != EC_SUCCESS) {
-        TRANS_LOGE(TRANS_SDK, "callback ret [%d]", ret);
+        TRANS_LOGE(TRANS_SDK, "callback ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     TRANS_LOGD(TRANS_SDK, "ok");

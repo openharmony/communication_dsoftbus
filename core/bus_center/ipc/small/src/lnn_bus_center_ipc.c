@@ -220,7 +220,7 @@ int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, ui
         }
     }
     if (IsRepeatJoinLNNRequest(pkgName, connAddr)) {
-        LNN_LOGE(LNN_EVENT, "repeat join lnn request pkgName=%s", pkgName);
+        LNN_LOGE(LNN_EVENT, "repeat join lnn request pkgName=%{public}s", pkgName);
         (void)SoftBusMutexUnlock(&g_lnnRequestInfo.lock);
         return SOFTBUS_ALREADY_EXISTED;
     }
@@ -253,7 +253,7 @@ int32_t LnnIpcServerLeave(const char *pkgName, int32_t callingPid, const char *n
         }
     }
     if (IsRepeatLeaveLNNRequest(pkgName, networkId)) {
-        LNN_LOGE(LNN_EVENT, "repeat leave lnn request pkgName=%s", pkgName);
+        LNN_LOGE(LNN_EVENT, "repeat leave lnn request pkgName=%{public}s", pkgName);
         (void)SoftBusMutexUnlock(&g_lnnRequestInfo.lock);
         return SOFTBUS_ALREADY_EXISTED;
     }
@@ -272,7 +272,7 @@ int32_t LnnIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t in
 {
     (void)pkgName;
     if (infoTypeLen != sizeof(NodeBasicInfo)) {
-        LNN_LOGE(LNN_EVENT, "infoTypeLen is invalid, infoTypeLen=%d", infoTypeLen);
+        LNN_LOGE(LNN_EVENT, "infoTypeLen is invalid, infoTypeLen=%{public}d", infoTypeLen);
         return SOFTBUS_INVALID_PARAM;
     }
     return LnnGetAllOnlineNodeInfo((NodeBasicInfo **)info, infoNum);

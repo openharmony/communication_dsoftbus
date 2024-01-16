@@ -65,7 +65,8 @@ public:
         } else if (streamType == StreamType::RAW_STREAM) {
             int32_t plainDataLength = buflen - adaptor_->GetEncryptOverhead();
             if (plainDataLength < 0) {
-                TRANS_LOGE(TRANS_STREAM, "bufLen=%d < GetEncryptOverhead=%zd",
+                TRANS_LOGE(TRANS_STREAM,
+                    "bufLen < GetEncryptOverhead. bufLen=%{public}d, GetEncryptOverhead=%{public}zd",
                     buflen, adaptor_->GetEncryptOverhead());
                 return;
             }
@@ -74,13 +75,13 @@ public:
                 plainDataLength, adaptor_->GetSessionKey());
             if (decLen != plainDataLength) {
                 TRANS_LOGE(TRANS_STREAM,
-                    "Decrypt failed, dataLen=%d, decLen=%zd", plainDataLength, decLen);
+                    "Decrypt failed, dataLen=%{public}d, decLen=%{public}zd", plainDataLength, decLen);
                 return;
             }
             retStreamData.buf = plainData.get();
             retStreamData.bufLen = plainDataLength;
         } else {
-            TRANS_LOGE(TRANS_STREAM, "Do not support, streamType=%d", streamType);
+            TRANS_LOGE(TRANS_STREAM, "Do not support, streamType=%{public}d", streamType);
             return;
         }
         StreamData extStreamData = {
@@ -93,10 +94,10 @@ public:
 
     void OnStreamStatus(int status) override
     {
-        TRANS_LOGI(TRANS_STREAM, "status=%d in.", status);
+        TRANS_LOGI(TRANS_STREAM, "status=%{public}d", status);
 
         if (adaptor_->GetListenerCallback() != nullptr && adaptor_->GetListenerCallback()->OnStatusChange != nullptr) {
-            TRANS_LOGE(TRANS_STREAM, "OnStatusChange status=%d", status);
+            TRANS_LOGE(TRANS_STREAM, "OnStatusChange status=%{public}d", status);
             adaptor_->GetListenerCallback()->OnStatusChange(adaptor_->GetChannelId(), status);
         }
     }
@@ -104,33 +105,36 @@ public:
     void OnQosEvent(int32_t eventId, int32_t tvCount, const QosTv *tvList) override
     {
         if (adaptor_->GetListenerCallback() != nullptr && adaptor_->GetListenerCallback()->OnQosEvent != nullptr) {
-            TRANS_LOGI(TRANS_QOS, "channelId=%" PRId64, adaptor_->GetChannelId());
+            TRANS_LOGI(TRANS_QOS, "channelId=%{public}" PRId64, adaptor_->GetChannelId());
             adaptor_->GetListenerCallback()->OnQosEvent(adaptor_->GetChannelId(), eventId, tvCount, tvList);
         } else {
             TRANS_LOGE(TRANS_QOS,
-                "Get ListenerCallback by StreamAdaptor is failed, channelId=%" PRId64, adaptor_->GetChannelId());
+                "Get ListenerCallback by StreamAdaptor is failed, channelId=%{public}" PRId64,
+                adaptor_->GetChannelId());
         }
     }
 
     void OnFrameStats(const StreamSendStats *data) override
     {
         if (adaptor_->GetListenerCallback() != nullptr && adaptor_->GetListenerCallback()->OnFrameStats != nullptr) {
-            TRANS_LOGI(TRANS_STREAM, "channelId=%" PRId64, adaptor_->GetChannelId());
+            TRANS_LOGI(TRANS_STREAM, "channelId=%{public}" PRId64, adaptor_->GetChannelId());
             adaptor_->GetListenerCallback()->OnFrameStats(adaptor_->GetChannelId(), data);
         } else {
             TRANS_LOGE(TRANS_STREAM,
-                "Get ListenerCallback by StreamAdaptor is failed, channelId=%" PRId64, adaptor_->GetChannelId());
+                "Get ListenerCallback by StreamAdaptor is failed, channelId=%{public}" PRId64,
+                adaptor_->GetChannelId());
         }
     }
 
     void OnRippleStats(const TrafficStats *data) override
     {
         if (adaptor_->GetListenerCallback() != nullptr && adaptor_->GetListenerCallback()->OnRippleStats != nullptr) {
-            TRANS_LOGI(TRANS_STREAM, "channelId=%" PRId64, adaptor_->GetChannelId());
+            TRANS_LOGI(TRANS_STREAM, "channelId=%{public}" PRId64, adaptor_->GetChannelId());
             adaptor_->GetListenerCallback()->OnRippleStats(adaptor_->GetChannelId(), data);
         } else {
             TRANS_LOGE(TRANS_STREAM,
-                "Get ListenerCallback by StreamAdaptor is failed, channelId=%" PRId64, adaptor_->GetChannelId());
+                "Get ListenerCallback by StreamAdaptor is failed, channelId=%{public}" PRId64,
+                adaptor_->GetChannelId());
         }
     }
 

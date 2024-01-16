@@ -126,12 +126,13 @@ BUSCENTER_BEHAVIOR:
   BIZ_STAGE: {type: INT32, desc: business stage }
   STAGE_RES: {type: INT32, desc: stage result }
   ERROR_CODE: { type: INT32, desc: error code }
+  AUTH_ID: { type: INT32, desc: auth id }
   DISC_SERVER_TYPE: {type: INT32, desc: disc server type }
   GEAR_CYCLE: {type: INT32, desc: gear cycle }
   GEAR_DURATION: {type: INT32, desc: gear duration }
   CONN_ID: { type: INT32, desc: connection id }
-  AUTH_TYPE: { type: INT32, desc: auth type }
-  AUTH_ID: { type: INT32, desc: auth id }
+  AUTH_LINK_TYPE: { type: INT32, desc: auth link type }
+  AUTH_COST_TIME: { type: INT32, desc: auth cost time }
   LNN_TYPE: { type: INT32, desc: lnn type }
   ONLINE_NUM: { type: INT32, desc: current online device num }
   PEER_DEV_ABILITY: { type: INT32, desc: peer device ability }

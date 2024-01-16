@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,6 +50,8 @@
 #define TLV_MAX_DATA_LEN 15
 #define TLV_VARIABLE_DATA_LEN 0
 
+static int32_t CalculateMbsTruncateSize(const char *multiByteStr, uint32_t capacity, uint32_t *truncatedSize);
+
 bool CheckBitMapEmpty(uint32_t capBitMapNum, const uint32_t *capBitMap)
 {
     for (uint32_t i = 0; i < capBitMapNum; i++) {
@@ -97,12 +99,25 @@ static int32_t DiscBleGetDeviceUdid(char *udid, uint32_t len)
     return SOFTBUS_OK;
 }
 
-int32_t DiscBleGetDeviceName(char *deviceName)
+int32_t DiscBleGetDeviceName(char *deviceName, uint32_t size)
 {
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, deviceName, DISC_MAX_DEVICE_NAME_LEN) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE, "Get local device name failed.");
+    DISC_CHECK_AND_RETURN_RET_LOGE(deviceName != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "device name is null");
+    DISC_CHECK_AND_RETURN_RET_LOGE(size != 0, SOFTBUS_INVALID_PARAM, DISC_BLE, "device name size is 0");
+
+    char localDevName[DEVICE_NAME_BUF_LEN] = {0};
+    int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, localDevName, sizeof(localDevName));
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, DISC_BLE, "get local device name failed");
+
+    uint32_t truncateLen = 0;
+    if (CalculateMbsTruncateSize((const char *)localDevName, size - 1, &truncateLen) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_BLE, "truncate device name failed");
         return SOFTBUS_ERR;
     }
+    if (memcpy_s(deviceName, size, localDevName, truncateLen) != EOK) {
+        DISC_LOGE(DISC_BLE, "copy local device name failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    deviceName[truncateLen] = '\0';
     return SOFTBUS_OK;
 }
 
@@ -216,7 +231,7 @@ static int32_t CalculateMbsTruncateSize(const char *multiByteStr, uint32_t capac
     while (capacity < multiByteStrLen - truncateTotal && truncateIndex >= 0) {
         int32_t truncateCharLen = wctomb(multiByteChar, wideStr[truncateIndex]);
         if (truncateCharLen <= 0) {
-            DISC_LOGE(DISC_BLE, "wctomb failed on %d w_char", truncateIndex);
+            DISC_LOGE(DISC_BLE, "wctomb failed on w_char. truncateIndex=%{public}d", truncateIndex);
             RestoreLocale(localeBefore);
             return SOFTBUS_ERR;
         }
@@ -247,7 +262,8 @@ int32_t AssembleTLV(BroadcastData *broadcastData, uint8_t dataType, const void *
     uint32_t validLen = (dataLen > remainLen) ? remainLen : dataLen;
     if (dataType == TLV_TYPE_DEVICE_NAME) {
         if (CalculateMbsTruncateSize((const char *)value, remainLen - 1, &validLen) != SOFTBUS_OK) {
-            DISC_LOGE(DISC_BLE, "truncate device name failed, validLen: %u remainLen: %u", validLen, remainLen);
+            DISC_LOGE(DISC_BLE,
+                "truncate device name failed, validLen=%{public}u, remainLen=%{public}u", validLen, remainLen);
             return SOFTBUS_ERR;
         }
         broadcastData->data.data[broadcastData->dataLen + validLen] = '\0';
@@ -257,6 +273,9 @@ int32_t AssembleTLV(BroadcastData *broadcastData, uint8_t dataType, const void *
         return SOFTBUS_MEM_ERR;
     }
     broadcastData->dataLen += validLen;
+    if (dataType == TLV_TYPE_DEVICE_NAME) {
+        broadcastData->dataLen += 1;
+    }
     return SOFTBUS_OK;
 }
 
@@ -264,7 +283,8 @@ int32_t AssembleTLV(BroadcastData *broadcastData, uint8_t dataType, const void *
 static int32_t CopyValue(void *dst, uint32_t dstLen, const void *src, uint32_t srcLen, const char *hint)
 {
     if (memcpy_s(dst, dstLen, src, srcLen) != EOK) {
-        DISC_LOGE(DISC_BLE, "parse tlv memcpy failed, tlvType: %s, tlvLen: %u, dstLen: %u", hint, srcLen, dstLen);
+        DISC_LOGE(DISC_BLE, "parse tlv memcpy failed, tlvType=%{public}s, tlvLen=%{public}u, dstLen=%{public}u",
+            hint, srcLen, dstLen);
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -280,7 +300,7 @@ static int32_t CopyBrAddrValue(DeviceWrapper *device, const uint8_t *src, uint32
         device->info->addrNum += 1;
         return SOFTBUS_OK;
     }
-    DISC_LOGE(DISC_BLE, "parse tlv convert br failed, tlvType: TLV_TYPE_BR_MAC, tlvLen: %u, dstLen: %d",
+    DISC_LOGE(DISC_BLE, "parse tlv convert br failed, tlvType=TLV_TYPE_BR_MAC, tlvLen=%{public}u, dstLen=%{public}d",
         srcLen, BT_MAC_LEN);
     return ret;
 }
@@ -386,7 +406,8 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_
         uint32_t len = (uint32_t)(data[curLen] & DATA_LENGTH_MASK);
         if (curLen + TL_LEN + len > dataLen || (len == TLV_VARIABLE_DATA_LEN && curLen + TL_LEN  >= dataLen)) {
             DISC_LOGE(DISC_BLE,
-                "unexperted advData: out of range, tlvType: %d, tlvLen: %u, current pos: %u, total pos: %u",
+                "unexperted advData: out of range, "
+                "tlvType=%{public}d, tlvLen=%{public}u, currentPos=%{public}u, totalPos=%{public}u",
                 type, len, curLen, dataLen);
             return SOFTBUS_ERR;
         }
@@ -411,7 +432,7 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_
                                 "TLV_TYPE_RANGE_POWER");
                 break;
             default:
-                DISC_LOGW(DISC_BLE, "Unknown TLV, tlvType: %d, tlvLen: %u, just skip", type, len);
+                DISC_LOGW(DISC_BLE, "Unknown TLV, just skip, tlvType=%{public}d, tlvLen=%{public}u", type, len);
                 break;
         }
         if (ret != SOFTBUS_OK) {
@@ -426,7 +447,7 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_
 int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const uint8_t *data, uint32_t dataLen)
 {
     DISC_CHECK_AND_RETURN_RET_LOGW(device != NULL && device->info != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE,
-        "device is invalid");
+        "device is null");
     BroadcastReportInfo *reportInfo = (BroadcastReportInfo *)data;
     DISC_CHECK_AND_RETURN_RET_LOGW(reportInfo != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "reportInfo=NULL is invalid");
     DISC_CHECK_AND_RETURN_RET_LOGW(dataLen == sizeof(BroadcastReportInfo), SOFTBUS_INVALID_PARAM, DISC_BLE,
@@ -453,17 +474,17 @@ int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const uint8_t *data, 
     if (bcTlvLen == 0) {
         return SOFTBUS_OK;
     }
-    uint8_t *copyData = SoftBusCalloc(bcTlvLen + rspLen);
+    uint8_t *copyData = SoftBusCalloc(bcTlvLen + rspLen + 1); // calloc 1 bytes to add tail 0
     DISC_CHECK_AND_RETURN_RET_LOGE(copyData != NULL, SOFTBUS_MEM_ERR, DISC_BLE, "malloc failed.");
     if (memcpy_s(copyData, bcTlvLen, &serviceData[POS_TLV], bcTlvLen) != EOK) {
-        DISC_LOGE(DISC_BLE, "memcpy_s adv failed, bcTlvLen: %u", bcTlvLen);
+        DISC_LOGE(DISC_BLE, "memcpy_s adv failed, bcTlvLen=%{public}u", bcTlvLen);
         SoftBusFree(copyData);
         return SOFTBUS_MEM_ERR;
     }
 
     if (rspLen > 0 && reportInfo->packet.rspData.payload != NULL) {
         if (memcpy_s(copyData + bcTlvLen, rspLen, reportInfo->packet.rspData.payload, rspLen) != EOK) {
-            DISC_LOGE(DISC_BLE, "memcpy_s rsp data failed, rspLen: %u", rspLen);
+            DISC_LOGE(DISC_BLE, "memcpy_s rsp data failed, rspLen=%{public}u", rspLen);
             SoftBusFree(copyData);
             return SOFTBUS_MEM_ERR;
         }

@@ -64,10 +64,12 @@ static void OnJoinLNNDone(const ConnectionAddr *addr, const char *networkId, int
         return;
     }
     if (retCode == 0) {
-        TRANS_LOGI(TRANS_TEST, "[test]OnJoinLNNDone enter networdId=%s, retCode=%d ip=%s port=%d",
+        TRANS_LOGI(TRANS_TEST,
+            "[test]OnJoinLNNDone enter networdId=%{public}s, retCode=%{public}d, ip=%{public}s, port=%{public}d",
             networkId, retCode, addr->info.ip.ip, addr->info.ip.port);
     } else {
-        TRANS_LOGI(TRANS_TEST, "[test]OnJoinLNNDone failed! networdId=%s, retCode=%d", networkId, retCode);
+        TRANS_LOGI(TRANS_TEST,
+            "[test]OnJoinLNNDone failed! networdId=%{public}s, retCode=%{public}d", networkId, retCode);
     }
     Start();
 }
@@ -75,9 +77,11 @@ static void OnJoinLNNDone(const ConnectionAddr *addr, const char *networkId, int
 static void OnLeaveLNNDone(const char *networkId, int retCode)
 {
     if (retCode == 0) {
-        TRANS_LOGI(TRANS_TEST, "[test]OnLeaveLNNDone enter networdId=%s, retCode=%d", networkId, retCode);
+        TRANS_LOGI(TRANS_TEST,
+            "[test]OnLeaveLNNDone enter networdId=%{public}s, retCode=%{public}d", networkId, retCode);
     } else {
-        TRANS_LOGI(TRANS_TEST, "[test]OnLeaveLNNDone failed! networdId=%s, retCode=%d", networkId, retCode);
+        TRANS_LOGI(TRANS_TEST,
+            "[test]OnLeaveLNNDone failed! networdId=%{public}s, retCode=%{public}d", networkId, retCode);
     }
 }
 
@@ -126,7 +130,7 @@ static int LeaveNetWork()
         TRANS_LOGI(TRANS_TEST, "[test]GetLocalNodeDeviceInfo error!");
         return -1;
     }
-    TRANS_LOGI(TRANS_TEST, "[test]GetLocalNodeDeviceInfo networkId=%s, typeId=%d, name=%s",
+    TRANS_LOGI(TRANS_TEST, "[test]GetLocalNodeDeviceInfo networkId=%{public}s, typeId=%{public}d, name=%{public}s",
         info1.networkId, info1.deviceTypeId, info1.deviceName);
 
     if (UnregNodeDeviceStateCb(&g_nodeStateCallback) != 0) {
@@ -143,7 +147,7 @@ static int LeaveNetWork()
 
 static int OnSessionOpened(int sessionId, int result)
 {
-    TRANS_LOGI(TRANS_TEST, "[test]session opened,sesisonId=%d", sessionId);
+    TRANS_LOGI(TRANS_TEST, "[test]session opened, sesisonId=%{public}d", sessionId);
     g_sessionId = sessionId;
     TEST_ASSERT_TRUE(g_testCount == 0);
     g_testCount++;
@@ -153,12 +157,12 @@ static int OnSessionOpened(int sessionId, int result)
 
 static void OnSessionClosed(int sessionId)
 {
-    TRANS_LOGI(TRANS_TEST, "[test]session closed, sessionId=%d", sessionId);
+    TRANS_LOGI(TRANS_TEST, "[test]session closed, sessionId=%{public}d", sessionId);
 }
 
 static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
 {
-    TRANS_LOGI(TRANS_TEST, "[test]session bytes received, sessionId=%d data=%s", sessionId, data);
+    TRANS_LOGI(TRANS_TEST, "[test]session bytes received, sessionId=%{public}d, data=%{public}s", sessionId, data);
     TEST_ASSERT_TRUE(g_testCount == 2);
     g_testCount++;
     Start();
@@ -166,7 +170,7 @@ static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
 
 static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
 {
-    TRANS_LOGI(TRANS_TEST, "[test]session msg received, sessionId=%d", sessionId);
+    TRANS_LOGI(TRANS_TEST, "[test]session msg received, sessionId=%{public}d", sessionId);
     Start();
 }
 
@@ -188,7 +192,7 @@ static int CreateSsAndOpenSession()
     if (ret != 0) {
         return ret;
     }
-    TRANS_LOGI(TRANS_TEST, "OpenSession g_networkId=%s", g_networkId);
+    TRANS_LOGI(TRANS_TEST, "OpenSession g_networkId=%{public}s", g_networkId);
     ret = OpenSession(g_sessionName, g_sessionName, g_networkId, g_groupid, &g_sessionAttr);
     TEST_ASSERT_TRUE(ret == 0);
     if (ret != 0) {
@@ -390,13 +394,13 @@ int main(void)
     if (scanf_s("%s", g_networkId, NETWORKIDSIZE) < 0) {
         return SOFTBUS_ERR;
     }
-    TRANS_LOGI(TRANS_TEST, "g_networkId=%s", g_networkId);
+    TRANS_LOGI(TRANS_TEST, "g_networkId=%{public}s", g_networkId);
     for (int i = 0; i < LOOP_COUNT; i++) {
         TransFuncTest001();
     }
 
     TRANS_LOGI(TRANS_TEST, "[test]------------------------------------------------------------");
-    TRANS_LOGI(TRANS_TEST, "[test]test number=%d, succ=%d. fail=%d",
+    TRANS_LOGI(TRANS_TEST, "[test]test number=%{public}d, succ=%{public}d, fail=%{public}d",
         g_failTestCount + g_succTestCount, g_succTestCount, g_failTestCount);
     TRANS_LOGI(TRANS_TEST, "[test]------------------------------------------------------------");
 }

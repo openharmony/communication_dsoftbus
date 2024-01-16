@@ -85,7 +85,7 @@ int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
     }
 
     ListenerModule module = GetMoudleType(connInfo->type, connInfo->socketOption.addr);
-    TRANS_LOGI(TRANS_CTRL, "get listener module=%d!", module);
+    TRANS_LOGI(TRANS_CTRL, "get listener module=%{public}d!", module);
     if (module == DIRECT_CHANNEL_SERVER_WIFI) {
         module = LnnGetProtocolListenerModule(connInfo->socketOption.protocol, LNN_LISTENER_MODE_DIRECT);
     }
@@ -99,7 +99,7 @@ int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
     }
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(newConn->channelId + ID_OFFSET));
     TRANS_LOGI(TRANS_CTRL,
-        "SoftbusHitraceChainBegin: set HitraceId=%lx.", (uint64_t)(newConn->channelId + ID_OFFSET));
+        "SoftbusHitraceChainBegin: set HitraceId=%{public}" PRIu64, (uint64_t)(newConn->channelId + ID_OFFSET));
     int32_t newchannelId = newConn->channelId;
     (void)memcpy_s(&newConn->appInfo, sizeof(AppInfo), appInfo, sizeof(AppInfo));
 
@@ -127,6 +127,6 @@ int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
         return ret;
     }
     *channelId = newchannelId;
-    TRANS_LOGI(TRANS_CTRL, "ok: channelId=%d", newchannelId);
+    TRANS_LOGI(TRANS_CTRL, "ok: channelId=%{public}d", newchannelId);
     return SOFTBUS_OK;
 }

@@ -36,12 +36,13 @@ extern "C" {
 
 LNN_ASSIGNER(Errcode, Result, result)
 LNN_ASSIGNER(Errcode, Errcode, errcode)
+LNN_ASSIGNER(Errcode, AuthId, authId)
 LNN_ASSIGNER(Int32, DiscServerType, discServerType)
 LNN_ASSIGNER(Int32, GearCycle, gearCycle)
 LNN_ASSIGNER(Int32, GearDuration, gearDuration)
 LNN_ASSIGNER(Int32, ConnectionId, connectionId)
-LNN_ASSIGNER(Int32, AuthType, authType)
-LNN_ASSIGNER(Int32, AuthId, authId)
+LNN_ASSIGNER(Int32, AuthLinkType, authLinkType)
+LNN_ASSIGNER(Int32, AuthCostTime, authCostTime)
 LNN_ASSIGNER(Int32, LnnType, lnnType)
 LNN_ASSIGNER(Int32, OnlineNum, onlineNum)
 LNN_ASSIGNER(Int32, PeerDeviceAbility, peerDeviceAbility)
@@ -57,16 +58,17 @@ LNN_ASSIGNER(String, PeerDeviceType, peerDeviceType)
 LNN_ASSIGNER(String, CallerPkg, callerPkg)
 LNN_ASSIGNER(String, CalleePkg, calleePkg)
 
-#define LNN_ASSIGNER_SIZE 22 // Size of g_connAssigners
+#define LNN_ASSIGNER_SIZE 23 // Size of g_connAssigners
 static const HiSysEventParamAssigner g_lnnAssigners[] = {
     { "STAGE_RES",        HISYSEVENT_INT32,  LnnAssignerResult           },
     { "ERROR_CODE",       HISYSEVENT_INT32,  LnnAssignerErrcode          },
+    { "AUTH_ID",          HISYSEVENT_INT32,  LnnAssignerAuthId           },
     { "DISC_SERVER_TYPE", HISYSEVENT_INT32,  LnnAssignerDiscServerType   },
     { "GEAR_CYCLE",       HISYSEVENT_INT32,  LnnAssignerGearCycle        },
     { "GEAR_DURATION",    HISYSEVENT_INT32,  LnnAssignerGearDuration     },
     { "CONN_ID",          HISYSEVENT_INT32,  LnnAssignerConnectionId     },
-    { "AUTH_TYPE",        HISYSEVENT_INT32,  LnnAssignerAuthType         },
-    { "AUTH_ID",          HISYSEVENT_INT32,  LnnAssignerAuthId           },
+    { "AUTH_LINK_TYPE",   HISYSEVENT_INT32,  LnnAssignerAuthLinkType     },
+    { "AUTH_COST_TIME",   HISYSEVENT_INT32,  LnnAssignerAuthCostTime     },
     { "LNN_TYPE",         HISYSEVENT_INT32,  LnnAssignerLnnType          },
     { "ONLINE_NUM",       HISYSEVENT_INT32,  LnnAssignerOnlineNum        },
     { "PEER_DEV_ABILITY", HISYSEVENT_INT32,  LnnAssignerPeerDeviceAbility},

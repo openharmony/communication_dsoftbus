@@ -15,6 +15,7 @@
 
 #include "trans_server_proxy_standard.h"
 
+#include <unistd.h>
 #include "ipc_skeleton.h"
 #include "ipc_types.h"
 
@@ -308,7 +309,7 @@ int32_t TransServerProxy::OpenAuthSession(const char *sessionName, const Connect
     }
     char *tmpName = nullptr;
     Anonymize(sessionName, &tmpName);
-    TRANS_LOGI(TRANS_SDK, "sessionName=%s ServerIpcOpenAuthSession begin", tmpName);
+    TRANS_LOGI(TRANS_SDK, "ServerIpcOpenAuthSession begin. sessionName=%{public}s", tmpName);
     AnonymizeFree(tmpName);
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -382,6 +383,14 @@ int32_t TransServerProxy::NotifyAuthSuccess(int32_t channelId, int32_t channelTy
     return serverRet;
 }
 
+int32_t TransServerProxy::GetAndComparePid(int32_t pid, int32_t channelId, int32_t channelType)
+{
+    (void)pid;
+    (void)channelId;
+    (void)channelType;
+    return SOFTBUS_OK;
+}
+
 int32_t TransServerProxy::CloseChannel(int32_t channelId, int32_t channelType)
 {
     sptr<IRemoteObject> remote = GetSystemAbility();
@@ -390,6 +399,7 @@ int32_t TransServerProxy::CloseChannel(int32_t channelId, int32_t channelType)
         return SOFTBUS_ERR;
     }
     MessageParcel data;
+    int32_t callingPid = (int32_t)getpid();
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TRANS_LOGE(TRANS_SDK, "CloseChannel write InterfaceToken failed!");
         return SOFTBUS_ERR;
@@ -400,6 +410,10 @@ int32_t TransServerProxy::CloseChannel(int32_t channelId, int32_t channelType)
     }
     if (!data.WriteInt32(channelType)) {
         TRANS_LOGE(TRANS_SDK, "CloseChannel write channel type failed!");
+        return SOFTBUS_ERR;
+    }
+    if (!data.WriteInt32(callingPid)) {
+        TRANS_LOGE(TRANS_SDK, "CloseChannel write channel callingPid failed!");
         return SOFTBUS_ERR;
     }
 
@@ -577,7 +591,7 @@ int32_t TransServerProxy::RippleStats(int32_t channelId, int32_t channelType, co
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_RIPPLE_STATS, data, reply, option);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "RippleStats send request failed, ret:%{public}d", ret);
+        TRANS_LOGE(TRANS_SDK, "RippleStats send request failed, ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     if (!reply.ReadInt32(ret)) {

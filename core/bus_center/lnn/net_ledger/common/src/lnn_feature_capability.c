@@ -54,6 +54,6 @@ uint64_t LnnGetFeatureCapabilty(void)
         LNN_LOGE(LNN_LEDGER, "get lnn feature fail, use default value");
         configValue = DEFAUTL_LNN_FEATURE;
     }
-    LNN_LOGI(LNN_LEDGER, "lnn feature is %lu", configValue);
+    LNN_LOGI(LNN_LEDGER, "lnn feature configValue=%{public}" PRIu64, configValue);
     return configValue;
 }

@@ -95,7 +95,7 @@ static SoftBusDumpVarNode *SoftBusCreateDumpVarNode(const char *varName, SoftBus
         return NULL;
     }
     if (strcpy_s(varNode->varName, SOFTBUS_DUMP_VAR_NAME_LEN, varName) != EOK) {
-        COMM_LOGE(COMM_DFX, "SoftBusCreateDumpVarNode set varName  %s fail.", varName);
+        COMM_LOGE(COMM_DFX, "SoftBusCreateDumpVarNode set varName fail. varName=%{public}s", varName);
         SoftBusFree(varNode);
         return NULL;
     }

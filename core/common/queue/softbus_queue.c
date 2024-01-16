@@ -65,7 +65,7 @@ int32_t QueueSizeCalc(uint32_t unitNum, uint32_t* queueSize)
         return QUEUE_INVAL;
     }
     if (unitNum > QUEUE_SIZE_MAX) {
-        COMM_LOGE(COMM_UTILS, "unitNum is invalid param unitNum=%u", unitNum);
+        COMM_LOGE(COMM_UTILS, "unitNum is invalid param unitNum=%{public}u", unitNum);
         return QUEUE_INVAL;
     }
 

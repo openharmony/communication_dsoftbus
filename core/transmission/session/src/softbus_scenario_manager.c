@@ -93,8 +93,9 @@ static void NotifyWifi(const char *ifName, const char *localMac,
     const char *peerMac, int finalType, int businessType)
 {
     (void)peerMac;
-    TRANS_LOGI(TRANS_CTRL, "ifName=%s, localMac=%s, peerMac=%s, finalType=%d, businessType=%d",
-          ifName,  localMac, peerMac, finalType, businessType);
+    TRANS_LOGI(TRANS_CTRL,
+        "ifName=%{public}s, localMac=%{public}s, peerMac=%{public}s, finalType=%{public}d, businessType=%{public}d",
+        ifName,  localMac, peerMac, finalType, businessType);
     Hid2dUpperScene *scene =  NULL;
     scene = (Hid2dUpperScene *)SoftBusCalloc(sizeof(Hid2dUpperScene));
     if (scene == NULL) {
@@ -298,7 +299,8 @@ static void ScenarioManagerAddBusinessType(ScenarioManager *manager,
             return;
     }
     TRANS_LOGI(TRANS_CTRL,
-        "same mac pair: businessType:%d, totalFileCount:%d, totalAudioCount=%d, totalVideoCount=%d!",
+        "same mac pair: businessType=%{public}d, totalFileCount=%{public}d, totalAudioCount=%{public}d, "
+        "totalVideoCount=%{public}d",
          businessType, scenarioItem->totalFileCount, scenarioItem->totalAudioCount,
          scenarioItem->totalVideoCount);
 }
@@ -336,7 +338,7 @@ static void ScenarioManagerDelBusinessType(ScenarioManager *manager,
     counter->totalCount--;
     (void)(*itemCount)--;
     TRANS_LOGI(TRANS_CTRL,
-        "businessType:%d, filecount:%d, audiocuont=%d, videocount=%d!",
+        "businessType=%{public}d, filecount=%{public}d, audiocuont=%{public}d, videocount=%{public}d",
          businessType, scenarioItem->totalFileCount, scenarioItem->totalAudioCount,
          scenarioItem->totalVideoCount);
 }
@@ -365,7 +367,7 @@ static bool ScenarioManagerIsBusinesExisted(ScenarioManager *manager,
     ScenarioItem *item, int businessType)
 {
     TRANS_LOGI(TRANS_CTRL,
-        "businessType:%d, filecount:%d, audiocuont=%d, videocount=%d!",
+        "businessType=%{public}d, filecount=%{public}d, audiocuont=%{public}d, videocount=%{public}d",
          businessType, item->totalFileCount, item->totalAudioCount, item->totalVideoCount);
     switch (businessType) {
         case SM_FILE_TYPE:
@@ -416,22 +418,22 @@ static void ScenarioManagerDoNotifyIfNeed(ScenarioManager *manager,
         return;
     }
     if (isAdd) {
-        TRANS_LOGI(TRANS_CTRL, "finalType:%d, bitPos%d", finalType, bitPos);
+        TRANS_LOGI(TRANS_CTRL, "finalType=%{public}d, bitPos=%{public}d", finalType, bitPos);
         if (!SoftbusIsBitmapSet(&finalType, bitPos)) {
             SoftbusBitmapSet(&finalType, bitPos);
             item->finalType = finalType;
-            TRANS_LOGI(TRANS_CTRL, "finalType:%d, bitPos%d", finalType, bitPos);
+            TRANS_LOGI(TRANS_CTRL, "finalType=%{public}d, bitPos=%{public}d", finalType, bitPos);
         }
         if (localScenarioCount->allMacTotalCount == 0) {
             notify = true;
         }
     } else {
-        TRANS_LOGI(TRANS_CTRL, "finalType:%d, bitPos%d", finalType, bitPos);
+        TRANS_LOGI(TRANS_CTRL, "finalType=%{public}d, bitPos=%{public}d", finalType, bitPos);
         if (SoftbusIsBitmapSet(&finalType, bitPos) &&
             !ScenarioManagerIsBusinesExisted(manager, item, info->businessType)) {
             SoftbusBitmapClr(&finalType, bitPos);
             item->finalType = finalType;
-            TRANS_LOGI(TRANS_CTRL, "finalType:%d, bitPos%d", finalType, bitPos);
+            TRANS_LOGI(TRANS_CTRL, "finalType=%{public}d, bitPos=%{public}d", finalType, bitPos);
         }
         if (localScenarioCount->allMacTotalCount == 0) {
             notify = true;
@@ -439,7 +441,7 @@ static void ScenarioManagerDoNotifyIfNeed(ScenarioManager *manager,
     }
     if (notify) {
         TRANS_LOGI(TRANS_CTRL,
-            "current businessType of finalType is %d", item->finalType);
+            "current businessType of finalType=%{public}d", item->finalType);
         const char* ifaceName = "chba";
         // do notify here
         NotifyWifi(ifaceName, item->localMac, item->peerMac, item->finalType, info->businessType);
@@ -491,7 +493,8 @@ static int32_t AddOriginalScenario(ScenarioManager *manager, OriginalScenario *i
     ScenarioManagerAddBusinessType(manager, scenarioItem, counter, info->businessType);
     LocalScenarioCount *localScenarioCount = GetScenarioCount(manager);
     TRANS_LOGI(TRANS_CTRL,
-        "allMacTotalCount:%d, allMacVideoCount:%d, allMacAudioCount:%d, allMacFileCount:%d",
+        "allMacTotalCount=%{public}d, allMacVideoCount=%{public}d, "
+        "allMacAudioCount=%{public}d, allMacFileCount=%{public}d",
         localScenarioCount->allMacTotalCount, localScenarioCount->allMacVideoCount,
         localScenarioCount->allMacAudioCount, localScenarioCount->allMacFileCount);
     SoftBusFree(localScenarioCount);
@@ -542,7 +545,8 @@ static int32_t DelOriginalScenario(ScenarioManager *manager, OriginalScenario *i
     ScenarioManagerDelScenarioItem(manager, scenarioItem);
     LocalScenarioCount *localScenarioCount = GetScenarioCount(manager);
     TRANS_LOGI(TRANS_CTRL,
-        "allMacTotalCount:%d, allMacVideoCount:%d, allMacAudioCount:%d, allMacFileCount:%d",
+        "allMacTotalCount=%{public}d, allMacVideoCount=%{public}d, "
+        "allMacAudioCount=%{public}d, allMacFileCount=%{public}d",
         localScenarioCount->allMacTotalCount, localScenarioCount->allMacVideoCount,
         localScenarioCount->allMacAudioCount, localScenarioCount->allMacFileCount);
     SoftBusFree(localScenarioCount);
@@ -565,12 +569,13 @@ static int32_t UpdateOriginalScenario(ScenarioManager *manager, OriginalScenario
         return SOFTBUS_INVALID_NUM;
     }
     TRANS_LOGI(TRANS_CTRL,
-        "UpdateOriginalScenario : localMac=%s, peerMac=%s, localPid=%d, businessType=%d, isAdd=%d",
+        "UpdateOriginalScenario: "
+        "localMac=%{public}s, peerMac=%{public}s, localPid=%{public}d, businessType=%{public}d, isAdd=%{public}d",
         info->localMac, info->peerMac, info->localPid, info->businessType, isAdd);
 
     int ret = isAdd ? AddOriginalScenario(manager, info) : DelOriginalScenario(manager, info);
     if (ret != 0) {
-        TRANS_LOGE(TRANS_CTRL, "update scenario info failed: %d", ret);
+        TRANS_LOGE(TRANS_CTRL, "update scenario info failed: ret=%{public}d", ret);
         return ret;
     }
     return ret;
@@ -578,7 +583,7 @@ static int32_t UpdateOriginalScenario(ScenarioManager *manager, OriginalScenario
 
 static void ScenarioManagerClearMacIfacePairList(ScenarioManager *manager)
 {
-    TRANS_LOGI(TRANS_CTRL, "before clean : macIfacePairList numer is :%d", manager->macIfacePairList->cnt);
+    TRANS_LOGI(TRANS_CTRL, "before clean : macIfacePairList numer=%{public}d", manager->macIfacePairList->cnt);
     MacIfacePair *pair = NULL;
     MacIfacePair *nextPair = NULL;
     if (SoftBusMutexLock(&(manager->macIfacePairList->lock)) != 0) {
@@ -590,7 +595,7 @@ static void ScenarioManagerClearMacIfacePairList(ScenarioManager *manager)
         SoftBusFree(pair);
         manager->macIfacePairList->cnt--;
     }
-    TRANS_LOGI(TRANS_CTRL, "before clean : macIfacePairList numer is :%d", manager->macIfacePairList->cnt);
+    TRANS_LOGI(TRANS_CTRL, "before clean : macIfacePairList numer=%{public}d", manager->macIfacePairList->cnt);
     (void)SoftBusMutexUnlock(&(manager->macIfacePairList->lock));
 }
 
@@ -606,7 +611,7 @@ static void ScenarioManagerClearBusinessCounterList(ListNode *list)
 
 static void ScenarioManagerClearScenarioItemList(ScenarioManager *manager)
 {
-    TRANS_LOGI(TRANS_CTRL, "before clean:scenarioItemList numer is :%d", manager->scenarioItemList->cnt);
+    TRANS_LOGI(TRANS_CTRL, "before clean:scenarioItemList numer=%{public}d", manager->scenarioItemList->cnt);
     ScenarioItem *item = NULL;
     ScenarioItem *tmp = NULL;
     if (SoftBusMutexLock(&(manager->scenarioItemList->lock)) != 0) {
@@ -619,7 +624,7 @@ static void ScenarioManagerClearScenarioItemList(ScenarioManager *manager)
         SoftBusFree(item);
         manager->scenarioItemList->cnt--;
     }
-    TRANS_LOGI(TRANS_CTRL, "after clean:scenarioItemList numer is :%d", manager->scenarioItemList->cnt);
+    TRANS_LOGI(TRANS_CTRL, "after clean:scenarioItemList numer=%{public}d", manager->scenarioItemList->cnt);
     (void)SoftBusMutexUnlock(&(manager->scenarioItemList->lock));
 }
 

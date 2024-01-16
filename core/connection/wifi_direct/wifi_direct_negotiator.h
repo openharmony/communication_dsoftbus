@@ -41,6 +41,7 @@ struct WifiDirectNegotiator {
     void (*resetContext)(void);
     void (*updateCurrentRemoteDeviceId)(struct WifiDirectNegotiateChannel *channel);
 
+    enum WifiDirectNegotiateCmdType (*getNegotiateCmdType)(struct NegotiateMessage *msg);
     int32_t (*postData)(struct NegotiateMessage *sendMsg);
     int32_t (*handleMessageFromProcessor)(struct NegotiateMessage *msg);
 

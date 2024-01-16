@@ -139,10 +139,14 @@ static int32_t SubscribeInfoCheck(const SubscribeInfo *info)
 
 static void DfxRecordSdkJoinLnnEnd(const char *packageName, int32_t reason)
 {
+    if (reason == SOFTBUS_OK) {
+        return;
+    }
+
     LnnEventExtra extra = { 0 };
     LnnEventExtraInit(&extra);
     extra.errcode = reason;
-    extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+    extra.result = EVENT_STAGE_RESULT_FAILED;
 
     char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
     if (packageName != NULL && IsValidString(packageName, PKG_NAME_SIZE_MAX - 1) && strncpy_s(pkgName,
@@ -154,10 +158,14 @@ static void DfxRecordSdkJoinLnnEnd(const char *packageName, int32_t reason)
 
 static void DfxRecordSdkLeaveLnnEnd(const char *packageName, int32_t reason)
 {
+    if (reason == SOFTBUS_OK) {
+        return;
+    }
+
     LnnEventExtra extra = { 0 };
     LnnEventExtraInit(&extra);
     extra.errcode = reason;
-    extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+    extra.result = EVENT_STAGE_RESULT_FAILED;
 
     char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
     if (packageName != NULL && IsValidString(packageName, PKG_NAME_SIZE_MAX - 1) && strncpy_s(pkgName,
@@ -185,11 +193,15 @@ static void DfxRecordSdkShiftGearStart(const char *packageName, const GearMode *
 
 static void DfxRecordLnnDiscServerEnd(int32_t serverType, const char *packageName, int32_t reason)
 {
+    if (reason == SOFTBUS_OK) {
+        return;
+    }
+
     LnnEventExtra extra = { 0 };
     LnnEventExtraInit(&extra);
     extra.discServerType = serverType;
     extra.errcode = reason;
-    extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+    extra.result = EVENT_STAGE_RESULT_FAILED;
 
     char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
     if (packageName != NULL && IsValidString(packageName, PKG_NAME_SIZE_MAX - 1) && strncpy_s(pkgName,
@@ -492,7 +504,7 @@ int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targ
     }
     size_t len = strnlen(callerId, CALLER_ID_MAX_LEN);
     if (len == 0 || len >= CALLER_ID_MAX_LEN) {
-        LNN_LOGE(LNN_STATE, "invalid shift lnn gear callerId len:%d", len);
+        LNN_LOGE(LNN_STATE, "invalid shift lnn gear callerId len=%{public}d", len);
         return SOFTBUS_INVALID_PARAM;
     }
     if (targetNetworkId != NULL &&

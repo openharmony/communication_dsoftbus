@@ -1669,6 +1669,7 @@ if (!defined(ohos_lite) && enhanced_test) {
       "$dsoftbus_root_path/core/bus_center/service/include",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
       "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+      "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
     ]
     include_dirs += bus_center_decision_center_inc
 

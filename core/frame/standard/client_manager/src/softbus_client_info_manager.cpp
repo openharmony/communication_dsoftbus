@@ -39,7 +39,7 @@ int32_t SoftbusClientInfoManager::SoftbusAddService(const std::string &pkgName, 
         COMM_LOGE(COMM_SVC, "package name, object or abilityDeath is nullptr\n");
         return SOFTBUS_INVALID_PARAM;
     }
-    COMM_LOGI(COMM_SVC, "add SoftbusAddService, pid=%d, pkgname=%s", pid, pkgName.c_str());
+    COMM_LOGI(COMM_SVC, "add SoftbusAddService, pid=%{public}d, pkgname=%{public}s", pid, pkgName.c_str());
     std::lock_guard<std::recursive_mutex> autoLock(clientObjectMapLock_);
     std::pair<sptr<IRemoteObject>, sptr<IRemoteObject::DeathRecipient>> clientObject(object, abilityDeath);
     ClientObjPair clientObjPair(pid, clientObject);
@@ -70,7 +70,7 @@ int32_t SoftbusClientInfoManager::SoftbusRemoveService(const sptr<IRemoteObject>
             break;
         }
     }
-    COMM_LOGI(COMM_SVC, "SoftbusRemoveService, pid=%d, pkgname=%s", (*pid), pkgName.c_str());
+    COMM_LOGI(COMM_SVC, "SoftbusRemoveService, pid=%{public}d, pkgname=%{public}s", (*pid), pkgName.c_str());
     return SOFTBUS_OK;
 }
 
@@ -88,7 +88,7 @@ sptr<IRemoteObject> SoftbusClientInfoManager::GetSoftbusClientProxy(const std::s
 sptr<IRemoteObject> SoftbusClientInfoManager::GetSoftbusClientProxy(const std::string &pkgName, int32_t pid)
 {
     std::lock_guard<std::recursive_mutex> autoLock(clientObjectMapLock_);
-    COMM_LOGI(COMM_SVC, "GetSoftbusClientProxy, pid=%d, pkgname=%s", pid, pkgName.c_str());
+    COMM_LOGI(COMM_SVC, "GetSoftbusClientProxy, pid=%{public}d, pkgname=%{public}s", pid, pkgName.c_str());
     ClientObjRange range = clientObjectMap_.equal_range(pkgName);
     auto iter = std::find_if(range.first, range.second, [&pid](auto iter) {return pid == iter.second.first;});
     if (iter != range.second) {
