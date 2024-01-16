@@ -166,9 +166,9 @@ void disconnectRequest(uint32_t connectionId)
     (void)connectionId;
     return;
 }
-void unpend(const ConnBrPendInfo *info)
+void Unpend(const char *addr)
 {
-    (void)info;
+    (void)addr;
     return;
 }
 
@@ -1027,7 +1027,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager026, TestSize.Level1)
     (void)strcpy_s(unpendInfo.addr, BT_MAC_LEN, "abc");
     ListInit(&g_brManager.pendings->list);
     g_brManagerAsyncHandler.handler.looper->RemoveMessageCustom = RvMessageCustom;
-    UnpendConnection(&unpendInfo);
+    UnpendConnection(unpendInfo.addr);
 }
 
 HWTEST_F(ConnectionBrConnectionTest, testBrManager027, TestSize.Level1)
@@ -1055,7 +1055,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager028, TestSize.Level1)
     g_brManager.state->connectionException = connectionException;
     g_brManager.state->connectionResume = connectionResume;
     g_brManager.state->disconnectRequest = disconnectRequest;
-    g_brManager.state->unpend = unpend;
+    g_brManager.state->unpend = Unpend;
     g_brManager.state->reset = reset;
 
     obj.connectionId = 0;
