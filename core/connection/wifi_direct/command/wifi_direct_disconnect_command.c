@@ -85,8 +85,8 @@ static int32_t CloseLink(struct WifiDirectDisconnectCommand *command)
 
     command->processor = processor;
     processor->activeCommand = (struct WifiDirectCommand *)command;
-    CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=%{public}d", command->type);
     negotiator->currentProcessor = processor;
+    CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=%d currentProcessor=%s", command->type,  processor->name);
 
     return processor->disconnectLink(connectInfo, link);
 }

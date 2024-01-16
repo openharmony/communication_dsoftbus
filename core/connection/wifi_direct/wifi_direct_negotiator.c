@@ -247,6 +247,21 @@ static bool IsMessageNeedPending(struct WifiDirectNegotiator *self, struct WifiD
         CONN_LOGI(CONN_WIFI_DIRECT, "mis deviceId");
         return true;
     }
+    if (self->currentProcessor == NULL) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "currentProcessor=NULL");
+        return false;
+    }
+    if (self->currentProcessor != processor) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "currentProcessor=%s processor=%s", self->currentProcessor->name, processor->name);
+        struct WifiDirectProcessor *hmlProcessor =
+            GetWifiDirectProcessorFactory()->createProcessor(WIFI_DIRECT_PROCESSOR_TYPE_HML);
+        struct WifiDirectProcessor *p2pV2Processor =
+            GetWifiDirectProcessorFactory()->createProcessor(WIFI_DIRECT_PROCESSOR_TYPE_P2P_V2);
+        if (self->currentProcessor == hmlProcessor && processor == p2pV2Processor) {
+            return hmlProcessor->isMessageNeedPending(cmdType, msg);
+        }
+        return true;
+    }
 
     return processor->isMessageNeedPending(cmdType, msg);
 }
@@ -284,6 +299,7 @@ static void ProcessNegotiateMessageWhenProcessorInvalid(struct NegotiateMessage 
     response->putInt(response, NM_KEY_RESULT_CODE, ERROR_WIFI_DIRECT_NO_SUITABLE_PROCESSOR);
     response->putPointer(response, NM_KEY_NEGO_CHANNEL, (void **)&channel);
 
+    response->dump(response, 0);
     if (GetWifiDirectNegotiator()->postData(response) != SOFTBUS_OK) {
         CONN_LOGE(CONN_WIFI_DIRECT, "send response failed");
     }
@@ -321,16 +337,16 @@ static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *ch
         CONN_LOGE(CONN_WIFI_DIRECT, "processor is null");
         if (self->currentProcessor == NULL) {
             CONN_LOGW(CONN_WIFI_DIRECT, "currentProcessor is null");
-            ProcessNegotiateMessageWhenProcessorInvalid(msg);
+            if (cmdType == CMD_CONN_V2_REQ_1) {
+                ProcessNegotiateMessageWhenProcessorInvalid(msg);
+            }
             NegotiateMessageDelete(msg);
             return;
         }
         CONN_LOGI(CONN_WIFI_DIRECT, "use currentProcessor");
-        command->processor = self->currentProcessor;
         processor = self->currentProcessor;
-    } else {
-        command->processor = processor;
     }
+    command->processor = processor;
 
     if (IsMessageNeedPending(self, processor, cmdType, msg)) {
         CONN_LOGI(CONN_WIFI_DIRECT, "queue negotiate command");
@@ -631,6 +647,7 @@ static struct WifiDirectNegotiator g_negotiator = {
     .isBusy = IsBusy,
     .resetContext = ResetContext,
     .updateCurrentRemoteDeviceId = UpdateCurrentRemoteDeviceId,
+    .getNegotiateCmdType = GetNegotiateCmdType,
     .handleMessageFromProcessor = HandleMessageFromProcessor,
     .onNegotiateChannelDataReceived = OnNegotiateChannelDataReceived,
     .onNegotiateChannelDisconnected = OnNegotiateChannelDisconnected,
