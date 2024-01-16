@@ -162,6 +162,7 @@ typedef struct {
     char *reqId;
     int64_t timeStart;
     int32_t linkType;
+    int32_t connectType;
     bool isFastData;
     uint32_t dataConfig;
 } ChannelInfo;

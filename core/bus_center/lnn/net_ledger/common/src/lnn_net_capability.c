@@ -66,7 +66,7 @@ uint32_t LnnGetNetCapabilty(void)
         LNN_LOGE(LNN_LEDGER, "get lnn capbility fail, use default value");
         configValue = DEFAUTL_LNN_CAPBILITY;
     }
-    LNN_LOGI(LNN_LEDGER, "lnn capbility is %u", configValue);
+    LNN_LOGI(LNN_LEDGER, "lnn capbility configValue=%{public}u", configValue);
     if ((configValue & (1 << BIT_BLE)) != 0) {
         (void)LnnSetNetCapability(&capability, BIT_BLE);
     }

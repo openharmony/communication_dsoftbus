@@ -113,11 +113,11 @@ int32_t BroadcastReceiverInit(void)
 
     WifiErrorCode ret = RegisterP2pStateChangedCallback(WifiDirectP2pStateChangeCallback);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, SOFTBUS_ERR, CONN_INIT,
-                                  "register p2p state change callback failed, ret=%d", ret);
+        "register p2p state change callback failed, ret=%{public}d", ret);
 
     ret = RegisterP2pConnectionChangedCallback(WifiDirectP2pConnectionChangeCallback);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, SOFTBUS_ERR, CONN_INIT,
-                                  "register p2p connection change callback failed, ret=%d", ret);
+        "register p2p connection change callback failed, ret=%{public}d", ret);
 
     g_broadcastReceiver.isInited = true;
     return SOFTBUS_OK;

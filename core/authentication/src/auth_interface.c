@@ -60,7 +60,7 @@ static ModuleListener g_moduleListener[] = {
 
 int32_t RegAuthTransListener(int32_t module, const AuthTransListener *listener)
 {
-    AUTH_LOGI(AUTH_CONN, "Trans: add listener, module=%d", module);
+    AUTH_LOGI(AUTH_CONN, "Trans: add listener, module=%{public}d", module);
     if (listener == NULL || listener->onDataReceived == NULL) {
         AUTH_LOGE(AUTH_CONN, "Trans: invalid listener");
         return SOFTBUS_INVALID_PARAM;
@@ -72,13 +72,13 @@ int32_t RegAuthTransListener(int32_t module, const AuthTransListener *listener)
             return SOFTBUS_OK;
         }
     }
-    AUTH_LOGE(AUTH_CONN, "Trans: unknown module=%d", module);
+    AUTH_LOGE(AUTH_CONN, "Trans: unknown module=%{public}d", module);
     return SOFTBUS_ERR;
 }
 
 void UnregAuthTransListener(int32_t module)
 {
-    AUTH_LOGI(AUTH_CONN, "Trans: remove listener, module=%d", module);
+    AUTH_LOGI(AUTH_CONN, "Trans: remove listener, module=%{public}d", module);
     for (uint32_t i = 0; i < sizeof(g_moduleListener) / sizeof(ModuleListener); i++) {
         if (g_moduleListener[i].module == module) {
             g_moduleListener[i].listener.onDataReceived = NULL;
@@ -357,7 +357,7 @@ bool AuthIsPotentialTrusted(const DeviceInfo *device)
         return false;
     }
     if (memcmp(localAccountHash, device->accountHash, SHORT_ACCOUNT_HASH_LEN) == 0 && !LnnIsDefaultOhosAccount()) {
-        AUTH_LOGD(AUTH_HICHAIN, "account:%02X%02X is same, continue verify progress",
+        AUTH_LOGD(AUTH_HICHAIN, "account is same, continue verify progress. account=%{public}02X%{public}02X",
             device->accountHash[0], device->accountHash[1]);
         return true;
     }
@@ -379,7 +379,7 @@ TrustedReturnType AuthHasTrustedRelation(void)
         return TRUSTED_RELATION_IGNORE;
     }
     SoftBusFree(udidArray);
-    AUTH_LOGD(AUTH_CONN, "auth get trusted relation num=%u", num);
+    AUTH_LOGD(AUTH_CONN, "auth get trusted relation num=%{public}u", num);
     return (num != 0) ? TRUSTED_RELATION_YES : TRUSTED_RELATION_NO;
 }
 
@@ -406,7 +406,7 @@ void AuthDeleteStoredAuthKey(const char *udid, int32_t discoveryType)
             linkType = AUTH_LINK_TYPE_P2P;
             break;
         default:
-            AUTH_LOGE(AUTH_KEY, "unkown support discType=%d", discoveryType);
+            AUTH_LOGE(AUTH_KEY, "unkown support discType=%{public}d", discoveryType);
             return;
     }
     AuthRemoveDeviceKey(udid, (int32_t)linkType);
@@ -430,7 +430,7 @@ int32_t AuthInit(void)
     }
     ret = CustomizedSecurityProtocolInit();
     if (ret != SOFTBUS_OK && ret != SOFTBUS_NOT_IMPLEMENT) {
-        AUTH_LOGI(AUTH_INIT, "customized protocol init failed, ret=%d", ret);
+        AUTH_LOGI(AUTH_INIT, "customized protocol init failed, ret=%{public}d", ret);
         return ret;
     }
     AuthLoadDeviceKey();

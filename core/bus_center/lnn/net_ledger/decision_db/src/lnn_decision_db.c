@@ -47,7 +47,7 @@ int32_t EncryptStorageData(uint8_t *dbKey, uint32_t len)
         LNN_LOGE(LNN_LEDGER, "calloc encrypt dbKey fail");
         return SOFTBUS_MEM_ERR;
     }
-    LNN_LOGI(LNN_LEDGER, "Encrypt, data len=%u", len);
+    LNN_LOGI(LNN_LEDGER, "Encrypt, data len=%{public}u", len);
     plainData.size = len;
     plainData.data = dbKey;
     if (LnnEncryptDataByHuks(&g_keyAlias, &plainData, &encryptData) != SOFTBUS_OK) {
@@ -243,7 +243,7 @@ static void InsertTrustedDevInfoRecord(void *param)
         }
         char *anonyUdid = NULL;
         Anonymize(udid, &anonyUdid);
-        LNN_LOGI(LNN_LEDGER, "insert udid=%s to trusted dev info table", anonyUdid);
+        LNN_LOGI(LNN_LEDGER, "insert udid to trusted dev info table. udid=%{public}s", anonyUdid);
         AnonymizeFree(anonyUdid);
         if (InsertRecord(ctx, TABLE_TRUSTED_DEV_INFO, (uint8_t *)&record) == SOFTBUS_OK) {
             (void)LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), CompleteUpdateTrustedDevInfo, NULL);
@@ -291,7 +291,7 @@ static void RemoveTrustedDevInfoRecord(void *param)
     }
     char *anonyUdid = NULL;
     Anonymize(udid, &anonyUdid);
-    LNN_LOGI(LNN_LEDGER, "remove udid=%s from trusted dev info table", anonyUdid);
+    LNN_LOGI(LNN_LEDGER, "remove udid from trusted dev info table. udid=%{public}s", anonyUdid);
     AnonymizeFree(anonyUdid);
     SoftBusFree(udid);
 }

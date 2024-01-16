@@ -124,7 +124,7 @@ static void ProcessDataMessage(SoftBusMessage *msg)
         return;
     }
     if (fsm->curState == NULL || (fsm->flag & FSM_FLAG_RUNNING) == 0) {
-        LNN_LOGE(LNN_STATE, "unexpected state in data msg(%d) process, flag=0x%x",
+        LNN_LOGE(LNN_STATE, "unexpected state in data msg process, arg1=%{public}d, flag=0x%{public}x",
             (int32_t)msg->arg1, fsm->flag);
         return;
     }
@@ -189,7 +189,7 @@ static void FsmStateMsgHandler(SoftBusMessage *msg)
     }
 
     if (msg->what != FSM_CTRL_MSG_DATA) {
-        LNN_LOGI(LNN_STATE, "process fsm ctrl msgType=%d", msg->what);
+        LNN_LOGI(LNN_STATE, "process fsm ctrl msgType=%{public}d", msg->what);
     }
     switch (msg->what) {
         case FSM_CTRL_MSG_START:
@@ -233,7 +233,7 @@ static int32_t RemoveMessageFunc(const SoftBusMessage *msg, void *para)
     }
     msgType = (int32_t)(intptr_t)para;
     if (msg->what == FSM_CTRL_MSG_DATA && (int32_t)msg->arg1 == msgType) {
-        LNN_LOGI(LNN_STATE, "remove fsm data msgType=%d", msgType);
+        LNN_LOGI(LNN_STATE, "remove fsm data msgType=%{public}d", msgType);
         FreeFsmHandleMsgObj((FsmCtrlMsgObj *)msg->obj);
         return 0;
     }

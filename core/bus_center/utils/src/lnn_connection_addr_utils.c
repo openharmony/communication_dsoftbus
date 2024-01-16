@@ -92,7 +92,7 @@ bool LnnConvertAddrToOption(const ConnectionAddr *addr, ConnectOption *option)
         option->socketOption.protocol = LNN_PROTOCOL_IP;
         return true;
     }
-    LNN_LOGE(LNN_STATE, "not supported type=%d", addr->type);
+    LNN_LOGE(LNN_STATE, "not supported type=%{public}d", addr->type);
     return false;
 }
 
@@ -135,7 +135,7 @@ bool LnnConvertOptionToAddr(ConnectionAddr *addr, const ConnectOption *option,
         addr->info.ip.port = (uint16_t)option->socketOption.port;
         return true;
     }
-    LNN_LOGE(LNN_STATE, "not supported type=%d", option->type);
+    LNN_LOGE(LNN_STATE, "not supported type=%{public}d", option->type);
     return false;
 }
 
@@ -203,7 +203,7 @@ bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *conn
         connInfo->info.ipInfo.port = addr->info.ip.port;
         return true;
     }
-    LNN_LOGE(LNN_STATE, "not supported type=%d", addr->type);
+    LNN_LOGE(LNN_STATE, "not supported type=%{public}d", addr->type);
     return false;
 }
 
@@ -241,7 +241,7 @@ bool LnnConvertAuthConnInfoToAddr(ConnectionAddr *addr, const AuthConnInfo *conn
         addr->info.ip.port = (uint16_t)connInfo->info.ipInfo.port;
         return true;
     }
-    LNN_LOGE(LNN_STATE, "not supported type=%d", connInfo->type);
+    LNN_LOGE(LNN_STATE, "not supported type=%{public}d", connInfo->type);
     return false;
 }
 

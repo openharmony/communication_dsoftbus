@@ -83,7 +83,7 @@ int32_t VerifyP2pUnPack(const cJSON *json, char *ip, uint32_t ipLen, int32_t *po
     }
     int32_t errCode = 0;
     if (GetJsonObjectNumberItem(json, JSON_KEY_TYPE, &errCode)) {
-        TRANS_LOGE(TRANS_CTRL, "VerifyP2pUnPack peer proc fail: errCode=%d", errCode);
+        TRANS_LOGE(TRANS_CTRL, "VerifyP2pUnPack peer proc fail: errCode=%{public}d", errCode);
         return SOFTBUS_PEER_PROC_ERR;
     }
     if (!GetJsonObjectNumberItem(json, P2P_PORT, port) ||

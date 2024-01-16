@@ -52,7 +52,8 @@ static void TransactBtSubnetState(LnnPhysicalSubnet *subnet, BtSubnetManagerEven
         [BT_SUBNET_MANAGER_EVENT_IF_DOWN] = {LNN_SUBNET_SHUTDOWN, subnet->status},
     };
     subnet->status = transactMap[event][isAccepted ? BT_EVENT_RESULT_ACCEPTED : BT_EVENT_RESULT_REJECTED];
-    LNN_LOGD(LNN_BUILDER, "subnet %s trans state from %d to %d", subnet->ifName,
+    LNN_LOGD(LNN_BUILDER,
+        "subnet ifName status trans. ifName=%{public}s, status:%{public}d->%{public}d", subnet->ifName,
         lastStatus, subnet->status);
 }
 
@@ -92,7 +93,7 @@ static int32_t EnableBtSubnet(LnnPhysicalSubnet *subnet)
     }
     char *anonyMac = NULL;
     Anonymize(macStr, &anonyMac);
-    LNN_LOGI(LNN_BUILDER, "btmac is %s", anonyMac);
+    LNN_LOGI(LNN_BUILDER, "btmac=%{public}s", anonyMac);
     AnonymizeFree(anonyMac);
     return LnnSetLocalStrInfo(STRING_KEY_BT_MAC, macStr);
 }
@@ -109,7 +110,7 @@ static int32_t DisableBrSubnet(LnnPhysicalSubnet *subnet)
     LNN_LOGI(LNN_BUILDER, "br subnet is disable, start leave br network");
     int32_t ret = LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "leave br network fail, ret=%d", ret);
+        LNN_LOGE(LNN_BUILDER, "leave br network fail, ret=%{public}d", ret);
         return ret;
     }
     return SOFTBUS_OK;
@@ -128,7 +129,7 @@ static int32_t DisableBleSubnet(LnnPhysicalSubnet *subnet)
     LNN_LOGI(LNN_BUILDER, "ble subnet is disable, start leave ble network");
     ret = LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "leave ble network fail, ret=%d", ret);
+        LNN_LOGE(LNN_BUILDER, "leave ble network fail, ret=%{public}d", ret);
         return ret;
     }
     return SOFTBUS_OK;
@@ -202,7 +203,7 @@ static void OnBtNetifStatusChanged(LnnPhysicalSubnet *subnet, void *status)
             }
             break;
         default:
-            LNN_LOGW(LNN_BUILDER, "discard unexpected event %d", event);
+            LNN_LOGW(LNN_BUILDER, "discard unexpected event. event=%{public}d", event);
             return;
     }
     TransactBtSubnetState(subnet, event, (ret == SOFTBUS_OK));
@@ -227,7 +228,7 @@ static LnnPhysicalSubnet *CreateBtSubnetManager(struct LnnProtocolManager *self,
 
         int32_t ret = strcpy_s(subnet->ifName, sizeof(subnet->ifName), ifName);
         if (ret != EOK) {
-            LNN_LOGE(LNN_BUILDER, "copy ifName failed! ret=%d", ret);
+            LNN_LOGE(LNN_BUILDER, "copy ifName failed! ret=%{public}d", ret);
             break;
         }
         return subnet;
@@ -282,11 +283,11 @@ static void LeaveSpecificBrNetwork(const char *btMac)
     }
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
-    LNN_LOGI(LNN_BUILDER, "start leave specific br networkId=%s", anonyNetworkId);
+    LNN_LOGI(LNN_BUILDER, "start leave specific br networkId=%{public}s", anonyNetworkId);
     AnonymizeFree(anonyNetworkId);
     int32_t ret = LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_BR);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "leave br network fail=%d", ret);
+        LNN_LOGE(LNN_BUILDER, "leave br network fail=%{public}d", ret);
     }
 }
 
@@ -298,7 +299,7 @@ static void BtAclStateChangedEvtHandler(const LnnEventBasicInfo *info)
     }
 
     const LnnMonitorBtAclStateChangedEvent *event = (const LnnMonitorBtAclStateChangedEvent *)info;
-    LNN_LOGI(LNN_BUILDER, "BtAclStateChange=%d", event->status);
+    LNN_LOGI(LNN_BUILDER, "BtAclStateChange=%{public}d", event->status);
     switch (event->status) {
         case SOFTBUS_BR_ACL_CONNECTED:
             /* do nothing */
@@ -341,7 +342,7 @@ int32_t LnnEnableBtProtocol(struct LnnProtocolManager *self, LnnNetIfMgr *netifM
 
     int ret = LnnRegistPhysicalSubnet(manager);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "regist subnet manager failed!ret=%d", ret);
+        LNN_LOGE(LNN_BUILDER, "regist subnet manager failed! ret=%{public}d", ret);
         manager->destroy(manager);
         return ret;
     }

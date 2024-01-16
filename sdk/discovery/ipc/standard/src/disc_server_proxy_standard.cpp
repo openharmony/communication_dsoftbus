@@ -145,7 +145,7 @@ int32_t DiscServerProxy::StopDiscovery(const char *pkgName, int subscribeId)
     MessageParcel reply;
     MessageOption option;
     int32_t err = remote->SendRequest(SERVER_STOP_DISCOVERY, data, reply, option);
-    DISC_LOGI(DISC_ABILITY, "StopDiscovery send request ret = %d!", err);
+    DISC_LOGI(DISC_ABILITY, "StopDiscovery send request ret=%{public}d!", err);
     if (err != 0) {
         DISC_LOGE(DISC_SDK, "StopDiscovery send request failed!");
         return SOFTBUS_ERR;
@@ -206,7 +206,7 @@ int32_t DiscServerProxy::PublishService(const char *pkgName, const PublishInfo *
     MessageParcel reply;
     MessageOption option;
     int32_t err = remote->SendRequest(SERVER_PUBLISH_SERVICE, data, reply, option);
-    DISC_LOGI(DISC_ABILITY, "PublishService send request ret = %d!", err);
+    DISC_LOGI(DISC_ABILITY, "PublishService send request ret=%{public}d!", err);
     if (err != 0) {
         DISC_LOGE(DISC_SDK, "PublishService send request failed!");
         return SOFTBUS_ERR;
@@ -245,7 +245,7 @@ int32_t DiscServerProxy::UnPublishService(const char *pkgName, int publishId)
     MessageParcel reply;
     MessageOption option;
     int32_t err = remote->SendRequest(SERVER_UNPUBLISH_SERVICE, data, reply, option);
-    DISC_LOGI(DISC_SDK, "UnPublishService send request ret = %d!", err);
+    DISC_LOGI(DISC_SDK, "UnPublishService send request ret=%{public}d!", err);
     if (err != 0) {
         DISC_LOGE(DISC_SDK, "UnPublishService send request failed!");
         return SOFTBUS_ERR;
@@ -296,6 +296,14 @@ int32_t DiscServerProxy::OpenAuthSession(const char *sessionName, const Connecti
 
 int32_t DiscServerProxy::NotifyAuthSuccess(int32_t channelId, int32_t channelType)
 {
+    (void)channelId;
+    (void)channelType;
+    return SOFTBUS_OK;
+}
+
+int32_t DiscServerProxy::GetAndComparePid(int32_t pid, int32_t channelId, int32_t channelType)
+{
+    (void)pid;
     (void)channelId;
     (void)channelType;
     return SOFTBUS_OK;

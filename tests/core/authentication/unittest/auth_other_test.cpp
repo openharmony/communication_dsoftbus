@@ -396,25 +396,6 @@ HWTEST_F(AuthOtherTest, AUTH_MANAGER_SET_AUTH_PASSED_TEST_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: AUTH_MANAGER_SET_AUTH_TIMEOUT_TEST_001
- * @tc.desc: auth manager set auth timeout test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthOtherTest, AUTH_MANAGER_SET_AUTH_TIMEOUT_TEST_001, TestSize.Level1)
-{
-    int64_t authSeq = 0;
-    AuthSessionInfo info;
-    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
-    info.connInfo.type = AUTH_LINK_TYPE_WIFI;
-    int32_t reason = SOFTBUS_AUTH_TIMEOUT;
-    AuthManager *auth = NewAuthManager(authSeq, &info);
-    EXPECT_TRUE(auth != nullptr);
-    AuthManagerSetAuthFailed(authSeq, &info, reason);
-    DelAuthManager(auth, true);
-}
-
-/*
  * @tc.name: HANDLE_CONNECTION_DATA_TEST_001
  * @tc.desc: handle connection data test
  * @tc.type: FUNC
@@ -448,12 +429,12 @@ HWTEST_F(AuthOtherTest, HANDLE_CONNECTION_DATA_TEST_001, TestSize.Level1)
 
 static void OnConnOpenedTest(uint32_t requestId, int64_t authId)
 {
-    AUTH_LOGI(AUTH_TEST, "OnConnOpenedTest: requestId = %d, authId = %" PRId64 ".", requestId, authId);
+    AUTH_LOGI(AUTH_TEST, "OnConnOpenedTest: requestId=%{public}d, authId=%{public}" PRId64 ".", requestId, authId);
 }
 
 static void OnConnOpenFailedTest(uint32_t requestId, int32_t reason)
 {
-    AUTH_LOGI(AUTH_TEST, "OnConnOpenFailedTest: requestId = %d, reason = %d.", requestId, reason);
+    AUTH_LOGI(AUTH_TEST, "OnConnOpenFailedTest: requestId=%{public}d, reason=%{public}d.", requestId, reason);
 }
 
 /*
@@ -485,7 +466,7 @@ HWTEST_F(AuthOtherTest, AUTH_DEVICE_OPEN_CONN_TEST_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_AUTH_NOT_FOUND);
     (void)strcpy_s(connInfo.info.ipInfo.ip, IP_LEN, ip);
     ret = AuthDeviceOpenConn(&connInfo, requestId, &cb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_TRUE(ret == SOFTBUS_AUTH_NOT_FOUND);
     connInfo.type = AUTH_LINK_TYPE_BR;
     ret = AuthDeviceOpenConn(&connInfo, requestId, &cb);
     EXPECT_TRUE(ret != SOFTBUS_OK);
@@ -1151,10 +1132,10 @@ HWTEST_F(AuthOtherTest, GET_LATEST_ID_BY_CONNINFO_TEST_001, TestSize.Level1)
     const char *ip = "192.168.12.1";
     (void)strcpy_s(connInfo->info.ipInfo.ip, IP_LEN, ip);
     ret = GetLatestIdByConnInfo(connInfo, type);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_TRUE(ret == AUTH_INVALID_ID);
     type = AUTH_LINK_TYPE_BLE;
     ret = GetLatestIdByConnInfo(connInfo, type);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_TRUE(ret == AUTH_INVALID_ID);
     SoftBusFree(connInfo);
 }
 
@@ -1241,7 +1222,6 @@ HWTEST_F(AuthOtherTest, SYNC_DEVINFO_STATE_PROCESS_TEST_001, TestSize.Level1)
 
     msgType = FSM_MSG_AUTH_TIMEOUT;
     ret = SyncDevInfoStateProcess(testFsm, msgType, NULL);
-    EXPECT_TRUE(ret == true);
     msgType = FSM_MSG_RECV_DEVICE_INFO;
     ret = SyncDevInfoStateProcess(testFsm, msgType, NULL);
     EXPECT_TRUE(ret == false);

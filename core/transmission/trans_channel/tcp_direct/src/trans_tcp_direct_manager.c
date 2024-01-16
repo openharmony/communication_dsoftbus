@@ -21,6 +21,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_hisysevt_transreporter.h"
 #include "softbus_socket.h"
 #include "trans_event.h"
 #include "trans_log.h"
@@ -35,8 +36,27 @@
 
 static void OnSessionOpenFailProc(const SessionConn *node, int32_t errCode)
 {
-    TRANS_LOGW(TRANS_CTRL, "OnSesssionOpenFailProc: channelId=%d, side=%d, status=%d",
+    TRANS_LOGW(TRANS_CTRL, "OnSesssionOpenFailProc: channelId=%{public}d, side=%{public}d, status=%{public}d",
         node->channelId, node->serverSide, node->status);
+    int64_t timeStart = node->appInfo.timeStart;
+    int64_t timeDiff = GetSoftbusRecordTimeMillis() - timeStart;
+    TransEventExtra extra = {
+        .calleePkg = NULL,
+        .callerPkg = node->appInfo.myData.pkgName,
+        .channelId = node->appInfo.myData.channelId,
+        .peerChannelId = node->appInfo.peerData.channelId,
+        .peerNetworkId = node->appInfo.peerNetWorkId,
+        .socketName = node->appInfo.myData.sessionName,
+        .linkType = node->appInfo.connectType,
+        .costTime = (int32_t)timeDiff,
+        .errcode = errCode,
+        .result = EVENT_STAGE_RESULT_FAILED
+    };
+    if (!node->serverSide) {
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
+    } else {
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_OPEN_CHANNEL_END, extra);
+    }
     if (node->serverSide == false) {
         if (TransTdcOnChannelOpenFailed(node->appInfo.myData.pkgName, node->appInfo.myData.pid,
             node->channelId, errCode) != SOFTBUS_OK) {
@@ -46,7 +66,7 @@ static void OnSessionOpenFailProc(const SessionConn *node, int32_t errCode)
 
     int32_t fd = node->appInfo.fd;
     if (fd >= 0) {
-        TRANS_LOGW(TRANS_CTRL, "fd=%d is shutdown", fd);
+        TRANS_LOGW(TRANS_CTRL, "session is shutdown. fd=%{public}d", fd);
         DelTrigger(node->listenMod, fd, RW_TRIGGER);
         ConnShutdownSocket(fd);
     }
@@ -193,7 +213,7 @@ void TransTdcDeathCallback(const char *pkgName, int32_t pid)
         TRANS_LOGE(TRANS_CTRL, "param invalid");
         return;
     }
-    TRANS_LOGW(TRANS_CTRL, "TransTdcDeathCallback: pkgName=%s, pid=%d", pkgName, pid);
+    TRANS_LOGW(TRANS_CTRL, "TransTdcDeathCallback: pkgName=%{public}s, pid=%{public}d", pkgName, pid);
     SessionConn *item = NULL;
     SessionConn *nextItem = NULL;
     if (GetSessionConnLock() != SOFTBUS_OK) {
@@ -239,12 +259,6 @@ static int32_t TransUpdAppInfo(AppInfo *appInfo, const ConnectOption *connInfo)
                 SOFTBUS_OK) {
                 TRANS_LOGE(TRANS_CTRL, "TransUpdAppInfo get local ip fail");
                 return SOFTBUS_TRANS_GET_LOCAL_IP_FAILED;
-            }
-        } else if ((connInfo->type == CONNECT_P2P_REUSE) || (connInfo->type == CONNECT_P2P)) {
-            if (GetWifiDirectManager()->getLocalIpByUuid(appInfo->peerData.deviceId, appInfo->myData.addr,
-                sizeof(appInfo->myData.addr)) != SOFTBUS_OK) {
-                TRANS_LOGE(TRANS_CTRL, "TransUpdAppInfo get p2p ip fail");
-                return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
             }
         }
     }

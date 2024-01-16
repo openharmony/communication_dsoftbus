@@ -17,7 +17,7 @@
 
 int OnStartDiscoveryWeak(const char *pkgName, const void *info)
 {
-    COMM_LOGI(COMM_INIT, "client OnStartDiscovery Strong pkgName = %s", pkgName);
+    COMM_LOGI(COMM_INIT, "client OnStartDiscovery Strong pkgName=%{public}s", pkgName);
     (void)info;
     return 0;
 }

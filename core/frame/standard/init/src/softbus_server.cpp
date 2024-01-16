@@ -105,7 +105,7 @@ int32_t SoftBusServer::SoftbusRegisterService(const char *clientPkgName, const s
         COMM_LOGE(COMM_SVC, "softbus add client service failed");
         return SOFTBUS_ERR;
     }
-    COMM_LOGI(COMM_SVC, "softbus register service success %s", clientPkgName);
+    COMM_LOGI(COMM_SVC, "softbus register service success. clientPkgName=%{public}s", clientPkgName);
     return SOFTBUS_OK;
 }
 
@@ -175,6 +175,11 @@ int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const Connection
 int32_t SoftBusServer::NotifyAuthSuccess(int32_t channelId, int32_t channelType)
 {
     return TransNotifyAuthSuccess(channelId, channelType);
+}
+
+int32_t SoftBusServer::GetAndComparePid(int32_t pid, int32_t channelId, int32_t channelType)
+{
+    return TransGetAndComparePid(pid, channelId, channelType);
 }
 
 int32_t SoftBusServer::CloseChannel(int32_t channelId, int32_t channelType)

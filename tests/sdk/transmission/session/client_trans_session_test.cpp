@@ -90,72 +90,72 @@ void TransClientSessionTest::TearDownTestCase(void)
 
 static int OnSessionOpened(int sessionId, int result)
 {
-    TRANS_LOGI(TRANS_TEST, "session opened, sessionId=%d", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session opened, sessionId=%{public}d", sessionId);
     return SOFTBUS_OK;
 }
 
 static void OnSessionClosed(int sessionId)
 {
-    TRANS_LOGI(TRANS_TEST, "session closed, sessionId=%d", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session closed, sessionId=%{public}d", sessionId);
 }
 
 static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
 {
-    TRANS_LOGI(TRANS_TEST, "session bytes received, sessionId=%d", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session bytes received, sessionId=%{public}d", sessionId);
 }
 
 static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
 {
-    TRANS_LOGI(TRANS_TEST, "session msg received, sessionId=%d", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session msg received, sessionId=%{public}d", sessionId);
 }
 
 static void OnStreamReceived(int sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
 {
-    TRANS_LOGI(TRANS_TEST, "session stream received, sessionId=%d", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session stream received, sessionId=%{public}d", sessionId);
 }
 
 static void OnQosEvent(int sessionId, int eventId, int tvCount, const QosTv *tvList)
 {
-    TRANS_LOGI(TRANS_TEST, "session Qos event emit, sessionId=%d", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session Qos event emit, sessionId=%{public}d", sessionId);
 }
 
 static int OnSessionOpenedErr(int sessionId, int result)
 {
-    TRANS_LOGI(TRANS_TEST, "session opened, sessionId=%d", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session opened, sessionId=%{public}d", sessionId);
     return SOFTBUS_ERR;
 }
 
 static int OnReceiveFileStarted(int sessionId, const char *files, int fileCnt)
 {
-    TRANS_LOGI(TRANS_TEST, "receive file start, sessionId=%d", sessionId);
+    TRANS_LOGI(TRANS_TEST, "receive file start, sessionId=%{public}d", sessionId);
     return SOFTBUS_OK;
 }
 
 static int OnReceiveFileProcess(int sessionId, const char *firstFile, uint64_t bytesUpload, uint64_t bytesTotal)
 {
-    TRANS_LOGI(TRANS_TEST, "receive file process, sessionId=%d", sessionId);
+    TRANS_LOGI(TRANS_TEST, "receive file process, sessionId=%{public}d", sessionId);
     return SOFTBUS_OK;
 }
 
 static void OnReceiveFileFinished(int sessionId, const char *files, int fileCnt)
 {
-    TRANS_LOGI(TRANS_TEST, "receive file finished, sessionId=%d", sessionId);
+    TRANS_LOGI(TRANS_TEST, "receive file finished, sessionId=%{public}d", sessionId);
 }
 
 void OnFileTransError(int sessionId)
 {
-    TRANS_LOGI(TRANS_TEST, "file transmission error, sessionId=%d", sessionId);
+    TRANS_LOGI(TRANS_TEST, "file transmission error, sessionId=%{public}d", sessionId);
 }
 
 int OnSendFileProcess(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
 {
-    TRANS_LOGI(TRANS_TEST, "send file process, sessionId=%d", sessionId);
+    TRANS_LOGI(TRANS_TEST, "send file process, sessionId=%{public}d", sessionId);
     return SOFTBUS_OK;
 }
 
 int OnSendFileFinished(int sessionId, const char *firstFile)
 {
-    TRANS_LOGI(TRANS_TEST, "send file finished, sessionId=%d", sessionId);
+    TRANS_LOGI(TRANS_TEST, "send file finished, sessionId=%{public}d", sessionId);
     return SOFTBUS_OK;
 }
 

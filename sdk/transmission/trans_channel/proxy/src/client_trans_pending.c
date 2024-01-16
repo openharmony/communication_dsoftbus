@@ -61,7 +61,7 @@ static int32_t CheckPendingPacketExisted(uint32_t id, uint64_t seq)
     PendingPacket *pending = NULL;
     LIST_FOR_EACH_ENTRY(pending, &g_pendingList, PendingPacket, node) {
         if (pending->id == id && pending->seq == seq) {
-            TRANS_LOGE(TRANS_SDK, "PendingPacket existed. pendingId=%u, pendingSeq=%" PRIu64, id, seq);
+            TRANS_LOGE(TRANS_SDK, "PendingPacket existed. pendingId=%{public}u, pendingSeq=%{public}" PRIu64, id, seq);
             (void)SoftBusMutexUnlock(&g_pendingLock);
             return SOFTBUS_ALREADY_EXISTED;
         }
@@ -74,7 +74,7 @@ int32_t CreatePendingPacket(uint32_t id, uint64_t seq)
 {
     int32_t ret = CheckPendingPacketExisted(id, seq);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "Check pending packet is exist, ret=%d.", ret);
+        TRANS_LOGE(TRANS_SDK, "Check pending packet is exist, ret=%{public}d.", ret);
         return ret;
     }
 

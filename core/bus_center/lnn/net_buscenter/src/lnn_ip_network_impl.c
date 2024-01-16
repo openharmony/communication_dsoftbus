@@ -103,7 +103,7 @@ static int32_t GetAvailableIpAddr(const char *ifName, char *ip, uint32_t size)
 {
     static int32_t retryTime = GET_IP_RETRY_TIMES;
     if (!LnnIsLinkReady(ifName)) {
-        LNN_LOGE(LNN_BUILDER, "ifName=%s link not ready", ifName);
+        LNN_LOGE(LNN_BUILDER, "link not ready. ifName=%{public}s", ifName);
     }
     if (strcmp(ifName, WLAN_IFNAME) != 0) {
         retryTime = 0;
@@ -112,7 +112,7 @@ static int32_t GetAvailableIpAddr(const char *ifName, char *ip, uint32_t size)
         retryTime = GET_IP_RETRY_TIMES;
         return SOFTBUS_OK;
     }
-    LNN_LOGD(LNN_BUILDER, "get ip retry time=%d", retryTime);
+    LNN_LOGD(LNN_BUILDER, "get ip retry time=%{public}d", retryTime);
     if (--retryTime > 0 && LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), RetryGetAvailableIpAddr,
         NULL, GET_IP_INTERVAL_TIME) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "LnnAsyncCallbackDelayHelper get available ip fail");
@@ -145,7 +145,7 @@ static int32_t OpenAuthPort(void)
     }
     char *anonyIp = NULL;
     Anonymize(localIp, &anonyIp);
-    LNN_LOGI(LNN_BUILDER, "open auth port listening on ip=%s", anonyIp);
+    LNN_LOGI(LNN_BUILDER, "open auth port listening on ip=%{public}s", anonyIp);
     AnonymizeFree(anonyIp);
     if (authPort == 0) {
         return LnnSetLocalNumInfo(NUM_KEY_AUTH_PORT, port);
@@ -305,7 +305,7 @@ static void LeaveOldIpNetwork(const char *ifCurrentName)
     bool addrType[CONNECTION_ADDR_MAX] = {false};
 
     if (LnnGetAddrTypeByIfName(ifCurrentName, &type) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "LnnGetAddrTypeByIfName failed ifName=%s", ifCurrentName);
+        LNN_LOGE(LNN_BUILDER, "LnnGetAddrTypeByIfName failed ifName=%{public}s", ifCurrentName);
         return;
     }
     if (type == CONNECTION_ADDR_MAX) {
@@ -329,7 +329,7 @@ static int32_t ReleaseMainPort(const char *ifName)
             break;
         }
         if (strcmp(ifName, oldMainIf) != 0) {
-            LNN_LOGE(LNN_BUILDER, "ifName=%s is not main port!", ifName);
+            LNN_LOGE(LNN_BUILDER, "if is not main port! ifName=%{public}s", ifName);
             return SOFTBUS_ERR;
         }
     } while (false);
@@ -372,11 +372,11 @@ static int32_t EnableIpSubnet(LnnPhysicalSubnet *subnet)
 
     int32_t ret = GetAvailableIpAddr(subnet->ifName, address, sizeof(address));
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "get available Ip failed!ifName=%s, ret=%d", subnet->ifName, ret);
+        LNN_LOGE(LNN_BUILDER, "get available Ip failed! ifName=%{public}s, ret=%{public}d", subnet->ifName, ret);
         return ret;
     }
     if (RequestMainPort(subnet->ifName, address)) {
-        LNN_LOGE(LNN_BUILDER, "request main port failed!ifName=%s", subnet->ifName);
+        LNN_LOGE(LNN_BUILDER, "request main port failed! ifName=%{public}s", subnet->ifName);
         return SOFTBUS_ERR;
     }
     LNN_LOGI(LNN_BUILDER, "open ip link and start discovery");
@@ -450,8 +450,8 @@ static void TransactIpSubnetState(LnnPhysicalSubnet *subnet, IpSubnetManagerEven
         [IP_SUBNET_MANAGER_EVENT_IF_CHANGED] = {LNN_SUBNET_RESETTING, subnet->status}
     };
     subnet->status = transactMap[event][isAccepted ? IP_EVENT_RESULT_ACCEPTED : IP_EVENT_RESULT_REJECTED];
-    LNN_LOGD(LNN_BUILDER, "subnet [%s, %u] state change to %d", subnet->ifName,
-        subnet->protocol->id, subnet->status);
+    LNN_LOGD(LNN_BUILDER, "subnet state change. ifName=%{public}s, protocolId=%{public}u, status=%{public}d",
+        subnet->ifName, subnet->protocol->id, subnet->status);
 }
 
 static IpSubnetManagerEvent GetIpEventInOther(LnnPhysicalSubnet *subnet)
@@ -507,10 +507,10 @@ static void OnIpNetifStatusChanged(LnnPhysicalSubnet *subnet, void *status)
         }
     } else {
         event = *(IpSubnetManagerEvent *)status;
-        LNN_LOGI(LNN_BUILDER, "want to enter event=%d", event);
+        LNN_LOGI(LNN_BUILDER, "want to enter event=%{public}d", event);
         SoftBusFree(status);
         if (event < IP_SUBNET_MANAGER_EVENT_IF_READY || event > IP_SUBNET_MANAGER_EVENT_MAX) {
-            LNN_LOGW(LNN_BUILDER, "is not right event=%d", event);
+            LNN_LOGW(LNN_BUILDER, "is not right event=%{public}d", event);
             return;
         }
     }
@@ -530,7 +530,7 @@ static void OnIpNetifStatusChanged(LnnPhysicalSubnet *subnet, void *status)
             break;
         }
         default:
-            LNN_LOGW(LNN_BUILDER, "discard unexpected event=%d", event);
+            LNN_LOGW(LNN_BUILDER, "discard unexpected event=%{public}d", event);
             return;
     }
 
@@ -554,7 +554,7 @@ static LnnPhysicalSubnet *CreateIpSubnetManager(const struct LnnProtocolManager 
 
         int32_t ret = strcpy_s(subnet->ifName, sizeof(subnet->ifName), ifName);
         if (ret != EOK) {
-            LNN_LOGE(LNN_BUILDER, "copy ifName failed ret=%d", ret);
+            LNN_LOGE(LNN_BUILDER, "copy ifName failed ret=%{public}d", ret);
             break;
         }
         return subnet;
@@ -632,7 +632,7 @@ static void WifiStateChangeEventHandler(const LnnEventBasicInfo *info)
     }
     const LnnMonitorWlanStateChangedEvent *event = (const LnnMonitorWlanStateChangedEvent *)info;
     SoftBusWifiState wifiState = (SoftBusWifiState)event->status;
-    LNN_LOGI(LNN_BUILDER, "wifi state change wifiState=%d", wifiState);
+    LNN_LOGI(LNN_BUILDER, "wifi state change. wifiState=%{public}d", wifiState);
     bool beforeConnected = g_apEnabled || g_wifiConnected;
     if (!WifiStateChangeWifiOrAp(wifiState)) {
         LNN_LOGI(LNN_BUILDER, "not interest wifi event");
@@ -641,7 +641,8 @@ static void WifiStateChangeEventHandler(const LnnEventBasicInfo *info)
     bool currentConnected = g_apEnabled || g_wifiConnected;
     bool isValidIp = IsValidLocalIp();
     LNN_LOGI(LNN_BUILDER,
-        "wifi or ap wifiConnected=%d, apEnabled=%d, beforeConnected=%d, currentConnected=%d, isValidIp=%d",
+        "wifi or ap wifiConnected=%{public}d, apEnabled=%{public}d, beforeConnected=%{public}d, "
+        "currentConnected=%{public}d, isValidIp=%{public}d",
         g_wifiConnected, g_apEnabled, beforeConnected, currentConnected, isValidIp);
     IpSubnetManagerEvent *status = (IpSubnetManagerEvent *)SoftBusCalloc(sizeof(IpSubnetManagerEvent));
     if (status == NULL) {
@@ -676,7 +677,7 @@ int32_t LnnInitIpProtocol(struct LnnProtocolManager *self)
     }
     DiscLinkStatusChanged(LINK_STATUS_DOWN, COAP);
     g_heartbeatEnable = IsEnableSoftBusHeartbeat();
-    LNN_LOGI(LNN_INIT, "init IP protocol g_heartbeatEnable=%d", g_heartbeatEnable);
+    LNN_LOGI(LNN_INIT, "init IP protocol g_heartbeatEnable=%{public}d", g_heartbeatEnable);
     return ret;
 }
 
@@ -694,7 +695,7 @@ int32_t LnnEnableIpProtocol(struct LnnProtocolManager *self, LnnNetIfMgr *netifM
     }
     int ret = LnnRegistPhysicalSubnet(manager);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "regist subnet manager failed!ret=%d", ret);
+        LNN_LOGE(LNN_BUILDER, "regist subnet manager failed! ret=%{public}d", ret);
         manager->destroy(manager);
         return ret;
     }

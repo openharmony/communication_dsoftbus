@@ -143,7 +143,7 @@ bool JSON_GetBoolFromOject(const JsonObj *obj, const char *key, bool *value)
     }
     nlohmann::json item = (*json)[key];
     if (!item.is_boolean()) {
-        JSON_LOGE("Cannot find or invalid [%s]", key);
+        JSON_LOGE("Cannot find or invalid key. key=%{public}s", key);
         return false;
     }
     *value = item.get<bool>();
@@ -180,7 +180,7 @@ static bool JSON_GetIntegerFromObject(const JsonObj *obj, const char *key, Integ
     }
     nlohmann::json item = (*json)[key];
     if (!item.is_number()) {
-        JSON_LOGE("Cannot find or invalid [%s]", key);
+        JSON_LOGE("Cannot find or invalid key. key=%{public}s", key);
         return false;
     }
     value = item.get<Integer>();
@@ -257,12 +257,12 @@ bool JSON_GetStringFromOject(const JsonObj *obj, const char *key, char *value, u
     }
     nlohmann::json item = (*json)[key];
     if (!item.is_string()) {
-        JSON_LOGD("cannot find or invalid [%s]", key);
+        JSON_LOGD("cannot find or invalid key. key=%{public}s", key);
         return false;
     }
     std::string valueString = item.get<std::string>();
     if (strcpy_s(value, size, valueString.c_str()) != EOK) {
-        JSON_LOGE("strcpy [%s] value err, size=%u, value=%s",
+        JSON_LOGE("strcpy value err, key=%{public}s, size=%{public}u, value=%{public}s",
             key, size, valueString.c_str());
         return false;
     }
@@ -301,11 +301,11 @@ bool JSON_GetStringArrayFromOject(const JsonObj *obj, const char * const key, ch
     }
     nlohmann::json item = (*json)[key];
     if (!item.is_array()) {
-        JSON_LOGE("cannot find or invalid [%s]", key);
+        JSON_LOGE("cannot find or invalid key. key=%{public}s", key);
         return false;
     }
     if ((unsigned long)(*len) < (unsigned long)item.size()) {
-        JSON_LOGE("item size invalid, size=%lu.", (unsigned long)item.size());
+        JSON_LOGE("item size invalid, size=%{public}lu.", (unsigned long)item.size());
         return false;
     }
     int32_t i = 0;
@@ -318,7 +318,7 @@ bool JSON_GetStringArrayFromOject(const JsonObj *obj, const char * const key, ch
             return false;
         }
         if (strcpy_s(value[i], len, valueString) != EOK) {
-            JSON_LOGE("strcpy [%s] value err, value=%s", key, valueString);
+            JSON_LOGE("strcpy value err. key=%{public}s, value=%{public}s", key, valueString);
             return false;
         }
         i++;

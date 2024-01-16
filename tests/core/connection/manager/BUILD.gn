@@ -22,7 +22,7 @@ ohos_unittest("ConnectionManagerTest") {
   module_out_path = module_output_path
 
   if (support_bluetooth && dsoftbus_feature_conn_br) {
-    defines = [ "connection_enable_br_test" ]
+    defines += [ "connection_enable_br_test" ]
   } else {
     defines = []
   }

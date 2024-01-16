@@ -56,7 +56,7 @@ static int32_t GetChannel5GListIntArray(int32_t *array, size_t *size)
 {
     int32_t ret = Hid2dGetChannelListFor5G(array, (int32_t) *size);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, SOFTBUS_ERR, CONN_WIFI_DIRECT,
-        "hid2d get channels failed ret=%d", ret);
+        "hid2d get channels failed ret=%{public}d", ret);
 
     int32_t count = 0;
     while (array[count]) {
@@ -73,7 +73,7 @@ static int32_t GetStationFrequency(void)
     int32_t ret = GetLinkedInfo(&linkedInfo);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, FREQUENCY_INVALID, CONN_WIFI_DIRECT,
         "get wifi linked info failed");
-    CONN_LOGI(CONN_WIFI_DIRECT, "frequency=%d", linkedInfo.frequency);
+    CONN_LOGI(CONN_WIFI_DIRECT, "frequency=%{public}d", linkedInfo.frequency);
 
     return linkedInfo.frequency;
 }
@@ -89,7 +89,8 @@ static int32_t GetStationFrequencyWithFilter(void)
         int32_t channelArray[CHANNEL_ARRAY_NUM_MAX];
         size_t channelArraySize = CHANNEL_ARRAY_NUM_MAX;
         ret = GetChannel5GListIntArray(channelArray, &channelArraySize);
-        CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get channel list failed", ret);
+        CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT,
+            "get channel list failed. ret=%{public}d", ret);
 
         int32_t channel = netWorkUtils->frequencyToChannel(frequency);
         if (netWorkUtils->isInChannelList(channel, channelArray, channelArraySize)) {
@@ -135,7 +136,7 @@ static int32_t GetSelfWifiConfigInfo(uint8_t *config, size_t *configSize)
     int32_t ret = Hid2dGetSelfWifiCfgInfo(TYPE_OF_GET_SELF_CONFIG, (char *)wifiConfig, &wifiConfigSize);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, SOFTBUS_ERR, CONN_WIFI_DIRECT, "get self wifi config failed");
 
-    CONN_LOGI(CONN_WIFI_DIRECT, "wifiConfigSize=%d", wifiConfigSize);
+    CONN_LOGI(CONN_WIFI_DIRECT, "wifiConfigSize=%{public}d", wifiConfigSize);
     if (wifiConfigSize == 0) {
         *configSize = 0;
         CONN_LOGI(CONN_WIFI_DIRECT, "empty wifi cfg");
@@ -211,7 +212,8 @@ static int32_t GetGroupConfig(char *groupConfigString, size_t *groupConfigString
         groupInfo = NULL;
         return ret;
     }
-    CONN_LOGI(CONN_WIFI_DIRECT, "groupName=%s, frequency=%d", groupInfo->groupName, groupInfo->frequency);
+    CONN_LOGI(CONN_WIFI_DIRECT, "groupName=%{public}s, frequency=%{public}d", groupInfo->groupName,
+        groupInfo->frequency);
 
     ret = sprintf_s(groupConfigString, *groupConfigStringSize, "%s\n%s\n%s\n%d",
                     groupInfo->groupName, macAddrString, groupInfo->passphrase, groupInfo->frequency);
@@ -298,12 +300,12 @@ static int32_t GetIpAddress(char *ipString, int32_t ipStringSize)
         return SOFTBUS_ERR;
     }
     SoftBusFree(groupInfo);
-    CONN_LOGI(CONN_WIFI_DIRECT, "interfaceName=%s", interface);
+    CONN_LOGI(CONN_WIFI_DIRECT, "interfaceName=%{public}s", interface);
 
     struct WifiDirectNetWorkUtils *netWorkUtils = GetWifiDirectNetWorkUtils();
     ret = netWorkUtils->getInterfaceIpString(interface, ipString, ipStringSize);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get ip string failed");
-    CONN_LOGI(CONN_WIFI_DIRECT, "ipString=%s", ipString);
+    CONN_LOGI(CONN_WIFI_DIRECT, "ipString=%{public}s", ipString);
     return SOFTBUS_OK;
 }
 
@@ -373,7 +375,7 @@ static int32_t RequestGcIp(const char *macString, char *ipString, size_t ipStrin
 
     ret = sprintf_s(ipString, ipStringSize, "%u.%u.%u.%u", ipArray[0], ipArray[1], ipArray[2], ipArray[3]);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret > 0, SOFTBUS_ERR, CONN_WIFI_DIRECT, "format ip string failed");
-    CONN_LOGI(CONN_WIFI_DIRECT, "gcIp=%s", ipString);
+    CONN_LOGI(CONN_WIFI_DIRECT, "gcIp=%{public}s", ipString);
 
     return SOFTBUS_OK;
 }
@@ -445,7 +447,7 @@ static int32_t P2pConnectGroup(char *groupConfigString, bool isLegacyGo)
             connectConfig.dhcpMode = CONNECT_AP_DHCP;
         }
     }
-    CONN_LOGI(CONN_WIFI_DIRECT, "dhcpMode=%d", connectConfig.dhcpMode);
+    CONN_LOGI(CONN_WIFI_DIRECT, "dhcpMode=%{public}d", connectConfig.dhcpMode);
     ret = Hid2dConnect(&connectConfig);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, SOFTBUS_ERR, CONN_WIFI_DIRECT, "connect group failed");
 
@@ -456,7 +458,7 @@ static int32_t P2pConnectGroup(char *groupConfigString, bool isLegacyGo)
 static int32_t P2pShareLinkReuse(void)
 {
     WifiErrorCode ret = Hid2dSharedlinkIncrease();
-    CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, SOFTBUS_ERR, CONN_WIFI_DIRECT, "failed ret=%d", ret);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, SOFTBUS_ERR, CONN_WIFI_DIRECT, "failed ret=%{public}d", ret);
     return SOFTBUS_OK;
 }
 
@@ -464,7 +466,7 @@ static int32_t P2pShareLinkRemoveGroup(const char *interface)
 {
     (void)interface;
     WifiErrorCode ret = Hid2dSharedlinkDecrease();
-    CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, SOFTBUS_ERR, CONN_WIFI_DIRECT, "failed ret=%d", ret);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, SOFTBUS_ERR, CONN_WIFI_DIRECT, "failed ret=%{public}d", ret);
     return SOFTBUS_OK;
 }
 
@@ -473,7 +475,7 @@ static int32_t P2pRemoveGroup(const char *interface)
     CONN_CHECK_AND_RETURN_RET_LOGW(interface != NULL, SOFTBUS_ERR, CONN_WIFI_DIRECT, "interface is null");
     struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(interface);
     if (info == NULL) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "can't find interface %s", interface);
+        CONN_LOGE(CONN_WIFI_DIRECT, "can't find interface. interface=%{public}s", interface);
         return SOFTBUS_ERR;
     }
 
@@ -484,13 +486,13 @@ static int32_t P2pRemoveGroup(const char *interface)
     if (role == WIFI_DIRECT_API_ROLE_GO) {
         ret = RemoveGroup();
         CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, SOFTBUS_ERR, CONN_WIFI_DIRECT,
-            "remove group failed, ret=%d", ret);
+            "remove group failed, ret=%{public}d", ret);
     } else if (role == WIFI_DIRECT_API_ROLE_GC) {
         ret = Hid2dRemoveGcGroup(interface);
         CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, SOFTBUS_ERR, CONN_WIFI_DIRECT,
-            "remove gc group of %s failed, ret=%d", interface, ret);
+            "remove gc group of interface failed, interface=%{public}s, ret=%{public}d", interface, ret);
     } else {
-        CONN_LOGW(CONN_WIFI_DIRECT, "unknonwn api role %d", role);
+        CONN_LOGW(CONN_WIFI_DIRECT, "unknonwn api role. role=%{public}d", role);
         return SOFTBUS_ERR;
     }
 

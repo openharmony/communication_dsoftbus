@@ -62,7 +62,7 @@ static void UpdateStateVersionAndStore(void)
     if (g_localNetLedger.localInfo.stateVersion > MAX_STATE_VERSION) {
         g_localNetLedger.localInfo.stateVersion = 0;
     }
-    LNN_LOGI(LNN_LEDGER, "local state version changed to %d",
+    LNN_LOGI(LNN_LEDGER, "local stateVersion=%{public}d",
         g_localNetLedger.localInfo.stateVersion);
     if ((ret = LnnSaveLocalDeviceInfo(&g_localNetLedger.localInfo)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "update local store fail");
@@ -318,8 +318,7 @@ static int32_t LlGetDeviceName(void *buf, uint32_t len)
         LNN_LOGE(LNN_LEDGER, "get device name fail");
         return SOFTBUS_ERR;
     }
-    uint32_t realyLen = len > strlen(deviceName) ? strlen(deviceName) : len -1;
-    if (strncpy_s((char *)buf, len, deviceName, realyLen) != EOK) {
+    if (strncpy_s((char *)buf, len, deviceName, strlen(deviceName)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
         return SOFTBUS_MEM_ERR;
     }
@@ -399,7 +398,7 @@ static int32_t LlGetWlanIp(void *buf, uint32_t len)
     }
     char *anonyIp = NULL;
     Anonymize(ip, &anonyIp);
-    LNN_LOGD(LNN_LEDGER, "get LocalIp=%s", anonyIp);
+    LNN_LOGD(LNN_LEDGER, "get LocalIp=%{public}s", anonyIp);
     AnonymizeFree(anonyIp);
     if (strncpy_s((char *)buf, len, ip, strlen(ip)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
@@ -722,8 +721,8 @@ static int32_t InitLocalDeviceInfo(DeviceBasicInfo *info)
         info->nickName, DEVICE_NAME_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get nick name fail");
     }
-    LNN_LOGD(LNN_LEDGER, "info->unifiedDefaultName: %s, unifiedName: %s, nickName: %s", info->unifiedDefaultName,
-        info->unifiedName, info->nickName);
+    LNN_LOGD(LNN_LEDGER, "info->unifiedDefaultName=%{public}s, unifiedName=%{public}s, nickName=%{public}s",
+        info->unifiedDefaultName, info->unifiedName, info->nickName);
     if (GetCommonDevInfo(COMM_DEVICE_KEY_DEVTYPE, devType, DEVICE_TYPE_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "GetCommonDevInfo: COMM_DEVICE_KEY_DEVTYPE failed");
         return SOFTBUS_ERR;
@@ -962,7 +961,7 @@ static int32_t UpdateLocalDeviceIp(const void *ip)
     LnnSetWiFiIp(&g_localNetLedger.localInfo, (char *)ip);
     char *anonyIp = NULL;
     Anonymize((char *)ip, &anonyIp);
-    LNN_LOGI(LNN_LEDGER, "set LocalIp=%s", anonyIp);
+    LNN_LOGI(LNN_LEDGER, "set LocalIp=%{public}s", anonyIp);
     AnonymizeFree(anonyIp);
     return SOFTBUS_OK;
 }
@@ -1001,7 +1000,7 @@ static int32_t UpdateMasterNodeUdid(const void *udid)
         } else {
             g_localNetLedger.localInfo.role = ROLE_LEAF;
         }
-        LNN_LOGI(LNN_LEDGER, "update local role from %d to %d",
+        LNN_LOGI(LNN_LEDGER, "update local role. role:%{public}d->%{public}d",
             role, g_localNetLedger.localInfo.role);
     }
     return LnnSetMasterUdid(&g_localNetLedger.localInfo, (const char *)udid);
@@ -1450,7 +1449,7 @@ int32_t LnnSetLocalStrInfo(InfoKey key, const char *info)
                 SoftBusMutexUnlock(&g_localNetLedger.lock);
                 return ret;
             }
-            LNN_LOGE(LNN_LEDGER, "key=%d not support or info format error", key);
+            LNN_LOGE(LNN_LEDGER, "key not support or info format error. key=%{public}d", key);
             SoftBusMutexUnlock(&g_localNetLedger.lock);
             return SOFTBUS_INVALID_PARAM;
         }
@@ -1480,7 +1479,7 @@ static int32_t LnnSetLocalInfo(InfoKey key, void* info)
                 SoftBusMutexUnlock(&g_localNetLedger.lock);
                 return ret;
             }
-            LNN_LOGE(LNN_LEDGER, "key=%d not support", key);
+            LNN_LOGE(LNN_LEDGER, "key not support. key=%{public}d", key);
             SoftBusMutexUnlock(&g_localNetLedger.lock);
             return SOFTBUS_ERR;
         }

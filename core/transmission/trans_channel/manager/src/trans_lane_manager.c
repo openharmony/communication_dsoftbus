@@ -170,21 +170,21 @@ int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LaneConnInfo
             SoftBusFree(newLane);
             (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
             TRANS_LOGI(TRANS_SVC,
-                "trans lane info has existed.channelId=%d, channelType=%d", channelId, channelType);
+                "trans lane info has existed. channelId=%{public}d, channelType=%{public}d", channelId, channelType);
             return SOFTBUS_ERR;
         }
     }
     ListInit(&(newLane->node));
     ListAdd(&(g_channelLaneList->list), &(newLane->node));
     g_channelLaneList->cnt++;
-    TRANS_LOGI(TRANS_SVC, "lane count is cnt=%d", g_channelLaneList->cnt);
+    TRANS_LOGI(TRANS_SVC, "lane count is cnt=%{public}d", g_channelLaneList->cnt);
     (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
     return SOFTBUS_OK;
 }
 
 int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType)
 {
-    TRANS_LOGI(TRANS_SVC, "del trans land mgr.chanId=%d channelType=%d", channelId, channelType);
+    TRANS_LOGI(TRANS_SVC, "del trans land mgr. chanId=%{public}d channelType=%{public}d", channelId, channelType);
     if (g_channelLaneList == NULL) {
         TRANS_LOGE(TRANS_INIT, "trans lane manager hasn't init.");
         return SOFTBUS_ERR;
@@ -206,7 +206,7 @@ int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType)
         }
     }
     (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
-    TRANS_LOGE(TRANS_SVC, "trans lane not found.channelId=%d, channelType=%d",
+    TRANS_LOGE(TRANS_SVC, "trans lane not found. channelId=%{public}d, channelType=%{public}d",
         channelId, channelType);
     return SOFTBUS_ERR;
 }
@@ -217,7 +217,7 @@ void TransLaneMgrDeathCallback(const char *pkgName, int32_t pid)
         TRANS_LOGE(TRANS_INIT, "trans lane manager hasn't init.");
         return;
     }
-    TRANS_LOGW(TRANS_CTRL, "TransLaneMgrDeathCallback: pkgName=%s, pid=%d", pkgName, pid);
+    TRANS_LOGW(TRANS_CTRL, "TransLaneMgrDeathCallback: pkgName=%{public}s, pid=%{public}d", pkgName, pid);
     if (SoftBusMutexLock(&(g_channelLaneList->lock)) != 0) {
         TRANS_LOGE(TRANS_SVC, "lock failed");
         return;
@@ -231,7 +231,7 @@ void TransLaneMgrDeathCallback(const char *pkgName, int32_t pid)
             LnnFreeLane(laneItem->laneId);
             SoftBusFree(laneItem);
             (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
-            TRANS_LOGI(TRANS_SVC, "pkgName=%s death del lane channelId=%d, channelType=%d",
+            TRANS_LOGI(TRANS_SVC, "death del lane. pkgName=%{public}s, channelId=%{public}d, channelType=%{public}d",
                 pkgName, laneItem->channelId, laneItem->channelType);
             return;
         }

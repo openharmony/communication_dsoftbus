@@ -111,7 +111,7 @@ int SessionServiceImpl::CloseSession(std::shared_ptr<Session> session)
     }
     int sessionId = session->GetSessionId();
     if (sessionId <= 0) {
-        TRANS_LOGE(TRANS_SDK, "invalid sessionId. sessionId=%d", sessionId);
+        TRANS_LOGE(TRANS_SDK, "invalid sessionId. sessionId=%{public}d", sessionId);
         return SOFTBUS_ERR;
     }
     CloseSessionInner(sessionId);

@@ -24,7 +24,6 @@ adapter_ble_inc = [
   "$dsoftbus_root_path/core/common/dfx/hidumper_adapter/include",
 ]
 adapter_ble_src = [
-  "$dsoftbus_root_path/adapter/common/net/bluetooth/ble/softbus_adapter_ble_gatt.c",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/ble/softbus_adapter_ble_gatt_client.c",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/ble/softbus_adapter_ble_gatt_server.c",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/common/adapter_bt_utils.c",

@@ -220,7 +220,7 @@ static int32_t SslAesGcmDecrypt(const AesGcmCipherKey *cipherkey, const unsigned
 static int32_t HandleError(EVP_CIPHER_CTX *ctx, const char *buf)
 {
     if (buf != NULL) {
-        COMM_LOGE(COMM_ADAPTER, "%s", buf);
+        COMM_LOGE(COMM_ADAPTER, "buf=%{public}s", buf);
     }
     if (ctx != NULL) {
         EVP_CIPHER_CTX_free(ctx);
@@ -258,7 +258,7 @@ int32_t SoftBusBase64Encode(unsigned char *dst, size_t dlen, size_t *olen, const
     *olen += outlen;
 
     if (*olen > dlen) {
-        COMM_LOGE(COMM_ADAPTER, "[TRANS] invalid dlen: %zu, olen:%zu.", dlen, *olen);
+        COMM_LOGE(COMM_ADAPTER, "[TRANS] invalid dlen=%{public}zu, olen=%{public}zu.", dlen, *olen);
         EVP_ENCODE_CTX_free(ctx);
         SoftBusFree(dstTmp);
         return SOFTBUS_INVALID_PARAM;
@@ -314,7 +314,7 @@ int32_t SoftBusBase64Decode(unsigned char *dst, size_t dlen, size_t *olen, const
     }
     *olen += outlen;
     if (*olen > dlen) {
-        COMM_LOGE(COMM_ADAPTER, "[TRANS] invalid dlen: %zu, olen:%zu.", dlen, *olen);
+        COMM_LOGE(COMM_ADAPTER, "[TRANS] invalid dlen=%{public}zu, olen=%{public}zu.", dlen, *olen);
         ret = SOFTBUS_INVALID_PARAM;
         goto FINISHED;
     }
@@ -372,7 +372,7 @@ int32_t SoftBusGenerateRandomArray(unsigned char *randStr, uint32_t len)
     ret = RAND_bytes(randStr, (int32_t)len);
     SoftBusMutexUnlock(&g_randomLock);
     if (ret != 1) {
-        COMM_LOGE(COMM_ADAPTER, "gen random error, ret[%d]", ret);
+        COMM_LOGE(COMM_ADAPTER, "gen random error, ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

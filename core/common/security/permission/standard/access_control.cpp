@@ -39,14 +39,14 @@ int32_t TransCheckAccessControl(const char *peerDeviceId)
     }
 
     int32_t firstCallingId = OHOS::IPCSkeleton::GetFirstTokenID();
-    COMM_LOGI(COMM_PERM, "FirstCaller:%d", firstCallingId);
+    COMM_LOGI(COMM_PERM, "FirstCaller=%{public}d", firstCallingId);
     if (firstCallingId == 0) {
         return SOFTBUS_OK;
     }
 
     char *tmpName = nullptr;
     Anonymize(peerDeviceId, &tmpName);
-    COMM_LOGI(COMM_PERM, "peerDeviceId:%s", tmpName);
+    COMM_LOGI(COMM_PERM, "peerDeviceId=%{public}s", tmpName);
     AnonymizeFree(tmpName);
 
     char deviceId[UDID_BUF_LEN] = {0};
@@ -55,7 +55,7 @@ int32_t TransCheckAccessControl(const char *peerDeviceId)
         return SOFTBUS_ERR;
     }
     Anonymize(deviceId, &tmpName);
-    COMM_LOGI(COMM_PERM, "deviceId:%s", tmpName);
+    COMM_LOGI(COMM_PERM, "deviceId=%{public}s", tmpName);
     AnonymizeFree(tmpName);
 
     std::string active = std::to_string(static_cast<int>(Status::ACTIVE));
@@ -65,12 +65,13 @@ int32_t TransCheckAccessControl(const char *peerDeviceId)
     parms.insert({{"tokenId", firstTokenIdStr}, {"trustDeviceId", deviceId}, {"status", active}});
 
     int32_t ret = DistributedDeviceProfileClient::GetInstance().GetAccessControlProfile(parms, profile);
-    COMM_LOGI(COMM_PERM, "profile size:%d ret:%d", profile.size(), ret);
+    COMM_LOGI(COMM_PERM, "profile size=%{public}d, ret=%{public}d", profile.size(), ret);
     if (profile.empty()) {
         return SOFTBUS_ERR;
     }
     for (auto &item : profile) {
-        COMM_LOGI(COMM_PERM, "GetBindLevel:%d GetBindType:%d", item.GetBindLevel(), item.GetBindType());
+        COMM_LOGI(COMM_PERM,
+            "GetBindLevel=%{public}d, GetBindType=%{public}d", item.GetBindLevel(), item.GetBindType());
     }
 
     return SOFTBUS_OK;

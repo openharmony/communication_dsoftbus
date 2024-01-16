@@ -25,11 +25,6 @@ using testing::_;
 using testing::NotNull;
 
 /* implement related global function of BLE */
-int BleGattLockInit()
-{
-    return BleMock::GetMock()->BleGattLockInit();
-}
-
 int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
 {
     return BleMock::GetMock()->SoftBusAddBtStateListener(listener);
@@ -127,11 +122,6 @@ BleMock::~BleMock()
     mock.store(nullptr);
 }
 
-int32_t BleMock::ActionOfBleGattLockInit()
-{
-    return SOFTBUS_OK;
-}
-
 int32_t BleMock::ActionOfInitBroadcastMgr()
 {
     return SOFTBUS_OK;
@@ -169,7 +159,7 @@ int32_t BleMock::ActionOfUnRegisterScanListener(int32_t listenerId)
 
 int32_t BleMock::ActionOfSetScanFilter(int32_t listenerId, const BcScanFilter *scanFilter, uint8_t filterNum)
 {
-    DISC_LOGI(DISC_TEST, "listenerId=%d filterSize=%d", listenerId, filterNum);
+    DISC_LOGI(DISC_TEST, "listenerId=%{public}d, filterSize=%{public}d", listenerId, filterNum);
     return SOFTBUS_OK;
 }
 
@@ -254,12 +244,13 @@ void BleMock::HexDump(const uint8_t *data, uint32_t len)
         ss << std::uppercase << std::hex << std::setfill('0') << std::setw(BYTE_DUMP_LEN)
             << static_cast<uint32_t>(data[i]) << " ";
     }
-    DISC_LOGI(DISC_TEST, "%s", ss.str().c_str());
+    DISC_LOGI(DISC_TEST, "ss=%{public}s", ss.str().c_str());
 }
 
 void BleMock::ShowAdvData(int32_t bcId, const BroadcastPacket *packet)
 {
-    DISC_LOGI(DISC_TEST, "bcId=%d advLen=%d rspLen=%d", bcId, packet->bcData.payloadLen, packet->rspData.payloadLen);
+    DISC_LOGI(DISC_TEST, "bcId=%{public}d, advLen=%{public}d, rspLen=%{public}d", bcId, packet->bcData.payloadLen,
+        packet->rspData.payloadLen);
     DISC_LOGI(DISC_TEST, "adv data:");
     HexDump(reinterpret_cast<const uint8_t *>(packet->bcData.payload), packet->bcData.payloadLen);
     DISC_LOGI(DISC_TEST, "rsp data:");
@@ -475,7 +466,6 @@ bool BleMock::IsDeInitSuccess()
 
 void BleMock::SetupSuccessStub()
 {
-    EXPECT_CALL(*this, BleGattLockInit).WillRepeatedly(BleMock::ActionOfBleGattLockInit);
     EXPECT_CALL(*this, InitBroadcastMgr).WillRepeatedly(BleMock::ActionOfInitBroadcastMgr);
     EXPECT_CALL(*this, DeInitBroadcastMgr).WillRepeatedly(BleMock::ActionOfDeInitBroadcastMgr);
     EXPECT_CALL(*this, SoftBusGetBtState).WillRepeatedly(BleMock::ActionOfGetBtState);

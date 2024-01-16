@@ -107,7 +107,7 @@ static void OnReceiveDeviceName(LnnSyncInfoType type, const char *networkId, con
     char udid[UDID_BUF_LEN];
     NodeBasicInfo basic;
     if (type != LNN_INFO_TYPE_DEVICE_NAME || len == 0 || networkId == NULL || msg == NULL) {
-        LNN_LOGE(LNN_BUILDER, "invalid param, SyncInfoType=%d", type);
+        LNN_LOGE(LNN_BUILDER, "invalid param, SyncInfoType=%{public}d", type);
         return;
     }
     if (strnlen((char *)msg, len) == len) {
@@ -116,7 +116,7 @@ static void OnReceiveDeviceName(LnnSyncInfoType type, const char *networkId, con
     }
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
-    LNN_LOGI(LNN_BUILDER, "recv device name changed msg=%s, networkId=%s",
+    LNN_LOGI(LNN_BUILDER, "recv device name changed. msg=%{public}s, networkId=%{public}s",
         (char *)msg, anonyNetworkId);
     AnonymizeFree(anonyNetworkId);
     if (LnnConvertDlId(networkId, CATEGORY_NETWORK_ID, CATEGORY_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
@@ -181,7 +181,7 @@ static void NickNameMsgProc(const char *networkId, int64_t accountId, const char
         return;
     }
     int32_t ret = SOFTBUS_OK;
-    LNN_LOGE(LNN_BUILDER, "peer unifiedDefaultName:%s", peerNodeInfo.deviceInfo.unifiedDefaultName);
+    LNN_LOGE(LNN_BUILDER, "peer unifiedDefaultName=%{public}s", peerNodeInfo.deviceInfo.unifiedDefaultName);
     if (strlen(peerNodeInfo.deviceInfo.unifiedName) != 0 &&
         strcmp(peerNodeInfo.deviceInfo.unifiedName, peerNodeInfo.deviceInfo.unifiedDefaultName) != 0) {
         ret = strcpy_s(displayName, DEVICE_NAME_BUF_LEN, peerNodeInfo.deviceInfo.unifiedName);
@@ -194,7 +194,7 @@ static void NickNameMsgProc(const char *networkId, int64_t accountId, const char
     if (ret != SOFTBUS_OK) {
         LNN_LOGW(LNN_BUILDER, "strcpy_s fail, use default name");
     }
-    LNN_LOGE(LNN_BUILDER, "peer deviceName:%s", displayName);
+    LNN_LOGE(LNN_BUILDER, "peer deviceName=%{public}s", displayName);
     if (strcmp(peerNodeInfo.deviceInfo.deviceName, displayName) == 0) {
         LNN_LOGI(LNN_BUILDER, "device name not change, ignore this msg");
         return;
@@ -238,7 +238,7 @@ static void HandlerGetDeviceName(const char *deviceName)
         LNN_LOGE(LNN_BUILDER, "set device name fail");
         return;
     }
-    LNN_LOGD(LNN_BUILDER, "name is %s", name);
+    LNN_LOGD(LNN_BUILDER, "name=%{public}s", name);
     if (LnnSetLocalStrInfo(STRING_KEY_DEV_NAME, name) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "set device name fail");
     }
@@ -346,7 +346,7 @@ static void LnnHandlerGetDeviceName(DeviceNameType type, const char *name)
     } else if (type == DEVICE_NAME_TYPE_NICK_NAME) {
         HandlerGetDeviceNickName(name);
     } else {
-        LNN_LOGW(LNN_BUILDER, "invalid type:%d", type);
+        LNN_LOGW(LNN_BUILDER, "invalid type=%{public}d", type);
     }
 }
 
@@ -362,7 +362,7 @@ static void UpdataLocalFromSetting(void *p)
         LNN_LOGE(LNN_BUILDER, "UpdataLocalFromSetting fail");
         g_tryGetDevnameNums++;
         if (g_tryGetDevnameNums < MAX_TRY) {
-            LNN_LOGI(LNN_BUILDER, "g_tryGetDevnameNums: %d", g_tryGetDevnameNums);
+            LNN_LOGI(LNN_BUILDER, "g_tryGetDevnameNums=%{public}d", g_tryGetDevnameNums);
             SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
             if (looper == NULL) {
                 return;
@@ -396,8 +396,8 @@ static void UpdataLocalFromSetting(void *p)
     }
     RegisterNameMonitor();
     DiscDeviceInfoChanged(TYPE_LOCAL_DEVICE_NAME);
-    LNN_LOGI(LNN_BUILDER, "UpdateLocalFromSetting done, deviceName: %s, unifiedName: %s"
-        "unifiedDefaultName: %s, nickName: %s", deviceName, unifiedName, unifiedDefaultName, nickName);
+    LNN_LOGI(LNN_BUILDER, "UpdateLocalFromSetting done, deviceName=%{public}s, unifiedName=%{public}s, "
+        "unifiedDefaultName=%{public}s, nickName=%{public}s", deviceName, unifiedName, unifiedDefaultName, nickName);
 }
 
 static void UpdateDeviceNameFromSetting(void)
@@ -419,7 +419,7 @@ static void LnnAccountStateChangeHandler(const LnnEventBasicInfo *info)
     }
     const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
     SoftBusAccountState accountState = (SoftBusAccountState)event->status;
-    LNN_LOGD(LNN_BUILDER, "account state=%d", accountState);
+    LNN_LOGD(LNN_BUILDER, "account state=%{public}d", accountState);
     HandlerGetDeviceNickName(NULL);
     return;
 }

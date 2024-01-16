@@ -28,6 +28,7 @@ wifi_direct_connection_external_deps = []
 wifi_direct_connection_inc = [
   "$dsoftbus_root_path/core/connection/wifi_direct",
   "//foundation/communication/wifi/wifi/interfaces/kits/c",
+  "$dsoftbus_root_path/core/connection/wifi_direct/utils",
 ]
 
 if (dsoftbus_feature_conn_p2p == true &&
@@ -71,6 +72,7 @@ if (dsoftbus_feature_conn_p2p == true &&
     "$dsoftbus_root_path/core/connection/wifi_direct/utils/wifi_direct_utils.cpp",
     "$dsoftbus_root_path/core/connection/wifi_direct/utils/wifi_direct_anonymous.c",
     "$dsoftbus_root_path/core/connection/wifi_direct/utils/wifi_direct_perf_recorder.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct/utils/wifi_direct_statistic.cpp",
   ]
 
   if (enhanced_wifi_direct) {

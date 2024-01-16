@@ -32,7 +32,7 @@ static IClientProxy *g_serverProxy = NULL;
 static int ClientSimpleResultCb(IOwner owner, int code, IpcIo *reply)
 {
     ReadInt32(reply, (int *)owner);
-    COMM_LOGI(COMM_SDK, "retvalue:%d", *(int *)owner);
+    COMM_LOGI(COMM_SDK, "retvalue=%{public}d", *(int *)owner);
     return EC_SUCCESS;
 }
 
@@ -56,7 +56,7 @@ static IClientProxy *GetServerProxy(void)
 
         int32_t ret = iUnknown->QueryInterface(iUnknown, CLIENT_PROXY_VER, (void **)&clientProxy);
         if (ret != EC_SUCCESS || clientProxy == NULL) {
-            COMM_LOGE(COMM_SDK, "QueryInterface failed [%d]", ret);
+            COMM_LOGE(COMM_SDK, "QueryInterface failed. ret=%{public}d", ret);
             SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
             continue;
         }
@@ -91,7 +91,7 @@ int32_t RegisterService(const char *name, const struct CommonScvId *svcId)
     int ret = SOFTBUS_ERR;
     if (g_serverProxy->Invoke(g_serverProxy, MANAGE_REGISTER_SERVICE, &request, &ret,
         ClientSimpleResultCb) != EC_SUCCESS) {
-        COMM_LOGI(COMM_SDK, "Call back ret(%d)", ret);
+        COMM_LOGI(COMM_SDK, "Call back ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     return ret;
