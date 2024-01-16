@@ -971,6 +971,34 @@ static bool IsValidQosInfo(const QosTV qos[], uint32_t qosCount)
     return (qos == NULL) ? (qosCount == 0) : (qosCount <= QOS_TYPE_BUTT);
 }
 
+static int32_t GetMaxIdleTimeout(const QosTV *qos, uint32_t qosCount, uint32_t *maxIdltimeout)
+{
+#define TRANS_DEFAULT_MAX_IDLE_TIMEOUT 30000
+    if (!IsValidQosInfo(qos, qosCount) || maxIdltimeout == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (qos == NULL && qosCount == 0) {
+        *maxIdltimeout = TRANS_DEFAULT_MAX_IDLE_TIMEOUT;
+        return SOFTBUS_OK;
+    }
+
+    for (uint32_t i = 0; i < qosCount; i++) {
+        if (qos[i].qos != QOS_TYPE_MAX_IDLE_TIMEOUT) {
+            continue;
+        }
+        if (qos[i].value < 0) {
+            TRANS_LOGE(TRANS_SDK, "invalid maximum idle time, value=%d", qos[i].value);
+            return SOFTBUS_INVALID_PARAM;
+        }
+        *maxIdltimeout = qos[i].value;
+        return SOFTBUS_OK;
+    }
+    *maxIdltimeout = TRANS_DEFAULT_MAX_IDLE_TIMEOUT;
+    return SOFTBUS_OK;
+}
+
 int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener)
 {
     if (!IsValidSessionId(socket) || !IsValidSocketListener(listener, false) || !IsValidQosInfo(qos, qosCount)) {
@@ -984,8 +1012,15 @@ int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t qosCount, const I
         return ret;
     }
 
+    uint32_t maxIdleTimeout = 0;
+    ret = GetMaxIdleTimeout(qos, qosCount, &maxIdleTimeout);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "ClientBind get maximum idle time failed, ret=%d", ret);
+        return ret;
+    }
+
     TransInfo transInfo;
-    ret = ClientIpcOpenSession(socket, (QosTV *)qos, qosCount, &transInfo);
+    ret = ClientIpcOpenSession(socket, qos, qosCount, &transInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "ClientBind open session failed, ret=%{public}d", ret);
         return ret;
@@ -1003,7 +1038,7 @@ int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t qosCount, const I
         return SOFTBUS_TRANS_SESSION_NO_ENABLE;
     }
 
-    ret = ClientSetSocketState(socket, SESSION_ROLE_CLIENT);
+    ret = ClientSetSocketState(socket, maxIdleTimeout, SESSION_ROLE_CLIENT);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "set session role failed, ret=%{public}d", ret);
         return SOFTBUS_ERR;
@@ -1027,7 +1062,14 @@ int32_t ClientListen(int32_t socket, const QosTV qos[], uint32_t qosCount, const
         return ret;
     }
 
-    ret = ClientSetSocketState(socket, SESSION_ROLE_SERVER);
+    uint32_t maxIdleTimeout = 0;
+    ret = GetMaxIdleTimeout(qos, qosCount, &maxIdleTimeout);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "ClientBind get maximum idle time failed, ret=%d", ret);
+        return ret;
+    }
+
+    ret = ClientSetSocketState(socket, maxIdleTimeout, SESSION_ROLE_SERVER);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "set session role failed. ret=%{public}d", ret);
         return SOFTBUS_ERR;

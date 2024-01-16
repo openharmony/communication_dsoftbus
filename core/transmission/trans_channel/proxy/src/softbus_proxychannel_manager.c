@@ -1444,26 +1444,7 @@ static void TransProxyTimerItemProc(const ListNode *proxyProcList)
     LIST_FOR_EACH_ENTRY_SAFE(removeNode, nextNode, proxyProcList, ProxyChannelInfo, node) {
         ListDelete(&(removeNode->node));
         status = removeNode->status;
-        if (status == PROXY_CHANNEL_STATUS_TIMEOUT) {
-            connId = removeNode->connId;
-            ProxyChannelInfo *resetMsg = (ProxyChannelInfo *)SoftBusMalloc(sizeof(ProxyChannelInfo));
-            if (resetMsg != NULL) {
-                (void)memcpy_s(resetMsg, sizeof(ProxyChannelInfo), removeNode, sizeof(ProxyChannelInfo));
-                TransProxyPostResetPeerMsgToLoop(resetMsg);
-            }
-            TransEventExtra extra = {
-                .peerNetworkId = NULL,
-                .calleePkg = NULL,
-                .callerPkg = NULL,
-                .channelId = removeNode->channelId,
-                .connectionId = (int32_t)connId,
-                .result = EVENT_STAGE_RESULT_OK,
-                .socketName = removeNode->appInfo.myData.sessionName
-            };
-            TRANS_EVENT(EVENT_SCENE_CLOSE_CHANNEL_TIMEOUT, EVENT_STAGE_CLOSE_CHANNEL, extra);
-            TransProxyPostOpenClosedMsgToLoop(removeNode);
-            TransProxyPostDisConnectMsgToLoop(connId);
-        } else if (status == PROXY_CHANNEL_STATUS_HANDSHAKE_TIMEOUT) {
+        if (status == PROXY_CHANNEL_STATUS_HANDSHAKE_TIMEOUT) {
             connId = removeNode->connId;
             TransProxyPostOpenFailMsgToLoop(removeNode, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
             TransProxyPostDisConnectMsgToLoop(connId);
@@ -1475,19 +1456,6 @@ static void TransProxyTimerItemProc(const ListNode *proxyProcList)
             TransProxyPostKeepAliveMsgToLoop(removeNode);
         }
     }
-}
-
-int GetBrAgingTimeout(const char *busname)
-{
-    if (busname == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "bus name is null");
-        return PROXY_CHANNEL_BT_IDLE_TIMEOUT;
-    }
-    int thresh = NotifyNearByGetBrAgingTimeoutByBusName(busname);
-    if (thresh == 0) {
-        thresh = PROXY_CHANNEL_BT_IDLE_TIMEOUT;
-    }
-    return thresh;
 }
 
 void TransProxyTimerProc(void)
@@ -1522,20 +1490,6 @@ void TransProxyTimerProc(void)
                 ReleaseProxyChannelId(removeNode->channelId);
                 ListDelete(&(removeNode->node));
                 ListAdd(&proxyProcList, &(removeNode->node));
-                g_proxyChannelList->cnt--;
-            }
-        }
-        if (removeNode->status == PROXY_CHANNEL_STATUS_COMPLETED) {
-            int thresh = GetBrAgingTimeout(removeNode->appInfo.myData.sessionName);
-            if (thresh < 0) {
-                continue;
-            }
-            if (removeNode->timeout >= thresh) {
-                removeNode->status = PROXY_CHANNEL_STATUS_TIMEOUT;
-                ReleaseProxyChannelId(removeNode->channelId);
-                ListDelete(&(removeNode->node));
-                ListAdd(&proxyProcList, &(removeNode->node));
-                TRANS_LOGE(TRANS_CTRL, "channelId is idle. myId=%{public}d", removeNode->myId);
                 g_proxyChannelList->cnt--;
             }
         }

@@ -384,6 +384,7 @@
         "TransSetSocketFileListener";
         "EvaluateQos";
         "GetMtuSize";
+        "ClientResetIdleTimeoutById";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;

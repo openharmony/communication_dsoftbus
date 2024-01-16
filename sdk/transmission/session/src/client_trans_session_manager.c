@@ -30,6 +30,8 @@
 #include "trans_log.h"
 #include "trans_server_proxy.h"
 
+static void ClientTransSessionTimerProc(void);
+
 static int32_t g_sessionIdNum = 0;
 static int32_t g_sessionId = 1;
 static SoftBusList *g_clientSessionServerList = NULL;
@@ -106,6 +108,11 @@ int TransClientInit(void)
 
     if (ClientTransChannelInit() != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "init trans channel failed");
+        return SOFTBUS_ERR;
+    }
+
+    if (RegisterTimeoutCallback(SOFTBUS_TRNAS_IDLE_TIMEOUT_TIMER_FUN, ClientTransSessionTimerProc) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_INIT, "init trans idle timer failed");
         return SOFTBUS_ERR;
     }
 
@@ -259,6 +266,7 @@ void TransClientDeinit(void)
     g_clientSessionServerList = NULL;
     ClientTransChannelDeinit();
     TransServerProxyDeInit();
+    (void)RegisterTimeoutCallback(SOFTBUS_TRNAS_IDLE_TIMEOUT_TIMER_FUN, NULL);
 }
 
 static bool SessionServerIsExist(const char *sessionName)
@@ -1774,7 +1782,7 @@ int32_t ClientIpcOpenSession(int32_t sessionId, const QosTV *qos, uint32_t qosCo
     return SOFTBUS_OK;
 }
 
-int32_t ClientSetSocketState(int32_t socket, SessionRole role)
+int32_t ClientSetSocketState(int32_t socket, uint32_t maxIdleTimeout, SessionRole role)
 {
     if (socket < 0) {
         TRANS_LOGE(TRANS_SDK, "Invalid param");
@@ -1801,6 +1809,9 @@ int32_t ClientSetSocketState(int32_t socket, SessionRole role)
     }
 
     sessionNode->role = role;
+    if (sessionNode->role == SESSION_ROLE_CLIENT) {
+        sessionNode->maxIdleTime = maxIdleTimeout;
+    }
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     return SOFTBUS_OK;
 }
@@ -1927,4 +1938,112 @@ bool IsSessionExceedLimit()
     }
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     return false;
+}
+
+static void ClientCleanUpTimeoutSession(const ListNode *destroyList)
+{
+    if (IsListEmpty(destroyList)) {
+        TRANS_LOGD(TRANS_SDK, "destroyList is empty.");
+        return;
+    }
+    DestroySessionInfo *destroyNode = NULL;
+    DestroySessionInfo *destroyNodeNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(destroyNode, destroyNodeNext, destroyList, DestroySessionInfo, node) {
+        int32_t id = destroyNode->sessionId;
+        (void)ClientDeleteRecvFileList(id);
+        (void)ClientTransCloseChannel(destroyNode->channelId, destroyNode->channelType);
+        TRANS_LOGI(TRANS_SDK, "session is idle, sessionId=%{public}d", id);
+        if (destroyNode->OnShutdown != NULL) {
+            destroyNode->OnShutdown(id, SHUTDOWN_REASON_TIMEOUT);
+        }
+        ListDelete(&(destroyNode->node));
+        SoftBusFree(destroyNode);
+    }
+    TRANS_LOGD(TRANS_SDK, "ok");
+}
+
+static void ClientTransSessionTimerProc(void)
+{
+#define SESSION_IDLE_TIME 1000
+    if (g_clientSessionServerList == NULL) {
+        TRANS_LOGE(TRANS_SDK, "not init");
+        return;
+    }
+
+    if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    SessionInfo *nextSessionNode = NULL;
+    ListNode destroyList;
+    ListInit(&destroyList);
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        if (IsListEmpty(&serverNode->sessionList)) {
+            continue;
+        }
+        LIST_FOR_EACH_ENTRY_SAFE(sessionNode, nextSessionNode, &(serverNode->sessionList), SessionInfo, node) {
+            if (sessionNode->role != SESSION_ROLE_CLIENT) {
+                continue;
+            }
+
+            sessionNode->timeout += SESSION_IDLE_TIME;
+            if (sessionNode->maxIdleTime == 0 || sessionNode->timeout <= sessionNode->maxIdleTime) {
+                continue;
+            }
+
+            DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, serverNode);
+            if (destroyNode == NULL) {
+                TRANS_LOGE(TRANS_SDK, "failed to create destory session Node, sessionId=%{public}d",
+                    sessionNode->sessionId);
+                continue;
+            }
+            ListAdd(&destroyList, &(destroyNode->node));
+            DestroySessionId();
+            ListDelete(&sessionNode->node);
+            SoftBusFree(sessionNode);
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_clientSessionServerList->lock);
+    (void)ClientCleanUpTimeoutSession(&destroyList);
+}
+
+int32_t ClientResetIdleTimeoutById(int32_t sessionId)
+{
+    if (sessionId <= 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid sessionId");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (g_clientSessionServerList == NULL) {
+        TRANS_LOGE(TRANS_SDK, "not init");
+        return SOFTBUS_TRANS_SESSION_SERVER_NOINIT;
+    }
+
+    if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    SessionInfo *nextSessionNode = NULL;
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        if (IsListEmpty(&serverNode->sessionList)) {
+            continue;
+        }
+        LIST_FOR_EACH_ENTRY_SAFE(sessionNode, nextSessionNode, &(serverNode->sessionList), SessionInfo, node) {
+            if (sessionNode->sessionId == sessionId) {
+                sessionNode->timeout = 0;
+                (void)SoftBusMutexUnlock(&g_clientSessionServerList->lock);
+                TRANS_LOGD(TRANS_SDK, "reset timeout of sessionId=%{public}d", sessionId);
+                return SOFTBUS_OK;
+            }
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_clientSessionServerList->lock);
+    TRANS_LOGE(TRANS_SDK, "not found session by sessionId=%{public}d", sessionId);
+    return SOFTBUS_NOT_FIND;
 }

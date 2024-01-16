@@ -256,6 +256,7 @@ NO_SANITIZE("cfi") int32_t TransOnDataReceived(int32_t channelId, int32_t channe
         return ret;
     }
 
+    (void)ClientResetIdleTimeoutById(sessionId);
     switch (type) {
         case TRANS_SESSION_BYTES:
             if (sessionCallback.socket.OnBytes != NULL) {
@@ -304,6 +305,7 @@ NO_SANITIZE("cfi") int32_t TransOnOnStreamRecevied(int32_t channelId, int32_t ch
         return ret;
     }
 
+    (void)ClientResetIdleTimeoutById(sessionId);
     if (sessionCallback.socket.OnStream != NULL) {
         sessionCallback.socket.OnStream(sessionId, data, ext, param);
         return SOFTBUS_OK;
@@ -345,5 +347,6 @@ IClientSessionCallBack *GetClientSessionCb(void)
     g_sessionCb.OnStreamReceived = TransOnOnStreamRecevied;
     g_sessionCb.OnGetSessionId = ClientGetSessionIdByChannelId;
     g_sessionCb.OnQosEvent = TransOnQosEvent;
+    g_sessionCb.OnIdleTimeoutReset = ClientResetIdleTimeoutById;
     return &g_sessionCb;
 }
