@@ -119,7 +119,6 @@ typedef struct {
     const char *localDeviceName; // LOCAL_DEV_NAME
     const char *peerIp;          // PEER_IP
     const char *localIp;         // LOCAL_IP
-    const char *extra;           // EXTRA
     const char *callerPkg;       // HOST_PKG
     const char *calleePkg;       // TO_CALL_PKG
     const char *peerPort;        // PEER_PORT
