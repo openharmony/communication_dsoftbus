@@ -332,9 +332,10 @@ static void TransProxyCloseProxyOtherRes(int32_t channelId, const ProxyChannelIn
     }
 
     uint32_t connId = info->connId;
+    bool isServer = (info->isServer != 1);
     TransProxyPostResetPeerMsgToLoop(info);
 
-    if (info->isServer != 1) {
+    if (isServer) {
         TransProxyPostDisConnectMsgToLoop(connId);
     }
 }
