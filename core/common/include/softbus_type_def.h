@@ -16,18 +16,11 @@
 #ifndef SOFTBUS_TYPE_DEF_H
 #define SOFTBUS_TYPE_DEF_H
 
+#include <stdbool.h>
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif
-#endif
-
-#ifndef true
-#define true 1
-#endif
-
-#ifndef false
-#define false 0
 #endif
 
 #ifndef NULL
