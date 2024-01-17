@@ -689,13 +689,18 @@ static int32_t GetNonDeviceInfo(DeviceInfo *info)
     return SOFTBUS_OK;
 }
 
+static void DestroyBleConfigAdvData(BroadcastPacket *packet)
+{
+    SoftBusFree(packet->bcData.payload);
+    SoftBusFree(packet->rspData.payload);
+    packet->bcData.payload = NULL;
+    packet->rspData.payload = NULL;
+}
+
 static int32_t BuildBleConfigAdvData(BroadcastPacket *packet, const BroadcastData *broadcastData)
 {
     if (packet->bcData.payload != NULL || packet->rspData.payload != NULL) {
-        SoftBusFree(packet->bcData.payload);
-        SoftBusFree(packet->rspData.payload);
-        packet->bcData.payload = NULL;
-        packet->rspData.payload = NULL;
+        DestroyBleConfigAdvData(packet);
     }
     packet->bcData.payload = (uint8_t *)SoftBusCalloc(ADV_DATA_MAX_LEN);
     if (packet->bcData.payload == NULL) {
@@ -707,7 +712,8 @@ static int32_t BuildBleConfigAdvData(BroadcastPacket *packet, const BroadcastDat
     packet->flag = FLAG_AD_DATA;
     packet->bcData.type = BC_DATA_TYPE_SERVICE;
     packet->bcData.id = BLE_UUID;
-    packet->bcData.payloadLen = (broadcastData->dataLen > ADV_DATA_MAX_LEN) ? ADV_DATA_MAX_LEN : broadcastData->dataLen;
+    packet->bcData.payloadLen = (broadcastData->dataLen > ADV_DATA_MAX_LEN) ? ADV_DATA_MAX_LEN :
+        broadcastData->dataLen;
     if (memcpy_s(&packet->bcData.payload[0], ADV_DATA_MAX_LEN, broadcastData->data.advData,
         packet->bcData.payloadLen) != EOK) {
         DISC_LOGE(DISC_BLE, "memcpy err");
@@ -734,21 +740,12 @@ static int32_t BuildBleConfigAdvData(BroadcastPacket *packet, const BroadcastDat
     if (memcpy_s(&packet->rspData.payload[0], RESP_DATA_MAX_LEN, broadcastData->data.rspData,
         packet->rspData.payloadLen) != EOK) {
         DISC_LOGE(DISC_BLE, "memcpy err");
-        SoftBusFree(packet->bcData.payload);
-        SoftBusFree(packet->rspData.payload);
-        packet->bcData.payload = NULL;
-        packet->rspData.payload = NULL;
+        DestroyBleConfigAdvData(packet);
         return SOFTBUS_MEM_ERR;
     }
 
     DISC_LOGI(DISC_BLE, "packet->rspData.payloadLen=%{public}d", packet->rspData.payloadLen);
     return SOFTBUS_OK;
-}
-
-static void DestroyBleConfigAdvData(BroadcastPacket *packet)
-{
-    SoftBusFree(packet->bcData.payload);
-    SoftBusFree(packet->rspData.payload);
 }
 
 static void AssembleNonOptionalTlv(DeviceInfo *info, BroadcastData *broadcastData)
