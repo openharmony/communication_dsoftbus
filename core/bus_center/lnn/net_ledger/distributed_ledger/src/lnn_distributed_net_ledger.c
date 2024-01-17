@@ -2472,9 +2472,9 @@ int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len)
     return SOFTBUS_NOT_FIND;
 }
 
-int32_t LnnGetNetworkIdByUdidHash(const char *udidHash, char *buf, uint32_t len)
+int32_t LnnGetNetworkIdByUdidHash(const uint8_t *udidHash, uint32_t udidHashLen, char *buf, uint32_t len)
 {
-    if (udidHash == NULL || udidHash[0] == '\0' || buf == NULL) {
+    if (udidHash == NULL || buf == NULL || udidHashLen == 0) {
         LNN_LOGE(LNN_LEDGER, "udidHash is empty");
         return SOFTBUS_INVALID_PARAM;
     }
