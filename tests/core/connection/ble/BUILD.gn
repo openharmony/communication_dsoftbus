@@ -31,12 +31,16 @@ config("softbus_connection_ble_test_config") {
     "$dsoftbus_root_path/core/connection/manager",
     "$dsoftbus_root_path/core/connection/tcp/include",
     "$dsoftbus_root_path/core/connection/ble/include",
+    "$dsoftbus_root_path/core/connection/br/include",
+    "$dsoftbus_root_path/core/adapter/br/include",
     "$dsoftbus_root_path/core/connection/ble/channel",
     "$dsoftbus_root_path/core/connection/ble/src",
     "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/adapter/common/bluetooth/include",
     "//third_party/googletest/googletest/include",
     "//third_party/googletest/googletest/src",
     "//third_party/bounds_checking_function/include",
@@ -99,6 +103,37 @@ ohos_unittest("BleConnectionServiceTest") {
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+    "//third_party/bounds_checking_function:libsec_shared",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("BleConnectionManagerTest") {
+  module_out_path = module_output_path
+  include_dirs = [
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+    "//foundation/communication/bluetooth/interfaces/inner_api/include",
+    "//foundation/communication/bluetooth/interfaces/inner_api/include/c_header",
+  ]
+  public_configs = [ ":softbus_connection_ble_test_config" ]
+  sources = [
+    "$dsoftbus_root_path/core/connection/ble/src/ble_protocol_interface_factory.c",
+    "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_connection.c",
+    "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_manager.c",
+    "$dsoftbus_root_path/core/connection/manager/softbus_conn_manager.c",
+    "connection_ble_manager_mock.cpp",
+    "connection_ble_manager_test.cpp",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
     "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
