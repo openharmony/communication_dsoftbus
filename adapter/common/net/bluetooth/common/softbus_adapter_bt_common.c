@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -90,7 +90,8 @@ static void SoftBusOnBtSateChanged(int32_t status)
 
 static void WrapperStateChangeCallback(const int transport, const int status)
 {
-    COMM_LOGI(COMM_ADAPTER, "WrapperStateChangeCallback, transport=%{public}d, status=%{public}d", transport, status);
+    COMM_LOGI(COMM_ADAPTER, "WrapperStateChangeCallback, transport = %{public}d (0 - BT, 1 - BLE), "
+        "status = %{public}d (0 - turning on, 1 - turn on, 2 - turning off, 3 - off)", transport, status);
     int st = ConvertBtState(transport, status);
     SoftBusOnBtSateChanged(st);
 }

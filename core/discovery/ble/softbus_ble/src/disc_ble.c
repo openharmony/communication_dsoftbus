@@ -1219,41 +1219,49 @@ static int32_t ProcessBleDiscFunc(bool isStart, uint8_t publishFlags, uint8_t ac
 
 static int32_t BleStartActivePublish(const PublishOption *option)
 {
+    DISC_LOGI(DISC_BLE, "start active publish");
     return ProcessBleDiscFunc(true, BLE_PUBLISH, BLE_ACTIVE, PUBLISH_ACTIVE_SERVICE, (void *)option);
 }
 
 static int32_t BleStartPassivePublish(const PublishOption *option)
 {
+    DISC_LOGI(DISC_BLE, "start passive publish");
     return ProcessBleDiscFunc(true, BLE_PUBLISH, BLE_PASSIVE, PUBLISH_PASSIVE_SERVICE, (void *)option);
 }
 
 static int32_t BleStopActivePublish(const PublishOption *option)
 {
+    DISC_LOGI(DISC_BLE, "stop active publish");
     return ProcessBleDiscFunc(false, BLE_PUBLISH, BLE_ACTIVE, UNPUBLISH_SERVICE, (void *)option);
 }
 
 static int32_t BleStopPassivePublish(const PublishOption *option)
 {
+    DISC_LOGI(DISC_BLE, "stop passive publish");
     return ProcessBleDiscFunc(false, BLE_PUBLISH, BLE_PASSIVE, UNPUBLISH_SERVICE, (void *)option);
 }
 
 static int32_t BleStartActiveDiscovery(const SubscribeOption *option)
 {
+    DISC_LOGI(DISC_BLE, "start active discovery");
     return ProcessBleDiscFunc(true, BLE_SUBSCRIBE, BLE_ACTIVE, START_ACTIVE_DISCOVERY, (void *)option);
 }
 
 static int32_t BleStartPassiveDiscovery(const SubscribeOption *option)
 {
+    DISC_LOGI(DISC_BLE, "start passive discovery");
     return ProcessBleDiscFunc(true, BLE_SUBSCRIBE, BLE_PASSIVE, START_PASSIVE_DISCOVERY, (void *)option);
 }
 
 static int32_t BleStopActiveDiscovery(const SubscribeOption *option)
 {
+    DISC_LOGI(DISC_BLE, "stop active discovery");
     return ProcessBleDiscFunc(false, BLE_SUBSCRIBE, BLE_ACTIVE, STOP_DISCOVERY, (void *)option);
 }
 
 static int32_t BleStopPassiveDiscovery(const SubscribeOption *option)
 {
+    DISC_LOGI(DISC_BLE, "stop passive discovery");
     return ProcessBleDiscFunc(false, BLE_SUBSCRIBE, BLE_PASSIVE, STOP_DISCOVERY, (void *)option);
 }
 
