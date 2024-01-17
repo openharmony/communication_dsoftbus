@@ -1042,8 +1042,8 @@ void LnnDestroyHeartbeatFsm(LnnHeartbeatFsm *hbFsm)
         DestroyLooper(hbFsm->fsm.looper);
         hbFsm->fsm.looper = NULL;
     }
-    SoftBusFree(hbFsm);
     LNN_LOGI(LNN_HEART_BEAT, "destroy heartbeat fsmId=%{public}u", hbFsm->id);
+    SoftBusFree(hbFsm);
 }
 
 static void DeinitHbFsmCallback(FsmStateMachine *fsm)

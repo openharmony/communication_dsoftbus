@@ -299,11 +299,11 @@ static void OnEntityTimeout(void *data)
 static void OnClientJoinTimeout(void *data)
 {
     struct P2pEntityConnectingClient *client = data;
+    CONN_LOGD(CONN_WIFI_DIRECT, "requestId=%{public}d, remoteMac=%{public}s, joiningClientCount=%{public}d",
+        client->requestId, WifiDirectAnonymizeMac(client->remoteMac), GetP2pEntity()->joiningClientCount);
     ListDelete(&client->node);
     SoftBusFree(client);
     GetP2pEntity()->joiningClientCount--;
-    CONN_LOGD(CONN_WIFI_DIRECT, "requestId=%{public}d, remoteMac=%{public}s, joiningClientCount=%{public}d",
-        client->requestId, WifiDirectAnonymizeMac(client->remoteMac), GetP2pEntity()->joiningClientCount);
     client = NULL;
 
     struct WifiDirectConnectParams params;
