@@ -415,6 +415,7 @@ static void ScenarioManagerDoNotifyIfNeed(ScenarioManager *manager,
     int bitPos = ScenarioManagerGetBitPosByBusinessType(info->businessType);
     if (bitPos < 0) {
         TRANS_LOGE(TRANS_CTRL, "error, invalid business type!");
+        SoftBusFree(localScenarioCount);
         return;
     }
     if (isAdd) {
@@ -492,6 +493,10 @@ static int32_t AddOriginalScenario(ScenarioManager *manager, OriginalScenario *i
     ScenarioManagerDoNotifyIfNeed(manager, info, true);
     ScenarioManagerAddBusinessType(manager, scenarioItem, counter, info->businessType);
     LocalScenarioCount *localScenarioCount = GetScenarioCount(manager);
+    if (localScenarioCount == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "failed to apply for memory");
+        return SOFTBUS_MALLOC_ERR;
+    }
     TRANS_LOGI(TRANS_CTRL,
         "allMacTotalCount=%{public}d, allMacVideoCount=%{public}d, "
         "allMacAudioCount=%{public}d, allMacFileCount=%{public}d",
@@ -544,6 +549,10 @@ static int32_t DelOriginalScenario(ScenarioManager *manager, OriginalScenario *i
     ScenarioManagerDoNotifyIfNeed(manager, info, false);
     ScenarioManagerDelScenarioItem(manager, scenarioItem);
     LocalScenarioCount *localScenarioCount = GetScenarioCount(manager);
+    if (localScenarioCount == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "failed to apply for memory");
+        return SOFTBUS_MALLOC_ERR;
+    }
     TRANS_LOGI(TRANS_CTRL,
         "allMacTotalCount=%{public}d, allMacVideoCount=%{public}d, "
         "allMacAudioCount=%{public}d, allMacFileCount=%{public}d",
