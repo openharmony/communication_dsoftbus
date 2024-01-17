@@ -973,7 +973,7 @@ static bool IsValidQosInfo(const QosTV qos[], uint32_t qosCount)
 
 static int32_t GetMaxIdleTimeout(const QosTV *qos, uint32_t qosCount, uint32_t *maxIdltimeout)
 {
-#define TRANS_DEFAULT_MAX_IDLE_TIMEOUT 30000
+#define TRANS_DEFAULT_MAX_IDLE_TIMEOUT 0
     if (!IsValidQosInfo(qos, qosCount) || maxIdltimeout == NULL) {
         TRANS_LOGE(TRANS_SDK, "invalid param");
         return SOFTBUS_INVALID_PARAM;
