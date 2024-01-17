@@ -24,6 +24,7 @@
 #include "softbus_broadcast_manager.h"
 #include "softbus_broadcast_utils.h"
 #include "softbus_errcode.h"
+#include "softbus_hidumper_bc_mgr.h"
 #include "softbus_utils.h"
 
 #define BC_WAIT_TIME_SEC 2
@@ -38,6 +39,9 @@ static int32_t g_adapterLpScannerId = -1;
 static int32_t g_btStateListenerId = -1;
 static volatile bool g_isScanCbReg = false;
 static volatile bool g_isLpScanCbReg = false;
+
+#define REGISTER_INFO_MANAGER "registerInfoMgr"
+static int32_t RegisterInfoDump(int fd);
 
 typedef struct {
     BaseServiceType srvType;
@@ -100,8 +104,8 @@ static void BcBtStateChanged(int32_t listenerId, int32_t state)
         DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_bcLock) == SOFTBUS_OK, DISC_BLE, "bcLock mutex err!");
 
         BroadcastManager *bcManager = &g_bcManager[managerId];
-        if (!bcManager->isUsed || bcManager->adapterBcId == -1 || !bcManager->isAdvertising ||
-            bcManager->bcCallback == NULL || bcManager->bcCallback->OnStopBroadcastingCallback == NULL) {
+        if (!bcManager->isUsed || bcManager->adapterBcId == -1 || bcManager->bcCallback == NULL ||
+            bcManager->bcCallback->OnStopBroadcastingCallback == NULL) {
             SoftBusMutexUnlock(&g_bcLock);
             continue;
         }
@@ -176,6 +180,8 @@ int32_t InitBroadcastMgr(void)
     DISC_CHECK_AND_RETURN_RET_LOGE(ret != SOFTBUS_ERR, ret, DISC_BLE, "add bt state listener fail!");
     g_btStateListenerId = ret;
     g_mgrInit = true;
+
+    SoftBusRegBcMgrVarDump((char *)REGISTER_INFO_MANAGER, &RegisterInfoDump);
     return SOFTBUS_OK;
 }
 
@@ -1709,5 +1715,39 @@ int32_t BroadcastSetLpAdvParam(int32_t duration, int32_t maxExtAdvEvents, int32_
     int32_t ret = g_interface[g_interfaceId]->SetLpDeviceParam(duration, maxExtAdvEvents, window, interval, bcHandle);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "call from adapter fail!");
 
+    return SOFTBUS_OK;
+}
+
+static int32_t RegisterInfoDump(int fd)
+{
+    SOFTBUS_DPRINTF(fd, "\n---------------------------Register Broadcaster Info-------------------------\n");
+    SOFTBUS_DPRINTF(fd, "max broadcaster num                   : %d\n", BC_NUM_MAX);
+    int32_t managerId;
+    for (managerId = 0; managerId < BC_NUM_MAX; managerId++) {
+        if (!g_bcManager[managerId].isUsed) {
+            continue;
+        }
+        SOFTBUS_DPRINTF(fd, "managerId                             : %d\n", managerId);
+        SOFTBUS_DPRINTF(fd, "serviceType(0 - HB, 1 - CONN, 2- TRANS_MSG, 3 - DIS, 4 - SHARE, 5 - APPROACH,\n");
+        SOFTBUS_DPRINTF(fd, "            6 - SH, 7 - FAST_OFFLINE  : %d\n", g_bcManager[managerId].srvType);
+        SOFTBUS_DPRINTF(fd, "adapterBcId                           : %d\n", g_bcManager[managerId].adapterBcId);
+        SOFTBUS_DPRINTF(fd, "isAdvertising(0 - false, 1 - true)    : %d\n\n", g_bcManager[managerId].isAdvertising);
+    }
+
+    SOFTBUS_DPRINTF(fd, "\n---------------------------Register Listener Info----------------------------\n");
+    SOFTBUS_DPRINTF(fd, "max listener num                      : %d\n", SCAN_NUM_MAX);
+    for (managerId = 0; managerId < SCAN_NUM_MAX; managerId++) {
+        if (!g_scanManager[managerId].isUsed) {
+            continue;
+        }
+        SOFTBUS_DPRINTF(fd, "managerId                             : %d\n", managerId);
+        SOFTBUS_DPRINTF(fd, "serviceType(0 - HB, 1 - CONN, 2- TRANS_MSG, 3 - DIS, 4 - SHARE, 5 - APPROACH,\n");
+        SOFTBUS_DPRINTF(fd, "            6 - SH, 7 - FAST_OFFLINE  : %d\n", g_scanManager[managerId].srvType);
+        SOFTBUS_DPRINTF(fd, "adapterScanId                         : %d\n", g_scanManager[managerId].adapterScanId);
+        SOFTBUS_DPRINTF(fd, "isNeedReset(0 - false, 1 - true)      : %d\n", g_scanManager[managerId].isNeedReset);
+        SOFTBUS_DPRINTF(fd, "isScanning(0 - false, 1 - true)       : %d\n", g_scanManager[managerId].isScanning);
+        SOFTBUS_DPRINTF(fd, "scan freq(0 - low power, 1 - 60/3000, 2 - 30/300, 3 - 60/240, 4 - 1000/1000,\n");
+        SOFTBUS_DPRINTF(fd, "                                      : %d\n\n", g_scanManager[managerId].freq);
+    }
     return SOFTBUS_OK;
 }
