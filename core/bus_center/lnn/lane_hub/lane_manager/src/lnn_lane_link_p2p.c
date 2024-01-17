@@ -464,6 +464,7 @@ static void NotifyLinkFail(AsyncResultType type, int32_t requestId, int32_t reas
     cb.OnLaneLinkFail = item->laneRequestInfo.cb.OnLaneLinkFail;
     linkReqId = item->laneRequestInfo.laneLinkReqId;
     authId = item->auth.authId;
+    int32_t channelId = item->proxyChannelInfo.channelId;
     ListDelete(&item->node); // async request finish, delete nodeInfo;
     SoftBusFree(item);
     LinkUnlock();
@@ -473,8 +474,8 @@ static void NotifyLinkFail(AsyncResultType type, int32_t requestId, int32_t reas
     if (authId != INVAILD_AUTH_ID) {
         AuthCloseConn(authId);
     }
-    if (item->proxyChannelInfo.channelId > 0) {
-        TransProxyPipelineCloseChannel(item->proxyChannelInfo.channelId);
+    if (channelId > 0) {
+        TransProxyPipelineCloseChannel(channelId);
     }
 }
 
