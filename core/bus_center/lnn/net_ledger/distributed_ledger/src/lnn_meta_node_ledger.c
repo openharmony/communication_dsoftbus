@@ -144,8 +144,8 @@ int32_t LnnDeactiveMetaNode(const char *metaNodeId)
     if (storageInfo != NULL) {
         ListDelete(&storageInfo->node);
         g_metaNodeList->cnt--;
-        SoftBusFree(storageInfo);
         DeleteFromProfile(storageInfo->info.configInfo.udid);
+        SoftBusFree(storageInfo);
         LNN_LOGI(LNN_LEDGER, "deactive a mete node");
     } else {
         LNN_LOGE(LNN_LEDGER, "meta node not exist");

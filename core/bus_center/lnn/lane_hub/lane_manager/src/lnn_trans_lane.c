@@ -668,11 +668,11 @@ static void LaneLinkFail(SoftBusMessage *msg)
     }
     if (nodeInfo->linkRetryIdx >= nodeInfo->listNum) {
         LNN_LOGE(LNN_LANE, "All linkTypes failed, notify the result");
-        Unlock();
-        DeleteLaneLinkNode(laneId);
         if (nodeInfo->p2pErrCode != SOFTBUS_OK) {
             reason = nodeInfo->p2pErrCode;
         }
+        Unlock();
+        DeleteLaneLinkNode(laneId);
         NotifyLaneAllocFail(laneId, reason);
         return;
     }

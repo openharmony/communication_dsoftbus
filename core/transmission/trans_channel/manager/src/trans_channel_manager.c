@@ -509,7 +509,6 @@ EXIT_ERR:
     if (appInfo->fastTransData != NULL) {
         SoftBusFree((void*)appInfo->fastTransData);
     }
-    AnonymizeFree(tmpName);
     SoftBusFree(appInfo);
     if (laneId != 0) {
         LnnFreeLane(laneId);
