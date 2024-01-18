@@ -51,7 +51,7 @@ bool IsPotentialTrustedDeviceDp(const char *deviceIdHash)
     std::vector<OHOS::DistributedDeviceProfile::TrustDeviceProfile> trustDevices;
     int32_t ret = DpClient::GetInstance().GetAllTrustDeviceProfile(trustDevices);
     if (ret != OHOS::DistributedDeviceProfile::DP_SUCCESS || trustDevices.empty()) {
-        LNN_LOGE(LNN_STATE, "GetAllTrustDeviceProfile ret=%{public}d, size=%{public}d", ret, trustDevices.size());
+        LNN_LOGE(LNN_STATE, "GetAllTrustDeviceProfile ret=%{public}d, size=%{public}zu", ret, trustDevices.size());
         return false;
     }
     for (const auto &trustDevice : trustDevices) {

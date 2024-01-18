@@ -291,7 +291,7 @@ static bool GetUdidOrShortHash(const AuthSessionInfo *info, char *udidBuf, uint3
         }
         return (memcpy_s(udidBuf, bufLen, request.connInfo.info.bleInfo.deviceIdHash, UDID_SHORT_HASH_HEX_STR) == EOK);
     }
-    AUTH_LOGD(AUTH_FSM, "udidLen=%{public}d, connInfoType=%{public}d", strlen(info->udid), info->connInfo.type);
+    AUTH_LOGD(AUTH_FSM, "udidLen=%{public}zu, connInfoType=%{public}d", strlen(info->udid), info->connInfo.type);
     return false;
 }
 
@@ -1246,7 +1246,7 @@ static int32_t UnpackBt(const JsonObj *json, NodeInfo *info, SoftBusVersion vers
 
 static int32_t PackWiFi(JsonObj *json, const NodeInfo *info, SoftBusVersion version, bool isMetaAuth)
 {
-    AUTH_LOGD(AUTH_FSM, "devIp=%{public}d", strlen(info->connectInfo.deviceIp));
+    AUTH_LOGD(AUTH_FSM, "devIp=%{public}zu", strlen(info->connectInfo.deviceIp));
     if (!JSON_AddInt32ToObject(json, CODE, CODE_VERIFY_IP) || !JSON_AddInt32ToObject(json, BUS_MAX_VERSION, BUS_V2) ||
         !JSON_AddInt32ToObject(json, BUS_MIN_VERSION, BUS_V1) ||
         !JSON_AddInt32ToObject(json, AUTH_PORT, LnnGetAuthPort(info)) ||
@@ -1258,7 +1258,7 @@ static int32_t PackWiFi(JsonObj *json, const NodeInfo *info, SoftBusVersion vers
     }
     char offlineCode[BASE64_OFFLINE_CODE_LEN] = {0};
     size_t len = 0;
-    AUTH_LOGE(AUTH_FSM, "offlineCodeLen=%{public}d, offlineCodeSize=%{public}d",
+    AUTH_LOGE(AUTH_FSM, "offlineCodeLen=%{public}zu, offlineCodeSize=%{public}zu",
         strlen(offlineCode), sizeof(info->offlineCode));
     int32_t ret = SoftBusBase64Encode((unsigned char*)offlineCode, BASE64_OFFLINE_CODE_LEN, &len,
         (unsigned char*)info->offlineCode, sizeof(info->offlineCode));
@@ -1635,7 +1635,7 @@ int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
     uint8_t *compressData = NULL;
     uint32_t compressLen = 0;
     if ((info->connInfo.type != AUTH_LINK_TYPE_WIFI) && info->isSupportCompress) {
-        AUTH_LOGI(AUTH_FSM, "before compress, datalen=%{public}d", strlen(msg) + 1);
+        AUTH_LOGI(AUTH_FSM, "before compress, datalen=%{public}zu", strlen(msg) + 1);
         if (DataCompress((uint8_t *)msg, strlen(msg) + 1, &compressData, &compressLen) != SOFTBUS_OK) {
             compressFlag = FLAG_UNCOMPRESS_DEVICE_INFO;
         } else {

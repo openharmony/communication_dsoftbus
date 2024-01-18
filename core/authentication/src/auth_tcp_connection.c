@@ -172,7 +172,7 @@ static int32_t RecvPacketHead(ListenerModule module, int32_t fd, SocketPktHead *
             (void)DelTrigger(module, fd, READ_TRIGGER);
             NotifyDisconnected(fd);
         }
-        AUTH_LOGE(AUTH_CONN, "head not enough, abandon it. len=%{public}d", len);
+        AUTH_LOGE(AUTH_CONN, "head not enough, abandon it. len=%{public}zd", len);
         return SOFTBUS_ERR;
     }
     return UnpackSocketPkt(buf, len, head);
@@ -455,7 +455,7 @@ int32_t SocketPostBytes(int32_t fd, const AuthDataHead *head, const uint8_t *dat
     ssize_t ret = ConnSendSocketData(fd, (const char *)buf, (size_t)size, 0);
     SoftBusFree(buf);
     if (ret != (ssize_t)size) {
-        AUTH_LOGE(AUTH_CONN, "fail. ret=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "fail. ret=%{public}zd", ret);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

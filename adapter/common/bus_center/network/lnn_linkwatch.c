@@ -131,7 +131,8 @@ static int32_t GetRtAttr(struct rtattr *rta, int32_t len, uint16_t type, uint8_t
             continue;
         }
         if (memcpy_s(value, valueLen, RTA_DATA(attr), (uint32_t)RTA_PAYLOAD(attr)) != EOK) {
-            LNN_LOGE(LNN_BUILDER, "get attr fail. valueLen=%{public}d, attr=%{public}d", valueLen, RTA_PAYLOAD(attr));
+            LNN_LOGE(LNN_BUILDER, "get attr fail. valueLen=%{public}d, attr=%{public}u",
+                valueLen, (uint32_t)RTA_PAYLOAD(attr));
             break;
         }
         return SOFTBUS_OK;

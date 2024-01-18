@@ -1069,7 +1069,7 @@ void VtpStreamSocket::DoStreamRecv()
             int plainDataLength = decryptedLength - GetEncryptOverhead();
             if (plainDataLength <= 0) {
                 TRANS_LOGE(
-                    TRANS_STREAM, "Decrypt failed, invalid decryptedLen=%{public}zd", decryptedLength);
+                    TRANS_STREAM, "Decrypt failed, invalid decryptedLen=%{public}d", decryptedLength);
                 break;
             }
             std::unique_ptr<char[]> plainData = std::make_unique<char[]>(plainDataLength);
@@ -1083,7 +1083,7 @@ void VtpStreamSocket::DoStreamRecv()
             StreamDepacketizer decode(streamType_);
             if (plainDataLength < static_cast<int>(sizeof(CommonHeader))) {
                 TRANS_LOGE(TRANS_STREAM,
-                    "failed, plainDataLen=%{public}d, CommonHeader=%{public}u", plainDataLength, sizeof(CommonHeader));
+                    "failed, plainDataLen=%{public}d, CommonHeader=%{public}zu", plainDataLength, sizeof(CommonHeader));
                 break;
             }
             decode.DepacketizeHeader(header);
