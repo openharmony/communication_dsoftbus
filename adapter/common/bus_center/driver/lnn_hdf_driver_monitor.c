@@ -62,7 +62,7 @@ static void ProcessLwipEvent(struct HdfSBuf *data)
 
     if (eventData == NULL || eventDataSize != sizeof(LwipMonitorReportInfo)) {
         LNN_LOGE(LNN_EVENT,
-            "receive lwip monitor not correct size: eventDataSize=%{public}d, LwipMonitorReportInfo=%{public}d",
+            "receive lwip monitor not correct size: eventDataSize=%{public}d, LwipMonitorReportInfo=%{public}zu",
             eventDataSize, sizeof(LwipMonitorReportInfo));
         return;
     }
