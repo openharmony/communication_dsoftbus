@@ -15,6 +15,7 @@
 
 #include "client_trans_stream.h"
 
+#include "client_trans_session_manager.h"
 #include "client_trans_udp_stream_interface.h"
 #include "session.h"
 #include "softbus_errcode.h"
@@ -137,6 +138,10 @@ int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPo
         return SOFTBUS_INVALID_PARAM;
     }
     if (channel->isServer) {
+        if (IsSessionExceedLimit()) {
+            *streamPort = 0;
+            return SOFTBUS_TRANS_SESSION_CNT_EXCEEDS_LIMIT;
+        }
         VtpStreamOpenParam p1 = { "DSOFTBUS_STREAM", channel->myIp,
             NULL, -1, streamType, (uint8_t*)channel->sessionKey, channel->keyLen };
 
