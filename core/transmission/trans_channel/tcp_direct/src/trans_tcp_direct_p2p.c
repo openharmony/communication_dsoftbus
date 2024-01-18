@@ -730,7 +730,6 @@ static int32_t OpenNewAuthConn(const AppInfo *appInfo, SessionConn *conn,
     int32_t ret = OpenAuthConn(appInfo->peerData.deviceId, requestId, conn->isMeta);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "OpenP2pDirectChannel open auth conn fail");
-        TransDelSessionConnById(newChannelId);
         return ret;
     }
     return SOFTBUS_OK;
