@@ -384,6 +384,10 @@
         "TransSetSocketFileListener";
         "EvaluateQos";
         "GetMtuSize";
+        "ClientAddPolicyReportCallback";
+        "ClientDeletePolicyReportCallback";
+        "ServerEnableDiscoveryPolicy";
+        "ServerSetDiscoveryPolicy";
         "ClientResetIdleTimeoutById";
         extern "C++" {
             OHOS::StreamAdaptor*;
