@@ -14,13 +14,11 @@
  */
 
 #include "removesessionserver_fuzzer.h"
-#include <cstddef>
-#include <cstdint>
+
 #include <securec.h>
-#include "softbus_def.h"
-#include "inner_session.h"
+
 #include "session.h"
-#include "softbus_utils.h"
+#include "softbus_def.h"
 
 namespace OHOS {
 const char *g_sessionName = "objectstore";

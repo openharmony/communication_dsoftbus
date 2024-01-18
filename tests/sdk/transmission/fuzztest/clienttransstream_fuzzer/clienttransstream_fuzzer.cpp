@@ -14,11 +14,8 @@
  */
 
 #include "clienttransstream_fuzzer.h"
-#include <cstddef>
-#include <cstdint>
+
 #include "client_trans_stream.h"
-#include "session.h"
-#include "softbus_def.h"
 
 namespace OHOS {
     void TransOnstreamChannelOpenedTest(const uint8_t* data, size_t size)

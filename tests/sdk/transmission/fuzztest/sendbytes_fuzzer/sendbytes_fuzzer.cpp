@@ -14,12 +14,10 @@
  */
 
 #include "sendbytes_fuzzer.h"
+
 #include <cstddef>
-#include <cstdint>
-#include <cstring>
-#include "inner_session.h"
+
 #include "session.h"
-#include "softbus_utils.h"
 
 namespace OHOS {
 void SendBytesTest(const uint8_t* data, size_t size)

@@ -34,7 +34,10 @@ ohos_unittest("CheckPermissionTest") {
     "//third_party/googletest:gtest_main",
   ]
 
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 group("unittest") {
   testonly = true

@@ -31,6 +31,6 @@ ohos_fuzztest("ConvertBtMacToBinaryFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [ "convertbtmactobinary_fuzzer.cpp" ]
-
   deps = [ "$dsoftbus_root_path/core/common:softbus_utils" ]
+  external_deps = [ "hilog:libhilog" ]
 }
