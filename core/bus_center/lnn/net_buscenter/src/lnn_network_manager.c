@@ -665,7 +665,8 @@ static void RetryCheckOOBEState(void *para)
         LNN_LOGI(LNN_BUILDER, "wifi handle SOFTBUS_OOBE_END");
         LnnNotifyOOBEStateChangeEvent(SOFTBUS_OOBE_END);
     } else {
-        LNN_LOGD(LNN_BUILDER, "check OOBE again after a delay. delay=%{public}" PRIu64 "ms", LNN_CHECK_OOBE_DELAY_LEN);
+        LNN_LOGD(LNN_BUILDER, "check OOBE again after a delay. delay=%{public}" PRIu64 "ms",
+            (uint64_t)LNN_CHECK_OOBE_DELAY_LEN);
         LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), RetryCheckOOBEState, NULL, LNN_CHECK_OOBE_DELAY_LEN);
     }
 }
