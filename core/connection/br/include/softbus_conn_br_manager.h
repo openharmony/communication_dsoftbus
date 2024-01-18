@@ -93,7 +93,7 @@ typedef struct {
     void (*connectionException)(uint32_t connectionId, int32_t error);
     void (*connectionResume)(uint32_t connectionId);
     void (*disconnectRequest)(uint32_t connectionId);
-    void (*unpend)(const ConnBrPendInfo *info);
+    void (*unpend)(const char *addr);
     void (*reset)(int32_t reason);
 } ConnBrState;
 
