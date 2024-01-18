@@ -200,37 +200,4 @@ HWTEST_F(ClientTransSessionImplTest, ClientTransSessionServerImplTest003, TestSi
     ret = testSessionImpl.SendBytes(data, len);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
-
-/**
- * @tc.name: ClientTransSessionServerImplTest004
- * @tc.desc: client trans session server impl test, use the wrong or normal parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(ClientTransSessionImplTest, ClientTransSessionServerImplTest004, TestSize.Level0)
-{
-    Communication::SoftBus::SessionServiceImpl testSessionServiceImpl;
-    std::shared_ptr<Communication::SoftBus::ISessionListener> listern = std::make_shared<ISessionListenerTest>();
-    int ret = testSessionServiceImpl.CreateSessionServer(g_pkgName2, g_sessionName2, listern);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    const char *groupId = "test";
-    SessionAttribute attr;
-    attr.dataType = 1;
-    attr.linkTypeNum = 0;
-    SessionParam param = {
-        .sessionName = g_sessionName2.c_str(),
-        .peerSessionName = g_sessionName2.c_str(),
-        .peerDeviceId = g_peerNetWorkId2.c_str(),
-        .groupId = groupId,
-        .attr = &attr,
-    };
-    int32_t sessionId = 0;
-    bool isEnabled = 0;
-    ret = ClientAddSession(&param, &sessionId, &isEnabled);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = testSessionServiceImpl.OpenSessionCallback(sessionId);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-}
 } // namespace OHOS

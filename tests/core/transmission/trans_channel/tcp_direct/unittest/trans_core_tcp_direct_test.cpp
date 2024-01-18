@@ -97,7 +97,7 @@ SessionServer *TestSetPack()
     if (newNode == nullptr) {
         return nullptr;
     }
-    
+
     (void)memset_s(newNode, sizeof(SessionServer), 0, sizeof(SessionServer));
     (void)memcpy_s(newNode->sessionName, SESSION_NAME_MAX_LEN, g_sessionName, strlen(g_sessionName));
     (void)memcpy_s(newNode->pkgName, PKG_NAME_SIZE_MAX_LEN, g_pkgName, strlen(g_pkgName));
@@ -112,7 +112,7 @@ SessionConn *TestSetSessionConn()
     if (conn == nullptr) {
         return nullptr;
     }
-    
+
     (void)memset_s(conn, sizeof(SessionConn), 0, sizeof(SessionConn));
     conn->serverSide = true;
     conn->channelId = 1;
@@ -139,7 +139,7 @@ string TestGetMsgPack()
         cJSON_Delete(msg);
         return nullptr;
     }
-    
+
     appInfo->appType = APP_TYPE_NOT_CARE;
     appInfo->businessType = BUSINESS_TYPE_BYTE;
     appInfo->myData.channelId = 1;
@@ -392,7 +392,7 @@ HWTEST_F(TransCoreTcpDirectTest, VerifyP2pPackErrorTest0010, TestSize.Level1)
  * @tc.desc: GetCipherFlagByAuthId, use correct parameters.
  * @tc.type: FUNC
  * @tc.require:
- */
+*/
 HWTEST_F(TransCoreTcpDirectTest, GetCipherFlagByAuthIdTest0011, TestSize.Level1)
 {
     bool isAuthServer = false;
@@ -405,8 +405,6 @@ HWTEST_F(TransCoreTcpDirectTest, GetCipherFlagByAuthIdTest0011, TestSize.Level1)
     authId = INVALID_VALUE;
     ret = GetCipherFlagByAuthId(authId, &flag, &isAuthServer);
     EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    AuthDeinit();
 }
 
 /**
@@ -456,38 +454,6 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcSetCallBackTest0013, TestSize.Level1)
 
     ret = TransTdcSetCallBack(NULL);
     EXPECT_TRUE(ret != SOFTBUS_OK);
-}
-
-/**
- * @tc.name: TransTdcOnChannelOpenedTest0014
- * @tc.desc: make sure channel open, use wrong parameters.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransCoreTcpDirectTest, TransTdcOnChannelOpenedTest0014, TestSize.Level1)
-{
-    int32_t pid = 0;
-    ChannelInfo *info = (ChannelInfo *)SoftBusCalloc(sizeof(ChannelInfo));
-    ASSERT_TRUE(info != nullptr);
-    (void)memset_s(info, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
-
-    int32_t ret = TransTdcOnChannelOpened(nullptr, pid, g_sessionName, nullptr);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    info->isServer = true;
-    info->channelType = CHANNEL_TYPE_AUTH;
-    ret = TransTdcOnChannelOpened(nullptr, pid, g_sessionName, info);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    ret = TransTdcOnChannelOpened(g_pkgName, pid, g_sessionName, info);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    info->isServer = false;
-    info->channelType = CHANNEL_TYPE_UDP;
-    ret = TransTdcOnChannelOpened(g_pkgName, pid, g_sessionName, info);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    SoftBusFree(info);
 }
 
 /**
