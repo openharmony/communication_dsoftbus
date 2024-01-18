@@ -31,9 +31,6 @@ int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel
         TRANS_LOGW(TRANS_SDK, "[client] invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (IsSessionExceedLimit()) {
-        return SOFTBUS_TRANS_SESSION_CNT_EXCEEDS_LIMIT;
-    }
 
     int32_t ret = SOFTBUS_ERR;
     int32_t udpPort = 0;

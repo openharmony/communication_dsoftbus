@@ -16,11 +16,12 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
+#include "client_trans_session_manager.h"
+#include "client_trans_stream.c"
+#include "client_trans_stream.h"
+#include "client_trans_udp_manager.h"
 #include "softbus_adapter_mem.h"
 #include "trans_server_proxy.h"
-#include "client_trans_udp_manager.h"
-#include "client_trans_stream.h"
-#include "client_trans_stream.c"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -215,12 +216,14 @@ HWTEST_F(ClientTransStreamTest, TransSendStream001, TestSize.Level0)
  */
 HWTEST_F(ClientTransStreamTest, TransOnstreamChannelOpened001, TestSize.Level0)
 {
+    int ret = TransClientInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ChannelInfo *channel = (ChannelInfo*)SoftBusMalloc(sizeof(ChannelInfo));
     ASSERT_TRUE(channel != nullptr);
     (void)memset_s(channel, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
 
     int32_t streamPort = 2;
-    int32_t ret = TransOnstreamChannelOpened(NULL, &streamPort);
+    ret = TransOnstreamChannelOpened(NULL, &streamPort);
 
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = TransOnstreamChannelOpened(channel, NULL);
@@ -251,6 +254,7 @@ HWTEST_F(ClientTransStreamTest, TransOnstreamChannelOpened001, TestSize.Level0)
     if (channel != nullptr) {
         SoftBusFree(channel);
     }
+    TransClientDeinit();
 }
 
 /**

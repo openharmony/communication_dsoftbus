@@ -389,6 +389,7 @@
         "ServerEnableDiscoveryPolicy";
         "ServerSetDiscoveryPolicy";
         "ClientResetIdleTimeoutById";
+        "IsSessionExceedLimit";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;
