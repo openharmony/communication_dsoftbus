@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,6 @@
 #include <securec.h>
 #include <string.h>
 
-#include "comm_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 
@@ -90,35 +89,14 @@ int32_t SoftBusMutexInit(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr)
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusMutexLock(SoftBusMutex *mutex)
+int32_t SoftBusMutexLockInner(SoftBusMutex *mutex)
 {
-    if ((mutex == NULL) || ((void *)(*mutex) == NULL)) {
-        COMM_LOGD(COMM_ADAPTER, "mutex is null");
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    int32_t ret = pthread_mutex_lock((pthread_mutex_t *)*mutex);
-    if (ret != 0) {
-        COMM_LOGE(COMM_ADAPTER, "SoftBusMutexLock failed, ret=%{public}d", ret);
-        return SOFTBUS_LOCK_ERR;
-    }
-    return SOFTBUS_OK;
+    return pthread_mutex_lock((pthread_mutex_t *)*mutex);
 }
 
-int32_t SoftBusMutexUnlock(SoftBusMutex *mutex)
+int32_t SoftBusMutexUnlockInner(SoftBusMutex *mutex)
 {
-    if ((mutex == NULL) || ((void *)(*mutex) == NULL)) {
-        COMM_LOGE(COMM_ADAPTER, "mutex is null");
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    int32_t ret = pthread_mutex_unlock((pthread_mutex_t *)*mutex);
-    if (ret != 0) {
-        COMM_LOGE(COMM_ADAPTER, "SoftBusMutexUnlock failed, ret=%{public}d", ret);
-        return SOFTBUS_LOCK_ERR;
-    }
-
-    return SOFTBUS_OK;
+    return pthread_mutex_unlock((pthread_mutex_t *)*mutex);
 }
 
 int32_t SoftBusMutexDestroy(SoftBusMutex *mutex)

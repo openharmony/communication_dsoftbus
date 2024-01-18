@@ -14,10 +14,8 @@
  */
 
 #include "sessionserviceimpl_fuzzer.h"
-#include <cstddef>
-#include <cstdint>
+
 #include "session.h"
-#include "softbus_utils.h"
 #include "session_service_impl.h"
 
 namespace OHOS {

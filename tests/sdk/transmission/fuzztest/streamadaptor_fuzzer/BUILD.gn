@@ -43,7 +43,10 @@ ohos_fuzztest("StreamAdaptorFuzzTest") {
   ]
   sources = [ "streamadaptor_fuzzer.cpp" ]
   deps = [ "../../../../../sdk:softbus_client" ]
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ###############################################################################

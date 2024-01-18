@@ -27,6 +27,7 @@ if (defined(ohos_lite)) {
         "-Wl,-rpath-link=$ohos_root_path/$root_out_dir",
       ]
       deps = [ "$dsoftbus_root_path/core/common:softbus_utils" ]
+      external_deps = [ "hilog:libhilog" ]
     }
   }
 } else {
@@ -37,10 +38,9 @@ if (defined(ohos_lite)) {
   ohos_unittest("SoftbusUtilsTest") {
     module_out_path = module_output_path
     sources = [ "unittest/softbus_utils_test.cpp" ]
-
     include_dirs = [ "$dsoftbus_root_path/core/common/include" ]
-
     deps = [ "$dsoftbus_root_path/core/common:softbus_utils" ]
+    external_deps = [ "hilog:libhilog" ]
   }
 
   ohos_unittest("Sqlite3UtilsTest") {

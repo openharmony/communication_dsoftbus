@@ -41,8 +41,10 @@ ohos_fuzztest("ClientTransSessionManagerFuzzTest") {
   ]
   sources = [ "clienttranssessionmanager_fuzzer.cpp" ]
   deps = [ "../../../../../sdk:softbus_client" ]
-
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ###############################################################################
