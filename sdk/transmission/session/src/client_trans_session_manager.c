@@ -1697,8 +1697,8 @@ int32_t ClientSetListenerBySessionId(int32_t sessionId, const ISocketListener *l
 
 static int32_t CheckBindSocketInfo(const SessionInfo *session)
 {
-    if (!IsValidString(session->info.peerSessionName, SESSION_NAME_SIZE_MAX) ||
-        !IsValidString(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX)) {
+    if (!IsValidString(session->info.peerSessionName, SESSION_NAME_SIZE_MAX - 1) ||
+        !IsValidString(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX - 1)) {
         char *anonySessionName = NULL;
         char *anonyNetworkId = NULL;
         Anonymize(session->info.peerSessionName, &anonySessionName);
