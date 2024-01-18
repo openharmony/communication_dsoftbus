@@ -201,6 +201,7 @@ HWTEST_F(ConnectionBleManagerTest, TestTransListener001, TestSize.Level1)
     int32_t ret = ConnBleSaveConnection(connection);
     ASSERT_EQ(SOFTBUS_OK, ret);
     g_transEventListener.onPostBytesFinished(connection->connectionId, len, pid, flag, module, seq, error);
+    SoftBusSleepMs(SLEEP_TIME_MS);
 }
 
 /*
