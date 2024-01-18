@@ -59,6 +59,7 @@ typedef struct {
 
 typedef struct {
     ListNode node;
+    char addr[BT_MAC_LEN];
     ConnBrPendInfo *pendInfo;
 } BrPending;
 
@@ -78,7 +79,7 @@ static int BrCompareManagerLooperEventFunc(const SoftBusMessage *msg, void *args
 static int32_t PendingDevice(ConnBrDevice *device, const char *anomizeAddress);
 static int32_t BrPendConnection(const ConnectOption *option, uint32_t time);
 static void ProcessAclCollisionException(ConnBrDevice *device, const char *anomizeAddress);
-static void UnpendConnection(const ConnBrPendInfo *unpendInfo);
+static void UnpendConnection(const char *addr);
 
 static ConnBrManager g_brManager = { 0 };
 static ConnectCallback g_connectCallback = { 0 };
@@ -317,7 +318,7 @@ static BrPending *GetBrPending(const char *addr)
 {
     BrPending *it = NULL;
     LIST_FOR_EACH_ENTRY(it, &g_brManager.pendings->list, BrPending, node) {
-        if (StrCmpIgnoreCase(it->pendInfo->addr, addr) == 0) {
+        if (StrCmpIgnoreCase(it->addr, addr) == 0) {
             return it;
         }
     }
@@ -509,7 +510,7 @@ static bool CheckPending(const char *addr)
     bool pending = false;
     BrPending *it = NULL;
     LIST_FOR_EACH_ENTRY(it, &g_brManager.pendings->list, BrPending, node) {
-        if (StrCmpIgnoreCase(it->pendInfo->addr, addr) == 0) {
+        if (StrCmpIgnoreCase(it->addr, addr) == 0) {
             pending = true;
             break;
         }
@@ -630,14 +631,8 @@ static void ServerAccepted(uint32_t connectionId)
         CONN_LOGE(CONN_BR, "convert connection info failed, error=%{public}d", status);
     }
     g_connectCallback.OnConnected(connectionId, &info);
-    ConnBrPendInfo *pendInfo = (ConnBrPendInfo *)SoftBusCalloc(sizeof(ConnBrPendInfo));
-    if (pendInfo == NULL || strcpy_s(pendInfo->addr, BT_MAC_LEN, connection->addr) != EOK) {
-        CONN_LOGE(CONN_BR, "copy addr failed, address=%{public}s", anomizeAddress);
-        SoftBusFree(pendInfo);
-        return;
-    }
-    ConnRemoveMsgFromLooper(&g_brManagerAsyncHandler, MSG_UNPEND, 0, 0, pendInfo);
-    UnpendConnection(pendInfo);
+    ConnRemoveMsgFromLooper(&g_brManagerAsyncHandler, MSG_UNPEND, 0, 0, connection->addr);
+    UnpendConnection(connection->addr);
 
     ConnBrDevice *connectingDevice = g_brManager.connecting;
     if (connectingDevice != NULL && StrCmpIgnoreCase(connectingDevice->addr, connection->addr) == 0) {
@@ -908,19 +903,19 @@ static void DisconnectRequest(uint32_t connectionId)
     ConnBrReturnConnection(&connection);
 }
 
-static void UnpendConnection(const ConnBrPendInfo *unpendInfo)
+static void UnpendConnection(const char *addr)
 {
     char anomizeAddress[BT_MAC_LEN] = { 0 };
-    ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, unpendInfo->addr, BT_MAC_LEN);
+    ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, addr, BT_MAC_LEN);
 
     CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_brManager.pendings->lock) == SOFTBUS_OK, CONN_BR,
         "unpend connection: lock failed, addr=%{public}s", anomizeAddress);
-    ConnRemoveMsgFromLooper(&g_brManagerAsyncHandler, MSG_UNPEND, 0, 0, (ConnBrPendInfo *)unpendInfo);
+    ConnRemoveMsgFromLooper(&g_brManagerAsyncHandler, MSG_UNPEND, 0, 0, (char *)addr);
     do {
         BrPending *target = NULL;
         BrPending *pendingIt = NULL;
         LIST_FOR_EACH_ENTRY(pendingIt, &g_brManager.pendings->list, BrPending, node) {
-            if (StrCmpIgnoreCase(pendingIt->pendInfo->addr, unpendInfo->addr) == 0) {
+            if (StrCmpIgnoreCase(pendingIt->addr, addr) == 0) {
                 target = pendingIt;
                 break;
             }
@@ -934,7 +929,7 @@ static void UnpendConnection(const ConnBrPendInfo *unpendInfo)
         g_brManager.pendings->cnt -= 1;
         ConnBrDevice *deviceIt = NULL;
         LIST_FOR_EACH_ENTRY(deviceIt, &g_brManager.waitings, ConnBrDevice, node) {
-            if (StrCmpIgnoreCase(deviceIt->addr, unpendInfo->addr) == 0) {
+            if (StrCmpIgnoreCase(deviceIt->addr, addr) == 0) {
                 deviceIt->state = BR_DEVICE_STATE_WAIT_SCHEDULE;
                 break;
             }
@@ -975,7 +970,7 @@ static void Reset(int32_t reason)
     BrPending *pendingNext = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(pendingIt, pendingNext, &g_brManager.pendings->list, BrPending, node) {
         ListDelete(&pendingIt->node);
-        ConnRemoveMsgFromLooper(&g_brManagerAsyncHandler, MSG_UNPEND, 0, 0, pendingIt->pendInfo);
+        ConnRemoveMsgFromLooper(&g_brManagerAsyncHandler, MSG_UNPEND, 0, 0, pendingIt->addr);
         SoftBusFree(pendingIt);
         g_brManager.pendings->cnt -= 1;
     }
@@ -1126,9 +1121,8 @@ static void BrManagerMsgHandler(SoftBusMessage *msg)
             break;
         }
         case MSG_UNPEND: {
-            ConnBrPendInfo *info = (ConnBrPendInfo *)(msg->obj);
             if (g_brManager.state->unpend != NULL) {
-                g_brManager.state->unpend(info);
+                g_brManager.state->unpend((const char *)msg->obj);
                 return;
             }
             break;
@@ -1162,12 +1156,7 @@ static int BrCompareManagerLooperEventFunc(const SoftBusMessage *msg, void *args
             return COMPARE_FAILED;
         }
         case MSG_UNPEND: {
-            ConnBrPendInfo *msgInfo = (ConnBrPendInfo *)(msg->obj);
-            ConnBrPendInfo *ctxInfo = (ConnBrPendInfo *)(ctx->obj);
-            if (msgInfo == NULL || ctxInfo == NULL) {
-                return COMPARE_SUCCESS;
-            }
-            if (StrCmpIgnoreCase(msgInfo->addr, ctxInfo->addr) == 0) {
+            if (StrCmpIgnoreCase((const char *)msg->obj, (const char *)ctx->obj) == 0) {
                 return COMPARE_SUCCESS;
             }
             return COMPARE_FAILED;
@@ -1557,30 +1546,28 @@ static int32_t BrPendConnection(const ConnectOption *option, uint32_t time)
         return SOFTBUS_LOCK_ERR;
     }
     do {
-        BrPending *target = GetBrPending(option->brOption.brMac);
-        ConnBrPendInfo *pendInfo = (ConnBrPendInfo *)SoftBusCalloc(sizeof(ConnBrPendInfo));
-        if (pendInfo == NULL || strcpy_s(pendInfo->addr, BT_MAC_LEN, option->brOption.brMac) != EOK) {
-            CONN_LOGE(CONN_BR, "copy addr failed, addr=%{public}s", animizeAddress);
-            SoftBusFree(pendInfo);
+        char *copyAddr = (char *)SoftBusCalloc(BT_MAC_LEN);
+        if (copyAddr == NULL || strcpy_s(copyAddr, BT_MAC_LEN, option->brOption.brMac) != EOK) {
+            CONN_LOGE(CONN_BR, "copy addr failed, addr=%s", animizeAddress);
+            // it is safe, SoftBusFree will check NULL situation
+            SoftBusFree(copyAddr);
+            status = SOFTBUS_MALLOC_ERR;
             break;
         }
-        uint64_t now = SoftBusGetSysTimeMs();
-        pendInfo->firstStartTimestamp = now;
-        pendInfo->firstDuration = time;
-        pendInfo->startTimestamp = now;
-        pendInfo->duration = time;
-        if (target != NULL) {
-            CONN_LOGD(
-                CONN_BR, "br pend connection, address pending, refresh timeout only, addr=%{public}s", animizeAddress);
-            if (target->pendInfo->startTimestamp + target->pendInfo->duration < now + time) {
-                pendInfo->firstStartTimestamp = target->pendInfo->firstStartTimestamp;
-                pendInfo->firstDuration = target->pendInfo->firstDuration;
-                ConnRemoveMsgFromLooper(&g_brManagerAsyncHandler, MSG_UNPEND, 0, 0, pendInfo);
-                target->pendInfo = pendInfo;
-                ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_UNPEND, 0, 0, pendInfo, time);
-            } else {
-                SoftBusFree(pendInfo);
+        BrPending *target = NULL;
+        BrPending *it = NULL;
+        LIST_FOR_EACH_ENTRY(it, &g_brManager.pendings->list, BrPending, node) {
+            if (StrCmpIgnoreCase(it->addr, option->brOption.brMac) == 0) {
+                target = it;
+                break;
             }
+        }
+
+        if (target != NULL) {
+            CONN_LOGD(CONN_BR, "br pend connection, address pending, refresh timeout only, addr=%s", animizeAddress);
+            ConnRemoveMsgFromLooper(&g_brManagerAsyncHandler, MSG_UNPEND, 0, 0, copyAddr);
+            ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_UNPEND, 0, 0, copyAddr,
+                (time < BR_CONNECTION_PEND_TIMEOUT_MAX_MILLIS ? time : BR_CONNECTION_PEND_TIMEOUT_MAX_MILLIS));
             break;
         }
 
@@ -1591,10 +1578,16 @@ static int32_t BrPendConnection(const ConnectOption *option, uint32_t time)
             break;
         }
         ListInit(&pending->node);
-        pending->pendInfo = pendInfo;
+        if (strcpy_s(pending->addr, BT_MAC_LEN, option->brOption.brMac) != EOK) {
+            SoftBusFree(copyAddr);
+            SoftBusFree(pending);
+            status = SOFTBUS_STRCPY_ERR;
+            break;
+        }
         ListAdd(&g_brManager.pendings->list, &pending->node);
         g_brManager.pendings->cnt += 1;
-        ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_UNPEND, 0, 0, pendInfo, time);
+        ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_UNPEND, 0, 0, copyAddr,
+            (time < BR_CONNECTION_PEND_TIMEOUT_MAX_MILLIS ? time : BR_CONNECTION_PEND_TIMEOUT_MAX_MILLIS));
         CONN_LOGD(CONN_BR, "br pend connection success, address=%{public}s", animizeAddress);
     } while (false);
     SoftBusMutexUnlock(&g_brManager.pendings->lock);
