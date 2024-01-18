@@ -200,7 +200,7 @@ HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyPipelineCloseChannelTest001,
     int32_t ret = TransProxyPipelineOpenChannel(TEST_NUMBER_THREE, networkId, &option, &channelCallback);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransProxyPipelineCloseChannel(TEST_NUMBER_THREE);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
