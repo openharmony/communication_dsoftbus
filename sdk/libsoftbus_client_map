@@ -385,6 +385,7 @@
         "EvaluateQos";
         "GetMtuSize";
         "ClientResetIdleTimeoutById";
+        "IsSessionExceedLimit";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;

@@ -16,12 +16,13 @@
 #include <gtest/gtest.h>
 #include "securec.h"
 
+#include "client_trans_session_callback.h"
+#include "client_trans_session_manager.h"
 #include "client_trans_udp_manager.h"
+#include "session.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
-#include "session.h"
 #include "trans_udp_channel_manager.h"
-#include "client_trans_session_callback.h"
 
 using namespace std;
 using namespace testing::ext;
@@ -88,6 +89,8 @@ void ClientTransUdpManagerTest::SetUpTestCase(void)
 {
     int ret = ClientTransUdpMgrInit(&g_sessionCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransClientInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 void ClientTransUdpManagerTest::TearDownTestCase(void) {}
