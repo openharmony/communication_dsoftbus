@@ -541,6 +541,7 @@ void AuthUpdateKeyIndex(const char *udidHash, int32_t keyType, int64_t index, bo
     AuthDeviceCommonKey *data = (AuthDeviceCommonKey *)LnnMapGet(&g_deviceKeyMap, (const char *)keyStr);
     if (data == NULL) {
         AUTH_LOGE(AUTH_KEY, "data is nullptr");
+        KeyUnlock();
         return;
     }
     data->keyInfo.keyIndex = index;
