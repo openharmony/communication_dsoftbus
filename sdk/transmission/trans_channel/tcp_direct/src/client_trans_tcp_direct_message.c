@@ -181,7 +181,7 @@ static int32_t TransTdcProcessPostData(const TcpDirectChannelInfo *channel, cons
     }
     ssize_t ret = ConnSendSocketData(channel->detail.fd, buf, outLen + DC_DATA_HEAD_SIZE, 0);
     if (ret != (ssize_t)outLen + DC_DATA_HEAD_SIZE) {
-        TRANS_LOGE(TRANS_SDK, "failed to send tcp data. ret=%{public}d", ret);
+        TRANS_LOGE(TRANS_SDK, "failed to send tcp data. ret=%{public}zd", ret);
         SoftBusFree(buf);
         return SOFTBUS_ERR;
     }

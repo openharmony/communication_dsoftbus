@@ -65,7 +65,7 @@ int32_t TransCheckAccessControl(const char *peerDeviceId)
     parms.insert({{"tokenId", firstTokenIdStr}, {"trustDeviceId", deviceId}, {"status", active}});
 
     int32_t ret = DistributedDeviceProfileClient::GetInstance().GetAccessControlProfile(parms, profile);
-    COMM_LOGI(COMM_PERM, "profile size=%{public}d, ret=%{public}d", profile.size(), ret);
+    COMM_LOGI(COMM_PERM, "profile size=%{public}zu, ret=%{public}d", profile.size(), ret);
     if (profile.empty()) {
         return SOFTBUS_ERR;
     }

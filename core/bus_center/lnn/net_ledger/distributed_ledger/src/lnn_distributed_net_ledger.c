@@ -747,7 +747,7 @@ static int32_t DlGetNodeBleMac(const char *networkId, void *buf, uint32_t len)
     if (info->bleMacRefreshSwitch != 0) {
         uint64_t currentTimeMs = GetCurrentTime();
         LNN_CHECK_AND_RETURN_RET_LOGE(info->connectInfo.latestTime + BLE_ADV_LOST_TIME >= currentTimeMs, SOFTBUS_ERR,
-            LNN_LEDGER, "ble mac out date, lastAdvTime=%{public}llu, now=%{public}llu",
+            LNN_LEDGER, "ble mac out date, lastAdvTime=%{public}" PRIu64 ", now=%{public}" PRIu64,
             info->connectInfo.latestTime, currentTimeMs);
     }
     if (strcpy_s((char *)buf, len, info->connectInfo.bleMacAddr) != EOK) {

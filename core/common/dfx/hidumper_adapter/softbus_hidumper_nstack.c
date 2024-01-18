@@ -38,7 +38,7 @@ void SoftBufNstackDumpFunc(void *softObj, const char *data, uint32_t len)
     int fd = *(int *)softObj;
     size_t dataLen = strnlen(data, SOFTBUF_NSTACK_DUMP_BUF_LEN);
     if (dataLen == 0 || dataLen == SOFTBUF_NSTACK_DUMP_BUF_LEN || dataLen != len) {
-        COMM_LOGE(COMM_DFX, "SoftBufNstackDumpFunc len error, dataStrlen=%{public}d, len=%{public}d.", dataLen, len);
+        COMM_LOGE(COMM_DFX, "SoftBufNstackDumpFunc len error, dataStrlen=%{public}zu, len=%{public}d.", dataLen, len);
         return;
     }
     SOFTBUS_DPRINTF(fd, "%s", data);

@@ -748,13 +748,13 @@ static void ProcessCtrlFdEvent(int32_t fd, int32_t wakeupTrace)
                 break;
             } else {
                 CONN_LOGE(
-                    CONN_COMMON, "wakeupTrace=%{public}d, fd=%{public}d, readLen=%{public}d, error=%{public}d",
+                    CONN_COMMON, "wakeupTrace=%{public}d, fd=%{public}d, readLen=%{public}zd, error=%{public}d",
                     wakeupTrace, fd, len, status);
                 break;
             }
         }
         CONN_LOGI(CONN_COMMON, "wakeup ctrl message received, wakeupTrace=%{public}d, fd=%{public}d, "
-                               "ctrlTraceId=%{public}d, readLength=%{public}d", wakeupTrace, fd, ctrlTraceId, len);
+                               "ctrlTraceId=%{public}d, readLength=%{public}zd", wakeupTrace, fd, ctrlTraceId, len);
     }
 #endif
 }
@@ -1239,7 +1239,7 @@ static void WakeupSelectThread(void)
         }
         int32_t ctrlTraceId = selectWakeupTraceIdGenerator++;
         ssize_t len = write(g_selectThreadState->ctrlWfd, &ctrlTraceId, sizeof(ctrlTraceId));
-        CONN_LOGI(CONN_COMMON, "wakeup ctrl message sent, writeLength=%{public}d, ctrlTraceId=%{public}d",
+        CONN_LOGI(CONN_COMMON, "wakeup ctrl message sent, writeLength=%{public}zd, ctrlTraceId=%{public}d",
             len, ctrlTraceId);
     } while (false);
     SoftBusMutexUnlock(&g_selectThreadStateLock);
