@@ -35,6 +35,7 @@
 #include "wifi_direct_anonymous.h"
 #include "wifi_direct_entity.h"
 #include "message_handler.h"
+#include "wifi_direct_statistic.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -764,5 +765,105 @@ HWTEST_F(WifiDirectUtilsTest, DirectWorkQueueTest002, TestSize.Level1)
     int32_t ret = CallMethodAsync(data, nullptr, delayTimeMs);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CONN_LOGI(CONN_WIFI_DIRECT, "WifiDirectUtilsTest, testDirectUtilsTest009, End");
+};
+
+/*
+* @tc.name: SetWifiDirectStatisticLinkType001
+* @tc.desc: test SetWifiDirectStatisticLinkType
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(WifiDirectUtilsTest, SetWifiDirectStatisticLinkType001, TestSize.Level1)
+{
+    (void)InitStatisticMutexLock();
+    enum StatisticLinkType linkType = StatisticLinkType::STATISTIC_P2P;
+    SetWifiDirectStatisticLinkType(1, linkType);
+    enum StatisticLinkType resultLinkType;
+    GetWifiDirectStatisticLinkType(1, &resultLinkType);
+    EXPECT_EQ(resultLinkType, linkType);
+    DestroyWifiDirectStatisticElement(1);
+};
+
+/*
+* @tc.name: SetWifiDirectStatisticBootLinkType001
+* @tc.desc: test SetWifiDirectStatisticBootLinkType
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(WifiDirectUtilsTest, SetWifiDirectStatisticBootLinkType001, TestSize.Level1)
+{
+    (void)InitStatisticMutexLock();
+    enum StatisticBootLinkType linkType = StatisticBootLinkType::STATISTIC_NONE;
+    SetWifiDirectStatisticBootLinkType(1, linkType);
+    int32_t resultLinkType;
+    GetWifiDirectStatisticBootLinkType(1, &resultLinkType);
+    EXPECT_EQ(resultLinkType, 0);
+    DestroyWifiDirectStatisticElement(1);
+};
+
+/*
+* @tc.name: SetWifiDirectStatisticRenegotiate001
+* @tc.desc: test SetWifiDirectStatisticRenegotiate
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(WifiDirectUtilsTest, SetWifiDirectStatisticRenegotiate001, TestSize.Level1)
+{
+    (void)InitStatisticMutexLock();
+    SetWifiDirectStatisticRenegotiate(1);
+    int32_t isRenegotiate;
+    GetWifiDirectStatisticRenegotiate(1, &isRenegotiate);
+    EXPECT_EQ(isRenegotiate, 1);
+    DestroyWifiDirectStatisticElement(1);
+};
+
+/*
+* @tc.name: SetWifiDirectStatisticReuse001
+* @tc.desc: test SetWifiDirectStatisticReuse
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(WifiDirectUtilsTest, SetWifiDirectStatisticReuse001, TestSize.Level1)
+{
+    (void)InitStatisticMutexLock();
+    SetWifiDirectStatisticReuse(1);
+    int32_t isReuse;
+    GetWifiDirectStatisticReuse(1, &isReuse);
+    EXPECT_EQ(isReuse, 1);
+    DestroyWifiDirectStatisticElement(1);
+};
+
+/*
+* @tc.name: SetWifiDirectStatisticLinkTime001
+* @tc.desc: test SetWifiDirectStatisticLinkTime
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(WifiDirectUtilsTest, SetWifiDirectStatisticLinkTime001, TestSize.Level1)
+{
+    (void)InitStatisticMutexLock();
+    SetWifiDirectStatisticLinkStartTime(1);
+    SetWifiDirectStatisticLinkEndTime(1);
+    uint64_t linkTime = -1;
+    GetWifiDirectStatisticLinkTime(1, &linkTime);
+    EXPECT_NE(linkTime, -1);
+    DestroyWifiDirectStatisticElement(1);
+};
+
+/*
+* @tc.name: SetWifiDirectStatisticNegotiateTime001
+* @tc.desc: test SetWifiDirectStatisticNegotiateTime
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(WifiDirectUtilsTest, SetWifiDirectStatisticLinkTime001, TestSize.Level1)
+{
+    (void)InitStatisticMutexLock();
+    SetWifiDirectStatisticNegotiateStartTime(1);
+    SetWifiDirectStatisticNegotiateEndTime(1);
+    uint64_t negotiateTime = -1;
+    GetWifiDirectStatisticNegotiateTime(1, &negotiateTime);
+    EXPECT_NE(negotiateTime, -1);
+    DestroyWifiDirectStatisticElement(1);
 };
 } //namespace OHOS
