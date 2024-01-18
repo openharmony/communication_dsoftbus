@@ -28,7 +28,7 @@
 #define MAX_SOCKET_TYPE 5
 #define SEND_BUF_SIZE   0x200000 // 2M
 #define RECV_BUF_SIZE   0x100000 // 1M
-#define USER_TIMEOUT_US 2000000   // 2000000us
+#define USER_TIMEOUT_US 5000000   // 5000000us
 
 static const SocketInterface *g_socketInterfaces[MAX_SOCKET_TYPE] = { 0 };
 static SoftBusMutex g_socketsMutex;
@@ -152,6 +152,7 @@ static int WaitEvent(int fd, short events, int timeout)
                 break;
             }
             if (!SoftBusSocketFdIsset(fd, &writeSet)) {
+                CONN_LOGE(CONN_COMMON, "Enter SoftBusSocketFdIsset.");
                 rc = 0;
             }
             break;
