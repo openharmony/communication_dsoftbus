@@ -408,7 +408,7 @@ static bool CheckServiceIsMatch(const BcScanFilter *filter, const BroadcastPaylo
         return false;
     }
     if (filter->serviceUuid != bcData->id) {
-        DISC_LOGW(DISC_BLE, "serviceUuid not match!");
+        DISC_LOGD(DISC_BLE, "serviceUuid not match!");
         return false;
     }
     for (uint32_t i = 0; i < filterLen; i++) {
@@ -503,7 +503,7 @@ static int32_t BuildBroadcastPacket(const SoftbusBroadcastData *softbusBcData, B
     // 2.2. Build broadcast response payload.
     if (softbusBcData->rspData.payload == NULL) {
         packet->rspData.payload = NULL;
-        DISC_LOGW(DISC_BLE, "no rspData!");
+        DISC_LOGD(DISC_BLE, "no rspData!");
     } else {
         maxPayloadLen = RSP_DATA_MAX_LEN;
         ret = BuildBcPayload(maxPayloadLen, &(softbusBcData->rspData), &(packet->rspData));
@@ -535,7 +535,7 @@ static bool CheckScanResultDataIsMatchApproach(const uint32_t managerId, Broadca
     if (bcData->payload == NULL) {
         return false;
     }
-    DISC_CHECK_AND_RETURN_RET_LOGE(bcData->type == BC_DATA_TYPE_SERVICE, false, DISC_BLE,
+    DISC_CHECK_AND_RETURN_RET_LOGD(bcData->type == BC_DATA_TYPE_SERVICE, false, DISC_BLE,
                                    "type dismatch. type=%{public}d", bcData->type);
 
     uint8_t filterSize = g_scanManager[managerId].filterSize;
@@ -1529,7 +1529,7 @@ int32_t StopScan(int32_t listenerId)
 
 int32_t SetScanFilter(int32_t listenerId, const BcScanFilter *scanFilter, uint8_t filterNum)
 {
-    DISC_LOGI(DISC_BLE, "enter.");
+    DISC_LOGD(DISC_BLE, "enter.");
     DISC_CHECK_AND_RETURN_RET_LOGE(scanFilter != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "param is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(filterNum != 0, SOFTBUS_INVALID_PARAM, DISC_BLE, "filterNum is 0!");
     int32_t ret = SoftBusMutexLock(&g_scanLock);
@@ -1667,7 +1667,6 @@ int32_t BroadcastEnableSyncDataToLpDevice(void)
 
 int32_t BroadcastDisableSyncDataToLpDevice(void)
 {
-    DISC_LOGI(DISC_BLE, "enter.");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_ERR, DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->DisableSyncDataToLpDevice != NULL,
                                    SOFTBUS_ERR, DISC_BLE, "function is null!");
@@ -1680,7 +1679,6 @@ int32_t BroadcastDisableSyncDataToLpDevice(void)
 
 int32_t BroadcastSetScanReportChannelToLpDevice(int32_t listenerId, bool enable)
 {
-    DISC_LOGI(DISC_BLE, "enter.");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_ERR, DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->SetScanReportChannelToLpDevice != NULL,
                                    SOFTBUS_ERR, DISC_BLE, "function is null!");

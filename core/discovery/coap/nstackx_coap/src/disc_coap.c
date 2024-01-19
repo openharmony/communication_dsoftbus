@@ -58,7 +58,7 @@ static int32_t RegisterAllCapBitmap(uint32_t capBitmapNum, const uint32_t inCapB
 
     info->isUpdate = false;
     for (uint32_t i = 0; i < capBitmapNum; i++) {
-        DISC_LOGI(DISC_COAP, "register input bitmap=%{public}u", inCapBitmap[i]);
+        DISC_LOGD(DISC_COAP, "register input bitmap=%{public}u", inCapBitmap[i]);
         for (uint32_t pos = 0; pos < count; pos++) {
             if (((inCapBitmap[i] >> (pos % INT32_MAX_BIT_NUM)) & 0x1) == 0) {
                 continue;
@@ -69,7 +69,7 @@ static int32_t RegisterAllCapBitmap(uint32_t capBitmapNum, const uint32_t inCapB
             }
             (info->capCount)[pos]++;
         }
-        DISC_LOGI(DISC_COAP, "register all cap bitmap=%{public}u", (info->allCap)[i]);
+        DISC_LOGD(DISC_COAP, "register all cap bitmap=%{public}u", (info->allCap)[i]);
     }
     return SOFTBUS_OK;
 }
@@ -87,7 +87,7 @@ static int32_t  UnregisterAllCapBitmap(uint32_t capBitmapNum, const uint32_t inC
     info->isEmpty = true;
     info->isUpdate = false;
     for (uint32_t i = 0; i < capBitmapNum; i++) {
-        DISC_LOGI(DISC_COAP, "unregister input bitmap=%{public}u", inCapBitmap[i]);
+        DISC_LOGD(DISC_COAP, "unregister input bitmap=%{public}u", inCapBitmap[i]);
         for (uint32_t pos = 0; pos < count; pos++) {
             if (((inCapBitmap[i] >> (pos % INT32_MAX_BIT_NUM)) & 0x1) == 0) {
                 continue;
@@ -102,7 +102,7 @@ static int32_t  UnregisterAllCapBitmap(uint32_t capBitmapNum, const uint32_t inC
         if ((info->allCap)[i] != 0) {
             info->isEmpty = false;
         }
-        DISC_LOGI(DISC_COAP, "register all cap bitmap=%{public}u", (info->allCap)[i]);
+        DISC_LOGD(DISC_COAP, "register all cap bitmap=%{public}u", (info->allCap)[i]);
     }
     return SOFTBUS_OK;
 }
