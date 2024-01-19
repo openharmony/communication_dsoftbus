@@ -164,7 +164,9 @@ int32_t TransSessionServerAddItem(SessionServer *newNode)
         }
     }
 
+    Anonymize(newNode->sessionName, &tmpName);
     ListAdd(&(g_sessionServerList->list), &(newNode->node));
+    TRANS_LOGI(TRANS_CTRL, "add sessionName = %{public}s", tmpName);
     g_sessionServerList->cnt++;
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
     AnonymizeFree(tmpName);
@@ -315,6 +317,7 @@ static void TransListDelete(ListNode *sessionServerList)
 
 static int32_t TransListCopy(ListNode *sessionServerList)
 {
+    TRANS_LOGI(TRANS_CTRL, "enter.");
     if (sessionServerList == NULL) {
         return SOFTBUS_ERR;
     }

@@ -170,6 +170,7 @@ int32_t TransRefreshProxyTimesNative(int channelId)
 
 static int32_t TransProxyAddChanItem(ProxyChannelInfo *chan)
 {
+    TRANS_LOGI(TRANS_CTRL, "enter.");
     if ((chan == NULL) || (g_proxyChannelList == NULL)) {
         TRANS_LOGE(TRANS_CTRL, "trans proxy add channel param nullptr!");
         return SOFTBUS_ERR;
@@ -370,6 +371,7 @@ static void TransProxyCloseProxyOtherRes(int32_t channelId, const ProxyChannelIn
 
 static void TransProxyReleaseChannelList(ListNode *proxyChannelList, int32_t errCode)
 {
+    TRANS_LOGI(TRANS_CTRL, "enter.");
     if (proxyChannelList == NULL || IsListEmpty(proxyChannelList)) {
         return;
     }
@@ -1436,6 +1438,7 @@ int32_t TransProxyCloseProxyChannel(int32_t channelId)
 
 static void TransProxyTimerItemProc(const ListNode *proxyProcList)
 {
+    TRANS_LOGI(TRANS_CTRL, "enter.");
     ProxyChannelInfo *removeNode = NULL;
     ProxyChannelInfo *nextNode = NULL;
     uint32_t connId;
@@ -1684,6 +1687,7 @@ void TransProxyManagerDeinit(void)
 
 static void TransProxyDestroyChannelList(const ListNode *destroyList)
 {
+    TRANS_LOGI(TRANS_CTRL, "enter.");
     if ((destroyList == NULL) || IsListEmpty(destroyList)) {
         return;
     }
@@ -1720,6 +1724,7 @@ void TransProxyDeathCallback(const char *pkgName, int32_t pid)
             ListDelete(&(item->node));
             g_proxyChannelList->cnt--;
             ListAdd(&destroyList, &(item->node));
+            TRANS_LOGI(TRANS_CTRL, "add channelId = %d", item->channelId);
         }
     }
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
