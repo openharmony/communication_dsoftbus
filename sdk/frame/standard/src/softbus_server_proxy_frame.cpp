@@ -53,7 +53,7 @@ const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 
 static int InnerRegisterService(void)
 {
-    srand(time(NULL));
+    srand(time(nullptr));
     int32_t randomNum = rand();
     int32_t scaledNum = randomNum % g_randomMax;
 
