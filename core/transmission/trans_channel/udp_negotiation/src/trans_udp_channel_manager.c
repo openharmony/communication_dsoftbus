@@ -216,7 +216,7 @@ static void NotifyUdpChannelCloseInList(ListNode *udpChannelList)
         (void)NotifyUdpChannelClosed(&udpChannel->info);
 
         ListDelete(&(udpChannel->node));
-    TRANS_LOGI(TRANS_CTRL, "delete channelId = %" PRId64, udpChannel->info.myData.channelId);
+        TRANS_LOGI(TRANS_CTRL, "channelId = %{public}" PRId64, udpChannel->info.myData.channelId);
         SoftBusFree(udpChannel);
     }
 }

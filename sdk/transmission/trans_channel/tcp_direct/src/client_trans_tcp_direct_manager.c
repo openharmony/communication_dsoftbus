@@ -241,7 +241,7 @@ int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo
         goto EXIT_ERR;
     }
     ListAdd(&g_tcpDirectChannelInfoList->list, &item->node);
-    TRANS_LOGI(TRANS_SDK, "add channelId = %d", item->channelId);
+    TRANS_LOGI(TRANS_SDK, "add channelId = %{public}d", item->channelId);
     (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
 
     if (ClientTransTdcOnSessionOpened(sessionName, channel) != SOFTBUS_OK) {

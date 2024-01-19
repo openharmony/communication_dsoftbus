@@ -68,7 +68,7 @@ int32_t TransDelConnByReqId(uint32_t reqId)
     LIST_FOR_EACH_ENTRY_SAFE(removeNode, tmpNode, &g_proxyConnectionList->list, ProxyConnInfo, node) {
         if (removeNode->requestId == reqId && removeNode->state == PROXY_CHANNEL_STATUS_PYH_CONNECTING) {
             ListDelete(&(removeNode->node));
-            TRANS_LOGI(TRANS_CTRL, "delete requestId = %u", removeNode->requestId);
+            TRANS_LOGI(TRANS_CTRL, "delete requestId = %{public}u", removeNode->requestId);
             SoftBusFree(removeNode);
             g_proxyConnectionList->cnt--;
             break;

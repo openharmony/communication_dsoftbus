@@ -156,7 +156,7 @@ int32_t TransSetFileSendListener(const char *sessionName, const IFileSendListene
         return SOFTBUS_ERR;
     }
     ListAdd(&(g_fileListener->list), &(fileNode->node));
-    TRANS_LOGI(TRANS_FILE, "add sessionName = %s", sessionName);
+    TRANS_LOGI(TRANS_FILE, "add sessionName = %{public}s", sessionName);
     (void)SoftBusMutexUnlock(&(g_fileListener->lock));
     return SOFTBUS_OK;
 }
