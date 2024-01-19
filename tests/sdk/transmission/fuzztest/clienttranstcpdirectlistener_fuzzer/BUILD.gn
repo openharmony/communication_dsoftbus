@@ -45,8 +45,10 @@ ohos_fuzztest("ClientTransTcpDirectListenerFuzzTest") {
   ]
   sources = [ "clienttranstcpdirectlistener_fuzzer.cpp" ]
   deps = [ "../../../../../sdk:softbus_client" ]
-
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ###############################################################################

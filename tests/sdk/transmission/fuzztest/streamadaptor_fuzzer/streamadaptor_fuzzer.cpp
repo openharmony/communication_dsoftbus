@@ -14,11 +14,11 @@
  */
 
 #include "streamadaptor_fuzzer.h"
-#include "stream_adaptor.h"
-#include "client_trans_udp_stream_interface.h"
+
 #include <string>
-#include <cstddef>
-#include <cstdint>
+
+#include "client_trans_udp_stream_interface.h"
+#include "stream_adaptor.h"
 
 #define STANDARD_NUMBER 2
 using namespace std;
