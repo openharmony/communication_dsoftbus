@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -157,13 +157,8 @@ static bool StrStartWith(const char *string, const char *target)
     return true;
 }
 
-static SoftBusAppInfo *ProcessAppInfo(cJSON *object)
+static SoftBusAppInfo *AppInfoMemoryRequest()
 {
-    if (object == NULL) {
-        COMM_LOGE(COMM_PERM, "object is null");
-        return NULL;
-    }
-
     SoftBusAppInfo *appInfo = (SoftBusAppInfo *)SoftBusCalloc(sizeof(SoftBusAppInfo));
     if (appInfo == NULL) {
         COMM_LOGE(COMM_PERM, "appInfo is null");
@@ -174,6 +169,22 @@ static SoftBusAppInfo *ProcessAppInfo(cJSON *object)
     appInfo->uid = UNKNOWN_VALUE;
     appInfo->pid = UNKNOWN_VALUE;
     appInfo->actions = 0;
+
+    COMM_LOGI(COMM_PERM, "appInfo malloc succ.");
+    return appInfo;
+}
+
+static SoftBusAppInfo *ProcessAppInfo(cJSON *object)
+{
+    if (object == NULL) {
+        COMM_LOGE(COMM_PERM, "object is null");
+        return NULL;
+    }
+
+    SoftBusAppInfo *appInfo = AppInfoMemoryRequest();
+    if (appInfo == NULL) {
+        return NULL;
+    }
 
     char mapKey[TEMP_STR_MAX_LEN];
     char *actionStr = NULL;
