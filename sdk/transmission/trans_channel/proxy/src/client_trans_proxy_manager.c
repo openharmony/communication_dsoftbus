@@ -576,7 +576,7 @@ int32_t TransProxyDelSliceProcessorByChannelId(int32_t channelId)
                 ClientTransProxyClearProcessor(&(node->processor[i]));
             }
             ListDelete(&(node->head));
-            TRANS_LOGI(TRANS_SDK, "delete channelId = %d", channelId);
+            TRANS_LOGI(TRANS_SDK, "delete channelId = %{public}d", channelId);
             SoftBusFree(node);
             g_channelSliceProcessorList->cnt--;
             (void)SoftBusMutexUnlock(&g_channelSliceProcessorList->lock);

@@ -487,7 +487,7 @@ static int32_t AddOriginalScenario(ScenarioManager *manager, OriginalScenario *i
         }
         counter->localPid = info->localPid;
         ListAdd(&scenarioItem->businessCounterList, &counter->node);
-        TRANS_LOGI(TRANS_CTRL, "add localPid = %d", counter->localPid);
+        TRANS_LOGI(TRANS_CTRL, "add localPid = %{public}d", counter->localPid);
     } else {
         TRANS_LOGI(TRANS_CTRL, "businessCounter already exist");
     }
@@ -545,7 +545,7 @@ static int32_t DelOriginalScenario(ScenarioManager *manager, OriginalScenario *i
     if (counter->totalCount <= 0) {
         TRANS_LOGE(TRANS_CTRL, "error, delete a counter form list!");
         ListDelete(&counter->node);
-        TRANS_LOGI(TRANS_CTRL, "delete localPid = %d", counter->localPid);
+        TRANS_LOGI(TRANS_CTRL, "delete localPid = %{public}d", counter->localPid);
         SoftBusFree(counter);
     }
     ScenarioManagerDoNotifyIfNeed(manager, info, false);

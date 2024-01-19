@@ -1050,7 +1050,7 @@ void TransUdpDeathCallback(const char *pkgName, int32_t pid)
             }
             *tempNode = *udpChannelNode;
             ListAdd(&destroyList, &tempNode->node);
-            TRANS_LOGI(TRANS_CTRL, "add pkgName = %s", pkgName);
+            TRANS_LOGI(TRANS_CTRL, "add pkgName = %{public}s", pkgName);
         }
     }
     (void)ReleaseUdpChannelLock();

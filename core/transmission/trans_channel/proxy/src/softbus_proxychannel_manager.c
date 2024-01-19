@@ -1724,7 +1724,7 @@ void TransProxyDeathCallback(const char *pkgName, int32_t pid)
             ListDelete(&(item->node));
             g_proxyChannelList->cnt--;
             ListAdd(&destroyList, &(item->node));
-            TRANS_LOGI(TRANS_CTRL, "add channelId = %d", item->channelId);
+            TRANS_LOGI(TRANS_CTRL, "add channelId = %{public}d", item->channelId);
         }
     }
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);

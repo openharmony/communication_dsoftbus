@@ -596,7 +596,7 @@ static ProxyFileMutexLock *GetSessionFileLock(int32_t channelId)
     sessionLock->count = 1;
     sessionLock->channelId = channelId;
     ListAdd(&g_sessionFileLockList, &sessionLock->node);
-    TRANS_LOGI(TRANS_FILE, "add channelId = %d", channelId);
+    TRANS_LOGI(TRANS_FILE, "add channelId = %{public}d", channelId);
     (void)SoftBusMutexUnlock(&g_sendFileInfoLock.lock);
     return sessionLock;
 }
@@ -653,7 +653,7 @@ static void DelSendListenerInfo(SendListenerInfo *info)
         return;
     }
     ListDelete(&info->node);
-    TRANS_LOGI(TRANS_FILE, "delete sessionId = %d", info->sessionId);
+    TRANS_LOGI(TRANS_FILE, "delete sessionId = %{public}d", info->sessionId);
     (void)SoftBusMutexUnlock(&g_sendFileInfoLock.lock);
 }
 
@@ -1493,7 +1493,7 @@ static void DelRecipient(int32_t sessionId)
             info->objRefCount--;
             if (info->objRefCount == 0) {
                 ListDelete(&info->node);
-                TRANS_LOGI(TRANS_FILE, "delete sessionId = %d", sessionId);
+                TRANS_LOGI(TRANS_FILE, "delete sessionId = %{public}d", sessionId);
                 ClearRecipientResources(info);
                 SoftBusFree(info);
             }
