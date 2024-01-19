@@ -1106,6 +1106,7 @@ static int32_t ProcessConnectResponseWithGoInfoAsNone(struct NegotiateMessage *m
     if (ret != SOFTBUS_OK) {
         SoftBusFree(groupConfigCopy);
         CONN_LOGW(CONN_WIFI_DIRECT, "split group config failed");
+        return SOFTBUS_ERR;
     }
 
     struct InnerLink *link = self->currentInnerLink;
