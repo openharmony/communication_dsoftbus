@@ -24,6 +24,7 @@
 #include "softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_base_listener.h"
+#include "softbus_conn_common.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_proxychannel_pipeline.h"
@@ -497,6 +498,15 @@ static int32_t SendVerifyP2pRsp(int64_t authId, int32_t module, int32_t flag, in
     return ret;
 }
 
+static void OutputAnonymizeIpAddress(const char *myIp, const char *peerIp)
+{
+    char anonymizedMyIp[IP_LEN] = { 0 };
+    ConvertAnonymizeIpAddress(anonymizedMyIp, IP_LEN, myIp, IP_LEN);
+    char anonymizedPeerIp[IP_LEN] = { 0 };
+    ConvertAnonymizeIpAddress(anonymizedPeerIp, IP_LEN, peerIp, IP_LEN);
+    TRANS_LOGE(TRANS_CTRL, "StartListener failed, myIp=%{public}s peerIp=%{public}s", anonymizedMyIp, anonymizedPeerIp);
+}
+
 static int32_t OnVerifyP2pRequest(int64_t authId, int64_t seq, const cJSON *json, bool isAuthLink)
 {
     TRANS_LOGI(TRANS_CTRL, "authId=%{public}" PRId64 ", seq=%{public}" PRId64, authId, seq);
@@ -521,6 +531,7 @@ static int32_t OnVerifyP2pRequest(int64_t authId, int64_t seq, const cJSON *json
     }
 
     if (pManager->getLocalIpByRemoteIp(peerIp, myIp, sizeof(myIp)) != SOFTBUS_OK) {
+        OutputAnonymizeIpAddress(myIp, peerIp);
         TRANS_LOGE(TRANS_CTRL, "OnVerifyP2pRequest get p2p ip fail");
         SendVerifyP2pFailRsp(authId, seq, CODE_VERIFY_P2P, ret, "get p2p ip fail", isAuthLink);
         return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
@@ -528,6 +539,7 @@ static int32_t OnVerifyP2pRequest(int64_t authId, int64_t seq, const cJSON *json
 
     ret = StartP2pListener(myIp, &myPort);
     if (ret != SOFTBUS_OK) {
+        OutputAnonymizeIpAddress(myIp, peerIp);
         SendVerifyP2pFailRsp(authId, seq, CODE_VERIFY_P2P, ret, "invalid p2p port", isAuthLink);
         return SOFTBUS_ERR;
     }
