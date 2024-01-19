@@ -304,7 +304,7 @@ void DumpBleScanFilter(BleScanNativeFilter *nativeFilter, int32_t filterSize)
         }
         (void)ConvertBytesToHexString(serviceData, hexLen, (nativeFilter + filterSize)->serviceData, len);
         (void)ConvertBytesToHexString(serviceDataMask, hexLen, (nativeFilter + filterSize)->serviceDataMask, len);
-        DISC_LOGI(DISC_BLE_ADAPTER,
+        DISC_LOGD(DISC_BLE_ADAPTER,
             "BLE Scan Filter size=%{public}d, serviceData=%{public}s, serviceDataMask=%{public}s",
             filterSize, serviceData, serviceDataMask);
         SoftBusFree(serviceData);
@@ -432,7 +432,7 @@ int32_t ParseScanResult(const uint8_t *advData, uint8_t advLen, SoftBusBcScanRes
         } else {
             if (type != SERVICE_BC_TYPE && type != MANUFACTURE_BC_TYPE) {
                 index += len;
-                DISC_LOGW(DISC_BLE_ADAPTER, "unsupported type. type=%{public}hhu", type);
+                DISC_LOGD(DISC_BLE_ADAPTER, "unsupported type. type=%{public}hhu", type);
                 continue;
             }
             SoftbusBroadcastPayload *data = isRsp ? &dst->data.rspData : &dst->data.bcData;
