@@ -235,7 +235,7 @@ static int32_t TransferStringCapToBitmap(const char *capability)
 
     for (uint32_t i = 0; i < sizeof(g_capabilityMap) / sizeof(g_capabilityMap[0]); i++) {
         if (strcmp(capability, g_capabilityMap[i].capability) == 0) {
-            DISC_LOGI(DISC_CONTROL, "capability=%{public}s", capability);
+            DISC_LOGD(DISC_CONTROL, "capability=%{public}s", capability);
             return g_capabilityMap[i].bitmap;
         }
     }
@@ -304,7 +304,7 @@ static void InnerDeviceFound(DiscInfo *infoNode, const DeviceInfo *device,
         return;
     }
 
-    DISC_LOGI(DISC_CONTROL, "call from inner module.");
+    DISC_LOGD(DISC_CONTROL, "call from inner module.");
     if (infoNode->item->callback.innerCb.OnDeviceFound != NULL) {
         DfxRecordDeviceFound(infoNode, device, additions);
         infoNode->item->callback.innerCb.OnDeviceFound(device, additions);
@@ -316,7 +316,7 @@ static void DiscOnDeviceFound(const DeviceInfo *device, const InnerDeviceInfoAdd
     DISC_CHECK_AND_RETURN_LOGW(device != NULL, DISC_CONTROL, "device is null");
     DISC_CHECK_AND_RETURN_LOGW(additions != NULL, DISC_CONTROL, "additions is null");
 
-    DISC_LOGI(DISC_CONTROL,
+    DISC_LOGD(DISC_CONTROL,
         "capabilityBitmap=%{public}d, medium=%{public}d", device->capabilityBitmap[0], additions->medium);
     for (uint32_t tmp = 0; tmp < CAPABILITY_MAX_BITNUM; tmp++) {
         if (IsBitmapSet((uint32_t *)device->capabilityBitmap, tmp) == false) {
@@ -329,7 +329,7 @@ static void DiscOnDeviceFound(const DeviceInfo *device, const InnerDeviceInfoAdd
         }
         DiscInfo *infoNode = NULL;
         LIST_FOR_EACH_ENTRY(infoNode, &(g_capabilityList[tmp]), DiscInfo, capNode) {
-            DISC_LOGI(DISC_CONTROL, "find callback id=%{public}d", infoNode->id);
+            DISC_LOGD(DISC_CONTROL, "find callback id=%{public}d", infoNode->id);
             infoNode->statistics.discTimes++;
             InnerDeviceFound(infoNode, device, additions);
         }
@@ -590,7 +590,7 @@ static int32_t AddDiscInfoToList(SoftBusList *serviceList, const char *packageNa
         return SOFTBUS_LOCK_ERR;
     }
 
-    DISC_LOGI(DISC_CONTROL, "packageName=%{public}s, id=%{public}d", packageName, info->id);
+    DISC_LOGD(DISC_CONTROL, "packageName=%{public}s, id=%{public}d", packageName, info->id);
 
     DiscItem *itemNode = NULL;
     bool exist = false;

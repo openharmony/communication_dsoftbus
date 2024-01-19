@@ -297,7 +297,7 @@ static void WrapperScanStateChangeCallback(uint8_t channelId, int32_t resultCode
         SoftBusMutexUnlock(&g_scannerLock);
         return;
     }
-    DISC_LOGI(DISC_BLE_ADAPTER,
+    DISC_LOGD(DISC_BLE_ADAPTER,
         "scannerId=%{public}d, bt-scannerId=%{public}d, resultCode=%{public}d, isStartScan=%{public}d", channelId,
         scanChannel->scannerId, resultCode, isStartScan);
     SoftBusMutexUnlock(&g_scannerLock);
@@ -654,7 +654,7 @@ static int32_t StartScan(int32_t scannerId, const SoftBusBcScanParams *param, co
     scanConfig.phy = (int)param->scanPhy;
     int ret = BleStartScanEx(btScannerId, &scanConfig, nativeFilter, (uint32_t)filterSize);
     FreeBtFilter(nativeFilter, filterSize);
-    DISC_LOGI(DISC_BLE_ADAPTER, "scannerId=%{public}d, bt-scannerId=%{public}d, ret=%{public}d",
+    DISC_LOGD(DISC_BLE_ADAPTER, "scannerId=%{public}d, bt-scannerId=%{public}d, ret=%{public}d",
         scannerId, btScannerId, ret);
     if (SoftBusMutexLock(&g_scannerLock) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE_ADAPTER, "lock failed, scannerId=%{public}d, bt-scannerId=%{public}d",
@@ -690,7 +690,7 @@ static int32_t StopScan(int32_t scannerId)
     g_scanChannel[scannerId].isScanning = false;
     SoftBusMutexUnlock(&g_scannerLock);
     int ret = BleStopScan(btScannerId);
-    DISC_LOGI(DISC_BLE_ADAPTER, "stop scan, scannerId=%{public}d, bt-scannerId=%{public}d, ret=%{public}d",
+    DISC_LOGD(DISC_BLE_ADAPTER, "stop scan, scannerId=%{public}d, bt-scannerId=%{public}d, ret=%{public}d",
         scannerId, btScannerId, ret);
     if (ret != OHOS_BT_STATUS_SUCCESS) {
         return SOFTBUS_ERR;
