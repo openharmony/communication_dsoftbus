@@ -14,11 +14,10 @@
  */
 
 #include "getsessionside_fuzzer.h"
+
 #include <cstddef>
-#include <cstdint>
-#include "inner_session.h"
+
 #include "session.h"
-#include "softbus_utils.h"
 
 namespace OHOS {
     void GetSessionSideTest(const uint8_t* data, size_t size)

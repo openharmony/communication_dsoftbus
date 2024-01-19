@@ -14,9 +14,7 @@
  */
 
 #include "getmysessionname_fuzzer.h"
-#include <cstddef>
-#include <cstdint>
-#include "inner_session.h"
+
 #include "session.h"
 #include "softbus_utils.h"
 

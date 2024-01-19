@@ -39,10 +39,11 @@ ohos_fuzztest("SetFileReceiveListenerFuzzTest") {
     "-fstack-protector-strong",
   ]
   sources = [ "setfilereceivelistener_fuzzer.cpp" ]
-
   deps = [ "../../../../../sdk:softbus_client" ]
-
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
 
 ###############################################################################

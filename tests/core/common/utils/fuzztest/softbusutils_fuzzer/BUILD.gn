@@ -32,6 +32,6 @@ ohos_fuzztest("SoftBusUtilsFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [ "softbusutils_fuzzer.cpp" ]
-
   deps = [ "$dsoftbus_root_path/core/common:softbus_utils" ]
+  external_deps = [ "hilog:libhilog" ]
 }

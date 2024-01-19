@@ -14,12 +14,11 @@
  */
 
 #include "clienttransudpstreaminterface_fuzzer.h"
-#include "client_trans_udp_stream_interface.h"
-#include "session.h"
-#include "softbus_def.h"
+
 #include <securec.h>
-#include <cstddef>
-#include <cstdint>
+
+#include "client_trans_udp_stream_interface.h"
+#include "softbus_def.h"
 
 namespace OHOS {
     void SendVtpStreamTest(const uint8_t* data, size_t size)
