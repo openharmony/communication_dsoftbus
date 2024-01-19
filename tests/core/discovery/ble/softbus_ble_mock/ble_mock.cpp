@@ -415,7 +415,7 @@ void BleMock::InjectActiveConPacket()
 {
     if (scanListener && scanListener->OnReportScanDataCallback) {
         constexpr uint32_t advLen = sizeof(activeDiscoveryAdvData);
-        constexpr uint32_t rspLen = sizeof(activeDiscoveryRspData);
+        constexpr uint32_t rspLen = sizeof(activeDiscoveryRspData2);
         BroadcastReportInfo reportInfo = {};
         reportInfo.packet.bcData.id = BLE_UUID;
         reportInfo.packet.bcData.type = BC_DATA_TYPE_SERVICE;
@@ -423,7 +423,7 @@ void BleMock::InjectActiveConPacket()
         reportInfo.packet.rspData.type = BC_DATA_TYPE_MANUFACTURER;
         reportInfo.packet.bcData.payload = &activeDiscoveryAdvData[0];
         reportInfo.packet.bcData.payloadLen = advLen;
-        reportInfo.packet.rspData.payload = &activeDiscoveryRspData[0];
+        reportInfo.packet.rspData.payload = &activeDiscoveryRspData2[0];
         reportInfo.packet.rspData.payloadLen = rspLen;
         scanListener->OnReportScanDataCallback(SCAN_LISTENER_ID, &reportInfo);
     }
