@@ -644,14 +644,36 @@ static void SetCompressFlag(const char *compressCapa, bool *sessionSupportFlag)
     }
 }
 
-static int32_t SetExchangeIdTypeAndValve(JsonObj *obj, AuthSessionInfo *info)
+static int32_t VerifyExchangeIdTypeAndInfo(AuthSessionInfo *info, int32_t idType, char *anonyUdid)
 {
-    int32_t idType = -1;
     char peerUdid[UDID_BUF_LEN] = {0};
+
+    if (idType == EXCHANGE_NETWORKID) {
+        if (GetPeerUdidByNetworkId(info->udid, peerUdid) != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_FSM, "get peer udid fail, peer networkId=%s", anonyUdid);
+            info->idType = EXCHANGE_FAIL;
+        } else {
+            if (memcpy_s(info->udid, UDID_BUF_LEN, peerUdid, UDID_BUF_LEN) != EOK) {
+                AUTH_LOGE(AUTH_FSM, "copy peer udid fail");
+                info->idType = EXCHANGE_FAIL;
+                return SOFTBUS_MEM_ERR;
+            }
+            AUTH_LOGE(AUTH_FSM, "get peer udid success, peer udid=%s", anonyUdid);
+            info->idType = EXCHANGE_NETWORKID;
+        }
+    }
+    AUTH_LOGI(AUTH_FSM, "idType verify and get info succ.");
+    return SOFTBUS_OK;
+}
+
+static int32_t SetExchangeIdTypeAndValue(JsonObj *obj, AuthSessionInfo *info)
+{
     if (obj == NULL || info == NULL) {
         AUTH_LOGE(AUTH_FSM, "param invalid");
         return SOFTBUS_INVALID_PARAM;
     }
+
+    int32_t idType = -1;
     if (!JSON_GetInt32FromOject(obj, EXCHANGE_ID_TYPE, &idType)) {
         AUTH_LOGI(AUTH_FSM, "parse idType failed, ignore");
         info->idType = EXCHANHE_UDID;
@@ -667,19 +689,11 @@ static int32_t SetExchangeIdTypeAndValve(JsonObj *obj, AuthSessionInfo *info)
         return SOFTBUS_OK;
     }
     if (info->isServer) {
-        if (idType == EXCHANGE_NETWORKID) {
-            if (GetPeerUdidByNetworkId(info->udid, peerUdid) != SOFTBUS_OK) {
-                info->idType = EXCHANGE_FAIL;
-            } else {
-                if (memcpy_s(info->udid, UDID_BUF_LEN, peerUdid, UDID_BUF_LEN) != EOK) {
-                    AUTH_LOGE(AUTH_FSM, "copy peer udid fail");
-                    info->idType = EXCHANGE_FAIL;
-                    AnonymizeFree(anonyUdid);
-                    return SOFTBUS_MEM_ERR;
-                }
-                info->idType = EXCHANGE_NETWORKID;
-            }
+        if (VerifyExchangeIdTypeAndInfo(info, idType, anonyUdid) != SOFTBUS_OK) {
+            AnonymizeFree(anonyUdid);
+            return SOFTBUS_ERR;
         }
+        AUTH_LOGI(AUTH_FSM, "isServer is true in authSessionInfo.");
         AnonymizeFree(anonyUdid);
         return SOFTBUS_OK;
     }
@@ -687,20 +701,9 @@ static int32_t SetExchangeIdTypeAndValve(JsonObj *obj, AuthSessionInfo *info)
         if (idType == EXCHANGE_FAIL) {
             info->idType = EXCHANGE_FAIL;
         }
-        if (idType == EXCHANGE_NETWORKID) {
-            if (GetPeerUdidByNetworkId(info->udid, peerUdid) != SOFTBUS_OK) {
-                AUTH_LOGE(AUTH_FSM, "get peer udid fail, peer networkId=%{public}s", anonyUdid);
-                info->idType = EXCHANGE_FAIL;
-            } else {
-                if (memcpy_s(info->udid, UDID_BUF_LEN, peerUdid, UDID_BUF_LEN) != EOK) {
-                    AUTH_LOGE(AUTH_FSM, "copy peer udid fail");
-                    info->idType = EXCHANGE_FAIL;
-                    AnonymizeFree(anonyUdid);
-                    return SOFTBUS_MEM_ERR;
-                }
-                AUTH_LOGE(AUTH_FSM, "get peer udid success, peer udid=%{public}s", anonyUdid);
-                info->idType = EXCHANGE_NETWORKID;
-            }
+        if (VerifyExchangeIdTypeAndInfo(info, idType, anonyUdid) != SOFTBUS_OK) {
+            AnonymizeFree(anonyUdid);
+            return SOFTBUS_ERR;
         }
     }
     AnonymizeFree(anonyUdid);
@@ -757,8 +760,8 @@ static int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo
         // info->version = SOFTBUS_OLD_V2;
         AUTH_LOGE(AUTH_FSM, "softbusVersion is not found");
     }
-    if (SetExchangeIdTypeAndValve(obj, info) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "set exchange id type or valve fail");
+    if (SetExchangeIdTypeAndValue(obj, info) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "set exchange id type or value failed");
         JSON_Delete(obj);
         return SOFTBUS_ERR;
     }
@@ -975,6 +978,55 @@ static void UnpackCipherRpaInfo(const JsonObj *json, NodeInfo *info)
     AUTH_LOGI(AUTH_FSM, "unpack cipher and rpa info success!");
 }
 
+static int32_t PackCommonEx(JsonObj *json, const NodeInfo *info)
+{
+    bool isFalse = (
+        !JSON_AddStringToObject(json, VERSION_TYPE, info->versionType) ||
+        !JSON_AddInt32ToObject(json, CONN_CAP, info->netCapacity) ||
+        !JSON_AddInt32ToObject(json, AUTH_CAP, info->authCapacity) ||
+        !JSON_AddInt16ToObject(json, DATA_CHANGE_FLAG, info->dataChangeFlag) ||
+        !JSON_AddBoolToObject(json, IS_CHARGING, info->batteryInfo.isCharging) ||
+        !JSON_AddBoolToObject(json, BLE_P2P, info->isBleP2p) ||
+        !JSON_AddInt64ToObject(json, TRANSPORT_PROTOCOL, (int64_t)LnnGetSupportedProtocols(info)));
+    if (isFalse) {
+        AUTH_LOGE(AUTH_FSM, "JSON_AddStringToObject failed.");
+        return SOFTBUS_ERR;
+    }
+
+    char btMacUpper[BT_MAC_LEN] = {0};
+    if (StringToUpperCase(LnnGetBtMac(info), btMacUpper, BT_MAC_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "btMac to upperCase failed.");
+        if (memcpy_s(btMacUpper, BT_MAC_LEN, LnnGetBtMac(info), BT_MAC_LEN) != EOK) {
+            AUTH_LOGE(AUTH_FSM, "btMac cpy failed.");
+            return SOFTBUS_MEM_ERR;
+        }
+    }
+    isFalse = (
+        !JSON_AddStringToObject(json, PKG_VERSION, info->pkgVersion) ||
+        !JSON_AddInt64ToObject(json, WIFI_VERSION, info->wifiVersion) ||
+        !JSON_AddInt64ToObject(json, BLE_VERSION, info->bleVersion) ||
+        !JSON_AddStringToObject(json, BT_MAC, btMacUpper) ||
+        !JSON_AddStringToObject(json, BLE_MAC, info->connectInfo.bleMacAddr) ||
+        !JSON_AddInt32ToObject(json, REMAIN_POWER, info->batteryInfo.batteryLevel) ||
+        !JSON_AddBoolToObject(json, IS_CHARGING, info->batteryInfo.isCharging) ||
+        !JSON_AddBoolToObject(json, IS_SCREENON, info->isScreenOn) ||
+        !JSON_AddInt32ToObject(json, NODE_WEIGHT, info->masterWeight) ||
+        !JSON_AddInt64ToObject(json, ACCOUNT_ID, info->accountId) ||
+        !JSON_AddBoolToObject(json, DISTRIBUTED_SWITCH, true) ||
+        !JSON_AddInt64ToObject(json, BLE_TIMESTAMP, info->bleStartTimestamp) ||
+        !JSON_AddInt32ToObject(json, WIFI_BUFF_SIZE, info->wifiBuffSize) ||
+        !JSON_AddInt32ToObject(json, BR_BUFF_SIZE, info->brBuffSize) ||
+        !JSON_AddInt64ToObject(json, FEATURE, info->feature) ||
+        !JSON_AddInt64ToObject(json, CONN_SUB_FEATURE, info->connSubFeature) ||
+        !JSON_AddInt64ToObject(json, NEW_CONN_CAP, info->netCapacity));
+    if (isFalse) {
+        AUTH_LOGE(AUTH_FSM, "JSON_AddStringToObject failed.");
+        return SOFTBUS_ERR;
+    }
+    AUTH_LOGI(AUTH_FSM, "pack common succ.");
+    return SOFTBUS_OK;
+}
+
 static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion version, bool isMetaAuth)
 {
     if (version >= SOFTBUS_NEW_V1) {
@@ -995,53 +1047,19 @@ static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion ve
     if (PackCommonDevInfo(json, info, isMetaAuth) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-    if (!JSON_AddStringToObject(json, VERSION_TYPE, info->versionType) ||
-        !JSON_AddInt32ToObject(json, CONN_CAP, info->netCapacity) ||
-        !JSON_AddInt32ToObject(json, AUTH_CAP, info->authCapacity) ||
-        !JSON_AddInt16ToObject(json, DATA_CHANGE_FLAG, info->dataChangeFlag) ||
-        !JSON_AddBoolToObject(json, IS_CHARGING, info->batteryInfo.isCharging) ||
-        !JSON_AddBoolToObject(json, BLE_P2P, info->isBleP2p) ||
-        !JSON_AddInt64ToObject(json, TRANSPORT_PROTOCOL, (int64_t)LnnGetSupportedProtocols(info))) {
-        AUTH_LOGE(AUTH_FSM, "JSON_AddStringToObject fail");
-        return SOFTBUS_ERR;
-    }
-    char btMacUpper[BT_MAC_LEN] = {0};
-    if (StringToUpperCase(LnnGetBtMac(info), btMacUpper, BT_MAC_LEN) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "btMac to upperCase fail");
-        if (memcpy_s(btMacUpper, BT_MAC_LEN, LnnGetBtMac(info), BT_MAC_LEN) != EOK) {
-            AUTH_LOGE(AUTH_FSM, "btMac cpy fail");
-            return SOFTBUS_ERR;
-        }
-    }
-    if (!JSON_AddStringToObject(json, PKG_VERSION, info->pkgVersion) ||
-        !JSON_AddInt64ToObject(json, WIFI_VERSION, info->wifiVersion) ||
-        !JSON_AddInt64ToObject(json, BLE_VERSION, info->bleVersion) ||
-        !JSON_AddStringToObject(json, BT_MAC, btMacUpper) ||
-        !JSON_AddStringToObject(json, BLE_MAC, info->connectInfo.bleMacAddr) ||
-        !JSON_AddInt32ToObject(json, REMAIN_POWER, info->batteryInfo.batteryLevel) ||
-        !JSON_AddBoolToObject(json, IS_CHARGING, info->batteryInfo.isCharging) ||
-        !JSON_AddBoolToObject(json, IS_SCREENON, info->isScreenOn) ||
-        !JSON_AddInt32ToObject(json, NODE_WEIGHT, info->masterWeight) ||
-        !JSON_AddInt64ToObject(json, ACCOUNT_ID, info->accountId) ||
-        !JSON_AddBoolToObject(json, DISTRIBUTED_SWITCH, true) ||
-        !JSON_AddInt64ToObject(json, BLE_TIMESTAMP, info->bleStartTimestamp) ||
-        !JSON_AddInt32ToObject(json, WIFI_BUFF_SIZE, info->wifiBuffSize) ||
-        !JSON_AddInt32ToObject(json, BR_BUFF_SIZE, info->brBuffSize) ||
-        !JSON_AddInt64ToObject(json, FEATURE, info->feature) ||
-        !JSON_AddInt64ToObject(json, CONN_SUB_FEATURE, info->connSubFeature) ||
-        !JSON_AddInt64ToObject(json, NEW_CONN_CAP, info->netCapacity)) {
-        AUTH_LOGE(AUTH_FSM, "JSON_AddStringToObject fail");
+    if (PackCommonEx(json, info) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "data pack failed.");
         return SOFTBUS_ERR;
     }
     PackOsInfo(json, info);
     PackCommonFastAuth(json, info);
     if (!PackCipherKeySyncMsg(json)) {
-        AUTH_LOGE(AUTH_FSM, "PackCipherKeySyncMsg fail");
+        AUTH_LOGE(AUTH_FSM, "PackCipherKeySyncMsg failed.");
     }
     PackCommP2pInfo(json, info);
 
     if (PackCipherRpaInfo(json, info) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "pack CipherRpaInfo of device key fail.");
+        AUTH_LOGE(AUTH_FSM, "pack CipherRpaInfo of device key failed.");
     }
     return SOFTBUS_OK;
 }

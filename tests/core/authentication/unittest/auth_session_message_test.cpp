@@ -297,26 +297,26 @@ HWTEST_F(AuthSessionMessageTest, SetExchangeIdTypeAndValve_TEST_001, TestSize.Le
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
     info.idType = EXCHANHE_UDID;
     JSON_AddInt32ToObject(obj1, SOFTBUS_VERSION_TAG, 123);
-    EXPECT_TRUE(SetExchangeIdTypeAndValve(nullptr, &info) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(SetExchangeIdTypeAndValve(obj1, nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(SetExchangeIdTypeAndValve(obj1, &info) == SOFTBUS_OK);
+    EXPECT_TRUE(SetExchangeIdTypeAndValue(nullptr, &info) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(SetExchangeIdTypeAndValue(obj1, nullptr) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(SetExchangeIdTypeAndValue(obj1, &info) == SOFTBUS_OK);
     JSON_AddInt32ToObject(obj1, EXCHANGE_ID_TYPE, EXCHANHE_UDID);
-    EXPECT_TRUE(SetExchangeIdTypeAndValve(obj1, &info) == SOFTBUS_OK);
+    EXPECT_TRUE(SetExchangeIdTypeAndValue(obj1, &info) == SOFTBUS_OK);
     JSON_Delete(obj1);
     JsonObj *obj2 = JSON_CreateObject();
     EXPECT_TRUE(obj2 != nullptr);
     JSON_AddInt32ToObject(obj2, EXCHANGE_ID_TYPE, EXCHANGE_NETWORKID);
     info.isServer = true;
-    EXPECT_TRUE(SetExchangeIdTypeAndValve(obj2, &info) == SOFTBUS_OK);
+    EXPECT_TRUE(SetExchangeIdTypeAndValue(obj2, &info) == SOFTBUS_OK);
     info.isServer = false;
-    EXPECT_TRUE(SetExchangeIdTypeAndValve(obj2, &info) == SOFTBUS_OK);
+    EXPECT_TRUE(SetExchangeIdTypeAndValue(obj2, &info) == SOFTBUS_OK);
     info.idType = EXCHANGE_NETWORKID;
-    EXPECT_TRUE(SetExchangeIdTypeAndValve(obj2, &info) == SOFTBUS_OK);
+    EXPECT_TRUE(SetExchangeIdTypeAndValue(obj2, &info) == SOFTBUS_OK);
     JSON_Delete(obj2);
     JsonObj *obj3 = JSON_CreateObject();
     EXPECT_TRUE(obj3 != nullptr);
     JSON_AddInt32ToObject(obj3, EXCHANGE_ID_TYPE, EXCHANGE_FAIL);
-    EXPECT_TRUE(SetExchangeIdTypeAndValve(obj3, &info) == SOFTBUS_OK);
+    EXPECT_TRUE(SetExchangeIdTypeAndValue(obj3, &info) == SOFTBUS_OK);
     JSON_Delete(obj3);
 }
 
