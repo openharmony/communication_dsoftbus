@@ -39,14 +39,13 @@ int32_t TransCheckAccessControl(const char *peerDeviceId)
     }
 
     int32_t firstCallingId = OHOS::IPCSkeleton::GetFirstTokenID();
-    COMM_LOGI(COMM_PERM, "FirstCaller=%{public}d", firstCallingId);
     if (firstCallingId == 0) {
         return SOFTBUS_OK;
     }
 
     char *tmpName = nullptr;
     Anonymize(peerDeviceId, &tmpName);
-    COMM_LOGI(COMM_PERM, "peerDeviceId=%{public}s", tmpName);
+    COMM_LOGI(COMM_PERM, "firstCaller=%{public}d, peerDeviceId=%{public}s", firstCallingId, tmpName);
     AnonymizeFree(tmpName);
 
     char deviceId[UDID_BUF_LEN] = {0};

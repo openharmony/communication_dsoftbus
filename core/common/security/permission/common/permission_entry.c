@@ -130,7 +130,6 @@ static int32_t GetPeMapValue(const char *string)
 static bool StrIsEmpty(const char *string)
 {
     if (string == NULL || strlen(string) == 0) {
-        COMM_LOGE(COMM_PERM, "invalid param");
         return true;
     }
     return false;
@@ -150,7 +149,6 @@ static bool StrStartWith(const char *string, const char *target)
     }
     for (size_t index = 0; index < targetLen; index++) {
         if (string[index] != target[index]) {
-            COMM_LOGE(COMM_PERM, "string don't equal target");
             return false;
         }
     }
