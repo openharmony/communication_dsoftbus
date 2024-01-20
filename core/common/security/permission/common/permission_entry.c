@@ -264,7 +264,7 @@ static SoftBusPermissionEntry *ProcessPermissionEntry(cJSON *object)
     return permissionEntry;
 }
 
-static int32_t CompareString(const char *src, const char *dest, bool regexp)
+int32_t CompareString(const char *src, const char *dest, bool regexp)
 {
     if (src == NULL || dest == NULL) {
         return SOFTBUS_INVALID_PARAM;
