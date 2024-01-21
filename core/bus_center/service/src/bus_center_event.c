@@ -339,17 +339,6 @@ void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info)
     if (isOnline) {
         LNN_LOGI(LNN_EVENT, "online process, remove networkId update event");
         RemoveNotifyMessage(NOTIFY_NETWORKID_UPDATE);
-    } else {
-        char peerUdid[UDID_BUF_LEN] = {0};
-        if (LnnGetRemoteStrInfo(info->networkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN)
-            != SOFTBUS_OK) {
-            LNN_LOGE(LNN_EVENT, "get udid error");
-            return;
-        }
-        if (UpdateLocalPtkIfValid(peerUdid) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_EVENT, "leave lnn update fail");
-            return;
-        }
     }
 }
 
