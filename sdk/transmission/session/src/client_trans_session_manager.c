@@ -1213,7 +1213,7 @@ static int32_t ClientTransGetTdcIp(int32_t channelId, char *myIp, int32_t ipLen)
     }
 
     if (strcpy_s(myIp, ipLen, socket.addr) != EOK) {
-        TRANS_LOGE(TRANS_SDK, "strcpy_s ip faild, len=%{public}d", strlen(socket.addr));
+        TRANS_LOGE(TRANS_SDK, "strcpy_s ip faild, len=%{public}zu", strlen(socket.addr));
         return SOFTBUS_ERR;
     }
 
@@ -1229,7 +1229,7 @@ static int32_t ClientTransGetUdpIp(int32_t channelId, char *myIp, int32_t ipLen)
     }
 
     if (strcpy_s(myIp, ipLen, channel.info.myIp) != EOK) {
-        TRANS_LOGE(TRANS_SDK, "strcpy_s ip faild, len=%{public}d", strlen(channel.info.myIp));
+        TRANS_LOGE(TRANS_SDK, "strcpy_s ip faild, len=%{public}zu", strlen(channel.info.myIp));
         return SOFTBUS_ERR;
     }
 
