@@ -177,11 +177,6 @@ int32_t SoftBusServer::NotifyAuthSuccess(int32_t channelId, int32_t channelType)
     return TransNotifyAuthSuccess(channelId, channelType);
 }
 
-int32_t SoftBusServer::GetAndComparePid(int32_t pid, int32_t channelId, int32_t channelType)
-{
-    return TransGetAndComparePid(pid, channelId, channelType);
-}
-
 int32_t SoftBusServer::CloseChannel(int32_t channelId, int32_t channelType)
 {
     return TransCloseChannel(channelId, channelType);
