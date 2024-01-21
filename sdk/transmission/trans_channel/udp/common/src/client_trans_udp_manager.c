@@ -212,9 +212,10 @@ static UdpChannel *ConvertChannelInfoToUdpChannel(const char *sessionName, const
     if (strcpy_s(newChannel->info.peerSessionName, SESSION_NAME_SIZE_MAX, channel->peerSessionName) != EOK ||
         strcpy_s(newChannel->info.mySessionName, SESSION_NAME_SIZE_MAX, sessionName) != EOK ||
         strcpy_s(newChannel->info.peerDeviceId, DEVICE_ID_SIZE_MAX, channel->peerDeviceId) != EOK ||
-        strcpy_s(newChannel->info.groupId, GROUP_ID_SIZE_MAX, channel->groupId) != EOK) {
+        strcpy_s(newChannel->info.groupId, GROUP_ID_SIZE_MAX, channel->groupId) != EOK ||
+        strcpy_s(newChannel->info.myIp, sizeof(newChannel->info.myIp), channel->myIp) != EOK) {
         TRANS_LOGE(TRANS_SDK,
-            "udp channel or peer session name, device id, group id failed");
+            "udp channel or peer session name, device id, group id, myIp failed");
         SoftBusFree(newChannel);
         return NULL;
     }

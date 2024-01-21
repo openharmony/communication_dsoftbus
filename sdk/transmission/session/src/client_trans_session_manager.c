@@ -22,13 +22,21 @@
 #include "client_trans_channel_manager.h"
 #include "client_trans_file_listener.h"
 #include "client_trans_proxy_file_manager.h"
+#include "client_trans_tcp_direct_manager.h"
+#include "client_trans_udp_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_app_info.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_socket.h"
 #include "softbus_utils.h"
 #include "trans_log.h"
 #include "trans_server_proxy.h"
+
+#define NETWORK_ID_LEN 7
+#define HML_IP_PREFIX "172.30."
+#define GET_ROUTE_TYPE(type) ((type) & 0xff)
+#define GET_CONN_TYPE(type) (((type) >> 8) & 0xff)
 
 static void ClientTransSessionTimerProc(void);
 
@@ -1189,22 +1197,123 @@ int32_t ClientGetSessionSide(int32_t sessionId)
     return side;
 }
 
+static int32_t ClientTransGetTdcIp(int32_t channelId, char *myIp, int32_t ipLen)
+{
+    TcpDirectChannelInfo channel;
+    if (TransTdcGetInfoById(channelId, &channel) == NULL) {
+        TRANS_LOGE(TRANS_SDK, "TdcGetInfo failed channelId=%{public}d", channelId);
+        return SOFTBUS_ERR;
+    }
+
+    SocketAddr socket;
+    // The local and peer IP belong to the same network segment, and the type can also be determined by the peer IP
+    if (ConnGetPeerSocketAddr(channel.detail.fd, &socket) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "ConnGetPeerSocketAddr failed fd=%{public}d", channel.detail.fd);
+        return SOFTBUS_ERR;
+    }
+
+    if (strcpy_s(myIp, ipLen, socket.addr) != EOK) {
+        TRANS_LOGE(TRANS_SDK, "strcpy_s ip faild, len=%{public}d", strlen(socket.addr));
+        return SOFTBUS_ERR;
+    }
+
+    return SOFTBUS_OK;
+}
+
+static int32_t ClientTransGetUdpIp(int32_t channelId, char *myIp, int32_t ipLen)
+{
+    UdpChannel channel;
+    if (TransGetUdpChannel(channelId, &channel) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get UdpChannel failed channelId=%{public}d", channelId);
+        return SOFTBUS_ERR;
+    }
+
+    if (strcpy_s(myIp, ipLen, channel.info.myIp) != EOK) {
+        TRANS_LOGE(TRANS_SDK, "strcpy_s ip faild, len=%{public}d", strlen(channel.info.myIp));
+        return SOFTBUS_ERR;
+    }
+
+    return SOFTBUS_OK;
+}
+
+// determine connection type based on IP
+static bool ClientTransCheckHmlIp(const char *ip)
+{
+    char ipSeg[NETWORK_ID_LEN] = {0};
+    if (strncpy_s(ipSeg, sizeof(ipSeg), ip, sizeof(ipSeg) - 1) == EOK) {
+        TRANS_LOGI(TRANS_SDK, "ipSeg=%{public}s", ipSeg);
+    } else {
+        TRANS_LOGW(TRANS_SDK, "strncpy_s ipSeg failed");
+    }
+
+    if (strncmp(ip, HML_IP_PREFIX, NETWORK_ID_LEN) == 0) {
+        return true;
+    }
+
+    return false;
+}
+
+// determine connection type based on IP, delete session when connection type and parameter connType are consistent
+static bool ClientTransCheckNeedDel(SessionInfo *sessionNode, int32_t routeType, int32_t connType)
+{
+    if (connType == TRANS_CONN_ALL) {
+        if (routeType != ROUTE_TYPE_ALL && sessionNode->routeType != routeType) {
+            return false;
+        }
+        return true;
+    }
+    /*
+    * only when the function OnWifiDirectDeviceOffLine is called can reach this else branch,
+    * and routeType is WIFI_P2P, the connType is hml or p2p
+    */
+    if (sessionNode->routeType != routeType) {
+        return false;
+    }
+
+    char myIp[IP_LEN] = {0};
+    if (sessionNode->channelType == CHANNEL_TYPE_UDP) {
+        if (ClientTransGetUdpIp(sessionNode->channelId, myIp, sizeof(myIp)) != SOFTBUS_OK) {
+            return false;
+        }
+    } else if (sessionNode->channelType == CHANNEL_TYPE_TCP_DIRECT) {
+        if (ClientTransGetTdcIp(sessionNode->channelId, myIp, sizeof(myIp)) != SOFTBUS_OK) {
+            return false;
+        }
+    } else {
+        TRANS_LOGW(TRANS_SDK, "check channelType=%{public}d", sessionNode->channelType);
+        return false;
+    }
+
+    bool isHml = ClientTransCheckHmlIp(myIp);
+    if (connType == TRANS_CONN_HML && isHml) {
+        return true;
+    } else if (connType == TRANS_CONN_P2P && !isHml) {
+        return true;
+    }
+
+    return false;
+}
+
 static void DestroyClientSessionByNetworkId(const ClientSessionServer *server,
-    const char *networkId, int32_t routeType, ListNode *destroyList)
+    const char *networkId, int32_t type, ListNode *destroyList)
 {
     SessionInfo *sessionNode = NULL;
     SessionInfo *sessionNodeNext = NULL;
+    // connType is set only in function OnWifiDirectDeviceOffLine, others is TRANS_CONN_ALL, and routeType is WIFI_P2P
+    int32_t routeType = GET_ROUTE_TYPE(type);
+    int32_t connType = GET_CONN_TYPE(type);
 
     LIST_FOR_EACH_ENTRY_SAFE(sessionNode, sessionNodeNext, &(server->sessionList), SessionInfo, node) {
         if (strcmp(sessionNode->info.peerDeviceId, networkId) != 0) {
             continue;
         }
-        if (routeType != ROUTE_TYPE_ALL && sessionNode->routeType != routeType) {
+
+        if (!ClientTransCheckNeedDel(sessionNode, routeType, connType)) {
             continue;
         }
 
-        TRANS_LOGI(TRANS_SDK, "channelId=%{public}d, channelType=%{public}d, routeType=%{public}d",
-            sessionNode->channelId, sessionNode->channelType, sessionNode->routeType);
+        TRANS_LOGI(TRANS_SDK, "channelId=%{public}d, channelType=%{public}d, routeType=%{public}d, type=%{public}d",
+            sessionNode->channelId, sessionNode->channelType, sessionNode->routeType, type);
         DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, server);
         if (destroyNode == NULL) {
             continue;
