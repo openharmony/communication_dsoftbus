@@ -19,7 +19,6 @@
 
 #include "bus_center_manager.h"
 #include "distribute_net_ledger_mock.h"
-#include "hb_fsm_mock.h"
 #include "hb_strategy_mock.h"
 #include "lnn_ble_heartbeat.h"
 #include "lnn_connection_mock.h"
@@ -35,6 +34,8 @@ using namespace testing;
 
 #define TEST_NETWORK_ID  "6542316a57d"
 
+constexpr char BT_MAC[] = "11:22";
+
 class HeartBeatUtilsTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -42,6 +43,16 @@ public:
     void SetUp();
     void TearDown();
 };
+
+static bool VisitHbTypeCbForTrue(LnnHeartbeatType *typeSet, LnnHeartbeatType eachType, void *data)
+{
+    return true;
+}
+
+static bool VisitHbTypeCbForFalse(LnnHeartbeatType *typeSet, LnnHeartbeatType eachType, void *data)
+{
+    return false;
+}
 
 void HeartBeatUtilsTest::SetUpTestCase() { }
 
@@ -199,5 +210,45 @@ HWTEST_F(HeartBeatUtilsTest, LnnGenerateBtMacHashTest_01, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = LnnGenerateBtMacHash(TEST_NETWORK_ID, 0, &brMacHash, BT_MAC_HASH_STR_LEN);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+/*
+ * @tc.name: LnnGenerateBtMacHashTest_02
+ * @tc.desc: lnn generate bt mac hash
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatUtilsTest, LnnGenerateBtMacHashTest_02, TestSize.Level1)
+{
+    char brMacHash;
+    NiceMock<DistributeLedgerInterfaceMock> disLedgerMock;
+    EXPECT_CALL(disLedgerMock, ConvertBtMacToBinary)
+        .WillOnce(Return(SOFTBUS_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = LnnGenerateBtMacHash(nullptr, BT_MAC_LEN, nullptr, BT_MAC_HASH_STR_LEN);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = LnnGenerateBtMacHash(BT_MAC, BT_MAC_LEN, &brMacHash, BT_MAC_LEN);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = LnnGenerateBtMacHash(BT_MAC, BT_MAC_LEN, &brMacHash, BT_MAC_HASH_STR_LEN);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = LnnGenerateBtMacHash(BT_MAC, BT_MAC_LEN, &brMacHash, BT_MAC_HASH_STR_LEN);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LnnVisitHbTypeSetTest_01
+ * @tc.desc: lnn visit hb type set
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatUtilsTest, LnnVisitHbTypeSetTest_01, TestSize.Level1)
+{
+    LnnHeartbeatType typeSet = HEARTBEAT_TYPE_BLE_V1;
+    bool ret = LnnVisitHbTypeSet(VisitHbTypeCbForTrue, &typeSet, nullptr);
+    EXPECT_TRUE(ret == true);
+    ret = LnnVisitHbTypeSet(VisitHbTypeCbForFalse, &typeSet, nullptr);
+    EXPECT_TRUE(ret == false);
+    ret = LnnVisitHbTypeSet(VisitHbTypeCbForTrue, &typeSet, nullptr);
+    EXPECT_TRUE(ret == true);
 }
 } // namespace OHOS

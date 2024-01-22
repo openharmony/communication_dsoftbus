@@ -22,6 +22,7 @@
 #include "lnn_lane_deps_mock.h"
 #include "lnn_trans_lane_deps_mock.h"
 #include "lnn_lane_interface.h"
+#include "lnn_lane_score_virtual.c"
 #include "lnn_trans_lane.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
@@ -30,6 +31,10 @@
 namespace OHOS {
 using namespace testing::ext;
 using namespace testing;
+
+constexpr int32_t CHANNEL_ID = 5;
+constexpr int32_t INTERVAL = 2;
+constexpr uint32_t LIST_SIZE = 10;
 
 class LNNTransLaneMockTest : public testing::Test {
 public:
@@ -153,5 +158,29 @@ HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_003, TestSize.Level1)
     EXPECT_TRUE(ret != SOFTBUS_OK);
     std::this_thread::sleep_for(std::chrono::milliseconds(200)); // delay 200ms for looper completion.
     transObj->Deinit();
+}
+
+/*
+* @tc.name: LNN_LANE_SCORE_VIRTUAL_001
+* @tc.desc: lnn_lane_score_virtual.c
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNTransLaneMockTest, LNN_LANE_SCORE_VIRTUAL_001, TestSize.Level1)
+{
+    uint32_t listSize = LIST_SIZE;
+    int32_t ret = LnnInitScore();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    LnnDeinitScore();
+    ret = LnnGetWlanLinkedInfo(nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = LnnGetCurrChannelScore(CHANNEL_ID);
+    EXPECT_TRUE(ret == VIRTUAL_DEFAULT_SCORE);
+    ret = LnnStartScoring(INTERVAL);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = LnnStopScoring();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = LnnGetAllChannelScore(nullptr, &listSize);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 } // namespace OHOS

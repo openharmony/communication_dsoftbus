@@ -21,6 +21,7 @@
 #include "lnn_heartbeat_medium_mgr.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_net_builder.h"
+#include "wifi_direct_manager.h"
 #include <gmock/gmock.h>
 #include <mutex>
 
@@ -57,6 +58,7 @@ public:
     virtual int32_t StopHeartBeatAdvByTypeNow(LnnHeartbeatType registedHbType) = 0;
     virtual SoftBusScreenState GetScreenState(void) = 0;
     virtual void SetScreenState(SoftBusScreenState state) = 0;
+    virtual struct WifiDirectManager* GetWifiDirectManager(void) = 0;
 };
 class HeartBeatFSMInterfaceMock : public HeartBeatFSMInterface {
 public:
@@ -89,6 +91,7 @@ public:
     MOCK_METHOD1(StopHeartBeatAdvByTypeNow, int32_t(LnnHeartbeatType));
     MOCK_METHOD0(GetScreenState, SoftBusScreenState(void));
     MOCK_METHOD1(SetScreenState, void(SoftBusScreenState));
+    MOCK_METHOD0(GetWifiDirectManager, WifiDirectManager*(void));
 };
 } // namespace OHOS
 #endif // AUTH_CONNECTION_MOCK_H
