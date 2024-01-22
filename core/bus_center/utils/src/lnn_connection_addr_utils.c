@@ -261,19 +261,19 @@ const char *LnnPrintConnectionAddr(const ConnectionAddr *addr)
         case CONNECTION_ADDR_ETH:
             Anonymize(addr->info.ip.ip, &anonyIp);
             ret = sprintf_s(printAddr, sizeof(printAddr),
-                "Ip=*.*.*%s", anonyIp);
+                "Ip=%s", anonyIp);
             AnonymizeFree(anonyIp);
             break;
         case CONNECTION_ADDR_BR:
             Anonymize(addr->info.br.brMac, &anonyMac);
             ret = sprintf_s(printAddr, sizeof(printAddr),
-                "BrMac=**:**:**:**:%s", anonyMac);
+                "BrMac=%s", anonyMac);
             AnonymizeFree(anonyMac);
             break;
         case CONNECTION_ADDR_BLE:
             Anonymize(addr->info.ble.bleMac, &anonyMac);
             ret = sprintf_s(printAddr, sizeof(printAddr),
-                "BleMac=**:**:**:**:%s", anonyMac);
+                "BleMac=%s", anonyMac);
             AnonymizeFree(anonyMac);
             break;
         default:
