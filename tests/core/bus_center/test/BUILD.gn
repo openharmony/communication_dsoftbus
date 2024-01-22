@@ -99,7 +99,6 @@ ohos_unittest("HeartBeatFSMTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_utils.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src/lnn_feature_capability.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_state_machine.c",
-    "$dsoftbus_root_path/core/connection/wifi_direct/wifi_direct_manager_virtual.c",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/src/lnn_net_ledger_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/distribute_net_ledger_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_connection_mock.cpp",
@@ -162,7 +161,10 @@ ohos_unittest("HeartBeatFSMTest") {
 
 ohos_unittest("HeartBeatStrategyTest") {
   module_out_path = module_output_path
-  sources = [ "$dsoftbus_root_path/tests/core/bus_center/test/heartbeat/hb_strategy_test.cpp" ]
+  sources = [
+    "$dsoftbus_root_path/tests/core/bus_center/test/heartbeat/hb_strategy_test.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/test/mock/src/hb_fsm_strategy_mock.cpp",
+  ]
 
   include_dirs = [
     "$dsoftbus_root_path/adapter/common/include",
@@ -223,7 +225,6 @@ ohos_unittest("HeartBeatUtilsTest") {
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/distribute_net_ledger_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_connection_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/test/heartbeat/hb_utils_test.cpp",
-    "$dsoftbus_root_path/tests/core/bus_center/test/mock/src/hb_fsm_mock.cpp",
   ]
 
   include_dirs = [
@@ -467,5 +468,6 @@ group("unittest") {
     ":HeartBeatFSMTest",
     ":HeartBeatMediumTest",
     ":HeartBeatStrategyTest",
+    ":HeartBeatUtilsTest",
   ]
 }
