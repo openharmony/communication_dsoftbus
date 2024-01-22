@@ -288,6 +288,7 @@ int32_t TransAddDataBufNode(int32_t channelId, int32_t fd)
         return SOFTBUS_ERR;
     }
     ListAdd(&g_tcpDataList->list, &node->node);
+    TRANS_LOGI(TRANS_SDK, "add channelId = %{public}d", channelId);
     g_tcpDataList->cnt++;
     SoftBusMutexUnlock(&g_tcpDataList->lock);
     return SOFTBUS_OK;
@@ -308,6 +309,7 @@ int32_t TransDelDataBufNode(int32_t channelId)
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpDataList->list, ClientDataBuf, node) {
         if (item->channelId == channelId) {
             ListDelete(&item->node);
+            TRANS_LOGI(TRANS_SDK, "delete channelId = %{public}d", channelId);
             SoftBusFree(item->data);
             SoftBusFree(item);
             g_tcpDataList->cnt--;
