@@ -229,6 +229,7 @@ void TransTdcDeathCallback(const char *pkgName, int32_t pid)
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &sessionList->list, SessionConn, node) {
         if ((strcmp(item->appInfo.myData.pkgName, pkgName) == 0) && (item->appInfo.myData.pid == pid)) {
             ListDelete(&item->node);
+            TRANS_LOGI(TRANS_CTRL, "delete pkgName = %{public}s, pid = %{public}d", pkgName, pid);
             sessionList->cnt--;
             DelTrigger(item->listenMod, item->appInfo.fd, RW_TRIGGER);
             SoftBusFree(item);

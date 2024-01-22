@@ -482,6 +482,7 @@ static int32_t AddSession(const char *sessionName, SessionInfo *session)
             continue;
         }
         ListAdd(&serverNode->sessionList, &session->node);
+        TRANS_LOGI(TRANS_SDK, "add sessionId = %{public}d", session->sessionId);
         return SOFTBUS_OK;
     }
     DestroySessionId();
@@ -664,6 +665,7 @@ int32_t ClientDeleteSession(int32_t sessionId)
                 continue;
             }
             ListDelete(&(sessionNode->node));
+            TRANS_LOGI(TRANS_SDK, "delete sessionId = %{public}d", sessionId);
             DestroySessionId();
             SoftBusFree(sessionNode);
             (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
@@ -1618,6 +1620,7 @@ int32_t ClientDeleteSocketSession(int32_t sessionId)
             }
             // delete sessionInfo
             ListDelete(&(sessionNode->node));
+            TRANS_LOGI(TRANS_SDK, "delete sessionId = %{public}d", sessionId);
             DestroySessionId();
             SoftBusFree(sessionNode);
             // delete session server if session server is empty

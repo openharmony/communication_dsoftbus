@@ -268,6 +268,7 @@ void TransDelSessionConnById(int32_t channelId)
                 AuthCloseConn(item->authId);
             }
             ListDelete(&item->node);
+            TRANS_LOGI(TRANS_CTRL, "delete channelId = %{public}d", item->channelId);
             SoftBusFree(item);
             g_sessionConnList->cnt--;
             ReleaseSessonConnLock();
