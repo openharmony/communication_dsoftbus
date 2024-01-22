@@ -96,7 +96,7 @@ typedef struct {
 } HiSysEventQueryParam;
 
 typedef struct {
-    int32_t delayTimeFirstDiscovery[MEDIUM_BUTT + 1];
+    int64_t delayTimeFirstDiscovery[MEDIUM_BUTT + 1];
     int32_t delayNumFirstDiscovery[MEDIUM_BUTT + 1];
 } DiscStatsInfo;
 
@@ -105,14 +105,16 @@ typedef struct {
     int32_t connSuccessTotal;
     int32_t linkTypeTotal[CONNECT_TYPE_MAX];
     int32_t linkTypeSuccessTotal[CONNECT_TYPE_MAX];
+    int64_t delayTimeLinkType[CONNECT_TYPE_MAX];
+    int32_t delayNumLinkType[CONNECT_TYPE_MAX];
 } ConnStatsInfo;
 
 typedef struct {
     int32_t linkTotal[STATISTIC_BOOT_LINK_TYPE_NUM][STATISTIC_LINK_TYPE_NUM];
     int32_t successTotal[STATISTIC_BOOT_LINK_TYPE_NUM][STATISTIC_LINK_TYPE_NUM];
     int32_t negotiateTotal[STATISTIC_BOOT_LINK_TYPE_NUM][STATISTIC_LINK_TYPE_NUM];
-    int32_t linkTimeConsuming[STATISTIC_BOOT_LINK_TYPE_NUM][STATISTIC_LINK_TYPE_NUM];
-    int32_t negotiateTimeCosuming[STATISTIC_BOOT_LINK_TYPE_NUM][STATISTIC_LINK_TYPE_NUM];
+    uint64_t linkTimeConsuming[STATISTIC_BOOT_LINK_TYPE_NUM][STATISTIC_LINK_TYPE_NUM];
+    uint64_t negotiateTimeCosuming[STATISTIC_BOOT_LINK_TYPE_NUM][STATISTIC_LINK_TYPE_NUM];
 } ConnHmlInfo;
 
 typedef struct {
@@ -177,8 +179,8 @@ static SoftBusMutex g_alarmOnQueryLock = {0};
 static SoftBusMutex g_transMapLock = {0};
 static bool g_isTransMapInit = false;
 static DiscStatsInfo g_discStatsInfo = {{0}, {0}};
-static ConnStatsInfo g_connStatsInfo = {0, 0, {0}, {0}};
-static ConnHmlInfo g_connHmlStatsInfo = {0};
+static ConnStatsInfo g_connStatsInfo = {0, 0, {0}, {0}, {0}, {0}};
+static ConnHmlInfo g_connHmlStatsInfo = {{0}, {0}, {0}, {0}, {0}};
 static LnnStatsInfo g_lnnStatsInfo = {0, 0, {0}, {0}, {0}, {0}, 0, 0, 0};
 static TransStatsInfo g_transStatsInfo = {0};
 static SoftBusAlarmEvtResult g_alarmEvtResult = {0};
@@ -291,15 +293,20 @@ static void OnCompleteDisc(int32_t reason, int32_t total)
     g_isDiscQueryEnd = true;
 }
 
-static void ConnStatsLinkType(int32_t linkTypePara, bool success)
+static void ConnStatsLinkType(int32_t linkTypePara, int32_t connDelayTime, bool success)
 {
     int32_t linkType = linkTypePara;
     if (linkType < CONNECT_TCP || linkType >= CONNECT_TYPE_MAX) {
         linkType = SOFTBUS_ZERO;
     }
     g_connStatsInfo.linkTypeTotal[linkType]++;
-    if (success) {
-        g_connStatsInfo.linkTypeSuccessTotal[linkType]++;
+    if (!success) {
+        return;
+    }
+    g_connStatsInfo.linkTypeSuccessTotal[linkType]++;
+    if (connDelayTime != SOFTBUS_ERR) {
+        g_connStatsInfo.delayTimeLinkType[linkType] += connDelayTime;
+        g_connStatsInfo.delayNumLinkType[linkType]++;
     }
 }
 
@@ -352,25 +359,22 @@ static void OnQueryConn(HiSysEventRecordC srcRecord[], size_t size)
         int32_t scene = GetInt32ValueByRecord(&srcRecord[i], BIZ_SCENE_NAME);
         int32_t stage = GetInt32ValueByRecord(&srcRecord[i], BIZ_STAGE_NAME);
         int32_t stageRes = GetInt32ValueByRecord(&srcRecord[i], STAGE_RES_NAME);
-        if (scene == SOFTBUS_ERR || stage == SOFTBUS_ERR || stageRes == SOFTBUS_ERR) {
+        if (scene != EVENT_SCENE_CONNECT || stage != EVENT_STAGE_CONNECT_END || stageRes == SOFTBUS_ERR) {
             continue;
         }
+
         int32_t linkType = GetInt32ValueByRecord(&srcRecord[i], LINK_TYPE_NAME);
-        if (scene == EVENT_SCENE_CONNECT && stage == EVENT_STAGE_CONNECT_END &&
-            stageRes == EVENT_STAGE_RESULT_OK) {
+        if (linkType == CONNECT_P2P || linkType == CONNECT_HML || linkType == CONNECT_TRIGGER_HML) {
+            FillConnHmlInfo(&srcRecord[i]);
+        }
+        int32_t connDelayTime = GetInt32ValueByRecord(&srcRecord[i], TIME_CONSUMING_NAME);
+        if (stageRes == EVENT_STAGE_RESULT_OK) {
             g_connStatsInfo.connSuccessTotal++;
-            ConnStatsLinkType(linkType, true);
+            ConnStatsLinkType(linkType, connDelayTime, true);
         }
-        if (scene == EVENT_SCENE_CONNECT && stage == EVENT_STAGE_CONNECT_END &&
-            stageRes == EVENT_STAGE_RESULT_FAILED) {
+        if (stageRes == EVENT_STAGE_RESULT_FAILED) {
             g_connStatsInfo.connFailTotal++;
-            ConnStatsLinkType(linkType, false);
-        }
-        if (scene == EVENT_SCENE_CONNECT && stage == EVENT_STAGE_CONNECT_END) {
-            int32_t linkType = GetInt32ValueByRecord(&srcRecord[i], LINK_TYPE_NAME);
-            if (linkType == CONNECT_P2P || linkType == CONNECT_HML || linkType == CONNECT_TRIGGER_HML) {
-                FillConnHmlInfo(&srcRecord[i]);
-            }
+            ConnStatsLinkType(linkType, connDelayTime, false);
         }
     }
     (void)SoftBusMutexUnlock(&g_connOnQueryLock);
@@ -737,9 +741,9 @@ static void FillTransSuccessRateDetail(cJSON *transObj)
     TransMapUnlock();
 }
 
-static void FillDiscSuccessRateDetail(cJSON *connObj)
+static void FillDiscSuccessRateDetail(cJSON *discObj)
 {
-    if (connObj == NULL) {
+    if (discObj == NULL) {
         COMM_LOGE(COMM_DFX, "disc json is add to root fail");
         return;
     }
@@ -750,7 +754,7 @@ static void FillDiscSuccessRateDetail(cJSON *connObj)
             COMM_LOGE(COMM_DFX, "FillDiscSuccessRateDetail sprintf_s fail");
             return;
         }
-        cJSON_AddItemToArray(connObj, cJSON_CreateString(detail));
+        cJSON_AddItemToArray(discObj, cJSON_CreateString(detail));
     }
 }
 
@@ -766,8 +770,9 @@ static void FillConnSuccessRateDetail(cJSON *connObj)
             rate = 1.0 * g_connStatsInfo.linkTypeSuccessTotal[i] / g_connStatsInfo.linkTypeTotal[i] * RATE_HUNDRED;
         }
         char detail[MAX_LENGTH_OF_SUCCESS_RATE] = {0};
-        if (sprintf_s(detail, sizeof(detail), "%d,%d,%d,%2.2f", i, g_connStatsInfo.linkTypeTotal[i],
-            g_connStatsInfo.linkTypeSuccessTotal[i], rate) <= 0) {
+        if (sprintf_s(detail, sizeof(detail), "%d,%d,%d,%2.2f,%"PRId64",%d", i, g_connStatsInfo.linkTypeTotal[i],
+            g_connStatsInfo.linkTypeSuccessTotal[i], rate, g_connStatsInfo.delayTimeLinkType[i],
+            g_connStatsInfo.delayNumLinkType[i]) <= 0) {
             COMM_LOGE(COMM_DFX, "FillConnSuccessRateDetail sprintf_s fail");
             return;
         }
@@ -792,14 +797,13 @@ static void FillHmlDetail(cJSON *hmlObj)
                 g_connHmlStatsInfo.negotiateTotal[i][j], g_connHmlStatsInfo.linkTimeConsuming[i][j],
                 g_connHmlStatsInfo.negotiateTimeCosuming[i][j]);
             if (res <= 0) {
-                COMM_LOGE(COMM_DFX, "sprintf_s fail");
+                COMM_LOGE(COMM_DFX, "FillHmlDetail sprintf_s fail");
                 return;
             }
             COMM_LOGI(COMM_DFX, "hml statistic : %{public}s", detail);
             cJSON_AddItemToArray(hmlObj, cJSON_CreateString(detail));
         }
     }
-    (void)memset_s(&g_connHmlStatsInfo, sizeof(g_connHmlStatsInfo), 0, sizeof(g_connHmlStatsInfo));
 }
 
 static void FillAuthSuccessRateDetail(cJSON *authObj)
@@ -846,6 +850,35 @@ static void FillSuccessRateDetail(SoftBusStatsResult *result)
     cJSON_Delete(root_obj);
 }
 
+static void SoftBusFreeDumperQueryData(void)
+{
+    if (memset_s(&g_discStatsInfo, sizeof(g_discStatsInfo), 0, sizeof(g_discStatsInfo)) != EOK) {
+        COMM_LOGE(COMM_DFX, "memset g_discStatsInfo fail!");
+    }
+    if (memset_s(&g_connStatsInfo, sizeof(g_connStatsInfo), 0, sizeof(g_connStatsInfo)) != EOK) {
+        COMM_LOGE(COMM_DFX, "memset g_connStatsInfo fail!");
+    }
+    if (memset_s(&g_connHmlStatsInfo, sizeof(g_connHmlStatsInfo), 0, sizeof(g_connHmlStatsInfo)) != EOK) {
+        COMM_LOGE(COMM_DFX, "memset g_connHmlStatsInfo fail!");
+    }
+    if (memset_s(&g_lnnStatsInfo, sizeof(g_lnnStatsInfo), 0, sizeof(g_lnnStatsInfo)) != EOK) {
+        COMM_LOGE(COMM_DFX, "memset g_lnnStatsInfo fail!");
+    }
+    if (TransMapLock() != SOFTBUS_OK) {
+        COMM_LOGE(COMM_DFX, "lock TransMap fail");
+    }
+    LnnMapDelete(&g_transStatsInfo.sessionNameLinkTypeMap);
+    TransMapUnlock();
+    if (memset_s(&g_transStatsInfo, sizeof(g_transStatsInfo), 0, sizeof(g_transStatsInfo)) != EOK) {
+        COMM_LOGE(COMM_DFX, "memset g_transStatsInfo fail!");
+    }
+
+    g_isDiscQueryEnd = false;
+    g_isConnQueryEnd = false;
+    g_isLnnQueryEnd = false;
+    g_isTransQueryEnd = false;
+}
+
 static void SoftBusProcessStatsQueryData(SoftBusStatsResult* result)
 {
     FillSuccessRateDetail(result);
@@ -873,29 +906,7 @@ static void SoftBusProcessStatsQueryData(SoftBusStatsResult* result)
     result->maxParaSessionNum = g_transStatsInfo.maxParaSessionNum;
     result->laneScoreOverTimes = g_transStatsInfo.laneScoreOverTimes;
     result->detectionTimes = g_transStatsInfo.detectionTimes;
-
-    if (memset_s(&g_connStatsInfo, sizeof(g_connStatsInfo), 0, sizeof(g_connStatsInfo)) != EOK) {
-        COMM_LOGE(COMM_DFX, "memset g_connStatsInfo fail!");
-        return;
-    }
-    if (memset_s(&g_lnnStatsInfo, sizeof(g_lnnStatsInfo), 0, sizeof(g_lnnStatsInfo)) != EOK) {
-        COMM_LOGE(COMM_DFX, "memset g_lnnStatsInfo fail!");
-        return;
-    }
-    if (TransMapLock() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_DFX, "lock TransMap fail");
-    }
-    LnnMapDelete(&g_transStatsInfo.sessionNameLinkTypeMap);
-    TransMapUnlock();
-    if (memset_s(&g_transStatsInfo, sizeof(g_transStatsInfo), 0, sizeof(g_transStatsInfo)) != EOK) {
-        COMM_LOGE(COMM_DFX, "memset g_transStatsInfo fail!");
-        return;
-    }
-
-    g_isDiscQueryEnd = false;
-    g_isConnQueryEnd = false;
-    g_isLnnQueryEnd = false;
-    g_isTransQueryEnd = false;
+    SoftBusFreeDumperQueryData();
 }
 
 static void SoftBusProcessAlarmQueryData(SoftBusAlarmEvtResult* result)
@@ -987,31 +998,31 @@ static int32_t InitDumperUtilMutexLock(void)
         (void)SoftBusMutexDestroy(&g_statsQueryLock);
         return SOFTBUS_ERR;
     }
-    
+
     if (SoftBusMutexInit(&g_alarmQueryLock, &mutexAttr) != SOFTBUS_OK) {
         COMM_LOGE(COMM_DFX, "init alarm lock fail");
         (void)SoftBusMutexDestroy(&g_alarmQueryLock);
         return SOFTBUS_ERR;
     }
-    
+
     if (SoftBusMutexInit(&g_discOnQueryLock, &mutexAttr) != SOFTBUS_OK) {
         COMM_LOGE(COMM_DFX, "init disc onQuery lock fail");
         (void)SoftBusMutexDestroy(&g_discOnQueryLock);
         return SOFTBUS_ERR;
     }
-    
+
     if (SoftBusMutexInit(&g_connOnQueryLock, &mutexAttr) != SOFTBUS_OK) {
         COMM_LOGE(COMM_DFX, "init conn onQuery lock fail");
         (void)SoftBusMutexDestroy(&g_connOnQueryLock);
         return SOFTBUS_ERR;
     }
-    
+
     if (SoftBusMutexInit(&g_lnnOnQueryLock, &mutexAttr) != SOFTBUS_OK) {
         COMM_LOGE(COMM_DFX, "init lnn onQuery lock fail");
         (void)SoftBusMutexDestroy(&g_lnnOnQueryLock);
         return SOFTBUS_ERR;
     }
-    
+
     if (SoftBusMutexInit(&g_transOnQueryLock, &mutexAttr) != SOFTBUS_OK) {
         COMM_LOGE(COMM_DFX, "init trans onQuery lock fail");
         (void)SoftBusMutexDestroy(&g_transOnQueryLock);

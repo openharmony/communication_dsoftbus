@@ -30,7 +30,6 @@
 #include "lnn_device_info.h"
 #include "lnn_device_info_recovery.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_event.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_link_finder.h"
@@ -845,8 +844,6 @@ static bool CleanInvalidConnStateProcess(FsmStateMachine *fsm, int32_t msgType, 
 
 static void OnlineStateEnter(FsmStateMachine *fsm)
 {
-    LnnEventExtra extra = { 0 };
-    LnnEventExtraInit(&extra);
     LnnConnectionFsm *connFsm = NULL;
 
     if (!CheckStateMsgCommonArgs(fsm)) {
@@ -951,8 +948,6 @@ static int32_t SyncBrOffline(const LnnConnectionFsm *connFsm)
 
 static void LeavingStateEnter(FsmStateMachine *fsm)
 {
-    LnnEventExtra extra = { 0 };
-    LnnEventExtraInit(&extra);
     LnnConnectionFsm *connFsm = NULL;
     int32_t rc;
     LnnConntionInfo *connInfo = NULL;

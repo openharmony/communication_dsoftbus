@@ -21,36 +21,30 @@
 #include "lnn_log.h"
 #include "softbus_adapter_perf.h"
 #include "softbus_errcode.h"
-
-static void DfxRecordLnnDiscServiceStart(int32_t serverType, const char *packageName)
-{
-    LnnEventExtra extra = { 0 };
-    LnnEventExtraInit(&extra);
-    extra.discServerType = serverType;
-
-    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
-    if (packageName != NULL && strncpy_s(pkgName, PKG_NAME_SIZE_MAX, packageName, PKG_NAME_SIZE_MAX - 1) == EOK) {
-        extra.callerPkg = pkgName;
-    }
-}
+#include "softbus_utils.h"
 
 static void DfxRecordLnnDiscServiceEnd(int32_t serverType, const char *packageName, int32_t reason)
 {
+    if (reason == SOFTBUS_OK) {
+        return;
+    }
+
     LnnEventExtra extra = { 0 };
     LnnEventExtraInit(&extra);
     extra.discServerType = serverType;
     extra.errcode = reason;
-    extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+    extra.result = EVENT_STAGE_RESULT_FAILED;
 
     char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
-    if (packageName != NULL && strncpy_s(pkgName, PKG_NAME_SIZE_MAX, packageName, PKG_NAME_SIZE_MAX - 1) == EOK) {
+    if (packageName != NULL && IsValidString(packageName, PKG_NAME_SIZE_MAX - 1) && strncpy_s(pkgName,
+        PKG_NAME_SIZE_MAX, packageName, PKG_NAME_SIZE_MAX - 1) == EOK) {
         extra.callerPkg = pkgName;
     }
+    LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_DISC_SERVICE, extra);
 }
 
 int32_t LnnPublishService(const char *pkgName, const PublishInfo *info, bool isInnerRequest)
 {
-    DfxRecordLnnDiscServiceStart(DISC_SERVER_PUBLISH, pkgName);
     LNN_CHECK_AND_RETURN_RET_LOGE(!SoftBusIsRamTest(), SOFTBUS_ERR, LNN_BUILDER, "LnnPublishService: ram test abort");
     int32_t ret;
     if (!isInnerRequest) {
@@ -59,7 +53,6 @@ int32_t LnnPublishService(const char *pkgName, const PublishInfo *info, bool isI
             LNN_LOGE(LNN_BUILDER, "DiscPublishService failed\n");
             return ret;
         }
-        DfxRecordLnnDiscServiceEnd(DISC_SERVER_PUBLISH, pkgName, SOFTBUS_OK);
         return SOFTBUS_OK;
     }
     if ((ret = DiscStartScan(MODULE_LNN, info)) != SOFTBUS_OK) {
@@ -67,20 +60,17 @@ int32_t LnnPublishService(const char *pkgName, const PublishInfo *info, bool isI
         LNN_LOGE(LNN_BUILDER, "DiscStartScan failed\n");
         return ret;
     }
-    DfxRecordLnnDiscServiceEnd(DISC_SERVER_PUBLISH, pkgName, SOFTBUS_OK);
     return SOFTBUS_OK;
 }
 
 int32_t LnnUnPublishService(const char *pkgName, int32_t publishId, bool isInnerRequest)
 {
-    DfxRecordLnnDiscServiceStart(DISC_SERVER_STOP_PUBLISH, pkgName);
     if (!isInnerRequest) {
         if (DiscUnPublishService(pkgName, publishId) != SOFTBUS_OK) {
             DfxRecordLnnDiscServiceEnd(DISC_SERVER_STOP_PUBLISH, pkgName, SOFTBUS_ERR);
             LNN_LOGE(LNN_BUILDER, "DiscUnPublishService failed\n");
             return SOFTBUS_ERR;
         }
-        DfxRecordLnnDiscServiceEnd(DISC_SERVER_STOP_PUBLISH, pkgName, SOFTBUS_OK);
         return SOFTBUS_OK;
     }
     if (DiscUnpublish(MODULE_LNN, publishId) != SOFTBUS_OK) {
@@ -88,14 +78,12 @@ int32_t LnnUnPublishService(const char *pkgName, int32_t publishId, bool isInner
         LNN_LOGE(LNN_BUILDER, "DiscUnpublish fail!\n");
         return SOFTBUS_ERR;
     }
-    DfxRecordLnnDiscServiceEnd(DISC_SERVER_STOP_PUBLISH, pkgName, SOFTBUS_OK);
     return SOFTBUS_OK;
 }
 
 int32_t LnnStartDiscDevice(const char *pkgName, const SubscribeInfo *info, const InnerCallback *cb,
     bool isInnerRequest)
 {
-    DfxRecordLnnDiscServiceStart(DISC_SERVER_DISCOVERY, pkgName);
     LNN_CHECK_AND_RETURN_RET_LOGE(!SoftBusIsRamTest(), SOFTBUS_ERR, LNN_BUILDER, "LnnStartDiscDevice: ram test abort");
     int32_t ret;
     if (!isInnerRequest) {
@@ -104,7 +92,6 @@ int32_t LnnStartDiscDevice(const char *pkgName, const SubscribeInfo *info, const
             LNN_LOGE(LNN_BUILDER, "DiscStartDiscovery failed\n");
             return ret;
         }
-        DfxRecordLnnDiscServiceEnd(DISC_SERVER_DISCOVERY, pkgName, SOFTBUS_OK);
         return SOFTBUS_OK;
     }
     if ((ret = DiscSetDiscoverCallback(MODULE_LNN, &cb->innerCb)) != SOFTBUS_OK) {
@@ -117,20 +104,17 @@ int32_t LnnStartDiscDevice(const char *pkgName, const SubscribeInfo *info, const
         LNN_LOGE(LNN_BUILDER, "DiscStartAdvertise failed\n");
         return ret;
     }
-    DfxRecordLnnDiscServiceEnd(DISC_SERVER_DISCOVERY, pkgName, SOFTBUS_OK);
     return SOFTBUS_OK;
 }
 
 int32_t LnnStopDiscDevice(const char *pkgName, int32_t subscribeId, bool isInnerRequest)
 {
-    DfxRecordLnnDiscServiceStart(DISC_SERVER_STOP_DISCOVERY, pkgName);
     if (!isInnerRequest) {
         if (DiscStopDiscovery(pkgName, subscribeId) != SOFTBUS_OK) {
             DfxRecordLnnDiscServiceEnd(DISC_SERVER_STOP_DISCOVERY, pkgName, SOFTBUS_ERR);
             LNN_LOGE(LNN_BUILDER, "DiscStopDiscovery failed\n");
             return SOFTBUS_ERR;
         }
-        DfxRecordLnnDiscServiceEnd(DISC_SERVER_STOP_DISCOVERY, pkgName, SOFTBUS_OK);
         return SOFTBUS_OK;
     }
     if (DiscStopAdvertise(MODULE_LNN, subscribeId) != SOFTBUS_OK) {
@@ -138,6 +122,5 @@ int32_t LnnStopDiscDevice(const char *pkgName, int32_t subscribeId, bool isInner
         LNN_LOGE(LNN_BUILDER, "DiscStopAdvertise fail!\n");
         return SOFTBUS_ERR;
     }
-    DfxRecordLnnDiscServiceEnd(DISC_SERVER_STOP_DISCOVERY, pkgName, SOFTBUS_OK);
     return SOFTBUS_OK;
 }

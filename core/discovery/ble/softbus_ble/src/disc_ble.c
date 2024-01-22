@@ -563,9 +563,6 @@ static void BleOnScanStop(int listenerId, int status)
 
 static void BleOnStateChanged(int32_t listenerId, int32_t state)
 {
-    DiscEventExtra extra = { 0 };
-    DiscEventExtraInit(&extra);
-    extra.bleTurnState = state;
     (void)listenerId;
     SoftBusMessage *msg = NULL;
     switch (state) {
@@ -955,11 +952,16 @@ static int32_t GetScannerParam(int32_t freq, BcScanParams *scanParam)
 
 static void DfxRecordScanEnd(int32_t reason)
 {
+    if (reason == SOFTBUS_OK) {
+        return;
+    }
+
     DiscEventExtra extra = { 0 };
     DiscEventExtraInit(&extra);
     extra.scanType = BLE + 1;
     extra.errcode = reason;
-    extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+    extra.result = EVENT_STAGE_RESULT_FAILED;
+    DISC_EVENT(EVENT_SCENE_BLE, EVENT_STAGE_SCAN, extra);
 }
 
 static void StartScaner(void)
@@ -985,7 +987,6 @@ static void StartScaner(void)
         DISC_LOGE(DISC_BLE, "start scan failed");
         return;
     }
-    DfxRecordScanEnd(SOFTBUS_OK);
     DISC_LOGI(DISC_BLE, "StartScanner success");
 }
 
@@ -1632,20 +1633,8 @@ static void ProcessTimeout(SoftBusMessage *msg)
     UpdateAdvertiser(NON_ADV_ID);
 }
 
-static void DfxRecordBleMsgHandlerStart(SoftBusMessage *msg)
-{
-    DiscEventExtra extra = { 0 };
-    DiscEventExtraInit(&extra);
-    extra.discType = BLE + 1;
-
-    if (msg != NULL) {
-        extra.interFuncType = msg->what + 1;
-    }
-}
-
 static void DiscBleMsgHandler(SoftBusMessage *msg)
 {
-    DfxRecordBleMsgHandlerStart(msg);
     switch (msg->what) {
         case PUBLISH_ACTIVE_SERVICE:
             StartActivePublish(msg);

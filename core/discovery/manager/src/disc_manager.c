@@ -196,21 +196,8 @@ static int32_t CallSpecificInterfaceFunc(const InnerOption *option,
     }
 }
 
-static void DfxRecordCallInterfaceStart(const DiscInfo *info, const InterfaceFuncType type)
-{
-    DiscEventExtra extra = { 0 };
-    DiscEventExtraInit(&extra);
-    extra.interFuncType = type + 1;
-
-    if (info != NULL) {
-        extra.discType = info->medium + 1;
-        extra.discMode = info->mode;
-    }
-}
-
 static int32_t CallInterfaceByMedium(const DiscInfo *info, const InterfaceFuncType type)
 {
-    DfxRecordCallInterfaceStart(info, type);
     switch (info->medium) {
         case COAP:
             return CallSpecificInterfaceFunc(&(info->option), g_discCoapInterface, info->mode, type);
@@ -935,35 +922,8 @@ int32_t DiscStopAdvertise(DiscModule moduleId, int32_t subscribeId)
     return InnerStopDiscovery(TransferModuleIdToPackageName(moduleId), subscribeId, SUBSCRIBE_INNER_SERVICE);
 }
 
-static void DfxRecordServiceStart(int32_t serverType, const char *packageName)
-{
-    DiscEventExtra extra = { 0 };
-    DiscEventExtraInit(&extra);
-    extra.serverType = serverType;
-
-    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
-    if (packageName != NULL && strncpy_s(pkgName, PKG_NAME_SIZE_MAX, packageName, PKG_NAME_SIZE_MAX - 1) == EOK) {
-        extra.callerPkg = pkgName;
-    }
-}
-
-static void DfxRecordServiceEnd(int32_t serverType, const char *packageName, int32_t reason)
-{
-    DiscEventExtra extra = { 0 };
-    DiscEventExtraInit(&extra);
-    extra.serverType = serverType;
-    extra.errcode = reason;
-    extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
-
-    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
-    if (packageName != NULL && strncpy_s(pkgName, PKG_NAME_SIZE_MAX, packageName, PKG_NAME_SIZE_MAX - 1) == EOK) {
-        extra.callerPkg = pkgName;
-    }
-}
-
 int32_t DiscPublishService(const char *packageName, const PublishInfo *info)
 {
-    DfxRecordServiceStart(SERVER_PUBLISH, packageName);
     DISC_CHECK_AND_RETURN_RET_LOGW(packageName != NULL && info != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL,
         "invalid parameters");
     DISC_CHECK_AND_RETURN_RET_LOGW(strlen(packageName) < PKG_NAME_SIZE_MAX,
@@ -981,27 +941,22 @@ int32_t DiscPublishService(const char *packageName, const PublishInfo *info)
     if (ret != SOFTBUS_OK) {
         FreeDiscInfo(infoNode, PUBLISH_SERVICE);
     }
-    DfxRecordServiceEnd(SERVER_PUBLISH, packageName, ret);
     return ret;
 }
 
 int32_t DiscUnPublishService(const char *packageName, int32_t publishId)
 {
-    DfxRecordServiceStart(SERVER_STOP_PUBLISH, packageName);
     DISC_CHECK_AND_RETURN_RET_LOGW(packageName != NULL && strlen(packageName) < PKG_NAME_SIZE_MAX,
                                   SOFTBUS_INVALID_PARAM, DISC_CONTROL, "invalid parameters");
     DISC_CHECK_AND_RETURN_RET_LOGW(g_isInited == true, SOFTBUS_DISCOVER_MANAGER_NOT_INIT, DISC_CONTROL,
         "manager is not inited");
 
-    int32_t ret = InnerUnPublishService(packageName, publishId, PUBLISH_SERVICE);
-    DfxRecordServiceEnd(SERVER_STOP_PUBLISH, packageName, ret);
-    return ret;
+    return InnerUnPublishService(packageName, publishId, PUBLISH_SERVICE);
 }
 
 int32_t DiscStartDiscovery(const char *packageName, const SubscribeInfo *info,
     const IServerDiscInnerCallback *cb)
 {
-    DfxRecordServiceStart(SERVER_DISCOVERY, packageName);
     DISC_CHECK_AND_RETURN_RET_LOGW(packageName != NULL && strlen(packageName) < PKG_NAME_SIZE_MAX,
                                   SOFTBUS_INVALID_PARAM, DISC_CONTROL, "invalid package name");
     DISC_CHECK_AND_RETURN_RET_LOGW(info != NULL && cb != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL,
@@ -1019,21 +974,17 @@ int32_t DiscStartDiscovery(const char *packageName, const SubscribeInfo *info,
     if (ret != SOFTBUS_OK) {
         FreeDiscInfo(infoNode, SUBSCRIBE_SERVICE);
     }
-    DfxRecordServiceEnd(SERVER_DISCOVERY, packageName, ret);
     return ret;
 }
 
 int32_t DiscStopDiscovery(const char *packageName, int32_t subscribeId)
 {
-    DfxRecordServiceStart(SERVER_STOP_DISCOVERY, packageName);
     DISC_CHECK_AND_RETURN_RET_LOGW(packageName != NULL && strlen(packageName) < PKG_NAME_SIZE_MAX,
                                   SOFTBUS_INVALID_PARAM, DISC_CONTROL, "invalid parameters");
     DISC_CHECK_AND_RETURN_RET_LOGW(g_isInited == true, SOFTBUS_DISCOVER_MANAGER_NOT_INIT, DISC_CONTROL,
         "manager is not inited");
 
-    int32_t ret = InnerStopDiscovery(packageName, subscribeId, SUBSCRIBE_SERVICE);
-    DfxRecordServiceEnd(SERVER_STOP_DISCOVERY, packageName, ret);
-    return ret;
+    return InnerStopDiscovery(packageName, subscribeId, SUBSCRIBE_SERVICE);
 }
 
 void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium)
