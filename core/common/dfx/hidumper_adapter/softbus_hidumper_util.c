@@ -722,6 +722,7 @@ static void FillTransSuccessRateDetail(cJSON *transObj)
     MapIterator *it = LnnMapInitIterator(&g_transStatsInfo.sessionNameLinkTypeMap);
     if (it == NULL) {
         COMM_LOGI(COMM_DFX, "map is empty");
+        TransMapUnlock();
         return;
     }
     while (LnnMapHasNext(it)) {
