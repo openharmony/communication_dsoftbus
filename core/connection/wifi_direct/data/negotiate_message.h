@@ -66,9 +66,6 @@ enum NegotiateMessageKey {
     NM_KEY_COMMAND_TYPE = 38,
     NM_KEY_INTERFACE_NAME = 39,
 
-    /* H2.0 */
-    NM_KEY_P2P_GROUP_CONFIG = 40,
-
     NM_KEY_MAX
 };
 
