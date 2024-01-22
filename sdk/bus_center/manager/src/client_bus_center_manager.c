@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,10 @@
 #define MAX_IPC_LEN 1024
 
 static int32_t g_maxNodeStateCbCount;
+static SoftBusList *g_publishMsgList = NULL;
+static SoftBusList *g_discoveryMsgList = NULL;
+static bool g_isInited = false;
+static SoftBusMutex g_isInitedLock;
 
 typedef struct {
     ListNode node;
@@ -68,6 +72,18 @@ typedef struct {
     bool isInit;
     SoftBusMutex lock;
 } BusCenterClient;
+
+typedef struct {
+    char pkgName[PKG_NAME_SIZE_MAX];
+    PublishInfo *info;
+    ListNode node;
+} DiscPublishMsg;
+
+typedef struct {
+    char pkgName[PKG_NAME_SIZE_MAX];
+    SubscribeInfo *info;
+    ListNode node;
+} DiscSubscribeMsg;
 
 static BusCenterClient g_busCenterClient = {
     .nodeStateCbListCnt = 0,
@@ -293,10 +309,273 @@ static void DuplicateTimeSyncResultCbList(ListNode *list, const char *networkId)
     }
 }
 
+static void FreeDiscPublishMsg(DiscPublishMsg *msgNode)
+{
+    if (msgNode != NULL && msgNode->info != NULL) {
+        SoftBusFree((char *)msgNode->info->capability);
+        SoftBusFree(msgNode->info->capabilityData);
+    }
+    if (msgNode != NULL) {
+        SoftBusFree(msgNode->info);
+    }
+    SoftBusFree(msgNode);
+}
+
+static void FreeDiscSubscribeMsg(DiscSubscribeMsg *msgNode)
+{
+    if (msgNode != NULL && msgNode->info != NULL) {
+        SoftBusFree((char *)msgNode->info->capability);
+        SoftBusFree(msgNode->info->capabilityData);
+    }
+    if (msgNode != NULL) {
+        SoftBusFree(msgNode->info);
+    }
+    SoftBusFree(msgNode);
+}
+
+static int32_t BuildDiscPublishMsg(DiscPublishMsg **msgNode, const PublishInfo *info, const char *pkgName)
+{
+    *msgNode = (DiscPublishMsg *)SoftBusCalloc(sizeof(DiscPublishMsg));
+    if (*msgNode == NULL) {
+        FreeDiscPublishMsg(*msgNode);
+        LNN_LOGE(LNN_STATE, "calloc msgNode failed");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    (*msgNode)->info = (PublishInfo *)SoftBusCalloc(sizeof(PublishInfo));
+    if ((*msgNode)->info == NULL) {
+        FreeDiscPublishMsg(*msgNode);
+        LNN_LOGE(LNN_STATE, "calloc info failed");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    (*msgNode)->info->capability = (char *)SoftBusCalloc(strlen(info->capability) + 1);
+    if ((*msgNode)->info->capability == NULL) {
+        FreeDiscPublishMsg(*msgNode);
+        LNN_LOGE(LNN_STATE, "calloc capability failed");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    (*msgNode)->info->publishId = info->publishId;
+    (*msgNode)->info->mode = info->mode;
+    (*msgNode)->info->medium = info->medium;
+    (*msgNode)->info->freq = info->freq;
+    (*msgNode)->info->dataLen = info->dataLen;
+    (*msgNode)->info->ranging = info->ranging;
+    if (strcpy_s((char *)(*msgNode)->info->capability, strlen(info->capability) + 1, info->capability) != EOK ||
+        strcpy_s((*msgNode)->pkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
+        FreeDiscPublishMsg(*msgNode);
+        LNN_LOGE(LNN_STATE, "copy capability or pkgName failed");
+        return SOFTBUS_ERR;
+    }
+    if (info->dataLen > 0) {
+        (*msgNode)->info->capabilityData = (unsigned char *)SoftBusCalloc(info->dataLen + 1);
+        if ((*msgNode)->info->capabilityData == NULL) {
+            FreeDiscPublishMsg(*msgNode);
+            LNN_LOGE(LNN_STATE, "calloc failed");
+            return SOFTBUS_MALLOC_ERR;
+        }
+        if (memcpy_s((*msgNode)->info->capabilityData, info->dataLen + 1,
+            info->capabilityData, info->dataLen + 1) != EOK) {
+            FreeDiscPublishMsg(*msgNode);
+            LNN_LOGE(LNN_STATE, "copy capabilityData failed");
+            return SOFTBUS_ERR;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t BuildDiscSubscribeMsg(DiscSubscribeMsg **msgNode, const SubscribeInfo *info, const char *pkgName)
+{
+    *msgNode = (DiscSubscribeMsg *)SoftBusCalloc(sizeof(DiscSubscribeMsg));
+    if (*msgNode == NULL) {
+        FreeDiscSubscribeMsg(*msgNode);
+        LNN_LOGE(LNN_STATE, "calloc msgNode failed");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    (*msgNode)->info = (SubscribeInfo *)SoftBusCalloc(sizeof(SubscribeInfo));
+    if ((*msgNode)->info == NULL) {
+        FreeDiscSubscribeMsg(*msgNode);
+        LNN_LOGE(LNN_STATE, "calloc info failed");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    (*msgNode)->info->capability = (char *)SoftBusCalloc(strlen(info->capability) + 1);
+    if ((*msgNode)->info->capability == NULL) {
+        FreeDiscSubscribeMsg(*msgNode);
+        LNN_LOGE(LNN_STATE, "calloc capability failed");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    (*msgNode)->info->subscribeId = info->subscribeId;
+    (*msgNode)->info->mode = info->mode;
+    (*msgNode)->info->medium = info->medium;
+    (*msgNode)->info->freq = info->freq;
+    (*msgNode)->info->dataLen = info->dataLen;
+    if (strcpy_s((char *)(*msgNode)->info->capability, strlen(info->capability) + 1, info->capability) != EOK ||
+        strcpy_s((*msgNode)->pkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
+        FreeDiscSubscribeMsg(*msgNode);
+        LNN_LOGE(LNN_STATE, "copy capability or pkgName failed");
+        return SOFTBUS_ERR;
+    }
+    if (info->dataLen > 0) {
+        (*msgNode)->info->capabilityData = (unsigned char *)SoftBusCalloc(info->dataLen + 1);
+        if ((*msgNode)->info->capabilityData == NULL) {
+            FreeDiscSubscribeMsg(*msgNode);
+            LNN_LOGE(LNN_STATE, "calloc failed");
+            return SOFTBUS_MALLOC_ERR;
+        }
+        if (memcpy_s((*msgNode)->info->capabilityData, info->dataLen + 1,
+            info->capabilityData, info->dataLen + 1) != EOK) {
+            FreeDiscSubscribeMsg(*msgNode);
+            LNN_LOGE(LNN_STATE, "copy capabilityData failed");
+            return SOFTBUS_ERR;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t AddDiscPublishMsg(const char *pkgName, const PublishInfo *info)
+{
+    LNN_CHECK_AND_RETURN_RET_LOGW(g_isInited, SOFTBUS_NO_INIT, LNN_STATE, "disc publish list not init");
+    LNN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&(g_publishMsgList->lock)) == SOFTBUS_OK,
+        SOFTBUS_LOCK_ERR, LNN_STATE, "lock failed");
+
+    DiscPublishMsg *msgNode = NULL;
+    LIST_FOR_EACH_ENTRY(msgNode, &(g_publishMsgList->list), DiscPublishMsg, node) {
+        if (msgNode->info->publishId == info->publishId
+            && strcmp(msgNode->info->capability, info->capability) == 0
+            && strcmp(msgNode->pkgName, pkgName) == 0) {
+            (void)SoftBusMutexUnlock(&(g_publishMsgList->lock));
+            return SOFTBUS_OK;
+        }
+    }
+
+    if (BuildDiscPublishMsg(&msgNode, info, pkgName) != SOFTBUS_OK) {
+        (void)SoftBusMutexUnlock(&(g_publishMsgList->lock));
+        LNN_LOGE(LNN_STATE, "build DiscPublishMsg failed");
+        return SOFTBUS_ERR;
+    }
+    ListTailInsert(&(g_publishMsgList->list), &(msgNode->node));
+    (void)SoftBusMutexUnlock(&(g_publishMsgList->lock));
+    return SOFTBUS_OK;
+}
+
+static int32_t DeleteDiscPublishMsg(const char *pkgName, int32_t publishId)
+{
+    LNN_CHECK_AND_RETURN_RET_LOGW(g_isInited, SOFTBUS_NO_INIT, LNN_STATE, "disc publish list not init");
+    LNN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&(g_publishMsgList->lock)) == SOFTBUS_OK,
+        SOFTBUS_LOCK_ERR, LNN_STATE, "lock failed");
+
+    DiscPublishMsg *msgNode = NULL;
+    DiscPublishMsg *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(msgNode, next, &(g_publishMsgList->list), DiscPublishMsg, node) {
+        if (msgNode->info->publishId == publishId && strcmp(msgNode->pkgName, pkgName) == 0) {
+            ListDelete(&(msgNode->node));
+            FreeDiscPublishMsg(msgNode);
+            break;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_publishMsgList->lock));
+    return SOFTBUS_OK;
+}
+
+static int32_t AddDiscSubscribeMsg(const char *pkgName, const SubscribeInfo *info)
+{
+    LNN_CHECK_AND_RETURN_RET_LOGW(g_isInited, SOFTBUS_NO_INIT, LNN_STATE, "disc subscribe list not init");
+    LNN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&(g_discoveryMsgList->lock)) == SOFTBUS_OK,
+        SOFTBUS_LOCK_ERR, LNN_STATE, "lock failed");
+
+    DiscSubscribeMsg *msgNode = NULL;
+    LIST_FOR_EACH_ENTRY(msgNode, &(g_discoveryMsgList->list), DiscSubscribeMsg, node) {
+        if (msgNode->info->subscribeId == info->subscribeId
+            && strcmp(msgNode->info->capability, info->capability) == 0
+            && strcmp(msgNode->pkgName, pkgName) == 0) {
+            (void)SoftBusMutexUnlock(&(g_discoveryMsgList->lock));
+            return SOFTBUS_OK;
+        }
+    }
+
+    if (BuildDiscSubscribeMsg(&msgNode, info, pkgName) != SOFTBUS_OK) {
+        (void)SoftBusMutexUnlock(&(g_discoveryMsgList->lock));
+        LNN_LOGE(LNN_STATE, "build DiscSubscribeMsg failed");
+        return SOFTBUS_ERR;
+    }
+    ListTailInsert(&(g_discoveryMsgList->list), &(msgNode->node));
+    (void)SoftBusMutexUnlock(&(g_discoveryMsgList->lock));
+    return SOFTBUS_OK;
+}
+
+static int32_t DeleteDiscSubscribeMsg(const char *pkgName, int32_t refreshId)
+{
+    LNN_CHECK_AND_RETURN_RET_LOGW(g_isInited, SOFTBUS_NO_INIT, LNN_STATE, "disc subscribe list not init");
+    LNN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&(g_discoveryMsgList->lock)) == SOFTBUS_OK,
+        SOFTBUS_LOCK_ERR, LNN_STATE, "lock failed");
+
+    DiscSubscribeMsg *msgNode = NULL;
+    DiscSubscribeMsg *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(msgNode, next, &(g_discoveryMsgList->list), DiscSubscribeMsg, node) {
+        if (msgNode->info->subscribeId == refreshId && strcmp(msgNode->pkgName, pkgName) == 0) {
+            ListDelete(&(msgNode->node));
+            FreeDiscSubscribeMsg(msgNode);
+            break;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_discoveryMsgList->lock));
+    return SOFTBUS_OK;
+}
+
+static int32_t DiscoveryMsgListInit()
+{
+    if (g_isInited) {
+        LNN_LOGI(LNN_STATE, "disc msg list already init");
+        return SOFTBUS_OK;
+    }
+    LNN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexInit(&g_isInitedLock, NULL) == SOFTBUS_OK,
+        SOFTBUS_LOCK_ERR, LNN_STATE, "lock init failed");
+    LNN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_isInitedLock) == SOFTBUS_OK,
+        SOFTBUS_LOCK_ERR, LNN_STATE, "lock failed");
+
+    g_publishMsgList = CreateSoftBusList();
+    g_discoveryMsgList = CreateSoftBusList();
+    if (g_publishMsgList == NULL || g_discoveryMsgList == NULL) {
+        LNN_LOGE(LNN_STATE, "init disc msg list failed");
+        DestroySoftBusList(g_publishMsgList);
+        DestroySoftBusList(g_discoveryMsgList);
+        (void)SoftBusMutexUnlock(&g_isInitedLock);
+        return SOFTBUS_ERR;
+    }
+    g_isInited = true;
+    (void)SoftBusMutexUnlock(&g_isInitedLock);
+    LNN_LOGI(LNN_STATE, "disc list init success");
+    return SOFTBUS_OK;
+}
+
+static int32_t DiscoveryMsgListDeInit()
+{
+    if (!g_isInited) {
+        LNN_LOGI(LNN_STATE, "disc msg list no need deInit");
+        return SOFTBUS_OK;
+    }
+    LNN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexInit(&g_isInitedLock, NULL) == SOFTBUS_OK,
+        SOFTBUS_LOCK_ERR, LNN_STATE, "lock init failed");
+    LNN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_isInitedLock) == SOFTBUS_OK,
+        SOFTBUS_LOCK_ERR, LNN_STATE, "lock failed");
+
+    DestroySoftBusList(g_publishMsgList);
+    DestroySoftBusList(g_discoveryMsgList);
+    g_publishMsgList = NULL;
+    g_discoveryMsgList = NULL;
+    g_isInited = false;
+
+    (void)SoftBusMutexUnlock(&g_isInitedLock);
+    LNN_LOGI(LNN_STATE, "disc list deinit success");
+    return SOFTBUS_OK;
+}
+
 void BusCenterClientDeinit(void)
 {
     if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "lock in deinit");
+        return;
+    }
+    if (DiscoveryMsgListDeInit() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "DiscoveryMsgListDeInit fail");
         return;
     }
     ClearJoinLNNList();
@@ -321,6 +600,10 @@ int BusCenterClientInit(void)
 
     if (SoftBusMutexInit(&g_busCenterClient.lock, NULL) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "g_busCenterClient.lock init failed");
+        return SOFTBUS_ERR;
+    }
+    if (DiscoveryMsgListInit() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "DiscoveryMsgListInit fail");
         return SOFTBUS_ERR;
     }
 
@@ -618,8 +901,12 @@ int32_t PublishLNNInner(const char *pkgName, const PublishInfo *info, const IPub
     int32_t ret = ServerIpcPublishLNN(pkgName, info);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "Server PublishLNNInner failed, ret=%{public}d", ret);
+        return ret;
     }
-    return ret;
+    if (AddDiscPublishMsg(pkgName, info) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "add publish msg error");
+    }
+    return SOFTBUS_OK;
 }
 
 int32_t StopPublishLNNInner(const char *pkgName, int32_t publishId)
@@ -627,8 +914,12 @@ int32_t StopPublishLNNInner(const char *pkgName, int32_t publishId)
     int32_t ret = ServerIpcStopPublishLNN(pkgName, publishId);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "Server StopPublishLNNInner failed, ret=%{public}d", ret);
+        return ret;
     }
-    return ret;
+    if (DeleteDiscPublishMsg(pkgName, publishId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "del publish msg error");
+    }
+    return SOFTBUS_OK;
 }
 
 int32_t RefreshLNNInner(const char *pkgName, const SubscribeInfo *info, const IRefreshCallback *cb)
@@ -637,8 +928,12 @@ int32_t RefreshLNNInner(const char *pkgName, const SubscribeInfo *info, const IR
     int32_t ret = ServerIpcRefreshLNN(pkgName, info);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "Server RefreshLNNInner failed, ret=%{public}d", ret);
+        return ret;
     }
-    return ret;
+    if (AddDiscSubscribeMsg(pkgName, info) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "add subscribe msg error");
+    }
+    return SOFTBUS_OK;
 }
 
 int32_t StopRefreshLNNInner(const char *pkgName, int32_t refreshId)
@@ -646,8 +941,12 @@ int32_t StopRefreshLNNInner(const char *pkgName, int32_t refreshId)
     int32_t ret = ServerIpcStopRefreshLNN(pkgName, refreshId);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "Server StopRefreshLNNInner failed, ret=%{public}d", ret);
+        return ret;
     }
-    return ret;
+    if (DeleteDiscSubscribeMsg(pkgName, refreshId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "del subscribe msg error");
+    }
+    return SOFTBUS_OK;
 }
 
 int32_t ActiveMetaNodeInner(const char *pkgName, const MetaNodeConfigInfo *info, char *metaNodeId)
@@ -875,4 +1174,56 @@ void LnnOnRefreshDeviceFound(const void *device)
     if (g_busCenterClient.refreshCb.OnDeviceFound != NULL) {
         g_busCenterClient.refreshCb.OnDeviceFound((const DeviceInfo *)device);
     }
+}
+
+int32_t DiscRecoveryPublish()
+{
+    if (!g_isInited) {
+        LNN_LOGI(LNN_STATE, "no need recovery publish");
+        return SOFTBUS_OK;
+    }
+    LNN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&(g_publishMsgList->lock)) == SOFTBUS_OK,
+        SOFTBUS_LOCK_ERR, LNN_STATE, "lock failed");
+
+    DiscPublishMsg *msgNode = NULL;
+    int32_t ret = SOFTBUS_OK;
+    LIST_FOR_EACH_ENTRY(msgNode, &(g_publishMsgList->list), DiscPublishMsg, node) {
+        if (ServerIpcPublishLNN(msgNode->pkgName, msgNode->info) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_STATE, "recovery publish error, pkgName=%{public}s, capability=%{public}s",
+                msgNode->pkgName, msgNode->info->capability);
+            ret = SOFTBUS_ERR;
+        } else {
+            LNN_LOGI(LNN_STATE, "recovery publish success, pkgName=%{public}s, capability=%{public}s",
+                msgNode->pkgName, msgNode->info->capability);
+        }
+    }
+
+    (void)SoftBusMutexUnlock(&(g_publishMsgList->lock));
+    return ret;
+}
+
+int32_t DiscRecoverySubscribe()
+{
+    if (!g_isInited) {
+        LNN_LOGI(LNN_STATE, "no need recovery subscribe");
+        return SOFTBUS_OK;
+    }
+    LNN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&(g_discoveryMsgList->lock)) == SOFTBUS_OK,
+        SOFTBUS_LOCK_ERR, LNN_STATE, "lock failed");
+
+    DiscSubscribeMsg *msgNode = NULL;
+    int32_t ret = SOFTBUS_OK;
+    LIST_FOR_EACH_ENTRY(msgNode, &(g_discoveryMsgList->list), DiscSubscribeMsg, node) {
+        if (ServerIpcRefreshLNN(msgNode->pkgName, msgNode->info) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_STATE, "recovery subscribe error, pkgName=%{public}s, capability=%{public}s",
+                msgNode->pkgName, msgNode->info->capability);
+            ret = SOFTBUS_ERR;
+        } else {
+            LNN_LOGI(LNN_STATE, "recovery subscribe success, pkgName=%{public}s, capability=%{public}s",
+                msgNode->pkgName, msgNode->info->capability);
+        }
+    }
+
+    (void)SoftBusMutexUnlock(&(g_discoveryMsgList->lock));
+    return ret;
 }
