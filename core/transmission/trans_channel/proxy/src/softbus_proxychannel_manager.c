@@ -1082,13 +1082,19 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
         (TransProxyAckHandshake(msg->connId, chan, ret) != SOFTBUS_OK)) {
         TRANS_LOGE(TRANS_CTRL, "ErrHandshake fail, connId=%{public}u.", msg->connId);
     }
+    char tmpSocketName[SESSION_NAME_SIZE_MAX] = {0};
+    if (memcpy_s(tmpSocketName, SESSION_NAME_SIZE_MAX, chan->appInfo.myData.sessionName,
+        strlen(chan->appInfo.myData.sessionName)) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "memcpy failed");
+        return;
+    }
     TransEventExtra extra = {
         .calleePkg = NULL,
         .callerPkg = NULL,
         .peerNetworkId = NULL,
         .channelId = chan->myId,
         .peerChannelId = chan->peerId,
-        .socketName = chan->appInfo.myData.sessionName,
+        .socketName = tmpSocketName,
         .authId = chan->authId,
         .connectionId = chan->connId,
         .linkType = chan->type
