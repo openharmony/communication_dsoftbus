@@ -47,6 +47,7 @@
  */
 #define DFINDER_COAP_ACK_TIMEOUT ((coap_fixed_point_t){1, 0}) // 1 seconds
 #define DFINDER_COAP_ACK_RANDOM_FACTOR ((coap_fixed_point_t){1, 200}) // 1.2
+#define DFINDER_COAP_MAX_RETRANSMIT_TIMES 2 // retransmit 2 times for CON packets
 
 int32_t CoapResolveAddress(const coap_str_const_t *server, struct sockaddr *dst)
 {
@@ -260,6 +261,7 @@ static void CoapSetAckTimeOut(coap_session_t *session)
     }
     coap_session_set_ack_timeout(session, DFINDER_COAP_ACK_TIMEOUT);
     coap_session_set_ack_random_factor(session, DFINDER_COAP_ACK_RANDOM_FACTOR);
+    coap_session_set_max_retransmit(session, DFINDER_COAP_MAX_RETRANSMIT_TIMES);
 }
 
 static coap_session_t *CoapGetSessionEx(coap_context_t *ctx, const char *localAddr, const char *localPort,
