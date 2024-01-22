@@ -29,12 +29,17 @@
 #include "lnn_distributed_net_ledger.h"
 #include "trans_event.h"
 
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+
 #define TRANS_REQUEST_PENDING_TIMEOUT (5000)
 #define SESSION_NAME_PHONEPAD "com.huawei.pcassistant.phonepad-connect-channel"
 #define SESSION_NAME_CASTPLUS "CastPlusSessionName"
 #define SESSION_NAME_DISTRIBUTE_COMMUNICATION "com.huawei.boosterd.user"
 #define SESSION_NAME_ISHARE "IShare"
 #define ISHARE_MIN_NAME_LEN 6
+
+#define SESSION_NAME_DBD "distributeddata-default"
+#define SESSION_NAME_DSL "device.security.level"
 
 typedef struct {
     ListNode node;
@@ -333,6 +338,49 @@ static bool IsShareSession(const char *sessionName)
     return true;
 }
 
+static bool PeerDeviceIsDoubleFrame(const char *peerNetworkId, const char *sessionName)
+{
+    uint32_t authCapacity;
+    if (LnnGetDLAuthCapacity(peerNetworkId, &authCapacity) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "failed to get auth capacity");
+        return false;
+    }
+    TRANS_LOGI(TRANS_SVC, "authCapacity=%{public}u", authCapacity);
+    if (authCapacity == 0 &&
+        (strncmp(sessionName, SESSION_NAME_DBD, strlen(SESSION_NAME_DBD)) == 0 ||
+        strncmp(sessionName, SESSION_NAME_DSL, strlen(SESSION_NAME_DSL)) == 0)) {
+        return true;
+    }
+    return false;
+}
+
+static bool IsMeshSync(const char *sessionName)
+{
+    uint32_t dslSessionLen = strlen(SESSION_NAME_DSL);
+    if (strlen(sessionName) < dslSessionLen ||
+        strncmp(sessionName, SESSION_NAME_DSL, dslSessionLen) != 0) {
+        return false;
+    }
+    TRANS_LOGI(TRANS_SVC, "dsl module");
+    return true;
+}
+
+static void ModuleLaneAdapter(LanePreferredLinkList *preferred, bool *isQosLane)
+{
+    static LaneLinkType link[] = {
+        LANE_WLAN_5G,
+        LANE_WLAN_2P4G,
+        LANE_BR,
+    };
+    (void)memset_s(preferred->linkType, sizeof(preferred->linkType), 0, sizeof(preferred->linkType));
+    preferred->linkTypeNum = MIN(sizeof(link) / sizeof(link[0]), LANE_LINK_TYPE_BUTT);
+    for (uint32_t i = 0; i < preferred->linkTypeNum; i++) {
+        preferred->linkType[i] = link[i];
+        TRANS_LOGD(TRANS_SVC, "link=%{public}d", preferred->linkType[i]);
+    }
+    *isQosLane = false;
+}
+
 static void TransGetQosInfo(const SessionParam *param, QosInfo *qosInfo, bool *isQosLane)
 {
     *isQosLane = param->isQosLane;
@@ -417,6 +465,10 @@ static int32_t GetRequestOptionBySessionParam(const SessionParam *param, LaneReq
 
     TransformSessionPreferredToLanePreferred(param, &(requestOption->requestInfo.trans.expectedLink),
         &requestOption->requestInfo.trans);
+    if (PeerDeviceIsDoubleFrame(param->peerDeviceId, param->sessionName) || IsMeshSync(param->sessionName)) {
+        ModuleLaneAdapter(&(requestOption->requestInfo.trans.expectedLink), isQosLane);
+        TRANS_LOGI(TRANS_SVC, "adapt double frame device and mesh, isQosLane=%{public}d", *isQosLane);
+    }
     return SOFTBUS_OK;
 }
 
