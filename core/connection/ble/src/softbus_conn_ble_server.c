@@ -988,7 +988,8 @@ int32_t ConnGattServerStopService(GattServiceType serviceId)
     if (status != SOFTBUS_OK) {
         ConnRemoveMsgFromLooper(&g_bleGattServerAsyncHandler, MSG_SERVER_WAIT_START_SERVER_TIMEOUT, serviceId, 0, NULL);
         ResetServerState(serviceId);
-        g_serverEventListener[serviceId].onServerClosed(BLE_GATT, status);
+        // After a service is forcibly stopped, the service is successfully stopped.
+        g_serverEventListener[serviceId].onServerClosed(BLE_GATT, SOFTBUS_OK);
         if (status != SOFTBUS_CONN_BLE_UNDERLAY_SERVICE_DELETE_ERR) {
             SoftBusGattsDeleteService(serviceHandle);
         }
@@ -1018,7 +1019,8 @@ static void NotifyServerClosed(GattServiceType serviceId, int32_t status)
         if (status != SOFTBUS_OK) {
             ClearServiceState(serviceId);
         }
-        g_serverEventListener[serviceId].onServerClosed(BLE_GATT, status);
+        // After a service is forcibly stopped, the service is successfully stopped.
+        g_serverEventListener[serviceId].onServerClosed(BLE_GATT, SOFTBUS_OK);
         return;
     }
     // if service type is unkown, notify all stopping services stoped
@@ -1147,7 +1149,8 @@ static void BleServerWaitStopServerTimeoutHandler(int32_t serviceId)
 
     if (status != SOFTBUS_OK) {
         ResetServerState(serviceId);
-        g_serverEventListener[serviceId].onServerClosed(BLE_GATT, SOFTBUS_CONN_BLE_SERVER_STOP_SERVER_TIMEOUT_ERR);
+        // After a service is forcibly stopped, the service is successfully stopped.
+        g_serverEventListener[serviceId].onServerClosed(BLE_GATT, SOFTBUS_OK);
     }
 }
 
