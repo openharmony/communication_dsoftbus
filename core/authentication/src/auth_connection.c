@@ -21,7 +21,6 @@
 #include "auth_log.h"
 #include "auth_tcp_connection.h"
 #include "lnn_async_callback_utils.h"
-#include "lnn_event.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_errcode.h"
 #include "softbus_adapter_mem.h"
@@ -551,15 +550,6 @@ static int32_t ConnectCommDevice(const AuthConnInfo *info, uint32_t requestId, C
     return SOFTBUS_OK;
 }
 
-static void DfxRecordLnnConnectStart(const AuthConnInfo *connInfo)
-{
-    LnnEventExtra extra = { 0 };
-    LnnEventExtraInit(&extra);
-    if (connInfo != NULL) {
-        extra.authLinkType = connInfo->type;
-    }
-}
-
 static int32_t PostCommData(uint32_t connectionId, bool toServer, const AuthDataHead *head, const uint8_t *data)
 {
     uint32_t size = ConnGetHeadSize() + GetAuthDataSize(head->len);
@@ -617,7 +607,6 @@ void AuthConnDeinit(void)
 
 int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnInfo *connInfo, ConnSideType sideType)
 {
-    DfxRecordLnnConnectStart(connInfo);
     CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
     AUTH_LOGI(AUTH_CONN, "requestId=%{public}u, connType=%{public}d, sideType=%{public}d", requestId,
         connInfo->type, sideType);
