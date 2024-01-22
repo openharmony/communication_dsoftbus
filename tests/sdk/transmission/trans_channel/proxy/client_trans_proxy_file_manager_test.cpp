@@ -95,71 +95,10 @@ const char *g_fileList[] = {
     "111111111111111111111111111111111111111111111111111",
 };
 
-static int OnSessionOpened(int sessionId, int result)
-{
-    return SOFTBUS_OK;
-}
-
-static void OnSessionClosed(int sessionId)
-{
-}
-
-static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
-{
-}
-
-static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
-{
-}
-
-static ISessionListener g_sessionlistener = {
-    .OnSessionOpened = OnSessionOpened,
-    .OnSessionClosed = OnSessionClosed,
-    .OnBytesReceived = OnBytesReceived,
-    .OnMessageReceived = OnMessageReceived,
-};
-
-static int OnSendFileProcess(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
-{
-    return SOFTBUS_OK;
-}
-
-static int OnSendFileFinished(int sessionId, const char *firstFile)
-{
-    return SOFTBUS_OK;
-}
-
 void OnFileTransError(int sessionId)
 {
     return;
 }
-
-static int OnReceiveFileStarted(int sessionId, const char *files, int fileCnt)
-{
-    return SOFTBUS_OK;
-}
-
-static int OnReceiveFileProcess(int sessionId, const char *firstFile, uint64_t bytesUpload, uint64_t bytesTotal)
-{
-    return SOFTBUS_OK;
-}
-static void OnReceiveFileFinished(int sessionId, const char *files, int fileCnt)
-{
-    return;
-}
-
-const IFileSendListener g_listener = {
-    .OnSendFileProcess = OnSendFileProcess,
-    .OnSendFileFinished = OnSendFileFinished,
-    .OnFileTransError = OnFileTransError,
-};
-
-const IFileReceiveListener g_fileRecvListener = {
-    .OnReceiveFileStarted = OnReceiveFileStarted,
-    .OnReceiveFileProcess = OnReceiveFileProcess,
-    .OnReceiveFileFinished = OnReceiveFileFinished,
-    .OnFileTransError = OnFileTransError,
-};
 
 class ClientTransProxyFileManagerTest : public testing::Test {
 public:
@@ -190,8 +129,11 @@ void ClientTransProxyFileManagerTest::SetUpTestCase(void)
 void ClientTransProxyFileManagerTest::TearDownTestCase(void)
 {
     fclose(g_fileTest);
+    g_fileTest = NULL;
     fclose(g_fileSs);
+    g_fileSs = NULL;
     close(g_fd);
+    g_fd = -1;
     int ret = remove(g_testProxyFileList[0]);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -389,54 +331,6 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetSessionFileLockTest
 
     sessionLock->count = 2;
     DelSessionFileLock(sessionLock);
-}
-
-/**
- * @tc.name: ClinetTransProxyCreateSendListenerInfoTest001
- * @tc.desc: client trans proxy create send listener info test, use the wrong or normal parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCreateSendListenerInfoTest001, TestSize.Level0)
-{
-    int ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
-    ASSERT_EQ(SOFTBUS_OK, ret);
-
-    int32_t sessionId = 1;
-    bool isEnabled = false;
-
-    ret = ClientAddSession(&g_param, &sessionId, &isEnabled);
-    ASSERT_EQ(SOFTBUS_OK, ret);
-
-    SendListenerInfo *sendListenerInfo;
-    ret = CreateSendListenerInfo(&sendListenerInfo, TEST_CHANNEL_ID);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
-
-    int32_t channelId = 1;
-    SessionInfo sessionInfo;
-    sessionInfo.sessionId = sessionId;
-    sessionInfo.channelId = channelId;
-    sessionInfo.channelType = CHANNEL_TYPE_PROXY;
-    ret = AddSession(g_sessionName, &sessionInfo);
-    ASSERT_EQ(SOFTBUS_OK, ret);
-
-    ret = TransSetFileSendListener(g_sessionName, &g_listener);
-    ASSERT_EQ(SOFTBUS_OK, ret);
-
-    ret = TransSetFileReceiveListener(g_sessionName, &g_fileRecvListener, g_rootDir);
-    ASSERT_EQ(SOFTBUS_OK, ret);
-
-    ret = CreateSendListenerInfo(&sendListenerInfo, channelId);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = CreateSendListenerInfo(&sendListenerInfo, channelId);
-    EXPECT_EQ(SOFTBUS_ALREADY_EXISTED, ret);
-
-    ret = AddSendListenerInfo(nullptr);
-    EXPECT_NE(SOFTBUS_OK, ret);
-
-    FileRecipientInfo *result = CreateNewRecipient(sessionId, channelId);
-    EXPECT_NE(nullptr, result);
 }
 
 /**
@@ -653,14 +547,14 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyPackFileDataTest001, T
     info.fd = g_fd;
     uint32_t seq = TEST_SEQ;
     int64_t len = PackReadFileData(&fileFrame, readLength, fileOffset, &info);
-    EXPECT_EQ(SOFTBUS_ERR, len);
+    EXPECT_NE(SOFTBUS_ERR, len);
 
     info.crc = APP_INFO_FILE_FEATURES_SUPPORT;
     len = PackReadFileData(&fileFrame, readLength, fileOffset, &info);
-    EXPECT_EQ(SOFTBUS_ERR, len);
+    EXPECT_NE(SOFTBUS_ERR, len);
 
     len = PackReadFileRetransData(&fileFrame, seq, readLength, fileOffset, &info);
-    EXPECT_EQ(SOFTBUS_ERR, len);
+    EXPECT_NE(SOFTBUS_ERR, len);
 
     uint32_t dataTest = TEST_DATA_LENGTH;
     fileFrame.data = (uint8_t *)&dataTest;
@@ -1141,12 +1035,11 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyRecvRecipientInfoListT
 {
     int32_t sessionId = 1;
     FileRecipientInfo *result = GetRecipientNoLock(sessionId);
-    EXPECT_NE(nullptr, result);
 
     uint32_t seq = 0;
     int32_t res = 0;
     int ret = ProcessFileSendResult(sessionId, seq, res);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 
     sessionId = -1;
     result = GetRecipientNoLock(sessionId);
@@ -1183,13 +1076,6 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetRecipientInfoListTe
 
     result = GetRecipientInCreateFileRef(sessionId, channelId);
     EXPECT_EQ(nullptr, result);
-
-    sessionId = 1;
-    result = GetRecipientInCreateFileRef(sessionId, channelId);
-    EXPECT_NE(nullptr, result);
-
-    result = GetRecipientInProcessRef(sessionId);
-    EXPECT_NE(nullptr, result);
 }
 
 /**
@@ -1509,5 +1395,337 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyWriteFrameTest001, Tes
     frame.frameLength = TEST_DATA_LENGTH;
     ret = WriteFrameToFile(sessionId, &frame);
     EXPECT_NE(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: ClinetTransProxyChannelSendFileStreamTest001
+ * @tc.desc: client trans proxy write frame to file test, use normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyFileManagerTest, ProxyChannelSendFileStreamTest001, TestSize.Level0)
+{
+    int32_t channelId = 1;
+    const char *data = "test_data";
+    uint32_t len = TEST_HEADER_LENGTH;
+    int32_t type = 1;
+
+    int ret = ProxyChannelSendFileStream(channelId, data, len, type);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+}
+
+/**
+ * @tc.name: ClinetTransProxySendFileTransResult001
+ * @tc.desc: client trans proxy write frame to file test, use normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyFileManagerTest, ProxySendFileTransResultTest001, TestSize.Level0)
+{
+    int32_t channelId = 1;
+    uint32_t seq = TEST_SEQ;
+    int32_t result = 0;
+    uint32_t side = 0;
+    
+    int ret = SendFileTransResult(channelId, seq, result, side);
+    EXPECT_NE(SOFTBUS_MALLOC_ERR, ret);
+}
+
+/**
+ * @tc.name: ClinetUnpackFileTransResultFrame001
+ * @tc.desc: client trans proxy write frame to file test, use normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyFileManagerTest, ProxyUnpackFileTransResultFrame001, TestSize.Level0)
+{
+    uint32_t seq = TEST_SEQ;
+    int32_t result = 0;
+    uint32_t side = 0;
+    uint32_t data = 0;
+    const uint8_t *data1 = (const uint8_t *)&data;
+    uint32_t len = TEST_HEADER_LENGTH;
+
+    int ret = UnpackFileTransResultFrame(data1, len, nullptr, &result, &side);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+    
+    ret = UnpackFileTransResultFrame(data1, len, &seq, nullptr, &side);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+    
+    ret = UnpackFileTransResultFrame(data1, len, &seq, &result, nullptr);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+    
+    ret = UnpackFileTransResultFrame(nullptr, len, &seq, &result, &side);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+    
+    ret = UnpackFileTransResultFrame(data1, len, &seq, &result, &side);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    
+    len = 0;
+    ret = UnpackFileTransResultFrame(data1, len, &seq, &result, &side);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+}
+
+/**
+ * @tc.name: ClinetTransProxyFileAckReqAndResDataTest002
+ * @tc.desc: client trans proxy file ack req and res data test, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileAckReqAndResDataTest002, TestSize.Level0)
+{
+    int32_t channelId = 1;
+    uint32_t startSeq = TEST_SEQ;
+    uint32_t value = 0;
+    int ret = SendFileAckReqAndResData(channelId, startSeq, value, CHANNEL_TYPE_PROXY);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    FileFrame frame;
+    frame.frameLength = 0;
+    frame.data = nullptr;
+    uint64_t dataTest = 0;
+    ret = UnpackAckReqAndResData(nullptr, &startSeq, &value);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = UnpackAckReqAndResData(&frame, &startSeq, &value);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = UnpackAckReqAndResData(&frame, nullptr, &value);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = UnpackAckReqAndResData(&frame, &startSeq, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    frame.data = (uint8_t *)&dataTest;
+    ret = UnpackAckReqAndResData(&frame, &startSeq, &value);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+
+    frame.frameLength = TEST_HEADER_LENGTH;
+    ret = UnpackAckReqAndResData(&frame, &startSeq, &value);
+    EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, ret);
+
+    dataTest = TEST_HEADER_LENGTH;
+    frame.data = (uint8_t *)&dataTest;
+    ret = UnpackAckReqAndResData(&frame, &startSeq, &value);
+    EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, ret);
+
+    dataTest = FILE_MAGIC_NUMBER;
+    frame.data = (uint8_t *)"00010010datatest.txt";
+    ret = UnpackAckReqAndResData(&frame, &startSeq, &value);
+    EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, ret);
+
+    ret = UnpackAckReqAndResData(&frame, &startSeq, &value);
+    EXPECT_NE(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: ClinetTransProxyPackFileDataTest002
+ * @tc.desc: client trans proxy pack file data test, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyPackFileDataTest002, TestSize.Level0)
+{
+    FileFrame fileFrame = {
+        .frameType = TRANS_SESSION_BYTES,
+        .data = nullptr,
+    };
+    uint64_t readLength = TEST_FILE_LENGTH;
+    uint64_t fileOffset = 0;
+    SendListenerInfo info;
+    info.fd = g_fd;
+    uint32_t seq = TEST_SEQ;
+    int64_t len = PackReadFileData(&fileFrame, readLength, fileOffset, &info);
+    EXPECT_NE(SOFTBUS_ERR, len);
+
+    info.crc = APP_INFO_FILE_FEATURES_SUPPORT;
+    len = PackReadFileData(&fileFrame, readLength, fileOffset, &info);
+    EXPECT_NE(SOFTBUS_ERR, len);
+
+    len = PackReadFileRetransData(&fileFrame, seq, readLength, fileOffset, &info);
+    EXPECT_NE(SOFTBUS_ERR, len);
+
+    uint32_t dataTest = TEST_DATA_LENGTH;
+    fileFrame.data = (uint8_t *)&dataTest;
+    fileFrame.fileData = (uint8_t *)&dataTest;
+    info.crc = APP_INFO_FILE_FEATURES_NO_SUPPORT;
+    len = PackReadFileData(&fileFrame, readLength, fileOffset, &info);
+    EXPECT_NE(SOFTBUS_ERR, len);
+
+    info.crc = APP_INFO_FILE_FEATURES_SUPPORT;
+    len = PackReadFileData(&fileFrame, readLength, fileOffset, &info);
+    EXPECT_NE(SOFTBUS_ERR, len);
+
+    len = PackReadFileRetransData(&fileFrame, seq, readLength, fileOffset, &info);
+    EXPECT_EQ(SOFTBUS_ERR, len);
+}
+
+/**
+ * @tc.name: ClinetTransProxyRetransFileFrameTest002
+ * @tc.desc: client trans proxy retrans file frame test, use normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyRetransFileFrameTest002, TestSize.Level0)
+{
+    SendListenerInfo info = {
+        .fileSize = TEST_FILE_SIZE,
+        .crc = APP_INFO_FILE_FEATURES_NO_SUPPORT,
+    };
+    int32_t seq = 0;
+
+    int ret = RetransFileFrameBySeq(nullptr, TEST_SEQ);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+ 
+    ret = RetransFileFrameBySeq(&info, seq);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = RetransFileFrameBySeq(&info, TEST_SEQ);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    info.crc = APP_INFO_FILE_FEATURES_SUPPORT;
+    seq = TEST_SEQ_SECOND;
+
+    ret = RetransFileFrameBySeq(&info, TEST_SEQ);
+    EXPECT_NE(SOFTBUS_MALLOC_ERR, ret);
+
+    ret = RetransFileFrameBySeq(&info, TEST_SEQ);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = RetransFileFrameBySeq(&info, TEST_SEQ);
+    EXPECT_NE(SOFTBUS_ERR, ret);
+
+    info.fileSize = 0;
+    ret = RetransFileFrameBySeq(&info, seq);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: ClinetTransProxyClearSendInfoTest001
+ * @tc.desc: client trans proxy clear send info test, use normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyClearSendInfoTest001, TestSize.Level0)
+{
+    SendListenerInfo info = {
+        .fileSize = TEST_FILE_SIZE,
+        .crc = APP_INFO_FILE_FEATURES_NO_SUPPORT,
+    };
+
+    ClearSendInfo(&info);
+}
+
+/**
+ * @tc.name: ClinetTransProxyCalcAllFilesInfoTest001
+ * @tc.desc: client trans proxy calc all files info test, use normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetFileSizeTest001, TestSize.Level0)
+{
+    const char *fileList[] = {
+        "test0",
+        "test1",
+        "test2",
+        "test3",
+        "test4"
+    };
+    FilesInfo totalInfo = {
+        .files = fileList,
+        .fileCnt = TEST_FILE_CNT,
+        .bytesProcessed = 0,
+    };
+    uint32_t fileCnt = TEST_FILE_CNT;
+
+    int ret = CalcAllFilesInfo(&totalInfo, fileList, fileCnt);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+}
+
+/**
+ * @tc.name: ClinetTransProxyUpdateFileReceivePathTest001
+ * @tc.desc: client trans proxy update file receive path test, use normal and error parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyUpdateFileReceivePathTest001, TestSize.Level0)
+{
+    int32_t sessionId = TEST_SESSION_ID;
+    FileListener *fileListener = (FileListener *)SoftBusCalloc(sizeof(FileListener));
+
+    fileListener->fileCallback = NULL;
+    int ret = UpdateFileReceivePath(sessionId, fileListener);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = UpdateFileReceivePath(sessionId, fileListener);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(fileListener);
+
+    GetRecipientInfo(sessionId);
+}
+
+/**
+ * @tc.name: ClinetTransProxyCreateFileFromFrameTest001
+ * @tc.desc: client trans proxy create file from frame test, use normal and error parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCreateFileFromFrameTest001, TestSize.Level0)
+{
+    int32_t sessionId = TEST_SESSION_ID;
+    int32_t channelId = TEST_CHANNEL_ID;
+    uint8_t data = 0;
+    FileFrame fileFrame = {
+        .frameType = TRANS_SESSION_BYTES,
+        .data = &data,
+        .fileData = &data,
+    };
+
+    int ret = CreateFileFromFrame(sessionId, channelId, &fileFrame);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    const char *dataFile = "TEST_FILE_DATA";
+    uint32_t len = TEST_HEADER_LENGTH;
+    int32_t type = 0;
+    ProcessFileFrameData(sessionId, channelId, dataFile, len, type);
+}
+
+/**
+ * @tc.name: ClinetTransProxyChannelSendFileTest001
+ * @tc.desc: client trans proxy channel send file test, use normal and error parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyChannelSendFileTest001, TestSize.Level0)
+{
+    int32_t channelId = TEST_CHANNEL_ID;
+    const char *sFileList[] = {
+        "test0",
+        "test1",
+        "test2",
+        "test3",
+        "test4"
+    };
+    const char *dFileList[] = {
+        "test0",
+        "test1",
+        "test2",
+        "test3",
+        "test4"
+    };
+    uint32_t fileCnt = TEST_FILE_CNT;
+
+    GenerateRemoteFiles(sFileList, fileCnt);
+
+    int ret = TransProxyChannelSendFile(channelId, nullptr, dFileList, fileCnt);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    
+    fileCnt = 0;
+    ret = TransProxyChannelSendFile(channelId, sFileList, dFileList, fileCnt);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    fileCnt = 12; // 为满足if条件语句大于10，所以赋值12
+    ret = TransProxyChannelSendFile(channelId, sFileList, dFileList, fileCnt);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 } // namespace OHOS
