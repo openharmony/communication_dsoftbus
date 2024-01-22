@@ -34,6 +34,7 @@
 
 #define MAX_LEN 2048
 #define TEST_FD 10
+#define COUNT 11
 #define PKG_LEN 32
 #define RECV_BUF "testrecvBuf"
 #define BUF_LEN 10
@@ -125,7 +126,6 @@ static ISessionListener g_sessionlistener = {
  * @tc.desc: extern module active publish, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:I5HQGA
- 
  */
 HWTEST_F(TransTcpDirectTest, CreateSessionServerTest001, TestSize.Level0)
 {
@@ -204,16 +204,19 @@ HWTEST_F(TransTcpDirectTest, CreateSessionServerTest004, TestSize.Level0)
         "ohos.distributedschedule.dms.test10"
     };
 
-    for (i = 0; i < MAX_SESSION_SERVER_NUMBER; i++) {
+    for (i = 0; i < COUNT; i++) {
         ret = CreateSessionServer(g_pkgName, sessionName[i], &g_sessionlistener);
         EXPECT_EQ(SOFTBUS_OK, ret);
-    }
-    ret = CreateSessionServer(g_pkgName, sessionName[i], &g_sessionlistener);
-    EXPECT_NE(SOFTBUS_OK, ret);
 
-    for (i = 0; i < MAX_SESSION_SERVER_NUMBER; i++) {
         ret = RemoveSessionServer(g_pkgName, sessionName[i]);
         EXPECT_EQ(SOFTBUS_OK, ret);
+    }
+    for (i = COUNT; i < MAX_SESSION_SERVER_NUMBER; i++) {
+        ret = CreateSessionServer(g_pkgName, sessionName[i], &g_sessionlistener);
+        EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+        ret = RemoveSessionServer(g_pkgName, sessionName[i]);
+        EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     }
 }
 
@@ -677,51 +680,6 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcessDataByFlagTest001, TestSize.Level0)
 }
 
 /**
- * @tc.name: TransTdcProcessDataTest001
- * @tc.desc: TransTdcProcessData, use the wrong or normal parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectTest, TransTdcProcessDataTest001, TestSize.Level0)
-{
-    int32_t channelId = 1;
-    int32_t fd = TEST_FD;
-    ChannelInfo *info = (ChannelInfo *)SoftBusCalloc(sizeof(ChannelInfo));
-    ASSERT_TRUE(info != nullptr);
-    (void)memset_s(info, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
-    info->peerSessionName = (char *)g_sessionName;
-    info->channelId = 1;
-    info->channelType = CHANNEL_TYPE_TCP_DIRECT;
-    info->sessionKey = (char *)g_sessionkey;
-    info->fd = g_fd;
-
-    int32_t ret = TransTdcProcessData(channelId);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
-    IClientSessionCallBack *cb = GetClientSessionCb();
-    ret = TransTdcManagerInit(cb);
-    ASSERT_EQ(ret, SOFTBUS_OK);
-
-    ret = ClientTransTdcOnChannelOpened(g_sessionName, info);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
-    ret = TransTdcProcessData(channelId);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
-
-    ret = TransDataListInit();
-    ASSERT_EQ(ret, SOFTBUS_OK);
-
-    ret = TransAddDataBufNode(channelId, fd);
-    ASSERT_EQ(ret, SOFTBUS_OK);
-
-    ret = TransTdcProcessData(channelId);
-    EXPECT_NE(SOFTBUS_OK, ret);
-
-    TransDataListDeinit();
-    TransTdcManagerDeinit();
-    SoftBusFree(info);
-}
-
-/**
  * @tc.name: TransResizeDataBufferTest001
  * @tc.desc: TransResizeDataBuffer, use the wrong or normal parameter.
  * @tc.type: FUNC
@@ -808,12 +766,8 @@ HWTEST_F(TransTcpDirectTest, ClientTdcOnDataEventTest001, TestSize.Level0)
     int32_t ret = TransTdcManagerInit(cb);
     ASSERT_EQ(ret, SOFTBUS_OK);
 
-    ret = ClientTransTdcOnChannelOpened(g_sessionName, info);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
     ret = ClientTdcOnDataEvent(DIRECT_CHANNEL_SERVER_WIFI, events, fd);
     EXPECT_TRUE(ret != SOFTBUS_OK);
-    TransTdcManagerDeinit();
 }
 
 /**

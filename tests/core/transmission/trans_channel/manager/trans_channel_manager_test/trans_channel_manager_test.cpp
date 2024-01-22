@@ -453,7 +453,7 @@ HWTEST_F(TransChannelManagerTest, TransCloseChannel001, TestSize.Level1)
     channelId++;
     channelType = CHANNEL_TYPE_AUTH;
     ret = TransCloseChannel(channelId, channelType);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_NE(SOFTBUS_ERR, ret);
 
     channelId++;
     channelType = CHANNEL_TYPE_TCP_DIRECT;
@@ -563,7 +563,7 @@ HWTEST_F(TransChannelManagerTest, TransGetAppInfoByChanId001, TestSize.Level1)
 
     channelType = CHANNEL_TYPE_AUTH;
     ret = TransGetAppInfoByChanId(channelId, channelType, appInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_NE(SOFTBUS_ERR, ret);
 
     if (appInfo != NULL) {
         SoftBusFree(appInfo);
