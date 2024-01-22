@@ -280,7 +280,7 @@ static bool WriteSendRequestMessage(const char *pkgName, MessageParcel *data, co
 
 int32_t BusCenterServerProxy::GetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int *infoNum)
 {
-    if (info == nullptr || infoNum == nullptr) {
+    if (pkgName == nullptr || info == nullptr || infoNum == nullptr) {
         return SOFTBUS_INVALID_PARAM;
     }
     sptr<IRemoteObject> remote = GetSystemAbility();
@@ -334,7 +334,7 @@ int32_t BusCenterServerProxy::GetAllOnlineNodeInfo(const char *pkgName, void **i
 
 int32_t BusCenterServerProxy::GetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen)
 {
-    if (info == nullptr) {
+    if (pkgName == nullptr || info == nullptr) {
         return SOFTBUS_INVALID_PARAM;
     }
     sptr<IRemoteObject> remote = GetSystemAbility();
@@ -377,7 +377,7 @@ int32_t BusCenterServerProxy::GetLocalDeviceInfo(const char *pkgName, void *info
 int32_t BusCenterServerProxy::GetNodeKeyInfo(const char *pkgName, const char *networkId, int key, unsigned char *buf,
     uint32_t len)
 {
-    if (networkId == nullptr || buf == nullptr) {
+    if (pkgName == nullptr || networkId == nullptr || buf == nullptr) {
         LNN_LOGE(LNN_EVENT, "params are nullptr");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -426,7 +426,7 @@ int32_t BusCenterServerProxy::GetNodeKeyInfo(const char *pkgName, const char *ne
 
 int32_t BusCenterServerProxy::SetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag)
 {
-    if (networkId == nullptr) {
+    if (pkgName == nullptr || networkId == nullptr) {
         LNN_LOGE(LNN_EVENT, "params are nullptr");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -773,6 +773,10 @@ int32_t BusCenterServerProxy::ActiveMetaNode(const MetaNodeConfigInfo *info, cha
 
 int32_t BusCenterServerProxy::DeactiveMetaNode(const char *metaNodeId)
 {
+    if (metaNodeId == nullptr) {
+        LNN_LOGE(LNN_EVENT, "params are nullptr");
+        return SOFTBUS_INVALID_PARAM;
+    }
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
         LNN_LOGE(LNN_EVENT, "remote is nullptr");
@@ -848,6 +852,10 @@ int32_t BusCenterServerProxy::GetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *i
 int32_t BusCenterServerProxy::ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
     const GearMode *mode)
 {
+    if (pkgName == nullptr || callerId == nullptr || targetNetworkId == nullptr || mode == nullptr) {
+        LNN_LOGE(LNN_EVENT, "params are nullptr");
+        return SOFTBUS_INVALID_PARAM;
+    }
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
         LNN_LOGE(LNN_EVENT, "remote is nullptr");
