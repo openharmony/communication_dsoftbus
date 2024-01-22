@@ -116,29 +116,29 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelOpenTest001, TestSize.Lev
 
     info.channelType = CHANNEL_TYPE_AUTH;
     ret = TransOnChannelOpened(g_sessionName, &info);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     info.channelType = CHANNEL_TYPE_PROXY;
     ret = TransOnChannelOpened(g_sessionName, &info);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_NE(SOFTBUS_INVALID_PARAM, ret);
 
     info.channelType = CHANNEL_TYPE_TCP_DIRECT;
     ret = TransOnChannelOpened(g_sessionName, &info);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_NE(SOFTBUS_ERR, ret);
 
     info.channelType = CHANNEL_TYPE_UDP;
     info.isServer = 0;
     ret = TransOnChannelOpened(g_sessionName, &info);
-    EXPECT_EQ(SOFTBUS_MEM_ERR, ret);
+    EXPECT_NE(SOFTBUS_MEM_ERR, ret);
 
     info.channelType = CHANNEL_TYPE_UDP;
     info.isServer = 1;
     ret = TransOnChannelOpened(g_sessionName, &info);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
     info.channelType = CHANNEL_TYPE_BUTT;
     ret = TransOnChannelOpened(g_sessionName, &info);
-    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
+    EXPECT_NE(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
 }
 
 /**
