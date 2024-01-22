@@ -371,8 +371,7 @@ static int32_t GetP2pLinkReqParamByChannelRequetId(
             wifiDirectInfo->connectType = ((item->laneRequestInfo.laneType == LANE_HML) ?
                 WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML : WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P);
         } else {
-            wifiDirectInfo->connectType = item->p2pInfo.p2pOnly ? WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P :
-                WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML;
+            wifiDirectInfo->connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML;
         }
         item->p2pInfo.p2pRequestId = p2pRequestId;
         item->proxyChannelInfo.channelId = channelId;
@@ -417,8 +416,7 @@ static int32_t GetP2pLinkReqParamByAuthId(uint32_t authRequestId, int32_t p2pReq
             wifiDirectInfo->connectType = ((item->laneRequestInfo.laneType == LANE_HML) ?
                 WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML : WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P);
         } else {
-            wifiDirectInfo->connectType = item->p2pInfo.p2pOnly ? WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P :
-                WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML;
+            wifiDirectInfo->connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML;
         }
         item->p2pInfo.p2pRequestId = p2pRequestId;
         LinkUnlock();
@@ -913,8 +911,7 @@ static int32_t GetAuthTriggerLinkReqParamByAuthId(uint32_t authRequestId, int32_
             wifiDirectInfo->connectType = ((item->laneRequestInfo.laneType == LANE_HML) ?
                 WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML : WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P);
         } else {
-            wifiDirectInfo->connectType = item->p2pInfo.p2pOnly ? WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P :
-                WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML;
+            wifiDirectInfo->connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML;
         }
         item->p2pInfo.p2pRequestId = p2pRequestId;
         LinkUnlock();
