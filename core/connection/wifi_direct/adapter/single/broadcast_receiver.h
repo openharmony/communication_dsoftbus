@@ -32,6 +32,12 @@ enum BroadcastReceiverAction {
     BROADCAST_RECEIVER_ACTION_MAX,
 };
 
+enum ListenerPriority {
+    LISTENER_PRIORITY_LOW,
+    LISTENER_PRIORITY_MIDDLE,
+    LISTENER_PRIORITY_HIGH,
+};
+
 struct P2pBroadcastParam {
     P2pState p2pState;
     WifiP2pLinkedInfo p2pLinkInfo;
@@ -47,7 +53,7 @@ typedef void (*BroadcastListener)(enum BroadcastReceiverAction action, const str
 
 struct BroadcastReceiver {
     void (*registerBroadcastListener)(const enum BroadcastReceiverAction *actionArray, size_t actionSize,
-                                      const char *name, BroadcastListener listener);
+                                      const char *name, enum ListenerPriority priority, BroadcastListener listener);
 
     ListNode listeners[BROADCAST_RECEIVER_ACTION_MAX];
     bool isInited;
