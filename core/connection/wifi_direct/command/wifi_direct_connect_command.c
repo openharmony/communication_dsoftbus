@@ -21,6 +21,7 @@
 #include "bus_center_manager.h"
 #include "wifi_direct_negotiator.h"
 #include "wifi_direct_decision_center.h"
+#include "command/wifi_direct_command_manager.h"
 #include "channel/wifi_direct_negotiate_channel.h"
 #include "data/negotiate_message.h"
 #include "data/inner_link.h"
@@ -310,6 +311,7 @@ static struct WifiDirectCommand* Duplicate(struct WifiDirectCommand *base)
         (struct WifiDirectConnectCommand *)WifiDirectConnectCommandNew(&self->connectInfo, &self->callback);
     if (copy != NULL) {
         copy->times = self->times;
+        copy->commandId = self->commandId;
     }
     return (struct WifiDirectCommand *)copy;
 }
@@ -320,6 +322,7 @@ void WifiDirectConnectCommandConstructor(struct WifiDirectConnectCommand *self,
 {
     self->type = COMMAND_TYPE_CONNECT;
     self->timerId = TIMER_ID_INVALID;
+    self->commandId = GetWifiDirectCommandManager()->allocateCommandId();
     self->execute = ExecuteConnection;
     self->onSuccess = OnConnectSuccess;
     self->onFailure = OnConnectFailure;

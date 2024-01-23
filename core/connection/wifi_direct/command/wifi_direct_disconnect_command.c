@@ -20,6 +20,7 @@
 #include "softbus_adapter_mem.h"
 #include "wifi_direct_negotiator.h"
 #include "wifi_direct_decision_center.h"
+#include "command/wifi_direct_command_manager.h"
 #include "channel/wifi_direct_negotiate_channel.h"
 #include "data/link_manager.h"
 #include "data/resource_manager.h"
@@ -158,6 +159,7 @@ static struct WifiDirectCommand* Duplicate(struct WifiDirectCommand *base)
         (struct WifiDirectDisconnectCommand *)WifiDirectDisconnectCommandNew(&self->connectInfo, &self->callback);
     if (copy != NULL) {
         copy->times = self->times;
+        copy->timerId = self->timerId;
     }
     return (struct WifiDirectCommand *)copy;
 }
@@ -168,6 +170,7 @@ void WifiDirectDisconnectCommandConstructor(struct WifiDirectDisconnectCommand *
 {
     self->type = COMMAND_TYPE_DISCONNECT;
     self->timerId = TIMER_ID_INVALID;
+    self->commandId = GetWifiDirectCommandManager()->allocateCommandId();
     self->execute = ExecuteDisconnection;
     self->onSuccess = OnDisconnectSuccess;
     self->onFailure = OnDisconnectFailure;
