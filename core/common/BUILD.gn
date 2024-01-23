@@ -84,13 +84,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/interface",
     ]
     include_dirs += conn_common_inc + trans_common_inc
-    dfx_src = [
-      "dfx/hidumper_adapter/softbus_hidumper_trans_virtual.c",
-      "dfx/hidumper_adapter/softbus_hidumper_buscenter_virtual.c",
-      "dfx/hidumper_adapter/softbus_hidumper_disc_virtual.c",
-      "dfx/hidumper_adapter/softbus_hidumper_conn_virtual.c",
-      "dfx/hisysevent_adapter/softbus_hisysevt_nstack_virtual.c",
-    ]
+    dfx_src = [ "dfx/hisysevent_adapter/softbus_hisysevt_nstack_virtual.c" ]
     sources = common_utils_src
     sources += conn_common_src + trans_common_src + dfx_src
     if (board_toolchain_type != "iccarm") {
