@@ -15,7 +15,7 @@
 #include "softbus_errcode.h"
 #include "softbus_hidumper_bc_mgr.h"
 
-int32_t SoftBusRegBcMgrVarDump(char *dumpVar, SoftBusVarDumpCb cb)
+int32_t SoftBusRegBcMgrVarDump(const char *dumpVar, SoftBusVarDumpCb cb)
 {
     (void)dumpVar;
     (void)cb;
