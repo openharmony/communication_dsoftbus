@@ -121,6 +121,7 @@ static void ReceivedControlData(ConnBleConnection *connection, const uint8_t *da
 static bool IsSameDevice(const char *leftIdentifier, const char *rightIdentifier);
 static void BleManagerMsgHandler(SoftBusMessage *msg);
 static int BleCompareManagerLooperEventFunc(const SoftBusMessage *msg, void *args);
+static int32_t BleUpdateConnection(uint32_t connectionId, UpdateOption *option);
 static void DelayRegisterLnnOnlineListener(void);
 
 static BleManager g_bleManager = { 0 };
@@ -343,6 +344,13 @@ static void BleNotifyDeviceConnectResult(const ConnBleDevice *device, ConnBleCon
         }
         return;
     }
+    UpdateOption option = {
+        .type = CONNECT_BLE,
+        .bleOption = {
+            .priority = CONN_BLE_PRIORITY_BALANCED,
+        }
+    };
+    BleUpdateConnection(connection->connectionId, &option);
 
     ConnectionInfo info = { 0 };
     int32_t status = BleConvert2ConnectionInfo(connection, &info);
@@ -1724,6 +1732,7 @@ static bool BleCheckActiveConnection(const ConnectOption *option)
 
 static int32_t BleUpdateConnection(uint32_t connectionId, UpdateOption *option)
 {
+    CONN_LOGI(CONN_BLE, "priority=%{public}d", option->bleOption.priority);
     CONN_CHECK_AND_RETURN_RET_LOGW(option != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "invaliad param, option is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(option->type == CONNECT_BLE, SOFTBUS_INVALID_PARAM, CONN_BLE,
         "invaliad param, not ble connect type. type=%{public}d", option->type);
