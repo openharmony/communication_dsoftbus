@@ -472,6 +472,7 @@ static int32_t PostJoinRequestToConnFsm(LnnConnectionFsm *connFsm, const Connect
             LnnNotifyJoinResult((ConnectionAddr *)addr, NULL, SOFTBUS_ERR);
         }
         if (connFsm != NULL && isCreate) {
+            LnnFsmRemoveMessageByType(&connFsm->fsm, FSM_CTRL_MSG_START);
             ListDelete(&connFsm->node);
             --g_netBuilder.connCount;
             LnnDestroyConnectionFsm(connFsm);

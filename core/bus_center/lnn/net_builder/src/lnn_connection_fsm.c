@@ -603,7 +603,7 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
         LNN_LOGI(LNN_BUILDER, "join LNN is ongoing, waiting...id=%{public}u", connFsm->id);
         return SOFTBUS_OK;
     }
-    LNN_LOGI(LNN_BUILDER, "begin join request, id=%{public}u, peer=%{public}s, isNeedConnect=%{public}d", connFsm->id,
+    LNN_LOGI(LNN_BUILDER, "begin join request, id=%{public}u, peer%{public}s, isNeedConnect=%{public}d", connFsm->id,
         LnnPrintConnectionAddr(&connInfo->addr), connFsm->isNeedConnect);
     connInfo->requestId = AuthGenRequestId();
     (void)LnnConvertAddrToAuthConnInfo(&connInfo->addr, &authConn);
@@ -862,7 +862,7 @@ static void OnlineStateEnter(FsmStateMachine *fsm)
     }
     LNN_LOGI(LNN_BUILDER,
         "online state enter. id=%{public}u, networkId=%{public}s, udid=%{public}s, deviceName=%{public}s, "
-        "peerAddr=%{public}s",
+        "peer%{public}s",
         connFsm->id, anonyNetworkId, isNodeInfoValid ? anonyUdid : "",
         isNodeInfoValid ? connFsm->connInfo.nodeInfo->deviceInfo.deviceName : "",
         LnnPrintConnectionAddr(&connFsm->connInfo.addr));
@@ -972,7 +972,7 @@ static void LeavingStateEnter(FsmStateMachine *fsm)
     }
     LNN_LOGI(LNN_BUILDER,
         "leaving state enter. id=%{public}u, networkId=%{public}s, udid=%{public}s, deviceName=%{public}s, "
-        "peerAddr=%{public}s",
+        "peer%{public}s",
         connFsm->id, anonyNetworkId, isNodeInfoValid ? anonyUdid : "",
         isNodeInfoValid ? connFsm->connInfo.nodeInfo->deviceInfo.deviceName : "",
         LnnPrintConnectionAddr(&connFsm->connInfo.addr));
