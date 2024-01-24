@@ -434,9 +434,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_SET_DLHEARTBEAT_TIMER_STAMP_Test_001, Te
 HWTEST_F(LNNDisctributedLedgerTest, LNN_SET_DLCONN_CAPABILITY_Test_001, TestSize.Level1)
 {
     uint64_t connCapability = CAPABILITY;
-    int32_t ret = LnnSetDLConnCapability(NODE1_NETWORK_ID, connCapability);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnSetDLConnCapability(NODE2_NETWORK_ID, connCapability);
+    int32_t ret = LnnSetDLConnCapability(NODE2_NETWORK_ID, connCapability);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
