@@ -539,8 +539,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxySendOneFrameTest001, T
  */
 HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxySendOneFrameTest002, TestSize.Level0)
 {
-    SendListenerInfo *infoRear = (SendListenerInfo *)SoftBusMalloc(sizeof(SendListenerInfo));
-    (void)memset_s(infoRear, sizeof(infoRear), 0, sizeof(infoRear));
+    SendListenerInfo *infoRear = (SendListenerInfo *)SoftBusCalloc(sizeof(SendListenerInfo));
     infoRear->sessionId = 1;
     infoRear->channelId = 1;
     infoRear->crc = APP_INFO_FILE_FEATURES_NO_SUPPORT;
