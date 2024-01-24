@@ -71,7 +71,7 @@ std::unique_ptr<char[]> StreamPacketizer::PacketizeStream()
         streamPktHeader.GetSeqNum(), streamPktHeader.GetSeqNum(), streamPktHeader.GetSubSeqNum(),
         streamPktHeader.GetSubSeqNum(), dataSize_, extSize_);
 
-    TRANS_LOGI(TRANS_STREAM,
+    TRANS_LOGD(TRANS_STREAM,
         "TLV version=%{public}d, num=%{public}d, extSize=%{public}zd, extLen=%{public}zd, checksum=%{public}u",
         tlv.GetVersion(), tlv.GetTlvNums(), extSize_, tlv.GetExtLen(), tlv.GetCheckSum());
 
