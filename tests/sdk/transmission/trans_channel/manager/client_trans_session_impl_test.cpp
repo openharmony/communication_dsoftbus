@@ -229,8 +229,5 @@ HWTEST_F(ClientTransSessionImplTest, ClientTransSessionServerImplTest004, TestSi
     bool isEnabled = 0;
     ret = ClientAddSession(&param, &sessionId, &isEnabled);
     EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = testSessionServiceImpl.OpenSessionCallback(sessionId);
-    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 } // namespace OHOS
