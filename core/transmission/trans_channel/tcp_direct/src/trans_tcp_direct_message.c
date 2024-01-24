@@ -180,6 +180,7 @@ void TransSrvDelDataBufNode(int channelId)
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpSrvDataList->list, ServerDataBuf, node) {
         if (item->channelId == channelId) {
             ListDelete(&item->node);
+            TRANS_LOGI(TRANS_BYTES, "delete channelId = %{public}d", item->channelId);
             SoftBusFree(item->data);
             SoftBusFree(item);
             g_tcpSrvDataList->cnt--;
@@ -225,7 +226,7 @@ static int32_t PackBytes(int32_t channelId, const char *data, TdcPacketHead *pac
     }
     packetHead->dataLen = encDataLen;
 
-    TRANS_LOGI(TRANS_BYTES, "PackBytes: flag=0x%{public}x, seq=%{public}" PRIu64,
+    TRANS_LOGI(TRANS_BYTES, "PackBytes: flag=%{public}u, seq=%{public}" PRIu64,
         packetHead->flags, packetHead->seq);
 
     PackTdcPacketHead(packetHead);

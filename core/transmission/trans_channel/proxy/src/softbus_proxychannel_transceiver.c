@@ -68,6 +68,7 @@ int32_t TransDelConnByReqId(uint32_t reqId)
     LIST_FOR_EACH_ENTRY_SAFE(removeNode, tmpNode, &g_proxyConnectionList->list, ProxyConnInfo, node) {
         if (removeNode->requestId == reqId && removeNode->state == PROXY_CHANNEL_STATUS_PYH_CONNECTING) {
             ListDelete(&(removeNode->node));
+            TRANS_LOGI(TRANS_CTRL, "delete requestId = %{public}u", removeNode->requestId);
             SoftBusFree(removeNode);
             g_proxyConnectionList->cnt--;
             break;
@@ -448,6 +449,7 @@ int32_t TransAddConnItem(ProxyConnInfo *chan)
         }
     }
     ListAdd(&(g_proxyConnectionList->list), &(chan->node));
+    TRANS_LOGI(TRANS_CTRL, "add requestId = %{public}u", chan->requestId);
     g_proxyConnectionList->cnt++;
     (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
     return SOFTBUS_OK;
@@ -516,6 +518,7 @@ void TransCreateConnByConnId(uint32_t connId)
     item->connId = connId;
     TransConnInfoToConnOpt(&info, &item->connInfo);
     ListAdd(&(g_proxyConnectionList->list), &(item->node));
+    TRANS_LOGI(TRANS_CTRL, "add connId = %{public}u", item->connId);
     g_proxyConnectionList->cnt++;
     (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
     return;
