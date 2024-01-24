@@ -697,7 +697,6 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcessDataTest001, TestSize.Level0)
     int32_t fd = TEST_FD;
     ChannelInfo *info = (ChannelInfo *)SoftBusCalloc(sizeof(ChannelInfo));
     ASSERT_TRUE(info != nullptr);
-    (void)memset_s(info, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
     info->peerSessionName = (char *)g_sessionName;
     info->channelId = 1;
     info->channelType = CHANNEL_TYPE_TCP_DIRECT;
@@ -926,7 +925,6 @@ HWTEST_F(TransTcpDirectTest, ClientTransTdcOnChannelOpenedTest001, TestSize.Leve
 {
     ChannelInfo *info = (ChannelInfo *)SoftBusCalloc(sizeof(ChannelInfo));
     ASSERT_TRUE(info != nullptr);
-    (void)memset_s(info, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
     info->peerSessionName = (char *)g_sessionName;
     info->channelId = 1;
     info->channelType = CHANNEL_TYPE_TCP_DIRECT;
