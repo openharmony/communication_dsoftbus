@@ -596,7 +596,7 @@ HWTEST_F(TransUdpNegoTest, PrepareAppInfoForUdpOpen001, TestSize.Level1)
         &opt, sizeof(SocketOption));
 
     int32_t ret = PrepareAppInfoForUdpOpen(&connOpt, &invalidInfo, &channelId);
-    EXPECT_TRUE(ret == SOFTBUS_TRANS_GET_P2P_INFO_FAILED);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /**

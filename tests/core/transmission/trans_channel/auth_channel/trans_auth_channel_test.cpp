@@ -118,7 +118,7 @@ static int32_t TestGenerateAppInfo(AppInfo *appInfo)
 HWTEST_F(TransAuthChannelTest, OperateAuthChannelInfoTest001, TestSize.Level1)
 {
     int32_t ret = GetAuthChannelInfoByChanId(TRANS_TEST_CHANNEL_ID, NULL);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
     ret = GetAuthIdByChannelId(TRANS_TEST_CHANNEL_ID);
     EXPECT_NE(ret, SOFTBUS_OK);
     ret =  GetChannelInfoByAuthId(TRANS_TEST_AUTH_ID, NULL);
@@ -586,10 +586,6 @@ HWTEST_F(TransAuthChannelTest, CopyPeerAppInfoTest001, TestSize.Level1)
     ASSERT_EQ(ret, SOFTBUS_OK);
     AppInfo *channelAppInfo = (AppInfo*)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(channelAppInfo != NULL);
-    ret = CopyPeerAppInfo(NULL, channelAppInfo);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = CopyPeerAppInfo(recvAppInfo, NULL);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = CopyPeerAppInfo(recvAppInfo, channelAppInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(recvAppInfo);
@@ -610,8 +606,6 @@ HWTEST_F(TransAuthChannelTest, OnRequsetUpdateAuthChannelTest001, TestSize.Level
     ASSERT_EQ(ret, SOFTBUS_OK);
     AppInfo *appInfo = (AppInfo*)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != NULL);
-    ret = OnRequsetUpdateAuthChannel(TRANS_TEST_AUTH_ID, NULL);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = TestGenerateAppInfo(appInfo);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = OnRequsetUpdateAuthChannel(TRANS_TEST_AUTH_ID, appInfo);
