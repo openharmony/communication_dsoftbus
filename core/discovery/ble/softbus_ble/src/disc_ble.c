@@ -769,7 +769,7 @@ static void AssembleNonOptionalTlv(DeviceInfo *info, BroadcastData *broadcastDat
     }
 }
 
-static int32_t GetBroadcastData(DeviceInfo *info, int32_t advId, BroadcastData *broadcastData)
+static int32_t AssembleBroadcastData(DeviceInfo *info, int32_t advId, BroadcastData *broadcastData)
 {
     bool isWakeRemote = GetWakeRemote();
     if (memset_s(broadcastData->data.data, BROADCAST_MAX_LEN, 0x0, BROADCAST_MAX_LEN) != EOK) {
@@ -795,6 +795,16 @@ static int32_t GetBroadcastData(DeviceInfo *info, int32_t advId, BroadcastData *
     broadcastData->data.data[POS_CAPABLITY] = info->capabilityBitmap[0] & BYTE_MASK;
     broadcastData->data.data[POS_CAPABLITY_EXTENSION] = 0x0;
     broadcastData->dataLen = POS_TLV;
+    return SOFTBUS_OK;
+}
+
+static int32_t GetBroadcastData(DeviceInfo *info, int32_t advId, BroadcastData *broadcastData)
+{
+    int32_t ret = AssembleBroadcastData(info, advId, broadcastData);
+    if (ret != SOFTBUS_OK) {
+        DISC_LOGE(DISC_BLE, "assemble broadcast failed, ret=%{public}d", ret);
+        return ret;
+    }
     char deviceIdHash[SHORT_DEVICE_ID_HASH_LENGTH + 1] = {0};
     if (DiscBleGetDeviceIdHash((uint8_t *)deviceIdHash, SHORT_DEVICE_ID_HASH_LENGTH + 1) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "get deviceId Hash failed");
@@ -813,7 +823,13 @@ static int32_t GetBroadcastData(DeviceInfo *info, int32_t advId, BroadcastData *
     if (advId == NON_ADV_ID) {
         AssembleNonOptionalTlv(info, broadcastData);
     }
-    (void)AssembleTLV(broadcastData, TLV_TYPE_DEVICE_NAME, (const void *)info->devName, strlen(info->devName) + 1);
+    uint32_t remainLen = BROADCAST_MAX_LEN - broadcastData->dataLen - 1;
+    uint32_t validLen = (strlen(info->devName) + 1 > remainLen) ? remainLen : strlen(info->devName) + 1;
+    char deviceName[DISC_MAX_DEVICE_NAME_LEN] = {0};
+    if (DiscBleGetDeviceName(deviceName, validLen) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_BLE, "get deviceName failed");
+    }
+    (void)AssembleTLV(broadcastData, TLV_TYPE_DEVICE_NAME, (const void *)deviceName, strlen(deviceName) + 1);
 
     DISC_LOGD(DISC_BLE, "broadcastData->dataLen=%{public}d", broadcastData->dataLen);
     return SOFTBUS_OK;
