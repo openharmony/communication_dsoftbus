@@ -74,6 +74,8 @@ int32_t LnnFsmStop(FsmStateMachine *fsm);
 int32_t LnnFsmPostMessage(FsmStateMachine *fsm, uint32_t msgType, void *data);
 int32_t LnnFsmPostMessageDelay(FsmStateMachine *fsm, uint32_t msgType, void *data, uint64_t delayMillis);
 
+int32_t LnnFsmRemoveMessageByType(FsmStateMachine *fsm, int32_t what);
+
 /* msgType value should not be 0 */
 int32_t LnnFsmRemoveMessage(FsmStateMachine *fsm, int32_t msgType);
 int32_t LnnFsmRemoveMessageSpecific(FsmStateMachine *fsm,
