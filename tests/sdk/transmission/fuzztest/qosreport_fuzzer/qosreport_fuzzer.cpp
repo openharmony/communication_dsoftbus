@@ -14,12 +14,11 @@
  */
 
 #include "qosreport_fuzzer.h"
+
 #include <cstddef>
-#include <cstdint>
+
 #include "client_trans_session_service.h"
-#include "inner_session.h"
 #include "session.h"
-#include "softbus_utils.h"
 
 namespace OHOS {
 void QosReportTest(const uint8_t* data, size_t size)

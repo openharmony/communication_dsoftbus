@@ -29,6 +29,8 @@
 
 #define MAX_SESSION_SERVER_NUM 100
 #define CMD_REGISTED_SESSION_LIST "registed_sessionlist"
+#define GET_ROUTE_TYPE(type) ((type) & 0xff)
+#define GET_CONN_TYPE(type) (((type) >> 8) & 0xff)
 
 static SoftBusList *g_sessionServerList = NULL;
 
@@ -164,7 +166,9 @@ int32_t TransSessionServerAddItem(SessionServer *newNode)
         }
     }
 
+    Anonymize(newNode->sessionName, &tmpName);
     ListAdd(&(g_sessionServerList->list), &(newNode->node));
+    TRANS_LOGI(TRANS_CTRL, "add sessionName = %{public}s", tmpName);
     g_sessionServerList->cnt++;
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
     AnonymizeFree(tmpName);
@@ -315,6 +319,7 @@ static void TransListDelete(ListNode *sessionServerList)
 
 static int32_t TransListCopy(ListNode *sessionServerList)
 {
+    TRANS_LOGI(TRANS_CTRL, "enter.");
     if (sessionServerList == NULL) {
         return SOFTBUS_ERR;
     }
@@ -340,14 +345,17 @@ static int32_t TransListCopy(ListNode *sessionServerList)
     return SOFTBUS_OK;
 }
 
-void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid, const char *peerIp, int32_t routeType)
+void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid, const char *peerIp, int32_t type)
 {
     if (networkId == NULL || g_sessionServerList == NULL) {
         return;
     }
+    int32_t routeType = GET_ROUTE_TYPE(type);
+    int32_t connType = GET_CONN_TYPE(type);
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
-    TRANS_LOGI(TRANS_CTRL, "routeType=%{public}d, networkId=%{public}s", routeType, anonyNetworkId);
+    TRANS_LOGI(TRANS_CTRL,
+        "routeType=%{public}d, networkId=%{public}s connType=%{public}d", routeType, anonyNetworkId, connType);
     AnonymizeFree(anonyNetworkId);
 
     ListNode sessionServerList = {0};
@@ -362,7 +370,7 @@ void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid, 
     SessionServer *tmp = NULL;
 
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &sessionServerList, SessionServer, node) {
-        (void)TransServerOnChannelLinkDown(pos->pkgName, pos->pid, uuid, udid, peerIp, networkId, routeType);
+        (void)TransServerOnChannelLinkDown(pos->pkgName, pos->pid, uuid, udid, peerIp, networkId, type);
     }
 
     if (routeType == WIFI_P2P) {

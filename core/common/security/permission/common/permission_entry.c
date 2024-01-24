@@ -130,7 +130,6 @@ static int32_t GetPeMapValue(const char *string)
 static bool StrIsEmpty(const char *string)
 {
     if (string == NULL || strlen(string) == 0) {
-        COMM_LOGE(COMM_PERM, "invalid param");
         return true;
     }
     return false;
@@ -150,7 +149,6 @@ static bool StrStartWith(const char *string, const char *target)
     }
     for (size_t index = 0; index < targetLen; index++) {
         if (string[index] != target[index]) {
-            COMM_LOGE(COMM_PERM, "string don't equal target");
             return false;
         }
     }
@@ -264,7 +262,7 @@ static SoftBusPermissionEntry *ProcessPermissionEntry(cJSON *object)
     return permissionEntry;
 }
 
-static int32_t CompareString(const char *src, const char *dest, bool regexp)
+int32_t CompareString(const char *src, const char *dest, bool regexp)
 {
     if (src == NULL || dest == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -488,7 +486,8 @@ SoftBusPermissionItem *CreatePermissionItem(int32_t permType, int32_t uid, int32
 
 int32_t CheckPermissionEntry(const char *sessionName, const SoftBusPermissionItem *pItem)
 {
-    if (sessionName == NULL || pItem == NULL || g_permissionEntryList == NULL) {
+    if (sessionName == NULL || pItem == NULL) {
+        COMM_LOGE(COMM_PERM, "INVALID PARAM");
         return SOFTBUS_INVALID_PARAM;
     }
     int permType;
@@ -496,6 +495,10 @@ int32_t CheckPermissionEntry(const char *sessionName, const SoftBusPermissionIte
     bool isDynamicPermission = CheckDBinder(sessionName);
     SoftBusList *permissionList = isDynamicPermission ? g_dynamicPermissionList : g_permissionEntryList;
 
+    if (permissionList == NULL) {
+        COMM_LOGE(COMM_PERM, "permissionList is NULL");
+        return SOFTBUS_INVALID_PARAM;
+    }
     (void)SoftBusMutexLock(&permissionList->lock);
     LIST_FOR_EACH_ENTRY(pe, &permissionList->list, SoftBusPermissionEntry, node) {
         if (CompareString(pe->sessionName, sessionName, pe->regexp) == SOFTBUS_OK) {

@@ -18,20 +18,50 @@
 #include <securec.h>
 
 #include "anonymizer.h"
+#include "permission_entry.h"
+#include "regex.h"
 #include "softbus_def.h"
+#include "softbus_errcode.h"
 #include "trans_log.h"
 
+typedef struct {
+    const char *sessionName;
+    bool regexp;
+} SessionWhiteList;
 
-#define AUTH_SESSION_WHITE_LIST_NUM (8)
-static char g_sessionWhiteList[AUTH_SESSION_WHITE_LIST_NUM][SESSION_NAME_SIZE_MAX] = {
-    "ohos.distributedhardware.devicemanager.resident",
-    "com.huawei.devicegroupmanage",
-    "IShareAuthSession",
-    "com.huawei.devicemanager.resident",
-    "com.huawei.plrdtest.dsoftbus",
-    "com.huawei.android.airsharing+CastPlusDiscoveryModule",
-    "com.huawei.dmsdp+dmsdp",
-    "com.huawei.devicemanager.dynamic",
+static const SessionWhiteList g_sessionWhiteList[] = {
+    {
+        .sessionName = "ohos.distributedhardware.devicemanager.resident",
+        .regexp = false,
+    },
+    {
+        .sessionName = "com.huawei.devicegroupmanage",
+        .regexp = false,
+    },
+    {
+        .sessionName = "IShareAuthSession",
+        .regexp = false,
+    },
+    {
+        .sessionName = "com.huawei.devicemanager.resident",
+        .regexp = false,
+    },
+    {
+        .sessionName = "com.huawei.plrdtest.dsoftbus",
+        .regexp = false,
+    },
+    {
+        .sessionName = "com.huawei.*CastPlusDiscoveryModule",
+        .regexp = true,
+    },
+    {
+        .sessionName = "com.huawei.dmsdp+dmsdp",
+        .regexp = false,
+    },
+    {
+        .sessionName = "com.huawei.devicemanager.dynamic",
+        .regexp = false,
+    }
 };
 
 #define NO_PKG_NAME_SESSION_WHITE_LIST_NUM (1)
@@ -45,11 +75,10 @@ bool CheckSessionNameValidOnAuthChannel(const char *sessionName)
         return false;
     }
 
-    uint16_t index = 0;
-    size_t len = 0;
-    for (; index < AUTH_SESSION_WHITE_LIST_NUM; ++index) {
-        len = strnlen(g_sessionWhiteList[index], SESSION_NAME_SIZE_MAX);
-        if (strncmp(sessionName, g_sessionWhiteList[index], len) == 0) {
+    uint32_t count = sizeof(g_sessionWhiteList) / sizeof(g_sessionWhiteList[0]);
+    for (uint32_t index = 0; index < count; ++index) {
+        if (CompareString(g_sessionWhiteList[index].sessionName, sessionName,
+                g_sessionWhiteList[index].regexp) == SOFTBUS_OK) {
             return true;
         }
     }

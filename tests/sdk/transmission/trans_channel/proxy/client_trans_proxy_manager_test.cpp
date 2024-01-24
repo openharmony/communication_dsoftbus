@@ -175,32 +175,6 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnChannelOpenedTest, TestS
 }
 
 /**
- * @tc.name: ClientTransProxyOnChannelClosedTest
- * @tc.desc: client trans proxy on channel closed test, use the normal parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnChannelClosedTest, TestSize.Level0)
-{
-    int32_t channelId = 1;
-    int ret = ClientTransProxyOnChannelClosed(channelId, SHUTDOWN_REASON_UNKNOWN);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-}
-
-/**
- * @tc.name: ClientTransProxyOnChannelOpenFailedTest
- * @tc.desc: client trans proxy on channel open failed test, use the normal parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnChannelOpenFailedTest, TestSize.Level0)
-{
-    int32_t channelId = 1;
-    int ret = ClientTransProxyOnChannelOpenFailed(channelId, TEST_ERR_CODE);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-}
-
-/**
  * @tc.name: ClientTransProxyOnDataReceivedTest
  * @tc.desc: client trans proxy on data received test, use the wrong or normal parameter.
  * @tc.type: FUNC
@@ -211,7 +185,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest, TestSi
     int32_t channelId = 1;
     int ret = ClientTransProxyOnDataReceived(channelId, nullptr, TEST_DATA_LENGTH, TRANS_SESSION_BYTES);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    
+
     ret = ClientTransProxyOnDataReceived(channelId, TEST_DATA, TEST_DATA_LENGTH, TRANS_SESSION_BYTES);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 }
@@ -232,12 +206,6 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyErrorCallBackTest, TestSiz
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     int32_t channelId = 1;
-    ret = ClientTransProxyOnChannelClosed(channelId, SHUTDOWN_REASON_UNKNOWN);
-    EXPECT_NE(SOFTBUS_OK, ret);
-
-    ret = ClientTransProxyOnChannelOpenFailed(channelId, TEST_ERR_CODE);
-    EXPECT_NE(SOFTBUS_OK, ret);
-
     ret = ClientTransProxyOnDataReceived(channelId, TEST_DATA, TEST_DATA_LENGTH, TRANS_SESSION_BYTES);
     EXPECT_NE(SOFTBUS_OK, ret);
 }

@@ -219,7 +219,7 @@ static int32_t CoapResponseService(CoapCtxType *ctx, const char *remoteUrl, uint
         return NSTACKX_EFAILED;
     }
 
-    int ret = CoapSendRequest(ctx, COAP_MESSAGE_NON, remoteUrl, data, strlen(data) + 1);
+    int ret = CoapSendRequest(ctx, COAP_MESSAGE_CON, remoteUrl, data, strlen(data) + 1);
     cJSON_free(data);
     return ret;
 }

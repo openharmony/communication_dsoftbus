@@ -44,6 +44,17 @@ static void EnqueueCommand(struct WifiDirectCommand *command)
     g_commandQueue.push_back(command);
 }
 
+static void EnqueueCommandFront(struct WifiDirectCommand *command)
+{
+    if (command->type == COMMAND_TYPE_CONNECT || command->type == COMMAND_TYPE_DISCONNECT) {
+        command->timerId = GetWifiDirectTimerList()->startTimer(reinterpret_cast<TimeoutHandler>(CommandTimeoutHandler),
+                                                                WIFI_DIRECT_COMMAND_WAIT_TIMEOUT, TIMER_FLAG_ONE_SHOOT,
+                                                                command);
+    }
+    std::lock_guard lockGuard(g_mutex);
+    g_commandQueue.push_front(command);
+}
+
 static struct WifiDirectCommand* DequeueCommand()
 {
     std::lock_guard lockGuard(g_mutex);
@@ -61,6 +72,7 @@ static struct WifiDirectCommand* DequeueCommand()
 
 static struct WifiDirectCommandManager g_manager = {
     .enqueueCommand = EnqueueCommand,
+    .enqueueCommandFront = EnqueueCommandFront,
     .dequeueCommand = DequeueCommand,
 };
 

@@ -178,6 +178,8 @@ ohos_unittest("TransClientSessionTest") {
     "$dsoftbus_root_path/tests/sdk/common/include",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/sdk/bus_center/manager/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/tcp_direct/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/common/include",
   ]
 
   deps = [

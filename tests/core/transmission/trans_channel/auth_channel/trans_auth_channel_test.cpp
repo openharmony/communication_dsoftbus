@@ -279,7 +279,7 @@ HWTEST_F(TransAuthChannelTest, TransSendAuthMsgTest001, TestSize.Level1)
 
     ret = TransSendAuthMsg(channelId, data, len);
     EXPECT_TRUE(ret != SOFTBUS_OK);
-    
+
     (void)TransCloseAuthChannel(channelId);
     TransAuthDeinit();
 }

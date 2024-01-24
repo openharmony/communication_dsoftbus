@@ -39,6 +39,29 @@ static bool IsNeedRetry(struct WifiDirectCommand *base, int32_t reason)
     return GetWifiDirectNegotiator()->isRetryErrorCode(reason);
 }
 
+
+static int32_t PreferNegotiateChannelForConnectInfo(struct InnerLink *link, struct WifiDirectConnectInfo *connectInfo)
+{
+    if (connectInfo->negoChannel != NULL) {
+        CONN_LOGD(CONN_WIFI_DIRECT, "prefer input channel");
+        return SOFTBUS_OK;
+    }
+    struct WifiDirectNegotiateChannel *channel = link->getPointer(link, IL_KEY_NEGO_CHANNEL, NULL);
+    if (channel != NULL) {
+        CONN_LOGD(CONN_WIFI_DIRECT, "prefer inner link channel");
+        if (connectInfo->negoChannel != NULL) {
+            connectInfo->negoChannel->destructor(connectInfo->negoChannel);
+        }
+        connectInfo->negoChannel = channel->duplicate(channel);
+        CONN_CHECK_AND_RETURN_RET_LOGW(connectInfo->negoChannel != NULL, SOFTBUS_MALLOC_ERR, CONN_WIFI_DIRECT,
+                                       "new channel failed");
+        return SOFTBUS_OK;
+    }
+
+    CONN_LOGE(CONN_WIFI_DIRECT, "no channel");
+    return ERROR_WRONG_AUTH_CONNECTION_INFO;
+}
+
 static enum WifiDirectLinkType GetLinkType(enum WifiDirectConnectType connectType)
 {
     switch (connectType) {
@@ -95,10 +118,14 @@ static int32_t ReuseLink(struct WifiDirectConnectCommand *command, struct InnerL
     struct WifiDirectProcessor *processor =
         GetWifiDirectDecisionCenter()->getProcessorByChannelAndLinkType(connectInfo->negoChannel, linkType);
 
+    int32_t ret = PreferNegotiateChannelForConnectInfo(link, connectInfo);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "prefer channel failed");
+
     command->processor = processor;
     processor->activeCommand = (struct WifiDirectCommand *)command;
     GetWifiDirectNegotiator()->currentProcessor = processor;
-    CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=%d currentProcessor=%s", command->type,  processor->name);
+    CONN_LOGI(CONN_WIFI_DIRECT,
+        "activeCommand=%{public}d, currentProcessor=%{public}s", command->type,  processor->name);
 
     return processor->reuseLink(connectInfo, link);
 }
@@ -149,7 +176,8 @@ static int32_t OpenLink(struct WifiDirectConnectCommand *command)
     command->processor = processor;
     processor->activeCommand = (struct WifiDirectCommand *)command;
     GetWifiDirectNegotiator()->currentProcessor = processor;
-    CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=%d currentProcessor=%s", command->type,  processor->name);
+    CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=%{public}d, currentProcessor=%{public}s",
+        command->type,  processor->name);
 
     SetWifiDirectStatisticLinkStartTime(connectInfo->requestId);
     return processor->createLink(connectInfo);

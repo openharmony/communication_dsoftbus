@@ -34,6 +34,7 @@
 
 #define MAX_LEN 2048
 #define TEST_FD 10
+#define COUNT 11
 #define PKG_LEN 32
 #define RECV_BUF "testrecvBuf"
 #define BUF_LEN 10
@@ -126,7 +127,6 @@ static ISessionListener g_sessionlistener = {
  * @tc.desc: extern module active publish, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:I5HQGA
- 
  */
 HWTEST_F(TransTcpDirectTest, CreateSessionServerTest001, TestSize.Level0)
 {
@@ -815,7 +815,6 @@ HWTEST_F(TransTcpDirectTest, ClientTdcOnDataEventTest001, TestSize.Level0)
 
     ret = ClientTdcOnDataEvent(DIRECT_CHANNEL_SERVER_WIFI, events, fd);
     EXPECT_TRUE(ret != SOFTBUS_OK);
-    TransTdcManagerDeinit();
 }
 
 /**

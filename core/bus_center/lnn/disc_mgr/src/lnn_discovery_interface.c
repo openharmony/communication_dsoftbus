@@ -17,8 +17,8 @@
 
 #include <securec.h>
 
-#include "disc_log.h"
 #include "lnn_event.h"
+#include "lnn_log.h"
 #include "softbus_adapter_perf.h"
 #include "softbus_errcode.h"
 
@@ -51,12 +51,12 @@ static void DfxRecordLnnDiscServiceEnd(int32_t serverType, const char *packageNa
 int32_t LnnPublishService(const char *pkgName, const PublishInfo *info, bool isInnerRequest)
 {
     DfxRecordLnnDiscServiceStart(DISC_SERVER_PUBLISH, pkgName);
-    DISC_CHECK_AND_RETURN_RET_LOGE(!SoftBusIsRamTest(), SOFTBUS_ERR, DISC_LNN, "LnnPublishService: ram test abort");
+    LNN_CHECK_AND_RETURN_RET_LOGE(!SoftBusIsRamTest(), SOFTBUS_ERR, LNN_BUILDER, "LnnPublishService: ram test abort");
     int32_t ret;
     if (!isInnerRequest) {
         if ((ret = DiscPublishService(pkgName, info)) != SOFTBUS_OK) {
             DfxRecordLnnDiscServiceEnd(DISC_SERVER_PUBLISH, pkgName, ret);
-            DISC_LOGE(DISC_LNN, "DiscPublishService failed\n");
+            LNN_LOGE(LNN_BUILDER, "DiscPublishService failed\n");
             return ret;
         }
         DfxRecordLnnDiscServiceEnd(DISC_SERVER_PUBLISH, pkgName, SOFTBUS_OK);
@@ -64,7 +64,7 @@ int32_t LnnPublishService(const char *pkgName, const PublishInfo *info, bool isI
     }
     if ((ret = DiscStartScan(MODULE_LNN, info)) != SOFTBUS_OK) {
         DfxRecordLnnDiscServiceEnd(DISC_SERVER_PUBLISH, pkgName, ret);
-        DISC_LOGE(DISC_LNN, "DiscStartScan failed\n");
+        LNN_LOGE(LNN_BUILDER, "DiscStartScan failed\n");
         return ret;
     }
     DfxRecordLnnDiscServiceEnd(DISC_SERVER_PUBLISH, pkgName, SOFTBUS_OK);
@@ -77,7 +77,7 @@ int32_t LnnUnPublishService(const char *pkgName, int32_t publishId, bool isInner
     if (!isInnerRequest) {
         if (DiscUnPublishService(pkgName, publishId) != SOFTBUS_OK) {
             DfxRecordLnnDiscServiceEnd(DISC_SERVER_STOP_PUBLISH, pkgName, SOFTBUS_ERR);
-            DISC_LOGE(DISC_LNN, "DiscUnPublishService failed\n");
+            LNN_LOGE(LNN_BUILDER, "DiscUnPublishService failed\n");
             return SOFTBUS_ERR;
         }
         DfxRecordLnnDiscServiceEnd(DISC_SERVER_STOP_PUBLISH, pkgName, SOFTBUS_OK);
@@ -85,7 +85,7 @@ int32_t LnnUnPublishService(const char *pkgName, int32_t publishId, bool isInner
     }
     if (DiscUnpublish(MODULE_LNN, publishId) != SOFTBUS_OK) {
         DfxRecordLnnDiscServiceEnd(DISC_SERVER_STOP_PUBLISH, pkgName, SOFTBUS_ERR);
-        DISC_LOGE(DISC_LNN, "DiscUnpublish fail!\n");
+        LNN_LOGE(LNN_BUILDER, "DiscUnpublish fail!\n");
         return SOFTBUS_ERR;
     }
     DfxRecordLnnDiscServiceEnd(DISC_SERVER_STOP_PUBLISH, pkgName, SOFTBUS_OK);
@@ -96,12 +96,12 @@ int32_t LnnStartDiscDevice(const char *pkgName, const SubscribeInfo *info, const
     bool isInnerRequest)
 {
     DfxRecordLnnDiscServiceStart(DISC_SERVER_DISCOVERY, pkgName);
-    DISC_CHECK_AND_RETURN_RET_LOGE(!SoftBusIsRamTest(), SOFTBUS_ERR, DISC_LNN, "LnnStartDiscDevice: ram test abort");
+    LNN_CHECK_AND_RETURN_RET_LOGE(!SoftBusIsRamTest(), SOFTBUS_ERR, LNN_BUILDER, "LnnStartDiscDevice: ram test abort");
     int32_t ret;
     if (!isInnerRequest) {
         if ((ret = DiscStartDiscovery(pkgName, info, &cb->serverCb)) != SOFTBUS_OK) {
             DfxRecordLnnDiscServiceEnd(DISC_SERVER_DISCOVERY, pkgName, ret);
-            DISC_LOGE(DISC_LNN, "DiscStartDiscovery failed\n");
+            LNN_LOGE(LNN_BUILDER, "DiscStartDiscovery failed\n");
             return ret;
         }
         DfxRecordLnnDiscServiceEnd(DISC_SERVER_DISCOVERY, pkgName, SOFTBUS_OK);
@@ -109,12 +109,12 @@ int32_t LnnStartDiscDevice(const char *pkgName, const SubscribeInfo *info, const
     }
     if ((ret = DiscSetDiscoverCallback(MODULE_LNN, &cb->innerCb)) != SOFTBUS_OK) {
         DfxRecordLnnDiscServiceEnd(DISC_SERVER_DISCOVERY, pkgName, ret);
-        DISC_LOGE(DISC_LNN, "DiscSetDiscoverCallback failed\n");
+        LNN_LOGE(LNN_BUILDER, "DiscSetDiscoverCallback failed\n");
         return ret;
     }
     if ((ret = DiscStartAdvertise(MODULE_LNN, info)) != SOFTBUS_OK) {
         DfxRecordLnnDiscServiceEnd(DISC_SERVER_DISCOVERY, pkgName, ret);
-        DISC_LOGE(DISC_LNN, "DiscStartAdvertise failed\n");
+        LNN_LOGE(LNN_BUILDER, "DiscStartAdvertise failed\n");
         return ret;
     }
     DfxRecordLnnDiscServiceEnd(DISC_SERVER_DISCOVERY, pkgName, SOFTBUS_OK);
@@ -127,7 +127,7 @@ int32_t LnnStopDiscDevice(const char *pkgName, int32_t subscribeId, bool isInner
     if (!isInnerRequest) {
         if (DiscStopDiscovery(pkgName, subscribeId) != SOFTBUS_OK) {
             DfxRecordLnnDiscServiceEnd(DISC_SERVER_STOP_DISCOVERY, pkgName, SOFTBUS_ERR);
-            DISC_LOGE(DISC_LNN, "DiscStopDiscovery failed\n");
+            LNN_LOGE(LNN_BUILDER, "DiscStopDiscovery failed\n");
             return SOFTBUS_ERR;
         }
         DfxRecordLnnDiscServiceEnd(DISC_SERVER_STOP_DISCOVERY, pkgName, SOFTBUS_OK);
@@ -135,7 +135,7 @@ int32_t LnnStopDiscDevice(const char *pkgName, int32_t subscribeId, bool isInner
     }
     if (DiscStopAdvertise(MODULE_LNN, subscribeId) != SOFTBUS_OK) {
         DfxRecordLnnDiscServiceEnd(DISC_SERVER_STOP_DISCOVERY, pkgName, SOFTBUS_ERR);
-        DISC_LOGE(DISC_LNN, "DiscStopAdvertise fail!\n");
+        LNN_LOGE(LNN_BUILDER, "DiscStopAdvertise fail!\n");
         return SOFTBUS_ERR;
     }
     DfxRecordLnnDiscServiceEnd(DISC_SERVER_STOP_DISCOVERY, pkgName, SOFTBUS_OK);
