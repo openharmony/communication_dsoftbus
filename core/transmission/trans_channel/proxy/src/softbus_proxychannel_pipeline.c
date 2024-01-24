@@ -221,6 +221,7 @@ int32_t TransProxyPipelineOpenChannel(int32_t requestId, const char *networkId,
     }
     ListInit(&item->node);
     ListAdd(&g_manager.channels->list, &item->node);
+    TRANS_LOGI(TRANS_CTRL, "add channelId = %{public}d", item->channelId);
     g_manager.channels->cnt += 1;
     SoftBusMutexUnlock(&g_manager.channels->lock);
 
@@ -361,6 +362,7 @@ int32_t InnerSaveChannel(int32_t channelId, const char *uuid)
     }
     ListInit(&item->node);
     ListAdd(&g_manager.channels->list, &item->node);
+    TRANS_LOGI(TRANS_CTRL, "add channelId = %{public}d", item->channelId);
     g_manager.channels->cnt += 1;
     SoftBusMutexUnlock(&g_manager.channels->lock);
     return SOFTBUS_OK;
@@ -480,6 +482,7 @@ static void InnerOnChannelOpenFailed(int32_t channelId)
         .onChannelOpenFailed = target->callback.onChannelOpenFailed,
     };
     ListDelete(&target->node);
+    TRANS_LOGI(TRANS_CTRL, "delete channelId = %{public}d", channelId);
     SoftBusFree(target);
     g_manager.channels->cnt -= 1;
     SoftBusMutexUnlock(&g_manager.channels->lock);
@@ -499,6 +502,7 @@ static void TransProxyPipelineOnChannelClosed(int32_t channelId)
     target = SearchChannelItemUnsafe(&channelId, CompareByChannelId);
     if (target != NULL) {
         ListDelete(&target->node);
+        TRANS_LOGI(TRANS_CTRL, "delete channelId = %{public}d", channelId);
         SoftBusFree(target);
         g_manager.channels->cnt -= 1;
     }

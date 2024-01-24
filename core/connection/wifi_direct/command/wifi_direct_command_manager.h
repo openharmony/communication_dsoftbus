@@ -26,6 +26,7 @@ extern "C" {
 
 struct WifiDirectCommandManager {
     void (*enqueueCommand)(struct WifiDirectCommand *command);
+    void (*enqueueCommandFront)(struct WifiDirectCommand *command);
     struct WifiDirectCommand* (*dequeueCommand)(void);
 };
 

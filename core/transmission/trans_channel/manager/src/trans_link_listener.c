@@ -28,12 +28,14 @@
 
 #define NETWORK_ID_LEN 7
 #define HML_IP_PREFIX "172.30."
+#define COMBINE_TYPE(routeType, connType) ((routeType) | ((uint8_t)(connType) << 8))
 
 static void OnWifiDirectDeviceOffLine(const char *peerMac, const char *peerIp, const char *peerUuid)
 {
     TRANS_CHECK_AND_RETURN_LOGW(peerUuid, TRANS_SVC, "peer uuid is null");
 
     NodeInfo nodeInfo;
+    TransConnType connType = TRANS_CONN_ALL;
     memset_s(&nodeInfo, sizeof(nodeInfo), 0, sizeof(nodeInfo));
     int32_t ret = LnnGetRemoteNodeInfoById(peerUuid, CATEGORY_UUID, &nodeInfo);
     TRANS_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, TRANS_SVC, "LnnGetRemoteNodeInfoById failed");
@@ -46,12 +48,15 @@ static void OnWifiDirectDeviceOffLine(const char *peerMac, const char *peerIp, c
                 StopHmlListener(type);
                 TRANS_LOGI(TRANS_SVC, "StopHmlListener succ");
             }
+            connType = TRANS_CONN_HML;
+        } else {
+            connType = TRANS_CONN_P2P;
         }
     } else {
         TRANS_LOGI(TRANS_SVC, "WifiDirectDeviceOffLine do not get localip");
     }
 
-    TransOnLinkDown(nodeInfo.networkId, nodeInfo.uuid, nodeInfo.masterUdid, peerIp, WIFI_P2P);
+    TransOnLinkDown(nodeInfo.networkId, nodeInfo.uuid, nodeInfo.masterUdid, peerIp, COMBINE_TYPE(WIFI_P2P, connType));
     TRANS_LOGI(TRANS_SVC, "Notify Degrade MigrateEvents start");
     ret = NotifyNearByOnMigrateEvents(nodeInfo.networkId, WIFI_P2P, false);
     if (ret != SOFTBUS_OK) {

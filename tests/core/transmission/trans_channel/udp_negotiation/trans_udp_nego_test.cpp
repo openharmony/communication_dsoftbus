@@ -843,7 +843,7 @@ HWTEST_F(TransUdpNegoTest, ParseRequestAppInfo001, TestSize.Level1)
     appInfo->udpConnType = UDP_CONN_TYPE_WIFI;
     ret = ParseRequestAppInfo(authId, msg, appInfo);
     EXPECT_EQ(ret, SOFTBUS_ERR);
-    
+
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     appInfo->udpConnType = UDP_CONN_TYPE_P2P;
     ret = ParseRequestAppInfo(authId, msg, appInfo);

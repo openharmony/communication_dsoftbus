@@ -269,7 +269,6 @@ bool IsValidString(const char *input, uint32_t maxLen)
     }
     uint32_t len = strlen(input);
     if (len == 0 || len > maxLen) {
-        COMM_LOGE(COMM_UTILS, "invalid param");
         return false;
     }
     return true;
@@ -437,7 +436,7 @@ int32_t StringToLowerCase(const char *str, char *buf, int32_t size)
 int32_t StrCmpIgnoreCase(const char *str1, const char *str2)
 {
     if (str1 == NULL || str2 == NULL) {
-        COMM_LOGE(COMM_UTILS, "invalid param");
+        COMM_LOGD(COMM_UTILS, "invalid param");
         return SOFTBUS_ERR;
     }
     int32_t i;
@@ -447,7 +446,6 @@ int32_t StrCmpIgnoreCase(const char *str1, const char *str2)
         }
     }
     if (str1[i] != '\0' || str2[i] != '\0') {
-        COMM_LOGE(COMM_UTILS, "str end != '\\0'");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -474,7 +472,6 @@ void SignalingMsgPrint(const char *distinguish, unsigned char *data, unsigned ch
     char signalingMsgBuf[BUF_HEX_LEN] = {0};
 
     if (!GetSignalingMsgSwitch()) {
-        COMM_LOGE(COMM_UTILS, "signalingMsgSwitch end != '\\0'");
         return;
     }
     if (dataLen >= BUF_BYTE_LEN) {

@@ -14,7 +14,9 @@
  */
 
 #include "sqlite3utils_fuzzer.h"
-#include <securec.h>
+
+#include <unistd.h>
+
 #include "sqlite3_utils.h"
 
 namespace OHOS {

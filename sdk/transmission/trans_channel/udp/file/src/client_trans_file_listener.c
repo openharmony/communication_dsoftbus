@@ -107,6 +107,7 @@ int32_t TransSetFileReceiveListener(const char *sessionName,
         return SOFTBUS_ERR;
     }
     ListAdd(&(g_fileListener->list), &(fileNode->node));
+    TRANS_LOGI(TRANS_FILE, "add sessionName = %{public}s", sessionName);
     (void)SoftBusMutexUnlock(&(g_fileListener->lock));
     return SOFTBUS_OK;
 }
@@ -155,6 +156,7 @@ int32_t TransSetFileSendListener(const char *sessionName, const IFileSendListene
         return SOFTBUS_ERR;
     }
     ListAdd(&(g_fileListener->list), &(fileNode->node));
+    TRANS_LOGI(TRANS_FILE, "add sessionName = %{public}s", sessionName);
     (void)SoftBusMutexUnlock(&(g_fileListener->lock));
     return SOFTBUS_OK;
 }
@@ -253,6 +255,7 @@ void TransDeleteFileListener(const char *sessionName)
     LIST_FOR_EACH_ENTRY(fileNode, &(g_fileListener->list), FileListener, node) {
         if (strcmp(fileNode->mySessionName, sessionName) == 0) {
             ListDelete(&fileNode->node);
+            TRANS_LOGI(TRANS_FILE, "delete sessionName = %{public}s", sessionName);
             SoftBusFree(fileNode);
             break;
         }

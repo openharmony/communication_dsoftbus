@@ -50,7 +50,7 @@ static void WriteHiSysEvent(
     int32_t ret = HiSysEvent_Write(
         form->func, form->line, form->domain, form->eventName, form->eventType, eventParams, validParamSize);
     if (ret != HISYSEVENT_WRITE_SUCCESS) {
-        COMM_LOGE(COMM_DFX, "write to hisysevent failed, ret=%{public}d", ret);
+        COMM_LOGD(COMM_DFX, "write to hisysevent failed, ret=%{public}d", ret);
     }
 }
 

@@ -59,6 +59,7 @@ static int32_t ClientTransAddUdpChannel(UdpChannel *channel)
     }
     ListInit(&(channel->node));
     ListAdd(&(g_udpChannelMgr->list), &(channel->node));
+    TRANS_LOGI(TRANS_SDK, "add channelId = %{public}d", channel->channelId);
     g_udpChannelMgr->cnt++;
 
     (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
@@ -80,6 +81,7 @@ int32_t TransDeleteUdpChannel(int32_t channelId)
     LIST_FOR_EACH_ENTRY(channelNode, &(g_udpChannelMgr->list), UdpChannel, node) {
         if (channelNode->channelId == channelId) {
             ListDelete(&(channelNode->node));
+            TRANS_LOGI(TRANS_SDK, "delete channelId = %{public}d", channelId);
             SoftBusFree(channelNode);
             g_udpChannelMgr->cnt--;
             (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
@@ -212,9 +214,10 @@ static UdpChannel *ConvertChannelInfoToUdpChannel(const char *sessionName, const
     if (strcpy_s(newChannel->info.peerSessionName, SESSION_NAME_SIZE_MAX, channel->peerSessionName) != EOK ||
         strcpy_s(newChannel->info.mySessionName, SESSION_NAME_SIZE_MAX, sessionName) != EOK ||
         strcpy_s(newChannel->info.peerDeviceId, DEVICE_ID_SIZE_MAX, channel->peerDeviceId) != EOK ||
-        strcpy_s(newChannel->info.groupId, GROUP_ID_SIZE_MAX, channel->groupId) != EOK) {
+        strcpy_s(newChannel->info.groupId, GROUP_ID_SIZE_MAX, channel->groupId) != EOK ||
+        strcpy_s(newChannel->info.myIp, sizeof(newChannel->info.myIp), channel->myIp) != EOK) {
         TRANS_LOGE(TRANS_SDK,
-            "udp channel or peer session name, device id, group id failed");
+            "udp channel or peer session name, device id, group id, myIp failed");
         SoftBusFree(newChannel);
         return NULL;
     }

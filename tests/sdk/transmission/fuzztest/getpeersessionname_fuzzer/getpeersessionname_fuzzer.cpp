@@ -14,11 +14,11 @@
  */
 
 #include "getpeersessionname_fuzzer.h"
+
 #include <cstddef>
-#include <cstdint>
-#include "inner_session.h"
+
 #include "session.h"
-#include "softbus_utils.h"
+#include "softbus_def.h"
 
 namespace OHOS {
 void GetPeerSessionNameTest(const uint8_t* data, size_t size)

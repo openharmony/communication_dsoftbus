@@ -57,7 +57,18 @@ static int32_t GetWifiServiceIpAddr(const char *ifName, char *ip, uint32_t size)
         LNN_LOGE(LNN_BUILDER, "invalid parameter");
         return SOFTBUS_ERR;
     }
-    (void)GetWlanIpv4Addr(ip, size);
+    if (strcmp(ifName, WLAN_IFNAME) != 0) {
+        return SOFTBUS_ERR;
+    }
+    if (GetWlanIpv4Addr(ip, size) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    if (strnlen(ip, size) == 0 || strnlen(ip, size) == size) {
+        return SOFTBUS_ERR;
+    }
+    if (strcmp(ip, LNN_LOOPBACK_IP) == 0 || strcmp(ip, "") == 0 || strcmp(ip, "0.0.0.0") == 0) {
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 

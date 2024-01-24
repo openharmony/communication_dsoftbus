@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,7 +58,7 @@ static int32_t RegisterAllCapBitmap(uint32_t capBitmapNum, const uint32_t inCapB
 
     info->isUpdate = false;
     for (uint32_t i = 0; i < capBitmapNum; i++) {
-        DISC_LOGI(DISC_COAP, "register input bitmap=%{public}u", inCapBitmap[i]);
+        DISC_LOGD(DISC_COAP, "register input bitmap=%{public}u", inCapBitmap[i]);
         for (uint32_t pos = 0; pos < count; pos++) {
             if (((inCapBitmap[i] >> (pos % INT32_MAX_BIT_NUM)) & 0x1) == 0) {
                 continue;
@@ -69,7 +69,7 @@ static int32_t RegisterAllCapBitmap(uint32_t capBitmapNum, const uint32_t inCapB
             }
             (info->capCount)[pos]++;
         }
-        DISC_LOGI(DISC_COAP, "register all cap bitmap=%{public}u", (info->allCap)[i]);
+        DISC_LOGD(DISC_COAP, "register all cap bitmap=%{public}u", (info->allCap)[i]);
     }
     return SOFTBUS_OK;
 }
@@ -87,7 +87,7 @@ static int32_t  UnregisterAllCapBitmap(uint32_t capBitmapNum, const uint32_t inC
     info->isEmpty = true;
     info->isUpdate = false;
     for (uint32_t i = 0; i < capBitmapNum; i++) {
-        DISC_LOGI(DISC_COAP, "unregister input bitmap=%{public}u", inCapBitmap[i]);
+        DISC_LOGD(DISC_COAP, "unregister input bitmap=%{public}u", inCapBitmap[i]);
         for (uint32_t pos = 0; pos < count; pos++) {
             if (((inCapBitmap[i] >> (pos % INT32_MAX_BIT_NUM)) & 0x1) == 0) {
                 continue;
@@ -102,7 +102,7 @@ static int32_t  UnregisterAllCapBitmap(uint32_t capBitmapNum, const uint32_t inC
         if ((info->allCap)[i] != 0) {
             info->isEmpty = false;
         }
-        DISC_LOGI(DISC_COAP, "register all cap bitmap=%{public}u", (info->allCap)[i]);
+        DISC_LOGD(DISC_COAP, "register all cap bitmap=%{public}u", (info->allCap)[i]);
     }
     return SOFTBUS_OK;
 }
@@ -186,16 +186,28 @@ static void DfxRecordStopDiscoveryEnd(int32_t reason)
     extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
 }
 
+static bool CheckParam(const PublishOption *pubOption, const SubscribeOption *subOption, bool isPublish)
+{
+    if (isPublish) {
+        DISC_CHECK_AND_RETURN_RET_LOGE(pubOption != NULL, false, DISC_COAP, "publish option is null");
+        DISC_CHECK_AND_RETURN_RET_LOGE(g_publishMgr != NULL, false, DISC_COAP, "g_publishMgr is null");
+        DISC_CHECK_AND_RETURN_RET_LOGE(LOW <= pubOption->freq && pubOption->freq < FREQ_BUTT, false, DISC_COAP,
+            "invalid publish freq. freq=%{public}d", pubOption->freq);
+        if (pubOption->ranging) {
+            DISC_LOGW(DISC_COAP, "coap publish not support ranging");
+        }
+    } else {
+        DISC_CHECK_AND_RETURN_RET_LOGE(subOption != NULL, false, DISC_COAP, "discovery option is null");
+        DISC_CHECK_AND_RETURN_RET_LOGE(g_subscribeMgr != NULL, false, DISC_COAP, "g_subscribeMgr is null");
+        DISC_CHECK_AND_RETURN_RET_LOGE(LOW <= subOption->freq && subOption->freq < FREQ_BUTT, false, DISC_COAP,
+            "invalid discovery freq. freq=%{public}d", subOption->freq);
+    }
+    return true;
+}
+
 static int32_t Publish(const PublishOption *option, bool isActive)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL && g_publishMgr != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP,
-        "invalid param");
-    DISC_CHECK_AND_RETURN_RET_LOGE(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
-        DISC_COAP, "invalid freq. freq=%{public}d", option->freq);
-    if (option->ranging) {
-        DISC_LOGW(DISC_COAP, "coap publish not support ranging, is it misuse? just ignore");
-    }
-
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckParam(option, NULL, true), SOFTBUS_INVALID_PARAM, DISC_COAP, "invalid param");
     DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&(g_publishMgr->lock)) == 0, SOFTBUS_LOCK_ERR, DISC_COAP,
         "publish mutex lock failed. isActive=%{public}s", isActive ? "active" : "passive");
     if (RegisterAllCapBitmap(CAPABILITY_NUM, option->capabilityBitmap, g_publishMgr, MAX_CAP_NUM) != SOFTBUS_OK) {
@@ -208,16 +220,14 @@ static int32_t Publish(const PublishOption *option, bool isActive)
         DISC_LOGE(DISC_COAP, "register all capability to dfinder failed.");
         goto PUB_FAIL;
     }
-    if (DiscCoapRegisterServiceData(option->capabilityData, option->dataLen,
-        option->capabilityBitmap[0]) != SOFTBUS_OK) {
-        DfxRecordRegisterEnd(option->capabilityData, option->capabilityBitmap[0],
-            SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL);
+    uint32_t curCap = option->capabilityBitmap[0];
+    if (DiscCoapRegisterServiceData(option->capabilityData, option->dataLen, curCap) != SOFTBUS_OK) {
+        DfxRecordRegisterEnd(option->capabilityData, curCap, SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL);
         DISC_LOGE(DISC_COAP, "register service data to dfinder failed.");
         goto PUB_FAIL;
     }
-    DfxRecordRegisterEnd(option->capabilityData, option->capabilityBitmap[0], SOFTBUS_OK);
-    if (DiscCoapRegisterCapabilityData(option->capabilityData, option->dataLen,
-        option->capabilityBitmap[0]) != SOFTBUS_OK) {
+    DfxRecordRegisterEnd(option->capabilityData, curCap, SOFTBUS_OK);
+    if (DiscCoapRegisterCapabilityData(option->capabilityData, option->dataLen, curCap) != SOFTBUS_OK) {
         DISC_LOGW(DISC_COAP, "register capability data to dfinder failed.");
         goto PUB_FAIL;
     }
@@ -273,10 +283,7 @@ static int32_t CoapStartScan(const PublishOption *option)
 
 static int32_t UnPublish(const PublishOption *option, bool isActive)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL && g_publishMgr != NULL, SOFTBUS_INVALID_PARAM,
-        DISC_COAP, "invalid param");
-    DISC_CHECK_AND_RETURN_RET_LOGE(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
-        DISC_COAP, "invalid freq. freq=%{public}d", option->freq);
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckParam(option, NULL, true), SOFTBUS_INVALID_PARAM, DISC_COAP, "invalid param");
     DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&(g_publishMgr->lock)) == 0, SOFTBUS_LOCK_ERR, DISC_COAP,
         "unPublish mutex lock failed. isActive=%{public}s", isActive ? "active" : "passive");
 
@@ -296,15 +303,14 @@ static int32_t UnPublish(const PublishOption *option, bool isActive)
             return SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL;
         }
     }
-    if (DiscCoapRegisterServiceData(option->capabilityData, option->dataLen,
-        option->capabilityBitmap[0]) != SOFTBUS_OK) {
+    uint32_t curCap = option->capabilityBitmap[0];
+    if (DiscCoapRegisterServiceData(option->capabilityData, option->dataLen, curCap) != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_publishMgr->lock));
-        DfxRecordRegisterEnd(option->capabilityData, option->capabilityBitmap[0],
-            SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL);
+        DfxRecordRegisterEnd(option->capabilityData, curCap, SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL);
         DISC_LOGE(DISC_COAP, "register service data to dfinder failed.");
         return SOFTBUS_ERR;
     }
-    DfxRecordRegisterEnd(option->capabilityData, option->capabilityBitmap[0], SOFTBUS_OK);
+    DfxRecordRegisterEnd(option->capabilityData, curCap, SOFTBUS_OK);
     if (isActive && g_publishMgr->isEmpty) {
         if (DiscCoapStopDiscovery() != SOFTBUS_OK) {
             (void)SoftBusMutexUnlock(&(g_publishMgr->lock));
@@ -336,12 +342,24 @@ static int32_t CoapStopScan(const PublishOption *option)
     return ret;
 }
 
+static bool UpdateFilter(void)
+{
+    if (!g_subscribeMgr->isUpdate) {
+        return true;
+    }
+    if (DiscCoapSetFilterCapability(CAPABILITY_NUM, g_subscribeMgr->allCap) != SOFTBUS_OK) {
+        DfxRecordSetFilterEnd(g_subscribeMgr->allCap[0], SOFTBUS_DISCOVER_COAP_SET_FILTER_CAP_FAIL);
+        DISC_LOGE(DISC_COAP, "set all filter capability to dfinder failed.");
+        SoftbusReportDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP, SOFTBUS_HISYSEVT_DISCOVER_COAP_SET_FILTER_CAP_FAIL);
+        return false;
+    }
+    DfxRecordSetFilterEnd(g_subscribeMgr->allCap[0], SOFTBUS_OK);
+    return true;
+}
+
 static int32_t Discovery(const SubscribeOption *option, bool isActive)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL && g_subscribeMgr != NULL, SOFTBUS_INVALID_PARAM,
-        DISC_COAP, "invalid param");
-    DISC_CHECK_AND_RETURN_RET_LOGE(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
-        DISC_COAP, "invalid freq. freq=%{public}d", option->freq);
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckParam(NULL, option, false), SOFTBUS_INVALID_PARAM, DISC_COAP, "invalid param");
     DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&(g_subscribeMgr->lock)) == 0, SOFTBUS_LOCK_ERR, DISC_COAP,
         "discovery mutex lock failed. isActive=%{public}s", isActive ? "active" : "passive");
 
@@ -351,16 +369,9 @@ static int32_t Discovery(const SubscribeOption *option, bool isActive)
         SoftbusReportDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP, SOFTBUS_HISYSEVT_DISCOVER_COAP_MERGE_CAP_FAIL);
         return SOFTBUS_DISCOVER_COAP_MERGE_CAP_FAIL;
     }
-    if (g_subscribeMgr->isUpdate) {
-        if (DiscCoapSetFilterCapability(CAPABILITY_NUM, g_subscribeMgr->allCap) != SOFTBUS_OK) {
-            (void)SoftBusMutexUnlock(&(g_subscribeMgr->lock));
-            DfxRecordSetFilterEnd(g_subscribeMgr->allCap[0], SOFTBUS_DISCOVER_COAP_SET_FILTER_CAP_FAIL);
-            DISC_LOGE(DISC_COAP, "set all filter capability to dfinder failed.");
-            SoftbusReportDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP,
-                SOFTBUS_HISYSEVT_DISCOVER_COAP_SET_FILTER_CAP_FAIL);
-            return SOFTBUS_DISCOVER_COAP_SET_FILTER_CAP_FAIL;
-        }
-        DfxRecordSetFilterEnd(g_subscribeMgr->allCap[0], SOFTBUS_OK);
+    if (!UpdateFilter()) {
+        (void)SoftBusMutexUnlock(&(g_subscribeMgr->lock));
+        return SOFTBUS_DISCOVER_COAP_SET_FILTER_CAP_FAIL;
     }
     if (!isActive) {
         (void)SoftBusMutexUnlock(&(g_subscribeMgr->lock));
@@ -421,10 +432,7 @@ static int32_t CoapSubscribe(const SubscribeOption *option)
 
 static int32_t StopDisc(const SubscribeOption *option, bool isActive)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL && g_subscribeMgr != NULL, SOFTBUS_INVALID_PARAM,
-        DISC_COAP, "invalid param");
-    DISC_CHECK_AND_RETURN_RET_LOGE(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
-        DISC_COAP, "invalid freq. freq=%{public}d", option->freq);
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckParam(NULL, option, false), SOFTBUS_INVALID_PARAM, DISC_COAP, "invalid param");
     DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&(g_subscribeMgr->lock)) == 0, SOFTBUS_LOCK_ERR,
         DISC_COAP, "stop discovery mutex lock failed. isActive=%{public}s", isActive ? "active" : "passive");
 
@@ -435,16 +443,9 @@ static int32_t StopDisc(const SubscribeOption *option, bool isActive)
         SoftbusReportDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP, SOFTBUS_HISYSEVT_DISCOVER_COAP_CANCEL_CAP_FAIL);
         return SOFTBUS_DISCOVER_COAP_CANCEL_CAP_FAIL;
     }
-    if (g_subscribeMgr->isUpdate) {
-        if (DiscCoapSetFilterCapability(CAPABILITY_NUM, g_subscribeMgr->allCap) != SOFTBUS_OK) {
-            (void)SoftBusMutexUnlock(&(g_subscribeMgr->lock));
-            DfxRecordSetFilterEnd(g_subscribeMgr->allCap[0], SOFTBUS_DISCOVER_COAP_SET_FILTER_CAP_FAIL);
-            DISC_LOGE(DISC_COAP, "set all filter capability to dfinder failed.");
-            SoftbusReportDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP,
-                SOFTBUS_HISYSEVT_DISCOVER_COAP_SET_FILTER_CAP_FAIL);
-            return SOFTBUS_DISCOVER_COAP_SET_FILTER_CAP_FAIL;
-        }
-        DfxRecordSetFilterEnd(g_subscribeMgr->allCap[0], SOFTBUS_OK);
+    if (!UpdateFilter()) {
+        (void)SoftBusMutexUnlock(&(g_subscribeMgr->lock));
+        return SOFTBUS_DISCOVER_COAP_SET_FILTER_CAP_FAIL;
     }
     if (isActive && g_subscribeMgr->isEmpty) {
         if (DiscCoapStopDiscovery() != SOFTBUS_OK) {
