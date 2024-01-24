@@ -59,6 +59,7 @@ static int32_t ClientTransAddUdpChannel(UdpChannel *channel)
     }
     ListInit(&(channel->node));
     ListAdd(&(g_udpChannelMgr->list), &(channel->node));
+    TRANS_LOGI(TRANS_SDK, "add channelId = %{public}d", channel->channelId);
     g_udpChannelMgr->cnt++;
 
     (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
@@ -80,6 +81,7 @@ int32_t TransDeleteUdpChannel(int32_t channelId)
     LIST_FOR_EACH_ENTRY(channelNode, &(g_udpChannelMgr->list), UdpChannel, node) {
         if (channelNode->channelId == channelId) {
             ListDelete(&(channelNode->node));
+            TRANS_LOGI(TRANS_SDK, "delete channelId = %{public}d", channelId);
             SoftBusFree(channelNode);
             g_udpChannelMgr->cnt--;
             (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));

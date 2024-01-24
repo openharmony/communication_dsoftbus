@@ -472,6 +472,7 @@ static int32_t PostJoinRequestToConnFsm(LnnConnectionFsm *connFsm, const Connect
             LnnNotifyJoinResult((ConnectionAddr *)addr, NULL, SOFTBUS_ERR);
         }
         if (connFsm != NULL && isCreate) {
+            LnnFsmRemoveMessageByType(&connFsm->fsm, FSM_CTRL_MSG_START);
             ListDelete(&connFsm->node);
             --g_netBuilder.connCount;
             LnnDestroyConnectionFsm(connFsm);
@@ -550,7 +551,7 @@ static bool IsNeedWifiReauth(const char *networkId, const char *newAccountHash, 
         return false;
     }
     bool isNullAccount = true;
-    for (uint32_t i = 0; i < len; ++i) {
+    for (int32_t i = 0; i < len; ++i) {
         if (newAccountHash[i] != 0) {
             isNullAccount = false;
             break;

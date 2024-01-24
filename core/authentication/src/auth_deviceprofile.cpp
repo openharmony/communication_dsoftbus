@@ -65,8 +65,8 @@ bool IsPotentialTrustedDeviceDp(const char *deviceIdHash)
         AnonymizeFree(anonyUdid);
         uint8_t udidHash[SHA_256_HASH_LEN] = {0};
         char hashStr[CUST_UDID_LEN + 1] = {0};
-        const unsigned char *udid = (const unsigned char *)trustDevice.GetDeviceId().c_str();
-        if (SoftBusGenerateStrHash(udid, trustDevice.GetDeviceId().length(), udidHash) != SOFTBUS_OK) {
+        if (SoftBusGenerateStrHash((const unsigned char *)trustDevice.GetDeviceId().c_str(),
+            trustDevice.GetDeviceId().length(), udidHash) != SOFTBUS_OK) {
             LNN_LOGE(LNN_STATE, "generate udidhash fail");
             continue;
         }

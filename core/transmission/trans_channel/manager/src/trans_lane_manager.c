@@ -113,6 +113,7 @@ int32_t TransLaneMgrInit(void)
 
 void TransLaneMgrDeinit(void)
 {
+    TRANS_LOGI(TRANS_CTRL, "enter.");
     if (g_channelLaneList == NULL) {
         return;
     }
@@ -176,6 +177,7 @@ int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LaneConnInfo
     }
     ListInit(&(newLane->node));
     ListAdd(&(g_channelLaneList->list), &(newLane->node));
+    TRANS_LOGI(TRANS_CTRL, "add channelId = %{public}d", newLane->channelId);
     g_channelLaneList->cnt++;
     TRANS_LOGI(TRANS_SVC, "lane count is cnt=%{public}d", g_channelLaneList->cnt);
     (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
@@ -198,6 +200,8 @@ int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType)
     LIST_FOR_EACH_ENTRY_SAFE(laneItem, next, &(g_channelLaneList->list), TransLaneInfo, node) {
         if (laneItem->channelId == channelId && laneItem->channelType == channelType) {
             ListDelete(&(laneItem->node));
+            TRANS_LOGI(TRANS_CTRL, "delete channelId = %{public}d, channelType = %{public}d",
+                laneItem->channelId, laneItem->channelType);
             g_channelLaneList->cnt--;
             LnnFreeLane(laneItem->laneId);
             SoftBusFree(laneItem);

@@ -352,12 +352,14 @@ int32_t ConnPreAssignPort(void)
     };
     ret = SoftBusInetPtoN(SOFTBUS_AF_INET, "0.0.0.0", &addr.sinAddr);
     if (ret != SOFTBUS_ADAPTER_OK) {
+        SoftBusSocketClose(socketFd);
         CONN_LOGE(CONN_COMMON, "convert address to net order failed");
         return SOFTBUS_ERR;
     }
 
     ret = SoftBusSocketBind(socketFd, (SoftBusSockAddr *)&addr, sizeof(SoftBusSockAddrIn));
     if (ret != SOFTBUS_ADAPTER_OK) {
+        SoftBusSocketClose(socketFd);
         CONN_LOGE(CONN_COMMON, "bind address failed");
         return SOFTBUS_ERR;
     }

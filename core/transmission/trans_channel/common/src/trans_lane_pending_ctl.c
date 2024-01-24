@@ -60,6 +60,7 @@ int32_t TransReqLanePendingInit(void)
 
 void TransReqLanePendingDeinit(void)
 {
+    TRANS_LOGI(TRANS_CTRL, "enter.");
     if (g_reqLanePendingList == NULL) {
         return;
     }
@@ -100,6 +101,7 @@ static int32_t TransDelLaneReqFromPendingList(uint32_t laneId)
         if (laneItem->laneId == laneId) {
             (void)SoftBusCondDestroy(&laneItem->cond);
             ListDelete(&(laneItem->node));
+            TRANS_LOGI(TRANS_SVC, "delete laneId = %{public}u", laneItem->laneId);
             g_reqLanePendingList->cnt--;
             SoftBusFree(laneItem);
             (void)SoftBusMutexUnlock(&(g_reqLanePendingList->lock));

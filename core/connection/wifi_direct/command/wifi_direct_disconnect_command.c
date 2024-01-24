@@ -27,6 +27,10 @@
 
 static int32_t PreferNegotiateChannelForConnectInfo(struct InnerLink *link, struct WifiDirectConnectInfo *connectInfo)
 {
+    if (connectInfo->negoChannel != NULL) {
+        CONN_LOGD(CONN_WIFI_DIRECT, "prefer input channel");
+        return SOFTBUS_OK;
+    }
     struct WifiDirectNegotiateChannel *channel = link->getPointer(link, IL_KEY_NEGO_CHANNEL, NULL);
     if (channel != NULL) {
         CONN_LOGD(CONN_WIFI_DIRECT, "prefer inner link channel");
@@ -36,10 +40,6 @@ static int32_t PreferNegotiateChannelForConnectInfo(struct InnerLink *link, stru
         connectInfo->negoChannel = channel->duplicate(channel);
         CONN_CHECK_AND_RETURN_RET_LOGW(connectInfo->negoChannel != NULL, SOFTBUS_MALLOC_ERR, CONN_WIFI_DIRECT,
                                       "new channel failed");
-        return SOFTBUS_OK;
-    }
-    if (connectInfo->negoChannel != NULL) {
-        CONN_LOGD(CONN_WIFI_DIRECT, "prefer input channel");
         return SOFTBUS_OK;
     }
 
