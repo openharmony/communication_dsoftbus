@@ -38,6 +38,7 @@
 #define PKG_LEN 32
 #define RECV_BUF "testrecvBuf"
 #define BUF_LEN 10
+#define COUNT 11
 #define SESSIONKEY_LEN 32
 #define INVALID_VALUE (-1)
 
@@ -207,14 +208,19 @@ HWTEST_F(TransTcpDirectTest, CreateSessionServerTest004, TestSize.Level0)
     for (i = 0; i < COUNT; i++) {
         ret = CreateSessionServer(g_pkgName, sessionName[i], &g_sessionlistener);
         EXPECT_EQ(SOFTBUS_OK, ret);
-
-        ret = RemoveSessionServer(g_pkgName, sessionName[i]);
-        EXPECT_EQ(SOFTBUS_OK, ret);
     }
     for (i = COUNT; i < MAX_SESSION_SERVER_NUMBER; i++) {
         ret = CreateSessionServer(g_pkgName, sessionName[i], &g_sessionlistener);
         EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    }
+    ret = CreateSessionServer(g_pkgName, sessionName[i], &g_sessionlistener);
+    EXPECT_NE(SOFTBUS_OK, ret);
 
+    for (i = 0; i < COUNT; i++) {
+        ret = RemoveSessionServer(g_pkgName, sessionName[i]);
+        EXPECT_EQ(SOFTBUS_OK, ret);
+    }
+    for (i = COUNT; i < MAX_SESSION_SERVER_NUMBER; i++) {
         ret = RemoveSessionServer(g_pkgName, sessionName[i]);
         EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     }
@@ -680,6 +686,47 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcessDataByFlagTest001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: TransTdcProcessDataTest001
+ * @tc.desc: TransTdcProcessData, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectTest, TransTdcProcessDataTest001, TestSize.Level0)
+{
+    int32_t channelId = 1;
+    int32_t fd = TEST_FD;
+    ChannelInfo *info = (ChannelInfo *)SoftBusCalloc(sizeof(ChannelInfo));
+    ASSERT_TRUE(info != nullptr);
+    info->peerSessionName = (char *)g_sessionName;
+    info->channelId = 1;
+    info->channelType = CHANNEL_TYPE_TCP_DIRECT;
+    info->sessionKey = (char *)g_sessionkey;
+    info->fd = g_fd;
+
+    int32_t ret = TransTdcProcessData(channelId);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+    IClientSessionCallBack *cb = GetClientSessionCb();
+    ret = TransTdcManagerInit(cb);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    ret = TransTdcProcessData(channelId);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    ret = TransDataListInit();
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    ret = TransAddDataBufNode(channelId, fd);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    ret = TransTdcProcessData(channelId);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    TransDataListDeinit();
+    TransTdcManagerDeinit();
+    SoftBusFree(info);
+}
+
+/**
  * @tc.name: TransResizeDataBufferTest001
  * @tc.desc: TransResizeDataBuffer, use the wrong or normal parameter.
  * @tc.type: FUNC
@@ -794,9 +841,6 @@ HWTEST_F(TransTcpDirectTest, TransGetNewTcpChannelTest001, TestSize.Level0)
     int32_t ret = TransTdcManagerInit(cb);
     ASSERT_EQ(ret, SOFTBUS_OK);
 
-    ret = ClientTransTdcOnChannelOpened(g_sessionName, channelInfo);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
-
     ret = ClientTransCheckTdcChannelExist(channelId);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(channelInfo);
@@ -868,5 +912,25 @@ HWTEST_F(TransTcpDirectTest, TransTdcDecryptTest002, TestSize.Level0)
     uint32_t outLen = MAX_LEN;
     int32_t ret = TransTdcDecrypt(g_sessionkey, RECV_BUF, strlen(RECV_BUF) + 1, output, &outLen);
     EXPECT_FALSE(ret == SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: ClientTransTdcOnChannelOpenedTest001
+ * @tc.desc: ClientTransTdcOnChannelOpened, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectTest, ClientTransTdcOnChannelOpenedTest001, TestSize.Level0)
+{
+    ChannelInfo *info = (ChannelInfo *)SoftBusCalloc(sizeof(ChannelInfo));
+    ASSERT_TRUE(info != nullptr);
+    info->peerSessionName = (char *)g_sessionName;
+    info->channelId = 1;
+    info->channelType = CHANNEL_TYPE_TCP_DIRECT;
+    info->sessionKey = (char *)g_sessionkey;
+    info->fd = g_fd;
+    int32_t ret = ClientTransTdcOnChannelOpened(g_sessionName, info);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+    SoftBusFree(info);
 }
 }
