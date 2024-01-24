@@ -566,14 +566,14 @@ static int32_t SendSyncInfoByNewChannel(const char *networkId, SyncInfoMsg *msg)
     }
     SyncChannelInfo *item = FindSyncChannelInfoByNetworkId(networkId);
     if (item == NULL) {
-        ListNodeInsert(&info->syncMsgList, &msg->node);
+        ListTailInsert(&info->syncMsgList, &msg->node);
         if (IsListEmpty(&g_syncInfoManager.channelInfoList)) {
             (void)LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT),
                 CloseUnusedChannel, NULL, UNUSED_CHANNEL_CLOSED_DELAY);
         }
         ListNodeInsert(&g_syncInfoManager.channelInfoList, &info->node);
     } else {
-        ListNodeInsert(&item->syncMsgList, &msg->node);
+        ListTailInsert(&item->syncMsgList, &msg->node);
         ResetSendSyncInfo(item, info, msg);
         SoftBusFree(info);
     }
@@ -597,7 +597,7 @@ static int32_t TrySendSyncInfoMsg(const char *networkId, SyncInfoMsg *msg)
         (void)SoftBusMutexUnlock(&g_syncInfoManager.lock);
         return SendSyncInfoByNewChannel(networkId, msg);
     }
-    ListNodeInsert(&info->syncMsgList, &msg->node);
+    ListTailInsert(&info->syncMsgList, &msg->node);
     if (info->isClientOpened) {
         SoftBusGetTime(&info->accessTime);
         ListDelete(&msg->node);
