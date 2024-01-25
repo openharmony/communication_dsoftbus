@@ -90,8 +90,8 @@ static void SoftBusOnBtSateChanged(int32_t status)
 
 static void WrapperStateChangeCallback(const int transport, const int status)
 {
-    COMM_LOGI(COMM_ADAPTER, "WrapperStateChangeCallback, transport = %{public}d (0 - BT, 1 - BLE), "
-        "status = %{public}d (0 - turning on, 1 - turn on, 2 - turning off, 3 - off)", transport, status);
+    COMM_LOGI(COMM_ADAPTER, "transport = %{public}d (1-BT, 2-BLE), "
+        "status = %{public}d (0-turning on, 1-on, 2-turning off, 3-off)", transport, status);
     int st = ConvertBtState(transport, status);
     SoftBusOnBtSateChanged(st);
 }

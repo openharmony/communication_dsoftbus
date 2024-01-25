@@ -498,7 +498,7 @@ static int32_t BuildBroadcastPacket(const SoftbusBroadcastData *softbusBcData, B
     int32_t ret = BuildBcPayload(maxPayloadLen, &(softbusBcData->bcData), &(packet->bcData));
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "build broadcast payload failed!");
 
-    DumpSoftbusData("scan result bcData:", softbusBcData->bcData.payloadLen, softbusBcData->bcData.payload);
+    DumpSoftbusData("scan result bcData", softbusBcData->bcData.payloadLen, softbusBcData->bcData.payload);
 
     // 2.2. Build broadcast response payload.
     if (softbusBcData->rspData.payload == NULL) {
@@ -512,7 +512,7 @@ static int32_t BuildBroadcastPacket(const SoftbusBroadcastData *softbusBcData, B
             DISC_LOGE(DISC_BLE, "build broadcast rsp payload failed!");
             return SOFTBUS_ERR;
         }
-        DumpSoftbusData("scan result rspData:", softbusBcData->rspData.payloadLen, softbusBcData->rspData.payload);
+        DumpSoftbusData("scan result rspData", softbusBcData->rspData.payloadLen, softbusBcData->rspData.payload);
     }
     return SOFTBUS_OK;
 }
@@ -975,15 +975,15 @@ static void DumpBcScanFilter(const SoftBusBcScanFilter *nativeFilter, uint8_t fi
     while (filterSize-- > 0) {
         int32_t len = (nativeFilter + filterSize)->serviceDataLength;
         if (len > 0) {
-            DumpSoftbusData("service data:", len, (nativeFilter + filterSize)->serviceData);
-            DumpSoftbusData("service dataMask:", len, (nativeFilter + filterSize)->serviceDataMask);
+            DumpSoftbusData("service data", len, (nativeFilter + filterSize)->serviceData);
+            DumpSoftbusData("service dataMask", len, (nativeFilter + filterSize)->serviceDataMask);
         } else {
             len = (nativeFilter + filterSize)->manufactureDataLength;
             if (len <= 0) {
                 continue;
             }
-            DumpSoftbusData("manufacture data:", len, (nativeFilter + filterSize)->manufactureData);
-            DumpSoftbusData("manufacture dataMask:", len, (nativeFilter + filterSize)->manufactureDataMask);
+            DumpSoftbusData("manufacture data", len, (nativeFilter + filterSize)->manufactureData);
+            DumpSoftbusData("manufacture dataMask", len, (nativeFilter + filterSize)->manufactureDataMask);
         }
     }
 }
@@ -1174,8 +1174,8 @@ static void ConvertBcParams(const BroadcastParam *srcParam, SoftbusBroadcastPara
 
 static void DumpBroadcastPacket(const BroadcastPayload *bcData, const BroadcastPayload *rspData)
 {
-    DumpSoftbusData("BroadcastPayload bcData:", bcData->payloadLen, bcData->payload);
-    DumpSoftbusData("BroadcastPayload rspData:", rspData->payloadLen, rspData->payload);
+    DumpSoftbusData("BroadcastPayload bcData", bcData->payloadLen, bcData->payload);
+    DumpSoftbusData("BroadcastPayload rspData", rspData->payloadLen, rspData->payload);
 }
 
 static int32_t SoftBusCondWaitTwoSec(int32_t bcId, SoftBusMutex *mutex)
