@@ -109,7 +109,7 @@ static OHOS::sptr<OHOS::IRemoteObject> GetSystemAbility()
     int32_t err = samgr->SendRequest(g_getSystemAbilityId, data, reply, option);
     if (err != 0) {
         if ((++g_printRequestFailedCount) % g_printInterval == 0) {
-            COMM_LOGE(COMM_EVENT, "Get GetSystemAbility failed!");
+            COMM_LOGD(COMM_EVENT, "Get GetSystemAbility failed!");
         }
         return nullptr;
     }
