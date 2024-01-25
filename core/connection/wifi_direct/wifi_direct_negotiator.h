@@ -54,10 +54,15 @@ struct WifiDirectNegotiator {
     void (*syncLnnInfo)(struct InnerLink *innerLink);
     int32_t (*prejudgeAvailability)(const char *remoteNetworkId, enum WifiDirectLinkType linkType);
 
+    void (*startWatchDog)(void);
+    void (*stopWatchDog)(void);
+    void (*watchDogTimeout)(struct WifiDirectNegotiator *self);
+
     char currentRemoteMac[MAC_ADDR_STR_LEN];
     char currentRemoteDeviceId[UUID_BUF_LEN];
     struct WifiDirectProcessor *currentProcessor;
     struct WifiDirectCommand *currentCommand;
+    int32_t watchDogTimerId;
 };
 
 struct WifiDirectNegotiator* GetWifiDirectNegotiator(void);

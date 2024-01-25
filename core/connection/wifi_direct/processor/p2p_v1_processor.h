@@ -35,7 +35,6 @@ enum P2pV1ProcessorState {
 struct P2pV1Processor {
     WIFI_DIRECT_PROCESSOR_BASE;
 
-    enum P2pV1ProcessorState currentState;
     struct InnerLink *currentInnerLink;
     struct NegotiateMessage *pendingRequestMsg;
     int32_t goPort;

@@ -26,10 +26,11 @@ struct ActionListenerNode {
     ListNode node;
     BroadcastListener listener;
     char name[32];
+    enum ListenerPriority priority;
 };
 
 static void RegisterBroadcastListener(const enum BroadcastReceiverAction *actionArray, size_t actionSize,
-                                      const char *name, BroadcastListener listener)
+                                      const char *name, enum ListenerPriority priority, BroadcastListener listener)
 {
     struct BroadcastReceiver *broadcastReceiver = GetBroadcastReceiver();
     for (size_t i = 0; i < actionSize; i++) {
@@ -39,6 +40,7 @@ static void RegisterBroadcastListener(const enum BroadcastReceiverAction *action
         enum BroadcastReceiverAction action = actionArray[i];
 
         ListInit(&actionListenerNode->node);
+        actionListenerNode->priority = priority;
         actionListenerNode->listener = listener;
         strcpy_s(actionListenerNode->name, sizeof(actionListenerNode->name), name);
         ListTailInsert(&broadcastReceiver->listeners[action], &actionListenerNode->node);
@@ -50,10 +52,13 @@ static void DispatchWorkHandler(void *data)
     struct BroadcastParam *param = (struct BroadcastParam *)data;
     struct BroadcastReceiver *broadcastReceiver = GetBroadcastReceiver();
     struct ListNode *actionListenerList = &broadcastReceiver->listeners[param->action];
+
     struct ActionListenerNode *actionListenerNode = NULL;
-    LIST_FOR_EACH_ENTRY(actionListenerNode, actionListenerList, struct ActionListenerNode, node) {
-        if (actionListenerNode->listener) {
-            actionListenerNode->listener(param->action, param);
+    for (int32_t priority = LISTENER_PRIORITY_HIGH; priority >= LISTENER_PRIORITY_LOW; priority--) {
+        LIST_FOR_EACH_ENTRY(actionListenerNode, actionListenerList, struct ActionListenerNode, node) {
+            if (actionListenerNode->priority == priority && actionListenerNode->listener) {
+                actionListenerNode->listener(param->action, param);
+            }
         }
     }
 
