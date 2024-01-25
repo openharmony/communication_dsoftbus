@@ -65,17 +65,7 @@ int32_t SendVtpStream(int32_t channelId, const StreamData *inData, const StreamD
 
     std::unique_ptr<IStream> stream = nullptr;
     if (adaptor->GetStreamType() == RAW_STREAM) {
-        ssize_t dataLen = inData->bufLen + adaptor->GetEncryptOverhead();
-        TRANS_LOGD(TRANS_STREAM,
-            "bufLen=%{public}d, encryptOverhead=%{public}zd", inData->bufLen, adaptor->GetEncryptOverhead());
-        std::unique_ptr<char[]> data = std::make_unique<char[]>(dataLen);
-        ssize_t encLen = adaptor->Encrypt(inData->buf, inData->bufLen, data.get(), dataLen, adaptor->GetSessionKey());
-        if (encLen != dataLen) {
-            TRANS_LOGE(TRANS_STREAM, "encrypted failed, dataLen=%{public}zd, encLen=%{public}zd", dataLen, encLen);
-            return SOFTBUS_ERR;
-        }
-
-        stream = IStream::MakeRawStream(data.get(), dataLen, {}, Communication::SoftBus::Scene::SOFTBUS_SCENE);
+        stream = IStream::MakeRawStream(inData->buf, inData->bufLen, {}, Communication::SoftBus::Scene::SOFTBUS_SCENE);
     } else if (adaptor->GetStreamType() == COMMON_VIDEO_STREAM || adaptor->GetStreamType() == COMMON_AUDIO_STREAM) {
         if (inData->bufLen < 0 || inData->bufLen > Communication::SoftBus::MAX_STREAM_LEN ||
             (ext != nullptr && (ext->bufLen < 0 || ext->bufLen > Communication::SoftBus::MAX_STREAM_LEN))) {

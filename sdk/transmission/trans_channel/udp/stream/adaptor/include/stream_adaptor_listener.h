@@ -63,23 +63,8 @@ public:
             retStreamData.bufLen = buflen;
             ConvertStreamFrameInfo(&tmpf, stream->GetStreamFrameInfo());
         } else if (streamType == StreamType::RAW_STREAM) {
-            int32_t plainDataLength = buflen - adaptor_->GetEncryptOverhead();
-            if (plainDataLength < 0) {
-                TRANS_LOGE(TRANS_STREAM,
-                    "bufLen < GetEncryptOverhead. bufLen=%{public}d, GetEncryptOverhead=%{public}zd",
-                    buflen, adaptor_->GetEncryptOverhead());
-                return;
-            }
-            plainData = std::make_unique<char[]>(plainDataLength);
-            ssize_t decLen = adaptor_->Decrypt(retbuf, buflen, plainData.get(),
-                plainDataLength, adaptor_->GetSessionKey());
-            if (decLen != plainDataLength) {
-                TRANS_LOGE(TRANS_STREAM,
-                    "Decrypt failed, dataLen=%{public}d, decLen=%{public}zd", plainDataLength, decLen);
-                return;
-            }
-            retStreamData.buf = plainData.get();
-            retStreamData.bufLen = plainDataLength;
+            retStreamData.buf = retbuf;
+            retStreamData.bufLen = buflen;
         } else {
             TRANS_LOGE(TRANS_STREAM, "Do not support, streamType=%{public}d", streamType);
             return;
