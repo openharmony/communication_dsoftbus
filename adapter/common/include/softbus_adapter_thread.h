@@ -86,13 +86,10 @@ static inline bool CheckMutexIsNull(const SoftBusMutex *mutex)
         COMM_LOGD(COMM_ADAPTER, "SoftBusMutexLock mutex is null");                     \
         ret = SOFTBUS_INVALID_PARAM;                                                   \
     } else {                                                                           \
-        COMM_LOGD(COMM_ADAPTER, "SoftBusMutexLock try lock");                          \
         ret = SoftBusMutexLockInner(mutex);                                            \
         if (ret != 0) {                                                                \
             COMM_LOGE(COMM_ADAPTER, "SoftBusMutexLock failed, ret=%{public}d", ret);   \
             ret = SOFTBUS_LOCK_ERR;                                                    \
-        } else {                                                                       \
-            COMM_LOGD(COMM_ADAPTER, "SoftBusMutexLock succ");                          \
         }                                                                              \
     }                                                                                  \
     ret;                                                                               \
@@ -109,8 +106,6 @@ static inline bool CheckMutexIsNull(const SoftBusMutex *mutex)
         if (ret != 0) {                                                                \
             COMM_LOGE(COMM_ADAPTER, "SoftBusMutexUnlock failed, ret=%{public}d", ret); \
             ret = SOFTBUS_LOCK_ERR;                                                    \
-        } else {                                                                       \
-            COMM_LOGD(COMM_ADAPTER, "SoftBusMutexUnlock succ");                        \
         }                                                                              \
     }                                                                                  \
     ret;                                                                               \
