@@ -95,10 +95,71 @@ const char *g_fileList[] = {
     "111111111111111111111111111111111111111111111111111",
 };
 
+static int OnSessionOpened(int sessionId, int result)
+{
+    return SOFTBUS_OK;
+}
+
+static void OnSessionClosed(int sessionId)
+{
+}
+
+static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
+{
+}
+
+static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
+{
+}
+
+static ISessionListener g_sessionlistener = {
+    .OnSessionOpened = OnSessionOpened,
+    .OnSessionClosed = OnSessionClosed,
+    .OnBytesReceived = OnBytesReceived,
+    .OnMessageReceived = OnMessageReceived,
+};
+
+static int OnSendFileProcess(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
+{
+    return SOFTBUS_OK;
+}
+
+static int OnSendFileFinished(int sessionId, const char *firstFile)
+{
+    return SOFTBUS_OK;
+}
+
 void OnFileTransError(int sessionId)
 {
     return;
 }
+
+static int OnReceiveFileStarted(int sessionId, const char *files, int fileCnt)
+{
+    return SOFTBUS_OK;
+}
+
+static int OnReceiveFileProcess(int sessionId, const char *firstFile, uint64_t bytesUpload, uint64_t bytesTotal)
+{
+    return SOFTBUS_OK;
+}
+static void OnReceiveFileFinished(int sessionId, const char *files, int fileCnt)
+{
+    return;
+}
+
+const IFileSendListener g_listener = {
+    .OnSendFileProcess = OnSendFileProcess,
+    .OnSendFileFinished = OnSendFileFinished,
+    .OnFileTransError = OnFileTransError,
+};
+
+const IFileReceiveListener g_fileRecvListener = {
+    .OnReceiveFileStarted = OnReceiveFileStarted,
+    .OnReceiveFileProcess = OnReceiveFileProcess,
+    .OnReceiveFileFinished = OnReceiveFileFinished,
+    .OnFileTransError = OnFileTransError,
+};
 
 class ClientTransProxyFileManagerTest : public testing::Test {
 public:
