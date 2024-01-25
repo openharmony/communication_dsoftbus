@@ -52,3 +52,8 @@ int32_t SoftBusTransDumpHanderInit(void)
 void SoftBusHiDumperTransDeInit(void)
 {
 }
+
+int32_t SoftBusTransDumpHandlerInit(void)
+{
+    return SOFTBUS_OK;
+}
