@@ -86,7 +86,7 @@ void VtpInstance::PrintFillpLog(FILLP_UINT32 debugType, FILLP_UINT32 debugLevel,
     }
     va_end(vaList);
 
-    TRANS_LOGE(TRANS_STREAM, "debugInfo=%{public}s", debugInfo);
+    TRANS_LOGD(TRANS_STREAM, "debugInfo=%{public}s", debugInfo);
 }
 
 void VtpInstance::PreSetFillpCoreParams(void)
