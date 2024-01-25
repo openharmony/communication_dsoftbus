@@ -38,6 +38,7 @@ typedef struct {
     UdpChannelStatus status;
     uint32_t requestId;
     bool isMeta;
+    int32_t errCode;
 } UdpChannelInfo;
 
 SoftBusList *GetUdpChannelMgrHead(void);
