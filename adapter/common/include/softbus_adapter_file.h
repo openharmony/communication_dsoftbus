@@ -66,4 +66,4 @@ int32_t SoftBusReadFullFileAndSize(const char *fileName, char *readBuf, uint32_t
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif
+#endif // SOFTBUS_ADAPTER_FILE_H
