@@ -106,12 +106,12 @@ static int32_t DestroyServer(struct WifiDirectConnectParams *params)
     return self->currentState->destroyServer(self->currentState, params);
 }
 
-static void NotifyNewClientJoining(struct WifiDirectConnectParams *params)
+static int32_t NotifyNewClientJoining(struct WifiDirectConnectParams *params)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "remoteMac=%{public}s", WifiDirectAnonymizeMac(params->remoteMac));
     struct P2pEntity *self = GetP2pEntity();
     struct P2pEntityConnectingClient *client = SoftBusCalloc(sizeof(*client));
-    CONN_CHECK_AND_RETURN_LOGE(client, CONN_WIFI_DIRECT, "malloc connecting client failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(client, SOFTBUS_MALLOC_ERR, CONN_WIFI_DIRECT, "malloc connecting client failed");
     ListInit(&client->node);
     int32_t ret = strcpy_s(client->remoteMac, sizeof(client->remoteMac), params->remoteMac);
     if (ret != EOK) {
@@ -123,6 +123,7 @@ static void NotifyNewClientJoining(struct WifiDirectConnectParams *params)
 
     client->timerId = GetWifiDirectTimerList()->startTimer(
         OnClientJoinTimeout, TIMEOUT_WAIT_CLIENT_JOIN_MS, TIMER_FLAG_ONE_SHOOT, client);
+    return SOFTBUS_OK;
 }
 
 static void CancelNewClientJoining(struct WifiDirectConnectParams *params)
