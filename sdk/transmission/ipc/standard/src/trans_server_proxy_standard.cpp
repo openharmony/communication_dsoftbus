@@ -421,7 +421,7 @@ int32_t TransServerProxy::CloseChannel(int32_t channelId, int32_t channelType)
 int32_t TransServerProxy::SendMessage(int32_t channelId, int32_t channelType, const void *dataInfo,
     uint32_t len, int32_t msgType)
 {
-    sptr<IRemoteObject> remote = GetSystemAbility();
+    sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TRANS_LOGE(TRANS_SDK, "remote is nullptr!");
         return SOFTBUS_ERR;
