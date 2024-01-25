@@ -26,17 +26,14 @@
 static int32_t GetNetworkIfIp(int32_t fd, struct ifreq *req, char *ip, char *netmask, uint32_t len)
 {
     if (ioctl(fd, SIOCGIFFLAGS, (char *)req) < 0) {
-        COMM_LOGE(COMM_ADAPTER, "ioctl SIOCGIFFLAGS fail, errno=%{public}d", errno);
         return SOFTBUS_ERR;
     }
     if (!((uint16_t)req->ifr_flags & IFF_UP)) {
-        COMM_LOGE(COMM_ADAPTER, "interface is not up");
         return SOFTBUS_ERR;
     }
 
     /* get IP of this interface */
     if (ioctl(fd, SIOCGIFADDR, (char *)req) < 0) {
-        COMM_LOGE(COMM_ADAPTER, "ioctl SIOCGIFADDR fail, errno=%{public}d", errno);
         return SOFTBUS_ERR;
     }
     struct sockaddr_in *sockAddr = (struct sockaddr_in *)&(req->ifr_addr);
@@ -78,7 +75,6 @@ int32_t GetNetworkIpByIfName(const char *ifName, char *ip, char *netmask, uint32
         return SOFTBUS_ERR;
     }
     if (GetNetworkIfIp(fd, &ifr, ip, netmask, len) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_ADAPTER, "GetNetworkIfIp fail. ifName=%{public}s", ifName);
         close(fd);
         return SOFTBUS_ERR;
     }
