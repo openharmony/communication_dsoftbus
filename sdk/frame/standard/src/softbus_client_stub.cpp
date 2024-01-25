@@ -78,7 +78,7 @@ SoftBusClientStub::SoftBusClientStub()
 int32_t SoftBusClientStub::OnRemoteRequest(uint32_t code,
     MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    COMM_LOGI(COMM_SDK, "SoftBusClientStub::OnReceived, code=%{public}u", code);
+    COMM_LOGD(COMM_SDK, "SoftBusClientStub::OnReceived, code=%{public}u", code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         COMM_LOGE(COMM_SDK, "SoftBusClientStub: ReadInterfaceToken faild!");
         return SOFTBUS_ERR;
