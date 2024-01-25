@@ -1764,7 +1764,8 @@ int32_t TransProxyGetAppInfoByChanId(int32_t chanId, AppInfo *appInfo)
         }
     }
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
-    return SOFTBUS_ERR;
+    TRANS_LOGE(TRANS_CTRL, "Proxy channel not find: channelId=%{public}d", chanId);
+    return SOFTBUS_NOT_FIND;
 }
 
 int32_t TransProxyGetConnIdByChanId(int32_t channelId, int32_t *connId)
