@@ -278,11 +278,19 @@ int32_t SoftBusClientStub::OnChannelOpenedInner(MessageParcel &data, MessageParc
     data.ReadInt32(channel.businessType);
     if (channel.channelType == CHANNEL_TYPE_UDP) {
         channel.myIp = (char *)data.ReadCString();
+        if (channel.myIp == nullptr) {
+            COMM_LOGE(COMM_SDK, "channel.myIp read addr failed!");
+            return SOFTBUS_ERR;
+        }
         data.ReadInt32(channel.streamType);
         data.ReadBool(channel.isUdpFile);
         if (!channel.isServer) {
             data.ReadInt32(channel.peerPort);
             channel.peerIp = (char *)data.ReadCString();
+            if (channel.peerIp == nullptr) {
+                COMM_LOGE(COMM_SDK, "channel.peerIp read addr failed!");
+                return SOFTBUS_ERR;
+            }
         }
     }
     data.ReadInt32(channel.routeType);
