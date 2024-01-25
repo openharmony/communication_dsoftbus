@@ -24,6 +24,7 @@ ohos_unittest("BroadcastReceiverTest") {
     "$dsoftbus_root_path/core/connection/manager",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/connection/common/include",
+    "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/connection/wifi_direct/processor",
     "$dsoftbus_root_path/core/connection/wifi_direct/data",
     "$dsoftbus_root_path/core/connection/wifi_direct/utils",
@@ -66,6 +67,9 @@ ohos_unittest("LinkManagerBroadcastTest") {
   include_dirs = [
     "$dsoftbus_root_path/core/connection/manager",
     "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/connection/common/include",
     "$dsoftbus_root_path/core/connection/wifi_direct/processor",
     "$dsoftbus_root_path/core/connection/wifi_direct/data",
@@ -105,6 +109,9 @@ ohos_unittest("WifiDirectAdapterSingleTest") {
 
   include_dirs = [
     "$dsoftbus_root_path/core/connection/manager",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/connection/common/include",
     "$dsoftbus_root_path/core/connection/wifi_direct/processor",
@@ -144,6 +151,9 @@ ohos_unittest("WifiDirectP2PAdapterTest") {
 
   include_dirs = [
     "$dsoftbus_root_path/core/connection/manager",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/connection/common/include",
     "$dsoftbus_root_path/core/connection/wifi_direct/processor",

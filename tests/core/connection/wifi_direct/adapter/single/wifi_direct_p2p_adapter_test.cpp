@@ -198,14 +198,14 @@ HWTEST_F(WifiDirectP2PAdapterTest, P2PAdapterTest002, TestSize.Level1)
     NiceMock<WifiDirectP2PAdapterInterfaceMock> wifiDirectP2PAdapterInterfaceMock;
     EXPECT_CALL(wifiDirectP2PAdapterInterfaceMock, GetLinkedInfo).WillRepeatedly(Return(ERROR_WIFI_INVALID_ARGS));
     int32_t ret = GetStationFrequency();
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, FREQUENCY_INVALID);
 
     EXPECT_CALL(wifiDirectP2PAdapterInterfaceMock, GetLinkedInfo).WillRepeatedly(Return(WIFI_SUCCESS));
     EXPECT_CALL(wifiDirectP2PAdapterInterfaceMock, Hid2dGetChannelListFor5G).WillRepeatedly(Return(WIFI_SUCCESS));
     GetWifiDirectNetWorkUtils()->is2GBand = Is2GBand;
     GetWifiDirectNetWorkUtils()->is5GBand = Is5GBand;
     ret = GetStationFrequency();
-    EXPECT_TRUE(ret == FREQUENCY_INVALID);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     GetWifiDirectNetWorkUtils()->is5GBand = Is5GBand;
     GetWifiDirectNetWorkUtils()->is5GBand = Is5GBand;
@@ -421,15 +421,16 @@ HWTEST_F(WifiDirectP2PAdapterTest, P2PAdapterTest014, TestSize.Level1)
     GetWifiDirectNetWorkUtils()->macStringToArray = StringToArray;
     NiceMock<WifiDirectP2PAdapterInterfaceMock> wifiDirectP2PAdapterInterfaceMock;
     EXPECT_CALL(wifiDirectP2PAdapterInterfaceMock, Hid2dConnect).WillRepeatedly(Return(ERROR_WIFI_INVALID_ARGS));
-    int32_t ret = P2pConnectGroup(groupConfigString);
+    bool isLegacyGo = true;
+    int32_t ret = P2pConnectGroup(groupConfigString, isLegacyGo);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     EXPECT_CALL(wifiDirectP2PAdapterInterfaceMock, Hid2dConnect).WillRepeatedly(Return(WIFI_SUCCESS));
-    ret = P2pConnectGroup(groupConfigString);
+    ret = P2pConnectGroup(groupConfigString, isLegacyGo);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     GetWifiDirectNetWorkUtils()->splitString = SplitString;
-    ret = P2pConnectGroup(groupConfigString);
+    ret = P2pConnectGroup(groupConfigString, isLegacyGo);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 };
 
