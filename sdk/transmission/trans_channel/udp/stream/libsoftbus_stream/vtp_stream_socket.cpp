@@ -408,7 +408,6 @@ bool VtpStreamSocket::CreateClient(IpAndPort &local, int streamType, std::pair<u
     streamFd_ = fd;
     configCv_.notify_all();
 
-    SetDefaultConfig(fd);
     TRANS_LOGI(TRANS_STREAM,
         "Success to create a client socket. fd=%{public}d, streamType=%{public}d", fd, streamType);
     return true;
@@ -715,6 +714,7 @@ int VtpStreamSocket::CreateAndBindSocket(IpAndPort &local)
         TRANS_LOGE(TRANS_STREAM, "FtSocket failed, errno=%{public}d", FtGetErrno());
         return -1;
     }
+    SetDefaultConfig(sockFd);
 
     // bind
     sockaddr_in localSockAddr = { 0 };
@@ -890,7 +890,6 @@ bool VtpStreamSocket::Accept()
 
     TRANS_LOGD(TRANS_STREAM,
         "Accept a client remotePort=%{public}d", remoteIpPort_.port);
-    SetDefaultConfig(fd);
 
     if (SetSocketEpollMode(fd) != ERR_OK) {
         TRANS_LOGE(TRANS_STREAM, "SetSocketEpollMode failed, fd=%{public}d", fd);
@@ -1157,7 +1156,7 @@ void VtpStreamSocket::SetDefaultConfig(int fd)
     if (!SetIpTos(fd, StreamAttr(static_cast<int>(IPTOS_LOWDELAY)))) {
         TRANS_LOGW(TRANS_STREAM, "SetIpTos failed");
     }
-
+    // Set Fillp direct sending
     if (!EnableDirectlySend(fd)) {
         TRANS_LOGW(TRANS_STREAM, "EnableDirectlySend failed");
     }
@@ -1165,7 +1164,7 @@ void VtpStreamSocket::SetDefaultConfig(int fd)
     if (!EnableSemiReliable(fd)) {
         TRANS_LOGW(TRANS_STREAM, "EnableSemiReliable failed");
     }
-
+    // Set Fillp Differentiated Transmission
     FILLP_BOOL enable = 1;
     if (!FtConfigSet(FT_CONF_APP_DIFFER_TRANSMIT, &enable, &fd)) {
         TRANS_LOGW(TRANS_STREAM, "Set differ transmit failed");
