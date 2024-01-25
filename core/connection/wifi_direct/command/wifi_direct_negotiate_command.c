@@ -17,6 +17,7 @@
 #include "softbus_adapter_mem.h"
 #include "wifi_direct_negotiator.h"
 #include "wifi_direct_decision_center.h"
+#include "command/wifi_direct_command_manager.h"
 #include "channel/wifi_direct_negotiate_channel.h"
 #include "data/link_info.h"
 #include "data/link_manager.h"
@@ -74,6 +75,7 @@ void WifiDirectNegotiateCommandConstructor(struct WifiDirectNegotiateCommand *se
 {
     self->type = COMMAND_TYPE_NEGO_MESSAGE;
     self->timerId = TIMER_ID_INVALID;
+    self->commandId = GetWifiDirectCommandManager()->allocateCommandId();
     self->execute = ExecuteProcessRemoteNegotiateMessage;
     self->onSuccess = OnNegotiateComplete;
     self->onFailure = OnNegotiateFailure;

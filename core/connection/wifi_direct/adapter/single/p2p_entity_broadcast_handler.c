@@ -61,5 +61,6 @@ void P2pEntityBroadcastHandlerInit(void)
         WIFI_P2P_CONNECTION_CHANGED_ACTION,
     };
 
-    broadcastReceiver->registerBroadcastListener(actions, ARRAY_SIZE(actions), "P2pEntity", Listener);
+    broadcastReceiver->registerBroadcastListener(actions, ARRAY_SIZE(actions), "P2pEntity",
+                                                 LISTENER_PRIORITY_LOW, Listener);
 }

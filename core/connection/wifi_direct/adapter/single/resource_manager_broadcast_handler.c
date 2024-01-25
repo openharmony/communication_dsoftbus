@@ -164,5 +164,6 @@ void ResourceManagerBroadcastHandlerInit(void)
         WIFI_P2P_CONNECTION_CHANGED_ACTION,
     };
 
-    broadcastReceiver->registerBroadcastListener(actions, ARRAY_SIZE(actions), "ResourceManager", Listener);
+    broadcastReceiver->registerBroadcastListener(actions, ARRAY_SIZE(actions), "ResourceManager",
+                                                 LISTENER_PRIORITY_HIGH, Listener);
 }

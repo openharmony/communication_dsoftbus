@@ -41,6 +41,7 @@ enum WifiDirectCommandType {
     void (*onTimeout)(struct WifiDirectCommand *base);                                            \
     struct WifiDirectCommand* (*duplicate)(struct WifiDirectCommand *base);                       \
     int32_t timerId;                                                                              \
+    uint32_t commandId;                                                                            \
     void (*destructor)(struct WifiDirectCommand *base);                                           \
     enum WifiDirectCommandType type;                                                              \
     struct WifiDirectProcessor *processor; \

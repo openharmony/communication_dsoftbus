@@ -104,5 +104,6 @@ void LinkManagerBroadcastHandlerInit(void)
         WIFI_P2P_CONNECTION_CHANGED_ACTION,
     };
 
-    broadcastReceiver->registerBroadcastListener(actions, ARRAY_SIZE(actions), "LinkManager", Listener);
+    broadcastReceiver->registerBroadcastListener(actions, ARRAY_SIZE(actions), "LinkManager",
+                                                 LISTENER_PRIORITY_MIDDLE, Listener);
 }
