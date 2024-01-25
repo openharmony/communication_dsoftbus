@@ -47,7 +47,7 @@ bool IsPotentialTrustedDeviceDp(const char *deviceIdHash)
         LNN_LOGE(LNN_STATE, "deviceIdHash is null");
         return false;
     }
-    LNN_LOGI(LNN_STATE, "IsPotentialTrustedDeviceDp deviceIdHash=%{public}s", deviceIdHash);
+    LNN_LOGI(LNN_STATE, "deviceIdHash=%{public}s", deviceIdHash);
     std::vector<OHOS::DistributedDeviceProfile::TrustDeviceProfile> trustDevices;
     int32_t ret = DpClient::GetInstance().GetAllTrustDeviceProfile(trustDevices);
     if (ret != OHOS::DistributedDeviceProfile::DP_SUCCESS || trustDevices.empty()) {
@@ -76,11 +76,11 @@ bool IsPotentialTrustedDeviceDp(const char *deviceIdHash)
             continue;
         }
         if (strncmp(hashStr, deviceIdHash, strlen(deviceIdHash)) == 0) {
-            LNN_LOGI(LNN_STATE, "device trusted in dp continue verify");
+            LNN_LOGI(LNN_STATE, "device trusted in dp continue verify, deviceIdHash=%{public}s", deviceIdHash);
             return true;
         }
     }
-    LNN_LOGI(LNN_STATE, "device is not trusted in dp");
+    LNN_LOGI(LNN_STATE, "device is not trusted in dp, deviceIdHash=%{public}s", deviceIdHash);
     return false;
 }
 
