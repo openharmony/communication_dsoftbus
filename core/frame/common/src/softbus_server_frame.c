@@ -21,18 +21,17 @@
 #include "disc_event_manager.h"
 #include "lnn_bus_center_ipc.h"
 #include "message_handler.h"
-#include "wifi_direct_initiator.h"
 #include "softbus_adapter_bt_common.h"
-#include "softbus_conn_interface.h"
 #include "softbus_conn_ble_direct.h"
+#include "softbus_conn_interface.h"
 #include "softbus_disc_server.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
-#include "softbus_utils.h"
-#include "trans_session_manager.h"
-#include "trans_session_service.h"
 #include "softbus_hidumper_interface.h"
 #include "softbus_hisysevt_common.h"
+#include "softbus_utils.h"
+#include "trans_session_service.h"
+#include "wifi_direct_initiator.h"
 
 static bool g_isInit = false;
 
@@ -66,59 +65,61 @@ void InitSoftBusServer(void)
     SoftbusConfigInit();
 
     if (ServerStubInit() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "server stub init failed.");
+        COMM_LOGE(COMM_SVC, "softbus server init failed: ServerStubInit");
         return;
     }
 
-    if (SoftBusTimerInit() == SOFTBUS_ERR) {
+    if (SoftBusTimerInit() != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus server init failed: SoftBusTimerInit");
         return;
     }
 
-    if (LooperInit() == SOFTBUS_ERR) {
+    if (LooperInit() != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus server init failed: LooperInit");
         return;
     }
-    if (ConnServerInit() == SOFTBUS_ERR) {
-        COMM_LOGE(COMM_SVC, "softbus conn server init failed.");
+    if (ConnServerInit() != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus server init failed: ConnServerInit");
         goto ERR_EXIT;
     }
 
-    if (AuthInit() == SOFTBUS_ERR) {
-        COMM_LOGE(COMM_SVC, "softbus auth init failed.");
+    if (AuthInit() != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus server init failed: AuthInit");
         goto ERR_EXIT;
     }
 
-    if (DiscServerInit() == SOFTBUS_ERR) {
-        COMM_LOGE(COMM_SVC, "softbus disc server init failed.");
+    if (DiscServerInit() != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus server init failed: DiscServerInit");
         goto ERR_EXIT;
     }
 
-    if (BusCenterServerInit() == SOFTBUS_ERR) {
-        COMM_LOGE(COMM_SVC, "softbus buscenter server init failed.");
+    if (BusCenterServerInit() != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus server init failed: BusCenterServerInit");
         goto ERR_EXIT;
     }
 
-    if (TransServerInit() == SOFTBUS_ERR) {
-        COMM_LOGE(COMM_SVC, "softbus trans server init failed.");
+    if (TransServerInit() != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus server init failed: TransServerInit");
         goto ERR_EXIT;
     }
 
     if (DiscEventManagerInit() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "softbus disc event manager init failed.");
+        COMM_LOGE(COMM_SVC, "softbus server init failed: DiscEventManagerInit");
         goto ERR_EXIT;
     }
 
     if (WifiDirectInit() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "softbus wifi direct init failed.");
+        COMM_LOGE(COMM_SVC, "softbus server init failed: WifiDirectInit");
         goto ERR_EXIT;
     }
 
-    if (ConnBleDirectInit() == SOFTBUS_ERR) {
-        COMM_LOGE(COMM_SVC, "softbus ble direct init failed.");
+    if (ConnBleDirectInit() != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus server init failed: ConnBleDirectInit");
         goto ERR_EXIT;
     }
 
     if (InitSoftbusSysEvt() != SOFTBUS_OK || SoftBusHiDumperInit() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "softbus dfx init failed.");
+        COMM_LOGE(COMM_SVC, "softbus server init failed: InitSoftbusSysEvt or SoftBusHiDumperInit");
         goto ERR_EXIT;
     }
 
@@ -129,7 +130,6 @@ void InitSoftBusServer(void)
 ERR_EXIT:
     ServerModuleDeinit();
     COMM_LOGE(COMM_SVC, "softbus framework init failed.");
-    return;
 }
 
 void ClientDeathCallback(const char *pkgName, int32_t pid)

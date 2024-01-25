@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,12 +16,10 @@
 #include "sqlite3_utils.h"
 
 #include <securec.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "comm_log.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_def.h"
 #include "softbus_errcode.h"
 
 #define SQL_DEFAULT_LEN 256
@@ -46,11 +44,11 @@ typedef struct {
 } SqliteManager;
 
 /* The default SQL statement */
-#define SQL_DROP_TABLE "DROP TABLE "
-#define SQL_REMOVE_ALL_RECORD "DELETE FROM "
-#define SQL_BEGIN_TRANSACTION "BEGIN TRANSACTION"
-#define SQL_COMMIT_TRANSACTION "COMMIT TRANSACTION"
-#define SQL_ROLLBACK_TRANSACTION "ROLLBACK TRANSACTION"
+#define SQL_DROP_TABLE            "DROP TABLE "
+#define SQL_REMOVE_ALL_RECORD     "DELETE FROM "
+#define SQL_BEGIN_TRANSACTION     "BEGIN TRANSACTION"
+#define SQL_COMMIT_TRANSACTION    "COMMIT TRANSACTION"
+#define SQL_ROLLBACK_TRANSACTION  "ROLLBACK TRANSACTION"
 #define SQL_SEARCH_IF_TABLE_EXIST "SELECT * FROM sqlite_master WHERE type ='table' AND name = '%s'"
 
 /**
@@ -122,13 +120,13 @@ static int32_t BindSelectTrustedDevInfoCb(DbContext *ctx, int32_t paraNum, uint8
     int32_t idx = 1;
 
     if (data == NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
         return SQLITE_ERROR;
     }
     return BindParaText(ctx, idx, (char *)data, strlen((char *)data));
 }
 
-static int32_t ExecuteSql(DbContext *ctx, const char *sql, uint32_t len, BindParaCb cb,
-    uint8_t *data)
+static int32_t ExecuteSql(DbContext *ctx, const char *sql, uint32_t len, BindParaCb cb, uint8_t *data)
 {
     int32_t paraNum;
     int32_t rc;
@@ -150,7 +148,7 @@ static int32_t ExecuteSql(DbContext *ctx, const char *sql, uint32_t len, BindPar
         }
         return rc;
     }
-    if (paraNum > 0 && cb == NULL) {
+    if (cb == NULL) {
         COMM_LOGE(COMM_UTILS, "need cd for binding parameter");
         (void)sqlite3_finalize(ctx->stmt);
         ctx->stmt = NULL;
@@ -234,8 +232,8 @@ int32_t OpenDatabase(DbContext **ctx)
         COMM_LOGE(COMM_UTILS, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
-    rc = sqlite3_open_v2(DATABASE_NAME, &sqlite, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE |
-        SQLITE_OPEN_NOMUTEX, NULL);
+    rc =
+        sqlite3_open_v2(DATABASE_NAME, &sqlite, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_NOMUTEX, NULL);
     if (rc != SQLITE_OK || sqlite == NULL) {
         COMM_LOGE(COMM_UTILS, "sqlite3_open_v2 fail: errmsg=%{public}s", sqlite3_errmsg(sqlite));
         (void)sqlite3_close_v2(sqlite);
@@ -288,7 +286,7 @@ int32_t CreateTable(DbContext *ctx, TableNameID id)
 int32_t DeleteTable(DbContext *ctx, TableNameID id)
 {
     int32_t rc;
-    char sql[SQL_DEFAULT_LEN] = {0};
+    char sql[SQL_DEFAULT_LEN] = { 0 };
 
     if (!CheckDbContextParam(ctx)) {
         COMM_LOGE(COMM_UTILS, "invalid parameters");
@@ -314,7 +312,7 @@ int32_t DeleteTable(DbContext *ctx, TableNameID id)
 int32_t CheckTableExist(DbContext *ctx, TableNameID id, bool *isExist)
 {
     int32_t rc;
-    char sql[SQL_DEFAULT_LEN] = {0};
+    char sql[SQL_DEFAULT_LEN] = { 0 };
 
     if (!CheckDbContextParam(ctx) || isExist == NULL) {
         COMM_LOGE(COMM_UTILS, "invalid parameters");
@@ -343,8 +341,8 @@ int32_t InsertRecord(DbContext *ctx, TableNameID id, uint8_t *data)
         COMM_LOGE(COMM_UTILS, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
-    rc = ExecuteSql(ctx, g_sqliteMgr[id].sqlForInsert, strlen(g_sqliteMgr[id].sqlForInsert),
-        g_sqliteMgr[id].insertCb, data);
+    rc = ExecuteSql(
+        ctx, g_sqliteMgr[id].sqlForInsert, strlen(g_sqliteMgr[id].sqlForInsert), g_sqliteMgr[id].insertCb, data);
     if (rc != SQLITE_DONE) {
         COMM_LOGE(COMM_UTILS, "insert data failed");
         rc = SOFTBUS_ERR;
@@ -382,7 +380,7 @@ int32_t RemoveRecordByKey(DbContext *ctx, TableNameID id, uint8_t *data)
 int32_t RemoveAllRecord(DbContext *ctx, TableNameID id)
 {
     int32_t rc;
-    char sql[SQL_DEFAULT_LEN] = {0};
+    char sql[SQL_DEFAULT_LEN] = { 0 };
 
     if (!CheckDbContextParam(ctx)) {
         COMM_LOGE(COMM_UTILS, "invalid parameters");
@@ -411,7 +409,7 @@ int32_t GetRecordNumByKey(DbContext *ctx, TableNameID id, uint8_t *data)
     int32_t rc;
     int32_t num = 0;
 
-    if (!CheckDbContextParam(ctx)) {
+    if (!CheckDbContextParam(ctx) || data == NULL) {
         COMM_LOGE(COMM_UTILS, "invalid parameters");
         return 0;
     }
@@ -438,7 +436,7 @@ int32_t QueryRecordByKey(DbContext *ctx, TableNameID id, uint8_t *data,
     int32_t rc;
     int32_t num = 0;
 
-    if (!CheckDbContextParam(ctx) || replyInfo == NULL) {
+    if (!CheckDbContextParam(ctx) || replyInfo == NULL || data == NULL) {
         COMM_LOGE(COMM_UTILS, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -652,7 +650,7 @@ int32_t GetQueryResultColText(DbContext *ctx, int32_t iCol, char *text, uint32_t
 
 int32_t GetQueryResultColInt(DbContext *ctx, int32_t iCol, int32_t *value)
 {
-    if (!CheckBindOrQueryParam(ctx) || iCol < 0) {
+    if (!CheckBindOrQueryParam(ctx) || iCol < 0 || value == NULL) {
         COMM_LOGE(COMM_UTILS, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -670,7 +668,7 @@ int32_t GetQueryResultColInt(DbContext *ctx, int32_t iCol, int32_t *value)
 
 int32_t GetQueryResultColInt64(DbContext *ctx, int32_t iCol, int64_t *value)
 {
-    if (!CheckBindOrQueryParam(ctx) || iCol < 0) {
+    if (!CheckBindOrQueryParam(ctx) || iCol < 0 || value == NULL) {
         COMM_LOGE(COMM_UTILS, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -688,7 +686,7 @@ int32_t GetQueryResultColInt64(DbContext *ctx, int32_t iCol, int64_t *value)
 
 int32_t GetQueryResultColDouble(DbContext *ctx, int32_t iCol, double *value)
 {
-    if (!CheckBindOrQueryParam(ctx) || iCol < 0) {
+    if (!CheckBindOrQueryParam(ctx) || iCol < 0 || value == NULL) {
         COMM_LOGE(COMM_UTILS, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
