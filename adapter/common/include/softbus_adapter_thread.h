@@ -135,4 +135,4 @@ int32_t SoftBusCondDestroy(SoftBusCond *cond);
 }
 #endif /* __cplusplus */
 
-#endif
+#endif // SOFTBUS_ADAPTER_THREAD_H

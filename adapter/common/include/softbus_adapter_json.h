@@ -36,7 +36,7 @@ void JSON_Delete(JsonObj *obj);
 
 void JSON_Free(void *obj);
 
-/* Note: must use JSON_Free to relase memory */
+/* Note: must use JSON_Free to release memory */
 char *JSON_PrintUnformatted(const JsonObj *obj);
 
 JsonObj *JSON_Parse(const char *str, uint32_t len);
@@ -61,14 +61,14 @@ bool JSON_AddStringToObject(JsonObj *obj, const char *key, const char *value);
 
 bool JSON_GetStringFromOject(const JsonObj *obj, const char *key, char *value, uint32_t size);
 
-bool JSON_AddStringArrayToObject(JsonObj *obj, const char * const key, const char **value, int32_t len);
+bool JSON_AddStringArrayToObject(JsonObj *obj, const char *key, const char **value, int32_t len);
 
 /* use input parameter len to limit value's max array num and return as real value's max array num */
-bool JSON_GetStringArrayFromOject(const JsonObj *obj, const char * const key, char **value, int32_t *len);
+bool JSON_GetStringArrayFromOject(const JsonObj *obj, const char *key, char **value, int32_t *len);
 
 #ifdef __cplusplus
 #if __cplusplus
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-#endif
+#endif // SOFTBUS_ADAPTER_JSON_H
