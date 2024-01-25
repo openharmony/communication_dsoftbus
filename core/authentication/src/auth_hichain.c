@@ -264,15 +264,6 @@ static void OnDeviceNotTrusted(const char *udid)
     }
 }
 
-static void DfxRecordLnnStartHichainEnd(int64_t authSeq, int32_t reason)
-{
-    LnnEventExtra extra = { 0 };
-    LnnEventExtraInit(&extra);
-    extra.authId = (int32_t)authSeq;
-    extra.errcode = reason;
-    extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
-}
-
 int32_t RegTrustDataChangeListener(const TrustDataChangeListener *listener)
 {
     if (listener == NULL) {
@@ -305,23 +296,19 @@ void UnregTrustDataChangeListener(void)
 int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid)
 {
     if (udid == NULL || uid == NULL) {
-        DfxRecordLnnStartHichainEnd(authSeq, SOFTBUS_INVALID_PARAM);
         AUTH_LOGE(AUTH_HICHAIN, "udid/uid is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     char *authParams = GenDeviceLevelParam(udid, uid, true);
     if (authParams == NULL) {
-        DfxRecordLnnStartHichainEnd(authSeq, SOFTBUS_ERR);
         AUTH_LOGE(AUTH_HICHAIN, "generate auth param fail");
         return SOFTBUS_ERR;
     }
     if (AuthDevice(authSeq, authParams, &g_hichainCallback) == SOFTBUS_OK) {
-        DfxRecordLnnStartHichainEnd(authSeq, SOFTBUS_OK);
         AUTH_LOGI(AUTH_HICHAIN, "hichain call authDevice succ");
         cJSON_free(authParams);
         return SOFTBUS_OK;
     }
-    DfxRecordLnnStartHichainEnd(authSeq, SOFTBUS_AUTH_START_ERR);
     AUTH_LOGE(AUTH_HICHAIN, "hichain call authDevice failed");
     cJSON_free(authParams);
     return SOFTBUS_AUTH_START_ERR;
