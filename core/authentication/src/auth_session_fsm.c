@@ -602,6 +602,18 @@ static int32_t ClientSetExchangeIdType(AuthFsm *authFsm)
     return SOFTBUS_OK;
 }
 
+static void UpdateUdidHashIfEmpty(AuthFsm *authFsm, AuthSessionInfo *info)
+{
+    if (info->connInfo.type == AUTH_LINK_TYPE_BLE && strlen(info->udid) != 0 &&
+        authFsm->info.connInfo.info.bleInfo.deviceIdHash[0] == '\0') {
+        AUTH_LOGW(AUTH_FSM, "udidhash is empty");
+        if (SoftBusGenerateStrHash((unsigned char *)info->udid, strlen(info->nodeInfo.deviceInfo.deviceUdid),
+            (unsigned char *)authFsm->info.connInfo.info.bleInfo.deviceIdHash) != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_FSM, "generate udidhash fail");
+        }
+    }
+}
+
 static void HandleMsgRecvDeviceId(AuthFsm *authFsm, const MessagePara *para)
 {
     int32_t ret;
@@ -615,12 +627,8 @@ static void HandleMsgRecvDeviceId(AuthFsm *authFsm, const MessagePara *para)
             LNN_AUDIT(AUDIT_SCENE_HANDLE_MSG_DEV_ID, lnnAuditExtra);
             break;
         }
+        UpdateUdidHashIfEmpty(authFsm, info);
         if (info->isServer) {
-            if (info->connInfo.type == AUTH_LINK_TYPE_BLE && strlen(info->udid) != 0 &&
-                authFsm->info.connInfo.info.bleInfo.deviceIdHash[0] == '\0') {
-                (void)SoftBusGenerateStrHash((unsigned char *)info->udid, strlen(info->nodeInfo.deviceInfo.deviceUdid),
-                    (unsigned char *)authFsm->info.connInfo.info.bleInfo.deviceIdHash);
-            }
             if (PostDeviceIdMessage(authFsm->authSeq, info) != SOFTBUS_OK) {
                 ret = SOFTBUS_AUTH_SYNC_DEVID_FAIL;
                 break;
