@@ -515,8 +515,8 @@ int32_t SoftBusClientStub::OnLeaveLNNResultInner(MessageParcel &data, MessagePar
 int32_t SoftBusClientStub::OnNodeOnlineStateChangedInner(MessageParcel &data, MessageParcel &reply)
 {
     const char *pkgName = data.ReadCString();
-    if (strlen(pkgName) == 0) {
-        COMM_LOGE(COMM_SDK, "Invalid package name, length is zero");
+    if (pkgName == nullptr || strlen(pkgName) == 0) {
+        COMM_LOGE(COMM_SDK, "Invalid package name, or length is zero");
         return SOFTBUS_ERR;
     }
     bool isOnline = false;
@@ -545,8 +545,8 @@ int32_t SoftBusClientStub::OnNodeOnlineStateChangedInner(MessageParcel &data, Me
 int32_t SoftBusClientStub::OnNodeBasicInfoChangedInner(MessageParcel &data, MessageParcel &reply)
 {
     const char *pkgName = data.ReadCString();
-    if (strlen(pkgName) == 0) {
-        COMM_LOGE(COMM_SDK, "Invalid package name, length is zero");
+    if (pkgName == nullptr || strlen(pkgName) == 0) {
+        COMM_LOGE(COMM_SDK, "Invalid package name, or length is zero");
         return SOFTBUS_ERR;
     }
     int32_t type;
