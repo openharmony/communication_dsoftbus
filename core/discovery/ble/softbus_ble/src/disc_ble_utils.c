@@ -260,22 +260,11 @@ int32_t AssembleTLV(BroadcastData *broadcastData, uint8_t dataType, const void *
     remainLen -= 1;
 
     uint32_t validLen = (dataLen > remainLen) ? remainLen : dataLen;
-    if (dataType == TLV_TYPE_DEVICE_NAME) {
-        if (CalculateMbsTruncateSize((const char *)value, remainLen - 1, &validLen) != SOFTBUS_OK) {
-            DISC_LOGE(DISC_BLE,
-                "truncate device name failed, validLen=%{public}u, remainLen=%{public}u", validLen, remainLen);
-            return SOFTBUS_ERR;
-        }
-        broadcastData->data.data[broadcastData->dataLen + validLen] = '\0';
-    }
     if (memcpy_s(&(broadcastData->data.data[broadcastData->dataLen]), validLen, value, validLen) != EOK) {
         DISC_LOGE(DISC_BLE, "assemble tlv memcpy failed");
         return SOFTBUS_MEM_ERR;
     }
     broadcastData->dataLen += validLen;
-    if (dataType == TLV_TYPE_DEVICE_NAME) {
-        broadcastData->dataLen += 1;
-    }
     return SOFTBUS_OK;
 }
 
