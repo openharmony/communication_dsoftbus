@@ -696,6 +696,7 @@ static void UdpOnAuthConnOpened(uint32_t requestId, int64_t authId)
     }
     ret = StartExchangeUdpInfo(channel, authId, channel->seq);
     if (ret != SOFTBUS_OK) {
+        channel->errCode = ret;
         TRANS_LOGE(TRANS_CTRL, "neg fail");
         ProcessAbnormalUdpChannelState(&channel->info, SOFTBUS_TRANS_HANDSHAKE_ERROR, true);
         extra.socketName = channel->info.myData.sessionName;
@@ -766,6 +767,16 @@ static void TransCloseUdpChannelByRequestId(uint32_t requestId)
     TRANS_LOGD(TRANS_CTRL, "ok");
 }
 
+static int32_t CheckAuthConnStatus(const uint32_t requestId)
+{
+    UdpChannelInfo channel;
+    if (TransGetUdpChannelByRequestId(requestId, &channel) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get channel fail");
+        return SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED;
+    }
+    return channel.errCode;
+}
+
 static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId, bool isMeta, int32_t linkType)
 {
     AuthConnInfo auth;
@@ -792,6 +803,11 @@ static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId, bool is
     ret = AuthOpenConn(&auth, requestId, &cb, isMeta);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "open fail: ret=%{public}d", ret);
+        return ret;
+    }
+    ret = CheckAuthConnStatus(requestId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "status check failed: ret=%{public}d", ret);
         return ret;
     }
 
