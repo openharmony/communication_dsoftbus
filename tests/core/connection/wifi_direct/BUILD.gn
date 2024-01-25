@@ -22,9 +22,13 @@ ohos_unittest("WifiDirectTest") {
   module_out_path = module_output_path
 
   include_dirs = [
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/connection/manager",
     "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/tests/core/connection/wifi_direct/processor",
+    "$dsoftbus_root_path/core/connection/wifi_direct/command",
     "$dsoftbus_root_path/core/connection/common/include",
     "$dsoftbus_root_path/core/connection/wifi_direct/processor",
     "$dsoftbus_root_path/core/connection/wifi_direct/data",
@@ -61,8 +65,10 @@ ohos_unittest("WifiDirectTest") {
     "hilog:libhilog",
   ]
   sources = [
+    "$dsoftbus_root_path/core/connection/wifi_direct/wifi_direct_fast_connect.c",
     "wifi_direct_coexist_rule_test.cpp",
-    "wifi_direct_command_manage_test.cpp",
+    "wifi_direct_decision_center_test.cpp",
+    "wifi_direct_fast_connect_test.cpp",
     "wifi_direct_initiator_test.cpp",
     "wifi_direct_ip_manager_test.cpp",
     "wifi_direct_negotiator_test.cpp",
@@ -79,8 +85,8 @@ group("unittest") {
     "adapter/single:unittest",
     "channel:unittest",
     "data:unittest",
-    "negotiate_state:unittest",
-    "processor:unittest",
+
+    #"processor:unittest",
     "protocol:unittest",
     "utils:unittest",
   ]

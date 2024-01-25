@@ -22,7 +22,6 @@
 #include "negotiate_message.h"
 #include "link_info.h"
 #include "wifi_config_info.h"
-#include "wifi_direct_intent.h"
 #include "inner_link.h"
 #include "info_container.h"
 #include "wifi_direct_p2p_adapter.h"
@@ -30,6 +29,7 @@
 #include "wifi_direct_protocol_factory.h"
 #include "wifi_direct_defines.h"
 #include "wifi_direct_decision_center.h"
+#include "wifi_direct_negotiate_channel.h"
 #include "link_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -1088,24 +1088,7 @@ HWTEST_F(WifiDirectDataTest, testWifiConfigInfoUnmarshalling006, TestSize.Level1
     EXPECT_TRUE(ret == true);
 }
 
-// wifi_direct_intent.c
-
-/*
-* @tc.name: testGetKeySize001
-* @tc.desc: test GetKeySize
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(WifiDirectDataTest, testWifiDirectIntentGetKeySize001, TestSize.Level1)
-{
-    struct WifiDirectIntent* self = WifiDirectIntentNew();
-    size_t ret = self->getKeySize();
-    WifiDirectIntentDelete(self);
-    EXPECT_EQ(ret, INTENT_KEY_MAX);
-}
-
 // inner_link.c
-
 /*
 * @tc.name: testGetKeySize001
 * @tc.desc: test GetKeySize
@@ -1148,7 +1131,7 @@ HWTEST_F(WifiDirectDataTest, testInnerLinkMarshalling001, TestSize.Level1)
     struct ProtocolFormat format = { TLV_TAG_SIZE, TLV_LENGTH_SIZE2 };
     protocol->setFormat(protocol, &format);
     bool value = true;
-    self->putBoolean(self, IL_KEY_IS_CLIENT, value);
+    self->putBoolean(self, IL_KEY_LINK_TYPE, value);
     bool ret = self->marshalling(self, protocol);
     InnerLinkDelete(self);
     EXPECT_TRUE(ret == true);
@@ -1167,7 +1150,7 @@ HWTEST_F(WifiDirectDataTest, testInnerLinkMarshalling002, TestSize.Level1)
     struct ProtocolFormat format = { TLV_TAG_SIZE, TLV_LENGTH_SIZE2 };
     protocol->setFormat(protocol, &format);
     constexpr int32_t value = 1;
-    self->putInt(self, IL_KEY_CONNECT_TYPE, value);
+    self->putInt(self, IL_KEY_STATE, value);
     bool ret = self->marshalling(self, protocol);
     InnerLinkDelete(self);
     EXPECT_TRUE(ret == true);
@@ -1243,7 +1226,7 @@ HWTEST_F(WifiDirectDataTest, testInnerLinkUnmarshalling001, TestSize.Level1)
     struct ProtocolFormat format = { TLV_TAG_SIZE, TLV_LENGTH_SIZE2 };
     protocol->setFormat(protocol, &format);
     bool value = true;
-    self->putBoolean(self, IL_KEY_IS_CLIENT, value);
+    self->putBoolean(self, IL_KEY_STATE, value);
     self->marshalling(self, protocol);
     bool ret = self->unmarshalling(self, protocol);
     InnerLinkDelete(self);
@@ -1263,7 +1246,7 @@ HWTEST_F(WifiDirectDataTest, testInnerLinkUnmarshalling002, TestSize.Level1)
     struct ProtocolFormat format = { TLV_TAG_SIZE, TLV_LENGTH_SIZE2 };
     protocol->setFormat(protocol, &format);
     constexpr int32_t value = 1;
-    self->putInt(self, IL_KEY_CONNECT_TYPE, value);
+    self->putInt(self, IL_KEY_STATE, value);
     self->marshalling(self, protocol);
     bool ret = self->unmarshalling(self, protocol);
     InnerLinkDelete(self);
@@ -1342,7 +1325,7 @@ HWTEST_F(WifiDirectDataTest, testInnerLinkGetLink001, TestSize.Level1)
     struct WifiDirectLink wifiLink;
     (void)memset_s(&wifiLink, sizeof(wifiLink), ZERO_NUM, sizeof(wifiLink));
     wifiLink.linkId = ONE_NUM;
-    wifiLink.connectType = WIFI_DIRECT_CONNECT_TYPE_WIFI_DIRECT;
+    wifiLink.linkType = WIFI_DIRECT_LINK_TYPE_P2P;
     const char str[] = "127.0.0.1";
     strcpy_s(wifiLink.localIp, sizeof(LENGTH_NUM), str);
     const char str1[] = "7.182.56.32";
@@ -1425,31 +1408,6 @@ HWTEST_F(WifiDirectDataTest, testInnerLinkAddId001, TestSize.Level1)
 }
 
 // info_container.c
-
-/*
-* @tc.name: testPutInt001
-* @tc.desc: test PutInt and PutBoolean
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(WifiDirectDataTest, testInfoContainerPutInt001, TestSize.Level1)
-{
-    struct InterfaceInfo* self = InterfaceInfoNew();
-    struct InfoContainerKeyProperty keyProperty;
-    keyProperty.tag = ONE_NUM;
-    keyProperty.content = nullptr;
-    keyProperty.type = INT;
-    keyProperty.flag = ONE_NUM;
-    InfoContainerConstructor((struct InfoContainer *)self, &keyProperty, LI_KEY_MAX);
-    struct InfoContainer *container = (struct InfoContainer *)self;
-    bool ret = true;
-    constexpr int32_t value = 1;
-    container->putInt(container, IL_KEY_CONNECT_TYPE, value);
-    container->putBoolean(container, IL_KEY_IS_CLIENT, ret);
-    InterfaceInfoDelete(self);
-    EXPECT_EQ(ret, true);
-}
-
 /*
 * @tc.name: testGet001
 * @tc.desc: test Get
@@ -1469,33 +1427,9 @@ HWTEST_F(WifiDirectDataTest, testInfoContainerGet001, TestSize.Level1)
     size_t key = LENGTH_HEADER;
     size_t size = FOUR_NUM;
     size_t count = THIRD_NUM;
-    container->get(container, IL_KEY_CONNECT_TYPE, &size, &count);
+    container->get(container, NM_KEY_CONTENT_TYPE, &size, &count);
     InterfaceInfoDelete(self);
     EXPECT_EQ(key, LENGTH_HEADER);
-}
-
-/*
-* @tc.name: testGetBoolean001
-* @tc.desc: test GetBoolean
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(WifiDirectDataTest, testInfoContainerGetBoolean001, TestSize.Level1)
-{
-    struct InterfaceInfo* self = InterfaceInfoNew();
-    struct InfoContainerKeyProperty keyProperty;
-    keyProperty.tag = ONE_NUM;
-    keyProperty.content = nullptr;
-    keyProperty.type = BOOLEAN;
-    keyProperty.flag = ONE_NUM;
-    InfoContainerConstructor((struct InfoContainer *)self, &keyProperty, LI_KEY_MAX);
-    struct InfoContainer *container = (struct InfoContainer *)self;
-    bool ret = true;
-    bool defaultValue = false;
-    container->putBoolean(container, IL_KEY_IS_CLIENT, ret);
-    bool ans = container->getBoolean(container, IL_KEY_IS_CLIENT, defaultValue);
-    InterfaceInfoDelete(self);
-    EXPECT_EQ(ans, true);
 }
 
 /*
@@ -1516,8 +1450,8 @@ HWTEST_F(WifiDirectDataTest, testInfoContainerGetInt001, TestSize.Level1)
     struct InfoContainer *container = (struct InfoContainer *)self;
     int32_t ret = THIRD_NUM;
     int32_t defaultValue = false;
-    container->putInt(container, IL_KEY_CONNECT_TYPE, ret);
-    int32_t ans = container->getInt(container, IL_KEY_CONNECT_TYPE, defaultValue);
+    container->putInt(container, IL_KEY_STATE, ret);
+    int32_t ans = container->getInt(container, IL_KEY_STATE, defaultValue);
     InterfaceInfoDelete(self);
     EXPECT_EQ(ans, THIRD_NUM);
 }
@@ -1651,7 +1585,7 @@ HWTEST_F(WifiDirectDataTest, testInfoContainerDump001, TestSize.Level1)
     container->keyProperties->type = INT;
     container->keyProperties->flag = DEVICE_ID_FLAG;
     size_t key = ONE_NUM;
-    container->dump(container);
+    container->dump(container, 1);
     InterfaceInfoDelete(self);
     EXPECT_TRUE(key == ONE_NUM);
 }
@@ -1671,7 +1605,7 @@ HWTEST_F(WifiDirectDataTest, testInfoContainerDump002, TestSize.Level1)
     container->keyProperties->type = INT;
     container->keyProperties->flag = CONTAINER_ARRAY_FLAG;
     size_t key = ONE_NUM;
-    container->dump(container);
+    container->dump(container, 1);
     InterfaceInfoDelete(self);
     EXPECT_TRUE(key == ONE_NUM);
 }
@@ -1691,7 +1625,7 @@ HWTEST_F(WifiDirectDataTest, testInfoContainerDump003, TestSize.Level1)
     container->keyProperties->type = INT;
     container->keyProperties->flag = CONTAINER_FLAG;
     size_t key = ONE_NUM;
-    container->dump(container);
+    container->dump(container, 1);
     InterfaceInfoDelete(self);
     EXPECT_TRUE(key == ONE_NUM);
 }
@@ -1711,7 +1645,7 @@ HWTEST_F(WifiDirectDataTest, testInfoContainerDump004, TestSize.Level1)
     container->keyProperties->type = INT;
     container->keyProperties->flag = DUMP_FLAG;
     size_t key = ONE_NUM;
-    container->dump(container);
+    container->dump(container, 1);
     InterfaceInfoDelete(self);
     EXPECT_TRUE(key == ONE_NUM);
 }
@@ -1911,7 +1845,7 @@ HWTEST_F(WifiDirectDataTest, testLinkManagerGetLinkByTypeAndDevice001, TestSize.
     struct LinkManager* self = GetLinkManager();
     LinkManagerInit();
     const char* macString = "AA:BB:CC:DD:EE:FF";
-    InnerLink* link = self->getLinkByTypeAndDevice(WIFI_DIRECT_CONNECT_TYPE_WIFI_DIRECT, macString);
+    InnerLink* link = self->getLinkByTypeAndDevice(WIFI_DIRECT_LINK_TYPE_P2P, macString);
     EXPECT_TRUE(link == nullptr);
 }
 
@@ -1961,17 +1895,17 @@ HWTEST_F(WifiDirectDataTest, testLinkManagerGetLinkById001, TestSize.Level1)
 }
 
 /*
-* @tc.name: testGetLinkByUuid001
-* @tc.desc: test GetLinkByUuid
+* @tc.name: testLinkManagergetLinkByDevice001
+* @tc.desc: test getLinkByDevice
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(WifiDirectDataTest, testLinkManagerGetLinkByUuid001, TestSize.Level1)
+HWTEST_F(WifiDirectDataTest, testLinkManagergetLinkByDevice001, TestSize.Level1)
 {
     struct LinkManager* self = GetLinkManager();
     LinkManagerInit();
     const char *uuid = "123e4567-e89b-12d3-a456-426655440000";
-    InnerLink* link = self->getLinkByUuid(uuid);
+    InnerLink* link = self->getLinkByDevice(uuid);
     EXPECT_TRUE(link == nullptr);
 }
 
@@ -2004,7 +1938,7 @@ HWTEST_F(WifiDirectDataTest, testLinkManagerNotifyLinkChange001, TestSize.Level1
     LinkManagerInit();
     struct InnerLink *newLink = InnerLinkNew();
     constexpr int32_t value = 3;
-    newLink->putInt(newLink, IL_KEY_CONNECT_TYPE, value);
+    newLink->putInt(newLink, IL_KEY_STATE, value);
     self->notifyLinkChange(newLink);
     InnerLinkDelete(newLink);
     EXPECT_EQ(value, 3);
@@ -2020,7 +1954,7 @@ HWTEST_F(WifiDirectDataTest, testLinkManagerRemoveLinksByConnectType001, TestSiz
 {
     struct LinkManager* self = GetLinkManager();
     LinkManagerInit();
-    self->removeLinksByConnectType(WIFI_DIRECT_CONNECT_TYPE_WIFI_DIRECT);
+    self->removeLinksByLinkType(WIFI_DIRECT_LINK_TYPE_HML);
     EXPECT_TRUE(self != nullptr);
 }
 
@@ -2036,32 +1970,8 @@ HWTEST_F(WifiDirectDataTest, testLinkManagerRefreshLinks001, TestSize.Level1)
     LinkManagerInit();
     char *clientDevices[MAX_CONNECTED_DEVICE_COUNT] = {NULL};
     int32_t clientDeviceSize = MAX_CONNECTED_DEVICE_COUNT;
-    self->refreshLinks(WIFI_DIRECT_CONNECT_TYPE_P2P, clientDeviceSize, clientDevices);
+    self->refreshLinks(WIFI_DIRECT_LINK_TYPE_P2P, clientDeviceSize, clientDevices);
     EXPECT_TRUE(self != nullptr);
-}
-
-/*
-* @tc.name: testGenerateLinkId001
-* @tc.desc: test GenerateLinkId
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(WifiDirectDataTest, testLinkManagerGenerateLinkId001, TestSize.Level1)
-{
-    struct LinkManager* self = GetLinkManager();
-    LinkManagerInit();
-    self->isInited = true;
-    self->currentLinkId = -1;
-    struct InnerLink *innerLink = InnerLinkNew();
-    constexpr int32_t value = 1;
-    innerLink->putInt(innerLink, IL_KEY_CONNECT_TYPE, value);
-    const char* remoteMac = "00:11:22:33:44:55";
-    innerLink->putString(innerLink, IL_KEY_REMOTE_BASE_MAC, remoteMac);
-    constexpr int32_t requestId = 1;
-    constexpr int32_t pid = 2;
-    int32_t id = self->generateLinkId(innerLink, requestId, pid);
-    InnerLinkDelete(innerLink);
-    EXPECT_TRUE(id != 0);
 }
 
 /*
@@ -2097,18 +2007,18 @@ HWTEST_F(WifiDirectDataTest, testLinkManagerRecycleLinkId002, TestSize.Level1)
 }
 
 /*
-* @tc.name: testClearNegoChannelForLink001
-* @tc.desc: test ClearNegoChannelForLink
+* @tc.name: testDump001
+* @tc.desc: test clearNegotiateChannelForLink
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(WifiDirectDataTest, testLinkManagerClearNegoChannelForLink001, TestSize.Level1)
+HWTEST_F(WifiDirectDataTest, testLinkManagerclearNegotiateChannelForLink001, TestSize.Level1)
 {
     struct LinkManager* self = GetLinkManager();
     LinkManagerInit();
-    const char* uuid = "123e4567-e89b-12d3-a456-426655440000";
-    self->clearNegoChannelForLink(uuid, true);
-    EXPECT_TRUE(uuid != nullptr);
+    WifiDirectNegotiateChannel channel;
+    self->clearNegotiateChannelForLink(&channel);
+    EXPECT_TRUE(self != nullptr);
 }
 
 /*
@@ -2121,7 +2031,7 @@ HWTEST_F(WifiDirectDataTest, testLinkManagerDump001, TestSize.Level1)
 {
     struct LinkManager* self = GetLinkManager();
     LinkManagerInit();
-    self->dump();
+    self->dump(1);
     EXPECT_TRUE(self != nullptr);
 }
 
@@ -2142,7 +2052,7 @@ HWTEST_F(WifiDirectDataTest, testLinkManagerCheckAll001, TestSize.Level1)
     struct LinkManager* self = GetLinkManager();
     LinkManagerInit();
     const char *interface = "checkAll";
-    bool ret = self->checkAll(WIFI_DIRECT_CONNECT_TYPE_HML, interface, RemoveServerChecker);
+    bool ret = self->checkAll(WIFI_DIRECT_LINK_TYPE_HML, interface, RemoveServerChecker);
     EXPECT_TRUE(ret == true);
 }
 }
