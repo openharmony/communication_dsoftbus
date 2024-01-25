@@ -82,7 +82,6 @@ int32_t BusCenterServerProxyInit(void)
 
 void BusCenterServerProxyDeInit(void)
 {
-    LNN_LOGI(LNN_EVENT, "enter");
     BusCenterExProxyDeInit();
     std::lock_guard<std::mutex> lock(g_mutex);
     g_serverProxy.clear();
