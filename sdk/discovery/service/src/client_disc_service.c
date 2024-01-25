@@ -99,17 +99,21 @@ static int32_t SubscribeInfoCheck(const SubscribeInfo *info)
 
 static void DfxRecordDiscServerEnd(int32_t serverType, int32_t reason, const char *packageName)
 {
+    if (reason == SOFTBUS_OK) {
+        return;
+    }
     DiscEventExtra extra = { 0 };
     DiscEventExtraInit(&extra);
     extra.serverType = serverType;
     extra.errcode = reason;
-    extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+    extra.result = EVENT_STAGE_RESULT_FAILED;
 
     char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
     if (packageName != NULL && IsValidString(packageName, PKG_NAME_SIZE_MAX - 1) && strncpy_s(pkgName,
         PKG_NAME_SIZE_MAX, packageName, PKG_NAME_SIZE_MAX - 1) == EOK) {
         extra.callerPkg = pkgName;
     }
+    DISC_EVENT(EVENT_SCENE_DISC, EVENT_STAGE_DISC_SDK, extra);
 }
 
 int PublishService(const char *packageName, const PublishInfo *info, const IPublishCallback *cb)
