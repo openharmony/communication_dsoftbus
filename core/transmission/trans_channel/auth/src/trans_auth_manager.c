@@ -927,7 +927,8 @@ int32_t TransAuthGetAppInfoByChanId(int32_t channelId, AppInfo *appInfo)
         }
     }
     SoftBusMutexUnlock(&g_authChannelList->lock);
-    return SOFTBUS_ERR;
+    TRANS_LOGE(TRANS_CTRL, "Auth channel not find: channelId=%{public}d", channelId);
+    return SOFTBUS_NOT_FIND;
 }
 
 int32_t TransAuthGetConnIdByChanId(int32_t channelId, int32_t *connId)
