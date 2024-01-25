@@ -84,6 +84,7 @@ if (defined(ohos_lite)) {
       deps += [
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common:softbus_utils",
+        "$dsoftbus_root_path/core/common/dfx/hidumper_adapter:softbus_dfx_dump",
         "//build/lite/config/component/cJSON:cjson_static",
       ]
       public_deps =
@@ -139,6 +140,7 @@ if (defined(ohos_lite)) {
         ":permission_json",
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common:softbus_utils",
+        "$dsoftbus_root_path/core/common/dfx/hidumper_adapter:softbus_dfx_dump",
         "//build/lite/config/component/cJSON:cjson_shared",
         "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
         "//foundation/systemabilitymgr/samgr_lite/samgr:samgr",

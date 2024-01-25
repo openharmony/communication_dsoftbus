@@ -36,9 +36,13 @@ if (defined(ohos_lite)) {
     cflags_cc = ohos_lite_cflags
   }
 
-  target(build_type, "softbus_dfx_event") {
+  target(build_type, "softbus_dfx_dump") {
     include_dirs = [
       "$dsoftbus_dfx_path/event/src",
+      "$dsoftbus_root_path/core/common/dfx/interface/include",
+      "$dsoftbus_root_path/core/transmission/common/include",
+      "$dsoftbus_root_path/interfaces/kits/transport",
+      "$hilog_lite_include_path",
       "//third_party/cJSON",
       "//third_party/bounds_checking_function/include",
     ]
@@ -56,7 +60,7 @@ if (defined(ohos_lite)) {
       "softbus_hidumper_util_virtual.c",
     ]
     deps = [ "$libsec_deps" ]
-    public_configs = [ ":dsoftbus_event_interface_lite" ]
+    public_configs = [ ":dsoftbus_dump_interface_lite" ]
   }
 } else {
   cflags = [ "-DFILLP_LINUX" ]
