@@ -24,6 +24,7 @@
 #include "p2p_v1_processor.h"
 #include "negotiate_message.h"
 #include "softbus_error_code.h"
+#include "auth_interface.h"
 #include "softbus_adapter_mem.h"
 #include "wifi_direct_command.h"
 #include "default_negotiate_channel.h"
@@ -147,18 +148,16 @@ void WifiDirectChannelTest::TearDown(void) {}
 HWTEST_F(WifiDirectChannelTest, testDirectChannelTest001, TestSize.Level0)
 {
     struct DefaultNegoChannelOpenCallback callback;
-    struct P2pV1Processor *self = GetP2pV1Processor();
-    struct NegotiateMessage *msg = NegotiateMessageNew();
-    EXPECT_NE(msg, nullptr);
+    struct DefaultNegoChannelParam param;
+    (void)memset_s(&param, sizeof(struct DefaultNegoChannelParam), 0, sizeof(struct DefaultNegoChannelParam));
     
     struct WifiDirectNegotiateChannel *channel = WifiDirectNegotiateChannelNew();
     EXPECT_NE(channel, nullptr);
     const char *remoteMac = "1a:2b:3c:4d:5e:6f:7g";
-    const char *remoteIp = "192.168.1.1";
     channel->setP2pMac(channel, remoteMac);
     callback.onConnectFailure = OnConnectFailure;
     callback.onConnectSuccess = OnConnectSuccess;
-    int ret = OpenDefaultNegotiateChannel(remoteIp, self->goPort, channel, &callback);
+    int ret = OpenDefaultNegotiateChannel(&param, channel, &callback);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 };
 
@@ -168,13 +167,13 @@ HWTEST_F(WifiDirectChannelTest, testDirectChannelTest001, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require: AR000I9Q40
 */
-HWTEST_F(WifiDirectChannelTest, testDirectChannelTest003, TestSize.Level0)
+HWTEST_F(WifiDirectChannelTest, testDirectChannelTest002, TestSize.Level0)
 {
     WifiDirectNegotiateChannel channel;
     char deviceId[] = {'d', 'e', 'v', 'i', 'c', 'e', 'I', 'd'};
     size_t size = sizeof(deviceId) / sizeof(deviceId[0]);
     int32_t ret = DefaultNegotiateChannelNew(1)->getDeviceId(&channel, deviceId, size);
-    EXPECT_EQ(SOFTBUS_NOT_IMPLEMENT, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 };
 
 /*
@@ -183,7 +182,7 @@ HWTEST_F(WifiDirectChannelTest, testDirectChannelTest003, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require: AR000I9Q40
 */
-HWTEST_F(WifiDirectChannelTest, testDirectChannelTest004, TestSize.Level0)
+HWTEST_F(WifiDirectChannelTest, testDirectChannelTest003, TestSize.Level0)
 {
     DefaultNegotiateChannel *base = DefaultNegotiateChannelNew(1);
     EXPECT_NE(base, nullptr);
@@ -199,7 +198,7 @@ HWTEST_F(WifiDirectChannelTest, testDirectChannelTest004, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require: AR000I9Q40
 */
-HWTEST_F(WifiDirectChannelTest, testDirectChannelTest005, TestSize.Level0)
+HWTEST_F(WifiDirectChannelTest, testDirectChannelTest004, TestSize.Level0)
 {
     DefaultNegotiateChannel *base = DefaultNegotiateChannelNew(1);
     EXPECT_NE(base, nullptr);
@@ -224,7 +223,7 @@ HWTEST_F(WifiDirectChannelTest, testDirectChannelTest005, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require: AR000I9Q40
 */
-HWTEST_F(WifiDirectChannelTest, testDirectChannelTest006, TestSize.Level0)
+HWTEST_F(WifiDirectChannelTest, testDirectChannelTest005, TestSize.Level0)
 {
     DefaultNegotiateChannel *base = DefaultNegotiateChannelNew(1);
     EXPECT_NE(base, nullptr);
@@ -238,11 +237,15 @@ HWTEST_F(WifiDirectChannelTest, testDirectChannelTest006, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require: AR000I9Q40
 */
-HWTEST_F(WifiDirectChannelTest, testDirectChannelTest007, TestSize.Level0)
+HWTEST_F(WifiDirectChannelTest, testDirectChannelTest006, TestSize.Level0)
 {
-    const char *localIp = "0A:2B:3C:4D:5E6";
-    int32_t ret = StartListeningForDefaultChannel(localIp);
-    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
+    AuthLinkType type = AUTH_LINK_TYPE_P2P;
+    ListenerModule *moduleId = static_cast<ListenerModule*>(SoftBusMalloc(sizeof(ListenerModule)));
+    int32_t port = 8080;
+    const char *localIp = "0A:2B:3C:4D:5E:6F";
+    int32_t ret = StartListeningForDefaultChannel(type, localIp, port, moduleId);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+    SoftBusFree(moduleId);
 };
 
 /* fast_connect_negotiate_channel.c */
@@ -252,7 +255,7 @@ HWTEST_F(WifiDirectChannelTest, testDirectChannelTest007, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require: AR000I9Q40
 */
-HWTEST_F(WifiDirectChannelTest, testDirectChannelTest008, TestSize.Level0)
+HWTEST_F(WifiDirectChannelTest, testDirectChannelTest007, TestSize.Level0)
 {
     int ret = FastConnectNegotiateChannelInit();
     EXPECT_EQ(SOFTBUS_LOCK_ERR, ret);
@@ -264,7 +267,7 @@ HWTEST_F(WifiDirectChannelTest, testDirectChannelTest008, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require: AR000I9Q40
 */
-HWTEST_F(WifiDirectChannelTest, testDirectChannelTest009, TestSize.Level0)
+HWTEST_F(WifiDirectChannelTest, testDirectChannelTest008, TestSize.Level0)
 {
     int32_t channelId = 1;
     FastConnectNegotiateChannel *channel = FastConnectNegotiateChannelNew(channelId);
@@ -277,7 +280,7 @@ HWTEST_F(WifiDirectChannelTest, testDirectChannelTest009, TestSize.Level0)
 * @tc.type: FUNC
 * @tc.require: AR000I9Q40
 */
-HWTEST_F(WifiDirectChannelTest, testDirectChannelTest010, TestSize.Level0)
+HWTEST_F(WifiDirectChannelTest, testDirectChannelTest009, TestSize.Level0)
 {
     DefaultNegotiateChannel *base = DefaultNegotiateChannelNew(1);
     EXPECT_NE(base, nullptr);

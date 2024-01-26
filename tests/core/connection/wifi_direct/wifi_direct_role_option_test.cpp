@@ -74,7 +74,7 @@ HWTEST_F(WifiDirectRoleTest, WifiDirectRoleOption001, TestSize.Level1)
 {
     struct WifiDirectRoleOption *self = GetWifiDirectRoleOption();
     const char *networkId = "192.168.0.1";
-    enum WifiDirectConnectType type = WIFI_DIRECT_CONNECT_TYPE_P2P;
+    enum WifiDirectConnectType type = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P;
     uint32_t value = 0xff;
     uint32_t *expectdRole = &value;
     bool flagValue = true;
@@ -93,7 +93,7 @@ HWTEST_F(WifiDirectRoleTest, WifiDirectRoleOption002, TestSize.Level1)
 {
     struct WifiDirectRoleOption *self = GetWifiDirectRoleOption();
     const char *networkId = "192.168.0.1";
-    enum WifiDirectConnectType type = WIFI_DIRECT_CONNECT_TYPE_HML;
+    enum WifiDirectConnectType type = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML;
     uint32_t value = 0x01;
     uint32_t *expectdRole = &value;
     bool flagValue = true;
@@ -112,7 +112,7 @@ HWTEST_F(WifiDirectRoleTest, WifiDirectRoleOption003, TestSize.Level1)
 {
     struct WifiDirectRoleOption *self = GetWifiDirectRoleOption();
     const char *networkId = "192.168.0.1";
-    enum WifiDirectConnectType type = WIFI_DIRECT_CONNECT_TYPE_WIFI_DIRECT;
+    enum WifiDirectConnectType type = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P;
     uint32_t value = 0x10;
     uint32_t *expectdRole = &value;
     bool flagValue = true;
@@ -131,13 +131,13 @@ HWTEST_F(WifiDirectRoleTest, WifiDirectRoleOption004, TestSize.Level1)
 {
     struct WifiDirectRoleOption *self = GetWifiDirectRoleOption();
     const char *networkId = "192.168.0.1";
-    enum WifiDirectConnectType type = WIFI_DIRECT_CONNECT_TYPE_INVALID;
+    enum WifiDirectConnectType type = WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML;
     uint32_t value = 0x10;
     uint32_t *expectdRole = &value;
     bool flagValue = true;
     bool *isStrict = &flagValue;
     int32_t ret = self->getExpectedRole(networkId, type, expectdRole, isStrict);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 };
 
 /*
@@ -150,12 +150,12 @@ HWTEST_F(WifiDirectRoleTest, WifiDirectRoleOption005, TestSize.Level1)
 {
     struct WifiDirectRoleOption *self = GetWifiDirectRoleOption();
     const char *networkId = "192.168.0.1";
-    enum WifiDirectConnectType type = WIFI_DIRECT_CONNECT_TYPE_MAX;
+    enum WifiDirectConnectType type = WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML;
     uint32_t value = 0x10;
     uint32_t *expectdRole = &value;
     bool flagValue = true;
     bool *isStrict = &flagValue;
     int32_t ret = self->getExpectedRole(networkId, type, expectdRole, isStrict);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 };
 }

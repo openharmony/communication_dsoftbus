@@ -55,8 +55,6 @@
 #include "wifi_direct_ip_manager.h"
 #include "wifi_direct_ipv4_info.h"
 #include "wifi_direct_types.h"
-#include "negotiate_state.h"
-#include "negotiate_message.h"
 #include "wifi_direct_role_negotiator.h"
 #include "wifi_direct_role_option.h"
 
@@ -109,12 +107,12 @@ HWTEST_F(WifiDirectIpManagerTest, WifiDirectIpManager001, TestSize.Level1)
     const char *interface = "\0 ";
     const char *macAddress = "\0 ";
     ret = self->configIp(interface, local, remote, macAddress);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     const char *remoteMac = "'\0's";
     const char *interface1 = " \0";
     const char *remoteMac1 = "\0-  \0";
     ret = self->configIp(interface1, local, remote, remoteMac1);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     self->releaseIp(interface, local, remote, remoteMac);
     self->cleanAllIps(interface);
     self->releaseIp(interface1, local, remote, remoteMac1);

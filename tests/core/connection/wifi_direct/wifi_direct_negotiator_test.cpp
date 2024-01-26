@@ -55,11 +55,10 @@
 #include "wifi_direct_ip_manager.h"
 #include "wifi_direct_ipv4_info.h"
 #include "wifi_direct_types.h"
-#include "negotiate_state.h"
-#include "negotiate_message.h"
 #include "wifi_direct_role_negotiator.h"
 #include "wifi_direct_role_option.h"
-
+#include "negotiate_message.h"
+#include "wifi_direct_trigger_channel.h"
 using namespace testing::ext;
 
 namespace OHOS {
@@ -102,15 +101,14 @@ HWTEST_F(WifiDirectNegotiatorTest, WifiDirectNegotiator001, TestSize.Level1)
 
 /*
 * @tc.name: testWifiDirectNegotiator
-* @tc.desc: test processNewCommand
+* @tc.desc: test ProcessNextCommand
 * @tc.type: FUNC
 * @tc.require:
 */
 HWTEST_F(WifiDirectNegotiatorTest, WifiDirectNegotiator002, TestSize.Level1)
 {
     struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
-
-    int32_t ret = self->processNewCommand();
+    int32_t ret = self->processNextCommand();
     EXPECT_EQ(ret, SOFTBUS_OK);
 };
 
@@ -123,30 +121,23 @@ HWTEST_F(WifiDirectNegotiatorTest, WifiDirectNegotiator002, TestSize.Level1)
 HWTEST_F(WifiDirectNegotiatorTest, WifiDirectNegotiator003, TestSize.Level1)
 {
     struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
-
     int32_t ret = self->retryCurrentCommand();
     EXPECT_EQ(ret, SOFTBUS_ERR);
 };
 
 /*
 * @tc.name: testWifiDirectNegotiator
-* @tc.desc: test startTimer
+* @tc.desc: test isRetryErrorCode
 * @tc.type: FUNC
 * @tc.require:
 */
 HWTEST_F(WifiDirectNegotiatorTest, WifiDirectNegotiator004, TestSize.Level1)
 {
     struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
-
-    int64_t tmieoutMs = 100;
-    int32_t ret = self->startTimer(tmieoutMs, NEGO_TIMEOUT_EVENT_WAITING_CONNECT_RESPONSE);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    self->stopTimer();
-
-    int32_t reason = 0;
-    self->handleFailure(reason);
-    self->handleFailureWithoutChangeState(reason);
+    bool ret = self->isRetryErrorCode(V1_ERROR_BUSY);
+    EXPECT_EQ(ret, true);
+    ret = self->isRetryErrorCode(1);
+    EXPECT_EQ(ret, false);
 };
 
 /*
@@ -158,10 +149,8 @@ HWTEST_F(WifiDirectNegotiatorTest, WifiDirectNegotiator004, TestSize.Level1)
 HWTEST_F(WifiDirectNegotiatorTest, WifiDirectNegotiator005, TestSize.Level1)
 {
     struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
-    struct WifiDirectConnectInfo *connectInfo = (struct WifiDirectConnectInfo*)SoftBusCalloc(sizeof(*connectInfo));
-    int32_t ret = self->closeLink(connectInfo);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    SoftBusFree(connectInfo);
+    bool ret = self->isBusy();
+    EXPECT_EQ(ret, false);
 };
 
 /*
@@ -174,7 +163,11 @@ HWTEST_F(WifiDirectNegotiatorTest, WifiDirectNegotiator006, TestSize.Level1)
 {
     struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
     struct NegotiateMessage* msg = NegotiateMessageNew();
-    int32_t ret = self->postData(msg);
+    struct WifiDirectNegotiateChannel *channel = nullptr;
+    (void)memset_s(channel, sizeof(WifiDirectNegotiateChannel), 0, sizeof(WifiDirectNegotiateChannel));
+    self->resetContext();
+    self->updateCurrentRemoteDeviceId(channel);
+    int32_t ret = self->handleMessageFromProcessor(msg);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 };
 
@@ -187,20 +180,25 @@ HWTEST_F(WifiDirectNegotiatorTest, WifiDirectNegotiator006, TestSize.Level1)
 HWTEST_F(WifiDirectNegotiatorTest, WifiDirectNegotiator007, TestSize.Level1)
 {
     struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
-    int32_t ret = self->processNewCommand();
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    struct WifiDirectNegotiateChannel *channel = nullptr;
+    (void)memset_s(channel, sizeof(WifiDirectNegotiateChannel), 0, sizeof(WifiDirectNegotiateChannel));
+    const char *netWorkId = "123456xxx";
+    enum WifiDirectLinkType type = WIFI_DIRECT_LINK_TYPE_P2P;
+    int32_t ret = self->prejudgeAvailability(netWorkId, type);
+    EXPECT_EQ(ret, V1_ERROR_IF_NOT_AVAILABLE);
 };
 
 /*
 * @tc.name: testWifiDirectNegotiator
-* @tc.desc: test retryCurrentCommand
+* @tc.desc: test postData
 * @tc.type: FUNC
 * @tc.require:
 */
 HWTEST_F(WifiDirectNegotiatorTest, WifiDirectNegotiator008, TestSize.Level1)
 {
     struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
-    int32_t ret = self->retryCurrentCommand();
+    struct NegotiateMessage *msg = NegotiateMessageNew();
+    int32_t ret = self->postData(msg);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 };
 
@@ -214,65 +212,8 @@ HWTEST_F(WifiDirectNegotiatorTest, WifiDirectNegotiator009, TestSize.Level1)
 {
     struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
     struct NegotiateMessage* msg = NegotiateMessageNew();
-    NegotiateStateType newState = NEGO_STATE_UNAVAILABLE;
-    int32_t ret = self->handleMessageFromProcessor(msg, newState);
+    int32_t ret = self->handleMessageFromProcessor(msg);
     EXPECT_EQ(ret, SOFTBUS_ERR);
-    newState =  NEGO_STATE_AVAILABLE;
-    ret = self->handleMessageFromProcessor(msg, newState);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-    newState = NEGO_STATE_PROCESSING;
-    ret = self->handleMessageFromProcessor(msg, newState);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-    newState = NEGO_STATE_WAITING_CONNECT_RESPONSE;
-    ret = self->handleMessageFromProcessor(msg, newState);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-    newState = NEGO_STATE_WAITING_CONNECT_REQUEST;
-    ret = self->handleMessageFromProcessor(msg, newState);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-    newState = NEGO_STATE_MAX;
-    ret = self->handleMessageFromProcessor(msg, newState);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-};
-
-/*
-* @tc.name: testWifiDirectNegotiator
-* @tc.desc: test handleSuccess
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(WifiDirectNegotiatorTest, WifiDirectNegotiator010, TestSize.Level1)
-{
-    struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
-    struct NegotiateMessage* msg = NegotiateMessageNew();
-    self->handleSuccess(msg);
-    SoftBusFree(msg);
-};
-
-/*
-* @tc.name: testWifiDirectNegotiator
-* @tc.desc: test handleFailure & handleFailureWithoutChangeState
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(WifiDirectNegotiatorTest, WifiDirectNegotiator011, TestSize.Level1)
-{
-    struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
-    int32_t reason = 0xff;
-    self->handleFailure(reason);
-    self->handleFailureWithoutChangeState(reason);
-};
-
-/*
-* @tc.name: testWifiDirectNegotiator
-* @tc.desc: test handleUnhandledRequest
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(WifiDirectNegotiatorTest, WifiDirectNegotiator012, TestSize.Level1)
-{
-    struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
-    struct NegotiateMessage* msg = NegotiateMessageNew();
-    self->handleUnhandledRequest(msg);
 };
 
 /*

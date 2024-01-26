@@ -55,7 +55,6 @@
 #include "wifi_direct_ip_manager.h"
 #include "wifi_direct_ipv4_info.h"
 #include "wifi_direct_types.h"
-#include "negotiate_state.h"
 #include "negotiate_message.h"
 #include "wifi_direct_role_negotiator.h"
 #include "wifi_direct_role_option.h"
@@ -97,8 +96,6 @@ void WifiDirectInitiator::TearDown(void)
 HWTEST_F(WifiDirectInitiator, WifiDirectInitiator001, TestSize.Level1)
 {
     int32_t ret = WifiDirectInit();
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-    ret = WifiDirectCommandManagerInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = WifiDirectWorkQueueInit();
     EXPECT_EQ(ret, SOFTBUS_OK);

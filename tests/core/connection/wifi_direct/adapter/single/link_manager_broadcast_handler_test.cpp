@@ -73,26 +73,27 @@ void NotifyLinkChange(struct InnerLink *link)
     return;
 }
 
-void RefreshLinks(enum WifiDirectConnectType connectType, int32_t clientDeviceSize, char *clientDevices[])
+void RefreshLinks(enum WifiDirectLinkType linkType, int32_t clientDeviceSize, char *clientDevices[])
 {
-    (void)connectType;
+    (void)linkType;
     (void)clientDeviceSize;
     (void)clientDevices;
     return;
 }
 
-void RemoveLinksByConnectType(enum WifiDirectConnectType connectType)
+void RemoveLinksByLinkType(enum WifiDirectLinkType linkType)
 {
-    (void)connectType;
+    (void)linkType;
     return;
 }
 
 void RegisterBroadcastListener(const enum BroadcastReceiverAction *actionArray, size_t actionSize,
-    const char *name, BroadcastListener listener)
+    const char *name, enum ListenerPriority priority, BroadcastListener listener)
 {
     (void)actionArray;
     (void)actionSize;
     (void)name;
+    (void)priority;
     (void)listener;
     return;
 }
@@ -132,20 +133,21 @@ HWTEST_F(LinkManagerBroadcastTest, LinkManagerBroadcastTest001, TestSize.Level1)
 
 HWTEST_F(LinkManagerBroadcastTest, LinkManagerBroadcastTest002, TestSize.Level1)
 {
-    struct P2pConnChangedInfo changedInfo;
-    changedInfo.p2pLinkInfo.connectState = P2P_DISCONNECTED;
-    GetLinkManager()->removeLinksByConnectType = RemoveLinksByConnectType;
-    (void)HandleP2pConnectionChanged(&changedInfo);
+    struct P2pBroadcastParam *param = static_cast<P2pBroadcastParam *>(SoftBusMalloc(sizeof(P2pBroadcastParam)));
+    (void)memset_s(param, sizeof(P2pBroadcastParam), 0, sizeof(P2pBroadcastParam));
+    param->p2pLinkInfo.connectState = P2P_DISCONNECTED;
+    GetLinkManager()->removeLinksByLinkType = RemoveLinksByLinkType;
+    (void)HandleP2pConnectionChanged(param);
 
-    changedInfo.p2pLinkInfo.connectState = P2P_CONNECTED;
-    changedInfo.groupInfo = nullptr;
-    (void)HandleP2pConnectionChanged(&changedInfo);
-
-    changedInfo.groupInfo =
-        reinterpret_cast<struct WifiDirectP2pGroupInfo *>(SoftBusMalloc(sizeof(WifiDirectP2pGroupInfo)));
-    EXPECT_TRUE(changedInfo.groupInfo != nullptr);
-    (void)HandleP2pConnectionChanged(&changedInfo);
-    SoftBusFree(changedInfo.groupInfo);
+    param->p2pLinkInfo.connectState = P2P_CONNECTED;
+    param->groupInfo = nullptr;
+    (void)HandleP2pConnectionChanged(param);
+    param->groupInfo =
+        static_cast<struct WifiDirectP2pGroupInfo *>(SoftBusMalloc(sizeof(WifiDirectP2pGroupInfo)));
+    EXPECT_TRUE(param->groupInfo != nullptr);
+    (void)HandleP2pConnectionChanged(static_cast<const struct P2pBroadcastParam *>(param));
+    SoftBusFree(param->groupInfo);
+    SoftBusFree(param);
 };
 
 HWTEST_F(LinkManagerBroadcastTest, LinkManagerBroadcastTest003, TestSize.Level1)
