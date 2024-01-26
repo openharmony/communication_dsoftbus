@@ -55,7 +55,6 @@
 #include "wifi_direct_ip_manager.h"
 #include "wifi_direct_ipv4_info.h"
 #include "wifi_direct_types.h"
-#include "negotiate_state.h"
 #include "negotiate_message.h"
 #include "wifi_direct_role_negotiator.h"
 #include "wifi_direct_role_option.h"
@@ -155,7 +154,7 @@ HWTEST_F(WifiDirectCoexist, WifiDirectCoexistRule005, TestSize.Level1)
 
 /*
 * @tc.name: WifiDirectCoexistRule006
-* @tc.desc: test setCoexistRule with different value
+* @tc.desc: test isCombinationAvailable with different value
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -171,7 +170,7 @@ HWTEST_F(WifiDirectCoexist, WifiDirectCoexistRule006, TestSize.Level1)
 
 /*
 * @tc.name: WifiDirectCoexistRule007
-* @tc.desc: test setCoexistRule with different value
+* @tc.desc: test isCombinationAvailable with different value
 * @tc.type: FUNC
 * @tc.require:
 */
