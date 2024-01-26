@@ -36,6 +36,7 @@ typedef struct {
     EpollTask taskList[MAX_COAP_SOCKET_NUM];
     uint32_t socketNum;
     uint8_t socketErrFlag;
+    uint8_t freeCtxLater;
     void *iface;
 } CoapCtxType;
 
