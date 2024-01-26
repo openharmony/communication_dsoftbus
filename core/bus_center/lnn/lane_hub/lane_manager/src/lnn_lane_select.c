@@ -30,6 +30,7 @@
 #include "lnn_common_utils.h"
 
 #define INVALID_LINK (-1)
+#define MESH_MAGIC_NUMBER 0x5A5A5A5A
 
 static void GetFileDefaultLink(LaneLinkType *linkList, uint32_t *listNum)
 {
@@ -310,6 +311,23 @@ int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
     return SOFTBUS_OK;
 }
 
+static void SelectMeshLinks(const char *networkId, LaneLinkType *resList, uint32_t *resNum)
+{
+    LaneLinkType optionalLink[LANE_LINK_TYPE_BUTT];
+    (void)memset_s(optionalLink, sizeof(optionalLink), 0, sizeof(optionalLink));
+    uint32_t optLinkNum = 0;
+    optionalLink[optLinkNum++] = LANE_WLAN_5G;
+    optionalLink[optLinkNum++] = LANE_WLAN_2P4G;
+    optionalLink[optLinkNum++] = LANE_BR;
+    *resNum = 0;
+    for (uint32_t i = 0; i < optLinkNum; i++) {
+        if (!IsValidLane(networkId, optionalLink[i])) {
+            continue;
+        }
+        resList[(*resNum)++] = optionalLink[i];
+    }
+}
+
 int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *request,
     LanePreferredLinkList *recommendList)
 {
@@ -328,6 +346,9 @@ int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *req
         request->qosRequire.minLaneLatency == 0) {
         LNN_LOGI(LNN_LANE, "select lane by default linkList");
         SelectByDefaultLink(networkId, request, laneLinkList.linkType, &(laneLinkList.linkTypeNum));
+    } else if (request->qosRequire.minBW == MESH_MAGIC_NUMBER) {
+        LNN_LOGI(LNN_LANE, "select lane by mesh linkList");
+        SelectMeshLinks(networkId, laneLinkList.linkType, &(laneLinkList.linkTypeNum));
     } else {
         LNN_LOGI(LNN_LANE, "select lane by qos require");
         if (DecideAvailableLane(networkId, request, &laneLinkList) != SOFTBUS_OK) {
