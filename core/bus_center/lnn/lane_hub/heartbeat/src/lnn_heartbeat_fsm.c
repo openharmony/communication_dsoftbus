@@ -538,7 +538,6 @@ static int32_t OnProcessSendOnce(FsmStateMachine *fsm, int32_t msgType, void *pa
 
 static void ReportSendBroadcastResultEvt(void)
 {
-    LNN_LOGI(LNN_HEART_BEAT, "report send broadcast result evt enter");
     if (SoftBusRecordDiscoveryResult(SEND_BROADCAST, NULL) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "report send broadcast result fail");
     }

@@ -132,7 +132,6 @@ static void ProcessLinkEvent(struct nlmsghdr *nlh)
     }
 
     if (LnnGetNetIfTypeByName((const char *)RTA_DATA(tb[IFLA_IFNAME]), &type) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "LnnGetNetIfTypeByName error");
         return;
     }
     if (type == LNN_NETIF_TYPE_ETH || type == LNN_NETIF_TYPE_WLAN) {
