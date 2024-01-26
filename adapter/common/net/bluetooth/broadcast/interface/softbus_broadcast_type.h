@@ -83,13 +83,45 @@ typedef enum {
     SRV_TYPE_HB, // The service type is heart beat.
     SRV_TYPE_CONN, // The service type is connection.
     SRV_TYPE_TRANS_MSG, // The service type is transmission message.
-    SRV_TYPE_DIS, // The service type is distrubite discovery.
+    SRV_TYPE_DIS, // The service type is distributed discovery.
     SRV_TYPE_SHARE, // The service type is share discovery.
     SRV_TYPE_APPROACH, // The service type is approach discovery.
     SRV_TYPE_SH, // The service type is sensorhub.
     SRV_TYPE_FAST_OFFLINE, // The service type is fast offline.
     SRV_TYPE_BUTT,
 } BaseServiceType;
+
+/**
+ * @brief Defines the mapping between supported service types and their names.
+ *
+ * @since 4.1
+ * @version 1.0
+ */
+typedef struct {
+    /** Service types. For details, see {@link BaseServiceType}. */
+    BaseServiceType srvType;
+    /** Service names. For details, see {@link g_srvTypeMap}. */
+    char *service;
+} SrvTypeMap;
+
+/**
+ * @brief Defines the mapping between supported service types and their names.
+ *
+ * Subsequent extensions need to be added in sequence.
+ *
+ * @since 4.1
+ * @version 1.0
+ */
+static const SrvTypeMap g_srvTypeMap[] = {
+    {SRV_TYPE_HB, (char *)"heart beat"},
+    {SRV_TYPE_CONN, (char *)"connection"},
+    {SRV_TYPE_TRANS_MSG, (char *)"trans msg"},
+    {SRV_TYPE_DIS, (char *)"distributed"},
+    {SRV_TYPE_SHARE, (char *)"share"},
+    {SRV_TYPE_APPROACH, (char *)"approach"},
+    {SRV_TYPE_SH, (char *)"sensorhub"},
+    {SRV_TYPE_FAST_OFFLINE, (char *)"fast offline"},
+};
 
 /**
  * @brief Defines the broadcast status type.
