@@ -300,7 +300,6 @@ static int32_t GetLocalIpInfo(char *ipAddr, uint32_t ipAddrLen, char *ifName, ui
 static int32_t SetLocalIpInfo(const char *ipAddr, const char *ifName)
 {
     if (LnnSetLocalStrInfo(STRING_KEY_WLAN_IP, ipAddr) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "set local ip error");
         return SOFTBUS_ERR;
     }
     if (LnnSetLocalStrInfo(STRING_KEY_NET_IF_NAME, ifName) != SOFTBUS_OK) {
@@ -371,7 +370,6 @@ static int32_t RequestMainPort(const char *ifName, const char *address)
         return SOFTBUS_ERR;
     }
     if (SetLocalIpInfo(address, ifName) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "set local ip info failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -541,7 +539,6 @@ static void OnIpNetifStatusChanged(LnnPhysicalSubnet *subnet, void *status)
             break;
         }
         default:
-            LNN_LOGW(LNN_BUILDER, "discard unexpected event=%{public}d", event);
             return;
     }
 
