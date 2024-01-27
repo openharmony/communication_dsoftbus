@@ -60,15 +60,9 @@ ohos_unittest("DiscBleTest") {
   ]
 
   if (is_standard_system) {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
+    external_deps = [ "c_utils:utils" ]
   } else {
-    external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-    ]
+    external_deps = [ "c_utils:utils" ]
   }
 }
 
