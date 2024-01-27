@@ -53,7 +53,7 @@ int32_t DiscServerProxyInit(void)
 
         int32_t ret = iUnknown->QueryInterface(iUnknown, CLIENT_PROXY_VER, (void **)&g_serverProxy);
         if (ret != EC_SUCCESS || g_serverProxy == NULL) {
-            DISC_LOGE(DISC_INIT, "QueryInterface failed [%d]", ret);
+            DISC_LOGE(DISC_INIT, "QueryInterface failed. ret=%{public}d", ret);
             SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
             continue;
         }
@@ -117,7 +117,7 @@ int ServerIpcPublishService(const char *pkgName, const PublishInfo *info)
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_PUBLISH_SERVICE, &request, NULL, NULL);
     if (ans != SOFTBUS_OK) {
-        DISC_LOGE(DISC_CONTROL, "publish service invoke failed[%d].", ans);
+        DISC_LOGE(DISC_CONTROL, "publish service invoke failed. ans=%{public}d", ans);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -151,7 +151,7 @@ int ServerIpcUnPublishService(const char *pkgName, int publishId)
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_UNPUBLISH_SERVICE, &request, NULL, NULL);
     if (ans != SOFTBUS_OK) {
-        DISC_LOGE(DISC_CONTROL, "unpublish service invoke failed[%d].", ans);
+        DISC_LOGE(DISC_CONTROL, "unpublish service invoke failed. ans=%{public}d", ans);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -208,7 +208,7 @@ int ServerIpcStartDiscovery(const char *pkgName, const SubscribeInfo *info)
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_START_DISCOVERY, &request, NULL, NULL);
     if (ans != SOFTBUS_OK) {
-        DISC_LOGE(DISC_CONTROL, "start discovery invoke failed[%d].", ans);
+        DISC_LOGE(DISC_CONTROL, "start discovery invoke failed. ans=%{public}d", ans);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -241,7 +241,7 @@ int ServerIpcStopDiscovery(const char *pkgName, int subscribeId)
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_STOP_DISCOVERY, &request, NULL, NULL);
     if (ans != SOFTBUS_OK) {
-        DISC_LOGE(DISC_CONTROL, "stop discovery invoke failed[%d].", ans);
+        DISC_LOGE(DISC_CONTROL, "stop discovery invoke failed. ans=%{public}d", ans);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

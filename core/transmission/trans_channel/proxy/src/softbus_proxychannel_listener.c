@@ -36,14 +36,14 @@
 static int32_t NotifyNormalChannelClosed(const char *pkgName, int32_t pid, int32_t channelId)
 {
     int32_t ret = TransProxyOnChannelClosed(pkgName, pid, channelId);
-    TRANS_LOGI(TRANS_CTRL, "proxy channel close, channelId=%d, ret=%d", channelId, ret);
+    TRANS_LOGI(TRANS_CTRL, "proxy channel close, channelId=%{public}d, ret=%{public}d", channelId, ret);
     return ret;
 }
 
 static int32_t NotifyNormalChannelOpenFailed(const char *pkgName, int32_t pid, int32_t channelId, int32_t errCode)
 {
     int32_t ret = TransProxyOnChannelOpenFailed(pkgName, pid, channelId, errCode);
-    TRANS_LOGW(TRANS_CTRL, "proxy channel open fail, channelId=%d, ret=%d", channelId, ret);
+    TRANS_LOGW(TRANS_CTRL, "proxy channel open fail, channelId=%{public}d, ret=%{public}d", channelId, ret);
     return ret;
 }
 
@@ -77,6 +77,7 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
     }
     info.timeStart = appInfo->timeStart;
     info.linkType = appInfo->linkType;
+    info.connectType = appInfo->connectType;
 
     int32_t ret = SOFTBUS_ERR;
     if (appInfo->appType != APP_TYPE_AUTH) {
@@ -91,7 +92,7 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
     }
 
     ret = TransProxyOnChannelOpened(appInfo->myData.pkgName, appInfo->myData.pid, appInfo->myData.sessionName, &info);
-    TRANS_LOGI(TRANS_CTRL, "proxy channel open, channelId=%d, ret=%d", channelId, ret);
+    TRANS_LOGI(TRANS_CTRL, "proxy channel open, channelId=%{public}d, ret=%{public}d", channelId, ret);
     return ret;
 }
 
@@ -102,7 +103,7 @@ int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned
         TRANS_LOGE(TRANS_CTRL, "proxy channel opened app info invalid.");
         return SOFTBUS_INVALID_PARAM;
     }
-    TRANS_LOGI(TRANS_CTRL, "proxy channel opened: channelId=%d, appType=%d, isServer=%d",
+    TRANS_LOGI(TRANS_CTRL, "proxy channel opened: channelId=%{public}d, appType=%{public}d, isServer=%{public}d",
         channelId, appInfo->appType, isServer);
 
     switch (appInfo->appType) {
@@ -127,8 +128,12 @@ int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned
         .errcode = ret,
         .result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED
     };
-    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
-    TRANS_LOGI(TRANS_CTRL, "on open ret %d", ret);
+    if (!isServer) {
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
+    } else if (ret != SOFTBUS_OK) {
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_OPEN_CHANNEL_END, extra);
+    }
+    TRANS_LOGI(TRANS_CTRL, "on open ret=%{public}d", ret);
     return ret;
 }
 
@@ -136,7 +141,7 @@ static int32_t TransProxyGetChannelIsServer(int32_t channelId, int8_t *isServer)
 {
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (chan == NULL) {
-        TRANS_LOGE(TRANS_MSG, "malloc in trans proxy send message. channelId=%d", channelId);
+        TRANS_LOGE(TRANS_MSG, "malloc in trans proxy send message. channelId=%{public}d", channelId);
         return SOFTBUS_MALLOC_ERR;
     }
     if (TransProxyGetChanByChanId(channelId, chan) != SOFTBUS_OK) {
@@ -161,7 +166,7 @@ int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int3
         TransEventExtra extra = {
             .calleePkg = NULL,
             .peerNetworkId = appInfo->peerData.deviceId,
-            .linkType = appInfo->linkType,
+            .linkType = appInfo->connectType,
             .channelId = channelId,
             .costTime = timediff,
             .errcode = errCode,
@@ -183,7 +188,7 @@ int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int3
     }
     SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName, appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, timediff);
     TRANS_LOGI(TRANS_CTRL,
-        "proxy channel openfailed: channelId=%d, appType=%d", channelId, appInfo->appType);
+        "proxy channel openfailed: channelId=%{public}d, appType=%{public}d", channelId, appInfo->appType);
     int32_t ret = SOFTBUS_ERR;
     switch (appInfo->appType) {
         case APP_TYPE_NORMAL:
@@ -206,7 +211,7 @@ int32_t OnProxyChannelClosed(int32_t channelId, const AppInfo *appInfo)
         return SOFTBUS_INVALID_PARAM;
     }
     TRANS_LOGI(TRANS_CTRL,
-        "proxy channel closed: channelId=%d, appType=%d", channelId, appInfo->appType);
+        "proxy channel closed: channelId=%{public}d, appType=%{public}d", channelId, appInfo->appType);
 
     int32_t ret = SOFTBUS_ERR;
     switch (appInfo->appType) {
@@ -255,7 +260,7 @@ static int32_t TransProxyGetAppInfo(const char *sessionName, const char *peerNet
     appInfo->autoCloseTime = 0;
     ret = LnnGetLocalStrInfo(STRING_KEY_UUID, appInfo->myData.deviceId, sizeof(appInfo->myData.deviceId));
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get local uuid fail ret=%d", ret);
+        TRANS_LOGE(TRANS_CTRL, "get local uuid fail. ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     if (strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), sessionName) != EOK) {
@@ -269,7 +274,7 @@ static int32_t TransProxyGetAppInfo(const char *sessionName, const char *peerNet
     ret = LnnGetRemoteStrInfo(peerNetworkId, STRING_KEY_UUID,
         appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId));
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get remote node uuid err ret=%d", ret);
+        TRANS_LOGE(TRANS_CTRL, "get remote node uuid err. ret=%{public}d", ret);
         return SOFTBUS_GET_REMOTE_UUID_ERR;
     }
 
@@ -304,7 +309,7 @@ static int32_t TransGetConnectOption(
     if (TransGetLaneInfoByOption(false, &option, &connInfo, &laneId) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
-    TRANS_LOGI(TRANS_CTRL, "net channel lane info laneId=%u type=%d", laneId, connInfo.type);
+    TRANS_LOGI(TRANS_CTRL, "net channel lane info. laneId=%{public}u, type=%{public}d", laneId, connInfo.type);
     if (TransGetConnectOptByConnInfo(&connInfo, connOpt) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
@@ -352,24 +357,24 @@ int32_t TransSendNetworkingMessage(int32_t channelId, const char *data, uint32_t
     int32_t ret = SOFTBUS_ERR;
     ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (info == NULL) {
-        TRANS_LOGE(TRANS_MSG, "malloc in trans proxy send message. channelId=%d", channelId);
+        TRANS_LOGE(TRANS_MSG, "malloc in trans proxy send message. channelId=%{public}d", channelId);
         return SOFTBUS_MALLOC_ERR;
     }
 
     if (TransProxyGetSendMsgChanInfo(channelId, info) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_MSG, "get proxy channelId=%d failed.", channelId);
+        TRANS_LOGE(TRANS_MSG, "get proxy channelId failed. channelId=%{public}d", channelId);
         SoftBusFree(info);
         return SOFTBUS_TRANS_PROXY_SEND_CHANNELID_INVALID;
     }
 
     if (info->status != PROXY_CHANNEL_STATUS_COMPLETED && info->status != PROXY_CHANNEL_STATUS_KEEPLIVEING) {
-        TRANS_LOGE(TRANS_MSG, "proxy channel status=%d is err.", info->status);
+        TRANS_LOGE(TRANS_MSG, "proxy channel status is err. status=%{public}d", info->status);
         SoftBusFree(info);
         return SOFTBUS_TRANS_PROXY_CHANNLE_STATUS_INVALID;
     }
 
     if (info->appInfo.appType != APP_TYPE_INNER) {
-        TRANS_LOGE(TRANS_MSG, "wrong appType=%d", info->appInfo.appType);
+        TRANS_LOGE(TRANS_MSG, "wrong appType=%{public}d", info->appInfo.appType);
         SoftBusFree(info);
         return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
     }

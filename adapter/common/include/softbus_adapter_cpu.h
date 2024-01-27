@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef SOFTBUS_CPU_H
-#define SOFTBUS_CPU_H
+#ifndef SOFTBUS_ADAPTER_CPU_H
+#define SOFTBUS_ADAPTER_CPU_H
 
 #ifndef _WIN32
 #include <sched.h>
@@ -67,4 +67,4 @@ extern "C" {
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-#endif // SOFTBUS_CPU_H
+#endif // SOFTBUS_ADAPTER_CPU_H

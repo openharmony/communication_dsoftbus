@@ -22,13 +22,23 @@
 #include "client_trans_channel_manager.h"
 #include "client_trans_file_listener.h"
 #include "client_trans_proxy_file_manager.h"
+#include "client_trans_tcp_direct_manager.h"
+#include "client_trans_udp_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_app_info.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_socket.h"
 #include "softbus_utils.h"
 #include "trans_log.h"
 #include "trans_server_proxy.h"
+
+#define NETWORK_ID_LEN 7
+#define HML_IP_PREFIX "172.30."
+#define GET_ROUTE_TYPE(type) ((type) & 0xff)
+#define GET_CONN_TYPE(type) (((type) >> 8) & 0xff)
+
+static void ClientTransSessionTimerProc(void);
 
 static int32_t g_sessionIdNum = 0;
 static int32_t g_sessionId = 1;
@@ -84,7 +94,7 @@ void PermissionStateChange(const char *pkgName, int32_t state)
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
         if ((strcmp(serverNode->pkgName, pkgName) == 0)) {
             serverNode->permissionState = state > 0 ? true : false;
-            TRANS_LOGI(TRANS_SDK, "pkgName=%s permission change, state=%d", pkgName, state);
+            TRANS_LOGI(TRANS_SDK, "permission change, pkgName=%{public}s, state=%{public}d", pkgName, state);
             break;
         }
     }
@@ -106,6 +116,11 @@ int TransClientInit(void)
 
     if (ClientTransChannelInit() != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "init trans channel failed");
+        return SOFTBUS_ERR;
+    }
+
+    if (RegisterTimeoutCallback(SOFTBUS_TRNAS_IDLE_TIMEOUT_TIMER_FUN, ClientTransSessionTimerProc) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_INIT, "init trans idle timer failed");
         return SOFTBUS_ERR;
     }
 
@@ -230,7 +245,7 @@ static void DestroyClientSessionServer(ClientSessionServer *server, ListNode *de
     ListDelete(&(server->node));
     char *tmpName = NULL;
     Anonymize(server->sessionName, &tmpName);
-    TRANS_LOGI(TRANS_SDK, "destroy session server sessionName=%s", tmpName);
+    TRANS_LOGI(TRANS_SDK, "destroy session server sessionName=%{public}s", tmpName);
     AnonymizeFree(tmpName);
     SoftBusFree(server);
 }
@@ -259,6 +274,7 @@ void TransClientDeinit(void)
     g_clientSessionServerList = NULL;
     ClientTransChannelDeinit();
     TransServerProxyDeInit();
+    (void)RegisterTimeoutCallback(SOFTBUS_TRNAS_IDLE_TIMEOUT_TIMER_FUN, NULL);
 }
 
 static bool SessionServerIsExist(const char *sessionName)
@@ -314,7 +330,7 @@ static void ShowClientSessionServer(void)
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_clientSessionServerList->list, ClientSessionServer, node) {
         Anonymize(pos->sessionName, &tmpName);
         TRANS_LOGE(TRANS_SDK,
-            "count=%d client session server sessionName=%s is exist", count, tmpName);
+            "client session server is exist. count=%{public}d, sessionName=%{public}s", count, tmpName);
         AnonymizeFree(tmpName);
         count++;
     }
@@ -359,7 +375,7 @@ int32_t ClientAddSessionServer(SoftBusSecType type, const char *pkgName, const c
     (void)SoftBusMutexUnlock(&g_clientSessionServerList->lock);
     char *tmpName = NULL;
     Anonymize(server->sessionName, &tmpName);
-    TRANS_LOGI(TRANS_SDK, "sessionName=%s, pkgName=%s",
+    TRANS_LOGI(TRANS_SDK, "sessionName=%{public}s, pkgName=%{public}s",
         tmpName, server->pkgName);
     AnonymizeFree(tmpName);
     return SOFTBUS_OK;
@@ -466,6 +482,7 @@ static int32_t AddSession(const char *sessionName, SessionInfo *session)
             continue;
         }
         ListAdd(&serverNode->sessionList, &session->node);
+        TRANS_LOGI(TRANS_SDK, "add sessionId = %{public}d", session->sessionId);
         return SOFTBUS_OK;
     }
     DestroySessionId();
@@ -492,7 +509,7 @@ int32_t ClientAddNewSession(const char *sessionName, SessionInfo *session)
     int32_t ret = AddSession(sessionName, session);
     if (ret != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-        TRANS_LOGE(TRANS_SDK, "add session failed, ret=%d", ret);
+        TRANS_LOGE(TRANS_SDK, "add session failed, ret=%{public}d", ret);
         return ret;
     }
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
@@ -535,7 +552,7 @@ int32_t ClientAddSession(const SessionParam *param, int32_t *sessionId, bool *is
     if (ret != SOFTBUS_OK) {
         SoftBusFree(session);
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-        TRANS_LOGE(TRANS_SDK, "Add Session failed, ret=%d", ret);
+        TRANS_LOGE(TRANS_SDK, "Add Session failed, ret=%{public}d", ret);
         return ret;
     }
 
@@ -580,7 +597,7 @@ int32_t ClientAddAuthSession(const char *sessionName, int32_t *sessionId)
     int32_t ret = ClientAddNewSession(sessionName, session);
     if (ret != SOFTBUS_OK) {
         SoftBusFree(session);
-        TRANS_LOGE(TRANS_SDK, "client add new session failed, ret=%d.", ret);
+        TRANS_LOGE(TRANS_SDK, "client add new session failed, ret=%{public}d.", ret);
         return ret;
     }
     *sessionId = session->sessionId;
@@ -621,7 +638,7 @@ int32_t ClientDeleteSessionServer(SoftBusSecType type, const char *sessionName)
 
 int32_t ClientDeleteSession(int32_t sessionId)
 {
-    TRANS_LOGI(TRANS_SDK, "sessionId=%d", sessionId);
+    TRANS_LOGI(TRANS_SDK, "sessionId=%{public}d", sessionId);
     if (sessionId < 0) {
         return SOFTBUS_ERR;
     }
@@ -648,6 +665,7 @@ int32_t ClientDeleteSession(int32_t sessionId)
                 continue;
             }
             ListDelete(&(sessionNode->node));
+            TRANS_LOGI(TRANS_SDK, "delete sessionId = %{public}d", sessionId);
             DestroySessionId();
             SoftBusFree(sessionNode);
             (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
@@ -682,7 +700,7 @@ int32_t ClientGetSessionDataById(int32_t sessionId, char *data, uint16_t len, Se
     int32_t ret = GetSessionById(sessionId, &serverNode, &sessionNode);
     if (ret != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-        TRANS_LOGE(TRANS_SDK, "sessionId=%d not found", sessionId);
+        TRANS_LOGE(TRANS_SDK, "session not found. sessionId=%{public}d", sessionId);
         return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
     }
 
@@ -734,7 +752,7 @@ int32_t ClientGetSessionIntegerDataById(int32_t sessionId, int *data, SessionKey
     int32_t ret = GetSessionById(sessionId, &serverNode, &sessionNode);
     if (ret != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-        TRANS_LOGE(TRANS_SDK, "not found by sessionId=%d", sessionId);
+        TRANS_LOGE(TRANS_SDK, "not found by sessionId=%{public}d", sessionId);
         return SOFTBUS_ERR;
     }
     switch (key) {
@@ -778,7 +796,7 @@ int32_t ClientGetChannelBySessionId(int32_t sessionId, int32_t *channelId, int32
     SessionInfo *sessionNode = NULL;
     if (GetSessionById(sessionId, &serverNode, &sessionNode) != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-        TRANS_LOGE(TRANS_SDK, "not found by sessionId=%d", sessionId);
+        TRANS_LOGE(TRANS_SDK, "not found by sessionId=%{public}d", sessionId);
         return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
     }
 
@@ -813,7 +831,7 @@ int32_t ClientGetChannelBusinessTypeBySessionId(int32_t sessionId, int32_t *busi
     SessionInfo *sessionNode = NULL;
     if (GetSessionById(sessionId, &serverNode, &sessionNode) != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-        TRANS_LOGE(TRANS_SDK, "not found by sessionId=%d", sessionId);
+        TRANS_LOGE(TRANS_SDK, "not found by sessionId=%{public}d", sessionId);
         return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
     }
 
@@ -847,7 +865,7 @@ int32_t ClientSetChannelBySessionId(int32_t sessionId, TransInfo *transInfo)
     int32_t ret = GetSessionById(sessionId, &serverNode, &sessionNode);
     if (ret != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-        TRANS_LOGE(TRANS_SDK, "not found by sessionId=%d", sessionId);
+        TRANS_LOGE(TRANS_SDK, "not found by sessionId=%{public}d", sessionId);
         return ret;
     }
     sessionNode->channelId = transInfo->channelId;
@@ -892,7 +910,7 @@ int32_t GetEncryptByChannelId(int32_t channelId, int32_t channelType, int32_t *d
     }
 
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-    TRANS_LOGE(TRANS_SDK, "not found session with channelId=%d", channelId);
+    TRANS_LOGE(TRANS_SDK, "not found session with channelId=%{public}d", channelId);
     return SOFTBUS_ERR;
 }
 
@@ -931,7 +949,7 @@ int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, in
     }
 
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-    TRANS_LOGE(TRANS_SDK, "not found session with channelId=%d", channelId);
+    TRANS_LOGE(TRANS_SDK, "not found session with channelId=%{public}d", channelId);
     return SOFTBUS_ERR;
 }
 
@@ -970,7 +988,7 @@ int32_t ClientGetRouteTypeByChannelId(int32_t channelId, int32_t channelType, in
     }
 
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-    TRANS_LOGE(TRANS_SDK, "not found routeType with channelId=%d", channelId);
+    TRANS_LOGE(TRANS_SDK, "not found routeType with channelId=%{public}d", channelId);
     return SOFTBUS_ERR;
 }
 
@@ -1009,7 +1027,7 @@ int32_t ClientGetDataConfigByChannelId(int32_t channelId, int32_t channelType, u
     }
 
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-    TRANS_LOGE(TRANS_SDK, "not found dataConfig with channelId=%d", channelId);
+    TRANS_LOGE(TRANS_SDK, "not found dataConfig with channelId=%{public}d", channelId);
     return SOFTBUS_ERR;
 }
 
@@ -1067,7 +1085,7 @@ int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sess
     }
 
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-    TRANS_LOGE(TRANS_SDK, "not found session with channelId=%d, channelType=%d",
+    TRANS_LOGE(TRANS_SDK, "not found session with channelId=%{public}d, channelType=%{public}d",
         channel->channelId, channel->channelType);
     return SOFTBUS_ERR;
 }
@@ -1094,7 +1112,7 @@ int32_t ClientGetSessionCallbackById(int32_t sessionId, ISessionListener *callba
     int32_t ret = GetSessionById(sessionId, &serverNode, &sessionNode);
     if (ret != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-        TRANS_LOGE(TRANS_SDK, "not found by sessionId=%d", sessionId);
+        TRANS_LOGE(TRANS_SDK, "not found by sessionId=%{public}d", sessionId);
         return SOFTBUS_ERR;
     }
 
@@ -1143,7 +1161,7 @@ int32_t ClientGetSessionCallbackByName(const char *sessionName, ISessionListener
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     char *tmpName = NULL;
     Anonymize(sessionName, &tmpName);
-    TRANS_LOGE(TRANS_SDK, "not found by sessionName=%S", tmpName);
+    TRANS_LOGE(TRANS_SDK, "not found by sessionName=%{public}s", tmpName);
     AnonymizeFree(tmpName);
     return SOFTBUS_ERR;
 }
@@ -1181,22 +1199,123 @@ int32_t ClientGetSessionSide(int32_t sessionId)
     return side;
 }
 
+static int32_t ClientTransGetTdcIp(int32_t channelId, char *myIp, int32_t ipLen)
+{
+    TcpDirectChannelInfo channel;
+    if (TransTdcGetInfoById(channelId, &channel) == NULL) {
+        TRANS_LOGE(TRANS_SDK, "TdcGetInfo failed channelId=%{public}d", channelId);
+        return SOFTBUS_ERR;
+    }
+
+    SocketAddr socket;
+    // The local and peer IP belong to the same network segment, and the type can also be determined by the peer IP
+    if (ConnGetPeerSocketAddr(channel.detail.fd, &socket) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "ConnGetPeerSocketAddr failed fd=%{public}d", channel.detail.fd);
+        return SOFTBUS_ERR;
+    }
+
+    if (strcpy_s(myIp, ipLen, socket.addr) != EOK) {
+        TRANS_LOGE(TRANS_SDK, "strcpy_s ip faild, len=%{public}zu", strlen(socket.addr));
+        return SOFTBUS_ERR;
+    }
+
+    return SOFTBUS_OK;
+}
+
+static int32_t ClientTransGetUdpIp(int32_t channelId, char *myIp, int32_t ipLen)
+{
+    UdpChannel channel;
+    if (TransGetUdpChannel(channelId, &channel) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get UdpChannel failed channelId=%{public}d", channelId);
+        return SOFTBUS_ERR;
+    }
+
+    if (strcpy_s(myIp, ipLen, channel.info.myIp) != EOK) {
+        TRANS_LOGE(TRANS_SDK, "strcpy_s ip faild, len=%{public}zu", strlen(channel.info.myIp));
+        return SOFTBUS_ERR;
+    }
+
+    return SOFTBUS_OK;
+}
+
+// determine connection type based on IP
+static bool ClientTransCheckHmlIp(const char *ip)
+{
+    char ipSeg[NETWORK_ID_LEN] = {0};
+    if (strncpy_s(ipSeg, sizeof(ipSeg), ip, sizeof(ipSeg) - 1) == EOK) {
+        TRANS_LOGI(TRANS_SDK, "ipSeg=%{public}s", ipSeg);
+    } else {
+        TRANS_LOGW(TRANS_SDK, "strncpy_s ipSeg failed");
+    }
+
+    if (strncmp(ip, HML_IP_PREFIX, NETWORK_ID_LEN) == 0) {
+        return true;
+    }
+
+    return false;
+}
+
+// determine connection type based on IP, delete session when connection type and parameter connType are consistent
+static bool ClientTransCheckNeedDel(SessionInfo *sessionNode, int32_t routeType, int32_t connType)
+{
+    if (connType == TRANS_CONN_ALL) {
+        if (routeType != ROUTE_TYPE_ALL && sessionNode->routeType != routeType) {
+            return false;
+        }
+        return true;
+    }
+    /*
+    * only when the function OnWifiDirectDeviceOffLine is called can reach this else branch,
+    * and routeType is WIFI_P2P, the connType is hml or p2p
+    */
+    if (sessionNode->routeType != routeType) {
+        return false;
+    }
+
+    char myIp[IP_LEN] = {0};
+    if (sessionNode->channelType == CHANNEL_TYPE_UDP) {
+        if (ClientTransGetUdpIp(sessionNode->channelId, myIp, sizeof(myIp)) != SOFTBUS_OK) {
+            return false;
+        }
+    } else if (sessionNode->channelType == CHANNEL_TYPE_TCP_DIRECT) {
+        if (ClientTransGetTdcIp(sessionNode->channelId, myIp, sizeof(myIp)) != SOFTBUS_OK) {
+            return false;
+        }
+    } else {
+        TRANS_LOGW(TRANS_SDK, "check channelType=%{public}d", sessionNode->channelType);
+        return false;
+    }
+
+    bool isHml = ClientTransCheckHmlIp(myIp);
+    if (connType == TRANS_CONN_HML && isHml) {
+        return true;
+    } else if (connType == TRANS_CONN_P2P && !isHml) {
+        return true;
+    }
+
+    return false;
+}
+
 static void DestroyClientSessionByNetworkId(const ClientSessionServer *server,
-    const char *networkId, int32_t routeType, ListNode *destroyList)
+    const char *networkId, int32_t type, ListNode *destroyList)
 {
     SessionInfo *sessionNode = NULL;
     SessionInfo *sessionNodeNext = NULL;
+    // connType is set only in function OnWifiDirectDeviceOffLine, others is TRANS_CONN_ALL, and routeType is WIFI_P2P
+    int32_t routeType = GET_ROUTE_TYPE(type);
+    int32_t connType = GET_CONN_TYPE(type);
 
     LIST_FOR_EACH_ENTRY_SAFE(sessionNode, sessionNodeNext, &(server->sessionList), SessionInfo, node) {
         if (strcmp(sessionNode->info.peerDeviceId, networkId) != 0) {
             continue;
         }
-        if (routeType != ROUTE_TYPE_ALL && sessionNode->routeType != routeType) {
+
+        if (!ClientTransCheckNeedDel(sessionNode, routeType, connType)) {
             continue;
         }
 
-        TRANS_LOGI(TRANS_SDK, "info={%d, %d, %d}",
-            sessionNode->channelId, sessionNode->channelType, sessionNode->routeType);
+        TRANS_LOGI(TRANS_SDK, "channelId=%{public}d, channelType=%{public}d, routeType=%{public}d, type=%{public}d",
+            sessionNode->channelId, sessionNode->channelType, sessionNode->routeType, type);
         DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, server);
         if (destroyNode == NULL) {
             continue;
@@ -1257,7 +1376,7 @@ int32_t ReCreateSessionServerToServer(void)
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
         int32_t ret = ServerIpcCreateSessionServer(serverNode->pkgName, serverNode->sessionName);
         Anonymize(serverNode->sessionName, &tmpName);
-        TRANS_LOGI(TRANS_SDK, "sessionName=%s, pkgName=%s, ret=%d",
+        TRANS_LOGI(TRANS_SDK, "sessionName=%{public}s, pkgName=%{public}s, ret=%{public}d",
             tmpName, serverNode->pkgName, ret);
         AnonymizeFree(tmpName);
     }
@@ -1284,7 +1403,7 @@ void ClientTransOnLinkDown(const char *networkId, int32_t routeType)
     }
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
-    TRANS_LOGI(TRANS_SDK, "routeType=%d, networkId=%s", routeType, anonyNetworkId);
+    TRANS_LOGI(TRANS_SDK, "routeType=%{public}d, networkId=%{public}s", routeType, anonyNetworkId);
     AnonymizeFree(anonyNetworkId);
 
     if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != 0) {
@@ -1310,11 +1429,11 @@ int32_t ClientGrantPermission(int uid, int pid, const char *busName)
     }
     char *tmpName = NULL;
     Anonymize(busName, &tmpName);
-    TRANS_LOGI(TRANS_SDK, "sessionName=%s", tmpName);
+    TRANS_LOGI(TRANS_SDK, "sessionName=%{public}s", tmpName);
     AnonymizeFree(tmpName);
     int32_t ret = ServerIpcGrantPermission(uid, pid, busName);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "server grant permission failed, ret=%d", ret);
+        TRANS_LOGE(TRANS_SDK, "server grant permission failed, ret=%{public}d", ret);
     }
     return ret;
 }
@@ -1327,11 +1446,11 @@ int32_t ClientRemovePermission(const char *busName)
     }
     char *tmpName = NULL;
     Anonymize(busName, &tmpName);
-    TRANS_LOGI(TRANS_SDK, "sessionName=%s", tmpName);
+    TRANS_LOGI(TRANS_SDK, "sessionName=%{public}s", tmpName);
     AnonymizeFree(tmpName);
     int32_t ret = ServerIpcRemovePermission(busName);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "server remove permission failed, ret=%d", ret);
+        TRANS_LOGE(TRANS_SDK, "server remove permission failed, ret=%{public}d", ret);
     }
     return ret;
 }
@@ -1358,7 +1477,7 @@ int32_t ClientGetFileConfigInfoById(int32_t sessionId, int32_t *fileEncrypt, int
     int32_t ret = GetSessionById(sessionId, &serverNode, &sessionNode);
     if (ret != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-        TRANS_LOGE(TRANS_SDK, "not found by sessionId=%d", sessionId);
+        TRANS_LOGE(TRANS_SDK, "not found by sessionId=%{public}d", sessionId);
         return SOFTBUS_NOT_FIND;
     }
     *fileEncrypt = sessionNode->fileEncrypt;
@@ -1390,7 +1509,7 @@ void ClientCleanAllSessionWhenServerDeath(void)
         }
         LIST_FOR_EACH_ENTRY_SAFE(sessionNode, nextSessionNode, &(serverNode->sessionList), SessionInfo, node) {
             if (sessionNode->role == SESSION_ROLE_SERVER) {
-                TRANS_LOGD(TRANS_SDK, "cannot delete socket for listening, socket=%d", sessionNode->sessionId);
+                TRANS_LOGD(TRANS_SDK, "cannot delete socket for listening, socket=%{public}d", sessionNode->sessionId);
                 continue;
             }
             DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, serverNode);
@@ -1406,7 +1525,7 @@ void ClientCleanAllSessionWhenServerDeath(void)
     }
     (void)SoftBusMutexUnlock(&g_clientSessionServerList->lock);
     (void)ClientDestroySession(&destroyList, SHUTDOWN_REASON_SERVICE_DIED);
-    TRANS_LOGI(TRANS_SDK, "client destroy session cnt=%d.", destroyCnt);
+    TRANS_LOGI(TRANS_SDK, "client destroy session cnt=%{public}d.", destroyCnt);
 }
 
 static ClientSessionServer *GetNewSocketServer(SoftBusSecType type, const char *sessionName, const char *pkgName)
@@ -1469,7 +1588,7 @@ int32_t ClientAddSocketServer(SoftBusSecType type, const char *pkgName, const ch
     g_clientSessionServerList->cnt++;
 
     (void)SoftBusMutexUnlock(&g_clientSessionServerList->lock);
-    TRANS_LOGE(TRANS_SDK, "session name [%s], pkg name [%s]", server->sessionName, server->pkgName);
+    TRANS_LOGE(TRANS_SDK, "sessionName=%{public}s, pkgName=%{public}s", server->sessionName, server->pkgName);
     return SOFTBUS_OK;
 }
 
@@ -1501,6 +1620,7 @@ int32_t ClientDeleteSocketSession(int32_t sessionId)
             }
             // delete sessionInfo
             ListDelete(&(sessionNode->node));
+            TRANS_LOGI(TRANS_SDK, "delete sessionId = %{public}d", sessionId);
             DestroySessionId();
             SoftBusFree(sessionNode);
             // delete session server if session server is empty
@@ -1514,7 +1634,7 @@ int32_t ClientDeleteSocketSession(int32_t sessionId)
     }
 
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-    TRANS_LOGE(TRANS_SDK, "%s:not found", __func__);
+    TRANS_LOGE(TRANS_SDK, "not found");
     return SOFTBUS_ERR;
 }
 
@@ -1543,14 +1663,22 @@ static SessionInfo *CreateNewSocketSession(const SessionParam *param)
 
     if (param->peerSessionName != NULL &&
         strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, param->peerSessionName) != EOK) {
-        TRANS_LOGE(TRANS_SDK, "strcpy peerSessionName failed");
+        char *anonySessionName = NULL;
+        Anonymize(param->peerSessionName, &anonySessionName);
+        TRANS_LOGI(TRANS_SDK, "strcpy peerName failed, peerName=%{public}s, peerNameLen=%{public}zu",
+            anonySessionName, strlen(param->peerSessionName));
+        AnonymizeFree(anonySessionName);
         SoftBusFree(session);
         return NULL;
     }
 
     if (param->peerDeviceId != NULL &&
         strcpy_s(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX, param->peerDeviceId) != EOK) {
-        TRANS_LOGE(TRANS_SDK, "strcpy peerDeviceId failed");
+        char *anonyNetworkId = NULL;
+        Anonymize(param->peerDeviceId, &anonyNetworkId);
+        TRANS_LOGI(TRANS_SDK, "strcpy peerDeviceId failed, peerDeviceId=%{public}s, peerDeviceIdLen=%{public}zu",
+            anonyNetworkId, strlen(param->peerDeviceId));
+        AnonymizeFree(anonyNetworkId);
         SoftBusFree(session);
         return NULL;
     }
@@ -1612,7 +1740,7 @@ int32_t ClientAddSocketSession(const SessionParam *param, int32_t *sessionId, bo
     if (ret != SOFTBUS_OK) {
         SoftBusFree(session);
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-        TRANS_LOGE(TRANS_SDK, "Add Session failed, ret [%d]", ret);
+        TRANS_LOGE(TRANS_SDK, "Add Session failed, ret=%{public}d", ret);
         return ret;
     }
 
@@ -1644,13 +1772,12 @@ int32_t ClientSetListenerBySessionId(int32_t sessionId, const ISocketListener *l
     int32_t ret = GetSessionById(sessionId, &serverNode, &sessionNode);
     if (ret != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-        TRANS_LOGE(TRANS_SDK, "%s:not found", __func__);
+        TRANS_LOGE(TRANS_SDK, "not found");
         return ret;
     }
 
     if (sessionNode->role != SESSION_ROLE_INIT) {
-        TRANS_LOGE(TRANS_SDK, "%s:socket in use, current role:%d", __func__,
-            sessionNode->role);
+        TRANS_LOGE(TRANS_SDK, "socket in use, currentRole=%{public}d", sessionNode->role);
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
         return SOFTBUS_TRANS_SOCKET_IN_USE;
     }
@@ -1659,7 +1786,7 @@ int32_t ClientSetListenerBySessionId(int32_t sessionId, const ISocketListener *l
     serverNode->listener.isSocketListener = true;
     if (ret != EOK) {
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-        TRANS_LOGE(TRANS_SDK, "%s:memcpy failed", __func__);
+        TRANS_LOGE(TRANS_SDK, "memcpy failed");
         return SOFTBUS_MEM_ERR;
     }
 
@@ -1672,7 +1799,7 @@ int32_t ClientSetListenerBySessionId(int32_t sessionId, const ISocketListener *l
     ret = TransSetSocketFileListener(serverNode->sessionName, serverNode->listener.socket.OnFile);
     if (ret != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-        TRANS_LOGE(TRANS_SDK, "%s:register socket file listener failed", __func__);
+        TRANS_LOGE(TRANS_SDK, "register socket file listener failed");
         return ret;
     }
 
@@ -1682,9 +1809,17 @@ int32_t ClientSetListenerBySessionId(int32_t sessionId, const ISocketListener *l
 
 static int32_t CheckBindSocketInfo(const SessionInfo *session)
 {
-    if (!IsValidString(session->info.peerSessionName, SESSION_NAME_SIZE_MAX) ||
-        !IsValidString(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX)) {
-        TRANS_LOGE(TRANS_SDK, "invalid peerName or peerNetworkId");
+    if (!IsValidString(session->info.peerSessionName, SESSION_NAME_SIZE_MAX - 1) ||
+        !IsValidString(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX - 1)) {
+        char *anonySessionName = NULL;
+        char *anonyNetworkId = NULL;
+        Anonymize(session->info.peerSessionName, &anonySessionName);
+        Anonymize(session->info.peerDeviceId, &anonyNetworkId);
+        TRANS_LOGI(TRANS_SDK, "invalid peerName=%{public}s, peerNameLen=%{public}zu, peerNetworkId=%{public}s, "
+                              "peerNetworkIdLen=%{public}zu", anonySessionName,
+            strlen(session->info.peerSessionName), anonyNetworkId, strlen(session->info.peerDeviceId));
+        AnonymizeFree(anonyNetworkId);
+        AnonymizeFree(anonySessionName);
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -1718,13 +1853,13 @@ int32_t ClientIpcOpenSession(int32_t sessionId, const QosTV *qos, uint32_t qosCo
     int32_t ret = GetSessionById(sessionId, &serverNode, &sessionNode);
     if (ret != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-        TRANS_LOGE(TRANS_SDK, "not found sessionInfo, socket=%d, ret=%d", sessionId, ret);
+        TRANS_LOGE(TRANS_SDK, "not found sessionInfo, socket=%{public}d, ret=%{public}d", sessionId, ret);
         return SOFTBUS_NOT_FIND;
     }
     ret = CheckBindSocketInfo(sessionNode);
     if (ret != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-        TRANS_LOGE(TRANS_SDK, "check socekt info failed, ret=%d", ret);
+        TRANS_LOGE(TRANS_SDK, "check socekt info failed, ret=%{public}d", ret);
         return ret;
     }
 
@@ -1753,13 +1888,13 @@ int32_t ClientIpcOpenSession(int32_t sessionId, const QosTV *qos, uint32_t qosCo
 
     ret = ServerIpcOpenSession(&param, transInfo);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "open session ipc err: ret=%d", ret);
+        TRANS_LOGE(TRANS_SDK, "open session ipc err: ret=%{public}d", ret);
         return ret;
     }
     return SOFTBUS_OK;
 }
 
-int32_t ClientSetSocketState(int32_t socket, SessionRole role)
+int32_t ClientSetSocketState(int32_t socket, uint32_t maxIdleTimeout, SessionRole role)
 {
     if (socket < 0) {
         TRANS_LOGE(TRANS_SDK, "Invalid param");
@@ -1781,11 +1916,14 @@ int32_t ClientSetSocketState(int32_t socket, SessionRole role)
     int32_t ret = GetSessionById(socket, &serverNode, &sessionNode);
     if (ret != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-        TRANS_LOGE(TRANS_SDK, "SessionInfo not found, socket=%d", socket);
+        TRANS_LOGE(TRANS_SDK, "SessionInfo not found, socket=%{public}d", socket);
         return ret;
     }
 
     sessionNode->role = role;
+    if (sessionNode->role == SESSION_ROLE_CLIENT) {
+        sessionNode->maxIdleTime = maxIdleTimeout;
+    }
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     return SOFTBUS_OK;
 }
@@ -1818,14 +1956,14 @@ int32_t ClientGetSessionCallbackAdapterByName(const char *sessionName, SessionLi
             &serverNode->listener, sizeof(SessionListenerAdapter));
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
         if (ret != EOK) {
-            TRANS_LOGE(TRANS_SDK, "memcpy SessionListenerAdapter failed, sessionName=%s", sessionName);
+            TRANS_LOGE(TRANS_SDK, "memcpy SessionListenerAdapter failed, sessionName=%{public}s", sessionName);
             return SOFTBUS_MEM_ERR;
         }
         return SOFTBUS_OK;
     }
 
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-    TRANS_LOGE(TRANS_SDK, "SessionCallbackAdapter not found, sessionName=%s", sessionName);
+    TRANS_LOGE(TRANS_SDK, "SessionCallbackAdapter not found, sessionName=%{public}s", sessionName);
     return SOFTBUS_ERR;
 }
 
@@ -1851,7 +1989,7 @@ int32_t ClientGetSessionCallbackAdapterById(int32_t sessionId, SessionListenerAd
     int32_t ret = GetSessionById(sessionId, &serverNode, &sessionNode);
     if (ret != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-        TRANS_LOGE(TRANS_SDK, "SessionInfo not found, socket=%d", sessionId);
+        TRANS_LOGE(TRANS_SDK, "SessionInfo not found, socket=%{public}d", sessionId);
         return SOFTBUS_ERR;
     }
 
@@ -1859,7 +1997,7 @@ int32_t ClientGetSessionCallbackAdapterById(int32_t sessionId, SessionListenerAd
         sizeof(SessionListenerAdapter));
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     if (ret != EOK) {
-        TRANS_LOGE(TRANS_SDK, "memcpy SessionListenerAdapter failed, socket=%d", sessionId);
+        TRANS_LOGE(TRANS_SDK, "memcpy SessionListenerAdapter failed, socket=%{public}d", sessionId);
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -1887,7 +2025,7 @@ int32_t ClientGetPeerSocketInfoById(int32_t sessionId, PeerSocketInfo *peerSocke
     int32_t ret = GetSessionById(sessionId, &serverNode, &sessionNode);
     if (ret != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-        TRANS_LOGE(TRANS_SDK, "SessionInfo not found, socket=%d", sessionId);
+        TRANS_LOGE(TRANS_SDK, "SessionInfo not found, socket=%{public}d", sessionId);
         return SOFTBUS_ERR;
     }
 
@@ -1897,4 +2035,127 @@ int32_t ClientGetPeerSocketInfoById(int32_t sessionId, PeerSocketInfo *peerSocke
     peerSocketInfo->dataType = (TransDataType)sessionNode->info.flag;
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     return SOFTBUS_OK;
+}
+
+bool IsSessionExceedLimit()
+{
+    if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != 0) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return true;
+    }
+    if (g_sessionIdNum >= MAX_SESSION_ID) {
+        (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+        TRANS_LOGE(TRANS_SDK, "sessionId num exceed limit.");
+        return true;
+    }
+    (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+    return false;
+}
+
+static void ClientCleanUpTimeoutSession(const ListNode *destroyList)
+{
+    if (IsListEmpty(destroyList)) {
+        TRANS_LOGD(TRANS_SDK, "destroyList is empty.");
+        return;
+    }
+    DestroySessionInfo *destroyNode = NULL;
+    DestroySessionInfo *destroyNodeNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(destroyNode, destroyNodeNext, destroyList, DestroySessionInfo, node) {
+        int32_t id = destroyNode->sessionId;
+        (void)ClientDeleteRecvFileList(id);
+        (void)ClientTransCloseChannel(destroyNode->channelId, destroyNode->channelType);
+        TRANS_LOGI(TRANS_SDK, "session is idle, sessionId=%{public}d", id);
+        if (destroyNode->OnShutdown != NULL) {
+            destroyNode->OnShutdown(id, SHUTDOWN_REASON_TIMEOUT);
+        }
+        ListDelete(&(destroyNode->node));
+        SoftBusFree(destroyNode);
+    }
+    TRANS_LOGD(TRANS_SDK, "ok");
+}
+
+static void ClientTransSessionTimerProc(void)
+{
+#define SESSION_IDLE_TIME 1000
+    if (g_clientSessionServerList == NULL) {
+        TRANS_LOGE(TRANS_SDK, "not init");
+        return;
+    }
+
+    if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    SessionInfo *nextSessionNode = NULL;
+    ListNode destroyList;
+    ListInit(&destroyList);
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        if (IsListEmpty(&serverNode->sessionList)) {
+            continue;
+        }
+        LIST_FOR_EACH_ENTRY_SAFE(sessionNode, nextSessionNode, &(serverNode->sessionList), SessionInfo, node) {
+            if (sessionNode->role != SESSION_ROLE_CLIENT) {
+                continue;
+            }
+
+            sessionNode->timeout += SESSION_IDLE_TIME;
+            if (sessionNode->maxIdleTime == 0 || sessionNode->timeout <= sessionNode->maxIdleTime) {
+                continue;
+            }
+
+            DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, serverNode);
+            if (destroyNode == NULL) {
+                TRANS_LOGE(TRANS_SDK, "failed to create destory session Node, sessionId=%{public}d",
+                    sessionNode->sessionId);
+                continue;
+            }
+            ListAdd(&destroyList, &(destroyNode->node));
+            DestroySessionId();
+            ListDelete(&sessionNode->node);
+            SoftBusFree(sessionNode);
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_clientSessionServerList->lock);
+    (void)ClientCleanUpTimeoutSession(&destroyList);
+}
+
+int32_t ClientResetIdleTimeoutById(int32_t sessionId)
+{
+    if (sessionId <= 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid sessionId");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (g_clientSessionServerList == NULL) {
+        TRANS_LOGE(TRANS_SDK, "not init");
+        return SOFTBUS_TRANS_SESSION_SERVER_NOINIT;
+    }
+
+    if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    SessionInfo *nextSessionNode = NULL;
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        if (IsListEmpty(&serverNode->sessionList)) {
+            continue;
+        }
+        LIST_FOR_EACH_ENTRY_SAFE(sessionNode, nextSessionNode, &(serverNode->sessionList), SessionInfo, node) {
+            if (sessionNode->sessionId == sessionId) {
+                sessionNode->timeout = 0;
+                (void)SoftBusMutexUnlock(&g_clientSessionServerList->lock);
+                TRANS_LOGD(TRANS_SDK, "reset timeout of sessionId=%{public}d", sessionId);
+                return SOFTBUS_OK;
+            }
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_clientSessionServerList->lock);
+    TRANS_LOGE(TRANS_SDK, "not found session by sessionId=%{public}d", sessionId);
+    return SOFTBUS_NOT_FIND;
 }

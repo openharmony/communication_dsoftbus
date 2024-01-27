@@ -107,6 +107,7 @@ int32_t TransSetFileReceiveListener(const char *sessionName,
         return SOFTBUS_ERR;
     }
     ListAdd(&(g_fileListener->list), &(fileNode->node));
+    TRANS_LOGI(TRANS_FILE, "add sessionName = %{public}s", sessionName);
     (void)SoftBusMutexUnlock(&(g_fileListener->lock));
     return SOFTBUS_OK;
 }
@@ -155,6 +156,7 @@ int32_t TransSetFileSendListener(const char *sessionName, const IFileSendListene
         return SOFTBUS_ERR;
     }
     ListAdd(&(g_fileListener->list), &(fileNode->node));
+    TRANS_LOGI(TRANS_FILE, "add sessionName = %{public}s", sessionName);
     (void)SoftBusMutexUnlock(&(g_fileListener->lock));
     return SOFTBUS_OK;
 }
@@ -162,7 +164,7 @@ int32_t TransSetFileSendListener(const char *sessionName, const IFileSendListene
 int32_t TransSetSocketFileListener(const char *sessionName, SocketFileCallbackFunc fileCallback)
 {
     if (sessionName == NULL || fileCallback == NULL) {
-        TRANS_LOGE(TRANS_SDK, "[client]%s invalid param.", __func__);
+        TRANS_LOGE(TRANS_SDK, "[client] invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     if (g_fileListener == NULL) {
@@ -203,7 +205,7 @@ int32_t TransSetSocketFileListener(const char *sessionName, SocketFileCallbackFu
     fileNode->fileCallback = fileCallback;
     ListAdd(&(g_fileListener->list), &(fileNode->node));
     (void)SoftBusMutexUnlock(&(g_fileListener->lock));
-    TRANS_LOGI(TRANS_SDK, "set socket file listener ok:%s", sessionName);
+    TRANS_LOGI(TRANS_SDK, "set socket file listener ok, sessionName=%{public}s", sessionName);
     return SOFTBUS_OK;
 }
 
@@ -253,6 +255,7 @@ void TransDeleteFileListener(const char *sessionName)
     LIST_FOR_EACH_ENTRY(fileNode, &(g_fileListener->list), FileListener, node) {
         if (strcmp(fileNode->mySessionName, sessionName) == 0) {
             ListDelete(&fileNode->node);
+            TRANS_LOGI(TRANS_FILE, "delete sessionName = %{public}s", sessionName);
             SoftBusFree(fileNode);
             break;
         }

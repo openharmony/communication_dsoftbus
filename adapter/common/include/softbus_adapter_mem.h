@@ -34,4 +34,4 @@ void SoftBusFree(void *pt);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif
+#endif // SOFTBUS_ADAPTER_MEM_H

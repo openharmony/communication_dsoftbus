@@ -59,6 +59,7 @@ typedef struct {
 
 typedef struct {
     ListNode node;
+    char addr[BT_MAC_LEN];
     ConnBrPendInfo *pendInfo;
 } BrPending;
 
@@ -78,7 +79,7 @@ static int BrCompareManagerLooperEventFunc(const SoftBusMessage *msg, void *args
 static int32_t PendingDevice(ConnBrDevice *device, const char *anomizeAddress);
 static int32_t BrPendConnection(const ConnectOption *option, uint32_t time);
 static void ProcessAclCollisionException(ConnBrDevice *device, const char *anomizeAddress);
-static void UnpendConnection(const ConnBrPendInfo *unpendInfo);
+static void UnpendConnection(const char *addr);
 
 static ConnBrManager g_brManager = { 0 };
 static ConnectCallback g_connectCallback = { 0 };
@@ -118,7 +119,7 @@ static void DfxRecordBrConnectFail(uint32_t reqId, uint32_t pId, ConnBrDevice *d
         return;
     }
 
-    CONN_LOGD(CONN_BR, "traceId=%u, reason=%d", statistics->connectTraceId, reason);
+    CONN_LOGD(CONN_BR, "traceId=%{public}u, reason=%{public}d", statistics->connectTraceId, reason);
     uint64_t costTime = SoftBusGetSysTimeMs() - statistics->startTime;
     SoftbusRecordConnResult(pId, SOFTBUS_HISYSEVT_CONN_TYPE_BR, SOFTBUS_EVT_CONN_FAIL, costTime, reason);
     ConnEventExtra extra = {
@@ -138,7 +139,7 @@ static void DfxRecordBrConnectSuccess(uint32_t pId, ConnBrConnection *connection
         return;
     }
 
-    CONN_LOGD(CONN_BR, "traceId=%u", statistics->connectTraceId);
+    CONN_LOGD(CONN_BR, "traceId=%{public}u", statistics->connectTraceId);
     uint64_t costTime = SoftBusGetSysTimeMs() - statistics->startTime;
     SoftbusRecordConnResult(pId, SOFTBUS_HISYSEVT_CONN_TYPE_BR, SOFTBUS_EVT_CONN_SUCC, costTime,
                             SOFTBUS_HISYSEVT_CONN_OK);
@@ -264,12 +265,14 @@ static void NotifyDeviceConnectResult(
     ConnBrRequest *it = NULL;
     if (connection == NULL) {
         LIST_FOR_EACH_ENTRY(it, &device->requests, ConnBrRequest, node) {
-            CONN_LOGD(CONN_BR, "br notify connect request %u failed, addr=%s, reason=%d", it->requestId,
-                anomizeAddress, reason);
+            CONN_LOGD(CONN_BR,
+                "br notify connect request failed, requestId=%{public}u, addr=%{public}s, reason=%{public}d",
+                it->requestId, anomizeAddress, reason);
             DfxRecordBrConnectFail(it->requestId, DEFAULT_PID, (ConnBrDevice *)device, &it->statistics, reason);
             it->result.OnConnectFailed(it->requestId, reason);
-            CONN_LOGD(CONN_BR, "br notify connect request %u failed done, addr=%s, reason=%d", it->requestId,
-                anomizeAddress, reason);
+            CONN_LOGD(CONN_BR,
+                "br notify connect request failed done, requestId=%{public}u, addr=%{public}s, reason=%{public}d",
+                it->requestId, anomizeAddress, reason);
         }
         return;
     }
@@ -283,7 +286,7 @@ static void NotifyDeviceConnectResult(
     ConnectionInfo info = { 0 };
     int32_t status = Convert2ConnectionInfo(connection, &info);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "convert br connection info failed, error=%d", status);
+        CONN_LOGE(CONN_BR, "convert br connection info failed, error=%{public}d", status);
     }
 
     ConnectOption option;
@@ -299,13 +302,15 @@ static void NotifyDeviceConnectResult(
             ConnBrUpdateConnectionRc(connection, 1);
         }
         isReuse = true;
-        CONN_LOGD(CONN_BR, "br notify connect request %u success, addr=%s, connection=%u",
+        CONN_LOGD(CONN_BR,
+            "br notify connect request success, requestId=%{public}u, addr=%{public}s, connection=%{public}u",
             it->requestId, anomizeAddress, connection->connectionId);
         it->statistics.reqId = it->requestId;
         DfxRecordBrConnectSuccess(DEFAULT_PID, connection, &it->statistics);
         it->result.OnConnectSuccessed(it->requestId, connection->connectionId, &info);
-        CONN_LOGD(CONN_BR, "br notify connect request %u success done, addr=%s, connection=%u", it->requestId,
-            anomizeAddress, connection->connectionId);
+        CONN_LOGD(CONN_BR,
+            "br notify connect request success done, requestId=%{public}u, addr=%{public}s, connection=%{public}u",
+            it->requestId, anomizeAddress, connection->connectionId);
     }
 }
 
@@ -313,7 +318,7 @@ static BrPending *GetBrPending(const char *addr)
 {
     BrPending *it = NULL;
     LIST_FOR_EACH_ENTRY(it, &g_brManager.pendings->list, BrPending, node) {
-        if (StrCmpIgnoreCase(it->pendInfo->addr, addr) == 0) {
+        if (StrCmpIgnoreCase(it->addr, addr) == 0) {
             return it;
         }
     }
@@ -328,23 +333,23 @@ static void ProcessBleDisconnectedEvent(char *addr)
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, addr, BT_MAC_LEN);
     BrPending *target = GetBrPending(addr);
     if (target == NULL) {
-        CONN_LOGD(CONN_BR, "address is not in pending list, no need to unpend, address=%s", anomizeAddress);
+        CONN_LOGD(CONN_BR, "address is not in pending list, no need to unpend, address=%{public}s", anomizeAddress);
         SoftBusMutexUnlock(&g_brManager.pendings->lock);
         return;
     }
     ConnBrPendInfo *info = (ConnBrPendInfo *)SoftBusCalloc(sizeof(ConnBrPendInfo));
     if (info == NULL || strcpy_s(info->addr, BT_MAC_LEN, addr) != EOK) {
-        CONN_LOGE(CONN_BR, "copy addr failed, address=%s", anomizeAddress);
+        CONN_LOGE(CONN_BR, "copy addr failed, address=%{public}s", anomizeAddress);
         SoftBusFree(info);
         SoftBusMutexUnlock(&g_brManager.pendings->lock);
         return;
     }
     uint64_t now = SoftBusGetSysTimeMs();
     if (target->pendInfo->firstStartTimestamp + target->pendInfo->firstDuration < now) {
-        CONN_LOGD(CONN_BR, "unpend address=%s", anomizeAddress);
+        CONN_LOGD(CONN_BR, "unpendAddress=%{public}s", anomizeAddress);
         ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_UNPEND, 0, 0, info, 0);
     } else {
-        CONN_LOGD(CONN_BR, "do not unpend address=%s", anomizeAddress);
+        CONN_LOGD(CONN_BR, "do not unpendAddress=%{public}s", anomizeAddress);
         SoftBusFree(info);
     }
     SoftBusMutexUnlock(&g_brManager.pendings->lock);
@@ -356,12 +361,13 @@ static void OnAclStateChanged(int32_t listenerId, const SoftBusBtAddr *addr, int
     char copyMac[BT_MAC_LEN] = { 0 };
     int32_t status = ConvertBtMacToStr(copyMac, BT_MAC_LEN, addr->addr, sizeof(addr->addr));
     if (status != SOFTBUS_OK) {
-        CONN_LOGW(CONN_BR, "convert bt mac to str fail, error=%d", status);
+        CONN_LOGW(CONN_BR, "convert bt mac to str fail, error=%{public}d", status);
         return;
     }
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, copyMac, BT_MAC_LEN);
-    CONN_LOGD(CONN_BR, "address=%s, aclState=%d, hciReason=%d", anomizeAddress, aclState, hciReason);
+    CONN_LOGD(
+        CONN_BR, "address=%{public}s, aclState=%{public}d, hciReason=%{public}d", anomizeAddress, aclState, hciReason);
     switch (aclState) {
         case SOFTBUS_ACL_STATE_LE_DISCONNECTED:
             ProcessBleDisconnectedEvent(copyMac);
@@ -376,8 +382,8 @@ static void PendingIfBleSameAddress(const char *addr)
     uint32_t connectionId = 0;
     do {
         ConnBleConnection *bleConnection = ConnBleGetConnectionByAddr(addr, CONN_SIDE_ANY, BLE_GATT);
-        CONN_CHECK_AND_RETURN_LOGW(bleConnection != NULL, CONN_BR,
-            "can not get ble connection, no need to pend BR connection");
+        CONN_CHECK_AND_RETURN_LOGW(
+            bleConnection != NULL, CONN_BR, "can not get ble connection, no need to pend BR connection");
         connectionId = bleConnection->connectionId;
         ConnBleReturnConnection(&bleConnection);
     } while (false);
@@ -387,23 +393,24 @@ static void PendingIfBleSameAddress(const char *addr)
     (void)memset_s(&options, sizeof(options), 0, sizeof(options));
     options.type = CONNECT_BR;
     if (strcpy_s(options.brOption.brMac, BT_MAC_LEN, addr) != EOK) {
-        CONN_LOGE(CONN_BR, "copy br mac fail, address = %s", anomizeAddress);
+        CONN_LOGE(CONN_BR, "copy br mac fail, address=%{public}s", anomizeAddress);
         return;
     }
     int32_t status = BrPendConnection(&options, BR_WAIT_BLE_DISCONNECTED_PEND_MILLIS);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "br pend connection failed, address=%s, error=%d", anomizeAddress, status);
+        CONN_LOGE(CONN_BR, "br pend connection failed, address=%{public}s, error=%{public}d", anomizeAddress, status);
         return;
     }
-    CONN_LOGI(CONN_BR, "there is a ble connection connected with the same address, pending br connection, "
-          "address=%s, ble connection id=%u",
+    CONN_LOGI(CONN_BR,
+        "there is a ble connection connected with the same address, pending br connection, "
+        "address=%{public}s, connectionId=%{public}u",
         anomizeAddress, connectionId);
     return;
 }
 
 static int32_t ConnectDeviceDirectly(ConnBrDevice *device, const char *anomizeAddress)
 {
-    CONN_LOGI(CONN_BR, "schedule connect request, addr=%s", anomizeAddress);
+    CONN_LOGI(CONN_BR, "schedule connect request, addr=%{public}s", anomizeAddress);
     int32_t status = SOFTBUS_OK;
     ConnBrConnection *connection = ConnBrCreateConnection(device->addr, CONN_SIDE_CLIENT, INVALID_SOCKET_HANDLE);
     if (connection == NULL) {
@@ -413,7 +420,7 @@ static int32_t ConnectDeviceDirectly(ConnBrDevice *device, const char *anomizeAd
     do {
         address = (char *)SoftBusCalloc(BT_MAC_LEN);
         if (address == NULL || strcpy_s(address, BT_MAC_LEN, device->addr) != EOK) {
-            CONN_LOGW(CONN_BR, "copy br address failed, addr=%s", anomizeAddress);
+            CONN_LOGW(CONN_BR, "copy br address failed, addr=%{public}s", anomizeAddress);
             status = SOFTBUS_MEM_ERR;
             break;
         }
@@ -447,7 +454,7 @@ static int32_t ConnectDeviceDirectly(ConnBrDevice *device, const char *anomizeAd
 
 static int32_t PendingDevice(ConnBrDevice *device, const char *anomizeAddress)
 {
-    CONN_LOGI(CONN_BR, "pend connect request, addr=%s, device state=%d", anomizeAddress, device->state);
+    CONN_LOGI(CONN_BR, "pend connect request, addr=%{public}s, deviceState=%{public}d", anomizeAddress, device->state);
     ConnBrDevice *connectingDevice = g_brManager.connecting;
     char connectingAnomizeAddress[BT_MAC_LEN] = { 0 };
     if (g_brManager.connecting != NULL) {
@@ -466,7 +473,7 @@ static int32_t PendingDevice(ConnBrDevice *device, const char *anomizeAddress)
             }
         }
     }
-    CONN_LOGD(CONN_BR, "pengding current br connect request, addr=%s, connecting address=%s",
+    CONN_LOGD(CONN_BR, "pengding current br connect request, addr=%{public}s, connectingAddress=%{public}s",
         anomizeAddress, connectingAnomizeAddress);
     if (targetDevice == NULL) {
         ListTailInsert(&g_brManager.waitings, &device->node);
@@ -486,7 +493,7 @@ static int32_t PendingDevice(ConnBrDevice *device, const char *anomizeAddress)
 static bool BrReuseConnection(ConnBrDevice *device, ConnBrConnection *connection)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&connection->lock) == SOFTBUS_OK, false, CONN_BR,
-        "br reuse connection failed: lock failed, conn id=%u", connection->connectionId);
+        "br reuse connection failed: lock failed, connId=%{public}u", connection->connectionId);
     enum ConnBrConnectionState state = connection->state;
     (void)SoftBusMutexUnlock(&connection->lock);
     if (state != BR_CONNECTION_STATE_CONNECTED) {
@@ -503,7 +510,7 @@ static bool CheckPending(const char *addr)
     bool pending = false;
     BrPending *it = NULL;
     LIST_FOR_EACH_ENTRY(it, &g_brManager.pendings->list, BrPending, node) {
-        if (StrCmpIgnoreCase(it->pendInfo->addr, addr) == 0) {
+        if (StrCmpIgnoreCase(it->addr, addr) == 0) {
             pending = true;
             break;
         }
@@ -537,13 +544,13 @@ static void AttempReuseConnect(ConnBrDevice *device, DeviceAction actionIfAbsent
     do {
         if (clientConnection != NULL && BrReuseConnection(device, clientConnection)) {
             FreeDevice(device);
-            CONN_LOGI(CONN_BR, "reuse client, addr=%s, connection id=%u", anomizeAddress,
+            CONN_LOGI(CONN_BR, "reuse client, addr=%{public}s, connectionId=%{public}u", anomizeAddress,
                 clientConnection->connectionId);
             break;
         }
         if (serverConnection != NULL && BrReuseConnection(device, serverConnection)) {
             FreeDevice(device);
-            CONN_LOGI(CONN_BR, "reuse server, addr=%s, conn id=%u", anomizeAddress,
+            CONN_LOGI(CONN_BR, "reuse server, addr=%{public}s, connId=%{public}u", anomizeAddress,
                 serverConnection->connectionId);
             break;
         }
@@ -564,7 +571,7 @@ static void ConnectRequestOnAvailableState(const ConnBrConnectRequestContext *ct
     ConnBrDevice *device = NULL;
     int32_t status = ConvertCtxToDevice(&device, ctx);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "ConvertCtxToDevice failed, request id=%u, error=%d", ctx->requestId, status);
+        CONN_LOGE(CONN_BR, "ConvertCtxToDevice failed, requestId=%{public}u, error=%{public}d", ctx->requestId, status);
         DfxRecordBrConnectFail(ctx->requestId, DEFAULT_PID, device, &ctx->statistics, status);
         ctx->result.OnConnectFailed(ctx->requestId, status);
         return;
@@ -581,7 +588,7 @@ static void ConnectRequestOnConnectingState(const ConnBrConnectRequestContext *c
     ConnBrDevice *device = NULL;
     int32_t status = ConvertCtxToDevice(&device, ctx);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "ConvertCtxToDevice failed, request id=%u, error=%d", ctx->requestId, status);
+        CONN_LOGE(CONN_BR, "ConvertCtxToDevice failed, requestId=%{public}u, error=%{public}d", ctx->requestId, status);
         DfxRecordBrConnectFail(ctx->requestId, DEFAULT_PID, device, &ctx->statistics, status);
         ctx->result.OnConnectFailed(ctx->requestId, status);
         return;
@@ -610,32 +617,27 @@ static void ServerAccepted(uint32_t connectionId)
 {
     ConnBrConnection *connection = ConnBrGetConnectionById(connectionId);
     if (connection == NULL) {
-        CONN_LOGE(CONN_BR, "can not get br connection, id=%u", connectionId);
+        CONN_LOGE(CONN_BR, "can not get br connection, connectionId=%{public}u", connectionId);
         return;
     }
 
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, connection->addr, BT_MAC_LEN);
-    CONN_LOGI(CONN_BR, "accept new connection, conn id=%u, peer addr=%s", connectionId, anomizeAddress);
+    CONN_LOGI(CONN_BR, "accept new connection, connId=%{public}u, peerAddr=%{public}s", connectionId, anomizeAddress);
 
     ConnectionInfo info = { 0 };
     int32_t status = Convert2ConnectionInfo(connection, &info);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "convert connection info failed, error=%d", status);
+        CONN_LOGE(CONN_BR, "convert connection info failed, error=%{public}d", status);
     }
     g_connectCallback.OnConnected(connectionId, &info);
-    ConnBrPendInfo *pendInfo = (ConnBrPendInfo *)SoftBusCalloc(sizeof(ConnBrPendInfo));
-    if (pendInfo == NULL || strcpy_s(pendInfo->addr, BT_MAC_LEN, connection->addr) != EOK) {
-        CONN_LOGE(CONN_BR, "copy addr failed, address=%s", anomizeAddress);
-        SoftBusFree(pendInfo);
-        return;
-    }
-    ConnRemoveMsgFromLooper(&g_brManagerAsyncHandler, MSG_UNPEND, 0, 0, pendInfo);
-    UnpendConnection(pendInfo);
+    ConnRemoveMsgFromLooper(&g_brManagerAsyncHandler, MSG_UNPEND, 0, 0, connection->addr);
+    UnpendConnection(connection->addr);
 
     ConnBrDevice *connectingDevice = g_brManager.connecting;
     if (connectingDevice != NULL && StrCmpIgnoreCase(connectingDevice->addr, connection->addr) == 0) {
-        CONN_LOGW(CONN_BR, "both ends request br connection, conn id=%u, peer addr=%s", connectionId, anomizeAddress);
+        CONN_LOGW(CONN_BR, "both ends request br connection, connId=%{public}u, peerAddr=%{public}s", connectionId,
+            anomizeAddress);
         ConnBrReturnConnection(&connection);
         return;
     }
@@ -655,20 +657,20 @@ static void ClientConnected(uint32_t connectionId)
 {
     ConnBrConnection *connection = ConnBrGetConnectionById(connectionId);
     if (connection == NULL) {
-        CONN_LOGE(CONN_BR, "can not get br connection %u", connectionId);
+        CONN_LOGE(CONN_BR, "can not get br connection. connectionId=%{public}u", connectionId);
         return;
     }
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, connection->addr, BT_MAC_LEN);
     ConnBrDevice *connectingDevice = g_brManager.connecting;
     if (connectingDevice == NULL || StrCmpIgnoreCase(connectingDevice->addr, connection->addr) != 0) {
-        CONN_LOGE(CONN_BR, "no connecting device, conn id=%u, address=%d", connectionId, anomizeAddress);
+        CONN_LOGE(CONN_BR, "no connecting device, connId=%{public}u, address=%{public}s", connectionId, anomizeAddress);
         ConnBrUpdateConnectionRc(connection, -1);
         ConnBrReturnConnection(&connection);
         return;
     }
     ConnRemoveMsgFromLooper(&g_brManagerAsyncHandler, MSG_CONNECT_TIMEOUT, connectionId, 0, NULL);
-    CONN_LOGI(CONN_BR, "connect ok, id=%d, addr=%s", connectionId, anomizeAddress);
+    CONN_LOGI(CONN_BR, "connect ok, connectionId=%{public}d, addr=%{public}s", connectionId, anomizeAddress);
 
     NotifyDeviceConnectResult(connectingDevice, connection, false, 0);
     FreeDevice(connectingDevice);
@@ -681,19 +683,20 @@ static void ClientConnectFailed(uint32_t connectionId, int32_t error)
 {
     ConnBrConnection *connection = ConnBrGetConnectionById(connectionId);
     if (connection == NULL) {
-        CONN_LOGE(CONN_BR, "can not get br connection, conn id=%u, error=%d", connectionId, error);
+        CONN_LOGE(CONN_BR, "can not get br connection, connectionId=%{public}u, error=%{public}d", connectionId, error);
         return;
     }
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, connection->addr, BT_MAC_LEN);
 
     ConnRemoveMsgFromLooper(&g_brManagerAsyncHandler, MSG_CONNECT_TIMEOUT, connectionId, 0, NULL);
-    CONN_LOGI(CONN_BR, "conn id=%u, addr=%s, error=%d", connectionId, anomizeAddress, error);
+    CONN_LOGI(CONN_BR, "connId=%{public}u, addr=%{public}s, error=%{public}d", connectionId, anomizeAddress, error);
     ConnBrDisconnectNow(connection);
 
     ConnBrDevice *connectingDevice = g_brManager.connecting;
     if (connectingDevice == NULL || StrCmpIgnoreCase(connectingDevice->addr, connection->addr) != 0) {
-        CONN_LOGE(CONN_BR, "no connecting device, conn id=%u, addr=%s, error=%d", connectionId, anomizeAddress, error);
+        CONN_LOGE(CONN_BR, "no connecting device, connId=%{public}u, addr=%{public}s, error=%{public}d", connectionId,
+            anomizeAddress, error);
         ConnBrRemoveConnection(connection);
         ConnBrReturnConnection(&connection);
         return;
@@ -704,8 +707,8 @@ static void ClientConnectFailed(uint32_t connectionId, int32_t error)
         ConnBrConnection *serverConnection = ConnBrGetConnectionByAddr(connection->addr, CONN_SIDE_SERVER);
         if (serverConnection != NULL) {
             if (BrReuseConnection(connectingDevice, serverConnection)) {
-                CONN_LOGI(CONN_BR, "reuse server connection, conn id=%u, addr=%s", serverConnection->connectionId,
-                    anomizeAddress);
+                CONN_LOGI(CONN_BR, "reuse server connection, connId=%{public}u, addr=%{public}s",
+                    serverConnection->connectionId, anomizeAddress);
                 reuseServerConnection = true;
             }
             ConnBrReturnConnection(&serverConnection);
@@ -729,8 +732,8 @@ static void ClientConnectFailed(uint32_t connectionId, int32_t error)
             }
         }
         if (collision) {
-            CONN_LOGW(CONN_BR, "acl collision, wait for retry, id=%u, addr=%s, result=%d", connectionId,
-                anomizeAddress, it->result);
+            CONN_LOGW(CONN_BR, "acl collision, wait for retry, id=%{public}u, addr=%{public}s, result=%{public}d",
+                connectionId, anomizeAddress, it->result);
             // NOTICE: assign connecting NULL first to prevent recursively pending in connecting
             g_brManager.connecting = NULL;
             ProcessAclCollisionException(connectingDevice, anomizeAddress);
@@ -752,20 +755,22 @@ static void ClientConnectTimeoutOnConnectingState(uint32_t connectionId, const c
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, address, BT_MAC_LEN);
 
-    CONN_LOGI(CONN_BR, "addr=%s, conn id=%u", anomizeAddress, connectionId);
+    CONN_LOGI(CONN_BR, "addr=%{public}s, connId=%{public}u", anomizeAddress, connectionId);
 
     ConnBrConnection *connection = ConnBrGetConnectionById(connectionId);
     if (connection != NULL) {
-        CONN_LOGI(CONN_BR, "addr=%s, conn id=%u, interrupt connect progress", anomizeAddress, connection->connectionId);
+        CONN_LOGI(CONN_BR, "interrupt connect progress. addr=%{public}s, connId=%{public}u", anomizeAddress,
+            connection->connectionId);
         ConnBrDisconnectNow(connection);
         ConnBrRemoveConnection(connection);
         ConnBrReturnConnection(&connection);
     } else {
-        CONN_LOGE(CONN_BR, "addr=%s, conn id=%u, connection not exist", anomizeAddress, connectionId);
+        CONN_LOGE(CONN_BR, "connection not exist. addr=%{public}s, connId=%{public}u", anomizeAddress, connectionId);
     }
     ConnBrDevice *connectingDevice = g_brManager.connecting;
     if (connectingDevice == NULL || StrCmpIgnoreCase(connectingDevice->addr, address) != 0) {
-        CONN_LOGE(CONN_BR, "addr=%s, conn id=%u, connecting device mismatch", anomizeAddress, connectionId);
+        CONN_LOGE(
+            CONN_BR, "connecting device mismatch. addr=%{public}s, connId=%{public}u", anomizeAddress, connectionId);
         return;
     }
     NotifyDeviceConnectResult(connectingDevice, NULL, false, SOFTBUS_CONN_BR_CONNECT_TIMEOUT_ERR);
@@ -779,12 +784,15 @@ static void DataReceived(ConnBrDataReceivedContext *ctx)
     ConnPktHead *head = (ConnPktHead *)ctx->data;
     ConnBrConnection *connection = ConnBrGetConnectionById(ctx->connectionId);
     if (connection == NULL) {
-        CONN_LOGE(CONN_BR, "connection not exist, conn id=%u, payload(Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 ")",
+        CONN_LOGE(CONN_BR,
+            "connection not exist, connId=%{public}u, "
+            "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
             ctx->connectionId, ctx->dataLen, head->flag, head->module, head->seq);
         SoftBusFree(ctx->data);
         return;
     }
-    CONN_LOGD(CONN_BR, "conn id=%u, payload(Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 ")",
+    CONN_LOGD(CONN_BR,
+        "connId=%{public}u, Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
         ctx->connectionId, ctx->dataLen, head->flag, head->module, head->seq);
     if (head->module == MODULE_CONNECTION) {
         ReceivedControlData(connection, ctx->data + ConnGetHeadSize(), ctx->dataLen - ConnGetHeadSize());
@@ -803,17 +811,17 @@ static void ReceivedControlData(ConnBrConnection *connection, const uint8_t *dat
 {
     cJSON *json = cJSON_ParseWithLength((const char *)data, dataLen);
     if (json == NULL) {
-        CONN_LOGE(CONN_BR, "parse json failed, conn id=%u", connection->connectionId);
+        CONN_LOGE(CONN_BR, "parse json failed, connId=%{public}u", connection->connectionId);
         return;
     }
 
     int32_t method = 0;
     if (!GetJsonObjectNumberItem(json, KEY_METHOD, &method)) {
-        CONN_LOGE(CONN_BR, "parse method failed, conn id=%u", connection->connectionId);
+        CONN_LOGE(CONN_BR, "parse method failed, connId=%{public}u", connection->connectionId);
         cJSON_Delete(json);
         return;
     }
-    CONN_LOGD(CONN_BR, "conn id=%u, method=%d", connection->connectionId, method);
+    CONN_LOGD(CONN_BR, "connId=%{public}u, method=%{public}d", connection->connectionId, method);
     int32_t status = SOFTBUS_OK;
     switch (method) {
         case BR_METHOD_NOTIFY_REQUEST:
@@ -829,12 +837,13 @@ static void ReceivedControlData(ConnBrConnection *connection, const uint8_t *dat
             status = ConnBrOnAckResponse(connection, json);
             break;
         default:
-            CONN_LOGE(CONN_BR, "UNSUPPORT method, conn id=%u, method=%d", connection->connectionId, method);
+            CONN_LOGE(
+                CONN_BR, "UNSUPPORT method, connId=%{public}u, method=%{public}d", connection->connectionId, method);
             break;
     }
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "unexpected error, conn id=%u, method=%d, error=%d", connection->connectionId, method,
-            status);
+        CONN_LOGE(CONN_BR, "unexpected error, connId=%{public}u, method=%{public}d, error=%{public}d",
+            connection->connectionId, method, status);
     }
     cJSON_Delete(json);
 }
@@ -842,12 +851,13 @@ static void ReceivedControlData(ConnBrConnection *connection, const uint8_t *dat
 static void ConnectionException(uint32_t connectionId, int32_t error)
 {
     ConnBrConnection *connection = ConnBrGetConnectionById(connectionId);
-    CONN_CHECK_AND_RETURN_LOGW(connection != NULL, CONN_BR,
-        "br connection exception: connection not exist, conn id=%u", connectionId);
+    CONN_CHECK_AND_RETURN_LOGW(
+        connection != NULL, CONN_BR, "br connection exception: connection not exist, connId=%{public}u", connectionId);
 
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, connection->addr, BT_MAC_LEN);
-    CONN_LOGI(CONN_BR, "release all resource, conn id=%u, addr=%s, error=%d", connectionId, anomizeAddress, error);
+    CONN_LOGI(CONN_BR, "release all resource, connId=%{public}u, addr=%{public}s, error=%{public}d", connectionId,
+        anomizeAddress, error);
     ConnBrDisconnectNow(connection);
 
     ConnBrDevice *it = NULL;
@@ -860,7 +870,7 @@ static void ConnectionException(uint32_t connectionId, int32_t error)
     ConnectionInfo info = { 0 };
     int32_t status = Convert2ConnectionInfo(connection, &info);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "convert br connection info failed, error=%d", status);
+        CONN_LOGE(CONN_BR, "convert br connection info failed, error=%{public}d", status);
     }
     ConnBrRemoveConnection(connection);
     ConnBrReturnConnection(&connection);
@@ -872,7 +882,7 @@ static void ConnectionResume(uint32_t connectionId)
 {
     ConnBrConnection *connection = ConnBrGetConnectionById(connectionId);
     CONN_CHECK_AND_RETURN_LOGW(connection != NULL, CONN_BR,
-        "br resume connection failed: connection not exist, conn id=%u", connectionId);
+        "br resume connection failed: connection not exist, connId=%{public}u", connectionId);
     ConnBrDevice *it = NULL;
     ConnBrDevice *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(it, next, &g_brManager.waitings, ConnBrDevice, node) {
@@ -888,30 +898,30 @@ static void DisconnectRequest(uint32_t connectionId)
 {
     ConnBrConnection *connection = ConnBrGetConnectionById(connectionId);
     CONN_CHECK_AND_RETURN_LOGW(connection != NULL, CONN_BR,
-        "br disconnect request failed: connection is not exist, conn id=%u", connectionId);
+        "br disconnect request failed: connection is not exist, connId=%{public}u", connectionId);
     ConnBrUpdateConnectionRc(connection, -1);
     ConnBrReturnConnection(&connection);
 }
 
-static void UnpendConnection(const ConnBrPendInfo *unpendInfo)
+static void UnpendConnection(const char *addr)
 {
     char anomizeAddress[BT_MAC_LEN] = { 0 };
-    ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, unpendInfo->addr, BT_MAC_LEN);
+    ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, addr, BT_MAC_LEN);
 
     CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_brManager.pendings->lock) == SOFTBUS_OK, CONN_BR,
-        "unpend connection: lock failed, addr=%s", anomizeAddress);
-    ConnRemoveMsgFromLooper(&g_brManagerAsyncHandler, MSG_UNPEND, 0, 0, (ConnBrPendInfo *)unpendInfo);
+        "unpend connection: lock failed, addr=%{public}s", anomizeAddress);
+    ConnRemoveMsgFromLooper(&g_brManagerAsyncHandler, MSG_UNPEND, 0, 0, (char *)addr);
     do {
         BrPending *target = NULL;
         BrPending *pendingIt = NULL;
         LIST_FOR_EACH_ENTRY(pendingIt, &g_brManager.pendings->list, BrPending, node) {
-            if (StrCmpIgnoreCase(pendingIt->pendInfo->addr, unpendInfo->addr) == 0) {
+            if (StrCmpIgnoreCase(pendingIt->addr, addr) == 0) {
                 target = pendingIt;
                 break;
             }
         }
         if (target == NULL) {
-            CONN_LOGD(CONN_BR, "unpend connection, address is not pending, addr=%s", anomizeAddress);
+            CONN_LOGD(CONN_BR, "unpend connection, address is not pending, addr=%{public}s", anomizeAddress);
             break;
         }
         ListDelete(&target->node);
@@ -919,12 +929,12 @@ static void UnpendConnection(const ConnBrPendInfo *unpendInfo)
         g_brManager.pendings->cnt -= 1;
         ConnBrDevice *deviceIt = NULL;
         LIST_FOR_EACH_ENTRY(deviceIt, &g_brManager.waitings, ConnBrDevice, node) {
-            if (StrCmpIgnoreCase(deviceIt->addr, unpendInfo->addr) == 0) {
+            if (StrCmpIgnoreCase(deviceIt->addr, addr) == 0) {
                 deviceIt->state = BR_DEVICE_STATE_WAIT_SCHEDULE;
                 break;
             }
         }
-        CONN_LOGI(CONN_BR, "ok, addr=%s", anomizeAddress);
+        CONN_LOGI(CONN_BR, "ok, addr=%{public}s", anomizeAddress);
         ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_NEXT_CMD, 0, 0, NULL, 0);
     } while (false);
     SoftBusMutexUnlock(&g_brManager.pendings->lock);
@@ -932,7 +942,7 @@ static void UnpendConnection(const ConnBrPendInfo *unpendInfo)
 
 static void Reset(int32_t reason)
 {
-    CONN_LOGW(CONN_BR, "br manager process RESET event, reason=%d", reason);
+    CONN_LOGW(CONN_BR, "br manager process RESET event, reason=%{public}d", reason);
     if (g_brManager.connecting != NULL) {
         ConnBrConnection *connection = ConnBrGetConnectionByAddr(g_brManager.connecting->addr, CONN_SIDE_CLIENT);
         if (connection != NULL) {
@@ -953,14 +963,14 @@ static void Reset(int32_t reason)
 
     int32_t status = SoftBusMutexLock(&g_brManager.pendings->lock);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "lock pendings failed, error=%d", status);
+        CONN_LOGE(CONN_BR, "lock pendings failed, error=%{public}d", status);
         return;
     }
     BrPending *pendingIt = NULL;
     BrPending *pendingNext = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(pendingIt, pendingNext, &g_brManager.pendings->list, BrPending, node) {
         ListDelete(&pendingIt->node);
-        ConnRemoveMsgFromLooper(&g_brManagerAsyncHandler, MSG_UNPEND, 0, 0, pendingIt->pendInfo);
+        ConnRemoveMsgFromLooper(&g_brManagerAsyncHandler, MSG_UNPEND, 0, 0, pendingIt->addr);
         SoftBusFree(pendingIt);
         g_brManager.pendings->cnt -= 1;
     }
@@ -968,7 +978,7 @@ static void Reset(int32_t reason)
 
     status = SoftBusMutexLock(&g_brManager.connections->lock);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "lock connections failed, error=%d", status);
+        CONN_LOGE(CONN_BR, "lock connections failed, error=%{public}d", status);
         return;
     }
     ConnBrConnection *connectionIt = NULL;
@@ -1034,7 +1044,7 @@ static void TransitionToState(enum BrServerState target)
 // 2. MUST free nested dynamic memory which layer large than 1, msg->obj self layer is 1;
 static void BrManagerMsgHandler(SoftBusMessage *msg)
 {
-    CONN_LOGI(CONN_BR, "recv msg %d, state '%s'", msg->what, g_brManager.state->name());
+    CONN_LOGI(CONN_BR, "recvMsg=%{public}d, state=%{public}s", msg->what, g_brManager.state->name());
     switch (msg->what) {
         case MSG_NEXT_CMD: {
             if (g_brManager.state->handlePendingRequest != NULL) {
@@ -1111,9 +1121,8 @@ static void BrManagerMsgHandler(SoftBusMessage *msg)
             break;
         }
         case MSG_UNPEND: {
-            ConnBrPendInfo *info = (ConnBrPendInfo *)(msg->obj);
             if (g_brManager.state->unpend != NULL) {
-                g_brManager.state->unpend(info);
+                g_brManager.state->unpend((const char *)msg->obj);
                 return;
             }
             break;
@@ -1127,10 +1136,10 @@ static void BrManagerMsgHandler(SoftBusMessage *msg)
             break;
         }
         default:
-            CONN_LOGW(CONN_BR, "unexpected msg, %d", msg->what);
+            CONN_LOGW(CONN_BR, "unexpected msg, what=%{public}d", msg->what);
             break;
     }
-    CONN_LOGW(CONN_BR, "ignore msg %d, state is '%s'", msg->what, g_brManager.state->name());
+    CONN_LOGW(CONN_BR, "ignore msg, what=%{public}d, state=%{public}s", msg->what, g_brManager.state->name());
 }
 
 static int BrCompareManagerLooperEventFunc(const SoftBusMessage *msg, void *args)
@@ -1147,12 +1156,7 @@ static int BrCompareManagerLooperEventFunc(const SoftBusMessage *msg, void *args
             return COMPARE_FAILED;
         }
         case MSG_UNPEND: {
-            ConnBrPendInfo *msgInfo = (ConnBrPendInfo *)(msg->obj);
-            ConnBrPendInfo *ctxInfo = (ConnBrPendInfo *)(ctx->obj);
-            if (msgInfo == NULL || ctxInfo == NULL) {
-                return COMPARE_SUCCESS;
-            }
-            if (StrCmpIgnoreCase(msgInfo->addr, ctxInfo->addr) == 0) {
+            if (StrCmpIgnoreCase((const char *)msg->obj, (const char *)ctx->obj) == 0) {
                 return COMPARE_SUCCESS;
             }
             return COMPARE_FAILED;
@@ -1161,8 +1165,10 @@ static int BrCompareManagerLooperEventFunc(const SoftBusMessage *msg, void *args
             break;
     }
     if (ctx->arg1 != 0 || ctx->arg2 != 0 || ctx->obj != NULL) {
-        CONN_LOGE(CONN_BR, "failed to avoid fault silence, what=%d, arg1=%" PRIu64 ", arg2=%" PRIu64 ", obj is null? "
-            "%d", ctx->what, ctx->arg1, ctx->arg2, ctx->obj == NULL);
+        CONN_LOGE(CONN_BR,
+            "failed to avoid fault silence, what=%{public}d, arg1=%{public}" PRIu64 ", arg2=%{public}" PRIu64
+            ", objIsNull=%{public}d",
+            ctx->what, ctx->arg1, ctx->arg2, ctx->obj == NULL);
         return COMPARE_FAILED;
     }
     return COMPARE_SUCCESS;
@@ -1180,10 +1186,10 @@ static void OnClientConnected(uint32_t connectionId)
 
 static void OnClientConnectFailed(uint32_t connectionId, int32_t error)
 {
-    CONN_LOGW(CONN_BR, "conn id=%u, error=%d", connectionId, error);
+    CONN_LOGW(CONN_BR, "connId=%{public}u, error=%{public}d", connectionId, error);
     ErrorContext *ctx = (ErrorContext *)SoftBusCalloc(sizeof(ErrorContext));
-    CONN_CHECK_AND_RETURN_LOGE(ctx != NULL, CONN_BR, "OnClientConnectFailed: calloc ctx failed, conn id=%u, error=%d",
-        connectionId, error);
+    CONN_CHECK_AND_RETURN_LOGE(ctx != NULL, CONN_BR,
+        "OnClientConnectFailed: calloc ctx failed, connId=%{public}u, error=%{public}d", connectionId, error);
     ctx->connectionId = connectionId;
     ctx->error = error;
     if (ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_CONNECT_FAIL, connectionId, 0, ctx, 0) != SOFTBUS_OK) {
@@ -1195,7 +1201,8 @@ static void OnDataReceived(uint32_t connectionId, uint8_t *data, uint32_t dataLe
 {
     ConnBrDataReceivedContext *ctx = (ConnBrDataReceivedContext *)SoftBusCalloc(sizeof(ConnBrDataReceivedContext));
     if (ctx == NULL) {
-        CONN_LOGE(CONN_BR, "calloc data received context failed, conn id=%u, len=%u", connectionId, dataLen);
+        CONN_LOGE(
+            CONN_BR, "calloc data received context failed, connId=%{public}u, len=%{public}u", connectionId, dataLen);
         SoftBusFree(data);
         return;
     }
@@ -1205,8 +1212,7 @@ static void OnDataReceived(uint32_t connectionId, uint8_t *data, uint32_t dataLe
 
     int32_t status = ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_DATA_RECEIVED, 0, 0, ctx, 0);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "post msg to looper failed, conn id=%u, len=%u",
-            connectionId, dataLen);
+        CONN_LOGE(CONN_BR, "post msg to looper failed, connId=%{public}u, len=%{public}u", connectionId, dataLen);
         SoftBusFree(data);
         SoftBusFree(ctx);
     }
@@ -1215,8 +1221,8 @@ static void OnDataReceived(uint32_t connectionId, uint8_t *data, uint32_t dataLe
 static void OnConnectionException(uint32_t connectionId, int32_t error)
 {
     ErrorContext *ctx = (ErrorContext *)SoftBusCalloc(sizeof(ErrorContext));
-    CONN_CHECK_AND_RETURN_LOGE(ctx != NULL, CONN_BR, "br connection exception: calloc ctx failed, conn id=%u, error=%d",
-        connectionId, error);
+    CONN_CHECK_AND_RETURN_LOGE(ctx != NULL, CONN_BR,
+        "br connection exception: calloc ctx failed, connId=%{public}u, error=%{public}d", connectionId, error);
     ctx->connectionId = connectionId;
     ctx->error = error;
     if (ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_CONNECTION_EXECEPTION, connectionId, 0, ctx, 0) !=
@@ -1233,13 +1239,15 @@ static void OnConnectionResume(uint32_t connectionId)
 static void OnPostByteFinshed(
     uint32_t connectionId, uint32_t len, int32_t pid, int32_t flag, int32_t module, int64_t seq, int32_t error)
 {
-    CONN_LOGI(CONN_BR, "conn id=%u, pid=%u, payload(Len/Flg/Module/Seq)=(%u/%d/%d/%" PRId64 "), error=%d",
+    CONN_LOGI(CONN_BR,
+        "connId=%{public}u, pid=%{public}u, "
+        "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 ", error=%{public}d",
         connectionId, pid, len, flag, module, seq, error);
     if (error != SOFTBUS_OK) {
         ConnBrConnection *connection = ConnBrGetConnectionById(connectionId);
         if (connection == NULL) {
             // maybe fail reason is that connection not exist, so log level is warning
-            CONN_LOGW(CONN_BR, "connection not exist, conn id=%u", connectionId);
+            CONN_LOGW(CONN_BR, "connection not exist, connId=%{public}u", connectionId);
             return;
         }
         ConnBrDisconnectNow(connection);
@@ -1263,12 +1271,12 @@ static uint32_t AllocateConnectionIdUnsafe()
 
 int32_t ConnBrSaveConnection(ConnBrConnection *connection)
 {
-    CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, SOFTBUS_INVALID_PARAM, CONN_BR,
-        "br save connection: connection is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        connection != NULL, SOFTBUS_INVALID_PARAM, CONN_BR, "br save connection: connection is null");
 
     int32_t status = SoftBusMutexLock(&g_brManager.connections->lock);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "lock manager connections failed, error=%d", status);
+        CONN_LOGE(CONN_BR, "lock manager connections failed, error=%{public}d", status);
         return status;
     }
     uint32_t connectionId = 0;
@@ -1287,7 +1295,7 @@ void ConnBrRemoveConnection(ConnBrConnection *connection)
 {
     CONN_CHECK_AND_RETURN_LOGW(connection != NULL, CONN_BR, "br remove connection: connection is null");
     CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_brManager.connections->lock) == SOFTBUS_OK, CONN_BR,
-        "br remove connection: lock manager connections failed, conn id=%u", connection->connectionId);
+        "br remove connection: lock manager connections failed, connId=%{public}u", connection->connectionId);
 
     ConnBrConnection *it = NULL;
     ConnBrConnection *target = NULL;
@@ -1298,11 +1306,11 @@ void ConnBrRemoveConnection(ConnBrConnection *connection)
         }
     }
     if (target != NULL) {
-        CONN_LOGW(CONN_BR, "conn id=%u", connection->connectionId);
+        CONN_LOGW(CONN_BR, "connId=%{public}u", connection->connectionId);
         ListDelete(&connection->node);
         ConnBrReturnConnection(&connection);
     } else {
-        CONN_LOGW(CONN_BR, "connection %u not exist", connection->connectionId);
+        CONN_LOGW(CONN_BR, "connection not exist, connId=%{public}u", connection->connectionId);
     }
     (void)SoftBusMutexUnlock(&g_brManager.connections->lock);
 }
@@ -1316,7 +1324,8 @@ ConnBrConnection *ConnBrGetConnectionByAddr(const char *addr, ConnSideType side)
 
     int32_t status = SoftBusMutexLock(&g_brManager.connections->lock);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "lock manager connections failed, addr=%s, error=%d", animizeAddress, status);
+        CONN_LOGE(CONN_BR, "lock manager connections failed, addr=%{public}s, error=%{public}d",
+            animizeAddress, status);
         return NULL;
     }
 
@@ -1330,7 +1339,7 @@ ConnBrConnection *ConnBrGetConnectionByAddr(const char *addr, ConnSideType side)
     if (target != NULL) {
         status = SoftBusMutexLock(&target->lock);
         if (status != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BR, "lock connection failed, error=%d", status);
+            CONN_LOGE(CONN_BR, "lock connection failed, error=%{public}d", status);
             SoftBusMutexUnlock(&g_brManager.connections->lock);
             return NULL;
         }
@@ -1345,7 +1354,8 @@ ConnBrConnection *ConnBrGetConnectionById(uint32_t connectionId)
 {
     int32_t status = SoftBusMutexLock(&g_brManager.connections->lock);
     CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, NULL, CONN_BR,
-        "br get connection by id: lock manager connections failed, conn id=%u, error=%d", connectionId, status);
+        "br get connection by id: lock manager connections failed, connId=%{public}u, error=%{public}d", connectionId,
+        status);
 
     ConnBrConnection *it = NULL;
     ConnBrConnection *target = NULL;
@@ -1358,7 +1368,7 @@ ConnBrConnection *ConnBrGetConnectionById(uint32_t connectionId)
     if (target != NULL) {
         status = SoftBusMutexLock(&target->lock);
         if (status != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BR, "lock connection failed, conn id=%u, error=%d", connectionId, status);
+            CONN_LOGE(CONN_BR, "lock connection failed, connId=%{public}u, error=%{public}d", connectionId, status);
             SoftBusMutexUnlock(&g_brManager.connections->lock);
             return NULL;
         }
@@ -1371,20 +1381,17 @@ ConnBrConnection *ConnBrGetConnectionById(uint32_t connectionId)
 
 void ConnBrReturnConnection(ConnBrConnection **connectionPtr)
 {
-    CONN_CHECK_AND_RETURN_LOGW(connectionPtr != NULL,  CONN_BR,
-        "br return connection: connectionPtr is null");
-    CONN_CHECK_AND_RETURN_LOGW(*connectionPtr != NULL, CONN_BR,
-        "br return connection: *connectionPtr is null");
+    CONN_CHECK_AND_RETURN_LOGW(connectionPtr != NULL, CONN_BR, "br return connection: connectionPtr is null");
+    CONN_CHECK_AND_RETURN_LOGW(*connectionPtr != NULL, CONN_BR, "br return connection: *connectionPtr is null");
 
     ConnBrConnection *connection = *connectionPtr;
     CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&connection->lock) == SOFTBUS_OK, CONN_BR,
-        "br return connection: lock failed, conn id=%u",
-        connection->connectionId);
+        "br return connection: lock failed, connId=%{public}u", connection->connectionId);
     connection->objectRc -= 1;
     int32_t objectRc = connection->objectRc;
     SoftBusMutexUnlock(&connection->lock);
     if (objectRc <= 0) {
-        CONN_LOGI(CONN_BR, "release br connection %u", connection->connectionId);
+        CONN_LOGI(CONN_BR, "release br connection. connectionId=%{public}u", connection->connectionId);
         ConnBrFreeConnection(connection);
     }
     *connectionPtr = NULL;
@@ -1393,42 +1400,41 @@ void ConnBrReturnConnection(ConnBrConnection **connectionPtr)
 static int32_t BrConnectDevice(const ConnectOption *option, uint32_t requestId, const ConnectResult *result)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(option != NULL, SOFTBUS_INVALID_PARAM, CONN_BR,
-        "BrConnectDevice: option is null, request id=%u", requestId);
+        "BrConnectDevice: option is null, requestId=%{public}u", requestId);
     CONN_CHECK_AND_RETURN_RET_LOGW(option->type == CONNECT_BR, SOFTBUS_INVALID_PARAM, CONN_BR,
-        "BrConnectDevice: not br connect type, request id=%u, type=%d", requestId,
-        option->type);
+        "BrConnectDevice: not br connect type, requestId=%{public}u, type=%{public}d", requestId, option->type);
     CONN_CHECK_AND_RETURN_RET_LOGW(result != NULL, SOFTBUS_INVALID_PARAM, CONN_BR,
-        "BrConnectDevice: result callback is null, request id=%u", requestId);
+        "BrConnectDevice: result callback is null, requestId=%{public}u", requestId);
     CONN_CHECK_AND_RETURN_RET_LOGW(result->OnConnectSuccessed != NULL, SOFTBUS_INVALID_PARAM, CONN_BR,
-        "BrConnectDevice: result callback OnConnectSuccessed is null, request id=%u",
-        requestId);
+        "BrConnectDevice: result callback OnConnectSuccessed is null, requestId=%{public}u", requestId);
     CONN_CHECK_AND_RETURN_RET_LOGW(result->OnConnectFailed != NULL, SOFTBUS_INVALID_PARAM, CONN_BR,
-        "BrConnectDevice: result callback OnConnectFailed is null, request id=%u", requestId);
+        "BrConnectDevice: result callback OnConnectFailed is null, requestId=%{public}u", requestId);
 
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, option->brOption.brMac, BT_MAC_LEN);
 
-    ConnBrConnectRequestContext *ctx = (ConnBrConnectRequestContext *)SoftBusCalloc(sizeof(ConnBrConnectRequestContext));
+    ConnBrConnectRequestContext *ctx =
+        (ConnBrConnectRequestContext *)SoftBusCalloc(sizeof(ConnBrConnectRequestContext));
     CONN_CHECK_AND_RETURN_RET_LOGE(ctx != NULL, SOFTBUS_MEM_ERR, CONN_BR,
-        "BrConnectDevice: calloc connect request context failed: request id=%u, addr=%s", requestId, anomizeAddress);
+        "BrConnectDevice: calloc connect request context failed: requestId=%{public}u, addr=%{public}s", requestId,
+        anomizeAddress);
     ctx->statistics.startTime = SoftBusGetSysTimeMs();
     ctx->statistics.connectTraceId = SoftbusGetConnectTraceId();
     ctx->requestId = requestId;
     if (strcpy_s(ctx->addr, BT_MAC_LEN, option->brOption.brMac) != EOK) {
-        CONN_LOGE(CONN_BR,
-            "copy address failed, request id=%u, address=%s", requestId, anomizeAddress);
+        CONN_LOGE(CONN_BR, "copy address failed, requestId=%{public}u, address=%{public}s", requestId, anomizeAddress);
         SoftBusFree(ctx);
         return SOFTBUS_STRCPY_ERR;
     }
     ctx->result = *result;
     int32_t status = ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_CONNECT_REQUEST, 0, 0, ctx, 0);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "post msg to looper failed, request id=%u, addr=%s, error=%d", requestId, anomizeAddress,
-            status);
+        CONN_LOGE(CONN_BR, "post msg to looper failed, requestId=%{public}u, addr=%{public}s, error=%{public}d",
+            requestId, anomizeAddress, status);
         SoftBusFree(ctx);
         return status;
     }
-    CONN_LOGI(CONN_BR, "receive connect request, request id=%u, address=%s, connectTraceId=%u",
+    CONN_LOGI(CONN_BR, "receive connect request, requestId=%{public}u, address=%{public}s, connectTraceId=%{public}u",
         requestId, anomizeAddress, ctx->statistics.connectTraceId);
     return SOFTBUS_OK;
 }
@@ -1437,30 +1443,31 @@ static int32_t BrDisconnectDevice(uint32_t connectionId)
 {
     ConnBrConnection *connection = ConnBrGetConnectionById(connectionId);
     CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, SOFTBUS_CONN_BR_CONNECTION_NOT_EXIST_ERR, CONN_BR,
-        "br disconnect device: connection not exist, conn id=%u", connectionId);
+        "br disconnect device: connection not exist, connId=%{public}u", connectionId);
     char animizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(animizeAddress, BT_MAC_LEN, connection->addr, BT_MAC_LEN);
     NipDisconnectDevice(connectionId);
     ConnBrReturnConnection(&connection);
     int32_t status = ConnPostMsgToLooper(&g_brManagerAsyncHandler, MGR_DISCONNECT_REQUEST, connectionId, 0, NULL, 0);
-    CONN_LOGI(CONN_BR, "conn id=%u, address=%s, status=%d", connectionId, animizeAddress, status);
+    CONN_LOGI(CONN_BR,
+        "connId=%{public}u, address=%{public}s, status=%{public}d", connectionId, animizeAddress, status);
     return status;
 }
 
 static int32_t BrDisconnectDeviceNow(const ConnectOption *option)
 {
-    CONN_CHECK_AND_RETURN_RET_LOGW(option != NULL, SOFTBUS_INVALID_PARAM, CONN_BR,
-        "br disconnect device now: option is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        option != NULL, SOFTBUS_INVALID_PARAM, CONN_BR, "br disconnect device now: option is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(option->type == CONNECT_BR, SOFTBUS_INVALID_PARAM, CONN_BR,
-        "br disconnect device now: not br type, type=%d", option->type);
+        "br disconnect device now: not br type, type=%{public}d", option->type);
 
     char animizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(animizeAddress, BT_MAC_LEN, option->brOption.brMac, BT_MAC_LEN);
-    CONN_LOGI(CONN_BR, "addr=%s, side=%d", animizeAddress, option->brOption.sideType);
+    CONN_LOGI(CONN_BR, "addr=%{public}s, side=%{public}d", animizeAddress, option->brOption.sideType);
 
     ConnBrConnection *connection = ConnBrGetConnectionByAddr(option->brOption.brMac, option->brOption.sideType);
     CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, SOFTBUS_CONN_BR_CONNECTION_NOT_EXIST_ERR, CONN_BR,
-        "br disconnect device now: connection not exist, address=%s, side=%d", animizeAddress,
+        "br disconnect device now: connection not exist, address=%{public}s, side=%{public}d", animizeAddress,
         option->brOption.sideType);
     NipDisconnectDevice(connection->connectionId);
     ConnBrDisconnectNow(connection);
@@ -1470,11 +1477,11 @@ static int32_t BrDisconnectDeviceNow(const ConnectOption *option)
 
 static int32_t BrGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
 {
-    CONN_CHECK_AND_RETURN_RET_LOGW(info != NULL, SOFTBUS_INVALID_PARAM, CONN_BR,
-        "br get connection info: info is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        info != NULL, SOFTBUS_INVALID_PARAM, CONN_BR, "br get connection info: info is null");
     ConnBrConnection *connection = ConnBrGetConnectionById(connectionId);
     CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, SOFTBUS_CONN_BR_CONNECTION_NOT_EXIST_ERR, CONN_BR,
-        "br get connection info: connection not exist, conn id=%u", connectionId);
+        "br get connection info: connection not exist, connId=%{public}u", connectionId);
 
     int32_t status = Convert2ConnectionInfo(connection, info);
     ConnBrReturnConnection(&connection);
@@ -1495,14 +1502,13 @@ static int32_t BrStopLocalListening(const LocalListenerInfo *info)
 
 static bool BrCheckActiveConnection(const ConnectOption *option)
 {
-    CONN_CHECK_AND_RETURN_RET_LOGW(option != NULL, false, CONN_BR,
-        "BrCheckActiveConnection: option is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(option != NULL, false, CONN_BR, "BrCheckActiveConnection: option is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(option->type == CONNECT_BR, false, CONN_BR,
-        "BrCheckActiveConnection: not br type, type=%d", option->type);
+        "BrCheckActiveConnection: not br type, type=%{public}d", option->type);
 
     ConnBrConnection *connection = ConnBrGetConnectionByAddr(option->brOption.brMac, option->brOption.sideType);
-    CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, false, CONN_BR,
-        "BrCheckActiveConnection: connection is not exist");
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        connection != NULL, false, CONN_BR, "BrCheckActiveConnection: connection is not exist");
     bool isActive = (connection->state == BR_CONNECTION_STATE_CONNECTED);
     ConnBrReturnConnection(&connection);
     return isActive;
@@ -1510,12 +1516,12 @@ static bool BrCheckActiveConnection(const ConnectOption *option)
 
 static void ProcessAclCollisionException(ConnBrDevice *device, const char *anomizeAddress)
 {
-    CONN_LOGI(CONN_BR, "addr=%s", anomizeAddress);
+    CONN_LOGI(CONN_BR, "addr=%{public}s", anomizeAddress);
     ConnectOption option;
     (void)memset_s(&option, sizeof(option), 0, sizeof(option));
     option.type = CONNECT_BR;
     if (strcpy_s(option.brOption.brMac, BT_MAC_LEN, device->addr) != EOK) {
-        CONN_LOGE(CONN_BR, "copy br mac fail, addr=%s", anomizeAddress);
+        CONN_LOGE(CONN_BR, "copy br mac fail, addr=%{public}s", anomizeAddress);
         return;
     }
     BrPendConnection(&option, BR_CONNECTION_ACL_CONNECT_COLLISION_MILLIS);
@@ -1528,41 +1534,40 @@ static int32_t BrPendConnection(const ConnectOption *option, uint32_t time)
     CONN_CHECK_AND_RETURN_RET_LOGW((option != NULL && time != 0 && time <= BR_CONNECTION_PEND_TIMEOUT_MAX_MILLIS),
         SOFTBUS_INVALID_PARAM, CONN_BR, "BrPendConnection: option is null or pend time is 0");
     CONN_CHECK_AND_RETURN_RET_LOGW(option->type == CONNECT_BR, SOFTBUS_INVALID_PARAM, CONN_BR,
-        "BrPendConnection: not br type, type=%d", option->type);
+        "BrPendConnection: not br type, type=%{public}d", option->type);
 
     char animizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(animizeAddress, BT_MAC_LEN, option->brOption.brMac, BT_MAC_LEN);
-    CONN_LOGI(CONN_BR, "addr=%s, side=%d", animizeAddress, option->brOption.sideType);
+    CONN_LOGI(CONN_BR, "addr=%{public}s, side=%{public}d", animizeAddress, option->brOption.sideType);
 
     int32_t status = SoftBusMutexLock(&g_brManager.pendings->lock);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "lock pendings failed: error=%d", status);
+        CONN_LOGE(CONN_BR, "lock pendings failed: error=%{public}d", status);
         return SOFTBUS_LOCK_ERR;
     }
     do {
-        BrPending *target = GetBrPending(option->brOption.brMac);
-        ConnBrPendInfo *pendInfo = (ConnBrPendInfo *)SoftBusCalloc(sizeof(ConnBrPendInfo));
-        if (pendInfo == NULL || strcpy_s(pendInfo->addr, BT_MAC_LEN, option->brOption.brMac) != EOK) {
+        char *copyAddr = (char *)SoftBusCalloc(BT_MAC_LEN);
+        if (copyAddr == NULL || strcpy_s(copyAddr, BT_MAC_LEN, option->brOption.brMac) != EOK) {
             CONN_LOGE(CONN_BR, "copy addr failed, addr=%s", animizeAddress);
-            SoftBusFree(pendInfo);
+            // it is safe, SoftBusFree will check NULL situation
+            SoftBusFree(copyAddr);
+            status = SOFTBUS_MALLOC_ERR;
             break;
         }
-        uint64_t now = SoftBusGetSysTimeMs();
-        pendInfo->firstStartTimestamp = now;
-        pendInfo->firstDuration = time;
-        pendInfo->startTimestamp = now;
-        pendInfo->duration = time;
+        BrPending *target = NULL;
+        BrPending *it = NULL;
+        LIST_FOR_EACH_ENTRY(it, &g_brManager.pendings->list, BrPending, node) {
+            if (StrCmpIgnoreCase(it->addr, option->brOption.brMac) == 0) {
+                target = it;
+                break;
+            }
+        }
+
         if (target != NULL) {
             CONN_LOGD(CONN_BR, "br pend connection, address pending, refresh timeout only, addr=%s", animizeAddress);
-            if (target->pendInfo->startTimestamp + target->pendInfo->duration < now + time) {
-                pendInfo->firstStartTimestamp = target->pendInfo->firstStartTimestamp;
-                pendInfo->firstDuration = target->pendInfo->firstDuration;
-                ConnRemoveMsgFromLooper(&g_brManagerAsyncHandler, MSG_UNPEND, 0, 0, pendInfo);
-                target->pendInfo = pendInfo;
-                ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_UNPEND, 0, 0, pendInfo, time);
-            } else {
-                SoftBusFree(pendInfo);
-            }
+            ConnRemoveMsgFromLooper(&g_brManagerAsyncHandler, MSG_UNPEND, 0, 0, copyAddr);
+            ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_UNPEND, 0, 0, copyAddr,
+                (time < BR_CONNECTION_PEND_TIMEOUT_MAX_MILLIS ? time : BR_CONNECTION_PEND_TIMEOUT_MAX_MILLIS));
             break;
         }
 
@@ -1573,11 +1578,17 @@ static int32_t BrPendConnection(const ConnectOption *option, uint32_t time)
             break;
         }
         ListInit(&pending->node);
-        pending->pendInfo = pendInfo;
+        if (strcpy_s(pending->addr, BT_MAC_LEN, option->brOption.brMac) != EOK) {
+            SoftBusFree(copyAddr);
+            SoftBusFree(pending);
+            status = SOFTBUS_STRCPY_ERR;
+            break;
+        }
         ListAdd(&g_brManager.pendings->list, &pending->node);
         g_brManager.pendings->cnt += 1;
-        ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_UNPEND, 0, 0, pendInfo, time);
-        CONN_LOGD(CONN_BR, "br pend connection success, address=%s", animizeAddress);
+        ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_UNPEND, 0, 0, copyAddr,
+            (time < BR_CONNECTION_PEND_TIMEOUT_MAX_MILLIS ? time : BR_CONNECTION_PEND_TIMEOUT_MAX_MILLIS));
+        CONN_LOGD(CONN_BR, "br pend connection success, address=%{public}s", animizeAddress);
     } while (false);
     SoftBusMutexUnlock(&g_brManager.pendings->lock);
     return status;
@@ -1597,18 +1608,18 @@ static void DumpLocalBtMac(void)
     SoftBusBtAddr addr = { 0 };
     int32_t status = SoftBusGetBtMacAddr(&addr);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "get bt Smac failed, error=%d", status);
+        CONN_LOGE(CONN_BR, "get bt Smac failed, error=%{public}d", status);
         return;
     }
     char myBtMac[BT_MAC_LEN] = { 0 };
     status = ConvertBtMacToStr(myBtMac, BT_MAC_LEN, addr.addr, sizeof(addr.addr));
     if (status != SOFTBUS_OK) {
-        CONN_LOGW(CONN_BR, "convert bt mac to str fail, error=%d", status);
+        CONN_LOGW(CONN_BR, "convert bt mac to str fail, error=%{public}d", status);
         return;
     }
     char anomizeMyAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeMyAddress, BT_MAC_LEN, myBtMac, BT_MAC_LEN);
-    CONN_LOGD(CONN_BR, "local bt address is %s", anomizeMyAddress);
+    CONN_LOGD(CONN_BR, "local bt address, anomizeMyAddress=%{public}s", anomizeMyAddress);
 }
 
 static void OnBtStateChanged(int listenerId, int state)
@@ -1618,13 +1629,13 @@ static void OnBtStateChanged(int listenerId, int state)
     if (state == SOFTBUS_BR_STATE_TURN_ON) {
         DumpLocalBtMac();
         status = ConnBrStartServer();
-        CONN_LOGI(CONN_BR, "recv bt on, start server, status=%d", status);
+        CONN_LOGI(CONN_BR, "recv bt on, start server, status=%{public}d", status);
         return;
     }
 
     if (state == SOFTBUS_BR_STATE_TURN_OFF) {
         status = ConnBrStopServer();
-        CONN_LOGI(CONN_BR, "recv bt off, stop server, status=%d", status);
+        CONN_LOGI(CONN_BR, "recv bt off, stop server, status=%{public}d", status);
 
         ErrorContext *ctx = (ErrorContext *)SoftBusCalloc(sizeof(ErrorContext));
         if (ctx == NULL) {
@@ -1645,8 +1656,8 @@ static int32_t InitBrManager()
 {
     SoftBusList *connections = CreateSoftBusList();
     SoftBusList *pendings = CreateSoftBusList();
-    CONN_CHECK_AND_RETURN_RET_LOGE(connections != NULL && pendings != NULL, SOFTBUS_ERR, CONN_INIT,
-        "InitBrManager: create list failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(
+        connections != NULL && pendings != NULL, SOFTBUS_ERR, CONN_INIT, "InitBrManager: create list failed");
     g_brManager.connections = connections;
     g_brManager.pendings = pendings;
     ListInit(&g_brManager.waitings);
@@ -1659,7 +1670,7 @@ static int32_t InitBrManager()
     };
     int32_t listenerId = SoftBusAddBtStateListener(&listener);
     CONN_CHECK_AND_RETURN_RET_LOGW(listenerId >= 0, SOFTBUS_ERR, CONN_INIT,
-        "InitBrManager: add bt state change listener failed, invalid listener id=%d", listenerId);
+        "InitBrManager: add bt state change listener failed, invalid listenerId=%{public}d", listenerId);
     TransitionToState(BR_STATE_AVAILABLE);
     return SOFTBUS_OK;
 }
@@ -1667,16 +1678,16 @@ static int32_t InitBrManager()
 ConnectFuncInterface *ConnInitBr(const ConnectCallback *callback)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(callback != NULL, NULL, CONN_INIT, "ConnInitBr: callback is null");
-    CONN_CHECK_AND_RETURN_RET_LOGW(callback->OnConnected != NULL, NULL, CONN_INIT,
-        "ConnInitBr: callback OnConnected is null");
-    CONN_CHECK_AND_RETURN_RET_LOGW(callback->OnDisconnected != NULL, NULL, CONN_INIT,
-        "ConnInitBr: callback OnDisconnected is null");
-    CONN_CHECK_AND_RETURN_RET_LOGW(callback->OnDataReceived != NULL, NULL, CONN_INIT,
-        "ConnInitBr: callback OnDataReceived is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        callback->OnConnected != NULL, NULL, CONN_INIT, "ConnInitBr: callback OnConnected is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        callback->OnDisconnected != NULL, NULL, CONN_INIT, "ConnInitBr: callback OnDisconnected is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        callback->OnDataReceived != NULL, NULL, CONN_INIT, "ConnInitBr: callback OnDataReceived is null");
 
     int32_t status = BrInitLooper();
-    CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, NULL, CONN_INIT,
-        "ConnInitBr: init looper failed, error=%d", status);
+    CONN_CHECK_AND_RETURN_RET_LOGE(
+        status == SOFTBUS_OK, NULL, CONN_INIT, "ConnInitBr: init looper failed, error=%{public}d", status);
     SppSocketDriver *sppDriver = InitSppSocketDriver();
     CONN_CHECK_AND_RETURN_RET_LOGE(sppDriver != NULL, NULL, CONN_INIT, "ConnInitBr: init spp socket driver failed");
 
@@ -1689,25 +1700,25 @@ ConnectFuncInterface *ConnInitBr(const ConnectCallback *callback)
         .onConnectionResume = OnConnectionResume,
     };
     status = ConnBrConnectionMuduleInit(g_brManagerAsyncHandler.handler.looper, sppDriver, &connectionEventListener);
-    CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, NULL, CONN_INIT,
-        "ConnInitBr: init connection failed, error=%d ", status);
+    CONN_CHECK_AND_RETURN_RET_LOGE(
+        status == SOFTBUS_OK, NULL, CONN_INIT, "ConnInitBr: init connection failed, error=%{public}d ", status);
 
     ConnBrTransEventListener transEventListener = {
         .onPostByteFinshed = OnPostByteFinshed,
     };
     status = ConnBrTransMuduleInit(sppDriver, &transEventListener);
-    CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, NULL, CONN_INIT,
-        "ConnInitBr: init trans failed, error=%d", status);
+    CONN_CHECK_AND_RETURN_RET_LOGE(
+        status == SOFTBUS_OK, NULL, CONN_INIT, "ConnInitBr: init trans failed, error=%{public}d", status);
 
     status = InitBrManager();
-    CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, NULL, CONN_INIT,
-        "ConnInitBr: init manager failed, error=%d", status);
+    CONN_CHECK_AND_RETURN_RET_LOGE(
+        status == SOFTBUS_OK, NULL, CONN_INIT, "ConnInitBr: init manager failed, error=%{public}d", status);
     status = ConnBrInitBrPendingPacket();
     CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, NULL, CONN_INIT,
-        "conn init br failed: init pending packet failed, error=%d", status);
+        "conn init br failed: init pending packet failed, error=%{public}d", status);
     status = ConnBrInitBrPendingPacket();
-    CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, NULL, CONN_INIT,
-        "conn init br failed: init br pending failed, error=%d", status);
+    CONN_CHECK_AND_RETURN_RET_LOGE(
+        status == SOFTBUS_OK, NULL, CONN_INIT, "conn init br failed: init br pending failed, error=%{public}d", status);
     g_connectCallback = *callback;
     static ConnectFuncInterface connectFuncInterface = {
         .ConnectDevice = BrConnectDevice,

@@ -55,6 +55,7 @@ struct WifiDirectTriggerChannel;
                                                                                                                   \
     char *name;                                                                                                   \
     int32_t timerId;                                                                                              \
+    int32_t currentState;                                                                                         \
     struct WifiDirectCommand *activeCommand;                                                                      \
     struct WifiDirectCommand *passiveCommand
 

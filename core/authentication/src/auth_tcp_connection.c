@@ -20,6 +20,7 @@
 #include "auth_channel.h"
 #include "auth_common.h"
 #include "auth_log.h"
+#include "auth_meta_manager.h"
 #include "bus_center_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
@@ -31,14 +32,6 @@
 #define AUTH_PKT_HEAD_LEN 24
 #define AUTH_KEEP_ALIVE_TIME_INTERVAL (10 * 60)
 #define AUTH_SOCKET_MAX_DATA_LEN (64 * 1024)
-
-typedef struct {
-    int32_t magic;
-    int32_t module;
-    int64_t seq;
-    int32_t flag;
-    uint32_t len;
-} SocketPktHead;
 
 typedef struct {
     int32_t module;
@@ -153,6 +146,10 @@ static void NotifyDataReceived(ListenerModule module, int32_t fd,
         NotifyChannelDataReceived(fd, pktHead, data);
         return;
     }
+    if (pktHead->module == MODULE_META_AUTH) {
+        AuthMetaNotifyDataReceived(fd, pktHead, data);
+        return;
+    }
     AuthDataHead head = {
         .dataType = ModuleToDataType(pktHead->module),
         .module = pktHead->module,
@@ -171,11 +168,11 @@ static int32_t RecvPacketHead(ListenerModule module, int32_t fd, SocketPktHead *
     ssize_t len = ConnRecvSocketData(fd, (char *)&buf[0], sizeof(buf), 0);
     if (len < AUTH_PKT_HEAD_LEN) {
         if (len < 0) {
-            AUTH_LOGE(AUTH_CONN, "recv head fail(=%d).", ConnGetSocketError(fd));
+            AUTH_LOGE(AUTH_CONN, "recv head fail. ret=%{public}d", ConnGetSocketError(fd));
             (void)DelTrigger(module, fd, READ_TRIGGER);
             NotifyDisconnected(fd);
         }
-        AUTH_LOGE(AUTH_CONN, "head not enough, len=%d, abandon it.", len);
+        AUTH_LOGE(AUTH_CONN, "head not enough, abandon it. len=%{public}zd", len);
         return SOFTBUS_ERR;
     }
     return UnpackSocketPkt(buf, len, head);
@@ -192,7 +189,7 @@ static uint8_t *RecvPacketData(int32_t fd, uint32_t len)
     while (offset < len) {
         ssize_t recvLen = ConnRecvSocketData(fd, (char *)(data + offset), (size_t)(len - offset), 0);
         if (recvLen < 0) {
-            AUTH_LOGE(AUTH_CONN, "recv data fail(=%d).", ConnGetSocketError(fd));
+            AUTH_LOGE(AUTH_CONN, "recv data fail. ret=%{public}d", ConnGetSocketError(fd));
             SoftBusFree(data);
             return NULL;
         }
@@ -203,7 +200,7 @@ static uint8_t *RecvPacketData(int32_t fd, uint32_t len)
 
 static int32_t ProcessSocketOutEvent(ListenerModule module, int32_t fd)
 {
-    AUTH_LOGI(AUTH_CONN, "socket client connect succ: fd=%d.", fd);
+    AUTH_LOGI(AUTH_CONN, "socket client connect succ: fd=%{public}d.", fd);
     (void)DelTrigger(module, fd, WRITE_TRIGGER);
     if (AddTrigger(module, fd, READ_TRIGGER) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "AddTrigger fail.");
@@ -229,7 +226,8 @@ static int32_t ProcessSocketInEvent(ListenerModule module, int32_t fd)
     if (RecvPacketHead(module, fd, &head) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-    AUTH_LOGI(AUTH_CONN, "RecvSocketData: fd=%d, module=%d, seq=%" PRId64 ", flag=%d, len=%u.",
+    AUTH_LOGI(AUTH_CONN,
+        "RecvSocketData: fd=%{public}d, module=%{public}d, seq=%{public}" PRId64 ", flag=%{public}d, len=%{public}u.",
         fd, head.module, head.seq, head.flag, head.len);
     if (head.len == 0 || head.len > AUTH_SOCKET_MAX_DATA_LEN) {
         AUTH_LOGW(AUTH_CONN, "data is out of size, abandon it.");
@@ -320,7 +318,7 @@ int32_t StartSocketListening(ListenerModule module, const LocalListenerInfo *inf
     };
     int32_t port = StartBaseListener(info, &listener);
     if (port <= 0) {
-        AUTH_LOGE(AUTH_CONN, "StartBaseListener fail(=%d).", port);
+        AUTH_LOGE(AUTH_CONN, "StartBaseListener fail. port=%{public}d", port);
         return SOFTBUS_ERR;
     }
     return port;
@@ -360,7 +358,7 @@ int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode)
     }
     int32_t ret = ConnOpenClientSocket(&option, localIp, !isBlockMode);
     if (ret < 0) {
-        AUTH_LOGE(AUTH_CONN, "ConnOpenClientSocket fail, error=%d", ret);
+        AUTH_LOGE(AUTH_CONN, "ConnOpenClientSocket fail, error=%{public}d", ret);
         return ret;
     }
     int32_t fd = ret;
@@ -422,7 +420,7 @@ int32_t NipSocketConnectDevice(ListenerModule module,
 void SocketDisconnectDevice(ListenerModule module, int32_t fd)
 {
     if (fd < 0) {
-        AUTH_LOGD(AUTH_CONN, "invalid fd:%d, maybe has shutdown", fd);
+        AUTH_LOGD(AUTH_CONN, "invalid fd, maybe has shutdown. fd=%{public}d", fd);
         return;
     }
     (void)DelTrigger(module, fd, RW_TRIGGER);
@@ -452,12 +450,12 @@ int32_t SocketPostBytes(int32_t fd, const AuthDataHead *head, const uint8_t *dat
         return SOFTBUS_ERR;
     }
 
-    AUTH_LOGI(AUTH_CONN, "fd=%d, module=%d, seq=%" PRId64 ", flag=%d, len=%u.",
+    AUTH_LOGI(AUTH_CONN, "fd=%{public}d, module=%{public}d, seq=%{public}" PRId64 ", flag=%{public}d, len=%{public}u.",
         fd, pktHead.module, pktHead.seq, pktHead.flag, pktHead.len);
     ssize_t ret = ConnSendSocketData(fd, (const char *)buf, (size_t)size, 0);
     SoftBusFree(buf);
     if (ret != (ssize_t)size) {
-        AUTH_LOGE(AUTH_CONN, "fail(=%d).", ret);
+        AUTH_LOGE(AUTH_CONN, "fail. ret=%{public}zd", ret);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -469,17 +467,17 @@ int32_t SocketGetConnInfo(int32_t fd, AuthConnInfo *connInfo, bool *isServer)
     CHECK_NULL_PTR_RETURN_VALUE(isServer, SOFTBUS_INVALID_PARAM);
     SocketAddr socket;
     if (ConnGetPeerSocketAddr(fd, &socket) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "fail, fd=%d.", fd);
+        AUTH_LOGE(AUTH_CONN, "fail, fd=%{public}d.", fd);
         return SOFTBUS_ERR;
     }
     int32_t localPort = ConnGetLocalSocketPort(fd);
     if (localPort <= 0) {
-        AUTH_LOGE(AUTH_CONN, "fail, fd=%d.", fd);
+        AUTH_LOGE(AUTH_CONN, "fail, fd=%{public}d.", fd);
         return SOFTBUS_ERR;
     }
     connInfo->type = AUTH_LINK_TYPE_WIFI;
     if (strcpy_s(connInfo->info.ipInfo.ip, sizeof(connInfo->info.ipInfo.ip), socket.addr) != EOK) {
-        AUTH_LOGE(AUTH_CONN, "copy ip fail, fd=%d.", fd);
+        AUTH_LOGE(AUTH_CONN, "copy ip fail, fd=%{public}d.", fd);
         return SOFTBUS_MEM_ERR;
     }
     connInfo->info.ipInfo.port = socket.port;
@@ -542,7 +540,7 @@ int32_t RegAuthChannelListener(int32_t module, const AuthChannelListener *listen
             return SOFTBUS_OK;
         }
     }
-    AUTH_LOGE(AUTH_CONN, "unknown module(=%d).", module);
+    AUTH_LOGE(AUTH_CONN, "unknown module. module=%{public}d", module);
     return SOFTBUS_ERR;
 }
 
@@ -569,20 +567,20 @@ int32_t AuthOpenChannel(const char *ip, int32_t port)
         AUTH_LOGE(AUTH_CONN, "connect fail.");
         return INVALID_CHANNEL_ID;
     }
-    AUTH_LOGI(AUTH_CONN, "open auth channel succ, channelId=%d.", fd);
+    AUTH_LOGI(AUTH_CONN, "open auth channel succ, channelId=%{public}d.", fd);
     return fd;
 }
 
 void AuthCloseChannel(int32_t channelId)
 {
-    AUTH_LOGI(AUTH_CONN, "close auth channel, id=%d.", channelId);
+    AUTH_LOGI(AUTH_CONN, "close auth channel, id=%{public}d.", channelId);
     SocketDisconnectDevice(AUTH, channelId);
 }
 
 int32_t AuthPostChannelData(int32_t channelId, const AuthChannelData *data)
 {
     if (channelId < 0 || data == NULL || data->data == NULL || data->len == 0) {
-        AUTH_LOGE(AUTH_CONN, "invalid param, channelId=%d.", channelId);
+        AUTH_LOGE(AUTH_CONN, "invalid param, channelId=%{public}d.", channelId);
         return SOFTBUS_INVALID_PARAM;
     }
     AuthDataHead head = {

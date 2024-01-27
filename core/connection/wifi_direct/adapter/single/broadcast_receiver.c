@@ -26,10 +26,11 @@ struct ActionListenerNode {
     ListNode node;
     BroadcastListener listener;
     char name[32];
+    enum ListenerPriority priority;
 };
 
 static void RegisterBroadcastListener(const enum BroadcastReceiverAction *actionArray, size_t actionSize,
-                                      const char *name, BroadcastListener listener)
+                                      const char *name, enum ListenerPriority priority, BroadcastListener listener)
 {
     struct BroadcastReceiver *broadcastReceiver = GetBroadcastReceiver();
     for (size_t i = 0; i < actionSize; i++) {
@@ -39,6 +40,7 @@ static void RegisterBroadcastListener(const enum BroadcastReceiverAction *action
         enum BroadcastReceiverAction action = actionArray[i];
 
         ListInit(&actionListenerNode->node);
+        actionListenerNode->priority = priority;
         actionListenerNode->listener = listener;
         strcpy_s(actionListenerNode->name, sizeof(actionListenerNode->name), name);
         ListTailInsert(&broadcastReceiver->listeners[action], &actionListenerNode->node);
@@ -50,10 +52,13 @@ static void DispatchWorkHandler(void *data)
     struct BroadcastParam *param = (struct BroadcastParam *)data;
     struct BroadcastReceiver *broadcastReceiver = GetBroadcastReceiver();
     struct ListNode *actionListenerList = &broadcastReceiver->listeners[param->action];
+
     struct ActionListenerNode *actionListenerNode = NULL;
-    LIST_FOR_EACH_ENTRY(actionListenerNode, actionListenerList, struct ActionListenerNode, node) {
-        if (actionListenerNode->listener) {
-            actionListenerNode->listener(param->action, param);
+    for (int32_t priority = LISTENER_PRIORITY_HIGH; priority >= LISTENER_PRIORITY_LOW; priority--) {
+        LIST_FOR_EACH_ENTRY(actionListenerNode, actionListenerList, struct ActionListenerNode, node) {
+            if (actionListenerNode->priority == priority && actionListenerNode->listener) {
+                actionListenerNode->listener(param->action, param);
+            }
         }
     }
 
@@ -92,7 +97,7 @@ static void WifiDirectP2pConnectionChangeCallback(const WifiP2pLinkedInfo info)
     CONN_CHECK_AND_RETURN_LOGE(param != NULL, CONN_WIFI_DIRECT, "alloc failed");
 
     param->action = WIFI_P2P_CONNECTION_CHANGED_ACTION;
-    (void)memcpy_s(&param->p2pParam.p2pLinkInfo, sizeof(WifiP2pLinkedInfo), &info, sizeof(WifiP2pLinkedInfo));
+    param->p2pParam.p2pLinkInfo = info;
     param->p2pParam.groupInfo = NULL;
     (void)GetWifiDirectP2pAdapter()->getGroupInfo(&param->p2pParam.groupInfo);
 
@@ -113,11 +118,11 @@ int32_t BroadcastReceiverInit(void)
 
     WifiErrorCode ret = RegisterP2pStateChangedCallback(WifiDirectP2pStateChangeCallback);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, SOFTBUS_ERR, CONN_INIT,
-                                  "register p2p state change callback failed, ret=%d", ret);
+        "register p2p state change callback failed, ret=%{public}d", ret);
 
     ret = RegisterP2pConnectionChangedCallback(WifiDirectP2pConnectionChangeCallback);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == WIFI_SUCCESS, SOFTBUS_ERR, CONN_INIT,
-                                  "register p2p connection change callback failed, ret=%d", ret);
+        "register p2p connection change callback failed, ret=%{public}d", ret);
 
     g_broadcastReceiver.isInited = true;
     return SOFTBUS_OK;

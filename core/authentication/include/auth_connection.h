@@ -70,7 +70,7 @@ int32_t GetConnInfoByConnectionId(uint32_t connectionId, AuthConnInfo *connInfo)
 void HandleRepeatDeviceIdDataDelay(uint64_t connId, const AuthConnInfo *connInfo, bool fromServer,
     const AuthDataHead *head, const uint8_t *data);
 
-#define CONN_INFO         "conn[%s:%u]"
+#define CONN_INFO         "conn=%{public}s:%{public}u"
 #define CONN_DATA(connId) GetConnTypeStr(connId), GetConnId(connId)
 
 #ifdef __cplusplus

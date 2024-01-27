@@ -157,6 +157,7 @@ int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthCon
 int32_t AuthPostTransData(int64_t authId, const AuthTransData *dataInfo);
 void AuthCloseConn(int64_t authId);
 int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta);
+int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta);
 void AuthDeleteStoredAuthKey(const char *udid, int32_t discoveryType);
 int32_t AuthGetLatestAuthSeqList(const char *udid, int64_t *seqList, uint32_t num);
 void AuthDeleteStoredAuthKey(const char *udid, int32_t discoveryType);

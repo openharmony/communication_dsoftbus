@@ -29,6 +29,8 @@
 
 #define MAX_SESSION_SERVER_NUM 100
 #define CMD_REGISTED_SESSION_LIST "registed_sessionlist"
+#define GET_ROUTE_TYPE(type) ((type) & 0xff)
+#define GET_CONN_TYPE(type) (((type) >> 8) & 0xff)
 
 static SoftBusList *g_sessionServerList = NULL;
 
@@ -94,7 +96,7 @@ bool TransSessionServerIsExist(const char *sessionName)
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
         if (strcmp(pos->sessionName, sessionName) == 0) {
             Anonymize(sessionName, &tmpName);
-            TRANS_LOGW(TRANS_CTRL, "session server sessionName=%s is exist", tmpName);
+            TRANS_LOGW(TRANS_CTRL, "session server is exist. sessionName=%{public}s", tmpName);
             (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
             AnonymizeFree(tmpName);
             return true;
@@ -115,7 +117,7 @@ static void ShowSessionServer(void)
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
         Anonymize(pos->sessionName, &tmpName);
         TRANS_LOGI(TRANS_CTRL,
-            "count=%d session server sessionName=%s is exist", count, tmpName);
+            "session server is exist. count=%{public}d, sessionName=%{public}s", count, tmpName);
         AnonymizeFree(tmpName);
         count++;
     }
@@ -149,14 +151,14 @@ int32_t TransSessionServerAddItem(SessionServer *newNode)
         if (strcmp(pos->sessionName, newNode->sessionName) == 0) {
             Anonymize(newNode->sessionName, &tmpName);
             if ((pos->uid == newNode->uid) && (pos->pid == newNode->pid)) {
-                TRANS_LOGI(TRANS_CTRL, "session server sessionName=%s is exist",
+                TRANS_LOGI(TRANS_CTRL, "session server is exist, sessionName=%{public}s",
                     tmpName);
                 (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
                 AnonymizeFree(tmpName);
                 return SOFTBUS_SERVER_NAME_REPEATED;
             } else {
                 TRANS_LOGI(TRANS_CTRL,
-                    "sessionName=%s has been used by other processes", tmpName);
+                    "sessionName has been used by other processes. sessionName=%{public}s", tmpName);
                 (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
                 AnonymizeFree(tmpName);
                 return SOFTBUS_SERVER_NAME_USED;
@@ -164,7 +166,9 @@ int32_t TransSessionServerAddItem(SessionServer *newNode)
         }
     }
 
+    Anonymize(newNode->sessionName, &tmpName);
     ListAdd(&(g_sessionServerList->list), &(newNode->node));
+    TRANS_LOGI(TRANS_CTRL, "add sessionName = %{public}s", tmpName);
     g_sessionServerList->cnt++;
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
     AnonymizeFree(tmpName);
@@ -197,7 +201,7 @@ int32_t TransSessionServerDelItem(const char *sessionName)
         g_sessionServerList->cnt--;
         char *tmpName = NULL;
         Anonymize(sessionName, &tmpName);
-        TRANS_LOGI(TRANS_CTRL, "destroy session server sessionName=%s", tmpName);
+        TRANS_LOGI(TRANS_CTRL, "destroy session server sessionName=%{public}s", tmpName);
         AnonymizeFree(tmpName);
     }
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
@@ -225,7 +229,7 @@ void TransDelItemByPackageName(const char *pkgName, int32_t pid)
         }
     }
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
-    TRANS_LOGI(TRANS_CTRL, "del pkgName=%s", pkgName);
+    TRANS_LOGI(TRANS_CTRL, "del pkgName=%{public}s", pkgName);
 }
 
 int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uint16_t len)
@@ -250,7 +254,7 @@ int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uin
             int32_t ret = strcpy_s(pkgName, len, pos->pkgName);
             (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
             if (ret != EOK) {
-                TRANS_LOGE(TRANS_CTRL, "strcpy_s error ret, ret=%d", ret);
+                TRANS_LOGE(TRANS_CTRL, "strcpy_s error ret, ret=%{public}d", ret);
                 return SOFTBUS_ERR;
             }
             return SOFTBUS_OK;
@@ -260,7 +264,7 @@ int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uin
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
     char *tmpName = NULL;
     Anonymize(sessionName, &tmpName);
-    TRANS_LOGE(TRANS_CTRL, "not found sessionName=%s.", tmpName);
+    TRANS_LOGE(TRANS_CTRL, "not found sessionName=%{public}s.", tmpName);
     AnonymizeFree(tmpName);
     return SOFTBUS_ERR;
 }
@@ -288,7 +292,7 @@ int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
         if (strcmp(pos->sessionName, sessionName) == 0) {
             *uid = pos->uid;
             *pid = pos->pid;
-            TRANS_LOGI(TRANS_CTRL, "sessionName=%s, uid=%d, pid=%d",
+            TRANS_LOGI(TRANS_CTRL, "sessionName=%{public}s, uid=%{public}d, pid=%{public}d",
                 tmpName, pos->uid, pos->pid);
             (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
             AnonymizeFree(tmpName);
@@ -297,7 +301,7 @@ int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid)
     }
 
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
-    TRANS_LOGE(TRANS_CTRL, "err: sessionName=%s", tmpName);
+    TRANS_LOGE(TRANS_CTRL, "err: sessionName=%{public}s", tmpName);
     AnonymizeFree(tmpName);
     return SOFTBUS_TRANS_GET_PID_FAILED;
 }
@@ -315,6 +319,7 @@ static void TransListDelete(ListNode *sessionServerList)
 
 static int32_t TransListCopy(ListNode *sessionServerList)
 {
+    TRANS_LOGI(TRANS_CTRL, "enter.");
     if (sessionServerList == NULL) {
         return SOFTBUS_ERR;
     }
@@ -340,14 +345,17 @@ static int32_t TransListCopy(ListNode *sessionServerList)
     return SOFTBUS_OK;
 }
 
-void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid, const char *peerIp, int32_t routeType)
+void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid, const char *peerIp, int32_t type)
 {
     if (networkId == NULL || g_sessionServerList == NULL) {
         return;
     }
+    int32_t routeType = GET_ROUTE_TYPE(type);
+    int32_t connType = GET_CONN_TYPE(type);
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
-    TRANS_LOGI(TRANS_CTRL, "routeType=%d, networkId=%s", routeType, anonyNetworkId);
+    TRANS_LOGI(TRANS_CTRL,
+        "routeType=%{public}d, networkId=%{public}s connType=%{public}d", routeType, anonyNetworkId, connType);
     AnonymizeFree(anonyNetworkId);
 
     ListNode sessionServerList = {0};
@@ -362,7 +370,7 @@ void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid, 
     SessionServer *tmp = NULL;
 
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &sessionServerList, SessionServer, node) {
-        (void)TransServerOnChannelLinkDown(pos->pkgName, pos->pid, uuid, udid, peerIp, networkId, routeType);
+        (void)TransServerOnChannelLinkDown(pos->pkgName, pos->pid, uuid, udid, peerIp, networkId, type);
     }
 
     if (routeType == WIFI_P2P) {

@@ -50,6 +50,7 @@ typedef struct RxIface_ {
     List remoteNodeList;
     uint32_t remoteNodeCnt;
     struct RemoteDevice_ *device;
+    struct timespec updateTime;
 } RxIface;
 
 typedef struct RemoteDevice_ {
@@ -420,10 +421,25 @@ static int32_t UpdateDeviceInfo(DeviceInfo *curInfo, const RxIface *rxIface, con
     return NSTACKX_EOK;
 }
 
-static int32_t UpdateRemoteNode(RemoteNode *remoteNode, const RxIface *rxIface,
-    const DeviceInfo *deviceInfo, uint8_t *updated)
+static void UpdatedByTimeout(RxIface *rxIface, uint8_t *updated)
 {
-    return UpdateDeviceInfo(&remoteNode->deviceInfo, rxIface, deviceInfo, updated);
+    struct timespec cur;
+    ClockGetTime(CLOCK_MONOTONIC, &cur);
+    uint32_t diffMs = GetTimeDiffMs(&cur, &(rxIface->updateTime));
+    if (diffMs > GetNotifyTimeoutMs()) {
+        *updated = NSTACKX_TRUE;
+    }
+    rxIface->updateTime = cur;
+}
+
+static int32_t UpdateRemoteNode(RemoteNode *remoteNode, RxIface *rxIface, const DeviceInfo *deviceInfo,
+    uint8_t *updated)
+{
+    int32_t ret = UpdateDeviceInfo(&remoteNode->deviceInfo, rxIface, deviceInfo, updated);
+    if (ret == NSTACKX_EOK && (*updated == NSTACKX_FALSE)) {
+        UpdatedByTimeout(rxIface, updated);
+    }
+    return ret;
 }
 
 #ifdef DFINDER_DISTINGUISH_ACTIVE_PASSIVE_DISCOVERY
@@ -622,6 +638,7 @@ int32_t UpdateRemoteNodeByDeviceInfo(const char *deviceId, const NSTACKX_Interfa
         if (rxIface == NULL) {
             goto FAIL_AND_FREE;
         }
+        ClockGetTime(CLOCK_MONOTONIC, &(rxIface->updateTime));
         ListInsertTail(&(device->rxIfaceList), &(rxIface->node));
     }
 
@@ -631,6 +648,7 @@ int32_t UpdateRemoteNodeByDeviceInfo(const char *deviceId, const NSTACKX_Interfa
         if (remoteNode == NULL) {
             goto FAIL_AND_FREE;
         }
+        ClockGetTime(CLOCK_MONOTONIC, &(rxIface->updateTime));
         *updated = NSTACKX_TRUE;
     } else {
         if (UpdateRemoteNode(remoteNode, rxIface, deviceInfo, updated) != NSTACKX_EOK) {

@@ -63,7 +63,7 @@ static int32_t ClientTdcOnDataEvent(ListenerModule module, int events, int32_t f
     TcpDirectChannelInfo channel;
     (void)memset_s(&channel, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
     if (TransTdcGetInfoByFd(fd, &channel) == NULL) {
-        TRANS_LOGE(TRANS_SDK, "can not match fd. fd=%d", fd);
+        TRANS_LOGE(TRANS_SDK, "can not match fd. fd=%{public}d", fd);
         return SOFTBUS_ERR;
     }
 
@@ -71,11 +71,11 @@ static int32_t ClientTdcOnDataEvent(ListenerModule module, int events, int32_t f
         int32_t channelId = channel.channelId;
         int32_t ret = TransTdcRecvData(channelId);
         if (ret == SOFTBUS_DATA_NOT_ENOUGH) {
-            TRANS_LOGE(TRANS_SDK, "client channelId=%d process data fail, SOFTBUS_DATA_NOT_ENOUGH,", channelId);
+            TRANS_LOGE(TRANS_SDK, "client process data fail, SOFTBUS_DATA_NOT_ENOUGH. channelId=%{public}d", channelId);
             return SOFTBUS_OK;
         }
         if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_SDK, "client channelId=%d process data fail,", channelId);
+            TRANS_LOGE(TRANS_SDK, "client process data fail, channelId=%{public}d", channelId);
             TransDelDataBufNode(channelId);
             TransTdcCloseChannel(channelId);
             ClientTransTdcOnSessionClosed(channelId, SHUTDOWN_REASON_RECV_DATA_ERR);

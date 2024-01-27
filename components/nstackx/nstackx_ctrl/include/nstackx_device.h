@@ -156,6 +156,8 @@ int32_t ReportDiscoveredDevice(const CoapCtxType *coapCtx, const DeviceInfo *dev
 void SetModeInfo(uint8_t mode);
 uint8_t GetModeInfo(void);
 
+uint32_t GetNotifyTimeoutMs(void);
+
 int32_t ConfigureDiscoverySettings(const NSTACKX_DiscoverySettings *discoverySettings);
 int32_t DiscConfigInner(const DFinderDiscConfig *discConfig);
 

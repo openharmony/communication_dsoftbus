@@ -34,9 +34,11 @@
 #include "utils/wifi_direct_work_queue.h"
 #include "utils/wifi_direct_utils.h"
 #include "utils/wifi_direct_anonymous.h"
+#include "utils/wifi_direct_timer_list.h"
 
 #define RETRY_COMMAND_DELAY_MS 1000
 #define WAIT_POST_REQUEST_MS 450
+#define WATCH_DOG_TIMEOUT_MS 30000
 
 /* public interface */
 static int32_t g_retryErrorCodeTable[] = {
@@ -88,7 +90,7 @@ static void SaveP2pChannel(struct WifiDirectNegotiateChannel *channel, struct Ne
 
     enum WifiDirectLinkType linkType = WIFI_DIRECT_LINK_TYPE_P2P;
     char *ip = msg->getString(msg, NM_KEY_IP, "");
-    CONN_LOGI(CONN_WIFI_DIRECT, "ip=%s", WifiDirectAnonymizeIp(ip));
+    CONN_LOGI(CONN_WIFI_DIRECT, "ip=%{public}s", WifiDirectAnonymizeIp(ip));
     if (strstr(ip, HML_IP_NET_PREFIX) != NULL) {
         linkType = WIFI_DIRECT_LINK_TYPE_HML;
     }
@@ -96,10 +98,11 @@ static void SaveP2pChannel(struct WifiDirectNegotiateChannel *channel, struct Ne
     char remoteUuid[UUID_BUF_LEN] = {0};
     int32_t ret = channel->getDeviceId(channel, remoteUuid, sizeof(remoteUuid));
     CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get remote uuid failed");
-    CONN_LOGI(CONN_WIFI_DIRECT, "linkType=%d remoteUuid=%s", linkType, WifiDirectAnonymizeDeviceId(remoteUuid));
+    CONN_LOGI(CONN_WIFI_DIRECT,
+        "linkType=%{public}d, remoteUuid=%{public}s", linkType, WifiDirectAnonymizeDeviceId(remoteUuid));
     struct InnerLink *link = GetLinkManager()->getLinkByTypeAndUuid(linkType, remoteUuid);
     if (link == NULL) {
-        CONN_LOGW(CONN_WIFI_DIRECT, "no link for %s", WifiDirectAnonymizeDeviceId(remoteUuid));
+        CONN_LOGW(CONN_WIFI_DIRECT, "no link. remoteUuid=%{public}s", WifiDirectAnonymizeDeviceId(remoteUuid));
         return;
     }
 
@@ -119,9 +122,9 @@ static int32_t UnpackData(struct WifiDirectNegotiateChannel *channel, const uint
         "no suitable protocol");
 
     if (protocol->getType() == WIFI_DIRECT_PROTOCOL_JSON) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "WIFI_DIRECT_PROTOCOL_JSON size=%zd", size);
+        CONN_LOGI(CONN_WIFI_DIRECT, "WIFI_DIRECT_PROTOCOL_JSON size=%{public}zd", size);
     } else if (protocol->getType() == WIFI_DIRECT_PROTOCOL_TLV) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "WIFI_DIRECT_PROTOCOL_TLV size=%zd", size);
+        CONN_LOGI(CONN_WIFI_DIRECT, "WIFI_DIRECT_PROTOCOL_TLV size=%{public}zd", size);
     }
 
     struct ProtocolFormat format = { TLV_TAG_SIZE, TLV_LENGTH_SIZE2 };
@@ -200,7 +203,7 @@ static void DumpCommandString(enum WifiDirectNegotiateCmdType cmdType, const cha
 
     for (uint32_t i = 0 ; i < ARRAY_SIZE(cmdStringMap); i++) {
         if (cmdStringMap[i].cmd == cmdType) {
-            CONN_LOGI(CONN_WIFI_DIRECT, "cmd=%s remoteDeviceId=%s", cmdStringMap[i].string,
+            CONN_LOGI(CONN_WIFI_DIRECT, "cmd=%{public}s, remoteDeviceId=%{public}s", cmdStringMap[i].string,
                       WifiDirectAnonymizeDeviceId(remoteDeviceId));
             break;
         }
@@ -239,11 +242,26 @@ static bool IsMessageNeedPending(struct WifiDirectNegotiator *self, struct WifiD
     char remoteDeviceId[UUID_BUF_LEN] = {0};
     int32_t ret = channel->getDeviceId(channel, remoteDeviceId, sizeof(remoteDeviceId));
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, true, CONN_WIFI_DIRECT, "get device id failed");
-    CONN_LOGI(CONN_WIFI_DIRECT, "currentRemote=%s msgRemote=%s",
-              WifiDirectAnonymizeDeviceId(self->currentRemoteDeviceId), WifiDirectAnonymizeDeviceId(remoteDeviceId));
+    CONN_LOGI(CONN_WIFI_DIRECT, "currentRemote=%{public}s, msgRemote=%{public}s",
+        WifiDirectAnonymizeDeviceId(self->currentRemoteDeviceId), WifiDirectAnonymizeDeviceId(remoteDeviceId));
 
     if (GetWifiDirectUtils()->strCompareIgnoreCase(remoteDeviceId, self->currentRemoteDeviceId) != 0) {
         CONN_LOGI(CONN_WIFI_DIRECT, "mis deviceId");
+        return true;
+    }
+    if (self->currentProcessor == NULL) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "currentProcessor=NULL");
+        return false;
+    }
+    if (self->currentProcessor != processor) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "currentProcessor=%s processor=%s", self->currentProcessor->name, processor->name);
+        struct WifiDirectProcessor *hmlProcessor =
+            GetWifiDirectProcessorFactory()->createProcessor(WIFI_DIRECT_PROCESSOR_TYPE_HML);
+        struct WifiDirectProcessor *p2pV2Processor =
+            GetWifiDirectProcessorFactory()->createProcessor(WIFI_DIRECT_PROCESSOR_TYPE_P2P_V2);
+        if (self->currentProcessor == hmlProcessor && processor == p2pV2Processor) {
+            return hmlProcessor->isMessageNeedPending(cmdType, msg);
+        }
         return true;
     }
 
@@ -270,6 +288,24 @@ static bool ProcessHandShake(enum WifiDirectNegotiateCmdType cmd, struct WifiDir
     }
     NegotiateMessageDelete(msg);
     return true;
+}
+
+static void ProcessNegotiateMessageWhenProcessorInvalid(struct NegotiateMessage *msg)
+{
+    struct WifiDirectNegotiateChannel *channel = msg->getPointer(msg, NM_KEY_NEGO_CHANNEL, NULL);
+    CONN_CHECK_AND_RETURN_LOGE(channel != NULL, CONN_WIFI_DIRECT, "channel is null");
+    struct NegotiateMessage *response = NegotiateMessageNew();
+    CONN_CHECK_AND_RETURN_LOGE(response != NULL, CONN_WIFI_DIRECT, "malloc response failed");
+    response->putInt(response, NM_KEY_MSG_TYPE, CMD_CONN_V2_RESP_3);
+    response->putInt(response, NM_KEY_SESSION_ID, msg->getInt(msg, NM_KEY_SESSION_ID, -1));
+    response->putInt(response, NM_KEY_RESULT_CODE, ERROR_WIFI_DIRECT_NO_SUITABLE_PROCESSOR);
+    response->putPointer(response, NM_KEY_NEGO_CHANNEL, (void **)&channel);
+
+    response->dump(response, 0);
+    if (GetWifiDirectNegotiator()->postData(response) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "send response failed");
+    }
+    NegotiateMessageDelete(response);
 }
 
 static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *channel, const uint8_t *data, size_t len)
@@ -302,24 +338,26 @@ static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *ch
     if (processor == NULL) {
         CONN_LOGE(CONN_WIFI_DIRECT, "processor is null");
         if (self->currentProcessor == NULL) {
-            CONN_LOGW(CONN_WIFI_DIRECT, "currentProcessor is null, ignore this message");
+            CONN_LOGW(CONN_WIFI_DIRECT, "currentProcessor is null");
+            if (cmdType == CMD_CONN_V2_REQ_1) {
+                ProcessNegotiateMessageWhenProcessorInvalid(msg);
+            }
             NegotiateMessageDelete(msg);
             return;
         }
         CONN_LOGI(CONN_WIFI_DIRECT, "use currentProcessor");
-        command->processor = self->currentProcessor;
         processor = self->currentProcessor;
-    } else {
-        command->processor = processor;
     }
+    command->processor = processor;
 
     if (IsMessageNeedPending(self, processor, cmdType, msg)) {
         CONN_LOGI(CONN_WIFI_DIRECT, "queue negotiate command");
         GetWifiDirectCommandManager()->enqueueCommand(command);
     } else {
+        self->startWatchDog();
         self->updateCurrentRemoteDeviceId(channel);
         self->currentProcessor = processor;
-        CONN_LOGI(CONN_WIFI_DIRECT, "currentProcessor=%s", processor->name);
+        CONN_LOGI(CONN_WIFI_DIRECT, "currentProcessor=%{public}s", processor->name);
         processor->processNegotiateMessage(cmdType, command);
     }
 }
@@ -331,7 +369,7 @@ static void OnNegotiateChannelDisconnected(struct WifiDirectNegotiateChannel *ch
     }
     char uuid[UUID_BUF_LEN] = {0};
     channel->getDeviceId(channel, uuid, sizeof(uuid));
-    CONN_LOGD(CONN_WIFI_DIRECT, "uuid=%s", WifiDirectAnonymizeDeviceId(uuid));
+    CONN_LOGD(CONN_WIFI_DIRECT, "uuid=%{public}s", WifiDirectAnonymizeDeviceId(uuid));
     GetLinkManager()->clearNegotiateChannelForLink(channel);
 }
 
@@ -340,9 +378,8 @@ static void OnTriggerChannelDataReceived(struct WifiDirectTriggerChannel *channe
     CONN_CHECK_AND_RETURN_LOGE(channel != NULL, CONN_WIFI_DIRECT, "channel is null");
     struct WifiDirectProcessor *processor = GetWifiDirectDecisionCenter()->getTriggerProcessorByChannel(channel);
     CONN_CHECK_AND_RETURN_LOGW(processor != NULL, CONN_WIFI_DIRECT, "trigger processor is null");
-
-    GetWifiDirectNegotiator()->currentProcessor = processor;
-    CONN_LOGI(CONN_WIFI_DIRECT, "currentProcessor=%s", processor->name);
+    GetWifiDirectNegotiator()->startWatchDog();
+    CONN_LOGI(CONN_WIFI_DIRECT, "processor=%{public}s", processor->name);
     processor->onTriggerChannelDataReceived(channel);
 }
 
@@ -351,8 +388,8 @@ static void OnDefaultTriggerChannelDataReceived(struct WifiDirectNegotiateChanne
 {
     struct WifiDirectProcessor *processor = GetWifiDirectDecisionCenter()->getTriggerProcessorByData(data, len);
     CONN_CHECK_AND_RETURN_LOGW(processor != NULL, CONN_WIFI_DIRECT, "trigger processor is null");
-    GetWifiDirectNegotiator()->currentProcessor = processor;
-    CONN_LOGI(CONN_WIFI_DIRECT, "currentProcessor=%s", processor->name);
+    CONN_LOGI(CONN_WIFI_DIRECT, "processor=%{public}s", processor->name);
+    GetWifiDirectNegotiator()->startWatchDog();
     processor->onDefaultTriggerChannelDataReceived(channel, data, len);
 }
 
@@ -367,7 +404,7 @@ static void OnOperationComplete(int32_t event, void *data)
 
 static void OnEntityChanged(enum EntityState state)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "state=%d", state);
+    CONN_LOGI(CONN_WIFI_DIRECT, "state=%{public}d", state);
 }
 
 static void NegotiateSchedule(void)
@@ -381,7 +418,7 @@ static void NegotiateSchedule(void)
         prevCommand->destructor(prevCommand);
     }
     GetWifiDirectNegotiator()->currentCommand = nextCommand;
-    CONN_LOGI(CONN_WIFI_DIRECT, "currentCommand=%d", nextCommand->type);
+    CONN_LOGI(CONN_WIFI_DIRECT, "currentCommand=%{public}d", nextCommand->type);
     nextCommand->execute(nextCommand);
 }
 
@@ -457,6 +494,7 @@ static void ResetContext(void)
         self->currentProcessor = NULL;
         CONN_LOGI(CONN_WIFI_DIRECT, "currentProcessor=NULL");
     }
+    self->stopWatchDog();
     self->processNextCommand();
 }
 
@@ -513,9 +551,9 @@ static int32_t PostData(struct NegotiateMessage *msg)
     }
 
     if (protocol->getType() == WIFI_DIRECT_PROTOCOL_TLV) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "WIFI_DIRECT_PROTOCOL_TLV size=%zd", size);
+        CONN_LOGI(CONN_WIFI_DIRECT, "WIFI_DIRECT_PROTOCOL_TLV size=%{public}zd", size);
     } else if (protocol->getType() == WIFI_DIRECT_PROTOCOL_JSON) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "WIFI_DIRECT_PROTOCOL_JSON size=%zd", size);
+        CONN_LOGI(CONN_WIFI_DIRECT, "WIFI_DIRECT_PROTOCOL_JSON size=%{public}zd", size);
     }
 
     int32_t ret = channel->postData(channel, buffer, size);
@@ -524,7 +562,8 @@ static int32_t PostData(struct NegotiateMessage *msg)
         "ERROR_POST_DATA_FAILED");
 
     if (IsNeedDelayForPostData(msg)) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "wait %dms for p2p auth to send data", WAIT_POST_REQUEST_MS);
+        CONN_LOGI(CONN_WIFI_DIRECT, "wait for p2p auth to send data. WAIT_POST_REQUEST_MS=%{public}dms",
+            WAIT_POST_REQUEST_MS);
         SoftBusSleepMs(WAIT_POST_REQUEST_MS);
     }
     return SOFTBUS_OK;
@@ -600,6 +639,53 @@ static int32_t PrejudgeAvailability(const char *remoteNetworkId, enum WifiDirect
     return SOFTBUS_OK;
 }
 
+static void WatchDogTimeout(struct WifiDirectNegotiator *self)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "currentRemoteDeviceId=%{public}s",
+              WifiDirectAnonymizeDeviceId(self->currentRemoteDeviceId));
+    struct WifiDirectProcessor *processor = self->currentProcessor;
+    if (self->currentProcessor != NULL) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "name=%{public}s state=%{public}d", processor->name, processor->currentState);
+        if (processor->activeCommand != NULL) {
+            CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=%{public}d", processor->activeCommand->type);
+        } else {
+            CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=NULL");
+        }
+        if (processor->passiveCommand != NULL) {
+            CONN_LOGI(CONN_WIFI_DIRECT, "passiveCommand=%{public}d", processor->passiveCommand->type);
+        } else {
+            CONN_LOGI(CONN_WIFI_DIRECT, "passiveCommand=NULL");
+        }
+    }
+    if (self->currentCommand != NULL) {
+        self->currentCommand->onFailure(self->currentCommand, SOFTBUS_TIMOUT);
+    } else {
+        self->resetContext();
+    }
+    GetWifiDirectCommandManager()->removePassiveCommand();
+}
+
+static void StartWatchDog(void)
+{
+    struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
+    if (self->watchDogTimerId != TIMER_ID_INVALID) {
+        GetWifiDirectTimerList()->stopTimer(self->watchDogTimerId);
+    }
+    self->watchDogTimerId = GetWifiDirectTimerList()->startTimer((TimeoutHandler)WatchDogTimeout, WATCH_DOG_TIMEOUT_MS,
+                                                                 TIMER_FLAG_ONE_SHOOT, self);
+    CONN_LOGI(CONN_WIFI_DIRECT, "watchDogTimerId=%{public}d", self->watchDogTimerId);
+}
+
+static void StopWatchDog(void)
+{
+    struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
+    CONN_LOGI(CONN_WIFI_DIRECT, "watchDogTimerId=%{public}d", self->watchDogTimerId);
+    if (self->watchDogTimerId != TIMER_ID_INVALID) {
+        GetWifiDirectTimerList()->stopTimer(self->watchDogTimerId);
+        self->watchDogTimerId = TIMER_ID_INVALID;
+    }
+}
+
 static struct EntityListener g_entityListener = {
     .onOperationComplete = OnOperationComplete,
     .onEntityChanged = OnEntityChanged,
@@ -613,6 +699,7 @@ static struct WifiDirectNegotiator g_negotiator = {
     .isBusy = IsBusy,
     .resetContext = ResetContext,
     .updateCurrentRemoteDeviceId = UpdateCurrentRemoteDeviceId,
+    .getNegotiateCmdType = GetNegotiateCmdType,
     .handleMessageFromProcessor = HandleMessageFromProcessor,
     .onNegotiateChannelDataReceived = OnNegotiateChannelDataReceived,
     .onNegotiateChannelDisconnected = OnNegotiateChannelDisconnected,
@@ -621,8 +708,13 @@ static struct WifiDirectNegotiator g_negotiator = {
     .syncLnnInfo = SyncLnnInfo,
     .prejudgeAvailability = PrejudgeAvailability,
 
+    .startWatchDog = StartWatchDog,
+    .stopWatchDog = StopWatchDog,
+    .watchDogTimeout = WatchDogTimeout,
+
     .currentCommand = NULL,
     .currentProcessor = NULL,
+    .watchDogTimerId = TIMER_ID_INVALID,
 };
 
 struct WifiDirectNegotiator* GetWifiDirectNegotiator(void)

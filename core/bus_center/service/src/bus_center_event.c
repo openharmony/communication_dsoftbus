@@ -129,7 +129,7 @@ static void HandleNotifyMessage(SoftBusMessage *msg)
         LNN_LOGE(LNN_EVENT, "invalid notify message");
         return;
     }
-    LNN_LOGI(LNN_EVENT, "handle notify msgType=%d", msg->what);
+    LNN_LOGI(LNN_EVENT, "handle notify msgType=%{public}d", msg->what);
     switch (msg->what) {
         case NOTIFY_ONLINE_STATE_CHANGED:
             HandleOnlineStateChangedMessage(msg);
@@ -141,7 +141,7 @@ static void HandleNotifyMessage(SoftBusMessage *msg)
             HandleNetworkUpdateMessage(msg);
             break;
         default:
-            LNN_LOGE(LNN_EVENT, "unknown notify msgType=%d", msg->what);
+            LNN_LOGE(LNN_EVENT, "unknown notify msgType=%{public}d", msg->what);
             break;
     }
 }
@@ -312,8 +312,11 @@ void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info)
         LNN_LOGW(LNN_EVENT, "info = null");
         return;
     }
-    LNN_LOGI(LNN_EVENT, "notify node %s %s",
-        info->deviceName, (isOnline == true) ? "online" : "offline");
+    char *anonyNetworkId = NULL;
+    Anonymize(info->networkId, &anonyNetworkId);
+    LNN_LOGI(LNN_EVENT, "notify node. deviceName=%{public}s, isOnline=%{public}s, networkId=%{public}s",
+        info->deviceName, (isOnline == true) ? "online" : "offline", anonyNetworkId);
+    AnonymizeFree(anonyNetworkId);
     SetDefaultQdisc();
     (void)PostNotifyMessage(NOTIFY_ONLINE_STATE_CHANGED, (uint64_t)isOnline, info);
     eventInfo.basic.event = LNN_EVENT_NODE_ONLINE_STATE_CHANGED;
@@ -336,17 +339,6 @@ void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info)
     if (isOnline) {
         LNN_LOGI(LNN_EVENT, "online process, remove networkId update event");
         RemoveNotifyMessage(NOTIFY_NETWORKID_UPDATE);
-    } else {
-        char peerUdid[UDID_BUF_LEN] = {0};
-        if (LnnGetRemoteStrInfo(info->networkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN)
-            != SOFTBUS_OK) {
-            LNN_LOGE(LNN_EVENT, "get udid error");
-            return;
-        }
-        if (UpdateLocalPtkIfValid(peerUdid) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_EVENT, "leave lnn update fail");
-            return;
-        }
     }
 }
 
@@ -371,7 +363,7 @@ void LnnNotifyBasicInfoChanged(NodeBasicInfo *info, NodeBasicInfoType type)
         return;
     }
     if (type == TYPE_DEVICE_NAME) {
-        LNN_LOGI(LNN_EVENT, "notify peer device name changed %s", info->deviceName);
+        LNN_LOGI(LNN_EVENT, "notify peer device name changed. deviceName=%{public}s", info->deviceName);
     }
     (void)PostNotifyMessage(NOTIFY_NODE_BASIC_INFO_CHANGED, (uint64_t)type, info);
 }
@@ -382,7 +374,7 @@ void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t re
         LNN_LOGW(LNN_EVENT, "addr or networkId = null!");
         return;
     }
-    LNN_LOGI(LNN_EVENT, "notify join LNN result=%d", retCode);
+    LNN_LOGI(LNN_EVENT, "notify join LNN result=%{public}d", retCode);
     LnnIpcNotifyJoinResult(addr, sizeof(ConnectionAddr), networkId, retCode);
 }
 
@@ -392,7 +384,7 @@ void LnnNotifyLeaveResult(const char *networkId, int32_t retCode)
         LNN_LOGW(LNN_EVENT, "networkId = null");
         return;
     }
-    LNN_LOGI(LNN_EVENT, "notify leave LNN result %d", retCode);
+    LNN_LOGI(LNN_EVENT, "notify leave LNN result. retCode=%{public}d", retCode);
     LnnIpcNotifyLeaveResult(networkId, retCode);
 }
 
@@ -416,14 +408,14 @@ void LnnNotifyTimeSyncResult(const char *pkgName, int32_t pid, const TimeSyncRes
         LNN_LOGW(LNN_EVENT, "invalid paramters");
         return;
     }
-    LNN_LOGI(LNN_EVENT, "notify time Sync result=%d", retCode);
+    LNN_LOGI(LNN_EVENT, "notify time Sync result. retCode=%{public}d", retCode);
     LnnIpcNotifyTimeSyncResult(pkgName, pid, info, sizeof(TimeSyncResultInfo), retCode);
 }
 
 void LnnNotifyWlanStateChangeEvent(SoftBusWifiState state)
 {
     if (state < SOFTBUS_WIFI_CONNECTED || state > SOFTBUS_WIFI_UNKNOWN) {
-        LNN_LOGE(LNN_EVENT, "bad state=%d", state);
+        LNN_LOGE(LNN_EVENT, "bad state=%{public}d", state);
         return;
     }
     LnnMonitorWlanStateChangedEvent event = {.basic.event = LNN_EVENT_WIFI_STATE_CHANGED, .status = state};
@@ -433,7 +425,7 @@ void LnnNotifyWlanStateChangeEvent(SoftBusWifiState state)
 void LnnNotifyScreenStateChangeEvent(SoftBusScreenState state)
 {
     if (state < SOFTBUS_SCREEN_ON || state >= SOFTBUS_SCREEN_UNKNOWN) {
-        LNN_LOGE(LNN_EVENT, "bad state=%d", state);
+        LNN_LOGE(LNN_EVENT, "bad state=%{public}d", state);
         return;
     }
     LnnMonitorHbStateChangedEvent event = {.basic.event = LNN_EVENT_SCREEN_STATE_CHANGED, .status = state};
@@ -444,7 +436,7 @@ void LnnNotifyBtStateChangeEvent(void *state)
 {
     SoftBusBtState *btState = (SoftBusBtState *)state;
     if (*btState < SOFTBUS_BLE_TURN_ON || *btState >= SOFTBUS_BT_UNKNOWN) {
-        LNN_LOGE(LNN_EVENT, "bad btState=%d", *btState);
+        LNN_LOGE(LNN_EVENT, "bad btState=%{public}d", *btState);
         SoftBusFree(btState);
         return;
     }
@@ -456,7 +448,7 @@ void LnnNotifyBtStateChangeEvent(void *state)
 void LnnNotifyScreenLockStateChangeEvent(SoftBusScreenLockState state)
 {
     if (state < SOFTBUS_SCREEN_LOCK || state >= SOFTBUS_SCREEN_LOCK_UNKNOWN) {
-        LNN_LOGE(LNN_EVENT, "bad lockState=%d", state);
+        LNN_LOGE(LNN_EVENT, "bad lockState=%{public}d", state);
         return;
     }
     LnnMonitorHbStateChangedEvent event = {.basic.event = LNN_EVENT_SCREEN_LOCK_CHANGED, .status = state};
@@ -467,7 +459,7 @@ void LnnNotifyAccountStateChangeEvent(void *state)
 {
     SoftBusAccountState *accountState = (SoftBusAccountState *)state;
     if (*accountState < SOFTBUS_ACCOUNT_LOG_IN || *accountState >= SOFTBUS_ACCOUNT_UNKNOWN) {
-        LNN_LOGE(LNN_EVENT, "bad accountState=%d", *accountState);
+        LNN_LOGE(LNN_EVENT, "bad accountState=%{public}d", *accountState);
         SoftBusFree(accountState);
         return;
     }
@@ -481,7 +473,7 @@ void LnnNotifyDifferentAccountChangeEvent(void *state)
 {
     SoftBusDifferentAccountState *difAccountState = (SoftBusDifferentAccountState *)state;
     if (*difAccountState < SOFTBUS_DIF_ACCOUNT_DEV_CHANGE || *difAccountState >= SOFTBUS_DIF_ACCOUNT_UNKNOWN) {
-        LNN_LOGE(LNN_EVENT, "bad difAccountState=%d", *difAccountState);
+        LNN_LOGE(LNN_EVENT, "bad difAccountState=%{public}d", *difAccountState);
         SoftBusFree(difAccountState);
         return;
     }
@@ -494,7 +486,7 @@ void LnnNotifyDifferentAccountChangeEvent(void *state)
 void LnnNotifyUserStateChangeEvent(SoftBusUserState state)
 {
     if (state < SOFTBUS_USER_FOREGROUND || state >= SOFTBUS_USER_UNKNOWN) {
-        LNN_LOGE(LNN_EVENT, "bad backgroundtState=%d", state);
+        LNN_LOGE(LNN_EVENT, "bad backgroundtState=%{public}d", state);
         return;
     }
     LnnMonitorHbStateChangedEvent event = {.basic.event = LNN_EVENT_USER_STATE_CHANGED, .status = state};
@@ -505,7 +497,7 @@ void LnnNotifyNightModeStateChangeEvent(void *state)
 {
     SoftBusNightModeState *nightModeState = (SoftBusNightModeState *)state;
     if (*nightModeState < SOFTBUS_NIGHT_MODE_ON || *nightModeState >= SOFTBUS_NIGHT_MODE_UNKNOWN) {
-        LNN_LOGE(LNN_EVENT, "bad nightModeState=%d", *nightModeState);
+        LNN_LOGE(LNN_EVENT, "bad nightModeState=%{public}d", *nightModeState);
         SoftBusFree(nightModeState);
         return;
     }
@@ -525,7 +517,7 @@ void LnnNotifyHomeGroupChangeEvent(SoftBusHomeGroupState state)
 void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state)
 {
     if (state < SOFTBUS_OOBE_RUNNING || state >= SOFTBUS_OOBE_UNKNOWN) {
-        LNN_LOGW(LNN_EVENT, "bad OOBEState=%d", state);
+        LNN_LOGW(LNN_EVENT, "bad OOBEState=%{public}d", state);
         return;
     }
     LnnMonitorHbStateChangedEvent event = {.basic.event = LNN_EVENT_OOBE_STATE_CHANGED, .status = state};
@@ -535,12 +527,12 @@ void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state)
 void LnnNotifyBtAclStateChangeEvent(const char *btMac, SoftBusBtAclState state)
 {
     if (btMac == NULL) {
-        LNN_LOGW(LNN_EVENT, "invalid btMac, state=%d", state);
+        LNN_LOGW(LNN_EVENT, "invalid btMac, state=%{public}d", state);
         return;
     }
     char *anonyMac = NULL;
     Anonymize(btMac, &anonyMac);
-    LNN_LOGI(LNN_EVENT, "notify bt acl state changed: state=%d, btMac=%s.", state, anonyMac);
+    LNN_LOGI(LNN_EVENT, "notify bt acl state changed: state=%{public}d, btMac=%{public}s.", state, anonyMac);
     AnonymizeFree(anonyMac);
     LnnMonitorBtAclStateChangedEvent event = {.basic.event = LNN_EVENT_BT_ACL_STATE_CHANGED, .status = state};
     if (strcpy_s(event.btMac, sizeof(event.btMac), btMac) != EOK) {
@@ -556,7 +548,7 @@ void LnnNotifyAddressChangedEvent(const char *ifName)
     if (ifName != NULL) {
         int32_t ret = strcpy_s(event.ifName, sizeof(event.ifName), ifName);
         if (ret != EOK) {
-            LNN_LOGE(LNN_EVENT, "copy ifName failed!ret=%d", ret);
+            LNN_LOGE(LNN_EVENT, "copy ifName failed! ret=%{public}d", ret);
             return;
         }
     }
@@ -606,7 +598,7 @@ void LnnNotifyHBRepeat(void)
 void LnnNotifyNetworkStateChanged(SoftBusNetworkState state)
 {
     if (state < SOFTBUS_WIFI_NETWORKD_ENABLE || state >= SOFTBUS_NETWORKD_UNKNOWN) {
-        LNN_LOGW(LNN_EVENT, "bad network state=%d", state);
+        LNN_LOGW(LNN_EVENT, "bad network state=%{public}d", state);
         return;
     }
     LnnMonitorHbStateChangedEvent event = {.basic.event = LNN_EVENT_NETWORK_STATE_CHANGED, .status = state};
@@ -686,7 +678,7 @@ int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler)
         return SOFTBUS_LOCK_ERR;
     }
     if (IsRepeatEventHandler(event, handler)) {
-        LNN_LOGE(LNN_EVENT, "event=%u handler is already exist", event);
+        LNN_LOGE(LNN_EVENT, "handler is already exist. event=%{public}u", event);
         (void)SoftBusMutexUnlock(&g_eventCtrl.lock);
         return SOFTBUS_INVALID_PARAM;
     }

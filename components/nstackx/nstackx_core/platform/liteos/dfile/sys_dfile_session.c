@@ -68,7 +68,7 @@ int32_t WaitSocketEvent(const DFileSession *session, SocketDesc fd, uint32_t tim
         return NSTACKX_EFAILED;
     }
 
-    if (ret) {
+    if (ret != 0) {
         if (FD_ISSET(fd, &readFds) && (canRead != NULL)) {
             *canRead = NSTACKX_TRUE;
         }

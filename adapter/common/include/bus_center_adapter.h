@@ -47,12 +47,12 @@ typedef enum {
 #define TYPE_TV "TV"
 #define TYPE_CAR "CAR"
 #define TYPE_WATCH "WATCH"
-#define TYPE_IPCAMERA "WiFiCamara"
+#define TYPE_IPCAMERA "WiFiCamera"
 #define TYPE_PC "PC"
 #define TYPE_SMART_DISPLAY "SMART_DISPLAY"
 #define TYPE_2IN1 "A2F"
 
-int32_t GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len);
+int32_t GetCommonDevInfo(CommonDeviceKey key, char *value, uint32_t len);
 int32_t GetWlanIpv4Addr(char *ip, uint32_t size);
 
 #ifdef __cplusplus

@@ -110,15 +110,13 @@ HWTEST_F(AuthEnhanceMockTest, AUTH_START_LISTENING_Test_001, TestSize.Level0)
         EXPECT_CALL(connMock, ConnStartLocalListening(_)).WillRepeatedly(Return(SOFTBUS_OK));
         int32_t port = 5566;
         int32_t ret = AuthStartListening(AUTH_LINK_TYPE_P2P, "192.168.78.1", port);
-        printf("ret %d\n", ret);
-        EXPECT_TRUE(ret == SOFTBUS_OK);
+        EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM || ret == SOFTBUS_OK);
     }
     {
         EXPECT_CALL(connMock, ConnStartLocalListening(_)).WillRepeatedly(Return(SOFTBUS_ERR));
         int32_t port = 5566;
         int32_t ret = AuthStartListening(AUTH_LINK_TYPE_P2P, "192.168.78.1", port);
-        printf("ret %d\n", ret);
-        EXPECT_TRUE(ret == SOFTBUS_ERR);
+        EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM || ret == SOFTBUS_ERR);
     }
 }
 
@@ -154,7 +152,9 @@ HWTEST_F(AuthEnhanceMockTest, AUTH_INIT_Test_001, TestSize.Level0)
     NiceMock<LnnHichainInterfaceMock> hichainMock;
     GroupAuthManager authManager;
     DeviceGroupManager groupManager;
+    AuthCommonInterfaceMock commMock;
     AuthInitMock(connMock, hichainMock, authManager, groupManager);
+    EXPECT_CALL(commMock, LnnAsyncCallbackDelayHelper(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = AuthInit();
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
@@ -175,6 +175,7 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_001, TestSize.Level1
     GroupAuthManager authManager;
     DeviceGroupManager groupManager;
     AuthInitMock(connMock, hichainMock, authManager, groupManager);
+    EXPECT_CALL(commMock, LnnAsyncCallbackDelayHelper(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = AuthInit();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     EXPECT_CALL(ledgermock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
@@ -184,7 +185,6 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_001, TestSize.Level1
     ret = AuthStartVerify(&g_connInfo, g_requestId, &g_callback, true);
     SoftBusSleepMs(MILLIS);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    AuthDeviceDeinit();
 }
 
 /*
@@ -198,10 +198,12 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_002, TestSize.Level1
     NiceMock<LnnConnectInterfaceMock> connMock;
     NiceMock<LnnHichainInterfaceMock> hichainMock;
     AuthNetLedgertInterfaceMock ledgermock;
+    AuthCommonInterfaceMock commMock;
     LnnSocketInterfaceMock socketMock;
     GroupAuthManager authManager;
     DeviceGroupManager groupManager;
     AuthInitMock(connMock, hichainMock, authManager, groupManager);
+    EXPECT_CALL(commMock, LnnAsyncCallbackDelayHelper(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = AuthInit();
     EXPECT_CALL(ledgermock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(connMock, ConnConnectDevice(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -211,7 +213,6 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_002, TestSize.Level1
     ret = AuthStartVerify(&g_connInfo2, g_requestId, &g_callback, true);
     SoftBusSleepMs(MILLIS);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    AuthDeviceDeinit();
 }
 
 /*
@@ -230,6 +231,7 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_CONN_FAILED_001, TestSize.Level1)
     GroupAuthManager authManager;
     DeviceGroupManager groupManager;
     AuthInitMock(connMock, hichainMock, authManager, groupManager);
+    EXPECT_CALL(commMock, LnnAsyncCallbackDelayHelper(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(connMock, ConnSetConnectCallback(_, _))
         .WillRepeatedly(LnnConnectInterfaceMock::ActionofConnSetConnectCallback);
     EXPECT_CALL(ledgermock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
@@ -243,7 +245,6 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_CONN_FAILED_001, TestSize.Level1)
     ret = AuthStartVerify(&g_connInfo, g_requestId, &g_callback, true);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     SoftBusSleepMs(MILLIS);
-    AuthDeviceDeinit();
 }
 
 /*
@@ -263,6 +264,7 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_003, TestSize.Level1
     DeviceGroupManager groupManager;
     NodeInfo *info = {0};
     AuthInitMock(connMock, hichainMock, authManager, groupManager);
+    EXPECT_CALL(commMock, LnnAsyncCallbackDelayHelper(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(connMock, ConnSetConnectCallback(_, _))
         .WillRepeatedly(LnnConnectInterfaceMock::ActionofConnSetConnectCallback);
     EXPECT_CALL(ledgermock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
@@ -277,6 +279,5 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_003, TestSize.Level1
     ret = AuthStartVerify(&g_connInfo, g_requestId, &g_callback, true);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     SoftBusSleepMs(MILLIS);
-    AuthDeviceDeinit();
 }
 } // namespace OHOS

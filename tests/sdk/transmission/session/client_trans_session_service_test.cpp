@@ -81,23 +81,23 @@ void TransClientSessionServiceTest::TearDownTestCase(void)
 
 static int OnSessionOpened(int sessionId, int result)
 {
-    TRANS_LOGI(TRANS_TEST, "session opened, sessionId=%d", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session opened, sessionId=%{public}d", sessionId);
     return SOFTBUS_OK;
 }
 
 static void OnSessionClosed(int sessionId)
 {
-    TRANS_LOGI(TRANS_TEST, "session closed, sessionId=%d", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session closed, sessionId=%{public}d", sessionId);
 }
 
 static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
 {
-    TRANS_LOGI(TRANS_TEST, "session bytes received, sessionId=%d", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session bytes received, sessionId=%{public}d", sessionId);
 }
 
 static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
 {
-    TRANS_LOGI(TRANS_TEST, "session msg received, sessionId=%d", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session msg received, sessionId=%{public}d", sessionId);
 }
 
 static ISessionListener g_sessionlistener = {
@@ -158,15 +158,15 @@ HWTEST_F(TransClientSessionServiceTest, TransClientSessionServiceTest01, TestSiz
     ret = QosReport(TRANS_TEST_SESSION_ID, APP_TYPE_AUTH, QOS_IMPROVE);
     EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
     ret = OpenSessionSync(NULL, g_sessionName, g_networkId, g_groupid, &g_sessionAttr);
-    EXPECT_EQ(ret,  INVALID_SESSION_ID);
+    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = OpenSessionSync(g_sessionName, NULL, g_networkId, g_groupid, &g_sessionAttr);
-    EXPECT_EQ(ret,  INVALID_SESSION_ID);
+    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = OpenSessionSync(g_sessionName, g_sessionName, NULL, g_groupid, &g_sessionAttr);
-    EXPECT_EQ(ret,  INVALID_SESSION_ID);
+    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = OpenSessionSync(g_sessionName, g_sessionName, g_networkId, NULL, &g_sessionAttr);
-    EXPECT_EQ(ret,  INVALID_SESSION_ID);
+    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = OpenSessionSync(g_sessionName, g_sessionName, g_networkId, g_groupid, NULL);
-    EXPECT_EQ(ret,  INVALID_SESSION_ID);
+    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = OpenSessionSync(g_sessionName, g_sessionName, g_networkId, g_groupid, &g_sessionAttr);
     EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
 }

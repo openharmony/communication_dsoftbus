@@ -31,9 +31,10 @@ typedef struct {
         const StreamFrameInfo *param);
     int32_t (*OnFileGetSessionId)(int32_t channelId, int32_t *sessionId);
     void (*OnMessageReceived)(void);
-    void (*OnUdpChannelOpened)(int32_t channelId);
+    int32_t (*OnUdpChannelOpened)(int32_t channelId);
     void (*OnUdpChannelClosed)(int32_t channelId, ShutdownReason reason);
     void (*OnQosEvent)(int channelId, int eventId, int tvCount, const QosTv *tvList);
+    int32_t (*OnIdleTimeoutReset)(int32_t sessionId);
 } UdpChannelMgrCb;
 
 typedef struct {
@@ -44,6 +45,7 @@ typedef struct {
     char peerSessionName[SESSION_NAME_SIZE_MAX];
     char peerDeviceId[DEVICE_ID_SIZE_MAX];
     char groupId[GROUP_ID_SIZE_MAX];
+    char myIp[IP_LEN];
 } sessionNeed;
 
 typedef struct {
@@ -72,6 +74,8 @@ int32_t TransUdpChannelSendStream(int32_t channelId, const StreamData *data, con
 int32_t TransUdpChannelSendFile(int32_t channelId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt);
 
 int32_t TransGetUdpChannelByFileId(int32_t dfileId, UdpChannel *udpChannel);
+
+int32_t TransGetUdpChannel(int32_t channelId, UdpChannel *udpChannel);
 
 void TransUdpDeleteFileListener(const char *sessionName);
 #ifdef __cplusplus

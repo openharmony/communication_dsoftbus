@@ -18,6 +18,7 @@ group("unittest") {
   testonly = true
   deps = [
     "bluetooth:unittest",
+    "broadcast:unittest",
     "unittest:unittest",
   ]
 }

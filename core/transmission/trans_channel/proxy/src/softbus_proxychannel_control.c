@@ -102,7 +102,7 @@ int32_t TransProxyHandshake(ProxyChannelInfo *info)
     msgHead.myId = info->myId;
     msgHead.peerId = INVALID_CHANNEL_ID;
     TRANS_LOGI(TRANS_CTRL,
-        "handshake myChannelId=%d cipher=0x%02x", msgHead.myId, msgHead.cipher);
+        "handshake myChannelId=%{public}d, cipher=0x%{public}02x", msgHead.myId, msgHead.cipher);
     payLoad = TransProxyPackHandshakeMsg(info);
     if (payLoad == NULL) {
         TRANS_LOGE(TRANS_CTRL, "pack handshake fail");
@@ -141,7 +141,7 @@ int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan, int32_t 
     char *payLoad = NULL;
     ProxyDataInfo dataInfo = {0};
     ProxyMessageHead msgHead = {0};
-    TRANS_LOGI(TRANS_CTRL, "send handshake ack msg myChannelId=%d peerChannelId=%d",
+    TRANS_LOGI(TRANS_CTRL, "send handshake ack msg myChannelId=%{public}d, peerChannelId=%{public}d",
         chan->myId, chan->peerId);
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE_ACK & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
     if (chan->appInfo.appType != APP_TYPE_AUTH) {
@@ -259,7 +259,7 @@ int32_t TransProxyResetPeer(ProxyChannelInfo *info)
     char *payLoad = NULL;
     ProxyDataInfo dataInfo = {0};
     ProxyMessageHead msgHead = {0};
-    TRANS_LOGI(TRANS_CTRL, "send reset msg myChannelId=%d peerChannelId=%d", info->myId, info->peerId);
+    TRANS_LOGI(TRANS_CTRL, "send reset msg myChannelId=%{public}d, peerChannelId=%{public}d", info->myId, info->peerId);
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_RESET & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
     msgHead.myId = info->myId;
     msgHead.peerId = info->peerId;

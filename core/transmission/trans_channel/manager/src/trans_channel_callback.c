@@ -42,17 +42,19 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
     }
     int64_t timeStart = channel->timeStart;
     int64_t timediff = GetSoftbusRecordTimeMillis() - timeStart;
-    if (!channel->isServer) {
-        TransEventExtra extra = {
-            .calleePkg = NULL,
-            .peerNetworkId = channel->peerDeviceId,
-            .linkType = channel->linkType,
-            .channelId = channel->channelId,
-            .costTime = (int32_t)timediff,
-            .result = EVENT_STAGE_RESULT_OK,
-            .callerPkg = pkgName,
-            .socketName = sessionName
-        };
+    TransEventExtra extra = {
+        .calleePkg = NULL,
+        .peerNetworkId = channel->peerDeviceId,
+        .linkType = channel->connectType,
+        .channelId = channel->channelId,
+        .costTime = (int32_t)timediff,
+        .result = EVENT_STAGE_RESULT_OK,
+        .callerPkg = pkgName,
+        .socketName = sessionName
+    };
+    if (channel->isServer) {
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_OPEN_CHANNEL_END, extra);
+    } else {
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     }
     SoftbusRecordOpenSessionKpi(pkgName, channel->linkType, SOFTBUS_EVT_OPEN_SESSION_SUCC, timediff);
@@ -109,7 +111,8 @@ static int32_t TransServerOnChannelOpenFailed(const char *pkgName, int32_t pid, 
     }
     SoftbusHitraceStop();
     TRANS_LOGW(TRANS_CTRL,
-        "trasn server on channel open failed.[pkgname=%s][channId=%d][type=%d]", pkgName, channelId, channelType);
+        "trasn server on channel open failed. pkgname=%{public}s, channId=%{public}d, type=%{public}d",
+        pkgName, channelId, channelType);
     return SOFTBUS_OK;
 }
 
@@ -166,7 +169,7 @@ int32_t TransServerOnChannelLinkDown(const char *pkgName, int32_t pid, const cha
     if (pkgName == NULL || networkId == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    TRANS_LOGW(TRANS_CTRL, "TransServerOnChannelLinkDown: pkgName=%s", pkgName);
+    TRANS_LOGW(TRANS_CTRL, "TransServerOnChannelLinkDown: pkgName=%{public}s", pkgName);
 
     ChannelMsg data = {
         .msgPid = pid,

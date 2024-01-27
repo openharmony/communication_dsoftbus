@@ -119,7 +119,7 @@ void SoftbusProxyChannelPipelineTest::TearDownTestCase(void)
 
 static void OnProxyChannelOpened(int32_t channelRequestId, int32_t channelId)
 {
-    TRANS_LOGI(TRANS_TEST, "channelRequestId=%d, channelId=%d", channelRequestId, channelId);
+    TRANS_LOGI(TRANS_TEST, "channelRequestId=%{public}d, channelId=%{public}d", channelRequestId, channelId);
     (void)channelRequestId;
     (void)channelId;
 }
@@ -200,7 +200,7 @@ HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyPipelineCloseChannelTest001,
     int32_t ret = TransProxyPipelineOpenChannel(TEST_NUMBER_THREE, networkId, &option, &channelCallback);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransProxyPipelineCloseChannel(TEST_NUMBER_THREE);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**

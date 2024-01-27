@@ -87,6 +87,11 @@ int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isM
     return GetLaneDepsInterface()->AuthGetPreferConnInfo(uuid, connInfo, isMeta);
 }
 
+int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
+{
+    return GetLaneDepsInterface()->AuthGetP2pConnInfo(uuid, connInfo, isMeta);
+}
+
 int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId,
     const AuthConnCallback *callback, bool isMeta)
 {
@@ -136,6 +141,11 @@ bool LnnVisitPhysicalSubnet(LnnVisitPhysicalSubnetCallback callback, void *data)
 const char *LnnConvertDLidToUdid(const char *id, IdCategory type)
 {
     return GetLaneDepsInterface()->LnnConvertDLidToUdid(id, type);
+}
+
+ConnBleConnection *ConnBleGetConnectionByUdid(const char *addr, const char *udid, BleProtocolType protocol)
+{
+    return GetLaneDepsInterface()->ConnBleGetConnectionByUdid(addr, udid, protocol);
 }
 
 int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -674,14 +674,14 @@ static int32_t SoftbusReportCalledAPIEvt(void)
         LIST_FOR_EACH_ENTRY(apiCntItem, &apiInfoItem->apiCntList, CalledApiCntStruct, node) {
             CreateCalledApiInfoMsg(msg, apiCntItem, appName, softbusVersion, packageVersion);
             if (SoftbusWriteHisEvt(msg) != SOFTBUS_OK) {
-                SoftbusFreeEvtReporMsg(msg);
+                SoftbusFreeEvtReportMsg(msg);
                 (void)SoftBusMutexUnlock(&g_calledApiInfoList->lock);
                 ReleaseCalledApiInfoList();
                 return SOFTBUS_ERR;
             }
         }
     }
-    SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReportMsg(msg);
     (void)SoftBusMutexUnlock(&g_calledApiInfoList->lock);
     ReleaseCalledApiInfoList();
     return SOFTBUS_OK;
@@ -701,13 +701,13 @@ static int32_t SoftbusReportCalledAPICntEvt(void)
     LIST_FOR_EACH_ENTRY(apiCntItem, &g_calledApiCntlist->list, CalledApiCntStruct, node) {
         CreateCalledApiCntMsg(msg, apiCntItem);
         if (SoftbusWriteHisEvt(msg) != SOFTBUS_OK) {
-            SoftbusFreeEvtReporMsg(msg);
+            SoftbusFreeEvtReportMsg(msg);
             (void)SoftBusMutexUnlock(&g_calledApiCntlist->lock);
             ReleaseCalledApiCntList();
             return SOFTBUS_ERR;
         }
     }
-    SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReportMsg(msg);
     (void)SoftBusMutexUnlock(&g_calledApiCntlist->lock);
     ReleaseCalledApiCntList();
     return SOFTBUS_OK;
@@ -722,7 +722,7 @@ static int32_t SoftbusReportOpenSessionKpiEvt(void)
     }
     CreateOpenSessionKpiMsg(msg);
     int ret = SoftbusWriteHisEvt(msg);
-    SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReportMsg(msg);
     return ret;
 }
 
@@ -735,7 +735,7 @@ static int32_t SoftbusReportOpenSessionCntEvt(void)
     }
     CreateOpenSessionCntMsg(msg);
     int ret = SoftbusWriteHisEvt(msg);
-    SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReportMsg(msg);
 
     return ret;
 }
@@ -808,7 +808,7 @@ static int32_t SoftbusReportOpenSessionTimeEvt(void)
     }
     CreateOpenSessionTimeMsg(msg);
     int ret = SoftbusWriteHisEvt(msg);
-    SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReportMsg(msg);
 
     return ret;
 }
@@ -851,10 +851,10 @@ void SoftbusReportTransErrorEvt(int32_t errcode)
     errcode = GetErrorCodeEx(errcode);
     CreateTransErrMsg(msg, errcode);
     int ret = SoftbusWriteHisEvt(msg);
-    SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReportMsg(msg);
 
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_EVENT, "Sys Evt Witre ErrCode %d FAIL!", errcode);
+        COMM_LOGE(COMM_EVENT, "Sys Evt Witre FAIL! errCode=%{public}d", errcode);
     }
 }
 
@@ -871,10 +871,10 @@ void SoftbusReportTransInfoEvt(const char *infoMsg)
     }
     CreateTransInfoMsg(msg, infoMsg);
     int ret = SoftbusWriteHisEvt(msg);
-    SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReportMsg(msg);
 
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_EVENT, "Sys Evt Witre ErrMsg %s FAIL!", infoMsg);
+        COMM_LOGE(COMM_EVENT, "Sys Evt Witre FAIL! errMsg=%{public}s", infoMsg);
     }
 }
 

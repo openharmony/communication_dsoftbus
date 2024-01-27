@@ -18,24 +18,23 @@
 #include <sys/time.h>
 #include "cmsis_os2.h"
 #include "comm_log.h"
-#include "softbus_def.h"
 #include "softbus_errcode.h"
 
 #define MS_PER_SECOND  1000
 #define US_PER_MSECOND 1000
 
-static TimerFunc g_timerfunc = NULL;
+static TimerFunc g_timerFunc = NULL;
 
 static void HandleTimeoutAdapterFun(void)
 {
-    if (g_timerfunc != NULL) {
-        g_timerfunc();
+    if (g_timerFunc != NULL) {
+        g_timerFunc();
     }
 }
 
 void SetTimerFunc(TimerFunc func)
 {
-    g_timerfunc = func;
+    g_timerFunc = func;
 }
 
 void *SoftBusCreateTimer(void **timerId, unsigned int type)
@@ -89,7 +88,7 @@ int SoftBusSleepMs(unsigned int ms)
 int32_t SoftBusGetTime(SoftBusSysTime *sysTime)
 {
     if (sysTime == NULL) {
-        COMM_LOGI(COMM_ADAPTER, "sysTime is null");
+        COMM_LOGW(COMM_ADAPTER, "sysTime is null");
         return SOFTBUS_INVALID_PARAM;
     }
     struct timeval time = {0};

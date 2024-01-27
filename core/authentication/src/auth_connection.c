@@ -21,7 +21,6 @@
 #include "auth_log.h"
 #include "auth_tcp_connection.h"
 #include "lnn_async_callback_utils.h"
-#include "lnn_event.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_errcode.h"
 #include "softbus_adapter_mem.h"
@@ -281,7 +280,7 @@ static void HandleConnConnectTimeout(const void *para)
 {
     CHECK_NULL_PTR_RETURN_VOID(para);
     uint32_t requestId = *(uint32_t *)(para);
-    AUTH_LOGE(AUTH_CONN, "connect timeout, requestId=%u", requestId);
+    AUTH_LOGE(AUTH_CONN, "connect timeout, requestId=%{public}u", requestId);
     ConnRequest *item = FindConnRequestByRequestId(requestId);
     if (item != NULL) {
         SocketDisconnectDevice(AUTH, item->fd);
@@ -314,7 +313,7 @@ static void HandleConnConnectCmd(const void *para)
     CHECK_NULL_PTR_RETURN_VOID(para);
     ConnCmdInfo *info = (ConnCmdInfo *)para;
     if (info->connInfo.type != AUTH_LINK_TYPE_WIFI) {
-        AUTH_LOGE(AUTH_CONN, "invalid connType=%d", info->connInfo.type);
+        AUTH_LOGE(AUTH_CONN, "invalid connType=%{public}d", info->connInfo.type);
         return;
     }
     int32_t fd = SocketConnectDevice(info->connInfo.info.ipInfo.ip, info->connInfo.info.ipInfo.port, false);
@@ -335,7 +334,7 @@ static void HandleConnConnectResult(const void *para)
     RouteBuildClientAuthManager(fd);
     ConnRequest *item = FindConnRequestByFd(fd);
     if (item == NULL) {
-        AUTH_LOGE(AUTH_CONN, "ConnRequest not found, fd=%d", fd);
+        AUTH_LOGE(AUTH_CONN, "ConnRequest not found, fd=%{public}d", fd);
         return;
     }
     uint64_t connId = GenConnId(AUTH_LINK_TYPE_WIFI, fd);
@@ -347,7 +346,7 @@ static void HandleConnConnectResult(const void *para)
 /* WiFi Connection */
 static void OnWiFiConnected(ListenerModule module, int32_t fd, bool isClient)
 {
-    AUTH_LOGI(AUTH_CONN, "OnWiFiConnected: fd=%d, side=%s", fd,
+    AUTH_LOGI(AUTH_CONN, "OnWiFiConnected: fd=%{public}d, side=%{public}s", fd,
         isClient ? "client" : "server(ignored)");
     if (!isClient) {
         /* do nothing, wait auth message. */
@@ -358,7 +357,7 @@ static void OnWiFiConnected(ListenerModule module, int32_t fd, bool isClient)
 
 static void OnWiFiDisconnected(int32_t fd)
 {
-    AUTH_LOGI(AUTH_CONN, "OnWiFiDisconnected: fd=%d", fd);
+    AUTH_LOGI(AUTH_CONN, "OnWiFiDisconnected: fd=%{public}d", fd);
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     connInfo.type = AUTH_LINK_TYPE_WIFI;
@@ -378,7 +377,7 @@ static void OnWiFiDataReceived(ListenerModule module, int32_t fd, const AuthData
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     if (SocketGetConnInfo(fd, &connInfo, &fromServer) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get connInfo fail, fd=%d", fd);
+        AUTH_LOGE(AUTH_CONN, "get connInfo fail, fd=%{public}d", fd);
         return;
     }
     NotifyDataReceived(GenConnId(connInfo.type, fd), &connInfo, fromServer, head, data);
@@ -397,7 +396,7 @@ static int32_t InitWiFiConn(void)
 /* BR/BLE/P2P Connection */
 static void OnCommConnected(uint32_t connectionId, const ConnectionInfo *info)
 {
-    AUTH_LOGI(AUTH_CONN, "(ignored)OnCommConnected: connectionId=%u", connectionId);
+    AUTH_LOGI(AUTH_CONN, "(ignored)OnCommConnected: connectionId=%{public}u", connectionId);
 }
 
 DiscoveryType ConvertToDiscoveryType(AuthLinkType type)
@@ -419,7 +418,7 @@ DiscoveryType ConvertToDiscoveryType(AuthLinkType type)
 
 static void OnCommDisconnected(uint32_t connectionId, const ConnectionInfo *info)
 {
-    AUTH_LOGI(AUTH_CONN, "connectionId=%u", connectionId);
+    AUTH_LOGI(AUTH_CONN, "connectionId=%{public}u", connectionId);
     CHECK_NULL_PTR_RETURN_VOID(info);
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
@@ -432,7 +431,7 @@ int32_t GetConnInfoByConnectionId(uint32_t connectionId, AuthConnInfo *connInfo)
     ConnectionInfo info = { 0 };
     int32_t ret = ConnGetConnectionInfo(connectionId, &info);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "GetConnectionInfo err=%d, connectionId=%u", ret, connectionId);
+        AUTH_LOGE(AUTH_CONN, "GetConnectionInfo err=%{public}d, connectionId=%{public}u", ret, connectionId);
         return ret;
     }
     return ConvertToAuthConnInfo(&info, connInfo);
@@ -445,7 +444,8 @@ static void OnCommDataReceived(uint32_t connectionId, ConnModule moduleId, int64
         return;
     }
     bool fromServer = ((seq % SEQ_INTERVAL) != 0);
-    AUTH_LOGI(AUTH_CONN, "connectionId=%u, module=%d, seq=%" PRId64 ", len=%d, from=%s",
+    AUTH_LOGI(AUTH_CONN,
+        "connectionId=%{public}u, module=%{public}d, seq=%{public}" PRId64 ", len=%{public}d, from=%{public}s",
         connectionId, moduleId, seq, len, GetAuthSideStr(fromServer));
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
@@ -467,7 +467,7 @@ static void AsyncCallDeviceIdReceived(void *para)
     if (recvData == NULL) {
         return;
     }
-    AUTH_LOGI(AUTH_CONN, "Delay handle connectionId=%u, len=%d, from=%s",
+    AUTH_LOGI(AUTH_CONN, "Delay handle connectionId=%{public}" PRIu64 ", len=%{public}d, from=%{public}s",
         recvData->connId, recvData->len, GetAuthSideStr(recvData->fromServer));
     NotifyDataReceived(recvData->connId, &recvData->connInfo, recvData->fromServer, &recvData->head, recvData->data);
     SoftBusFree(para);
@@ -510,7 +510,7 @@ static int32_t InitCommConn(void)
 static void OnCommConnectSucc(uint32_t requestId, uint32_t connectionId, const ConnectionInfo *info)
 {
     AuthConnInfo connInfo;
-    AUTH_LOGI(AUTH_CONN, "requestId=%u, connectionId=%u", requestId, connectionId);
+    AUTH_LOGI(AUTH_CONN, "requestId=%{public}u, connectionId=%{public}u", requestId, connectionId);
     CHECK_NULL_PTR_RETURN_VOID(info);
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     (void)ConvertToAuthConnInfo(info, &connInfo);
@@ -521,7 +521,7 @@ static void OnCommConnectSucc(uint32_t requestId, uint32_t connectionId, const C
 
 static void OnCommConnectFail(uint32_t requestId, int32_t reason)
 {
-    AUTH_LOGI(AUTH_CONN, "requestId=%u, reason=%d", requestId, reason);
+    AUTH_LOGI(AUTH_CONN, "requestId=%{public}u, reason=%{public}d", requestId, reason);
     RemoveConnConnectTimeout(requestId);
     NotifyClientConnected(requestId, 0, SOFTBUS_CONN_FAIL, NULL);
 }
@@ -532,7 +532,7 @@ static int32_t ConnectCommDevice(const AuthConnInfo *info, uint32_t requestId, C
     (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     int32_t ret = ConvertToConnectOption(info, &option);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "ConvertToConnectOption fail=%d", ret);
+        AUTH_LOGE(AUTH_CONN, "ConvertToConnectOption fail=%{public}d", ret);
         return ret;
     }
     if (option.type == CONNECT_BR) {
@@ -544,20 +544,10 @@ static int32_t ConnectCommDevice(const AuthConnInfo *info, uint32_t requestId, C
     };
     ret = ConnConnectDevice(&option, requestId, &result);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "ConnConnectDevice fail=%d", ret);
+        AUTH_LOGE(AUTH_CONN, "ConnConnectDevice fail=%{public}d", ret);
         return ret;
     }
     return SOFTBUS_OK;
-}
-
-static void DfxRecordLnnConnectStart(const AuthConnInfo *connInfo)
-{
-    LnnEventExtra extra = { 0 };
-    LnnEventExtraInit(&extra);
-    if (connInfo != NULL) {
-        extra.lnnType = connInfo->type;
-    }
-    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_CONNECTION, extra);
 }
 
 static int32_t PostCommData(uint32_t connectionId, bool toServer, const AuthDataHead *head, const uint8_t *data)
@@ -570,7 +560,7 @@ static int32_t PostCommData(uint32_t connectionId, bool toServer, const AuthData
     }
     int32_t ret = PackAuthData(head, data, buf + ConnGetHeadSize(), size - ConnGetHeadSize());
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "pack data fail=%d", ret);
+        AUTH_LOGE(AUTH_CONN, "pack data fail=%{public}d", ret);
         SoftBusFree(buf);
         return ret;
     }
@@ -582,7 +572,9 @@ static int32_t PostCommData(uint32_t connectionId, bool toServer, const AuthData
         .len = size,
         .buf = (char *)buf,
     };
-    AUTH_LOGI(AUTH_CONN, "data{seq=%" PRId64 ", len=%u} conn{id=%u, seq=%" PRId64 ", len=%u}",
+    AUTH_LOGI(AUTH_CONN,
+        "dataSeq=%{public}" PRId64 ", dataLen=%{public}u, "
+        "connId=%{public}u, connSeq=%{public}" PRId64 ", connLen=%{public}u}",
         head->seq, head->len, connectionId, connData.seq, connData.len);
     return ConnPostBytes(connectionId, &connData);
 }
@@ -615,9 +607,8 @@ void AuthConnDeinit(void)
 
 int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnInfo *connInfo, ConnSideType sideType)
 {
-    DfxRecordLnnConnectStart(connInfo);
     CHECK_NULL_PTR_RETURN_VALUE(connInfo, SOFTBUS_INVALID_PARAM);
-    AUTH_LOGI(AUTH_CONN, "requestId=%u, connType=%d, sideType=%d", requestId,
+    AUTH_LOGI(AUTH_CONN, "requestId=%{public}u, connType=%{public}d, sideType=%{public}d", requestId,
         connInfo->type, sideType);
     PostConnConnectTimeout(requestId);
     int32_t ret = 0;
@@ -649,7 +640,7 @@ int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnInfo *connInfo, Conn
     }
     if (ret != SOFTBUS_OK) {
         RemoveConnConnectTimeout(requestId);
-        AUTH_LOGE(AUTH_CONN, "ConnectDevice fail, requestId=%u", requestId);
+        AUTH_LOGE(AUTH_CONN, "ConnectDevice fail, requestId=%{public}u", requestId);
     }
     return ret;
 }
@@ -666,7 +657,7 @@ void UpdateAuthDevicePriority(uint64_t connId)
         }
     };
     int32_t ret = ConnUpdateConnection(GetConnId(connId), &option);
-    AUTH_LOGI(AUTH_CONN, "update connecton priority to balanced, connType=%d, id=%u, ret=%d",
+    AUTH_LOGI(AUTH_CONN, "update connecton priority to balanced, connType=%{public}d, id=%{public}u, ret=%{public}d",
         GetConnType(connId), GetConnId(connId), ret);
 }
 
@@ -676,7 +667,7 @@ void DisconnectAuthDevice(uint64_t *connId)
         AUTH_LOGW(AUTH_CONN, "connId nulptr");
         return;
     }
-    AUTH_LOGI(AUTH_CONN, "connType=%d, connectionId=%u", GetConnType(*connId), GetConnId(*connId));
+    AUTH_LOGI(AUTH_CONN, "connType=%{public}d, connectionId=%{public}u", GetConnType(*connId), GetConnId(*connId));
     switch (GetConnType(*connId)) {
         case AUTH_LINK_TYPE_WIFI:
             SocketDisconnectDevice(AUTH, GetFd(*connId));
@@ -700,8 +691,11 @@ int32_t PostAuthData(uint64_t connId, bool toServer, const AuthDataHead *head, c
 {
     CHECK_NULL_PTR_RETURN_VALUE(head, SOFTBUS_INVALID_PARAM);
     CHECK_NULL_PTR_RETURN_VALUE(data, SOFTBUS_INVALID_PARAM);
-    AUTH_LOGI(AUTH_CONN, "auth post data{type=0x%x, module=%d, seq=%" PRId64 ", flag=%d, len=%u} " CONN_INFO " to[%s]",
-        head->dataType, head->module, head->seq, head->flag, head->len, CONN_DATA(connId), GetAuthSideStr(toServer));
+    AUTH_LOGI(AUTH_CONN,
+        "auth post dataType=0x%{public}x, dataModule=%{public}d, dataSeq=%{public}" PRId64 ", "
+        "dataFlag=%{public}d, dataLen=%{public}u, " CONN_INFO ", toServer=%{public}s",
+        head->dataType, head->module, head->seq, head->flag, head->len, CONN_DATA(connId),
+        GetAuthSideStr(toServer));
     switch (GetConnType(connId)) {
         case AUTH_LINK_TYPE_WIFI:
             return SocketPostBytes(GetFd(connId), head, data);
@@ -741,7 +735,7 @@ bool CheckActiveAuthConnection(const AuthConnInfo *connInfo)
     CHECK_NULL_PTR_RETURN_VALUE(connInfo, false);
     (void)memset_s(&connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     if (ConvertToConnectOption(connInfo, &connOpt) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "convert to connect option fail, connType=%d.", connInfo->type);
+        AUTH_LOGE(AUTH_CONN, "convert to connect option fail, connType=%{public}d.", connInfo->type);
         return false;
     }
     return CheckActiveConnection(&connOpt);
@@ -753,7 +747,7 @@ int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port)
         AUTH_LOGW(AUTH_CONN, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    AUTH_LOGI(AUTH_CONN, "start auth listening, linkType=%d, port=%d", type, port);
+    AUTH_LOGI(AUTH_CONN, "start auth listening, linkType=%{public}d, port=%{public}d", type, port);
     switch (type) {
         case AUTH_LINK_TYPE_WIFI: {
             LocalListenerInfo info = {
@@ -773,7 +767,7 @@ int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port)
             return StartSocketListening(AUTH, &info);
         }
         default:
-            AUTH_LOGE(AUTH_CONN, "unsupport linkType=%d", type);
+            AUTH_LOGE(AUTH_CONN, "unsupport linkType=%{public}d", type);
             break;
     }
     return SOFTBUS_INVALID_PARAM;
@@ -781,13 +775,13 @@ int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port)
 
 void AuthStopListening(AuthLinkType type)
 {
-    AUTH_LOGI(AUTH_CONN, "stop auth listening, linkType=%d", type);
+    AUTH_LOGI(AUTH_CONN, "stop auth listening, linkType=%{public}d", type);
     switch (type) {
         case AUTH_LINK_TYPE_WIFI:
             StopSocketListening();
             break;
         default:
-            AUTH_LOGE(AUTH_CONN, "unsupport linkType=%d", type);
+            AUTH_LOGE(AUTH_CONN, "unsupport linkType=%{public}d", type);
             break;
     }
 }
@@ -811,13 +805,13 @@ int32_t AuthStartListeningForWifiDirect(AuthLinkType type, const char *ip, int32
         AUTH_CHECK_AND_RETURN_RET_LOGE(local.socketOption.moduleId > 0, SOFTBUS_ERR, AUTH_CONN,
                                        "alloc listener module id failed");
     } else {
-        AUTH_LOGE(AUTH_CONN, "type=%d invalid", type);
+        AUTH_LOGE(AUTH_CONN, "type invalid. type=%{public}d", type);
         return SOFTBUS_INVALID_PARAM;
     }
 
     int32_t realPort = ConnStartLocalListening(&local);
     AUTH_CHECK_AND_RETURN_RET_LOGE(realPort > 0, SOFTBUS_ERR, AUTH_CONN, "start local listening failed");
-    AUTH_LOGI(AUTH_CONN, "moduleId=%u port=%d", local.socketOption.moduleId, realPort);
+    AUTH_LOGI(AUTH_CONN, "moduleId=%{public}u, port=%{public}d", local.socketOption.moduleId, realPort);
     *moduleId = local.socketOption.moduleId;
     return realPort;
 }
@@ -825,7 +819,7 @@ int32_t AuthStartListeningForWifiDirect(AuthLinkType type, const char *ip, int32
 void AuthStopListeningForWifiDirect(AuthLinkType type, ListenerModule moduleId)
 {
     AUTH_CHECK_AND_RETURN_LOGE(type == AUTH_LINK_TYPE_P2P || type == AUTH_LINK_TYPE_ENHANCED_P2P, AUTH_CONN,
-                               "type=%d invalid", type);
+                               "type invalid. type=%{public}d", type);
     LocalListenerInfo local = {
         .type = CONNECT_TCP,
         .socketOption = {

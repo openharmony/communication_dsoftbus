@@ -16,17 +16,9 @@ import("../../../dsoftbus.gni")
 dsoftbus_dfx_path = "$dsoftbus_core_path/common/dfx"
 
 if (defined(ohos_lite)) {
-  if (ohos_kernel_type == "liteos_m") {
-    hilog_lite_include_path =
-        "//base/hiviewdfx/hilog_lite/interfaces/native/kits/hilog_lite"
-    hilog_lite_deps_path =
-        "//base/hiviewdfx/hilog_lite/frameworks/mini:hilog_lite"
-  } else {
-    hilog_lite_include_path =
-        "//base/hiviewdfx/hilog_lite/interfaces/native/innerkits"
-    hilog_lite_deps_path =
-        "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared"
-  }
+  hilog_lite_include_path = "//base/hiviewdfx/hilog_lite/interfaces/native/kits"
+  hilog_lite_deps_path =
+      "//base/hiviewdfx/hilog_lite/frameworks/mini:hilog_lite"
   if (defined(board_toolchain_type)) {
     if (board_toolchain_type != "iccarm") {
       ohos_lite_cflags = [

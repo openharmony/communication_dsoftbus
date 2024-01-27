@@ -178,6 +178,8 @@ ohos_unittest("TransClientSessionTest") {
     "$dsoftbus_root_path/tests/sdk/common/include",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/sdk/bus_center/manager/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/tcp_direct/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/common/include",
   ]
 
   deps = [
@@ -202,6 +204,28 @@ ohos_unittest("TransClientSessionTest") {
   }
 }
 
+ohos_unittest("TransClientSocketServiceTest") {
+  module_out_path = module_output_path
+  sources = [ "client_trans_socket_service_test.cpp" ]
+
+  deps = [
+    "$dsoftbus_root_path/sdk:softbus_client",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+  }
+}
+
 group("unittest") {
   testonly = true
   deps = [
@@ -210,5 +234,6 @@ group("unittest") {
     ":TransClientSessionManagerTest",
     ":TransClientSessionServiceTest",
     ":TransClientSessionTest",
+    ":TransClientSocketServiceTest",
   ]
 }

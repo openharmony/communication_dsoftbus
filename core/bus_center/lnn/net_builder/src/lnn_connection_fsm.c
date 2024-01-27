@@ -30,7 +30,6 @@
 #include "lnn_device_info.h"
 #include "lnn_device_info_recovery.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_event.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_link_finder.h"
@@ -134,7 +133,7 @@ static bool CheckInterfaceCommonArgs(const LnnConnectionFsm *connFsm, bool needC
         return false;
     }
     if (needCheckDead && connFsm->isDead) {
-        LNN_LOGE(LNN_BUILDER, "[id=%u]connection fsm is already dead", connFsm->id);
+        LNN_LOGE(LNN_BUILDER, "connection fsm is already dead. id=%{public}u", connFsm->id);
         return false;
     }
     return true;
@@ -162,7 +161,7 @@ static void NotifyLeaveResult(LnnConnectionFsm *connFsm, const char *networkId, 
 
 static void FreeUnhandledMessage(int32_t msgType, void *para)
 {
-    LNN_LOGI(LNN_BUILDER, "free unhandled msg=%d", msgType);
+    LNN_LOGI(LNN_BUILDER, "free unhandled msg. msgType=%{public}d", msgType);
     if (para != NULL) {
         SoftBusFree(para);
     }
@@ -389,7 +388,8 @@ static void SetLnnConnNodeInfo(
     if (LnnUpdateGroupType(connInfo->nodeInfo) != SOFTBUS_OK) {
         LNN_LOGI(LNN_BUILDER, "update grouptype fail");
     }
-    LNN_LOGI(LNN_BUILDER, "peer feature=%" PRIu64 ", local=%" PRIu64 "", connInfo->nodeInfo->feature, localFeature);
+    LNN_LOGI(LNN_BUILDER, "peer feature=%{public}" PRIu64 ", local=%{public}" PRIu64 "",
+        connInfo->nodeInfo->feature, localFeature);
     if (IsFeatureSupport(connInfo->nodeInfo->feature, BIT_BLE_SUPPORT_SENSORHUB_HEARTBEAT) &&
         IsFeatureSupport(localFeature, BIT_BLE_SUPPORT_SENSORHUB_HEARTBEAT)) {
         DeviceStateChangeProcess(connInfo->nodeInfo->deviceInfo.deviceUdid, connInfo->addr.type, true);
@@ -430,12 +430,12 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
     }
     connInfo->flag &= ~LNN_CONN_INFO_FLAG_JOIN_PASSIVE;
     if (retCode != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "[id=%u]join failed, ready clean, retCode=%d", connFsm->id, retCode);
+        LNN_LOGE(LNN_BUILDER, "join failed, ready clean, id=%{public}u, retCode=%{public}d", connFsm->id, retCode);
         connFsm->isDead = true;
         LnnRequestCleanConnFsm(connFsm->id);
         return;
     }
-    LNN_LOGI(LNN_BUILDER, "[id=%u]complete join LNN done", connFsm->id);
+    LNN_LOGI(LNN_BUILDER, "complete join LNN done. id=%{public}u", connFsm->id);
 }
 
 static bool UpdateLeaveToLedger(const LnnConnectionFsm *connFsm, const char *networkId, NodeBasicInfo *basic)
@@ -451,7 +451,7 @@ static bool UpdateLeaveToLedger(const LnnConnectionFsm *connFsm, const char *net
     ReportCategory report;
     const char *findNetworkId = isCleanInfo ? connInfo->cleanInfo->networkId : networkId;
     if (LnnGetRemoteNodeInfoById(findNetworkId, CATEGORY_NETWORK_ID, &info) != SOFTBUS_OK) {
-        LNN_LOGW(LNN_BUILDER, "get node info by networkId fail, isCleanInfo=%d", isCleanInfo);
+        LNN_LOGW(LNN_BUILDER, "get node info by networkId fail, isCleanInfo=%{public}d", isCleanInfo);
         return needReportOffline;
     }
     isMetaAuth = (info.AuthTypeValue & (1 << ONLINE_METANODE)) != 0;
@@ -460,12 +460,12 @@ static bool UpdateLeaveToLedger(const LnnConnectionFsm *connFsm, const char *net
     LnnGetLnnRelation(udid, CATEGORY_UDID, relation, CONNECTION_ADDR_MAX);
     LnnNotifyLnnRelationChanged(udid, connInfo->addr.type, relation[connInfo->addr.type], false);
     if (LnnGetBasicInfoByUdid(udid, basic) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "[id=%u]get basic info fail", connFsm->id);
+        LNN_LOGE(LNN_BUILDER, "get basic info fail. id=%{public}u", connFsm->id);
         needReportOffline = false;
     }
     if (isCleanInfo) {
         if (strcpy_s(basic->networkId, NETWORK_ID_BUF_LEN, networkId) != EOK) {
-            LNN_LOGE(LNN_BUILDER, "get node info by networkId fail, isCleanInfo = %d", isCleanInfo);
+            LNN_LOGE(LNN_BUILDER, "get node info by networkId fail, isCleanInfo=%{public}d", isCleanInfo);
             return needReportOffline;
         }
     }
@@ -474,7 +474,7 @@ static bool UpdateLeaveToLedger(const LnnConnectionFsm *connFsm, const char *net
         DeleteFromProfile(udid);
         // just remove node when peer device is not trusted
         if ((connInfo->flag & LNN_CONN_INFO_FLAG_LEAVE_PASSIVE) != 0 && !isMetaAuth) {
-            LNN_LOGE(LNN_BUILDER, "[id=%u]remove node", connFsm->id);
+            LNN_LOGE(LNN_BUILDER, "remove node. id=%{public}u", connFsm->id);
             LnnRemoveNode(udid);
         }
     }
@@ -538,7 +538,7 @@ static void CompleteLeaveLNN(LnnConnectionFsm *connFsm, const char *networkId, i
     connFsm->isDead = true;
     LnnNotifyAuthHandleLeaveLNN(connInfo->authId);
     LnnRequestCleanConnFsm(connFsm->id);
-    LNN_LOGI(LNN_BUILDER, "[id=%u]complete leave lnn, ready clean", connFsm->id);
+    LNN_LOGI(LNN_BUILDER, "complete leave lnn, ready clean. id=%{public}u", connFsm->id);
 }
 
 static int32_t OnJoinFail(LnnConnectionFsm *connFsm, int32_t retCode)
@@ -599,10 +599,10 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
         return SOFTBUS_ERR;
     }
     if (connInfo->authId > 0) {
-        LNN_LOGI(LNN_BUILDER, "[id=%u]join LNN is ongoing, waiting...", connFsm->id);
+        LNN_LOGI(LNN_BUILDER, "join LNN is ongoing, waiting...id=%{public}u", connFsm->id);
         return SOFTBUS_OK;
     }
-    LNN_LOGI(LNN_BUILDER, "[id=%u]begin join request, peer%s, isNeedConnect=%d", connFsm->id,
+    LNN_LOGI(LNN_BUILDER, "begin join request, id=%{public}u, peer%{public}s, isNeedConnect=%{public}d", connFsm->id,
         LnnPrintConnectionAddr(&connInfo->addr), connFsm->isNeedConnect);
     connInfo->requestId = AuthGenRequestId();
     (void)LnnConvertAddrToAuthConnInfo(&connInfo->addr, &authConn);
@@ -616,7 +616,7 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
         char udidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = {0};
         ret = ConvertBytesToHexString(udidHash, HB_SHORT_UDID_HASH_HEX_LEN + 1,
             (const unsigned char *)connInfo->addr.info.ble.udidHash, HB_SHORT_UDID_HASH_LEN);
-        LNN_LOGI(LNN_BUILDER, "join udidHash = %s", udidHash);
+        LNN_LOGI(LNN_BUILDER, "join udidHash=%{public}s", udidHash);
         if (ret == EOK) {
             if (LnnRetrieveDeviceInfo(udidHash, &deviceInfo) == SOFTBUS_OK &&
                 AuthRestoreAuthManager(udidHash, &authConn, connInfo->requestId, &deviceInfo, &authId) == SOFTBUS_OK &&
@@ -627,14 +627,14 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
         }
     }
     if (AuthStartVerify(&authConn, connInfo->requestId, LnnGetVerifyCallback(), true) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "[id=%u]auth verify device failed", connFsm->id);
+        LNN_LOGE(LNN_BUILDER, "auth verify device failed. id=%{public}u", connFsm->id);
         CompleteJoinLNN(connFsm, NULL, SOFTBUS_ERR);
         rc = SOFTBUS_ERR;
     } else {
         LnnFsmPostMessageDelay(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN_TIMEOUT, NULL, JOIN_LNN_TIMEOUT_LEN);
         rc = SOFTBUS_OK;
     }
-    LNN_LOGI(LNN_BUILDER, "[id=%u]verify request requestId=%u", connFsm->id, connInfo->requestId);
+    LNN_LOGI(LNN_BUILDER, "verify request. id=%{public}u, requestId=%{public}u", connFsm->id, connInfo->requestId);
     return rc;
 }
 
@@ -677,7 +677,7 @@ static int32_t OnAuthDone(LnnConnectionFsm *connFsm, int32_t *retCode)
     LnnConntionInfo *connInfo = &connFsm->connInfo;
 
     if (retCode == NULL) {
-        LNN_LOGE(LNN_BUILDER, "[id=%u]auth result is null", connFsm->id);
+        LNN_LOGE(LNN_BUILDER, "auth result is null. id=%{public}u", connFsm->id);
         return SOFTBUS_INVALID_PARAM;
     }
     if (CheckDeadFlag(connFsm, true)) {
@@ -685,17 +685,19 @@ static int32_t OnAuthDone(LnnConnectionFsm *connFsm, int32_t *retCode)
         return SOFTBUS_ERR;
     }
 
-    LNN_LOGI(LNN_BUILDER, "[id=%u]auth done, authId=%" PRId64 ", result=%d, connType=%d",
+    LNN_LOGI(LNN_BUILDER,
+        "auth done, id=%{public}u, authId=%{public}" PRId64 ", result=%{public}d, connType=%{public}d",
         connFsm->id, connInfo->authId, *retCode, connFsm->connInfo.addr.type);
     if (*retCode == SOFTBUS_OK) {
         LNN_LOGI(LNN_BUILDER,
-            "[id=%u]auth passed, authId=%" PRId64, connFsm->id, connInfo->authId);
+            "auth passed, id=%{public}u, authId=%{public}" PRId64, connFsm->id, connInfo->authId);
         (void)LnnFillConnInfo(connInfo);
         LnnFsmTransactState(&connFsm->fsm, g_states + STATE_CLEAN_INVALID_CONN_INDEX);
         LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_INVALID_CONN, NULL);
     } else {
         LNN_LOGE(LNN_BUILDER,
-            "[id=%u]auth failed, authId=%" PRId64 ", requestId=%u, reason=%d, connType=%d",
+            "auth failed, id=%{public}u, authId=%{public}" PRId64 ", requestId=%{public}u, reason=%{public}d, "
+            "connType=%{public}d",
             connFsm->id, connInfo->authId, connInfo->requestId, *retCode, connFsm->connInfo.addr.type);
         CompleteJoinLNN(connFsm, NULL, *retCode);
     }
@@ -713,7 +715,7 @@ static bool AuthStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para)
     }
     connFsm = TO_CONN_FSM(fsm);
 
-    LNN_LOGI(LNN_BUILDER, "[id=%u]auth process message=%d", connFsm->id, msgType);
+    LNN_LOGI(LNN_BUILDER, "auth process. id=%{public}u, msgType=%{public}d", connFsm->id, msgType);
     switch (msgType) {
         case FSM_MSG_TYPE_JOIN_LNN:
             OnJoinLNN(connFsm);
@@ -741,7 +743,7 @@ static bool IsNodeInfoChanged(const LnnConnectionFsm *connFsm, const NodeInfo *o
     const NodeInfo *newNodeInfo, ConnectionAddrType *type)
 {
     if (strcmp(newNodeInfo->networkId, oldNodeInfo->networkId) != 0) {
-        LNN_LOGI(LNN_BUILDER, "[id=%u]networkId changed", connFsm->id);
+        LNN_LOGI(LNN_BUILDER, "networkId changed. id=%{public}u", connFsm->id);
         *type = CONNECTION_ADDR_MAX;
         return true;
     }
@@ -749,27 +751,27 @@ static bool IsNodeInfoChanged(const LnnConnectionFsm *connFsm, const NodeInfo *o
         return false;
     }
     if (!LnnHasDiscoveryType(oldNodeInfo, DISCOVERY_TYPE_WIFI)) {
-        LNN_LOGI(LNN_BUILDER, "[id=%u]oldNodeInfo not have wifi, discoveryType = %u",
+        LNN_LOGI(LNN_BUILDER, "oldNodeInfo not have wifi, id=%{public}u, discoveryType=%{public}u",
             connFsm->id, oldNodeInfo->discoveryType);
         return false;
     }
     if (strcmp(newNodeInfo->connectInfo.deviceIp, oldNodeInfo->connectInfo.deviceIp) != 0) {
-        LNN_LOGI(LNN_BUILDER, "[id=%u]peer IP changed", connFsm->id);
+        LNN_LOGI(LNN_BUILDER, "peer IP changed. id=%{public}u", connFsm->id);
         *type = connFsm->connInfo.addr.type;
         return true;
     }
     if (newNodeInfo->connectInfo.authPort != oldNodeInfo->connectInfo.authPort) {
-        LNN_LOGI(LNN_BUILDER, "[id=%u]peer auth port changed", connFsm->id);
+        LNN_LOGI(LNN_BUILDER, "peer auth port changed. id=%{public}u", connFsm->id);
         *type = connFsm->connInfo.addr.type;
         return true;
     }
     if (newNodeInfo->connectInfo.proxyPort != oldNodeInfo->connectInfo.proxyPort) {
-        LNN_LOGI(LNN_BUILDER, "[id=%u]peer proxy port changed", connFsm->id);
+        LNN_LOGI(LNN_BUILDER, "peer proxy port changed. id=%{public}u", connFsm->id);
         *type = connFsm->connInfo.addr.type;
         return true;
     }
     if (newNodeInfo->connectInfo.sessionPort != oldNodeInfo->connectInfo.sessionPort) {
-        LNN_LOGI(LNN_BUILDER, "[id=%u]peer session port changed", connFsm->id);
+        LNN_LOGI(LNN_BUILDER, "peer session port changed. id=%{public}u", connFsm->id);
         *type = connFsm->connInfo.addr.type;
         return true;
     }
@@ -792,13 +794,13 @@ static void OnLeaveInvalidConn(LnnConnectionFsm *connFsm)
     }
     if (ret == SOFTBUS_OK && LnnIsNodeOnline(&oldNodeInfo)) {
         if (IsNodeInfoChanged(connFsm, &oldNodeInfo, newNodeInfo, &addrType)) {
-            LNN_LOGI(LNN_BUILDER, "[id=%u]node info changed, ready clean invalid connection",
+            LNN_LOGI(LNN_BUILDER, "node info changed, ready clean invalid connection. id=%{public}u",
                 connFsm->id);
             LnnRequestLeaveInvalidConn(oldNodeInfo.networkId, addrType, newNodeInfo->networkId);
             return;
         }
     }
-    LNN_LOGI(LNN_BUILDER, "[id=%u]no need clean invalid connection fsm", connFsm->id);
+    LNN_LOGI(LNN_BUILDER, "no need clean invalid connection fsm. id=%{public}u", connFsm->id);
     LnnFsmTransactState(&connFsm->fsm, g_states + STATE_ONLINE_INDEX);
 }
 
@@ -812,7 +814,7 @@ static bool CleanInvalidConnStateProcess(FsmStateMachine *fsm, int32_t msgType, 
     }
     connFsm = TO_CONN_FSM(fsm);
 
-    LNN_LOGI(LNN_BUILDER, "[id=%u]clean invalid state process message=%d",
+    LNN_LOGI(LNN_BUILDER, "clean invalid state process message. id=%{public}u, msgType=%{public}d",
         connFsm->id, msgType);
     switch (msgType) {
         case FSM_MSG_TYPE_LEAVE_LNN:
@@ -842,9 +844,6 @@ static bool CleanInvalidConnStateProcess(FsmStateMachine *fsm, int32_t msgType, 
 
 static void OnlineStateEnter(FsmStateMachine *fsm)
 {
-    LnnEventExtra extra = { 0 };
-    LnnEventExtraInit(&extra);
-    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, extra);
     LnnConnectionFsm *connFsm = NULL;
 
     if (!CheckStateMsgCommonArgs(fsm)) {
@@ -858,9 +857,10 @@ static void OnlineStateEnter(FsmStateMachine *fsm)
     if (isNodeInfoValid) {
         Anonymize(connFsm->connInfo.nodeInfo->deviceInfo.deviceUdid, &anonyUdid);
     }
-    LNN_LOGI(LNN_BUILDER, "[id=%u][networkId=%s][udid=%s][deviceName=%s][peer%s]online state enter",
-        connFsm->id, anonyNetworkId,
-        isNodeInfoValid ? anonyUdid : "",
+    LNN_LOGI(LNN_BUILDER,
+        "online state enter. id=%{public}u, networkId=%{public}s, udid=%{public}s, deviceName=%{public}s, "
+        "peer%{public}s",
+        connFsm->id, anonyNetworkId, isNodeInfoValid ? anonyUdid : "",
         isNodeInfoValid ? connFsm->connInfo.nodeInfo->deviceInfo.deviceName : "",
         LnnPrintConnectionAddr(&connFsm->connInfo.addr));
     AnonymizeFree(anonyUdid);
@@ -875,13 +875,13 @@ static void OnJoinLNNInOnline(LnnConnectionFsm *connFsm)
 {
     LnnConntionInfo *connInfo = &connFsm->connInfo;
 
-    LNN_LOGI(LNN_BUILDER, "[id=%u]request addr is already online", connFsm->id);
+    LNN_LOGI(LNN_BUILDER, "request addr is already online. id=%{public}u", connFsm->id);
     NotifyJoinResult(connFsm, connInfo->peerNetworkId, SOFTBUS_OK);
 }
 
 static void LeaveLNNInOnline(LnnConnectionFsm *connFsm)
 {
-    LNN_LOGI(LNN_BUILDER, "[id=%u]transact to leaving state", connFsm->id);
+    LNN_LOGI(LNN_BUILDER, "transact to leaving state. id=%{public}u", connFsm->id);
     if (CheckDeadFlag(connFsm, true)) {
         return;
     }
@@ -898,7 +898,7 @@ static bool OnlineStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para
     }
     connFsm = TO_CONN_FSM(fsm);
 
-    LNN_LOGI(LNN_BUILDER, "[id=%u]online process message=%d", connFsm->id, msgType);
+    LNN_LOGI(LNN_BUILDER, "online process message. id=%{public}u, msgType=%{public}d", connFsm->id, msgType);
     switch (msgType) {
         case FSM_MSG_TYPE_JOIN_LNN:
             OnJoinLNNInOnline(connFsm);
@@ -937,7 +937,7 @@ static int32_t SyncBrOffline(const LnnConnectionFsm *connFsm)
     }
     combinedInt = ((uint16_t)code << CONN_CODE_SHIFT) | ((uint16_t)DISCOVERY_TYPE_BR & DISCOVERY_TYPE_MASK);
     combinedInt = SoftBusHtoNl(combinedInt);
-    LNN_LOGI(LNN_BUILDER, "GetOfflineMsg combinedInt: 0x%04x", combinedInt);
+    LNN_LOGI(LNN_BUILDER, "GetOfflineMsg combinedInt=0x%{public}04x", combinedInt);
     if (LnnSendSyncInfoMsg(LNN_INFO_TYPE_OFFLINE, connFsm->connInfo.peerNetworkId,
         (uint8_t *)&combinedInt, sizeof(int32_t), LnnSyncOfflineComplete) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "send sync offline fail");
@@ -948,9 +948,6 @@ static int32_t SyncBrOffline(const LnnConnectionFsm *connFsm)
 
 static void LeavingStateEnter(FsmStateMachine *fsm)
 {
-    LnnEventExtra extra = { 0 };
-    LnnEventExtraInit(&extra);
-    LNN_EVENT(EVENT_SCENE_LEAVE_LNN, EVENT_STAGE_LEAVE_LNN, extra);
     LnnConnectionFsm *connFsm = NULL;
     int32_t rc;
     LnnConntionInfo *connInfo = NULL;
@@ -968,9 +965,10 @@ static void LeavingStateEnter(FsmStateMachine *fsm)
     if (isNodeInfoValid) {
         Anonymize(connFsm->connInfo.nodeInfo->deviceInfo.deviceUdid, &anonyUdid);
     }
-    LNN_LOGI(LNN_BUILDER, "[id=%u][networkId=%s][udid=%s][deviceName=%s][peer%s]leaving state enter",
-        connFsm->id, anonyNetworkId,
-        isNodeInfoValid ? anonyUdid : "",
+    LNN_LOGI(LNN_BUILDER,
+        "leaving state enter. id=%{public}u, networkId=%{public}s, udid=%{public}s, deviceName=%{public}s, "
+        "peer%{public}s",
+        connFsm->id, anonyNetworkId, isNodeInfoValid ? anonyUdid : "",
         isNodeInfoValid ? connFsm->connInfo.nodeInfo->deviceInfo.deviceName : "",
         LnnPrintConnectionAddr(&connFsm->connInfo.addr));
     AnonymizeFree(anonyUdid);
@@ -997,7 +995,7 @@ static bool LeavingStateProcess(FsmStateMachine *fsm, int32_t msgType, void *par
     }
     connFsm = TO_CONN_FSM(fsm);
 
-    LNN_LOGI(LNN_BUILDER, "[id=%u]leaving process message: %d", connFsm->id, msgType);
+    LNN_LOGI(LNN_BUILDER, "leaving process message. id=%{public}u, msgType=%{public}d", connFsm->id, msgType);
     switch (msgType) {
         case FSM_MSG_TYPE_JOIN_LNN:
             NotifyJoinResult(connFsm, NULL, SOFTBUS_NETWORK_JOIN_LEAVING);
@@ -1085,7 +1083,7 @@ LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target, const cha
         }
     }
     connFsm->isNeedConnect = isNeedConnect;
-    LNN_LOGI(LNN_BUILDER, "create a new connection fsm[id=%u][peer%s][needConnect=%d]",
+    LNN_LOGI(LNN_BUILDER, "create a new connection fsm. id=%{public}u, peerAddr=%{public}s, needConnect=%{public}d",
         connFsm->id, LnnPrintConnectionAddr(target), isNeedConnect);
     return connFsm;
 }
@@ -1095,7 +1093,7 @@ void LnnDestroyConnectionFsm(LnnConnectionFsm *connFsm)
     if (connFsm == NULL) {
         return;
     }
-    LNN_LOGI(LNN_BUILDER, "destroy a connection fsm[id=%u]", connFsm->id);
+    LNN_LOGI(LNN_BUILDER, "destroy a connection fsm. id=%{public}u", connFsm->id);
     if (connFsm->connInfo.cleanInfo != NULL) {
         SoftBusFree(connFsm->connInfo.cleanInfo);
     }
@@ -1112,10 +1110,10 @@ int32_t LnnStartConnectionFsm(LnnConnectionFsm *connFsm)
         return SOFTBUS_INVALID_PARAM;
     }
     if (LnnFsmStart(&connFsm->fsm, g_states + STATE_AUTH_INDEX) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "start connection fsm[id=%u] failed", connFsm->id);
+        LNN_LOGE(LNN_BUILDER, "start connection fsm failed. id=%{public}u", connFsm->id);
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_BUILDER, "connection fsm[id=%u] is starting", connFsm->id);
+    LNN_LOGI(LNN_BUILDER, "connection fsm is starting. id=%{public}u", connFsm->id);
     return SOFTBUS_OK;
 }
 
@@ -1127,7 +1125,7 @@ int32_t LnnStopConnectionFsm(LnnConnectionFsm *connFsm, LnnConnectionFsmStopCall
     }
     connFsm->stopCallback = callback;
     if (LnnFsmStop(&connFsm->fsm) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "stop connection fsm(id=%u) failed", connFsm->id);
+        LNN_LOGE(LNN_BUILDER, "stop connection fsm failed. id=%{public}u", connFsm->id);
         return SOFTBUS_ERR;
     }
     return LnnFsmDeinit(&connFsm->fsm);

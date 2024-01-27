@@ -66,23 +66,23 @@ public:
 
 static int OnServerSessionOpened(int sessionId, int result)
 {
-    TRANS_LOGI(TRANS_TEST, "session opened,sesison id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session opened, sesisonId=%{public}d\r\n", sessionId);
     return SOFTBUS_OK;
 }
 
 static void OnServerSessionClosed(int sessionId)
 {
-    TRANS_LOGI(TRANS_TEST, "session closed, session id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session closed, sessionId=%{public}d\r\n", sessionId);
 }
 
 static void OnServerBytesReceived(int sessionId, const void *data, unsigned int len)
 {
-    TRANS_LOGI(TRANS_TEST, "session bytes received, session id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session bytes received, sessionId=%{public}d\r\n", sessionId);
 }
 
 static void OnServerMessageReceived(int sessionId, const void *data, unsigned int len)
 {
-    TRANS_LOGI(TRANS_TEST, "session msg received, session id = %d\r\n", sessionId);
+    TRANS_LOGI(TRANS_TEST, "session msg received, sessionId=%{public}d\r\n", sessionId);
 }
 
 static ISessionListener g_sessionlistener = {
@@ -95,26 +95,26 @@ static ISessionListener g_sessionlistener = {
 
 static int32_t OnSessionOpened(const char *sessionName, const ChannelInfo *channel, SessionType flag)
 {
-    TRANS_LOGI(TRANS_TEST, "session opened,sesisonName=%s", sessionName);
+    TRANS_LOGI(TRANS_TEST, "session opened, sesisonName=%{public}s", sessionName);
     return SOFTBUS_OK;
 }
 
 static int32_t OnSessionClosed(int32_t channelId, int32_t channelType, ShutdownReason reason)
 {
-    TRANS_LOGI(TRANS_TEST, "session closed, channelId=%d", channelId);
+    TRANS_LOGI(TRANS_TEST, "session closed, channelId=%{public}d", channelId);
     return SOFTBUS_OK;
 }
 
 static int32_t OnSessionOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
 {
-    TRANS_LOGI(TRANS_TEST, "session bytes received, channelId=%d", channelId);
+    TRANS_LOGI(TRANS_TEST, "session bytes received, channelId=%{public}d", channelId);
     return SOFTBUS_OK;
 }
 
 static int32_t OnDataReceived(int32_t channelId, int32_t channelType,
                               const void *data, uint32_t len, SessionPktType type)
 {
-    TRANS_LOGI(TRANS_TEST, "session msg received, channelId=%d", channelId);
+    TRANS_LOGI(TRANS_TEST, "session msg received, channelId=%{public}d", channelId);
     return SOFTBUS_OK;
 }
 static IClientSessionCallBack g_sessionCb = {

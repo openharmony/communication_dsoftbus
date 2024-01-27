@@ -14,12 +14,11 @@
  */
 
 #include "removerecordbykey_fuzzer.h"
-#include "sqlite3_utils.h"
+
 #include <securec.h>
-#include <cstdlib>
-#include <cstring>
 #include <unistd.h>
-#include "softbus_adapter_mem.h"
+
+#include "sqlite3_utils.h"
 
 namespace OHOS {
     static constexpr size_t MAX_BUFFER_LEN = 100;

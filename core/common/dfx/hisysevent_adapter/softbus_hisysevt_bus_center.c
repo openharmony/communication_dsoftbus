@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -394,7 +394,7 @@ static int32_t SetDevDiscStaticMsgParamName(SoftBusEvtReportMsg *msg)
         param = &msg->paramArray[i];
         param->paramType = g_devDiscoveryStaticParam[i].paramType;
         if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, g_devDiscoveryStaticParam[i].paramName) != EOK) {
-            COMM_LOGE(COMM_EVENT, "copy param %s fail", g_devDiscoveryStaticParam[i].paramName);
+            COMM_LOGE(COMM_EVENT, "copy param fail. paramName=%{public}s", g_devDiscoveryStaticParam[i].paramName);
             return SOFTBUS_ERR;
         }
     }
@@ -429,7 +429,8 @@ static int32_t SetDevDiscStaticMsgParamValve(SoftBusEvtReportMsg *msg, DevDiscov
 static int32_t SoftBusCreateDevDiscStaticMsg(SoftBusEvtReportMsg *msg)
 {
     if (strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_DEVICE_DISCOVERY) != EOK) {
-        COMM_LOGE(COMM_EVENT, "strcpy evtname %s fail", STATISTIC_EVT_DEVICE_DISCOVERY);
+        COMM_LOGE(COMM_EVENT,
+            "strcpy evtname fail. STATISTIC_EVT_DEVICE_DISCOVERY=%{public}s", STATISTIC_EVT_DEVICE_DISCOVERY);
         return SOFTBUS_ERR;
     }
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
@@ -493,7 +494,7 @@ static int32_t ReportDevDiscoveryRecordEvt(void)
             break;
         }
     } while (false);
-    SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReportMsg(msg);
     CleanDevDiscoveryRecord();
     return ret;
 }
@@ -554,7 +555,8 @@ static int32_t SetAppDiscStaticMsgParamName(SoftBusEvtReportMsg *msg)
         param = &msg->paramArray[i];
         param->paramType = g_appDiscoveryStaticParam[i].paramType;
         if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, g_appDiscoveryStaticParam[i].paramName) != EOK) {
-            COMM_LOGE(COMM_EVENT, "strcpy_s param name %s fail", g_appDiscoveryStaticParam[i].paramName);
+            COMM_LOGE(COMM_EVENT,
+                "strcpy_s param name fail. paramName=%{public}s", g_appDiscoveryStaticParam[i].paramName);
             return SOFTBUS_ERR;
         }
     }
@@ -579,7 +581,8 @@ static int32_t SoftBusCreateAppDiscStaticMsg(SoftBusEvtReportMsg *msg, AppDiscNo
         return SOFTBUS_ERR;
     }
     if (strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_APP_DISCOVERY) != EOK) {
-        COMM_LOGE(COMM_EVENT, "strcpy evt name %s fail", STATISTIC_EVT_APP_DISCOVERY);
+        COMM_LOGE(COMM_EVENT,
+            "strcpy evt name fail. STATISTIC_EVT_APP_DISCOVERY=%{public}s", STATISTIC_EVT_APP_DISCOVERY);
         return SOFTBUS_ERR;
     }
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
@@ -629,7 +632,7 @@ static int32_t ReportAppDiscoveryRecordEvt(void)
                 break;
             }
         } while (false);
-        SoftbusFreeEvtReporMsg(msg);
+        SoftbusFreeEvtReportMsg(msg);
         if (ret != SOFTBUS_OK) {
             (void)SoftBusMutexUnlock(&g_appDiscLock);
             return ret;
@@ -686,7 +689,7 @@ static int32_t SetBusCenterFaultMsgParamName(SoftBusEvtReportMsg *msg)
         param = &msg->paramArray[i];
         param->paramType = g_softBusFailEvtParam[i].paramType;
         if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, g_softBusFailEvtParam[i].paramName) != EOK) {
-            COMM_LOGE(COMM_EVENT, "strcpy_s param name %s fail", g_softBusFailEvtParam[i].paramName);
+            COMM_LOGE(COMM_EVENT, "strcpy_s param name fail. paramName=%{public}s", g_softBusFailEvtParam[i].paramName);
             return SOFTBUS_ERR;
         }
     }
@@ -745,7 +748,7 @@ static int32_t SetBusCenterFaultMsgParamValve(SoftBusEvtReportMsg *msg, SoftBusF
 static int32_t SoftBusCreateBusCenterFaultMsg(SoftBusEvtReportMsg *msg, SoftBusFaultEvtInfo *info)
 {
     if (strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, FAULT_EVT_BUS_CENTER) != EOK) {
-        COMM_LOGE(COMM_EVENT, "strcpy_s evt name %s fail", FAULT_EVT_BUS_CENTER);
+        COMM_LOGE(COMM_EVENT, "strcpy_s evt name fail. FAULT_EVT_BUS_CENTER=%{public}s", FAULT_EVT_BUS_CENTER);
         return SOFTBUS_ERR;
     }
     msg->evtType = SOFTBUS_EVT_TYPE_FAULT;
@@ -775,7 +778,7 @@ int32_t SoftBusReportBusCenterFaultEvt(SoftBusFaultEvtInfo *info)
     info->errorCode = GetErrorCodeEx(info->errorCode);
     SoftBusCreateBusCenterFaultMsg(msg, info);
     int ret = SoftbusWriteHisEvt(msg);
-    SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReportMsg(msg);
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_EVENT, "sys evt write buscenter fault msg fail");
     }
@@ -863,7 +866,8 @@ static int32_t SetOnlineInfoMsgParamName(SoftBusEvtReportMsg *msg)
         param = &msg->paramArray[i];
         param->paramType = g_onlineInfoStaticParam[i].paramType;
         if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, g_onlineInfoStaticParam[i].paramName) != EOK) {
-            COMM_LOGE(COMM_EVENT, "strcpy_s param name %s fail", g_onlineInfoStaticParam[i].paramName);
+            COMM_LOGE(COMM_EVENT,
+                "strcpy_s param name fail. paramName=%{public}s", g_onlineInfoStaticParam[i].paramName);
             return SOFTBUS_ERR;
         }
     }
@@ -911,7 +915,8 @@ static int32_t SetOnlineInfoMsgParamValve(SoftBusEvtReportMsg *msg, OnlineDevice
 static int32_t SoftBusCreateEvtMsgByInfo(SoftBusEvtReportMsg *msg, OnlineDeviceInfo *info)
 {
     if (strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_DEVICE_ONLINE) != EOK) {
-        COMM_LOGE(COMM_EVENT, "strcpy_s evtname %s fail", STATISTIC_EVT_DEVICE_ONLINE);
+        COMM_LOGE(COMM_EVENT,
+            "strcpy_s evtname fail. STATISTIC_EVT_DEVICE_ONLINE=%{public}s", STATISTIC_EVT_DEVICE_ONLINE);
         return SOFTBUS_ERR;
     }
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
@@ -948,7 +953,7 @@ int32_t SoftBusReportDevOnlineEvt(OnlineDeviceInfo *info, const char *udid)
     }
     SoftBusCreateEvtMsgByInfo(msg, info);
     int ret = SoftbusWriteHisEvt(msg);
-    SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReportMsg(msg);
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_EVENT, "sysevt write online device info msg fail");
     }
@@ -987,7 +992,7 @@ static int32_t SetAuthResultMsgParamName(SoftBusEvtReportMsg *msg)
         param = &msg->paramArray[i];
         param->paramType = g_authResultParam[i].paramType;
         if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, g_authResultParam[i].paramName) != EOK) {
-            COMM_LOGE(COMM_EVENT, "strcpy_s param name %s fail", g_authResultParam[i].paramName);
+            COMM_LOGE(COMM_EVENT, "strcpy_s param name fail. paramName=%{public}s", g_authResultParam[i].paramName);
             return SOFTBUS_ERR;
         }
     }
@@ -1025,7 +1030,7 @@ static int32_t SetAuthResultMsgParamValve(SoftBusEvtReportMsg *msg, AuthResultRe
 static int32_t SoftBusCreateAuthResultMsg(SoftBusEvtReportMsg *msg, SoftBusLinkType linkType)
 {
     if (strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_AUTH_KPI) != EOK) {
-        COMM_LOGE(COMM_EVENT, "strcpy evtname %s fail", STATISTIC_EVT_AUTH_KPI);
+        COMM_LOGE(COMM_EVENT, "strcpy evtname fail. STATISTIC_EVT_AUTH_KPI=%{public}s", STATISTIC_EVT_AUTH_KPI);
         return SOFTBUS_ERR;
     }
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
@@ -1071,7 +1076,8 @@ static int32_t SetOnlineDurMsgParamName(SoftBusEvtReportMsg *msg)
         param = &msg->paramArray[i];
         param->paramType = g_busCenterDurStaticParam[i + 1].paramType;
         if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, g_busCenterDurStaticParam[i + 1].paramName) != EOK) {
-            COMM_LOGE(COMM_EVENT, "copy param name %s fail", g_busCenterDurStaticParam[i + 1].paramName);
+            COMM_LOGE(COMM_EVENT,
+                "copy param name fail. paramName=%{public}s", g_busCenterDurStaticParam[i + 1].paramName);
             return SOFTBUS_ERR;
         }
     }
@@ -1103,7 +1109,8 @@ static int32_t SetOnlineDurMsgParamValve(SoftBusEvtReportMsg *msg, DevOnlineDurR
 static int32_t SoftBusCreateOnlineDurMsg(SoftBusEvtReportMsg *msg)
 {
     if (strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_ONLINE_DURATION) != EOK) {
-        COMM_LOGE(COMM_EVENT, "strcpy evtname %s fail", STATISTIC_EVT_ONLINE_DURATION);
+        COMM_LOGE(COMM_EVENT,
+            "strcpy evtname fail. STATISTIC_EVT_ONLINE_DURATION=%{public}s", STATISTIC_EVT_ONLINE_DURATION);
         return SOFTBUS_ERR;
     }
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
@@ -1153,7 +1160,7 @@ static int32_t SetBusCenterDurMsgParamName(SoftBusEvtReportMsg *msg)
         param = &msg->paramArray[i];
         param->paramType = g_busCenterDurStaticParam[i].paramType;
         if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, g_busCenterDurStaticParam[i].paramName) != EOK) {
-            COMM_LOGE(COMM_EVENT, "copy param name %s fail", g_busCenterDurStaticParam[i].paramName);
+            COMM_LOGE(COMM_EVENT, "copy param name fail. paramName=%{public}s", g_busCenterDurStaticParam[i].paramName);
             return SOFTBUS_ERR;
         }
     }
@@ -1186,7 +1193,7 @@ static int32_t SetBusCenterDurMsgParamValve(SoftBusEvtReportMsg *msg, BusCenterD
 static int32_t CreateBusCenterDurStasticMsg(SoftBusEvtReportMsg *msg, SoftBusLinkType linkType)
 {
     if (strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_LNN_DURATION) != EOK) {
-        COMM_LOGE(COMM_EVENT, "strcpy evtname %s fail", STATISTIC_EVT_LNN_DURATION);
+        COMM_LOGE(COMM_EVENT, "strcpy evtname fail. STATISTIC_EVT_LNN_DURATION=%{public}s", STATISTIC_EVT_LNN_DURATION);
         return SOFTBUS_ERR;
     }
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
@@ -1250,7 +1257,7 @@ static int32_t ReportOnlineDurRecordEvt(void)
             break;
         }
     } while (false);
-    SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReportMsg(msg);
     CleanDevOnlineDurRecord();
     return ret;
 }
@@ -1317,7 +1324,7 @@ static int32_t ReportBusCenterRecordEvt(void)
             break;
         }
     }
-    SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReportMsg(msg);
     CleanBusCenterRecord();
     return ret;
 }
@@ -1385,7 +1392,7 @@ static int32_t ReportAuthResultRecordEvt(void)
             break;
         }
     }
-    SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReportMsg(msg);
     CleanAuthResultRecord();
     return ret;
 }

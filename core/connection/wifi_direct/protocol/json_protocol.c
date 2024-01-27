@@ -63,8 +63,8 @@ static bool SetDataSource(struct WifiDirectProtocol *base, const uint8_t *data, 
     struct WifiDirectJsonProtocol *self = (struct WifiDirectJsonProtocol *)base;
     CONN_CHECK_AND_RETURN_RET_LOGW(data, false, CONN_WIFI_DIRECT, "data is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(size > 0 && size <= CAPACITY_MAX, false, CONN_WIFI_DIRECT,
-        "size=%u is too large", size);
-    CONN_LOGI(CONN_WIFI_DIRECT, "size=%d", size);
+        "size is too large. size=%{public}zu", size);
+    CONN_LOGI(CONN_WIFI_DIRECT, "size=%{public}zu", size);
     cJSON_Delete(self->cJsonOfMsg);
     self->cJsonOfMsg = cJSON_ParseWithLength((char *)data, size);
     CONN_CHECK_AND_RETURN_RET_LOGW(self->cJsonOfMsg, false, CONN_WIFI_DIRECT, "cJsonOfMsg is null");
@@ -108,7 +108,7 @@ static bool WriteData(struct WifiDirectProtocol *base, struct InfoContainerKeyPr
             break;
         }
         default: {
-            CONN_LOGW(CONN_WIFI_DIRECT, "JsonProtocol pack: invalid value type=%d", keyProperty->type);
+            CONN_LOGW(CONN_WIFI_DIRECT, "JsonProtocol pack: invalid value type=%{public}d", keyProperty->type);
             return false;
         }
     }
@@ -156,7 +156,7 @@ static bool ReadData(struct WifiDirectProtocol *base, struct InfoContainerKeyPro
             break;
         }
         default:
-            CONN_LOGE(CONN_WIFI_DIRECT, "invalid cJson type=%d", self->readPos->type);
+            CONN_LOGE(CONN_WIFI_DIRECT, "invalid cJson type=%{public}d", self->readPos->type);
             return false;
     }
     self->readPos = self->readPos->next;

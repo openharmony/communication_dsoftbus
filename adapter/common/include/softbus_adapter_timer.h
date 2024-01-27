@@ -47,4 +47,4 @@ uint64_t SoftBusGetSysTimeMs(void);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
-#endif
+#endif // SOFTBUS_ADAPTER_TIMER_H

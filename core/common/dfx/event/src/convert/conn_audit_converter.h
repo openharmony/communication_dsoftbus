@@ -49,7 +49,6 @@ CONN_AUDIT_ASSIGNER(String, PeerUdid, peerUdid)
 CONN_AUDIT_ASSIGNER(String, ConnPayload, connPayload)
 CONN_AUDIT_ASSIGNER(String, LocalDeviceName, localDeviceName)
 CONN_AUDIT_ASSIGNER(String, PeerIp, peerIp)
-CONN_AUDIT_ASSIGNER(String, Extra, extra)
 CONN_AUDIT_ASSIGNER(String, CallerPkg, callerPkg)
 CONN_AUDIT_ASSIGNER(String, CalleePkg, calleePkg)
 CONN_AUDIT_ASSIGNER(Int32, ConnectTimes, connectTimes)
@@ -60,7 +59,7 @@ CONN_AUDIT_ASSIGNER(String, LocalIp, localIp)
 CONN_AUDIT_ASSIGNER(String, PeerPort, peerPort)
 CONN_AUDIT_ASSIGNER(String, LocalPort, localPort)
 
-#define CONN_AUDIT_ASSIGNER_SIZE 25 // Size of g_connAuditAssigners
+#define CONN_AUDIT_ASSIGNER_SIZE 24 // Size of g_connAuditAssigners
 static HiSysEventParamAssigner g_connAuditAssigners[] = {
     { "ERROR_CODE",     HISYSEVENT_INT32,  ConnAuditAssignerErrcode        },
     { "AUDIT_TYPE",     HISYSEVENT_INT32,  ConnAuditAssignerAuditType      },
@@ -69,22 +68,21 @@ static HiSysEventParamAssigner g_connAuditAssigners[] = {
     { "LINK_TYPE",      HISYSEVENT_INT32,  ConnAuditAssignerLinkType       },
     { "EXPECT_ROLE",    HISYSEVENT_INT32,  ConnAuditAssignerExpectRole     },
     { "COST_TIME",      HISYSEVENT_INT32,  ConnAuditAssignerCostTime       },
+    { "CONN_TIMES",     HISYSEVENT_INT32,  ConnAuditAssignerConnectTimes   },
     { "FREQ",           HISYSEVENT_STRING, ConnAuditAssignerFrequency      },
     { "PEER_BR_MAC",    HISYSEVENT_STRING, ConnAuditAssignerPeerBrMac      },
+    { "LOCAL_BR_MAC",   HISYSEVENT_STRING, ConnAuditAssignerLocalBrMac     },
     { "PEER_BLE_MAC",   HISYSEVENT_STRING, ConnAuditAssignerPeerBleMac     },
+    { "LOCAL_BLE_MAC",  HISYSEVENT_STRING, ConnAuditAssignerLocalBleMac    },
     { "PEER_DEV_TYPE",  HISYSEVENT_STRING, ConnAuditAssignerPeerDeviceType },
     { "PEER_UDID",      HISYSEVENT_STRING, ConnAuditAssignerPeerUdid       },
+    { "LOCAL_UDID",     HISYSEVENT_STRING, ConnAuditAssignerLocalUdid      },
     { "CONN_PAYLOAD",   HISYSEVENT_STRING, ConnAuditAssignerConnPayload    },
     { "LOCAL_DEV_NAME", HISYSEVENT_STRING, ConnAuditAssignerLocalDeviceName},
     { "PEER_IP",        HISYSEVENT_STRING, ConnAuditAssignerPeerIp         },
-    { "HOST_PKG",       HISYSEVENT_STRING, ConnAuditAssignerCallerPkg      },
-    { "EXTRA",          HISYSEVENT_STRING, ConnAuditAssignerExtra          },
-    { "TO_CALL_PKG",    HISYSEVENT_STRING, ConnAuditAssignerCalleePkg      },
-    { "CONN_TIMES",     HISYSEVENT_INT32,  ConnAuditAssignerConnectTimes   },
-    { "LOCAL_BR_MAC",   HISYSEVENT_STRING, ConnAuditAssignerLocalBrMac     },
-    { "LOCAL_BLE_MAC",  HISYSEVENT_STRING, ConnAuditAssignerLocalBleMac    },
-    { "LOCAL_UDID",     HISYSEVENT_STRING, ConnAuditAssignerLocalUdid      },
     { "LOCAL_IP",       HISYSEVENT_STRING, ConnAuditAssignerLocalIp        },
+    { "HOST_PKG",       HISYSEVENT_STRING, ConnAuditAssignerCallerPkg      },
+    { "TO_CALL_PKG",    HISYSEVENT_STRING, ConnAuditAssignerCalleePkg      },
     { "PEER_PORT",      HISYSEVENT_STRING, ConnAuditAssignerPeerPort       },
     { "LOCAL_PORT",     HISYSEVENT_STRING, ConnAuditAssignerLocalPort      },
     // Modification Note: remember updating CONN_AUDIT_ASSIGNER_SIZE

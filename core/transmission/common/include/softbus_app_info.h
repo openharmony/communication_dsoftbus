@@ -51,6 +51,12 @@ typedef enum {
 } AppType;
 
 typedef enum {
+    TRANS_CONN_ALL = 0,
+    TRANS_CONN_P2P = 1,
+    TRANS_CONN_HML = 2,
+} TransConnType;
+
+typedef enum {
     ROUTE_TYPE_ALL = 0,
     WIFI_STA = 1,
     WIFI_P2P = 2,
@@ -110,6 +116,7 @@ typedef struct {
     int32_t transFlag;
     int64_t authSeq;
     int32_t linkType;
+    int32_t connectType;
     int32_t channelType;
     int32_t errorCode;
     int64_t timeStart;

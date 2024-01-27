@@ -64,7 +64,7 @@ int32_t LnnIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t in
 {
     (void)pkgName;
     if (infoTypeLen != sizeof(NodeBasicInfo)) {
-        LNN_LOGE(LNN_EVENT, "infoTypeLen is invalid, infoTypeLen = %d", infoTypeLen);
+        LNN_LOGE(LNN_EVENT, "infoTypeLen is invalid, infoTypeLen=%{public}d", infoTypeLen);
         return SOFTBUS_INVALID_PARAM;
     }
     return LnnGetAllOnlineNodeInfo((NodeBasicInfo **)info, infoNum);

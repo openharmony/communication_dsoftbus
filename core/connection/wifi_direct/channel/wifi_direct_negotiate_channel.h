@@ -21,6 +21,13 @@
 extern "C" {
 #endif
 
+enum WifiDirectNegotiateChannelType {
+    NEGOTIATE_WIFI = 0,
+    NEGOTIATE_BLE,
+    NEGOTIATE_BR,
+    NEGOTIATE_MAX,
+};
+
 #define WIFI_DIRECT_NEGOTIATE_CHANNEL_BASE \
     int32_t (*postData)(struct WifiDirectNegotiateChannel *base, const uint8_t *data, size_t size);           \
     int32_t (*getDeviceId)(struct WifiDirectNegotiateChannel *base, char *deviceId, size_t deviceIdSize);     \
@@ -30,7 +37,8 @@ extern "C" {
     bool (*isMetaChannel)(struct WifiDirectNegotiateChannel *base);                                           \
     bool (*equal)(struct WifiDirectNegotiateChannel *leftBase, struct WifiDirectNegotiateChannel *rightBase); \
     struct WifiDirectNegotiateChannel* (*duplicate)(struct WifiDirectNegotiateChannel *base);                 \
-    void (*destructor)(struct WifiDirectNegotiateChannel *base)
+    void (*destructor)(struct WifiDirectNegotiateChannel *base);                                              \
+    enum WifiDirectNegotiateChannelType (*getMediumType)(struct WifiDirectNegotiateChannel *base)
 
 struct WifiDirectNegotiateChannel {
     WIFI_DIRECT_NEGOTIATE_CHANNEL_BASE;

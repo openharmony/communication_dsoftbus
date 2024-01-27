@@ -79,7 +79,7 @@ static int32_t WifiConnectToTargetAp(const unsigned char *targetBssid, const cha
                    sizeof(SoftBusWifiDevConf) * WIFI_MAX_CONFIG_SIZE);
     int32_t retVal = SoftBusGetWifiDeviceConfig(result, &wifiConfigSize);
     if (retVal != SOFTBUS_OK || wifiConfigSize > WIFI_MAX_CONFIG_SIZE) {
-        LNN_LOGE(LNN_BUILDER, "git config fail,retVal=%d,wifiConfigSize=%d", retVal, wifiConfigSize);
+        LNN_LOGE(LNN_BUILDER, "git config fail, retVal=%{public}d, wifiConfigSize=%{public}d", retVal, wifiConfigSize);
         ResultClean(result);
         return SOFTBUS_ERR;
     }
@@ -139,7 +139,7 @@ void OnReceiveTransReqMsg(LnnSyncInfoType type, const char *networkId, const uin
 {
     char udid[UDID_BUF_LEN];
 
-    LNN_LOGI(LNN_BUILDER, "recv trans req msg infoType=%d, len=%d", type, len);
+    LNN_LOGI(LNN_BUILDER, "recv trans req msg infoType=%{public}d, len=%{public}d", type, len);
     if (type != LNN_INFO_TYPE_BSS_TRANS) {
         return;
     }
@@ -159,7 +159,7 @@ static void OnReceiveBrOffline(LnnSyncInfoType type, const char *networkId, cons
     int16_t peerCode, code;
     DiscoveryType discType;
 
-    LNN_LOGI(LNN_BUILDER, "Recv offline info, infoType=%d, len=%d", type, len);
+    LNN_LOGI(LNN_BUILDER, "Recv offline info, infoType=%{public}d, len=%{public}d", type, len);
     if (type != LNN_INFO_TYPE_OFFLINE) {
         return;
     }
@@ -180,7 +180,7 @@ static void OnReceiveBrOffline(LnnSyncInfoType type, const char *networkId, cons
         return;
     }
     if (discType != DISCOVERY_TYPE_BR || code != peerCode) {
-        LNN_LOGE(LNN_BUILDER, "info error discType=%d, code=%d, peerCode=%d",
+        LNN_LOGE(LNN_BUILDER, "info error discType=%{public}d, code=%{public}d, peerCode=%{public}d",
             discType, code, peerCode);
         return;
     }

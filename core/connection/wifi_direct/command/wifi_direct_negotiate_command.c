@@ -17,6 +17,7 @@
 #include "softbus_adapter_mem.h"
 #include "wifi_direct_negotiator.h"
 #include "wifi_direct_decision_center.h"
+#include "command/wifi_direct_command_manager.h"
 #include "channel/wifi_direct_negotiate_channel.h"
 #include "data/link_info.h"
 #include "data/link_manager.h"
@@ -25,17 +26,21 @@
 static void ExecuteProcessRemoteNegotiateMessage(struct WifiDirectCommand *base)
 {
     struct WifiDirectNegotiateCommand *self = (struct WifiDirectNegotiateCommand *)base;
-    struct LinkInfo *linkInfo = self->msg->getContainer(self->msg, NM_KEY_LINK_INFO);
-    if (linkInfo != NULL) {
-        self->msg->remove(self->msg, NM_KEY_LINK_INFO);
+    struct WifiDirectNegotiator *negotiator = GetWifiDirectNegotiator();
+    enum WifiDirectNegotiateCmdType cmdType = negotiator->getNegotiateCmdType(self->msg);
+    if (cmdType == CMD_CONN_V2_REQ_1) {
+        struct LinkInfo *linkInfo = self->msg->getContainer(self->msg, NM_KEY_LINK_INFO);
+        if (linkInfo != NULL) {
+            self->msg->remove(self->msg, NM_KEY_LINK_INFO);
+        }
     }
     struct WifiDirectProcessor *processor = GetWifiDirectDecisionCenter()->getProcessorByNegotiateMessage(self->msg);
     if (processor != NULL) {
         base->processor = processor;
     }
-    struct WifiDirectNegotiator *negotiator = GetWifiDirectNegotiator();
     negotiator->currentCommand = base;
     negotiator->currentProcessor = base->processor;
+    CONN_LOGI(CONN_WIFI_DIRECT, "currentProcessor=%s", negotiator->currentProcessor->name);
     negotiator->updateCurrentRemoteDeviceId(self->msg->getPointer(self->msg, NM_KEY_NEGO_CHANNEL, NULL));
     base->processor->processNegotiateMessage(self->cmdType, base);
 }
@@ -70,6 +75,7 @@ void WifiDirectNegotiateCommandConstructor(struct WifiDirectNegotiateCommand *se
 {
     self->type = COMMAND_TYPE_NEGO_MESSAGE;
     self->timerId = TIMER_ID_INVALID;
+    self->commandId = GetWifiDirectCommandManager()->allocateCommandId();
     self->execute = ExecuteProcessRemoteNegotiateMessage;
     self->onSuccess = OnNegotiateComplete;
     self->onFailure = OnNegotiateFailure;

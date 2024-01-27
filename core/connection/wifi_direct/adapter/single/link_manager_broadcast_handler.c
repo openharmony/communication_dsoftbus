@@ -39,7 +39,7 @@ static void UpdateInnerLink(struct WifiDirectP2pGroupInfo *groupInfo)
         int32_t ret = GetWifiDirectNetWorkUtils()->macArrayToString(groupInfo->groupOwner.address, MAC_ADDR_ARRAY_SIZE,
                                                                     groupOwnerMac, sizeof(groupOwnerMac));
         CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "convert mac to string failed");
-        CONN_LOGI(CONN_WIFI_DIRECT, "groupOwnerMac=%s", WifiDirectAnonymizeMac(groupOwnerMac));
+        CONN_LOGI(CONN_WIFI_DIRECT, "groupOwnerMac=%{public}s", WifiDirectAnonymizeMac(groupOwnerMac));
 
         struct InnerLink link;
         InnerLinkConstructorWithArgs(&link, WIFI_DIRECT_LINK_TYPE_P2P, IF_NAME_P2P, groupOwnerMac);
@@ -54,13 +54,13 @@ static void UpdateInnerLink(struct WifiDirectP2pGroupInfo *groupInfo)
     (void)memset_s(clientDevicesBuf, sizeof(clientDevicesBuf), 0, sizeof(clientDevicesBuf));
     char *clientDevices[MAX_CONNECTED_DEVICE_COUNT] = {NULL};
     int32_t clientDeviceSize = MIN(groupInfo->clientDeviceSize, MAX_CONNECTED_DEVICE_COUNT);
-    CONN_LOGI(CONN_WIFI_DIRECT, "local is group owner, clientDeviceSize=%d", clientDeviceSize);
+    CONN_LOGI(CONN_WIFI_DIRECT, "local is group owner, clientDeviceSize=%{public}d", clientDeviceSize);
 
     for (int32_t i = 0; i < clientDeviceSize; i++) {
         clientDevices[i] = clientDevicesBuf[i];
         GetWifiDirectNetWorkUtils()->macArrayToString(groupInfo->clientDevices[i].address, MAC_ADDR_ARRAY_SIZE,
                                                       clientDevices[i], MAC_ADDR_STR_LEN);
-        CONN_LOGI(CONN_WIFI_DIRECT, "remoteMac=%s", WifiDirectAnonymizeMac(clientDevices[i]));
+        CONN_LOGI(CONN_WIFI_DIRECT, "remoteMac=%{public}s", WifiDirectAnonymizeMac(clientDevices[i]));
         struct InnerLink newLink;
         InnerLinkConstructorWithArgs(&newLink, WIFI_DIRECT_LINK_TYPE_P2P, IF_NAME_P2P, clientDevices[i]);
         newLink.putInt(&newLink, IL_KEY_STATE, INNER_LINK_STATE_CONNECTED);
@@ -104,5 +104,6 @@ void LinkManagerBroadcastHandlerInit(void)
         WIFI_P2P_CONNECTION_CHANGED_ACTION,
     };
 
-    broadcastReceiver->registerBroadcastListener(actions, ARRAY_SIZE(actions), "LinkManager", Listener);
+    broadcastReceiver->registerBroadcastListener(actions, ARRAY_SIZE(actions), "LinkManager",
+                                                 LISTENER_PRIORITY_MIDDLE, Listener);
 }

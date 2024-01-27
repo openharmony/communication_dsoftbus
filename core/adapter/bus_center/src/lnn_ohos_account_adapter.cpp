@@ -44,14 +44,14 @@ int32_t GetOsAccountId(char *id, uint32_t idLen, uint32_t *len)
     }
 
     *len = accountInfo.second.name_.length();
-    LNN_LOGI(LNN_STATE, "uid=%s len=%d", accountInfo.second.name_.c_str(), *len);
+    LNN_LOGI(LNN_STATE, "uid=%{public}s, len=%{public}d", accountInfo.second.name_.c_str(), *len);
 
     if (memcmp(DEFAULT_ACCOUNT_NAME, accountInfo.second.name_.c_str(), *len) == 0) {
         LNN_LOGE(LNN_STATE, "not login account");
         return SOFTBUS_ERR;
     }
     if (memcpy_s(id, idLen, accountInfo.second.name_.c_str(), *len) != EOK) {
-        LNN_LOGE(LNN_STATE, "memcpy_s uid failed, idLen=%d len=%d", idLen, *len);
+        LNN_LOGE(LNN_STATE, "memcpy_s uid failed, idLen=%{public}d, len=%{public}d", idLen, *len);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -70,7 +70,7 @@ int64_t GetCurrentAccount(void)
         return 0;
     }
 
-    LNN_LOGI(LNN_STATE, "name_=%s", accountInfo.second.name_.c_str());
+    LNN_LOGI(LNN_STATE, "name_=%{public}s", accountInfo.second.name_.c_str());
     if (memcmp(DEFAULT_ACCOUNT_NAME, accountInfo.second.name_.c_str(),
         accountInfo.second.name_.length()) == 0) {
         LNN_LOGE(LNN_STATE, "not login account");
@@ -92,7 +92,7 @@ int32_t GetActiveOsAccountIds(void)
         LNN_LOGE(LNN_STATE, "QueryActiveOsAccountIds failed");
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_STATE, "GetActiveOsAccountIds id=%d", accountId[0]);
+    LNN_LOGI(LNN_STATE, "GetActiveOsAccountIds id=%{public}d", accountId[0]);
     return accountId[0];
 }
 
@@ -103,13 +103,14 @@ bool IsActiveOsAccountUnlocked(void)
         LNN_LOGE(LNN_STATE, "accountId is invalid");
         return false;
     }
-    LNN_LOGI(LNN_STATE, "current active os accountId=%d", osAccountId);
+    LNN_LOGI(LNN_STATE, "current active os accountId=%{public}d", osAccountId);
     bool isUnlocked = false;
     OHOS::ErrCode res = OHOS::AccountSA::OsAccountManager::IsOsAccountVerified(osAccountId, isUnlocked);
     if (res != OHOS::ERR_OK) {
-        LNN_LOGE(LNN_STATE, "check account verify status failed,res=%d accountId=%d", res, osAccountId);
+        LNN_LOGE(LNN_STATE, "check account verify status failed, res=%{public}d, osAccountId=%{public}d", res,
+            osAccountId);
         return false;
     }
-    LNN_LOGI(LNN_STATE, "account verified status=%d, accountId=%d", isUnlocked, osAccountId);
+    LNN_LOGI(LNN_STATE, "account verified status=%{public}d, accountId=%{public}d", isUnlocked, osAccountId);
     return isUnlocked;
 }

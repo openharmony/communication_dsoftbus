@@ -54,7 +54,7 @@ static sptr<IRemoteObject> GetSystemAbility()
     }
     int32_t err = samgr->SendRequest(g_getSystemAbilityId, data, reply, option);
     if (err != 0) {
-        LNN_LOGE(LNN_EVENT, "Get GetSystemAbility failed=%d", err);
+        LNN_LOGE(LNN_EVENT, "Get GetSystemAbility failed=%{public}d", err);
         return nullptr;
     }
     return reply.ReadRemoteObject();
@@ -82,7 +82,6 @@ int32_t BusCenterServerProxyInit(void)
 
 void BusCenterServerProxyDeInit(void)
 {
-    LNN_LOGI(LNN_EVENT, "enter");
     BusCenterExProxyDeInit();
     std::lock_guard<std::mutex> lock(g_mutex);
     g_serverProxy.clear();

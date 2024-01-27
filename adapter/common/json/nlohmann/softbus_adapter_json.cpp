@@ -83,6 +83,7 @@ char *JSON_PrintUnformatted(const JsonObj *obj)
         return nullptr;
     }
     if (strcpy_s(result, jsonString.length() + 1, jsonString.c_str()) != EOK) {
+        JSON_LOGE("strcpy json string fail");
         SoftBusFree(result);
         return nullptr;
     }
@@ -143,14 +144,14 @@ bool JSON_GetBoolFromOject(const JsonObj *obj, const char *key, bool *value)
     }
     nlohmann::json item = (*json)[key];
     if (!item.is_boolean()) {
-        JSON_LOGE("Cannot find or invalid [%s]", key);
+        JSON_LOGE("Cannot find or invalid key. key=%{public}s", key);
         return false;
     }
     *value = item.get<bool>();
     return true;
 }
 
-template<typename Integer>
+template <typename Integer>
 static bool JSON_AddIntegerToObject(JsonObj *obj, const char *key, Integer num)
 {
     if (obj == nullptr || key == nullptr) {
@@ -166,7 +167,7 @@ static bool JSON_AddIntegerToObject(JsonObj *obj, const char *key, Integer num)
     return true;
 }
 
-template<typename Integer>
+template <typename Integer>
 static bool JSON_GetIntegerFromObject(const JsonObj *obj, const char *key, Integer &value)
 {
     if (obj == nullptr || key == nullptr) {
@@ -180,7 +181,7 @@ static bool JSON_GetIntegerFromObject(const JsonObj *obj, const char *key, Integ
     }
     nlohmann::json item = (*json)[key];
     if (!item.is_number()) {
-        JSON_LOGE("Cannot find or invalid [%s]", key);
+        JSON_LOGE("Cannot find or invalid key. key=%{public}s", key);
         return false;
     }
     value = item.get<Integer>();
@@ -257,21 +258,21 @@ bool JSON_GetStringFromOject(const JsonObj *obj, const char *key, char *value, u
     }
     nlohmann::json item = (*json)[key];
     if (!item.is_string()) {
-        JSON_LOGD("cannot find or invalid [%s]", key);
+        JSON_LOGD("cannot find or invalid key. key=%{public}s", key);
         return false;
     }
     std::string valueString = item.get<std::string>();
     if (strcpy_s(value, size, valueString.c_str()) != EOK) {
-        JSON_LOGE("strcpy [%s] value err, size=%u, value=%s",
+        JSON_LOGE("strcpy value err, key=%{public}s, size=%{public}u, value=%{public}s",
             key, size, valueString.c_str());
         return false;
     }
     return true;
 }
 
-bool JSON_AddStringArrayToObject(JsonObj *obj, const char * const key, const char **value, int32_t len)
+bool JSON_AddStringArrayToObject(JsonObj *obj, const char *key, const char **value, int32_t len)
 {
-    if (value == NULL || obj == NULL || key == NULL || len == 0) {
+    if (value == nullptr || obj == nullptr || key == nullptr || len <= 0) {
         JSON_LOGE("input invalid");
         return false;
     }
@@ -288,9 +289,9 @@ bool JSON_AddStringArrayToObject(JsonObj *obj, const char * const key, const cha
     return true;
 }
 
-bool JSON_GetStringArrayFromOject(const JsonObj *obj, const char * const key, char **value, int32_t *len)
+bool JSON_GetStringArrayFromOject(const JsonObj *obj, const char *key, char **value, int32_t *len)
 {
-    if (value == NULL || obj == NULL || key == NULL || len == NULL || *len <= 0) {
+    if (value == nullptr || obj == nullptr || key == nullptr || len == nullptr || *len <= 0) {
         JSON_LOGE("input invalid");
         return false;
     }
@@ -301,24 +302,24 @@ bool JSON_GetStringArrayFromOject(const JsonObj *obj, const char * const key, ch
     }
     nlohmann::json item = (*json)[key];
     if (!item.is_array()) {
-        JSON_LOGE("cannot find or invalid [%s]", key);
+        JSON_LOGE("cannot find or invalid key. key=%{public}s", key);
         return false;
     }
     if ((unsigned long)(*len) < (unsigned long)item.size()) {
-        JSON_LOGE("item size invalid, size=%lu.", (unsigned long)item.size());
+        JSON_LOGE("item size invalid, size=%{public}lu.", (unsigned long)item.size());
         return false;
     }
     int32_t i = 0;
     for (nlohmann::json::iterator it = item.begin(); it != item.end(); ++it) {
         std::string str = it.value().get<std::string>();
         const char *valueString = str.c_str();
-        uint32_t len = strlen(valueString) + 1;
-        value[i] = (char*)SoftBusCalloc(len);
-        if (value[i] == NULL) {
+        uint32_t valueLen = strlen(valueString) + 1;
+        value[i] = reinterpret_cast<char *>(SoftBusCalloc(valueLen));
+        if (value[i] == nullptr) {
             return false;
         }
-        if (strcpy_s(value[i], len, valueString) != EOK) {
-            JSON_LOGE("strcpy [%s] value err, value=%s", key, valueString);
+        if (strcpy_s(value[i], valueLen, valueString) != EOK) {
+            JSON_LOGE("strcpy value err. key=%{public}s, value=%{public}s", key, valueString);
             return false;
         }
         i++;

@@ -26,7 +26,6 @@ ohos_unittest("NstackxAdapterTest") {
     "nstackx_adapter_mock.cpp",
     "nstackx_adapter_test.cpp",
   ]
-  sources += test_utils_src
 
   include_dirs = [
     "$dsoftbus_root_path/components/nstackx/nstackx_ctrl/interface",
@@ -49,7 +48,6 @@ ohos_unittest("NstackxAdapterTest") {
 
     "$dsoftbus_root_path/tests/core/discovery/coap/nstackx_adapter_mock",
   ]
-  include_dirs += test_utils_inc
 
   deps = [
     "$dsoftbus_dfx_path/log:softbus_dfx_log",

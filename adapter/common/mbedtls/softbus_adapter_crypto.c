@@ -74,40 +74,40 @@ static mbedtls_cipher_type_t GetCtrAlgorithmByKeyLen(uint32_t keyLen)
     return MBEDTLS_CIPHER_NONE;
 }
 
-static int32_t MbedAesGcmEncrypt(const AesGcmCipherKey *cipherkey, const unsigned char *plainText,
+static int32_t MbedAesGcmEncrypt(const AesGcmCipherKey *cipherKey, const unsigned char *plainText,
     uint32_t plainTextSize, unsigned char *cipherText, uint32_t cipherTextLen)
 {
-    if ((cipherkey == NULL) || (plainText == NULL) || (plainTextSize == 0) || cipherText == NULL ||
+    if ((cipherKey == NULL) || (plainText == NULL) || (plainTextSize == 0) || cipherText == NULL ||
         (cipherTextLen < plainTextSize + OVERHEAD_LEN)) {
-        COMM_LOGE(COMM_ADAPTER, "Encrypt invalid para\n");
+        COMM_LOGE(COMM_ADAPTER, "Encrypt invalid para");
         return SOFTBUS_INVALID_PARAM;
     }
 
     int32_t ret;
-    unsigned char tagBuf[TAG_LEN] = {0};
+    unsigned char tagBuf[TAG_LEN] = { 0 };
     mbedtls_gcm_context aesContext;
     mbedtls_gcm_init(&aesContext);
 
-    ret = mbedtls_gcm_setkey(&aesContext, MBEDTLS_CIPHER_ID_AES, cipherkey->key, cipherkey->keyLen * KEY_BITS_UNIT);
+    ret = mbedtls_gcm_setkey(&aesContext, MBEDTLS_CIPHER_ID_AES, cipherKey->key, cipherKey->keyLen * KEY_BITS_UNIT);
     if (ret != 0) {
         mbedtls_gcm_free(&aesContext);
         return SOFTBUS_ENCRYPT_ERR;
     }
 
-    ret = mbedtls_gcm_crypt_and_tag(&aesContext, MBEDTLS_GCM_ENCRYPT, plainTextSize, cipherkey->iv,
-        GCM_IV_LEN, NULL, 0, plainText, cipherText + GCM_IV_LEN, TAG_LEN, tagBuf);
+    ret = mbedtls_gcm_crypt_and_tag(&aesContext, MBEDTLS_GCM_ENCRYPT, plainTextSize, cipherKey->iv, GCM_IV_LEN, NULL, 0,
+        plainText, cipherText + GCM_IV_LEN, TAG_LEN, tagBuf);
     if (ret != 0) {
         mbedtls_gcm_free(&aesContext);
         return SOFTBUS_ENCRYPT_ERR;
     }
 
-    if (memcpy_s(cipherText, cipherTextLen, cipherkey->iv, GCM_IV_LEN) != EOK) {
+    if (memcpy_s(cipherText, cipherTextLen, cipherKey->iv, GCM_IV_LEN) != EOK) {
         mbedtls_gcm_free(&aesContext);
         return SOFTBUS_ENCRYPT_ERR;
     }
 
-    if (memcpy_s(cipherText + GCM_IV_LEN + plainTextSize, cipherTextLen - GCM_IV_LEN - plainTextSize,
-        tagBuf, TAG_LEN) != 0) {
+    if (memcpy_s(cipherText + GCM_IV_LEN + plainTextSize, cipherTextLen - GCM_IV_LEN - plainTextSize, tagBuf,
+        TAG_LEN) != 0) {
         mbedtls_gcm_free(&aesContext);
         return SOFTBUS_ENCRYPT_ERR;
     }
@@ -116,30 +116,30 @@ static int32_t MbedAesGcmEncrypt(const AesGcmCipherKey *cipherkey, const unsigne
     return (plainTextSize + OVERHEAD_LEN);
 }
 
-static int32_t MbedAesGcmDecrypt(const AesGcmCipherKey *cipherkey, const unsigned char *cipherText,
+static int32_t MbedAesGcmDecrypt(const AesGcmCipherKey *cipherKey, const unsigned char *cipherText,
     uint32_t cipherTextSize, unsigned char *plain, uint32_t plainLen)
 {
-    if ((cipherkey == NULL) || (cipherText == NULL) || (cipherTextSize <= OVERHEAD_LEN) || plain == NULL ||
+    if ((cipherKey == NULL) || (cipherText == NULL) || (cipherTextSize <= OVERHEAD_LEN) || plain == NULL ||
         (plainLen < cipherTextSize - OVERHEAD_LEN)) {
-        COMM_LOGE(COMM_ADAPTER, "Decrypt invalid para\n");
+        COMM_LOGE(COMM_ADAPTER, "Decrypt invalid para");
         return SOFTBUS_INVALID_PARAM;
     }
 
     mbedtls_gcm_context aesContext;
     mbedtls_gcm_init(&aesContext);
-    int32_t ret = mbedtls_gcm_setkey(&aesContext, MBEDTLS_CIPHER_ID_AES, cipherkey->key,
-        cipherkey->keyLen * KEY_BITS_UNIT);
+    int32_t ret =
+        mbedtls_gcm_setkey(&aesContext, MBEDTLS_CIPHER_ID_AES, cipherKey->key, cipherKey->keyLen * KEY_BITS_UNIT);
     if (ret != 0) {
-        COMM_LOGE(COMM_ADAPTER, "Decrypt mbedtls_gcm_setkey fail\n");
+        COMM_LOGE(COMM_ADAPTER, "Decrypt mbedtls_gcm_setkey fail.");
         mbedtls_gcm_free(&aesContext);
         return SOFTBUS_DECRYPT_ERR;
     }
 
     int32_t actualPlainLen = (int32_t)(cipherTextSize - OVERHEAD_LEN);
-    ret = mbedtls_gcm_auth_decrypt(&aesContext, cipherTextSize - OVERHEAD_LEN, cipherkey->iv,
-        GCM_IV_LEN, NULL, 0, cipherText + actualPlainLen + GCM_IV_LEN, TAG_LEN, cipherText + GCM_IV_LEN, plain);
+    ret = mbedtls_gcm_auth_decrypt(&aesContext, cipherTextSize - OVERHEAD_LEN, cipherKey->iv, GCM_IV_LEN, NULL, 0,
+        cipherText + actualPlainLen + GCM_IV_LEN, TAG_LEN, cipherText + GCM_IV_LEN, plain);
     if (ret != 0) {
-        COMM_LOGE(COMM_ADAPTER, "[TRANS] Decrypt mbedtls_gcm_auth_decrypt fail.[%d]\n", ret);
+        COMM_LOGE(COMM_ADAPTER, "[TRANS] Decrypt mbedtls_gcm_auth_decrypt fail. ret=%{public}d", ret);
         mbedtls_gcm_free(&aesContext);
         return SOFTBUS_DECRYPT_ERR;
     }
@@ -151,7 +151,7 @@ static int32_t MbedAesGcmDecrypt(const AesGcmCipherKey *cipherkey, const unsigne
 static int32_t HandleError(mbedtls_cipher_context_t *ctx, const char *buf)
 {
     if (buf != NULL) {
-        COMM_LOGE(COMM_ADAPTER, "%s", buf);
+        COMM_LOGE(COMM_ADAPTER, "buf=%{public}s", buf);
     }
     if (ctx != NULL) {
         mbedtls_cipher_free(ctx);
@@ -163,6 +163,7 @@ int32_t SoftBusBase64Encode(unsigned char *dst, size_t dlen,
     size_t *olen, const unsigned char *src, size_t slen)
 {
     if (dst == NULL || dlen == 0 || olen == NULL || src == NULL || slen == 0) {
+        COMM_LOGE(COMM_ADAPTER, "base64 encode invalid para");
         return SOFTBUS_INVALID_PARAM;
     }
     return mbedtls_base64_encode(dst, dlen, olen, src, slen);
@@ -172,6 +173,7 @@ int32_t SoftBusBase64Decode(unsigned char *dst, size_t dlen,
     size_t *olen, const unsigned char *src, size_t slen)
 {
     if (dst == NULL || dlen == 0 || olen == NULL || src == NULL || slen == 0) {
+        COMM_LOGE(COMM_ADAPTER, "base64 decode invalid para");
         return SOFTBUS_INVALID_PARAM;
     }
     return mbedtls_base64_decode(dst, dlen, olen, src, slen);
@@ -188,6 +190,10 @@ int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned 
     mbedtls_md_init(&ctx);
 
     info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
+    if (info == NULL) {
+        mbedtls_md_free(&ctx);
+        return SOFTBUS_ENCRYPT_ERR;
+    }
     if (mbedtls_md_setup(&ctx, info, 0) != 0) {
         mbedtls_md_free(&ctx);
         return SOFTBUS_ENCRYPT_ERR;
@@ -220,7 +226,7 @@ int32_t SoftBusGenerateRandomArray(unsigned char *randStr, uint32_t len)
     static bool initFlag = false;
     int32_t ret;
 
-    if (initFlag == false) {
+    if (!initFlag) {
         if (SoftBusMutexInit(&g_randomLock, NULL) != SOFTBUS_OK) {
             COMM_LOGE(COMM_ADAPTER, "SoftBusGenerateRandomArray init lock fail");
             return SOFTBUS_LOCK_ERR;
@@ -230,7 +236,7 @@ int32_t SoftBusGenerateRandomArray(unsigned char *randStr, uint32_t len)
         ret = mbedtls_ctr_drbg_seed(&ctrDrbg, mbedtls_entropy_func, &entropy, NULL, 0);
         if (ret != 0) {
             SoftBusMutexUnlock(&g_randomLock);
-            COMM_LOGE(COMM_ADAPTER, "gen random seed error, ret[%d]", ret);
+            COMM_LOGE(COMM_ADAPTER, "gen random seed error, ret=%{public}d", ret);
             return SOFTBUS_ERR;
         }
         initFlag = true;
@@ -244,7 +250,7 @@ int32_t SoftBusGenerateRandomArray(unsigned char *randStr, uint32_t len)
     ret = mbedtls_ctr_drbg_random(&ctrDrbg, randStr, len);
     SoftBusMutexUnlock(&g_randomLock);
     if (ret != 0) {
-        COMM_LOGE(COMM_ADAPTER, "gen random error, ret[%d]", ret);
+        COMM_LOGE(COMM_ADAPTER, "gen random error, ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -350,6 +356,7 @@ int32_t SoftBusEncryptDataByCtr(AesCtrCipherKey *key, const unsigned char *input
     unsigned char *encryptData, uint32_t *encryptLen)
 {
     if (key == NULL || input == NULL || inLen == 0 || encryptData == NULL || encryptLen == NULL) {
+        COMM_LOGE(COMM_ADAPTER, "softbus encrypt data by ctr invalid para");
         return SOFTBUS_INVALID_PARAM;
     }
     mbedtls_cipher_type_t type = GetCtrAlgorithmByKeyLen(key->keyLen);

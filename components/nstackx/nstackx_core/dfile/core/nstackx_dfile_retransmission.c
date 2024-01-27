@@ -49,8 +49,8 @@ static void SendBackPressureFrame(DFileTrans *dFileTrans)
     allSize = recvListAllSize + recvInnerAllSize;
     uint32_t recvListWindowSize = (dFileTrans->fileManager->iowMaxRate * DFILE_KILOBYTES / NSTACKX_MILLI_TICKS)
         * NSTACKX_ACK_INTERVAL * FILE_RECV_LIST_SLOW_START_RATE;
-    if (((allSize >= dFileTrans->fileManager->iowCount * FILE_RECV_LIST_IO_WRITE_THRESHOLD) ||
-        (allSize >= dFileTrans->fileManager->maxRecvBlockListSize * FILE_RECV_LIST_IO_WRITE_THRESHOLD) ||
+    if (((allSize >= (uint32_t)(dFileTrans->fileManager->iowCount * FILE_RECV_LIST_IO_WRITE_THRESHOLD)) ||
+        (allSize >= (uint32_t)(dFileTrans->fileManager->maxRecvBlockListSize * FILE_RECV_LIST_IO_WRITE_THRESHOLD)) ||
         (allSize * blockFrameSize >= recvListWindowSize)) &&
         allSize > 0) {
         dFileTrans->fileManager->recvListOverIo = 1;

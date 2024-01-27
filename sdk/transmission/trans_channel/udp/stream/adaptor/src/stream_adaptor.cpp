@@ -129,7 +129,7 @@ ssize_t StreamAdaptor::Encrypt(const void *in, ssize_t inLen, void *out, ssize_t
         reinterpret_cast<unsigned char *>(out), reinterpret_cast<unsigned int *>(&outLen));
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK || outLen != inLen + OVERHEAD_LEN) {
-        TRANS_LOGE(TRANS_STREAM, "Encrypt Data fail. ret=%d", ret);
+        TRANS_LOGE(TRANS_STREAM, "Encrypt Data fail. ret=%{public}d", ret);
         return SOFTBUS_ENCRYPT_ERR;
     }
 
@@ -155,7 +155,7 @@ ssize_t StreamAdaptor::Decrypt(const void *in, ssize_t inLen, void *out, ssize_t
         reinterpret_cast<unsigned char *>(out), reinterpret_cast<unsigned int *>(&outLen));
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_STREAM, "Decrypt Data fail. ret=%d ", ret);
+        TRANS_LOGE(TRANS_STREAM, "Decrypt Data fail. ret=%{public}d ", ret);
         return SOFTBUS_DECRYPT_ERR;
     }
 

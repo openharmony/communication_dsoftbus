@@ -121,6 +121,11 @@ int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isM
     return GetTransAuthInterface()->AuthGetPreferConnInfo(uuid, connInfo, isMeta);
 }
 
+int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
+{
+    return GetTransAuthInterface()->AuthGetP2pConnInfo(uuid, connInfo, isMeta);
+}
+
 int64_t AuthGetLatestIdByUuid(const char *uuid, bool isIpConnection, bool isMeta)
 {
     return GetTransAuthInterface()->AuthGetLatestIdByUuid(uuid, isIpConnection, isMeta);

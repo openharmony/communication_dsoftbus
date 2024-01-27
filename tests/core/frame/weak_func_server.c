@@ -18,7 +18,7 @@
 
 int StartDiscoveryWeak(const char *pkgName, const void *info)
 {
-    COMM_LOGI(COMM_INIT, "StartDiscovery Strong pkgName = %s", pkgName);
+    COMM_LOGI(COMM_INIT, "StartDiscovery Strong pkgName=%{public}s", pkgName);
     GetClientProvideInterface()->onChannelOpened(pkgName, NULL);
     return 0;
 }

@@ -39,6 +39,7 @@ int32_t TransCloseAuthChannel(int32_t channelId);
 int32_t TransSendAuthMsg(int32_t channelId, const char *msg, int32_t len);
 int32_t TransAuthGetAppInfoByChanId(int32_t channelId, AppInfo *appInfo);
 int32_t TransAuthGetConnOptionByChanId(int32_t channelId, ConnectOption *connOpt);
+int32_t TransAuthGetConnIdByChanId(int32_t channelId, int32_t *connId);
 
 #ifdef __cplusplus
 #if __cplusplus

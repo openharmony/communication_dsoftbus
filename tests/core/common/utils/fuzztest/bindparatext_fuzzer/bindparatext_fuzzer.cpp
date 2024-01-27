@@ -14,11 +14,10 @@
  */
 
 #include "bindparatext_fuzzer.h"
-#include "sqlite3_utils.h"
-#include <securec.h>
-#include <cstdlib>
-#include <cstring>
+
 #include <unistd.h>
+
+#include "sqlite3_utils.h"
 
 namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)

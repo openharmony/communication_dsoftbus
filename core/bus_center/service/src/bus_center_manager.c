@@ -21,6 +21,7 @@
 #include "bus_center_event.h"
 #include "bus_center_decision_center.h"
 #include "lnn_async_callback_utils.h"
+#include "lnn_coap_discovery_impl.h"
 #include "lnn_decision_center.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_event_monitor.h"
@@ -111,7 +112,7 @@ static void ReadDelayConfig(void)
         LNN_LOGE(LNN_STATE, "get lnn delay init len fail, use default value");
         g_lnnLocalConfigInit.delayLen = DEFAULT_DELAY_LEN;
     }
-    LNN_LOGI(LNN_STATE, "lnn delay init len=%u", g_lnnLocalConfigInit.delayLen);
+    LNN_LOGI(LNN_STATE, "lnn delay init len=%{public}u", g_lnnLocalConfigInit.delayLen);
 }
 
 static void BusCenterServerDelayInit(void *para)
@@ -135,12 +136,13 @@ static void BusCenterServerDelayInit(void *para)
         }
         if (!g_lnnLocalConfigInit.initDelayImpl[i].isInit &&
             g_lnnLocalConfigInit.initDelayImpl[i].implInit() != SOFTBUS_OK) {
-            LNN_LOGE(LNN_STATE, "init delay impl(%u) failed", i);
+            LNN_LOGE(LNN_STATE, "init delay impl failed. i=%{public}u", i);
             ret = SOFTBUS_ERR;
         } else {
             g_lnnLocalConfigInit.initDelayImpl[i].isInit = true;
         }
     }
+    LnnCoapConnectInit();
     if (ret != SOFTBUS_OK) {
         retry++;
         SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
@@ -237,5 +239,6 @@ void BusCenterServerDeinit(void)
     LnnDeinitNetLedger();
     DeinitDecisionCenter();
     LnnDeinitMetaNode();
+    LnnCoapConnectDeinit();
     LNN_LOGI(LNN_INIT, "bus center server deinit");
 }

@@ -114,7 +114,7 @@ static int32_t OnActiveMetaNode(Reply *info, IpcIo *reply, uint32_t infoSize)
     if (info->retCode == SOFTBUS_OK) {
         info->data = (void *)ReadString(reply, &infoSize);
         if (infoSize != (NETWORK_ID_BUF_LEN - 1)) {
-            LNN_LOGE(LNN_EVENT, "invalid meta node id length=%d", infoSize);
+            LNN_LOGE(LNN_EVENT, "invalid meta node id length=%{public}d", infoSize);
             return SOFTBUS_ERR;
         }
     }
@@ -161,7 +161,7 @@ static int32_t OnStartPublishLnn(Reply *info, IpcIo *reply, uint32_t infoSize)
 static int32_t ClientBusCenterResultCb(Reply *info, int ret, IpcIo *reply)
 {
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "ClientBusCenterResultCb failed. ret=%d", ret);
+        LNN_LOGE(LNN_EVENT, "ClientBusCenterResultCb failed. ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     uint32_t infoSize;
@@ -199,7 +199,7 @@ int32_t BusCenterServerProxyInit(void)
 
         int32_t ret = iUnknown->QueryInterface(iUnknown, CLIENT_PROXY_VER, (void **)&g_serverProxy);
         if (ret != EC_SUCCESS || g_serverProxy == NULL) {
-            LNN_LOGE(LNN_INIT, "QueryInterface failed=%d", ret);
+            LNN_LOGE(LNN_INIT, "QueryInterface failed=%{public}d", ret);
             SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
             continue;
         }
@@ -234,14 +234,14 @@ int32_t ServerIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_GET_ALL_ONLINE_NODE_INFO, &request, &reply,
         ClientBusCenterResultCb);
     if (ans != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "invoke failed=%d", ans);
+        LNN_LOGE(LNN_EVENT, "invoke failed=%{public}d", ans);
         return SOFTBUS_ERR;
     }
     uint32_t maxConnCount = UINT32_MAX;
     (void)SoftbusGetConfig(SOFTBUS_INT_MAX_LNN_CONNECTION_CNT, (unsigned char *)&maxConnCount, sizeof(maxConnCount));
     *infoNum = reply.arg1;
     if (*infoNum < 0 || (uint32_t)(*infoNum) > maxConnCount) {
-        LNN_LOGE(LNN_EVENT, "invoke failed=%d", *infoNum);
+        LNN_LOGE(LNN_EVENT, "invoke failed=%{public}d", *infoNum);
         return SOFTBUS_ERR;
     }
     int32_t infoSize = (*infoNum) * (int32_t)infoTypeLen;
@@ -287,7 +287,7 @@ int32_t ServerIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t in
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_GET_LOCAL_DEVICE_INFO, &request, &reply,
         ClientBusCenterResultCb);
     if (ans != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "invoke failed=%d", ans);
+        LNN_LOGE(LNN_EVENT, "invoke failed=%{public}d", ans);
         return SOFTBUS_ERR;
     }
     if (reply.data == NULL) {
@@ -325,12 +325,12 @@ int32_t ServerIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int 
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_GET_NODE_KEY_INFO, &request, &reply,
         ClientBusCenterResultCb);
     if (ans != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "GetNodeKeyInfo invoke failed=%d", ans);
+        LNN_LOGE(LNN_EVENT, "GetNodeKeyInfo invoke failed=%{public}d", ans);
         return SOFTBUS_ERR;
     }
     if (reply.data == NULL || reply.dataLen > len) {
         LNN_LOGE(LNN_EVENT,
-            "GetNodeKeyInfo read retBuf failed, inlen=%d, reply.dataLen=%d", len, reply.dataLen);
+            "GetNodeKeyInfo read retBuf failed, inlen=%{public}d, reply.dataLen=%{public}d", len, reply.dataLen);
         return SOFTBUS_ERR;
     }
     if (memcpy_s(buf, len, reply.data, reply.dataLen) != EOK) {
@@ -359,7 +359,7 @@ int32_t ServerIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkI
     WriteInt16(&request, dataChangeFlag);
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_SET_NODE_DATA_CHANGE_FLAG, &request, NULL, NULL);
     if (ans != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "invoke failed=%d", ans);
+        LNN_LOGE(LNN_EVENT, "invoke failed=%{public}d", ans);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -385,7 +385,7 @@ int ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen)
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_JOIN_LNN, &request, NULL, NULL);
     if (ans != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "join Lnn invoke failed=%d", ans);
+        LNN_LOGE(LNN_EVENT, "join Lnn invoke failed=%{public}d", ans);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -410,7 +410,7 @@ int ServerIpcLeaveLNN(const char *pkgName, const char *networkId)
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_LEAVE_LNN, &request, NULL, NULL);
     if (ans != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "leave Lnn invoke failed=%d", ans);
+        LNN_LOGE(LNN_EVENT, "leave Lnn invoke failed=%{public}d", ans);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -438,7 +438,7 @@ int32_t ServerIpcStartTimeSync(const char *pkgName, const char *targetNetworkId,
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_START_TIME_SYNC, &request, NULL, NULL);
     if (ans != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "StartTimeSync invoke failed=%d", ans);
+        LNN_LOGE(LNN_EVENT, "StartTimeSync invoke failed=%{public}d", ans);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -464,7 +464,7 @@ int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_STOP_TIME_SYNC, &request, NULL, NULL);
     if (ans != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "StopTimeSync invoke failed=%d", ans);
+        LNN_LOGE(LNN_EVENT, "StopTimeSync invoke failed=%{public}d", ans);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -500,7 +500,7 @@ int32_t ServerIpcPublishLNN(const char *pkgName, const PublishInfo *info)
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_PUBLISH_LNN, &request, &reply, ClientBusCenterResultCb);
     if (ans != SOFTBUS_OK || reply.retCode != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "publish Lnn invoke failed[%d, %d].", ans, reply.retCode);
+        LNN_LOGE(LNN_EVENT, "publish Lnn invoke failed. ans=%{public}d, retCode=%{public}d", ans, reply.retCode);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -526,7 +526,7 @@ int32_t ServerIpcStopPublishLNN(const char *pkgName, int32_t publishId)
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_STOP_PUBLISH_LNN, &request, NULL, NULL);
     if (ans != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "ServerIpcStopPublishLNN invoke failed=%d", ans);
+        LNN_LOGE(LNN_EVENT, "ServerIpcStopPublishLNN invoke failed. ans=%{public}d", ans);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -563,7 +563,7 @@ int32_t ServerIpcRefreshLNN(const char *pkgName, const SubscribeInfo *info)
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_REFRESH_LNN, &request, &reply, ClientBusCenterResultCb);
     if (ans != SOFTBUS_OK || reply.retCode != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "refresh Lnn invoke failed[%d, %d].", ans, reply.retCode);
+        LNN_LOGE(LNN_EVENT, "refresh Lnn invoke failed. ans=%{public}d, retCode=%{public}d", ans, reply.retCode);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -589,7 +589,7 @@ int32_t ServerIpcStopRefreshLNN(const char *pkgName, int32_t refreshId)
     /* asynchronous invocation */
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_STOP_REFRESH_LNN, &request, NULL, NULL);
     if (ans != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "invoke failed=%d", ans);
+        LNN_LOGE(LNN_EVENT, "invoke failed=%{public}d", ans);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -616,8 +616,7 @@ int32_t ServerIpcActiveMetaNode(const char *pkgName, const MetaNodeConfigInfo *i
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_ACTIVE_META_NODE, &request, &reply,
         ClientBusCenterResultCb);
     if (ans != SOFTBUS_OK || reply.retCode != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "invoke failed[%d, %d]",
-            ans, reply.retCode);
+        LNN_LOGE(LNN_EVENT, "invoke failed. ans=%{public}d, retCode=%{public}d", ans, reply.retCode);
         return SOFTBUS_ERR;
     }
     if (reply.data == NULL) {
@@ -649,7 +648,7 @@ int32_t ServerIpcDeactiveMetaNode(const char *pkgName, const char *metaNodeId)
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_DEACTIVE_META_NODE, &request,
         &reply, ClientBusCenterResultCb);
     if (ans != SOFTBUS_OK || reply.retCode != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "invoke failed[%d, %d]", ans, reply.retCode);
+        LNN_LOGE(LNN_EVENT, "invoke failed. ans=%{public}d, retCode=%{public}d", ans, reply.retCode);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -673,7 +672,7 @@ int32_t ServerIpcGetAllMetaNodeInfo(const char *pkgName, MetaNodeInfo *infos, in
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_GET_ALL_META_NODE_INFO, &request, &reply,
         ClientBusCenterResultCb);
     if (ans != SOFTBUS_OK || reply.retCode != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "invoke failed[%d, %d]", ans, reply.retCode);
+        LNN_LOGE(LNN_EVENT, "invoke failed. ans=%{public}d, retCode=%{public}d", ans, reply.retCode);
         return SOFTBUS_ERR;
     }
     if (reply.arg1 > 0) {
@@ -719,7 +718,7 @@ int32_t ServerIpcShiftLNNGear(const char *pkgName, const char *callerId, const c
     int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_SHIFT_LNN_GEAR, &request, &reply,
         ClientBusCenterResultCb);
     if (ans != SOFTBUS_OK || reply.retCode != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "invoke failed[%d, %d]", ans, reply.retCode);
+        LNN_LOGE(LNN_EVENT, "invoke failed. ans=%{public}d, retCode=%{public}d", ans, reply.retCode);
         return ans != SOFTBUS_OK ? SOFTBUS_ERR : reply.retCode;
     }
     return SOFTBUS_OK;

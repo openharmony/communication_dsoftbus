@@ -55,7 +55,6 @@
 #include "wifi_direct_ip_manager.h"
 #include "wifi_direct_ipv4_info.h"
 #include "wifi_direct_types.h"
-#include "negotiate_state.h"
 #include "negotiate_message.h"
 #include "wifi_direct_role_negotiator.h"
 #include "wifi_direct_role_option.h"
@@ -89,18 +88,6 @@ void WifiDirectTest::TearDown(void)
 {}
 
 /*
-* @tc.name: WifiDirectCommandManager
-* @tc.desc: test TcpGetConnNum
-* @tc.type: FUNC
-* @tc.require:wifi_direct\wifi_direct_command_manager.h
-*/
-HWTEST_F(WifiDirectTest, WifiDirectCommandManager, TestSize.Level1)
-{
-    int32_t ret = WifiDirectCommandManagerInit();
-    EXPECT_EQ(ret, SOFTBUS_OK);
-};
-
-/*
 * @tc.name: WifiDirectInitiator
 * @tc.desc: test WifiDirectInitiator
 * @tc.type: FUNC
@@ -109,8 +96,6 @@ HWTEST_F(WifiDirectTest, WifiDirectCommandManager, TestSize.Level1)
 HWTEST_F(WifiDirectTest, WifiDirectInitiator, TestSize.Level1)
 {
     int32_t ret = WifiDirectInit();
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-    ret = WifiDirectCommandManagerInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = WifiDirectWorkQueueInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -134,38 +119,6 @@ HWTEST_F(WifiDirectTest, WifiDirectInitiator, TestSize.Level1)
 };
 
 /*
-* @tc.name: testWifiDirectIpManager
-* @tc.desc: test applyIp
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(WifiDirectTest, WifiDirectIpManager, TestSize.Level1)
-{
-    struct WifiDirectIpManager *self = GetWifiDirectIpManager();
-    struct WifiDirectIpv4Info *remoteArray = (struct WifiDirectIpv4Info*)SoftBusCalloc(sizeof(*remoteArray));
-    struct WifiDirectIpv4Info *local = (struct WifiDirectIpv4Info*)SoftBusCalloc(sizeof(*local));
-    struct WifiDirectIpv4Info *remote = (struct WifiDirectIpv4Info*)SoftBusCalloc(sizeof(*remote));
-    int32_t remoteArraySize = 32;
-    int32_t ret = self->applyIp(remoteArray, remoteArraySize, local, remote);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    const char *interface = "interface";
-    const char *macAddress = "00:1A:2B:3C:4D:5E";
-    ret = self->configIp(interface, local, remote, macAddress);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-    const char *remoteMac = " 213213";
-    const char *interface1 = "1,2,3";
-    const char *remoteMac1 = "00:1A:2B:3C:4D:5E";
-    ret = self->configIp(interface1, local, remote, remoteMac1);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-    self->releaseIp(interface, local, remote, remoteMac);
-    self->cleanAllIps(interface);
-    SoftBusFree(remoteArray);
-    SoftBusFree(local);
-    SoftBusFree(remote);
-};
-
-/*
 * @tc.name: testWifiDirectManager
 * @tc.desc: test getRequestId
 * @tc.type: FUNC
@@ -174,7 +127,6 @@ HWTEST_F(WifiDirectTest, WifiDirectIpManager, TestSize.Level1)
 HWTEST_F(WifiDirectTest, WifiDirectManager001, TestSize.Level1)
 {
     struct WifiDirectManager *self = GetWifiDirectManager();
-
     int32_t ret = self->getRequestId();
     EXPECT_EQ(ret, SOFTBUS_OK);
 };
@@ -189,9 +141,7 @@ HWTEST_F(WifiDirectTest, WifiDirectManager002, TestSize.Level1)
 {
     struct WifiDirectManager *self = GetWifiDirectManager();
     struct WifiDirectStatusListener *listener = (struct WifiDirectStatusListener*)SoftBusCalloc(sizeof(*listener));
-
     self->registerStatusListener(listener);
-
     const char *ipString = "192.168.0.1";
     char uuid[] = "b5f3c3ce-08b8-4c66-9a71-0b4641d9c769";
     int32_t uuidSize = 36;
@@ -210,7 +160,6 @@ HWTEST_F(WifiDirectTest, WifiDirectManager002, TestSize.Level1)
 HWTEST_F(WifiDirectTest, WifiDirectManager003, TestSize.Level1)
 {
     struct WifiDirectManager *self = GetWifiDirectManager();
-
     const char *remoteMac = "00:1A:2B:3C:4D:5E";
     bool status = self->isDeviceOnline(remoteMac);
     EXPECT_EQ(status, false);
@@ -225,7 +174,6 @@ HWTEST_F(WifiDirectTest, WifiDirectManager003, TestSize.Level1)
 HWTEST_F(WifiDirectTest, WifiDirectManager004, TestSize.Level1)
 {
     struct WifiDirectManager *self = GetWifiDirectManager();
-
     const char *remoteIp = "192.168.0.1";
     char localIp[] = "192.168.1.1";
     int32_t localIpSize = 32;
@@ -242,11 +190,9 @@ HWTEST_F(WifiDirectTest, WifiDirectManager004, TestSize.Level1)
 HWTEST_F(WifiDirectTest, WifiDirectManager005, TestSize.Level1)
 {
     struct WifiDirectManager *self = GetWifiDirectManager();
-
     char localIp[] = "192.168.1.1";
     char uuid[] = "b5f3c3ce-08b8-4c66-9ff1-0b4641d9c769";
     int32_t localIpSize = 32;
-
     int32_t ret = self->getLocalIpByUuid(uuid, localIp, localIpSize);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 };
@@ -265,15 +211,14 @@ HWTEST_F(WifiDirectTest, WifiDirectNegotiator001, TestSize.Level1)
 
 /*
 * @tc.name: testWifiDirectNegotiator
-* @tc.desc: test processNewCommand
+* @tc.desc: test processNextCommand
 * @tc.type: FUNC
 * @tc.require:
 */
 HWTEST_F(WifiDirectTest, WifiDirectNegotiator002, TestSize.Level1)
 {
     struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
-
-    int32_t ret = self->processNewCommand();
+    int32_t ret = self->processNextCommand();
     EXPECT_EQ(ret, SOFTBUS_OK);
 };
 
@@ -286,40 +231,17 @@ HWTEST_F(WifiDirectTest, WifiDirectNegotiator002, TestSize.Level1)
 HWTEST_F(WifiDirectTest, WifiDirectNegotiator003, TestSize.Level1)
 {
     struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
-
     int32_t ret = self->retryCurrentCommand();
     EXPECT_EQ(ret, SOFTBUS_ERR);
 };
 
 /*
-* @tc.name: testWifiDirectNegotiator
-* @tc.desc: test startTimer
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(WifiDirectTest, WifiDirectNegotiator004, TestSize.Level1)
-{
-    struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
-
-    int64_t tmieoutMs = 100;
-    int32_t ret = self->startTimer(tmieoutMs, NEGO_TIMEOUT_EVENT_WAITING_CONNECT_RESPONSE);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    self->stopTimer();
-
-    int32_t reason = 0;
-    self->handleFailure(reason);
-
-    self->handleFailureWithoutChangeState(reason);
-};
-
-/*
-* @tc.name: testWifiDirectRoleNegotiator
+* @tc.name: WifiDirectNegotiator004
 * @tc.desc: test WifiDirectRoleNegotiator
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(WifiDirectTest, WifiDirectRoleNegotiator, TestSize.Level1)
+HWTEST_F(WifiDirectTest, WifiDirectNegotiator004, TestSize.Level1)
 {
     enum WifiDirectRole myRole = WIFI_DIRECT_ROLE_AUTO;
     enum WifiDirectRole peerRole = WIFI_DIRECT_ROLE_GC;
@@ -327,9 +249,7 @@ HWTEST_F(WifiDirectTest, WifiDirectRoleNegotiator, TestSize.Level1)
     const char *localGoMac = "00:0a:95:9d:68:16";
     const char *remoteGoMac = "08:00:27:ff:ff:ff";
     struct WifiDirectRoleNegotiator *self = GetRoleNegotiator();
-
     int state = self->getFinalRoleWithPeerExpectedRole(myRole, peerRole, expectedRole, localGoMac, remoteGoMac);
-    
     EXPECT_EQ(state, SOFTBUS_INVALID_PARAM);
 };
 }

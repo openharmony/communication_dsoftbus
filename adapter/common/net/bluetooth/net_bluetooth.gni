@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,15 +21,17 @@ adapter_ble_inc = [
   "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/adapter/include",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/adapter/ble/include",
+  "$dsoftbus_root_path/core/common/dfx/hidumper_adapter/include",
 ]
 adapter_ble_src = [
-  "$dsoftbus_root_path/adapter/common/net/bluetooth/ble/softbus_adapter_ble_gatt.c",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/ble/softbus_adapter_ble_gatt_client.c",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/ble/softbus_adapter_ble_gatt_server.c",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/common/adapter_bt_utils.c",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/common/softbus_adapter_bt_common.c",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/adapter/ble/src/softbus_ble_utils.c",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/manager/src/softbus_broadcast_mgr.c",
+  "$dsoftbus_root_path/core/common/dfx/hidumper_adapter/softbus_hidumper_bc_mgr.c",
+  "$dsoftbus_root_path/core/common/dfx/hidumper_adapter/softbus_hidumper.c",
 ]
 
 if (dsoftbus_feature_ex_kits) {

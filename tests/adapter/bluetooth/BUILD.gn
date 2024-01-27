@@ -45,16 +45,6 @@ if (!defined(ohos_lite)) {
     bt_test_external_deps += [ "bluetooth:btframework" ]
   }
 
-  ohos_unittest("AdapterBleGattTest") {
-    module_out_path = module_output_path
-    sources = bt_test_sources
-    sources += [ "softbus_adapter_ble_gatt_test.cpp" ]
-
-    include_dirs = bt_test_inc
-    deps = bt_test_deps
-    external_deps = bt_test_external_deps
-  }
-
   ohos_unittest("AdapterBleGattServerTest") {
     module_out_path = module_output_path
     sources = bt_test_sources
@@ -103,7 +93,6 @@ if (!defined(ohos_lite)) {
       deps += [
         # ":AdapterBleGattClientTest",
         # ":AdapterBleGattServerTest",
-        # ":AdapterBleGattTest",
         # ":AdapterBtCommonTest",
         # ":AdapterBtUtilsTest",
       ]

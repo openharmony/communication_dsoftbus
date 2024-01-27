@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-defines = []
 import("../../../core/common/dfx/dsoftbus_dfx.gni")
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
@@ -31,16 +30,19 @@ if (defined(ohos_lite)) {
         "dsoftbus_other_test.cpp",
         "softbus_adapter_range_test.cpp",
         "softbus_socket_test.cpp",
-        "softbus_thread_test.cpp",
       ]
       include_dirs = [
         "$dsoftbus_root_path/adapter/common/include",
         "$dsoftbus_root_path/core/common/include/",
+        "$dsoftbus_root_path/core/common/dfx/interface/include",
         "$dsoftbus_root_path/interfaces/kits/common",
+        "$hilog_lite_include_path",
         "//third_party/bounds_checking_function/include",
       ]
       deps = [
-        "../../../adapter:softbus_adapter",
+        "$dsoftbus_root_path/adapter:softbus_adapter",
+        "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
+        "$hilog_lite_deps_path",
         "//third_party/bounds_checking_function:libsec_static",
       ]
     }

@@ -66,26 +66,71 @@ int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrateg
 {
     return HeartBeatStrategyInterface()->LnnStartHbByTypeAndStrategy(hbType, strategyType, isRelay);
 }
+
 int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType)
 {
     return HeartBeatStrategyInterface()->LnnRequestLeaveSpecific(networkId, addrType);
 }
+
 int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
     const AuthVerifyCallback *callback, bool isFastAuth)
 {
     return HeartBeatStrategyInterface()->AuthStartVerify(connInfo, requestId, callback, isFastAuth);
 }
+
 AuthVerifyCallback *LnnGetReAuthVerifyCallback(void)
 {
     return HeartBeatStrategyInterface()->LnnGetReAuthVerifyCallback();
 }
+
 uint32_t AuthGenRequestId(void)
 {
     return HeartBeatStrategyInterface()->AuthGenRequestId();
 }
+
 int32_t LnnSetGearModeBySpecificType(const char *callerId, const GearMode *mode, LnnHeartbeatType type)
 {
     return HeartBeatStrategyInterface()->LnnSetGearModeBySpecificType(callerId, mode, type);
+}
+
+int32_t LnnEnableHeartbeatByType(LnnHeartbeatType type, bool isEnable)
+{
+    return HeartBeatStrategyInterface()->LnnEnableHeartbeatByType(type, isEnable);
+}
+
+int32_t LnnStopHeartbeatByType(LnnHeartbeatType type)
+{
+    return HeartBeatStrategyInterface()->LnnStopHeartbeatByType(type);
+}
+
+int32_t LnnHbStrategyInit(void)
+{
+    return HeartBeatStrategyInterface()->LnnHbStrategyInit();
+}
+
+int32_t LnnUpdateSendInfoStrategy(LnnHeartbeatUpdateInfoType type)
+{
+    return HeartBeatStrategyInterface()->LnnUpdateSendInfoStrategy(type);
+}
+
+int32_t LnnStopScreenChangeOfflineTiming(const char *networkId, ConnectionAddrType addrType)
+{
+    return HeartBeatStrategyInterface()->LnnStopScreenChangeOfflineTiming(networkId, addrType);
+}
+
+int32_t LnnSetMediumParamBySpecificType(const LnnHeartbeatMediumParam *param)
+{
+    return HeartBeatStrategyInterface()->LnnSetMediumParamBySpecificType(param);
+}
+
+int32_t LnnStartScreenChangeOfflineTiming(const char *networkId, ConnectionAddrType addrType)
+{
+    return HeartBeatStrategyInterface()->LnnStartScreenChangeOfflineTiming(networkId, addrType);
+}
+
+int32_t LnnStopHeartBeatAdvByTypeNow(LnnHeartbeatType registedHbType)
+{
+    return HeartBeatStrategyInterface()->LnnStopHeartBeatAdvByTypeNow(registedHbType);
 }
 }
 } // namespace OHOS

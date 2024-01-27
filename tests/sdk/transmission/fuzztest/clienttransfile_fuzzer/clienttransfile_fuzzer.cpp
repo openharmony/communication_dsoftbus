@@ -16,16 +16,12 @@
 #include "clienttransfile_fuzzer.h"
 
 #include <cstddef>
-#include <cstdint>
-#include <cstring>
 #include <securec.h>
 
 #include "client_trans_file.h"
-#include "softbus_utils.h"
-#include "softbus_def.h"
-#include "session.h"
 #include "client_trans_file_listener.h"
 #include "file_adapter.h"
+#include "softbus_def.h"
 
 namespace OHOS {
 

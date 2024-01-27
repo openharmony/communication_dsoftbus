@@ -197,7 +197,7 @@ static void OptString(const JsonObj *json, const char * const key,
         AUTH_LOGI(AUTH_FSM, "set default fail");
         return;
     }
-    AUTH_LOGI(AUTH_FSM, "(%s) prase fail, use default", key);
+    AUTH_LOGI(AUTH_FSM, "key prase fail, use default. key=%{public}s", key);
 }
 
 static void OptInt(const JsonObj *json, const char * const key, int *target, int defaultValue)
@@ -205,7 +205,7 @@ static void OptInt(const JsonObj *json, const char * const key, int *target, int
     if (JSON_GetInt32FromOject(json, key, target)) {
         return;
     }
-    AUTH_LOGI(AUTH_FSM, "(%s) prase fail, use default", key);
+    AUTH_LOGI(AUTH_FSM, "key prase fail, use default. key=%{public}s", key);
     *target = defaultValue;
 }
 
@@ -214,7 +214,7 @@ static void OptInt64(const JsonObj *json, const char * const key, int64_t *targe
     if (JSON_GetInt64FromOject(json, key, target)) {
         return;
     }
-    AUTH_LOGI(AUTH_FSM, "(%s) prase fail, use default", key);
+    AUTH_LOGI(AUTH_FSM, "key prase fail, use default. key=%{public}s", key);
     *target = defaultValue;
 }
 
@@ -223,7 +223,7 @@ static void OptBool(const JsonObj *json, const char * const key, bool *target, b
     if (JSON_GetBoolFromOject(json, key, target)) {
         return;
     }
-    AUTH_LOGI(AUTH_FSM, "(%s) prase fail, use default", key);
+    AUTH_LOGI(AUTH_FSM, "key prase fail, use default. key=%{public}s", key);
     *target = defaultValue;
 }
 
@@ -238,7 +238,7 @@ static int32_t PackFastAuthValue(JsonObj *obj, AuthDeviceKeyInfo *deviceCommKey)
     aesParam.keyLen = deviceCommKey->keyLen;
     int32_t ret = LnnEncryptAesGcm(&aesParam, (int32_t)deviceCommKey->keyIndex, &data, &dataLen);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "SoftBusEncryptDataWithSeq fail=%d", ret);
+        AUTH_LOGE(AUTH_FSM, "SoftBusEncryptDataWithSeq fail=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     if (data == NULL || dataLen == 0) {
@@ -251,7 +251,7 @@ static int32_t PackFastAuthValue(JsonObj *obj, AuthDeviceKeyInfo *deviceCommKey)
         SoftBusFree(data);
         return SOFTBUS_ERR;
     }
-    AUTH_LOGD(AUTH_FSM, "pack fastAuthTag=%s", encryptFastAuth);
+    AUTH_LOGD(AUTH_FSM, "pack fastAuthTag=%{public}s", encryptFastAuth);
     JSON_AddStringToObject(obj, FAST_AUTH, encryptFastAuth);
     SoftBusFree(data);
     return SOFTBUS_OK;
@@ -291,7 +291,7 @@ static bool GetUdidOrShortHash(const AuthSessionInfo *info, char *udidBuf, uint3
         }
         return (memcpy_s(udidBuf, bufLen, request.connInfo.info.bleInfo.deviceIdHash, UDID_SHORT_HASH_HEX_STR) == EOK);
     }
-    AUTH_LOGD(AUTH_FSM, "udid len=%d, connInfo type=%d", strlen(info->udid), info->connInfo.type);
+    AUTH_LOGD(AUTH_FSM, "udidLen=%{public}zu, connInfoType=%{public}d", strlen(info->udid), info->connInfo.type);
     return false;
 }
 
@@ -344,7 +344,7 @@ static int32_t GetFastAuthKey(const char *udidHash, AuthSessionInfo *info, AuthD
 
 static void PackFastAuth(JsonObj *obj, AuthSessionInfo *info, const NodeInfo *localNodeInfo)
 {
-    AUTH_LOGD(AUTH_FSM, "pack fastAuth, isServer=%d", info->isServer);
+    AUTH_LOGD(AUTH_FSM, "pack fastAuth, isServer=%{public}d", info->isServer);
     bool isNeedPack;
     if (!info->isServer || info->isSupportFastAuth) {
         isNeedPack = true;
@@ -365,7 +365,7 @@ static void PackFastAuth(JsonObj *obj, AuthSessionInfo *info, const NodeInfo *lo
         info->isSupportFastAuth = false;
         return;
     }
-    AUTH_LOGD(AUTH_FSM, "udidHashHexStr=%s", udidHashHexStr);
+    AUTH_LOGD(AUTH_FSM, "udidHashHexStr=%{public}s", udidHashHexStr);
     if (info->connInfo.type != AUTH_LINK_TYPE_ENHANCED_P2P &&
         !IsPotentialTrustedDevice(ID_TYPE_DEVID, (const char *)udidHashHexStr, false, false)) {
         AUTH_LOGI(AUTH_FSM, "not potential trusted realtion, bypass fastAuthProc");
@@ -403,7 +403,7 @@ static void ParseFastAuthValue(AuthSessionInfo *info, const char *encryptedFastA
     aesParam.keyLen = deviceKey->keyLen;
     int32_t ret = LnnDecryptAesGcm(&aesParam, &data, &dataLen);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "LnnDecryptAesGcm fail=%d, fastAuth not support", ret);
+        AUTH_LOGE(AUTH_FSM, "LnnDecryptAesGcm fail, fastAuth not support. ret=%{public}d", ret);
         return;
     }
     if (data == NULL || dataLen == 0) {
@@ -428,7 +428,7 @@ static void UnpackFastAuth(JsonObj *obj, AuthSessionInfo *info)
         AUTH_LOGI(AUTH_FSM, "old version or not support fastAuth");
         return;
     }
-    AUTH_LOGE(AUTH_FSM, "unpack fastAuthTag:%s", encryptedFastAuth);
+    AUTH_LOGE(AUTH_FSM, "unpack fastAuthTag=%{public}s", encryptedFastAuth);
     uint8_t udidHash[SHA_256_HASH_LEN] = {0};
     int ret = SoftBusGenerateStrHash((uint8_t *)info->udid, strlen(info->udid), udidHash);
     if (ret != SOFTBUS_OK) {
@@ -499,7 +499,7 @@ static bool VerifySessionInfoIdType(const AuthSessionInfo *info, JsonObj *obj, c
         }
         char *anonyNetworkId = NULL;
         Anonymize(networkId, &anonyNetworkId);
-        AUTH_LOGI(AUTH_FSM, "exchangeIdType=%d, networkid=%s", info->idType, anonyNetworkId);
+        AUTH_LOGI(AUTH_FSM, "exchangeIdType=%{public}d, networkid=%{public}s", info->idType, anonyNetworkId);
         AnonymizeFree(anonyNetworkId);
     } else {
         if (!JSON_AddStringToObject(obj, DEVICE_ID_TAG, udid)) {
@@ -508,7 +508,7 @@ static bool VerifySessionInfoIdType(const AuthSessionInfo *info, JsonObj *obj, c
         }
         char *anonyUdid = NULL;
         Anonymize(udid, &anonyUdid);
-        AUTH_LOGI(AUTH_FSM, "exchangeIdType=%d, udid=%s", info->idType, anonyUdid);
+        AUTH_LOGI(AUTH_FSM, "exchangeIdType=%{public}d, udid=%{public}s", info->idType, anonyUdid);
         AnonymizeFree(anonyUdid);
     }
 
@@ -518,7 +518,7 @@ static bool VerifySessionInfoIdType(const AuthSessionInfo *info, JsonObj *obj, c
 
 static char *PackDeviceIdJson(const AuthSessionInfo *info)
 {
-    AUTH_LOGI(AUTH_FSM, "connType=%d", info->connInfo.type);
+    AUTH_LOGI(AUTH_FSM, "connType=%{public}d", info->connInfo.type);
     JsonObj *obj = JSON_CreateObject();
     if (obj == NULL) {
         return NULL;
@@ -583,18 +583,18 @@ static bool UnpackWifiSinglePassInfo(JsonObj *obj, AuthSessionInfo *info)
     SocketAddr socketAddr;
     int32_t rc = SoftBusSocketGetPeerName(socketFd, (SoftBusSockAddr *)&addr);
     if (rc != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "fd=%d, GetPerrName rc=%d", socketFd, rc);
+        AUTH_LOGE(AUTH_FSM, "GetPerrName fd=%{public}d, rc=%{public}d", socketFd, rc);
         return true;
     }
     (void)memset_s(&socketAddr, sizeof(socketAddr), 0, sizeof(socketAddr));
     if (SoftBusInetNtoP(SOFTBUS_AF_INET, (void *)&addr.sinAddr, socketAddr.addr, sizeof(socketAddr.addr)) == NULL) {
-        AUTH_LOGE(AUTH_FSM, "fd=%d, GetPerrName rc=%d", socketFd, rc);
+        AUTH_LOGE(AUTH_FSM, "GetPerrName fd=%{public}d, rc=%{public}d", socketFd, rc);
         return true;
     }
     uint8_t hash[SHA_256_HASH_LEN] = {0};
     rc = SoftBusGenerateStrHash((const unsigned char *)socketAddr.addr, strlen(socketAddr.addr), hash);
     if (rc != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "generate hash failed rc=%d", rc);
+        AUTH_LOGE(AUTH_FSM, "generate hash failed rc=%{public}d", rc);
         return true;
     }
     char socketIpHash[SHA_256_HEX_HASH_LEN] = { 0 };
@@ -641,14 +641,36 @@ static void SetCompressFlag(const char *compressCapa, bool *sessionSupportFlag)
     }
 }
 
-static int32_t SetExchangeIdTypeAndValve(JsonObj *obj, AuthSessionInfo *info)
+static int32_t VerifyExchangeIdTypeAndInfo(AuthSessionInfo *info, int32_t idType, char *anonyUdid)
 {
-    int32_t idType = -1;
     char peerUdid[UDID_BUF_LEN] = {0};
+
+    if (idType == EXCHANGE_NETWORKID) {
+        if (GetPeerUdidByNetworkId(info->udid, peerUdid) != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_FSM, "get peer udid fail, peer networkId=%s", anonyUdid);
+            info->idType = EXCHANGE_FAIL;
+        } else {
+            if (memcpy_s(info->udid, UDID_BUF_LEN, peerUdid, UDID_BUF_LEN) != EOK) {
+                AUTH_LOGE(AUTH_FSM, "copy peer udid fail");
+                info->idType = EXCHANGE_FAIL;
+                return SOFTBUS_MEM_ERR;
+            }
+            AUTH_LOGE(AUTH_FSM, "get peer udid success, peer udid=%s", anonyUdid);
+            info->idType = EXCHANGE_NETWORKID;
+        }
+    }
+    AUTH_LOGI(AUTH_FSM, "idType verify and get info succ.");
+    return SOFTBUS_OK;
+}
+
+static int32_t SetExchangeIdTypeAndValue(JsonObj *obj, AuthSessionInfo *info)
+{
     if (obj == NULL || info == NULL) {
         AUTH_LOGE(AUTH_FSM, "param invalid");
         return SOFTBUS_INVALID_PARAM;
     }
+
+    int32_t idType = -1;
     if (!JSON_GetInt32FromOject(obj, EXCHANGE_ID_TYPE, &idType)) {
         AUTH_LOGI(AUTH_FSM, "parse idType failed, ignore");
         info->idType = EXCHANHE_UDID;
@@ -656,26 +678,19 @@ static int32_t SetExchangeIdTypeAndValve(JsonObj *obj, AuthSessionInfo *info)
     }
     char *anonyUdid = NULL;
     Anonymize(info->udid, &anonyUdid);
-    AUTH_LOGI(AUTH_FSM, "old idType=%d exchangeIdType=%d deviceId=%s", info->idType, idType, anonyUdid);
+    AUTH_LOGI(AUTH_FSM,
+        "oldIdType=%{public}d, exchangeIdType=%{public}d, deviceId=%{public}s", info->idType, idType, anonyUdid);
     if (idType == EXCHANHE_UDID) {
         info->idType = EXCHANHE_UDID;
         AnonymizeFree(anonyUdid);
         return SOFTBUS_OK;
     }
     if (info->isServer) {
-        if (idType == EXCHANGE_NETWORKID) {
-            if (GetPeerUdidByNetworkId(info->udid, peerUdid) != SOFTBUS_OK) {
-                info->idType = EXCHANGE_FAIL;
-            } else {
-                if (memcpy_s(info->udid, UDID_BUF_LEN, peerUdid, UDID_BUF_LEN) != EOK) {
-                    AUTH_LOGE(AUTH_FSM, "copy peer udid fail");
-                    info->idType = EXCHANGE_FAIL;
-                    AnonymizeFree(anonyUdid);
-                    return SOFTBUS_MEM_ERR;
-                }
-                info->idType = EXCHANGE_NETWORKID;
-            }
+        if (VerifyExchangeIdTypeAndInfo(info, idType, anonyUdid) != SOFTBUS_OK) {
+            AnonymizeFree(anonyUdid);
+            return SOFTBUS_ERR;
         }
+        AUTH_LOGI(AUTH_FSM, "isServer is true in authSessionInfo.");
         AnonymizeFree(anonyUdid);
         return SOFTBUS_OK;
     }
@@ -683,20 +698,9 @@ static int32_t SetExchangeIdTypeAndValve(JsonObj *obj, AuthSessionInfo *info)
         if (idType == EXCHANGE_FAIL) {
             info->idType = EXCHANGE_FAIL;
         }
-        if (idType == EXCHANGE_NETWORKID) {
-            if (GetPeerUdidByNetworkId(info->udid, peerUdid) != SOFTBUS_OK) {
-                AUTH_LOGE(AUTH_FSM, "get peer udid fail, peer networkId=%s", anonyUdid);
-                info->idType = EXCHANGE_FAIL;
-            } else {
-                if (memcpy_s(info->udid, UDID_BUF_LEN, peerUdid, UDID_BUF_LEN) != EOK) {
-                    AUTH_LOGE(AUTH_FSM, "copy peer udid fail");
-                    info->idType = EXCHANGE_FAIL;
-                    AnonymizeFree(anonyUdid);
-                    return SOFTBUS_MEM_ERR;
-                }
-                AUTH_LOGE(AUTH_FSM, "get peer udid success, peer udid=%s", anonyUdid);
-                info->idType = EXCHANGE_NETWORKID;
-            }
+        if (VerifyExchangeIdTypeAndInfo(info, idType, anonyUdid) != SOFTBUS_OK) {
+            AnonymizeFree(anonyUdid);
+            return SOFTBUS_ERR;
         }
     }
     AnonymizeFree(anonyUdid);
@@ -786,7 +790,7 @@ static void GetAndSetLocalUnifiedName(JsonObj *json)
         if (LnnSetLocalStrInfo(STRING_KEY_DEV_UNIFIED_NAME, unified) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_FSM, "set device unifiedDefaultName fail");
         }
-        AUTH_LOGI(AUTH_FSM, "unifed length is not zero, unified: %s", unified);
+        AUTH_LOGI(AUTH_FSM, "unifed length is not zero, unified=%{public}s", unified);
     }
     (void)JSON_AddStringToObject(json, UNIFIED_DEVICE_NAME, unified);
 }
@@ -822,7 +826,7 @@ static void PackCommonFastAuth(JsonObj *json, const NodeInfo *info)
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "GetExtData fail");
     } else {
-        AUTH_LOGI(AUTH_FSM, "GetExtData=%s", extData);
+        AUTH_LOGI(AUTH_FSM, "GetExtData=%{public}s", extData);
         (void)JSON_AddStringToObject(json, EXTDATA, extData);
     }
 }
@@ -970,6 +974,55 @@ static void UnpackCipherRpaInfo(const JsonObj *json, NodeInfo *info)
     AUTH_LOGI(AUTH_FSM, "unpack cipher and rpa info success!");
 }
 
+static int32_t PackCommonEx(JsonObj *json, const NodeInfo *info)
+{
+    bool isFalse = (
+        !JSON_AddStringToObject(json, VERSION_TYPE, info->versionType) ||
+        !JSON_AddInt32ToObject(json, CONN_CAP, info->netCapacity) ||
+        !JSON_AddInt32ToObject(json, AUTH_CAP, info->authCapacity) ||
+        !JSON_AddInt16ToObject(json, DATA_CHANGE_FLAG, info->dataChangeFlag) ||
+        !JSON_AddBoolToObject(json, IS_CHARGING, info->batteryInfo.isCharging) ||
+        !JSON_AddBoolToObject(json, BLE_P2P, info->isBleP2p) ||
+        !JSON_AddInt64ToObject(json, TRANSPORT_PROTOCOL, (int64_t)LnnGetSupportedProtocols(info)));
+    if (isFalse) {
+        AUTH_LOGE(AUTH_FSM, "JSON_AddStringToObject failed.");
+        return SOFTBUS_ERR;
+    }
+
+    char btMacUpper[BT_MAC_LEN] = {0};
+    if (StringToUpperCase(LnnGetBtMac(info), btMacUpper, BT_MAC_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "btMac to upperCase failed.");
+        if (memcpy_s(btMacUpper, BT_MAC_LEN, LnnGetBtMac(info), BT_MAC_LEN) != EOK) {
+            AUTH_LOGE(AUTH_FSM, "btMac cpy failed.");
+            return SOFTBUS_MEM_ERR;
+        }
+    }
+    isFalse = (
+        !JSON_AddStringToObject(json, PKG_VERSION, info->pkgVersion) ||
+        !JSON_AddInt64ToObject(json, WIFI_VERSION, info->wifiVersion) ||
+        !JSON_AddInt64ToObject(json, BLE_VERSION, info->bleVersion) ||
+        !JSON_AddStringToObject(json, BT_MAC, btMacUpper) ||
+        !JSON_AddStringToObject(json, BLE_MAC, info->connectInfo.bleMacAddr) ||
+        !JSON_AddInt32ToObject(json, REMAIN_POWER, info->batteryInfo.batteryLevel) ||
+        !JSON_AddBoolToObject(json, IS_CHARGING, info->batteryInfo.isCharging) ||
+        !JSON_AddBoolToObject(json, IS_SCREENON, info->isScreenOn) ||
+        !JSON_AddInt32ToObject(json, NODE_WEIGHT, info->masterWeight) ||
+        !JSON_AddInt64ToObject(json, ACCOUNT_ID, info->accountId) ||
+        !JSON_AddBoolToObject(json, DISTRIBUTED_SWITCH, true) ||
+        !JSON_AddInt64ToObject(json, BLE_TIMESTAMP, info->bleStartTimestamp) ||
+        !JSON_AddInt32ToObject(json, WIFI_BUFF_SIZE, info->wifiBuffSize) ||
+        !JSON_AddInt32ToObject(json, BR_BUFF_SIZE, info->brBuffSize) ||
+        !JSON_AddInt64ToObject(json, FEATURE, info->feature) ||
+        !JSON_AddInt64ToObject(json, CONN_SUB_FEATURE, info->connSubFeature) ||
+        !JSON_AddInt64ToObject(json, NEW_CONN_CAP, info->netCapacity));
+    if (isFalse) {
+        AUTH_LOGE(AUTH_FSM, "JSON_AddStringToObject failed.");
+        return SOFTBUS_ERR;
+    }
+    AUTH_LOGI(AUTH_FSM, "pack common succ.");
+    return SOFTBUS_OK;
+}
+
 static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion version, bool isMetaAuth)
 {
     if (version >= SOFTBUS_NEW_V1) {
@@ -990,52 +1043,18 @@ static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion ve
     if (PackCommonDevInfo(json, info, isMetaAuth) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
-    if (!JSON_AddStringToObject(json, VERSION_TYPE, info->versionType) ||
-        !JSON_AddInt32ToObject(json, CONN_CAP, info->netCapacity) ||
-        !JSON_AddInt32ToObject(json, AUTH_CAP, info->authCapacity) ||
-        !JSON_AddInt16ToObject(json, DATA_CHANGE_FLAG, info->dataChangeFlag) ||
-        !JSON_AddBoolToObject(json, IS_CHARGING, info->batteryInfo.isCharging) ||
-        !JSON_AddBoolToObject(json, BLE_P2P, info->isBleP2p) ||
-        !JSON_AddInt64ToObject(json, TRANSPORT_PROTOCOL, (int64_t)LnnGetSupportedProtocols(info))) {
-        AUTH_LOGE(AUTH_FSM, "JSON_AddStringToObject fail");
-        return SOFTBUS_ERR;
-    }
-    char btMacUpper[BT_MAC_LEN] = {0};
-    if (StringToUpperCase(LnnGetBtMac(info), btMacUpper, BT_MAC_LEN) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "btMac to upperCase fail");
-        if (memcpy_s(btMacUpper, BT_MAC_LEN, LnnGetBtMac(info), BT_MAC_LEN) != EOK) {
-            AUTH_LOGE(AUTH_FSM, "btMac cpy fail");
-            return SOFTBUS_ERR;
-        }
-    }
-    if (!JSON_AddStringToObject(json, PKG_VERSION, info->pkgVersion) ||
-        !JSON_AddInt64ToObject(json, WIFI_VERSION, info->wifiVersion) ||
-        !JSON_AddInt64ToObject(json, BLE_VERSION, info->bleVersion) ||
-        !JSON_AddStringToObject(json, BT_MAC, btMacUpper) ||
-        !JSON_AddStringToObject(json, BLE_MAC, info->connectInfo.bleMacAddr) ||
-        !JSON_AddInt32ToObject(json, REMAIN_POWER, info->batteryInfo.batteryLevel) ||
-        !JSON_AddBoolToObject(json, IS_CHARGING, info->batteryInfo.isCharging) ||
-        !JSON_AddBoolToObject(json, IS_SCREENON, info->isScreenOn) ||
-        !JSON_AddInt32ToObject(json, NODE_WEIGHT, info->masterWeight) ||
-        !JSON_AddInt64ToObject(json, ACCOUNT_ID, info->accountId) ||
-        !JSON_AddBoolToObject(json, DISTRIBUTED_SWITCH, true) ||
-        !JSON_AddInt64ToObject(json, BLE_TIMESTAMP, info->bleStartTimestamp) ||
-        !JSON_AddInt32ToObject(json, WIFI_BUFF_SIZE, info->wifiBuffSize) ||
-        !JSON_AddInt32ToObject(json, BR_BUFF_SIZE, info->brBuffSize) ||
-        !JSON_AddInt64ToObject(json, FEATURE, info->feature) ||
-        !JSON_AddInt64ToObject(json, CONN_SUB_FEATURE, info->connSubFeature) ||
-        !JSON_AddInt64ToObject(json, NEW_CONN_CAP, info->netCapacity)) {
-        AUTH_LOGE(AUTH_FSM, "JSON_AddStringToObject fail");
+    if (PackCommonEx(json, info) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "data pack failed.");
         return SOFTBUS_ERR;
     }
     PackCommonFastAuth(json, info);
     if (!PackCipherKeySyncMsg(json)) {
-        AUTH_LOGE(AUTH_FSM, "PackCipherKeySyncMsg fail");
+        AUTH_LOGE(AUTH_FSM, "PackCipherKeySyncMsg failed.");
     }
     PackCommP2pInfo(json, info);
 
     if (PackCipherRpaInfo(json, info) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "pack CipherRpaInfo of device key fail.");
+        AUTH_LOGE(AUTH_FSM, "pack CipherRpaInfo of device key failed.");
     }
     return SOFTBUS_OK;
 }
@@ -1080,9 +1099,11 @@ static void UnpackCommon(const JsonObj *json, NodeInfo *info, SoftBusVersion ver
             !JSON_GetInt32FromOject(json, MASTER_WEIGHT, &info->masterWeight)) {
             AUTH_LOGE(AUTH_FSM, "get master node info fail");
         }
-        AUTH_LOGE(AUTH_FSM, "get master weight=%d", info->masterWeight);
+        AUTH_LOGE(AUTH_FSM, "get master weight=%{public}d", info->masterWeight);
         if (!JSON_GetStringFromOject(json, NODE_ADDR, info->nodeAddress, sizeof(info->nodeAddress))) {
-            AUTH_LOGW(AUTH_FSM, "no node address packed. set to address %s", NODE_ADDR_LOOPBACK);
+            AUTH_LOGW(AUTH_FSM,
+                "no node address packed. set to address NODE_ADDR_LOOPBACK. NODE_ADDR_LOOPBACK=%{public}s",
+                NODE_ADDR_LOOPBACK);
             (void)strcpy_s(info->nodeAddress, sizeof(info->nodeAddress), NODE_ADDR_LOOPBACK);
         }
     }
@@ -1119,9 +1140,9 @@ static void UnpackCommon(const JsonObj *json, NodeInfo *info, SoftBusVersion ver
     OptInt(json, NODE_WEIGHT, &info->masterWeight, DEFAULT_NODE_WEIGHT);
 
     // IS_SUPPORT_TCP_HEARTBEAT
-    OptInt64(json, NEW_CONN_CAP, (int64_t *)&info->netCapacity, -1);
+    OptInt(json, NEW_CONN_CAP, (int32_t *)&info->netCapacity, -1);
     if (info->netCapacity == (uint32_t)-1) {
-        (void)JSON_GetInt64FromOject(json, CONN_CAP, (int64_t *)&info->netCapacity);
+        (void)JSON_GetInt32FromOject(json, CONN_CAP, (int32_t *)&info->netCapacity);
     }
     OptInt(json, WIFI_BUFF_SIZE, &info->wifiBuffSize, DEFAULT_WIFI_BUFF_SIZE);
     OptInt(json, BR_BUFF_SIZE, &info->wifiBuffSize, DEFAULT_BR_BUFF_SIZE);
@@ -1188,7 +1209,7 @@ static void AddDiscoveryType(JsonObj *json, const char *remoteUuid)
         AUTH_LOGE(AUTH_FSM, "disc Type calc fail");
         return;
     }
-    AUTH_LOGD(AUTH_FSM, "pack discType is:%s", discTypeStr);
+    AUTH_LOGD(AUTH_FSM, "discTypeStr=%{public}s", discTypeStr);
     JSON_AddStringToObject(json, DISCOVERY_TYPE, discTypeStr);
 }
 
@@ -1248,7 +1269,7 @@ static int32_t UnpackBt(const JsonObj *json, NodeInfo *info, SoftBusVersion vers
 
 static int32_t PackWiFi(JsonObj *json, const NodeInfo *info, SoftBusVersion version, bool isMetaAuth)
 {
-    AUTH_LOGD(AUTH_FSM, "devIp %d", strlen(info->connectInfo.deviceIp));
+    AUTH_LOGD(AUTH_FSM, "devIp=%{public}zu", strlen(info->connectInfo.deviceIp));
     if (!JSON_AddInt32ToObject(json, CODE, CODE_VERIFY_IP) || !JSON_AddInt32ToObject(json, BUS_MAX_VERSION, BUS_V2) ||
         !JSON_AddInt32ToObject(json, BUS_MIN_VERSION, BUS_V1) ||
         !JSON_AddInt32ToObject(json, AUTH_PORT, LnnGetAuthPort(info)) ||
@@ -1260,7 +1281,8 @@ static int32_t PackWiFi(JsonObj *json, const NodeInfo *info, SoftBusVersion vers
     }
     char offlineCode[BASE64_OFFLINE_CODE_LEN] = {0};
     size_t len = 0;
-    AUTH_LOGE(AUTH_FSM, "offlineCode %d, %d", strlen(offlineCode), sizeof(info->offlineCode));
+    AUTH_LOGE(AUTH_FSM, "offlineCodeLen=%{public}zu, offlineCodeSize=%{public}zu",
+        strlen(offlineCode), sizeof(info->offlineCode));
     int32_t ret = SoftBusBase64Encode((unsigned char*)offlineCode, BASE64_OFFLINE_CODE_LEN, &len,
         (unsigned char*)info->offlineCode, sizeof(info->offlineCode));
     if (ret != 0) {
@@ -1387,7 +1409,7 @@ static int32_t UnpackDeviceInfoBtV1(const JsonObj *json, NodeInfo *info)
 
 char *PackDeviceInfoMessage(int32_t linkType, SoftBusVersion version, bool isMetaAuth, const char *remoteUuid)
 {
-    AUTH_LOGI(AUTH_FSM, "connType=%d", linkType);
+    AUTH_LOGI(AUTH_FSM, "connType=%{public}d", linkType);
     const NodeInfo *info = LnnGetLocalNodeInfo();
     if (info == NULL) {
         AUTH_LOGE(AUTH_FSM, "local info is null");
@@ -1438,7 +1460,9 @@ static void UpdatePeerDeviceName(NodeInfo *peerNodeInfo)
         LnnGetDeviceDisplayName(peerNodeInfo->deviceInfo.nickName,
             peerNodeInfo->deviceInfo.unifiedDefaultName, deviceName, DEVICE_NAME_BUF_LEN);
     }
-    AUTH_LOGD(AUTH_FSM, "peer tmpDeviceName: %s, deviceName: %s, unifiedName: %s, unifiedDefaultName: %s, nickName: %s",
+    AUTH_LOGD(AUTH_FSM,
+        "peer tmpDeviceName=%{public}s, deviceName=%{public}s, unifiedName=%{public}s, "
+        "unifiedDefaultName=%{public}s, nickName=%{public}s",
         deviceName, peerNodeInfo->deviceInfo.deviceName, peerNodeInfo->deviceInfo.unifiedName,
         peerNodeInfo->deviceInfo.unifiedDefaultName, peerNodeInfo->deviceInfo.nickName);
     if (strlen(deviceName) != 0) {
@@ -1453,7 +1477,7 @@ int32_t UnpackDeviceInfoMessage(const DevInfoData *devInfo, NodeInfo *nodeInfo, 
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(devInfo != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "devInfo is NULL");
     AUTH_CHECK_AND_RETURN_RET_LOGE(nodeInfo != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "nodeInfo is NULL");
-    AUTH_LOGI(AUTH_FSM, "connType=%d", devInfo->linkType);
+    AUTH_LOGI(AUTH_FSM, "connType=%{public}d", devInfo->linkType);
     JsonObj *json = JSON_Parse(devInfo->msg, devInfo->len);
     if (json == NULL) {
         AUTH_LOGE(AUTH_FSM, "parse cjson fail");
@@ -1561,13 +1585,6 @@ static void DfxRecordLnnPostDeviceIdStart(int64_t authSeq)
     LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_DEVICE_ID_POST, extra);
 }
 
-static void DfxRecordLnnProcessDeviceIdStart(void)
-{
-    LnnEventExtra extra = { 0 };
-    LnnEventExtraInit(&extra);
-    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_DEVICE_ID_PROCESS, extra);
-}
-
 int32_t PostDeviceIdMessage(int64_t authSeq, const AuthSessionInfo *info)
 {
     DfxRecordLnnPostDeviceIdStart(authSeq);
@@ -1581,7 +1598,6 @@ int32_t PostDeviceIdMessage(int64_t authSeq, const AuthSessionInfo *info)
 
 int32_t ProcessDeviceIdMessage(AuthSessionInfo *info, const uint8_t *data, uint32_t len)
 {
-    DfxRecordLnnProcessDeviceIdStart();
     AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "info is NULL");
     AUTH_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "data is NULL");
     if ((info->connInfo.type != AUTH_LINK_TYPE_WIFI) && (len == DEVICE_ID_STR_LEN) && (info->isServer)) {
@@ -1615,14 +1631,6 @@ static void DfxRecordLnnPostDeviceInfoStart(int64_t authSeq)
     LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_DEVICE_INFO_POST, extra);
 }
 
-static void DfxRecordLnnProcessDeviceInfoStart(int64_t authSeq)
-{
-    LnnEventExtra extra = { 0 };
-    LnnEventExtraInit(&extra);
-    extra.authId = (int32_t)authSeq;
-    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_DEVICE_INFO_PROCESS, extra);
-}
-
 int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
 {
     DfxRecordLnnPostDeviceInfoStart(authSeq);
@@ -1636,14 +1644,14 @@ int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
     uint8_t *compressData = NULL;
     uint32_t compressLen = 0;
     if ((info->connInfo.type != AUTH_LINK_TYPE_WIFI) && info->isSupportCompress) {
-        AUTH_LOGI(AUTH_FSM, "before compress, datalen=%d", strlen(msg) + 1);
+        AUTH_LOGI(AUTH_FSM, "before compress, datalen=%{public}zu", strlen(msg) + 1);
         if (DataCompress((uint8_t *)msg, strlen(msg) + 1, &compressData, &compressLen) != SOFTBUS_OK) {
             compressFlag = FLAG_UNCOMPRESS_DEVICE_INFO;
         } else {
             compressFlag = FLAG_COMPRESS_DEVICE_INFO;
             AUTH_LOGI(AUTH_FSM, "deviceInfo compress finish");
         }
-        AUTH_LOGI(AUTH_FSM, "after compress, datalen=%u", compressLen);
+        AUTH_LOGI(AUTH_FSM, "after compress, datalen=%{public}u", compressLen);
     }
     uint8_t *inputData = NULL;
     uint32_t inputLen;
@@ -1688,7 +1696,6 @@ int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
 
 int32_t ProcessDeviceInfoMessage(int64_t authSeq, AuthSessionInfo *info, const uint8_t *data, uint32_t len)
 {
-    DfxRecordLnnProcessDeviceInfoStart(authSeq);
     AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "info is NULL");
     AUTH_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "data is NULL");
     uint8_t *msg = NULL;
@@ -1702,15 +1709,15 @@ int32_t ProcessDeviceInfoMessage(int64_t authSeq, AuthSessionInfo *info, const u
     uint8_t *decompressData = NULL;
     uint32_t decompressLen = 0;
     if ((info->connInfo.type != AUTH_LINK_TYPE_WIFI) && info->isSupportCompress) {
-        AUTH_LOGI(AUTH_FSM, "before decompress, msgSize=%u", msgSize);
+        AUTH_LOGI(AUTH_FSM, "before decompress, msgSize=%{public}u", msgSize);
         if (DataDecompress((uint8_t *)msg, msgSize, &decompressData, &decompressLen) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_FSM, "data decompress fail");
             SoftBusFree(msg);
             return SOFTBUS_ERR;
         } else {
-            AUTH_LOGI(AUTH_FSM, "deviceInfo deCompress finish, decompress=%d", decompressLen);
+            AUTH_LOGI(AUTH_FSM, "deviceInfo deCompress finish, decompress=%{public}d", decompressLen);
         }
-        AUTH_LOGI(AUTH_FSM, "after decompress, datalen=%d", decompressLen);
+        AUTH_LOGI(AUTH_FSM, "after decompress, datalen=%{public}d", decompressLen);
     }
     DevInfoData devInfo = {NULL, 0, info->connInfo.type, info->version};
     if ((decompressData != NULL) && (decompressLen != 0)) {
