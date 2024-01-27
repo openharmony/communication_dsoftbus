@@ -131,8 +131,6 @@ static int32_t CreateSessionConnNode(ListenerModule module, int fd, int32_t chan
     conn->timeout = 0;
     conn->listenMod = module;
     conn->authId = AUTH_INVALID_ID;
-    conn->appInfo.routeType = ((module == DIRECT_CHANNEL_SERVER_P2P) || (module >= DIRECT_CHANNEL_SERVER_HML_START &&
-        module <= DIRECT_CHANNEL_SERVER_HML_END)) ? WIFI_P2P : WIFI_STA;
     conn->appInfo.routeType = (module == DIRECT_CHANNEL_SERVER_P2P) ? WIFI_P2P : WIFI_STA;
     conn->appInfo.peerData.port = clientAddr->socketOption.port;
     if (LnnGetLocalStrInfo(STRING_KEY_UUID, conn->appInfo.myData.deviceId, sizeof(conn->appInfo.myData.deviceId)) !=
