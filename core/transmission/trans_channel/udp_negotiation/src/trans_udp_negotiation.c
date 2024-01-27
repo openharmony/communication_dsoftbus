@@ -772,7 +772,8 @@ static int32_t UdpOpenAuthConn(const char *peerUdid, uint32_t requestId, bool is
     (void)memset_s(&auth, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     AuthConnCallback cb = {0};
     int32_t ret = SOFTBUS_ERR;
-    if (linkType == LANE_HML) {
+    if (linkType == LANE_HML || linkType == LANE_P2P_REUSE) {
+        TRANS_LOGI(TRANS_CTRL, "get AuthConnInfo, linkType=%{public}d", linkType);
         ret = AuthGetP2pConnInfo(peerUdid, &auth, isMeta);
     }
     if (ret != SOFTBUS_OK) {
