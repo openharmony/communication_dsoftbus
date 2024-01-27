@@ -95,6 +95,28 @@ int32_t SoftBusServerStub::CheckChannelPermission(int32_t channelId, int32_t cha
     return SOFTBUS_OK;
 }
 
+int32_t SoftBusServerStub::CheckPidByChannelId(pid_t callingPid, int32_t channelId, int32_t channelType)
+{
+    AppInfo *appInfo = (AppInfo *)SoftBusMalloc(sizeof(AppInfo));
+    if (appInfo == NULL) {
+        COMM_LOGE(COMM_SVC, "malloc appInfo failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    int32_t ret = TransGetAppInfoByChanId(channelId, channelType, appInfo);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "get AppInfo by channelId failed!");
+        SoftBusFree(appInfo);
+        return ret == SOFTBUS_NOT_FIND ? SOFTBUS_OK : ret;
+    }
+    if (callingPid != appInfo->myData.pid) {
+        COMM_LOGE(COMM_SVC, "callingPid not match!");
+        SoftBusFree(appInfo);
+        return SOFTBUS_ERR;
+    }
+    SoftBusFree(appInfo);
+    return SOFTBUS_OK;
+}
+
 static inline int32_t CheckAndRecordAccessToken(const char* permission)
 {
     uint32_t tokenCaller = IPCSkeleton::GetCallingTokenID();
@@ -763,8 +785,9 @@ int32_t SoftBusServerStub::SendMessageInner(MessageParcel &data, MessageParcel &
         COMM_LOGE(COMM_SVC, "SendMessage message type failed!");
         return SOFTBUS_ERR;
     }
-    if (CheckChannelPermission(channelId, channelType) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "SendMessage permission check failed!");
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    if (CheckPidByChannelId(callingPid, channelId, channelType) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "pid permission check failed!");
         return SOFTBUS_PERMISSION_DENIED;
     }
 
