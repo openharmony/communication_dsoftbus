@@ -60,9 +60,10 @@ std::unique_ptr<char[]> StreamPacketizer::PacketizeStream()
     }
 
     TRANS_LOGI(TRANS_STREAM,
-        "streamPktHeader version=%d, subVersion=%d, extFlag=%d, streamType=%d, marker=%d, flag=%d, "
-        "streamId=%d (%x), timestamp=%u (%x), dataLen=%u (%x), seqNum=%d (%x), subSeqNum=%d (%x), "
-        "dataSize=%zd, extSize=%zd",
+        "streamPktHeader version=%{public}d, subVersion=%{public}d, extFlag=%{public}d, streamType=%{public}d, "
+        "marker=%{public}d, flag=%{public}d, streamId=%{public}d(%{public}x), timestamp=%{public}u(%{public}x), "
+        "dataLen=%{public}u(%{public}x), seqNum=%{public}d(%{public}x), subSeqNum=%{public}d(%{public}x), "
+        "dataSize=%{public}zd, extSize=%{public}zd",
         streamPktHeader.GetVersion(), streamPktHeader.GetSubVersion(), streamPktHeader.GetExtFlag(),
         streamPktHeader.GetStreamType(), streamPktHeader.GetMarker(), streamPktHeader.GetFlag(),
         streamPktHeader.GetStreamId(), streamPktHeader.GetStreamId(), streamPktHeader.GetTimestamp(),
@@ -70,14 +71,14 @@ std::unique_ptr<char[]> StreamPacketizer::PacketizeStream()
         streamPktHeader.GetSeqNum(), streamPktHeader.GetSeqNum(), streamPktHeader.GetSubSeqNum(),
         streamPktHeader.GetSubSeqNum(), dataSize_, extSize_);
 
-    TRANS_LOGI(TRANS_STREAM,
-        "TLV version=%d, num=%d, extSize=%zd, extLen=%zd, checksum=%u",
+    TRANS_LOGD(TRANS_STREAM,
+        "TLV version=%{public}d, num=%{public}d, extSize=%{public}zd, extLen=%{public}zd, checksum=%{public}u",
         tlv.GetVersion(), tlv.GetTlvNums(), extSize_, tlv.GetExtLen(), tlv.GetCheckSum());
 
     auto ret = memcpy_s(data.get() + hdrSize_ + extSize_, dataSize_, originData_->GetBuffer().get(),
         originData_->GetBufferLen());
     if (ret != 0) {
-        TRANS_LOGE(TRANS_STREAM, "Failed to memcpy data!, ret=%d", ret);
+        TRANS_LOGE(TRANS_STREAM, "Failed to memcpy data! ret=%{public}d", ret);
     }
 
     return data;

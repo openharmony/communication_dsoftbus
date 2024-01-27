@@ -58,7 +58,7 @@ int32_t TransAuthChannelMsgUnpack(const char *msg, AppInfo *appInfo, int32_t len
     }
     int32_t errcode;
     if (GetJsonObjectNumberItem(obj, "ERR_CODE", &errcode)) {
-        TRANS_LOGE(TRANS_SVC, "unpack errcode=%d", errcode);
+        TRANS_LOGE(TRANS_SVC, "unpack errcode=%{public}d", errcode);
         cJSON_Delete(obj);
         return SOFTBUS_ERR;
     }

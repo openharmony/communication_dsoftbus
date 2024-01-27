@@ -86,7 +86,7 @@ void VtpInstance::PrintFillpLog(FILLP_UINT32 debugType, FILLP_UINT32 debugLevel,
     }
     va_end(vaList);
 
-    TRANS_LOGE(TRANS_STREAM, "debugInfo=%s", debugInfo);
+    TRANS_LOGD(TRANS_STREAM, "debugInfo=%{public}s", debugInfo);
 }
 
 void VtpInstance::PreSetFillpCoreParams(void)
@@ -95,7 +95,7 @@ void VtpInstance::PreSetFillpCoreParams(void)
     logCallBack.debugCallbackFunc = static_cast<FillpDebugSendFunc>(PrintFillpLog);
     FILLP_INT32 err = FillpRegLMCallbackFn(&logCallBack);
     if (err != ERR_OK) {
-        TRANS_LOGE(TRANS_STREAM, "failed to create the log, errno=%d", FtGetErrno());
+        TRANS_LOGE(TRANS_STREAM, "failed to create the log, errno=%{public}d", FtGetErrno());
     }
 
     FillpSysLibCallbackFuncStruct adpLibSysFunc;
@@ -104,7 +104,7 @@ void VtpInstance::PreSetFillpCoreParams(void)
     err = FillpApiRegLibSysFunc(&adpLibSysFunc, nullptr);
     if (err != FILLP_SUCCESS) {
         TRANS_LOGE(TRANS_STREAM,
-            "failed to register fillp callback function, errno=%d", FtGetErrno());
+            "failed to register fillp callback function, errno=%{public}d", FtGetErrno());
     }
 
     FillpApiSetDebugLogLevel(UpdateVtpLogLevel());
@@ -113,21 +113,21 @@ void VtpInstance::PreSetFillpCoreParams(void)
     err = FtConfigSet(FT_CONF_MAX_SOCK_NUM, &maxSocketNums, nullptr);
     if (err != ERR_OK) {
         TRANS_LOGE(TRANS_STREAM,
-            "failed to set MAX_SOCKET_NUM config, ret=%d", static_cast<int>(err));
+            "failed to set MAX_SOCKET_NUM config, ret=%{public}d", static_cast<int>(err));
     }
 
     FILLP_UINT16 maxConnectionNums = MAX_DEFAULT_SOCKET_NUM; // keep same with the nums of socket.
     err = FtConfigSet(FT_CONF_MAX_CONNECTION_NUM, &maxConnectionNums, nullptr);
     if (err != ERR_OK) {
         TRANS_LOGE(TRANS_STREAM,
-            "failed to set MAX_CONNECTION_NUM config, ret=%d", static_cast<int>(err));
+            "failed to set MAX_CONNECTION_NUM config, ret=%{public}d", static_cast<int>(err));
     }
 
     FILLP_INT32 keepAlive = FILLP_KEEP_ALIVE_TIME;
     FILLP_INT confSock = FILLP_CONFIG_ALL_SOCKET;
     err = FtConfigSet(FT_CONF_TIMER_KEEP_ALIVE, &keepAlive, &confSock);
     if (err != ERR_OK) {
-        TRANS_LOGE(TRANS_STREAM, "failed to set KA config, ret=%d", static_cast<int>(err));
+        TRANS_LOGE(TRANS_STREAM, "failed to set KA config, ret=%{public}d", static_cast<int>(err));
     }
 }
 
@@ -143,7 +143,7 @@ bool VtpInstance::InitVtp(const std::string &pkgName)
         }
         initVtpCount_++;
         TRANS_LOGI(TRANS_STREAM,
-            "vtp instance is already created, return true. pkgName=%s", pkgName.c_str());
+            "vtp instance is already created, return true. pkgName=%{public}s", pkgName.c_str());
         return true;
     }
 
@@ -152,7 +152,7 @@ bool VtpInstance::InitVtp(const std::string &pkgName)
 
     int err = static_cast<int>(FtInit());
     if (err != ERR_OK) {
-        TRANS_LOGE(TRANS_STREAM, "pkgName=%s failed to init fillp, ret=%d", pkgName.c_str(), err);
+        TRANS_LOGE(TRANS_STREAM, "failed to init fillp, pkgName=%{public}s, ret=%{public}d", pkgName.c_str(), err);
         return false;
     }
     isDestroyed_ = false;
@@ -162,7 +162,7 @@ bool VtpInstance::InitVtp(const std::string &pkgName)
     }
 #endif
     packetNameArray_.push_back(pkgName);
-    TRANS_LOGI(TRANS_STREAM, "pkgName=%s success to init vtp instance", pkgName.c_str());
+    TRANS_LOGI(TRANS_STREAM, "success to init vtp instance. pkgName=%{public}s", pkgName.c_str());
     return true;
 }
 

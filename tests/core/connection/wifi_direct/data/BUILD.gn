@@ -30,6 +30,7 @@ ohos_unittest("WifiDirectDataTest") {
     "$dsoftbus_root_path/core/connection/manager",
     "$dsoftbus_root_path/core/connection/tcp/include",
     "$dsoftbus_root_path/core/connection/wifi_direct/processor",
+    "$dsoftbus_root_path/core/connection/wifi_direct/channel",
     "$dsoftbus_root_path/core/connection/wifi_direct/data",
     "$dsoftbus_root_path/core/connection/wifi_direct/protocol",
     "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single",

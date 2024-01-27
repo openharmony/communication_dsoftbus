@@ -15,7 +15,11 @@
 
 #include "softbus_server_proxy_frame.h"
 
+#include <chrono>
+#include <cstdlib>
+#include <ctime>
 #include <mutex>
+#include <thread>
 #include "client_trans_session_manager.h"
 #include "bus_center_server_proxy.h"
 #include "comm_log.h"
@@ -42,12 +46,19 @@ std::mutex g_mutex;
 uint32_t g_waitServerInterval = 2;
 uint32_t g_getSystemAbilityId = 2;
 uint32_t g_printRequestFailedCount = 0;
+int32_t g_randomMax = 501; // range of random numbers is (0, 500ms)
 constexpr uint32_t g_printInterval = 200;
 const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 }
 
 static int InnerRegisterService(void)
 {
+    srand(time(nullptr));
+    int32_t randomNum = rand();
+    int32_t scaledNum = randomNum % g_randomMax;
+
+    // Prevent high-concurrency conflicts
+    std::this_thread::sleep_for(std::chrono::milliseconds(scaledNum));
     if (g_serverProxy == nullptr) {
         COMM_LOGE(COMM_SDK, "g_serverProxy is nullptr!");
         return SOFTBUS_INVALID_PARAM;
@@ -98,7 +109,7 @@ static OHOS::sptr<OHOS::IRemoteObject> GetSystemAbility()
     int32_t err = samgr->SendRequest(g_getSystemAbilityId, data, reply, option);
     if (err != 0) {
         if ((++g_printRequestFailedCount) % g_printInterval == 0) {
-            COMM_LOGE(COMM_EVENT, "Get GetSystemAbility failed!");
+            COMM_LOGD(COMM_EVENT, "Get GetSystemAbility failed!");
         }
         return nullptr;
     }
@@ -180,6 +191,6 @@ int ClientRegisterService(const char *pkgName)
         SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
     }
 
-    COMM_LOGI(COMM_SDK, "%s softbus server register service success!\n", pkgName);
+    COMM_LOGI(COMM_SDK, "softbus server register service success! pkgName=%{public}s\n", pkgName);
     return SOFTBUS_OK;
 }

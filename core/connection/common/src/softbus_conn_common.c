@@ -121,7 +121,7 @@ int32_t ConnPostMsgToLooper(
 {
     SoftBusMessage *msg = (SoftBusMessage *)SoftBusCalloc(sizeof(SoftBusMessage));
     CONN_CHECK_AND_RETURN_RET_LOGE(msg != NULL, SOFTBUS_MEM_ERR, CONN_COMMON,
-        "ATTENTION, calloc message object failed: what=%d", what);
+        "ATTENTION, calloc message object failed: what=%{public}d", what);
     msg->what = what;
     msg->arg1 = arg1;
     msg->arg2 = arg2;
@@ -202,7 +202,7 @@ int32_t WaitQueueLength(
             CONN_LOGE(CONN_COMMON, "wait get queue count fail");
             break;
         }
-        CONN_LOGD(CONN_COMMON, "queue count=%d", queueCount);
+        CONN_LOGD(CONN_COMMON, "queue count=%{public}d", queueCount);
         if (queueCount < (maxLen - diffLen)) {
             break;
         }

@@ -71,6 +71,7 @@ static uint32_t g_filterCapabilityBitmap[NSTACKX_MAX_CAPABILITY_NUM] = {0};
 /* g_interfaceList store the actual interface name prefix for one platform */
 static NetworkInterfaceInfo g_interfaceList[NSTACKX_MAX_INTERFACE_NUM];
 static SeqAll g_seqAll = {0, 0, 0};
+static uint32_t g_notifyTimeoutMs = 0;
 
 #ifndef DFINDER_USE_MINI_NSTACKX
 /*
@@ -332,6 +333,18 @@ static CoapBroadcastType CheckAdvertiseInfo(const uint32_t advertiseCount, const
     return COAP_BROADCAST_TYPE_USER;
 }
 
+#define NOTIFY_TIMEOUT_FLUCATION_MS 500
+
+static void SetNotifyTimeoutMs(uint32_t timeoutMs)
+{
+    g_notifyTimeoutMs = timeoutMs;
+}
+
+uint32_t GetNotifyTimeoutMs(void)
+{
+    return g_notifyTimeoutMs;
+}
+
 int32_t ConfigureDiscoverySettings(const NSTACKX_DiscoverySettings *discoverySettings)
 {
     if (discoverySettings->businessData == NULL) {
@@ -351,9 +364,11 @@ int32_t ConfigureDiscoverySettings(const NSTACKX_DiscoverySettings *discoverySet
     CoapBroadcastType ret = CheckAdvertiseInfo(advertiseCount, advertiseDuration);
     if (ret == COAP_BROADCAST_TYPE_DEFAULT) {
         SetCoapDiscoverType(COAP_BROADCAST_TYPE_DEFAULT);
+        SetNotifyTimeoutMs(NSTACKX_MIN_ADVERTISE_DURATION + NOTIFY_TIMEOUT_FLUCATION_MS);
     } else if (ret == COAP_BROADCAST_TYPE_USER) {
         SetCoapDiscoverType(COAP_BROADCAST_TYPE_USER);
         SetCoapUserDiscoverInfo(advertiseCount, advertiseDuration);
+        SetNotifyTimeoutMs(advertiseDuration + NOTIFY_TIMEOUT_FLUCATION_MS);
     }
     IncreaseSequenceNumber(NSTACKX_TRUE);
     return NSTACKX_EOK;

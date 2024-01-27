@@ -70,14 +70,14 @@ static int ClientIpcInterfaceMsgHandle(uint32_t code, IpcIo *data, IpcIo *reply,
         return SOFTBUS_ERR;
     }
 
-    COMM_LOGI(COMM_SDK, "receive ipc transact code(%u)", code);
+    COMM_LOGI(COMM_SDK, "receive ipc transact code. code=%{public}u", code);
     unsigned int num = sizeof(g_softBusIpcClientCmdTbl) / sizeof(struct SoftBusIpcClientCmd);
     for (unsigned int i = 0; i < num; i++) {
         if (code == g_softBusIpcClientCmdTbl[i].code) {
             return g_softBusIpcClientCmdTbl[i].func(data, reply);
         }
     }
-    COMM_LOGE(COMM_SDK, "not support code(%u)", code);
+    COMM_LOGE(COMM_SDK, "not support code. code=%{public}u", code);
     return SOFTBUS_ERR;
 }
 
@@ -128,7 +128,7 @@ static void *DeathProcTask(void *arg)
         return NULL;
     }
 
-    COMM_LOGI(COMM_SDK, "\n<< !!! SERVICE (%s) RECOVER !!! >>\n", SOFTBUS_SERVICE);
+    COMM_LOGI(COMM_SDK, "\n<< !!! SERVICE (%{public}s) RECOVER !!! >>\n", SOFTBUS_SERVICE);
     CLIENT_NotifyObserver(EVENT_SERVER_RECOVERY, NULL, 0);
     UnregisterServerDeathCb();
 
@@ -147,7 +147,7 @@ static int StartDeathProcTask(void)
     SoftBusThread tid;
     ret = SoftBusThreadAttrInit(&threadAttr);
     if (ret != 0) {
-        COMM_LOGE(COMM_SDK, "Thread attr init failed, ret[%d]", ret);
+        COMM_LOGE(COMM_SDK, "Thread attr init failed, ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
 
@@ -156,7 +156,7 @@ static int StartDeathProcTask(void)
     threadAttr.taskName = "OS_deathTsk";
     ret = SoftBusThreadCreate(&tid, &threadAttr, DeathProcTask, NULL);
     if (ret != 0) {
-        COMM_LOGE(COMM_SDK, "create DeathProcTask failed, ret[%d]", ret);
+        COMM_LOGE(COMM_SDK, "create DeathProcTask failed, ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
 
@@ -165,7 +165,7 @@ static int StartDeathProcTask(void)
 
 static void DeathCallback(void)
 {
-    COMM_LOGW(COMM_SDK, "\n<< ATTENTION !!! >> SERVICE (%s) DEAD !!!\n", SOFTBUS_SERVICE);
+    COMM_LOGW(COMM_SDK, "\n<< ATTENTION !!! >> SERVICE (%{public}s) DEAD !!!\n", SOFTBUS_SERVICE);
 
     if (StartDeathProcTask() != SOFTBUS_OK) {
         COMM_LOGE(COMM_SDK, "start death proc task failed");

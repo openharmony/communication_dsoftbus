@@ -16,7 +16,6 @@
 #include "nstackx_getopt.h"
 #include "nstackx_error.h"
 #include "nstackx_log.h"
-#include "nstackx_util.h"
 
 #define TAG "nStackXGetOpt"
 #define NSTACK_GETOPT_MAX_ARGC 100

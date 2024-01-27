@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -90,7 +90,8 @@ static void SoftBusOnBtSateChanged(int32_t status)
 
 static void WrapperStateChangeCallback(const int transport, const int status)
 {
-    COMM_LOGI(COMM_ADAPTER, "WrapperStateChangeCallback, transport=%d, status=%d", transport, status);
+    COMM_LOGI(COMM_ADAPTER, "transport = %{public}d (1-BT, 2-BLE), "
+        "status = %{public}d (0-turning on, 1-on, 2-turning off, 3-off)", transport, status);
     int st = ConvertBtState(transport, status);
     SoftBusOnBtSateChanged(st);
 }
@@ -102,7 +103,9 @@ static void WrapperAclStateChangedCallback(const BdAddr *bdAddr, GapAclState sta
         return;
     }
 
-    COMM_LOGD(COMM_ADAPTER, "WrapperAclStateChangedCallback, addr:%02X:%02X:***%02X, state=%d, reason=%u",
+    COMM_LOGD(COMM_ADAPTER,
+        "WrapperAclStateChangedCallback, addr=%{public}02X:%{public}02X:***%{public}02X, state=%{public}d, "
+        "reason=%{public}u",
         bdAddr->addr[MAC_FIRST_INDEX], bdAddr->addr[MAC_ONE_INDEX], bdAddr->addr[MAC_FIVE_INDEX], state, reason);
     int listenerId;
     int aclState = ConvertAclState(state);
@@ -123,7 +126,8 @@ static void WrapperPairRequestedCallback(const BdAddr *bdAddr, int transport)
         return;
     }
 
-    COMM_LOGI(COMM_ADAPTER, "WrapperPairRequestedCallback, addr:%02X:%02X:***%02X, transport=%d",
+    COMM_LOGI(COMM_ADAPTER,
+        "WrapperPairRequestedCallback, addr=%{public}02X:%{public}02X:***%{public}02X, transport=%{public}d",
         bdAddr->addr[MAC_FIRST_INDEX], bdAddr->addr[MAC_ONE_INDEX], bdAddr->addr[MAC_FIVE_INDEX], transport);
     if (!PairRequestReply(bdAddr, transport, true)) {
         COMM_LOGE(COMM_ADAPTER, "PairRequestReply error");
@@ -138,7 +142,9 @@ static void WrapperPairConfiremedCallback(const BdAddr *bdAddr, int transport, i
         return;
     }
 
-    COMM_LOGI(COMM_ADAPTER, "WrapperPairConfirmedCallback, addr=%02X:%02X:***%02X, transport=%d, reqType:%d, number:%d",
+    COMM_LOGI(COMM_ADAPTER,
+        "WrapperPairConfirmedCallback, addr=%{public}02X:%{public}02X:***%{public}02X, "
+        "transport=%{public}d, reqType=%{public}d, number=%{public}d",
         bdAddr->addr[MAC_FIRST_INDEX], bdAddr->addr[MAC_ONE_INDEX], bdAddr->addr[MAC_FIVE_INDEX],
         transport, reqType, number);
     if (!SetDevicePairingConfirmation(bdAddr, transport, true)) {

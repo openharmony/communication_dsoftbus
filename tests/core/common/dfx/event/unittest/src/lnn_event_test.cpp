@@ -37,10 +37,11 @@ HWTEST_F(LnnEventTest, LnnEventTest001, TestSize.Level0)
     LnnEventExtra extra = {
         .result = 1,
         .errcode = 2233,
+        .authId = 112233,
         .onlineNum = -1, // invalid
         .peerPort = "9000",
     };
-    constexpr int32_t VALID_EXTRA_SIZE = 3;
+    constexpr int32_t VALID_EXTRA_SIZE = 4;
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,
@@ -61,15 +62,16 @@ HWTEST_F(LnnEventTest, LnnEventTest002, TestSize.Level0)
     LnnEventExtra validExtra = {
         .result = 1,
         .errcode = 2,
-        .discServerType = 3,
-        .gearCycle = 4,
-        .gearDuration = 5,
-        .connectionId = 6,
-        .authType = 7,
-        .authId = 8,
-        .lnnType = 9,
-        .onlineNum = 10,
-        .peerDeviceAbility = 11,
+        .authId = 3,
+        .discServerType = 4,
+        .gearCycle = 5,
+        .gearDuration = 6,
+        .connectionId = 7,
+        .authLinkType = 8,
+        .authCostTime = 9,
+        .lnnType = 10,
+        .onlineNum = 11,
+        .peerDeviceAbility = 12,
         .peerDeviceInfo = "testPeerDeviceInfo",
         .peerIp = "10.11.12.1",
         .peerBrMac = "dd:15:bc:b9:f2:04",
@@ -103,15 +105,16 @@ HWTEST_F(LnnEventTest, LnnEventTest003, TestSize.Level0)
     LnnEventExtra invalidExtra = {
         .result = -1,  // vaild
         .errcode = -2, // valid
-        .discServerType = -3,
-        .gearCycle = -4,
-        .gearDuration = -5,
-        .connectionId = -6,
-        .authType = -7,
-        .authId = -8,
-        .lnnType = -9,
-        .onlineNum = -10,
-        .peerDeviceAbility = -11,
+        .authId = -3,  // vaild
+        .discServerType = -4,
+        .gearCycle = -5,
+        .gearDuration = -6,
+        .connectionId = -7,
+        .authLinkType = -8,
+        .authCostTime = -9,
+        .lnnType = -10,
+        .onlineNum = -11,
+        .peerDeviceAbility = -12,
         .peerDeviceInfo = "",
         .peerIp = "",
         .peerBrMac = "",
@@ -124,7 +127,7 @@ HWTEST_F(LnnEventTest, LnnEventTest003, TestSize.Level0)
         .callerPkg = "\0",
         .calleePkg = nullptr,
     };
-    constexpr int32_t VALID_EXTRA_SIZE = 2; // result, errcode is valid
+    constexpr int32_t VALID_EXTRA_SIZE = 3; // result, errcode, authId is valid
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,
@@ -143,7 +146,7 @@ HWTEST_F(LnnEventTest, LnnEventTest003, TestSize.Level0)
 HWTEST_F(LnnEventTest, LnnEventTest004, TestSize.Level0)
 {
     LnnEventExtra emptyExtra = { 0 };
-    constexpr int32_t VALID_EXTRA_SIZE = 2; // result, errcode is valid
+    constexpr int32_t VALID_EXTRA_SIZE = 3; // result, errcode, authId is valid
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,

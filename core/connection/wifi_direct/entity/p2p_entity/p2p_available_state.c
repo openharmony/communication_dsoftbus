@@ -52,7 +52,7 @@ static void SetLinkAttr(struct WifiDirectConnectParams *params)
                             params->isProxyEnable ? "1" : "0", params->remoteMac);
     CONN_CHECK_AND_RETURN_LOGW(ret > 0, CONN_WIFI_DIRECT, "format link attr string failed");
 
-    CONN_LOGI(CONN_WIFI_DIRECT, "interface=%s isProxyEnable=%s,mac=%s", params->interface,
+    CONN_LOGI(CONN_WIFI_DIRECT, "interface=%{public}s, isProxyEnable=%{public}s, mac=%{public}s", params->interface,
         params->isProxyEnable ? "1" : "0", WifiDirectAnonymizeMac(params->remoteMac));
     GetWifiDirectP2pAdapter()->setWifiLinkAttr(params->interface, linkAttr);
 }
@@ -126,7 +126,7 @@ static void HandleConnectionChange(struct P2pEntityState *self, struct WifiDirec
         return;
     }
 
-    CONN_LOGI(CONN_WIFI_DIRECT, "remove joining client, clientDeviceSize=%d", groupInfo->clientDeviceSize);
+    CONN_LOGI(CONN_WIFI_DIRECT, "remove joining client, clientDeviceSize=%{public}d", groupInfo->clientDeviceSize);
     for (int32_t i = 0; i < groupInfo->clientDeviceSize; i++) {
         char remoteMac[MAC_ADDR_STR_LEN] = {0};
         GetWifiDirectNetWorkUtils()->macArrayToString(groupInfo->clientDevices[i].address, MAC_ADDR_ARRAY_SIZE,
@@ -136,7 +136,8 @@ static void HandleConnectionChange(struct P2pEntityState *self, struct WifiDirec
 
     struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(IF_NAME_P2P);
     int32_t reuseCount = info->getInt(info, II_KEY_REUSE_COUNT, 0);
-    CONN_LOGI(CONN_WIFI_DIRECT, "joiningClientCount=%d reuseCount=%d", entity->joiningClientCount, reuseCount);
+    CONN_LOGI(CONN_WIFI_DIRECT, "joiningClientCount=%{public}d, reuseCount=%{public}d", entity->joiningClientCount,
+        reuseCount);
     if (groupInfo->clientDeviceSize == 0 && entity->joiningClientCount == 0 && reuseCount > 0) {
         CONN_LOGI(CONN_WIFI_DIRECT, "gc disconnected abnormally");
         GetWifiDirectP2pAdapter()->shareLinkRemoveGroupSync(IF_NAME_P2P);

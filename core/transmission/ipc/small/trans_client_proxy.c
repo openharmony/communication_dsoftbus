@@ -146,7 +146,7 @@ int32_t ClientIpcOnChannelLinkDown(ChannelMsg *data, const char *networkId, cons
         return SOFTBUS_INVALID_PARAM;
     }
     (void)peerIp;
-    TRANS_LOGI(TRANS_CTRL, "pkgName=%s", data->msgPkgName);
+    TRANS_LOGI(TRANS_CTRL, "pkgName=%{public}s", data->msgPkgName);
 
     IpcIo io;
     uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN];

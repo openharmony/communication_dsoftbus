@@ -28,7 +28,7 @@
 #define MAX_SOCKET_TYPE 5
 #define SEND_BUF_SIZE   0x200000 // 2M
 #define RECV_BUF_SIZE   0x100000 // 1M
-#define USER_TIMEOUT_US 2000000   // 2000000us
+#define USER_TIMEOUT_US 5000000   // 5000000us
 
 static const SocketInterface *g_socketInterfaces[MAX_SOCKET_TYPE] = { 0 };
 static SoftBusMutex g_socketsMutex;
@@ -42,7 +42,7 @@ int32_t RegistSocketProtocol(const SocketInterface *interface)
     }
     int ret = SoftBusMutexLock(&g_socketsMutex);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "get lock failed!ret=%" PRId32, ret);
+        CONN_LOGE(CONN_COMMON, "get lock failed! ret=%{public}" PRId32, ret);
         return ret;
     }
 
@@ -65,7 +65,7 @@ const SocketInterface *GetSocketInterface(ProtocolType protocolType)
 {
     int ret = SoftBusMutexLock(&g_socketsMutex);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "get lock failed!ret=%" PRId32, ret);
+        CONN_LOGE(CONN_COMMON, "get lock failed! ret=%{public}" PRId32, ret);
         return NULL;
     }
     const SocketInterface *result = NULL;
@@ -89,7 +89,7 @@ int32_t ConnInitSockets(void)
 {
     int32_t ret = SoftBusMutexInit(&g_socketsMutex, NULL);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_INIT, "init mutex failed!ret=%" PRId32, ret);
+        CONN_LOGE(CONN_INIT, "init mutex failed! ret=%{public}" PRId32, ret);
         return ret;
     }
 
@@ -97,7 +97,7 @@ int32_t ConnInitSockets(void)
 
     ret = RegistSocketProtocol(GetTcpProtocol());
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_INIT, "regist tcp failed!!ret=%" PRId32, ret);
+        CONN_LOGE(CONN_INIT, "regist tcp failed!! ret=%{public}" PRId32, ret);
         (void)SoftBusMutexDestroy(&g_socketsMutex);
         return ret;
     }
@@ -105,7 +105,7 @@ int32_t ConnInitSockets(void)
 
     ret = RegistNewIpSocket();
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_INIT, "regist newip failed!!ret=%" PRId32, ret);
+        CONN_LOGE(CONN_INIT, "regist newip failed!! ret=%{public}" PRId32, ret);
         (void)SoftBusMutexDestroy(&g_socketsMutex);
         return ret;
     }
@@ -126,7 +126,7 @@ int32_t ConnOpenClientSocket(const ConnectOption *option, const char *bindAddr, 
     }
     const SocketInterface *socketInterface = GetSocketInterface(option->socketOption.protocol);
     if (socketInterface == NULL) {
-        CONN_LOGE(CONN_COMMON, "protocol not supported!protocol=%d", option->socketOption.protocol);
+        CONN_LOGE(CONN_COMMON, "protocol not supported! protocol=%{public}d", option->socketOption.protocol);
         return SOFTBUS_ERR;
     }
     return socketInterface->OpenClientSocket(option, bindAddr, isNonBlock);
@@ -135,7 +135,7 @@ int32_t ConnOpenClientSocket(const ConnectOption *option, const char *bindAddr, 
 static int WaitEvent(int fd, short events, int timeout)
 {
     if (fd < 0) {
-        CONN_LOGE(CONN_COMMON, "fd=%d invalid params", fd);
+        CONN_LOGE(CONN_COMMON, "invalid params. fd=%{public}d", fd);
         return -1;
     }
     SoftBusSockTimeOut tv = { 0 };
@@ -152,6 +152,7 @@ static int WaitEvent(int fd, short events, int timeout)
                 break;
             }
             if (!SoftBusSocketFdIsset(fd, &writeSet)) {
+                CONN_LOGE(CONN_COMMON, "Enter SoftBusSocketFdIsset.");
                 rc = 0;
             }
             break;
@@ -181,17 +182,17 @@ int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock)
     }
     int32_t flags = fcntl(fd, F_GETFL, 0);
     if (flags < 0) {
-        CONN_LOGE(CONN_COMMON, "fd=%d,fcntl get flag failed, errno=%d", fd, errno);
+        CONN_LOGE(CONN_COMMON, "fcntl get flag failed, fd=%{public}d, errno=%{public}d", fd, errno);
         return SOFTBUS_ERR;
     }
     if (isNonBlock && ((uint32_t)flags & O_NONBLOCK) == 0) {
         flags = (int32_t)((uint32_t)flags | O_NONBLOCK);
-        CONN_LOGI(CONN_COMMON, "fd=%d set to nonblock", fd);
+        CONN_LOGI(CONN_COMMON, "set to nonblock. fd=%{public}d", fd);
     } else if (!isNonBlock && ((uint32_t)flags & O_NONBLOCK) != 0) {
         flags = (int32_t)((uint32_t)flags & ~O_NONBLOCK);
-        CONN_LOGI(CONN_COMMON, "fd=%d set to block", fd);
+        CONN_LOGI(CONN_COMMON, "set to block. fd=%{public}d", fd);
     } else {
-        CONN_LOGI(CONN_COMMON, "fd=%d nonblock state is already ok", fd);
+        CONN_LOGI(CONN_COMMON, "nonblock state is already ok. fd=%{public}d", fd);
         return SOFTBUS_OK;
     }
     return fcntl(fd, F_SETFL, flags);
@@ -200,7 +201,7 @@ int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock)
 ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_t len, int32_t timeout)
 {
     if (fd < 0 || buf == NULL || len == 0) {
-        CONN_LOGE(CONN_COMMON, "fd=%d invalid params", fd);
+        CONN_LOGE(CONN_COMMON, "invalid params. fd=%{public}d", fd);
         return -1;
     }
 
@@ -210,7 +211,7 @@ ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_t len, int32_t time
 
     int err = WaitEvent(fd, SOFTBUS_SOCKET_OUT, USER_TIMEOUT_US);
     if (err <= 0) {
-        CONN_LOGE(CONN_COMMON, "wait event error %d", err);
+        CONN_LOGE(CONN_COMMON, "wait event error. err=%{public}d", err);
         return err;
     }
     ssize_t bytes = 0;
@@ -222,7 +223,7 @@ ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_t len, int32_t time
             if (bytes == 0) {
                 bytes = -1;
             }
-            CONN_LOGE(CONN_COMMON, "tcp send fail %zd %d", rc, errno);
+            CONN_LOGE(CONN_COMMON, "tcp send fail. rc=%{public}zd, errno=%{public}d", rc, errno);
             break;
         }
         bytes += rc;
@@ -235,7 +236,7 @@ ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_t len, int32_t time
             continue;
         } else if (err < 0) {
             if (bytes == 0) {
-                CONN_LOGE(CONN_COMMON, "send data wait event fail %d", err);
+                CONN_LOGE(CONN_COMMON, "send data wait event fail. err=%{public}d", err);
                 bytes = err;
             }
             break;
@@ -247,14 +248,14 @@ ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_t len, int32_t time
 static ssize_t OnRecvData(int32_t fd, char *buf, size_t len, int timeout, int flags)
 {
     if (fd < 0 || buf == NULL || len == 0) {
-        CONN_LOGE(CONN_COMMON, "fd[%d] len[%zu] invalid params", fd, len);
+        CONN_LOGE(CONN_COMMON, "invalid params. fd=%{public}d, len=%{public}zu", fd, len);
         return -1;
     }
 
     if (timeout != 0) {
         int err = WaitEvent(fd, SOFTBUS_SOCKET_IN, timeout);
         if (err < 0) {
-            CONN_LOGE(CONN_COMMON, "recv data wait event err[%d]", err);
+            CONN_LOGE(CONN_COMMON, "recv data wait event err=%{public}d", err);
             return err;
         }
     }
@@ -264,10 +265,10 @@ static ssize_t OnRecvData(int32_t fd, char *buf, size_t len, int timeout, int fl
         CONN_LOGW(CONN_COMMON, "recv data socket EAGAIN");
         rc = 0;
     } else if (rc == 0) {
-        CONN_LOGE(CONN_COMMON, "recv data fail, peer close connection, fd=%d", fd);
+        CONN_LOGE(CONN_COMMON, "recv data fail, peer close connection, fd=%{public}d", fd);
         rc = -1;
     } else if (rc < 0) {
-        CONN_LOGE(CONN_COMMON, "recv data fail fd[%d] errno[%d], rc[%d]", fd, errno, rc);
+        CONN_LOGE(CONN_COMMON, "recv data fail fd=%{public}d, errno=%{public}d, rc=%{public}zd", fd, errno, rc);
         rc = -1;
     }
     return rc;
@@ -281,7 +282,7 @@ ssize_t ConnRecvSocketData(int32_t fd, char *buf, size_t len, int32_t timeout)
 void ConnCloseSocket(int32_t fd)
 {
     if (fd >= 0) {
-        CONN_LOGI(CONN_COMMON, "close fd=%d", fd);
+        CONN_LOGI(CONN_COMMON, "close fd=%{public}d", fd);
         SoftBusSocketClose(fd);
     }
 }
@@ -289,7 +290,7 @@ void ConnCloseSocket(int32_t fd)
 void ConnShutdownSocket(int32_t fd)
 {
     if (fd >= 0) {
-        CONN_LOGI(CONN_COMMON, "shutdown fd=%d", fd);
+        CONN_LOGI(CONN_COMMON, "shutdown fd=%{public}d", fd);
         SoftBusSocketShutDown(fd, SOFTBUS_SHUT_RDWR);
         SoftBusSocketClose(fd);
     }
@@ -319,11 +320,11 @@ int32_t ConnGetPeerSocketAddr(int32_t fd, SocketAddr *socketAddr)
     }
     int rc = SoftBusSocketGetPeerName(fd, (SoftBusSockAddr *)&addr);
     if (rc != 0) {
-        CONN_LOGE(CONN_COMMON, "fd=%d, GetPeerName rc=%d", fd, rc);
+        CONN_LOGE(CONN_COMMON, "GetPeerName fd=%{public}d, rc=%{public}d", fd, rc);
         return SOFTBUS_ERR;
     }
     if (SoftBusInetNtoP(SOFTBUS_AF_INET, (void *)&addr.sinAddr, socketAddr->addr, sizeof(socketAddr->addr)) == NULL) {
-        CONN_LOGE(CONN_COMMON, "fd=%d, InetNtoP fail", fd);
+        CONN_LOGE(CONN_COMMON, "InetNtoP fail. fd=%{public}d", fd);
         return SOFTBUS_ERR;
     }
     socketAddr->port = SoftBusNtoHs(addr.sinPort);
@@ -335,7 +336,7 @@ int32_t ConnPreAssignPort(void)
     int socketFd = -1;
     int ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     if (ret < 0) {
-        CONN_LOGE(CONN_COMMON, "create socket failed, ret=%d", ret);
+        CONN_LOGE(CONN_COMMON, "create socket failed, ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     int reuse = 1;
@@ -351,12 +352,14 @@ int32_t ConnPreAssignPort(void)
     };
     ret = SoftBusInetPtoN(SOFTBUS_AF_INET, "0.0.0.0", &addr.sinAddr);
     if (ret != SOFTBUS_ADAPTER_OK) {
+        SoftBusSocketClose(socketFd);
         CONN_LOGE(CONN_COMMON, "convert address to net order failed");
         return SOFTBUS_ERR;
     }
 
     ret = SoftBusSocketBind(socketFd, (SoftBusSockAddr *)&addr, sizeof(SoftBusSockAddrIn));
     if (ret != SOFTBUS_ADAPTER_OK) {
+        SoftBusSocketClose(socketFd);
         CONN_LOGE(CONN_COMMON, "bind address failed");
         return SOFTBUS_ERR;
     }

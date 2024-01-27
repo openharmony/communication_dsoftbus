@@ -40,7 +40,7 @@ static void HandleP2pStateChanged(enum P2pState state)
         enabled = true;
     }
 
-    CONN_LOGI(CONN_WIFI_DIRECT, "state=%d enable=%d", state, enabled);
+    CONN_LOGI(CONN_WIFI_DIRECT, "state=%{public}d, enable=%{public}d", state, enabled);
     info.putBoolean(&info, II_KEY_IS_ENABLE, enabled);
     GetResourceManager()->notifyInterfaceInfoChange(&info);
     InterfaceInfoDestructor(&info);
@@ -48,7 +48,7 @@ static void HandleP2pStateChanged(enum P2pState state)
     struct InterfaceInfo *interfaceInfo = GetResourceManager()->getInterfaceInfo(IF_NAME_P2P);
     if (interfaceInfo) {
         int32_t connectCap = interfaceInfo->getInt(interfaceInfo, II_KEY_CONNECT_CAPABILITY, WIFI_DIRECT_API_ROLE_NONE);
-        CONN_LOGI(CONN_WIFI_DIRECT, "connectCap=%d", connectCap);
+        CONN_LOGI(CONN_WIFI_DIRECT, "connectCap=%{public}d", connectCap);
         if (connectCap == WIFI_DIRECT_API_ROLE_NONE) {
             GetResourceManager()->initWifiDirectInfo();
         }
@@ -86,7 +86,7 @@ static void ResetInterfaceInfo(void)
 
 static void UpdateInterfaceInfo(struct WifiDirectP2pGroupInfo *groupInfo)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "isGroupOwner=%d clientDeviceSize=%d", groupInfo->isGroupOwner,
+    CONN_LOGI(CONN_WIFI_DIRECT, "isGroupOwner=%{public}d, clientDeviceSize=%{public}d", groupInfo->isGroupOwner,
         groupInfo->clientDeviceSize);
 
     char localMac[MAC_ADDR_STR_LEN] = {0};
@@ -95,12 +95,12 @@ static void UpdateInterfaceInfo(struct WifiDirectP2pGroupInfo *groupInfo)
     char dynamicMacString[MAC_ADDR_STR_LEN] = {0};
     int32_t ret = GetWifiDirectP2pAdapter()->getDynamicMacAddress(dynamicMacString, sizeof(dynamicMacString));
     CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get mac failed");
-    CONN_LOGI(CONN_WIFI_DIRECT, "localDynamicMac=%s", WifiDirectAnonymizeMac(dynamicMacString));
+    CONN_LOGI(CONN_WIFI_DIRECT, "localDynamicMac=%{public}s", WifiDirectAnonymizeMac(dynamicMacString));
 
     char ipString[IP_ADDR_STR_LEN] = {0};
     ret = GetWifiDirectP2pAdapter()->getIpAddress(ipString, sizeof(ipString));
     CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get ip failed");
-    CONN_LOGI(CONN_WIFI_DIRECT, "localIp=%s", WifiDirectAnonymizeIp(ipString));
+    CONN_LOGI(CONN_WIFI_DIRECT, "localIp=%{public}s", WifiDirectAnonymizeIp(ipString));
 
     struct InterfaceInfo info;
     InterfaceInfoConstructorWithName(&info, IF_NAME_P2P);
@@ -164,5 +164,6 @@ void ResourceManagerBroadcastHandlerInit(void)
         WIFI_P2P_CONNECTION_CHANGED_ACTION,
     };
 
-    broadcastReceiver->registerBroadcastListener(actions, ARRAY_SIZE(actions), "ResourceManager", Listener);
+    broadcastReceiver->registerBroadcastListener(actions, ARRAY_SIZE(actions), "ResourceManager",
+                                                 LISTENER_PRIORITY_HIGH, Listener);
 }

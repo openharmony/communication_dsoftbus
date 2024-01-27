@@ -83,11 +83,12 @@ int32_t GetIpAddress(char *ipString, int32_t ipStringSize)
 }
 
 void RegisterBroadcastListener(const enum BroadcastReceiverAction *actionArray, size_t actionSize,
-    const char *name, BroadcastListener listener)
+    const char *name, enum ListenerPriority priority, BroadcastListener listener)
 {
     (void)actionArray;
     (void)actionSize;
     (void)name;
+    (void)priority;
     (void)listener;
     return;
 }
@@ -160,15 +161,15 @@ HWTEST_F(ResourceManagerBroadcastTest, BroadcastTest003, TestSize.Level1)
 
 HWTEST_F(ResourceManagerBroadcastTest, BroadcastTest004, TestSize.Level1)
 {
-    struct P2pConnChangedInfo changedInfo;
+    struct BroadcastParam param;
     struct WifiDirectP2pGroupInfo groupInfo;
 
-    changedInfo.p2pLinkInfo.connectState = P2P_DISCONNECTED;
-    (void)HandleP2pConnectionChanged(&changedInfo);
+    param.p2pParam.p2pLinkInfo.connectState = P2P_DISCONNECTED;
+    (void)HandleP2pConnectionChanged(&param);
 
-    changedInfo.p2pLinkInfo.connectState = P2P_CONNECTED;
-    changedInfo.groupInfo = &groupInfo;
-    (void)HandleP2pConnectionChanged(&changedInfo);
+    param.p2pParam.p2pLinkInfo.connectState = P2P_CONNECTED;
+    param.p2pParam.groupInfo = &groupInfo;
+    (void)HandleP2pConnectionChanged(&param);
 };
 
 HWTEST_F(ResourceManagerBroadcastTest, BroadcastTest005, TestSize.Level1)

@@ -15,6 +15,7 @@
 
 #include "client_trans_stream.h"
 
+#include "client_trans_session_manager.h"
 #include "client_trans_udp_stream_interface.h"
 #include "session.h"
 #include "softbus_errcode.h"
@@ -49,7 +50,7 @@ static void SetStreamChannelStatus(int32_t channelId, int32_t status)
 
     switch (status) {
         case STREAM_CONNECTED:
-            TRANS_LOGI(TRANS_STREAM, "channelId=%d dstream connected.", channelId);
+            TRANS_LOGI(TRANS_STREAM, "dstream connected. channelId=%{public}d", channelId);
             if (g_udpChannelMgrCb->OnUdpChannelOpened == NULL) {
                 TRANS_LOGE(TRANS_STREAM, "udp channel callback on udp channel opened is null.");
                 return;
@@ -57,22 +58,22 @@ static void SetStreamChannelStatus(int32_t channelId, int32_t status)
             g_udpChannelMgrCb->OnUdpChannelOpened(channelId);
             break;
         case STREAM_CLOSED:
-            TRANS_LOGI(TRANS_STREAM, "channelId=%d dstream closed.", channelId);
+            TRANS_LOGI(TRANS_STREAM, "dstream closed. channelId=%{public}d", channelId);
             break;
         case STREAM_INIT:
-            TRANS_LOGI(TRANS_STREAM, "channelId=%d dstream init.", channelId);
+            TRANS_LOGI(TRANS_STREAM, "dstream init. channelId=%{public}d", channelId);
             break;
         case STREAM_OPENING:
-            TRANS_LOGI(TRANS_STREAM, "channelId=%d dstream opening.", channelId);
+            TRANS_LOGI(TRANS_STREAM, "dstream opening. channelId=%{public}d", channelId);
             break;
         case STREAM_CONNECTING:
-            TRANS_LOGI(TRANS_STREAM, "channelId=%d dstream connecting.", channelId);
+            TRANS_LOGI(TRANS_STREAM, "dstream connecting. channelId=%{public}d", channelId);
             break;
         case STREAM_CLOSING:
-            TRANS_LOGI(TRANS_STREAM, "channelId=%d dstream closing.", channelId);
+            TRANS_LOGI(TRANS_STREAM, "dstream closing. channelId=%{public}d", channelId);
             break;
         default:
-            TRANS_LOGE(TRANS_STREAM, "channelId=%d unsupport stream status=%d.", channelId, status);
+            TRANS_LOGE(TRANS_STREAM, "unsupport stream. channelId=%{public}d, status=%{public}d.", channelId, status);
             break;
     }
 }
@@ -99,9 +100,9 @@ static void OnQosEvent(int channelId, int eventId, int tvCount, const QosTv *tvL
 static void OnFrameStats(int32_t channelId, const StreamSendStats *data)
 {
     int32_t ret = ServerIpcStreamStats(channelId, CHANNEL_TYPE_UDP, data);
-    TRANS_LOGI(TRANS_STREAM, "notify frame stats to server, channelId=%d", channelId);
+    TRANS_LOGI(TRANS_STREAM, "notify frame stats to server, channelId=%{public}d", channelId);
     if ((ret != SOFTBUS_OK) && (ret != SOFTBUS_NOT_IMPLEMENT)) {
-        TRANS_LOGE(TRANS_STREAM, "ipc to server fail, ret=%d", ret);
+        TRANS_LOGE(TRANS_STREAM, "ipc to server fail, ret=%{public}d", ret);
         return;
     }
 }
@@ -109,9 +110,9 @@ static void OnFrameStats(int32_t channelId, const StreamSendStats *data)
 static void OnRippleStats(int32_t channelId, const TrafficStats *data)
 {
     int32_t ret = ServerIpcRippleStats(channelId, CHANNEL_TYPE_UDP, data);
-    TRANS_LOGI(TRANS_STREAM, "notify ripple stats to server, channelId=%d", channelId);
+    TRANS_LOGI(TRANS_STREAM, "notify ripple stats to server, channelId=%{public}d", channelId);
     if ((ret != SOFTBUS_OK) && (ret != SOFTBUS_NOT_IMPLEMENT)) {
-        TRANS_LOGE(TRANS_STREAM, "ipc to server fail, ret=%d", ret);
+        TRANS_LOGE(TRANS_STREAM, "ipc to server fail, ret=%{public}d", ret);
         return;
     }
 }
@@ -133,10 +134,14 @@ int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPo
     }
     StreamType streamType = (StreamType)channel->streamType;
     if (streamType != RAW_STREAM && streamType != COMMON_VIDEO_STREAM && streamType != COMMON_AUDIO_STREAM) {
-        TRANS_LOGE(TRANS_STREAM, "stream type invalid. type=%d", channel->streamType);
+        TRANS_LOGE(TRANS_STREAM, "stream type invalid. type=%{public}d", channel->streamType);
         return SOFTBUS_INVALID_PARAM;
     }
     if (channel->isServer) {
+        if (IsSessionExceedLimit()) {
+            *streamPort = 0;
+            return SOFTBUS_TRANS_SESSION_CNT_EXCEEDS_LIMIT;
+        }
         VtpStreamOpenParam p1 = { "DSOFTBUS_STREAM", channel->myIp,
             NULL, -1, streamType, (uint8_t*)channel->sessionKey, channel->keyLen };
 
@@ -146,14 +151,14 @@ int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPo
             return SOFTBUS_TRANS_UDP_START_STREAM_SERVER_FAILED;
         }
         *streamPort = port;
-        TRANS_LOGI(TRANS_STREAM, "stream server success, listen port=%d.", port);
+        TRANS_LOGI(TRANS_STREAM, "stream server success, listen port=%{public}d.", port);
     } else {
         VtpStreamOpenParam p1 = { "DSOFTBUS_STREAM", channel->myIp, channel->peerIp,
             channel->peerPort, streamType, (uint8_t *)channel->sessionKey, channel->keyLen };
 
         int32_t ret = StartVtpStreamChannelClient(channel->channelId, &p1, &g_streamCallcb);
         if (ret <= 0) {
-            TRANS_LOGE(TRANS_STREAM, "start stream channel as client failed. ret=%d", ret);
+            TRANS_LOGE(TRANS_STREAM, "start stream channel as client failed. ret=%{public}d", ret);
             return SOFTBUS_TRANS_UDP_START_STREAM_CLIENT_FAILED;
         }
         TRANS_LOGI(TRANS_STREAM, "stream start client success.");
@@ -177,7 +182,7 @@ int32_t TransSendStream(int32_t channelId, const StreamData *data, const StreamD
 
 int32_t TransCloseStreamChannel(int32_t channelId)
 {
-    TRANS_LOGI(TRANS_STREAM, "close stream channel. channelId=%d", channelId);
+    TRANS_LOGI(TRANS_STREAM, "close stream channel. channelId=%{public}d", channelId);
     if (CloseVtpStreamChannel(channelId, "DSOFTBUS_STREAM") != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_STREAM, "close stream channel failed.");
         return SOFTBUS_ERR;

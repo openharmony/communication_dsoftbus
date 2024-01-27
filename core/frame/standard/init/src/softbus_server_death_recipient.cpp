@@ -25,7 +25,7 @@ void SoftBusDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
     std::string pkgName;
     int32_t pid = 0;
     SoftbusClientInfoManager::GetInstance().SoftbusRemoveService(remote.promote(), pkgName, &pid);
-    COMM_LOGI(COMM_SVC, "client service %s died, remove it from softbus server", pkgName.c_str());
+    COMM_LOGI(COMM_SVC, "client service died, remove it from softbus server. pkgName=%{public}s", pkgName.c_str());
     ClientDeathCallback(pkgName.c_str(), pid);
 }
 }  // namespace OHOS

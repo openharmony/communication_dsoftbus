@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,16 +16,18 @@
 #ifndef SOFTBUS_ADAPTER_THREAD_H
 #define SOFTBUS_ADAPTER_THREAD_H
 
+#include <stdbool.h>
 #include <stdint.h>
+
+#include "comm_log.h"
 #include "softbus_adapter_timer.h"
 
 #ifdef __cplusplus
-#if __cplusplus
 extern "C" {
-#endif
 #endif
 
 #define TASK_NAME_MAX_LEN (16)
+
 typedef enum {
     SOFTBUS_SCHED_OTHER,
     SOFTBUS_SCHED_RR
@@ -34,7 +36,7 @@ typedef enum {
 typedef enum {
     SOFTBUS_THREAD_JOINABLE,
     SOFTBUS_THREAD_DETACH
-}SoftBusDetachState;
+} SoftBusDetachState;
 
 typedef enum {
     SOFTBUS_PRIORITY_LOWEST,
@@ -43,7 +45,6 @@ typedef enum {
     SOFTBUS_PRIORITY_HIGH,
     SOFTBUS_PRIORITY_HIGHEST
 } SoftBusThreadPriority;
-
 
 typedef struct {
     const char *taskName;
@@ -65,14 +66,52 @@ typedef struct {
 typedef uintptr_t SoftBusThread;
 typedef uintptr_t SoftBusMutex;
 typedef uintptr_t SoftBusCond;
-/* mutex */
+
+// mutex
 int32_t SoftBusMutexAttrInit(SoftBusMutexAttr *mutexAttr);
 int32_t SoftBusMutexInit(SoftBusMutex *mutex, SoftBusMutexAttr *mutexAttr);
-int32_t SoftBusMutexLock(SoftBusMutex *mutex);
-int32_t SoftBusMutexUnlock(SoftBusMutex *mutex);
+int32_t SoftBusMutexLockInner(SoftBusMutex *mutex);
+int32_t SoftBusMutexUnlockInner(SoftBusMutex *mutex);
 int32_t SoftBusMutexDestroy(SoftBusMutex *mutex);
 
-/* pthread */
+static inline bool CheckMutexIsNull(const SoftBusMutex *mutex)
+{
+    return (mutex == NULL) || ((void *)(*mutex) == NULL);
+}
+
+#define SoftBusMutexLock(mutex)                                                        \
+({                                                                                     \
+    int32_t ret = SOFTBUS_OK;                                                          \
+    if (CheckMutexIsNull(mutex)) {                                                     \
+        COMM_LOGD(COMM_ADAPTER, "SoftBusMutexLock mutex is null");                     \
+        ret = SOFTBUS_INVALID_PARAM;                                                   \
+    } else {                                                                           \
+        ret = SoftBusMutexLockInner(mutex);                                            \
+        if (ret != 0) {                                                                \
+            COMM_LOGE(COMM_ADAPTER, "SoftBusMutexLock failed, ret=%{public}d", ret);   \
+            ret = SOFTBUS_LOCK_ERR;                                                    \
+        }                                                                              \
+    }                                                                                  \
+    ret;                                                                               \
+})
+
+#define SoftBusMutexUnlock(mutex)                                                      \
+({                                                                                     \
+    int32_t ret = SOFTBUS_OK;                                                          \
+    if (CheckMutexIsNull(mutex)) {                                                     \
+        COMM_LOGE(COMM_ADAPTER, "SoftBusMutexUnlock mutex is null");                   \
+        ret = SOFTBUS_INVALID_PARAM;                                                   \
+    } else {                                                                           \
+        ret = SoftBusMutexUnlockInner(mutex);                                          \
+        if (ret != 0) {                                                                \
+            COMM_LOGE(COMM_ADAPTER, "SoftBusMutexUnlock failed, ret=%{public}d", ret); \
+            ret = SOFTBUS_LOCK_ERR;                                                    \
+        }                                                                              \
+    }                                                                                  \
+    ret;                                                                               \
+})
+
+// pthread
 int32_t SoftBusThreadAttrInit(SoftBusThreadAttr *threadAttr);
 int32_t SoftBusThreadCreate(SoftBusThread *thread, SoftBusThreadAttr *threadAttr, void *(*threadEntry)(void *),
     void *arg);
@@ -80,7 +119,7 @@ int32_t SoftBusThreadJoin(SoftBusThread thread, void **value);
 int32_t SoftBusThreadSetName(SoftBusThread thread, const char *name);
 SoftBusThread SoftBusThreadGetSelf(void);
 
-/* cond */
+// cond
 int32_t SoftBusCondInit(SoftBusCond *cond);
 int32_t SoftBusCondSignal(SoftBusCond *cond);
 int32_t SoftBusCondBroadcast(SoftBusCond *cond);
@@ -88,9 +127,7 @@ int32_t SoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, SoftBusSysTime *
 int32_t SoftBusCondDestroy(SoftBusCond *cond);
 
 #ifdef __cplusplus
-#if __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* __cplusplus */
 
-#endif
+#endif // SOFTBUS_ADAPTER_THREAD_H

@@ -176,7 +176,7 @@ int32_t LaneInfoProcess(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, La
         return SOFTBUS_ERR;
     }
     if ((linkInfo->type >= LANE_LINK_TYPE_BUTT) || (g_funcList[linkInfo->type] == NULL)) {
-        LNN_LOGE(LNN_LANE, "unsupport linkType=%d", linkInfo->type);
+        LNN_LOGE(LNN_LANE, "unsupport linkType=%{public}d", linkInfo->type);
         return SOFTBUS_ERR;
     }
     return g_funcList[linkInfo->type](linkInfo, connInfo, profile);

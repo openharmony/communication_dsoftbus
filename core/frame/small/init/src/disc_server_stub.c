@@ -28,7 +28,7 @@ int32_t ServerPublishService(IpcIo *req, IpcIo *reply)
 {
     COMM_LOGI(COMM_SVC, "publish service ipc server pop.");
     if (req == NULL || reply == NULL) {
-        COMM_LOGE(COMM_SVC, "%s:invalid param.", __func__);
+        COMM_LOGE(COMM_SVC, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
     size_t len;

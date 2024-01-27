@@ -44,7 +44,7 @@ if (defined(ohos_lite)) {
   }
   if (ohos_kernel_type == "liteos_m") {
     static_library("softbus_server_frame") {
-      defines = AUTH_SERVER_DEFINES
+      defines += AUTH_SERVER_DEFINES
       defines += [ "__STDC_FORMAT_MACROS" ]
       include_dirs = dsoftbus_server_common_inc
       include_dirs += [
@@ -84,6 +84,7 @@ if (defined(ohos_lite)) {
       deps += [
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common:softbus_utils",
+        "$dsoftbus_root_path/core/common/dfx/hidumper_adapter:softbus_dfx_dump",
         "//build/lite/config/component/cJSON:cjson_static",
       ]
       public_deps =
@@ -101,7 +102,7 @@ if (defined(ohos_lite)) {
     }
   } else {
     shared_library("softbus_server_frame") {
-      defines = AUTH_SERVER_DEFINES
+      defines += AUTH_SERVER_DEFINES
       defines += [ "__STDC_FORMAT_MACROS" ]
       include_dirs = dsoftbus_server_common_inc
       include_dirs += [
@@ -139,6 +140,7 @@ if (defined(ohos_lite)) {
         ":permission_json",
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common:softbus_utils",
+        "$dsoftbus_root_path/core/common/dfx/hidumper_adapter:softbus_dfx_dump",
         "//build/lite/config/component/cJSON:cjson_shared",
         "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
         "//foundation/systemabilitymgr/samgr_lite/samgr:samgr",
@@ -191,7 +193,7 @@ if (defined(ohos_lite)) {
     }
     branch_protector_ret = "pac_ret"
 
-    defines = AUTH_SERVER_DEFINES
+    defines += AUTH_SERVER_DEFINES
     defines += [ "__STDC_FORMAT_MACROS" ]
     include_dirs = dsoftbus_server_common_inc
     include_dirs += [

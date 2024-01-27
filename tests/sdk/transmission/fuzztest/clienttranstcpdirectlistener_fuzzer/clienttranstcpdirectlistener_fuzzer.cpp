@@ -14,18 +14,15 @@
  */
 
 #include "clienttranstcpdirectlistener_fuzzer.h"
-#include <cstddef>
-#include <cstdint>
+
 #include <securec.h>
-#include "inner_session.h"
-#include "session.h"
-#include "softbus_utils.h"
+
 #include "client_trans_udp_manager.h"
 #include "client_trans_tcp_direct_manager.h"
 #include "client_trans_tcp_direct_listener.h"
 #include "client_trans_tcp_direct_callback.h"
-#include "softbus_def.h"
 #include "client_trans_session_callback.h"
+#include "session.h"
 #include "softbus_error_code.h"
 
 namespace OHOS {

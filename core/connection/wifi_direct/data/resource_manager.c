@@ -45,7 +45,7 @@ static int32_t InitWifiDirectInfo(void)
         return ret;
     }
 
-    CONN_LOGI(CONN_INIT, "cap=%s", coexistCap);
+    CONN_LOGI(CONN_INIT, "cap=%{public}s", coexistCap);
     ret = GetWifiDirectCoexistRule()->setCoexistRule(coexistCap);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_INIT, "set coexist rule failed");
@@ -73,7 +73,7 @@ static struct InterfaceInfo *GetInterfaceInfo(const char *interface)
     }
 
     SoftBusMutexUnlock(&self->mutex);
-    CONN_LOGE(CONN_WIFI_DIRECT, "not find %s", interface);
+    CONN_LOGE(CONN_WIFI_DIRECT, "not find interface. interface=%{public}s", interface);
     return NULL;
 }
 
@@ -197,7 +197,7 @@ static bool IsStationAndHmlDBAC(void)
         }
     }
 
-    CONN_LOGI(CONN_WIFI_DIRECT, "staFreq=%d hmlFreq=%d", staFreq, hmlFreq);
+    CONN_LOGI(CONN_WIFI_DIRECT, "staFreq=%{public}d, hmlFreq=%{public}d", staFreq, hmlFreq);
     if (staFreq != -1 && hmlFreq != -1 && staFreq != hmlFreq) {
         struct WifiDirectNetWorkUtils *netWorkUtils = GetWifiDirectNetWorkUtils();
         if ((netWorkUtils->is2GBand(staFreq) && netWorkUtils->is2GBand(hmlFreq)) ||
@@ -218,7 +218,7 @@ static bool IsInterfaceAvailable(const char *interface, bool forShare)
     CONN_CHECK_AND_RETURN_RET_LOGW(info, false, CONN_WIFI_DIRECT, "interface info is null");
 
     if (!info->getBoolean(info, II_KEY_IS_ENABLE, false)) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "%s IS_ENABLE=0", interface);
+        CONN_LOGE(CONN_WIFI_DIRECT, "IS_ENABLE=0 interface=%{public}s", interface);
         return false;
     }
 
@@ -272,7 +272,8 @@ static int32_t GetAllInterfacesSimpleInfo(struct InterfaceInfo **infoArray, int3
         bool isAvailable = self->isInterfaceAvailable(name, false);
         isAvailable = IsAvailableByProperty(name, isAvailable);
         int32_t deviceCount = info->getInt(info, II_KEY_CONNECTED_DEVICE_COUNT, 0);
-        CONN_LOGI(CONN_WIFI_DIRECT, "name=%s available=%d deviceCount=%d", name, isAvailable, deviceCount);
+        CONN_LOGI(CONN_WIFI_DIRECT,
+            "name=%{public}s, available=%{public}d, deviceCount=%{public}d", name, isAvailable, deviceCount);
 
         array[i].putName(array + i, name);
         array[i].putBoolean(array + i, II_KEY_IS_AVAILABLE, isAvailable);
@@ -305,7 +306,8 @@ static int32_t GetAllInterfacesInfo(struct InterfaceInfo **infoArray, int32_t *i
         array[i].putBoolean(array + i, II_KEY_IS_AVAILABLE, isAvailable);
         int32_t deviceCount = info->getInt(info, II_KEY_CONNECTED_DEVICE_COUNT, 0);
 
-        CONN_LOGI(CONN_WIFI_DIRECT, "name=%s available=%d deviceCount=%d", name, isAvailable, deviceCount);
+        CONN_LOGI(CONN_WIFI_DIRECT,
+            "name=%{public}s, available=%{public}d, deviceCount=%{public}d", name, isAvailable, deviceCount);
         i++;
     }
     SoftBusMutexUnlock(&self->mutex);
@@ -319,7 +321,7 @@ static int32_t GetAllInterfacesNameAndMac(struct InterfaceInfo **infoArray, int3
 {
     struct ResourceManager *self = GetResourceManager();
     CONN_CHECK_AND_RETURN_RET_LOGW(self->isInited, SOFTBUS_ERR, CONN_WIFI_DIRECT, "not inited");
-    CONN_LOGI(CONN_WIFI_DIRECT, "count=%d", self->count);
+    CONN_LOGI(CONN_WIFI_DIRECT, "count=%{public}d", self->count);
     struct InterfaceInfo *array = InterfaceInfoNewArray(self->count);
     CONN_CHECK_AND_RETURN_RET_LOGW(array, SOFTBUS_MALLOC_ERR, CONN_WIFI_DIRECT, "new interface array failed");
 
@@ -330,7 +332,7 @@ static int32_t GetAllInterfacesNameAndMac(struct InterfaceInfo **infoArray, int3
     LIST_FOR_EACH_ENTRY(info, &self->interfaces, struct InterfaceInfo, node) {
         char *name = info->getName(info);
         char *mac = info->getString(info, II_KEY_BASE_MAC, "");
-        CONN_LOGD(CONN_WIFI_DIRECT, "name=%s mac=%s", name, WifiDirectAnonymizeMac(mac));
+        CONN_LOGD(CONN_WIFI_DIRECT, "name=%{public}s, mac=%{public}s", name, WifiDirectAnonymizeMac(mac));
         array[i].putName(array + i, name);
         array[i].putString(array + i, II_KEY_BASE_MAC, mac);
         i++;
@@ -362,7 +364,7 @@ static int32_t InitInterfaceInfo(const char *interface)
     InterfaceInfoConstructor(&info);
     info.putName(&info, interface);
 
-    CONN_LOGI(CONN_INIT, "interface %s", interface);
+    CONN_LOGI(CONN_INIT, "interface=%{public}s", interface);
     if (strcmp(interface, IF_NAME_P2P) == 0) {
         char macString[MAC_ADDR_STR_LEN];
         int32_t ret = GetWifiDirectP2pAdapter()->getMacAddress(macString, sizeof(macString));
@@ -407,7 +409,7 @@ static void UpdateInterfaceWithMode(const char *interface, int cap)
     info.putInt(&info, II_KEY_CONNECT_CAPABILITY, cap);
     info.putInt(&info, II_KEY_REUSE_COUNT, 0);
 
-    CONN_LOGI(CONN_INIT, "interface=%s cap=0x%x", interface, cap);
+    CONN_LOGI(CONN_INIT, "interface=%{public}s, cap=0x%{public}x", interface, cap);
     if (((uint32_t)cap & WIFI_DIRECT_API_ROLE_GO) || ((uint32_t)cap & WIFI_DIRECT_API_ROLE_GC)) {
         int32_t channelArray[CHANNEL_ARRAY_NUM_MAX];
         size_t channelArraySize = CHANNEL_ARRAY_NUM_MAX;
@@ -418,14 +420,14 @@ static void UpdateInterfaceWithMode(const char *interface, int cap)
     }
 
     if (GetWifiDirectP2pAdapter()->isWifiP2pEnabled()) {
-        CONN_LOGI(CONN_INIT, "set %s enable=true", interface);
+        CONN_LOGI(CONN_INIT, "set interface enable=true, interface=%{public}s", interface);
         info.putBoolean(&info, II_KEY_IS_ENABLE, true);
         char baseMac[MAC_ADDR_STR_LEN] = {0};
         if (GetWifiDirectP2pAdapter()->getBaseMac(interface, (uint32_t)cap, baseMac, sizeof(baseMac)) == SOFTBUS_OK) {
             info.putString(&info, II_KEY_BASE_MAC, baseMac);
         }
     } else {
-        CONN_LOGI(CONN_INIT, "set %s enable=false", interface);
+        CONN_LOGI(CONN_INIT, "set interface enable=false, interface=%{public}s", interface);
         info.putBoolean(&info, II_KEY_IS_ENABLE, false);
     }
 
@@ -446,7 +448,7 @@ static int32_t InitInterfacesByCoexistCap(const char *coexistCap)
     for (int i = 0; i < cJSON_GetArraySize(coexistObj); i++) {
         cJSON *subItems = cJSON_GetArrayItem(coexistObj, i);
         if (!cJSON_IsArray(subItems)) {
-            CONN_LOGW(CONN_INIT, "item %d is not array", i);
+            CONN_LOGW(CONN_INIT, "item is not array. i=%{public}d ", i);
             continue;
         }
 
@@ -460,7 +462,7 @@ static int32_t InitInterfacesByCoexistCap(const char *coexistCap)
 
             int mode = 0;
             if (!GetJsonObjectInt32Item(subItem, "MODE", &mode)) {
-                CONN_LOGW(CONN_INIT, "%s get mode failed", interface);
+                CONN_LOGW(CONN_INIT, "get mode failed. interface=%{public}s", interface);
                 continue;
             }
 
@@ -485,6 +487,7 @@ static struct ResourceManager g_manager = {
     .getInterfaceInfo = GetInterfaceInfo,
     .notifyInterfaceInfoChange = NotifyInterfaceInfoChange,
     .isInterfaceAvailable = IsInterfaceAvailable,
+    .isStationAndHmlDBAC = IsStationAndHmlDBAC,
     .registerListener = RegisterListener,
     .getAllInterfacesSimpleInfo = GetAllInterfacesSimpleInfo,
     .getAllInterfacesInfo = GetAllInterfacesInfo,

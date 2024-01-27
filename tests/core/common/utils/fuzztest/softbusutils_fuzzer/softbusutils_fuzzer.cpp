@@ -14,7 +14,9 @@
  */
 
 #include "softbusutils_fuzzer.h"
+
 #include <securec.h>
+
 #include "softbus_utils.h"
 
 namespace OHOS {

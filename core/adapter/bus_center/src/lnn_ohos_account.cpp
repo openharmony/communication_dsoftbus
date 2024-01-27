@@ -76,7 +76,8 @@ int32_t LnnInitOhosAccount(void)
     }
     int64_t accountId = GetCurrentAccount();
     (void)LnnSetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, accountId);
-    LNN_LOGD(LNN_STATE, "init accountHash [%02X %02X]", accountHash[0], accountHash[1]);
+    LNN_LOGD(LNN_STATE, "init accountHash. accountHash[0]=%{public}02X, accountHash[1]=%{public}02X",
+        accountHash[0], accountHash[1]);
     return LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN);
 }
 
@@ -99,11 +100,12 @@ void LnnUpdateOhosAccount(void)
         }
     }
     if (memcmp(accountHash, localAccountHash, SHA_256_HASH_LEN) == EOK) {
-        LNN_LOGD(LNN_STATE, "accountHash not changed, [%02X %02X]",
+        LNN_LOGD(LNN_STATE, "accountHash not changed, accountHash=[%{public}02X, %{public}02X]",
             accountHash[0], accountHash[1]);
         return;
     }
-    LNN_LOGI(LNN_STATE, "accountHash update from [%02X %02X] to [%02X %02X]",
+    LNN_LOGI(LNN_STATE,
+        "accountHash update. localAccountHash=[%{public}02X, %{public}02X], accountHash=[%{public}02X, %{public}02X]",
         localAccountHash[0], localAccountHash[1], accountHash[0], accountHash[1]);
     LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN);
     DiscDeviceInfoChanged(TYPE_ACCOUNT);
@@ -120,7 +122,8 @@ void LnnOnOhosAccountLogout(void)
         LNN_LOGE(LNN_STATE, "OnAccountChanged generate default str hash fail");
         return;
     }
-    LNN_LOGI(LNN_STATE, "accountHash changed to [%02X %02X]", accountHash[0], accountHash[1]);
+    LNN_LOGI(LNN_STATE,
+        "accountHash changed. accountHash=[%{public}02X, %{public}02X]", accountHash[0], accountHash[1]);
     LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN);
     DiscDeviceInfoChanged(TYPE_ACCOUNT);
     LnnUpdateHeartbeatInfo(UPDATE_HB_ACCOUNT_INFO);

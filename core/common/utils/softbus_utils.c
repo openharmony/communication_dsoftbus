@@ -142,7 +142,7 @@ int32_t ConvertBytesToUpperCaseHexString(char *outBuf, uint32_t outBufLen, const
     uint32_t inLen)
 {
     if ((outBuf == NULL) || (inBuf == NULL) || (outBufLen < HEXIFY_LEN(inLen))) {
-        COMM_LOGE(COMM_UTILS, "invalid param, inlen:%u, outBufLen:%u", inLen, outBufLen);
+        COMM_LOGE(COMM_UTILS, "invalid param, inlen=%{public}u, outBufLen=%{public}u", inLen, outBufLen);
         return SOFTBUS_ERR;
     }
 
@@ -188,7 +188,7 @@ int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen, const
         } else if ((c >= 'A') && (c <= 'F')) {
             c -= 'A' - DEC_MAX_NUM;
         } else {
-            COMM_LOGE(COMM_UTILS, "HexToString Error! %c", c);
+            COMM_LOGE(COMM_UTILS, "HexToString Error! inBuf=%{public}c", c);
             return SOFTBUS_ERR;
         }
         unsigned char c2 = *inBuf++;
@@ -199,7 +199,7 @@ int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen, const
         } else if ((c2 >= 'A') && (c2 <= 'F')) {
             c2 -= 'A' - DEC_MAX_NUM;
         } else {
-            COMM_LOGE(COMM_UTILS, "HexToString Error! %c2", c2);
+            COMM_LOGE(COMM_UTILS, "HexToString Error! inBuf2=%{public}c", c2);
             return SOFTBUS_ERR;
         }
         *outBuf++ = (c << HEX_MAX_BIT_NUM) | c2;
@@ -212,7 +212,7 @@ int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned
     uint32_t inLen)
 {
     if ((outBuf == NULL) || (inBuf == NULL) || (outBufLen < HEXIFY_LEN(inLen))) {
-        COMM_LOGD(COMM_UTILS, "outBufLen=%d inLen=%d", outBufLen, inLen);
+        COMM_LOGD(COMM_UTILS, "outBufLen=%{public}d, inLen=%{public}d", outBufLen, inLen);
         return SOFTBUS_ERR;
     }
 
@@ -269,7 +269,6 @@ bool IsValidString(const char *input, uint32_t maxLen)
     }
     uint32_t len = strlen(input);
     if (len == 0 || len > maxLen) {
-        COMM_LOGE(COMM_UTILS, "invalid param");
         return false;
     }
     return true;
@@ -437,7 +436,7 @@ int32_t StringToLowerCase(const char *str, char *buf, int32_t size)
 int32_t StrCmpIgnoreCase(const char *str1, const char *str2)
 {
     if (str1 == NULL || str2 == NULL) {
-        COMM_LOGE(COMM_UTILS, "invalid param");
+        COMM_LOGD(COMM_UTILS, "invalid param");
         return SOFTBUS_ERR;
     }
     int32_t i;
@@ -447,7 +446,6 @@ int32_t StrCmpIgnoreCase(const char *str1, const char *str2)
         }
     }
     if (str1[i] != '\0' || str2[i] != '\0') {
-        COMM_LOGE(COMM_UTILS, "str end != '\0'");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -474,7 +472,6 @@ void SignalingMsgPrint(const char *distinguish, unsigned char *data, unsigned ch
     char signalingMsgBuf[BUF_HEX_LEN] = {0};
 
     if (!GetSignalingMsgSwitch()) {
-        COMM_LOGE(COMM_UTILS, "signalingMsgSwitch end != '\0'");
         return;
     }
     if (dataLen >= BUF_BYTE_LEN) {
@@ -483,7 +480,7 @@ void SignalingMsgPrint(const char *distinguish, unsigned char *data, unsigned ch
         ret = ConvertBytesToHexString(signalingMsgBuf, BUF_HEX_LEN + OFFSET, data, dataLen);
     }
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_UTILS, "intercept signaling msg faile");
+        COMM_LOGE(COMM_UTILS, "intercept signaling msg failed");
         return;
     }
 }
@@ -582,13 +579,13 @@ int32_t GenerateStrHashAndConvertToHexString(const unsigned char *str, uint32_t 
     }
     ret = SoftBusGenerateStrHash(str, strlen((char *)str), hashResult);
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_UTILS, "generate str hash fail, ret=%d", ret);
+        COMM_LOGE(COMM_UTILS, "generate str hash fail, ret=%{public}d", ret);
         return ret;
     }
     ret = ConvertBytesToHexString((char *)hashStr, hashStrLen, (const unsigned char *)hashResult,
         len / HEXIFY_UNIT_LEN);
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_UTILS, "convert bytes to str hash fail, ret=%d", ret);
+        COMM_LOGE(COMM_UTILS, "convert bytes to str hash fail, ret=%{public}d", ret);
         return ret;
     }
     return SOFTBUS_OK;

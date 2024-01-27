@@ -52,8 +52,6 @@ uint8_t *AssembleRspData(const SoftbusBroadcastPayload *data, uint16_t *dataLen)
 
 int32_t ParseScanResult(const uint8_t *advData, uint8_t advLen, SoftBusBcScanResult *dst);
 
-void DumpSoftbusAdapterData(const char *description, uint8_t *data, uint16_t len);
-
 #ifdef __cplusplus
 }
 #endif

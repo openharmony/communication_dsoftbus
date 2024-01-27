@@ -176,6 +176,6 @@ int32_t CheckDynamicPermission(void)
         return SOFTBUS_OK;
     }
     COMM_LOGE(COMM_PERM,
-        "check dynamic permission failed, processName:%{private}s", nativeTokenInfo.processName.c_str());
+        "check dynamic permission failed, processName=%{private}s", nativeTokenInfo.processName.c_str());
     return SOFTBUS_ERR;
 }

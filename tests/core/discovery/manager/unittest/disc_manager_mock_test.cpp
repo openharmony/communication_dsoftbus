@@ -138,7 +138,7 @@ HWTEST_F(DiscManagerMockTest, ClientDeathCallback001, TestSize.Level1)
         EXPECT_EQ(checker.GetResult(), true);
     }
     {
-        ExceptionBranchChecker checker("Test is dead");
+        ExceptionBranchChecker checker("pkg is dead");
         DiscMgrDeathCallback("Test");
         EXPECT_EQ(checker.GetResult(), true);
     }

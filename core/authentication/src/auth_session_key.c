@@ -48,7 +48,7 @@ static void RemoveOldKey(SessionKeyList *list)
     }
     item = LIST_ENTRY(GET_LIST_HEAD(list), SessionKeyItem, node);
     ListDelete(&item->node);
-    AUTH_LOGI(AUTH_FSM, "session key num reach max, remove the oldest, index=%d", item->index);
+    AUTH_LOGI(AUTH_FSM, "session key num reach max, remove the oldest, index=%{public}d", item->index);
     (void)memset_s(&item->key, sizeof(SessionKey), 0, sizeof(SessionKey));
     SoftBusFree(item);
 }
@@ -99,7 +99,7 @@ int32_t AddSessionKey(SessionKeyList *list, int32_t index, const SessionKey *key
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(key != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "key is NULL");
     AUTH_CHECK_AND_RETURN_RET_LOGE(list != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "list is NULL");
-    AUTH_LOGD(AUTH_FSM, "keyLen=%d", key->len);
+    AUTH_LOGD(AUTH_FSM, "keyLen=%{public}d", key->len);
     SessionKeyItem *item = (SessionKeyItem *)SoftBusMalloc(sizeof(SessionKeyItem));
     if (item == NULL) {
         AUTH_LOGE(AUTH_FSM, "malloc SessionKeyItem fail");
@@ -137,7 +137,7 @@ int32_t GetLatestSessionKey(const SessionKeyList *list, int32_t *index, SessionK
     }
     item->lastUseTime = GetCurrentTimeMs();
     *index = item->index;
-    AUTH_LOGD(AUTH_FSM, "get session key succ, index=%d", item->index);
+    AUTH_LOGD(AUTH_FSM, "get session key succ, index=%{public}d", item->index);
     return SOFTBUS_OK;
 }
 
@@ -151,14 +151,14 @@ int32_t GetSessionKeyByIndex(const SessionKeyList *list, int32_t index, SessionK
             continue;
         }
         if (memcpy_s(key, sizeof(SessionKey), &item->key, sizeof(item->key)) != EOK) {
-            AUTH_LOGE(AUTH_FSM, "get session key fail, index=%d", index);
+            AUTH_LOGE(AUTH_FSM, "get session key fail, index=%{public}d", index);
             return SOFTBUS_MEM_ERR;
         }
         item->lastUseTime = GetCurrentTimeMs();
-        AUTH_LOGD(AUTH_FSM, "get session key succ, index=%d", index);
+        AUTH_LOGD(AUTH_FSM, "get session key succ, index=%{public}d", index);
         return SOFTBUS_OK;
     }
-    AUTH_LOGE(AUTH_FSM, "session key not found, index=%d", index);
+    AUTH_LOGE(AUTH_FSM, "session key not found, index=%{public}d", index);
     return SOFTBUS_ERR;
 }
 
@@ -177,7 +177,7 @@ void RemoveSessionkeyByIndex(SessionKeyList *list, int32_t index)
         ListDelete(&item->node);
         SoftBusFree(item);
     } else {
-        AUTH_LOGE(AUTH_FSM, "Remove Session key not found, index=%d", index);
+        AUTH_LOGE(AUTH_FSM, "Remove Session key not found, index=%{public}d", index);
     }
 }
 
@@ -207,7 +207,7 @@ int32_t EncryptData(const SessionKeyList *list, const uint8_t *inData, uint32_t 
     int32_t ret = SoftBusEncryptDataWithSeq(&cipherKey, inData, inLen, outData + ENCRYPT_INDEX_LEN, outLen, index);
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "SoftBusEncryptDataWithSeq fail=%d", ret);
+        AUTH_LOGE(AUTH_FSM, "SoftBusEncryptDataWithSeq fail=%{public}d", ret);
         return SOFTBUS_ENCRYPT_ERR;
     }
     *outLen += ENCRYPT_INDEX_LEN;
@@ -240,7 +240,7 @@ int32_t DecryptData(const SessionKeyList *list, const uint8_t *inData, uint32_t 
         outData, outLen, index);
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "SoftBusDecryptDataWithSeq fail=%d", ret);
+        AUTH_LOGE(AUTH_FSM, "SoftBusDecryptDataWithSeq fail=%{public}d", ret);
         return SOFTBUS_DECRYPT_ERR;
     }
     return SOFTBUS_OK;
@@ -299,25 +299,27 @@ void DumpSessionkeyList(const SessionKeyList *list)
     uint32_t keyNum = 0;
     SessionKeyItem *item = NULL;
     LIST_FOR_EACH_ENTRY(item, (const ListNode *)list, SessionKeyItem, node) {
-        AUTH_LOGD(AUTH_FSM, "[Dump]SessionKey[%d]={index=%d, key: {len=%u, key=XX}, lastUseTime=%" PRIu64 "}",
+        AUTH_LOGD(AUTH_FSM,
+            "[Dump] SessionKey keyNum=%{public}d, index=%{public}d, keyLen=%{public}u, key=XX, "
+            "lastUseTime=%{public}" PRIu64 "",
             keyNum, item->index, item->key.len, item->lastUseTime);
         keyNum++;
     }
-    AUTH_LOGD(AUTH_FSM, "[Dump] SessionKey total num=%u", keyNum);
+    AUTH_LOGD(AUTH_FSM, "[Dump] SessionKey total num=%{public}u", keyNum);
 }
 
 static void HandleUpdateSessionKeyEvent(const void *obj)
 {
     AUTH_CHECK_AND_RETURN_LOGE(obj != NULL, AUTH_FSM, "obj is NULL");
     int64_t authId = *(int64_t *)(obj);
-    AUTH_LOGI(AUTH_FSM, "update session key begin, authId=%" PRId64, authId);
+    AUTH_LOGI(AUTH_FSM, "update session key begin, authId=%{public}" PRId64, authId);
     AuthManager *auth = GetAuthManagerByAuthId(authId);
     if (auth == NULL) {
         return;
     }
     if (AuthSessionStartAuth(GenSeq(false), AuthGenRequestId(),
         auth->connId, &auth->connInfo, false, false) != SOFTBUS_OK) {
-        AUTH_LOGI(AUTH_FSM, "start auth session to update session key fail, authId=%" PRId64, authId);
+        AUTH_LOGI(AUTH_FSM, "start auth session to update session key fail, authId=%{public}" PRId64, authId);
     }
     DelAuthManager(auth, false);
 }
@@ -328,7 +330,7 @@ static int32_t RemoveUpdateSessionKeyFunc(const void *obj, void *para)
     AUTH_CHECK_AND_RETURN_RET_LOGE(para != NULL, SOFTBUS_ERR, AUTH_FSM, "para is NULL");
     int64_t authId = *(int64_t *)(obj);
     if (authId == *(int64_t *)(para)) {
-        AUTH_LOGI(AUTH_FSM, "remove update session key event, authId=%" PRId64, authId);
+        AUTH_LOGI(AUTH_FSM, "remove update session key event, authId=%{public}" PRId64, authId);
         return SOFTBUS_OK;
     }
     return SOFTBUS_ERR;

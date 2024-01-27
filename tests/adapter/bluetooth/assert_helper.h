@@ -20,7 +20,6 @@
 
 #include "gmock/gmock.h"
 
-#include "softbus_adapter_ble_gatt.h"
 #include "softbus_adapter_ble_gatt_client.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"

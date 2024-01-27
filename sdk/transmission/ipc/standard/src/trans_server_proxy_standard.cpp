@@ -308,7 +308,7 @@ int32_t TransServerProxy::OpenAuthSession(const char *sessionName, const Connect
     }
     char *tmpName = nullptr;
     Anonymize(sessionName, &tmpName);
-    TRANS_LOGI(TRANS_SDK, "sessionName=%s ServerIpcOpenAuthSession begin", tmpName);
+    TRANS_LOGI(TRANS_SDK, "ServerIpcOpenAuthSession begin. sessionName=%{public}s", tmpName);
     AnonymizeFree(tmpName);
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -577,7 +577,7 @@ int32_t TransServerProxy::RippleStats(int32_t channelId, int32_t channelType, co
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_RIPPLE_STATS, data, reply, option);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "RippleStats send request failed, ret:%{public}d", ret);
+        TRANS_LOGE(TRANS_SDK, "RippleStats send request failed, ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     if (!reply.ReadInt32(ret)) {

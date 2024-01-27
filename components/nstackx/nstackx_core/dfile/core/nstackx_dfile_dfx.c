@@ -250,7 +250,7 @@ void WaitFileHeaderTimeoutEvent(DFileTransErrorCode errorCode)
 
 void DFileServerCreateEvent(void)
 {
-    char valueStr[DFile_EVENT_NAME_LEN];
+    char valueStr[DFile_EVENT_NAME_LEN] = "";
     char eventName[DFile_EVENT_NAME_LEN] = "Server created";
 
     DFileEventParam temp;

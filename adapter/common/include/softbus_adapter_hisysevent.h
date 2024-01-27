@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,8 @@
 
 #ifndef SOFTBUS_ADAPTER_HISYSEVENT_H
 #define SOFTBUS_ADAPTER_HISYSEVENT_H
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 #ifdef __cplusplus
@@ -25,8 +25,8 @@ extern "C" {
 #endif
 #endif
 
-#define SOFTBUS_HISYSEVT_NAME_LEN  65
-#define SOFTBUS_HISYSEVT_PARAM_LEN 65
+#define SOFTBUS_HISYSEVT_NAME_LEN                65
+#define SOFTBUS_HISYSEVT_PARAM_LEN               65
 #define SOFTBUS_HISYSEVT_PARAM_UINT32_ARRAY_SIZE 52
 
 typedef enum {
@@ -97,7 +97,7 @@ typedef union {
     double d;
     char str[SOFTBUS_HISYSEVT_PARAM_LEN];
     uint32_t u32a[SOFTBUS_HISYSEVT_PARAM_UINT32_ARRAY_SIZE];
-}SoftbusEvtParamValue;
+} SoftbusEvtParamValue;
 
 typedef struct {
     SoftBusEvtParamType paramType;
@@ -112,11 +112,11 @@ typedef struct {
     SoftBusEvtParam *paramArray;
 } SoftBusEvtReportMsg;
 
-int32_t SoftbusWriteHisEvt(SoftBusEvtReportMsg* reportMsg);
+int32_t SoftbusWriteHisEvt(SoftBusEvtReportMsg *reportMsg);
 
-SoftBusEvtReportMsg* SoftbusCreateEvtReportMsg(int32_t paramNum);
+SoftBusEvtReportMsg *SoftbusCreateEvtReportMsg(int32_t paramNum);
 
-void SoftbusFreeEvtReporMsg(SoftBusEvtReportMsg* msg);
+void SoftbusFreeEvtReportMsg(SoftBusEvtReportMsg *msg);
 
 #ifdef __cplusplus
 #if __cplusplus

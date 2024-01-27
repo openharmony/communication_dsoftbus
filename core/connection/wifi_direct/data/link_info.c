@@ -133,7 +133,7 @@ static bool Unmarshalling(struct LinkInfo *self, struct WifiDirectProtocol *prot
     while (protocol->readData(protocol, &keyProperty, &data, &size)) {
         bool ret = true;
         enum LinkInfoKey key = GetKeyFromKeyProperty(&keyProperty);
-        CONN_CHECK_AND_RETURN_RET_LOGW(key < LI_KEY_MAX, false, CONN_WIFI_DIRECT, "key out of range, tag=%d",
+        CONN_CHECK_AND_RETURN_RET_LOGW(key < LI_KEY_MAX, false, CONN_WIFI_DIRECT, "key out of range, tag=%{public}d",
             keyProperty.tag);
 
         switch (LinkInfoKeyProperties[key].type) {
@@ -165,7 +165,7 @@ static bool Unmarshalling(struct LinkInfo *self, struct WifiDirectProtocol *prot
             default:
                 continue;
         }
-        CONN_CHECK_AND_RETURN_RET_LOGW(ret, false, CONN_WIFI_DIRECT, "unmarshalling failed key=%d", key);
+        CONN_CHECK_AND_RETURN_RET_LOGW(ret, false, CONN_WIFI_DIRECT, "unmarshalling failed key=%{public}d", key);
     }
 
     return true;

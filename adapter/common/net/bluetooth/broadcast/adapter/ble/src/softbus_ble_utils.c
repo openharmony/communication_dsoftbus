@@ -304,7 +304,8 @@ void DumpBleScanFilter(BleScanNativeFilter *nativeFilter, int32_t filterSize)
         }
         (void)ConvertBytesToHexString(serviceData, hexLen, (nativeFilter + filterSize)->serviceData, len);
         (void)ConvertBytesToHexString(serviceDataMask, hexLen, (nativeFilter + filterSize)->serviceDataMask, len);
-        DISC_LOGI(DISC_BLE_ADAPTER, "BLE Scan Filter size:%d [serviceData:%s, serviceDataMask:%s]",
+        DISC_LOGD(DISC_BLE_ADAPTER,
+            "BLE Scan Filter size=%{public}d, serviceData=%{public}s, serviceDataMask=%{public}s",
             filterSize, serviceData, serviceDataMask);
         SoftBusFree(serviceData);
         SoftBusFree(serviceDataMask);
@@ -431,7 +432,7 @@ int32_t ParseScanResult(const uint8_t *advData, uint8_t advLen, SoftBusBcScanRes
         } else {
             if (type != SERVICE_BC_TYPE && type != MANUFACTURE_BC_TYPE) {
                 index += len;
-                DISC_LOGW(DISC_BLE_ADAPTER, "unsupported type: %hhu", type);
+                DISC_LOGD(DISC_BLE_ADAPTER, "unsupported type. type=%{public}hhu", type);
                 continue;
             }
             SoftbusBroadcastPayload *data = isRsp ? &dst->data.rspData : &dst->data.bcData;
@@ -445,7 +446,7 @@ int32_t ParseScanResult(const uint8_t *advData, uint8_t advLen, SoftBusBcScanRes
             data->id = ((uint16_t)advData[index + ID_LEN] << BC_SHIFT_BIT) | (uint16_t)advData[index + ID_LEN - 1];
             if (data->payloadLen == 0) {
                 index += len;
-                DISC_LOGW(DISC_BLE_ADAPTER, "parse no payload, isRsp: %d", isRsp);
+                DISC_LOGW(DISC_BLE_ADAPTER, "parse no payload, isRsp=%{public}d", isRsp);
                 continue;
             }
             data->payload = (uint8_t *)SoftBusCalloc(data->payloadLen);
@@ -456,20 +457,4 @@ int32_t ParseScanResult(const uint8_t *advData, uint8_t advLen, SoftBusBcScanRes
         index += len;
     }
     return SOFTBUS_OK;
-}
-
-void DumpSoftbusAdapterData(const char *description, uint8_t *data, uint16_t len)
-{
-    DISC_CHECK_AND_RETURN_LOGE(description != NULL, DISC_BLE_ADAPTER, "data is null!");
-    DISC_CHECK_AND_RETURN_LOGE(len != 0, DISC_BLE_ADAPTER, "len is 0!");
-    DISC_CHECK_AND_RETURN_LOGE(data != NULL, DISC_BLE_ADAPTER, "data is null!");
-
-    int32_t hexLen = HEXIFY_LEN(len);
-    char *softbusData = (char *)SoftBusCalloc(sizeof(char) * hexLen);
-    DISC_CHECK_AND_RETURN_LOGE(softbusData != NULL, DISC_BLE_ADAPTER, "malloc failed!");
-
-    (void)ConvertBytesToHexString(softbusData, hexLen, data, len);
-    DISC_LOGI(DISC_BLE_ADAPTER, "%s softbusData:%s", description, softbusData);
-
-    SoftBusFree(softbusData);
 }

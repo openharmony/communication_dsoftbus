@@ -77,7 +77,7 @@ struct EntityListener {
     int32_t (*disconnect)(struct WifiDirectConnectParams *params);                    \
     int32_t (*destroyServer)(struct WifiDirectConnectParams *params);                 \
     int32_t (*switchNotify)(struct WifiDirectConnectParams *params);                  \
-    void (*notifyNewClientJoining)(struct WifiDirectConnectParams *params);           \
+    int32_t (*notifyNewClientJoining)(struct WifiDirectConnectParams *params);        \
     void (*notifyNewClientJoinFail)(struct WifiDirectConnectParams *params);          \
     void (*cancelNewClientJoining)(struct WifiDirectConnectParams *params);           \
     void (*registerListener)(struct EntityListener *listener);                        \

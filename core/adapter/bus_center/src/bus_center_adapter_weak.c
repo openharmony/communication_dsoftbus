@@ -24,7 +24,7 @@
 #define DEFAULT_DEVICE_NAME "UNKNOWN"
 #define DEFAULT_UDID_NAME "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00"
 
-int32_t __attribute__ ((weak)) GetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len)
+int32_t __attribute__ ((weak)) GetCommonDevInfo(CommonDeviceKey key, char *value, uint32_t len)
 {
     if (value == NULL) {
         return SOFTBUS_INVALID_PARAM;

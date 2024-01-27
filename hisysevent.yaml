@@ -126,12 +126,13 @@ BUSCENTER_BEHAVIOR:
   BIZ_STAGE: {type: INT32, desc: business stage }
   STAGE_RES: {type: INT32, desc: stage result }
   ERROR_CODE: { type: INT32, desc: error code }
+  AUTH_ID: { type: INT32, desc: auth id }
   DISC_SERVER_TYPE: {type: INT32, desc: disc server type }
   GEAR_CYCLE: {type: INT32, desc: gear cycle }
   GEAR_DURATION: {type: INT32, desc: gear duration }
   CONN_ID: { type: INT32, desc: connection id }
-  AUTH_TYPE: { type: INT32, desc: auth type }
-  AUTH_ID: { type: INT32, desc: auth id }
+  AUTH_LINK_TYPE: { type: INT32, desc: auth link type }
+  AUTH_COST_TIME: { type: INT32, desc: auth cost time }
   LNN_TYPE: { type: INT32, desc: lnn type }
   ONLINE_NUM: { type: INT32, desc: current online device num }
   PEER_DEV_ABILITY: { type: INT32, desc: peer device ability }
@@ -284,18 +285,18 @@ CONNECTION_AUDIT:
   LINK_TYPE: { type: INT32, desc: link type }
   EXPECT_ROLE: { type: INT32, desc: expect role }
   COST_TIME: { type: INT32, desc: total cost time}
+  CONN_TIMES: { type: INT32, desc: connect times }
   FREQ: { type: STRING, desc: frequency}
   PEER_BR_MAC: { type: STRING, desc: peer device br mac }
+  LOCAL_BR_MAC: { type: STRING, desc: local br mac }
   PEER_BLE_MAC: { type: STRING, desc: peer device ble mac }
+  LOCAL_BLE_MAC: { type: STRING, desc: local ble mac }
   PEER_DEV_TYPE: { type: STRING, desc: peer device type }
   PEER_UDID: { type: STRING, desc: peer device udid }
+  LOCAL_UDID: { type: STRING, desc: local ble udid }
   CONN_PAYLOAD: { type: STRING, desc: payload data }
   LOCAL_DEV_NAME: { type: STRING, desc: local device name }
   PEER_IP: { type: STRING, desc: peer device ip }
-  CONN_TIMES: { type: INT32, desc: connect times }
-  LOCAL_BR_MAC: { type: STRING, desc: local br mac }
-  LOCAL_BLE_MAC: { type: STRING, desc: local ble mac }
-  LOCAL_UDID: { type: STRING, desc: local ble udid }
   LOCAL_IP: { type: STRING, desc: loca ip }
   PEER_PORT: { type: STRING, desc: peer port }
   LOCAL_PORT: { type: STRING, desc: local port }

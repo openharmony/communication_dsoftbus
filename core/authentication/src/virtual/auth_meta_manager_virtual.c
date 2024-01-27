@@ -75,6 +75,14 @@ int32_t AuthMetaOpenConn(const AuthConnInfo *info, uint32_t requestId, const Aut
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+void AuthMetaNotifyDataReceived(uint32_t connectionId, const SocketPktHead *pktHead, const uint8_t *data)
+{
+    (void)connectionId;
+    (void)pktHead;
+    (void)data;
+    AUTH_LOGI(AUTH_CONN, "auth meta notify data received");
+}
+
 void AuthMetaCloseConn(int64_t authId)
 {
     (void)authId;
@@ -105,7 +113,7 @@ int64_t AuthMetaGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer)
     AUTH_LOGI(AUTH_CONN, "auth meta get auth id by uuid");
     return SOFTBUS_NOT_IMPLEMENT;
 }
-
+ 
 int32_t AuthMetaSetP2pMac(int64_t authId, const char *p2pMac)
 {
     (void)authId;

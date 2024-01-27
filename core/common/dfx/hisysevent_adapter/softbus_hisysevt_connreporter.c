@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -209,7 +209,7 @@ static int32_t AddPIdOfPkgNameNode(PIdOfPkgNameNode **pIdOfNameNode, uint32_t pI
     PIdOfPkgNameNode *newNode = (PIdOfPkgNameNode *)SoftBusCalloc(sizeof(PIdOfPkgNameNode));
     COMM_CHECK_AND_RETURN_RET_LOGE(newNode != NULL, SOFTBUS_ERR, COMM_EVENT, "malloc fail");
     if (strcpy_s(newNode->pkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
-        COMM_LOGE(COMM_EVENT, "strcpy pkgName %s fail", pkgName);
+        COMM_LOGE(COMM_EVENT, "strcpy pkgName fail. pkgName=%{public}s", pkgName);
         SoftBusFree(newNode);
         return SOFTBUS_ERR;
     }
@@ -255,7 +255,7 @@ static int32_t AddConnResultApiRecordNode(ConnResultApiRecordNode **connResultNo
     ConnResultApiRecordNode *newNode = (ConnResultApiRecordNode *)SoftBusCalloc(sizeof(ConnResultApiRecordNode));
     COMM_CHECK_AND_RETURN_RET_LOGE(newNode != NULL, SOFTBUS_ERR, COMM_EVENT, "malloc fail");
     if (strcpy_s(newNode->pkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
-        COMM_LOGE(COMM_EVENT, "strcpy pkgName %s fail", pkgName);
+        COMM_LOGE(COMM_EVENT, "strcpy pkgName fail. pkgName=%{public}s", pkgName);
         SoftBusFree(newNode);
         return SOFTBUS_ERR;
     }
@@ -272,7 +272,7 @@ static int32_t SetMsgParamNameAndType(SoftBusEvtReportMsg *msg, SoftBusEvtParamS
         param = &msg->paramArray[i];
         param->paramType = paramSize[i].paramType;
         if (strcpy_s(param->paramName, SOFTBUS_HISYSEVT_PARAM_LEN, paramSize[i].paramName) != EOK) {
-            COMM_LOGE(COMM_EVENT, "copy param name %s fail", paramSize[i].paramName);
+            COMM_LOGE(COMM_EVENT, "copy param name fail. paramName=%{public}s", paramSize[i].paramName);
             return SOFTBUS_ERR;
         }
     }
@@ -334,8 +334,8 @@ static int32_t SoftBusCreateConnDurMsg(SoftBusEvtReportMsg *msg, ConnResultRecor
                                        SoftBusConnType connType)
 {
     errno_t errnoRet = strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_CONN_DURATION);
-    COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT, "strcpy evtname %s fail",
-                                  STATISTIC_EVT_CONN_DURATION);
+    COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT,
+        "strcpy evtname fail. STATISTIC_EVT_CONN_DURATION=%{public}s", STATISTIC_EVT_CONN_DURATION);
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
     msg->paramNum = CONN_RESULT_DURATION_PARAM_NUM;
 
@@ -354,8 +354,8 @@ static int32_t SoftBusCreateProcStepMsg(SoftBusEvtReportMsg *msg, SoftBusConnTyp
 {
     ProcessStepRecord *record = &g_processStep[connType][step];
     errno_t errnoRet = strcpy_s(msg->evtName, SOFTBUS_HISYSEVT_NAME_LEN, STATISTIC_EVT_PROCESS_STEP_DURATION);
-    COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT, "strcpy evtname %s fail",
-                                  STATISTIC_EVT_PROCESS_STEP_DURATION);
+    COMM_CHECK_AND_RETURN_RET_LOGE(errnoRet == EOK, SOFTBUS_ERR, COMM_EVENT,
+        "strcpy evtname fail. STATISTIC_EVT_PROCESS_STEP_DURATION=%{public}s", STATISTIC_EVT_PROCESS_STEP_DURATION);
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
     msg->paramNum = PROCESS_STEP_DURATION_PARAM_NUM;
 
@@ -372,7 +372,7 @@ static int32_t SoftBusCreateProcStepMsg(SoftBusEvtReportMsg *msg, SoftBusConnTyp
 
 static inline void ClearConnResultMsg(SoftBusEvtReportMsg *msg)
 {
-    SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReportMsg(msg);
     ClearConnResultRecord();
     SoftBusMutexUnlock(&g_connResApiLock);
 }
@@ -396,7 +396,7 @@ static int32_t SoftBusReportConnResultRecordEvt(void)
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &(g_connResultApiRecord), ConnResultApiRecordNode, node) {
         for (SoftBusConnType connType = SOFTBUS_HISYSEVT_CONN_TYPE_BR; connType < SOFTBUS_HISYSEVT_CONN_TYPE_BUTT;
              connType++)  {
-            COMM_LOGD(COMM_EVENT, "create conn duration event msg connType=%d", connType);
+            COMM_LOGD(COMM_EVENT, "create conn duration event msg connType=%{public}d", connType);
             char *pkgName = item->pkgName;
             ConnResultRecord *record = &item->connResultRecord[connType];
             if (record->mConnTotalCount == 0) {
@@ -420,7 +420,7 @@ static int32_t SoftBusReportConnResultRecordEvt(void)
 
 static inline void ClearProcStepMsg(SoftBusEvtReportMsg *msg)
 {
-    SoftbusFreeEvtReporMsg(msg);
+    SoftbusFreeEvtReportMsg(msg);
     ClearProcessStep();
     SoftBusMutexUnlock(&g_procStepLock);
 }
@@ -463,7 +463,7 @@ int32_t SoftBusRecordPIdAndPkgName(uint32_t pId, const char *pkgName)
 {
     COMM_CHECK_AND_RETURN_RET_LOGE(IsValidString(pkgName, PKG_NAME_SIZE_MAX), SOFTBUS_ERR, COMM_EVENT,
         "invalid param!");
-    COMM_LOGD(COMM_EVENT, "record pid and pkg name, pid=%d, pkgName=%s", pId, pkgName);
+    COMM_LOGD(COMM_EVENT, "record pid and pkg name, pid=%{public}d, pkgName=%{public}s", pId, pkgName);
     int32_t ret = SoftBusMutexLock(&g_pIdOfNameLock);
     COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, COMM_EVENT, "pId of name lock fail");
     PIdOfPkgNameNode *pIdOfPkgNameNode = GetPkgNameByPId(pId);
@@ -509,7 +509,7 @@ static int32_t SoftbusReportConnFault(SoftBusConnType connType, int32_t errCode,
     connFaultInfo.linkType = connType;
     connFaultInfo.errorCode = errCode;
     if (strcpy_s(connFaultInfo.callerPackName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
-        COMM_LOGE(COMM_EVENT, "strcpy pkgName %s fail", pkgName);
+        COMM_LOGE(COMM_EVENT, "strcpy pkgName fail. pkgName=%{public}s", pkgName);
         return SOFTBUS_ERR;
     }
     if (SoftBusReportBusCenterFaultEvt(&connFaultInfo) != SOFTBUS_OK) {
@@ -522,7 +522,9 @@ static int32_t SoftbusReportConnFault(SoftBusConnType connType, int32_t errCode,
 int32_t SoftbusRecordConnResult(uint32_t pId, SoftBusConnType connType, SoftBusConnStatus status,
                                 uint64_t costTime, int32_t errCode)
 {
-    COMM_LOGD(COMM_EVENT, "record conn duration connType=%d, status=%d, costTime=%" PRIu64, connType, status, costTime);
+    COMM_LOGD(COMM_EVENT,
+        "record conn duration. connType=%{public}d, status=%{public}d, costTime=%{public}" PRIu64,
+        connType, status, costTime);
     if (connType < SOFTBUS_HISYSEVT_CONN_TYPE_BR || connType >= SOFTBUS_HISYSEVT_CONN_TYPE_BUTT ||
         status > SOFTBUS_EVT_CONN_FAIL) {
         COMM_LOGE(COMM_EVENT, "param is invalid");

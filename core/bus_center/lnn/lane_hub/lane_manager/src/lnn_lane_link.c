@@ -227,7 +227,7 @@ int32_t DelLaneResourceItemWithDelay(LaneResource *resourceItem, uint32_t laneId
     }
     LaneResource* item = LaneResourceIsExist(resourceItem);
     if (item != NULL) {
-        LNN_LOGI(LNN_LANE, "link=%d ref=%d", item->type, item->laneRef);
+        LNN_LOGI(LNN_LANE, "link=%{public}d, ref=%{public}d", item->type, item->laneRef);
         if (item->type == LANE_HML && item->laneRef == 1) {
             if (StartDelayDestroyLink(laneId, item) == SOFTBUS_OK) {
                 *isDelayDestroy = true;
@@ -257,7 +257,7 @@ int32_t DelLaneResourceItem(const LaneResource *resourceItem)
     }
     LaneResource* item = LaneResourceIsExist(resourceItem);
     if (item != NULL) {
-        LNN_LOGI(LNN_LANE, "link=%d ref=%d", item->type, item->laneRef);
+        LNN_LOGI(LNN_LANE, "link=%{public}d, ref=%{public}d", item->type, item->laneRef);
         if ((--item->laneRef) == 0) {
             ListDelete(&item->node);
             SoftBusFree(item);
@@ -409,14 +409,14 @@ int32_t FindLaneLinkInfoByLaneId(uint32_t laneId, LaneLinkInfo *linkInfoitem)
 static bool LinkTypeCheck(LaneLinkType type)
 {
     static const LaneLinkType supportList[] = { LANE_P2P, LANE_HML, LANE_WLAN_2P4G, LANE_WLAN_5G, LANE_BR, LANE_BLE,
-        LANE_BLE_DIRECT, LANE_P2P_REUSE, LANE_COC, LANE_COC_DIRECT };
+        LANE_BLE_DIRECT, LANE_P2P_REUSE, LANE_COC, LANE_COC_DIRECT, LANE_BLE_REUSE };
     uint32_t size = sizeof(supportList) / sizeof(LaneLinkType);
     for (uint32_t i = 0; i < size; i++) {
         if (supportList[i] == type) {
             return true;
         }
     }
-    LNN_LOGE(LNN_LANE, "linkType=%d not supported", type);
+    LNN_LOGE(LNN_LANE, "linkType not supported, linkType=%{public}d", type);
     return false;
 }
 
@@ -440,7 +440,7 @@ int32_t ConvertToLaneResource(const LaneLinkInfo *linkInfo, LaneResource *laneRe
         case LANE_BR:
             if (memcpy_s(&(laneResourceInfo->linkInfo.br), sizeof(BrLinkInfo),
                 &(linkInfo->linkInfo.br), sizeof(BrLinkInfo)) != EOK) {
-                LNN_LOGE(LNN_LANE, "linkInfo br memcpy_s fail, linkInfo type=%d", linkInfo->type);
+                LNN_LOGE(LNN_LANE, "linkInfo br memcpy_s fail, linkInfo type=%{public}d", linkInfo->type);
                 return SOFTBUS_ERR;
             }
             break;
@@ -448,7 +448,7 @@ int32_t ConvertToLaneResource(const LaneLinkInfo *linkInfo, LaneResource *laneRe
         case LANE_COC:
             if (memcpy_s(&(laneResourceInfo->linkInfo.ble), sizeof(BleLinkInfo),
                 &(linkInfo->linkInfo.ble), sizeof(BleLinkInfo)) != EOK) {
-                LNN_LOGE(LNN_LANE, "linkInfo ble memcpy_s fail, linkInfo type=%d", linkInfo->type);
+                LNN_LOGE(LNN_LANE, "linkInfo ble memcpy_s fail, linkInfo type=%{public}d", linkInfo->type);
                 return SOFTBUS_ERR;
             }
             break;
@@ -456,7 +456,7 @@ int32_t ConvertToLaneResource(const LaneLinkInfo *linkInfo, LaneResource *laneRe
         case LANE_HML:
             if (memcpy_s(&(laneResourceInfo->linkInfo.p2p), sizeof(P2pConnInfo),
                 &(linkInfo->linkInfo.p2p), sizeof(P2pConnInfo)) != EOK) {
-                LNN_LOGE(LNN_LANE, "linkInfo p2p memcpy_s fail, linkInfo type=%d", linkInfo->type);
+                LNN_LOGE(LNN_LANE, "linkInfo p2p memcpy_s fail, linkInfo type=%{public}d", linkInfo->type);
                 return SOFTBUS_ERR;
             }
             break;
@@ -465,7 +465,7 @@ int32_t ConvertToLaneResource(const LaneLinkInfo *linkInfo, LaneResource *laneRe
         case LANE_P2P_REUSE:
             if (memcpy_s(&(laneResourceInfo->linkInfo.wlan), sizeof(WlanLinkInfo),
                 &(linkInfo->linkInfo.wlan), sizeof(WlanLinkInfo)) != EOK) {
-                LNN_LOGE(LNN_LANE, "linkInfo wlan memcpy_s fail, linkInfo type=%d", linkInfo->type);
+                LNN_LOGE(LNN_LANE, "linkInfo wlan memcpy_s fail, linkInfo type=%{public}d", linkInfo->type);
                 return SOFTBUS_ERR;
             }
             break;
@@ -473,12 +473,12 @@ int32_t ConvertToLaneResource(const LaneLinkInfo *linkInfo, LaneResource *laneRe
         case LANE_COC_DIRECT:
             if (memcpy_s(&(laneResourceInfo->linkInfo.bleDirect), sizeof(BleDirectInfo),
                 &(linkInfo->linkInfo.bleDirect), sizeof(BleDirectInfo)) != EOK) {
-                LNN_LOGE(LNN_LANE, "linkInfo bleDirect memcpy_s fail, linkInfo type=%d", linkInfo->type);
+                LNN_LOGE(LNN_LANE, "linkInfo bleDirect memcpy_s fail, linkInfo type=%{public}d", linkInfo->type);
                 return SOFTBUS_ERR;
             }
             break;
         default:
-            LNN_LOGE(LNN_LANE, "curr linkInfo type=%d is not supported", linkInfo->type);
+            LNN_LOGE(LNN_LANE, "curr link type is not supported, linkInfo type=%{public}d", linkInfo->type);
             return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -847,14 +847,14 @@ static int32_t GetWlanLinkedAttribute(int32_t *channel, bool *is5GBand, bool *is
     LnnWlanLinkedInfo info;
     int32_t ret = LnnGetWlanLinkedInfo(&info);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "LnnGetWlanLinkedInfo fail, ret=%d", ret);
+        LNN_LOGE(LNN_LANE, "LnnGetWlanLinkedInfo fail, ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     *isConnected = info.isConnected;
     *is5GBand = (info.band != 1);
 
     *channel = SoftBusFrequencyToChannel(info.frequency);
-    LNN_LOGI(LNN_LANE, "wlan current channel is %d", *channel);
+    LNN_LOGI(LNN_LANE, "wlan current channel=%{public}d", *channel);
     return SOFTBUS_OK;
 }
 
@@ -912,7 +912,7 @@ static ProtocolType LnnLaneSelectProtocol(LnnNetIfType ifType, const char *netWo
 
     (void)LnnVisitPhysicalSubnet(FindBestProtocol, &req);
 
-    LNN_LOGI(LNN_LANE, "protocol=%d", req.selectedProtocol);
+    LNN_LOGI(LNN_LANE, "protocol=%{public}d", req.selectedProtocol);
     if (req.selectedProtocol == 0) {
         req.selectedProtocol = LNN_PROTOCOL_IP;
     }
@@ -955,7 +955,7 @@ static int32_t LaneLinkOfWlan(uint32_t reqId, const LinkRequest *reqInfo, const 
         ret = LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_WLAN_IP, linkInfo.linkInfo.wlan.connInfo.addr,
             sizeof(linkInfo.linkInfo.wlan.connInfo.addr));
         if (ret != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LANE, "LnnGetRemote wlan ip error, ret=%d", ret);
+            LNN_LOGE(LNN_LANE, "LnnGetRemote wlan ip error, ret=%{public}d", ret);
             return SOFTBUS_ERR;
         }
         if (strnlen(linkInfo.linkInfo.wlan.connInfo.addr, sizeof(linkInfo.linkInfo.wlan.connInfo.addr)) == 0 ||
@@ -967,7 +967,7 @@ static int32_t LaneLinkOfWlan(uint32_t reqId, const LinkRequest *reqInfo, const 
         ret = LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_NODE_ADDR, linkInfo.linkInfo.wlan.connInfo.addr,
             sizeof(linkInfo.linkInfo.wlan.connInfo.addr));
         if (ret != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LANE, "LnnGetRemote wlan addr error, ret=%d", ret);
+            LNN_LOGE(LNN_LANE, "LnnGetRemote wlan addr error, ret=%{public}d", ret);
             return SOFTBUS_ERR;
         }
     }
@@ -1072,7 +1072,7 @@ int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *
     }
     char *anonyNetworkId = NULL;
     Anonymize(reqInfo->peerNetworkId, &anonyNetworkId);
-    LNN_LOGI(LNN_LANE, "build link, linktype=%d, laneId=%u, peerNetworkId=%s",
+    LNN_LOGI(LNN_LANE, "build link, linktype=%{public}d, laneId=%{public}u, peerNetworkId=%{public}s",
         reqInfo->linkType, reqId, anonyNetworkId);
     AnonymizeFree(anonyNetworkId);
     if (g_linkTable[reqInfo->linkType](reqId, reqInfo, callback) != SOFTBUS_OK) {
@@ -1084,17 +1084,16 @@ int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *
 
 void DestroyLink(const char *networkId, uint32_t reqId, LaneLinkType type, int32_t pid)
 {
-    LNN_LOGI(LNN_LANE, "type=%d", type);
+    LNN_LOGI(LNN_LANE, "type=%{public}d", type);
     if (networkId == NULL) {
         LNN_LOGE(LNN_LANE, "the networkId is nullptr");
         return;
     }
     if (type == LANE_P2P || type == LANE_HML) {
-        LNN_LOGI(LNN_LANE, "type=LANE_WD: %d", type);
         LaneDeleteP2pAddress(networkId, false);
         LnnDisconnectP2p(networkId, pid, reqId);
     } else {
-        LNN_LOGI(LNN_LANE, "ignore this link request,linkType=%d", type);
+        LNN_LOGI(LNN_LANE, "ignore this link request, linkType=%{public}d", type);
     }
 }
 

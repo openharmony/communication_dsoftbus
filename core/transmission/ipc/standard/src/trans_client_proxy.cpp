@@ -15,6 +15,9 @@
 
 #include "trans_client_proxy.h"
 
+#include <chrono>
+#include <future>
+
 #include "softbus_client_info_manager.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -23,6 +26,8 @@
 #include "trans_log.h"
 
 using namespace OHOS;
+
+constexpr int32_t IPC_OPT_TIMEOUT_S = 10; /* Calling IPC timeout for 10 seconds*/
 
 static sptr<TransClientProxy> GetClientProxy(const char *pkgName, int32_t pid)
 {
@@ -49,6 +54,12 @@ int32_t InformPermissionChange(int32_t state, const char *pkgName, int32_t pid)
     return clientProxy->OnClientPermissonChange(pkgName, state);
 }
 
+static void CallProxyOnChannelOpened(sptr<TransClientProxy> clientProxy, const char *sessionName,
+    const ChannelInfo *channel, int32_t *ret)
+{
+    *ret = clientProxy->OnChannelOpened(sessionName, channel);
+}
+
 int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName,
     const ChannelInfo *channel, int32_t pid)
 {
@@ -57,7 +68,16 @@ int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName,
         TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr!");
         return SOFTBUS_ERR;
     }
-    return clientProxy->OnChannelOpened(sessionName, channel);
+
+    int32_t ret = SOFTBUS_ERR;
+    std::future<void> task = std::async([clientProxy, sessionName, channel, &ret]() {
+        CallProxyOnChannelOpened(clientProxy, sessionName, channel, &ret);
+    });
+    if (task.wait_for(std::chrono::seconds(IPC_OPT_TIMEOUT_S)) != std::future_status::ready) {
+        TRANS_LOGE(TRANS_SDK, "CallProxyOnChannelOpened timeout!");
+        return SOFTBUS_ERR;
+    }
+    return ret;
 }
 
 int32_t ClientIpcOnChannelOpenFailed(ChannelMsg *data, int32_t errCode)
@@ -91,6 +111,11 @@ int32_t ClientIpcOnChannelLinkDown(ChannelMsg *data, const char *networkId, cons
     return SOFTBUS_OK;
 }
 
+static void CallProxyOnChannelClosed(sptr<TransClientProxy> clientProxy, ChannelMsg *data)
+{
+    clientProxy->OnChannelClosed(data->msgChannelId, data->msgChannelType);
+}
+
 int32_t ClientIpcOnChannelClosed(ChannelMsg *data)
 {
     if (data == nullptr) {
@@ -102,7 +127,13 @@ int32_t ClientIpcOnChannelClosed(ChannelMsg *data)
         TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr!");
         return SOFTBUS_ERR;
     }
-    clientProxy->OnChannelClosed(data->msgChannelId, data->msgChannelType);
+    std::future<void> task = std::async([clientProxy, data]() {
+        CallProxyOnChannelClosed(clientProxy, data);
+    });
+    if (task.wait_for(std::chrono::seconds(IPC_OPT_TIMEOUT_S)) != std::future_status::ready) {
+        TRANS_LOGE(TRANS_SDK, "CallProxyOnChannelClosed timeout!");
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 

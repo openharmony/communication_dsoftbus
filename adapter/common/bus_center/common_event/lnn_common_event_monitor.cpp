@@ -52,7 +52,7 @@ CommonEventMonitor::CommonEventMonitor(const CommonEventSubscribeInfo &subscribe
 void CommonEventMonitor::OnReceiveEvent(const CommonEventData &data)
 {
     std::string action = data.GetWant().GetAction();
-    LNN_LOGI(LNN_EVENT, "notify common event=%s", action.c_str());
+    LNN_LOGI(LNN_EVENT, "notify common event=%{public}s", action.c_str());
 
     if (action == CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED) {
         LnnUpdateOhosAccount();

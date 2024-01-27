@@ -55,17 +55,21 @@
 #define DEVICE_TYPE_SIZE_LEN 3
 #define SOFTBUS_BUSCENTER_DUMP_REMOTEDEVICEINFO "remote_device_info"
 
-#define RETURN_IF_GET_NODE_VALID(networkId, buf, info) do {                 \
-        if ((networkId) == NULL || (buf) == NULL) {                        \
-            LNN_LOGE(LNN_LEDGER, "networkId or buf is invalid"); \
-            return SOFTBUS_INVALID_PARAM;                               \
-        }                                                               \
-        (info) = LnnGetNodeInfoById((networkId), (CATEGORY_NETWORK_ID)); \
-        if ((info) == NULL) {                                           \
-            LNN_LOGE(LNN_LEDGER, "get node info fail."); \
-            return SOFTBUS_ERR;                                         \
-        }                                                               \
-    } while (0)                                                        \
+#define RETURN_IF_GET_NODE_VALID(networkId, buf, info)                                \
+    do {                                                                              \
+        if ((networkId) == NULL || (buf) == NULL) {                                   \
+            LNN_LOGE(LNN_LEDGER, "networkId or buf is invalid");                      \
+            return SOFTBUS_INVALID_PARAM;                                             \
+        }                                                                             \
+        (info) = LnnGetNodeInfoById((networkId), (CATEGORY_NETWORK_ID));              \
+        if ((info) == NULL) {                                                         \
+            char *anonyNetworkId = NULL;                                              \
+            Anonymize(networkId, &anonyNetworkId);                                    \
+            LNN_LOGE(LNN_LEDGER, "get node info fail. networkId=%{public}s", anonyNetworkId); \
+            AnonymizeFree(anonyNetworkId);                                            \
+            return SOFTBUS_ERR;                                                       \
+        }                                                                             \
+    } while (0)
 
 #define CONNECTION_FREEZE_TIMEOUT_MILLIS (10 * 1000)
 
@@ -291,13 +295,12 @@ static int32_t ConvertNodeInfoToBasicInfo(const NodeInfo *info, NodeBasicInfo *b
     }
     if (strncpy_s(basic->deviceName, DEVICE_NAME_BUF_LEN, info->deviceInfo.deviceName,
         strlen(info->deviceInfo.deviceName)) != EOK) {
-            LNN_LOGE(LNN_LEDGER, "strncpy_s name error!");
-            return SOFTBUS_MEM_ERR;
+        LNN_LOGE(LNN_LEDGER, "strncpy_s name error!");
+        return SOFTBUS_MEM_ERR;
     }
-
     if (strncpy_s(basic->networkId, NETWORK_ID_BUF_LEN, info->networkId, strlen(info->networkId)) != EOK) {
-            LNN_LOGE(LNN_LEDGER, "strncpy_s networkID error!");
-            return SOFTBUS_MEM_ERR;
+        LNN_LOGE(LNN_LEDGER, "strncpy_s networkID error!");
+        return SOFTBUS_MEM_ERR;
     }
     basic->deviceTypeId = info->deviceInfo.deviceTypeId;
     return SOFTBUS_OK;
@@ -512,7 +515,10 @@ int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info
     NodeInfo *nodeInfo = LnnGetNodeInfoById(id, type);
     if (nodeInfo == NULL) {
         (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
-        LNN_LOGE(LNN_LEDGER, "can not find target node");
+        char *anonyId = NULL;
+        Anonymize(id, &anonyId);
+        LNN_LOGI(LNN_LEDGER, "can not find target node, id=%{public}s, type=%{public}d", anonyId, type);
+        AnonymizeFree(anonyId);
         return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
     }
     if (memcpy_s(info, sizeof(NodeInfo), nodeInfo, sizeof(NodeInfo)) != EOK) {
@@ -741,7 +747,8 @@ static int32_t DlGetNodeBleMac(const char *networkId, void *buf, uint32_t len)
     if (info->bleMacRefreshSwitch != 0) {
         uint64_t currentTimeMs = GetCurrentTime();
         LNN_CHECK_AND_RETURN_RET_LOGE(info->connectInfo.latestTime + BLE_ADV_LOST_TIME >= currentTimeMs, SOFTBUS_ERR,
-        LNN_LEDGER, "ble mac out date, lastAdvTime:%llu, now:%llu", info->connectInfo.latestTime, currentTimeMs);
+            LNN_LEDGER, "ble mac out date, lastAdvTime=%{public}" PRIu64 ", now=%{public}" PRIu64,
+            info->connectInfo.latestTime, currentTimeMs);
     }
     if (strcpy_s((char *)buf, len, info->connectInfo.bleMacAddr) != EOK) {
         return SOFTBUS_MEM_ERR;
@@ -929,7 +936,7 @@ static int32_t DlGetWifiDirectAddr(const char *networkId, void *buf, uint32_t le
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
     if ((!LnnIsNodeOnline(info)) && (!info->metaInfo.isMetaNode)) {
         LNN_LOGE(LNN_LEDGER, "node is offline");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_NODE_OFFLINE;
     }
     wifiDirectAddr = LnnGetWifiDirectAddr(info);
     if (wifiDirectAddr == NULL) {
@@ -951,7 +958,6 @@ static int32_t DlGetNodeAddr(const char *networkId, void *buf, uint32_t len)
         LNN_LOGE(LNN_LEDGER, "node is offline");
         return SOFTBUS_NETWORK_NODE_OFFLINE;
     }
-
     if (strcpy_s((char*)buf, len, info->nodeAddress) != EOK) {
         LNN_LOGE(LNN_LEDGER, "copy node addr to buf fail");
         return SOFTBUS_MEM_ERR;
@@ -1312,7 +1318,8 @@ static void MergeLnnInfo(const NodeInfo *oldInfo, NodeInfo *info)
         if (oldInfo->authChannelId[i][AUTH_AS_CLIENT_SIDE] != 0 ||
             oldInfo->authChannelId[i][AUTH_AS_SERVER_SIDE] != 0 || info->authChannelId[i][AUTH_AS_CLIENT_SIDE] != 0 ||
             info->authChannelId[i][AUTH_AS_SERVER_SIDE] != 0 ) {
-            LNN_LOGD(LNN_LEDGER, "Merge authChannelId %d|%d -> %d|%d, addrType = %d ",
+            LNN_LOGD(LNN_LEDGER,
+                "Merge authChannelId. authChannelId:%{public}d|%{public}d->%{public}d|%{public}d, addrType=%{public}d",
                 oldInfo->authChannelId[i][AUTH_AS_CLIENT_SIDE], oldInfo->authChannelId[i][AUTH_AS_SERVER_SIDE],
                 info->authChannelId[i][AUTH_AS_CLIENT_SIDE], info->authChannelId[i][AUTH_AS_SERVER_SIDE], i);
         }
@@ -1353,11 +1360,11 @@ static void UpdateNewNodeAccountHash(NodeInfo *info)
         LNN_LOGE(LNN_LEDGER, "long to string fail");
         return;
     }
-    LNN_LOGD(LNN_LEDGER, "account string:%s", accountString);
+    LNN_LOGD(LNN_LEDGER, "accountString=%{public}s", accountString);
     int ret = SoftBusGenerateStrHash((uint8_t *)accountString,
         strlen(accountString), (unsigned char *)info->accountHash);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "account hash fail, ret:%d", ret);
+        LNN_LOGE(LNN_LEDGER, "account hash fail, ret=%{public}d", ret);
         return;
     }
 }
@@ -1429,7 +1436,7 @@ int32_t LnnAddMetaInfo(NodeInfo *info)
     LnnSetAuthTypeValue(&info->AuthTypeValue, ONLINE_METANODE);
     int32_t ret = LnnMapSet(&map->udidMap, udid, info, sizeof(NodeInfo));
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "lnn map set failed, ret=%d", ret);
+        LNN_LOGE(LNN_LEDGER, "lnn map set failed, ret=%{public}d", ret);
     }
     LNN_LOGI(LNN_LEDGER, "LnnAddMetaInfo success");
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
@@ -1462,7 +1469,7 @@ int32_t LnnDeleteMetaInfo(const char *udid, ConnectionAddrType type)
     LnnClearAuthTypeValue(&info->AuthTypeValue, ONLINE_METANODE);
     int32_t ret = LnnMapSet(&map->udidMap, udid, info, sizeof(NodeInfo));
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "lnn map set failed, ret=%d", ret);
+        LNN_LOGE(LNN_LEDGER, "lnn map set failed, ret=%{public}d", ret);
     }
     LNN_LOGI(LNN_LEDGER, "LnnDeleteMetaInfo success");
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
@@ -1485,7 +1492,7 @@ static void OnlinePreventBrConnection(const NodeInfo *info)
 
     bool preventFlag = false;
     do {
-        LNN_LOGI(LNN_LEDGER, "check the ble start timestamp, local:%" PRId64", peer:%" PRId64"",
+        LNN_LOGI(LNN_LEDGER, "check the ble start timestamp, local=%{public}" PRId64", peer=%{public}" PRId64"",
             localNodeInfo->bleStartTimestamp, info->bleStartTimestamp);
         if (localNodeInfo->bleStartTimestamp < info->bleStartTimestamp) {
             LNN_LOGI(LNN_LEDGER, "peer later, prevent br connection");
@@ -1497,7 +1504,7 @@ static void OnlinePreventBrConnection(const NodeInfo *info)
             break;
         }
         if (strcmp(info->softBusVersion, SOFTBUS_VERSION_FOR_INITCONNECTFLAG) < 0) {
-            LNN_LOGI(LNN_LEDGER, "peer is old version, peerVersion:%s", info->softBusVersion);
+            LNN_LOGI(LNN_LEDGER, "peer is old version, peerVersion=%{public}s", info->softBusVersion);
             preventFlag = true;
             break;
         }
@@ -1520,7 +1527,7 @@ static void NotifyMigrateUpgrade(NodeInfo *info)
     if (LnnGetBasicInfoByUdid(info->deviceInfo.deviceUdid, &basic) == SOFTBUS_OK) {
         LnnNotifyMigrate(true, &basic);
     } else {
-        LNN_LOGE(LNN_LEDGER, "NotifyMigrateUpgrade,GetBasicInfoByUdid fail!");
+        LNN_LOGE(LNN_LEDGER, "NotifyMigrateUpgrade, GetBasicInfoByUdid fail!");
     }
 }
 
@@ -1595,7 +1602,7 @@ static void BleDirectlyOnlineProc(NodeInfo *info)
         char *anonyNetworkId = NULL;
         Anonymize(deviceInfo.networkId, &anonyDevNetworkId);
         Anonymize(info->networkId, &anonyNetworkId);
-        LNN_LOGI(LNN_LEDGER, "old networkId=%s, new networkid=%s", anonyDevNetworkId, anonyNetworkId);
+        LNN_LOGI(LNN_LEDGER, "oldNetworkId=%{public}s, newNetworkid=%{public}s", anonyDevNetworkId, anonyNetworkId);
         AnonymizeFree(anonyDevNetworkId);
         AnonymizeFree(anonyNetworkId);
         if (strcpy_s(deviceInfo.networkId, sizeof(deviceInfo.networkId), info->networkId) != EOK) {
@@ -1698,7 +1705,7 @@ static void DfxRecordLnnAddOnlineNodeEnd(NodeInfo *info, int32_t onlineNum, int3
         extra.peerUdid = udidData;
     }
     char bleMacAddr[MAC_LEN] = { 0 };
-    if (strncpy_s(bleMacAddr, MAC_LEN, info->deviceInfo.deviceUdid, MAC_LEN - 1) == EOK) {
+    if (strncpy_s(bleMacAddr, MAC_LEN, info->connectInfo.bleMacAddr, MAC_LEN - 1) == EOK) {
         extra.peerBleMac = bleMacAddr;
     }
     char deviceType[DEVICE_TYPE_SIZE_LEN + 1] = { 0 };
@@ -1751,7 +1758,7 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
     UpdateNewNodeAccountHash(info);
     int32_t ret = LnnMapSet(&map->udidMap, udid, info, sizeof(NodeInfo));
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "lnn map set failed, ret=%d", ret);
+        LNN_LOGE(LNN_LEDGER, "lnn map set failed, ret=%{public}d", ret);
     }
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     NodeOnlineProc(info);
@@ -1812,12 +1819,12 @@ int32_t LnnUpdateGroupType(const NodeInfo *info)
     NodeInfo *oldInfo = NULL;
     udid = LnnGetDeviceUdid(info);
     int32_t groupType = AuthGetGroupType(udid, info->uuid);
-    LNN_LOGI(LNN_LEDGER, "groupType = %d", groupType);
+    LNN_LOGI(LNN_LEDGER, "groupType=%{public}d", groupType);
     int32_t ret = SOFTBUS_ERR;
     map = &g_distributedNetLedger.distributedInfo;
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail!");
-        return REPORT_NONE;
+        return SOFTBUS_LOCK_ERR;
     }
     oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
     if (oldInfo != NULL) {
@@ -1835,7 +1842,7 @@ static void NotifyMigrateDegrade(const char *udid)
     if (LnnGetBasicInfoByUdid(udid, &basic) == SOFTBUS_OK) {
         LnnNotifyMigrate(false, &basic);
     } else {
-        LNN_LOGE(LNN_LEDGER, "NotifyMigrateDegrade,GetBasicInfoByUdid fail!");
+        LNN_LOGE(LNN_LEDGER, "NotifyMigrateDegrade, GetBasicInfoByUdid fail!");
     }
 }
 
@@ -1850,7 +1857,8 @@ static ReportCategory ClearAuthChannelId(NodeInfo *info, ConnectionAddrType type
         }
         if (info->authChannelId[type][AUTH_AS_CLIENT_SIDE] != 0 ||
             info->authChannelId[type][AUTH_AS_SERVER_SIDE] != 0) {
-            LNN_LOGI(LNN_LEDGER, "authChannelId(%d|%d) not clear, not need to report offline.",
+            LNN_LOGI(LNN_LEDGER,
+                "authChannelId not clear, not need to report offline. authChannelId=%{public}d|%{public}d",
                 info->authChannelId[type][AUTH_AS_CLIENT_SIDE], info->authChannelId[type][AUTH_AS_SERVER_SIDE]);
             return REPORT_NONE;
         }
@@ -1897,7 +1905,7 @@ ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int3
     }
     LnnClearDiscoveryType(info, LnnConvAddrTypeToDiscType(type));
     if (info->discoveryType != 0) {
-        LNN_LOGI(LNN_LEDGER, "discoveryType=%u after clear, not need to report offline.", info->discoveryType);
+        LNN_LOGI(LNN_LEDGER, "after clear, not need to report offline. discoveryType=%{public}u", info->discoveryType);
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         UpdateNetworkInfo(udid);
         if (type == CONNECTION_ADDR_WLAN) {
@@ -1976,7 +1984,7 @@ int32_t LnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstId
     }
     info = LnnGetNodeInfoById(srcId, srcIdType);
     if (info == NULL) {
-        LNN_LOGE(LNN_LEDGER, "no node info for: %d", srcIdType);
+        LNN_LOGE(LNN_LEDGER, "no node info srcIdType=%{public}d", srcIdType);
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_NOT_FIND;
     }
@@ -2091,7 +2099,7 @@ bool LnnSetDLP2pInfo(const char *networkId, const P2pInfo *info)
 {
     NodeInfo *node = NULL;
     if (networkId == NULL || info == NULL) {
-        LNN_LOGE(LNN_LEDGER, "%s:invalid param", __func__);
+        LNN_LOGE(LNN_LEDGER, "invalid param");
         return false;
     }
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
@@ -2450,6 +2458,9 @@ int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len)
             StrCmpIgnoreCase(nodeInfo->connectInfo.macAddr, btMac) == 0) {
             if (strcpy_s(buf, len, nodeInfo->networkId) != EOK) {
                 LNN_LOGE(LNN_LEDGER, "strcpy_s networkId fail");
+                LnnMapDeinitIterator(it);
+                (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+                return SOFTBUS_MEM_ERR;
             }
             LnnMapDeinitIterator(it);
             (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
@@ -2461,9 +2472,9 @@ int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len)
     return SOFTBUS_NOT_FIND;
 }
 
-int32_t LnnGetNetworkIdByUdidHash(const char *udidHash, char *buf, uint32_t len)
+int32_t LnnGetNetworkIdByUdidHash(const uint8_t *udidHash, uint32_t udidHashLen, char *buf, uint32_t len)
 {
-    if (udidHash == NULL || udidHash[0] == '\0' || buf == NULL) {
+    if (udidHash == NULL || buf == NULL || udidHashLen == 0) {
         LNN_LOGE(LNN_LEDGER, "udidHash is empty");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -2477,7 +2488,7 @@ int32_t LnnGetNetworkIdByUdidHash(const char *udidHash, char *buf, uint32_t len)
         (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_ERR;
     }
-    char nodeUdidHash[SHA_256_HASH_LEN] = {0};
+    uint8_t nodeUdidHash[SHA_256_HASH_LEN] = {0};
     while (LnnMapHasNext(it)) {
         it = LnnMapNext(it);
         if (it == NULL) {
@@ -2487,7 +2498,7 @@ int32_t LnnGetNetworkIdByUdidHash(const char *udidHash, char *buf, uint32_t len)
         NodeInfo *nodeInfo = (NodeInfo *)it->node->value;
         if (LnnIsNodeOnline(nodeInfo) || nodeInfo->metaInfo.isMetaNode) {
             if (SoftBusGenerateStrHash((uint8_t*)nodeInfo->deviceInfo.deviceUdid,
-                strlen(nodeInfo->deviceInfo.deviceUdid), (uint8_t*)nodeUdidHash) != SOFTBUS_OK) {
+                strlen(nodeInfo->deviceInfo.deviceUdid), nodeUdidHash) != SOFTBUS_OK) {
                 continue;
             }
             if (memcmp(nodeUdidHash, udidHash, SHA_256_HASH_LEN) != 0) {
@@ -2495,6 +2506,9 @@ int32_t LnnGetNetworkIdByUdidHash(const char *udidHash, char *buf, uint32_t len)
             }
             if (strcpy_s(buf, len, nodeInfo->networkId) != EOK) {
                 LNN_LOGE(LNN_LEDGER, "strcpy_s networkId fail");
+                LnnMapDeinitIterator(it);
+                (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+                return SOFTBUS_MEM_ERR;
             }
             LnnMapDeinitIterator(it);
             (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
@@ -2771,7 +2785,7 @@ int32_t LnnSetDLNodeAddr(const char *id, IdCategory type, const char *addr)
     }
     int ret = strcpy_s(nodeInfo->nodeAddress, sizeof(nodeInfo->nodeAddress), addr);
     if (ret != EOK) {
-        LNN_LOGE(LNN_LEDGER, "set node addr failed!ret=%d", ret);
+        LNN_LOGE(LNN_LEDGER, "set node addr failed! ret=%{public}d", ret);
     }
     (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return ret == EOK ? SOFTBUS_OK : SOFTBUS_ERR;
@@ -2933,7 +2947,8 @@ const NodeInfo *LnnGetOnlineNodeByUdidHash(const char *recvUdidHash)
             char *anoyUdidHash = NULL;
             Anonymize(nodeInfo->deviceInfo.deviceUdid, &anoyUdid);
             Anonymize((const char *)shortUdidHash, &anoyUdidHash);
-            LNN_LOGI(LNN_LEDGER, "node udid=%s, shortUdidHash=%s is online", anoyUdid, anoyUdidHash);
+            LNN_LOGI(LNN_LEDGER, "node is online. nodeUdid=%{public}s, shortUdidHash=%{public}s",
+                anoyUdid, anoyUdidHash);
             AnonymizeFree(anoyUdid);
             AnonymizeFree(anoyUdidHash);
             SoftBusFree(info);
@@ -2957,7 +2972,7 @@ void LnnRefreshDeviceOnlineStateAndDevIdInfo(const char *pkgName, DeviceInfo *de
     (void)pkgName;
     RefreshDeviceOnlineStateInfo(device, addtions);
     if (device->devId[0] != '\0') {
-        LNN_LOGI(LNN_LEDGER, "device found by medium=%d, udidhash=%s, online status=%d",
+        LNN_LOGI(LNN_LEDGER, "device found. medium=%{public}d, udidhash=%{public}s, onlineStatus=%{public}d",
             addtions->medium, device->devId, device->isOnline);
     }
 }

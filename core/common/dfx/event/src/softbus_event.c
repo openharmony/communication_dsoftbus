@@ -50,7 +50,7 @@ static void WriteHiSysEvent(
     int32_t ret = HiSysEvent_Write(
         form->func, form->line, form->domain, form->eventName, form->eventType, eventParams, validParamSize);
     if (ret != HISYSEVENT_WRITE_SUCCESS) {
-        COMM_LOGE(COMM_DFX, "write to hisysevent failed, ret=%d", ret);
+        COMM_LOGD(COMM_DFX, "write to hisysevent failed, ret=%{public}d", ret);
     }
 }
 
@@ -132,7 +132,7 @@ static void WriteSoftbusEvent(SoftbusEventModule module, SoftbusEventForm *form)
             break;
         }
         default: {
-            COMM_LOGW(COMM_DFX, "invalid module %d", (int32_t)module);
+            COMM_LOGW(COMM_DFX, "invalid module. module=%{public}d", (int32_t)module);
             break;
         }
     }
@@ -184,7 +184,7 @@ static void WriteSoftbusAudit(SoftbusEventModule module, SoftbusEventForm *form)
             break;
         }
         default: {
-            COMM_LOGW(COMM_DFX, "invalid module %d", (int32_t)module);
+            COMM_LOGW(COMM_DFX, "invalid module. module=%{public}d", (int32_t)module);
             break;
         }
     }

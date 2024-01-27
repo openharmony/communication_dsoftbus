@@ -95,12 +95,12 @@ typedef struct {
 static void UpdateDiscEventAndReport(DiscEventExtra *extra, const DeviceInfo *device)
 {
     if (device == NULL) {
-        DISC_EVENT(EVENT_SCENE_SCAN, EVENT_STAGE_SCAN_END, *extra);
+        DISC_EVENT(EVENT_SCENE_DISC, EVENT_STAGE_DEVICE_FOUND, *extra);
         DISC_LOGI(DISC_CONTROL, "device info is null");
         return;
     }
     if (device->addrNum <= CONNECTION_ADDR_WLAN || device->addrNum > CONNECTION_ADDR_MAX) {
-        DISC_EVENT(EVENT_SCENE_SCAN, EVENT_STAGE_SCAN_END, *extra);
+        DISC_EVENT(EVENT_SCENE_DISC, EVENT_STAGE_DEVICE_FOUND, *extra);
         DISC_LOGI(DISC_CONTROL, "unknown device info");
         return;
     }
@@ -124,12 +124,11 @@ static void UpdateDiscEventAndReport(DiscEventExtra *extra, const DeviceInfo *de
         }
     }
 
-    extra->peerNetworkId = device->devId;
     char deviceType[DEVICE_TYPE_SIZE_MAX + 1] = { 0 };
     if (snprintf_s(deviceType, DEVICE_TYPE_SIZE_MAX + 1, DEVICE_TYPE_SIZE_MAX, "%03X", device->devType) >= 0) {
         extra->peerDeviceType = deviceType;
     }
-    DISC_EVENT(EVENT_SCENE_SCAN, EVENT_STAGE_SCAN_END, *extra);
+    DISC_EVENT(EVENT_SCENE_DISC, EVENT_STAGE_DEVICE_FOUND, *extra);
 }
 
 static void DfxRecordStartDiscoveryDevice(DiscInfo *infoNode)
@@ -197,21 +196,8 @@ static int32_t CallSpecificInterfaceFunc(const InnerOption *option,
     }
 }
 
-static void DfxRecordCallInterfaceStart(const DiscInfo *info, const InterfaceFuncType type)
-{
-    DiscEventExtra extra = { 0 };
-    DiscEventExtraInit(&extra);
-    extra.interFuncType = type + 1;
-
-    if (info != NULL) {
-        extra.discType = info->medium + 1;
-        extra.discMode = info->mode;
-    }
-}
-
 static int32_t CallInterfaceByMedium(const DiscInfo *info, const InterfaceFuncType type)
 {
-    DfxRecordCallInterfaceStart(info, type);
     switch (info->medium) {
         case COAP:
             return CallSpecificInterfaceFunc(&(info->option), g_discCoapInterface, info->mode, type);
@@ -236,7 +222,7 @@ static int32_t TransferStringCapToBitmap(const char *capability)
 
     for (uint32_t i = 0; i < sizeof(g_capabilityMap) / sizeof(g_capabilityMap[0]); i++) {
         if (strcmp(capability, g_capabilityMap[i].capability) == 0) {
-            DISC_LOGI(DISC_CONTROL, "capability=%s", capability);
+            DISC_LOGD(DISC_CONTROL, "capability=%{public}s", capability);
             return g_capabilityMap[i].bitmap;
         }
     }
@@ -287,7 +273,7 @@ static void FreeDiscInfo(DiscInfo *info, const ServiceType type)
 static bool IsInnerModule(const DiscInfo *infoNode)
 {
     for (uint32_t i = 0; i < MODULE_MAX; i++) {
-        DISC_LOGD(DISC_CONTROL, "%s", infoNode->item->packageName);
+        DISC_LOGD(DISC_CONTROL, "packageName=%{public}s", infoNode->item->packageName);
         if (strcmp(infoNode->item->packageName, g_discModuleMap[i]) == 0) {
             DISC_LOGD(DISC_CONTROL, "true");
             return true;
@@ -305,7 +291,7 @@ static void InnerDeviceFound(DiscInfo *infoNode, const DeviceInfo *device,
         return;
     }
 
-    DISC_LOGI(DISC_CONTROL, "call from inner module.");
+    DISC_LOGD(DISC_CONTROL, "call from inner module.");
     if (infoNode->item->callback.innerCb.OnDeviceFound != NULL) {
         DfxRecordDeviceFound(infoNode, device, additions);
         infoNode->item->callback.innerCb.OnDeviceFound(device, additions);
@@ -317,19 +303,20 @@ static void DiscOnDeviceFound(const DeviceInfo *device, const InnerDeviceInfoAdd
     DISC_CHECK_AND_RETURN_LOGW(device != NULL, DISC_CONTROL, "device is null");
     DISC_CHECK_AND_RETURN_LOGW(additions != NULL, DISC_CONTROL, "additions is null");
 
-    DISC_LOGI(DISC_CONTROL, "capabilityBitmap=%d, medium=%d", device->capabilityBitmap[0], additions->medium);
+    DISC_LOGD(DISC_CONTROL,
+        "capabilityBitmap=%{public}d, medium=%{public}d", device->capabilityBitmap[0], additions->medium);
     for (uint32_t tmp = 0; tmp < CAPABILITY_MAX_BITNUM; tmp++) {
         if (IsBitmapSet((uint32_t *)device->capabilityBitmap, tmp) == false) {
             continue;
         }
 
-        if (SoftBusMutexLock(&(g_discoveryInfoList->lock)) != 0) {
+        if (SoftBusMutexLock(&(g_discoveryInfoList->lock)) != SOFTBUS_OK) {
             DISC_LOGE(DISC_CONTROL, "lock failed");
             return;
         }
         DiscInfo *infoNode = NULL;
         LIST_FOR_EACH_ENTRY(infoNode, &(g_capabilityList[tmp]), DiscInfo, capNode) {
-            DISC_LOGI(DISC_CONTROL, "find callback id=%d", infoNode->id);
+            DISC_LOGD(DISC_CONTROL, "find callback id=%{public}d", infoNode->id);
             infoNode->statistics.discTimes++;
             InnerDeviceFound(infoNode, device, additions);
         }
@@ -359,17 +346,18 @@ static int32_t CheckPublishInfo(const PublishInfo *info)
             return SOFTBUS_INVALID_PARAM;
         }
         if (info->dataLen > MAX_CAPABILITYDATA_LEN) {
-            DISC_LOGE(DISC_CONTROL, "dataLen(%u) > max length", info->dataLen);
+            DISC_LOGE(DISC_CONTROL, "dataLen > max length. dataLen=%{public}u", info->dataLen);
             return SOFTBUS_INVALID_PARAM;
         }
         uint32_t len = strlen((char *)info->capabilityData);
         if (info->capabilityData[info->dataLen] != '\0') {
-            DISC_LOGE(DISC_CONTROL, "capabilityData is not c-string format: len(%u) and dataLen(%u)",
+            DISC_LOGE(DISC_CONTROL, "capabilityData is not c-string format: len=%{public}u, dataLen=%{public}u",
                 len, info->dataLen);
             return SOFTBUS_INVALID_PARAM;
         }
         if (len != info->dataLen) {
-            DISC_LOGE(DISC_CONTROL, "capabilityData len(%u) != dataLen(%u)", len, info->dataLen);
+            DISC_LOGE(DISC_CONTROL, "capabilityData len != dataLen. len=%{public}u, dataLen=%{public}u",
+                len, info->dataLen);
             return SOFTBUS_INVALID_PARAM;
         }
     }
@@ -398,17 +386,18 @@ static int32_t CheckSubscribeInfo(const SubscribeInfo *info)
             return SOFTBUS_INVALID_PARAM;
         }
         if (info->dataLen > MAX_CAPABILITYDATA_LEN) {
-            DISC_LOGE(DISC_CONTROL, "dataLen(%u) > max length", info->dataLen);
+            DISC_LOGE(DISC_CONTROL, "dataLen > max length. dataLen=%{public}u", info->dataLen);
             return SOFTBUS_INVALID_PARAM;
         }
         uint32_t len = strlen((char *)info->capabilityData);
         if (info->capabilityData[info->dataLen] != '\0') {
-            DISC_LOGE(DISC_CONTROL, "capabilityData is not c-string format: len(%u) and dataLen(%u)",
+            DISC_LOGE(DISC_CONTROL, "capabilityData is not c-string format: len=%{public}u, dataLen=%{public}u",
                 len, info->dataLen);
             return SOFTBUS_INVALID_PARAM;
         }
         if (len != info->dataLen) {
-            DISC_LOGE(DISC_CONTROL, "capabilityData len(%u) != dataLen(%u)", len, info->dataLen);
+            DISC_LOGE(DISC_CONTROL, "capabilityData len != dataLen. len=%{public}u, dataLen=%{public}u",
+                len, info->dataLen);
             return SOFTBUS_INVALID_PARAM;
         }
     }
@@ -478,7 +467,10 @@ static DiscInfo *CreateDiscInfoForPublish(const PublishInfo *info)
             SoftBusFree(infoNode);
             return NULL;
         }
-        (void)memcpy_s(option->capabilityData, info->dataLen, info->capabilityData, info->dataLen);
+        if (memcpy_s(option->capabilityData, info->dataLen, info->capabilityData, info->dataLen) != EOK) {
+            DISC_LOGE(DISC_CONTROL, "memcpy_s failed");
+            return NULL;
+        }
     }
 
     int32_t bitmap = TransferStringCapToBitmap(info->capability);
@@ -517,7 +509,10 @@ static DiscInfo *CreateDiscInfoForSubscribe(const SubscribeInfo *info)
             SoftBusFree(infoNode);
             return NULL;
         }
-        (void)memcpy_s(option->capabilityData, info->dataLen, info->capabilityData, info->dataLen);
+        if (memcpy_s(option->capabilityData, info->dataLen, info->capabilityData, info->dataLen) != EOK) {
+            DISC_LOGE(DISC_CONTROL, "memcpy_s failed");
+            return NULL;
+        }
     }
 
     int32_t bimap = TransferStringCapToBitmap(info->capability);
@@ -541,7 +536,7 @@ static void DumpDiscInfoList(const DiscItem *itemNode)
     LIST_FOR_EACH_ENTRY(infoNode, &(itemNode->InfoList), DiscInfo, node) {
         itemStrLen = sprintf_s(&dumpStr[dumpStrPos], DUMP_STR_LEN - dumpStrPos, "%d,", infoNode->id);
         if (itemStrLen <= 0) {
-            DISC_LOGI(DISC_CONTROL, "info id:%s", dumpStr);
+            DISC_LOGI(DISC_CONTROL, "info id=%{public}s", dumpStr);
             dumpStrPos = 0;
             itemStrLen = sprintf_s(&dumpStr[dumpStrPos], DUMP_STR_LEN - dumpStrPos, "%d,", infoNode->id);
             DISC_CHECK_AND_RETURN_LOGW(itemStrLen > 0, DISC_CONTROL, "sprintf_s failed");
@@ -550,7 +545,7 @@ static void DumpDiscInfoList(const DiscItem *itemNode)
     }
 
     if (dumpStrPos > 0) {
-        DISC_LOGI(DISC_CONTROL, "info id:%s", dumpStr);
+        DISC_LOGI(DISC_CONTROL, "info id=%{public}s", dumpStr);
     }
 }
 
@@ -576,13 +571,13 @@ static void DfxRecordAddDiscInfoEnd(DiscInfo *info, const char *packageName, int
 static int32_t AddDiscInfoToList(SoftBusList *serviceList, const char *packageName, const InnerCallback *cb,
                                  DiscInfo *info, ServiceType type)
 {
-    if (SoftBusMutexLock(&(serviceList->lock)) != 0) {
+    if (SoftBusMutexLock(&(serviceList->lock)) != SOFTBUS_OK) {
         DfxRecordAddDiscInfoEnd(info, packageName, SOFTBUS_LOCK_ERR);
         DISC_LOGE(DISC_CONTROL, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
 
-    DISC_LOGI(DISC_CONTROL, "packageName=%s, id=%d", packageName, info->id);
+    DISC_LOGD(DISC_CONTROL, "packageName=%{public}s, id=%{public}d", packageName, info->id);
 
     DiscItem *itemNode = NULL;
     bool exist = false;
@@ -652,7 +647,7 @@ static DiscInfo *RemoveInfoFromList(SoftBusList *serviceList, const char *packag
         return NULL;
     }
 
-    DISC_LOGI(DISC_CONTROL, "packageName=%s, id=%d", packageName, id);
+    DISC_LOGI(DISC_CONTROL, "packageName=%{public}s, id=%{public}d", packageName, id);
 
     bool isIdExist = false;
     DiscItem *itemNode = NULL;
@@ -781,7 +776,7 @@ static const char* TransferModuleIdToPackageName(DiscModule moduleId)
 
 static int32_t InnerSetDiscoveryCallback(const char *packageName, const DiscInnerCallback *cb)
 {
-    if (SoftBusMutexLock(&(g_discoveryInfoList->lock)) != 0) {
+    if (SoftBusMutexLock(&(g_discoveryInfoList->lock)) != SOFTBUS_OK) {
         DISC_LOGE(DISC_CONTROL, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
@@ -927,35 +922,8 @@ int32_t DiscStopAdvertise(DiscModule moduleId, int32_t subscribeId)
     return InnerStopDiscovery(TransferModuleIdToPackageName(moduleId), subscribeId, SUBSCRIBE_INNER_SERVICE);
 }
 
-static void DfxRecordServiceStart(int32_t serverType, const char *packageName)
-{
-    DiscEventExtra extra = { 0 };
-    DiscEventExtraInit(&extra);
-    extra.serverType = serverType;
-
-    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
-    if (packageName != NULL && strncpy_s(pkgName, PKG_NAME_SIZE_MAX, packageName, PKG_NAME_SIZE_MAX - 1) == EOK) {
-        extra.callerPkg = pkgName;
-    }
-}
-
-static void DfxRecordServiceEnd(int32_t serverType, const char *packageName, int32_t reason)
-{
-    DiscEventExtra extra = { 0 };
-    DiscEventExtraInit(&extra);
-    extra.serverType = serverType;
-    extra.errcode = reason;
-    extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
-
-    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
-    if (packageName != NULL && strncpy_s(pkgName, PKG_NAME_SIZE_MAX, packageName, PKG_NAME_SIZE_MAX - 1) == EOK) {
-        extra.callerPkg = pkgName;
-    }
-}
-
 int32_t DiscPublishService(const char *packageName, const PublishInfo *info)
 {
-    DfxRecordServiceStart(SERVER_PUBLISH, packageName);
     DISC_CHECK_AND_RETURN_RET_LOGW(packageName != NULL && info != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL,
         "invalid parameters");
     DISC_CHECK_AND_RETURN_RET_LOGW(strlen(packageName) < PKG_NAME_SIZE_MAX,
@@ -973,27 +941,22 @@ int32_t DiscPublishService(const char *packageName, const PublishInfo *info)
     if (ret != SOFTBUS_OK) {
         FreeDiscInfo(infoNode, PUBLISH_SERVICE);
     }
-    DfxRecordServiceEnd(SERVER_PUBLISH, packageName, ret);
     return ret;
 }
 
 int32_t DiscUnPublishService(const char *packageName, int32_t publishId)
 {
-    DfxRecordServiceStart(SERVER_STOP_PUBLISH, packageName);
     DISC_CHECK_AND_RETURN_RET_LOGW(packageName != NULL && strlen(packageName) < PKG_NAME_SIZE_MAX,
                                   SOFTBUS_INVALID_PARAM, DISC_CONTROL, "invalid parameters");
     DISC_CHECK_AND_RETURN_RET_LOGW(g_isInited == true, SOFTBUS_DISCOVER_MANAGER_NOT_INIT, DISC_CONTROL,
         "manager is not inited");
 
-    int32_t ret = InnerUnPublishService(packageName, publishId, PUBLISH_SERVICE);
-    DfxRecordServiceEnd(SERVER_STOP_PUBLISH, packageName, ret);
-    return ret;
+    return InnerUnPublishService(packageName, publishId, PUBLISH_SERVICE);
 }
 
 int32_t DiscStartDiscovery(const char *packageName, const SubscribeInfo *info,
     const IServerDiscInnerCallback *cb)
 {
-    DfxRecordServiceStart(SERVER_DISCOVERY, packageName);
     DISC_CHECK_AND_RETURN_RET_LOGW(packageName != NULL && strlen(packageName) < PKG_NAME_SIZE_MAX,
                                   SOFTBUS_INVALID_PARAM, DISC_CONTROL, "invalid package name");
     DISC_CHECK_AND_RETURN_RET_LOGW(info != NULL && cb != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL,
@@ -1011,21 +974,17 @@ int32_t DiscStartDiscovery(const char *packageName, const SubscribeInfo *info,
     if (ret != SOFTBUS_OK) {
         FreeDiscInfo(infoNode, SUBSCRIBE_SERVICE);
     }
-    DfxRecordServiceEnd(SERVER_DISCOVERY, packageName, ret);
     return ret;
 }
 
 int32_t DiscStopDiscovery(const char *packageName, int32_t subscribeId)
 {
-    DfxRecordServiceStart(SERVER_STOP_DISCOVERY, packageName);
     DISC_CHECK_AND_RETURN_RET_LOGW(packageName != NULL && strlen(packageName) < PKG_NAME_SIZE_MAX,
                                   SOFTBUS_INVALID_PARAM, DISC_CONTROL, "invalid parameters");
     DISC_CHECK_AND_RETURN_RET_LOGW(g_isInited == true, SOFTBUS_DISCOVER_MANAGER_NOT_INIT, DISC_CONTROL,
         "manager is not inited");
 
-    int32_t ret = InnerStopDiscovery(packageName, subscribeId, SUBSCRIBE_SERVICE);
-    DfxRecordServiceEnd(SERVER_STOP_DISCOVERY, packageName, ret);
-    return ret;
+    return InnerStopDiscovery(packageName, subscribeId, SUBSCRIBE_SERVICE);
 }
 
 void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium)
@@ -1035,13 +994,13 @@ void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium)
             g_discCoapInterface->LinkStatusChanged(status);
         }
     } else {
-        DISC_LOGE(DISC_CONTROL, "not support medium=%d", medium);
+        DISC_LOGE(DISC_CONTROL, "not support medium=%{public}d", medium);
     }
 }
 
 void DiscDeviceInfoChanged(InfoTypeChanged type)
 {
-    DISC_LOGI(DISC_CONTROL, "type=%d", type);
+    DISC_LOGI(DISC_CONTROL, "type=%{public}d", type);
     if (g_discBleInterface != NULL && g_discBleInterface->UpdateLocalDeviceInfo != NULL) {
         g_discBleInterface->UpdateLocalDeviceInfo(type);
     }
@@ -1054,6 +1013,7 @@ static IdContainer* CreateIdContainer(int32_t id, const char *pkgName)
 {
     IdContainer *container = SoftBusCalloc(sizeof(IdContainer));
     if (container == NULL) {
+        DISC_LOGE(DISC_CONTROL, "container calloc failed");
         return NULL;
     }
 
@@ -1063,11 +1023,13 @@ static IdContainer* CreateIdContainer(int32_t id, const char *pkgName)
     uint32_t nameLen = strlen(pkgName) + 1;
     container->pkgName = SoftBusCalloc(nameLen);
     if (container->pkgName == NULL) {
+        DISC_LOGE(DISC_CONTROL, "Container pkgName calloc failed");
         SoftBusFree(container);
         return NULL;
     }
 
     if (strcpy_s(container->pkgName, nameLen, pkgName) != EOK) {
+        DISC_LOGE(DISC_CONTROL, "strcpy_s failed");
         SoftBusFree(container);
         return NULL;
     }
@@ -1089,11 +1051,13 @@ static void CleanupPublishDiscovery(ListNode *ids, ServiceType type)
     LIST_FOR_EACH_ENTRY(it, ids, IdContainer, node) {
         if (type == PUBLISH_SERVICE) {
             ret = DiscUnPublishService(it->pkgName, it->id);
-            DISC_LOGE(DISC_CONTROL, "clean publish pkgName=%s id=%d ret=%d", it->pkgName, it->id, ret);
+            DISC_LOGE(DISC_CONTROL, "clean publish pkgName=%{public}s, id=%{public}d, ret=%{public}d",
+                it->pkgName, it->id, ret);
             return;
         } else if (type == SUBSCRIBE_SERVICE) {
             ret = DiscStopDiscovery(it->pkgName, it->id);
-            DISC_LOGE(DISC_CONTROL, "clean subscribe pkgName=%s id=%d ret=%d", it->pkgName, it->id, ret);
+            DISC_LOGE(DISC_CONTROL, "clean subscribe pkgName=%{public}s, id=%{public}d, ret=%{public}d",
+                it->pkgName, it->id, ret);
         }
     }
 }
@@ -1103,7 +1067,7 @@ static void RemoveDiscInfoByPackageName(SoftBusList *itemList, const ServiceType
     ListNode ids;
     ListInit(&ids);
 
-    if (SoftBusMutexLock(&itemList->lock) != 0) {
+    if (SoftBusMutexLock(&itemList->lock) != SOFTBUS_OK) {
         DISC_LOGE(DISC_CONTROL, "lock failed");
         return;
     }
@@ -1169,7 +1133,7 @@ void DiscMgrDeathCallback(const char *pkgName)
     DISC_CHECK_AND_RETURN_LOGW(pkgName != NULL, DISC_CONTROL, "pkgName is null");
     DISC_CHECK_AND_RETURN_LOGW(g_isInited == true, DISC_CONTROL, "disc manager is not inited");
 
-    DISC_LOGI(DISC_CONTROL, "%s is dead", pkgName);
+    DISC_LOGI(DISC_CONTROL, "pkg is dead. pkgName=%{public}s", pkgName);
     RemoveDiscInfoForPublish(pkgName);
     RemoveDiscInfoForDiscovery(pkgName);
 }

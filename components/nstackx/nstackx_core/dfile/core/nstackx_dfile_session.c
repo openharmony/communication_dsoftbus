@@ -75,14 +75,12 @@ static QueueNode *CreateQueueNode(const uint8_t *frame, size_t length,
     queueNode->sendLen = 0;
 
     if (memcpy_s(queueNode->frame, length, frame, length) != EOK) {
-        free(queueNode->frame);
-        free(queueNode);
+        DestroyQueueNode(queueNode);
         return NULL;
     }
     if (peerAddr != NULL) {
         if (memcpy_s(&queueNode->peerAddr, sizeof(struct sockaddr_in), peerAddr, sizeof(struct sockaddr_in)) != EOK) {
-            free(queueNode->frame);
-            free(queueNode);
+            DestroyQueueNode(queueNode);
             return NULL;
         }
     }
@@ -486,7 +484,7 @@ void DFileSessionSendSetting(PeerInfo *peerInfo)
             return;
         }
     }
-    
+
     int32_t ret = DFileWriteHandle(buf, frameLen, peerInfo);
     if (ret != (int32_t)frameLen && ret != NSTACKX_EAGAIN) {
         data.errorCode = NSTACKX_EFAILED;
@@ -918,8 +916,7 @@ int32_t DFileWriteHandle(const uint8_t *frame, size_t len, void *context)
 
     if (PthreadMutexLock(&session->outboundQueueLock) != 0) {
         DFILE_LOGE(TAG, "pthread mutex lock failed");
-        free(queueNode->frame);
-        free(queueNode);
+        DestroyQueueNode(queueNode);
         return NSTACKX_EFAILED;
     }
     ListInsertTail(&session->outboundQueue, &queueNode->list);
@@ -1827,7 +1824,7 @@ void *DFileReceiverHandle(void *arg)
             break;
         }
     }
-    DFILE_LOGI(TAG, "Total recv blocks: direct %llu inner %llu", session->recvBlockNumDirect, 
+    DFILE_LOGI(TAG, "Total recv blocks: direct %llu inner %llu", session->recvBlockNumDirect,
             session->recvBlockNumInner);
     if (ret < 0 && ret != NSTACKX_EAGAIN && ret != NSTACKX_PEER_CLOSE) {
         PostFatalEvent(session);

@@ -166,13 +166,13 @@ static int BindLocalIP(int fd, const char *localIP, uint16_t port)
     addr.sinFamily = SOFTBUS_AF_INET;
     int rc = SoftBusInetPtoN(SOFTBUS_AF_INET, localIP, &addr.sinAddr);
     if (rc != SOFTBUS_ADAPTER_OK) {
-        CONN_LOGE(CONN_COMMON, "SoftBusInetPtoN rc=%d", rc);
+        CONN_LOGE(CONN_COMMON, "SoftBusInetPtoN rc=%{public}d", rc);
         return SOFTBUS_ERR;
     }
     addr.sinPort = SoftBusHtoNs(port);
     rc = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketBind(fd, (SoftBusSockAddr *)&addr, sizeof(addr)));
     if (rc < 0) {
-        CONN_LOGE(CONN_COMMON, "bind fd=%d,rc=%d", fd, rc);
+        CONN_LOGE(CONN_COMMON, "bind fd=%{public}d, rc=%{public}d", fd, rc);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -182,7 +182,7 @@ int32_t SetIpTos(int fd, uint32_t tos)
 {
     int rc = SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_IP, SOFTBUS_IP_TOS, &tos, sizeof(tos));
     if (rc != 0) {
-        CONN_LOGE(CONN_COMMON, "set tos failed, fd=%d", fd);
+        CONN_LOGE(CONN_COMMON, "set tos failed, fd=%{public}d", fd);
         return SOFTBUS_TCP_SOCKET_ERR;
     }
     return SOFTBUS_OK;
@@ -195,11 +195,11 @@ static int32_t OpenTcpServerSocket(const LocalListenerInfo *option)
         return -1;
     }
     if (option->type != CONNECT_TCP && option->type != CONNECT_P2P) {
-        CONN_LOGE(CONN_COMMON, "bad type!type=%d", option->type);
+        CONN_LOGE(CONN_COMMON, "bad type! type=%{public}d", option->type);
         return -1;
     }
     if (option->socketOption.port < 0) {
-        CONN_LOGE(CONN_COMMON, "bad port!port=%d", option->socketOption.port);
+        CONN_LOGE(CONN_COMMON, "bad port! port=%{public}d", option->socketOption.port);
         return -1;
     }
 
@@ -207,18 +207,18 @@ static int32_t OpenTcpServerSocket(const LocalListenerInfo *option)
     int ret = SoftBusSocketCreate(
         SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM | SOFTBUS_SOCK_CLOEXEC | SOFTBUS_SOCK_NONBLOCK, 0, (int32_t *)&fd);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "Create socket failed! ret=%d", ret);
+        CONN_LOGE(CONN_COMMON, "Create socket failed! ret=%{public}d", ret);
         return -1;
     }
 
     SetServerOption(fd);
     ret = BindLocalIP(fd, option->socketOption.addr, (uint16_t)option->socketOption.port);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "BindLocalIP ret=%d", ret);
+        CONN_LOGE(CONN_COMMON, "BindLocalIP ret=%{public}d", ret);
         ConnShutdownSocket(fd);
         return -1;
     }
-    CONN_LOGI(CONN_COMMON, "server listen tcp socket, fd=%d", fd);
+    CONN_LOGI(CONN_COMMON, "server listen tcp socket, fd=%{public}d", fd);
     return fd;
 }
 
@@ -242,9 +242,10 @@ static int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(option != NULL, SOFTBUS_ERR, CONN_COMMON, "invalid param, option is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(option->type == CONNECT_TCP || option->type == CONNECT_P2P ||
-        option->type == CONNECT_P2P_REUSE, SOFTBUS_ERR, CONN_COMMON, "invalid param, unsupport type=%d", option->type);
+        option->type == CONNECT_P2P_REUSE, SOFTBUS_ERR, CONN_COMMON, "invalid param, unsupport type=%{public}d",
+        option->type);
     CONN_CHECK_AND_RETURN_RET_LOGW(option->socketOption.port > 0, SOFTBUS_ERR, CONN_COMMON,
-        "invalid param, invalid port=%d", option->socketOption.port);
+        "invalid param, invalid port=%{public}d", option->socketOption.port);
 
     char animizedIp[IP_LEN] = { 0 };
     ConvertAnonymizeIpAddress(animizedIp, IP_LEN, option->socketOption.addr, IP_LEN);
@@ -252,12 +253,13 @@ static int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp
     int32_t fd = -1;
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &fd);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "create socket failed, server ip=%s, server port=%d, error=%d",
+        CONN_LOGE(CONN_COMMON, "create socket failed, serverIp=%{public}s, serverPort=%{public}d, error=%{public}d",
             animizedIp, option->socketOption.port, ret);
         return ret;
     }
     if (isNonBlock && ConnToggleNonBlockMode(fd, true) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "set nonblock failed, server ip=%s, server port=%d, fd=%d", animizedIp,
+        CONN_LOGE(
+            CONN_COMMON, "set nonblock failed, serverIp=%{public}s, serverPort=%{public}d, fd=%{public}d", animizedIp,
             option->socketOption.port, fd);
         SoftBusSocketClose(fd);
         return SOFTBUS_ERR;
@@ -265,8 +267,9 @@ static int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp
     SetClientOption(fd);
     ret = BindTcpClientAddr(fd, myIp);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "bind client address failed, server ip=%s, server port=%d, error=%d", animizedIp,
-            option->socketOption.port, ret);
+        CONN_LOGE(
+            CONN_COMMON, "bind client address failed, serverIp=%{public}s, serverPort=%{public}d, error=%{public}d",
+            animizedIp, option->socketOption.port, ret);
         ConnShutdownSocket(fd);
         return ret;
     }
@@ -278,13 +281,15 @@ static int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp
     ret = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketConnect(fd, (SoftBusSockAddr *)&addr));
     if ((ret != SOFTBUS_ADAPTER_OK) && (ret != SOFTBUS_ADAPTER_SOCKET_EINPROGRESS) &&
         (ret != SOFTBUS_ADAPTER_SOCKET_EAGAIN)) {
-        CONN_LOGE(CONN_COMMON, "client connect failed, server ip=%s, server port=%d, fd=%d, error=%d, errno=%d",
+        CONN_LOGE(CONN_COMMON,
+            "client connect failed, serverIp=%{public}s, serverPort=%{public}d, fd=%{public}d, error=%{public}d, "
+            "errno=%{public}d",
             animizedIp, option->socketOption.port, fd, ret, errno);
         ConnShutdownSocket(fd);
         return ret;
     }
-    CONN_LOGI(CONN_COMMON, "client open tcp socket, server ip=%s, server port=%d, fd=%d", animizedIp,
-        option->socketOption.port, fd);
+    CONN_LOGI(CONN_COMMON, "client open tcp socket, serverIp=%{public}s, serverPort=%{public}d, fd=%{public}d",
+        animizedIp, option->socketOption.port, fd);
     return fd;
 }
 
@@ -294,7 +299,7 @@ static int32_t GetTcpSockPort(int32_t fd)
 
     int rc = SoftBusSocketGetLocalName(fd, (SoftBusSockAddr *)&addr);
     if (rc != 0) {
-        CONN_LOGE(CONN_COMMON, "fd=%d,GetTcpSockPort rc=%d", fd, rc);
+        CONN_LOGE(CONN_COMMON, "GetTcpSockPort. fd=%{public}d, rc=%{public}d", fd, rc);
         return rc;
     }
     return SoftBusNtoHs(addr.sinPort);
@@ -377,7 +382,7 @@ static int32_t AcceptTcpClient(int32_t fd, ConnectOption *clientAddr, int32_t *c
     int32_t ret =
         SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketAccept(fd, (SoftBusSockAddr *)&addr, cfd));
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "accept failed, ret=%" PRId32 " cfd=%d, fd=%d", ret, *cfd, fd);
+        CONN_LOGE(CONN_COMMON, "accept failed, ret=%{public}" PRId32 ", cfd=%{public}d, fd=%{public}d", ret, *cfd, fd);
         return ret;
     }
 

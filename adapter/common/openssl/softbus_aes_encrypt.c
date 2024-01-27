@@ -331,7 +331,8 @@ static int32_t OpensslAesGcmEncrypt(
     }
     outLen += outBufLen;
     if (*outDataLen < ((uint32_t)outLen + AES_GCM_TAG_LEN)) {
-        COMM_LOGE(COMM_ADAPTER, "invalid param. *outDataLen is: %u, outLen is: %u", *outDataLen, (uint32_t)outLen);
+        COMM_LOGE(COMM_ADAPTER, "invalid param. *outDataLen=%{public}u, outLen=%{public}u", *outDataLen,
+            (uint32_t)outLen);
         EVP_CIPHER_CTX_free(ctx);
         return SOFTBUS_INVALID_PARAM;
     }

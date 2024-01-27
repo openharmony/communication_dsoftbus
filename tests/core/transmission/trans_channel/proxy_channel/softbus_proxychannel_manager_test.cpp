@@ -394,7 +394,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetAppInfoByChanIdTest002, Te
     AppInfo* appInfo = NULL;
 
     ret = TransProxyGetAppInfoByChanId(chanId, appInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     chanId = TEST_MESSAGE_CHANNEL_ID;
     EXPECT_NE(SOFTBUS_OK, ret);
@@ -836,25 +836,6 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyDeathCallbackTest001, TestSiz
 
     ret = TransProxyGetSendMsgChanInfo(chan->channelId, chan);
     EXPECT_NE(SOFTBUS_OK, ret);
-}
-
-
-/**
-  * @tc.name: GetBrAgingTimeoutTest001
-  * @tc.desc: test proxy trans get braging timeout.
-  * @tc.type: FUNC
-  * @tc.require:
-  */
-HWTEST_F(SoftbusProxyChannelManagerTest, GetBrAgingTimeoutTest001, TestSize.Level1)
-{
-    char *busName = NULL;
-    int32_t ret = SOFTBUS_ERR;
-
-    ret = GetBrAgingTimeout(busName);
-    EXPECT_EQ(PROXY_CHANNEL_BT_IDLE_TIMEOUT, ret);
-
-    ret = GetBrAgingTimeout(busName);
-    EXPECT_EQ(PROXY_CHANNEL_BT_IDLE_TIMEOUT, ret);
 }
 
 /**

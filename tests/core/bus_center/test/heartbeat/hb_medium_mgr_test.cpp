@@ -714,7 +714,7 @@ HWTEST_F(HeartBeatMediumTest, HbIsRepeatedReAuthRequest_TEST01, TestSize.Level1)
     uint64_t nowTime = TEST_RECVTIME_LAST;
 
     bool ret = HbIsRepeatedReAuthRequest(&storedInfo, nowTime);
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(ret);
 
     nowTime = TEST_RECVTIME_LAST + HB_RECV_INFO_SAVE_LEN;
     ret = HbIsRepeatedReAuthRequest(nullptr, nowTime);

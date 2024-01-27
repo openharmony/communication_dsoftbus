@@ -94,6 +94,7 @@ void *LnnMapGet(const Map *map, const char *key);
 
 /**
  * Erase map element
+ * Erase cannot be used on the iterator
  *
  * @param : map Map see details in type Map
  *          key Map key

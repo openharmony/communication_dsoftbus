@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 #include "common_list.h"
 #include "softbus_errcode.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_hidumper_bc_mgr.h"
 #include "softbus_hidumper_buscenter.h"
 #include "softbus_hidumper_conn.h"
 #include "softbus_hidumper_disc.h"
@@ -94,7 +95,7 @@ static SoftBusDumpVarNode *SoftBusCreateDumpVarNode(const char *varName, SoftBus
         return NULL;
     }
     if (strcpy_s(varNode->varName, SOFTBUS_DUMP_VAR_NAME_LEN, varName) != EOK) {
-        COMM_LOGE(COMM_DFX, "SoftBusCreateDumpVarNode set varName  %s fail.", varName);
+        COMM_LOGE(COMM_DFX, "SoftBusCreateDumpVarNode set varName fail. varName=%{public}s", varName);
         SoftBusFree(varNode);
         return NULL;
     }
@@ -225,6 +226,11 @@ int32_t SoftBusDumpDispatch(int fd, int32_t argc, const char **argv)
 
 int32_t SoftBusHiDumperModuleInit(void)
 {
+    if (SoftBusBcMgrHiDumperInit() != SOFTBUS_OK) {
+        COMM_LOGE(COMM_INIT, "init BroadcastManager HiDumper fail!");
+        return SOFTBUS_ERR;
+    }
+
     if (SoftBusDiscHiDumperInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_INIT, "init Disc HiDumper fail!");
         return SOFTBUS_ERR;
@@ -254,6 +260,7 @@ int32_t SoftBusHiDumperModuleInit(void)
 
 void SoftBusHiDumperModuleDeInit(void)
 {
+    SoftBusHiDumperBcMgrDeInit();
     SoftBusHiDumperDiscDeInit();
     SoftBusHiDumperConnDeInit();
     SoftBusHiDumperBusCenterDeInit();

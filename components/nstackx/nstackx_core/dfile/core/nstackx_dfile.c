@@ -61,6 +61,11 @@ typedef struct {
     OnDFileRenameFile onRenameFile;
 } DFileSetRenameHookCtx;
 
+typedef struct {
+    DFileSession *session;
+    FileListInfo *fileListInfo;
+} DFileSendFileCtx;
+
 static int32_t GetDFileSessionId(uint16_t *sessionId)
 {
     if (PthreadMutexLock(&g_dFileSessionIdMutex) != 0) {
@@ -290,7 +295,6 @@ static uint8_t HasRepeatedNumber(const uint16_t *data, uint16_t len)
     return NSTACKX_FALSE;
 }
 
-
 typedef struct {
     DFileSession *session;
     char *pathList[NSTACKX_MAX_STORAGE_PATH_NUM];
@@ -428,11 +432,6 @@ int32_t NSTACKX_DFileSetStoragePathList(int32_t sessionId, const char *path[], c
     }
     return NSTACKX_EOK;
 }
-
-typedef struct {
-    DFileSession *session;
-    FileListInfo *fileListInfo;
-} DFileSendFileCtx;
 
 static inline void AddFileList(DFileSession *session, FileListInfo *fileListInfo)
 {

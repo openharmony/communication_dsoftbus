@@ -33,6 +33,7 @@ struct ResourceManager {
     struct InterfaceInfo* (*getInterfaceInfo)(const char *interface);
     void (*notifyInterfaceInfoChange)(struct InterfaceInfo *info);
     bool (*isInterfaceAvailable)(const char *interface, bool forShare);
+    bool (*isStationAndHmlDBAC)(void);
     void (*registerListener)(struct ResourceManagerListener *listener);
     int32_t (*getAllInterfacesSimpleInfo)(struct InterfaceInfo **infoArray, int32_t *infoArraySize);
     int32_t (*getAllInterfacesInfo)(struct InterfaceInfo **infoArray, int32_t *infoArraySize);

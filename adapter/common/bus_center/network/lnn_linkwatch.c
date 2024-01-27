@@ -43,7 +43,7 @@ static int32_t AddAttr(struct nlmsghdr *nlMsgHdr, uint32_t maxLen, int32_t type,
     struct rtattr *rta = NULL;
 
     if (NLMSG_ALIGN(nlMsgHdr->nlmsg_len) + RTA_ALIGN(len) > maxLen) {
-        LNN_LOGE(LNN_BUILDER, "message exceeded bound of %d", maxLen);
+        LNN_LOGE(LNN_BUILDER, "message exceeded bound. maxLen=%{public}d", maxLen);
         return SOFTBUS_ERR;
     }
     rta = ((struct rtattr *) (((uint8_t *) (nlMsgHdr)) + NLMSG_ALIGN((nlMsgHdr)->nlmsg_len)));
@@ -66,7 +66,7 @@ static int32_t ProcessNetlinkAnswer(struct nlmsghdr *answer, int32_t bufLen, uin
     for (hdr = (struct nlmsghdr *)answer; remain >= (int32_t)sizeof(*hdr);) {
         len = hdr->nlmsg_len;
         if ((hdr->nlmsg_len - sizeof(*hdr)) < 0 || len > (uint32_t)remain) {
-            LNN_LOGE(LNN_BUILDER, "malformed message: len=%d", len);
+            LNN_LOGE(LNN_BUILDER, "malformed message: len=%{public}d", len);
             return SOFTBUS_ERR;
         }
         if (hdr->nlmsg_seq != seq) {
@@ -108,7 +108,7 @@ static int32_t RtNetlinkTalk(struct nlmsghdr *nlMsgHdr, struct nlmsghdr *answer,
             if (status == SOFTBUS_ADAPTER_SOCKET_EINTR || status == SOFTBUS_ADAPTER_SOCKET_EAGAIN) {
                 continue;
             }
-            LNN_LOGE(LNN_BUILDER, "netlink receive error=%d", status);
+            LNN_LOGE(LNN_BUILDER, "netlink receive error, status=%{public}d", status);
             SoftBusSocketClose(fd);
             return SOFTBUS_ERR;
         }
@@ -131,7 +131,8 @@ static int32_t GetRtAttr(struct rtattr *rta, int32_t len, uint16_t type, uint8_t
             continue;
         }
         if (memcpy_s(value, valueLen, RTA_DATA(attr), (uint32_t)RTA_PAYLOAD(attr)) != EOK) {
-            LNN_LOGE(LNN_BUILDER, "get attr fail: %d, %d", valueLen, RTA_PAYLOAD(attr));
+            LNN_LOGE(LNN_BUILDER, "get attr fail. valueLen=%{public}d, attr=%{public}u",
+                valueLen, (uint32_t)RTA_PAYLOAD(attr));
             break;
         }
         return SOFTBUS_OK;

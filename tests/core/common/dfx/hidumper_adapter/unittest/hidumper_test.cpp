@@ -107,19 +107,19 @@ HWTEST_F(HidumperTest, SoftBusHiDumperInitTest001, TestSize.Level1)
 // -------------------------------------------------disc----------------------------------------- //
 static int32_t DiscVarTest1Dumper(int fd)
 {
-    COMM_LOGI(COMM_TEST, "DiscVarTest1Dumper called, fd = %d", fd);
+    COMM_LOGI(COMM_TEST, "DiscVarTest1Dumper called, fd=%{public}d", fd);
     return SOFTBUS_OK;
 }
 
 static int32_t DiscVarTest2Dumper(int fd)
 {
-    COMM_LOGI(COMM_TEST, "DiscVarTest2Dumper called, fd = %d", fd);
+    COMM_LOGI(COMM_TEST, "DiscVarTest2Dumper called, fd=%{public}d", fd);
     return SOFTBUS_OK;
 }
 
 static int32_t DiscVarTest3Dumper(int fd)
 {
-    COMM_LOGI(COMM_TEST, "DiscVarTest3Dumper called, fd = %d", fd);
+    COMM_LOGI(COMM_TEST, "DiscVarTest3Dumper called, fd=%{public}d", fd);
     return SOFTBUS_OK;
 }
 
@@ -190,19 +190,19 @@ HWTEST_F(HidumperTest, SoftBusRegDiscVarDump004, TestSize.Level1)
 // -------------------------------------------------conn-----------------------------------------//
 static int32_t ConnVarTest1Dumper(int fd)
 {
-    COMM_LOGI(COMM_TEST, "ConnVarTest1Dumper called, fd = %d", fd);
+    COMM_LOGI(COMM_TEST, "ConnVarTest1Dumper called, fd=%{public}d", fd);
     return SOFTBUS_OK;
 }
 
 static int32_t ConnVarTest2Dumper(int fd)
 {
-    COMM_LOGI(COMM_TEST, "ConnVarTest2Dumper called, fd = %d", fd);
+    COMM_LOGI(COMM_TEST, "ConnVarTest2Dumper called, fd=%{public}d", fd);
     return SOFTBUS_OK;
 }
 
 static int32_t ConnVarTest3Dumper(int fd)
 {
-    COMM_LOGI(COMM_TEST, "ConnVarTest3Dumper called, fd = %d", fd);
+    COMM_LOGI(COMM_TEST, "ConnVarTest3Dumper called, fd=%{public}d", fd);
     return SOFTBUS_OK;
 }
 
@@ -274,19 +274,19 @@ HWTEST_F(HidumperTest, SoftBusRegConnVarDump004, TestSize.Level1)
 // -------------------------------------------------buscenter-----------------------------------------//
 static int32_t LnnVarTest1Dumper(int fd)
 {
-    COMM_LOGI(COMM_TEST, "LnnVarTest1Dumper called, fd = %d", fd);
+    COMM_LOGI(COMM_TEST, "LnnVarTest1Dumper called, fd=%{public}d", fd);
     return SOFTBUS_OK;
 }
 
 static int32_t LnnVarTest2Dumper(int fd)
 {
-    COMM_LOGI(COMM_TEST, "LnnVarTest2Dumper called, fd = %d", fd);
+    COMM_LOGI(COMM_TEST, "LnnVarTest2Dumper called, fd=%{public}d", fd);
     return SOFTBUS_OK;
 }
 
 static int32_t LnnVarTest3Dumper(int fd)
 {
-    COMM_LOGI(COMM_TEST, "LnnVarTest3Dumper called, fd = %d", fd);
+    COMM_LOGI(COMM_TEST, "LnnVarTest3Dumper called, fd=%{public}d", fd);
     return SOFTBUS_OK;
 }
 
@@ -647,7 +647,7 @@ HWTEST_F(HidumperTest, SoftBusDumpProcess011, TestSize.Level1)
 
 int32_t DumpHandlerTest1(int fd, int32_t argc, const char **argv)
 {
-    COMM_LOGE(COMM_TEST, "DumpHandlerTest1:fd = %d, argc = %d", fd, argc);
+    COMM_LOGE(COMM_TEST, "DumpHandlerTest1:fd=%{public}d, argc=%{public}d", fd, argc);
     return SOFTBUS_OK;
 }
 /**

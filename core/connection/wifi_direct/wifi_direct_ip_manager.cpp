@@ -63,8 +63,10 @@ static int32_t ConfigIp(const char *interface, struct WifiDirectIpv4Info *local,
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "convert local ip failed");
     ret = WifiDirectIpv4ToString(remote, remoteIp, sizeof(remoteIp));
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "convert remote ip failed");
-    CONN_LOGD(CONN_WIFI_DIRECT, "config ip for %s, localIp=%s remoteIp=%s remoteMac=%s", interface,
-              WifiDirectAnonymizeIp(localIp), WifiDirectAnonymizeIp(remoteIp), WifiDirectAnonymizeMac(remoteMac));
+    CONN_LOGD(CONN_WIFI_DIRECT,
+        "config ip. interface=%{public}s, localIp=%{public}s, remoteIp=%{public}s, remoteMac=%{public}s",
+        interface, WifiDirectAnonymizeIp(localIp), WifiDirectAnonymizeIp(remoteIp),
+        WifiDirectAnonymizeMac(remoteMac));
 
     ret = AddInterfaceAddress(interface, localIp, local->prefixLength);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "add ip failed");
@@ -86,9 +88,11 @@ static void ReleaseIp(const char *interface, struct WifiDirectIpv4Info *local, s
     ret = WifiDirectIpv4ToString(remote, remoteIp, sizeof(remoteIp));
     CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "convert remote ip failed");
 
-    CONN_LOGD(CONN_WIFI_DIRECT, "release ip for %s, localIp=%s/%hhu remoteIp=%s remoteMac=%s", interface,
-              WifiDirectAnonymizeIp(localIp), local->prefixLength,
-              WifiDirectAnonymizeIp(remoteIp), WifiDirectAnonymizeMac(remoteMac));
+    CONN_LOGD(CONN_WIFI_DIRECT,
+        "release ip. interface=%{public}s, localIp=%{public}s, localPrefixLength=%{public}hhu, "
+        "remoteIp=%{public}s, remoteMac=%{public}s",
+        interface, WifiDirectAnonymizeIp(localIp), local->prefixLength,
+        WifiDirectAnonymizeIp(remoteIp), WifiDirectAnonymizeMac(remoteMac));
 
     ret = DeleteInterfaceAddress(interface, localIp, local->prefixLength);
     CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "delete ip failed");
@@ -101,11 +105,11 @@ static void ReleaseIp(const char *interface, struct WifiDirectIpv4Info *local, s
 
 static void ClearAllIps(const char *interface)
 {
-    CONN_LOGD(CONN_WIFI_DIRECT, "%s", interface);
+    CONN_LOGD(CONN_WIFI_DIRECT, "interface=%{public}s", interface);
     for (const auto &local : g_localIps) {
         const auto *localIp = local.first.c_str();
         if (DeleteInterfaceAddress(interface, localIp, local.second) != SOFTBUS_OK) {
-            CONN_LOGE(CONN_WIFI_DIRECT, "delete ip=%s failed", WifiDirectAnonymizeIp(localIp));
+            CONN_LOGE(CONN_WIFI_DIRECT, "delete failed. ip=%{public}s", WifiDirectAnonymizeIp(localIp));
         }
     }
 
@@ -113,8 +117,10 @@ static void ClearAllIps(const char *interface)
         const auto *remoteIp = remote.first.c_str();
         const auto *remoteMac = remote.second.c_str();
         if (DeleteStaticArp(interface, remoteIp, remoteMac) != SOFTBUS_OK) {
-            CONN_LOGE(CONN_WIFI_DIRECT, "delete arp (%s,%s) failed", WifiDirectAnonymizeIp(remoteIp),
-                      WifiDirectAnonymizeIp(remoteMac));
+            CONN_LOGE(CONN_WIFI_DIRECT,
+                "delete arp failed. "
+                "WifiDirectAnonymizeIp.remoteIp=%{public}s, WifiDirectAnonymizeIp.remoteMac=%{public}s",
+                WifiDirectAnonymizeIp(remoteIp), WifiDirectAnonymizeIp(remoteMac));
         }
     }
 }
@@ -135,7 +141,7 @@ static std::vector<std::string> GetHmlAllUsedIp(std::initializer_list<std::vecto
             std::string ipStr = ip;
             if (ipStr.find(HML_IP_NET_PREFIX) != std::string::npos) {
                 hmlAll.push_back(ipStr);
-                CONN_LOGI(CONN_WIFI_DIRECT, "%s", WifiDirectAnonymizeIp(ip));
+                CONN_LOGI(CONN_WIFI_DIRECT, "WifiDirectAnonymizeIp=%{public}s", WifiDirectAnonymizeIp(ip));
             }
         }
     }
@@ -165,7 +171,7 @@ static std::string ApplySubNet(struct WifiDirectIpv4Info *remoteArray, size_t re
             }
         }
         if (found) {
-            CONN_LOGI(CONN_WIFI_DIRECT, "subNet=%s", subNet.c_str());
+            CONN_LOGI(CONN_WIFI_DIRECT, "subNet=%{public}s", subNet.c_str());
             return subNet;
         }
     }

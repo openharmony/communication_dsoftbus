@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,9 +24,9 @@
 typedef struct {
     ListNode node;
     char name[PKG_NAME_SIZE_MAX]; /* softbus client name */
-    unsigned int handle; /* use for small system device */
-    unsigned int token; /* use for small system device */
-    unsigned int cookie; /* use for small system device */
+    unsigned int handle;          /* use for small system device */
+    unsigned int token;           /* use for small system device */
+    unsigned int cookie;          /* use for small system device */
 } SoftBusClientInfoNode;
 
 static SoftBusList *g_clientInfoList = NULL;
@@ -40,7 +40,7 @@ int SERVER_InitClient(void)
 
     g_clientInfoList = CreateSoftBusList();
     if (g_clientInfoList == NULL) {
-        COMM_LOGE(COMM_SVC, "init service info list failed");
+        COMM_LOGE(COMM_SVC, "init client info list failed");
         return SOFTBUS_MALLOC_ERR;
     }
 
@@ -53,19 +53,18 @@ int SERVER_RegisterService(const char *name, const struct CommonScvId *svcId)
         COMM_LOGE(COMM_SVC, "invalid param");
         return SOFTBUS_ERR;
     }
-    COMM_LOGI(COMM_SVC, "new client register:%s", name);
+    COMM_LOGI(COMM_SVC, "new client register=%{public}s", name);
 
     if (g_clientInfoList == NULL) {
         COMM_LOGE(COMM_SVC, "not init");
         return SOFTBUS_ERR;
     }
 
-    SoftBusClientInfoNode *clientInfo = SoftBusMalloc(sizeof(SoftBusClientInfoNode));
+    SoftBusClientInfoNode *clientInfo = SoftBusCalloc(sizeof(SoftBusClientInfoNode));
     if (clientInfo == NULL) {
         COMM_LOGE(COMM_SVC, "malloc failed");
         return SOFTBUS_ERR;
     }
-    (void)memset_s(clientInfo, sizeof(SoftBusClientInfoNode), 0, sizeof(SoftBusClientInfoNode));
 
     if (strcpy_s(clientInfo->name, sizeof(clientInfo->name), name) != EOK) {
         COMM_LOGE(COMM_SVC, "strcpy failed");
@@ -126,6 +125,10 @@ int SERVER_GetIdentityByPkgName(const char *name, struct CommonScvId *svcId)
 
 int SERVER_GetClientInfoNodeNum(int *num)
 {
+    if (num == NULL) {
+        COMM_LOGE(COMM_SVC, "num is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
     *num = 0;
     if (g_clientInfoList == NULL) {
         COMM_LOGE(COMM_SVC, "not init");
@@ -162,6 +165,8 @@ int SERVER_GetAllClientIdentity(struct CommonScvId *svcId, int num)
             svcId[i].token = clientInfo->token;
             svcId[i].cookie = clientInfo->cookie;
             i++;
+        } else {
+            break;
         }
     }
     (void)SoftBusMutexUnlock(&g_clientInfoList->lock);
@@ -170,15 +175,19 @@ int SERVER_GetAllClientIdentity(struct CommonScvId *svcId, int num)
 
 void SERVER_UnregisterService(const char *name)
 {
+    if (name == NULL) {
+        COMM_LOGE(COMM_SVC, "invalid parameters");
+        return;
+    }
     if (g_clientInfoList == NULL) {
         COMM_LOGE(COMM_SVC, "server info list not init");
         return;
     }
-    if (SoftBusMutexLock(&g_clientInfoList->lock) != 0) {
+    if (SoftBusMutexLock(&g_clientInfoList->lock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "lock failed");
         return;
     }
-    COMM_LOGE(COMM_SVC, "client service %s died, remove it from softbus server", name);
+    COMM_LOGE(COMM_SVC, "client service died, remove it from softbus server. name=%{public}s", name);
     SoftBusClientInfoNode *clientInfo = NULL;
     LIST_FOR_EACH_ENTRY(clientInfo, &g_clientInfoList->list, SoftBusClientInfoNode, node) {
         if (strcmp(clientInfo->name, name) == 0) {

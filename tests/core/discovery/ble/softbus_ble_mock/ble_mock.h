@@ -21,7 +21,6 @@
 #include <gmock/gmock.h>
 #include <mutex>
 
-#include "softbus_adapter_ble_gatt.h"
 #include "softbus_adapter_ble_gatt_client.h"
 #include "softbus_adapter_ble_gatt_server.h"
 #include "softbus_adapter_bt_common.h"
@@ -30,7 +29,6 @@
 
 class BleInterface {
 public:
-    virtual int BleGattLockInit() = 0;
     virtual int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener) = 0;
     virtual int SoftBusRemoveBtStateListener(int listenerId) = 0;
 
@@ -68,7 +66,6 @@ public:
     BleMock();
     ~BleMock();
 
-    MOCK_METHOD(int, BleGattLockInit, (), (override));
     MOCK_METHOD(int, SoftBusAddBtStateListener, (const SoftBusBtStateListener *listener), (override));
     MOCK_METHOD(int, SoftBusRemoveBtStateListener, (int listenerId), (override));
     MOCK_METHOD(int32_t, InitBroadcastMgr, (), (override));
@@ -98,7 +95,6 @@ public:
     bool GetAsyncAdvertiseResult();
     bool IsScanning();
 
-    static int32_t ActionOfBleGattLockInit();
     static int32_t ActionOfAddBtStateListener(const SoftBusBtStateListener *listener);
     static int32_t ActionOfRemoveBtStateListener(int listenerId);
     static int32_t ActionOfInitBroadcastMgr();
@@ -148,7 +144,8 @@ public:
         0x63, 0x0B, 0x76, 0x19, 0xAE, 0x21, 0x0E, 0x3A, 0x4D, 0x79, 0x20, 0x44, 0x65 };
     static inline uint8_t activeDiscoveryAdvData2[] = { 0x04, 0x05, 0x90, 0x00, 0x01, 0x12, 0x00, 0x18, 0xE8, 0x31,
         0xF7, 0x63, 0x0B, 0x76, 0x19, 0xAE, 0x21, 0x0E, 0x3A, 0x4D, 0x79, 0x20, 0x44, 0x65 };
-    static inline uint8_t activeDiscoveryRspData[] = { 0x76, 0x69, 0x63, 0x65, 0x00 };
+    static inline uint8_t activeDiscoveryRspData[] = { 0x76, 0x69, 0x63, 0x65 };
+    static inline uint8_t activeDiscoveryRspData2[] = { 0x76, 0x69, 0x63, 0x65, 0x00 };
 
     static inline uint8_t activePublishAdvData[] = { 0x04, 0x05, 0x10, 0x00, 0x01, 0x02, 0x00, 0x18, 0xE8, 0x31, 0xF7,
         0x63, 0x0B, 0x76, 0x19, 0xAE, 0x21, 0x0E, 0x3A, 0x4D, 0x79, 0x20, 0x44, 0x65 };

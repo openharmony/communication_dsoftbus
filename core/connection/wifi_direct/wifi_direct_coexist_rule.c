@@ -48,7 +48,7 @@ static void ShowRulesList(ListNode *rulesList)
                 pos += ret;
             }
         }
-        CONN_LOGI(CONN_WIFI_DIRECT, "rules[%d]:%s", index, buffer);
+        CONN_LOGI(CONN_WIFI_DIRECT, "index=%{public}d, rule=%{public}s", index, buffer);
         index++;
     }
 }
@@ -68,7 +68,7 @@ static int32_t SetCoexistRule(const char *rule)
     for (int i = 0; i < cJSON_GetArraySize(coexistObj); i++) {
         cJSON *subItems = cJSON_GetArrayItem(coexistObj, i);
         if (!cJSON_IsArray(subItems)) {
-            CONN_LOGW(CONN_WIFI_DIRECT, "item %d is not array", i);
+            CONN_LOGW(CONN_WIFI_DIRECT, "item is not array. i=%{public}d", i);
             continue;
         }
 
@@ -144,7 +144,7 @@ static void ShowCombinations(ListNode *combinations)
             pos += ret;
         }
     }
-    CONN_LOGI(CONN_WIFI_DIRECT, "%s", buffer);
+    CONN_LOGI(CONN_WIFI_DIRECT, "buffer=%{public}s", buffer);
 }
 
 static bool RecoverCoexistRule(void)

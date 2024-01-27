@@ -106,11 +106,11 @@ static StartTimeSyncReq *CreateStartTimeSyncReq(const char *pkgName, TimeSyncAcc
     StartTimeSyncReq *req = (StartTimeSyncReq *)SoftBusMalloc(sizeof(StartTimeSyncReq));
 
     if (req == NULL) {
-        LNN_LOGE(LNN_CLOCK, "malloc start time sync request fail=%s", pkgName);
+        LNN_LOGE(LNN_CLOCK, "malloc start time sync request fail=%{public}s", pkgName);
         return NULL;
     }
     if (strncpy_s(req->pkgName, PKG_NAME_SIZE_MAX, pkgName, strlen(pkgName)) != EOK) {
-        LNN_LOGE(LNN_CLOCK, "copy pkgName fail=%s", pkgName);
+        LNN_LOGE(LNN_CLOCK, "copy pkgName fail=%{public}s", pkgName);
         SoftBusFree(req);
         return NULL;
     }
@@ -150,15 +150,17 @@ static int32_t TryUpdateStartTimeSyncReq(TimeSyncReqInfo *info, const StartTimeS
             continue;
         }
         if (item->accuracy < startReq->accuracy || item->period > startReq->period) {
-            LNN_LOGI(LNN_CLOCK, "update exist request(%d-->%d, %d-->%d) for %s",
-                item->accuracy, startReq->accuracy, item->period, startReq->period, startReq->pkgName);
+            LNN_LOGI(LNN_CLOCK,
+                "update exist request. pkgName=%{public}s, "
+                "accuracy:%{public}d->%{public}d, period:%{public}d->%{public}d",
+                startReq->pkgName, item->accuracy, startReq->accuracy, item->period, startReq->period);
             item->accuracy = startReq->accuracy;
             item->period = startReq->period;
         }
         return SOFTBUS_OK;
     }
-    LNN_LOGI(LNN_CLOCK, "add start time sync request(%d, %d) for %s",
-        startReq->accuracy, startReq->period, startReq->pkgName);
+    LNN_LOGI(LNN_CLOCK, "add start time sync request. pkgName=%{public}s, accuracy=%{public}d, period=%{public}d",
+        startReq->pkgName, startReq->accuracy, startReq->period);
     item = CreateStartTimeSyncReq(startReq->pkgName, startReq->accuracy, startReq->period);
     if (item == NULL) {
         LNN_LOGE(LNN_CLOCK, "create start time sync request fail");
@@ -179,7 +181,7 @@ static void RemoveStartTimeSyncReq(const TimeSyncReqInfo *info, const char *pkgN
         }
         ListDelete(&item->node);
         SoftBusFree(item);
-        LNN_LOGI(LNN_CLOCK, "remove start time sync req for %s", pkgName);
+        LNN_LOGI(LNN_CLOCK, "remove start time sync req. pkgName=%{public}s", pkgName);
         break;
     }
 }
@@ -187,7 +189,7 @@ static void RemoveStartTimeSyncReq(const TimeSyncReqInfo *info, const char *pkgN
 static bool TryUpdateTimeSyncReqInfo(TimeSyncReqInfo *info, TimeSyncAccuracy accuracy, TimeSyncPeriod period)
 {
     if (info->curAccuracy < accuracy || info->curPeriod > period) {
-        LNN_LOGI(LNN_CLOCK, "update exist request(%d-->%d, %d-->%d)",
+        LNN_LOGI(LNN_CLOCK, "update exist request. accuracy:%{public}d->%{public}d, period:%{public}d->%{public}d",
             info->curAccuracy, accuracy, info->curPeriod, period);
         info->curAccuracy = accuracy;
         info->curPeriod = period;
@@ -265,15 +267,16 @@ static void TryUpdateTimeSyncReq(TimeSyncReqInfo *info)
     }
     if (count > 0) {
         if (curAccuracy > info->curAccuracy || curPeriod < info->curPeriod) {
-            LNN_LOGI(LNN_CLOCK, "update time sync request(%d-->%d, %d-->%d) for",
+            LNN_LOGI(LNN_CLOCK,
+                "update time sync request. accuracy:%{public}d->%{public}d, period:%{public}d->%{public}d",
                 info->curAccuracy, curAccuracy, info->curPeriod, curPeriod);
             info->curAccuracy = curAccuracy;
             info->curPeriod = curPeriod;
-            LNN_LOGI(LNN_CLOCK, "update time sync request rc=%d",
+            LNN_LOGI(LNN_CLOCK, "update time sync request. rc=%{public}d",
                 LnnStartTimeSyncImpl(info->targetNetworkId, curAccuracy, curPeriod, &g_timeSyncImplCb));
         }
     } else {
-        LNN_LOGI(LNN_CLOCK, "stop time sync request rc=%d",
+        LNN_LOGI(LNN_CLOCK, "stop time sync request. rc=%{public}d",
             LnnStopTimeSyncImpl(info->targetNetworkId));
         ListDelete(&info->node);
         SoftBusFree(info);
@@ -290,7 +293,7 @@ static int32_t ProcessStopTimeSyncRequest(const StopTimeSyncReqMsgPara *para)
     }
     info = FindTimeSyncReqInfo(para->targetNetworkId);
     if (info == NULL) {
-        LNN_LOGI(LNN_CLOCK, "no specific networkId for %s", para->pkgName);
+        LNN_LOGI(LNN_CLOCK, "no specific networkId. pkgName=%{public}s", para->pkgName);
         SoftBusFree((void *)para);
         return SOFTBUS_ERR;
     }
@@ -321,10 +324,11 @@ static void NotifyTimeSyncResult(const TimeSyncReqInfo *info, double offset, int
         LNN_LOGE(LNN_CLOCK, "copy networkId fail");
         return;
     }
-    LNN_LOGI(LNN_CLOCK, "notify time sync result(%d, %d, %d, %d)",
+    LNN_LOGI(LNN_CLOCK,
+        "notify time sync result. millisecond=%{public}d, microsecond=%{public}d, accuracy=%{public}d, flag=%{public}d",
         resultInfo.result.millisecond, resultInfo.result.microsecond, resultInfo.result.accuracy, resultInfo.flag);
     LIST_FOR_EACH_ENTRY(item, &info->startReqList, StartTimeSyncReq, node) {
-        LNN_LOGI(LNN_CLOCK, "notify time sync result to %s", item->pkgName);
+        LNN_LOGI(LNN_CLOCK, "notify time sync result. pkgName=%{public}s", item->pkgName);
         LnnNotifyTimeSyncResult(item->pkgName, item->pid, &resultInfo, retCode);
     }
 }
@@ -357,11 +361,11 @@ static int32_t ProcessTimeSyncComplete(const TimeSyncCompleteMsgPara *para)
         SoftBusFree((void *)para);
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_CLOCK, "time sync complete result(offset=%.6lf, retCode=%d)",
+    LNN_LOGI(LNN_CLOCK, "time sync complete result. offset=%{public}.6lf, retCode=%{public}d",
         para->offset, para->retCode);
     NotifyTimeSyncResult(info, para->offset, para->retCode);
     if (para->retCode == SOFTBUS_NETWORK_TIME_SYNC_HANDSHAKE_ERR || para->retCode == SOFTBUS_ERR) {
-        LNN_LOGE(LNN_CLOCK, "time sync fail=%d, stop it internal", para->retCode);
+        LNN_LOGE(LNN_CLOCK, "time sync fail, stop it internal. retCode=%{public}d", para->retCode);
         RemoveAllStartTimeSyncReq(info);
     }
     SoftBusFree((void *)para);
@@ -384,7 +388,7 @@ static void TimeSyncMessageHandler(SoftBusMessage *msg)
         LNN_LOGE(LNN_CLOCK, "time sync msg is null");
         return;
     }
-    LNN_LOGI(LNN_CLOCK, "process time sync msg=%d", msg->what);
+    LNN_LOGI(LNN_CLOCK, "process time sync msg=%{public}d", msg->what);
     switch (msg->what) {
         case MSG_TYPE_START_TIME_SYNC:
             ProcessStartTimeSyncRequest((const StartTimeSyncReqMsgPara *)msg->obj);

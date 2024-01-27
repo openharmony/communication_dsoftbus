@@ -45,7 +45,7 @@ void DiscFillBtype(uint32_t capability, uint32_t allCap, NSTACKX_DiscoverySettin
             discSet->businessType = (uint8_t)NSTACKX_BUSINESS_TYPE_STRATEGY;
             break;
         default:
-            DISC_LOGW(DISC_COAP, "use the default bType for capability(%u)", capability);
+            DISC_LOGW(DISC_COAP, "use the default bType, capability=%{public}u", capability);
             discSet->businessType = (uint8_t)NSTACKX_BUSINESS_TYPE_NULL;
             break;
     }
@@ -64,13 +64,14 @@ int32_t DiscCoapProcessDeviceInfo(const NSTACKX_DeviceInfo *nstackxInfo, DeviceI
     };
     if (nstackxInfo->discoveryType == NSTACKX_DISCOVERY_TYPE_ACTIVE ||
         nstackxInfo->mode == PUBLISH_MODE_PROACTIVE) {
-        DISC_LOGI(DISC_COAP, "DiscFound: devName=%s, netIf=%s", devInfo->devName, nstackxInfo->networkName);
+        DISC_LOGI(DISC_COAP,
+            "DiscFound: devName=%{public}s, netIf=%{public}s", devInfo->devName, nstackxInfo->networkName);
         discCb->OnDeviceFound(devInfo, &addtions);
         return SOFTBUS_OK;
     }
 
     uint8_t bType = nstackxInfo->businessType;
-    DISC_LOGI(DISC_COAP, "DiscRecv: broadcast from %s, bType=%u", devInfo->devName, bType);
+    DISC_LOGI(DISC_COAP, "DiscRecv: broadcast devName=%{public}s, bType=%{public}u", devInfo->devName, bType);
     if (bType != NSTACKX_BUSINESS_TYPE_NULL && DiscCoapSendRsp(devInfo, bType) != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "send response failed");
         return SOFTBUS_ERR;

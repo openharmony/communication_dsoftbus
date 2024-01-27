@@ -60,7 +60,7 @@ static enum WifiDirectApiRole TransferRoleToPreferLinkMode(enum WifiDirectRole r
 
 static uint32_t BytesToInt(const uint8_t *data, uint32_t len)
 {
-    CONN_CHECK_AND_RETURN_RET_LOGW(len <= sizeof(uint32_t), 0, CONN_WIFI_DIRECT, "len=%u invalid", len);
+    CONN_CHECK_AND_RETURN_RET_LOGW(len <= sizeof(uint32_t), 0, CONN_WIFI_DIRECT, "len invalid. len=%{public}u", len);
     uint32_t res = 0;
     CONN_CHECK_AND_RETURN_RET_LOGW(memcpy_s(&res, sizeof(res), data, len) == EOK, 0, CONN_WIFI_DIRECT,
         "memcpy_s failed");
@@ -70,7 +70,7 @@ static uint32_t BytesToInt(const uint8_t *data, uint32_t len)
 static void IntToBytes(uint32_t data, uint32_t len, uint8_t *out, uint32_t outSize)
 {
     if (len > sizeof(uint32_t)) {
-        CONN_LOGW(CONN_WIFI_DIRECT, "len=%u invalid", len);
+        CONN_LOGW(CONN_WIFI_DIRECT, "len invalid. len=%{public}u", len);
         return;
     }
 
@@ -80,7 +80,7 @@ static void IntToBytes(uint32_t data, uint32_t len, uint8_t *out, uint32_t outSi
 
 static void HexDump(const char *banana, const uint8_t *data, size_t size)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "%s size=%d", banana, size);
+    CONN_LOGI(CONN_WIFI_DIRECT, "banana=%{public}s, size=%{public}zu", banana, size);
     char line[64];
     int32_t pos = 0;
     bool isLastPrinted = false;
@@ -100,21 +100,22 @@ static void HexDump(const char *banana, const uint8_t *data, size_t size)
         if (i % HEX_DUMP_LINE_NUM == 0) {
             pos = 0;
             isLastPrinted = true;
-            CONN_LOGI(CONN_WIFI_DIRECT, "%s", line);
+            CONN_LOGI(CONN_WIFI_DIRECT, "line=%{public}s", line);
         }
     }
     if (!isLastPrinted) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "%s", line);
+        CONN_LOGI(CONN_WIFI_DIRECT, "line=%{public}s", line);
     }
 }
 
 static void ShowLinkInfoList(const char *banana, ListNode *list)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "%s", banana);
+    CONN_LOGI(CONN_WIFI_DIRECT, "banana=%{public}s", banana);
     struct LinkInfo *info = nullptr;
     LIST_FOR_EACH_ENTRY(info, list, struct LinkInfo, node) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "interface=%s mode=%d", info->getString(info, LI_KEY_LOCAL_INTERFACE, ""),
-                  info->getInt(info, LI_KEY_LOCAL_LINK_MODE, -1));
+        CONN_LOGI(CONN_WIFI_DIRECT,
+            "interface=%{public}s, mode=%{public}d", info->getString(info, LI_KEY_LOCAL_INTERFACE, ""),
+            info->getInt(info, LI_KEY_LOCAL_LINK_MODE, -1));
     }
 }
 
@@ -141,14 +142,14 @@ static int32_t StrCompareIgnoreCase(const char *str1, const char *str2)
 static bool SupportHml()
 {
     bool support =  OHOS::system::GetBoolParameter("persist.sys.softbus.connect.hml", true);
-    CONN_LOGI(CONN_WIFI_DIRECT, "persist.sys.softbus.connect.hml=%d", support);
+    CONN_LOGI(CONN_WIFI_DIRECT, "persist.sys.softbus.connect.hml=%{public}d", support);
     return support;
 }
 
 static bool SupportHmlTwo()
 {
     bool support =  OHOS::system::GetBoolParameter("persist.sys.softbus.connect.hml_two", false);
-    CONN_LOGI(CONN_WIFI_DIRECT, "persist.sys.softbus.connect.hml_two=%d", support);
+    CONN_LOGI(CONN_WIFI_DIRECT, "persist.sys.softbus.connect.hml_two=%{public}d", support);
     return support;
 }
 

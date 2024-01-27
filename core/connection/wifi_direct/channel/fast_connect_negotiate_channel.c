@@ -45,7 +45,7 @@ static void OnDataReceived(int32_t channelId, const char *data, uint32_t len)
 {
     CONN_CHECK_AND_RETURN_LOGW(data != NULL && len != 0, CONN_WIFI_DIRECT, "data invalid");
     CONN_CHECK_AND_RETURN_LOGW(len <= MAX_FAST_CONNECT_DATA_LEN, CONN_WIFI_DIRECT, "data too large");
-    CONN_LOGI(CONN_WIFI_DIRECT, "len=%u", len);
+    CONN_LOGI(CONN_WIFI_DIRECT, "len=%{public}u", len);
 
     struct DataStruct *dataStruct = SoftBusCalloc(sizeof(struct DataStruct) + len);
     CONN_CHECK_AND_RETURN_LOGE(dataStruct, CONN_WIFI_DIRECT, "malloc failed");
@@ -65,7 +65,7 @@ static void OnDataReceived(int32_t channelId, const char *data, uint32_t len)
 
 static void OnDisconnected(int32_t channelId)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "channelId=%d", channelId);
+    CONN_LOGI(CONN_WIFI_DIRECT, "channelId=%{public}d", channelId);
 }
 
 static int32_t PostData(struct WifiDirectNegotiateChannel *base, const uint8_t *data, size_t size)
@@ -107,6 +107,12 @@ static bool IsP2pChannel(struct WifiDirectNegotiateChannel *base)
     return false;
 }
 
+static enum WifiDirectNegotiateChannelType GetMediumType(struct WifiDirectNegotiateChannel *base)
+{
+    (void)base;
+    return NEGOTIATE_MAX;
+}
+
 static struct WifiDirectNegotiateChannel *Duplicate(struct WifiDirectNegotiateChannel *base)
 {
     struct FastConnectNegotiateChannel *self = (struct FastConnectNegotiateChannel*)base;
@@ -129,6 +135,7 @@ void FastConnectNegotiateChannelConstructor(struct FastConnectNegotiateChannel *
     self->getP2pMac = GetP2pMac;
     self->setP2pMac = SetP2pMac;
     self->isP2pChannel = IsP2pChannel;
+    self->getMediumType = GetMediumType;
     self->duplicate = Duplicate;
     self->destructor = Destructor;
 

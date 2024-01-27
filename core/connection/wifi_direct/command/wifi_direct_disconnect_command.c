@@ -20,6 +20,7 @@
 #include "softbus_adapter_mem.h"
 #include "wifi_direct_negotiator.h"
 #include "wifi_direct_decision_center.h"
+#include "command/wifi_direct_command_manager.h"
 #include "channel/wifi_direct_negotiate_channel.h"
 #include "data/link_manager.h"
 #include "data/resource_manager.h"
@@ -27,6 +28,10 @@
 
 static int32_t PreferNegotiateChannelForConnectInfo(struct InnerLink *link, struct WifiDirectConnectInfo *connectInfo)
 {
+    if (connectInfo->negoChannel != NULL) {
+        CONN_LOGD(CONN_WIFI_DIRECT, "prefer input channel");
+        return SOFTBUS_OK;
+    }
     struct WifiDirectNegotiateChannel *channel = link->getPointer(link, IL_KEY_NEGO_CHANNEL, NULL);
     if (channel != NULL) {
         CONN_LOGD(CONN_WIFI_DIRECT, "prefer inner link channel");
@@ -36,10 +41,6 @@ static int32_t PreferNegotiateChannelForConnectInfo(struct InnerLink *link, stru
         connectInfo->negoChannel = channel->duplicate(channel);
         CONN_CHECK_AND_RETURN_RET_LOGW(connectInfo->negoChannel != NULL, SOFTBUS_MALLOC_ERR, CONN_WIFI_DIRECT,
                                       "new channel failed");
-        return SOFTBUS_OK;
-    }
-    if (connectInfo->negoChannel != NULL) {
-        CONN_LOGD(CONN_WIFI_DIRECT, "prefer input channel");
         return SOFTBUS_OK;
     }
 
@@ -67,7 +68,7 @@ static int32_t CloseLink(struct WifiDirectDisconnectCommand *command)
     }
 
     int32_t reference = link->getReference(link);
-    CONN_LOGI(CONN_WIFI_DIRECT, "remoteMac=%s reference=%d",
+    CONN_LOGI(CONN_WIFI_DIRECT, "remoteMac=%{public}s, reference=%{public}d",
           WifiDirectAnonymizeMac(link->getString(link, IL_KEY_REMOTE_BASE_MAC, "")), reference);
     if (reference > 1) {
         command->onSuccess((struct WifiDirectCommand *)command, NULL);
@@ -85,8 +86,8 @@ static int32_t CloseLink(struct WifiDirectDisconnectCommand *command)
 
     command->processor = processor;
     processor->activeCommand = (struct WifiDirectCommand *)command;
-    CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=%d", command->type);
     negotiator->currentProcessor = processor;
+    CONN_LOGI(CONN_WIFI_DIRECT, "activeCommand=%d currentProcessor=%s", command->type,  processor->name);
 
     return processor->disconnectLink(connectInfo, link);
 }
@@ -95,7 +96,7 @@ static void ExecuteDisconnection(struct WifiDirectCommand *base)
 {
     struct WifiDirectDisconnectCommand *self = (struct WifiDirectDisconnectCommand *)base;
     self->times++;
-    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%d times=%d", self->connectInfo.requestId, self->times);
+    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}d, times=%{public}d", self->connectInfo.requestId, self->times);
 
     int32_t ret = CloseLink(self);
     if (ret != SOFTBUS_OK) {
@@ -107,7 +108,8 @@ static void OnDisconnectSuccess(struct WifiDirectCommand *base, struct Negotiate
 {
     (void)msg;
     struct WifiDirectDisconnectCommand *self = (struct WifiDirectDisconnectCommand *)base;
-    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%d linkId=%d", self->connectInfo.requestId, self->connectInfo.linkId);
+    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}d, linkId=%{public}d", self->connectInfo.requestId,
+        self->connectInfo.linkId);
     GetLinkManager()->recycleLinkId(self->connectInfo.linkId, self->connectInfo.remoteMac);
 
     if (self->callback.onDisconnectSuccess != NULL) {
@@ -123,7 +125,8 @@ static void OnDisconnectSuccess(struct WifiDirectCommand *base, struct Negotiate
 static void OnDisconnectFailure(struct WifiDirectCommand *base, int32_t reason)
 {
     struct WifiDirectDisconnectCommand *self = (struct WifiDirectDisconnectCommand *)base;
-    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%d linkId=%d reason=%d", self->connectInfo.requestId,
+    CONN_LOGI(CONN_WIFI_DIRECT,
+        "requestId=%{public}d, linkId=%{public}d, reason=%{public}d", self->connectInfo.requestId,
         self->connectInfo.linkId, reason);
     GetLinkManager()->recycleLinkId(self->connectInfo.linkId, self->connectInfo.remoteMac);
 
@@ -140,8 +143,9 @@ static void OnDisconnectFailure(struct WifiDirectCommand *base, int32_t reason)
 static void OnDisconnectTimeout(struct WifiDirectCommand *base)
 {
     struct WifiDirectDisconnectCommand *self = (struct WifiDirectDisconnectCommand *)base;
-    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%d linkId=%d reason=%d", self->connectInfo.requestId,
-              self->connectInfo.linkId, ERROR_WIFI_DIRECT_COMMAND_WAIT_TIMEOUT);
+    CONN_LOGI(CONN_WIFI_DIRECT,
+        "requestId=%{public}d, linkId=%{public}d, reason=%{public}d", self->connectInfo.requestId,
+        self->connectInfo.linkId, ERROR_WIFI_DIRECT_COMMAND_WAIT_TIMEOUT);
     if (self->callback.onDisconnectFailure != NULL) {
         CONN_LOGI(CONN_WIFI_DIRECT, "call onDisconnectFailure");
         self->callback.onDisconnectFailure(self->connectInfo.requestId, ERROR_WIFI_DIRECT_COMMAND_WAIT_TIMEOUT);
@@ -155,6 +159,7 @@ static struct WifiDirectCommand* Duplicate(struct WifiDirectCommand *base)
         (struct WifiDirectDisconnectCommand *)WifiDirectDisconnectCommandNew(&self->connectInfo, &self->callback);
     if (copy != NULL) {
         copy->times = self->times;
+        copy->timerId = self->timerId;
     }
     return (struct WifiDirectCommand *)copy;
 }
@@ -165,6 +170,7 @@ void WifiDirectDisconnectCommandConstructor(struct WifiDirectDisconnectCommand *
 {
     self->type = COMMAND_TYPE_DISCONNECT;
     self->timerId = TIMER_ID_INVALID;
+    self->commandId = GetWifiDirectCommandManager()->allocateCommandId();
     self->execute = ExecuteDisconnection;
     self->onSuccess = OnDisconnectSuccess;
     self->onFailure = OnDisconnectFailure;

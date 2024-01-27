@@ -18,6 +18,9 @@
 #include <securec.h>
 
 #include "bus_center_manager.h"
+#include "distribute_net_ledger_mock.h"
+#include "hb_ctrl_deps_mock.h"
+#include "hb_fsm_mock.h"
 #include "hb_strategy_mock.h"
 #include "lnn_ble_heartbeat.h"
 #include "lnn_heartbeat_ctrl.h"
@@ -26,6 +29,7 @@
 #include "lnn_ip_network_impl_mock.h"
 #include "lnn_state_machine.h"
 #include "message_handler.h"
+#include "softbus_adapter_bt_common.h"
 #include "softbus_common.h"
 #include "softbus_error_code.h"
 
@@ -67,9 +71,13 @@ void HeartBeatCtrlTest::TearDown() { }
 HWTEST_F(HeartBeatCtrlTest, LNN_OFFLINE_TIMEING_BY_HEARTBEAT_TEST_001, TestSize.Level1)
 {
     NiceMock<HeartBeatStategyInterfaceMock> hbStrateMock;
+    DistributeLedgerInterfaceMock distributeNetLedgerMock;
+    HeartBeatCtrlDepsInterfaceMock hbCtrlDepsMock;
     EXPECT_CALL(hbStrateMock, LnnStartOfflineTimingStrategy)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(distributeNetLedgerMock, LnnSetDLHeartbeatTimestamp).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbCtrlDepsMock, SoftBusGetBtState).WillRepeatedly(Return(BLE_ENABLE));
 
     int32_t ret = LnnOfflineTimingByHeartbeat(nullptr, CONNECTION_ADDR_BLE);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
@@ -91,9 +99,15 @@ HWTEST_F(HeartBeatCtrlTest, LNN_SHIFT_LNN_GEAR_TEST_001, TestSize.Level1)
 {
     NiceMock<HeartBeatStategyInterfaceMock> hbStrateMock;
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
+    DistributeLedgerInterfaceMock distributeNetLedgerMock;
+    HeartBeatCtrlDepsInterfaceMock hbCtrlDepsMock;
+
     EXPECT_CALL(hbStrateMock, LnnSetGearModeBySpecificType)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(distributeNetLedgerMock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
+    EXPECT_CALL(hbCtrlDepsMock, AuthFlushDevice).WillRepeatedly(Return(SOFTBUS_OK));
+
     GearMode mode;
     int32_t ret = LnnShiftLNNGear(nullptr, CALLERID, TARGETNETWORKID, &mode);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
@@ -147,12 +161,17 @@ HWTEST_F(HeartBeatCtrlTest, LNN_SHIFT_LNN_GEAR_WITHOUT_PKG_NAME_TEST_001, TestSi
 HWTEST_F(HeartBeatCtrlTest, LNN_INIT_HEARBEAT_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnIpNetworkImplInterfaceMock> serviceMock;
-    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
+    NiceMock<HeartBeatStategyInterfaceMock> hbStrateMock;
+    HeartBeatCtrlDepsInterfaceMock hbCtrlDepsMock;
+    LnnNetLedgertInterfaceMock netLedgerMock;
     EXPECT_CALL(serviceMock, LnnRegisterEventHandler)
     .WillOnce(Return(SOFTBUS_ERR))
     .WillOnce(Return(SOFTBUS_OK))
     .WillOnce(Return(SOFTBUS_ERR))
     .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbStrateMock, LnnHbStrategyInit).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbCtrlDepsMock, IsEnableSoftBusHeartbeat).WillRepeatedly(Return(true));
+    EXPECT_CALL(netLedgerMock, LnnGetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnInitHeartbeat();
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = LnnInitHeartbeat();

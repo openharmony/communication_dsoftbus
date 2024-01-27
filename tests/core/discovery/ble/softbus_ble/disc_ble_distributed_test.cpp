@@ -138,13 +138,12 @@ HWTEST_F(DiscDistributedBleTest, TestScanFilter001, TestSize.Level1)
 
     BroadcastReportInfo reportInfo = {0};
 
-    // when not reportInfo->dataStatus == SOFTBUS_BLE_DATA_COMPLETE
-    reportInfo.dataStatus = SOFTBUS_BLE_DATA_INCOMPLETE_MORE_TO_COME;
+    reportInfo.dataStatus = SOFTBUS_BC_DATA_INCOMPLETE_MORE_TO_COME;
     int32_t ret = ScanFilter(&reportInfo);
     EXPECT_NE(ret, SOFTBUS_OK);
 
     // when not advData != NULL
-    reportInfo.dataStatus = SOFTBUS_BLE_DATA_COMPLETE;
+    reportInfo.dataStatus = SOFTBUS_BC_DATA_COMPLETE;
     ret = ScanFilter(&reportInfo);
     EXPECT_NE(ret, SOFTBUS_OK);
 
@@ -184,7 +183,7 @@ HWTEST_F(DiscDistributedBleTest, TestScanFilter002, TestSize.Level1)
 
     uint8_t payload[POS_TLV] = {0};
     BroadcastReportInfo reportInfo = {
-        .dataStatus = SOFTBUS_BLE_DATA_COMPLETE,
+        .dataStatus = SOFTBUS_BC_DATA_COMPLETE,
         .packet = {
             .bcData = {
                 .payload = &payload[0],
@@ -244,7 +243,7 @@ HWTEST_F(DiscDistributedBleTest, TestScanFilter003, TestSize.Level1)
 
     uint8_t payload[POS_TLV] = {0};
     BroadcastReportInfo reportInfo = {
-        .dataStatus = SOFTBUS_BLE_DATA_COMPLETE,
+        .dataStatus = SOFTBUS_BC_DATA_COMPLETE,
         .packet = {
             .bcData = {
                 .payload = &payload[0],
@@ -255,7 +254,7 @@ HWTEST_F(DiscDistributedBleTest, TestScanFilter003, TestSize.Level1)
             .rspData = {
                 .payload = &payload[0],
                 .payloadLen = POS_TLV,
-                .type = BC_DATA_TYPE_SERVICE,
+                .type = BC_DATA_TYPE_MANUFACTURER,
                 .id = COMPANY_ID,
             },
         },
@@ -471,7 +470,7 @@ HWTEST_F(DiscDistributedBleTest, TestStopScaner001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     g_isScanning = true;
-    g_bleListener.scanListenerId = SCAN_MAX_NUM;
+    g_bleListener.scanListenerId = SCAN_NUM_MAX;
     ret = StopScaner();
     EXPECT_NE(ret, SOFTBUS_OK);
 

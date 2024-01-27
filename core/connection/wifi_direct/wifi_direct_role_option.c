@@ -36,7 +36,7 @@ static enum WifiDirectRole GetExpectedP2pRole(const char *networkId)
     int32_t ret = LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, WIFI_DIRECT_ROLE_AUTO, CONN_WIFI_DIRECT,
         "get local dev type id failed");
-    CONN_LOGD(CONN_WIFI_DIRECT, "localDevTypeId=0x%03X", localDevTypeId);
+    CONN_LOGD(CONN_WIFI_DIRECT, "localDevTypeId=0x%{public}03X", localDevTypeId);
 
     if (IsPowerAlwaysOn(localDevTypeId)) {
         CONN_LOGI(CONN_WIFI_DIRECT, "local device's power is always-on");
@@ -47,7 +47,7 @@ static enum WifiDirectRole GetExpectedP2pRole(const char *networkId)
     ret = LnnGetRemoteNumInfo(networkId, NUM_KEY_DEV_TYPE_ID, &remoteDevTypeId);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, WIFI_DIRECT_ROLE_AUTO, CONN_WIFI_DIRECT,
         "get remote dev type id failed");
-    CONN_LOGD(CONN_WIFI_DIRECT, "remoteDevTypeId=0x%03X", remoteDevTypeId);
+    CONN_LOGD(CONN_WIFI_DIRECT, "remoteDevTypeId=0x%{public}03X", remoteDevTypeId);
 
     if (IsPowerAlwaysOn(remoteDevTypeId)) {
         CONN_LOGI(CONN_WIFI_DIRECT, "remote device's power is always-on");
@@ -70,7 +70,7 @@ static enum WifiDirectRole GetExpectedP2pRole(const char *networkId)
 static int32_t GetExpectedRole(const char *networkId, enum WifiDirectConnectType type, uint32_t *expectedRole,
                                bool *isStrict)
 {
-    if (type == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P || type == WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_P2P) {
+    if (type == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P) {
         enum WifiDirectRole role = GetExpectedP2pRole(networkId);
         if (role == WIFI_DIRECT_ROLE_GC) {
             *expectedRole = WIFI_DIRECT_API_ROLE_GC;
@@ -92,11 +92,11 @@ static int32_t GetExpectedRole(const char *networkId, enum WifiDirectConnectType
         }
         *isStrict = false;
     } else {
-        CONN_LOGW(CONN_WIFI_DIRECT, "type=%d invalid", type);
+        CONN_LOGW(CONN_WIFI_DIRECT, "type invalid. type=%{public}d", type);
         return SOFTBUS_INVALID_PARAM;
     }
 
-    CONN_LOGI(CONN_WIFI_DIRECT, "expectRole=0x%x isStrict=%d", *expectedRole, *isStrict);
+    CONN_LOGI(CONN_WIFI_DIRECT, "expectRole=0x%{public}x, isStrict=%{public}d", *expectedRole, *isStrict);
     return SOFTBUS_OK;
 }
 

@@ -145,7 +145,7 @@ static void RegisterToDpHelper(void)
     SubscribeInfo subscribeInfo(saId, subscribeKey, subscribeTypes, subscribeDPChangeListener);
 
     int32_t subscribeRes = DistributedDeviceProfileClient::GetInstance().SubscribeDeviceProfile(subscribeInfo);
-    AUTH_LOGI(AUTH_INIT, "GetCharacteristicProfile subscribeRes %d", subscribeRes);
+    AUTH_LOGI(AUTH_INIT, "GetCharacteristicProfile subscribeRes=%{public}d", subscribeRes);
 }
 } // namespace AuthToDeviceProfile
 } // namespace OHOS

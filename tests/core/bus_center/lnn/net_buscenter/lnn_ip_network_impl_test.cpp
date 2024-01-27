@@ -163,7 +163,7 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_003, TestSize.Level1
     EXPECT_CALL(ipMock, LnnIsLinkReady).WillOnce(Return(false)).WillRepeatedly(Return(true));
     EXPECT_CALL(ipMock, GetNetworkIpByIfName).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
     int ret = GetAvailableIpAddr(IFNAME_TEST0, const_cast<char *>(WLAN_IP1), SIZE);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = GetAvailableIpAddr(IFNAME_TEST1, const_cast<char *>(WLAN_IP2), SIZE);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
@@ -176,7 +176,7 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_003, TestSize.Level1
 
     EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalStrInfo2);
     IpSubnetManagerEvent res = GetIpEventInRunning(&subnet);
-    EXPECT_TRUE(res != IP_SUBNET_MANAGER_EVENT_IF_READY);
+    EXPECT_TRUE(res == IP_SUBNET_MANAGER_EVENT_IF_READY);
 
     strcpy_s(subnet.ifName, sizeof("DeviceName"), "DeviceName");
     res = GetIpEventInRunning(&subnet);

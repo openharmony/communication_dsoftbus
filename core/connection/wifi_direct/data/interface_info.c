@@ -164,7 +164,8 @@ static bool Marshalling(struct InterfaceInfo *self, struct WifiDirectProtocol *p
         struct InfoContainerKeyProperty *keyProperty = self->keyProperties + key;
         if (protocolType == WIFI_DIRECT_PROTOCOL_TLV && (key == II_KEY_BASE_MAC || key == II_KEY_DYNAMIC_MAC)) {
             ret = MarshallingMacAddress(self, protocol, key);
-            CONN_CHECK_AND_RETURN_RET_LOGW(ret, false, CONN_WIFI_DIRECT, "mac address marshalling failed, key=%d", key);
+            CONN_CHECK_AND_RETURN_RET_LOGW(ret, false, CONN_WIFI_DIRECT,
+                "mac address marshalling failed, key=%{public}zu", key);
             continue;
         }
 
@@ -193,7 +194,7 @@ static bool Marshalling(struct InterfaceInfo *self, struct WifiDirectProtocol *p
                 break;
         }
 
-        CONN_CHECK_AND_RETURN_RET_LOGW(ret, false, CONN_WIFI_DIRECT, "marshalling failed, key=%d", key);
+        CONN_CHECK_AND_RETURN_RET_LOGW(ret, false, CONN_WIFI_DIRECT, "marshalling failed, key=%{public}zu", key);
     }
 
     return true;
@@ -210,7 +211,7 @@ static bool Unmarshalling(struct InterfaceInfo *self, struct WifiDirectProtocol 
     while (protocol->readData(protocol, &keyProperty, &data, &size)) {
         bool ret = false;
         enum InterfaceInfoKey key = GetKeyFromKeyProperty(&keyProperty);
-        CONN_CHECK_AND_RETURN_RET_LOGW(key < II_KEY_MAX, false, CONN_WIFI_DIRECT, "key out of range, tag=%d",
+        CONN_CHECK_AND_RETURN_RET_LOGW(key < II_KEY_MAX, false, CONN_WIFI_DIRECT, "key out of range, tag=%{public}d",
             keyProperty.tag);
         if (!data || !size) {
             continue;
@@ -218,8 +219,8 @@ static bool Unmarshalling(struct InterfaceInfo *self, struct WifiDirectProtocol 
 
         if (protocolType == WIFI_DIRECT_PROTOCOL_TLV && (key == II_KEY_BASE_MAC || key == II_KEY_DYNAMIC_MAC)) {
             ret = UnmarshallingMacAddress(self, key, data, size);
-            CONN_CHECK_AND_RETURN_RET_LOGW(ret, false, CONN_WIFI_DIRECT, "mac address unmarshalling failed key=%d",
-                key);
+            CONN_CHECK_AND_RETURN_RET_LOGW(ret, false, CONN_WIFI_DIRECT,
+                "mac address unmarshalling failed key=%{public}d", key);
             continue;
         }
 
@@ -247,7 +248,7 @@ static bool Unmarshalling(struct InterfaceInfo *self, struct WifiDirectProtocol 
 
         data = NULL;
         size = 0;
-        CONN_CHECK_AND_RETURN_RET_LOGW(ret, false, CONN_WIFI_DIRECT, "unmarshalling failed key=%d", key);
+        CONN_CHECK_AND_RETURN_RET_LOGW(ret, false, CONN_WIFI_DIRECT, "unmarshalling failed key=%{public}d", key);
     }
 
     return true;
@@ -315,7 +316,7 @@ static void IncreaseRefCount(struct InterfaceInfo *self)
     int32_t count = self->getInt(self, II_KEY_REUSE_COUNT, 0);
     count++;
     self->putInt(self, II_KEY_REUSE_COUNT, count);
-    CONN_LOGI(CONN_WIFI_DIRECT, "reuseCount=%d", count);
+    CONN_LOGI(CONN_WIFI_DIRECT, "reuseCount=%{public}d", count);
 }
 
 static void DecreaseRefCount(struct InterfaceInfo *self)
@@ -323,7 +324,7 @@ static void DecreaseRefCount(struct InterfaceInfo *self)
     int32_t count = self->getInt(self, II_KEY_REUSE_COUNT, 0);
     --count;
     self->putInt(self, II_KEY_REUSE_COUNT, count);
-    CONN_LOGI(CONN_WIFI_DIRECT, "reuseCount=%d", count);
+    CONN_LOGI(CONN_WIFI_DIRECT, "reuseCount=%{public}d", count);
 }
 
 /* private method implement */
@@ -362,7 +363,8 @@ static bool MarshallingMacAddress(struct InterfaceInfo *self, struct WifiDirectP
 
 static bool UnmarshallingMacAddress(struct InterfaceInfo *self, enum InterfaceInfoKey key, uint8_t *data, size_t size)
 {
-    CONN_CHECK_AND_RETURN_RET_LOGW(size == MAC_ADDR_ARRAY_SIZE, false, CONN_WIFI_DIRECT, "size=%d is invalid", size);
+    CONN_CHECK_AND_RETURN_RET_LOGW(size == MAC_ADDR_ARRAY_SIZE, false, CONN_WIFI_DIRECT,
+        "size is invalid. size=%{public}zu", size);
     char address[MAC_ADDR_STR_LEN] = {0};
     int32_t ret = GetWifiDirectNetWorkUtils()->macArrayToString(data, size, address, sizeof(address));
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, false, CONN_WIFI_DIRECT, "mac array to string failed");

@@ -24,6 +24,7 @@
 
 #define MAX_NR_IOVCNT       20
 #define MAX_UDP_PAYLOAD     65507
+#define MAX_SEND_COUNT      1
 
 static inline uint32_t GetIovListSize(void)
 {
@@ -189,7 +190,7 @@ static int32_t CheckUnsentList(List *unsent, List *head, int32_t maxCount)
 
 static int32_t GetMaxSendCount(void)
 {
-    return 1;
+    return MAX_SEND_COUNT;
 }
 
 static int32_t DoSendDataFrame(DFileSession *session, List *head, int32_t count, uint32_t tid, uint8_t socketIndex)
