@@ -763,7 +763,7 @@ static int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo
     }
     UnPackVersionByDeviceId(obj, info);
     if (SetExchangeIdTypeAndValue(obj, info) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "set exchange id type or valve fail");
+        AUTH_LOGE(AUTH_FSM, "set exchange id type or value failed");
         JSON_Delete(obj);
         return SOFTBUS_ERR;
     }
