@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "anonymizer.h"
 #include "common_list.h"
 #include "lnn_heartbeat_medium_mgr.h"
 #include "lnn_heartbeat_utils.h"
@@ -688,8 +689,11 @@ int32_t LnnStartOfflineTimingStrategy(const char *networkId, ConnectionAddrType 
     if (networkId == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
+    char *anonyNetworkId = NULL;
     if (LnnIsSupportBurstFeature(networkId)) {
-        LNN_LOGI(LNN_HEART_BEAT, "target device support burst, dont't need post offline info");
+        Anonymize(networkId, &anonyNetworkId);
+        LNN_LOGI(LNN_HEART_BEAT, "%{public}s support burst, dont't need post offline info", anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
         return SOFTBUS_OK;
     }
     if (strcpy_s((char *)msgPara.networkId, NETWORK_ID_BUF_LEN, networkId) != EOK) {
