@@ -762,7 +762,7 @@ static int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo
         return SOFTBUS_ERR;
     }
     UnPackVersionByDeviceId(obj, info);
-    if (SetExchangeIdTypeAndValve(obj, info) != SOFTBUS_OK) {
+    if (SetExchangeIdTypeAndValue(obj, info) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "set exchange id type or valve fail");
         JSON_Delete(obj);
         return SOFTBUS_ERR;
