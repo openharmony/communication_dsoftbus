@@ -502,5 +502,5 @@ int32_t TransGetUdpAppInfoByChannelId(int32_t channelId, AppInfo *appInfo)
     }
     (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
     TRANS_LOGE(TRANS_CTRL, "udp channel not found. channelId=%{public}d", channelId);
-    return SOFTBUS_ERR;
+    return SOFTBUS_NOT_FIND;
 }
