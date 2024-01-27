@@ -153,7 +153,6 @@ void LnnDCClearConnectException(const ConnectOption *option)
     LNN_CHECK_AND_RETURN_LOGE(g_exceptionConnMgr.initFlag && g_exceptionConnMgr.connections != NULL,
         LNN_STATE, "decision center not init yet");
     SoftBusMutexLock(&g_exceptionConnMgr.connections->lock);
-    LNN_LOGI(LNN_STATE, "connType=%{public}d", option->type);
     switch (option->type) {
         case CONNECT_BR:
             ClearBrConnectException(option);
