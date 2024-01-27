@@ -47,11 +47,14 @@ CONN_ASSIGNER(Int32, CostTime, costTime)
 CONN_ASSIGNER(Int32, Rssi, rssi)
 CONN_ASSIGNER(Int32, Load, load)
 CONN_ASSIGNER(Int32, Frequency, frequency)
+CONN_ASSIGNER(String, ChallengeCode, challengeCode)
 CONN_ASSIGNER(AnonymizeString, PeerIp, peerIp)
 CONN_ASSIGNER(AnonymizeString, PeerBrMac, peerBrMac)
 CONN_ASSIGNER(AnonymizeString, PeerBleMac, peerBleMac)
 CONN_ASSIGNER(AnonymizeString, PeerWifiMac, peerWifiMac)
 CONN_ASSIGNER(String, PeerPort, peerPort)
+CONN_ASSIGNER(AnonymizeString, PeerNetworkId, peerNetworkId)
+CONN_ASSIGNER(AnonymizeString, LocalNetworkId, localNetworkId)
 CONN_ASSIGNER(String, CallerPkg, callerPkg)
 CONN_ASSIGNER(String, CalleePkg, calleePkg)
 CONN_ASSIGNER(Errcode, BootLinkType, bootLinkType)
@@ -60,33 +63,36 @@ CONN_ASSIGNER(Errcode, IsReuse, isReuse)
 CONN_ASSIGNER(Uint64, NegotiateTime, negotiateTime)
 CONN_ASSIGNER(Uint64, LinkTime, linkTime)
 
-#define CONN_ASSIGNER_SIZE 25 // Size of g_connAssigners
+#define CONN_ASSIGNER_SIZE 28 // Size of g_connAssigners
 static HiSysEventParamAssigner g_connAssigners[] = {
-    { "STAGE_RES",         HISYSEVENT_INT32,  ConnAssignerResult       },
-    { "ERROR_CODE",        HISYSEVENT_INT32,  ConnAssignerErrcode      },
-    { "CONN_ID",           HISYSEVENT_INT32,  ConnAssignerConnectionId },
-    { "REQ_ID",            HISYSEVENT_INT32,  ConnAssignerRequestId    },
-    { "LINK_TYPE",         HISYSEVENT_INT32,  ConnAssignerLinkType     },
-    { "AUTH_TYPE",         HISYSEVENT_INT32,  ConnAssignerAuthType     },
-    { "AUTH_ID",           HISYSEVENT_INT32,  ConnAssignerAuthId       },
-    { "LNN_TYPE",          HISYSEVENT_STRING, ConnAssignerLnnType      },
-    { "EXPECT_ROLE",       HISYSEVENT_INT32,  ConnAssignerExpectRole   },
-    { "COST_TIME",         HISYSEVENT_INT32,  ConnAssignerCostTime     },
-    { "RSSI",              HISYSEVENT_INT32,  ConnAssignerRssi         },
-    { "CHLOAD",            HISYSEVENT_INT32,  ConnAssignerLoad         },
-    { "FREQ",              HISYSEVENT_INT32,  ConnAssignerFrequency    },
-    { "PEER_IP",           HISYSEVENT_STRING, ConnAssignerPeerIp       },
-    { "PEER_BR_MAC",       HISYSEVENT_STRING, ConnAssignerPeerBrMac    },
-    { "PEER_BLE_MAC",      HISYSEVENT_STRING, ConnAssignerPeerBleMac   },
-    { "PEER_WIFI_MAC",     HISYSEVENT_STRING, ConnAssignerPeerWifiMac  },
-    { "PEER_PORT",         HISYSEVENT_STRING, ConnAssignerPeerPort     },
-    { "HOST_PKG",          HISYSEVENT_STRING, ConnAssignerCallerPkg    },
-    { "TO_CALL_PKG",       HISYSEVENT_STRING, ConnAssignerCalleePkg    },
-    { "BOOT_LINK_TYPE",    HISYSEVENT_INT32,  ConnAssignerBootLinkType },
-    { "IS_RENEGOTIATE",    HISYSEVENT_INT32,  ConnAssignerIsRenegotiate},
-    { "IS_REUSE",          HISYSEVENT_INT32,  ConnAssignerIsReuse      },
-    { "NEGOTIATE_TIME",    HISYSEVENT_UINT64, ConnAssignerNegotiateTime},
-    { "LINK_TIME",         HISYSEVENT_UINT64, ConnAssignerLinkTime     },
+    { "STAGE_RES",         HISYSEVENT_INT32,  ConnAssignerResult        },
+    { "ERROR_CODE",        HISYSEVENT_INT32,  ConnAssignerErrcode       },
+    { "CONN_ID",           HISYSEVENT_INT32,  ConnAssignerConnectionId  },
+    { "REQ_ID",            HISYSEVENT_INT32,  ConnAssignerRequestId     },
+    { "LINK_TYPE",         HISYSEVENT_INT32,  ConnAssignerLinkType      },
+    { "AUTH_TYPE",         HISYSEVENT_INT32,  ConnAssignerAuthType      },
+    { "AUTH_ID",           HISYSEVENT_INT32,  ConnAssignerAuthId        },
+    { "LNN_TYPE",          HISYSEVENT_STRING, ConnAssignerLnnType       },
+    { "EXPECT_ROLE",       HISYSEVENT_INT32,  ConnAssignerExpectRole    },
+    { "COST_TIME",         HISYSEVENT_INT32,  ConnAssignerCostTime      },
+    { "RSSI",              HISYSEVENT_INT32,  ConnAssignerRssi          },
+    { "CHLOAD",            HISYSEVENT_INT32,  ConnAssignerLoad          },
+    { "FREQ",              HISYSEVENT_INT32,  ConnAssignerFrequency     },
+    { "CHALLENGE_CODE",    HISYSEVENT_STRING, ConnAssignerChallengeCode },
+    { "PEER_IP",           HISYSEVENT_STRING, ConnAssignerPeerIp        },
+    { "PEER_BR_MAC",       HISYSEVENT_STRING, ConnAssignerPeerBrMac     },
+    { "PEER_BLE_MAC",      HISYSEVENT_STRING, ConnAssignerPeerBleMac    },
+    { "PEER_WIFI_MAC",     HISYSEVENT_STRING, ConnAssignerPeerWifiMac   },
+    { "PEER_PORT",         HISYSEVENT_STRING, ConnAssignerPeerPort      },
+    { "PEER_NET_ID",       HISYSEVENT_STRING, ConnAssignerPeerNetworkId },
+    { "LOCAL_NET_ID",      HISYSEVENT_STRING, ConnAssignerLocalNetworkId},
+    { "HOST_PKG",          HISYSEVENT_STRING, ConnAssignerCallerPkg     },
+    { "TO_CALL_PKG",       HISYSEVENT_STRING, ConnAssignerCalleePkg     },
+    { "BOOT_LINK_TYPE",    HISYSEVENT_INT32,  ConnAssignerBootLinkType  },
+    { "IS_RENEGOTIATE",    HISYSEVENT_INT32,  ConnAssignerIsRenegotiate },
+    { "IS_REUSE",          HISYSEVENT_INT32,  ConnAssignerIsReuse       },
+    { "NEGOTIATE_TIME",    HISYSEVENT_UINT64, ConnAssignerNegotiateTime },
+    { "LINK_TIME",         HISYSEVENT_UINT64, ConnAssignerLinkTime      },
     // Modification Note: remember updating CONN_ASSIGNER_SIZE
 };
 

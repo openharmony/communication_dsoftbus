@@ -39,8 +39,13 @@ HWTEST_F(ConnEventTest, ConnEventTest001, TestSize.Level0)
         .errcode = 2233,
         .requestId = 0, // invalid
         .peerPort = "9000",
+        .bootLinkType = 2,
+        .isRenegotiate = 3,
+        .isReuse = 4,
+        .negotiateTime = 5,
+        .linkTime = 6,
     };
-    constexpr int32_t VALID_EXTRA_SIZE = 3;
+    constexpr int32_t VALID_EXTRA_SIZE = 8;
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,
@@ -72,13 +77,21 @@ HWTEST_F(ConnEventTest, ConnEventTest002, TestSize.Level0)
         .rssi = 10,
         .load = 11,
         .frequency = 12,
+        .challengeCode = "2024",
         .peerIp = "10.11.12.1",
         .peerBrMac = "dd-15-bc-b9-f2-04",
         .peerBleMac = "dd-15-bc-b9-f2-04",
         .peerWifiMac = "dd-15-bc-b9-f2-04",
         .peerPort = "testPeerPort",
+        .peerNetworkId = "a8ynvpdaihw1f6nknjd2hkfhxljxypkr6kvjsbhnhpp16974uo4fvsrpfa6t50fm",
+        .localNetworkId = "a8ynvpdaihw1f6nknjd2hkfhxljxypkr6kvjsbhnhpp16974uo4fvsrpfa6t50fm",
         .callerPkg = "testCallerPkg",
         .calleePkg = "testCalleePkg",
+        .bootLinkType = 13,
+        .isRenegotiate = 14,
+        .isReuse = 15,
+        .negotiateTime = 16,
+        .linkTime = 17,
     };
     constexpr int32_t VALID_EXTRA_SIZE = CONN_ASSIGNER_SIZE;
 
@@ -112,20 +125,29 @@ HWTEST_F(ConnEventTest, ConnEventTest003, TestSize.Level0)
         .rssi = -10,
         .load = -11,
         .frequency = -12,
+        .challengeCode = "",
         .peerIp = "",
         .peerBrMac = "",
         .peerBleMac = "",
         .peerWifiMac = "\0",
         .peerPort = nullptr,
+        .peerNetworkId = "",
+        .localNetworkId = "",
         .callerPkg = "\0",
         .calleePkg = nullptr,
+        .bootLinkType = -13,
+        .isRenegotiate = -14,
+        .isReuse = -15,
+        .negotiateTime = 0,
+        .linkTime = 0,
     };
-    constexpr int32_t VALID_EXTRA_SIZE = 2; // result, errcode is valid
+    constexpr int32_t TWO_VALID_EXTRA_SIZE = 2; // result, errcode is valid
+    constexpr int32_t VALID_EXTRA_SIZE = 7;
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(CONN_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR),
-            ConnInvalidParamArrayMatcher(invalidExtra, VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
+            ConnInvalidParamArrayMatcher(invalidExtra, TWO_VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
         .Times(1);
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, invalidExtra);
 }
@@ -139,12 +161,13 @@ HWTEST_F(ConnEventTest, ConnEventTest003, TestSize.Level0)
 HWTEST_F(ConnEventTest, ConnEventTest004, TestSize.Level0)
 {
     ConnEventExtra emptyExtra = { 0 };
-    constexpr int32_t VALID_EXTRA_SIZE = 2; // result, errcode is valid
+    constexpr int32_t TWO_VALID_EXTRA_SIZE = 2; // result, errcode is valid
+    constexpr int32_t VALID_EXTRA_SIZE = 7;
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(CONN_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR),
-            ConnInvalidParamArrayMatcher(emptyExtra, VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
+            ConnInvalidParamArrayMatcher(emptyExtra, TWO_VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
         .Times(1);
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_START, emptyExtra);
 }
