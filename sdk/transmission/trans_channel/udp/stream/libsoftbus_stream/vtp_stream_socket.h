@@ -45,8 +45,8 @@ struct ConnectStatus {
 
 class VtpStreamSocket : public std::enable_shared_from_this<VtpStreamSocket>, public IStreamSocket {
 public:
-    static constexpr int FILLP_VTP_SEND_CACHE_SIZE = 500;
-    static constexpr int FILLP_VTP_RECV_CACHE_SIZE = 500;
+    static constexpr int FILLP_VTP_SEND_CACHE_SIZE = 8192;
+    static constexpr int FILLP_VTP_RECV_CACHE_SIZE = 8192;
     static constexpr int FILLP_KEEP_ALIVE_TIME = 300000;
 
     VtpStreamSocket();
