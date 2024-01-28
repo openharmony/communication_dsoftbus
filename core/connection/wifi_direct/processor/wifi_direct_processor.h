@@ -42,6 +42,7 @@ struct WifiDirectTriggerChannel;
     int32_t (*reuseLink)(struct WifiDirectConnectInfo *connectInfo, struct InnerLink *innerLink);                 \
     int32_t (*disconnectLink)(struct WifiDirectConnectInfo *connectInfo, struct InnerLink *innerLink);            \
     void (*processNegotiateMessage)(enum WifiDirectNegotiateCmdType cmd, struct WifiDirectCommand *command);      \
+    void (*processParallelNegotiateMessage)(enum WifiDirectNegotiateCmdType cmd, struct WifiDirectCommand *command); \
     void (*processHandShake)(struct NegotiateMessage *msg);                                                       \
     void (*onTriggerChannelDataReceived)(struct WifiDirectTriggerChannel *channel);                               \
     void (*onDefaultTriggerChannelDataReceived)(struct WifiDirectNegotiateChannel *channel,                       \

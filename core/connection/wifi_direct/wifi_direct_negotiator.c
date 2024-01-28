@@ -73,7 +73,6 @@ static int32_t HandleMessageFromProcessor(struct NegotiateMessage *msg)
 
     int32_t ret = SOFTBUS_OK;
     if (msg != NULL) {
-        msg->dump(msg, 0);
         struct WifiDirectNegotiateChannel *channel = msg->getPointer(msg, NM_KEY_NEGO_CHANNEL, NULL);
         CONN_CHECK_AND_RETURN_RET_LOGW(channel != NULL, SOFTBUS_ERR, CONN_WIFI_DIRECT, "channel is null");
         self->updateCurrentRemoteDeviceId(channel);
@@ -308,18 +307,40 @@ static void ProcessNegotiateMessageWhenProcessorInvalid(struct NegotiateMessage 
     NegotiateMessageDelete(response);
 }
 
+static bool ProcessParallelMessage(enum WifiDirectNegotiateCmdType type, struct WifiDirectCommand *command,
+                                   struct WifiDirectProcessor *processor)
+{
+    struct WifiDirectProcessor *hmlProcessor =
+        GetWifiDirectProcessorFactory()->createProcessor(WIFI_DIRECT_PROCESSOR_TYPE_HML);
+    if (type != CMD_CONN_V2_REQ_3 || processor != hmlProcessor || processor->isMessageNeedPending(type, command->msg)) {
+        return false;
+    }
+    if (processor->processParallelNegotiateMessage == NULL) {
+        return false;
+    }
+
+    processor->processParallelNegotiateMessage(type, command);
+    return true;
+}
+
+static void AuditNegotiateMessageWrong(void)
+{
+    struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
+    ConnAuditExtra extra = {
+        .auditType = AUDIT_EVENT_MSG_ERROR,
+        .errcode = ERROR_WIFI_DIRECT_WRONG_NEGOTIATION_MSG,
+        .peerUdid = self->currentRemoteDeviceId,
+    };
+    CONN_AUDIT(STATS_SCENE_CONN_WIFI_RECV_FAILED, extra);
+    CONN_LOGW(CONN_WIFI_DIRECT, "unpack msg failed");
+}
+
 static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *channel, const uint8_t *data, size_t len)
 {
     struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
     struct NegotiateMessage *msg = GenerateNegotiateMessage(channel, data, len);
     if (msg == NULL) {
-        ConnAuditExtra extra = {
-            .auditType = AUDIT_EVENT_MSG_ERROR,
-            .errcode = ERROR_WIFI_DIRECT_WRONG_NEGOTIATION_MSG,
-            .peerUdid = self->currentRemoteDeviceId,
-        };
-        CONN_AUDIT(STATS_SCENE_CONN_WIFI_RECV_FAILED, extra);
-        CONN_LOGW(CONN_WIFI_DIRECT, "unpack msg failed");
+        AuditNegotiateMessageWrong();
         return;
     }
     enum WifiDirectNegotiateCmdType cmdType = GetNegotiateCmdType(msg);
@@ -349,6 +370,10 @@ static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *ch
         processor = self->currentProcessor;
     }
     command->processor = processor;
+    if (ProcessParallelMessage(cmdType, command, processor)) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "process parallel msg done");
+        return;
+    }
 
     if (IsMessageNeedPending(self, processor, cmdType, msg)) {
         CONN_LOGI(CONN_WIFI_DIRECT, "queue negotiate command");
@@ -556,6 +581,7 @@ static int32_t PostData(struct NegotiateMessage *msg)
         CONN_LOGI(CONN_WIFI_DIRECT, "WIFI_DIRECT_PROTOCOL_JSON size=%{public}zd", size);
     }
 
+    msg->dump(msg, 0);
     int32_t ret = channel->postData(channel, buffer, size);
     decisionCenter->putProtocol(protocol);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ERROR_POST_DATA_FAILED, CONN_WIFI_DIRECT,
