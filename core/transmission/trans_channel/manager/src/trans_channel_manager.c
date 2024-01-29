@@ -92,6 +92,7 @@ static int32_t GenerateProxyChannelId()
 
     if (g_channelIdCount >= MAX_PROXY_CHANNEL_ID_COUNT) {
         TRANS_LOGE(TRANS_CTRL, "No more channel Ids(1024) can be applied");
+        SoftBusMutexUnlock(&g_myIdLock);
         return INVALID_CHANNEL_ID;
     }
 
