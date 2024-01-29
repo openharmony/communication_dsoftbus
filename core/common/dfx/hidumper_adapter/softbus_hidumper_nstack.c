@@ -90,6 +90,7 @@ static int32_t SoftBusNStackDumpDfinderHander(int fd, int32_t argc, const char *
 static int32_t SoftBusNStackDmsgDumpHander(int fd, int32_t argc, const char **argv)
 {
     if (fd < 0 || argc < 0 || argv == NULL) {
+        COMM_LOGE(COMM_DFX, "invalid param");
         return SOFTBUS_ERR;
     }
 
