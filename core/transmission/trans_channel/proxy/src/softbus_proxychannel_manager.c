@@ -1087,6 +1087,7 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     char tmpSocketName[SESSION_NAME_SIZE_MAX] = {0};
     if (memcpy_s(tmpSocketName, SESSION_NAME_SIZE_MAX, chan->appInfo.myData.sessionName,
         strlen(chan->appInfo.myData.sessionName)) != EOK) {
+        SoftBusFree(chan);
         TRANS_LOGE(TRANS_CTRL, "memcpy failed");
         return;
     }
