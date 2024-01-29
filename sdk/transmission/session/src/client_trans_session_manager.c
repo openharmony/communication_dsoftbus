@@ -38,6 +38,8 @@
 #define GET_ROUTE_TYPE(type) ((type) & 0xff)
 #define GET_CONN_TYPE(type) (((type) >> 8) & 0xff)
 
+#define DISTRIBUTED_DATA_SESSION "distributeddata-default"
+
 static void ClientTransSessionTimerProc(void);
 
 static int32_t g_sessionIdNum = 0;
@@ -1638,12 +1640,24 @@ int32_t ClientDeleteSocketSession(int32_t sessionId)
     return SOFTBUS_ERR;
 }
 
+static bool IsDistributedDataSession(const char *sessionName)
+{
+    uint32_t distributedDataSessionLen = strlen(DISTRIBUTED_DATA_SESSION);
+    if (strlen(sessionName) < distributedDataSessionLen ||
+        strncmp(sessionName, DISTRIBUTED_DATA_SESSION, distributedDataSessionLen) != 0) {
+        return false;
+    }
+    return true;
+}
+
 static SessionInfo *GetSocketExistSession(const SessionParam *param)
 {
     ClientSessionServer *serverNode = NULL;
     SessionInfo *sessionInfo = NULL;
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
-        if ((strcmp(serverNode->sessionName, param->sessionName) != 0) || IsListEmpty(&serverNode->sessionList)) {
+        // distributeddata module can create different socket by same name
+        if ((strcmp(serverNode->sessionName, param->sessionName) != 0) || IsListEmpty(&serverNode->sessionList) ||
+            IsDistributedDataSession(param->sessionName)) {
             continue;
         }
         LIST_FOR_EACH_ENTRY(sessionInfo, &(serverNode->sessionList), SessionInfo, node) {
