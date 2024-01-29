@@ -145,6 +145,7 @@
 #define BROADCAST_CIPHER_IV "BROADCAST_CIPHER_IV"
 #define IRK "IRK"
 #define PUB_MAC "PUB_MAC"
+#define OH_OS_TYPE 10
 
 #define FLAG_COMPRESS_DEVICE_INFO 1
 #define FLAG_UNCOMPRESS_DEVICE_INFO 0
@@ -1125,6 +1126,10 @@ static void UnpackCommon(const JsonObj *json, NodeInfo *info, SoftBusVersion ver
     OptInt64(json, ACCOUNT_ID, &info->accountId, 0);
     OptInt(json, NODE_WEIGHT, &info->masterWeight, DEFAULT_NODE_WEIGHT);
     OptInt(json, OS_TYPE, &info->deviceInfo.osType, -1);
+    if ((info->deviceInfo.osType == -1) && info->authCapacity != 0) {
+        info->deviceInfo.osType = OH_OS_TYPE;
+        AUTH_LOGD(AUTH_FSM, "info->deviceInfo.osType: %{public}d", info->deviceInfo.osType);
+    }
     OptString(json, OS_VERSION, info->deviceInfo.osVersion, OS_VERSION_BUF_LEN, "");
 
     // IS_SUPPORT_TCP_HEARTBEAT
