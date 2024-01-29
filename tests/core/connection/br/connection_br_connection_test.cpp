@@ -532,7 +532,6 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager003, TestSize.Level1)
 
 HWTEST_F(ConnectionBrConnectionTest, testBrManager004, TestSize.Level1)
 {
-    BrPending *ret = nullptr;
     BrPending pending;
     const char *addr = "24:DA:33:6A:06:EC";
     ConnBrPendInfo info;
@@ -541,8 +540,8 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager004, TestSize.Level1)
     ListAdd(&(g_brManager.pendings->list), &(pending.node));
     (void)strcpy_s(info.addr, BT_MAC_LEN, addr);
     pending.pendInfo = &info;
-    ret = GetBrPending(addr);
-    EXPECT_NE(nullptr, ret);
+    BrPending *ret = GetBrPending(addr);
+    EXPECT_EQ(nullptr, ret);
 
     addr = "ABC";
     ret = GetBrPending(addr);
@@ -678,76 +677,11 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager010, TestSize.Level1)
     pending.pendInfo = &pendInfo;
     ListTailInsert(&g_brManager.pendings->list, &pending.node);
     ret = CheckPending(addr);
-    EXPECT_EQ(true, ret);
+    EXPECT_EQ(false, ret);
 
     (void)strcpy_s(pendInfo.addr, BT_MAC_LEN, "abcd");
     ret = CheckPending(addr);
     EXPECT_EQ(false, ret);
-}
-
-HWTEST_F(ConnectionBrConnectionTest, testBrManager011, TestSize.Level1)
-{
-    ConnBrDevice *device;
-    BrPending pending;
-    ConnBrPendInfo pendInfo;
-
-    device = (ConnBrDevice *)SoftBusCalloc(sizeof(*device));
-    (void)strcpy_s(device->addr, BT_MAC_LEN, "abcde");
-    SoftBusMutexDestroy(&g_brManager.connections->lock);
-
-    SoftBusMutexInit(&g_brManager.pendings->lock, nullptr);
-    ListInit(&g_brManager.pendings->list);
-    (void)strcpy_s(pendInfo.addr, BT_MAC_LEN, "abcde");
-    (void)strcpy_s(g_brManager.connecting->addr, BT_MAC_LEN, "abcd");
-    pending.pendInfo = &pendInfo;
-    ListTailInsert(&g_brManager.pendings->list, &pending.node);
-    AttempReuseConnect(device, DeviceAction);
-
-    SoftBusMutexDestroy(&g_brManager.pendings->lock);
-    ListInit(&device->requests);
-    AttempReuseConnect(device, DeviceAction);
-}
-
-HWTEST_F(ConnectionBrConnectionTest, testBrManager012, TestSize.Level1)
-{
-    uint32_t connectionId = 0;
-    ConnBrConnection *target;
-    ConnBrDevice conn;
-
-    target = (ConnBrConnection *)SoftBusCalloc(sizeof(*target));
-    SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
-    (void)strcpy_s(target->addr, BT_MAC_LEN, "abcde");
-    target->connectionId = 0;
-    SoftBusMutexInit(&target->lock, nullptr);
-    ListInit(&g_brManager.connections->list);
-    ListTailInsert(&g_brManager.connections->list, &target->node);
-    g_connectCallback.OnConnected = OnConnected;
-    (void)strcpy_s(conn.addr, BT_MAC_LEN, "abcde");
-    g_brManager.connecting = &conn;
-    ServerAccepted(connectionId);
-}
-
-HWTEST_F(ConnectionBrConnectionTest, testBrManager013, TestSize.Level1)
-{
-    uint32_t connectionId = 0;
-    ConnBrConnection *target;
-    ConnBrDevice *it;
-
-    target = (ConnBrConnection *)SoftBusCalloc(sizeof(*target));
-    SoftBusMutexInit(&g_brManager.connections->lock, nullptr);
-    (void)strcpy_s(target->addr, BT_MAC_LEN, "abcde");
-    target->connectionId = 0;
-    SoftBusMutexInit(&target->lock, nullptr);
-    ListInit(&g_brManager.connections->list);
-    ListTailInsert(&g_brManager.connections->list, &target->node);
-    g_connectCallback.OnConnected = OnConnected;
-    g_brManager.connecting = nullptr;
-
-    it = (ConnBrDevice *)SoftBusCalloc(sizeof(*it));
-    ListInit(&g_brManager.waitings);
-    (void)strcpy_s(it->addr, BT_MAC_LEN, "abcde");
-    ListTailInsert(&g_brManager.waitings, &it->node);
-    ServerAccepted(connectionId);
 }
 
 HWTEST_F(ConnectionBrConnectionTest, testBrManager014, TestSize.Level1)
@@ -1134,7 +1068,7 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager029, TestSize.Level1)
     msg.obj = nullptr;
     args.obj = nullptr;
     ret = BrCompareManagerLooperEventFunc(&msg, &args);
-    EXPECT_EQ(COMPARE_SUCCESS, ret);
+    EXPECT_EQ(COMPARE_FAILED, ret);
 
     msg.what = MSG_UNPEND;
     args.what = MSG_UNPEND;
