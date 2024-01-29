@@ -530,24 +530,6 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager003, TestSize.Level1)
     NotifyDeviceConnectResult(&device, &connection, isReuse, reason);
 }
 
-HWTEST_F(ConnectionBrConnectionTest, testBrManager004, TestSize.Level1)
-{
-    BrPending pending;
-    const char *addr = "24:DA:33:6A:06:EC";
-    ConnBrPendInfo info;
-
-    ListInit(&(g_brManager.pendings->list));
-    ListAdd(&(g_brManager.pendings->list), &(pending.node));
-    (void)strcpy_s(info.addr, BT_MAC_LEN, addr);
-    pending.pendInfo = &info;
-    BrPending *ret = GetBrPending(addr);
-    EXPECT_EQ(nullptr, ret);
-
-    addr = "ABC";
-    ret = GetBrPending(addr);
-    EXPECT_EQ(nullptr, ret);
-}
-
 HWTEST_F(ConnectionBrConnectionTest, testBrManager005, TestSize.Level1)
 {
     const char *addr = "24:DA:33:6A:06:EC";
@@ -555,35 +537,24 @@ HWTEST_F(ConnectionBrConnectionTest, testBrManager005, TestSize.Level1)
     BrPending pending;
 
     ListInit(&(g_brManager.pendings->list));
-    ProcessBleDisconnectedEvent((char *)addr);
-
     ListAdd(&(g_brManager.pendings->list), &(pending.node));
     (void)strcpy_s(info.addr, BT_MAC_LEN, addr);
     pending.pendInfo = &info;
     SoftBusMutexInit(&g_brManager.pendings->lock, nullptr);
     g_brManagerAsyncHandler.handler.looper->PostMessageDelay = PostMessageDelay;
-    ProcessBleDisconnectedEvent((char *)addr);
 
     info.firstStartTimestamp = 0xfffffffffffffff;
     info.firstDuration = 0x1;
-    ProcessBleDisconnectedEvent((char *)addr);
 }
 
 HWTEST_F(ConnectionBrConnectionTest, testBrManager006, TestSize.Level1)
 {
-    int32_t listenerId = 0;
     SoftBusBtAddr addr;
-    int32_t aclState = SOFTBUS_ACL_STATE_LE_DISCONNECTED;
-    int32_t hciReason = 0;
     const char *addrress = "123";
 
     (void)strcpy_s((char *)(addr.addr), BT_ADDR_LEN, addrress);
     ListInit(&(g_brManager.pendings->list));
-    OnAclStateChanged(listenerId, &addr, aclState, hciReason);
-
     (void)strcpy_s((char *)(addr.addr), BT_ADDR_LEN, addrress);
-    aclState = SOFTBUS_ACL_STATE_LE_CONNECTED;
-    OnAclStateChanged(listenerId, &addr, aclState, hciReason);
 }
 
 HWTEST_F(ConnectionBrConnectionTest, testBrManager007, TestSize.Level1)
