@@ -514,7 +514,7 @@ int RemoveSessionServer(const char *pkgName, const char *sessionName);
  * @param mySessionName Indicates the pointer to the local session name.
  * @param peerSessionName Indicates the pointer to the remote session name.
  * @param peerNetworkId Indicates the pointer to the remote device ID.
- * @param Indicates the pointer to the group ID. This parameter can be left empty in automatic networking.
+ * @param groupId Indicates the pointer to the group ID. This parameter can be left empty in automatic networking.
  * In manual networking, you need to apply for a valid group ID from HiChain.
  * @param attr Indicates the pointer to the session attributes {@link SessionAttribute}.
  *
