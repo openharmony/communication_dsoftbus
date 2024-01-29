@@ -33,7 +33,7 @@ static void HandleP2pStateChanged(enum P2pState state)
 
 static void HandleP2pConnectionChanged(const struct P2pBroadcastParam *param)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     if (param->p2pLinkInfo.connectState == P2P_DISCONNECTED || param->groupInfo == NULL) {
         GetP2pEntity()->handleConnectionChange(NULL);
     } else {

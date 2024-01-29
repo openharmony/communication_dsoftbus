@@ -224,7 +224,7 @@ static bool Equal(struct WifiDirectNegotiateChannel *leftBase, struct WifiDirect
 
 static struct WifiDirectNegotiateChannel *Duplicate(struct WifiDirectNegotiateChannel *base)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     struct DefaultNegotiateChannel *self = (struct DefaultNegotiateChannel *)base;
     struct DefaultNegotiateChannel *copy = DefaultNegotiateChannelNew(self->authId);
     int32_t ret = strcpy_s(copy->remoteDeviceId, UUID_BUF_LEN, self->remoteDeviceId);
@@ -269,7 +269,7 @@ void DefaultNegotiateChannelDestructor(struct DefaultNegotiateChannel *self)
 
 struct DefaultNegotiateChannel *DefaultNegotiateChannelNew(int64_t authId)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     struct DefaultNegotiateChannel *self = SoftBusCalloc(sizeof(*self));
     CONN_CHECK_AND_RETURN_RET_LOGE(self != NULL, NULL, CONN_WIFI_DIRECT, "malloc failed");
     DefaultNegotiateChannelConstructor(self, authId);
@@ -278,7 +278,7 @@ struct DefaultNegotiateChannel *DefaultNegotiateChannelNew(int64_t authId)
 
 void DefaultNegotiateChannelDelete(struct DefaultNegotiateChannel *self)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     DefaultNegotiateChannelDestructor(self);
     SoftBusFree(self);
 }

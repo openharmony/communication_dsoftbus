@@ -346,7 +346,7 @@ void WifiDirectConnectCommandDestructor(struct WifiDirectConnectCommand *self)
 struct WifiDirectCommand* WifiDirectConnectCommandNew(struct WifiDirectConnectInfo *connectInfo,
                                                       struct WifiDirectConnectCallback *callback)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     struct WifiDirectConnectCommand *self = (struct WifiDirectConnectCommand *)SoftBusCalloc(sizeof(*self));
     CONN_CHECK_AND_RETURN_RET_LOGE(self != NULL, NULL, CONN_WIFI_DIRECT, "malloc failed");
     WifiDirectConnectCommandConstructor(self, connectInfo, callback);
