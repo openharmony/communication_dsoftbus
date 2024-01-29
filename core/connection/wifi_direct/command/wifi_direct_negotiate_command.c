@@ -97,7 +97,7 @@ void WifiDirectNegotiateCommandDestructor(struct WifiDirectNegotiateCommand *sel
 
 struct WifiDirectCommand* WifiDirectNegotiateCommandNew(int32_t cmdType, struct NegotiateMessage *msg)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     struct WifiDirectNegotiateCommand *self = (struct WifiDirectNegotiateCommand *)SoftBusCalloc(sizeof(*self));
     CONN_CHECK_AND_RETURN_RET_LOGE(self != NULL, NULL, CONN_WIFI_DIRECT, "malloc failed");
     WifiDirectNegotiateCommandConstructor(self, cmdType, msg);
@@ -106,7 +106,7 @@ struct WifiDirectCommand* WifiDirectNegotiateCommandNew(int32_t cmdType, struct 
 
 void WifiDirectNegotiateCommandDelete(struct WifiDirectCommand *base)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     WifiDirectNegotiateCommandDestructor((struct WifiDirectNegotiateCommand *)base);
     SoftBusFree(base);
 }
