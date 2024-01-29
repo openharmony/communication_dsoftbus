@@ -65,6 +65,7 @@ static SoftBusMessage *CreateFsmHandleMsg(FsmStateMachine *fsm,
 
     msg = SoftBusCalloc(sizeof(*msg));
     if (msg == NULL) {
+        LNN_LOGE(LNN_STATE, "calloc msg failed");
         return NULL;
     }
     msg->what = what;
@@ -75,6 +76,7 @@ static SoftBusMessage *CreateFsmHandleMsg(FsmStateMachine *fsm,
 
     ctrlMsgObj = SoftBusMalloc(sizeof(*ctrlMsgObj));
     if (ctrlMsgObj == NULL) {
+        LNN_LOGE(LNN_STATE, "calloc ctrl msg obj failed");
         SoftBusFree(msg);
         return NULL;
     }
@@ -91,6 +93,7 @@ static void ProcessStartMessage(SoftBusMessage *msg)
     FsmState *state = NULL;
 
     if (ctrlMsgObj == NULL) {
+        LNN_LOGE(LNN_STATE, "unexpected state in start msg process");
         return;
     }
     fsm = ctrlMsgObj->fsm;
@@ -117,10 +120,12 @@ static void ProcessDataMessage(SoftBusMessage *msg)
     FsmStateMachine *fsm = NULL;
 
     if (ctrlMsgObj == NULL) {
+        LNN_LOGE(LNN_STATE, "unexpected state in data msg=%{public}d process, ctrlMsgObj is null", (int32_t)msg->arg1);
         return;
     }
     fsm = ctrlMsgObj->fsm;
     if (fsm == NULL) {
+        LNN_LOGE(LNN_STATE, "unexpected state in data msg=%{public}d process, fsm is null", (int32_t)msg->arg1);
         return;
     }
     if (fsm->curState == NULL || (fsm->flag & FSM_FLAG_RUNNING) == 0) {
@@ -143,6 +148,7 @@ static void ProcessStopMessage(SoftBusMessage *msg)
     }
     fsm = ctrlMsgObj->fsm;
     if (fsm == NULL) {
+        LNN_LOGE(LNN_STATE, "unexpected state in stop msg process");
         return;
     }
     if (fsm->curState == NULL || (fsm->flag & FSM_FLAG_RUNNING) == 0) {
@@ -168,10 +174,12 @@ static void ProcessDeinitMessage(SoftBusMessage *msg)
     FsmStateMachine *fsm = NULL;
 
     if (ctrlMsgObj == NULL) {
+        LNN_LOGE(LNN_STATE, "unexpected state in deinit msg process");
         return;
     }
     fsm = ctrlMsgObj->fsm;
     if (fsm == NULL) {
+        LNN_LOGE(LNN_STATE, "fsm is null in deinit msg process");
         return;
     }
     if (fsm->looper != NULL) {
@@ -185,6 +193,7 @@ static void ProcessDeinitMessage(SoftBusMessage *msg)
 static void FsmStateMsgHandler(SoftBusMessage *msg)
 {
     if (msg == NULL) {
+        LNN_LOGE(LNN_STATE, "process msg is null");
         return;
     }
 
