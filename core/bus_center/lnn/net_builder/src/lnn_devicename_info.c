@@ -178,6 +178,7 @@ static void NickNameMsgProc(const char *networkId, int64_t accountId, const char
         return;
     }
     if (!LnnSetDLDeviceNickName(networkId, nickName)) {
+        LNN_LOGE(LNN_BUILDER, "set remote device nick name fail");
         return;
     }
     int32_t ret = SOFTBUS_OK;
@@ -305,6 +306,7 @@ static void HandlerGetDeviceNickName(const char *displayName)
     }
     char unifiedName[DEVICE_NAME_BUF_LEN] = {0};
     if (LnnGetUnifiedDeviceName(unifiedName, DEVICE_NAME_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get device unified name fail");
         return;
     }
     if (strlen(localNodeInfo->deviceInfo.unifiedName) != 0) {
@@ -365,6 +367,7 @@ static void UpdataLocalFromSetting(void *p)
             LNN_LOGI(LNN_BUILDER, "g_tryGetDevnameNums=%{public}d", g_tryGetDevnameNums);
             SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
             if (looper == NULL) {
+                LNN_LOGE(LNN_BUILDER, "looper is null");
                 return;
             }
             int ret = LnnAsyncCallbackDelayHelper(looper, UpdataLocalFromSetting, NULL, DELAY_LEN);

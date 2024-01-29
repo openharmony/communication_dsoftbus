@@ -710,6 +710,7 @@ static bool AuthStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para)
     LnnConnectionFsm *connFsm = NULL;
 
     if (!CheckStateMsgCommonArgs(fsm)) {
+        LNN_LOGE(LNN_BUILDER, "connFsm is invalid");
         FreeUnhandledMessage(msgType, para);
         return false;
     }
@@ -748,6 +749,8 @@ static bool IsNodeInfoChanged(const LnnConnectionFsm *connFsm, const NodeInfo *o
         return true;
     }
     if (connFsm->connInfo.addr.type != CONNECTION_ADDR_ETH && connFsm->connInfo.addr.type != CONNECTION_ADDR_WLAN) {
+        LNN_LOGI(LNN_BUILDER, "[id=%{public}u] type=%{public}d is not expected",
+            connFsm->id, connFsm->connInfo.addr.type);
         return false;
     }
     if (!LnnHasDiscoveryType(oldNodeInfo, DISCOVERY_TYPE_WIFI)) {
@@ -809,6 +812,7 @@ static bool CleanInvalidConnStateProcess(FsmStateMachine *fsm, int32_t msgType, 
     LnnConnectionFsm *connFsm = NULL;
 
     if (!CheckStateMsgCommonArgs(fsm)) {
+        LNN_LOGE(LNN_BUILDER, "connFsm is invalid");
         FreeUnhandledMessage(msgType, para);
         return false;
     }
@@ -847,6 +851,7 @@ static void OnlineStateEnter(FsmStateMachine *fsm)
     LnnConnectionFsm *connFsm = NULL;
 
     if (!CheckStateMsgCommonArgs(fsm)) {
+        LNN_LOGE(LNN_BUILDER, "connFsm is invalid");
         return;
     }
     connFsm = TO_CONN_FSM(fsm);
@@ -953,6 +958,7 @@ static void LeavingStateEnter(FsmStateMachine *fsm)
     LnnConntionInfo *connInfo = NULL;
 
     if (!CheckStateMsgCommonArgs(fsm)) {
+        LNN_LOGE(LNN_BUILDER, "connFsm is invalid");
         return;
     }
     connFsm = TO_CONN_FSM(fsm);
@@ -990,6 +996,7 @@ static bool LeavingStateProcess(FsmStateMachine *fsm, int32_t msgType, void *par
     LnnConnectionFsm *connFsm = NULL;
 
     if (!CheckStateMsgCommonArgs(fsm)) {
+        LNN_LOGE(LNN_BUILDER, "connFsm is invalid");
         FreeUnhandledMessage(msgType, para);
         return false;
     }
@@ -1023,6 +1030,7 @@ static void ConnectionFsmDinitCallback(FsmStateMachine *fsm)
 
     LNN_LOGI(LNN_BUILDER, "connection fsm deinit callback enter");
     if (!CheckStateMsgCommonArgs(fsm)) {
+        LNN_LOGE(LNN_BUILDER, "connFsm is invalid");
         return;
     }
     connFsm = TO_CONN_FSM(fsm);
@@ -1091,6 +1099,7 @@ LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target, const cha
 void LnnDestroyConnectionFsm(LnnConnectionFsm *connFsm)
 {
     if (connFsm == NULL) {
+        LNN_LOGE(LNN_BUILDER, "connFsm is null");
         return;
     }
     LNN_LOGI(LNN_BUILDER, "destroy a connection fsm. id=%{public}u", connFsm->id);
@@ -1134,6 +1143,7 @@ int32_t LnnStopConnectionFsm(LnnConnectionFsm *connFsm, LnnConnectionFsmStopCall
 int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm)
 {
     if (!CheckInterfaceCommonArgs(connFsm, true)) {
+        LNN_LOGE(LNN_BUILDER, "connFsm is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     SetWatchdogFlag(false);
@@ -1150,6 +1160,7 @@ int32_t LnnSendAuthResultMsgToConnFsm(LnnConnectionFsm *connFsm, int32_t retCode
     int32_t *para = NULL;
 
     if (!CheckInterfaceCommonArgs(connFsm, true)) {
+        LNN_LOGE(LNN_BUILDER, "connFsm is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     para = (int32_t *)SoftBusMalloc(sizeof(int32_t));
@@ -1169,6 +1180,7 @@ int32_t LnnSendAuthResultMsgToConnFsm(LnnConnectionFsm *connFsm, int32_t retCode
 int32_t LnnSendNotTrustedToConnFsm(LnnConnectionFsm *connFsm)
 {
     if (!CheckInterfaceCommonArgs(connFsm, true)) {
+        LNN_LOGE(LNN_BUILDER, "connFsm is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     return LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_NOT_TRUSTED, NULL);
@@ -1177,6 +1189,7 @@ int32_t LnnSendNotTrustedToConnFsm(LnnConnectionFsm *connFsm)
 int32_t LnnSendDisconnectMsgToConnFsm(LnnConnectionFsm *connFsm)
 {
     if (!CheckInterfaceCommonArgs(connFsm, true)) {
+        LNN_LOGE(LNN_BUILDER, "connFsm is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     return LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_DISCONNECT, NULL);
@@ -1185,6 +1198,7 @@ int32_t LnnSendDisconnectMsgToConnFsm(LnnConnectionFsm *connFsm)
 int32_t LnnSendLeaveRequestToConnFsm(LnnConnectionFsm *connFsm)
 {
     if (!CheckInterfaceCommonArgs(connFsm, true)) {
+        LNN_LOGE(LNN_BUILDER, "connFsm is invalid");
         return SOFTBUS_ERR;
     }
     return LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_LNN, NULL);
@@ -1193,6 +1207,7 @@ int32_t LnnSendLeaveRequestToConnFsm(LnnConnectionFsm *connFsm)
 int32_t LnnSendSyncOfflineFinishToConnFsm(LnnConnectionFsm *connFsm)
 {
     if (!CheckInterfaceCommonArgs(connFsm, true)) {
+        LNN_LOGE(LNN_BUILDER, "connFsm is invalid");
         return SOFTBUS_ERR;
     }
     return LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_SYNC_OFFLINE_DONE, NULL);
@@ -1201,6 +1216,7 @@ int32_t LnnSendSyncOfflineFinishToConnFsm(LnnConnectionFsm *connFsm)
 int32_t LnnSendNewNetworkOnlineToConnFsm(LnnConnectionFsm *connFsm)
 {
     if (!CheckInterfaceCommonArgs(connFsm, true)) {
+        LNN_LOGE(LNN_BUILDER, "connFsm is invalid");
         return SOFTBUS_ERR;
     }
     return LnnFsmPostMessage(&connFsm->fsm, FSM_MSG_TYPE_INITIATE_ONLINE, NULL);
