@@ -18,18 +18,32 @@
 
 #include <securec.h>
 
+#include "anonymizer.h"
 #include "bus_center_adapter.h"
 #include "bus_center_info_key.h"
 #include "parameter.h"
 #include "lnn_log.h"
 #include "lnn_settingdata_event_monitor.h"
 #include "softbus_adapter_bt_common.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_common.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_utils.h"
 
 #define DEFAULT_DEVICE_NAME "OpenHarmony"
+#define OHOS_API_VERSION    "const.ohos.apiversion"
+#define OHOS_BOOT_SN        "ohos.boot.sn"
+#define OHOS_FULL_NAME      "const.ohos.fullname"
+#define VERSION_SDK         "ro.build.version.sdk"
+#define UNDEFINED_VALUE     "undefined"
+#define OHOS_TYPE_UNKNOWN   (-1)
+#define API_VERSION_LEN     10
+#define VERSION_SDK_LEN     10
+#define OH_OS_TYPE          10
+#define HO_OS_TYPE          11
+#define SN_LEN              32
+#define FULL_NAME_LEN       128
 
 typedef struct {
     const char *inBuf;
@@ -95,6 +109,53 @@ static int32_t SoftBusConvertDeviceType(const char *inBuf, char *outBuf, uint32_
     return SOFTBUS_ERR;
 }
 
+static int32_t SoftBusGetOsType(void)
+{
+    char apiVersion[API_VERSION_LEN + 1];
+    (void)memset_s(apiVersion, API_VERSION_LEN + 1, 0, API_VERSION_LEN + 1);
+    GetParameter(OHOS_API_VERSION, UNDEFINED_VALUE, apiVersion, API_VERSION_LEN);
+    char bootSN[SN_LEN + 1];
+    (void)memset_s(bootSN, SN_LEN + 1, 0, SN_LEN + 1);
+    GetParameter(OHOS_BOOT_SN, UNDEFINED_VALUE, bootSN, SN_LEN);
+    char osFullName[FULL_NAME_LEN + 1];
+    (void)memset_s(osFullName, FULL_NAME_LEN + 1, 0, FULL_NAME_LEN + 1);
+    GetParameter(OHOS_FULL_NAME, UNDEFINED_VALUE, osFullName, FULL_NAME_LEN);
+    if (strcmp(apiVersion, UNDEFINED_VALUE) != 0 || strcmp(bootSN, UNDEFINED_VALUE) != 0 ||
+        strcmp(osFullName, UNDEFINED_VALUE) != 0) {
+        char *anonyBootSN = NULL;
+        Anonymize(bootSN, &anonyBootSN);
+        LNN_LOGI(LNN_STATE, "apiVersion: %{public}s bootSN: %{public}s osFullName: %{public}s", apiVersion, anonyBootSN,
+            osFullName);
+        AnonymizeFree(anonyBootSN);
+        return OH_OS_TYPE;
+    }
+    char versionSDK[VERSION_SDK_LEN + 1];
+    (void)memset_s(versionSDK, VERSION_SDK_LEN + 1, 0, VERSION_SDK_LEN + 1);
+    GetParameter(VERSION_SDK, UNDEFINED_VALUE, versionSDK, VERSION_SDK_LEN);
+    if (strcmp(versionSDK, UNDEFINED_VALUE) != 0) {
+        LNN_LOGE(LNN_STATE, "versionSDK: %{public}s", versionSDK);
+        return HO_OS_TYPE;
+    }
+    LNN_LOGE(LNN_STATE, "GetOsTYpe fail!");
+    return OHOS_TYPE_UNKNOWN;
+}
+
+static char *SoftBusGetOsVersion(void)
+{
+    char *osFullName = (char *)SoftBusCalloc(sizeof(char) * (FULL_NAME_LEN + 1));
+    if (osFullName == NULL) {
+        LNN_LOGE(LNN_STATE, "calloc osFullName fail!");
+        return NULL;
+    }
+    GetParameter(OHOS_FULL_NAME, UNDEFINED_VALUE, osFullName, FULL_NAME_LEN);
+    if (strcmp(osFullName, UNDEFINED_VALUE) != 0) {
+        return osFullName;
+    }
+    SoftBusFree(osFullName);
+    return NULL;
+}
+
+
 int32_t GetCommonDevInfo(CommonDeviceKey key, char *value, uint32_t len)
 {
     if (value == NULL) {
@@ -143,6 +204,38 @@ int32_t GetCommonDevInfo(CommonDeviceKey key, char *value, uint32_t len)
             break;
         default:
             break;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t GetCommonOsType(int32_t *value)
+{
+    int32_t ret = SoftBusGetOsType();
+    *value = ret;
+    if (*value == OHOS_TYPE_UNKNOWN) {
+        LNN_LOGE(LNN_STATE, "get invalid os type, osType = %{public}d", *value);
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t GetCommonOsVersion(char *value, uint32_t len)
+{
+    if (value == NULL) {
+        LNN_LOGE(LNN_STATE, "para error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    char *osFullName = NULL;
+    osFullName = SoftBusGetOsVersion();
+    if (osFullName != NULL) {
+        if (strcpy_s(value, len, osFullName) != EOK) {
+            SoftBusFree(osFullName);
+            LNN_LOGE(LNN_STATE, "GetOsVersion failed.");
+            return SOFTBUS_ERR;
+        }
+        SoftBusFree(osFullName);
+    } else {
+        LNN_LOGE(LNN_STATE, "GetOsVersion failed.");
+        return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }

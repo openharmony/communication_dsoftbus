@@ -108,6 +108,8 @@
 #define IS_CHARGING "IS_CHARGING"
 #define BATTERY_LEAVEL "BATTERY_LEAVEL"
 #define PKG_VERSION "PKG_VERSION"
+#define OS_TYPE "OS_TYPE"
+#define OS_VERSION "OS_VERSION"
 #define WIFI_VERSION "WIFI_VERSION"
 #define BLE_VERSION "BLE_VERSION"
 #define HML_MAC "HML_MAC"
@@ -823,6 +825,12 @@ static void PackCommonFastAuth(JsonObj *json, const NodeInfo *info)
     }
 }
 
+static void PackOsInfo(JsonObj *json, const NodeInfo *info)
+{
+    (void)JSON_AddInt32ToObject(json, OS_TYPE, info->deviceInfo.osType);
+    (void)JSON_AddStringToObject(json, OS_VERSION, info->deviceInfo.osVersion);
+}
+
 static void PackCommP2pInfo(JsonObj *json, const NodeInfo *info)
 {
     (void)JSON_AddInt32ToObject(json, P2P_ROLE, LnnGetP2pRole(info));
@@ -1024,6 +1032,7 @@ static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion ve
         AUTH_LOGE(AUTH_FSM, "JSON_AddStringToObject fail");
         return SOFTBUS_ERR;
     }
+    PackOsInfo(json, info);
     PackCommonFastAuth(json, info);
     if (!PackCipherKeySyncMsg(json)) {
         AUTH_LOGE(AUTH_FSM, "PackCipherKeySyncMsg fail");
@@ -1115,6 +1124,8 @@ static void UnpackCommon(const JsonObj *json, NodeInfo *info, SoftBusVersion ver
     OptBool(json, IS_SCREENON, &info->isScreenOn, false);
     OptInt64(json, ACCOUNT_ID, &info->accountId, 0);
     OptInt(json, NODE_WEIGHT, &info->masterWeight, DEFAULT_NODE_WEIGHT);
+    OptInt(json, OS_TYPE, &info->deviceInfo.osType, -1);
+    OptString(json, OS_VERSION, info->deviceInfo.osVersion, OS_VERSION_BUF_LEN, "");
 
     // IS_SUPPORT_TCP_HEARTBEAT
     OptInt(json, NEW_CONN_CAP, (int32_t *)&info->netCapacity, -1);
