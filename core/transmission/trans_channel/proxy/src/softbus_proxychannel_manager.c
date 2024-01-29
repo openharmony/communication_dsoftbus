@@ -1194,8 +1194,8 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
         };
         TRANS_EVENT(EVENT_SCENE_CLOSE_CHANNEL_PASSIVE, EVENT_STAGE_CLOSE_CHANNEL, extra);
         OnProxyChannelClosed(info->channelId, &(info->appInfo));
-        (void)TransProxyCloseConnChannelReset(msg->connId, (info->isServer == 0));
     }
+    (void)TransProxyCloseConnChannelReset(msg->connId, (info->isServer == 0));
     if ((msg->msgHead.cipher & BAD_CIPHER) == BAD_CIPHER) {
         TRANS_LOGE(TRANS_CTRL, "clear bad key authId=%{public}" PRId64 ", keyIndex=%{public}d",
             msg->authId, msg->keyIndex);
