@@ -46,6 +46,8 @@
 #define MAX_STATE_VERSION 0xFF
 #define SUPPORT_EXCHANGE_NETWORKID 1
 #define DEFAULT_CONN_SUB_FEATURE 1
+#define OH_OS_TYPE 10
+#define HO_OS_TYPE 11
 
 typedef struct {
     NodeInfo localInfo;
@@ -113,6 +115,19 @@ static int32_t LlGetNetworkId(void *buf, uint32_t len)
     }
     if (strncpy_s((char *)buf, len, info->networkId, strlen(info->networkId)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "STR COPY ERROR!");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t LlGetOsVersion(void *buf, uint32_t len)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (buf == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strcpy_s((char *)buf, len, info->deviceInfo.osVersion) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s osVersion ERROR!");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -561,6 +576,16 @@ static int32_t LlGetDeviceTypeId(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t LlGetOsType(void *buf, uint32_t len)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (buf == NULL || len != sizeof(uint32_t)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((int32_t *)buf) = info->deviceInfo.osType;
+    return SOFTBUS_OK;
+}
+
 static int32_t L1GetMasterNodeWeight(void *buf, uint32_t len)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
@@ -709,6 +734,13 @@ static int32_t InitLocalDeviceInfo(DeviceBasicInfo *info)
     // get device info
     if (GetCommonDevInfo(COMM_DEVICE_KEY_DEVNAME, info->deviceName, DEVICE_NAME_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "COMM_DEVICE_KEY_DEVNAME failed");
+        return SOFTBUS_ERR;
+    }
+    if (GetCommonOsType(&info->osType) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get os type failed");
+    }
+    if (GetCommonOsVersion(info->osVersion, OS_VERSION_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get os version failed");
         return SOFTBUS_ERR;
     }
     if (LnnGetUnifiedDeviceName(info->unifiedName, DEVICE_NAME_BUF_LEN) != SOFTBUS_OK) {
@@ -1298,6 +1330,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {STRING_KEY_HICE_VERSION, VERSION_MAX_LEN, LlGetNodeSoftBusVersion, NULL},
     {STRING_KEY_DEV_UDID, UDID_BUF_LEN, LlGetDeviceUdid, UpdateLocalDeviceUdid},
     {STRING_KEY_NETWORKID, NETWORK_ID_BUF_LEN, LlGetNetworkId, UpdateLocalNetworkId},
+    {STRING_KEY_OS_VERSION, OS_VERSION_BUF_LEN, LlGetOsVersion, NULL},
     {STRING_KEY_UUID, UUID_BUF_LEN, LlGetUuid, UpdateLocalUuid},
     {STRING_KEY_DEV_TYPE, DEVICE_TYPE_BUF_LEN, LlGetDeviceType, UpdateLocalDeviceType},
     {STRING_KEY_DEV_NAME, DEVICE_NAME_BUF_LEN, LlGetDeviceName, UpdateLocalDeviceName},
@@ -1325,6 +1358,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {NUM_KEY_FEATURE_CAPA, -1, LlGetFeatureCapa, UpdateLocalFeatureCapability},
     {NUM_KEY_DISCOVERY_TYPE, -1, LlGetNetType, NULL},
     {NUM_KEY_DEV_TYPE_ID, -1, LlGetDeviceTypeId, NULL},
+    {NUM_KEY_OS_TYPE, -1, LlGetOsType, NULL},
     {NUM_KEY_MASTER_NODE_WEIGHT, -1, L1GetMasterNodeWeight, UpdateMasgerNodeWeight},
     {NUM_KEY_P2P_ROLE, -1, L1GetP2pRole, UpdateP2pRole},
     {NUM_KEY_STATE_VERSION, -1, LlGetStateVersion, UpdateStateVersion},
@@ -1622,6 +1656,16 @@ int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info)
     rc = LnnGetLocalStrInfo(STRING_KEY_DEV_TYPE, type, DEVICE_TYPE_BUF_LEN);
     if (rc != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get local device type failed");
+        return SOFTBUS_ERR;
+    }
+    rc = LnnGetLocalStrInfo(STRING_KEY_OS_VERSION, info->osVersion, OS_VERSION_BUF_LEN);
+    if (rc != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get local os version failed");
+        return SOFTBUS_ERR;
+    }
+    rc = LnnGetLocalNumInfo(NUM_KEY_OS_TYPE, &info->osType);
+    if (rc != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get local os type failed");
         return SOFTBUS_ERR;
     }
     return LnnConvertDeviceTypeToId(type, &info->deviceTypeId);
