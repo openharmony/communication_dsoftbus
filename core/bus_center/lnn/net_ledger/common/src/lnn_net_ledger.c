@@ -79,10 +79,18 @@ static void LnnRestoreLocalDeviceInfo()
         Anonymize(info.networkId, &anonyNetworkId);
         LNN_LOGI(LNN_LEDGER, "load local deviceInfo success, networkId=%{public}s", anonyNetworkId);
         int64_t accountId = 0;
+        int32_t osType = 0;
         AnonymizeFree(anonyNetworkId);
         if (LnnGetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, &accountId) == SOFTBUS_OK) {
             if (accountId != info.accountId) {
                 info.stateVersion++;
+                LnnSaveLocalDeviceInfo(&info);
+            }
+        }
+        if (LnnGetLocalNumInfo(NUM_KEY_OS_TYPE, &osType) == SOFTBUS_OK) {
+            if (osType != info.deviceInfo.osType) {
+                info.stateVersion++;
+                LnnSaveLocalDeviceInfo(&info);
             }
         }
         LNN_LOGI(LNN_LEDGER, "load local deviceInfo stateVersion=%{public}d", info.stateVersion);
