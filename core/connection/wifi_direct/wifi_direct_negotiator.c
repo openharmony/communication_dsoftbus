@@ -508,7 +508,7 @@ static bool IsBusy(void)
 
 static void ResetContext(void)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
     (void)memset_s(self->currentRemoteDeviceId, sizeof(self->currentRemoteDeviceId), 0,
                    sizeof(self->currentRemoteDeviceId));

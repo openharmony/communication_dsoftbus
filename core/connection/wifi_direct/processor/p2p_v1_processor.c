@@ -285,7 +285,7 @@ static void OnOperationEvent(int32_t event, void *data)
 
 static void ResetContext(void)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
+    CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     struct P2pV1Processor *self = GetP2pV1Processor();
     self->currentState = P2P_V1_PROCESSOR_STATE_AVAILABLE;
     self->pendingErrorCode = OK;
