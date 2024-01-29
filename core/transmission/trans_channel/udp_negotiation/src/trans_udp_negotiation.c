@@ -936,8 +936,10 @@ int32_t TransOpenUdpChannel(AppInfo *appInfo, const ConnectOption *connOpt, int3
         TRANS_LOGE(TRANS_CTRL, "open udp negotiation failed.");
         ReleaseUdpChannelId(id);
         TransDelUdpChannel(id);
+        SoftBusFree(newChannel);
         return ret;
     }
+    SoftBusFree(newChannel);
     *channelId = id;
     return SOFTBUS_OK;
 }
