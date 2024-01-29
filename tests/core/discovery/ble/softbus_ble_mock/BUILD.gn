@@ -58,12 +58,6 @@ ohos_unittest("DiscBleTest") {
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
   ]
-
-  if (is_standard_system) {
-    external_deps = [ "c_utils:utils" ]
-  } else {
-    external_deps = [ "c_utils:utils" ]
-  }
 }
 
 group("unittest") {
