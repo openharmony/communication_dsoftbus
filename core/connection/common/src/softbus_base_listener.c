@@ -36,6 +36,7 @@
 #define DEFAULT_BACKLOG   4
 #define FDARR_EXPAND_BASE 2
 #define SELECT_UNEXPECT_FAIL_RETRY_WAIT_MILLIS (3 * 1000)
+#define SELECT_ABNORMAL_EVENT_RETRY_WAIT_MILLIS (3 * 10) /* wait retry time for an abnotmal event by select*/
 
 enum BaseListenerStatus {
     LISTENER_IDLE = 0,
@@ -1112,8 +1113,8 @@ static void *SelectTask(void *arg)
         if (nEvents <= 0) {
             CONN_LOGE(CONN_COMMON, "unexpect wakeup, retry after some times. "
                                    "waitDelay=%{public}dms, wakeupTraceId=%{public}d, events=%{public}d",
-                SELECT_UNEXPECT_FAIL_RETRY_WAIT_MILLIS, wakeupTraceId, nEvents);
-            SoftBusSleepMs(SELECT_UNEXPECT_FAIL_RETRY_WAIT_MILLIS);
+                SELECT_ABNORMAL_EVENT_RETRY_WAIT_MILLIS, wakeupTraceId, nEvents);
+            SoftBusSleepMs(SELECT_ABNORMAL_EVENT_RETRY_WAIT_MILLIS);
             continue;
         }
         CONN_LOGI(CONN_COMMON, "select task, wakeup from select, selectTrace=%{public}d, wakeupTraceId=%{public}d, "
