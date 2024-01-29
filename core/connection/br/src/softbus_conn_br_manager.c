@@ -314,69 +314,6 @@ static void NotifyDeviceConnectResult(
     }
 }
 
-static BrPending *GetBrPending(const char *addr)
-{
-    BrPending *it = NULL;
-    LIST_FOR_EACH_ENTRY(it, &g_brManager.pendings->list, BrPending, node) {
-        if (StrCmpIgnoreCase(it->addr, addr) == 0) {
-            return it;
-        }
-    }
-    return NULL;
-}
-
-static void ProcessBleDisconnectedEvent(char *addr)
-{
-    CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_brManager.pendings->lock) == SOFTBUS_OK, CONN_BR,
-        "ATTENTION UNEXPECTED ERROR! check pending failed: lock pendings failed");
-    char anomizeAddress[BT_MAC_LEN] = { 0 };
-    ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, addr, BT_MAC_LEN);
-    BrPending *target = GetBrPending(addr);
-    if (target == NULL) {
-        CONN_LOGD(CONN_BR, "address is not in pending list, no need to unpend, address=%{public}s", anomizeAddress);
-        SoftBusMutexUnlock(&g_brManager.pendings->lock);
-        return;
-    }
-    ConnBrPendInfo *info = (ConnBrPendInfo *)SoftBusCalloc(sizeof(ConnBrPendInfo));
-    if (info == NULL || strcpy_s(info->addr, BT_MAC_LEN, addr) != EOK) {
-        CONN_LOGE(CONN_BR, "copy addr failed, address=%{public}s", anomizeAddress);
-        SoftBusFree(info);
-        SoftBusMutexUnlock(&g_brManager.pendings->lock);
-        return;
-    }
-    uint64_t now = SoftBusGetSysTimeMs();
-    if (target->pendInfo->firstStartTimestamp + target->pendInfo->firstDuration < now) {
-        CONN_LOGD(CONN_BR, "unpendAddress=%{public}s", anomizeAddress);
-        ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_UNPEND, 0, 0, info, 0);
-    } else {
-        CONN_LOGD(CONN_BR, "do not unpendAddress=%{public}s", anomizeAddress);
-        SoftBusFree(info);
-    }
-    SoftBusMutexUnlock(&g_brManager.pendings->lock);
-}
-
-static void OnAclStateChanged(int32_t listenerId, const SoftBusBtAddr *addr, int32_t aclState, int32_t hciReason)
-{
-    CONN_CHECK_AND_RETURN_LOGW(addr != NULL, CONN_BR, "invalid parameter: addr is NULL");
-    char copyMac[BT_MAC_LEN] = { 0 };
-    int32_t status = ConvertBtMacToStr(copyMac, BT_MAC_LEN, addr->addr, sizeof(addr->addr));
-    if (status != SOFTBUS_OK) {
-        CONN_LOGW(CONN_BR, "convert bt mac to str fail, error=%{public}d", status);
-        return;
-    }
-    char anomizeAddress[BT_MAC_LEN] = { 0 };
-    ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, copyMac, BT_MAC_LEN);
-    CONN_LOGD(
-        CONN_BR, "address=%{public}s, aclState=%{public}d, hciReason=%{public}d", anomizeAddress, aclState, hciReason);
-    switch (aclState) {
-        case SOFTBUS_ACL_STATE_LE_DISCONNECTED:
-            ProcessBleDisconnectedEvent(copyMac);
-            break;
-        default:
-            break;
-    }
-}
-
 static void PendingIfBleSameAddress(const char *addr)
 {
     uint32_t connectionId = 0;
@@ -1665,7 +1602,7 @@ static int32_t InitBrManager()
     g_brManager.connecting = NULL;
 
     static SoftBusBtStateListener listener = {
-        .OnBtAclStateChanged = OnAclStateChanged,
+        .OnBtAclStateChanged = NULL,
         .OnBtStateChanged = OnBtStateChanged,
     };
     int32_t listenerId = SoftBusAddBtStateListener(&listener);
