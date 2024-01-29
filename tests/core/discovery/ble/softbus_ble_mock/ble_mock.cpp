@@ -324,9 +324,9 @@ int32_t BleMock::ActionOfUpdateAdvForActiveDiscovery(
     ShowAdvData(bcId, packet);
 
     if (packet->bcData.payloadLen != sizeof(activeDiscoveryAdvData2) ||
-        packet->rspData.payloadLen != sizeof(activeDiscoveryRspData) ||
+        packet->rspData.payloadLen != sizeof(activeDiscoveryRspData2) ||
         memcmp(packet->bcData.payload, activeDiscoveryAdvData2, packet->bcData.payloadLen) != 0 ||
-        memcmp(packet->rspData.payload, activeDiscoveryRspData, packet->rspData.payloadLen) != 0) {
+        memcmp(packet->rspData.payload, activeDiscoveryRspData2, packet->rspData.payloadLen) != 0) {
         isAsyncAdvertiseSuccess = false;
         GetMock()->AsyncAdvertiseDone();
         return SOFTBUS_ERR;
