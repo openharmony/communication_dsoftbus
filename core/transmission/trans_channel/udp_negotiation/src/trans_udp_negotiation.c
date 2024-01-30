@@ -939,7 +939,6 @@ int32_t TransOpenUdpChannel(AppInfo *appInfo, const ConnectOption *connOpt, int3
         SoftBusFree(newChannel);
         return ret;
     }
-    SoftBusFree(newChannel);
     *channelId = id;
     return SOFTBUS_OK;
 }
