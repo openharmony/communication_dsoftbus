@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,15 +54,15 @@ char *PackError(int errCode, const char *errDesc)
     return data;
 }
 
-static int PackFirstData(const AppInfo *appInfo, cJSON *json)
+static int32_t PackFirstData(const AppInfo *appInfo, cJSON *json)
 {
     TRANS_LOGD(TRANS_CTRL, "begin to pack first data");
-    uint8_t *encodeFastData = (uint8_t *)SoftBusMalloc(BASE64_FAST_DATA_LEN);
+    uint8_t *encodeFastData = (uint8_t *)SoftBusCalloc(BASE64_FAST_DATA_LEN);
     if (encodeFastData == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "malloc encode fast data fail.");
-        return SOFTBUS_ERR;
+        TRANS_LOGE(TRANS_CTRL, "malloc encode fast data failed.");
+        return SOFTBUS_MALLOC_ERR;
     }
-    size_t fastDataSize = 0;
+
     uint32_t outLen;
     char *buf = TransTdcPackFastData(appInfo, &outLen);
     if (buf == NULL) {
@@ -76,9 +76,10 @@ static int PackFirstData(const AppInfo *appInfo, cJSON *json)
         SoftBusFree(encodeFastData);
         return SOFTBUS_ENCRYPT_ERR;
     }
+    size_t fastDataSize = 0;
     int32_t ret = SoftBusBase64Encode(encodeFastData, BASE64_FAST_DATA_LEN, &fastDataSize,
         (const unsigned char *)buf, outLen);
-    if (ret != 0) {
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "base64 encode failed.");
         SoftBusFree(encodeFastData);
         SoftBusFree(buf);
@@ -88,10 +89,40 @@ static int PackFirstData(const AppInfo *appInfo, cJSON *json)
         TRANS_LOGE(TRANS_CTRL, "add first data failed.");
         SoftBusFree(encodeFastData);
         SoftBusFree(buf);
-        return SOFTBUS_ERR;
+        return SOFTBUS_PARSE_JSON_ERR;
     }
     SoftBusFree(encodeFastData);
     SoftBusFree(buf);
+    return SOFTBUS_OK;
+}
+
+static int32_t JsonObjectPackRequestEx(const AppInfo *appInfo, cJSON *json, unsigned char *encodeSessionKey)
+{
+    bool addBRet = (
+        !AddNumberToJsonObject(json, CODE, CODE_OPEN_CHANNEL) ||
+        !AddNumberToJsonObject(json, API_VERSION, appInfo->myData.apiVersion) ||
+        !AddStringToJsonObject(json, BUS_NAME, appInfo->peerData.sessionName) ||
+        !AddStringToJsonObject(json, GROUP_ID, appInfo->groupId) ||
+        !AddNumberToJsonObject(json, UID, appInfo->myData.uid) ||
+        !AddNumberToJsonObject(json, PID, appInfo->myData.pid) ||
+        !AddStringToJsonObject(json, SESSION_KEY, (char *)encodeSessionKey) ||
+        !AddNumberToJsonObject(json, MTU_SIZE, (int32_t)appInfo->myData.dataConfig));
+    if (addBRet) {
+        return SOFTBUS_PARSE_JSON_ERR;
+    }
+    char *authState = (char *)appInfo->myData.authState;
+    if (appInfo->myData.apiVersion != API_V1 && (!AddStringToJsonObject(json, PKG_NAME, appInfo->myData.pkgName) ||
+        !AddStringToJsonObject(json, CLIENT_BUS_NAME, appInfo->myData.sessionName) ||
+        !AddStringToJsonObject(json, AUTH_STATE, authState) ||
+        !AddNumberToJsonObject(json, MSG_ROUTE_TYPE, appInfo->routeType))) {
+        return SOFTBUS_PARSE_JSON_ERR;
+    }
+    (void)AddNumberToJsonObject(json, BUSINESS_TYPE, appInfo->businessType);
+    (void)AddNumberToJsonObject(json, AUTO_CLOSE_TIME, appInfo->autoCloseTime);
+    (void)AddNumberToJsonObject(json, TRANS_FLAGS, TRANS_FLAG_HAS_CHANNEL_AUTH);
+    (void)AddNumberToJsonObject(json, MY_HANDLE_ID, appInfo->myHandleId);
+    (void)AddNumberToJsonObject(json, PEER_HANDLE_ID, appInfo->peerHandleId);
+
     return SOFTBUS_OK;
 }
 
@@ -119,37 +150,18 @@ char *PackRequest(const AppInfo *appInfo)
 
     unsigned char encodeSessionKey[BASE64KEY] = {0};
     size_t keyLen = 0;
-    int32_t ret = SoftBusBase64Encode(encodeSessionKey, BASE64KEY, &keyLen, (unsigned char*)appInfo->sessionKey,
-        SESSION_KEY_LENGTH);
-    if (ret != 0) {
+    int32_t ret = SoftBusBase64Encode(encodeSessionKey, BASE64KEY,
+        &keyLen, (unsigned char *)appInfo->sessionKey, SESSION_KEY_LENGTH);
+    if (ret != SOFTBUS_OK) {
         cJSON_Delete(json);
         return NULL;
     }
-    bool addBRet = (!AddNumberToJsonObject(json, CODE, CODE_OPEN_CHANNEL) ||
-        !AddNumberToJsonObject(json, API_VERSION, appInfo->myData.apiVersion) ||
-        !AddStringToJsonObject(json, BUS_NAME, appInfo->peerData.sessionName) ||
-        !AddStringToJsonObject(json, GROUP_ID, appInfo->groupId) ||
-        !AddNumberToJsonObject(json, UID, appInfo->myData.uid) ||
-        !AddNumberToJsonObject(json, PID, appInfo->myData.pid) ||
-        !AddStringToJsonObject(json, SESSION_KEY, (char*)encodeSessionKey) ||
-        !AddNumberToJsonObject(json, MTU_SIZE, (int)appInfo->myData.dataConfig));
-    if (addBRet) {
+    ret = JsonObjectPackRequestEx(appInfo, json, encodeSessionKey);
+    if (ret != SOFTBUS_OK) {
         cJSON_Delete(json);
+        TRANS_LOGE(TRANS_CTRL, "pack jsonObj failed.");
         return NULL;
     }
-    char *authState = (char*)appInfo->myData.authState;
-    if (appInfo->myData.apiVersion != API_V1 && (!AddStringToJsonObject(json, PKG_NAME, appInfo->myData.pkgName) ||
-        !AddStringToJsonObject(json, CLIENT_BUS_NAME, appInfo->myData.sessionName) ||
-        !AddStringToJsonObject(json, AUTH_STATE, authState) ||
-        !AddNumberToJsonObject(json, MSG_ROUTE_TYPE, appInfo->routeType))) {
-        cJSON_Delete(json);
-        return NULL;
-    }
-    (void)AddNumberToJsonObject(json, BUSINESS_TYPE, appInfo->businessType);
-    (void)AddNumberToJsonObject(json, AUTO_CLOSE_TIME, appInfo->autoCloseTime);
-    (void)AddNumberToJsonObject(json, TRANS_FLAGS, TRANS_FLAG_HAS_CHANNEL_AUTH);
-    (void)AddNumberToJsonObject(json, MY_HANDLE_ID, appInfo->myHandleId);
-    (void)AddNumberToJsonObject(json, PEER_HANDLE_ID, appInfo->peerHandleId);
     char *data = cJSON_PrintUnformatted(json);
     if (data == NULL) {
         TRANS_LOGE(TRANS_CTRL, "cJSON_PrintUnformatted failed");
@@ -158,33 +170,33 @@ char *PackRequest(const AppInfo *appInfo)
     return data;
 }
 
-static int UnpackFirstData(AppInfo *appInfo, const cJSON *json)
+static int32_t UnpackFirstData(AppInfo *appInfo, const cJSON *json)
 {
     if (!GetJsonObjectNumber16Item(json, FIRST_DATA_SIZE, &(appInfo->fastTransDataSize))) {
         appInfo->fastTransDataSize = 0;
     }
     TRANS_LOGD(TRANS_CTRL, "fastDataSize=%{public}d", appInfo->fastTransDataSize);
     if (appInfo->fastTransDataSize > 0 && appInfo->fastTransDataSize <= MAX_FAST_DATA_LEN) {
-        uint8_t *encodeFastData = (uint8_t *)SoftBusMalloc(BASE64_FAST_DATA_LEN);
+        uint8_t *encodeFastData = (uint8_t *)SoftBusCalloc(BASE64_FAST_DATA_LEN);
         if (encodeFastData == NULL) {
-            TRANS_LOGE(TRANS_CTRL, "malloc encode fast data fail.");
-            return SOFTBUS_ERR;
+            TRANS_LOGE(TRANS_CTRL, "malloc encode fast data failed.");
+            return SOFTBUS_MALLOC_ERR;
         }
         size_t fastDataSize = 0;
         if (!GetJsonObjectStringItem(json, FIRST_DATA, (char *)encodeFastData, BASE64_FAST_DATA_LEN)) {
             TRANS_LOGE(TRANS_CTRL, "Failed to get fast data");
             SoftBusFree(encodeFastData);
-            return SOFTBUS_ERR;
+            return SOFTBUS_PARSE_JSON_ERR;
         }
-        appInfo->fastTransData = (uint8_t *)SoftBusMalloc(appInfo->fastTransDataSize + FAST_TDC_EXT_DATA_SIZE);
+        appInfo->fastTransData = (uint8_t *)SoftBusCalloc(appInfo->fastTransDataSize + FAST_TDC_EXT_DATA_SIZE);
         if (appInfo->fastTransData == NULL) {
-            TRANS_LOGE(TRANS_CTRL, "malloc fast data fail.");
+            TRANS_LOGE(TRANS_CTRL, "malloc fast data failed.");
             SoftBusFree(encodeFastData);
-            return SOFTBUS_ERR;
+            return SOFTBUS_MALLOC_ERR;
         }
         int32_t ret = SoftBusBase64Decode((unsigned char *)appInfo->fastTransData, appInfo->fastTransDataSize +
-            FAST_TDC_EXT_DATA_SIZE, &fastDataSize, encodeFastData, strlen((char*)encodeFastData));
-        if (ret != 0) {
+            FAST_TDC_EXT_DATA_SIZE, &fastDataSize, encodeFastData, strlen((char *)encodeFastData));
+        if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "mbedtls decode failed.");
             SoftBusFree((void *)appInfo->fastTransData);
             appInfo->fastTransData = NULL;
@@ -364,16 +376,16 @@ int UnpackReply(const cJSON *msg, AppInfo *appInfo, uint16_t *fastDataSize)
     return SOFTBUS_OK;
 }
 
-int UnpackReplyErrCode(const cJSON *msg, int32_t *errCode)
+int32_t UnpackReplyErrCode(const cJSON *msg, int32_t *errCode)
 {
     if ((msg == NULL) || (errCode == NULL)) {
         TRANS_LOGW(TRANS_CTRL, "invalid param");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     if (!GetJsonObjectInt32Item(msg, ERR_CODE, errCode)) {
         TRANS_LOGW(TRANS_CTRL, "unpack reply faild");
-        return SOFTBUS_ERR;
+        return SOFTBUS_PARSE_JSON_ERR;
     }
 
     return SOFTBUS_OK;
@@ -385,9 +397,9 @@ static int32_t TransTdcEncrypt(const char *sessionKey, const char *in, uint32_t 
     cipherKey.keyLen = SESSION_KEY_LENGTH;
     if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey, SESSION_KEY_LENGTH) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "memcpy key error.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
-    int32_t ret = SoftBusEncryptData(&cipherKey, (unsigned char*)in, inLen, (unsigned char*)out, outLen);
+    int32_t ret = SoftBusEncryptData(&cipherKey, (unsigned char *)in, inLen, (unsigned char *)out, outLen);
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "SoftBusEncryptData fail. ret=%{public}d", ret);
@@ -412,7 +424,7 @@ char *TransTdcPackFastData(const AppInfo *appInfo, uint32_t *outLen)
         return NULL;
     }
     uint32_t dataLen = appInfo->fastTransDataSize + OVERHEAD_LEN;
-    char *buf = (char *)SoftBusMalloc(dataLen + FAST_DATA_HEAD_SIZE);
+    char *buf = (char *)SoftBusCalloc(dataLen + FAST_DATA_HEAD_SIZE);
     if (buf == NULL) {
         TRANS_LOGE(TRANS_CTRL, "malloc failed.");
         return NULL;
