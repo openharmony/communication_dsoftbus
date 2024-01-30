@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,6 +55,9 @@ int32_t LnnOnTimeSyncResult(const void *info, int retCode);
 void LnnOnPublishLNNResult(int32_t publishId, int32_t reason);
 void LnnOnRefreshLNNResult(int32_t refreshId, int32_t reason);
 void LnnOnRefreshDeviceFound(const void *device);
+
+int32_t DiscRecoveryPublish();
+int32_t DiscRecoverySubscribe();
 
 #ifdef __cplusplus
 }

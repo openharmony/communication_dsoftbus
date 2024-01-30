@@ -19,6 +19,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 
+#include "client_bus_center_manager.h"
 #include "softbus_access_token_test.h"
 #include "softbus_bus_center.h"
 #include "discovery_service.h"
@@ -2468,4 +2469,81 @@ HWTEST_F(DiscSdkTest, StopRefreshLNNTest012, TestSize.Level1)
     ret = StopRefreshLNN(g_pkgName, testInfo.subscribeId);
 }
 
+/**
+ * @tc.name:DiscRecoveryPublishTest01
+ * @tc.desc: Test recovery publish.
+ * @tc.in: Test module, Test number, Test levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require:The DiscRecoveryPublish operates normally
+ */
+HWTEST_F(DiscSdkTest, DiscRecoveryPublishTest01, TestSize.Level1)
+{
+    int ret;
+    PublishInfo testInfo = {
+        .publishId = GetPublishId(),
+        .mode = DISCOVER_MODE_ACTIVE,
+        .medium = COAP,
+        .freq = LOW,
+        .capability = "dvKit",
+        .capabilityData = (unsigned char *)"capdata2",
+        .dataLen = strlen("capdata2")
+    };
+    BusCenterClientDeinit();
+    BusCenterClientInit();
+    ret = DiscRecoveryPublish();
+    EXPECT_TRUE(ret == 0);
+
+    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_TRUE(ret == 0);
+    ret = DiscRecoveryPublish();
+    EXPECT_TRUE(ret != 0);
+    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
+
+    ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
+    EXPECT_TRUE(ret == 0);
+    ret = StopPublishLNN(g_pkgName, testInfo.publishId);
+    ret = DiscRecoveryPublish();
+    EXPECT_TRUE(ret == 0);
+}
+
+/**
+ * @tc.name:DiscRecoverySubscribeTest01
+ * @tc.desc: Test recovery subscribe.
+ * @tc.in: Test module, Test number, Test levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require:The DiscRecoverySubscribe operates normally
+ */
+HWTEST_F(DiscSdkTest, DiscRecoverySubscribeTest01, TestSize.Level1)
+{
+    int ret;
+    SubscribeInfo testInfo = {
+        .subscribeId = GetSubscribeId(),
+        .mode = DISCOVER_MODE_PASSIVE,
+        .medium = AUTO,
+        .freq = LOW,
+        .isSameAccount = true,
+        .isWakeRemote = false,
+        .capability = "dvKit",
+        .capabilityData = (unsigned char *)"capdata3",
+        .dataLen = strlen("capdata3")
+    };
+    BusCenterClientDeinit();
+    BusCenterClientInit();
+    ret = DiscRecoverySubscribe();
+    EXPECT_TRUE(ret == 0);
+
+    ret = RefreshLNN(g_pkgName, &testInfo, &g_refreshCb);
+    EXPECT_TRUE(ret == 0);
+    ret = DiscRecoverySubscribe();
+    EXPECT_TRUE(ret != 0);
+    ret = StopRefreshLNN(g_pkgName, testInfo.subscribeId);
+
+    ret = RefreshLNN(g_pkgName, &testInfo, &g_refreshCb);
+    EXPECT_TRUE(ret == 0);
+    ret = StopRefreshLNN(g_pkgName, testInfo.subscribeId);
+    ret = DiscRecoverySubscribe();
+    EXPECT_TRUE(ret == 0);
+}
 } // namespace OHOS
