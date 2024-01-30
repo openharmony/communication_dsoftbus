@@ -162,7 +162,7 @@ void StreamManager::SetStreamRecvListener(std::shared_ptr<IStreamManagerListener
     if (it != socketMap_.end()) {
         auto streamSocket = it->second;
         streamSocket->SetStreamListener(socketListener_);
-        TRANS_LOGI(TRANS_STREAM, "success curProtocol=%{public}d", curProtocol_);
+        TRANS_LOGD(TRANS_STREAM, "success curProtocol=%{public}d", curProtocol_);
     }
 }
 } // namespace SoftBus

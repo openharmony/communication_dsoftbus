@@ -94,10 +94,10 @@ public:
 
     void OnStreamStatus(int status) override
     {
-        TRANS_LOGI(TRANS_STREAM, "status=%{public}d", status);
+        TRANS_LOGD(TRANS_STREAM, "status=%{public}d", status);
 
         if (adaptor_->GetListenerCallback() != nullptr && adaptor_->GetListenerCallback()->OnStatusChange != nullptr) {
-            TRANS_LOGE(TRANS_STREAM, "OnStatusChange status=%{public}d", status);
+            TRANS_LOGI(TRANS_STREAM, "OnStatusChange status=%{public}d", status);
             adaptor_->GetListenerCallback()->OnStatusChange(adaptor_->GetChannelId(), status);
         }
     }

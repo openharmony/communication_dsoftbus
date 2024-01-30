@@ -110,7 +110,7 @@ void VtpStreamSocket::RemoveStreamSocketLock(int fd)
     std::lock_guard<std::mutex> guard(g_streamSocketLockMapLock_);
     if (g_streamSocketLockMap.find(fd) != g_streamSocketLockMap.end()) {
         g_streamSocketLockMap.erase(fd);
-        TRANS_LOGE(TRANS_STREAM, "Remove streamsocketlock for the fd success. fd=%{public}d", fd);
+        TRANS_LOGI(TRANS_STREAM, "Remove streamsocketlock for the fd success. fd=%{public}d", fd);
     } else {
         TRANS_LOGE(TRANS_STREAM,
             "Streamsocketlock for the fd not exist in the map. fd=%{public}d", fd);
@@ -209,7 +209,7 @@ int VtpStreamSocket::HandleFillpFrameStats(int fd, const FtEventCbkInfo *info)
     auto itListener = g_streamSocketMap.find(fd);
     if (itListener != g_streamSocketMap.end()) {
         if (itListener->second->streamReceiver_ != nullptr) {
-            TRANS_LOGI(TRANS_STREAM, "OnFrameStats enter");
+            TRANS_LOGD(TRANS_STREAM, "OnFrameStats enter");
             itListener->second->streamReceiver_->OnFrameStats(&stats);
         } else {
             TRANS_LOGE(TRANS_STREAM, "streamReceiver_ is nullptr");
@@ -363,15 +363,15 @@ void VtpStreamSocket::FillpAppStatistics()
         metricList.info.appStatistics.periodSendBits = fillpPcbStats.appFcStastics.periodSendBits;
         metricList.info.appStatistics.periodSendRateBps = fillpPcbStats.appFcStastics.periodSendRateBps;
 
-        TRANS_LOGI(TRANS_STREAM,
+        TRANS_LOGD(TRANS_STREAM,
             "Succeed to get fillp statistics information for streamfd=%{public}d", streamFd_);
-        TRANS_LOGI(TRANS_STREAM,
+        TRANS_LOGD(TRANS_STREAM,
             "[Metric Return]: periodRtt=%{public}d", fillpPcbStats.appFcStastics.periodRtt);
 
         std::lock_guard<std::mutex> guard(streamSocketLock_);
 
         if (streamReceiver_ != nullptr) {
-            TRANS_LOGI(TRANS_STREAM,
+            TRANS_LOGD(TRANS_STREAM,
                 "[Metric Notify]: Fillp traffic statistics information of socket is notified. streamfd=%{public}d",
                 streamFd_);
             streamReceiver_->OnQosEvent(eventId, tvCount, &metricList);
@@ -613,7 +613,7 @@ bool VtpStreamSocket::Send(std::unique_ptr<IStream> stream)
         return false;
     }
 
-    TRANS_LOGI(TRANS_STREAM, "send out..., streamType=%{public}d, len=%{public}zd", streamType_, len);
+    TRANS_LOGD(TRANS_STREAM, "send out..., streamType=%{public}d, len=%{public}zd", streamType_, len);
     return true;
 }
 
@@ -696,9 +696,9 @@ bool VtpStreamSocket::InitVtpInstance(const std::string &pkgName)
 
 void VtpStreamSocket::DestroyVtpInstance(const std::string &pkgName)
 {
-    TRANS_LOGW(TRANS_STREAM, "enter.");
+    TRANS_LOGD(TRANS_STREAM, "enter.");
     vtpInstance_->DestroyVtp(pkgName);
-    TRANS_LOGW(TRANS_STREAM, "ok");
+    TRANS_LOGD(TRANS_STREAM, "ok");
 }
 
 int VtpStreamSocket::CreateAndBindSocket(IpAndPort &local)
@@ -735,7 +735,7 @@ int VtpStreamSocket::CreateAndBindSocket(IpAndPort &local)
         return -1;
     }
 
-    // 闁兼儳鍢茶ぐ鍣媜rt
+    // 获取port
     ret = FtGetSockName(sockFd, reinterpret_cast<sockaddr *>(&localSockAddr), &localAddrLen);
     if (ret != ERR_OK) {
         TRANS_LOGE(TRANS_STREAM, "getsockname error ret=%{public}d, errno=%{public}d", ret, FtGetErrno());
@@ -819,7 +819,7 @@ bool VtpStreamSocket::EnableSemiReliable(int streamFd) const
             "Fail to enable direct send for streamFd=%{public}d, errno=%{public}d", streamFd, FtGetErrno());
         return false;
     }
-    TRANS_LOGI(TRANS_STREAM, "Success to enable direct send for streamFd=%{public}d", streamFd);
+    TRANS_LOGI(TRANS_STREAM, "Success to enable semi reliable for streamFd=%{public}d", streamFd);
     return true;
 }
 
@@ -835,7 +835,7 @@ void VtpStreamSocket::RegisterMetricCallback(bool isServer)
         TRANS_LOGE(TRANS_STREAM, "fail to set socket binding to device");
         return;
     }
-    TRANS_LOGI(TRANS_STREAM, "FtSetSockOpt start success");
+    TRANS_LOGD(TRANS_STREAM, "FtSetSockOpt start success");
     if (isServer) {
         if (regStatisticsRet == 0) {
             TRANS_LOGI(TRANS_STREAM,
@@ -969,7 +969,7 @@ int VtpStreamSocket::SetSocketEpollMode(int fd)
         return ret;
     }
 
-    TRANS_LOGI(TRANS_STREAM, "SetNonBlockMode success");
+    TRANS_LOGD(TRANS_STREAM, "SetNonBlockMode success");
     return SOFTBUS_OK;
 }
 
@@ -1196,7 +1196,7 @@ bool VtpStreamSocket::SetIpTos(int fd, const StreamAttr &tos)
         return false;
     }
 
-    TRANS_LOGI(TRANS_STREAM, "Success to set ip tos: fd=%{public}d, tos=%{public}d", fd, tmp);
+    TRANS_LOGD(TRANS_STREAM, "Success to set ip tos: fd=%{public}d, tos=%{public}d", fd, tmp);
     return true;
 }
 
@@ -1278,14 +1278,14 @@ bool VtpStreamSocket::SetVtpStackConfigDelayed(int type, const StreamAttr &value
     if (streamFd_ == -1) {
         configCv_.wait(lock, [this] { return streamFd_ != -1; });
     }
-    TRANS_LOGI(TRANS_STREAM, "set vtp stack config, streamFd=%{public}d", streamFd_);
+    TRANS_LOGD(TRANS_STREAM, "set vtp stack config, streamFd=%{public}d", streamFd_);
     return SetVtpStackConfig(type, value);
 }
 
 bool VtpStreamSocket::SetVtpStackConfig(int type, const StreamAttr &value)
 {
     if (streamFd_ == -1) {
-        TRANS_LOGI(TRANS_STREAM, "set vtp stack config when streamFd is legal");
+        TRANS_LOGI(TRANS_STREAM, "set vtp stack config when streamFd is legal, type=%{public}d", type);
         auto self = GetSelf();
         std::thread([self, type, value]() {
             const std::string threadName = "OS_setVtpCfg";
