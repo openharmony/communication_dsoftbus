@@ -191,7 +191,7 @@ HWTEST_F(ConnEventTest, ConnEventTest005, TestSize.Level0)
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(CONN_AUDIT_NAME), Eq(SOFTBUS_EVENT_TYPE_SECURITY),
             ConnAuditValidParamArrayMatcher(extra, VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
     .Times(1);
-    CONN_AUDIT(AUDIT_SCENE_CONN_RESERVED, extra);
+    CONN_AUDIT(AUDIT_SCENE_CONN_HML_GROUP_TIMEOUT, extra);
 }
 
 } // namespace OHOS
