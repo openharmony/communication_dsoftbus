@@ -1594,17 +1594,8 @@ int32_t ClientAddSocketServer(SoftBusSecType type, const char *pkgName, const ch
     return SOFTBUS_OK;
 }
 
-int32_t ClientDeleteSocketSession(int32_t sessionId)
+static int32_t DeleteSocketSession(int32_t sessionId, char *pkgName, char *sessionName, bool *isEmptyList)
 {
-    if (sessionId < 0) {
-        TRANS_LOGE(TRANS_SDK, "Invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    if (g_clientSessionServerList == NULL) {
-        TRANS_LOGE(TRANS_SDK, "not init");
-        return SOFTBUS_TRANS_SESSION_SERVER_NOINIT;
-    }
     if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != 0) {
         TRANS_LOGE(TRANS_SDK, "lock failed");
         return SOFTBUS_LOCK_ERR;
@@ -1612,32 +1603,99 @@ int32_t ClientDeleteSocketSession(int32_t sessionId)
 
     ClientSessionServer *serverNode = NULL;
     SessionInfo *sessionNode = NULL;
-    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
-        if (IsListEmpty(&serverNode->sessionList)) {
-            continue;
-        }
-        LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
-            if (sessionNode->sessionId != sessionId) {
-                continue;
-            }
-            // delete sessionInfo
-            ListDelete(&(sessionNode->node));
-            TRANS_LOGI(TRANS_SDK, "delete sessionId = %{public}d", sessionId);
-            DestroySessionId();
-            SoftBusFree(sessionNode);
-            // delete session server if session server is empty
-            if (IsListEmpty(&serverNode->sessionList)) {
-                ListDelete(&(serverNode->node));
-                g_clientSessionServerList->cnt--;
-            }
+    int32_t ret = GetSessionById(sessionId, &serverNode, &sessionNode);
+    if (ret != SOFTBUS_OK) {
+        (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+        TRANS_LOGE(TRANS_SDK, "not found by sessionId=%{public}d", sessionId);
+        return SOFTBUS_NOT_FIND;
+    }
+
+    if (strcpy_s(pkgName, PKG_NAME_SIZE_MAX, serverNode->pkgName) != EOK) {
+        (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+        TRANS_LOGE(TRANS_SDK, "strcpy pkgName failed");
+        return SOFTBUS_STRCPY_ERR;
+    }
+
+    if (strcpy_s(sessionName, SESSION_NAME_SIZE_MAX, serverNode->sessionName) != EOK) {
+        (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+        TRANS_LOGE(TRANS_SDK, "strcpy sessionName failed");
+        return SOFTBUS_STRCPY_ERR;
+    }
+
+    ListDelete(&(sessionNode->node));
+    TRANS_LOGI(TRANS_SDK, "delete session, sessionId=%{public}d", sessionId);
+    DestroySessionId();
+    SoftBusFree(sessionNode);
+    *isEmptyList = IsListEmpty(&serverNode->sessionList);
+    (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+    return SOFTBUS_OK;
+}
+
+static int32_t TryDeleteEmptySessionServer(const char *sessionName)
+{
+    if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != 0) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    char *tmpName = NULL;
+    Anonymize(sessionName, &tmpName);
+    ClientSessionServer *serverNode = NULL;
+    ClientSessionServer *serverNodeNext = NULL;
+    ListNode destroyList;
+    ListInit(&destroyList);
+    LIST_FOR_EACH_ENTRY_SAFE(
+        serverNode, serverNodeNext, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        if (strcmp(serverNode->sessionName, sessionName) == 0 && IsListEmpty(&serverNode->sessionList)) {
+            ListDelete(&(serverNode->node));
+            SoftBusFree(serverNode);
+            g_clientSessionServerList->cnt--;
             (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+            TRANS_LOGI(TRANS_SDK, "delete empty session server, sessionName=%{public}s", tmpName);
+            AnonymizeFree(tmpName);
             return SOFTBUS_OK;
         }
     }
-
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-    TRANS_LOGE(TRANS_SDK, "not found");
-    return SOFTBUS_ERR;
+    TRANS_LOGE(TRANS_SDK, "not found session server or session list is not empty, sessionName=%{public}s", tmpName);
+    AnonymizeFree(tmpName);
+    return SOFTBUS_NOT_FIND;
+}
+
+int32_t ClientDeleteSocketSession(int32_t sessionId)
+{
+    if (sessionId <= 0) {
+        TRANS_LOGE(TRANS_SDK, "Invalid sessionId=%{public}d", sessionId);
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
+    bool isEmptyList = false;
+    int32_t ret = DeleteSocketSession(sessionId, pkgName, sessionName, &isEmptyList);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "failed delete session");
+        return ret;
+    }
+
+    if (!isEmptyList) {
+        TRANS_LOGD(TRANS_SDK, "sessionList is not empty");
+        return SOFTBUS_OK;
+    }
+
+    // calling the ipc interface by locking here may block other threads for a long time
+    ret = ServerIpcRemoveSessionServer(pkgName, sessionName);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "remove session server failed, ret=%{public}d.", ret);
+        return ret;
+    }
+
+    ret = TryDeleteEmptySessionServer(sessionName);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "remove session server failed, ret=%{public}d", ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
 }
 
 static bool IsDistributedDataSession(const char *sessionName)
