@@ -14,6 +14,7 @@
  */
 
 #include "securec.h"
+#include <unistd.h>
 
 #include "disc_log.h"
 #include "softbus_adapter_bt_common.h"
@@ -27,7 +28,10 @@
 #include "softbus_hidumper_bc_mgr.h"
 #include "softbus_utils.h"
 
+#define BC_WAIT_TIME_MILLISEC 50
 #define BC_WAIT_TIME_SEC 2
+#define MGR_TIME_THOUSAND_MULTIPLIER 1000LL
+#define BC_WAIT_TIME_MICROSEC (BC_WAIT_TIME_MILLISEC * MGR_TIME_THOUSAND_MULTIPLIER)
 
 static volatile bool g_mgrInit = false;
 static volatile bool g_mgrLockInit = false;
@@ -48,6 +52,7 @@ typedef struct {
     int32_t adapterBcId;
     bool isUsed;
     bool isAdvertising;
+    int64_t time;
     SoftBusCond cond;
     BroadcastCallback *bcCallback;
 } BroadcastManager;
@@ -111,6 +116,7 @@ static void BcBtStateChanged(int32_t listenerId, int32_t state)
         }
         (void)g_interface[g_interfaceId]->StopBroadcasting(bcManager->adapterBcId);
         bcManager->isAdvertising = false;
+        bcManager->time = 0;
         SoftBusCondBroadcast(&bcManager->cond);
 
         SoftBusMutexUnlock(&g_bcLock);
@@ -271,6 +277,7 @@ static void BcStopBroadcastingCallback(int32_t adapterBcId, int32_t status)
             GetSrvType(bcManager->srvType), managerId, adapterBcId, status);
         if (status == SOFTBUS_BC_STATUS_SUCCESS) {
             bcManager->isAdvertising = false;
+            bcManager->time = 0;
             SoftBusCondSignal(&bcManager->cond);
         }
         SoftBusMutexUnlock(&g_bcLock);
@@ -685,7 +692,6 @@ int32_t RegisterBroadcaster(BaseServiceType srvType, int32_t *bcId, const Broadc
     }
     DISC_LOGD(DISC_BLE,
         "BaseServiceType=%{public}d, bcId=%{public}d, adapterBcId=%{public}d", srvType, managerId, adapterBcId);
-
     *bcId = managerId;
     ret = SoftBusCondInit(&g_bcManager[managerId].cond);
     if (ret != SOFTBUS_OK) {
@@ -697,6 +703,7 @@ int32_t RegisterBroadcaster(BaseServiceType srvType, int32_t *bcId, const Broadc
     g_bcManager[managerId].adapterBcId = adapterBcId;
     g_bcManager[managerId].isUsed = true;
     g_bcManager[managerId].isAdvertising = false;
+    g_bcManager[managerId].time = 0;
     g_bcManager[managerId].bcCallback = (BroadcastCallback *)cb;
     SoftBusMutexUnlock(&g_bcLock);
     return SOFTBUS_OK;
@@ -746,6 +753,7 @@ int32_t UnRegisterBroadcaster(int32_t bcId)
     g_bcManager[bcId].adapterBcId = -1;
     g_bcManager[bcId].isUsed = false;
     g_bcManager[bcId].isAdvertising = false;
+    g_bcManager[bcId].time = 0;
     SoftBusCondDestroy(&g_bcManager[bcId].cond);
     g_bcManager[bcId].bcCallback = NULL;
 
@@ -1257,6 +1265,14 @@ static int32_t BuildSoftbusBroadcastData(const BroadcastPacket *packet, SoftbusB
     return SOFTBUS_OK;
 }
 
+static int64_t MgrGetSysTime(void)
+{
+    SoftBusSysTime absTime = {0};
+    SoftBusGetTime(&absTime);
+    int64_t time = absTime.sec * MGR_TIME_THOUSAND_MULTIPLIER * MGR_TIME_THOUSAND_MULTIPLIER + absTime.usec;
+    return time;
+}
+
 int32_t StartBroadcasting(int32_t bcId, const BroadcastParam *param, const BroadcastPacket *packet)
 {
     DISC_LOGI(DISC_BLE, "enter. bcId=%{public}d", bcId);
@@ -1297,6 +1313,7 @@ int32_t StartBroadcasting(int32_t bcId, const BroadcastParam *param, const Broad
               GetSrvType(g_bcManager[bcId].srvType), bcId, g_bcManager[bcId].adapterBcId);
     SoftBusMutexUnlock(&g_bcLock);
     ret = g_interface[g_interfaceId]->StartBroadcasting(g_bcManager[bcId].adapterBcId, &adapterParam, &softbusBcData);
+    g_bcManager[bcId].time = MgrGetSysTime();
     if (ret != SOFTBUS_OK) {
         g_bcManager[bcId].bcCallback->OnStartBroadcastingCallback(bcId, (int32_t)SOFTBUS_BC_STATUS_FAIL);
         DISC_LOGE(DISC_BLE, "call from adapter fail!");
@@ -1369,14 +1386,17 @@ int32_t StopBroadcasting(int32_t bcId)
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_ERR, DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->StopBroadcasting != NULL,
                                    SOFTBUS_ERR, DISC_BLE, "function is null!");
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckBcIdIsValid(bcId), SOFTBUS_ERR, DISC_BLE, "invalid bcId");
+
+    int64_t time = MgrGetSysTime();
+    if (time - g_bcManager[bcId].time < BC_WAIT_TIME_MICROSEC) {
+        int64_t diffTime = g_bcManager[bcId].time + BC_WAIT_TIME_MICROSEC - time;
+        DISC_LOGW(DISC_BLE, "wait %{public}d us", (int32_t)diffTime);
+        usleep(diffTime);
+    }
 
     int32_t ret = SoftBusMutexLock(&g_bcLock);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_BLE, "mutex err!");
-
-    if (!CheckBcIdIsValid(bcId)) {
-        SoftBusMutexUnlock(&g_bcLock);
-        return SOFTBUS_ERR;
-    }
 
     if (!g_bcManager[bcId].isAdvertising) {
         DISC_LOGW(DISC_BLE, "bcId is not advertising. bcId=%{public}d", bcId);
