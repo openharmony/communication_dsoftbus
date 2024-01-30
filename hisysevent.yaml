@@ -287,10 +287,12 @@ CONNECTION_AUDIT:
   COST_TIME: { type: INT32, desc: total cost time}
   CONN_TIMES: { type: INT32, desc: connect times }
   FREQ: { type: STRING, desc: frequency}
+  CHALLENGE_CODE: { type: STRING, desc: challenge code }
   PEER_BR_MAC: { type: STRING, desc: peer device br mac }
   LOCAL_BR_MAC: { type: STRING, desc: local br mac }
   PEER_BLE_MAC: { type: STRING, desc: peer device ble mac }
   LOCAL_BLE_MAC: { type: STRING, desc: local ble mac }
+  PEER_WIFI_MAC: { type: STRING, desc: peer wifi mac }
   PEER_DEV_TYPE: { type: STRING, desc: peer device type }
   PEER_UDID: { type: STRING, desc: peer device udid }
   LOCAL_UDID: { type: STRING, desc: local ble udid }
