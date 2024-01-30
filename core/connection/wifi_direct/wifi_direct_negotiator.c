@@ -403,7 +403,6 @@ static void OnTriggerChannelDataReceived(struct WifiDirectTriggerChannel *channe
     CONN_CHECK_AND_RETURN_LOGE(channel != NULL, CONN_WIFI_DIRECT, "channel is null");
     struct WifiDirectProcessor *processor = GetWifiDirectDecisionCenter()->getTriggerProcessorByChannel(channel);
     CONN_CHECK_AND_RETURN_LOGW(processor != NULL, CONN_WIFI_DIRECT, "trigger processor is null");
-    GetWifiDirectNegotiator()->startWatchDog();
     CONN_LOGI(CONN_WIFI_DIRECT, "processor=%{public}s", processor->name);
     processor->onTriggerChannelDataReceived(channel);
 }
@@ -414,7 +413,6 @@ static void OnDefaultTriggerChannelDataReceived(struct WifiDirectNegotiateChanne
     struct WifiDirectProcessor *processor = GetWifiDirectDecisionCenter()->getTriggerProcessorByData(data, len);
     CONN_CHECK_AND_RETURN_LOGW(processor != NULL, CONN_WIFI_DIRECT, "trigger processor is null");
     CONN_LOGI(CONN_WIFI_DIRECT, "processor=%{public}s", processor->name);
-    GetWifiDirectNegotiator()->startWatchDog();
     processor->onDefaultTriggerChannelDataReceived(channel, data, len);
 }
 
