@@ -284,12 +284,12 @@ HWTEST_F(AuthSessionMessageTest, UnPackBtDeviceIdV1_TEST_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: SetExchangeIdTypeAndValve_TEST_001
- * @tc.desc: SetExchangeIdTypeAndValve test
+ * @tc.name: SetExchangeIdTypeAndValue_TEST_001
+ * @tc.desc: SetExchangeIdTypeAndValue test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthSessionMessageTest, SetExchangeIdTypeAndValve_TEST_001, TestSize.Level1)
+HWTEST_F(AuthSessionMessageTest, SetExchangeIdTypeAndValue_TEST_001, TestSize.Level1)
 {
     JsonObj *obj1 = JSON_CreateObject();
     EXPECT_TRUE(obj1 != nullptr);

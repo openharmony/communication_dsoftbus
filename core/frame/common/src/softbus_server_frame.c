@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,76 +60,85 @@ bool GetServerIsInit(void)
     return g_isInit;
 }
 
+static int32_t InitServicesAndModules(void)
+{
+    if (ConnServerInit() != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus conn server init failed.");
+        return SOFTBUS_CONN_SERVER_INIT_FAILED;
+    }
+
+    if (AuthInit() != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus auth init failed.");
+        return SOFTBUS_AUTH_INIT_FAIL;
+    }
+
+    if (DiscServerInit() != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus disc server init failed.");
+        return SOFTBUS_DISC_SERVER_INIT_FAILED;
+    }
+
+    if (BusCenterServerInit() != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus buscenter server init failed.");
+        return SOFTBUS_CENTER_SERVER_INIT_FAILED;
+    }
+
+    if (TransServerInit() != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus trans server init failed.");
+        return SOFTBUS_TRANS_SERVER_INIT_FAILED;
+    }
+
+    if (DiscEventManagerInit() != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus disc event manager init failed.");
+        return SOFTBUS_DISCOVER_MANAGER_INIT_FAIL;
+    }
+
+    if (WifiDirectInit() != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus wifi direct init failed.");
+        return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
+    }
+
+    if (ConnBleDirectInit() != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus ble direct init failed.");
+        return SOFTBUS_CONN_BLE_DIRECT_INIT_FAILED;
+    }
+
+    if (InitSoftbusSysEvt() != SOFTBUS_OK || SoftBusHiDumperInit() != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus dfx init failed.");
+        return SOFTBUS_DFX_INIT_FAILED;
+    }
+
+    return SOFTBUS_OK;
+}
+
 void InitSoftBusServer(void)
 {
     SoftbusConfigInit();
 
     if (ServerStubInit() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "softbus server init failed: ServerStubInit");
+        COMM_LOGE(COMM_SVC, "server stub init failed.");
         return;
     }
 
     if (SoftBusTimerInit() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "softbus server init failed: SoftBusTimerInit");
+        COMM_LOGE(COMM_SVC, "softbus timer init failed.");
         return;
     }
 
     if (LooperInit() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "softbus server init failed: LooperInit");
+        COMM_LOGE(COMM_SVC, "softbus looper init failed.");
         return;
     }
-    if (ConnServerInit() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "softbus server init failed: ConnServerInit");
-        goto ERR_EXIT;
-    }
 
-    if (AuthInit() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "softbus server init failed: AuthInit");
-        goto ERR_EXIT;
-    }
-
-    if (DiscServerInit() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "softbus server init failed: DiscServerInit");
-        goto ERR_EXIT;
-    }
-
-    if (BusCenterServerInit() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "softbus server init failed: BusCenterServerInit");
-        goto ERR_EXIT;
-    }
-
-    if (TransServerInit() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "softbus server init failed: TransServerInit");
-        goto ERR_EXIT;
-    }
-
-    if (DiscEventManagerInit() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "softbus server init failed: DiscEventManagerInit");
-        goto ERR_EXIT;
-    }
-
-    if (WifiDirectInit() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "softbus server init failed: WifiDirectInit");
-        goto ERR_EXIT;
-    }
-
-    if (ConnBleDirectInit() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "softbus server init failed: ConnBleDirectInit");
-        goto ERR_EXIT;
-    }
-
-    if (InitSoftbusSysEvt() != SOFTBUS_OK || SoftBusHiDumperInit() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "softbus server init failed: InitSoftbusSysEvt or SoftBusHiDumperInit");
-        goto ERR_EXIT;
+    int32_t ret = InitServicesAndModules();
+    if (ret != SOFTBUS_OK) {
+        ServerModuleDeinit();
+        COMM_LOGE(COMM_SVC, "softbus framework init failed, err = %{public}d", ret);
+        return;
     }
 
     SoftBusBtInit();
     g_isInit = true;
     COMM_LOGI(COMM_SVC, "softbus framework init success.");
-    return;
-ERR_EXIT:
-    ServerModuleDeinit();
-    COMM_LOGE(COMM_SVC, "softbus framework init failed.");
 }
 
 void ClientDeathCallback(const char *pkgName, int32_t pid)
