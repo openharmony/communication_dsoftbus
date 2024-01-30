@@ -95,7 +95,7 @@ typedef struct {
 } ConnStatsExtra;
 
 typedef enum {
-    AUDIT_SCENE_CONN_RESERVED = 1,
+    AUDIT_SCENE_CONN_HML_GROUP_TIMEOUT = 1,
 } ConnAuditScene;
 
 typedef struct {
@@ -108,10 +108,12 @@ typedef struct {
     int32_t costTime;            // COST_TIME
     int32_t connectTimes;        // CONN_TIMES
     const char *frequency;       // FREQ
+    const char *challengeCode;   // CHALLENGE_CODE
     const char *peerBrMac;       // PEER_BR_MAC
     const char *localBrMac;      // LOCAL_BR_MAC
     const char *peerBleMac;      // PEER_BLE_MAC
     const char *localBleMac;     // LOCAL_BLE_MAC
+    const char *peerWifiMac;     // PEER_WIFI_MAC
     const char *peerDeviceType;  // PEER_DEV_TYPE
     const char *peerUdid;        // PEER_UDID
     const char *localUdid;       // LOCAL_UDID

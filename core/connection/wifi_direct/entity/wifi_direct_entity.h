@@ -34,6 +34,7 @@ struct WifiDirectConnectParams {
     char groupConfig[GROUP_CONFIG_STR_LEN];
     char gcIp[IP_ADDR_STR_LEN];
     char interface[IF_NAME_LEN];
+    uint8_t challengeCode[CHALLENGE_CODE_LEN];
     struct LinkInfo *linkInfo;
 
     char *extension;
