@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +15,10 @@
 
 #include "message_handler.h"
 
+#include <securec.h>
+
 #include "common_list.h"
 #include "comm_log.h"
-#include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
@@ -71,12 +72,11 @@ NO_SANITIZE("cfi") static void FreeSoftBusMsg(SoftBusMessage *msg)
 
 SoftBusMessage *MallocMessage(void)
 {
-    SoftBusMessage *msg = (SoftBusMessage *)SoftBusMalloc(sizeof(SoftBusMessage));
+    SoftBusMessage *msg = (SoftBusMessage *)SoftBusCalloc(sizeof(SoftBusMessage));
     if (msg == NULL) {
         COMM_LOGE(COMM_UTILS, "malloc SoftBusMessage failed");
         return NULL;
     }
-    (void)memset_s(msg, sizeof(SoftBusMessage), 0, sizeof(SoftBusMessage));
     return msg;
 }
 
@@ -98,7 +98,7 @@ static void *LoopTask(void *arg)
 
     COMM_LOGD(COMM_UTILS, "LoopTask running. name=%{public}s", context->name);
 
-    if (SoftBusMutexLock(&context->lock) != 0) {
+    if (SoftBusMutexLock(&context->lock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_UTILS, "lock failed");
         return NULL;
     }
@@ -107,8 +107,7 @@ static void *LoopTask(void *arg)
     (void)SoftBusMutexUnlock(&context->lock);
 
     for (;;) {
-        if (SoftBusMutexLock(&context->lock) != 0) {
-            COMM_LOGE(COMM_UTILS, "lock failed");
+        if (SoftBusMutexLock(&context->lock) != SOFTBUS_OK) {
             return NULL;
         }
         // wait
@@ -205,14 +204,13 @@ static int StartNewLooperThread(SoftBusLooper *looper)
 #define MAINLOOP_STACK_SIZE (32 * 1024)
 #endif
 #endif
-    int ret;
     SoftBusThreadAttr threadAttr;
     SoftBusThread tid;
     SoftBusThreadAttrInit(&threadAttr);
 
     threadAttr.stackSize = MAINLOOP_STACK_SIZE;
-    ret = SoftBusThreadCreate(&tid, &threadAttr, LoopTask, looper);
-    if (ret != 0) {
+    int32_t ret = SoftBusThreadCreate(&tid, &threadAttr, LoopTask, looper);
+    if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_UTILS, "Init DeathProcTask ThreadAttr failed");
         return -1;
     }
@@ -224,7 +222,7 @@ static int StartNewLooperThread(SoftBusLooper *looper)
 
 static void DumpLooperLocked(const SoftBusLooperContext *context, const SoftBusHandler *handler)
 {
-    int i = 0;
+    int32_t i = 0;
     ListNode *item = NULL;
     LIST_FOR_EACH(item, &context->msgHead) {
         SoftBusMessageNode *itemNode = LIST_ENTRY(item, SoftBusMessageNode, node);
@@ -252,8 +250,7 @@ void DumpLooper(const SoftBusLooper *looper)
         return;
     }
     SoftBusLooperContext *context = looper->context;
-    if (SoftBusMutexLock(&context->lock) != 0) {
-        COMM_LOGE(COMM_UTILS, "lock failed");
+    if (SoftBusMutexLock(&context->lock) != SOFTBUS_OK) {
         return;
     }
     if (looper->dumpable) {
@@ -262,42 +259,51 @@ void DumpLooper(const SoftBusLooper *looper)
     (void)SoftBusMutexUnlock(&context->lock);
 }
 
-static void PostMessageAtTime(const SoftBusLooper *looper, SoftBusMessage *msgPost)
+static int32_t PostMessageAtTimeParamVerify(const SoftBusLooper *looper, SoftBusMessage *msgPost)
 {
     if (msgPost == NULL) {
-        COMM_LOGE(COMM_UTILS, "PostMessageAtTime with nullmsg");
-        return;
+        COMM_LOGE(COMM_UTILS, "the msgPost param is null.");
+        return SOFTBUS_INVALID_PARAM;
     }
+
     if (looper == NULL) {
-        COMM_LOGE(COMM_UTILS, "PostMessageAtTime with nulllooper");
+        COMM_LOGE(COMM_UTILS, "the looper param is null.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (looper->dumpable) {
+        COMM_LOGD(COMM_UTILS, "PostMessageAtTime name=%{public}s, what=%{public}d, time=%{public}" PRId64 "us",
+            looper->context->name, msgPost->what, msgPost->time);
+    }
+
+    if (msgPost->handler == NULL) {
+        COMM_LOGE(COMM_UTILS, "[%s] msg handler is null", looper->context->name);
+        return SOFTBUS_ERR;
+    }
+
+    COMM_LOGI(COMM_UTILS, "params verify succ.");
+    return SOFTBUS_OK;
+}
+
+static void PostMessageAtTime(const SoftBusLooper *looper, SoftBusMessage *msgPost)
+{
+    if (PostMessageAtTimeParamVerify(looper, msgPost) != SOFTBUS_OK) {
         FreeSoftBusMsg(msgPost);
         return;
     }
 
-    if (looper->dumpable) {
-        COMM_LOGD(COMM_UTILS,
-            "PostMessageAtTime name=%{public}s, what=%{public}d, time=%{public}" PRId64 "us", looper->context->name,
-            msgPost->what, msgPost->time);
-    }
-    if (msgPost->handler == NULL) {
-        FreeSoftBusMsg(msgPost);
-        COMM_LOGE(COMM_UTILS, "PostMessageAtTime. msg handler is null. name=%{public}s",
-            looper->context->name);
-        return;
-    }
-    SoftBusMessageNode *newNode = (SoftBusMessageNode *)SoftBusMalloc(sizeof(SoftBusMessageNode));
+    SoftBusMessageNode *newNode = (SoftBusMessageNode *)SoftBusCalloc(sizeof(SoftBusMessageNode));
     if (newNode == NULL) {
-        COMM_LOGE(COMM_UTILS, "oom");
+        COMM_LOGE(COMM_UTILS, "message node malloc failed.");
         FreeSoftBusMsg(msgPost);
         return;
     }
     ListInit(&newNode->node);
     newNode->msg = msgPost;
     SoftBusLooperContext *context = looper->context;
-    if (SoftBusMutexLock(&context->lock) != 0) {
+    if (SoftBusMutexLock(&context->lock) != SOFTBUS_OK) {
         SoftBusFree(newNode);
         FreeSoftBusMsg(msgPost);
-        COMM_LOGE(COMM_UTILS, "lock failed");
         return;
     }
     if (context->stop == 1) {
@@ -373,8 +379,7 @@ static void LoopRemoveMessageCustom(const SoftBusLooper *looper, const SoftBusHa
     int (*customFunc)(const SoftBusMessage*, void*), void *args)
 {
     SoftBusLooperContext *context = looper->context;
-    if (SoftBusMutexLock(&context->lock) != 0) {
-        COMM_LOGE(COMM_UTILS, "lock failed");
+    if (SoftBusMutexLock(&context->lock) != SOFTBUS_OK) {
         return;
     }
     if (context->running == 0 || context->stop == 1) {
@@ -400,8 +405,7 @@ static void LoopRemoveMessageCustom(const SoftBusLooper *looper, const SoftBusHa
     (void)SoftBusMutexUnlock(&context->lock);
 }
 
-static void LooperRemoveMessage(const SoftBusLooper *looper, const SoftBusHandler *handler,
-    int what)
+static void LooperRemoveMessage(const SoftBusLooper *looper, const SoftBusHandler *handler, int32_t what)
 {
     LoopRemoveMessageCustom(looper, handler, WhatRemoveFunc, (void*)(intptr_t)what);
 }
