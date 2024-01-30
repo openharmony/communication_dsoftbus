@@ -314,17 +314,22 @@ static int DeRegisterCoAPEpollTaskCb(CoapCtxType *ctx)
     } else {
         DeRegisteCoAPEpollTaskCtx(ctx);
     }
+    if (ctx->freeCtxLater == NSTACKX_TRUE) {
+        CoapContextRemove(ctx);
+        coap_free_context(ctx->ctx);
+        free(ctx);
+    }
     return NSTACKX_EOK;
 }
 
 void DeRegisterCoAPEpollTask(void)
 {
     List *pos = NULL;
-    LIST_FOR_EACH(pos, &g_ctxList) {
+    List *tmp = NULL;
+    LIST_FOR_EACH_SAFE(pos, tmp, &g_ctxList) {
         (void)DeRegisterCoAPEpollTaskCb((CoapCtxType *)pos);
     }
 }
-
 
 #ifdef _WIN32
 int32_t CoapSelectWait(TaskListInfo *taskListInfo)
@@ -460,20 +465,23 @@ void CoapThreadDestroy(void)
 
 void CoapServerDestroy(CoapCtxType *ctx, bool moduleDeinit)
 {
-    DFINDER_LOGD(TAG, "coap server destroy");
+    DFINDER_LOGD(TAG, "coap server destroy, module deinit: %d", moduleDeinit);
 
-    CoapContextRemove(ctx);
-
-    uint32_t i;
-    for (i = 0; i < ctx->socketNum && i < MAX_COAP_SOCKET_NUM; ++i) {
+    for (uint32_t i = 0; i < ctx->socketNum && i < MAX_COAP_SOCKET_NUM; ++i) {
         if (ctx->taskList[i].taskfd < 0) {
             continue;
         }
         (void)DeRegisterEpollTask(&ctx->taskList[i]);
     }
-    coap_free_context(ctx->ctx);
-    free(ctx);
-    (void)moduleDeinit;
+
+    if (moduleDeinit) {
+        CoapContextRemove(ctx);
+        coap_free_context(ctx->ctx);
+        free(ctx);
+    } else {
+        // release the context after EpollLoop has processed this round of tasks
+        ctx->freeCtxLater = NSTACKX_TRUE;
+    }
 }
 
 CoapCtxType *CoapServerInit(const struct in_addr *ip, void *iface)
