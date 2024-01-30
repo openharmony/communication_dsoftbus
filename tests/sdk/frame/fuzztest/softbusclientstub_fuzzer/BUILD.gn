@@ -120,6 +120,7 @@ ohos_fuzztest("SoftbusClientStubFuzzTest") {
     "../../../../../sdk/frame/small/include",
     "../../../../../sdk/frame/mini/include",
     "../../../../../sdk/frame/common/include",
+    "../../../../../core/common/dfx/interface/include",
   ]
   cflags = [
     "-g",
