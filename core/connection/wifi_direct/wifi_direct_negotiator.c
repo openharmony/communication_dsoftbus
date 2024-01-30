@@ -487,7 +487,11 @@ static int32_t RetryCurrentCommand(void)
     GetWifiDirectNegotiator()->currentCommand = NULL;
     CONN_LOGI(CONN_WIFI_DIRECT, "currentCommand=NULL");
     struct WifiDirectCommand *commandCopy = command->duplicate(command);
-    return CallMethodAsync(RetryCommandAsync, commandCopy, RETRY_COMMAND_DELAY_MS);
+    if (CallMethodAsync(RetryCommandAsync, commandCopy, RETRY_COMMAND_DELAY_MS) != SOFTBUS_OK) {
+        commandCopy->destructor(commandCopy);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
 }
 
 static bool IsBusy(void)

@@ -302,7 +302,6 @@ static int32_t GetInterfaceMacAddr(const char *ifName, uint8_t *macAddrArray, si
 
     if (ret != 0) {
         CONN_LOGW(CONN_WIFI_DIRECT, "ioctl get hw addr failed ret=%{public}d", ret);
-        close(fd);
         return SOFTBUS_ERR;
     }
 
