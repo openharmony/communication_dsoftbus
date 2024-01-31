@@ -117,8 +117,8 @@ static int32_t SoftBusGetOsType(void)
     char bootSN[SN_LEN + 1];
     (void)memset_s(bootSN, SN_LEN + 1, 0, SN_LEN + 1);
     GetParameter(OHOS_BOOT_SN, UNDEFINED_VALUE, bootSN, SN_LEN);
-    char osFullName[FULL_NAME_LEN + 1];
-    (void)memset_s(osFullName, FULL_NAME_LEN + 1, 0, FULL_NAME_LEN + 1);
+    char osFullName[FULL_NAME_LEN];
+    (void)memset_s(osFullName, FULL_NAME_LEN, 0, FULL_NAME_LEN);
     GetParameter(OHOS_FULL_NAME, UNDEFINED_VALUE, osFullName, FULL_NAME_LEN);
     if (strcmp(apiVersion, UNDEFINED_VALUE) != 0 || strcmp(bootSN, UNDEFINED_VALUE) != 0 ||
         strcmp(osFullName, UNDEFINED_VALUE) != 0) {
@@ -133,7 +133,7 @@ static int32_t SoftBusGetOsType(void)
     (void)memset_s(versionSDK, VERSION_SDK_LEN + 1, 0, VERSION_SDK_LEN + 1);
     GetParameter(VERSION_SDK, UNDEFINED_VALUE, versionSDK, VERSION_SDK_LEN);
     if (strcmp(versionSDK, UNDEFINED_VALUE) != 0) {
-        LNN_LOGE(LNN_STATE, "versionSDK: %{public}s", versionSDK);
+        LNN_LOGI(LNN_STATE, "versionSDK: %{public}s", versionSDK);
         return HO_OS_TYPE;
     }
     LNN_LOGE(LNN_STATE, "GetOsTYpe fail!");
@@ -142,7 +142,7 @@ static int32_t SoftBusGetOsType(void)
 
 static char *SoftBusGetOsVersion(void)
 {
-    char *osFullName = (char *)SoftBusCalloc(sizeof(char) * (FULL_NAME_LEN + 1));
+    char *osFullName = (char *)SoftBusCalloc(FULL_NAME_LEN);
     if (osFullName == NULL) {
         LNN_LOGE(LNN_STATE, "calloc osFullName fail!");
         return NULL;
@@ -229,12 +229,12 @@ int32_t GetCommonOsVersion(char *value, uint32_t len)
     if (osFullName != NULL) {
         if (strcpy_s(value, len, osFullName) != EOK) {
             SoftBusFree(osFullName);
-            LNN_LOGE(LNN_STATE, "GetOsVersion failed.");
+            LNN_LOGE(LNN_STATE, "strcpy_s osFullName failed.");
             return SOFTBUS_ERR;
         }
         SoftBusFree(osFullName);
     } else {
-        LNN_LOGE(LNN_STATE, "GetOsVersion failed.");
+        LNN_LOGE(LNN_STATE, "get invalid osVersion, osVersion= %{public}s", UNDEFINED_VALUE);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
