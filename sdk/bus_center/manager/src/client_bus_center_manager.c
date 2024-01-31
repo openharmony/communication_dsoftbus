@@ -309,47 +309,44 @@ static void DuplicateTimeSyncResultCbList(ListNode *list, const char *networkId)
     }
 }
 
-static void FreeDiscPublishMsg(DiscPublishMsg *msgNode)
+static void FreeDiscPublishMsg(DiscPublishMsg **msgNode)
 {
-    if (msgNode != NULL && msgNode->info != NULL) {
-        SoftBusFree((char *)msgNode->info->capability);
-        SoftBusFree(msgNode->info->capabilityData);
+    if (*msgNode != NULL && (*msgNode)->info != NULL) {
+        SoftBusFree((char *)(*msgNode)->info->capability);
+        SoftBusFree((*msgNode)->info->capabilityData);
+        SoftBusFree((*msgNode)->info);
     }
-    if (msgNode != NULL) {
-        SoftBusFree(msgNode->info);
-    }
-    SoftBusFree(msgNode);
+    SoftBusFree(*msgNode);
+    *msgNode = NULL;
 }
 
-static void FreeDiscSubscribeMsg(DiscSubscribeMsg *msgNode)
+static void FreeDiscSubscribeMsg(DiscSubscribeMsg **msgNode)
 {
-    if (msgNode != NULL && msgNode->info != NULL) {
-        SoftBusFree((char *)msgNode->info->capability);
-        SoftBusFree(msgNode->info->capabilityData);
+    if (*msgNode != NULL && (*msgNode)->info != NULL) {
+        SoftBusFree((char *)(*msgNode)->info->capability);
+        SoftBusFree((*msgNode)->info->capabilityData);
+        SoftBusFree((*msgNode)->info);
     }
-    if (msgNode != NULL) {
-        SoftBusFree(msgNode->info);
-    }
-    SoftBusFree(msgNode);
+    SoftBusFree(*msgNode);
+    *msgNode = NULL;
 }
 
 static int32_t BuildDiscPublishMsg(DiscPublishMsg **msgNode, const PublishInfo *info, const char *pkgName)
 {
     *msgNode = (DiscPublishMsg *)SoftBusCalloc(sizeof(DiscPublishMsg));
     if (*msgNode == NULL) {
-        FreeDiscPublishMsg(*msgNode);
         LNN_LOGE(LNN_STATE, "calloc msgNode failed");
         return SOFTBUS_MALLOC_ERR;
     }
     (*msgNode)->info = (PublishInfo *)SoftBusCalloc(sizeof(PublishInfo));
     if ((*msgNode)->info == NULL) {
-        FreeDiscPublishMsg(*msgNode);
+        FreeDiscPublishMsg(msgNode);
         LNN_LOGE(LNN_STATE, "calloc info failed");
         return SOFTBUS_MALLOC_ERR;
     }
     (*msgNode)->info->capability = (char *)SoftBusCalloc(strlen(info->capability) + 1);
     if ((*msgNode)->info->capability == NULL) {
-        FreeDiscPublishMsg(*msgNode);
+        FreeDiscPublishMsg(msgNode);
         LNN_LOGE(LNN_STATE, "calloc capability failed");
         return SOFTBUS_MALLOC_ERR;
     }
@@ -361,20 +358,20 @@ static int32_t BuildDiscPublishMsg(DiscPublishMsg **msgNode, const PublishInfo *
     (*msgNode)->info->ranging = info->ranging;
     if (strcpy_s((char *)(*msgNode)->info->capability, strlen(info->capability) + 1, info->capability) != EOK ||
         strcpy_s((*msgNode)->pkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
-        FreeDiscPublishMsg(*msgNode);
+        FreeDiscPublishMsg(msgNode);
         LNN_LOGE(LNN_STATE, "copy capability or pkgName failed");
         return SOFTBUS_ERR;
     }
     if (info->dataLen > 0) {
         (*msgNode)->info->capabilityData = (unsigned char *)SoftBusCalloc(info->dataLen + 1);
         if ((*msgNode)->info->capabilityData == NULL) {
-            FreeDiscPublishMsg(*msgNode);
+            FreeDiscPublishMsg(msgNode);
             LNN_LOGE(LNN_STATE, "calloc failed");
             return SOFTBUS_MALLOC_ERR;
         }
         if (memcpy_s((*msgNode)->info->capabilityData, info->dataLen + 1,
             info->capabilityData, info->dataLen + 1) != EOK) {
-            FreeDiscPublishMsg(*msgNode);
+            FreeDiscPublishMsg(msgNode);
             LNN_LOGE(LNN_STATE, "copy capabilityData failed");
             return SOFTBUS_ERR;
         }
@@ -386,19 +383,18 @@ static int32_t BuildDiscSubscribeMsg(DiscSubscribeMsg **msgNode, const Subscribe
 {
     *msgNode = (DiscSubscribeMsg *)SoftBusCalloc(sizeof(DiscSubscribeMsg));
     if (*msgNode == NULL) {
-        FreeDiscSubscribeMsg(*msgNode);
         LNN_LOGE(LNN_STATE, "calloc msgNode failed");
         return SOFTBUS_MALLOC_ERR;
     }
     (*msgNode)->info = (SubscribeInfo *)SoftBusCalloc(sizeof(SubscribeInfo));
     if ((*msgNode)->info == NULL) {
-        FreeDiscSubscribeMsg(*msgNode);
+        FreeDiscSubscribeMsg(msgNode);
         LNN_LOGE(LNN_STATE, "calloc info failed");
         return SOFTBUS_MALLOC_ERR;
     }
     (*msgNode)->info->capability = (char *)SoftBusCalloc(strlen(info->capability) + 1);
     if ((*msgNode)->info->capability == NULL) {
-        FreeDiscSubscribeMsg(*msgNode);
+        FreeDiscSubscribeMsg(msgNode);
         LNN_LOGE(LNN_STATE, "calloc capability failed");
         return SOFTBUS_MALLOC_ERR;
     }
@@ -409,20 +405,20 @@ static int32_t BuildDiscSubscribeMsg(DiscSubscribeMsg **msgNode, const Subscribe
     (*msgNode)->info->dataLen = info->dataLen;
     if (strcpy_s((char *)(*msgNode)->info->capability, strlen(info->capability) + 1, info->capability) != EOK ||
         strcpy_s((*msgNode)->pkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
-        FreeDiscSubscribeMsg(*msgNode);
+        FreeDiscSubscribeMsg(msgNode);
         LNN_LOGE(LNN_STATE, "copy capability or pkgName failed");
         return SOFTBUS_ERR;
     }
     if (info->dataLen > 0) {
         (*msgNode)->info->capabilityData = (unsigned char *)SoftBusCalloc(info->dataLen + 1);
         if ((*msgNode)->info->capabilityData == NULL) {
-            FreeDiscSubscribeMsg(*msgNode);
+            FreeDiscSubscribeMsg(msgNode);
             LNN_LOGE(LNN_STATE, "calloc failed");
             return SOFTBUS_MALLOC_ERR;
         }
         if (memcpy_s((*msgNode)->info->capabilityData, info->dataLen + 1,
             info->capabilityData, info->dataLen + 1) != EOK) {
-            FreeDiscSubscribeMsg(*msgNode);
+            FreeDiscSubscribeMsg(msgNode);
             LNN_LOGE(LNN_STATE, "copy capabilityData failed");
             return SOFTBUS_ERR;
         }
@@ -467,7 +463,7 @@ static int32_t DeleteDiscPublishMsg(const char *pkgName, int32_t publishId)
     LIST_FOR_EACH_ENTRY_SAFE(msgNode, next, &(g_publishMsgList->list), DiscPublishMsg, node) {
         if (msgNode->info->publishId == publishId && strcmp(msgNode->pkgName, pkgName) == 0) {
             ListDelete(&(msgNode->node));
-            FreeDiscPublishMsg(msgNode);
+            FreeDiscPublishMsg(&msgNode);
             break;
         }
     }
@@ -512,7 +508,7 @@ static int32_t DeleteDiscSubscribeMsg(const char *pkgName, int32_t refreshId)
     LIST_FOR_EACH_ENTRY_SAFE(msgNode, next, &(g_discoveryMsgList->list), DiscSubscribeMsg, node) {
         if (msgNode->info->subscribeId == refreshId && strcmp(msgNode->pkgName, pkgName) == 0) {
             ListDelete(&(msgNode->node));
-            FreeDiscSubscribeMsg(msgNode);
+            FreeDiscSubscribeMsg(&msgNode);
             break;
         }
     }
