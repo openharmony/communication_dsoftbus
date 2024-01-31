@@ -293,16 +293,20 @@ static int32_t ConvertNodeInfoToBasicInfo(const NodeInfo *info, NodeBasicInfo *b
         LNN_LOGE(LNN_LEDGER, "para error!");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (strncpy_s(basic->deviceName, DEVICE_NAME_BUF_LEN, info->deviceInfo.deviceName,
-        strlen(info->deviceInfo.deviceName)) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "strncpy_s name error!");
+    if (strcpy_s(basic->deviceName, DEVICE_NAME_BUF_LEN, info->deviceInfo.deviceName) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s name error!");
         return SOFTBUS_MEM_ERR;
     }
-    if (strncpy_s(basic->networkId, NETWORK_ID_BUF_LEN, info->networkId, strlen(info->networkId)) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "strncpy_s networkID error!");
+    if (strcpy_s(basic->networkId, NETWORK_ID_BUF_LEN, info->networkId) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s networkID error!");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (strcpy_s(basic->osVersion, OS_VERSION_BUF_LEN, info->deviceInfo.osVersion) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s osVersion error!");
         return SOFTBUS_MEM_ERR;
     }
     basic->deviceTypeId = info->deviceInfo.deviceTypeId;
+    basic->osType = info->deviceInfo.osType;
     return SOFTBUS_OK;
 }
 
