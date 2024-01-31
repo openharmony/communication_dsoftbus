@@ -481,5 +481,10 @@ bool IsActiveOsAccountUnlocked(void)
 {
     return GetNetLedgerInterface()->IsActiveOsAccountUnlocked();
 }
+
+int32_t GetActiveOsAccountIds(void)
+{
+    return GetNetLedgerInterface()->GetActiveOsAccountIds();
+}
 }
 }
