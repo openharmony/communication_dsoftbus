@@ -406,9 +406,13 @@ static void ScenarioManagerDoNotifyIfNeed(ScenarioManager *manager,
 {
     bool notify = false;
     ScenarioItem *item = ScenarioManagerGetOrAddScenarioItem(manager, info, false);
-    LocalScenarioCount *localScenarioCount = GetScenarioCount(manager);
-    if (item == NULL || localScenarioCount == NULL) {
+    if (item == NULL) {
         TRANS_LOGE(TRANS_CTRL, "scenario item not found!");
+        return;
+    }
+    LocalScenarioCount *localScenarioCount = GetScenarioCount(manager);
+    if (localScenarioCount == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "localScenarioCount is null");
         return;
     }
     uint32_t finalType = item->finalType;
@@ -496,6 +500,7 @@ static int32_t AddOriginalScenario(ScenarioManager *manager, OriginalScenario *i
     LocalScenarioCount *localScenarioCount = GetScenarioCount(manager);
     if (localScenarioCount == NULL) {
         TRANS_LOGE(TRANS_CTRL, "failed to apply for memory");
+        (void)SoftBusMutexUnlock(&(manager->scenarioItemList->lock));
         return SOFTBUS_MALLOC_ERR;
     }
     TRANS_LOGI(TRANS_CTRL,
@@ -553,6 +558,7 @@ static int32_t DelOriginalScenario(ScenarioManager *manager, OriginalScenario *i
     LocalScenarioCount *localScenarioCount = GetScenarioCount(manager);
     if (localScenarioCount == NULL) {
         TRANS_LOGE(TRANS_CTRL, "failed to apply for memory");
+        (void)SoftBusMutexUnlock(&(manager->scenarioItemList->lock));
         return SOFTBUS_MALLOC_ERR;
     }
     TRANS_LOGI(TRANS_CTRL,
