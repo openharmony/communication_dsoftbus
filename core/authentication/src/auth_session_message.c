@@ -710,6 +710,24 @@ static int32_t SetExchangeIdTypeAndValue(JsonObj *obj, AuthSessionInfo *info)
     return SOFTBUS_OK;
 }
 
+static void UnPackVersionByDeviceId(JsonObj *obj, AuthSessionInfo *info)
+{
+    int32_t maxBuffSize;
+    OptString(obj, DEVICE_ID_TAG, info->udid, UDID_BUF_LEN, "");
+    OptInt(obj, DATA_BUF_SIZE_TAG, &maxBuffSize, PACKET_SIZE);
+    if (strlen(info->udid) != 0) {
+        info->version = SOFTBUS_OLD_V2;
+    } else {
+        info->version = SOFTBUS_OLD_V1;
+        if (strcpy_s(info->udid, UDID_BUF_LEN, info->uuid) != EOK) {
+            AUTH_LOGE(AUTH_FSM, "strcpy udid fail, ignore");
+        }
+    }
+    if (!JSON_GetInt32FromOject(obj, SOFTBUS_VERSION_TAG, (int32_t *)&info->version)) {
+        AUTH_LOGE(AUTH_FSM, "softbusVersion is not found");
+    }
+}
+
 static int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo *info)
 {
     JsonObj *obj = JSON_Parse(msg, len);
@@ -725,6 +743,7 @@ static int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo
     }
     if (!UnpackWifiSinglePassInfo(obj, info)) {
         AUTH_LOGE(AUTH_FSM, "check ip fail, can't support auth");
+        JSON_Delete(obj);
         return SOFTBUS_ERR;
     }
     if (info->connInfo.type == AUTH_LINK_TYPE_WIFI && info->isServer) {
@@ -745,21 +764,7 @@ static int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo
         JSON_Delete(obj);
         return SOFTBUS_ERR;
     }
-    int32_t maxBuffSize;
-    OptString(obj, DEVICE_ID_TAG, info->udid, UDID_BUF_LEN, "");
-    OptInt(obj, DATA_BUF_SIZE_TAG, &maxBuffSize, PACKET_SIZE);
-    if (strlen(info->udid) != 0) {
-        info->version = SOFTBUS_OLD_V2;
-    } else {
-        info->version = SOFTBUS_OLD_V1;
-        if (strcpy_s(info->udid, UDID_BUF_LEN, info->uuid) != EOK) {
-            AUTH_LOGE(AUTH_FSM, "strcpy udid fail, ignore");
-        }
-    }
-    if (!JSON_GetInt32FromOject(obj, SOFTBUS_VERSION_TAG, (int32_t *)&info->version)) {
-        // info->version = SOFTBUS_OLD_V2;
-        AUTH_LOGE(AUTH_FSM, "softbusVersion is not found");
-    }
+    UnPackVersionByDeviceId(obj, info);
     if (SetExchangeIdTypeAndValue(obj, info) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "set exchange id type or value failed");
         JSON_Delete(obj);
