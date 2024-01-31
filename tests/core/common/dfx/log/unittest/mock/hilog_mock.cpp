@@ -44,3 +44,25 @@ int HiLogPrint(LogType type, LogLevel level, unsigned int domain, const char *ta
     va_end(va_args);
     return HilogMock::GetMock()->HiLogPrint(type, level, domain, tag, fmt, args);
 }
+
+#ifdef HILOG_RAWFORMAT
+int HilogMock::HiLogPrintDict(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+    const FmtId *fmtid, const char *fmt, ...)
+{
+    return 0;
+}
+
+int HiLogPrintDict(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+    const FmtId *fmtid, const char *fmt, ...)
+{
+    (void)fmtid;
+    char *args;
+    va_list va_args;
+    va_start(va_args, fmt);
+    for (int i = 0; i < ARG_COUNT; ++i) {
+        args = va_arg(va_args, char *);
+    }
+    va_end(va_args);
+    return HilogMock::GetMock()->HiLogPrint(type, level, domain, tag, fmt, args);
+}
+#endif // HILOG_RAWFORMAT
