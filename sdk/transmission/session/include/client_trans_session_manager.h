@@ -177,6 +177,8 @@ int32_t ClientGetPeerSocketInfoById(int32_t sessionId, PeerSocketInfo *peerSocke
 bool IsSessionExceedLimit();
 
 int32_t ClientResetIdleTimeoutById(int32_t sessionId);
+
+int32_t ClientGetSessionNameByChannelId(int32_t channelId, int32_t channelType, char *sessionName, int32_t len);
 #ifdef __cplusplus
 }
 #endif
