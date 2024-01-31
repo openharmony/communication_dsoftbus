@@ -61,6 +61,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common/dfx/interface/include",
       "$softbus_adapter_common/include",
       "$hilog_lite_include_path",
+      "$utils_lite_include_path",
     ]
     include_dirs += conn_common_inc + trans_common_inc
     if (board_toolchain_type != "iccarm") {
@@ -95,12 +96,12 @@ if (defined(ohos_lite)) {
       ]
     }
     if (ohos_kernel_type == "liteos_m") {
-      defines += [ "SOFTBUS_MINI_SYSTEM" ]
+      defines += [ "SOFTBUS_LITEOS_M" ]
       defines += [ "__STDC_FORMAT_MACROS" ]
     } else {
       defines += [ "DEFAULT_STORAGE_PATH=\"/storage/data\"" ]
       defines += [ "__STDC_FORMAT_MACROS" ]
-      defines += [ "SOFTBUS_SMALL_SYSTEM" ]
+      defines += [ "SOFTBUS_LITEOS_A" ]
     }
     deps = [
       "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
