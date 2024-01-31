@@ -312,6 +312,7 @@ static void BtStateChangeEventHandler(const LnnEventBasicInfo *info)
     }
     uint32_t netCapability = 0;
     if (LnnGetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t *)&netCapability) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get netcap fail");
         return;
     }
     const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;

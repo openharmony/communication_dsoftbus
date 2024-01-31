@@ -67,6 +67,7 @@ static int32_t MapResize(Map *map, uint32_t size)
 
     nodes = (MapNode **)SoftBusCalloc(size * sizeof(*nodes));
     if (nodes == NULL) {
+        LNN_LOGE(LNN_STATE, "calloc node fail");
         return SOFTBUS_MEM_ERR;
     }
 
@@ -100,6 +101,7 @@ static MapNode *MapCreateNode(const char *key, uint32_t hash,
     keySize = keySize + (SHIFT_ALIGN_BYTE - keySize % SHIFT_ALIGN_BYTE);
     MapNode *node = (MapNode *)SoftBusCalloc(sizeof(*node) + keySize + valueSize);
     if (node == NULL) {
+        LNN_LOGE(LNN_STATE, "calloc node fail");
         return NULL;
     }
 
@@ -108,10 +110,12 @@ static MapNode *MapCreateNode(const char *key, uint32_t hash,
     node->value = (uint8_t *)node + sizeof(*node) + keySize;
     node->valueSize = valueSize;
     if (memcpy_s(node->key, keySize, key, strlen(key) + 1) != EOK) {
+        LNN_LOGE(LNN_STATE, "memcpy node key fail");
         SoftBusFree(node);
         return NULL;
     }
     if (memcpy_s(node->value, node->valueSize, value, valueSize) != EOK) {
+        LNN_LOGE(LNN_STATE, "memcpy node value fail");
         SoftBusFree(node);
         return NULL;
     }
@@ -167,10 +171,12 @@ int32_t LnnMapSet(Map *map, const char *key, const void *value, uint32_t valueSi
     }
 
     if (map->nodes == NULL) {
+        LNN_LOGE(LNN_STATE, "map node is null");
         return SOFTBUS_ERR;
     }
     node = MapCreateNode(key, hash, value, valueSize);
     if (node == NULL) {
+        LNN_LOGE(LNN_STATE, "create node fail");
         return SOFTBUS_INVALID_PARAM;
     }
     MapAddNode(map, node);
@@ -189,6 +195,7 @@ int32_t LnnMapSet(Map *map, const char *key, const void *value, uint32_t valueSi
 void* LnnMapGet(const Map *map, const char *key)
 {
     if (map == NULL || key == NULL || map->nodeSize == 0 || map->nodes == NULL) {
+        LNN_LOGE(LNN_STATE, "invalid param");
         return NULL;
     }
 
@@ -216,6 +223,7 @@ void* LnnMapGet(const Map *map, const char *key)
 int32_t LnnMapErase(Map *map, const char *key)
 {
     if (map == NULL || key == NULL || map->nodeSize == 0 || map->nodes == NULL) {
+        LNN_LOGE(LNN_STATE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -280,6 +288,7 @@ void LnnMapDelete(Map *map)
     MapNode *next = NULL;
 
     if (map == NULL || map->nodes == NULL) {
+        LNN_LOGE(LNN_STATE, "invalid param");
         return;
     }
 
@@ -308,10 +317,12 @@ MapIterator *LnnMapInitIterator(Map *map)
 {
     MapIterator *it = NULL;
     if (map == NULL) {
+        LNN_LOGE(LNN_STATE, "map is null");
         return NULL;
     }
     it = (MapIterator *)SoftBusCalloc(sizeof(MapIterator));
     if (it == NULL) {
+        LNN_LOGE(LNN_STATE, "calloc iterator fail");
         return NULL;
     }
     it->node = NULL;
