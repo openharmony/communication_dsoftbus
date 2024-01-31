@@ -108,9 +108,43 @@ if (defined(ohos_lite)) {
     }
   }
 
+  ohos_unittest("DiscSdkAutoTest") {
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
+    module_out_path = module_output_path
+    sources = [ "disc_sdk_auto_test.cpp" ]
+    include_dirs = [
+      "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/tests/sdk/common/include",
+      "$dsoftbus_root_path/interfaces/kits/common",
+      "$dsoftbus_root_path/interfaces/kits/discovery",
+    ]
+    deps = [
+      "$dsoftbus_root_path/sdk:softbus_client",
+      "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+      "//third_party/bounds_checking_function:libsec_static",
+      "//third_party/googletest:gtest_main",
+    ]
+    if (is_standard_system) {
+      external_deps = [
+        "c_utils:utils",
+        "hilog:libhilog",
+      ]
+    } else {
+      external_deps = [
+        "c_utils:utils",
+        "hilog:libhilog",
+      ]
+    }
+  }
+
   group("unittest") {
     testonly = true
     deps = [
+      ":DiscSdkAutoTest",
       ":DiscSdkOnlyL2Test",
       ":DiscSdkTest",
     ]
