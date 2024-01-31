@@ -680,6 +680,10 @@ int32_t LnnInitNetworkManagerDelay(void)
         LNN_LOGE(LNN_INIT, "get local udid error");
         return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR;
     }
+    if (GetActiveOsAccountIds() == SOFTBUS_ERR) {
+        LNN_LOGW(LNN_INIT, "try to get accountId fail");
+        return SOFTBUS_ERR;
+    }
     LnnNetIfMgr *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_netIfNameList, LnnNetIfMgr, node) {
         for (i = 0; i < LNN_NETWORK_MAX_PROTOCOL_COUNT; ++i) {

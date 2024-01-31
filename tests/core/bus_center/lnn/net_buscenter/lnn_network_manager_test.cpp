@@ -220,6 +220,7 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_003, TestSize.Level
 
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, GetActiveOsAccountIds).WillOnce(Return(SOFTBUS_OK)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ledgerMock, IsActiveOsAccountUnlocked).WillOnce(Return(true)).WillRepeatedly(Return(true));
     ret = LnnInitNetworkManagerDelay();
     EXPECT_TRUE(ret != SOFTBUS_OK);
