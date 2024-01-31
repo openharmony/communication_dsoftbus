@@ -28,9 +28,11 @@
 bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2, bool isShort)
 {
     if (addr1 == NULL || addr2 == NULL) {
+        LNN_LOGW(LNN_STATE, "addr1 or addr2 is null");
         return false;
     }
     if (addr1->type != addr2->type) {
+        LNN_LOGW(LNN_STATE, "addr1 type not equal addr2 type");
         return false;
     }
     if (addr1->type == CONNECTION_ADDR_BR) {
@@ -258,6 +260,7 @@ const char *LnnPrintConnectionAddr(const ConnectionAddr *addr)
     }
     switch (addr->type) {
         case CONNECTION_ADDR_WLAN:
+        /* fall-through */
         case CONNECTION_ADDR_ETH:
             Anonymize(addr->info.ip.ip, &anonyIp);
             ret = sprintf_s(printAddr, sizeof(printAddr),
