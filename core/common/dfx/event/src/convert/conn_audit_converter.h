@@ -42,8 +42,10 @@ CONN_AUDIT_ASSIGNER(Int32, LinkType, linkType)
 CONN_AUDIT_ASSIGNER(Int32, ExpectRole, expectRole)
 CONN_AUDIT_ASSIGNER(Int32, CostTime, costTime)
 CONN_AUDIT_ASSIGNER(String, Frequency, frequency)
+CONN_AUDIT_ASSIGNER(String, ChallengeCode, challengeCode)
 CONN_AUDIT_ASSIGNER(String, PeerBrMac, peerBrMac)
 CONN_AUDIT_ASSIGNER(String, PeerBleMac, peerBleMac)
+CONN_AUDIT_ASSIGNER(String, PeerWifiMac, peerWifiMac)
 CONN_AUDIT_ASSIGNER(String, PeerDeviceType, peerDeviceType)
 CONN_AUDIT_ASSIGNER(String, PeerUdid, peerUdid)
 CONN_AUDIT_ASSIGNER(String, ConnPayload, connPayload)
@@ -59,7 +61,7 @@ CONN_AUDIT_ASSIGNER(String, LocalIp, localIp)
 CONN_AUDIT_ASSIGNER(String, PeerPort, peerPort)
 CONN_AUDIT_ASSIGNER(String, LocalPort, localPort)
 
-#define CONN_AUDIT_ASSIGNER_SIZE 24 // Size of g_connAuditAssigners
+#define CONN_AUDIT_ASSIGNER_SIZE 26 // Size of g_connAuditAssigners
 static HiSysEventParamAssigner g_connAuditAssigners[] = {
     { "ERROR_CODE",     HISYSEVENT_INT32,  ConnAuditAssignerErrcode        },
     { "AUDIT_TYPE",     HISYSEVENT_INT32,  ConnAuditAssignerAuditType      },
@@ -70,10 +72,12 @@ static HiSysEventParamAssigner g_connAuditAssigners[] = {
     { "COST_TIME",      HISYSEVENT_INT32,  ConnAuditAssignerCostTime       },
     { "CONN_TIMES",     HISYSEVENT_INT32,  ConnAuditAssignerConnectTimes   },
     { "FREQ",           HISYSEVENT_STRING, ConnAuditAssignerFrequency      },
+    { "CHALLENGE_CODE", HISYSEVENT_STRING, ConnAuditAssignerChallengeCode  },
     { "PEER_BR_MAC",    HISYSEVENT_STRING, ConnAuditAssignerPeerBrMac      },
     { "LOCAL_BR_MAC",   HISYSEVENT_STRING, ConnAuditAssignerLocalBrMac     },
     { "PEER_BLE_MAC",   HISYSEVENT_STRING, ConnAuditAssignerPeerBleMac     },
     { "LOCAL_BLE_MAC",  HISYSEVENT_STRING, ConnAuditAssignerLocalBleMac    },
+    { "PEER_WIFI_MAC",  HISYSEVENT_STRING, ConnAuditAssignerPeerWifiMac    },
     { "PEER_DEV_TYPE",  HISYSEVENT_STRING, ConnAuditAssignerPeerDeviceType },
     { "PEER_UDID",      HISYSEVENT_STRING, ConnAuditAssignerPeerUdid       },
     { "LOCAL_UDID",     HISYSEVENT_STRING, ConnAuditAssignerLocalUdid      },
