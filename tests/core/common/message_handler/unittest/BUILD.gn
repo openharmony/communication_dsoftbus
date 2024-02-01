@@ -24,5 +24,6 @@ static_library("softbus_test_message_handler") {
     "$dsoftbus_root_path/core/common/include",
     "$softbus_adapter_common/include",
     "$hilog_lite_include_path",
+    "$utils_lite_include_path",
   ]
 }

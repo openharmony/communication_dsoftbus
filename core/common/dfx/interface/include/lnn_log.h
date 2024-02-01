@@ -50,19 +50,19 @@ static const SoftBusLogLabel LNN_LABELS[MODULE_DOMAIN_MAX_LEN] = {
     { LNN_TEST,       DOMAIN_ID_TEST, "LnnTest"     },
 };
 
-#if defined(SOFTBUS_LITE_SYSTEM) || defined(SOFTBUS_SMALL_SYSTEM)
-#define LNN_LOGF(label, ...) SOFTBUS_LITE_LOGF_INNER(label, ##__VA_ARGS__)
-#define LNN_LOGE(label, ...) SOFTBUS_LITE_LOGE_INNER(label, ##__VA_ARGS__)
-#define LNN_LOGW(label, ...) SOFTBUS_LITE_LOGW_INNER(label, ##__VA_ARGS__)
-#define LNN_LOGI(label, ...) SOFTBUS_LITE_LOGI_INNER(label, ##__VA_ARGS__)
-#define LNN_LOGD(label, ...) SOFTBUS_LITE_LOGD_INNER(label, ##__VA_ARGS__)
+#if defined(SOFTBUS_LITEOS_M)
+#define LNN_LOGF(label, fmt, ...) SOFTBUS_LOGF_INNER(label, fmt, ##__VA_ARGS__)
+#define LNN_LOGE(label, fmt, ...) SOFTBUS_LOGE_INNER(label, fmt, ##__VA_ARGS__)
+#define LNN_LOGW(label, fmt, ...) SOFTBUS_LOGW_INNER(label, fmt, ##__VA_ARGS__)
+#define LNN_LOGI(label, fmt, ...) SOFTBUS_LOGI_INNER(label, fmt, ##__VA_ARGS__)
+#define LNN_LOGD(label, fmt, ...) SOFTBUS_LOGD_INNER(label, fmt, ##__VA_ARGS__)
 #else
-#define LNN_LOGF(label, ...) (void)SOFTBUS_LOG_INNER(LOG_FATAL, LNN_LABELS[label], ##__VA_ARGS__)
-#define LNN_LOGE(label, ...) (void)SOFTBUS_LOG_INNER(LOG_ERROR, LNN_LABELS[label], ##__VA_ARGS__)
-#define LNN_LOGW(label, ...) (void)SOFTBUS_LOG_INNER(LOG_WARN, LNN_LABELS[label], ##__VA_ARGS__)
-#define LNN_LOGI(label, ...) (void)SOFTBUS_LOG_INNER(LOG_INFO, LNN_LABELS[label], ##__VA_ARGS__)
-#define LNN_LOGD(label, ...) (void)SOFTBUS_LOG_INNER(LOG_DEBUG, LNN_LABELS[label], ##__VA_ARGS__)
-#endif // SOFTBUS_LITE_SYSTEM || SOFTBUS_SMALL_SYSTEM
+#define LNN_LOGF(label, fmt, ...) SOFTBUS_LOG_INNER(LOG_FATAL, LNN_LABELS[label], fmt, ##__VA_ARGS__)
+#define LNN_LOGE(label, fmt, ...) SOFTBUS_LOG_INNER(LOG_ERROR, LNN_LABELS[label], fmt, ##__VA_ARGS__)
+#define LNN_LOGW(label, fmt, ...) SOFTBUS_LOG_INNER(LOG_WARN, LNN_LABELS[label], fmt, ##__VA_ARGS__)
+#define LNN_LOGI(label, fmt, ...) SOFTBUS_LOG_INNER(LOG_INFO, LNN_LABELS[label], fmt, ##__VA_ARGS__)
+#define LNN_LOGD(label, fmt, ...) SOFTBUS_LOG_INNER(LOG_DEBUG, LNN_LABELS[label], fmt, ##__VA_ARGS__)
+#endif // SOFTBUS_LITEOS_M
 
 #define LNN_CHECK_AND_RETURN_RET_LOGW(cond, ret, label, fmt, ...) \
     CHECK_AND_RETURN_RET_LOG_INNER(cond, ret, LNN_LOGW, label, fmt, ##__VA_ARGS__)
