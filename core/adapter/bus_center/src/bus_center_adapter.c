@@ -26,6 +26,7 @@
 #include "lnn_settingdata_event_monitor.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_bus_center.h"
 #include "softbus_common.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
@@ -43,7 +44,6 @@
 #define OH_OS_TYPE          10
 #define HO_OS_TYPE          11
 #define SN_LEN              32
-#define FULL_NAME_LEN       128
 
 typedef struct {
     const char *inBuf;
@@ -117,9 +117,9 @@ static int32_t SoftBusGetOsType(void)
     char bootSN[SN_LEN + 1];
     (void)memset_s(bootSN, SN_LEN + 1, 0, SN_LEN + 1);
     GetParameter(OHOS_BOOT_SN, UNDEFINED_VALUE, bootSN, SN_LEN);
-    char osFullName[FULL_NAME_LEN];
-    (void)memset_s(osFullName, FULL_NAME_LEN, 0, FULL_NAME_LEN);
-    GetParameter(OHOS_FULL_NAME, UNDEFINED_VALUE, osFullName, FULL_NAME_LEN);
+    char osFullName[OS_VERSION_BUF_LEN];
+    (void)memset_s(osFullName, OS_VERSION_BUF_LEN, 0, OS_VERSION_BUF_LEN);
+    GetParameter(OHOS_FULL_NAME, UNDEFINED_VALUE, osFullName, OS_VERSION_BUF_LEN);
     if (strcmp(apiVersion, UNDEFINED_VALUE) != 0 || strcmp(bootSN, UNDEFINED_VALUE) != 0 ||
         strcmp(osFullName, UNDEFINED_VALUE) != 0) {
         char *anonyBootSN = NULL;
@@ -142,12 +142,12 @@ static int32_t SoftBusGetOsType(void)
 
 static char *SoftBusGetOsVersion(void)
 {
-    char *osFullName = (char *)SoftBusCalloc(FULL_NAME_LEN);
+    char *osFullName = (char *)SoftBusCalloc(OS_VERSION_BUF_LEN);
     if (osFullName == NULL) {
         LNN_LOGE(LNN_STATE, "calloc osFullName fail!");
         return NULL;
     }
-    GetParameter(OHOS_FULL_NAME, UNDEFINED_VALUE, osFullName, FULL_NAME_LEN);
+    GetParameter(OHOS_FULL_NAME, UNDEFINED_VALUE, osFullName, OS_VERSION_BUF_LEN);
     if (strcmp(osFullName, UNDEFINED_VALUE) != 0) {
         return osFullName;
     }
