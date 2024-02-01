@@ -35,7 +35,6 @@ int32_t LnnShiftLNNGearWithoutPkgName(const char *callerId, const GearMode *mode
 void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type);
 void LnnRequestBleDiscoveryProcess(int32_t strategy, int64_t timeout);
 
-void LnnHbOnTrustedRelationChanged(int32_t groupType);
 void LnnHbOnTrustedRelationIncreased(int32_t groupType);
 void LnnHbOnTrustedRelationReduced(void);
 

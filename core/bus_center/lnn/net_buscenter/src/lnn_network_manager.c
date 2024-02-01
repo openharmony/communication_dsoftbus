@@ -449,7 +449,7 @@ static void OnDeviceBound(const char *udid, const char *groupInfo)
         LNN_LOGD(LNN_BUILDER, "device is online, no need to start discovery");
         return;
     }
-    LnnHbOnTrustedRelationChanged(AUTH_PEER_TO_PEER_GROUP);
+    LnnHbOnTrustedRelationIncreased(AUTH_PEER_TO_PEER_GROUP);
     LNN_LOGD(LNN_BUILDER, "wifi handle OnDeviceBound");
     RestartCoapDiscovery();
 }
