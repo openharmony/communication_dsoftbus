@@ -771,14 +771,6 @@ static void HbDelayCheckTrustedRelation(void *para)
     }
 }
 
-void LnnHbOnTrustedRelationChanged(int32_t groupType)
-{
-    if (groupType == AUTH_PEER_TO_PEER_GROUP && LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT),
-        HbDelayCheckTrustedRelation, NULL, CHECK_TRUSTED_RELATION_TIME) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "async check trusted relaion fail after device bound");
-    }
-}
-
 void LnnHbOnTrustedRelationIncreased(int32_t groupType)
 {
     /* If it is a peer-to-peer group, delay initialization to give BR networking priority. */
