@@ -37,6 +37,7 @@ StatisticEvtReportFunc g_statisticEvtReportFunc[SOFTBUS_STATISTIC_EVT_BUTT] = {N
 StatisticEvtReportFunc GetStatisticEvtReportFunc(StatisticEvtType type)
 {
     if (type < SOFTBUS_STATISTIC_EVT_START || type >= SOFTBUS_STATISTIC_EVT_BUTT) {
+        COMM_LOGE(COMM_EVENT, "invalid param");
         return NULL;
     }
 
@@ -46,6 +47,7 @@ StatisticEvtReportFunc GetStatisticEvtReportFunc(StatisticEvtType type)
 int32_t SetStatisticEvtReportFunc(StatisticEvtType type, StatisticEvtReportFunc func)
 {
     if (type < SOFTBUS_STATISTIC_EVT_START || type >= SOFTBUS_STATISTIC_EVT_BUTT || func == NULL) {
+        COMM_LOGE(COMM_EVENT, "invalid param");
         return SOFTBUS_ERR;
     }
 
@@ -120,11 +122,13 @@ static int32_t CreateAndPostMsgDelay(SoftBusLooper *looper, HandleMessageFunc ca
     uint64_t delayMillis)
 {
     if ((looper == NULL) || (callback == NULL)) {
+        COMM_LOGE(COMM_EVENT, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
     SoftBusMessage *message = CreateMessage(looper, callback);
     if (message == NULL) {
+        COMM_LOGE(COMM_EVENT, "create message fail");
         return SOFTBUS_MEM_ERR;
     }
 
@@ -143,13 +147,16 @@ int32_t InitSoftbusSysEvt(void)
     InitStatisticEvtReportFunc();
 
     if (InitTransStatisticSysEvt() != SOFTBUS_OK) {
+        COMM_LOGE(COMM_INIT, "init trans statistic sys evt fail");
         return SOFTBUS_ERR;
     }
     if (InitBusCenterDfx() != SOFTBUS_OK) {
+        COMM_LOGE(COMM_INIT, "init bus center dfx fail");
         return SOFTBUS_ERR;
     }
 
     if (InitDiscStatisticSysEvt() != SOFTBUS_OK) {
+        COMM_LOGE(COMM_INIT, "init disc statistic fail");
         return SOFTBUS_ERR;
     }
 

@@ -106,6 +106,7 @@ static void DeleteLaneIdNode(uint32_t laneId, LaneModel *laneModel)
 static int32_t AddLaneModel(uint32_t laneId, uint32_t profileId, LaneProfile *laneProfile)
 {
     if (ModelLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get lock fail");
         return SOFTBUS_ERR;
     }
     LaneModel *laneModel = (LaneModel *)LnnReadData(&g_profileMap, profileId);
@@ -139,6 +140,7 @@ static int32_t AddLaneModel(uint32_t laneId, uint32_t profileId, LaneProfile *la
 int32_t BindLaneIdToProfile(uint32_t laneId, LaneProfile *profile)
 {
     if (profile == NULL) {
+        LNN_LOGE(LNN_LANE, "profile is null");
         return SOFTBUS_ERR;
     }
     LaneGenerateParam param;
@@ -156,6 +158,7 @@ int32_t BindLaneIdToProfile(uint32_t laneId, LaneProfile *profile)
 void UnbindLaneIdFromProfile(uint32_t laneId, uint32_t profileId)
 {
     if (ModelLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get lock fail");
         return;
     }
     LaneModel *laneModel = (LaneModel *)LnnReadData(&g_profileMap, profileId);
@@ -173,6 +176,7 @@ void UnbindLaneIdFromProfile(uint32_t laneId, uint32_t profileId)
 int32_t GetLaneProfile(uint32_t profileId, LaneProfile *profile)
 {
     if (profile == NULL) {
+        LNN_LOGE(LNN_LANE, "profile is null");
         return SOFTBUS_ERR;
     }
     if (ModelLock() != SOFTBUS_OK) {
@@ -185,6 +189,7 @@ int32_t GetLaneProfile(uint32_t profileId, LaneProfile *profile)
         return SOFTBUS_ERR;
     }
     if (memcpy_s(profile, sizeof(LaneProfile), &laneModel->profile, sizeof(LaneProfile)) != EOK) {
+        LNN_LOGE(LNN_LANE, "profile memcpy fail");
         ModelUnlock();
         return SOFTBUS_ERR;
     }
@@ -195,6 +200,7 @@ int32_t GetLaneProfile(uint32_t profileId, LaneProfile *profile)
 int32_t GetLaneIdList(uint32_t profileId, uint32_t **laneIdList, uint32_t *listSize)
 {
     if (ModelLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get lock fail");
         return SOFTBUS_ERR;
     }
     LaneModel *laneModel = (LaneModel *)LnnReadData(&g_profileMap, profileId);
@@ -229,6 +235,7 @@ uint32_t GetActiveProfileNum(void)
 {
     uint32_t num = 0;
     if (ModelLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get lock fail");
         return num;
     }
     num = g_profileMap.nodeSize;

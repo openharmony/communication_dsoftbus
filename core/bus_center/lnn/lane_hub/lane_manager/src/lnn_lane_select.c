@@ -114,7 +114,8 @@ static bool IsValidLane(const char *networkId, LaneLinkType linkType)
     if ((linkAttr == NULL) || (!linkAttr->available)) {
         return false;
     }
-    if (linkAttr->IsEnable(networkId) != true) {
+    if (!linkAttr->IsEnable(networkId)) {
+        LNN_LOGE(LNN_LANE, "link capacity is not support. linkType=%{public}d", linkType);
         return false;
     }
     return true;
