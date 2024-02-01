@@ -52,19 +52,19 @@ static const SoftBusLogLabel DISC_LABELS[MODULE_DOMAIN_MAX_LEN] = {
     { DISC_TEST,        DOMAIN_ID_TEST, "DiscTest"      },
 };
 
-#if defined(SOFTBUS_LITE_SYSTEM) || defined(SOFTBUS_SMALL_SYSTEM)
-#define DISC_LOGF(label, ...) SOFTBUS_LITE_LOGF_INNER(label, ##__VA_ARGS__)
-#define DISC_LOGE(label, ...) SOFTBUS_LITE_LOGE_INNER(label, ##__VA_ARGS__)
-#define DISC_LOGW(label, ...) SOFTBUS_LITE_LOGW_INNER(label, ##__VA_ARGS__)
-#define DISC_LOGI(label, ...) SOFTBUS_LITE_LOGI_INNER(label, ##__VA_ARGS__)
-#define DISC_LOGD(label, ...) SOFTBUS_LITE_LOGD_INNER(label, ##__VA_ARGS__)
+#if defined(SOFTBUS_LITEOS_M)
+#define DISC_LOGF(label, fmt, ...) SOFTBUS_LOGF_INNER(label, fmt, ##__VA_ARGS__)
+#define DISC_LOGE(label, fmt, ...) SOFTBUS_LOGE_INNER(label, fmt, ##__VA_ARGS__)
+#define DISC_LOGW(label, fmt, ...) SOFTBUS_LOGW_INNER(label, fmt, ##__VA_ARGS__)
+#define DISC_LOGI(label, fmt, ...) SOFTBUS_LOGI_INNER(label, fmt, ##__VA_ARGS__)
+#define DISC_LOGD(label, fmt, ...) SOFTBUS_LOGD_INNER(label, fmt, ##__VA_ARGS__)
 #else
-#define DISC_LOGF(label, ...) (void)SOFTBUS_LOG_INNER(LOG_FATAL, DISC_LABELS[label], ##__VA_ARGS__)
-#define DISC_LOGE(label, ...) (void)SOFTBUS_LOG_INNER(LOG_ERROR, DISC_LABELS[label], ##__VA_ARGS__)
-#define DISC_LOGW(label, ...) (void)SOFTBUS_LOG_INNER(LOG_WARN, DISC_LABELS[label], ##__VA_ARGS__)
-#define DISC_LOGI(label, ...) (void)SOFTBUS_LOG_INNER(LOG_INFO, DISC_LABELS[label], ##__VA_ARGS__)
-#define DISC_LOGD(label, ...) (void)SOFTBUS_LOG_INNER(LOG_DEBUG, DISC_LABELS[label], ##__VA_ARGS__)
-#endif // SOFTBUS_LITE_SYSTEM || SOFTBUS_SMALL_SYSTEM
+#define DISC_LOGF(label, fmt, ...) SOFTBUS_LOG_INNER(LOG_FATAL, DISC_LABELS[label], fmt, ##__VA_ARGS__)
+#define DISC_LOGE(label, fmt, ...) SOFTBUS_LOG_INNER(LOG_ERROR, DISC_LABELS[label], fmt, ##__VA_ARGS__)
+#define DISC_LOGW(label, fmt, ...) SOFTBUS_LOG_INNER(LOG_WARN, DISC_LABELS[label], fmt, ##__VA_ARGS__)
+#define DISC_LOGI(label, fmt, ...) SOFTBUS_LOG_INNER(LOG_INFO, DISC_LABELS[label], fmt, ##__VA_ARGS__)
+#define DISC_LOGD(label, fmt, ...) SOFTBUS_LOG_INNER(LOG_DEBUG, DISC_LABELS[label], fmt, ##__VA_ARGS__)
+#endif // SOFTBUS_LITEOS_M
 
 #define DISC_CHECK_AND_RETURN_RET_LOGD(cond, ret, label, fmt, ...) \
     CHECK_AND_RETURN_RET_LOG_INNER(cond, ret, DISC_LOGD, label, fmt, ##__VA_ARGS__)

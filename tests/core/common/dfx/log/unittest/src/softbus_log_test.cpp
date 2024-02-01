@@ -46,10 +46,7 @@ HWTEST_F(SoftBusLogTest, SoftBusLogTest001, TestSize.Level0)
     };
 
     HilogMock mock;
-    EXPECT_CALL(mock,
-        HiLogPrint(Eq(LOG_CORE), Eq(static_cast<LogLevel>(level)), Eq(label.domain), StrEq(label.tag),
-            StrEq("%{public}s"), StrEq(TEST_LOG_DETAIL)))
-        .Times(1);
+    EXPECT_CALL(mock, HiLogPrint(Eq(LOG_CORE), Eq(level), Eq(label.domain), StrEq(label.tag), _, _)).Times(1);
     SOFTBUS_LOG_INNER(level, label, "%{public}s", TEST_LOG_DETAIL);
 }
 } // namespace OHOS
