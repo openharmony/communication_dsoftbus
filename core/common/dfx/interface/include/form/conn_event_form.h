@@ -32,34 +32,48 @@ typedef enum {
     EVENT_STAGE_CONNECT_START = 1,
     EVENT_STAGE_CONNECT_INVOKE_PROTOCOL = 2,
     EVENT_STAGE_CONNECT_END = 3,
+    EVENT_STAGE_CONNECT_SEND_MESSAGE = 10,
+    EVENT_STAGE_CONNECT_CHECK_HML = 11,
+    EVENT_STAGE_CONNECT_CREATE_GROUP = 12,
+    EVENT_STAGE_CONNECT_CONNECT_NOTIFY = 13,
+    EVENT_STAGE_CONNECT_POST_RENEGOTIATE_REQ = 14,
+    EVENT_STAGE_CONNECT_RENEGOTIATE_CONNECT = 15,
+    EVENT_STAGE_CONNECT_SWITCH_NOTIFY = 16,
+    EVENT_STAGE_CONNECT_POST_RENEGOTIATE_RESP = 17,
+    EVENT_STAGE_CONNECT_CONNECT_GROUP = 18,
+    EVENT_STAGE_CONNECT_CONFIG_INFO = 19,
+    EVENT_STAGE_CONNECT_START_LISTENING = 20,
 } ConnEventConnectStage;
 
 typedef struct {
-    int32_t result;            // STAGE_RES
-    int32_t errcode;           // ERROR_CODE
-    int32_t connectionId;      // CONN_ID
-    int32_t requestId;         // REQ_ID
-    int32_t linkType;          // LINK_TYPE
-    int32_t authType;          // AUTH_TYPE
-    int32_t authId;            // AUTH_ID
-    const char *lnnType;       // LNN_TYPE
-    int32_t expectRole;        // EXPECT_ROLE
-    int32_t costTime;          // TIME_CONSUMING
-    int32_t rssi;              // RSSI
-    int32_t load;              // CHLOAD
-    int32_t frequency;         // FREQ
-    const char *peerIp;        // PEER_IP
-    const char *peerBrMac;     // PEER_BR_MAC
-    const char *peerBleMac;    // PEER_BLE_MAC
-    const char *peerWifiMac;   // PEER_WIFI_MAC
-    const char *peerPort;      // PEER_PORT
-    const char *callerPkg;     // HOST_PKG
-    const char *calleePkg;     // TO_CALL_PKG
-    int32_t bootLinkType;      // BOOT_LINK_TYPE
-    int32_t isRenegotiate;     // IS_RENEGOTIATE
-    int32_t isReuse;           // IS_REUSE
-    uint64_t negotiateTime;    // NEGOTIATE_TIME_COSUMING
-    uint64_t linkTime;         // LINK_TIME_COSUMING
+    int32_t result;             // STAGE_RES
+    int32_t errcode;            // ERROR_CODE
+    int32_t connectionId;       // CONN_ID
+    int32_t requestId;          // REQ_ID
+    int32_t linkType;           // LINK_TYPE
+    int32_t authType;           // AUTH_TYPE
+    int32_t authId;             // AUTH_ID
+    const char *lnnType;        // LNN_TYPE
+    int32_t expectRole;         // EXPECT_ROLE
+    int32_t costTime;           // TIME_CONSUMING
+    int32_t rssi;               // RSSI
+    int32_t load;               // CHLOAD
+    int32_t frequency;          // FREQ
+    const char *challengeCode;  // CHALLENGE_CODE
+    const char *peerIp;         // PEER_IP
+    const char *peerBrMac;      // PEER_BR_MAC
+    const char *peerBleMac;     // PEER_BLE_MAC
+    const char *peerWifiMac;    // PEER_WIFI_MAC
+    const char *peerPort;       // PEER_PORT
+    const char *peerNetworkId;  // PEER_NET_ID
+    const char *localNetworkId; // LOCAL_NET_ID
+    const char *callerPkg;      // HOST_PKG
+    const char *calleePkg;      // TO_CALL_PKG
+    int32_t bootLinkType;       // BOOT_LINK_TYPE
+    int32_t isRenegotiate;      // IS_RENEGOTIATE
+    int32_t isReuse;            // IS_REUSE
+    uint64_t negotiateTime;     // NEGOTIATE_TIME_COSUMING
+    uint64_t linkTime;          // LINK_TIME_COSUMING
 } ConnEventExtra;
 
 typedef enum {

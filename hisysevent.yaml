@@ -261,15 +261,23 @@ CONNECTION_BEHAVIOR:
   AUTH_ID: { type: INT32, desc: auth id }
   LNN_TYPE: { type: STRING, desc: lnn type }
   EXPECT_ROLE: { type: INT32, desc: expect role }
-  TIME_CONSUMING: { type: INT32, desc: total cost time}
-  RSSI: { type: INT32, desc: rssi}
-  CHLOAD: { type: INT32, desc: chload}
-  FREQ: { type: INT32, desc: frequency}
+  COST_TIME: { type: INT32, desc: total cost time }
+  RSSI: { type: INT32, desc: rssi }
+  CHLOAD: { type: INT32, desc: chload }
+  FREQ: { type: INT32, desc: frequency }
+  CHALLENGE_CODE: { type: STRING, desc: challenge code }
   PEER_IP: { type: STRING, desc: peer device ip }
   PEER_BR_MAC: { type: STRING, desc: peer device br mac }
   PEER_BLE_MAC: { type: STRING, desc: peer device ble mac }
   PEER_WIFI_MAC: { type: STRING, desc: peer device wifi mac }
   PEER_PORT: { type: STRING, desc: peer device port }
+  PEER_NET_ID: { type: STRING, desc: peer network id }
+  LOCAL_NET_ID: { type: STRING, desc: local network id }
+  BOOT_LINK_TYPE: { type: INT32, desc: boot link type }
+  IS_RENEGOTIATE: { type: INT32, desc: is renegotiate }
+  IS_REUSE: { type: INT32, desc: is reuse }
+  NEGOTIATE_TIME: { type: UINT64, desc: negotiate time }
+  LINK_TIME: { type: UINT64, desc: link time }
 
 CONNECTION_AUDIT:
   __BASE: {type: SECURITY, level: CRITICAL, desc: connection security audit }
