@@ -203,9 +203,12 @@ static void FillConnEventExtra(int32_t requestId, ConnEventExtra *extra)
     extra->peerBrMac = NULL;
     extra->peerWifiMac = NULL;
     extra->peerPort = NULL;
+    extra->peerNetworkId = NULL;
+    extra->localNetworkId = NULL;
     extra->calleePkg = NULL;
     extra->callerPkg = NULL;
     extra->lnnType = NULL;
+    extra->challengeCode = NULL;
     enum StatisticLinkType statisticLinkType = STATISTIC_LINK_TYPE_NUM;
     GetWifiDirectStatisticLinkType(requestId, &statisticLinkType);
     if (statisticLinkType == STATISTIC_P2P) {
