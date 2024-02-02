@@ -52,6 +52,21 @@ public:
     void TearDown();
 };
 
+static bool IsDeviceOnline(const char *remoteMac)
+{
+    return true;
+}
+
+static int32_t GetLocalIpByUuid(const char *uuid, char *localIp, int32_t localIpSize)
+{
+    return SOFTBUS_OK;
+}
+
+static struct WifiDirectManager manager = {
+    .isDeviceOnline = IsDeviceOnline,
+    .getLocalIpByUuid = GetLocalIpByUuid,
+};
+
 void HeartBeatFSMTest::SetUpTestCase()
 {
     int32_t ret = LooperInit();
@@ -371,6 +386,7 @@ HWTEST_F(HeartBeatFSMTest, ProcessLostHeartbeatTest_01, TestSize.Level1)
     EXPECT_CALL(distriLedgerMock, ConvertBtMacToBinary).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(connMock, CheckActiveConnection).WillRepeatedly(Return(true));
     EXPECT_CALL(heartbeatFsmMock, LnnRequestLeaveSpecific).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(heartbeatFsmMock, GetWifiDirectManager).WillRepeatedly(Return(&manager));
     int32_t ret = ProcessLostHeartbeat(nullptr, CONNECTION_ADDR_BLE, false);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     EXPECT_CALL(distriLedgerMock, LnnGetOnlineStateById).WillOnce(Return(false)).WillRepeatedly(Return(true));
@@ -885,5 +901,44 @@ HWTEST_F(HeartBeatFSMTest, LnnPostUpdateSendInfoMsgToHbFsm_01, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     LnnPostUpdateSendInfoMsgToHbFsm(&hbFsm, UPDATE_HB_NETWORK_INFO);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LnnPostSendBeginMsgToHbFsm_02
+ * @tc.desc: lnn post send begin msg to hb fsm
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, LnnPostSendBeginMsgToHbFsm_02, TestSize.Level1)
+{
+    LnnHeartbeatFsm hbFsm;
+    LnnHeartbeatType type = HEARTBEAT_TYPE_BLE_V1;
+    bool wakeupFlag = true;
+    LnnProcessSendOnceMsgPara msgPara;
+    int32_t ret = LnnPostSendBeginMsgToHbFsm(nullptr, type, wakeupFlag, &msgPara, TEST_TIME3);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = LnnPostSendBeginMsgToHbFsm(&hbFsm, type, wakeupFlag, &msgPara, TEST_TIME3);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+/*
+ * @tc.name: LnnPostScreenOffCheckDevMsgToHbFsm_02
+ * @tc.desc: lnn post screen off check dev msg to hb fsm
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, LnnPostScreenOffCheckDevMsgToHbFsm_02, TestSize.Level1)
+{
+    LnnHeartbeatFsm hbFsm = {
+        .fsmName = "test66",
+    };
+    LnnCheckDevStatusMsgPara *msgPara = nullptr;
+    msgPara = (LnnCheckDevStatusMsgPara *)SoftBusMalloc(sizeof(LnnCheckDevStatusMsgPara));
+    int32_t ret = LnnPostScreenOffCheckDevMsgToHbFsm(nullptr, msgPara, TEST_TIME3);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = LnnPostScreenOffCheckDevMsgToHbFsm(&hbFsm, nullptr, TEST_TIME3);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = LnnPostScreenOffCheckDevMsgToHbFsm(&hbFsm, msgPara, TEST_TIME3);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 } // namespace OHOS

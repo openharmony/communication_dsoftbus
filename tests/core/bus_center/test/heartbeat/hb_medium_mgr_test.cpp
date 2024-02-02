@@ -21,6 +21,7 @@
 #include "distribute_net_ledger_mock.h"
 #include "hb_strategy_mock.h"
 #include "lnn_ble_heartbeat.h"
+#include "lnn_heartbeat_ctrl_virtual.c"
 #include "lnn_heartbeat_medium_mgr.c"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_net_ledger_mock.h"
@@ -40,6 +41,8 @@ using namespace testing;
 #define TEST_UDID_HASH      "1111222233334444"
 #define TEST_CAPABILTIY     1
 #define TEST_STATEVERSION   10
+#define TEST_UPDATETIME     60
+#define TEST_GROUPTYPE      6
 
 class HeartBeatMediumTest : public testing::Test {
 public:
@@ -722,5 +725,180 @@ HWTEST_F(HeartBeatMediumTest, HbIsRepeatedReAuthRequest_TEST01, TestSize.Level1)
 
     ret = HbIsRepeatedReAuthRequest(nullptr, nowTime);
     EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: UpdateOnlineInfoNoConnection_TEST01
+ * @tc.desc: update online info no connection
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatMediumTest, UpdateOnlineInfoNoConnection_TEST01, TestSize.Level1)
+{
+    HbRespData hbResp = {
+        .capabiltiy = TEST_CAPABILTIY,
+        .stateVersion = STATE_VERSION_INVALID,
+    };
+    UpdateOnlineInfoNoConnection(TEST_NETWORK_ID, &hbResp);
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(ledgerMock, LnnSetDLConnCapability).WillRepeatedly(Return(SOFTBUS_ERR));
+    UpdateOnlineInfoNoConnection(TEST_NETWORK_ID, &hbResp);
+}
+
+/*
+ * @tc.name: HbGetOnlineNodeByRecvInfo_TEST01
+ * @tc.desc: hb get online node by recv info
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatMediumTest, HbGetOnlineNodeByRecvInfo_TEST01, TestSize.Level1)
+{
+    NodeInfo nodeInfo = {
+        .discoveryType = TEST_DISC_TYPE,
+        .deviceInfo.deviceUdid = TEST_UDID_HASH,
+    };
+    HbRespData hbResp = {
+        .capabiltiy = TEST_CAPABILTIY,
+        .stateVersion = STATE_VERSION_INVALID,
+    };
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo)
+        .WillOnce(Return(SOFTBUS_ERR))
+        .WillOnce(Return(SOFTBUS_OK))
+        .WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline);
+    EXPECT_CALL(ledgerMock, LnnIsLSANode).WillRepeatedly(Return(true));
+    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, LnnHasDiscoveryType).WillRepeatedly(Return(false));
+    int32_t ret = HbGetOnlineNodeByRecvInfo(TEST_UDID_HASH, CONNECTION_ADDR_BLE, &nodeInfo, &hbResp);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = HbGetOnlineNodeByRecvInfo(TEST_UDID_HASH, CONNECTION_ADDR_WLAN, &nodeInfo, &hbResp);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = HbGetOnlineNodeByRecvInfo(TEST_UDID_HASH, CONNECTION_ADDR_BLE, &nodeInfo, &hbResp);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+/*
+ * @tc.name: HbUpdateOfflineTimingByRecvInfo_TEST01
+ * @tc.desc: hb update offline timing by recv info
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatMediumTest, HbUpdateOfflineTimingByRecvInfo_TEST01, TestSize.Level1)
+{
+    LnnHeartbeatType hbType = HEARTBEAT_TYPE_BLE_V1;
+    NiceMock<DistributeLedgerInterfaceMock> disLedgerMock;
+    NiceMock<HeartBeatStategyInterfaceMock> heartBeatMock;
+    EXPECT_CALL(disLedgerMock, LnnGetDLHeartbeatTimestamp)
+        .WillOnce(Return(SOFTBUS_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(disLedgerMock, LnnSetDLHeartbeatTimestamp)
+        .WillOnce(Return(SOFTBUS_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(heartBeatMock, LnnStopOfflineTimingStrategy)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(heartBeatMock, LnnStartOfflineTimingStrategy)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = HbUpdateOfflineTimingByRecvInfo(TEST_NETWORK_ID, CONNECTION_ADDR_BR, hbType, TEST_UPDATETIME);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = HbUpdateOfflineTimingByRecvInfo(TEST_NETWORK_ID, CONNECTION_ADDR_BLE, hbType, TEST_UPDATETIME);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = HbUpdateOfflineTimingByRecvInfo(TEST_NETWORK_ID, CONNECTION_ADDR_ETH, hbType, TEST_UPDATETIME);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: SoftBusNetNodeResult_TEST01
+ * @tc.desc: softbus net node result
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatMediumTest, SoftBusNetNodeResult_TEST01, TestSize.Level1)
+{
+    DeviceInfo device;
+    (void)memset_s(&device, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
+    NiceMock<HeartBeatStategyInterfaceMock> heartBeatMock;
+    EXPECT_CALL(heartBeatMock, LnnNotifyDiscoveryDevice)
+        .WillOnce(Return(SOFTBUS_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = SoftBusNetNodeResult(&device, false);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = SoftBusNetNodeResult(&device, false);
+    EXPECT_TRUE(ret == SOFTBUS_NETWORK_NODE_DIRECT_ONLINE);
+    ret = SoftBusNetNodeResult(&device, true);
+    EXPECT_TRUE(ret == SOFTBUS_NETWORK_NODE_OFFLINE);
+}
+
+/*
+ * @tc.name: HbMediumMgrRelayProcess_TEST01
+ * @tc.desc: hb medium mgr relay process
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatMediumTest, HbMediumMgrRelayProcess_TEST01, TestSize.Level1)
+{
+    NiceMock<HeartBeatStategyInterfaceMock> heartBeatMock;
+    EXPECT_CALL(heartBeatMock, LnnStartHbByTypeAndStrategy).WillRepeatedly(Return(SOFTBUS_OK));
+    HbMediumMgrRelayProcess(TEST_UDID_HASH, CONNECTION_ADDR_WLAN, HEARTBEAT_TYPE_BLE_V1);
+}
+
+/*
+ * @tc.name: LnnDumpHbOnlineNodeList_TEST02
+ * @tc.desc: dump hb online node list
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatMediumTest, LnnDumpHbOnlineNodeList_TEST02, TestSize.Level1)
+{
+    NiceMock<DistributeLedgerInterfaceMock> disLedgerMock;
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo)
+        .WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline);
+    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(disLedgerMock, LnnGetDLHeartbeatTimestamp).WillRepeatedly(Return(SOFTBUS_OK));
+    LnnDumpHbOnlineNodeList();
+}
+
+/*
+ * @tc.name: LnnHbMediumMgrInit_TEST01
+ * @tc.desc: hb medium mgr init
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatMediumTest, LnnHbMediumMgrInit_TEST01, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnRegisterBleLpDeviceMediumMgr)
+        .WillOnce(Return(SOFTBUS_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = LnnHbMediumMgrInit();
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    HbDeinitRecvList();
+    ret = LnnHbMediumMgrInit();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LnnHeartbeatCtrlVirtual_TEST01
+ * @tc.desc: lnn_heartbeat_ctrl_virtual.c
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatMediumTest, LnnHeartbeatCtrlVirtual_TEST01, TestSize.Level1)
+{
+    int32_t ret = LnnStartHeartbeatFrameDelay();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = LnnSetHeartbeatMediumParam(nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_NOT_IMPLEMENT);
+    ret = LnnOfflineTimingByHeartbeat(TEST_NETWORK_ID, CONNECTION_ADDR_BLE);
+    EXPECT_TRUE(ret == SOFTBUS_NOT_IMPLEMENT);
+    ret = LnnShiftLNNGear(nullptr, nullptr, TEST_NETWORK_ID, nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_NOT_IMPLEMENT);
+    LnnUpdateHeartbeatInfo(UPDATE_HB_NETWORK_INFO);
+    LnnHbOnTrustedRelationIncreased(TEST_GROUPTYPE);
+    LnnHbOnTrustedRelationReduced();
+    LnnDeinitHeartbeat();
+    ret = LnnInitHeartbeat();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 } // namespace OHOS

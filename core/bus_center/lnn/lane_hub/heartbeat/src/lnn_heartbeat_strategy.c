@@ -435,7 +435,8 @@ static int32_t FixedPeriodSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj)
 static int32_t AdjustablePeriodSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj)
 {
     int32_t ret;
-    GearMode mode = {0};
+    GearMode mode;
+    (void)memset_s(&mode, sizeof(GearMode), 0, sizeof(GearMode));
     LnnProcessSendOnceMsgPara *msgPara = (LnnProcessSendOnceMsgPara *)obj;
 
     if (msgPara->hbType != HEARTBEAT_TYPE_BLE_V0 || msgPara->strategyType != STRATEGY_HB_SEND_ADJUSTABLE_PERIOD) {
@@ -683,7 +684,8 @@ int32_t LnnStartNewHbStrategyFsm(void)
 
 int32_t LnnStartOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType)
 {
-    GearMode mode = {0};
+    GearMode mode;
+    (void)memset_s(&mode, sizeof(GearMode), 0, sizeof(GearMode));
     LnnCheckDevStatusMsgPara msgPara = {0};
 
     if (networkId == NULL) {
