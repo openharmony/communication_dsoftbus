@@ -381,6 +381,7 @@
         "ClientGetSessionCallbackAdapterByName";
         "ClientGetSessionCallbackAdapterById";
         "ClientGetPeerSocketInfoById";
+        "ClientGetSessionNameByChannelId";
         "TransSetSocketFileListener";
         "EvaluateQos";
         "GetMtuSize";
