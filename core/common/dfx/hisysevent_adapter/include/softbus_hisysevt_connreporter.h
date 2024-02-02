@@ -79,6 +79,7 @@ typedef struct {
     uint32_t reqId;
     uint64_t startTime;
     uint32_t connectTraceId;
+    bool reuse;
 } ConnectStatistics;
 
 int32_t SoftBusRecordPIdAndPkgName(uint32_t pId, const char *pkgName);
