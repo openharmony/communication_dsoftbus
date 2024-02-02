@@ -168,13 +168,13 @@ static int32_t TryUpdateStartTimeSyncReq(TimeSyncReqInfo *info, const StartTimeS
     return SOFTBUS_OK;
 }
 
-static void RemoveStartTimeSyncReq(const TimeSyncReqInfo *info, const char *pkgName, int32_t pid)
+static void RemoveStartTimeSyncReq(const TimeSyncReqInfo *info, const char *pkgName, int32_t callingPid)
 {
     StartTimeSyncReq *item = NULL;
     StartTimeSyncReq *next = NULL;
 
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &info->startReqList, StartTimeSyncReq, node) {
-        if (strcmp(pkgName, item->pkgName) != 0 || item->pid != pid) {
+        if (strcmp(pkgName, item->pkgName) != 0 || item->pid != callingPid) {
             continue;
         }
         ListDelete(&item->node);
