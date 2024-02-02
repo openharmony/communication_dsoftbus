@@ -293,7 +293,7 @@ static void OnCompleteDisc(int32_t reason, int32_t total)
     g_isDiscQueryEnd = true;
 }
 
-static void ConnStatsLinkType(int32_t linkTypePara, int32_t connDelayTime, bool success)
+static void ConnStatsLinkType(int32_t linkTypePara, int32_t connDelayTime, bool success, int32_t reuse)
 {
     int32_t linkType = linkTypePara;
     if (linkType < CONNECT_TCP || linkType >= CONNECT_TYPE_MAX) {
@@ -304,7 +304,7 @@ static void ConnStatsLinkType(int32_t linkTypePara, int32_t connDelayTime, bool 
         return;
     }
     g_connStatsInfo.linkTypeSuccessTotal[linkType]++;
-    if (connDelayTime != SOFTBUS_ERR) {
+    if (connDelayTime != SOFTBUS_ERR && reuse == 0) {
         g_connStatsInfo.delayTimeLinkType[linkType] += connDelayTime;
         g_connStatsInfo.delayNumLinkType[linkType]++;
     }
@@ -359,6 +359,7 @@ static void OnQueryConn(HiSysEventRecordC srcRecord[], size_t size)
         int32_t scene = GetInt32ValueByRecord(&srcRecord[i], BIZ_SCENE_NAME);
         int32_t stage = GetInt32ValueByRecord(&srcRecord[i], BIZ_STAGE_NAME);
         int32_t stageRes = GetInt32ValueByRecord(&srcRecord[i], STAGE_RES_NAME);
+        int32_t isReuse = GetInt32ValueByRecord(&srcRecord[i], IS_REUSE);
         if (scene != EVENT_SCENE_CONNECT || stage != EVENT_STAGE_CONNECT_END || stageRes == SOFTBUS_ERR) {
             continue;
         }
@@ -370,11 +371,11 @@ static void OnQueryConn(HiSysEventRecordC srcRecord[], size_t size)
         int32_t connDelayTime = GetInt32ValueByRecord(&srcRecord[i], TIME_CONSUMING_NAME);
         if (stageRes == EVENT_STAGE_RESULT_OK) {
             g_connStatsInfo.connSuccessTotal++;
-            ConnStatsLinkType(linkType, connDelayTime, true);
+            ConnStatsLinkType(linkType, connDelayTime, true, isReuse);
         }
         if (stageRes == EVENT_STAGE_RESULT_FAILED) {
             g_connStatsInfo.connFailTotal++;
-            ConnStatsLinkType(linkType, connDelayTime, false);
+            ConnStatsLinkType(linkType, connDelayTime, false, isReuse);
         }
     }
     (void)SoftBusMutexUnlock(&g_connOnQueryLock);
