@@ -165,5 +165,5 @@ void ResourceManagerBroadcastHandlerInit(void)
     };
 
     broadcastReceiver->registerBroadcastListener(actions, ARRAY_SIZE(actions), "ResourceManager",
-                                                 LISTENER_PRIORITY_HIGH, Listener);
+                                                 LISTENER_PRIORITY_MIDDLE, Listener);
 }
