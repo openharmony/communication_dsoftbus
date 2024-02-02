@@ -19,6 +19,7 @@
 
 #include "client_trans_tcp_direct_callback.h"
 #include "client_trans_tcp_direct_manager.h"
+#include "client_trans_session_manager.h"
 #include "common_list.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
@@ -37,6 +38,7 @@
 #define MIN_BUF_LEN (1024 + DATA_EXTEND_LEN)
 
 #define BYTE_TOS 0x60
+#define COLLABORATE_BYTE_TOS 0x80
 #define MESSAGE_TOS 0xC0
 
 typedef struct {
@@ -160,6 +162,14 @@ static char *TransTdcPackData(const TcpDirectChannelInfo *channel, const char *d
     return buf;
 }
 
+static bool CheckCollaborationSessionName(const char *sessionName)
+{
+    if (strstr(sessionName, "ohos.collaborationcenter") != NULL) {
+        return true;
+    }
+    return false;
+}
+
 static int32_t TransTdcProcessPostData(const TcpDirectChannelInfo *channel, const char *data, uint32_t len,
     int32_t flags)
 {
@@ -174,7 +184,16 @@ static int32_t TransTdcProcessPostData(const TcpDirectChannelInfo *channel, cons
         SoftBusFree(buf);
         return SOFTBUS_ENCRYPT_ERR;
     }
+    char sessionName[SESSION_NAME_SIZE_MAX + 1] = { 0 };
+    if (ClientGetSessionNameByChannelId(channel->channelId, channel->detail.channelType,
+        sessionName, SESSION_NAME_SIZE_MAX)) {
+        TRANS_LOGE(TRANS_SDK, "failed to get sessionName, channelId=%{public}d", channel->channelId);
+        return SOFTBUS_ERR;
+    }
     uint32_t tos = (flags == FLAG_BYTES) ? BYTE_TOS : MESSAGE_TOS;
+    if (CheckCollaborationSessionName(sessionName)) {
+        tos = (flags == FLAG_BYTES) ? COLLABORATE_BYTE_TOS : MESSAGE_TOS;
+    }
     if (SetIpTos(channel->detail.fd, tos) != SOFTBUS_OK) {
         SoftBusFree(buf);
         return SOFTBUS_TCP_SOCKET_ERR;
