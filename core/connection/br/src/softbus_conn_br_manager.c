@@ -147,6 +147,7 @@ static void DfxRecordBrConnectSuccess(uint32_t pId, ConnBrConnection *connection
         .connectionId = connection->connectionId,
         .linkType = CONNECT_BR,
         .costTime = costTime,
+        .isReuse = statistics->reuse ? 1 : 0,
         .result = EVENT_STAGE_RESULT_OK };
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
 }
@@ -298,6 +299,7 @@ static void NotifyDeviceConnectResult(
 
     LIST_FOR_EACH_ENTRY(it, &device->requests, ConnBrRequest, node) {
         // not need sync reference count when establish connection, initial reference count is 1
+        it->statistics.reuse = isReuse;
         if (isReuse) {
             ConnBrUpdateConnectionRc(connection, 1);
         }
