@@ -95,12 +95,12 @@ static void LnnRestoreLocalDeviceInfo()
         LnnNotifyNetworkIdChangeEvent(info.networkId);
     }
     AuthLoadDeviceKey();
+    LnnLoadPtkInfo();
     if (LnnLoadRemoteDeviceInfo() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "load remote deviceInfo fail");
         return;
     }
     LoadBleBroadcastKey();
-    LnnLoadPtkInfo();
     LnnLoadLocalBroadcastCipherKey();
     LNN_LOGI(LNN_LEDGER, "load remote deviceInfo devicekey success");
 }
