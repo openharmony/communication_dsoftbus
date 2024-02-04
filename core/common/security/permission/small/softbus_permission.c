@@ -25,7 +25,7 @@
 #include "softbus_errcode.h"
 #include "softbus_log.h"
 
-#define SOFTBUS_PERMISSION_NAME "ohos.permission.DISTRIBUTED_DATASYNC"
+#define SOFTBUS_PERMISSION_NAME "ohos.permission.DISTRIBUTED_SOFTBUS_CENTER"
 
 #define SHELL_UID 2
 #define INVALID_UID (-1)
@@ -58,7 +58,7 @@ static int32_t GetPermType(pid_t callingUid, pid_t callingPid, const char *pkgNa
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "native app");
         return NATIVE_APP;
     }
-    return SOFTBUS_PERMISSION_DENIED;
+    return NORMAL_APP;
 }
 
 int32_t TransPermissionInit(void)
