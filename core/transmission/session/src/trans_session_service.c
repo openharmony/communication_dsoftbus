@@ -51,7 +51,7 @@ int32_t TransServerInit(void)
         TRANS_LOGE(TRANS_INIT, "QosInit Failed");
         return SOFTBUS_ERR;
     }
-    if (ScenarioManagerGetInstance() == NULL) {
+    if (ScenarioManagerGetInstance() != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "ScenarioManager init Failed");
         return SOFTBUS_ERR;
     }
