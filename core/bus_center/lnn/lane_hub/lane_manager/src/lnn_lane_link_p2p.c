@@ -1084,14 +1084,14 @@ static int32_t LnnSelectDirectLink(const LinkRequest *request, uint32_t laneLink
             ret = OpenAuthToConnP2p(request, laneLinkReqId, callback);
         }
     }
+    if (CheckHasBrConnection(request->peerNetworkId) && ret != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LANE, "open new br auth to connect p2p, laneId=%{public}u", laneLinkReqId);
+        ret = OpenAuthToConnP2p(request, laneLinkReqId, callback);
+    }
     if ((local & (1 << BIT_BLE_TRIGGER_CONNECTION)) != 0 && (remote & (1 << BIT_BLE_TRIGGER_CONNECTION)) != 0 &&
         ret != SOFTBUS_OK && GetWifiDirectUtils()->supportHmlTwo()) {
         LNN_LOGI(LNN_LANE, "open ble trigger to connect, laneId=%{public}u", laneLinkReqId);
         ret = OpenBleTriggerToConn(request, laneLinkReqId, callback);
-    }
-    if (CheckHasBrConnection(request->peerNetworkId) && ret != SOFTBUS_OK) {
-        LNN_LOGI(LNN_LANE, "open new br auth to connect p2p, laneId=%{public}u", laneLinkReqId);
-        ret = OpenAuthToConnP2p(request, laneLinkReqId, callback);
     }
     if (((local & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) != 0) &&
         ((remote & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) != 0) &&
