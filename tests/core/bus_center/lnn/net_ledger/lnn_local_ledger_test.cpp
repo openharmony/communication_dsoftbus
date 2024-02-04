@@ -387,4 +387,105 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_004, TestSize.Level1)
     EXPECT_EQ(g_localKeyTable[41].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
     LnnDeinitLocalLedger();
 }
+
+/*
+* @tc.name: Local_Ledger_Key_Test_005
+* @tc.desc: local ledger key test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_005, TestSize.Level1)
+{
+    NodeInfo *info = nullptr;
+    int32_t ret = LnnInitLocalNodeInfo(info);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+
+    NodeInfo *nodeInfo = (NodeInfo*)SoftBusMalloc(sizeof(NodeInfo));
+    ASSERT_TRUE(nodeInfo != nullptr);
+    (void)memset_s(nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+
+    LocalLedgerDepsInterfaceMock localLedgerMock;
+    EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_))
+    .WillOnce(Return(SOFTBUS_OK))
+    .WillRepeatedly(Return(SOFTBUS_ERR));
+    ret = LnnInitLocalNodeInfo(nodeInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = LnnInitLocalNodeInfo(nodeInfo);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    ret = LnnInitLocalNodeInfo(nodeInfo);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    if (nodeInfo != NULL) {
+        SoftBusFree(nodeInfo);
+    }
+}
+
+/*
+* @tc.name: Local_Ledger_Key_Test_006
+* @tc.desc: local ledger key test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_006, TestSize.Level1)
+{
+    int32_t ret = LnnSetLocalUnifiedName(NULL);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    const char *unifiedName = "testJohn";
+    ret = LnnSetLocalUnifiedName(unifiedName);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+
+    ret = UpdateLocalPubMac(NULL);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    const void *testId = "testId";
+    ret = UpdateLocalPubMac(testId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    
+    ret = LlUpdateStaticCapability(NULL);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = LlUpdateStaticCapability(testId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: Local_Ledger_Key_Test_007
+* @tc.desc: local ledger key test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_007, TestSize.Level1)
+{
+    uint32_t len = 101;
+    int32_t ret = LlGetStaticCapability(NULL, 1);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LlGetIrk(NULL, len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LlGetPubMac(NULL, len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LlGetCipherInfoKey(NULL, len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    
+    void *buf = SoftBusCalloc(100);
+    ASSERT_TRUE(buf != nullptr);
+    ret = LlGetStaticCapability(buf, len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LlGetIrk(buf, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LlGetPubMac(buf, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LlGetCipherInfoKey(buf, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = LlGetStaticCapability(buf, 100);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = LlGetIrk(buf, len);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = LlGetPubMac(buf, len);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = LlGetCipherInfoKey(buf, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    SoftBusFree(buf);
+}
+
 } // namespace OHOS
