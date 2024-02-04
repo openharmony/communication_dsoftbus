@@ -44,7 +44,7 @@ typedef enum {
 
 typedef struct ScenarioManager ScenarioManager;
 
-ScenarioManager *ScenarioManagerGetInstance(void);
+int32_t ScenarioManagerGetInstance(void);
 
 // update scenarios based on the command and determine whether to deliver the driver.
 int32_t AddScenario(const char *localMac, const char *peerMac, int localPid, int businessType);
