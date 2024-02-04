@@ -281,7 +281,6 @@ static int32_t PostMessageAtTimeParamVerify(const SoftBusLooper *looper, SoftBus
         return SOFTBUS_ERR;
     }
 
-    COMM_LOGI(COMM_UTILS, "params verify succ.");
     return SOFTBUS_OK;
 }
 
