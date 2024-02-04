@@ -62,5 +62,6 @@ void P2pEntityBroadcastHandlerInit(void)
     };
 
     broadcastReceiver->registerBroadcastListener(actions, ARRAY_SIZE(actions), "P2pEntity",
-                                                 LISTENER_PRIORITY_LOW, Listener);
+                                                 LISTENER_PRIORITY_HIGH, Listener);
 }
+
