@@ -482,6 +482,7 @@ static void CopyLinkInfoToLinkedList(const P2pLinkReqList *linkReqInfo, P2pLinke
     linkedInfo->pid = linkReqInfo->laneRequestInfo.pid;
     linkedInfo->laneLinkReqId = linkReqInfo->laneRequestInfo.laneLinkReqId;
     linkedInfo->auth.authId = INVAILD_AUTH_ID;
+    linkedInfo->p2pLinkDownReqId = -1;
     if (LnnGetRemoteStrInfo(linkReqInfo->laneRequestInfo.networkId, STRING_KEY_P2P_MAC,
         linkedInfo->remoteMac, sizeof(linkedInfo->remoteMac)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get remote p2p mac fail");
