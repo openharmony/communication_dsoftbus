@@ -140,22 +140,6 @@ static int32_t SoftBusGetOsType(void)
     return OHOS_TYPE_UNKNOWN;
 }
 
-static char *SoftBusGetOsVersion(void)
-{
-    char *osFullName = (char *)SoftBusCalloc(OS_VERSION_BUF_LEN);
-    if (osFullName == NULL) {
-        LNN_LOGE(LNN_STATE, "calloc osFullName fail!");
-        return NULL;
-    }
-    GetParameter(OHOS_FULL_NAME, UNDEFINED_VALUE, osFullName, OS_VERSION_BUF_LEN);
-    if (strcmp(osFullName, UNDEFINED_VALUE) != 0) {
-        return osFullName;
-    }
-    SoftBusFree(osFullName);
-    return NULL;
-}
-
-
 int32_t GetCommonDevInfo(CommonDeviceKey key, char *value, uint32_t len)
 {
     if (value == NULL) {
@@ -214,6 +198,7 @@ int32_t GetCommonOsType(int32_t *value)
     *value = ret;
     if (*value == OHOS_TYPE_UNKNOWN) {
         LNN_LOGE(LNN_STATE, "get invalid os type, osType = %{public}d", *value);
+        return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -224,19 +209,24 @@ int32_t GetCommonOsVersion(char *value, uint32_t len)
         LNN_LOGE(LNN_STATE, "para error");
         return SOFTBUS_INVALID_PARAM;
     }
-    char *osFullName = NULL;
-    osFullName = SoftBusGetOsVersion();
-    if (osFullName != NULL) {
+    char *osFullName = (char *)SoftBusCalloc(OS_VERSION_BUF_LEN);
+    if (osFullName == NULL) {
+        LNN_LOGE(LNN_STATE, "calloc osFullName failed!");
+        return SOFTBUS_MEM_ERR;
+    }
+    GetParameter(OHOS_FULL_NAME, UNDEFINED_VALUE, osFullName, OS_VERSION_BUF_LEN);
+    if (strcmp(osFullName, UNDEFINED_VALUE) != 0) {
         if (strcpy_s(value, len, osFullName) != EOK) {
-            SoftBusFree(osFullName);
             LNN_LOGE(LNN_STATE, "strcpy_s osFullName failed.");
-            return SOFTBUS_ERR;
+            SoftBusFree(osFullName);
+            return SOFTBUS_MEM_ERR;
         }
-        SoftBusFree(osFullName);
     } else {
         LNN_LOGE(LNN_STATE, "get invalid osVersion, osVersion= %{public}s", UNDEFINED_VALUE);
+        SoftBusFree(osFullName);
         return SOFTBUS_ERR;
     }
+    SoftBusFree(osFullName);
     return SOFTBUS_OK;
 }
 
