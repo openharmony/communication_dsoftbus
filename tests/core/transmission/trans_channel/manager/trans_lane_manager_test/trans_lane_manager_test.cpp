@@ -137,30 +137,30 @@ HWTEST_F(TransLaneManagerTest, TransLaneMgrAddLane001, TestSize.Level1)
 {
     int32_t channelId = 2112;
     int32_t channelType = 2112;
-    uint32_t laneId = 1;
+    uint32_t laneReqId = 1;
     AppInfoData *myData = (AppInfoData *)SoftBusCalloc(sizeof(AppInfoData));
     ASSERT_TRUE(myData != nullptr);
     LaneConnInfo *connInfo = (LaneConnInfo *)SoftBusCalloc(sizeof(LaneConnInfo));
     ASSERT_TRUE(connInfo != nullptr);
 
     TransLaneMgrDeinit();
-    int32_t ret = TransLaneMgrAddLane(channelId, channelType, connInfo, laneId, myData);
+    int32_t ret = TransLaneMgrAddLane(channelId, channelType, connInfo, laneReqId, myData);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     ret = TransLaneMgrInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransLaneMgrAddLane(channelId, channelType, connInfo, laneId, myData);
+    ret = TransLaneMgrAddLane(channelId, channelType, connInfo, laneReqId, myData);
     EXPECT_EQ(SOFTBUS_OK, ret);
     TransLaneMgrDeinit();
 
     ret = TransLaneMgrInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransLaneMgrAddLane(channelId, channelType, NULL, laneId, myData);
+    ret = TransLaneMgrAddLane(channelId, channelType, NULL, laneReqId, myData);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     channelId = 1;
     channelType = 2;
-    ret = TransLaneMgrAddLane(channelId, channelType, connInfo, laneId, myData);
+    ret = TransLaneMgrAddLane(channelId, channelType, connInfo, laneReqId, myData);
     EXPECT_EQ(SOFTBUS_OK, ret);
     if (myData != NULL) {
         SoftBusFree(myData);
@@ -217,51 +217,51 @@ HWTEST_F(TransLaneManagerTest, TransLaneMgrDeathCallback001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransGetLaneIdByChannelId001
- * @tc.desc: TransGetLaneIdByChannelId001, use the wrong parameter.
+ * @tc.name: TransGetLaneReqIdByChannelId001
+ * @tc.desc: TransGetLaneReqIdByChannelId001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransLaneManagerTest, TransGetLaneIdByChannelId001, TestSize.Level1)
+HWTEST_F(TransLaneManagerTest, TransGetLaneReqIdByChannelId001, TestSize.Level1)
 {
     int32_t channelId = 2112;
-    uint32_t laneId = 22;
+    uint32_t laneReqId = 22;
 
-    int32_t ret = TransGetLaneIdByChannelId(channelId, NULL);
+    int32_t ret = TransGetLaneReqIdByChannelId(channelId, NULL);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransLaneMgrInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
     channelId = -1;
-    ret = TransGetLaneIdByChannelId(channelId, &laneId);
+    ret = TransGetLaneReqIdByChannelId(channelId, &laneReqId);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 
 /**
- * @tc.name: TransGetChannelInfoByLaneId001
- * @tc.desc: TransGetChannelInfoByLaneId001, use the wrong parameter.
+ * @tc.name: TransGetChannelInfoByLaneReqId001
+ * @tc.desc: TransGetChannelInfoByLaneReqId001, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransLaneManagerTest, TransGetChannelInfoByLaneId001, TestSize.Level1)
+HWTEST_F(TransLaneManagerTest, TransGetChannelInfoByLaneReqId001, TestSize.Level1)
 {
     int32_t channelId = 2112;
     int32_t channelType = 2112;
-    uint32_t laneId = 0;
+    uint32_t laneReqId = 0;
 
     int32_t ret = TransLaneMgrInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
     TransLaneMgrDeinit();
 
-    ret = TransGetChannelInfoByLaneId(laneId, NULL, &channelType);
+    ret = TransGetChannelInfoByLaneReqId(laneReqId, NULL, &channelType);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = TransGetChannelInfoByLaneId(laneId, &channelId, NULL);
+    ret = TransGetChannelInfoByLaneReqId(laneReqId, &channelId, NULL);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransLaneMgrInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransGetChannelInfoByLaneId(laneId, &channelId, &channelType);
+    ret = TransGetChannelInfoByLaneReqId(laneReqId, &channelId, &channelType);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 } // OHOS

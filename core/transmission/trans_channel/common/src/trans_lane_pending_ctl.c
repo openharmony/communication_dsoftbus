@@ -43,7 +43,7 @@
 
 typedef struct {
     ListNode node;
-    uint32_t laneId;
+    uint32_t laneReqId;
     int32_t errCode;
     SoftBusCond cond;
     bool bSucc;
@@ -87,9 +87,9 @@ void TransReqLanePendingDeinit(void)
     g_reqLanePendingList = NULL;
 }
 
-static int32_t TransDelLaneReqFromPendingList(uint32_t laneId)
+static int32_t TransDelLaneReqFromPendingList(uint32_t laneReqId)
 {
-    TRANS_LOGD(TRANS_SVC, "del tran request from pending laneId=%{public}u", laneId);
+    TRANS_LOGD(TRANS_SVC, "del tran request from pending laneReqId=%{public}u", laneReqId);
     if (g_reqLanePendingList == NULL) {
         TRANS_LOGE(TRANS_INIT, "lane request list hasn't init.");
         return SOFTBUS_ERR;
@@ -103,10 +103,10 @@ static int32_t TransDelLaneReqFromPendingList(uint32_t laneId)
     TransReqLaneItem *laneItem = NULL;
     TransReqLaneItem *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(laneItem, next, &(g_reqLanePendingList->list), TransReqLaneItem, node) {
-        if (laneItem->laneId == laneId) {
+        if (laneItem->laneReqId == laneReqId) {
             (void)SoftBusCondDestroy(&laneItem->cond);
             ListDelete(&(laneItem->node));
-            TRANS_LOGI(TRANS_SVC, "delete laneId = %{public}u", laneItem->laneId);
+            TRANS_LOGI(TRANS_SVC, "delete laneReqId = %{public}u", laneItem->laneReqId);
             g_reqLanePendingList->cnt--;
             SoftBusFree(laneItem);
             (void)SoftBusMutexUnlock(&(g_reqLanePendingList->lock));
@@ -114,11 +114,11 @@ static int32_t TransDelLaneReqFromPendingList(uint32_t laneId)
         }
     }
     (void)SoftBusMutexUnlock(&(g_reqLanePendingList->lock));
-    TRANS_LOGE(TRANS_SVC, "trans lane request not found, laneId=%{public}u", laneId);
+    TRANS_LOGE(TRANS_SVC, "trans lane request not found, laneReqId=%{public}u", laneReqId);
     return SOFTBUS_ERR;
 }
 
-static int32_t TransAddLaneReqFromPendingList(uint32_t laneId)
+static int32_t TransAddLaneReqFromPendingList(uint32_t laneReqId)
 {
     if (g_reqLanePendingList == NULL) {
         TRANS_LOGE(TRANS_INIT, "lane pending list no init.");
@@ -131,7 +131,7 @@ static int32_t TransAddLaneReqFromPendingList(uint32_t laneId)
         return SOFTBUS_MALLOC_ERR;
     }
     item->errCode = SOFTBUS_ERR;
-    item->laneId = laneId;
+    item->laneReqId = laneReqId;
     item->bSucc = false;
     item->isFinished = false;
 
@@ -151,11 +151,11 @@ static int32_t TransAddLaneReqFromPendingList(uint32_t laneId)
     g_reqLanePendingList->cnt++;
     (void)SoftBusMutexUnlock(&g_reqLanePendingList->lock);
 
-    TRANS_LOGI(TRANS_SVC, "add tran request to pending laneId=%{public}u", laneId);
+    TRANS_LOGI(TRANS_SVC, "add tran request to pending laneReqId=%{public}u", laneReqId);
     return SOFTBUS_OK;
 }
 
-static int32_t TransGetLaneReqItemByLaneId(uint32_t laneId, bool *bSucc, LaneConnInfo *connInfo, int32_t *errCode)
+static int32_t TransGetLaneReqItemByLaneReqId(uint32_t laneReqId, bool *bSucc, LaneConnInfo *connInfo, int32_t *errCode)
 {
     if (bSucc == NULL || connInfo == NULL) {
         TRANS_LOGE(TRANS_SVC, "param err.");
@@ -172,7 +172,7 @@ static int32_t TransGetLaneReqItemByLaneId(uint32_t laneId, bool *bSucc, LaneCon
 
     TransReqLaneItem *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &(g_reqLanePendingList->list), TransReqLaneItem, node) {
-        if (item->laneId == laneId) {
+        if (item->laneReqId == laneReqId) {
             *bSucc = item->bSucc;
             *errCode = item->errCode;
             if (memcpy_s(connInfo, sizeof(LaneConnInfo), &(item->connInfo), sizeof(LaneConnInfo)) != EOK) {
@@ -184,11 +184,11 @@ static int32_t TransGetLaneReqItemByLaneId(uint32_t laneId, bool *bSucc, LaneCon
         }
     }
     (void)SoftBusMutexUnlock(&(g_reqLanePendingList->lock));
-    TRANS_LOGE(TRANS_SVC, "trans lane request not found. laneId=%{public}u", laneId);
+    TRANS_LOGE(TRANS_SVC, "trans lane request not found. laneReqId=%{public}u", laneReqId);
     return SOFTBUS_ERR;
 }
 
-static int32_t TransUpdateLaneConnInfoByLaneId(uint32_t laneId, bool bSucc,
+static int32_t TransUpdateLaneConnInfoByLaneReqId(uint32_t laneReqId, bool bSucc,
     const LaneConnInfo *connInfo, int32_t errCode)
 {
     if (g_reqLanePendingList == NULL) {
@@ -202,7 +202,7 @@ static int32_t TransUpdateLaneConnInfoByLaneId(uint32_t laneId, bool bSucc,
 
     TransReqLaneItem *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &(g_reqLanePendingList->list), TransReqLaneItem, node) {
-        if (item->laneId == laneId) {
+        if (item->laneReqId == laneReqId) {
             item->bSucc = bSucc;
             item->errCode = errCode;
             if ((connInfo != NULL) &&
@@ -217,32 +217,32 @@ static int32_t TransUpdateLaneConnInfoByLaneId(uint32_t laneId, bool bSucc,
         }
     }
     (void)SoftBusMutexUnlock(&(g_reqLanePendingList->lock));
-    TRANS_LOGE(TRANS_SVC, "trans lane request not found. laneId=%{public}u", laneId);
+    TRANS_LOGE(TRANS_SVC, "trans lane request not found. laneReqId=%{public}u", laneReqId);
     return SOFTBUS_ERR;
 }
 
-static void TransOnLaneRequestSuccess(uint32_t laneId, const LaneConnInfo *connInfo)
+static void TransOnLaneRequestSuccess(uint32_t laneReqId, const LaneConnInfo *connInfo)
 {
-    TRANS_LOGI(TRANS_SVC, "request success. laneId=%{public}u", laneId);
-    if (TransUpdateLaneConnInfoByLaneId(laneId, true, connInfo, SOFTBUS_OK) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "update lane connInfo failed, laneId=%{public}u", laneId);
+    TRANS_LOGI(TRANS_SVC, "request success. laneReqId=%{public}u", laneReqId);
+    if (TransUpdateLaneConnInfoByLaneReqId(laneReqId, true, connInfo, SOFTBUS_OK) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "update lane connInfo failed, laneReqId=%{public}u", laneReqId);
     }
     return;
 }
 
-static void TransOnLaneRequestFail(uint32_t laneId, int32_t reason)
+static void TransOnLaneRequestFail(uint32_t laneReqId, int32_t reason)
 {
-    TRANS_LOGI(TRANS_SVC, "request failed, laneId=%{public}u, reason=%{public}d", laneId, reason);
-    if (TransUpdateLaneConnInfoByLaneId(laneId, false, NULL, reason) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "update lane connInfo failed, laneId=%{public}u", laneId);
+    TRANS_LOGI(TRANS_SVC, "request failed, laneReqId=%{public}u, reason=%{public}d", laneReqId, reason);
+    if (TransUpdateLaneConnInfoByLaneReqId(laneReqId, false, NULL, reason) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "update lane connInfo failed, laneReqId=%{public}u", laneReqId);
     }
     return;
 }
 
-static void TransOnLaneStateChange(uint32_t laneId, LaneState state)
+static void TransOnLaneStateChange(uint32_t laneReqId, LaneState state)
 {
     /* current no treatment */
-    (void)laneId;
+    (void)laneReqId;
     (void)state;
     return;
 }
@@ -492,7 +492,7 @@ static int32_t TransSoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, uint
     return SoftBusCondWait(cond, mutex, &tv);
 }
 
-static int32_t TransWaitingRequestCallback(uint32_t laneId)
+static int32_t TransWaitingRequestCallback(uint32_t laneReqId)
 {
     if (g_reqLanePendingList == NULL) {
         TRANS_LOGE(TRANS_SVC, "lane request list hasn't init.");
@@ -505,30 +505,30 @@ static int32_t TransWaitingRequestCallback(uint32_t laneId)
     bool isFound = false;
     TransReqLaneItem *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &(g_reqLanePendingList->list), TransReqLaneItem, node) {
-        if (item->laneId == laneId) {
+        if (item->laneReqId == laneReqId) {
             isFound = true;
             break;
         }
     }
     if (!isFound) {
         (void)SoftBusMutexUnlock(&(g_reqLanePendingList->lock));
-        TRANS_LOGI(TRANS_SVC, "not found laneId in pending. laneId=%{public}u", laneId);
+        TRANS_LOGI(TRANS_SVC, "not found laneReqId in pending. laneReqId=%{public}u", laneReqId);
         return SOFTBUS_ERR;
     }
     if (item->isFinished == false) {
         int32_t rc = TransSoftBusCondWait(&item->cond, &g_reqLanePendingList->lock, 0);
         if (rc != SOFTBUS_OK) {
             (void)SoftBusMutexUnlock(&(g_reqLanePendingList->lock));
-            TRANS_LOGI(TRANS_SVC, "wait cond failed laneId=%{public}u", laneId);
+            TRANS_LOGI(TRANS_SVC, "wait cond failed laneReqId=%{public}u", laneReqId);
             return rc;
         }
     }
     (void)SoftBusMutexUnlock(&(g_reqLanePendingList->lock));
-    TRANS_LOGI(TRANS_SVC, "receive lane cond laneId=%{public}u", laneId);
+    TRANS_LOGI(TRANS_SVC, "receive lane cond laneReqId=%{public}u", laneReqId);
     return SOFTBUS_OK;
 }
 
-static int32_t TransAddLaneReqToPendingAndWaiting(bool isQosLane, uint32_t laneId,
+static int32_t TransAddLaneReqToPendingAndWaiting(bool isQosLane, uint32_t laneReqId,
     const LaneRequestOption *requestOption)
 {
     if (requestOption == NULL) {
@@ -536,9 +536,9 @@ static int32_t TransAddLaneReqToPendingAndWaiting(bool isQosLane, uint32_t laneI
         return SOFTBUS_ERR;
     }
 
-    int32_t ret = TransAddLaneReqFromPendingList(laneId);
+    int32_t ret = TransAddLaneReqFromPendingList(laneReqId);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "add laneId to pending failed. laneId=%{public}u", laneId);
+        TRANS_LOGE(TRANS_SVC, "add laneReqId to pending failed. laneReqId=%{public}u", laneReqId);
         return SOFTBUS_ERR;
     }
 
@@ -548,18 +548,18 @@ static int32_t TransAddLaneReqToPendingAndWaiting(bool isQosLane, uint32_t laneI
     listener.OnLaneStateChange = TransOnLaneStateChange;
     if (isQosLane) {
         // lane by qos
-        ret = GetLaneManager()->lnnRequestLane(laneId, requestOption, &listener);
+        ret = GetLaneManager()->lnnRequestLane(laneReqId, requestOption, &listener);
     } else {
-        ret = LnnRequestLane(laneId, requestOption, &listener);
+        ret = LnnRequestLane(laneReqId, requestOption, &listener);
     }
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "trans request lane failed.");
-        (void)TransDelLaneReqFromPendingList(laneId);
+        (void)TransDelLaneReqFromPendingList(laneReqId);
         return SOFTBUS_ERR;
     }
-    TRANS_LOGI(TRANS_SVC, "add laneId to pending and start waiting. laneId=%{public}u", laneId);
-    if (TransWaitingRequestCallback(laneId) != SOFTBUS_OK) {
-        (void)TransDelLaneReqFromPendingList(laneId);
+    TRANS_LOGI(TRANS_SVC, "add laneReqId to pending and start waiting. laneReqId=%{public}u", laneReqId);
+    if (TransWaitingRequestCallback(laneReqId) != SOFTBUS_OK) {
+        (void)TransDelLaneReqFromPendingList(laneReqId);
         return SOFTBUS_ERR;
     }
 
@@ -567,39 +567,39 @@ static int32_t TransAddLaneReqToPendingAndWaiting(bool isQosLane, uint32_t laneI
 }
 
 int32_t TransGetLaneInfoByOption(bool isQosLane, const LaneRequestOption *requestOption, LaneConnInfo *connInfo,
-    uint32_t *laneId)
+    uint32_t *laneReqId)
 {
-    if ((requestOption == NULL) || (connInfo == NULL) || (laneId == NULL)) {
+    if ((requestOption == NULL) || (connInfo == NULL) || (laneReqId == NULL)) {
         TRANS_LOGE(TRANS_SVC, "get lane info by option param error.");
         return SOFTBUS_ERR;
     }
 
-    *laneId = GetLaneManager()->applyLaneId(LANE_TYPE_TRANS);
-    if (TransAddLaneReqToPendingAndWaiting(isQosLane, *laneId, requestOption) != SOFTBUS_OK) {
+    *laneReqId = GetLaneManager()->applyLaneReqId(LANE_TYPE_TRANS);
+    if (TransAddLaneReqToPendingAndWaiting(isQosLane, *laneReqId, requestOption) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "trans add lane to pending list failed.");
         return SOFTBUS_ERR;
     }
     bool bSuccess = false;
     int32_t errCode = SOFTBUS_ERR;
-    if (TransGetLaneReqItemByLaneId(*laneId, &bSuccess, connInfo, &errCode) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "get lane req item failed. laneId=%{public}u.", *laneId);
-        (void)TransDelLaneReqFromPendingList(*laneId);
+    if (TransGetLaneReqItemByLaneReqId(*laneReqId, &bSuccess, connInfo, &errCode) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "get lane req item failed. laneReqId=%{public}u.", *laneReqId);
+        (void)TransDelLaneReqFromPendingList(*laneReqId);
         return SOFTBUS_ERR;
     }
 
     int32_t ret = SOFTBUS_OK;
     if (!bSuccess) {
         ret = errCode;
-        TRANS_LOGE(TRANS_SVC, "request lane conninfo failed. laneId=%{public}u.", *laneId);
+        TRANS_LOGE(TRANS_SVC, "request lane conninfo failed. laneReqId=%{public}u.", *laneReqId);
     }
-    TRANS_LOGI(TRANS_SVC, "request lane conninfo success. laneId=%{public}u.", *laneId);
-    (void)TransDelLaneReqFromPendingList(*laneId);
+    TRANS_LOGI(TRANS_SVC, "request lane conninfo success. laneReqId=%{public}u.", *laneReqId);
+    (void)TransDelLaneReqFromPendingList(*laneReqId);
     return ret;
 }
 
-int32_t TransGetLaneInfo(const SessionParam *param, LaneConnInfo *connInfo, uint32_t *laneId)
+int32_t TransGetLaneInfo(const SessionParam *param, LaneConnInfo *connInfo, uint32_t *laneReqId)
 {
-    if ((param == NULL) || (connInfo == NULL) || (laneId == NULL)) {
+    if ((param == NULL) || (connInfo == NULL) || (laneReqId == NULL)) {
         TRANS_LOGE(TRANS_SVC, "get lane info param error.");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -611,12 +611,12 @@ int32_t TransGetLaneInfo(const SessionParam *param, LaneConnInfo *connInfo, uint
         return SOFTBUS_ERR;
     }
 
-    int32_t ret = TransGetLaneInfoByOption(isQosLane, &requestOption, connInfo, laneId);
+    int32_t ret = TransGetLaneInfoByOption(isQosLane, &requestOption, connInfo, laneReqId);
     TransEventExtra extra = {
         .calleePkg = NULL,
         .callerPkg = NULL,
         .socketName = param->sessionName,
-        .laneId = *laneId,
+        .laneId = *laneReqId,
         .peerNetworkId = param->peerDeviceId,
         .laneTransType = requestOption.requestInfo.trans.transType,
         .errcode = ret,
