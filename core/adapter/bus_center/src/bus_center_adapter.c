@@ -100,7 +100,7 @@ static int32_t SoftBusConvertDeviceType(const char *inBuf, char *outBuf, uint32_
     for (id = 0; id < sizeof(g_typeConvertMap) / sizeof(TypeInfo); id++) {
         if (strcmp(g_typeConvertMap[id].inBuf, inBuf) == EOK) {
             if (strcpy_s(outBuf, outLen, g_typeConvertMap[id].outBuf) != EOK) {
-                LNN_LOGE(LNN_STATE, "strcps_s fail");
+                LNN_LOGE(LNN_STATE, "strcpy_s fail");
                 return SOFTBUS_ERR;
             }
             return SOFTBUS_OK;
@@ -136,7 +136,7 @@ static int32_t SoftBusGetOsType(void)
         LNN_LOGI(LNN_STATE, "versionSDK: %{public}s", versionSDK);
         return HO_OS_TYPE;
     }
-    LNN_LOGE(LNN_STATE, "GetOsTYpe fail!");
+    LNN_LOGE(LNN_STATE, "GetOsType fail!");
     return OHOS_TYPE_UNKNOWN;
 }
 
