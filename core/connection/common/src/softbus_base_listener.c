@@ -1110,7 +1110,10 @@ static void *SelectTask(void *arg)
         int32_t maxFd = maxFdOrStatus > selectState->ctrlRfd ? maxFdOrStatus : selectState->ctrlRfd;
         int32_t nEvents = SoftBusSocketSelect(maxFd + 1, &readSet, &writeSet, &exceptSet, NULL);
         int32_t wakeupTraceId = ++wakeupTraceIdGenerator;
-        if (nEvents <= 0) {
+        if (nEvents == 0) {
+            continue;
+        }
+        if (nEvents < 0) {
             CONN_LOGE(CONN_COMMON, "unexpect wakeup, retry after some times. "
                                    "waitDelay=%{public}dms, wakeupTraceId=%{public}d, events=%{public}d",
                 SELECT_ABNORMAL_EVENT_RETRY_WAIT_MILLIS, wakeupTraceId, nEvents);
