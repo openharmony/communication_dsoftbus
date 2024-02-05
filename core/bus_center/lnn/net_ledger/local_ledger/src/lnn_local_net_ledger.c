@@ -124,6 +124,7 @@ static int32_t LlGetOsVersion(void *buf, uint32_t len)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
     if (buf == NULL) {
+        LNN_LOGE(LNN_LEDGER, "buf of osVersion is null");
         return SOFTBUS_INVALID_PARAM;
     }
     if (strcpy_s((char *)buf, len, info->deviceInfo.osVersion) != EOK) {
@@ -580,6 +581,7 @@ static int32_t LlGetOsType(void *buf, uint32_t len)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
     if (buf == NULL || len != sizeof(uint32_t)) {
+        LNN_LOGE(LNN_LEDGER, "buf of osType is null");
         return SOFTBUS_INVALID_PARAM;
     }
     *((int32_t *)buf) = info->deviceInfo.osType;
@@ -741,7 +743,6 @@ static int32_t InitLocalDeviceInfo(DeviceBasicInfo *info)
     }
     if (GetCommonOsVersion(info->osVersion, OS_VERSION_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get os version failed");
-        return SOFTBUS_ERR;
     }
     if (LnnGetUnifiedDeviceName(info->unifiedName, DEVICE_NAME_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get unifiedName fail");
