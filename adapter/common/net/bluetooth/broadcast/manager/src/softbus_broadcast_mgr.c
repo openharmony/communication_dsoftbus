@@ -203,7 +203,7 @@ static bool CheckLockIsInit(SoftBusMutex *lock)
 int32_t DeInitBroadcastMgr(void)
 {
     DISC_LOGI(DISC_BLE, "enter.");
-    DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_ERR, DISC_BLE, "interface is null!");
+    DISC_CHECK_AND_RETURN_RET_LOGW(g_interface[g_interfaceId] != NULL, SOFTBUS_OK, DISC_BLE, "already deinit!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->DeInit != NULL,
                                    SOFTBUS_ERR, DISC_BLE, "function is null!");
 
@@ -224,6 +224,7 @@ int32_t DeInitBroadcastMgr(void)
 
     ret = g_interface[g_interfaceId]->DeInit();
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "call from adapter fail!");
+    g_interface[g_interfaceId] = NULL;
     return SOFTBUS_OK;
 }
 
@@ -663,15 +664,15 @@ int32_t RegisterBroadcaster(BaseServiceType srvType, int32_t *bcId, const Broadc
     DISC_LOGI(DISC_BLE, "enter.");
     int32_t ret = SOFTBUS_OK;
     int32_t adapterBcId = -1;
+    DISC_CHECK_AND_RETURN_RET_LOGE(srvType >= 0 && srvType < SRV_TYPE_BUTT, SOFTBUS_INVALID_PARAM, DISC_BLE,
+                                   "srvType is invalid!");
     DISC_CHECK_AND_RETURN_RET_LOGE(bcId != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid param bcId!");
     DISC_CHECK_AND_RETURN_RET_LOGE(cb != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid param cb!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_ERR, DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->RegisterBroadcaster != NULL,
                                    SOFTBUS_ERR, DISC_BLE, "function is null!");
-
     ret = SoftBusMutexLock(&g_bcLock);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_BLE, "mutex err!");
-
     ret = g_interface[g_interfaceId]->RegisterBroadcaster(&adapterBcId, &g_softbusBcBleCb);
     if (ret != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "call from adapter fail!");
@@ -691,7 +692,8 @@ int32_t RegisterBroadcaster(BaseServiceType srvType, int32_t *bcId, const Broadc
         return SOFTBUS_ERR;
     }
     DISC_LOGD(DISC_BLE,
-        "BaseServiceType=%{public}d, bcId=%{public}d, adapterBcId=%{public}d", srvType, managerId, adapterBcId);
+        "srvType=%{public}s, bcId=%{public}d, adapterBcId=%{public}d", GetSrvType(srvType), managerId, adapterBcId);
+
     *bcId = managerId;
     ret = SoftBusCondInit(&g_bcManager[managerId].cond);
     if (ret != SOFTBUS_OK) {
@@ -733,7 +735,12 @@ int32_t UnRegisterBroadcaster(int32_t bcId)
         SoftBusMutexUnlock(&g_bcLock);
         return SOFTBUS_INVALID_PARAM;
     }
-
+    
+    if (g_bcManager[bcId].isAdvertising) {
+        SoftBusMutexUnlock(&g_bcLock);
+        (void)g_interface[g_interfaceId]->StopBroadcasting(g_bcManager[bcId].adapterBcId);
+        SoftBusMutexLock(&g_bcLock);
+    }
     ret = g_interface[g_interfaceId]->UnRegisterBroadcaster(g_bcManager[bcId].adapterBcId);
     if (ret != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "call from adapter fail!");
@@ -741,14 +748,6 @@ int32_t UnRegisterBroadcaster(int32_t bcId)
         return ret;
     }
 
-    if (g_bcManager[bcId].isAdvertising) {
-        ret = g_interface[g_interfaceId]->StopBroadcasting(g_bcManager[bcId].adapterBcId);
-        if (ret != SOFTBUS_OK) {
-            DISC_LOGE(DISC_BLE, "stop broadcasting fail!");
-            SoftBusMutexUnlock(&g_bcLock);
-            return ret;
-        }
-    }
     g_bcManager[bcId].srvType = -1;
     g_bcManager[bcId].adapterBcId = -1;
     g_bcManager[bcId].isUsed = false;
@@ -811,7 +810,8 @@ int32_t RegisterScanListener(BaseServiceType srvType, int32_t *listenerId, const
     DISC_LOGI(DISC_BLE, "enter.");
     int32_t ret = SOFTBUS_OK;
     int32_t adapterScanId = -1;
-    
+    DISC_CHECK_AND_RETURN_RET_LOGE(srvType >= 0 && srvType < SRV_TYPE_BUTT, SOFTBUS_INVALID_PARAM, DISC_BLE,
+                                   "srvType is invalid!");
     DISC_CHECK_AND_RETURN_RET_LOGE(listenerId != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid param listenerId!");
     DISC_CHECK_AND_RETURN_RET_LOGE(cb != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid param cb!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_ERR, DISC_BLE, "interface is null!");
@@ -840,8 +840,8 @@ int32_t RegisterScanListener(BaseServiceType srvType, int32_t *listenerId, const
         SoftBusMutexUnlock(&g_scanLock);
         return SOFTBUS_ERR;
     }
-    DISC_LOGD(DISC_BLE, "BaseServiceType=%{public}d, listenerId=%{public}d, adapterScanId=%{public}d",
-              srvType, managerId, adapterScanId);
+    DISC_LOGD(DISC_BLE, "srvType=%{public}s, listenerId=%{public}d, adapterScanId=%{public}d",
+              GetSrvType(srvType), managerId, adapterScanId);
     *listenerId = managerId;
     g_scanManager[managerId].srvType = srvType;
     g_scanManager[managerId].adapterScanId = adapterScanId;
@@ -955,6 +955,7 @@ static void CombineSoftbusBcScanFilters(int32_t listenerId, SoftBusBcScanFilter 
     }
     *adapterFilter = (SoftBusBcScanFilter *)SoftBusCalloc(sizeof(SoftBusBcScanFilter) * size);
     if (*adapterFilter == NULL) {
+        DISC_LOGE(DISC_BLE, "malloc failed!");
         return;
     }
     *filterSize = size;
@@ -1075,6 +1076,7 @@ static int32_t CheckAndStopScan(int32_t listenerId)
     int32_t ret;
     bool needUpdate = CheckNeedUpdateScan(listenerId, &liveListenerId);
     if (!needUpdate) {
+        DISC_LOGI(DISC_BLE, "call stop scan");
         ret = g_interface[g_interfaceId]->StopScan(g_scanManager[listenerId].adapterScanId);
         if (ret != SOFTBUS_OK) {
             g_scanManager[listenerId].scanCallback->OnStopScanCallback(listenerId, (int32_t)SOFTBUS_BC_STATUS_FAIL);
@@ -1111,7 +1113,7 @@ static int32_t CheckAndStopScan(int32_t listenerId)
 
 int32_t UnRegisterScanListener(int32_t listenerId)
 {
-    DISC_LOGI(DISC_BLE, "enter.");
+    DISC_LOGI(DISC_BLE, "enter. listenerId=%{public}d", listenerId);
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_ERR, DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->UnRegisterScanListener != NULL,
                                    SOFTBUS_ERR, DISC_BLE, "function is null!");
@@ -1130,7 +1132,6 @@ int32_t UnRegisterScanListener(int32_t listenerId)
             return ret;
         }
     }
-
     if (CheckNeedUnRegisterScanListener(listenerId)) {
         if (adapterScanId == g_adapterLpScannerId) {
             g_isLpScanCbReg = false;
@@ -1147,7 +1148,7 @@ int32_t UnRegisterScanListener(int32_t listenerId)
             return ret;
         }
     }
-
+    DISC_LOGD(DISC_BLE, "srvType=%{public}s", GetSrvType(g_scanManager[listenerId].srvType));
     ReleaseBcScanFilter(listenerId);
     g_scanManager[listenerId].srvType = -1;
     g_scanManager[listenerId].adapterScanId = -1;
@@ -1470,6 +1471,39 @@ static bool NeedUpdateScan(int32_t listenerId)
     return true;
 }
 
+static int32_t StartScanSub(int32_t listenerId)
+{
+    SoftBusBcScanParams adapterParam;
+    BuildSoftBusBcScanParams(&g_scanManager[listenerId].param, &adapterParam);
+
+    CheckScanFreq(listenerId, &adapterParam);
+
+    int32_t filterSize = 0;
+    SoftBusBcScanFilter *adapterFilter = NULL;
+
+    if (!NeedUpdateScan(listenerId)) {
+        DISC_LOGD(DISC_BLE, "no need update scan");
+        return SOFTBUS_OK;
+    }
+    DISC_LOGD(DISC_BLE, "need update scan");
+    GetBcScanFilters(listenerId, &adapterFilter, &filterSize);
+    DISC_CHECK_AND_RETURN_RET_LOGE(filterSize > 0, SOFTBUS_ERR, DISC_BLE, "fitersize is 0!");
+    DumpBcScanFilter(adapterFilter, filterSize);
+
+    DISC_LOGI(DISC_BLE, "start service srvType=%{public}s, listenerId=%{public}d, adapterId=%{public}d",
+              GetSrvType(g_scanManager[listenerId].srvType), listenerId, g_scanManager[listenerId].adapterScanId);
+    int32_t ret = g_interface[g_interfaceId]->StartScan(g_scanManager[listenerId].adapterScanId, &adapterParam,
+        adapterFilter, filterSize);
+    SoftBusFree(adapterFilter);
+    if (ret != SOFTBUS_OK) {
+        g_scanManager[listenerId].scanCallback->OnStartScanCallback(listenerId, (int32_t)SOFTBUS_BC_STATUS_FAIL);
+        DISC_LOGE(DISC_BLE, "call from adapter fail!");
+        return ret;
+    }
+
+    return SOFTBUS_OK;
+}
+
 int32_t StartScan(int32_t listenerId, const BcScanParams *param)
 {
     DISC_LOGI(DISC_BLE, "enter. listenerId=%{public}d", listenerId);
@@ -1488,30 +1522,12 @@ int32_t StartScan(int32_t listenerId, const BcScanParams *param)
     }
 
     g_scanManager[listenerId].param = *param;
-    SoftBusBcScanParams adapterParam;
-    BuildSoftBusBcScanParams(param, &adapterParam);
-
     g_scanManager[listenerId].freq = GetScanFreq(param->scanInterval, param->scanWindow);
-    CheckScanFreq(listenerId, &adapterParam);
 
-    int32_t filterSize = 0;
-    SoftBusBcScanFilter *adapterFilter = NULL;
-
-    if (NeedUpdateScan(listenerId)) {
-        DISC_LOGD(DISC_BLE, "need update scan");
-        GetBcScanFilters(listenerId, &adapterFilter, &filterSize);
-        DumpBcScanFilter(adapterFilter, filterSize);
-        DISC_LOGI(DISC_BLE, "start service srvType=%{public}s, listenerId=%{public}d, adapterId=%{public}d",
-                  GetSrvType(g_scanManager[listenerId].srvType), listenerId, g_scanManager[listenerId].adapterScanId);
-        ret = g_interface[g_interfaceId]->StartScan(g_scanManager[listenerId].adapterScanId, &adapterParam,
-                                                    adapterFilter, filterSize);
-        SoftBusFree(adapterFilter);
-        if (ret != SOFTBUS_OK) {
-            g_scanManager[listenerId].scanCallback->OnStartScanCallback(listenerId, (int32_t)SOFTBUS_BC_STATUS_FAIL);
-            DISC_LOGE(DISC_BLE, "call from adapter fail!");
-            SoftBusMutexUnlock(&g_scanLock);
-            return ret;
-        }
+    ret = StartScanSub(listenerId);
+    if (ret != SOFTBUS_OK) {
+        SoftBusMutexUnlock(&g_scanLock);
+        return ret;
     }
 
     g_scanManager[listenerId].isScanning = true;
@@ -1753,11 +1769,11 @@ static int32_t RegisterInfoDump(int fd)
         if (!g_bcManager[managerId].isUsed) {
             continue;
         }
+        BroadcastManager *bcManager = &g_bcManager[managerId];
         SOFTBUS_DPRINTF(fd, "managerId                             : %d\n", managerId);
-        SOFTBUS_DPRINTF(fd, "serviceType(0 - HB, 1 - CONN, 2- TRANS_MSG, 3 - DIS, 4 - SHARE, 5 - APPROACH,\n");
-        SOFTBUS_DPRINTF(fd, "            6 - SH, 7 - FAST_OFFLINE  : %d\n", g_bcManager[managerId].srvType);
-        SOFTBUS_DPRINTF(fd, "adapterBcId                           : %d\n", g_bcManager[managerId].adapterBcId);
-        SOFTBUS_DPRINTF(fd, "isAdvertising(0 - false, 1 - true)    : %d\n\n", g_bcManager[managerId].isAdvertising);
+        SOFTBUS_DPRINTF(fd, "serviceType                           : %s\n", GetSrvType(bcManager->srvType));
+        SOFTBUS_DPRINTF(fd, "adapterBcId                           : %d\n", bcManager->adapterBcId);
+        SOFTBUS_DPRINTF(fd, "isAdvertising(0 - false, 1 - true)    : %d\n\n", bcManager->isAdvertising);
     }
 
     SOFTBUS_DPRINTF(fd, "\n---------------------------Register Listener Info----------------------------\n");
@@ -1766,14 +1782,14 @@ static int32_t RegisterInfoDump(int fd)
         if (!g_scanManager[managerId].isUsed) {
             continue;
         }
+        ScanManager *scanManager = &g_scanManager[managerId];
         SOFTBUS_DPRINTF(fd, "managerId                             : %d\n", managerId);
-        SOFTBUS_DPRINTF(fd, "serviceType(0 - HB, 1 - CONN, 2- TRANS_MSG, 3 - DIS, 4 - SHARE, 5 - APPROACH,\n");
-        SOFTBUS_DPRINTF(fd, "            6 - SH, 7 - FAST_OFFLINE  : %d\n", g_scanManager[managerId].srvType);
-        SOFTBUS_DPRINTF(fd, "adapterScanId                         : %d\n", g_scanManager[managerId].adapterScanId);
-        SOFTBUS_DPRINTF(fd, "isNeedReset(0 - false, 1 - true)      : %d\n", g_scanManager[managerId].isNeedReset);
-        SOFTBUS_DPRINTF(fd, "isScanning(0 - false, 1 - true)       : %d\n", g_scanManager[managerId].isScanning);
+        SOFTBUS_DPRINTF(fd, "serviceType                           : %s\n", GetSrvType(scanManager->srvType));
+        SOFTBUS_DPRINTF(fd, "adapterScanId                         : %d\n", scanManager->adapterScanId);
+        SOFTBUS_DPRINTF(fd, "isNeedReset(0 - false, 1 - true)      : %d\n", scanManager->isNeedReset);
+        SOFTBUS_DPRINTF(fd, "isScanning(0 - false, 1 - true)       : %d\n", scanManager->isScanning);
         SOFTBUS_DPRINTF(fd, "scan freq(0 - low power, 1 - 60/3000, 2 - 30/300, 3 - 60/240, 4 - 1000/1000,\n");
-        SOFTBUS_DPRINTF(fd, "                                      : %d\n\n", g_scanManager[managerId].freq);
+        SOFTBUS_DPRINTF(fd, "                                      : %d\n\n", scanManager->freq);
     }
     return SOFTBUS_OK;
 }
