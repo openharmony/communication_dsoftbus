@@ -79,7 +79,7 @@ typedef struct {
         BleLinkInfo ble;
         BleDirectInfo bleDirect;
     } linkInfo;
-    uint32_t laneId;
+    uint32_t laneReqId;
 } LaneLinkInfo;
 
 typedef struct {
@@ -120,10 +120,10 @@ int32_t FindLaneResourceByLinkInfo(const LaneLinkInfo *linkInfoItem, LaneResourc
 int32_t AddLaneResourceItem(const LaneResource *resourceItem);
 int32_t DelLaneResourceItem(const LaneResource *resourceItem);
 int32_t AddLinkInfoItem(const LaneLinkInfo *linkInfoItem);
-int32_t DelLinkInfoItem(uint32_t laneId);
-int32_t FindLaneLinkInfoByLaneId(uint32_t laneId, LaneLinkInfo *linkInfoitem);
+int32_t DelLinkInfoItem(uint32_t laneReqId);
+int32_t FindLaneLinkInfoByLaneReqId(uint32_t laneReqId, LaneLinkInfo *linkInfoitem);
 int32_t ConvertToLaneResource(const LaneLinkInfo *linkInfo, LaneResource *laneResourceInfo);
-int32_t DelLaneResourceItemWithDelay(LaneResource *resourceItem, uint32_t laneId, bool *isDelayDestroy);
+int32_t DelLaneResourceItemWithDelay(LaneResource *resourceItem, uint32_t laneReqId, bool *isDelayDestroy);
 void HandleLaneReliabilityTime(void);
 
 #ifdef __cplusplus

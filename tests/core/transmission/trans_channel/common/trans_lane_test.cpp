@@ -137,103 +137,103 @@ HWTEST_F(TransLaneTest, TransLaneTest001, TestSize.Level1)
 HWTEST_F(TransLaneTest, TransLaneTest002, TestSize.Level1)
 {
     (void)TransReqLanePendingInit();
-    uint32_t laneId = 1;
+    uint32_t laneReqId = 1;
     uint32_t invalidId = 111;
-    int32_t ret = TransAddLaneReqFromPendingList(laneId);
+    int32_t ret = TransAddLaneReqFromPendingList(laneReqId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
     ret = TransDelLaneReqFromPendingList(invalidId);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    ret = TransDelLaneReqFromPendingList(laneId);
+    ret = TransDelLaneReqFromPendingList(laneReqId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
     TransReqLanePendingDeinit();
-    ret = TransAddLaneReqFromPendingList(laneId);
+    ret = TransAddLaneReqFromPendingList(laneReqId);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    ret = TransDelLaneReqFromPendingList(laneId);
+    ret = TransDelLaneReqFromPendingList(laneReqId);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     TransReqLanePendingDeinit();
 }
 
 /**
  * @tc.name: TransLaneTest003
- * @tc.desc: trans get lane Reqitem by laneId.
+ * @tc.desc: trans get lane Reqitem by laneReqId.
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(TransLaneTest, TransLaneTest003, TestSize.Level1)
 {
-    uint32_t laneId = 1;
+    uint32_t laneReqId = 1;
     uint32_t invalidId = 111;
     bool bSucc = false;
     int32_t errCode = SOFTBUS_OK;
     LaneConnInfo *connInfo = (LaneConnInfo *)SoftBusCalloc(sizeof(LaneConnInfo));
     ASSERT_TRUE(connInfo != nullptr);
-    int32_t ret = TransGetLaneReqItemByLaneId(invalidId, &bSucc, connInfo, &errCode);
+    int32_t ret = TransGetLaneReqItemByLaneReqId(invalidId, &bSucc, connInfo, &errCode);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     (void)TransReqLanePendingInit();
     (void)memset_s(connInfo, sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
-    ret = TransAddLaneReqFromPendingList(laneId);
+    ret = TransAddLaneReqFromPendingList(laneReqId);
     ASSERT_TRUE(ret == SOFTBUS_OK);
 
-    ret = TransGetLaneReqItemByLaneId(invalidId, &bSucc, connInfo, &errCode);
+    ret = TransGetLaneReqItemByLaneReqId(invalidId, &bSucc, connInfo, &errCode);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    ret = TransGetLaneReqItemByLaneId(laneId, &bSucc, connInfo, &errCode);
+    ret = TransGetLaneReqItemByLaneReqId(laneReqId, &bSucc, connInfo, &errCode);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
-    ret = TransGetLaneReqItemByLaneId(laneId, &bSucc, NULL, &errCode);
+    ret = TransGetLaneReqItemByLaneReqId(laneReqId, &bSucc, NULL, &errCode);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    ret = TransDelLaneReqFromPendingList(laneId);
+    ret = TransDelLaneReqFromPendingList(laneReqId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
     TransReqLanePendingDeinit();
-    ret = TransAddLaneReqFromPendingList(laneId);
+    ret = TransAddLaneReqFromPendingList(laneReqId);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     TransReqLanePendingDeinit();
 
-    ret = TransGetLaneReqItemByLaneId(laneId, &bSucc, connInfo, &errCode);
+    ret = TransGetLaneReqItemByLaneReqId(laneReqId, &bSucc, connInfo, &errCode);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     SoftBusFree(connInfo);
 }
 
 /**
  * @tc.name: TransLaneTest004
- * @tc.desc: trans update lane connInfo by laneId.
+ * @tc.desc: trans update lane connInfo by laneReqId.
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(TransLaneTest, TransLaneTest004, TestSize.Level1)
 {
     (void)TransReqLanePendingInit();
-    uint32_t laneId = 1;
+    uint32_t laneReqId = 1;
     uint32_t invalidId = 111;
     bool bSucc = false;
     int32_t errCode = SOFTBUS_OK;
     LaneConnInfo *connInfo = (LaneConnInfo *)SoftBusCalloc(sizeof(LaneConnInfo));
     ASSERT_TRUE(connInfo != nullptr);
     (void)memset_s(connInfo, sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
-    int32_t ret = TransAddLaneReqFromPendingList(laneId);
+    int32_t ret = TransAddLaneReqFromPendingList(laneReqId);
     ASSERT_TRUE(ret == SOFTBUS_OK);
 
-    ret = TransUpdateLaneConnInfoByLaneId(invalidId, bSucc, connInfo, errCode);
+    ret = TransUpdateLaneConnInfoByLaneReqId(invalidId, bSucc, connInfo, errCode);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    ret = TransUpdateLaneConnInfoByLaneId(laneId, bSucc, connInfo, errCode);
+    ret = TransUpdateLaneConnInfoByLaneReqId(laneReqId, bSucc, connInfo, errCode);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     
     connInfo->connInfo.p2p.protocol = 1;
-    ret = TransUpdateLaneConnInfoByLaneId(laneId, bSucc, connInfo, errCode);
+    ret = TransUpdateLaneConnInfoByLaneReqId(laneReqId, bSucc, connInfo, errCode);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
-    ret = TransDelLaneReqFromPendingList(laneId);
+    ret = TransDelLaneReqFromPendingList(laneReqId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     TransReqLanePendingDeinit();
     
-    ret = TransUpdateLaneConnInfoByLaneId(laneId, bSucc, connInfo, errCode);
+    ret = TransUpdateLaneConnInfoByLaneReqId(laneReqId, bSucc, connInfo, errCode);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     TransReqLanePendingDeinit();
     SoftBusFree(connInfo);
@@ -241,26 +241,26 @@ HWTEST_F(TransLaneTest, TransLaneTest004, TestSize.Level1)
 
 /**
  * @tc.name: TransLaneTest005
- * @tc.desc: trans lane request success by laneId.
+ * @tc.desc: trans lane request success by laneReqId.
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(TransLaneTest, TransLaneTest005, TestSize.Level1)
 {
     (void)TransReqLanePendingInit();
-    uint32_t laneId = 1;
+    uint32_t laneReqId = 1;
     uint32_t invalidId = 111;
     LaneConnInfo *connInfo = (LaneConnInfo *)SoftBusCalloc(sizeof(LaneConnInfo));
     ASSERT_TRUE(connInfo != nullptr);
     (void)memset_s(connInfo, sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
-    int32_t ret = TransAddLaneReqFromPendingList(laneId);
+    int32_t ret = TransAddLaneReqFromPendingList(laneReqId);
     ASSERT_TRUE(ret == SOFTBUS_OK);
 
     TransOnLaneRequestSuccess(invalidId, connInfo);
     connInfo->connInfo.p2p.protocol = 1;
-    TransOnLaneRequestSuccess(laneId, connInfo);
+    TransOnLaneRequestSuccess(laneReqId, connInfo);
 
-    ret = TransDelLaneReqFromPendingList(laneId);
+    ret = TransDelLaneReqFromPendingList(laneReqId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     TransReqLanePendingDeinit();
     SoftBusFree(connInfo);
@@ -268,27 +268,27 @@ HWTEST_F(TransLaneTest, TransLaneTest005, TestSize.Level1)
 
 /**
  * @tc.name: TransLaneTest006
- * @tc.desc: trans lane request fail by laneId.
+ * @tc.desc: trans lane request fail by laneReqId.
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(TransLaneTest, TransLaneTest006, TestSize.Level1)
 {
     (void)TransReqLanePendingInit();
-    uint32_t laneId = 1;
+    uint32_t laneReqId = 1;
     uint32_t invalidId = 111;
     LaneRequestFailReason reason = LANE_LINK_FAILED;
     LaneConnInfo *connInfo = (LaneConnInfo *)SoftBusCalloc(sizeof(LaneConnInfo));
     ASSERT_TRUE(connInfo != nullptr);
     (void)memset_s(connInfo, sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
-    int32_t ret = TransAddLaneReqFromPendingList(laneId);
+    int32_t ret = TransAddLaneReqFromPendingList(laneReqId);
     ASSERT_TRUE(ret == SOFTBUS_OK);
 
     TransOnLaneRequestFail(invalidId, reason);
     connInfo->connInfo.p2p.protocol = 1;
-    TransOnLaneRequestFail(laneId, reason);
+    TransOnLaneRequestFail(laneReqId, reason);
 
-    ret = TransDelLaneReqFromPendingList(laneId);
+    ret = TransDelLaneReqFromPendingList(laneReqId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     TransReqLanePendingDeinit();
     SoftBusFree(connInfo);
@@ -302,9 +302,9 @@ HWTEST_F(TransLaneTest, TransLaneTest006, TestSize.Level1)
  */
 HWTEST_F(TransLaneTest, TransLaneTest007, TestSize.Level1)
 {
-    uint32_t laneId = 1;
+    uint32_t laneReqId = 1;
     LaneState state = LANE_STATE_EXCEPTION;
-    TransOnLaneStateChange(laneId, state);
+    TransOnLaneStateChange(laneReqId, state);
 
     int32_t ret = GetStreamLaneType(RAW_STREAM);
     EXPECT_TRUE(ret == LANE_T_RAW_STREAM);
@@ -438,17 +438,17 @@ HWTEST_F(TransLaneTest, TransLaneTest011, TestSize.Level1)
  */
 HWTEST_F(TransLaneTest, TransLaneTest012, TestSize.Level1)
 {
-    uint32_t laneId = 1;
+    uint32_t laneReqId = 1;
     uint32_t invalidId = 111;
-    int32_t ret = TransWaitingRequestCallback(laneId);
+    int32_t ret = TransWaitingRequestCallback(laneReqId);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     (void)TransReqLanePendingInit();
     bool bSucc = true;
 
-    ret = TransWaitingRequestCallback(laneId);
+    ret = TransWaitingRequestCallback(laneReqId);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    ret = TransAddLaneReqFromPendingList(laneId);
+    ret = TransAddLaneReqFromPendingList(laneReqId);
     ASSERT_TRUE(ret == SOFTBUS_OK);
 
     ret = TransWaitingRequestCallback(invalidId);
@@ -456,16 +456,16 @@ HWTEST_F(TransLaneTest, TransLaneTest012, TestSize.Level1)
 
     LaneConnInfo connInfo;
     connInfo.type = LANE_WLAN_5G;
-    ret = TransUpdateLaneConnInfoByLaneId(laneId, bSucc, &connInfo, SOFTBUS_OK);
+    ret = TransUpdateLaneConnInfoByLaneReqId(laneReqId, bSucc, &connInfo, SOFTBUS_OK);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
-    ret = TransWaitingRequestCallback(laneId);
+    ret = TransWaitingRequestCallback(laneReqId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
-    (void)TransDelLaneReqFromPendingList(laneId);
+    (void)TransDelLaneReqFromPendingList(laneReqId);
     TransReqLanePendingDeinit();
 
-    ret = TransWaitingRequestCallback(laneId);
+    ret = TransWaitingRequestCallback(laneReqId);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
@@ -490,7 +490,7 @@ HWTEST_F(TransLaneTest, TransLaneTest013, TestSize.Level1)
             },
         },
     };
-    uint32_t laneId = 1;
+    uint32_t laneReqId = 1;
     LaneRequestOption requestOption = {
         .type = LANE_TYPE_TRANS,
     };
@@ -499,21 +499,21 @@ HWTEST_F(TransLaneTest, TransLaneTest013, TestSize.Level1)
     const LnnLaneManager *laneMgr = GetLaneManager();
     ASSERT_TRUE(laneMgr != nullptr);
 
-    int32_t ret = TransAddLaneReqToPendingAndWaiting(laneMgr, laneId, &requestOption);
+    int32_t ret = TransAddLaneReqToPendingAndWaiting(laneMgr, laneReqId, &requestOption);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     (void)TransReqLanePendingInit();
 
     (void)memcpy_s(&requestOption.requestInfo, sizeof(TransOption), &trans, sizeof(TransOption));
-    ret = TransAddLaneReqToPendingAndWaiting(laneMgr, laneId, NULL);
+    ret = TransAddLaneReqToPendingAndWaiting(laneMgr, laneReqId, NULL);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    ret = TransAddLaneReqToPendingAndWaiting(laneMgr, laneId, &requestOption);
+    ret = TransAddLaneReqToPendingAndWaiting(laneMgr, laneReqId, &requestOption);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    ret = TransAddLaneReqToPendingAndWaiting(laneMgr, laneId, &requestOption);
+    ret = TransAddLaneReqToPendingAndWaiting(laneMgr, laneReqId, &requestOption);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    (void)TransDelLaneReqFromPendingList(laneId);
+    (void)TransDelLaneReqFromPendingList(laneReqId);
     LnnDeinitDistributedLedger();
     TransReqLanePendingDeinit();
 }
@@ -527,29 +527,29 @@ HWTEST_F(TransLaneTest, TransLaneTest013, TestSize.Level1)
 HWTEST_F(TransLaneTest, TransLaneTest014, TestSize.Level1)
 {
     (void)TransReqLanePendingInit();
-    uint32_t laneId = 1;
+    uint32_t laneReqId = 1;
     uint32_t errCode = SOFTBUS_OK;
     LaneRequestOption requestOption = {
         .type = LANE_TYPE_TRANS,
     };
     LaneConnInfo connInfo;
-    int32_t ret = TransGetLaneInfoByOption(false, NULL, &connInfo, &laneId);
+    int32_t ret = TransGetLaneInfoByOption(false, NULL, &connInfo, &laneReqId);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    ret = TransGetLaneInfoByOption(false, &requestOption, &connInfo, &laneId);
+    ret = TransGetLaneInfoByOption(false, &requestOption, &connInfo, &laneReqId);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     (void)InitLane();
-    ret = TransGetLaneInfoByOption(false, &requestOption, &connInfo, &laneId);
+    ret = TransGetLaneInfoByOption(false, &requestOption, &connInfo, &laneReqId);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    ret = TransUpdateLaneConnInfoByLaneId(laneId, true, &connInfo, errCode);
+    ret = TransUpdateLaneConnInfoByLaneReqId(laneReqId, true, &connInfo, errCode);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    ret = TransGetLaneInfoByOption(false, &requestOption, &connInfo, &laneId);
+    ret = TransGetLaneInfoByOption(false, &requestOption, &connInfo, &laneReqId);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    (void)LnnFreeLane(laneId);
+    (void)LnnFreeLane(laneReqId);
     DeinitLane();
     TransReqLanePendingDeinit();
 }
@@ -563,7 +563,7 @@ HWTEST_F(TransLaneTest, TransLaneTest014, TestSize.Level1)
 HWTEST_F(TransLaneTest, TransLaneTest015, TestSize.Level1)
 {
     (void)TransReqLanePendingInit();
-    uint32_t laneId = 1;
+    uint32_t laneReqId = 1;
 
     LaneConnInfo connInfo = {
         .type = LANE_P2P,
@@ -584,12 +584,12 @@ HWTEST_F(TransLaneTest, TransLaneTest015, TestSize.Level1)
     };
     SessionParam *sessionParam = GenerateParamTest(&sessionNormalAttr);
     SoftBusFree(sessionParam);
-    ret = TransGetLaneInfo(NULL, &connInfo, &laneId);
+    ret = TransGetLaneInfo(NULL, &connInfo, &laneReqId);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     TransSessionServerDelItem(g_sessionName);
     SoftBusFree(node);
-    (void)LnnFreeLane(laneId);
+    (void)LnnFreeLane(laneReqId);
     DeinitLane();
     TransReqLanePendingDeinit();
 }
