@@ -180,7 +180,7 @@ int SendStream(int sessionId, const StreamData *data, const StreamData *ext, con
 
 int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)
 {
-    TRANS_LOGI(TRANS_MSG, "sessionId=%{public}d", sessionId);
+    TRANS_LOGI(TRANS_FILE, "sessionId=%{public}d", sessionId);
     if ((sFileList == NULL) || (fileCnt == 0)) {
         TRANS_LOGW(TRANS_FILE, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
