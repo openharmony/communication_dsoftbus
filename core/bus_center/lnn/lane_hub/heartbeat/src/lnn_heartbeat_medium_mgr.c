@@ -477,7 +477,7 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, int32_t weight,
         (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
         return SOFTBUS_OK;
     }
-    if (HbIsRepeatedJoinLnnRequest(storedInfo, nowTime)) {
+    if (!device->isOnline || HbIsRepeatedJoinLnnRequest(storedInfo, nowTime)) {
         Anonymize(device->devId, &anonyUdid);
         LNN_LOGD(LNN_HEART_BEAT,
             "recv but ignore repeated join lnn request, udidHash=%{public}s, isNeedOnline=%{public}d",
