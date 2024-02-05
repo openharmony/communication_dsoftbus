@@ -329,7 +329,7 @@ static int32_t BleConvert2ConnectionInfo(ConnBleConnection *connection, Connecti
     return SOFTBUS_OK;
 }
 
-static void BleNotifyDeviceConnectResult(const ConnBleDevice *device, ConnBleConnection *connection, int32_t reason, 
+static void BleNotifyDeviceConnectResult(const ConnBleDevice *device, ConnBleConnection *connection, int32_t reason,
     bool isReuse)
 {
     char anomizeAddress[BT_MAC_LEN] = { 0 };
