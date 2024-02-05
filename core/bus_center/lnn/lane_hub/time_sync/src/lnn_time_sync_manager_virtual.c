@@ -28,10 +28,11 @@ int32_t LnnStartTimeSync(const char *pkgName, const char *targetNetworkId,
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t LnnStopTimeSync(const char *pkgName, const char *targetNetworkId)
+int32_t LnnStopTimeSync(const char *pkgName, const char *targetNetworkId, int32_t callingPid)
 {
     (void)pkgName;
     (void)targetNetworkId;
+    (void)callingPid;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 

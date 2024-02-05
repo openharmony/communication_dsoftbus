@@ -222,7 +222,8 @@ int32_t SoftBusServer::StartTimeSync(const char *pkgName, const char *targetNetw
 
 int32_t SoftBusServer::StopTimeSync(const char *pkgName, const char *targetNetworkId)
 {
-    return LnnIpcStopTimeSync(pkgName, targetNetworkId);
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    return LnnIpcStopTimeSync(pkgName, targetNetworkId, callingPid);
 }
 
 int32_t SoftBusServer::QosReport(int32_t channelId, int32_t chanType, int32_t appType, int32_t quality)
