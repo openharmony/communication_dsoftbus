@@ -355,6 +355,7 @@ if (defined(ohos_lite)) {
       "auth:unittest",
       "monitor_permission_test:CheckPermissionTest",
       "permission:TransDynamicPermissionTest",
+      "qos:unittest",
       "udp/distributed_stream:distributed_stream_test",
       "udp/file:unittest",
     ]

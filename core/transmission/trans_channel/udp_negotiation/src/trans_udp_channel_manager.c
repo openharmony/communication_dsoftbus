@@ -196,7 +196,7 @@ int32_t TransDelUdpChannel(int32_t channelId)
         if (udpChannelNode->info.myData.channelId == channelId) {
             ReleaseUdpChannelId((int32_t)(udpChannelNode->info.myData.channelId));
             ListDelete(&(udpChannelNode->node));
-            TRANS_LOGI(TRANS_CTRL, "delete channelId = %d{public}", channelId);
+            TRANS_LOGI(TRANS_CTRL, "delete channelId = %{public}d", channelId);
             SoftBusFree(udpChannelNode);
             g_udpChannelMgr->cnt--;
             (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
