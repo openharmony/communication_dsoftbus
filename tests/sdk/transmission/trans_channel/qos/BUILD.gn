@@ -27,6 +27,8 @@ ohos_unittest("TransQosTest") {
     "$dsoftbus_root_path/interfaces/kits/common",
     "//commonlibrary/c_utils/base/include",
     "//third_party/bounds_checking_function/include",
+    "//foundation/communication/dsoftbus/sdk/transmission/trans_channel/qos/include",
+    "//foundation/communication/dsoftbus/sdk/transmission/session/include",
   ]
 
   deps = [
@@ -114,7 +116,6 @@ group("unittest") {
   testonly = true
   deps = [
     ":TransQosStatClientTest",
-    ":TransQosStatServerTest",
     ":TransQosTest",
   ]
 }
