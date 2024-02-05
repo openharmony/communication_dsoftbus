@@ -214,6 +214,7 @@ static void DfxRecordBleConnectSuccess(uint32_t pId, ConnBleConnection *connecti
         .connectionId = (int32_t)connection->connectionId,
         .linkType = CONNECT_BLE,
         .costTime = (int32_t)costTime,
+        .isReuse = statistics->reuse ? 1 : 0,
         .result = EVENT_STAGE_RESULT_OK };
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
 }
@@ -230,6 +231,7 @@ static int32_t NewRequest(ConnBleRequest **outRequest, const ConnBleConnectReque
     request->challengeCode = ctx->challengeCode;
     request->result = ctx->result;
     request->protocol = ctx->protocol;
+    request->statistics.startTime = ctx->statistics.startTime;
 
     *outRequest = request;
     return SOFTBUS_OK;
@@ -327,7 +329,8 @@ static int32_t BleConvert2ConnectionInfo(ConnBleConnection *connection, Connecti
     return SOFTBUS_OK;
 }
 
-static void BleNotifyDeviceConnectResult(const ConnBleDevice *device, ConnBleConnection *connection, int32_t reason)
+static void BleNotifyDeviceConnectResult(const ConnBleDevice *device, ConnBleConnection *connection, int32_t reason,
+    bool isReuse)
 {
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, device->addr, BT_MAC_LEN);
@@ -365,6 +368,7 @@ static void BleNotifyDeviceConnectResult(const ConnBleDevice *device, ConnBleCon
             "requestId=%{public}u, addr=%{public}s, connId=%{public}u, protocol=%{public}d, challenge=%{public}u",
             it->requestId, anomizeAddress, connection->connectionId, device->protocol, it->challengeCode);
         it->statistics.reqId = it->requestId;
+        it->statistics.reuse = isReuse;
         DfxRecordBleConnectSuccess(DEFAULT_PID, connection, &it->statistics);
         info.bleInfo.challengeCode = it->challengeCode;
         it->result.OnConnectSuccessed(it->requestId, connection->connectionId, &info);
@@ -381,7 +385,7 @@ static bool BleReuseConnection(ConnBleDevice *device, ConnBleConnection *connect
     if (state != BLE_CONNECTION_STATE_EXCHANGED_BASIC_INFO) {
         return false;
     }
-    BleNotifyDeviceConnectResult(device, connection, 0);
+    BleNotifyDeviceConnectResult(device, connection, 0, true);
     return true;
 }
 
@@ -418,14 +422,14 @@ static void AttempReuseConnect(ConnBleDevice *device, DeviceAction actionIfAbsen
             CONN_LOGI(CONN_BLE,
                 "ble manager reject connect request as udid is in prevent list, addr=%{public}s, udid=%{public}s",
                 anomizeAddress, anomizeUdid);
-            BleNotifyDeviceConnectResult(device, NULL, SOFTBUS_CONN_BLE_CONNECT_PREVENTED_ERR);
+            BleNotifyDeviceConnectResult(device, NULL, SOFTBUS_CONN_BLE_CONNECT_PREVENTED_ERR, false);
             FreeDevice(device);
             return;
         }
         device->state = BLE_DEVICE_STATE_WAIT_SCHEDULE;
         int32_t status = actionIfAbsent(device, anomizeAddress, anomizeUdid);
         if (status != SOFTBUS_OK) {
-            BleNotifyDeviceConnectResult(device, NULL, status);
+            BleNotifyDeviceConnectResult(device, NULL, status, false);
             FreeDevice(device);
         }
         return;
@@ -635,7 +639,7 @@ static void BleClientConnectTimeoutOnConnectingState(uint32_t connectionId, cons
             "addr=%{public}s, connId=%{public}u", anomizeAddress, connectionId);
         return;
     }
-    BleNotifyDeviceConnectResult(connectingDevice, NULL, SOFTBUS_CONN_BLE_CONNECT_TIMEOUT_ERR);
+    BleNotifyDeviceConnectResult(connectingDevice, NULL, SOFTBUS_CONN_BLE_CONNECT_TIMEOUT_ERR, false);
     FreeDevice(connectingDevice);
     g_bleManager.connecting = NULL;
     TransitionToState(BLE_MGR_STATE_AVAILABLE);
@@ -663,7 +667,7 @@ static void BleClientConnected(uint32_t connectionId)
     CONN_LOGI(
         CONN_BLE, "ble client connect success, clientId=%{public}d, addr=%{public}s", connectionId, anomizeAddress);
 
-    BleNotifyDeviceConnectResult(connectingDevice, connection, 0);
+    BleNotifyDeviceConnectResult(connectingDevice, connection, 0, false);
     FreeDevice(connectingDevice);
     g_bleManager.connecting = NULL;
     TransitionToState(BLE_MGR_STATE_AVAILABLE);
@@ -707,11 +711,11 @@ static void BleClientConnectFailed(uint32_t connectionId, int32_t error)
                 "connId=%{public}u, addr=%{public}s",
                 serverConnection->connectionId, anomizeAddress);
         } else {
-            BleNotifyDeviceConnectResult(connectingDevice, NULL, error);
+            BleNotifyDeviceConnectResult(connectingDevice, NULL, error, false);
         }
         ConnBleReturnConnection(&serverConnection);
     } else {
-        BleNotifyDeviceConnectResult(connectingDevice, NULL, error);
+        BleNotifyDeviceConnectResult(connectingDevice, NULL, error, false);
     }
     FreeDevice(connectingDevice);
     g_bleManager.connecting = NULL;
@@ -1085,7 +1089,7 @@ static void BleReset(int32_t reason)
                 &g_bleManagerSyncHandler, BLE_MGR_MSG_CONNECT_TIMEOUT, connection->connectionId, 0, NULL);
             ConnBleReturnConnection(&connection);
         }
-        BleNotifyDeviceConnectResult(g_bleManager.connecting, NULL, SOFTBUS_CONN_BLUETOOTH_OFF);
+        BleNotifyDeviceConnectResult(g_bleManager.connecting, NULL, SOFTBUS_CONN_BLUETOOTH_OFF, false);
         FreeDevice(g_bleManager.connecting);
         g_bleManager.connecting = NULL;
     }
@@ -1093,7 +1097,7 @@ static void BleReset(int32_t reason)
     ConnBleDevice *deviceNext = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(deviceIt, deviceNext, &g_bleManager.waitings, ConnBleDevice, node) {
         ListDelete(&deviceIt->node);
-        BleNotifyDeviceConnectResult(deviceIt, NULL, SOFTBUS_CONN_BLUETOOTH_OFF);
+        BleNotifyDeviceConnectResult(deviceIt, NULL, SOFTBUS_CONN_BLUETOOTH_OFF, false);
         FreeDevice(deviceIt);
     }
 
