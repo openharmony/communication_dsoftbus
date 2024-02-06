@@ -22,12 +22,14 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <ifaddrs.h>
+#include <securec.h>
 #include <string>
 #include <vector>
 #include <map>
 #include <set>
 
 #include "conn_log.h"
+#include "softbus_adapter_errcode.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_error_code.h"
 #include "utils/wifi_direct_ipv4_info.h"
@@ -202,7 +204,8 @@ static void ClearAllIpsOfInterface(const char *interface)
                 sinkAddrString = sinkAddrString.substr(0, (sinkAddrString.length() - 2)) + HML_IP_SOURCE_SUFFIX;
             }
             if (arpDel(interface, sinkAddrString.c_str()) != SOFTBUS_OK) {
-                CONN_LOGE(CONN_WIFI_DIRECT, "delete arp failed. ip=%{public}s", WifiDirectAnonymizeIp(sinkAddrString));
+                CONN_LOGE(CONN_WIFI_DIRECT, "delete arp failed. ip=%{public}s",
+                    WifiDirectAnonymizeIp(sinkAddrString.c_str()));
             }
         }
     }
