@@ -14,10 +14,20 @@
  */
 
 #include "wifi_direct_ip_manager.h"
+
+#include <arpa/inet.h>
+#include <ifaddrs.h>
+#include <net/if_arp.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <ifaddrs.h>
+#include <securec.h>
 #include <string>
 #include <vector>
 #include <map>
 #include <set>
+
 #include "conn_log.h"
 #include "softbus_error_code.h"
 #include "utils/wifi_direct_ipv4_info.h"
@@ -94,12 +104,15 @@ static void ReleaseIp(const char *interface, struct WifiDirectIpv4Info *local, s
         interface, WifiDirectAnonymizeIp(localIp), local->prefixLength,
         WifiDirectAnonymizeIp(remoteIp), WifiDirectAnonymizeMac(remoteMac));
 
-    ret = DeleteInterfaceAddress(interface, localIp, local->prefixLength);
-    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "delete ip failed");
+    if (DeleteInterfaceAddress(interface, localIp, local->prefixLength) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "delete ip failed. ip=%{public}s", WifiDirectAnonymizeIp(localIp));
+    }
     g_localIps.erase({localIp, local->prefixLength});
 
-    ret = DeleteStaticArp(interface, remoteIp, remoteMac);
-    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "delete static arp failed");
+    if (DeleteStaticArp(interface, remoteIp, remoteMac) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "delete arp failed. remoteIp=%{public}s, remoteMac=%{public}s",
+            WifiDirectAnonymizeIp(remoteIp), WifiDirectAnonymizeIp(remoteMac));
+    }
     g_remoteArps.erase(remoteIp);
 }
 
@@ -117,12 +130,44 @@ static void ClearAllIps(const char *interface)
         const auto *remoteIp = remote.first.c_str();
         const auto *remoteMac = remote.second.c_str();
         if (DeleteStaticArp(interface, remoteIp, remoteMac) != SOFTBUS_OK) {
-            CONN_LOGE(CONN_WIFI_DIRECT,
-                "delete arp failed. "
-                "WifiDirectAnonymizeIp.remoteIp=%{public}s, WifiDirectAnonymizeIp.remoteMac=%{public}s",
+            CONN_LOGE(CONN_WIFI_DIRECT, "delete arp failed. remoteIp=%{public}s, remoteMac=%{public}s",
                 WifiDirectAnonymizeIp(remoteIp), WifiDirectAnonymizeIp(remoteMac));
         }
     }
+}
+
+static void ClearAllIpsOfInterface(const char *interface)
+{
+    CONN_LOGD(CONN_WIFI_DIRECT, "interface=%{public}s", interface);
+    struct ifaddrs *ifAddr = nullptr;
+    if (getifaddrs(&ifAddr) == -1) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "getifaddrs failed, errno=%{public}d", errno);
+        return;
+    }
+
+    struct ifaddrs *ifa = nullptr;
+    for (ifa = ifAddr; ifa != nullptr; ifa = ifa->ifa_next) {
+        if (ifa->ifa_addr == nullptr || ifa->ifa_addr->sa_family != AF_INET || ifa->ifa_netmask == nullptr) {
+            continue;
+        }
+
+        char sourceAddrString[IP_ADDR_STR_LEN];
+        struct sockaddr_in *addr = reinterpret_cast<struct sockaddr_in *>(ifa->ifa_addr);
+        inet_ntop(AF_INET, &addr->sin_addr.s_addr, sourceAddrString, sizeof(sourceAddrString));
+
+        addr = reinterpret_cast<struct sockaddr_in *>(ifa->ifa_netmask);
+        int32_t prefixLength = IP_MASK_MAX - (ffs(static_cast<int32_t>(ntohl(addr->sin_addr.s_addr))) - 1);
+
+        CONN_LOGI(CONN_WIFI_DIRECT, "name=%{public}s, ip=%{public}s, prefix=%{public}d",
+            ifa->ifa_name, WifiDirectAnonymizeIp(sourceAddrString), prefixLength);
+        if (strcmp(interface, ifa->ifa_name) == 0) {
+            if (DeleteInterfaceAddress(interface, sourceAddrString, prefixLength) != SOFTBUS_OK) {
+                CONN_LOGE(CONN_WIFI_DIRECT, "delete failed. ip=%{public}s", WifiDirectAnonymizeIp(sourceAddrString));
+            }
+        }
+    }
+
+    freeifaddrs(ifAddr);
 }
 
 /* private method implement */
@@ -151,8 +196,8 @@ static std::vector<std::string> GetHmlAllUsedIp(std::initializer_list<std::vecto
 
 static std::string ApplySubNet(struct WifiDirectIpv4Info *remoteArray, size_t remoteArraySize)
 {
-    size_t localIpv4ArraySize = INTERFACE_NUM_MAX;
-    struct WifiDirectIpv4Info localIpv4Array[INTERFACE_NUM_MAX];
+    size_t localIpv4ArraySize = IP_NUM_MAX;
+    struct WifiDirectIpv4Info localIpv4Array[IP_NUM_MAX];
     int32_t ret = GetWifiDirectNetWorkUtils()->getLocalIpv4InfoArray(localIpv4Array, &localIpv4ArraySize);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, "", CONN_WIFI_DIRECT, "get local ipv4 array failed");
 
@@ -184,6 +229,7 @@ static struct WifiDirectIpManager g_manager = {
     .configIp = ConfigIp,
     .releaseIp = ReleaseIp,
     .cleanAllIps = ClearAllIps,
+    .clearAllIpsOfInterface = ClearAllIpsOfInterface,
 };
 
 struct WifiDirectIpManager* GetWifiDirectIpManager(void)

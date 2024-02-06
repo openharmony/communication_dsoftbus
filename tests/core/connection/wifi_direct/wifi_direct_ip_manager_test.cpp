@@ -95,10 +95,10 @@ void WifiDirectIpManagerTest::TearDown(void)
 HWTEST_F(WifiDirectIpManagerTest, WifiDirectIpManager001, TestSize.Level1)
 {
     struct WifiDirectIpManager *self = GetWifiDirectIpManager();
-    struct WifiDirectIpv4Info remoteArray[INTERFACE_NUM_MAX];
-    struct WifiDirectIpv4Info remote[INTERFACE_NUM_MAX];
-    struct WifiDirectIpv4Info local[INTERFACE_NUM_MAX];
-    int32_t remoteArraySize = INTERFACE_NUM_MAX;
+    struct WifiDirectIpv4Info remoteArray[IP_NUM_MAX];
+    struct WifiDirectIpv4Info remote[IP_NUM_MAX];
+    struct WifiDirectIpv4Info local[IP_NUM_MAX];
+    int32_t remoteArraySize = IP_NUM_MAX;
     ListNode conflictList;
     ListInit(&conflictList);
     int32_t ret = self->applyIp(remoteArray, remoteArraySize, local, remote);
