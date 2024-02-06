@@ -41,6 +41,7 @@ static constexpr int32_t HML_IP_NET_START = 1;
 static constexpr int32_t HML_IP_NET_END = 255;
 static constexpr const char *HML_IP_SOURCE_SUFFIX = ".2";
 static constexpr const char *HML_IP_SINK_SUFFIX = ".1";
+static constexpr int32_t HML_IP_SUFFIX_LENGTH = 2;
 
 static std::map<std::string, std::string> g_remoteArps;
 static std::set<std::pair<std::string, int32_t>> g_localIps;
@@ -143,7 +144,7 @@ static int32_t arpDel(const char *ifname, const char *sinkIpStr)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(ifname != NULL, SOFTBUS_ERR, CONN_WIFI_DIRECT, "ifname is null");
     CONN_CHECK_AND_RETURN_RET_LOGE(sinkIpStr != NULL, SOFTBUS_ERR, CONN_WIFI_DIRECT, "sinkIpStr is null");
-    CONN_LOGI(CONN_WIFI_DIRECT, "sinkIpStr=%{public}s", sinkIpStr);
+    CONN_LOGI(CONN_WIFI_DIRECT, "sinkIpStr=%{public}s", WifiDirectAnonymizeIp(sinkIpStr));
  
     struct arpreq req {};
     struct sockaddr_in *sin = reinterpret_cast<struct sockaddr_in *>(&req.arp_pa);
@@ -198,10 +199,12 @@ static void ClearAllIpsOfInterface(const char *interface)
             }
             
             std::string sinkAddrString = sourceAddrString;
-            if (sinkAddrString.substr(sinkAddrString.length() - 2) == HML_IP_SOURCE_SUFFIX) {
-                sinkAddrString = sinkAddrString.substr(0, (sinkAddrString.length() - 2)) + HML_IP_SINK_SUFFIX;
+            std::string prefixStr = sinkAddrString.substr(0, (sinkAddrString.length() - HML_IP_SUFFIX_LENGTH));
+            std::string suffixStr = sinkAddrString.substr(sinkAddrString.length() - HML_IP_SUFFIX_LENGTH);
+            if (suffixStr == HML_IP_SOURCE_SUFFIX) {
+                sinkAddrString = prefixStr + HML_IP_SINK_SUFFIX;
             } else {
-                sinkAddrString = sinkAddrString.substr(0, (sinkAddrString.length() - 2)) + HML_IP_SOURCE_SUFFIX;
+                sinkAddrString = prefixStr + HML_IP_SOURCE_SUFFIX;
             }
             if (arpDel(interface, sinkAddrString.c_str()) != SOFTBUS_OK) {
                 CONN_LOGE(CONN_WIFI_DIRECT, "delete arp failed. ip=%{public}s",
