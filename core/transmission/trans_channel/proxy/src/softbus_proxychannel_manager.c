@@ -865,7 +865,6 @@ static int TransProxyGetLocalInfo(ProxyChannelInfo *chan)
         if (TransProxyGetUidAndPidBySessionName(chan->appInfo.myData.sessionName,
                 &chan->appInfo.myData.uid, &chan->appInfo.myData.pid) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "proc handshake get uid pid fail");
-            ReleaseProxyChannelId(chan->channelId);
             return SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED;
         }
     }
@@ -1087,6 +1086,7 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     char tmpSocketName[SESSION_NAME_SIZE_MAX] = {0};
     if (memcpy_s(tmpSocketName, SESSION_NAME_SIZE_MAX, chan->appInfo.myData.sessionName,
         strlen(chan->appInfo.myData.sessionName)) != EOK) {
+        ReleaseProxyChannelId(chan->channelId);
         SoftBusFree(chan);
         TRANS_LOGE(TRANS_CTRL, "memcpy failed");
         return;
@@ -1103,6 +1103,7 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
         .linkType = chan->type
     };
     if (ret != SOFTBUS_OK) {
+        ReleaseProxyChannelId(chan->channelId);
         SoftBusFree(chan);
         goto EXIT_ERR;
     }
@@ -1110,6 +1111,7 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     TransCreateConnByConnId(msg->connId);
     if ((ret = TransProxyAddChanItem(chan)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "AddChanItem fail");
+        ReleaseProxyChannelId(chan->channelId);
         SoftBusFree(chan);
         goto EXIT_ERR;
     }
