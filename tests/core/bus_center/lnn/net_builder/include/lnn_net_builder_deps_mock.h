@@ -20,6 +20,7 @@
 #include <mutex>
 
 #include "auth_interface.h"
+#include "auth_request.h"
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "lnn_async_callback_utils.h"
@@ -42,12 +43,12 @@
 #include "lnn_sync_item_info.h"
 #include "lnn_topo_manager.h"
 #include "message_handler.h"
+#include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_bus_center.h"
 #include "softbus_conn_interface.h"
 #include "softbus_feature_config.h"
 #include "softbus_json_utils.h"
-#include "auth_request.h"
 namespace OHOS {
 class NetBuilderDepsInterface {
 public:
@@ -152,6 +153,7 @@ public:
     virtual bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type);
     virtual const char *LnnConvertDLidToUdid(const char *id, IdCategory type);
     virtual int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request);
+    virtual int SoftBusGetBtState(void);
 };
 class NetBuilderDepsInterfaceMock : public NetBuilderDepsInterface {
 public:
@@ -250,6 +252,7 @@ public:
     MOCK_METHOD2(LnnHasDiscoveryType, bool (const NodeInfo *, DiscoveryType));
     MOCK_METHOD2(LnnConvertDLidToUdid, const char *(const char *, IdCategory));
     MOCK_METHOD2(GetAuthRequest, int32_t (uint32_t, AuthRequest *));
+    MOCK_METHOD0(SoftBusGetBtState, int ());
 
     static int32_t ActionOfLnnGetSettingDeviceName(char *deviceName, uint32_t len);
 };
