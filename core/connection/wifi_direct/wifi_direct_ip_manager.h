@@ -31,6 +31,7 @@ struct WifiDirectIpManager {
     void (*releaseIp)(const char *interface, struct WifiDirectIpv4Info *local, struct WifiDirectIpv4Info *remote,
                       const char *remoteMac);
     void (*cleanAllIps)(const char *interface);
+    void (*clearAllIpsOfInterface)(const char *interface);
 };
 
 struct WifiDirectIpManager* GetWifiDirectIpManager(void);
