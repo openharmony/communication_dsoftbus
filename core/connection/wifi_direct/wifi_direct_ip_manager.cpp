@@ -49,7 +49,7 @@ static std::set<std::pair<std::string, int32_t>> g_localIps;
 /* private method forward declare */
 static std::vector<std::string> GetHmlAllUsedIp(std::initializer_list<std::vector<WifiDirectIpv4Info>*> all);
 static std::string ApplySubNet(struct WifiDirectIpv4Info *remoteArray, size_t remoteArraySize);
-static int32_t arpDel(const char *ifname, const char *sinkIpStr);
+static int32_t ArpDel(const char *ifname, const char *sinkIpStr);
 
 /* public interface */
 static int32_t ApplyIp(struct WifiDirectIpv4Info *remoteArray, size_t remoteArraySize,
@@ -140,7 +140,7 @@ static void ClearAllIps(const char *interface)
     }
 }
 
-static int32_t arpDel(const char *ifname, const char *sinkIpStr)
+static int32_t ArpDel(const char *ifname, const char *sinkIpStr)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(ifname != NULL, SOFTBUS_ERR, CONN_WIFI_DIRECT, "ifname is null");
     CONN_CHECK_AND_RETURN_RET_LOGE(sinkIpStr != NULL, SOFTBUS_ERR, CONN_WIFI_DIRECT, "sinkIpStr is null");
@@ -206,7 +206,7 @@ static void ClearAllIpsOfInterface(const char *interface)
             } else {
                 sinkAddrString = prefixStr + HML_IP_SOURCE_SUFFIX;
             }
-            if (arpDel(interface, sinkAddrString.c_str()) != SOFTBUS_OK) {
+            if (ArpDel(interface, sinkAddrString.c_str()) != SOFTBUS_OK) {
                 CONN_LOGE(CONN_WIFI_DIRECT, "delete arp failed. ip=%{public}s",
                     WifiDirectAnonymizeIp(sinkAddrString.c_str()));
             }
