@@ -516,5 +516,9 @@ int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request)
     return GetNetBuilderDepsInterface()->GetAuthRequest(requestId, request);
 }
 
+int SoftBusGetBtState(void)
+{
+    return GetNetBuilderDepsInterface()->SoftBusGetBtState();
+}
 } // extern "C"
 } // namespace OHOS
