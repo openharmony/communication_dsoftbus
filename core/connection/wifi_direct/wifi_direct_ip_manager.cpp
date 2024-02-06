@@ -14,13 +14,21 @@
  */
 
 #include "wifi_direct_ip_manager.h"
+
 #include <arpa/inet.h>
+#include <ifaddrs.h>
+#include <net/if_arp.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 #include <ifaddrs.h>
 #include <string>
 #include <vector>
 #include <map>
 #include <set>
+
 #include "conn_log.h"
+#include "softbus_adapter_socket.h"
 #include "softbus_error_code.h"
 #include "utils/wifi_direct_ipv4_info.h"
 #include "utils/wifi_direct_network_utils.h"
@@ -38,6 +46,7 @@ static std::set<std::pair<std::string, int32_t>> g_localIps;
 /* private method forward declare */
 static std::vector<std::string> GetHmlAllUsedIp(std::initializer_list<std::vector<WifiDirectIpv4Info>*> all);
 static std::string ApplySubNet(struct WifiDirectIpv4Info *remoteArray, size_t remoteArraySize);
+static int32_t arpDel(const char *ifname, const char *ipStr);
 
 /* public interface */
 static int32_t ApplyIp(struct WifiDirectIpv4Info *remoteArray, size_t remoteArraySize,
@@ -128,6 +137,35 @@ static void ClearAllIps(const char *interface)
     }
 }
 
+static int32_t arpDel(const char *ifname, const char *ipStr)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGE(ifname != NULL, SOFTBUS_ERR, CONN_WIFI_DIRECT, "ifname is null");
+    CONN_CHECK_AND_RETURN_RET_LOGE(ipStr != NULL, SOFTBUS_ERR, CONN_WIFI_DIRECT, "ipStr is null");
+    CONN_LOGI(CONN_WIFI_DIRECT, "ipStr=%{public}s", ipStr);
+ 
+    struct arpreq req;
+    struct sockaddr_in *sin = nullptr;
+    int32_t sockfd;
+
+    memset_s(&req, sizeof(req), 0, sizeof(req));
+    sin = (struct sockaddr_in *)&req.arp_pa;
+	sin->sin_family = AF_INET;
+	sin->sin_addr.s_addr = inet_addr(ipStr);
+    req.arp_dev = ifname;
+
+    if (SoftBusSocketCreate(AF_INET, SOCK_DGRAM, 0, &sockfd) != SOFTBUS_ADAPTER_OK || sockfd < 0) {
+        return SOFTBUS_ERR;
+    }
+
+    if (SoftBusSocketIoctl(sockfd, SIOCDARP, &req) < 0) {
+        SoftBusSocketClose(sockfd);
+        return SOFTBUS_ERR;
+    }
+
+    SoftBusSocketClose(sockfd);
+    return SOFTBUS_OK;
+}
+
 static void ClearAllIpsOfInterface(const char *interface)
 {
     CONN_LOGD(CONN_WIFI_DIRECT, "interface=%{public}s", interface);
@@ -144,6 +182,7 @@ static void ClearAllIpsOfInterface(const char *interface)
         }
 
         char addrString[IP_ADDR_STR_LEN];
+        char sinkAddrString[IP_ADDR_STR_LEN];
         struct sockaddr_in *addr = reinterpret_cast<struct sockaddr_in *>(ifa->ifa_addr);
         inet_ntop(AF_INET, &addr->sin_addr.s_addr, addrString, sizeof(addrString));
 
@@ -154,6 +193,10 @@ static void ClearAllIpsOfInterface(const char *interface)
             ifa->ifa_name, WifiDirectAnonymizeIp(addrString), prefixLength);
         if (strcmp(interface, ifa->ifa_name) == 0) {
             if (DeleteInterfaceAddress(interface, addrString, prefixLength) != SOFTBUS_OK) {
+                CONN_LOGE(CONN_WIFI_DIRECT, "delete failed. ip=%{public}s", WifiDirectAnonymizeIp(addrString));
+            }
+            sinkAddrString = static_cast<std::string>(addrString) - HML_IP_SOURCE_SUFFIX + HML_IP_SINK_SUFFIX).c_str();
+            if (arpDel(interface, sinkAddrString) != SOFTBUS_OK) {
                 CONN_LOGE(CONN_WIFI_DIRECT, "delete failed. ip=%{public}s", WifiDirectAnonymizeIp(addrString));
             }
         }
