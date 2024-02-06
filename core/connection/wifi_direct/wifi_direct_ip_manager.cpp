@@ -148,8 +148,8 @@ static int32_t ArpDel(const char *ifname, const char *sinkIpStr)
  
     struct arpreq req {};
     struct sockaddr_in *sin = reinterpret_cast<struct sockaddr_in *>(&req.arp_pa);
-	sin->sin_family = AF_INET;
-	sin->sin_addr.s_addr = inet_addr(sinkIpStr);
+    sin->sin_family = AF_INET;
+    sin->sin_addr.s_addr = inet_addr(sinkIpStr);
     if (strcpy_s(req.arp_dev, sizeof(req.arp_dev), ifname) != EOK) {
         CONN_LOGE(CONN_WIFI_DIRECT, "string copy failed");
         return SOFTBUS_ERR;
