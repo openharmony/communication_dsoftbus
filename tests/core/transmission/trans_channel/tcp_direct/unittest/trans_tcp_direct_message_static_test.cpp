@@ -241,7 +241,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcProcessDataConfig0005, TestSiz
     SoftBusFree(appInfo);
     appInfo = nullptr;
     ret = TransTdcProcessDataConfig(appInfo);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
 /**
@@ -261,10 +261,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, ProcessMessage0006, TestSize.Level1)
     char *dataTmp = reinterpret_cast<char *>(data);
 
     ret = ProcessMessage(channelId, flagReply, seq, dataTmp);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 
     ret = ProcessMessage(channelId, flagRequst, seq, dataTmp);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 }
 
 /**

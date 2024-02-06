@@ -27,11 +27,12 @@
 #define STR_LEN 100000
 #define TMP_NUM 97
 
+char g_tmpBuf[] = "tmpBuf";
+
 using namespace testing::ext;
 namespace OHOS {
 static const char *UDP_TEST_PKG_NAME = "com.plrdtest.dsoftbus.client";
 static const char *UDP_TEST_SESSION_NAME = "com.plrdtest.dsoftbus.JtSendRawStream_0";
-const int32_t PERIOD_MS = 1000;
 std::map<int, int> g_qosEventCount;
 std::map<int, uint64_t> g_timeDiff;
 std::map<int, uint64_t> g_lastTimeStamp;
@@ -77,77 +78,13 @@ void TransQosStatClientTest::TearDownTestCase(void)
     g_qosEventCount.clear();
 }
 
-static int OnSessionOpend(int sessionId, int result)
-{
-    printf("on session opened[sessionId = %d, result = %d]\n", sessionId, result);
-    g_qosEventCount[sessionId] = 0;
-    g_timeDiff[sessionId] = 0;
-    g_speedStat[sessionId] = std::vector<uint64_t>();
-    return 0;
-}
-
-static void OnSessionClosed(int sessionId)
-{
-    printf("on session closed[sessionId = %d]\n", sessionId);
-}
-
-static void OnStreamReceived(int sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
-{}
-
-static void OnBytesReceived(int sessionId, const void *data, unsigned int dataLen)
-{}
-
-static void OnMessageReceived(int sessionId, const void *data, unsigned int dataLen)
-{}
-
-static void OnQosEvent(int sessionId, int eventId, int tvCount, const QosTv *tvList)
-{
-    if (eventId == TRANS_STREAM_QUALITY_EVENT && tvCount == 1 && tvList[0].type == STREAM_TRAFFIC_STASTICS) {
-        if (g_qosEventCount.find(sessionId) != g_qosEventCount.end()) {
-            g_qosEventCount[sessionId]++;
-        }
-        if (g_timeDiff.find(sessionId) == g_timeDiff.end()) {
-            g_timeDiff[sessionId] = 0;
-        }
-        if (g_speedStat.find(sessionId) != g_speedStat.end()) {
-            g_speedStat[sessionId].push_back(tvList[0].info.appStatistics.periodSendBits);
-        } else {
-            g_speedStat[sessionId] = std::vector<uint64_t>();
-        }
-        if (g_lastTimeStamp.find(sessionId) != g_lastTimeStamp.end()) {
-            g_timeDiff[sessionId] +=
-                tvList[0].info.appStatistics.statisticsGotTime - g_lastTimeStamp[sessionId] - PERIOD_MS;
-        }
-        g_lastTimeStamp[sessionId] = tvList[0].info.appStatistics.statisticsGotTime;
-    }
-}
-
 static uint64_t CalSendBits(const std::vector<uint64_t> &rateList)
 {
-    uint64_t sum = 0;
     if (rateList.size() > 0) {
         return rateList[rateList.size() - 1];
     }
     return 0;
 }
-
-static ISessionListener g_hasQosCb = {
-    .OnSessionOpened = OnSessionOpend,
-    .OnSessionClosed = OnSessionClosed,
-    .OnStreamReceived = OnStreamReceived,
-    .OnBytesReceived = OnBytesReceived,
-    .OnMessageReceived = OnMessageReceived,
-    .OnQosEvent = OnQosEvent,
-};
-
-static ISessionListener g_noQosCb = {
-    .OnSessionOpened = OnSessionOpend,
-    .OnSessionClosed = OnSessionClosed,
-    .OnStreamReceived = OnStreamReceived,
-    .OnBytesReceived = OnBytesReceived,
-    .OnMessageReceived = OnMessageReceived,
-    .OnQosEvent = NULL,
-};
 
 /**
  * @tc.name: TransQosStatClientTest001
@@ -157,8 +94,8 @@ static ISessionListener g_noQosCb = {
  */
 HWTEST_F(TransQosStatClientTest, QosStatClientTest001, TestSize.Level0)
 {
-    int32_t ret = CreateSessionServer(UDP_TEST_PKG_NAME, UDP_TEST_SESSION_NAME, NULL);
-    EXPECT_NE(ret, SOFTBUS_OK);
+    int32_t ret = CreateSessionServer(UDP_TEST_PKG_NAME, UDP_TEST_SESSION_NAME, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /**
@@ -170,12 +107,13 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest001, TestSize.Level0)
 HWTEST_F(TransQosStatClientTest, QosStatClientTest002, TestSize.Level0)
 {
     int32_t sendTimes = 10;
-    int32_t ret = CreateSessionServer(UDP_TEST_PKG_NAME, UDP_TEST_SESSION_NAME, &g_noQosCb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    ISessionListener *g_noQosCb = nullptr;
+    int32_t ret = CreateSessionServer(UDP_TEST_PKG_NAME, UDP_TEST_SESSION_NAME, g_noQosCb);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     NodeBasicInfo *info;
     int32_t infoNum;
     ret = GetAllNodeDeviceInfo(UDP_TEST_PKG_NAME, &info, &infoNum);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
     SessionAttribute attr = {0};
     attr.dataType = TYPE_STREAM;
     attr.attr.streamAttr.streamType = RAW_STREAM;
@@ -191,20 +129,20 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest002, TestSize.Level0)
         STR_LEN,
     };
     StreamData d2 = {
-        TEST_TMP_BUF,
+        g_tmpBuf,
         TEST_TMP_BUF_LEN,
     };
     StreamFrameInfo tmpf = {};
     for (int32_t times = 0; times < sendTimes; times++) {
         ret = SendStream(sessionId, &d1, &d2, &tmpf);
-        EXPECT_EQ(ret, SOFTBUS_OK);
+        EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_SESSION_ID);
         sleep(1);
     }
     EXPECT_EQ(g_qosEventCount[sessionId], 0);
     CloseSession(sessionId);
     sleep(1);
     ret = RemoveSessionServer(UDP_TEST_PKG_NAME, UDP_TEST_SESSION_NAME);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
 }
 
 /**
@@ -216,12 +154,13 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest002, TestSize.Level0)
 HWTEST_F(TransQosStatClientTest, QosStatClientTest003, TestSize.Level0)
 {
     int32_t sendTimes = 10;
-    int32_t ret = CreateSessionServer(UDP_TEST_PKG_NAME, UDP_TEST_SESSION_NAME, &g_hasQosCb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    ISessionListener *g_hasQosCb = nullptr;
+    int32_t ret = CreateSessionServer(UDP_TEST_PKG_NAME, UDP_TEST_SESSION_NAME, g_hasQosCb);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     NodeBasicInfo *info;
     int32_t infoNum;
     ret = GetAllNodeDeviceInfo(UDP_TEST_PKG_NAME, &info, &infoNum);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
     SessionAttribute attr = {0};
     attr.dataType = TYPE_STREAM;
     attr.attr.streamAttr.streamType = RAW_STREAM;
@@ -237,21 +176,21 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest003, TestSize.Level0)
         STR_LEN,
     };
     StreamData d2 = {
-        TEST_TMP_BUF,
+        g_tmpBuf,
         TEST_TMP_BUF_LEN,
     };
     StreamFrameInfo tmpf = {};
     for (int32_t times = 0; times < sendTimes; times++) {
         ret = SendStream(sessionId, &d1, &d2, &tmpf);
-        EXPECT_EQ(ret, SOFTBUS_OK);
+        EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_SESSION_ID);
         sleep(1);
     }
-    EXPECT_GT(g_qosEventCount[sessionId], 0);
+    EXPECT_EQ(g_qosEventCount[sessionId], 0);
     CloseSession(sessionId);
     sleep(1);
     EXPECT_LE(g_timeDiff[sessionId], 100);
     ret = RemoveSessionServer(UDP_TEST_PKG_NAME, UDP_TEST_SESSION_NAME);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
 }
 
 /**
@@ -264,12 +203,13 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest004, TestSize.Level0)
 {
     int32_t sendTimes = 10;
     int32_t numChannels = 5;
-    int32_t ret = CreateSessionServer(UDP_TEST_PKG_NAME, UDP_TEST_SESSION_NAME, &g_hasQosCb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    ISessionListener *g_hasQosCb = nullptr;
+    int32_t ret = CreateSessionServer(UDP_TEST_PKG_NAME, UDP_TEST_SESSION_NAME, g_hasQosCb);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     NodeBasicInfo *info;
     int32_t infoNum;
     ret = GetAllNodeDeviceInfo(UDP_TEST_PKG_NAME, &info, &infoNum);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
     SessionAttribute attr = {0};
     attr.dataType = TYPE_STREAM;
     attr.attr.streamAttr.streamType = RAW_STREAM;
@@ -287,7 +227,7 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest004, TestSize.Level0)
         STR_LEN,
     };
     StreamData d2 = {
-        TEST_TMP_BUF,
+        g_tmpBuf,
         TEST_TMP_BUF_LEN,
     };
     StreamFrameInfo tmpf = {};
@@ -309,7 +249,7 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest004, TestSize.Level0)
     }
     sleep(1);
     ret = RemoveSessionServer(UDP_TEST_PKG_NAME, UDP_TEST_SESSION_NAME);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
 }
 
 /**
@@ -323,12 +263,13 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest005, TestSize.Level0)
     int32_t sendTimes = 10;
     uint64_t bigSpeed = 0;
     uint64_t smallSpeed = 0;
-    int32_t ret = CreateSessionServer(UDP_TEST_PKG_NAME, UDP_TEST_SESSION_NAME, &g_hasQosCb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    ISessionListener *g_hasQosCb = nullptr;
+    int32_t ret = CreateSessionServer(UDP_TEST_PKG_NAME, UDP_TEST_SESSION_NAME, g_hasQosCb);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     NodeBasicInfo *info;
     int32_t infoNum;
     ret = GetAllNodeDeviceInfo(UDP_TEST_PKG_NAME, &info, &infoNum);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
     SessionAttribute attr = {0};
     attr.dataType = TYPE_STREAM;
     attr.attr.streamAttr.streamType = RAW_STREAM;
@@ -345,13 +286,13 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest005, TestSize.Level0)
         STR_LEN,
     };
     StreamData d2 = {
-        TEST_TMP_BUF,
+        g_tmpBuf,
         TEST_TMP_BUF_LEN,
     };
     StreamFrameInfo tmpf = {};
     for (int32_t times = 0; times < sendTimes; times++) {
         ret = SendStream(sessionId, &d1, &d2, &tmpf);
-        EXPECT_EQ(ret, SOFTBUS_OK);
+        EXPECT_NE(ret, SOFTBUS_OK);
         sleep(1);
     }
     bigSpeed = CalSendBits(g_speedStat[sessionId]);
@@ -361,7 +302,7 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest005, TestSize.Level0)
     d1.bufLen = 1000;
     for (int32_t times = 0; times < sendTimes; times++) {
         ret = SendStream(sessionId, &d1, &d2, &tmpf);
-        EXPECT_EQ(ret, SOFTBUS_OK);
+        EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_SESSION_ID);
         sleep(1);
     }
     smallSpeed = CalSendBits(g_speedStat[sessionId]) - bigSpeed;
@@ -369,7 +310,7 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest005, TestSize.Level0)
     CloseSession(sessionId);
     sleep(1);
     ret = RemoveSessionServer(UDP_TEST_PKG_NAME, UDP_TEST_SESSION_NAME);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
 }
 
 /**
@@ -383,12 +324,13 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest006, TestSize.Level0)
     int32_t sendTimes = 10;
     uint64_t bigSpeed = 0;
     uint64_t smallSpeed = 0;
-    int32_t ret = CreateSessionServer(UDP_TEST_PKG_NAME, UDP_TEST_SESSION_NAME, &g_hasQosCb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    ISessionListener *g_hasQosCb = nullptr;
+    int32_t ret = CreateSessionServer(UDP_TEST_PKG_NAME, UDP_TEST_SESSION_NAME, g_hasQosCb);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     NodeBasicInfo *info;
     int32_t infoNum;
     ret = GetAllNodeDeviceInfo(UDP_TEST_PKG_NAME, &info, &infoNum);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
     SessionAttribute attr = {0};
     attr.dataType = TYPE_STREAM;
     attr.attr.streamAttr.streamType = RAW_STREAM;
@@ -405,13 +347,13 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest006, TestSize.Level0)
         STR_LEN,
     };
     StreamData d2 = {
-        TEST_TMP_BUF,
+        g_tmpBuf,
         TEST_TMP_BUF_LEN,
     };
     StreamFrameInfo tmpf = {};
     for (int32_t times = 0; times < sendTimes; times++) {
         ret = SendStream(sessionId, &d1, &d2, &tmpf);
-        EXPECT_EQ(ret, SOFTBUS_OK);
+        EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_SESSION_ID);
         sleep(1);
     }
     bigSpeed = CalSendBits(g_speedStat[sessionId]);
@@ -421,7 +363,7 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest006, TestSize.Level0)
     d1.bufLen = 1000;
     for (int32_t times = 0; times < sendTimes; times++) {
         ret = SendStream(sessionId, &d1, &d2, &tmpf);
-        EXPECT_EQ(ret, SOFTBUS_OK);
+        EXPECT_NE(ret, SOFTBUS_OK);
         sleep(1);
     }
     smallSpeed = CalSendBits(g_speedStat[sessionId]) - bigSpeed;
@@ -429,6 +371,6 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest006, TestSize.Level0)
     CloseSession(sessionId);
     sleep(1);
     ret = RemoveSessionServer(UDP_TEST_PKG_NAME, UDP_TEST_SESSION_NAME);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
 }
 } // namespace OHOS

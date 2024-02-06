@@ -15,6 +15,8 @@
 
 #include <gtest/gtest.h>
 
+#include "client_qos_manager.h"
+#include "client_trans_session_service.h"
 #include "session.h"
 #include "softbus_errcode.h"
 
@@ -24,6 +26,7 @@ namespace OHOS {
 const int32_t G_VALID_SESSION_ID = 1;
 const int32_t G_INVALID_SESSION_ID = 1;
 const int32_t G_VALID_APP_TYPE = 1;
+const int32_t G_VALID_QUALITY = 1;
 
 class TransQosTest : public testing::Test {
 public:
@@ -62,5 +65,8 @@ HWTEST_F(TransQosTest, QosReportTest001, TestSize.Level0)
 
     ret = QosReport(G_VALID_SESSION_ID, G_VALID_APP_TYPE, QOS_IMPROVE);
     EXPECT_NE(ret, SOFTBUS_OK);
+
+    ret = ClientQosReport(G_VALID_SESSION_ID, G_VALID_APP_TYPE, QOS_IMPROVE, G_VALID_QUALITY);
+    EXPECT_NE(ret, SOFTBUS_NOT_IMPLEMENT);
 }
 } // namespace OHOS

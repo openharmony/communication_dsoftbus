@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "data_bus_native.h"
 #include "softbus_rsa_encrypt.h"
 
 #include <hks_api.h>
@@ -284,6 +285,32 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftBusRsaDecrypt003, TestSize.Level0)
     ret = SoftBusRsaDecrypt(encryptedData, srcDataLen1, &decryptedData, &decryptedDataLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     SoftBusFree(encryptedData);
+}
+
+/*
+ * @tc.name: DataBusNativeVirtual00
+ * @tc.desc: function
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(AdapterDsoftbusRsaCryptoTest, DataBusNativeVirtual001, TestSize.Level0)
+{
+    int channelId = 0;
+    int ret = NotifyNearByUpdateHandleId(channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = NotifyNearByUpdateMigrateOption(channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    const char *peerDeviceId = NULL;
+    int routeType = 0;
+    bool isUpgrade = true;
+    ret = NotifyNearByOnMigrateEvents(peerDeviceId, routeType, isUpgrade);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    const char *busName = NULL;
+    ret = NotifyNearByGetBrAgingTimeoutByBusName(busName);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 static int32_t ConstructKeyParamSet(struct HksParamSet **paramSet, const struct HksParam *params, uint32_t paramCount)

@@ -413,7 +413,7 @@ static int32_t ClientTransProxyProcSendMsgAck(int32_t channelId, const char *dat
         return SOFTBUS_ERR;
     }
     int32_t seq = *(int32_t *)data;
-    TRANS_LOGI(TRANS_SDK, "ClientTransProxyProcSendMsgAck. channelId-%{public}d, seq=%{public}d",
+    TRANS_LOGI(TRANS_SDK, "ClientTransProxyProcSendMsgAck. channelId=%{public}d, seq=%{public}d",
         channelId, seq);
     return SetPendingPacket(channelId, seq, PENDING_TYPE_PROXY);
 }
