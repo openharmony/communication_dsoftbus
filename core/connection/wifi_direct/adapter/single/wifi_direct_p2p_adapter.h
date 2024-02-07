@@ -67,6 +67,7 @@ enum WifiDirectP2pAdapterEvent {
 };
 
 struct WifiDirectP2pAdapter {
+    bool (*isWifiEnabled)(void);
     bool (*isWifiP2pEnabled)(void);
     bool (*isWifiConnected)(void);
     bool (*isWifiApEnabled)(void);
