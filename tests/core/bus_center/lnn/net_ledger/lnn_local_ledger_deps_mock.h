@@ -20,6 +20,7 @@
 #include <mutex>
 
 #include "lnn_device_info.h"
+#include "lnn_feature_capability.h"
 #include "lnn_net_capability.h"
 #include "softbus_adapter_crypto.h"
 #include "bus_center_adapter.h"
@@ -40,6 +41,10 @@ public:
     virtual int32_t LnnInitLocalP2pInfo(NodeInfo *info);
     virtual int32_t SoftBusRegBusCenterVarDump(char *dumpVar, SoftBusVarDumpCb cb);
     virtual int32_t LnnInitOhosAccount(void);
+    virtual uint64_t LnnGetFeatureCapabilty(void);
+    virtual bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit);
+    virtual int32_t GetCommonOsType(int32_t *value);
+    virtual int32_t GetCommonOsVersion(char *value, uint32_t len);
 };
 class LocalLedgerDepsInterfaceMock : public LocalLedgerDepsInterface {
 public:
@@ -51,6 +56,10 @@ public:
     MOCK_METHOD1(LnnInitLocalP2pInfo, int32_t (NodeInfo *info));
     MOCK_METHOD2(SoftBusRegBusCenterVarDump, int32_t (char *, SoftBusVarDumpCb));
     MOCK_METHOD0(LnnInitOhosAccount, int32_t ());
+    MOCK_METHOD0(LnnGetFeatureCapabilty, uint64_t ());
+    MOCK_METHOD2(IsFeatureSupport, bool (uint64_t, FeatureCapability));
+    MOCK_METHOD1(GetCommonOsType, int32_t (int32_t *));
+    MOCK_METHOD2(GetCommonOsVersion, int32_t (char *, uint32_t));
 
     static int32_t LedgerGetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len);
     static int32_t LedgerSoftBusRegBusCenterVarDump(char *dumpVar, SoftBusVarDumpCb cb);

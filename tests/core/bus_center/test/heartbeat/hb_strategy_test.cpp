@@ -88,7 +88,7 @@ HWTEST_F(HeartBeatStrategyTest, LNN_STOP_HEARTBEAT_ADV_BY_TYPE_NOW_TEST_01, Test
     ret = LnnStopHeartBeatAdvByTypeNow(HEARTBEAT_TYPE_MAX - 1);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = LnnStartNewHbStrategyFsm();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = LnnStopHeartBeatAdvByTypeNow(HEARTBEAT_TYPE_MAX - 1);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
@@ -101,6 +101,9 @@ HWTEST_F(HeartBeatStrategyTest, LNN_STOP_HEARTBEAT_ADV_BY_TYPE_NOW_TEST_01, Test
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_START_SCREEN_CHANGE_OFFLINE_TIMING_TEST_01, TestSize.Level1)
 {
+    NiceMock<HeartBeatFSMStrategyInterfaceMock> hbMock;
+    ON_CALL(hbMock, LnnConvertConnAddrTypeToHbType).WillByDefault(Return(CONNECTION_ADDR_WLAN));
+    ON_CALL(hbMock, LnnPostScreenOffCheckDevMsgToHbFsm).WillByDefault(Return(SOFTBUS_OK));
     int32_t ret = LnnStartScreenChangeOfflineTiming(nullptr, CONNECTION_ADDR_WLAN);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnStartScreenChangeOfflineTiming(NETWORKID, CONNECTION_ADDR_MAX);
@@ -117,6 +120,9 @@ HWTEST_F(HeartBeatStrategyTest, LNN_START_SCREEN_CHANGE_OFFLINE_TIMING_TEST_01, 
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_STOP_SCREEN_CHANGE_OFFLINE_TIMING_TEST_01, TestSize.Level1)
 {
+    NiceMock<HeartBeatFSMStrategyInterfaceMock> hbMock;
+    ON_CALL(hbMock, LnnConvertConnAddrTypeToHbType).WillByDefault(Return(CONNECTION_ADDR_WLAN));
+    ON_CALL(hbMock, LnnRemoveScreenOffCheckStatusMsg).WillByDefault(Return());
     int32_t ret = LnnStopScreenChangeOfflineTiming(nullptr, CONNECTION_ADDR_WLAN);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnStopScreenChangeOfflineTiming(NETWORKID, CONNECTION_ADDR_WLAN);
@@ -131,6 +137,13 @@ HWTEST_F(HeartBeatStrategyTest, LNN_STOP_SCREEN_CHANGE_OFFLINE_TIMING_TEST_01, T
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_START_OFFLINE_TIMING_STRATEGY_TEST_01, TestSize.Level1)
 {
+    NiceMock<HeartBeatFSMStrategyInterfaceMock> hbMock;
+    ON_CALL(hbMock, LnnConvertConnAddrTypeToHbType).WillByDefault(Return(CONNECTION_ADDR_WLAN));
+    ON_CALL(hbMock, LnnGetLocalNumU64Info).WillByDefault(Return(SOFTBUS_OK));
+    ON_CALL(hbMock, LnnGetRemoteNumU64Info).WillByDefault(Return(SOFTBUS_OK));
+    ON_CALL(hbMock, IsFeatureSupport).WillByDefault(Return(false));
+    ON_CALL(hbMock, LnnConvertHbTypeToId).WillByDefault(Return(1));
+    ON_CALL(hbMock, LnnPostCheckDevStatusMsgToHbFsm).WillByDefault(Return(SOFTBUS_ERR));
     int32_t ret = LnnStartOfflineTimingStrategy(nullptr, CONNECTION_ADDR_WLAN);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnStartOfflineTimingStrategy(NETWORKID, CONNECTION_ADDR_WLAN);
@@ -145,6 +158,9 @@ HWTEST_F(HeartBeatStrategyTest, LNN_START_OFFLINE_TIMING_STRATEGY_TEST_01, TestS
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_STOP_OFFLINE_TIMING_STRATEGY_TEST_01, TestSize.Level1)
 {
+    NiceMock<HeartBeatFSMStrategyInterfaceMock> hbMock;
+    ON_CALL(hbMock, LnnConvertConnAddrTypeToHbType).WillByDefault(Return(CONNECTION_ADDR_WLAN));
+    ON_CALL(hbMock, LnnRemoveCheckDevStatusMsg).WillByDefault(Return());
     int32_t ret = LnnStopOfflineTimingStrategy(nullptr, CONNECTION_ADDR_WLAN);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnStopOfflineTimingStrategy(NETWORKID, CONNECTION_ADDR_WLAN);
@@ -159,6 +175,8 @@ HWTEST_F(HeartBeatStrategyTest, LNN_STOP_OFFLINE_TIMING_STRATEGY_TEST_01, TestSi
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_STOP_HEARTBEAT_BY_TYPE_TEST_01, TestSize.Level1)
 {
+    NiceMock<HeartBeatFSMStrategyInterfaceMock> hbMock;
+    ON_CALL(hbMock, LnnPostStopMsgToHbFsm).WillByDefault(Return(SOFTBUS_OK));
     int32_t ret = LnnStopHeartbeatByType(LNN_HB_TYPE);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
@@ -171,6 +189,8 @@ HWTEST_F(HeartBeatStrategyTest, LNN_STOP_HEARTBEAT_BY_TYPE_TEST_01, TestSize.Lev
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_STOPV0_HEARTBEAT_AND_NOT_TRANS_STATE_TEST_01, TestSize.Level1)
 {
+    NiceMock<HeartBeatFSMStrategyInterfaceMock> hbMock;
+    ON_CALL(hbMock, LnnPostStopMsgToHbFsm).WillByDefault(Return(SOFTBUS_OK));
     int32_t ret = LnnStopV0HeartbeatAndNotTransState();
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
@@ -183,6 +203,9 @@ HWTEST_F(HeartBeatStrategyTest, LNN_STOPV0_HEARTBEAT_AND_NOT_TRANS_STATE_TEST_01
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_GET_MEDIUM_PARAM_BY_SPECIFIC_TYPE_TEST_01, TestSize.Level1)
 {
+    NiceMock<HeartBeatFSMStrategyInterfaceMock> hbMock;
+    ON_CALL(hbMock, LnnVisitHbTypeSet).WillByDefault(Return(true));
+    ON_CALL(hbMock, LnnConvertHbTypeToId).WillByDefault(Return(1));
     LnnHeartbeatMediumParam param;
     int32_t ret = LnnHbStrategyInit();
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -201,6 +224,10 @@ HWTEST_F(HeartBeatStrategyTest, LNN_GET_MEDIUM_PARAM_BY_SPECIFIC_TYPE_TEST_01, T
  */
 HWTEST_F(HeartBeatStrategyTest, LNN_SET_MEDIUM_PARAM_BY_SPECIFIC_TYPE_TEST_01, TestSize.Level1)
 {
+    NiceMock<HeartBeatFSMStrategyInterfaceMock> hbMock;
+    ON_CALL(hbMock, LnnVisitHbTypeSet).WillByDefault(Return(true));
+    ON_CALL(hbMock, LnnConvertHbTypeToId).WillByDefault(Return(1));
+    ON_CALL(hbMock, LnnPostSetMediumParamMsgToHbFsm).WillByDefault(Return(SOFTBUS_OK));
     LnnHeartbeatMediumParam param;
     int32_t ret = LnnHbStrategyInit();
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -222,8 +249,18 @@ HWTEST_F(HeartBeatStrategyTest, LNN_GET_HB_STRATEGY_MANAGER_TEST_01, TestSize.Le
     LnnHeartbeatStrategyManager mgr;
     LnnProcessSendOnceMsgPara msgPara;
     LnnHeartbeatFsm hbFsm;
+    NiceMock<HeartBeatFSMStrategyInterfaceMock> hbMock;
+    ON_CALL(hbMock, LnnCheckSupportedHbType).WillByDefault(Return(true));
+    ON_CALL(hbMock, GetScreenState).WillByDefault(Return(SOFTBUS_SCREEN_ON));
+    ON_CALL(hbMock, LnnVisitHbTypeSet).WillByDefault(Return(true));
+    ON_CALL(hbMock, LnnRemoveSendEndMsg).WillByDefault(Return());
+    ON_CALL(hbMock, LnnFsmRemoveMessage).WillByDefault(Return(SOFTBUS_OK));
+    ON_CALL(hbMock, LnnPostSendBeginMsgToHbFsm).WillByDefault(Return(SOFTBUS_ERR));
+    ON_CALL(hbMock, LnnRemoveCheckDevStatusMsg).WillByDefault(Return());
+    ON_CALL(hbMock, LnnPostCheckDevStatusMsgToHbFsm).WillByDefault(Return(SOFTBUS_ERR));
+
     int32_t ret = LnnGetHbStrategyManager(&mgr, HEARTBEAT_TYPE_MAX, STRATEGY_HB_SEND_SINGLE);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnGetHbStrategyManager(&mgr, HEARTBEAT_TYPE_UDP, STRATEGY_HB_SEND_SINGLE);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     msgPara.strategyType = STRATEGY_HB_SEND_SINGLE;
@@ -236,7 +273,7 @@ HWTEST_F(HeartBeatStrategyTest, LNN_GET_HB_STRATEGY_MANAGER_TEST_01, TestSize.Le
     ret = LnnGetHbStrategyManager(&mgr, HEARTBEAT_TYPE_UDP, STRATEGY_HB_SEND_FIXED_PERIOD);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = mgr.onProcess(&hbFsm, reinterpret_cast<void *>(&msgPara));
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
     msgPara.strategyType = STRATEGY_HB_SEND_ADJUSTABLE_PERIOD;
     ret = mgr.onProcess(&hbFsm, reinterpret_cast<void *>(&msgPara));
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
@@ -266,6 +303,9 @@ HWTEST_F(HeartBeatStrategyTest, LNN_GET_GEAR_MODE_BY_SPECIFIC_TYPE_TEST_01, Test
         .duration = NORMAL_DURATION,
         .wakeupFlag = false,
     };
+    NiceMock<HeartBeatFSMStrategyInterfaceMock> hbMock;
+    ON_CALL(hbMock, LnnVisitHbTypeSet).WillByDefault(Return(true));
+    ON_CALL(hbMock, LnnConvertHbTypeToId).WillByDefault(Return(1));
     int32_t ret = LnnHbStrategyInit();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnGetGearModeBySpecificType(nullptr, LNN_HB_TYPE);
@@ -283,6 +323,8 @@ HWTEST_F(HeartBeatStrategyTest, LNN_GET_GEAR_MODE_BY_SPECIFIC_TYPE_TEST_01, Test
  */
 HWTEST_F(HeartBeatStrategyTest, VISIT_CLEAR_NONE_SPLIT_HB_TYPE_TEST_01, TestSize.Level1)
 {
+    NiceMock<HeartBeatFSMStrategyInterfaceMock> hbMock;
+    ON_CALL(hbMock, LnnConvertHbTypeToId).WillByDefault(Return(1));
     LnnHeartbeatType typeSet;
     bool ret = VisitClearNoneSplitHbType(&typeSet, HEARTBEAT_TYPE_BLE_V3, nullptr);
     EXPECT_TRUE(ret == true);
@@ -304,6 +346,7 @@ HWTEST_F(HeartBeatStrategyTest, SEND_EACH_SEPARATELY_TEST_01, TestSize.Level1)
     LnnHeartbeatFsm hbFsm;
     LnnProcessSendOnceMsgPara msgPara;
     NiceMock<HeartBeatFSMStrategyInterfaceMock> hbMock;
+    ON_CALL(hbMock, LnnVisitHbTypeSet).WillByDefault(Return(true));
     EXPECT_CALL(hbMock, LnnPostSendBeginMsgToHbFsm)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));

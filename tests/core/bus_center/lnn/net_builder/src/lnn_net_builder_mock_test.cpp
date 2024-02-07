@@ -16,7 +16,6 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
-#include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_net_builder_deps_mock.h"
 #include "lnn_net_builder.c"
