@@ -111,5 +111,25 @@ int32_t LnnInitOhosAccount(void)
 {
     return GetLocalLedgerDepsInterface()->LnnInitOhosAccount();
 }
+
+uint64_t LnnGetFeatureCapabilty(void)
+{
+    return GetLocalLedgerDepsInterface()->LnnGetFeatureCapabilty();
+}
+
+bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit)
+{
+    return GetLocalLedgerDepsInterface()->IsFeatureSupport(feature, capaBit);
+}
+
+int32_t GetCommonOsType(int32_t *value)
+{
+    return GetLocalLedgerDepsInterface()->GetCommonOsType(value);
+}
+
+int32_t GetCommonOsVersion(char *value, uint32_t len)
+{
+    return GetLocalLedgerDepsInterface()->GetCommonOsVersion(value, len);
+}
 } // extern "C"
 } // namespace OHOS
