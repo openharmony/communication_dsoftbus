@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,14 @@
 #include "softbus_errcode.h"
 #include "softbus_server_ipc_interface_code.h"
 #include "trans_log.h"
+
+#define WRITE_PARCEL_WITH_RET(parcel, type, data, retval)                              \
+    do {                                                                               \
+        if (!(parcel).Write##type(data)) {                                             \
+            TRANS_LOGE(TRANS_SVC, "write data failed.");                               \
+            return (retval);                                                           \
+        }                                                                              \
+    } while (false)
 
 namespace OHOS {
 int32_t TransClientProxy::OnClientPermissonChange(const char *pkgName, int32_t state)
@@ -53,6 +61,52 @@ int32_t TransClientProxy::OnClientPermissonChange(const char *pkgName, int32_t s
     return SOFTBUS_OK;
 }
 
+int32_t TransClientProxy::MessageParcelWrite(MessageParcel &data, const char *sessionName, const ChannelInfo *channel)
+{
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TRANS_LOGE(TRANS_CTRL, "write InterfaceToken failed.");
+        return SOFTBUS_ERR;
+    }
+    WRITE_PARCEL_WITH_RET(data, CString, sessionName, SOFTBUS_ERR);
+    WRITE_PARCEL_WITH_RET(data, Int32, channel->channelId, SOFTBUS_ERR);
+    WRITE_PARCEL_WITH_RET(data, Int32, channel->channelType, SOFTBUS_ERR);
+    
+    if (channel->channelType == CHANNEL_TYPE_TCP_DIRECT) {
+        WRITE_PARCEL_WITH_RET(data, FileDescriptor, channel->fd, SOFTBUS_ERR);
+    }
+    WRITE_PARCEL_WITH_RET(data, Bool, channel->isServer, SOFTBUS_ERR);
+    WRITE_PARCEL_WITH_RET(data, Bool, channel->isEnabled, SOFTBUS_ERR);
+    WRITE_PARCEL_WITH_RET(data, Bool, channel->isEncrypt, SOFTBUS_ERR);
+    WRITE_PARCEL_WITH_RET(data, Int32, channel->peerUid, SOFTBUS_ERR);
+    WRITE_PARCEL_WITH_RET(data, Int32, channel->peerPid, SOFTBUS_ERR);
+    WRITE_PARCEL_WITH_RET(data, CString, channel->groupId, SOFTBUS_ERR);
+    WRITE_PARCEL_WITH_RET(data, Uint32, channel->keyLen, SOFTBUS_ERR);
+    if (!data.WriteRawData(channel->sessionKey, channel->keyLen)) {
+        TRANS_LOGE(TRANS_CTRL, "write sessionKey and keyLen failed.");
+        return SOFTBUS_ERR;
+    }
+    WRITE_PARCEL_WITH_RET(data, CString, channel->peerSessionName, SOFTBUS_ERR);
+    WRITE_PARCEL_WITH_RET(data, CString, channel->peerDeviceId, SOFTBUS_ERR);
+    WRITE_PARCEL_WITH_RET(data, Int32, channel->businessType, SOFTBUS_ERR);
+    if (channel->channelType == CHANNEL_TYPE_UDP) {
+        WRITE_PARCEL_WITH_RET(data, CString, channel->myIp, SOFTBUS_ERR);
+        WRITE_PARCEL_WITH_RET(data, Int32, channel->streamType, SOFTBUS_ERR);
+        WRITE_PARCEL_WITH_RET(data, Bool, channel->isUdpFile, SOFTBUS_ERR);
+        
+        if (!channel->isServer) {
+            WRITE_PARCEL_WITH_RET(data, Int32, channel->peerPort, SOFTBUS_ERR);
+            WRITE_PARCEL_WITH_RET(data, CString, channel->peerIp, SOFTBUS_ERR);
+        }
+    }
+    WRITE_PARCEL_WITH_RET(data, Int32, channel->routeType, SOFTBUS_ERR);
+    WRITE_PARCEL_WITH_RET(data, Int32, channel->encrypt, SOFTBUS_ERR);
+    WRITE_PARCEL_WITH_RET(data, Int32, channel->algorithm, SOFTBUS_ERR);
+    WRITE_PARCEL_WITH_RET(data, Int32, channel->crc, SOFTBUS_ERR);
+    WRITE_PARCEL_WITH_RET(data, Uint32, channel->dataConfig, SOFTBUS_ERR);
+
+    return SOFTBUS_OK;
+}
+
 int32_t TransClientProxy::OnChannelOpened(const char *sessionName, const ChannelInfo *channel)
 {
     sptr<IRemoteObject> remote = Remote();
@@ -61,114 +115,8 @@ int32_t TransClientProxy::OnChannelOpened(const char *sessionName, const Channel
         return SOFTBUS_ERR;
     }
     MessageParcel data;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TRANS_LOGE(TRANS_CTRL, "write InterfaceToken failed!");
-        return SOFTBUS_ERR;
-    }
-    if (!data.WriteCString(sessionName)) {
-        TRANS_LOGE(TRANS_CTRL, "write addr type length failed");
-        return SOFTBUS_ERR;
-    }
-    if (!data.WriteInt32(channel->channelId)) {
-        TRANS_LOGE(TRANS_CTRL, "write addr type length failed");
-        return SOFTBUS_ERR;
-    }
-    if (!data.WriteInt32(channel->channelType)) {
-        TRANS_LOGE(TRANS_CTRL, "write addr type length failed");
-        return SOFTBUS_ERR;
-    }
-    if (channel->channelType == CHANNEL_TYPE_TCP_DIRECT) {
-        if (!data.WriteFileDescriptor(channel->fd)) {
-            TRANS_LOGE(TRANS_CTRL, "write addr type length failed");
-            return SOFTBUS_ERR;
-        }
-    }
-    if (!data.WriteBool(channel->isServer)) {
-        TRANS_LOGE(TRANS_CTRL, "write addr type length failed");
-        return SOFTBUS_ERR;
-    }
-    if (!data.WriteBool(channel->isEnabled)) {
-        TRANS_LOGE(TRANS_CTRL, "write addr type length failed");
-        return SOFTBUS_ERR;
-    }
-    if (!data.WriteBool(channel->isEncrypt)) {
-        TRANS_LOGE(TRANS_CTRL, "write isEncrypt failed");
-        return SOFTBUS_ERR;
-    }
-    if (!data.WriteInt32(channel->peerUid)) {
-        TRANS_LOGE(TRANS_CTRL, "write peerUid failed");
-        return SOFTBUS_ERR;
-    }
-    if (!data.WriteInt32(channel->peerPid)) {
-        TRANS_LOGE(TRANS_CTRL, "write peerPid failed");
-        return SOFTBUS_ERR;
-    }
-    if (!data.WriteCString(channel->groupId)) {
-        TRANS_LOGE(TRANS_CTRL, "write groupId failed");
-        return SOFTBUS_ERR;
-    }
-    if (!data.WriteUint32(channel->keyLen)) {
-        TRANS_LOGE(TRANS_CTRL, "write keyLen failed");
-        return SOFTBUS_ERR;
-    }
-    if (!data.WriteRawData(channel->sessionKey, channel->keyLen)) {
-        TRANS_LOGE(TRANS_CTRL, "write sessionKey and keyLen failed");
-        return SOFTBUS_ERR;
-    }
-    if (!data.WriteCString(channel->peerSessionName)) {
-        TRANS_LOGE(TRANS_CTRL, "write peerSessionName failed");
-        return SOFTBUS_ERR;
-    }
-    if (!data.WriteCString(channel->peerDeviceId)) {
-        TRANS_LOGE(TRANS_CTRL, "write peerDeviceId failed");
-        return SOFTBUS_ERR;
-    }
-    if (!data.WriteInt32(channel->businessType)) {
-        TRANS_LOGE(TRANS_CTRL, "write businessType failed");
-        return SOFTBUS_ERR;
-    }
-    if (channel->channelType == CHANNEL_TYPE_UDP) {
-        if (!data.WriteCString(channel->myIp)) {
-            TRANS_LOGE(TRANS_CTRL, "write myIp failed");
-            return SOFTBUS_ERR;
-        }
-        if (!data.WriteInt32(channel->streamType)) {
-            TRANS_LOGE(TRANS_CTRL, "write streamType failed");
-            return SOFTBUS_ERR;
-        }
-        if (!data.WriteBool(channel->isUdpFile)) {
-            TRANS_LOGE(TRANS_CTRL, "write isUdpFile failed");
-            return SOFTBUS_ERR;
-        }
-        if (!channel->isServer) {
-            if (!data.WriteInt32(channel->peerPort)) {
-                TRANS_LOGE(TRANS_CTRL, "write peerPort failed");
-                return SOFTBUS_ERR;
-            }
-            if (!data.WriteCString(channel->peerIp)) {
-                TRANS_LOGE(TRANS_CTRL, "write peerIp failed");
-                return SOFTBUS_ERR;
-            }
-        }
-    }
-    if (!data.WriteInt32(channel->routeType)) {
-        TRANS_LOGE(TRANS_CTRL, "write route type failed");
-        return SOFTBUS_ERR;
-    }
-    if (!data.WriteInt32(channel->encrypt)) {
-        TRANS_LOGE(TRANS_CTRL, "write encrypt failed");
-        return SOFTBUS_ERR;
-    }
-    if (!data.WriteInt32(channel->algorithm)) {
-        TRANS_LOGE(TRANS_CTRL, "write algorithm failed");
-        return SOFTBUS_ERR;
-    }
-    if (!data.WriteInt32(channel->crc)) {
-        TRANS_LOGE(TRANS_CTRL, "write crc failed");
-        return SOFTBUS_ERR;
-    }
-    if (!data.WriteUint32(channel->dataConfig)) {
-        TRANS_LOGE(TRANS_CTRL, "write data config failed");
+    if (MessageParcelWrite(data, sessionName, channel) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "message parcel write failed.");
         return SOFTBUS_ERR;
     }
 
@@ -216,8 +164,7 @@ int32_t TransClientProxy::OnChannelOpenFailed(int32_t channelId, int32_t channel
     MessageOption option = { MessageOption::TF_ASYNC };
     int32_t ret = remote->SendRequest(CLIENT_ON_CHANNEL_OPENFAILED, data, reply, option);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "OnChannelOpenFailed send request failed, ret=%{public}d",
-            ret);
+        TRANS_LOGE(TRANS_CTRL, "OnChannelOpenFailed send request failed, ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
 
