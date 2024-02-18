@@ -1383,12 +1383,15 @@ int32_t SetBroadcastingData(int32_t bcId, const BroadcastPacket *packet)
 
 int32_t StopBroadcasting(int32_t bcId)
 {
-    DISC_LOGI(DISC_BLE, "enter. bcId=%{public}d", bcId);
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_ERR, DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->StopBroadcasting != NULL,
                                    SOFTBUS_ERR, DISC_BLE, "function is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(CheckBcIdIsValid(bcId), SOFTBUS_ERR, DISC_BLE, "invalid bcId");
-
+    if (g_bcManager[bcId].srvType != SRV_TYPE_HB) {
+        DISC_LOGI(DISC_BLE, "enter. bcId=%{public}d", bcId);
+    } else {
+        DISC_LOGD(DISC_BLE, "enter. bcId=%{public}d", bcId);
+    }
     int64_t time = MgrGetSysTime();
     if (time - g_bcManager[bcId].time < BC_WAIT_TIME_MICROSEC) {
         int64_t diffTime = g_bcManager[bcId].time + BC_WAIT_TIME_MICROSEC - time;
@@ -1506,7 +1509,6 @@ static int32_t StartScanSub(int32_t listenerId)
 
 int32_t StartScan(int32_t listenerId, const BcScanParams *param)
 {
-    DISC_LOGI(DISC_BLE, "enter. listenerId=%{public}d", listenerId);
     DISC_CHECK_AND_RETURN_RET_LOGE(param != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid param!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_ERR, DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->StartScan != NULL,
@@ -1519,6 +1521,12 @@ int32_t StartScan(int32_t listenerId, const BcScanParams *param)
         DISC_LOGE(DISC_BLE, "invalid param listenerId. listenerId=%{public}d", listenerId);
         SoftBusMutexUnlock(&g_scanLock);
         return SOFTBUS_ERR;
+    }
+
+    if (g_scanManager[listenerId].srvType != SRV_TYPE_HB) {
+        DISC_LOGI(DISC_BLE, "enter. listenerId=%{public}d", listenerId);
+    } else {
+        DISC_LOGD(DISC_BLE, "enter. listenerId=%{public}d", listenerId);
     }
 
     g_scanManager[listenerId].param = *param;
@@ -1539,7 +1547,6 @@ int32_t StartScan(int32_t listenerId, const BcScanParams *param)
 
 int32_t StopScan(int32_t listenerId)
 {
-    DISC_LOGI(DISC_BLE, "enter. listenerId=%{public}d", listenerId);
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_ERR, DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->StopScan != NULL,
                                    SOFTBUS_ERR, DISC_BLE, "function is null!");
@@ -1551,6 +1558,11 @@ int32_t StopScan(int32_t listenerId)
         DISC_LOGE(DISC_BLE, "invalid param listenerId. listenerId=%{public}d", listenerId);
         SoftBusMutexUnlock(&g_scanLock);
         return SOFTBUS_ERR;
+    }
+    if (g_scanManager[listenerId].srvType != SRV_TYPE_HB) {
+        DISC_LOGI(DISC_BLE, "enter. listenerId=%{public}d", listenerId);
+    } else {
+        DISC_LOGD(DISC_BLE, "enter. listenerId=%{public}d", listenerId);
     }
     if (!g_scanManager[listenerId].isScanning) {
         DISC_LOGI(DISC_BLE, "listenerId is not scanning. listenerId=%{public}d", listenerId);
