@@ -214,9 +214,9 @@ void VtpInstance::DestroyVtp(const std::string &pkgName)
         return;
     }
 
-    TRANS_LOGI(TRANS_STREAM, "begin to destroy vtp instance");
+    TRANS_LOGD(TRANS_STREAM, "begin to destroy vtp instance");
     FtDestroy();
-    TRANS_LOGI(TRANS_STREAM, "success to destroy vtp instance");
+    TRANS_LOGD(TRANS_STREAM, "success to destroy vtp instance");
     isDestroyed_ = true;
     initVtpCount_ = 0;
 }
