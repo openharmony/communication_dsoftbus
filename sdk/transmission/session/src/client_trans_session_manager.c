@@ -73,8 +73,9 @@ int32_t CheckPermissionState(int32_t sessionId)
         }
         LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
             if (sessionNode->sessionId == sessionId) {
+                bool permissionState = serverNode->permissionState;
                 (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-                return serverNode->permissionState ? SOFTBUS_OK : SOFTBUS_PERMISSION_DENIED;
+                return permissionState ? SOFTBUS_OK : SOFTBUS_PERMISSION_DENIED;
             }
         }
     }
