@@ -132,5 +132,16 @@ int32_t LnnStopHeartBeatAdvByTypeNow(LnnHeartbeatType registedHbType)
 {
     return HeartBeatStrategyInterface()->LnnStopHeartBeatAdvByTypeNow(registedHbType);
 }
+
+int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
+    void *para, uint64_t delayMillis)
+{
+    return HeartBeatStrategyInterface()->LnnAsyncCallbackDelayHelper(looper, callback, para, delayMillis);
+}
+
+int32_t LnnStartHeartbeat(uint64_t delayMillis)
+{
+    return HeartBeatStrategyInterface()->LnnStartHeartbeat(delayMillis);
+}
 }
 } // namespace OHOS

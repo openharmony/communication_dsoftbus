@@ -152,9 +152,9 @@ HWTEST_F(AuthEnhanceMockTest, AUTH_INIT_Test_001, TestSize.Level0)
     NiceMock<LnnHichainInterfaceMock> hichainMock;
     GroupAuthManager authManager;
     DeviceGroupManager groupManager;
-    AuthCommonInterfaceMock commMock;
+    NiceMock<AuthCommonInterfaceMock> commMock;
     AuthInitMock(connMock, hichainMock, authManager, groupManager);
-    EXPECT_CALL(commMock, LnnAsyncCallbackDelayHelper(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    ON_CALL(commMock, LnnAsyncCallbackDelayHelper(_, _, _, _)).WillByDefault(Return(SOFTBUS_OK));
     int32_t ret = AuthInit();
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
@@ -171,17 +171,17 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_001, TestSize.Level1
     NiceMock<LnnHichainInterfaceMock> hichainMock;
     LnnSocketInterfaceMock socketMock;
     AuthNetLedgertInterfaceMock ledgermock;
-    AuthCommonInterfaceMock commMock;
+    NiceMock<AuthCommonInterfaceMock> commMock;
     GroupAuthManager authManager;
     DeviceGroupManager groupManager;
     AuthInitMock(connMock, hichainMock, authManager, groupManager);
-    EXPECT_CALL(commMock, LnnAsyncCallbackDelayHelper(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    ON_CALL(commMock, LnnAsyncCallbackDelayHelper(_, _, _, _)).WillByDefault(Return(SOFTBUS_OK));
     int32_t ret = AuthInit();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     EXPECT_CALL(ledgermock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(connMock, ConnConnectDevice(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(socketMock, ConnOpenClientSocket(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(commMock, SoftBusGetBtState).WillRepeatedly(Return(BLE_ENABLE));
+    ON_CALL(commMock, SoftBusGetBtState).WillByDefault(Return(BLE_ENABLE));
     ret = AuthStartVerify(&g_connInfo, g_requestId, &g_callback, true);
     SoftBusSleepMs(MILLIS);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -198,13 +198,14 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_002, TestSize.Level1
     NiceMock<LnnConnectInterfaceMock> connMock;
     NiceMock<LnnHichainInterfaceMock> hichainMock;
     AuthNetLedgertInterfaceMock ledgermock;
-    AuthCommonInterfaceMock commMock;
+    NiceMock<AuthCommonInterfaceMock> commMock;
     LnnSocketInterfaceMock socketMock;
     GroupAuthManager authManager;
     DeviceGroupManager groupManager;
     AuthInitMock(connMock, hichainMock, authManager, groupManager);
-    EXPECT_CALL(commMock, LnnAsyncCallbackDelayHelper(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    ON_CALL(commMock, LnnAsyncCallbackDelayHelper(_, _, _, _)).WillByDefault(Return(SOFTBUS_OK));
     int32_t ret = AuthInit();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
     EXPECT_CALL(ledgermock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(connMock, ConnConnectDevice(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(socketMock, ConnOpenClientSocket).WillRepeatedly(Return(2));
@@ -227,21 +228,21 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_CONN_FAILED_001, TestSize.Level1)
     NiceMock<LnnHichainInterfaceMock> hichainMock;
     AuthNetLedgertInterfaceMock ledgermock;
     LnnSocketInterfaceMock socketMock;
-    AuthCommonInterfaceMock commMock;
+    NiceMock<AuthCommonInterfaceMock> commMock;
     GroupAuthManager authManager;
     DeviceGroupManager groupManager;
     AuthInitMock(connMock, hichainMock, authManager, groupManager);
-    EXPECT_CALL(commMock, LnnAsyncCallbackDelayHelper(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    ON_CALL(commMock, LnnAsyncCallbackDelayHelper(_, _, _, _)).WillByDefault(Return(SOFTBUS_OK));
+    int32_t ret = AuthInit();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
     EXPECT_CALL(connMock, ConnSetConnectCallback(_, _))
         .WillRepeatedly(LnnConnectInterfaceMock::ActionofConnSetConnectCallback);
     EXPECT_CALL(ledgermock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    int32_t ret = AuthInit();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
     EXPECT_CALL(connMock, ConnConnectDevice(_, _, NotNull()))
         .WillRepeatedly(LnnConnectInterfaceMock::ActionofOnConnectFailed);
     EXPECT_CALL(connMock, ConnPostBytes).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(socketMock, ConnOpenClientSocket(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(commMock, SoftBusGetBtState).WillRepeatedly(Return(BLE_ENABLE));
+    ON_CALL(commMock, SoftBusGetBtState).WillByDefault(Return(BLE_ENABLE));
     ret = AuthStartVerify(&g_connInfo, g_requestId, &g_callback, true);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     SoftBusSleepMs(MILLIS);
@@ -259,23 +260,23 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_003, TestSize.Level1
     NiceMock<LnnHichainInterfaceMock> hichainMock;
     AuthNetLedgertInterfaceMock ledgermock;
     LnnSocketInterfaceMock socketMock;
-    AuthCommonInterfaceMock commMock;
+    NiceMock<AuthCommonInterfaceMock> commMock;
     GroupAuthManager authManager;
     DeviceGroupManager groupManager;
     NodeInfo *info = {0};
     AuthInitMock(connMock, hichainMock, authManager, groupManager);
-    EXPECT_CALL(commMock, LnnAsyncCallbackDelayHelper(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    ON_CALL(commMock, LnnAsyncCallbackDelayHelper(_, _, _, _)).WillByDefault(Return(SOFTBUS_OK));
+    int32_t ret = AuthInit();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
     EXPECT_CALL(connMock, ConnSetConnectCallback(_, _))
         .WillRepeatedly(LnnConnectInterfaceMock::ActionofConnSetConnectCallback);
     EXPECT_CALL(ledgermock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ledgermock, LnnGetLocalNodeInfo).WillRepeatedly(Return(info));
-    int32_t ret = AuthInit();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
     EXPECT_CALL(connMock, ConnConnectDevice(_, _, NotNull()))
         .WillRepeatedly(LnnConnectInterfaceMock::ActionofOnConnectSuccessed);
     EXPECT_CALL(connMock, ConnPostBytes).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(socketMock, ConnOpenClientSocket(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(commMock, SoftBusGetBtState).WillRepeatedly(Return(BLE_ENABLE));
+    ON_CALL(commMock, SoftBusGetBtState).WillByDefault(Return(BLE_ENABLE));
     ret = AuthStartVerify(&g_connInfo, g_requestId, &g_callback, true);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     SoftBusSleepMs(MILLIS);

@@ -33,6 +33,7 @@
 namespace OHOS {
 using namespace testing::ext;
 constexpr uint32_t CAPABILTY = 17;
+constexpr uint64_t FEATURE = 1;
 using namespace testing;
 class LNNLedgerMockTest : public testing::Test {
 public:
@@ -70,6 +71,7 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_001, TestSize.Level1)
     LocalLedgerDepsInterfaceMock localLedgerMock;
     EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
     EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_, _)).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(localLedgerMock, LnnGetFeatureCapabilty()).WillRepeatedly(Return(FEATURE));
     EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_ERR);
 }
 
@@ -81,9 +83,11 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_001, TestSize.Level1)
 */
 HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_002, TestSize.Level1)
 {
-    LocalLedgerDepsInterfaceMock localLedgerMock;
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
     EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
     EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, LnnGetFeatureCapabilty()).WillRepeatedly(Return(FEATURE));
+    ON_CALL(localLedgerMock, GetCommonOsType).WillByDefault(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock,
         GetCommonDevInfo(_, NotNull(), _)).WillRepeatedly(localLedgerMock.LedgerGetCommonDevInfo);
     EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -121,6 +125,7 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_004, TestSize.Level1)
     LocalLedgerDepsInterfaceMock localLedgerMock;
     EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
     EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, LnnGetFeatureCapabilty()).WillRepeatedly(Return(FEATURE));
     EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_, _, _)).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, SoftBusRegBusCenterVarDump(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -138,6 +143,9 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_005, TestSize.Level1)
     LocalLedgerDepsInterfaceMock localLedgerMock;
     EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
     EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, LnnGetFeatureCapabilty()).WillRepeatedly(Return(FEATURE));
+    EXPECT_CALL(localLedgerMock, GetCommonOsType(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, GetCommonOsVersion(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_)).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_ERR);
@@ -154,6 +162,9 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_006, TestSize.Level1)
     LocalLedgerDepsInterfaceMock localLedgerMock;
     EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
     EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, LnnGetFeatureCapabilty()).WillRepeatedly(Return(FEATURE));
+    EXPECT_CALL(localLedgerMock, GetCommonOsType(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, GetCommonOsVersion(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, SoftBusRegBusCenterVarDump(_, _)).WillRepeatedly(Return(SOFTBUS_ERR));
@@ -171,6 +182,9 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_007, TestSize.Level1)
     LocalLedgerDepsInterfaceMock localLedgerMock;
     EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
     EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, LnnGetFeatureCapabilty()).WillRepeatedly(Return(FEATURE));
+    EXPECT_CALL(localLedgerMock, GetCommonOsType(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, GetCommonOsVersion(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_, _, _))
         .WillOnce(Return(SOFTBUS_OK)).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -202,6 +216,9 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_009, TestSize.Level1)
 {
     LocalLedgerDepsInterfaceMock localLedgerMock;
     EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, LnnGetFeatureCapabilty()).WillRepeatedly(Return(FEATURE));
+    EXPECT_CALL(localLedgerMock, GetCommonOsType(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, GetCommonOsVersion(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, LnnInitOhosAccount()).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_TRUE(LnnInitLocalLedgerDelay() == SOFTBUS_OK);
 }
@@ -222,6 +239,9 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_001, TestSize.Level1)
     LocalLedgerDepsInterfaceMock localLedgerMock;
     EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
     EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, LnnGetFeatureCapabilty()).WillRepeatedly(Return(FEATURE));
+    EXPECT_CALL(localLedgerMock, GetCommonOsType(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, GetCommonOsVersion(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock,
         GetCommonDevInfo(_, NotNull(), _)).WillRepeatedly(localLedgerMock.LedgerGetCommonDevInfo);
     EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -246,7 +266,7 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_001, TestSize.Level1)
     EXPECT_EQ(g_localKeyTable[9].getInfo(infoMinsize, len), SOFTBUS_MEM_ERR);
     EXPECT_EQ(g_localKeyTable[10].getInfo(infoMinsize, len), SOFTBUS_MEM_ERR);
     EXPECT_EQ(g_localKeyTable[11].getInfo(infoMinsize, len), SOFTBUS_MEM_ERR);
-    EXPECT_EQ(g_localKeyTable[18].getInfo(infoMinsize, len), SOFTBUS_MEM_ERR);
+    EXPECT_EQ(g_localKeyTable[18].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[19].getInfo(infoMinsize, len), SOFTBUS_MEM_ERR);
     EXPECT_EQ(g_localKeyTable[35].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
     LnnDeinitLocalLedger();
@@ -263,10 +283,12 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_002, TestSize.Level1)
     char infoTmp[] = "";
     char *infoMinsize = infoTmp;
     uint32_t len = 0;
-
     LocalLedgerDepsInterfaceMock localLedgerMock;
     EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
     EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, LnnGetFeatureCapabilty()).WillRepeatedly(Return(FEATURE));
+    EXPECT_CALL(localLedgerMock, GetCommonOsType(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, GetCommonOsVersion(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock,
         GetCommonDevInfo(_, NotNull(), _)).WillRepeatedly(localLedgerMock.LedgerGetCommonDevInfo);
     EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -274,16 +296,13 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_002, TestSize.Level1)
         SoftBusRegBusCenterVarDump(_, _)).WillRepeatedly(localLedgerMock.LedgerSoftBusRegBusCenterVarDump);
     int32_t ret = LnnInitLocalLedger();
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    EXPECT_EQ(g_localKeyTable[12].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(g_localKeyTable[12].getInfo(infoMinsize, len), SOFTBUS_MEM_ERR);
     EXPECT_EQ(g_localKeyTable[13].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[14].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[15].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[16].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[17].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[20].getInfo(infoMinsize, len), SOFTBUS_MEM_ERR);
-    EXPECT_EQ(g_localKeyTable[21].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[22].getInfo(infoMinsize, len), SOFTBUS_MEM_ERR);
-    EXPECT_EQ(g_localKeyTable[23].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[24].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[25].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[26].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
@@ -308,83 +327,53 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_002, TestSize.Level1)
 */
 HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_003, TestSize.Level1)
 {
-    char *infoCharNull = nullptr;
-    void *infoVoidNull = nullptr;
-    uint32_t len = 0;
-
     LocalLedgerDepsInterfaceMock localLedgerMock;
     EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
     EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, LnnGetFeatureCapabilty()).WillRepeatedly(Return(FEATURE));
+    EXPECT_CALL(localLedgerMock, GetCommonOsType(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, GetCommonOsVersion(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock,
         GetCommonDevInfo(_, NotNull(), _)).WillRepeatedly(localLedgerMock.LedgerGetCommonDevInfo);
     EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock,
         SoftBusRegBusCenterVarDump(_, _)).WillRepeatedly(localLedgerMock.LedgerSoftBusRegBusCenterVarDump);
-    int32_t ret = LnnInitLocalLedger();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
     for (uint32_t i = 0; i < sizeof(g_localKeyTable) / sizeof(LocalLedgerKey); i++) {
         if (g_localKeyTable[i].getInfo != NULL) {
-            EXPECT_EQ(g_localKeyTable[i].getInfo((void *)infoCharNull, len), SOFTBUS_INVALID_PARAM);
+            EXPECT_EQ(g_localKeyTable[i].getInfo(nullptr, 0), SOFTBUS_INVALID_PARAM);
         }
     }
-    EXPECT_EQ(g_localKeyTable[1].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[2].setInfo(infoVoidNull), SOFTBUS_ERR);
-    EXPECT_EQ(g_localKeyTable[4].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[5].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[6].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[7].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[8].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[9].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[10].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[11].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[13].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[14].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[15].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
-    LnnDeinitLocalLedger();
-}
-
-/*
-* @tc.name: Local_Ledger_Key_Test_004
-* @tc.desc: local ledger key test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_004, TestSize.Level1)
-{
-    char *infoCharNull = nullptr;
-    void *infoVoidNull = nullptr;
-    uint32_t len = 0;
-
-    LocalLedgerDepsInterfaceMock localLedgerMock;
-    EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
-    EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(localLedgerMock,
-        GetCommonDevInfo(_, NotNull(), _)).WillRepeatedly(localLedgerMock.LedgerGetCommonDevInfo);
-    EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(localLedgerMock,
-        SoftBusRegBusCenterVarDump(_, _)).WillRepeatedly(localLedgerMock.LedgerSoftBusRegBusCenterVarDump);
-    int32_t ret = LnnInitLocalLedger();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    for (uint32_t i = 0; i < sizeof(g_localKeyTable) / sizeof(LocalLedgerKey); i++) {
-        if (g_localKeyTable[i].getInfo != NULL) {
-            EXPECT_EQ(g_localKeyTable[i].getInfo((void *)infoCharNull, len), SOFTBUS_INVALID_PARAM);
-        }
-    }
-    EXPECT_EQ(g_localKeyTable[16].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[17].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[18].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[19].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[20].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[21].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[22].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[23].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[24].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[27].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[30].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[32].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[33].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[35].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(g_localKeyTable[41].setInfo(infoVoidNull), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UpdateLocalDeviceUdid(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UpdateLocalNetworkId(nullptr), SOFTBUS_ERR);
+    EXPECT_EQ(UpdateLocalUuid(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UpdateLocalDeviceType(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UpdateLocalDeviceName(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UpdateUnifiedName(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UpdateUnifiedDefaultName(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UpdateNickName(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UpdateLocalBtMac(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UpdateLocalDeviceIp(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UpdateLocalNetIfName(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(LlUpdateNodeAddr(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UpdateP2pMac(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UpdateWifiCfg(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UpdateChanList5g(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UpdateP2pGoMac(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(LlUpdateLocalOffLineCode(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(LlUpdateLocalExtData(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UpdateWifiDirectAddr(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(LlUpdateLocalP2pIp(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UpdateLocalSessionPort(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UpdateLocalAuthPort(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UpdateLocalProxyPort(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UpdateLocalNetCapability(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UpdateLocalFeatureCapability(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UpdateLocalCipherInfoKey(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UpdateLocalCipherInfoIv(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(LlUpdateStaticCapLen(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(LlUpdateAccount(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(LlUpdateStaticCapability(nullptr), SOFTBUS_INVALID_PARAM);
     LnnDeinitLocalLedger();
 }
 
@@ -405,9 +394,16 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_005, TestSize.Level1)
     (void)memset_s(nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
 
     LocalLedgerDepsInterfaceMock localLedgerMock;
+    EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
+    EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, LnnGetFeatureCapabilty()).WillRepeatedly(Return(FEATURE));
+    EXPECT_CALL(localLedgerMock, GetCommonOsType(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, GetCommonOsVersion(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock,
+        GetCommonDevInfo(_, NotNull(), _)).WillRepeatedly(localLedgerMock.LedgerGetCommonDevInfo);
     EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_))
-    .WillOnce(Return(SOFTBUS_OK))
-    .WillRepeatedly(Return(SOFTBUS_ERR));
+        .WillOnce(Return(SOFTBUS_OK))
+        .WillRepeatedly(Return(SOFTBUS_ERR));
     ret = LnnInitLocalNodeInfo(nodeInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = LnnInitLocalNodeInfo(nodeInfo);
