@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,7 +79,7 @@ int UnpackReply(const cJSON *msg, AppInfo *appInfo, uint16_t *fastDataSize);
 
 char *PackError(int errCode, const char *errDesc);
 
-int UnpackReplyErrCode(const cJSON *msg, int32_t *errCode);
+int32_t UnpackReplyErrCode(const cJSON *msg, int32_t *errCode);
 
 char *TransTdcPackFastData(const AppInfo *appInfo, uint32_t *outLen);
 
