@@ -577,7 +577,10 @@ static int32_t AddDiscInfoToList(SoftBusList *serviceList, const char *packageNa
         return SOFTBUS_LOCK_ERR;
     }
 
-    DISC_LOGD(DISC_CONTROL, "packageName=%{public}s, id=%{public}d", packageName, info->id);
+    bool isDumpable = (strcmp(g_discModuleMap[0], packageName) != 0);
+    if (isDumpable) {
+        DISC_LOGI(DISC_CONTROL, "packageName=%{public}s, id=%{public}d", packageName, info->id);
+    }
 
     DiscItem *itemNode = NULL;
     bool exist = false;
@@ -585,8 +588,9 @@ static int32_t AddDiscInfoToList(SoftBusList *serviceList, const char *packageNa
         if (strcmp(itemNode->packageName, packageName) != 0) {
             continue;
         }
-
-        DumpDiscInfoList(itemNode);
+        if (isDumpable) {
+            DumpDiscInfoList(itemNode);
+        }
 
         DiscInfo *infoNode = NULL;
         LIST_FOR_EACH_ENTRY(infoNode, &(itemNode->InfoList), DiscInfo, node) {
@@ -647,7 +651,10 @@ static DiscInfo *RemoveInfoFromList(SoftBusList *serviceList, const char *packag
         return NULL;
     }
 
-    DISC_LOGI(DISC_CONTROL, "packageName=%{public}s, id=%{public}d", packageName, id);
+    bool isDumpable = (strcmp(g_discModuleMap[0], packageName) != 0);
+    if (isDumpable) {
+        DISC_LOGI(DISC_CONTROL, "packageName=%{public}s, id=%{public}d", packageName, id);
+    }
 
     bool isIdExist = false;
     DiscItem *itemNode = NULL;
@@ -656,8 +663,9 @@ static DiscInfo *RemoveInfoFromList(SoftBusList *serviceList, const char *packag
         if (strcmp(itemNode->packageName, packageName) != 0) {
             continue;
         }
-
-        DumpDiscInfoList(itemNode);
+        if (isDumpable) {
+            DumpDiscInfoList(itemNode);
+        }
 
         if (itemNode->infoNum == 0) {
             serviceList->cnt--;
