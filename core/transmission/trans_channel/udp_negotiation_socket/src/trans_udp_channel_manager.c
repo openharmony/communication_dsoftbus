@@ -92,7 +92,7 @@ static void TransUdpTimerProc(void)
             }
             ReleaseUdpChannelId((int32_t)(udpChannel->info.myData.channelId));
             ListDelete(&(udpChannel->node));
-            TRANS_LOGI(TRANS_CTRL, "channelId = %{public}d", udpChannel->info.myData.channelId);
+            TRANS_LOGI(TRANS_CTRL, "channelId=%{public}d", udpChannel->info.myData.channelId);
             g_udpChannelMgr->cnt--;
 
             ListAdd(&udpTmpChannelList, &(udpChannel->node));
@@ -171,7 +171,7 @@ int32_t TransAddUdpChannel(UdpChannelInfo *channel)
     }
     ListInit(&(channel->node));
     ListAdd(&(g_udpChannelMgr->list), &(channel->node));
-    TRANS_LOGI(TRANS_CTRL, "channelId = %{public}d", channel->info.myData.channelId);
+    TRANS_LOGI(TRANS_CTRL, "channelId=%{public}d", channel->info.myData.channelId);
     g_udpChannelMgr->cnt++;
 
     (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
@@ -197,7 +197,7 @@ int32_t TransDelUdpChannel(int32_t channelId)
         if (udpChannelNode->info.myData.channelId == channelId) {
             ReleaseUdpChannelId((int32_t)(udpChannelNode->info.myData.channelId));
             ListDelete(&(udpChannelNode->node));
-            TRANS_LOGI(TRANS_CTRL, "delete channelId = %{public}d", channelId);
+            TRANS_LOGI(TRANS_CTRL, "delete channelId=%{public}d", channelId);
             SoftBusFree(udpChannelNode);
             g_udpChannelMgr->cnt--;
             (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
@@ -240,7 +240,7 @@ void TransCloseUdpChannelByNetWorkId(const char* netWorkId)
         if (strcmp(udpChannel->info.peerNetWorkId, netWorkId) == 0) {
             ReleaseUdpChannelId((int32_t)(udpChannel->info.myData.channelId));
             ListDelete(&(udpChannel->node));
-            TRANS_LOGI(TRANS_CTRL, "channelId = %{public}d", udpChannel->info.myData.channelId);
+            TRANS_LOGI(TRANS_CTRL, "channelId=%{public}d", udpChannel->info.myData.channelId);
             g_udpChannelMgr->cnt--;
 
             ListAdd(&udpDeleteChannelList, &(udpChannel->node));
