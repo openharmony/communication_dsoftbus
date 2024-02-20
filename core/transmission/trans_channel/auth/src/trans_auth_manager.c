@@ -242,7 +242,7 @@ static int32_t OnRequsetUpdateAuthChannel(int32_t authId, AppInfo *appInfo)
     if (CopyPeerAppInfo(appInfo, &item->appInfo) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "CopyPeerAppInfo failed");
         ListDelete(&item->node);
-        TRANS_LOGI(TRANS_CTRL, "delete channelId = %{public}" PRId64, item->appInfo.myData.channelId);
+        TRANS_LOGI(TRANS_CTRL, "delete channelId=%{public}" PRId64, item->appInfo.myData.channelId);
         SoftBusFree(item);
         SoftBusMutexUnlock(&g_authChannelList->lock);
         return SOFTBUS_MEM_ERR;
@@ -555,7 +555,7 @@ static int32_t AddAuthChannelInfo(AuthChannelInfo *info)
         }
     }
     ListAdd(&g_authChannelList->list, &info->node);
-    TRANS_LOGI(TRANS_CTRL, "add channelId = %{public}" PRId64, info->appInfo.myData.channelId);
+    TRANS_LOGI(TRANS_CTRL, "add channelId=%{public}" PRId64, info->appInfo.myData.channelId);
     g_authChannelList->cnt++;
     (void)SoftBusMutexUnlock(&g_authChannelList->lock);
     return SOFTBUS_OK;
@@ -574,7 +574,7 @@ static void DelAuthChannelInfoByChanId(int32_t channelId)
     LIST_FOR_EACH_ENTRY_SAFE(item, tmp, &g_authChannelList->list, AuthChannelInfo, node) {
         if (item->appInfo.myData.channelId == channelId) {
             ListDelete(&item->node);
-            TRANS_LOGI(TRANS_CTRL, "delete channelId = %{public}d", channelId);
+            TRANS_LOGI(TRANS_CTRL, "delete channelId=%{public}d", channelId);
             SoftBusFree(item);
             g_authChannelList->cnt--;
             break;
@@ -832,7 +832,7 @@ int32_t TransCloseAuthChannel(int32_t channelId)
             continue;
         }
         ListDelete(&channel->node);
-        TRANS_LOGI(TRANS_CTRL, "delete channelId = %{public}d", channelId);
+        TRANS_LOGI(TRANS_CTRL, "delete channelId=%{public}d", channelId);
         g_authChannelList->cnt--;
         AuthCloseChannel(channel->authId);
         NofifyCloseAuthChannel(channel->appInfo.myData.pkgName, channel->appInfo.myData.pid, channelId);
