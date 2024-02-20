@@ -595,6 +595,8 @@ HWTEST_F(ConnectionBrTest, testBrPendingPacket005, TestSize.Level1)
     info.type = CONNECT_BR;
     (void)memcpy_s(info.brOption.brMac, BT_MAC_LEN, TEST_BR_MAC, BT_MAC_LEN);
     printf("brMac: %s\n", info.brOption.brMac);
+    ConnBrConnection *connection = ConnBrCreateConnection(TEST_BR_MAC, CONN_SIDE_CLIENT, INVALID_SOCKET_HANDLE);
+    ConnBrSaveConnection(connection);
     ret = ConnDisconnectDeviceAllConn(&info);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
