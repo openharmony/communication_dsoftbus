@@ -141,7 +141,7 @@ int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type)
         return SOFTBUS_MALLOC_ERR;
     }
     ListAdd(&pendingList->list, &item->node);
-    TRANS_LOGI(TRANS_SVC, "add channelId = %{public}d", item->channelId);
+    TRANS_LOGI(TRANS_SVC, "add channelId=%{public}d", item->channelId);
     pendingList->cnt++;
     SoftBusMutexUnlock(&pendingList->lock);
 
@@ -163,7 +163,7 @@ int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type)
 
     SoftBusMutexLock(&pendingList->lock);
     ListDelete(&item->node);
-    TRANS_LOGI(TRANS_SVC, "delete channelId = %{public}d", item->channelId);
+    TRANS_LOGI(TRANS_SVC, "delete channelId=%{public}d", item->channelId);
     pendingList->cnt--;
     SoftBusMutexUnlock(&pendingList->lock);
     ReleasePendingItem(item);
