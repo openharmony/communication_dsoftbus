@@ -563,6 +563,10 @@ static void BleOnScanStop(int listenerId, int status)
 
 static void BleOnStateChanged(int32_t listenerId, int32_t state)
 {
+    DiscEventExtra extra = { 0 };
+    DiscEventExtraInit(&extra);
+    extra.bleTurnState = state;
+    DISC_EVENT(EVENT_SCENE_BLE, EVENT_STAGE_STATE_TURN, extra);
     (void)listenerId;
     SoftBusMessage *msg = NULL;
     switch (state) {
@@ -848,7 +852,7 @@ static void DfxRecordAdevertiserEnd(int32_t adv, int32_t reason)
     DiscEventExtra extra = { 0 };
     DiscEventExtraInit(&extra);
     extra.discType = BLE + 1;
-    extra.broadcastType = adv;
+    extra.broadcastType = adv + 1;
     extra.errcode = reason;
     extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
     DISC_EVENT(EVENT_SCENE_BLE, EVENT_STAGE_BROADCAST, extra);
@@ -968,15 +972,11 @@ static int32_t GetScannerParam(int32_t freq, BcScanParams *scanParam)
 
 static void DfxRecordScanEnd(int32_t reason)
 {
-    if (reason == SOFTBUS_OK) {
-        return;
-    }
-
     DiscEventExtra extra = { 0 };
     DiscEventExtraInit(&extra);
     extra.scanType = BLE + 1;
     extra.errcode = reason;
-    extra.result = EVENT_STAGE_RESULT_FAILED;
+    extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
     DISC_EVENT(EVENT_SCENE_BLE, EVENT_STAGE_SCAN, extra);
 }
 
@@ -1003,6 +1003,7 @@ static void StartScaner(void)
         DISC_LOGE(DISC_BLE, "start scan failed");
         return;
     }
+    DfxRecordScanEnd(SOFTBUS_OK);
     DISC_LOGI(DISC_BLE, "StartScanner success");
 }
 
@@ -1187,21 +1188,32 @@ static SoftBusMessage *CreateBleHandlerMsg(int32_t what, uint64_t arg1, uint64_t
     return msg;
 }
 
-static void DfxRecordBleProcessEnd(uint8_t publishFlag, uint8_t activeFlag, const void *option, int32_t reason)
+static void DfxRecordBleProcessEnd(uint8_t publishFlag, uint8_t activeFlag, int32_t funcCode,
+    const void *option, int32_t reason)
 {
     DiscEventExtra extra = { 0 };
     DiscEventExtraInit(&extra);
-    extra.discType = BLE + 1;
-    extra.discMode = (activeFlag == BLE_ACTIVE) ? DISCOVER_MODE_ACTIVE : DISCOVER_MODE_PASSIVE;
     extra.errcode = reason;
+    extra.discType = BLE + 1;
+    extra.interFuncType = funcCode + 1;
+    extra.discMode = (activeFlag == BLE_ACTIVE) ? DISCOVER_MODE_ACTIVE : DISCOVER_MODE_PASSIVE;
     extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
 
+    const char *capabilityData = NULL;
     if (publishFlag == BLE_PUBLISH && option != NULL) {
         PublishOption *publishOption = (PublishOption *)option;
         extra.capabilityBit = (int32_t)publishOption->capabilityBitmap[0];
+        capabilityData = (const char *)publishOption->capabilityData;
     } else if (publishFlag == BLE_SUBSCRIBE && option != NULL) {
         SubscribeOption *subscribeOption = (SubscribeOption *)option;
         extra.capabilityBit = (int32_t)subscribeOption->capabilityBitmap[0];
+        capabilityData = (const char *)subscribeOption->capabilityData;
+    }
+
+    char data[MAX_CAPABILITYDATA_LEN] = { 0 };
+    if (capabilityData != NULL && strncpy_s(data, MAX_CAPABILITYDATA_LEN, capabilityData,
+        MAX_CAPABILITYDATA_LEN - 1) == EOK) {
+        extra.capabilityData = data;
     }
     DISC_EVENT(EVENT_SCENE_BLE, EVENT_STAGE_BLE_PROCESS, extra);
 }
@@ -1210,24 +1222,24 @@ static int32_t ProcessBleDiscFunc(bool isStart, uint8_t publishFlags, uint8_t ac
     int32_t funcCode, const void *option)
 {
     if (isStart && SoftBusGetBtState() != BLE_ENABLE) {
-        DfxRecordBleProcessEnd(publishFlags, activeFlags, option, SOFTBUS_ERR);
+        DfxRecordBleProcessEnd(publishFlags, activeFlags, funcCode, option, SOFTBUS_ERR);
         DISC_LOGE(DISC_BLE, "get bt state failed.");
         return SOFTBUS_ERR;
     }
     int32_t ret = ProcessBleInfoManager(isStart, publishFlags, activeFlags, option);
     if (ret != SOFTBUS_OK) {
-        DfxRecordBleProcessEnd(publishFlags, activeFlags, option, ret);
+        DfxRecordBleProcessEnd(publishFlags, activeFlags, funcCode, option, ret);
         DISC_LOGE(DISC_BLE, "process ble info manager failed");
         return ret;
     }
     SoftBusMessage *msg = CreateBleHandlerMsg(funcCode, 0, 0, NULL);
     if (msg == NULL) {
-        DfxRecordBleProcessEnd(publishFlags, activeFlags, option, SOFTBUS_MALLOC_ERR);
+        DfxRecordBleProcessEnd(publishFlags, activeFlags, funcCode, option, SOFTBUS_MALLOC_ERR);
         DISC_LOGE(DISC_BLE, "CreateBleHandlerMsg failed");
         return SOFTBUS_MALLOC_ERR;
     }
     g_discBleHandler.looper->PostMessage(g_discBleHandler.looper, msg);
-    DfxRecordBleProcessEnd(publishFlags, activeFlags, option, SOFTBUS_OK);
+    DfxRecordBleProcessEnd(publishFlags, activeFlags, funcCode, option, SOFTBUS_OK);
     return SOFTBUS_OK;
 }
 
