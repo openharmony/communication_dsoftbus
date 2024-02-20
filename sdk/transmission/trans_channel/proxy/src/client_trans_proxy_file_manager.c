@@ -596,7 +596,7 @@ static ProxyFileMutexLock *GetSessionFileLock(int32_t channelId)
     sessionLock->count = 1;
     sessionLock->channelId = channelId;
     ListAdd(&g_sessionFileLockList, &sessionLock->node);
-    TRANS_LOGI(TRANS_FILE, "add channelId = %{public}d", channelId);
+    TRANS_LOGI(TRANS_FILE, "add channelId=%{public}d", channelId);
     (void)SoftBusMutexUnlock(&g_sendFileInfoLock.lock);
     return sessionLock;
 }
