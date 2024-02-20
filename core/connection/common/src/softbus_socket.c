@@ -81,7 +81,7 @@ const SocketInterface *GetSocketInterface(ProtocolType protocolType)
 
 int32_t __attribute__((weak)) RegistNewIpSocket(void)
 {
-    CONN_LOGI(CONN_COMMON, "newip not deployed");
+    CONN_LOGD(CONN_COMMON, "newip not deployed");
     return SOFTBUS_OK;
 }
 

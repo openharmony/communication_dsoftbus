@@ -331,7 +331,8 @@ NO_SANITIZE("cfi") int32_t TransOnQosEvent(int32_t channelId, int32_t channelTyp
         return ret;
     }
     if (listener.OnQosEvent == NULL) {
-        TRANS_LOGE(TRANS_QOS, "listener OnQosEvent is NULL");
+        TRANS_LOGE(TRANS_QOS, "listener OnQosEvent is NULL, channelId=%{public}d, sessionId=%{public}d",
+                   channelId, sessionId);
         return SOFTBUS_ERR;
     }
     listener.OnQosEvent(sessionId, eventId, tvCount, tvList);

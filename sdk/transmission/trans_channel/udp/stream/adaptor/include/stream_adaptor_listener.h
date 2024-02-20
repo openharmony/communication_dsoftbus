@@ -105,7 +105,7 @@ public:
     void OnQosEvent(int32_t eventId, int32_t tvCount, const QosTv *tvList) override
     {
         if (adaptor_->GetListenerCallback() != nullptr && adaptor_->GetListenerCallback()->OnQosEvent != nullptr) {
-            TRANS_LOGI(TRANS_QOS, "channelId=%{public}" PRId64, adaptor_->GetChannelId());
+            TRANS_LOGD(TRANS_QOS, "channelId=%{public}" PRId64, adaptor_->GetChannelId());
             adaptor_->GetListenerCallback()->OnQosEvent(adaptor_->GetChannelId(), eventId, tvCount, tvList);
         } else {
             TRANS_LOGE(TRANS_QOS,
