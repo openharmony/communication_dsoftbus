@@ -43,7 +43,7 @@ void StreamDepacketizer::DepacketizeBuffer(char *buffer, uint32_t bufferSize)
     uint32_t tlvTotalLen = 0;
     if (header_.GetExtFlag() != 0) {
         tlvs_.Depacketize(ptr, bufferSize);
-        TRANS_LOGI(TRANS_STREAM, "TLV version=%{public}d, num=%{public}d, extLen=%{public}zd, checksum=%{public}u",
+        TRANS_LOGD(TRANS_STREAM, "TLV version=%{public}d, num=%{public}d, extLen=%{public}zd, checksum=%{public}u",
             tlvs_.GetVersion(), tlvs_.GetTlvNums(), tlvs_.GetExtLen(), tlvs_.GetCheckSum());
 
         tlvTotalLen = tlvs_.GetCheckSum() + sizeof(tlvs_.GetCheckSum());
