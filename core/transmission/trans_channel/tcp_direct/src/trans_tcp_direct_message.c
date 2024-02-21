@@ -180,7 +180,7 @@ void TransSrvDelDataBufNode(int channelId)
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpSrvDataList->list, ServerDataBuf, node) {
         if (item->channelId == channelId) {
             ListDelete(&item->node);
-            TRANS_LOGI(TRANS_BYTES, "delete channelId = %{public}d", item->channelId);
+            TRANS_LOGI(TRANS_BYTES, "delete channelId=%{public}d", item->channelId);
             SoftBusFree(item->data);
             SoftBusFree(item);
             g_tcpSrvDataList->cnt--;
