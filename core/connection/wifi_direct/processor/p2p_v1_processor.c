@@ -255,7 +255,7 @@ static void ProcessNegotiateMessage(enum WifiDirectNegotiateCmdType cmd, struct 
     }
 }
 
-static void OnOperationEvent(int32_t event, void *data)
+static void OnOperationEvent(int32_t event, struct EntityEventData *entityEvenData)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "event=%{public}d", event);
     bool reply = true;
@@ -1392,10 +1392,12 @@ static void OpenAuthConnection(struct WifiDirectNegotiateChannel *channel, struc
 
     struct DefaultNegoChannelParam param = {
         .type = AUTH_LINK_TYPE_P2P,
-        .remoteUuid = remoteUuid,
-        .remoteIp = remoteIp,
         .remotePort = remotePort,
     };
+    ret = strcpy_s(param.remoteUuid, sizeof(param.remoteUuid), remoteUuid);
+    COMM_CHECK_AND_RETURN_LOGE(ret == EOK, CONN_WIFI_DIRECT, "copy remote uuid failed");
+    ret = strcpy_s(param.remoteIp, sizeof(param.remoteIp), remoteIp);
+    COMM_CHECK_AND_RETURN_LOGE(ret == EOK, CONN_WIFI_DIRECT, "copy remote ip failed");
     struct DefaultNegoChannelOpenCallback callback = {
         .onConnectSuccess = OnAuthConnectSuccess,
         .onConnectFailure = OnAuthConnectFailure,

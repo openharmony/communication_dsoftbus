@@ -315,20 +315,23 @@ enum WifiDirectErrorCode {
     /* Error code representing waiting hand shake timeout */
     ERROR_HML_WAITING_HANDSHAKE_TIMEOUT = ERROR_BASE - 6611,
 
+    /* Error code representing opening auth failed */
+    ERROR_HML_OPEN_AUTH_FAILED = ERROR_BASE - 6612,
+
     /* Error code wait HML_CREATE_GROUP timeout */
-    ERROR_HML_CREATE_GROUP_TIMEOUT = ERROR_BASE - 6612,
+    ERROR_HML_CREATE_GROUP_TIMEOUT = ERROR_BASE - 6613,
 
     /* Error code wait HML_DESTROY_GROUP timeout */
-    ERROR_HML_DESTROY_GROUP_TIMEOUT = ERROR_BASE - 6613,
+    ERROR_HML_DESTROY_GROUP_TIMEOUT = ERROR_BASE - 6614,
 
     /* Error code wait HML_CONN_NOTIFY timeout */
-    ERROR_HML_CONN_NOTIFY_TIMEOUT = ERROR_BASE - 6614,
+    ERROR_HML_CONN_NOTIFY_TIMEOUT = ERROR_BASE - 6615,
 
     /* Error code wait HML_CONNECT_GROUP timeout */
-    ERROR_HML_CONNECT_GROUP_TIMEOUT = ERROR_BASE - 6615,
+    ERROR_HML_CONNECT_GROUP_TIMEOUT = ERROR_BASE - 6616,
 
     /* Error code wait HML_DISCONNECT_GROUP timeout */
-    ERROR_HML_DISCONNECT_GROUP_TIMEOUT = ERROR_BASE - 6616,
+    ERROR_HML_DISCONNECT_GROUP_TIMEOUT = ERROR_BASE - 6617,
 
     /* Error code representing end position of wifi direct errors */
     ERROR_WIFI_DIRECT_END = ERROR_BASE - 6999,

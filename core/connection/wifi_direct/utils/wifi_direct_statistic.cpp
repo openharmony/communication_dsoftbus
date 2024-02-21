@@ -27,7 +27,7 @@ struct WifiDirectStatistic {
     uint64_t linkTimeConsuming = 0;
     bool isReuse = false;
 };
-static std::map<int32_t, WifiDirectStatistic> g_wifiDirectStatistic;
+std::map<int32_t, WifiDirectStatistic> g_wifiDirectStatistic;
 static SoftBusMutex g_statisticLock;
 
 int32_t InitStatisticMutexLock()

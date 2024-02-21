@@ -40,7 +40,7 @@ static void ExecuteProcessRemoteNegotiateMessage(struct WifiDirectCommand *base)
     }
     negotiator->currentCommand = base;
     negotiator->currentProcessor = base->processor;
-    CONN_LOGI(CONN_WIFI_DIRECT, "currentProcessor=%s", negotiator->currentProcessor->name);
+    CONN_LOGI(CONN_WIFI_DIRECT, "currentProcessor=%{public}s", negotiator->currentProcessor->name);
     negotiator->updateCurrentRemoteDeviceId(self->msg->getPointer(self->msg, NM_KEY_NEGO_CHANNEL, NULL));
     base->processor->processNegotiateMessage(self->cmdType, base);
 }

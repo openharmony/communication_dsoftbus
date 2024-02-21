@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "adapter/single/wifi_direct_p2p_adapter.h"
 #include "wifi_direct_negotiator.h"
 #include <string.h>
 #include "securec.h"
@@ -35,6 +36,7 @@
 #include "utils/wifi_direct_utils.h"
 #include "utils/wifi_direct_anonymous.h"
 #include "utils/wifi_direct_timer_list.h"
+#include "wifi_direct_ip_manager.h"
 
 #define RETRY_COMMAND_DELAY_MS 1000
 #define WAIT_POST_REQUEST_MS 450
@@ -253,7 +255,8 @@ static bool IsMessageNeedPending(struct WifiDirectNegotiator *self, struct WifiD
         return false;
     }
     if (self->currentProcessor != processor) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "currentProcessor=%s processor=%s", self->currentProcessor->name, processor->name);
+        CONN_LOGI(CONN_WIFI_DIRECT, "currentProcessor=%{public}s processor=%{public}s",
+            self->currentProcessor->name, processor->name);
         struct WifiDirectProcessor *hmlProcessor =
             GetWifiDirectProcessorFactory()->createProcessor(WIFI_DIRECT_PROCESSOR_TYPE_HML);
         struct WifiDirectProcessor *p2pV2Processor =
@@ -395,7 +398,7 @@ static void OnNegotiateChannelDisconnected(struct WifiDirectNegotiateChannel *ch
     char uuid[UUID_BUF_LEN] = {0};
     channel->getDeviceId(channel, uuid, sizeof(uuid));
     CONN_LOGD(CONN_WIFI_DIRECT, "uuid=%{public}s", WifiDirectAnonymizeDeviceId(uuid));
-    GetLinkManager()->clearNegotiateChannelForLink(channel);
+    GetLinkManager()->removeLinkByChannel(channel);
 }
 
 static void OnTriggerChannelDataReceived(struct WifiDirectTriggerChannel *channel)
@@ -416,13 +419,32 @@ static void OnDefaultTriggerChannelDataReceived(struct WifiDirectNegotiateChanne
     processor->onDefaultTriggerChannelDataReceived(channel, data, len);
 }
 
-static void OnOperationComplete(int32_t event, void *data)
+static void CheckServerIsNeedDestroy(struct EntityEventData *entityEventData)
+{
+    if (entityEventData->groupInfo->clientDeviceSize == 0) {
+        struct WifiDirectEntity *entity = GetWifiDirectEntityFactory()->createEntity(ENTITY_TYPE_HML);
+        struct WifiDirectConnectParams params;
+        (void)memset_s(&params, sizeof(params), 0, sizeof(params));
+        if (strcpy_s(params.interface, sizeof(params.interface), IF_NAME_HML) != EOK) {
+            CONN_LOGW(CONN_WIFI_DIRECT, "copy failed. interface=%{public}s", IF_NAME_HML);
+        }
+        entity->destroyServer(&params);
+        GetWifiDirectIpManager()->cleanAllIps(IF_NAME_HML);
+    }
+}
+
+static void OnOperationComplete(int32_t event, struct EntityEventData *entityEvenData)
 {
     struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
     struct WifiDirectProcessor *processor = self->currentProcessor;
-    CONN_CHECK_AND_RETURN_LOGW(processor, CONN_WIFI_DIRECT, "current processor is null");
-
-    processor->onOperationEvent(event, data);
+    if (processor == NULL) {
+        if (event == ENTITY_EVENT_HML_DISCONNECT_COMPLETE) {
+            CheckServerIsNeedDestroy(entityEvenData);
+        }
+        CONN_LOGI(CONN_WIFI_DIRECT, "current processor is null");
+        return;
+    }
+    processor->onOperationEvent(event, entityEvenData);
 }
 
 static void OnEntityChanged(enum EntityState state)

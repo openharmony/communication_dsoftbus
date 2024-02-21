@@ -15,6 +15,7 @@
 
 #include "resource_manager_broadcast_handler.h"
 #include <string.h>
+#include "securec.h"
 #include "conn_log.h"
 #include "softbus_error_code.h"
 #include "broadcast_receiver.h"

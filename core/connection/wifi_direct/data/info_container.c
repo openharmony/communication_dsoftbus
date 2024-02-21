@@ -113,6 +113,7 @@ static void PutContainer(struct InfoContainer *self, size_t key, struct InfoCont
     }
 
     if (!value) {
+        self->entries[key].data = NULL;
         return;
     }
 

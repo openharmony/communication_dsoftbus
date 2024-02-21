@@ -148,7 +148,7 @@ static bool SupportHml()
 
 static bool SupportHmlTwo()
 {
-    bool support =  OHOS::system::GetBoolParameter("persist.sys.softbus.connect.hml_two", false);
+    bool support =  OHOS::system::GetBoolParameter("persist.sys.softbus.connect.hml_two", true);
     CONN_LOGI(CONN_WIFI_DIRECT, "persist.sys.softbus.connect.hml_two=%{public}d", support);
     return support;
 }

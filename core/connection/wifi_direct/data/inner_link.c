@@ -378,7 +378,7 @@ static size_t GetKeyFromKeyProperty(struct InfoContainerKeyProperty *keyProperty
 static bool UnmarshallingPrimary(struct InnerLink *self, enum InnerLinkKey key, uint8_t *data, size_t size)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(self != NULL, false, CONN_WIFI_DIRECT, "self is null");
-    self->putRawData(self, key, data, ALIGN_SIZE_4(size));
+    self->putRawData(self, key, data, size);
     return true;
 }
 
