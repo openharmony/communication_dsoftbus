@@ -39,6 +39,7 @@ int32_t ConnStartActionAsync(void *arg, void *(*runnable)(void *), const char *t
 {
     SoftBusThreadAttr attr;
     SoftBusThreadAttrInit(&attr);
+    attr.detachState = SOFTBUS_THREAD_DETACH;
     attr.taskName = taskName;
     SoftBusThread actionAsyncThread;
     int32_t status = SoftBusThreadCreate(&actionAsyncThread, &attr, runnable, arg);
