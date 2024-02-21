@@ -47,7 +47,7 @@ int32_t WifiDirectInit(void)
     bool hasFailure = false;
     for (size_t i = 0; i < ARRAY_SIZE(g_subInitFunctions); i++) {
         if (g_subInitFunctions[i]() == SOFTBUS_OK) {
-            CONN_LOGI(CONN_INIT, "init success. i=%{public}zu ", i);
+            CONN_LOGI(CONN_INIT, "init success. i=%{public}zu", i);
             continue;
         }
         CONN_LOGE(CONN_INIT, "init failed. i=%{public}zu", i);
