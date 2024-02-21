@@ -40,6 +40,11 @@ static LaneDepsInterface *GetLaneDepsInterface()
 
 void LaneDepsInterfaceMock::SetDefaultResult()
 {
+    NodeInfo info = {
+        .p2pInfo.p2pRole = 1,
+        .p2pInfo.p2pMac = "abc",
+        .p2pInfo.goMac = "abc",
+    };
     EXPECT_CALL(*this, LnnGetOnlineStateById).WillRepeatedly(Return(true));
     EXPECT_CALL(*this, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(*this, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
@@ -48,6 +53,11 @@ void LaneDepsInterfaceMock::SetDefaultResult()
     EXPECT_CALL(*this, LnnGetNodeInfoById).WillRepeatedly(Return(nullptr));
     EXPECT_CALL(*this, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(*this, LnnHasDiscoveryType).WillRepeatedly(Return(true));
+    ON_CALL(*this, LnnGetLocalNodeInfo).WillByDefault(Return(&info));
+    ON_CALL(*this, ConnOpenClientSocket).WillByDefault(Return(SOFTBUS_OK));
+    ON_CALL(*this, AddTrigger).WillByDefault(Return(SOFTBUS_OK));
+    ON_CALL(*this, LnnGetLocalNumU64Info).WillByDefault(Return(SOFTBUS_OK));
+    ON_CALL(*this, LnnGetRemoteNumU64Info).WillByDefault(Return(SOFTBUS_OK));
 }
 
 int32_t LaneDepsInterfaceMock::ActionOfGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash)
@@ -237,5 +247,9 @@ int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
     return GetLaneDepsInterface()->AddTrigger(module, fd, trigger);
 }
 
+int32_t QueryLaneResource(const LaneQueryInfo *queryInfo, const QosInfo *qosInfo)
+{
+    return GetLaneDepsInterface()->QueryLaneResource(queryInfo, qosInfo);
+}
 }
 } // namespace OHOS
