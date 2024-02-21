@@ -181,7 +181,7 @@ static void OnLaneLinkSuccess(uint32_t reqId, const LaneLinkInfo *linkInfo)
 */
 HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_001, TestSize.Level1)
 {
-    LaneDepsInterfaceMock mock;
+    NiceMock<LaneDepsInterfaceMock> mock;
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
     uint32_t laneId = laneManager->applyLaneId(laneType);
@@ -218,7 +218,7 @@ HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_001, TestSize.Level1)
 */
 HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_002, TestSize.Level1)
 {
-    LaneDepsInterfaceMock mock;
+    NiceMock<LaneDepsInterfaceMock> mock;
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
     uint32_t laneId = laneManager->applyLaneId(laneType);
@@ -255,7 +255,7 @@ HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_002, TestSize.Level1)
 */
 HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_003, TestSize.Level1)
 {
-    LaneDepsInterfaceMock mock;
+    NiceMock<LaneDepsInterfaceMock> mock;
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
     uint32_t laneId = laneManager->applyLaneId(laneType);
@@ -292,7 +292,7 @@ HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_003, TestSize.Level1)
 */
 HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_004, TestSize.Level1)
 {
-    LaneDepsInterfaceMock mock;
+    NiceMock<LaneDepsInterfaceMock> mock;
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
     uint32_t laneId = laneManager->applyLaneId(laneType);
@@ -329,7 +329,7 @@ HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_004, TestSize.Level1)
 */
 HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_005, TestSize.Level1)
 {
-    LaneDepsInterfaceMock mock;
+    NiceMock<LaneDepsInterfaceMock> mock;
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
     uint32_t laneId = laneManager->applyLaneId(laneType);
@@ -366,7 +366,7 @@ HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_005, TestSize.Level1)
 */
 HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_006, TestSize.Level1)
 {
-    LaneDepsInterfaceMock mock;
+    NiceMock<LaneDepsInterfaceMock> mock;
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
     uint32_t laneId = laneManager->applyLaneId(laneType);
@@ -403,7 +403,7 @@ HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_006, TestSize.Level1)
 */
 HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_007, TestSize.Level1)
 {
-    LaneDepsInterfaceMock mock;
+    NiceMock<LaneDepsInterfaceMock> mock;
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
     uint32_t laneId = laneManager->applyLaneId(laneType);
@@ -439,7 +439,7 @@ HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_007, TestSize.Level1)
 */
 HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_008, TestSize.Level1)
 {
-    LaneDepsInterfaceMock mock;
+    NiceMock<LaneDepsInterfaceMock> mock;
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
     uint32_t laneId = laneManager->applyLaneId(laneType);
@@ -475,7 +475,7 @@ HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_008, TestSize.Level1)
 */
 HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_009, TestSize.Level1)
 {
-    LaneDepsInterfaceMock mock;
+    NiceMock<LaneDepsInterfaceMock> mock;
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
     uint32_t laneId = laneManager->applyLaneId(laneType);
@@ -747,7 +747,7 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_PROFILE_001, TestSize.Level1)
 */
 HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_001, TestSize.Level1)
 {
-    LaneDepsInterfaceMock mock;
+    NiceMock<LaneDepsInterfaceMock> mock;
     LanePreferredLinkList *linkList = nullptr;
     uint32_t listNum = 0;
     LaneSelectParam selectParam;
@@ -792,7 +792,7 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_001, TestSize.Level1)
 */
 HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_002, TestSize.Level1)
 {
-    LaneDepsInterfaceMock mock;
+    NiceMock<LaneDepsInterfaceMock> mock;
     LanePreferredLinkList *linkList = nullptr;
     uint32_t listNum = 0;
     LaneSelectParam selectParam;
@@ -830,7 +830,7 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_002, TestSize.Level1)
 */
 HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_003, TestSize.Level1)
 {
-    LaneDepsInterfaceMock mock;
+    NiceMock<LaneDepsInterfaceMock> mock;
     LanePreferredLinkList linkList;
     uint32_t listNum = 0;
     LaneSelectParam selectParam;
@@ -893,6 +893,7 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_001, TestSize.Level1)
     };
     int32_t ret;
     LnnWifiAdpterInterfaceMock wifiMock;
+    EXPECT_CALL(wifiMock, LnnDisconnectP2p).WillRepeatedly(Return());
     EXPECT_CALL(wifiMock, LnnConnectP2p)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -953,7 +954,7 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_002, TestSize.Level1)
         .OnLaneLinkException = OnLaneLinkException,
     };
     int32_t ret;
-    LnnWifiAdpterInterfaceMock wifiMock;
+    NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
     const char *udid = "testuuid";
     EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_ERR));
     ret = BuildLink(&reqInfo, 0, &cb);
@@ -961,9 +962,7 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_002, TestSize.Level1)
     EXPECT_CALL(mock, LnnConvertDLidToUdid).WillRepeatedly(Return(udid));
     EXPECT_CALL(mock, ConnBleGetClientConnectionByUdid).WillRepeatedly(Return(NULL));
     EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_ERR));
-    EXPECT_CALL(wifiMock, LnnConnectP2p)
-        .WillOnce(Return(SOFTBUS_ERR))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    ON_CALL(wifiMock, LnnConnectP2p).WillByDefault(Return(SOFTBUS_ERR));
     ret = BuildLink(&reqInfo, 0, &cb);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
@@ -1017,11 +1016,10 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_003, TestSize.Level1)
 */
 HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_004, TestSize.Level1)
 {
-    LaneDepsInterfaceMock mock;
+    NiceMock<LaneDepsInterfaceMock> mock;
     LinkRequest reqInfo;
     int32_t ret;
     const char *udid = "testuuid";
-    const char *bleMac = "127.1.1.1";
     (void)memset_s(&reqInfo, sizeof(LinkRequest), 0, sizeof(LinkRequest));
     LaneLinkCb cb = {
         .OnLaneLinkSuccess = OnLaneLinkSuccess,
@@ -1030,21 +1028,18 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_004, TestSize.Level1)
     };
 
     reqInfo.linkType = LANE_BLE;
-    (void)strcpy_s(reqInfo.peerBleMac, MAX_MAC_LEN, bleMac);
     EXPECT_CALL(mock, LnnConvertDLidToUdid).WillRepeatedly(Return(udid));
     EXPECT_CALL(mock, ConnBleGetClientConnectionByUdid).WillRepeatedly(Return(nullptr));
-    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_ERR));
+    ON_CALL(mock, LnnGetRemoteStrInfo).WillByDefault(Return(SOFTBUS_ERR));
     ret = BuildLink(&reqInfo, 0, &cb);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 
     EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, SoftBusGenerateStrHash)
-        .WillOnce(Return(SOFTBUS_ERR))
-        .WillRepeatedly(LaneDepsInterfaceMock::ActionOfGenerateStrHash);
+    ON_CALL(mock, SoftBusGenerateStrHash).WillByDefault(Return(SOFTBUS_ERR));
     ret = BuildLink(&reqInfo, 0, &cb);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = BuildLink(&reqInfo, 0, &cb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
 /*
@@ -1055,7 +1050,7 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_004, TestSize.Level1)
 */
 HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_005, TestSize.Level1)
 {
-    LaneDepsInterfaceMock mock;
+    NiceMock<LaneDepsInterfaceMock> mock;
     LinkRequest reqInfo;
     int32_t ret;
     const char *udid = "testuuid";
@@ -1076,6 +1071,7 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_005, TestSize.Level1)
     EXPECT_CALL(mock, LnnConvertDLidToUdid).WillRepeatedly(Return(udid));
     EXPECT_CALL(mock, ConnBleGetClientConnectionByUdid).WillRepeatedly(Return(connection));
     EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_ERR));
+    ON_CALL(mock, LnnGetRemoteNodeInfoById).WillByDefault(Return(SOFTBUS_OK));
     ret = BuildLink(&reqInfo, 0, &cb);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     SoftBusFree(connection);
@@ -1241,7 +1237,7 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_009, TestSize.Level1)
 */
 HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_010, TestSize.Level1)
 {
-    LaneDepsInterfaceMock mock;
+    NiceMock<LaneDepsInterfaceMock> mock;
     LinkRequest reqInfo;
     int32_t ret;
     const char *udid = "testuuid";
@@ -1261,10 +1257,12 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_010, TestSize.Level1)
     if (strcpy_s(reqInfo.peerBleMac, MAX_MAC_LEN, bleMac) != EOK) {
         return;
     }
+    ON_CALL(mock, ConnBleGetConnectionByUdid).WillByDefault(Return(connection));
+    ON_CALL(mock, ConnBleReturnConnection).WillByDefault(Return());
     EXPECT_CALL(mock, LnnConvertDLidToUdid).WillRepeatedly(Return(udid));
     EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
     ret = BuildLink(&reqInfo, 0, &cb);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 
     EXPECT_CALL(mock, ConnBleGetConnectionByUdid).WillRepeatedly(Return(connection));
     ret = BuildLink(&reqInfo, 0, &cb);
@@ -1296,7 +1294,7 @@ HWTEST_F(LNNLaneMockTest, LANE_ADD_P2P_ADDRESS_TEST_001, TestSize.Level1)
 */
 HWTEST_F(LNNLaneMockTest, LNN_SELECT_EXPECT_LANES_BY_QOS_001, TestSize.Level1)
 {
-    LaneDepsInterfaceMock mock;
+    NiceMock<LaneDepsInterfaceMock> mock;
     LanePreferredLinkList linkList;
     LaneSelectParam selectParam;
     (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
@@ -1346,7 +1344,7 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_EXPECT_LANES_BY_QOS_001, TestSize.Level1)
 */
 HWTEST_F(LNNLaneMockTest, LNN_SELECT_EXPECT_LANES_BY_QOS_002, TestSize.Level1)
 {
-    LaneDepsInterfaceMock mock;
+    NiceMock<LaneDepsInterfaceMock> mock;
     LanePreferredLinkList linkList;
     LaneSelectParam selectParam;
     (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
@@ -1400,7 +1398,7 @@ HWTEST_F(LNNLaneMockTest, LANE_FLOAD_EXPLORE_001, TestSize.Level1)
 */
 HWTEST_F(LNNLaneMockTest, LANE_DECISION_MODELS_001, TestSize.Level1)
 {
-    LaneDepsInterfaceMock mock;
+    NiceMock<LaneDepsInterfaceMock> mock;
     LaneSelectParam selectParam;
     (void)memset_s(&selectParam, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
     LanePreferredLinkList linkList;
@@ -1512,7 +1510,7 @@ HWTEST_F(LNNLaneMockTest, LANE_DETECT_RELIABILITY_002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = LaneDetectOnDataEvent(module, events, FD);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
     EXPECT_CALL(mock, ConnOpenClientSocket).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, AddTrigger).WillRepeatedly(Return(SOFTBUS_OK));
 

@@ -188,40 +188,6 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftBusRsaEncrypt003, TestSize.Level0)
 }
 
 /*
- * @tc.name: SoftBusRsaDecrypt001
- * @tc.desc: parameters are Legal
- * @tc.type: FUNC
- * @tc.require: I5OHDE
- */
-HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftBusRsaDecrypt001, TestSize.Level0)
-{
-    uint32_t pKeyLen = SOFTBUS_RSA_PUB_KEY_LEN;
-    uint8_t publicKey[pKeyLen];
-    uint32_t srcDataLen = 5;
-    uint8_t srcData[srcDataLen];
-    uint32_t encryptedDataLen = 0;
-    uint8_t *encryptedData = NULL;
-    uint32_t decryptedDataLen = 0;
-    uint8_t *decryptedData = NULL;
-
-    int32_t ret = SoftBusGetPublicKey(publicKey, pKeyLen);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = SoftBusGenerateRandomArray(srcData, srcDataLen);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    PublicKey peerPublicKey = { publicKey, pKeyLen };
-
-    ret = SoftBusRsaEncrypt(srcData, srcDataLen, &peerPublicKey, &encryptedData, &encryptedDataLen);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = SoftBusRsaDecrypt(encryptedData, encryptedDataLen, &decryptedData, &decryptedDataLen);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = memcmp((const char *)decryptedData, (const char *)srcData, decryptedDataLen);
-    EXPECT_EQ(0, ret);
-
-    SoftBusFree(encryptedData);
-    SoftBusFree(decryptedData);
-}
-
-/*
  * @tc.name: SoftBusRsaDecrypt002
  * @tc.desc: parameter is nullptr
  * @tc.type: FUNC

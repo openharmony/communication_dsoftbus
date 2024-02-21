@@ -147,5 +147,9 @@ void SetScreenState(SoftBusScreenState state)
 {
     return HeartBeatFSMInterfaceInstance()->SetScreenState(state);
 }
+struct WifiDirectManager* GetWifiDirectManager(void)
+{
+    return HeartBeatFSMInterfaceInstance()->GetWifiDirectManager();
+}
 }
 } // namespace OHOS

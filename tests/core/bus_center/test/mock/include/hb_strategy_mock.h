@@ -16,6 +16,7 @@
 #ifndef HEARTBEAT_STRATEGY_H
 #define HEARTBEAT_STRATEGY_H
 
+#include "lnn_async_callback_utils.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_net_builder.h"
 #include <gmock/gmock.h>
@@ -49,6 +50,9 @@ public:
     virtual int32_t LnnSetMediumParamBySpecificType(const LnnHeartbeatMediumParam *param) = 0;
     virtual int32_t LnnStartScreenChangeOfflineTiming(const char *networkId, ConnectionAddrType addrType) = 0;
     virtual int32_t LnnStopHeartBeatAdvByTypeNow(LnnHeartbeatType registedHbType) = 0;
+    virtual int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
+        void *para, uint64_t delayMillis) = 0;
+    virtual int32_t LnnStartHeartbeat(uint64_t delayMillis) = 0;
 };
 class HeartBeatStategyInterfaceMock : public HeartBeatStategyInterface {
 public:
@@ -74,6 +78,8 @@ public:
     MOCK_METHOD1(LnnSetMediumParamBySpecificType, int32_t (const LnnHeartbeatMediumParam *));
     MOCK_METHOD2(LnnStartScreenChangeOfflineTiming, int32_t (const char *, ConnectionAddrType));
     MOCK_METHOD1(LnnStopHeartBeatAdvByTypeNow, int32_t (LnnHeartbeatType));
+    MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t(SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
+    MOCK_METHOD1(LnnStartHeartbeat, int32_t(uint64_t));
 };
 } // namespace OHOS
 #endif // HEARTBEAT_STRATEGY_H
