@@ -170,7 +170,7 @@ int32_t TransAddUdpChannel(UdpChannelInfo *channel)
     }
     ListInit(&(channel->node));
     ListAdd(&(g_udpChannelMgr->list), &(channel->node));
-    TRANS_LOGI(TRANS_CTRL, "add channelId = %{public}" PRId64, channel->info.myData.channelId);
+    TRANS_LOGI(TRANS_CTRL, "add channelId=%{public}" PRId64, channel->info.myData.channelId);
     g_udpChannelMgr->cnt++;
 
     (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
@@ -196,7 +196,7 @@ int32_t TransDelUdpChannel(int32_t channelId)
         if (udpChannelNode->info.myData.channelId == channelId) {
             ReleaseUdpChannelId((int32_t)(udpChannelNode->info.myData.channelId));
             ListDelete(&(udpChannelNode->node));
-            TRANS_LOGI(TRANS_CTRL, "delete channelId = %{public}d", channelId);
+            TRANS_LOGI(TRANS_CTRL, "delete channelId=%{public}d", channelId);
             SoftBusFree(udpChannelNode);
             g_udpChannelMgr->cnt--;
             (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
@@ -216,7 +216,7 @@ static void NotifyUdpChannelCloseInList(ListNode *udpChannelList)
         (void)NotifyUdpChannelClosed(&udpChannel->info);
 
         ListDelete(&(udpChannel->node));
-        TRANS_LOGI(TRANS_CTRL, "channelId = %{public}" PRId64, udpChannel->info.myData.channelId);
+        TRANS_LOGI(TRANS_CTRL, "channelId=%{public}" PRId64, udpChannel->info.myData.channelId);
         SoftBusFree(udpChannel);
     }
 }
