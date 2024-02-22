@@ -674,6 +674,7 @@ static void ClientConnected(uint32_t connectionId)
     ConnRemoveMsgFromLooper(&g_brManagerAsyncHandler, MSG_CONNECT_TIMEOUT, connectionId, 0, NULL);
     CONN_LOGI(CONN_BR, "connect ok, connectionId=%{public}d, addr=%{public}s", connectionId, anomizeAddress);
 
+    connection->retryCount = 0;
     NotifyDeviceConnectResult(connectingDevice, connection, false, 0);
     FreeDevice(connectingDevice);
     g_brManager.connecting = NULL;
@@ -728,12 +729,14 @@ static void ClientConnectFailed(uint32_t connectionId, int32_t error)
         LIST_FOR_EACH_ENTRY(it, &connection->connectProcessStatus->list, BrUnderlayerStatus, node) {
             if (it->result == CONN_BR_CONNECT_UNDERLAYER_ERROR_CONNECTION_EXISTS ||
                 it->result == CONN_BR_CONNECT_UNDERLAYER_ERROR_CONTROLLER_BUSY ||
-                it->result == CONN_BR_CONNECT_UNDERLAYER_ERROR_CONN_SDP_BUSY) {
+                it->result == CONN_BR_CONNECT_UNDERLAYER_ERROR_CONN_SDP_BUSY ||
+                it->result == CONN_BR_CONNECT_UNDERLAYER_ERROR_CONN_AUTH_FAILED) {
+                connection->retryCount += 1;
                 collision = true;
                 break;
             }
         }
-        if (collision) {
+        if (collision && connection->retryCount < MAX_RETRY_COUNT) {
             CONN_LOGW(CONN_BR, "acl collision, wait for retry, id=%{public}u, addr=%{public}s, result=%{public}d",
                 connectionId, anomizeAddress, it->result);
             // NOTICE: assign connecting NULL first to prevent recursively pending in connecting
