@@ -67,7 +67,6 @@ void VtpInstance::PrintFillpLog(FILLP_UINT32 debugType, FILLP_UINT32 debugLevel,
 {
     /* unused param */
     static_cast<void>(debugType);
-    static_cast<void>(debugLevel);
     static_cast<void>(debugId);
 
     char debugInfo[DEBUG_BUFFER_LEN];
@@ -86,7 +85,20 @@ void VtpInstance::PrintFillpLog(FILLP_UINT32 debugType, FILLP_UINT32 debugLevel,
     }
     va_end(vaList);
 
-    TRANS_LOGD(TRANS_STREAM, "debugInfo=%{public}s", debugInfo);
+    switch (debugLevel) {
+        case FILLP_DBG_LVL_INFO:
+            TRANS_LOGI(TRANS_STREAM, "info=%{public}s", debugInfo);
+            break;
+        case FILLP_DBG_LVL_ERROR:
+            TRANS_LOGE(TRANS_STREAM, "errorInfo=%{public}s", debugInfo);
+            break;
+        case FILLP_DBG_LVL_WARNING:
+            TRANS_LOGW(TRANS_STREAM, "warningInfo=%{public}s", debugInfo);
+            break;
+        default:
+            TRANS_LOGD(TRANS_STREAM, "debugInfo=%{public}s", debugInfo);
+            break;
+    }
 }
 
 void VtpInstance::PreSetFillpCoreParams(void)
