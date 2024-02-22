@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "anonymizer.h"
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "lnn_async_callback_utils.h"
@@ -101,7 +102,8 @@ static void UpdateNetworkInfo(const char *udid)
 
 static void OnReceiveCapaSyncInfoMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len)
 {
-    LNN_LOGI(LNN_BUILDER, "Recv capability info. type=%{public}d, len=%{public}d", type, len);
+    LNN_LOGI(LNN_BUILDER, "Recv capability info. type=%{public}d, len=%{public}d, networkid=%{public}s",
+        type, len, networkId);
     if (type != LNN_INFO_TYPE_CAPABILITY) {
         return;
     }
@@ -116,7 +118,10 @@ static void OnReceiveCapaSyncInfoMsg(LnnSyncInfoType type, const char *networkId
         LNN_LOGE(LNN_BUILDER, "convert msg to capability fail");
         return;
     }
-    LNN_LOGI(LNN_BUILDER, "capability=%{public}d", capability);
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
+    LNN_LOGI(LNN_BUILDER, "capability=%{public}d, networkId=%{public}s", capability, anonyNetworkId);
+    AnonymizeFree(anonyNetworkId);
     // update ledger
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));

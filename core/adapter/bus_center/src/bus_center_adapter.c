@@ -166,6 +166,7 @@ int32_t GetCommonDevInfo(CommonDeviceKey key, char *value, uint32_t len)
             break;
         case COMM_DEVICE_KEY_DEVTYPE:
             devType = GetDeviceType();
+            LNN_LOGI(LNN_STATE, "get device from GetDeviceType, GetDeviceType=%{public}s", devType);
             if (devType != NULL) {
                 char softBusDevType[DEVICE_TYPE_BUF_LEN] = {0};
                 if (SoftBusConvertDeviceType(devType, softBusDevType, len) != SOFTBUS_OK) {
