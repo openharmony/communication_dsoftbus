@@ -357,6 +357,15 @@ int32_t ConnBrUpdateConnectionRc(ConnBrConnection *connection, int32_t delta)
         "br update connection ref: lock failed, connId=%{public}u, delta=%{public}d", connection->connectionId, delta);
     connection->connectionRc += delta;
     int32_t localRc = connection->connectionRc;
+    ConnEventExtra extra = {
+        .connectionId = (int32_t)connection->connectionId,
+        .connRcDelta = delta,
+        .connRc = localRc,
+        .peerBrMac = connection->addr,
+        .linkType = CONNECT_BR,
+        .result = EVENT_STAGE_RESULT_OK
+    };
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_UPDATE_CONNECTION_RC, extra);
     CONN_LOGI(CONN_BR, "connId=%{public}u, side=%{public}d, delta=%{public}d, newRef=%{public}d",
         connection->connectionId, connection->side, delta, localRc);
     if (localRc <= 0) {

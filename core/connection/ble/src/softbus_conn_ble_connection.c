@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "conn_event.h"
 #include "conn_log.h"
 #include "bus_center_manager.h"
 #include "softbus_adapter_mem.h"
@@ -336,6 +337,15 @@ int32_t ConnBleUpdateConnectionRc(ConnBleConnection *connection, uint16_t challe
         connection->state = BLE_CONNECTION_STATE_NEGOTIATION_CLOSING;
     }
     (void)SoftBusMutexUnlock(&connection->lock);
+    ConnEventExtra extra = {
+        .connRcDelta = delta,
+        .connRc = localRc,
+        .linkType = CONNECT_BLE,
+        .peerBleMac = connection->addr,
+        .connectionId = (int32_t)connection->connectionId,
+        .result = EVENT_STAGE_RESULT_OK
+    };
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_UPDATE_CONNECTION_RC, extra);
     CONN_LOGI(CONN_BLE,
         "ble notify refrence, connId=%{public}u, handle=%{public}d, side=%{public}d, delta=%{public}d, "
         "challenge=%{public}u, localRc=%{public}d",
@@ -607,6 +617,14 @@ static int32_t SendBasicInfo(ConnBleConnection *connection)
     if (payload != NULL) {
         cJSON_free(payload);
     }
+    ConnEventExtra extra = {
+        .connectionId = (int32_t)connection->connectionId,
+        .connRole = connection->side,
+        .linkType = CONNECT_BLE,
+        .peerBleMac = connection->addr,
+        .result = EVENT_STAGE_RESULT_OK
+    };
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_SEND_BASIC_INFO, extra);
     return status;
 }
 
@@ -690,6 +708,19 @@ static int32_t ParseBasicInfo(ConnBleConnection *connection, const uint8_t *data
             "parse basic info, the role of connection is mismatch, "
             "expectedPeerType=%{public}d, actualPeerType=%{public}d", expectedPeerType, type);
     }
+    ConnEventExtra extra = {
+        .connectionId = (int32_t)connection->connectionId,
+        .connRole = connection->side,
+        .supportFeature = feature,
+        .linkType = CONNECT_BLE,
+        .peerBleMac = connection->addr,
+        .result = EVENT_STAGE_RESULT_OK
+    };
+    char devType[DEVICE_TYPE_MAX_SIZE + 1] = {0};
+    if (snprintf_s(devType, DEVICE_TYPE_MAX_SIZE + 1, DEVICE_TYPE_MAX_SIZE, "%03X", deviceType) >= 0) {
+        extra.peerDeviceType = devType;
+    }
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_PARSE_BASIC_INFO, extra);
     CONN_LOGI(CONN_BLE,
         "ble parse basic info, connId=%{public}u, side=%{public}s, deviceType=%{public}d, supportFeature=%{public}u",
         connection->connectionId, connection->side == CONN_SIDE_CLIENT ? "client" : "server", deviceType, feature);

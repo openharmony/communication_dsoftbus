@@ -34,6 +34,9 @@ typedef enum {
     EVENT_SCENE_ACTIVATION = 7,
     EVENT_SCENE_DETECTION = 8,
     EVENT_SCENE_OPEN_CHANNEL_SERVER = 9,
+    EVENT_SCENE_TRANS_CREATE_SESS_SERVER = 10,
+    EVENT_SCENE_TRANS_REMOVE_SESS_SERVER = 11,
+    EVENT_SCENE_TRANS_PROXY_RESET_PEER = 12,
 } TransEventScene;
 
 typedef enum {
@@ -48,6 +51,10 @@ typedef enum {
 typedef enum {
     EVENT_STAGE_CLOSE_CHANNEL = 1,
 } TransEventCloseChannelStage;
+
+typedef enum {
+    EVENT_STAGE_TRANS_COMMON_ONE = 1,
+} TransEventCommonStage;
 
 typedef struct {
     int32_t result;            // STAGE_RES

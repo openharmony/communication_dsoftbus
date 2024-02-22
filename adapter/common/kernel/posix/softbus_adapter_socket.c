@@ -27,8 +27,10 @@
 #include <unistd.h>
 
 #include "comm_log.h"
+#include "conn_event.h"
 #include "endian.h" /* liteos_m htons */
 #include "softbus_adapter_errcode.h"
+#include "softbus_error_code.h"
 #include "softbus_def.h"
 
 static void ShiftByte(uint8_t *in, int8_t inSize)
@@ -71,6 +73,17 @@ static int32_t GetErrorCode(void)
             break;
     }
     return errCode;
+}
+
+static void DfxReportAdapterSocket(const ConnEventScene scene, const int32_t res, int32_t fd, int32_t cfd)
+{
+    ConnEventExtra extra = {
+        .fd = fd,
+        .cfd = cfd,
+        .errcode = res,
+        .result = res == SOFTBUS_OK ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED
+    };
+    CONN_EVENT(scene, EVENT_STAGE_TCP_COMMON_ONE, extra);
 }
 
 int32_t SoftBusSocketCreate(int32_t domain, int32_t type, int32_t protocol, int32_t *socketFd)
@@ -238,9 +251,11 @@ int32_t SoftBusSocketListen(int32_t socketFd, int32_t backLog)
     int32_t ret = listen(socketFd, backLog);
     if (ret != 0) {
         COMM_LOGE(COMM_ADAPTER, "listen strerror=%{public}s, errno=%{public}d", strerror(errno), errno);
+        DfxReportAdapterSocket(EVENT_SCENE_SOCKET_LISTEN, SOFTBUS_TCPCONNECTION_SOCKET_ERR, socketFd, 0);
         return SOFTBUS_ADAPTER_ERR;
     }
 
+    DfxReportAdapterSocket(EVENT_SCENE_SOCKET_LISTEN, SOFTBUS_OK, socketFd, 0);
     return SOFTBUS_ADAPTER_OK;
 }
 
@@ -254,18 +269,22 @@ int32_t SoftBusSocketAccept(int32_t socketFd, SoftBusSockAddr *addr, int32_t *ac
     uint32_t len = sizeof(sysAddr);
     if (memset_s(&sysAddr, len, 0, len) != EOK) {
         COMM_LOGE(COMM_ADAPTER, "memset failed");
+        DfxReportAdapterSocket(EVENT_SCENE_SOCKET_ACCEPT, SOFTBUS_MEM_ERR, socketFd, 0);
         return SOFTBUS_ADAPTER_ERR;
     }
     int32_t ret = accept(socketFd, &sysAddr, (socklen_t *)&len);
     if (ret < 0) {
         COMM_LOGE(COMM_ADAPTER, "accept strerror=%{public}s, errno=%{public}d", strerror(errno), errno);
+        DfxReportAdapterSocket(EVENT_SCENE_SOCKET_ACCEPT, SOFTBUS_TCPCONNECTION_SOCKET_ERR, socketFd, 0);
         return GetErrorCode();
     }
     if (SysAddrToSoftBusAddr(&sysAddr, addr) != SOFTBUS_ADAPTER_OK) {
         COMM_LOGE(COMM_ADAPTER, "socket accept sys addr to softbus addr failed");
+        DfxReportAdapterSocket(EVENT_SCENE_SOCKET_ACCEPT, SOFTBUS_INVALID_PARAM, socketFd, ret);
         return SOFTBUS_ADAPTER_ERR;
     }
     *acceptFd = ret;
+    DfxReportAdapterSocket(EVENT_SCENE_SOCKET_ACCEPT, SOFTBUS_OK, socketFd, *acceptFd);
     return SOFTBUS_ADAPTER_OK;
 }
 
@@ -274,14 +293,17 @@ int32_t SoftBusSocketConnect(int32_t socketFd, const SoftBusSockAddr *addr)
     struct sockaddr sysAddr;
     if (SoftBusAddrToSysAddr(addr, &sysAddr, sizeof(SoftBusSockAddr)) != SOFTBUS_ADAPTER_OK) {
         COMM_LOGE(COMM_ADAPTER, "socket connect sys addr to softbus addr failed");
+        DfxReportAdapterSocket(EVENT_SCENE_SOCKET_CONNECT, SOFTBUS_INVALID_PARAM, socketFd, 0);
         return SOFTBUS_ADAPTER_ERR;
     }
     uint32_t len = sizeof(sysAddr);
     int32_t ret = connect(socketFd, &sysAddr, (socklen_t)len);
     if (ret < 0) {
         COMM_LOGE(COMM_ADAPTER, "connect=%{public}s", strerror(errno));
+        DfxReportAdapterSocket(EVENT_SCENE_SOCKET_CONNECT, SOFTBUS_TCPCONNECTION_SOCKET_ERR, socketFd, 0);
         return GetErrorCode();
     }
+    DfxReportAdapterSocket(EVENT_SCENE_SOCKET_CONNECT, SOFTBUS_OK, socketFd, 0);
     return SOFTBUS_ADAPTER_OK;
 }
 
