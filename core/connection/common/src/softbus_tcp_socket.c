@@ -70,7 +70,7 @@ static int SetQuickStart(int fd, int quick)
     errno = 0;
     int rc = setsockopt(fd, SOFTBUS_IPPROTO_TCP, TCP_QUICK_START, &quick, sizeof(quick));
     if (rc != 0) {
-        CONN_LOGE(CONN_COMMON, "set TCP_QUICK_START");
+        CONN_LOGE(CONN_COMMON, "set TCP_QUICK_START failed. rc=%{public}d", rc);
         return -1;
     }
     return 0;
@@ -80,7 +80,7 @@ static int SetSendBufFix(int fd, int val)
 {
     int rc = setsockopt(fd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_SNDBUF, &val, sizeof(val));
     if (rc != 0) {
-        CONN_LOGE(CONN_COMMON, "set SOFTBUS_SO_SNDBUF");
+        CONN_LOGE(CONN_COMMON, "set SOFTBUS_SO_SNDBUF failed. rc=%{public}d", rc);
         return -1;
     }
     return 0;
@@ -90,7 +90,7 @@ static int SetRcvBufFix(int fd, int val)
 {
     int rc = setsockopt(fd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_RCVBUF, &val, sizeof(val));
     if (rc != 0) {
-        CONN_LOGE(CONN_COMMON, "set SOFTBUS_SO_RCVBUF");
+        CONN_LOGE(CONN_COMMON, "set SOFTBUS_SO_RCVBUF failed. rc=%{public}d", rc);
         return -1;
     }
     return 0;
