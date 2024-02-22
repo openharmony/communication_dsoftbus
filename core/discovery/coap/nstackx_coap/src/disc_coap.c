@@ -130,19 +130,28 @@ static void DfxRecordCoapEnd(bool isStart, bool isActive, bool isPublish, const 
     extra.errcode = reason;
     extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
 
+    const char *capabilityData = NULL;
     if (isPublish) {
         extra.interFuncType = (isStart ? PUBLISH_FUNC : UNPUBLISH_FUNC) + 1;
         PublishOption *publishOption = (PublishOption *)option;
         extra.broadcastFreq = publishOption == NULL ? 0 : publishOption->freq;
+        capabilityData = publishOption == NULL ? capabilityData : (const char *)publishOption->capabilityData;
     } else {
         extra.interFuncType = (isStart ? STARTDISCOVERTY_FUNC : STOPDISCOVERY_FUNC) + 1;
         SubscribeOption *subscribeOption = (SubscribeOption *)option;
         extra.broadcastFreq = subscribeOption == NULL ? 0 : subscribeOption->freq;
+        capabilityData = subscribeOption == NULL ? capabilityData : (const char *)subscribeOption->capabilityData;
+    }
+
+    char data[MAX_CAPABILITYDATA_LEN] = { 0 };
+    if (capabilityData != NULL && strncpy_s(data, MAX_CAPABILITYDATA_LEN, capabilityData,
+        MAX_CAPABILITYDATA_LEN - 1) == EOK) {
+        extra.capabilityData = data;
     }
     DISC_EVENT(EVENT_SCENE_COAP, EVENT_STAGE_COAP, extra);
 }
 
-static void DfxRecordRegisterEnd(const unsigned char *capabilityData, uint32_t capability, int32_t reason)
+static void DfxRecordRegisterEnd(uint32_t capability, int32_t reason)
 {
     if (reason == SOFTBUS_OK) {
         return;
@@ -204,7 +213,7 @@ static int32_t Publish(const PublishOption *option, bool isActive)
     }
     uint32_t curCap = option->capabilityBitmap[0];
     if (DiscCoapRegisterServiceData(option->capabilityData, option->dataLen, curCap) != SOFTBUS_OK) {
-        DfxRecordRegisterEnd(option->capabilityData, curCap, SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL);
+        DfxRecordRegisterEnd(curCap, SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL);
         DISC_LOGE(DISC_COAP, "register service data to dfinder failed.");
         goto PUB_FAIL;
     }
@@ -285,7 +294,7 @@ static int32_t UnPublish(const PublishOption *option, bool isActive)
     uint32_t curCap = option->capabilityBitmap[0];
     if (DiscCoapRegisterServiceData(option->capabilityData, option->dataLen, curCap) != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_publishMgr->lock));
-        DfxRecordRegisterEnd(option->capabilityData, curCap, SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL);
+        DfxRecordRegisterEnd(curCap, SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL);
         DISC_LOGE(DISC_COAP, "register service data to dfinder failed.");
         return SOFTBUS_ERR;
     }
