@@ -158,7 +158,8 @@ int32_t LnnConvertDeviceTypeToId(const char *deviceType, uint16_t *typeId)
         if (*typeId != TYPE_UNKNOW_ID) {
             return SOFTBUS_OK;
         }
-        LNN_LOGE(LNN_LEDGER, "convert string to int fail");
+        LNN_LOGE(LNN_LEDGER, "convert string to int fail, typeId=%{public}u, deviceType=%{public}s",
+            *typeId, deviceType);
     }
     *typeId = TYPE_UNKNOW_ID;
     return SOFTBUS_ERR;
