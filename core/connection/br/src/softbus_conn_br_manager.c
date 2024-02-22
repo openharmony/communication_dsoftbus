@@ -129,6 +129,9 @@ static void DfxRecordBrConnectFail(uint32_t reqId, uint32_t pId, ConnBrDevice *d
         .errcode = reason,
         .result = EVENT_STAGE_RESULT_FAILED
     };
+    if (device != NULL) {
+        extra.peerBrMac = device->addr;
+    }
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
 }
 
@@ -145,6 +148,7 @@ static void DfxRecordBrConnectSuccess(uint32_t pId, ConnBrConnection *connection
                             SOFTBUS_HISYSEVT_CONN_OK);
     ConnEventExtra extra = {
         .connectionId = connection->connectionId,
+        .peerBrMac = connection->addr,
         .linkType = CONNECT_BR,
         .costTime = costTime,
         .isReuse = statistics->reuse ? 1 : 0,
@@ -369,10 +373,12 @@ static int32_t ConnectDeviceDirectly(ConnBrDevice *device, const char *anomizeAd
             break;
         }
         ConnEventExtra extra = {
-            .peerBrMac = device->addr,
             .connectionId = (int32_t)connection->connectionId,
-            .result = EVENT_STAGE_RESULT_OK };
-        CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_INVOKE_PROTOCOL, extra);
+            .peerBrMac = connection->addr,
+            .linkType = CONNECT_BR,
+            .result = EVENT_STAGE_RESULT_OK
+        };
+        CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_DEVICE_DIRECTLY, extra);
         status = ConnBrConnect(connection);
         if (status != SOFTBUS_OK) {
             break;
@@ -589,6 +595,13 @@ static void ServerAccepted(uint32_t connectionId)
             FreeDevice(it);
         }
     }
+    ConnEventExtra extra = {
+        .connectionId = (int32_t)connectionId,
+        .peerBrMac = connection->addr,
+        .linkType = CONNECT_BR,
+        .result = EVENT_STAGE_RESULT_OK
+    };
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_SERVER_ACCEPTED, extra);
     ConnBrReturnConnection(&connection);
 }
 
@@ -1376,6 +1389,13 @@ static int32_t BrConnectDevice(const ConnectOption *option, uint32_t requestId, 
         SoftBusFree(ctx);
         return status;
     }
+    ConnEventExtra extra = {
+        .requestId = (int32_t)requestId,
+        .peerBrMac = option->brOption.brMac,
+        .linkType = CONNECT_BR,
+        .result = EVENT_STAGE_RESULT_OK
+    };
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_DEVICE, extra);
     CONN_LOGI(CONN_BR, "receive connect request, requestId=%{public}u, address=%{public}s, connectTraceId=%{public}u",
         requestId, anomizeAddress, ctx->statistics.connectTraceId);
     return SOFTBUS_OK;
