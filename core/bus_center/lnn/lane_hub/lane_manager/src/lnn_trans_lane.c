@@ -198,7 +198,7 @@ static void DeleteLaneLinkNode(uint32_t laneId)
 static int32_t TriggerLink(uint32_t laneId, TransOption *request,
     LanePreferredLinkList *recommendLinkList)
 {
-    LNN_LOGI(LNN_LANE, "TriggerLink enter");
+    LNN_LOGI(LNN_LANE, "TriggerLink enter, laneId=%{public}u", laneId);
     LaneLinkNodeInfo *linkNode = (LaneLinkNodeInfo *)SoftBusCalloc(sizeof(LaneLinkNodeInfo));
     if (linkNode == NULL) {
         return SOFTBUS_MALLOC_ERR;

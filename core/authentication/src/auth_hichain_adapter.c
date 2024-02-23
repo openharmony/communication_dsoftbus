@@ -203,7 +203,7 @@ static bool HasTrustedRelationWithLocalDevice(const DeviceGroupManager *gmInstan
     uint32_t groupNum = 0;
     char *returnGroupVec = NULL;
     if (gmInstance->getRelatedGroups(accountId, AUTH_APPID, localUdid, &returnGroupVec, &groupNum) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_HICHAIN, "GetRelatedGroups fail");
+        AUTH_LOGE(AUTH_HICHAIN, "GetRelatedGroups fail, accountId=%{public}d", accountId);
         gmInstance->destroyInfo(&returnGroupVec);
         return false;
     }
@@ -225,7 +225,7 @@ static bool HasTrustedRelationWithLocalDevice(const DeviceGroupManager *gmInstan
         if (isPointToPoint) {
             int groupType = 0;
             if ((GetJsonObjectNumberItem(groupItem, GROUP_TYPE, &groupType) && groupType == SAME_ACCOUNT_GROUY_TYPE)) {
-                AUTH_LOGI(AUTH_HICHAIN, "ignore same account group");
+                AUTH_LOGD(AUTH_HICHAIN, "ignore same account group");
                 continue;
             }
         }
