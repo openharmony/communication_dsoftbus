@@ -188,6 +188,7 @@ static int32_t TransTdcProcessPostData(const TcpDirectChannelInfo *channel, cons
     if (ClientGetSessionNameByChannelId(channel->channelId, channel->detail.channelType,
         sessionName, SESSION_NAME_SIZE_MAX)) {
         TRANS_LOGE(TRANS_SDK, "failed to get sessionName, channelId=%{public}d", channel->channelId);
+        SoftBusFree(buf);
         return SOFTBUS_ERR;
     }
     uint32_t tos = (flags == FLAG_BYTES) ? BYTE_TOS : MESSAGE_TOS;
