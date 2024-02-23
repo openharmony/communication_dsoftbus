@@ -280,10 +280,20 @@ int32_t TransProxyResetPeer(ProxyChannelInfo *info)
         return SOFTBUS_ERR;
     }
     cJSON_free(payLoad);
-    if (TransProxyTransSendMsg(info->connId, dataInfo.outData,  dataInfo.outLen,
-        CONN_LOW, info->appInfo.myData.pid) != SOFTBUS_OK) {
+    int32_t ret =
+        TransProxyTransSendMsg(info->connId, dataInfo.outData, dataInfo.outLen, CONN_LOW, info->appInfo.myData.pid);
+    TransEventExtra extra = {
+        .socketName = info->appInfo.myData.sessionName,
+        .channelId = info->channelId,
+        .errcode = ret,
+        .result = EVENT_STAGE_RESULT_OK
+    };
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "send reset buf fail");
+        extra.result = EVENT_STAGE_RESULT_FAILED;
+        TRANS_EVENT(EVENT_SCENE_TRANS_PROXY_RESET_PEER, EVENT_STAGE_TRANS_COMMON_ONE, extra);
         return SOFTBUS_ERR;
     }
+    TRANS_EVENT(EVENT_SCENE_TRANS_PROXY_RESET_PEER, EVENT_STAGE_TRANS_COMMON_ONE, extra);
     return SOFTBUS_OK;
 }

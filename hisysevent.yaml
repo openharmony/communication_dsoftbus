@@ -265,6 +265,15 @@ CONNECTION_BEHAVIOR:
   RSSI: { type: INT32, desc: rssi }
   CHLOAD: { type: INT32, desc: chload }
   FREQ: { type: INT32, desc: frequency }
+  CONN_PROTOCOL: { type: INT32, desc: connection protocol }
+  CONN_ROLE: { type: INT32, desc: connection role }
+  CONN_RC_DELTA: { type: INT32, desc: connection request count delta }
+  CONN_RC: { type: INT32, desc: connection request count }
+  SUPT_FEATURE: { type: INT32, desc: support feature }
+  MODULE_ID: { type: INT32, desc: module id }
+  PROTOCOL_TYPE: { type: UINT32, desc: protocol type }
+  FD: { type: INT32, desc: local fd }
+  CFD: { type: INT32, desc: client fd when local is server side }
   CHALLENGE_CODE: { type: STRING, desc: challenge code }
   PEER_IP: { type: STRING, desc: peer device ip }
   PEER_BR_MAC: { type: STRING, desc: peer device br mac }
@@ -272,6 +281,8 @@ CONNECTION_BEHAVIOR:
   PEER_WIFI_MAC: { type: STRING, desc: peer device wifi mac }
   PEER_PORT: { type: STRING, desc: peer device port }
   PEER_NET_ID: { type: STRING, desc: peer network id }
+  PEER_UDID: { type: STRING, desc: peer udid }
+  PEER_DEV_TYPE: { type: STRING, desc: peer device type }
   LOCAL_NET_ID: { type: STRING, desc: local network id }
   BOOT_LINK_TYPE: { type: INT32, desc: boot link type }
   IS_RENEGOTIATE: { type: INT32, desc: is renegotiate }

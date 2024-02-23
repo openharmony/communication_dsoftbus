@@ -20,6 +20,7 @@
 #include <unistd.h>
 
 #include "common_list.h"
+#include "conn_event.h"
 #include "conn_log.h"
 #include "softbus_adapter_errcode.h"
 #include "softbus_adapter_mem.h"
@@ -400,8 +401,32 @@ static void CleanupServerListenInfoUnsafe(SoftbusListenerNode *node)
     node->info.listenPort = -1;
 }
 
+static void FillConnEventExtra(const LocalListenerInfo *info, ConnEventExtra *extra, int32_t err)
+{
+    if (info == NULL || extra == NULL) {
+        return;
+    }
+    extra->result = err == SOFTBUS_OK ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+    extra->linkType = info->type;
+    extra->moduleId = info->socketOption.moduleId;
+    extra->proType = info->socketOption.protocol;
+}
+
+static void FillConnEventExtraByModule(ListenerModule module, ConnEventExtra *extra, int32_t err)
+{
+    if (extra == NULL) {
+        return;
+    }
+    extra->result = err == SOFTBUS_OK ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+    extra->moduleId = module;
+}
+
 int32_t StartBaseListener(const LocalListenerInfo *info, const SoftbusBaseListener *listener)
 {
+    ConnEventExtra extra = {
+        .result = 0
+    };
+    CONN_EVENT(EVENT_SCENE_START_BASE_LISTENER, EVENT_STAGE_TCP_COMMON_ONE, extra);
     CONN_CHECK_AND_RETURN_RET_LOGW(info != NULL, SOFTBUS_INVALID_PARAM, CONN_COMMON, "info is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(info->type == CONNECT_TCP || info->type == CONNECT_P2P, SOFTBUS_INVALID_PARAM,
         CONN_COMMON, "only CONNECT_TCP and CONNECT_P2P is permitted, "
@@ -427,6 +452,8 @@ int32_t StartBaseListener(const LocalListenerInfo *info, const SoftbusBaseListen
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "lock listener node failed, module=%{public}d, error=%{public}d", module, status);
         ReturnListenerNode(&node);
+        FillConnEventExtra(info, &extra, SOFTBUS_LOCK_ERR);
+        CONN_EVENT(EVENT_SCENE_START_BASE_LISTENER, EVENT_STAGE_TCP_COMMON_ONE, extra);
         return SOFTBUS_LOCK_ERR;
     }
 
@@ -467,11 +494,18 @@ int32_t StartBaseListener(const LocalListenerInfo *info, const SoftbusBaseListen
     } while (false);
     (void)SoftBusMutexUnlock(&node->lock);
     ReturnListenerNode(&node);
+    FillConnEventExtra(info, &extra, status);
+    CONN_EVENT(EVENT_SCENE_START_BASE_LISTENER, EVENT_STAGE_TCP_COMMON_ONE, extra);
     return status == SOFTBUS_OK ? listenPort : status;
 }
 
 int32_t StopBaseListener(ListenerModule module)
 {
+    ConnEventExtra extra = {
+        .moduleId = module,
+        .result = 0
+    };
+    CONN_EVENT(EVENT_SCENE_STOP_BASE_LISTENER, EVENT_STAGE_TCP_COMMON_ONE, extra);
     CONN_CHECK_AND_RETURN_RET_LOGW(
         module >= 0 && module < UNUSE_BUTT, SOFTBUS_INVALID_PARAM, CONN_COMMON,
         "invalid module, module=%{public}d", module);
@@ -486,6 +520,8 @@ int32_t StopBaseListener(ListenerModule module)
         CONN_LOGE(CONN_COMMON, "stop listen thread failed, module=%{public}d, error=%{public}d", module, status);
     }
     ReturnListenerNode(&node);
+    FillConnEventExtraByModule(module, &extra, status);
+    CONN_EVENT(EVENT_SCENE_STOP_BASE_LISTENER, EVENT_STAGE_TCP_COMMON_ONE, extra);
     return status;
 }
 

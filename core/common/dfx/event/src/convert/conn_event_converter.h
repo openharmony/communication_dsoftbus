@@ -47,6 +47,15 @@ CONN_ASSIGNER(Int32, CostTime, costTime)
 CONN_ASSIGNER(Int32, Rssi, rssi)
 CONN_ASSIGNER(Int32, Load, load)
 CONN_ASSIGNER(Int32, Frequency, frequency)
+CONN_ASSIGNER(Int32, ConnProtocol, connProtocol)
+CONN_ASSIGNER(Int32, ConnRole, connRole)
+CONN_ASSIGNER(Int32, ConnRcDelta, connRcDelta)
+CONN_ASSIGNER(Int32, ConnRc, connRc)
+CONN_ASSIGNER(Int32, SupportFeature, supportFeature)
+CONN_ASSIGNER(Int32, ModuleId, moduleId)
+CONN_ASSIGNER(Uint32, ProtocolType, proType)
+CONN_ASSIGNER(Int32, Fd, fd)
+CONN_ASSIGNER(Int32, Cfd, cfd)
 CONN_ASSIGNER(String, ChallengeCode, challengeCode)
 CONN_ASSIGNER(AnonymizeString, PeerIp, peerIp)
 CONN_ASSIGNER(AnonymizeString, PeerBrMac, peerBrMac)
@@ -54,6 +63,8 @@ CONN_ASSIGNER(AnonymizeString, PeerBleMac, peerBleMac)
 CONN_ASSIGNER(AnonymizeString, PeerWifiMac, peerWifiMac)
 CONN_ASSIGNER(String, PeerPort, peerPort)
 CONN_ASSIGNER(AnonymizeString, PeerNetworkId, peerNetworkId)
+CONN_ASSIGNER(AnonymizeString, PeerUdid, peerUdid)
+CONN_ASSIGNER(String, PeerDeviceType, peerDeviceType)
 CONN_ASSIGNER(AnonymizeString, LocalNetworkId, localNetworkId)
 CONN_ASSIGNER(String, CallerPkg, callerPkg)
 CONN_ASSIGNER(String, CalleePkg, calleePkg)
@@ -63,7 +74,7 @@ CONN_ASSIGNER(Errcode, IsReuse, isReuse)
 CONN_ASSIGNER(Uint64, NegotiateTime, negotiateTime)
 CONN_ASSIGNER(Uint64, LinkTime, linkTime)
 
-#define CONN_ASSIGNER_SIZE 28 // Size of g_connAssigners
+#define CONN_ASSIGNER_SIZE 39 // Size of g_connAssigners
 static HiSysEventParamAssigner g_connAssigners[] = {
     { "STAGE_RES",         HISYSEVENT_INT32,  ConnAssignerResult        },
     { "ERROR_CODE",        HISYSEVENT_INT32,  ConnAssignerErrcode       },
@@ -78,6 +89,15 @@ static HiSysEventParamAssigner g_connAssigners[] = {
     { "RSSI",              HISYSEVENT_INT32,  ConnAssignerRssi          },
     { "CHLOAD",            HISYSEVENT_INT32,  ConnAssignerLoad          },
     { "FREQ",              HISYSEVENT_INT32,  ConnAssignerFrequency     },
+    { "CONN_PROTOCOL",     HISYSEVENT_INT32,  ConnAssignerConnProtocol  },
+    { "CONN_ROLE",         HISYSEVENT_INT32,  ConnAssignerConnRole      },
+    { "CONN_RC_DELTA",     HISYSEVENT_INT32,  ConnAssignerConnRcDelta   },
+    { "CONN_RC",           HISYSEVENT_INT32,  ConnAssignerConnRc        },
+    { "SUPT_FEATURE",      HISYSEVENT_INT32,  ConnAssignerSupportFeature},
+    { "MODULE_ID",         HISYSEVENT_INT32,  ConnAssignerModuleId      },
+    { "PROTOCOL_TYPE",     HISYSEVENT_UINT32, ConnAssignerProtocolType  },
+    { "FD",                HISYSEVENT_INT32,  ConnAssignerFd            },
+    { "CFD",               HISYSEVENT_INT32,  ConnAssignerCfd           },
     { "CHALLENGE_CODE",    HISYSEVENT_STRING, ConnAssignerChallengeCode },
     { "PEER_IP",           HISYSEVENT_STRING, ConnAssignerPeerIp        },
     { "PEER_BR_MAC",       HISYSEVENT_STRING, ConnAssignerPeerBrMac     },
@@ -85,6 +105,8 @@ static HiSysEventParamAssigner g_connAssigners[] = {
     { "PEER_WIFI_MAC",     HISYSEVENT_STRING, ConnAssignerPeerWifiMac   },
     { "PEER_PORT",         HISYSEVENT_STRING, ConnAssignerPeerPort      },
     { "PEER_NET_ID",       HISYSEVENT_STRING, ConnAssignerPeerNetworkId },
+    { "PEER_UDID",         HISYSEVENT_STRING, ConnAssignerPeerUdid      },
+    { "PEER_DEV_TYPE",     HISYSEVENT_STRING, ConnAssignerPeerDeviceType},
     { "LOCAL_NET_ID",      HISYSEVENT_STRING, ConnAssignerLocalNetworkId},
     { "HOST_PKG",          HISYSEVENT_STRING, ConnAssignerCallerPkg     },
     { "TO_CALL_PKG",       HISYSEVENT_STRING, ConnAssignerCalleePkg     },

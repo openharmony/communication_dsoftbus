@@ -186,6 +186,7 @@ static void DfxRecordBleConnectFail(
         .requestId = reqId,
         .linkType = CONNECT_BLE,
         .costTime = costTime,
+        .peerBleMac = device->addr,
         .errcode = reason,
         .result = EVENT_STAGE_RESULT_FAILED
     };
@@ -215,6 +216,8 @@ static void DfxRecordBleConnectSuccess(uint32_t pId, ConnBleConnection *connecti
         .linkType = CONNECT_BLE,
         .costTime = (int32_t)costTime,
         .isReuse = statistics->reuse ? 1 : 0,
+        .peerBleMac = connection->addr,
+        .requestId = (int32_t)statistics->reqId,
         .result = EVENT_STAGE_RESULT_OK };
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
 }
@@ -509,6 +512,14 @@ static int32_t BleConnectDeviceDirectly(ConnBleDevice *device, const char *anomi
         ConnBleRemoveConnection(connection);
         SoftBusFree(address);
     }
+    ConnEventExtra extra = {
+        .connectionId = (int32_t)connection->connectionId,
+        .peerBleMac = device->addr,
+        .peerUdid = device->udid,
+        .linkType = CONNECT_BLE,
+        .result = EVENT_STAGE_RESULT_OK
+    };
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_DEVICE_DIRECTLY, extra);
     ConnBleReturnConnection(&connection);
     return status;
 }
@@ -808,6 +819,14 @@ static void BleServerAccepted(uint32_t connectionId)
         "ble server accept a new connection, connId=%{public}u, peerAddr=%{public}s, peerUdid=%{public}s",
         connectionId, anomizeAddress, anomizeUdid);
     g_connectCallback.OnConnected(connectionId, &info);
+    ConnEventExtra extra = {
+        .connectionId = (int32_t)connectionId,
+        .peerBleMac = connection->addr,
+        .peerUdid = connection->udid,
+        .linkType = CONNECT_BLE,
+        .result = EVENT_STAGE_RESULT_OK
+    };
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_SERVER_ACCEPTED, extra);
 
     ConnBleDevice *connectingDevice = g_bleManager.connecting;
     if (connectingDevice != NULL && StrCmpIgnoreCase(connectingDevice->addr, connection->addr) == 0) {
@@ -1637,6 +1656,15 @@ static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId,
         SoftBusFree(ctx);
         return status;
     }
+    ConnEventExtra extra = {
+        .connProtocol = option->bleOption.protocol,
+        .peerBleMac = option->bleOption.bleMac,
+        .peerUdid = anomizeUdid,
+        .linkType = CONNECT_BLE,
+        .requestId = (int32_t)requestId,
+        .result = EVENT_STAGE_RESULT_OK
+    };
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_DEVICE, extra);
     CONN_LOGI(CONN_BLE,
         "ble connect device: receive connect request, "
         "reqId=%{public}u, addr=%{public}s, protocol=%{public}d, udid=%{public}s, "
