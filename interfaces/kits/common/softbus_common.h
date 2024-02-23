@@ -196,6 +196,12 @@ extern "C" {
  *
  */
 #define NODE_STATUS_MAX_NUM 32
+
+/**
+ * @brief Indicates the maximum num of the device type size.
+ *
+ */
+#define DEVICE_TYPE_MAX_SIZE 3
 /**
  * @brief Enumerates {@link ConnectionAddrType} types of a device that is added to a LNN.
  *
