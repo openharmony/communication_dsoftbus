@@ -745,6 +745,7 @@ NO_SANITIZE("cfi") void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg
         uint32_t outLen;
         char *buf = TransProxyPackFastData(&info->appInfo, &outLen);
         if (buf == NULL) {
+            SoftBusFree(info);
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "failed to pack bytes.");
             return;
         }
