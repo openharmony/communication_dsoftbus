@@ -1664,7 +1664,10 @@ static void GetNodeInfoDiscovery(NodeInfo *oldInfo, NodeInfo *info, NodeInfoAbil
         info->metaInfo = oldInfo->metaInfo;
     }
     if (oldInfo != NULL && LnnIsNodeOnline(oldInfo)) {
-        LNN_LOGI(LNN_LEDGER, "addOnlineNode find online node");
+        char *anonyUuid = NULL;
+        Anonymize(oldInfo->uuid, &anonyUuid);
+        LNN_LOGI(LNN_LEDGER, "addOnlineNode find online node, uuid=%{public}s", anonyUuid);
+        AnonymizeFree(anonyUuid);
         infoAbility->isOffline = false;
         infoAbility->isChanged = IsNetworkIdChanged(info, oldInfo);
         infoAbility->oldWifiFlag = LnnHasDiscoveryType(oldInfo, DISCOVERY_TYPE_WIFI);
@@ -1679,7 +1682,9 @@ static void GetNodeInfoDiscovery(NodeInfo *oldInfo, NodeInfo *info, NodeInfoAbil
             infoAbility->isNetworkChanged = true;
         } else {
             RetainOfflineCode(oldInfo, info);
-            LNN_LOGE(LNN_LEDGER, "flag error");
+            LNN_LOGE(LNN_LEDGER, "flag error, oldBleFlag=%{public}d, oldBrFlag=%{public}d, oldWifiFlag=%{public}d,"
+                "newWifiFlag=%{public}d, newBleBrFlag=%{public}d", infoAbility->oldBleFlag, infoAbility->oldBrFlag,
+                infoAbility->oldWifiFlag, infoAbility->newBleBrFlag, infoAbility->newBleBrFlag);
         }
         if ((infoAbility->oldBleFlag || infoAbility->oldBrFlag) && !infoAbility->oldWifiFlag &&
             infoAbility->newWifiFlag) {

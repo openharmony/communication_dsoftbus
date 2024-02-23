@@ -252,7 +252,11 @@ static int32_t AdjustLanePriority(const char *networkId, const LaneSelectParam *
     }
     if ((resListScore[LANE_WLAN_2P4G] == INVALID_LINK && resListScore[LANE_WLAN_5G] == INVALID_LINK) ||
         (resListScore[LANE_P2P] == INVALID_LINK && resListScore[LANE_HML] == INVALID_LINK)) {
-        LNN_LOGI(LNN_LANE, "linklist does not require any changes");
+        char *anonyNetworkId = NULL;
+        Anonymize(networkId, &anonyNetworkId);
+        LNN_LOGI(LNN_LANE, "linklist does not require any changes, networkId=%{public}s, resNum=%{public}u",
+            anonyNetworkId, resNum);
+        AnonymizeFree(anonyNetworkId);
         return SOFTBUS_OK;
     }
     uint32_t idxWlan = LANE_LINK_TYPE_BUTT;
@@ -284,16 +288,19 @@ int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
     if (PreProcLaneSelect(networkId, request, recommendList, listNum) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
     LaneLinkType resList[LANE_LINK_TYPE_BUTT];
     uint32_t resNum = 0;
     (void)memset_s(resList, sizeof(resList), -1, sizeof(resList));
     if ((request->list.linkTypeNum > 0) && (request->list.linkTypeNum <= LANE_LINK_TYPE_BUTT)) {
-        LNN_LOGI(LNN_LANE, "Select lane by preferred linklist");
+        LNN_LOGI(LNN_LANE, "Select lane by preferred linklist, networkId=%{public}s", anonyNetworkId);
         SelectByPreferredLink(networkId, request, resList, &resNum);
     } else {
-        LNN_LOGI(LNN_LANE, "Select lane by default linklist");
+        LNN_LOGI(LNN_LANE, "Select lane by default linklist, networkId=%{public}s", anonyNetworkId);
         SelectByDefaultLink(networkId, request, resList, &resNum);
     }
+    AnonymizeFree(anonyNetworkId);
     if (resNum == 0) {
         LNN_LOGE(LNN_LANE, "there is none linkResource can be used");
         *listNum = 0;
