@@ -72,7 +72,7 @@ if (defined(ohos_lite)) {
   ]
   if (enhanced_broadcast) {
     import(
-        "$dsoftbus_root_path/dsoftbus_enhance/core/transmission/trans_channel/ble_broadcast/ble_broadcast.gni")
+        "$dsoftbus_root_path/dsoftbus_enhance/core/broadcast/notification_message/notification_message.gni")
 
     trans_session_src += broadcast_sources
     trans_session_inc += broadcast_include_dirs
