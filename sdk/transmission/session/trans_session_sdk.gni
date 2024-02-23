@@ -64,8 +64,8 @@ if (defined(ohos_lite)) {
     import(
         "$dsoftbus_root_path/dsoftbus_enhance/sdk/transmission/trans_channel/ble_broadcast/broadcast_sdk.gni")
 
-    trans_session_sdk_src += broadcast_sources
-    trans_session_sdk_inc += broadcast_include_dirs
+    trans_session_sdk_src += broadcast_sdk_sources
+    trans_session_sdk_inc += broadcast_sdk_include_dirs
   } else {
     trans_session_sdk_inc +=
         [ "$dsoftbus_root_path/core/transmission/broadcast/include" ]
