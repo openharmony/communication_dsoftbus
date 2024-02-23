@@ -76,7 +76,6 @@
     "SESSION_NAME": "ohos.distributedhardware.devicemanager.*",
     "REGEXP": "true",
     "DEVID": "UUID",
-    "SEC_LEVEL": "public",
     "APP_INFO": [
       {
         "PKG_NAME": "ohos.distributedhardware.devicemanager",
