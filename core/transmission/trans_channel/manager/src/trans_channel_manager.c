@@ -48,10 +48,16 @@
 #define MAX_PROXY_CHANNEL_ID 0x00008000
 #define MAX_TDC_CHANNEL_ID 0x7FFFFFFF
 #define MAX_FD_ID 1025
+#define MAX_PROXY_CHANNEL_ID_COUNT 1024
+#define ID_NOT_USED 0
+#define ID_USED 1UL
+#define BIT_NUM 8
 
-static int32_t g_allocProxyChannelId = MAX_FD_ID;
 static int32_t g_allocTdcChannelId = MAX_PROXY_CHANNEL_ID;
 static SoftBusMutex g_myIdLock;
+static unsigned long g_proxyChanIdBits[MAX_PROXY_CHANNEL_ID_COUNT / BIT_NUM / sizeof(long)] = {0};
+static uint32_t g_proxyIdMark = 0;
+static uint32_t g_channelIdCount = 0;
 
 typedef struct {
     int32_t channelType;
@@ -76,18 +82,33 @@ static int32_t GenerateTdcChannelId()
 
 static int32_t GenerateProxyChannelId()
 {
-    int32_t channelId;
     if (SoftBusMutexLock(&g_myIdLock) != 0) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
-    channelId = g_allocProxyChannelId++;
-    if (g_allocProxyChannelId >= MAX_PROXY_CHANNEL_ID) {
-        g_allocProxyChannelId = MAX_FD_ID;
+
+    if (g_channelIdCount >= MAX_PROXY_CHANNEL_ID_COUNT) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "No more channel Ids(1024) can be applied");
+        SoftBusMutexUnlock(&g_myIdLock);
+        return INVALID_CHANNEL_ID;
+    }
+
+    for (uint32_t id = g_proxyIdMark + 1; id != g_proxyIdMark; id++) {
+        id = id % MAX_PROXY_CHANNEL_ID_COUNT;
+        uint32_t index = id / (BIT_NUM * sizeof(long));
+        uint32_t bit = id % (BIT_NUM * sizeof(long));
+        if ((g_proxyChanIdBits[index] & (ID_USED << bit)) == ID_NOT_USED) {
+            g_proxyChanIdBits[index] |= (ID_USED << bit);
+            g_proxyIdMark = id;
+            g_channelIdCount++;
+            SoftBusMutexUnlock(&g_myIdLock);
+            return (int32_t)id + MAX_FD_ID;
+        }
     }
     SoftBusMutexUnlock(&g_myIdLock);
-    return channelId;
+    return INVALID_CHANNEL_ID;
 }
+
 
 int32_t GenerateChannelId(bool isTdcChannel)
 {
@@ -147,44 +168,6 @@ NO_SANITIZE("cfi") void TransChannelDeinit(void)
     SoftBusMutexDestroy(&g_myIdLock);
 }
 
-static int32_t TransGetRemoteInfo(const SessionParam* param, AppInfo* appInfo)
-{
-    if (param == NULL || appInfo == NULL) {
-        return SOFTBUS_ERR;
-    }
-    if (LnnGetRemoteStrInfo(param->peerDeviceId, STRING_KEY_UUID,
-        appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId)) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "direct get remote node uuid err");
-        char peerNetworkId[NETWORK_ID_BUF_LEN];
-        (void)memset_s(peerNetworkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
-        if (LnnGetNetworkIdByUuid(param->peerDeviceId, peerNetworkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get remote node networkId err by uuid");
-        } else {
-            if (strcpy_s(appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId),
-                param->peerDeviceId) != SOFTBUS_OK) {
-                return SOFTBUS_ERR;
-            }
-            if (strcpy_s((char *)param->peerDeviceId, sizeof(peerNetworkId), peerNetworkId) != SOFTBUS_OK) {
-                return SOFTBUS_ERR;
-            }
-            return SOFTBUS_OK;
-        }
-        if (LnnGetNetworkIdByUdid(param->peerDeviceId, peerNetworkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get remote node networkId err by udid");
-            return SOFTBUS_ERR;
-        }
-        if (strcpy_s((char *)param->peerDeviceId, sizeof(peerNetworkId), peerNetworkId) != SOFTBUS_OK) {
-            return SOFTBUS_ERR;
-        }
-        if (LnnGetRemoteStrInfo(param->peerDeviceId, STRING_KEY_UUID,
-            appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId)) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get remote node uuid err");
-            return SOFTBUS_ERR;
-        }
-    }
-    return SOFTBUS_OK;
-}
-
 static int32_t CopyAppInfoFromSessionParam(AppInfo* appInfo, const SessionParam* param)
 {
     if (param == NULL || param->attr == NULL) {
@@ -226,8 +209,9 @@ static int32_t CopyAppInfoFromSessionParam(AppInfo* appInfo, const SessionParam*
     if (strcpy_s(appInfo->peerData.sessionName, sizeof(appInfo->peerData.sessionName), param->peerSessionName) != 0) {
         return SOFTBUS_ERR;
     }
-    if (TransGetRemoteInfo(param, appInfo) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get remote node info err");
+    if (LnnGetRemoteStrInfo(param->peerDeviceId, STRING_KEY_UUID,
+        appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId)) != SOFTBUS_OK) {
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "get remote node uuid err");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
