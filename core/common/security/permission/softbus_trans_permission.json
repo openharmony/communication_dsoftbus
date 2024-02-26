@@ -341,16 +341,11 @@
     ]
   },
   {
-    "SESSION_NAME": "com.huawei.profile-session",
+    "SESSION_NAME": "com.huawei.profile-session*",
     "REGEXP": "true",
     "DEVID": "UDID",
     "SEC_LEVEL": "public",
     "APP_INFO": [
-      {
-        "PKG_NAME": "com.huawei.device_profile_adapter",
-        "TYPE": "system_app",
-        "ACTIONS": "create,open"
-      },
       {
         "PKG_NAME": "com.huawei.profile",
         "TYPE": "system_app",
