@@ -2008,21 +2008,6 @@ HWTEST_F(WifiDirectDataTest, testLinkManagerRecycleLinkId002, TestSize.Level1)
 
 /*
 * @tc.name: testDump001
-* @tc.desc: test clearNegotiateChannelForLink
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(WifiDirectDataTest, testLinkManagerclearNegotiateChannelForLink001, TestSize.Level1)
-{
-    struct LinkManager* self = GetLinkManager();
-    LinkManagerInit();
-    WifiDirectNegotiateChannel channel;
-    self->clearNegotiateChannelForLink(&channel);
-    EXPECT_TRUE(self != nullptr);
-}
-
-/*
-* @tc.name: testDump001
 * @tc.desc: test Dump
 * @tc.type: FUNC
 * @tc.require:
