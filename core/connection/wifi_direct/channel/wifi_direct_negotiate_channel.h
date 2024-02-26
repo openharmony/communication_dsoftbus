@@ -38,6 +38,7 @@ enum WifiDirectNegotiateChannelType {
     bool (*equal)(struct WifiDirectNegotiateChannel *leftBase, struct WifiDirectNegotiateChannel *rightBase); \
     struct WifiDirectNegotiateChannel* (*duplicate)(struct WifiDirectNegotiateChannel *base);                 \
     void (*destructor)(struct WifiDirectNegotiateChannel *base);                                              \
+    bool isRemoteSupportTlv;                                                                                   \
     enum WifiDirectNegotiateChannelType (*getMediumType)(struct WifiDirectNegotiateChannel *base)
 
 struct WifiDirectNegotiateChannel {

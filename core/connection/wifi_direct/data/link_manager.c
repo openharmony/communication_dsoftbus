@@ -15,6 +15,7 @@
 
 #include "link_manager.h"
 #include <string.h>
+#include <securec.h>
 #include "conn_log.h"
 #include "softbus_utils.h"
 #include "softbus_error_code.h"
@@ -23,6 +24,8 @@
 #include "wifi_direct_defines.h"
 #include "channel/wifi_direct_negotiate_channel.h"
 #include "channel/default_negotiate_channel.h"
+#include "entity/wifi_direct_entity.h"
+#include "entity/wifi_direct_entity_factory.h"
 #include "utils/wifi_direct_ipv4_info.h"
 #include "utils/wifi_direct_work_queue.h"
 #include "utils/wifi_direct_anonymous.h"
@@ -32,6 +35,8 @@
 static void UpdateLink(struct InnerLink *oldLink, struct InnerLink *newLink);
 static void OnInnerLinkChange(struct InnerLink *innerLink, bool isStateChange);
 static void CloseP2pNegotiateChannel(struct InnerLink *innerLink);
+static void DisconnectLink(struct InnerLink *innerLink);
+static struct InnerLink *FindInnerLinkByChannel(struct WifiDirectNegotiateChannel *channel);
 
 /* public interface */
 static struct InnerLink *GetLinkByDevice(const char *macString)
@@ -130,20 +135,19 @@ static struct InnerLink* GetLinkByTypeAndUuid(enum WifiDirectLinkType linkType, 
 {
     struct LinkManager *self = GetLinkManager();
     CONN_CHECK_AND_RETURN_RET_LOGW(self->isInited, NULL, CONN_WIFI_DIRECT, "not inited");
+    CONN_CHECK_AND_RETURN_RET_LOGW(linkType > WIFI_DIRECT_LINK_TYPE_INVALID && linkType < WIFI_DIRECT_LINK_TYPE_MAX,
+                                   NULL, CONN_WIFI_DIRECT, "linkType=%{public}d invalid", linkType);
+    int32_t res = SoftBusMutexLock(&self->mutex);
+    CONN_CHECK_AND_RETURN_RET_LOGE(res == SOFTBUS_OK, NULL, CONN_WIFI_DIRECT, "lock failed");
     struct InnerLink *target = NULL;
 
-    SoftBusMutexLock(&self->mutex);
-    for (size_t type = 0; type < WIFI_DIRECT_LINK_TYPE_MAX; type++) {
-        LIST_FOR_EACH_ENTRY(target, &self->linkLists[type], struct InnerLink, node) {
-            enum WifiDirectLinkType itemLinkType =
-                target->getInt(target, IL_KEY_LINK_TYPE, WIFI_DIRECT_LINK_TYPE_INVALID);
+    LIST_FOR_EACH_ENTRY(target, &self->linkLists[linkType], struct InnerLink, node) {
             const char *linkUuid = target->getString(target, IL_KEY_DEVICE_ID, "");
-            if (itemLinkType == linkType && StrCmpIgnoreCase(linkUuid, uuid) == SOFTBUS_OK) {
+            if (StrCmpIgnoreCase(linkUuid, uuid) == SOFTBUS_OK) {
                 CONN_LOGI(CONN_WIFI_DIRECT, "find type=%{public}d, uuid=%{public}s", linkType,
                     WifiDirectAnonymizeDeviceId(uuid));
                 SoftBusMutexUnlock(&self->mutex);
                 return target;
-            }
         }
     }
     SoftBusMutexUnlock(&self->mutex);
@@ -219,6 +223,41 @@ static void ReleaseLinkIp(struct InnerLink *link)
     GetWifiDirectIpManager()->releaseIp(interface, localIpv4, remoteIpv4, remoteMac);
 }
 
+static void RemoveLinkByChannel(struct WifiDirectNegotiateChannel *channel)
+{
+    struct LinkManager *self = GetLinkManager();
+    CONN_CHECK_AND_RETURN_LOGW(self->isInited, CONN_WIFI_DIRECT, "ont inited");
+
+    int32_t ret = SoftBusMutexLock(&self->mutex);
+    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "lock failed");
+    struct InnerLink *target = FindInnerLinkByChannel(channel);
+    if (target == NULL) {
+        SoftBusMutexUnlock(&self->mutex);
+        return;
+    }
+
+    self->count--;
+    ListDelete(&target->node);
+    DisconnectLink(target);
+    target->setState(target, INNER_LINK_STATE_DISCONNECTED);
+    OnInnerLinkChange(target, true);
+    CloseP2pNegotiateChannel(target);
+    InnerLinkDelete(target);
+    SoftBusMutexUnlock(&self->mutex);
+}
+
+static struct InnerLink* FindLinkByChannel(struct WifiDirectNegotiateChannel *channel)
+{
+    struct LinkManager *self = GetLinkManager();
+    CONN_CHECK_AND_RETURN_RET_LOGW(self->isInited, NULL, CONN_WIFI_DIRECT, "not inited");
+
+    int32_t ret = SoftBusMutexLock(&self->mutex);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, NULL, CONN_WIFI_DIRECT, "lock faild");
+    struct InnerLink *target = FindInnerLinkByChannel(channel);
+    SoftBusMutexUnlock(&self->mutex);
+    return target;
+}
+
 static void RemoveLinksByLinkType(enum WifiDirectLinkType linkType)
 {
     CONN_CHECK_AND_RETURN_LOGW(linkType < WIFI_DIRECT_LINK_TYPE_MAX, CONN_WIFI_DIRECT, "connect type invalid");
@@ -279,7 +318,7 @@ static void RefreshLinks(enum WifiDirectLinkType linkType, int32_t clientDeviceS
     SoftBusMutexUnlock(&self->mutex);
 }
 
-static void RegisterListener(const struct LinkManagerListener *listener)
+static void RegisterListener(struct LinkManagerListener *listener)
 {
     GetLinkManager()->listener = *listener;
 }
@@ -363,27 +402,6 @@ static struct InnerLink *FindInnerLinkByChannel(struct WifiDirectNegotiateChanne
     return NULL;
 }
 
-static void ClearNegotiateChannelForLink(struct WifiDirectNegotiateChannel *channel)
-{
-    struct LinkManager *self = GetLinkManager();
-    CONN_CHECK_AND_RETURN_LOGW(self->isInited, CONN_WIFI_DIRECT, "not inited");
-
-    int32_t ret = SoftBusMutexLock(&self->mutex);
-    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "mutex lock failed");
-    struct InnerLink *target = FindInnerLinkByChannel(channel);
-    if (target == NULL) {
-        SoftBusMutexUnlock(&self->mutex);
-        return;
-    }
-
-    struct DefaultNegotiateChannel *channelOld = target->getPointer(target, IL_KEY_NEGO_CHANNEL, NULL);
-    if (channelOld != NULL) {
-        DefaultNegotiateChannelDelete(channelOld);
-    }
-    target->remove(target, IL_KEY_NEGO_CHANNEL);
-    SoftBusMutexUnlock(&self->mutex);
-}
-
 static void Dump(int32_t fd)
 {
     struct LinkManager *self = GetLinkManager();
@@ -427,13 +445,14 @@ static struct LinkManager g_manager = {
     .getLinkByTypeAndUuid = GetLinkByTypeAndUuid,
     .getAllLinks = GetAllLinks,
     .notifyLinkChange = NotifyLinkChange,
+    .removeLinkByChannel = RemoveLinkByChannel,
+    .findLinkByChannel = FindLinkByChannel,
     .removeLinksByLinkType = RemoveLinksByLinkType,
     .refreshLinks = RefreshLinks,
     .registerListener = RegisterListener,
     .generateLinkId = GenerateLinkId,
     .recycleLinkId = RecycleLinkId,
     .setNegotiateChannelForLink = SetNegotiateChannelForLink,
-    .clearNegotiateChannelForLink = ClearNegotiateChannelForLink,
     .dump = Dump,
     .checkAll = CheckAll,
     .currentLinkId = 0,
@@ -614,5 +633,29 @@ static void CloseP2pNegotiateChannel(struct InnerLink *innerLink)
         }
         DefaultNegotiateChannelDelete(channel);
         innerLink->remove(innerLink, IL_KEY_NEGO_CHANNEL);
+    }
+}
+
+static void DisconnectLink(struct InnerLink *innerLink)
+{
+    int32_t ret = SOFTBUS_ERR;
+    struct WifiDirectEntity *entity = NULL;
+    struct WifiDirectConnectParams param;
+    enum WifiDirectLinkType linkType = innerLink->getInt(innerLink, IL_KEY_LINK_TYPE, WIFI_DIRECT_LINK_TYPE_INVALID);
+    if (linkType == WIFI_DIRECT_LINK_TYPE_P2P) {
+        ret = strcpy_s(param.interface, sizeof(param.interface), IF_NAME_P2P);
+        CONN_CHECK_AND_RETURN_LOGE(ret == EOK, CONN_WIFI_DIRECT, "copy interface faild");
+        entity = GetWifiDirectEntityFactory()->createEntity(ENTITY_TYPE_P2P);
+    } else if (linkType == WIFI_DIRECT_LINK_TYPE_HML) {
+        ret = strcpy_s(param.interface, sizeof(param.interface), IF_NAME_HML);
+        CONN_CHECK_AND_RETURN_LOGE(ret == EOK, CONN_WIFI_DIRECT, "copy interface falid");
+        char *remoteMac = innerLink->getString(innerLink, IL_KEY_REMOTE_BASE_MAC, "");
+        ret = strcpy_s(param.remoteMac, sizeof(param.remoteMac), remoteMac);
+        CONN_CHECK_AND_RETURN_LOGE(ret == EOK, CONN_WIFI_DIRECT, "copy remoteMac faild");
+        entity = GetWifiDirectEntityFactory()->createEntity(ENTITY_TYPE_HML);
+    }
+    if (entity != NULL) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "linkType=%{public}d", linkType);
+        entity->disconnect(&param);
     }
 }

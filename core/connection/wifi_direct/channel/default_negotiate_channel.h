@@ -29,6 +29,7 @@ struct DefaultNegotiateChannel {
     int32_t (*postDataWithFlag)(struct DefaultNegotiateChannel *self, const uint8_t *data, size_t size, int32_t flag);
 
     int64_t authId;
+    AuthLinkType authLinkType;
     char p2pMac[MAC_ADDR_STR_LEN];
     char remoteDeviceId[UUID_BUF_LEN];
 };
@@ -40,8 +41,8 @@ void DefaultNegotiateChannelDelete(struct DefaultNegotiateChannel *self);
 
 struct DefaultNegoChannelParam {
     AuthLinkType type;
-    char *remoteUuid;
-    char *remoteIp;
+    char remoteUuid[UUID_BUF_LEN];
+    char remoteIp[IP_ADDR_STR_LEN];
     int32_t remotePort;
     ListenerModule localModuleId;
 };
