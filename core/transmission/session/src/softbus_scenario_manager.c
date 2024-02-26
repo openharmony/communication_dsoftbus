@@ -301,8 +301,8 @@ static void ScenarioManagerAddBusinessType(ScenarioManager *manager,
     TRANS_LOGI(TRANS_CTRL,
         "same mac pair: businessType=%{public}d, totalFileCount=%{public}d, totalAudioCount=%{public}d, "
         "totalVideoCount=%{public}d",
-         businessType, scenarioItem->totalFileCount, scenarioItem->totalAudioCount,
-         scenarioItem->totalVideoCount);
+        businessType, scenarioItem->totalFileCount, scenarioItem->totalAudioCount,
+        scenarioItem->totalVideoCount);
 }
 
 static void ScenarioManagerDelBusinessType(ScenarioManager *manager,
@@ -339,8 +339,8 @@ static void ScenarioManagerDelBusinessType(ScenarioManager *manager,
     (void)(*itemCount)--;
     TRANS_LOGI(TRANS_CTRL,
         "businessType=%{public}d, filecount=%{public}d, audiocuont=%{public}d, videocount=%{public}d",
-         businessType, scenarioItem->totalFileCount, scenarioItem->totalAudioCount,
-         scenarioItem->totalVideoCount);
+        businessType, scenarioItem->totalFileCount, scenarioItem->totalAudioCount,
+        scenarioItem->totalVideoCount);
 }
 
 static int32_t ScenarioManagerGetBitPosByBusinessType(int businessType)
@@ -368,7 +368,7 @@ static bool ScenarioManagerIsBusinesExisted(ScenarioManager *manager,
 {
     TRANS_LOGI(TRANS_CTRL,
         "businessType=%{public}d, filecount=%{public}d, audiocuont=%{public}d, videocount=%{public}d",
-         businessType, item->totalFileCount, item->totalAudioCount, item->totalVideoCount);
+        businessType, item->totalFileCount, item->totalAudioCount, item->totalVideoCount);
     switch (businessType) {
         case SM_FILE_TYPE:
             return item->totalFileCount > 0;

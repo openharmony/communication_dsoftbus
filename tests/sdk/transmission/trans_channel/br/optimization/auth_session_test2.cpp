@@ -19,7 +19,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
-#include <inttypes.h>
+#include <cinttypes>
 #include <iostream>
 #include <semaphore.h>
 #include <string>
@@ -157,7 +157,8 @@ static ISessionListener g_listener = {
 
 int OnSendFileProcess(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
 {
-    cout << "OnSendFileProcess sessionId = " << sessionId << ", bytesUpload = " << bytesUpload << ", total = " << bytesTotal << endl;
+    cout << "OnSendFileProcess sessionId = " << sessionId << ", bytesUpload = " <<
+        bytesUpload << ", total = " << bytesTotal << endl;
     return 0;
 }
 
@@ -471,7 +472,7 @@ void AuthSessionTest::TransTestCase001(TransTestInfo &transInfo)
 
 /*
 * @tc.name: testSendBytesMessage001
-* @tc.desc: 
+* @tc.desc:
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -501,7 +502,7 @@ HWTEST_F(AuthSessionTest, testSendBytesMessage001, TestSize.Level1)
 
 /*
 * @tc.name: testSendBytesMessage002
-* @tc.desc: 
+* @tc.desc:
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -531,7 +532,7 @@ HWTEST_F(AuthSessionTest, testSendBytesMessage002, TestSize.Level1)
 
 /*
 * @tc.name: testSendFile001
-* @tc.desc: 
+* @tc.desc:
 * @tc.type: FUNC
 * @tc.require:
 */

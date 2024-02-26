@@ -74,14 +74,14 @@ int main(void)
     int ret = CreateSessionServer(g_pkgNameA, g_sessionNameA, &g_sessionlistenerA);
     printf("create session server result = %d\n", ret);
 
-    /* 
+    /*
      * 2. Device A calls OpenAuthSession() to create a raw channel for identity negotiation based on the session name
      * and connection information before networking.
      */
     int sessionId = OpenAuthSession(g_sessionNameA, &(g_addrInfo), 1, NULL);
     printf("open auth session result = %d\n", sessionId);
 
-    /* 
+    /*
      * 3. When the identity authentication is complete,
      * NotifyAuthSuccess is called to notify device A of the authentication success.
      */
