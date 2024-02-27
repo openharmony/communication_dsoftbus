@@ -357,15 +357,6 @@ int32_t ConnBrUpdateConnectionRc(ConnBrConnection *connection, int32_t delta)
         "br update connection ref: lock failed, connId=%{public}u, delta=%{public}d", connection->connectionId, delta);
     connection->connectionRc += delta;
     int32_t localRc = connection->connectionRc;
-    ConnEventExtra extra = {
-        .connectionId = (int32_t)connection->connectionId,
-        .connRcDelta = delta,
-        .connRc = localRc,
-        .peerBrMac = connection->addr,
-        .linkType = CONNECT_BR,
-        .result = EVENT_STAGE_RESULT_OK
-    };
-    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_UPDATE_CONNECTION_RC, extra);
     CONN_LOGI(CONN_BR, "connId=%{public}u, side=%{public}d, delta=%{public}d, newRef=%{public}d",
         connection->connectionId, connection->side, delta, localRc);
     if (localRc <= 0) {
@@ -385,6 +376,13 @@ int32_t ConnBrUpdateConnectionRc(ConnBrConnection *connection, int32_t delta)
             .referenceNumber = localRc,
         },
     };
+    ConnEventExtra extra = {
+        .connectionId = (int32_t)connection->connectionId,
+        .connRcDelta = delta,
+        .connRc = localRc,
+        .peerBrMac = connection->addr,
+        .linkType = CONNECT_BR
+    };
     uint8_t *data = NULL;
     uint32_t dataLen = 0;
     int64_t seq = ConnBrPackCtlMessage(ctx, &data, &dataLen);
@@ -392,9 +390,15 @@ int32_t ConnBrUpdateConnectionRc(ConnBrConnection *connection, int32_t delta)
         CONN_LOGE(CONN_BR,
             "connection request message failed, connectionId=%{public}u, ret=%{public}d",
             connection->connectionId, (int32_t)seq);
+        extra.errcode = (int32_t)seq;
+        extra.result = EVENT_STAGE_RESULT_FAILED;
+        CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_UPDATE_CONNECTION_RC, extra);
         return (int32_t)seq;
     }
-    return ConnBrPostBytes(connection->connectionId, data, dataLen, 0, flag, MODULE_CONNECTION, seq);
+    extra.errcode = ConnBrPostBytes(connection->connectionId, data, dataLen, 0, flag, MODULE_CONNECTION, seq);
+    extra.result = extra.errcode == SOFTBUS_OK ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_UPDATE_CONNECTION_RC, extra);
+    return extra.errcode;
 }
 
 int32_t ConnBrDisconnectNow(ConnBrConnection *connection)

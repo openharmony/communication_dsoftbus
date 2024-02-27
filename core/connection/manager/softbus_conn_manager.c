@@ -518,13 +518,15 @@ int32_t ConnConnectDevice(const ConnectOption *info, uint32_t requestId, const C
     RecordStartTime(info);
     ConnEventExtra extra = {
         .requestId = requestId,
-        .linkType = info->type
+        .linkType = info->type,
+        .result = EVENT_STAGE_RESULT_OK
     };
     if (info->type == CONNECT_BR) {
         extra.peerBrMac = info->brOption.brMac;
     }
     if (info->type == CONNECT_BLE) {
         extra.peerBleMac = info->bleOption.bleMac;
+        extra.connProtocol = info->bleOption.protocol;
     }
     if (info->type == CONNECT_TCP) {
         extra.peerWifiMac = info->socketOption.addr;

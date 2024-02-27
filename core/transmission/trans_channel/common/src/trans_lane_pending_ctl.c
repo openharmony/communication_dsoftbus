@@ -619,6 +619,7 @@ int32_t TransGetLaneInfo(const SessionParam *param, LaneConnInfo *connInfo, uint
         .laneId = *laneId,
         .peerNetworkId = param->peerDeviceId,
         .laneTransType = requestOption.requestInfo.trans.transType,
+        .linkType = connInfo->type,
         .errcode = ret,
         .result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED
     };
