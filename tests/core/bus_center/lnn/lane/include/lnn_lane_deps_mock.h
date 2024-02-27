@@ -22,6 +22,7 @@
 #include "auth_interface.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_link.h"
+#include "lnn_lane_query.h"
 #include "lnn_lane_score.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_node_info.h"
@@ -77,6 +78,7 @@ public:
     virtual bool CheckActiveConnection(const ConnectOption *option) = 0;
     virtual int32_t ConnOpenClientSocket(const ConnectOption *option, const char *bindAddr, bool isNonBlock) = 0;
     virtual int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType trigger) = 0;
+    virtual int32_t QueryLaneResource(const LaneQueryInfo *queryInfo, const QosInfo *qosInfo) = 0;
 };
 
 class LaneDepsInterfaceMock : public LaneDepsInterface {
@@ -119,8 +121,8 @@ public:
     MOCK_METHOD1(CheckActiveConnection, bool (const ConnectOption *));
     MOCK_METHOD3(ConnOpenClientSocket, int32_t (const ConnectOption *option, const char *bindAddr, bool isNonBlock));
     MOCK_METHOD3(AddTrigger, int32_t (ListenerModule module, int32_t fd, TriggerType trigger));
-
-    void SetDefaultResult(void);
+    MOCK_METHOD2(QueryLaneResource, int32_t (const LaneQueryInfo *, const QosInfo *));
+    void SetDefaultResult(NodeInfo *info);
     static int32_t ActionOfGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash);
 };
 } // namespace OHOS

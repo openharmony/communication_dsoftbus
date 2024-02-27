@@ -520,5 +520,111 @@ int SoftBusGetBtState(void)
 {
     return GetNetBuilderDepsInterface()->SoftBusGetBtState();
 }
+
+int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type)
+{
+    return GetNetBuilderDepsInterface()->LnnSetNetCapability(capability, type);
+}
+
+int32_t LnnClearNetCapability(uint32_t *capability, NetCapability type)
+{
+    return GetNetBuilderDepsInterface()->LnnClearNetCapability(capability, type);
+}
+
+int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler)
+{
+    return GetNetBuilderDepsInterface()->LnnRegisterEventHandler(event, handler);
+}
+
+void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler)
+{
+    return GetNetBuilderDepsInterface()->LnnUnregisterEventHandler(event, handler);
+}
+
+void LnnNotifyDeviceVerified(const char *udid)
+{
+    return GetNetBuilderDepsInterface()->LnnNotifyDeviceVerified(udid);
+}
+
+int32_t LnnInitBusCenterEvent(void)
+{
+    return GetNetBuilderDepsInterface()->LnnInitBusCenterEvent();
+}
+
+int32_t LnnInitBatteryInfo(void)
+{
+    return GetNetBuilderDepsInterface()->LnnInitBatteryInfo();
+}
+
+void LnnDeinitBatteryInfo(void)
+{
+    return GetNetBuilderDepsInterface()->LnnDeinitBatteryInfo();
+}
+
+int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len)
+{
+    return GetNetBuilderDepsInterface()->LnnSetLocalByteInfo(key, info, len);
+}
+
+void LnnDeinitNetworkInfo(void)
+{
+    return GetNetBuilderDepsInterface()->LnnDeinitNetworkInfo();
+}
+
+void LnnDeinitDevicename(void)
+{
+    return GetNetBuilderDepsInterface()->LnnDeinitDevicename();
+}
+
+const NodeInfo *LnnGetLocalNodeInfo(void)
+{
+    return GetNetBuilderDepsInterface()->LnnGetLocalNodeInfo();
+}
+
+void LnnRemoveNode(const char *udid)
+{
+    return GetNetBuilderDepsInterface()->LnnRemoveNode(udid);
+}
+
+int32_t LnnClearDiscoveryType(NodeInfo *info, DiscoveryType type)
+{
+    return GetNetBuilderDepsInterface()->LnnClearDiscoveryType(info, type);
+}
+
+const char *LnnPrintConnectionAddr(const ConnectionAddr *addr)
+{
+    return GetNetBuilderDepsInterface()->LnnPrintConnectionAddr(addr);
+}
+
+int32_t LnnUpdateGroupType(const NodeInfo *info)
+{
+    return GetNetBuilderDepsInterface()->LnnUpdateGroupType(info);
+}
+
+int32_t LnnUpdateAccountInfo(const NodeInfo *info)
+{
+    return GetNetBuilderDepsInterface()->LnnUpdateAccountInfo(info);
+}
+
+bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *connInfo)
+{
+    return GetNetBuilderDepsInterface()->LnnConvertAddrToAuthConnInfo(addr, connInfo);
+}
+
+int32_t LnnFsmRemoveMessageByType(FsmStateMachine *fsm, int32_t what)
+{
+    return GetNetBuilderDepsInterface()->LnnFsmRemoveMessageByType(fsm, what);
+}
+
+void LnnDeinitBusCenterEvent(void)
+{
+    return GetNetBuilderDepsInterface()->LnnDeinitBusCenterEvent();
+}
+
+int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
+    const AuthVerifyCallback *callback, bool isFastAuth)
+{
+    return GetNetBuilderDepsInterface()->AuthStartVerify(connInfo, requestId, callback, isFastAuth);
+}
 } // extern "C"
 } // namespace OHOS
