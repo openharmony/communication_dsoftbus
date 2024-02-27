@@ -244,6 +244,22 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOpenProxyChannelTest001, Test
 
     ret = TransProxyOpenProxyChannel(&appInfo, &connInfo, NULL);
     EXPECT_NE(SOFTBUS_OK, ret);
+
+    connInfo.type = CONNECT_BLE_DIRECT;
+    ret = TransProxyOpenProxyChannel(&appInfo, &connInfo, NULL);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    connInfo.type = CONNECT_BLE;
+    ret = TransProxyOpenProxyChannel(&appInfo, &connInfo, NULL);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    connInfo.type = CONNECT_BR;
+    ret = TransProxyOpenProxyChannel(&appInfo, &connInfo, NULL);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    connInfo.type = CONNECT_TCP;
+    ret = TransProxyOpenProxyChannel(&appInfo, &connInfo, NULL);
+    EXPECT_NE(SOFTBUS_OK, ret);
 }
 
 /**
@@ -316,6 +332,11 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetNameByChanIdTest001, TestS
     uint16_t sessionLen = SESSION_NAME_SIZE_MAX;
     int32_t ret = TransProxyGetNameByChanId(channelId, pkgName, sessionName, pkgLen, sessionLen);
     EXPECT_NE(SOFTBUS_OK, ret);
+
+    ret = TransProxyGetNameByChanId(channelId, nullptr, sessionName, pkgLen, sessionLen);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransProxyGetNameByChanId(channelId, pkgName, nullptr, pkgLen, sessionLen);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     channelId = TEST_NUMBER_TEN;
     ret = TransProxyGetNameByChanId(channelId, pkgName, sessionName, pkgLen, sessionLen);
@@ -1137,4 +1158,130 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetLocalInfoTest001, TestSize
     TransNotifyOffLine(&lnnInfo);
 }
 
+/**
+ * @tc.name: TransProxyGetAppInfoTypeTest001
+ * @tc.desc: TransProxyGetAppInfoType.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetAppInfoTypeTest001, TestSize.Level1)
+{
+    int16_t myId = 1;
+    const char *identity = "test";
+    int32_t ret = TransProxyGetAppInfoType(myId, identity);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+}
+
+/**
+ * @tc.name: TransProxySpecialUpdateChanInfoTest001
+ * @tc.desc: TransProxySpecialUpdateChanInfo.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, TransProxySpecialUpdateChanInfoTest001, TestSize.Level1)
+{
+    ProxyChannelInfo channelInfo;
+    memset_s(&channelInfo, sizeof(ProxyChannelInfo), 0, sizeof(ProxyChannelInfo));
+    int32_t ret = TransProxySpecialUpdateChanInfo(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    channelInfo.channelId = TEST_MESSAGE_CHANNEL_ID;
+    channelInfo.reqId = -1;
+    channelInfo.isServer = -1;
+    channelInfo.type = CONNECT_BR;
+    channelInfo.status = -1;
+    channelInfo.status = PROXY_CHANNEL_STATUS_HANDSHAKEING;
+    channelInfo.connId = 1;
+    ret = TransProxySpecialUpdateChanInfo(&channelInfo);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+    channelInfo.type = CONNECT_TYPE_MAX;
+    ret = TransProxySpecialUpdateChanInfo(&channelInfo);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+}
+
+/**
+ * @tc.name: TransProxyGetChanByChanIdTest001
+ * @tc.desc: TransProxyGetChanByChanId.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetChanByChanIdTest001, TestSize.Level1)
+{
+    ProxyChannelInfo chan;
+    memset_s(&chan, sizeof(ProxyChannelInfo), 0, sizeof(ProxyChannelInfo));
+    int32_t chanId = 1;
+    int32_t ret = TransProxyGetChanByChanId(chanId, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransProxyGetChanByChanId(chanId, &chan);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+}
+
+/**
+ * @tc.name: TransProxyProcessDataConfigTest001
+ * @tc.desc: TransProxyProcessDataConfig.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyProcessDataConfigTest001, TestSize.Level1)
+{
+    AppInfo appInfo;
+    memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    int32_t ret = TransProxyProcessDataConfig(nullptr);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+    appInfo.businessType = BUSINESS_TYPE_MESSAGE;
+    appInfo.peerData.dataConfig = 2;
+    appInfo.myData.dataConfig = 1;
+    ret = TransProxyProcessDataConfig(&appInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    appInfo.peerData.dataConfig = 0;
+    ret = TransProxyProcessDataConfig(&appInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: TransProxyFillDataConfigTest001
+ * @tc.desc: TransProxyFillDataConfig.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyFillDataConfigTest001, TestSize.Level1)
+{
+    AppInfo appInfo;
+    memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    appInfo.appType = APP_TYPE_AUTH;
+    int32_t ret = TransProxyFillDataConfig(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    appInfo.businessType = BUSINESS_TYPE_MESSAGE;
+    appInfo.peerData.dataConfig = 2;
+    appInfo.myData.dataConfig = 1;
+    ret = TransProxyFillDataConfig(&appInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    appInfo.peerData.dataConfig = 0;
+    ret = TransProxyFillDataConfig(&appInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: ConvertConnectType2AuthLinkTypeTest001
+ * @tc.desc: ConvertConnectType2AuthLinkType.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, ConvertConnectType2AuthLinkTypeTest001, TestSize.Level1)
+{
+    ConnectType type = CONNECT_TCP;
+    AuthLinkType ret = ConvertConnectType2AuthLinkType(type);
+    EXPECT_EQ(ret, AUTH_LINK_TYPE_WIFI);
+    type = CONNECT_BLE;
+    ret = ConvertConnectType2AuthLinkType(type);
+    EXPECT_EQ(ret, AUTH_LINK_TYPE_BLE);
+    type = CONNECT_BLE_DIRECT;
+    ret = ConvertConnectType2AuthLinkType(type);
+    EXPECT_EQ(ret, AUTH_LINK_TYPE_BLE);
+    type = CONNECT_BR;
+    ret = ConvertConnectType2AuthLinkType(type);
+    EXPECT_EQ(ret, AUTH_LINK_TYPE_BR);
+    type = CONNECT_P2P;
+    ret = ConvertConnectType2AuthLinkType(type);
+    EXPECT_EQ(ret, AUTH_LINK_TYPE_P2P);
+}
 } // namespace OHOS
