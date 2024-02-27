@@ -264,19 +264,19 @@ HWTEST_F(SoftBusMessageOpenChannelTest, UnpackReplyErrCode001, TestSize.Level1)
 {
     int32_t errCode = -12345;
     int ret = UnpackReplyErrCode(NULL, NULL);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     char *mag = TestGetMsgPack();
     cJSON *json = cJSON_Parse(mag);
     ret = UnpackReplyErrCode(json, NULL);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = UnpackReplyErrCode(NULL, &errCode);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     errCode = 1;
     ret = UnpackReplyErrCode(json, &errCode);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 }
 
 /**

@@ -33,6 +33,8 @@ using namespace testing::ext;
 
 namespace OHOS {
 
+#define TEST_STRING_IDENTITY "11"
+
 class SoftbusProxyTransceiverTest : public testing::Test {
 public:
     SoftbusProxyTransceiverTest()
@@ -348,5 +350,96 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxySendBadKeyMessagel001, TestSize.
     connInfo.type = CONNECT_TCP;
     ret = TransProxyOpenNewConnChannel(moduleId, &chan, &connInfo, channelId);
     EXPECT_NE(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: TransProxyTransInitl001
+ * @tc.desc: test TransProxyTransInit.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransProxyTransInit001, TestSize.Level1)
+{
+    int32_t ret = TransProxyTransInit();
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+    DestroySoftBusList(g_proxyConnectionList);
+    g_proxyConnectionList = nullptr;
+}
+
+/**
+ * @tc.name: TransDelConnByReqId001
+ * @tc.desc: test TransDelConnByReqId.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransDelConnByReqId001, TestSize.Level1)
+{
+    uint32_t reqId = ConnGetNewRequestId(MODULE_PROXY_CHANNEL);
+    int32_t ret = TransDelConnByReqId(reqId);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+    g_proxyConnectionList = CreateSoftBusList();
+    ret = TransDelConnByReqId(reqId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    DestroySoftBusList(g_proxyConnectionList);
+    g_proxyConnectionList = nullptr;
+}
+
+/**
+ * @tc.name: TransProxyCreateLoopMsg001
+ * @tc.desc: test TransProxyCreateLoopMsg.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransProxyCreateLoopMsg001, TestSize.Level1)
+{
+    const char *chan = "testchan";
+    SoftBusMessage *ret = TransProxyCreateLoopMsg(LOOP_RESETPEER_MSG, 0,
+        0, const_cast<char *>(chan));
+    EXPECT_NE(ret, nullptr);
+}
+
+/**
+ * @tc.name: TransGetConn001
+ * @tc.desc: test TransGetConn.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransGetConn001, TestSize.Level1)
+{
+    ConnectOption connInfo;
+    memset_s(&connInfo, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    ProxyConnInfo proxyConn;
+    memset_s(&proxyConn, sizeof(ProxyConnInfo), 0, sizeof(ProxyConnInfo));
+    int32_t ret = TransGetConn(&connInfo, &proxyConn);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    g_proxyConnectionList = CreateSoftBusList();
+    EXPECT_NE(g_proxyConnectionList, nullptr);
+    ret = TransGetConn(nullptr, &proxyConn);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransGetConn(&connInfo, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = TransGetConn(&connInfo, &proxyConn);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+    DestroySoftBusList(g_proxyConnectionList);
+    g_proxyConnectionList = nullptr;
+}
+
+/**
+ * @tc.name: TransProxySendBadKeyMessage001
+ * @tc.desc: test TransProxySendBadKeyMessage.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransProxySendBadKeyMessage001, TestSize.Level1)
+{
+    ProxyMessage msg;
+    memset_s(&msg, sizeof(ProxyMessage), 0, sizeof(ProxyMessage));
+    const char *identity = TEST_STRING_IDENTITY;
+    msg.data = TransProxyPackIdentity(identity);
+    msg.dateLen = 9;
+    int32_t ret = TransProxySendBadKeyMessage(&msg);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 } // namespace OHOS
