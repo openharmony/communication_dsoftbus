@@ -43,7 +43,7 @@ static void OnSessionOpenFailProc(const SessionConn *node, int32_t errCode)
     TransEventExtra extra = {
         .calleePkg = NULL,
         .callerPkg = node->appInfo.myData.pkgName,
-        .channelId = node->appInfo.myData.channelId,
+        .channelId = node->channelId,
         .peerChannelId = node->appInfo.peerData.channelId,
         .peerNetworkId = node->appInfo.peerNetWorkId,
         .socketName = node->appInfo.myData.sessionName,
