@@ -410,7 +410,7 @@ static void TransGetQosInfo(const SessionParam *param, QosInfo *qosInfo, bool *i
 static void TransGetBleMac(const SessionParam *param, LaneRequestOption *requestOption)
 {
     if (LnnGetRemoteStrInfo(requestOption->requestInfo.trans.networkId, STRING_KEY_BLE_MAC,
-            requestOption->requestInfo.trans.peerBleMac, BT_MAC_LEN) != SOFTBUS_OK) {
+        requestOption->requestInfo.trans.peerBleMac, BT_MAC_LEN) != SOFTBUS_OK) {
         if (strcpy_s(requestOption->requestInfo.trans.peerBleMac, BT_MAC_LEN, "") != EOK) {
             TRANS_LOGE(TRANS_SVC, "strcpy fail");
         }
