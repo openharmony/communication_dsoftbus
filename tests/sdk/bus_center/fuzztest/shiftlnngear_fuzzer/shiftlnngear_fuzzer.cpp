@@ -83,6 +83,7 @@ namespace OHOS {
         ShiftLNNGear(TEST_PKG_NAME1, callerId, networkId, &g_mode);
         if (callerId != nullptr) {
             free(callerId);
+            callerId = nullptr;
         }
         return true;
     }
