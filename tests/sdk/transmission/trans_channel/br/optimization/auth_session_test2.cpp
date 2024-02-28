@@ -472,7 +472,7 @@ void AuthSessionTest::TransTestCase001(TransTestInfo &transInfo)
 
 /*
 * @tc.name: testSendBytesMessage001
-* @tc.desc:
+* @tc.desc: test send bytes message
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -502,7 +502,7 @@ HWTEST_F(AuthSessionTest, testSendBytesMessage001, TestSize.Level1)
 
 /*
 * @tc.name: testSendBytesMessage002
-* @tc.desc:
+* @tc.desc: test send bytes 2 message
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -532,7 +532,7 @@ HWTEST_F(AuthSessionTest, testSendBytesMessage002, TestSize.Level1)
 
 /*
 * @tc.name: testSendFile001
-* @tc.desc:
+* @tc.desc: test send file
 * @tc.type: FUNC
 * @tc.require:
 */
