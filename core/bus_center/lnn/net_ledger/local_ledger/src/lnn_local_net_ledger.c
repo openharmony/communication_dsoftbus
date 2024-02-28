@@ -287,6 +287,7 @@ static int32_t UpdateLocalDeviceType(const void *buf)
     }
     if (LnnConvertDeviceTypeToId((char *)buf, &typeId) == SOFTBUS_OK) {
         info->deviceInfo.deviceTypeId = typeId;
+        LNN_LOGI(LNN_LEDGER, "update local deviceTypeId=%{public}u, deviceType=%{public}s", typeId, (char *)buf);
         return SOFTBUS_OK;
     }
     LNN_LOGE(LNN_LEDGER, "set device type error");
