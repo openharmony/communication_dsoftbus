@@ -285,18 +285,18 @@ int32_t LnnEncryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlo
     struct HksBlob cipherText = {inData->size, cipher};
     if (UpdateLoopFinishByHuks(&handleEncrypt, g_encryptParamSet, inData, &cipherText) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "huks encrypt data update and finish fail");
-        (void)memset_s(cipher, sizeof(cipher), 0x0, sizeof(cipher));
+        (void)memset_s(cipher, inData->size, 0x0, inData->size);
         SoftBusFree(cipher);
         return SOFTBUS_ERR;
     }
     outData->size = cipherText.size;
     if (memcpy_s(outData->data, cipherText.size, cipherText.data, cipherText.size) != EOK) {
         LNN_LOGE(LNN_LEDGER, "huks memcpy_s encrypt data fail");
-        (void)memset_s(cipher, sizeof(cipher), 0x0, sizeof(cipher));
+        (void)memset_s(cipher, inData->size, 0x0, inData->size);
         SoftBusFree(cipher);
         return SOFTBUS_MEM_ERR;
     }
-    (void)memset_s(cipher, sizeof(cipher), 0x0, sizeof(cipher));
+    (void)memset_s(cipher, inData->size, 0x0, inData->size);
     SoftBusFree(cipher);
     return SOFTBUS_OK;
 }
@@ -323,18 +323,18 @@ int32_t LnnDecryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlo
     struct HksBlob plainText = {inData->size, plain};
     if (UpdateLoopFinishByHuks(&handleDecrypt, g_decryptParamSet, inData, &plainText) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "huks decrypt data update and finish fail");
-        (void)memset_s(plain, sizeof(plain), 0x0, sizeof(plain));
+        (void)memset_s(plain, inData->size, 0x0, inData->size);
         SoftBusFree(plain);
         return SOFTBUS_ERR;
     }
     outData->size = plainText.size;
     if (memcpy_s(outData->data, plainText.size, plainText.data, plainText.size) != EOK) {
         LNN_LOGE(LNN_LEDGER, "huks memcpy_s decrypt data fail");
-        (void)memset_s(plain, sizeof(plain), 0x0, sizeof(plain));
+        (void)memset_s(plain, inData->size, 0x0, inData->size);
         SoftBusFree(plain);
         return SOFTBUS_MEM_ERR;
     }
-    (void)memset_s(plain, sizeof(plain), 0x0, sizeof(plain));
+    (void)memset_s(plain, inData->size, 0x0, inData->size);
     SoftBusFree(plain);
     return SOFTBUS_OK;
 }
