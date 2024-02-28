@@ -578,6 +578,7 @@ static void AdjustIfRemoteMacChange(struct InnerLink *innerLink)
             WifiDirectAnonymizeMac(remoteMac), WifiDirectAnonymizeMac(targetRemoteMac));
         if (strlen(remoteMac) != 0 && strlen(targetRemoteMac) != 0 &&
             StrCmpIgnoreCase(remoteMac, targetRemoteMac) != SOFTBUS_OK &&
+            strlen(deviceId) != 0 && strlen(targetDeviceId) != 0 &&
             StrCmpIgnoreCase(deviceId, targetDeviceId) == SOFTBUS_OK) {
             CONN_LOGD(CONN_WIFI_DIRECT, "find");
             found = true;
