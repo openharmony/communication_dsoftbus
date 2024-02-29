@@ -102,8 +102,7 @@ static void UpdateNetworkInfo(const char *udid)
 
 static void OnReceiveCapaSyncInfoMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len)
 {
-    LNN_LOGI(LNN_BUILDER, "Recv capability info. type=%{public}d, len=%{public}d, networkid=%{public}s",
-        type, len, networkId);
+    LNN_LOGI(LNN_BUILDER, "Recv capability info. type=%{public}d, len=%{public}d", type, len);
     if (type != LNN_INFO_TYPE_CAPABILITY) {
         return;
     }
