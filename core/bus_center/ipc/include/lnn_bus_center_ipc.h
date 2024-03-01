@@ -25,7 +25,7 @@
 extern "C" {
 #endif
 
-int32_t LnnIpcInit (void);
+int32_t LnnIpcInit(void);
 int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, uint32_t addrTypeLen);
 int32_t MetaNodeIpcServerJoin(
     const char *pkgName, int32_t callingPid, void *addr, CustomData *customData, uint32_t addrTypeLen);

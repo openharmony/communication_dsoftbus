@@ -48,7 +48,7 @@ static uint32_t ConvertMsgToCapability(uint32_t *capability, const uint8_t *msg,
         return SOFTBUS_ERR;
     }
     for (uint32_t i = 0; i < BITLEN; i++) {
-        *capability = *capability | (*(msg + i) << BITS*i);
+        *capability = *capability | (*(msg + i) << (BITS * i));
     }
     return SOFTBUS_OK;
 }
@@ -174,7 +174,7 @@ static void SendNetCapabilityToRemote(uint32_t netCapability, uint32_t type)
         if (IsNeedToSend(&nodeInfo, type)) {
             int32_t ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, netInfo[i].networkId, msg, MSG_LEN, NULL);
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "sync network info ret = %d to %s.",
-             ret, netInfo[i].deviceName);
+                ret, netInfo[i].deviceName);
         }
     }
     SoftBusFree(netInfo);
@@ -184,7 +184,7 @@ static void SendNetCapabilityToRemote(uint32_t netCapability, uint32_t type)
 static void WifiStateProcess(uint32_t netCapability, bool isSend)
 {
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "wifi state change netCapability= %d, isSend = %d",
-            netCapability, isSend);
+        netCapability, isSend);
     if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, netCapability) != SOFTBUS_OK) {
         return;
     }
@@ -305,7 +305,7 @@ static void BtStateChangeEventHandler(const LnnEventBasicInfo *info)
     }
 
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "bt state change netCapability= %d, isSend = %d",
-            netCapability, isSend);
+        netCapability, isSend);
     if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, netCapability) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "set cap to local ledger fail");
         return;

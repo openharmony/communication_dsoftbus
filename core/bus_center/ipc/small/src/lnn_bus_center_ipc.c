@@ -52,7 +52,7 @@ typedef struct {
 
 static LNNRequestInfo g_lnnRequestInfo;
 
-int32_t LnnIpcInit (void)
+int32_t LnnIpcInit(void)
 {
     g_lnnRequestInfo.joinLNNRequestInfo = NULL;
     g_lnnRequestInfo.leaveLNNRequestInfo = NULL;

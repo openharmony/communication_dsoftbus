@@ -370,7 +370,9 @@ HWTEST_F(HeartBeatFSMTest, ProcessLostHeartbeatTest_01, TestSize.Level1)
     int32_t ret = ProcessLostHeartbeat(nullptr, CONNECTION_ADDR_BLE);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     EXPECT_CALL(distriLedgerMock, LnnGetOnlineStateById).WillOnce(Return(false)).WillRepeatedly(Return(true));
-    EXPECT_CALL(lnnNetLedgerMock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(lnnNetLedgerMock, LnnGetRemoteNodeInfoById)
+        .WillOnce(Return(SOFTBUS_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     ret = ProcessLostHeartbeat(TEST_NETWORK_ID, CONNECTION_ADDR_BLE);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = ProcessLostHeartbeat(TEST_NETWORK_ID, CONNECTION_ADDR_BR);
@@ -513,8 +515,6 @@ HWTEST_F(HeartBeatFSMTest, LnnPostNextSendOnceMsgToHbFsmTest_01, TestSize.Level1
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     ret = LnnPostSendEndMsgToHbFsm(nullptr, custData, TEST_TIME1);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    // ret = LnnPostSendEndMsgToHbFsm(hbFsm, custData, TEST_TIME1);
-    // EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnPostStartMsgToHbFsm(nullptr, TEST_TIME1);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnPostStopMsgToHbFsm(nullptr, HEARTBEAT_TYPE_BLE_V1);

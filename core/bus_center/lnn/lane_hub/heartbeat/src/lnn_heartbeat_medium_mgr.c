@@ -856,7 +856,6 @@ static bool VisitRegistHeartbeatMediumMgr(LnnHeartbeatType *typeSet, LnnHeartbea
 
 NO_SANITIZE("cfi") int32_t LnnRegistHeartbeatMediumMgr(LnnHeartbeatMediumMgr *mgr)
 {
-    // TODO: One-to-one correspondence between LnnHeartbeatMediumMgr and implementation.
     if (mgr == NULL) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "HB regist manager get invalid param");
         return SOFTBUS_INVALID_PARAM;

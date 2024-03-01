@@ -56,7 +56,7 @@ typedef struct {
     bool isRequestDisable;
 } HbConditionState;
 
-static HbConditionState g_hbConditionState; // TODO: fix concurrent problem
+static HbConditionState g_hbConditionState;
 static int64_t g_lastScreenOnTime;
 static int64_t g_lastScreenOffTime;
 static bool g_enableState = false;
@@ -452,7 +452,6 @@ static void HbScreenLockChangeEventHandler(const LnnEventBasicInfo *info)
     switch (lockState) {
         case SOFTBUS_SCREEN_UNLOCK:
             LLOGI("HB handle SOFTBUS_SCREEN_UNLOCK");
-            // TODO: refactor update account process to boot complete event.
             LnnUpdateOhosAccount();
             HbConditionChanged(false);
             break;
@@ -513,7 +512,6 @@ static void HbDifferentAccountEventHandler(const LnnEventBasicInfo *info)
     }
     const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
     SoftBusDifferentAccountState difAccountState = (SoftBusDifferentAccountState)event->status;
-    // g_hbConditionState.accountState == difAccountState;
     if (difAccountState == LNN_EVENT_DIF_ACCOUNT_DEV_CHANGED) {
         HbConditionChanged(false);
     }
@@ -607,7 +605,6 @@ static void HbTryRecoveryNetwork(void)
     } else if (ret == TRUSTED_RELATION_NO) {
         g_hbConditionState.hasTrustedRelation = false;
     }
-    // TODO: get and set nightState, backgroundState.
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB try to recovery heartbeat network, relation=%d",
         g_hbConditionState.hasTrustedRelation);
     HbConditionChanged(true);
