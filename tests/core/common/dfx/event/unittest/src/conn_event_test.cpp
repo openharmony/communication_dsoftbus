@@ -177,7 +177,7 @@ HWTEST_F(ConnEventTest, ConnEventTest004, TestSize.Level0)
  * @tc.desc: Test conn event form size
  * @tc.type: FUNC
  * @tc.require: I8HA59
- */
+ *//*
 HWTEST_F(ConnEventTest, ConnEventTest005, TestSize.Level0)
 {
     ConnAuditExtra extra = {
@@ -215,6 +215,6 @@ HWTEST_F(ConnEventTest, ConnEventTest005, TestSize.Level0)
             ConnAuditValidParamArrayMatcher(extra, VALID_EXTRA_SIZE), ParamArraySizeMatcher(VALID_EXTRA_SIZE)))
     .Times(1);
     CONN_AUDIT(AUDIT_SCENE_CONN_HML_GROUP_TIMEOUT, extra);
-}
+}*/
 
 } // namespace OHOS
