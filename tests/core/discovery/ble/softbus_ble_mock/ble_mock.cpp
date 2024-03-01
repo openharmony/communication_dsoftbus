@@ -218,6 +218,7 @@ int32_t BleMock::ActionOfStartBroadcasting(int32_t bcId, const BroadcastParam *p
     if (advCallback) {
         advCallback->OnStartBroadcastingCallback(bcId, SOFTBUS_BT_STATUS_SUCCESS);
     }
+    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_LOCK_LOCKED_MS));
     GetMock()->AsyncAdvertiseDone();
     return SOFTBUS_OK;
 }
@@ -336,6 +337,7 @@ int32_t BleMock::ActionOfUpdateAdvForActiveDiscovery(
         advCallback->OnUpdateBroadcastingCallback(bcId, SOFTBUS_BT_STATUS_SUCCESS);
     }
 
+    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_LOCK_LOCKED_MS));
     GetMock()->AsyncAdvertiseDone();
     return SOFTBUS_OK;
 }
