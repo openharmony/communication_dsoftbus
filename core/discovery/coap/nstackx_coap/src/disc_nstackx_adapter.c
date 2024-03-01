@@ -44,6 +44,7 @@
 #define DISC_USECOND           1000
 #define MULTI_BYTE_CHAR_LEN    8
 #define MAX_WIDE_STR_LEN       128
+#define DEFAULT_MAX_DEVICE_NUM 20
 
 #define NSTACKX_LOCAL_DEV_INFO "NstackxLocalDevInfo"
 
@@ -579,6 +580,11 @@ int32_t DiscNstackxInit(void)
     }
 
     NSTACKX_DFinderRegisterLog(NstackxLogInnerImpl);
+    if (SoftbusGetConfig(SOFTBUS_INT_DISC_COAP_MAX_DEVICE_NUM, (unsigned char *)&g_nstackxCallBack.maxDeviceNum,
+        sizeof(g_nstackxCallBack.maxDeviceNum)) != SOFTBUS_OK) {
+        DISC_LOGI(DISC_COAP, "get disc max device num config failed, use default %{public}u", DEFAULT_MAX_DEVICE_NUM);
+        g_nstackxCallBack.maxDeviceNum = DEFAULT_MAX_DEVICE_NUM;
+    }
     if (NSTACKX_Init(&g_nstackxCallBack) != SOFTBUS_OK) {
         DeinitLocalInfo();
         return SOFTBUS_DISCOVER_COAP_INIT_FAIL;
