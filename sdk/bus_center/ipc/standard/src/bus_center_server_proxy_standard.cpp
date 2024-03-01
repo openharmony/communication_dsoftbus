@@ -172,7 +172,8 @@ int32_t BusCenterServerProxy::JoinLNN(const char *pkgName, void *addr, uint32_t 
     return serverRet;
 }
 
-int32_t BusCenterServerProxy::JoinMetaNode(const char *pkgName, void *addr, CustomData *customData, uint32_t addrTypeLen)
+int32_t BusCenterServerProxy::JoinMetaNode(
+    const char *pkgName, void *addr, CustomData *customData, uint32_t addrTypeLen)
 {
     if (pkgName == nullptr || addr == nullptr) {
         return SOFTBUS_INVALID_PARAM;

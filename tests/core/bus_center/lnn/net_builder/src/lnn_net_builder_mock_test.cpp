@@ -355,15 +355,9 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_ON_AUTH_META_VERIFY_FAILED_TEST_001, Tes
 */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_SPECIFIC_TEST_001, TestSize.Level1)
 {
-    // EXPECT_TRUE(LnnInitBusCenterEvent() == SOFTBUS_OK);
-    // EXPECT_TRUE(LnnInitNetBuilder() == SOFTBUS_OK);
-    // void *para = reinterpret_cast<void *>(SoftBusMalloc(sizeof(SpecificLeaveMsgPara)));
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, LnnSendLeaveRequestToConnFsm(_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_TRUE(ProcessLeaveSpecific(nullptr) == SOFTBUS_INVALID_PARAM);
-    // EXPECT_TRUE(ProcessLeaveSpecific(para) == SOFTBUS_OK);
-    // LnnDeinitNetBuilder();
-    // LnnDeinitBusCenterEvent();
 }
 
 /*
@@ -420,7 +414,6 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_NODE_STATE_CHANGED_TEST_001, TestSize.Le
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_TRUE(ProcessNodeStateChanged(nullptr) == SOFTBUS_INVALID_PARAM);
-    // EXPECT_TRUE(LnnInitNetBuilder() == SOFTBUS_OK);
     EXPECT_TRUE(ProcessNodeStateChanged(para) == SOFTBUS_ERR);
 }
 
@@ -1268,12 +1261,9 @@ HWTEST_F(LNNNetBuilderMockTest, ON_LNN_PROCESS_NOT_TRUSTED_MSG_DELAY_TEST_001, T
     EXPECT_CALL(NetBuilderMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     OnLnnProcessNotTrustedMsgDelay(nullptr);
     void *para1 = reinterpret_cast<void *>(SoftBusMalloc(sizeof(NotTrustedDelayInfo)));
-    // EXPECT_CALL(NetBuilderMock, LnnGetAllAuthSeq(_, _, _)).WillOnce(Return(SOFTBUS_ERR));
     OnLnnProcessNotTrustedMsgDelay(para1);
 
     void *para2 = reinterpret_cast<void *>(SoftBusMalloc(sizeof(NotTrustedDelayInfo)));
-    // EXPECT_CALL(NetBuilderMock, LnnGetAllAuthSeq(_, _, _)).WillOnce(Return(SOFTBUS_OK));
-    // EXPECT_CALL(NetBuilderMock, LnnConvertDlId(_, _, _, _, _)).WillOnce(Return(SOFTBUS_ERR));
     OnLnnProcessNotTrustedMsgDelay(para2);
 }
 

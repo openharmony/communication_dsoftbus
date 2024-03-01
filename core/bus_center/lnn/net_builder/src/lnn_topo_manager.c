@@ -302,47 +302,6 @@ static const char *PackOneLnnRelation(const char *udid, const char *peerUdid,
     return msg;
 }
 
-static const char *PackLocalTopoUpdateMsg(const char *skipUdid)
-{
-    TopoTableItem *topoItem = NULL;
-    TopoInfo *topoInfo = NULL;
-    int32_t i, count;
-    cJSON *json = NULL;
-    cJSON *info = NULL;
-    const char *msg = NULL;
-
-    if (PackCommonTopoMsg(&json, &info) != SOFTBUS_OK) {
-        return NULL;
-    }
-    count = 0;
-    for (i = 0; i < TOPO_HASH_TABLE_SIZE; ++i) {
-        LIST_FOR_EACH_ENTRY(topoItem, &g_topoTable.table[i], TopoTableItem, node) {
-            if (strcmp(skipUdid, topoItem->udid) == 0) {
-                continue;
-            }
-            LIST_FOR_EACH_ENTRY(topoInfo, &topoItem->joinList, TopoInfo, node) {
-                if (strcmp(topoInfo->peerUdid, skipUdid) == 0) {
-                    continue;
-                }
-                if (PackTopoInfo(info, topoItem->udid, topoInfo->peerUdid, topoInfo->relation,
-                    CONNECTION_ADDR_MAX) == SOFTBUS_OK) {
-                    count++;
-                }
-            }
-        }
-    }
-    if (count == 0) {
-        cJSON_Delete(json);
-        return NULL;
-    }
-    msg = cJSON_PrintUnformatted(json);
-    if (msg == NULL) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "format lnn relation json fail");
-    }
-    cJSON_Delete(json);
-    return msg;
-}
-
 static int32_t AddTopoInfo(const char *udid, const char *peerUdid, const uint8_t *relation, uint32_t len)
 {
     TopoTableItem *topoItem = NULL;
@@ -566,109 +525,6 @@ static void OnReceiveTopoUpdateMsg(LnnSyncInfoType type, const char *networkId, 
     (void)SoftBusMutexUnlock(&g_topoTable.lock);
 }
 
-static void NotifyLocalTopo(const char *udid)
-{
-    const char *msg = NULL;
-    char networkId[NETWORK_ID_BUF_LEN] = {0};
-
-    if (LnnConvertDlId(udid, CATEGORY_UDID, CATEGORY_NETWORK_ID, networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "convert networkId fail");
-        return;
-    }
-    msg = PackLocalTopoUpdateMsg(udid);
-    if (msg == NULL) {
-        return;
-    }
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "sync local topo");
-    if (LnnSendSyncInfoMsg(LNN_INFO_TYPE_TOPO_UPDATE, networkId, (const uint8_t *)msg,
-        strlen(msg) + 1, NULL) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "sync local topo fail");
-    }
-    cJSON_free((void *)msg);
-}
-
-static void NotifyLnnRelationChange(const char *localUdid, const char *udid,
-    const uint8_t *relation, uint32_t len)
-{
-    char networkId[NETWORK_ID_BUF_LEN] = {0};
-    NodeBasicInfo *info = NULL;
-    int32_t infoNum, i;
-    const char *msg = NULL;
-    uint32_t msgLen;
-
-    LnnConvertDlId(udid, CATEGORY_UDID, CATEGORY_NETWORK_ID, networkId, NETWORK_ID_BUF_LEN);
-    msg = PackOneLnnRelation(localUdid, udid, relation, len);
-    if (msg == NULL) {
-        return;
-    }
-    if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get all online node info fail");
-        cJSON_free((void *)msg);
-        return;
-    }
-    msgLen = strlen(msg) + 1;
-    for (i = 0; i < infoNum; ++i) {
-        if (LnnIsLSANode(&info[i])) {
-            continue;
-        }
-        if (strcmp(networkId, info[i].networkId) == 0) {
-            continue;
-        }
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "sync topo update");
-        if (LnnSendSyncInfoMsg(LNN_INFO_TYPE_TOPO_UPDATE, info[i].networkId,
-            (const uint8_t *)msg, msgLen, NULL) != SOFTBUS_OK) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "sync topo update fail");
-        }
-    }
-    cJSON_free((void *)msg);
-    SoftBusFree(info);
-}
-
-static void TryClearTopoTable(void)
-{
-    NodeBasicInfo *info = NULL;
-    int32_t infoNum = 0;
-
-    if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get all online node info fail");
-        return;
-    }
-    SoftBusFree(info);
-    if (infoNum != 0) {
-        return;
-    }
-    ClearTopoTable();
-}
-
-static void ProcessLnnRelationChange(const char *udid, const uint8_t *relation, uint32_t len, bool isJoin)
-{
-    char localUdid[UDID_BUF_LEN];
-
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "read local udid fail");
-        return;
-    }
-    if (SoftBusMutexLock(&g_topoTable.lock) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "lock topo table fail");
-        return;
-    }
-    // 1. notify this lnn relation to other node
-    NotifyLnnRelationChange(localUdid, udid, relation, len);
-    // 2. update local topo talbe
-    if (UpdateLocalTopo(localUdid, udid, relation, len) != SOFTBUS_OK) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "update local topo fail");
-        (void)SoftBusMutexUnlock(&g_topoTable.lock);
-        return;
-    }
-    if (isJoin) {
-        // 3. send local topo table to peer node
-        NotifyLocalTopo(udid);
-    } else {
-        TryClearTopoTable();
-    }
-    (void)SoftBusMutexUnlock(&g_topoTable.lock);
-}
-
 static void OnLnnRelationChangedDelay(void *para)
 {
     LnnRelationChangedMsg *msg = (LnnRelationChangedMsg *)para;
@@ -678,36 +534,6 @@ static void OnLnnRelationChangedDelay(void *para)
     RouteLnnRelationEventHandler(msg);
     SoftBusFree(msg);
     return;
-
-    SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "OnLnnRelationChangedDelay: %d", msg->type);
-    if (msg->type == CONNECTION_ADDR_MAX) {
-        SoftBusFree(msg);
-        return;
-    }
-    uint8_t newRelation[CONNECTION_ADDR_MAX] = {0};
-    int32_t rc = LnnGetLnnRelation(msg->udid, CATEGORY_UDID, newRelation, CONNECTION_ADDR_MAX);
-    if (rc != SOFTBUS_OK && rc != SOFTBUS_NOT_FIND) { // NOT_FIND means node is offline
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "get new lnn relation fail");
-        SoftBusFree(msg);
-        return;
-    }
-    if (msg->isJoin) {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "lnn join relaion is %d/%d for type:%d",
-            msg->relation, newRelation[msg->type], msg->type);
-        if (msg->relation != LNN_RELATION_JOIN_THREAD || newRelation[msg->type] == 0) {
-            SoftBusFree(msg);
-            return;
-        }
-    } else {
-        SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "lnn leave relaion is %d/%d for type:%d",
-            msg->relation, newRelation[msg->type], msg->type);
-        if (msg->relation > 0 || newRelation[msg->type] > 0) {
-            SoftBusFree(msg);
-            return;
-        }
-    }
-    ProcessLnnRelationChange(msg->udid, newRelation, CONNECTION_ADDR_MAX, msg->isJoin);
-    SoftBusFree(msg);
 }
 
 static void OnLnnRelationChanged(const LnnEventBasicInfo *info)
