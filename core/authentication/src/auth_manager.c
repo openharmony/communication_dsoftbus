@@ -492,7 +492,7 @@ static int64_t GetAuthIdByConnInfo(const AuthConnInfo *connInfo, bool isServer)
     return authId;
 }
 
-static int64_t GetActiveAuthIdByConnInfo(const AuthConnInfo *connInfo)
+static int64_t GetActiveAuthIdByConnInfo(const AuthConnInfo *connInfo, bool judgeTimeOut)
 {
     if (!RequireAuthLock()) {
         return AUTH_INVALID_ID;
@@ -503,8 +503,9 @@ static int64_t GetActiveAuthIdByConnInfo(const AuthConnInfo *connInfo)
     auth[num++] = FindAuthManagerByConnInfo(connInfo, true);
     /* Check auth valid period */
     uint64_t currentTime = GetCurrentTimeMs();
-    for (uint32_t i = 0; i < num; i++) {
+    for (uint32_t i = 0; i < num && judgeTimeOut; i++) {
         if (auth[i] != NULL && (currentTime - auth[i]->lastActiveTime >= MAX_AUTH_VALID_PERIOD)) {
+            AUTH_LOGI(AUTH_CONN, "auth manager timeout. authId=%{public}" PRId64, auth[i]->authId);
             auth[i] = NULL;
         }
     }
@@ -1470,6 +1471,7 @@ int32_t AuthDeviceOpenConn(const AuthConnInfo *info, uint32_t requestId, const A
     }
     AUTH_LOGI(AUTH_CONN, "open auth conn: connType=%{public}d, requestId=%{public}u", info->type, requestId);
     int64_t authId;
+    bool judgeTimeOut = false;
     switch (info->type) {
         case AUTH_LINK_TYPE_WIFI:
             authId = GetLatestIdByConnInfo(info, AUTH_LINK_TYPE_WIFI);
@@ -1480,14 +1482,15 @@ int32_t AuthDeviceOpenConn(const AuthConnInfo *info, uint32_t requestId, const A
             break;
         case AUTH_LINK_TYPE_BR:
         case AUTH_LINK_TYPE_BLE:
+            judgeTimeOut = true;
         case AUTH_LINK_TYPE_P2P:
-            authId = GetActiveAuthIdByConnInfo(info);
+            authId = GetActiveAuthIdByConnInfo(info, judgeTimeOut);
             if (authId != AUTH_INVALID_ID) {
                 return StartReconnectDevice(authId, info, requestId, callback);
             }
             return StartVerifyDevice(requestId, info, NULL, callback, true);
         case AUTH_LINK_TYPE_ENHANCED_P2P:
-            authId = GetActiveAuthIdByConnInfo(info);
+            authId = GetActiveAuthIdByConnInfo(info, judgeTimeOut);
             if (authId != AUTH_INVALID_ID) {
                 AUTH_LOGI(AUTH_CONN, "reuse enhanced p2p authId=%{public}" PRId64, authId);
                 callback->onConnOpened(requestId, authId);

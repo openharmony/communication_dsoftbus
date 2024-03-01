@@ -337,7 +337,7 @@ HWTEST_F(AuthOtherTest, REMOVE_AUTH_MANAGER_BY_AUTH_ID_TEST_001, TestSize.Level1
     EXPECT_TRUE(ret != AUTH_INVALID_ID);
     connInfo.type = AUTH_LINK_TYPE_WIFI;
     (void)strcpy_s(connInfo.info.ipInfo.ip, IP_LEN, ip);
-    ret = GetActiveAuthIdByConnInfo(&connInfo);
+    ret = GetActiveAuthIdByConnInfo(&connInfo, false);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
     RemoveAuthManagerByAuthId(authSeq);
     RemoveAuthManagerByConnInfo(&connInfo, true);
