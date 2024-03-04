@@ -26,6 +26,7 @@
 #include "lnn_lane_link.h"
 #include "lnn_lane_model.h"
 #include "lnn_lane_select.h"
+#include "lnn_parameter_utils.h"
 #include "lnn_select_rule.h"
 #include "lnn_wifi_adpter_mock.h"
 #include "message_handler.h"
@@ -524,7 +525,7 @@ HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_010, TestSize.Level1)
     LaneRequestOption requestOption;
     (void)memset_s(&requestOption, sizeof(LaneRequestOption), 0, sizeof(LaneRequestOption));
     requestOption.type = LANE_TYPE_BUTT;
-    int32_t ret = laneManager->lnnRequestLane(laneId, &requestOption, nullptr);
+    int32_t ret = laneManager->lnnRequestLane(laneReqId, &requestOption, nullptr);
     EXPECT_EQ(ret, SOFTBUS_ERR);
     ret = laneManager->lnnRequestLane(laneId, nullptr, &g_listener);
     EXPECT_EQ(ret, SOFTBUS_ERR);

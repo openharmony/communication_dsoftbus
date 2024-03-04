@@ -49,6 +49,7 @@ public:
         bool *isDelayDestroy) = 0;
     virtual void FreeLaneId(uint32_t laneId) = 0;
     virtual void HandleLaneReliabilityTime(void) = 0;
+    virtual int32_t SelectExpectLaneByParameter(LanePreferredLinkList *setRecommendLinkList) = 0;
 };
 
 class TransLaneDepsInterfaceMock : public TransLaneDepsInterface {
@@ -72,6 +73,7 @@ public:
         bool *isDelayDestroy));
     MOCK_METHOD1(FreeLaneId, void (uint32_t laneId));
     MOCK_METHOD0(HandleLaneReliabilityTime, void ());
+    MOCK_METHOD1(SelectExpectLaneByParameter, int32_t (LanePreferredLinkList *));
 };
 } // namespace OHOS
 #endif // LNN_TRANS_LANE_DEPS_MOCK_H
