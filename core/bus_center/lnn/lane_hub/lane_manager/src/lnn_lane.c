@@ -26,6 +26,7 @@
 #include "lnn_lane_common.h"
 #include "lnn_lane_interface.h"
 #include "lnn_lane_link.h"
+#include "lnn_lane_listener.h"
 #include "lnn_lane_model.h"
 #include "lnn_lane_query.h"
 #include "lnn_lane_score.h"
@@ -98,6 +99,16 @@ static uint32_t AllocLaneId(LaneType type)
     Unlock();
     LNN_LOGE(LNN_LANE, "laneId num exceeds the limit");
     return INVALID_LANE_ID;
+}
+
+int32_t ParseLaneTypeByLaneId(const uint32_t laneId, LaneType *laneType)
+{
+    if (laneId == INVALID_LANE_ID) {
+        LNN_LOGE(LNN_LANE, "[ParseLaneType]invalid laneId");
+        return SOFTBUS_ERR;
+    }
+    *laneType = (LaneType)(laneId >> LANE_ID_TYPE_SHIFT);
+    return SOFTBUS_OK;
 }
 
 static void DestroyLaneId(uint32_t laneId)
@@ -404,6 +415,10 @@ int32_t InitLane(void)
     }
     if (InitLaneLink() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "[InitLane]init laneLink fail");
+        return SOFTBUS_ERR;
+    }
+    if (InitLaneListener() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "[InitLane]init laneListener fail");
         return SOFTBUS_ERR;
     }
     if (LaneDelayInit() != SOFTBUS_OK) {

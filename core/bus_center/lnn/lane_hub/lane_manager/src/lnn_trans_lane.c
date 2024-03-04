@@ -23,6 +23,7 @@
 #include "lnn_lane_common.h"
 #include "lnn_lane_def.h"
 #include "lnn_lane_interface.h"
+#include "lnn_lane_listener.h"
 #include "lnn_lane_model.h"
 #include "lnn_lane_select.h"
 #include "lnn_log.h"
@@ -151,11 +152,24 @@ static void LinkSuccess(uint32_t laneId, const LaneLinkInfo *linkInfo)
         (void)LnnLanePostMsgToHandler(MSG_TYPE_LANE_LINK_FAIL, laneId, SOFTBUS_ERR, NULL, 0);
         return;
     }
+    if (linkInfo->type == LANE_P2P || linkInfo->type == LANE_HML) {
+        if (CreateLaneTypeInfoByLaneId(laneId, linkInfo) != SOFTBUS_OK) {
+            SoftBusFree(linkParam);
+            DelLaneResourceItem(&resourceItem);
+            DelLinkInfoItem(laneId);
+            LNN_LOGE(LNN_LANE, "create lanetype info fail, laneId=%{public}u", laneId);
+            (void)LnnLanePostMsgToHandler(MSG_TYPE_LANE_LINK_FAIL, laneId, SOFTBUS_ERR, NULL, 0);
+            return;
+        }
+    }
     if (LnnLanePostMsgToHandler(MSG_TYPE_LANE_LINK_SUCCESS, laneId, 0, linkParam, 0) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "post LaneLinkSuccess msg err, laneId=%{public}u", laneId);
         SoftBusFree(linkParam);
         DelLaneResourceItem(&resourceItem);
         DelLinkInfoItem(laneId);
+        if (linkInfo->type == LANE_P2P || linkInfo->type == LANE_HML) {
+            DelLaneTypeInfoItem(linkInfo->linkInfo.p2p.connInfo.peerIp);
+        }
         return;
     }
 }
