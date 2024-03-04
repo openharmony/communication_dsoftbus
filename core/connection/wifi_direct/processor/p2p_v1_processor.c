@@ -151,7 +151,7 @@ static int32_t ReuseLink(struct WifiDirectConnectInfo *connectInfo, struct Inner
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(connectInfo, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "connect info is null");
     CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}d, remoteMac=%{public}s", connectInfo->requestId,
-          WifiDirectAnonymizeMac(connectInfo->remoteMac));
+        WifiDirectAnonymizeMac(connectInfo->remoteMac));
 
     struct WifiDirectIpv4Info *ipv4Info = link->getRawData(link, IL_KEY_REMOTE_IPV4, NULL, NULL);
     CONN_CHECK_AND_RETURN_RET_LOGW(ipv4Info, SOFTBUS_ERR, CONN_WIFI_DIRECT, "p2p link is used by another service");
@@ -187,7 +187,7 @@ static int32_t DisconnectLink(struct WifiDirectConnectInfo *connectInfo, struct 
     int32_t reuseCount = info->getInt(info, II_KEY_REUSE_COUNT, 0);
     CONN_LOGI(CONN_WIFI_DIRECT,
         "requestId=%{public}d, remoteMac=%{public}s, reuseCount=%{public}d", connectInfo->requestId,
-          WifiDirectAnonymizeMac(remoteMac), reuseCount);
+        WifiDirectAnonymizeMac(remoteMac), reuseCount);
     if (reuseCount == 0) {
         CONN_LOGI(CONN_WIFI_DIRECT, "reuseCount already 0");
         ProcessSuccess(NULL, false);
@@ -437,8 +437,8 @@ static int32_t CreateGroup(struct NegotiateMessage *msg)
 
     bool isLocalWideBandSupported = adapter->isWideBandSupported();
     CONN_LOGI(CONN_WIFI_DIRECT, "stationFrequency=%{public}d, finalFrequency=%{public}d, "
-                                "localWideBand=%{public}d, remoteWideBand=%{public}d",
-          stationFrequency, finalFrequency, isLocalWideBandSupported, isRemoteWideBandSupported);
+        "localWideBand=%{public}d, remoteWideBand=%{public}d",
+        stationFrequency, finalFrequency, isLocalWideBandSupported, isRemoteWideBandSupported);
 
     struct WifiDirectConnectParams params;
     (void)memset_s(&params, sizeof(params), 0, sizeof(params));
@@ -749,7 +749,7 @@ static struct NegotiateMessage* BuildInterfaceInfoResponse(struct NegotiateMessa
     struct WifiDirectNegotiateChannel *channel = msg->getPointer(msg, NM_KEY_NEGO_CHANNEL, NULL);
 
     CONN_LOGI(CONN_WIFI_DIRECT, "interface=%{public}s, localMac=%{public}s, localIp=%{public}s", interface,
-          WifiDirectAnonymizeMac(localMac), WifiDirectAnonymizeIp(localIp));
+        WifiDirectAnonymizeMac(localMac), WifiDirectAnonymizeIp(localIp));
     struct NegotiateMessage *response = NegotiateMessageNew();
     CONN_CHECK_AND_RETURN_RET_LOGE(response, NULL, CONN_WIFI_DIRECT, "new negotiate msg failed");
 
@@ -967,7 +967,7 @@ static bool IsNeedReversal(struct NegotiateMessage *msg)
     ret = channel->getP2pMac(channel, remoteMac, sizeof(remoteMac));
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, false, CONN_WIFI_DIRECT, "get remote mac failed");
     CONN_LOGI(CONN_WIFI_DIRECT, "localMac=%{public}s, remoteMac=%{public}s",
-          WifiDirectAnonymizeMac(localMac), WifiDirectAnonymizeMac(remoteMac));
+        WifiDirectAnonymizeMac(localMac), WifiDirectAnonymizeMac(remoteMac));
     return GetWifiDirectUtils()->strCompareIgnoreCase(localMac, remoteMac) < 0;
 }
 
@@ -1427,7 +1427,7 @@ static int32_t OnCreateGroupComplete(int32_t event)
     GetWifiDirectPerfRecorder()->record(TP_P2P_CREATE_GROUP_END);
     GetWifiDirectPerfRecorder()->calculate();
     CONN_CHECK_AND_RETURN_RET_LOGW(event == ENTITY_EVENT_P2P_CREATE_COMPLETE, V1_ERROR_CREATE_GROUP_FAILED,
-                                  CONN_WIFI_DIRECT, "create group failed");
+                                   CONN_WIFI_DIRECT, "create group failed");
     CONN_LOGI(CONN_WIFI_DIRECT, "create group done, timeUsed=%{public}" PRIu64 "MS",
         GetWifiDirectPerfRecorder()->getTime(TC_CREATE_GROUP));
 
@@ -1542,7 +1542,7 @@ static int32_t OnConnectGroupComplete(int32_t event)
 static int32_t OnRemoveGroupComplete(int32_t event)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(event == ENTITY_EVENT_P2P_REMOVE_COMPLETE, ERROR_REMOVE_LINK_FAILED,
-                                  CONN_WIFI_DIRECT, "remove group failed");
+                                   CONN_WIFI_DIRECT, "remove group failed");
     CONN_LOGI(CONN_WIFI_DIRECT, "remove group done");
     struct P2pV1Processor *self = GetP2pV1Processor();
     if (self->activeCommand != NULL) {

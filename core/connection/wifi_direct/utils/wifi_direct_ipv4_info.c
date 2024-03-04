@@ -67,7 +67,7 @@ int32_t WifiDirectIpv4InfoToBytes(const struct WifiDirectIpv4Info *ipv4, size_t 
         if (offset + IPV4_INFO_BYTES_ARRAY_LEN > *dataLen) {
             CONN_LOGW(CONN_WIFI_DIRECT,
                 "i=%{public}zu, dataLen=%{public}zu, ipv4count=%{public}zu, offset=%{public}zu",
-                  i, *dataLen, ipv4Count, offset);
+                i, *dataLen, ipv4Count, offset);
             return SOFTBUS_ERR;
         }
 

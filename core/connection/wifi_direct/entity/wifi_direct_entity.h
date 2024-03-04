@@ -84,7 +84,7 @@ struct EntityListener {
     void (*registerListener)(struct EntityListener *listener);                        \
                                                                                       \
     bool isInited;                                                                    \
-    struct EntityListener *listener;
+    struct EntityListener *listener
 
 struct WifiDirectEntity {
     WIFI_DIRECT_ENTITY_BASE;
