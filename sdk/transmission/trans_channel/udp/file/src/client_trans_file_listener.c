@@ -132,7 +132,7 @@ int32_t TransSetFileSendListener(const char *sessionName, const IFileSendListene
     }
     if (exist) {
         if (memcpy_s(&(fileNode->sendListener), sizeof(IFileSendListener),
-                sendListener, sizeof(IFileSendListener)) != EOK) {
+            sendListener, sizeof(IFileSendListener)) != EOK) {
             (void)SoftBusMutexUnlock(&(g_fileListener->lock));
             TRANS_LOGE(TRANS_FILE, "update file send listener failed");
             return SOFTBUS_ERR;

@@ -857,13 +857,13 @@ static int TransProxyGetLocalInfo(ProxyChannelInfo *chan)
         ((chan->appInfo.appType == APP_TYPE_AUTH) && (IsNoPkgNameSession(chan->appInfo.myData.sessionName)));
     if (!noNeedGetPkg) {
         if (TransProxyGetPkgName(chan->appInfo.myData.sessionName,
-                chan->appInfo.myData.pkgName, sizeof(chan->appInfo.myData.pkgName)) != SOFTBUS_OK) {
+            chan->appInfo.myData.pkgName, sizeof(chan->appInfo.myData.pkgName)) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "proc handshake get pkg name fail");
             return SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED;
         }
 
         if (TransProxyGetUidAndPidBySessionName(chan->appInfo.myData.sessionName,
-                &chan->appInfo.myData.uid, &chan->appInfo.myData.pid) != SOFTBUS_OK) {
+            &chan->appInfo.myData.uid, &chan->appInfo.myData.pid) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "proc handshake get uid pid fail");
             return SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED;
         }
