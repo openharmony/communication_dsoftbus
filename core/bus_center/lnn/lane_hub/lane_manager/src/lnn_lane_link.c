@@ -911,8 +911,11 @@ static ProtocolType LnnLaneSelectProtocol(LnnNetIfType ifType, const char *netWo
     }
 
     (void)LnnVisitPhysicalSubnet(FindBestProtocol, &req);
-
-    LNN_LOGI(LNN_LANE, "protocol=%{public}d", req.selectedProtocol);
+    char *anonyNetworkId = NULL;
+    Anonymize(netWorkId, &anonyNetworkId);
+    LNN_LOGI(LNN_LANE, "networkId=%{public}s select protocol=%{public}d, pri=%{public}u",
+        anonyNetworkId, req.selectedProtocol, req.currPri);
+    AnonymizeFree(anonyNetworkId);
     if (req.selectedProtocol == 0) {
         req.selectedProtocol = LNN_PROTOCOL_IP;
     }
@@ -973,10 +976,10 @@ static int32_t LaneLinkOfWlan(uint32_t reqId, const LinkRequest *reqInfo, const 
     }
     if (reqInfo->transType == LANE_T_MSG) {
         ret = LnnGetRemoteNumInfo(reqInfo->peerNetworkId, NUM_KEY_PROXY_PORT, &port);
-        LNN_LOGI(LNN_LANE, "LnnGetRemote proxy port");
+        LNN_LOGI(LNN_LANE, "LnnGetRemote proxy port, port=%{public}d, ret=%{public}d", port, ret);
     } else {
         ret = LnnGetRemoteNumInfo(reqInfo->peerNetworkId, NUM_KEY_SESSION_PORT, &port);
-        LNN_LOGI(LNN_LANE, "LnnGetRemote session port");
+        LNN_LOGI(LNN_LANE, "LnnGetRemote session port, port=%{public}d, ret=%{public}d", port, ret);
     }
     if (ret < 0) {
         LNN_LOGE(LNN_LANE, "LnnGetRemote is failed.");
