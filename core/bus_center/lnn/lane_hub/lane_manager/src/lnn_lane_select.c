@@ -21,6 +21,7 @@
 #include "common_list.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_log.h"
+#include "lnn_parameter_utils.h"
 #include "lnn_select_rule.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
@@ -326,6 +327,46 @@ static void SelectMeshLinks(const char *networkId, LaneLinkType *resList, uint32
             continue;
         }
         resList[(*resNum)++] = optionalLink[i];
+    }
+}
+
+static void AddRecommendLinkType(LanePreferredLinkList *setRecommendLinkList,
+    LaneLinkType linkType, int32_t *linkNum)
+{
+    setRecommendLinkList->linkType[(*linkNum)++] = linkType;
+    setRecommendLinkList->linkTypeNum = *linkNum;
+}
+
+int32_t SelectExpectLaneByParameter(LanePreferredLinkList *setRecommendLinkList)
+{
+    if (setRecommendLinkList == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int linkNum = 0;
+    if (IsLinkEnabled(LANE_HML)) {
+        AddRecommendLinkType(setRecommendLinkList, LANE_HML, &linkNum);
+        LNN_LOGI(LNN_LANE, "hml_only = on");
+        return SOFTBUS_OK;
+    } else if (IsLinkEnabled(LANE_P2P)) {
+        AddRecommendLinkType(setRecommendLinkList, LANE_P2P, &linkNum);
+        LNN_LOGI(LNN_LANE, "p2p_only = on");
+        return SOFTBUS_OK;
+    } else if (IsLinkEnabled(LANE_BR)) {
+        AddRecommendLinkType(setRecommendLinkList, LANE_BR, &linkNum);
+        LNN_LOGI(LNN_LANE, "br_only = on");
+        return SOFTBUS_OK;
+    } else if (IsLinkEnabled(LANE_WLAN_5G) || IsLinkEnabled(LANE_WLAN_2P4G)) {
+        AddRecommendLinkType(setRecommendLinkList, LANE_WLAN_5G, &linkNum);
+        AddRecommendLinkType(setRecommendLinkList, LANE_WLAN_2P4G, &linkNum);
+        LNN_LOGI(LNN_LANE, "wlan_only = on");
+        return SOFTBUS_OK;
+    } else if (IsLinkEnabled(LANE_BLE)) {
+        AddRecommendLinkType(setRecommendLinkList, LANE_BLE, &linkNum);
+        LNN_LOGI(LNN_LANE, "ble_only = on");
+        return SOFTBUS_OK;
+    } else {
+        return SOFTBUS_ERR;
     }
 }
 

@@ -320,14 +320,19 @@ static int32_t AllocLane(uint32_t laneId, const LaneRequestOption *request, cons
         return SOFTBUS_ERR;
     }
     recommendLinkList->linkTypeNum = 0;
-    if (SelectExpectLanesByQos((const char *)transRequest->networkId, &selectParam,
-            recommendLinkList) != SOFTBUS_OK) {
+    if (SelectExpectLaneByParameter(recommendLinkList) == SOFTBUS_OK) {
+        for (uint32_t i = 0; i <= recommendLinkList->linkTypeNum; i++) {
+            LNN_LOGI(LNN_LANE, "DetectLinkParam success, linkType[%{public}d]=%{public}d, laneReqId=%{public}u",
+                i, recommendLinkList->linkType[i], laneReqId);
+        }
+    } else if (SelectExpectLanesByQos((const char *)transRequest->networkId, &selectParam,
+        recommendLinkList) != SOFTBUS_OK) {
         SoftBusFree(recommendLinkList);
         LNN_LOGE(LNN_LANE, "selectExpectLanesByQos fail, laneId=%{public}u", laneId);
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_LANE, "select lane link by qos success, laneId=%{public}u, linkNum=%{public}d",
-        laneId, recommendLinkList->linkTypeNum);
+    LNN_LOGI(LNN_LANE, "select lane link success, laneReqId=%{public}u, linkNum=%{public}d",
+        laneReqId, recommendLinkList->linkTypeNum);
     if (recommendLinkList->linkTypeNum == 0) {
         SoftBusFree(recommendLinkList);
         LNN_LOGE(LNN_LANE, "no link resources available, allocLane fail, laneId=%{public}u", laneId);
