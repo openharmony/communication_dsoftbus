@@ -650,7 +650,6 @@ int32_t TransProxyPipelineInit(void)
     }
     g_manager.channels = channels;
 
-
     ret = TransRegisterNetworkingChannelListener(SESSION_NAME, &listener);
     if (ret != SOFTBUS_OK) {
         goto exit;
