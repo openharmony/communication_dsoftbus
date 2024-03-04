@@ -93,18 +93,6 @@ HWTEST_F(ConnLogTest, ConnLogTest001, TestSize.Level0)
     EXPECT_EQ(++connDomainBase, label.domain);
     EXPECT_STREQ("ConnNewIp", label.tag);
 
-    EXPECT_EQ(++index, CONN_BROADCAST);
-    label = CONN_LABELS[CONN_BROADCAST];
-    EXPECT_EQ(CONN_BROADCAST, label.label);
-    EXPECT_EQ(++connDomainBase, label.domain);
-    EXPECT_STREQ("ConnBC", label.tag);
-
-    EXPECT_EQ(++index, CONN_NEWIP);
-    label = CONN_LABELS[CONN_NEWIP];
-    EXPECT_EQ(CONN_NEWIP, label.label);
-    EXPECT_EQ(++connDomainBase, label.domain);
-    EXPECT_STREQ("ConnNewIp", label.tag);
-
     EXPECT_EQ(++index, CONN_TEST);
     label = CONN_LABELS[CONN_TEST];
     EXPECT_EQ(CONN_TEST, label.label);
