@@ -111,10 +111,11 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOpenConnChannelTest002, TestSize
     brInfo.type = CONNECT_BR;
     ConnectionInfo bleInfo;
     bleInfo.type = CONNECT_BLE;
-    TransCreateConnByConnId(1);
-    TransCreateConnByConnId(2);
-    TransCreateConnByConnId(3);
-    TransCreateConnByConnId(4);
+    bool isServer = false;
+    TransCreateConnByConnId(1, isServer);
+    TransCreateConnByConnId(2, isServer);
+    TransCreateConnByConnId(3, isServer);
+    TransCreateConnByConnId(4, isServer);
 
     AppInfo appInfo;
     appInfo.appType = APP_TYPE_AUTH;
@@ -143,13 +144,14 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyCloseConnChannelTest001, TestSiz
 {
     ConnectionInfo tcpInfo;
     tcpInfo.type = CONNECT_TCP;
-    TransCreateConnByConnId(1);
+    bool isServer = false;
+    TransCreateConnByConnId(1, isServer);
 
-    int32_t ret = TransProxyCloseConnChannel(1);
+    int32_t ret = TransProxyCloseConnChannel(1, isServer);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransProxyCloseConnChannel(1);
+    ret = TransProxyCloseConnChannel(1, isServer);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransProxyCloseConnChannel(1);
+    ret = TransProxyCloseConnChannel(1, isServer);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -163,14 +165,14 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyCloseConnChannelResetTest001, Te
 {
     ConnectionInfo tcpInfo;
     tcpInfo.type = CONNECT_TCP;
+    bool isServer = false;
+    TransCreateConnByConnId(2, isServer);
 
-    TransCreateConnByConnId(2);
-
-    int32_t ret = TransProxyCloseConnChannelReset(2, false);
+    int32_t ret = TransProxyCloseConnChannelReset(2, false, isServer);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransProxyCloseConnChannelReset(2, false);
+    ret = TransProxyCloseConnChannelReset(2, false, isServer);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransProxyCloseConnChannelReset(2, true);
+    ret = TransProxyCloseConnChannelReset(2, true, isServer);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -284,9 +286,11 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyConnExistProc001, TestSize.Level
     ProxyConnInfo conn;
     ProxyChannelInfo chan;
     int32_t chanNewId = 1;
-    TransCreateConnByConnId(1);
+    bool isServer = false;
+    TransCreateConnByConnId(1, isServer);
     conn.connInfo.type = CONNECT_BR;
     conn.state = PROXY_CHANNEL_STATUS_PYH_CONNECTING;
+    chan.isServer = false;
     int32_t ret = SOFTBUS_ERR;
     ret = TransProxyConnExistProc(&conn, &chan, chanNewId);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -410,17 +414,18 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransGetConn001, TestSize.Level1)
     memset_s(&connInfo, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     ProxyConnInfo proxyConn;
     memset_s(&proxyConn, sizeof(ProxyConnInfo), 0, sizeof(ProxyConnInfo));
-    int32_t ret = TransGetConn(&connInfo, &proxyConn);
+    bool isServer = false;
+    int32_t ret = TransGetConn(&connInfo, &proxyConn, isServer);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     g_proxyConnectionList = CreateSoftBusList();
     EXPECT_NE(g_proxyConnectionList, nullptr);
-    ret = TransGetConn(nullptr, &proxyConn);
+    ret = TransGetConn(nullptr, &proxyConn, isServer);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = TransGetConn(&connInfo, nullptr);
+    ret = TransGetConn(&connInfo, nullptr, isServer);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = TransGetConn(&connInfo, &proxyConn);
+    ret = TransGetConn(&connInfo, &proxyConn, isServer);
     EXPECT_EQ(SOFTBUS_ERR, ret);
     DestroySoftBusList(g_proxyConnectionList);
     g_proxyConnectionList = nullptr;
