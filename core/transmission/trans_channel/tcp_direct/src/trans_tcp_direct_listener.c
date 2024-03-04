@@ -308,9 +308,9 @@ static int32_t TdcOnDataEvent(ListenerModule module, int events, int fd)
     if (GetSessionConnByFd(fd, conn) == NULL || conn->appInfo.fd != fd) {
         TRANS_LOGE(TRANS_CTRL, "fd=%{public}d is not exist tdc info. appfd=%{public}d", fd, conn->appInfo.fd);
         for (uint32_t i = DIRECT_CHANNEL_SERVER_P2P; i <= DIRECT_CHANNEL_SERVER_HML_END; i++) {
-            DelTrigger(i, fd, READ_TRIGGER);
-            DelTrigger(i, fd, WRITE_TRIGGER);
-            DelTrigger(i, fd, EXCEPT_TRIGGER);
+            DelTrigger((ListenerModule)i, fd, READ_TRIGGER);
+            DelTrigger((ListenerModule)i, fd, WRITE_TRIGGER);
+            DelTrigger((ListenerModule)i, fd, EXCEPT_TRIGGER);
         }
         SoftBusFree(conn);
         ConnShutdownSocket(fd);
