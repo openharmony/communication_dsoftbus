@@ -37,6 +37,7 @@ void UnregisterLaneIdListener(const ILaneIdStateListener *listener);
 int32_t InitLane(void);
 void DeinitLane(void);
 void FreeLaneId(uint32_t laneId);
+int32_t ParseLaneTypeByLaneId(const uint32_t laneId, LaneType *laneType);
 
 #ifdef __cplusplus
 }
