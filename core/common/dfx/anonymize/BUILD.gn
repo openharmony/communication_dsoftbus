@@ -79,12 +79,6 @@ if (defined(ohos_lite)) {
     ]
     external_deps = [ "hilog:libhilog" ]
     innerapi_tags = [ "platformsdk_indirect" ]
-
-    install_images = [
-      system_base_dir,
-      updater_base_dir,
-    ]
-
     part_name = "dsoftbus"
     subsystem_name = "communication"
   }
