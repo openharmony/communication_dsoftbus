@@ -15,9 +15,10 @@
 #ifndef WIFI_DIRECT_MANAGER_H
 #define WIFI_DIRECT_MANAGER_H
 
-#include "common_list.h"
-#include "wifi_direct_types.h"
 #include "channel/wifi_direct_negotiate_channel.h"
+#include "common_list.h"
+#include "wifi_direct_defines.h"
+#include "wifi_direct_types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,12 +30,18 @@ struct WifiDirectStatusListener {
     void (*onDeviceOffLine)(const char *remoteMac, const char *remoteIp, const char *remoteUuid);
 };
 
+enum WifiDirectListenerModule {
+    TRANS_LINK_MODULE = 0,
+    LNN_LANE_MODULE = 1,
+    MODULE_TYPE_MAX,
+};
+
 struct WifiDirectManager {
     /* public interface */
     int32_t (*getRequestId)(void);
     int32_t (*connectDevice)(struct WifiDirectConnectInfo *connectInfo, struct WifiDirectConnectCallback *callback);
     int32_t (*disconnectDevice)(struct WifiDirectConnectInfo *connectInfo, struct WifiDirectConnectCallback *callback);
-    void (*registerStatusListener)(struct WifiDirectStatusListener *listener);
+    void (*registerStatusListener)(enum WifiDirectListenerModule module, struct WifiDirectStatusListener *listener);
     int32_t (*getRemoteUuidByIp)(const char *ipString, char *uuid, int32_t uuidSize);
     bool (*isDeviceOnline)(const char *remoteMac);
     int32_t (*getLocalIpByRemoteIp)(const char *remoteIp, char *localIp, int32_t localIpSize);
@@ -51,7 +58,7 @@ struct WifiDirectManager {
     /* private data member */
     int32_t requestId;
     ListNode callbackList;
-    struct WifiDirectStatusListener listener;
+    struct WifiDirectStatusListener listeners[MODULE_TYPE_MAX];
     enum WifiDirectRole myRole;
     char localMac[MAC_ADDR_STR_LEN];
     bool feature;
