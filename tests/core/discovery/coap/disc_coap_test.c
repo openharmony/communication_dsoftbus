@@ -241,7 +241,7 @@ static int32_t DiscCoapTestPulbishService()
         printf("scanf_s failed.");
         return DISC_TEST_ERR;
     }
-    getchar();
+    (void)getchar();
     if (DiscCoapPulbishService(pubCapBitmap, publishMode) != DISC_TEST_OK) {
         return DISC_TEST_ERR;
     }
@@ -264,7 +264,7 @@ static int32_t DiscCoapTestUnpulbishService()
         printf("scanf_s failed.");
         return DISC_TEST_ERR;
     }
-    getchar();
+    (void)getchar();
     if (DiscCoapUnpulbishService(pubCapBitmap, publishMode) != DISC_TEST_OK) {
         return DISC_TEST_ERR;
     }
@@ -287,7 +287,7 @@ static int32_t DiscCoapTestStartDiscovery()
         printf("scanf_s failed.");
         return DISC_TEST_ERR;
     }
-    getchar();
+    (void)getchar();
     if (DiscCoapStartDiscovery(filterCapBitmap, discMode) != DISC_TEST_OK) {
         return DISC_TEST_ERR;
     }
@@ -310,7 +310,7 @@ static int32_t DiscCoapTestStopDiscovery()
         printf("scanf_s failed.");
         return DISC_TEST_ERR;
     }
-    getchar();
+    (void)getchar();
     if (DiscCoapStopDiscovery(filterCapBitmap, discMode) != DISC_TEST_OK) {
         return DISC_TEST_ERR;
     }
@@ -588,7 +588,7 @@ static int32_t DiscCoapTestPulbishServiceCase()
 {
     printf("input the testcase num=");
     char input = getchar();
-    getchar();
+    (void)getchar();
     switch (input) {
         case '1':
             if (CoapPulblish001() != DISC_TEST_OK) {
@@ -621,7 +621,7 @@ static int32_t DiscCoapTestUnpulbishServiceCase()
 {
     printf("input the testcase num=");
     char input = getchar();
-    getchar();
+    (void)getchar();
     switch (input) {
         case '1':
             if (CoapUnpulblish001() != DISC_TEST_OK) {
@@ -654,7 +654,7 @@ static int32_t DiscCoapTestStartDiscoveryCase()
 {
     printf("input the testcase num=");
     char input = getchar();
-    getchar();
+    (void)getchar();
     switch (input) {
         case '1':
             if (CoapStartAdvertise001() != DISC_TEST_OK) {
@@ -687,7 +687,7 @@ static int32_t DiscCoapTestStopDiscoveryCase()
 {
     printf("input the testcase num=");
     char input = getchar();
-    getchar();
+    (void)getchar();
     switch (input) {
         case '1':
             if (CoapStopAdvertise001() != DISC_TEST_OK) {
@@ -751,7 +751,7 @@ int main()
         sleep(1);
         printf("input=");
         char input = getchar();
-        getchar();
+        (void)getchar();
         switch (input) {
             case '1': {
                 if (DiscCoapTestInit() != DISC_TEST_OK) {
