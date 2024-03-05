@@ -36,7 +36,7 @@
 static SoftBusMutex g_laneStateListenerMutex;
 static ListNode g_laneListenerList;
 static ListNode g_laneTypeInfoList;
-
+static ListNode g_laneStatusNotifyState;
 
 static int32_t LaneListenerLock(void)
 {
@@ -132,6 +132,7 @@ int32_t DelLaneTypeInfoItem(const char *peerIp)
     LaneListenerUnlock();
     return SOFTBUS_OK;
 }
+
 int32_t FindLaneTypeInfoByPeerIp(const char *peerIp, LaneTypeInfo *laneTypeInfo)
 {
     if (peerIp == NULL || laneTypeInfo == NULL) {
@@ -159,6 +160,94 @@ int32_t FindLaneTypeInfoByPeerIp(const char *peerIp, LaneTypeInfo *laneTypeInfo)
     return SOFTBUS_ERR;
 }
 
+int32_t AddLaneStatusNotifyInfo(const LaneStatusNotifyInfo *inputLaneStatusNotifyInfo)
+{
+    if (inputLaneStatusNotifyInfo == NULL) {
+        LNN_LOGE(LNN_LANE, "inputLaneStatusNotifyInfo is nullptr");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    LaneStatusNotifyInfo *laneStatusNotifyInfoItem = (LaneStatusNotifyInfo *)SoftBusMalloc(sizeof(LaneStatusNotifyInfo));
+    if (laneStatusNotifyInfoItem == NULL) {
+        LNN_LOGE(LNN_LANE, "laneStatusNotifyInfoItem malloc fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    if (memcpy_s(laneStatusNotifyInfoItem, sizeof(LaneStatusNotifyInfo), inputLaneStatusNotifyInfo, sizeof(LaneStatusNotifyInfo)) != EOK) {
+        SoftBusFree(laneStatusNotifyInfoItem);
+        LNN_LOGE(LNN_LANE, "memcpy_s fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (LaneListenerLock() != SOFTBUS_OK) {
+        SoftBusFree(laneStatusNotifyInfoItem);
+        LNN_LOGE(LNN_LANE, "lane lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    ListAdd(&g_laneStatusNotifyState, &laneStatusNotifyInfoItem->node);
+    LaneListenerUnlock();
+    return SOFTBUS_OK;
+}
+
+int32_t UpdateLaneStatusNotifyState(const char *peerIp, const char *peerUuid, const bool state)
+{
+    if (peerIp == NULL) {
+        LNN_LOGE(LNN_LANE, "peerIp is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (LaneListenerLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "lane listener lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    LaneStatusNotifyInfo *item = NULL;
+    LaneStatusNotifyInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneStatusNotifyState, LaneStatusNotifyInfo, node) {
+        if (strncmp(item->peerIp, peerIp, IP_LEN) == 0) {
+            item->isNeedNotify = state;
+            if (strncpy_s(item->peerUuid, UUID_BUF_LEN, peerUuid, UUID_BUF_LEN) != EOK) {
+                LNN_LOGE(LNN_STATE, "copy peerIp fail");
+                LaneListenerUnlock();
+                return SOFTBUS_ERR;
+            }
+            LaneListenerUnlock();
+            return SOFTBUS_OK;
+        }
+    }
+    LaneListenerUnlock();
+    char *anonyIp = NULL;
+    Anonymize(peerIp, &anonyIp);
+    LNN_LOGE(LNN_STATE, "lane status notify item not exists, peerIp=%{public}s", anonyIp);
+    AnonymizeFree(anonyIp);
+    return SOFTBUS_ERR;
+}
+
+bool IsNeedNotifyLaneStatus(const char *peerIp)
+{
+    if (LaneListenerLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "lane listener lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    LaneStatusNotifyInfo *item = NULL;
+    LaneStatusNotifyInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneStatusNotifyState, LaneStatusNotifyInfo, node) {
+        if (strncmp(item->peerIp, peerIp, IP_LEN) == 0) {
+            LaneListenerUnlock();
+            return true;
+        }
+    }
+    LaneListenerUnlock();
+    return false;
+}
+
+static LaneStatusNotifyInfo *LaneStatusNotifyIsExist(const char *peerIp)
+{
+    LaneStatusNotifyInfo *item = NULL;
+    LaneStatusNotifyInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneStatusNotifyState, LaneStatusNotifyInfo, node) {
+        if (strncmp(item->peerIp, peerIp, IP_LEN) == 0) {
+            return item;
+        }
+    }
+    return NULL;
+}
+
 static LaneListenerInfo *LaneListenerIsExist(const LaneType type)
 {
     LaneListenerInfo *item = NULL;
@@ -179,7 +268,7 @@ int32_t RegisterLaneListener(const LaneType type, const LaneStatusListener *list
     LaneListenerInfo *laneListenerItem = (LaneListenerInfo *)SoftBusMalloc(sizeof(LaneListenerInfo));
     if (laneListenerItem == NULL) {
         LNN_LOGE(LNN_LANE, "lane listener malloc fail");
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     laneListenerItem->type = type;
     laneListenerItem->laneStatusListen = *listener;
@@ -245,11 +334,11 @@ int32_t InitLaneListener(void)
     }
     ListInit(&g_laneListenerList);
     ListInit(&g_laneTypeInfoList);
+    ListInit(&g_laneStatusNotifyState);
 
     LnnReqLinkListener();
     return SOFTBUS_OK;
 }
-
 
 static int32_t GetLaneResourceByPeerIp(const char *peerIp, LaneResource *laneResourceItem)
 {
@@ -260,13 +349,19 @@ static int32_t GetLaneResourceByPeerIp(const char *peerIp, LaneResource *laneRes
         return SOFTBUS_ERR;
     }
     char *anonyIp = NULL;
-    if (FindLaneResourceByLinkInfo(&linkInfo, laneResourceItem) != SOFTBUS_OK) {
-        Anonymize(peerIp, &anonyIp);
-        LNN_LOGE(LNN_STATE, "find lane resource fail, peerIp=%{public}s", anonyIp);
-        AnonymizeFree(anonyIp);
-        return SOFTBUS_ERR;
+    int32_t ret = FindLaneResourceByLinkInfo(&linkInfo, laneResourceItem);
+    if (ret == SOFTBUS_OK) {
+        return ret;
     }
-    return SOFTBUS_OK;
+    linkInfo.type = LANE_HML;
+    ret = FindLaneResourceByLinkInfo(&linkInfo, laneResourceItem);
+    if (ret == SOFTBUS_OK) {
+        return ret;
+    }
+    Anonymize(peerIp, &anonyIp);
+    LNN_LOGE(LNN_STATE, "find lane resource fail, peerIp=%{public}s, ret=%{public}d", anonyIp, ret);
+    AnonymizeFree(anonyIp);
+    return SOFTBUS_ERR;
 }
 
 static void LnnOnWifiDirectDeviceOffLine(const char *peerMac, const char *peerIp, const char *peerUuid)
@@ -295,7 +390,7 @@ static void LnnOnWifiDirectDeviceOffLine(const char *peerMac, const char *peerIp
 
     LaneListenerInfo laneListener;
     LaneStatusListenerInfo laneStatusListenerInfo;
-    if (strncpy_s(laneStatusListenerInfo.peerUuid, UUID_BUF_LEN, peerUuid, strlen(peerUuid)) != EOK) {
+    if (strncpy_s(laneStatusListenerInfo.peerUuid, UUID_BUF_LEN, peerUuid, UUID_BUF_LEN) != EOK) {
         LNN_LOGE(LNN_STATE, "copy peerUuid fail");
         return;
     }
@@ -334,22 +429,52 @@ static void LnnOnWifiDirectRoleChange(enum WifiDirectRole myRole)
 
 static void LnnOnWifiDirectDeviceOnLine(const char *peerMac, const char *peerIp, const char *peerUuid)
 {
-    LaneResource laneResourceItem;
-    (void)memset_s(&laneResourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
-    if (GetLaneResourceByPeerIp(peerIp, &laneResourceItem) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "get lane resource fail");
+    if (peerUuid == NULL || peerIp == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
         return;
     }
-    LaneStatusListenerInfo laneStatusListenerInfo;
-    if (strncpy_s(laneStatusListenerInfo.peerUuid, UUID_BUF_LEN, peerUuid, UUID_BUF_LEN) != EOK) {
+    LaneStatusNotifyInfo *laneStatusNotifyInfo = LaneStatusNotifyIsExist(peerIp);
+    if (laneStatusNotifyInfo != NULL) {
+        if (UpdateLaneStatusNotifyState(peerIp, peerUuid, true) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LANE, "update lane status notify state err");
+            return;
+        }
+        return;
+    }
+
+    LaneStatusNotifyInfo inputLaneStatusNotifyInfo;
+    if (strncpy_s(inputLaneStatusNotifyInfo.peerIp, IP_LEN, peerIp, IP_LEN) != EOK) {
+        LNN_LOGE(LNN_STATE, "copy peerIp fail");
+        return;
+    }
+    if (strncpy_s(inputLaneStatusNotifyInfo.peerUuid, UUID_BUF_LEN, peerUuid, UUID_BUF_LEN) != EOK) {
         LNN_LOGE(LNN_STATE, "copy peerUuid fail");
         return;
     }
-    laneStatusListenerInfo.type = laneResourceItem.type;
+    inputLaneStatusNotifyInfo.isNeedNotify = true;
+    if (AddLaneStatusNotifyInfo(&inputLaneStatusNotifyInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "add lane status notify info err");
+        return;
+    }
+}
+
+int32_t LnnOnWifiDirectDeviceOnLineNotify(const char *peerIp, const LaneLinkType linkType)
+{
+    LaneStatusNotifyInfo *laneStatusNotifyInfo = LaneStatusNotifyIsExist(peerIp);
+    if (laneStatusNotifyInfo == NULL || !laneStatusNotifyInfo->isNeedNotify) {
+        LNN_LOGI(LNN_LANE, "no need to notify lane status");
+        return SOFTBUS_OK;
+    }
+    LaneStatusListenerInfo laneStatusListenerInfo;
+    if (strncpy_s(laneStatusListenerInfo.peerUuid, UUID_BUF_LEN, laneStatusNotifyInfo->peerUuid, UUID_BUF_LEN) != EOK) {
+        LNN_LOGE(LNN_STATE, "copy peerUuid fail");
+        return SOFTBUS_ERR;
+    }
+    laneStatusListenerInfo.type = linkType;
 
     if (LaneListenerLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "lane listener lock fail");
-        return;
+        return SOFTBUS_LOCK_ERR;
     }
     LaneListenerInfo *item = NULL;
     LaneListenerInfo *next = NULL;
@@ -359,9 +484,10 @@ static void LnnOnWifiDirectDeviceOnLine(const char *peerMac, const char *peerIp,
         }
     }
     LaneListenerUnlock();
+    return SOFTBUS_OK;
 }
 
-int32_t LnnReqLinkListener(void)
+void LnnReqLinkListener(void)
 {
     struct WifiDirectStatusListener listener = {
         .onDeviceOffLine = LnnOnWifiDirectDeviceOffLine,
@@ -371,8 +497,5 @@ int32_t LnnReqLinkListener(void)
     struct WifiDirectManager *mgr = GetWifiDirectManager();
     if (mgr != NULL && mgr->registerStatusListener != NULL) {
         mgr->registerStatusListener(&listener);
-        return SOFTBUS_OK;
     }
-    LNN_LOGE(LNN_STATE, "get wifi direct manager err");
-    return SOFTBUS_ERR;
 }
