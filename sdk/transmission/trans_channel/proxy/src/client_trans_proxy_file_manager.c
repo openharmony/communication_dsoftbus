@@ -738,7 +738,7 @@ static int32_t UnpackFileTransStartInfo(FileFrame *fileFrame, const FileRecipien
         // magic(4 byte) + dataLen(8 byte) + oneFrameLen(4 byte) + fileSize(8 byte) + fileName
         fileFrame->magic = (*(uint32_t *)(fileFrame->data));
         uint64_t dataLen = (*(uint64_t *)(fileFrame->data + FRAME_MAGIC_OFFSET));
-        if(FRAME_HEAD_LEN + dataLen > fileFrame->frameLength) {
+        if (FRAME_HEAD_LEN + dataLen > fileFrame->frameLength) {
             return SOFTBUS_ERR;
         }
         if (fileFrame->magic != FILE_MAGIC_NUMBER || dataLen < (FRAME_DATA_SEQ_OFFSET + sizeof(uint64_t))) {
@@ -1755,13 +1755,13 @@ static int32_t ProcessOneFrame(const FileFrame *fileFrame, uint32_t dataLen, int
         uint32_t frameDataLength = dataLen - FRAME_DATA_SEQ_OFFSET;
         fileInfo->seq = fileFrame->seq;
 
-        if(MAX_FILE_SIZE < frameDataLength) {
+        if (MAX_FILE_SIZE < frameDataLength) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "frameDataLength is too large, frameDataLength:%" PRIu32,
                 frameDataLength);
             return SOFTBUS_ERR;
         }
 
-        if(fileInfo->fileOffset > MAX_FILE_SIZE - frameDataLength) {
+        if (fileInfo->fileOffset > MAX_FILE_SIZE - frameDataLength) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "file is too large, offset:%" PRIu64,
                 fileInfo->fileOffset + frameDataLength);
             return SOFTBUS_ERR;
