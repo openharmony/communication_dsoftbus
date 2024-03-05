@@ -39,6 +39,13 @@ typedef struct {
 } LaneStatusListenerInfo;
 
 typedef struct {
+    ListNode node;
+    char peerIp[IP_LEN];
+    char peerUuid[UUID_BUF_LEN];
+    bool isNeedNotify;
+} LaneStatusNotifyInfo;
+
+typedef struct {
     void (*onLaneOnLine)(LaneStatusListenerInfo *laneStatusListenerInfo);
     void (*onLaneOffLine)(LaneStatusListenerInfo *laneStatusListenerInfo);
     void (*onLaneStateChange)(LaneStatusListenerInfo *laneStatusListenerInfo);
@@ -58,7 +65,9 @@ int32_t CreateLaneTypeInfoByLaneId(const uint32_t laneId, const LaneLinkInfo *li
 int32_t DelLaneTypeInfoItem(const char *peerIp);
 int32_t FindLaneTypeInfoByPeerIp(const char *peerIp, LaneTypeInfo *laneTypeInfo);
 int32_t InitLaneListener(void);
-int32_t LnnReqLinkListener(void);
+void LnnReqLinkListener(void);
+int32_t UpdateLaneStatusNotifyState(const char *peerIp, const char *peerUuid, const bool state);
+int32_t LnnOnWifiDirectDeviceOnLineNotify(const char *peerIp, const LaneLinkType linkType);
 
 #ifdef __cplusplus
 }

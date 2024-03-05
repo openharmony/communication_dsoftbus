@@ -153,6 +153,15 @@ static void LinkSuccess(uint32_t laneId, const LaneLinkInfo *linkInfo)
         return;
     }
     if (linkInfo->type == LANE_P2P || linkInfo->type == LANE_HML) {
+        if (LnnOnWifiDirectDeviceOnLineNotify(linkInfo->linkInfo.p2p.connInfo.peerIp, linkInfo->type) != SOFTBUS_OK) {
+            SoftBusFree(linkParam);
+            DelLaneResourceItem(&resourceItem);
+            DelLinkInfoItem(laneId);
+            LNN_LOGE(LNN_LANE, "notify WifiDirectDevice OnLine fail");
+            (void)LnnLanePostMsgToHandler(MSG_TYPE_LANE_LINK_FAIL, laneId, SOFTBUS_ERR, NULL, 0);
+            return;
+        }
+
         if (CreateLaneTypeInfoByLaneId(laneId, linkInfo) != SOFTBUS_OK) {
             SoftBusFree(linkParam);
             DelLaneResourceItem(&resourceItem);
