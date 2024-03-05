@@ -321,7 +321,7 @@ static int32_t AllocLane(uint32_t laneId, const LaneRequestOption *request, cons
     }
     recommendLinkList->linkTypeNum = 0;
     if (SelectExpectLanesByQos((const char *)transRequest->networkId, &selectParam,
-            recommendLinkList) != SOFTBUS_OK) {
+        recommendLinkList) != SOFTBUS_OK) {
         SoftBusFree(recommendLinkList);
         LNN_LOGE(LNN_LANE, "selectExpectLanesByQos fail, laneId=%{public}u", laneId);
         return SOFTBUS_ERR;
