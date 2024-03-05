@@ -53,7 +53,7 @@ static uint32_t ConvertMsgToCapability(uint32_t *capability, const uint8_t *msg,
         return SOFTBUS_ERR;
     }
     for (uint32_t i = 0; i < BITLEN; i++) {
-        *capability = *capability | (*(msg + i) << BITS*i);
+        *capability = *capability | (*(msg + i) << (BITS * i));
     }
     return SOFTBUS_OK;
 }
