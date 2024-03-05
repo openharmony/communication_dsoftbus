@@ -192,9 +192,12 @@ void ClientTransProxyFileManagerTest::TearDownTestCase(void)
 {
     int ret = fclose(g_fileTest);
     EXPECT_EQ(ret, 0);
+    g_fileTest = NULL;
     ret = fclose(g_fileSs);
     EXPECT_EQ(ret, 0);
+    g_fileSs = NULL;
     close(g_fd);
+    g_fd = -1;
     ret = remove(g_testProxyFileList[0]);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
