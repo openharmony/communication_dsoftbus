@@ -1779,7 +1779,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyUpdateFileReceivePathT
     int32_t sessionId = TEST_SESSION_ID;
     FileListener *fileListener = (FileListener *)SoftBusCalloc(sizeof(FileListener));
 
-    fileListener->fileCallback = NULL;
+    fileListener->socketRecvCallback = NULL;
     int ret = UpdateFileReceivePath(sessionId, fileListener);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
