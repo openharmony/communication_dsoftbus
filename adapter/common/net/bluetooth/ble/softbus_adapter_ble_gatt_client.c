@@ -261,7 +261,7 @@ int32_t SoftbusGattcWriteCharacteristic(int32_t clientId, SoftBusGattcData *clie
     characteristic.characteristicUuid.uuid = clientData->characterUuid.uuid;
     characteristic.characteristicUuid.uuidLen = clientData->characterUuid.uuidLen;
     if (BleGattcWriteCharacteristic(clientId, characteristic, OHOS_GATT_WRITE_NO_RSP, clientData->valueLen,
-            (const char *)clientData->value) != SOFTBUS_OK) {
+        (const char *)clientData->value) != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, " error");
         return SOFTBUS_GATTC_INTERFACE_FAILED;
     }
