@@ -59,7 +59,7 @@ NO_SANITIZE("cfi") void TransPermissionDeinit(void)
 NO_SANITIZE("cfi") int32_t CalcPermType(pid_t callingUid, pid_t callingPid)
 {
     using namespace AccessToken;
-    if (callingUid == (pid_t)getuid() && callingPid == getpid()) {
+    if (callingUid == static_cast<pid_t>(getuid()) && callingPid == getpid()) {
         SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_INFO, "self app");
         return SELF_APP;
     }

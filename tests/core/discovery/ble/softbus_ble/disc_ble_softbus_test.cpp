@@ -20,6 +20,9 @@
 #include "softbus_errcode.h"
 #include "message_handler.h"
 
+#define TEST_ADVID_1 1
+#define TEST_ADVID_2 2
+
 using namespace testing::ext;
 namespace OHOS {
 class DiscSoftBusBleTest : public testing::Test {
@@ -67,7 +70,7 @@ int SoftBusSetAdvData(int advId, const SoftBusBleAdvData *data)
 {
     (void)data;
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, SoftBusSetAdvData, START");
-    if (advId == 1 || advId == 2) {
+    if (advId == TEST_ADVID_1 || advId == TEST_ADVID_2) {
         return SOFTBUS_OK;
     }
     return SOFTBUS_ERR;
@@ -77,7 +80,7 @@ int SoftBusStartAdv(int advId, const SoftBusBleAdvParams *param)
 {
     (void)param;
     SoftBusLog(SOFTBUS_LOG_DISC, SOFTBUS_LOG_INFO, "DiscSoftBusBleTest, SoftBusBleAdvParams, START");
-    if (advId == 2) {
+    if (advId == TEST_ADVID_2) {
         return SOFTBUS_OK;
     }
     return SOFTBUS_ERR;

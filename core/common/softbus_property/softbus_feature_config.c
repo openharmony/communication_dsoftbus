@@ -44,7 +44,7 @@
 #define CONN_TCP_MAX_CONN_NUM 30
 #define CONN_TCP_TIME_OUT 100
 #define MAX_NODE_STATE_CB_CNT 10
-#define MAX_LNN_CONNECTION_CNT 30 // TODO: restore after fix the problem of connection exceeding max limit
+#define MAX_LNN_CONNECTION_CNT 30
 #define LNN_SUPPORT_CAPBILITY 62
 #define LNN_SUPPORT_FEATURE     0x77E2
 #define AUTH_ABILITY_COLLECTION 0
