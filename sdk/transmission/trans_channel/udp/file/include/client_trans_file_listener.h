@@ -31,7 +31,8 @@ typedef struct {
     IFileSendListener sendListener;
     IFileReceiveListener recvListener;
     char rootDir[FILE_RECV_ROOT_DIR_SIZE_MAX];
-    SocketFileCallbackFunc fileCallback;
+    SocketFileCallbackFunc socketSendCallback;
+    SocketFileCallbackFunc socketRecvCallback;
 } FileListener;
 
 int TransFileInit(void);
@@ -47,7 +48,7 @@ int32_t TransGetFileListener(const char *sessionName, FileListener *fileListener
 
 void TransDeleteFileListener(const char *sessionName);
 
-int32_t TransSetSocketFileListener(const char *sessionName, SocketFileCallbackFunc fileCallback);
+int32_t TransSetSocketFileListener(const char *sessionName, SocketFileCallbackFunc fileCallback, bool isReceiver);
 #ifdef __cplusplus
 }
 #endif

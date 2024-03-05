@@ -70,7 +70,8 @@ typedef struct {
 typedef struct {
     bool isSocketListener;
     ISessionListener session;
-    ISocketListener socket;
+    ISocketListener socketClient;
+    ISocketListener socketServer;
 } SessionListenerAdapter;
 
 typedef struct {
@@ -162,7 +163,7 @@ int32_t ClientDeleteSocketSession(int32_t sessionId);
 
 int32_t ClientAddSocketSession(const SessionParam *param, int32_t *sessionId, bool *isEnabled);
 
-int32_t ClientSetListenerBySessionId(int32_t sessionId, const ISocketListener *listener);
+int32_t ClientSetListenerBySessionId(int32_t sessionId, const ISocketListener *listener, bool isServer);
 
 int32_t ClientIpcOpenSession(int32_t sessionId, const QosTV *qos, uint32_t qosCount, TransInfo *transInfo);
 
@@ -170,7 +171,7 @@ int32_t ClientSetSocketState(int32_t socket, uint32_t maxIdleTimeout, SessionRol
 
 int32_t ClientGetSessionCallbackAdapterByName(const char *sessionName, SessionListenerAdapter *callbackAdapter);
 
-int32_t ClientGetSessionCallbackAdapterById(int32_t sessionId, SessionListenerAdapter *callbackAdapter);
+int32_t ClientGetSessionCallbackAdapterById(int32_t sessionId, SessionListenerAdapter *callbackAdapter, bool *isServer);
 
 int32_t ClientGetPeerSocketInfoById(int32_t sessionId, PeerSocketInfo *peerSocketInfo);
 
