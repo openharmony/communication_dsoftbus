@@ -47,7 +47,7 @@ typedef struct tagSppSocketDriver {
     int32_t (*OpenSppServer)(const char *name, int32_t nameLen, const char *uuid, int32_t isSecure);
     int32_t (*GetSppServerPort)(int serverId);
     void (*CloseSppServer)(int32_t serverFd);
-    int32_t (*ConnectByPort)(const char *uuid, const BT_ADDR mac,const int32_t socketPsmValue, void *connectCallback);
+    int32_t (*ConnectByPort)(const char *uuid, const BT_ADDR mac, const int32_t socketPsmValue, void *connectCallback);
     int32_t (*Connect)(const char *uuid, const BT_ADDR mac, void *connectCallback);
     int32_t (*DisConnect)(int32_t clientFd);
     bool (*IsConnected)(int32_t clientFd);
