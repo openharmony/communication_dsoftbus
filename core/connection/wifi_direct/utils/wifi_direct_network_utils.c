@@ -206,7 +206,7 @@ static int32_t IpStringToIntArray(const char *addrString, uint32_t *addrArray, s
     CONN_CHECK_AND_RETURN_RET_LOGW(addrArraySize >= IPV4_ADDR_ARRAY_LEN, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT,
         "array to small");
 
-    int32_t ret = sscanf_s(addrString, "%p.%p.%p.%p", addrArray, addrArray + 1, addrArray + 2, addrArray + 3);
+    int32_t ret = sscanf_s(addrString, "%u.%u.%u.%u", addrArray, addrArray + 1, addrArray + 2, addrArray + 3);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret > 0, SOFTBUS_ERR, CONN_WIFI_DIRECT, "scan ip number failed");
     return SOFTBUS_OK;
 }
