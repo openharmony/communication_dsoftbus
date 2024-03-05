@@ -298,7 +298,7 @@ static void CalculateSessionTransferRate(DFileSession *session, uint64_t totalBy
     }
     const double rate = 1.0 * session->bytesTransferred / DFILE_MEGABYTES * MSEC_TICKS_PER_SEC / spendTime;
     DFILE_LOGI(TAG, "Total %u trans, %llu bytes, used %u ms. rate %.2f MB/s",
-         session->transCount, session->bytesTransferred, spendTime, rate);
+        session->transCount, session->bytesTransferred, spendTime, rate);
     DFileMsg msgData;
     (void)memset_s(&msgData, sizeof(msgData), 0, sizeof(msgData));
     msgData.rate = (uint32_t)rate;
@@ -521,7 +521,7 @@ static void SetDFileSessionConfig(DFileSession *session, DFileConfig *dFileConfi
     }
 
     DFILE_LOGI(TAG, "connType is %u set sendrate is %u maxSendRate is %u peerInfo->dataFrameSize is %u",
-         connType, peerInfo->sendRate, peerInfo->maxSendRate, peerInfo->dataFrameSize);
+        connType, peerInfo->sendRate, peerInfo->maxSendRate, peerInfo->dataFrameSize);
     if (session->sessionType == DFILE_SESSION_TYPE_SERVER) {
         if (FileManagerSetRecvParaWithConnType(session->fileManager, connType) != NSTACKX_EOK) {
             DFILE_LOGE(TAG, "failed to set recv para");
@@ -823,8 +823,8 @@ static void DFileSessionHandleBackPressure(DFileSession *session, const DFileFra
     DFileSessionResolveBackPress(session, backPress, session->clientSendThreadNum);
 
     DFILE_LOGI(TAG, "handle back pressure recvListOverIo %u recvBufThreshold %u stopSendPeriod %u",
-         backPress.recvListOverIo, backPress.recvBufThreshold,
-         backPress.stopSendPeriod);
+        backPress.recvListOverIo, backPress.recvBufThreshold,
+        backPress.stopSendPeriod);
 
     return;
 }
@@ -1041,7 +1041,7 @@ static void AmendPeerInfoSendRate(PeerInfo *peerInfo)
 {
     peerInfo->amendSendRate = peerInfo->sendRate;
     DFILE_LOGI(TAG, "current: sendrate %u, realsendframerate %u---new amendSendRate %d",
-         peerInfo->sendRate, peerInfo->sendFrameRate, peerInfo->amendSendRate);
+        peerInfo->sendRate, peerInfo->sendFrameRate, peerInfo->amendSendRate);
 }
 
 static void DFileSendCalculateRate(DFileSession *session, PeerInfo *peerInfo)
@@ -1081,14 +1081,14 @@ static void DFileSendCalculateRate(DFileSession *session, PeerInfo *peerInfo)
                   "min qdisc %u max qdisc %u search num %u ave qdisc %u"
                   "totalRecvBlocks %llu socket:%u "
                   "overRun %llu maxRetryCountPerSec %u maxRetryCountLastSec %u wlanCatagory %u",
-             peerInfo->dataFrameSize, peerInfo->maxSendRate, peerInfo->sendRate, peerInfo->amendSendRate,
-             peerInfo->sendCount, measureElapse, peerInfo->sendFrameRate, peerInfo->sendCountRateMB,
-             NSTACKX_ATOM_FETCH(&(session->totalSendBlocks)), peerInfo->eAgainCount,
-             NSTACKX_ATOM_FETCH(&(session->sendBlockListEmptyTimes)), session->sleepTimes,
-             NSTACKX_ATOM_FETCH(&(session->noPendingDataTimes)), peerInfo->qdiscMinLeft,
-             peerInfo->qdiscMaxLeft, peerInfo->qdiscSearchNum, peerInfo->qdiscAveLeft,
-             NSTACKX_ATOM_FETCH(&(session->totalRecvBlocks)), peerInfo->socketIndex,
-             peerInfo->overRun, peerInfo->maxRetryCountPerSec, peerInfo->maxRetryCountLastSec, session->wlanCatagory);
+            peerInfo->dataFrameSize, peerInfo->maxSendRate, peerInfo->sendRate, peerInfo->amendSendRate,
+            peerInfo->sendCount, measureElapse, peerInfo->sendFrameRate, peerInfo->sendCountRateMB,
+            NSTACKX_ATOM_FETCH(&(session->totalSendBlocks)), peerInfo->eAgainCount,
+            NSTACKX_ATOM_FETCH(&(session->sendBlockListEmptyTimes)), session->sleepTimes,
+            NSTACKX_ATOM_FETCH(&(session->noPendingDataTimes)), peerInfo->qdiscMinLeft,
+            peerInfo->qdiscMaxLeft, peerInfo->qdiscSearchNum, peerInfo->qdiscAveLeft,
+            NSTACKX_ATOM_FETCH(&(session->totalRecvBlocks)), peerInfo->socketIndex,
+            peerInfo->overRun, peerInfo->maxRetryCountPerSec, peerInfo->maxRetryCountLastSec, session->wlanCatagory);
         AmendPeerInfoSendRate(peerInfo);
         ClearSessionStats(session);
         ClearPeerinfoStats(peerInfo);
@@ -1139,7 +1139,7 @@ static void DFileRecvCalculateRate(DFileSession *session, DFileFrame *dFileFrame
             session->fileManager->iowMaxRate = session->fileManager->iowRate;
         }
         DFILE_LOGI(TAG, "measureElapse %llu iowBytes %llu iowCount %llu IO write rate : %u KB/s", measureElapse,
-             session->fileManager->iowBytes, session->fileManager->iowCount, session->fileManager->iowRate);
+            session->fileManager->iowBytes, session->fileManager->iowCount, session->fileManager->iowRate);
         session->fileManager->iowBytes = 0;
         ClockGetTime(CLOCK_MONOTONIC, &session->measureBefore);
     }
@@ -1825,7 +1825,7 @@ void *DFileReceiverHandle(void *arg)
         }
     }
     DFILE_LOGI(TAG, "Total recv blocks: direct %llu inner %llu", session->recvBlockNumDirect,
-            session->recvBlockNumInner);
+        session->recvBlockNumInner);
     if (ret < 0 && ret != NSTACKX_EAGAIN && ret != NSTACKX_PEER_CLOSE) {
         PostFatalEvent(session);
     }
