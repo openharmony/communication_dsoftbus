@@ -105,10 +105,12 @@ static int32_t DisconnectDevice(struct WifiDirectConnectInfo *connectInfo, struc
     return GetWifiDirectNegotiator()->processNextCommand();
 }
 
-static void RegisterStatusListener(struct WifiDirectStatusListener *listener)
+static void RegisterStatusListener(enum WifiDirectListenerModule module, struct WifiDirectStatusListener *listener)
 {
     CONN_CHECK_AND_RETURN_LOGW(listener, CONN_WIFI_DIRECT, "listener is null");
-    GetWifiDirectManager()->listener = *listener;
+    CONN_CHECK_AND_RETURN_LOGW(module >= 0 && module < MODULE_TYPE_MAX, CONN_WIFI_DIRECT, "module invalid");
+    struct WifiDirectManager *self = GetWifiDirectManager();
+    self->listeners[module] = *listener;
 }
 
 static int32_t GetRemoteUuidByIp(const char *ipString, char *uuid, int32_t uuidSize)
@@ -286,8 +288,10 @@ static void OnInterfaceInfoChange(struct InterfaceInfo *info)
     CONN_LOGI(CONN_WIFI_DIRECT, "oldRole=%{public}d, newRole=%{public}d", self->myRole, newRole);
     if (self->myRole != newRole) {
         self->myRole = newRole;
-        if (self->listener.onLocalRoleChange) {
-            self->listener.onLocalRoleChange(newRole);
+        for (uint32_t index = 0; index < MODULE_TYPE_MAX; index++) {
+            if (self->listeners[index].onLocalRoleChange != NULL) {
+                self->listeners[index].onLocalRoleChange(newRole);
+            }
         }
         return;
     }
@@ -321,15 +325,19 @@ static void OnInnerLinkChange(struct InnerLink *innerLink, bool isStateChange)
         CONN_LOGI(CONN_WIFI_DIRECT,
             "online. remoteMac=%{public}s, remoteUuid=%{public}s", WifiDirectAnonymizeMac(remoteMac),
             WifiDirectAnonymizeDeviceId(remoteUuid));
-        if (self->listener.onDeviceOnLine) {
-            self->listener.onDeviceOnLine(remoteMac, remoteIp, remoteUuid);
+        for (uint32_t index = 0; index < MODULE_TYPE_MAX; index++) {
+            if (self->listeners[index].onDeviceOnLine != NULL) {
+                self->listeners[index].onDeviceOnLine(remoteMac, remoteIp, remoteUuid);
+            }
         }
     } else if (state == INNER_LINK_STATE_DISCONNECTED) {
         CONN_LOGI(CONN_WIFI_DIRECT,
             "offline. remoteMac=%{public}s, remoteUuid=%{public}s", WifiDirectAnonymizeMac(remoteMac),
             WifiDirectAnonymizeDeviceId(remoteUuid));
-        if (self->listener.onDeviceOffLine) {
-            self->listener.onDeviceOffLine(remoteMac, remoteIp, remoteUuid);
+        for (uint32_t index = 0; index < MODULE_TYPE_MAX; index++) {
+            if (self->listeners[index].onDeviceOffLine != NULL) {
+                self->listeners[index].onDeviceOffLine(remoteMac, remoteIp, remoteUuid);
+            }
         }
     } else {
         CONN_LOGD(CONN_WIFI_DIRECT, "other state");
