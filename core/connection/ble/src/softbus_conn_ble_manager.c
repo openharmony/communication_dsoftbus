@@ -697,9 +697,9 @@ static bool IsSameDevice(const char *leftIdentifier, const char *rightIdentifier
     char leftHashStr[HEXIFY_LEN(SHORT_UDID_HASH_LEN)] = { 0 };
     char rightHashStr[HEXIFY_LEN(SHORT_UDID_HASH_LEN)] = { 0 };
     if (ConvertBytesToHexString(leftHashStr, HEXIFY_LEN(SHORT_UDID_HASH_LEN), leftHash, SHORT_UDID_HASH_LEN) !=
-            SOFTBUS_OK ||
+        SOFTBUS_OK ||
         ConvertBytesToHexString(rightHashStr, HEXIFY_LEN(SHORT_UDID_HASH_LEN), rightHash, SHORT_UDID_HASH_LEN) !=
-            SOFTBUS_OK) {
+        SOFTBUS_OK) {
         CLOGE("ATTENTION! convert bytes to array failed");
         return false;
     }
@@ -1608,7 +1608,7 @@ static bool BleCheckActiveConnection(const ConnectOption *option)
         "ble check action connection failed: invaliad param, option->type is not ble, type=%d", option->type);
     char hashStr[HEXIFY_LEN(SHORT_UDID_HASH_LEN)] = { 0 };
     if (ConvertBytesToHexString(hashStr, HEXIFY_LEN(SHORT_UDID_HASH_LEN),
-            (unsigned char *)option->bleOption.deviceIdHash, SHORT_UDID_HASH_LEN) != SOFTBUS_OK) {
+        (unsigned char *)option->bleOption.deviceIdHash, SHORT_UDID_HASH_LEN) != SOFTBUS_OK) {
         CLOGE("ATTENTION! convert bytes to array failed");
         return false;
     }
@@ -2096,7 +2096,7 @@ static void LnnOnlineEventListener(const LnnEventBasicInfo *info)
             if (status != SOFTBUS_OK) {
                 CLOGE("ATTENTION UNEXPECTED ERROR! complementation coc connection udid failed: try to get connection "
                       "lock failed, connection id=%u, error=%d",
-                it->connectionId, status);
+                      it->connectionId, status);
                 continue;
             }
             ConnBleInnerComplementDeviceId(it);

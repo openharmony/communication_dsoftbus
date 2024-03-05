@@ -996,7 +996,6 @@ static void ProcessSpecifiedListenerNodeEvent(SoftbusListenerNode *node, SoftBus
         return;
     }
 
-    // TODO: process listen fd exception, rebuild listen socket
     if (listenFd > 0 && SoftBusSocketFdIsset(listenFd, readSet)) {
         status =
             ProcessSpecifiedServerAcceptEvent(node->module, listenFd, connectType, socketIf, &listener, wakeupTrace);
