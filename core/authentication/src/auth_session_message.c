@@ -575,7 +575,6 @@ static int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo
         }
     }
     if (!JSON_GetInt32FromOject(obj, SOFTBUS_VERSION_TAG, (int32_t *)&info->version)) {
-        // info->version = SOFTBUS_OLD_V2;
     }
     if (SetExchangeIdTypeAndValve(obj, info) != SOFTBUS_OK) {
         ALOGE("set exchange id type or valve fail.");

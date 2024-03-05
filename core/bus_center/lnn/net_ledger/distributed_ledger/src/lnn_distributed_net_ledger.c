@@ -257,8 +257,8 @@ static void RetainOfflineCode(const NodeInfo *oldInfo, NodeInfo *newInfo)
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "para error!");
         return;
     }
-    // 4 represents the number of destination bytes and source bytes.
-    if (memcpy_s(newInfo->offlineCode, 4, oldInfo->offlineCode, 4) != SOFTBUS_OK) {
+    if (memcpy_s(newInfo->offlineCode, OFFLINE_CODE_BYTE_SIZE,
+        oldInfo->offlineCode, OFFLINE_CODE_BYTE_SIZE) != SOFTBUS_OK) {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "memcpy offlineCode error!");
         return;
     }

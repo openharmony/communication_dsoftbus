@@ -181,10 +181,6 @@ HWTEST_F(HeartBeatMediumTest, GetOnlineNodeByRecvInfoTest_01, TestSize.Level1)
     int32_t ret = HbGetOnlineNodeByRecvInfo(udidHash, CONNECTION_ADDR_BR, &nodeInfo, &hbResp);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    // ret = HbGetOnlineNodeByRecvInfo(TEST_UDID_HASH, CONNECTION_ADDR_BR, &nodeInfo, &hbResp);
-    // EXPECT_TRUE(ret == SOFTBUS_OK);
-    // ret = HbGetOnlineNodeByRecvInfo(TEST_UDID_HASH, CONNECTION_ADDR_WLAN, &nodeInfo, &hbResp);
-    // EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*
