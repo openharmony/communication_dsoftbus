@@ -199,7 +199,7 @@ static void DisconnectP2pWithoutAuthConn(int32_t pid, const char *mac, int32_t l
 }
 
 static int32_t GetP2pLinkDownParam(uint32_t authRequestId, int32_t p2pRequestId,
-    struct WifiDirectConnectInfo *wifiDirectInfo,int64_t authId)
+    struct WifiDirectConnectInfo *wifiDirectInfo, int64_t authId)
 {
     P2pLinkedList *item = NULL;
     P2pLinkedList *next = NULL;
