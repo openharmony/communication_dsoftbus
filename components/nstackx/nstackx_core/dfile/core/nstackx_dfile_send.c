@@ -284,7 +284,7 @@ static void CheckSendByBackPress(DFileSession *session, uint32_t tid, uint8_t so
 
 #ifndef NSTACKX_WITH_LITEOS
         DFILE_LOGI(TAG, "tid %u sleep %u us fileProCnt %u Interval %u lastStopCnt %u stopSendCnt %u", tid, sleepTime,
-             fileProcessCnt, peerInfo->rateStateInterval, stopCnt, session->stopSendCnt[tid]);
+            fileProcessCnt, peerInfo->rateStateInterval, stopCnt, session->stopSendCnt[tid]);
 #endif
         (void)usleep(sleepTime);
     }
@@ -449,7 +449,7 @@ int32_t SocketRecvForTcp(DFileSession *session, uint8_t *buffer, struct sockaddr
     payloadLen = ntohs(frameHeader->length);
     if (payloadLen >= NSTACKX_RECV_BUFFER_LEN) {
         DFILE_LOGI(TAG, "header length is %u recv length is %u payloadLen is %u type %u", length,
-             session->recvLen, payloadLen, frameHeader->type);
+            session->recvLen, payloadLen, frameHeader->type);
         return NSTACKX_EFAILED;
     }
 

@@ -744,7 +744,7 @@ static void GenerateAllEmptyFiles(FileListTask *fileList)
             NotifyFileMsg(fileList, fileInfo->fileId, FILE_MANAGER_RECEIVE_FAIL);
         } else {
             DFILE_LOGI(TAG, "Create empty file successfully: transId %u, fileId %u", fileList->transId, 
-                    fileInfo->fileId);
+                fileInfo->fileId);
             NotifyFileMsg(fileList, fileList->fileInfo[i].fileId, FILE_MANAGER_RECEIVE_SUCCESS);
         }
     }
@@ -760,7 +760,7 @@ static void FileListRefreshFileRecvStatus(FileListTask *fileList)
         if (FileGetRecvStatus(&fileList->fileInfo[i]) == STATE_RECEIVE_ONGOING) {
             fileList->fileInfo[i].errCode = FILE_MANAGER_FILE_EOTHER;
             DFILE_LOGE(TAG, "file list will be stopped and set incompleted file %u to fail", 
-                    fileList->fileInfo[i].fileId);
+                fileList->fileInfo[i].fileId);
             NotifyFileMsg(fileList, fileList->fileInfo[i].fileId, FILE_MANAGER_RECEIVE_FAIL);
         }
     }
@@ -1395,7 +1395,7 @@ static int32_t FileManagerInit(FileManager *fileManager, FileManagerMsgPara *msg
             return NSTACKX_EFAILED;
         }
         DFILE_LOGI(TAG, "connect type is %u and send frame list number is %u max send list size is %u",
-             connType, fileManager->sendFrameListNum, fileManager->maxSendBlockListSize);
+            connType, fileManager->sendFrameListNum, fileManager->maxSendBlockListSize);
     }
     if (IsEpollDescValid(msgPara->epollfd) && msgPara->msgReceiver != NULL) {
         fileManager->msgReceiver = msgPara->msgReceiver;
@@ -2009,8 +2009,9 @@ void ClearTransStateList(DFileSession *session)
 {
     List *tmp = NULL;
     List *pos = NULL;
-    if (session == NULL || ListIsEmpty(&session->tranIdStateList.head))
+    if (session == NULL || ListIsEmpty(&session->tranIdStateList.head)) {
         return;
+    }
 
     if (PthreadMutexLock(&session->tranIdStateList.lock) != 0) {
         DFILE_LOGE(TAG, "pthread mutex lock error");
