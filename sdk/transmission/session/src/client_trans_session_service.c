@@ -929,9 +929,9 @@ int32_t ClientAddSocket(const SocketInfo *info, int32_t *sessionId)
     }
 
     SessionParam param = {
-        .sessionName = info->name,
-        .peerSessionName = info->peerName,
-        .peerDeviceId = info->peerNetworkId,
+        .sessionName = info->name != NULL ? info->name : "",
+        .peerSessionName = info->peerName != NULL ? info->peerName : "",
+        .peerDeviceId = info->peerNetworkId != NULL ? info->peerNetworkId : "",
         .groupId = "reserved",
         .attr = tmpAttr,
     };
@@ -1006,7 +1006,7 @@ int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t qosCount, const I
         return SOFTBUS_INVALID_PARAM;
     }
 
-    int32_t ret = ClientSetListenerBySessionId(socket, listener);
+    int32_t ret = ClientSetListenerBySessionId(socket, listener, false);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "ClientBind set listener failed, ret=%{public}d", ret);
         return ret;
@@ -1056,7 +1056,7 @@ int32_t ClientListen(int32_t socket, const QosTV qos[], uint32_t qosCount, const
         return SOFTBUS_INVALID_PARAM;
     }
 
-    int32_t ret = ClientSetListenerBySessionId(socket, listener);
+    int32_t ret = ClientSetListenerBySessionId(socket, listener, true);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "set listener failed. ret=%{public}d", ret);
         return ret;

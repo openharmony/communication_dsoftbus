@@ -742,18 +742,42 @@ HWTEST_F(TransSdkFileTest, TransFileTest013, TestSize.Level0)
  */
 HWTEST_F(TransSdkFileTest, TransFileTest014, TestSize.Level0)
 {
-    int32_t ret = TransSetSocketFileListener(nullptr, nullptr);
+    int32_t ret = TransSetSocketFileListener(nullptr, nullptr, false);
     ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = TransSetSocketFileListener(g_mySessionName, nullptr);
+    ret = TransSetSocketFileListener(g_mySessionName, nullptr, false);
     ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = TransSetSocketFileListener(nullptr, SocketFileCallbackFuncTest);
+    ret = TransSetSocketFileListener(nullptr, SocketFileCallbackFuncTest, false);
     ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransFileInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = TransSetSocketFileListener(g_mySessionName, SocketFileCallbackFuncTest);
+    ret = TransSetSocketFileListener(g_mySessionName, SocketFileCallbackFuncTest, false);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    TransFileDeinit();
+}
+
+/**
+ * @tc.name: TransFileTest015
+ * @tc.desc: trans add new file callback of socket
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkFileTest, TransFileTest015, TestSize.Level0)
+{
+    int32_t ret = TransFileInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = TransAddNewSocketFileListener(nullptr, nullptr, false);
+    ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = TransAddNewSocketFileListener(g_mySessionName, nullptr, false);
+    ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = TransAddNewSocketFileListener(nullptr, SocketFileCallbackFuncTest, false);
+    ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = TransAddNewSocketFileListener(g_mySessionName, SocketFileCallbackFuncTest, false);
     ASSERT_EQ(ret, SOFTBUS_OK);
     TransFileDeinit();
 }
