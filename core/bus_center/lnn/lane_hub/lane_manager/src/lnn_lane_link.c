@@ -320,7 +320,7 @@ static int32_t LaneLinkOfBleDirectCommon(const LinkRequest *reqInfo, LaneLinkInf
     }
 
     if (memcpy_s(linkInfo->linkInfo.bleDirect.nodeIdHash, NODEID_SHORT_HASH_LEN, peerNetwordIdHash,
-            NODEID_SHORT_HASH_LEN) != EOK) {
+        NODEID_SHORT_HASH_LEN) != EOK) {
         return SOFTBUS_ERR;
     }
     if (memcpy_s(linkInfo->linkInfo.bleDirect.localUdidHash, UDID_SHORT_HASH_LEN, localUdidHash, UDID_SHORT_HASH_LEN) !=
