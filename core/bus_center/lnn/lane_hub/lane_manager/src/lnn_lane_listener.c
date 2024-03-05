@@ -484,6 +484,10 @@ int32_t LnnOnWifiDirectDeviceOnLineNotify(const char *peerIp, const LaneLinkType
         }
     }
     LaneListenerUnlock();
+    if (UpdateLaneStatusNotifyState(peerIp, laneStatusNotifyInfo->peerUuid, false) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "update lane status notify state err");
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 
