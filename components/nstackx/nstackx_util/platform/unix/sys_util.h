@@ -18,12 +18,12 @@
 
 #include "nstackx_common_header.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #if defined(MIPS)
 #include <stdatomic.h>
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 #define PATH_SEPARATOR '/'

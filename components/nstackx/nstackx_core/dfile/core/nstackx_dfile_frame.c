@@ -513,7 +513,7 @@ int32_t DecodeFileTransferDoneFrame(FileList *fileList, FileTransferDoneFrame *t
     fileIdNum = length / sizeof(uint16_t);
 
     DFILE_LOGI(TAG, "transId %u, FileTransferDone:fileIdNum %u, file number %u",
-         ntohs(transferDoneFrame->header.transId), fileIdNum, FileListGetNum(fileList));
+        ntohs(transferDoneFrame->header.transId), fileIdNum, FileListGetNum(fileList));
     for (i = 0; i < fileIdNum; i++) {
         fileId = ntohs(transferDoneFrame->fileId[i]);
         if (fileId == 0 || fileId > FileListGetNum(fileList)) {
