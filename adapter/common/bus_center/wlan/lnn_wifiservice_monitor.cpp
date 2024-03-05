@@ -39,7 +39,7 @@ namespace EventFwk {
 class WifiServiceMonitor : public CommonEventSubscriber {
 public:
     explicit WifiServiceMonitor(const CommonEventSubscribeInfo &subscriberInfo);
-    virtual ~WifiServiceMonitor(){}
+    virtual ~WifiServiceMonitor() {}
     virtual void OnReceiveEvent(const CommonEventData &data);
 };
 
