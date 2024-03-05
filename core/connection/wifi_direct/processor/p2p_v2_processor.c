@@ -1106,7 +1106,7 @@ static struct NegotiateMessage* BuildConnectResponse2(struct NegotiateMessage *m
     respLinkInfo.putInt(&respLinkInfo, LI_KEY_CENTER_FREQUENCY1,
                         linkInfo->getInt(linkInfo, LI_KEY_CENTER_FREQUENCY1, -1));
     respLinkInfo.putInt(&respLinkInfo, LI_KEY_CENTER_FREQUENCY2,
-                       linkInfo->getInt(linkInfo, LI_KEY_CENTER_FREQUENCY2, -1));
+                        linkInfo->getInt(linkInfo, LI_KEY_CENTER_FREQUENCY2, -1));
     respLinkInfo.putInt(&respLinkInfo, LI_KEY_BANDWIDTH, linkInfo->getInt(linkInfo, LI_KEY_BANDWIDTH, -1));
     respLinkInfo.putString(&respLinkInfo, LI_KEY_REMOTE_BASE_MAC, info->getString(info, II_KEY_BASE_MAC, ""));
 

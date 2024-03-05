@@ -101,7 +101,7 @@ static bool CheckTargetDevice(struct NegotiateMessage *msg)
 }
 
 static int32_t HandleResponse(struct WifiDirectProcessor *processor, enum WifiDirectNegotiateCmdType cmd,
-                             struct NegotiateMessage *msg)
+                              struct NegotiateMessage *msg)
 {
     if (!CheckTargetDevice(msg)) {
         return SOFTBUS_OK;
@@ -136,7 +136,7 @@ static bool IsNeedReversal(struct NegotiateMessage *msg)
 }
 
 static int32_t HandleRequest(struct WifiDirectProcessor *processor, enum WifiDirectNegotiateCmdType cmd,
-                              struct NegotiateMessage *msg)
+                             struct NegotiateMessage *msg)
 {
     if (!CheckTargetDevice(msg)) {
         processor->processUnhandledRequest(msg, ERROR_MANAGER_BUSY);
