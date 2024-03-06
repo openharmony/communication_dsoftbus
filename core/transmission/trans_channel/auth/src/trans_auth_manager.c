@@ -195,15 +195,15 @@ static int32_t NotifyOnDataReceived(int32_t authId, const void *data, uint32_t l
 static int32_t CopyPeerAppInfo(AppInfo *recvAppInfo, AppInfo *channelAppInfo)
 {
     if (memcpy_s(channelAppInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX,
-            recvAppInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX) != EOK ||
+                 recvAppInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX) != EOK ||
         memcpy_s(recvAppInfo->myData.deviceId, DEVICE_ID_SIZE_MAX,
-            channelAppInfo->myData.deviceId, DEVICE_ID_SIZE_MAX) != EOK ||
+                 channelAppInfo->myData.deviceId, DEVICE_ID_SIZE_MAX) != EOK ||
         memcpy_s(channelAppInfo->peerData.pkgName, PKG_NAME_SIZE_MAX,
-            recvAppInfo->peerData.pkgName, PKG_NAME_SIZE_MAX) != EOK ||
+                 recvAppInfo->peerData.pkgName, PKG_NAME_SIZE_MAX) != EOK ||
         memcpy_s(recvAppInfo->myData.pkgName, PKG_NAME_SIZE_MAX,
-            channelAppInfo->myData.pkgName, PKG_NAME_SIZE_MAX) != EOK ||
+                 channelAppInfo->myData.pkgName, PKG_NAME_SIZE_MAX) != EOK ||
         memcpy_s(channelAppInfo->peerData.sessionName, SESSION_NAME_SIZE_MAX,
-            recvAppInfo->peerData.sessionName, SESSION_NAME_SIZE_MAX) != EOK) {
+                 recvAppInfo->peerData.sessionName, SESSION_NAME_SIZE_MAX) != EOK) {
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;

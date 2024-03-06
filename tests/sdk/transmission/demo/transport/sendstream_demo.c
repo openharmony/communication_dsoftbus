@@ -53,7 +53,7 @@ static void OnSessionClosed(int sessionId)
 
 // Notify that the stream data is received.
 static void OnStreamReceived(int sessionId, const StreamData *data, const StreamData *ext,
-            const StreamFrameInfo *param)
+                             const StreamFrameInfo *param)
 {
     printf("session stream received, session id = %d\r\n", sessionId);
 }
@@ -122,7 +122,7 @@ static void OnSessionClosed(int sessionId)
 }
 
 static void OnStreamReceived(int sessionId, const StreamData *data, const StreamData *ext,
-            const StreamFrameInfo *param)
+                             const StreamFrameInfo *param)
 {
     printf("session stream received, session id = %d\r\n", sessionId);
 }

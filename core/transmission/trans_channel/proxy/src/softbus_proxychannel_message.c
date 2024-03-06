@@ -631,9 +631,9 @@ int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanI
             !GetJsonObjectNumberItem(root, JSON_KEY_CRC, &appInfo->crc) ||
             !GetJsonObjectNumber16Item(root, JSON_KEY_FIRST_DATA_SIZE, fastDataSize) ||
             !GetJsonObjectStringItem(root, JSON_KEY_SRC_BUS_NAME, appInfo->peerData.sessionName,
-                                 sizeof(appInfo->peerData.sessionName)) ||
+                                     sizeof(appInfo->peerData.sessionName)) ||
             !GetJsonObjectStringItem(root, JSON_KEY_DST_BUS_NAME, appInfo->myData.sessionName,
-                                 sizeof(appInfo->myData.sessionName))) {
+                                     sizeof(appInfo->myData.sessionName))) {
             TRANS_LOGW(TRANS_CTRL, "unpack handshake ack old version");
         }
         if (!GetJsonObjectInt32Item(root, JSON_KEY_MY_HANDLE_ID, &(appInfo->peerHandleId))) {
