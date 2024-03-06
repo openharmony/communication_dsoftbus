@@ -1047,8 +1047,9 @@ static void BleRequestWriteCallback(SoftBusGattWriteRequest writeCbPara)
     } else if (writeCbPara.attrHandle == g_serverState.connCharacteristicHandle) {
         isConnCharacteristic = true;
     } else {
-        CLOGE("receive gatt server callback, request write failed: not NET or CONN characteristic,  "
-              "connection id=%u, underlayer handle=%d, attr handle=%d, net charateristic handle=%d, conn charateristic ",
+        CLOGE("receive gatt server callback, request write failed: not NET or CONN characteristic, "
+            "connection id=%u, underlayer handle=%d, attr handle=%d,"
+            "net charateristic handle=%d, conn charateristic ",
             connection->connectionId, underlayerHandle, g_serverState.netCharacteristicHandle,
             g_serverState.connCharacteristicHandle);
         ConnBleReturnConnection(&connection);
