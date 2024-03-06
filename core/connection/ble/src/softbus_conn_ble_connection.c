@@ -622,7 +622,8 @@ static int32_t SendBasicInfo(ConnBleConnection *connection)
         .connRole = connection->side,
         .linkType = CONNECT_BLE,
         .peerBleMac = connection->addr,
-        .result = EVENT_STAGE_RESULT_OK
+        .errcode = status,
+        .result = status == SOFTBUS_OK ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED
     };
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_SEND_BASIC_INFO, extra);
     return status;
