@@ -294,7 +294,7 @@ static void OnInterfaceInfoChange(struct InterfaceInfo *info)
 
     char *newLocalMac = info->getString(info, II_KEY_BASE_MAC, "");
     CONN_LOGI(CONN_WIFI_DIRECT, "newLocalMac=%{public}s, oldLocalMac=%{public}s",
-          WifiDirectAnonymizeMac(newLocalMac), WifiDirectAnonymizeMac(self->localMac));
+        WifiDirectAnonymizeMac(newLocalMac), WifiDirectAnonymizeMac(self->localMac));
     if (strcmp(newLocalMac, self->localMac) != 0) {
         if (strcpy_s(self->localMac, sizeof(self->localMac), newLocalMac) != EOK) {
             CONN_LOGW(CONN_WIFI_DIRECT, "copy local mac failed");

@@ -465,7 +465,7 @@ HWTEST_F(WifiProcessorTest, testV2ProcessReuseLink001, TestSize.Level1)
     strcpy_s(info.remoteMac, sizeof(info.remoteMac), myMac);
     struct DefaultNegotiateChannel channel;
     DefaultNegotiateChannelConstructor(&channel, 222);
-    info.negoChannel = (struct WifiDirectNegotiateChannel*)&channel; 
+    info.negoChannel = (struct WifiDirectNegotiateChannel*)&channel;
 
     struct InnerLink link;
     InnerLinkConstructor(&link);
