@@ -55,7 +55,7 @@ struct InnerLink;
                                                                                                                   \
     enum WifiDirectProcessorState currentState;                                                                   \
     struct NegotiateMessage *currentMsg;                                                                          \
-    char *name;
+    char *name
 
 struct WifiDirectProcessor {
     PROCESSOR_BASE;

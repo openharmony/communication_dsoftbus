@@ -201,10 +201,10 @@ int32_t ConnBleStopServer(void)
 int32_t ConnBleConnect(ConnBleConnection *connection)
 {
     CONN_CHECK_AND_RETURN_RET_LOG(connection != NULL, SOFTBUS_INVALID_PARAM,
-    "ble connection connect failed, invalid param, connection is null");
+        "ble connection connect failed, invalid param, connection is null");
     const BleUnifyInterface *interface = ConnBleGetUnifyInterface(connection->protocol);
     CONN_CHECK_AND_RETURN_RET_LOG(interface != NULL, SOFTBUS_ERR,
-    "ble connection connect failed, protocol not support");
+        "ble connection connect failed, protocol not support");
     return interface->bleClientConnect(connection);
 }
 
@@ -234,10 +234,10 @@ static bool ShoudRefreshGatt(enum ConnBleDisconnectReason reason)
 int32_t ConnBleDisconnectNow(ConnBleConnection *connection, enum ConnBleDisconnectReason reason)
 {
     CONN_CHECK_AND_RETURN_RET_LOG(connection != NULL, SOFTBUS_INVALID_PARAM,
-    "ble connection disconnect failed, invalid param, connection is null");
+        "ble connection disconnect failed, invalid param, connection is null");
     const BleUnifyInterface *interface = ConnBleGetUnifyInterface(connection->protocol);
     CONN_CHECK_AND_RETURN_RET_LOG(interface != NULL, SOFTBUS_ERR,
-    "ble connection disconnect failed, protocol not support");
+        "ble connection disconnect failed, protocol not support");
     CLOGW("receive ble disconnect now, connection id=%u, side=%d, reason=%d", connection->connectionId,
         connection->side, reason);
     ConnRemoveMsgFromLooper(
@@ -369,13 +369,13 @@ int32_t ConnBleOnReferenceRequest(ConnBleConnection *connection, const cJSON *js
 int32_t ConnBleUpdateConnectionPriority(ConnBleConnection *connection, ConnectBlePriority priority)
 {
     CONN_CHECK_AND_RETURN_RET_LOG(connection != NULL, SOFTBUS_INVALID_PARAM,
-    "ble connection update connection priority failed, invalid param, connection is null");
+        "ble connection update connection priority failed, invalid param, connection is null");
     if (connection->side == CONN_SIDE_SERVER) {
         return SOFTBUS_FUNC_NOT_SUPPORT;
     }
     const BleUnifyInterface *interface = ConnBleGetUnifyInterface(connection->protocol);
     CONN_CHECK_AND_RETURN_RET_LOG(interface != NULL, SOFTBUS_ERR,
-    "ble connection update connection priority failed, protocol not support");
+        "ble connection update connection priority failed, protocol not support");
     return interface->bleClientUpdatePriority(connection, priority);
 }
 
@@ -389,7 +389,7 @@ int32_t ConnBleSend(ConnBleConnection *connection, const uint8_t *data, uint32_t
         dataLen != 0, SOFTBUS_INVALID_PARAM, "ble connection send data failed, invalid param, data len is 0");
     const BleUnifyInterface *interface = ConnBleGetUnifyInterface(connection->protocol);
     CONN_CHECK_AND_RETURN_RET_LOG(interface != NULL, SOFTBUS_ERR,
-    "ble connection send data failed, protocol not support");
+        "ble connection send data failed, protocol not support");
     return connection->side == CONN_SIDE_SERVER ?
         interface->bleServerSend(connection, data, dataLen, module) :
         interface->bleClientSend(connection, data, dataLen, module);
