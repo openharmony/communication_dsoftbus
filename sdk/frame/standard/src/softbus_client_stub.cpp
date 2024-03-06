@@ -404,7 +404,15 @@ int32_t SoftBusClientStub::OnChannelMsgReceivedInner(MessageParcel &data, Messag
         return SOFTBUS_ERR;
     }
     char *infoData = (char *)SoftBusMalloc(len);
-    memcpy_s(infoData, len, dataInfo, len);
+    if (infoData == nullptr) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "malloc infoData fail");
+        return SOFTBUS_ERR;
+    }
+    if (memcpy_s(infoData, len, dataInfo, len) != EOK) {
+        SoftBusLog(SOFTBUS_LOG_COMM, SOFTBUS_LOG_ERROR, "memcpy infoData failed!");
+        SoftBusFree(infoData);
+        return SOFTBUS_ERR;
+    }
     int ret = OnChannelMsgReceived(channelId, channelType, infoData, len, type);
     SoftBusFree(infoData);
     bool res = reply.WriteInt32(ret);
