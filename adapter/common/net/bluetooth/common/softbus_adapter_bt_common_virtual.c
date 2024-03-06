@@ -57,5 +57,4 @@ int SoftBusSetBtName(const char *name)
 
 void SoftBusBtInit(void)
 {
-
 }

@@ -177,7 +177,7 @@ static int32_t CallSpecificInterfaceFunc(const InnerOption *option,
     const DiscoveryFuncInterface *interface, const DiscoverMode mode, InterfaceFuncType type)
 {
     DISC_CHECK_AND_RETURN_RET_LOGW(interface != NULL, SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL,
-                                  DISC_CONTROL, "interface is null");
+        DISC_CONTROL, "interface is null");
     switch (type) {
         case PUBLISH_FUNC:
             return ((mode == DISCOVER_MODE_ACTIVE) ? (interface->Publish(&(option->publishOption))) :
@@ -218,7 +218,7 @@ static int32_t CallInterfaceByMedium(const DiscInfo *info, const InterfaceFuncTy
 static int32_t TransferStringCapToBitmap(const char *capability)
 {
     DISC_CHECK_AND_RETURN_RET_LOGW(capability != NULL, SOFTBUS_DISCOVER_MANAGER_CAPABILITY_INVALID,
-                                  DISC_CONTROL, "capability is null");
+        DISC_CONTROL, "capability is null");
 
     for (uint32_t i = 0; i < sizeof(g_capabilityMap) / sizeof(g_capabilityMap[0]); i++) {
         if (strcmp(capability, g_capabilityMap[i].capability) == 0) {
@@ -283,8 +283,7 @@ static bool IsInnerModule(const DiscInfo *infoNode)
     return false;
 }
 
-static void InnerDeviceFound(DiscInfo *infoNode, const DeviceInfo *device,
-                                                const InnerDeviceInfoAddtions *additions)
+static void InnerDeviceFound(DiscInfo *infoNode, const DeviceInfo *device, const InnerDeviceInfoAddtions *additions)
 {
     if (IsInnerModule(infoNode) == false) {
         (void)infoNode->item->callback.serverCb.OnServerDeviceFound(infoNode->item->packageName, device, additions);
@@ -327,11 +326,11 @@ static void DiscOnDeviceFound(const DeviceInfo *device, const InnerDeviceInfoAdd
 static int32_t CheckPublishInfo(const PublishInfo *info)
 {
     DISC_CHECK_AND_RETURN_RET_LOGW(info->mode == DISCOVER_MODE_PASSIVE || info->mode == DISCOVER_MODE_ACTIVE,
-                                  SOFTBUS_INVALID_PARAM, DISC_CONTROL, "mode is invalid");
+        SOFTBUS_INVALID_PARAM, DISC_CONTROL, "mode is invalid");
     DISC_CHECK_AND_RETURN_RET_LOGW(info->medium >= AUTO && info->medium <= COAP,
-                                  SOFTBUS_DISCOVER_MANAGER_INVALID_MEDIUM, DISC_CONTROL, "mode is invalid");
+        SOFTBUS_DISCOVER_MANAGER_INVALID_MEDIUM, DISC_CONTROL, "mode is invalid");
     DISC_CHECK_AND_RETURN_RET_LOGW(info->freq >= LOW && info->freq <= SUPER_HIGH,
-                                  SOFTBUS_INVALID_PARAM, DISC_CONTROL, "freq is invalid");
+        SOFTBUS_INVALID_PARAM, DISC_CONTROL, "freq is invalid");
 
     if (info->capabilityData == NULL) {
         if (info->dataLen == 0) {
@@ -367,11 +366,11 @@ static int32_t CheckPublishInfo(const PublishInfo *info)
 static int32_t CheckSubscribeInfo(const SubscribeInfo *info)
 {
     DISC_CHECK_AND_RETURN_RET_LOGW(info->mode == DISCOVER_MODE_PASSIVE || info->mode == DISCOVER_MODE_ACTIVE,
-                                  SOFTBUS_INVALID_PARAM, DISC_CONTROL, "mode is invalid");
+        SOFTBUS_INVALID_PARAM, DISC_CONTROL, "mode is invalid");
     DISC_CHECK_AND_RETURN_RET_LOGW(info->medium >= AUTO && info->medium <= COAP,
-                                  SOFTBUS_DISCOVER_MANAGER_INVALID_MEDIUM, DISC_CONTROL, "mode is invalid");
+        SOFTBUS_DISCOVER_MANAGER_INVALID_MEDIUM, DISC_CONTROL, "mode is invalid");
     DISC_CHECK_AND_RETURN_RET_LOGW(info->freq >= LOW && info->freq <= SUPER_HIGH,
-                                  SOFTBUS_INVALID_PARAM, DISC_CONTROL, "freq is invalid");
+        SOFTBUS_INVALID_PARAM, DISC_CONTROL, "freq is invalid");
 
     if (info->capabilityData == NULL) {
         if (info->dataLen == 0) {
@@ -724,7 +723,7 @@ static int32_t InnerUnPublishService(const char *packageName, int32_t publishId,
 {
     DiscInfo *infoNode = RemoveInfoFromPublishList(packageName, publishId, type);
     DISC_CHECK_AND_RETURN_RET_LOGE(infoNode != NULL, SOFTBUS_DISCOVER_MANAGER_INFO_NOT_DELETE,
-                                  DISC_CONTROL, "delete info from list failed");
+        DISC_CONTROL, "delete info from list failed");
 
     int32_t ret = CallInterfaceByMedium(infoNode, UNPUBLISH_FUNC);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_CONTROL, "DiscInterfaceByMedium failed");
@@ -759,7 +758,7 @@ static int32_t InnerStopDiscovery(const char *packageName, int32_t subscribeId, 
 {
     DiscInfo *infoNode = RemoveInfoFromDiscoveryList(packageName, subscribeId, type);
     DISC_CHECK_AND_RETURN_RET_LOGE(infoNode != NULL, SOFTBUS_DISCOVER_MANAGER_INFO_NOT_DELETE,
-                                  DISC_CONTROL, "delete info from list failed");
+        DISC_CONTROL, "delete info from list failed");
 
     int32_t ret = CallInterfaceByMedium(infoNode, STOPDISCOVERY_FUNC);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_CONTROL, "DiscInterfaceByMedium failed");
@@ -808,7 +807,7 @@ static int32_t InnerSetDiscoveryCallback(const char *packageName, const DiscInne
 int32_t DiscSetDiscoverCallback(DiscModule moduleId, const DiscInnerCallback *callback)
 {
     DISC_CHECK_AND_RETURN_RET_LOGW(moduleId >= MODULE_MIN && moduleId <= MODULE_MAX && callback != NULL,
-                                  SOFTBUS_INVALID_PARAM, DISC_CONTROL, "invalid parameters");
+        SOFTBUS_INVALID_PARAM, DISC_CONTROL, "invalid parameters");
     DISC_CHECK_AND_RETURN_RET_LOGW(g_isInited == true, SOFTBUS_DISCOVER_MANAGER_NOT_INIT, DISC_CONTROL,
         "manager is not inited");
     return InnerSetDiscoveryCallback(TransferModuleIdToPackageName(moduleId), callback);
@@ -817,7 +816,7 @@ int32_t DiscSetDiscoverCallback(DiscModule moduleId, const DiscInnerCallback *ca
 int32_t DiscPublish(DiscModule moduleId, const PublishInfo *info)
 {
     DISC_CHECK_AND_RETURN_RET_LOGW(moduleId >= MODULE_MIN && moduleId <= MODULE_MAX && info != NULL,
-                                  SOFTBUS_INVALID_PARAM, DISC_CONTROL, "invalid parameters");
+        SOFTBUS_INVALID_PARAM, DISC_CONTROL, "invalid parameters");
     DISC_CHECK_AND_RETURN_RET_LOGW(info->mode == DISCOVER_MODE_ACTIVE, SOFTBUS_INVALID_PARAM, DISC_CONTROL,
         "mode is not active");
     DISC_CHECK_AND_RETURN_RET_LOGW(CheckPublishInfo(info) == SOFTBUS_OK, SOFTBUS_INVALID_PARAM, DISC_CONTROL,
@@ -839,7 +838,7 @@ int32_t DiscPublish(DiscModule moduleId, const PublishInfo *info)
 int32_t DiscStartScan(DiscModule moduleId, const PublishInfo *info)
 {
     DISC_CHECK_AND_RETURN_RET_LOGW(moduleId >= MODULE_MIN && moduleId <= MODULE_MAX && info != NULL,
-                                  SOFTBUS_INVALID_PARAM, DISC_CONTROL, "invalid parameters");
+        SOFTBUS_INVALID_PARAM, DISC_CONTROL, "invalid parameters");
     DISC_CHECK_AND_RETURN_RET_LOGW(info->mode == DISCOVER_MODE_PASSIVE, SOFTBUS_INVALID_PARAM, DISC_CONTROL,
         "mode is not passive");
     DISC_CHECK_AND_RETURN_RET_LOGW(CheckPublishInfo(info) == SOFTBUS_OK, SOFTBUS_INVALID_PARAM, DISC_CONTROL,
@@ -861,7 +860,7 @@ int32_t DiscStartScan(DiscModule moduleId, const PublishInfo *info)
 int32_t DiscUnpublish(DiscModule moduleId, int32_t publishId)
 {
     DISC_CHECK_AND_RETURN_RET_LOGW(moduleId >= MODULE_MIN && moduleId <= MODULE_MAX,
-                                  SOFTBUS_INVALID_PARAM, DISC_CONTROL, "invalid moduleId");
+        SOFTBUS_INVALID_PARAM, DISC_CONTROL, "invalid moduleId");
     DISC_CHECK_AND_RETURN_RET_LOGW(g_isInited == true, SOFTBUS_DISCOVER_MANAGER_NOT_INIT, DISC_CONTROL,
         "manager is not inited");
 
@@ -871,7 +870,7 @@ int32_t DiscUnpublish(DiscModule moduleId, int32_t publishId)
 int32_t DiscStartAdvertise(DiscModule moduleId, const SubscribeInfo *info)
 {
     DISC_CHECK_AND_RETURN_RET_LOGW(moduleId >= MODULE_MIN && moduleId <= MODULE_MAX && info != NULL,
-                                  SOFTBUS_INVALID_PARAM, DISC_CONTROL, "invalid parameters");
+        SOFTBUS_INVALID_PARAM, DISC_CONTROL, "invalid parameters");
     DISC_CHECK_AND_RETURN_RET_LOGW(info->mode == DISCOVER_MODE_ACTIVE, SOFTBUS_INVALID_PARAM, DISC_CONTROL,
         "mode is not active");
     DISC_CHECK_AND_RETURN_RET_LOGW(CheckSubscribeInfo(info) == SOFTBUS_OK, SOFTBUS_INVALID_PARAM, DISC_CONTROL,
@@ -893,7 +892,7 @@ int32_t DiscStartAdvertise(DiscModule moduleId, const SubscribeInfo *info)
 int32_t DiscSubscribe(DiscModule moduleId, const SubscribeInfo *info)
 {
     DISC_CHECK_AND_RETURN_RET_LOGW(moduleId >= MODULE_MIN && moduleId <= MODULE_MAX && info != NULL,
-                                  SOFTBUS_INVALID_PARAM, DISC_CONTROL, "invalid parameters");
+        SOFTBUS_INVALID_PARAM, DISC_CONTROL, "invalid parameters");
     DISC_CHECK_AND_RETURN_RET_LOGW(info->mode == DISCOVER_MODE_PASSIVE, SOFTBUS_INVALID_PARAM, DISC_CONTROL,
         "mode is not passive");
     DISC_CHECK_AND_RETURN_RET_LOGW(CheckSubscribeInfo(info) == SOFTBUS_OK, SOFTBUS_INVALID_PARAM, DISC_CONTROL,
@@ -915,7 +914,7 @@ int32_t DiscSubscribe(DiscModule moduleId, const SubscribeInfo *info)
 int32_t DiscStopAdvertise(DiscModule moduleId, int32_t subscribeId)
 {
     DISC_CHECK_AND_RETURN_RET_LOGW(moduleId >= MODULE_MIN && moduleId <= MODULE_MAX,
-                                  SOFTBUS_INVALID_PARAM, DISC_CONTROL, "invalid moduleId");
+        SOFTBUS_INVALID_PARAM, DISC_CONTROL, "invalid moduleId");
     DISC_CHECK_AND_RETURN_RET_LOGW(g_isInited == true, SOFTBUS_DISCOVER_MANAGER_NOT_INIT, DISC_CONTROL,
         "manager is not inited");
 
@@ -927,7 +926,7 @@ int32_t DiscPublishService(const char *packageName, const PublishInfo *info)
     DISC_CHECK_AND_RETURN_RET_LOGW(packageName != NULL && info != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL,
         "invalid parameters");
     DISC_CHECK_AND_RETURN_RET_LOGW(strlen(packageName) < PKG_NAME_SIZE_MAX,
-                                  SOFTBUS_INVALID_PARAM, DISC_CONTROL, "package name too long");
+        SOFTBUS_INVALID_PARAM, DISC_CONTROL, "package name too long");
     DISC_CHECK_AND_RETURN_RET_LOGW(CheckPublishInfo(info) == SOFTBUS_OK, SOFTBUS_INVALID_PARAM, DISC_CONTROL,
         "invalid info");
     DISC_CHECK_AND_RETURN_RET_LOGW(g_isInited == true, SOFTBUS_DISCOVER_MANAGER_NOT_INIT, DISC_CONTROL,
@@ -947,7 +946,7 @@ int32_t DiscPublishService(const char *packageName, const PublishInfo *info)
 int32_t DiscUnPublishService(const char *packageName, int32_t publishId)
 {
     DISC_CHECK_AND_RETURN_RET_LOGW(packageName != NULL && strlen(packageName) < PKG_NAME_SIZE_MAX,
-                                  SOFTBUS_INVALID_PARAM, DISC_CONTROL, "invalid parameters");
+        SOFTBUS_INVALID_PARAM, DISC_CONTROL, "invalid parameters");
     DISC_CHECK_AND_RETURN_RET_LOGW(g_isInited == true, SOFTBUS_DISCOVER_MANAGER_NOT_INIT, DISC_CONTROL,
         "manager is not inited");
 
@@ -958,7 +957,7 @@ int32_t DiscStartDiscovery(const char *packageName, const SubscribeInfo *info,
     const IServerDiscInnerCallback *cb)
 {
     DISC_CHECK_AND_RETURN_RET_LOGW(packageName != NULL && strlen(packageName) < PKG_NAME_SIZE_MAX,
-                                  SOFTBUS_INVALID_PARAM, DISC_CONTROL, "invalid package name");
+        SOFTBUS_INVALID_PARAM, DISC_CONTROL, "invalid package name");
     DISC_CHECK_AND_RETURN_RET_LOGW(info != NULL && cb != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL,
         "invalid parameters");
     DISC_CHECK_AND_RETURN_RET_LOGW(g_isInited == true, SOFTBUS_DISCOVER_MANAGER_NOT_INIT, DISC_CONTROL,
@@ -980,7 +979,7 @@ int32_t DiscStartDiscovery(const char *packageName, const SubscribeInfo *info,
 int32_t DiscStopDiscovery(const char *packageName, int32_t subscribeId)
 {
     DISC_CHECK_AND_RETURN_RET_LOGW(packageName != NULL && strlen(packageName) < PKG_NAME_SIZE_MAX,
-                                  SOFTBUS_INVALID_PARAM, DISC_CONTROL, "invalid parameters");
+        SOFTBUS_INVALID_PARAM, DISC_CONTROL, "invalid parameters");
     DISC_CHECK_AND_RETURN_RET_LOGW(g_isInited == true, SOFTBUS_DISCOVER_MANAGER_NOT_INIT, DISC_CONTROL,
         "manager is not inited");
 
