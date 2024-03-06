@@ -181,7 +181,8 @@ void ClientTransProxyFileManagerTest::SetUpTestCase(void)
 
     g_fileSs = fopen(g_testProxyFileList[1], "w+");
     EXPECT_NE(g_fileSs, nullptr);
-    fprintf(g_fileSs, "%s", "Hello world!\n");
+    ret = fprintf(g_fileSs, "%s", "Hello world!\n");
+    EXPECT_GE(ret, 0);
     g_fd = open(TEST_FILE_PATH, O_RDWR | O_CREAT, S_IRWXU);
     EXPECT_NE(g_fd, -1);
     write(g_fd, g_writeData, sizeof(g_writeData));
@@ -189,13 +190,15 @@ void ClientTransProxyFileManagerTest::SetUpTestCase(void)
 
 void ClientTransProxyFileManagerTest::TearDownTestCase(void)
 {
-    fclose(g_fileTest);
+    int ret = fclose(g_fileTest);
+    EXPECT_EQ(ret, 0);
     g_fileTest = NULL;
-    fclose(g_fileSs);
+    ret = fclose(g_fileSs);
+    EXPECT_EQ(ret, 0);
     g_fileSs = NULL;
     close(g_fd);
     g_fd = -1;
-    int ret = remove(g_testProxyFileList[0]);
+    ret = remove(g_testProxyFileList[0]);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = remove(g_testProxyFileList[1]);

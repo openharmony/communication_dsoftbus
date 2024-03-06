@@ -156,7 +156,6 @@ int32_t TestGetPkgNameBySessionName(const char *sessionName, char *pkgName, uint
 
 void SoftbusProxyChannelListenerTest::SetUpTestCase(void)
 {
-
     IServerChannelCallBack callBack;
     callBack.OnChannelOpened = TestOnChannelOpened;
     callBack.OnChannelClosed = TestOnChannelClosed;

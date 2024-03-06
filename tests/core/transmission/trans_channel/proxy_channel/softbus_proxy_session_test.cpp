@@ -100,7 +100,6 @@ int32_t TestSessionDataReceived(const char *pkgName, int32_t pid, int32_t channe
 
 void SoftbusProxySessionTest::SetUpTestCase(void)
 {
-
     SoftbusConfigInit();
     ASSERT_EQ(SOFTBUS_OK, LooperInit());
     ASSERT_EQ(SOFTBUS_OK, SoftBusTimerInit());

@@ -1874,13 +1874,13 @@ static int32_t ProcessOneFrame(const FileFrame *fileFrame, uint32_t dataLen, int
         uint32_t frameDataLength = dataLen - FRAME_DATA_SEQ_OFFSET;
         fileInfo->seq = fileFrame->seq;
 
-        if(MAX_FILE_SIZE < frameDataLength) {
+        if (MAX_FILE_SIZE < frameDataLength) {
             TRANS_LOGE(TRANS_FILE, "frameDataLength is too large, frameDataLen=%{public}" PRIu32,
                 frameDataLength);
             return SOFTBUS_ERR;
         }
 
-        if(fileInfo->fileOffset > MAX_FILE_SIZE - frameDataLength) {
+        if (fileInfo->fileOffset > MAX_FILE_SIZE - frameDataLength) {
             TRANS_LOGE(TRANS_FILE, "file is too large, offset=%{public}" PRIu64,
                 fileInfo->fileOffset + frameDataLength);
             return SOFTBUS_ERR;
