@@ -208,30 +208,18 @@ static int32_t UnpackFirstData(AppInfo *appInfo, const cJSON *json)
     return SOFTBUS_OK;
 }
 
-int UnpackRequest(const cJSON *msg, AppInfo *appInfo)
+static int32_t ParseMessageToAppInfo(const cJSON *msg, AppInfo *appInfo)
 {
-    if (msg == NULL || appInfo == NULL) {
-        TRANS_LOGW(TRANS_CTRL, "invalid param");
-        return SOFTBUS_ERR;
-    }
-    if (UnpackFirstData(appInfo, msg) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "unpack first data failed");
-        SoftBusFree((void *)appInfo->fastTransData);
-        return SOFTBUS_ERR;
-    }
-    int apiVersion = API_V1;
-    (void)GetJsonObjectNumberItem(msg, API_VERSION, &apiVersion);
     char sessionKey[BASE64KEY] = {0};
     if (!GetJsonObjectStringItem(msg, BUS_NAME, (appInfo->myData.sessionName), SESSION_NAME_SIZE_MAX) ||
         !GetJsonObjectStringItem(msg, GROUP_ID, (appInfo->groupId), GROUP_ID_SIZE_MAX) ||
         !GetJsonObjectStringItem(msg, SESSION_KEY, sessionKey, sizeof(sessionKey))) {
         TRANS_LOGE(TRANS_CTRL, "Failed to get BUS_NAME");
-        return SOFTBUS_ERR;
+        return SOFTBUS_PARSE_JSON_ERR;
     }
     if (!GetJsonObjectNumberItem(msg, MTU_SIZE, (int32_t *)&(appInfo->peerData.dataConfig))) {
-        TRANS_LOGE(TRANS_CTRL, "peer dataconfig is null.");
+        TRANS_LOGW(TRANS_CTRL, "peer dataconfig is null.");
     }
-    appInfo->peerData.apiVersion = (ApiVersion)apiVersion;
     appInfo->peerData.uid = -1;
     appInfo->peerData.pid = -1;
     (void)GetJsonObjectNumberItem(msg, UID, &appInfo->peerData.uid);
@@ -250,7 +238,29 @@ int UnpackRequest(const cJSON *msg, AppInfo *appInfo)
     (void)memset_s(sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
     if (len != SESSION_KEY_LENGTH) {
         TRANS_LOGE(TRANS_CTRL, "Failed to decode sessionKey ret=%{public}d, len=%{public}zu", ret, len);
+        return SOFTBUS_PARSE_JSON_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t UnpackRequest(const cJSON *msg, AppInfo *appInfo)
+{
+    if (msg == NULL || appInfo == NULL) {
+        TRANS_LOGW(TRANS_CTRL, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (UnpackFirstData(appInfo, msg) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "unpack first data failed");
         return SOFTBUS_ERR;
+    }
+
+    int32_t apiVersion = API_V1;
+    (void)GetJsonObjectNumberItem(msg, API_VERSION, &apiVersion);
+    appInfo->peerData.apiVersion = (ApiVersion)apiVersion;
+    if (ParseMessageToAppInfo(msg, appInfo) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "fill appInfo failed.");
+        SoftBusFree((void *)appInfo->fastTransData);
+        return SOFTBUS_PARSE_JSON_ERR;
     }
     if (apiVersion == API_V1) {
         return SOFTBUS_OK;
@@ -260,7 +270,8 @@ int UnpackRequest(const cJSON *msg, AppInfo *appInfo)
         !GetJsonObjectStringItem(msg, CLIENT_BUS_NAME, (appInfo->peerData.sessionName), SESSION_NAME_SIZE_MAX) ||
         !GetJsonObjectStringItem(msg, AUTH_STATE, (appInfo->peerData.authState), AUTH_STATE_SIZE_MAX)) {
         TRANS_LOGE(TRANS_CTRL, "Failed to get pkgName");
-        return SOFTBUS_ERR;
+        SoftBusFree((void *)appInfo->fastTransData);
+        return SOFTBUS_PARSE_JSON_ERR;
     }
     int32_t routeType = WIFI_STA;
     if (GetJsonObjectNumberItem(msg, MSG_ROUTE_TYPE, &routeType) != SOFTBUS_OK) {
@@ -268,11 +279,11 @@ int UnpackRequest(const cJSON *msg, AppInfo *appInfo)
     }
     appInfo->routeType = (RouteType)routeType;
 
-    if (!GetJsonObjectNumberItem(msg, BUSINESS_TYPE, (int*)&appInfo->businessType)) {
+    if (!GetJsonObjectNumberItem(msg, BUSINESS_TYPE, (int32_t *)&appInfo->businessType)) {
         appInfo->businessType = BUSINESS_TYPE_NOT_CARE;
     }
-    int transFlag = TRANS_FLAG_HAS_CHANNEL_AUTH;
-    (void)GetJsonObjectNumberItem(msg, AUTO_CLOSE_TIME, (int*)&appInfo->autoCloseTime);
+    int32_t transFlag = TRANS_FLAG_HAS_CHANNEL_AUTH;
+    (void)GetJsonObjectNumberItem(msg, AUTO_CLOSE_TIME, (int32_t *)&appInfo->autoCloseTime);
     (void)GetJsonObjectNumberItem(msg, TRANS_FLAGS, &transFlag);
 
     return SOFTBUS_OK;
