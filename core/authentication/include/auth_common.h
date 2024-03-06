@@ -45,6 +45,8 @@ typedef enum {
     DATA_TYPE_CLOSE_ACK = 0xFFFF0005,
     /* data type for meta negotiation */
     DATA_TYPE_META_NEGOTIATION = 0xFFFF0006,
+    /* data type for decrypt fail */
+    DATA_TYPE_DECRYPT_FAIL = 0xFFFF0007,
 } AuthDataType;
 
 #define CLIENT_SIDE_FLAG 0
