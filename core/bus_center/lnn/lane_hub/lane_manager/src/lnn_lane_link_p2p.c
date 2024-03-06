@@ -938,8 +938,8 @@ static void OnAuthTriggerConnOpened(uint32_t authRequestId, int64_t authId)
     struct DefaultNegotiateChannel channel;
     DefaultNegotiateChannelConstructor(&channel, authId);
     wifiDirectInfo.negoChannel = (struct WifiDirectNegotiateChannel*)&channel;
-    if (GetAuthTriggerLinkReqParamByAuthId(authRequestId, wifiDirectInfo.requestId,
-            &wifiDirectInfo, authId) != SOFTBUS_OK) {
+    if (GetAuthTriggerLinkReqParamByAuthId(authRequestId, wifiDirectInfo.requestId, &wifiDirectInfo,
+        authId) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "set auth trigger link param fail");
         goto FAIL;
     }
