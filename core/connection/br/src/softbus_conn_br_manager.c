@@ -147,6 +147,7 @@ static void DfxRecordBrConnectSuccess(uint32_t pId, ConnBrConnection *connection
     SoftbusRecordConnResult(pId, SOFTBUS_HISYSEVT_CONN_TYPE_BR, SOFTBUS_EVT_CONN_SUCC, costTime,
                             SOFTBUS_HISYSEVT_CONN_OK);
     ConnEventExtra extra = {
+        .requestId = statistics->reqId,
         .connectionId = connection->connectionId,
         .peerBrMac = connection->addr,
         .linkType = CONNECT_BR,
@@ -372,13 +373,6 @@ static int32_t ConnectDeviceDirectly(ConnBrDevice *device, const char *anomizeAd
         if (status != SOFTBUS_OK) {
             break;
         }
-        ConnEventExtra extra = {
-            .connectionId = (int32_t)connection->connectionId,
-            .peerBrMac = connection->addr,
-            .linkType = CONNECT_BR,
-            .result = EVENT_STAGE_RESULT_OK
-        };
-        CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_DEVICE_DIRECTLY, extra);
         status = ConnBrConnect(connection);
         if (status != SOFTBUS_OK) {
             break;
@@ -389,6 +383,14 @@ static int32_t ConnectDeviceDirectly(ConnBrDevice *device, const char *anomizeAd
         TransitionToState(BR_STATE_CONNECTING);
     } while (false);
 
+    ConnEventExtra extra = {
+        .connectionId = (int32_t)connection->connectionId,
+        .peerBrMac = connection->addr,
+        .linkType = CONNECT_BR,
+        .errcode = status,
+        .result = status == SOFTBUS_OK ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED
+    };
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_DEVICE_DIRECTLY, extra);
     if (status != SOFTBUS_OK) {
         ConnBrRemoveConnection(connection);
         SoftBusFree(address);
