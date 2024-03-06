@@ -138,7 +138,7 @@ void DiscAccountTest::SetUpTestCase(void)
     if (scanf_s("%d", &g_testWay, sizeof(g_testWay)) < 0) {
         printf("input error!\n");
     }
-    getchar();
+    (void)getchar();
     if (g_testWay == PUBLISHSERVICE_WAY) {
         return;
     }
@@ -150,7 +150,7 @@ void DiscAccountTest::SetUpTestCase(void)
     if (scanf_s("%d", &g_accountWay, sizeof(g_accountWay)) < 0) {
         printf("input error!\n");
     }
-    getchar();
+    (void)getchar();
     if (g_accountWay == SAMEACCOUNT_TRUE) {
         g_sInfo.isSameAccount = true;
         return;

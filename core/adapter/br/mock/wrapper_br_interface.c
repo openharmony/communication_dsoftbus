@@ -83,7 +83,7 @@ static int32_t ConnectByPort(const char *uuid, const BT_ADDR mac, const int sock
 
 static int32_t Connect(const char *uuid, const BT_ADDR mac, void *connectCallback)
 {
-    return ConnectByPort(uuid, mac, -1 ,connectCallback);
+    return ConnectByPort(uuid, mac, -1, connectCallback);
 }
 
 static int32_t DisConnect(int32_t clientFd)
