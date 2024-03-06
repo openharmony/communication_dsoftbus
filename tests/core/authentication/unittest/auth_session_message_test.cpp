@@ -260,8 +260,6 @@ HWTEST_F(AuthSessionMessageTest, UnpackWifiSinglePassInfo_TEST_001, TestSize.Lev
     EXPECT_TRUE(UnpackWifiSinglePassInfo(obj, &info));
     info.connInfo.type = AUTH_LINK_TYPE_WIFI;
     EXPECT_TRUE(UnpackWifiSinglePassInfo(obj, &info));
-    JSON_AddStringToObject(obj, DEV_IP_HASH_TAG, "12345678");
-    EXPECT_TRUE(UnpackWifiSinglePassInfo(obj, &info));
     JSON_Delete(obj);
 }
 

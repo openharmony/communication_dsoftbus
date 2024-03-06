@@ -79,7 +79,7 @@ ohos_unittest("AuthEnhanceMockTest") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
   sources = [
     "$dsoftbus_root_path/core/adapter/authentication/src/lnn_extdata_config_virtual.c",
