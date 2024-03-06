@@ -71,7 +71,7 @@ enum {
 
 char *PackRequest(const AppInfo *appInfo);
 
-int UnpackRequest(const cJSON *msg, AppInfo *appInfo);
+int32_t UnpackRequest(const cJSON *msg, AppInfo *appInfo);
 
 char *PackReply(const AppInfo *appInfo);
 
