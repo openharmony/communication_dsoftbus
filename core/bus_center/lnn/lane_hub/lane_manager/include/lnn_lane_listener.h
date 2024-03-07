@@ -23,7 +23,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif  
+#endif
 
 typedef struct {
     ListNode node;
@@ -54,19 +54,14 @@ typedef struct {
 typedef struct {
     ListNode node;
     LaneStatusListener laneStatusListen;
-    LaneType type; 
+    LaneType type;
 } LaneListenerInfo;
 
 int32_t UnRegisterLaneListener(const LaneType type);
-int32_t registerLaneListener(const LaneType type, const LaneStatusListener *listener);
-
-int32_t FindLaneListenerInfoByLaneType(const LaneType type, LaneListenerInfo *outLaneListener);
+int32_t RegisterLaneListener(const LaneType type, const LaneStatusListener *listener);
 int32_t CreateLaneTypeInfoByLaneId(const uint32_t laneId, const LaneLinkInfo *linkInfo);
 int32_t DelLaneTypeInfoItem(const char *peerIp);
-int32_t FindLaneTypeInfoByPeerIp(const char *peerIp, LaneTypeInfo *laneTypeInfo);
 int32_t InitLaneListener(void);
-void LnnReqLinkListener(void);
-int32_t UpdateLaneStatusNotifyState(const char *peerIp, const char *peerUuid, const bool state);
 int32_t LnnOnWifiDirectDeviceOnLineNotify(const char *peerIp, const LaneLinkType linkType);
 
 #ifdef __cplusplus
