@@ -44,6 +44,8 @@ int32_t TransRequestQos(int32_t channelId, int32_t chanType, int32_t appType, in
 
 int32_t TransNotifyAuthSuccess(int32_t channelId, int32_t channelType);
 
+int32_t TransReleaseUdpResources(int32_t channelId);
+
 int32_t TransCloseChannel(int32_t channelId, int32_t channelType);
 
 int32_t TransSendMsg(int32_t channelId, int32_t channelType, const void *data, uint32_t len, int32_t msgType);

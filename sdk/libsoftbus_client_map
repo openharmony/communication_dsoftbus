@@ -291,6 +291,7 @@
         "ClientTransProxyOnChannelClosed";
         "ClientTransTdcOnSessionClosed";
         "TransTdcStopRead";
+        "ServerIpcReleaseResources";
         "ServerIpcCloseChannel";
         "DiscClientOnDiscoverFailed";
         "SendBytesInner";

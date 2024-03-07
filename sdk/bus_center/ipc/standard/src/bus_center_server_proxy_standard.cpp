@@ -132,6 +132,12 @@ int32_t BusCenterServerProxy::NotifyAuthSuccess(int32_t channelId, int32_t chann
     return SOFTBUS_OK;
 }
 
+int32_t BusCenterServerProxy::ReleaseResources(int32_t channelId)
+{
+    (void)channelId;
+    return SOFTBUS_OK;
+}
+
 int32_t BusCenterServerProxy::CloseChannel(int32_t channelId, int32_t channelType)
 {
     (void)channelId;
