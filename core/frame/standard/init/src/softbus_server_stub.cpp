@@ -153,6 +153,7 @@ void SoftBusServerStub::InitMemberFuncMap()
     memberFuncMap_[MANAGE_REGISTER_SERVICE] = &SoftBusServerStub::SoftbusRegisterServiceInner;
     memberFuncMap_[SERVER_CREATE_SESSION_SERVER] = &SoftBusServerStub::CreateSessionServerInner;
     memberFuncMap_[SERVER_REMOVE_SESSION_SERVER] = &SoftBusServerStub::RemoveSessionServerInner;
+    memberFuncMap_[SERVER_RELEASE_RESOURCES] = &SoftBusServerStub::ReleaseResourcesInner;
     memberFuncMap_[SERVER_OPEN_SESSION] = &SoftBusServerStub::OpenSessionInner;
     memberFuncMap_[SERVER_OPEN_AUTH_SESSION] = &SoftBusServerStub::OpenAuthSessionInner;
     memberFuncMap_[SERVER_NOTIFY_AUTH_SUCCESS] = &SoftBusServerStub::NotifyAuthSuccessInner;
@@ -193,6 +194,7 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[MANAGE_REGISTER_SERVICE] = nullptr;
     memberPermissionMap_[SERVER_CREATE_SESSION_SERVER] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_REMOVE_SESSION_SERVER] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_RELEASE_RESOURCES] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_OPEN_SESSION] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_OPEN_AUTH_SESSION] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_NOTIFY_AUTH_SUCCESS] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
@@ -731,6 +733,22 @@ int32_t SoftBusServerStub::NotifyAuthSuccessInner(MessageParcel &data, MessagePa
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "NotifyAuthSuccessInner write reply failed!");
         return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::ReleaseResourcesInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t channelId;
+    if (!data.ReadInt32(channelId)) {
+        COMM_LOGE(COMM_SVC, "failed to read channel Id");
+        return SOFTBUS_IPC_ERR;
+    }
+
+    int32_t retReply = ReleaseResources(channelId);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "failed to write reply failed");
+        return SOFTBUS_IPC_ERR;
     }
     return SOFTBUS_OK;
 }

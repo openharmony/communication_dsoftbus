@@ -166,6 +166,38 @@ int32_t TransServerProxy::RemoveSessionServer(const char *pkgName, const char *s
     return serverRet;
 }
 
+int32_t TransServerProxy::ReleaseResources(int32_t channelId)
+{
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        TRANS_LOGD(TRANS_SDK, "remote is nullptr!");
+        return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TRANS_LOGE(TRANS_SDK, "failed to write InterfaceToken");
+        return SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED;
+    }
+    if (!data.WriteInt32(channelId)) {
+        TRANS_LOGE(TRANS_SDK, "failed to write channelId");
+        return SOFTBUS_IPC_ERR;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(SERVER_RELEASE_RESOURCES, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "failed to send request ret=%{public}d", ret);
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t serverRet = 0;
+    if (!reply.ReadInt32(serverRet)) {
+        TRANS_LOGE(TRANS_SDK, "failed to read serverRet failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static bool TransWriteSessionAttrs(const SessionAttribute *attrs, MessageParcel &data)
 {
     if (attrs == nullptr) {
