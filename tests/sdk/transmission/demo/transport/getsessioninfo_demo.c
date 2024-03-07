@@ -72,7 +72,7 @@ static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
 
 // Notify that the stream data is received.
 static void OnStreamReceived(int sessionId, const StreamData *data, const StreamData *ext,
-            const StreamFrameInfo *param)
+    const StreamFrameInfo *param)
 {
     printf("session stream received, session id = %d\r\n", sessionId);
 }

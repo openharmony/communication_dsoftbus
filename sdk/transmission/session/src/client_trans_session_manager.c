@@ -1021,7 +1021,7 @@ int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sess
                 *sessionId = sessionNode->sessionId;
                 if (channel->channelType == CHANNEL_TYPE_AUTH || !sessionNode->isEncrypt) {
                     if (memcpy_s(sessionNode->info.peerDeviceId, DEVICE_ID_SIZE_MAX,
-                            channel->peerDeviceId, DEVICE_ID_SIZE_MAX) != EOK) {
+                        channel->peerDeviceId, DEVICE_ID_SIZE_MAX) != EOK) {
                         (void)SoftBusMutexUnlock(&g_clientSessionServerList->lock);
                         return SOFTBUS_MEM_ERR;
                     }

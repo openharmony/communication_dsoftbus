@@ -27,7 +27,7 @@ namespace SoftBus {
 class RawStreamData : public IStream {
 public:
     RawStreamData() = default;
-    virtual ~RawStreamData() override = default;
+    ~RawStreamData() override = default;
     static constexpr int BYTE_TO_BIT = 8;
     static constexpr int INT_TO_BYTE = 0xff;
     static constexpr int FRAME_HEADER_LEN = 4;
