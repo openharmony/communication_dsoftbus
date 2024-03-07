@@ -634,6 +634,22 @@ static void ClientConnected(uint32_t connectionId)
     ConnBrReturnConnection(&connection);
 }
 
+static void ProcessConnectError(ConnBrDevice *connectingDevice, ConnBrConnection *connection, int32_t error)
+{
+    int32_t result = 0;
+    BrUnderlayerStatus *it = NULL;
+    LIST_FOR_EACH_ENTRY(it, &connection->connectProcessStatus->list, BrUnderlayerStatus, node) {
+        // to Find the last error result.
+        if ((it->result) != 0) {
+            result = it->result;
+        }
+    }
+    if (result != 0) {
+        error = -(-SOFTBUS_CONN_BR_UNDERLAY_BASE_ERR + result);
+    }
+    NotifyDeviceConnectResult(connectingDevice, NULL, false, error);
+}
+
 static void ClientConnectFailed(uint32_t connectionId, int32_t error)
 {
     ConnBrConnection *connection = ConnBrGetConnectionById(connectionId);
@@ -696,7 +712,7 @@ static void ClientConnectFailed(uint32_t connectionId, int32_t error)
             ProcessAclCollisionException(connectingDevice, anomizeAddress);
             break;
         }
-        NotifyDeviceConnectResult(connectingDevice, NULL, false, error);
+        ProcessConnectError(connectingDevice, connection, error);
     } while (false);
     ConnBrRemoveConnection(connection);
     ConnBrReturnConnection(&connection);
