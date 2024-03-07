@@ -341,26 +341,18 @@ int32_t InitLaneListener(void)
 
 static int32_t GetLaneResourceByPeerIp(const char *peerIp, LaneResource *laneResourceItem)
 {
-    LaneLinkInfo linkInfo;
-    linkInfo.type = LANE_P2P;
-    if (strncpy_s(linkInfo.linkInfo.p2p.connInfo.peerIp, IP_LEN, peerIp, IP_LEN) != EOK) {
-        LNN_LOGE(LNN_STATE, "copy peerIp fail");
+    if (peerIp == NULL || laneResourceItem == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
         return SOFTBUS_ERR;
     }
-    char *anonyIp = NULL;
-    int32_t ret = FindLaneResourceByLinkInfo(&linkInfo, laneResourceItem);
-    if (ret == SOFTBUS_OK) {
-        return ret;
+    if (FindLaneResourceByPeerIp(peerIp, laneResourceItem) != SOFTBUS_OK) {
+        char *anonyIp = NULL;
+        Anonymize(peerIp, &anonyIp);
+        LNN_LOGE(LNN_STATE, "find lane resource fail, peerIp=%{public}s", anonyIp);
+        AnonymizeFree(anonyIp);
+        return SOFTBUS_ERR;
     }
-    linkInfo.type = LANE_HML;
-    ret = FindLaneResourceByLinkInfo(&linkInfo, laneResourceItem);
-    if (ret == SOFTBUS_OK) {
-        return ret;
-    }
-    Anonymize(peerIp, &anonyIp);
-    LNN_LOGE(LNN_STATE, "find lane resource fail, peerIp=%{public}s, ret=%{public}d", anonyIp, ret);
-    AnonymizeFree(anonyIp);
-    return SOFTBUS_ERR;
+    return SOFTBUS_OK;
 }
 
 static void LnnOnWifiDirectDeviceOffLine(const char *peerMac, const char *peerIp, const char *peerUuid)
