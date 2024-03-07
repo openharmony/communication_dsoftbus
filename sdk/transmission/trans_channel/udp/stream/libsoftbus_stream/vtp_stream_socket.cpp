@@ -26,13 +26,13 @@
 
 #include "fillpinc.h"
 #include "raw_stream_data.h"
-#include "stream_common_data.h"
 #include "session.h"
-#include "softbus_adapter_timer.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_socket.h"
+#include "softbus_adapter_timer.h"
 #include "softbus_errcode.h"
 #include "softbus_trans_def.h"
+#include "stream_common_data.h"
 #include "stream_depacketizer.h"
 #include "stream_packetizer.h"
 
@@ -888,8 +888,7 @@ bool VtpStreamSocket::Accept()
         remoteIpPort_.port = v6Addr->sin6_port;
     }
 
-    TRANS_LOGD(TRANS_STREAM,
-        "Accept a client remotePort=%{public}d", remoteIpPort_.port);
+    TRANS_LOGD(TRANS_STREAM, "Accept a client remotePort=%{public}d", remoteIpPort_.port);
 
     if (SetSocketEpollMode(fd) != ERR_OK) {
         TRANS_LOGE(TRANS_STREAM, "SetSocketEpollMode failed, fd=%{public}d", fd);

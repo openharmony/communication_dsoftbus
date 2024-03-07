@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,14 +15,21 @@
 
 #include "trans_server_proxy_standard.h"
 
+#include "anonymizer.h"
 #include "ipc_skeleton.h"
 #include "ipc_types.h"
-
-#include "anonymizer.h"
 #include "message_parcel.h"
 #include "softbus_errcode.h"
 #include "softbus_server_ipc_interface_code.h"
 #include "trans_log.h"
+
+#define WRITE_PARCEL_WITH_RET(parcel, type, data, retval)                              \
+    do {                                                                               \
+        if (!(parcel).Write##type(data)) {                                             \
+            TRANS_LOGE(TRANS_SDK, "write data failed.");                               \
+            return (retval);                                                           \
+        }                                                                              \
+    } while (false)
 
 namespace OHOS {
 static uint32_t g_getSystemAbilityId = 2;
@@ -257,23 +264,10 @@ int32_t TransServerProxy::OpenSession(const SessionParam *param, TransInfo *info
         TRANS_LOGE(TRANS_SDK, "OpenSession write InterfaceToken failed!");
         return SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED;
     }
-    if (!data.WriteCString(param->sessionName)) {
-        TRANS_LOGE(TRANS_SDK, "OpenSession write my session name failed!");
-        return SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED;
-    }
-    if (!data.WriteCString(param->peerSessionName)) {
-        TRANS_LOGE(TRANS_SDK, "OpenSession write peer session name failed!");
-        return SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED;
-    }
-    if (!data.WriteCString(param->peerDeviceId)) {
-        TRANS_LOGE(TRANS_SDK, "OpenSession write addr type length failed!");
-        return SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED;
-    }
-    if (!data.WriteCString(param->groupId)) {
-        TRANS_LOGE(TRANS_SDK, "OpenSession write addr type length failed!");
-        return SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED;
-    }
-
+    WRITE_PARCEL_WITH_RET(data, CString, param->sessionName, SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
+    WRITE_PARCEL_WITH_RET(data, CString, param->peerSessionName, SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
+    WRITE_PARCEL_WITH_RET(data, CString, param->peerDeviceId, SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
+    WRITE_PARCEL_WITH_RET(data, CString, param->groupId, SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
     if (!TransWriteSessionAttrs(param->attr, data)) {
         TRANS_LOGE(TRANS_SDK, "OpenSession write attr failed!");
         return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;

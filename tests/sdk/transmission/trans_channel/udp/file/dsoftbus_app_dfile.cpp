@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,8 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <functional>
+#include <map>
 #include <unistd.h>
 
 #include "securec.h"
@@ -29,9 +31,9 @@
 #define LOG2_ERR(fmt, ...)  printf("ERROR:%s:%d " fmt "\n", __FUNCTION__, __LINE__, ##__VA_ARGS__)
 
 namespace {
-const int NETWORK_ID_LEN = 65;
-const int ARG_NUM = 2;
-const int FILE_NUM = 4;
+const int32_t NETWORK_ID_LEN = 65;
+const int32_t ARG_NUM = 2;
+const int32_t FILE_NUM = 4;
 
 const char *g_testModuleName   = "com.huawei.plrdtest.dsoftbus";
 const char *g_testSessionName  = "com.huawei.plrdtest.dsoftbus.JtOnOpenFileSession";
@@ -108,7 +110,7 @@ static INodeStateCb g_nodeStateCallback = {
     .onNodeOffline = OnNodeOffline,
 };
 
-static int OnSessionOpened(int sessionId, int result)
+static int32_t OnSessionOpened(int32_t sessionId, int32_t result)
 {
     LOG2_INFO("############# session opened,sesison id[%d] result[%d]", sessionId, result);
     if (result == SOFTBUS_OK) {
@@ -119,18 +121,18 @@ static int OnSessionOpened(int sessionId, int result)
     return result;
 }
 
-static void OnSessionClosed(int sessionId)
+static void OnSessionClosed(int32_t sessionId)
 {
     LOG2_INFO("session closed, session id = %d", sessionId);
     TestChangeDebugState(TRANS_STATE_REMOVE_SESSION_SERVER);
 }
 
-static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
+static void OnBytesReceived(int32_t sessionId, const void *data, uint32_t len)
 {
     LOG2_INFO("session bytes received, sessionid[%d], dataLen[%u]", sessionId, len);
 }
 
-static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
+static void OnMessageReceived(int32_t sessionId, const void *data, uint32_t len)
 {
     LOG2_INFO("session msg received, sessionid[%d], dataLen[%u]", sessionId, len);
 }
@@ -145,21 +147,21 @@ static void TestSessionListenerInit(void)
     g_sessionAttr.dataType = TYPE_FILE;
 }
 
-static int OnSendFileProcess(int sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
+static int32_t OnSendFileProcess(int32_t sessionId, uint64_t bytesUpload, uint64_t bytesTotal)
 {
     LOG2_INFO("OnSendFileProcess sessionId = %d, bytesUpload = %" PRIu64 ", total = %" PRIu64 "\n",
         sessionId, bytesUpload, bytesTotal);
-    return 0;
+    return SOFTBUS_OK;
 }
 
-static int OnSendFileFinished(int sessionId, const char *firstFile)
+static int32_t OnSendFileFinished(int32_t sessionId, const char *firstFile)
 {
     LOG2_INFO("OnSendFileFinished sessionId = %d, first file = %s\n", sessionId, firstFile);
     TestChangeDebugState(TRANS_STATE_CLOSE);
-    return 0;
+    return SOFTBUS_OK;
 }
 
-static void OnFileTransError(int sessionId)
+static void OnFileTransError(int32_t sessionId)
 {
     LOG2_INFO("OnFileTransError sessionId = %d\n", sessionId);
 }
@@ -173,11 +175,11 @@ static IFileSendListener g_fileSendListener = {
 static void TestSetFileSendListener(void)
 {
     LOG2_INFO("*******************SET FILE SEND LISTENER*************");
-    int ret = SetFileSendListener(g_testModuleName, g_testSessionName, &g_fileSendListener);
+    int32_t ret = SetFileSendListener(g_testModuleName, g_testSessionName, &g_fileSendListener);
     LOG2_INFO("SetFileSendListener ret = %d\n", ret);
 }
 
-static int TestSendFile(int sessionId)
+static int32_t TestSendFile(int32_t sessionId)
 {
     const char *sfileList[] = {
         "/data/big.tar",
@@ -185,77 +187,94 @@ static int TestSendFile(int sessionId)
         "/data/richu-002.jpg",
         "/data/richu-003.jpg",
     };
-    int ret = SendFile(sessionId, sfileList, nullptr, FILE_NUM);
+    int32_t ret = SendFile(sessionId, sfileList, nullptr, FILE_NUM);
     LOG2_INFO("SendFile ret = %d\n", ret);
     return ret;
 }
 
-static void TestActiveSendFile(int state)
+static void TransStateCenterSessionServer(void)
 {
-    switch (state) {
-        case TRANS_STATE_CREATE_SESSION_SERVER: {
-            int ret = CreateSessionServer(g_testModuleName, g_testSessionName, &g_sessionlistener);
-            LOG2_INFO("CreateSessionServer ret: %d ", ret);
-            if (ret != -986 && ret != SOFTBUS_OK) { // -986: SOFTBUS_SERVER_NAME_REPEATED
-                LOG2_ERR("CreateSessionServer ret: %d ", ret);
-                return;
-            }
-            TestSetFileSendListener();
-            TestChangeDebugState(TRANS_STATE_OPEN);
-            break;
-        }
-        case TRANS_STATE_OPEN: {
-            g_sessionId = OpenSession(g_testSessionName, g_testSessionName, g_networkId, g_testGroupId, &g_sessionAttr);
-            if (g_sessionId < 0) {
-                LOG2_ERR("OpenSession ret[%d]", g_sessionId);
-                return;
-            }
-            break;
-        }
-        case TRANS_STATE_SEND_FILE: {
-            TestSendFile(g_sessionId);
-            TestChangeDebugState(TRANS_TEST_FIN);
-            break;
-        }
-        case TRANS_STATE_CLOSE: {
-            CloseSession(g_sessionId);
-            g_sessionId = -1;
-            TestChangeDebugState(TRANS_STATE_REMOVE_SESSION_SERVER);
-            break;
-        }
-        case TRANS_STATE_REMOVE_SESSION_SERVER: {
-            int ret = RemoveSessionServer(g_testModuleName, g_testSessionName);
-            if (ret != SOFTBUS_OK) {
-                LOG2_ERR("RemoveSessionServer failed, ret %d ", ret);
-                return;
-            }
-            LOG2_INFO("RemoveSessionServer success, ret %d ", ret);
-            TestChangeDebugState(LNN_STATE_LEAVELNN);
-            break;
-        }
-        case LNN_STATE_LEAVELNN: {
-            LeaveLNN(g_testModuleName, g_networkId, OnLeaveLNNDone);
-            TestChangeDebugState(-1);
-            break;
-        }
-        default: {
-        }
+    int32_t ret = CreateSessionServer(g_testModuleName, g_testSessionName, &g_sessionlistener);
+    LOG2_INFO("CreateSessionServer ret: %d", ret);
+    if (ret != SOFTBUS_SERVER_NAME_REPEATED && ret != SOFTBUS_OK) {
+        LOG2_ERR("CreateSessionServer ret: %d", ret);
+        return;
+    }
+    TestSetFileSendListener();
+    TestChangeDebugState(TRANS_STATE_OPEN);
+}
+
+static void TransStateOpen(void)
+{
+    g_sessionId = OpenSession(g_testSessionName, g_testSessionName, g_networkId, g_testGroupId, &g_sessionAttr);
+    if (g_sessionId < 0) {
+        LOG2_ERR("OpenSession ret[%d]", g_sessionId);
+        return;
     }
 }
 
-static int OnSessionOpenRecvFile(int sessionId, int result)
+static void TransStateSendFile(void)
+{
+    TestSendFile(g_sessionId);
+    TestChangeDebugState(TRANS_TEST_FIN);
+}
+
+static void TransStateClose(void)
+{
+    CloseSession(g_sessionId);
+    g_sessionId = -1;
+    TestChangeDebugState(TRANS_STATE_REMOVE_SESSION_SERVER);
+}
+
+static void TransStateRemoveSessionServer(void)
+{
+    int32_t ret = RemoveSessionServer(g_testModuleName, g_testSessionName);
+    if (ret != SOFTBUS_OK) {
+        LOG2_ERR("RemoveSessionServer failed, ret: %d", ret);
+        return;
+    }
+    LOG2_INFO("RemoveSessionServer success, ret: %d", ret);
+    TestChangeDebugState(LNN_STATE_LEAVELNN);
+}
+
+static void LNNLeaveState(void)
+{
+    LeaveLNN(g_testModuleName, g_networkId, OnLeaveLNNDone);
+    TestChangeDebugState(-1);
+}
+
+static void TestActiveSendFile(int32_t state)
+{
+    std::map<int32_t, std::function<void()>> options = {
+        { TRANS_STATE_CREATE_SESSION_SERVER, TransStateCenterSessionServer },
+        { TRANS_STATE_OPEN, TransStateOpen },
+        { TRANS_STATE_SEND_FILE, TransStateSendFile },
+        { TRANS_STATE_CLOSE, TransStateClose },
+        { TRANS_STATE_REMOVE_SESSION_SERVER, TransStateRemoveSessionServer },
+        { LNN_STATE_LEAVELNN, LNNLeaveState }
+    };
+
+    auto it = options.find(state);
+    if (it != options.end()) {
+        it->second();
+    } else {
+        LOG2_INFO("default: Invalid option");
+    }
+}
+
+static int32_t OnSessionOpenRecvFile(int32_t sessionId, int32_t result)
 {
     LOG2_INFO("############# recv session opened,sesison id[%d] result[%d]", sessionId, result);
-    return 0;
+    return SOFTBUS_OK;
 }
 
-static int OnReceiveFileStarted(int sessionId, const char *files, int fileCnt)
+static int32_t OnReceiveFileStarted(int32_t sessionId, const char *files, int32_t fileCnt)
 {
     LOG2_INFO("File receive start sessionId = %d, first file = %s, fileCnt = %d\n", sessionId, files, fileCnt);
-    return 0;
+    return SOFTBUS_OK;
 }
 
-static void OnReceiveFileFinished(int sessionId, const char *files, int fileCnt)
+static void OnReceiveFileFinished(int32_t sessionId, const char *files, int32_t fileCnt)
 {
     LOG2_INFO("File receive finished sessionId = %d, first file = %s, fileCnt = %d\n", sessionId, files, fileCnt);
 }
@@ -268,20 +287,20 @@ static IFileReceiveListener g_fileRecvListener = {
 
 static void TestSetFileRecvListener()
 {
-    int ret = SetFileReceiveListener(g_testModuleName, g_testSessionNamE2, &g_fileRecvListener, "/data/");
+    int32_t ret = SetFileReceiveListener(g_testModuleName, g_testSessionNamE2, &g_fileRecvListener, "/data/");
     LOG2_INFO("SetFileRecvListener ret = %d\n", ret);
 }
 
-static void TestReceiveFile(int state)
+static void TestReceiveFile(int32_t state)
 {
-    int ret = 0;
+    int32_t ret = 0;
     switch (state) {
         case TRANS_STATE_CREATE_SESSION_SERVER: {
             g_sessionlistener.OnSessionOpened = OnSessionOpenRecvFile;
             ret = CreateSessionServer(g_testModuleName, g_testSessionNamE2, &g_sessionlistener);
-            LOG2_INFO("CreateSessionServer ret: %d ", ret);
-            if (ret != -986 && ret != SOFTBUS_OK) { // -986: SOFTBUS_SERVER_NAME_REPEATED
-                LOG2_ERR("CreateSessionServer ret: %d ", ret);
+            LOG2_INFO("CreateSessionServer ret: %d", ret);
+            if (ret != SOFTBUS_SERVER_NAME_REPEATED && ret != SOFTBUS_OK) {
+                LOG2_ERR("CreateSessionServer ret: %d", ret);
                 return;
             }
             TestSetFileRecvListener();
@@ -293,12 +312,12 @@ static void TestReceiveFile(int state)
     }
 }
 
-int main(int argc, char *argv[])
+int32_t main(int32_t argc, char *argv[])
 {
     if (argc == 1) {
         return -1;
     }
-    int testWay = 0;
+    int32_t testWay = 0;
     if (argc >= ARG_NUM) {
         testWay = atoi(argv[1]);
     }
