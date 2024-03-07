@@ -134,7 +134,7 @@ public:
 
         if (firstLevelHeader.type & TopMask::EXT_BUF_MASK) {
             constexpr uint32_t EXT_FILED_NUM = 4;
-            if (sizeof(uint16_t) * EXT_FILED_NUM > size) {
+            if (size < sizeof(uint16_t) * EXT_FILED_NUM) {
                 return;
             }
             TypeLength tl;

@@ -38,7 +38,7 @@ public:
         explicit StreamSocketListener(std::shared_ptr<IStreamManagerListener> streamListener)
             : listener_(streamListener) {}
         StreamSocketListener() = delete;
-        virtual ~StreamSocketListener() override= default;
+        ~StreamSocketListener() override= default;
         void OnStreamReceived(std::unique_ptr<IStream> stream) override
         {
             listener_->OnStreamReceived(std::move(stream));
