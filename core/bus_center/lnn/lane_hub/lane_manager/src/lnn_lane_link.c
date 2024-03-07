@@ -510,6 +510,35 @@ int32_t FindLaneResourceByLinkInfo(const LaneLinkInfo *linkInfoItem, LaneResourc
     return SOFTBUS_OK;
 }
 
+int32_t FindLaneResourceByPeerIp(const char *peerIp, LaneResource *laneResourceItem)
+{
+    if (peerIp == NULL || laneResourceItem == NULL) {
+        LNN_LOGE(LNN_LANE, "peerIp is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (LaneLock() != SOFTBUS_OK) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    LaneResource *item = NULL;
+    LaneResource *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResourceList, LaneResource, node) {
+        if ((item->type == LANE_P2P || item->type == LANE_HML) &&
+            strncmp(peerIp, item->linkInfo.p2p.connInfo.peerIp, IP_LEN) == 0) {
+            break;
+        }
+    }
+    if (item == NULL) {
+        LaneUnlock();
+        return SOFTBUS_ERR;
+    }
+    if (CreateResourceItem(item, laneResourceItem) != SOFTBUS_OK) {
+        LaneUnlock();
+        return SOFTBUS_ERR;
+    }
+    LaneUnlock();
+    return SOFTBUS_OK;
+}
+
 static int32_t LaneLinkOfBr(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
 {
     LaneLinkInfo linkInfo;
