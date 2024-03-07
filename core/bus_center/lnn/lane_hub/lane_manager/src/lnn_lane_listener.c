@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,7 +32,6 @@
 #include "softbus_errcode.h"
 #include "softbus_adapter_thread.h"
 
-
 static SoftBusMutex g_laneStateListenerMutex;
 static ListNode g_laneListenerList;
 static ListNode g_laneTypeInfoList;
@@ -57,7 +56,7 @@ static bool LaneTypeCheck(LaneType type)
             return true;
         }
     }
-    LNN_LOGE(LNN_LANE, "LaneType=%d not supported", type);
+    LNN_LOGE(LNN_LANE, "LaneType=%{public}d not supported", type);
     return false;
 }
 
