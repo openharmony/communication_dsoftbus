@@ -782,4 +782,76 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcFillDataConfigTest001, TestSiz
 
     SoftBusFree(appInfo);
 }
+
+/**
+ * @tc.name: IsMetaSessionTest001
+ * @tc.desc: Should return false when given invalid parameter.
+ * @tc.desc: Should return true when given valid parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, IsMetaSessionTest001, TestSize.Level1)
+{
+    const char *invalid = "test";
+    bool ret = IsMetaSession(invalid);
+    EXPECT_FALSE(ret);
+    const char *testSession = "testsession";
+    ret = IsMetaSession(testSession);
+    EXPECT_FALSE(ret);
+    const char *sessionName = "IShare";
+    ret = IsMetaSession(sessionName);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: TransTdcGetDataBufInfoByChannelId001
+ * @tc.desc: Should return SOFTBUS_ERR when given invalid parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcGetDataBufInfoByChannelIdTest001, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    int32_t fd = 1;
+    size_t len = 1;
+    int32_t ret = TransTdcGetDataBufInfoByChannelId(channelId, nullptr, &len);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    ret = TransTdcGetDataBufInfoByChannelId(channelId, &fd, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    ret = TransTdcGetDataBufInfoByChannelId(channelId, &fd, &len);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    DestroySoftBusList(g_tcpSrvDataList);
+    g_tcpSrvDataList = nullptr;
+    ret = TransTdcGetDataBufInfoByChannelId(channelId, &fd, &len);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+}
+
+/**
+ * @tc.name: TransTdcUpdateDataBufWInfo0014
+ * @tc.desc: Should return SOFTBUS_ERR when dataList is null.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcUpdateDataBufWInfo0014, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    int32_t ret;
+    string recvStr = "testrecvBuf";
+    int32_t recvLen = 10;
+    void *tmp = SoftBusCalloc(recvLen);
+    if (tmp == nullptr) {
+        return;
+    }
+
+    char *recvBuf = reinterpret_cast<char *>(tmp);
+    strcpy_s(recvBuf, recvLen, recvStr.c_str());
+    DestroySoftBusList(g_tcpSrvDataList);
+    g_tcpSrvDataList = nullptr;
+    ret = TransTdcUpdateDataBufWInfo(channelId, recvBuf, recvLen);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+
+    SoftBusFree(tmp);
+    tmp = nullptr;
+}
+
 }

@@ -620,4 +620,27 @@ HWTEST_F(TransProxyChannelTest, TransGetConnIdByChanIdTest001, TestSize.Level1)
     TestDelTestProxyChannel();
 }
 
+/**
+ * @tc.name: TransProxySendInnerMessageTest001
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given null channelInfo.
+ * @tc.desc: Should return SOFTBUS_TRANS_PROXY_PACKMSG_ERR when given invalid parameters.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProxyChannelTest, TransProxySendInnerMessageTest001, TestSize.Level1)
+{
+    ProxyChannelInfo info;
+    memset_s(&info, sizeof(ProxyChannelInfo), 0, sizeof(ProxyChannelInfo));
+    uint32_t payLoadLen = 12;
+    int32_t priority = 1;
+
+    int32_t ret = TransProxySendInnerMessage(nullptr, TEST_PAY_LOAD, payLoadLen, priority);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    info.myId = 1;
+    info.peerId = 1;
+    info.authId = 1;
+    ret = TransProxySendInnerMessage(&info, TEST_PAY_LOAD, payLoadLen, priority);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_PACKMSG_ERR, ret);
+}
+
 } // namespace OHOS
