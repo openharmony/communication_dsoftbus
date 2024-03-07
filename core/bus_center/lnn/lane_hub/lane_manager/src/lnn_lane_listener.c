@@ -450,7 +450,7 @@ static void LnnReqLinkListener(void)
     };
     struct WifiDirectManager *mgr = GetWifiDirectManager();
     if (mgr != NULL && mgr->registerStatusListener != NULL) {
-        mgr->registerStatusListener(&listener);
+        mgr->registerStatusListener(LNN_LANE_MODULE, &listener);
     }
 }
 
