@@ -664,7 +664,7 @@ static int32_t AddTarFileInfo(const char *tarFileName, FileListTask *fmFileList,
     fmFileList->tarFileInfo.tarData = NULL;
     fmFileList->tarFileInfo.writeOffset = 0;
     DFILE_LOGI(TAG, "tarLen: %llu, blockNum: %u, endLen: %llu", tarFilesTotalLen,
-         fmFileList->tarFileInfo.totalBlockNum, tarFilesTotalLen % standardBlockSize);
+        fmFileList->tarFileInfo.totalBlockNum, tarFilesTotalLen % standardBlockSize);
     fmFileList->tarFileInfo.fileName = realpath(tarFileName, NULL);
     if ((fmFileList->tarFileInfo.fileName == NULL) ||
         (!IsAccessiblePath(fmFileList->tarFileInfo.fileName, R_OK, S_IFREG))) {
