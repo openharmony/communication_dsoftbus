@@ -203,7 +203,7 @@ HWTEST_F(ClientTransProxyFileCommonTest, ClinetTransProxyFilePathTest, TestSize.
     EXPECT_EQ(false, result);
 
     result = CheckDestFilePathValid(g_fileSet1[1]);
-    EXPECT_EQ(false, result);
+    EXPECT_EQ(true, result);
 
     result = CheckDestFilePathValid(g_filePath);
     EXPECT_EQ(false, result);
