@@ -139,9 +139,9 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const C
     char *tmpName = NULL;
     Anonymize(sessionName, &tmpName);
     TRANS_LOGI(TRANS_SDK,
-        "TransOnSessionOpened: sessionName=%{public}s, flag=%{public}d, isServer=%{public}d, type=%{public}d, "
-        "crc=%{public}d",
-        tmpName, flag, channel->isServer, channel->routeType, channel->crc);
+        "TransOnSessionOpened: sessionName=%{public}s, channelId=%{public}d, channelType=%{public}d, flag=%{public}d,"
+        "isServer=%{public}d, type=%{public}d, crc=%{public}d",
+        tmpName, channel->channelId, channel->channelType, flag, channel->isServer, channel->routeType, channel->crc);
     AnonymizeFree(tmpName);
 
     SessionListenerAdapter sessionCallback;
