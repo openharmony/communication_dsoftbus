@@ -280,8 +280,8 @@ static void RetainOfflineCode(const NodeInfo *oldInfo, NodeInfo *newInfo)
         LNN_LOGE(LNN_LEDGER, "para error!");
         return;
     }
-    // 4 represents the number of destination bytes and source bytes.
-    if (memcpy_s(newInfo->offlineCode, 4, oldInfo->offlineCode, 4) != SOFTBUS_OK) {
+    if (memcpy_s(newInfo->offlineCode, OFFLINE_CODE_BYTE_SIZE,
+        oldInfo->offlineCode, OFFLINE_CODE_BYTE_SIZE) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "memcpy offlineCode error!");
         return;
     }
@@ -292,16 +292,20 @@ static int32_t ConvertNodeInfoToBasicInfo(const NodeInfo *info, NodeBasicInfo *b
         LNN_LOGE(LNN_LEDGER, "para error!");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (strncpy_s(basic->deviceName, DEVICE_NAME_BUF_LEN, info->deviceInfo.deviceName,
-        strlen(info->deviceInfo.deviceName)) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "strncpy_s name error!");
+    if (strcpy_s(basic->deviceName, DEVICE_NAME_BUF_LEN, info->deviceInfo.deviceName) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s name error!");
         return SOFTBUS_MEM_ERR;
     }
-    if (strncpy_s(basic->networkId, NETWORK_ID_BUF_LEN, info->networkId, strlen(info->networkId)) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "strncpy_s networkID error!");
+    if (strcpy_s(basic->networkId, NETWORK_ID_BUF_LEN, info->networkId) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s networkID error!");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (strcpy_s(basic->osVersion, OS_VERSION_BUF_LEN, info->deviceInfo.osVersion) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s osVersion error!");
         return SOFTBUS_MEM_ERR;
     }
     basic->deviceTypeId = info->deviceInfo.deviceTypeId;
+    basic->osType = info->deviceInfo.osType;
     return SOFTBUS_OK;
 }
 
@@ -1316,7 +1320,7 @@ static void MergeLnnInfo(const NodeInfo *oldInfo, NodeInfo *info)
         }
         if (oldInfo->authChannelId[i][AUTH_AS_CLIENT_SIDE] != 0 ||
             oldInfo->authChannelId[i][AUTH_AS_SERVER_SIDE] != 0 || info->authChannelId[i][AUTH_AS_CLIENT_SIDE] != 0 ||
-            info->authChannelId[i][AUTH_AS_SERVER_SIDE] != 0 ) {
+            info->authChannelId[i][AUTH_AS_SERVER_SIDE] != 0) {
             LNN_LOGD(LNN_LEDGER,
                 "Merge authChannelId. authChannelId:%{public}d|%{public}d->%{public}d|%{public}d, addrType=%{public}d",
                 oldInfo->authChannelId[i][AUTH_AS_CLIENT_SIDE], oldInfo->authChannelId[i][AUTH_AS_SERVER_SIDE],
@@ -1402,6 +1406,11 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo)
     }
     if (memcpy_s(oldInfo->accountHash, SHA_256_HASH_LEN, newInfo->accountHash, SHA_256_HASH_LEN) != EOK) {
         LNN_LOGE(LNN_LEDGER, "copy account hash failed");
+        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        return SOFTBUS_ERR;
+    }
+    if (memcpy_s(oldInfo->remotePtk, PTK_DEFAULT_LEN, newInfo->remotePtk, PTK_DEFAULT_LEN) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "copy ptk failed");
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_ERR;
     }
@@ -1608,7 +1617,7 @@ static void BleDirectlyOnlineProc(NodeInfo *info)
             LNN_LOGE(LNN_LEDGER, "strcpy_s networkId fail");
             return;
         }
-        if(LnnSaveRemoteDeviceInfo(&deviceInfo) != SOFTBUS_OK) {
+        if (LnnSaveRemoteDeviceInfo(&deviceInfo) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "save remote devInfo fail");
             return;
         }
@@ -1654,7 +1663,10 @@ static void GetNodeInfoDiscovery(NodeInfo *oldInfo, NodeInfo *info, NodeInfoAbil
         info->metaInfo = oldInfo->metaInfo;
     }
     if (oldInfo != NULL && LnnIsNodeOnline(oldInfo)) {
-        LNN_LOGI(LNN_LEDGER, "addOnlineNode find online node");
+        char *anonyUuid = NULL;
+        Anonymize(oldInfo->uuid, &anonyUuid);
+        LNN_LOGI(LNN_LEDGER, "addOnlineNode find online node, uuid=%{public}s", anonyUuid);
+        AnonymizeFree(anonyUuid);
         infoAbility->isOffline = false;
         infoAbility->isChanged = IsNetworkIdChanged(info, oldInfo);
         infoAbility->oldWifiFlag = LnnHasDiscoveryType(oldInfo, DISCOVERY_TYPE_WIFI);
@@ -1669,7 +1681,9 @@ static void GetNodeInfoDiscovery(NodeInfo *oldInfo, NodeInfo *info, NodeInfoAbil
             infoAbility->isNetworkChanged = true;
         } else {
             RetainOfflineCode(oldInfo, info);
-            LNN_LOGE(LNN_LEDGER, "flag error");
+            LNN_LOGE(LNN_LEDGER, "flag error, oldBleFlag=%{public}d, oldBrFlag=%{public}d, oldWifiFlag=%{public}d,"
+                "newWifiFlag=%{public}d, newBleBrFlag=%{public}d", infoAbility->oldBleFlag, infoAbility->oldBrFlag,
+                infoAbility->oldWifiFlag, infoAbility->newBleBrFlag, infoAbility->newBleBrFlag);
         }
         if ((infoAbility->oldBleFlag || infoAbility->oldBrFlag) && !infoAbility->oldWifiFlag &&
             infoAbility->newWifiFlag) {
@@ -1847,7 +1861,8 @@ static void NotifyMigrateDegrade(const char *udid)
 
 static ReportCategory ClearAuthChannelId(NodeInfo *info, ConnectionAddrType type, int32_t authId)
 {
-    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI) && LnnConvAddrTypeToDiscType(type) == DISCOVERY_TYPE_WIFI) {
+    if ((LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI) && LnnConvAddrTypeToDiscType(type) == DISCOVERY_TYPE_WIFI) ||
+        (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BLE) && LnnConvAddrTypeToDiscType(type) == DISCOVERY_TYPE_BLE)) {
         if (info->authChannelId[type][AUTH_AS_CLIENT_SIDE] == authId) {
             info->authChannelId[type][AUTH_AS_CLIENT_SIDE] = 0;
         }

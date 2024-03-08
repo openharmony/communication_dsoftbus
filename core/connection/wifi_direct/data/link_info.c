@@ -138,7 +138,7 @@ static bool Unmarshalling(struct LinkInfo *self, struct WifiDirectProtocol *prot
 
         switch (LinkInfoKeyProperties[key].type) {
             case INT:
-                self->putRawData(self, key, data, ALIGN_SIZE_4(size));
+                self->putRawData(self, key, data, size);
                 break;
             case BOOLEAN:
                 self->putBoolean(self, key, (bool)data[0]);
@@ -190,7 +190,7 @@ static size_t GetKeyFromKeyProperty(struct InfoContainerKeyProperty *keyProperty
 static bool UnmarshallingPrimary(struct LinkInfo *self, enum LinkInfoKey key,
                                  uint8_t *data, size_t size)
 {
-    self->putRawData(self, key, data, ALIGN_SIZE_4(size));
+    self->putRawData(self, key, data, size);
     return true;
 }
 

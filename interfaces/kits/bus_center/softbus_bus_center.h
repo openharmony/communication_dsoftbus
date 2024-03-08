@@ -148,6 +148,14 @@ extern "C" {
 #define MAX_META_NODE_NUM 3
 
 /**
+ * @brief Indicates the length of os version buffer, including the terminating null character <b>\0</b>.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+#define OS_VERSION_BUF_LEN 128
+
+/**
  * @brief Enumerates keys for an online device.
  * The key can be obtained via {@link GetNodeKeyInfo}.
  *
@@ -249,6 +257,8 @@ typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];    /**< Device network id */
     char deviceName[DEVICE_NAME_BUF_LEN];  /**< Device name */
     uint16_t deviceTypeId;                 /**< Device type id */
+    int32_t osType;                        /**< Os type */
+    char osVersion[OS_VERSION_BUF_LEN];    /**< Os version */
 } NodeBasicInfo;
 
 /**

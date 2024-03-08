@@ -337,7 +337,7 @@ HWTEST_F(AuthOtherTest, REMOVE_AUTH_MANAGER_BY_AUTH_ID_TEST_001, TestSize.Level1
     EXPECT_TRUE(ret != AUTH_INVALID_ID);
     connInfo.type = AUTH_LINK_TYPE_WIFI;
     (void)strcpy_s(connInfo.info.ipInfo.ip, IP_LEN, ip);
-    ret = GetActiveAuthIdByConnInfo(&connInfo);
+    ret = GetActiveAuthIdByConnInfo(&connInfo, false);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
     RemoveAuthManagerByAuthId(authSeq);
     RemoveAuthManagerByConnInfo(&connInfo, true);
@@ -835,7 +835,7 @@ HWTEST_F(AuthOtherTest, FSM_MSG_TYPE_TO_STR_TEST_001, TestSize.Level1)
     EXPECT_EQ(ret, str);
     type = FSM_MSG_RECV_DEVICE_ID;
     ret = FsmMsgTypeToStr(type);
-    const char *str1= "RECV_DEVICE_ID";
+    const char *str1 = "RECV_DEVICE_ID";
     EXPECT_EQ(ret, str1);
 }
 
@@ -915,7 +915,7 @@ HWTEST_F(AuthOtherTest, AUTH_DEVICE_GET_PREFER_CONN_INFO_TEST_001, TestSize.Leve
     ret = AuthDeviceGetPreferConnInfo(NULL, connInfo);
     connInfo->type = AUTH_LINK_TYPE_BLE;
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    SoftBusFree(connInfo); 
+    SoftBusFree(connInfo);
 }
 
 /*

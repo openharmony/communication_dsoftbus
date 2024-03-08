@@ -81,8 +81,8 @@ bool CheckDestFilePathValid(const char *destFile)
         return false;
     }
     int32_t len = (int32_t)(strlen(destFile));
-    if ((len == 0) || (len > MAX_FILE_PATH_NAME_LEN) || (destFile[0] == PATH_SEPARATOR)) {
-        TRANS_LOGE(TRANS_FILE, "destFile first char is '/'");
+    if ((len == 0) || (len > MAX_FILE_PATH_NAME_LEN)) {
+        TRANS_LOGE(TRANS_FILE, "destFile path len is invalid");
         return false;
     }
 

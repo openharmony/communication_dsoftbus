@@ -124,14 +124,14 @@ int32_t ConnGattClientUpdatePriority(ConnBleConnection *connection, ConnectBlePr
     return GetConnectionBleInterface()->ConnGattClientUpdatePriority(connection, priority);
 }
 
-int32_t ConnGattServerStartService(GattService *servce, GattServiceType serviceId)
+int32_t ConnGattServerStartService()
 {
-    return GetConnectionBleInterface()->ConnGattServerStartService(servce, serviceId);
+    return GetConnectionBleInterface()->ConnGattServerStartService();
 }
 
-int32_t ConnGattServerStopService(GattServiceType serviceId)
+int32_t ConnGattServerStopService()
 {
-    return GetConnectionBleInterface()->ConnGattServerStopService(serviceId);
+    return GetConnectionBleInterface()->ConnGattServerStopService();
 }
 
 int32_t ConnGattServerSend(ConnBleConnection *connection, const uint8_t *data, uint32_t dataLen, int32_t module)
@@ -150,15 +150,15 @@ int32_t ConnGattServerDisconnect(ConnBleConnection *connection)
 }
 
 int32_t ConnGattInitClientModule(
-    SoftBusLooper *looper, const ConnBleClientEventListener *listener, GattServiceType serviceId)
+    SoftBusLooper *looper, const ConnBleClientEventListener *listener)
 {
-    return GetConnectionBleInterface()->ConnGattInitClientModule(looper, listener, serviceId);
+    return GetConnectionBleInterface()->ConnGattInitClientModule(looper, listener);
 }
 
 int32_t ConnGattInitServerModule(
-    SoftBusLooper *looper, const ConnBleServerEventListener *listener, GattServiceType serviceId)
+    SoftBusLooper *looper, const ConnBleServerEventListener *listener)
 {
-    return GetConnectionBleInterface()->ConnGattInitServerModule(looper, listener, serviceId);
+    return GetConnectionBleInterface()->ConnGattInitServerModule(looper, listener);
 }
 }
 } // namespace OHOS

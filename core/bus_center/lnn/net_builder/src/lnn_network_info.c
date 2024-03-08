@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "anonymizer.h"
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "lnn_async_callback_utils.h"
@@ -53,7 +54,7 @@ static uint32_t ConvertMsgToCapability(uint32_t *capability, const uint8_t *msg,
         return SOFTBUS_ERR;
     }
     for (uint32_t i = 0; i < BITLEN; i++) {
-        *capability = *capability | (*(msg + i) << BITS*i);
+        *capability = *capability | (*(msg + i) << (BITS * i));
     }
     return SOFTBUS_OK;
 }
@@ -116,7 +117,10 @@ static void OnReceiveCapaSyncInfoMsg(LnnSyncInfoType type, const char *networkId
         LNN_LOGE(LNN_BUILDER, "convert msg to capability fail");
         return;
     }
-    LNN_LOGI(LNN_BUILDER, "capability=%{public}d", capability);
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
+    LNN_LOGI(LNN_BUILDER, "capability=%{public}d, networkId=%{public}s", capability, anonyNetworkId);
+    AnonymizeFree(anonyNetworkId);
     // update ledger
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));

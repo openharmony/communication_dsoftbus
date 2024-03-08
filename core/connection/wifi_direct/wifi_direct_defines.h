@@ -29,7 +29,7 @@
 #define WIFI_CFG_INFO_MAX_LEN 512
 
 #define CHANNEL_ARRAY_NUM_MAX 256
-#define INTERFACE_NUM_MAX 10
+#define IP_NUM_MAX 32
 #define IF_NAME_WLAN "wlan0"
 #define IF_NAME_WLAN1 "wlan1"
 #define IF_NAME_P2P "p2p0"

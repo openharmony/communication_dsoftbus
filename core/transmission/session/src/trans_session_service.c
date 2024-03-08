@@ -25,6 +25,7 @@
 #include "softbus_scenario_manager.h"
 #include "softbus_utils.h"
 #include "trans_channel_manager.h"
+#include "trans_event.h"
 #include "trans_log.h"
 #include "trans_session_manager.h"
 
@@ -107,13 +108,21 @@ int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, i
     newNode->pid = pid;
 
     int32_t ret = TransSessionServerAddItem(newNode);
+    TransEventExtra extra = {
+        .socketName = sessionName,
+        .callerPkg = pkgName,
+        .errcode = ret,
+        .result = ret == SOFTBUS_OK ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED
+    };
     if (ret != SOFTBUS_OK) {
         SoftBusFree(newNode);
         if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
             TRANS_LOGW(TRANS_CTRL, "session server is already created");
         }
+        TRANS_EVENT(EVENT_SCENE_TRANS_CREATE_SESS_SERVER, EVENT_STAGE_TRANS_COMMON_ONE, extra);
         return ret;
     }
+    TRANS_EVENT(EVENT_SCENE_TRANS_CREATE_SESS_SERVER, EVENT_STAGE_TRANS_COMMON_ONE, extra);
     TRANS_LOGD(TRANS_CTRL, "ok");
     return SOFTBUS_OK;
 }
@@ -124,7 +133,15 @@ int32_t TransRemoveSessionServer(const char *pkgName, const char *sessionName)
         !IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1)) {
         return SOFTBUS_INVALID_PARAM;
     }
-    return TransSessionServerDelItem(sessionName);
+    int32_t ret = TransSessionServerDelItem(sessionName);
+    TransEventExtra extra = {
+        .socketName = sessionName,
+        .callerPkg = pkgName,
+        .errcode = ret,
+        .result = ret == SOFTBUS_OK ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED
+    };
+    TRANS_EVENT(EVENT_SCENE_TRANS_REMOVE_SESS_SERVER, EVENT_STAGE_TRANS_COMMON_ONE, extra);
+    return ret;
 }
 
 int32_t TransOpenSession(const SessionParam *param, TransInfo *info)

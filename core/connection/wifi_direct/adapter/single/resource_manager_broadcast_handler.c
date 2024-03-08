@@ -15,6 +15,7 @@
 
 #include "resource_manager_broadcast_handler.h"
 #include <string.h>
+#include "securec.h"
 #include "conn_log.h"
 #include "softbus_error_code.h"
 #include "broadcast_receiver.h"
@@ -165,5 +166,5 @@ void ResourceManagerBroadcastHandlerInit(void)
     };
 
     broadcastReceiver->registerBroadcastListener(actions, ARRAY_SIZE(actions), "ResourceManager",
-                                                 LISTENER_PRIORITY_HIGH, Listener);
+                                                 LISTENER_PRIORITY_MIDDLE, Listener);
 }

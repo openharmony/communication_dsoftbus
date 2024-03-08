@@ -137,7 +137,7 @@ AppInfo *TestSetAppInfo()
 HWTEST_F(TransTcpDirectMessageStaticTest, SwitchCipherTypeToAuthLinkType0001, TestSize.Level1)
 {
     SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
-    if(conn == NULL) {
+    if (conn == NULL) {
         return;
     }
 
@@ -189,7 +189,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcPostFisrtData0003, TestSize.Le
 {
     int32_t ret;
     SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
-    if(conn == NULL) {
+    if (conn == NULL) {
         return;
     }
 
@@ -241,7 +241,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcProcessDataConfig0005, TestSiz
     SoftBusFree(appInfo);
     appInfo = nullptr;
     ret = TransTdcProcessDataConfig(appInfo);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
 /**
@@ -261,10 +261,10 @@ HWTEST_F(TransTcpDirectMessageStaticTest, ProcessMessage0006, TestSize.Level1)
     char *dataTmp = reinterpret_cast<char *>(data);
 
     ret = ProcessMessage(channelId, flagReply, seq, dataTmp);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 
     ret = ProcessMessage(channelId, flagRequst, seq, dataTmp);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 }
 
 /**
@@ -400,7 +400,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcUpdateDataBufWInfo0013, TestSi
     string recvStr = "testrecvBuf";
     int32_t recvLen = 10;
     void *tmp = SoftBusCalloc(recvLen);
-    if(tmp == NULL) {
+    if (tmp == nullptr) {
         return;
     }
 

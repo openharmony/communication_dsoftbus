@@ -74,8 +74,11 @@ typedef struct {
      * @brief Called when a socket is bind.
      *
      * This callback is invoked to verify the socket or initialize resources related to the socket.
+     * When the connection is successful, this callback be called on the server side.
+     * The server side refers to the side that called {@Listen} function.
      *
-     * @param socket Indicates the unique socket fd; socket fd = <b>0</b> if the bind is failed.
+     * @param socket Indicates the unique socket fd.
+     * @param info Indicates the information of peer socket.
      * @since 2.0
      * @version 2.0
      */
@@ -153,7 +156,8 @@ typedef struct {
      *
      * @param socket Indicates the unique socket fd.
      * @param event Indicates the type of QoS state change.
-     * @param qos[] Indicates the QoS status that we can provide.
+     * @param qos Indicates the QoS status that we can provide.
+     * @param qosCount Indicates the number of the third parameter <b>qos</b>.
      * @since 2.0
      * @version 2.0
      */
@@ -163,12 +167,13 @@ typedef struct {
 /**
  * @brief Creates a socket.
  *
- * A maximum of 10 socket can be created.
+ * A maximum of 15 socket can be created.
  *
  * @param info Indicates the description of the socket structure.
  * It is the unique identifier of the upper-layer service. The value cannot be empty or exceed 64 characters.
  *
- * @return Returns <b>socket fd</b> if the socket creation is successful; returns <b>-1</b> otherwise.
+ * @return Returns <b>socket fd</b> if the socket creation is successful;
+ * returns an error code less than zero otherwise.
  * @since 2.0
  * @version 2.0
  */
@@ -179,9 +184,11 @@ int32_t Socket(SocketInfo info);
  *
  * @param socket Indicates the the unique socket fd.
  * @param qos Indicates the QoS requirements for socket. The value cannot be empty.
+ * @param qosCount Indicates the number of the second parameter <b>qos</b>.
  * @param listener Indicates the pointer to the socket callback.
  *
- * @return Returns <b>0</b> if the listen creation is successful; returns <b>-1</b> otherwise.
+ * @return Returns <b>SOFTBUS_OK</b> if the listen creation is successful;
+ * returns an error code less than zero otherwise.
  * @since 2.0
  * @version 2.0
  */
@@ -190,16 +197,17 @@ int32_t Listen(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISock
 /**
  * @brief Binds a socket, which is called by client.
  *
- * {@link OnBind} is invoked to return whether the socket is successfully bind.
- * Data can be transmitted only after the socket is successfully bind.
+ * When the connection is successful, this function return <b>SOFTBUS_OK</b> and
+ * {@link OnBind} be called on the server side.
  *
  * @param socket Indicates the the unique socket fd.
  * @param qos Indicates the QoS requirements for socket. The value cannot be empty.
+ * @param qosCount Indicates the number of the second parameter <b>qos</b>.
  * @param listener Indicates the pointer to the socket callback.
  *
  * @return Returns <b>SOFTBUS_TRANS_INVALID_PARAM</b> if invalid parameters are detected.
  * @return Returns <b>INVALID_SOCKET</b> if the operation fails.
- * @return Returns the socket fd (an integer greater than <b>0</b>) if the socket is bind;
+ * @return Returns <b>SOFTBUS_OK</b> if the socket is bind;
  * returns an error code otherwise.
  * @since 2.0
  * @version 2.0
@@ -303,7 +311,7 @@ void Shutdown(int32_t socket);
  * @param peerNetworkId Indicates the pointer to the remote device ID.
  * @param dataType Indicates the type of data.
  * @param qos Indicates the expected quality of service.
- * @param qosLen Indicates the number of qos
+ * @param qosCount Indicates the number of the fourth parameter <b>qos</b>.
  *
  * @return Returns no value.
  * @since 2.0

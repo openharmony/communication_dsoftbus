@@ -26,7 +26,6 @@
 #include "bus_center_manager.h"
 #include "common_list.h"
 #include "lnn_async_callback_utils.h"
-#include "lnn_node_info.h"
 #include "lnn_battery_info.h"
 #include "lnn_cipherkey_manager.h"
 #include "lnn_connection_addr_utils.h"
@@ -46,20 +45,22 @@
 #include "lnn_network_manager.h"
 #include "lnn_node_info.h"
 #include "lnn_node_weight.h"
+#include "lnn_ohos_account.h"
 #include "lnn_p2p_info.h"
 #include "lnn_physical_subnet_manager.h"
 #include "lnn_sync_info_manager.h"
-#include "lnn_ohos_account.h"
 #include "lnn_sync_item_info.h"
 #include "lnn_topo_manager.h"
-#include "softbus_adapter_mem.h"
+#include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_json.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "softbus_feature_config.h"
 #include "softbus_hisysevt_bus_center.h"
 #include "softbus_json_utils.h"
 #include "softbus_utils.h"
+#include "softbus_wifi_api_adapter.h"
 
 #define LNN_CONN_CAPABILITY_MSG_LEN      8
 #define DEFAULT_MAX_LNN_CONNECTION_COUNT 10
@@ -84,6 +85,7 @@ typedef enum {
     MSG_TYPE_LEAVE_INVALID_CONN,
     MSG_TYPE_LEAVE_BY_ADDR_TYPE,
     MSG_TYPE_LEAVE_SPECIFIC,
+    MSG_TYPE_LEAVE_BY_AUTH_ID,
     MSG_TYPE_MAX,
 } NetBuilderMessageType;
 
@@ -1353,6 +1355,34 @@ static NodeInfo *DupNodeInfo(const NodeInfo *nodeInfo)
     return node;
 }
 
+static int32_t ProcessLeaveByAuthId(const void *para)
+{
+    int32_t rc;
+    LnnConnectionFsm *connFsm = NULL;
+    const int64_t *authId = (const int64_t *)para;
+    if (authId == NULL) {
+        LNN_LOGE(LNN_BUILDER, "authId is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    do {
+        connFsm = FindConnectionFsmByAuthId(*authId);
+        if (connFsm == NULL || connFsm->isDead) {
+            LNN_LOGE(LNN_BUILDER, "can not find connection fsm by authId: %{public}" PRId64, *authId);
+            rc = SOFTBUS_ERR;
+            break;
+        }
+        LNN_LOGI(LNN_BUILDER, "[id=%{public}u]leave reqeust, authId: %{public}" PRId64, connFsm->id, *authId);
+        if (LnnSendLeaveRequestToConnFsm(connFsm) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "send leaveReqeust to connection fsm[id=%{public}u] failed", connFsm->id);
+            rc = SOFTBUS_ERR;
+            break;
+        }
+        rc = SOFTBUS_OK;
+    } while (false);
+    SoftBusFree((void *) authId);
+    return rc;
+}
+
 static NetBuilderMessageProcess g_messageProcessor[MSG_TYPE_MAX] = {
     ProcessJoinLNNRequest,
     ProcessDevDiscoveryRequest,
@@ -1368,6 +1398,7 @@ static NetBuilderMessageProcess g_messageProcessor[MSG_TYPE_MAX] = {
     ProcessLeaveInvalidConn,
     ProcessLeaveByAddrType,
     ProcessLeaveSpecific,
+    ProcessLeaveByAuthId,
 };
 
 static void NetBuilderMessageHandler(SoftBusMessage *msg)
@@ -2152,6 +2183,38 @@ static void AccountStateChangeHandler(const LnnEventBasicInfo *info)
     }
 }
 
+static void UpdateLocalNetCapability(void)
+{
+    uint32_t netCapability = 0;
+    if (LnnGetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t *)&netCapability) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "get cap from local ledger fail");
+        return;
+    }
+    int btState = SoftBusGetBtState();
+    if (btState == BLE_ENABLE) {
+        LNN_LOGI(LNN_INIT, "bluetooth state is on");
+        (void)LnnSetNetCapability(&netCapability, BIT_BR);
+        (void)LnnSetNetCapability(&netCapability, BIT_BLE);
+    } else if (btState == BLE_DISABLE) {
+        LNN_LOGI(LNN_INIT, "bluetooth state is off");
+        (void)LnnClearNetCapability(&netCapability, BIT_BR);
+        (void)LnnClearNetCapability(&netCapability, BIT_BLE);
+    }
+
+    bool isWifiActive = SoftBusIsWifiActive();
+    LNN_LOGI(LNN_INIT, "wifi state: %s", isWifiActive ? "true" : "false");
+    if (!isWifiActive) {
+        (void)LnnClearNetCapability(&netCapability, BIT_WIFI);
+        (void)LnnClearNetCapability(&netCapability, BIT_WIFI_P2P);
+        (void)LnnClearNetCapability(&netCapability, BIT_WIFI_24G);
+        (void)LnnClearNetCapability(&netCapability, BIT_WIFI_5G);
+    }
+
+    if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, netCapability) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "set cap to local ledger fail");
+    }
+}
+
 int32_t LnnInitNetBuilder(void)
 {
     if (g_netBuilder.isInit == true) {
@@ -2163,6 +2226,7 @@ int32_t LnnInitNetBuilder(void)
         return SOFTBUS_ERR;
     }
     LnnInitTopoManager();
+    UpdateLocalNetCapability();
     InitNodeInfoSync();
     NetBuilderConfigInit();
     // link finder init fail will not cause softbus init fail
@@ -2524,6 +2588,23 @@ int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrTy
     para->addrType = addrType;
     if (PostMessageToHandler(MSG_TYPE_LEAVE_SPECIFIC, para) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "post leave specific msg failed");
+        SoftBusFree(para);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnNotifyEmptySessionKey(int64_t authId)
+{
+    int64_t *para = NULL;
+    para = (int64_t *)SoftBusMalloc(sizeof(int64_t));
+    if (para == NULL) {
+        LNN_LOGE(LNN_BUILDER, "malloc para fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    *para = authId;
+    if (PostMessageToHandler(MSG_TYPE_LEAVE_BY_AUTH_ID, para) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "post empty sessionKey msg fail");
         SoftBusFree(para);
         return SOFTBUS_ERR;
     }

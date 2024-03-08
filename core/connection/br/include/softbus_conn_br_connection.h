@@ -35,6 +35,8 @@ extern "C" {
 #define WAIT_BR_NEGOTIATION_CLOSING_TIMEOUT_MILLIS (3 * 1000)
 #define RETRY_NOTIFY_REFERENCE_DELAY_MILLIS        (1 * 1000)
 
+#define MAX_RETRY_COUNT                            (2)
+
 enum ConnBrConnectionState {
     BR_CONNECTION_STATE_CONNECTING = 0,
     BR_CONNECTION_STATE_CONNECTED,
@@ -52,6 +54,7 @@ typedef struct {
     char addr[BT_MAC_LEN];
     uint32_t mtu;
 
+    uint32_t retryCount;
     // protect variable access below
     SoftBusMutex lock;
     int32_t socketHandle;

@@ -175,6 +175,8 @@ int32_t NotifyUdpChannelOpenFailed(const AppInfo *info, int32_t errCode)
 
     int64_t timeStart = info->timeStart;
     int64_t timediff = GetSoftbusRecordTimeMillis() - timeStart;
+    UdpChannelInfo channel;
+    (void)memset_s(&channel, sizeof(channel), 0, sizeof(channel));
     TransEventExtra extra = {
         .calleePkg = NULL,
         .callerPkg = info->myData.pkgName,
@@ -186,7 +188,11 @@ int32_t NotifyUdpChannelOpenFailed(const AppInfo *info, int32_t errCode)
         .errcode = errCode,
         .result = EVENT_STAGE_RESULT_FAILED
     };
-    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
+    if (TransGetUdpChannelById(info->myData.channelId, &channel) == SOFTBUS_OK && channel.clientSide) {
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
+    } else {
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_OPEN_CHANNEL_END, extra);
+    }
 
     TransAlarmExtra extraAlarm = {
         .conflictName = NULL,
@@ -474,9 +480,9 @@ static int32_t ParseRequestAppInfo(int64_t authId, const cJSON *msg, AppInfo *ap
     } else {
         appInfo->routeType = WIFI_P2P;
         if (GetWifiDirectManager()->getLocalIpByRemoteIp(appInfo->peerData.addr, localIp,
-                sizeof(localIp)) != SOFTBUS_OK) {
-                TRANS_LOGE(TRANS_CTRL, "get p2p ip failed.");
-                return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
+            sizeof(localIp)) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get p2p ip failed.");
+            return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
         }
     }
     if (strcpy_s(appInfo->myData.addr, sizeof(appInfo->myData.addr), localIp) != EOK) {
@@ -691,6 +697,7 @@ static void UdpOnAuthConnOpened(uint32_t requestId, int64_t authId)
         TRANS_LOGE(TRANS_CTRL, "get channel fail");
         goto EXIT_ERR;
     }
+    extra.channelId = (int32_t)channel->info.myData.channelId;
     ret = StartExchangeUdpInfo(channel, authId, channel->seq);
     if (ret != SOFTBUS_OK) {
         channel->errCode = ret;
@@ -831,8 +838,6 @@ static int32_t OpenAuthConnForUdpNegotiation(UdpChannelInfo *channel)
     channelObj->isMeta = TransGetAuthTypeByNetWorkId(channel->info.peerNetWorkId);
     ReleaseUdpChannelLock();
 
-    int32_t ret = UdpOpenAuthConn(channel->info.peerData.deviceId, requestId, channelObj->isMeta,
-        channel->info.linkType);
     TransEventExtra extra = {
         .calleePkg = NULL,
         .callerPkg = NULL,
@@ -843,6 +848,8 @@ static int32_t OpenAuthConnForUdpNegotiation(UdpChannelInfo *channel)
         .peerNetworkId = channel->info.peerNetWorkId
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, extra);
+    int32_t ret = UdpOpenAuthConn(channel->info.peerData.deviceId, requestId, channelObj->isMeta,
+        channel->info.linkType);
     if (ret != SOFTBUS_OK) {
         extra.errcode = ret;
         extra.result = EVENT_STAGE_RESULT_FAILED;
@@ -923,6 +930,7 @@ int32_t TransOpenUdpChannel(AppInfo *appInfo, const ConnectOption *connOpt, int3
     }
     newChannel->seq = GenerateSeq(false);
     newChannel->status = UDP_CHANNEL_STATUS_INIT;
+    newChannel->clientSide = true;
     int32_t ret = SOFTBUS_ERR;
     ret = TransAddUdpChannel(newChannel);
     if (ret != SOFTBUS_OK) {

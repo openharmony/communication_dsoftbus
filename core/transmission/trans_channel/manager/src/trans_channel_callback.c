@@ -111,7 +111,7 @@ static int32_t TransServerOnChannelOpenFailed(const char *pkgName, int32_t pid, 
     }
     SoftbusHitraceStop();
     TRANS_LOGW(TRANS_CTRL,
-        "trasn server on channel open failed. pkgname=%{public}s, channId=%{public}d, type=%{public}d",
+        "trasn server on channel open failed. pkgname=%{public}s, channelId=%{public}d, type=%{public}d",
         pkgName, channelId, channelType);
     return SOFTBUS_OK;
 }
@@ -122,7 +122,7 @@ static int32_t TransServerOnMsgReceived(const char *pkgName, int32_t pid, int32_
     if (pkgName == NULL || receiveData == NULL || receiveData->data == NULL || receiveData->dataLen == 0) {
         return SOFTBUS_INVALID_PARAM;
     }
-    
+
     ChannelMsg data = {
         .msgChannelId = channelId,
         .msgChannelType = channelType,

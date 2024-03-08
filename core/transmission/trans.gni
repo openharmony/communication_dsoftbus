@@ -16,8 +16,7 @@ import("../../core/transmission/trans_channel/trans_channel.gni")
 import("../../dsoftbus.gni")
 
 native_source_path = rebase_path("$dsoftbus_root_path")
-broadcast_dep_dir =
-    "dsoftbus_enhance/core/transmission/trans_channel/ble_broadcast"
+broadcast_dep_dir = "dsoftbus_enhance/core/broadcast/notification_message"
 enhanced_broadcast = exec_script("$dsoftbus_root_path/check_sub_module.py",
                                  [
                                    "$native_source_path",
@@ -72,7 +71,7 @@ if (defined(ohos_lite)) {
   ]
   if (enhanced_broadcast) {
     import(
-        "$dsoftbus_root_path/dsoftbus_enhance/core/transmission/trans_channel/ble_broadcast/ble_broadcast.gni")
+        "$dsoftbus_root_path/dsoftbus_enhance/core/broadcast/notification_message/notification_message.gni")
 
     trans_session_src += broadcast_sources
     trans_session_inc += broadcast_include_dirs

@@ -113,6 +113,7 @@ static void PutContainer(struct InfoContainer *self, size_t key, struct InfoCont
     }
 
     if (!value) {
+        self->entries[key].data = NULL;
         return;
     }
 
@@ -346,8 +347,8 @@ static void DumpIpv4InfoContent(struct InfoContainerKeyProperty *keyProperty, st
 static void DumpIpv4InfoArrayContent(struct InfoContainerKeyProperty *keyProperty, const uint8_t *item, size_t size,
                                      int32_t fd)
 {
-    struct WifiDirectIpv4Info ipv4[INTERFACE_NUM_MAX];
-    size_t count = INTERFACE_NUM_MAX;
+    struct WifiDirectIpv4Info ipv4[IP_NUM_MAX];
+    size_t count = IP_NUM_MAX;
     WifiDirectIpv4BytesToInfo(item, size, ipv4, &count);
     char ipString[IP_ADDR_STR_LEN] = {0};
     char buffer[IPV4_INFO_ARRAY_BUFFER_LEN] = {0};

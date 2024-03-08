@@ -129,7 +129,7 @@ static void SocketServiceStart(int localFlag)
 
 static void ClientConnect(int32_t *socketFd)
 {
-    EXPECT_TRUE(socketFd != NULL);
+    EXPECT_TRUE(socketFd != nullptr);
     SoftBusSockAddrIn serAddr = {
         .sinFamily = SOFTBUS_AF_INET,
         .sinPort = SoftBusHtoNs(8888),

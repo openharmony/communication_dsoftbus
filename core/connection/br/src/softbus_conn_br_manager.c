@@ -129,6 +129,9 @@ static void DfxRecordBrConnectFail(uint32_t reqId, uint32_t pId, ConnBrDevice *d
         .errcode = reason,
         .result = EVENT_STAGE_RESULT_FAILED
     };
+    if (device != NULL) {
+        extra.peerBrMac = device->addr;
+    }
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
 }
 
@@ -144,9 +147,12 @@ static void DfxRecordBrConnectSuccess(uint32_t pId, ConnBrConnection *connection
     SoftbusRecordConnResult(pId, SOFTBUS_HISYSEVT_CONN_TYPE_BR, SOFTBUS_EVT_CONN_SUCC, costTime,
                             SOFTBUS_HISYSEVT_CONN_OK);
     ConnEventExtra extra = {
+        .requestId = statistics->reqId,
         .connectionId = connection->connectionId,
+        .peerBrMac = connection->addr,
         .linkType = CONNECT_BR,
         .costTime = costTime,
+        .isReuse = statistics->reuse ? 1 : 0,
         .result = EVENT_STAGE_RESULT_OK };
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
 }
@@ -298,6 +304,7 @@ static void NotifyDeviceConnectResult(
 
     LIST_FOR_EACH_ENTRY(it, &device->requests, ConnBrRequest, node) {
         // not need sync reference count when establish connection, initial reference count is 1
+        it->statistics.reuse = isReuse;
         if (isReuse) {
             ConnBrUpdateConnectionRc(connection, 1);
         }
@@ -366,11 +373,6 @@ static int32_t ConnectDeviceDirectly(ConnBrDevice *device, const char *anomizeAd
         if (status != SOFTBUS_OK) {
             break;
         }
-        ConnEventExtra extra = {
-            .peerBrMac = device->addr,
-            .connectionId = (int32_t)connection->connectionId,
-            .result = EVENT_STAGE_RESULT_OK };
-        CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_INVOKE_PROTOCOL, extra);
         status = ConnBrConnect(connection);
         if (status != SOFTBUS_OK) {
             break;
@@ -381,6 +383,14 @@ static int32_t ConnectDeviceDirectly(ConnBrDevice *device, const char *anomizeAd
         TransitionToState(BR_STATE_CONNECTING);
     } while (false);
 
+    ConnEventExtra extra = {
+        .connectionId = (int32_t)connection->connectionId,
+        .peerBrMac = connection->addr,
+        .linkType = CONNECT_BR,
+        .errcode = status,
+        .result = status == SOFTBUS_OK ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED
+    };
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_DEVICE_DIRECTLY, extra);
     if (status != SOFTBUS_OK) {
         ConnBrRemoveConnection(connection);
         SoftBusFree(address);
@@ -587,6 +597,13 @@ static void ServerAccepted(uint32_t connectionId)
             FreeDevice(it);
         }
     }
+    ConnEventExtra extra = {
+        .connectionId = (int32_t)connectionId,
+        .peerBrMac = connection->addr,
+        .linkType = CONNECT_BR,
+        .result = EVENT_STAGE_RESULT_OK
+    };
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_SERVER_ACCEPTED, extra);
     ConnBrReturnConnection(&connection);
 }
 
@@ -609,6 +626,7 @@ static void ClientConnected(uint32_t connectionId)
     ConnRemoveMsgFromLooper(&g_brManagerAsyncHandler, MSG_CONNECT_TIMEOUT, connectionId, 0, NULL);
     CONN_LOGI(CONN_BR, "connect ok, connectionId=%{public}d, addr=%{public}s", connectionId, anomizeAddress);
 
+    connection->retryCount = 0;
     NotifyDeviceConnectResult(connectingDevice, connection, false, 0);
     FreeDevice(connectingDevice);
     g_brManager.connecting = NULL;
@@ -663,12 +681,14 @@ static void ClientConnectFailed(uint32_t connectionId, int32_t error)
         LIST_FOR_EACH_ENTRY(it, &connection->connectProcessStatus->list, BrUnderlayerStatus, node) {
             if (it->result == CONN_BR_CONNECT_UNDERLAYER_ERROR_CONNECTION_EXISTS ||
                 it->result == CONN_BR_CONNECT_UNDERLAYER_ERROR_CONTROLLER_BUSY ||
-                it->result == CONN_BR_CONNECT_UNDERLAYER_ERROR_CONN_SDP_BUSY) {
+                it->result == CONN_BR_CONNECT_UNDERLAYER_ERROR_CONN_SDP_BUSY ||
+                it->result == CONN_BR_CONNECT_UNDERLAYER_ERROR_CONN_AUTH_FAILED) {
+                connection->retryCount += 1;
                 collision = true;
                 break;
             }
         }
-        if (collision) {
+        if (collision && connection->retryCount < MAX_RETRY_COUNT) {
             CONN_LOGW(CONN_BR, "acl collision, wait for retry, id=%{public}u, addr=%{public}s, result=%{public}d",
                 connectionId, anomizeAddress, it->result);
             // NOTICE: assign connecting NULL first to prevent recursively pending in connecting
@@ -1371,6 +1391,13 @@ static int32_t BrConnectDevice(const ConnectOption *option, uint32_t requestId, 
         SoftBusFree(ctx);
         return status;
     }
+    ConnEventExtra extra = {
+        .requestId = (int32_t)requestId,
+        .peerBrMac = option->brOption.brMac,
+        .linkType = CONNECT_BR,
+        .result = EVENT_STAGE_RESULT_OK
+    };
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_DEVICE, extra);
     CONN_LOGI(CONN_BR, "receive connect request, requestId=%{public}u, address=%{public}s, connectTraceId=%{public}u",
         requestId, anomizeAddress, ctx->statistics.connectTraceId);
     return SOFTBUS_OK;

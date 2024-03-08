@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "anonymizer.h"
 #include "bus_center_manager.h"
 #include "lnn_lane_qos.h"
+#include "lnn_network_manager.h"
 #include "session.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_interface.h"
@@ -33,17 +34,16 @@
 #include "softbus_utils.h"
 #include "trans_auth_manager.h"
 #include "trans_channel_callback.h"
+#include "trans_event.h"
 #include "trans_lane_manager.h"
 #include "trans_lane_pending_ctl.h"
 #include "trans_link_listener.h"
 #include "trans_log.h"
 #include "trans_session_manager.h"
 #include "trans_tcp_direct_manager.h"
+#include "trans_tcp_direct_sessionconn.h"
 #include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation.h"
-#include "trans_tcp_direct_sessionconn.h"
-#include "lnn_network_manager.h"
-#include "trans_event.h"
 #include "wifi_direct_manager.h"
 
 #define MIGRATE_ENABLE 2

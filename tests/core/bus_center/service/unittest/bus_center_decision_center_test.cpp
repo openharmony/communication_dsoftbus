@@ -20,7 +20,6 @@
 #include "bus_center_decision_center.h"
 #include "message_handler.h"
 #include "softbus_conn_interface.h"
-#include <stdbool.h>
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_net_builder.h"
@@ -66,9 +65,9 @@ HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest001, TestSize.Level0)
     ConnectOption option;
     memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     option.type = CONNECT_BR;
-    LnnDCReportConnectException(&option,1);
+    LnnDCReportConnectException(&option, 1);
     option.type = CONNECT_P2P;
-    LnnDCReportConnectException(&option,1);
+    LnnDCReportConnectException(&option, 1);
 }
 }
        

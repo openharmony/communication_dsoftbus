@@ -218,7 +218,7 @@ int32_t ClientTransProxyAddChannelInfo(ClientProxyChannelInfo *info)
     }
 
     ListAdd(&g_proxyChannelInfoList->list, &info->node);
-    TRANS_LOGI(TRANS_SDK, "add channelId = %{public}d", info->channelId);
+    TRANS_LOGI(TRANS_SDK, "add channelId=%{public}d", info->channelId);
     (void)SoftBusMutexUnlock(&g_proxyChannelInfoList->lock);
     return SOFTBUS_OK;
 }
@@ -234,7 +234,7 @@ int32_t ClientTransProxyDelChannelInfo(int32_t channelId)
     LIST_FOR_EACH_ENTRY(item, &(g_proxyChannelInfoList->list), ClientProxyChannelInfo, node) {
         if (item->channelId == channelId) {
             ListDelete(&item->node);
-            TRANS_LOGI(TRANS_SDK, "delete channelId = %{public}d", channelId);
+            TRANS_LOGI(TRANS_SDK, "delete channelId=%{public}d", channelId);
             SoftBusFree(item);
             DelPendingPacket(channelId, PENDING_TYPE_PROXY);
             (void)SoftBusMutexUnlock(&g_proxyChannelInfoList->lock);
@@ -413,7 +413,7 @@ static int32_t ClientTransProxyProcSendMsgAck(int32_t channelId, const char *dat
         return SOFTBUS_ERR;
     }
     int32_t seq = *(int32_t *)data;
-    TRANS_LOGI(TRANS_SDK, "ClientTransProxyProcSendMsgAck. channelId-%{public}d, seq=%{public}d",
+    TRANS_LOGI(TRANS_SDK, "ClientTransProxyProcSendMsgAck. channelId=%{public}d, seq=%{public}d",
         channelId, seq);
     return SetPendingPacket(channelId, seq, PENDING_TYPE_PROXY);
 }
@@ -576,7 +576,7 @@ int32_t TransProxyDelSliceProcessorByChannelId(int32_t channelId)
                 ClientTransProxyClearProcessor(&(node->processor[i]));
             }
             ListDelete(&(node->head));
-            TRANS_LOGI(TRANS_SDK, "delete channelId = %{public}d", channelId);
+            TRANS_LOGI(TRANS_SDK, "delete channelId=%{public}d", channelId);
             SoftBusFree(node);
             g_channelSliceProcessorList->cnt--;
             (void)SoftBusMutexUnlock(&g_channelSliceProcessorList->lock);

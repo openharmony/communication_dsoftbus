@@ -165,6 +165,7 @@ private:
 
     static constexpr int32_t BYTE_DUMP_LEN = 2;
     static constexpr int32_t WAIT_LOOPER_DONE_MS = 500;
+    static constexpr int32_t WAIT_LOCK_LOCKED_MS = 100;
     static constexpr int32_t WAIT_ASYNC_TIMEOUT = 1;
 
     std::mutex mutex_;
