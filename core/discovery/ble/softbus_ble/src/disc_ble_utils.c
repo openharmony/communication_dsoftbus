@@ -296,7 +296,7 @@ static int32_t CopyBrAddrValue(DeviceWrapper *device, const uint8_t *src, uint32
 
 static int32_t CopyDeviceIdHashValue(DeviceWrapper *device, const uint8_t *data, uint32_t len)
 {
-    if (CopyValue(device->info->addr[0].info.ble.udidHash, DISC_MAX_DEVICE_ID_LEN,
+    if (CopyValue(device->info->addr[0].info.ble.udidHash, UDID_HASH_LEN,
         (void *)data, len, "TLV_TYPE_DEVICE_ID_HASH") != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "parse tlv copy device id hash value failed");
         return SOFTBUS_ERR;
