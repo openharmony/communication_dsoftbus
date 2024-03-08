@@ -145,10 +145,12 @@ static void RestartEventNotify(void)
 {
     if (g_restartEventCallback == nullptr) {
         COMM_LOGI(COMM_SDK, "Restart event notify is not used!\n");
+        return;
     }
     if (g_restartEventCallback() != SOFTBUS_OK) {
         RestartEventCallbackUnregister();
-        COMM_LOGE(COMM_SDK, "Restart event notify failed!\n");
+        COMM_LOGE(COMM_SDK, "Restart event notify failed!\n");\
+        return;
     }
     COMM_LOGI(COMM_SDK, "Restart event notify success!\n");
 }
