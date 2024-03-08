@@ -24,11 +24,11 @@ extern "C" {
 #endif
 
 LaneInterface *TransLaneGetInstance(void);
-int32_t GetTransOptionByLaneId(uint32_t laneId, TransOption *reqInfo);
+int32_t GetTransOptionByLaneReqId(uint32_t laneReqId, TransOption *reqInfo);
+int32_t PostDelayDestroyMessage(uint32_t laneReqId, LaneResource *resourceItem, uint64_t delayMillis);
 int32_t PostDetectTimeoutMessage(uint32_t detectId, uint64_t delayMillis);
 int32_t PostReliabilityTimeMessage(void);
 void RemoveDetectTimeoutMessage(uint32_t detectId);
-int32_t PostDelayDestroyMessage(uint32_t laneId, LaneResource *resourseItem, uint64_t delayMillis);
 
 #ifdef __cplusplus
 }

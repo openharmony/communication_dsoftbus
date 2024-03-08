@@ -63,12 +63,12 @@ uint32_t GenerateLaneProfileId(const LaneGenerateParam *param)
     return GetTransLaneIf()->GenerateLaneProfileId(param);
 }
 
-void UnbindLaneIdFromProfile(uint32_t laneId, uint32_t profileId)
+void UnbindLaneReqIdFromProfile(uint32_t laneReqId, uint32_t profileId)
 {
-    GetTransLaneIf()->UnbindLaneIdFromProfile(laneId, profileId);
+    GetTransLaneIf()->UnbindLaneReqIdFromProfile(laneReqId, profileId);
 }
 
-int32_t BindLaneIdToProfile(uint32_t laneId, LaneProfile *profile)
+int32_t BindLaneIdToProfile(uint64_t laneId, LaneProfile *profile)
 {
     return GetTransLaneIf()->BindLaneIdToProfile(laneId, profile);
 }
@@ -84,27 +84,27 @@ int32_t AddLinkInfoItem(const LaneLinkInfo *linkInfoItem)
 {
     return GetTransLaneIf()->AddLinkInfoItem(linkInfoItem);
 }
-int32_t DelLinkInfoItem(uint32_t laneId)
+int32_t DelLinkInfoItem(uint32_t laneReqId)
 {
-    return GetTransLaneIf()->DelLinkInfoItem(laneId);
+    return GetTransLaneIf()->DelLinkInfoItem(laneReqId);
 }
-int32_t FindLaneLinkInfoByLaneId(uint32_t laneId, LaneLinkInfo *linkInfoitem)
+int32_t FindLaneLinkInfoByLaneReqId(uint32_t laneReqId, LaneLinkInfo *linkInfoitem)
 {
-    return GetTransLaneIf()->FindLaneLinkInfoByLaneId(laneId, linkInfoitem);
+    return GetTransLaneIf()->FindLaneLinkInfoByLaneReqId(laneReqId, linkInfoitem);
 }
 int32_t ConvertToLaneResource(const LaneLinkInfo *linkInfo, LaneResource *laneResourceInfo)
 {
     return GetTransLaneIf()->ConvertToLaneResource(linkInfo, laneResourceInfo);
 }
 
-int32_t DelLaneResourceItemWithDelay(LaneResource *resourceItem, uint32_t laneId, bool *isDelayDestroy)
+int32_t DelLaneResourceItemWithDelay(LaneResource *resourceItem, uint32_t laneReqId, bool *isDelayDestroy)
 {
-    return GetTransLaneIf()->DelLaneResourceItemWithDelay(resourceItem, laneId, isDelayDestroy);
+    return GetTransLaneIf()->DelLaneResourceItemWithDelay(resourceItem, laneReqId, isDelayDestroy);
 }
 
-void FreeLaneId(uint32_t laneId)
+void FreeLaneReqId(uint32_t laneReqId)
 {
-    return GetTransLaneIf()->FreeLaneId(laneId);
+    return GetTransLaneIf()->FreeLaneReqId(laneReqId);
 }
 
 void HandleLaneReliabilityTime(void)

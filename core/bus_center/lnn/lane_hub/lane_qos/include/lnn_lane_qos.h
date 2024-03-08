@@ -64,7 +64,7 @@ typedef struct {
 } StreamInfo;
 
 typedef struct {
-    uint32_t laneId;
+    uint64_t laneId;
     LaneTransType statsType;
     union {
         MsgStats msg;
@@ -90,10 +90,10 @@ int32_t LnnInitQos(void);
 void LnnDeinitQos(void);
 int32_t LnnRegPeriodAdjustmentCallback(OnStatsPeriodAdjustment callback);
 void LnnReportLaneIdStatsInfo(const LaneIdStatsInfo *statsList, uint32_t listSize);
-void LnnReportRippleData(uint32_t laneId, const LnnRippleData *data);
-int32_t LnnRequestQosOptimization(const uint32_t *laneIdList,
+void LnnReportRippleData(uint64_t laneId, const LnnRippleData *data);
+int32_t LnnRequestQosOptimization(const uint64_t *laneIdList,
     uint32_t listSize, int32_t *result, uint32_t resultSize);
-void LnnCancelQosOptimization(const uint32_t *laneIdList, uint32_t listSize);
+void LnnCancelQosOptimization(const uint64_t *laneIdList, uint32_t listSize);
 
 #ifdef __cplusplus
 }

@@ -245,7 +245,7 @@ static void DelP2pLinkedItem(uint32_t authReqId)
     LinkUnlock();
 }
 
-static void DelP2pLinkedItemByLaneId(uint32_t laneId)
+static void DelP2pLinkedItemByLaneReqId(uint32_t laneReqId)
 {
     if (LinkLock() != 0) {
         LNN_LOGE(LNN_LANE, "lock fail");
@@ -254,8 +254,8 @@ static void DelP2pLinkedItemByLaneId(uint32_t laneId)
     P2pLinkedList *item = NULL;
     P2pLinkedList *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, g_p2pLinkedList, P2pLinkedList, node) {
-        if (item->laneLinkReqId == laneId) {
-            LNN_LOGI(LNN_LANE, "delete linkedItem, laneId=%{public}u", laneId);
+        if (item->laneLinkReqId == laneReqId) {
+            LNN_LOGI(LNN_LANE, "delete linkedItem, laneReqId=%{public}u", laneReqId);
             ListDelete(&item->node);
             SoftBusFree(item);
             break;
@@ -630,8 +630,8 @@ static void OnAuthConnOpenFailed(uint32_t authRequestId, int32_t reason)
 static int32_t updataP2pLinkReq(P2pLinkReqList *p2pReqInfo, uint32_t laneLinkReqId)
 {
     TransOption reqInfo = {0};
-    if (GetTransOptionByLaneId(laneLinkReqId, &reqInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get TransReqInfo fail, laneId=%{public}d", laneLinkReqId);
+    if (GetTransOptionByLaneReqId(laneLinkReqId, &reqInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get TransReqInfo fail, laneReqId=%{public}d", laneLinkReqId);
         return SOFTBUS_ERR;
     }
     if (reqInfo.isWithQos) {
@@ -641,7 +641,7 @@ static int32_t updataP2pLinkReq(P2pLinkReqList *p2pReqInfo, uint32_t laneLinkReq
         p2pReqInfo->p2pInfo.bandWidth = 0;
         p2pReqInfo->p2pInfo.isWithQos = false;
     }
-    LNN_LOGI(LNN_LANE, "wifi direct conn, bandWidth=%{public}d, isWithQos=%{public}d, laneId=%{public}d",
+    LNN_LOGI(LNN_LANE, "wifi direct conn, bandWidth=%{public}d, isWithQos=%{public}d, laneReqId=%{public}d",
         p2pReqInfo->p2pInfo.bandWidth, p2pReqInfo->p2pInfo.isWithQos, laneLinkReqId);
     return SOFTBUS_OK;
 }
@@ -746,7 +746,7 @@ static int32_t OpenAuthToDisconnP2p(const char *networkId, uint32_t laneLinkReqI
         .onConnOpenFailed = OnConnOpenFailedForDisconnect
     };
     if (AuthOpenConn(&connInfo, authRequestId, &cb, isMetaAuth) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "open auth conn fail, laneId=%{public}u", laneLinkReqId);
+        LNN_LOGE(LNN_LANE, "open auth conn fail, laneReqId=%{public}u", laneLinkReqId);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -992,8 +992,8 @@ static int32_t OpenAuthTriggerToConn(const LinkRequest *request, uint32_t laneLi
 static int32_t CheckTransReqInfo(const LinkRequest *request, uint32_t laneLinkReqId)
 {
     TransOption reqInfo = {0};
-    if (GetTransOptionByLaneId(laneLinkReqId, &reqInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get TransReqInfo fail, laneId=%{public}d", laneLinkReqId);
+    if (GetTransOptionByLaneReqId(laneLinkReqId, &reqInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get TransReqInfo fail, laneReqId=%{public}d", laneLinkReqId);
         return SOFTBUS_ERR;
     }
     if (reqInfo.isWithQos) {
@@ -1083,31 +1083,31 @@ static int32_t LnnSelectDirectLink(const LinkRequest *request, uint32_t laneLink
         AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_BLE, true)) {
         if ((local & (1 << BIT_BLE_TRIGGER_CONNECTION)) != 0 && (remote & (1 << BIT_BLE_TRIGGER_CONNECTION)) != 0 &&
             GetWifiDirectUtils()->supportHmlTwo()) {
-            LNN_LOGI(LNN_LANE, "open auth trigger to connect, laneId=%{public}u", laneLinkReqId);
+            LNN_LOGI(LNN_LANE, "open auth trigger to connect, laneReqId=%{public}u", laneLinkReqId);
             ret = OpenAuthTriggerToConn(request, laneLinkReqId, callback);
         }
         if (ret != SOFTBUS_OK) {
-            LNN_LOGI(LNN_LANE, "open active auth nego to connect, laneId=%{public}u", laneLinkReqId);
+            LNN_LOGI(LNN_LANE, "open active auth nego to connect, laneReqId=%{public}u", laneLinkReqId);
             ret = OpenAuthToConnP2p(request, laneLinkReqId, callback);
         }
     }
     if (CheckHasBrConnection(request->peerNetworkId) && ret != SOFTBUS_OK) {
-        LNN_LOGI(LNN_LANE, "open new br auth to connect p2p, laneId=%{public}u", laneLinkReqId);
+        LNN_LOGI(LNN_LANE, "open new br auth to connect p2p, laneReqId=%{public}u", laneLinkReqId);
         ret = OpenAuthToConnP2p(request, laneLinkReqId, callback);
     }
     if ((local & (1 << BIT_BLE_TRIGGER_CONNECTION)) != 0 && (remote & (1 << BIT_BLE_TRIGGER_CONNECTION)) != 0 &&
         ret != SOFTBUS_OK && GetWifiDirectUtils()->supportHmlTwo()) {
-        LNN_LOGI(LNN_LANE, "open ble trigger to connect, laneId=%{public}u", laneLinkReqId);
+        LNN_LOGI(LNN_LANE, "open ble trigger to connect, laneReqId=%{public}u", laneLinkReqId);
         ret = OpenBleTriggerToConn(request, laneLinkReqId, callback);
     }
     if (((local & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) != 0) &&
         ((remote & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) != 0) &&
           ret != SOFTBUS_OK) {
-            LNN_LOGI(LNN_LANE, "open channel to connect p2p, laneId=%{public}u", laneLinkReqId);
+            LNN_LOGI(LNN_LANE, "open channel to connect p2p, laneReqId=%{public}u", laneLinkReqId);
             ret = OpenProxyChannelToConnP2p(request, laneLinkReqId, callback);
     }
     if (ret != SOFTBUS_OK) {
-        LNN_LOGI(LNN_LANE, "open auth to connect p2p, laneId=%{public}u", laneLinkReqId);
+        LNN_LOGI(LNN_LANE, "open auth to connect p2p, laneReqId=%{public}u", laneLinkReqId);
         ret = OpenAuthToConnP2p(request, laneLinkReqId, callback);
     }
     return ret;
@@ -1155,9 +1155,9 @@ void LnnDisconnectP2p(const char *networkId, int32_t pid, uint32_t laneLinkReqId
             break;
         }
     }
-    LNN_LOGI(LNN_LANE, "pid=%{public}d, laneId=%{public}u, linkId=%{public}d", pid, laneLinkReqId, linkId);
+    LNN_LOGI(LNN_LANE, "pid=%{public}d, laneReqId=%{public}u, linkId=%{public}d", pid, laneLinkReqId, linkId);
     if (!isNodeExist) {
-        LNN_LOGE(LNN_LANE, "node isn't exist, ignore disconn request, laneId=%{public}u", laneLinkReqId);
+        LNN_LOGE(LNN_LANE, "node isn't exist, ignore disconn request, laneReqId=%{public}u", laneLinkReqId);
         LinkUnlock();
         return;
     }
@@ -1169,7 +1169,7 @@ void LnnDisconnectP2p(const char *networkId, int32_t pid, uint32_t laneLinkReqId
     LinkUnlock();
     if (OpenAuthToDisconnP2p(networkId, laneLinkReqId) != SOFTBUS_OK) {
         DisconnectP2pWithoutAuthConn(pid, mac, linkId);
-        DelP2pLinkedItemByLaneId(laneLinkReqId);
+        DelP2pLinkedItemByLaneReqId(laneLinkReqId);
     }
     return;
 }

@@ -33,10 +33,10 @@ int32_t InitLaneModel(void);
 void DeinitLaneModel(void);
 uint32_t GenerateLaneProfileId(const LaneGenerateParam *param);
 int32_t GetLaneProfile(uint32_t profileId, LaneProfile *profile);
-int32_t GetLaneIdList(uint32_t profileId, uint32_t **laneIdList, uint32_t *listNum);
+int32_t GetLaneIdList(uint32_t profileId, uint64_t **laneIdList, uint32_t *listNum);
 uint32_t GetActiveProfileNum(void);
-int32_t BindLaneIdToProfile(uint32_t laneId, LaneProfile *profile);
-void UnbindLaneIdFromProfile(uint32_t laneId, uint32_t profileId);
+int32_t BindLaneIdToProfile(uint64_t laneId, LaneProfile *profile);
+void UnbindLaneIdFromProfile(uint64_t laneId, uint32_t profileId);
 
 #ifdef __cplusplus
 }

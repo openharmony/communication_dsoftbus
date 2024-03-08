@@ -39,23 +39,23 @@ void LnnReportLaneIdStatsInfo(const LaneIdStatsInfo *statsList, uint32_t listSiz
     return;
 }
 
-void LnnReportRippleData(uint32_t laneId, const LnnRippleData *data)
+void LnnReportRippleData(uint64_t laneId, const LnnRippleData *data)
 {
     (void)laneId;
     (void)data;
     return;
 }
 
-int32_t LnnRequestQosOptimization(const uint32_t *laneList, uint32_t listSize, int32_t *result, uint32_t resultSize)
+int32_t LnnRequestQosOptimization(const uint64_t *laneIdList, uint32_t listSize, int32_t *result, uint32_t resultSize)
 {
-    (void)laneList;
+    (void)laneIdList;
     (void)listSize;
     (void)result;
     (void)resultSize;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-void LnnCancelQosOptimization(const uint32_t *laneIdList, uint32_t listSize)
+void LnnCancelQosOptimization(const uint64_t *laneIdList, uint32_t listSize)
 {
     (void)laneIdList;
     (void)listSize;

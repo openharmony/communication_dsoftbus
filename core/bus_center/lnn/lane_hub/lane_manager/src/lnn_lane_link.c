@@ -196,7 +196,7 @@ int32_t AddLaneResourceItem(const LaneResource *inputResource)
     return SOFTBUS_OK;
 }
 
-static int32_t StartDelayDestroyLink(uint32_t laneId, LaneResource* item)
+static int32_t StartDelayDestroyLink(uint32_t laneReqId, LaneResource* item)
 {
     LaneResource* resourceItem = (LaneResource *)SoftBusMalloc(sizeof(LaneResource));
     if (resourceItem == NULL) {
@@ -208,14 +208,14 @@ static int32_t StartDelayDestroyLink(uint32_t laneId, LaneResource* item)
         SoftBusFree(resourceItem);
         return SOFTBUS_MEM_ERR;
     }
-    if (PostDelayDestroyMessage(laneId, resourceItem, DELAY_DESTROY_LANE_TIME) != SOFTBUS_OK) {
+    if (PostDelayDestroyMessage(laneReqId, resourceItem, DELAY_DESTROY_LANE_TIME) != SOFTBUS_OK) {
         SoftBusFree(resourceItem);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }
 
-int32_t DelLaneResourceItemWithDelay(LaneResource *resourceItem, uint32_t laneId, bool *isDelayDestroy)
+int32_t DelLaneResourceItemWithDelay(LaneResource *resourceItem, uint32_t laneReqId, bool *isDelayDestroy)
 {
     if (resourceItem == NULL || isDelayDestroy == NULL) {
         LNN_LOGE(LNN_LANE, "resourceItem or isDelayDestroy is nullptr");
@@ -229,7 +229,7 @@ int32_t DelLaneResourceItemWithDelay(LaneResource *resourceItem, uint32_t laneId
     if (item != NULL) {
         LNN_LOGI(LNN_LANE, "link=%{public}d, ref=%{public}d", item->type, item->laneRef);
         if (item->type == LANE_HML && item->laneRef == 1) {
-            if (StartDelayDestroyLink(laneId, item) == SOFTBUS_OK) {
+            if (StartDelayDestroyLink(laneReqId, item) == SOFTBUS_OK) {
                 *isDelayDestroy = true;
                 LaneUnlock();
                 return SOFTBUS_OK;
@@ -326,7 +326,7 @@ static int32_t CreateLinkInfoItem(const LaneLinkInfo *inputLinkInfo, LaneLinkInf
             return SOFTBUS_ERR;
     }
     outputLinkInfo->type = inputLinkInfo->type;
-    outputLinkInfo->laneId = inputLinkInfo->laneId;
+    outputLinkInfo->laneReqId = inputLinkInfo->laneReqId;
     return SOFTBUS_OK;
 }
 
@@ -356,10 +356,10 @@ int32_t AddLinkInfoItem(const LaneLinkInfo *inputLinkInfo)
     return SOFTBUS_OK;
 }
 
-int32_t DelLinkInfoItem(uint32_t laneId)
+int32_t DelLinkInfoItem(uint32_t laneReqId)
 {
-    if (laneId == INVALID_LANE_ID) {
-        LNN_LOGE(LNN_LANE, "laneId is invalid");
+    if (laneReqId == INVALID_LANE_REQ_ID) {
+        LNN_LOGE(LNN_LANE, "laneReqId is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     if (LaneLock() != SOFTBUS_OK) {
@@ -369,7 +369,7 @@ int32_t DelLinkInfoItem(uint32_t laneId)
     LaneLinkInfo *item = NULL;
     LaneLinkInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_LinkInfoList, LaneLinkInfo, node) {
-        if (item->laneId == laneId) {
+        if (item->laneReqId == laneReqId) {
             ListDelete(&item->node);
             SoftBusFree(item);
         }
@@ -378,10 +378,10 @@ int32_t DelLinkInfoItem(uint32_t laneId)
     return SOFTBUS_OK;
 }
 
-int32_t FindLaneLinkInfoByLaneId(uint32_t laneId, LaneLinkInfo *linkInfoitem)
+int32_t FindLaneLinkInfoByLaneReqId(uint32_t laneReqId, LaneLinkInfo *linkInfoitem)
 {
-    if (laneId == INVALID_LANE_ID || linkInfoitem == NULL) {
-        LNN_LOGE(LNN_LANE, "laneId or linkInfoItem is invalid");
+    if (laneReqId == INVALID_LANE_REQ_ID || linkInfoitem == NULL) {
+        LNN_LOGE(LNN_LANE, "laneReqId or linkInfoItem is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     if (LaneLock() != SOFTBUS_OK) {
@@ -391,7 +391,7 @@ int32_t FindLaneLinkInfoByLaneId(uint32_t laneId, LaneLinkInfo *linkInfoitem)
     LaneLinkInfo *item = NULL;
     LaneLinkInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_LinkInfoList, LaneLinkInfo, node) {
-        if (item->laneId == laneId) {
+        if (item->laneReqId == laneReqId) {
             if (CreateLinkInfoItem(item, linkInfoitem) != SOFTBUS_OK) {
                 LaneUnlock();
                 LNN_LOGE(LNN_LANE, "create linkInfoItem fail");
@@ -402,7 +402,7 @@ int32_t FindLaneLinkInfoByLaneId(uint32_t laneId, LaneLinkInfo *linkInfoitem)
         }
     }
     LaneUnlock();
-    LNN_LOGE(LNN_LANE, "find laneLinkInfo by laneId fail");
+    LNN_LOGE(LNN_LANE, "find laneLinkInfo by laneReqId fail");
     return SOFTBUS_ERR;
 }
 
@@ -1075,7 +1075,7 @@ int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *
     }
     char *anonyNetworkId = NULL;
     Anonymize(reqInfo->peerNetworkId, &anonyNetworkId);
-    LNN_LOGI(LNN_LANE, "build link, linktype=%{public}d, laneId=%{public}u, peerNetworkId=%{public}s",
+    LNN_LOGI(LNN_LANE, "build link, linktype=%{public}d, laneReqId=%{public}u, peerNetworkId=%{public}s",
         reqInfo->linkType, reqId, anonyNetworkId);
     AnonymizeFree(anonyNetworkId);
     if (g_linkTable[reqInfo->linkType](reqId, reqInfo, callback) != SOFTBUS_OK) {

@@ -26,6 +26,7 @@
 extern "C" {
 #endif
 
+#define INVALID_LANE_REQ_ID 0
 #define INVALID_LANE_ID 0
 
 typedef enum {
@@ -108,9 +109,9 @@ typedef struct {
 } LaneConnInfo;
 
 typedef struct {
-    void (*OnLaneRequestSuccess)(uint32_t laneId, const LaneConnInfo *info);
-    void (*OnLaneRequestFail)(uint32_t laneId, int32_t errCode);
-    void (*OnLaneStateChange)(uint32_t laneId, LaneState state);
+    void (*OnLaneRequestSuccess)(uint32_t laneReqId, const LaneConnInfo *info);
+    void (*OnLaneRequestFail)(uint32_t laneReqId, int32_t errCode);
+    void (*OnLaneStateChange)(uint32_t laneReqId, LaneState state);
 } ILaneListener;
 
 typedef enum {
@@ -169,17 +170,17 @@ typedef struct {
 
 typedef struct {
     int32_t (*lnnQueryLaneResource)(const LaneQueryInfo *queryInfo, const QosInfo *qosInfo);
-    uint32_t (*applyLaneId)(LaneType type);
-    int32_t (*lnnRequestLane)(uint32_t laneId, const LaneRequestOption *request, const ILaneListener *listener);
-    int32_t (*lnnFreeLane)(uint32_t laneId);
+    uint32_t (*applyLaneReqId)(LaneType type);
+    int32_t (*lnnRequestLane)(uint32_t laneReqId, const LaneRequestOption *request, const ILaneListener *listener);
+    int32_t (*lnnFreeLane)(uint32_t laneReqId);
 } LnnLaneManager;
 
 LnnLaneManager* GetLaneManager(void);
 
 int32_t LnnQueryLaneResource(const LaneQueryInfo *queryInfo, const QosInfo *qosInfo);
-uint32_t ApplyLaneId(LaneType type);
-int32_t LnnRequestLane(uint32_t laneId, const LaneRequestOption *request, const ILaneListener *listener);
-int32_t LnnFreeLane(uint32_t laneId);
+uint32_t ApplyLaneReqId(LaneType type);
+int32_t LnnRequestLane(uint32_t laneReqId, const LaneRequestOption *request, const ILaneListener *listener);
+int32_t LnnFreeLane(uint32_t laneReqId);
 
 #ifdef __cplusplus
 }

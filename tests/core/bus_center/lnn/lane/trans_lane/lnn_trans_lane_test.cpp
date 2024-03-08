@@ -78,13 +78,13 @@ HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_001, TestSize.Level1)
     EXPECT_TRUE(transObj != nullptr);
     transObj->Init(nullptr);
 
-    uint32_t laneId = 1;
-    int32_t ret = transObj->AllocLane(laneId, nullptr, nullptr);
+    uint32_t laneReqId = 1;
+    int32_t ret = transObj->AllocLane(laneReqId, nullptr, nullptr);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     LaneRequestOption request;
     request.type = LANE_TYPE_BUTT;
-    ret = transObj->AllocLane(laneId, (const LaneRequestOption *)&request, nullptr);
+    ret = transObj->AllocLane(laneReqId, (const LaneRequestOption *)&request, nullptr);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     transObj->Deinit();
@@ -104,11 +104,11 @@ HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_002, TestSize.Level1)
     LaneInterface *transObj = TransLaneGetInstance();
     EXPECT_TRUE(transObj != nullptr);
     transObj->Init(nullptr);
-    uint32_t laneId = 1;
+    uint32_t laneReqId = 1;
     LaneRequestOption request;
     request.type = LANE_TYPE_TRANS;
     EXPECT_CALL(laneMock, SelectLane).WillOnce(Return(SOFTBUS_OK));
-    int32_t ret = transObj->AllocLane(laneId, (const LaneRequestOption *)&request, nullptr);
+    int32_t ret = transObj->AllocLane(laneReqId, (const LaneRequestOption *)&request, nullptr);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     std::this_thread::sleep_for(std::chrono::milliseconds(200)); // delay 200ms for looper completion.
     transObj->Deinit();
@@ -128,11 +128,11 @@ HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_003, TestSize.Level1)
     LaneInterface *transObj = TransLaneGetInstance();
     EXPECT_TRUE(transObj != nullptr);
     transObj->Init(nullptr);
-    uint32_t laneId = 1;
+    uint32_t laneReqId = 1;
     LaneRequestOption request;
     request.type = LANE_TYPE_TRANS;
     EXPECT_CALL(laneMock, SelectExpectLanesByQos).WillOnce(Return(SOFTBUS_OK));
-    int32_t ret = transObj->allocLaneByQos(laneId, (const LaneRequestOption *)&request, nullptr);
+    int32_t ret = transObj->allocLaneByQos(laneReqId, (const LaneRequestOption *)&request, nullptr);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     std::this_thread::sleep_for(std::chrono::milliseconds(200)); // delay 200ms for looper completion.
     transObj->Deinit();
