@@ -180,7 +180,7 @@ void TransSrvDelDataBufNode(int channelId)
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpSrvDataList->list, ServerDataBuf, node) {
         if (item->channelId == channelId) {
             ListDelete(&item->node);
-            TRANS_LOGI(TRANS_BYTES, "delete channelId = %{public}d", item->channelId);
+            TRANS_LOGI(TRANS_BYTES, "delete channelId=%{public}d", item->channelId);
             SoftBusFree(item->data);
             SoftBusFree(item);
             g_tcpSrvDataList->cnt--;
@@ -457,7 +457,7 @@ int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)
     TransEventExtra extra = {
         .calleePkg = NULL,
         .callerPkg = conn.appInfo.myData.pkgName,
-        .channelId = conn.appInfo.myData.channelId,
+        .channelId = conn.channelId,
         .peerNetworkId = conn.appInfo.peerNetWorkId,
         .socketName = conn.appInfo.myData.sessionName,
         .linkType = conn.appInfo.connectType,

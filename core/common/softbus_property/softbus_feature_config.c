@@ -61,6 +61,7 @@
 #define DEFAULT_DISC_FREQ_MID ((5 << 16) | 24)
 #define DEFAULT_DISC_FREQ_HIGH ((5 << 16) | 36)
 #define DEFAULT_DISC_FREQ_SUPER_HIGH ((10 << 16) | 48)
+#define DEFAULT_DISC_COAP_MAX_DEVICE_NUM 20
 
 #ifdef SOFTBUS_LINUX
 #define DEFAULT_NEW_BYTES_LEN (4 * 1024 * 1024)
@@ -169,6 +170,7 @@ static TransConfigItem g_tranConfig = {0};
 
 typedef struct {
     uint32_t discFreq[FREQ_BUTT];
+    uint32_t discCoapMaxDeviceNum;
 } DiscConfigItem;
 
 static DiscConfigItem g_discConfig = {
@@ -178,6 +180,7 @@ static DiscConfigItem g_discConfig = {
         DEFAULT_DISC_FREQ_HIGH,
         DEFAULT_DISC_FREQ_SUPER_HIGH,
     },
+    .discCoapMaxDeviceNum = DEFAULT_DISC_COAP_MAX_DEVICE_NUM
 };
 
 ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
@@ -340,6 +343,11 @@ ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
         SOFTBUS_INT_BLE_MAC_AUTO_REFRESH_SWITCH,
         (unsigned char *)&(g_config.bleMacAutoRefreshSwitch),
         sizeof(g_config.bleMacAutoRefreshSwitch)
+    },
+    {
+        SOFTBUS_INT_DISC_COAP_MAX_DEVICE_NUM,
+        (unsigned char *)&(g_discConfig.discCoapMaxDeviceNum),
+        sizeof(g_discConfig.discCoapMaxDeviceNum)
     },
 };
 

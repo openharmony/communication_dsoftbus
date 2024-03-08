@@ -59,7 +59,7 @@ std::unique_ptr<char[]> StreamPacketizer::PacketizeStream()
         return nullptr;
     }
 
-    TRANS_LOGI(TRANS_STREAM,
+    TRANS_LOGD(TRANS_STREAM,
         "streamPktHeader version=%{public}d, subVersion=%{public}d, extFlag=%{public}d, streamType=%{public}d, "
         "marker=%{public}d, flag=%{public}d, streamId=%{public}d(%{public}x), timestamp=%{public}u(%{public}x), "
         "dataLen=%{public}u(%{public}x), seqNum=%{public}d(%{public}x), subSeqNum=%{public}d(%{public}x), "

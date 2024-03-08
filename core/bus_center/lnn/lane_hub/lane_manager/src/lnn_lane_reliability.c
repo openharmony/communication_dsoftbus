@@ -66,9 +66,9 @@ static int32_t GetSameLaneDetectInfo(LaneDetectInfo *infoItem)
             case LANE_WLAN_2P4G:
             case LANE_WLAN_5G:
                 if ((strncmp(infoItem->linkInfo.wlanDetect.wlanInfo.connInfo.addr,
-                        item->linkInfo.wlanDetect.wlanInfo.connInfo.addr, MAX_SOCKET_ADDR_LEN) == 0) &&
-                        (infoItem->linkInfo.wlanDetect.wlanInfo.connInfo.port ==
-                        item->linkInfo.wlanDetect.wlanInfo.connInfo.port)) {
+                    item->linkInfo.wlanDetect.wlanInfo.connInfo.addr, MAX_SOCKET_ADDR_LEN) == 0) &&
+                    (infoItem->linkInfo.wlanDetect.wlanInfo.connInfo.port ==
+                    item->linkInfo.wlanDetect.wlanInfo.connInfo.port)) {
                     infoItem->linkInfo.wlanDetect.wlanFd = item->linkInfo.wlanDetect.wlanFd;
                     infoItem->laneDetectId = item->laneDetectId;
                     ListTailInsert(&g_laneDetectList.list, &infoItem->node);
@@ -78,7 +78,7 @@ static int32_t GetSameLaneDetectInfo(LaneDetectInfo *infoItem)
                 break;
             case LANE_BR:
                 if ((strncmp(infoItem->linkInfo.brDetect.brInfo.brMac,
-                        item->linkInfo.brDetect.brInfo.brMac, BT_MAC_LEN) == 0)) {
+                    item->linkInfo.brDetect.brInfo.brMac, BT_MAC_LEN) == 0)) {
                     infoItem->linkInfo.brDetect.brReqId = item->linkInfo.brDetect.brReqId;
                     infoItem->laneDetectId = item->laneDetectId;
                     ListTailInsert(&g_laneDetectList.list, &infoItem->node);
@@ -106,7 +106,7 @@ static int32_t ClientConnectTcp(LaneDetectInfo *infoItem)
         }
     };
     if (strncpy_s(option.socketOption.addr, MAX_SOCKET_ADDR_LEN,
-            infoItem->linkInfo.wlanDetect.wlanInfo.connInfo.addr, MAX_SOCKET_ADDR_LEN) != EOK) {
+        infoItem->linkInfo.wlanDetect.wlanInfo.connInfo.addr, MAX_SOCKET_ADDR_LEN) != EOK) {
         return SOFTBUS_MEM_ERR;
     }
     int32_t fd = ConnOpenClientSocket(&option, BIND_ADDR_ALL, true);
@@ -142,7 +142,7 @@ static int32_t GetLaneDetectInfoByWlanFd(uint32_t fd, LaneDetectInfo *infoItem)
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneDetectList.list, LaneDetectInfo, node) {
         if (item->linkInfo.wlanDetect.wlanFd == fd) {
             if (memcpy_s(infoItem, sizeof(LaneDetectInfo), item,
-                    sizeof(LaneDetectInfo)) != EOK) {
+                sizeof(LaneDetectInfo)) != EOK) {
                 SoftBusMutexUnlock(&g_laneDetectList.lock);
                 return SOFTBUS_MEM_ERR;
             }
@@ -191,7 +191,7 @@ static int32_t WlanDetectReliability(uint32_t laneReqId, const LaneLinkInfo *lan
         return SOFTBUS_MEM_ERR;
     }
     if (memcpy_s(&(infoItem->linkInfo.wlanDetect.wlanInfo), sizeof(WlanLinkInfo),
-            &(laneInfo->linkInfo.wlan), sizeof(WlanLinkInfo)) != EOK) {
+        &(laneInfo->linkInfo.wlan), sizeof(WlanLinkInfo)) != EOK) {
         SoftBusFree(infoItem);
         return SOFTBUS_MEM_ERR;
     }

@@ -16,6 +16,7 @@
 #define WIFI_DIRECT_PROCESSOR_H
 
 #include "wifi_direct_types.h"
+#include "entity/wifi_direct_entity.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,7 +48,7 @@ struct WifiDirectTriggerChannel;
     void (*onTriggerChannelDataReceived)(struct WifiDirectTriggerChannel *channel);                               \
     void (*onDefaultTriggerChannelDataReceived)(struct WifiDirectNegotiateChannel *channel,                       \
                                                 const uint8_t *data, size_t len);                                 \
-    void (*onOperationEvent)(int32_t result, void *data);                                                         \
+    void (*onOperationEvent)(int32_t result, struct EntityEventData *entityEventData);                            \
                                                                                                                   \
     bool (*isMessageNeedPending)(enum WifiDirectNegotiateCmdType cmd, struct NegotiateMessage *msg);              \
     void (*onReversal)(enum WifiDirectNegotiateCmdType cmd, struct NegotiateMessage *msg);                        \

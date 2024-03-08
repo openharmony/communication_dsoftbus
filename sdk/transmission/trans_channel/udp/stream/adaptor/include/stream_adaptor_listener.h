@@ -94,10 +94,10 @@ public:
 
     void OnStreamStatus(int status) override
     {
-        TRANS_LOGI(TRANS_STREAM, "status=%{public}d", status);
+        TRANS_LOGD(TRANS_STREAM, "status=%{public}d", status);
 
         if (adaptor_->GetListenerCallback() != nullptr && adaptor_->GetListenerCallback()->OnStatusChange != nullptr) {
-            TRANS_LOGE(TRANS_STREAM, "OnStatusChange status=%{public}d", status);
+            TRANS_LOGI(TRANS_STREAM, "OnStatusChange status=%{public}d", status);
             adaptor_->GetListenerCallback()->OnStatusChange(adaptor_->GetChannelId(), status);
         }
     }
@@ -105,7 +105,7 @@ public:
     void OnQosEvent(int32_t eventId, int32_t tvCount, const QosTv *tvList) override
     {
         if (adaptor_->GetListenerCallback() != nullptr && adaptor_->GetListenerCallback()->OnQosEvent != nullptr) {
-            TRANS_LOGI(TRANS_QOS, "channelId=%{public}" PRId64, adaptor_->GetChannelId());
+            TRANS_LOGD(TRANS_QOS, "channelId=%{public}" PRId64, adaptor_->GetChannelId());
             adaptor_->GetListenerCallback()->OnQosEvent(adaptor_->GetChannelId(), eventId, tvCount, tvList);
         } else {
             TRANS_LOGE(TRANS_QOS,

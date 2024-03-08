@@ -28,6 +28,11 @@
 
 #define DEFAULT_NET_MASK "255.255.255.0"
 
+static bool IsWifiEnable(void)
+{
+    return IsWifiActive() == WIFI_STA_ACTIVE;
+}
+
 static bool IsWifiP2pEnabled(void)
 {
     enum P2pState state;
@@ -542,6 +547,7 @@ static bool IsThreeVapConflict(void)
 }
 
 static struct WifiDirectP2pAdapter g_adapter = {
+    .isWifiEnabled = IsWifiEnable,
     .isWifiP2pEnabled = IsWifiP2pEnabled,
     .isWifiConnected = IsWifiConnected,
     .isWifiApEnabled = IsWifiApEnabled,

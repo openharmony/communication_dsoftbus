@@ -26,6 +26,14 @@ extern "C" {
 
 typedef enum {
     EVENT_SCENE_CONNECT = 1,
+    EVENT_SCENE_START_BASE_LISTENER = 2,
+    EVENT_SCENE_STOP_BASE_LISTENER = 3,
+    EVENT_SCENE_SOCKET_CREATE = 4,
+    EVENT_SCENE_SOCKET_LISTEN = 5,
+    EVENT_SCENE_SOCKET_ACCEPT = 6,
+    EVENT_SCENE_SOCKET_CONNECT = 7,
+    EVENT_SCENE_SOCKET_SHUTDOWN = 8,
+    EVENT_SCENE_SOCKET_CLOSE = 9,
 } ConnEventScene;
 
 typedef enum {
@@ -43,7 +51,17 @@ typedef enum {
     EVENT_STAGE_CONNECT_CONNECT_GROUP = 18,
     EVENT_STAGE_CONNECT_CONFIG_INFO = 19,
     EVENT_STAGE_CONNECT_START_LISTENING = 20,
+    EVENT_STAGE_CONNECT_DEVICE = 2101,
+    EVENT_STAGE_CONNECT_DEVICE_DIRECTLY = 2102,
+    EVENT_STAGE_CONNECT_UPDATE_CONNECTION_RC = 2103,
+    EVENT_STAGE_CONNECT_SERVER_ACCEPTED = 2104,
+    EVENT_STAGE_CONNECT_SEND_BASIC_INFO = 2105,
+    EVENT_STAGE_CONNECT_PARSE_BASIC_INFO = 2106,
 } ConnEventConnectStage;
+
+typedef enum {
+    EVENT_STAGE_TCP_COMMON_ONE = 1,
+} ConnEventTcpCommonStage;
 
 typedef struct {
     int32_t result;             // STAGE_RES
@@ -59,6 +77,15 @@ typedef struct {
     int32_t rssi;               // RSSI
     int32_t load;               // CHLOAD
     int32_t frequency;          // FREQ
+    int32_t connProtocol;       // CONN_PROTOCOL
+    int32_t connRole;           // CONN_ROLE
+    int32_t connRcDelta;        // CONN_RC_DELTA
+    int32_t connRc;             // CONN_RC
+    int32_t supportFeature;     // SUPT_FEATURE
+    int32_t moduleId;           // MODULE_ID
+    uint32_t proType;           // PROTOCOL_TYPE
+    int32_t fd;                 // FD
+    int32_t cfd;                // CFD
     const char *challengeCode;  // CHALLENGE_CODE
     const char *peerIp;         // PEER_IP
     const char *peerBrMac;      // PEER_BR_MAC
@@ -66,6 +93,8 @@ typedef struct {
     const char *peerWifiMac;    // PEER_WIFI_MAC
     const char *peerPort;       // PEER_PORT
     const char *peerNetworkId;  // PEER_NET_ID
+    const char *peerUdid;       // PEER_UDID
+    const char *peerDeviceType; // PEER_DEV_TYPE
     const char *localNetworkId; // LOCAL_NET_ID
     const char *callerPkg;      // HOST_PKG
     const char *calleePkg;      // TO_CALL_PKG

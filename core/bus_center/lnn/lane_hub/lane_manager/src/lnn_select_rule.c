@@ -99,7 +99,10 @@ static bool IsEnableWlan2P4G(const char *networkId)
 {
     SoftBusBand band = SoftBusGetLinkBand();
     if (band != BAND_24G && band != BAND_UNKNOWN) {
-        LNN_LOGE(LNN_LANE, "band isn't 2.4G or unknown");
+        char *anonyNetworkId = NULL;
+        Anonymize(networkId, &anonyNetworkId);
+        LNN_LOGE(LNN_LANE, "band isn't 2.4G or unknown, networkId=%{public}s", anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
         return false;
     }
     NodeInfo node;

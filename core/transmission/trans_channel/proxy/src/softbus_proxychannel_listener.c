@@ -83,7 +83,10 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
     if (appInfo->appType != APP_TYPE_AUTH) {
         ret = LnnGetNetworkIdByUuid(appInfo->peerData.deviceId, buf, NETWORK_ID_BUF_LEN);
         if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "get info networkId fail.");
+            char *anonyUuid = NULL;
+            Anonymize(appInfo->peerData.deviceId, &anonyUuid);
+            TRANS_LOGE(TRANS_CTRL, "get info networkId fail, uuid=%{public}s", anonyUuid);
+            AnonymizeFree(anonyUuid);
             return SOFTBUS_ERR;
         }
         info.peerDeviceId = buf;

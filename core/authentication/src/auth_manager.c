@@ -30,12 +30,14 @@
 #include "lnn_async_callback_utils.h"
 #include "lnn_app_bind_interface.h"
 #include "lnn_decision_db.h"
+#include "lnn_device_info.h"
 #include "lnn_event.h"
 #include "lnn_feature_capability.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_net_builder.h"
 #include "softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_socket.h"
 #include "softbus_def.h"
 
 #define MAX_AUTH_VALID_PERIOD              (30 * 60 * 1000L)            /* 30 mins */
@@ -315,7 +317,7 @@ void RemoveAuthSessionKeyByIndex(int64_t authId, int32_t index)
     AuthRemoveDeviceKey(udid, type);
     if ((ret == SOFTBUS_OK) && (connType != CONNECTION_ADDR_MAX) && (keyClear)) {
         AUTH_LOGI(AUTH_CONN, "auth key clear empty, Lnn offline. authId=%{public}" PRId64, authId);
-        LnnRequestLeaveSpecific(networkId, connType);
+        LnnNotifyEmptySessionKey(authId);
     }
 }
 
@@ -492,7 +494,7 @@ static int64_t GetAuthIdByConnInfo(const AuthConnInfo *connInfo, bool isServer)
     return authId;
 }
 
-static int64_t GetActiveAuthIdByConnInfo(const AuthConnInfo *connInfo)
+static int64_t GetActiveAuthIdByConnInfo(const AuthConnInfo *connInfo, bool judgeTimeOut)
 {
     if (!RequireAuthLock()) {
         return AUTH_INVALID_ID;
@@ -503,8 +505,9 @@ static int64_t GetActiveAuthIdByConnInfo(const AuthConnInfo *connInfo)
     auth[num++] = FindAuthManagerByConnInfo(connInfo, true);
     /* Check auth valid period */
     uint64_t currentTime = GetCurrentTimeMs();
-    for (uint32_t i = 0; i < num; i++) {
+    for (uint32_t i = 0; i < num && judgeTimeOut; i++) {
         if (auth[i] != NULL && (currentTime - auth[i]->lastActiveTime >= MAX_AUTH_VALID_PERIOD)) {
+            AUTH_LOGI(AUTH_CONN, "auth manager timeout. authId=%{public}" PRId64, auth[i]->authId);
             auth[i] = NULL;
         }
     }
@@ -1204,6 +1207,24 @@ static void HandleCloseAckData(
     }
 }
 
+static int32_t PostDecryptFailAuthData(
+    uint64_t connId, bool fromServer, const AuthDataHead *inputHead, const uint8_t *data)
+{
+    AuthDataHead head = {
+        .dataType = DATA_TYPE_DECRYPT_FAIL,
+        .module = 0,
+        .seq = inputHead->seq,
+        .flag = 0,
+        .len = inputHead->len,
+    };
+    AUTH_LOGI(AUTH_CONN, "post decrypt fail data");
+    if (PostAuthData(connId, fromServer, &head, data) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "post data fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static void HandleConnectionData(
     uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
 {
@@ -1215,6 +1236,7 @@ static void HandleConnectionData(
         PrintAuthConnInfo(connInfo);
         AUTH_LOGE(AUTH_CONN, "AuthManager not found, connType=%{public}d", connInfo->type);
         ReleaseAuthLock();
+        (void)PostDecryptFailAuthData(connId, fromServer, head, data);
         return;
     }
     int64_t authId = auth->authId;
@@ -1232,6 +1254,41 @@ static void HandleConnectionData(
         g_transCallback.OnDataReceived(authId, head, decData, decDataLen);
     }
     SoftBusFree(decData);
+}
+
+static void HandleDecryptFailData(
+    uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
+{
+    if (!RequireAuthLock()) {
+        return;
+    }
+    int32_t num = 0;
+    const AuthManager *auth[2] = { NULL, NULL }; /* 2: client + server */
+    auth[num++] = FindAuthManagerByConnInfo(connInfo, false);
+    auth[num++] = FindAuthManagerByConnInfo(connInfo, true);
+    if (auth[0] == NULL && auth[1] == NULL) {
+        PrintAuthConnInfo(connInfo);
+        AUTH_LOGE(AUTH_CONN, "AuthManager not found, conntype=%{public}d", connInfo->type);
+        ReleaseAuthLock();
+        return;
+    }
+    uint8_t *decData = NULL;
+    uint32_t decDataLen = 0;
+    int32_t index = (int32_t)SoftBusLtoHl(*(uint32_t *)data);
+    if (auth[0] != NULL && DecryptInner(&auth[0]->sessionKeyList, data, head->len,
+        &decData, &decDataLen) == SOFTBUS_OK) {
+        ReleaseAuthLock();
+        SoftBusFree(decData);
+        RemoveAuthSessionKeyByIndex(auth[0]->authId, index);
+    } else if (auth[1] != NULL && DecryptInner(&auth[1]->sessionKeyList, data, head->len,
+        &decData, &decDataLen) == SOFTBUS_OK) {
+        ReleaseAuthLock();
+        SoftBusFree(decData);
+        RemoveAuthSessionKeyByIndex(auth[1]->authId, index);
+    } else {
+        ReleaseAuthLock();
+        AUTH_LOGE(AUTH_CONN, "decrypt trans data fail.");
+    }
 }
 
 static void OnDataReceived(
@@ -1261,6 +1318,9 @@ static void OnDataReceived(
             break;
         case DATA_TYPE_CONNECTION:
             HandleConnectionData(connId, connInfo, fromServer, head, data);
+            break;
+        case DATA_TYPE_DECRYPT_FAIL:
+            HandleDecryptFailData(connId, connInfo, fromServer, head, data);
             break;
         default:
             break;
@@ -1470,6 +1530,7 @@ int32_t AuthDeviceOpenConn(const AuthConnInfo *info, uint32_t requestId, const A
     }
     AUTH_LOGI(AUTH_CONN, "open auth conn: connType=%{public}d, requestId=%{public}u", info->type, requestId);
     int64_t authId;
+    bool judgeTimeOut = false;
     switch (info->type) {
         case AUTH_LINK_TYPE_WIFI:
             authId = GetLatestIdByConnInfo(info, AUTH_LINK_TYPE_WIFI);
@@ -1480,14 +1541,15 @@ int32_t AuthDeviceOpenConn(const AuthConnInfo *info, uint32_t requestId, const A
             break;
         case AUTH_LINK_TYPE_BR:
         case AUTH_LINK_TYPE_BLE:
+            judgeTimeOut = true;
         case AUTH_LINK_TYPE_P2P:
-            authId = GetActiveAuthIdByConnInfo(info);
+            authId = GetActiveAuthIdByConnInfo(info, judgeTimeOut);
             if (authId != AUTH_INVALID_ID) {
                 return StartReconnectDevice(authId, info, requestId, callback);
             }
             return StartVerifyDevice(requestId, info, NULL, callback, true);
         case AUTH_LINK_TYPE_ENHANCED_P2P:
-            authId = GetActiveAuthIdByConnInfo(info);
+            authId = GetActiveAuthIdByConnInfo(info, judgeTimeOut);
             if (authId != AUTH_INVALID_ID) {
                 AUTH_LOGI(AUTH_CONN, "reuse enhanced p2p authId=%{public}" PRId64, authId);
                 callback->onConnOpened(requestId, authId);

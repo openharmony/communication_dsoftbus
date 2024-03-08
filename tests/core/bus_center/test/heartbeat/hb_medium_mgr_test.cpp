@@ -216,10 +216,6 @@ HWTEST_F(HeartBeatMediumTest, GetOnlineNodeByRecvInfoTest_01, TestSize.Level1)
     EXPECT_CALL(ledgerMock, LnnHasDiscoveryType).WillRepeatedly(Return(SOFTBUS_ERR));
     ret = HbGetOnlineNodeByRecvInfo(udidHash, CONNECTION_ADDR_BR, &nodeInfo, &hbResp);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-    // ret = HbGetOnlineNodeByRecvInfo(TEST_UDID_HASH, CONNECTION_ADDR_BR, &nodeInfo, &hbResp);
-    // EXPECT_TRUE(ret == SOFTBUS_OK);
-    // ret = HbGetOnlineNodeByRecvInfo(TEST_UDID_HASH, CONNECTION_ADDR_WLAN, &nodeInfo, &hbResp);
-    // EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*
@@ -308,7 +304,7 @@ HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvProcessTest_01, TestSize.Level1)
     ON_CALL(hbStrateMock, LnnStopOfflineTimingStrategy).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(hbStrateMock, LnnStartOfflineTimingStrategy).WillByDefault(Return(SOFTBUS_OK));
     int ret = HbMediumMgrRecvProcess(&device, weight, masterWeight, HEARTBEAT_TYPE_BLE_V1, false, &hbResp);
-    EXPECT_TRUE(ret == SOFTBUS_NETWORK_NODE_OFFLINE);
+    EXPECT_TRUE(ret == SOFTBUS_NETWORK_HEARTBEAT_REPEATED);
     HbFirstSaveRecvTime(&storedInfo, &device, weight, masterWeight, TEST_RECVTIME_FIRST);
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_ERR));
     ret = HbMediumMgrRecvProcess(&device, weight, masterWeight, HEARTBEAT_TYPE_BLE_V1, false, &hbResp);

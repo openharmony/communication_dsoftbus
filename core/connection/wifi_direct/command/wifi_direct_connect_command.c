@@ -222,6 +222,7 @@ static void FillConnEventExtra(int32_t requestId, ConnEventExtra *extra)
     GetWifiDirectStatisticRenegotiate(requestId, &(extra->isRenegotiate));
     GetWifiDirectStatisticReuse(requestId, &(extra->isReuse));
     GetWifiDirectStatisticLinkTime(requestId, &(extra->linkTime));
+    extra->costTime = (int32_t)extra->linkTime;
     GetWifiDirectStatisticNegotiateTime(requestId, &(extra->negotiateTime));
     DestroyWifiDirectStatisticElement(requestId);
 }

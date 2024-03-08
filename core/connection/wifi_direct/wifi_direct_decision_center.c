@@ -14,7 +14,13 @@
  */
 
 #include "wifi_direct_decision_center.h"
-#include "channel/wifi_direct_negotiate_channel.h"
+#include <string.h>
+#include <cJSON.h>
+#include "softbus_error_code.h"
+#include "softbus_json_utils.h"
+#include "wifi_direct_negotiate_channel.h"
+#include "wifi_direct_p2p_adapter.h"
+#include "data/wifi_config_info.h"
 #include "data/link_info.h"
 #include "data/inner_link.h"
 #include "data/negotiate_message.h"

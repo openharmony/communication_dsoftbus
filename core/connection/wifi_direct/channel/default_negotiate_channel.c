@@ -17,6 +17,7 @@
 #include "securec.h"
 #include "common_list.h"
 #include "conn_log.h"
+#include "data/link_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "auth_manager.h"
@@ -199,11 +200,8 @@ static enum WifiDirectNegotiateChannelType GetMediumType(struct WifiDirectNegoti
 
 static bool IsP2pChannel(struct WifiDirectNegotiateChannel *base)
 {
-    AuthConnInfo connInfo;
-    (void)memset_s(&connInfo, sizeof(connInfo), 0, sizeof(connInfo));
-    int32_t ret = AuthGetConnInfo(((struct DefaultNegotiateChannel *)base)->authId, &connInfo);
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, false, CONN_WIFI_DIRECT, "get auth conn info failed");
-    return connInfo.type == AUTH_LINK_TYPE_P2P;
+    struct DefaultNegotiateChannel *self = (struct DefaultNegotiateChannel *)base;
+    return self->authLinkType == AUTH_LINK_TYPE_P2P || self->authLinkType == AUTH_LINK_TYPE_ENHANCED_P2P;
 }
 
 static bool IsMetaChannel(struct WifiDirectNegotiateChannel *base)
@@ -233,12 +231,33 @@ static struct WifiDirectNegotiateChannel *Duplicate(struct WifiDirectNegotiateCh
         DefaultNegotiateChannelDelete(copy);
         return NULL;
     }
+    copy->isRemoteSupportTlv = self->isRemoteSupportTlv;
+    copy->authLinkType = self->authLinkType;
     return (struct WifiDirectNegotiateChannel*)copy;
 }
 
 static void Destructor(struct WifiDirectNegotiateChannel *base)
 {
     DefaultNegotiateChannelDelete((struct DefaultNegotiateChannel *)base);
+}
+
+static void GetInfoFromInnerLink(struct DefaultNegotiateChannel *self)
+{
+    struct WifiDirectNegotiateChannel *base = (struct WifiDirectNegotiateChannel *)self;
+    struct InnerLink *innerLink = GetLinkManager()->findLinkByChannel(base);
+    if (innerLink == NULL) {
+        CONN_LOGW(CONN_WIFI_DIRECT, "FindLinkByChannel failed");
+        return;
+    }
+    struct DefaultNegotiateChannel *channelOld = innerLink->getPointer(innerLink, IL_KEY_NEGO_CHANNEL, NULL);
+    if (channelOld == NULL) {
+        CONN_LOGW(CONN_WIFI_DIRECT, "getpointer failed");
+        return;
+    }
+    self->isRemoteSupportTlv = channelOld->isRemoteSupportTlv;
+    self->authLinkType = channelOld->authLinkType;
+    CONN_LOGI(CONN_WIFI_DIRECT, "isSupportTlv=%{public}d authLinkType=%{public}d",
+        self->isRemoteSupportTlv, self->authLinkType);
 }
 
 void DefaultNegotiateChannelConstructor(struct DefaultNegotiateChannel *self, int64_t authId)
@@ -259,7 +278,36 @@ void DefaultNegotiateChannelConstructor(struct DefaultNegotiateChannel *self, in
     self->destructor = Destructor;
 
     int32_t ret = AuthGetDeviceUuid(self->authId, self->remoteDeviceId, UUID_BUF_LEN);
-    CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get device id failed");
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGW(CONN_WIFI_DIRECT, "get device id faild");
+        GetInfoFromInnerLink(self);
+        return;
+    }
+
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
+    ret = LnnGetNetworkIdByUdid(self->remoteDeviceId, networkId, sizeof(networkId));
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGW(CONN_WIFI_DIRECT, "get networkId failed");
+        GetInfoFromInnerLink(self);
+        return;
+    }
+
+    bool result = false;
+    ret = LnnGetRemoteBoolInfo(networkId, BOOL_KEY_TLV_NEGOTIATION, &result);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGW(CONN_WIFI_DIRECT, "get key faild");
+        GetInfoFromInnerLink(self);
+        return;
+    }
+
+    self->isRemoteSupportTlv = result;
+    AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(connInfo), 0, sizeof(connInfo));
+    ret = AuthGetConnInfo(self->authId, &connInfo);
+    CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get auth conn info failed");
+    self->authLinkType = connInfo.type;
+    CONN_LOGI(CONN_WIFI_DIRECT, "isSupportTlv=%{public}d authLinkType=%{public}d",
+        self->isRemoteSupportTlv, self->authLinkType);
 }
 
 void DefaultNegotiateChannelDestructor(struct DefaultNegotiateChannel *self)
@@ -288,8 +336,6 @@ int32_t OpenDefaultNegotiateChannel(struct DefaultNegoChannelParam *param,
                                     struct DefaultNegoChannelOpenCallback *callback)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(param != NULL, SOFTBUS_ERR, CONN_WIFI_DIRECT, "param is null");
-    CONN_CHECK_AND_RETURN_RET_LOGW(param->remoteUuid != NULL, SOFTBUS_ERR, CONN_WIFI_DIRECT, "remoteUuid is null");
-    CONN_CHECK_AND_RETURN_RET_LOGW(param->remoteIp != NULL, SOFTBUS_ERR, CONN_WIFI_DIRECT, "remoteIp is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(callback != NULL, SOFTBUS_ERR, CONN_WIFI_DIRECT, "callback is null");
 
     bool isMeta = false;

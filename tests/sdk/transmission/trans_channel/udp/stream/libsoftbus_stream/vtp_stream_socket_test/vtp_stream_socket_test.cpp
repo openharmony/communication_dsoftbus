@@ -649,7 +649,9 @@ HWTEST_F(VtpStreamSocketTest, RegisterMetricCallback001, TestSize.Level1)
     ASSERT_TRUE(info != nullptr);
     (void)memset_s(info, sizeof(FtEventCbkInfo), 0, sizeof(FtEventCbkInfo));
 
-    int ret = vtpStreamSocket->HandleFillpFrameStats(fd, info);
+    int ret = vtpStreamSocket->HandleFillpFrameStats(fd, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = vtpStreamSocket->HandleFillpFrameStats(fd, info);
     EXPECT_EQ(0, ret);
 
     auto self = vtpStreamSocket->GetSelf();
@@ -797,10 +799,18 @@ HWTEST_F(VtpStreamSocketTest, Decrypt001, TestSize.Level1)
     ssize_t len = 2;
     data = std::make_unique<char[]>(len + FRAME_HEADER_LEN);
 
-    ssize_t ret = vtpStreamSocket->Encrypt(in, inLen, data.get() + FRAME_HEADER_LEN, outLen);
+    ssize_t ret = vtpStreamSocket->Encrypt(nullptr, inLen, data.get() + FRAME_HEADER_LEN, outLen);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = vtpStreamSocket->Encrypt(in, inLen, nullptr, outLen);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = vtpStreamSocket->Encrypt(in, inLen, data.get() + FRAME_HEADER_LEN, outLen);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
-    ssize_t res = vtpStreamSocket->Decrypt(in, inLen, data.get(), outLen);
+    ssize_t res = vtpStreamSocket->Decrypt(nullptr, inLen, data.get(), outLen);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, res);
+    res = vtpStreamSocket->Decrypt(in, inLen, nullptr, outLen);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, res);
+    res = vtpStreamSocket->Decrypt(in, inLen, data.get(), outLen);
     EXPECT_EQ(SOFTBUS_ERR, res);
 
     outLen = 23;
@@ -995,7 +1005,9 @@ HWTEST_F(VtpStreamSocketTest, HandleRipplePolicy001, TestSize.Level1)
     (void)memset_s(info, sizeof(FtEventCbkInfo), 0, sizeof(FtEventCbkInfo));
 
     ASSERT_TRUE(!vtpStreamSocket->g_streamSocketMap.empty());
-    int ret = vtpStreamSocket->HandleRipplePolicy(fd, info);
+    int ret = vtpStreamSocket->HandleRipplePolicy(fd, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = vtpStreamSocket->HandleRipplePolicy(fd, info);
     EXPECT_EQ(0, ret);
 
     fd = 10;

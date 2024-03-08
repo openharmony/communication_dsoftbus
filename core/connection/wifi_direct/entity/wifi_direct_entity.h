@@ -23,6 +23,11 @@
 extern "C" {
 #endif
 
+struct EntityEventData {
+    struct WifiDirectP2pGroupInfo *groupInfo;
+    void *privateData;
+};
+
 struct WifiDirectConnectParams {
     int32_t frequency;
     bool isNeedDhcp;
@@ -66,7 +71,7 @@ enum EntityOperationEvent {
 };
 
 struct EntityListener {
-    void (*onOperationComplete)(int32_t event, void *data);
+    void (*onOperationComplete)(int32_t event, struct EntityEventData *entityEventData);
     void (*onEntityChanged)(enum EntityState state);
 };
 

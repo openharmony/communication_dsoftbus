@@ -276,7 +276,7 @@ static int32_t GetLocalIpv4InfoArray(struct WifiDirectIpv4Info *info, size_t *si
         addr = (struct sockaddr_in *)ifa->ifa_netmask;
         info[count].prefixLength = IP_MASK_MAX - (ffs((int32_t)ntohl(addr->sin_addr.s_addr)) - 1);
 
-        CONN_LOGI(CONN_WIFI_DIRECT, "name=%{public}s, ifa_name=%{public}s, WifiDirectAnonymizeIp=%{public}hhu",
+        CONN_LOGI(CONN_WIFI_DIRECT, "name=%{public}s, ip=%{public}s, prefix=%{public}hhu",
             ifa->ifa_name, WifiDirectAnonymizeIp(addrString), info[count].prefixLength);
         count++;
     }

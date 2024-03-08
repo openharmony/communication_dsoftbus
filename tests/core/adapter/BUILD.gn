@@ -24,6 +24,7 @@ ohos_unittest("AdapterDsoftbusRsaCryptoTest") {
   include_dirs = [
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/adapter/huks/include",
+    "$dsoftbus_root_path/core/adapter/transmission/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/dfx/interface/include",
     "$dsoftbus_root_path/interfaces/kits/common",

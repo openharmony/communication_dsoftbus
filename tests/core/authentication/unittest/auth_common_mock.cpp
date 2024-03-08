@@ -86,11 +86,20 @@ int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
 {
     return GetCommonInterface()->LnnGetTrustedDevInfoFromDb(udidArray, num);
 }
-}
 
-int32_t GetActiveOsAccountIds(void)
+int32_t LnnGetAllOnlineNodeNum(int32_t *nodeNum)
 {
-    return GetCommonInterface()->GetActiveOsAccountIds();
+    return GetCommonInterface()->LnnGetAllOnlineNodeNum(nodeNum);
 }
 
+int32_t LnnSetLocalStrInfo(InfoKey key, const char *info)
+{
+    return GetCommonInterface()->LnnSetLocalStrInfo(key, info);
+}
+
+int32_t LnnNotifyEmptySessionKey(int64_t authId)
+{
+    return GetCommonInterface()->LnnNotifyEmptySessionKey(authId);
+}
+}
 } // namespace OHOS

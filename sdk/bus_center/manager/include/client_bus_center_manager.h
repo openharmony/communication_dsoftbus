@@ -56,8 +56,8 @@ void LnnOnPublishLNNResult(int32_t publishId, int32_t reason);
 void LnnOnRefreshLNNResult(int32_t refreshId, int32_t reason);
 void LnnOnRefreshDeviceFound(const void *device);
 
-int32_t DiscRecoveryPublish();
-int32_t DiscRecoverySubscribe();
+int32_t DiscRecoveryPublish(void);
+int32_t DiscRecoverySubscribe(void);
 
 #ifdef __cplusplus
 }
