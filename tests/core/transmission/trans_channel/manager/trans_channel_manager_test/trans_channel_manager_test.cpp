@@ -175,6 +175,28 @@ HWTEST_F(TransChannelManagerTest, GetAppInfo001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TransOpenChannel002
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given null parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, TransOpenChannel002, TestSize.Level1)
+{
+    SessionParam param;
+    (void)memset_s(&param, sizeof(SessionParam), 0, sizeof(SessionParam));
+    int tmp = 0;
+    param.attr = &g_sessionAttr[tmp];
+    TransInfo transInfo;
+    (void)memset_s(&transInfo, sizeof(TransInfo), 0, sizeof(TransInfo));
+
+    int ret = TransOpenChannel(nullptr, &transInfo);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = TransOpenChannel(&param, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
  * @tc.name: TransGetChannelType001
  * @tc.desc: TransGetChannelType, use the wrong parameter.
  * @tc.type: FUNC
