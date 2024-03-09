@@ -109,13 +109,13 @@ static uint32_t AllocLaneReqId(LaneType type)
     return INVALID_LANE_REQ_ID;
 }
 
-int32_t ParseLaneTypeByLaneId(const uint32_t laneId, LaneType *laneType)
+int32_t ParseLaneTypeByLaneReqId(const uint32_t laneReqId, LaneType *laneType)
 {
-    if (laneId == INVALID_LANE_ID) {
-        LNN_LOGE(LNN_LANE, "[ParseLaneType]invalid laneId");
+    if (laneReqId == INVALID_LANE_REQ_ID) {
+        LNN_LOGE(LNN_LANE, "[ParseLaneType]invalid laneReqId");
         return SOFTBUS_ERR;
     }
-    *laneType = (LaneType)(laneId >> LANE_ID_TYPE_SHIFT);
+    *laneType = (LaneType)(laneReqId >> LANE_REQ_ID_TYPE_SHIFT);
     return SOFTBUS_OK;
 }
 

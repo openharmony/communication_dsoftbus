@@ -86,14 +86,14 @@ static int32_t AddLaneTypeInfoItem(const LaneTypeInfo *inputLaneTypeInfo)
     return SOFTBUS_OK;
 }
 
-int32_t CreateLaneTypeInfoByLaneId(const uint32_t laneId, const LaneLinkInfo *linkInfo)
+int32_t CreateLaneTypeInfoByLaneReqId(const uint32_t laneReqId, const LaneLinkInfo *linkInfo)
 {
-    if (laneId == INVALID_LANE_ID) {
-        LNN_LOGE(LNN_LANE, "[ParseLaneType]invalid laneId");
+    if (laneReqId == INVALID_LANE_REQ_ID) {
+        LNN_LOGE(LNN_LANE, "[CreateLaneType]invalid laneReqId");
         return SOFTBUS_ERR;
     }
     LaneType laneType;
-    if (ParseLaneTypeByLaneId(laneId, &laneType) != SOFTBUS_OK) {
+    if (ParseLaneTypeByLaneReqId(laneReqId, &laneType) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "parse lanetype fail");
         return SOFTBUS_ERR;
     }
