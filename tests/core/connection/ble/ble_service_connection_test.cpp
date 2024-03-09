@@ -49,34 +49,6 @@ extern "C" int SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback)
     return SOFTBUS_OK;
 }
 
-extern "C"  GattService *CreateService(void)
-{
-    char array[16];
-    GattService *gattService = (GattService *)SoftBusCalloc(sizeof(GattService));
-    CONN_CHECK_AND_RETURN_RET_LOGE(gattService != NULL, NULL, CONN_BLE, "calloc gatt service failed");
-    SoftBusBtUuid serviceUuid = {
-        .uuid = array,
-        .uuidLen = sizeof(array)/sizeof(array[0]),
-    };
-    SoftBusBtUuid connCharacteristicUuid = {
-        .uuid = array,
-        .uuidLen = sizeof(array)/sizeof(array[0]),
-    };
-    SoftBusBtUuid netUuid = {
-        .uuid = array,
-        .uuidLen = sizeof(array)/sizeof(array[0]),
-    };
-    SoftBusBtUuid descriptorUuid = {
-        .uuid = array,
-        .uuidLen = sizeof(array)/sizeof(array[0]),
-    };
-    gattService->serviceUuid = serviceUuid;
-    gattService->connCharacteristicUuid = connCharacteristicUuid;
-    gattService->netUuid = netUuid;
-    gattService->descriptorUuid = descriptorUuid;
-    return gattService;
-}
-
 class ServiceConnectionTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -102,12 +74,9 @@ void ServiceConnectionTest::SetUpTestCase()
 HWTEST_F(ServiceConnectionTest, ServiceConnection001, TestSize.Level1)
 {
     int32_t ret;
-    GattService *service = CreateService();
-    EXPECT_NE(service, nullptr);
-    GattServiceType serviceId = SOFTBUS_GATT_SERVICE;
     NiceMock<ConnectionBleInterfaceMock> bleMock;
     EXPECT_CALL(bleMock, SoftBusGattsAddService(_, _, _)).WillRepeatedly(Return(SOFTBUS_ERR));
-    ret = ConnGattServerStartService(service, serviceId);
+    ret = ConnGattServerStartService();
     EXPECT_EQ(SOFTBUS_CONN_BLE_UNDERLAY_SERVER_ADD_SERVICE_ERR, ret);
 }
 
@@ -124,7 +93,7 @@ HWTEST_F(ServiceConnectionTest, ServiceConnection002, TestSize.Level1)
     int32_t ret;
     NiceMock<ConnectionBleInterfaceMock> bleMock;
     EXPECT_CALL(bleMock, SoftBusGattsStopService).WillRepeatedly(Return(SOFTBUS_ERR));
-    ret = ConnGattServerStopService(SOFTBUS_GATT_SERVICE);
+    ret = ConnGattServerStopService();
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 

@@ -457,7 +457,7 @@ int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)
     TransEventExtra extra = {
         .calleePkg = NULL,
         .callerPkg = conn.appInfo.myData.pkgName,
-        .channelId = conn.appInfo.myData.channelId,
+        .channelId = conn.channelId,
         .peerNetworkId = conn.appInfo.peerNetWorkId,
         .socketName = conn.appInfo.myData.sessionName,
         .linkType = conn.appInfo.connectType,

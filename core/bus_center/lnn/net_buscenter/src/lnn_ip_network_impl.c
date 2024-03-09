@@ -98,7 +98,7 @@ static bool GetIpProcess(const char *ifName, char *ip, uint32_t size)
 static VisitNextChoice NotifyWlanAddressChanged(const LnnNetIfMgr *netifManager, void *data)
 {
     if (netifManager->type == LNN_NETIF_TYPE_WLAN) {
-        LNN_LOGI(LNN_BUILDER, "notify wlan changed");
+        LNN_LOGI(LNN_BUILDER, "notify wlan changed at %{public}" PRIu64, SoftBusGetSysTimeMs());
         LnnNotifyPhysicalSubnetStatusChanged(netifManager->ifName, LNN_PROTOCOL_IP, data);
     }
     return CHOICE_VISIT_NEXT;

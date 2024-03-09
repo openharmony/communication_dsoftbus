@@ -82,7 +82,7 @@ static void NotifySocketSendResult(int32_t socket, DFileMsgType msgType, const D
     event.bytesProcessed = msgData->transferUpdate.bytesTransferred;
     event.bytesTotal = msgData->transferUpdate.totalBytes;
     event.UpdateRecvPath = NULL;
-    listener->fileCallback(socket, &event);
+    listener->socketSendCallback(socket, &event);
 }
 
 static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileMsg *msgData)
@@ -118,11 +118,11 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
     }
 
     if (msgType == DFILE_ON_CONNECT_FAIL || msgType == DFILE_ON_FATAL_ERROR) {
-        if (fileListener.fileCallback != NULL) {
+        if (fileListener.socketSendCallback != NULL) {
             FileEvent event;
             (void)memset_s(&event, sizeof(FileEvent), 0, sizeof(FileEvent));
             event.type = FILE_EVENT_SEND_ERROR;
-            fileListener.fileCallback(sessionId, &event);
+            fileListener.socketSendCallback(sessionId, &event);
         } else if (fileListener.sendListener.OnFileTransError != NULL) {
             fileListener.sendListener.OnFileTransError(sessionId);
         }
@@ -131,7 +131,7 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
         return;
     }
     (void)g_udpChannelMgrCb->OnIdleTimeoutReset(sessionId);
-    if (fileListener.fileCallback != NULL) {
+    if (fileListener.socketSendCallback != NULL) {
         NotifySocketSendResult(sessionId, msgType, msgData, &fileListener);
     } else {
         NotifySendResult(sessionId, msgType, msgData, &fileListener);
@@ -202,7 +202,7 @@ static void NotifySocketRecvResult(int32_t socket, DFileMsgType msgType, const D
     event.bytesProcessed = msgData->transferUpdate.bytesTransferred;
     event.bytesTotal = msgData->transferUpdate.totalBytes;
     event.UpdateRecvPath = NULL;
-    listener->fileCallback(socket, &event);
+    listener->socketRecvCallback(socket, &event);
 }
 
 static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFileMsg *msgData)
@@ -232,11 +232,11 @@ static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFi
         return;
     }
     if (msgType == DFILE_ON_CONNECT_FAIL || msgType == DFILE_ON_FATAL_ERROR) {
-        if (fileListener.fileCallback != NULL) {
+        if (fileListener.socketRecvCallback != NULL) {
             FileEvent event;
             (void)memset_s(&event, sizeof(FileEvent), 0, sizeof(FileEvent));
             event.type = FILE_EVENT_RECV_ERROR;
-            fileListener.fileCallback(sessionId, &event);
+            fileListener.socketRecvCallback(sessionId, &event);
         } else if (fileListener.recvListener.OnFileTransError != NULL) {
             fileListener.recvListener.OnFileTransError(sessionId);
         }
@@ -244,7 +244,7 @@ static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFi
         return;
     }
     (void)g_udpChannelMgrCb->OnIdleTimeoutReset(sessionId);
-    if (fileListener.fileCallback != NULL) {
+    if (fileListener.socketRecvCallback != NULL) {
         NotifySocketRecvResult(sessionId, msgType, msgData, &fileListener);
     } else {
         NotifyRecvResult(sessionId, msgType, msgData, &fileListener);
@@ -259,11 +259,11 @@ static int32_t UpdateFileRecvPath(int32_t channelId, FileListener *fileListener,
         return SOFTBUS_ERR;
     }
 
-    if (fileListener->fileCallback != NULL) {
+    if (fileListener->socketRecvCallback != NULL) {
         FileEvent event;
         (void)memset_s(&event, sizeof(FileEvent), 0, sizeof(FileEvent));
         event.type = FILE_EVENT_RECV_UPDATE_PATH;
-        fileListener->fileCallback(sessionId, &event);
+        fileListener->socketRecvCallback(sessionId, &event);
         if (event.UpdateRecvPath == NULL) {
             TRANS_LOGE(TRANS_SDK, "UpdateRecvPath is null");
             return SOFTBUS_ERR;

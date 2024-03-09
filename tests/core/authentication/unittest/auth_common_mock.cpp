@@ -96,5 +96,10 @@ int32_t LnnSetLocalStrInfo(InfoKey key, const char *info)
 {
     return GetCommonInterface()->LnnSetLocalStrInfo(key, info);
 }
+
+int32_t LnnNotifyEmptySessionKey(int64_t authId)
+{
+    return GetCommonInterface()->LnnNotifyEmptySessionKey(authId);
+}
 }
 } // namespace OHOS

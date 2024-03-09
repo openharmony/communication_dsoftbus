@@ -94,13 +94,6 @@ enum ConnBleFeatureCapability {
 typedef uint32_t ConnBleFeatureBitSet;
 
 typedef struct {
-    SoftBusBtUuid serviceUuid;
-    SoftBusBtUuid connCharacteristicUuid;
-    SoftBusBtUuid netUuid;
-    SoftBusBtUuid descriptorUuid;
-} GattService;
-
-typedef struct {
     ListNode node;
     BleProtocolType protocol;
     uint32_t connectionId;
@@ -130,10 +123,6 @@ typedef struct {
 
     // NOTICE: fields below are inner ones for helping connect progress, they are invalid after connection established
     int32_t retrySearchServiceCnt;
-
-    GattServiceType serviceId;
-    GattService gattService;
-    uint32_t expectedMtuSize;
 } ConnBleConnection;
 
 typedef struct {
@@ -168,15 +157,13 @@ typedef struct {
     int32_t (*bleClientDisconnect)(ConnBleConnection *connection, bool grace, bool refreshGatt);
     int32_t (*bleClientSend)(ConnBleConnection *connection, const uint8_t *data, uint32_t dataLen, int32_t module);
     int32_t (*bleClientUpdatePriority)(ConnBleConnection *connection, ConnectBlePriority priority);
-    int32_t (*bleServerStartService)(GattService *servce, GattServiceType serviceId);
-    int32_t (*bleServerStopService)(GattServiceType serviceId);
+    int32_t (*bleServerStartService)(void);
+    int32_t (*bleServerStopService)(void);
     int32_t (*bleServerSend)(ConnBleConnection *connection, const uint8_t *data, uint32_t dataLen, int32_t module);
     int32_t (*bleServerConnect)(ConnBleConnection *connection);
     int32_t (*bleServerDisconnect)(ConnBleConnection *connection);
-    int32_t (*bleClientInitModule)(
-        SoftBusLooper *looper, const ConnBleClientEventListener *listener, GattServiceType serviceId);
-    int32_t (*bleServerInitModule)(
-        SoftBusLooper *looper, const ConnBleServerEventListener *listener, GattServiceType serviceId);
+    int32_t (*bleClientInitModule)(SoftBusLooper *looper, const ConnBleClientEventListener *listener);
+    int32_t (*bleServerInitModule)(SoftBusLooper *looper, const ConnBleServerEventListener *listener);
 } BleUnifyInterface;
 
 ConnBleConnection *ConnBleCreateConnection(
@@ -199,7 +186,6 @@ void ConnBleInnerComplementDeviceId(ConnBleConnection *connection);
 
 int32_t ConnBleInitConnectionMudule(SoftBusLooper *looper, ConnBleConnectionEventListener *listener);
 
-void ReturnConnection(GattServiceType serviceId, ConnBleConnection *connection);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

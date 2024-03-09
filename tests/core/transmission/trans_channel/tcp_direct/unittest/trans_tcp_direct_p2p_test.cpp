@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,11 @@ namespace OHOS {
 #define AUTH_TRANS_DATA_LEN 32
 #define PKG_NAME_SIZE_MAX_LEN 65
 #define SESSION_NAME_MAX_LEN 65
+#define MY_IP "192.168.2.1"
+#define HML_ADDR "172.30.2.1"
+#define NOAMAL_SEQ 123
+#define NORMAL_FD 151
+#define MY_PORT 6000
 
 static const char *g_addr = "192.168.8.119";
 static const char *g_ip = "192.168.8.1";
@@ -214,7 +219,8 @@ HWTEST_F(TransTcpDirectP2pTest, VerifyP2pTest001, TestSize.Level1)
     int32_t ret = VerifyP2p(authId, nullptr, nullptr, 0, seq);
     ASSERT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 
-    ret = VerifyP2p(authId, g_ip, nullptr, g_port, seq);
+    int32_t port = MY_PORT;
+    ret = VerifyP2p(authId, g_ip, nullptr, port, seq);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 }
 
@@ -466,39 +472,13 @@ HWTEST_F(TransTcpDirectP2pTest, StartHmlListenerTest002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = StartHmlListener(g_ip, &g_port);
     EXPECT_EQ(ret, SOFTBUS_ERR);
-}
 
-/**
- * @tc.name: DelHmlListenerByMoudleTest001
- * @tc.desc: DelHmlListenerByMoudle
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectP2pTest, DelHmlListenerByMoudleTest001, TestSize.Level1)
-{
-    int32_t ret = CreatHmlListenerList();
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = StartHmlListener(g_ip, &g_port);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    ListenerModule moduleType = GetMoudleByHmlIp(g_ip);
+    EXPECT_EQ(moduleType, UNUSE_BUTT);
+
     for (int i = DIRECT_CHANNEL_SERVER_HML_START; i <= DIRECT_CHANNEL_SERVER_HML_END; i++) {
         DelHmlListenerByMoudle((ListenerModule)i);
     }
-}
-
-/**
- * @tc.name: GetMoudleByHmlIpTest001
- * @tc.desc: GetMoudleByHmlIp
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectP2pTest, GetMoudleByHmlIpTest001, TestSize.Level1)
-{
-    int32_t ret = CreatHmlListenerList();
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = StartHmlListener(g_ip, &g_port);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-    ListenerModule moduleType = GetMoudleByHmlIp(g_ip);
-    EXPECT_EQ(moduleType, UNUSE_BUTT);
 }
 
 /**
@@ -538,5 +518,41 @@ HWTEST_F(TransTcpDirectP2pTest, OnP2pVerifyChannelClosedTest001, TestSize.Level1
     int32_t channelId = 0;
     OnP2pVerifyChannelClosed(channelId);
     EXPECT_TRUE(1);
+}
+
+/**
+ * @tc.name: AddP2pOrHmlTriggerTest001
+ * @tc.desc: AddP2pOrHmlTrigger, use hml addr, not found hml ip.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, AddP2pOrHmlTriggerTest001, TestSize.Level1)
+{
+    int32_t ret = CreatHmlListenerList();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    int32_t fd = NORMAL_FD;
+    const char *myAddr = HML_ADDR;
+    int32_t seq = NOAMAL_SEQ;
+    ret = AddP2pOrHmlTrigger(fd, myAddr, seq);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+}
+
+/**
+ * @tc.name: AddP2pOrHmlTriggerTest002
+ * @tc.desc: AddP2pOrHmlTrigger, not use hml addr, enter AddTrigger return fail.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, AddP2pOrHmlTriggerTest002, TestSize.Level1)
+{
+    int32_t ret = CreatHmlListenerList();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    int32_t fd = NORMAL_FD;
+    const char *myAddr = MY_IP;
+    int32_t seq = NOAMAL_SEQ;
+    ret = AddP2pOrHmlTrigger(fd, myAddr, seq);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 }

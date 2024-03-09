@@ -54,7 +54,7 @@ static uint32_t ConvertMsgToCapability(uint32_t *capability, const uint8_t *msg,
         return SOFTBUS_ERR;
     }
     for (uint32_t i = 0; i < BITLEN; i++) {
-        *capability = *capability | (*(msg + i) << BITS*i);
+        *capability = *capability | (*(msg + i) << (BITS * i));
     }
     return SOFTBUS_OK;
 }
@@ -102,8 +102,7 @@ static void UpdateNetworkInfo(const char *udid)
 
 static void OnReceiveCapaSyncInfoMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len)
 {
-    LNN_LOGI(LNN_BUILDER, "Recv capability info. type=%{public}d, len=%{public}d, networkid=%{public}s",
-        type, len, networkId);
+    LNN_LOGI(LNN_BUILDER, "Recv capability info. type=%{public}d, len=%{public}d", type, len);
     if (type != LNN_INFO_TYPE_CAPABILITY) {
         return;
     }
