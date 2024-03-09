@@ -33,6 +33,7 @@ struct WifiDirectUtils {
     int32_t (*strCompareIgnoreCase)(const char *str1, const char *str2);
     bool (*supportHml)(void);
     bool (*supportHmlTwo)(void);
+    bool (*supportCocRenegotiate)(void);
 };
 
 struct WifiDirectUtils* GetWifiDirectUtils(void);
