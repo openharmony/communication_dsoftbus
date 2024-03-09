@@ -33,7 +33,7 @@ typedef struct {
 
 typedef struct {
     char peerUuid[UUID_BUF_LEN];
-    uint32_t laneId;
+    uint32_t laneReqId;
     LaneLinkType type;
     enum WifiDirectRole role;
 } LaneStatusListenerInfo;
@@ -59,7 +59,7 @@ typedef struct {
 
 int32_t UnRegisterLaneListener(const LaneType type);
 int32_t RegisterLaneListener(const LaneType type, const LaneStatusListener *listener);
-int32_t CreateLaneTypeInfoByLaneId(const uint32_t laneId, const LaneLinkInfo *linkInfo);
+int32_t CreateLaneTypeInfoByLaneReqId(const uint32_t laneReqId, const LaneLinkInfo *linkInfo);
 int32_t DelLaneTypeInfoItem(const char *peerIp);
 int32_t InitLaneListener(void);
 int32_t LnnOnWifiDirectDeviceOnLineNotify(const char *peerIp, const LaneLinkType linkType);
