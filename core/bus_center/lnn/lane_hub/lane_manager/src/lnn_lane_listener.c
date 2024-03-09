@@ -356,7 +356,7 @@ static void LnnOnWifiDirectDeviceOffLine(const char *peerMac, const char *peerIp
     LaneResource laneResourceItem;
     (void)memset_s(&laneResourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
     if (GetLaneResourceByPeerIp(peerIp, &laneResourceItem) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "get lane resource fail");
+        LNN_LOGI(LNN_STATE, "no lane resource found, no need to notify");
         return;
     }
 
