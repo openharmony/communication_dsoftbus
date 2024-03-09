@@ -227,7 +227,8 @@ void TestTransProxyAddNormalChannel(int32_t channelId, const char *identity, Pro
 
 /**@
  * @tc.name: TransProxyOpenProxyChannelTest001
- * @tc.desc: test proxy open proxy channel, use wrong param.
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given invalid parameters.
+ * @tc.desc: Should return SOFTBUS_TRANS_PROXY_CREATE_CHANNEL_FAILED when given invalid channelId.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -237,29 +238,29 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOpenProxyChannelTest001, Test
     ConnectOption connInfo;
     int32_t channelId = TEST_NUMBER_VALID;
     int32_t ret = TransProxyOpenProxyChannel(NULL, &connInfo, &channelId);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransProxyOpenProxyChannel(&appInfo, NULL, &channelId);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransProxyOpenProxyChannel(&appInfo, &connInfo, NULL);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     connInfo.type = CONNECT_BLE_DIRECT;
-    ret = TransProxyOpenProxyChannel(&appInfo, &connInfo, NULL);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    ret = TransProxyOpenProxyChannel(&appInfo, &connInfo, &channelId);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CREATE_CHANNEL_FAILED, ret);
 
     connInfo.type = CONNECT_BLE;
-    ret = TransProxyOpenProxyChannel(&appInfo, &connInfo, NULL);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    ret = TransProxyOpenProxyChannel(&appInfo, &connInfo, &channelId);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CREATE_CHANNEL_FAILED, ret);
 
     connInfo.type = CONNECT_BR;
-    ret = TransProxyOpenProxyChannel(&appInfo, &connInfo, NULL);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    ret = TransProxyOpenProxyChannel(&appInfo, &connInfo, &channelId);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CREATE_CHANNEL_FAILED, ret);
 
     connInfo.type = CONNECT_TCP;
-    ret = TransProxyOpenProxyChannel(&appInfo, &connInfo, NULL);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    ret = TransProxyOpenProxyChannel(&appInfo, &connInfo, &channelId);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CREATE_CHANNEL_FAILED, ret);
 }
 
 /**
@@ -1160,7 +1161,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetLocalInfoTest001, TestSize
 
 /**
  * @tc.name: TransProxyGetAppInfoTypeTest001
- * @tc.desc: TransProxyGetAppInfoType.
+ * @tc.desc: Should return SOFTBUS_ERR when given invalid parameters.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1174,7 +1175,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetAppInfoTypeTest001, TestSi
 
 /**
  * @tc.name: TransProxySpecialUpdateChanInfoTest001
- * @tc.desc: TransProxySpecialUpdateChanInfo.
+ * @tc.desc: Should return SOFTBUS_ERR when given invalid parameters.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1200,7 +1201,8 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxySpecialUpdateChanInfoTest001,
 
 /**
  * @tc.name: TransProxyGetChanByChanIdTest001
- * @tc.desc: TransProxyGetChanByChanId.
+ * @tc.desc: Should return SOFTBUS_ERR when given invalid parameters.
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given null channelInfo.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1217,7 +1219,8 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetChanByChanIdTest001, TestS
 
 /**
  * @tc.name: TransProxyProcessDataConfigTest001
- * @tc.desc: TransProxyProcessDataConfig.
+ * @tc.desc: Should return SOFTBUS_ERR when given null appInfo.
+ * @tc.desc: Should return SOFTBUS_OK when given valid parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1239,7 +1242,8 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyProcessDataConfigTest001, Tes
 
 /**
  * @tc.name: TransProxyFillDataConfigTest001
- * @tc.desc: TransProxyFillDataConfig.
+ * @tc.desc: Should return SOFTBUS_ERR when given null appInfo.
+ * @tc.desc: Should return SOFTBUS_OK when given valid parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1262,7 +1266,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyFillDataConfigTest001, TestSi
 
 /**
  * @tc.name: ConvertConnectType2AuthLinkTypeTest001
- * @tc.desc: ConvertConnectType2AuthLinkType.
+ * @tc.desc: Should return corresponding link type when given different connect types.
  * @tc.type: FUNC
  * @tc.require:
  */

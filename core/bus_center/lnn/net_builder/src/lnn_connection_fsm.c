@@ -559,6 +559,12 @@ static void TryCancelJoinProcedure(LnnConnectionFsm *connFsm)
     }
 }
 
+static void FilterRetrieveDeviceInfo(NodeInfo *info)
+{
+    info->authChannelId[CONNECTION_ADDR_BLE][AUTH_AS_CLIENT_SIDE] = 0;
+    info->authChannelId[CONNECTION_ADDR_BLE][AUTH_AS_SERVER_SIDE] = 0;
+}
+
 static int32_t LnnRecoveryBroadcastKey()
 {
     if (LnnLoadLocalBroadcastCipherKey() != SOFTBUS_OK) {
@@ -621,6 +627,7 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
             if (LnnRetrieveDeviceInfo(udidHash, &deviceInfo) == SOFTBUS_OK &&
                 AuthRestoreAuthManager(udidHash, &authConn, connInfo->requestId, &deviceInfo, &authId) == SOFTBUS_OK &&
                 LnnRecoveryBroadcastKey() == SOFTBUS_OK) {
+                FilterRetrieveDeviceInfo(&deviceInfo);
                 LnnGetVerifyCallback()->onVerifyPassed(connInfo->requestId, authId, &deviceInfo);
                 return SOFTBUS_OK;
             }

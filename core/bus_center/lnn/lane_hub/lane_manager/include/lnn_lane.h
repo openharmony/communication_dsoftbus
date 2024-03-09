@@ -24,21 +24,21 @@
 extern "C" {
 #endif
 
+#define MAX_LANE_REQ_ID_NUM 1024
 #define MAX_LANE_ID_NUM 1024
 #define NET_IF_NAME_MAX_LEN 16
 
 typedef struct {
-    void (*OnLaneIdEnabled)(uint32_t laneId, uint32_t laneProfileId);
-    void (*OnLaneIdDisabled)(uint32_t laneId, uint32_t laneProfileId);
+    void (*OnLaneIdEnabled)(uint64_t laneId, uint32_t laneProfileId);
+    void (*OnLaneIdDisabled)(uint64_t laneId, uint32_t laneProfileId);
 } ILaneIdStateListener;
 
 void RegisterLaneIdListener(const ILaneIdStateListener *listener);
 void UnregisterLaneIdListener(const ILaneIdStateListener *listener);
 int32_t InitLane(void);
 void DeinitLane(void);
-void FreeLaneId(uint32_t laneId);
+void FreeLaneReqId(uint32_t laneReqId);
 int32_t ParseLaneTypeByLaneId(const uint32_t laneId, LaneType *laneType);
-
 #ifdef __cplusplus
 }
 #endif

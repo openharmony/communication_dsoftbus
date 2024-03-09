@@ -93,6 +93,16 @@ static BusCenterClient g_busCenterClient = {
     .isInit = false,
 };
 
+static bool IsUdidHashEmpty(const ConnectionAddr *addr)
+{
+    for (uint32_t i = 0; i < UDID_HASH_LEN; i++) {
+        if (addr->info.ble.udidHash[i] != 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
 static bool IsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2)
 {
     if (addr1->type != addr2->type) {
@@ -102,14 +112,11 @@ static bool IsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAd
         return strncmp(addr1->info.br.brMac, addr2->info.br.brMac, BT_MAC_LEN) == 0;
     }
     if (addr1->type == CONNECTION_ADDR_BLE) {
-        for (uint32_t i = 0; i <= UDID_HASH_LEN; i++) {
-            if (addr2->info.ble.udidHash[i] == 0) {
-                continue;
-            }
-            return memcmp(addr1->info.ble.udidHash, addr2->info.ble.udidHash, UDID_HASH_LEN) == 0 ||
-                strncmp(addr1->info.ble.bleMac, addr2->info.ble.bleMac, BT_MAC_LEN) == 0;
+        if (IsUdidHashEmpty(addr2)) {
+            return strncmp(addr1->info.ble.bleMac, addr2->info.ble.bleMac, BT_MAC_LEN) == 0;
         }
-        return strncmp(addr1->info.ble.bleMac, addr2->info.ble.bleMac, BT_MAC_LEN) == 0;
+        return memcmp(addr1->info.ble.udidHash, addr2->info.ble.udidHash, UDID_HASH_LEN) == 0 ||
+            strncmp(addr1->info.ble.bleMac, addr2->info.ble.bleMac, BT_MAC_LEN) == 0;
     }
     if (addr1->type == CONNECTION_ADDR_WLAN || addr1->type == CONNECTION_ADDR_ETH) {
         return (strncmp(addr1->info.ip.ip, addr2->info.ip.ip, IP_STR_MAX_LEN) == 0)

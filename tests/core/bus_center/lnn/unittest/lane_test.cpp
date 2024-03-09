@@ -182,73 +182,73 @@ static const char *GetLinkType(LaneLinkType type)
     }
 }
 
-static void OnLaneRequestSuccess(uint32_t laneId, const LaneConnInfo *info)
+static void OnLaneRequestSuccess(uint32_t laneReqId, const LaneConnInfo *info)
 {
-    printf("LaneRequestSucc: laneId:0x%x, linkType:%s\n", laneId, GetLinkType(info->type));
+    printf("LaneRequestSucc: laneReqId:0x%x, linkType:%s\n", laneReqId, GetLinkType(info->type));
     const LnnLaneManager *laneManager = GetLaneManager();
-    int32_t ret = laneManager->lnnFreeLane(laneId);
+    int32_t ret = laneManager->lnnFreeLane(laneReqId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
-static void OnLaneRequestFail(uint32_t laneId, int32_t errCode)
+static void OnLaneRequestFail(uint32_t laneReqId, int32_t errCode)
 {
-    printf("LaneRequestFail: laneId:0x%x, reason:%d\n", laneId, errCode);
+    printf("LaneRequestFail: laneReqId:0x%x, reason:%d\n", laneReqId, errCode);
     const LnnLaneManager *laneManager = GetLaneManager();
-    int32_t ret = laneManager->lnnFreeLane(laneId);
+    int32_t ret = laneManager->lnnFreeLane(laneReqId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
-static void OnLaneStateChange(uint32_t laneId, LaneState state)
+static void OnLaneStateChange(uint32_t laneReqId, LaneState state)
 {
-    printf("LaneStateChange: laneId:0x%x, state:%d\n", laneId, state);
+    printf("LaneStateChange: laneReqId:0x%x, state:%d\n", laneReqId, state);
     const LnnLaneManager *laneManager = GetLaneManager();
-    int32_t ret = laneManager->lnnFreeLane(laneId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-}
-
-/*
-* @tc.name: LANE_ID_APPLY_Test_001
-* @tc.desc: apply laneId test
-* @tc.type: FUNC
-* @tc.require: I5FBFG
-*/
-HWTEST_F(LaneTest, LANE_ID_APPLY_Test_001, TestSize.Level1)
-{
-    const LnnLaneManager *laneManager = GetLaneManager();
-    LaneType laneType = LANE_TYPE_TRANS;
-    uint32_t laneId = laneManager->applyLaneId(laneType);
-    EXPECT_TRUE(laneId != INVALID_LANE_ID);
-    int32_t ret = laneManager->lnnFreeLane(laneId);
+    int32_t ret = laneManager->lnnFreeLane(laneReqId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*
-* @tc.name: LANE_ID_APPLY_Test_002
-* @tc.desc: apply laneId test
+* @tc.name: LANE_REQ_ID_APPLY_Test_001
+* @tc.desc: apply laneReqId test
 * @tc.type: FUNC
 * @tc.require: I5FBFG
 */
-HWTEST_F(LaneTest, LANE_ID_APPLY_Test_002, TestSize.Level1)
+HWTEST_F(LaneTest, LANE_REQ_ID_APPLY_Test_001, TestSize.Level1)
+{
+    const LnnLaneManager *laneManager = GetLaneManager();
+    LaneType laneType = LANE_TYPE_TRANS;
+    uint32_t laneReqId = laneManager->applyLaneReqId(laneType);
+    EXPECT_TRUE(laneReqId != INVALID_LANE_REQ_ID);
+    int32_t ret = laneManager->lnnFreeLane(laneReqId);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LANE_REQ_ID_APPLY_Test_002
+* @tc.desc: apply laneReqId test
+* @tc.type: FUNC
+* @tc.require: I5FBFG
+*/
+HWTEST_F(LaneTest, LANE_REQ_ID_APPLY_Test_002, TestSize.Level1)
 {
     LaneType laneType = LANE_TYPE_TRANS;
-    uint32_t laneId;
-    uint32_t *laneIdList = (uint32_t *)SoftBusCalloc(sizeof(uint32_t) * MAX_LANE_ID_NUM);
-    if (laneIdList == nullptr) {
+    uint32_t laneReqId;
+    uint32_t *laneReqIdList = (uint32_t *)SoftBusCalloc(sizeof(uint32_t) * MAX_LANE_REQ_ID_NUM);
+    if (laneReqIdList == nullptr) {
         return;
     }
     const LnnLaneManager *laneManager = GetLaneManager();
     uint32_t i;
-    for (i = 0; i < MAX_LANE_ID_NUM; i++) {
-        laneId = laneManager->applyLaneId(laneType);
-        EXPECT_TRUE(laneId != INVALID_LANE_ID);
-        laneIdList[i] = laneId;
+    for (i = 0; i < MAX_LANE_REQ_ID_NUM; i++) {
+        laneReqId = laneManager->applyLaneReqId(laneType);
+        EXPECT_TRUE(laneReqId != INVALID_LANE_REQ_ID);
+        laneReqIdList[i] = laneReqId;
     }
-    laneId = laneManager->applyLaneId(laneType);
-    EXPECT_TRUE(laneId == INVALID_LANE_ID);
-    for (i = 0; i < MAX_LANE_ID_NUM; i++) {
-        EXPECT_EQ(laneManager->lnnFreeLane(laneIdList[i]), SOFTBUS_OK);
+    laneReqId = laneManager->applyLaneReqId(laneType);
+    EXPECT_TRUE(laneReqId == INVALID_LANE_REQ_ID);
+    for (i = 0; i < MAX_LANE_REQ_ID_NUM; i++) {
+        EXPECT_EQ(laneManager->lnnFreeLane(laneReqIdList[i]), SOFTBUS_OK);
     }
-    SoftBusFree(laneIdList);
+    SoftBusFree(laneReqIdList);
 }
 
 /*
@@ -393,8 +393,8 @@ HWTEST_F(LaneTest, LANE_LINK_Test_002, TestSize.Level1)
 HWTEST_F(LaneTest, TRANS_LANE_ALLOC_Test_001, TestSize.Level1)
 {
     const LnnLaneManager *laneManager = GetLaneManager();
-    uint32_t laneId = laneManager->applyLaneId(LANE_TYPE_TRANS);
-    EXPECT_TRUE(laneId != INVALID_LANE_ID);
+    uint32_t laneReqId = laneManager->applyLaneReqId(LANE_TYPE_TRANS);
+    EXPECT_TRUE(laneReqId != INVALID_LANE_REQ_ID);
     LaneRequestOption request;
     (void)memset_s(&request, sizeof(LaneRequestOption), 0, sizeof(LaneRequestOption));
     request.type = LANE_TYPE_TRANS;
@@ -411,11 +411,11 @@ HWTEST_F(LaneTest, TRANS_LANE_ALLOC_Test_001, TestSize.Level1)
         .OnLaneRequestFail = OnLaneRequestFail,
         .OnLaneStateChange = OnLaneStateChange,
     };
-    ret = laneManager->lnnRequestLane(laneId, &request, &listener);
+    ret = laneManager->lnnRequestLane(laneReqId, &request, &listener);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
     trans->qosRequire.minBW = DEFAULT_QOSINFO_MIN_BW + LOW_BW;
-    ret = laneManager->lnnRequestLane(laneId, &request, &listener);
+    ret = laneManager->lnnRequestLane(laneReqId, &request, &listener);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     SoftBusSleepMs(5);
 }

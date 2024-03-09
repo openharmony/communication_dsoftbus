@@ -195,7 +195,8 @@ NO_SANITIZE("cfi") static DestroySessionInfo *CreateDestroySessionNode(SessionIn
     destroyNode->channelId = sessionNode->channelId;
     destroyNode->channelType = sessionNode->channelType;
     destroyNode->OnSessionClosed = server->listener.session.OnSessionClosed;
-    destroyNode->OnShutdown = server->listener.socket.OnShutdown;
+    destroyNode->OnShutdown = sessionNode->isServer ? server->listener.socketServer.OnShutdown :
+        server->listener.socketClient.OnShutdown;
     return destroyNode;
 }
 
@@ -1714,12 +1715,18 @@ static SessionInfo *GetSocketExistSession(const SessionParam *param)
     ClientSessionServer *serverNode = NULL;
     SessionInfo *sessionInfo = NULL;
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
-        // distributeddata module can create different socket by same name
+        // distributeddata module can create different socket of whether the SocketInfo is same or not
         if ((strcmp(serverNode->sessionName, param->sessionName) != 0) || IsListEmpty(&serverNode->sessionList) ||
             IsDistributedDataSession(param->sessionName)) {
             continue;
         }
         LIST_FOR_EACH_ENTRY(sessionInfo, &(serverNode->sessionList), SessionInfo, node) {
+            if ((strcmp(sessionInfo->info.peerSessionName, param->peerSessionName) != 0) ||
+                (strcmp(sessionInfo->info.peerDeviceId, param->peerDeviceId) != 0) ||
+                (strcmp(sessionInfo->info.groupId, param->groupId) != 0) ||
+                (sessionInfo->info.flag != param->attr->dataType)) {
+                continue;
+            }
             return sessionInfo;
         }
     }
@@ -1822,18 +1829,16 @@ int32_t ClientAddSocketSession(const SessionParam *param, int32_t *sessionId, bo
     return SOFTBUS_OK;
 }
 
-int32_t ClientSetListenerBySessionId(int32_t sessionId, const ISocketListener *listener)
+int32_t ClientSetListenerBySessionId(int32_t sessionId, const ISocketListener *listener, bool isServer)
 {
     if ((sessionId < 0) || listener == NULL) {
         TRANS_LOGE(TRANS_SDK, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-
     if (g_clientSessionServerList == NULL) {
         TRANS_LOGE(TRANS_SDK, "not init");
         return SOFTBUS_TRANS_SESSION_SERVER_NOINIT;
     }
-
     if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != 0) {
         TRANS_LOGE(TRANS_SDK, "lock failed");
         return SOFTBUS_LOCK_ERR;
@@ -1841,7 +1846,6 @@ int32_t ClientSetListenerBySessionId(int32_t sessionId, const ISocketListener *l
 
     ClientSessionServer *serverNode = NULL;
     SessionInfo *sessionNode = NULL;
-
     int32_t ret = GetSessionById(sessionId, &serverNode, &sessionNode);
     if (ret != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
@@ -1854,28 +1858,25 @@ int32_t ClientSetListenerBySessionId(int32_t sessionId, const ISocketListener *l
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
         return SOFTBUS_TRANS_SOCKET_IN_USE;
     }
-    ret = memcpy_s(&(serverNode->listener.socket), sizeof(ISocketListener), listener,
-        sizeof(ISocketListener));
-    serverNode->listener.isSocketListener = true;
+    ISocketListener *socketListener = isServer ? &(serverNode->listener.socketServer) :
+        &(serverNode->listener.socketClient);
+    ret = memcpy_s(socketListener, sizeof(ISocketListener), listener, sizeof(ISocketListener));
     if (ret != EOK) {
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
         TRANS_LOGE(TRANS_SDK, "memcpy failed");
         return SOFTBUS_MEM_ERR;
     }
-
-    // register file listener
-    if (serverNode->listener.socket.OnFile == NULL) {
+    serverNode->listener.isSocketListener = true;
+    if (socketListener->OnFile == NULL) {
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
         return SOFTBUS_OK;
     }
-
-    ret = TransSetSocketFileListener(serverNode->sessionName, serverNode->listener.socket.OnFile);
+    ret = TransSetSocketFileListener(serverNode->sessionName, socketListener->OnFile, isServer);
     if (ret != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
         TRANS_LOGE(TRANS_SDK, "register socket file listener failed");
         return ret;
     }
-
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     return SOFTBUS_OK;
 }
@@ -2040,7 +2041,7 @@ int32_t ClientGetSessionCallbackAdapterByName(const char *sessionName, SessionLi
     return SOFTBUS_ERR;
 }
 
-int32_t ClientGetSessionCallbackAdapterById(int32_t sessionId, SessionListenerAdapter *callbackAdapter)
+int32_t ClientGetSessionCallbackAdapterById(int32_t sessionId, SessionListenerAdapter *callbackAdapter, bool *isServer)
 {
     if (sessionId < 0 || callbackAdapter == NULL) {
         TRANS_LOGE(TRANS_SDK, "Invalid param");
@@ -2068,6 +2069,7 @@ int32_t ClientGetSessionCallbackAdapterById(int32_t sessionId, SessionListenerAd
 
     ret = memcpy_s(callbackAdapter, sizeof(SessionListenerAdapter), &serverNode->listener,
         sizeof(SessionListenerAdapter));
+    *isServer = sessionNode->isServer;
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     if (ret != EOK) {
         TRANS_LOGE(TRANS_SDK, "memcpy SessionListenerAdapter failed, socket=%{public}d", sessionId);
@@ -2125,7 +2127,7 @@ bool IsSessionExceedLimit()
     return false;
 }
 
-static void ClientCleanUpTimeoutSession(const ListNode *destroyList)
+NO_SANITIZE("cfi") static void ClientCleanUpTimeoutSession(const ListNode *destroyList)
 {
     if (IsListEmpty(destroyList)) {
         TRANS_LOGD(TRANS_SDK, "destroyList is empty.");

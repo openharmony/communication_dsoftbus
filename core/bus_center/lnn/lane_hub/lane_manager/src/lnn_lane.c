@@ -42,8 +42,8 @@
 #define ID_CALC_MASK 0x1F
 #define IS_USED 1
 #define IS_NOT_USED 0
-#define LANE_ID_BITMAP_COUNT ((MAX_LANE_ID_NUM + ID_CALC_MASK) >> ID_SHIFT_STEP)
-#define LANE_ID_TYPE_SHIFT 28
+#define LANE_REQ_ID_BITMAP_COUNT ((MAX_LANE_REQ_ID_NUM + ID_CALC_MASK) >> ID_SHIFT_STEP)
+#define LANE_REQ_ID_TYPE_SHIFT 28
 #define LANE_RANDOM_ID_MASK 0xFFFFFFF
 
 #define LANE_SCORING_INTERVAL 300 /* 5min */
@@ -59,11 +59,12 @@ typedef struct {
     uint32_t cnt;
 } LaneListenerList;
 
-static uint32_t g_laneIdBitmap[LANE_ID_BITMAP_COUNT];
+static uint32_t g_laneReqIdBitmap[LANE_REQ_ID_BITMAP_COUNT];
 static SoftBusMutex g_laneMutex;
 static LaneListenerList g_laneListenerList;
 static LaneInterface *g_laneObject[LANE_TYPE_BUTT];
 static ILaneIdStateListener g_laneIdListener;
+static uint32_t g_laneReqId = 0;
 
 static int32_t Lock(void)
 {
@@ -78,27 +79,34 @@ static void Unlock(void)
 /*
  *  0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
  * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- * |  type |          randomId(1 ~ MAX_LANE_ID_NUM)                |
+ * |  type |          randomId(1 ~ MAX_LANE_REQ_ID_NUM)                |
  * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  */
-static uint32_t AllocLaneId(LaneType type)
+static uint32_t AllocLaneReqId(LaneType type)
 {
     if (Lock() != SOFTBUS_OK) {
-        return INVALID_LANE_ID;
+        return INVALID_LANE_REQ_ID;
     }
-    uint32_t laneId, randomId;
-    for (uint32_t idIndex = 0; idIndex < MAX_LANE_ID_NUM; idIndex++) {
-        if (((g_laneIdBitmap[idIndex >> ID_SHIFT_STEP] >> (idIndex & ID_CALC_MASK)) & IS_USED) == IS_NOT_USED) {
-            g_laneIdBitmap[idIndex >> ID_SHIFT_STEP] |= (IS_USED << (idIndex & ID_CALC_MASK));
+    uint32_t laneReqId;
+    uint32_t randomId;
+    uint32_t idIndex = (g_laneReqId + 1) % MAX_LANE_REQ_ID_NUM;
+    while (true) {
+        if (((g_laneReqIdBitmap[idIndex >> ID_SHIFT_STEP] >> (idIndex & ID_CALC_MASK)) & IS_USED) == IS_NOT_USED) {
+            g_laneReqIdBitmap[idIndex >> ID_SHIFT_STEP] |= (IS_USED << (idIndex & ID_CALC_MASK));
+            g_laneReqId = idIndex;
             randomId = idIndex + 1;
-            laneId = randomId | ((uint32_t)type << LANE_ID_TYPE_SHIFT);
+            laneReqId = randomId | ((uint32_t)type << LANE_REQ_ID_TYPE_SHIFT);
             Unlock();
-            return laneId;
+            return laneReqId;
         }
+        if (idIndex == g_laneReqId) {
+            break;
+        }
+        idIndex = (idIndex + 1) % MAX_LANE_REQ_ID_NUM;
     }
     Unlock();
-    LNN_LOGE(LNN_LANE, "laneId num exceeds the limit");
-    return INVALID_LANE_ID;
+    LNN_LOGE(LNN_LANE, "laneReqId num exceeds the limit");
+    return INVALID_LANE_REQ_ID;
 }
 
 int32_t ParseLaneTypeByLaneId(const uint32_t laneId, LaneType *laneType)
@@ -111,19 +119,19 @@ int32_t ParseLaneTypeByLaneId(const uint32_t laneId, LaneType *laneType)
     return SOFTBUS_OK;
 }
 
-static void DestroyLaneId(uint32_t laneId)
+static void DestroyLaneReqId(uint32_t laneReqId)
 {
-    uint32_t randomId = laneId & LANE_RANDOM_ID_MASK;
-    if ((randomId == INVALID_LANE_ID) || (randomId > MAX_LANE_ID_NUM)) {
-        LNN_LOGE(LNN_LANE, "[DestroyLaneId]invalid laneId");
+    uint32_t randomId = laneReqId & LANE_RANDOM_ID_MASK;
+    if ((randomId == INVALID_LANE_REQ_ID) || (randomId > MAX_LANE_REQ_ID_NUM)) {
+        LNN_LOGE(LNN_LANE, "[DestroyLaneReqId]invalid laneReqId");
         return;
     }
     if (Lock() != SOFTBUS_OK) {
         return;
     }
-    LNN_LOGD(LNN_LANE, "laneId=%{public}u", laneId);
+    LNN_LOGD(LNN_LANE, "laneReqId=%{public}u", laneReqId);
     uint32_t idIndex = randomId - 1;
-    g_laneIdBitmap[idIndex >> ID_SHIFT_STEP] &= (~(IS_USED << (idIndex & ID_CALC_MASK)));
+    g_laneReqIdBitmap[idIndex >> ID_SHIFT_STEP] &= (~(IS_USED << (idIndex & ID_CALC_MASK)));
     Unlock();
 }
 
@@ -164,7 +172,8 @@ void RegisterLaneIdListener(const ILaneIdStateListener *listener)
         return;
     }
     ListInit(&newNode->node);
-    if (memcpy_s(&newNode->listener, sizeof(ILaneIdStateListener), listener, sizeof(ILaneIdStateListener)) != EOK) {
+    if (memcpy_s(&newNode->listener, sizeof(ILaneIdStateListener), listener,
+        sizeof(ILaneIdStateListener)) != EOK) {
         SoftBusFree(newNode);
         return;
     }
@@ -229,7 +238,7 @@ static int32_t GetAllLaneIdListener(ILaneIdStateListener **listener, uint32_t *l
     return SOFTBUS_OK;
 }
 
-static void LaneIdEnabled(uint32_t laneId, uint32_t profileId)
+static void LaneIdEnabled(uint64_t laneId, uint32_t profileId)
 {
     ILaneIdStateListener *listener = NULL;
     uint32_t listenerNum = 0;
@@ -245,7 +254,7 @@ static void LaneIdEnabled(uint32_t laneId, uint32_t profileId)
     SoftBusFree(listener);
 }
 
-static void LaneIdDisabled(uint32_t laneId, uint32_t laneProfileId)
+static void LaneIdDisabled(uint64_t laneId, uint32_t laneProfileId)
 {
     ILaneIdStateListener *listener = NULL;
     uint32_t listenerNum = 0;
@@ -273,18 +282,18 @@ static bool RequestInfoCheck(const LaneRequestOption *request, const ILaneListen
     return true;
 }
 
-/* return laneId if the operation is successful, return 0 otherwise. */
-uint32_t ApplyLaneId(LaneType type)
+/* return laneReqId if the operation is successful, return 0 otherwise. */
+uint32_t ApplyLaneReqId(LaneType type)
 {
-    return AllocLaneId(type);
+    return AllocLaneReqId(type);
 }
 
-void FreeLaneId(uint32_t laneId)
+void FreeLaneReqId(uint32_t laneReqId)
 {
-    return DestroyLaneId(laneId);
+    return DestroyLaneReqId(laneReqId);
 }
 
-static int32_t LnnRequestLaneByQos(uint32_t laneId, const LaneRequestOption *request,
+static int32_t LnnRequestLaneByQos(uint32_t laneReqId, const LaneRequestOption *request,
     const ILaneListener *listener)
 {
     if (RequestInfoCheck(request, listener) == false) {
@@ -295,24 +304,24 @@ static int32_t LnnRequestLaneByQos(uint32_t laneId, const LaneRequestOption *req
         LNN_LOGE(LNN_LANE, "laneType is not supported. laneType=%{public}d", request->type);
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_LANE, "laneRequestByQos, laneId=%{public}u, laneType=%{public}d, transType=%{public}d, "
+    LNN_LOGI(LNN_LANE, "laneRequestByQos, laneReqId=%{public}u, laneType=%{public}d, transType=%{public}d, "
         "minBW=%{public}u, maxLaneLatency=%{public}u, minLaneLatency=%{public}u",
-        laneId, request->type, request->requestInfo.trans.transType,
+        laneReqId, request->type, request->requestInfo.trans.transType,
         request->requestInfo.trans.qosRequire.minBW,
         request->requestInfo.trans.qosRequire.maxLaneLatency,
         request->requestInfo.trans.qosRequire.minLaneLatency);
-    int32_t result = g_laneObject[request->type]->allocLaneByQos(laneId, request, listener);
+    int32_t result = g_laneObject[request->type]->allocLaneByQos(laneReqId, request, listener);
     if (result != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "alloc lane by qos fail, laneId=%{public}u, result=%{public}d", laneId, result);
+        LNN_LOGE(LNN_LANE, "alloc lane by qos fail, laneReqId=%{public}u, result=%{public}d", laneReqId, result);
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_LANE, "request lane by qos success, laneId=%{public}u", laneId);
+    LNN_LOGI(LNN_LANE, "request lane by qos success, laneReqId=%{public}u", laneReqId);
     return SOFTBUS_OK;
 }
 
 static LnnLaneManager g_LaneManager = {
     .lnnQueryLaneResource = LnnQueryLaneResource,
-    .applyLaneId = ApplyLaneId,
+    .applyLaneReqId = ApplyLaneReqId,
     .lnnRequestLane = LnnRequestLaneByQos,
     .lnnFreeLane = LnnFreeLane,
 };
@@ -322,7 +331,7 @@ LnnLaneManager* GetLaneManager(void)
     return &g_LaneManager;
 }
 
-int32_t LnnRequestLane(uint32_t laneId, const LaneRequestOption *request,
+int32_t LnnRequestLane(uint32_t laneReqId, const LaneRequestOption *request,
     const ILaneListener *listener)
 {
     if (RequestInfoCheck(request, listener) == false) {
@@ -334,20 +343,24 @@ int32_t LnnRequestLane(uint32_t laneId, const LaneRequestOption *request,
         return SOFTBUS_ERR;
     }
     int32_t result;
-    LNN_LOGI(LNN_LANE, "laneRequest, laneId=%{public}u, laneType=%{public}d, transType=%{public}d",
-        laneId, request->type, request->requestInfo.trans.transType);
-    result = g_laneObject[request->type]->AllocLane(laneId, request, listener);
+    LNN_LOGI(LNN_LANE, "laneRequest, laneReqId=%{public}u, laneType=%{public}d, transType=%{public}d",
+        laneReqId, request->type, request->requestInfo.trans.transType);
+    for (uint32_t i = 0; i < request->requestInfo.trans.expectedLink.linkTypeNum; i++) {
+        LNN_LOGI(LNN_LANE, "laneRequest assign the priority=%{public}u, link=%{public}d",
+            i, request->requestInfo.trans.expectedLink.linkType[i]);
+    }
+    result = g_laneObject[request->type]->AllocLane(laneReqId, request, listener);
     if (result != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "alloc lane fail, result=%{public}d", result);
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_LANE, "request lane success, laneId=%{public}u", laneId);
+    LNN_LOGI(LNN_LANE, "request lane success, laneReqId=%{public}u", laneReqId);
     return SOFTBUS_OK;
 }
 
-int32_t LnnFreeLane(uint32_t laneId)
+int32_t LnnFreeLane(uint32_t laneReqId)
 {
-    uint32_t laneType = laneId >> LANE_ID_TYPE_SHIFT;
+    uint32_t laneType = laneReqId >> LANE_REQ_ID_TYPE_SHIFT;
     if (laneType >= LANE_TYPE_BUTT) {
         LNN_LOGE(LNN_LANE, "laneType invalid");
         return SOFTBUS_ERR;
@@ -355,8 +368,8 @@ int32_t LnnFreeLane(uint32_t laneId)
     if (g_laneObject[laneType] == NULL) {
         return SOFTBUS_ERR;
     }
-    LNN_LOGD(LNN_LANE, "free lane enter, laneId=%{public}u", laneId);
-    int32_t result = g_laneObject[laneType]->FreeLane(laneId);
+    LNN_LOGD(LNN_LANE, "free lane enter, laneReqId=%{public}u", laneReqId);
+    int32_t result = g_laneObject[laneType]->FreeLane(laneReqId);
     if (result != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "freeLane fail, result=%{public}d", result);
         return SOFTBUS_ERR;
