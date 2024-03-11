@@ -240,11 +240,11 @@ static int32_t TestAuthSessionSendData(const char *testData, int32_t count, char
     return SOFTBUS_OK;
 }
 
-static void DiscoveryTestEntry(int testWay, int count)
+static void DiscoveryTestEntry(int32_t testWay, int32_t count)
 {
     TestSessionListenerInit();
     g_sessionAttr.dataType = TYPE_BYTES;
-    int stat = 0;
+    int32_t stat = 0;
     char *testData = (char *)SoftBusCalloc(SEND_DATA_SIZE_64K + 1);
     if (testData == NULL) {
         printf("DiscoveryTestEntry malloc fail!\n");
@@ -255,8 +255,8 @@ static void DiscoveryTestEntry(int testWay, int count)
         SoftBusFree(testData);
         return;
     }
-    int ret = SOFTBUS_OK;
-    while (1) {
+    int32_t ret = SOFTBUS_OK;
+    while (true) {
         if (stat == CREATE_SESSION_CASE) {
             stat = TestCreateSessionServer(testWay);
         } else if (stat == OPEN_SESSION_CASE) {
@@ -277,10 +277,8 @@ static void DiscoveryTestEntry(int testWay, int count)
             if (ret != SOFTBUS_OK) {
                 stat = -1;
             }
-        } else if (stat == WAIT_OPEN_SESSION_CASE) {
-            if (g_connectCnt >= count) {
-                stat = -1;
-            }
+        } else if (stat == WAIT_OPEN_SESSION_CASE && g_connectCnt >= count) {
+            stat = -1;
         } else if (stat == -1) {
             TestCloseSession();
             break;
@@ -288,11 +286,7 @@ static void DiscoveryTestEntry(int testWay, int count)
         sleep(TICK_TIME);
     }
     SoftBusFree(testData);
-    if (ret == SOFTBUS_OK) {
-        printf("Test Auth Channel OK!\n");
-    } else {
-        printf("Test Auth Channel failed!\n");
-    }
+    printf("Test Auth Channel %s!\n", ret == SOFTBUS_OK ? "OK" : "failed");
 }
 
 int main(int argc, char *argv[])

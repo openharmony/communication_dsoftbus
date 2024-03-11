@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +15,9 @@
 
 #include "softbus_server_stub.h"
 
-#include "accesstoken_kit.h"
 #include "access_control.h"
 #include "access_token.h"
+#include "accesstoken_kit.h"
 #include "anonymizer.h"
 #include "comm_log.h"
 #include "discovery_service.h"
@@ -31,10 +31,10 @@
 #include "softbus_conn_interface.h"
 #include "softbus_errcode.h"
 #include "softbus_hisysevt_transreporter.h"
-#include "softbus_server_ipc_interface_code.h"
 #include "softbus_permission.h"
 #include "softbus_server.h"
 #include "softbus_server_frame.h"
+#include "softbus_server_ipc_interface_code.h"
 #include "trans_channel_manager.h"
 #include "trans_event.h"
 #include "trans_session_manager.h"
@@ -46,13 +46,21 @@
 #include "system_ability_definition.h"
 #endif
 
+#define READ_PARCEL_WITH_RET(parcel, type, data, retVal)        \
+    do {                                                        \
+        if (!(parcel).Read##type(data)) {                       \
+            COMM_LOGE(COMM_SVC, "read data failed.");           \
+            return (retVal);                                    \
+        }                                                       \
+    } while (false)                                             \
+
 #define JUDG_CNT 1
 using namespace OHOS::Security::AccessToken;
 
 namespace OHOS {
 int32_t SoftBusServerStub::CheckOpenSessionPermission(const SessionParam *param)
 {
-    char pkgName[PKG_NAME_SIZE_MAX] = {0};
+    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
     if ((param == nullptr) ||
         (TransGetPkgNameBySessionName(param->sessionName, pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK)) {
         COMM_LOGE(COMM_SVC, "OpenSession pararm error or lock mutex or copy pkgName failed");
@@ -75,8 +83,8 @@ int32_t SoftBusServerStub::CheckOpenSessionPermission(const SessionParam *param)
 
 int32_t SoftBusServerStub::CheckChannelPermission(int32_t channelId, int32_t channelType)
 {
-    char pkgName[PKG_NAME_SIZE_MAX] = {0};
-    char sessionName[SESSION_NAME_SIZE_MAX] = {0};
+    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
     int32_t ret = SOFTBUS_OK;
     TransInfo info;
     info.channelId = channelId;
@@ -117,7 +125,7 @@ int32_t SoftBusServerStub::CheckPidByChannelId(pid_t callingPid, int32_t channel
     return SOFTBUS_OK;
 }
 
-static inline int32_t CheckAndRecordAccessToken(const char* permission)
+static inline int32_t CheckAndRecordAccessToken(const char *permission)
 {
     uint32_t tokenCaller = IPCSkeleton::GetCallingTokenID();
     int32_t ret = AccessTokenKit::VerifyAccessToken(tokenCaller, permission);
@@ -225,8 +233,8 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_GET_BUS_CENTER_EX_OBJ] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
 }
 
-int32_t SoftBusServerStub::OnRemoteRequest(uint32_t code,
-    MessageParcel &data, MessageParcel &reply, MessageOption &option)
+int32_t SoftBusServerStub::OnRemoteRequest(
+    uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
     SoftbusRecordCalledApiCnt(code);
     if (data.ReadInterfaceToken() != GetDescriptor()) {
@@ -244,8 +252,7 @@ int32_t SoftBusServerStub::OnRemoteRequest(uint32_t code,
     auto itPerm = memberPermissionMap_.find(code);
     if (itPerm != memberPermissionMap_.end()) {
         const char *permission = itPerm->second;
-        if ((permission != nullptr) &&
-            (CheckAndRecordAccessToken(permission) != PERMISSION_GRANTED)) {
+        if ((permission != nullptr) && (CheckAndRecordAccessToken(permission) != PERMISSION_GRANTED)) {
             SoftbusReportPermissionFaultEvt(code);
             COMM_LOGE(COMM_SVC, "access token permission denied! permission=%{public}s", permission);
             pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
@@ -262,7 +269,7 @@ int32_t SoftBusServerStub::OnRemoteRequest(uint32_t code,
             return SOFTBUS_ACCESS_TOKEN_DENIED;
         }
     }
-    
+
     const auto &itFunc = memberFuncMap_.find(code);
     if (itFunc != memberFuncMap_.end()) {
         auto memberFunc = itFunc->second;
@@ -299,8 +306,8 @@ int32_t SoftBusServerStub::StartDiscoveryInner(MessageParcel &data, MessageParce
     }
     subInfo.dataLen = data.ReadUint32();
     if (subInfo.dataLen > 0 && subInfo.dataLen < MAX_CAPABILITYDATA_LEN) {
-        subInfo.capabilityData = const_cast<unsigned char *>(
-            reinterpret_cast<const unsigned char *>(data.ReadCString()));
+        subInfo.capabilityData =
+            const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(data.ReadCString()));
         if (subInfo.capabilityData == nullptr) {
             COMM_LOGE(COMM_SVC, "StartDiscoveryInner read capabilityData failed!");
             return SOFTBUS_ERR;
@@ -358,8 +365,8 @@ int32_t SoftBusServerStub::PublishServiceInner(MessageParcel &data, MessageParce
     }
     pubInfo.dataLen = data.ReadUint32();
     if (pubInfo.dataLen > 0 && pubInfo.dataLen < MAX_CAPABILITYDATA_LEN) {
-        pubInfo.capabilityData = const_cast<unsigned char *>(
-            reinterpret_cast<const unsigned char*>(data.ReadCString()));
+        pubInfo.capabilityData =
+            const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(data.ReadCString()));
         if (pubInfo.capabilityData == nullptr) {
             COMM_LOGE(COMM_SVC, "PublishServiceInner read capabilityData failed!");
             return SOFTBUS_ERR;
@@ -417,7 +424,7 @@ int32_t SoftBusServerStub::SoftbusRegisterServiceInner(MessageParcel &data, Mess
     return SOFTBUS_OK;
 }
 #ifdef SUPPORT_BUNDLENAME
-static bool IsObjectstoreDbSessionName(const char* sessionName)
+static bool IsObjectstoreDbSessionName(const char *sessionName)
 {
 #define OBJECTSTORE_DB_SESSION_NAME "objectstoreDB-*"
     regex_t regComp;
@@ -433,13 +440,12 @@ static bool IsObjectstoreDbSessionName(const char* sessionName)
 static int32_t GetBundleName(pid_t callingUid, std::string &bundleName)
 {
     sptr<ISystemAbilityManager> systemAbilityManager =
-            SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (systemAbilityManager == nullptr) {
         COMM_LOGE(COMM_SVC, "Failed to get system ability manager.");
         return SOFTBUS_ERR;
     }
-    sptr<IRemoteObject> remoteObject =
-            systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
     if (remoteObject == nullptr) {
         COMM_LOGE(COMM_SVC, "Failed to get bundle manager service.");
         return SOFTBUS_ERR;
@@ -456,7 +462,7 @@ static int32_t GetBundleName(pid_t callingUid, std::string &bundleName)
     return SOFTBUS_OK;
 }
 
-static int32_t CheckSessionName(const char* sessionName, pid_t callingUid)
+static int32_t CheckSessionName(const char *sessionName, pid_t callingUid)
 {
 #define SESSION_NAME "objectstoreDB-"
     if (IsObjectstoreDbSessionName(sessionName)) {
@@ -565,24 +571,24 @@ static void ReadSessionAttrs(MessageParcel &data, SessionAttribute *getAttr)
     getAttr->linkTypeNum = data.ReadInt32();
 
     if (getAttr->linkTypeNum > 0) {
-        pGetArr = const_cast<LinkType *>(reinterpret_cast<const LinkType *>(
-            data.ReadBuffer(sizeof(LinkType) * getAttr->linkTypeNum)));
+        pGetArr = const_cast<LinkType *>(
+            reinterpret_cast<const LinkType *>(data.ReadBuffer(sizeof(LinkType) * getAttr->linkTypeNum)));
     }
 
     if (pGetArr != nullptr && getAttr->linkTypeNum <= LINK_TYPE_MAX) {
-        (void)memcpy_s(getAttr->linkType, sizeof(LinkType) * LINK_TYPE_MAX,
-                       pGetArr, sizeof(LinkType) * getAttr->linkTypeNum);
+        (void)memcpy_s(
+            getAttr->linkType, sizeof(LinkType) * LINK_TYPE_MAX, pGetArr, sizeof(LinkType) * getAttr->linkTypeNum);
     }
 
     getAttr->attr.streamAttr.streamType = data.ReadInt32();
     getAttr->fastTransDataSize = data.ReadUint16();
     if (getAttr->fastTransDataSize != 0) {
-        getAttr->fastTransData = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(
-            data.ReadRawData(getAttr->fastTransDataSize)));
+        getAttr->fastTransData =
+            const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(data.ReadRawData(getAttr->fastTransDataSize)));
     }
 }
 
-static bool ReadQosInfo(MessageParcel& data, SessionParam &param)
+static bool ReadQosInfo(MessageParcel &data, SessionParam &param)
 {
     if (!data.ReadBool(param.isQosLane)) {
         COMM_LOGE(COMM_SVC, "failed to read isQosLane");
@@ -618,7 +624,7 @@ static bool ReadQosInfo(MessageParcel& data, SessionParam &param)
     return true;
 }
 
-static void ReadSessionInfo(MessageParcel& data, SessionParam &param)
+static void ReadSessionInfo(MessageParcel &data, SessionParam &param)
 {
     param.sessionName = data.ReadCString();
     param.peerSessionName = data.ReadCString();
@@ -774,8 +780,7 @@ int32_t SoftBusServerStub::SendMessageInner(MessageParcel &data, MessageParcel &
         COMM_LOGE(COMM_SVC, "SendMessage dataInfo len failed!");
         return SOFTBUS_ERR;
     }
-    void *dataInfo = const_cast<void *>(reinterpret_cast<const void *>(
-        data.ReadRawData(len)));
+    void *dataInfo = const_cast<void *>(reinterpret_cast<const void *>(data.ReadRawData(len)));
     if (dataInfo == nullptr) {
         COMM_LOGE(COMM_SVC, "SendMessage read dataInfo failed!");
         return SOFTBUS_ERR;
@@ -861,8 +866,7 @@ int32_t SoftBusServerStub::JoinLNNInner(MessageParcel &data, MessageParcel &repl
         COMM_LOGE(COMM_SVC, "SoftbusJoinLNNInner read addr type failed! length=%{public}d", addrTypeLen);
         return SOFTBUS_IPC_ERR;
     }
-    void *addr = const_cast<void *>(reinterpret_cast<const void *>(
-        data.ReadRawData(addrTypeLen)));
+    void *addr = const_cast<void *>(reinterpret_cast<const void *>(data.ReadRawData(addrTypeLen)));
     if (addr == nullptr) {
         COMM_LOGE(COMM_SVC, "SoftbusJoinLNNInner read addr failed!");
         return SOFTBUS_IPC_ERR;
@@ -985,47 +989,40 @@ int32_t SoftBusServerStub::GetNodeKeyInfoInner(MessageParcel &data, MessageParce
     const char *clientName = data.ReadCString();
     const char *networkId = data.ReadCString();
     if (clientName == nullptr || networkId == nullptr) {
-        COMM_LOGE(COMM_SVC, "GetNodeKeyInfoInner read clientName or networkId failed!");
+        COMM_LOGE(COMM_SVC, "read clientName or networkId failed!");
         return SOFTBUS_IPC_ERR;
     }
     PrintNetworkId(networkId);
     int32_t key;
-    if (!data.ReadInt32(key)) {
-        COMM_LOGE(COMM_SVC, "GetNodeKeyInfoInner read key failed!");
-        return SOFTBUS_IPC_ERR;
-    }
+    READ_PARCEL_WITH_RET(data, Int32, key, SOFTBUS_IPC_ERR);
     int32_t infoLen = GetNodeKeyInfoLen(key);
     if (infoLen == SOFTBUS_ERR) {
-        COMM_LOGE(COMM_SVC, "GetNodeKeyInfoInner info len failed!");
-        return SOFTBUS_INVALID_PARAM;
+        COMM_LOGE(COMM_SVC, "get info len failed!");
+        return SOFTBUS_NETWORK_NODE_KEY_INFO_ERR;
     }
     int32_t len;
-    if (!data.ReadInt32(len)) {
-        COMM_LOGE(COMM_SVC, "GetNodeKeyInfoInner read len failed!");
-        return SOFTBUS_IPC_ERR;
-    }
+    READ_PARCEL_WITH_RET(data, Int32, len, SOFTBUS_IPC_ERR);
     if (len < infoLen) {
-        COMM_LOGE(COMM_SVC, "GetNodeKeyInfoInner read len is invalid param, len=%{public}d, infoLen=%{public}d", len,
-            infoLen);
+        COMM_LOGE(COMM_SVC, "read len is invalid param, len=%{public}d, infoLen=%{public}d", len, infoLen);
         return SOFTBUS_INVALID_PARAM;
     }
     void *buf = SoftBusCalloc(infoLen);
     if (buf == nullptr) {
-        COMM_LOGE(COMM_SVC, "GetNodeKeyInfoInner malloc buffer failed!");
+        COMM_LOGE(COMM_SVC, "malloc buffer failed!");
         return SOFTBUS_MALLOC_ERR;
     }
     if (GetNodeKeyInfo(clientName, networkId, key, static_cast<unsigned char *>(buf), infoLen) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "GetNodeKeyInfoInner get key info failed!");
+        COMM_LOGE(COMM_SVC, "get key info failed!");
         SoftBusFree(buf);
         return SOFTBUS_NETWORK_NODE_KEY_INFO_ERR;
     }
     if (!reply.WriteInt32(infoLen)) {
-        COMM_LOGE(COMM_SVC, "GetNodeKeyInfoInner write info length failed!");
+        COMM_LOGE(COMM_SVC, "write info length failed!");
         SoftBusFree(buf);
         return SOFTBUS_IPC_ERR;
     }
     if (!reply.WriteRawData(buf, infoLen)) {
-        COMM_LOGE(COMM_SVC, "GetNodeKeyInfoInner write key info failed!");
+        COMM_LOGE(COMM_SVC, "write key info failed!");
         SoftBusFree(buf);
         return SOFTBUS_IPC_ERR;
     }
@@ -1158,8 +1155,8 @@ int32_t SoftBusServerStub::StreamStatsInner(MessageParcel &data, MessageParcel &
         COMM_LOGE(COMM_SVC, "StreamStatsInner read channelType fail");
         return SOFTBUS_ERR;
     }
-    StreamSendStats *stats = const_cast<StreamSendStats *>(reinterpret_cast<const StreamSendStats *>(
-        data.ReadRawData(sizeof(StreamSendStats))));
+    StreamSendStats *stats = const_cast<StreamSendStats *>(
+        reinterpret_cast<const StreamSendStats *>(data.ReadRawData(sizeof(StreamSendStats))));
     if (stats == nullptr) {
         COMM_LOGE(COMM_SVC, "read StreamSendStats fail, stats is nullptr");
         return SOFTBUS_ERR;
@@ -1184,8 +1181,8 @@ int32_t SoftBusServerStub::RippleStatsInner(MessageParcel &data, MessageParcel &
         COMM_LOGE(COMM_SVC, "rippleStatsInner read channelType fail");
         return SOFTBUS_ERR;
     }
-    TrafficStats *stats = const_cast<TrafficStats *>(reinterpret_cast<const TrafficStats *>(
-        data.ReadRawData(sizeof(TrafficStats))));
+    TrafficStats *stats =
+        const_cast<TrafficStats *>(reinterpret_cast<const TrafficStats *>(data.ReadRawData(sizeof(TrafficStats))));
     if (stats == nullptr) {
         COMM_LOGE(COMM_SVC, "read rippleStats fail, stats is nullptr");
         return SOFTBUS_ERR;
@@ -1260,8 +1257,7 @@ int32_t SoftBusServerStub::PublishLNNInner(MessageParcel &data, MessageParcel &r
     int32_t medium;
     int32_t freq;
     (void)memset_s(&info, sizeof(PublishInfo), 0, sizeof(PublishInfo));
-    if (!data.ReadInt32(info.publishId) || !data.ReadInt32(mode) || !data.ReadInt32(medium) ||
-        !data.ReadInt32(freq)) {
+    if (!data.ReadInt32(info.publishId) || !data.ReadInt32(mode) || !data.ReadInt32(medium) || !data.ReadInt32(freq)) {
         COMM_LOGE(COMM_SVC, "SoftbusPublishLNNInner read common publish info failed!");
         return SOFTBUS_IPC_ERR;
     }
@@ -1278,8 +1274,7 @@ int32_t SoftBusServerStub::PublishLNNInner(MessageParcel &data, MessageParcel &r
         return SOFTBUS_IPC_ERR;
     }
     if (info.dataLen > 0 && info.dataLen < MAX_CAPABILITYDATA_LEN) {
-        info.capabilityData = const_cast<unsigned char *>(
-            reinterpret_cast<const unsigned char*>(data.ReadCString()));
+        info.capabilityData = const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(data.ReadCString()));
         if (info.capabilityData == nullptr) {
             COMM_LOGE(COMM_SVC, "SoftbusPublishLNNInner read capabilityData failed!");
             return SOFTBUS_IPC_ERR;
@@ -1325,7 +1320,7 @@ int32_t SoftBusServerStub::RefreshLNNInner(MessageParcel &data, MessageParcel &r
     COMM_LOGI(COMM_SVC, "enter");
     const char *clientName = data.ReadCString();
     if (clientName == nullptr) {
-        COMM_LOGE(COMM_SVC, "SoftbusRefreshLNNInner read clientName failed!");
+        COMM_LOGE(COMM_SVC, "read clientName failed!");
         return SOFTBUS_IPC_ERR;
     }
     SubscribeInfo info;
@@ -1335,30 +1330,24 @@ int32_t SoftBusServerStub::RefreshLNNInner(MessageParcel &data, MessageParcel &r
     (void)memset_s(&info, sizeof(SubscribeInfo), 0, sizeof(SubscribeInfo));
     if (!data.ReadInt32(info.subscribeId) || !data.ReadInt32(mode) || !data.ReadInt32(medium) ||
         !data.ReadInt32(freq)) {
-        COMM_LOGE(COMM_SVC, "SoftbusRefreshLNNInner read common subscribe info failed!");
+        COMM_LOGE(COMM_SVC, "read common subscribe info failed!");
         return SOFTBUS_IPC_ERR;
     }
     info.mode = (DiscoverMode)mode;
     info.medium = (ExchangeMedium)medium;
     info.freq = (ExchangeFreq)freq;
-    if (!data.ReadBool(info.isSameAccount) || !data.ReadBool(info.isWakeRemote)) {
-        COMM_LOGE(COMM_SVC, "SoftbusRefreshLNNInner read subscribe info flag failed!");
-        return SOFTBUS_IPC_ERR;
-    }
+    READ_PARCEL_WITH_RET(data, Bool, info.isSameAccount, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Bool, info.isWakeRemote, SOFTBUS_IPC_ERR);
     info.capability = data.ReadCString();
     if (info.capability == nullptr) {
-        COMM_LOGE(COMM_SVC, "SoftbusRefreshLNNInner read capability failed!");
+        COMM_LOGE(COMM_SVC, "read capability failed!");
         return SOFTBUS_IPC_ERR;
     }
-    if (!data.ReadUint32(info.dataLen)) {
-        COMM_LOGE(COMM_SVC, "SoftbusRefreshLNNInner read dataLen failed!");
-        return SOFTBUS_IPC_ERR;
-    }
+    READ_PARCEL_WITH_RET(data, Uint32, info.dataLen, SOFTBUS_IPC_ERR);
     if (info.dataLen > 0 && info.dataLen < MAX_CAPABILITYDATA_LEN) {
-        info.capabilityData = const_cast<unsigned char *>(
-            reinterpret_cast<const unsigned char*>(data.ReadCString()));
+        info.capabilityData = const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(data.ReadCString()));
         if (info.capabilityData == nullptr) {
-            COMM_LOGE(COMM_SVC, "SoftbusRefreshLNNInner read capabilityData failed!");
+            COMM_LOGE(COMM_SVC, "read capabilityData failed!");
             return SOFTBUS_IPC_ERR;
         }
     } else {
@@ -1367,7 +1356,7 @@ int32_t SoftBusServerStub::RefreshLNNInner(MessageParcel &data, MessageParcel &r
     }
     int32_t retReply = RefreshLNN(clientName, &info);
     if (!reply.WriteInt32(retReply)) {
-        COMM_LOGE(COMM_SVC, "SoftbusRefreshLNNInner write reply failed!");
+        COMM_LOGE(COMM_SVC, "write reply failed!");
         return SOFTBUS_IPC_ERR;
     }
     return SOFTBUS_OK;
@@ -1403,7 +1392,7 @@ int32_t SoftBusServerStub::ActiveMetaNodeInner(MessageParcel &data, MessageParce
         COMM_LOGE(COMM_SVC, "ActiveMetaNode read meta node config info failed!");
         return SOFTBUS_IPC_ERR;
     }
-    char metaNodeId[NETWORK_ID_BUF_LEN] = {0};
+    char metaNodeId[NETWORK_ID_BUF_LEN] = { 0 };
     if (ActiveMetaNode(info, metaNodeId) != SOFTBUS_OK) {
         return SOFTBUS_NETWORK_ACTIVE_META_NODE_ERR;
     }

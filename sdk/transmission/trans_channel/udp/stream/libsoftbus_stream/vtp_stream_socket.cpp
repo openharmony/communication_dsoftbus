@@ -26,13 +26,13 @@
 
 #include "fillpinc.h"
 #include "raw_stream_data.h"
-#include "stream_common_data.h"
 #include "session.h"
-#include "softbus_adapter_timer.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_socket.h"
+#include "softbus_adapter_timer.h"
 #include "softbus_errcode.h"
 #include "softbus_trans_def.h"
+#include "stream_common_data.h"
 #include "stream_depacketizer.h"
 #include "stream_packetizer.h"
 
@@ -860,7 +860,6 @@ void VtpStreamSocket::RegisterMetricCallback(bool isServer)
 bool VtpStreamSocket::Accept()
 {
     TRANS_LOGD(TRANS_STREAM, "enter.");
-
     auto fd = FtAccept(listenFd_, nullptr, nullptr);
     TRANS_LOGI(TRANS_STREAM, "accept streamFd=%{public}d", fd);
     if (fd == -1) {
@@ -888,8 +887,7 @@ bool VtpStreamSocket::Accept()
         remoteIpPort_.port = v6Addr->sin6_port;
     }
 
-    TRANS_LOGD(TRANS_STREAM,
-        "Accept a client remotePort=%{public}d", remoteIpPort_.port);
+    TRANS_LOGD(TRANS_STREAM, "Accept a client remotePort=%{public}d", remoteIpPort_.port);
 
     if (SetSocketEpollMode(fd) != ERR_OK) {
         TRANS_LOGE(TRANS_STREAM, "SetSocketEpollMode failed, fd=%{public}d", fd);
@@ -1042,16 +1040,57 @@ int VtpStreamSocket::RecvStreamLen()
     return ntohl(*reinterpret_cast<int *>(buffer.get()));
 }
 
+void VtpStreamSocket::ProcessCommonDataStream(std::unique_ptr<char[]> &dataBuffer,
+    int32_t &dataLength, std::unique_ptr<char[]> &extBuffer, int32_t &extLen, StreamFrameInfo &info)
+{
+    TRANS_LOGD(TRANS_STREAM, "recv common stream");
+    int32_t decryptedLength = dataLength;
+    auto decryptedBuffer = std::move(dataBuffer);
+
+    int32_t plainDataLength = decryptedLength - GetEncryptOverhead();
+    if (plainDataLength <= 0) {
+        TRANS_LOGE(TRANS_STREAM, "Decrypt failed, invalid decryptedLen=%{public}d", decryptedLength);
+        return;
+    }
+    std::unique_ptr<char[]> plainData = std::make_unique<char[]>(plainDataLength);
+    ssize_t decLen = Decrypt(decryptedBuffer.get(), decryptedLength, plainData.get(), plainDataLength);
+    if (decLen != plainDataLength) {
+        TRANS_LOGE(TRANS_STREAM,
+            "Decrypt failed, dataLen=%{public}d, decryptedLen=%{public}zd", plainDataLength, decLen);
+        return;
+    }
+    auto header = plainData.get();
+    StreamDepacketizer decode(streamType_);
+    if (plainDataLength < static_cast<int32_t>(sizeof(CommonHeader))) {
+        TRANS_LOGE(TRANS_STREAM,
+            "failed, plainDataLen=%{public}d, CommonHeader=%{public}zu", plainDataLength, sizeof(CommonHeader));
+        return;
+    }
+    decode.DepacketizeHeader(header);
+
+    auto buffer = plainData.get() + sizeof(CommonHeader);
+    decode.DepacketizeBuffer(buffer, plainDataLength - sizeof(CommonHeader));
+
+    extBuffer = decode.GetUserExt();
+    extLen = decode.GetUserExtSize();
+    info = decode.GetFrameInfo();
+    dataBuffer = decode.GetData();
+    dataLength = decode.GetDataLength();
+    if (dataLength <= 0) {
+        TRANS_LOGE(TRANS_STREAM, "common depacketize error, dataLen=%{public}d", dataLength);
+        return;
+    }
+}
+
 void VtpStreamSocket::DoStreamRecv()
 {
     while (isStreamRecv_) {
         std::unique_ptr<char[]> dataBuffer = nullptr;
         std::unique_ptr<char[]> extBuffer = nullptr;
-        int extLen = 0;
+        int32_t extLen = 0;
         StreamFrameInfo info = {};
-        int dataLength = 0;
         TRANS_LOGD(TRANS_STREAM, "recv stream");
-        dataLength = VtpStreamSocket::RecvStreamLen();
+        int32_t dataLength = VtpStreamSocket::RecvStreamLen();
         if (dataLength <= 0 || dataLength > MAX_STREAM_LEN) {
             TRANS_LOGE(TRANS_STREAM, "read frame length error, dataLength=%{public}d", dataLength);
             break;
@@ -1061,45 +1100,7 @@ void VtpStreamSocket::DoStreamRecv()
         dataBuffer = VtpStreamSocket::RecvStream(dataLength);
 
         if (streamType_ == COMMON_VIDEO_STREAM || streamType_ == COMMON_AUDIO_STREAM) {
-            TRANS_LOGD(TRANS_STREAM, "recv common stream");
-            int decryptedLength = dataLength;
-            auto decryptedBuffer = std::move(dataBuffer);
-
-            int plainDataLength = decryptedLength - GetEncryptOverhead();
-            if (plainDataLength <= 0) {
-                TRANS_LOGE(
-                    TRANS_STREAM, "Decrypt failed, invalid decryptedLen=%{public}d", decryptedLength);
-                break;
-            }
-            std::unique_ptr<char[]> plainData = std::make_unique<char[]>(plainDataLength);
-            ssize_t decLen = Decrypt(decryptedBuffer.get(), decryptedLength, plainData.get(), plainDataLength);
-            if (decLen != plainDataLength) {
-                TRANS_LOGE(TRANS_STREAM,
-                    "Decrypt failed, dataLen=%{public}d, decryptedLen=%{public}zd", plainDataLength, decLen);
-                break;
-            }
-            auto header = plainData.get();
-            StreamDepacketizer decode(streamType_);
-            if (plainDataLength < static_cast<int>(sizeof(CommonHeader))) {
-                TRANS_LOGE(TRANS_STREAM,
-                    "failed, plainDataLen=%{public}d, CommonHeader=%{public}zu", plainDataLength, sizeof(CommonHeader));
-                break;
-            }
-            decode.DepacketizeHeader(header);
-
-            auto buffer = plainData.get() + sizeof(CommonHeader);
-            decode.DepacketizeBuffer(buffer, plainDataLength - sizeof(CommonHeader));
-
-            extBuffer = decode.GetUserExt();
-            extLen = decode.GetUserExtSize();
-            info = decode.GetFrameInfo();
-            dataBuffer = decode.GetData();
-            dataLength = decode.GetDataLength();
-            if (dataLength <= 0) {
-                TRANS_LOGE(TRANS_STREAM,
-                    "common depacketize error, dataLen=%{public}d", dataLength);
-                break;
-            }
+            ProcessCommonDataStream(dataBuffer, dataLength, extBuffer, extLen, info);
         }
 
         StreamData data = { std::move(dataBuffer), dataLength, std::move(extBuffer), extLen };
@@ -1121,19 +1122,18 @@ void VtpStreamSocket::DoStreamRecv()
         }
 
         PutStream(std::move(stream));
-        TRANS_LOGD(TRANS_STREAM,
-            "put frame done, dataLen=%{public}d, streamType=%{public}d", dataLength, streamType_);
+        TRANS_LOGD(TRANS_STREAM, "put frame done, dataLen=%{public}d, streamType=%{public}d", dataLength, streamType_);
     }
     TRANS_LOGI(TRANS_STREAM, "recv thread exit");
 }
 
-std::unique_ptr<char[]> VtpStreamSocket::RecvStream(int dataLength)
+std::unique_ptr<char[]> VtpStreamSocket::RecvStream(int32_t dataLength)
 {
     auto buffer = std::make_unique<char[]>(dataLength);
-    int recvLen = 0;
+    int32_t recvLen = 0;
     while (recvLen < dataLength) {
-        int ret = -1;
-        int timeout = -1;
+        int32_t ret = -1;
+        int32_t timeout = -1;
 
         if (EpollTimeout(streamFd_, timeout) == 0) {
             do {
