@@ -55,6 +55,7 @@ public:
         const IStreamListener *callback);
     void ReleaseAdaptor();
     bool GetAliveState();
+    bool IsEncryptedRawStream();
 
 private:
     int64_t channelId_ = -1;
@@ -66,6 +67,7 @@ private:
     std::pair<uint8_t*, uint32_t> sessionKey_ = std::make_pair(nullptr, 0);
     const IStreamListener *callback_ = nullptr;
     std::atomic<bool> enableState_ = {false};
+    bool isRawStreamEncrypt_ = {false};
 };
 } // namespace OHOS
 

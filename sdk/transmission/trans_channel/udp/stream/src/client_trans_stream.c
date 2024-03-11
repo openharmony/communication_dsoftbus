@@ -125,6 +125,19 @@ static IStreamListener g_streamCallcb = {
     .OnRippleStats = OnRippleStats,
 };
 
+static int32_t GetRawStreamEncryptOptByChannelId(int32_t channelId, bool *isEncryptRawStream)
+{
+    if (g_udpChannelMgrCb == NULL) {
+        TRANS_LOGE(TRANS_STREAM, "udp channel callback is null.");
+        return SOFTBUS_ERR;
+    }
+    if (g_udpChannelMgrCb->OnRawStreamEncryptOptGet == NULL) {
+        TRANS_LOGE(TRANS_STREAM, "OnRawStreamEncryptOptGet of udp channel callback is null.");
+        return SOFTBUS_ERR;
+    }
+    return g_udpChannelMgrCb->OnRawStreamEncryptOptGet(channelId, isEncryptRawStream);
+}
+
 int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPort)
 {
     TRANS_LOGD(TRANS_STREAM, "enter.");
@@ -137,13 +150,18 @@ int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPo
         TRANS_LOGE(TRANS_STREAM, "stream type invalid. type=%{public}d", channel->streamType);
         return SOFTBUS_INVALID_PARAM;
     }
+    bool isEncryptedRawStream = false;
+    if (GetRawStreamEncryptOptByChannelId(channel->channelId, &isEncryptedRawStream) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_STREAM, "failed to get encryption option by channelId=%{public}d", channel->channelId);
+        return SOFTBUS_ERR;
+    }
     if (channel->isServer) {
         if (IsSessionExceedLimit()) {
             *streamPort = 0;
             return SOFTBUS_TRANS_SESSION_CNT_EXCEEDS_LIMIT;
         }
         VtpStreamOpenParam p1 = { "DSOFTBUS_STREAM", channel->myIp,
-            NULL, -1, streamType, (uint8_t*)channel->sessionKey, channel->keyLen };
+            NULL, -1, streamType, (uint8_t*)channel->sessionKey, channel->keyLen, isEncryptedRawStream};
 
         int32_t port = StartVtpStreamChannelServer(channel->channelId, &p1, &g_streamCallcb);
         if (port <= 0) {
@@ -154,7 +172,7 @@ int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPo
         TRANS_LOGI(TRANS_STREAM, "stream server success, listen port=%{public}d.", port);
     } else {
         VtpStreamOpenParam p1 = { "DSOFTBUS_STREAM", channel->myIp, channel->peerIp,
-            channel->peerPort, streamType, (uint8_t *)channel->sessionKey, channel->keyLen };
+            channel->peerPort, streamType, (uint8_t *)channel->sessionKey, channel->keyLen, isEncryptedRawStream};
 
         int32_t ret = StartVtpStreamChannelClient(channel->channelId, &p1, &g_streamCallcb);
         if (ret <= 0) {

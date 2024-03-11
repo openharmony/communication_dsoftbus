@@ -29,13 +29,14 @@ extern "C" {
  * @version 2.0
  */
 typedef enum {
-    DATA_TYPE_MESSAGE = 1,  /**< Message */
-    DATA_TYPE_BYTES,        /**< Bytes */
-    DATA_TYPE_FILE,         /**< File */
-    DATA_TYPE_RAW_STREAM,   /**< Raw data stream */
-    DATA_TYPE_VIDEO_STREAM, /**< Video data stream*/
-    DATA_TYPE_AUDIO_STREAM, /**< Audio data stream*/
-    DATA_TYPE_SLICE_STREAM, /**< Video slice stream*/
+    DATA_TYPE_MESSAGE = 1,         /**< Message */
+    DATA_TYPE_BYTES,               /**< Bytes */
+    DATA_TYPE_FILE,                /**< File */
+    DATA_TYPE_RAW_STREAM,          /**< Raw data stream */
+    DATA_TYPE_VIDEO_STREAM,        /**< Video data stream */
+    DATA_TYPE_AUDIO_STREAM,        /**< Audio data stream */
+    DATA_TYPE_SLICE_STREAM,        /**< Video slice stream */
+    DATA_TYPE_RAW_STREAM_ENCRYPED, /**< Encryped raw stream data */
     DATA_TYPE_BUTT,
 } TransDataType;
 

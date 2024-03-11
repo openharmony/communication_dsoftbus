@@ -393,6 +393,8 @@
         "IsSessionExceedLimit";
         "DiscRecoveryPublish";
         "DiscRecoverySubscribe";
+        "ClientRawStreamEncryptOptGet";
+        "ClientRawStreamEncryptDefOptGet";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;
