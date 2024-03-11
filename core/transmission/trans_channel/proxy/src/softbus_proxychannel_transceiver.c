@@ -792,11 +792,10 @@ int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, const ConnectOption *c
         .calleePkg = NULL,
         .callerPkg = NULL,
         .socketName = appInfo->myData.sessionName,
-        .channelType = CHANNEL_TYPE_PROXY,
+        .channelType = appInfo->appType == APP_TYPE_AUTH ? CHANNEL_TYPE_AUTH : CHANNEL_TYPE_PROXY,
         .channelId = chanNewId,
         .requestId = chan->reqId,
         .linkType = chan->type
-
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, extra);
     return ret;
