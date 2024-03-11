@@ -122,7 +122,7 @@ int32_t AddLaneResourceItem(const LaneResource *resourceItem);
 int32_t DelLaneResourceItem(const LaneResource *resourceItem);
 int32_t AddLinkInfoItem(const LaneLinkInfo *linkInfoItem);
 int32_t DelLinkInfoItem(uint32_t laneReqId);
-int32_t FindLaneLinkInfoByLaneReqId(uint32_t laneReqId, LaneLinkInfo *linkInfoitem);
+int32_t FindLaneLinkInfoByLaneReqId(uint32_t laneReqId, LaneLinkInfo *linkInfoItem);
 int32_t ConvertToLaneResource(const LaneLinkInfo *linkInfo, LaneResource *laneResourceInfo);
 int32_t DelLaneResourceItemWithDelay(LaneResource *resourceItem, uint32_t laneReqId, bool *isDelayDestroy);
 void HandleLaneReliabilityTime(void);
