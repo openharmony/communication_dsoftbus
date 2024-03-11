@@ -378,9 +378,9 @@ int32_t DelLinkInfoItem(uint32_t laneReqId)
     return SOFTBUS_OK;
 }
 
-int32_t FindLaneLinkInfoByLaneReqId(uint32_t laneReqId, LaneLinkInfo *linkInfoitem)
+int32_t FindLaneLinkInfoByLaneReqId(uint32_t laneReqId, LaneLinkInfo *linkInfoItem)
 {
-    if (laneReqId == INVALID_LANE_REQ_ID || linkInfoitem == NULL) {
+    if (laneReqId == INVALID_LANE_REQ_ID || linkInfoItem == NULL) {
         LNN_LOGE(LNN_LANE, "laneReqId or linkInfoItem is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -392,7 +392,7 @@ int32_t FindLaneLinkInfoByLaneReqId(uint32_t laneReqId, LaneLinkInfo *linkInfoit
     LaneLinkInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_LinkInfoList, LaneLinkInfo, node) {
         if (item->laneReqId == laneReqId) {
-            if (CreateLinkInfoItem(item, linkInfoitem) != SOFTBUS_OK) {
+            if (CreateLinkInfoItem(item, linkInfoItem) != SOFTBUS_OK) {
                 LaneUnlock();
                 LNN_LOGE(LNN_LANE, "create linkInfoItem fail");
                 return SOFTBUS_ERR;
@@ -519,24 +519,28 @@ int32_t FindLaneResourceByPeerIp(const char *peerIp, LaneResource *laneResourceI
     if (LaneLock() != SOFTBUS_OK) {
         return SOFTBUS_LOCK_ERR;
     }
+    LaneResource *itemDst = NULL;
     LaneResource *item = NULL;
     LaneResource *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResourceList, LaneResource, node) {
         if ((item->type == LANE_P2P || item->type == LANE_HML) &&
             strncmp(peerIp, item->linkInfo.p2p.connInfo.peerIp, IP_LEN) == 0) {
+            itemDst = item;
             break;
         }
     }
-    if (item == NULL) {
+    if (itemDst == NULL) {
         LaneUnlock();
+        LNN_LOGE(LNN_LANE, "find lane resource fail");
         return SOFTBUS_ERR;
     }
-    if (CreateResourceItem(item, laneResourceItem) != SOFTBUS_OK) {
+    if (CreateResourceItem(itemDst, laneResourceItem) != SOFTBUS_OK) {
         LaneUnlock();
         return SOFTBUS_ERR;
     }
     LaneUnlock();
     return SOFTBUS_OK;
+
 }
 
 static int32_t LaneLinkOfBr(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)

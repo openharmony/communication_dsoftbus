@@ -88,9 +88,9 @@ static int32_t AddLaneTypeInfoItem(const LaneTypeInfo *inputLaneTypeInfo)
 
 int32_t CreateLaneTypeInfoByLaneReqId(const uint32_t laneReqId, const LaneLinkInfo *linkInfo)
 {
-    if (laneReqId == INVALID_LANE_REQ_ID) {
-        LNN_LOGE(LNN_LANE, "[CreateLaneType]invalid laneReqId");
-        return SOFTBUS_ERR;
+    if (laneReqId == INVALID_LANE_REQ_ID || linkInfo == NULL) {
+        LNN_LOGE(LNN_LANE, "[CreateLaneType]invalid param");
+        return SOFTBUS_INVALID_PARAM;
     }
     LaneType laneType;
     if (ParseLaneTypeByLaneReqId(laneReqId, &laneType) != SOFTBUS_OK) {
@@ -187,7 +187,7 @@ static int32_t AddLaneStatusNotifyInfo(const LaneStatusNotifyInfo *inputLaneStat
 
 static int32_t UpdateLaneStatusNotifyState(const char *peerIp, const char *peerUuid, const bool state)
 {
-    if (peerIp == NULL) {
+    if (peerIp == NULL || peerUuid == NULL) {
         LNN_LOGE(LNN_LANE, "peerIp is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -241,6 +241,10 @@ static int32_t DelLaneStatusNotifyInfo(const char *peerIp)
 
 static LaneStatusNotifyInfo *LaneStatusNotifyIsExist(const char *peerIp)
 {
+    if (peerIp == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return NULL;
+    }
     LaneStatusNotifyInfo *item = NULL;
     LaneStatusNotifyInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneStatusNotifyStateList, LaneStatusNotifyInfo, node) {
@@ -266,6 +270,7 @@ static LaneListenerInfo *LaneListenerIsExist(const LaneType type)
 static int32_t FindLaneListenerInfoByLaneType(const LaneType type, LaneListenerInfo *outLaneListener)
 {
     if (!LaneTypeCheck(type) || outLaneListener == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     if (LaneListenerLock() != SOFTBUS_OK) {
@@ -334,7 +339,7 @@ static int32_t GetLaneResourceByPeerIp(const char *peerIp, LaneResource *laneRes
 {
     if (peerIp == NULL || laneResourceItem == NULL) {
         LNN_LOGE(LNN_LANE, "invalid param");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (FindLaneResourceByPeerIp(peerIp, laneResourceItem) != SOFTBUS_OK) {
         char *anonyIp = NULL;
@@ -352,7 +357,6 @@ static void LnnOnWifiDirectDeviceOffLine(const char *peerMac, const char *peerIp
         LNN_LOGE(LNN_LANE, "invalid param");
         return;
     }
-
     LaneResource laneResourceItem;
     (void)memset_s(&laneResourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
     if (GetLaneResourceByPeerIp(peerIp, &laneResourceItem) != SOFTBUS_OK) {
@@ -456,6 +460,10 @@ static void LnnReqLinkListener(void)
 
 int32_t LnnOnWifiDirectDeviceOnLineNotify(const char *peerIp, const LaneLinkType linkType)
 {
+    if (peerIp == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
     LaneStatusNotifyInfo *laneStatusNotifyInfo = LaneStatusNotifyIsExist(peerIp);
     if (laneStatusNotifyInfo == NULL || !laneStatusNotifyInfo->isNeedNotify) {
         LNN_LOGI(LNN_LANE, "no need to notify lane status");
