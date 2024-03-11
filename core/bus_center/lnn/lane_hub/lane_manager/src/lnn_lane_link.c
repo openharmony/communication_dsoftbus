@@ -378,9 +378,9 @@ int32_t DelLinkInfoItem(uint32_t laneReqId)
     return SOFTBUS_OK;
 }
 
-int32_t FindLaneLinkInfoByLaneReqId(uint32_t laneReqId, LaneLinkInfo *linkInfoItem)
+int32_t FindLaneLinkInfoByLaneReqId(uint32_t laneReqId, LaneLinkInfo *linkInfoitem)
 {
-    if (laneReqId == INVALID_LANE_REQ_ID || linkInfoItem == NULL) {
+    if (laneReqId == INVALID_LANE_REQ_ID || linkInfoitem == NULL) {
         LNN_LOGE(LNN_LANE, "laneReqId or linkInfoItem is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -392,7 +392,7 @@ int32_t FindLaneLinkInfoByLaneReqId(uint32_t laneReqId, LaneLinkInfo *linkInfoIt
     LaneLinkInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_LinkInfoList, LaneLinkInfo, node) {
         if (item->laneReqId == laneReqId) {
-            if (CreateLinkInfoItem(item, linkInfoItem) != SOFTBUS_OK) {
+            if (CreateLinkInfoItem(item, linkInfoitem) != SOFTBUS_OK) {
                 LaneUnlock();
                 LNN_LOGE(LNN_LANE, "create linkInfoItem fail");
                 return SOFTBUS_ERR;
