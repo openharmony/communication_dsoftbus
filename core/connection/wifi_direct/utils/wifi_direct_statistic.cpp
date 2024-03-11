@@ -18,6 +18,7 @@
 #include "softbus_adapter_timer.h"
 #include "softbus_error_code.h"
 #include "softbus_adapter_thread.h"
+#include "conn_log.h"
 
 struct WifiDirectStatistic {
     StatisticLinkType linkType = STATISTIC_LINK_TYPE_NUM;
@@ -26,6 +27,23 @@ struct WifiDirectStatistic {
     uint64_t negotiateTimeConsuming = 0;
     uint64_t linkTimeConsuming = 0;
     bool isReuse = false;
+    uint64_t processConsuming = 0;
+    uint64_t hmlTriggerStartTime = 0;
+    uint64_t hmlTriggerConsuming = 0;
+    uint64_t createGroupStartTime = 0;
+    uint64_t createGroupConsuming = 0;
+    uint64_t createGroupNotifyStartTime = 0;
+    uint64_t createGroupNotifyConsuming = 0;
+    uint64_t connectGroupStartTime = 0;
+    uint64_t connectGroupConsuming = 0;
+    uint64_t openAuthConnectionStartTime = 0;
+    uint64_t openAuthConnectionConsuming = 0;
+    uint64_t renegotiateCreateGroupStartTime = 0;
+    uint64_t renegotiateCreateGroupConsuming = 0;
+    uint64_t renegotiateCreateGroupNotifyStartTime = 0;
+    uint64_t renegotiateCreateGroupNotifyConsuming = 0;
+    uint64_t renegotiateRemoveStartTime = 0;
+    uint64_t renegotiateRemoveConsuming = 0;
 };
 std::map<int32_t, WifiDirectStatistic> g_wifiDirectStatistic;
 static SoftBusMutex g_statisticLock;
@@ -145,4 +163,190 @@ void DestroyWifiDirectStatisticElement(int32_t requestId)
     (void)SoftBusMutexLock(&g_statisticLock);
     g_wifiDirectStatistic.erase(requestId);
     (void)SoftBusMutexUnlock(&g_statisticLock);
+}
+
+bool IsReNegotiate(int32_t requestId)
+{
+    return g_wifiDirectStatistic[requestId].isRenegotiate;
+}
+
+void SetIsReNegotiate(int32_t requestId)
+{
+    g_wifiDirectStatistic[requestId].isRenegotiate = true;
+}
+
+void SetHmlTriggerStartTime(int32_t requestId)
+{
+    (void)SoftBusMutexLock(&g_statisticLock);
+    g_wifiDirectStatistic[requestId].hmlTriggerStartTime = SoftBusGetSysTimeMs();
+    (void)SoftBusMutexUnlock(&g_statisticLock);
+}
+
+void SetHmlTriggerEndTime(int32_t requestId)
+{
+    (void)SoftBusMutexLock(&g_statisticLock);
+    uint64_t startTime = g_wifiDirectStatistic[requestId].hmlTriggerStartTime;
+    g_wifiDirectStatistic[requestId].hmlTriggerConsuming = SoftBusGetSysTimeMs() - startTime;
+    (void)SoftBusMutexUnlock(&g_statisticLock);
+}
+
+void SetCreateGroupStartTime(int32_t requestId)
+{
+    (void)SoftBusMutexLock(&g_statisticLock);
+    g_wifiDirectStatistic[requestId].createGroupStartTime = SoftBusGetSysTimeMs();
+    (void)SoftBusMutexUnlock(&g_statisticLock);
+}
+
+void SetCreateGroupEndTime(int32_t requestId)
+{
+    (void)SoftBusMutexLock(&g_statisticLock);
+    uint64_t startTime = g_wifiDirectStatistic[requestId].createGroupStartTime;
+    g_wifiDirectStatistic[requestId].createGroupConsuming = SoftBusGetSysTimeMs() - startTime;
+    (void)SoftBusMutexUnlock(&g_statisticLock);
+}
+
+void SetCreateGroupNotifyStartTime(int32_t requestId)
+{
+    (void)SoftBusMutexLock(&g_statisticLock);
+    g_wifiDirectStatistic[requestId].createGroupNotifyStartTime = SoftBusGetSysTimeMs();
+    (void)SoftBusMutexUnlock(&g_statisticLock);
+}
+
+void SetCreateGroupNotifyEndTime(int32_t requestId)
+{
+    (void)SoftBusMutexLock(&g_statisticLock);
+    uint64_t startTime = g_wifiDirectStatistic[requestId].createGroupNotifyStartTime;
+    g_wifiDirectStatistic[requestId].createGroupNotifyConsuming = SoftBusGetSysTimeMs() - startTime;
+    (void)SoftBusMutexUnlock(&g_statisticLock);
+}
+
+void SetConnectGroupStartTime(int32_t requestId)
+{
+    (void)SoftBusMutexLock(&g_statisticLock);
+    g_wifiDirectStatistic[requestId].connectGroupStartTime = SoftBusGetSysTimeMs();
+    (void)SoftBusMutexUnlock(&g_statisticLock);
+}
+
+void SetConnectGroupEndTime(int32_t requestId)
+{
+    (void)SoftBusMutexLock(&g_statisticLock);
+    uint64_t startTime = g_wifiDirectStatistic[requestId].connectGroupStartTime;
+    g_wifiDirectStatistic[requestId].connectGroupConsuming = SoftBusGetSysTimeMs() - startTime;
+    (void)SoftBusMutexUnlock(&g_statisticLock);
+}
+
+void SetOpenAuthConnectionStartTime(int32_t requestId)
+{
+    (void)SoftBusMutexLock(&g_statisticLock);
+    g_wifiDirectStatistic[requestId].openAuthConnectionStartTime = SoftBusGetSysTimeMs();
+    (void)SoftBusMutexUnlock(&g_statisticLock);
+}
+
+void SetOpenAuthConnectionEndTime(int32_t requestId)
+{
+    (void)SoftBusMutexLock(&g_statisticLock);
+    uint64_t startTime = g_wifiDirectStatistic[requestId].openAuthConnectionStartTime;
+    g_wifiDirectStatistic[requestId].openAuthConnectionConsuming = SoftBusGetSysTimeMs() - startTime;
+    (void)SoftBusMutexUnlock(&g_statisticLock);
+}
+
+void SetRenegotiateCreateGroupStartTime(int32_t requestId)
+{
+    (void)SoftBusMutexLock(&g_statisticLock);
+    g_wifiDirectStatistic[requestId].renegotiateCreateGroupStartTime = SoftBusGetSysTimeMs();
+    (void)SoftBusMutexUnlock(&g_statisticLock);
+}
+
+void SetRenegotiateCreateGroupEndTime(int32_t requestId)
+{
+    (void)SoftBusMutexLock(&g_statisticLock);
+    uint64_t startTime = g_wifiDirectStatistic[requestId].renegotiateCreateGroupStartTime;
+    g_wifiDirectStatistic[requestId].renegotiateCreateGroupConsuming = SoftBusGetSysTimeMs() - startTime;
+    (void)SoftBusMutexUnlock(&g_statisticLock);
+}
+
+void SetRenegotiateCreateGroupNotifyStartTime(int32_t requestId)
+{
+    (void)SoftBusMutexLock(&g_statisticLock);
+    g_wifiDirectStatistic[requestId].renegotiateCreateGroupNotifyStartTime = SoftBusGetSysTimeMs();
+    (void)SoftBusMutexUnlock(&g_statisticLock);
+}
+
+void SetRenegotiateCreateGroupNotifyEndTime(int32_t requestId)
+{
+    (void)SoftBusMutexLock(&g_statisticLock);
+    uint64_t startTime = g_wifiDirectStatistic[requestId].renegotiateCreateGroupNotifyStartTime;
+    g_wifiDirectStatistic[requestId].renegotiateCreateGroupNotifyConsuming = SoftBusGetSysTimeMs() - startTime;
+    (void)SoftBusMutexUnlock(&g_statisticLock);
+}
+
+void SetRenegotiateRemoveStartTime(int32_t requestId)
+{
+    (void)SoftBusMutexLock(&g_statisticLock);
+    g_wifiDirectStatistic[requestId].renegotiateRemoveStartTime = SoftBusGetSysTimeMs();
+    (void)SoftBusMutexUnlock(&g_statisticLock);
+}
+
+void SetRenegotiateRemoveEndTime(int32_t requestId)
+{
+    (void)SoftBusMutexLock(&g_statisticLock);
+    uint64_t startTime = g_wifiDirectStatistic[requestId].renegotiateRemoveStartTime;
+    g_wifiDirectStatistic[requestId].renegotiateRemoveConsuming = SoftBusGetSysTimeMs() - startTime;
+    (void)SoftBusMutexUnlock(&g_statisticLock);
+}
+
+void HmlTriggerRenegotiateLogPrint(int32_t requestId)
+{
+    g_wifiDirectStatistic[requestId].processConsuming = g_wifiDirectStatistic[requestId].hmlTriggerConsuming -
+        g_wifiDirectStatistic[requestId].createGroupConsuming -
+        g_wifiDirectStatistic[requestId].createGroupNotifyConsuming -
+        g_wifiDirectStatistic[requestId].renegotiateRemoveConsuming -
+        g_wifiDirectStatistic[requestId].renegotiateCreateGroupConsuming -
+        g_wifiDirectStatistic[requestId].renegotiateCreateGroupNotifyConsuming -
+        g_wifiDirectStatistic[requestId].connectGroupConsuming -
+        g_wifiDirectStatistic[requestId].openAuthConnectionConsuming;
+    CONN_LOGI(CONN_WIFI_DIRECT,
+        "hmlTriggerReNegotiate statistic requestId=%{public}d, total=%{public}" PRIu64
+        "MS, createGroup=%{public}" PRIu64 "MS, createGroupConnectNotify=%{public}" PRIu64
+        "MS, removeGroup=%{public}" PRIu64 "MS, reNegotiateCreateGroup=%{public}" PRIu64
+        "MS,reNegotiateCreateGroupConnectNotify=%{public}" PRIu64 " MS connectGroup=%{public}" PRIu64
+        "MS,openAuthConnection=%{public}" PRIu64 "MS, process=%{public}" PRIu64 "MS",
+        requestId, g_wifiDirectStatistic[requestId].hmlTriggerConsuming,
+        g_wifiDirectStatistic[requestId].createGroupConsuming,
+        g_wifiDirectStatistic[requestId].createGroupNotifyConsuming,
+        g_wifiDirectStatistic[requestId].renegotiateRemoveConsuming,
+        g_wifiDirectStatistic[requestId].renegotiateCreateGroupConsuming,
+        g_wifiDirectStatistic[requestId].renegotiateCreateGroupNotifyConsuming,
+        g_wifiDirectStatistic[requestId].connectGroupConsuming,
+        g_wifiDirectStatistic[requestId].openAuthConnectionConsuming,
+        g_wifiDirectStatistic[requestId].processConsuming);
+}
+
+void HmlTriggerLogPrint(int32_t requestId)
+{
+    g_wifiDirectStatistic[requestId].processConsuming = g_wifiDirectStatistic[requestId].hmlTriggerConsuming -
+        g_wifiDirectStatistic[requestId].createGroupConsuming -
+        g_wifiDirectStatistic[requestId].createGroupNotifyConsuming -
+        g_wifiDirectStatistic[requestId].connectGroupConsuming -
+        g_wifiDirectStatistic[requestId].openAuthConnectionConsuming;
+    CONN_LOGI(CONN_WIFI_DIRECT,
+        "hmlTrigger statistic requestId=%{public}d, total=%{public}" PRIu64 "MS, createGroup=%{public}" PRIu64
+        "MS, createGroupConnectNotify=%{public}" PRIu64 "MS, connectGroup=%{public}" PRIu64
+        "MS, openAuthConnection=%{public}" PRIu64 "MS, process=%{public}" PRIu64 "MS",
+        requestId, g_wifiDirectStatistic[requestId].hmlTriggerConsuming,
+        g_wifiDirectStatistic[requestId].createGroupConsuming,
+        g_wifiDirectStatistic[requestId].createGroupNotifyConsuming,
+        g_wifiDirectStatistic[requestId].connectGroupConsuming,
+        g_wifiDirectStatistic[requestId].openAuthConnectionConsuming,
+        g_wifiDirectStatistic[requestId].processConsuming);
+}
+
+void HmlTriggerCalculate(int32_t requestId)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "hmlTrigger isRenegotiate=%{public}d", g_wifiDirectStatistic[requestId].isRenegotiate);
+    if (g_wifiDirectStatistic[requestId].isRenegotiate) {
+        HmlTriggerRenegotiateLogPrint(requestId);
+    } else {
+        HmlTriggerLogPrint(requestId);
+    }
 }
