@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -467,10 +467,10 @@ static int32_t CheckSessionIsOpened(int32_t sessionId)
     return SOFTBUS_ERR;
 }
 
-int OpenSessionSync(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId,
+int32_t OpenSessionSync(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId,
     const char *groupId, const SessionAttribute *attr)
 {
-    int ret = CheckParamIsValid(mySessionName, peerSessionName, peerNetworkId, groupId, attr);
+    int32_t ret = CheckParamIsValid(mySessionName, peerSessionName, peerNetworkId, groupId, attr);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
@@ -491,15 +491,13 @@ int OpenSessionSync(const char *mySessionName, const char *peerSessionName, cons
     bool isEnabled = false;
 
     ret = ClientAddSession(&param, &sessionId, &isEnabled);
-    if (ret != SOFTBUS_OK) {
-        if (ret == SOFTBUS_TRANS_SESSION_REPEATED) {
-            TRANS_LOGI(TRANS_SDK, "session already opened");
-            CheckSessionIsOpened(sessionId);
-            return OpenSessionWithExistSession(sessionId, isEnabled);
-        }
-        TRANS_LOGE(TRANS_SDK, "add session err: ret=%{public}d", ret);
-        return ret;
+    if (ret != SOFTBUS_OK && ret == SOFTBUS_TRANS_SESSION_REPEATED) {
+        TRANS_LOGI(TRANS_SDK, "session already opened");
+        CheckSessionIsOpened(sessionId);
+        return OpenSessionWithExistSession(sessionId, isEnabled);
     }
+    TRANS_LOGI(TRANS_SDK, "add session succ: ret=%{public}d", ret);
+    return ret;
 
     TransInfo transInfo;
     (void)memset_s(&transInfo, sizeof(TransInfo), 0, sizeof(TransInfo));
@@ -522,8 +520,7 @@ int OpenSessionSync(const char *mySessionName, const char *peerSessionName, cons
         (void)ClientDeleteSession(sessionId);
         return SOFTBUS_TRANS_SESSION_NO_ENABLE;
     }
-    TRANS_LOGI(TRANS_SDK, "ok: sessionId=%{public}d, channelId=%{public}d",
-        sessionId, transInfo.channelId);
+    TRANS_LOGI(TRANS_SDK, "ok: sessionId=%{public}d, channelId=%{public}d", sessionId, transInfo.channelId);
     return sessionId;
 }
 

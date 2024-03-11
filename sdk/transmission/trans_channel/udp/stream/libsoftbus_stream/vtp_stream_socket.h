@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -103,6 +103,8 @@ private:
         { PKT_LOSS, FT_CONF_APP_FC_RECV_PKT_LOSS },
     };
 
+    void VtpStreamSocket::ProcessCommonDataStream(std::unique_ptr<char[]> &dataBuffer,
+        int32_t &dataLength, std::unique_ptr<char[]> &extBuffer, int32_t &extLen, StreamFrameInfo &info);
     void InsertElementToFuncMap(int type, ValueType valueType, MySetFunc set, MyGetFunc get);
     int CreateAndBindSocket(IpAndPort &local) override;
     bool Accept() override;
@@ -114,7 +116,7 @@ private:
     std::unique_ptr<IStream> MakeStreamData(StreamData &data, const StreamFrameInfo &info) const;
     int RecvStreamLen();
     void DoStreamRecv();
-    std::unique_ptr<char[]> RecvStream(int dataLength) override;
+    std::unique_ptr<char[]> RecvStream(int32_t dataLength) override;
 
     void SetDefaultConfig(int fd);
     bool SetIpTos(int fd, const StreamAttr &tos);
