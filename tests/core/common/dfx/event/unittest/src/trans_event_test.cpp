@@ -78,6 +78,7 @@ HWTEST_F(TransEventTest, TransEventTest002, TestSize.Level0)
         .peerChannelId = 16,
         .btFlow = 17,
         .peerNetworkId = "a8ynvpdaihw1f6nknjd2hkfhxljxypkr6kvjsbhnhpp16974uo4fvsrpfa6t50fm",
+        .peerUdid = "a8ynvpdaihw1f6nknjd2hkfhxljxypkr6kvjsbhnhpp16974uo4fvsrpfa6t50fm",
         .callerPkg = "testCallerPkg",
         .calleePkg = "testCalleePkg",
     };
@@ -119,6 +120,7 @@ HWTEST_F(TransEventTest, TransEventTest003, TestSize.Level0)
         .peerChannelId = -16,
         .btFlow = -17,
         .peerNetworkId = "",
+        .peerUdid = "",
         .callerPkg = "\0",
         .calleePkg = nullptr,
     };

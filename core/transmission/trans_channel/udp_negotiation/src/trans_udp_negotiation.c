@@ -568,6 +568,8 @@ static void TransOnExchangeUdpInfoRequest(int64_t authId, int64_t seq, const cJS
         .channelType = CHANNEL_TYPE_UDP,
         .authId = authId
     };
+    char peerNetworkId[NETWORK_ID_BUF_LEN] = {0};
+    char peerUdid[UDID_BUF_LEN] = {0};
     int32_t ret = ParseRequestAppInfo(authId, msg, &info);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get appinfo failed. ret=%{public}d", ret);
@@ -575,6 +577,10 @@ static void TransOnExchangeUdpInfoRequest(int64_t authId, int64_t seq, const cJS
         goto ERR_EXIT;
     }
     if (info.udpChannelOptType == TYPE_UDP_CHANNEL_OPEN) {
+        if (LnnGetNetworkIdByUuid(info.peerData.deviceId, peerNetworkId, NETWORK_ID_BUF_LEN) == SOFTBUS_OK &&
+            LnnGetRemoteStrInfo(peerNetworkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN) == SOFTBUS_OK) {
+            extra.peerUdid = peerUdid;
+        }
         extra.socketName = info.myData.sessionName;
         extra.peerChannelId = info.peerData.channelId;
         extra.result = EVENT_STAGE_RESULT_OK;
