@@ -114,7 +114,7 @@ HWTEST_F(WifiDirectManagerTest, WifiDirectManager002, TestSize.Level1)
     struct WifiDirectManager* manager = GetWifiDirectManager();
 
     const char *loaclIp = "130.30.0.1";
-    std::string interfaceName = "p2p"; 
+    std::string interfaceName = "p2p";
     size_t interfaceNameSize = interfaceName.size();
     int32_t ret = manager->getInterfaceNameByLocalIp(nullptr, (char*)interfaceName.c_str(), interfaceNameSize);
     EXPECT_EQ(ret, SOFTBUS_ERR);
@@ -137,9 +137,11 @@ HWTEST_F(WifiDirectManagerTest, WifiDirectManager003, TestSize.Level1)
     size_t localMacSize = localMac.size();
     std::string remoteMac = "AVADACAWAFADABAN";
     size_t remoteMacSize = remoteMac.size();
-    int32_t ret = manager->getLocalAndRemoteMacByLocalIp(nullptr, (char*)localMac.c_str(), localMacSize, (char*)remoteMac.c_str(), remoteMacSize);
+    int32_t ret = manager->getLocalAndRemoteMacByLocalIp(nullptr, (char*)localMac.c_str(),
+        localMacSize, (char*)remoteMac.c_str(), remoteMacSize);
     EXPECT_EQ(ret, SOFTBUS_ERR);
-    ret = manager->getLocalAndRemoteMacByLocalIp(loaclIp, (char*)localMac.c_str(), localMacSize, (char*)remoteMac.c_str(), remoteMacSize);
+    ret = manager->getLocalAndRemoteMacByLocalIp(loaclIp, (char*)localMac.c_str(),
+        localMacSize, (char*)remoteMac.c_str(), remoteMacSize);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 };
 }
