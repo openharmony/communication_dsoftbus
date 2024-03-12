@@ -26,7 +26,6 @@
 #include "auth_deviceprofile.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_fast_offline.h"
-#include "lnn_lane_info.h"
 #include "lnn_map.h"
 #include "lnn_node_info.h"
 #include "lnn_lane_def.h"

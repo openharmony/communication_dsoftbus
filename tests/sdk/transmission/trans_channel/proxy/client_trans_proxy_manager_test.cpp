@@ -29,6 +29,7 @@
 #define TEST_DATA "testdata"
 #define TEST_DATA_LENGTH 9
 #define TEST_FILE_CNT 4
+#define TEST_SEQ 188
 
 using namespace std;
 using namespace testing::ext;
@@ -245,6 +246,49 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxyChannelSendFileTest, TestSize.Le
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     ret = TransProxyChannelSendFile(channelId, g_testProxyFileName, g_proxyFileSet, TEST_FILE_CNT);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+}
+
+/**
+ * @tc.name: ClientTransProxyGetInfoByChannelIdTest
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given channelInfo is null.
+ * @tc.desc: Should return SOFTBUS_ERR when given invalid parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyGetInfoByChannelIdTest, TestSize.Level0)
+{
+    int32_t channelId = 1;
+    ProxyChannelInfoDetail info;
+    memset_s(&info, sizeof(ProxyChannelInfoDetail), 0, sizeof(ProxyChannelInfoDetail));
+    int ret = ClientTransProxyGetInfoByChannelId(channelId, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = ClientTransProxyGetInfoByChannelId(channelId, &info);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+}
+
+/**
+ * @tc.name: TransProxyPackAndSendDataTest
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given channelInfo or data is null.
+ * @tc.desc: Should return SOFTBUS_ERR when given invalid parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyManagerTest, TransProxyPackAndSendDataTest, TestSize.Level0)
+{
+    int32_t channelId = 1;
+    const char *data = "test";
+    uint32_t len = 5;
+    ProxyChannelInfoDetail info;
+    memset_s(&info, sizeof(ProxyChannelInfoDetail), 0, sizeof(ProxyChannelInfoDetail));
+    SessionPktType pktType = TRANS_SESSION_MESSAGE;
+    int32_t ret = TransProxyPackAndSendData(channelId, nullptr, len, &info, pktType);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransProxyPackAndSendData(channelId, data, len, nullptr, pktType);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransProxyPackAndSendData(channelId,
+        static_cast<const void *>(data), len, &info, pktType);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 } // namespace OHOS

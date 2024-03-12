@@ -36,9 +36,9 @@ static LaneLinkDepsInterface *GetLaneLinkDepsInterface()
 }
 
 extern "C" {
-int32_t GetTransOptionByLaneId(uint32_t laneId, TransOption *reqInfo)
+int32_t GetTransOptionByLaneReqId(uint32_t laneReqId, TransOption *reqInfo)
 {
-    return GetLaneLinkDepsInterface()->GetTransOptionByLaneId(laneId, reqInfo);
+    return GetLaneLinkDepsInterface()->GetTransOptionByLaneReqId(laneReqId, reqInfo);
 }
 }
 } // namespace OHOS
