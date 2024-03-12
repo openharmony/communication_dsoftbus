@@ -685,8 +685,7 @@ static inline int TransTdcPostReplyMsg(int32_t channelId, uint64_t seq, uint32_t
     return TransTdcPostBytes(channelId, &packetHead, reply);
 }
 
-static int32_t OpenDataBusRequestReply(const AppInfo *appInfo, int32_t channelId, uint64_t seq,
-    uint32_t flags)
+static int32_t OpenDataBusRequestReply(const AppInfo *appInfo, int32_t channelId, uint64_t seq, uint32_t flags)
 {
     char *reply = PackReply(appInfo);
     if (reply == NULL) {
@@ -698,8 +697,7 @@ static int32_t OpenDataBusRequestReply(const AppInfo *appInfo, int32_t channelId
     return ret;
 }
 
-static int32_t OpenDataBusRequestError(int32_t channelId, uint64_t seq, char *errDesc,
-    int32_t errCode, uint32_t flags)
+static int32_t OpenDataBusRequestError(int32_t channelId, uint64_t seq, char *errDesc, int32_t errCode, uint32_t flags)
 {
     char *reply = PackError(errCode, errDesc);
     if (reply == NULL) {
@@ -1015,7 +1013,7 @@ static int32_t DecryptMessage(int32_t channelId, const TdcPacketHead *pktHead, c
     return SOFTBUS_OK;
 }
 
-static int32_t ProcessReceivedData(int32_t channelId)
+static int32_t ProcessReceivedData(int32_t channelId, int32_t type)
 {
     uint64_t seq;
     uint32_t flags;
@@ -1064,7 +1062,7 @@ static int32_t ProcessReceivedData(int32_t channelId)
     return ret;
 }
 
-static int32_t TransTdcSrvProcData(ListenerModule module, int32_t channelId)
+static int32_t TransTdcSrvProcData(ListenerModule module, int32_t channelId, int32_t type)
 {
     if (SoftBusMutexLock(&g_tcpSrvDataList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock failed.");
@@ -1107,7 +1105,7 @@ static int32_t TransTdcSrvProcData(ListenerModule module, int32_t channelId)
     }
     DelTrigger(module, node->fd, READ_TRIGGER);
     SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
-    return ProcessReceivedData(channelId);
+    return ProcessReceivedData(channelId, type);
 }
 
 static int32_t TransTdcGetDataBufInfoByChannelId(int32_t channelId, int32_t *fd, size_t *len)
@@ -1179,7 +1177,7 @@ static int32_t TransTdcUpdateDataBufWInfo(int32_t channelId, char *recvBuf, int3
     return SOFTBUS_ERR;
 }
 
-int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId)
+int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId, int32_t type)
 {
     int32_t fd = -1;
     size_t len = 0;
@@ -1213,5 +1211,5 @@ int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId)
     }
     SoftBusFree(recvBuf);
 
-    return TransTdcSrvProcData(module, channelId);
+    return TransTdcSrvProcData(module, channelId, type);
 }

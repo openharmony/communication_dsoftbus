@@ -219,8 +219,12 @@ bool CheckAuthConnCallback(const AuthConnCallback *connCb)
     return true;
 }
 
-void PerformVerifyCallback(uint32_t requestId, int32_t result, int64_t authId, const NodeInfo *info)
+void PerformVerifyCallback(uint32_t requestId, int32_t result, AuthHandle authHandle, const NodeInfo *info)
 {
+    if (authHandle.type < AUTH_LINK_TYPE_WIFI || authHandle.type >= AUTH_LINK_TYPE_MAX) {
+        AUTH_LOGE(AUTH_CONN, "authHandle type error");
+        return;
+    }
     AuthRequest request;
     if (GetAuthRequest(requestId, &request) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "get auth request failed");
@@ -231,7 +235,7 @@ void PerformVerifyCallback(uint32_t requestId, int32_t result, int64_t authId, c
         return;
     }
     if (result == SOFTBUS_OK) {
-        request.verifyCb.onVerifyPassed(request.requestId, authId, info);
+        request.verifyCb.onVerifyPassed(request.requestId, authHandle, info);
     } else {
         request.verifyCb.onVerifyFailed(request.requestId, result);
     }
@@ -248,8 +252,9 @@ void PerformAuthConnCallback(uint32_t requestId, int32_t result, int64_t authId)
         AUTH_LOGE(AUTH_CONN, "check connCb failed");
         return;
     }
+    AuthHandle authHandle = { .authId = authId, .type = request.connInfo.type };
     if (result == SOFTBUS_OK) {
-        request.connCb.onConnOpened(request.requestId, authId);
+        request.connCb.onConnOpened(request.requestId, authHandle);
     } else {
         request.connCb.onConnOpenFailed(request.requestId, result);
     }

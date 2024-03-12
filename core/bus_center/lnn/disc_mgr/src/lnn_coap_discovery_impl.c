@@ -22,6 +22,7 @@
 #include "lnn_log.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
 
@@ -51,7 +52,7 @@ static void DeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions 
     }
     (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
     // devId format is hex hash string here
-    LNN_LOGD(LNN_BUILDER, "DeviceFound devName=%{public}s, devId=%{public}s", device->devName, device->devId);
+    LNN_LOGI(LNN_BUILDER, "DeviceFound devName=%{public}s, devId=%{public}s", device->devName, device->devId);
     if (!AuthIsPotentialTrusted(device)) {
         LNN_LOGW(LNN_BUILDER, "discovery device is not potential trusted, devId=%{public}s, "
             "accountHash=%{public}02X%{public}02X", device->devId, device->accountHash[0], device->accountHash[1]);
@@ -70,6 +71,10 @@ static void DeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions 
     if (strncpy_s(addr.info.ip.ip, IP_STR_MAX_LEN, device->addr[0].info.ip.ip,
         strlen(device->addr[0].info.ip.ip)) != 0) {
         LNN_LOGE(LNN_BUILDER, "strncpy ip failed");
+        return;
+    }
+    if (strcpy_s((char *)addr.info.ip.udidHash, UDID_HASH_LEN, device->devId) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "strcpy udidHash failed");
         return;
     }
     addr.info.ip.port = device->addr[0].info.ip.port;

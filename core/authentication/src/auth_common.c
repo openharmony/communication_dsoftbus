@@ -104,7 +104,6 @@ static void HandleAuthMessage(SoftBusMessage *msg)
     handler(msg->obj);
 }
 
-
 int32_t PostAuthEvent(EventType event, EventHandler handler, const void *obj, uint32_t size, uint64_t delayMs)
 {
     if (!IsAuthHandlerInit()) {

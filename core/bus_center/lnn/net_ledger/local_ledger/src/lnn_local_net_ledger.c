@@ -45,6 +45,7 @@
 #define ALL_GROUP_TYPE 0xF
 #define MAX_STATE_VERSION 0xFF
 #define SUPPORT_EXCHANGE_NETWORKID 1
+#define SUPPORT_NORMALIZED_LINK 2
 #define DEFAULT_CONN_SUB_FEATURE 1
 #define OH_OS_TYPE 10
 #define HO_OS_TYPE 11
@@ -62,7 +63,7 @@ static void UpdateStateVersionAndStore(void)
     int32_t ret;
     g_localNetLedger.localInfo.stateVersion++;
     if (g_localNetLedger.localInfo.stateVersion > MAX_STATE_VERSION) {
-        g_localNetLedger.localInfo.stateVersion = 0;
+        g_localNetLedger.localInfo.stateVersion = 1;
     }
     LNN_LOGI(LNN_LEDGER, "local stateVersion=%{public}d",
         g_localNetLedger.localInfo.stateVersion);
@@ -523,7 +524,7 @@ static int32_t UpdateStateVersion(const void *buf)
         return SOFTBUS_INVALID_PARAM;
     }
     if (*(int32_t *)buf > MAX_STATE_VERSION) {
-        *(int32_t *)buf = 0;
+        *(int32_t *)buf = 1;
     }
     info->stateVersion = *(int32_t *)buf;
     return SOFTBUS_OK;
@@ -586,6 +587,17 @@ static int32_t LlGetOsType(void *buf, uint32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
     *((int32_t *)buf) = info->deviceInfo.osType;
+    return SOFTBUS_OK;
+}
+
+static int32_t LlGetAuthCapability(void *buf, uint32_t len)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (buf == NULL || len != sizeof(uint32_t)) {
+        LNN_LOGE(LNN_LEDGER, "buf of authCapability is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((int32_t *)buf) = info->authCapacity;
     return SOFTBUS_OK;
 }
 
@@ -1361,6 +1373,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {NUM_KEY_DISCOVERY_TYPE, -1, LlGetNetType, NULL},
     {NUM_KEY_DEV_TYPE_ID, -1, LlGetDeviceTypeId, NULL},
     {NUM_KEY_OS_TYPE, -1, LlGetOsType, NULL},
+    {NUM_KEY_AUTH_CAP, -1, LlGetAuthCapability, NULL},
     {NUM_KEY_MASTER_NODE_WEIGHT, -1, L1GetMasterNodeWeight, UpdateMasgerNodeWeight},
     {NUM_KEY_P2P_ROLE, -1, L1GetP2pRole, UpdateP2pRole},
     {NUM_KEY_STATE_VERSION, -1, LlGetStateVersion, UpdateStateVersion},
@@ -1731,7 +1744,7 @@ int32_t LnnInitLocalLedger(void)
     nodeInfo->groupType = ALL_GROUP_TYPE;
     nodeInfo->discoveryType = 0;
     nodeInfo->netCapacity = LnnGetNetCapabilty();
-    nodeInfo->authCapacity = SUPPORT_EXCHANGE_NETWORKID;
+    nodeInfo->authCapacity = SUPPORT_EXCHANGE_NETWORKID | SUPPORT_NORMALIZED_LINK;
     nodeInfo->feature = LnnGetFeatureCapabilty();
     nodeInfo->connSubFeature = DEFAULT_CONN_SUB_FEATURE;
     if (LnnInitLocalNodeInfo(nodeInfo) != SOFTBUS_OK) {

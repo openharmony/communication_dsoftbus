@@ -586,29 +586,31 @@ int32_t TransProxyGetNewChanSeq(int32_t channelId)
     return seq;
 }
 
-int64_t TransProxyGetAuthId(int32_t channelId)
+int32_t TransProxyGetAuthId(int32_t channelId, AuthHandle *authHandle)
 {
-    int64_t authId;
+    if (authHandle == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
     ProxyChannelInfo *item = NULL;
-
     if (g_proxyChannelList == NULL) {
-        return AUTH_INVALID_ID;
+        TRANS_LOGE(TRANS_CTRL, "g_proxyChannelList is null");
+        return SOFTBUS_ERR;
     }
 
     if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return AUTH_INVALID_ID;
+        return SOFTBUS_ERR;
     }
 
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->channelId == channelId) {
-            authId = item->authId;
+            *authHandle = item->authHandle;
             (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
-            return authId;
+            return SOFTBUS_OK;
         }
     }
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
-    return AUTH_INVALID_ID;
+    return SOFTBUS_ERR;
 }
 
 int32_t TransProxyGetSessionKeyByChanId(int32_t channelId, char *sessionKey, uint32_t sessionKeySize)
@@ -901,6 +903,19 @@ static inline int32_t CheckAppTypeAndMsgHead(const ProxyMessageHead *msgHead, co
     return SOFTBUS_OK;
 }
 
+static inline AuthLinkType ConvertConnectType2AuthLinkType(ConnectType type)
+{
+    if (type == CONNECT_TCP) {
+        return AUTH_LINK_TYPE_WIFI;
+    } else if ((type == CONNECT_BLE) || (type == CONNECT_BLE_DIRECT)) {
+        return AUTH_LINK_TYPE_BLE;
+    } else if (type == CONNECT_BR) {
+        return AUTH_LINK_TYPE_BR;
+    } else {
+        return AUTH_LINK_TYPE_P2P;
+    }
+}
+
 static void ConstructProxyChannelInfo(
     ProxyChannelInfo *chan, const ProxyMessage *msg, int16_t newChanId, const ConnectionInfo *info)
 {
@@ -911,7 +926,8 @@ static void ConstructProxyChannelInfo(
     chan->myId = newChanId;
     chan->channelId = newChanId;
     chan->peerId = msg->msgHead.peerId;
-    chan->authId = msg->authId;
+    chan->authHandle.authId = msg->authId;
+    chan->authHandle.type = ConvertConnectType2AuthLinkType(info->type);
     chan->type = info->type;
     if (chan->type == CONNECT_BLE || chan->type == CONNECT_BLE_DIRECT) {
         chan->blePrototolType = info->bleInfo.protocol;
@@ -1111,7 +1127,7 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
         .channelId = chan->myId,
         .peerChannelId = chan->peerId,
         .socketName = tmpSocketName,
-        .authId = chan->authId,
+        .authId = chan->authHandle.authId,
         .connectionId = chan->connId,
         .linkType = chan->type
     };
@@ -1334,19 +1350,6 @@ void TransProxyonMessageReceived(const ProxyMessage *msg)
     }
 }
 
-static inline AuthLinkType ConvertConnectType2AuthLinkType(ConnectType type)
-{
-    if (type == CONNECT_TCP) {
-        return AUTH_LINK_TYPE_WIFI;
-    } else if ((type == CONNECT_BLE) || (type == CONNECT_BLE_DIRECT)) {
-        return AUTH_LINK_TYPE_BLE;
-    } else if (type == CONNECT_BR) {
-        return AUTH_LINK_TYPE_BR;
-    } else {
-        return AUTH_LINK_TYPE_P2P;
-    }
-}
-
 int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int32_t channelId, const AppInfo *appInfo)
 {
     chan->myId = (int16_t)channelId;
@@ -1358,9 +1361,9 @@ int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int32_t channelId, cons
     }
 
     if (appInfo->appType != APP_TYPE_AUTH) {
-        chan->authId =
-            AuthGetLatestIdByUuid(appInfo->peerData.deviceId, ConvertConnectType2AuthLinkType(chan->type), false);
-        if (chan->authId == AUTH_INVALID_ID) {
+        AuthGetLatestIdByUuid(appInfo->peerData.deviceId, ConvertConnectType2AuthLinkType(chan->type),
+            false, &chan->authHandle);
+        if (chan->authHandle.authId == AUTH_INVALID_ID) {
             TRANS_LOGE(TRANS_CTRL, "get authId for cipher err");
             return SOFTBUS_ERR;
         }

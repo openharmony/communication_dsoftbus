@@ -51,19 +51,19 @@ uint32_t SwitchAuthLinkTypeToFlagType(AuthLinkType type)
     }
 }
 
-int32_t GetCipherFlagByAuthId(int64_t authId, uint32_t *flag, bool *isAuthServer)
+int32_t GetCipherFlagByAuthId(AuthHandle authHandle, uint32_t *flag, bool *isAuthServer)
 {
     if (flag == NULL || isAuthServer == NULL) {
         TRANS_LOGE(TRANS_CTRL, "param invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     AuthConnInfo info;
-    if (AuthGetServerSide(authId, isAuthServer) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get auth server side fail authId=%{public}" PRId64, authId);
+    if (AuthGetServerSide(authHandle.authId, isAuthServer) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get auth server side fail authId=%{public}" PRId64, authHandle.authId);
         return SOFTBUS_ERR;
     }
-    if (AuthGetConnInfo(authId, &info) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get authinfo fail authId=%{public}" PRId64, authId);
+    if (AuthGetConnInfo(authHandle, &info) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get authinfo fail authId=%{public}" PRId64, authHandle.authId);
         return SOFTBUS_ERR;
     }
     *flag = SwitchAuthLinkTypeToFlagType(info.type);
@@ -81,7 +81,7 @@ static int32_t StartVerifySession(SessionConn *conn)
     SetSessionKeyByChanId(conn->channelId, conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey));
     bool isAuthServer = false;
     uint32_t cipherFlag = FLAG_WIFI;
-    if (GetCipherFlagByAuthId(conn->authId, &cipherFlag, &isAuthServer)) {
+    if (GetCipherFlagByAuthId(conn->authHandle, &cipherFlag, &isAuthServer)) {
         TRANS_LOGE(TRANS_CTRL, "get cipher flag failed");
         return SOFTBUS_TRANS_GET_CIPHER_FAILED;
     }
@@ -130,7 +130,7 @@ static int32_t CreateSessionConnNode(ListenerModule module, int fd, int32_t chan
     conn->status = TCP_DIRECT_CHANNEL_STATUS_CONNECTING;
     conn->timeout = 0;
     conn->listenMod = module;
-    conn->authId = AUTH_INVALID_ID;
+    conn->authHandle.authId = AUTH_INVALID_ID;
     conn->appInfo.routeType = (module == DIRECT_CHANNEL_SERVER_P2P) ? WIFI_P2P : WIFI_STA;
     conn->appInfo.peerData.port = clientAddr->socketOption.port;
     if (LnnGetLocalStrInfo(STRING_KEY_UUID, conn->appInfo.myData.deviceId, sizeof(conn->appInfo.myData.deviceId)) !=
@@ -249,7 +249,7 @@ static void TransProcDataRes(ListenerModule module, int32_t ret, int32_t channel
 
 static int32_t ProcessSocketInEvent(SessionConn *conn, int fd)
 {
-    int32_t ret = TransTdcSrvRecvData(conn->listenMod, conn->channelId);
+    int32_t ret = TransTdcSrvRecvData(conn->listenMod, conn->channelId, conn->authHandle.type);
     TRANS_LOGE(TRANS_CTRL, "Trans Srv Recv Data ret=%{public}d. ", ret);
     if (ret == SOFTBUS_DATA_NOT_ENOUGH) {
         return SOFTBUS_OK;
@@ -273,7 +273,7 @@ static int32_t ProcessSocketOutEvent(SessionConn *conn, int fd)
         .callerPkg = NULL,
         .socketFd = fd,
         .channelId = conn->channelId,
-        .authId = conn->authId,
+        .authId = conn->authHandle.authId,
         .errcode = ret,
         .result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_START, extra);
