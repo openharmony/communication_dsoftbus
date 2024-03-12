@@ -522,19 +522,15 @@ static int32_t OnVerifyP2pRequest(int64_t authId, int64_t seq, const cJSON *json
         return ret;
     }
 
-    pManager = GetWifiDirectManager();
-    if (pManager == NULL || pManager->getLocalIpByRemoteIp == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "get wifidirectmanager or get localipbyremoteip fail");
-        SendVerifyP2pFailRsp(authId, seq, CODE_VERIFY_P2P, SOFTBUS_ERR,
-            "get wifidirectmanager or localip fail", isAuthLink);
-        return SOFTBUS_ERR;
-    }
-
-    if (pManager->getLocalIpByRemoteIp(peerIp, myIp, sizeof(myIp)) != SOFTBUS_OK) {
-        OutputAnonymizeIpAddress(myIp, peerIp);
-        TRANS_LOGE(TRANS_CTRL, "OnVerifyP2pRequest get p2p ip fail");
-        SendVerifyP2pFailRsp(authId, seq, CODE_VERIFY_P2P, ret, "get p2p ip fail", isAuthLink);
-        return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
+    struct WifiDirectManager *pManager = GetWifiDirectManager();
+    if (pManager != NULL && pManager->getLocalIpByRemoteIp != NULL) {
+        int32_t ret = pManager->getLocalIpByRemoteIp(peerIp, myIp, sizeof(myIp));
+        if (ret != SOFTBUS_OK) {
+            OutputAnonymizeIpAddress(myIp, peerIp);
+            TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
+            SendVerifyP2pFailRsp(authId, seq, CODE_VERIFY_P2P, ret, "get p2p ip fail", isAuthLink);
+            return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
+        }
     }
 
     ret = StartP2pListener(myIp, &myPort);
