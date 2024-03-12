@@ -514,7 +514,6 @@ static int32_t OnVerifyP2pRequest(int64_t authId, int64_t seq, const cJSON *json
     char peerIp[IP_LEN] = {0};
     int32_t myPort = 0;
     char myIp[IP_LEN] = {0};
-    struct WifiDirectManager *pManager = NULL;
 
     int32_t ret = VerifyP2pUnPack(json, peerIp, IP_LEN, &peerPort);
     if (ret != SOFTBUS_OK) {
