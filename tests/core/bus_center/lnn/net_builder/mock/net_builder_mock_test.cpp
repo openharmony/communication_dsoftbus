@@ -151,13 +151,13 @@ HWTEST_F(NetBuilderMockTest, NET_BUILDER_TEST_005, TestSize.Level1)
 {
     AuthInterfaceMock authMock;
     ON_CALL(authMock, AuthHandleLeaveLNN(_)).WillByDefault(Return());
-    int64_t authId = 1;
-    int32_t ret = LnnNotifyAuthHandleLeaveLNN(authId);
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
+    int32_t ret = LnnNotifyAuthHandleLeaveLNN(authHandle);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnNotifyAuthHandleLeaveLNN(authId);
+    ret = LnnNotifyAuthHandleLeaveLNN(authHandle);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
     LnnDeinitNetBuilder();

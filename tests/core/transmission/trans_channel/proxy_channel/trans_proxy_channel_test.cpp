@@ -129,7 +129,7 @@ void TestAddTestProxyChannel(int32_t authId = AUTH_INVALID_ID)
     }
     chan->myId = m_testProxyChannelId;
     chan->channelId = m_testProxyChannelId;
-    chan->authId = authId;
+    chan->authHandle.authId = authId;
     chan->appInfo.appType = APP_TYPE_NORMAL;
     chan->status = PROXY_CHANNEL_STATUS_PYH_CONNECTED;
     if (TransProxyAddChanItem(chan) != SOFTBUS_OK) {
@@ -199,7 +199,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyHandshakeTest001, TestSize.Level1)
     ret = TransProxyHandshake(&info);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    info.authId = AUTH_INVALID_ID;
+    info.authHandle.authId = AUTH_INVALID_ID;
     ret = TransProxyHandshake(&info);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
@@ -218,7 +218,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyAckHandshakeTest001, TestSize.Level1)
     info.appInfo.appType = APP_TYPE_AUTH;
     info.myId = 0;
     info.peerId = 0;
-    info.authId = AUTH_INVALID_ID;
+    info.authHandle.authId = AUTH_INVALID_ID;
 
     TestAddTestProxyChannel();
     info.channelId = m_testProxyChannelId;
@@ -252,7 +252,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyKeepaliveTest001, TestSize.Level1)
     info.appInfo.appType = APP_TYPE_AUTH;
     info.myId = 0;
     info.peerId = 0;
-    info.authId = AUTH_INVALID_ID;
+    info.authHandle.authId = AUTH_INVALID_ID;
     int32_t ret = strcpy_s(info.identity, sizeof(info.identity), TEST_CHANNEL_INDENTITY);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     TestAddTestProxyChannel();
@@ -279,7 +279,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyKeepaliveTest002, TestSize.Level1)
     info.appInfo.appType = APP_TYPE_AUTH;
     info.myId = 0;
     info.peerId = 0;
-    info.authId = AUTH_INVALID_ID;
+    info.authHandle.authId = AUTH_INVALID_ID;
     int32_t ret = strcpy_s(info.identity, sizeof(info.identity), TEST_CHANNEL_INDENTITY);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     TestAddTestProxyChannel(1);
@@ -302,7 +302,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyAckKeepaliveTest001, TestSize.Level1)
     info.appInfo.appType = APP_TYPE_AUTH;
     info.myId = 0;
     info.peerId = 0;
-    info.authId = AUTH_INVALID_ID;
+    info.authHandle.authId = AUTH_INVALID_ID;
     (void)strcpy_s(info.identity, sizeof(info.identity), TEST_CHANNEL_INDENTITY);
     TestAddTestProxyChannel();
     info.channelId = m_testProxyChannelId;
@@ -333,7 +333,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyAckKeepaliveTest002, TestSize.Level1)
     info.appInfo.appType = APP_TYPE_AUTH;
     info.myId = 0;
     info.peerId = 0;
-    info.authId = AUTH_INVALID_ID;
+    info.authHandle.authId = AUTH_INVALID_ID;
     (void)strcpy_s(info.identity, sizeof(info.identity), TEST_CHANNEL_INDENTITY);
     TestAddTestProxyChannel(1);
     info.channelId = m_testProxyChannelId;
@@ -357,7 +357,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyResetPeerTest001, TestSize.Level1)
     info.appInfo.appType = APP_TYPE_AUTH;
     info.myId = 0;
     info.peerId = 0;
-    info.authId = AUTH_INVALID_ID;
+    info.authHandle.authId = AUTH_INVALID_ID;
     (void)strcpy_s(info.identity, sizeof(info.identity), TEST_CHANNEL_INDENTITY);
 
     TestAddTestProxyChannel();
@@ -379,7 +379,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyResetPeerTest002, TestSize.Level1)
     info.appInfo.appType = APP_TYPE_AUTH;
     info.myId = 0;
     info.peerId = 0;
-    info.authId = AUTH_INVALID_ID;
+    info.authHandle.authId = AUTH_INVALID_ID;
     (void)strcpy_s(info.identity, sizeof(info.identity), TEST_CHANNEL_INDENTITY);
 
     TestAddTestProxyChannel(1);
@@ -403,7 +403,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyAddChanItemTest001, TestSize.Level1)
     info->appInfo.appType = APP_TYPE_AUTH;
     info->myId = 0;
     info->peerId = 0;
-    info->authId = AUTH_INVALID_ID;
+    info->authHandle.authId = AUTH_INVALID_ID;
     (void)strcpy_s(info->identity, sizeof(info->identity), TEST_CHANNEL_INDENTITY);
     IServerChannelCallBack callBack;
     TransProxyManagerInitInner(&callBack);
@@ -429,7 +429,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyProcessErrMsgTest001, TestSize.Level1)
     info.appInfo.appType = APP_TYPE_AUTH;
     info.myId = 0;
     info.peerId = 0;
-    info.authId = AUTH_INVALID_ID;
+    info.authHandle.authId = AUTH_INVALID_ID;
     int32_t ret = strcpy_s(info.identity, sizeof(info.identity), TEST_CHANNEL_INDENTITY);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     TestAddTestProxyChannel();
@@ -461,7 +461,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyProcessHandshakeMsgTest001, TestSize.L
     info.appInfo.appType = APP_TYPE_AUTH;
     info.myId = 0;
     info.peerId = 0;
-    info.authId = AUTH_INVALID_ID;
+    info.authHandle.authId = AUTH_INVALID_ID;
     int32_t ret = strcpy_s(info.identity, sizeof(info.identity), TEST_CHANNEL_INDENTITY);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     TestAddTestProxyChannel();
@@ -489,7 +489,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyCreateChanInfoTest001, TestSize.Level1
     info->appInfo.appType = APP_TYPE_AUTH;
     info->myId = 0;
     info->peerId = 0;
-    info->authId = AUTH_INVALID_ID;
+    info->authHandle.authId = AUTH_INVALID_ID;
     (void)strcpy_s(info->identity, sizeof(info->identity), TEST_CHANNEL_INDENTITY);
     IServerChannelCallBack callBack;
     TransProxyManagerInitInner(&callBack);
@@ -638,7 +638,7 @@ HWTEST_F(TransProxyChannelTest, TransProxySendInnerMessageTest001, TestSize.Leve
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     info.myId = 1;
     info.peerId = 1;
-    info.authId = 1;
+    info.authHandle.authId = 1;
     ret = TransProxySendInnerMessage(&info, TEST_PAY_LOAD, payLoadLen, priority);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_PACKMSG_ERR, ret);
 }

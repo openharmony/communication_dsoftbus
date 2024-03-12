@@ -192,7 +192,7 @@ void TestTransProxyAddAuthChannel(int32_t channelId, const char *identity, Proxy
     AppInfo appInfo;
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     ASSERT_TRUE(NULL != chan);
-    chan->authId = channelId;
+    chan->authHandle.authId = channelId;
     chan->connId = channelId;
     chan->myId = channelId;
     chan->peerId = channelId;
@@ -211,7 +211,7 @@ void TestTransProxyAddNormalChannel(int32_t channelId, const char *identity, Pro
     AppInfo appInfo;
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     ASSERT_TRUE(NULL != chan);
-    chan->authId = channelId;
+    chan->authHandle.authId = channelId;
     chan->connId = channelId;
     chan->myId = channelId;
     chan->peerId = channelId;
@@ -309,13 +309,14 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyKeepAlvieChanTest001, TestSiz
  */
 HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetAuthIdTest001, TestSize.Level1)
 {
+    AuthHandle authHandle = { 0 };
     int32_t channelId = TEST_NUMBER_VALID;
-    int32_t ret = TransProxyGetAuthId(channelId);
-    EXPECT_EQ(AUTH_INVALID_ID, ret);
+    int32_t ret = TransProxyGetAuthId(channelId, &authHandle);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
 
     channelId = m_testProxyAuthChannelId;
-    ret = TransProxyGetAuthId(channelId);
-    EXPECT_EQ(AUTH_INVALID_ID, ret);
+    ret = TransProxyGetAuthId(channelId, &authHandle);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 
 /**
@@ -474,7 +475,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetConnOptionByChanIdTest001,
 
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     ASSERT_TRUE(NULL != chan);
-    chan->authId = TEST_NUMBER_TWENTY;
+    chan->authHandle.authId = TEST_NUMBER_TWENTY;
     chan->connId = TEST_NUMBER_TWENTY;
     chan->reqId = TEST_NUMBER_TWENTY;
     chan->channelId = TEST_NUMBER_TWENTY;

@@ -20,6 +20,7 @@
 #include "anonymizer.h"
 #include "auth_common.h"
 #include "auth_hichain_adapter.h"
+#include "auth_hichain_request.h"
 #include "auth_log.h"
 #include "auth_session_fsm.h"
 #include "bus_center_manager.h"
@@ -293,7 +294,7 @@ void UnregTrustDataChangeListener(void)
     (void)memset_s(&g_dataChangeListener, sizeof(TrustDataChangeListener), 0, sizeof(TrustDataChangeListener));
 }
 
-int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid)
+int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid, bool isAddRequest)
 {
     if (udid == NULL || uid == NULL) {
         AUTH_LOGE(AUTH_HICHAIN, "udid/uid is invalid");
@@ -303,6 +304,27 @@ int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid)
     if (authParams == NULL) {
         AUTH_LOGE(AUTH_HICHAIN, "generate auth param fail");
         return SOFTBUS_ERR;
+    }
+    if (isAddRequest) {
+        HichainRequest request = {
+            .authSeq = authSeq,
+            .isServer = false,
+        };
+        if (strcpy_s(request.udid, sizeof(request.udid), udid) != EOK ||
+            strcpy_s(request.peerUid, sizeof(request.peerUid), uid) != EOK) {
+            AUTH_LOGE(AUTH_HICHAIN, "copy str fail, authSeq=%{public}" PRId64, authSeq);
+            return SOFTBUS_MEM_ERR;
+        }
+        uint32_t num = AddHichainRequest(&request);
+        if (num == 0) {
+            AUTH_LOGE(AUTH_HICHAIN, "add hichain request to list fail, authSeq=%{public}" PRId64, authSeq);
+            return SOFTBUS_AUTH_INNER_ERR;
+        }
+        if (num > 1) {
+            AUTH_LOGI(AUTH_HICHAIN, "wait last hichain request complete, num=%{public}u, authSeq=%{public}" PRId64,
+                num, authSeq);
+            return SOFTBUS_OK;
+        }
     }
     if (AuthDevice(authSeq, authParams, &g_hichainCallback) == SOFTBUS_OK) {
         AUTH_LOGI(AUTH_HICHAIN, "hichain call authDevice succ");

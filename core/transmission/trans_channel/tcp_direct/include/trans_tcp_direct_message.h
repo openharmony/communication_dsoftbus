@@ -34,7 +34,7 @@ int32_t TransSrvAddDataBufNode(int32_t channelId, int32_t fd);
 void TransSrvDelDataBufNode(int channelId);
 int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const char *data);
 int32_t TransTdcProcessPacket(int32_t channelId);
-int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId);
+int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId, int32_t type);
 
 int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode);
 

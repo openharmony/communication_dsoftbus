@@ -106,6 +106,7 @@ typedef struct {
 
 typedef enum {
     BIT_SUPPORT_EXCHANGE_NETWORKID = 0,
+    BIT_SUPPORT_NORMALIZED_LINK = 1,
 } AuthCapability;
 
 typedef struct {

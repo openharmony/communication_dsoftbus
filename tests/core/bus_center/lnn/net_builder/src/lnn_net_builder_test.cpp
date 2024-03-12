@@ -342,11 +342,12 @@ HWTEST_F(LNNNetBuilderTest, LNN_GET_VERIFY_CALLBACK_TEST_001, TestSize.Level0)
     int32_t ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
     AuthVerifyCallback *authVerifyCallback = LnnGetVerifyCallback();
-    authVerifyCallback->onVerifyPassed(REQUEST_ID, AUTH_ID, info);
-    authVerifyCallback->onVerifyPassed(REQUEST_ID, AUTH_ID, &info1);
+    AuthHandle authHandle = { .authId = AUTH_ID, .type = AUTH_LINK_TYPE_WIFI };
+    authVerifyCallback->onVerifyPassed(REQUEST_ID, authHandle, info);
+    authVerifyCallback->onVerifyPassed(REQUEST_ID, authHandle, &info1);
     authVerifyCallback = LnnGetReAuthVerifyCallback();
-    authVerifyCallback->onVerifyPassed(REQUEST_ID, AUTH_ID, info);
-    authVerifyCallback->onVerifyPassed(REQUEST_ID, AUTH_ID, &info1);
+    authVerifyCallback->onVerifyPassed(REQUEST_ID, authHandle, info);
+    authVerifyCallback->onVerifyPassed(REQUEST_ID, authHandle, &info1);
     authVerifyCallback->onVerifyFailed(REQUEST_ID, SOFTBUS_OK);
     authVerifyCallback->onVerifyFailed(REQUEST_ID, SOFTBUS_AUTH_HICHAIN_AUTH_ERROR);
 }
@@ -359,11 +360,12 @@ HWTEST_F(LNNNetBuilderTest, LNN_GET_VERIFY_CALLBACK_TEST_001, TestSize.Level0)
 */
 HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_AUTH_HANDLE_LEAVELNN_TEST_001, TestSize.Level0)
 {
-    int32_t ret = LnnNotifyAuthHandleLeaveLNN(AUTH_ID);
+    AuthHandle authHandle = { .authId = AUTH_ID, .type = AUTH_LINK_TYPE_WIFI };
+    int32_t ret = LnnNotifyAuthHandleLeaveLNN(authHandle);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnNotifyAuthHandleLeaveLNN(AUTH_ID);
+    ret = LnnNotifyAuthHandleLeaveLNN(authHandle);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 } // namespace OHOS

@@ -421,13 +421,14 @@ HWTEST_F(TransProxyManagerTest, TransProxyGetNewChanSeqTest001, TestSize.Level1)
  */
 HWTEST_F(TransProxyManagerTest, TransProxyGetAuthIdTest001, TestSize.Level1)
 {
+    AuthHandle authHandle = { 0 };
     int32_t channelId = -1;
-    int32_t ret = TransProxyGetAuthId(channelId);
-    EXPECT_EQ(AUTH_INVALID_ID, ret);
+    int32_t ret = TransProxyGetAuthId(channelId, &authHandle);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
 
     channelId = m_testProxyAuthChannelId;
-    ret = TransProxyGetAuthId(channelId);
-    EXPECT_NE(AUTH_INVALID_ID, ret);
+    ret = TransProxyGetAuthId(channelId, &authHandle);
+    EXPECT_NE(SOFTBUS_ERR, ret);
 }
 
 /**

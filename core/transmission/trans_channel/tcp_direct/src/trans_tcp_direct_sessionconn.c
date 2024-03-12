@@ -134,7 +134,7 @@ SessionConn *CreateNewSessinConn(ListenerModule module, bool isServerSid)
     conn->status = TCP_DIRECT_CHANNEL_STATUS_INIT;
     conn->timeout = 0;
     conn->req = -1;
-    conn->authId = AUTH_INVALID_ID;
+    conn->authHandle.authId = AUTH_INVALID_ID;
     conn->requestId = 0; // invalid num
     conn->listenMod = module;
     return conn;
@@ -225,7 +225,7 @@ int32_t SetAuthIdByChanId(int32_t channelId, int64_t authId)
     }
     LIST_FOR_EACH_ENTRY(conn, &g_sessionConnList->list, SessionConn, node) {
         if (conn->channelId == channelId) {
-            conn->authId = authId;
+            conn->authHandle.authId = authId;
             ReleaseSessonConnLock();
             return SOFTBUS_OK;
         }
@@ -243,7 +243,7 @@ int64_t GetAuthIdByChanId(int32_t channelId)
     }
     LIST_FOR_EACH_ENTRY(conn, &g_sessionConnList->list, SessionConn, node) {
         if (conn->channelId == channelId) {
-            authId = conn->authId;
+            authId = conn->authHandle.authId;
             ReleaseSessonConnLock();
             return authId;
         }
@@ -263,9 +263,9 @@ void TransDelSessionConnById(int32_t channelId)
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_sessionConnList->list, SessionConn, node) {
         if (item->channelId == channelId) {
             if ((item->listenMod == DIRECT_CHANNEL_SERVER_P2P || (item->listenMod >= DIRECT_CHANNEL_SERVER_HML_START &&
-                item->listenMod <= DIRECT_CHANNEL_SERVER_HML_END)) && item->authId != AUTH_INVALID_ID &&
+                item->listenMod <= DIRECT_CHANNEL_SERVER_HML_END)) && item->authHandle.authId != AUTH_INVALID_ID &&
                 !item->serverSide && item->appInfo.routeType != WIFI_P2P_REUSE && item->requestId != REQUEST_INVALID) {
-                AuthCloseConn(item->authId);
+                AuthCloseConn(item->authHandle);
             }
             ListDelete(&item->node);
             TRANS_LOGI(TRANS_CTRL, "delete channelId=%{public}d", item->channelId);
