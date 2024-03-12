@@ -106,6 +106,13 @@ static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
             return true;
         }
     }
+    int32_t level = 0;
+    if (LnnGetLocalNumInfo(NUM_KEY_DEVICE_SECURITY_LEVEL, &level) == SOFTBUS_OK) {
+        if (level != info->deviceSecurityLevel) {
+            LNN_LOGW(LNN_LEDGER, "deviceSecuritylevel change %{public}d->%{public}d", info->deviceSecurityLevel, level);
+            return true;
+        }
+    }
     return false;
 }
 
@@ -205,6 +212,8 @@ static int32_t LnnGetNodeKeyInfoLocal(const char *networkId, int key, uint8_t *i
             return LnnGetLocalStrInfo(STRING_KEY_NODE_ADDR, (char *)info, infoLen);
         case NODE_KEY_P2P_IP_ADDRESS:
             return LnnGetLocalStrInfo(STRING_KEY_P2P_IP, (char *)info, infoLen);
+        case NODE_KEY_DEVICE_SECURITY_LEVEL:
+            return LnnGetLocalNumInfo(NUM_KEY_DEVICE_SECURITY_LEVEL, (int32_t *)info);
         default:
             LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
             return SOFTBUS_ERR;
@@ -240,6 +249,8 @@ static int32_t LnnGetNodeKeyInfoRemote(const char *networkId, int key, uint8_t *
             return LnnGetRemoteStrInfo(networkId, STRING_KEY_NODE_ADDR, (char *)info, infoLen);
         case NODE_KEY_P2P_IP_ADDRESS:
             return LnnGetRemoteStrInfo(networkId, STRING_KEY_P2P_IP, (char *)info, infoLen);
+        case NODE_KEY_DEVICE_SECURITY_LEVEL:
+            return LnnGetRemoteNumInfo(networkId, NUM_KEY_DEVICE_SECURITY_LEVEL, (int32_t *)info);
         default:
             LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
             return SOFTBUS_ERR;
@@ -315,6 +326,8 @@ int32_t LnnGetNodeKeyInfoLen(int32_t key)
             return SHORT_ADDRESS_MAX_LEN;
         case NODE_KEY_P2P_IP_ADDRESS:
             return IP_LEN;
+        case NODE_KEY_DEVICE_SECURITY_LEVEL:
+            return LNN_COMMON_LEN;
         default:
             LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
             return SOFTBUS_ERR;

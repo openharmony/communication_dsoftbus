@@ -38,6 +38,7 @@
 #define OS_VERSION          "const.ohos.fullname" /* Read osversion by the string */
 #define VERSION_SDK         "ro.build.version.sdk"
 #define UNDEFINED_VALUE     "undefined"
+#define OHOS_DEVICE_SECURITY_LEVEL "const.security.device_security_level"
 #define OHOS_TYPE_UNKNOWN   (-1)
 #define API_VERSION_LEN     10
 #define VERSION_SDK_LEN     10
@@ -236,4 +237,19 @@ int32_t GetWlanIpv4Addr(char *ip, uint32_t size)
     (void)ip;
     (void)size;
     return SOFTBUS_ERR;
+}
+
+int32_t GetDeviceSecurityLevel(int32_t *level)
+{
+    if (level == NULL) {
+        LNN_LOGE(LNN_STATE, "param error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *level = GetIntParameter(OHOS_DEVICE_SECURITY_LEVEL, -1);
+    LNN_LOGI(LNN_STATE, "level=%{public}d", *level);
+    if (*level <= 0) {
+        LNN_LOGE(LNN_STATE, "getIntParamenter fail.");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
 }
