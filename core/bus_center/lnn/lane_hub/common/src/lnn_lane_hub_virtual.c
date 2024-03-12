@@ -34,31 +34,3 @@ int32_t LnnInitLaneHubDelay(void)
 void LnnDeinitLaneHub(void)
 {
 }
-
-LnnLanesObject *LnnRequestLanesObject(const char *networkId, int32_t pid, LnnLaneProperty prop,
-    const LnnPreferredLinkList *list, uint32_t laneNum)
-{
-    (void)networkId;
-    (void)pid;
-    (void)prop;
-    (void)list;
-    (void)laneNum;
-    return NULL;
-}
-
-void LnnReleaseLanesObject(LnnLanesObject *lanesObject)
-{
-}
-
-int32_t LnnGetLaneId(LnnLanesObject *lanesObject, uint32_t num)
-{
-    (void)lanesObject;
-    (void)num;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
-const LnnLaneInfo *LnnGetLaneInfo(int32_t laneId)
-{
-    (void)laneId;
-    return NULL;
-}

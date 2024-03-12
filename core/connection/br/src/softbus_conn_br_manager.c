@@ -644,8 +644,8 @@ static void ProcessConnectError(ConnBrDevice *connectingDevice, ConnBrConnection
             result = it->result;
         }
     }
-    if (result != 0) {
-        error = -(-SOFTBUS_CONN_BR_UNDERLAY_BASE_ERR + result);
+    if (result == CONN_BR_CONNECT_UNDERLAYER_ERROR_PAGE_TIMEOUT) {
+        error = SOFTBUS_CONN_BR_UNDERLAY_PAGE_TIMEOUT_ERR;
     }
     NotifyDeviceConnectResult(connectingDevice, NULL, false, error);
 }

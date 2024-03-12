@@ -60,16 +60,16 @@ public:
     virtual int32_t ConnGattClientSend(
         ConnBleConnection *connection, const uint8_t *data, uint32_t dataLen, int32_t module) = 0;
     virtual int32_t ConnGattClientUpdatePriority(ConnBleConnection *connection, ConnectBlePriority priority) = 0;
-    virtual int32_t ConnGattServerStartService(GattService *servce, GattServiceType serviceId) = 0;
-    virtual int32_t ConnGattServerStopService(GattServiceType serviceId) = 0;
+    virtual int32_t ConnGattServerStartService() = 0;
+    virtual int32_t ConnGattServerStopService() = 0;
     virtual int32_t ConnGattServerSend(
         ConnBleConnection *connection, const uint8_t *data, uint32_t dataLen, int32_t module) = 0;
     virtual int32_t ConnGattServerConnect(ConnBleConnection *connection) = 0;
     virtual int32_t ConnGattServerDisconnect(ConnBleConnection *connection) = 0;
     virtual int32_t ConnGattInitClientModule(
-        SoftBusLooper *looper, const ConnBleClientEventListener *listener, GattServiceType serviceId) = 0;
+        SoftBusLooper *looper, const ConnBleClientEventListener *listener) = 0;
     virtual int32_t ConnGattInitServerModule(
-        SoftBusLooper *looper, const ConnBleServerEventListener *listener, GattServiceType serviceId) = 0;
+        SoftBusLooper *looper, const ConnBleServerEventListener *listener) = 0;
 };
 
 class ConnectionBleManagerInterfaceMock : public ConnectionBleManagerInterface {
@@ -107,15 +107,15 @@ public:
     MOCK_METHOD(int32_t, ConnGattClientDisconnect, (ConnBleConnection *, bool, bool), (override));
     MOCK_METHOD(int32_t, ConnGattClientSend, (ConnBleConnection *, const uint8_t *, uint32_t, int32_t), (override));
     MOCK_METHOD(int32_t, ConnGattClientUpdatePriority, (ConnBleConnection *, ConnectBlePriority), (override));
-    MOCK_METHOD(int32_t, ConnGattServerStartService, (GattService *, GattServiceType), (override));
-    MOCK_METHOD(int32_t, ConnGattServerStopService, (GattServiceType), (override));
+    MOCK_METHOD(int32_t, ConnGattServerStartService, (), (override));
+    MOCK_METHOD(int32_t, ConnGattServerStopService, (), (override));
     MOCK_METHOD(int32_t, ConnGattServerSend, (ConnBleConnection *, const uint8_t *, uint32_t, int32_t), (override));
     MOCK_METHOD(int32_t, ConnGattServerConnect, (ConnBleConnection *), (override));
     MOCK_METHOD(int32_t, ConnGattServerDisconnect, (ConnBleConnection *), (override));
     MOCK_METHOD(int32_t, ConnGattInitClientModule,
-        (SoftBusLooper *, const ConnBleClientEventListener *, GattServiceType), (override));
+        (SoftBusLooper *, const ConnBleClientEventListener *), (override));
     MOCK_METHOD(int32_t, ConnGattInitServerModule,
-        (SoftBusLooper *, const ConnBleServerEventListener *, GattServiceType), (override));
+        (SoftBusLooper *, const ConnBleServerEventListener *), (override));
 };
 } // namespace OHOS
 #endif // CONNECTION_BLE_MANAGER_MOCK_H

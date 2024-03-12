@@ -28,14 +28,12 @@ extern "C" {
 #define SERVER_WAIT_STOP_SERVER_TIMEOUT_MILLIS  (5 * 1000)
 #define SERVER_WAIT_MTU_TIMEOUT_MILLIS          (10 * 1000)
 
-int32_t ConnGattServerStartService(GattService *servce, GattServiceType serviceId);
-int32_t ConnGattServerStopService(GattServiceType serviceId);
+int32_t ConnGattServerStartService(void);
+int32_t ConnGattServerStopService(void);
 int32_t ConnGattServerSend(ConnBleConnection *connection, const uint8_t *data, uint32_t dataLen, int32_t module);
 int32_t ConnGattServerDisconnect(ConnBleConnection *connection);
 int32_t ConnGattServerConnect(ConnBleConnection *connection);
-int32_t ConnGattInitServerModule(
-    SoftBusLooper *looper, const ConnBleServerEventListener *listener, GattServiceType serviceId);
-int32_t RegisterServerListener(const ConnBleServerEventListener *listener, GattServiceType serviceId);
+int32_t ConnGattInitServerModule(SoftBusLooper *looper, const ConnBleServerEventListener *listener);
 
 #ifdef __cplusplus
 }

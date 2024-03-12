@@ -139,6 +139,22 @@ static int32_t ServerProxyInit(void)
     return SOFTBUS_OK;
 }
 
+static RestartEventCallback g_restartEventCallback = nullptr;
+
+static void RestartEventNotify(void)
+{
+    if (g_restartEventCallback == nullptr) {
+        COMM_LOGI(COMM_SDK, "Restart event notify is not used!\n");
+        return;
+    }
+    if (g_restartEventCallback() != SOFTBUS_OK) {
+        RestartEventCallbackUnregister();
+        COMM_LOGE(COMM_SDK, "Restart event notify failed!\n");\
+        return;
+    }
+    COMM_LOGI(COMM_SDK, "Restart event notify success!\n");
+}
+
 void ClientDeathProcTask(void)
 {
     {
@@ -167,6 +183,27 @@ void ClientDeathProcTask(void)
     TransBroadCastReInit();
     DiscRecoveryPublish();
     DiscRecoverySubscribe();
+    RestartEventNotify();
+}
+
+void RestartEventCallbackUnregister(void)
+{
+    g_restartEventCallback = nullptr;
+}
+
+int32_t RestartEventCallbackRegister(RestartEventCallback callback)
+{
+    if (callback == nullptr) {
+        COMM_LOGE(COMM_SDK, "Restart event callback register param is invalid!\n");
+        return SOFTBUS_ERR;
+    }
+    if (g_restartEventCallback != nullptr) {
+        COMM_LOGE(COMM_SDK, "Restart event callback register failed!\n");
+        return SOFTBUS_ERR;
+    }
+    g_restartEventCallback = callback;
+    COMM_LOGI(COMM_SDK, "Restart event callback register success!\n");
+    return SOFTBUS_OK;
 }
 
 int32_t ClientStubInit(void)

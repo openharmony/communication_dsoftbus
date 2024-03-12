@@ -224,19 +224,19 @@ int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len)
     return GetTransAuthInterface()->LnnGetNetworkIdByBtMac(btMac, buf, len);
 }
 
-uint32_t ApplyLaneId(LaneType type)
+uint32_t ApplyLaneReqId(LaneType type)
 {
-    return GetTransAuthInterface()->ApplyLaneId(type);
+    return GetTransAuthInterface()->ApplyLaneReqId(type);
 }
 
-int32_t LnnRequestLane(uint32_t laneId, const LaneRequestOption *request, const ILaneListener *listener)
+int32_t LnnRequestLane(uint32_t laneReqId, const LaneRequestOption *request, const ILaneListener *listener)
 {
-    return GetTransAuthInterface()->LnnRequestLane(laneId, request, listener);
+    return GetTransAuthInterface()->LnnRequestLane(laneReqId, request, listener);
 }
 
-int32_t LnnFreeLane(uint32_t laneId)
+int32_t LnnFreeLane(uint32_t laneReqId)
 {
-    return GetTransAuthInterface()->LnnFreeLane(laneId);
+    return GetTransAuthInterface()->LnnFreeLane(laneReqId);
 }
 }
 }
