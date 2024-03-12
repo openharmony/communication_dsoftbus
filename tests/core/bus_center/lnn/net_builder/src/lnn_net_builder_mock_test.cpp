@@ -255,9 +255,10 @@ HWTEST_F(LNNNetBuilderMockTest, ON_DEVICE_VERIFY_PASS_TEST_001, TestSize.Level1)
     EXPECT_CALL(NetBuilderMock, LnnConvertAuthConnInfoToAddr(_, _, _))
         .WillOnce(Return(false))
         .WillRepeatedly(Return(true));
-    OnDeviceVerifyPass(AUTH_META_ID, &info);
-    OnDeviceVerifyPass(AUTH_META_ID, &info);
-    OnDeviceVerifyPass(AUTH_META_ID, nullptr);
+    AuthHandle authHandle = { .authId = AUTH_META_ID };
+    OnDeviceVerifyPass(authHandle, &info);
+    OnDeviceVerifyPass(authHandle, &info);
+    OnDeviceVerifyPass(authHandle, nullptr);
 }
 
 /*
@@ -715,7 +716,8 @@ HWTEST_F(LNNNetBuilderMockTest, FIND_CONNECTION_FSM_TEST_001, TestSize.Level1)
     (void)strcpy_s(connFsm->connInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
     connFsm->connInfo.addr.type = CONNECTION_ADDR_BR;
     connFsm->connInfo.requestId = REQUEST_ID;
-    connFsm->connInfo.authId = AUTH_ID;
+    connFsm->connInfo.authHandle.authId = AUTH_ID;
+    connFsm->connInfo.authHandle.type = AUTH_LINK_TYPE_BR;
     connFsm->id = FSM_ID;
     ListAdd(&g_netBuilder.fsmList, &connFsm->node);
     MetaJoinRequestNode *requestNode =
@@ -737,8 +739,10 @@ HWTEST_F(LNNNetBuilderMockTest, FIND_CONNECTION_FSM_TEST_001, TestSize.Level1)
 
     EXPECT_TRUE(FindConnectionFsmByRequestId(REQUEST_ID) != nullptr);
     EXPECT_TRUE(FindConnectionFsmByRequestId(REQUEST_ID_ADD) == nullptr);
-    EXPECT_TRUE(FindConnectionFsmByAuthId(AUTH_ID) != nullptr);
-    EXPECT_TRUE(FindConnectionFsmByAuthId(AUTH_ID_ADD) == nullptr);
+    AuthHandle authHandle = { .authId = AUTH_ID };
+    AuthHandle authHandle2 = {.authId = AUTH_ID_ADD};
+    EXPECT_TRUE(FindConnectionFsmByAuthHandle(&authHandle) != nullptr);
+    EXPECT_TRUE(FindConnectionFsmByAuthHandle(&authHandle2) == nullptr);
     EXPECT_TRUE(FindConnectionFsmByNetworkId(NODE_NETWORK_ID) != nullptr);
     EXPECT_TRUE(FindConnectionFsmByNetworkId(NODE1_NETWORK_ID) == nullptr);
     EXPECT_TRUE(FindConnectionFsmByConnFsmId(FSM_ID) != nullptr);
@@ -1007,12 +1011,12 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_VERIFY_PASS_TEST_002, TestSize.Le
         reinterpret_cast<DeviceVerifyPassMsgPara *>(SoftBusMalloc(sizeof(DeviceVerifyPassMsgPara)));
     msgPara->nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
     (void)strcpy_s(msgPara->nodeInfo->networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
-    msgPara->authId = AUTH_ID;
+    msgPara->authHandle.authId = AUTH_ID;
 
     LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
     ListInit(&connFsm->node);
     (void)strcpy_s(connFsm->connInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
-    connFsm->connInfo.authId = AUTH_ID_ADD;
+    connFsm->connInfo.authHandle.authId = AUTH_ID_ADD;
     ListAdd(&g_netBuilder.fsmList, &connFsm->node);
     g_netBuilder.connCount = CURRENT_COUNT;
     g_netBuilder.maxConnCount = CONN_COUNT;
@@ -1036,12 +1040,12 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_VERIFY_PASS_TEST_003, TestSize.Le
         reinterpret_cast<DeviceVerifyPassMsgPara *>(SoftBusMalloc(sizeof(DeviceVerifyPassMsgPara)));
     msgPara->nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
     (void)strcpy_s(msgPara->nodeInfo->networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
-    msgPara->authId = AUTH_ID;
+    msgPara->authHandle.authId = AUTH_ID;
 
     LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
     ListInit(&connFsm->node);
     (void)strcpy_s(connFsm->connInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
-    connFsm->connInfo.authId = AUTH_ID;
+    connFsm->connInfo.authHandle.authId = AUTH_ID;
     connFsm->isDead = true;
     ListAdd(&g_netBuilder.fsmList, &connFsm->node);
     g_netBuilder.connCount = CURRENT_COUNT;
@@ -1064,12 +1068,12 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_VERIFY_PASS_TEST_004, TestSize.Le
         reinterpret_cast<DeviceVerifyPassMsgPara *>(SoftBusMalloc(sizeof(DeviceVerifyPassMsgPara)));
     msgPara->nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
     (void)strcpy_s(msgPara->nodeInfo->networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
-    msgPara->authId = AUTH_ID;
+    msgPara->authHandle.authId = AUTH_ID;
 
     LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
     ListInit(&connFsm->node);
     (void)strcpy_s(connFsm->connInfo.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID);
-    connFsm->connInfo.authId = AUTH_ID;
+    connFsm->connInfo.authHandle.authId = AUTH_ID;
     connFsm->isDead = false;
     ListAdd(&g_netBuilder.fsmList, &connFsm->node);
 
@@ -1495,10 +1499,11 @@ HWTEST_F(LNNNetBuilderMockTest, ON_RE_AUTH_VERIFY_PASSED_TEST_001, TestSize.Leve
     EXPECT_CALL(NetBuilderMock, LnnConvertAuthConnInfoToAddr)
         .WillOnce(Return(false))
             .WillRepeatedly(Return(true));
-    OnReAuthVerifyPassed(REQUEST_ID, AUTH_ID, nullptr);
-    OnReAuthVerifyPassed(REQUEST_ID, AUTH_ID, &info);
-    OnReAuthVerifyPassed(REQUEST_ID, AUTH_ID, &info);
-    OnReAuthVerifyPassed(REQUEST_ID, AUTH_ID, &info);
+    AuthHandle authHandle = { .authId = AUTH_ID };
+    OnReAuthVerifyPassed(REQUEST_ID, authHandle, nullptr);
+    OnReAuthVerifyPassed(REQUEST_ID, authHandle, &info);
+    OnReAuthVerifyPassed(REQUEST_ID, authHandle, &info);
+    OnReAuthVerifyPassed(REQUEST_ID, authHandle, &info);
 }
 
 /*
@@ -1526,8 +1531,9 @@ HWTEST_F(LNNNetBuilderMockTest, ON_RE_AUTH_VERIFY_PASSED_TEST_002, TestSize.Leve
     EXPECT_CALL(NetBuilderMock, LnnIsSameConnectionAddr(_, _, _))
         .WillOnce(Return(false))
         .WillRepeatedly(Return(true));
-    OnReAuthVerifyPassed(REQUEST_ID, AUTH_ID, &info);
-    OnReAuthVerifyPassed(REQUEST_ID, AUTH_ID, &info);
+    AuthHandle authHandle = { .authId = AUTH_ID };
+    OnReAuthVerifyPassed(REQUEST_ID, authHandle, &info);
+    OnReAuthVerifyPassed(REQUEST_ID, authHandle, &info);
 
     ListDelete(&connFsm->node);
     SoftBusFree(connFsm);

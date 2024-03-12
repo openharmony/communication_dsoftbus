@@ -100,8 +100,8 @@ typedef struct {
 } SocketPktHead;
 
 typedef struct {
-    void (*OnDataReceived)(int64_t authId, const AuthDataHead *head, const uint8_t *data, uint32_t len);
-    void (*OnDisconnected)(int64_t authId);
+    void (*OnDataReceived)(AuthHandle authHandle, const AuthDataHead *head, const uint8_t *data, uint32_t len);
+    void (*OnDisconnected)(AuthHandle authHandle);
 } AuthTransCallback;
 
 /* Auth handler */

@@ -119,7 +119,7 @@ void TestAddProxyChannel(int32_t channelId, AppType appType, ProxyChannelStatus 
     AppInfo appInfo;
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     ASSERT_TRUE(NULL != chan);
-    chan->authId = channelId;
+    chan->authHandle.authId = channelId;
     chan->connId = channelId;
     chan->myId = channelId;
     chan->peerId = channelId;

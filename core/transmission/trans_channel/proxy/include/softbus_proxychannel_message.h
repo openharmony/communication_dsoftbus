@@ -126,7 +126,7 @@ typedef struct {
     int32_t seq;
     char identity[IDENTITY_LEN + 1];
     AppInfo appInfo;
-    int64_t authId; /* for cipher */
+    AuthHandle authHandle; /* for cipher */
 } ProxyChannelInfo;
 
 typedef struct {
@@ -163,7 +163,7 @@ int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanI
 char* TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan);
 char* TransProxyPackHandshakeErrMsg(int32_t errCode);
 int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg);
-int32_t TransProxyPackMessage(ProxyMessageHead *msg, int64_t authId, ProxyDataInfo *dataInfo);
+int32_t TransProxyPackMessage(ProxyMessageHead *msg, AuthHandle authHandle, ProxyDataInfo *dataInfo);
 char* TransProxyPackHandshakeMsg(ProxyChannelInfo *info);
 int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, int32_t len);
 char* TransProxyPackIdentity(const char *identity);

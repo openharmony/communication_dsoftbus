@@ -1362,9 +1362,9 @@ static void SendHandShakeToGoAsync(void *data)
     channel->destructor(channel);
 }
 
-static void OnAuthConnectSuccess(uint32_t authRequestId, int64_t p2pAuthId)
+static void OnAuthConnectSuccess(uint32_t authRequestId, AuthHandle authHandle)
 {
-    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(p2pAuthId);
+    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(authHandle);
     CONN_CHECK_AND_RETURN_LOGW(channel, CONN_WIFI_DIRECT, "new channel failed");
 
     if (CallMethodAsync(SendHandShakeToGoAsync, channel, 0) != SOFTBUS_OK) {
