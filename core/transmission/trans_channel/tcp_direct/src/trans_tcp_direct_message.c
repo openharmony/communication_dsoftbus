@@ -239,7 +239,7 @@ NO_SANITIZE("cfi") int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *p
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t bufferLen = AuthGetEncryptSize(packetHead->dataLen) + DC_MSG_PACKET_HEAD_SIZE;
-    char *buffer = (char *)SoftBusMalloc(bufferLen);
+    char *buffer = (char *)SoftBusCalloc(bufferLen);
     if (buffer == NULL) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "buffer malloc error.");
         return SOFTBUS_MALLOC_ERR;
