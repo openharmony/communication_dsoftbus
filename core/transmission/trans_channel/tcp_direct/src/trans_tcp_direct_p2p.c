@@ -526,7 +526,7 @@ static int32_t OnVerifyP2pRequest(int64_t authId, int64_t seq, const cJSON *json
         TRANS_LOGE(TRANS_CTRL, "Failed to apply for memory");
         SendVerifyP2pFailRsp(authId, seq, CODE_VERIFY_P2P, SOFTBUS_ERR,
             "get wifidirectmanager or localip fail", isAuthLink);
-        return SOFTBUS_MALLOC;
+        return SOFTBUS_ERR;
     }
 
     ret = pManager->getLocalIpByRemoteIp(peerIp, myIp, sizeof(myIp));
