@@ -40,19 +40,19 @@ public:
 
     virtual uint32_t AuthGenRequestId(void) = 0;
     virtual int32_t AuthFlushDevice(const char *uuid) = 0;
-    virtual void AuthHandleLeaveLNN(int64_t authId) = 0;
+    virtual void AuthHandleLeaveLNN(AuthHandle authHandle) = 0;
 
     virtual int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port) = 0;
     virtual void AuthStopListening(AuthLinkType type) = 0;
 
     virtual int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId,
         const AuthConnCallback *callback, bool isMeta) = 0;
-    virtual void AuthCloseConn(int64_t authId) = 0;
-    virtual int32_t AuthPostTransData(int64_t authId, const AuthTransData *dataInfo) = 0;
+    virtual void AuthCloseConn(AuthHandle authHandle) = 0;
+    virtual int32_t AuthPostTransData(AuthHandle authHandle, const AuthTransData *dataInfo) = 0;
     virtual int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
     virtual int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
 
-    virtual int64_t AuthGetLatestIdByUuid(const char *uuid, bool isIpConnection, bool isMeta) = 0;
+    virtual void AuthGetLatestIdByUuid(const char *uuid, bool isIpConnection, bool isMeta, AuthHandle *authHandle) = 0;
     virtual int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer, bool isMeta) = 0;
     virtual int64_t AuthGetIdByP2pMac(const char *p2pMac, AuthLinkType type, bool isServer, bool isMeta) = 0;
 
@@ -60,7 +60,7 @@ public:
     virtual uint32_t AuthGetDecryptSize(uint32_t inLen) = 0;
 
     virtual int32_t AuthSetP2pMac(int64_t authId, const char *p2pMac) = 0;
-    virtual int32_t AuthGetConnInfo(int64_t authId, AuthConnInfo *connInfo) = 0;
+    virtual int32_t AuthGetConnInfo(AuthHandle authHandle, AuthConnInfo *connInfo) = 0;
     virtual int32_t AuthGetServerSide(int64_t authId, bool *isServer) = 0;
     virtual int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size) = 0;
     virtual int32_t AuthGetVersion(int64_t authId, SoftBusVersion *version) = 0;
@@ -104,17 +104,17 @@ public:
 
     MOCK_METHOD0(AuthGenRequestId, uint32_t ());
     MOCK_METHOD1(AuthFlushDevice, int32_t (const char *));
-    MOCK_METHOD1(AuthHandleLeaveLNN, void (int64_t));
+    MOCK_METHOD1(AuthHandleLeaveLNN, void (AuthHandle));
     MOCK_METHOD3(AuthStartListening, int32_t (AuthLinkType, const char *, int32_t));
     MOCK_METHOD1(AuthStopListening, void (AuthLinkType));
 
     MOCK_METHOD4(AuthOpenConn, int32_t (const AuthConnInfo *, uint32_t, const AuthConnCallback *, bool));
-    MOCK_METHOD1(AuthCloseConn, void (int64_t));
-    MOCK_METHOD2(AuthPostTransData, int32_t (int64_t, const AuthTransData *));
+    MOCK_METHOD1(AuthCloseConn, void (AuthHandle));
+    MOCK_METHOD2(AuthPostTransData, int32_t (AuthHandle, const AuthTransData *));
     MOCK_METHOD3(AuthGetPreferConnInfo, int32_t (const char *, AuthConnInfo *, bool));
     MOCK_METHOD3(AuthGetP2pConnInfo, int32_t (const char *, AuthConnInfo *, bool));
 
-    MOCK_METHOD3(AuthGetLatestIdByUuid, int64_t (const char *, AuthLinkType, bool));
+    MOCK_METHOD4(AuthGetLatestIdByUuid, void (const char *, AuthLinkType, bool, AuthHandle *));
     MOCK_METHOD3(AuthGetIdByConnInfo, int64_t (const AuthConnInfo *, bool, bool));
     MOCK_METHOD4(AuthGetIdByP2pMac, int64_t (const char *, AuthLinkType, bool, bool));
 
@@ -122,7 +122,7 @@ public:
     MOCK_METHOD1(AuthGetDecryptSize, uint32_t (uint32_t));
 
     MOCK_METHOD2(AuthSetP2pMac, int32_t (int64_t, const char *));
-    MOCK_METHOD2(AuthGetConnInfo, int32_t (int64_t, AuthConnInfo *));
+    MOCK_METHOD2(AuthGetConnInfo, int32_t (AuthHandle, AuthConnInfo *));
     MOCK_METHOD2(AuthGetServerSide, int32_t (int64_t, bool *));
     MOCK_METHOD3(AuthGetDeviceUuid, int32_t (int64_t, char *, uint16_t));
     MOCK_METHOD2(AuthGetVersion, int32_t (int64_t, SoftBusVersion *));

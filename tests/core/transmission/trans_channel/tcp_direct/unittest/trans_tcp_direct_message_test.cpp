@@ -107,7 +107,7 @@ SessionConn *TestSetSessionConn()
     conn->status = TCP_DIRECT_CHANNEL_STATUS_INIT;
     conn->timeout = 0;
     conn->req = INVALID_VALUE;
-    conn->authId = 1;
+    conn->authHandle.authId = 1;
     conn->requestId = 1;
     conn->listenMod = DIRECT_CHANNEL_SERVER_WIFI;
     conn->appInfo.myData.pid = 1;

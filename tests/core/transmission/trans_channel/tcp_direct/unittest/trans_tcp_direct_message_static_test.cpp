@@ -101,7 +101,7 @@ SessionConn *TestSetSessionConn()
     conn->status = TCP_DIRECT_CHANNEL_STATUS_INIT;
     conn->timeout = 0;
     conn->req = INVALID_VALUE;
-    conn->authId = 1;
+    conn->authHandle.authId = 1;
     conn->requestId = 1;
     conn->listenMod = DIRECT_CHANNEL_SERVER_WIFI;
     conn->appInfo.myData.pid = 1;
@@ -367,7 +367,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, ProcessReceivedData0011, TestSize.Leve
 {
     int32_t channelId = 1;
     int32_t ret;
-    ret = ProcessReceivedData(channelId);
+    ret = ProcessReceivedData(channelId, 0);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
@@ -382,7 +382,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcSrvProcData0012, TestSize.Leve
     int32_t channelId = 1;
     int32_t ret;
 
-    ret = TransTdcSrvProcData(DIRECT_CHANNEL_SERVER_P2P, channelId);
+    ret = TransTdcSrvProcData(DIRECT_CHANNEL_SERVER_P2P, channelId, 0);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 

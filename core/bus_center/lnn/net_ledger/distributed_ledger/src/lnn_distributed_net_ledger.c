@@ -242,6 +242,7 @@ static void NewWifiDiscovered(const NodeInfo *oldInfo, NodeInfo *newInfo)
         return;
     }
     newInfo->discoveryType = newInfo->discoveryType | oldInfo->discoveryType;
+    newInfo->stateVersion = oldInfo->stateVersion;
     macAddr = LnnGetBtMac(newInfo);
     if (macAddr == NULL) {
         LNN_LOGE(LNN_LEDGER, "LnnGetBtMac Fail!");

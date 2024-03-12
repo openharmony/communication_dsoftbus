@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,31 +12,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef SOFTBUS_SESSION_LISTENER
-#define SOFTBUS_SESSION_LISTENER
 
+#ifndef AUTH_HICHAIN_REQUEST_H
+#define AUTH_HICHAIN_REQUEST_H
+
+#include <stdint.h>
+#include <stdbool.h>
 #include "auth_interface.h"
-#include "softbus_base_listener.h"
+#include "softbus_common.h"
 
 #ifdef __cplusplus
+#if __cplusplus
 extern "C" {
-#endif /* __cplusplus */
+#endif
+#endif
 
 typedef struct {
+    int64_t authSeq;
+    char udid[UDID_BUF_LEN];
+    char peerUid[MAX_ACCOUNT_HASH_LEN];
+    bool isServer;
     ListNode node;
-    char myIp[IP_LEN];
-    int32_t myPort;
-    ListenerModule moudleType;
-} HmlListenerInfo;
+} HichainRequest;
 
-int32_t GetCipherFlagByAuthId(AuthHandle authHandle, uint32_t *flag, bool *isAuthServer);
-
-int32_t TransTdcStartSessionListener(ListenerModule module, const LocalListenerInfo *info);
-
-int32_t TransTdcStopSessionListener(ListenerModule module);
+void NotifyHiChainRequestSuccess(int64_t authSeq, const uint8_t *sessionKey, uint32_t sessionKeyLen);
+void NotifyHiChainRequestFail(int64_t authSeq, bool isNeedReAuth);
+uint32_t AddHichainRequest(const HichainRequest *request);
 
 #ifdef __cplusplus
+#if __cplusplus
 }
-#endif /* __cplusplus */
-
 #endif
+#endif
+#endif /* AUTH_HICHAIN_REQUEST_H */

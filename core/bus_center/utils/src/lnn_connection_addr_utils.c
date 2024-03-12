@@ -188,7 +188,8 @@ bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *conn
     if (addr->type == CONNECTION_ADDR_BLE) {
         connInfo->type = AUTH_LINK_TYPE_BLE;
         if (strcpy_s(connInfo->info.bleInfo.bleMac, BT_MAC_LEN, addr->info.ble.bleMac) != EOK ||
-            memcpy_s(connInfo->info.bleInfo.deviceIdHash, UDID_HASH_LEN, addr->info.ble.udidHash, UDID_HASH_LEN)) {
+            memcpy_s(connInfo->info.bleInfo.deviceIdHash, UDID_HASH_LEN, addr->info.ble.udidHash,
+                UDID_HASH_LEN) != EOK) {
             LNN_LOGE(LNN_STATE, "copy ble mac to connInfo fail");
             return false;
         }
@@ -198,7 +199,8 @@ bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *conn
     }
     if (addr->type == CONNECTION_ADDR_ETH || addr->type == CONNECTION_ADDR_WLAN) {
         connInfo->type = AUTH_LINK_TYPE_WIFI;
-        if (strcpy_s(connInfo->info.ipInfo.ip, IP_LEN, addr->info.ip.ip) != EOK) {
+        if (strcpy_s(connInfo->info.ipInfo.ip, IP_LEN, addr->info.ip.ip) != EOK ||
+            memcpy_s(connInfo->info.ipInfo.deviceIdHash, UDID_HASH_LEN, addr->info.ip.udidHash, UDID_HASH_LEN) != EOK) {
             LNN_LOGE(LNN_STATE, "copy ip to connInfo fail");
             return false;
         }
