@@ -397,9 +397,12 @@ static void FillAppInfo(AppInfo *appInfo, const SessionParam *param,
             TRANS_LOGE(TRANS_CTRL, "copy local ip failed");
         }
     } else if (connInfo->type == LANE_P2P_REUSE) {
-        if (GetWifiDirectManager()->getLocalIpByRemoteIp(connInfo->connInfo.wlan.addr, appInfo->myData.addr, IP_LEN) !=
-            SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "get local ip failed");
+        struct WifiDirectManager *mgr = GetWifiDirectManager();
+        if (mgr != NULL && mgr->getLocalIpByRemoteIp != NULL) {
+            int32_t ret = mgr->getLocalIpByRemoteIp(connInfo->connInfo.wlan.addr, appInfo->myData.addr, IP_LEN);
+            if (ret != SOFTBUS_OK) {
+                TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
+            }
         }
     }
 }
