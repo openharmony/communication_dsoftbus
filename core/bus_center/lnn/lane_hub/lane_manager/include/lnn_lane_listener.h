@@ -63,7 +63,7 @@ typedef struct {
 typedef struct {
     LaneStatusChangeType laneStatusChangeType;
     union {
-        enum WifiDirectRole role
+        enum WifiDirectRole role;
     } laneStatusInfo;
 } LaneStatusInfoChange;
 

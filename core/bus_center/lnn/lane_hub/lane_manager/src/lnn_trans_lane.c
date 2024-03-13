@@ -638,7 +638,7 @@ static void LaneLinkSuccess(SoftBusMessage *msg)
         LNN_LOGE(LNN_LANE, "create lanetype info fail, laneReqId=%{public}u", laneReqId);
     }
     if (LnnOnWifiDirectDeviceOnLineNotify(info) != SOFTBUS_OK) {
-        DelLaneTypeInfoItem(info);
+        DelLaneTypeInfoItem(laneReqId);
         LNN_LOGE(LNN_LANE, "notify WifiDirectDevice OnLine fail");
     }
     NotifyLaneAllocSuccess(laneReqId, info);
