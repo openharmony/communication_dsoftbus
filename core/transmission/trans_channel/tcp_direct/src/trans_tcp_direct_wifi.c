@@ -61,9 +61,13 @@ static ListenerModule GetMoudleType(ConnectType type, const char *peerIp)
     ListenerModule module = UNUSE_BUTT;
     if (type == CONNECT_P2P_REUSE) {
         char myIp[IP_LEN] = {0};
-        if (GetWifiDirectManager()->getLocalIpByRemoteIp(peerIp, myIp, sizeof(myIp)) != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "get p2p ip fail.");
-            return module;
+        struct WifiDirectManager *mgr = GetWifiDirectManager();
+        if (mgr != NULL && mgr->getLocalIpByRemoteIp != NULL) {
+            int32_t ret = mgr->getLocalIpByRemoteIp(peerIp, myIp, sizeof(myIp));
+            if (ret != SOFTBUS_OK) {
+                TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
+                return module;
+            }
         }
         if (strncmp(myIp, HML_IP_PREFIX, NETWORK_ID_LEN) == 0) {
             module = GetMoudleByHmlIp(myIp);
@@ -103,12 +107,12 @@ int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
     int32_t newchannelId = newConn->channelId;
     (void)memcpy_s(&newConn->appInfo, sizeof(AppInfo), appInfo, sizeof(AppInfo));
 
-    newConn->authId = AuthGetLatestIdByUuid(newConn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_WIFI, false);
-    if ((newConn->authId == AUTH_INVALID_ID) && (connInfo->type == CONNECT_P2P_REUSE)) {
-        newConn->authId = AuthGetLatestIdByUuid(newConn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_BR, false);
+    AuthGetLatestIdByUuid(newConn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_WIFI, false, &newConn->authHandle);
+    if ((newConn->authHandle.authId == AUTH_INVALID_ID) && (connInfo->type == CONNECT_P2P_REUSE)) {
+        AuthGetLatestIdByUuid(newConn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_BR, false, &newConn->authHandle);
     }
 
-    if (newConn->authId == AUTH_INVALID_ID) {
+    if (newConn->authHandle.authId == AUTH_INVALID_ID) {
         SoftBusFree(newConn);
         TRANS_LOGE(TRANS_CTRL, "get authId fail");
         return SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED;

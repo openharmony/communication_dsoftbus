@@ -131,7 +131,7 @@ HWTEST_F(AuthSessionFsmTest, PROC_AUTH_FSM_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: RECOVERY_DEVICE_KEY_TEST_001
- * @tc.desc: RecoveryDeviceKey test
+ * @tc.desc: RecoveryFastAuthKey test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -150,9 +150,9 @@ HWTEST_F(AuthSessionFsmTest, RECOVERY_DEVICE_KEY_TEST_001, TestSize.Level1)
     HandleCommonMsg(&authFsm, SOFTBUS_AUTH_INNER_ERR, nullptr);
     ASSERT_TRUE(memcpy_s(authFsm.info.udid, UDID_BUF_LEN, UDID_TEST, strlen(UDID_TEST)) == EOK);
     authFsm.info.connInfo.type = AUTH_LINK_TYPE_ENHANCED_P2P;
-    EXPECT_TRUE(RecoveryDeviceKey(&authFsm) == SOFTBUS_ERR);
+    EXPECT_TRUE(RecoveryFastAuthKey(&authFsm) == SOFTBUS_ERR);
     authFsm.info.connInfo.type = AUTH_LINK_TYPE_WIFI;
-    EXPECT_TRUE(RecoveryDeviceKey(&authFsm) == SOFTBUS_ERR);
+    EXPECT_TRUE(RecoveryFastAuthKey(&authFsm) == SOFTBUS_ERR);
     SyncDevIdStateEnter(nullptr);
 }
 

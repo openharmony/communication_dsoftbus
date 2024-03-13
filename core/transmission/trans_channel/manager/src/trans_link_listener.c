@@ -41,19 +41,23 @@ static void OnWifiDirectDeviceOffLine(const char *peerMac, const char *peerIp, c
     TRANS_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, TRANS_SVC, "LnnGetRemoteNodeInfoById failed");
 
     char myIp[IP_LEN] = {0};
-    if (GetWifiDirectManager()->getLocalIpByRemoteIp(peerIp, myIp, sizeof(myIp)) == SOFTBUS_OK) {
-        if (strncmp(myIp, HML_IP_PREFIX, NETWORK_ID_LEN) == 0) {
-            ListenerModule type = GetMoudleByHmlIp(myIp);
-            if (type != UNUSE_BUTT) {
-                StopHmlListener(type);
-                TRANS_LOGI(TRANS_SVC, "StopHmlListener succ");
-            }
-            connType = TRANS_CONN_HML;
-        } else {
-            connType = TRANS_CONN_P2P;
+    struct WifiDirectManager *mgr = GetWifiDirectManager();
+    if (mgr != NULL && mgr->getLocalIpByRemoteIp != NULL) {
+        int32_t ret = mgr->getLocalIpByRemoteIp(peerIp, myIp, sizeof(myIp));
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
+            return;
         }
+    }
+    if (strncmp(myIp, HML_IP_PREFIX, NETWORK_ID_LEN) == 0) {
+        ListenerModule type = GetMoudleByHmlIp(myIp);
+        if (type != UNUSE_BUTT) {
+            StopHmlListener(type);
+            TRANS_LOGI(TRANS_SVC, "StopHmlListener succ");
+        }
+        connType = TRANS_CONN_HML;
     } else {
-        TRANS_LOGI(TRANS_SVC, "WifiDirectDeviceOffLine do not get localip");
+        connType = TRANS_CONN_P2P;
     }
 
     TransOnLinkDown(nodeInfo.networkId, nodeInfo.uuid, nodeInfo.masterUdid, peerIp, COMBINE_TYPE(WIFI_P2P, connType));

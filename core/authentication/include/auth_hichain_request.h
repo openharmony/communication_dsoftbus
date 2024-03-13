@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,26 +13,35 @@
  * limitations under the License.
  */
 
-#ifndef TRANS_UDP_NEGOTIATION_EXCHANGE_H
-#define TRANS_UDP_NEGOTIATION_EXCHANGE_H
+#ifndef AUTH_HICHAIN_REQUEST_H
+#define AUTH_HICHAIN_REQUEST_H
 
 #include <stdint.h>
-#include "cJSON.h"
-#include "softbus_app_info.h"
+#include <stdbool.h>
+#include "auth_interface.h"
+#include "softbus_common.h"
 
 #ifdef __cplusplus
+#if __cplusplus
 extern "C" {
 #endif
+#endif
 
-int32_t TransUnpackReplyUdpInfo(const cJSON *msg, AppInfo *appInfo);
-int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo);
-int32_t TransUnpackReplyErrInfo(const cJSON *msg, int32_t *errCode);
+typedef struct {
+    int64_t authSeq;
+    char udid[UDID_BUF_LEN];
+    char peerUid[MAX_ACCOUNT_HASH_LEN];
+    bool isServer;
+    ListNode node;
+} HichainRequest;
 
-int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo);
-int32_t TransPackReplyUdpInfo(cJSON *msg, const AppInfo *appInfo);
-int32_t TransPackReplyErrInfo(cJSON *msg, int errCode, const char* errDesc);
+void NotifyHiChainRequestSuccess(int64_t authSeq, const uint8_t *sessionKey, uint32_t sessionKeyLen);
+void NotifyHiChainRequestFail(int64_t authSeq, bool isNeedReAuth);
+uint32_t AddHichainRequest(const HichainRequest *request);
 
 #ifdef __cplusplus
+#if __cplusplus
 }
 #endif
 #endif
+#endif /* AUTH_HICHAIN_REQUEST_H */

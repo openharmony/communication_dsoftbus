@@ -369,12 +369,12 @@ static void OnMessageReceived(int32_t channelId, const char *data, uint32_t len)
         LNN_LOGE(LNN_BUILDER, "recv NULL data, channelId=%{public}d", channelId);
         return;
     }
-    LNN_LOGI(LNN_BUILDER, "recv sync info msg. type=%{public}d, channelId=%{public}d, len=%{public}d",
-        (LnnSyncInfoType)(*(int32_t *)data), channelId, len);
     if (len <= MSG_HEAD_LEN || len > MAX_SYNC_INFO_MSG_LEN) {
         LNN_LOGE(LNN_BUILDER, "invalid msg. len=%{public}d", len);
         return;
     }
+    LNN_LOGI(LNN_BUILDER, "recv sync info msg. type=%{public}d, channelId=%{public}d, len=%{public}d",
+        (LnnSyncInfoType)(*(int32_t *)data), channelId, len);
     if (SoftBusMutexLock(&g_syncInfoManager.lock) != 0) {
         LNN_LOGE(LNN_BUILDER, "sync channel opened failed lock fail");
         return;

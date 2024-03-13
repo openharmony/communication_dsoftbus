@@ -45,7 +45,7 @@ int32_t TransProxySendInnerMessage(ProxyChannelInfo *info, const char *payLoad,
 
     dataInfo.inData = (uint8_t *)payLoad;
     dataInfo.inLen = payLoadLen;
-    if (TransProxyPackMessage(&msgHead, info->authId, &dataInfo) != SOFTBUS_OK) {
+    if (TransProxyPackMessage(&msgHead, info->authHandle, &dataInfo) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "pack msg error");
         return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
     }
@@ -55,19 +55,20 @@ int32_t TransProxySendInnerMessage(ProxyChannelInfo *info, const char *payLoad,
 
 static int32_t SetCipherOfHandshakeMsg(uint32_t channelId, uint8_t *cipher)
 {
-    int64_t authId = TransProxyGetAuthId((int32_t)channelId);
-    if (authId == AUTH_INVALID_ID) {
-        TRANS_LOGE(TRANS_CTRL, "get authId fail");
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+    if (TransProxyGetAuthId((int32_t)channelId, &authHandle) != SOFTBUS_OK ||
+        authHandle.authId == AUTH_INVALID_ID) {
+        TRANS_LOGE(TRANS_CTRL, "get authHandle fail");
         return SOFTBUS_ERR;
     }
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
-    if (AuthGetConnInfo(authId, &connInfo) != SOFTBUS_OK) {
+    if (AuthGetConnInfo(authHandle, &connInfo) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get auth connInfo fail");
         return SOFTBUS_ERR;
     }
     bool isAuthServer = false;
-    if (AuthGetServerSide(authId, &isAuthServer) != SOFTBUS_OK) {
+    if (AuthGetServerSide(authHandle.authId, &isAuthServer) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get auth server side fail");
         return SOFTBUS_ERR;
     }
@@ -110,7 +111,7 @@ int32_t TransProxyHandshake(ProxyChannelInfo *info)
     }
     dataInfo.inData = (uint8_t *)payLoad;
     dataInfo.inLen = strlen(payLoad) + 1;
-    if (TransProxyPackMessage(&msgHead, info->authId, &dataInfo) != SOFTBUS_OK) {
+    if (TransProxyPackMessage(&msgHead, info->authHandle, &dataInfo) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "pack handshake head fail");
         cJSON_free(payLoad);
         return SOFTBUS_TRANS_PROXY_PACK_HANDSHAKE_HEAD_ERR;
@@ -161,7 +162,7 @@ int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan, int32_t 
     }
     dataInfo.inData = (uint8_t *)payLoad;
     dataInfo.inLen = strlen(payLoad) + 1;
-    if (TransProxyPackMessage(&msgHead, chan->authId, &dataInfo) != SOFTBUS_OK) {
+    if (TransProxyPackMessage(&msgHead, chan->authHandle, &dataInfo) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "pack handshake ack head fail");
         cJSON_free(payLoad);
         return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
@@ -199,7 +200,7 @@ void TransProxyKeepalive(uint32_t connId, const ProxyChannelInfo *info)
     }
     dataInfo.inData = (uint8_t *)payLoad;
     dataInfo.inLen = strlen(payLoad) + 1;
-    if (TransProxyPackMessage(&msgHead, info->authId, &dataInfo) != SOFTBUS_OK) {
+    if (TransProxyPackMessage(&msgHead, info->authHandle, &dataInfo) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "pack keepalive head fail");
         cJSON_free(payLoad);
         return;
@@ -235,7 +236,7 @@ int32_t TransProxyAckKeepalive(ProxyChannelInfo *info)
     }
     dataInfo.inData = (uint8_t *)payLoad;
     dataInfo.inLen = strlen(payLoad) + 1;
-    if (TransProxyPackMessage(&msgHead, info->authId, &dataInfo) != SOFTBUS_OK) {
+    if (TransProxyPackMessage(&msgHead, info->authHandle, &dataInfo) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "pack keepalive ack head fail");
         cJSON_free(payLoad);
         return SOFTBUS_ERR;
@@ -274,7 +275,7 @@ int32_t TransProxyResetPeer(ProxyChannelInfo *info)
     }
     dataInfo.inData = (uint8_t *)payLoad;
     dataInfo.inLen = strlen(payLoad) + 1;
-    if (TransProxyPackMessage(&msgHead, info->authId, &dataInfo) != SOFTBUS_OK) {
+    if (TransProxyPackMessage(&msgHead, info->authHandle, &dataInfo) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "pack reset head fail");
         cJSON_free(payLoad);
         return SOFTBUS_ERR;

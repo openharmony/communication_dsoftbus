@@ -137,7 +137,7 @@ int32_t GetLatestSessionKey(const SessionKeyList *list, int32_t *index, SessionK
     }
     item->lastUseTime = GetCurrentTimeMs();
     *index = item->index;
-    AUTH_LOGD(AUTH_FSM, "get session key succ, index=%{public}d", item->index);
+    AUTH_LOGI(AUTH_FSM, "get session key succ, index=%{public}d", item->index);
     return SOFTBUS_OK;
 }
 
@@ -155,7 +155,7 @@ int32_t GetSessionKeyByIndex(const SessionKeyList *list, int32_t index, SessionK
             return SOFTBUS_MEM_ERR;
         }
         item->lastUseTime = GetCurrentTimeMs();
-        AUTH_LOGD(AUTH_FSM, "get session key succ, index=%{public}d", index);
+        AUTH_LOGI(AUTH_FSM, "get session key succ, index=%{public}d", index);
         return SOFTBUS_OK;
     }
     AUTH_LOGE(AUTH_FSM, "session key not found, index=%{public}d", index);
@@ -311,17 +311,18 @@ void DumpSessionkeyList(const SessionKeyList *list)
 static void HandleUpdateSessionKeyEvent(const void *obj)
 {
     AUTH_CHECK_AND_RETURN_LOGE(obj != NULL, AUTH_FSM, "obj is NULL");
-    int64_t authId = *(int64_t *)(obj);
-    AUTH_LOGI(AUTH_FSM, "update session key begin, authId=%{public}" PRId64, authId);
-    AuthManager *auth = GetAuthManagerByAuthId(authId);
+    AuthHandle authHandle = *(AuthHandle *)(obj);
+    AUTH_LOGI(AUTH_FSM, "update session key begin, authId=%{public}" PRId64, authHandle.authId);
+    AuthManager *auth = GetAuthManagerByAuthId(authHandle.authId);
     if (auth == NULL) {
         return;
     }
     if (AuthSessionStartAuth(GenSeq(false), AuthGenRequestId(),
-        auth->connId, &auth->connInfo, false, false) != SOFTBUS_OK) {
-        AUTH_LOGI(AUTH_FSM, "start auth session to update session key fail, authId=%{public}" PRId64, authId);
+        auth->connId[authHandle.type], &auth->connInfo[authHandle.type], false, false) != SOFTBUS_OK) {
+        AUTH_LOGI(AUTH_FSM, "start auth session to update session key fail, authId=%{public}" PRId64,
+            authHandle.authId);
     }
-    DelAuthManager(auth, false);
+    DelDupAuthManager(auth);
 }
 
 static int32_t RemoveUpdateSessionKeyFunc(const void *obj, void *para)
@@ -336,10 +337,14 @@ static int32_t RemoveUpdateSessionKeyFunc(const void *obj, void *para)
     return SOFTBUS_ERR;
 }
 
-void ScheduleUpdateSessionKey(int64_t authId, uint64_t delayMs)
+void ScheduleUpdateSessionKey(AuthHandle authHandle, uint64_t delayMs)
 {
-    RemoveAuthEvent(EVENT_UPDATE_SESSION_KEY, RemoveUpdateSessionKeyFunc, (void *)(&authId));
-    PostAuthEvent(EVENT_UPDATE_SESSION_KEY, HandleUpdateSessionKeyEvent, &authId, sizeof(authId), delayMs);
+    if (authHandle.type < AUTH_LINK_TYPE_WIFI || authHandle.type >= AUTH_LINK_TYPE_MAX) {
+        AUTH_LOGE(AUTH_FSM, "authHandle type error");
+        return;
+    }
+    RemoveAuthEvent(EVENT_UPDATE_SESSION_KEY, RemoveUpdateSessionKeyFunc, (void *)(&authHandle.authId));
+    PostAuthEvent(EVENT_UPDATE_SESSION_KEY, HandleUpdateSessionKeyEvent, &authHandle, sizeof(AuthHandle), delayMs);
 }
 
 void CancelUpdateSessionKey(int64_t authId)

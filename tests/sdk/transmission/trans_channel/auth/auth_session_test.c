@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,7 +53,7 @@ ConnectionAddr g_addrInfo[CONN_ADDR_INFO_COUNT];
 
 static int32_t g_connectCnt = 0;
 
-static int OnSessionOpened(int sessionId, int result)
+static int32_t OnSessionOpened(int32_t sessionId, int32_t result)
 {
     printf("############# session opened,sesison id[%d] result[%d]\n", sessionId, result);
     if (result == SOFTBUS_OK) {
@@ -69,30 +69,28 @@ static int OnSessionOpened(int sessionId, int result)
     return result;
 }
 
-static void OnSessionClosed(int sessionId)
+static void OnSessionClosed(int32_t sessionId)
 {
     printf("############# session closed, session id = %d\n", sessionId);
     g_sessionId = -1;
     g_successFlag = false;
 }
 
-static void OnBytesReceived(int sessionId, const void *data, unsigned int len)
+static void OnBytesReceived(int32_t sessionId, const void *data, uint32_t len)
 {
-    (void)data;
     if (g_sessionId == -1 || sessionId == g_sessionId) {
-        printf("client bytes received, data[%s], dataLen[%u]\n", data, len);
+        printf("client bytes received, data[%s], dataLen[%u]\n", (char *)data, len);
     } else {
-        printf("server bytes received, sessionid[%d], data[%s], dataLen[%u]\n", sessionId, data, len);
+        printf("server bytes received, sessionid[%d], data[%s], dataLen[%u]\n", sessionId, (char *)data, len);
     }
 }
 
-static void OnMessageReceived(int sessionId, const void *data, unsigned int len)
+static void OnMessageReceived(int32_t sessionId, const void *data, uint32_t len)
 {
-    (void)data;
     if (g_sessionId == -1 || sessionId == g_sessionId) {
-        printf("client msg received, data[%s], dataLen[%u]\n", data, len);
+        printf("client msg received, data[%s], dataLen[%u]\n", (char *)data, len);
     } else {
-        printf("server msg received, sessionid[%d], data[%s], dataLen[%u]\n", sessionId, data, len);
+        printf("server msg received, sessionid[%d], data[%s], dataLen[%u]\n", sessionId, (char *)data, len);
     }
 }
 
@@ -128,12 +126,12 @@ static int32_t TestSendMessageData(const char *data, int32_t len)
     return ret;
 }
 
-static int32_t TestCreateSessionServer(int testWay)
+static int32_t TestCreateSessionServer(int32_t testWay)
 {
     int32_t state = -1;
     int32_t ret = CreateSessionServer(g_testModuleName, g_testSessionName, &g_sessionlistener);
     printf("CreateSessionServer ret: %d \n", ret);
-    if (ret != SOFTBUS_SERVER_NAME_REPEATED && ret != SOFTBUS_OK) { // -986: SOFTBUS_SERVER_NAME_REPEATED
+    if (ret != SOFTBUS_SERVER_NAME_REPEATED && ret != SOFTBUS_OK) {
         printf("CreateSessionServer ret: %d \n", ret);
     } else if (testWay == 1) {
         state = OPEN_SESSION_CASE;

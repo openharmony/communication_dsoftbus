@@ -15,6 +15,7 @@
 #ifndef SOFTBUS_SESSION_LISTENER
 #define SOFTBUS_SESSION_LISTENER
 
+#include "auth_interface.h"
 #include "softbus_base_listener.h"
 
 #ifdef __cplusplus
@@ -28,7 +29,7 @@ typedef struct {
     ListenerModule moudleType;
 } HmlListenerInfo;
 
-int32_t GetCipherFlagByAuthId(int64_t authId, uint32_t *flag, bool *isAuthServer);
+int32_t GetCipherFlagByAuthId(AuthHandle authHandle, uint32_t *flag, bool *isAuthServer);
 
 int32_t TransTdcStartSessionListener(ListenerModule module, const LocalListenerInfo *info);
 
