@@ -62,7 +62,7 @@ static void FillpChangePackInteval(struct FillpPcb *pcb)
     if (pcb->packState == FILLP_PACK_STATE_KEEP_ALIVE ||
         (((struct FtSocket *)conn->sock)->resConf.common.enlargePackIntervalFlag == FILLP_TRUE &&
         pcb->packTimerNode.interval != pcb->statistics.pack.packIntervalBackup)) {
-        FILLP_LOGINF("FillpDataInput, change pack timer to working state with a new time interval %u, old %u",
+        FILLP_LOGDBG("FillpDataInput, change pack timer to working state with a new time interval %u, old %u",
             pcb->statistics.pack.packIntervalBackup, pcb->statistics.pack.packInterval);
         pcb->statistics.pack.packInterval = pcb->statistics.pack.packIntervalBackup;
         FillpDisablePackTimer(pcb);

@@ -534,6 +534,10 @@ static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSO
             SendVerifyP2pFailRsp(authHandle, seq, CODE_VERIFY_P2P, ret, "get p2p ip fail", isAuthLink);
             return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
         }
+    } else {
+        SendVerifyP2pFailRsp(authHandle, seq, CODE_VERIFY_P2P, SOFTBUS_ERR,
+            "get wifidirectmanager or localip fail", isAuthLink);
+        return SOFTBUS_ERR;
     }
 
     ret = StartP2pListener(myIp, &myPort);
