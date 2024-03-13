@@ -81,7 +81,7 @@ typedef enum {
 
 typedef enum {
     LANE_STATUS_CHANGE_TYPE_P2P = 0X0,
-    LNN_LINK_TYPE_BUTT,
+    LANE_STATUS_CHANGE_TYPE_BUTT,
 } LaneStatusChangeType;
 
 typedef enum {
