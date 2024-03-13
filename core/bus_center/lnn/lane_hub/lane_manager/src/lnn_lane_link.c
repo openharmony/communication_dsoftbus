@@ -1112,7 +1112,6 @@ int32_t InitLaneLink(void)
     return SOFTBUS_OK;
 }
 
-
 void DeinitLaneLink(void)
 {
     LnnDestroyP2p();
