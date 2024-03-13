@@ -74,6 +74,7 @@ int32_t ClientIpcOnChannelOpened(const char *pkgName, const char *sessionName,
     WriteInt32(&io, channel->channelType);
     WriteBool(&io, channel->isServer);
     WriteBool(&io, channel->isEnabled);
+    WriteBool(&io, channel->isEncrypt);
     WriteInt32(&io, channel->peerUid);
     WriteInt32(&io, channel->peerPid);
     WriteString(&io, channel->groupId);
