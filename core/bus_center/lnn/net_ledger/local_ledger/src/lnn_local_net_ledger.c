@@ -1182,6 +1182,27 @@ static int32_t LlUpdateStaticCapLen(const void *len)
     return SOFTBUS_OK;
 }
 
+static int32_t LlGetDeviceSecurityLevel(void *buf, uint32_t len)
+{
+    if (buf == NULL || len != sizeof(int32_t)) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((int32_t *)buf) = g_localNetLedger.localInfo.deviceSecurityLevel;
+    return SOFTBUS_OK;
+}
+
+static int32_t LlUpdateDeviceSecurityLevel(const void *buf)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (buf == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    info->deviceSecurityLevel = *((int32_t *)buf);
+    return SOFTBUS_OK;
+}
+
 int32_t LlUpdateStaticCapability(const void *staticCap)
 {
     if (staticCap == NULL) {
@@ -1383,6 +1404,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {NUM_KEY_ACCOUNT_LONG, sizeof(int64_t), LocalGetNodeAccountId, LocalUpdateNodeAccountId},
     {NUM_KEY_BLE_START_TIME, sizeof(int64_t), LocalGetNodeBleStartTime, LocalUpdateBleStartTime},
     {NUM_KEY_STATIC_CAP_LEN, sizeof(int32_t), LlGetStaticCapLen, LlUpdateStaticCapLen},
+    {NUM_KEY_DEVICE_SECURITY_LEVEL, sizeof(int32_t), LlGetDeviceSecurityLevel, LlUpdateDeviceSecurityLevel},
     {BYTE_KEY_IRK, LFINDER_IRK_LEN, LlGetIrk, UpdateLocalIrk},
     {BYTE_KEY_PUB_MAC, LFINDER_MAC_ADDR_LEN, LlGetPubMac, UpdateLocalPubMac},
     {BYTE_KEY_BROADCAST_CIPHER_KEY, SESSION_KEY_LENGTH, LlGetCipherInfoKey, UpdateLocalCipherInfoKey},
@@ -1714,6 +1736,10 @@ static int32_t LnnInitLocalNodeInfo(NodeInfo *nodeInfo)
     if (InitLocalVersionType(nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init local version type error");
         return SOFTBUS_ERR;
+    }
+    if (GetDeviceSecurityLevel(&nodeInfo->deviceSecurityLevel) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "init local deviceSecurityLevel fail, deviceSecurityLevel=%{public}d",
+            nodeInfo->deviceSecurityLevel);
     }
     if (InitConnectInfo(&nodeInfo->connectInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init local connect info error");
