@@ -117,7 +117,6 @@ void LaneAddP2pAddressByIp(const char *ipAddr, uint16_t port);
 void LaneUpdateP2pAddressByIp(const char *ipAddr, const char *networkId);
 
 int32_t FindLaneResourceByLinkInfo(const LaneLinkInfo *linkInfoItem, LaneResource *laneResourceItem);
-int32_t FindLaneResourceByPeerIp(const char *peerIp, LaneResource *laneResourceItem);
 int32_t AddLaneResourceItem(const LaneResource *resourceItem);
 int32_t DelLaneResourceItem(const LaneResource *resourceItem);
 int32_t AddLinkInfoItem(const LaneLinkInfo *linkInfoItem);
