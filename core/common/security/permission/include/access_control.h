@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,20 @@
 #ifndef ACCESS_CONTROL_H
 #define ACCESS_CONTROL_H
 
-int32_t TransCheckAccessControl(const char *peerDeviceId);
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
+int32_t TransCheckClientAccessControl(const char *peerNetworkId);
+int32_t TransCheckServerAccessControl(uint32_t firstCallingId);
+uint32_t TransACLGetFirstTokenID();
+
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* __cplusplus */
 
 #endif /* ACCESS_CONTROL_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "trans_udp_negotiation.h"
 
+#include "access_control.h"
 #include "auth_interface.h"
 #include "bus_center_event.h"
 #include "bus_center_info_key.h"
@@ -444,6 +445,9 @@ static int32_t ParseRequestAppInfo(AuthHandle authHandle, const cJSON *msg, AppI
     if (TransUnpackRequestUdpInfo(msg, appInfo) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "unpack request udp info failed.");
         return SOFTBUS_ERR;
+    }
+    if (appInfo->firstTokenId != 0 && TransCheckServerAccessControl(appInfo->firstTokenId) != SOFTBUS_OK) {
+        return SOFTBUS_TRANS_CHECK_ACL_FAILED;
     }
     appInfo->myHandleId = -1;
     appInfo->peerHandleId = -1;
