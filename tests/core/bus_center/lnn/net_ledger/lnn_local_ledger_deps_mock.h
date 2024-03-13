@@ -45,6 +45,7 @@ public:
     virtual bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit);
     virtual int32_t GetCommonOsType(int32_t *value);
     virtual int32_t GetCommonOsVersion(char *value, uint32_t len);
+    virtual int32_t GetDeviceSecurityLevel(int32_t *level);
 };
 class LocalLedgerDepsInterfaceMock : public LocalLedgerDepsInterface {
 public:
@@ -60,6 +61,7 @@ public:
     MOCK_METHOD2(IsFeatureSupport, bool (uint64_t, FeatureCapability));
     MOCK_METHOD1(GetCommonOsType, int32_t (int32_t *));
     MOCK_METHOD2(GetCommonOsVersion, int32_t (char *, uint32_t));
+    MOCK_METHOD1(GetDeviceSecurityLevel, int32_t (int32_t *));
 
     static int32_t LedgerGetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len);
     static int32_t LedgerSoftBusRegBusCenterVarDump(char *dumpVar, SoftBusVarDumpCb cb);

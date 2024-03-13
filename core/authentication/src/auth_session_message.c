@@ -148,6 +148,7 @@
 #define IRK "IRK"
 #define PUB_MAC "PUB_MAC"
 #define OH_OS_TYPE 10
+#define DEVICE_SECURITY_LEVEL "DEVICE_SECURITY_LEVEL"
 
 #define FLAG_COMPRESS_DEVICE_INFO 1
 #define FLAG_UNCOMPRESS_DEVICE_INFO 0
@@ -1274,6 +1275,10 @@ static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion ve
     if (PackCipherRpaInfo(json, info) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "pack CipherRpaInfo of device key failed.");
     }
+
+    if (!JSON_AddInt32ToObject(json, DEVICE_SECURITY_LEVEL, info->deviceSecurityLevel)) {
+        AUTH_LOGE(AUTH_FSM, "pack deviceSecurityLevel fail.");
+    }
     return SOFTBUS_OK;
 }
 
@@ -1390,6 +1395,7 @@ static void UnpackCommon(const JsonObj *json, NodeInfo *info, SoftBusVersion ver
     OptString(json, HML_MAC, info->wifiDirectAddr, MAC_LEN, "");
 
     UnpackCipherRpaInfo(json, info);
+    OptInt(json, DEVICE_SECURITY_LEVEL, &info->deviceSecurityLevel, -1);
 }
 
 static int32_t GetBtDiscTypeString(const NodeInfo *info, char *buf, uint32_t len)
