@@ -106,6 +106,7 @@ typedef struct {
 
 typedef enum {
     BIT_SUPPORT_EXCHANGE_NETWORKID = 0,
+    BIT_SUPPORT_NORMALIZED_LINK = 1,
 } AuthCapability;
 
 typedef struct {
@@ -174,6 +175,7 @@ typedef struct {
     uint8_t staticCapability[STATIC_CAP_LEN];
     int32_t staticCapLen;
     char remotePtk[PTK_DEFAULT_LEN];
+    int32_t deviceSecurityLevel;
     uint8_t relation[CONNECTION_ADDR_MAX];
     uint64_t heartbeatTimestamp;
     uint64_t bleDirectTimestamp;

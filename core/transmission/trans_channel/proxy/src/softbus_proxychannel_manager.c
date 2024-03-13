@@ -350,7 +350,7 @@ void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId)
         if (item->reqId == reqId && item->status == PROXY_CHANNEL_STATUS_PYH_CONNECTING) {
             item->status = PROXY_CHANNEL_STATUS_HANDSHAKEING;
             item->connId = connId;
-            TransAddConnRefByConnId(connId);
+            TransAddConnRefByConnId(connId, (bool)item->isServer);
             TransProxyPostHandshakeMsgToLoop(item->channelId);
         }
     }
@@ -361,12 +361,9 @@ void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId)
 static void TransProxyCloseProxyOtherRes(int32_t channelId, const ProxyChannelInfo *info)
 {
     uint32_t connId = info->connId;
-    bool isServer = (info->isServer != 1);
+    bool isServer = (bool)info->isServer;
     TransProxyPostResetPeerMsgToLoop(info);
-
-    if (isServer) {
-        TransProxyPostDisConnectMsgToLoop(connId);
-    }
+    TransProxyPostDisConnectMsgToLoop(connId, isServer);
 }
 
 static void TransProxyReleaseChannelList(ListNode *proxyChannelList, int32_t errCode)
@@ -589,29 +586,31 @@ int32_t TransProxyGetNewChanSeq(int32_t channelId)
     return seq;
 }
 
-int64_t TransProxyGetAuthId(int32_t channelId)
+int32_t TransProxyGetAuthId(int32_t channelId, AuthHandle *authHandle)
 {
-    int64_t authId;
+    if (authHandle == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
     ProxyChannelInfo *item = NULL;
-
     if (g_proxyChannelList == NULL) {
-        return AUTH_INVALID_ID;
+        TRANS_LOGE(TRANS_CTRL, "g_proxyChannelList is null");
+        return SOFTBUS_ERR;
     }
 
     if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return AUTH_INVALID_ID;
+        return SOFTBUS_ERR;
     }
 
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->channelId == channelId) {
-            authId = item->authId;
+            *authHandle = item->authHandle;
             (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
-            return authId;
+            return SOFTBUS_OK;
         }
     }
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
-    return AUTH_INVALID_ID;
+    return SOFTBUS_ERR;
 }
 
 int32_t TransProxyGetSessionKeyByChanId(int32_t channelId, char *sessionKey, uint32_t sessionKeySize)
@@ -904,16 +903,31 @@ static inline int32_t CheckAppTypeAndMsgHead(const ProxyMessageHead *msgHead, co
     return SOFTBUS_OK;
 }
 
+static inline AuthLinkType ConvertConnectType2AuthLinkType(ConnectType type)
+{
+    if (type == CONNECT_TCP) {
+        return AUTH_LINK_TYPE_WIFI;
+    } else if ((type == CONNECT_BLE) || (type == CONNECT_BLE_DIRECT)) {
+        return AUTH_LINK_TYPE_BLE;
+    } else if (type == CONNECT_BR) {
+        return AUTH_LINK_TYPE_BR;
+    } else {
+        return AUTH_LINK_TYPE_P2P;
+    }
+}
+
 static void ConstructProxyChannelInfo(
     ProxyChannelInfo *chan, const ProxyMessage *msg, int16_t newChanId, const ConnectionInfo *info)
 {
-    chan->isServer = 1;
+    // always be client when communicating with WinPC
+    chan->isServer = (msg->msgHead.cipher & CS_MODE) == 0 ? 0 : 1;
     chan->status = PROXY_CHANNEL_STATUS_COMPLETED;
     chan->connId = msg->connId;
     chan->myId = newChanId;
     chan->channelId = newChanId;
     chan->peerId = msg->msgHead.peerId;
-    chan->authId = msg->authId;
+    chan->authHandle.authId = msg->authId;
+    chan->authHandle.type = ConvertConnectType2AuthLinkType(info->type);
     chan->type = info->type;
     if (chan->type == CONNECT_BLE || chan->type == CONNECT_BLE_DIRECT) {
         chan->blePrototolType = info->bleInfo.protocol;
@@ -1114,7 +1128,7 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
         .channelId = chan->myId,
         .peerChannelId = chan->peerId,
         .socketName = tmpSocketName,
-        .authId = chan->authId,
+        .authId = chan->authHandle.authId,
         .connectionId = chan->connId,
         .channelType = chan->appInfo.appType == APP_TYPE_AUTH ? CHANNEL_TYPE_AUTH : CHANNEL_TYPE_PROXY,
         .linkType = chan->type
@@ -1134,7 +1148,7 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
         extra.peerUdid = peerUdid;
     }
 
-    TransCreateConnByConnId(msg->connId);
+    TransCreateConnByConnId(msg->connId, (bool)chan->isServer);
     if ((ret = TransProxyAddChanItem(chan)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "AddChanItem fail");
         ReleaseProxyChannelId(chan->channelId);
@@ -1146,7 +1160,7 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_START, extra);
     if ((ret = OnProxyChannelOpened(chan->channelId, &(chan->appInfo), PROXY_CHANNEL_SERVER)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "OnProxyChannelOpened fail");
-        (void)TransProxyCloseConnChannelReset(msg->connId, false);
+        (void)TransProxyCloseConnChannelReset(msg->connId, false, (bool)chan->isServer);
         TransProxyDelChanByChanId(chan->channelId);
         goto EXIT_ERR;
     }
@@ -1224,7 +1238,7 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
         TRANS_EVENT(EVENT_SCENE_CLOSE_CHANNEL_PASSIVE, EVENT_STAGE_CLOSE_CHANNEL, extra);
         OnProxyChannelClosed(info->channelId, &(info->appInfo));
     }
-    (void)TransProxyCloseConnChannelReset(msg->connId, (info->isServer == 0));
+    (void)TransProxyCloseConnChannelReset(msg->connId, (info->isServer == 0), info->isServer);
     if ((msg->msgHead.cipher & BAD_CIPHER) == BAD_CIPHER) {
         TRANS_LOGE(TRANS_CTRL, "clear bad key authId=%{public}" PRId64 ", keyIndex=%{public}d",
             msg->authId, msg->keyIndex);
@@ -1347,19 +1361,6 @@ void TransProxyonMessageReceived(const ProxyMessage *msg)
     }
 }
 
-static inline AuthLinkType ConvertConnectType2AuthLinkType(ConnectType type)
-{
-    if (type == CONNECT_TCP) {
-        return AUTH_LINK_TYPE_WIFI;
-    } else if ((type == CONNECT_BLE) || (type == CONNECT_BLE_DIRECT)) {
-        return AUTH_LINK_TYPE_BLE;
-    } else if (type == CONNECT_BR) {
-        return AUTH_LINK_TYPE_BR;
-    } else {
-        return AUTH_LINK_TYPE_P2P;
-    }
-}
-
 int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int32_t channelId, const AppInfo *appInfo)
 {
     chan->myId = (int16_t)channelId;
@@ -1371,9 +1372,9 @@ int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int32_t channelId, cons
     }
 
     if (appInfo->appType != APP_TYPE_AUTH) {
-        chan->authId =
-            AuthGetLatestIdByUuid(appInfo->peerData.deviceId, ConvertConnectType2AuthLinkType(chan->type), false);
-        if (chan->authId == AUTH_INVALID_ID) {
+        AuthGetLatestIdByUuid(appInfo->peerData.deviceId, ConvertConnectType2AuthLinkType(chan->type),
+            false, &chan->authHandle);
+        if (chan->authHandle.authId == AUTH_INVALID_ID) {
             TRANS_LOGE(TRANS_CTRL, "get authId for cipher err");
             return SOFTBUS_ERR;
         }
@@ -1401,7 +1402,6 @@ void TransProxyOpenProxyChannelSuccess(int32_t chanId)
     }
 
     if (TransProxyGetChanByChanId(chanId, chan) != SOFTBUS_OK) {
-        (void)TransProxyCloseConnChannel(chan->connId);
         SoftBusFree(chan);
         TRANS_LOGE(TRANS_CTRL, "disconnect device channelId=%{public}d", chanId);
         return;
@@ -1420,7 +1420,7 @@ void TransProxyOpenProxyChannelSuccess(int32_t chanId)
             .result = EVENT_STAGE_RESULT_FAILED
         };
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_START, extra);
-        (void)TransProxyCloseConnChannel(chan->connId);
+        (void)TransProxyCloseConnChannel(chan->connId, chan->isServer);
         TRANS_LOGE(TRANS_CTRL, "shake hand err. channelId=%{public}d", chanId);
         TransProxyOpenProxyChannelFail(chan->channelId, &(chan->appInfo), ret);
         TransProxyDelChanByChanId(chanId);
@@ -1478,14 +1478,16 @@ static void TransProxyTimerItemProc(const ListNode *proxyProcList)
     ProxyChannelInfo *nextNode = NULL;
     uint32_t connId;
     int8_t status;
+    bool isServer;
 
     LIST_FOR_EACH_ENTRY_SAFE(removeNode, nextNode, proxyProcList, ProxyChannelInfo, node) {
         ListDelete(&(removeNode->node));
         status = removeNode->status;
         if (status == PROXY_CHANNEL_STATUS_HANDSHAKE_TIMEOUT) {
             connId = removeNode->connId;
+            isServer = removeNode->isServer;
             TransProxyPostOpenFailMsgToLoop(removeNode, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
-            TransProxyPostDisConnectMsgToLoop(connId);
+            TransProxyPostDisConnectMsgToLoop(connId, isServer);
         } else if (status == PROXY_CHANNEL_STATUS_CONNECTING_TIMEOUT) {
             (void)TransDelConnByReqId(removeNode->reqId);
             TransProxyPostOpenFailMsgToLoop(removeNode, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
@@ -1732,7 +1734,7 @@ static void TransProxyDestroyChannelList(const ListNode *destroyList)
     LIST_FOR_EACH_ENTRY_SAFE(destroyNode, nextDestroyNode, destroyList, ProxyChannelInfo, node) {
         ListDelete(&(destroyNode->node));
         TransProxyResetPeer(destroyNode);
-        TransProxyCloseConnChannel(destroyNode->connId);
+        TransProxyCloseConnChannel(destroyNode->connId, destroyNode->isServer);
         SoftBusFree(destroyNode);
     }
     return;

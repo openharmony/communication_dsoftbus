@@ -275,6 +275,7 @@ typedef struct {
              */
             char ip[IP_STR_MAX_LEN];
             uint16_t port;            /**< Port number represented by the host byte order */
+            uint8_t udidHash[UDID_HASH_LEN]; /**< udid hash value */
         } ip;
         /**< Session address */
         struct SessionAddr {
@@ -360,6 +361,11 @@ typedef enum {
     /**Approach capability */
     APPROACH_CAPABILITY_BITMAP
 } DataBitMap;
+
+typedef struct {
+    int64_t authId;
+    uint32_t type;
+} AuthHandle;
 
 /**
  * @brief Defines the mapping between supported capabilities and bitmaps.

@@ -17,7 +17,7 @@
 #define SOFTBUS_TCP_DIRECT_SESSIONCONN_H
 
 #include <stdint.h>
-#include "softbus_def.h"
+#include "auth_interface.h"
 #include "common_list.h"
 #include "softbus_app_info.h"
 #include "softbus_base_listener.h"
@@ -49,7 +49,7 @@ typedef struct {
     uint32_t timeout;
     int64_t req;
     uint32_t requestId;
-    int64_t authId;
+    AuthHandle authHandle;
     bool isMeta;
     ListenerModule listenMod;
 } SessionConn;

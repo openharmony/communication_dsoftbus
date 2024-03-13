@@ -88,9 +88,9 @@ uint32_t AuthGenRequestId(void)
     return GetNetBuilderDepsInterface()->AuthGenRequestId();
 }
 
-void AuthHandleLeaveLNN(int64_t authId)
+void AuthHandleLeaveLNN(AuthHandle authHandle)
 {
-    return GetNetBuilderDepsInterface()->AuthHandleLeaveLNN(authId);
+    return GetNetBuilderDepsInterface()->AuthHandleLeaveLNN(authHandle);
 }
 
 int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
@@ -245,9 +245,9 @@ int32_t SoftBusGetTime(SoftBusSysTime *sysTime)
     return GetNetBuilderDepsInterface()->SoftBusGetTime(sysTime);
 }
 
-int32_t AuthGetConnInfo(int64_t authId, AuthConnInfo *connInfo)
+int32_t AuthGetConnInfo(AuthHandle authHandle, AuthConnInfo *connInfo)
 {
-    return GetNetBuilderDepsInterface()->AuthGetConnInfo(authId, connInfo);
+    return GetNetBuilderDepsInterface()->AuthGetConnInfo(authHandle, connInfo);
 }
 
 void LnnNotifyLeaveResult(const char *networkId, int32_t retCode)

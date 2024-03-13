@@ -40,6 +40,8 @@
 using namespace testing::ext;
 using testing::Return;
 namespace OHOS {
+constexpr int64_t AUTH_ID = 1;
+
 class WifiProcessorV1MockTest : public testing::Test {
 public:
     WifiProcessorV1MockTest()
@@ -79,7 +81,8 @@ HWTEST_F(WifiProcessorV1MockTest, testV1CreateLink001, TestSize.Level1)
     connectInfo.isNetworkDelegate = true;
     connectInfo.linkId = 4;
     struct DefaultNegotiateChannel channel;
-    DefaultNegotiateChannelConstructor(&channel, 11111111);
+    AuthHandle authHandle = { .authId = AUTH_ID, .type = AUTH_LINK_TYPE_WIFI };
+    DefaultNegotiateChannelConstructor(&channel, authHandle);
     connectInfo.negoChannel = (struct WifiDirectNegotiateChannel *)&channel;
 
     DefaultNegotiateChannelMock defaultMock;
@@ -125,7 +128,8 @@ HWTEST_F(WifiProcessorV1MockTest, testV1CreateLink002, TestSize.Level1)
     connectInfo.isNetworkDelegate = true;
     connectInfo.linkId = 4;
     struct DefaultNegotiateChannel channel;
-    DefaultNegotiateChannelConstructor(&channel, 11111111);
+    AuthHandle authHandle = { .authId = AUTH_ID, .type = AUTH_LINK_TYPE_WIFI };
+    DefaultNegotiateChannelConstructor(&channel, authHandle);
     connectInfo.negoChannel = (struct WifiDirectNegotiateChannel *)&channel;
 
     DefaultNegotiateChannelMock defaultMock;
@@ -180,7 +184,8 @@ HWTEST_F(WifiProcessorV1MockTest, testV1CreateLink003, TestSize.Level1)
     connectInfo.isNetworkDelegate = true;
     connectInfo.linkId = 4;
     struct DefaultNegotiateChannel channel;
-    DefaultNegotiateChannelConstructor(&channel, 11111111);
+    AuthHandle authHandle = { .authId = AUTH_ID, .type = AUTH_LINK_TYPE_WIFI };
+    DefaultNegotiateChannelConstructor(&channel, authHandle);
     connectInfo.negoChannel = (struct WifiDirectNegotiateChannel *)&channel;
 
     DefaultNegotiateChannelMock defaultMock;
@@ -228,7 +233,8 @@ HWTEST_F(WifiProcessorV1MockTest, testV1DisconnectLink001, TestSize.Level1)
     connectInfo.isNetworkDelegate = true;
     connectInfo.linkId = 4;
     struct DefaultNegotiateChannel channel;
-    DefaultNegotiateChannelConstructor(&channel, 11111111);
+    AuthHandle authHandle = { .authId = AUTH_ID, .type = AUTH_LINK_TYPE_WIFI };
+    DefaultNegotiateChannelConstructor(&channel, authHandle);
     connectInfo.negoChannel = (struct WifiDirectNegotiateChannel *)&channel;
     struct InnerLink innerlink;
     (void)memset_s(&innerlink, sizeof(innerlink), 0, sizeof(innerlink));
@@ -275,7 +281,8 @@ HWTEST_F(WifiProcessorV1MockTest, testV1DisconnectLink002, TestSize.Level1)
     connectInfo.isNetworkDelegate = true;
     connectInfo.linkId = 4;
     struct DefaultNegotiateChannel channel;
-    DefaultNegotiateChannelConstructor(&channel, 11111111);
+    AuthHandle authHandle = { .authId = AUTH_ID, .type = AUTH_LINK_TYPE_WIFI };
+    DefaultNegotiateChannelConstructor(&channel, authHandle);
     connectInfo.negoChannel = (struct WifiDirectNegotiateChannel *)&channel;
     struct InnerLink innerlink;
     (void)memset_s(&innerlink, sizeof(innerlink), 0, sizeof(innerlink));
@@ -324,7 +331,8 @@ HWTEST_F(WifiProcessorV1MockTest, testV1DisconnectLink003, TestSize.Level1)
     connectInfo.isNetworkDelegate = true;
     connectInfo.linkId = 4;
     struct DefaultNegotiateChannel channel;
-    DefaultNegotiateChannelConstructor(&channel, 11111111);
+    AuthHandle authHandle = { .authId = AUTH_ID, .type = AUTH_LINK_TYPE_WIFI };
+    DefaultNegotiateChannelConstructor(&channel, authHandle);
     connectInfo.negoChannel = (struct WifiDirectNegotiateChannel *)&channel;
     struct InnerLink innerlink;
     (void)memset_s(&innerlink, sizeof(innerlink), 0, sizeof(innerlink));
@@ -371,7 +379,8 @@ HWTEST_F(WifiProcessorV1MockTest, testV1ReuseLink001, TestSize.Level1)
     char myMac[MAC_ADDR_STR_LEN] = "00:11:22:33:44:55";
     strcpy_s(connectInfo.remoteMac, sizeof(connectInfo.remoteMac), myMac);
     struct DefaultNegotiateChannel channel;
-    DefaultNegotiateChannelConstructor(&channel, 11111111);
+    AuthHandle authHandle = { .authId = AUTH_ID, .type = AUTH_LINK_TYPE_WIFI };
+    DefaultNegotiateChannelConstructor(&channel, authHandle);
     connectInfo.negoChannel = (struct WifiDirectNegotiateChannel *)&channel;
     struct InnerLink innerlink;
     (void)memset_s(&innerlink, sizeof(innerlink), 0, sizeof(innerlink));
@@ -407,8 +416,8 @@ HWTEST_F(WifiProcessorV1MockTest, testV1ProcessNegotiateMessage001, TestSize.Lev
 {
     struct P2pV1Processor *self = GetP2pV1Processor();
     struct NegotiateMessage *msg = NegotiateMessageNew();
-    
-    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(22222);
+    AuthHandle authHandle = { .authId = AUTH_ID, .type = AUTH_LINK_TYPE_WIFI };
+    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(authHandle);
     msg->putPointer(msg, NM_KEY_NEGO_CHANNEL, (void **)&channel);
     msg->putString(msg, NM_KEY_SELF_WIFI_CONFIG, "ssss");
     msg->putInt(msg, NM_KEY_CONTENT_TYPE, P2P_CONTENT_TYPE_GO_INFO);
@@ -451,8 +460,8 @@ HWTEST_F(WifiProcessorV1MockTest, testV1ProcessNegotiateMessage002, TestSize.Lev
 {
     struct P2pV1Processor *self = GetP2pV1Processor();
     struct NegotiateMessage *msg = NegotiateMessageNew();
-    
-    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(22222);
+    AuthHandle authHandle = { .authId = AUTH_ID, .type = AUTH_LINK_TYPE_WIFI };
+    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(authHandle);
     msg->putPointer(msg, NM_KEY_NEGO_CHANNEL, (void **)&channel);
     msg->putString(msg, NM_KEY_SELF_WIFI_CONFIG, "ssss");
     msg->putInt(msg, NM_KEY_CONTENT_TYPE, P2P_CONTENT_TYPE_GO_INFO);
@@ -495,8 +504,8 @@ HWTEST_F(WifiProcessorV1MockTest, testV1ProcessNegotiateMessage003, TestSize.Lev
 {
     struct P2pV1Processor *self = GetP2pV1Processor();
     struct NegotiateMessage *msg = NegotiateMessageNew();
-    
-    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(22222);
+    AuthHandle authHandle = { .authId = AUTH_ID, .type = AUTH_LINK_TYPE_WIFI };
+    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(authHandle);
     msg->putPointer(msg, NM_KEY_NEGO_CHANNEL, (void **)&channel);
     msg->putString(msg, NM_KEY_SELF_WIFI_CONFIG, "ssss");
     msg->putInt(msg, NM_KEY_CONTENT_TYPE, P2P_CONTENT_TYPE_GC_INFO);
@@ -550,8 +559,8 @@ HWTEST_F(WifiProcessorV1MockTest, testV1ProcessNegotiateMessage004, TestSize.Lev
 {
     struct P2pV1Processor *self = GetP2pV1Processor();
     struct NegotiateMessage *msg = NegotiateMessageNew();
-    
-    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(22222);
+    AuthHandle authHandle = { .authId = AUTH_ID, .type = AUTH_LINK_TYPE_WIFI };
+    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(authHandle);
     msg->putPointer(msg, NM_KEY_NEGO_CHANNEL, (void **)&channel);
     msg->putString(msg, NM_KEY_SELF_WIFI_CONFIG, "ssss");
     msg->putInt(msg, NM_KEY_CONTENT_TYPE, P2P_CONTENT_TYPE_RESULT);
@@ -598,8 +607,8 @@ HWTEST_F(WifiProcessorV1MockTest, testV1ProcessNegotiateMessage005, TestSize.Lev
 {
     struct P2pV1Processor *self = GetP2pV1Processor();
     struct NegotiateMessage *msg = NegotiateMessageNew();
-    
-    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(22222);
+    AuthHandle authHandle = { .authId = AUTH_ID, .type = AUTH_LINK_TYPE_WIFI };
+    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(authHandle);
     msg->putPointer(msg, NM_KEY_NEGO_CHANNEL, (void **)&channel);
     msg->putString(msg, NM_KEY_SELF_WIFI_CONFIG, "ssss");
     msg->putInt(msg, NM_KEY_CONTENT_TYPE, P2P_CONTENT_TYPE_RESULT);
@@ -648,8 +657,8 @@ HWTEST_F(WifiProcessorV1MockTest, testV1ProcessNegotiateMessage006, TestSize.Lev
 {
     struct P2pV1Processor *self = GetP2pV1Processor();
     struct NegotiateMessage *msg = NegotiateMessageNew();
-    
-    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(22222);
+    AuthHandle authHandle = { .authId = AUTH_ID, .type = AUTH_LINK_TYPE_WIFI };
+    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(authHandle);
     msg->putPointer(msg, NM_KEY_NEGO_CHANNEL, (void **)&channel);
     msg->putString(msg, NM_KEY_SELF_WIFI_CONFIG, "ssss");
     msg->putInt(msg, NM_KEY_CONTENT_TYPE, P2P_CONTENT_TYPE_GC_INFO);
@@ -696,8 +705,8 @@ HWTEST_F(WifiProcessorV1MockTest, testV1ProcessNegotiateMessage007, TestSize.Lev
 {
     struct P2pV1Processor *self = GetP2pV1Processor();
     struct NegotiateMessage *msg = NegotiateMessageNew();
-    
-    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(22222);
+    AuthHandle authHandle = { .authId = AUTH_ID, .type = AUTH_LINK_TYPE_WIFI };
+    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(authHandle);
     msg->putPointer(msg, NM_KEY_NEGO_CHANNEL, (void **)&channel);
     msg->putString(msg, NM_KEY_SELF_WIFI_CONFIG, "ssss");
     msg->putInt(msg, NM_KEY_CONTENT_TYPE, P2P_CONTENT_TYPE_GC_INFO);
@@ -745,8 +754,8 @@ HWTEST_F(WifiProcessorV1MockTest, testV1ProcessNegotiateMessage008, TestSize.Lev
 {
     struct P2pV1Processor *self = GetP2pV1Processor();
     struct NegotiateMessage *msg = NegotiateMessageNew();
-    
-    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(22222);
+    AuthHandle authHandle = { .authId = AUTH_ID, .type = AUTH_LINK_TYPE_WIFI };
+    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(authHandle);
     msg->putPointer(msg, NM_KEY_NEGO_CHANNEL, (void **)&channel);
     msg->putString(msg, NM_KEY_SELF_WIFI_CONFIG, "ssss");
     msg->putInt(msg, NM_KEY_CONTENT_TYPE, P2P_CONTENT_TYPE_GC_INFO);
@@ -794,8 +803,8 @@ HWTEST_F(WifiProcessorV1MockTest, testV1ProcessNegotiateMessage009, TestSize.Lev
 {
     struct P2pV1Processor *self = GetP2pV1Processor();
     struct NegotiateMessage *msg = NegotiateMessageNew();
-    
-    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(22222);
+    AuthHandle authHandle = { .authId = AUTH_ID, .type = AUTH_LINK_TYPE_WIFI };
+    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(authHandle);
     msg->putPointer(msg, NM_KEY_NEGO_CHANNEL, (void **)&channel);
     msg->putString(msg, NM_KEY_SELF_WIFI_CONFIG, "ssss");
     msg->putInt(msg, NM_KEY_CONTENT_TYPE, P2P_CONTENT_TYPE_GC_INFO);
@@ -843,8 +852,8 @@ HWTEST_F(WifiProcessorV1MockTest, testV1ProcessNegotiateMessage0010, TestSize.Le
 {
     struct P2pV1Processor *self = GetP2pV1Processor();
     struct NegotiateMessage *msg = NegotiateMessageNew();
-    
-    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(22222);
+    AuthHandle authHandle = { .authId = AUTH_ID, .type = AUTH_LINK_TYPE_WIFI };
+    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(authHandle);
     msg->putPointer(msg, NM_KEY_NEGO_CHANNEL, (void **)&channel);
     msg->putString(msg, NM_KEY_SELF_WIFI_CONFIG, "ssss");
     msg->putInt(msg, NM_KEY_CONTENT_TYPE, P2P_CONTENT_TYPE_GC_INFO);
@@ -900,8 +909,8 @@ HWTEST_F(WifiProcessorV1MockTest, testV1ProcessNegotiateMessage0011, TestSize.Le
     struct P2pV1Processor *self = GetP2pV1Processor();
     self->pendingRequestMsg = NULL;
     struct NegotiateMessage *msg = NegotiateMessageNew();
-    
-    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(22222);
+    AuthHandle authHandle = { .authId = AUTH_ID, .type = AUTH_LINK_TYPE_WIFI };
+    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(authHandle);
     msg->putPointer(msg, NM_KEY_NEGO_CHANNEL, (void **)&channel);
     msg->putString(msg, NM_KEY_SELF_WIFI_CONFIG, "ssss");
     msg->putInt(msg, NM_KEY_CONTENT_TYPE, P2P_CONTENT_TYPE_GC_INFO);
@@ -953,7 +962,8 @@ HWTEST_F(WifiProcessorV1MockTest, testV1OnOperationEvent001, TestSize.Level1)
     constexpr int32_t result = 10;
     constexpr int32_t requestId = 10;
     struct NegotiateMessage *msg = NegotiateMessageNew();
-    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(22222);
+    AuthHandle authHandle = { .authId = AUTH_ID, .type = AUTH_LINK_TYPE_WIFI };
+    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(authHandle);
     msg->putPointer(msg, NM_KEY_NEGO_CHANNEL, (void **)&channel);
     self->currentMsg = msg;
     self->needReply =  true;
@@ -995,7 +1005,8 @@ HWTEST_F(WifiProcessorV1MockTest, testV1OnOperationEvent003, TestSize.Level1)
     constexpr int32_t result = OK;
     constexpr int32_t requestId = 12;
     struct NegotiateMessage *msg = NegotiateMessageNew();
-    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(22222);
+    AuthHandle authHandle = { .authId = AUTH_ID, .type = AUTH_LINK_TYPE_WIFI };
+    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(authHandle);
     msg->putPointer(msg, NM_KEY_NEGO_CHANNEL, (void **)&channel);
     msg->putString(msg, NM_KEY_MAC, "1B:22:33:44:55:66");
     self->currentMsg = msg;
@@ -1042,7 +1053,8 @@ HWTEST_F(WifiProcessorV1MockTest, testV1OnOperationEvent004, TestSize.Level1)
     constexpr int32_t result = OK;
     constexpr int32_t requestId = 12;
     struct NegotiateMessage *msg = NegotiateMessageNew();
-    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(22222);
+    AuthHandle authHandle = { .authId = AUTH_ID, .type = AUTH_LINK_TYPE_WIFI };
+    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(authHandle);
     msg->putPointer(msg, NM_KEY_NEGO_CHANNEL, (void **)&channel);
     msg->putString(msg, NM_KEY_MAC, "1B:22:33:44:55:66");
     self->currentMsg = msg;
@@ -1088,7 +1100,8 @@ HWTEST_F(WifiProcessorV1MockTest, testV1OnOperationEvent005, TestSize.Level1)
     constexpr int32_t result = OK;
     constexpr int32_t requestId = 13;
     struct NegotiateMessage *msg = NegotiateMessageNew();
-    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(22222);
+    AuthHandle authHandle = { .authId = AUTH_ID, .type = AUTH_LINK_TYPE_WIFI };
+    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(authHandle);
     msg->putPointer(msg, NM_KEY_NEGO_CHANNEL, (void **)&channel);
     msg->putString(msg, NM_KEY_MAC, "1B:22:33:44:55:66");
     msg->putString(msg, NM_KEY_GROUP_CONFIG, "11:22:33:44:55:66");
@@ -1136,7 +1149,8 @@ HWTEST_F(WifiProcessorV1MockTest, testV1OnOperationEvent006, TestSize.Level1)
     constexpr int32_t result = OK;
     constexpr int32_t requestId = 14;
     struct NegotiateMessage *msg = NegotiateMessageNew();
-    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(22222);
+    AuthHandle authHandle = { .authId = AUTH_ID, .type = AUTH_LINK_TYPE_WIFI };
+    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(authHandle);
     msg->putPointer(msg, NM_KEY_NEGO_CHANNEL, (void **)&channel);
     self->currentMsg = msg;
     self->needReply =  false;
@@ -1164,7 +1178,8 @@ HWTEST_F(WifiProcessorV1MockTest, testV1OnOperationEvent007, TestSize.Level1)
     constexpr int32_t result = OK;
     constexpr int32_t requestId = 14;
     struct NegotiateMessage *msg = NegotiateMessageNew();
-    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(22222);
+    AuthHandle authHandle = { .authId = AUTH_ID, .type = AUTH_LINK_TYPE_WIFI };
+    struct DefaultNegotiateChannel *channel = DefaultNegotiateChannelNew(authHandle);
     msg->putPointer(msg, NM_KEY_NEGO_CHANNEL, (void **)&channel);
     self->currentMsg = msg;
     self->needReply =  false;

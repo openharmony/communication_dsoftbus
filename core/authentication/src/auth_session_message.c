@@ -58,6 +58,8 @@
 #define DATA_BUF_SIZE_TAG "DataBufSize"
 #define SOFTBUS_VERSION_TAG "softbusVersion"
 #define SUPPORT_INFO_COMPRESS "supportInfoCompress"
+#define IS_NORMALIZED "isNormalized"
+#define NORMALIZED_DATA "normalizedData"
 #define EXCHANGE_ID_TYPE "exchangeIdType"
 #define DEV_IP_HASH_TAG "DevIpHash"
 #define CMD_TAG_LEN 30
@@ -146,6 +148,7 @@
 #define IRK "IRK"
 #define PUB_MAC "PUB_MAC"
 #define OH_OS_TYPE 10
+#define DEVICE_SECURITY_LEVEL "DEVICE_SECURITY_LEVEL"
 
 #define FLAG_COMPRESS_DEVICE_INFO 1
 #define FLAG_UNCOMPRESS_DEVICE_INFO 0
@@ -181,6 +184,7 @@
 #define CODE_VERIFY_DEVICE 2
 #define DEVICE_ID "DEVICE_ID"
 #define ENCRYPTED_FAST_AUTH_MAX_LEN 512
+#define ENCRYPTED_NORMALIZED_KEY_MAX_LEN 512
 #define UDID_SHORT_HASH_HEX_STR 16
 #define UDID_SHORT_HASH_LEN_TEMP 8
 
@@ -268,7 +272,7 @@ static bool GenerateUdidShortHash(const char *udid, char *udidHashBuf, uint32_t 
         AUTH_LOGE(AUTH_FSM, "generate udidHash fail");
         return false;
     }
-    if (ConvertBytesToUpperCaseHexString(udidHashBuf, bufLen, hash, UDID_SHORT_HASH_LEN_TEMP) != SOFTBUS_OK) {
+    if (ConvertBytesToHexString(udidHashBuf, bufLen, hash, UDID_SHORT_HASH_LEN_TEMP) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "convert bytes to string fail");
         return false;
     }
@@ -287,47 +291,78 @@ static bool GetUdidOrShortHash(const AuthSessionInfo *info, char *udidBuf, uint3
     }
     if (info->connInfo.type == AUTH_LINK_TYPE_BLE) {
         AUTH_LOGI(AUTH_FSM, "use bleInfo deviceIdHash build fastAuthInfo");
-        AuthRequest request = {0};
-        if (GetAuthRequestNoLock(info->requestId, &request) != SOFTBUS_OK) {
-            AUTH_LOGE(AUTH_FSM, "GetAuthRequest fail");
-            return false;
-        }
-        return (memcpy_s(udidBuf, bufLen, request.connInfo.info.bleInfo.deviceIdHash, UDID_SHORT_HASH_HEX_STR) == EOK);
+        return (ConvertBytesToHexString(udidBuf, bufLen, info->connInfo.info.bleInfo.deviceIdHash,
+            UDID_SHORT_HASH_LEN_TEMP) == SOFTBUS_OK);
     }
     AUTH_LOGD(AUTH_FSM, "udidLen=%{public}zu, connInfoType=%{public}d", strlen(info->udid), info->connInfo.type);
+    return false;
+}
+
+static bool GetUdidOrShortHashForNormalized(const AuthSessionInfo *info, char *udidBuf, uint32_t bufLen)
+{
+    if (strlen(info->udid) != 0) {
+        AUTH_LOGI(AUTH_FSM, "use info->udid build normalize auth");
+        return GenerateUdidShortHash(info->udid, udidBuf, bufLen);
+    }
+    char udid[UDID_BUF_LEN] = {0};
+    switch (info->connInfo.type) {
+        case AUTH_LINK_TYPE_BR:
+            if (LnnGetUdidByBrMac(info->connInfo.info.brInfo.brMac, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
+                AUTH_LOGE(AUTH_FSM, "get udid by brMac fail.");
+                return false;
+            }
+            return GenerateUdidShortHash(udid, udidBuf, bufLen);
+        case AUTH_LINK_TYPE_WIFI:
+            return (memcpy_s(udidBuf, bufLen, info->connInfo.info.ipInfo.deviceIdHash,
+                UDID_SHORT_HASH_HEX_STR) == EOK);
+        case AUTH_LINK_TYPE_BLE:
+            return (ConvertBytesToHexString(udidBuf, bufLen, info->connInfo.info.bleInfo.deviceIdHash,
+                UDID_SHORT_HASH_LEN_TEMP) == SOFTBUS_OK);
+        case AUTH_LINK_TYPE_P2P:
+        case AUTH_LINK_TYPE_ENHANCED_P2P:
+            if (!info->isServer) {
+                AUTH_LOGD(AUTH_FSM, "client(enhance p2p), use conninfo udid");
+                return GenerateUdidShortHash(info->connInfo.info.ipInfo.udid, udidBuf, bufLen);
+            }
+            return false;
+        default:
+            AUTH_LOGE(AUTH_CONN, "unknown connType. type=%{public}d", info->connInfo.type);
+    }
     return false;
 }
 
 static int32_t GetEnhancedP2pAuthKey(const char *udidHash, AuthSessionInfo *info, AuthDeviceKeyInfo *deviceKey)
 {
     /* first, reuse ble authKey */
-    if (AuthFindDeviceKey(udidHash, AUTH_LINK_TYPE_BLE, deviceKey) == SOFTBUS_OK) {
+    if (AuthFindDeviceKey(udidHash, AUTH_LINK_TYPE_NORMALIZED, deviceKey) == SOFTBUS_OK ||
+        AuthFindDeviceKey(udidHash, AUTH_LINK_TYPE_BLE, deviceKey) == SOFTBUS_OK) {
         AUTH_LOGD(AUTH_FSM, "get ble authKey succ");
         return SOFTBUS_OK;
     }
     /* second, reuse wifi authKey */
-    int64_t authId = AuthGetLatestIdByUuid(info->uuid, AUTH_LINK_TYPE_WIFI, false);
-    if (authId == AUTH_INVALID_ID) {
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+    AuthGetLatestIdByUuid(info->uuid, AUTH_LINK_TYPE_WIFI, false, &authHandle);
+    if (authHandle.authId == AUTH_INVALID_ID) {
         AUTH_LOGE(AUTH_FSM, "get wifi authKey fail");
         return SOFTBUS_ERR;
     }
-    AuthManager *auth = GetAuthManagerByAuthId(authId);
+    AuthManager *auth = GetAuthManagerByAuthId(authHandle.authId);
     int32_t index;
     SessionKey sessionKey;
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
     if (GetLatestSessionKey(&auth->sessionKeyList, &index, &sessionKey) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "get key fail");
-        DelAuthManager(auth, false);
+        DelDupAuthManager(auth);
         return SOFTBUS_ERR;
     }
-    DelAuthManager(auth, false);
+    DelDupAuthManager(auth);
     if (memcpy_s(deviceKey->deviceKey, SESSION_KEY_LENGTH,
         sessionKey.value, sizeof(sessionKey.value)) != EOK) {
         AUTH_LOGE(AUTH_FSM, "memcpy fail");
         return SOFTBUS_MEM_ERR;
     }
     deviceKey->keyLen = sessionKey.len;
-    /* wifi authKey not enable, associated with recoveryDeviceKey */
+    /* wifi authKey not enable, associated with recoveryFastAuthKey */
     return SOFTBUS_ERR;
 }
 
@@ -345,7 +380,7 @@ static int32_t GetFastAuthKey(const char *udidHash, AuthSessionInfo *info, AuthD
     return SOFTBUS_OK;
 }
 
-static void PackFastAuth(JsonObj *obj, AuthSessionInfo *info, const NodeInfo *localNodeInfo)
+static void PackFastAuth(JsonObj *obj, AuthSessionInfo *info)
 {
     AUTH_LOGD(AUTH_FSM, "pack fastAuth, isServer=%{public}d", info->isServer);
     bool isNeedPack;
@@ -368,7 +403,7 @@ static void PackFastAuth(JsonObj *obj, AuthSessionInfo *info, const NodeInfo *lo
         info->isSupportFastAuth = false;
         return;
     }
-    AUTH_LOGD(AUTH_FSM, "udidHashHexStr=%{public}s", udidHashHexStr);
+    AUTH_LOGI(AUTH_FSM, "udidHashHexStr=%{public}s", udidHashHexStr);
     if (info->connInfo.type != AUTH_LINK_TYPE_ENHANCED_P2P &&
         !IsPotentialTrustedDevice(ID_TYPE_DEVID, (const char *)udidHashHexStr, false, false)) {
         AUTH_LOGI(AUTH_FSM, "not potential trusted realtion, bypass fastAuthProc");
@@ -386,6 +421,77 @@ static void PackFastAuth(JsonObj *obj, AuthSessionInfo *info, const NodeInfo *lo
         return;
     }
     (void)memset_s(&deviceCommKey, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
+}
+
+static int32_t PackNormalizedKeyValue(JsonObj *obj, SessionKey *sessionKey)
+{
+    uint32_t dataLen = 0;
+    uint8_t *data = NULL;
+    AesGcmInputParam aesParam = {0};
+    aesParam.data = (uint8_t *)TRUE_STRING_TAG;
+    aesParam.dataLen = strlen(TRUE_STRING_TAG);
+    aesParam.key = sessionKey->value;
+    aesParam.keyLen = sessionKey->len;
+    int32_t ret = LnnEncryptAesGcm(&aesParam, 0, &data, &dataLen);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "encrypt aes gcm fail=%{public}d", ret);
+        return SOFTBUS_ERR;
+    }
+    if (data == NULL || dataLen == 0) {
+        AUTH_LOGE(AUTH_FSM, "encrypt data invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    char encNormalizedKey[ENCRYPTED_NORMALIZED_KEY_MAX_LEN] = {0};
+    if (ConvertBytesToUpperCaseHexString(encNormalizedKey, ENCRYPTED_NORMALIZED_KEY_MAX_LEN - 1,
+        data, dataLen) != SOFTBUS_OK) {
+        SoftBusFree(data);
+        return SOFTBUS_ERR;
+    }
+    JSON_AddStringToObject(obj, NORMALIZED_DATA, encNormalizedKey);
+    AUTH_LOGI(AUTH_FSM, "pack normalize value succ");
+    SoftBusFree(data);
+    return SOFTBUS_OK;
+}
+
+static void PackNormalizedKey(JsonObj *obj, AuthSessionInfo *info, const NodeInfo *localNodeInfo)
+{
+    if (!info->isNeedFastAuth) {
+        AUTH_LOGE(AUTH_FSM, "force auth.");
+        return;
+    }
+    if (info->isServer && info->normalizedType == NORMALIZED_KEY_ERROR) {
+        AUTH_LOGE(AUTH_FSM, "peer not support normalize or key error.");
+        return;
+    }
+    char udidHashHexStr[SHA_256_HEX_HASH_LEN] = {0};
+    if (!GetUdidOrShortHashForNormalized(info, udidHashHexStr, SHA_256_HEX_HASH_LEN)) {
+        AUTH_LOGE(AUTH_FSM, "get udid fail, bypass normalizedAuth");
+        return;
+    }
+    if (info->normalizedKey != NULL) {
+        if (PackNormalizedKeyValue(obj, info->normalizedKey) != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_FSM, "pack normalized key fail");
+        }
+        return;
+    }
+    info->normalizedKey = (SessionKey *)SoftBusCalloc(sizeof(SessionKey));
+    AuthDeviceKeyInfo deviceKey;
+    (void)memset_s(&deviceKey, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
+    if (AuthFindDeviceKey((char *)udidHashHexStr, AUTH_LINK_TYPE_NORMALIZED, &deviceKey) != SOFTBUS_OK) {
+        AUTH_LOGW(AUTH_FSM, "can't find device key");
+        return;
+    }
+    info->normalizedKey->len = deviceKey.keyLen;
+    if (memcpy_s(info->normalizedKey->value, sizeof(info->normalizedKey->value),
+        deviceKey.deviceKey, sizeof(deviceKey.deviceKey)) != EOK) {
+        AUTH_LOGE(AUTH_FSM, "session key cpy fail");
+        return;
+    }
+    (void)memset_s(&deviceKey, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
+    if (PackNormalizedKeyValue(obj, info->normalizedKey) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "pack normalized key fail");
+        return;
+    }
 }
 
 static void ParseFastAuthValue(AuthSessionInfo *info, const char *encryptedFastAuth, AuthDeviceKeyInfo *deviceKey)
@@ -423,6 +529,92 @@ static void ParseFastAuthValue(AuthSessionInfo *info, const char *encryptedFastA
     info->isSupportFastAuth = true;
 }
 
+static void ParseNormalizedKeyValue(AuthSessionInfo *info, const char *encNormalizedKey,
+    SessionKey *sessionKey)
+{
+    uint8_t normalizedKeyBytes[ENCRYPTED_NORMALIZED_KEY_MAX_LEN] = {0};
+    if (ConvertHexStringToBytes(normalizedKeyBytes, ENCRYPTED_NORMALIZED_KEY_MAX_LEN,
+        encNormalizedKey, strlen(encNormalizedKey)) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "normalizedType String to bytes fail");
+        return;
+    }
+    uint32_t bytesLen = strlen(encNormalizedKey) >> 1;
+    uint32_t dataLen = 0;
+    uint8_t *data = NULL;
+    AesGcmInputParam aesParam = {0};
+    aesParam.data = normalizedKeyBytes;
+    aesParam.dataLen = bytesLen;
+    aesParam.key = sessionKey->value;
+    aesParam.keyLen = sessionKey->len;
+    int32_t ret = LnnDecryptAesGcm(&aesParam, &data, &dataLen);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "LnnDecryptAesGcm fail=%{public}d, key error", ret);
+        return;
+    }
+    if (data == NULL || dataLen == 0) {
+        AUTH_LOGE(AUTH_FSM, "decrypt data invalid");
+        return;
+    }
+    if (strncmp((char *)data, TRUE_STRING_TAG, strlen(TRUE_STRING_TAG)) != 0) {
+        AUTH_LOGE(AUTH_FSM, "normalized key error");
+        SoftBusFree(data);
+        return;
+    }
+    AUTH_LOGI(AUTH_FSM, "parse normalized key succ");
+    SoftBusFree(data);
+    info->normalizedType = NORMALIZED_SUPPORT;
+}
+
+static int32_t AuthGetNormalizedKey(AuthSessionInfo *info)
+{
+    if (info->normalizedKey != NULL) {
+        AUTH_LOGI(AUTH_FSM, "already exit normalizedKey");
+        return SOFTBUS_OK;
+    }
+    info->normalizedKey = (SessionKey *)SoftBusCalloc(sizeof(SessionKey));
+    AuthDeviceKeyInfo deviceKey;
+    (void)memset_s(&deviceKey, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
+    uint8_t udidHash[SHA_256_HASH_LEN] = {0};
+    int ret = SoftBusGenerateStrHash((uint8_t *)info->udid, strlen(info->udid), udidHash);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "generate udidHash fail");
+        return SOFTBUS_ERR;
+    }
+    char hashHexStr[UDID_SHORT_HASH_HEX_STR + 1] = {0};
+    if (ConvertBytesToUpperCaseHexString(hashHexStr, UDID_SHORT_HASH_HEX_STR + 1,
+        udidHash, UDID_SHORT_HASH_LEN_TEMP) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "udid hash bytes to hexString fail");
+        return SOFTBUS_ERR;
+    }
+    if (AuthFindDeviceKey(hashHexStr, AUTH_LINK_TYPE_NORMALIZED, &deviceKey) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "can't find common key, normalizedType not support");
+        return SOFTBUS_AUTH_GET_SESSION_KEY_FAIL;
+    }
+    info->normalizedKey->len = deviceKey.keyLen;
+    if (memcpy_s(info->normalizedKey->value, sizeof(info->normalizedKey->value),
+        deviceKey.deviceKey, sizeof(deviceKey.deviceKey)) != EOK) {
+        AUTH_LOGE(AUTH_FSM, "session key cpy fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    (void)memset_s(&deviceKey, sizeof(deviceKey), 0, sizeof(deviceKey));
+    return SOFTBUS_OK;
+}
+
+static void UnpackNormalizedKey(JsonObj *obj, AuthSessionInfo *info)
+{
+    info->normalizedType = NORMALIZED_KEY_ERROR;
+    char encNormalizedKey[ENCRYPTED_NORMALIZED_KEY_MAX_LEN] = {0};
+    if (!JSON_GetStringFromOject(obj, NORMALIZED_DATA, encNormalizedKey, ENCRYPTED_NORMALIZED_KEY_MAX_LEN)) {
+        AUTH_LOGI(AUTH_FSM, "normalizedKey error");
+        return;
+    }
+    if (AuthGetNormalizedKey(info) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "get normalizedKey fail!");
+        return;
+    }
+    ParseNormalizedKeyValue(info, encNormalizedKey, info->normalizedKey);
+}
+
 static void UnpackFastAuth(JsonObj *obj, AuthSessionInfo *info)
 {
     info->isSupportFastAuth = false;
@@ -439,7 +631,7 @@ static void UnpackFastAuth(JsonObj *obj, AuthSessionInfo *info)
         return;
     }
     char udidShortHash[UDID_SHORT_HASH_HEX_STR + 1] = {0};
-    if (ConvertBytesToUpperCaseHexString(udidShortHash, UDID_SHORT_HASH_HEX_STR + 1,
+    if (ConvertBytesToHexString(udidShortHash, UDID_SHORT_HASH_HEX_STR + 1,
         udidHash, UDID_SHORT_HASH_LEN_TEMP) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "udid hash bytes to hexString fail");
         return;
@@ -563,7 +755,16 @@ static char *PackDeviceIdJson(const AuthSessionInfo *info)
     }
     const NodeInfo *nodeInfo = LnnGetLocalNodeInfo();
     PackCompressInfo(obj, nodeInfo);
-    PackFastAuth(obj, (AuthSessionInfo *)info, nodeInfo);
+    PackFastAuth(obj, (AuthSessionInfo *)info);
+    bool isSupportNormalizedKey = IsSupportFeatureByCapaBit(nodeInfo->authCapacity, BIT_SUPPORT_NORMALIZED_LINK);
+    if (!JSON_AddBoolToObject(obj, IS_NORMALIZED, isSupportNormalizedKey)) {
+        AUTH_LOGE(AUTH_FSM, "add normalizedType fail");
+        JSON_Delete(obj);
+        return NULL;
+    }
+    if (isSupportNormalizedKey) {
+        PackNormalizedKey(obj, (AuthSessionInfo *)info, nodeInfo);
+    }
     char *msg = JSON_PrintUnformatted(obj);
     JSON_Delete(obj);
     return msg;
@@ -775,7 +976,15 @@ static int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo
         OptString(obj, SUPPORT_INFO_COMPRESS, compressParse, PARSE_UNCOMPRESS_STRING_BUFF_LEN, FALSE_STRING_TAG);
         SetCompressFlag(compressParse, &info->isSupportCompress);
     }
+    bool isSupportNormalizedKey = false;
+    OptBool(obj, IS_NORMALIZED, &isSupportNormalizedKey, false);
     UnpackFastAuth(obj, info);
+    if (isSupportNormalizedKey) {
+        UnpackNormalizedKey(obj, info);
+    } else {
+        info->normalizedType = NORMALIZED_NOT_SUPPORT;
+        AUTH_LOGI(AUTH_FSM, "not support normalizedType");
+    }
     JSON_Delete(obj);
     return SOFTBUS_OK;
 }
@@ -1066,6 +1275,10 @@ static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion ve
     if (PackCipherRpaInfo(json, info) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "pack CipherRpaInfo of device key failed.");
     }
+
+    if (!JSON_AddInt32ToObject(json, DEVICE_SECURITY_LEVEL, info->deviceSecurityLevel)) {
+        AUTH_LOGE(AUTH_FSM, "pack deviceSecurityLevel fail.");
+    }
     return SOFTBUS_OK;
 }
 
@@ -1182,6 +1395,7 @@ static void UnpackCommon(const JsonObj *json, NodeInfo *info, SoftBusVersion ver
     OptString(json, HML_MAC, info->wifiDirectAddr, MAC_LEN, "");
 
     UnpackCipherRpaInfo(json, info);
+    OptInt(json, DEVICE_SECURITY_LEVEL, &info->deviceSecurityLevel, -1);
 }
 
 static int32_t GetBtDiscTypeString(const NodeInfo *info, char *buf, uint32_t len)
@@ -1846,7 +2060,7 @@ bool IsFlushDevicePacket(const AuthConnInfo *connInfo, const AuthDataHead *head,
     return result;
 }
 
-int32_t PostVerifyDeviceMessage(const AuthManager *auth, int32_t flagRelay)
+int32_t PostVerifyDeviceMessage(const AuthManager *auth, int32_t flagRelay, AuthLinkType type)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(auth != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "auth is NULL");
     char *msg = PackVerifyDeviceMessage(auth->uuid);
@@ -1871,7 +2085,7 @@ int32_t PostVerifyDeviceMessage(const AuthManager *auth, int32_t flagRelay)
         .flag = flagRelay,
         .len = dataLen,
     };
-    if (PostAuthData(auth->connId, !auth->isServer, &head, data) != SOFTBUS_OK) {
+    if (PostAuthData(auth->connId[type], !auth->isServer, &head, data) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "post verify device msg fail");
         SoftBusFree(data);
         return SOFTBUS_AUTH_SEND_FAIL;

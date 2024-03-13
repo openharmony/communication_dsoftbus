@@ -145,11 +145,11 @@ HWTEST_F(AuthTest, HICHAIN_START_AUTH_Test_001, TestSize.Level1)
     const char *uid = "testdata";
     int32_t ret;
 
-    ret = HichainStartAuth(authSeq, nullptr, uid);
+    ret = HichainStartAuth(authSeq, nullptr, uid, false);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = HichainStartAuth(authSeq, udid, nullptr);
+    ret = HichainStartAuth(authSeq, udid, nullptr, false);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    (void)HichainStartAuth(authSeq, udid, uid);
+    (void)HichainStartAuth(authSeq, udid, uid, false);
 }
 
 /*
@@ -542,7 +542,7 @@ HWTEST_F(AuthTest, POST_VERIFY_DEVICE_MESSAGE_001, TestSize.Level1)
     AuthManager auth = { 0 };
     int32_t flagRelay = 1;
     InitSessionKeyList(&auth.sessionKeyList);
-    int32_t ret = PostVerifyDeviceMessage(&auth, flagRelay);
+    int32_t ret = PostVerifyDeviceMessage(&auth, flagRelay, AUTH_LINK_TYPE_WIFI);
     EXPECT_TRUE(ret == SOFTBUS_ENCRYPT_ERR);
 }
 
@@ -806,6 +806,7 @@ HWTEST_F(AuthTest, AUTH_DEVICE_GET_PREFER_CONN_INFO_Test_001, TestSize.Level1)
 HWTEST_F(AuthTest, AUTH_DEVICE_POST_TRANS_DATA_Test_001, TestSize.Level1)
 {
     int64_t authId = 0;
+    AuthHandle authHandle = { .authId = authId, .type = AUTH_LINK_TYPE_BLE };
     int32_t ret;
     const AuthTransData dataInfo = { 0 };
     AuthSessionInfo info;
@@ -816,34 +817,11 @@ HWTEST_F(AuthTest, AUTH_DEVICE_POST_TRANS_DATA_Test_001, TestSize.Level1)
 
     AuthManager *auth = NewAuthManager(authId, &info);
     EXPECT_TRUE(auth != nullptr);
-    ret = AuthDevicePostTransData(authId, nullptr);
+    ret = AuthDevicePostTransData(authHandle, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = AuthDevicePostTransData(authId, &dataInfo);
+    ret = AuthDevicePostTransData(authHandle, &dataInfo);
     EXPECT_TRUE(ret == SOFTBUS_ENCRYPT_ERR);
-    DelAuthManager(auth, true);
-}
-
-/*
- * @tc.name: AUTH_DEVICE_GET_LATEST_ID_BY_UUID_Test_001
- * @tc.desc: auth device get latest id by uuid test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthTest, AUTH_DEVICE_GET_LATEST_ID_BY_UUID_Test_001, TestSize.Level1)
-{
-    char uuid[TEST_DATA_LEN] = "testdata";
-    int64_t ret;
-
-    ret = AuthDeviceGetLatestIdByUuid(nullptr, AUTH_LINK_TYPE_WIFI);
-    EXPECT_TRUE(ret == AUTH_INVALID_ID);
-    uuid[0] = '\0';
-    ret = AuthDeviceGetLatestIdByUuid(const_cast<const char *>(uuid), AUTH_LINK_TYPE_WIFI);
-    EXPECT_TRUE(ret == AUTH_INVALID_ID);
-    uuid[0] = '1';
-    ret = AuthDeviceGetLatestIdByUuid(const_cast<const char *>(uuid), AUTH_LINK_TYPE_WIFI);
-    EXPECT_TRUE(ret == AUTH_INVALID_ID);
-    ret = AuthDeviceGetLatestIdByUuid(const_cast<const char *>(uuid), AUTH_LINK_TYPE_BR);
-    EXPECT_TRUE(ret == AUTH_INVALID_ID);
+    DelAuthManager(auth, AUTH_LINK_TYPE_MAX);
 }
 
 /*
@@ -883,15 +861,15 @@ HWTEST_F(AuthTest, AUTH_DEVICE_GET_ID_BY_P2P_MAC_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
 }
 
-static void AuthOnDataReceived(int64_t authId, const AuthTransData *data)
+static void AuthOnDataReceived(AuthHandle authHandle, const AuthTransData *data)
 {
-    (void)authId;
+    (void)authHandle;
     (void)data;
 }
 
-static void AuthOnDisconnected(int64_t authId)
+static void AuthOnDisconnected(AuthHandle authHandle)
 {
-    (void)authId;
+    (void)authHandle;
 }
 
 /*
@@ -992,15 +970,16 @@ HWTEST_F(AuthTest, AUTH_POST_TRANS_DATA_Test_001, TestSize.Level1)
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
     info.isServer = true;
     info.connInfo.type = AUTH_LINK_TYPE_BLE;
+    AuthHandle authHandle = { .authId = 0, .type = info.connInfo.type };
 
     AuthManager *auth = NewAuthManager(authId, &info);
     EXPECT_TRUE(auth != nullptr);
-    ret = AuthPostTransData(authId, nullptr);
+    ret = AuthPostTransData(authHandle, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = AuthPostTransData(authId, &dataInfo);
+    ret = AuthPostTransData(authHandle, &dataInfo);
     EXPECT_TRUE(ret == SOFTBUS_ENCRYPT_ERR);
-    AuthCloseConn(authId);
-    DelAuthManager(auth, true);
+    AuthCloseConn(authHandle);
+    DelAuthManager(auth, AUTH_LINK_TYPE_MAX);
 }
 
 /*
@@ -1018,26 +997,6 @@ HWTEST_F(AuthTest, REG_GROUP_CHANGE_LISTENER_Test_001, TestSize.Level1)
     ret = RegGroupChangeListener(&listener);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     UnregGroupChangeListener();
-}
-
-/*
- * @tc.name: AUTH_GET_LATESTID_BY_UUID_Test_001
- * @tc.desc: auth get latestId by uuid test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthTest, AUTH_GET_LATESTID_BY_UUID_Test_001, TestSize.Level1)
-{
-    char uuid[TEST_DATA_LEN] = "testdata";
-    int64_t ret;
-
-    ret = AuthGetLatestIdByUuid(nullptr, AUTH_LINK_TYPE_WIFI, false);
-    EXPECT_TRUE(ret == AUTH_INVALID_ID);
-    ret = AuthGetLatestIdByUuid(const_cast<const char *>(uuid), AUTH_LINK_TYPE_WIFI, true);
-    EXPECT_TRUE(ret == AUTH_INVALID_ID);
-    uuid[0] = '\0';
-    ret = AuthGetLatestIdByUuid(const_cast<const char *>(uuid), AUTH_LINK_TYPE_WIFI, false);
-    EXPECT_TRUE(ret == AUTH_INVALID_ID);
 }
 
 /*
@@ -1115,7 +1074,7 @@ HWTEST_F(AuthTest, AUTH_ENCRYPT_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = AuthEncrypt(authId, inData, inLen, outData, &errLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    DelAuthManager(auth, true);
+    DelAuthManager(auth, AUTH_LINK_TYPE_MAX);
 }
 
 /*
@@ -1153,7 +1112,7 @@ HWTEST_F(AuthTest, AUTH_DECRYPT_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = AuthDecrypt(authId, inData, inLen, outData, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_ENCRYPT_ERR);
-    DelAuthManager(auth, true);
+    DelAuthManager(auth, AUTH_LINK_TYPE_MAX);
 }
 
 /*
@@ -1180,7 +1139,7 @@ HWTEST_F(AuthTest, AUTH_SET_P2P_MAC_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret != SOFTBUS_INVALID_PARAM);
     ret = AuthSetP2pMac(authId, P2P_MAC2);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    DelAuthManager(auth, true);
+    DelAuthManager(auth, AUTH_LINK_TYPE_MAX);
 }
 
 /*
@@ -1198,12 +1157,12 @@ HWTEST_F(AuthTest, AUTH_GET_CONN_INFO_Test_001, TestSize.Level1)
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
     info.isServer = true;
     info.connInfo.type = AUTH_LINK_TYPE_BLE;
-
+    AuthHandle authHandle = { .authId = authId, .type = info.connInfo.type };
     AuthManager *auth = NewAuthManager(authId, &info);
     EXPECT_TRUE(auth != nullptr);
-    ret = AuthGetConnInfo(authId, nullptr);
+    ret = AuthGetConnInfo(authHandle, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    DelAuthManager(auth, true);
+    DelAuthManager(auth, AUTH_LINK_TYPE_MAX);
 }
 
 /*
@@ -1226,7 +1185,7 @@ HWTEST_F(AuthTest, AUTH_GET_SERVER_SIDE_Test_001, TestSize.Level1)
     EXPECT_TRUE(auth != nullptr);
     ret = AuthGetServerSide(authId, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    DelAuthManager(auth, true);
+    DelAuthManager(auth, AUTH_LINK_TYPE_MAX);
 }
 
 /*
@@ -1272,7 +1231,7 @@ HWTEST_F(AuthTest, AUTH_GET_DEVICE_UUID_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = AuthGetDeviceUuid(authId, uuid, size);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    DelAuthManager(auth, true);
+    DelAuthManager(auth, AUTH_LINK_TYPE_MAX);
 }
 
 /*
@@ -1299,7 +1258,7 @@ HWTEST_F(AuthTest, AUTH_GET_VERSION_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = AuthGetVersion(authId, &version);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    DelAuthManager(auth, true);
+    DelAuthManager(auth, AUTH_LINK_TYPE_MAX);
 }
 
 /*
@@ -1317,17 +1276,17 @@ HWTEST_F(AuthTest, AUTH_INIT_Test_001, TestSize.Level1)
     AuthDeinit();
 }
 
-static void AuthOnDataReceivedTest(int64_t authId, const AuthDataHead *head, const uint8_t *data, uint32_t len)
+static void AuthOnDataReceivedTest(AuthHandle authHandle, const AuthDataHead *head, const uint8_t *data, uint32_t len)
 {
-    (void)authId;
+    (void)authHandle;
     (void)head;
     (void)data;
     (void)len;
 }
 
-static void AuthOnDisconnectedTest(int64_t authId)
+static void AuthOnDisconnectedTest(AuthHandle authHandle)
 {
-    (void)authId;
+    (void)authHandle;
 }
 
 /*
@@ -1551,9 +1510,9 @@ HWTEST_F(AuthTest, CHECK_VERIFY_CALLBACK_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == false);
 }
 
-static void OnConnOpenedTest(uint32_t requestId, int64_t authId)
+static void OnConnOpenedTest(uint32_t requestId, AuthHandle authHandle)
 {
-    AUTH_LOGI(AUTH_TEST, "requestId=%{public}d, authId=%{public}" PRId64, requestId, authId);
+    AUTH_LOGI(AUTH_TEST, "requestId=%{public}d, authId=%{public}" PRId64, requestId, authHandle.authId);
 }
 
 static void OnConnOpenFailedTest(uint32_t requestId, int32_t reason)
@@ -1837,7 +1796,7 @@ HWTEST_F(AuthTest, POST_VERIFY_DEVICE_MESSAGE_Test_001, TestSize.Level1)
     AuthManager authValue;
     int32_t flagRelay = 1;
     (void)memset_s(&authValue, sizeof(AuthManager), 0, sizeof(AuthManager));
-    int32_t ret = PostVerifyDeviceMessage(auth, flagRelay);
+    int32_t ret = PostVerifyDeviceMessage(auth, flagRelay, AUTH_LINK_TYPE_WIFI);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
@@ -1955,7 +1914,7 @@ HWTEST_F(AuthTest, NOTIFY_TRANS_DATA_RECEIVED_Test_001, TestSize.Level1)
     int32_t ret;
     ret = RegAuthTransListener(MODULE_UDP_INFO, &listener);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    int64_t authId = 0;
+    AuthHandle authHandle = { .authId = 0 };
     AuthDataHead head = {
         .dataType = 0,
         .module = MODULE_UDP_INFO,
@@ -1965,8 +1924,8 @@ HWTEST_F(AuthTest, NOTIFY_TRANS_DATA_RECEIVED_Test_001, TestSize.Level1)
     };
     const char *data = "1111222233334444";
     uint32_t len = 0;
-    NotifyTransDataReceived(authId, &head, reinterpret_cast<const uint8_t *>(data), len);
-    NotifyTransDisconnected(authId);
+    NotifyTransDataReceived(authHandle, &head, reinterpret_cast<const uint8_t *>(data), len);
+    NotifyTransDisconnected(authHandle);
     UnregAuthTransListener(MODULE_UDP_INFO);
 }
 

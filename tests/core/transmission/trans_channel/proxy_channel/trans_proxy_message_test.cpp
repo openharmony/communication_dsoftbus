@@ -337,32 +337,32 @@ HWTEST_F(TransProxyMessageTest, TransProxyIdentityMsgTest001, TestSize.Level1)
 HWTEST_F(TransProxyMessageTest, TransProxyPackMessageTest001, TestSize.Level1)
 {
     ProxyMessageHead msg;
-    int64_t authId = AUTH_INVALID_ID;
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
     ProxyDataInfo dataInfo;
-    int32_t ret = TransProxyPackMessage(NULL, authId, &dataInfo);
+    int32_t ret = TransProxyPackMessage(NULL, authHandle, &dataInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
 
-    ret = TransProxyPackMessage(&msg, authId, NULL);
+    ret = TransProxyPackMessage(&msg, authHandle, NULL);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     dataInfo.inData = NULL;
-    ret = TransProxyPackMessage(&msg, authId, &dataInfo);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     dataInfo.inData = 0;
-    ret = TransProxyPackMessage(&msg, authId, &dataInfo);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     msg.cipher = 0;
     msg.type = PROXYCHANNEL_MSG_TYPE_HANDSHAKE;
-    ret = TransProxyPackMessage(&msg, authId, &dataInfo);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     dataInfo.inData = (uint8_t *)"1";
     dataInfo.inLen = strlen((const char*)dataInfo.inData);
     msg.cipher |= ENCRYPTED;
     msg.type = PROXYCHANNEL_MSG_TYPE_NORMAL;
-    ret = TransProxyPackMessage(&msg, authId, &dataInfo);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
