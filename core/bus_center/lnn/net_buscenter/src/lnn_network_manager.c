@@ -500,10 +500,14 @@ static void SaveBrNetworkDevices(void)
             continue;
         }
         if (!LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_BR)) {
-            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_DBG, "night mode on: ignore no br network device.");
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "night mode on: ignore no br network device.");
             continue;
         }
         DeviceNightMode *modeInfo = (DeviceNightMode *)SoftBusMalloc(sizeof(DeviceNightMode));
+        if (modeInfo == NULL) {
+            SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "mode info malloc fail.");
+            continue;
+        }
         if (strcpy_s(modeInfo->addrs.info.br.brMac, BT_MAC_LEN, nodeInfo.connectInfo.macAddr) != EOK) {
             SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "night mode on: str copy fail.");
             SoftBusFree(modeInfo);
