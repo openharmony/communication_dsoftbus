@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include <securec.h>
 #include <string.h>
 
+#include "access_control.h"
 #include "anonymizer.h"
 #include "auth_interface.h"
 #include "bus_center_manager.h"
@@ -840,6 +841,11 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
     char *errDesc = NULL;
     int32_t errCode;
     int myHandleId;
+    if (conn->appInfo.firstTokenId != 0 && TransCheckServerAccessControl(conn->appInfo.firstTokenId) != SOFTBUS_OK) {
+        errCode = SOFTBUS_TRANS_CHECK_ACL_FAILED;
+        errDesc = (char *)"Server check acl failed";
+        goto ERR_EXIT;
+    }
     if (TransTdcGetUidAndPid(conn->appInfo.myData.sessionName,
         &conn->appInfo.myData.uid, &conn->appInfo.myData.pid) != SOFTBUS_OK) {
         errCode = SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED;
