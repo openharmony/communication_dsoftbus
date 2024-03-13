@@ -27,28 +27,50 @@ extern "C" {
 
 typedef struct {
     ListNode node;
-    char peerIp[IP_LEN];
     LaneType laneType;
+    LaneLinkInfo laneLinkInfo;
+    uint32_t ref;
 } LaneTypeInfo;
 
 typedef struct {
+    uint32_t laneTypeNum;
+    LaneTypeInfo laneTypeInfo[LANE_TYPE_BUTT];
+} LaneTypeInfoList;
+
+typedef struct {
+    LaneLinkInfoIdType linkInfoIdType;
+    union {
+        char peerIp[IP_LEN];
+        char brMac[BT_MAC_LEN];
+        char bleMac[BT_MAC_LEN];
+        char addr[MAX_SOCKET_ADDR_LEN];
+        char networkId[NETWORK_ID_BUF_LEN];
+    } linkInfoId;
+} LaneTypeInfoQuery;
+
+typedef struct {
     char peerUuid[UUID_BUF_LEN];
-    uint32_t laneReqId;
+    uint32_t laneId;
     LaneLinkType type;
-    enum WifiDirectRole role;
-} LaneStatusListenerInfo;
+} LaneStatusInfoOn;
 
 typedef struct {
-    ListNode node;
-    char peerIp[IP_LEN];
     char peerUuid[UUID_BUF_LEN];
-    bool isNeedNotify;
-} LaneStatusNotifyInfo;
+    uint32_t laneId;
+    LaneLinkType type;
+} LaneStatusInfoOff;
 
 typedef struct {
-    void (*onLaneOnLine)(LaneStatusListenerInfo *laneStatusListenerInfo);
-    void (*onLaneOffLine)(LaneStatusListenerInfo *laneStatusListenerInfo);
-    void (*onLaneStateChange)(LaneStatusListenerInfo *laneStatusListenerInfo);
+    LaneStatusChangeType laneStatusChangeType;
+    union {
+        enum WifiDirectRole role
+    } laneStatusInfo;
+} LaneStatusInfoChange;
+
+typedef struct {
+    void (*onLaneOnLine)(LaneStatusInfoOn *laneStatusInfoOn);
+    void (*onLaneOffLine)(LaneStatusInfoOff *laneStatusInfoOff);
+    void (*onLaneStateChange)(LaneStatusInfoChange *laneStatusInfoChange);
 } LaneStatusListener;
 
 typedef struct {
@@ -57,12 +79,18 @@ typedef struct {
     LaneType type;
 } LaneListenerInfo;
 
+typedef struct {
+    ListNode node;
+    char peerIp[IP_LEN];
+    char peerUuid[UUID_BUF_LEN];
+} LaneStatusNotifyInfo;
+
 int32_t UnRegisterLaneListener(const LaneType type);
 int32_t RegisterLaneListener(const LaneType type, const LaneStatusListener *listener);
-int32_t CreateLaneTypeInfoByLaneReqId(const uint32_t laneReqId, const LaneLinkInfo *linkInfo);
-int32_t DelLaneTypeInfoItem(const char *peerIp);
+int32_t AddLaneTypeInfo(const LaneLinkInfo *linkInfo);
+int32_t DelLaneTypeInfoItem(uint32_t laneReqId);
 int32_t InitLaneListener(void);
-int32_t LnnOnWifiDirectDeviceOnLineNotify(const char *peerIp, const LaneLinkType linkType);
+int32_t LnnOnWifiDirectDeviceOnLineNotify(const LaneLinkInfo *linkInfo);
 
 #ifdef __cplusplus
 }
