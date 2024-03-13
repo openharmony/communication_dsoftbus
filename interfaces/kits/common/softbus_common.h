@@ -229,22 +229,6 @@ typedef enum  {
 } BleProtocolType;
 
 /**
- * @brief Enumerates secret key types.
- *
- * @since 1.0
- * @verison 1.0
- */
-typedef enum {
-    PROXY_TRANSMISION = 0, /**< Proxy Transmision */
-    PROXY_HEARTBEAT = 1, /**< Proxy Heartbeat */
-    PROXY_HICAR = 2,
-    PROXY_SHARE = 4,
-    PROXY_CASTPLUS = 5,
-    PROXY_WEAR = 7,
-    CUSTOM_UNKNOWN = 8, /**< Proxy Unknown*/
-} MetaNodeType;
-
-/**
  * @brief Defines the address of a device that is added to a LNN.
  * For details, see {@link ConnectionAddr}.
  *
