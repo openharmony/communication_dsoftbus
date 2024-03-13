@@ -152,33 +152,11 @@ static void LinkSuccess(uint32_t laneReqId, const LaneLinkInfo *linkInfo)
         (void)LnnLanePostMsgToHandler(MSG_TYPE_LANE_LINK_FAIL, laneReqId, SOFTBUS_ERR, NULL, 0);
         return;
     }
-    if (linkInfo->type == LANE_P2P || linkInfo->type == LANE_HML) {
-        if (CreateLaneTypeInfoByLaneReqId(laneReqId, linkInfo) != SOFTBUS_OK) {
-            SoftBusFree(linkParam);
-            DelLaneResourceItem(&resourceItem);
-            DelLinkInfoItem(laneReqId);
-            LNN_LOGE(LNN_LANE, "create lanetype info fail, laneReqId=%{public}u", laneReqId);
-            (void)LnnLanePostMsgToHandler(MSG_TYPE_LANE_LINK_FAIL, laneReqId, SOFTBUS_ERR, NULL, 0);
-            return;
-        }
-        if (LnnOnWifiDirectDeviceOnLineNotify(linkInfo->linkInfo.p2p.connInfo.peerIp, linkInfo->type) != SOFTBUS_OK) {
-            SoftBusFree(linkParam);
-            DelLaneResourceItem(&resourceItem);
-            DelLinkInfoItem(laneReqId);
-            DelLaneTypeInfoItem(linkInfo->linkInfo.p2p.connInfo.peerIp);
-            LNN_LOGE(LNN_LANE, "notify WifiDirectDevice OnLine fail");
-            (void)LnnLanePostMsgToHandler(MSG_TYPE_LANE_LINK_FAIL, laneReqId, SOFTBUS_ERR, NULL, 0);
-            return;
-        }
-    }
     if (LnnLanePostMsgToHandler(MSG_TYPE_LANE_LINK_SUCCESS, laneReqId, 0, linkParam, 0) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "post LaneLinkSuccess msg err, laneReqId=%{public}u", laneReqId);
         SoftBusFree(linkParam);
         DelLaneResourceItem(&resourceItem);
         DelLinkInfoItem(laneReqId);
-        if (linkInfo->type == LANE_P2P || linkInfo->type == LANE_HML) {
-            DelLaneTypeInfoItem(linkInfo->linkInfo.p2p.connInfo.peerIp);
-        }
         return;
     }
 }
@@ -428,6 +406,7 @@ static int32_t FreeLaneLink(uint32_t laneReqId, LaneResource *laneResourceInfo, 
             ListDelete(&item->node);
             g_requestList->cnt--;
             Unlock();
+            DelLaneTypeInfoItem(laneReqId);
             DelLinkInfoItem(laneReqId);
             if (isDelayDestroy) {
                 LNN_LOGI(LNN_LANE, "delayDestroy finished. laneReqId=%{public}u", laneReqId);
@@ -440,6 +419,7 @@ static int32_t FreeLaneLink(uint32_t laneReqId, LaneResource *laneResourceInfo, 
             return SOFTBUS_OK;
         }
     }
+    DelLaneTypeInfoItem(laneReqId);
     DelLinkInfoItem(laneReqId);
     if (isDelayDestroy) {
         DelLaneResourceItem(laneResourceInfo);
@@ -653,6 +633,14 @@ static void LaneLinkSuccess(SoftBusMessage *msg)
     LaneLinkInfo *info = (LaneLinkInfo *)msg->obj;
     uint32_t laneReqId = (uint32_t)msg->arg1;
     DeleteLaneLinkNode(laneReqId);
+
+    if (AddLaneTypeInfo(info) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "create lanetype info fail, laneReqId=%{public}u", laneReqId);
+    }
+    if (LnnOnWifiDirectDeviceOnLineNotify(info) != SOFTBUS_OK) {
+        DelLaneTypeInfoItem(info);
+        LNN_LOGE(LNN_LANE, "notify WifiDirectDevice OnLine fail");
+    }
     NotifyLaneAllocSuccess(laneReqId, info);
     SoftBusFree(info);
     return;
