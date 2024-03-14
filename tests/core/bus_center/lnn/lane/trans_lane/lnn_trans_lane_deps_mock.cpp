@@ -128,4 +128,5 @@ int32_t DelLaneTypeInfoItem(uint32_t laneReqId)
 {
     return GetTransLaneIf()->DelLaneTypeInfoItem(laneReqId);
 }
+}
 } // namespace OHOS
