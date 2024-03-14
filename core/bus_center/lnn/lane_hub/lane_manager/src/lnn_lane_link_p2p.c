@@ -453,8 +453,8 @@ static void NotifyLinkFail(AsyncResultType type, int32_t requestId, int32_t reas
     if (authId != INVAILD_AUTH_ID) {
         AuthCloseConn(authId);
     }
-    if (channelId > 0) {
-        TransProxyPipelineCloseChannel(channelId);
+    if (item->proxyChannelInfo.channelId > 0) {
+        TransProxyPipelineCloseChannel(item->proxyChannelInfo.channelId);
     }
 }
 
