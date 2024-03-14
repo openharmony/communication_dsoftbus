@@ -16,8 +16,9 @@
 #ifndef NSTACKX_H
 #define NSTACKX_H
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,6 +40,7 @@ extern "C" {
 #else
 #define NSTACKX_MAX_BUSINESS_DATA_LEN 300
 #endif
+#define NSTACKX_MAX_NOTIFICATION_DATA_LEN 800
 
 #ifdef DFINDER_SAVE_DEVICE_LIST
 #define NSTACKX_MIN_DEVICE_NUM 1
@@ -134,7 +136,8 @@ typedef enum {
     NSTACKX_BUSINESS_TYPE_SOFTBUS = 2,  /* designed for softbus-mineharmony to implement some customized features */
     NSTACKX_BUSINESS_TYPE_NEARBY = 3,   /* designed to handle the interaction between two nearby service */
     NSTACKX_BUSINESS_TYPE_AUTONET = 4,  /* designed for softbus-autonet to implement some customized features */
-    NSTACKX_BUSINESS_TYPE_STRATEGY = 5  /* designed for softbus-strategy to report disc result in different rounds */
+    NSTACKX_BUSINESS_TYPE_STRATEGY = 5, /* designed for softbus-strategy to report disc result in different rounds */
+    NSTACKX_BUSINESS_TYPE_MAX           /* for parameter legality verification */
 } NSTACKX_BusinessType;
 
 #define NSTACKX_MIN_ADVERTISE_COUNT 1
@@ -200,8 +203,24 @@ typedef enum {
     DFINDER_ON_TOO_MANY_DEVICE,
 } DFinderMsgType;
 
+/* store the notification config, used with interface: NSTACKX_SendNotification */
+typedef struct {
+    uint8_t businessType;     /* service identify, see enum NSTACKX_BusinessType */
+    char *msg;                /* notification data in json format */
+    size_t msgLen;            /* strlen of notification data */
+    uint32_t *intervalsMs;    /* pointer to intervals to send notification, first element should be 0 */
+    uint32_t intervalLen;     /* configured number of intervals */
+} NotificationConfig;
+
 /* Data receive callback type */
 typedef void (*NSTACKX_OnDFinderMsgReceived)(DFinderMsgType msgType);
+
+/**
+ * @brief define function pointer type, used to report the notification data received
+ *
+ * @param [out] element: notification data to report, see struct NotificationReportType
+ */
+typedef void (*NSTACKX_OnNotificationReceived)(const NotificationConfig *notificattion);
 
 /* NSTACKX parameter, which contains callback list */
 typedef struct {
@@ -209,6 +228,7 @@ typedef struct {
     NSTACKX_OnDeviceListChanged onDeviceFound;
     NSTACKX_OnMsgReceived onMsgReceived;
     NSTACKX_OnDFinderMsgReceived onDFinderMsgReceived;
+    NSTACKX_OnNotificationReceived onNotificationReceived;
     uint32_t maxDeviceNum; // the size of the device list configured by the caller
 } NSTACKX_Parameter;
 
@@ -472,6 +492,38 @@ typedef struct {
  * @exception
  */
 DFINDER_EXPORT int32_t NSTACKX_SendDiscoveryRsp(const NSTACKX_ResponseSettings *responseSettings);
+
+/**
+ * @brief start sending broadcast notifications
+ *
+ * @param [in] config: configurable properties to send notification, see struct NotificationConfig
+ *
+ * @return (int32_t)
+ *      0                operation success
+ *      negative value   a number indicating the rough cause of this failure
+ *
+ * @note 1. if the sending is already running, calling this interface will stop the previous one and start a new one,
+ *          caller can update its notification msg through this way
+ *       2. caller should ensure the consistency of associated data
+ * @exception
+ */
+DFINDER_EXPORT int32_t NSTACKX_SendNotification(const NotificationConfig *config);
+
+/**
+ * @brief stop sending broadcast notifications
+ *
+ * @param [in] businessType: service identify, notification of which business we should stop
+ *
+ * @return (int32_t)
+ *      0                operation success
+ *      negative value   a number indicating the rough cause of this failure
+ *
+ * @note 1. calling this interface will stop the sending timer
+ *       2. if not business sensitive, should use NSTACKX_BUSINESS_TYPE_NULL, see struct NSTACKX_BusinessType
+ *
+ * @exception
+ */
+DFINDER_EXPORT int32_t NSTACKX_StopSendNotification(uint8_t businessType);
 
 #ifdef ENABLE_USER_LOG
 typedef void (*DFinderLogCallback)(const char *moduleName, uint32_t logLevel, const char *format, ...);

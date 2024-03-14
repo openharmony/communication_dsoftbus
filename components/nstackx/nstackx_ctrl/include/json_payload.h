@@ -40,6 +40,7 @@ extern "C" {
 #define JSON_BUSINESS_DATA "bData"
 #define JSON_EXTEND_SERVICE_DATA "extendServiceData"
 #define JSON_SEQUENCE_NUMBER "seqNo"
+#define JSON_NOTIFICATION "notify"
 
 #ifdef DFINDER_USE_MINI_NSTACKX
 #define COAP_DEVICE_DISCOVER_URI "device_discover"
@@ -49,6 +50,8 @@ struct DeviceInfo;
 
 char *PrepareServiceDiscover(const char *localIpStr, uint8_t isBroadcast, uint8_t businessType);
 int32_t ParseServiceDiscover(const uint8_t *buf, struct DeviceInfo *deviceInfo, char **remoteUrlPtr);
+char *PrepareServiceNotification(void);
+int32_t ParseServiceNotification(const uint8_t *buf, NotificationConfig *config);
 
 #ifdef __cplusplus
 }
