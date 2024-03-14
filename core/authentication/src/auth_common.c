@@ -38,9 +38,6 @@
 
 #define AUTH_SUPPORT_AS_SERVER_MASK 0x01
 
-/* ble network advdata take 8 bytes of UDID hash */
-#define SHORT_HASH_LEN 8
-
 typedef struct {
     EventType event;
     RemoveCompareFunc cmpFunc;

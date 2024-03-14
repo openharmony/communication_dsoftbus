@@ -214,7 +214,7 @@ HWTEST_F(TransTcpDirectP2pTest, OnChannelOpenFailTest001, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectP2pTest, VerifyP2pTest001, TestSize.Level1)
 {
-    AuthHandle authHandle = { .authId = 1 };
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     int64_t seq = 1;
     int32_t ret = VerifyP2p(authHandle, nullptr, nullptr, 0, seq);
     ASSERT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
@@ -251,7 +251,7 @@ HWTEST_F(TransTcpDirectP2pTest, OpenAuthConnTest001, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pRequestTest001, TestSize.Level1)
 {
-    AuthHandle authHandle = { .authId = 1 };
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     int64_t seq = 1;
     int32_t code = CODE_VERIFY_P2P;
     int32_t errCode = SOFTBUS_INVALID_PARAM;
@@ -294,7 +294,7 @@ HWTEST_F(TransTcpDirectP2pTest, ConnectTcpDirectPeerTest001, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectP2pTest, OnAuthDataRecvTest001, TestSize.Level1)
 {
-    AuthHandle authHandle = { .authId = 1 };
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     int64_t seq = 1;
     int32_t flags = MSG_FLAG_REQUEST;
     const char *str = "data";
@@ -332,7 +332,7 @@ HWTEST_F(TransTcpDirectP2pTest, OpenAuthConntest002, TestSize.Level1)
     int32_t ret;
     int32_t reason = 1;
     uint32_t requestId = 1;
-    AuthHandle authHandle = { .authId = 1 };
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     bool isMeta = 1;
 
     (void)memcpy_s(appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX, "test", DEVICE_ID_SIZE_MAX);
@@ -353,7 +353,7 @@ HWTEST_F(TransTcpDirectP2pTest, OpenAuthConntest002, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectP2pTest, SendVerifyP2pRsp003, TestSize.Level1)
 {
-    AuthHandle authHandle = { .authId = 1 };
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     int32_t ret;
     int32_t errCode = SOFTBUS_ERR;
     int64_t seq = 1;

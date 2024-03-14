@@ -220,7 +220,7 @@ HWTEST_F(TransUdpNegoTest, TransPackReplyErrInfo001, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, sendUdpInfo001, TestSize.Level1)
 {
-    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_WIFI };
     int64_t seq = 0;
     string msg = "ProcessMessage";
     cJSON *replyMsg = cJSON_Parse((char *)msg.c_str());
@@ -242,7 +242,7 @@ HWTEST_F(TransUdpNegoTest, SendReplyErrInfo001, TestSize.Level1)
 {
     int32_t errCode = 0;
     string errDesc = "ProcessMessage";
-    AuthHandle authHandle = { .authId = 0 };
+    AuthHandle authHandle = { .authId = 0, .type = AUTH_LINK_TYPE_WIFI };
     int32_t ret = SendReplyErrInfo(errCode, NULL, authHandle, 0);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
@@ -258,7 +258,7 @@ HWTEST_F(TransUdpNegoTest, SendReplyErrInfo001, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, SendReplyUdpInfo001, TestSize.Level1)
 {
-    AuthHandle authHandle = { .authId = INVALID_ID };
+    AuthHandle authHandle = { .authId = INVALID_ID, .type = AUTH_LINK_TYPE_WIFI };
     int64_t seq = INVALID_SEQ;
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
@@ -342,7 +342,7 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoRequest001, TestSize.Level1)
     ASSERT_TRUE(newChannel != nullptr);
     (void)memset_s(newChannel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
     newChannel->seq = 1;
-    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_WIFI };
 
     int32_t ret = TransAddUdpChannel(newChannel);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -358,7 +358,7 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoRequest001, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoRequest002, TestSize.Level1)
 {
-    AuthHandle authHandle = { .authId = 1 };
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     int64_t invalidSeq = 0;
     string msgStr = "normal msgStr";
     cJSON *msg = cJSON_Parse(msgStr.c_str());
@@ -385,7 +385,7 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoRequest002, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, StartExchangeUdpInfo001, TestSize.Level1)
 {
-    AuthHandle authHandle = { 0 };
+    AuthHandle authHandle = { .authId = 0, .type = AUTH_LINK_TYPE_WIFI };
     int64_t seq = 0;
     UdpChannelInfo channel;
     (void)memset_s(&channel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
@@ -406,7 +406,7 @@ HWTEST_F(TransUdpNegoTest, StartExchangeUdpInfo001, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, StartExchangeUdpInfo002, TestSize.Level1)
 {
-    AuthHandle authHandle = { .authId = 1 };
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     UdpChannelInfo *channel = CreateUdpChannelPackTest();
     ASSERT_TRUE(channel != nullptr);
     int32_t ret = TransAddUdpChannel(channel);
@@ -424,7 +424,7 @@ HWTEST_F(TransUdpNegoTest, StartExchangeUdpInfo002, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, UdpModuleCb001, TestSize.Level1)
 {
-    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_WIFI };
     AuthTransData data;
     int32_t ret = memset_s(&data, sizeof(AuthTransData), 0, sizeof(AuthTransData));
     ASSERT_TRUE(ret == SOFTBUS_OK);
@@ -449,7 +449,7 @@ HWTEST_F(TransUdpNegoTest, UdpModuleCb001, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, UdpModuleCb002, TestSize.Level1)
 {
-    AuthHandle authHandle = { .authId = 1 };
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     uint8_t val = 1;
     AuthTransData data1 = {0};
     int32_t ret = memset_s(&data1, sizeof(AuthTransData), 0, sizeof(AuthTransData));
@@ -480,7 +480,7 @@ HWTEST_F(TransUdpNegoTest, UdpModuleCb002, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfo001, TestSize.Level1)
 {
-    AuthHandle authHandle = { .authId = 1 };
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     uint8_t val = 1;
     AuthTransData data = {
         .data = &val,
@@ -504,7 +504,7 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfo001, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, UdpOnAuthConnOpened001, TestSize.Level1)
 {
-    AuthHandle authHandle = { .authId = 1 };
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     uint32_t invalidId = 0;
     UdpChannelInfo *channel = CreateUdpChannelPackTest();
     ASSERT_TRUE(channel != nullptr);
@@ -790,7 +790,7 @@ HWTEST_F(TransUdpNegoTest, ProcessUdpChannelState001, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, SetPeerDeviceIdByAuth001, TestSize.Level1)
 {
-    AuthHandle authHandle = { .authId = 0 };
+    AuthHandle authHandle = { .authId = 0, .type = AUTH_LINK_TYPE_WIFI };
     UdpChannelInfo *channel = CreateUdpChannelPackTest();
     ASSERT_TRUE(channel != nullptr);
     AppInfo *appInfo = (AppInfo*)SoftBusCalloc(sizeof(AppInfo));
@@ -815,7 +815,7 @@ HWTEST_F(TransUdpNegoTest, ParseRequestAppInfo001, TestSize.Level1)
 {
     int32_t ret = TransSessionMgrInit();
     ASSERT_TRUE(ret == SOFTBUS_OK);
-    AuthHandle authHandle = { .authId = INVALID_AUTH_ID };
+    AuthHandle authHandle = { .authId = INVALID_AUTH_ID, .type = AUTH_LINK_TYPE_WIFI };
     AppInfo *appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
@@ -870,7 +870,7 @@ HWTEST_F(TransUdpNegoTest, ParseRequestAppInfo001, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransPackRequestUdpInfo001, TestSize.Level1)
 {
-    AuthHandle authHandle = { .authId = 1 };
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     int64_t seq = 1;
     AppInfo *appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);

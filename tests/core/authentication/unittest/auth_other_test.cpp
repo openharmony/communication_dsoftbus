@@ -1110,7 +1110,7 @@ HWTEST_F(AuthOtherTest, START_RECONNECT_DEVICE_TEST_001, TestSize.Level1)
 {
     AuthConnInfo connInfo;
     AuthConnCallback connCb;
-    AuthHandle authHandle = { .authId = 1 };
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     int32_t ret = StartReconnectDevice(authHandle, &connInfo, 1, &connCb);
     EXPECT_TRUE(ret == SOFTBUS_AUTH_NOT_FOUND);
 
