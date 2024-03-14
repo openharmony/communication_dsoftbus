@@ -49,10 +49,10 @@ public:
     void TearDown();
 };
 
-void OnConnectSuccess(uint32_t requestId, int64_t authId)
+void OnConnectSuccess(uint32_t requestId, AuthHandle authHandle)
 {
     (void)requestId;
-    (void)authId;
+    (void)authHandle;
 }
 
 void OnConnectFailure(uint32_t requestId, int32_t reason)
@@ -172,7 +172,8 @@ HWTEST_F(WifiDirectChannelTest, testDirectChannelTest002, TestSize.Level0)
     WifiDirectNegotiateChannel channel;
     char deviceId[] = {'d', 'e', 'v', 'i', 'c', 'e', 'I', 'd'};
     size_t size = sizeof(deviceId) / sizeof(deviceId[0]);
-    int32_t ret = DefaultNegotiateChannelNew(1)->getDeviceId(&channel, deviceId, size);
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
+    int32_t ret = DefaultNegotiateChannelNew(authHandle)->getDeviceId(&channel, deviceId, size);
     EXPECT_EQ(SOFTBUS_OK, ret);
 };
 
@@ -184,7 +185,8 @@ HWTEST_F(WifiDirectChannelTest, testDirectChannelTest002, TestSize.Level0)
 */
 HWTEST_F(WifiDirectChannelTest, testDirectChannelTest003, TestSize.Level0)
 {
-    DefaultNegotiateChannel *base = DefaultNegotiateChannelNew(1);
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
+    DefaultNegotiateChannel *base = DefaultNegotiateChannelNew(authHandle);
     EXPECT_NE(base, nullptr);
     char p2pMac[] = {'p', '2', 'p', 'M', 'a', 'c'};
     size_t p2pMacSize = sizeof(p2pMac) / sizeof(p2pMac[0]);
@@ -200,7 +202,8 @@ HWTEST_F(WifiDirectChannelTest, testDirectChannelTest003, TestSize.Level0)
 */
 HWTEST_F(WifiDirectChannelTest, testDirectChannelTest004, TestSize.Level0)
 {
-    DefaultNegotiateChannel *base = DefaultNegotiateChannelNew(1);
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
+    DefaultNegotiateChannel *base = DefaultNegotiateChannelNew(authHandle);
     EXPECT_NE(base, nullptr);
     const char *p2pMac = "test345";
     base->setP2pMac((WifiDirectNegotiateChannel*)base, p2pMac);
@@ -209,7 +212,7 @@ HWTEST_F(WifiDirectChannelTest, testDirectChannelTest004, TestSize.Level0)
     ret = base->isMetaChannel((WifiDirectNegotiateChannel*)base);
     EXPECT_EQ(true, ret);
 
-    base->authId = 0;
+    base->authHandle.authId = 0;
     base->setP2pMac((WifiDirectNegotiateChannel*)base, p2pMac);
     ret = base->isP2pChannel((WifiDirectNegotiateChannel*)base);
     EXPECT_EQ(false, ret);
@@ -225,7 +228,8 @@ HWTEST_F(WifiDirectChannelTest, testDirectChannelTest004, TestSize.Level0)
 */
 HWTEST_F(WifiDirectChannelTest, testDirectChannelTest005, TestSize.Level0)
 {
-    DefaultNegotiateChannel *base = DefaultNegotiateChannelNew(1);
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
+    DefaultNegotiateChannel *base = DefaultNegotiateChannelNew(authHandle);
     EXPECT_NE(base, nullptr);
     WifiDirectNegotiateChannel *ret = base->duplicate((WifiDirectNegotiateChannel*)base);
     EXPECT_NE(ret, nullptr);
@@ -282,7 +286,8 @@ HWTEST_F(WifiDirectChannelTest, testDirectChannelTest008, TestSize.Level0)
 */
 HWTEST_F(WifiDirectChannelTest, testDirectChannelTest009, TestSize.Level0)
 {
-    DefaultNegotiateChannel *base = DefaultNegotiateChannelNew(1);
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
+    DefaultNegotiateChannel *base = DefaultNegotiateChannelNew(authHandle);
     EXPECT_NE(base, nullptr);
     WifiDirectNegotiateChannel *ret = base->duplicate((WifiDirectNegotiateChannel*)base);
     EXPECT_NE(nullptr, ret);

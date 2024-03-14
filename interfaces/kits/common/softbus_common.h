@@ -229,22 +229,6 @@ typedef enum  {
 } BleProtocolType;
 
 /**
- * @brief Enumerates secret key types.
- *
- * @since 1.0
- * @verison 1.0
- */
-typedef enum {
-    PROXY_TRANSMISION = 0, /**< Proxy Transmision */
-    PROXY_HEARTBEAT = 1, /**< Proxy Heartbeat */
-    PROXY_HICAR = 2,
-    PROXY_SHARE = 4,
-    PROXY_CASTPLUS = 5,
-    PROXY_WEAR = 7,
-    CUSTOM_UNKNOWN = 8, /**< Proxy Unknown*/
-} MetaNodeType;
-
-/**
  * @brief Defines the address of a device that is added to a LNN.
  * For details, see {@link ConnectionAddr}.
  *
@@ -275,6 +259,7 @@ typedef struct {
              */
             char ip[IP_STR_MAX_LEN];
             uint16_t port;            /**< Port number represented by the host byte order */
+            uint8_t udidHash[UDID_HASH_LEN]; /**< udid hash value */
         } ip;
         /**< Session address */
         struct SessionAddr {
@@ -360,6 +345,11 @@ typedef enum {
     /**Approach capability */
     APPROACH_CAPABILITY_BITMAP
 } DataBitMap;
+
+typedef struct {
+    int64_t authId;
+    uint32_t type;
+} AuthHandle;
 
 /**
  * @brief Defines the mapping between supported capabilities and bitmaps.

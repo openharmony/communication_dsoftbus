@@ -136,7 +136,7 @@ HWTEST_F(AuthEnhanceMockTest, AUTH_HICHAIN_START_AUTH_Test_001, TestSize.Level0)
     authManager.authDevice = LnnHichainInterfaceMock::InvokeAuthDevice;
     EXPECT_CALL(hichainMock, InitDeviceAuthService()).WillRepeatedly(Return(0));
     EXPECT_CALL(hichainMock, GetGaInstance()).WillRepeatedly(Return(&authManager));
-    int32_t ret = HichainStartAuth(authSeq, udid, uid);
+    int32_t ret = HichainStartAuth(authSeq, udid, uid, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 

@@ -111,6 +111,11 @@ void HandleLaneReliabilityTime(void)
 {
     return GetTransLaneIf()->HandleLaneReliabilityTime();
 }
+
+int32_t SelectExpectLaneByParameter(LanePreferredLinkList *setRecommendLinkList)
+{
+    return GetTransLaneIf()->SelectExpectLaneByParameter(setRecommendLinkList);
+}
 int32_t AddLaneTypeInfo(const LaneLinkInfo *linkInfo)
 {
     return GetTransLaneIf()->AddLaneTypeInfo(linkInfo);
@@ -122,6 +127,5 @@ int32_t LnnOnWifiDirectDeviceOnLineNotify(const LaneLinkInfo *linkInfo)
 int32_t DelLaneTypeInfoItem(uint32_t laneReqId)
 {
     return GetTransLaneIf()->DelLaneTypeInfoItem(laneReqId);
-}
 }
 } // namespace OHOS

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <cstdint>
 #include <securec.h>
 
 #include "lnn_local_ledger_deps_mock.h"
@@ -130,6 +131,11 @@ int32_t GetCommonOsType(int32_t *value)
 int32_t GetCommonOsVersion(char *value, uint32_t len)
 {
     return GetLocalLedgerDepsInterface()->GetCommonOsVersion(value, len);
+}
+
+int32_t GetDeviceSecurityLevel(int32_t *level)
+{
+    return GetLocalLedgerDepsInterface()->GetDeviceSecurityLevel(level);
 }
 } // extern "C"
 } // namespace OHOS

@@ -50,7 +50,7 @@
 #define MIGRATE_SUPPORTED 1
 #define MAX_PROXY_CHANNEL_ID 0x00000800
 #define MAX_TDC_CHANNEL_ID 0x7FFFFFFF
-#define MAX_FD_ID 1025
+#define MIN_FD_ID 1025
 #define MAX_PROXY_CHANNEL_ID_COUNT 1024
 #define ID_NOT_USED 0
 #define ID_USED 1UL
@@ -105,7 +105,7 @@ static int32_t GenerateProxyChannelId()
             g_proxyIdMark = id;
             g_channelIdCount++;
             SoftBusMutexUnlock(&g_myIdLock);
-            return (int32_t)id + MAX_FD_ID;
+            return (int32_t)id + MIN_FD_ID;
         }
     }
     SoftBusMutexUnlock(&g_myIdLock);
@@ -114,7 +114,7 @@ static int32_t GenerateProxyChannelId()
 
 void ReleaseProxyChannelId(int32_t channelId)
 {
-    if (channelId == INVALID_CHANNEL_ID) {
+    if (channelId < MIN_FD_ID) {
         return;
     }
     if (SoftBusMutexLock(&g_myIdLock) != 0) {
@@ -126,7 +126,7 @@ void ReleaseProxyChannelId(int32_t channelId)
     } else {
         TRANS_LOGE(TRANS_CTRL, "g_channelIdCount error");
     }
-    uint32_t id = (uint32_t)channelId - MAX_FD_ID;
+    uint32_t id = (uint32_t)channelId - MIN_FD_ID;
     uint32_t dex = id / (8 * sizeof(long));
     uint32_t bit = id % (8 * sizeof(long));
     g_proxyChanIdBits[dex] &= (~(ID_USED << bit));
@@ -397,9 +397,12 @@ static void FillAppInfo(AppInfo *appInfo, const SessionParam *param,
             TRANS_LOGE(TRANS_CTRL, "copy local ip failed");
         }
     } else if (connInfo->type == LANE_P2P_REUSE) {
-        if (GetWifiDirectManager()->getLocalIpByRemoteIp(connInfo->connInfo.wlan.addr, appInfo->myData.addr, IP_LEN) !=
-            SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "get local ip failed");
+        struct WifiDirectManager *mgr = GetWifiDirectManager();
+        if (mgr != NULL && mgr->getLocalIpByRemoteIp != NULL) {
+            int32_t ret = mgr->getLocalIpByRemoteIp(connInfo->connInfo.wlan.addr, appInfo->myData.addr, IP_LEN);
+            if (ret != SOFTBUS_OK) {
+                TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
+            }
         }
     }
 }
@@ -441,12 +444,15 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
 
     AppInfo *appInfo = GetAppInfo(param);
     TRANS_CHECK_AND_RETURN_RET_LOGW(!(appInfo == NULL), INVALID_CHANNEL_ID, TRANS_CTRL, "GetAppInfo is null.");
+    char peerUdid[UDID_BUF_LEN] = {0};
+    int32_t udidRet = LnnGetRemoteStrInfo(appInfo->peerNetWorkId, STRING_KEY_DEV_UDID, peerUdid, sizeof(peerUdid));
     TransEventExtra extra = {
         .calleePkg = NULL,
         .callerPkg = appInfo->myData.pkgName,
         .socketName = appInfo->myData.sessionName,
         .dataType = appInfo->businessType,
         .peerNetworkId = appInfo->peerNetWorkId,
+        .peerUdid = udidRet == SOFTBUS_OK ? peerUdid : NULL,
         .result = EVENT_STAGE_RESULT_OK
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_START, extra);
@@ -577,21 +583,22 @@ EXIT_ERR:
 int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connOpt,
     const char *reqId)
 {
+    int32_t channelId = INVALID_CHANNEL_ID;
+    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) || connOpt == NULL) {
+        return channelId;
+    }
+    char callerPkg[PKG_NAME_SIZE_MAX] = {0};
+    (void)TransGetPkgNameBySessionName(sessionName, callerPkg, PKG_NAME_SIZE_MAX);
     TransEventExtra extra = {
         .calleePkg = NULL,
-        .callerPkg = NULL,
-        .socketName = NULL,
+        .callerPkg = callerPkg,
+        .socketName = sessionName,
         .peerNetworkId = NULL,
         .channelType = CHANNEL_TYPE_AUTH,
+        .linkType = connOpt->type,
         .result = EVENT_STAGE_RESULT_OK
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_START, extra);
-    int32_t channelId = INVALID_CHANNEL_ID;
-    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) || connOpt == NULL) {
-        goto EXIT_ERR;
-    }
-    extra.socketName = sessionName;
-    extra.linkType = connOpt->type;
     if (connOpt->type == CONNECT_TCP) {
         if (TransOpenAuthMsgChannel(sessionName, connOpt, &channelId, reqId) != SOFTBUS_OK) {
             goto EXIT_ERR;

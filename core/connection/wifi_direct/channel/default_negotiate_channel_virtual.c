@@ -15,10 +15,10 @@
 
 #include "default_negotiate_channel.h"
 
-void DefaultNegotiateChannelConstructor(struct DefaultNegotiateChannel *self, int64_t authId)
+void DefaultNegotiateChannelConstructor(struct DefaultNegotiateChannel *self, AuthHandle authHandle)
 {
     (void)self;
-    (void)authId;
+    (void)authHandle;
 }
 
 void DefaultNegotiateChannelDestructor(struct DefaultNegotiateChannel *self)
@@ -26,9 +26,9 @@ void DefaultNegotiateChannelDestructor(struct DefaultNegotiateChannel *self)
     (void)self;
 }
 
-struct DefaultNegotiateChannel* DefaultNegotiateChannelNew(int64_t authId)
+struct DefaultNegotiateChannel* DefaultNegotiateChannelNew(AuthHandle authHandle)
 {
-    (void)authId;
+    (void)authHandle;
     return NULL;
 }
 
