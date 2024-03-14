@@ -818,9 +818,15 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
         return SOFTBUS_INVALID_PARAM;
     }
 
+    char peerUuid[DEVICE_ID_SIZE_MAX] = {0};
+    char peerNetworkId[NETWORK_ID_BUF_LEN] = {0};
+    char peerUdid[UDID_BUF_LEN] = {0};
+    bool udidRet = GetUuidByChanId(channelId, peerUuid, DEVICE_ID_SIZE_MAX) == SOFTBUS_OK &&
+        LnnGetNetworkIdByUuid(peerUuid, peerNetworkId, NETWORK_ID_BUF_LEN) == SOFTBUS_OK &&
+        LnnGetRemoteStrInfo(peerNetworkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN) == SOFTBUS_OK;
     TransEventExtra extra = {
         .socketName = conn->appInfo.myData.sessionName,
-        .peerNetworkId = NULL,
+        .peerUdid = udidRet ? peerUdid : NULL,
         .calleePkg = NULL,
         .callerPkg = NULL,
         .channelId = channelId,

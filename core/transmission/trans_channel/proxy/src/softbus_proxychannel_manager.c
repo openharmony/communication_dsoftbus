@@ -1120,21 +1120,32 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
         TRANS_LOGE(TRANS_CTRL, "memcpy failed");
         return;
     }
+    char peerNetworkId[NETWORK_ID_BUF_LEN] = {0};
+    char peerUdid[UDID_BUF_LEN] = {0};
     TransEventExtra extra = {
         .calleePkg = NULL,
         .callerPkg = NULL,
-        .peerNetworkId = NULL,
         .channelId = chan->myId,
         .peerChannelId = chan->peerId,
         .socketName = tmpSocketName,
         .authId = chan->authHandle.authId,
         .connectionId = chan->connId,
+        .channelType = chan->appInfo.appType == APP_TYPE_AUTH ? CHANNEL_TYPE_AUTH : CHANNEL_TYPE_PROXY,
         .linkType = chan->type
     };
     if (ret != SOFTBUS_OK) {
         ReleaseProxyChannelId(chan->channelId);
         SoftBusFree(chan);
         goto EXIT_ERR;
+    }
+
+    if (chan->appInfo.appType == APP_TYPE_AUTH &&
+        strcpy_s(peerUdid, UDID_BUF_LEN, chan->appInfo.peerData.deviceId) == EOK) {
+        extra.peerUdid = peerUdid;
+    } else if (chan->appInfo.appType != APP_TYPE_AUTH &&
+        LnnGetNetworkIdByUuid(chan->appInfo.peerData.deviceId, peerNetworkId, NETWORK_ID_BUF_LEN) == SOFTBUS_OK &&
+        LnnGetRemoteStrInfo(peerNetworkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN) == SOFTBUS_OK) {
+        extra.peerUdid = peerUdid;
     }
 
     TransCreateConnByConnId(msg->connId, (bool)chan->isServer);
