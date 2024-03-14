@@ -45,6 +45,7 @@ void SetLocalDeviceBusinessType(uint8_t businessType);
 uint8_t GetLocalDeviceBusinessType(void);
 
 int SetLocalDeviceBusinessData(const char *data, bool unicast);
+int32_t LocalizeNotificationMsg(const char *msg);
 uint8_t GetLocalDeviceMode(void);
 void SetLocalDeviceMode(uint8_t mode);
 
