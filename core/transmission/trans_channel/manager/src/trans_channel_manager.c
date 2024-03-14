@@ -50,7 +50,7 @@
 #define MIGRATE_SUPPORTED 1
 #define MAX_PROXY_CHANNEL_ID 0x00000800
 #define MAX_TDC_CHANNEL_ID 0x7FFFFFFF
-#define MAX_FD_ID 1025
+#define MIN_FD_ID 1025
 #define MAX_PROXY_CHANNEL_ID_COUNT 1024
 #define ID_NOT_USED 0
 #define ID_USED 1UL
@@ -105,7 +105,7 @@ static int32_t GenerateProxyChannelId()
             g_proxyIdMark = id;
             g_channelIdCount++;
             SoftBusMutexUnlock(&g_myIdLock);
-            return (int32_t)id + MAX_FD_ID;
+            return (int32_t)id + MIN_FD_ID;
         }
     }
     SoftBusMutexUnlock(&g_myIdLock);
@@ -114,7 +114,7 @@ static int32_t GenerateProxyChannelId()
 
 void ReleaseProxyChannelId(int32_t channelId)
 {
-    if (channelId < MAX_FD_ID) {
+    if (channelId < MIN_FD_ID) {
         return;
     }
     if (SoftBusMutexLock(&g_myIdLock) != 0) {
@@ -126,7 +126,7 @@ void ReleaseProxyChannelId(int32_t channelId)
     } else {
         TRANS_LOGE(TRANS_CTRL, "g_channelIdCount error");
     }
-    uint32_t id = (uint32_t)channelId - MAX_FD_ID;
+    uint32_t id = (uint32_t)channelId - MIN_FD_ID;
     uint32_t dex = id / (8 * sizeof(long));
     uint32_t bit = id % (8 * sizeof(long));
     g_proxyChanIdBits[dex] &= (~(ID_USED << bit));
