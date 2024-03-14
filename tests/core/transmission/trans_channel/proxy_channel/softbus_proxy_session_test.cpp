@@ -119,7 +119,7 @@ void TestAddProxyChannel(int32_t channelId, AppType appType, ProxyChannelStatus 
     AppInfo appInfo;
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     ASSERT_TRUE(NULL != chan);
-    chan->authId = channelId;
+    chan->authHandle.authId = channelId;
     chan->connId = channelId;
     chan->myId = channelId;
     chan->peerId = channelId;
@@ -179,7 +179,7 @@ HWTEST_F(SoftbusProxySessionTest, TransProxyPostSessionDataTest002, TestSize.Lev
 
 /**
  * @tc.name: TransProxyPostSessionDataTest003
- * @tc.desc: test proxy post session data.
+ * @tc.desc: Should return SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND when given invalid Channid.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -193,14 +193,32 @@ HWTEST_F(SoftbusProxySessionTest, TransProxyPostSessionDataTest003, TestSize.Lev
     uint32_t len = strlen(data);
 
     ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_MESSAGE);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
     ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_MESSAGE);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
     ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_MESSAGE);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
 
     ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_BYTES);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
+    ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_FILE_FIRST_FRAME);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
+    ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_FILE_ONGOINE_FRAME);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
+    ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_FILE_LAST_FRAME);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
+    ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_FILE_ONLYONE_FRAME);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
+    ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_FILE_ALLFILE_SENT);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
+    ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_FILE_CRC_CHECK_FRAME);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
+    ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_FILE_ACK_REQUEST_SENT);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
+    ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_FILE_ACK_RESPONSE_SENT);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
+    ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_ASYNC_MESSAGE);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
 }
 
 /**
@@ -410,6 +428,23 @@ HWTEST_F(SoftbusProxySessionTest, TransOnNormalMsgReceivedTest005, TestSize.Leve
     head.sliceSeq = TEST_SLICESEQ_THREE;
     (void)memcpy_s(buf, TEST_BUFFER_SIZE, &head, sizeof(TestSliceHead));
     ret = TransOnNormalMsgReceived(pkgName, pid, channelId, buf, len);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: NotifyClientMsgReceivedTest001
+ * @tc.desc: Should return SOFTBUS_OK when given valid paramters.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxySessionTest, NotifyClientMsgReceivedTest001, TestSize.Level1)
+{
+    const char *pkgName = "com.test.trans.proxysession";
+    int32_t channelId = -1;
+    int32_t pid = 1;
+    TransReceiveData receiveData;
+    memset_s(&receiveData, sizeof(TransReceiveData), 0, sizeof(TransReceiveData));
+    int32_t ret = NotifyClientMsgReceived(pkgName, pid, channelId, &receiveData);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 } // namespace OHOS

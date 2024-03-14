@@ -128,9 +128,9 @@ uint32_t AuthGenRequestId(void)
     return GetServiceInterface()->AuthGenRequestId();
 }
 
-void AuthHandleLeaveLNN(int64_t authId)
+void AuthHandleLeaveLNN(AuthHandle authHandle)
 {
-    return GetServiceInterface()->AuthHandleLeaveLNN(authId);
+    return GetServiceInterface()->AuthHandleLeaveLNN(authHandle);
 }
 
 int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)

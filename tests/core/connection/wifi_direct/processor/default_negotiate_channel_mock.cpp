@@ -78,7 +78,7 @@ static bool GetTlvFeature(struct DefaultNegotiateChannel *self)
 static struct WifiDirectNegotiateChannel* Duplicate(struct WifiDirectNegotiateChannel *base)
 {
     struct DefaultNegotiateChannel *self = (struct DefaultNegotiateChannel *)base;
-    struct DefaultNegotiateChannel *copy = DefaultNegotiateChannelNew(self->authId);
+    struct DefaultNegotiateChannel *copy = DefaultNegotiateChannelNew(self->authHandle);
     return (struct WifiDirectNegotiateChannel*)copy;
 }
 
@@ -87,10 +87,10 @@ static void Destructor(struct WifiDirectNegotiateChannel *base)
     DefaultNegotiateChannelDelete((struct DefaultNegotiateChannel *)base);
 }
 
-void DefaultNegotiateChannelConstructor(struct DefaultNegotiateChannel *self, int64_t authId)
+void DefaultNegotiateChannelConstructor(struct DefaultNegotiateChannel *self, AuthHandle authHandle)
 {
     (void)memset_s(self, sizeof(*self), 0, sizeof(*self));
-    self->authId = authId;
+    self->authHandle = authHandle;
 
     self->postData = PostData;
     self->getDeviceId = GetDeviceId;
@@ -110,14 +110,14 @@ void DefaultNegotiateChannelDestructor(struct DefaultNegotiateChannel *self)
     (void)self;
 }
 
-struct DefaultNegotiateChannel* DefaultNegotiateChannelNew(int64_t authId)
+struct DefaultNegotiateChannel* DefaultNegotiateChannelNew(AuthHandle authHandle)
 {
     struct DefaultNegotiateChannel *self = (struct DefaultNegotiateChannel *)SoftBusCalloc(sizeof(*self));
     if (!self) {
         CONN_LOGE(CONN_WIFI_DIRECT, "malloc failed");
         return nullptr;
     }
-    DefaultNegotiateChannelConstructor(self, authId);
+    DefaultNegotiateChannelConstructor(self, authHandle);
     return self;
 }
 

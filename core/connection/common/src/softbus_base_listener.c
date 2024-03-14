@@ -406,19 +406,11 @@ static void FillConnEventExtra(const LocalListenerInfo *info, ConnEventExtra *ex
     if (info == NULL || extra == NULL) {
         return;
     }
+    extra->errcode = err;
     extra->result = err == SOFTBUS_OK ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
     extra->linkType = info->type;
     extra->moduleId = info->socketOption.moduleId;
     extra->proType = info->socketOption.protocol;
-}
-
-static void FillConnEventExtraByModule(ListenerModule module, ConnEventExtra *extra, int32_t err)
-{
-    if (extra == NULL) {
-        return;
-    }
-    extra->result = err == SOFTBUS_OK ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
-    extra->moduleId = module;
 }
 
 int32_t StartBaseListener(const LocalListenerInfo *info, const SoftbusBaseListener *listener)
@@ -520,7 +512,8 @@ int32_t StopBaseListener(ListenerModule module)
         CONN_LOGE(CONN_COMMON, "stop listen thread failed, module=%{public}d, error=%{public}d", module, status);
     }
     ReturnListenerNode(&node);
-    FillConnEventExtraByModule(module, &extra, status);
+    extra.errcode = status;
+    extra.result = status == SOFTBUS_OK ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
     CONN_EVENT(EVENT_SCENE_STOP_BASE_LISTENER, EVENT_STAGE_TCP_COMMON_ONE, extra);
     return status;
 }

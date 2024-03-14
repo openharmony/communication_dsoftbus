@@ -75,7 +75,7 @@ static int32_t GetErrorCode(void)
     return errCode;
 }
 
-static void DfxReportAdapterSocket(const ConnEventScene scene, const int32_t res, int32_t fd, int32_t cfd)
+static void DfxReportAdapterSocket(ConnEventScene scene, int32_t res, int32_t fd, int32_t cfd)
 {
     ConnEventExtra extra = {
         .fd = fd,
@@ -300,8 +300,13 @@ int32_t SoftBusSocketConnect(int32_t socketFd, const SoftBusSockAddr *addr)
     int32_t ret = connect(socketFd, &sysAddr, (socklen_t)len);
     if (ret < 0) {
         COMM_LOGE(COMM_ADAPTER, "connect=%{public}s", strerror(errno));
-        DfxReportAdapterSocket(EVENT_SCENE_SOCKET_CONNECT, SOFTBUS_TCPCONNECTION_SOCKET_ERR, socketFd, 0);
-        return GetErrorCode();
+        int32_t result = GetErrorCode();
+        if (result == SOFTBUS_ADAPTER_SOCKET_EINPROGRESS || result == SOFTBUS_ADAPTER_SOCKET_EAGAIN) {
+            DfxReportAdapterSocket(EVENT_SCENE_SOCKET_CONNECT, SOFTBUS_OK, socketFd, 0);
+        } else {
+            DfxReportAdapterSocket(EVENT_SCENE_SOCKET_CONNECT, SOFTBUS_TCPCONNECTION_SOCKET_ERR, socketFd, 0);
+        }
+        return result;
     }
     DfxReportAdapterSocket(EVENT_SCENE_SOCKET_CONNECT, SOFTBUS_OK, socketFd, 0);
     return SOFTBUS_ADAPTER_OK;

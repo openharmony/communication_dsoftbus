@@ -22,6 +22,7 @@
 
 #include "access_control_profile.h"
 #include "anonymizer.h"
+#include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "distributed_device_profile_client.h"
 #include "lnn_distributed_net_ledger.h"
@@ -38,7 +39,6 @@
 #include "trust_device_profile.h"
 
 using DpClient = OHOS::DistributedDeviceProfile::DistributedDeviceProfileClient;
-static constexpr uint32_t CUST_UDID_LEN = 16;
 static constexpr uint32_t ACCOUNT_HASH_SHORT_LEN = 2;
 
 bool IsPotentialTrustedDeviceDp(const char *deviceIdHash)

@@ -141,7 +141,7 @@ HWTEST_F(WifiDirectTest, WifiDirectManager002, TestSize.Level1)
 {
     struct WifiDirectManager *self = GetWifiDirectManager();
     struct WifiDirectStatusListener *listener = (struct WifiDirectStatusListener*)SoftBusCalloc(sizeof(*listener));
-    self->registerStatusListener(listener);
+    self->registerStatusListener(TRANS_LINK_MODULE, listener);
     const char *ipString = "192.168.0.1";
     char uuid[] = "b5f3c3ce-08b8-4c66-9a71-0b4641d9c769";
     int32_t uuidSize = 36;

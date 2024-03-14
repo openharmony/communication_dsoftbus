@@ -57,7 +57,7 @@ int32_t FindAndDelAuthRequestByConnInfo(uint32_t requestId, const AuthConnInfo *
 void DelAuthRequest(uint32_t requestId);
 void ClearAuthRequest(void);
 
-void PerformVerifyCallback(uint32_t requestId, int32_t result, int64_t authId, const NodeInfo *info);
+void PerformVerifyCallback(uint32_t requestId, int32_t result, AuthHandle authHandle, const NodeInfo *info);
 void PerformAuthConnCallback(uint32_t requestId, int32_t result, int64_t authId);
 
 #ifdef __cplusplus

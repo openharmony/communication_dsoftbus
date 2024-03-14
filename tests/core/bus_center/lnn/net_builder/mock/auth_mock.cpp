@@ -36,9 +36,9 @@ static AuthInterface *GetAuthInterface()
 }
 
 extern "C" {
-void AuthHandleLeaveLNN(int64_t authId)
+void AuthHandleLeaveLNN(AuthHandle authHandle)
 {
-    GetAuthInterface()->AuthHandleLeaveLNN(authId);
+    GetAuthInterface()->AuthHandleLeaveLNN(authHandle);
 }
 
 uint32_t AuthGenRequestId(void)
@@ -72,9 +72,9 @@ void UnregAuthTransListener(int32_t module)
     return GetAuthInterface()->UnregAuthTransListener(module);
 }
 
-int32_t AuthPostTransData(int64_t authId, const AuthTransData *dataInfo)
+int32_t AuthPostTransData(AuthHandle authHandle, const AuthTransData *dataInfo)
 {
-    return GetAuthInterface()->AuthPostTransData(authId, dataInfo);
+    return GetAuthInterface()->AuthPostTransData(authHandle, dataInfo);
 }
 
 int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer, bool isMeta)

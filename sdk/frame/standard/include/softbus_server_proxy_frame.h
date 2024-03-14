@@ -16,10 +16,14 @@
 #ifndef SOFTBUS_SERVER_PROXY_H
 #define SOFTBUS_SERVER_PROXY_H
 
+#include <stdint.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+typedef int32_t (*RestartEventCallback)(void);
+void RestartEventCallbackUnregister(void);
+int32_t RestartEventCallbackRegister(RestartEventCallback callback);
 void ClientDeathProcTask(void);
 
 #ifdef __cplusplus

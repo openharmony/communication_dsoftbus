@@ -45,6 +45,8 @@ typedef enum {
     DATA_TYPE_CLOSE_ACK = 0xFFFF0005,
     /* data type for meta negotiation */
     DATA_TYPE_META_NEGOTIATION = 0xFFFF0006,
+    /* data type for decrypt fail */
+    DATA_TYPE_DECRYPT_FAIL = 0xFFFF0007,
 } AuthDataType;
 
 #define CLIENT_SIDE_FLAG 0
@@ -98,8 +100,8 @@ typedef struct {
 } SocketPktHead;
 
 typedef struct {
-    void (*OnDataReceived)(int64_t authId, const AuthDataHead *head, const uint8_t *data, uint32_t len);
-    void (*OnDisconnected)(int64_t authId);
+    void (*OnDataReceived)(AuthHandle authHandle, const AuthDataHead *head, const uint8_t *data, uint32_t len);
+    void (*OnDisconnected)(AuthHandle authHandle);
 } AuthTransCallback;
 
 /* Auth handler */

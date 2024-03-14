@@ -153,6 +153,13 @@ static bool SupportHmlTwo()
     return support;
 }
 
+static bool SupportCocRenegotiate(void)
+{
+    bool support = OHOS::system::GetBoolParameter("persist.sys.softbus.connect.coc_renegotiate", true);
+    CONN_LOGI(CONN_WIFI_DIRECT, "persist.sys.softbus.connect.coc_renegotiate=%{public}d", support);
+    return support;
+}
+
 static struct WifiDirectUtils g_utils = {
     .transferModeToRole = TransferModeToRole,
     .transferRoleToPreferLinkMode = TransferRoleToPreferLinkMode,
@@ -163,6 +170,7 @@ static struct WifiDirectUtils g_utils = {
     .strCompareIgnoreCase = StrCompareIgnoreCase,
     .supportHml = SupportHml,
     .supportHmlTwo = SupportHmlTwo,
+    .supportCocRenegotiate = SupportCocRenegotiate,
 };
 
 struct WifiDirectUtils* GetWifiDirectUtils(void)

@@ -53,7 +53,7 @@ public:
     virtual int SoftBusFrequencyToChannel(int frequency) = 0;
     virtual NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type) = 0;
     virtual const NodeInfo *LnnGetLocalNodeInfo(void) = 0;
-    virtual void AuthCloseConn(int64_t authId) = 0;
+    virtual void AuthCloseConn(AuthHandle authHandle) = 0;
     virtual int32_t AuthSetP2pMac(int64_t authId, const char *p2pMac) = 0;
     virtual bool LnnVisitPhysicalSubnet(LnnVisitPhysicalSubnetCallback callback, void *data) = 0;
     virtual const char *LnnConvertDLidToUdid(const char *id, IdCategory type) = 0;
@@ -63,8 +63,8 @@ public:
     virtual int32_t LnnGetRemoteNumU64Info(const char *networkId, InfoKey key, uint64_t *info) = 0;
     virtual bool AuthDeviceCheckConnInfo(const char *uuid, AuthLinkType type, bool checkConnection) = 0;
     virtual uint32_t AuthGenRequestId(void) = 0;
-    virtual int32_t AuthPostTransData(int64_t authId, const AuthTransData *dataInfo) = 0;
-    virtual int32_t AuthGetConnInfo(int64_t authId, AuthConnInfo *connInfo) = 0;
+    virtual int32_t AuthPostTransData(AuthHandle authHandle, const AuthTransData *dataInfo) = 0;
+    virtual int32_t AuthGetConnInfo(AuthHandle authHandle, AuthConnInfo *connInfo) = 0;
     virtual int32_t AuthGetMetaType(int64_t authId, bool *isMetaAuth) = 0;
     virtual ConnBleConnection *ConnBleGetClientConnectionByUdid(const char *udid, BleProtocolType protocol) = 0;
     virtual void ConnBleReturnConnection(ConnBleConnection **connection) = 0;
@@ -98,7 +98,7 @@ public:
     MOCK_METHOD3(LnnGetRemoteNumInfo, int32_t (const char*, InfoKey, int32_t*));
     MOCK_METHOD2(LnnGetNodeInfoById, NodeInfo* (const char*, IdCategory));
     MOCK_METHOD0(LnnGetLocalNodeInfo, NodeInfo * ());
-    MOCK_METHOD1(AuthCloseConn, void (int64_t));
+    MOCK_METHOD1(AuthCloseConn, void (AuthHandle));
     MOCK_METHOD2(AuthSetP2pMac, int32_t (int64_t, const char*));
     MOCK_METHOD2(LnnVisitPhysicalSubnet, bool (LnnVisitPhysicalSubnetCallback, void*));
     MOCK_METHOD2(LnnConvertDLidToUdid, const char *(const char *, IdCategory));
@@ -107,8 +107,8 @@ public:
     MOCK_METHOD3(LnnGetRemoteNumU64Info, int32_t (const char *, InfoKey, uint64_t *));
     MOCK_METHOD3(AuthDeviceCheckConnInfo, bool (const char *, AuthLinkType, bool));
     MOCK_METHOD0(AuthGenRequestId, uint32_t ());
-    MOCK_METHOD2(AuthPostTransData, int32_t (int64_t, const AuthTransData *));
-    MOCK_METHOD2(AuthGetConnInfo, int32_t (int64_t, AuthConnInfo *));
+    MOCK_METHOD2(AuthPostTransData, int32_t (AuthHandle, const AuthTransData *));
+    MOCK_METHOD2(AuthGetConnInfo, int32_t (AuthHandle, AuthConnInfo *));
     MOCK_METHOD2(AuthGetMetaType, int32_t (int64_t, bool *));
     MOCK_METHOD2(ConnBleGetClientConnectionByUdid, ConnBleConnection *(const char *, BleProtocolType));
     MOCK_METHOD1(ConnBleReturnConnection, void (ConnBleConnection **));

@@ -86,9 +86,9 @@ int32_t AuthFlushDevice(const char *uuid)
     return GetTransAuthInterface()->AuthFlushDevice(uuid);
 }
 
-void AuthHandleLeaveLNN(int64_t authId)
+void AuthHandleLeaveLNN(AuthHandle authHandle)
 {
-    GetTransAuthInterface()->AuthHandleLeaveLNN(authId);
+    GetTransAuthInterface()->AuthHandleLeaveLNN(authHandle);
 }
 
 int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port)
@@ -106,14 +106,14 @@ int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthCon
     return GetTransAuthInterface()->AuthOpenConn(info, requestId, callback, isMeta);
 }
 
-void AuthCloseConn(int64_t authId)
+void AuthCloseConn(AuthHandle authHandle)
 {
-    GetTransAuthInterface()->AuthCloseConn(authId);
+    GetTransAuthInterface()->AuthCloseConn(authHandle);
 }
 
-int32_t AuthPostTransData(int64_t authId, const AuthTransData *dataInfo)
+int32_t AuthPostTransData(AuthHandle authHandle, const AuthTransData *dataInfo)
 {
-    return GetTransAuthInterface()->AuthPostTransData(authId, dataInfo);
+    return GetTransAuthInterface()->AuthPostTransData(authHandle, dataInfo);
 }
 
 int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
@@ -126,9 +126,9 @@ int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta
     return GetTransAuthInterface()->AuthGetP2pConnInfo(uuid, connInfo, isMeta);
 }
 
-int64_t AuthGetLatestIdByUuid(const char *uuid, bool isIpConnection, bool isMeta)
+void AuthGetLatestIdByUuid(const char *uuid, bool isIpConnection, bool isMeta, AuthHandle *authHandle)
 {
-    return GetTransAuthInterface()->AuthGetLatestIdByUuid(uuid, isIpConnection, isMeta);
+    return GetTransAuthInterface()->AuthGetLatestIdByUuid(uuid, isIpConnection, isMeta, authHandle);
 }
 
 int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer, bool isMeta)
@@ -156,9 +156,9 @@ int32_t AuthSetP2pMac(int64_t authId, const char *p2pMac)
     return GetTransAuthInterface()->AuthSetP2pMac(authId, p2pMac);
 }
 
-int32_t AuthGetConnInfo(int64_t authId, AuthConnInfo *connInfo)
+int32_t AuthGetConnInfo(AuthHandle authHandle, AuthConnInfo *connInfo)
 {
-    return GetTransAuthInterface()->AuthGetConnInfo(authId, connInfo);
+    return GetTransAuthInterface()->AuthGetConnInfo(authHandle, connInfo);
 }
 
 int32_t AuthGetServerSide(int64_t authId, bool *isServer)
@@ -224,19 +224,19 @@ int32_t LnnGetNetworkIdByBtMac(const char *btMac, char *buf, uint32_t len)
     return GetTransAuthInterface()->LnnGetNetworkIdByBtMac(btMac, buf, len);
 }
 
-uint32_t ApplyLaneId(LaneType type)
+uint32_t ApplyLaneReqId(LaneType type)
 {
-    return GetTransAuthInterface()->ApplyLaneId(type);
+    return GetTransAuthInterface()->ApplyLaneReqId(type);
 }
 
-int32_t LnnRequestLane(uint32_t laneId, const LaneRequestOption *request, const ILaneListener *listener)
+int32_t LnnRequestLane(uint32_t laneReqId, const LaneRequestOption *request, const ILaneListener *listener)
 {
-    return GetTransAuthInterface()->LnnRequestLane(laneId, request, listener);
+    return GetTransAuthInterface()->LnnRequestLane(laneReqId, request, listener);
 }
 
-int32_t LnnFreeLane(uint32_t laneId)
+int32_t LnnFreeLane(uint32_t laneReqId)
 {
-    return GetTransAuthInterface()->LnnFreeLane(laneId);
+    return GetTransAuthInterface()->LnnFreeLane(laneReqId);
 }
 }
 }

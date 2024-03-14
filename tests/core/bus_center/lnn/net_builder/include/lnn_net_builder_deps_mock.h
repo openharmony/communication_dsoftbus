@@ -65,7 +65,7 @@ public:
     virtual int32_t AuthMetaStartVerify(uint32_t connectionId, const uint8_t *key, uint32_t keyLen,
         uint32_t requestId, int32_t callingPid, const AuthVerifyCallback *callBack) = 0;
     virtual uint32_t AuthGenRequestId(void) = 0;
-    virtual void AuthHandleLeaveLNN(int64_t authId) = 0;
+    virtual void AuthHandleLeaveLNN(AuthHandle authHandle) = 0;
     virtual LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target,
         const char *pkgName, bool isNeedConnect);
     virtual int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len);
@@ -102,7 +102,7 @@ public:
         int32_t weight2, const char *masterUdid2);
     virtual void LnnNotifyAllTypeOffline(ConnectionAddrType type);
     virtual int32_t SoftBusGetTime(SoftBusSysTime *sysTime);
-    virtual int32_t AuthGetConnInfo(int64_t authId, AuthConnInfo *connInfo);
+    virtual int32_t AuthGetConnInfo(AuthHandle authHandle, AuthConnInfo *connInfo);
     virtual void LnnNotifyLeaveResult(const char *networkId, int32_t retCode);
     virtual int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type);
     virtual int32_t LnnSendNotTrustedInfo(const NotTrustedDelayInfo *info, uint32_t num,
@@ -192,7 +192,7 @@ public:
     MOCK_METHOD6(AuthMetaStartVerify, int32_t (uint32_t, const uint8_t *,
         uint32_t, uint32_t, int32_t, const AuthVerifyCallback *));
     MOCK_METHOD0(AuthGenRequestId, uint32_t ());
-    MOCK_METHOD1(AuthHandleLeaveLNN, void (int64_t));
+    MOCK_METHOD1(AuthHandleLeaveLNN, void (AuthHandle));
     MOCK_METHOD3(SoftbusGetConfig, int (ConfigType, unsigned char *, uint32_t));
     MOCK_METHOD2(LnnSetLocalStrInfo, int32_t (InfoKey, const char *));
     MOCK_METHOD2(LnnSetLocalNumInfo, int32_t (InfoKey, int32_t));
@@ -224,7 +224,7 @@ public:
     MOCK_METHOD4(LnnCompareNodeWeight, int32_t (int32_t, const char *, int32_t, const char *));
     MOCK_METHOD1(LnnNotifyAllTypeOffline, void (ConnectionAddrType));
     MOCK_METHOD1(SoftBusGetTime, int32_t (SoftBusSysTime *));
-    MOCK_METHOD2(AuthGetConnInfo, int32_t (int64_t, AuthConnInfo *));
+    MOCK_METHOD2(AuthGetConnInfo, int32_t (AuthHandle, AuthConnInfo *));
     MOCK_METHOD2(LnnNotifyLeaveResult, void (const char *, int32_t));
     MOCK_METHOD2(LnnGetAddrTypeByIfName, int32_t (const char *, ConnectionAddrType *));
     MOCK_METHOD3(LnnSendNotTrustedInfo, int32_t (const NotTrustedDelayInfo *, uint32_t, LnnSyncInfoMsgComplete));
@@ -265,7 +265,8 @@ public:
     MOCK_METHOD1(LnnSendJoinRequestToConnFsm, int32_t (LnnConnectionFsm *));
     MOCK_METHOD3(LnnNotifyJoinResult, void (ConnectionAddr *, const char *, int32_t));
     MOCK_METHOD1(LnnDestroyConnectionFsm, void (LnnConnectionFsm *));
-    MOCK_METHOD3(LnnCreateConnectionFsm, LnnConnectionFsm * (const ConnectionAddr *target, const char *pkgName, bool isNeedConnect));
+    MOCK_METHOD3(LnnCreateConnectionFsm, LnnConnectionFsm * (const ConnectionAddr *target,
+        const char *pkgName, bool isNeedConnect));
     MOCK_METHOD1(LnnStartConnectionFsm, int32_t (LnnConnectionFsm *));
     MOCK_METHOD3(LnnNotifyMasterNodeChanged, void (bool, const char*, int32_t));
     MOCK_METHOD0(LnnInitFastOffline, int32_t ());

@@ -128,9 +128,9 @@ const NodeInfo *LnnGetLocalNodeInfo(void)
     return GetLaneDepsInterface()->LnnGetLocalNodeInfo();
 }
 
-void AuthCloseConn(int64_t authId)
+void AuthCloseConn(AuthHandle authHandle)
 {
-    return GetLaneDepsInterface()->AuthCloseConn(authId);
+    return GetLaneDepsInterface()->AuthCloseConn(authHandle);
 }
 
 int32_t AuthSetP2pMac(int64_t authId, const char *p2pMac)
@@ -173,14 +173,14 @@ uint32_t AuthGenRequestId(void)
     return GetLaneDepsInterface()->AuthGenRequestId();
 }
 
-int32_t AuthPostTransData(int64_t authId, const AuthTransData *dataInfo)
+int32_t AuthPostTransData(AuthHandle authHandle, const AuthTransData *dataInfo)
 {
-    return GetLaneDepsInterface()->AuthPostTransData(authId, dataInfo);
+    return GetLaneDepsInterface()->AuthPostTransData(authHandle, dataInfo);
 }
 
-int32_t AuthGetConnInfo(int64_t authId, AuthConnInfo *connInfo)
+int32_t AuthGetConnInfo(AuthHandle authHandle, AuthConnInfo *connInfo)
 {
-    return GetLaneDepsInterface()->AuthGetConnInfo(authId, connInfo);
+    return GetLaneDepsInterface()->AuthGetConnInfo(authHandle, connInfo);
 }
 
 int32_t AuthGetMetaType(int64_t authId, bool *isMetaAuth)

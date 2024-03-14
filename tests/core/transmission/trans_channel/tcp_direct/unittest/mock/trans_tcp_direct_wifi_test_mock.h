@@ -30,7 +30,7 @@ public:
     virtual ~TransTcpDirectWifiInterface() {};
     virtual SessionConn *CreateNewSessinConn(ListenerModule module, bool isServerSid) = 0;
     virtual ListenerModule LnnGetProtocolListenerModule(ProtocolType protocol, ListenerMode mode) = 0;
-    virtual int64_t AuthGetLatestIdByUuid(const char *uuid, AuthLinkType type, bool isMeta) = 0;
+    virtual void AuthGetLatestIdByUuid(const char *uuid, AuthLinkType type, bool isMeta, AuthHandle *authHandle) = 0;
     virtual ListenerModule GetMoudleByHmlIp(const char *ip) = 0;
     virtual int32_t TransSrvAddDataBufNode(int32_t channelId, int32_t fd) = 0;
     virtual int32_t TransTdcAddSessionConn(SessionConn *conn) = 0;
@@ -44,7 +44,8 @@ public:
     ~TransTcpDirectWifiInterfaceMock() override;
     MOCK_METHOD2(CreateNewSessinConn, SessionConn * (ListenerModule module, bool isServerSid));
     MOCK_METHOD2(LnnGetProtocolListenerModule, ListenerModule (ProtocolType protocol, ListenerMode mode));
-    MOCK_METHOD3(AuthGetLatestIdByUuid, int64_t (const char *uuid, AuthLinkType type, bool isMeta));
+    MOCK_METHOD4(AuthGetLatestIdByUuid, void (const char *uuid, AuthLinkType type, bool isMeta,
+        AuthHandle *authHandle));
     MOCK_METHOD1(GetMoudleByHmlIp, ListenerModule (const char *ip));
     MOCK_METHOD2(TransSrvAddDataBufNode, int32_t (int32_t channelId, int32_t fd));
     MOCK_METHOD1(TransTdcAddSessionConn, int32_t (SessionConn *conn));
