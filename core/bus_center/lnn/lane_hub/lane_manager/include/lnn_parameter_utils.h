@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,32 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef LNN_LANE_SELECT_H
-#define LNN_LANE_SELECT_H
+#ifndef LNN_PARAMETER_UTILS_H
+#define LNN_PARAMETER_UTILS_H
 
-#include "lnn_lane_def.h"
+#include <stdbool.h>
 #include "lnn_lane_interface.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct {
-    LaneTransType transType;
-    QosInfo qosRequire;
-    //OldInfo
-    uint32_t expectedBw;
-    LanePreferredLinkList list;
-} LaneSelectParam;
-
-
-int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
-    LanePreferredLinkList *recommendList, uint32_t *listNum);
-
-int32_t SelectExpectLaneByParameter(LanePreferredLinkList *setRecommendLinkList);
-
-int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *request,
-    LanePreferredLinkList *recommendList);
+bool IsLinkEnabled(LaneLinkType parameter);
 
 #ifdef __cplusplus
 }
