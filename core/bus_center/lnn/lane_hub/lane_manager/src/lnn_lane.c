@@ -26,7 +26,6 @@
 #include "lnn_lane_common.h"
 #include "lnn_lane_interface.h"
 #include "lnn_lane_link.h"
-#include "lnn_lane_listener.h"
 #include "lnn_lane_model.h"
 #include "lnn_lane_query.h"
 #include "lnn_lane_score.h"
@@ -107,16 +106,6 @@ static uint32_t AllocLaneReqId(LaneType type)
     Unlock();
     LNN_LOGE(LNN_LANE, "laneReqId num exceeds the limit");
     return INVALID_LANE_REQ_ID;
-}
-
-int32_t ParseLaneTypeByLaneReqId(const uint32_t laneReqId, LaneType *laneType)
-{
-    if (laneReqId == INVALID_LANE_REQ_ID) {
-        LNN_LOGE(LNN_LANE, "[ParseLaneType]invalid laneReqId");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    *laneType = (LaneType)(laneReqId >> LANE_REQ_ID_TYPE_SHIFT);
-    return SOFTBUS_OK;
 }
 
 static void DestroyLaneReqId(uint32_t laneReqId)
@@ -324,6 +313,8 @@ static LnnLaneManager g_LaneManager = {
     .applyLaneReqId = ApplyLaneReqId,
     .lnnRequestLane = LnnRequestLaneByQos,
     .lnnFreeLane = LnnFreeLane,
+    .registerLaneListener = RegisterLaneListener,
+    .unRegisterLaneListener = UnRegisterLaneListener,
 };
 
 LnnLaneManager* GetLaneManager(void)

@@ -19,55 +19,18 @@
 #include "lnn_lane_def.h"
 #include "lnn_lane_interface.h"
 #include "lnn_lane_link.h"
-#include "wifi_direct_types.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct {
-    ListNode node;
-    LaneType laneType;
-    LaneLinkInfo laneLinkInfo;
-    uint32_t ref;
-} LaneTypeInfo;
-
-typedef struct {
-    uint32_t laneTypeNum;
-    LaneTypeInfo laneTypeInfoList[LANE_TYPE_BUTT];
-} LaneTypeInfoResult;
-
-typedef struct {
-    char peerUdid[UDID_BUF_LEN];
-    uint32_t laneId;
-    LaneLinkType type;
-} LaneStatusInfo;
-
-typedef struct {
-    void (*onLaneOnLine)(LaneStatusInfo *laneStatusInfoOn);
-    void (*onLaneOffLine)(LaneStatusInfo *laneStatusInfoOff);
-    void (*onLaneStateChange)(LaneStatusInfoChange *laneStatusInfoChange);
-} LaneStatusListener;
-
-typedef struct {
-    LaneStatusChangeType laneStatusChangeType;
-    union {
-        enum WifiDirectRole role;
-    } laneStatusInfo;
-} LaneStatusInfoChange;
-
-typedef struct {
-    ListNode node;
-    LaneStatusListener laneStatusListen;
-    LaneType type;
-} LaneListenerInfo;
-
-int32_t UnRegisterLaneListener(const LaneType type);
-int32_t RegisterLaneListener(const LaneType type, const LaneStatusListener *listener);
-int32_t AddLaneTypeInfo(const LaneLinkInfo *linkInfo);
-int32_t DelLaneTypeInfoItem(uint32_t laneReqId);
-int32_t LnnOnWifiDirectDeviceOnLineNotify(const LaneLinkInfo *linkInfo);
+int32_t UnRegisterLaneListener(LaneType type);
+int32_t RegisterLaneListener(LaneType type, const LaneStatusListener *listener);
+int32_t AddLaneBusinessInfoItem(LaneType laneType, const LaneLinkInfo *laneLinkInfo);
+int32_t DelLaneBusinessInfoItem(LaneType laneType, const LaneLinkInfo *laneLinkInfo);
 int32_t InitLaneListener(void);
+int32_t LaneLinkupNotify(const char *peerUdid, const LaneLinkInfo *laneLinkInfo);
+int32_t LaneLinkdownNotify(const char *peerUdid, const LaneLinkInfo *laneLinkInfo);
 
 #ifdef __cplusplus
 }
