@@ -324,7 +324,8 @@ static int32_t FindLaneListenerInfoByLaneType(const LaneType type, LaneListenerI
 
 static int32_t GetStatusInfoByLinkInfo(const LaneLinkInfo *laneLinkInfo, LaneStatusInfo *laneStatusInfo)
 {
-    TransOption reqInfo = {0};
+    TransOption reqInfo;
+    memset_s(&reqInfo, sizeof(TransOption), 0, sizeof(TransOption));
     if (GetTransOptionByLaneReqId(laneLinkInfo->laneReqId, &reqInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get TransReqInfo fail, laneReqId=%{public}d", laneLinkInfo->laneReqId);
         return SOFTBUS_ERR;

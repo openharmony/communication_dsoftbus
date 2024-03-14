@@ -49,6 +49,9 @@ public:
         bool *isDelayDestroy) = 0;
     virtual void FreeLaneReqId(uint32_t laneReqId) = 0;
     virtual void HandleLaneReliabilityTime(void) = 0;
+    virtual int32_t AddLaneTypeInfo(const LaneLinkInfo *linkInfo) = 0;
+    virtual int32_t LnnOnWifiDirectDeviceOnLineNotify(const LaneLinkInfo *linkInfo) = 0;
+    virtual int32_t DelLaneTypeInfoItem(uint32_t laneReqId) = 0;
 };
 
 class TransLaneDepsInterfaceMock : public TransLaneDepsInterface {
@@ -72,6 +75,9 @@ public:
         bool *isDelayDestroy));
     MOCK_METHOD1(FreeLaneReqId, void (uint32_t laneReqId));
     MOCK_METHOD0(HandleLaneReliabilityTime, void ());
+    MOCK_METHOD1(AddLaneTypeInfo, int32_t (const LaneLinkInfo *linkInfo));
+    MOCK_METHOD1(LnnOnWifiDirectDeviceOnLineNotify, int32_t (const LaneLinkInfo *linkInfo));
+    MOCK_METHOD1(DelLaneTypeInfoItem, int32_t (uint32_t laneReqId));
 };
 } // namespace OHOS
 #endif // LNN_TRANS_LANE_DEPS_MOCK_H
