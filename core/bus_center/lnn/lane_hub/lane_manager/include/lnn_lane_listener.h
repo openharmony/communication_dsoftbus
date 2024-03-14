@@ -44,13 +44,6 @@ typedef struct {
 } LaneStatusInfo;
 
 typedef struct {
-    LaneStatusChangeType laneStatusChangeType;
-    union {
-        enum WifiDirectRole role;
-    } laneStatusInfo;
-} LaneStatusInfoChange;
-
-typedef struct {
     void (*onLaneOnLine)(LaneStatusInfo *laneStatusInfoOn);
     void (*onLaneOffLine)(LaneStatusInfo *laneStatusInfoOff);
     void (*onLaneStateChange)(LaneStatusInfoChange *laneStatusInfoChange);
