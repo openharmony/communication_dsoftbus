@@ -114,7 +114,7 @@ static int32_t GenerateProxyChannelId()
 
 void ReleaseProxyChannelId(int32_t channelId)
 {
-    if (channelId == INVALID_CHANNEL_ID) {
+    if (channelId < MAX_FD_ID) {
         return;
     }
     if (SoftBusMutexLock(&g_myIdLock) != 0) {
