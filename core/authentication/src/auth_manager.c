@@ -569,6 +569,12 @@ static AuthManager *AuthManagerIsExist(int64_t authSeq, const AuthSessionInfo *i
 {
     AuthManager *auth = FindAuthManagerByConnInfo(&info->connInfo, info->isServer);
     if (auth != NULL && auth->connInfo[info->connInfo.type].type != 0) {
+        if (strcpy_s(auth->uuid, UUID_BUF_LEN, info->uuid) != EOK) {
+            char *anonyUuid = NULL;
+            Anonymize(info->uuid, &anonyUuid);
+            AUTH_LOGE(AUTH_FSM, "str copy uuid fail, uuid=%{public}s", anonyUuid);
+            AnonymizeFree(anonyUuid);
+        }
         if (auth->connId[info->connInfo.type] != info->connId &&
             auth->connInfo[info->connInfo.type].type == AUTH_LINK_TYPE_WIFI) {
             DisconnectAuthDevice(&auth->connId[info->connInfo.type]);
