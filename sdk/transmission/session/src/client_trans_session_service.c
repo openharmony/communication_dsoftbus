@@ -350,7 +350,7 @@ static int IsValidAddrInfoArr(const ConnectionAddr *addrInfo, int num)
     int32_t wifiIndex = -1;
     int32_t brIndex = -1;
     int32_t bleIndex = -1;
-    for (int32_t index = 0; index < num; index++) {
+    for (int32_t index = 0; num > index; index++) {
         if ((addrInfo[index].type == CONNECTION_ADDR_ETH || addrInfo[index].type == CONNECTION_ADDR_WLAN) &&
             wifiIndex < 0) {
             wifiIndex = index;
