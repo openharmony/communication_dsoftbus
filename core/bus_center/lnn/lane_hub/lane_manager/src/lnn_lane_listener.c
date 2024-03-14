@@ -406,22 +406,6 @@ static void LnnOnWifiDirectDeviceOffLine(const char *peerMac, const char *peerIp
 static void LnnOnWifiDirectRoleChange(enum WifiDirectRole myRole)
 {
     return;
-    // LaneStatusInfoChange laneStatusInfoChange;
-    // laneStatusInfoChange.laneStatusChangeType = LANE_STATUS_CHANGE_TYPE_P2P;
-    // laneStatusInfoChange.laneStatusInfo.role = myRole;
-
-    // if (LaneListenerLock() != SOFTBUS_OK) {
-    //     LNN_LOGE(LNN_LANE, "lane listener lock fail");
-    //     return;
-    // }
-    // LaneListenerInfo *item = NULL;
-    // LaneListenerInfo *next = NULL;
-    // LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneListenerList, LaneListenerInfo, node) {
-    //     if (item->laneStatusListen.onLaneStateChange != NULL) {
-    //         item->laneStatusListen.onLaneStateChange(&laneStatusInfoChange);
-    //     }
-    // }
-    // LaneListenerUnlock();
 }
 
 static void LnnOnWifiDirectDeviceOnLine(const char *peerMac, const char *peerIp, const char *peerUuid)
