@@ -116,17 +116,21 @@ int32_t SelectExpectLaneByParameter(LanePreferredLinkList *setRecommendLinkList)
 {
     return GetTransLaneIf()->SelectExpectLaneByParameter(setRecommendLinkList);
 }
-int32_t AddLaneTypeInfo(const LaneLinkInfo *linkInfo)
+int32_t AddLaneBusinessInfoItem(LaneType laneType, const LaneLinkInfo *laneLinkInfo)
 {
-    return GetTransLaneIf()->AddLaneTypeInfo(linkInfo);
+    return GetTransLaneIf()->AddLaneBusinessInfoItem(laneType, laneLinkInfo);
 }
-int32_t LnnOnWifiDirectDeviceOnLineNotify(const LaneLinkInfo *linkInfo)
+int32_t DelLaneBusinessInfoItem(LaneType laneType, const LaneLinkInfo *laneLinkInfo)
 {
-    return GetTransLaneIf()->LnnOnWifiDirectDeviceOnLineNotify(linkInfo);
+    return GetTransLaneIf()->DelLaneBusinessInfoItem(laneType, laneLinkInfo);
 }
-int32_t DelLaneTypeInfoItem(uint32_t laneReqId)
+int32_t LaneLinkupNotify(const char *peerUdid, const LaneLinkInfo *laneLinkInfo)
 {
-    return GetTransLaneIf()->DelLaneTypeInfoItem(laneReqId);
+    return GetTransLaneIf()->LaneLinkupNotify(peerUdid, laneLinkInfo);
+}
+int32_t LaneLinkdownNotify(const char *peerUdid, const LaneLinkInfo *laneLinkInfo)
+{
+    return GetTransLaneIf()->LaneLinkdownNotify(peerUdid, laneLinkInfo);
 }
 }
 } // namespace OHOS

@@ -18,6 +18,7 @@
 
 #include "lnn_lane_assign.h"
 #include "lnn_lane_link.h"
+#include "lnn_lane_listener.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,6 +30,7 @@ int32_t PostDelayDestroyMessage(uint32_t laneReqId, LaneResource *resourceItem, 
 int32_t PostDetectTimeoutMessage(uint32_t detectId, uint64_t delayMillis);
 int32_t PostReliabilityTimeMessage(void);
 void RemoveDetectTimeoutMessage(uint32_t detectId);
+int32_t PostLaneStateChangeMessage(LaneState state, const char *peerUdid, const LaneLinkInfo *laneLinkInfo);
 
 #ifdef __cplusplus
 }
