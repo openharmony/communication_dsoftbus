@@ -84,15 +84,6 @@ typedef enum {
     LANE_STATUS_CHANGE_TYPE_BUTT,
 } LaneStatusChangeType;
 
-typedef enum {
-    LANE_LINK_INFO_ID_PEER_IP = 0X0,
-    LANE_LINK_INFO_ID_BR_MAC,
-    LANE_LINK_INFO_ID_BLE_MAC,
-    LANE_LINK_INFO_ID_WLAN_ADDR,
-    LANE_LINK_INFO_ID_NETWORK_ID,
-    LANE_LINK_INFO_ID_BUTT,
-} LaneLinkInfoIdType;
-
 #ifdef __cplusplus
 }
 #endif
