@@ -322,31 +322,42 @@ static int32_t FindLaneListenerInfoByLaneType(const LaneType type, LaneListenerI
     return SOFTBUS_OK;
 }
 
+static int32_t GetStatusInfoByLinkInfo(const LaneLinkInfo *laneLinkInfo, LaneStatusInfo *laneStatusInfo)
+{
+    TransOption reqInfo = {0};
+    if (GetTransOptionByLaneReqId(laneLinkInfo->laneReqId, &reqInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get TransReqInfo fail, laneReqId=%{public}d", laneLinkInfo->laneReqId);
+        return SOFTBUS_ERR;
+    }
+    NodeInfo nodeInfo;
+    memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    int32_t ret = LnnGetRemoteNodeInfoById(reqInfo.networkId, CATEGORY_NETWORK_ID, &nodeInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get TransReqInfo fail, laneReqId=%{public}d", laneLinkInfo->laneReqId);
+        return SOFTBUS_ERR;
+    }
+    if (strncpy_s(laneStatusInfo->peerUdid, UDID_BUF_LEN, nodeInfo.masterUdid, UDID_BUF_LEN) != EOK) {
+        LNN_LOGE(LNN_STATE, "copy peerUuid fail");
+        return SOFTBUS_ERR;
+    }
+    laneStatusInfo->type = laneLinkInfo->type;
+    return SOFTBUS_OK;
+}
+
 static void LnnOnWifiDirectDeviceOffLineNotify(const LaneTypeInfo *laneTypeInfo)
 {
     if (laneTypeInfo == NULL) {
         LNN_LOGE(LNN_LANE, "invalid param");
         return;
     }
-    LaneListenerInfo laneListener;
+
     LaneStatusInfo laneStatusInfo;
-    TransOption reqInfo = {0};
-    if (GetTransOptionByLaneReqId(laneTypeInfo->laneLinkInfo.laneReqId, &reqInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get TransReqInfo fail, laneReqId=%{public}d", laneTypeInfo->laneLinkInfo.laneReqId);
+    memset_s(&laneStatusInfo, sizeof(LaneStatusInfo), 0, sizeof(LaneStatusInfo));
+    if (GetStatusInfoByLinkInfo(&laneTypeInfo->laneLinkInfo, &laneStatusInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "get lane status info fail");
         return;
     }
-    NodeInfo nodeInfo;
-    memset_s(&nodeInfo, sizeof(nodeInfo), 0, sizeof(nodeInfo));
-    int32_t ret = LnnGetRemoteNodeInfoById(reqInfo.networkId, CATEGORY_NETWORK_ID, &nodeInfo);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get TransReqInfo fail, laneReqId=%{public}d", laneTypeInfo->laneLinkInfo.laneReqId);
-        return;
-    }
-    if (strncpy_s(laneStatusInfo.peerUdid, UDID_BUF_LEN, nodeInfo.masterUdid, UDID_BUF_LEN) != EOK) {
-        LNN_LOGE(LNN_STATE, "copy peerUuid fail");
-        return;
-    }
-    laneStatusInfo.type = laneTypeInfo->laneLinkInfo.type;
+    LaneListenerInfo laneListener;
     if (FindLaneListenerInfoByLaneType(laneTypeInfo->laneType, &laneListener) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "find lane listener fail, laneType=%{public}d", laneTypeInfo->laneType);
         return;
@@ -436,23 +447,11 @@ int32_t LnnOnWifiDirectDeviceOnLineNotify(const LaneLinkInfo *linkInfo)
         return SOFTBUS_OK;
     }
     LaneStatusInfo laneStatusInfo;
-    TransOption reqInfo = {0};
-    if (GetTransOptionByLaneReqId(linkInfo->laneReqId, &reqInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get TransReqInfo fail, laneReqId=%{public}d", linkInfo->laneReqId);
+    memset_s(&laneStatusInfo, sizeof(LaneStatusInfo), 0, sizeof(LaneStatusInfo));
+    if (GetStatusInfoByLinkInfo(linkInfo, &laneStatusInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "get lane status info fail");
         return SOFTBUS_ERR;
     }
-    NodeInfo nodeInfo;
-    memset_s(&nodeInfo, sizeof(nodeInfo), 0, sizeof(nodeInfo));
-    int32_t ret = LnnGetRemoteNodeInfoById(reqInfo.networkId, CATEGORY_NETWORK_ID, &nodeInfo);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get TransReqInfo fail, laneReqId=%{public}d", linkInfo->laneReqId);
-        return SOFTBUS_ERR;
-    }
-    if (strncpy_s(laneStatusInfo.peerUdid, UDID_BUF_LEN, nodeInfo.masterUdid, UDID_BUF_LEN) != EOK) {
-        LNN_LOGE(LNN_STATE, "copy peerUuid fail");
-        return SOFTBUS_ERR;
-    }
-    laneStatusInfo.type = linkInfo->type;
 
     if (LaneListenerLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "lane listener lock fail");
