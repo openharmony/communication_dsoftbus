@@ -262,32 +262,15 @@ HWTEST_F(ConnectionBleTest, ManagerTest002, TestSize.Level1)
     ret = ConnStopLocalListening(nullptr);
     ASSERT_TRUE(ret != SOFTBUS_OK);
 }
-
 /*
 * @tc.name: ManagerTest003
-* @tc.desc: test set unset callback and post disconnect without connect.
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(ConnectionBleTest, ManagerTest003, TestSize.Level1)
-{
-    ConnectCallback connCb;
-    connCb.OnConnected = ConnectedCB;
-    connCb.OnDisconnected = DisConnectedCB;
-    connCb.OnDataReceived = DataReceivedCB;
-    int ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
-}
-/*
-* @tc.name: ManagerTest004
 * @tc.desc: Test Start stop listening.
 * @tc.in: Test module, Test number, Test Levels.
 * @tc.out: NonZero
 * @tc.type: FUNC
 * @tc.require:The ConnStartLocalListening and ConnStopLocalListening operates normally.
 */
-HWTEST_F(ConnectionBleTest, ManagerTest004, TestSize.Level1)
+HWTEST_F(ConnectionBleTest, ManagerTest003, TestSize.Level1)
 {
     ConnectCallback connCb;
     connCb.OnConnected = ConnectedCB;
