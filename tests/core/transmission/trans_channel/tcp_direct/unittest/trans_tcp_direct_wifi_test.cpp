@@ -127,8 +127,6 @@ HWTEST_F(TransTcpDirectWifiTest, OpenTcpDirectChannelTest002, TestSize.Level1)
     connInfo->type = CONNECT_P2P_REUSE;
     NiceMock<TransTcpDirectWifiInterfaceMock> TcpWifiMock;
     EXPECT_CALL(TcpWifiMock, CreateNewSessinConn).WillOnce(Return(conn));
-    EXPECT_CALL(TcpWifiMock, AuthGetLatestIdByUuid).WillRepeatedly(Return(AUTH_INVALID_ID));
-    EXPECT_CALL(TcpWifiMock, AuthGetLatestIdByUuid).WillRepeatedly(Return(NORMAL_CHANNEL));
     EXPECT_CALL(TcpWifiMock, ConnOpenClientSocket).WillOnce(Return(NORMAL_FD));
     EXPECT_CALL(TcpWifiMock, AddTrigger).WillOnce(Return(SOFTBUS_OK));
     int32_t ret = OpenTcpDirectChannel(appInfo, connInfo, &channelId);
@@ -205,7 +203,6 @@ HWTEST_F(TransTcpDirectWifiTest, OpenTcpDirectChannelTest005, TestSize.Level1)
     connInfo->type = CONNECT_P2P_REUSE;
     NiceMock<TransTcpDirectWifiInterfaceMock> TcpWifiMock;
     EXPECT_CALL(TcpWifiMock, CreateNewSessinConn).WillOnce(Return(conn));
-    EXPECT_CALL(TcpWifiMock, AuthGetLatestIdByUuid).WillRepeatedly(Return(AUTH_INVALID_ID));
     int32_t ret = OpenTcpDirectChannel(appInfo, connInfo, &channelId);
     EXPECT_EQ(SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED, ret);
 
@@ -232,7 +229,6 @@ HWTEST_F(TransTcpDirectWifiTest, OpenTcpDirectChannelTest006, TestSize.Level1)
     connInfo->type = CONNECT_P2P_REUSE;
     NiceMock<TransTcpDirectWifiInterfaceMock> TcpWifiMock;
     EXPECT_CALL(TcpWifiMock, CreateNewSessinConn).WillOnce(Return(conn));
-    EXPECT_CALL(TcpWifiMock, AuthGetLatestIdByUuid).WillRepeatedly(Return(NORMAL_CHANNEL));
     EXPECT_CALL(TcpWifiMock, ConnOpenClientSocket).WillOnce(Return(SOFTBUS_ERR));
     int32_t ret = OpenTcpDirectChannel(appInfo, connInfo, &channelId);
     EXPECT_EQ(SOFTBUS_ERR, ret);
@@ -260,7 +256,6 @@ HWTEST_F(TransTcpDirectWifiTest, OpenTcpDirectChannelTest007, TestSize.Level1)
     connInfo->type = CONNECT_P2P_REUSE;
     NiceMock<TransTcpDirectWifiInterfaceMock> TcpWifiMock;
     EXPECT_CALL(TcpWifiMock, CreateNewSessinConn).WillOnce(Return(conn));
-    EXPECT_CALL(TcpWifiMock, AuthGetLatestIdByUuid).WillRepeatedly(Return(NORMAL_CHANNEL));
     EXPECT_CALL(TcpWifiMock, ConnOpenClientSocket).WillRepeatedly(Return(NORMAL_FD));
     EXPECT_CALL(TcpWifiMock, AddTrigger).WillRepeatedly(Return(SOFTBUS_ERR));
     int32_t ret = OpenTcpDirectChannel(appInfo, connInfo, &channelId);
@@ -290,7 +285,6 @@ HWTEST_F(TransTcpDirectWifiTest, OpenTcpDirectChannelTest008, TestSize.Level1)
     connInfo->type = CONNECT_P2P_REUSE;
     NiceMock<TransTcpDirectWifiInterfaceMock> TcpWifiMock;
     EXPECT_CALL(TcpWifiMock, CreateNewSessinConn).WillOnce(Return(conn));
-    EXPECT_CALL(TcpWifiMock, AuthGetLatestIdByUuid).WillRepeatedly(Return(NORMAL_CHANNEL));
     EXPECT_CALL(TcpWifiMock, ConnOpenClientSocket).WillRepeatedly(Return(NORMAL_FD));
     EXPECT_CALL(TcpWifiMock, TransSrvAddDataBufNode).WillRepeatedly(Return(SOFTBUS_ERR));
     int32_t ret = OpenTcpDirectChannel(appInfo, connInfo, &channelId);
@@ -319,7 +313,6 @@ HWTEST_F(TransTcpDirectWifiTest, OpenTcpDirectChannelTest009, TestSize.Level1)
     connInfo->type = CONNECT_P2P_REUSE;
     NiceMock<TransTcpDirectWifiInterfaceMock> TcpWifiMock;
     EXPECT_CALL(TcpWifiMock, CreateNewSessinConn).WillOnce(Return(conn));
-    EXPECT_CALL(TcpWifiMock, AuthGetLatestIdByUuid).WillRepeatedly(Return(NORMAL_CHANNEL));
     EXPECT_CALL(TcpWifiMock, ConnOpenClientSocket).WillRepeatedly(Return(NORMAL_FD));
     EXPECT_CALL(TcpWifiMock, TransTdcAddSessionConn).WillRepeatedly(Return(SOFTBUS_ERR));
     int32_t ret = OpenTcpDirectChannel(appInfo, connInfo, &channelId);

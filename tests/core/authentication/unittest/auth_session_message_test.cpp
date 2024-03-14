@@ -164,19 +164,17 @@ HWTEST_F(AuthSessionMessageTest, GetEnhancedP2pAuthKey_TEST_001, TestSize.Level1
     EXPECT_TRUE(GetFastAuthKey("hashtest", &info, nullptr) == SOFTBUS_ERR);
     info.connInfo.type = AUTH_LINK_TYPE_BLE;
     EXPECT_TRUE(GetFastAuthKey("hashtest", &info, nullptr) == SOFTBUS_ERR);
-    NodeInfo localNodeInfo;
-    (void)memset_s(&localNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     info.isServer = true;
     info.isSupportFastAuth = true;
     info.isNeedFastAuth = false;
-    PackFastAuth(nullptr, &info, &localNodeInfo);
+    PackFastAuth(nullptr, &info);
     info.isNeedFastAuth = true;
-    PackFastAuth(nullptr, &info, &localNodeInfo);
+    PackFastAuth(nullptr, &info);
     info.isSupportFastAuth = false;
-    PackFastAuth(nullptr, &info, &localNodeInfo);
+    PackFastAuth(nullptr, &info);
     info.isServer = false;
     info.isNeedFastAuth = true;
-    PackFastAuth(nullptr, &info, &localNodeInfo);
+    PackFastAuth(nullptr, &info);
 }
 
 /*

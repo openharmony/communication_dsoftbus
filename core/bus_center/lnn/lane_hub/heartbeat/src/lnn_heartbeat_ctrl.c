@@ -477,7 +477,6 @@ static void HbDifferentAccountEventHandler(const LnnEventBasicInfo *info)
     }
     const LnnMonitorHbStateChangedEvent *event = (const LnnMonitorHbStateChangedEvent *)info;
     SoftBusDifferentAccountState difAccountState = (SoftBusDifferentAccountState)event->status;
-    // g_hbConditionState.accountState == difAccountState;
     if (difAccountState == LNN_EVENT_DIF_ACCOUNT_DEV_CHANGED) {
         HbConditionChanged(false);
     }

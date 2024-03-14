@@ -185,6 +185,7 @@ static void DfxRecordBleConnectFail(
     ConnEventExtra extra = {
         .requestId = reqId,
         .linkType = CONNECT_BLE,
+        .connProtocol = device->protocol,
         .costTime = costTime,
         .peerBleMac = device->addr,
         .errcode = reason,
@@ -214,11 +215,13 @@ static void DfxRecordBleConnectSuccess(uint32_t pId, ConnBleConnection *connecti
     ConnEventExtra extra = {
         .connectionId = (int32_t)connection->connectionId,
         .linkType = CONNECT_BLE,
+        .connProtocol = connection->protocol,
         .costTime = (int32_t)costTime,
         .isReuse = statistics->reuse ? 1 : 0,
         .peerBleMac = connection->addr,
         .requestId = (int32_t)statistics->reqId,
-        .result = EVENT_STAGE_RESULT_OK };
+        .result = EVENT_STAGE_RESULT_OK
+    };
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
 }
 
@@ -508,18 +511,19 @@ static int32_t BleConnectDeviceDirectly(ConnBleDevice *device, const char *anomi
         TransitionToState(BLE_MGR_STATE_CONNECTING);
     } while (false);
 
-    if (status != SOFTBUS_OK) {
-        ConnBleRemoveConnection(connection);
-        SoftBusFree(address);
-    }
     ConnEventExtra extra = {
         .connectionId = (int32_t)connection->connectionId,
         .peerBleMac = device->addr,
         .peerUdid = device->udid,
         .linkType = CONNECT_BLE,
-        .result = EVENT_STAGE_RESULT_OK
+        .errcode = status,
+        .result = status == SOFTBUS_OK ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED
     };
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_DEVICE_DIRECTLY, extra);
+    if (status != SOFTBUS_OK) {
+        ConnBleRemoveConnection(connection);
+        SoftBusFree(address);
+    }
     ConnBleReturnConnection(&connection);
     return status;
 }

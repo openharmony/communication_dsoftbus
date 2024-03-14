@@ -18,7 +18,6 @@
 #include "softbus_adapter_define.h"
 #include <cstddef>
 #include <cstdint>
-#include <securec.h>
 
 namespace OHOS {
 const int PROTOCOL_MAXLEN = 100;
@@ -35,8 +34,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     }
 
     int32_t socketFd = *(reinterpret_cast<const int32_t*>(data));
-    struct SocketProtocol buf;
-    memset_s(&buf, sizeof(struct SocketProtocol), 0, sizeof(struct SocketProtocol));
+    struct SocketProtocol buf = {0};
     uint32_t len = *(reinterpret_cast<const uint32_t*>(data));
     int32_t flags = *(reinterpret_cast<const int32_t*>(data));
 

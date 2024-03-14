@@ -19,6 +19,7 @@
 #include <securec.h>
 
 #include "anonymizer.h"
+#include "auth_interface.h"
 #include "auth_device_common_key.h"
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
@@ -61,6 +62,60 @@ int32_t LnnInitNetLedger(void)
     return SOFTBUS_OK;
 }
 
+static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
+{
+    int64_t accountId = 0;
+    if (LnnGetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, &accountId) == SOFTBUS_OK) {
+        if (accountId != info->accountId) {
+            LNN_LOGW(LNN_LEDGER, "account change");
+            return true;
+        }
+    }
+    char softBusVersion[VERSION_MAX_LEN] = {0};
+    if (LnnGetLocalStrInfo(STRING_KEY_HICE_VERSION, softBusVersion, sizeof(softBusVersion)) == SOFTBUS_OK) {
+        if (strcmp(softBusVersion, info->softBusVersion) != 0) {
+            LNN_LOGW(LNN_LEDGER, "softbus version change, version:%s", softBusVersion);
+            return true;
+        }
+    }
+    uint64_t softbusFeature = 0;
+    if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &softbusFeature) == SOFTBUS_OK) {
+        if (softbusFeature != info->feature) {
+            LNN_LOGW(LNN_LEDGER, "feature change, old:%" PRIu64 ", new:%" PRIu64, info->feature, softbusFeature);
+            return true;
+        }
+    }
+    char uuid[UUID_BUF_LEN] = {0};
+    if (LnnGetLocalStrInfo(STRING_KEY_UUID, uuid, UUID_BUF_LEN) == SOFTBUS_OK) {
+        if (strcmp(uuid, info->uuid) != 0) {
+            LNN_LOGW(LNN_LEDGER, "uuid change.");
+            return true;
+        }
+    }
+    int32_t osType = 0;
+    if (LnnGetLocalNumInfo(NUM_KEY_OS_TYPE, &osType) == SOFTBUS_OK) {
+        if (osType != info->deviceInfo.osType) {
+            LNN_LOGW(LNN_LEDGER, "osType change, old:%d, new:%d", info->deviceInfo.osType, osType);
+            return true;
+        }
+    }
+    uint32_t authCapacity = 0;
+    if (LnnGetLocalNumInfo(NUM_KEY_AUTH_CAP, (int32_t *)&authCapacity) == SOFTBUS_OK) {
+        if (authCapacity != info->authCapacity) {
+            LNN_LOGW(LNN_LEDGER, "authCapacity change, old:%d, new:%d", info->authCapacity, authCapacity);
+            return true;
+        }
+    }
+    int32_t level = 0;
+    if (LnnGetLocalNumInfo(NUM_KEY_DEVICE_SECURITY_LEVEL, &level) == SOFTBUS_OK) {
+        if (level != info->deviceSecurityLevel) {
+            LNN_LOGW(LNN_LEDGER, "deviceSecuritylevel change %{public}d->%{public}d", info->deviceSecurityLevel, level);
+            return true;
+        }
+    }
+    return false;
+}
+
 static void LnnRestoreLocalDeviceInfo()
 {
     LNN_LOGI(LNN_LEDGER, "restore local device info enter");
@@ -78,20 +133,10 @@ static void LnnRestoreLocalDeviceInfo()
         char *anonyNetworkId = NULL;
         Anonymize(info.networkId, &anonyNetworkId);
         LNN_LOGI(LNN_LEDGER, "load local deviceInfo success, networkId=%{public}s", anonyNetworkId);
-        int64_t accountId = 0;
-        int32_t osType = 0;
         AnonymizeFree(anonyNetworkId);
-        if (LnnGetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, &accountId) == SOFTBUS_OK) {
-            if (accountId != info.accountId) {
-                info.stateVersion++;
-                LnnSaveLocalDeviceInfo(&info);
-            }
-        }
-        if (LnnGetLocalNumInfo(NUM_KEY_OS_TYPE, &osType) == SOFTBUS_OK) {
-            if (osType != info.deviceInfo.osType) {
-                info.stateVersion++;
-                LnnSaveLocalDeviceInfo(&info);
-            }
+        if (IsBleDirectlyOnlineFactorChange(&info)) {
+            info.stateVersion++;
+            LnnSaveLocalDeviceInfo(&info);
         }
         LNN_LOGI(LNN_LEDGER, "load local deviceInfo stateVersion=%{public}d", info.stateVersion);
         if (LnnSetLocalNumInfo(NUM_KEY_STATE_VERSION, info.stateVersion) != SOFTBUS_OK) {
@@ -167,6 +212,8 @@ static int32_t LnnGetNodeKeyInfoLocal(const char *networkId, int key, uint8_t *i
             return LnnGetLocalStrInfo(STRING_KEY_NODE_ADDR, (char *)info, infoLen);
         case NODE_KEY_P2P_IP_ADDRESS:
             return LnnGetLocalStrInfo(STRING_KEY_P2P_IP, (char *)info, infoLen);
+        case NODE_KEY_DEVICE_SECURITY_LEVEL:
+            return LnnGetLocalNumInfo(NUM_KEY_DEVICE_SECURITY_LEVEL, (int32_t *)info);
         default:
             LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
             return SOFTBUS_ERR;
@@ -202,6 +249,8 @@ static int32_t LnnGetNodeKeyInfoRemote(const char *networkId, int key, uint8_t *
             return LnnGetRemoteStrInfo(networkId, STRING_KEY_NODE_ADDR, (char *)info, infoLen);
         case NODE_KEY_P2P_IP_ADDRESS:
             return LnnGetRemoteStrInfo(networkId, STRING_KEY_P2P_IP, (char *)info, infoLen);
+        case NODE_KEY_DEVICE_SECURITY_LEVEL:
+            return LnnGetRemoteNumInfo(networkId, NUM_KEY_DEVICE_SECURITY_LEVEL, (int32_t *)info);
         default:
             LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
             return SOFTBUS_ERR;
@@ -277,6 +326,8 @@ int32_t LnnGetNodeKeyInfoLen(int32_t key)
             return SHORT_ADDRESS_MAX_LEN;
         case NODE_KEY_P2P_IP_ADDRESS:
             return IP_LEN;
+        case NODE_KEY_DEVICE_SECURITY_LEVEL:
+            return LNN_COMMON_LEN;
         default:
             LNN_LOGE(LNN_LEDGER, "invalid node key type=%{public}d", key);
             return SOFTBUS_ERR;

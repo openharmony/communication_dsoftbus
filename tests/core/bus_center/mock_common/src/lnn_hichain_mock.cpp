@@ -27,6 +27,8 @@ namespace OHOS {
 const int32_t GRUOP_NUM1 = 10;
 const int32_t GRUOP_NUM2 = 12;
 const int32_t GRUOP_NUM3 = 100;
+const int32_t GROUP_TYPE_POINT_TO_POINT = 256;
+const int32_t GROUP_VISIBILITY_INVALID = 26;
 char jsonChar = 'A';
 bool flage  = false;
 bool is_return_device_num = false;
@@ -183,8 +185,8 @@ int32_t LnnHichainInterfaceMock::getRelatedGroups1(
     if (!JSON_AddStringToObject(obj, "groupName", "mygroup<256>E469") ||
         !JSON_AddStringToObject(obj, "groupId", "1D77EBFF0349B27EED57014DD7B2449A") ||
         !JSON_AddStringToObject(obj, "groupOwner", "com.hhhs.secueity") ||
-        !JSON_AddInt32ToObject(obj, "groupType", 256) ||
-        !JSON_AddInt32ToObject(obj, "groupVisibility", 26)) {
+        !JSON_AddInt32ToObject(obj, "groupType", GROUP_TYPE_POINT_TO_POINT) ||
+        !JSON_AddInt32ToObject(obj, "groupVisibility", GROUP_VISIBILITY_INVALID)) {
         JSON_Delete(obj);
         return SOFTBUS_ERR;
     }
@@ -196,7 +198,7 @@ int32_t LnnHichainInterfaceMock::getRelatedGroups1(
     return SOFTBUS_OK;
 }
 int32_t LnnHichainInterfaceMock::getTrustedDevices(
-        int32_t osAccountId, const char *appId, const char *groupId, char **returnDevInfoVec, uint32_t *deviceNum)
+    int32_t osAccountId, const char *appId, const char *groupId, char **returnDevInfoVec, uint32_t *deviceNum)
 {
     (void)osAccountId;
     (void)appId;
@@ -223,7 +225,7 @@ int32_t LnnHichainInterfaceMock::getTrustedDevices(
 }
 
 int32_t LnnHichainInterfaceMock::getTrustedDevices1(
-        int32_t osAccountId, const char *appId, const char *groupId, char **returnDevInfoVec, uint32_t *deviceNum)
+    int32_t osAccountId, const char *appId, const char *groupId, char **returnDevInfoVec, uint32_t *deviceNum)
 {
     (void)osAccountId;
     (void)appId;

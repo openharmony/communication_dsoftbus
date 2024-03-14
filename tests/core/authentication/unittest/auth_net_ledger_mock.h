@@ -97,9 +97,9 @@ public:
     static inline bool isRuned;
     static inline SoftBusMutex mutex;
     static char *Pack(int64_t authSeq, const AuthSessionInfo *info, AuthDataHead &head);
-    static void OnDeviceVerifyPass(int64_t authId, const NodeInfo *info);
+    static void OnDeviceVerifyPass(AuthHandle authHandle, const NodeInfo *info);
     static void OnDeviceNotTrusted(const char *peerUdid);
-    static void OnDeviceDisconnect(int64_t authId);
+    static void OnDeviceDisconnect(AuthHandle authHandle);
 };
 } // namespace OHOS
 #endif // AUTH_NET_LEDGER_MOCK_H

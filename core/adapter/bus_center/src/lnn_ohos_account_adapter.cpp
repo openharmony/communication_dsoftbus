@@ -92,7 +92,7 @@ int32_t GetActiveOsAccountIds(void)
         LNN_LOGE(LNN_STATE, "QueryActiveOsAccountIds failed");
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_STATE, "GetActiveOsAccountIds id=%{public}d", accountId[0]);
+    LNN_LOGD(LNN_STATE, "account id=%{public}d", accountId[0]);
     return accountId[0];
 }
 

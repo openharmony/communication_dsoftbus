@@ -119,7 +119,7 @@ SessionConn *TestSetSessionConn()
     conn->status = TCP_DIRECT_CHANNEL_STATUS_INIT;
     conn->timeout = 0;
     conn->req = INVALID_VALUE;
-    conn->authId = 1;
+    conn->authHandle.authId = 1;
     conn->requestId = 0;
     conn->listenMod = DIRECT_CHANNEL_SERVER_WIFI;
     conn->appInfo.myData.pid = 1;
@@ -219,7 +219,7 @@ HWTEST_F(TransCoreTcpDirectTest, TransOpenDirectChannelTest003, TestSize.Level1)
     ConnectOption connOpt;
     int32_t channelId = 0;
     (void)memset_s(&connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
-    uint32_t laneId = 0;
+    uint32_t laneReqId = 0;
     attr.dataType = 1;
     attr.linkTypeNum = 0;
     SessionParam param = {
@@ -240,7 +240,7 @@ HWTEST_F(TransCoreTcpDirectTest, TransOpenDirectChannelTest003, TestSize.Level1)
     appInfo->crc = APP_INFO_FILE_FEATURES_SUPPORT;
     (void)memcpy_s(appInfo->myData.addr, IP_LEN, g_ip, strlen(g_ip));
 
-    int32_t ret = TransGetLaneInfo(&param, &connInfo, &laneId);
+    int32_t ret = TransGetLaneInfo(&param, &connInfo, &laneReqId);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     ret = TransGetConnectOptByConnInfo(&connInfo, &connOpt);
@@ -396,14 +396,14 @@ HWTEST_F(TransCoreTcpDirectTest, VerifyP2pPackErrorTest0010, TestSize.Level1)
 HWTEST_F(TransCoreTcpDirectTest, GetCipherFlagByAuthIdTest0011, TestSize.Level1)
 {
     bool isAuthServer = false;
-    int64_t authId = 1;
+    AuthHandle authHandle = { .authId = 1 };
     uint32_t flag = 0;
 
-    int32_t ret = GetCipherFlagByAuthId(authId, &flag, &isAuthServer);
+    int32_t ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    authId = INVALID_VALUE;
-    ret = GetCipherFlagByAuthId(authId, &flag, &isAuthServer);
+    authHandle.authId = INVALID_VALUE;
+    ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
@@ -531,7 +531,7 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcSrvRecvDataTest0017, TestSize.Level1)
     ret = TransSrvAddDataBufNode(channelId, fd);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
-    ret = TransTdcSrvRecvData((ListenerModule)ERRMOUDLE, channelId);
+    ret = TransTdcSrvRecvData((ListenerModule)ERRMOUDLE, channelId, 0);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     TransSrvDataListDeinit();
@@ -558,7 +558,7 @@ HWTEST_F(TransCoreTcpDirectTest, NotifyChannelOpenFailedTest0018, TestSize.Level
     conn->status = TCP_DIRECT_CHANNEL_STATUS_INIT;
     conn->timeout = 0;
     conn->req = INVALID_VALUE;
-    conn->authId = 1;
+    conn->authHandle.authId = 1;
     conn->requestId = 0;
     conn->listenMod = DIRECT_CHANNEL_SERVER_WIFI;
     conn->appInfo.myData.pid = 1;

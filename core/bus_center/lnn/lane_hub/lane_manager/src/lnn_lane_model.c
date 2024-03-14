@@ -33,7 +33,7 @@
 
 typedef struct {
     ListNode node;
-    uint32_t laneId;
+    uint64_t laneId;
 } LaneIdInfo;
 
 typedef struct {
@@ -69,7 +69,7 @@ uint32_t GenerateLaneProfileId(const LaneGenerateParam *param)
     return laneProfileId;
 }
 
-static void AddLaneIdNode(uint32_t laneId, LaneModel *laneModel)
+static void AddLaneIdNode(uint64_t laneId, LaneModel *laneModel)
 {
     LaneIdInfo *infoNode = NULL;
     LIST_FOR_EACH_ENTRY(infoNode, &laneModel->laneIdList, LaneIdInfo, node) {
@@ -89,7 +89,7 @@ static void AddLaneIdNode(uint32_t laneId, LaneModel *laneModel)
     laneModel->ref++;
 }
 
-static void DeleteLaneIdNode(uint32_t laneId, LaneModel *laneModel)
+static void DeleteLaneIdNode(uint64_t laneId, LaneModel *laneModel)
 {
     LaneIdInfo *item = NULL;
     LaneIdInfo *next = NULL;
@@ -103,7 +103,7 @@ static void DeleteLaneIdNode(uint32_t laneId, LaneModel *laneModel)
     }
 }
 
-static int32_t AddLaneModel(uint32_t laneId, uint32_t profileId, LaneProfile *laneProfile)
+static int32_t AddLaneModel(uint64_t laneId, uint32_t profileId, LaneProfile *laneProfile)
 {
     if (ModelLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get lock fail");
@@ -137,7 +137,7 @@ static int32_t AddLaneModel(uint32_t laneId, uint32_t profileId, LaneProfile *la
     return SOFTBUS_OK;
 }
 
-int32_t BindLaneIdToProfile(uint32_t laneId, LaneProfile *profile)
+int32_t BindLaneIdToProfile(uint64_t laneId, LaneProfile *profile)
 {
     if (profile == NULL) {
         LNN_LOGE(LNN_LANE, "profile is null");
@@ -155,7 +155,7 @@ int32_t BindLaneIdToProfile(uint32_t laneId, LaneProfile *profile)
     return SOFTBUS_OK;
 }
 
-void UnbindLaneIdFromProfile(uint32_t laneId, uint32_t profileId)
+void UnbindLaneIdFromProfile(uint64_t laneId, uint32_t profileId)
 {
     if (ModelLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get lock fail");
@@ -197,7 +197,7 @@ int32_t GetLaneProfile(uint32_t profileId, LaneProfile *profile)
     return SOFTBUS_OK;
 }
 
-int32_t GetLaneIdList(uint32_t profileId, uint32_t **laneIdList, uint32_t *listSize)
+int32_t GetLaneIdList(uint32_t profileId, uint64_t **laneIdList, uint32_t *listSize)
 {
     if (ModelLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get lock fail");
@@ -214,7 +214,7 @@ int32_t GetLaneIdList(uint32_t profileId, uint32_t **laneIdList, uint32_t *listS
         ModelUnlock();
         return SOFTBUS_ERR;
     }
-    *laneIdList = (uint32_t *)SoftBusCalloc(sizeof(uint32_t) * laneModel->ref);
+    *laneIdList = (uint64_t *)SoftBusCalloc(sizeof(uint64_t) * laneModel->ref);
     if (*laneIdList == NULL) {
         LNN_LOGE(LNN_LANE, "laneIdList malloc fail");
         ModelUnlock();

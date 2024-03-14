@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "anonymizer.h"
 #include "bus_center_manager.h"
 #include "lnn_lane_qos.h"
+#include "lnn_network_manager.h"
 #include "session.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_interface.h"
@@ -33,17 +34,16 @@
 #include "softbus_utils.h"
 #include "trans_auth_manager.h"
 #include "trans_channel_callback.h"
+#include "trans_event.h"
 #include "trans_lane_manager.h"
 #include "trans_lane_pending_ctl.h"
 #include "trans_link_listener.h"
 #include "trans_log.h"
 #include "trans_session_manager.h"
 #include "trans_tcp_direct_manager.h"
+#include "trans_tcp_direct_sessionconn.h"
 #include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation.h"
-#include "trans_tcp_direct_sessionconn.h"
-#include "lnn_network_manager.h"
-#include "trans_event.h"
 #include "wifi_direct_manager.h"
 
 #define MIGRATE_ENABLE 2
@@ -397,9 +397,12 @@ static void FillAppInfo(AppInfo *appInfo, const SessionParam *param,
             TRANS_LOGE(TRANS_CTRL, "copy local ip failed");
         }
     } else if (connInfo->type == LANE_P2P_REUSE) {
-        if (GetWifiDirectManager()->getLocalIpByRemoteIp(connInfo->connInfo.wlan.addr, appInfo->myData.addr, IP_LEN) !=
-            SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "get local ip failed");
+        struct WifiDirectManager *mgr = GetWifiDirectManager();
+        if (mgr != NULL && mgr->getLocalIpByRemoteIp != NULL) {
+            int32_t ret = mgr->getLocalIpByRemoteIp(connInfo->connInfo.wlan.addr, appInfo->myData.addr, IP_LEN);
+            if (ret != SOFTBUS_OK) {
+                TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
+            }
         }
     }
 }
@@ -433,7 +436,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     transInfo->channelId = INVALID_CHANNEL_ID;
     transInfo->channelType = CHANNEL_TYPE_BUTT;
     LaneConnInfo connInfo;
-    uint32_t laneId = 0;
+    uint32_t laneReqId = 0;
     ConnectOption connOpt;
     (void)memset_s(&connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     int32_t ret = INVALID_CHANNEL_ID;
@@ -441,16 +444,19 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
 
     AppInfo *appInfo = GetAppInfo(param);
     TRANS_CHECK_AND_RETURN_RET_LOGW(!(appInfo == NULL), INVALID_CHANNEL_ID, TRANS_CTRL, "GetAppInfo is null.");
+    char peerUdid[UDID_BUF_LEN] = {0};
+    int32_t udidRet = LnnGetRemoteStrInfo(appInfo->peerNetWorkId, STRING_KEY_DEV_UDID, peerUdid, sizeof(peerUdid));
     TransEventExtra extra = {
         .calleePkg = NULL,
         .callerPkg = appInfo->myData.pkgName,
         .socketName = appInfo->myData.sessionName,
         .dataType = appInfo->businessType,
         .peerNetworkId = appInfo->peerNetWorkId,
+        .peerUdid = udidRet == SOFTBUS_OK ? peerUdid : NULL,
         .result = EVENT_STAGE_RESULT_OK
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_START, extra);
-    errCode = TransGetLaneInfo(param, &connInfo, &laneId);
+    errCode = TransGetLaneInfo(param, &connInfo, &laneReqId);
     char *tmpName = NULL;
     if (errCode != SOFTBUS_OK) {
         SoftbusReportTransErrorEvt(SOFTBUS_TRANS_GET_LANE_INFO_ERR);
@@ -459,7 +465,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     }
     Anonymize(param->sessionName, &tmpName);
     TRANS_LOGI(TRANS_CTRL,
-        "sessionName=%{public}s, laneId=%{public}u, linkType=%{public}u.", tmpName, laneId, connInfo.type);
+        "sessionName=%{public}s, laneReqId=%{public}u, linkType=%{public}u.", tmpName, laneReqId, connInfo.type);
     AnonymizeFree(tmpName);
     errCode = TransGetConnectOptByConnInfo(&connInfo, &connOpt);
     if (errCode != SOFTBUS_OK) {
@@ -472,7 +478,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     extra.linkType = connOpt.type;
     FillAppInfo(appInfo, param, transInfo, &connInfo);
     TransOpenChannelSetModule(transInfo->channelType, &connOpt);
-    TRANS_LOGI(TRANS_CTRL, "laneId=%{public}u, channelType=%{public}u", laneId, transInfo->channelType);
+    TRANS_LOGI(TRANS_CTRL, "laneReqId=%{public}u, channelType=%{public}u", laneReqId, transInfo->channelType);
     errCode = TransOpenChannelProc((ChannelType)transInfo->channelType, appInfo, &connOpt,
         &(transInfo->channelId));
     if (errCode != SOFTBUS_OK) {
@@ -484,9 +490,9 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     }
 
     if (((ChannelType)transInfo->channelType == CHANNEL_TYPE_TCP_DIRECT) && (connOpt.type != CONNECT_P2P)) {
-        LnnFreeLane(laneId);
+        LnnFreeLane(laneReqId);
     } else if (TransLaneMgrAddLane(transInfo->channelId, transInfo->channelType,
-        &connInfo, laneId, &appInfo->myData) != SOFTBUS_OK) {
+        &connInfo, laneReqId, &appInfo->myData) != SOFTBUS_OK) {
         SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName,
             appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, GetSoftbusRecordTimeMillis() - timeStart);
         TransCloseChannel(transInfo->channelId, transInfo->channelType);
@@ -519,8 +525,8 @@ EXIT_ERR:
         SoftBusFree((void*)appInfo->fastTransData);
     }
     SoftBusFree(appInfo);
-    if (laneId != 0) {
-        LnnFreeLane(laneId);
+    if (laneReqId != 0) {
+        LnnFreeLane(laneReqId);
     }
     TRANS_LOGE(TRANS_CTRL, "server TransOpenChannel err");
     return ret;
@@ -577,21 +583,22 @@ EXIT_ERR:
 int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connOpt,
     const char *reqId)
 {
+    int32_t channelId = INVALID_CHANNEL_ID;
+    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) || connOpt == NULL) {
+        return channelId;
+    }
+    char callerPkg[PKG_NAME_SIZE_MAX] = {0};
+    (void)TransGetPkgNameBySessionName(sessionName, callerPkg, PKG_NAME_SIZE_MAX);
     TransEventExtra extra = {
         .calleePkg = NULL,
-        .callerPkg = NULL,
-        .socketName = NULL,
+        .callerPkg = callerPkg,
+        .socketName = sessionName,
         .peerNetworkId = NULL,
         .channelType = CHANNEL_TYPE_AUTH,
+        .linkType = connOpt->type,
         .result = EVENT_STAGE_RESULT_OK
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_START, extra);
-    int32_t channelId = INVALID_CHANNEL_ID;
-    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) || connOpt == NULL) {
-        goto EXIT_ERR;
-    }
-    extra.socketName = sessionName;
-    extra.linkType = connOpt->type;
     if (connOpt->type == CONNECT_TCP) {
         if (TransOpenAuthMsgChannel(sessionName, connOpt, &channelId, reqId) != SOFTBUS_OK) {
             goto EXIT_ERR;
@@ -656,13 +663,15 @@ int32_t TransStreamStats(int32_t channelId, int32_t channelType, const StreamSen
         TRANS_LOGE(TRANS_STREAM, "streamStats data is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    uint32_t laneId;
-    int32_t ret = TransGetLaneIdByChannelId(channelId, &laneId);
+    uint32_t laneReqId;
+    int32_t ret = TransGetLaneReqIdByChannelId(channelId, &laneReqId);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_STREAM, "get laneId fail, streamStatsInfo cannot be processed");
+        TRANS_LOGE(TRANS_STREAM, "get laneReqId fail, streamStatsInfo cannot be processed");
         return SOFTBUS_ERR;
     }
-    TRANS_LOGI(TRANS_STREAM, "transStreamStats channelId=%{public}d, laneId=0x%{public}x", channelId, laneId);
+    TRANS_LOGI(TRANS_STREAM, "transStreamStats channelId=%{public}d, laneReqId=0x%{public}x", channelId, laneReqId);
+    // modify with laneId
+    uint64_t laneId = INVALID_LANE_ID;
     LaneIdStatsInfo info;
     (void)memset_s(&info, sizeof(info), 0, sizeof(info));
     info.laneId = laneId;
@@ -677,12 +686,14 @@ int32_t TransRequestQos(int32_t channelId, int32_t chanType, int32_t appType, in
 {
     (void)chanType;
     (void)appType;
-    uint32_t laneId;
-    int32_t ret = TransGetLaneIdByChannelId(channelId, &laneId);
+    uint32_t laneReqId;
+    int32_t ret = TransGetLaneReqIdByChannelId(channelId, &laneReqId);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_QOS, "get laneId fail, transRequestQos cannot be processed");
+        TRANS_LOGE(TRANS_QOS, "get laneReqId fail, transRequestQos cannot be processed");
         return SOFTBUS_ERR;
     }
+    // modify with laneId
+    uint64_t laneId = INVALID_LANE_ID;
     int32_t result = 0;
     if (quality == QOS_IMPROVE) {
         TRANS_LOGI(TRANS_QOS, "trans requestQos");
@@ -710,19 +721,21 @@ int32_t TransRippleStats(int32_t channelId, int32_t channelType, const TrafficSt
         TRANS_LOGE(TRANS_CTRL, "rippleStats data is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    uint32_t laneId;
-    int32_t ret = TransGetLaneIdByChannelId(channelId, &laneId);
+    uint32_t laneReqId;
+    int32_t ret = TransGetLaneReqIdByChannelId(channelId, &laneReqId);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get laneId fail, streamStatsInfo cannot be processed");
+        TRANS_LOGE(TRANS_CTRL, "get laneReqId fail, streamStatsInfo cannot be processed");
         return SOFTBUS_ERR;
     }
-    TRANS_LOGI(TRANS_CTRL, "transRippleStats channelId=%{public}d, laneId=0x%{public}x", channelId, laneId);
+    TRANS_LOGI(TRANS_CTRL, "transRippleStats channelId=%{public}d, laneReqId=0x%{public}x", channelId, laneReqId);
     LnnRippleData rptdata;
     (void)memset_s(&rptdata, sizeof(rptdata), 0, sizeof(rptdata));
     if (memcpy_s(&rptdata.stats, sizeof(rptdata.stats), data->stats, sizeof(data->stats)) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "memcpy fail");
         return SOFTBUS_ERR;
     }
+    // modify with laneId
+    uint64_t laneId = INVALID_LANE_ID;
     LnnReportRippleData(laneId, &rptdata);
     return SOFTBUS_OK;
 }

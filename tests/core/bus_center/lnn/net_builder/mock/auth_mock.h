@@ -26,7 +26,7 @@ public:
     AuthInterface() {};
     virtual ~AuthInterface() {};
 
-    virtual void AuthHandleLeaveLNN(int64_t authId) = 0;
+    virtual void AuthHandleLeaveLNN(AuthHandle authHandle) = 0;
     virtual uint32_t AuthGenRequestId(void) = 0;
     virtual int32_t AuthStartVerify(const AuthConnInfo *connInfo,
         uint32_t requestId, const AuthVerifyCallback *callback, bool isFastAuth) = 0;
@@ -34,7 +34,7 @@ public:
     virtual int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size) = 0;
     virtual int32_t RegAuthTransListener(int32_t module, const AuthTransListener *listener) = 0;
     virtual void UnregAuthTransListener(int32_t module) = 0;
-    virtual int32_t AuthPostTransData(int64_t authId, const AuthTransData *dataInfo) = 0;
+    virtual int32_t AuthPostTransData(AuthHandle authHandle, const AuthTransData *dataInfo) = 0;
     virtual int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer, bool isMeta) = 0;
     virtual int32_t AuthFlushDevice(const char *uuid) = 0;
 };
@@ -42,7 +42,7 @@ class AuthInterfaceMock : public AuthInterface {
 public:
     AuthInterfaceMock();
     ~AuthInterfaceMock() override;
-    MOCK_METHOD(void, AuthHandleLeaveLNN, (int64_t), (override));
+    MOCK_METHOD(void, AuthHandleLeaveLNN, (AuthHandle), (override));
     MOCK_METHOD(uint32_t, AuthGenRequestId, (), (override));
     MOCK_METHOD(int32_t, AuthStartVerify, (const AuthConnInfo *,
         uint32_t, const AuthVerifyCallback *, bool), (override));
@@ -51,7 +51,7 @@ public:
 
     MOCK_METHOD2(RegAuthTransListener, int32_t (int32_t, const AuthTransListener *));
     MOCK_METHOD1(UnregAuthTransListener, void (int32_t));
-    MOCK_METHOD2(AuthPostTransData, int32_t (int64_t, const AuthTransData *));
+    MOCK_METHOD2(AuthPostTransData, int32_t (AuthHandle, const AuthTransData *));
     MOCK_METHOD3(AuthGetIdByConnInfo, int64_t (const AuthConnInfo *, bool, bool));
     MOCK_METHOD1(AuthFlushDevice, int32_t(const char *));
 };

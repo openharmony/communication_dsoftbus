@@ -106,6 +106,7 @@ int32_t TestTransAuthChannelMsgPack(cJSON *msg, const AppInfo *appInfo)
     }
     return SOFTBUS_OK;
 }
+
 /**
  * @tc.name: PackError001
  * @tc.desc: PackError001, use the wrong parameter.
@@ -168,22 +169,22 @@ HWTEST_F(SoftBusMessageOpenChannelTest, PackRequest001, TestSize.Level1)
 HWTEST_F(SoftBusMessageOpenChannelTest, UnpackRequest001, TestSize.Level1)
 {
     int32_t ret = UnpackRequest(NULL, NULL);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     char *mag = TestGetMsgPack();
     cJSON *json = cJSON_Parse(mag);
     EXPECT_NE(json, nullptr);
     ret = UnpackRequest(json, NULL);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
     (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     ret = UnpackRequest(NULL, appInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     int res = strcpy_s(appInfo->groupId, sizeof(appInfo->groupId), g_groupid);
     EXPECT_EQ(EOK, res);
     ret = UnpackRequest(json, appInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 
     if (appInfo != NULL) {
         SoftBusFree(appInfo);

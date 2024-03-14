@@ -357,7 +357,8 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp)
         LNN_LOGI(LNN_HEART_BEAT, "ble don't support ble direct online");
         return true;
     }
-    if (LnnRetrieveDeviceInfo(device->devId, &deviceInfo) != SOFTBUS_OK) {
+    if (LnnRetrieveDeviceInfo(device->devId, &deviceInfo) != SOFTBUS_OK ||
+        strlen(deviceInfo.connectInfo.macAddr) == 0) {
         LNN_LOGI(LNN_HEART_BEAT,
             "don't support ble direct online because peer state version change, ver:%{public}d->%{public}d",
             deviceInfo.stateVersion, (int32_t)hbResp->stateVersion);
@@ -375,12 +376,11 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp)
         return true;
     }
     AuthDeviceKeyInfo keyInfo = { 0 };
-    LNN_LOGI(LNN_HEART_BEAT, "AuthFindDeviceKey=%{public}s", device->devId);
-    if (AuthFindDeviceKey(device->devId, AUTH_LINK_TYPE_BLE, &keyInfo) != SOFTBUS_OK) {
+    if (AuthFindDeviceKey(device->devId, AUTH_LINK_TYPE_BLE, &keyInfo) != SOFTBUS_OK &&
+        AuthFindDeviceKey(device->devId, AUTH_LINK_TYPE_NORMALIZED, &keyInfo) != SOFTBUS_OK) {
         LNN_LOGI(LNN_HEART_BEAT, "don't support ble direct online because key not exist");
         return true;
     }
-
     // update capability
     SetDeviceNetCapability(&deviceInfo.netCapacity, hbResp);
     if ((ret = LnnUpdateRemoteDeviceInfo(&deviceInfo)) != SOFTBUS_OK) {
