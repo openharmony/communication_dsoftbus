@@ -113,7 +113,7 @@ int32_t ParseLaneTypeByLaneReqId(const uint32_t laneReqId, LaneType *laneType)
 {
     if (laneReqId == INVALID_LANE_REQ_ID) {
         LNN_LOGE(LNN_LANE, "[ParseLaneType]invalid laneReqId");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     *laneType = (LaneType)(laneReqId >> LANE_REQ_ID_TYPE_SHIFT);
     return SOFTBUS_OK;

@@ -1709,4 +1709,36 @@ HWTEST_F(LNNLaneMockTest, LANE_DEL_AND_ADD_LANELINKINFO_001, TestSize.Level1)
     ret = DelLinkInfoItem(INVALID_LANE_REQ_ID);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
+
+/*
+* @tc.name: LANE_PARSE_LANE_TYPE_001
+* @tc.desc: LANE_PARSE_LANE_TYPE
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LANE_PARSE_LANE_TYPE_001, TestSize.Level1)
+{
+    const LnnLaneManager *laneManager = GetLaneManager();
+    LaneType laneType = LANE_TYPE_TRANS;
+    uint32_t laneReqId = laneManager->applyLaneReqId(laneType);
+    LaneType laneTypeParse;
+    int32_t ret = ParseLaneTypeByLaneReqId(laneReqId, &laneTypeParse);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(laneTypeParse, LANE_TYPE_TRANS);
+
+    laneType = LANE_TYPE_CTRL;
+    laneReqId = laneManager->applyLaneReqId(laneType);
+    ret = ParseLaneTypeByLaneReqId(laneReqId, &laneTypeParse);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(laneTypeParse, LANE_TYPE_CTRL);
+
+    laneType = LANE_TYPE_HDLC;
+    laneReqId = laneManager->applyLaneReqId(laneType);
+    ret = ParseLaneTypeByLaneReqId(laneReqId, &laneTypeParse);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(laneTypeParse, LANE_TYPE_HDLC);
+
+    ret = ParseLaneTypeByLaneReqId(INVALID_LANE_REQ_ID, &laneTypeParse);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
 } // namespace OHOS

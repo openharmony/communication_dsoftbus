@@ -50,6 +50,13 @@ typedef struct {
 } LaneStatusListener;
 
 typedef struct {
+    LaneStatusChangeType laneStatusChangeType;
+    union {
+        enum WifiDirectRole role;
+    } laneStatusInfo;
+} LaneStatusInfoChange;
+
+typedef struct {
     ListNode node;
     LaneStatusListener laneStatusListen;
     LaneType type;
