@@ -1036,8 +1036,8 @@ NO_SANITIZE("cfi") void LnnDestroyHeartbeatFsm(LnnHeartbeatFsm *hbFsm)
         DestroyLooper(hbFsm->fsm.looper);
         hbFsm->fsm.looper = NULL;
     }
-    SoftBusFree(hbFsm);
     SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "HB destroy heartbeat fsmId(%u)", hbFsm->id);
+    SoftBusFree(hbFsm);
 }
 
 static void DeinitHbFsmCallback(FsmStateMachine *fsm)

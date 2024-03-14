@@ -312,6 +312,7 @@ static void OnClientJoinTimeout(void *data)
     CLOGD(LOG_LABEL "requestId=%d remoteMac=%s", client->requestId, WifiDirectAnonymizeMac(client->remoteMac));
     ListDelete(&client->node);
     SoftBusFree(client);
+    GetP2pEntity()->joiningClientCount--;
     client = NULL;
 
     struct WifiDirectConnectParams params;
