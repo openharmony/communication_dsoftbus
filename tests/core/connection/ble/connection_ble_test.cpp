@@ -278,7 +278,6 @@ HWTEST_F(ConnectionBleTest, ManagerTest003, TestSize.Level1)
     int ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
-    g_connId = 0;
 }
 /*
 * @tc.name: ManagerTest004
@@ -306,6 +305,5 @@ HWTEST_F(ConnectionBleTest, ManagerTest004, TestSize.Level1)
     ret = ConnStopLocalListening(&info);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
-    g_connId = 0;
 }
 }
