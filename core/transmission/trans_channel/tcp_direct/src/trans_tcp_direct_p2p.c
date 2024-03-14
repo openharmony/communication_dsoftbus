@@ -536,6 +536,7 @@ static void OnP2pVerifyMsgReceived(int32_t channelId, const char *data, uint32_t
     } else {
         TLOGE("invalid data type: %lld", msgType);
     }
+    cJSON_Delete(json);
 }
 
 void OnP2pVerifyChannelClosed(int32_t channelId)
