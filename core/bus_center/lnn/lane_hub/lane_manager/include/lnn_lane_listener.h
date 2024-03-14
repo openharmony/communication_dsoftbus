@@ -51,8 +51,8 @@ typedef struct {
 } LaneStatusInfoChange;
 
 typedef struct {
-    void (*onLaneOnLine)(LaneStatusInfoOn *laneStatusInfoOn);
-    void (*onLaneOffLine)(LaneStatusInfoOff *laneStatusInfoOff);
+    void (*onLaneOnLine)(LaneStatusInfo *laneStatusInfoOn);
+    void (*onLaneOffLine)(LaneStatusInfo *laneStatusInfoOff);
     void (*onLaneStateChange)(LaneStatusInfoChange *laneStatusInfoChange);
 } LaneStatusListener;
 
