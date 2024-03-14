@@ -144,8 +144,8 @@ NO_SANITIZE("cfi") int32_t LnnDeactiveMetaNode(const char *metaNodeId)
     if (storageInfo != NULL) {
         ListDelete(&storageInfo->node);
         g_metaNodeList->cnt--;
-        SoftBusFree(storageInfo);
         DeleteFromProfile(storageInfo->info.configInfo.udid);
+        SoftBusFree(storageInfo);
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_INFO, "deactive a mete node");
     } else {
         SoftBusLog(SOFTBUS_LOG_LNN, SOFTBUS_LOG_ERROR, "meta node not exist");

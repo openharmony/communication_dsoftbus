@@ -227,11 +227,11 @@ NO_SANITIZE("cfi") void TransLaneMgrDeathCallback(const char *pkgName, int32_t p
         if ((strcmp(laneItem->pkgName, pkgName) == 0) && (laneItem->pid == pid)) {
             ListDelete(&(laneItem->node));
             g_channelLaneList->cnt--;
+            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "%s death del lane[id=%d, type = %d]",
+                pkgName, laneItem->channelId, laneItem->channelType);
             LnnFreeLane(laneItem->laneId);
             SoftBusFree(laneItem);
             (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
-            SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_INFO, "%s death del lane[id=%d, type = %d]",
-                pkgName, laneItem->channelId, laneItem->channelType);
             return;
         }
     }
