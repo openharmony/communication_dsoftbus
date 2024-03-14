@@ -111,5 +111,10 @@ void HandleLaneReliabilityTime(void)
 {
     return GetTransLaneIf()->HandleLaneReliabilityTime();
 }
+
+int32_t SelectExpectLaneByParameter(LanePreferredLinkList *setRecommendLinkList)
+{
+    return GetTransLaneIf()->SelectExpectLaneByParameter(setRecommendLinkList);
+}
 }
 } // namespace OHOS
