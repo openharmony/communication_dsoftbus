@@ -21,7 +21,7 @@
 #include "auth_connection.h"
 #include "auth_device_common_key.h"
 #include "auth_hichain.h"
-#include "auth_hichain_request.h"
+#include "auth_normalize_request.h"
 #include "auth_log.h"
 #include "auth_manager.h"
 #include "auth_request.h"
@@ -418,19 +418,11 @@ static void CompleteAuthSession(AuthFsm *authFsm, int32_t result)
             AUTH_LOGI(AUTH_FSM, "save device key for fast auth");
             SaveDeviceKey(authFsm, AUTH_LINK_TYPE_BLE);
         }
-        SessionKey sessionKey;
-        (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
-        if (authFsm->info.normalizedType == NORMALIZED_KEY_ERROR &&
-            AuthManagerGetSessionKey(authFsm->authSeq, &authFsm->info, &sessionKey) == SOFTBUS_OK) {
-            NotifyHiChainRequestSuccess(authFsm->authSeq, sessionKey.value, sessionKey.len);
-            (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
-        }
+        NotifyNormalizeRequestSuccess(authFsm->authSeq);
     } else {
         LnnFsmRemoveMessage(&authFsm->fsm, FSM_MSG_AUTH_TIMEOUT);
-        if (result == FSM_MSG_AUTH_TIMEOUT || authFsm->info.isServer) {
-            NotifyHiChainRequestFail(authFsm->authSeq, false);
-        } else {
-            NotifyHiChainRequestFail(authFsm->authSeq, true);
+        if (!authFsm->info.isServer) {
+            NotifyNormalizeRequestFail(authFsm->authSeq, result);
         }
         AuthManagerSetAuthFailed(authFsm->authSeq, &authFsm->info, result);
     }
@@ -547,24 +539,6 @@ static int32_t RecoveryFastAuthKey(AuthFsm *authFsm)
     return AuthSessionHandleAuthFinish(authFsm->authSeq);
 }
 
-static int32_t RecoverySessionKeyByAuthManager(AuthFsm *authFsm, AuthManager *auth)
-{
-    int32_t index = 0;
-    SessionKey sessionKey;
-    if (GetLatestSessionKey(&auth->sessionKeyList, &index, &sessionKey) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "get key fail");
-        return SOFTBUS_ENCRYPT_ERR;
-    }
-    AUTH_LOGI(AUTH_FSM, "auth recovery sessionkey, authSeq=%{public}" PRId64 ", authId=%{public}" PRId64,
-            authFsm->authSeq, auth->authId);
-    int32_t ret = AuthSessionSaveSessionKey(authFsm->authSeq, sessionKey.value, sessionKey.len);
-    if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "post save sessionKey event fail");
-        return ret;
-    }
-    return AuthSessionHandleAuthFinish(authFsm->authSeq);
-}
-
 static void AuditReportSetPeerDevInfo(LnnAuditExtra *lnnAuditExtra, AuthSessionInfo *info)
 {
     if (lnnAuditExtra == NULL || info == NULL) {
@@ -663,7 +637,7 @@ static void UpdateUdidHashIfEmpty(AuthFsm *authFsm, AuthSessionInfo *info)
     if (info->connInfo.type == AUTH_LINK_TYPE_BLE && strlen(info->udid) != 0 &&
         authFsm->info.connInfo.info.bleInfo.deviceIdHash[0] == '\0') {
         AUTH_LOGW(AUTH_FSM, "udidhash is empty");
-        if (SoftBusGenerateStrHash((unsigned char *)info->udid, strlen(info->nodeInfo.deviceInfo.deviceUdid),
+        if (SoftBusGenerateStrHash((unsigned char *)info->udid, strlen(info->udid),
             (unsigned char *)authFsm->info.connInfo.info.bleInfo.deviceIdHash) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_FSM, "generate udidhash fail");
         }
@@ -688,6 +662,10 @@ static void HandleMsgRecvDeviceId(AuthFsm *authFsm, const MessagePara *para)
             if (PostDeviceIdMessage(authFsm->authSeq, info) != SOFTBUS_OK) {
                 ret = SOFTBUS_AUTH_SYNC_DEVID_FAIL;
                 break;
+            }
+        } else {
+            if (info->normalizedType == NORMALIZED_NOT_SUPPORT) {
+                NotifyNormalizeRequestSuccess(authFsm->authSeq);
             }
         }
         LnnFsmTransactState(&authFsm->fsm, g_states + STATE_DEVICE_AUTH);
@@ -869,50 +847,10 @@ static int32_t ProcessClientAuthState(AuthFsm *authFsm)
     Anonymize(authFsm->info.udid, &anonyUdid);
     AUTH_LOGI(AUTH_FSM, "start auth send udid=%{public}s", anonyUdid);
     AnonymizeFree(anonyUdid);
-    bool isSupportNormalizedKey = authFsm->info.normalizedType != NORMALIZED_NOT_SUPPORT;
-    if (isSupportNormalizedKey) {
-        AuthManager *auth = AuthDeviceGetDeviceUdid(authFsm->info.udid, authFsm->info.isServer);
-        if (auth != NULL && RecoverySessionKeyByAuthManager(authFsm, auth) == SOFTBUS_OK) {
-            DelDupAuthManager(auth);
-            return SOFTBUS_OK;
-        }
-        DelDupAuthManager(auth);
-    }
-
-    if (HichainStartAuth(authFsm->authSeq, authFsm->info.udid, authFsm->info.connInfo.peerUid,
-        isSupportNormalizedKey) != SOFTBUS_OK) {
+    if (HichainStartAuth(authFsm->authSeq, authFsm->info.udid, authFsm->info.connInfo.peerUid) != SOFTBUS_OK) {
         return SOFTBUS_AUTH_HICHAIN_AUTH_FAIL;
     }
     return SOFTBUS_OK;
-}
-
-static int32_t ProcessServerAuthState(AuthFsm *authFsm)
-{
-    if (authFsm->info.normalizedType == NORMALIZED_NOT_SUPPORT) {
-        AUTH_LOGI(AUTH_FSM, "peer not support normalized,authSeq=%{public}" PRId64, authFsm->authSeq);
-        return SOFTBUS_OK;
-    }
-    AuthManager *auth = AuthDeviceGetDeviceUdid(authFsm->info.udid, authFsm->info.isServer);
-    if (auth != NULL) {
-        if (RecoverySessionKeyByAuthManager(authFsm, auth) == SOFTBUS_OK) {
-            DelDupAuthManager(auth);
-            return SOFTBUS_OK;
-        }
-        DelDupAuthManager(auth);
-        AUTH_LOGE(AUTH_FSM, "recovery session key fail, authSeq=%{public}" PRId64, authFsm->authSeq);
-        return SOFTBUS_ERR;
-    }
-    HichainRequest request = {
-        .authSeq = authFsm->authSeq,
-        .isServer = true,
-    };
-    if (strcpy_s(request.udid, sizeof(request.udid), authFsm->info.udid) != EOK ||
-        strcpy_s(request.peerUid, sizeof(request.peerUid), authFsm->info.connInfo.peerUid) != EOK) {
-        AUTH_LOGE(AUTH_FSM, "copy str fail, authSeq=%{public}" PRId64, authFsm->authSeq);
-        return SOFTBUS_MEM_ERR;
-    }
-    uint32_t num = AddHichainRequest(&request);
-    return (num != 0) ? SOFTBUS_OK : SOFTBUS_ERR;
 }
 
 static void DeviceAuthStateEnter(FsmStateMachine *fsm)
@@ -921,7 +859,7 @@ static void DeviceAuthStateEnter(FsmStateMachine *fsm)
         AUTH_LOGE(AUTH_FSM, "fsm is null");
         return;
     }
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_OK;
     AuthFsm *authFsm = TO_AUTH_FSM(fsm);
     if (authFsm == NULL) {
         AUTH_LOGE(AUTH_FSM, "authFsm is null");
@@ -937,8 +875,6 @@ static void DeviceAuthStateEnter(FsmStateMachine *fsm)
     }
     if (!info->isServer) {
         ret = ProcessClientAuthState(authFsm);
-    } else {
-        ret = ProcessServerAuthState(authFsm);
     }
     if (ret != SOFTBUS_OK) {
         goto ERR_EXIT;

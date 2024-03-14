@@ -21,6 +21,13 @@ void AuthLoadDeviceKey(void)
 {
 }
 
+void AuthUpdateCreateTime(const char *udidHash, int32_t keyType, bool isServer)
+{
+    (void)udidHash;
+    (void)keyType;
+    (void)isServer;
+}
+
 int32_t AuthInsertDeviceKey(const NodeInfo *deviceInfo, const AuthDeviceKeyInfo *deviceKey)
 {
     (void)deviceInfo;
@@ -33,12 +40,6 @@ void AuthRemoveDeviceKeyByUdid(const char *udidOrHash)
     (void)udidOrHash;
 }
 
-void AuthRemoveDeviceKey(const char *udidHash, int32_t keyType)
-{
-    (void)udidHash;
-    (void)keyType;
-}
-
 int32_t AuthFindDeviceKey(const char *udidHash, int32_t keyType, AuthDeviceKeyInfo *deviceKey)
 {
     (void)udidHash;
@@ -49,6 +50,21 @@ int32_t AuthFindDeviceKey(const char *udidHash, int32_t keyType, AuthDeviceKeyIn
 
 void AuthClearDeviceKey(void)
 {
+}
+
+int32_t AuthFindNormalizeKeyByServerSide(const char *udidHash, bool isServer, AuthDeviceKeyInfo *deviceKey)
+{
+    (void)udidHash;
+    (void)isServer;
+    (void)deviceKey;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t AuthFindLatestNormalizeKey(const char *udidHash, AuthDeviceKeyInfo *deviceKey)
+{
+    (void)udidHash;
+    (void)deviceKey;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 void AuthUpdateKeyIndex(const char *udidHash, int32_t keyType, int64_t index, bool isServer)

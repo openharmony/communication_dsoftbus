@@ -21,6 +21,7 @@
 
 #include "auth_common.h"
 #include "auth_interface.h"
+#include "auth_normalize_request.h"
 #include "auth_session_fsm.h"
 #include "auth_session_key.h"
 #include "common_list.h"
@@ -79,13 +80,13 @@ bool AuthDeviceCheckConnInfo(const char* uuid, AuthLinkType type, bool checkConn
 void AuthDeviceGetLatestIdByUuid(const char *uuid, AuthLinkType type, AuthHandle *authHandle);
 int64_t AuthDeviceGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer);
 int64_t AuthDeviceGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer);
-AuthManager *AuthDeviceGetDeviceUdid(char *udid, bool isServer);
 AuthManager *NewAuthManager(int64_t authSeq, const AuthSessionInfo *info);
 
 int32_t AuthDeviceEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen);
 int32_t AuthDeviceDecrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen);
 int32_t AuthDeviceSetP2pMac(int64_t authId, const char *p2pMac);
 
+int32_t AuthVerifyAfterNotifyNormalize(NormalizeRequest *request);
 int32_t AuthDeviceGetConnInfo(AuthHandle authHandle, AuthConnInfo *connInfo);
 int32_t AuthDeviceGetDeviceUuid(int64_t authId, char *uuid, uint16_t size);
 int32_t AuthDeviceGetVersion(int64_t authId, SoftBusVersion *version);
