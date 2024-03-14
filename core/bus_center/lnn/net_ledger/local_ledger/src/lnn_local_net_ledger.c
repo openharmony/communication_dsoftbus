@@ -26,6 +26,7 @@
 #include "bus_center_manager.h"
 #include "lnn_cipherkey_manager.h"
 #include "lnn_device_info_recovery.h"
+#include "lnn_parameter_utils.h"
 #include "lnn_log.h"
 #include "lnn_ohos_account.h"
 #include "lnn_p2p_info.h"
@@ -42,9 +43,11 @@
 #define VERSION_TYPE_LITE "LITE"
 #define VERSION_TYPE_DEFAULT ""
 #define SOFTBUS_BUSCENTER_DUMP_LOCALDEVICEINFO "local_device_info"
+#define SOFTBUS_BUSCENTER_DUMP_LINKPARAM "link_param"
 #define ALL_GROUP_TYPE 0xF
 #define MAX_STATE_VERSION 0xFF
 #define SUPPORT_EXCHANGE_NETWORKID 1
+#define SUPPORT_NORMALIZED_LINK 2
 #define DEFAULT_CONN_SUB_FEATURE 1
 #define OH_OS_TYPE 10
 #define HO_OS_TYPE 11
@@ -62,7 +65,7 @@ static void UpdateStateVersionAndStore(void)
     int32_t ret;
     g_localNetLedger.localInfo.stateVersion++;
     if (g_localNetLedger.localInfo.stateVersion > MAX_STATE_VERSION) {
-        g_localNetLedger.localInfo.stateVersion = 0;
+        g_localNetLedger.localInfo.stateVersion = 1;
     }
     LNN_LOGI(LNN_LEDGER, "local stateVersion=%{public}d",
         g_localNetLedger.localInfo.stateVersion);
@@ -523,7 +526,7 @@ static int32_t UpdateStateVersion(const void *buf)
         return SOFTBUS_INVALID_PARAM;
     }
     if (*(int32_t *)buf > MAX_STATE_VERSION) {
-        *(int32_t *)buf = 0;
+        *(int32_t *)buf = 1;
     }
     info->stateVersion = *(int32_t *)buf;
     return SOFTBUS_OK;
@@ -586,6 +589,17 @@ static int32_t LlGetOsType(void *buf, uint32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
     *((int32_t *)buf) = info->deviceInfo.osType;
+    return SOFTBUS_OK;
+}
+
+static int32_t LlGetAuthCapability(void *buf, uint32_t len)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (buf == NULL || len != sizeof(uint32_t)) {
+        LNN_LOGE(LNN_LEDGER, "buf of authCapability is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((int32_t *)buf) = info->authCapacity;
     return SOFTBUS_OK;
 }
 
@@ -1170,6 +1184,27 @@ static int32_t LlUpdateStaticCapLen(const void *len)
     return SOFTBUS_OK;
 }
 
+static int32_t LlGetDeviceSecurityLevel(void *buf, uint32_t len)
+{
+    if (buf == NULL || len != sizeof(int32_t)) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((int32_t *)buf) = g_localNetLedger.localInfo.deviceSecurityLevel;
+    return SOFTBUS_OK;
+}
+
+static int32_t LlUpdateDeviceSecurityLevel(const void *buf)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (buf == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    info->deviceSecurityLevel = *((int32_t *)buf);
+    return SOFTBUS_OK;
+}
+
 int32_t LlUpdateStaticCapability(const void *staticCap)
 {
     if (staticCap == NULL) {
@@ -1361,6 +1396,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {NUM_KEY_DISCOVERY_TYPE, -1, LlGetNetType, NULL},
     {NUM_KEY_DEV_TYPE_ID, -1, LlGetDeviceTypeId, NULL},
     {NUM_KEY_OS_TYPE, -1, LlGetOsType, NULL},
+    {NUM_KEY_AUTH_CAP, -1, LlGetAuthCapability, NULL},
     {NUM_KEY_MASTER_NODE_WEIGHT, -1, L1GetMasterNodeWeight, UpdateMasgerNodeWeight},
     {NUM_KEY_P2P_ROLE, -1, L1GetP2pRole, UpdateP2pRole},
     {NUM_KEY_STATE_VERSION, -1, LlGetStateVersion, UpdateStateVersion},
@@ -1370,6 +1406,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {NUM_KEY_ACCOUNT_LONG, sizeof(int64_t), LocalGetNodeAccountId, LocalUpdateNodeAccountId},
     {NUM_KEY_BLE_START_TIME, sizeof(int64_t), LocalGetNodeBleStartTime, LocalUpdateBleStartTime},
     {NUM_KEY_STATIC_CAP_LEN, sizeof(int32_t), LlGetStaticCapLen, LlUpdateStaticCapLen},
+    {NUM_KEY_DEVICE_SECURITY_LEVEL, sizeof(int32_t), LlGetDeviceSecurityLevel, LlUpdateDeviceSecurityLevel},
     {BYTE_KEY_IRK, LFINDER_IRK_LEN, LlGetIrk, UpdateLocalIrk},
     {BYTE_KEY_PUB_MAC, LFINDER_MAC_ADDR_LEN, LlGetPubMac, UpdateLocalPubMac},
     {BYTE_KEY_BROADCAST_CIPHER_KEY, SESSION_KEY_LENGTH, LlGetCipherInfoKey, UpdateLocalCipherInfoKey},
@@ -1685,6 +1722,23 @@ int32_t SoftBusDumpBusCenterLocalDeviceInfo(int fd)
     return SOFTBUS_OK;
 }
 
+static int32_t SoftBusDumpBusCenterParameter(int fd)
+{
+    SOFTBUS_DPRINTF(fd, "-----LinkParam-----\n");
+    SOFTBUS_DPRINTF(fd, IsLinkEnabled(LANE_HML) ?
+        "hml parameter: on\n" : "hml parameter: off\n");
+    SOFTBUS_DPRINTF(fd, IsLinkEnabled(LANE_P2P) ?
+        "p2p parameter: on\n" : "p2p parameter: off\n");
+    SOFTBUS_DPRINTF(fd, IsLinkEnabled(LANE_BR) ?
+        "br parameter: on\n" : "br parameter: off\n");
+    SOFTBUS_DPRINTF(fd, (IsLinkEnabled(LANE_WLAN_5G) ||
+        IsLinkEnabled(LANE_WLAN_2P4G)) ?
+        "wlan parameter: on\n" : "wlan parameter: off\n");
+    SOFTBUS_DPRINTF(fd, IsLinkEnabled(LANE_BLE) ?
+        "ble parameter: on\n" : "ble parameter: off\n");
+    return SOFTBUS_OK;
+}
+
 static int32_t LnnInitLocalNodeInfo(NodeInfo *nodeInfo)
 {
     if (InitOfflineCode(nodeInfo) != SOFTBUS_OK) {
@@ -1701,6 +1755,10 @@ static int32_t LnnInitLocalNodeInfo(NodeInfo *nodeInfo)
     if (InitLocalVersionType(nodeInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init local version type error");
         return SOFTBUS_ERR;
+    }
+    if (GetDeviceSecurityLevel(&nodeInfo->deviceSecurityLevel) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "init local deviceSecurityLevel fail, deviceSecurityLevel=%{public}d",
+            nodeInfo->deviceSecurityLevel);
     }
     if (InitConnectInfo(&nodeInfo->connectInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init local connect info error");
@@ -1731,7 +1789,7 @@ int32_t LnnInitLocalLedger(void)
     nodeInfo->groupType = ALL_GROUP_TYPE;
     nodeInfo->discoveryType = 0;
     nodeInfo->netCapacity = LnnGetNetCapabilty();
-    nodeInfo->authCapacity = SUPPORT_EXCHANGE_NETWORKID;
+    nodeInfo->authCapacity = SUPPORT_EXCHANGE_NETWORKID | SUPPORT_NORMALIZED_LINK;
     nodeInfo->feature = LnnGetFeatureCapabilty();
     nodeInfo->connSubFeature = DEFAULT_CONN_SUB_FEATURE;
     if (LnnInitLocalNodeInfo(nodeInfo) != SOFTBUS_OK) {
@@ -1747,6 +1805,10 @@ int32_t LnnInitLocalLedger(void)
         (char *)SOFTBUS_BUSCENTER_DUMP_LOCALDEVICEINFO, &SoftBusDumpBusCenterLocalDeviceInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "SoftBusRegBusCenterVarDump regist fail");
         return SOFTBUS_ERR;
+    }
+    if (SoftBusRegBusCenterVarDump(
+        (char *)SOFTBUS_BUSCENTER_DUMP_LINKPARAM, &SoftBusDumpBusCenterParameter) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "SoftBusRegBusCenterVarDump regist fail");
     }
     if (LnnFirstGetUdid() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "first get udid fail, try again in one second");

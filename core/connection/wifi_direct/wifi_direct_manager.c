@@ -70,6 +70,7 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *connectInfo, struct W
     GetWifiDirectPerfRecorder()->clear();
     GetWifiDirectPerfRecorder()->setPid(connectInfo->pid);
     GetWifiDirectPerfRecorder()->record(TP_P2P_CONNECT_START);
+    SetHmlTriggerStartTime(connectInfo->requestId);
 
     struct WifiDirectCommand *command = WifiDirectConnectCommandNew(connectInfo, callback);
     CONN_CHECK_AND_RETURN_RET_LOGW(command, SOFTBUS_MALLOC_ERR, CONN_WIFI_DIRECT, "alloc connect command failed");

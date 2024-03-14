@@ -44,6 +44,12 @@ typedef enum {
     EXCHANGE_TYPE_MAX
 } ExchangeDataType;
 
+typedef enum {
+    NORMALIZED_NOT_SUPPORT,
+    NORMALIZED_KEY_ERROR,
+    NORMALIZED_SUPPORT,
+} NormalizedType;
+
 typedef struct {
     uint32_t requestId;
     bool isServer;
@@ -63,6 +69,8 @@ typedef struct {
     bool isNeedFastAuth;
     int64_t oldIndex;
     int32_t idType;
+    NormalizedType normalizedType;
+    SessionKey *normalizedKey;
 } AuthSessionInfo;
 
 typedef struct {
@@ -93,6 +101,7 @@ int32_t AuthSessionHandleDeviceNotTrusted(const char *udid);
 int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId);
 AuthFsm *GetAuthFsmByConnId(uint64_t connId, bool isServer);
 void AuthSessionFsmExit(void);
+int32_t AuthRecoverySessionKey(int64_t authSeq, SessionKey sessionKey);
 
 #ifdef __cplusplus
 #if __cplusplus

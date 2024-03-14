@@ -228,10 +228,10 @@ char *AuthNetLedgertInterfaceMock::Pack(int64_t authSeq, const AuthSessionInfo *
     return nullptr;
 }
 
-void AuthNetLedgertInterfaceMock::OnDeviceVerifyPass(int64_t authId, const NodeInfo *info)
+void AuthNetLedgertInterfaceMock::OnDeviceVerifyPass(AuthHandle authHandle, const NodeInfo *info)
 {
     AUTH_LOGI(AUTH_TEST, "Device verify passed & send cond");
-    (void)authId;
+    (void)authHandle;
     (void)info;
     if (SoftBusMutexLock(&LnnHichainInterfaceMock::mutex) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_TEST, "Device verify Lock failed");
@@ -255,10 +255,10 @@ void AuthNetLedgertInterfaceMock::OnDeviceNotTrusted(const char *peerUdid)
     SoftBusMutexUnlock(&LnnHichainInterfaceMock::mutex);
 }
 
-void AuthNetLedgertInterfaceMock::OnDeviceDisconnect(int64_t authId)
+void AuthNetLedgertInterfaceMock::OnDeviceDisconnect(AuthHandle authHandle)
 {
     AUTH_LOGI(AUTH_TEST, "Device disconnect call back & send cond");
-    (void)authId;
+    (void)authHandle;
     if (SoftBusMutexLock(&LnnHichainInterfaceMock::mutex) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_TEST, "Device disconnect Lock failed");
         return;

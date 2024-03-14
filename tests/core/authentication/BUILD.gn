@@ -91,6 +91,7 @@ ohos_unittest("AuthEnhanceMockTest") {
     "$dsoftbus_root_path/core/authentication/src/auth_deviceprofile_virtual.cpp",
     "$dsoftbus_root_path/core/authentication/src/auth_hichain.c",
     "$dsoftbus_root_path/core/authentication/src/auth_hichain_adapter.c",
+    "$dsoftbus_root_path/core/authentication/src/auth_hichain_request.c",
     "$dsoftbus_root_path/core/authentication/src/auth_interface.c",
     "$dsoftbus_root_path/core/authentication/src/auth_manager.c",
     "$dsoftbus_root_path/core/authentication/src/auth_request.c",

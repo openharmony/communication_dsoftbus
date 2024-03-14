@@ -117,13 +117,13 @@ typedef struct {
 typedef struct {
     uint32_t requestId;
     int32_t retCode;
-    int64_t authId;
+    AuthHandle authHandle;
     NodeInfo *nodeInfo;
 } VerifyResultMsgPara;
 
 typedef struct {
     ConnectionAddr addr;
-    int64_t authId;
+    AuthHandle authHandle;
     NodeInfo *nodeInfo;
 } DeviceVerifyPassMsgPara;
 
@@ -238,12 +238,13 @@ static LnnConnectionFsm *FindConnectionFsmByRequestId(uint32_t requestId)
     return NULL;
 }
 
-static LnnConnectionFsm *FindConnectionFsmByAuthId(int64_t authId)
+static LnnConnectionFsm *FindConnectionFsmByAuthHandle(const AuthHandle *authHandle)
 {
     LnnConnectionFsm *item = NULL;
 
     LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
-        if (item->connInfo.authId == authId) {
+        if (item->connInfo.authHandle.authId == authHandle->authId &&
+            item->connInfo.authHandle.type == authHandle->type) {
             return item;
         }
     }
@@ -787,11 +788,11 @@ static int32_t ProcessVerifyResult(const void *para)
             rc = SOFTBUS_NETWORK_NOT_FOUND;
             break;
         }
-        LNN_LOGI(LNN_BUILDER,
-            "connection fsm auth done, fsmId=%{public}u, authId=%{public}" PRId64 ", retCode=%{public}d",
-            connFsm->id, msgPara->authId, msgPara->retCode);
+        LNN_LOGI(LNN_BUILDER, "fsmId=%{public}u connection fsm auth done, type=%{public}d, authId=%{public}"
+            PRId64 ", retCode=%{public}d", connFsm->id,msgPara->authHandle.type,
+            msgPara->authHandle.authId, msgPara->retCode);
         if (msgPara->retCode == SOFTBUS_OK) {
-            connFsm->connInfo.authId = msgPara->authId;
+            connFsm->connInfo.authHandle = msgPara->authHandle;
             connFsm->connInfo.nodeInfo = msgPara->nodeInfo;
         }
         if (LnnSendAuthResultMsgToConnFsm(connFsm, msgPara->retCode) != SOFTBUS_OK) {
@@ -815,19 +816,19 @@ static int32_t CreatePassiveConnectionFsm(const DeviceVerifyPassMsgPara *msgPara
     LnnConnectionFsm *connFsm = NULL;
     connFsm = StartNewConnectionFsm(&msgPara->addr, DEFAULT_PKG_NAME, true);
     if (connFsm == NULL) {
-        LNN_LOGE(LNN_BUILDER, "start new connection fsm fail, authId=%{public}" PRId64, msgPara->authId);
+        LNN_LOGE(LNN_BUILDER, "start new connection fsm fail, authId=%{public}" PRId64, msgPara->authHandle.authId);
         return SOFTBUS_ERR;
     }
-    connFsm->connInfo.authId = msgPara->authId;
+    connFsm->connInfo.authHandle = msgPara->authHandle;
     connFsm->connInfo.nodeInfo = msgPara->nodeInfo;
     connFsm->connInfo.flag |= LNN_CONN_INFO_FLAG_JOIN_PASSIVE;
-    LNN_LOGI(LNN_BUILDER, "start a passive connection fsm, fsmId=%{public}u, authId=%{public}" PRId64, connFsm->id,
-        msgPara->authId);
+    LNN_LOGI(LNN_BUILDER, "fsmId=%{public}u start a passive connection fsm, type=%{public}d, authId=%{public}" PRId64,
+        connFsm->id, msgPara->authHandle.type, msgPara->authHandle.authId);
     if (LnnSendAuthResultMsgToConnFsm(connFsm, SOFTBUS_OK) != SOFTBUS_OK) {
         connFsm->connInfo.nodeInfo = NULL;
         StopConnectionFsm(connFsm);
-        LNN_LOGE(LNN_BUILDER, "post auth result to connection fsm fail, fsmId=%{public}u, authId=%{public}" PRId64,
-            connFsm->id, msgPara->authId);
+        LNN_LOGE(LNN_BUILDER, "fsmId=%{public}u post auth result to connection fsm fail, authId=%{public}" PRId64,
+            connFsm->id, msgPara->authHandle.authId);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -850,14 +851,14 @@ static int32_t ProcessDeviceVerifyPass(const void *para)
     }
 
     do {
-        connFsm = FindConnectionFsmByAuthId(msgPara->authId);
+        connFsm = FindConnectionFsmByAuthHandle(&msgPara->authHandle);
         if (connFsm == NULL || connFsm->isDead) {
             rc = CreatePassiveConnectionFsm(msgPara);
             break;
         }
         if (strcmp(connFsm->connInfo.peerNetworkId, msgPara->nodeInfo->networkId) != 0) {
-            LNN_LOGI(LNN_BUILDER, "networkId changed, fsmId=%{public}u, authId=%{public}" PRId64, connFsm->id,
-                msgPara->authId);
+            LNN_LOGI(LNN_BUILDER, "fsmId=%{public}u networkId changed, authId=%{public}" PRId64, connFsm->id,
+                msgPara->authHandle.authId);
             rc = CreatePassiveConnectionFsm(msgPara);
             break;
         }
@@ -865,8 +866,8 @@ static int32_t ProcessDeviceVerifyPass(const void *para)
         if (LnnUpdateNodeInfo(msgPara->nodeInfo) != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "LnnUpdateNodeInfo failed");
         }
-        LNN_LOGI(LNN_BUILDER, "connection fsm exist, ignore VerifyPass. fsmId=%{public}u, authId=%{public}" PRId64,
-            connFsm->id, msgPara->authId);
+        LNN_LOGI(LNN_BUILDER, "fsmId=%{public}u connection fsm exist, ignore VerifyPass authId=%{public}" PRId64,
+            connFsm->id, msgPara->authHandle.authId);
         rc = SOFTBUS_ERR;
     } while (false);
 
@@ -881,28 +882,29 @@ static int32_t ProcessDeviceDisconnect(const void *para)
 {
     int32_t rc = SOFTBUS_OK;
     LnnConnectionFsm *connFsm = NULL;
-    const int64_t *authId = (const int64_t *)para;
+    const AuthHandle *authHandle = (const AuthHandle *)para;
 
-    if (authId == NULL) {
-        LNN_LOGW(LNN_BUILDER, "authId is null");
+    if (authHandle == NULL) {
+        LNN_LOGW(LNN_BUILDER, "auth authHandle is null");
         return SOFTBUS_INVALID_PARAM;
     }
 
     do {
-        connFsm = FindConnectionFsmByAuthId(*authId);
+        connFsm = FindConnectionFsmByAuthHandle(authHandle);
         if (connFsm == NULL || connFsm->isDead) {
-            LNN_LOGE(LNN_BUILDER, "can not find connection fsm. authId=%{public}" PRId64, *authId);
+            LNN_LOGE(LNN_BUILDER, "can not find connection fsm. authId=%{public}" PRId64, authHandle->authId);
             rc = SOFTBUS_NETWORK_NOT_FOUND;
             break;
         }
-        LNN_LOGI(LNN_BUILDER, "device disconnect, fsmId=%{public}u, authId=%{public}" PRId64, connFsm->id, *authId);
+        LNN_LOGI(LNN_BUILDER, "fsmId=%{public}u device disconnect, authId=%{public}" PRId64,
+            connFsm->id, authHandle->authId);
         if (LnnSendDisconnectMsgToConnFsm(connFsm) != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "send disconnect to connection failed. fsmId=%{public}u", connFsm->id);
             rc = SOFTBUS_ERR;
             break;
         }
     } while (false);
-    SoftBusFree((void *)authId);
+    SoftBusFree((void *)authHandle);
     return rc;
 }
 
@@ -1357,28 +1359,23 @@ static NodeInfo *DupNodeInfo(const NodeInfo *nodeInfo)
 
 static int32_t ProcessLeaveByAuthId(const void *para)
 {
-    int32_t rc;
-    LnnConnectionFsm *connFsm = NULL;
+    int32_t rc = SOFTBUS_OK;
     const int64_t *authId = (const int64_t *)para;
     if (authId == NULL) {
         LNN_LOGE(LNN_BUILDER, "authId is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    do {
-        connFsm = FindConnectionFsmByAuthId(*authId);
-        if (connFsm == NULL || connFsm->isDead) {
-            LNN_LOGE(LNN_BUILDER, "can not find connection fsm by authId: %{public}" PRId64, *authId);
-            rc = SOFTBUS_ERR;
-            break;
+    LnnConnectionFsm *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_netBuilder.fsmList, LnnConnectionFsm, node) {
+        if (item->connInfo.authHandle.authId != *authId || item->isDead) {
+            continue;
         }
-        LNN_LOGI(LNN_BUILDER, "[id=%{public}u]leave reqeust, authId: %{public}" PRId64, connFsm->id, *authId);
-        if (LnnSendLeaveRequestToConnFsm(connFsm) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "send leaveReqeust to connection fsm[id=%{public}u] failed", connFsm->id);
+        LNN_LOGI(LNN_BUILDER, "[id=%{public}u]leave reqeust, authId: %{public}" PRId64, item->id, *authId);
+        if (LnnSendLeaveRequestToConnFsm(item) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "send leaveReqeust to connection fsm[id=%{public}u] failed", item->id);
             rc = SOFTBUS_ERR;
-            break;
         }
-        rc = SOFTBUS_OK;
-    } while (false);
+    }
     SoftBusFree((void *) authId);
     return rc;
 }
@@ -1433,13 +1430,17 @@ static ConnectionAddrType GetCurrentConnectType(void)
     return type;
 }
 
-static void OnDeviceVerifyPass(int64_t authId, const NodeInfo *info)
+static void OnDeviceVerifyPass(AuthHandle authHandle, const NodeInfo *info)
 {
     AuthConnInfo connInfo;
     DeviceVerifyPassMsgPara *para = NULL;
-    LNN_LOGI(LNN_BUILDER, "verify passed passively, authId=%{public}" PRId64, authId);
-    if (AuthGetConnInfo(authId, &connInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "get AuthConnInfo fail, authId=%{public}" PRId64, authId);
+    LNN_LOGI(LNN_BUILDER, "verify passed passively, authId=%{public}" PRId64, authHandle.authId);
+    if (authHandle.type < AUTH_LINK_TYPE_WIFI || authHandle.type >= AUTH_LINK_TYPE_MAX) {
+        LNN_LOGE(LNN_BUILDER, "authHandle type error");
+        return;
+    }
+    if (AuthGetConnInfo(authHandle, &connInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get AuthConnInfo fail, authId=%{public}" PRId64, authHandle.authId);
         return;
     }
     para = (DeviceVerifyPassMsgPara *)SoftBusMalloc(sizeof(DeviceVerifyPassMsgPara));
@@ -1452,7 +1453,7 @@ static void OnDeviceVerifyPass(int64_t authId, const NodeInfo *info)
         SoftBusFree(para);
         return;
     }
-    para->authId = authId;
+    para->authHandle = authHandle;
     para->nodeInfo = DupNodeInfo(info);
     if (para->nodeInfo == NULL) {
         LNN_LOGE(LNN_BUILDER, "dup NodeInfo fail");
@@ -1469,16 +1470,21 @@ static void OnDeviceVerifyPass(int64_t authId, const NodeInfo *info)
     }
 }
 
-static void OnDeviceDisconnect(int64_t authId)
+static void OnDeviceDisconnect(AuthHandle authHandle)
 {
-    int64_t *para = NULL;
-    para = (int64_t *)SoftBusMalloc(sizeof(int64_t));
+    if (authHandle.type < AUTH_LINK_TYPE_WIFI || authHandle.type >= AUTH_LINK_TYPE_MAX) {
+        LNN_LOGE(LNN_BUILDER, "authHandle type error");
+        return;
+    }
+    AuthHandle *para = NULL;
+    para = (AuthHandle *)SoftBusMalloc(sizeof(AuthHandle));
     if (para == NULL) {
         LNN_LOGE(LNN_BUILDER, "malloc DeviceDisconnect para fail");
         return;
     }
-    LNN_LOGI(LNN_BUILDER, "auth device disconnect, authId=%{public}" PRId64, authId);
-    *para = authId;
+    LNN_LOGI(LNN_BUILDER, "auth device disconnect, authId=%{public}" PRId64, authHandle.authId);
+    para->authId = authHandle.authId;
+    para->type = authHandle.type;
     if (PostMessageToHandler(MSG_TYPE_DEVICE_DISCONNECT, para) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "post DEVICE_DISCONNECT msg fail");
         SoftBusFree(para);
@@ -1689,7 +1695,7 @@ static AuthVerifyListener g_verifyListener = {
     .onDeviceDisconnect = OnDeviceDisconnect,
 };
 
-static void PostVerifyResult(uint32_t requestId, int32_t retCode, int64_t authId, const NodeInfo *info)
+static void PostVerifyResult(uint32_t requestId, int32_t retCode, AuthHandle authHandle, const NodeInfo *info)
 {
     VerifyResultMsgPara *para = NULL;
     para = (VerifyResultMsgPara *)SoftBusCalloc(sizeof(VerifyResultMsgPara));
@@ -1706,7 +1712,7 @@ static void PostVerifyResult(uint32_t requestId, int32_t retCode, int64_t authId
             SoftBusFree(para);
             return;
         }
-        para->authId = authId;
+        para->authHandle = authHandle;
     }
     if (PostMessageToHandler(MSG_TYPE_VERIFY_RESULT, para) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "post verify result message failed");
@@ -1718,20 +1724,25 @@ static void PostVerifyResult(uint32_t requestId, int32_t retCode, int64_t authId
     }
 }
 
-static void OnVerifyPassed(uint32_t requestId, int64_t authId, const NodeInfo *info)
+static void OnVerifyPassed(uint32_t requestId, AuthHandle authHandle, const NodeInfo *info)
 {
-    LNN_LOGI(LNN_BUILDER, "verify passed. requestId=%{public}u, authId=%{public}" PRId64, requestId, authId);
+    LNN_LOGI(LNN_BUILDER, "verify passed. requestId=%{public}u, authId=%{public}" PRId64, requestId, authHandle.authId);
     if (info == NULL) {
         LNN_LOGE(LNN_BUILDER, "post verify result message failed");
         return;
     }
-    PostVerifyResult(requestId, SOFTBUS_OK, authId, info);
+    if (authHandle.type < AUTH_LINK_TYPE_WIFI || authHandle.type >= AUTH_LINK_TYPE_MAX) {
+        LNN_LOGE(LNN_BUILDER, "authHandle type error");
+        return;
+    }
+    PostVerifyResult(requestId, SOFTBUS_OK, authHandle, info);
 }
 
 static void OnVerifyFailed(uint32_t requestId, int32_t reason)
 {
-    LNN_LOGI(LNN_BUILDER, "verify failed. requestId=%{public}u, reason=%{public}d", requestId, reason);
-    PostVerifyResult(requestId, reason, AUTH_INVALID_ID, NULL);
+    LNN_LOGI(LNN_BUILDER, "verify failed: requestId=%{public}u, reason=%{public}d", requestId, reason);
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+    PostVerifyResult(requestId, reason, authHandle, NULL);
 }
 
 static AuthVerifyCallback g_verifyCallback = {
@@ -1744,9 +1755,10 @@ AuthVerifyCallback *LnnGetVerifyCallback(void)
     return &g_verifyCallback;
 }
 
-static void OnReAuthVerifyPassed(uint32_t requestId, int64_t authId, const NodeInfo *info)
+static void OnReAuthVerifyPassed(uint32_t requestId, AuthHandle authHandle, const NodeInfo *info)
 {
-    LNN_LOGI(LNN_BUILDER, "reAuth verify passed. requestId=%{public}u, authId=%{public}" PRId64, requestId, authId);
+    LNN_LOGI(LNN_BUILDER, "reAuth verify passed: requestId=%{public}u, authId=%{public}" PRId64,
+        requestId, authHandle.authId);
     if (info == NULL) {
         LNN_LOGE(LNN_BUILDER, "reAuth verify result error");
         return;
@@ -1776,23 +1788,20 @@ static void OnReAuthVerifyPassed(uint32_t requestId, int64_t authId, const NodeI
             (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
             (void)LnnGetRemoteNodeInfoById(info->deviceInfo.deviceUdid, CATEGORY_UDID, &nodeInfo);
             UpdateDpSameAccount(nodeInfo.accountHash, nodeInfo.deviceInfo.deviceUdid);
-            LNN_LOGI(LNN_BUILDER, "reauth finish and updateProfile");
         }
     } else {
         connFsm = StartNewConnectionFsm(&addr, DEFAULT_PKG_NAME, true);
         if (connFsm == NULL) {
-            LNN_LOGE(LNN_BUILDER, "start new connection fsm fail. authId=%{public}" PRId64, authId);
             return;
         }
-        connFsm->connInfo.authId = authId;
+        connFsm->connInfo.authHandle = authHandle;
         connFsm->connInfo.nodeInfo = DupNodeInfo(info);
         connFsm->connInfo.flag |= LNN_CONN_INFO_FLAG_JOIN_AUTO;
-        LNN_LOGI(LNN_BUILDER, "start a connection fsm, fsmId=%{public}u, authId=%{public}" PRId64, connFsm->id, authId);
+        LNN_LOGI(LNN_BUILDER, "fsmId=%{public}u start a connection fsm, authId=%{public}" PRId64,
+            connFsm->id, authHandle.authId);
         if (LnnSendAuthResultMsgToConnFsm(connFsm, SOFTBUS_OK) != SOFTBUS_OK) {
             connFsm->connInfo.nodeInfo = NULL;
             StopConnectionFsm(connFsm);
-            LNN_LOGE(LNN_BUILDER, "post auth result to connection fsm fail. fsmId=%{public}u, authId=%{public}" PRId64,
-                connFsm->id, authId);
         }
     }
 }
@@ -1803,7 +1812,8 @@ static void OnReAuthVerifyFailed(uint32_t requestId, int32_t reason)
     if (reason != SOFTBUS_AUTH_HICHAIN_AUTH_ERROR) {
         return;
     }
-    PostVerifyResult(requestId, reason, AUTH_INVALID_ID, NULL);
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+    PostVerifyResult(requestId, reason, authHandle, NULL);
 }
 
 static AuthVerifyCallback g_reAuthVerifyCallback = {
@@ -2506,7 +2516,7 @@ int32_t LnnNotifyMasterElect(const char *networkId, const char *masterUdid, int3
 }
 
 /* Note: must called in connection fsm. */
-int32_t LnnNotifyAuthHandleLeaveLNN(int64_t authId)
+int32_t LnnNotifyAuthHandleLeaveLNN(AuthHandle authHandle)
 {
     LnnConnectionFsm *item = NULL;
 
@@ -2519,13 +2529,15 @@ int32_t LnnNotifyAuthHandleLeaveLNN(int64_t authId)
         if (item->isDead) {
             continue;
         }
-        if (item->connInfo.authId == authId) {
+        if (item->connInfo.authHandle.authId == authHandle.authId &&
+            item->connInfo.authHandle.type == authHandle.type) {
             LNN_LOGI(
-                LNN_BUILDER, "connection fsm already use. fsmId=%{public}u, authId=%{public}" PRId64, item->id, authId);
+                LNN_BUILDER, "fsmId=%{public}u connection fsm already use type=%{public}d authId=%{public}" PRId64,
+                item->id, authHandle.type, authHandle.authId);
             return SOFTBUS_OK;
         }
     }
-    AuthHandleLeaveLNN(authId);
+    AuthHandleLeaveLNN(authHandle);
     return SOFTBUS_OK;
 }
 

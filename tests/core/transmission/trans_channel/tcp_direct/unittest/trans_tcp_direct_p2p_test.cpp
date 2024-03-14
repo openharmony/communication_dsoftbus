@@ -85,7 +85,7 @@ SessionConn *TestSetSessionConn()
     conn->status = TCP_DIRECT_CHANNEL_STATUS_INIT;
     conn->timeout = 0;
     conn->req = 1;
-    conn->authId = 1;
+    conn->authHandle.authId = 1;
     conn->requestId = 1;
     conn->listenMod = DIRECT_CHANNEL_SERVER_WIFI;
     conn->appInfo.myData.pid = 1;
@@ -214,13 +214,13 @@ HWTEST_F(TransTcpDirectP2pTest, OnChannelOpenFailTest001, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectP2pTest, VerifyP2pTest001, TestSize.Level1)
 {
-    int64_t authId = 1;
+    AuthHandle authHandle = { .authId = 1 };
     int64_t seq = 1;
-    int32_t ret = VerifyP2p(authId, nullptr, nullptr, 0, seq);
+    int32_t ret = VerifyP2p(authHandle, nullptr, nullptr, 0, seq);
     ASSERT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 
     int32_t port = MY_PORT;
-    ret = VerifyP2p(authId, g_ip, nullptr, port, seq);
+    ret = VerifyP2p(authHandle, g_ip, nullptr, port, seq);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 }
 
@@ -251,7 +251,7 @@ HWTEST_F(TransTcpDirectP2pTest, OpenAuthConnTest001, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pRequestTest001, TestSize.Level1)
 {
-    int64_t authId = 1;
+    AuthHandle authHandle = { .authId = 1 };
     int64_t seq = 1;
     int32_t code = CODE_VERIFY_P2P;
     int32_t errCode = SOFTBUS_INVALID_PARAM;
@@ -259,16 +259,16 @@ HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pRequestTest001, TestSize.Level1)
     string msg = TestGetMsgPack();
     cJSON *json = cJSON_Parse(msg.c_str());
     EXPECT_TRUE(json != nullptr);
-    SendVerifyP2pFailRsp(authId, seq, code, errCode, nullptr, true);
+    SendVerifyP2pFailRsp(authHandle, seq, code, errCode, nullptr, true);
 
-    SendVerifyP2pFailRsp(authId, seq, code, errCode, errDesc, true);
-    int32_t ret = OnVerifyP2pRequest(authId, seq, nullptr, true);
+    SendVerifyP2pFailRsp(authHandle, seq, code, errCode, errDesc, true);
+    int32_t ret = OnVerifyP2pRequest(authHandle, seq, nullptr, true);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = OnVerifyP2pRequest(authId, seq, json, true);
+    ret = OnVerifyP2pRequest(authHandle, seq, json, true);
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 
-    OnAuthChannelClose(authId);
+    OnAuthChannelClose(authHandle);
 }
 
 /**
@@ -294,7 +294,7 @@ HWTEST_F(TransTcpDirectP2pTest, ConnectTcpDirectPeerTest001, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectP2pTest, OnAuthDataRecvTest001, TestSize.Level1)
 {
-    int64_t authId = 1;
+    AuthHandle authHandle = { .authId = 1 };
     int64_t seq = 1;
     int32_t flags = MSG_FLAG_REQUEST;
     const char *str = "data";
@@ -304,15 +304,15 @@ HWTEST_F(TransTcpDirectP2pTest, OnAuthDataRecvTest001, TestSize.Level1)
     data->seq = 1;
     data->data = (const uint8_t *)str;
     data->len = AUTH_TRANS_DATA_LEN;
-    int32_t ret = OnVerifyP2pRequest(authId, seq, nullptr, true);
+    int32_t ret = OnVerifyP2pRequest(authHandle, seq, nullptr, true);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    OnAuthMsgProc(authId, flags, seq, nullptr);
+    OnAuthMsgProc(authHandle, flags, seq, nullptr);
 
     flags = MES_FLAG_REPLY;
-    OnAuthMsgProc(authId, flags, seq, nullptr);
+    OnAuthMsgProc(authHandle, flags, seq, nullptr);
 
-    OnAuthDataRecv(authId, nullptr);
-    OnAuthDataRecv(authId, data);
+    OnAuthDataRecv(authHandle, nullptr);
+    OnAuthDataRecv(authHandle, data);
 
     SoftBusFree(data);
 }
@@ -332,12 +332,12 @@ HWTEST_F(TransTcpDirectP2pTest, OpenAuthConntest002, TestSize.Level1)
     int32_t ret;
     int32_t reason = 1;
     uint32_t requestId = 1;
-    int64_t authId = 1;
+    AuthHandle authHandle = { .authId = 1 };
     bool isMeta = 1;
 
     (void)memcpy_s(appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX, "test", DEVICE_ID_SIZE_MAX);
     OnAuthConnOpenFailed(requestId, reason);
-    OnAuthConnOpened(requestId, authId);
+    OnAuthConnOpened(requestId, authHandle);
     ret = OpenAuthConn(appInfo->peerData.deviceId, requestId, isMeta);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
@@ -353,17 +353,17 @@ HWTEST_F(TransTcpDirectP2pTest, OpenAuthConntest002, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectP2pTest, SendVerifyP2pRsp003, TestSize.Level1)
 {
-    int64_t authId = 1;
+    AuthHandle authHandle = { .authId = 1 };
     int32_t ret;
     int32_t errCode = SOFTBUS_ERR;
     int64_t seq = 1;
     bool isAuthLink = true;
     bool notAuthLink = false;
-    SendVerifyP2pFailRsp(authId, seq, CODE_VERIFY_P2P, errCode, "pack reply failed", isAuthLink);
+    SendVerifyP2pFailRsp(authHandle, seq, CODE_VERIFY_P2P, errCode, "pack reply failed", isAuthLink);
 
-    ret = SendVerifyP2pRsp(authId, MODULE_P2P_LISTEN, MES_FLAG_REPLY, seq, "pack reply failed", isAuthLink);
+    ret = SendVerifyP2pRsp(authHandle, MODULE_P2P_LISTEN, MES_FLAG_REPLY, seq, "pack reply failed", isAuthLink);
     EXPECT_TRUE(ret != SOFTBUS_OK);
-    ret = SendVerifyP2pRsp(authId, MODULE_P2P_LISTEN, MES_FLAG_REPLY, seq, "pack reply failed", notAuthLink);
+    ret = SendVerifyP2pRsp(authHandle, MODULE_P2P_LISTEN, MES_FLAG_REPLY, seq, "pack reply failed", notAuthLink);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
@@ -418,11 +418,11 @@ HWTEST_F(TransTcpDirectP2pTest, StartVerifyP2pInfo005, TestSize.Level1)
     }
     int32_t ret;
 
-    conn->authId = AUTH_INVALID_ID;
+    conn->authHandle.authId = AUTH_INVALID_ID;
     ret = StartVerifyP2pInfo(appInfo, conn);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    conn->authId = 1;
+    conn->authHandle.authId = 1;
     ret = StartVerifyP2pInfo(appInfo, conn);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 

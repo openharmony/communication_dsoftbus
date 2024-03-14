@@ -168,7 +168,7 @@ static int32_t ClientBusCenterResultCb(Reply *info, int ret, IpcIo *reply)
     uint32_t count = sizeof(g_busCenterStateHandler) / sizeof(ClientBusCenterStateHandler);
     for (uint32_t i = 0; i < count; i++) {
         if (g_busCenterStateHandler[i].funIdType == info->id) {
-            return (g_busCenterStateHandler[i].funIdHandler)(&info, reply, infoSize);
+            return (g_busCenterStateHandler[i].funIdHandler)(info, reply, infoSize);
         }
     }
     LNN_LOGI(LNN_INIT, "funcId not exist");

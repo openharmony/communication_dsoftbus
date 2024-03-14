@@ -209,6 +209,7 @@ TRANSPORT_BEHAVIOR:
   CHAN_SCORE: { type: INT32, desc: channel score }
   PEER_CHAN_ID: { type: INT32, desc: peer channel id }
   PEER_NET_ID: { type: STRING, desc: peer device net id }
+  PEER_UDID: { type: STRING, desc: peer udid }
 
 TRANSPORT_AUDIT:
   __BASE: {type: SECURITY, level: CRITICAL, desc: transport recurity audit }
