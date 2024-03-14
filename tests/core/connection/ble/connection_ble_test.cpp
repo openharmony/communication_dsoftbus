@@ -39,8 +39,8 @@ void ConnectedCB(unsigned int connectionId, const ConnectionInfo *info)
         g_connId = connectionId;
     }
 }
-void DisConnectedCB(unsigned int connectionId, const ConnectionInfo *info){}
-void DataReceivedCB(unsigned int connectionId, ConnModule moduleId, int64_t seq, char *data, int len){}
+void DisConnectedCB(unsigned int connectionId, const ConnectionInfo *info) {}
+void DataReceivedCB(unsigned int connectionId, ConnModule moduleId, int64_t seq, char *data, int len) {}
 class ConnectionBleTest : public testing::Test {
 public:
     static void SetUpTestCase();
