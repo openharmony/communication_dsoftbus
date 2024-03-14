@@ -46,6 +46,8 @@ config("softbus_connection_ble_test_config") {
     "//third_party/googletest/googletest/src",
     "//third_party/bounds_checking_function/include",
     "$dsoftbus_root_path/core/bus_center/service/include",
+    "//foundation/communication/bluetooth/interfaces/inner_api/include",
+    "//foundation/communication/bluetooth/interfaces/inner_api/include/c_header",
   ]
 }
 
