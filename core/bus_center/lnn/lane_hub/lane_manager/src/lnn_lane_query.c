@@ -201,6 +201,11 @@ static int32_t WlanLinkState(const char *networkId)
 
 static int32_t P2pLinkState(const char *networkId)
 {
+    struct WifiDirectManager *pManager = GetWifiDirectManager();
+    if (pManager == NULL) {
+        LNN_LOGE(LNN_LANE, "not support wifi direct");
+        return SOFTBUS_P2P_NOT_SUPPORT;
+    }
     if (!SoftBusIsWifiActive()) {
         return SOFTBUS_WIFI_OFF;
     }
@@ -214,7 +219,7 @@ static int32_t P2pLinkState(const char *networkId)
         return SOFTBUS_P2P_NOT_SUPPORT;
     }
 
-    int32_t ret = GetWifiDirectManager()->prejudgeAvailability(networkId, WIFI_DIRECT_LINK_TYPE_P2P);
+    int32_t ret = pManager->prejudgeAvailability(networkId, WIFI_DIRECT_LINK_TYPE_P2P);
     if (ret == V1_ERROR_GC_CONNECTED_TO_ANOTHER_DEVICE) {
         return SOFTBUS_P2P_ROLE_CONFLICT;
     }
@@ -223,6 +228,11 @@ static int32_t P2pLinkState(const char *networkId)
 
 static int32_t HmlLinkState(const char *networkId)
 {
+    struct WifiDirectManager *pManager = GetWifiDirectManager();
+    if (pManager == NULL) {
+        LNN_LOGE(LNN_LANE, "not support wifi direct");
+        return SOFTBUS_HML_NOT_SUPPORT;
+    }
     if (!SoftBusIsWifiActive()) {
         return SOFTBUS_WIFI_OFF;
     }
@@ -244,7 +254,7 @@ static int32_t HmlLinkState(const char *networkId)
         return SOFTBUS_HML_NOT_SUPPORT;
     }
 
-    int32_t ret = GetWifiDirectManager()->prejudgeAvailability(networkId, WIFI_DIRECT_LINK_TYPE_HML);
+    int32_t ret = pManager->prejudgeAvailability(networkId, WIFI_DIRECT_LINK_TYPE_HML);
     if (ret == ERROR_LOCAL_THREE_VAP_CONFLICT) {
         return SOFTBUS_HML_THREE_VAP_CONFLIC;
     }
