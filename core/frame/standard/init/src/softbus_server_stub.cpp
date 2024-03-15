@@ -748,6 +748,12 @@ int32_t SoftBusServerStub::CloseChannelInner(MessageParcel &data, MessageParcel 
         COMM_LOGE(COMM_SVC, "CloseChannelInner read channel channel type failed!");
         return SOFTBUS_ERR;
     }
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    int32_t ret = TransGetAndComparePid(callingPid, channelId, channelType);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "This pid:%{public}d, can not close channel:%{public}d, ret = %{public}d!", callingPid, channelId, checkResult);
+        return ret;
+    }
 
     int32_t retReply = CloseChannel(channelId, channelType);
     if (!reply.WriteInt32(retReply)) {
