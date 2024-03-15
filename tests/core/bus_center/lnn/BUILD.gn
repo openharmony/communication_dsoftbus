@@ -1416,10 +1416,10 @@ ohos_unittest("LNNLaneLinkTest") {
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane_link/lnn_lane_link_test.cpp",
   ]
 
-  if (dsoftbus_feature_conn_p2p) {
+  if (dsoftbus_feature_conn_p2p && softbus_communication_wifi_feature) {
     sources += [ "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_link_p2p.c" ]
   } else {
-    sources += [ "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/nn_lane_link_p2p_virtual.c" ]
+    sources += [ "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_link_p2p_virtual.c" ]
   }
 
   include_dirs = [
