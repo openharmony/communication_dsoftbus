@@ -864,7 +864,8 @@ int32_t TransGetAndComparePid(pid_t pid, int32_t channelId, int32_t channelType)
     }
     pid_t curChannelPid = appInfo.myData.pid;
     if (pid != curChannelPid) {
-        TRANS_LOGE(TRANS_CTRL, "callingPid not equal curChannelPid,calling pid = %{public}d, current channel pid = %{public}d !", pid, curChannelPid);
+        TRANS_LOGE(TRANS_CTRL, "callingPid not equal curChannelPid,calling pid = %{public}d,
+            current channel pid = %{public}d !", pid, curChannelPid);
         return SOFTBUS_CHECK_PID_ERROR;
     }
     TRANS_LOGI(TRANS_CTRL, "callingPid check success. callingPid=%{public}d !", curChannelPid);
