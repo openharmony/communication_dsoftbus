@@ -65,6 +65,7 @@ typedef struct {
     int32_t crc;
     LinkType linkType[LINK_TYPE_MAX];
     uint32_t dataConfig;
+    bool isEncyptedRawStream;
 } SessionInfo;
 
 typedef struct {
@@ -82,6 +83,7 @@ typedef struct {
     SessionListenerAdapter listener;
     ListNode sessionList;
     bool permissionState;
+    bool isSrvEncryptedRawStream;
 } ClientSessionServer;
 
 typedef enum {
@@ -161,7 +163,8 @@ int32_t ClientAddSocketServer(SoftBusSecType type, const char *pkgName, const ch
 
 int32_t ClientDeleteSocketSession(int32_t sessionId);
 
-int32_t ClientAddSocketSession(const SessionParam *param, int32_t *sessionId, bool *isEnabled);
+int32_t ClientAddSocketSession(const SessionParam *param, bool isEncyptedRawStream, int32_t *sessionId,
+    bool *isEnabled);
 
 int32_t ClientSetListenerBySessionId(int32_t sessionId, const ISocketListener *listener, bool isServer);
 
@@ -180,6 +183,10 @@ bool IsSessionExceedLimit();
 int32_t ClientResetIdleTimeoutById(int32_t sessionId);
 
 int32_t ClientGetSessionNameByChannelId(int32_t channelId, int32_t channelType, char *sessionName, int32_t len);
+
+int32_t ClientRawStreamEncryptDefOptGet(const char *sessionName, bool *isEncrypt);
+
+int32_t ClientRawStreamEncryptOptGet(int32_t channelId, int32_t channelType, bool *isEncrypt);
 #ifdef __cplusplus
 }
 #endif
