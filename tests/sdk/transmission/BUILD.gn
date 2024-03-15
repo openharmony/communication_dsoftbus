@@ -40,6 +40,11 @@ group("integration_test") {
   deps = [ "integration_test:integration_test" ]
 }
 
+group("moduletest") {
+  testonly = true
+  deps = [ "moduletest:moduletest" ]
+}
+
 group("unittest") {
   testonly = true
   deps = [

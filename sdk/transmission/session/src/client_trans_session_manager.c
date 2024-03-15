@@ -314,6 +314,7 @@ static ClientSessionServer *GetNewSessionServer(SoftBusSecType type, const char 
         goto EXIT_ERR;
     }
     server->listener.isSocketListener = false;
+    server->isSrvEncryptedRawStream = false;
 
     ListInit(&server->node);
     ListInit(&server->sessionList);
@@ -1545,7 +1546,7 @@ static ClientSessionServer *GetNewSocketServer(SoftBusSecType type, const char *
     if (strcpy_s(server->sessionName, sizeof(server->sessionName), sessionName) != EOK) {
         goto EXIT_ERR;
     }
-
+    server->isSrvEncryptedRawStream = false;
     ListInit(&server->node);
     ListInit(&server->sessionList);
     return server;
@@ -1710,7 +1711,20 @@ static bool IsDistributedDataSession(const char *sessionName)
     return true;
 }
 
-static SessionInfo *GetSocketExistSession(const SessionParam *param)
+static bool IsDifferentDataType(const SessionInfo *sessionInfo, int dataType, bool isEncyptedRawStream)
+{
+    if (sessionInfo->info.flag != dataType) {
+        return true;
+    }
+
+    if (dataType != RAW_STREAM) {
+        return false;
+    }
+
+    return sessionInfo->isEncyptedRawStream != isEncyptedRawStream;
+}
+
+static SessionInfo *GetSocketExistSession(const SessionParam *param, bool isEncyptedRawStream)
 {
     ClientSessionServer *serverNode = NULL;
     SessionInfo *sessionInfo = NULL;
@@ -1721,10 +1735,10 @@ static SessionInfo *GetSocketExistSession(const SessionParam *param)
             continue;
         }
         LIST_FOR_EACH_ENTRY(sessionInfo, &(serverNode->sessionList), SessionInfo, node) {
-            if ((strcmp(sessionInfo->info.peerSessionName, param->peerSessionName) != 0) ||
+            if (sessionInfo->isServer || (strcmp(sessionInfo->info.peerSessionName, param->peerSessionName) != 0) ||
                 (strcmp(sessionInfo->info.peerDeviceId, param->peerDeviceId) != 0) ||
                 (strcmp(sessionInfo->info.groupId, param->groupId) != 0) ||
-                (sessionInfo->info.flag != param->attr->dataType)) {
+                IsDifferentDataType(sessionInfo, param->attr->dataType, isEncyptedRawStream)) {
                 continue;
             }
             return sessionInfo;
@@ -1783,7 +1797,7 @@ static SessionInfo *CreateNewSocketSession(const SessionParam *param)
     return session;
 }
 
-int32_t ClientAddSocketSession(const SessionParam *param, int32_t *sessionId, bool *isEnabled)
+int32_t ClientAddSocketSession(const SessionParam *param, bool isEncyptedRawStream, int32_t *sessionId, bool *isEnabled)
 {
     if (param == NULL || param->sessionName == NULL || param->groupId == NULL || param->attr == NULL ||
         sessionId == NULL) {
@@ -1801,7 +1815,7 @@ int32_t ClientAddSocketSession(const SessionParam *param, int32_t *sessionId, bo
         return SOFTBUS_LOCK_ERR;
     }
 
-    SessionInfo *session = GetSocketExistSession(param);
+    SessionInfo *session = GetSocketExistSession(param, isEncyptedRawStream);
     if (session != NULL) {
         *sessionId = session->sessionId;
         *isEnabled = session->isEnable;
@@ -1815,7 +1829,7 @@ int32_t ClientAddSocketSession(const SessionParam *param, int32_t *sessionId, bo
         TRANS_LOGE(TRANS_SDK, "create session failed");
         return SOFTBUS_TRANS_SESSION_CREATE_FAILED;
     }
-
+    session->isEncyptedRawStream = isEncyptedRawStream;
     int32_t ret = AddSession(param->sessionName, session);
     if (ret != SOFTBUS_OK) {
         SoftBusFree(session);
@@ -1997,6 +2011,9 @@ int32_t ClientSetSocketState(int32_t socket, uint32_t maxIdleTimeout, SessionRol
     sessionNode->role = role;
     if (sessionNode->role == SESSION_ROLE_CLIENT) {
         sessionNode->maxIdleTime = maxIdleTimeout;
+    }
+    if (sessionNode->role == SESSION_ROLE_SERVER) {
+        serverNode->isSrvEncryptedRawStream = sessionNode->isEncyptedRawStream;
     }
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     return SOFTBUS_OK;
@@ -2272,4 +2289,74 @@ int32_t ClientGetSessionNameByChannelId(int32_t channelId, int32_t channelType, 
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     TRANS_LOGE(TRANS_SDK, "not found session with channelId=%{public}d", channelId);
     return SOFTBUS_ERR;
+}
+
+int32_t ClientRawStreamEncryptDefOptGet(const char *sessionName, bool *isEncrypt)
+{
+    if (sessionName == NULL || isEncrypt == NULL) {
+        TRANS_LOGE(TRANS_SDK, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (g_clientSessionServerList == NULL) {
+        TRANS_LOGE(TRANS_SDK, "not init");
+        return SOFTBUS_TRANS_SESSION_SERVER_NOINIT;
+    }
+
+    if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        if (strcmp(serverNode->sessionName, sessionName) == 0) {
+            *isEncrypt = serverNode->isSrvEncryptedRawStream;
+            (void)SoftBusMutexUnlock(&g_clientSessionServerList->lock);
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_clientSessionServerList->lock);
+    char *tmpName = NULL;
+    Anonymize(sessionName, &tmpName);
+    TRANS_LOGE(TRANS_SDK, "not found ClientSessionServer by sessionName=%{public}s", tmpName);
+    AnonymizeFree(tmpName);
+    return SOFTBUS_TRANS_SESSION_SERVER_NOT_FOUND;
+}
+
+int32_t ClientRawStreamEncryptOptGet(int32_t channelId, int32_t channelType, bool *isEncrypt)
+{
+    if (channelId < 0 || isEncrypt == NULL) {
+        TRANS_LOGE(TRANS_SDK, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (g_clientSessionServerList == NULL) {
+        TRANS_LOGE(TRANS_SDK, "not init");
+        return SOFTBUS_TRANS_SESSION_SERVER_NOINIT;
+    }
+
+    if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    SessionInfo *nextSessionNode = NULL;
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        if (IsListEmpty(&serverNode->sessionList)) {
+            continue;
+        }
+        LIST_FOR_EACH_ENTRY_SAFE(sessionNode, nextSessionNode, &(serverNode->sessionList), SessionInfo, node) {
+            if (sessionNode->channelId == channelId && sessionNode->channelType == (ChannelType)channelType) {
+                *isEncrypt = sessionNode->isEncyptedRawStream;
+                (void)SoftBusMutexUnlock(&g_clientSessionServerList->lock);
+                return SOFTBUS_OK;
+            }
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_clientSessionServerList->lock);
+    TRANS_LOGE(TRANS_SDK, "not found session by channelId=%{public}d", channelId);
+    return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
 }
