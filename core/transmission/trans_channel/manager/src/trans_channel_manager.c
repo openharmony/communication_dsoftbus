@@ -859,13 +859,13 @@ int32_t TransGetAndComparePid(pid_t pid, int32_t channelId, int32_t channelType)
     AppInfo appInfo;
     int32_t ret = TransGetAppInfoByChanId(channelId, channelType, &appInfo);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get appInfo by channelId failed, ret = %{public}d !", ret);
+        TRANS_LOGE(TRANS_CTRL, "get appInfo by channelId failed, ret = %{public}d", ret);
         return ret;
     }
     pid_t curChannelPid = appInfo.myData.pid;
     if (pid != curChannelPid) {
-        TRANS_LOGE(TRANS_CTRL, "callingPid not equal curChannelPid,calling pid = %{public}d,
-            current channel pid = %{public}d !", pid, curChannelPid);
+        TRANS_LOGE(TRANS_CTRL, "callingPid not equal curChannelPid, callingPid = %{public}d, pid = %{public}d",
+            pid, curChannelPid);
         return SOFTBUS_CHECK_PID_ERROR;
     }
     TRANS_LOGI(TRANS_CTRL, "callingPid check success. callingPid=%{public}d !", curChannelPid);
