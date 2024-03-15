@@ -17,6 +17,7 @@
 #include <securec.h>
 #include <string.h>
 
+#include "access_control.h"
 #include "auth_interface.h"
 #include "auth_manager.h"
 #include "auth_session_fsm.h"
@@ -1035,6 +1036,11 @@ static int32_t TransProxyFillChannelInfo(const ProxyMessage *msg, ProxyChannelIn
     int16_t newChanId = (int16_t)(GenerateChannelId(false));
     ConstructProxyChannelInfo(chan, msg, newChanId, &info);
 
+    if (chan->appInfo.appType == APP_TYPE_NORMAL && chan->appInfo.firstTokenId != 0 &&
+        TransCheckServerAccessControl(chan->appInfo.firstTokenId) != SOFTBUS_OK) {
+        return SOFTBUS_TRANS_CHECK_ACL_FAILED;
+    }
+
     ret = TransProxyGetLocalInfo(chan);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "TransProxyGetLocalInfo fail. ret=%{public}d.", ret);
@@ -1108,7 +1114,7 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     TRANS_CHECK_AND_RETURN_LOGW(!(chan == NULL), TRANS_CTRL, "proxy handshake calloc failed.");
 
     int32_t ret = TransProxyFillChannelInfo(msg, chan);
-    if ((ret == SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED) &&
+    if ((ret == SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED || ret == SOFTBUS_TRANS_CHECK_ACL_FAILED) &&
         (TransProxyAckHandshake(msg->connId, chan, ret) != SOFTBUS_OK)) {
         TRANS_LOGE(TRANS_CTRL, "ErrHandshake fail, connId=%{public}u.", msg->connId);
     }

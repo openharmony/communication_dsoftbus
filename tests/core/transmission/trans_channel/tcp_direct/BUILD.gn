@@ -173,6 +173,7 @@ ohos_unittest("TransTcpDirectMessageTest") {
   include_dirs = [
     "$softbus_adapter_common/include",
     "$dsoftbus_root_path/core/adapter/transmission/include",
+    "$dsoftbus_root_path/core/common/security/permission/include",
     "$dsoftbus_root_path/core/adapter/common/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/connection/wifi_direct",
@@ -397,6 +398,7 @@ ohos_unittest("TransTcpDirectMessageStaticTest") {
     "$softbus_adapter_common/include",
     "$dsoftbus_root_path/core/adapter/transmission/include",
     "$dsoftbus_root_path/core/adapter/common/include",
+    "$dsoftbus_root_path/core/common/security/permission/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/connection/wifi_direct",
     "$dsoftbus_root_path/core/discovery/interface",
