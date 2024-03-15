@@ -751,7 +751,8 @@ int32_t SoftBusServerStub::CloseChannelInner(MessageParcel &data, MessageParcel 
     pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
     int32_t ret = TransGetAndComparePid(callingPid, channelId, channelType);
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "This pid:%{public}d, can not close channel:%{public}d, ret = %{public}d!", callingPid, channelId, checkResult);
+        COMM_LOGE(COMM_SVC, "This pid:%{public}d, can not close channel:%{public}d,
+            ret = %{public}d!", callingPid, channelId, ret);
         return ret;
     }
 
