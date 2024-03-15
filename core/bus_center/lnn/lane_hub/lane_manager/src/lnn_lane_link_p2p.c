@@ -563,7 +563,7 @@ static void OnWifiDirectConnectSuccess(int32_t p2pRequestId, const struct WifiDi
     LaneLinkInfo linkInfo;
     if (link == NULL) {
         LNN_LOGE(LNN_LANE, "link is null");
-        return;
+        goto FAIL;
     }
     LNN_LOGI(LNN_LANE, "wifidirect conn succ, requestId=%{public}d, p2pGenLinkId=%{public}d, linktype=%{public}d",
         p2pRequestId, link->linkId, link->linkType);
