@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include <map>
 
 #include "accesstoken_kit.h"
+#include "access_control.h"
 #include "access_control_profile.h"
 #include "anonymizer.h"
 #include "bus_center_info_key.h"
@@ -31,30 +32,12 @@
 #include "softbus_errcode.h"
 
 using namespace OHOS::DistributedDeviceProfile;
-int32_t TransCheckAccessControl(const char *peerDeviceId)
+using namespace OHOS::Security::AccessToken;
+static int32_t TransCheckAccessControl(uint32_t firstCallingId, const char *deviceId)
 {
-    if (peerDeviceId == nullptr) {
-        COMM_LOGE(COMM_PERM, "peerDeviceId is null");
-        return SOFTBUS_ERR;
-    }
-
-    int32_t firstCallingId = OHOS::IPCSkeleton::GetFirstTokenID();
-    if (firstCallingId == 0) {
-        return SOFTBUS_OK;
-    }
-
     char *tmpName = nullptr;
-    Anonymize(peerDeviceId, &tmpName);
-    COMM_LOGI(COMM_PERM, "firstCaller=%{public}d, peerDeviceId=%{public}s", firstCallingId, tmpName);
-    AnonymizeFree(tmpName);
-
-    char deviceId[UDID_BUF_LEN] = {0};
-    if (LnnGetRemoteStrInfo(peerDeviceId, STRING_KEY_DEV_UDID, deviceId, sizeof(deviceId)) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_PERM, "LnnGetRemoteStrInfo udid failed");
-        return SOFTBUS_ERR;
-    }
     Anonymize(deviceId, &tmpName);
-    COMM_LOGI(COMM_PERM, "deviceId=%{public}s", tmpName);
+    COMM_LOGI(COMM_PERM, "firstCaller=%{public}u, deviceId=%{public}s", firstCallingId, tmpName);
     AnonymizeFree(tmpName);
 
     std::string active = std::to_string(static_cast<int>(Status::ACTIVE));
@@ -66,12 +49,69 @@ int32_t TransCheckAccessControl(const char *peerDeviceId)
     int32_t ret = DistributedDeviceProfileClient::GetInstance().GetAccessControlProfile(parms, profile);
     COMM_LOGI(COMM_PERM, "profile size=%{public}zu, ret=%{public}d", profile.size(), ret);
     if (profile.empty()) {
-        return SOFTBUS_ERR;
+        COMM_LOGE(COMM_PERM, "check acl failed:firstCaller=%{public}u", firstCallingId);
+        return SOFTBUS_TRANS_CHECK_ACL_FAILED;
     }
     for (auto &item : profile) {
-        COMM_LOGI(COMM_PERM,
-            "GetBindLevel=%{public}d, GetBindType=%{public}d", item.GetBindLevel(), item.GetBindType());
+        COMM_LOGI(COMM_PERM, "BindLevel=%{public}d, BindType=%{public}d", item.GetBindLevel(), item.GetBindType());
     }
 
     return SOFTBUS_OK;
+}
+
+int32_t TransCheckClientAccessControl(const char *peerNetworkId)
+{
+    if (peerNetworkId == nullptr) {
+        COMM_LOGE(COMM_PERM, "peerDeviceId is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    uint32_t firstCallingId = OHOS::IPCSkeleton::GetFirstTokenID();
+    if (firstCallingId == 0) {
+        return SOFTBUS_OK;
+    }
+
+    auto tokenType = AccessTokenKit::GetTokenTypeFlag((AccessTokenID)firstCallingId);
+    if (tokenType != ATokenTypeEnum::TOKEN_HAP) {
+        COMM_LOGI(COMM_PERM, "tokenType=%{public}d, not hap, no verification required", tokenType);
+        return SOFTBUS_OK;
+    }
+
+    char deviceId[UDID_BUF_LEN] = {0};
+    int32_t ret = LnnGetRemoteStrInfo(peerNetworkId, STRING_KEY_DEV_UDID, deviceId, sizeof(deviceId));
+    if (ret != SOFTBUS_OK) {
+        char *tmpName = nullptr;
+        Anonymize(peerNetworkId, &tmpName);
+        COMM_LOGE(COMM_PERM, "get remote udid failed, firstCaller=%{public}u, networkId=%{public}s, ret=%{public}d",
+            firstCallingId, tmpName, ret);
+        AnonymizeFree(tmpName);
+        return ret;
+    }
+    return TransCheckAccessControl(firstCallingId, deviceId);
+}
+
+int32_t TransCheckServerAccessControl(uint32_t firstCallingId)
+{
+    if (firstCallingId == 0) {
+        return SOFTBUS_OK;
+    }
+
+    auto tokenType = AccessTokenKit::GetTokenTypeFlag((AccessTokenID)firstCallingId);
+    if (tokenType != ATokenTypeEnum::TOKEN_HAP) {
+        COMM_LOGI(COMM_PERM, "tokenType=%{public}d, No need for permission verification", tokenType);
+        return SOFTBUS_OK;
+    }
+
+    char deviceId[UDID_BUF_LEN] = {0};
+    int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, deviceId, sizeof(deviceId));
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_PERM, "get local udid failed, firstCaller=%{public}u, ret=%{public}d", firstCallingId, ret);
+        return ret;
+    }
+    return TransCheckAccessControl(firstCallingId, deviceId);
+}
+
+uint32_t TransACLGetFirstTokenID()
+{
+    return OHOS::IPCSkeleton::GetFirstTokenID();
 }

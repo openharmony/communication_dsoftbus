@@ -59,6 +59,7 @@ typedef struct {
     StreamType type;
     uint8_t *sessionKey;
     uint32_t keyLen;
+    bool isRawStreamEncrypt;
 } VtpStreamOpenParam;
 
 int32_t StartVtpStreamChannelServer(int32_t channelId, const VtpStreamOpenParam *param,

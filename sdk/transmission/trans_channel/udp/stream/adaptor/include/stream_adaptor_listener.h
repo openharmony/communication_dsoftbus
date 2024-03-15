@@ -63,23 +63,11 @@ public:
             retStreamData.bufLen = buflen;
             ConvertStreamFrameInfo(&tmpf, stream->GetStreamFrameInfo());
         } else if (streamType == StreamType::RAW_STREAM) {
-            int32_t plainDataLength = buflen - adaptor_->GetEncryptOverhead();
-            if (plainDataLength < 0) {
-                TRANS_LOGE(TRANS_STREAM,
-                    "bufLen < GetEncryptOverhead. bufLen=%{public}d, GetEncryptOverhead=%{public}zd",
-                    buflen, adaptor_->GetEncryptOverhead());
+            int32_t ret = ConvertRawStreamData(retbuf, buflen, plainData, retStreamData);
+            if (ret != SOFTBUS_OK) {
+                TRANS_LOGE(TRANS_STREAM, "failed to convert raw stream data, ret=%{public}d", ret);
                 return;
             }
-            plainData = std::make_unique<char[]>(plainDataLength);
-            ssize_t decLen = adaptor_->Decrypt(retbuf, buflen, plainData.get(),
-                plainDataLength, adaptor_->GetSessionKey());
-            if (decLen != plainDataLength) {
-                TRANS_LOGE(TRANS_STREAM,
-                    "Decrypt failed, dataLen=%{public}d, decLen=%{public}zd", plainDataLength, decLen);
-                return;
-            }
-            retStreamData.buf = plainData.get();
-            retStreamData.bufLen = plainDataLength;
         } else {
             TRANS_LOGE(TRANS_STREAM, "Do not support, streamType=%{public}d", streamType);
             return;
@@ -139,6 +127,36 @@ public:
     }
 
 private:
+    int32_t ConvertRawStreamData(char *buf, int32_t bufLen, std::unique_ptr<char[]> &plainData,
+        StreamData &retStreamData)
+    {
+        if (!adaptor_->IsEncryptedRawStream()) {
+            retStreamData.buf = buf;
+            retStreamData.bufLen = bufLen;
+            return SOFTBUS_OK;
+        }
+
+        ssize_t encryptOverhead = adaptor_->GetEncryptOverhead();
+        int32_t plainDataLength = bufLen - encryptOverhead;
+        if (plainDataLength < 0) {
+            TRANS_LOGE(TRANS_STREAM,
+                "bufLen < GetEncryptOverhead. bufLen=%{public}d, GetEncryptOverhead=%{public}zd",
+                bufLen, encryptOverhead);
+            return SOFTBUS_TRANS_DECRYPT_ERR;
+        }
+        plainData = std::make_unique<char[]>(plainDataLength);
+        ssize_t decLen = adaptor_->Decrypt(buf, bufLen, plainData.get(), plainDataLength,
+            adaptor_->GetSessionKey());
+        if (decLen != plainDataLength) {
+            TRANS_LOGE(TRANS_STREAM,
+                "Decrypt failed, dataLen=%{public}d, decLen=%{public}zd", plainDataLength, decLen);
+            return SOFTBUS_TRANS_DECRYPT_ERR;
+        }
+        retStreamData.buf = plainData.get();
+        retStreamData.bufLen = plainDataLength;
+        return SOFTBUS_OK;
+    }
+
     std::shared_ptr<StreamAdaptor> adaptor_ = nullptr;
 };
 } // namespace OHOS

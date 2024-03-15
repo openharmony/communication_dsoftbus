@@ -42,6 +42,7 @@
 #define PEER_HANDLE_ID "PEER_HANDLE_ID"
 #define FIRST_DATA "FIRST_DATA"
 #define FIRST_DATA_SIZE "FIRST_DATA_SIZE"
+#define JSON_KEY_FIRST_TOKEN_ID "FIRST_TOKEN_ID"
 
 #ifdef __cplusplus
 extern "C" {

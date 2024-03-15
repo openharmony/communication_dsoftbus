@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "access_control.h"
 #include "anonymizer.h"
 #include "bus_center_manager.h"
 #include "lnn_lane_qos.h"
@@ -285,6 +286,7 @@ static AppInfo *GetAppInfo(const SessionParam *param)
     appInfo->myHandleId = -1;
     appInfo->peerHandleId = -1;
     appInfo->timeStart = GetSoftbusRecordTimeMillis();
+    appInfo->firstTokenId = TransACLGetFirstTokenID();
 
     TRANS_LOGD(TRANS_CTRL, "GetAppInfo ok");
     return appInfo;
