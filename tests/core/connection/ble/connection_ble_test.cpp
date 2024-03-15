@@ -31,6 +31,16 @@
 using namespace testing::ext;
 using namespace testing;
 namespace OHOS {
+static uint32_t g_connId;
+
+void ConnectedCB(unsigned int connectionId, const ConnectionInfo *info)
+{
+    if (info->type == CONNECT_BLE) {
+        g_connId = connectionId;
+    }
+}
+void DisConnectedCB(unsigned int connectionId, const ConnectionInfo *info) {}
+void DataReceivedCB(unsigned int connectionId, ConnModule moduleId, int64_t seq, char *data, int len) {}
 class ConnectionBleTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -216,5 +226,67 @@ HWTEST_F(ConnectionBleTest, QueueTest002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ConnBleDeinitSendQueue();
+}
+
+/*
+* @tc.name: ManagerTest001
+* @tc.desc: Test ConnTypeIsSupport.
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ConnectionBleTest, ManagerTest001, TestSize.Level1)
+{
+    int ret;
+    ret = ConnTypeIsSupport(CONNECT_BLE);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: ManagerTest002
+* @tc.desc: Test invalid param.
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(ConnectionBleTest, ManagerTest002, TestSize.Level1)
+{
+    int ret = ConnSetConnectCallback(static_cast<ConnModule>(0), nullptr);
+    ASSERT_TRUE(ret != SOFTBUS_OK);
+    ret = ConnConnectDevice(nullptr, 0, nullptr);
+    ASSERT_TRUE(ret != SOFTBUS_OK);
+    ret = ConnDisconnectDevice(0);
+    ASSERT_TRUE(ret != SOFTBUS_OK);
+    ret = ConnPostBytes(0, nullptr);
+    ASSERT_TRUE(ret != SOFTBUS_OK);
+    ret = ConnStartLocalListening(nullptr);
+    ASSERT_TRUE(ret != SOFTBUS_OK);
+    ret = ConnStopLocalListening(nullptr);
+    ASSERT_TRUE(ret != SOFTBUS_OK);
+}
+/*
+* @tc.name: ManagerTest003
+* @tc.desc: Test Start stop listening.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require:The ConnStartLocalListening and ConnStopLocalListening operates normally.
+*/
+HWTEST_F(ConnectionBleTest, ManagerTest003, TestSize.Level1)
+{
+    ConnectCallback connCb;
+    connCb.OnConnected = ConnectedCB;
+    connCb.OnDisconnected = DisConnectedCB;
+    connCb.OnDataReceived = DataReceivedCB;
+    int ret = ConnSetConnectCallback(MODULE_TRUST_ENGINE, &connCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    NiceMock<ConnectionBleInterfaceMock> bleMock;
+    EXPECT_CALL(bleMock, BleGattsAddService).WillRepeatedly(Return(SOFTBUS_OK));
+    LocalListenerInfo info;
+    info.type = CONNECT_BLE;
+    ret = ConnStartLocalListening(&info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = ConnStopLocalListening(&info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ConnUnSetConnectCallback(MODULE_TRUST_ENGINE);
 }
 }

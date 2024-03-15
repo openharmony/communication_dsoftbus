@@ -85,5 +85,10 @@ bool GetJsonObjectSignedNumberItem(const cJSON *json, const char * const string,
 {
     return GetConnectionBleInterface()->GetJsonObjectSignedNumberItem(json, string, target);
 }
+
+int BleGattsAddService(int serverId, BtUuid srvcUuid, bool isPrimary, int number)
+{
+    return GetConnectionBleInterface()->BleGattsAddService(serverId, srvcUuid, isPrimary, number);
+}
 }
 }

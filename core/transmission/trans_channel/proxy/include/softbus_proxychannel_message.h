@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -63,6 +63,7 @@ typedef enum {
 #define JSON_KEY_ROUTE_TYPE "ROUTE_TYPE"
 #define JSON_KEY_FIRST_DATA "FIRST_DATA"
 #define JSON_KEY_FIRST_DATA_SIZE "FIRST_DATA_SIZE"
+#define JSON_KEY_FIRST_TOKEN_ID "FIRST_TOKEN_ID"
 
 typedef struct {
     uint8_t type; // MsgType

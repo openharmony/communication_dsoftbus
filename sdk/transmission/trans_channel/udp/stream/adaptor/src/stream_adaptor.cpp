@@ -95,6 +95,7 @@ void StreamAdaptor::InitAdaptor(int32_t channelId, const VtpStreamOpenParam *par
     callback_ = callback;
     streamType_ = param->type;
     channelId_ = channelId;
+    isRawStreamEncrypt_ = param->isRawStreamEncrypt;
 }
 
 void StreamAdaptor::ReleaseAdaptor()
@@ -160,4 +161,10 @@ ssize_t StreamAdaptor::Decrypt(const void *in, ssize_t inLen, void *out, ssize_t
     }
 
     return outLen;
+}
+
+bool StreamAdaptor::IsEncryptedRawStream()
+{
+    // This option only applies to raw stream data
+    return isRawStreamEncrypt_;
 }

@@ -872,7 +872,7 @@ int CreateSocket(const char *pkgName, const char *sessionName)
     return ret;
 }
 
-static SessionAttribute *CreateSessionAttributeBySocketInfoTrans(const SocketInfo *info)
+static SessionAttribute *CreateSessionAttributeBySocketInfoTrans(const SocketInfo *info, bool *isEncyptedRawStream)
 {
     SessionAttribute *tmpAttr = (SessionAttribute *)SoftBusCalloc(sizeof(SessionAttribute));
     if (tmpAttr == NULL) {
@@ -880,6 +880,7 @@ static SessionAttribute *CreateSessionAttributeBySocketInfoTrans(const SocketInf
         return NULL;
     }
 
+    *isEncyptedRawStream = false;
     tmpAttr->fastTransData = NULL;
     tmpAttr->fastTransDataSize = 0;
     switch (info->dataType) {
@@ -893,8 +894,10 @@ static SessionAttribute *CreateSessionAttributeBySocketInfoTrans(const SocketInf
             tmpAttr->dataType = TYPE_FILE;
             break;
         case DATA_TYPE_RAW_STREAM:
+        case DATA_TYPE_RAW_STREAM_ENCRYPED:
             tmpAttr->dataType = TYPE_STREAM;
             tmpAttr->attr.streamAttr.streamType = RAW_STREAM;
+            *isEncyptedRawStream = (info->dataType == DATA_TYPE_RAW_STREAM_ENCRYPED);
             break;
         case DATA_TYPE_VIDEO_STREAM:
             tmpAttr->dataType = TYPE_STREAM;
@@ -922,10 +925,11 @@ int32_t ClientAddSocket(const SocketInfo *info, int32_t *sessionId)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    SessionAttribute *tmpAttr = CreateSessionAttributeBySocketInfoTrans(info);
+    bool isEncyptedRawStream = false;
+    SessionAttribute *tmpAttr = CreateSessionAttributeBySocketInfoTrans(info, &isEncyptedRawStream);
     if (tmpAttr == NULL) {
         TRANS_LOGE(TRANS_SDK, "Create SessionAttribute failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
 
     SessionParam param = {
@@ -937,7 +941,7 @@ int32_t ClientAddSocket(const SocketInfo *info, int32_t *sessionId)
     };
 
     bool isEnabled = false;
-    int32_t ret = ClientAddSocketSession(&param, sessionId, &isEnabled);
+    int32_t ret = ClientAddSocketSession(&param, isEncyptedRawStream, sessionId, &isEnabled);
     if (ret != SOFTBUS_OK) {
         SoftBusFree(tmpAttr);
         if (ret == SOFTBUS_TRANS_SESSION_REPEATED) {

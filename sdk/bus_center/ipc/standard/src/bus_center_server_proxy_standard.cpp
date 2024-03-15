@@ -31,6 +31,7 @@
 #include "softbus_server_ipc_interface_code.h"
 
 namespace OHOS {
+sptr<IRemoteObject> g_remoteProxy = nullptr;
 namespace {
 uint32_t g_getSystemAbilityId = 2;
 const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
@@ -60,6 +61,25 @@ sptr<IRemoteObject> GetSystemAbility()
     }
     return reply.ReadRemoteObject();
 }
+}
+
+int32_t BusCenterServerProxy::BusCenterServerProxyStandardInit(void)
+{
+    if (g_remoteProxy != nullptr) {
+        LNN_LOGE(LNN_EVENT, "init success");
+        return SOFTBUS_OK;
+    }
+    g_remoteProxy = GetSystemAbility();
+    if (g_remoteProxy == nullptr) {
+        LNN_LOGE(LNN_EVENT, "get system ability fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+void BusCenterServerProxy::BusCenterServerProxyStandardDeInit(void)
+{
+    g_remoteProxy.clear();
 }
 
 int32_t BusCenterServerProxy::StartDiscovery(const char *pkgName, const SubscribeInfo *subInfo)
@@ -337,12 +357,10 @@ int32_t BusCenterServerProxy::GetLocalDeviceInfo(const char *pkgName, void *info
     if (pkgName == nullptr || info == nullptr) {
         return SOFTBUS_INVALID_PARAM;
     }
-    sptr<IRemoteObject> remote = GetSystemAbility();
-    if (remote == nullptr) {
-        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+    if (g_remoteProxy == nullptr) {
+        LNN_LOGE(LNN_EVENT, "g_remoteProxy is nullptr");
         return SOFTBUS_IPC_ERR;
     }
-
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         LNN_LOGE(LNN_EVENT, "write InterfaceToken failed");
@@ -358,7 +376,7 @@ int32_t BusCenterServerProxy::GetLocalDeviceInfo(const char *pkgName, void *info
     }
     MessageParcel reply;
     MessageOption option;
-    if (remote->SendRequest(SERVER_GET_LOCAL_DEVICE_INFO, data, reply, option) != 0) {
+    if (g_remoteProxy->SendRequest(SERVER_GET_LOCAL_DEVICE_INFO, data, reply, option) != 0) {
         LNN_LOGE(LNN_EVENT, "send request failed");
         return SOFTBUS_IPC_ERR;
     }

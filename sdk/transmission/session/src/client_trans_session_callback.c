@@ -363,5 +363,7 @@ IClientSessionCallBack *GetClientSessionCb(void)
     g_sessionCb.OnGetSessionId = ClientGetSessionIdByChannelId;
     g_sessionCb.OnQosEvent = TransOnQosEvent;
     g_sessionCb.OnIdleTimeoutReset = ClientResetIdleTimeoutById;
+    g_sessionCb.OnRawStreamEncryptDefOptGet = ClientRawStreamEncryptDefOptGet;
+    g_sessionCb.OnRawStreamEncryptOptGet = ClientRawStreamEncryptOptGet;
     return &g_sessionCb;
 }
