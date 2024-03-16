@@ -47,7 +47,54 @@ ohos_unittest("SoftbusPermissionTest") {
   }
 }
 
+ohos_unittest("SoftbusPermissionACLTest") {
+  module_out_path = module_output_path
+  sources = [ "unittest/softbus_permission_acl_test.cpp" ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/common/security/permission/include",
+    "$dsoftbus_root_path/core/common/security/permission/standard",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/sdk:softbus_client",
+    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    "//third_party/googletest:gtest_main",
+  ]
+  if (is_standard_system) {
+    external_deps = [
+      "access_token:libaccesstoken_sdk",
+      "access_token:libtoken_setproc",
+      "c_utils:utils",
+      "hilog:libhilog",
+      "ipc:ipc_single",
+    ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+  }
+  if (!defined(global_parts_info) ||
+      defined(global_parts_info.deviceprofile_device_info_manager)) {
+    external_deps += [
+      "device_info_manager:distributed_device_profile_common",
+      "device_info_manager:distributed_device_profile_sdk",
+    ]
+  }
+}
+
 group("unittest") {
   testonly = true
-  deps = [ ":SoftbusPermissionTest" ]
+  deps = [
+    ":SoftbusPermissionACLTest",
+    ":SoftbusPermissionTest",
+  ]
 }
