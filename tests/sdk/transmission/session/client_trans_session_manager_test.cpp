@@ -1242,4 +1242,45 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest42, TestSiz
     ClientCleanAllSessionWhenServerDeath();
     PermissionStateChange(g_pkgName, 0);
 }
+
+/**
+ * @tc.name: TransClientSessionManagerTest43
+ * @tc.desc: Transmission sdk session manager get encrypt option by session name.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest43, TestSize.Level1)
+{
+    int32_t ret = ClientRawStreamEncryptDefOptGet(nullptr, nullptr);
+    ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = ClientRawStreamEncryptDefOptGet(g_sessionName, nullptr);
+    ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    bool isEncrypt = false;
+    ret = ClientRawStreamEncryptDefOptGet(nullptr, &isEncrypt);
+    ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = ClientRawStreamEncryptDefOptGet(g_sessionName, &isEncrypt);
+    ASSERT_EQ(ret, SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
+}
+
+/**
+ * @tc.name: TransClientSessionManagerTest44
+ * @tc.desc: Transmission sdk session manager get encrypt option by channelId.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest44, TestSize.Level1)
+{
+    bool isEncrypt = false;
+    int32_t ret = ClientRawStreamEncryptOptGet(TRANS_TEST_INVALID_CHANNEL_ID, CHANNEL_TYPE_UDP, &isEncrypt);
+    ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = ClientRawStreamEncryptOptGet(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, nullptr);
+    ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = ClientRawStreamEncryptOptGet(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, &isEncrypt);
+    ASSERT_EQ(ret, SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
+}
 }

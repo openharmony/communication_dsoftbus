@@ -27,7 +27,7 @@ static char g_networkId[NETWORK_ID_BUF_LEN] = { 0 };
 
 static void OnDefNodeOnline(NodeBasicInfo *info)
 {
-    if (info == NULL) {
+    if (info == nullptr) {
         LOGI("Online: info is null...");
         return;
     }
@@ -37,7 +37,7 @@ static void OnDefNodeOnline(NodeBasicInfo *info)
 
 static void OnDefNodeOffline(NodeBasicInfo *info)
 {
-    if (info == NULL) {
+    if (info == nullptr) {
         LOGI("Offline: info is null...");
         return;
     }
@@ -47,7 +47,7 @@ static void OnDefNodeOffline(NodeBasicInfo *info)
 
 static void OnDefNodeBasicInfoChanged(NodeBasicInfoType type, NodeBasicInfo *info)
 {
-    if (info == NULL) {
+    if (info == nullptr) {
         LOGI("InfoChanged: info is null, type=%d", type);
         return;
     }
@@ -56,7 +56,7 @@ static void OnDefNodeBasicInfoChanged(NodeBasicInfoType type, NodeBasicInfo *inf
 
 static void onDefNodeStatusChanged(NodeStatusType type, NodeStatus *status)
 {
-    if (status == NULL) {
+    if (status == nullptr) {
         LOGI("StatusChanged: info is null, type=%d", type);
         return;
     }
@@ -83,9 +83,9 @@ void AddPermission()
         .dcapsNum = 0,
         .permsNum = permsSize,
         .aclsNum = 0,
-        .dcaps = NULL,
+        .dcaps = nullptr,
         .perms = perms,
-        .acls = NULL,
+        .acls = nullptr,
         .processName = "dsoftbus_service",
         .aplStr = "system_core",
     };
@@ -96,10 +96,10 @@ void AddPermission()
 static int CheckRemoteDeviceIsNull(bool isSetNetId)
 {
     int nodeNum = 0;
-    NodeBasicInfo *nodeInfo = NULL;
+    NodeBasicInfo *nodeInfo = nullptr;
     int ret = GetAllNodeDeviceInfo(PKG_NAME, &nodeInfo, &nodeNum);
     LOGI("[check]get node number=%d, ret=%d", nodeNum, ret);
-    if (nodeInfo != NULL && nodeNum > 0) {
+    if (nodeInfo != nullptr && nodeNum > 0) {
         LOGI("[check]get netid is=%s", nodeInfo->networkId);
         if (isSetNetId) {
             (void)strncpy_s(g_networkId, NETWORK_ID_BUF_LEN, nodeInfo->networkId, NETWORK_ID_BUF_LEN);
