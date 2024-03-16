@@ -694,7 +694,7 @@ static void TryAsMasterNodeNextLoop(FsmStateMachine *fsm)
         LNN_LOGE(LNN_HEART_BEAT, "try as master node get gearmode fail");
         return;
     }
-    delayMillis = (uint64_t)mode.cycle * HB_TIME_FACTOR + HB_NOTIFY_DEV_LOST_DELAY_LEN;
+    delayMillis = (uint64_t)mode.cycle * HB_TIME_FACTOR + HB_NOTIFY_MASTER_NODE_DELAY_LEN;
     if (LnnFsmPostMessageDelay(fsm, EVENT_HB_AS_MASTER_NODE, NULL, delayMillis) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "try as master node post msg fail");
         return;

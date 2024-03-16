@@ -626,5 +626,15 @@ int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
 {
     return GetNetBuilderDepsInterface()->AuthStartVerify(connInfo, requestId, callback, isFastAuth);
 }
+
+bool LnnIsNeedCleanConnectionFsm(const NodeInfo *nodeInfo, ConnectionAddrType type)
+{
+    return GetNetBuilderDepsInterface()->LnnIsNeedCleanConnectionFsm(nodeInfo, type);
+}
+
+int32_t AuthFlushDevice(const char *uuid)
+{
+    return GetNetBuilderDepsInterface()->AuthFlushDevice(uuid);
+}
 } // extern "C"
 } // namespace OHOS
