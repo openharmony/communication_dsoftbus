@@ -26,7 +26,7 @@
 #include "lnn_lane_link.h"
 #include "lnn_lane_model.h"
 #include "lnn_lane_select.h"
-#include "lnn_parameter_utils.h"
+#include "lnn_link_enabled_mock.h"
 #include "lnn_select_rule.h"
 #include "lnn_wifi_adpter_mock.h"
 #include "message_handler.h"
@@ -1379,6 +1379,126 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_EXPECT_LANES_BY_QOS_002, TestSize.Level1)
     selectParam.transType = LANE_T_MIX;
     ret = SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, &linkList);
     EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LNN_SELECT_EXPECT_LANE_BY_PARAMETER_001
+* @tc.desc: SelectExpectLaneByParameter
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_SELECT_EXPECT_LANE_BY_PARAMETER_001, TestSize.Level1)
+{
+    NiceMock<IsLinkEnabledDepsInterfaceMock> enabledMock;
+    EXPECT_CALL(enabledMock, IsLinkEnabled).WillOnce(Return(true));
+    int32_t ret = SelectExpectLaneByParameter(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: LNN_SELECT_EXPECT_LANE_BY_PARAMETER_002
+* @tc.desc: SelectExpectLaneByParameter
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_SELECT_EXPECT_LANE_BY_PARAMETER_002, TestSize.Level1)
+{
+    NiceMock<IsLinkEnabledDepsInterfaceMock> enabledMock;
+    LanePreferredLinkList linkList;
+
+    EXPECT_CALL(enabledMock, IsLinkEnabled).WillOnce(Return(true));
+
+    int32_t ret = SelectExpectLaneByParameter(&linkList);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LNN_SELECT_EXPECT_LANE_BY_PARAMETER_003
+* @tc.desc: SelectExpectLaneByParameter
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_SELECT_EXPECT_LANE_BY_PARAMETER_003, TestSize.Level1)
+{
+    NiceMock<IsLinkEnabledDepsInterfaceMock> enabledMock;
+    LanePreferredLinkList linkList;
+
+    EXPECT_CALL(enabledMock, IsLinkEnabled).WillOnce(Return(false)).WillOnce(Return(true));
+
+    int32_t ret = SelectExpectLaneByParameter(&linkList);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LNN_SELECT_EXPECT_LANE_BY_PARAMETER_004
+* @tc.desc: SelectExpectLaneByParameter
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_SELECT_EXPECT_LANE_BY_PARAMETER_004, TestSize.Level1)
+{
+    NiceMock<IsLinkEnabledDepsInterfaceMock> enabledMock;
+    LanePreferredLinkList linkList;
+
+    EXPECT_CALL(enabledMock, IsLinkEnabled).WillOnce(Return(false)).WillOnce(Return(false)).
+        WillOnce(Return(true));
+
+    int32_t ret = SelectExpectLaneByParameter(&linkList);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LNN_SELECT_EXPECT_LANE_BY_PARAMETER_005
+* @tc.desc: SelectExpectLaneByParameter
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_SELECT_EXPECT_LANE_BY_PARAMETER_005, TestSize.Level1)
+{
+    NiceMock<IsLinkEnabledDepsInterfaceMock> enabledMock;
+    LanePreferredLinkList linkList;
+
+    EXPECT_CALL(enabledMock, IsLinkEnabled).WillOnce(Return(false)).WillOnce(Return(false)).
+        WillOnce(Return(false)).WillOnce(Return(true));
+
+    int32_t ret = SelectExpectLaneByParameter(&linkList);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LNN_SELECT_EXPECT_LANE_BY_PARAMETER_006
+* @tc.desc: SelectExpectLaneByParameter
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_SELECT_EXPECT_LANE_BY_PARAMETER_006, TestSize.Level1)
+{
+    NiceMock<IsLinkEnabledDepsInterfaceMock> enabledMock;
+    LanePreferredLinkList linkList;
+
+    EXPECT_CALL(enabledMock, IsLinkEnabled).WillOnce(Return(false)).WillOnce(Return(false)).
+        WillOnce(Return(false)).WillOnce(Return(false)).WillOnce(Return(true));
+
+    int32_t ret = SelectExpectLaneByParameter(&linkList);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LNN_SELECT_EXPECT_LANE_BY_PARAMETER_007
+* @tc.desc: SelectExpectLaneByParameter
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_SELECT_EXPECT_LANE_BY_PARAMETER_007, TestSize.Level1)
+{
+    NiceMock<IsLinkEnabledDepsInterfaceMock> enabledMock;
+    LanePreferredLinkList linkList;
+
+    EXPECT_CALL(enabledMock, IsLinkEnabled).WillOnce(Return(false)).WillOnce(Return(false)).
+        WillOnce(Return(false)).WillOnce(Return(false)).WillOnce(Return(false));
+
+    int32_t ret = SelectExpectLaneByParameter(&linkList);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 }
 
 /*
