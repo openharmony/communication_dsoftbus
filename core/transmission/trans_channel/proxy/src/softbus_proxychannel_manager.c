@@ -1036,7 +1036,7 @@ static int32_t TransProxyFillChannelInfo(const ProxyMessage *msg, ProxyChannelIn
     int16_t newChanId = (int16_t)(GenerateChannelId(false));
     ConstructProxyChannelInfo(chan, msg, newChanId, &info);
 
-    if (chan->appInfo.appType == APP_TYPE_NORMAL && chan->appInfo.firstTokenId != 0 &&
+    if (chan->appInfo.appType == APP_TYPE_NORMAL && chan->appInfo.firstTokenId != TOKENID_NOT_SET &&
         TransCheckServerAccessControl(chan->appInfo.firstTokenId) != SOFTBUS_OK) {
         return SOFTBUS_TRANS_CHECK_ACL_FAILED;
     }
