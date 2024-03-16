@@ -208,7 +208,7 @@ static void HbConditionChanged(bool isOnlySetState)
     }
 }
 
-static uint64_t GettDisEnableBleDiscoveryTime(int64_t modeDuration)
+static uint64_t GetDisEnableBleDiscoveryTime(int64_t modeDuration)
 {
     uint64_t timeout = 0ULL;
     if (modeDuration < MIN_DISABLE_BLE_DISCOVERY_TIME) {
@@ -238,7 +238,7 @@ void LnnRequestBleDiscoveryProcess(int32_t strategy, int64_t timeout)
             LNN_LOGI(LNN_HEART_BEAT, "ble has been requestDisabled, need wait timeout or enabled");
             return;
         }
-        uint64_t time = GettDisEnableBleDiscoveryTime(timeout);
+        uint64_t time = GetDisEnableBleDiscoveryTime(timeout);
         if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), RequestEnableDiscovery, NULL, time) !=
             SOFTBUS_OK) {
             LNN_LOGI(LNN_HEART_BEAT, "ble has been requestDisabled fail, due to async callback fail");
@@ -639,6 +639,25 @@ int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType ad
         g_hbConditionState.btState = SOFTBUS_BR_TURN_ON;
     }
     return SOFTBUS_OK;
+}
+
+void LnnStopOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType addrType)
+{
+    if (networkId == NULL) {
+        LNN_LOGE(LNN_HEART_BEAT, "HB stop offline timing get invalid param");
+        return;
+    }
+    /* only support ble medium type yet. */
+    if (addrType != CONNECTION_ADDR_BLE) {
+        LNN_LOGE(LNN_HEART_BEAT, "HB stop offline timing not support addrType:%{public}d now", addrType);
+        return;
+    }
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
+    LNN_LOGD(LNN_HEART_BEAT, "heartbeat(HB) stop offline timing, networkId:%{public}s", anonyNetworkId);
+    AnonymizeFree(anonyNetworkId);
+    (void)LnnStopScreenChangeOfflineTiming(networkId, addrType);
+    (void)LnnStopOfflineTimingStrategy(networkId, addrType);
 }
 
 static void ReportBusinessDiscoveryResultEvt(const char *pkgName, int32_t discCnt)

@@ -1218,9 +1218,14 @@ static void HandleDeviceIdData(
             AUTH_LOGE(AUTH_FSM, "local device NOT support as server, ignore auth seq=%{public}" PRId64, head->seq);
             return;
         }
+        if (!RequireAuthLock()) {
+            AUTH_LOGE(AUTH_FSM, "lock fail");
+            return;
+        }
         AuthFsm *fsm = GetAuthFsmByConnId(connId, true);
         if ((fsm != NULL && fsm->info.idType == EXCHANGE_NETWORKID) ||
             (fsm != NULL && fsm->info.idType == EXCHANGE_FAIL)) {
+            ReleaseAuthLock();
             ret = AuthSessionProcessDevIdData(head->seq, data, head->len);
             if (ret != SOFTBUS_OK) {
                 AUTH_LOGE(AUTH_FSM,
@@ -1230,9 +1235,11 @@ static void HandleDeviceIdData(
         }
         if (fsm != NULL && fsm->info.idType == EXCHANHE_UDID) {
             AUTH_LOGE(AUTH_FSM, "the same connId fsm not support, ignore auth seq=%{public}" PRId64, head->seq);
+            ReleaseAuthLock();
             HandleRepeatDeviceIdDataDelay(connId, connInfo, fromServer, head, data);
             return;
         }
+        ReleaseAuthLock();
         ret = AuthSessionStartAuth(head->seq, AuthGenRequestId(), connId, connInfo, true, true);
         if (ret != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_FSM,
@@ -1769,6 +1776,32 @@ void UnregGroupChangeListener(void)
     g_groupChangeListener.onGroupCreated = NULL;
     g_groupChangeListener.onGroupDeleted = NULL;
     g_groupChangeListener.onDeviceBound = NULL;
+}
+
+int32_t AuthGetLatestAuthSeqListByType(const char *udid, int64_t *seqList, uint64_t *authVerifyTime, uint32_t type)
+{
+    if (udid == NULL || udid[0] == '\0' || seqList == NULL || authVerifyTime == NULL) {
+        AUTH_LOGE(AUTH_CONN, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!RequireAuthLock()) {
+        AUTH_LOGE(AUTH_CONN, "lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    const AuthManager *authClient = NULL;
+    const AuthManager *authServer = NULL;
+    authClient = FindAuthManagerByUdid(udid, ConvertToAuthLinkType((DiscoveryType)type), false);
+    authServer = FindAuthManagerByUdid(udid, ConvertToAuthLinkType((DiscoveryType)type), true);
+    if (authClient != NULL) {
+        seqList[0] = authClient->lastAuthSeq;
+        authVerifyTime[0] = authClient->lastVerifyTime;
+    }
+    if (authServer != NULL) {
+        seqList[1] = authServer->lastAuthSeq;
+        authVerifyTime[1] = authServer->lastVerifyTime;
+    }
+    ReleaseAuthLock();
+    return SOFTBUS_OK;
 }
 
 int32_t AuthGetLatestAuthSeqList(const char *udid, int64_t *seqList, uint32_t num)
