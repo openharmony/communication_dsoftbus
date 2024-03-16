@@ -400,7 +400,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyPackMessageTest001, TestSize.
 {
     ProxyMessageHead msg;
     ProxyDataInfo dataInfo;
-    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_WIFI };
     int32_t ret = TransProxyPackMessage(NULL, authHandle, &dataInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
 
@@ -445,7 +445,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyPackMessageTest002, TestSize.
 
     msg.cipher = 0;
     msg.type = PROXYCHANNEL_MSG_TYPE_HANDSHAKE;
-    AuthHandle authHandle = {.authId = AUTH_INVALID_ID};
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_WIFI };
     ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
 

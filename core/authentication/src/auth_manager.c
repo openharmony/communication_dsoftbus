@@ -24,6 +24,7 @@
 #include "auth_interface.h"
 #include "auth_log.h"
 #include "auth_request.h"
+#include "auth_normalize_request.h"
 #include "auth_session_fsm.h"
 #include "auth_session_message.h"
 #include "bus_center_manager.h"
@@ -45,6 +46,7 @@
 #define SCHEDULE_UPDATE_SESSION_KEY_PERIOD ((5 * 60 + 30) * 60 * 1000L) /* 5 hour 30 mins */
 #define FLAG_REPLY                         1
 #define FLAG_ACTIVE                        0
+#define UDID_SHORT_HASH_LEN_TEMP           8
 #define RETRY_REGDATA_TIMES                3
 #define RETRY_REGDATA_MILLSECONDS          300
 #define DELAY_REG_DP_TIME                  10000
@@ -115,17 +117,17 @@ void DelDupAuthManager(AuthManager *auth)
 void DelAuthManager(AuthManager *auth, int32_t type)
 {
     AUTH_CHECK_AND_RETURN_LOGE(auth != NULL, AUTH_FSM, "auth is null");
-    if (type < AUTH_LINK_TYPE_WIFI || type >= AUTH_LINK_TYPE_MAX) {
+    if (type < AUTH_LINK_TYPE_WIFI || type > AUTH_LINK_TYPE_MAX) {
         AUTH_LOGE(AUTH_FSM, "type error.");
-        return;
-    }
-    if (auth->connId[type] == 0) {
-        AUTH_LOGE(AUTH_FSM, "authManager has been deleted, authId=%{public}" PRId64, auth->authId);
         return;
     }
     char *anonyUdid = NULL;
     Anonymize(auth->udid, &anonyUdid);
     if (type != AUTH_LINK_TYPE_MAX) {
+        if (auth->connId[type] == 0) {
+            AUTH_LOGE(AUTH_FSM, "authManager has been deleted, authId=%{public}" PRId64, auth->authId);
+            return;
+        }
         auth->connId[type] = 0;
         (void)memset_s(&auth->connInfo[type], sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
         for (int32_t i = AUTH_LINK_TYPE_WIFI; i < AUTH_LINK_TYPE_MAX; i++) {
@@ -1058,6 +1060,63 @@ static void HandleBleConnectResult(uint32_t requestId, int64_t authId, uint64_t 
     } while (FindAuthRequestByConnInfo(&request.connInfo, &request) == SOFTBUS_OK);
 }
 
+static int32_t GenerateUdidShortHash(const char *udid, uint8_t *hash)
+{
+    if (SoftBusGenerateStrHash((uint8_t *)udid, strlen(udid), hash) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "generate udidHash fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t GetUdidShortHash(const AuthConnInfo *connInfo, char *udidBuf, uint32_t bufLen)
+{
+    char udid[UDID_BUF_LEN] = {0};
+    uint8_t emptyHash[SHA_256_HASH_LEN] = {0};
+    uint8_t hash[SHA_256_HASH_LEN] = {0};
+    switch (connInfo->type) {
+        case AUTH_LINK_TYPE_BR:
+            if (LnnGetUdidByBrMac(connInfo->info.brInfo.brMac, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
+                AUTH_LOGE(AUTH_FSM, "get udid by brMac fail.");
+                return SOFTBUS_ERR;
+            }
+            if (GenerateUdidShortHash(udid, hash) != SOFTBUS_OK) {
+                return SOFTBUS_ERR;
+            }
+            break;
+        case AUTH_LINK_TYPE_WIFI:
+            if (ConvertHexStringToBytes(hash, SHA_256_HASH_LEN, (const char *)connInfo->info.ipInfo.deviceIdHash,
+                strlen((const char *)connInfo->info.ipInfo.deviceIdHash)) != SOFTBUS_OK) {
+                return SOFTBUS_ERR;
+            }
+            break;
+        case AUTH_LINK_TYPE_BLE:
+            if (memcpy_s(hash, SHA_256_HASH_LEN, connInfo->info.bleInfo.deviceIdHash, UDID_HASH_LEN) != EOK) {
+                return SOFTBUS_MEM_ERR;
+            }
+            break;
+        case AUTH_LINK_TYPE_P2P:
+        case AUTH_LINK_TYPE_ENHANCED_P2P:
+            if (GenerateUdidShortHash(connInfo->info.ipInfo.udid, hash) != SOFTBUS_OK) {
+                return SOFTBUS_ERR;
+            }
+            break;
+        default:
+            AUTH_LOGE(AUTH_CONN, "unknown connType. type=%{public}d", connInfo->type);
+            return SOFTBUS_ERR;
+    }
+    if (memcmp(emptyHash, hash, SHA_256_HASH_LEN) == 0) {
+        AUTH_LOGI(AUTH_CONN, "udidHash is empty");
+        return SOFTBUS_ERR;
+    }
+    if (ConvertBytesToHexString(udidBuf, bufLen, hash, UDID_SHORT_HASH_LEN_TEMP) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "convert bytes to string fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+
 static void DfxRecordLnnConnectEnd(uint64_t connId, const AuthConnInfo *connInfo, int32_t reason)
 {
     LnnEventExtra extra = { 0 };
@@ -1070,6 +1129,38 @@ static void DfxRecordLnnConnectEnd(uint64_t connId, const AuthConnInfo *connInfo
         extra.authLinkType = connInfo->type;
     }
     LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_CONNECTION, extra);
+}
+
+int32_t AuthVerifyAfterNotifyNormalize(NormalizeRequest *request)
+{
+    if (request == NULL) {
+        AUTH_LOGE(AUTH_CONN, "normalize request is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = AuthSessionStartAuth(request->authSeq, request->requestId, request->connId, &request->connInfo,
+        false, request->isFastAuth);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "start auth session fail=%{public}d, requestId=%{public}u", ret, request->requestId);
+        DisconnectAuthDevice(&request->connId);
+        ReportAuthRequestFailed(request->requestId, ret);
+    }
+    return ret;
+}
+
+static uint32_t AddConcurrentAuthRequest(const AuthConnInfo *connInfo, AuthRequest *request, uint64_t connId)
+{
+    char udidHashHexStr[SHA_256_HEX_HASH_LEN] = {0};
+    uint32_t num = 0;
+    if (GetUdidShortHash(connInfo, udidHashHexStr, SHA_256_HEX_HASH_LEN) == SOFTBUS_OK) {
+        NormalizeRequest normalizeRequest = {.authSeq = request->traceId, .requestId = request->requestId,
+            .connId = connId, .isFastAuth = request->isFastAuth, .connInfo = *connInfo};
+        if (strcpy_s(normalizeRequest.udidHash, sizeof(normalizeRequest.udidHash), udidHashHexStr) != EOK) {
+            return num;
+        }
+        num = AddNormalizeRequest(&normalizeRequest);
+        AUTH_LOGI(AUTH_CONN, "add normalize queue, num=%{public}d, udidHash=%{public}s", num, udidHashHexStr);
+    }
+    return num;
 }
 
 static void OnConnectResult(uint32_t requestId, uint64_t connId, int32_t result, const AuthConnInfo *connInfo)
@@ -1100,6 +1191,12 @@ static void OnConnectResult(uint32_t requestId, uint64_t connId, int32_t result,
             SoftbusHitraceStop();
             return;
         }
+    }
+
+    uint32_t num = AddConcurrentAuthRequest(&request.connInfo, &request, connId);
+    if (num > 1) {
+        SoftbusHitraceStop();
+        return;
     }
     int32_t ret = AuthSessionStartAuth(request.traceId, requestId, connId, connInfo, false, request.isFastAuth);
     if (ret != SOFTBUS_OK) {
@@ -1901,30 +1998,6 @@ int32_t AuthDeviceGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
     }
     DelDupAuthManager(auth);
     return SOFTBUS_OK;
-}
-
-AuthManager *AuthDeviceGetDeviceUdid(char *udid, bool isServer)
-{
-    if (udid == NULL) {
-        AUTH_LOGE(AUTH_CONN, "uuid is empty");
-        return NULL;
-    }
-    if (!RequireAuthLock()) {
-        AUTH_LOGE(AUTH_CONN, "lock fail");
-        return NULL;
-    }
-    AuthManager *item = NULL;
-    AuthManager *newAuth = NULL;
-    ListNode *list = isServer ? &g_authServerList : &g_authClientList;
-    LIST_FOR_EACH_ENTRY(item, list, AuthManager, node) {
-        if (strcmp(udid, item->udid) == 0) {
-            newAuth = DupAuthManager(item);
-            ReleaseAuthLock();
-            return newAuth;
-        }
-    }
-    ReleaseAuthLock();
-    return NULL;
 }
 
 int32_t AuthDeviceGetVersion(int64_t authId, SoftBusVersion *version)

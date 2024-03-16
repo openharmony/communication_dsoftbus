@@ -219,7 +219,7 @@ int32_t AuthRestoreAuthManager(const char *udidHash,
     }
     // get device key
     AuthDeviceKeyInfo keyInfo = {0};
-    if (AuthFindDeviceKey(udidHash, AUTH_LINK_TYPE_NORMALIZED, &keyInfo) != SOFTBUS_OK &&
+    if (AuthFindLatestNormalizeKey(udidHash, &keyInfo) != SOFTBUS_OK &&
         AuthFindDeviceKey(udidHash, connInfo->type, &keyInfo) != SOFTBUS_OK) {
         AUTH_LOGI(AUTH_KEY, "restore manager fail because device key not exist");
         return SOFTBUS_ERR;
@@ -417,32 +417,6 @@ bool IsAuthHasTrustedRelation(void)
 {
     bool hasTrustedRelation = (AuthHasTrustedRelation() == TRUSTED_RELATION_YES) ? true : false;
     return hasTrustedRelation;
-}
-
-void AuthDeleteStoredAuthKey(const char *udid, int32_t discoveryType)
-{
-    AuthLinkType linkType;
-    switch (discoveryType) {
-        case DISCOVERY_TYPE_WIFI:
-            linkType = AUTH_LINK_TYPE_WIFI;
-            break;
-        case DISCOVERY_TYPE_BLE:
-            linkType = AUTH_LINK_TYPE_BLE;
-            break;
-        case DISCOVERY_TYPE_BR:
-            linkType = AUTH_LINK_TYPE_BR;
-            break;
-        case DISCOVERY_TYPE_P2P:
-            linkType = AUTH_LINK_TYPE_P2P;
-            break;
-        case DISCOVERY_TYPE_COUNT:
-            linkType = AUTH_LINK_TYPE_NORMALIZED;
-            break;
-        default:
-            AUTH_LOGE(AUTH_KEY, "unkown support discType=%{public}d", discoveryType);
-            return;
-    }
-    AuthRemoveDeviceKey(udid, (int32_t)linkType);
 }
 
 int32_t AuthInit(void)

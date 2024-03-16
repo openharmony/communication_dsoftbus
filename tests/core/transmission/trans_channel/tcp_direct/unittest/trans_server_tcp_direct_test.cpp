@@ -215,7 +215,7 @@ static void TestDelSessionConnNode(int32_t channelId)
  */
 HWTEST_F(TransServerTcpDirectTest, GetCipherFlagByAuthId001, TestSize.Level1)
 {
-    AuthHandle authHandle = { .authId = 0 };
+    AuthHandle authHandle = { .authId = 0, .type = AUTH_LINK_TYPE_WIFI };
     uint32_t flag = 0;
     bool isAuthServer = false;
 
@@ -514,7 +514,7 @@ HWTEST_F(TransServerTcpDirectTest, GetAuthIdByChanId001, TestSize.Level1)
  */
 HWTEST_F(TransServerTcpDirectTest, SendAuthData001, TestSize.Level1)
 {
-    AuthHandle authHandle = { .authId = 1 };
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     int64_t seq = 0;
     const char *data = TEST_MESSAGE;
     int32_t ret = SendAuthData(authHandle, MODULE_P2P_LISTEN, MSG_FLAG_REQUEST, seq, data);
