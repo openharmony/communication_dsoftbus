@@ -396,7 +396,7 @@ HWTEST_F(TransCoreTcpDirectTest, VerifyP2pPackErrorTest0010, TestSize.Level1)
 HWTEST_F(TransCoreTcpDirectTest, GetCipherFlagByAuthIdTest0011, TestSize.Level1)
 {
     bool isAuthServer = false;
-    AuthHandle authHandle = { .authId = 1 };
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     uint32_t flag = 0;
 
     int32_t ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer);
