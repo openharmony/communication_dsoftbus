@@ -197,7 +197,7 @@ int32_t TMessenger::StartConnect(const std::string &pkgName, const std::string &
         .pkgName = (char *)(pkgName.c_str()),
         .name = (char *)(myName.c_str()),
         .peerName = (char *)(peerName.c_str()),
-        .peerNetworkId = NULL,
+        .peerNetworkId = nullptr,
         .dataType = DATA_TYPE_MESSAGE,
     };
     info.peerNetworkId = OHOS::WaitOnLineAndGetNetWorkId();
@@ -352,7 +352,7 @@ std::shared_ptr<Response> TMessenger::WaitResponse(uint32_t timeout)
 
 std::shared_ptr<Response> TMessenger::GetMessageFromRecvList(Message::MsgType type)
 {
-    auto it = std::find_if(msgList_.begin(), msgList_.end(), [&] (const std::shared_ptr<Message> &it) {
+    auto it = std::find_if(msgList_.begin(), msgList_.end(), [type] (const std::shared_ptr<Message> &it) {
         return it->msgType_ == type;
     });
 
