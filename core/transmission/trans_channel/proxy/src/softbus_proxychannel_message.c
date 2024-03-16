@@ -338,6 +338,7 @@ static int32_t PackHandshakeMsgForFastData(AppInfo *appInfo, cJSON *root)
         char *buf = TransProxyPackFastData(appInfo, &outLen);
         if (buf == NULL) {
             SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "failed to pack bytes.");
+            SoftBusFree(encodeFastData);
             return SOFTBUS_ERR;
         }
         int32_t ret = SoftBusBase64Encode(encodeFastData, BASE64_FAST_DATA_LEN, &fastDataSize,
