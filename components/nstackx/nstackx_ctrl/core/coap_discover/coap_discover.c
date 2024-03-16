@@ -69,6 +69,11 @@ static uint32_t g_recvDiscoverMsgNum;
 static MsgIdList *g_msgIdList = NULL;
 static uint8_t g_subscribeCount;
 
+static uint32_t *g_notificationIntervals = NULL;
+static uint32_t g_notificationTargetCnt = 0;
+static uint32_t g_notificationRunCnt = 0;
+static Timer *g_notificationTimer = NULL;
+
 #ifdef DFINDER_SUPPORT_SET_SCREEN_STATUS
 static bool g_isScreenOn = true;
 
@@ -975,6 +980,146 @@ static void CoapRecvRecountTimerHandle(void *argument)
     return;
 }
 
+static int32_t CoapPostServiceNotificationEx(CoapCtxType *ctx)
+{
+    char broadcastIp[NSTACKX_MAX_IP_STRING_LEN] = {0};
+    if (GetBroadcastIp(ctx->iface, broadcastIp, sizeof(broadcastIp)) != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "get %s broadcast ip failed, please check nic status with ifconfig or reconnect to network",
+            GetLocalIfaceName(ctx->iface));
+        return NSTACKX_EFAILED;
+    }
+    char notificationUri[COAP_URI_BUFFER_LENGTH] = {0};
+    if (sprintf_s(notificationUri, sizeof(notificationUri),
+        "coap://%s/%s", broadcastIp, COAP_SERVICE_NOTIFICATION_URI) < 0) {
+        DFINDER_LOGE(TAG, "format coap service notification uri failed");
+        return NSTACKX_EFAILED;
+    }
+    char *data = PrepareServiceNotification();
+    if (data == NULL) {
+        DFINDER_LOGE(TAG, "prepare service notification data fail");
+        return NSTACKX_EFAILED;
+    }
+    int32_t ret = CoapSendRequest(ctx, COAP_MESSAGE_NON, notificationUri, data, strlen(data) + 1);
+    cJSON_free(data);
+    return ret;
+}
+
+static int32_t CoapPostServiceNotification(void)
+{
+    List *pos = NULL;
+    List *head = GetCoapContextList();
+    int successCnt = 0;
+    LIST_FOR_EACH(pos, head) {
+        int32_t ret = CoapPostServiceNotificationEx((CoapCtxType *)pos);
+        if (ret == NSTACKX_EOK) {
+            successCnt++;
+        }
+    }
+    if (successCnt == 0) {
+        DFINDER_LOGE(TAG, "no iface to send request, coap context ready: %d", IsCoapContextReady());
+        IncStatistics(STATS_POST_SD_REQUEST_FAILED);
+        return NSTACKX_EFAILED;
+    }
+    return NSTACKX_EOK;
+}
+
+static uint32_t GetNextNotificationInterval(uint32_t runCnt)
+{
+    if (runCnt >= g_notificationTargetCnt) {
+        return 0;
+    }
+    return g_notificationIntervals[runCnt];
+}
+
+void CoapServiceNotificationStop(void)
+{
+    (void)TimerSetTimeout(g_notificationTimer, 0, NSTACKX_FALSE);
+    g_notificationRunCnt = 0;
+    g_notificationTargetCnt = 0;
+    if (g_notificationIntervals != NULL) {
+        free(g_notificationIntervals);
+        g_notificationIntervals = NULL;
+    }
+}
+
+static void CoapServiceNotificationTimerHandle(void *argument)
+{
+    (void)argument;
+    if (!IsCoapContextReady()) {
+        DFINDER_LOGE(TAG, "coap context not ready, check nic status");
+        return;
+    }
+    if (CoapPostServiceNotification() != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "failed when post service notification");
+        goto L_ERR_NOTIFICATION;
+    }
+    DFINDER_LOGI(TAG, "the %u time for sending notification", g_notificationRunCnt + 1);
+    uint32_t nextInterval = GetNextNotificationInterval(++g_notificationRunCnt);
+    if (TimerSetTimeout(g_notificationTimer, nextInterval, NSTACKX_FALSE) != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "failed to set timer for service notification");
+        goto L_ERR_NOTIFICATION;
+    }
+    return;
+L_ERR_NOTIFICATION:
+    DFINDER_LOGE(TAG, "abort notification, tried %u request, now reset notification cnt to 0", g_notificationRunCnt);
+    g_notificationRunCnt = 0;
+}
+
+static int32_t HndPostServiceNotificationEx(const coap_pdu_t *request)
+{
+    size_t size = 0;
+    const uint8_t *buf = NULL;
+    if (coap_get_data(request, &size, &buf) == 0 || size == 0 || size > COAP_RXBUFFER_SIZE) {
+        DFINDER_LOGE(TAG, "coap_get_data fail, size: %zu, coap rx buffer size: %d", size, COAP_RXBUFFER_SIZE);
+        return NSTACKX_EFAILED;
+    }
+    NotificationConfig *notification = (NotificationConfig *)calloc(1, sizeof(NotificationConfig));
+    if (notification == NULL) {
+        DFINDER_LOGE(TAG, "calloc for notification fail, size wanted: %zu", sizeof(NotificationConfig));
+        return NSTACKX_ENOMEM;
+    }
+    notification->msg = (char *)calloc(NSTACKX_MAX_NOTIFICATION_DATA_LEN, sizeof(char));
+    if (notification->msg == NULL) {
+        DFINDER_LOGE(TAG, "calloc for notification msg failed");
+        free(notification);
+        return NSTACKX_ENOMEM;
+    }
+    if (GetServiceNotificationInfo(buf, size, notification) != NSTACKX_EOK) {
+        free(notification->msg);
+        free(notification);
+        return NSTACKX_EFAILED;
+    }
+    NotificationReceived(notification);
+    free(notification->msg);
+    free(notification);
+    return NSTACKX_EOK;
+}
+
+static void HndPostServiceNotification(coap_resource_t *resource, coap_session_t *session,
+    const coap_pdu_t *request, const coap_string_t *query, coap_pdu_t *response)
+{
+    (void)resource;
+    (void)query;
+    (void)session;
+    (void)response;
+
+    if (request == NULL) {
+        DFINDER_LOGW(TAG, "request pdu is null, return");
+        return;
+    }
+#ifdef DFINDER_SUPPORT_SET_SCREEN_STATUS
+    if (!g_isScreenOn) {
+        DFINDER_LOGD(TAG, "device screen is off, ignore pdu received");
+        return;
+    }
+#endif
+    DFINDER_LOGI(TAG, "recv coap notification pdu mid: %d", coap_pdu_get_mid(request));
+
+    if (HndPostServiceNotificationEx(request) != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, " hnd post service notificatioin failed for pdu mid: %d", coap_pdu_get_mid(request));
+    }
+}
+
 int32_t CoapInitResources(coap_context_t *ctx)
 {
     coap_resource_t *r =
@@ -996,6 +1141,17 @@ int32_t CoapInitResources(coap_context_t *ctx)
     }
     coap_register_request_handler(msg, COAP_REQUEST_POST, HndPostServiceMsg);
     coap_add_resource(ctx, msg);
+
+    coap_resource_t *notification = coap_resource_init(coap_make_str_const(COAP_SERVICE_NOTIFICATION_URI), 0);
+    if (notification == NULL) {
+        DFINDER_LOGE(TAG, "coap_resource_init for service notification failed");
+        (void)coap_delete_resource(ctx, r);
+        (void)coap_delete_resource(ctx, msg);
+        return NSTACKX_ENOMEM;
+    }
+    coap_register_request_handler(notification, COAP_REQUEST_POST, HndPostServiceNotification);
+    coap_add_resource(ctx, notification);
+
     return NSTACKX_EOK;
 }
 
@@ -1020,6 +1176,18 @@ int32_t CoapDiscoverInit(EpollDesc epollfd)
         return NSTACKX_EFAILED;
     }
 
+    if (g_notificationTimer == NULL) {
+        g_notificationTimer = TimerStart(epollfd, 0, NSTACKX_FALSE, CoapServiceNotificationTimerHandle, NULL);
+    }
+    if (g_notificationTimer == NULL) {
+        DFINDER_LOGE(TAG, "failed to start timer for service notification");
+        TimerDelete(g_recvRecountTimer);
+        g_recvRecountTimer = NULL;
+        TimerDelete(g_discoverTimer);
+        g_discoverTimer = NULL;
+        return NSTACKX_EFAILED;
+    }
+
     g_msgIdList = (MsgIdList *)calloc(1U, sizeof(MsgIdList));
     if (g_msgIdList == NULL) {
         DFINDER_LOGE(TAG, "message Id record list calloc error");
@@ -1027,6 +1195,8 @@ int32_t CoapDiscoverInit(EpollDesc epollfd)
         g_discoverTimer = NULL;
         TimerDelete(g_recvRecountTimer);
         g_recvRecountTimer = NULL;
+        TimerDelete(g_notificationTimer);
+        g_notificationTimer = NULL;
         return NSTACKX_EFAILED;
     }
 
@@ -1037,6 +1207,7 @@ int32_t CoapDiscoverInit(EpollDesc epollfd)
     g_recvDiscoverMsgNum = 0;
     g_subscribeCount = 0;
     g_discoverCount = 0;
+    g_notificationRunCnt = 0;
     return NSTACKX_EOK;
 }
 
@@ -1050,6 +1221,10 @@ void CoapDiscoverDeinit(void)
         TimerDelete(g_recvRecountTimer);
         g_recvRecountTimer = NULL;
     }
+    if (g_notificationTimer != NULL) {
+        TimerDelete(g_notificationTimer);
+        g_notificationTimer = NULL;
+    }
     if (g_msgIdList != NULL) {
         free(g_msgIdList);
         g_msgIdList = NULL;
@@ -1057,6 +1232,10 @@ void CoapDiscoverDeinit(void)
     if (g_coapIntervalArr != NULL) {
         free(g_coapIntervalArr);
         g_coapIntervalArr = NULL;
+    }
+    if (g_notificationIntervals != NULL) {
+        free(g_notificationIntervals);
+        g_notificationIntervals = NULL;
     }
 }
 
@@ -1148,4 +1327,57 @@ void SendDiscoveryRsp(const NSTACKX_ResponseSettings *responseSettings)
     if (SendDiscoveryRspEx(ctx, responseSettings) != NSTACKX_EOK) {
         IncStatistics(STATS_SEND_SD_RESPONSE_FAILED);
     }
+}
+
+int32_t LocalizeNotificationInterval(const uint32_t *intervals, const uint32_t intervalLen)
+{
+    uint32_t *tmp = (uint32_t *)malloc(intervalLen * sizeof(uint32_t));
+    if (tmp != NULL) {
+        if (g_notificationIntervals != NULL) {
+            free(g_notificationIntervals);
+        }
+        g_notificationIntervals = tmp;
+        for (size_t i = 0; i < intervalLen; ++i) {
+            g_notificationIntervals[i] = intervals[i];
+        }
+        g_notificationTargetCnt = intervalLen;
+        return NSTACKX_EOK;
+    }
+    DFINDER_LOGW(TAG, "malloc for notification intervals fail, interval len %u", intervalLen);
+    if (g_notificationIntervals != NULL) {
+        DFINDER_LOGW(TAG, "going to use last success notification config");
+        return NSTACKX_EOK;
+    }
+    DFINDER_LOGE(TAG, "set notification intervals fail and can not use last success config");
+    return NSTACKX_EFAILED;
+}
+
+static void CoapServiceNotificationFirstTime(void)
+{
+    if (CoapPostServiceNotification() != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "failed to send service notification first time");
+        return;
+    }
+
+    uint32_t nextInterval = GetNextNotificationInterval(++g_notificationRunCnt);
+    if (TimerSetTimeout(g_notificationTimer, nextInterval, NSTACKX_FALSE) != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "failed to set timer when doing service notification");
+        return;
+    }
+    DFINDER_LOGI(TAG, "first time for service notification");
+}
+
+void CoapServiceNotification(void)
+{
+    if (!IsCoapContextReady()) {
+        DFINDER_LOGW(TAG, "no coap ctx inited, please check nic info or reconnected");
+        return;
+    }
+    if (g_notificationRunCnt != 0) {
+        DFINDER_LOGI(TAG, "reset notification run cnt to 0, run cnt: %u, target cnt: %u",
+            g_notificationRunCnt, g_notificationTargetCnt);
+        g_notificationRunCnt = 0;
+        (void)TimerSetTimeout(g_notificationTimer, 0, NSTACKX_FALSE);
+    }
+    CoapServiceNotificationFirstTime();
 }

@@ -76,6 +76,8 @@ void CoapServiceDiscoverInnerConfigurable(uint8_t userRequest);
 void CoapServiceDiscoverStopInner(void);
 uint8_t CoapDiscoverRequestOngoing(void);
 
+void CoapServiceNotification(void);
+
 int32_t CoapInitResources(coap_context_t *ctx);
 
 int32_t CoapDiscoverInit(EpollDesc epollfd);
@@ -90,6 +92,8 @@ void SetCoapDiscoverType(CoapBroadcastType type);
 void SetCoapUserDiscoverInfo(uint32_t advCount, uint32_t advDuration);
 int32_t SetCoapDiscConfig(const DFinderDiscConfig *discConfig);
 void SendDiscoveryRsp(const NSTACKX_ResponseSettings *responseSettings);
+int32_t LocalizeNotificationInterval(const uint32_t *intervals, const uint32_t intervalLen);
+void CoapServiceNotificationStop(void);
 
 #ifdef __cplusplus
 }

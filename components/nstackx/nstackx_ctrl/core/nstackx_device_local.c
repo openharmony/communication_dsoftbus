@@ -558,6 +558,15 @@ int SetLocalDeviceBusinessData(const char *data, bool unicast)
     return NSTACKX_EOK;
 }
 
+int32_t LocalizeNotificationMsg(const char *msg)
+{
+    if (strcpy_s(g_localDevice.deviceInfo.notification, NSTACKX_MAX_NOTIFICATION_DATA_LEN, msg) != EOK) {
+        DFINDER_LOGE(TAG, "copy notification msg to local dev failed");
+        return NSTACKX_EFAILED;
+    }
+    return NSTACKX_EOK;
+}
+
 uint8_t GetLocalDeviceMode(void)
 {
     return g_localDevice.deviceInfo.mode;
