@@ -323,6 +323,7 @@ static void DfxRecordLnnAuthEnd(AuthFsm *authFsm, uint64_t costTime, int32_t rea
     if (authFsm != NULL) {
         extra.authLinkType = authFsm->info.connInfo.type;
         extra.authId = (int32_t)authFsm->authSeq;
+        extra.authRequestId = (int32_t)authFsm->info.requestId;
     }
     LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH, extra);
 }
