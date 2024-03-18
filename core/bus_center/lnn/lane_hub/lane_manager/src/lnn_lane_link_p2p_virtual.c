@@ -18,10 +18,16 @@
 
 int32_t LnnConnectP2p(const LinkRequest *request, uint32_t laneLinkReqId, const LaneLinkCb *callback)
 {
+    (void)request;
+    (void)laneLinkReqId;
+    (void)callback;
     return SOFTBUS_P2P_NOT_SUPPORT;
 }
 void LnnDisconnectP2p(const char *networkId, int32_t pid, uint32_t laneLinkReqId)
 {
+    (void)networkId;
+    (void)pid;
+    (void)laneLinkReqId;
     return;
 }
 void LnnDestroyP2p(void)
