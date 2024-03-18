@@ -399,11 +399,11 @@ HWTEST_F(AuthManagerTest, HANDLE_RECONNECT_RESULT_TEST_001, TestSize.Level1)
     EXPECT_TRUE(AddAuthRequest(&request) == SOFTBUS_OK);
     HandleBleConnectResult(REQUEST_ID_1, AUTH_SEQ, CONN_ID, SOFTBUS_OK, 0);
     HandleBleConnectResult(REQUEST_ID, AUTH_SEQ, CONN_ID, SOFTBUS_OK, 0);
-    DfxRecordLnnConnectEnd(CONN_ID_1, nullptr, SOFTBUS_OK);
+    DfxRecordLnnConnectEnd(REQUEST_ID_1, CONN_ID_1, nullptr, SOFTBUS_OK);
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     connInfo.type = AUTH_LINK_TYPE_WIFI;
-    DfxRecordLnnConnectEnd(CONN_ID_1, &connInfo, SOFTBUS_OK);
+    DfxRecordLnnConnectEnd(REQUEST_ID_1, CONN_ID_1, &connInfo, SOFTBUS_OK);
     OnConnectResult(REQUEST_ID_1, CONN_ID_1, SOFTBUS_OK, &connInfo);
     OnConnectResult(REQUEST_ID, CONN_ID_1, SOFTBUS_OK, &connInfo);
     connInfo.type = AUTH_LINK_TYPE_BLE;

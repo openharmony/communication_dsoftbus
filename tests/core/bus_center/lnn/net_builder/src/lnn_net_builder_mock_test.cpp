@@ -1359,6 +1359,7 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_SEND_JOIN_LNN_REQUEST_TEST_001, TestSize.Lev
     EXPECT_TRUE(TrySendJoinLNNRequest(nullptr, true, false) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(TrySendJoinLNNRequest(para, true, false) == SOFTBUS_ERR);
 
+    DfxRecordLnnAuthStart(nullptr, para, 0);
     ListDelete(&connFsm->node);
     SoftBusFree(connFsm);
 }

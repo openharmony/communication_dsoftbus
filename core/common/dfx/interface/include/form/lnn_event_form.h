@@ -26,6 +26,8 @@
 extern "C" {
 #endif
 
+#define LNN_DEFAULT_PKG_NAME "MODULE_LNN"
+
 typedef enum {
     EVENT_SCENE_LNN = 1,
     EVENT_SCENE_JOIN_LNN = 2,
@@ -66,6 +68,11 @@ typedef enum {
     DISC_SERVER_STOP_DISCOVERY = 4,
 } LnnDiscServerType;
 
+typedef enum {
+    LNN_TYPE_AUTOMATIC = 1,
+    LNN_TYPE_MANUAL = 2,
+} LnnType;
+
 typedef struct {
     int32_t result;             // STAGE_RES
     int32_t errcode;            // ERROR_CODE
@@ -75,6 +82,7 @@ typedef struct {
     int32_t gearDuration;       // GEAR_DURATION
     int32_t connectionId;       // CONN_ID
     int32_t authLinkType;       // AUTH_LINK_TYPE
+    int32_t authRequestId;      // AUTH_REQUEST_ID
     int32_t authCostTime;       // AUTH_COST_TIME
     int32_t lnnType;            // LNN_TYPE
     int32_t onlineNum;          // ONLINE_NUM

@@ -116,6 +116,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_CREATE_CONNECTION_FSM_TEST_001, TestSize.Leve
     LnnConnectionFsm *fsm = LnnCreateConnectionFsm(target1, "pkgName", true);
     EXPECT_TRUE(fsm == nullptr);
     LnnDestroyConnectionFsm(fsm);
+    DfxRecordConnAuthStart(nullptr, fsm, 0);
 }
 
 /*
