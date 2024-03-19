@@ -696,9 +696,10 @@ HWTEST_F(AuthTest, AUTH_POST_CHANNEL_DATA_Test_001, TestSize.Level1)
 HWTEST_F(AuthTest, AUTH_MANAGER_SET_SESSION_KEY_Test_001, TestSize.Level1)
 {
     int64_t authSeq = 0;
-    const AuthSessionInfo info = { 0 };
+    AuthSessionInfo info = { 0 };
     const SessionKey sessionKey = { { 0 }, TEST_DATA_LEN };
 
+    info.connInfo.type = AUTH_LINK_TYPE_BLE;
     int32_t ret = AuthManagerSetSessionKey(authSeq, &info, &sessionKey, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
@@ -712,11 +713,12 @@ HWTEST_F(AuthTest, AUTH_MANAGER_SET_SESSION_KEY_Test_001, TestSize.Level1)
 HWTEST_F(AuthTest, AUTH_MANAGER_GET_SESSION_KEY_Test_001, TestSize.Level1)
 {
     int64_t authSeq = 0;
-    const AuthSessionInfo info = { 0 };
+    AuthSessionInfo info = { 0 };
     SessionKey sessionKey = { { 0 }, TEST_DATA_LEN };
 
+    info.connInfo.type = AUTH_LINK_TYPE_BLE;
     int32_t ret = AuthManagerGetSessionKey(authSeq, &info, &sessionKey);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*
@@ -745,6 +747,7 @@ HWTEST_F(AuthTest, AUTH_START_VERIFY_Test_001, TestSize.Level1)
     int32_t ret;
 
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    connInfo.type = AUTH_LINK_TYPE_BLE;
     ret = AuthStartVerify(nullptr, requestId, &callback, true);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = AuthStartVerify(&connInfo, requestId, nullptr, true);
@@ -838,6 +841,7 @@ HWTEST_F(AuthTest, AUTH_DEVICE_GET_ID_BY_CONN_INFO_Test_001, TestSize.Level1)
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     ret = AuthDeviceGetIdByConnInfo(nullptr, true);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
+    connInfo.type = AUTH_LINK_TYPE_BLE;
     ret = AuthDeviceGetIdByConnInfo(&connInfo, true);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
 }
