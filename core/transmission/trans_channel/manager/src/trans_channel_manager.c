@@ -403,6 +403,8 @@ static void FillAppInfo(AppInfo *appInfo, const SessionParam *param,
             if (ret != SOFTBUS_OK) {
                 TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
             }
+        } else {
+            TRANS_LOGE(TRANS_CTRL, "GetWifiDirectManager failed");
         }
     }
 }

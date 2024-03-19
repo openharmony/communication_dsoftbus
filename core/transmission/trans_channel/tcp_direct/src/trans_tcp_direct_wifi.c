@@ -68,6 +68,9 @@ static ListenerModule GetMoudleType(ConnectType type, const char *peerIp)
                 TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
                 return module;
             }
+        } else {
+            TRANS_LOGE(TRANS_CTRL, "GetWifiDirectManager failed");
+            return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
         }
         if (strncmp(myIp, HML_IP_PREFIX, NETWORK_ID_LEN) == 0) {
             module = GetMoudleByHmlIp(myIp);

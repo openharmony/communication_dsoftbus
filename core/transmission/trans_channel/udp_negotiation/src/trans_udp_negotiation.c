@@ -480,6 +480,9 @@ static int32_t ParseRequestAppInfo(int64_t authId, const cJSON *msg, AppInfo *ap
                 TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
                 return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
             }
+        } else {
+            TRANS_LOGE(TRANS_CTRL, "GetWifiDirectManager failed");
+            return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
         }
     }
     if (strcpy_s(appInfo->myData.addr, sizeof(appInfo->myData.addr), localIp) != EOK) {
