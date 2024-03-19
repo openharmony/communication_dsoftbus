@@ -42,6 +42,7 @@ private:
     int32_t OpenSessionInner(MessageParcel &data, MessageParcel &reply);
     int32_t OpenAuthSessionInner(MessageParcel &data, MessageParcel &reply);
     int32_t NotifyAuthSuccessInner(MessageParcel &data, MessageParcel &reply);
+    int32_t ReleaseResourcesInner(MessageParcel &data, MessageParcel &reply);
     int32_t CloseChannelInner(MessageParcel &data, MessageParcel &reply);
     int32_t SendMessageInner(MessageParcel &data, MessageParcel &reply);
     int32_t CheckOpenSessionPermission(const SessionParam *param);

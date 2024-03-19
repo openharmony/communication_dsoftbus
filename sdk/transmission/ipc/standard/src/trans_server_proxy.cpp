@@ -30,6 +30,8 @@ using namespace OHOS;
 namespace {
 sptr<TransServerProxy> g_serverProxy = nullptr;
 const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
+constexpr int32_t MIN_CHANNEL_ID = 0; // UDP channelId minmum value
+constexpr int32_t MAX_CHANNEL_ID = 19; // UDP channelId maxmum value
 uint32_t g_getSystemAbilityId = 2;
 std::mutex g_mutex;
 }
@@ -164,6 +166,19 @@ int32_t ServerIpcCloseChannel(int32_t channelId, int32_t channelType)
         return SOFTBUS_ERR;
     }
     return g_serverProxy->CloseChannel(channelId, channelType);
+}
+
+int32_t ServerIpcReleaseResources(int32_t channelId)
+{
+    if (g_serverProxy == nullptr) {
+        TRANS_LOGW(TRANS_SDK, "softbus server g_serverProxy is nullptr!");
+        return SOFTBUS_OK;
+    }
+    if ((channelId < MIN_CHANNEL_ID) || (channelId > MAX_CHANNEL_ID)) {
+        TRANS_LOGE(TRANS_SDK, "channelId=%{public}d is invalid.", channelId);
+        return SOFTBUS_TRANS_INVALID_CHANNEL_ID;
+    }
+    return g_serverProxy->ReleaseResources(channelId);
 }
 
 int32_t ServerIpcSendMessage(int32_t channelId, int32_t channelType, const void *data, uint32_t len, int32_t msgType)

@@ -766,6 +766,14 @@ int32_t TransNotifyAuthSuccess(int32_t channelId, int32_t channelType)
     return TransNotifyAuthDataSuccess(channelId, &connOpt);
 }
 
+int32_t TransReleaseUdpResources(int32_t channelId)
+{
+    TRANS_LOGI(TRANS_CTRL, "release Udp channel resources: channelId=%{public}d", channelId);
+    (void)TransLaneMgrDelLane(channelId, CHANNEL_TYPE_UDP);
+    (void)TransDelUdpChannel(channelId);
+    return SOFTBUS_OK;
+}
+
 int32_t TransCloseChannel(int32_t channelId, int32_t channelType)
 {
     TRANS_LOGI(TRANS_CTRL, "close channel: channelId=%{public}d, channelType=%{public}d", channelId, channelType);
