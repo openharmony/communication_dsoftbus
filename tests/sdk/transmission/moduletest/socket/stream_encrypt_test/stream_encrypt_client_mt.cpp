@@ -57,13 +57,13 @@ void OnShutdownClient(int32_t socket, ShutdownReason reason)
 }
 
 static ISocketListener g_listener = {
-    .OnBind = NULL,
+    .OnBind = nullptr,
     .OnShutdown = OnShutdownClient,
-    .OnBytes = NULL,
-    .OnMessage = NULL,
-    .OnStream = NULL,
-    .OnFile = NULL,
-    .OnQos = NULL,
+    .OnBytes = nullptr,
+    .OnMessage = nullptr,
+    .OnStream = nullptr,
+    .OnFile = nullptr,
+    .OnQos = nullptr,
 };
 
 bool IsTestOk(bool isLocalEncrypt, const std::string sendData, const std::shared_ptr<Response> &resp)
@@ -161,7 +161,7 @@ HWTEST_F(StreamEncryptClientMt, RawStreamEncryptTest002, TestSize.Level1)
         .name = (char *)TEST_SESSION_NAME,
         .pkgName = (char *)PKG_NAME,
         .peerName = (char *)TEST_SESSION_NAME_SRV,
-        .peerNetworkId = NULL,
+        .peerNetworkId = nullptr,
         .dataType = DATA_TYPE_RAW_STREAM_ENCRYPED,
     };
     info.peerNetworkId = WaitOnLineAndGetNetWorkId();
@@ -309,7 +309,7 @@ HWTEST_F(StreamEncryptClientMt, RawStreamEncryptTest003, TestSize.Level1)
     attr.linkType[1] = LINK_TYPE_WIFI_WLAN_2G;
     attr.linkType[2] = LINK_TYPE_BR;
     attr.linkType[3] = LINK_TYPE_BLE;
-    attr.fastTransData = NULL;
+    attr.fastTransData = nullptr;
     attr.fastTransDataSize = 0;
 
     /**

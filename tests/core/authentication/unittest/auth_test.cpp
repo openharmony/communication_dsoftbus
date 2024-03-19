@@ -145,11 +145,11 @@ HWTEST_F(AuthTest, HICHAIN_START_AUTH_Test_001, TestSize.Level1)
     const char *uid = "testdata";
     int32_t ret;
 
-    ret = HichainStartAuth(authSeq, nullptr, uid, false);
+    ret = HichainStartAuth(authSeq, nullptr, uid);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = HichainStartAuth(authSeq, udid, nullptr, false);
+    ret = HichainStartAuth(authSeq, udid, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    (void)HichainStartAuth(authSeq, udid, uid, false);
+    (void)HichainStartAuth(authSeq, udid, uid);
 }
 
 /*
@@ -1914,7 +1914,7 @@ HWTEST_F(AuthTest, NOTIFY_TRANS_DATA_RECEIVED_Test_001, TestSize.Level1)
     int32_t ret;
     ret = RegAuthTransListener(MODULE_UDP_INFO, &listener);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    AuthHandle authHandle = { .authId = 0 };
+    AuthHandle authHandle = { .authId = 0, .type = AUTH_LINK_TYPE_WIFI };
     AuthDataHead head = {
         .dataType = 0,
         .module = MODULE_UDP_INFO,

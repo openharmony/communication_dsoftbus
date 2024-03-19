@@ -22,6 +22,9 @@ extern "C" {
 #endif
 #endif
 
+// if the upstream module does not set the first caller tokenID, the value is 0
+#define TOKENID_NOT_SET 0
+
 int32_t TransCheckClientAccessControl(const char *peerNetworkId);
 int32_t TransCheckServerAccessControl(uint32_t firstCallingId);
 uint32_t TransACLGetFirstTokenID();

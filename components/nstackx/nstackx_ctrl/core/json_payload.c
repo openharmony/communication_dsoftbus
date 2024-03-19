@@ -558,3 +558,68 @@ int32_t ParseServiceDiscover(const uint8_t *buf, struct DeviceInfo *deviceInfo, 
     }
     return ret;
 }
+
+static char *PrepareServiceNotificationEx(void)
+{
+    cJSON *data = cJSON_CreateObject();
+    if (data == NULL) {
+        DFINDER_LOGE(TAG, "cJSON_CreateObject failed");
+        return NULL;
+    }
+    const DeviceInfo *deviceInfo = GetLocalDeviceInfo();
+    if (JsonAddStr(data, JSON_NOTIFICATION, deviceInfo->notification) != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "add json data: %s fail", JSON_NOTIFICATION);
+        cJSON_Delete(data);
+        return NULL;
+    }
+    char *formatString = cJSON_PrintUnformatted(data);
+    if (formatString == NULL) {
+        DFINDER_LOGE(TAG, "cJSON_PrintUnformatted return null");
+    }
+    cJSON_Delete(data);
+    return formatString;
+}
+
+char *PrepareServiceNotification(void)
+{
+    char *str = PrepareServiceNotificationEx();
+    if (str == NULL) {
+        ; // record exception here
+    }
+    return str;
+}
+
+int32_t ParseServiceNotification(const uint8_t *buf, NotificationConfig *notificaiton)
+{
+    if (buf == NULL || notificaiton == NULL) {
+        DFINDER_LOGE(TAG, "buf or notification is null");
+        return NSTACKX_EINVAL;
+    }
+    cJSON *data = cJSON_Parse((char *)buf);
+    if (data == NULL) {
+        DFINDER_LOGE(TAG, "cJSON_Parse buf fail");
+        return NSTACKX_EINVAL;
+    }
+    cJSON *item = cJSON_GetObjectItemCaseSensitive(data, JSON_NOTIFICATION);
+    if (item == NULL) {
+        DFINDER_LOGE(TAG, "can not get service notification");
+        goto LERR;
+    }
+    if (!cJSON_IsString(item)) {
+        DFINDER_LOGE(TAG, "json notification data not in string format");
+        goto LERR;
+    }
+    if (item->valuestring == NULL) {
+        DFINDER_LOGE(TAG, "notification data item->valuestring is null");
+        goto LERR;
+    }
+    if (strcpy_s(notificaiton->msg, NSTACKX_MAX_NOTIFICATION_DATA_LEN, item->valuestring)) {
+        DFINDER_LOGE(TAG, "parse service notification data fail, value string: %s", item->valuestring);
+        goto LERR;
+    }
+    cJSON_Delete(data);
+    return NSTACKX_EOK;
+LERR:
+    cJSON_Delete(data);
+    return NSTACKX_EFAILED;
+}

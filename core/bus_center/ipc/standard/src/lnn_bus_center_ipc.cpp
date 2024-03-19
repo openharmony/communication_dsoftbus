@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -130,14 +130,20 @@ static int32_t AddLeaveLNNInfo(const char *pkgName, int32_t callingPid, const ch
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
     const InnerDeviceInfoAddtions *addtions)
 {
+    LNN_CHECK_AND_RETURN_RET_LOGE(addtions != nullptr, SOFTBUS_INVALID_PARAM, LNN_EVENT, "addtions is null");
+    LNN_CHECK_AND_RETURN_RET_LOGE(device != nullptr, SOFTBUS_INVALID_PARAM, LNN_EVENT, "device is null");
+    LNN_CHECK_AND_RETURN_RET_LOGE(pkgName != nullptr, SOFTBUS_INVALID_PARAM, LNN_EVENT, "pkgName is null");
+    uint32_t pkgNameLen = strnlen(pkgName, PKG_NAME_SIZE_MAX);
+    LNN_CHECK_AND_RETURN_RET_LOGE(pkgNameLen < PKG_NAME_SIZE_MAX, SOFTBUS_INVALID_PKGNAME, LNN_EVENT,
+        "pkgName invalid");
+
     DeviceInfo newDevice;
-    if (memcpy_s(&newDevice, sizeof(DeviceInfo), device, sizeof(DeviceInfo)) != EOK) {
-        LNN_LOGE(LNN_EVENT, "copy new device info error");
-        return SOFTBUS_MEM_ERR;
-    }
+    auto ret = memcpy_s(&newDevice, sizeof(DeviceInfo), device, sizeof(DeviceInfo));
+    LNN_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_MEM_ERR, LNN_EVENT, "copy device info failed");
+
     std::lock_guard<std::mutex> autoLock(g_lock);
     for (const auto &iter : g_refreshLnnRequestInfo) {
-        if (strncmp(pkgName, (*iter).pkgName, strlen(pkgName)) != 0) {
+        if (strncmp(pkgName, iter->pkgName, pkgNameLen) != 0) {
             continue;
         }
         LnnRefreshDeviceOnlineStateAndDevIdInfo(pkgName, &newDevice, addtions);
@@ -238,11 +244,13 @@ int32_t LnnIpcStopPublishLNN(const char *pkgName, int32_t publishId)
     return LnnUnPublishService(pkgName, publishId, false);
 }
 
-static bool IsRepeatRfreshLnnRequest(const char *pkgName, int32_t callingPid)
+static bool IsRepeatRefreshLnnRequest(const char *pkgName, int32_t callingPid, int32_t subscribeId)
 {
+    uint32_t pkgNameLen = strlen(pkgName);
     std::lock_guard<std::mutex> autoLock(g_lock);
     for (const auto &iter : g_refreshLnnRequestInfo) {
-        if (strncmp(pkgName, (*iter).pkgName, strlen(pkgName)) == 0 && (*iter).pid == callingPid) {
+        if (strncmp(pkgName, iter->pkgName, pkgNameLen) == 0 && iter->pid == callingPid &&
+            iter->subscribeId == subscribeId) {
             return true;
         }
     }
@@ -252,13 +260,11 @@ static bool IsRepeatRfreshLnnRequest(const char *pkgName, int32_t callingPid)
 static int32_t AddRefreshLnnInfo(const char *pkgName, int32_t callingPid, int32_t subscribeId)
 {
     RefreshLnnRequestInfo *info = new (std::nothrow) RefreshLnnRequestInfo();
-    if (info == nullptr) {
-        return SOFTBUS_MEM_ERR;
-    }
+    LNN_CHECK_AND_RETURN_RET_LOGE(info != nullptr, SOFTBUS_MALLOC_ERR, LNN_EVENT, "malloc failed");
     if (strncpy_s(info->pkgName, PKG_NAME_SIZE_MAX, pkgName, strlen(pkgName)) != EOK) {
         LNN_LOGE(LNN_EVENT, "copy pkgName fail");
         delete info;
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     info->pid = callingPid;
     info->subscribeId = subscribeId;
@@ -267,12 +273,14 @@ static int32_t AddRefreshLnnInfo(const char *pkgName, int32_t callingPid, int32_
     return SOFTBUS_OK;
 }
 
-static int32_t DeleteRefreshLnnInfo(const char *pkgName, int32_t callingPid)
+static int32_t DeleteRefreshLnnInfo(const char *pkgName, int32_t callingPid, int32_t subscribeId)
 {
+    uint32_t pkgNameLen = strlen(pkgName);
     std::lock_guard<std::mutex> autoLock(g_lock);
     std::vector<RefreshLnnRequestInfo *>::iterator iter;
     for (iter = g_refreshLnnRequestInfo.begin(); iter != g_refreshLnnRequestInfo.end();) {
-        if (strncmp(pkgName, (*iter)->pkgName, strlen(pkgName)) != 0 || (*iter)->pid != callingPid) {
+        if (strncmp(pkgName, (*iter)->pkgName, pkgNameLen) != 0 || (*iter)->pid != callingPid ||
+            (*iter)->subscribeId != subscribeId) {
             ++iter;
             continue;
         }
@@ -284,14 +292,18 @@ static int32_t DeleteRefreshLnnInfo(const char *pkgName, int32_t callingPid)
 
 int32_t LnnIpcRefreshLNN(const char *pkgName, int32_t callingPid, const SubscribeInfo *info)
 {
-    if (pkgName == nullptr || info == nullptr) {
-        LNN_LOGE(LNN_EVENT, "parameters are nullptr");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (IsRepeatRfreshLnnRequest(pkgName, callingPid)) {
-        LNN_LOGD(LNN_EVENT, "repeat refresh lnn request pkgName=%{public}s", pkgName);
+    LNN_CHECK_AND_RETURN_RET_LOGE(info != nullptr, SOFTBUS_INVALID_PARAM, LNN_EVENT, "info is null");
+    LNN_CHECK_AND_RETURN_RET_LOGE(pkgName != nullptr, SOFTBUS_INVALID_PARAM, LNN_EVENT, "pkgName is null");
+    LNN_CHECK_AND_RETURN_RET_LOGE(strnlen(pkgName, PKG_NAME_SIZE_MAX) < PKG_NAME_SIZE_MAX, SOFTBUS_INVALID_PKGNAME,
+        LNN_EVENT, "pkgName invalid");
+
+    if (IsRepeatRefreshLnnRequest(pkgName, callingPid, info->subscribeId)) {
+        LNN_LOGD(LNN_EVENT, "repeat refresh lnn request pkgName=%{public}s, subscribeId=%{public}d",
+            pkgName, info->subscribeId);
     } else {
-        (void)AddRefreshLnnInfo(pkgName, callingPid, info->subscribeId);
+        int32_t ret = AddRefreshLnnInfo(pkgName, callingPid, info->subscribeId);
+        LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, LNN_EVENT,
+            "add refresh info failed, ret=%{public}d", ret);
     }
     InnerCallback callback = {
         .serverCb = g_discInnerCb,
@@ -299,13 +311,18 @@ int32_t LnnIpcRefreshLNN(const char *pkgName, int32_t callingPid, const Subscrib
     return LnnStartDiscDevice(pkgName, info, &callback, false);
 }
 
-int32_t LnnIpcStopRefreshLNN(const char *pkgName, int32_t callingPid, int32_t refreshId)
+int32_t LnnIpcStopRefreshLNN(const char *pkgName, int32_t callingPid, int32_t subscribeId)
 {
-    if (IsRepeatRfreshLnnRequest(pkgName, callingPid) && (DeleteRefreshLnnInfo(pkgName, callingPid) != SOFTBUS_OK)) {
+    LNN_CHECK_AND_RETURN_RET_LOGE(pkgName != nullptr, SOFTBUS_INVALID_PARAM, LNN_EVENT, "pkgName is null");
+    LNN_CHECK_AND_RETURN_RET_LOGE(strnlen(pkgName, PKG_NAME_SIZE_MAX) < PKG_NAME_SIZE_MAX, SOFTBUS_INVALID_PKGNAME,
+        LNN_EVENT, "pkgName invalid");
+
+    if (IsRepeatRefreshLnnRequest(pkgName, callingPid, subscribeId) &&
+        DeleteRefreshLnnInfo(pkgName, callingPid, subscribeId) != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "stop refresh lnn, clean info fail");
         return SOFTBUS_ERR;
     }
-    return LnnStopDiscDevice(pkgName, refreshId, false);
+    return LnnStopDiscDevice(pkgName, subscribeId, false);
 }
 
 int32_t LnnIpcActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId)

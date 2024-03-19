@@ -171,4 +171,25 @@ HWTEST_F(TransClientSocketServiceTest, SocketPkgName001, TestSize.Level1)
     socketId = Socket(info);
     ASSERT_EQ(socketId, SOFTBUS_INVALID_PARAM);
 }
+
+/**
+ * @tc.name: SocketPkgName001
+ * @tc.desc: call Socket function with different data type.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSocketServiceTest, DataType001, TestSize.Level1)
+{
+    SocketInfo info;
+    info.name = const_cast<char *>(g_socketName.c_str());
+    info.peerName = nullptr;
+    info.peerNetworkId = nullptr;
+    info.pkgName = const_cast<char *>(g_pkgName.c_str());
+
+    for (int32_t type = DATA_TYPE_MESSAGE; type < DATA_TYPE_BUTT; type++) {
+        info.dataType = static_cast<TransDataType>(type);
+        int32_t socketId = Socket(info);
+        EXPECT_EQ(socketId, SOFTBUS_ERR);
+    }
+}
 } // namespace OHOS
