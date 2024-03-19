@@ -1026,6 +1026,8 @@ NO_SANITIZE("cfi") int32_t TransTdcSrvRecvData(ListenerModule module, int32_t ch
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "cId[%d] recv tcp data fail,ret=%d.", channelId, recvLen);
         return SOFTBUS_ERR;
     } else if (recvLen == 0) {
+        SoftBusFree(recvBuf);
+        SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "recv tcp data fail, channelId=%d", channelId);
         return SOFTBUS_DATA_NOT_ENOUGH;
     }
 
