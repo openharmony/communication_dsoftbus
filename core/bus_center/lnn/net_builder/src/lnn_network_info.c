@@ -200,6 +200,9 @@ static void SendNetCapabilityToRemote(uint32_t netCapability, uint32_t type)
             LNN_LOGE(LNN_BUILDER,
                 "sync network info ret=%{public}d, deviceName=%{public}s.", ret, netInfo[i].deviceName);
         }
+        if ((type & (1 << (uint32_t)DISCOVERY_TYPE_WIFI)) != 0 && !LnnHasCapability(netCapability, BIT_BLE)) {
+            LnnSendP2pSyncInfoMsg(netInfo[i].networkId, netCapability);
+        }
     }
     SoftBusFree(netInfo);
     SoftBusFree(msg);
