@@ -495,7 +495,7 @@ static int32_t ClientTransProxyNoSubPacketProc(int32_t channelId, const char *da
 {
     PacketHead head;
     if (memcpy_s(&head, sizeof(PacketHead), data, sizeof(PacketHead)) != EOK) {
-        TRANS_LOGE(TRANS_SDK, "invalid pack head");
+        TRANS_LOGE(TRANS_SDK, "memcpy packetHead failed");
         return SOFTBUS_MEM_ERR;
     }
     ClientUnPackPacketHead(&head);
