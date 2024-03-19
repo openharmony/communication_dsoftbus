@@ -150,30 +150,24 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenedTest002, TestSize.Lev
     channel.peerIp = strTmp;
     channel.routeType = TEST_DATA_TYPE;
 
-    std::cout << "111111111111" << std::endl;
     ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
-    std::cout << "2222222222222" << std::endl;
     ret = TransOnUdpChannelClosed(channel.channelId, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_EQ(SOFTBUS_ERR, ret);
-    std::cout << "3333333333333" << std::endl;
 
     channel.businessType = BUSINESS_TYPE_FILE;
     ret = TransOnUdpChannelOpened(strSessionName, &channel, &udpPort);
     EXPECT_EQ(SOFTBUS_ERR, ret);
-    std::cout << "4444444444444" << std::endl;
 
     channel.businessType = BUSINESS_TYPE_FILE;
     channel.channelId = TEST_CHANNELID + 1;
     ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort);
     EXPECT_EQ(SOFTBUS_ERR, ret);
-    std::cout << "555555555555" << std::endl;
 
     channel.businessType = TEST_COUNT;
     ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort);
     EXPECT_EQ(SOFTBUS_ERR, ret);
-    std::cout << "6666666666666" << std::endl;
 }
 
 /**
