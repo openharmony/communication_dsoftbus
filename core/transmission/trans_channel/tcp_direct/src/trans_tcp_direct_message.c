@@ -335,13 +335,17 @@ static int32_t GetServerSideIpInfo(SessionConn *conn, char *ip, uint32_t len)
         }
     } else if (conn->appInfo.routeType == WIFI_P2P) {
         struct WifiDirectManager *mgr = GetWifiDirectManager();
-        if (mgr != NULL && mgr->getLocalIpByRemoteIp != NULL) {
-            int32_t ret = mgr->getLocalIpByRemoteIp(conn->appInfo.peerData.addr, myIp, sizeof(myIp));
-            if (ret != SOFTBUS_OK) {
-                TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
-                return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
-            }
+        if (mgr == NULL || mgr->getLocalIpByRemoteIp == NULL) {
+            TRANS_LOGE(TRANS_CTRL, "GetWifiDirectManager failed");
+            return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
         }
+
+        int32_t ret = mgr->getLocalIpByRemoteIp(conn->appInfo.peerData.addr, myIp, sizeof(myIp));
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
+            return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
+        }
+
         if (LnnSetLocalStrInfo(STRING_KEY_P2P_IP, myIp) != SOFTBUS_OK) {
             TRANS_LOGW(TRANS_CTRL, "ServerSide set local p2p ip fail");
         }
@@ -374,13 +378,17 @@ static int32_t GetClientSideIpInfo(SessionConn *conn, char *ip, uint32_t len)
         }
     } else if (conn->appInfo.routeType == WIFI_P2P) {
         struct WifiDirectManager *mgr = GetWifiDirectManager();
-        if (mgr != NULL && mgr->getLocalIpByRemoteIp != NULL) {
-            int32_t ret = mgr->getLocalIpByRemoteIp(conn->appInfo.peerData.addr, myIp, sizeof(myIp));
-            if (ret != SOFTBUS_OK) {
-                TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
-                return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
-            }
+        if (mgr == NULL || mgr->getLocalIpByRemoteIp == NULL) {
+            TRANS_LOGE(TRANS_CTRL, "GetWifiDirectManager failed");
+            return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
         }
+
+        int32_t ret = mgr->getLocalIpByRemoteIp(conn->appInfo.peerData.addr, myIp, sizeof(myIp));
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
+            return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
+        }
+
         if (LnnSetLocalStrInfo(STRING_KEY_P2P_IP, myIp) != SOFTBUS_OK) {
             TRANS_LOGW(TRANS_CTRL, "Client set local p2p ip fail");
         }
@@ -977,18 +985,20 @@ static int64_t GetAuthIdByChannelInfo(int32_t channelId, uint64_t seq, uint32_t 
     bool fromAuthServer = ((seq & AUTH_CONN_SERVER_SIDE) != 0);
     char uuid[UUID_BUF_LEN] = {0};
     struct WifiDirectManager *mgr = GetWifiDirectManager();
-    if (mgr != NULL && mgr->getRemoteUuidByIp != NULL) {
-        int32_t ret = mgr->getRemoteUuidByIp(appInfo.peerData.addr, uuid, sizeof(uuid));
-        if (ret != SOFTBUS_OK) {
-            AuthConnInfo connInfo;
-            connInfo.type = AUTH_LINK_TYPE_WIFI;
-            if (strcpy_s(connInfo.info.ipInfo.ip, IP_LEN, appInfo.peerData.addr) != EOK) {
-                TRANS_LOGE(TRANS_CTRL, "copy ip addr fail");
-                return AUTH_INVALID_ID;
-            }
-            TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
-            return AuthGetIdByConnInfo(&connInfo, !fromAuthServer, false);
+    if (mgr == NULL || mgr->getRemoteUuidByIp == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "GetWifiDirectManager failed");
+        return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
+    }
+    int32_t ret = mgr->getRemoteUuidByIp(appInfo.peerData.addr, uuid, sizeof(uuid));
+    if (ret != SOFTBUS_OK) {
+        AuthConnInfo connInfo;
+        connInfo.type = AUTH_LINK_TYPE_WIFI;
+        if (strcpy_s(connInfo.info.ipInfo.ip, IP_LEN, appInfo.peerData.addr) != EOK) {
+            TRANS_LOGE(TRANS_CTRL, "copy ip addr fail");
+            return AUTH_INVALID_ID;
         }
+        TRANS_LOGE(TRANS_CTRL, "get Local Ip fail");
+        return AuthGetIdByConnInfo(&connInfo, !fromAuthServer, false);
     }
 
     AuthLinkType linkType = SwitchCipherTypeToAuthLinkType(cipherFlag);
