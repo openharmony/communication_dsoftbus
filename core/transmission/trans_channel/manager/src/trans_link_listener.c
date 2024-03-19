@@ -48,6 +48,9 @@ static void OnWifiDirectDeviceOffLine(const char *peerMac, const char *peerIp, c
             TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
             return;
         }
+    } else {
+        TRANS_LOGE(TRANS_CTRL, "GetWifiDirectManager failed");
+        return;
     }
     if (strncmp(myIp, HML_IP_PREFIX, NETWORK_ID_LEN) == 0) {
         ListenerModule type = GetMoudleByHmlIp(myIp);
