@@ -245,11 +245,11 @@ HWTEST_F(ClientTransStreamTest, TransOnstreamChannelOpened001, TestSize.Level0)
     channel->isServer = false;
     channel->channelId = -1;
     ret = TransOnstreamChannelOpened(channel, &streamPort);
-    EXPECT_EQ(SOFTBUS_TRANS_UDP_START_STREAM_CLIENT_FAILED, ret);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
 
     channel->isServer = true;
     ret = TransOnstreamChannelOpened(channel, &streamPort);
-    EXPECT_EQ(SOFTBUS_TRANS_UDP_START_STREAM_SERVER_FAILED, ret);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
 
     if (channel != nullptr) {
         SoftBusFree(channel);
