@@ -1576,7 +1576,7 @@ static int32_t BrPendConnection(const ConnectOption *option, uint32_t time)
 
 static int32_t BrInitLooper(void)
 {
-    g_brManagerAsyncHandler.handler.looper = CreateNewLooper("br_looper");
+    g_brManagerAsyncHandler.handler.looper = CreateNewLooper("Conn_Br_lp");
     if (g_brManagerAsyncHandler.handler.looper == NULL) {
         return SOFTBUS_ERR;
     }
