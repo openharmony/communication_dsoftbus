@@ -2133,7 +2133,7 @@ static int32_t ConflictGetConnection(const char *udid)
 
 static int32_t BleInitLooper(void)
 {
-    g_bleManagerSyncHandler.handler.looper = CreateNewLooper("conn_ble_looper");
+    g_bleManagerSyncHandler.handler.looper = CreateNewLooper("Conn_Ble_lp");
     if (g_bleManagerSyncHandler.handler.looper == NULL) {
         CONN_LOGE(CONN_INIT, "init conn ble looper failed");
         return SOFTBUS_ERR;

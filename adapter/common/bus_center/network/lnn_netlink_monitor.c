@@ -197,7 +197,10 @@ static void *NetlinkMonitorThread(void *para)
 int32_t LnnInitNetlinkMonitorImpl(void)
 {
     SoftBusThread tid;
-    if (SoftBusThreadCreate(&tid, NULL, NetlinkMonitorThread, NULL) != 0) {
+    SoftBusThreadAttr threadAttr;
+    SoftBusThreadAttrInit(&threadAttr);
+    threadAttr.taskName = "NetMonitor_Tsk";
+    if (SoftBusThreadCreate(&tid, &threadAttr, NetlinkMonitorThread, NULL) != 0) {
         LNN_LOGE(LNN_INIT, "create ip change monitor thread failed");
         return SOFTBUS_ERR;
     }
