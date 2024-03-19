@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef AUTH_HICHAIN_REQUEST_H
-#define AUTH_HICHAIN_REQUEST_H
+#ifndef AUTH_NORMALIZE_REQUEST_H
+#define AUTH_NORMALIZE_REQUEST_H
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -28,20 +28,22 @@ extern "C" {
 #endif
 
 typedef struct {
+    char udidHash[SHA_256_HEX_HASH_LEN];
     int64_t authSeq;
-    char udid[UDID_BUF_LEN];
-    char peerUid[MAX_ACCOUNT_HASH_LEN];
-    bool isServer;
+    uint32_t requestId;
+    uint64_t connId;
+    bool isFastAuth;
+    AuthConnInfo connInfo;
     ListNode node;
-} HichainRequest;
+} NormalizeRequest;
 
-void NotifyHiChainRequestSuccess(int64_t authSeq, const uint8_t *sessionKey, uint32_t sessionKeyLen);
-void NotifyHiChainRequestFail(int64_t authSeq, bool isNeedReAuth);
-uint32_t AddHichainRequest(const HichainRequest *request);
+uint32_t AddNormalizeRequest(const NormalizeRequest *request);
+void NotifyNormalizeRequestSuccess(int64_t authSeq);
+void NotifyNormalizeRequestFail(int64_t authSeq, int32_t ret);
 
 #ifdef __cplusplus
 #if __cplusplus
 }
 #endif
 #endif
-#endif /* AUTH_HICHAIN_REQUEST_H */
+#endif /* AUTH_NORMALIZE_REQUEST_H */

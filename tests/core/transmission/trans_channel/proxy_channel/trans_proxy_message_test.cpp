@@ -337,7 +337,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyIdentityMsgTest001, TestSize.Level1)
 HWTEST_F(TransProxyMessageTest, TransProxyPackMessageTest001, TestSize.Level1)
 {
     ProxyMessageHead msg;
-    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_WIFI };
     ProxyDataInfo dataInfo;
     int32_t ret = TransProxyPackMessage(NULL, authHandle, &dataInfo);
     EXPECT_NE(SOFTBUS_OK, ret);

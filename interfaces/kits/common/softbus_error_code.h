@@ -227,6 +227,7 @@ enum SoftBusErrNo {
     SOFTBUS_TRANS_SESSION_SERVER_NOT_FOUND,
     SOFTBUS_TRANS_ENCRYPT_ERR,
     SOFTBUS_TRANS_DECRYPT_ERR,
+    SOFTBUS_TRANS_BAD_KEY, // Send badkey notification for offline events
     SOFTBUS_TRANS_CHECK_PID_ERROR,
 
     /* errno begin: -((203 << 21) | (3 << 16) | 0xFFFF) */

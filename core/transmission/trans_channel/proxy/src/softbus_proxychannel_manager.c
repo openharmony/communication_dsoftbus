@@ -1036,7 +1036,7 @@ static int32_t TransProxyFillChannelInfo(const ProxyMessage *msg, ProxyChannelIn
     int16_t newChanId = (int16_t)(GenerateChannelId(false));
     ConstructProxyChannelInfo(chan, msg, newChanId, &info);
 
-    if (chan->appInfo.appType == APP_TYPE_NORMAL && chan->appInfo.firstTokenId != 0 &&
+    if (chan->appInfo.appType == APP_TYPE_NORMAL && chan->appInfo.firstTokenId != TOKENID_NOT_SET &&
         TransCheckServerAccessControl(chan->appInfo.firstTokenId) != SOFTBUS_OK) {
         return SOFTBUS_TRANS_CHECK_ACL_FAILED;
     }
@@ -1227,7 +1227,8 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
         return;
     }
     if (info->status == PROXY_CHANNEL_STATUS_HANDSHAKEING) {
-        int errCode = SOFTBUS_TRANS_HANDSHAKE_ERROR;
+        int32_t errCode = ((msg->msgHead.cipher & BAD_CIPHER) == BAD_CIPHER) ?
+            SOFTBUS_TRANS_BAD_KEY : SOFTBUS_TRANS_HANDSHAKE_ERROR;
         TransProxyUnPackRestErrMsg(msg->data, &errCode, msg->dateLen);
         TRANS_LOGE(TRANS_CTRL, "TransProxyProcessResetMsg errCode=%{public}d", errCode);
         TransProxyOpenProxyChannelFail(info->channelId, &(info->appInfo), errCode);

@@ -193,6 +193,7 @@ ohos_unittest("TransClientSessionTest") {
 
   if (is_standard_system) {
     external_deps = [
+      "access_token:libtoken_setproc",
       "c_utils:utils",
       "hilog:libhilog",
     ]

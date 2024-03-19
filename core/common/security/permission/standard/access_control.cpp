@@ -31,8 +31,11 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 
-using namespace OHOS::DistributedDeviceProfile;
-using namespace OHOS::Security::AccessToken;
+namespace {
+    using namespace OHOS::DistributedDeviceProfile;
+    using namespace OHOS::Security::AccessToken;
+}
+
 static int32_t TransCheckAccessControl(uint32_t firstCallingId, const char *deviceId)
 {
     char *tmpName = nullptr;
@@ -67,7 +70,7 @@ int32_t TransCheckClientAccessControl(const char *peerNetworkId)
     }
 
     uint32_t firstCallingId = OHOS::IPCSkeleton::GetFirstTokenID();
-    if (firstCallingId == 0) {
+    if (firstCallingId == TOKENID_NOT_SET) {
         return SOFTBUS_OK;
     }
 
@@ -92,7 +95,7 @@ int32_t TransCheckClientAccessControl(const char *peerNetworkId)
 
 int32_t TransCheckServerAccessControl(uint32_t firstCallingId)
 {
-    if (firstCallingId == 0) {
+    if (firstCallingId == TOKENID_NOT_SET) {
         return SOFTBUS_OK;
     }
 

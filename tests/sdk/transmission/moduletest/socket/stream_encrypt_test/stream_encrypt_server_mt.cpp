@@ -198,11 +198,11 @@ HWTEST_F(StreamEncryptServerMt, RawStreamEncryptTestServer002, TestSize.Level1)
     ISocketListener listener = {
         .OnBind = OnBindServer,
         .OnShutdown = OnShutdownServer,
-        .OnBytes = NULL,
-        .OnMessage = NULL,
+        .OnBytes = nullptr,
+        .OnMessage = nullptr,
         .OnStream = OnStreamReceivedWithUnencryptOpt,
-        .OnFile = NULL,
-        .OnQos = NULL,
+        .OnFile = nullptr,
+        .OnQos = nullptr,
     };
 
     int32_t ret = Listen(socket, qosInfo, sizeof(qosInfo) / sizeof(qosInfo[0]), &listener);

@@ -25,6 +25,7 @@ extern "C" {
 #define COAP_DEVICE_DISCOVER_URI "device_discover"
 #define COAP_SERVICE_DISCOVER_URI "service_discover"
 #define COAP_SERVICE_MSG_URI "service_msg"
+#define COAP_SERVICE_NOTIFICATION_URI "short_notification_message"
 
 typedef struct {
     coap_proto_t proto;
