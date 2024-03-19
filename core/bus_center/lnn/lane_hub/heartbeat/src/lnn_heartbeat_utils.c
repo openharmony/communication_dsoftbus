@@ -142,7 +142,6 @@ static bool HbHasActiveP2pConnection(const char *networkId)
         LNN_LOGE(LNN_HEART_BEAT, "HB not support wifi direct");
         return false;
     }
-
     if (LnnGetRemoteStrInfo(networkId, STRING_KEY_P2P_MAC, peerMac, sizeof(peerMac)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB get peer p2p mac err");
         return false;
