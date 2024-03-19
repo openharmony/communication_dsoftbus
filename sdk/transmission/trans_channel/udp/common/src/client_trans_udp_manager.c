@@ -322,6 +322,11 @@ static int32_t ClosePeerUdpChannel(int32_t channelId)
     return ServerIpcCloseChannel(channelId, CHANNEL_TYPE_UDP);
 }
 
+static int32_t RleaseUdpResources(int32_t channelId)
+{
+    return ServerIpcReleaseResources(channelId);
+}
+
 static int32_t CloseUdpChannel(int32_t channelId, bool isActive, ShutdownReason reason)
 {
     UdpChannel channel;
@@ -338,6 +343,10 @@ static int32_t CloseUdpChannel(int32_t channelId, bool isActive, ShutdownReason 
 
     if (isActive && (ClosePeerUdpChannel(channelId) != SOFTBUS_OK)) {
         TRANS_LOGE(TRANS_SDK, "trans close peer udp channel failed. channelId=%{public}d", channelId);
+    }
+
+    if (!isActive && (RleaseUdpResources(channelId) != SOFTBUS_OK)) {
+        TRANS_LOGW(TRANS_SDK, "trans release udp resources failed. channelId=%{public}d", channelId);
     }
 
     if (TransDeleteBusinnessChannel(&channel) != SOFTBUS_OK) {
