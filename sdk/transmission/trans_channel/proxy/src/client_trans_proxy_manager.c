@@ -494,8 +494,10 @@ static int32_t ClientTransProxyProcessSessionData(int32_t channelId, const Packe
 static int32_t ClientTransProxyNoSubPacketProc(int32_t channelId, const char *data, uint32_t len)
 {
     PacketHead head;
-    (void)memset_s(&head, sizeof(PacketHead), 0, sizeof(PacketHead));
-    (void)memcpy_s(&head, sizeof(PacketHead), data, sizeof(PacketHead));
+    if (memcpy_s(&head, sizeof(PacketHead), data, sizeof(PacketHead)) != EOK) {
+        TRANS_LOGE(TRANS_SDK, "invalid pack head");
+        return SOFTBUS_MEM_ERR;
+    }
     ClientUnPackPacketHead(&head);
     if ((uint32_t)head.magicNumber != MAGIC_NUMBER) {
         TRANS_LOGE(TRANS_SDK, "invalid magicNumber=%{public}x", head.magicNumber);
