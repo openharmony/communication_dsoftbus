@@ -493,26 +493,26 @@ static int32_t ClientTransProxyProcessSessionData(int32_t channelId, const Packe
 
 static int32_t ClientTransProxyNoSubPacketProc(int32_t channelId, const char *data, uint32_t len)
 {
-    PacketHead *head = (PacketHead*)data;
-    if (head == NULL) {
-        TRANS_LOGW(TRANS_SDK, "invalid param data.");
+    PacketHead head;
+    if (memcpy_s(&head, sizeof(PacketHead), data, sizeof(PacketHead)) != EOK) {
+        TRANS_LOGE(TRANS_SDK, "memcpy packetHead failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    ClientUnPackPacketHead(&head);
+    if ((uint32_t)head.magicNumber != MAGIC_NUMBER) {
+        TRANS_LOGE(TRANS_SDK, "invalid magicNumber=%{public}x", head.magicNumber);
         return SOFTBUS_ERR;
     }
-    ClientUnPackPacketHead(head);
-    if ((uint32_t)head->magicNumber != MAGIC_NUMBER) {
-        TRANS_LOGE(TRANS_SDK, "invalid magicNumber=%{public}x", head->magicNumber);
+    if (head.dataLen <= 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid dataLen=%{public}d", head.dataLen);
         return SOFTBUS_ERR;
     }
-    if (head->dataLen <= 0) {
-        TRANS_LOGE(TRANS_SDK, "invalid dataLen=%{public}d", head->dataLen);
-        return SOFTBUS_ERR;
-    }
-    TRANS_LOGD(TRANS_SDK, "NoSubPacketProc dataLen=%{public}d, inputLen=%{public}d", head->dataLen, len);
-    if (head->dataLen + sizeof(PacketHead) != len) {
+    TRANS_LOGD(TRANS_SDK, "NoSubPacketProc dataLen=%{public}d, inputLen=%{public}d", head.dataLen, len);
+    if (head.dataLen + sizeof(PacketHead) != len) {
         TRANS_LOGE(TRANS_SDK, "dataLen error");
         return SOFTBUS_ERR;
     }
-    int32_t ret = ClientTransProxyProcessSessionData(channelId, head, data + sizeof(PacketHead));
+    int32_t ret = ClientTransProxyProcessSessionData(channelId, &head, data + sizeof(PacketHead));
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "process data err");
         return SOFTBUS_ERR;
