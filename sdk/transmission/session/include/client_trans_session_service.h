@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,7 @@ extern "C" {
 #endif
 
 int32_t QosReport(int32_t sessionId, int32_t appType, int32_t quality);
-int32_t OpenSessionSync(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId,
+int OpenSessionSync(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId,
     const char *groupId, const SessionAttribute *attr);
 int32_t GetDefaultConfigType(int32_t channelType, int32_t businessType);
 #ifdef __cplusplus

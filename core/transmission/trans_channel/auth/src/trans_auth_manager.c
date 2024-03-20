@@ -335,6 +335,7 @@ static void OnRecvAuthChannelRequest(int32_t authId, const char *data, int32_t l
         goto EXIT_ERR;
     }
     extra.socketName = appInfo.myData.sessionName;
+    extra.peerUdid = appInfo.peerData.deviceId;
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_START, extra);
     if (!CheckSessionNameValidOnAuthChannel(appInfo.myData.sessionName)) {
         TRANS_LOGE(TRANS_SVC, "check auth channel pkginfo invalid.");
@@ -436,6 +437,7 @@ static void OnRecvAuthChannelReply(int32_t authId, const char *data, int32_t len
         TRANS_LOGE(TRANS_SVC, "unpackReply failed");
         goto EXIT_ERR;
     }
+    extra.peerUdid = info.appInfo.peerData.deviceId;
     ret = TransAuthProcessDataConfig(&info.appInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "ProcessDataConfig failed");

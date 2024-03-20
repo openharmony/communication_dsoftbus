@@ -16,6 +16,7 @@
 #ifndef WIFI_DIRECET_STATISTIC_H
 #define WIFI_DIRECET_STATISTIC_H
 
+#include "stdint.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -52,6 +53,27 @@ void SetWifiDirectStatisticNegotiateStartTime(int32_t requestId);
 void SetWifiDirectStatisticNegotiateEndTime(int32_t requestId);
 void GetWifiDirectStatisticNegotiateTime(int32_t requestId, uint64_t *negotiateTime);
 void DestroyWifiDirectStatisticElement(int32_t requestId);
+bool IsReNegotiate(int32_t requestId);
+void SetIsReNegotiate(int32_t requestId);
+void SetHmlTriggerStartTime(int32_t requestId);
+void SetHmlTriggerEndTime(int32_t requestId);
+void SetCreateGroupStartTime(int32_t requestId);
+void SetCreateGroupEndTime(int32_t requestId);
+void SetCreateGroupNotifyStartTime(int32_t requestId);
+void SetCreateGroupNotifyEndTime(int32_t requestId);
+void SetConnectGroupStartTime(int32_t requestId);
+void SetConnectGroupEndTime(int32_t requestId);
+void SetOpenAuthConnectionStartTime(int32_t requestId);
+void SetOpenAuthConnectionEndTime(int32_t requestId);
+void SetRenegotiateCreateGroupStartTime(int32_t requestId);
+void SetRenegotiateCreateGroupEndTime(int32_t requestId);
+void SetRenegotiateCreateGroupNotifyStartTime(int32_t requestId);
+void SetRenegotiateCreateGroupNotifyEndTime(int32_t requestId);
+void SetRenegotiateRemoveStartTime(int32_t requestId);
+void SetRenegotiateRemoveEndTime(int32_t requestId);
+void HmlTriggerCalculate(int32_t requestId);
+void HmlTriggerLogPrint(int32_t requestId);
+void HmlTriggerRenegotiateLogPrint(int32_t requestId);
 
 #ifdef __cplusplus
 }

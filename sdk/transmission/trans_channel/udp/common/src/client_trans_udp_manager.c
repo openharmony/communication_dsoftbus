@@ -322,6 +322,11 @@ static int32_t ClosePeerUdpChannel(int32_t channelId)
     return ServerIpcCloseChannel(channelId, CHANNEL_TYPE_UDP);
 }
 
+static int32_t RleaseUdpResources(int32_t channelId)
+{
+    return ServerIpcReleaseResources(channelId);
+}
+
 static int32_t CloseUdpChannel(int32_t channelId, bool isActive, ShutdownReason reason)
 {
     UdpChannel channel;
@@ -338,6 +343,10 @@ static int32_t CloseUdpChannel(int32_t channelId, bool isActive, ShutdownReason 
 
     if (isActive && (ClosePeerUdpChannel(channelId) != SOFTBUS_OK)) {
         TRANS_LOGE(TRANS_SDK, "trans close peer udp channel failed. channelId=%{public}d", channelId);
+    }
+
+    if (!isActive && (RleaseUdpResources(channelId) != SOFTBUS_OK)) {
+        TRANS_LOGW(TRANS_SDK, "trans release udp resources failed. channelId=%{public}d", channelId);
     }
 
     if (TransDeleteBusinnessChannel(&channel) != SOFTBUS_OK) {
@@ -436,6 +445,41 @@ static int32_t OnIdleTimeoutReset(int32_t sessionId)
     return g_sessionCb->OnIdleTimeoutReset(sessionId);
 }
 
+static int32_t OnRawStreamEncryptOptGet(int32_t channelId, bool *isEncrypt)
+{
+    if (channelId < 0 || isEncrypt == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (g_sessionCb == NULL) {
+        TRANS_LOGE(TRANS_SDK, "session callback is null");
+        return SOFTBUS_ERR;
+    }
+
+    if (g_sessionCb->OnRawStreamEncryptOptGet == NULL) {
+        TRANS_LOGE(TRANS_SDK, "OnRawStreamEncryptOptGet of session callback is null");
+        return SOFTBUS_ERR;
+    }
+
+    UdpChannel channel;
+    if (memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel)) != EOK) {
+        TRANS_LOGE(TRANS_SDK, "on udp channel opened memset failed.");
+        return SOFTBUS_MEM_ERR;
+    }
+    int ret = TransGetUdpChannel(channelId, &channel);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get udp failed. channelId=%{public}d", channelId);
+        return ret;
+    }
+
+    if (channel.info.isServer) {
+        return g_sessionCb->OnRawStreamEncryptDefOptGet(channel.info.mySessionName, isEncrypt);
+    } else {
+        return g_sessionCb->OnRawStreamEncryptOptGet(channel.channelId, CHANNEL_TYPE_UDP, isEncrypt);
+    }
+}
+
 static UdpChannelMgrCb g_udpChannelCb = {
     .OnStreamReceived = OnStreamReceived,
     .OnFileGetSessionId = OnFileGetSessionId,
@@ -444,6 +488,7 @@ static UdpChannelMgrCb g_udpChannelCb = {
     .OnUdpChannelClosed = OnUdpChannelClosed,
     .OnQosEvent = OnQosEvent,
     .OnIdleTimeoutReset = OnIdleTimeoutReset,
+    .OnRawStreamEncryptOptGet = OnRawStreamEncryptOptGet,
 };
 
 int32_t ClientTransUdpMgrInit(IClientSessionCallBack *callback)

@@ -16,6 +16,7 @@
 #include "lnn_distributed_net_ledger.h"
 
 #include <stddef.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -242,6 +243,7 @@ static void NewWifiDiscovered(const NodeInfo *oldInfo, NodeInfo *newInfo)
         return;
     }
     newInfo->discoveryType = newInfo->discoveryType | oldInfo->discoveryType;
+    newInfo->stateVersion = oldInfo->stateVersion;
     macAddr = LnnGetBtMac(newInfo);
     if (macAddr == NULL) {
         LNN_LOGE(LNN_LEDGER, "LnnGetBtMac Fail!");
@@ -790,6 +792,18 @@ static int32_t DlGetStaticCapLen(const char *networkId, void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t DlGetDeviceSecurityLevel(const char *networkId, void *buf, uint32_t len)
+{
+    NodeInfo *info = NULL;
+    if (len != LNN_COMMON_LEN) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    *((int32_t *)buf) = info->deviceSecurityLevel;
+    return SOFTBUS_OK;
+}
+
 static int32_t DlGetStaticCap(const char *networkId, void *buf, uint32_t len)
 {
     if (len > STATIC_CAP_LEN) {
@@ -1218,6 +1232,7 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {NUM_KEY_DATA_CHANGE_FLAG, DlGetNodeDataChangeFlag},
     {NUM_KEY_DEV_TYPE_ID, DlGetDeviceTypeId},
     {NUM_KEY_STATIC_CAP_LEN, DlGetStaticCapLen},
+    {NUM_KEY_DEVICE_SECURITY_LEVEL, DlGetDeviceSecurityLevel},
     {BOOL_KEY_TLV_NEGOTIATION, DlGetNodeTlvNegoFlag},
     {BYTE_KEY_ACCOUNT_HASH, DlGetAccountHash},
     {BYTE_KEY_REMOTE_PTK, DlGetRemotePtk},
@@ -1745,6 +1760,33 @@ static void DfxRecordLnnSetNodeOfflineEnd(const char *udid, int32_t onlineNum, i
     LNN_EVENT(EVENT_SCENE_LEAVE_LNN, EVENT_STAGE_LEAVE_LNN, extra);
 }
 
+static void TryUpdateDeviceSecurityLevel(NodeInfo *info)
+{
+    NodeInfo deviceInfo;
+    (void)memset_s(&deviceInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    uint8_t udidHash[SHA_256_HASH_LEN] = {0};
+    char hashStr[SHORT_UDID_HASH_HEX_LEN + 1] = {0};
+    if (SoftBusGenerateStrHash((const unsigned char *)info->deviceInfo.deviceUdid,
+        strlen(info->deviceInfo.deviceUdid), udidHash) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "generate udidhash fail");
+        return;
+    }
+    if (ConvertBytesToHexString(hashStr, SHORT_UDID_HASH_HEX_LEN + 1, udidHash,
+        SHORT_UDID_HASH_HEX_LEN / HEXIFY_UNIT_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert udidhash to hexstr fail");
+        return;
+    }
+    if (LnnRetrieveDeviceInfo(hashStr, &deviceInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get deviceInfo by udidhash fail");
+        return;
+    }
+    LNN_LOGI(LNN_LEDGER, "deviceSecurityLevel new=%{public}d, old=%{public}d",
+        info->deviceSecurityLevel, deviceInfo.deviceSecurityLevel);
+    if (deviceInfo.deviceSecurityLevel > 0) {
+        info->deviceSecurityLevel = deviceInfo.deviceSecurityLevel;
+    }
+}
+
 ReportCategory LnnAddOnlineNode(NodeInfo *info)
 {
     // judge map
@@ -1769,6 +1811,7 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
     LnnSetNodeConnStatus(info, STATUS_ONLINE);
     LnnSetAuthTypeValue(&info->AuthTypeValue, ONLINE_HICHAIN);
     UpdateNewNodeAccountHash(info);
+    TryUpdateDeviceSecurityLevel(info);
     int32_t ret = LnnMapSet(&map->udidMap, udid, info, sizeof(NodeInfo));
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lnn map set failed, ret=%{public}d", ret);

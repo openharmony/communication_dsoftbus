@@ -46,20 +46,38 @@ static inline void ConvertStreamFrameInfo(const StreamFrameInfo *inFrameInfo,
     outFrameInfo->bitrate = 0;
 }
 
-int32_t ProcessAdaptorAndEncrypt(const StreamFrameInfo *param, const StreamData *inData,
+static int32_t CreateRawStream(const std::shared_ptr<StreamAdaptor> &adaptor, const char *buf, ssize_t bufLen,
+    std::unique_ptr<IStream> &stream)
+{
+    bool isEncrypt = adaptor->IsEncryptedRawStream();
+    if (!isEncrypt) {
+        TRANS_LOGD(TRANS_STREAM, "isEncrypt=%{public}d, bufLen=%{public}zd", isEncrypt, bufLen);
+        stream = IStream::MakeRawStream(buf, bufLen, {}, Communication::SoftBus::Scene::SOFTBUS_SCENE);
+        return SOFTBUS_OK;
+    }
+
+    ssize_t dataLen = bufLen + adaptor->GetEncryptOverhead();
+    TRANS_LOGD(TRANS_STREAM, "isEncrypt=%{public}d, bufLen=%{public}zd, encryptOverhead=%{public}zd", isEncrypt,
+        bufLen, adaptor->GetEncryptOverhead());
+    std::unique_ptr<char[]> data = std::make_unique<char[]>(dataLen);
+    ssize_t encLen = adaptor->Encrypt(buf, bufLen, data.get(), dataLen, adaptor->GetSessionKey());
+    if (encLen != dataLen) {
+        TRANS_LOGE(TRANS_STREAM, "encrypted failed, dataLen=%{public}zd, encLen=%{public}zd", dataLen, encLen);
+        return SOFTBUS_TRANS_ENCRYPT_ERR;
+    }
+    stream = IStream::MakeRawStream(data.get(), dataLen, {}, Communication::SoftBus::Scene::SOFTBUS_SCENE);
+    return SOFTBUS_OK;
+}
+
+static int32_t ProcessAdaptorAndEncrypt(const StreamFrameInfo *param, const StreamData *inData,
     std::shared_ptr<StreamAdaptor> &adaptor, std::unique_ptr<IStream> &stream, const StreamData *ext)
 {
     if (adaptor->GetStreamType() == RAW_STREAM) {
-        ssize_t dataLen = inData->bufLen + adaptor->GetEncryptOverhead();
-        TRANS_LOGD(TRANS_STREAM,
-            "bufLen=%{public}d, encryptOverhead=%{public}zd", inData->bufLen, adaptor->GetEncryptOverhead());
-        std::unique_ptr<char[]> data = std::make_unique<char[]>(dataLen);
-        ssize_t encLen = adaptor->Encrypt(inData->buf, inData->bufLen, data.get(), dataLen, adaptor->GetSessionKey());
-        if (encLen != dataLen) {
-            TRANS_LOGE(TRANS_STREAM, "encrypted failed, dataLen=%{public}zd, encLen=%{public}zd", dataLen, encLen);
-            return SOFTBUS_ENCRYPT_ERR;
+        int32_t ret = CreateRawStream(adaptor, inData->buf, inData->bufLen, stream);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_STREAM, "failed to create raw stream, ret=%{public}d", ret);
+            return ret;
         }
-        stream = IStream::MakeRawStream(data.get(), dataLen, {}, Communication::SoftBus::Scene::SOFTBUS_SCENE);
     } else if (adaptor->GetStreamType() == COMMON_VIDEO_STREAM || adaptor->GetStreamType() == COMMON_AUDIO_STREAM) {
         if (inData->bufLen < 0 || inData->bufLen > Communication::SoftBus::MAX_STREAM_LEN ||
             (ext != nullptr && (ext->bufLen < 0 || ext->bufLen > Communication::SoftBus::MAX_STREAM_LEN))) {
@@ -98,8 +116,8 @@ int32_t ProcessAdaptorAndEncrypt(const StreamFrameInfo *param, const StreamData 
 int32_t SendVtpStream(int32_t channelId, const StreamData *inData, const StreamData *ext, const StreamFrameInfo *param)
 {
     if (inData == nullptr || inData->buf == nullptr || param == nullptr) {
-        TRANS_LOGE(TRANS_STREAM, "invalid argument!");
-        return SOFTBUS_ERR;
+        TRANS_LOGE(TRANS_STREAM, "invalid argument inData or param");
+        return SOFTBUS_INVALID_PARAM;
     }
     std::shared_ptr<StreamAdaptor> adaptor = nullptr;
     {
@@ -109,7 +127,7 @@ int32_t SendVtpStream(int32_t channelId, const StreamData *inData, const StreamD
             TRANS_LOGE(TRANS_STREAM, "adaptor not existed!");
             return SOFTBUS_ERR;
         }
-        adaptor = it->second;            
+        adaptor = it->second;
     }
 
     std::unique_ptr<IStream> stream = nullptr;

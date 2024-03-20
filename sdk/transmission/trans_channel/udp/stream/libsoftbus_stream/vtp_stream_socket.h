@@ -45,8 +45,8 @@ struct ConnectStatus {
 
 class VtpStreamSocket : public std::enable_shared_from_this<VtpStreamSocket>, public IStreamSocket {
 public:
-    static constexpr int FILLP_VTP_SEND_CACHE_SIZE = 8192;
-    static constexpr int FILLP_VTP_RECV_CACHE_SIZE = 8192;
+    static constexpr int FILLP_VTP_SEND_CACHE_SIZE = 500;
+    static constexpr int FILLP_VTP_RECV_CACHE_SIZE = 500;
     static constexpr int FILLP_KEEP_ALIVE_TIME = 300000;
 
     VtpStreamSocket();
@@ -103,8 +103,8 @@ private:
         { PKT_LOSS, FT_CONF_APP_FC_RECV_PKT_LOSS },
     };
 
-    void VtpStreamSocket::ProcessCommonDataStream(std::unique_ptr<char[]> &dataBuffer,
-        int32_t &dataLength, std::unique_ptr<char[]> &extBuffer, int32_t &extLen, StreamFrameInfo &info);
+    bool ProcessCommonDataStream(std::unique_ptr<char[]> &dataBuffer, int32_t &dataLength,
+        std::unique_ptr<char[]> &extBuffer, int32_t &extLen, StreamFrameInfo &info);
     void InsertElementToFuncMap(int type, ValueType valueType, MySetFunc set, MyGetFunc get);
     int CreateAndBindSocket(IpAndPort &local) override;
     bool Accept() override;
@@ -114,7 +114,7 @@ private:
 
     void InsertBufferLength(int num, int length, uint8_t *output) const;
     std::unique_ptr<IStream> MakeStreamData(StreamData &data, const StreamFrameInfo &info) const;
-    int RecvStreamLen();
+    int32_t RecvStreamLen();
     void DoStreamRecv();
     std::unique_ptr<char[]> RecvStream(int32_t dataLength) override;
 

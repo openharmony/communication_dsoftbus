@@ -132,6 +132,7 @@ int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned
         .result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED
     };
     if (!isServer) {
+        extra.peerUdid = appInfo->appType == APP_TYPE_AUTH ? appInfo->peerData.deviceId : NULL;
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
     } else if (ret != SOFTBUS_OK) {
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_OPEN_CHANNEL_END, extra);

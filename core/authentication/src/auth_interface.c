@@ -88,7 +88,12 @@ void UnregAuthTransListener(int32_t module)
     }
 }
 
-static void NotifyTransDataReceived(int64_t authId,
+bool IsSupportFeatureByCapaBit(uint32_t feature, AuthCapability capaBit)
+{
+    return ((feature & (1 << (uint32_t)capaBit)) != 0);
+}
+
+static void NotifyTransDataReceived(AuthHandle authHandle,
     const AuthDataHead *head, const uint8_t *data, uint32_t len)
 {
     AuthTransListener *listener = NULL;
@@ -109,14 +114,14 @@ static void NotifyTransDataReceived(int64_t authId,
         .len = len,
         .data = data,
     };
-    listener->onDataReceived(authId, &transData);
+    listener->onDataReceived(authHandle, &transData);
 }
 
-static void NotifyTransDisconnected(int64_t authId)
+static void NotifyTransDisconnected(AuthHandle authHandle)
 {
     for (uint32_t i = 0; i < sizeof(g_moduleListener) / sizeof(ModuleListener); i++) {
         if (g_moduleListener[i].listener.onDisconnected != NULL) {
-            g_moduleListener[i].listener.onDisconnected(authId);
+            g_moduleListener[i].listener.onDisconnected(authHandle);
         }
     }
 }
@@ -134,25 +139,33 @@ int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthCon
     return AuthDeviceOpenConn(info, requestId, callback);
 }
 
-int32_t AuthPostTransData(int64_t authId, const AuthTransData *dataInfo)
+int32_t AuthPostTransData(AuthHandle authHandle, const AuthTransData *dataInfo)
 {
-    AuthManager *auth = GetAuthManagerByAuthId(authId);
-    if (auth != NULL) {
-        DelAuthManager(auth, false);
-        return AuthDevicePostTransData(authId, dataInfo);
+    if (authHandle.type < AUTH_LINK_TYPE_WIFI || authHandle.type >= AUTH_LINK_TYPE_MAX) {
+        AUTH_LOGE(AUTH_CONN, "authHandle type error");
+        return SOFTBUS_INVALID_PARAM;
     }
-    return AuthMetaPostTransData(authId, dataInfo);
+    AuthManager *auth = GetAuthManagerByAuthId(authHandle.authId);
+    if (auth != NULL) {
+        DelDupAuthManager(auth);
+        return AuthDevicePostTransData(authHandle, dataInfo);
+    }
+    return AuthMetaPostTransData(authHandle.authId, dataInfo);
 }
 
-void AuthCloseConn(int64_t authId)
+void AuthCloseConn(AuthHandle authHandle)
 {
-    AuthManager *auth = GetAuthManagerByAuthId(authId);
-    if (auth != NULL) {
-        DelAuthManager(auth, false);
-        AuthDeviceCloseConn(authId);
+    if (authHandle.type < AUTH_LINK_TYPE_WIFI || authHandle.type >= AUTH_LINK_TYPE_MAX) {
+        AUTH_LOGE(AUTH_CONN, "authHandle type error");
         return;
     }
-    AuthMetaCloseConn(authId);
+    AuthManager *auth = GetAuthManagerByAuthId(authHandle.authId);
+    if (auth != NULL) {
+        DelDupAuthManager(auth);
+        AuthDeviceCloseConn(authHandle);
+        return;
+    }
+    AuthMetaCloseConn(authHandle.authId);
 }
 
 int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta)
@@ -172,12 +185,13 @@ int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta
 }
 
 /* for ProxyChannel & P2P TcpDirectchannel */
-int64_t AuthGetLatestIdByUuid(const char *uuid, AuthLinkType type, bool isMeta)
+void AuthGetLatestIdByUuid(const char *uuid, AuthLinkType type, bool isMeta, AuthHandle *authHandle)
 {
+    authHandle->authId = AUTH_INVALID_ID;
     if (isMeta) {
-        return AUTH_INVALID_ID;
+        return;
     }
-    return AuthDeviceGetLatestIdByUuid(uuid, type);
+    AuthDeviceGetLatestIdByUuid(uuid, type, authHandle);
 }
 
 int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer, bool isMeta)
@@ -205,7 +219,8 @@ int32_t AuthRestoreAuthManager(const char *udidHash,
     }
     // get device key
     AuthDeviceKeyInfo keyInfo = {0};
-    if (AuthFindDeviceKey(udidHash, connInfo->type, &keyInfo) != SOFTBUS_OK) {
+    if (AuthFindLatestNormalizeKey(udidHash, &keyInfo) != SOFTBUS_OK &&
+        AuthFindDeviceKey(udidHash, connInfo->type, &keyInfo) != SOFTBUS_OK) {
         AUTH_LOGI(AUTH_KEY, "restore manager fail because device key not exist");
         return SOFTBUS_ERR;
     }
@@ -218,11 +233,13 @@ int32_t AuthRestoreAuthManager(const char *udidHash,
     SessionKey sessionKey;
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
+    bool isSupportNormalizedKey = IsSupportFeatureByCapaBit(nodeInfo->authCapacity, BIT_SUPPORT_NORMALIZED_LINK);
     info.requestId = requestId;
     info.isServer = keyInfo.isServerSide;
     info.connId = keyInfo.keyIndex;
     info.connInfo = *connInfo;
     info.version = SOFTBUS_NEW_V2;
+    info.normalizedType = isSupportNormalizedKey ? NORMALIZED_SUPPORT : NORMALIZED_NOT_SUPPORT;
     if (strcpy_s(info.uuid, sizeof(info.uuid), nodeInfo->uuid) != EOK ||
         strcpy_s(info.udid, sizeof(info.udid), nodeInfo->deviceInfo.deviceUdid) != EOK) {
         AUTH_LOGW(AUTH_KEY, "restore manager fail because copy uuid/udid fail");
@@ -233,8 +250,17 @@ int32_t AuthRestoreAuthManager(const char *udidHash,
         return SOFTBUS_MEM_ERR;
     }
     sessionKey.len = keyInfo.keyLen;
-    *authId = keyInfo.keyIndex;
-    return AuthManagerSetSessionKey(keyInfo.keyIndex, &info, &sessionKey, false);
+    if (AuthManagerSetSessionKey(keyInfo.keyIndex, &info, &sessionKey, false) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    AuthManager *auth = GetAuthManagerByConnInfo(&info.connInfo, info.isServer);
+    if (auth == NULL) {
+        AUTH_LOGE(AUTH_KEY, "authManager is null");
+        return SOFTBUS_ERR;
+    }
+    *authId = auth->authId;
+    DelDupAuthManager(auth);
+    return SOFTBUS_OK;
 }
 
 int32_t AuthEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
@@ -242,7 +268,7 @@ int32_t AuthEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8
 {
     AuthManager *auth = GetAuthManagerByAuthId(authId);
     if (auth != NULL) {
-        DelAuthManager(auth, false);
+        DelDupAuthManager(auth);
         return AuthDeviceEncrypt(authId, inData, inLen, outData, outLen);
     }
     return AuthMetaEncrypt(authId, inData, inLen, outData, outLen);
@@ -253,7 +279,7 @@ int32_t AuthDecrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8
 {
     AuthManager *auth = GetAuthManagerByAuthId(authId);
     if (auth != NULL) {
-        DelAuthManager(auth, false);
+        DelDupAuthManager(auth);
         return AuthDeviceDecrypt(authId, inData, inLen, outData, outLen);
     }
     return AuthMetaDecrypt(authId, inData, inLen, outData, outLen);
@@ -263,27 +289,31 @@ int32_t AuthSetP2pMac(int64_t authId, const char *p2pMac)
 {
     AuthManager *auth = GetAuthManagerByAuthId(authId);
     if (auth != NULL) {
-        DelAuthManager(auth, false);
+        DelDupAuthManager(auth);
         return AuthDeviceSetP2pMac(authId, p2pMac);
     }
     return AuthMetaSetP2pMac(authId, p2pMac);
 }
 
-int32_t AuthGetConnInfo(int64_t authId, AuthConnInfo *connInfo)
+int32_t AuthGetConnInfo(AuthHandle authHandle, AuthConnInfo *connInfo)
 {
-    AuthManager *auth = GetAuthManagerByAuthId(authId);
-    if (auth != NULL) {
-        DelAuthManager(auth, false);
-        return AuthDeviceGetConnInfo(authId, connInfo);
+    if (authHandle.type < AUTH_LINK_TYPE_WIFI || authHandle.type >= AUTH_LINK_TYPE_MAX) {
+        AUTH_LOGE(AUTH_CONN, "authHandle type error");
+        return SOFTBUS_INVALID_PARAM;
     }
-    return AuthMetaGetConnInfo(authId, connInfo);
+    AuthManager *auth = GetAuthManagerByAuthId(authHandle.authId);
+    if (auth != NULL) {
+        DelDupAuthManager(auth);
+        return AuthDeviceGetConnInfo(authHandle, connInfo);
+    }
+    return AuthMetaGetConnInfo(authHandle.authId, connInfo);
 }
 
 int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
 {
     AuthManager *auth = GetAuthManagerByAuthId(authId);
     if (auth != NULL) {
-        DelAuthManager(auth, false);
+        DelDupAuthManager(auth);
         return AuthDeviceGetDeviceUuid(authId, uuid, size);
     }
     return AuthMetaGetDeviceUuid(authId, uuid, size);
@@ -298,7 +328,7 @@ int32_t AuthGetServerSide(int64_t authId, bool *isServer)
 {
     AuthManager *auth = GetAuthManagerByAuthId(authId);
     if (auth != NULL) {
-        DelAuthManager(auth, false);
+        DelDupAuthManager(auth);
         return AuthDeviceGetServerSide(authId, isServer);
     }
     return AuthMetaGetServerSide(authId, isServer);
@@ -312,7 +342,7 @@ int32_t AuthGetMetaType(int64_t authId, bool *isMetaAuth)
     }
     AuthManager *auth = GetAuthManagerByAuthId(authId);
     if (auth != NULL) {
-        DelAuthManager(auth, false);
+        DelDupAuthManager(auth);
         *isMetaAuth = false;
         return SOFTBUS_OK;
     }
@@ -387,29 +417,6 @@ bool IsAuthHasTrustedRelation(void)
 {
     bool hasTrustedRelation = (AuthHasTrustedRelation() == TRUSTED_RELATION_YES) ? true : false;
     return hasTrustedRelation;
-}
-
-void AuthDeleteStoredAuthKey(const char *udid, int32_t discoveryType)
-{
-    AuthLinkType linkType;
-    switch (discoveryType) {
-        case DISCOVERY_TYPE_WIFI:
-            linkType = AUTH_LINK_TYPE_WIFI;
-            break;
-        case DISCOVERY_TYPE_BLE:
-            linkType = AUTH_LINK_TYPE_BLE;
-            break;
-        case DISCOVERY_TYPE_BR:
-            linkType = AUTH_LINK_TYPE_BR;
-            break;
-        case DISCOVERY_TYPE_P2P:
-            linkType = AUTH_LINK_TYPE_P2P;
-            break;
-        default:
-            AUTH_LOGE(AUTH_KEY, "unkown support discType=%{public}d", discoveryType);
-            return;
-    }
-    AuthRemoveDeviceKey(udid, (int32_t)linkType);
 }
 
 int32_t AuthInit(void)

@@ -212,6 +212,7 @@ HWTEST_F(ConnEventTest, ConnEventTest005, TestSize.Level0)
         .costTime = 999,
         .connectTimes = 3,
         .frequency = "3999",
+        .challengeCode = "1",
         .peerBrMac = "11:22:33:44:55:66",
         .localBrMac = "12:22:23:33:33:91",
         .peerBleMac = "22:66:55:44:33:22",
@@ -229,7 +230,7 @@ HWTEST_F(ConnEventTest, ConnEventTest005, TestSize.Level0)
         .localPort = "2484",
     };
 
-    constexpr int32_t VALID_EXTRA_SIZE = 24;
+    constexpr int32_t VALID_EXTRA_SIZE = 25;
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,

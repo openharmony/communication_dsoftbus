@@ -49,6 +49,7 @@ if (dsoftbus_feature_lnn_net) {
     "$authentication_path/src/auth_hichain.c",
     "$authentication_path/src/auth_hichain_adapter.c",
     "$authentication_path/src/auth_manager.c",
+    "$authentication_path/src/auth_normalize_request.c",
     "$authentication_path/src/auth_request.c",
     "$authentication_path/src/auth_session_fsm.c",
     "$authentication_path/src/auth_session_key.c",

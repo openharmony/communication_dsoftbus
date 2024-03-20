@@ -93,6 +93,7 @@ ohos_unittest("AuthEnhanceMockTest") {
     "$dsoftbus_root_path/core/authentication/src/auth_hichain_adapter.c",
     "$dsoftbus_root_path/core/authentication/src/auth_interface.c",
     "$dsoftbus_root_path/core/authentication/src/auth_manager.c",
+    "$dsoftbus_root_path/core/authentication/src/auth_normalize_request.c",
     "$dsoftbus_root_path/core/authentication/src/auth_request.c",
     "$dsoftbus_root_path/core/authentication/src/auth_session_fsm.c",
     "$dsoftbus_root_path/core/authentication/src/auth_session_key.c",

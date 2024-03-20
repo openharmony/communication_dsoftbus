@@ -301,6 +301,12 @@ int32_t DiscServerProxy::NotifyAuthSuccess(int32_t channelId, int32_t channelTyp
     return SOFTBUS_OK;
 }
 
+int32_t DiscServerProxy::ReleaseResources(int32_t channelId)
+{
+    (void)channelId;
+    return SOFTBUS_OK;
+}
+
 int32_t DiscServerProxy::CloseChannel(int32_t channelId, int32_t channelType)
 {
     (void)channelId;

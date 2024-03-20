@@ -101,13 +101,13 @@ HWTEST_F(ClientTransSessionImplTest, ClientTransSessionServerImplTest001, TestSi
     std::shared_ptr<Communication::SoftBus::ISessionListener> listern = std::make_shared<ISessionListenerTest>();
 
     int ret = testSessionServiceImpl.CreateSessionServer(g_pkgName1, g_sessionName1, listern);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = testSessionServiceImpl.CreateSessionServer(g_pkgName2, g_sessionName1, listern);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = testSessionServiceImpl.CreateSessionServer(g_pkgName2, g_sessionName2, nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = testSessionServiceImpl.CreateSessionServer(g_pkgName3, g_sessionName2, listern);
     EXPECT_NE(SOFTBUS_OK, ret);
@@ -145,13 +145,13 @@ HWTEST_F(ClientTransSessionImplTest, ClientTransSessionServerImplTest002, TestSi
     int uid = 0;
     int pid = 0;
     ret = testSessionServiceImpl.GrantPermission(-1, -1, g_pkgName1);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = testSessionServiceImpl.GrantPermission(uid, pid, g_pkgName1);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = testSessionServiceImpl.GrantPermission(uid, pid, g_pkgName2);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
 
     int sessionId = 1;
     ret = testSessionServiceImpl.OpenSessionCallback(sessionId);
@@ -163,13 +163,13 @@ HWTEST_F(ClientTransSessionImplTest, ClientTransSessionServerImplTest002, TestSi
     testSessionServiceImpl.MessageReceivedCallback(sessionId, data, TEST_DATA_LENGTH);
 
     ret = testSessionServiceImpl.CloseSession(session);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = testSessionServiceImpl.RemoveSessionServer(g_pkgName1, g_sessionName1);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = testSessionServiceImpl.RemoveSessionServer(g_pkgName2, g_sessionName1);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = testSessionServiceImpl.RemoveSessionServer(g_pkgName3, g_sessionName2);
     EXPECT_NE(SOFTBUS_OK, ret);

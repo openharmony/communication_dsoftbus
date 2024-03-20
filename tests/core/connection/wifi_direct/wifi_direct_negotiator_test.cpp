@@ -60,7 +60,7 @@
 #include "negotiate_message.h"
 #include "wifi_direct_trigger_channel.h"
 using namespace testing::ext;
-
+struct WifiDirectNegotiateChannel;
 namespace OHOS {
 
 class WifiDirectNegotiatorTest : public testing::Test {
@@ -227,5 +227,21 @@ HWTEST_F(WifiDirectNegotiatorTest, WifiDirectNegotiator013, TestSize.Level1)
     struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
     struct InnerLink *innerLink = InnerLinkNew();
     self->syncLnnInfo(innerLink);
+};
+
+/*
+* @tc.name: testWifiDirectNegotiator
+* @tc.desc: test syncLnnInfo
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(WifiDirectNegotiatorTest, WifiDirectNegotiator014, TestSize.Level1)
+{
+    struct WifiDirectNegotiator *self = GetWifiDirectNegotiator();
+    struct WifiDirectNegotiateChannel *channel = (struct WifiDirectNegotiateChannel*)SoftBusCalloc(sizeof(*channel));
+    (void)memset_s(channel, sizeof(*channel), 0, sizeof(*channel));
+    const uint8_t *data = nullptr;
+    size_t len = 0;
+    self->onNegotiateChannelDataReceived(channel, data, len);
 };
 }

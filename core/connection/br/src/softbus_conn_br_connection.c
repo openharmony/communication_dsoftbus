@@ -312,6 +312,7 @@ ConnBrConnection *ConnBrCreateConnection(const char *addr, ConnSideType side, in
     connection->sequence = 0;
     connection->waitSequence = 0;
     connection->ackTimeoutCount = 0;
+    connection->retryCount = 0;
     return connection;
 }
 

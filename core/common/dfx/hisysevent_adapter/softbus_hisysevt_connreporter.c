@@ -566,7 +566,7 @@ int32_t SoftbusRecordConnResult(uint32_t pId, SoftBusConnType connType, SoftBusC
     SoftBusMutexUnlock(&g_connResApiLock);
     errCode = GetErrorCodeEx(errCode);
     COMM_CHECK_AND_RETURN_RET_LOGE(SoftbusReportConnFault(connType, errCode, pkgName) == SOFTBUS_OK, SOFTBUS_ERR,
-                                  COMM_EVENT, "report conn fault event fail!");
+                                   COMM_EVENT, "report conn fault event fail!");
     return SOFTBUS_OK;
 }
 
@@ -580,7 +580,7 @@ int32_t SoftbusRecordProccessDuration(uint32_t pId, SoftBusConnType connType, So
     }
     SoftbusRecordConnResult(pId, connType, status, stepTime->totalTime, errCode);
     COMM_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_procStepLock) == SOFTBUS_OK, SOFTBUS_ERR, COMM_EVENT,
-                                  "record g_procStepLock fail");
+                                   "record g_procStepLock fail");
     for (ProcessStep i = NEGOTIATION_STEP; i < STEP_BUTT; i++) {
         uint64_t costTime = stepTime->connGroupTime;
         switch (i) {
@@ -625,7 +625,7 @@ static int32_t InitConnEvtMutexLock(void)
 {
     SoftBusMutexAttr mutexAttr = {SOFTBUS_MUTEX_RECURSIVE};
     COMM_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexInit(&g_pIdOfNameLock, &mutexAttr) == SOFTBUS_OK, SOFTBUS_ERR,
-                                  COMM_EVENT, "init pId of name lock fail");
+                                   COMM_EVENT, "init pId of name lock fail");
     int32_t nRet = SoftBusMutexInit(&g_connResApiLock, &mutexAttr);
     if (nRet != SOFTBUS_OK) {
         COMM_LOGE(COMM_EVENT, "init conn res api lock fail");

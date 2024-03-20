@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -63,6 +63,7 @@ typedef enum {
 #define JSON_KEY_ROUTE_TYPE "ROUTE_TYPE"
 #define JSON_KEY_FIRST_DATA "FIRST_DATA"
 #define JSON_KEY_FIRST_DATA_SIZE "FIRST_DATA_SIZE"
+#define JSON_KEY_FIRST_TOKEN_ID "FIRST_TOKEN_ID"
 
 typedef struct {
     uint8_t type; // MsgType
@@ -126,7 +127,7 @@ typedef struct {
     int32_t seq;
     char identity[IDENTITY_LEN + 1];
     AppInfo appInfo;
-    int64_t authId; /* for cipher */
+    AuthHandle authHandle; /* for cipher */
 } ProxyChannelInfo;
 
 typedef struct {
@@ -163,7 +164,7 @@ int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanI
 char* TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan);
 char* TransProxyPackHandshakeErrMsg(int32_t errCode);
 int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg);
-int32_t TransProxyPackMessage(ProxyMessageHead *msg, int64_t authId, ProxyDataInfo *dataInfo);
+int32_t TransProxyPackMessage(ProxyMessageHead *msg, AuthHandle authHandle, ProxyDataInfo *dataInfo);
 char* TransProxyPackHandshakeMsg(ProxyChannelInfo *info);
 int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, int32_t len);
 char* TransProxyPackIdentity(const char *identity);

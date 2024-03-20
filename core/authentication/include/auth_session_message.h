@@ -47,7 +47,7 @@ int32_t ProcessDeviceInfoMessage(int64_t authSeq, AuthSessionInfo *info, const u
 
 int32_t PostCloseAckMessage(int64_t authSeq, const AuthSessionInfo *info);
 int32_t PostHichainAuthMessage(int64_t authSeq, const AuthSessionInfo *info, const uint8_t *data, uint32_t len);
-int32_t PostVerifyDeviceMessage(const AuthManager *auth, int32_t flagRelay);
+int32_t PostVerifyDeviceMessage(const AuthManager *auth, int32_t flagRelay, AuthLinkType type);
 bool IsFlushDevicePacket(const AuthConnInfo *connInfo, const AuthDataHead *head, const uint8_t *data, bool isServer);
 
 #ifdef __cplusplus

@@ -648,8 +648,12 @@ static int32_t GetConDeviceInfo(DeviceInfo *info)
         isWakeRemote = isWakeRemote ? isWakeRemote : g_bleInfoManager[infoIndex].isWakeRemote[pos];
     }
     (void)memset_s(info->accountHash, MAX_ACCOUNT_HASH_LEN, 0x0, MAX_ACCOUNT_HASH_LEN);
-    if (!LnnIsDefaultOhosAccount()) {
-        DiscBleGetShortUserIdHash((uint8_t *)info->accountHash, SHORT_USER_ID_HASH_LEN);
+    if (isSameAccount) {
+        if (!LnnIsDefaultOhosAccount()) {
+            DiscBleGetShortUserIdHash((uint8_t *)info->accountHash, SHORT_USER_ID_HASH_LEN);
+        } else {
+            DISC_LOGW(DISC_BLE, "Account not logged in during same account check");
+        }
     }
     for (uint32_t pos = 0; pos < CAPABILITY_NUM; pos++) {
         info->capabilityBitmap[pos] = g_bleInfoManager[infoIndex].capBitMap[pos];

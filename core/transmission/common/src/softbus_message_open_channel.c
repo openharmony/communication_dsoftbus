@@ -122,6 +122,7 @@ static int32_t JsonObjectPackRequestEx(const AppInfo *appInfo, cJSON *json, unsi
     (void)AddNumberToJsonObject(json, TRANS_FLAGS, TRANS_FLAG_HAS_CHANNEL_AUTH);
     (void)AddNumberToJsonObject(json, MY_HANDLE_ID, appInfo->myHandleId);
     (void)AddNumberToJsonObject(json, PEER_HANDLE_ID, appInfo->peerHandleId);
+    (void)AddNumberToJsonObject(json, JSON_KEY_FIRST_TOKEN_ID, appInfo->firstTokenId);
 
     return SOFTBUS_OK;
 }
@@ -285,7 +286,9 @@ int32_t UnpackRequest(const cJSON *msg, AppInfo *appInfo)
     int32_t transFlag = TRANS_FLAG_HAS_CHANNEL_AUTH;
     (void)GetJsonObjectNumberItem(msg, AUTO_CLOSE_TIME, (int32_t *)&appInfo->autoCloseTime);
     (void)GetJsonObjectNumberItem(msg, TRANS_FLAGS, &transFlag);
-
+    if (!GetJsonObjectNumberItem(msg, JSON_KEY_FIRST_TOKEN_ID, &appInfo->firstTokenId)) {
+        appInfo->firstTokenId = 0;
+    }
     return SOFTBUS_OK;
 }
 
@@ -349,7 +352,7 @@ int32_t UnpackReply(const cJSON *msg, AppInfo *appInfo, uint16_t *fastDataSize)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    char uuid[DEVICE_ID_SIZE_MAX] = {0};
+    char uuid[DEVICE_ID_SIZE_MAX] = { 0 };
     if (!GetJsonObjectStringItem(msg, DEVICE_ID, uuid, DEVICE_ID_SIZE_MAX)) {
         TRANS_LOGE(TRANS_CTRL, "Failed to get uuid");
         return SOFTBUS_PARSE_JSON_ERR;

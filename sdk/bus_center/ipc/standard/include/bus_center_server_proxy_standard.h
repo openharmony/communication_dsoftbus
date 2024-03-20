@@ -37,6 +37,7 @@ public:
     int32_t OpenSession(const SessionParam *param, TransInfo *info) override;
     int32_t NotifyAuthSuccess(int32_t channelId, int32_t channelType) override;
     int32_t OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo) override;
+    int32_t ReleaseResources(int32_t channelId) override;
     int32_t CloseChannel(int32_t channelId, int32_t channelType) override;
     int32_t SendMessage(int32_t channelId, int32_t channelType, const void *data,
         uint32_t len, int32_t msgType) override;
@@ -66,6 +67,8 @@ public:
     int32_t GetBusCenterExObj(sptr<IRemoteObject> &object) override;
     int32_t EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos,
         uint32_t qosCount) override;
+    int32_t BusCenterServerProxyStandardInit(void);
+    void BusCenterServerProxyStandardDeInit(void);
 
 private:
     static inline BrokerDelegator<BusCenterServerProxy> delegator_;

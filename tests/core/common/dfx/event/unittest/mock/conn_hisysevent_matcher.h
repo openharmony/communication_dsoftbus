@@ -269,6 +269,11 @@ MATCHER_P2(ConnAuditValidParamArrayMatcher, inExtra, validSize, "conn valid para
     ++index;
     EXPECT_STREQ(params[index].name, g_connAuditAssigners[index].name);
     EXPECT_EQ(params[index].t, g_connAuditAssigners[index].type);
+    EXPECT_STREQ(params[index].v.s, extra.challengeCode);
+
+    ++index;
+    EXPECT_STREQ(params[index].name, g_connAuditAssigners[index].name);
+    EXPECT_EQ(params[index].t, g_connAuditAssigners[index].type);
     EXPECT_STREQ(params[index].v.s, extra.peerBrMac);
 
     ++index;

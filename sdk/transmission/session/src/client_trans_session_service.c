@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -467,10 +467,10 @@ static int32_t CheckSessionIsOpened(int32_t sessionId)
     return SOFTBUS_ERR;
 }
 
-int32_t OpenSessionSync(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId,
+int OpenSessionSync(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId,
     const char *groupId, const SessionAttribute *attr)
 {
-    int32_t ret = CheckParamIsValid(mySessionName, peerSessionName, peerNetworkId, groupId, attr);
+    int ret = CheckParamIsValid(mySessionName, peerSessionName, peerNetworkId, groupId, attr);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
@@ -491,13 +491,15 @@ int32_t OpenSessionSync(const char *mySessionName, const char *peerSessionName, 
     bool isEnabled = false;
 
     ret = ClientAddSession(&param, &sessionId, &isEnabled);
-    if (ret != SOFTBUS_OK && ret == SOFTBUS_TRANS_SESSION_REPEATED) {
-        TRANS_LOGI(TRANS_SDK, "session already opened");
-        CheckSessionIsOpened(sessionId);
-        return OpenSessionWithExistSession(sessionId, isEnabled);
+    if (ret != SOFTBUS_OK) {
+        if (ret == SOFTBUS_TRANS_SESSION_REPEATED) {
+            TRANS_LOGI(TRANS_SDK, "session already opened");
+            CheckSessionIsOpened(sessionId);
+            return OpenSessionWithExistSession(sessionId, isEnabled);
+        }
+        TRANS_LOGE(TRANS_SDK, "add session err: ret=%{public}d", ret);
+        return ret;
     }
-    TRANS_LOGI(TRANS_SDK, "add session succ: ret=%{public}d", ret);
-    return ret;
 
     TransInfo transInfo;
     (void)memset_s(&transInfo, sizeof(TransInfo), 0, sizeof(TransInfo));
@@ -520,7 +522,8 @@ int32_t OpenSessionSync(const char *mySessionName, const char *peerSessionName, 
         (void)ClientDeleteSession(sessionId);
         return SOFTBUS_TRANS_SESSION_NO_ENABLE;
     }
-    TRANS_LOGI(TRANS_SDK, "ok: sessionId=%{public}d, channelId=%{public}d", sessionId, transInfo.channelId);
+    TRANS_LOGI(TRANS_SDK, "ok: sessionId=%{public}d, channelId=%{public}d",
+        sessionId, transInfo.channelId);
     return sessionId;
 }
 
@@ -869,7 +872,7 @@ int CreateSocket(const char *pkgName, const char *sessionName)
     return ret;
 }
 
-static SessionAttribute *CreateSessionAttributeBySocketInfoTrans(const SocketInfo *info)
+static SessionAttribute *CreateSessionAttributeBySocketInfoTrans(const SocketInfo *info, bool *isEncyptedRawStream)
 {
     SessionAttribute *tmpAttr = (SessionAttribute *)SoftBusCalloc(sizeof(SessionAttribute));
     if (tmpAttr == NULL) {
@@ -877,6 +880,7 @@ static SessionAttribute *CreateSessionAttributeBySocketInfoTrans(const SocketInf
         return NULL;
     }
 
+    *isEncyptedRawStream = false;
     tmpAttr->fastTransData = NULL;
     tmpAttr->fastTransDataSize = 0;
     switch (info->dataType) {
@@ -890,8 +894,10 @@ static SessionAttribute *CreateSessionAttributeBySocketInfoTrans(const SocketInf
             tmpAttr->dataType = TYPE_FILE;
             break;
         case DATA_TYPE_RAW_STREAM:
+        case DATA_TYPE_RAW_STREAM_ENCRYPED:
             tmpAttr->dataType = TYPE_STREAM;
             tmpAttr->attr.streamAttr.streamType = RAW_STREAM;
+            *isEncyptedRawStream = (info->dataType == DATA_TYPE_RAW_STREAM_ENCRYPED);
             break;
         case DATA_TYPE_VIDEO_STREAM:
             tmpAttr->dataType = TYPE_STREAM;
@@ -919,10 +925,11 @@ int32_t ClientAddSocket(const SocketInfo *info, int32_t *sessionId)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    SessionAttribute *tmpAttr = CreateSessionAttributeBySocketInfoTrans(info);
+    bool isEncyptedRawStream = false;
+    SessionAttribute *tmpAttr = CreateSessionAttributeBySocketInfoTrans(info, &isEncyptedRawStream);
     if (tmpAttr == NULL) {
         TRANS_LOGE(TRANS_SDK, "Create SessionAttribute failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
 
     SessionParam param = {
@@ -934,7 +941,7 @@ int32_t ClientAddSocket(const SocketInfo *info, int32_t *sessionId)
     };
 
     bool isEnabled = false;
-    int32_t ret = ClientAddSocketSession(&param, sessionId, &isEnabled);
+    int32_t ret = ClientAddSocketSession(&param, isEncyptedRawStream, sessionId, &isEnabled);
     if (ret != SOFTBUS_OK) {
         SoftBusFree(tmpAttr);
         if (ret == SOFTBUS_TRANS_SESSION_REPEATED) {

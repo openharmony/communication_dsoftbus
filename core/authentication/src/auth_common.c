@@ -38,9 +38,6 @@
 
 #define AUTH_SUPPORT_AS_SERVER_MASK 0x01
 
-/* ble network advdata take 8 bytes of UDID hash */
-#define SHORT_HASH_LEN 8
-
 typedef struct {
     EventType event;
     RemoveCompareFunc cmpFunc;
@@ -103,7 +100,6 @@ static void HandleAuthMessage(SoftBusMessage *msg)
     }
     handler(msg->obj);
 }
-
 
 int32_t PostAuthEvent(EventType event, EventHandler handler, const void *obj, uint32_t size, uint64_t delayMs)
 {
