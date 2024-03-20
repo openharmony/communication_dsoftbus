@@ -228,6 +228,7 @@ enum SoftBusErrNo {
     SOFTBUS_TRANS_ENCRYPT_ERR,
     SOFTBUS_TRANS_DECRYPT_ERR,
     SOFTBUS_TRANS_BAD_KEY, // Send badkey notification for offline events
+    SOFTBUS_TRANS_CHECK_PID_ERROR,
 
     /* errno begin: -((203 << 21) | (3 << 16) | 0xFFFF) */
     SOFTBUS_AUTH_ERR_BASE = SOFTBUS_ERRNO(AUTH_SUB_MODULE_CODE),
