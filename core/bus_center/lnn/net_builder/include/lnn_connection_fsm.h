@@ -62,7 +62,7 @@ typedef struct {
     NodeInfo *nodeInfo;
     char peerNetworkId[NETWORK_ID_BUF_LEN];
     LnnInvalidCleanInfo *cleanInfo;
-    int64_t authId;
+    AuthHandle authHandle;
     uint32_t requestId;
     uint32_t flag;
     SoftBusVersion version;

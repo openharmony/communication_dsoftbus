@@ -16,8 +16,17 @@
 #include "access_control.h"
 #include "softbus_error_code.h"
 
-int32_t TransCheckAccessControl(const char *peerDeviceId)
+int32_t TransCheckClientAccessControl(const char *peerNetworkId)
 {
-    (void)peerDeviceId;
+    (void)peerNetworkId;
+    return SOFTBUS_OK;
+}
+int32_t TransCheckServerAccessControl(uint32_t firstCallingId)
+{
+    (void)firstCallingId;
+    return SOFTBUS_OK;
+}
+uint32_t TransACLGetFirstTokenID()
+{
     return SOFTBUS_OK;
 }

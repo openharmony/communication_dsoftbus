@@ -92,7 +92,7 @@ void TestAddTestSessionConn(void)
         return;
     }
     g_conn->channelId = 1;
-    g_conn->authId = 1;
+    g_conn->authHandle.authId = 1;
     g_conn->serverSide = false;
     if (TransTdcAddSessionConn(g_conn) != SOFTBUS_OK) {
         printf("add session conn failed.\n");
@@ -178,7 +178,7 @@ static void TestDelAuthManager(int64_t authId)
 {
     AuthManager *auth = GetAuthManagerByAuthId(authId);
     if (auth != NULL) {
-        DelAuthManager(auth, true);
+        DelAuthManager(auth, AUTH_LINK_TYPE_MAX);
     }
 }
 
@@ -190,7 +190,7 @@ static int32_t TestAddSessionConn(bool isServerSide)
     }
 
     session->channelId = TRANS_TEST_CHCANNEL_ID;
-    session->authId = TRANS_TEST_AUTH_SEQ;
+    session->authHandle.authId = TRANS_TEST_AUTH_SEQ;
     session->appInfo.fd = TRANS_TEST_FD;
 
     int32_t ret = TransTdcAddSessionConn(session);
@@ -215,11 +215,11 @@ static void TestDelSessionConnNode(int32_t channelId)
  */
 HWTEST_F(TransServerTcpDirectTest, GetCipherFlagByAuthId001, TestSize.Level1)
 {
-    int64_t authId = 0;
+    AuthHandle authHandle = { .authId = 0, .type = AUTH_LINK_TYPE_WIFI };
     uint32_t flag = 0;
     bool isAuthServer = false;
 
-    int32_t ret = GetCipherFlagByAuthId(authId, &flag, &isAuthServer);
+    int32_t ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
@@ -231,12 +231,13 @@ HWTEST_F(TransServerTcpDirectTest, GetCipherFlagByAuthId001, TestSize.Level1)
  */
 HWTEST_F(TransServerTcpDirectTest, GetCipherFlagByAuthId002, TestSize.Level1)
 {
+    AuthHandle authHandle = { .authId = TRANS_TEST_AUTH_SEQ, .type = AUTH_LINK_TYPE_WIFI };
     int32_t ret = TestAddAuthManager(TRANS_TEST_AUTH_SEQ, g_sessionKey, false);
     ASSERT_EQ(ret, SOFTBUS_OK);
     uint32_t flag = 0;
     bool isAuthServer = false;
 
-    ret = GetCipherFlagByAuthId(TRANS_TEST_AUTH_SEQ, &flag, &isAuthServer);
+    ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer);
     EXPECT_EQ(ret, SOFTBUS_ERR);
     EXPECT_EQ(ret, SOFTBUS_ERR);
     EXPECT_FALSE(isAuthServer);
@@ -278,7 +279,7 @@ HWTEST_F(TransServerTcpDirectTest, StartVerifySession002, TestSize.Level1)
         return;
     }
     tmpSessionConn->channelId = 1;
-    tmpSessionConn->authId = 1;
+    tmpSessionConn->authHandle.authId = 1;
     tmpSessionConn->serverSide = false;
     if (TransTdcAddSessionConn(tmpSessionConn) != SOFTBUS_OK) {
         printf("add session conn failed.\n");
@@ -286,10 +287,10 @@ HWTEST_F(TransServerTcpDirectTest, StartVerifySession002, TestSize.Level1)
 
     static const char *tmpSessionKeyTest = "www.test.com";
 
-    int32_t ret = TestAddAuthManager(tmpSessionConn->authId, tmpSessionKeyTest, false);
+    int32_t ret = TestAddAuthManager(tmpSessionConn->authHandle.authId, tmpSessionKeyTest, false);
     ASSERT_EQ(ret, SOFTBUS_OK);
 
-    TestDelAuthManager(tmpSessionConn->authId);
+    TestDelAuthManager(tmpSessionConn->authHandle.authId);
 }
 
 /**
@@ -513,10 +514,10 @@ HWTEST_F(TransServerTcpDirectTest, GetAuthIdByChanId001, TestSize.Level1)
  */
 HWTEST_F(TransServerTcpDirectTest, SendAuthData001, TestSize.Level1)
 {
-    int64_t authId = 1;
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     int64_t seq = 0;
     const char *data = TEST_MESSAGE;
-    int32_t ret = SendAuthData(authId, MODULE_P2P_LISTEN, MSG_FLAG_REQUEST, seq, data);
+    int32_t ret = SendAuthData(authHandle, MODULE_P2P_LISTEN, MSG_FLAG_REQUEST, seq, data);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 

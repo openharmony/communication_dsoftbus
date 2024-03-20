@@ -28,15 +28,15 @@ struct DefaultNegotiateChannel {
 
     int32_t (*postDataWithFlag)(struct DefaultNegotiateChannel *self, const uint8_t *data, size_t size, int32_t flag);
 
-    int64_t authId;
+    AuthHandle authHandle;
     AuthLinkType authLinkType;
     char p2pMac[MAC_ADDR_STR_LEN];
     char remoteDeviceId[UUID_BUF_LEN];
 };
 
-void DefaultNegotiateChannelConstructor(struct DefaultNegotiateChannel *self, int64_t authId);
+void DefaultNegotiateChannelConstructor(struct DefaultNegotiateChannel *self, AuthHandle authHandle);
 void DefaultNegotiateChannelDestructor(struct DefaultNegotiateChannel *self);
-struct DefaultNegotiateChannel* DefaultNegotiateChannelNew(int64_t authId);
+struct DefaultNegotiateChannel* DefaultNegotiateChannelNew(AuthHandle authHandle);
 void DefaultNegotiateChannelDelete(struct DefaultNegotiateChannel *self);
 
 struct DefaultNegoChannelParam {
@@ -48,7 +48,7 @@ struct DefaultNegoChannelParam {
 };
 
 struct DefaultNegoChannelOpenCallback {
-    void (*onConnectSuccess)(uint32_t requestId, int64_t authId);
+    void (*onConnectSuccess)(uint32_t requestId, AuthHandle authHandle);
     void (*onConnectFailure)(uint32_t requestId, int32_t reason);
 };
 

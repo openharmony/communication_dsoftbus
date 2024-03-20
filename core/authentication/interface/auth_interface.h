@@ -33,6 +33,7 @@ extern "C" {
 
 #define AUTH_IDENTICAL_ACCOUNT_GROUP 1
 #define AUTH_PEER_TO_PEER_GROUP 256
+#define CUST_UDID_LEN 16
 
 typedef enum {
     /* nearby type v1 */
@@ -51,6 +52,7 @@ typedef enum {
     AUTH_LINK_TYPE_BLE,
     AUTH_LINK_TYPE_P2P,
     AUTH_LINK_TYPE_ENHANCED_P2P,
+    AUTH_LINK_TYPE_NORMALIZED,
     AUTH_LINK_TYPE_MAX,
 } AuthLinkType;
 
@@ -68,6 +70,7 @@ typedef struct {
         } bleInfo;
         struct {
             char ip[IP_LEN];
+            uint8_t deviceIdHash[UDID_HASH_LEN];
             int32_t port;
             int64_t authId; /* for open p2p auth conn */
             ListenerModule moduleId; /* for open enhance p2p auth conn */
@@ -81,27 +84,26 @@ typedef enum {
     ONLINE_HICHAIN = 0,
     ONLINE_METANODE,
     ONLINE_MIX,
-
     AUTH_TYPE_BUTT,
 } AuthType;
 
 typedef struct {
-    void (*onDeviceVerifyPass)(int64_t authId, const NodeInfo *info);
+    void (*onDeviceVerifyPass)(AuthHandle authHandle, const NodeInfo *info);
     void (*onDeviceNotTrusted)(const char *peerUdid);
-    void (*onDeviceDisconnect)(int64_t authId);
+    void (*onDeviceDisconnect)(AuthHandle authHandle);
 } AuthVerifyListener;
 int32_t RegAuthVerifyListener(const AuthVerifyListener *listener);
 void UnregAuthVerifyListener(void);
 
 typedef struct {
-    void (*onVerifyPassed)(uint32_t requestId, int64_t authId, const NodeInfo *info);
+    void (*onVerifyPassed)(uint32_t requestId, AuthHandle authHandle, const NodeInfo *info);
     void (*onVerifyFailed)(uint32_t requestId, int32_t reason);
 } AuthVerifyCallback;
 
 uint32_t AuthGenRequestId(void);
 int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
     const AuthVerifyCallback *callback, bool isFastAuth);
-void AuthHandleLeaveLNN(int64_t authId);
+void AuthHandleLeaveLNN(AuthHandle authHandle);
 int32_t AuthFlushDevice(const char *uuid);
 
 int32_t AuthMetaStartVerify(uint32_t connectionId, const uint8_t *key, uint32_t keyLen,
@@ -143,27 +145,25 @@ typedef struct {
 } AuthTransData;
 
 typedef struct {
-    void (*onDataReceived)(int64_t authId, const AuthTransData *data);
-    void (*onDisconnected)(int64_t authId);
+    void (*onDataReceived)(AuthHandle authHandle, const AuthTransData *data);
+    void (*onDisconnected)(AuthHandle authHandle);
 } AuthTransListener;
 int32_t RegAuthTransListener(int32_t module, const AuthTransListener *listener);
 void UnregAuthTransListener(int32_t module);
 
 typedef struct {
-    void (*onConnOpened)(uint32_t requestId, int64_t authId);
+    void (*onConnOpened)(uint32_t requestId, AuthHandle authHandle);
     void (*onConnOpenFailed)(uint32_t requestId, int32_t reason);
 } AuthConnCallback;
 int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback, bool isMeta);
-int32_t AuthPostTransData(int64_t authId, const AuthTransData *dataInfo);
-void AuthCloseConn(int64_t authId);
+int32_t AuthPostTransData(AuthHandle authHandle, const AuthTransData *dataInfo);
+void AuthCloseConn(AuthHandle authHandle);
 int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta);
 int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta);
-void AuthDeleteStoredAuthKey(const char *udid, int32_t discoveryType);
 int32_t AuthGetLatestAuthSeqList(const char *udid, int64_t *seqList, uint32_t num);
-void AuthDeleteStoredAuthKey(const char *udid, int32_t discoveryType);
 
 /* for ProxyChannel & P2P TcpDirectchannel */
-int64_t AuthGetLatestIdByUuid(const char *uuid, AuthLinkType type, bool isMeta);
+void AuthGetLatestIdByUuid(const char *uuid, AuthLinkType type, bool isMeta, AuthHandle *authHandle);
 int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer, bool isMeta);
 int64_t AuthGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer, bool isMeta);
 
@@ -171,15 +171,15 @@ uint32_t AuthGetEncryptSize(uint32_t inLen);
 uint32_t AuthGetDecryptSize(uint32_t inLen);
 int32_t AuthEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen);
 int32_t AuthDecrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen);
-
 int32_t AuthSetP2pMac(int64_t authId, const char *p2pMac);
 
-int32_t AuthGetConnInfo(int64_t authId, AuthConnInfo *connInfo);
+int32_t AuthGetConnInfo(AuthHandle authHandle, AuthConnInfo *connInfo);
 int32_t AuthGetServerSide(int64_t authId, bool *isServer);
 int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size);
 int32_t AuthGetVersion(int64_t authId, SoftBusVersion *version);
 int32_t AuthGetMetaType(int64_t authId, bool *isMetaAuth);
 int32_t AuthGetGroupType(const char *udid, const char *uuid);
+bool IsSupportFeatureByCapaBit(uint32_t feature, AuthCapability capaBit);
 
 int32_t AuthInit(void);
 void AuthDeinit(void);

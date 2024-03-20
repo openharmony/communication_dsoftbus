@@ -407,7 +407,7 @@ HWTEST_F(TransIpcStandardTest, GrantPermissionTest001, TestSize.Level0)
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 
     ret = transServerProxy.GrantPermission(UUID, PID, g_sessionName);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
 }
 
 /**
@@ -420,10 +420,10 @@ HWTEST_F(TransIpcStandardTest, RemovePermissionTest001, TestSize.Level0)
 {
     TransServerProxy transServerProxy(nullptr);
     int32_t ret = transServerProxy.RemovePermission(g_sessionName);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
 
     ret = transServerProxy.RemovePermission(g_sessionName);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
 }
 
 /**
@@ -740,7 +740,7 @@ HWTEST_F(TransIpcStandardTest, ServerIpcGrantPermissionTest001, TestSize.Level0)
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 
     ret = ServerIpcGrantPermission(uid, pid, g_sessionName);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
 
     TransClientDeinit();
 }
@@ -763,7 +763,7 @@ HWTEST_F(TransIpcStandardTest, ServerIpcRemovePermissionTest001, TestSize.Level0
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 
     ret = ServerIpcRemovePermission(g_sessionName);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
 
     TransClientDeinit();
 }

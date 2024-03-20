@@ -74,10 +74,10 @@ public:
         const ConnectOption *option, uint32_t requestId, const ConnectResult *result);
     static int32_t ActionofConnGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info);
     static void ActionofConnUnSetConnectCallback(ConnModule moduleId);
-    static void OnVerifyPassed(uint32_t requestId, int64_t authId, const NodeInfo *info)
+    static void OnVerifyPassed(uint32_t requestId, AuthHandle authHandle, const NodeInfo *info)
     {
         (void)requestId;
-        (void)authId;
+        (void)authHandle;
         (void)info;
         return;
     }

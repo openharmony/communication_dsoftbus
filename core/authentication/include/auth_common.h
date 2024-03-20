@@ -79,6 +79,7 @@ if (expression) { \
 #define MASK_UINT64_L32 0x00000000FFFFFFFF
 #define MASK_UINT64_H32 0xFFFFFFFF00000000
 #define AUTH_REQUEST_TIMTOUR 30000
+#define SHORT_HASH_LEN 8
 
 #define TO_INT32(value) ((int32_t)(((uint32_t)(value)) & INT32_MASK))
 #define TO_UINT32(value) ((uint32_t)(((uint32_t)(value)) & INT32_MASK))
@@ -100,8 +101,8 @@ typedef struct {
 } SocketPktHead;
 
 typedef struct {
-    void (*OnDataReceived)(int64_t authId, const AuthDataHead *head, const uint8_t *data, uint32_t len);
-    void (*OnDisconnected)(int64_t authId);
+    void (*OnDataReceived)(AuthHandle authHandle, const AuthDataHead *head, const uint8_t *data, uint32_t len);
+    void (*OnDisconnected)(AuthHandle authHandle);
 } AuthTransCallback;
 
 /* Auth handler */

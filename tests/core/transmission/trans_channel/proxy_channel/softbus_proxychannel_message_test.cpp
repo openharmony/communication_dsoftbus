@@ -167,7 +167,7 @@ void TestMessageAddProxyChannel(int32_t channelId, AppType appType, const char *
     AppInfo appInfo;
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     ASSERT_TRUE(NULL != chan);
-    chan->authId = channelId;
+    chan->authHandle.authId = channelId;
     chan->connId = channelId;
     chan->myId = channelId;
     chan->peerId = channelId;
@@ -399,32 +399,32 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyIdentityMsgTest001, TestSize.
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyPackMessageTest001, TestSize.Level1)
 {
     ProxyMessageHead msg;
-    int64_t authId = AUTH_INVALID_ID;
     ProxyDataInfo dataInfo;
-    int32_t ret = TransProxyPackMessage(NULL, authId, &dataInfo);
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_WIFI };
+    int32_t ret = TransProxyPackMessage(NULL, authHandle, &dataInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
 
-    ret = TransProxyPackMessage(&msg, authId, NULL);
+    ret = TransProxyPackMessage(&msg, authHandle, NULL);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     dataInfo.inData = NULL;
-    ret = TransProxyPackMessage(&msg, authId, &dataInfo);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     dataInfo.inData = 0;
-    ret = TransProxyPackMessage(&msg, authId, &dataInfo);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     msg.cipher = 0;
     msg.type = PROXYCHANNEL_MSG_TYPE_HANDSHAKE;
-    ret = TransProxyPackMessage(&msg, authId, &dataInfo);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     dataInfo.inData = (uint8_t *)"1";
     dataInfo.inLen = strlen((const char*)dataInfo.inData);
     msg.cipher |= ENCRYPTED;
     msg.type = PROXYCHANNEL_MSG_TYPE_NORMAL;
-    ret = TransProxyPackMessage(&msg, authId, &dataInfo);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
@@ -437,7 +437,6 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyPackMessageTest001, TestSize.
 HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyPackMessageTest002, TestSize.Level1)
 {
     ProxyMessageHead msg;
-    int64_t authId = AUTH_INVALID_ID;
     ProxyDataInfo dataInfo;
     int32_t ret = SOFTBUS_ERR;
 
@@ -446,17 +445,18 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyPackMessageTest002, TestSize.
 
     msg.cipher = 0;
     msg.type = PROXYCHANNEL_MSG_TYPE_HANDSHAKE;
-    ret = TransProxyPackMessage(&msg, authId, &dataInfo);
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_WIFI };
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     msg.cipher |= ENCRYPTED;
     msg.type = PROXYCHANNEL_MSG_TYPE_NORMAL;
-    ret = TransProxyPackMessage(&msg, authId, &dataInfo);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
-    authId = 1;
-    ret = TransProxyPackMessage(&msg, authId, &dataInfo);
+    authHandle.authId = 1;
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
-    ret = TransProxyPackMessage(&msg, authId, &dataInfo);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 
@@ -975,7 +975,8 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyGetAuthIdTest001, TestSize.Le
     ProxyMessage msg;
     msg.connId = 1;
     msg.msgHead.cipher = 1;
-    int32_t ret = GetAuthIdByHandshakeMsg(msg.connId, msg.msgHead.cipher);
+    AuthHandle authHandle = { 0 };
+    int32_t ret = GetAuthIdByHandshakeMsg(msg.connId, msg.msgHead.cipher, &authHandle);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 

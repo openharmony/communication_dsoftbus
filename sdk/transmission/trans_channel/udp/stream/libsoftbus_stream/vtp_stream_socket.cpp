@@ -1008,15 +1008,15 @@ std::unique_ptr<IStream> VtpStreamSocket::MakeStreamData(StreamData &data, const
     return stream;
 }
 
-int VtpStreamSocket::RecvStreamLen()
+int32_t VtpStreamSocket::RecvStreamLen()
 {
-    int hdrSize = FRAME_HEADER_LEN;
+    int32_t hdrSize = FRAME_HEADER_LEN;
     if (streamType_ == RAW_STREAM && scene_ == COMPATIBLE_SCENE) {
         hdrSize = streamHdrSize_;
     }
 
-    int len = -1;
-    int timeout = -1;
+    int32_t len = -1;
+    int32_t timeout = -1;
     auto buffer = std::make_unique<char[]>(hdrSize);
     if (EpollTimeout(streamFd_, timeout) == 0) {
         do {
@@ -1040,7 +1040,7 @@ int VtpStreamSocket::RecvStreamLen()
     return ntohl(*reinterpret_cast<int *>(buffer.get()));
 }
 
-void VtpStreamSocket::ProcessCommonDataStream(std::unique_ptr<char[]> &dataBuffer,
+bool VtpStreamSocket::ProcessCommonDataStream(std::unique_ptr<char[]> &dataBuffer,
     int32_t &dataLength, std::unique_ptr<char[]> &extBuffer, int32_t &extLen, StreamFrameInfo &info)
 {
     TRANS_LOGD(TRANS_STREAM, "recv common stream");
@@ -1050,21 +1050,21 @@ void VtpStreamSocket::ProcessCommonDataStream(std::unique_ptr<char[]> &dataBuffe
     int32_t plainDataLength = decryptedLength - GetEncryptOverhead();
     if (plainDataLength <= 0) {
         TRANS_LOGE(TRANS_STREAM, "Decrypt failed, invalid decryptedLen=%{public}d", decryptedLength);
-        return;
+        return false;
     }
     std::unique_ptr<char[]> plainData = std::make_unique<char[]>(plainDataLength);
     ssize_t decLen = Decrypt(decryptedBuffer.get(), decryptedLength, plainData.get(), plainDataLength);
     if (decLen != plainDataLength) {
         TRANS_LOGE(TRANS_STREAM,
             "Decrypt failed, dataLen=%{public}d, decryptedLen=%{public}zd", plainDataLength, decLen);
-        return;
+        return false;
     }
     auto header = plainData.get();
     StreamDepacketizer decode(streamType_);
     if (plainDataLength < static_cast<int32_t>(sizeof(CommonHeader))) {
         TRANS_LOGE(TRANS_STREAM,
             "failed, plainDataLen=%{public}d, CommonHeader=%{public}zu", plainDataLength, sizeof(CommonHeader));
-        return;
+        return false;
     }
     decode.DepacketizeHeader(header);
 
@@ -1078,8 +1078,9 @@ void VtpStreamSocket::ProcessCommonDataStream(std::unique_ptr<char[]> &dataBuffe
     dataLength = decode.GetDataLength();
     if (dataLength <= 0) {
         TRANS_LOGE(TRANS_STREAM, "common depacketize error, dataLen=%{public}d", dataLength);
-        return;
+        return false;
     }
+    return true;
 }
 
 void VtpStreamSocket::DoStreamRecv()
@@ -1100,7 +1101,9 @@ void VtpStreamSocket::DoStreamRecv()
         dataBuffer = VtpStreamSocket::RecvStream(dataLength);
 
         if (streamType_ == COMMON_VIDEO_STREAM || streamType_ == COMMON_AUDIO_STREAM) {
-            ProcessCommonDataStream(dataBuffer, dataLength, extBuffer, extLen, info);
+            if (!ProcessCommonDataStream(dataBuffer, dataLength, extBuffer, extLen, info)) {
+                break;
+            }
         }
 
         StreamData data = { std::move(dataBuffer), dataLength, std::move(extBuffer), extLen };

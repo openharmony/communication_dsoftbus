@@ -29,13 +29,14 @@ extern "C" {
  * @version 2.0
  */
 typedef enum {
-    DATA_TYPE_MESSAGE = 1,  /**< Message */
-    DATA_TYPE_BYTES,        /**< Bytes */
-    DATA_TYPE_FILE,         /**< File */
-    DATA_TYPE_RAW_STREAM,   /**< Raw data stream */
-    DATA_TYPE_VIDEO_STREAM, /**< Video data stream*/
-    DATA_TYPE_AUDIO_STREAM, /**< Audio data stream*/
-    DATA_TYPE_SLICE_STREAM, /**< Video slice stream*/
+    DATA_TYPE_MESSAGE = 1,         /**< Message */
+    DATA_TYPE_BYTES,               /**< Bytes */
+    DATA_TYPE_FILE,                /**< File */
+    DATA_TYPE_RAW_STREAM,          /**< Raw data stream */
+    DATA_TYPE_VIDEO_STREAM,        /**< Video data stream */
+    DATA_TYPE_AUDIO_STREAM,        /**< Audio data stream */
+    DATA_TYPE_SLICE_STREAM,        /**< Video slice stream */
+    DATA_TYPE_RAW_STREAM_ENCRYPED, /**< Encryped raw stream data */
     DATA_TYPE_BUTT,
 } TransDataType;
 
@@ -109,13 +110,13 @@ typedef enum {
  */
 typedef enum {
     QOS_TYPE_MIN_BW,            /**< Minimum bandwidth. */
-    QOS_TYPE_MAX_LATENCY,       /**< Maximum latency. */
+    QOS_TYPE_MAX_WAIT_TIMEOUT = 1,  /**< Maximum timeout of Bind. */
+    QOS_TYPE_MAX_LATENCY = 1,       /**< Maximum latency. */
     QOS_TYPE_MIN_LATENCY,       /**< Minimum latency. */
-    QOS_TYPE_MAX_WAIT_TIMEOUT,  /**< Maximum timeout of transmission. */
-    QOS_TYPE_MAX_BUFFER,        /**< Maximum cache. */
-    QOS_TYPE_FIRST_PACKAGE,     /**< First packet size. */
+    QOS_TYPE_MAX_BUFFER,        /**< @reserved Maximum cache. */
+    QOS_TYPE_FIRST_PACKAGE,     /**< @reserved First packet size. */
     QOS_TYPE_MAX_IDLE_TIMEOUT,  /**< Maximum idle time. */
-    QOS_TYPE_TRANS_RELIABILITY, /**< Transmission reliability. */
+    QOS_TYPE_TRANS_RELIABILITY, /**< @reserved Transmission reliability. */
     QOS_TYPE_BUTT,
 } QosType;
 

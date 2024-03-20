@@ -100,15 +100,16 @@ int32_t AuthOpenConn(const AuthConnInfo *info, uint32_t requestId, const AuthCon
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t AuthPostTransData(int64_t authId, const AuthTransData *dataInfo)
+int32_t AuthPostTransData(AuthHandle authHandle, const AuthTransData *dataInfo)
 {
-    (void)authId;
+    (void)authHandle;
     (void)dataInfo;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-void AuthCloseConn(int64_t authId)
+void AuthCloseConn(AuthHandle authHandle)
 {
+    (void)authHandle;
     return;
 }
 
@@ -128,11 +129,12 @@ int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int64_t AuthGetLatestIdByUuid(const char *uuid, AuthLinkType type, bool isMeta)
+void AuthGetLatestIdByUuid(const char *uuid, AuthLinkType type, bool isMeta, AuthHandle *authHandle)
 {
     (void)uuid;
     (void)type;
     (void)isMeta;
+    (void)authHandle;
     return AUTH_INVALID_ID;
 }
 

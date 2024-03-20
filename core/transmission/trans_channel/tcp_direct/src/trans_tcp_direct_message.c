@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include <securec.h>
 #include <string.h>
 
+#include "access_control.h"
 #include "anonymizer.h"
 #include "auth_interface.h"
 #include "bus_center_manager.h"
@@ -333,10 +334,13 @@ static int32_t GetServerSideIpInfo(SessionConn *conn, char *ip, uint32_t len)
             TRANS_LOGW(TRANS_CTRL, "ServerSide wifi set peer ip fail");
         }
     } else if (conn->appInfo.routeType == WIFI_P2P) {
-        if (GetWifiDirectManager()->getLocalIpByRemoteIp(conn->appInfo.peerData.addr, myIp, sizeof(myIp)) !=
-            SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "NotifyChannelOpened get p2p ip fail");
-            return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
+        struct WifiDirectManager *mgr = GetWifiDirectManager();
+        if (mgr != NULL && mgr->getLocalIpByRemoteIp != NULL) {
+            int32_t ret = mgr->getLocalIpByRemoteIp(conn->appInfo.peerData.addr, myIp, sizeof(myIp));
+            if (ret != SOFTBUS_OK) {
+                TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
+                return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
+            }
         }
         if (LnnSetLocalStrInfo(STRING_KEY_P2P_IP, myIp) != SOFTBUS_OK) {
             TRANS_LOGW(TRANS_CTRL, "ServerSide set local p2p ip fail");
@@ -369,10 +373,13 @@ static int32_t GetClientSideIpInfo(SessionConn *conn, char *ip, uint32_t len)
             TRANS_LOGW(TRANS_CTRL, "Client wifi set peer ip fail");
         }
     } else if (conn->appInfo.routeType == WIFI_P2P) {
-        if (GetWifiDirectManager()->getLocalIpByRemoteIp(conn->appInfo.peerData.addr, myIp, sizeof(myIp)) !=
-            SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "NotifyChannelOpened get p2p ip fail");
-            return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
+        struct WifiDirectManager *mgr = GetWifiDirectManager();
+        if (mgr != NULL && mgr->getLocalIpByRemoteIp != NULL) {
+            int32_t ret = mgr->getLocalIpByRemoteIp(conn->appInfo.peerData.addr, myIp, sizeof(myIp));
+            if (ret != SOFTBUS_OK) {
+                TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
+                return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
+            }
         }
         if (LnnSetLocalStrInfo(STRING_KEY_P2P_IP, myIp) != SOFTBUS_OK) {
             TRANS_LOGW(TRANS_CTRL, "Client set local p2p ip fail");
@@ -679,8 +686,7 @@ static inline int TransTdcPostReplyMsg(int32_t channelId, uint64_t seq, uint32_t
     return TransTdcPostBytes(channelId, &packetHead, reply);
 }
 
-static int32_t OpenDataBusRequestReply(const AppInfo *appInfo, int32_t channelId, uint64_t seq,
-    uint32_t flags)
+static int32_t OpenDataBusRequestReply(const AppInfo *appInfo, int32_t channelId, uint64_t seq, uint32_t flags)
 {
     char *reply = PackReply(appInfo);
     if (reply == NULL) {
@@ -692,8 +698,7 @@ static int32_t OpenDataBusRequestReply(const AppInfo *appInfo, int32_t channelId
     return ret;
 }
 
-static int32_t OpenDataBusRequestError(int32_t channelId, uint64_t seq, char *errDesc,
-    int32_t errCode, uint32_t flags)
+static int32_t OpenDataBusRequestError(int32_t channelId, uint64_t seq, char *errDesc, int32_t errCode, uint32_t flags)
 {
     char *reply = PackError(errCode, errDesc);
     if (reply == NULL) {
@@ -814,9 +819,15 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
         return SOFTBUS_INVALID_PARAM;
     }
 
+    char peerUuid[DEVICE_ID_SIZE_MAX] = {0};
+    char peerNetworkId[NETWORK_ID_BUF_LEN] = {0};
+    char peerUdid[UDID_BUF_LEN] = {0};
+    bool udidRet = GetUuidByChanId(channelId, peerUuid, DEVICE_ID_SIZE_MAX) == SOFTBUS_OK &&
+        LnnGetNetworkIdByUuid(peerUuid, peerNetworkId, NETWORK_ID_BUF_LEN) == SOFTBUS_OK &&
+        LnnGetRemoteStrInfo(peerNetworkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN) == SOFTBUS_OK;
     TransEventExtra extra = {
         .socketName = conn->appInfo.myData.sessionName,
-        .peerNetworkId = NULL,
+        .peerUdid = udidRet ? peerUdid : NULL,
         .calleePkg = NULL,
         .callerPkg = NULL,
         .channelId = channelId,
@@ -836,6 +847,12 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
     char *errDesc = NULL;
     int32_t errCode;
     int myHandleId;
+    if (conn->appInfo.firstTokenId != TOKENID_NOT_SET &&
+        TransCheckServerAccessControl(conn->appInfo.firstTokenId) != SOFTBUS_OK) {
+        errCode = SOFTBUS_TRANS_CHECK_ACL_FAILED;
+        errDesc = (char *)"Server check acl failed";
+        goto ERR_EXIT;
+    }
     if (TransTdcGetUidAndPid(conn->appInfo.myData.sessionName,
         &conn->appInfo.myData.uid, &conn->appInfo.myData.pid) != SOFTBUS_OK) {
         errCode = SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED;
@@ -959,14 +976,19 @@ static int64_t GetAuthIdByChannelInfo(int32_t channelId, uint64_t seq, uint32_t 
     }
     bool fromAuthServer = ((seq & AUTH_CONN_SERVER_SIDE) != 0);
     char uuid[UUID_BUF_LEN] = {0};
-    if (GetWifiDirectManager()->getRemoteUuidByIp(appInfo.peerData.addr, uuid, sizeof(uuid)) != SOFTBUS_OK) {
-        AuthConnInfo connInfo;
-        connInfo.type = AUTH_LINK_TYPE_WIFI;
-        if (strcpy_s(connInfo.info.ipInfo.ip, IP_LEN, appInfo.peerData.addr) != EOK) {
-            TRANS_LOGE(TRANS_CTRL, "copy ip addr fail");
-            return AUTH_INVALID_ID;
+    struct WifiDirectManager *mgr = GetWifiDirectManager();
+    if (mgr != NULL && mgr->getRemoteUuidByIp != NULL) {
+        int32_t ret = mgr->getRemoteUuidByIp(appInfo.peerData.addr, uuid, sizeof(uuid));
+        if (ret != SOFTBUS_OK) {
+            AuthConnInfo connInfo;
+            connInfo.type = AUTH_LINK_TYPE_WIFI;
+            if (strcpy_s(connInfo.info.ipInfo.ip, IP_LEN, appInfo.peerData.addr) != EOK) {
+                TRANS_LOGE(TRANS_CTRL, "copy ip addr fail");
+                return AUTH_INVALID_ID;
+            }
+            TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
+            return AuthGetIdByConnInfo(&connInfo, !fromAuthServer, false);
         }
-        return AuthGetIdByConnInfo(&connInfo, !fromAuthServer, false);
     }
 
     AuthLinkType linkType = SwitchCipherTypeToAuthLinkType(cipherFlag);
@@ -1004,7 +1026,7 @@ static int32_t DecryptMessage(int32_t channelId, const TdcPacketHead *pktHead, c
     return SOFTBUS_OK;
 }
 
-static int32_t ProcessReceivedData(int32_t channelId)
+static int32_t ProcessReceivedData(int32_t channelId, int32_t type)
 {
     uint64_t seq;
     uint32_t flags;
@@ -1053,7 +1075,7 @@ static int32_t ProcessReceivedData(int32_t channelId)
     return ret;
 }
 
-static int32_t TransTdcSrvProcData(ListenerModule module, int32_t channelId)
+static int32_t TransTdcSrvProcData(ListenerModule module, int32_t channelId, int32_t type)
 {
     if (SoftBusMutexLock(&g_tcpSrvDataList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock failed.");
@@ -1096,7 +1118,7 @@ static int32_t TransTdcSrvProcData(ListenerModule module, int32_t channelId)
     }
     DelTrigger(module, node->fd, READ_TRIGGER);
     SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
-    return ProcessReceivedData(channelId);
+    return ProcessReceivedData(channelId, type);
 }
 
 static int32_t TransTdcGetDataBufInfoByChannelId(int32_t channelId, int32_t *fd, size_t *len)
@@ -1168,7 +1190,7 @@ static int32_t TransTdcUpdateDataBufWInfo(int32_t channelId, char *recvBuf, int3
     return SOFTBUS_ERR;
 }
 
-int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId)
+int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId, int32_t type)
 {
     int32_t fd = -1;
     size_t len = 0;
@@ -1202,5 +1224,5 @@ int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId)
     }
     SoftBusFree(recvBuf);
 
-    return TransTdcSrvProcData(module, channelId);
+    return TransTdcSrvProcData(module, channelId, type);
 }

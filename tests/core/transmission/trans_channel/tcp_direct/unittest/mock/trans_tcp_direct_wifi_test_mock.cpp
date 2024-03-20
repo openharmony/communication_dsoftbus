@@ -46,9 +46,9 @@ ListenerModule LnnGetProtocolListenerModule(ProtocolType protocol, ListenerMode 
     return GetTransTcpDirectWifiInterface()->LnnGetProtocolListenerModule(protocol, mode);
 }
 
-int64_t AuthGetLatestIdByUuid(const char *uuid, AuthLinkType type, bool isMeta)
+void AuthGetLatestIdByUuid(const char *uuid, AuthLinkType type, bool isMeta, AuthHandle *authHandle)
 {
-    return GetTransTcpDirectWifiInterface()->AuthGetLatestIdByUuid(uuid, type, isMeta);
+    return GetTransTcpDirectWifiInterface()->AuthGetLatestIdByUuid(uuid, type, isMeta, authHandle);
 }
 
 ListenerModule GetMoudleByHmlIp(const char *ip)

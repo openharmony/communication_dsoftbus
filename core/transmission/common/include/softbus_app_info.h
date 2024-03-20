@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -123,6 +123,7 @@ typedef struct {
     int64_t connectedStart;
     const uint8_t *fastTransData;
     uint16_t fastTransDataSize;
+    int32_t firstTokenId;
 } AppInfo;
 
 #ifdef __cplusplus

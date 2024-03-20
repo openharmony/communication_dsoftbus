@@ -77,6 +77,11 @@ int32_t BusCenterServerProxyInit(void)
         LNN_LOGE(LNN_EVENT, "Create bus center server proxy failed");
         return SOFTBUS_SERVER_NOT_INIT;
     }
+    int ret = g_serverProxy->BusCenterServerProxyStandardInit();
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "Create bus center server proxy standard failed");
+        return SOFTBUS_SERVER_NOT_INIT;
+    }
     return SOFTBUS_OK;
 }
 
@@ -84,6 +89,11 @@ void BusCenterServerProxyDeInit(void)
 {
     BusCenterExProxyDeInit();
     std::lock_guard<std::mutex> lock(g_mutex);
+    if (g_serverProxy == nullptr) {
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
+        return;
+    }
+    g_serverProxy->BusCenterServerProxyStandardDeInit();
     g_serverProxy.clear();
 }
 
