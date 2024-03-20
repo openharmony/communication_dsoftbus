@@ -57,7 +57,8 @@ extern "C" {
  * @param addrInfo Indicates the pointer to the address information for the connection between devices.
  * @param num Indicates the number of device connection records.
  * @param mixAddr Indicates the pointer to the connection address information.
- * If the address information passed by <b>addrInfo</b> is invalid, this parameter can be used to obtain the connection information.
+ * If the address information passed by <b>addrInfo</b> is invalid,
+ * this parameter can be used to obtain the connection information.
  *
  * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if invalid parameters are detected.
  * @return Returns <b>INVALID_SESSION_ID</b> if the session ID is invalid.
