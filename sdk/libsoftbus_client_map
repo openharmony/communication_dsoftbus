@@ -385,8 +385,8 @@
         "TransSetSocketFileListener";
         "EvaluateQos";
         "GetMtuSize";
-        "GrantPermission";
-        "RemovePermission";
+        "DBinderGrantPermission";
+        "DBinderRemovePermission";
         "ClientAddPolicyReportCallback";
         "ClientDeletePolicyReportCallback";
         "ServerEnableDiscoveryPolicy";

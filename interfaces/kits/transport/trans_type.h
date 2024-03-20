@@ -111,8 +111,8 @@ typedef enum {
 typedef enum {
     QOS_TYPE_MIN_BW,            /**< Minimum bandwidth. */
     QOS_TYPE_MAX_WAIT_TIMEOUT = 1,  /**< Maximum timeout of Bind. */
-    QOS_TYPE_MAX_LATENCY = 1,       /**< @deprecated Maximum latency. */
-    QOS_TYPE_MIN_LATENCY,       /**< @deprecated Minimum latency. */
+    QOS_TYPE_MAX_LATENCY = 1,       /**< Maximum latency. */
+    QOS_TYPE_MIN_LATENCY,       /**< Minimum latency. */
     QOS_TYPE_MAX_BUFFER,        /**< @reserved Maximum cache. */
     QOS_TYPE_FIRST_PACKAGE,     /**< @reserved First packet size. */
     QOS_TYPE_MAX_IDLE_TIMEOUT,  /**< Maximum idle time. */
