@@ -134,12 +134,12 @@ int32_t GetMtuSize(int32_t socket, uint32_t *mtuSize)
     return GetSocketMtuSize(socket, mtuSize);
 }
 
-int32_t GrantPermission(int32_t uid, int32_t pid, const char *socketName)
+int32_t DBinderGrantPermission(int32_t uid, int32_t pid, const char *socketName)
 {
     return ClientGrantPermission(uid, pid, socketName);
 }
 
-int32_t RemovePermission(const char *socketName)
+int32_t DBinderRemovePermission(const char *socketName)
 {
     return ClientRemovePermission(socketName);
 }

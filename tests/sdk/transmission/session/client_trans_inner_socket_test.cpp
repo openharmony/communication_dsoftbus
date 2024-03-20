@@ -24,7 +24,7 @@ namespace OHOS {
 namespace {
 void CounterfeitProcess(const char *processName)
 {
-    NativeTokenInfoParams infoTnstance = {
+    NativeTokenInfoParams infoInstance = {
         .dcapsNum = 0,
         .permsNum = 0,
         .aclsNum = 0,
@@ -34,7 +34,7 @@ void CounterfeitProcess(const char *processName)
         .processName = processName,
         .aplStr = "system_core",
     };
-    uint64_t tokenId = GetAccessTokenId(&infoTnstance);
+    uint64_t tokenId = GetAccessTokenId(&infoInstance);
     SetSelfTokenID(tokenId);
 }
 } // namespace
@@ -42,12 +42,12 @@ void CounterfeitProcess(const char *processName)
 class ClientTransSocketTest : public testing::Test { };
 
 /*
- * @tc.name: GrantPermissionTest001
+ * @tc.name: DBinderGrantPermissionTest001
  * @tc.desc: Grant permission to DBinder test.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransSocketTest, GrantPermissionTest001, TestSize.Level1)
+HWTEST_F(ClientTransSocketTest, DBinderGrantPermissionTest001, TestSize.Level1)
 {
     CounterfeitProcess("samgr");
     int32_t uid = getuid();
@@ -55,19 +55,19 @@ HWTEST_F(ClientTransSocketTest, GrantPermissionTest001, TestSize.Level1)
     int32_t pid = getpid();
     ASSERT_GT(pid, 0);
     std::string socketName = "DBinder" + std::to_string(uid) + std::string("_") + std::to_string(pid);
-    auto ret = GrantPermission(uid, pid, socketName.c_str());
+    auto ret = DBinderGrantPermission(uid, pid, socketName.c_str());
     ASSERT_EQ(ret, SOFTBUS_OK);
-    ret = RemovePermission(socketName.c_str());
+    ret = DBinderRemovePermission(socketName.c_str());
     ASSERT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
- * @tc.name: GrantPermissionTest002
- * @tc.desc: Other percess call GrantPermission test.
+ * @tc.name: DBinderGrantPermissionTest002
+ * @tc.desc: Other percess call DBinderGrantPermission test.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransSocketTest, GrantPermissionTest002, TestSize.Level1)
+HWTEST_F(ClientTransSocketTest, DBinderGrantPermissionTest002, TestSize.Level1)
 {
     CounterfeitProcess("msdp");
     int32_t uid = getuid();
@@ -75,17 +75,17 @@ HWTEST_F(ClientTransSocketTest, GrantPermissionTest002, TestSize.Level1)
     int32_t pid = getpid();
     ASSERT_GT(pid, 0);
     std::string socketName = "DBinder" + std::to_string(uid) + std::string("_") + std::to_string(pid);
-    auto ret = GrantPermission(uid, pid, socketName.c_str());
-    ASSERT_NE(ret, SOFTBUS_OK);
+    auto ret = DBinderGrantPermission(uid, pid, socketName.c_str());
+    ASSERT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
 }
 
 /*
- * @tc.name: RemovePermissionTest001
- * @tc.desc: Other percess call RemovePermission test.
+ * @tc.name: DBinderRemovePermissionTest001
+ * @tc.desc: Other percess call DBinderRemovePermission test.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransSocketTest, RemovePermissionTest001, TestSize.Level1)
+HWTEST_F(ClientTransSocketTest, DBinderRemovePermissionTest001, TestSize.Level1)
 {
     CounterfeitProcess("samgr");
     int32_t uid = getuid();
@@ -93,10 +93,10 @@ HWTEST_F(ClientTransSocketTest, RemovePermissionTest001, TestSize.Level1)
     int32_t pid = getpid();
     ASSERT_GT(pid, 0);
     std::string socketName = "DBinder" + std::to_string(uid) + std::string("_") + std::to_string(pid);
-    auto ret = GrantPermission(uid, pid, socketName.c_str());
+    auto ret = DBinderGrantPermission(uid, pid, socketName.c_str());
     ASSERT_EQ(ret, SOFTBUS_OK);
     CounterfeitProcess("msdp");
-    ret = RemovePermission(socketName.c_str());
-    ASSERT_NE(ret, SOFTBUS_OK);
+    ret = DBinderRemovePermission(socketName.c_str());
+    ASSERT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
 }
 } // namespace OHOS
