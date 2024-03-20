@@ -1874,7 +1874,7 @@ int32_t ProcessDeviceIdMessage(AuthSessionInfo *info, const uint8_t *data, uint3
     return UnpackDeviceIdJson((const char *)data, len, info);
 }
 
-static void GetSessionKeyList(int64_t authSeq, const AuthSessionInfo *info, SessionKeyList *list)
+static void GetDumpSessionKeyList(int64_t authSeq, const AuthSessionInfo *info, SessionKeyList *list)
 {
     ListInit(list);
     SessionKey sessionKey;
@@ -1888,6 +1888,9 @@ static void GetSessionKeyList(int64_t authSeq, const AuthSessionInfo *info, Sess
         return;
     }
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
+    if (SetSessionKeyAvailable(list, TO_INT32(authSeq)) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "set session key available fail");
+    }
 }
 
 static void DfxRecordLnnPostDeviceInfoStart(int64_t authSeq)
@@ -1932,7 +1935,7 @@ int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
         inputLen = strlen(msg) + 1;
     }
     SessionKeyList sessionKeyList;
-    GetSessionKeyList(authSeq, info, &sessionKeyList);
+    GetDumpSessionKeyList(authSeq, info, &sessionKeyList);
     if (EncryptInner(&sessionKeyList, inputData, inputLen, &data, &dataLen) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "encrypt device info fail");
         JSON_Free(msg);
@@ -1941,6 +1944,7 @@ int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
     }
     JSON_Free(msg);
     SoftBusFree(compressData);
+    DestroySessionKeyList(&sessionKeyList);
     if (info->connInfo.type == AUTH_LINK_TYPE_WIFI && info->isServer) {
         compressFlag = FLAG_RELAY_DEVICE_INFO;
         authSeq = 0;
@@ -1968,11 +1972,12 @@ int32_t ProcessDeviceInfoMessage(int64_t authSeq, AuthSessionInfo *info, const u
     uint8_t *msg = NULL;
     uint32_t msgSize = 0;
     SessionKeyList sessionKeyList;
-    GetSessionKeyList(authSeq, info, &sessionKeyList);
+    GetDumpSessionKeyList(authSeq, info, &sessionKeyList);
     if (DecryptInner(&sessionKeyList, data, len, &msg, &msgSize) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "decrypt device info fail");
         return SOFTBUS_DECRYPT_ERR;
     }
+    DestroySessionKeyList(&sessionKeyList);
     uint8_t *decompressData = NULL;
     uint32_t decompressLen = 0;
     if ((info->connInfo.type != AUTH_LINK_TYPE_WIFI) && info->isSupportCompress) {
