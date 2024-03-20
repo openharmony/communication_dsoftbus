@@ -168,7 +168,7 @@ int32_t CheckDynamicPermission(void)
     auto tokenType = AccessToken::AccessTokenKit::GetTokenTypeFlag(callingToken);
     if (tokenType != AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
         COMM_LOGE(COMM_PERM, "not native call");
-        return SOFTBUS_ERR;
+        return SOFTBUS_PERMISSION_DENIED;
     }
     AccessToken::NativeTokenInfo nativeTokenInfo;
     int32_t result = AccessToken::AccessTokenKit::GetNativeTokenInfo(callingToken, nativeTokenInfo);
@@ -177,5 +177,5 @@ int32_t CheckDynamicPermission(void)
     }
     COMM_LOGE(COMM_PERM,
         "check dynamic permission failed, processName=%{private}s", nativeTokenInfo.processName.c_str());
-    return SOFTBUS_ERR;
+    return SOFTBUS_PERMISSION_DENIED;
 }
