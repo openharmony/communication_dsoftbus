@@ -131,21 +131,27 @@ static void DfxRecordCoapEnd(bool isStart, bool isActive, bool isPublish, const 
     extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
 
     const char *capabilityData = NULL;
+    uint32_t dataLen = MAX_CAPABILITYDATA_LEN - 1;
     if (isPublish) {
         extra.interFuncType = (isStart ? PUBLISH_FUNC : UNPUBLISH_FUNC) + 1;
-        PublishOption *publishOption = (PublishOption *)option;
-        extra.broadcastFreq = publishOption == NULL ? 0 : publishOption->freq;
-        capabilityData = publishOption == NULL ? capabilityData : (const char *)publishOption->capabilityData;
+        if (option != NULL) {
+            PublishOption *publishOption = (PublishOption *)option;
+            extra.broadcastFreq = publishOption->freq;
+            capabilityData = (const char *)publishOption->capabilityData;
+            dataLen = publishOption->dataLen < dataLen ? publishOption->dataLen : dataLen;
+        }
     } else {
         extra.interFuncType = (isStart ? STARTDISCOVERTY_FUNC : STOPDISCOVERY_FUNC) + 1;
-        SubscribeOption *subscribeOption = (SubscribeOption *)option;
-        extra.broadcastFreq = subscribeOption == NULL ? 0 : subscribeOption->freq;
-        capabilityData = subscribeOption == NULL ? capabilityData : (const char *)subscribeOption->capabilityData;
+        if (option != NULL) {
+            SubscribeOption *subscribeOption = (SubscribeOption *)option;
+            extra.broadcastFreq = subscribeOption->freq;
+            capabilityData = (const char *)subscribeOption->capabilityData;
+            dataLen = subscribeOption->dataLen < dataLen ? subscribeOption->dataLen : dataLen;
+        }
     }
 
     char data[MAX_CAPABILITYDATA_LEN] = { 0 };
-    if (capabilityData != NULL && strncpy_s(data, MAX_CAPABILITYDATA_LEN, capabilityData,
-        MAX_CAPABILITYDATA_LEN - 1) == EOK) {
+    if (capabilityData != NULL && strncpy_s(data, MAX_CAPABILITYDATA_LEN, capabilityData, dataLen) == EOK) {
         extra.capabilityData = data;
     }
     DISC_EVENT(EVENT_SCENE_COAP, EVENT_STAGE_COAP, extra);
@@ -332,8 +338,9 @@ static bool UpdateFilter(void)
     if (!g_subscribeMgr->isUpdate) {
         return true;
     }
-    if (DiscCoapSetFilterCapability(CAPABILITY_NUM, g_subscribeMgr->allCap) != SOFTBUS_OK) {
-        DfxRecordSetFilterEnd(g_subscribeMgr->allCap[0], SOFTBUS_DISCOVER_COAP_SET_FILTER_CAP_FAIL);
+    int32_t ret = DiscCoapSetFilterCapability(CAPABILITY_NUM, g_subscribeMgr->allCap);
+    if (ret != SOFTBUS_OK) {
+        DfxRecordSetFilterEnd(g_subscribeMgr->allCap[0], ret);
         DISC_LOGE(DISC_COAP, "set all filter capability to dfinder failed.");
         SoftbusReportDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP, SOFTBUS_HISYSEVT_DISCOVER_COAP_SET_FILTER_CAP_FAIL);
         return false;
