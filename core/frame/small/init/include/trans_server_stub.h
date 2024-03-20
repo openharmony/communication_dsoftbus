@@ -30,6 +30,7 @@ int32_t ServerNotifyAuthSuccess(IpcIo *req, IpcIo *reply);
 int32_t ServerOpenAuthSession(IpcIo *req, IpcIo *reqly);
 int32_t ServerCloseChannel(IpcIo *req, IpcIo *reply);
 int32_t ServerSendSessionMsg(IpcIo *req, IpcIo *reply);
+int32_t ServerReleaseResources(IpcIo *req, IpcIo *reply);
 
 #ifdef __cplusplus
 }
