@@ -632,15 +632,17 @@ int32_t AuthManagerSetSessionKey(int64_t authSeq, const AuthSessionInfo *info,
     if (auth->connInfo[info->connInfo.type].type == AUTH_LINK_TYPE_WIFI && !auth->isServer) {
         ScheduleUpdateSessionKey(authHandle, SCHEDULE_UPDATE_SESSION_KEY_PERIOD);
     }
+    int32_t ret = SOFTBUS_OK;
     if (!isConnect) {
+        ret = SetSessionKeyAvailable(&auth->sessionKeyList, sessionKeyIndex);
         auth->hasAuthPassed = true;
     }
     AUTH_LOGI(AUTH_FSM,
         "auth manager. authId=%{public}" PRId64 ", authSeq=%{public}" PRId64
-        ", index=%{public}d, lastVerifyTime=%{public}" PRId64,
-        auth->authId, authSeq, sessionKeyIndex, auth->lastVerifyTime);
+        ", index=%{public}d, lastVerifyTime=%{public}" PRId64 ", ret=%{public}d",
+        auth->authId, authSeq, sessionKeyIndex, auth->lastVerifyTime, ret);
     ReleaseAuthLock();
-    return SOFTBUS_OK;
+    return ret;
 }
 
 int32_t AuthManagerGetSessionKey(int64_t authSeq, const AuthSessionInfo *info, SessionKey *sessionKey)
@@ -923,7 +925,7 @@ void AuthManagerSetAuthPassed(int64_t authSeq, const AuthSessionInfo *info)
             GetAuthSideStr(info->isServer));
         return;
     }
-
+    (void)SetSessionKeyAvailable(&auth->sessionKeyList, TO_INT32(authSeq));
     auth->hasAuthPassed = true;
     if (info->nodeInfo.p2pInfo.p2pMac[0] != '\0') {
         if (strcpy_s(auth->p2pMac, sizeof(auth->p2pMac), info->nodeInfo.p2pInfo.p2pMac)) {
@@ -1837,9 +1839,13 @@ void AuthDeviceGetLatestIdByUuid(const char *uuid, AuthLinkType type, AuthHandle
     authHandle->authId = AUTH_INVALID_ID;
     uint64_t latestVerifyTime = 0;
     for (uint32_t i = 0; i < num; i++) {
-        if (auth[i] != NULL && auth[i]->lastVerifyTime > latestVerifyTime) {
+        uint64_t tmpTime = 0;
+        if (auth[i] != NULL) {
+            tmpTime = GetLatestAvailableSessionKeyTime(&auth[i]->sessionKeyList);
+        }
+        if (tmpTime > latestVerifyTime) {
             authHandle->authId = auth[i]->authId;
-            latestVerifyTime = auth[i]->lastVerifyTime;
+            latestVerifyTime = tmpTime;
         }
     }
     ReleaseAuthLock();

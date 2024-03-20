@@ -35,7 +35,7 @@
 #define AUTH_TIMEOUT_MS (10 * 1000)
 #define TO_AUTH_FSM(ptr) CONTAINER_OF(ptr, AuthFsm, fsm)
 #define SHORT_UDID_HASH_LEN 8
-#define SHORT_UDID_HASH_HEX_LEN 16
+#define SHORT_UDID_HASH_HEX_LEN 17
 
 typedef enum {
     STATE_SYNC_DEVICE_ID = 0,
@@ -189,8 +189,8 @@ static int32_t ProcAuthFsm(uint32_t requestId, bool isServer, AuthFsm *authFsm)
             AUTH_LOGE(AUTH_FSM, "get auth request fail");
             return SOFTBUS_ERR;
         }
-        char udidHash[SHORT_UDID_HASH_HEX_LEN + 1] = {0};
-        int32_t ret = ConvertBytesToHexString(udidHash, SHORT_UDID_HASH_HEX_LEN + 1,
+        char udidHash[SHORT_UDID_HASH_HEX_LEN] = {0};
+        int32_t ret = ConvertBytesToHexString(udidHash, SHORT_UDID_HASH_HEX_LEN,
             (const unsigned char *)request.connInfo.info.bleInfo.deviceIdHash, SHORT_UDID_HASH_LEN);
         if (ret == SOFTBUS_OK && LnnRetrieveDeviceInfo((const char *)udidHash, &nodeInfo) == SOFTBUS_OK &&
             IsNeedExchangeNetworkId(nodeInfo.authCapacity, BIT_SUPPORT_EXCHANGE_NETWORKID)) {
@@ -494,7 +494,20 @@ static int32_t RecoveryNormalizedDeviceKey(AuthFsm *authFsm)
         AUTH_LOGE(AUTH_FSM, "normalizedKey is NULL, auth fail");
         return SOFTBUS_ERR;
     }
-    int32_t ret = AuthSessionSaveSessionKey(authFsm->authSeq, authFsm->info.normalizedKey->value,
+    uint8_t hash[SHA_256_HASH_LEN] = {0};
+    int32_t ret = SoftBusGenerateStrHash((uint8_t *)authFsm->info.udid, strlen(authFsm->info.udid), hash);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "generate udidHash fail");
+        return ret;
+    }
+    char udidShortHash[SHORT_UDID_HASH_HEX_LEN] = {0};
+    if (ConvertBytesToUpperCaseHexString(udidShortHash, SHORT_UDID_HASH_HEX_LEN,
+        hash, SHORT_UDID_HASH_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "convert bytes to string fail");
+        return SOFTBUS_ERR;
+    }
+    AuthUpdateNormalizeKeyIndex(udidShortHash, authFsm->authSeq, authFsm->info.isServer);
+    ret = AuthSessionSaveSessionKey(authFsm->authSeq, authFsm->info.normalizedKey->value,
         authFsm->info.normalizedKey->len);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "post save sessionKey event fail");
@@ -505,8 +518,6 @@ static int32_t RecoveryNormalizedDeviceKey(AuthFsm *authFsm)
 
 static int32_t RecoveryFastAuthKey(AuthFsm *authFsm)
 {
-#define UDID_SHORT_HASH_LEN_TEMP 8
-#define UDID_SHORT_HASH_HEX_STRING 17
     AuthDeviceKeyInfo key = {0};
     uint8_t hash[SHA_256_HASH_LEN] = {0};
     int32_t ret = SoftBusGenerateStrHash((uint8_t *)authFsm->info.udid, strlen(authFsm->info.udid), hash);
@@ -514,9 +525,9 @@ static int32_t RecoveryFastAuthKey(AuthFsm *authFsm)
         AUTH_LOGE(AUTH_FSM, "generate udidHash fail");
         return ret;
     }
-    char udidShortHash[UDID_SHORT_HASH_HEX_STRING] = {0};
-    if (ConvertBytesToUpperCaseHexString(udidShortHash, UDID_SHORT_HASH_HEX_STRING,
-        hash, UDID_SHORT_HASH_LEN_TEMP) != SOFTBUS_OK) {
+    char udidShortHash[SHORT_UDID_HASH_HEX_LEN] = {0};
+    if (ConvertBytesToUpperCaseHexString(udidShortHash, SHORT_UDID_HASH_HEX_LEN,
+        hash, SHORT_UDID_HASH_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "convert bytes to string fail");
         return SOFTBUS_ERR;
     }
