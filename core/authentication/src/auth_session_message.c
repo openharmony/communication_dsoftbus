@@ -2106,6 +2106,10 @@ bool IsFlushDevicePacket(const AuthConnInfo *connInfo, const AuthDataHead *head,
 int32_t PostVerifyDeviceMessage(const AuthManager *auth, int32_t flagRelay, AuthLinkType type)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(auth != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "auth is NULL");
+    if (type < AUTH_LINK_TYPE_WIFI || type >= AUTH_LINK_TYPE_MAX) {
+        AUTH_LOGE(AUTH_FSM, "type error, type=%{public}d", type);
+        return SOFTBUS_ERR;
+    }
     char *msg = PackVerifyDeviceMessage(auth->uuid);
     if (msg == NULL) {
         AUTH_LOGE(AUTH_FSM, "pack verify device msg fail");

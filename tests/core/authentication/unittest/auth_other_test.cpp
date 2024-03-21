@@ -388,6 +388,7 @@ HWTEST_F(AuthOtherTest, AUTH_MANAGER_SET_AUTH_PASSED_TEST_001, TestSize.Level1)
     int32_t reason = 0;
 
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    info.connInfo.type = AUTH_LINK_TYPE_WIFI;
     AuthManager *auth = NewAuthManager(authSeq, &info);
     EXPECT_TRUE(auth != nullptr);
     AuthManagerSetAuthPassed(authSeq, nullptr);

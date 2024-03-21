@@ -705,12 +705,48 @@ ohos_unittest("AuthSessionFsmTest") {
   }
 }
 
+ohos_unittest("AuthNormalizeRequestTest") {
+  module_out_path = module_output_path
+  sources = [ "unittest/auth_normalize_request_test.cpp" ]
+
+  include_dirs = [
+    "//base/security/device_auth/interfaces/inner_api",
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    "//third_party/bounds_checking_function:libsec_shared",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "device_auth:deviceauth_sdk",
+      "hilog:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+  }
+}
+
 group("unittest") {
   testonly = true
   deps = [
     ":AuthEnhanceMockTest",
     ":AuthHichainTest",
     ":AuthManagerTest",
+    ":AuthNormalizeRequestTest",
     ":AuthOtherTest",
     ":AuthSessionFsmTest",
     ":AuthSessionMessageTest",
