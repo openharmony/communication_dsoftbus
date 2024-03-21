@@ -118,7 +118,7 @@ int32_t DiscCoapParseServiceData(const cJSON *data, DeviceInfo *device)
     DISC_CHECK_AND_RETURN_RET_LOGE(device != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "device info is NULL");
     char serviceData[MAX_SERVICE_DATA_LEN] = {0};
     if (!GetJsonObjectStringItem(data, JSON_SERVICE_DATA, serviceData, sizeof(serviceData))) {
-        DISC_LOGE(DISC_COAP, "parse service data failed.");
+        DISC_LOGD(DISC_COAP, "parse service data failed.");
         return SOFTBUS_ERR;
     }
     char port[MAX_PORT_STR_LEN] = {0};
