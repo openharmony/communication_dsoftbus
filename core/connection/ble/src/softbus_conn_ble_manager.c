@@ -777,9 +777,9 @@ static bool IsSameDevice(const char *leftIdentifier, const char *rightIdentifier
     char leftHashStr[HEXIFY_LEN(SHORT_UDID_HASH_LEN)] = { 0 };
     char rightHashStr[HEXIFY_LEN(SHORT_UDID_HASH_LEN)] = { 0 };
     if (ConvertBytesToHexString(leftHashStr, HEXIFY_LEN(SHORT_UDID_HASH_LEN), leftHash, SHORT_UDID_HASH_LEN) !=
-            SOFTBUS_OK ||
+        SOFTBUS_OK ||
         ConvertBytesToHexString(rightHashStr, HEXIFY_LEN(SHORT_UDID_HASH_LEN), rightHash, SHORT_UDID_HASH_LEN) !=
-            SOFTBUS_OK) {
+        SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "convert bytes to array failed");
         return false;
     }
