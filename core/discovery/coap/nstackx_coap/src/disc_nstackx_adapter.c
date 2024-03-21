@@ -111,7 +111,7 @@ static int32_t ParseReservedInfo(const NSTACKX_DeviceInfo *nstackxDevice, Device
     DiscCoapParseWifiIpAddr(reserveInfo, device);
     DiscCoapParseHwAccountHash(reserveInfo, device);
     if (DiscCoapParseServiceData(reserveInfo, device) != SOFTBUS_OK) {
-        DISC_LOGW(DISC_COAP, "parse service data failed");
+        DISC_LOGD(DISC_COAP, "parse service data failed");
     }
     cJSON_Delete(reserveInfo);
     return SOFTBUS_OK;
@@ -173,7 +173,7 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
         }
 
         if (DiscCoapProcessDeviceInfo(nstackxDeviceInfo, discDeviceInfo, g_discCoapInnerCb) != SOFTBUS_OK) {
-            DISC_LOGW(DISC_COAP, "DiscRecv: process device info failed");
+            DISC_LOGD(DISC_COAP, "DiscRecv: process device info failed");
         }
     }
 
