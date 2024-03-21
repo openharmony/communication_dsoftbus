@@ -484,12 +484,15 @@ static int32_t ParseRequestAppInfo(AuthHandle authHandle, const cJSON *msg, AppI
     } else {
         appInfo->routeType = WIFI_P2P;
         struct WifiDirectManager *mgr = GetWifiDirectManager();
-        if (mgr != NULL && mgr->getLocalIpByRemoteIp != NULL) {
-            int32_t ret = mgr->getLocalIpByRemoteIp(appInfo->peerData.addr, localIp, sizeof(localIp));
-            if (ret != SOFTBUS_OK) {
-                TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
-                return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
-            }
+        if (mgr == NULL || mgr->getLocalIpByRemoteIp == NULL) {
+            TRANS_LOGE(TRANS_CTRL, "GetWifiDirectManager failed");
+            return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
+        }
+
+        ret = mgr->getLocalIpByRemoteIp(appInfo->peerData.addr, localIp, sizeof(localIp));
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
+            return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
         }
     }
     if (strcpy_s(appInfo->myData.addr, sizeof(appInfo->myData.addr), localIp) != EOK) {

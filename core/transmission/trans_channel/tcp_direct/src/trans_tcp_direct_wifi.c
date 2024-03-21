@@ -62,13 +62,17 @@ static ListenerModule GetMoudleType(ConnectType type, const char *peerIp)
     if (type == CONNECT_P2P_REUSE) {
         char myIp[IP_LEN] = {0};
         struct WifiDirectManager *mgr = GetWifiDirectManager();
-        if (mgr != NULL && mgr->getLocalIpByRemoteIp != NULL) {
-            int32_t ret = mgr->getLocalIpByRemoteIp(peerIp, myIp, sizeof(myIp));
-            if (ret != SOFTBUS_OK) {
-                TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
-                return module;
-            }
+        if (mgr == NULL || mgr->getLocalIpByRemoteIp == NULL) {
+            TRANS_LOGE(TRANS_CTRL, "GetWifiDirectManager failed");
+            return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
         }
+
+        int32_t ret = mgr->getLocalIpByRemoteIp(peerIp, myIp, sizeof(myIp));
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
+            return module;
+        }
+
         if (strncmp(myIp, HML_IP_PREFIX, NETWORK_ID_LEN) == 0) {
             module = GetMoudleByHmlIp(myIp);
         } else {

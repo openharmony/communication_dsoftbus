@@ -527,7 +527,7 @@ static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSO
 
     struct WifiDirectManager *pManager = GetWifiDirectManager();
     if (pManager != NULL && pManager->getLocalIpByRemoteIp != NULL) {
-        int32_t ret = pManager->getLocalIpByRemoteIp(peerIp, myIp, sizeof(myIp));
+        ret = pManager->getLocalIpByRemoteIp(peerIp, myIp, sizeof(myIp));
         if (ret != SOFTBUS_OK) {
             OutputAnonymizeIpAddress(myIp, peerIp);
             TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
