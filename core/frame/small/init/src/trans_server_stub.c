@@ -298,3 +298,20 @@ int32_t ServerSendSessionMsg(IpcIo *req, IpcIo *reply)
     WriteInt32(reply, ret);
     return ret;
 }
+
+int32_t ServerReleaseResources(IpcIo *req, IpcIo *reply)
+{
+    TRANS_LOGI(TRANS_CTRL, "ipc server pop");
+    if (req == NULL || reply == NULL) {
+        TRANS_LOGW(TRANS_CTRL, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t channelId = 0;
+    if (!ReadInt32(req, &channelId)) {
+        TRANS_LOGE(TRANS_CTRL, "failed to read channelId");
+        return SOFTBUS_IPC_ERR;
+    }
+
+    int32_t ret = TransReleaseUdpResources(channelId);
+    return ret;
+}
