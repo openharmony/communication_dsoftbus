@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,6 +59,11 @@ public:
     }
     int32_t OnChannelMsgReceived([[maybe_unused]] int32_t channelId, [[maybe_unused]] int32_t channelType,
         [[maybe_unused]] const void *data, [[maybe_unused]] uint32_t len, [[maybe_unused]] int32_t type) override
+    {
+        return SOFTBUS_OK;
+    }
+    int32_t SetChannelInfo([[maybe_unused]]const char *sessionName, [[maybe_unused]] int32_t sessionId,
+        [[maybe_unused]] int32_t channelId, [[maybe_unused]] int32_t channelType) override
     {
         return SOFTBUS_OK;
     }

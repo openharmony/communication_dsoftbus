@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,6 +51,7 @@ static int32_t AcceptSessionAsServer(const char *sessionName, const ChannelInfo 
     session->algorithm = channel->algorithm;
     session->crc = channel->crc;
     session->dataConfig = channel->dataConfig;
+    session->isAsync = false;
     if (strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, channel->peerSessionName) != EOK ||
         strcpy_s(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX, channel->peerDeviceId) != EOK ||
         strcpy_s(session->info.groupId, GROUP_ID_SIZE_MAX, channel->groupId) != EOK) {
@@ -111,8 +112,13 @@ static int32_t GetSocketCallbackAdapterByChannelId(int32_t channelId, int32_t ch
     return SOFTBUS_OK;
 }
 
-NO_SANITIZE("cfi") static int32_t TransOnServerBindSuccess(int32_t sessionId, const ISocketListener *socketCallback)
+static int32_t TransOnBindSuccess(int32_t sessionId, const ISocketListener *socketCallback)
 {
+    if (socketCallback == NULL || socketCallback->OnBind == NULL) {
+        TRANS_LOGE(TRANS_SDK, "Invalid OnBind callback function");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
     PeerSocketInfo info;
     int32_t ret = ClientGetPeerSocketInfoById(sessionId, &info);
     if (ret != SOFTBUS_OK) {
@@ -120,14 +126,42 @@ NO_SANITIZE("cfi") static int32_t TransOnServerBindSuccess(int32_t sessionId, co
         return SOFTBUS_ERR;
     }
 
-    if (socketCallback->OnBind == NULL) {
+    (void)socketCallback->OnBind(sessionId, info);
+    TRANS_LOGI(TRANS_SDK, "OnBind success, socket=%{public}d", sessionId);
+    return SOFTBUS_OK;
+}
+
+static int32_t TransOnBindFailed(int32_t sessionId, const ISocketListener *socketCallback, int32_t errCode)
+{
+    if (socketCallback == NULL || socketCallback->OnError == NULL) {
         TRANS_LOGE(TRANS_SDK, "Invalid OnBind callback function");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
-    (void)socketCallback->OnBind(sessionId, info);
-    TRANS_LOGI(TRANS_SDK, "OnBind success, server socket=%{public}d", sessionId);
+    (void)socketCallback->OnError(sessionId, errCode);
+    TRANS_LOGI(TRANS_SDK, "OnError success, client socket=%{public}d", sessionId);
     return SOFTBUS_OK;
+}
+
+static int32_t handelOnBindSuccess(int32_t sessionId, SessionListenerAdapter sessionCallback, bool isServer)
+{
+    // async bind call back client and server， sync bind only call back server.
+    bool isAsync = true;
+    int ret = ClientGetSessionIsAsyncBySessionId(sessionId, &isAsync);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "Get is async type failed");
+        return ret;
+    }
+    if (isServer) {
+        ret = TransOnBindSuccess(sessionId, &sessionCallback.socketServer);
+    } else if (isAsync) {
+        ret = TransOnBindSuccess(sessionId, &sessionCallback.socketClient);
+    }
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "OnBind failed, ret=%{public}d", ret);
+        (void)ClientDeleteSession(sessionId);
+    }
+    return ret;
 }
 
 NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel, SessionType flag)
@@ -157,23 +191,19 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const C
         ret = AcceptSessionAsServer(sessionName, channel, flag, &sessionId);
     } else {
         ret = ClientEnableSessionByChannelId(channel, &sessionId);
+        if (ret == SOFTBUS_ERR) {
+            SoftBusSleepMs(300); // avoid set channel info later than sesssion opened callback
+            ret = ClientEnableSessionByChannelId(channel, &sessionId);
+        }
     }
 
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "accept session failed");
-        return SOFTBUS_ERR;
+        TRANS_LOGE(TRANS_SDK, "accept session failed, ret=%{public}d", ret);
+        return ret;
     }
 
     if (sessionCallback.isSocketListener) {
-        if (!channel->isServer) {
-            TRANS_LOGI(TRANS_SDK, "OnBind success, client socket=%{public}d", sessionId);
-            return SOFTBUS_OK;
-        }
-        ret = TransOnServerBindSuccess(sessionId, &sessionCallback.socketServer);
-        if (ret != SOFTBUS_OK) {
-            (void)ClientDeleteSession(sessionId);
-        }
-        return ret;
+        return handelOnBindSuccess(sessionId, sessionCallback, channel->isServer);
     }
     TRANS_LOGI(TRANS_SDK, "trigger session open callback");
     if ((sessionCallback.session.OnSessionOpened == NULL) ||
@@ -188,13 +218,36 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const C
 
 NO_SANITIZE("cfi") int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
 {
-    TRANS_LOGI(TRANS_SDK, "channelId=%{public}d, channelType=%{public}d", channelId, channelType);
+    TRANS_LOGI(TRANS_SDK, "trigger session open failed callback, channelId=%{public}d, channelType=%{public}d",
+        channelId, channelType);
     int32_t sessionId = INVALID_SESSION_ID;
     SessionListenerAdapter sessionCallback;
-    bool isServer = false;
     (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
+    if (channelType == CHANNEL_TYPE_UNDEFINED) {
+        // only client async bind failed call
+        sessionId = channelId;
+        bool tmpIsServer = false;
+        ClientGetSessionCallbackAdapterById(sessionId, &sessionCallback, &tmpIsServer);
+        (void)TransOnBindFailed(sessionId, &sessionCallback.socketClient, errCode);
+        (void)ClientDeleteSession(sessionId);
+        return SOFTBUS_OK;
+    }
+    bool isServer = false;
     (void)GetSocketCallbackAdapterByChannelId(channelId, channelType, &sessionId, &sessionCallback, &isServer);
-    TRANS_LOGI(TRANS_SDK, "trigger session open failed callback");
+    if (sessionCallback.isSocketListener) {
+        bool isAsync = true;
+        int ret = ClientGetSessionIsAsyncBySessionId(sessionId, &isAsync);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "get is async type failed, ret=%{public}d", ret);
+            return ret;
+        }
+        if (!isServer && isAsync) {
+            (void)TransOnBindFailed(sessionId, &sessionCallback.socketClient, errCode);
+        }
+        (void)ClientDeleteSession(sessionId);
+        TRANS_LOGI(TRANS_SDK, "ok, sessionid=%{public}d", sessionId);
+        return SOFTBUS_OK;
+    }
     if (sessionCallback.session.OnSessionOpened != NULL) {
         (void)sessionCallback.session.OnSessionOpened(sessionId, errCode);
     }
@@ -236,8 +289,7 @@ static int32_t ProcessReceivedFileData(int32_t sessionId, int32_t channelId, con
     SessionPktType type)
 {
     char sessionName[SESSION_NAME_SIZE_MAX] = {0};
-    if (ClientGetSessionDataById(sessionId, sessionName, SESSION_NAME_SIZE_MAX, KEY_SESSION_NAME)
-        != SOFTBUS_OK) {
+    if (ClientGetSessionDataById(sessionId, sessionName, SESSION_NAME_SIZE_MAX, KEY_SESSION_NAME) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "get session name failed");
         return SOFTBUS_ERR;
     }
