@@ -180,11 +180,17 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
     SoftBusFree(discDeviceInfo);
 }
 
+static void OnNotificationReceived(const NotificationConfig *notification)
+{
+    DiscCoapReportNotification(notification);
+}
+
 static NSTACKX_Parameter g_nstackxCallBack = {
     .onDeviceListChanged = OnDeviceFound,
     .onDeviceFound = NULL,
     .onMsgReceived = NULL,
     .onDFinderMsgReceived = NULL,
+    .onNotificationReceived = OnNotificationReceived,
 };
 
 int32_t DiscCoapRegisterCb(const DiscInnerCallback *discCoapCb)
