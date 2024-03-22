@@ -36,6 +36,7 @@ group("unittest") {
   }
   if (dsoftbus_feature_disc_coap) {
     deps += [
+      "coap/common/unittest:unittest",
       "coap/nstackx_adapter_mock:unittest",
       "coap/unittest:unittest",
     ]
