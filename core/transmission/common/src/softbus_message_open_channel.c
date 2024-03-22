@@ -107,6 +107,7 @@ char *PackRequest(const AppInfo *appInfo)
         return NULL;
     }
     if (!AddNumber16ToJsonObject(json, FIRST_DATA_SIZE, appInfo->fastTransDataSize)) {
+        cJSON_Delete(json);
         return NULL;
     }
     if (appInfo->fastTransDataSize > 0) {
@@ -291,6 +292,7 @@ NO_SANITIZE("cfi") char *PackReply(const AppInfo *appInfo)
     }
     if (!AddNumber16ToJsonObject(json, FIRST_DATA_SIZE, appInfo->fastTransDataSize)) {
         SoftBusLog(SOFTBUS_LOG_TRAN, SOFTBUS_LOG_ERROR, "Failed to add trans data size");
+        cJSON_Delete(json);
         return NULL;
     }
     if (appInfo->myData.apiVersion != API_V1) {
