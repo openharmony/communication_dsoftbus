@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -76,6 +76,8 @@ typedef struct {
      * This callback is invoked to verify the socket or initialize resources related to the socket.
      * When the connection is successful, this callback be called on the server side.
      * The server side refers to the side that called {@Listen} function.
+     *
+     * When a socket is async bind, client side need implement this interface.
      *
      * @param socket Indicates the unique socket fd.
      * @param info Indicates the information of peer socket.
@@ -162,6 +164,20 @@ typedef struct {
      * @version 2.0
      */
     void (*OnQos)(int32_t socket, QoSEvent eventId, const QosTV *qos, uint32_t qosCount);
+
+    /**
+     * @brief Called when an async bind socket is error.
+     *
+     * This callback is notice error for the socket.
+     *
+     * When a socket is async bind, client side need implement this interface.
+     *
+     * @param socket Indicates the unique socket fd.
+     * @param errCode Indicates the error for the async bind socket.
+     * @since 2.0
+     * @version 2.0
+     */
+    void (*OnError)(int32_t socket, int32_t errCode);
 } ISocketListener;
 
 /**
@@ -213,6 +229,25 @@ int32_t Listen(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISock
  * @version 2.0
  */
 int32_t Bind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener);
+
+/**
+ * @brief Async bind a socket, which is called by client.
+ *
+ * {@link OnBind} is invoked to return whether the socket is successfully bind.
+ * Data can be transmitted only after the socket is successfully bind.
+ *
+ * @param socket Indicates the the unique socket fd.
+ * @param qos Indicates the QoS requirements for socket. The value cannot be empty.
+ * @param listener Indicates the pointer to the socket callback.
+ *
+ * @return Returns <b>SOFTBUS_TRANS_INVALID_PARAM</b> if invalid parameters are detected.
+ * @return Returns <b>INVALID_SOCKET</b> if the operation fails.
+ * @return Returns <b>SOFTBUS_OK</b>) if the socket is in binding status,
+ * returns an error code otherwise.
+ * @since 2.0
+ * @version 2.0
+ */
+int32_t BindAsync(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener);
 
 /**
  * @example sendbytes_message_demo.c

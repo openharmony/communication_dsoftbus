@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -116,5 +116,24 @@ int32_t ClientOnChannelMsgreceived(IpcIo *data, IpcIo *reply)
     ReadUint32(data, &dataLen);
     const uint8_t *data2 = ReadBuffer(data, dataLen);
     (void)TransOnChannelMsgReceived(channelId, channelType, data2, dataLen, type);
+    return SOFTBUS_OK;
+}
+
+int32_t ClientSetChannelInfo(IpcIo *data, IpcIo *reply)
+{
+    if (data == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    (void)reply;
+    size_t size = 0;
+    const char *sessionName = (const char *)ReadString(data, &size);
+    int32_t sessionId = 0;
+    int32_t channelId = 0;
+    int32_t channelType = 0;
+    ReadInt32(data, &sessionId);
+    ReadInt32(data, &channelId);
+    ReadInt32(data, &channelType);
+    (void)TransSetChannelInfo(sessionName, sessionId, channelId, channelType);
     return SOFTBUS_OK;
 }

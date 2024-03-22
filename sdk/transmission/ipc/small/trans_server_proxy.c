@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -209,6 +209,8 @@ int32_t ServerIpcOpenSession(const SessionParam *param, TransInfo *info)
     WriteString(&request, param->peerSessionName);
     WriteString(&request, param->peerDeviceId);
     WriteString(&request, param->groupId);
+    WriteBool(&request, param->isAsync);
+    WriteInt32(&request, param->sessionId);
     if (!TransWriteIpcSessionAttrs(&request, param->attr)) {
         TRANS_LOGE(TRANS_SDK, "OpenSession write attr failed!");
         return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;
@@ -226,6 +228,9 @@ int32_t ServerIpcOpenSession(const SessionParam *param, TransInfo *info)
     if (ans != EC_SUCCESS) {
         TRANS_LOGE(TRANS_SDK, "callback ret=%{public}d", transSerializer.ret);
         return SOFTBUS_TRANS_PROXY_INVOKE_FAILED;
+    }
+    if (param->isAsync) {
+        return transSerializer.ret;
     }
     info->channelId = transSerializer.transInfo.channelId;
     info->channelType = transSerializer.transInfo.channelType;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -122,9 +122,10 @@ static SessionInfo *GenerateSession(const SessionParam *param)
     session->algorithm = TRANS_TEST_ALGORITHM;
     session->fileEncrypt = TRANS_TEST_FILE_ENCRYPT;
     session->crc = TRANS_TEST_CRC;
-
+    session->isAsync = param->isAsync;
     return session;
 }
+
 static void GenerateCommParam(SessionParam *sessionParam)
 {
     sessionParam->sessionName = g_sessionName;
@@ -984,6 +985,77 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionDestroyTest01, TestSiz
 }
 
 /**
+ * @tc.name: TransClientSessionIsAsyncTest01
+ * @tc.desc: Session IsAsync param tests.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, TransClientSessionIsAsyncTest01, TestSize.Level1)
+{
+    int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    SessionParam *sessionParam = (SessionParam *)SoftBusMalloc(sizeof(SessionParam));
+    ASSERT_TRUE(sessionParam != NULL);
+    memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
+    GenerateCommParam(sessionParam);
+    SessionInfo *session = GenerateSession(sessionParam);
+    ASSERT_TRUE(session != NULL);
+    ret = ClientAddNewSession(g_sessionName, session);
+    session->sessionId = 1;
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    sessionParam->isAsync = true;
+    SessionInfo *newSession = GenerateSession(sessionParam);
+    ret = ClientAddNewSession(g_sessionName, newSession);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    newSession->sessionId = 2;
+    bool isAsync = false;
+    ClientGetSessionIsAsyncBySessionId(2, &isAsync);
+    ASSERT_EQ(isAsync, true);
+    ClientGetSessionIsAsyncBySessionId(1, &isAsync);
+    ASSERT_EQ(isAsync, false);
+    SetSessionIsAsyncById(1, true);
+    ClientGetSessionIsAsyncBySessionId(1, &isAsync);
+    ASSERT_EQ(isAsync, true);
+    ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(sessionParam);
+}
+
+/**
+ * @tc.name: ClientTransSetChannelInfoTest01
+ * @tc.desc: Session IsAsync param tests.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, ClientTransSetChannelInfoTest01, TestSize.Level1)
+{
+    int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
+    ASSERT_TRUE(sessionParam != NULL);
+    memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
+    GenerateCommParam(sessionParam);
+    SessionInfo *session = GenerateSession(sessionParam);
+    ASSERT_TRUE(session != NULL);
+    session->channelId = TRANS_TEST_CHANNEL_ID;
+    session->channelType = CHANNEL_TYPE_PROXY;
+    session->routeType = WIFI_STA;
+    ret = ClientAddNewSession(g_sessionName, session);
+    session->sessionId = 1;
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = ClientTransSetChannelInfo(g_sessionName, 1, 11, CHANNEL_TYPE_TCP_DIRECT);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    int32_t channelId = INVALID_CHANNEL_ID;
+    int32_t ChannelType = CHANNEL_TYPE_BUTT;
+    ClientGetChannelBySessionId(1, &channelId, &ChannelType, NULL);
+    ASSERT_EQ(channelId, 11);
+    ASSERT_EQ(ChannelType, CHANNEL_TYPE_TCP_DIRECT);
+    ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(sessionParam);
+}
+
+/**
  * @tc.name: TransClientSessionManagerTest29
  * @tc.desc: Transmission sdk session manager add and delete server with invalid parameters no initialize.
  * @tc.type: FUNC
@@ -1282,5 +1354,28 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest44, TestSiz
 
     ret = ClientRawStreamEncryptOptGet(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, &isEncrypt);
     ASSERT_EQ(ret, SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
+}
+
+/**
+ * @tc.name: TransClientSessionManagerTest45
+ * @tc.desc: Call isAsync functions when g_clientSessionServerList no initialize.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest45, TestSize.Level1)
+{
+    int32_t ret = SetSessionIsAsyncById(1, true);
+    EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
+    ret = SetSessionIsAsyncById(-1, true);
+    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+    ret = ClientTransSetChannelInfo(g_sessionName, 1, 1, CHANNEL_TYPE_AUTH);
+    EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
+    ret = ClientTransSetChannelInfo(NULL, 1, 1, 1);
+    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+    bool isAsync = false;
+    ret = ClientGetSessionIsAsyncBySessionId(1, &isAsync);
+    EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
+    ret = ClientGetSessionIsAsyncBySessionId(-1, &isAsync);
+    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
 }
 }
