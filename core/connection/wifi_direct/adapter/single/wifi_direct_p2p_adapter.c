@@ -25,6 +25,7 @@
 #include "wifi_direct_defines.h"
 #include "utils/wifi_direct_network_utils.h"
 #include "data/resource_manager.h"
+#include "utils/wifi_direct_anonymous.h"
 
 #define DEFAULT_NET_MASK "255.255.255.0"
 
@@ -217,8 +218,7 @@ static int32_t GetGroupConfig(char *groupConfigString, size_t *groupConfigString
         groupInfo = NULL;
         return ret;
     }
-    CONN_LOGI(CONN_WIFI_DIRECT, "groupName=%{public}s, frequency=%{public}d", groupInfo->groupName,
-        groupInfo->frequency);
+    CONN_LOGI(CONN_WIFI_DIRECT, "frequency=%{public}d", groupInfo->frequency);
 
     ret = sprintf_s(groupConfigString, *groupConfigStringSize, "%s\n%s\n%s\n%d",
                     groupInfo->groupName, macAddrString, groupInfo->passphrase, groupInfo->frequency);
@@ -310,7 +310,7 @@ static int32_t GetIpAddress(char *ipString, int32_t ipStringSize)
     struct WifiDirectNetWorkUtils *netWorkUtils = GetWifiDirectNetWorkUtils();
     ret = netWorkUtils->getInterfaceIpString(interface, ipString, ipStringSize);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get ip string failed");
-    CONN_LOGI(CONN_WIFI_DIRECT, "ipString=%{public}s", ipString);
+    CONN_LOGI(CONN_WIFI_DIRECT, "ipString=%{public}s", WifiDirectAnonymizeIp(ipString));
     return SOFTBUS_OK;
 }
 
@@ -380,7 +380,7 @@ static int32_t RequestGcIp(const char *macString, char *ipString, size_t ipStrin
 
     ret = sprintf_s(ipString, ipStringSize, "%u.%u.%u.%u", ipArray[0], ipArray[1], ipArray[2], ipArray[3]);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret > 0, SOFTBUS_ERR, CONN_WIFI_DIRECT, "format ip string failed");
-    CONN_LOGI(CONN_WIFI_DIRECT, "gcIp=%{public}s", ipString);
+    CONN_LOGI(CONN_WIFI_DIRECT, "gcIp=%{public}s", WifiDirectAnonymizeIp(ipString));
 
     return SOFTBUS_OK;
 }
