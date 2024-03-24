@@ -458,13 +458,13 @@ static bool CheckScanResultDataIsMatch(const uint32_t managerId, BroadcastPayloa
 
 static void DumpSoftbusData(const char *description, uint16_t len, const uint8_t *data)
 {
-    DISC_CHECK_AND_RETURN_LOGE(description != NULL, DISC_BLE, "data is null!");
-    DISC_CHECK_AND_RETURN_LOGE(len != 0, DISC_BLE, "len is 0!");
-    DISC_CHECK_AND_RETURN_LOGE(data != NULL, DISC_BLE, "data is null!");
+    DISC_CHECK_AND_RETURN_LOGE(description != NULL, DISC_BLE, "description is null!");
+    DISC_CHECK_AND_RETURN_LOGE(len != 0, DISC_BLE, "description=%{public}s, len is 0!", description);
+    DISC_CHECK_AND_RETURN_LOGE(data != NULL, DISC_BLE, "description=%{public}s, data is null!", description);
 
     int32_t hexLen = HEXIFY_LEN(len);
     char *softbusData = (char *)SoftBusCalloc(sizeof(char) * hexLen);
-    DISC_CHECK_AND_RETURN_LOGE(softbusData != NULL, DISC_BLE, "malloc failed!");
+    DISC_CHECK_AND_RETURN_LOGE(softbusData != NULL, DISC_BLE, "description=%{public}s, malloc failed!", description);
 
     (void)ConvertBytesToHexString(softbusData, hexLen, data, len);
     DISC_LOGD(DISC_BLE, "description=%{public}s, softbusData=%{public}s", description, softbusData);
