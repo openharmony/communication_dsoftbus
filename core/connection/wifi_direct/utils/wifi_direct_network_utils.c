@@ -82,7 +82,7 @@ static int32_t ChannelListToString(int32_t *channelArray, size_t channelArraySiz
 static int32_t StringToChannelList(char *channelListString, int32_t *channelArray, size_t *channelArraySize)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(*channelArraySize <= CHANNEL_ARRAY_NUM_MAX, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT,
-                                  "size too large");
+                                   "size too large");
 
     if (channelListString == NULL || strlen(channelListString) == 0) {
         *channelArraySize = 0;
