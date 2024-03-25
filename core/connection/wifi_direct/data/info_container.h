@@ -115,7 +115,7 @@ static struct InfoContainerKeyProperty type##KeyProperties[max]
         size_t count;                                                                               \
         size_t size;                                                                                \
         bool remove;                                                                                \
-    } entries[max];
+    } entries[max]
 
 struct InfoContainer {
     INFO_CONTAINER_BASE(InfoContainer, 0);
