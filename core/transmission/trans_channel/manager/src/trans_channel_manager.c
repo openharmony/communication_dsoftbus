@@ -400,11 +400,14 @@ static void FillAppInfo(AppInfo *appInfo, const SessionParam *param,
         }
     } else if (connInfo->type == LANE_P2P_REUSE) {
         struct WifiDirectManager *mgr = GetWifiDirectManager();
-        if (mgr != NULL && mgr->getLocalIpByRemoteIp != NULL) {
-            int32_t ret = mgr->getLocalIpByRemoteIp(connInfo->connInfo.wlan.addr, appInfo->myData.addr, IP_LEN);
-            if (ret != SOFTBUS_OK) {
-                TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
-            }
+        if (mgr == NULL || mgr->getLocalIpByRemoteIp == NULL) {
+            TRANS_LOGE(TRANS_CTRL, "GetWifiDirectManager failed");
+            return;
+        }
+
+        int32_t ret = mgr->getLocalIpByRemoteIp(connInfo->connInfo.wlan.addr, appInfo->myData.addr, IP_LEN);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
         }
     }
 }
@@ -766,6 +769,14 @@ int32_t TransNotifyAuthSuccess(int32_t channelId, int32_t channelType)
     return TransNotifyAuthDataSuccess(channelId, &connOpt);
 }
 
+int32_t TransReleaseUdpResources(int32_t channelId)
+{
+    TRANS_LOGI(TRANS_CTRL, "release Udp channel resources: channelId=%{public}d", channelId);
+    (void)TransLaneMgrDelLane(channelId, CHANNEL_TYPE_UDP);
+    (void)TransDelUdpChannel(channelId);
+    return SOFTBUS_OK;
+}
+
 int32_t TransCloseChannel(int32_t channelId, int32_t channelType)
 {
     TRANS_LOGI(TRANS_CTRL, "close channel: channelId=%{public}d, channelType=%{public}d", channelId, channelType);
@@ -850,6 +861,28 @@ int32_t TransGetNameByChanId(const TransInfo *info, char *pkgName, char *session
         default:
             return SOFTBUS_INVALID_PARAM;
     }
+}
+
+int32_t TransGetAndComparePid(pid_t pid, int32_t channelId, int32_t channelType)
+{
+    if ((ChannelType)channelType == CHANNEL_TYPE_TCP_DIRECT) {
+        TRANS_LOGI(TRANS_CTRL, "channel type is tcp direct!");
+        return SOFTBUS_OK;
+    }
+    AppInfo appInfo;
+    int32_t ret = TransGetAppInfoByChanId(channelId, channelType, &appInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get appInfo by channelId failed, ret = %{public}d", ret);
+        return ret;
+    }
+    pid_t curChannelPid = appInfo.myData.pid;
+    if (pid != curChannelPid) {
+        TRANS_LOGE(TRANS_CTRL, "callingPid not equal curChannelPid, callingPid = %{public}d, pid = %{public}d",
+            pid, curChannelPid);
+        return SOFTBUS_TRANS_CHECK_PID_ERROR;
+    }
+    TRANS_LOGI(TRANS_CTRL, "callingPid check success. callingPid=%{public}d !", curChannelPid);
+    return SOFTBUS_OK;
 }
 
 int32_t TransGetAppInfoByChanId(int32_t channelId, int32_t channelType, AppInfo* appInfo)

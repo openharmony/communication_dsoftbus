@@ -254,8 +254,8 @@ static void BleServiceAddMsgHandler(const ServiceAddMsgContext *ctx)
         };
         rc = SoftBusGattsAddCharacteristic(ctx->srvcHandle, uuid,
             SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_READ | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE_NO_RSP |
-                SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_NOTIFY |
-                SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_INDICATE,
+            SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_NOTIFY |
+            SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_INDICATE,
             SOFTBUS_GATT_PERMISSION_READ | SOFTBUS_GATT_PERMISSION_WRITE);
         if (rc != SOFTBUS_OK) {
             CONN_LOGW(CONN_BLE, "underlayer add characteristic failed, err=%{public}d", rc);

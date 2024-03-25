@@ -364,10 +364,6 @@ static int32_t ProcessSendOnceStrategy(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnc
     bool isRemoved = true;
     LnnHeartbeatType registedHbType = msgPara->hbType;
     bool wakeupFlag = mode != NULL ? mode->wakeupFlag : false;
-    if (GetScreenState() == SOFTBUS_SCREEN_OFF && !wakeupFlag && !msgPara->isRelay) {
-        LNN_LOGW(LNN_HEART_BEAT, "screen state is off and not wakeup adv");
-        return SOFTBUS_OK;
-    }
     (void)LnnVisitHbTypeSet(VisitClearUnRegistedHbType, &registedHbType, NULL);
     if (registedHbType < HEARTBEAT_TYPE_MIN) {
         LNN_LOGW(LNN_HEART_BEAT, "HB send once get hbType is not available. hbType=%{public}d", msgPara->hbType);

@@ -379,7 +379,7 @@ static int32_t OpensslAesGcmDecrypt(
         return SOFTBUS_MEM_ERR;
     }
     if (EVP_CIPHER_CTX_ctrl(
-            ctx, EVP_CTRL_GCM_SET_TAG, AES_GCM_TAG_LEN, (void *)(srcData + (srcDataLen - AES_GCM_TAG_LEN))) != 1) {
+        ctx, EVP_CTRL_GCM_SET_TAG, AES_GCM_TAG_LEN, (void *)(srcData + (srcDataLen - AES_GCM_TAG_LEN))) != 1) {
         COMM_LOGE(COMM_ADAPTER, "EVP_CTRL_GCM_SET_TAG failed.");
         EVP_CIPHER_CTX_free(ctx);
         return SOFTBUS_ERR;

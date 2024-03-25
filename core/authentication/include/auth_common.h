@@ -138,6 +138,7 @@ int32_t ConvertToConnectOption(const AuthConnInfo *connInfo, ConnectOption *opti
 int32_t ConvertToAuthConnInfo(const ConnectionInfo *info, AuthConnInfo *connInfo);
 int32_t GetPeerUdidByNetworkId(const char *networkId, char *udidHash);
 DiscoveryType ConvertToDiscoveryType(AuthLinkType type);
+AuthLinkType ConvertToAuthLinkType(DiscoveryType type);
 
 int32_t AuthCommonInit(void);
 void AuthCommonDeinit(void);

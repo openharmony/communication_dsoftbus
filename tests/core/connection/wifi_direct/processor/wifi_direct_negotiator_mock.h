@@ -34,7 +34,7 @@ public:
     WifiDirectNegotiatorMock();
     ~WifiDirectNegotiatorMock();
     MOCK_METHOD(int32_t, HandleMessageFromProcessor, (struct NegotiateMessage *msg, 
-                                    enum NegotiateStateType nextState), (override));
+        enum NegotiateStateType nextState), (override));
     MOCK_METHOD(int32_t, PostData, (struct NegotiateMessage *msg), (override));
     MOCK_METHOD(void, HandleSuccess, (struct NegotiateMessage *msg), (override));
 

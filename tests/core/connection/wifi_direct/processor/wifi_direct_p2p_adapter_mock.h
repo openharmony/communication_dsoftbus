@@ -42,9 +42,9 @@ public:
     }
 
     WifiDirectP2pAdapterMock();
-    ~WifiDirectP2pAdapterMock(); 
+    ~WifiDirectP2pAdapterMock();
 
-    MOCK_METHOD(int32_t , RequestGcIp, (const char *macString, char *ipString, size_t ipStringSize), (override));
+    MOCK_METHOD(int32_t, RequestGcIp, (const char *macString, char *ipString, size_t ipStringSize), (override));
     MOCK_METHOD(bool, IsThreeVapConflict, (), (override));
     MOCK_METHOD(int32_t, GetSelfWifiConfigInfoV2, (uint8_t *cfg, size_t *size), (override));
     MOCK_METHOD(int32_t, GetInterfaceCoexistCap, (char **cap), (override));

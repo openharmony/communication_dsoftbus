@@ -146,6 +146,8 @@ public:
     virtual void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode);
     virtual void LnnDestroyConnectionFsm(LnnConnectionFsm *connFsm);
     virtual int32_t LnnStartConnectionFsm(LnnConnectionFsm *connFsm);
+    virtual bool LnnIsNeedCleanConnectionFsm(const NodeInfo *nodeInfo, ConnectionAddrType type);
+    virtual int32_t AuthFlushDevice(const char *uuid);
     virtual void LnnNotifyMasterNodeChanged(bool isMaster, const char* masterNodeUdid, int32_t weight);
     virtual int32_t LnnInitFastOffline(void);
     virtual int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum);
@@ -301,6 +303,8 @@ public:
     MOCK_METHOD2(LnnFsmRemoveMessageByType, int32_t (FsmStateMachine *, int32_t));
     MOCK_METHOD0(LnnDeinitBusCenterEvent, void ());
     MOCK_METHOD4(AuthStartVerify, int32_t (const AuthConnInfo *, uint32_t, const AuthVerifyCallback *, bool));
+    MOCK_METHOD2(LnnIsNeedCleanConnectionFsm, bool (const NodeInfo *, ConnectionAddrType));
+    MOCK_METHOD1(AuthFlushDevice, int32_t (const char *uuid));
 
     static int32_t ActionOfLnnGetSettingDeviceName(char *deviceName, uint32_t len);
 };

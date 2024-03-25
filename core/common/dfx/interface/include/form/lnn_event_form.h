@@ -123,6 +123,8 @@ typedef enum {
     AUDIT_SCENE_HANDLE_MSG_DEV_ID = 3,
     AUDIT_SCENE_HANDLE_MSG_DEV_INFO = 4,
     AUDIT_SCENE_HANDLE_MSG_AUTH_DATA = 5,
+    AUDIT_SCENE_HEARTBEAT_FREQ = 6,
+    AUDIT_SCENE_HEARTBEAT_MSG = 7,
 } LnnAuditScene;
 
 typedef enum {
@@ -161,6 +163,7 @@ typedef struct {
     int32_t peerDevType;         // PEER_DEV_TYPE
     int32_t attackTimes;         // ATTACK_TIMES
     int32_t beAttackedPort;      // BE_ATTACKED_PORT
+    int32_t hbEventType;         // HEARTBEAT_EVENT_TYPE
 } LnnAuditExtra;
 
 #ifdef __cplusplus

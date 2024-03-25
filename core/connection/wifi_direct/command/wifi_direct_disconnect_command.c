@@ -40,7 +40,7 @@ static int32_t PreferNegotiateChannelForConnectInfo(struct InnerLink *link, stru
         }
         connectInfo->negoChannel = channel->duplicate(channel);
         CONN_CHECK_AND_RETURN_RET_LOGW(connectInfo->negoChannel != NULL, SOFTBUS_MALLOC_ERR, CONN_WIFI_DIRECT,
-                                      "new channel failed");
+                                       "new channel failed");
         return SOFTBUS_OK;
     }
 
@@ -69,7 +69,7 @@ static int32_t CloseLink(struct WifiDirectDisconnectCommand *command)
 
     int32_t reference = link->getReference(link);
     CONN_LOGI(CONN_WIFI_DIRECT, "remoteMac=%{public}s, reference=%{public}d",
-          WifiDirectAnonymizeMac(link->getString(link, IL_KEY_REMOTE_BASE_MAC, "")), reference);
+        WifiDirectAnonymizeMac(link->getString(link, IL_KEY_REMOTE_BASE_MAC, "")), reference);
     if (reference > 1) {
         command->onSuccess((struct WifiDirectCommand *)command, NULL);
         return SOFTBUS_OK;

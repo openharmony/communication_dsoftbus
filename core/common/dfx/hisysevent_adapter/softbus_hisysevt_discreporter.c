@@ -501,7 +501,7 @@ int32_t SoftbusRecordDiscBleRssi(int32_t rssi)
         return SOFTBUS_INVALID_PARAM;
     }
     COMM_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleRssiRangeLock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, COMM_EVENT,
-                                  "ble rssi range lock fail");
+                                   "ble rssi range lock fail");
 
     size_t rangeId = (MAX_RANGE_ID - rssi) / INTERVAL_OF_RSSI;
     g_bleRssiRangeId[rangeId] = rangeId;
@@ -523,7 +523,7 @@ static int32_t InitDiscEvtMutexLock(void)
 {
     SoftBusMutexAttr mutexAttr = {SOFTBUS_MUTEX_RECURSIVE};
     COMM_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexInit(&g_discDetailLock, &mutexAttr) == SOFTBUS_OK, SOFTBUS_ERR,
-                                  COMM_EVENT, "init disc detail lock fail");
+                                   COMM_EVENT, "init disc detail lock fail");
     int32_t nRet = SoftBusMutexInit(&g_bleRssiRangeLock, &mutexAttr);
     if (nRet != SOFTBUS_OK) {
         COMM_LOGE(COMM_EVENT, "init ble rssi range lock fail");

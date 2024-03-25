@@ -56,6 +56,8 @@ typedef enum {
     AUDIT_EVENT_IO_ERROR,
     AUDIT_EVENT_DOS_ATTACK,
     AUDIT_EVENT_DATA_LIMIT,
+    AUDIT_EVENT_HB_FREQ_ERROR,
+    AUDIT_EVENT_HB_MSG_ERROR,
 } SoftbusAuditType;
 
 #ifdef __cplusplus
