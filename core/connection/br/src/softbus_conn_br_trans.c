@@ -95,7 +95,7 @@ int32_t ConnBrTransReadOneFrame(uint32_t connectionId, int32_t socketHandle, Lim
             return dataLen;
         }
         int32_t recvLen = g_sppDriver->Read(
-                socketHandle, buffer->buffer + buffer->length, (int32_t)(buffer->capacity - buffer->length));
+            socketHandle, buffer->buffer + buffer->length, (int32_t)(buffer->capacity - buffer->length));
         if (recvLen == BR_READ_SOCKET_CLOSED) {
             CONN_LOGW(CONN_BR,
                 "br connection read return, connection closed. connId=%{public}u, socketHandle=%{public}d",

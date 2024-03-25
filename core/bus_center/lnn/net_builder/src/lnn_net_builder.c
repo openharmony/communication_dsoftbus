@@ -575,9 +575,7 @@ static int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReport
         LNN_LOGW(LNN_BUILDER, "addr is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (!para->isNeedConnect) {
-        isShort = true;
-    }
+    isShort = para->isNeedConnect ? false : true;
     connFsm = FindConnectionFsmByAddr(&para->addr, isShort);
     if (connFsm == NULL || connFsm->isDead) {
         if (TryPendingJoinRequest(para, needReportFailure)) {
@@ -589,9 +587,14 @@ static int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReport
         SoftBusFree((void *)para);
         return ret;
     }
-    connFsm->connInfo.flag |=
-        (needReportFailure ? LNN_CONN_INFO_FLAG_JOIN_REQUEST : LNN_CONN_INFO_FLAG_JOIN_AUTO);
+    connFsm->connInfo.flag |= (needReportFailure ? LNN_CONN_INFO_FLAG_JOIN_REQUEST : LNN_CONN_INFO_FLAG_JOIN_AUTO);
     if ((connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_ONLINE) != 0) {
+        if (connFsm->connInfo.addr.type == CONNECTION_ADDR_WLAN || connFsm->connInfo.addr.type == CONNECTION_ADDR_ETH) {
+            char uuid[UUID_BUF_LEN] = {0};
+            (void)LnnConvertDlId(connFsm->connInfo.peerNetworkId, CATEGORY_NETWORK_ID, CATEGORY_UUID,
+                uuid, UUID_BUF_LEN);
+            (void)AuthFlushDevice(uuid);
+        }
         if ((LnnSendJoinRequestToConnFsm(connFsm) != SOFTBUS_OK) && needReportFailure) {
             LNN_LOGE(LNN_BUILDER, "online status, process join lnn request failed");
             LnnNotifyJoinResult((ConnectionAddr *)&para->addr, NULL, SOFTBUS_ERR);
@@ -606,9 +609,8 @@ static int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReport
         return SOFTBUS_OK;
     }
     AuthConnInfo authConn;
-    uint32_t requestId = AuthGenRequestId();
     (void)LnnConvertAddrToAuthConnInfo(&addr, &authConn);
-    if (AuthStartVerify(&authConn, requestId, LnnGetReAuthVerifyCallback(), false) != SOFTBUS_OK) {
+    if (AuthStartVerify(&authConn, AuthGenRequestId(), LnnGetReAuthVerifyCallback(), false) != SOFTBUS_OK) {
         LNN_LOGI(LNN_BUILDER, "AuthStartVerify error");
         return SOFTBUS_ERR;
     }
@@ -856,9 +858,7 @@ static int32_t ProcessDeviceVerifyPass(const void *para)
             rc = CreatePassiveConnectionFsm(msgPara);
             break;
         }
-        if (strcmp(connFsm->connInfo.peerNetworkId, msgPara->nodeInfo->networkId) != 0) {
-            LNN_LOGI(LNN_BUILDER, "fsmId=%{public}u networkId changed, authId=%{public}" PRId64, connFsm->id,
-                msgPara->authHandle.authId);
+        if (LnnIsNeedCleanConnectionFsm(msgPara->nodeInfo, msgPara->addr.type)) {
             rc = CreatePassiveConnectionFsm(msgPara);
             break;
         }
@@ -1781,7 +1781,7 @@ static void OnReAuthVerifyPassed(uint32_t requestId, AuthHandle authHandle, cons
         return;
     }
     LnnConnectionFsm *connFsm = FindConnectionFsmByAddr(&addr, true);
-    if (connFsm != NULL && ((connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_JOIN_PASSIVE) == 0)) {
+    if (connFsm != NULL && !connFsm->isDead && !LnnIsNeedCleanConnectionFsm(info, addr.type)) {
         if (info != NULL && LnnUpdateGroupType(info) == SOFTBUS_OK && LnnUpdateAccountInfo(info) == SOFTBUS_OK) {
             UpdateProfile(info);
             NodeInfo nodeInfo;

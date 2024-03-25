@@ -231,7 +231,7 @@ void LnnNotifyScreenStateChangeEvent(SoftBusScreenState state);
 void LnnNotifyDifferentAccountChangeEvent(void *state);
 void LnnNotifyBtStateChangeEvent(void *state);
 void LnnNotifyScreenLockStateChangeEvent(SoftBusScreenLockState state);
-void LnnNotifyAccountStateChangeEvent(void *state);
+void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state);
 void LnnNotifyUserStateChangeEvent(SoftBusUserState state);
 void LnnNotifyHomeGroupChangeEvent(SoftBusHomeGroupState state);
 void LnnNotifyNightModeStateChangeEvent(void *state);

@@ -455,18 +455,15 @@ void LnnNotifyScreenLockStateChangeEvent(SoftBusScreenLockState state)
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
-void LnnNotifyAccountStateChangeEvent(void *state)
+void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state)
 {
-    SoftBusAccountState *accountState = (SoftBusAccountState *)state;
-    if (*accountState < SOFTBUS_ACCOUNT_LOG_IN || *accountState >= SOFTBUS_ACCOUNT_UNKNOWN) {
-        LNN_LOGE(LNN_EVENT, "bad accountState=%{public}d", *accountState);
-        SoftBusFree(accountState);
+    if (state < SOFTBUS_ACCOUNT_LOG_IN || state >= SOFTBUS_ACCOUNT_UNKNOWN) {
+        LNN_LOGE(LNN_EVENT, "bad accountState=%{public}d", state);
         return;
     }
     LnnMonitorHbStateChangedEvent event = {.basic.event = LNN_EVENT_ACCOUNT_CHANGED,
-        .status = (uint8_t)(*accountState)};
+        .status = (uint8_t)state};
     NotifyEvent((const LnnEventBasicInfo *)&event);
-    SoftBusFree(accountState);
 }
 
 void LnnNotifyDifferentAccountChangeEvent(void *state)

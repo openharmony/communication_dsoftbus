@@ -163,7 +163,7 @@
 #define DEVICE_ID_STR_LEN 64 // for bt v1
 #define DEFAULT_BATTERY_LEVEL 100
 #define DEFAULT_NODE_WEIGHT 100
-#define BASE64_OFFLINE_CODE_LEN ((OFFLINE_CODE_BYTE_SIZE / 3 + 1) * 4 + 1)
+#define BASE64_OFFLINE_CODE_LEN 16
 #define DEFAULT_WIFI_BUFF_SIZE 32768 // 32k
 #define DEFAULT_BR_BUFF_SIZE 4096 // 4k
 #define DEFAULT_BLE_TIMESTAMP (roundl(pow(2, 63)) - 1)
@@ -1880,7 +1880,7 @@ int32_t ProcessDeviceIdMessage(AuthSessionInfo *info, const uint8_t *data, uint3
     return UnpackDeviceIdJson((const char *)data, len, info);
 }
 
-static void GetSessionKeyList(int64_t authSeq, const AuthSessionInfo *info, SessionKeyList *list)
+static void GetDumpSessionKeyList(int64_t authSeq, const AuthSessionInfo *info, SessionKeyList *list)
 {
     ListInit(list);
     SessionKey sessionKey;
@@ -1894,6 +1894,9 @@ static void GetSessionKeyList(int64_t authSeq, const AuthSessionInfo *info, Sess
         return;
     }
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
+    if (SetSessionKeyAvailable(list, TO_INT32(authSeq)) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "set session key available fail");
+    }
 }
 
 static void DfxRecordLnnPostDeviceInfoStart(int64_t authSeq)
@@ -1938,7 +1941,7 @@ int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
         inputLen = strlen(msg) + 1;
     }
     SessionKeyList sessionKeyList;
-    GetSessionKeyList(authSeq, info, &sessionKeyList);
+    GetDumpSessionKeyList(authSeq, info, &sessionKeyList);
     if (EncryptInner(&sessionKeyList, inputData, inputLen, &data, &dataLen) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "encrypt device info fail");
         JSON_Free(msg);
@@ -1947,6 +1950,7 @@ int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
     }
     JSON_Free(msg);
     SoftBusFree(compressData);
+    DestroySessionKeyList(&sessionKeyList);
     if (info->connInfo.type == AUTH_LINK_TYPE_WIFI && info->isServer) {
         compressFlag = FLAG_RELAY_DEVICE_INFO;
         authSeq = 0;
@@ -1974,11 +1978,12 @@ int32_t ProcessDeviceInfoMessage(int64_t authSeq, AuthSessionInfo *info, const u
     uint8_t *msg = NULL;
     uint32_t msgSize = 0;
     SessionKeyList sessionKeyList;
-    GetSessionKeyList(authSeq, info, &sessionKeyList);
+    GetDumpSessionKeyList(authSeq, info, &sessionKeyList);
     if (DecryptInner(&sessionKeyList, data, len, &msg, &msgSize) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "decrypt device info fail");
         return SOFTBUS_DECRYPT_ERR;
     }
+    DestroySessionKeyList(&sessionKeyList);
     uint8_t *decompressData = NULL;
     uint32_t decompressLen = 0;
     if ((info->connInfo.type != AUTH_LINK_TYPE_WIFI) && info->isSupportCompress) {
@@ -2106,6 +2111,10 @@ bool IsFlushDevicePacket(const AuthConnInfo *connInfo, const AuthDataHead *head,
 int32_t PostVerifyDeviceMessage(const AuthManager *auth, int32_t flagRelay, AuthLinkType type)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(auth != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "auth is NULL");
+    if (type < AUTH_LINK_TYPE_WIFI || type >= AUTH_LINK_TYPE_MAX) {
+        AUTH_LOGE(AUTH_FSM, "type error, type=%{public}d", type);
+        return SOFTBUS_ERR;
+    }
     char *msg = PackVerifyDeviceMessage(auth->uuid);
     if (msg == NULL) {
         AUTH_LOGE(AUTH_FSM, "pack verify device msg fail");

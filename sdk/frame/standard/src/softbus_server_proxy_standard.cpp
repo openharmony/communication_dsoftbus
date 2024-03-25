@@ -141,6 +141,12 @@ int32_t SoftBusServerProxyFrame::NotifyAuthSuccess(int32_t channelId, int32_t ch
     return SOFTBUS_OK;
 }
 
+int32_t SoftBusServerProxyFrame::ReleaseResources(int32_t channelId)
+{
+    (void)channelId;
+    return SOFTBUS_OK;
+}
+
 int32_t SoftBusServerProxyFrame::CloseChannel(int32_t channelId, int32_t channelType)
 {
     (void)channelId;

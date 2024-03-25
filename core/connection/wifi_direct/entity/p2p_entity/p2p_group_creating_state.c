@@ -65,7 +65,7 @@ static void HandleConnectionChange(struct P2pEntityState *self, struct WifiDirec
 
     entity->isConnectionChangeReceived = true;
     CONN_LOGI(CONN_WIFI_DIRECT, "isConnectionChangeReceived=%{public}d, isConnectStateChangeReceived=%{public}d",
-          entity->isConnectionChangeReceived, entity->isConnectStateChangeReceived);
+        entity->isConnectionChangeReceived, entity->isConnectStateChangeReceived);
 
     if (entity->isConnectionChangeReceived && entity->isConnectStateChangeReceived) {
         CONN_LOGI(CONN_WIFI_DIRECT, "create group complete");
@@ -88,7 +88,7 @@ static void HandleConnectStateChange(struct P2pEntityState *self, enum WifiDirec
         CONN_LOGI(CONN_WIFI_DIRECT, "p2p connected");
         entity->isConnectStateChangeReceived = true;
         CONN_LOGI(CONN_WIFI_DIRECT, "isConnectionChangeReceived=%{public}d, isConnectStateChangeReceived=%{public}d",
-              entity->isConnectionChangeReceived, entity->isConnectStateChangeReceived);
+            entity->isConnectionChangeReceived, entity->isConnectStateChangeReceived);
 
         if (entity->isConnectionChangeReceived && entity->isConnectStateChangeReceived) {
             CONN_LOGI(CONN_WIFI_DIRECT, "create group complete");

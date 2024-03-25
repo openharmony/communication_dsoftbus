@@ -27,7 +27,7 @@ public:
     static DefaultNegotiateChannelMock* GetMock()
     {
         return mock;
-    }   
+    }
 
     DefaultNegotiateChannelMock();
     ~DefaultNegotiateChannelMock();

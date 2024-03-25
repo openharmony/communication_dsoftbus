@@ -133,3 +133,13 @@ int32_t GetMtuSize(int32_t socket, uint32_t *mtuSize)
     TRANS_LOGI(TRANS_SDK, "GetMtuSize: socket=%{public}d", socket);
     return GetSocketMtuSize(socket, mtuSize);
 }
+
+int32_t DBinderGrantPermission(int32_t uid, int32_t pid, const char *socketName)
+{
+    return ClientGrantPermission(uid, pid, socketName);
+}
+
+int32_t DBinderRemovePermission(const char *socketName)
+{
+    return ClientRemovePermission(socketName);
+}

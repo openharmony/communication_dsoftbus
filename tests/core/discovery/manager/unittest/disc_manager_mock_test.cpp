@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,33 @@
  * limitations under the License.
  */
 
+#include <csignal>
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <thread>
 
-#include "disc_log.h"
-#include "disc_interface.h"
-#include "disc_manager.h"
-#include "softbus_error_code.h"
 #include "ble_mock.h"
 #include "coap_mock.h"
+#include "disc_interface.h"
+#include "disc_log.h"
+#include "disc_manager.h"
 #include "exception_branch_checker.h"
+#include "softbus_error_code.h"
 
 using namespace testing::ext;
 using testing::Return;
+
+namespace {
+uint32_t g_segmentFaultCount = 0;
+
+void SignalHandler(int32_t sig, siginfo_t *info, void *context)
+{
+    (void)sig;
+    (void)info;
+    (void)context;
+    g_segmentFaultCount++;
+}
+} //anonymize namespace
 
 namespace OHOS {
 class DiscManagerMockTest : public testing::Test {
@@ -751,6 +765,60 @@ HWTEST_F(DiscManagerMockTest, DiscStopDiscovery001, TestSize.Level1)
     }
 
     DISC_LOGI(DISC_TEST, "DiscStopDiscovery001 end ----");
+}
+
+/*
+* @tc.name: DiscConcurrentRequests001
+* @tc.desc: test with concurrent requests
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(DiscManagerMockTest, DiscConcurrentRequests001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscConcurrentRequests001 begin ----");
+    BleMock bleMock;
+    bleMock.SetupStub();
+
+    struct sigaction sa = {
+        .sa_flags = SA_SIGINFO,
+        .sa_sigaction = SignalHandler,
+    };
+    sigemptyset(&sa.sa_mask);
+    ASSERT_NE(sigaction(SIGSEGV, &sa, nullptr), -1);
+
+    SubscribeInfo subscribeInfo = {
+        .subscribeId = 1,
+        .mode = DISCOVER_MODE_PASSIVE,
+        .medium = BLE,
+        .freq = LOW,
+        .capability = "osdCapability",
+    };
+    PublishInfo publishInfo = {
+        .publishId = 1,
+        .mode = DISCOVER_MODE_PASSIVE,
+        .medium = BLE,
+        .freq = LOW,
+        .capability = "osdCapability",
+    };
+
+    uint32_t loopCount = 100;
+    uint32_t waitSeconds = 10;
+    g_segmentFaultCount = 0;
+    for (uint32_t i = 0; i < loopCount; ++i) {
+        std::thread(DiscStartDiscovery, packageName_, &subscribeInfo, &serverCallback_).detach();
+        std::thread(DiscStopDiscovery, packageName_, subscribeInfo.subscribeId).detach();
+        std::thread(DiscPublishService, packageName_, &publishInfo).detach();
+        std::thread(DiscUnPublishService, packageName_, publishInfo.publishId).detach();
+
+        std::thread(DiscStartAdvertise, MODULE_LNN, &subscribeInfo).detach();
+        std::thread(DiscStopAdvertise, MODULE_LNN, subscribeInfo.subscribeId).detach();
+        std::thread(DiscStartScan, MODULE_LNN, &publishInfo).detach();
+        std::thread(DiscUnpublish, MODULE_LNN, publishInfo.publishId).detach();
+    }
+
+    std::this_thread::sleep_for(std::chrono::seconds(waitSeconds));
+    EXPECT_EQ(g_segmentFaultCount, 0);
+    DISC_LOGI(DISC_TEST, "DiscConcurrentRequests001 end ----");
 }
 
 /*

@@ -77,7 +77,6 @@ static HiSysEventParamAssigner g_connAuditAssigners[] = {
     { "LOCAL_BR_MAC",   HISYSEVENT_STRING, ConnAuditAssignerLocalBrMac     },
     { "PEER_BLE_MAC",   HISYSEVENT_STRING, ConnAuditAssignerPeerBleMac     },
     { "LOCAL_BLE_MAC",  HISYSEVENT_STRING, ConnAuditAssignerLocalBleMac    },
-    { "PEER_WIFI_MAC",  HISYSEVENT_STRING, ConnAuditAssignerPeerWifiMac    },
     { "PEER_DEV_TYPE",  HISYSEVENT_STRING, ConnAuditAssignerPeerDeviceType },
     { "PEER_UDID",      HISYSEVENT_STRING, ConnAuditAssignerPeerUdid       },
     { "LOCAL_UDID",     HISYSEVENT_STRING, ConnAuditAssignerLocalUdid      },
@@ -89,6 +88,7 @@ static HiSysEventParamAssigner g_connAuditAssigners[] = {
     { "TO_CALL_PKG",    HISYSEVENT_STRING, ConnAuditAssignerCalleePkg      },
     { "PEER_PORT",      HISYSEVENT_STRING, ConnAuditAssignerPeerPort       },
     { "LOCAL_PORT",     HISYSEVENT_STRING, ConnAuditAssignerLocalPort      },
+    { "PEER_WIFI_MAC",  HISYSEVENT_STRING, ConnAuditAssignerPeerWifiMac    },
     // Modification Note: remember updating CONN_AUDIT_ASSIGNER_SIZE
 };
 

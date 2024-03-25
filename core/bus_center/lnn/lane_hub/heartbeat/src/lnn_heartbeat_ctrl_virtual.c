@@ -40,6 +40,14 @@ int32_t LnnOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType ad
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+void LnnStopOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType addrType)
+{
+    (void)networkId;
+    (void)addrType;
+
+    LNN_LOGI(LNN_HEART_BEAT, "heartbeat stop offline timing by heartbeat");
+}
+
 int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode)
 {
     (void)pkgName;
