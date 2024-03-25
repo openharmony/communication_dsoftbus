@@ -648,8 +648,12 @@ static int32_t GetConDeviceInfo(DeviceInfo *info)
         isWakeRemote = isWakeRemote ? isWakeRemote : g_bleInfoManager[infoIndex].isWakeRemote[pos];
     }
     (void)memset_s(info->accountHash, MAX_ACCOUNT_HASH_LEN, 0x0, MAX_ACCOUNT_HASH_LEN);
-    if (!LnnIsDefaultOhosAccount()) {
-        DiscBleGetShortUserIdHash((uint8_t *)info->accountHash, SHORT_USER_ID_HASH_LEN);
+    if (isSameAccount) {
+        if (!LnnIsDefaultOhosAccount()) {
+            DiscBleGetShortUserIdHash((uint8_t *)info->accountHash, SHORT_USER_ID_HASH_LEN);
+        } else {
+            DISC_LOGW(DISC_BLE, "Account not logged in during same account check");
+        }
     }
     for (uint32_t pos = 0; pos < CAPABILITY_NUM; pos++) {
         info->capabilityBitmap[pos] = g_bleInfoManager[infoIndex].capBitMap[pos];
@@ -892,8 +896,9 @@ static int32_t StartAdvertiser(int32_t adv)
 
     SignalingMsgPrint("ble adv send", (uint8_t *)packet.bcData.payload, (uint8_t)packet.bcData.payloadLen,
         DISC_BLE);
-    if (StartBroadcasting(advertiser->channel, &advParam, &packet) != SOFTBUS_OK) {
-        DfxRecordAdevertiserEnd(adv, SOFTBUS_DISCOVER_START_BROADCAST_FAIL);
+    ret = StartBroadcasting(advertiser->channel, &advParam, &packet);
+    if (ret != SOFTBUS_OK) {
+        DfxRecordAdevertiserEnd(adv, ret);
         DestroyBleConfigAdvData(&packet);
         DISC_LOGE(DISC_BLE, "start adv failed, adv=%{public}d", adv);
         return SOFTBUS_DISCOVER_START_BROADCAST_FAIL;
@@ -994,12 +999,12 @@ static void StartScaner(void)
     BcScanParams scanParam;
     int32_t maxFreq = GetMaxExchangeFreq();
     if (GetScannerParam(maxFreq, &scanParam) != SOFTBUS_OK) {
-        DfxRecordScanEnd(SOFTBUS_DISCOVER_START_SCAN_FAIL);
         DISC_LOGE(DISC_BLE, "GetScannerParam failed");
         return;
     }
-    if (StartScan(g_bleListener.scanListenerId, &scanParam) != SOFTBUS_OK) {
-        DfxRecordScanEnd(SOFTBUS_DISCOVER_START_SCAN_FAIL);
+    int32_t ret = StartScan(g_bleListener.scanListenerId, &scanParam);
+    if (ret != SOFTBUS_OK) {
+        DfxRecordScanEnd(ret);
         DISC_LOGE(DISC_BLE, "start scan failed");
         return;
     }
@@ -1200,19 +1205,21 @@ static void DfxRecordBleProcessEnd(uint8_t publishFlag, uint8_t activeFlag, int3
     extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
 
     const char *capabilityData = NULL;
+    uint32_t dataLen = MAX_CAPABILITYDATA_LEN - 1;
     if (publishFlag == BLE_PUBLISH && option != NULL) {
         PublishOption *publishOption = (PublishOption *)option;
         extra.capabilityBit = (int32_t)publishOption->capabilityBitmap[0];
         capabilityData = (const char *)publishOption->capabilityData;
+        dataLen = publishOption->dataLen < dataLen ? publishOption->dataLen : dataLen;
     } else if (publishFlag == BLE_SUBSCRIBE && option != NULL) {
         SubscribeOption *subscribeOption = (SubscribeOption *)option;
         extra.capabilityBit = (int32_t)subscribeOption->capabilityBitmap[0];
         capabilityData = (const char *)subscribeOption->capabilityData;
+        dataLen = subscribeOption->dataLen < dataLen ? subscribeOption->dataLen : dataLen;
     }
 
     char data[MAX_CAPABILITYDATA_LEN] = { 0 };
-    if (capabilityData != NULL && strncpy_s(data, MAX_CAPABILITYDATA_LEN, capabilityData,
-        MAX_CAPABILITYDATA_LEN - 1) == EOK) {
+    if (capabilityData != NULL && strncpy_s(data, MAX_CAPABILITYDATA_LEN, capabilityData, dataLen) == EOK) {
         extra.capabilityData = data;
     }
     DISC_EVENT(EVENT_SCENE_BLE, EVENT_STAGE_BLE_PROCESS, extra);

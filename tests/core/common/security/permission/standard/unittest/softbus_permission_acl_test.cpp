@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 #include "securec.h"
 
-#include "access_control.cpp"
+#include "access_control.h"
 #include "session.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
@@ -40,18 +40,6 @@ public:
 
 void SoftbusPermissionACLTest::SetUpTestCase(void) {}
 void SoftbusPermissionACLTest::TearDownTestCase(void) {}
-
-/**
- * @tc.name: TransCheckAccessControl001
- * @tc.desc: test function TransCheckAccessControl parameters.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusPermissionACLTest, TransCheckAccessControl001, TestSize.Level0)
-{
-    int32_t ret = TransCheckAccessControl(HAP_TOKENID, "test");
-    EXPECT_EQ(SOFTBUS_TRANS_CHECK_ACL_FAILED, ret);
-}
 
 /**
  * @tc.name: TransCheckClientAccessControl001

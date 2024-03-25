@@ -177,6 +177,11 @@ int32_t SoftBusServer::NotifyAuthSuccess(int32_t channelId, int32_t channelType)
     return TransNotifyAuthSuccess(channelId, channelType);
 }
 
+int32_t SoftBusServer::ReleaseResources(int32_t channelId)
+{
+    return TransReleaseUdpResources(channelId);
+}
+
 int32_t SoftBusServer::CloseChannel(int32_t channelId, int32_t channelType)
 {
     return TransCloseChannel(channelId, channelType);

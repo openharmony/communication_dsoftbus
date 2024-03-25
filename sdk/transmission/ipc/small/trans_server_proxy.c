@@ -278,6 +278,27 @@ int32_t ServerIpcNotifyAuthSuccess(int32_t channelId, int32_t channelType)
     return ret;
 }
 
+int32_t ServerIpcReleaseResources(int32_t channelId)
+{
+    uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
+    IpcIo request = {0};
+    IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
+    WriteInt32(&request, channelId);
+
+    int32_t ret = SOFTBUS_ERR;
+    /* sync */
+    if (g_serverProxy == NULL) {
+        TRANS_LOGE(TRANS_SDK, "server proxy not init");
+        return SOFTBUS_NO_INIT;
+    }
+    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_RELEASE_RESOURCES, &request, &ret, ProxyCallback);
+    if (ans != EC_SUCCESS) {
+        TRANS_LOGE(TRANS_SDK, "callback ret=%{public}d", ret);
+        return SOFTBUS_IPC_ERR;
+    }
+    return ret;
+}
+
 int32_t ServerIpcCloseChannel(int32_t channelId, int32_t channelType)
 {
     TRANS_LOGD(TRANS_SDK, "enter.");

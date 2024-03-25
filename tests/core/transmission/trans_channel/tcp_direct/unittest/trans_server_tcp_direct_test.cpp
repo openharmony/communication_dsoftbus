@@ -257,7 +257,7 @@ HWTEST_F(TransServerTcpDirectTest, StartVerifySession001, TestSize.Level1)
     ASSERT_TRUE(info != nullptr);
 
     SessionKey sessionKey;
-
+    info->connInfo.type = AUTH_LINK_TYPE_WIFI;
     int32_t ret = AuthManagerSetSessionKey(authSeq, info, &sessionKey, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 

@@ -291,6 +291,7 @@
         "ClientTransProxyOnChannelClosed";
         "ClientTransTdcOnSessionClosed";
         "TransTdcStopRead";
+        "ServerIpcReleaseResources";
         "ServerIpcCloseChannel";
         "DiscClientOnDiscoverFailed";
         "SendBytesInner";
@@ -385,6 +386,8 @@
         "TransSetSocketFileListener";
         "EvaluateQos";
         "GetMtuSize";
+        "DBinderGrantPermission";
+        "DBinderRemovePermission";
         "ClientAddPolicyReportCallback";
         "ClientDeletePolicyReportCallback";
         "ServerEnableDiscoveryPolicy";

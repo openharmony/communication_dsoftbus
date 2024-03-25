@@ -42,6 +42,7 @@ int32_t AuthInsertDeviceKey(const NodeInfo *deviceInfo, const AuthDeviceKeyInfo 
 void AuthRemoveDeviceKeyByUdid(const char *udidOrHash);
 int32_t AuthFindDeviceKey(const char *udidHash, int32_t keyType, AuthDeviceKeyInfo *deviceKey);
 void AuthUpdateKeyIndex(const char *udidHash, int32_t keyType, int64_t index, bool isServer);
+void AuthUpdateNormalizeKeyIndex(const char *udidHash, int64_t index, bool isServer);
 int32_t AuthFindNormalizeKeyByServerSide(const char *udidHash, bool isServer, AuthDeviceKeyInfo *deviceKey);
 int32_t AuthFindLatestNormalizeKey(const char *udidHash, AuthDeviceKeyInfo *deviceKey);
 void AuthClearDeviceKey(void);
