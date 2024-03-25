@@ -187,6 +187,10 @@ int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta
 /* for ProxyChannel & P2P TcpDirectchannel */
 void AuthGetLatestIdByUuid(const char *uuid, AuthLinkType type, bool isMeta, AuthHandle *authHandle)
 {
+    if (authHandle == NULL) {
+        AUTH_LOGE(AUTH_CONN, "authHandle is null");
+        return;
+    }
     authHandle->authId = AUTH_INVALID_ID;
     if (isMeta) {
         return;
@@ -251,6 +255,7 @@ int32_t AuthRestoreAuthManager(const char *udidHash,
     }
     sessionKey.len = keyInfo.keyLen;
     if (AuthManagerSetSessionKey(keyInfo.keyIndex, &info, &sessionKey, false) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_KEY, "set sessionkey fail, index=%{public}" PRId64, keyInfo.keyIndex);
         return SOFTBUS_ERR;
     }
     AuthManager *auth = GetAuthManagerByConnInfo(&info.connInfo, info.isServer);

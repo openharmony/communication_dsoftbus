@@ -137,6 +137,7 @@ void DelAuthManager(AuthManager *auth, int32_t type)
     if (type != AUTH_LINK_TYPE_MAX) {
         if (auth->connId[type] == 0) {
             AUTH_LOGE(AUTH_FSM, "authManager has been deleted, authId=%{public}" PRId64, auth->authId);
+            AnonymizeFree(anonyUdid);
             return;
         }
         auth->connId[type] = 0;
@@ -1087,7 +1088,7 @@ static void HandleBleConnectResult(uint32_t requestId, int64_t authId, uint64_t 
     } while (FindAuthRequestByConnInfo(&request.connInfo, &request) == SOFTBUS_OK);
 }
 
-static int32_t GenerateUdidShortHash(const char *udid, uint8_t *hash)
+static int32_t GenerateUdidHash(const char *udid, uint8_t *hash)
 {
     if (SoftBusGenerateStrHash((uint8_t *)udid, strlen(udid), hash) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "generate udidHash fail");
@@ -1107,7 +1108,8 @@ static int32_t GetUdidShortHash(const AuthConnInfo *connInfo, char *udidBuf, uin
                 AUTH_LOGE(AUTH_FSM, "get udid by brMac fail.");
                 return SOFTBUS_ERR;
             }
-            if (GenerateUdidShortHash(udid, hash) != SOFTBUS_OK) {
+            if (GenerateUdidHash(udid, hash) != SOFTBUS_OK) {
+                AUTH_LOGE(AUTH_FSM, "GenerateUdidHash fail.");
                 return SOFTBUS_ERR;
             }
             break;
@@ -1124,7 +1126,8 @@ static int32_t GetUdidShortHash(const AuthConnInfo *connInfo, char *udidBuf, uin
             break;
         case AUTH_LINK_TYPE_P2P:
         case AUTH_LINK_TYPE_ENHANCED_P2P:
-            if (GenerateUdidShortHash(connInfo->info.ipInfo.udid, hash) != SOFTBUS_OK) {
+            if (GenerateUdidHash(connInfo->info.ipInfo.udid, hash) != SOFTBUS_OK) {
+                AUTH_LOGE(AUTH_FSM, "GenerateUdidHash fail.");
                 return SOFTBUS_ERR;
             }
             break;
