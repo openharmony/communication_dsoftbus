@@ -551,7 +551,7 @@ FAIL:
 
 static void OnWifiDirectConnectSuccess(int32_t p2pRequestId, const struct WifiDirectLink *link)
 {
-    int errCode = SOFTBUS_OK;
+    int errCode = SOFTBUS_ERR;
     LaneLinkInfo linkInfo;
     if (link == NULL) {
         LNN_LOGE(LNN_LANE, "link is null");
