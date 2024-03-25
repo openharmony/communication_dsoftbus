@@ -948,7 +948,10 @@ static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, const MessagePara *para)
         return;
     }
     info->isNodeInfoReceived = true;
-
+    if (strcpy_s(info->nodeInfo.uuid, UUID_BUF_LEN, info->uuid) != EOK) {
+        AUTH_LOGE(AUTH_FSM, "copy uuid fail.");
+        return;
+    }
     if (info->connInfo.type == AUTH_LINK_TYPE_WIFI) {
         info->isCloseAckReceived = true; /* WiFi auth no need close ack, set true directly */
         if (!info->isServer) {
