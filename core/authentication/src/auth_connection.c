@@ -330,16 +330,20 @@ static void HandleConnConnectCmd(const void *para)
 static void HandleConnConnectResult(const void *para)
 {
     CHECK_NULL_PTR_RETURN_VOID(para);
-    int32_t fd = *(int32_t *)(para);
-    RouteBuildClientAuthManager(fd);
-    ConnRequest *item = FindConnRequestByFd(fd);
+    AuthConnectResult *connResult = (AuthConnectResult *)(para);
+    RouteBuildClientAuthManager(connResult->fd);
+    ConnRequest *item = FindConnRequestByFd(connResult->fd);
     if (item == NULL) {
-        AUTH_LOGE(AUTH_CONN, "ConnRequest not found, fd=%{public}d", fd);
+        AUTH_LOGE(AUTH_CONN, "ConnRequest not found, fd=%{public}d", connResult->fd);
         return;
     }
-    uint64_t connId = GenConnId(AUTH_LINK_TYPE_WIFI, fd);
     RemoveConnConnectTimeout(item->requestId);
-    NotifyClientConnected(item->requestId, connId, SOFTBUS_OK, &item->connInfo);
+    if (connResult->ret == SOFTBUS_OK) {
+        NotifyClientConnected(item->requestId, GenConnId(AUTH_LINK_TYPE_WIFI, connResult->fd),
+            SOFTBUS_OK, &item->connInfo);
+    } else {
+        NotifyClientConnected(item->requestId, 0, connResult->ret, NULL);
+    }
     DelConnRequest(item);
 }
 
@@ -352,7 +356,11 @@ static void OnWiFiConnected(ListenerModule module, int32_t fd, bool isClient)
         /* do nothing, wait auth message. */
         return;
     }
-    (void)PostAuthEvent(EVENT_CONNECT_RESULT, HandleConnConnectResult, &fd, sizeof(fd), 0);
+    AuthConnectResult info = {
+        .fd = fd,
+        .ret = SOFTBUS_OK,
+    };
+    (void)PostAuthEvent(EVENT_CONNECT_RESULT, HandleConnConnectResult, &info, sizeof(AuthConnectResult), 0);
 }
 
 static void OnWiFiDisconnected(int32_t fd)
@@ -362,6 +370,11 @@ static void OnWiFiDisconnected(int32_t fd)
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     connInfo.type = AUTH_LINK_TYPE_WIFI;
     NotifyDisconnected(GenConnId(connInfo.type, fd), &connInfo);
+    AuthConnectResult info = {
+        .fd = fd,
+        .ret = SOFTBUS_AUTH_CONN_FAIL,
+    };
+    (void)PostAuthEvent(EVENT_CONNECT_RESULT, HandleConnConnectResult, &info, sizeof(AuthConnectResult), 0);
     RouteClearAuthChannelId(fd);
 }
 
@@ -397,23 +410,6 @@ static int32_t InitWiFiConn(void)
 static void OnCommConnected(uint32_t connectionId, const ConnectionInfo *info)
 {
     AUTH_LOGI(AUTH_CONN, "(ignored)OnCommConnected: connectionId=%{public}u", connectionId);
-}
-
-DiscoveryType ConvertToDiscoveryType(AuthLinkType type)
-{
-    switch (type) {
-        case AUTH_LINK_TYPE_WIFI:
-            return DISCOVERY_TYPE_WIFI;
-        case AUTH_LINK_TYPE_BLE:
-            return DISCOVERY_TYPE_BLE;
-        case AUTH_LINK_TYPE_BR:
-            return DISCOVERY_TYPE_BR;
-        case AUTH_LINK_TYPE_P2P:
-            return DISCOVERY_TYPE_P2P;
-        default:
-            break;
-    }
-    return DISCOVERY_TYPE_UNKNOWN;
 }
 
 static void OnCommDisconnected(uint32_t connectionId, const ConnectionInfo *info)
