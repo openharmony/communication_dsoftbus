@@ -777,9 +777,9 @@ static bool IsSameDevice(const char *leftIdentifier, const char *rightIdentifier
     char leftHashStr[HEXIFY_LEN(SHORT_UDID_HASH_LEN)] = { 0 };
     char rightHashStr[HEXIFY_LEN(SHORT_UDID_HASH_LEN)] = { 0 };
     if (ConvertBytesToHexString(leftHashStr, HEXIFY_LEN(SHORT_UDID_HASH_LEN), leftHash, SHORT_UDID_HASH_LEN) !=
-            SOFTBUS_OK ||
+        SOFTBUS_OK ||
         ConvertBytesToHexString(rightHashStr, HEXIFY_LEN(SHORT_UDID_HASH_LEN), rightHash, SHORT_UDID_HASH_LEN) !=
-            SOFTBUS_OK) {
+        SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "convert bytes to array failed");
         return false;
     }
@@ -1651,6 +1651,12 @@ static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId,
         ctx->psm = option->bleOption.psm;
     }
     ctx->challengeCode = option->bleOption.challengeCode;
+    CONN_LOGI(CONN_BLE,
+        "ble connect device: receive connect request, "
+        "reqId=%{public}u, addr=%{public}s, protocol=%{public}d, udid=%{public}s, "
+        "fastestConnectEnable=%{public}d, connectTraceId=%{public}u",
+        requestId, anomizeAddress, ctx->protocol, anomizeUdid, ctx->fastestConnectEnable,
+        ctx->statistics.connectTraceId);
     status = ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_CONNECT_REQUEST, 0, 0, ctx, 0);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE,
@@ -1669,12 +1675,6 @@ static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId,
         .result = EVENT_STAGE_RESULT_OK
     };
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_DEVICE, extra);
-    CONN_LOGI(CONN_BLE,
-        "ble connect device: receive connect request, "
-        "reqId=%{public}u, addr=%{public}s, protocol=%{public}d, udid=%{public}s, "
-        "fastestConnectEnable=%{public}d, connectTraceId=%{public}u",
-        requestId, anomizeAddress, ctx->protocol, anomizeUdid, ctx->fastestConnectEnable,
-        ctx->statistics.connectTraceId);
     return SOFTBUS_OK;
 }
 

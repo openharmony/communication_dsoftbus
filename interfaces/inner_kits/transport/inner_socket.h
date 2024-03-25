@@ -54,6 +54,34 @@ extern "C" {
  * @version 1.0
  */
 int32_t GetMtuSize(int32_t socket, uint32_t *mtuSize);
+
+/**
+ * @brief Grant permission to socket with uid and pid.
+ *
+ * @param uid Indicates the uid of the process.
+ * @param pid Indicates the pid of the process.
+ * @param socketName Indicates the name of the socket to grant permission.
+ *
+ * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if invalid parameters are detected.
+ * @return Returns <b>SOFTBUS_OK</b> if the operation is successful; returns an error code otherwise.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+int32_t DBinderGrantPermission(int32_t uid, int32_t pid, const char *socketName);
+
+/**
+ * @brief Removes permissions for a specific socket
+ *
+ * @param socketName Indicates the name of the socket to remove permission.
+ *
+ * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if invalid parameters are detected.
+ * @return Returns <b>SOFTBUS_OK</b> if the operation is successful; returns an error code otherwise.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+int32_t DBinderRemovePermission(const char *socketName);
 #ifdef __cplusplus
 }
 #endif

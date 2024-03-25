@@ -36,6 +36,7 @@ int32_t ServerIpcSendMessage(int32_t channelId, int32_t channelType, const void 
 int32_t ServerIpcQosReport(int32_t channelId, int32_t chanType, int32_t appType, int32_t quality);
 int32_t ServerIpcGrantPermission(int uid, int pid, const char *sessionName);
 int32_t ServerIpcRemovePermission(const char *sessionName);
+int32_t ServerIpcReleaseResources(int32_t channelId);
 int32_t ServerIpcStreamStats(int32_t channelId, int32_t channelType, const StreamSendStats *data);
 int32_t ServerIpcRippleStats(int32_t channelId, int32_t channelType, const TrafficStats *data);
 int32_t ServerIpcEvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos, uint32_t qosCount);

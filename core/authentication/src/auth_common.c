@@ -402,6 +402,24 @@ int32_t ConvertToAuthConnInfo(const ConnectionInfo *info, AuthConnInfo *connInfo
     return SOFTBUS_OK;
 }
 
+DiscoveryType ConvertToDiscoveryType(AuthLinkType type)
+{
+    switch (type) {
+        case AUTH_LINK_TYPE_WIFI:
+            return DISCOVERY_TYPE_WIFI;
+        case AUTH_LINK_TYPE_BLE:
+            return DISCOVERY_TYPE_BLE;
+        case AUTH_LINK_TYPE_BR:
+            return DISCOVERY_TYPE_BR;
+        case AUTH_LINK_TYPE_P2P:
+            return DISCOVERY_TYPE_P2P;
+        default:
+            break;
+    }
+    AUTH_LOGE(AUTH_CONN, "unexpected AuthLinkType=%{public}d", type);
+    return DISCOVERY_TYPE_UNKNOWN;
+}
+
 AuthLinkType ConvertToAuthLinkType(DiscoveryType type)
 {
     switch (type) {

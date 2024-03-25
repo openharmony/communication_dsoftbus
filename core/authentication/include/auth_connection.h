@@ -45,6 +45,11 @@ typedef struct {
         uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data);
 } AuthConnListener;
 
+typedef struct {
+    int32_t fd;
+    int32_t ret;
+} AuthConnectResult;
+
 int32_t AuthConnInit(const AuthConnListener *listener);
 void AuthConnDeinit(void);
 

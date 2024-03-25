@@ -206,7 +206,8 @@ const ServerInvokeCmd g_serverInvokeCmdTbl[] = {
     { SERVER_NOTIFY_AUTH_SUCCESS, ServerNotifyAuthSuccess},
     { SERVER_CLOSE_CHANNEL, ServerCloseChannel },
     { SERVER_SESSION_SENDMSG, ServerSendSessionMsg },
-    { SERVER_SET_NODE_DATA_CHANGE_FLAG, ServerSetNodeDataChangeFlag},
+    { SERVER_SET_NODE_DATA_CHANGE_FLAG, ServerSetNodeDataChangeFlag },
+    { SERVER_RELEASE_RESOURCES, ServerReleaseResources },
 };
 
 static int32_t Invoke(IServerProxy *iProxy, int funcId, void *origin, IpcIo *req, IpcIo *reply)

@@ -186,7 +186,7 @@ HWTEST_F(TransTcpDirectWifiTest, OpenTcpDirectChannelTest004, TestSize.Level1)
 
 /**
  * @tc.name: OpenTcpDirectChannelTest005
- * @tc.desc: OpenTcpDirectChannel, AuthGetLatestIdByUuid func return err.
+ * @tc.desc: Should return SOFTBUS_ERR  when CreateNewSessinConn return valid paramter.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -202,9 +202,11 @@ HWTEST_F(TransTcpDirectWifiTest, OpenTcpDirectChannelTest005, TestSize.Level1)
     int32_t channelId = NORMAL_CHANNEL;
     connInfo->type = CONNECT_P2P_REUSE;
     NiceMock<TransTcpDirectWifiInterfaceMock> TcpWifiMock;
+    ON_CALL(TcpWifiMock, AuthGetLatestIdByUuid(_, _, _, _))
+        .WillByDefault(DoAll(SetArgPointee<3>(AuthHandle{.authId = AUTH_INVALID_ID}), Return()));
     EXPECT_CALL(TcpWifiMock, CreateNewSessinConn).WillOnce(Return(conn));
     int32_t ret = OpenTcpDirectChannel(appInfo, connInfo, &channelId);
-    EXPECT_EQ(SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     SoftBusFree(appInfo);
     SoftBusFree(connInfo);

@@ -88,6 +88,9 @@ ohos_unittest("SoftbusPermissionACLTest") {
       "device_info_manager:distributed_device_profile_common",
       "device_info_manager:distributed_device_profile_sdk",
     ]
+    sources += [ "$dsoftbus_core_path/common/security/permission/standard/access_control.cpp" ]
+  } else {
+    sources += [ "$dsoftbus_core_path/common/security/permission/standard/access_control_virtual.cpp" ]
   }
 }
 

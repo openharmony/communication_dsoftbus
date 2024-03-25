@@ -43,8 +43,10 @@ void InitSessionKeyList(SessionKeyList *list);
 void DestroySessionKeyList(SessionKeyList *list);
 int32_t DupSessionKeyList(const SessionKeyList *srcList, SessionKeyList *dstList);
 
+uint64_t GetLatestAvailableSessionKeyTime(const SessionKeyList *list);
 bool HasSessionKey(const SessionKeyList *list);
 int32_t AddSessionKey(SessionKeyList *list, int32_t index, const SessionKey *key);
+int32_t SetSessionKeyAvailable(SessionKeyList *list, int32_t index);
 int32_t GetLatestSessionKey(const SessionKeyList *list, int32_t *index, SessionKey *key);
 int32_t GetSessionKeyByIndex(const SessionKeyList *list, int32_t index, SessionKey *key);
 void RemoveSessionkeyByIndex(SessionKeyList *list, int32_t index);
