@@ -1,0 +1,47 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//build/test.gni")
+import("../../../../../../core/common/dfx/dsoftbus_dfx.gni")
+import("../../../../../../core/discovery/coap/disc_coap.gni")
+import("../../../../../../dsoftbus.gni")
+
+module_output_path = "dsoftbus/discovery"
+
+ohos_unittest("DiscCoapParserTest") {
+  module_out_path = module_output_path
+  sources = [
+    "$dsoftbus_root_path/core/discovery/coap/common/src/disc_coap_parser.c",
+    "disc_coap_parser_test.cpp",
+  ]
+
+  include_dirs = disc_coap_inc
+
+  deps = [
+    "$dsoftbus_dfx_path/log:softbus_dfx_log",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "//third_party/cJSON:cjson",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+group("unittest") {
+  testonly = true
+  deps = [ ":DiscCoapParserTest" ]
+}
