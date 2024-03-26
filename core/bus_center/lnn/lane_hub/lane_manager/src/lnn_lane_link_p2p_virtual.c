@@ -28,9 +28,7 @@ void LnnDisconnectP2p(const char *networkId, int32_t pid, uint32_t laneLinkReqId
     (void)networkId;
     (void)pid;
     (void)laneLinkReqId;
-    return;
 }
 void LnnDestroyP2p(void)
 {
-    return;
 }
