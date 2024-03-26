@@ -196,9 +196,6 @@ int32_t RestartEventCallbackRegister(RestartEventCallback callback)
         COMM_LOGE(COMM_SDK, "Restart event callback register param is invalid!\n");
         return SOFTBUS_ERR;
     }
-    if (g_restartEventCallback != nullptr) {
-        COMM_LOGE(COMM_SDK, "Restart event callback covered!\n");
-    }
     g_restartEventCallback = callback;
     COMM_LOGI(COMM_SDK, "Restart event callback register success!\n");
     return SOFTBUS_OK;
