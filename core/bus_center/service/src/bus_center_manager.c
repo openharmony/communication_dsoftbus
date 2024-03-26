@@ -40,7 +40,7 @@
 #define WATCHDOG_TASK_NAME "LNN_WATCHDOG_TASK"
 #define WATCHDOG_INTERVAL_TIME 10000
 #define WATCHDOG_DELAY_TIME 5000
-#define DEFAULT_DELAY_LEN 1000
+#define DEFAULT_DELAY_LEN 1500
 #define RETRY_MAX 10
 
 int32_t __attribute__((weak)) InitNodeAddrAllocator(void)
