@@ -137,12 +137,16 @@ static bool HbHasActiveBleConnection(const char *networkId)
 static bool HbHasActiveP2pConnection(const char *networkId)
 {
     char peerMac[MAC_ADDR_STR_LEN] = {0};
-
+    struct WifiDirectManager *pManager = GetWifiDirectManager();
+    if (pManager == NULL) {
+        LNN_LOGE(LNN_HEART_BEAT, "HB not support wifi direct");
+        return false;
+    }
     if (LnnGetRemoteStrInfo(networkId, STRING_KEY_P2P_MAC, peerMac, sizeof(peerMac)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB get peer p2p mac err");
         return false;
     }
-    bool isOnline = GetWifiDirectManager()->isDeviceOnline(peerMac);
+    bool isOnline = pManager->isDeviceOnline(peerMac);
     LNN_LOGD(LNN_HEART_BEAT, "HB has active p2p connection=%{public}s", isOnline ? "true" : "false");
     return isOnline;
 }
@@ -151,11 +155,16 @@ static bool HbHasActiveHmlConnection(const char *networkId)
 {
     NodeInfo info;
     char myIp[IP_LEN] = {0};
+    struct WifiDirectManager *pManager = GetWifiDirectManager();
+    if (pManager == NULL) {
+        LNN_LOGE(LNN_HEART_BEAT, "HB not support wifi direct");
+        return false;
+    }
     if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &info) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB get node info fail");
         return false;
     }
-    if (GetWifiDirectManager()->getLocalIpByUuid(info.uuid, myIp, sizeof(myIp)) == SOFTBUS_OK) {
+    if (pManager->getLocalIpByUuid(info.uuid, myIp, sizeof(myIp)) == SOFTBUS_OK) {
         LNN_LOGI(LNN_HEART_BEAT, "HB get HML ip success");
         return true;
     }
