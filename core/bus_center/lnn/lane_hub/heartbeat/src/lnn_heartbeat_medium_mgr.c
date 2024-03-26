@@ -30,6 +30,7 @@
 #include "lnn_device_info.h"
 #include "lnn_device_info_recovery.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_event.h"
 #include "lnn_feature_capability.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_heartbeat_utils.h"
@@ -427,6 +428,23 @@ static int32_t SoftBusNetNodeResult(DeviceInfo *device, bool isConnect)
     }
 }
 
+static void DfxRecordHeartBeatAuthStart(const AuthConnInfo *connInfo, const char *packageName, uint32_t requestId)
+{
+    LnnEventExtra extra = { 0 };
+    LnnEventExtraInit(&extra);
+    extra.authRequestId = (int32_t)requestId;
+
+    if (connInfo != NULL) {
+        extra.authLinkType = connInfo->type;
+    }
+    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    if (packageName != NULL && IsValidString(packageName, PKG_NAME_SIZE_MAX - 1) && strncpy_s(pkgName,
+        PKG_NAME_SIZE_MAX, packageName, PKG_NAME_SIZE_MAX - 1) == EOK) {
+        extra.callerPkg = pkgName;
+    }
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH, extra);
+}
+
 static int32_t HbNotifyReceiveDevice(DeviceInfo *device, int32_t weight,
     int32_t masterWeight, LnnHeartbeatType hbType, bool isOnlineDirectly, HbRespData *hbResp)
 {
@@ -469,6 +487,7 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, int32_t weight,
         AuthConnInfo authConn;
         uint32_t requestId = AuthGenRequestId();
         (void)LnnConvertAddrToAuthConnInfo(device->addr, &authConn);
+        DfxRecordHeartBeatAuthStart(&authConn, LNN_DEFAULT_PKG_NAME, requestId);
         if (AuthStartVerify(&authConn, requestId, LnnGetReAuthVerifyCallback(), false) != SOFTBUS_OK) {
             LNN_LOGI(LNN_HEART_BEAT, "AuthStartVerify error");
             (void)SoftBusMutexUnlock(&g_hbRecvList->lock);

@@ -42,6 +42,7 @@ LNN_ASSIGNER(Int32, GearCycle, gearCycle)
 LNN_ASSIGNER(Int32, GearDuration, gearDuration)
 LNN_ASSIGNER(Int32, ConnectionId, connectionId)
 LNN_ASSIGNER(Int32, AuthLinkType, authLinkType)
+LNN_ASSIGNER(Int32, AuthRequestId, authRequestId)
 LNN_ASSIGNER(Int32, AuthCostTime, authCostTime)
 LNN_ASSIGNER(Int32, LnnType, lnnType)
 LNN_ASSIGNER(Int32, OnlineNum, onlineNum)
@@ -58,7 +59,7 @@ LNN_ASSIGNER(String, PeerDeviceType, peerDeviceType)
 LNN_ASSIGNER(String, CallerPkg, callerPkg)
 LNN_ASSIGNER(String, CalleePkg, calleePkg)
 
-#define LNN_ASSIGNER_SIZE 23 // Size of g_connAssigners
+#define LNN_ASSIGNER_SIZE 24 // Size of g_connAssigners
 static const HiSysEventParamAssigner g_lnnAssigners[] = {
     { "STAGE_RES",        HISYSEVENT_INT32,  LnnAssignerResult           },
     { "ERROR_CODE",       HISYSEVENT_INT32,  LnnAssignerErrcode          },
@@ -68,6 +69,7 @@ static const HiSysEventParamAssigner g_lnnAssigners[] = {
     { "GEAR_DURATION",    HISYSEVENT_INT32,  LnnAssignerGearDuration     },
     { "CONN_ID",          HISYSEVENT_INT32,  LnnAssignerConnectionId     },
     { "AUTH_LINK_TYPE",   HISYSEVENT_INT32,  LnnAssignerAuthLinkType     },
+    { "AUTH_REQUEST_ID",  HISYSEVENT_INT32,  LnnAssignerAuthRequestId    },
     { "AUTH_COST_TIME",   HISYSEVENT_INT32,  LnnAssignerAuthCostTime     },
     { "LNN_TYPE",         HISYSEVENT_INT32,  LnnAssignerLnnType          },
     { "ONLINE_NUM",       HISYSEVENT_INT32,  LnnAssignerOnlineNum        },

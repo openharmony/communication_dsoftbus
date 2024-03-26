@@ -30,6 +30,7 @@
 #include "lnn_device_info.h"
 #include "lnn_device_info_recovery.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_event.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_link_finder.h"
@@ -595,6 +596,21 @@ static int32_t LnnRecoveryBroadcastKey()
     return SOFTBUS_OK;
 }
 
+static void DfxRecordConnAuthStart(const AuthConnInfo *connInfo, LnnConnectionFsm *connFsm, uint32_t requestId)
+{
+    LnnEventExtra extra = { 0 };
+    LnnEventExtraInit(&extra);
+    extra.authRequestId = (int32_t)requestId;
+
+    if (connInfo != NULL) {
+        extra.authLinkType = connInfo->type;
+    }
+    if (connFsm != NULL && IsValidString(connFsm->pkgName, PKG_NAME_SIZE_MAX - 1)) {
+        extra.callerPkg = connFsm->pkgName;
+    }
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH, extra);
+}
+
 static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
 {
     int32_t rc;
@@ -634,6 +650,7 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
             }
         }
     }
+    DfxRecordConnAuthStart(&authConn, connFsm, connInfo->requestId);
     if (AuthStartVerify(&authConn, connInfo->requestId, LnnGetVerifyCallback(), true) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "auth verify device failed. [id=%{public}u]", connFsm->id);
         CompleteJoinLNN(connFsm, NULL, SOFTBUS_ERR);

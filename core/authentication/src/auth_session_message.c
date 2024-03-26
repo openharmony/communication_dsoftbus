@@ -1850,17 +1850,20 @@ static int32_t PostDeviceIdNew(int64_t authSeq, const AuthSessionInfo *info)
     return SOFTBUS_OK;
 }
 
-static void DfxRecordLnnPostDeviceIdStart(int64_t authSeq)
+static void DfxRecordLnnPostDeviceIdStart(int64_t authSeq, const AuthSessionInfo *info)
 {
     LnnEventExtra extra = { 0 };
     LnnEventExtraInit(&extra);
     extra.authId = (int32_t)authSeq;
+    if (info != NULL) {
+        extra.authRequestId = (int32_t)info->requestId;
+    }
     LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_DEVICE_ID_POST, extra);
 }
 
 int32_t PostDeviceIdMessage(int64_t authSeq, const AuthSessionInfo *info)
 {
-    DfxRecordLnnPostDeviceIdStart(authSeq);
+    DfxRecordLnnPostDeviceIdStart(authSeq, info);
     AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "info is NULL");
     if (info->version == SOFTBUS_OLD_V1) {
         return PostDeviceIdV1(authSeq, info);
@@ -1899,17 +1902,20 @@ static void GetDumpSessionKeyList(int64_t authSeq, const AuthSessionInfo *info, 
     }
 }
 
-static void DfxRecordLnnPostDeviceInfoStart(int64_t authSeq)
+static void DfxRecordLnnPostDeviceInfoStart(int64_t authSeq, const AuthSessionInfo *info)
 {
     LnnEventExtra extra = { 0 };
     LnnEventExtraInit(&extra);
     extra.authId = (int32_t)authSeq;
+    if (info != NULL) {
+        extra.authRequestId = (int32_t)info->requestId;
+    }
     LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_DEVICE_INFO_POST, extra);
 }
 
 int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
 {
-    DfxRecordLnnPostDeviceInfoStart(authSeq);
+    DfxRecordLnnPostDeviceInfoStart(authSeq, info);
     AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "info is NULL");
     char *msg = PackDeviceInfoMessage(info->connInfo.type, info->version, false, info->uuid);
     if (msg == NULL) {
