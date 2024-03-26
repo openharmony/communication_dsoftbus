@@ -781,16 +781,6 @@ static int32_t RetryRegTrustDataChangeListener()
     return SOFTBUS_ERR;
 }
 
-static void DfxRecordLnnAuthStart(const AuthConnInfo *connInfo)
-{
-    LnnEventExtra extra = { 0 };
-    LnnEventExtraInit(&extra);
-    if (connInfo != NULL) {
-        extra.authLinkType = connInfo->type;
-    }
-    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH, extra);
-}
-
 static int32_t StartVerifyDevice(uint32_t requestId, const AuthConnInfo *connInfo, const AuthVerifyCallback *verifyCb,
     const AuthConnCallback *connCb, bool isFastAuth)
 {
@@ -1144,10 +1134,11 @@ static int32_t GetUdidShortHash(const AuthConnInfo *connInfo, char *udidBuf, uin
 }
 
 
-static void DfxRecordLnnConnectEnd(uint64_t connId, const AuthConnInfo *connInfo, int32_t reason)
+static void DfxRecordLnnConnectEnd(uint32_t requestId, uint64_t connId, const AuthConnInfo *connInfo, int32_t reason)
 {
     LnnEventExtra extra = { 0 };
     LnnEventExtraInit(&extra);
+    extra.authRequestId = (int32_t)requestId;
     extra.connectionId = (int32_t)connId;
     extra.errcode = reason;
     extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
@@ -1192,7 +1183,7 @@ static uint32_t AddConcurrentAuthRequest(const AuthConnInfo *connInfo, AuthReque
 
 static void OnConnectResult(uint32_t requestId, uint64_t connId, int32_t result, const AuthConnInfo *connInfo)
 {
-    DfxRecordLnnConnectEnd(connId, connInfo, result);
+    DfxRecordLnnConnectEnd(requestId, connId, connInfo, result);
     AUTH_LOGI(AUTH_CONN, "OnConnectResult: requestId=%{public}u, result=%{public}d", requestId, result);
     AuthRequest request;
     if (GetAuthRequest(requestId, &request) != SOFTBUS_OK) {
@@ -1541,7 +1532,6 @@ uint32_t AuthGenRequestId(void)
 int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
     const AuthVerifyCallback *callback, bool isFastAuth)
 {
-    DfxRecordLnnAuthStart(connInfo);
     if (connInfo == NULL || !CheckVerifyCallback(callback)) {
         AUTH_LOGE(AUTH_CONN, "invalid param");
         return SOFTBUS_INVALID_PARAM;
