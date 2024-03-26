@@ -559,10 +559,11 @@ FAIL:
 
 static void OnWifiDirectConnectSuccess(int32_t p2pRequestId, const struct WifiDirectLink *link)
 {
-    int errCode = SOFTBUS_ERR;
+    int errCode = SOFTBUS_OK;
     LaneLinkInfo linkInfo;
     if (link == NULL) {
         LNN_LOGE(LNN_LANE, "link is null");
+        errCode = SOFTBUS_INVALID_PARAM;
         goto FAIL;
     }
     LNN_LOGI(LNN_LANE, "wifidirect conn succ, requestId=%{public}d, p2pGenLinkId=%{public}d, linktype=%{public}d",
