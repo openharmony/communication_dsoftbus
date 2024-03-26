@@ -54,7 +54,7 @@
 #ifndef DEFAULT_STORAGE_PATH
 #define DEFAULT_STORAGE_PATH "/data/service/el1/public"
 #endif
-#define LNN_UDID_INIT_DELAY_LEN 1000
+#define LNN_UDID_INIT_DELAY_LEN 1500
 #define LNN_NET_IF_NAME "0:eth0,1:wlan0,2:br0,3:ble0"
 #define LNN_MAX_CONCURENT_NUM 2
 #define DEFAULT_DISC_FREQ_LOW ((5 << 16) | 12)
