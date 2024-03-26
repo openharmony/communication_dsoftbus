@@ -732,7 +732,6 @@ static int32_t TransProxyUnpackNormalHandshakeMsg(cJSON *root, AppInfo *appInfo,
     }
     if (UnpackPackHandshakeMsgForFastData(appInfo, root) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "unpack fast data failed");
-        SoftBusFree((void *)appInfo->fastTransData);
         return SOFTBUS_TRANS_PROXY_UNPACK_FAST_DATA_FAILED;
     }
     if (!GetJsonObjectNumberItem(root, JSON_KEY_FIRST_TOKEN_ID, &appInfo->firstTokenId)) {
@@ -1001,7 +1000,6 @@ char *TransProxyPackFastData(const AppInfo *appInfo, uint32_t *outLen)
     if (TransProxyPackFastDataHead(&dataInfo, appInfo) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "TransProxyPackFastDataHead error");
         SoftBusFree(dataInfo.inData);
-        SoftBusFree(dataInfo.outData);
         return NULL;
     }
 
