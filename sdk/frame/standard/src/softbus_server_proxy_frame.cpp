@@ -180,10 +180,9 @@ void ClientDeathProcTask(void)
     TransServerProxyInit();
     BusCenterServerProxyInit();
     InnerRegisterService();
-    TransBroadCastReInit();
+    RestartEventNotify();
     DiscRecoveryPublish();
     DiscRecoverySubscribe();
-    RestartEventNotify();
 }
 
 void RestartEventCallbackUnregister(void)
@@ -198,8 +197,7 @@ int32_t RestartEventCallbackRegister(RestartEventCallback callback)
         return SOFTBUS_ERR;
     }
     if (g_restartEventCallback != nullptr) {
-        COMM_LOGE(COMM_SDK, "Restart event callback register failed!\n");
-        return SOFTBUS_ERR;
+        COMM_LOGE(COMM_SDK, "Restart event callback covered!\n");
     }
     g_restartEventCallback = callback;
     COMM_LOGI(COMM_SDK, "Restart event callback register success!\n");
