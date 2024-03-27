@@ -488,7 +488,7 @@ static int64_t GetLatestIdByConnInfo(const AuthConnInfo *connInfo)
         return AUTH_INVALID_ID;
     }
     if (!RequireAuthLock()) {
-        return SOFTBUS_LOCK_ERR;
+        return AUTH_INVALID_ID;
     }
     uint32_t num = 0;
     const AuthManager *auth[2] = { NULL, NULL }; /* 2: client + server */
@@ -1598,7 +1598,7 @@ static int32_t TryGetBrConnInfo(const char *uuid, AuthConnInfo *connInfo)
 {
     char networkId[NETWORK_ID_BUF_LEN] = { 0 };
     if (LnnGetNetworkIdByUuid(uuid, networkId, sizeof(networkId)) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get networkdId by uuid fail");
+        AUTH_LOGE(AUTH_CONN, "get networkId by uuid fail");
         return SOFTBUS_AUTH_GET_BR_CONN_INFO_FAIL;
     }
 
@@ -1799,7 +1799,7 @@ void UnregGroupChangeListener(void)
     g_groupChangeListener.onDeviceBound = NULL;
 }
 
-int32_t AuthGetLatestAuthSeqListByType(const char *udid, int64_t *seqList, uint64_t *authVerifyTime, uint32_t type)
+int32_t AuthGetLatestAuthSeqListByType(const char *udid, int64_t *seqList, uint64_t *authVerifyTime, DiscoveryType type)
 {
     if (udid == NULL || udid[0] == '\0' || seqList == NULL || authVerifyTime == NULL) {
         AUTH_LOGE(AUTH_CONN, "invalid param");
@@ -1811,8 +1811,13 @@ int32_t AuthGetLatestAuthSeqListByType(const char *udid, int64_t *seqList, uint6
     }
     const AuthManager *authClient = NULL;
     const AuthManager *authServer = NULL;
-    authClient = FindAuthManagerByUdid(udid, ConvertToAuthLinkType((DiscoveryType)type), false);
-    authServer = FindAuthManagerByUdid(udid, ConvertToAuthLinkType((DiscoveryType)type), true);
+    authClient = FindAuthManagerByUdid(udid, ConvertToAuthLinkType(type), false);
+    authServer = FindAuthManagerByUdid(udid, ConvertToAuthLinkType(type), true);
+    if (authClient == NULL && authServer == NULL) {
+        AUTH_LOGE(AUTH_CONN, "authManager not found");
+        ReleaseAuthLock();
+        return SOFTBUS_ERR;
+    }
     if (authClient != NULL) {
         seqList[0] = authClient->lastAuthSeq;
         authVerifyTime[0] = authClient->lastVerifyTime;
@@ -1908,6 +1913,36 @@ void AuthDeviceGetLatestIdByUuid(const char *uuid, AuthLinkType type, AuthHandle
         ", uuid=%{public}s, type=%{public}d",
         authHandle->authId, latestVerifyTime, anonyUuid, authHandle->type);
     AnonymizeFree(anonyUuid);
+}
+
+NO_SANITIZE("cfi") int64_t AuthP2pGetLatestIdByUuid(const char *uuid)
+{
+    if (uuid == NULL || uuid[0] == '\0') {
+        AUTH_LOGE(AUTH_CONN, "uuid is empty.");
+        return AUTH_INVALID_ID;
+    }
+    if (!RequireAuthLock()) {
+        return AUTH_INVALID_ID;
+    }
+    uint32_t num = 0;
+    const AuthManager *auth[2] = { NULL, NULL }; /* 2: P2P * (Cleint + Server) */
+    auth[num++] = FindAuthManagerByUuid(uuid, AUTH_LINK_TYPE_P2P, false);
+    auth[num++] = FindAuthManagerByUuid(uuid, AUTH_LINK_TYPE_P2P, true);
+    int64_t latestAuthId = AUTH_INVALID_ID;
+    uint64_t latestVerifyTime = 0;
+    for (uint32_t i = 0; i < num; i++) {
+        if (auth[i] != NULL && auth[i]->lastVerifyTime > latestVerifyTime) {
+            latestAuthId = auth[i]->authId;
+            latestVerifyTime = auth[i]->lastVerifyTime;
+        }
+    }
+    ReleaseAuthLock();
+    char *anonyUuid = NULL;
+    Anonymize(uuid, &anonyUuid);
+    AUTH_LOGD(AUTH_CONN, "latest p2p auth manager[%{public}" PRId64 "] found, lastVerifyTime=%{public}" PRId64
+    ", uuid:%{public}s", latestAuthId, latestVerifyTime, anonyUuid);
+    AnonymizeFree(anonyUuid);
+    return latestAuthId;
 }
 
 int64_t AuthDeviceGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer)
