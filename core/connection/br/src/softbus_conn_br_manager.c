@@ -1391,8 +1391,9 @@ static int32_t BrConnectDevice(const ConnectOption *option, uint32_t requestId, 
     CONN_CHECK_AND_RETURN_RET_LOGE(ctx != NULL, SOFTBUS_MEM_ERR, CONN_BR,
         "BrConnectDevice: calloc connect request context failed: requestId=%{public}u, addr=%{public}s", requestId,
         anomizeAddress);
+    uint32_t traceId = SoftbusGetConnectTraceId();
     ctx->statistics.startTime = SoftBusGetSysTimeMs();
-    ctx->statistics.connectTraceId = SoftbusGetConnectTraceId();
+    ctx->statistics.connectTraceId = traceId;
     ctx->requestId = requestId;
     if (strcpy_s(ctx->addr, BT_MAC_LEN, option->brOption.brMac) != EOK) {
         CONN_LOGE(CONN_BR, "copy address failed, requestId=%{public}u, address=%{public}s", requestId, anomizeAddress);
@@ -1415,7 +1416,7 @@ static int32_t BrConnectDevice(const ConnectOption *option, uint32_t requestId, 
     };
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_DEVICE, extra);
     CONN_LOGI(CONN_BR, "receive connect request, requestId=%{public}u, address=%{public}s, connectTraceId=%{public}u",
-        requestId, anomizeAddress, ctx->statistics.connectTraceId);
+        requestId, anomizeAddress, traceId);
     return SOFTBUS_OK;
 }
 
