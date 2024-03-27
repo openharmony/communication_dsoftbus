@@ -161,8 +161,8 @@ void AuthCloseConn(AuthHandle authHandle);
 int32_t AuthGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta);
 int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta);
 int32_t AuthGetLatestAuthSeqList(const char *udid, int64_t *seqList, uint32_t num);
-int32_t AuthGetLatestAuthSeqListByType(const char *udid, int64_t *seqList, uint64_t *authVerifyTime, uint32_t type);
-
+int32_t AuthGetLatestAuthSeqListByType(const char *udid, int64_t *seqList, uint64_t *authVerifyTime,
+    DiscoveryType type);
 /* for ProxyChannel & P2P TcpDirectchannel */
 void AuthGetLatestIdByUuid(const char *uuid, AuthLinkType type, bool isMeta, AuthHandle *authHandle);
 int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer, bool isMeta);
