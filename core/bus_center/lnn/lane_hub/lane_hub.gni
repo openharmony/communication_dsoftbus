@@ -41,7 +41,6 @@ if (dsoftbus_feature_lnn_net) {
   bus_center_hub_src = [
     "$core_lane_hub_path/common/src/lnn_lane_hub.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane_link.c",
-    "$core_lane_hub_path/lane_manager/src/lnn_lane_link_p2p.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane_common.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane_model.c",
@@ -51,6 +50,14 @@ if (dsoftbus_feature_lnn_net) {
     "$core_lane_hub_path/lane_manager/src/lnn_trans_lane.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane_reliability.c",
   ]
+
+  if (dsoftbus_feature_conn_p2p && softbus_communication_wifi_feature) {
+    bus_center_hub_src +=
+        [ "$core_lane_hub_path/lane_manager/src/lnn_lane_link_p2p.c" ]
+  } else {
+    bus_center_hub_src +=
+        [ "$core_lane_hub_path/lane_manager/src/lnn_lane_link_p2p_virtual.c" ]
+  }
 
   if (enhanced) {
     lane_src_enhance_path =
