@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,24 +13,24 @@
  * limitations under the License.
  */
 
-#ifndef LNN_TRANS_LANE_H
-#define LNN_TRANS_LANE_H
+#ifndef LNN_LANE_LISTENER_H
+#define LNN_LANE_LISTENER_H
 
-#include "lnn_lane_assign.h"
+#include "lnn_lane_def.h"
+#include "lnn_lane_interface.h"
 #include "lnn_lane_link.h"
-#include "lnn_lane_listener.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-LaneInterface *TransLaneGetInstance(void);
-int32_t GetTransOptionByLaneReqId(uint32_t laneReqId, TransOption *reqInfo);
-int32_t PostDelayDestroyMessage(uint32_t laneReqId, LaneResource *resourceItem, uint64_t delayMillis);
-int32_t PostDetectTimeoutMessage(uint32_t detectId, uint64_t delayMillis);
-int32_t PostReliabilityTimeMessage(void);
-void RemoveDetectTimeoutMessage(uint32_t detectId);
-int32_t PostLaneStateChangeMessage(LaneState state, const char *peerUdid, const LaneLinkInfo *laneLinkInfo);
+int32_t UnRegisterLaneListener(LaneType type);
+int32_t RegisterLaneListener(LaneType type, const LaneStatusListener *listener);
+int32_t AddLaneBusinessInfoItem(LaneType laneType, const LaneLinkInfo *laneLinkInfo);
+int32_t DelLaneBusinessInfoItem(LaneType laneType, const LaneLinkInfo *laneLinkInfo);
+int32_t InitLaneListener(void);
+int32_t LaneLinkupNotify(const char *peerUdid, const LaneLinkInfo *laneLinkInfo);
+int32_t LaneLinkdownNotify(const char *peerUdid, const LaneLinkInfo *laneLinkInfo);
 
 #ifdef __cplusplus
 }

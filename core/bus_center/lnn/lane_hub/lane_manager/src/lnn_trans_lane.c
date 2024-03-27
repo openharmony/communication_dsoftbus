@@ -17,12 +17,14 @@
 
 #include <securec.h>
 
+#include "anonymizer.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
 #include "lnn_lane.h"
 #include "lnn_lane_common.h"
 #include "lnn_lane_def.h"
 #include "lnn_lane_interface.h"
+#include "lnn_lane_listener.h"
 #include "lnn_lane_model.h"
 #include "lnn_lane_select.h"
 #include "lnn_log.h"
@@ -37,12 +39,13 @@
 #include "lnn_lane_reliability.h"
 
 #define DETECT_LANE_TIMELINESS 2000
+#define LANE_REQ_ID_TYPE_SHIFT 28
 
 typedef enum {
     MSG_TYPE_LANE_TRIGGER_LINK = 0,
     MSG_TYPE_LANE_LINK_SUCCESS,
     MSG_TYPE_LANE_LINK_FAIL,
-    MSG_TYPE_LANE_LINK_EXCEPTION,
+    MSG_TYPE_LANE_STATE_CHANGE,
     MSG_TYPE_DELAY_DESTROY_LINK,
     MSG_TYPE_LANE_DETECT_TIMEOUT,
     MSG_TYPE_RELIABILITY_TIME,
@@ -78,6 +81,12 @@ typedef struct {
     int32_t psm;
     LaneTransType transType;
 } LaneLinkNodeInfo;
+
+typedef struct {
+    LaneState state;
+    char peerUdid[UDID_BUF_LEN];
+    LaneLinkInfo laneLinkInfo;
+} StateNotifyInfo;
 
 static ListNode g_multiLinkList;
 static SoftBusMutex g_transLaneMutex;
@@ -164,14 +173,6 @@ static void LinkFail(uint32_t laneReqId, int32_t reason)
 {
     if (LnnLanePostMsgToHandler(MSG_TYPE_LANE_LINK_FAIL, laneReqId, reason, NULL, 0) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "post lanelink fail msg err");
-        return;
-    }
-}
-
-static void LinkException(uint32_t laneReqId, int32_t reason)
-{
-    if (LnnLanePostMsgToHandler(MSG_TYPE_LANE_LINK_EXCEPTION, laneReqId, reason, NULL, 0) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "post laneStateException msg err");
         return;
     }
 }
@@ -397,6 +398,35 @@ static int32_t Alloc(uint32_t laneReqId, const LaneRequestOption *request, const
     return SOFTBUS_OK;
 }
 
+static int32_t ParseLaneTypeByLaneReqId(uint32_t laneReqId, LaneType *laneType)
+{
+    if (laneReqId == INVALID_LANE_REQ_ID || laneType == NULL) {
+        LNN_LOGE(LNN_LANE, "[ParseLaneType]invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *laneType = (LaneType)(laneReqId >> LANE_REQ_ID_TYPE_SHIFT);
+    return SOFTBUS_OK;
+}
+
+static int32_t DeleteLaneBusinessInfo(uint32_t laneReqId)
+{
+    LaneType laneType;
+    if (ParseLaneTypeByLaneReqId(laneReqId, &laneType) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "parse lanetype fail");
+        return SOFTBUS_ERR;
+    }
+
+    LaneLinkInfo laneLinkInfo;
+    (void)memset_s(&laneLinkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
+    if (FindLaneLinkInfoByLaneReqId(laneReqId, &laneLinkInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "find link info fail");
+        return SOFTBUS_ERR;
+    }
+
+    DelLaneBusinessInfoItem(laneType, &laneLinkInfo);
+    return SOFTBUS_OK;
+}
+
 static int32_t FreeLaneLink(uint32_t laneReqId, LaneResource *laneResourceInfo, bool isDelayDestroy)
 {
     if (Lock() != SOFTBUS_OK) {
@@ -438,6 +468,8 @@ static int32_t Free(uint32_t laneReqId)
     (void)memset_s(&laneLinkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
     LaneResource laneResourceInfo;
     (void)memset_s(&laneResourceInfo, sizeof(LaneResource), 0, sizeof(LaneResource));
+
+    DeleteLaneBusinessInfo(laneReqId);
     FindLaneLinkInfoByLaneReqId(laneReqId, &laneLinkInfo);
     ConvertToLaneResource(&laneLinkInfo, &laneResourceInfo);
     bool isDelayDestroy = false;
@@ -551,20 +583,6 @@ static void NotifyLaneAllocFail(uint32_t laneReqId, int32_t reason)
     Unlock();
 }
 
-static void NotifyLaneStateChange(uint32_t laneReqId, int32_t state)
-{
-    TransReqInfo reqInfo;
-    if (GetLaneReqInfo(laneReqId, &reqInfo) != SOFTBUS_OK) {
-        return;
-    }
-    LaneState laneState = LANE_STATE_OK;
-    if (state != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "lane state is changed, state=%{public}d", state);
-        laneState = LANE_STATE_EXCEPTION;
-    }
-    reqInfo.listener.OnLaneStateChange(laneReqId, laneState);
-}
-
 static LaneLinkNodeInfo *GetLaneLinkNodeWithoutLock(uint32_t laneReqId)
 {
     LaneLinkNodeInfo *linkNode = NULL;
@@ -583,7 +601,6 @@ static void LaneTriggerLink(SoftBusMessage *msg)
     LaneLinkCb linkCb = {
         .OnLaneLinkSuccess = LinkSuccess,
         .OnLaneLinkFail = LinkFail,
-        .OnLaneLinkException = LinkException,
     };
     LinkRequest requestInfo = { 0 };
     if (Lock() != SOFTBUS_OK) {
@@ -635,6 +652,15 @@ static void LaneLinkSuccess(SoftBusMessage *msg)
     LaneLinkInfo *info = (LaneLinkInfo *)msg->obj;
     uint32_t laneReqId = (uint32_t)msg->arg1;
     DeleteLaneLinkNode(laneReqId);
+
+    LaneType laneType;
+    if (ParseLaneTypeByLaneReqId(laneReqId, &laneType) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "parse lanetype fail");
+        return;
+    }
+    if (AddLaneBusinessInfoItem(laneType, info) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "create laneBusinessInfo fail, laneReqId=%{public}u", laneReqId);
+    }
     NotifyLaneAllocSuccess(laneReqId, info);
     SoftBusFree(info);
     return;
@@ -681,11 +707,28 @@ static void LaneLinkFail(SoftBusMessage *msg)
     }
 }
 
-static void LaneLinkException(SoftBusMessage *msg)
+static void LaneStateChange(SoftBusMessage *msg)
 {
-    uint32_t laneReqId = (uint32_t)msg->arg1;
-    int32_t state = (int32_t)msg->arg2;
-    NotifyLaneStateChange(laneReqId, state);
+    if (msg->obj == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid msg->obj");
+        return;
+    }
+    StateNotifyInfo *info = (StateNotifyInfo*)msg->obj;
+    switch (info->state) {
+        case LANE_STATE_LINKUP:
+            if (LaneLinkupNotify(info->peerUdid, &info->laneLinkInfo) != SOFTBUS_OK) {
+                LNN_LOGE(LNN_LANE, "notify lane linkup fail");
+            }
+            break;
+        case LANE_STATE_LINKDOWN:
+            if (LaneLinkdownNotify(info->peerUdid, &info->laneLinkInfo) != SOFTBUS_OK) {
+                LNN_LOGE(LNN_LANE, "notify lane linkdown fail");
+            }
+            break;
+        default:
+            LNN_LOGE(LNN_LANE, "lane state=%{public}d cannot found", info->state);
+    }
+    SoftBusFree(info);
 }
 
 static void HandleDelayDestroyLink(SoftBusMessage *msg)
@@ -729,8 +772,8 @@ static void MsgHandler(SoftBusMessage *msg)
         case MSG_TYPE_LANE_LINK_FAIL:
             LaneLinkFail(msg);
             break;
-        case MSG_TYPE_LANE_LINK_EXCEPTION:
-            LaneLinkException(msg);
+        case MSG_TYPE_LANE_STATE_CHANGE:
+            LaneStateChange(msg);
             break;
         case MSG_TYPE_DELAY_DESTROY_LINK:
             HandleDelayDestroyLink(msg);
@@ -889,4 +932,31 @@ int32_t PostDelayDestroyMessage(uint32_t laneReqId, LaneResource *resourceItem, 
 {
     LNN_LOGI(LNN_LANE, "post dely destroy message. laneReqId=%{public}u", laneReqId);
     return LnnLanePostMsgToHandler(MSG_TYPE_DELAY_DESTROY_LINK, laneReqId, true, resourceItem, delayMillis);
+}
+
+int32_t PostLaneStateChangeMessage(LaneState state, const char *peerUdid, const LaneLinkInfo *laneLinkInfo)
+{
+    LNN_LOGI(LNN_LANE, "post lane state change msg, state=%{public}d", state);
+    if (peerUdid == NULL || laneLinkInfo == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    StateNotifyInfo *stateNotifyInfo = (StateNotifyInfo *)SoftBusMalloc(sizeof(StateNotifyInfo));
+    if (stateNotifyInfo == NULL) {
+        LNN_LOGE(LNN_LANE, "malloc stateNotifyInfo fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    stateNotifyInfo->state = state;
+    if (strncpy_s(stateNotifyInfo->peerUdid, UDID_BUF_LEN, peerUdid, UDID_BUF_LEN) != EOK) {
+        SoftBusFree(stateNotifyInfo);
+        LNN_LOGE(LNN_STATE, "copy peerUdid fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    if (memcpy_s(&stateNotifyInfo->laneLinkInfo, sizeof(LaneLinkInfo), laneLinkInfo,
+        sizeof(LaneLinkInfo)) != EOK) {
+        SoftBusFree(stateNotifyInfo);
+        LNN_LOGE(LNN_LANE, "memcpy laneLinkInfo fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return LnnLanePostMsgToHandler(MSG_TYPE_LANE_STATE_CHANGE, 0, 0, stateNotifyInfo, 0);
 }
