@@ -59,7 +59,8 @@ typedef enum {
 
 typedef enum {
     LANE_STATE_OK = 0,
-    LANE_STATE_EXCEPTION,
+    LANE_STATE_LINKUP,
+    LANE_STATE_LINKDOWN,
 } LaneState;
 
 typedef enum {
@@ -169,10 +170,18 @@ typedef struct {
 } LaneRequestOption;
 
 typedef struct {
+    void (*onLaneLinkup)(uint64_t laneId, const char *peerUdid, const LaneConnInfo *laneConnInfo);
+    void (*onLaneLinkdown)(uint64_t laneId, const char *peerUdid, const LaneConnInfo *laneConnInfo);
+    void (*onLaneStateChange)(uint64_t laneId, LaneState state);
+} LaneStatusListener;
+
+typedef struct {
     int32_t (*lnnQueryLaneResource)(const LaneQueryInfo *queryInfo, const QosInfo *qosInfo);
     uint32_t (*applyLaneReqId)(LaneType type);
     int32_t (*lnnRequestLane)(uint32_t laneReqId, const LaneRequestOption *request, const ILaneListener *listener);
     int32_t (*lnnFreeLane)(uint32_t laneReqId);
+    int32_t (*registerLaneListener)(LaneType type, const LaneStatusListener *listener);
+    int32_t (*unRegisterLaneListener)(LaneType type);
 } LnnLaneManager;
 
 LnnLaneManager* GetLaneManager(void);
