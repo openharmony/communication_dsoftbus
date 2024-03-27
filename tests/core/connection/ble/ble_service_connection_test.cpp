@@ -39,14 +39,19 @@
 using namespace testing::ext;
 using namespace testing;
 using namespace std;
+
 namespace OHOS {
 
 SoftBusGattsCallback *g_callback = nullptr;
 
-extern "C" int SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback)
+extern "C" {
+int SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback, SoftBusBtUuid serviceUuid, int32_t expectedMtu)
 {
+    (void)serviceUuid;
+    (void)expectedMtu;
     g_callback = callback;
     return SOFTBUS_OK;
+}
 }
 
 class ServiceConnectionTest : public testing::Test {
