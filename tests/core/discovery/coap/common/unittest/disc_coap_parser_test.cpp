@@ -19,7 +19,6 @@
 #include "cJSON.h"
 #include "disc_coap_parser.h"
 #include "disc_log.h"
-#include "nstackx.h"
 #include "softbus_error_code.h"
 
 using namespace testing::ext;
@@ -229,7 +228,7 @@ HWTEST_F(DiscCoapParserTest, DiscCoapFillServiceData001, TestSize.Level1)
     uint32_t capability = (1 << CASTPLUS_CAPABILITY_BITMAP);
     std::string capabilityData;
     uint32_t dataLen = 0;
-    char outData[NSTACKX_MAX_SERVICE_DATA_LEN] = {0};
+    char outData[MAX_SERVICE_DATA_LEN] = {0};
 
     int32_t ret = DiscCoapFillServiceData(capability, capabilityData.c_str(), dataLen, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -260,7 +259,7 @@ HWTEST_F(DiscCoapParserTest, DiscCoapFillServiceData002, TestSize.Level1)
     uint32_t capability = 0;
     std::string capabilityData;
     uint32_t dataLen = 0;
-    char outData[NSTACKX_MAX_SERVICE_DATA_LEN] = {0};
+    char outData[MAX_SERVICE_DATA_LEN] = {0};
 
     capability = 1;
     int32_t ret = DiscCoapFillServiceData(capability, capabilityData.c_str(), dataLen, outData);
