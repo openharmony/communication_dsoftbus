@@ -57,7 +57,11 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *connectInfo, struct W
 
     char uuid[UUID_BUF_LEN] = {0};
     int32_t ret = LnnGetRemoteStrInfo(connectInfo->remoteNetworkId, STRING_KEY_UUID, uuid, sizeof(uuid));
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "get uuid failed");
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "get uuid failed");
+        // fall-through
+    }
+    
     ret = GetWifiDirectRoleOption()->getExpectedRole(connectInfo->remoteNetworkId, connectInfo->connectType,
                                                      &connectInfo->expectApiRole, &connectInfo->isStrict);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get expected role failed");
