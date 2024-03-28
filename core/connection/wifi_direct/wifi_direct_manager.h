@@ -33,6 +33,7 @@ struct WifiDirectStatusListener {
 enum WifiDirectListenerModule {
     TRANS_LINK_MODULE = 0,
     LNN_LANE_MODULE = 1,
+    LEGACY_HML_MODULE = 2,
     MODULE_TYPE_MAX,
 };
 
