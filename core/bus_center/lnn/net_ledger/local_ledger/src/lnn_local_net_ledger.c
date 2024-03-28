@@ -1734,7 +1734,9 @@ static int32_t SoftBusDumpBusCenterParameter(int fd)
     SOFTBUS_DPRINTF(fd, (IsLinkEnabled(LANE_WLAN_5G) ||
         IsLinkEnabled(LANE_WLAN_2P4G)) ?
         "wlan parameter: on\n" : "wlan parameter: off\n");
-    SOFTBUS_DPRINTF(fd, IsLinkEnabled(LANE_BLE) ?
+    SOFTBUS_DPRINTF(fd, IsLinkEnabled(LANE_COC_DIRECT) ?
+        "coc parameter: on\n" : "coc parameter: off\n");
+    SOFTBUS_DPRINTF(fd, IsLinkEnabled(LANE_BLE_DIRECT) ?
         "ble parameter: on\n" : "ble parameter: off\n");
     return SOFTBUS_OK;
 }
