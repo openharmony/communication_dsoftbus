@@ -248,43 +248,32 @@ ohos_unittest("TransTcpDirectMessageTest") {
 
 ohos_unittest("TransTcpDirectMessageAppendTest") {
   module_out_path = module_output_path
-  sources = [ "unittest/trans_tcp_direct_message_append_test.cpp" ]
+  sources = [
+    "unittest/mock/trans_tcp_direct_message_test_mock.cpp",
+    "unittest/trans_tcp_direct_message_append_test.cpp",
+  ]
 
   include_dirs = [
     "$softbus_adapter_common/include",
-
-    "$dsoftbus_root_path/core/adapter/bus_center/include",
-    "$dsoftbus_root_path/core/adapter/transmission/include",
-    "$dsoftbus_root_path/core/authentication/interface",
-
-    "$dsoftbus_root_path/core/bus_center/interface",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
-
-    "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/common/message_handler/include",
-
-    "$dsoftbus_root_path/core/connection/interface",
-    "$dsoftbus_root_path/core/connection/p2p/interface",
-    "$dsoftbus_root_path/core/connection/p2p/common/include",
-    "$dsoftbus_root_path/core/connection/wifi_direct",
-
-    "$dsoftbus_root_path/core/discovery/interface",
-    "$dsoftbus_root_path/core/discovery/manager/include",
-
-    "$dsoftbus_root_path/core/transmission/common/include",
-    "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
-    "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
-    "$dsoftbus_root_path/core/transmission/interface",
-    "$dsoftbus_root_path/core/transmission/session/include",
-    "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
-    "$dsoftbus_root_path/core/transmission/pending_packet/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/frame/common/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
-    "$dsoftbus_root_path/interfaces/kits",
-    "$dsoftbus_root_path/interfaces/kits/bus_center",
-    "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/src",
+    "$dsoftbus_root_path/tests/core/transmission/trans_channel/tcp_direct/unittest/mock",
+    "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/include",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/connection/wifi_direct",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/adapter/transmission/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/common/security/permission/include",
 
     "//base/security/device_auth/interfaces/inner_api",
     "//commonlibrary/c_utils/base/include",
@@ -292,16 +281,10 @@ ohos_unittest("TransTcpDirectMessageAppendTest") {
     "unittest/common/",
   ]
 
-  include_dirs += [
-    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
-    "$dsoftbus_root_path/core/frame/common/include",
-    "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
-    "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/src",
-  ]
-
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+    "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
   ]
 
