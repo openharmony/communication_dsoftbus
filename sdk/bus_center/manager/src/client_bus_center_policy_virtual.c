@@ -16,7 +16,7 @@
 #include "client_bus_center_manager.h"
 #include "softbus_error_code.h"
 
-int32_t DiscRecoverySharePolicy()
+int32_t DiscRecoveryPolicy()
 {
     return SOFTBUS_OK;
 }
