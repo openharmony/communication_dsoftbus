@@ -93,6 +93,7 @@ int32_t LnnSetDLP2pIp(const char *id, IdCategory type, const char *p2pIp);
 NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type);
 bool LnnSetDlPtk(const char *networkId, const char *remotePtk);
 bool LnnSetDLWifiDirectAddr(const char *networkId, const char *addr);
+int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType);
 #ifdef __cplusplus
 }
 #endif
