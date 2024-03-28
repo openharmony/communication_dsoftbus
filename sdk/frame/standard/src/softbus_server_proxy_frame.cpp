@@ -183,7 +183,7 @@ void ClientDeathProcTask(void)
     TransBroadCastReInit();
     DiscRecoveryPublish();
     DiscRecoverySubscribe();
-    DiscRecoverySharePolicy();
+    DiscRecoveryPolicy();
     RestartEventNotify();
 }
 
