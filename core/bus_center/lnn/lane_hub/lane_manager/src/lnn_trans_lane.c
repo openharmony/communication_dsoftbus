@@ -941,9 +941,9 @@ int32_t PostLaneStateChangeMessage(LaneState state, const char *peerUdid, const 
         LNN_LOGE(LNN_LANE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    StateNotifyInfo *stateNotifyInfo = (StateNotifyInfo *)SoftBusMalloc(sizeof(StateNotifyInfo));
+    StateNotifyInfo *stateNotifyInfo = (StateNotifyInfo *)SoftBusCalloc(sizeof(StateNotifyInfo));
     if (stateNotifyInfo == NULL) {
-        LNN_LOGE(LNN_LANE, "malloc stateNotifyInfo fail");
+        LNN_LOGE(LNN_LANE, "calloc stateNotifyInfo fail");
         return SOFTBUS_MALLOC_ERR;
     }
     stateNotifyInfo->state = state;
@@ -958,5 +958,10 @@ int32_t PostLaneStateChangeMessage(LaneState state, const char *peerUdid, const 
         LNN_LOGE(LNN_LANE, "memcpy laneLinkInfo fail");
         return SOFTBUS_MEM_ERR;
     }
-    return LnnLanePostMsgToHandler(MSG_TYPE_LANE_STATE_CHANGE, 0, 0, stateNotifyInfo, 0);
+    if (LnnLanePostMsgToHandler(MSG_TYPE_LANE_STATE_CHANGE, 0, 0, stateNotifyInfo, 0) != SOFTBUS_OK) {
+        SoftBusFree(stateNotifyInfo);
+        LNN_LOGE(LNN_LANE, "post lane state change msg fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
 }
