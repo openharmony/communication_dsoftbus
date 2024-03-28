@@ -40,7 +40,7 @@ typedef struct {
     AuthConnInfo connInfo[AUTH_LINK_TYPE_MAX];
     uint64_t lastActiveTime;
     /* 密钥信息 */
-    int64_t lastAuthSeq;
+    int64_t lastAuthSeq[AUTH_LINK_TYPE_MAX];
     uint64_t lastVerifyTime;
     SessionKeyList sessionKeyList;
     /* 设备信息 */
@@ -78,7 +78,6 @@ bool AuthDeviceCheckConnInfo(const char* uuid, AuthLinkType type, bool checkConn
 
 /* for ProxyChannel & P2P TcpDirectchannel */
 void AuthDeviceGetLatestIdByUuid(const char *uuid, AuthLinkType type, AuthHandle *authHandle);
-int64_t AuthP2pGetLatestIdByUuid(const char *uuid);
 int64_t AuthDeviceGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer);
 int64_t AuthDeviceGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer);
 AuthManager *NewAuthManager(int64_t authSeq, const AuthSessionInfo *info);
