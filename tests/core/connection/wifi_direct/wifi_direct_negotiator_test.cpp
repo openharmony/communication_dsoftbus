@@ -87,6 +87,11 @@ void WifiDirectNegotiatorTest::SetUp(void)
 void WifiDirectNegotiatorTest::TearDown(void)
 {}
 
+static int32_t GetDeviceId(struct WifiDirectNegotiateChannel *base, char *deviceId, size_t deviceIdSize)
+{
+    return SOFTBUS_OK;
+}
+
 /*
 * @tc.name: testWifiDirectNegotiator
 * @tc.desc: test WifiDirectNegotiatorInit
@@ -242,6 +247,8 @@ HWTEST_F(WifiDirectNegotiatorTest, WifiDirectNegotiator014, TestSize.Level1)
     (void)memset_s(channel, sizeof(*channel), 0, sizeof(*channel));
     const uint8_t *data = nullptr;
     size_t len = 0;
+    channel->isRemoteSupportTlv = true;
+    channel->getDeviceId = GetDeviceId;
     self->onNegotiateChannelDataReceived(channel, data, len);
 };
 }
