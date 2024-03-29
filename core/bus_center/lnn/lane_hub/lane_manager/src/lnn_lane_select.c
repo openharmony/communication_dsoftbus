@@ -337,11 +337,16 @@ static void SelectMeshLinks(const char *networkId, LaneLinkType *resList, uint32
     }
 }
 
-static void AddRecommendLinkType(LanePreferredLinkList *setRecommendLinkList,
+static int32_t AddRecommendLinkType(LanePreferredLinkList *setRecommendLinkList,
     LaneLinkType linkType, int32_t *linkNum)
 {
+    if ((*linkNum) < 0 || (*linkNum) >= LANE_LINK_TYPE_BUTT) {
+        LNN_LOGE(LNN_LANE, "enum out of bounds");
+        return SOFTBUS_ERR;
+    }
     setRecommendLinkList->linkType[(*linkNum)++] = linkType;
     setRecommendLinkList->linkTypeNum = *linkNum;
+    return SOFTBUS_OK;
 }
 
 int32_t SelectExpectLaneByParameter(LanePreferredLinkList *setRecommendLinkList)
@@ -368,8 +373,12 @@ int32_t SelectExpectLaneByParameter(LanePreferredLinkList *setRecommendLinkList)
         AddRecommendLinkType(setRecommendLinkList, LANE_WLAN_2P4G, &linkNum);
         LNN_LOGI(LNN_LANE, "wlan_only = on");
         return SOFTBUS_OK;
-    } else if (IsLinkEnabled(LANE_BLE)) {
-        AddRecommendLinkType(setRecommendLinkList, LANE_BLE, &linkNum);
+    } else if (IsLinkEnabled(LANE_COC_DIRECT)) {
+        AddRecommendLinkType(setRecommendLinkList, LANE_COC_DIRECT, &linkNum);
+        LNN_LOGI(LNN_LANE, "coc_only = on");
+        return SOFTBUS_OK;
+    } else if (IsLinkEnabled(LANE_BLE_DIRECT)) {
+        AddRecommendLinkType(setRecommendLinkList, LANE_BLE_DIRECT, &linkNum);
         LNN_LOGI(LNN_LANE, "ble_only = on");
         return SOFTBUS_OK;
     } else {
