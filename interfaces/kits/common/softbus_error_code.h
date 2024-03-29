@@ -231,6 +231,11 @@ enum SoftBusErrNo {
     SOFTBUS_TRANS_CHECK_PID_ERROR,
     SOFTBUS_TRANS_NOT_LOGIN,
     SOFTBUS_TRANS_NOT_SAME_ACCOUNT,
+    SOFTBUS_TRANS_GET_LOCAL_UID_FAIL, // get local userId fail
+    SOFTBUS_TRANS_MSG_BUILD_BC_PARAM_FAIL, // build broadcast params fail
+    SOFTBUS_TRANS_MSG_BUILD_PAYLOAD_FAIL, // build broadcast payload fail
+    SOFTBUS_TRANS_MSG_INIT_FAIL, // notification message init fail
+    SOFTBUS_TRANS_MSG_REPLACE_PAYLOAD_FAIL, // replace payload without stopping the broadcast fail
 
     /* errno begin: -((203 << 21) | (3 << 16) | 0xFFFF) */
     SOFTBUS_AUTH_ERR_BASE = SOFTBUS_ERRNO(AUTH_SUB_MODULE_CODE),
@@ -425,6 +430,17 @@ enum SoftBusErrNo {
     SOFTBUS_DISCOVER_START_SCAN_FAIL,
     SOFTBUS_DISCOVER_END_SCAN_FAIL,
     SOFTBUS_DISC_SERVER_INIT_FAILED,
+
+    SOFTBUS_BC_MGR_NO_FUNC_REGISTERED, // no medium has registered
+    SOFTBUS_BC_MGR_FUNC_NULL, // the function registered is null
+    SOFTBUS_BC_MGR_BUILD_ADV_PACKT_FAIL, // build broadcast adv packet fail
+    SOFTBUS_BC_MGR_BUILD_RSP_PACKT_FAIL, // build broadcast rsp packet fail
+    SOFTBUS_BC_MGR_INVALID_BC_ID, // invalid broadcast id
+    SOFTBUS_BC_MGR_INVALID_LISN_ID, // invalid listener id
+    SOFTBUS_BC_MGR_NOT_BROADCASTING, // not broadcasting
+    SOFTBUS_BC_MGR_REG_NO_AVAILABLE_BC_ID, // no available broadcast id
+    SOFTBUS_BC_MGR_REG_NO_AVAILABLE_LISN_ID, // no available listener id
+    SOFTBUS_BC_MGR_REG_DUP, // duplicate registration
 
     /* softbus ok */
     SOFTBUS_OK = 0,

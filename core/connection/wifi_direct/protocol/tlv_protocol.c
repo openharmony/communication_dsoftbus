@@ -58,6 +58,7 @@ static bool SetDataSource(struct WifiDirectProtocol *base, const uint8_t *data, 
     self->data = (uint8_t *)SoftBusMalloc(size);
     CONN_CHECK_AND_RETURN_RET_LOGE(self->data, false, CONN_WIFI_DIRECT, "alloc failed");
 
+    // If return fails, putProtocol is called in the outer layer to release the memory applied for by self->data
     if (memcpy_s(self->data, size, data, size) != EOK) {
         CONN_LOGE(CONN_WIFI_DIRECT, "self->data memcpy fail");
         return false;
@@ -129,13 +130,19 @@ static bool Grow(struct WifiDirectTlvProtocol *self, size_t writeSize)
 
     uint8_t *data = SoftBusCalloc(capacity);
     CONN_CHECK_AND_RETURN_RET_LOGE(data, false, CONN_WIFI_DIRECT, "alloc failed");
-    int32_t ret = memcpy_s(data, capacity, self->data, self->writePos);
-    CONN_CHECK_AND_RETURN_RET_LOGW(ret == EOK, false, CONN_WIFI_DIRECT, "copy failed");
+    if (memcpy_s(data, capacity, self->data, self->writePos) != EOK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "copy failed");
+        // If return fails, putProtocol is called after Pack fail to release the memory applied for by self->data
+        // Calling relationships: Pack->Marshalling->WriteData->WriteTlvData->Grow
+        SoftBusFree(data);
+        return false;
+    }
 
     SoftBusFree(self->data);
     self->data = data;
     self->capacity = capacity;
-
+    // putProtocol is called after Pack succeed and postData to release the memory applied for by self->data
+    // Calling relationships: Pack->Marshalling->WriteData->WriteTlvData->Grow
     return true;
 }
 

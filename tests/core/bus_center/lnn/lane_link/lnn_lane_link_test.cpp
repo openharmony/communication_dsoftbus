@@ -70,13 +70,6 @@ static void OnLaneLinkFail(uint32_t reqId, int32_t reason)
     return;
 }
 
-static void OnLaneLinkException(uint32_t reqId, int32_t reason)
-{
-    (void)reqId;
-    (void)reason;
-    return;
-}
-
 /*
 * @tc.name: LNN_LANE_LINK_001
 * @tc.desc: LnnConnectP2p
@@ -92,7 +85,6 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_001, TestSize.Level1)
     const LaneLinkCb cb = {
         .OnLaneLinkSuccess = OnLaneLinkSuccess,
         .OnLaneLinkFail = OnLaneLinkFail,
-        .OnLaneLinkException = OnLaneLinkException,
     };
     LaneDepsInterfaceMock linkMock;
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo)
@@ -175,7 +167,6 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_002, TestSize.Level1)
     const LaneLinkCb cb = {
         .OnLaneLinkSuccess = OnLaneLinkSuccess,
         .OnLaneLinkFail = OnLaneLinkFail,
-        .OnLaneLinkException = OnLaneLinkException,
     };
 
     LaneLinkDepsInterfaceMock laneLinkMock;
@@ -225,7 +216,6 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_003, TestSize.Level1)
     const LaneLinkCb cb = {
         .OnLaneLinkSuccess = OnLaneLinkSuccess,
         .OnLaneLinkFail = OnLaneLinkFail,
-        .OnLaneLinkException = OnLaneLinkException,
     };
 
     LaneLinkDepsInterfaceMock laneLinkMock;
@@ -268,7 +258,6 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_004, TestSize.Level1)
     const LaneLinkCb cb = {
         .OnLaneLinkSuccess = OnLaneLinkSuccess,
         .OnLaneLinkFail = OnLaneLinkFail,
-        .OnLaneLinkException = OnLaneLinkException,
     };
 
     LaneLinkDepsInterfaceMock laneLinkMock;
@@ -310,7 +299,6 @@ HWTEST_F(LNNLaneLinkTest, LNN_LANE_LINK_006, TestSize.Level1)
     const LaneLinkCb cb = {
         .OnLaneLinkSuccess = OnLaneLinkSuccess,
         .OnLaneLinkFail = OnLaneLinkFail,
-        .OnLaneLinkException = OnLaneLinkException,
     };
     LinkRequest *request = (LinkRequest *)SoftBusCalloc(sizeof(LinkRequest));
     if (request == NULL) {

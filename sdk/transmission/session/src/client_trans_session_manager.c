@@ -1686,18 +1686,19 @@ int32_t ClientDeleteSocketSession(int32_t sessionId)
         return SOFTBUS_OK;
     }
 
-    // calling the ipc interface by locking here may block other threads for a long time
-    ret = ServerIpcRemoveSessionServer(pkgName, sessionName);
+    ret = TryDeleteEmptySessionServer(sessionName);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "remove session server failed, ret=%{public}d.", ret);
+        TRANS_LOGE(TRANS_SDK, "delete empty session server failed, ret=%{public}d", ret);
         return ret;
     }
 
-    ret = TryDeleteEmptySessionServer(sessionName);
+    // calling the ipc interface by locking here may block other threads for a long time
+    ret = ServerIpcRemoveSessionServer(pkgName, sessionName);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "remove session server failed, ret=%{public}d", ret);
         return ret;
     }
+
     return SOFTBUS_OK;
 }
 

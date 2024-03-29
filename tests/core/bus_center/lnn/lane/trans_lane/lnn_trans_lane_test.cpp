@@ -32,9 +32,12 @@ namespace OHOS {
 using namespace testing::ext;
 using namespace testing;
 
+constexpr uint32_t LANE_REQ_ID = 111;
 constexpr int32_t CHANNEL_ID = 5;
 constexpr int32_t INTERVAL = 2;
 constexpr uint32_t LIST_SIZE = 10;
+const char PEER_UDID[] = "111122223333abcdef";
+const char PEER_IP[] = "127.30.0.1";
 
 class LNNTransLaneMockTest : public testing::Test {
 public:
@@ -161,5 +164,81 @@ HWTEST_F(LNNTransLaneMockTest, LNN_LANE_SCORE_VIRTUAL_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnGetAllChannelScore(nullptr, &listSize);
     EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LNN_LANE_POST_LANE_STATE_CHANGE_MESSAGE_001
+* @tc.desc: PostLaneStateChangeMessage
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNTransLaneMockTest, LNN_LANE_POST_LANE_STATE_CHANGE_MESSAGE_001, TestSize.Level1)
+{
+    LaneLinkInfo laneLinkInfo;
+    (void)memset_s(&laneLinkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
+    laneLinkInfo.type = LANE_HML;
+    (void)strncpy_s(laneLinkInfo.linkInfo.p2p.connInfo.peerIp, IP_LEN, PEER_IP, IP_LEN);
+
+    LaneDepsInterfaceMock laneMock;
+    EXPECT_CALL(laneMock, StartBaseClient).WillRepeatedly(Return(SOFTBUS_OK));
+    TransLaneDepsInterfaceMock transLaneMock;
+    EXPECT_CALL(transLaneMock, LaneLinkupNotify).WillRepeatedly(Return(SOFTBUS_OK));
+    LaneInterface *transObj = TransLaneGetInstance();
+    EXPECT_TRUE(transObj != nullptr);
+    transObj->Init(nullptr);
+    int32_t ret = PostLaneStateChangeMessage(LANE_STATE_LINKUP, PEER_UDID, &laneLinkInfo);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200)); // delay 200ms for looper completion.
+    transObj->Deinit();
+}
+
+/*
+* @tc.name: LNN_LANE_POST_LANE_STATE_CHANGE_MESSAGE_002
+* @tc.desc: PostLaneStateChangeMessage
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNTransLaneMockTest, LNN_LANE_POST_LANE_STATE_CHANGE_MESSAGE_002, TestSize.Level1)
+{
+    LaneLinkInfo laneLinkInfo;
+    (void)memset_s(&laneLinkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
+    laneLinkInfo.type = LANE_HML;
+    (void)strncpy_s(laneLinkInfo.linkInfo.p2p.connInfo.peerIp, IP_LEN, PEER_IP, IP_LEN);
+
+    LaneDepsInterfaceMock laneMock;
+    EXPECT_CALL(laneMock, StartBaseClient).WillRepeatedly(Return(SOFTBUS_OK));
+    TransLaneDepsInterfaceMock transLaneMock;
+    EXPECT_CALL(transLaneMock, LaneLinkdownNotify).WillRepeatedly(Return(SOFTBUS_OK));
+    LaneInterface *transObj = TransLaneGetInstance();
+    EXPECT_TRUE(transObj != nullptr);
+    transObj->Init(nullptr);
+    int32_t ret = PostLaneStateChangeMessage(LANE_STATE_LINKDOWN, PEER_UDID, &laneLinkInfo);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200)); // delay 200ms for looper completion.
+    transObj->Deinit();
+}
+
+/*
+* @tc.name: LNN_LANE_DELETE_LANE_BUSINESS_INFO_001
+* @tc.desc: DeleteLaneBusinessInfo
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNTransLaneMockTest, LNN_LANE_DELETE_LANE_BUSINESS_INFO_001, TestSize.Level1)
+{
+    LaneInterface *transObj = TransLaneGetInstance();
+    EXPECT_TRUE(transObj != nullptr);
+    LaneDepsInterfaceMock laneMock;
+    EXPECT_CALL(laneMock, StartBaseClient).WillRepeatedly(Return(SOFTBUS_OK));
+    transObj->Init(nullptr);
+    TransLaneDepsInterfaceMock transLaneMock;
+    EXPECT_CALL(transLaneMock, DelLaneBusinessInfoItem).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(transLaneMock, FindLaneLinkInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(transLaneMock, ConvertToLaneResource).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(transLaneMock, DelLaneResourceItemWithDelay)
+        .WillRepeatedly(DoAll(SetArgPointee<2>(true), Return(SOFTBUS_OK)));
+    int32_t ret = transObj->FreeLane(LANE_REQ_ID);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    transObj->Deinit();
 }
 } // namespace OHOS

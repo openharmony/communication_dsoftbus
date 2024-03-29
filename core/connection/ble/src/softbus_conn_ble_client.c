@@ -15,9 +15,8 @@
 
 #include "softbus_conn_ble_client.h"
 
-#include <securec.h>
+#include "securec.h"
 
-#include "conn_event.h"
 #include "conn_log.h"
 #include "message_handler.h"
 #include "softbus_adapter_ble_gatt_client.h"
@@ -26,10 +25,12 @@
 #include "softbus_conn_ble_manager.h"
 #include "softbus_conn_common.h"
 #include "softbus_def.h"
+#include "softbus_errcode.h"
+#include "softbus_type_def.h"
+#include "conn_event.h"
 #include "softbus_utils.h"
 
 #define INVALID_GATTC_ID (-1)
-#define DEFAULT_MTU_SIZE 512
 
 enum ClientLoopMsgType {
     MSG_CLIENT_CONNECTED = 300,
@@ -62,10 +63,22 @@ static int32_t NotificatedNetHandler(int32_t underlayerHandle, ConnBleConnection
 static void BleGattClientMsgHandler(SoftBusMessage *msg);
 static int BleCompareGattClientLooperEventFunc(const SoftBusMessage *msg, void *args);
 static int32_t RetrySearchService(ConnBleConnection *connection, enum RetrySearchServiceReason reason);
+static void BleGattcConnStateCallback(int32_t underlayerHandle, int32_t state, int32_t status);
+static void BleGattcSearchServiceCallback(int32_t underlayerHandle, int32_t status);
+static void BleGattcRegisterNotificationCallback(int32_t underlayerHandle, int32_t status);
+static void BleGattcNotificationReceiveCallback(int32_t underlayerHandle, SoftBusGattcNotify *param, int32_t status);
+static void BleGattcConfigureMtuSizeCallback(int32_t underlayerHandle, int32_t mtuSize, int32_t status);
 static ConnBleClientEventListener g_clientEventListener = { 0 };
+static SoftBusGattcCallback g_gattcCallback = {
+    .ConnectionStateCallback = BleGattcConnStateCallback,
+    .ServiceCompleteCallback = BleGattcSearchServiceCallback,
+    .RegistNotificationCallback = BleGattcRegisterNotificationCallback,
+    .NotificationReceiveCallback = BleGattcNotificationReceiveCallback,
+    .ConfigureMtuSizeCallback = BleGattcConfigureMtuSizeCallback,
+};
 static SoftBusHandlerWrapper g_bleGattClientAsyncHandler = {
     .handler = {
-        .name = (char *)("BleGattClientAsyncHandler"),
+        .name = "BleGattClientAsyncHandler",
         .HandleMessage = BleGattClientMsgHandler,
         // assign when initiation
         .looper = NULL,
@@ -100,16 +113,15 @@ int32_t ConnGattClientConnect(ConnBleConnection *connection)
 
     SoftBusBtAddr binaryAddr = { 0 };
     int32_t status = ConvertBtMacToBinary(connection->addr, BT_MAC_LEN, binaryAddr.addr, BT_ADDR_LEN);
-    if (status != SOFTBUS_OK) {
-        CONN_LOGW(CONN_BLE,
-            "client connect failed: convert string mac to binary fail, connectionId=%{public}u, err=%{public}d",
-            connection->connectionId, status);
-        return status;
-    }
+    CONN_CHECK_AND_RETURN_RET_LOGW(status == SOFTBUS_OK, status, CONN_BLE, "client connect failed: convert string mac "
+        "to binary fail, connectionId=%{public}u, err=%{public}d", connection->connectionId, status);
     int32_t underlayerHandle = SoftbusGattcRegister();
     CONN_CHECK_AND_RETURN_RET_LOGW(underlayerHandle != INVALID_GATTC_ID, SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_REGISTER_ERR,
         CONN_BLE, "ble client connect failed: underlayer register failed, underlayerHandle=%{public}d",
         underlayerHandle);
+    status = SoftbusGattcRegisterCallback(&g_gattcCallback, underlayerHandle);
+    CONN_CHECK_AND_RETURN_RET_LOGW(status == SOFTBUS_OK, status, CONN_BLE, "client connect %{public}u failed: convert "
+        "string mac to binary fail, err=%{public}d", connection->connectionId, status);
     if (connection->fastestConnectEnable && SoftbusGattcSetFastestConn(underlayerHandle) != SOFTBUS_OK) {
         CONN_LOGW(CONN_BLE, "enable ble fastest connection failed, it is not a big deal, go ahead");
     }
@@ -117,7 +129,7 @@ int32_t ConnGattClientConnect(ConnBleConnection *connection)
         .peerBleMac = connection->addr,
         .connectionId = (int32_t)connection->connectionId,
         .result = EVENT_STAGE_RESULT_OK
-        };
+    };
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_INVOKE_PROTOCOL, extra);
     status = SoftbusGattcConnect(underlayerHandle, &binaryAddr);
     if (status != SOFTBUS_OK) {
@@ -180,7 +192,6 @@ static void ConnectedMsgHandler(const CommonStatusContext *ctx)
         (void)SoftbusGattcUnRegister(ctx->underlayerHandle);
         return;
     }
-
     int32_t rc = SOFTBUS_OK;
     do {
         if (ctx->status != SOFTBUS_OK) {
@@ -599,8 +610,8 @@ int32_t ConnGattClientDisconnect(ConnBleConnection *connection, bool grace, bool
         underlayerHandle == INVALID_UNDERLAY_HANDLE ? BLE_CONNECTION_STATE_CLOSED : BLE_CONNECTION_STATE_CLOSING;
     (void)SoftBusMutexUnlock(&connection->lock);
     if (underlayerHandle == INVALID_UNDERLAY_HANDLE) {
-        CONN_LOGD(CONN_BLE,
-            "handle is valid, repeat disconnect? just report close. connectionId=%{public}u", connection->connectionId);
+        CONN_LOGD(CONN_BLE, "ble client connection disconnect, handle is valid, repeat disconnect? just report close. "
+            "connectionId=%{public}u", connection->connectionId);
         g_clientEventListener.onClientConnectionClosed(connection->connectionId, SOFTBUS_OK);
         return SOFTBUS_OK;
     }
@@ -688,7 +699,8 @@ static void BleGattcNotificationReceiveCallback(int32_t underlayerHandle, SoftBu
     } else if (memcmp(param->charaUuid.uuid, SOFTBUS_CHARA_BLENET_UUID, param->charaUuid.uuidLen) == 0) {
         isConnCharacteristic = false;
     } else {
-        CONN_LOGE(CONN_BLE, "not NET or CONN characteristic, connId=%{public}u, handle=%{public}d",
+        CONN_LOGE(CONN_BLE,
+            "notification receive failed: not NET or CONN characteristic, connId=%{public}u, handle=%{public}d",
             connection->connectionId, underlayerHandle);
         ConnAuditExtra extra = {
             .auditType = AUDIT_EVENT_MSG_ERROR,
@@ -713,9 +725,9 @@ static void BleGattcNotificationReceiveCallback(int32_t underlayerHandle, SoftBu
 static char *GetBleAttrUuid(int32_t module)
 {
     if (module == MODULE_BLE_NET) {
-        return (char *)(SOFTBUS_CHARA_BLENET_UUID);
+        return SOFTBUS_CHARA_BLENET_UUID;
     } else {
-        return (char *)(SOFTBUS_CHARA_BLECONN_UUID);
+        return SOFTBUS_CHARA_BLECONN_UUID;
     }
 }
 
@@ -738,7 +750,7 @@ int32_t ConnGattClientSend(ConnBleConnection *connection, const uint8_t *data, u
     char *characteristicUuid = GetBleAttrUuid(module);
     SoftBusGattcData gattcData = {
         .serviceUuid = {
-            .uuid = (char *)SOFTBUS_SERVICE_UUID,
+            .uuid = SOFTBUS_SERVICE_UUID,
             .uuidLen = strlen(SOFTBUS_SERVICE_UUID),
         },
         .characterUuid = {
@@ -868,17 +880,11 @@ int32_t ConnGattInitClientModule(SoftBusLooper *looper, const ConnBleClientEvent
         "init ble client failed: invalid param, listener onClientDataReceived is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(listener->onClientConnectionClosed != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT,
         "init ble client failed: invalid param, listener onClientConnectionClosed is null");
-
-    static SoftBusGattcCallback gattcCallback = {
-        .ConnectionStateCallback = BleGattcConnStateCallback,
-        .ServiceCompleteCallback = BleGattcSearchServiceCallback,
-        .RegistNotificationCallback = BleGattcRegisterNotificationCallback,
-        .NotificationReceiveCallback = BleGattcNotificationReceiveCallback,
-        .ConfigureMtuSizeCallback = BleGattcConfigureMtuSizeCallback,
-    };
-    SoftbusGattcRegisterCallback(&gattcCallback);
-
+    int32_t status = InitSoftbusAdapterClient();
+    CONN_CHECK_AND_RETURN_RET_LOGW(status == SOFTBUS_OK, status, CONN_INIT,
+        "init softbus adapter failed, err=%{public}d", status);
     g_bleGattClientAsyncHandler.handler.looper = looper;
     g_clientEventListener = *listener;
+
     return SOFTBUS_OK;
 }
