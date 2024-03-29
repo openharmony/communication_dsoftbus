@@ -184,7 +184,6 @@ void ClientDeathProcTask(void)
     DiscRecoveryPublish();
     DiscRecoverySubscribe();
     DiscRecoveryPolicy();
-    RestartEventNotify();
 }
 
 void RestartEventCallbackUnregister(void)
