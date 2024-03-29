@@ -268,7 +268,7 @@ uint64_t LnnGetSysTimeMs(void)
 
 int32_t LnnInitLaneLooper(void)
 {
-    SoftBusLooper *looper = CreateNewLooper("Lane-looper");
+    SoftBusLooper *looper = CreateNewLooper("Lane_lp");
     if (!looper) {
         LNN_LOGE(LNN_LANE, "init laneLooper fail");
         return SOFTBUS_ERR;

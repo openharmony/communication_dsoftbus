@@ -595,7 +595,7 @@ int32_t ConnBleInitTransModule(ConnBleTransEventListener *listener)
         status == SOFTBUS_OK, status, CONN_INIT, "init ble trans failed: init send queue failed, err=%{public}d",
         status);
 
-    status = ConnStartActionAsync(NULL, BleSendTask, NULL);
+    status = ConnStartActionAsync(NULL, BleSendTask, "BleSend_Tsk");
     CONN_CHECK_AND_RETURN_RET_LOGW(
         status == SOFTBUS_OK, status, CONN_INIT, "init ble trans failed: start send task failed, err=%{public}d",
         status);

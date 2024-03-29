@@ -107,7 +107,7 @@ static LaneBusinessInfo *GetLaneBusinessInfoWithoutLock(const LaneBusinessInfo *
     return NULL;
 }
 
-static int32_t CreateLaneBusinessInfoItem(LaneType lanetype, const LaneLinkInfo *laneLinkInfo,
+static int32_t CreateLaneBusinessInfoItem(LaneType laneType, const LaneLinkInfo *laneLinkInfo,
     LaneBusinessInfo *laneBusinessInfo)
 {
     if (laneLinkInfo == NULL || laneBusinessInfo == NULL) {
@@ -118,7 +118,7 @@ static int32_t CreateLaneBusinessInfoItem(LaneType lanetype, const LaneLinkInfo 
         LNN_LOGE(LNN_LANE, "memcpy laneLinkInfo fail");
         return SOFTBUS_MEM_ERR;
     }
-    laneBusinessInfo->laneType = lanetype;
+    laneBusinessInfo->laneType = laneType;
     laneBusinessInfo->ref = 1;
     return SOFTBUS_OK;
 }
@@ -132,7 +132,7 @@ int32_t AddLaneBusinessInfoItem(LaneType laneType, const LaneLinkInfo *laneLinkI
     LaneBusinessInfo laneBusinessInfo;
     (void)memset_s(&laneBusinessInfo, sizeof(LaneBusinessInfo), 0, sizeof(LaneBusinessInfo));
     if (CreateLaneBusinessInfoItem(laneType, laneLinkInfo, &laneBusinessInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "create resourceItem fail");
+        LNN_LOGE(LNN_LANE, "create laneBusinessInfo fail");
         return SOFTBUS_ERR;
     }
     if (LaneListenerLock() != SOFTBUS_OK) {
@@ -145,9 +145,9 @@ int32_t AddLaneBusinessInfoItem(LaneType laneType, const LaneLinkInfo *laneLinkI
         LaneListenerUnlock();
         return SOFTBUS_OK;
     }
-    LaneBusinessInfo *laneBusinessInfoItem = (LaneBusinessInfo *)SoftBusMalloc(sizeof(LaneBusinessInfo));
+    LaneBusinessInfo *laneBusinessInfoItem = (LaneBusinessInfo *)SoftBusCalloc(sizeof(LaneBusinessInfo));
     if (laneBusinessInfoItem == NULL) {
-        LNN_LOGE(LNN_LANE, "malloc laneBusinessInfoItem fail");
+        LNN_LOGE(LNN_LANE, "calloc laneBusinessInfoItem fail");
         LaneListenerUnlock();
         return SOFTBUS_MALLOC_ERR;
     }
@@ -274,6 +274,7 @@ int32_t LaneLinkupNotify(const char *peerUdid, const LaneLinkInfo *laneLinkInfo)
         return SOFTBUS_ERR;
     }
     LaneListenerInfo listenerList[LANE_TYPE_BUTT];
+    (void)memset_s(listenerList, sizeof(listenerList), 0, sizeof(listenerList));
     if (LaneListenerLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "lane listener lock fail");
         return SOFTBUS_LOCK_ERR;
@@ -418,9 +419,9 @@ int32_t RegisterLaneListener(LaneType type, const LaneStatusListener *listener)
         LaneListenerUnlock();
         return SOFTBUS_OK;
     }
-    LaneListenerInfo *laneListenerItem = (LaneListenerInfo *)SoftBusMalloc(sizeof(LaneListenerInfo));
+    LaneListenerInfo *laneListenerItem = (LaneListenerInfo *)SoftBusCalloc(sizeof(LaneListenerInfo));
     if (laneListenerItem == NULL) {
-        LNN_LOGE(LNN_LANE, "lane listener malloc fail");
+        LNN_LOGE(LNN_LANE, "calloc lane listener fail");
         LaneListenerUnlock();
         return SOFTBUS_MALLOC_ERR;
     }

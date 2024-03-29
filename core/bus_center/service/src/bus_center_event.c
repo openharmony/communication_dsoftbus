@@ -635,7 +635,7 @@ void LnnNotifyNetworkIdChangeEvent(const char *networkId)
 int32_t LnnInitBusCenterEvent(void)
 {
     int32_t i;
-    SoftBusLooper *looper = CreateNewLooper("NotifyLooper");
+    SoftBusLooper *looper = CreateNewLooper("LnnNotify_Lp");
     if (looper == NULL) {
         LNN_LOGE(LNN_EVENT, "create notify looper fail");
         return SOFTBUS_ERR;
