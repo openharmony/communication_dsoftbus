@@ -2234,6 +2234,18 @@ static void UpdateLocalNetCapability(void)
         (void)LnnClearNetCapability(&netCapability, BIT_WIFI_P2P);
         (void)LnnClearNetCapability(&netCapability, BIT_WIFI_24G);
         (void)LnnClearNetCapability(&netCapability, BIT_WIFI_5G);
+    } else {
+        SoftBusBand band = SoftBusGetLinkBand();
+        if (band == BAND_24G) {
+            (void)LnnSetNetCapability(&netCapability, BIT_WIFI_24G);
+            (void)LnnClearNetCapability(&netCapability, BIT_WIFI_5G);
+        } else if (band == BAND_5G) {
+            (void)LnnSetNetCapability(&netCapability, BIT_WIFI_5G);
+            (void)LnnClearNetCapability(&netCapability, BIT_WIFI_24G);
+        } else {
+            (void)LnnSetNetCapability(&netCapability, BIT_WIFI_5G);
+            (void)LnnSetNetCapability(&netCapability, BIT_WIFI_24G);
+        }
     }
 
     if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, netCapability) != SOFTBUS_OK) {
