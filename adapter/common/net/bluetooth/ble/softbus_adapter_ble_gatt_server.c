@@ -745,7 +745,7 @@ int SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback, SoftBusBtUuid 
 void SoftBusUnRegisterGattsCallbacks(SoftBusBtUuid serviceUuid)
 {
     RemoveGattsManager(serviceUuid);
-    if (g_halRegFlag == -1 || IsGattsManagerEmpty()) {
+    if (g_halRegFlag == -1 || !IsGattsManagerEmpty()) {
         CONN_LOGI(CONN_BLE, "no need to unregist gatt server.");
         return;
     }
