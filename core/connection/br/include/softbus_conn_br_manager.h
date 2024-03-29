@@ -49,6 +49,11 @@ typedef struct {
     char addr[BT_MAC_LEN];
     enum ConnBrDeviceState state;
     ListNode requests;
+    uint32_t connectionId;
+    struct {
+        uint32_t keepAliveBleRequestId;
+        uint32_t keepAliveBleConnectionId;
+    } bleKeepAliveInfo;
 } ConnBrDevice;
 
 typedef struct {
@@ -60,6 +65,7 @@ typedef struct {
 
 typedef struct {
     uint32_t requestId;
+    uint32_t connectionId;
     char addr[BT_MAC_LEN];
     ConnectResult result;
     ConnectStatistics statistics;
