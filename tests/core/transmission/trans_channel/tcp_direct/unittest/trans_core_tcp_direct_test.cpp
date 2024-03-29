@@ -396,14 +396,15 @@ HWTEST_F(TransCoreTcpDirectTest, VerifyP2pPackErrorTest0010, TestSize.Level1)
 HWTEST_F(TransCoreTcpDirectTest, GetCipherFlagByAuthIdTest0011, TestSize.Level1)
 {
     bool isAuthServer = false;
+    bool isLegacyOs = false;
     AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     uint32_t flag = 0;
 
-    int32_t ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer);
+    int32_t ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer, isLegacyOs);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     authHandle.authId = INVALID_VALUE;
-    ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer);
+    ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer, isLegacyOs);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 

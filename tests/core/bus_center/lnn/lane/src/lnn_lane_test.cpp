@@ -1552,7 +1552,27 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_EXPECT_LANE_BY_PARAMETER_007, TestSize.Leve
     LanePreferredLinkList linkList;
 
     EXPECT_CALL(enabledMock, IsLinkEnabled).WillOnce(Return(false)).WillOnce(Return(false)).
-        WillOnce(Return(false)).WillOnce(Return(false)).WillOnce(Return(false)).WillOnce(Return(false));
+        WillOnce(Return(false)).WillOnce(Return(false)).WillOnce(Return(false)).
+        WillOnce(Return(false)).WillOnce(Return(true));
+
+    int32_t ret = SelectExpectLaneByParameter(&linkList);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LNN_SELECT_EXPECT_LANE_BY_PARAMETER_008
+* @tc.desc: SelectExpectLaneByParameter
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_SELECT_EXPECT_LANE_BY_PARAMETER_008, TestSize.Level1)
+{
+    NiceMock<IsLinkEnabledDepsInterfaceMock> enabledMock;
+    LanePreferredLinkList linkList;
+
+    EXPECT_CALL(enabledMock, IsLinkEnabled).WillOnce(Return(false)).WillOnce(Return(false)).
+        WillOnce(Return(false)).WillOnce(Return(false)).WillOnce(Return(false)).
+        WillOnce(Return(false)).WillOnce(Return(false));
 
     int32_t ret = SelectExpectLaneByParameter(&linkList);
     EXPECT_EQ(ret, SOFTBUS_ERR);
