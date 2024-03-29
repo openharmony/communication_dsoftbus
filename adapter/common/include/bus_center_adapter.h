@@ -55,6 +55,7 @@ typedef enum {
 int32_t GetCommonDevInfo(CommonDeviceKey key, char *value, uint32_t len);
 int32_t GetCommonOsType(int32_t *value);
 int32_t GetCommonOsVersion(char *value, uint32_t len);
+int32_t GetCommonDeviceVersion(char *value, uint32_t len);
 int32_t GetWlanIpv4Addr(char *ip, uint32_t size);
 int32_t GetDeviceSecurityLevel(int32_t *level);
 

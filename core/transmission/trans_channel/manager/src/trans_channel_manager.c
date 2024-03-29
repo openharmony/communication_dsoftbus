@@ -20,6 +20,7 @@
 #include "access_control.h"
 #include "anonymizer.h"
 #include "bus_center_manager.h"
+#include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_qos.h"
 #include "lnn_network_manager.h"
 #include "session.h"
@@ -449,15 +450,17 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
 
     AppInfo *appInfo = GetAppInfo(param);
     TRANS_CHECK_AND_RETURN_RET_LOGW(!(appInfo == NULL), INVALID_CHANNEL_ID, TRANS_CTRL, "GetAppInfo is null.");
-    char peerUdid[UDID_BUF_LEN] = {0};
-    int32_t udidRet = LnnGetRemoteStrInfo(appInfo->peerNetWorkId, STRING_KEY_DEV_UDID, peerUdid, sizeof(peerUdid));
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    int32_t peerRet = LnnGetRemoteNodeInfoById(appInfo->peerNetWorkId, CATEGORY_NETWORK_ID, &nodeInfo);
     TransEventExtra extra = {
         .calleePkg = NULL,
         .callerPkg = appInfo->myData.pkgName,
         .socketName = appInfo->myData.sessionName,
         .dataType = appInfo->businessType,
         .peerNetworkId = appInfo->peerNetWorkId,
-        .peerUdid = udidRet == SOFTBUS_OK ? peerUdid : NULL,
+        .peerUdid = peerRet == SOFTBUS_OK ? nodeInfo.deviceInfo.deviceUdid : NULL,
+        .peerDevVer = peerRet == SOFTBUS_OK ? nodeInfo.deviceInfo.deviceVersion : NULL,
         .result = EVENT_STAGE_RESULT_OK
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_START, extra);

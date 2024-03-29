@@ -827,15 +827,8 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
         return SOFTBUS_INVALID_PARAM;
     }
 
-    char peerUuid[DEVICE_ID_SIZE_MAX] = {0};
-    char peerNetworkId[NETWORK_ID_BUF_LEN] = {0};
-    char peerUdid[UDID_BUF_LEN] = {0};
-    bool udidRet = GetUuidByChanId(channelId, peerUuid, DEVICE_ID_SIZE_MAX) == SOFTBUS_OK &&
-        LnnGetNetworkIdByUuid(peerUuid, peerNetworkId, NETWORK_ID_BUF_LEN) == SOFTBUS_OK &&
-        LnnGetRemoteStrInfo(peerNetworkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN) == SOFTBUS_OK;
     TransEventExtra extra = {
         .socketName = conn->appInfo.myData.sessionName,
-        .peerUdid = udidRet ? peerUdid : NULL,
         .calleePkg = NULL,
         .callerPkg = NULL,
         .channelId = channelId,
@@ -843,6 +836,15 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
         .socketFd = conn->appInfo.fd,
         .result = EVENT_STAGE_RESULT_OK
     };
+    char peerUuid[DEVICE_ID_SIZE_MAX] = {0};
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    bool peerRet = GetUuidByChanId(channelId, peerUuid, DEVICE_ID_SIZE_MAX) == SOFTBUS_OK &&
+        LnnGetRemoteNodeInfoById(peerUuid, CATEGORY_UUID, &nodeInfo) == SOFTBUS_OK;
+    if (peerRet) {
+        extra.peerUdid = nodeInfo.deviceInfo.deviceUdid;
+        extra.peerDevVer = nodeInfo.deviceInfo.deviceVersion;
+    }
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_START, extra);
     if ((flags & FLAG_AUTH_META) != 0 && !IsMetaSession(conn->appInfo.myData.sessionName)) {
         char *tmpName = NULL;
