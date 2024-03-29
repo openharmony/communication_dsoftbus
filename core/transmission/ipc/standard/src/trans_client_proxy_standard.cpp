@@ -227,7 +227,7 @@ int32_t TransClientProxy::OnChannelClosed(int32_t channelId, int32_t channelType
         return SOFTBUS_ERR;
     }
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     int32_t ret = remote->SendRequest(CLIENT_ON_CHANNEL_CLOSED, data, reply, option);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "OnChannelClosed send request failed, ret=%{public}d", ret);
