@@ -61,6 +61,7 @@ typedef struct {
     union {
         struct {
             char brMac[BT_MAC_LEN];
+            uint32_t connectionId;
         } brInfo;
         struct {
             BleProtocolType protocol;

@@ -856,11 +856,14 @@ static int32_t StartReconnectDevice(
     request.type = REQUEST_TYPE_RECONNECT;
     request.addTime = GetCurrentTimeMs();
     request.isFastAuth = true;
+    if (connInfo->type == AUTH_LINK_TYPE_BR) {
+        request.connInfo.info.brInfo.connectionId = auth->connId;
+    }
     if (AddAuthRequest(&request) == 0) {
         AUTH_LOGE(AUTH_CONN, "add reconnect request fail, requestId=%{public}u", requestId);
         return SOFTBUS_ERR;
     }
-    if (ConnectAuthDevice(requestId, connInfo, sideType) != SOFTBUS_OK) {
+    if (ConnectAuthDevice(requestId, &request.connInfo, sideType) != SOFTBUS_OK) {
         DelAuthRequest(requestId);
         return SOFTBUS_AUTH_CONN_FAIL;
     }
