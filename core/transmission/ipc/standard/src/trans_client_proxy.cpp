@@ -111,11 +111,6 @@ int32_t ClientIpcOnChannelLinkDown(ChannelMsg *data, const char *networkId, cons
     return SOFTBUS_OK;
 }
 
-static void CallProxyOnChannelClosed(sptr<TransClientProxy> clientProxy, ChannelMsg *data)
-{
-    clientProxy->OnChannelClosed(data->msgChannelId, data->msgChannelType);
-}
-
 int32_t ClientIpcOnChannelClosed(ChannelMsg *data)
 {
     if (data == nullptr) {
@@ -127,12 +122,10 @@ int32_t ClientIpcOnChannelClosed(ChannelMsg *data)
         TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr!");
         return SOFTBUS_ERR;
     }
-    std::future<void> task = std::async([clientProxy, data]() {
-        CallProxyOnChannelClosed(clientProxy, data);
-    });
-    if (task.wait_for(std::chrono::seconds(IPC_OPT_TIMEOUT_S)) != std::future_status::ready) {
-        TRANS_LOGE(TRANS_SDK, "CallProxyOnChannelClosed timeout!");
-        return SOFTBUS_ERR;
+    int32_t ret = clientProxy->OnChannelClosed(data->msgChannelId, data->msgChannelType);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "OnChannelClosed failed, ret=%{public}d", ret);
+        return ret;
     }
     return SOFTBUS_OK;
 }

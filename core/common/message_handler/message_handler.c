@@ -207,17 +207,17 @@ static int StartNewLooperThread(SoftBusLooper *looper)
     SoftBusThreadAttr threadAttr;
     SoftBusThread tid;
     SoftBusThreadAttrInit(&threadAttr);
-
+    threadAttr.taskName = looper->context->name;
     threadAttr.stackSize = MAINLOOP_STACK_SIZE;
     int32_t ret = SoftBusThreadCreate(&tid, &threadAttr, LoopTask, looper);
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_UTILS, "Init DeathProcTask ThreadAttr failed");
-        return -1;
+        return SOFTBUS_ERR;
     }
 
     COMM_LOGI(COMM_UTILS, "loop thread creating. name=%{public}s, tid=%{public}d", looper->context->name,
         (int)(uintptr_t)tid);
-    return 0;
+    return SOFTBUS_OK;
 }
 
 static void DumpLooperLocked(const SoftBusLooperContext *context, const SoftBusHandler *handler)
@@ -436,7 +436,6 @@ SoftBusLooper *CreateNewLooper(const char *name)
         SoftBusFree(looper);
         return NULL;
     }
-
     if (memcpy_s(context->name, sizeof(context->name), name, strlen(name)) != EOK) {
         COMM_LOGE(COMM_UTILS, "memcpy_s fail");
         SoftBusFree(looper);
@@ -566,14 +565,14 @@ void DestroyLooper(SoftBusLooper *looper)
 
 int LooperInit(void)
 {
-    SoftBusLooper *looper = CreateNewLooper("BusCenter");
+    SoftBusLooper *looper = CreateNewLooper("BusCenter_Lp");
     if (!looper) {
         COMM_LOGE(COMM_UTILS, "init BusCenter looper fail.");
         return SOFTBUS_ERR;
     }
     SetLooper(LOOP_TYPE_DEFAULT, looper);
     
-    SoftBusLooper *handleFileLooper = CreateNewLooper("HandleFile");
+    SoftBusLooper *handleFileLooper = CreateNewLooper("Hidumper_Lp");
     if (!handleFileLooper) {
         COMM_LOGE(COMM_UTILS, "init HandleFile looper fail.");
         return SOFTBUS_ERR;
