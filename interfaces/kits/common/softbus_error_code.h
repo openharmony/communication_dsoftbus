@@ -111,6 +111,10 @@ enum SoftBusErrNo {
     /* internal error */
     SOFTBUS_ERR,
 
+    SOFTBUS_NOT_LOGIN, // not login hw account
+    SOFTBUS_NOT_SAME_ACCOUNT, // check whether the accounts are the same
+    SOFTBUS_NO_ONLINE_DEVICE, // there is no network online device
+
     /* errno begin: -((203 << 21) | (5 << 16) | 0xFFFF) */
     SOFTBUS_TRANS_ERR_BASE = SOFTBUS_ERRNO(TRANS_SUB_MODULE_CODE),
     SOFTBUS_TRANS_INVALID_SESSION_ID,
@@ -229,8 +233,6 @@ enum SoftBusErrNo {
     SOFTBUS_TRANS_DECRYPT_ERR,
     SOFTBUS_TRANS_BAD_KEY, // Send badkey notification for offline events
     SOFTBUS_TRANS_CHECK_PID_ERROR,
-    SOFTBUS_TRANS_NOT_LOGIN,
-    SOFTBUS_TRANS_NOT_SAME_ACCOUNT,
     SOFTBUS_TRANS_GET_LOCAL_UID_FAIL, // get local userId fail
     SOFTBUS_TRANS_MSG_BUILD_BC_PARAM_FAIL, // build broadcast params fail
     SOFTBUS_TRANS_MSG_BUILD_PAYLOAD_FAIL, // build broadcast payload fail
