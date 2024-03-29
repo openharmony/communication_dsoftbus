@@ -58,54 +58,13 @@ static void LaneUnlock(void)
     (void)SoftBusMutexUnlock(&g_laneResourceMutex);
 }
 
-static bool FindLaneResource(const LaneResource *resourceItem, LaneResource *item)
-{
-    switch (resourceItem->type) {
-        case LANE_BR:
-            if (strncmp(resourceItem->linkInfo.br.brMac, item->linkInfo.br.brMac, BT_MAC_LEN) != 0) {
-                return false;
-            }
-            break;
-        case LANE_BLE:
-        case LANE_COC:
-            if (strncmp(resourceItem->linkInfo.ble.bleMac, item->linkInfo.ble.bleMac, BT_MAC_LEN) != 0) {
-                return false;
-            }
-            break;
-        case LANE_P2P:
-        case LANE_HML:
-            if (strncmp(resourceItem->linkInfo.p2p.connInfo.peerIp,
-                item->linkInfo.p2p.connInfo.peerIp, IP_LEN) != 0) {
-                return false;
-            }
-            break;
-        case LANE_WLAN_5G:
-        case LANE_WLAN_2P4G:
-        case LANE_P2P_REUSE:
-            if (strncmp(resourceItem->linkInfo.wlan.connInfo.addr,
-                item->linkInfo.wlan.connInfo.addr, MAX_SOCKET_ADDR_LEN) != 0) {
-                return false;
-            }
-            break;
-        case LANE_BLE_DIRECT:
-        case LANE_COC_DIRECT:
-            if (strcmp(resourceItem->linkInfo.bleDirect.networkId, item->linkInfo.bleDirect.networkId) != 0) {
-                return false;
-            }
-            break;
-        default:
-            return false;
-    }
-    return true;
-}
-
 static LaneResource* LaneResourceIsExist(const LaneResource *resourceItem)
 {
     LaneResource *item = NULL;
     LaneResource *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResourceList, LaneResource, node) {
         if (resourceItem->type == item->type) {
-            if (FindLaneResource(resourceItem, item)) {
+            if (CompLaneResource(resourceItem, item)) {
                 return item;
             }
         }
@@ -1069,7 +1028,7 @@ int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *
         return SOFTBUS_INVALID_PARAM;
     }
     if (callback == NULL || callback->OnLaneLinkSuccess == NULL ||
-        callback->OnLaneLinkFail == NULL || callback->OnLaneLinkException == NULL) {
+        callback->OnLaneLinkFail == NULL) {
         LNN_LOGE(LNN_LANE, "the callback is invalid");
         return SOFTBUS_INVALID_PARAM;
     }

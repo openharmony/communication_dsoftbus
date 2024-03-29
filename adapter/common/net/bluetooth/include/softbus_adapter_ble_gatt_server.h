@@ -19,6 +19,7 @@
 #include "stdbool.h"
 #include "stdint.h"
 #include "softbus_adapter_bt_common.h"
+#include "common_list.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -127,8 +128,17 @@ typedef struct {
     char *value;
 } SoftBusGattsNotify;
 
-int SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback);
-void SoftBusUnRegisterGattsCallbacks(void);
+typedef struct {
+    SoftBusGattsCallback callback;
+    ListNode node;
+    SoftBusBtUuid serviceUuid;
+    int32_t handle; // the id of start server
+    int32_t expectedMtu;
+    int32_t connId; // as server connected
+} SoftBusGattsManager;
+
+int SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback, SoftBusBtUuid srvcUuid, int32_t expectedMtu);
+void SoftBusUnRegisterGattsCallbacks(SoftBusBtUuid srvcUuid);
 int SoftBusGattsAddService(SoftBusBtUuid srvcUuid, bool isPrimary, int number);
 int SoftBusGattsAddCharacteristic(int srvcHandle, SoftBusBtUuid characUuid, int properties, int permissions);
 int SoftBusGattsAddDescriptor(int srvcHandle, SoftBusBtUuid descUuid, int permissions);
@@ -139,6 +149,7 @@ int SoftBusGattsConnect(SoftBusBtAddr btAddr);
 int SoftBusGattsDisconnect(SoftBusBtAddr btAddr, int connId);
 int SoftBusGattsSendResponse(SoftBusGattsResponse *param);
 int SoftBusGattsSendNotify(SoftBusGattsNotify *param);
+int InitSoftbusAdapterServer(void);
 
 #ifdef __cplusplus
 #if __cplusplus

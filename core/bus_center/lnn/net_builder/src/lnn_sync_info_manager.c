@@ -18,12 +18,16 @@
 #include <securec.h>
 #include <string.h>
 
+#include "anonymizer.h"
+#include "auth_manager.h"
 #include "bus_center_event.h"
 #include "common_list.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_net_builder.h"
 #include "lnn_log.h"
 #include "message_handler.h"
+#include "softbus_adapter_json.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_adapter_timer.h"
@@ -413,6 +417,117 @@ static INetworkingListener g_networkListener = {
     OnMessageReceived,
 };
 
+#define NETWORK_SYNC_CONN_CAP "conn_cap_long"
+#define NETWORK_SYNC_TYPE "networking_type"
+#define NETWORK_SYNC_SEQ "auth_seq"
+
+static char *PackP2pNetworkingMsg(int64_t connCap, int32_t networkType, int64_t authSeq)
+{
+    JsonObj *json = JSON_CreateObject();
+    if (json == NULL) {
+        LNN_LOGE(LNN_BUILDER, "create json object fail");
+        return NULL;
+    }
+    if (!JSON_AddInt64ToObject(json, NETWORK_SYNC_CONN_CAP, connCap) ||
+        !JSON_AddInt32ToObject(json, NETWORK_SYNC_TYPE, networkType) ||
+        !JSON_AddInt64ToObject(json, NETWORK_SYNC_SEQ, authSeq)) {
+        LNN_LOGE(LNN_BUILDER, "add p2p networking msg to json fail");
+        JSON_Delete(json);
+        return NULL;
+    }
+    char *msg = JSON_PrintUnformatted(json);
+    JSON_Delete(json);
+    return msg;
+}
+
+static int32_t CheckPeerAuthSeq(const char *uuid, int64_t peerAuthSeq)
+{
+    int64_t localAuthSeq[2] = {0};
+    uint64_t authVerifyTime[2] = {0};
+    char udid[UDID_BUF_LEN] = {0};
+
+    if (LnnConvertDlId(uuid, CATEGORY_UUID, CATEGORY_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "convert uuid fail");
+        return SOFTBUS_ERR;
+    }
+    if (AuthGetLatestAuthSeqListByType(udid, localAuthSeq, authVerifyTime, DISCOVERY_TYPE_BLE) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get authseq fail");
+        return SOFTBUS_ERR;
+    }
+    char *anonyUdid = NULL;
+    Anonymize(udid, &anonyUdid);
+    if (peerAuthSeq == 0 || (peerAuthSeq != localAuthSeq[0] && peerAuthSeq != localAuthSeq[1])) {
+        LNN_LOGE(LNN_BUILDER, "authSeq is invalid, udid:%{public}s, local:%{public}" PRId64 ", %{public}"
+            PRId64 "peer:%{public}" PRId64 "", anonyUdid, localAuthSeq[0], localAuthSeq[1], peerAuthSeq);
+        AnonymizeFree(anonyUdid);
+        return SOFTBUS_ERR;
+    }
+    AnonymizeFree(anonyUdid);
+    return SOFTBUS_OK;
+}
+
+static int32_t UnPackP2pNetworkingData(const AuthTransData *data, int64_t *peerConnCap, int32_t *peerNetworkType,
+    int64_t *peerAuthSeq)
+{
+    JsonObj *json = JSON_Parse((const char *)data->data, data->len);
+    if (json == NULL) {
+        LNN_LOGE(LNN_BUILDER, "json parse fail");
+        return SOFTBUS_ERR;
+    }
+    if (!JSON_GetInt64FromOject(json, NETWORK_SYNC_CONN_CAP, peerConnCap) ||
+        !JSON_GetInt32FromOject(json, NETWORK_SYNC_TYPE, peerNetworkType) ||
+        !JSON_GetInt64FromOject(json, NETWORK_SYNC_SEQ, peerAuthSeq)) {
+        LNN_LOGE(LNN_BUILDER, "json parse object fail");
+        JSON_Delete(json);
+        return SOFTBUS_ERR;
+    }
+    JSON_Delete(json);
+    return SOFTBUS_OK;
+}
+
+static void OnP2pNetworkingDataRecv(AuthHandle authHandle, const AuthTransData *data)
+{
+    if (data == NULL || data->data == NULL || data->len ==0) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return;
+    }
+    LNN_LOGI(LNN_BUILDER, "authId=%" PRId64 ", module=%{public}d, seq=%{public}" PRId64 ", len=%{public}u.",
+        authHandle.authId, data->module, data->seq, data->len);
+    if (data->module != MODULE_P2P_NETWORKING_SYNC) {
+        LNN_LOGE(LNN_BUILDER, "data->module is not MODULE_P2P_NETWORKING_SYNC");
+        return;
+    }
+
+    int64_t peerConnCap = 0;
+    int32_t peerNetworkType = 0;
+    int64_t peerAuthSeq = 0;
+    UnPackP2pNetworkingData(data, &peerConnCap, &peerNetworkType, &peerAuthSeq);
+    if (peerNetworkType != DISCOVERY_TYPE_BLE || LnnHasCapability((uint32_t)peerConnCap, BIT_BLE)) {
+        LNN_LOGE(LNN_BUILDER, "no need to offline, peerNetworkType:%{public}d, peerConnCap:%{public}u",
+            peerNetworkType, (uint32_t)peerConnCap);
+        return;
+    }
+    char uuid[UUID_BUF_LEN] = {0};
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
+    if (AuthGetDeviceUuid(authHandle.authId, uuid, UUID_BUF_LEN) != SOFTBUS_OK ||
+        CheckPeerAuthSeq(uuid, peerAuthSeq) != SOFTBUS_OK) {
+        char *anonyUuid = NULL;
+        Anonymize(uuid, &anonyUuid);
+        LNN_LOGW(LNN_BUILDER, "device has offline or get authId/authSeq fail, uuid:%{public}s", anonyUuid);
+        AnonymizeFree(anonyUuid);
+        return;
+    }
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
+    (void)LnnConvertDlId(uuid, CATEGORY_UUID, CATEGORY_NETWORK_ID, networkId, NETWORK_ID_BUF_LEN);
+    if (LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_BLE) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "request leave specific fail, networkId:%{public}s", anonyNetworkId);
+    } else {
+        LNN_LOGD(LNN_BUILDER, "offline ble by p2p succ, networkId:%{public}s", anonyNetworkId);
+    }
+    AnonymizeFree(anonyNetworkId);
+}
+
 static void LnnSyncManagerHandleOffline(const char *networkId)
 {
     if (SoftBusMutexLock(&g_syncInfoManager.lock) != 0) {
@@ -469,6 +584,14 @@ int32_t LnnInitSyncInfoManager(void)
         LNN_LOGE(LNN_INIT, "sync info manager mutex init fail");
         return SOFTBUS_LOCK_ERR;
     }
+    AuthTransListener p2pNetworkingCb = {
+        .onDataReceived = OnP2pNetworkingDataRecv,
+        .onDisconnected = NULL,
+    };
+    if (RegAuthTransListener(MODULE_P2P_NETWORKING_SYNC, &p2pNetworkingCb) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "p2p networking sync set cb fail");
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 
@@ -478,6 +601,7 @@ void LnnDeinitSyncInfoManager(void)
     for (i = 0; i < LNN_INFO_TYPE_COUNT; ++i) {
         g_syncInfoManager.handlers[i] = NULL;
     }
+    UnregAuthTransListener(MODULE_P2P_NETWORKING_SYNC);
     LnnRegisterEventHandler(LNN_EVENT_NODE_ONLINE_STATE_CHANGED, OnLnnOnlineStateChange);
     ClearSyncChannelInfo();
     SoftBusMutexDestroy(&g_syncInfoManager.lock);
@@ -629,4 +753,65 @@ int32_t LnnSendSyncInfoMsg(LnnSyncInfoType type, const char *networkId,
         SoftBusFree(syncMsg);
     }
     return rc;
+}
+
+static void SetAuthdataInfoParam(AuthTransData *dataInfo, char *msg)
+{
+    dataInfo->module = MODULE_P2P_NETWORKING_SYNC;
+    dataInfo->flag = 0;
+    dataInfo->seq = 0;
+    dataInfo->len = strlen(msg) + 1;
+    dataInfo->data = (const uint8_t *)msg;
+}
+
+NO_SANITIZE("cfi") int32_t LnnSendP2pSyncInfoMsg(const char *networkId, uint32_t netCapability)
+{
+    char uuid[UUID_BUF_LEN] = {0};
+    char *anonyNetworkId = NULL;
+    if (networkId == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    Anonymize(networkId, &anonyNetworkId);
+    (void)LnnConvertDlId(networkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN);
+    AuthHandle authHandle = { .authId = AuthP2pGetLatestIdByUuid(uuid) };
+    if (authHandle.authId == AUTH_INVALID_ID) {
+        LNN_LOGW(LNN_BUILDER, "not find p2p auth manager, no need to sync, networkId:%{public}s", anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
+        return SOFTBUS_OK;
+    }
+    int64_t authSeq[2] = {0};
+    uint64_t authVerifyTime[2] = {0};
+    char udid[UDID_BUF_LEN] = {0};
+    (void)LnnConvertDlId(networkId, CATEGORY_NETWORK_ID, CATEGORY_UDID, udid, UDID_BUF_LEN);
+    if (AuthGetLatestAuthSeqListByType(udid, authSeq, authVerifyTime, DISCOVERY_TYPE_BLE) != SOFTBUS_OK ||
+        (authSeq[0] == 0 && authSeq[1] == 0)) {
+        LNN_LOGE(LNN_BUILDER, "seqErr, ble authSeq:%{public}" PRId64 ", %{public}" PRId64 "", authSeq[0], authSeq[1]);
+        AnonymizeFree(anonyNetworkId);
+        return SOFTBUS_ERR;
+    }
+    char *msg = PackP2pNetworkingMsg((int64_t)netCapability, DISCOVERY_TYPE_BLE,
+        authVerifyTime[0] > authVerifyTime[1] ? authSeq[0] : authSeq[1]);
+    if (msg == NULL) {
+        LNN_LOGE(LNN_BUILDER, "pack p2p networking msg fail, networkId:%{public}s", anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
+        return SOFTBUS_ERR;
+    }
+    AuthTransData dataInfo = {0};
+    SetAuthdataInfoParam(&dataInfo, msg);
+    cJSON_free(msg);
+    if (SoftBusGenerateRandomArray((uint8_t *)&dataInfo.seq, sizeof(int64_t)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "generate seq fail");
+        AnonymizeFree(anonyNetworkId);
+        return SOFTBUS_ERR;
+    }
+    if (AuthPostTransData(authHandle, &dataInfo) == SOFTBUS_OK) {
+        LNN_LOGI(LNN_BUILDER, "send p2p sync info msg to networkId:%{public}s, netCap:%{public}u, seq:%{public}"
+            PRId64 ", [%{public}" PRId64 "/%{public}" PRId64 ", %{public}" PRIu64 "/%{public}" PRId64 "]",
+            anonyNetworkId, netCapability, dataInfo.seq, authVerifyTime[0], authSeq[0], authVerifyTime[1], authSeq[1]);
+    } else {
+        LNN_LOGE(LNN_BUILDER, "post trans data fail, networkId:%{public}s", anonyNetworkId);
+    }
+    AnonymizeFree(anonyNetworkId);
+    return SOFTBUS_OK;
 }

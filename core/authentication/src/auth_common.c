@@ -432,9 +432,9 @@ AuthLinkType ConvertToAuthLinkType(DiscoveryType type)
         case DISCOVERY_TYPE_P2P:
             return AUTH_LINK_TYPE_P2P;
         default:
+            AUTH_LOGE(AUTH_CONN, "unexpected discType=%{public}d", type);
             break;
     }
-    AUTH_LOGE(AUTH_CONN, "unexpected DiscoveryType=%{public}d", type);
     return AUTH_LINK_TYPE_MAX;
 }
 

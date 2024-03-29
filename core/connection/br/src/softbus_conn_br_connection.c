@@ -613,7 +613,7 @@ int32_t ConnBrStartServer(void)
     }
     serverState->available = true;
     serverState->serverId = -1;
-    status = ConnStartActionAsync(serverState, ListenTask, NULL);
+    status = ConnStartActionAsync(serverState, ListenTask, "BrListen_Tsk");
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BR, "start br server failed: error=%{public}d", status);
         (void)SoftBusMutexDestroy(&serverState->mutex);

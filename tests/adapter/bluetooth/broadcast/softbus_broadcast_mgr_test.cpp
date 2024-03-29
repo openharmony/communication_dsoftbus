@@ -50,9 +50,9 @@ public:
     void SetUp() override {}
     void TearDown() override {}
 
-    static constexpr char BC_DATA_PAYLOAD[] = {0x04, 0x05, 0x90, 0x00, 0x00, 0x10, 0x00, 0x18, 0xB9, 0x13, 0x3D, 0x28,
+    static inline uint8_t BC_DATA_PAYLOAD[] = {0x04, 0x05, 0x90, 0x00, 0x00, 0x10, 0x00, 0x18, 0xB9, 0x13, 0x3D, 0x28,
         0xFC, 0x0D, 0x7F, 0xAB, 0x21, 0x00, 0x30, 0x4F, 0x70, 0x65, 0x6E, 0x48};
-    static constexpr char RSP_DATA_PAYLOAD[] = {0x61, 0x72, 0x6D, 0x6F, 0x6E, 0x79, 0x20, 0x33, 0x2E, 0x32, 0x00};
+    static inline uint8_t RSP_DATA_PAYLOAD[] = {0x61, 0x72, 0x6D, 0x6F, 0x6E, 0x79, 0x20, 0x33, 0x2E, 0x32, 0x00};
 };
 
 static void BuildBroadcastParam(BroadcastParam *bcParam)
@@ -272,9 +272,9 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastInterface001, TestSize.Level1)
     BuildBroadcastPacketExceptPayload(&packet);
 
     packet.bcData.payloadLen = sizeof(BC_DATA_PAYLOAD);
-    packet.bcData.payload = reinterpret_cast<uint8_t *>(const_cast<char *>(BC_DATA_PAYLOAD));
+    packet.bcData.payload = BC_DATA_PAYLOAD;
     packet.rspData.payloadLen = sizeof(RSP_DATA_PAYLOAD);
-    packet.rspData.payload = reinterpret_cast<uint8_t *>(const_cast<char *>(RSP_DATA_PAYLOAD));
+    packet.rspData.payload = RSP_DATA_PAYLOAD;
 
     EXPECT_EQ(SOFTBUS_ERR, StartBroadcasting(bcId, &bcParam, &packet));
     EXPECT_EQ(SOFTBUS_ERR, SetBroadcastingData(bcId, &packet));
@@ -411,9 +411,9 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastUnRegisterBroadcaster002, Test
     BuildBroadcastPacketExceptPayload(&packet);
 
     packet.bcData.payloadLen = sizeof(BC_DATA_PAYLOAD);
-    packet.bcData.payload = reinterpret_cast<uint8_t *>(const_cast<char *>(BC_DATA_PAYLOAD));
+    packet.bcData.payload = BC_DATA_PAYLOAD;
     packet.rspData.payloadLen = sizeof(RSP_DATA_PAYLOAD);
-    packet.rspData.payload = reinterpret_cast<uint8_t *>(const_cast<char *>(RSP_DATA_PAYLOAD));
+    packet.rspData.payload = RSP_DATA_PAYLOAD;
     EXPECT_EQ(SOFTBUS_OK, StartBroadcasting(bcId, &bcParam, &packet));
     EXPECT_EQ(SOFTBUS_OK, UnRegisterBroadcaster(bcId));
 
@@ -576,9 +576,9 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastStartBroadcasting001, TestSize
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, StartBroadcasting(bcId, &bcParam, &packet));
 
     packet.bcData.payloadLen = sizeof(BC_DATA_PAYLOAD);
-    packet.bcData.payload = reinterpret_cast<uint8_t *>(const_cast<char *>(BC_DATA_PAYLOAD));
+    packet.bcData.payload = BC_DATA_PAYLOAD;
     packet.rspData.payloadLen = sizeof(RSP_DATA_PAYLOAD);
-    packet.rspData.payload = reinterpret_cast<uint8_t *>(const_cast<char *>(RSP_DATA_PAYLOAD));
+    packet.rspData.payload = RSP_DATA_PAYLOAD;
     int32_t invalidBcId = -1;
     EXPECT_EQ(SOFTBUS_ERR, StartBroadcasting(invalidBcId, &bcParam, &packet));
 
@@ -612,9 +612,9 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastStartBroadcasting002, TestSize
     BuildBroadcastPacketExceptPayload(&packet);
 
     packet.bcData.payloadLen = sizeof(BC_DATA_PAYLOAD);
-    packet.bcData.payload = reinterpret_cast<uint8_t *>(const_cast<char *>(BC_DATA_PAYLOAD));
+    packet.bcData.payload = BC_DATA_PAYLOAD;
     packet.rspData.payloadLen = sizeof(RSP_DATA_PAYLOAD);
-    packet.rspData.payload = reinterpret_cast<uint8_t *>(const_cast<char *>(RSP_DATA_PAYLOAD));
+    packet.rspData.payload = RSP_DATA_PAYLOAD;
 
     EXPECT_EQ(SOFTBUS_OK, StartBroadcasting(bcId, &bcParam, &packet));
     EXPECT_EQ(SOFTBUS_OK, StopBroadcasting(bcId));
@@ -648,9 +648,9 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastStartBroadcasting003, TestSize
     BuildBroadcastPacketExceptPayload(&packet);
 
     packet.bcData.payloadLen = sizeof(BC_DATA_PAYLOAD);
-    packet.bcData.payload = reinterpret_cast<uint8_t *>(const_cast<char *>(BC_DATA_PAYLOAD));
+    packet.bcData.payload = BC_DATA_PAYLOAD;
     packet.rspData.payloadLen = sizeof(RSP_DATA_PAYLOAD);
-    packet.rspData.payload = reinterpret_cast<uint8_t *>(const_cast<char *>(RSP_DATA_PAYLOAD));
+    packet.rspData.payload = RSP_DATA_PAYLOAD;
 
     EXPECT_EQ(SOFTBUS_OK, StartBroadcasting(bcId, &bcParam, &packet));
     EXPECT_EQ(SOFTBUS_ERR, StartBroadcasting(bcId, &bcParam, &packet));
@@ -709,9 +709,9 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastUpdateBroadcasting002, TestSiz
     BuildBroadcastPacketExceptPayload(&packet);
 
     packet.bcData.payloadLen = sizeof(BC_DATA_PAYLOAD);
-    packet.bcData.payload = reinterpret_cast<uint8_t *>(const_cast<char *>(BC_DATA_PAYLOAD));
+    packet.bcData.payload = BC_DATA_PAYLOAD;
     packet.rspData.payloadLen = sizeof(RSP_DATA_PAYLOAD);
-    packet.rspData.payload = reinterpret_cast<uint8_t *>(const_cast<char *>(RSP_DATA_PAYLOAD));
+    packet.rspData.payload = RSP_DATA_PAYLOAD;
 
     EXPECT_EQ(SOFTBUS_OK, StartBroadcasting(bcId, &bcParam, &packet));
     EXPECT_EQ(SOFTBUS_OK, UpdateBroadcasting(bcId, &bcParam, &packet));
@@ -797,9 +797,9 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastSetBroadcastingData003, TestSi
     BuildBroadcastPacketExceptPayload(&packet);
 
     packet.bcData.payloadLen = sizeof(BC_DATA_PAYLOAD);
-    packet.bcData.payload = reinterpret_cast<uint8_t *>(const_cast<char *>(BC_DATA_PAYLOAD));
+    packet.bcData.payload = BC_DATA_PAYLOAD;
     packet.rspData.payloadLen = sizeof(RSP_DATA_PAYLOAD);
-    packet.rspData.payload = reinterpret_cast<uint8_t *>(const_cast<char *>(RSP_DATA_PAYLOAD));
+    packet.rspData.payload = RSP_DATA_PAYLOAD;
 
     EXPECT_EQ(SOFTBUS_OK, StartBroadcasting(bcId, &bcParam, &packet));
     EXPECT_EQ(SOFTBUS_OK, SetBroadcastingData(bcId, &packet));

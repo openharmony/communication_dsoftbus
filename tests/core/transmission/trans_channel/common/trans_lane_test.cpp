@@ -303,7 +303,7 @@ HWTEST_F(TransLaneTest, TransLaneTest006, TestSize.Level1)
 HWTEST_F(TransLaneTest, TransLaneTest007, TestSize.Level1)
 {
     uint32_t laneReqId = 1;
-    LaneState state = LANE_STATE_EXCEPTION;
+    LaneState state = LANE_STATE_LINKUP;
     TransOnLaneStateChange(laneReqId, state);
 
     int32_t ret = GetStreamLaneType(RAW_STREAM);

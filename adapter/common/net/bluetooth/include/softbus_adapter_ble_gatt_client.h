@@ -20,6 +20,7 @@
 #include "stdint.h"
 
 #include "softbus_adapter_bt_common.h"
+#include "common_list.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -54,7 +55,13 @@ typedef enum {
     SOFTBUS_GATT_PRIORITY_LOW_POWER,
 } SoftbusBleGattPriority;
 
-void SoftbusGattcRegisterCallback(SoftBusGattcCallback *cb);
+typedef struct {
+    SoftBusGattcCallback callback;
+    ListNode node;
+    int32_t clientId;
+} SoftBusGattcManager;
+
+int32_t SoftbusGattcRegisterCallback(SoftBusGattcCallback *cb, int32_t clientId);
 int32_t SoftbusGattcRegister(void);
 int32_t SoftbusGattcUnRegister(int32_t clientId);
 int32_t SoftbusGattcConnect(int32_t clientId, SoftBusBtAddr *addr);
@@ -70,6 +77,7 @@ int32_t SoftbusGattcConfigureMtuSize(int32_t clientId, int mtuSize);
 int32_t SoftbusGattcSetFastestConn(int32_t clientId);
 int32_t SoftbusGattcSetPriority(int32_t clientId, SoftBusBtAddr *addr, SoftbusBleGattPriority priority);
 
+int32_t InitSoftbusAdapterClient(void);
 #ifdef __cplusplus
 #if __cplusplus
 }
