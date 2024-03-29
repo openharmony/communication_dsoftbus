@@ -395,6 +395,7 @@
         "IsSessionExceedLimit";
         "DiscRecoveryPublish";
         "DiscRecoverySubscribe";
+        "DiscRecoveryPolicy";
         "ClientRawStreamEncryptOptGet";
         "ClientRawStreamEncryptDefOptGet";
         extern "C++" {
