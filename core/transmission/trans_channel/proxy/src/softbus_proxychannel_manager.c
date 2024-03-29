@@ -26,6 +26,7 @@
 #include "bus_center_manager.h"
 #include "common_list.h"
 #include "data_bus_native.h"
+#include "lnn_distributed_net_ledger.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
@@ -1126,8 +1127,8 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
         TRANS_LOGE(TRANS_CTRL, "memcpy failed");
         return;
     }
-    char peerNetworkId[NETWORK_ID_BUF_LEN] = {0};
-    char peerUdid[UDID_BUF_LEN] = {0};
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     TransEventExtra extra = {
         .calleePkg = NULL,
         .callerPkg = NULL,
@@ -1146,12 +1147,12 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     }
 
     if (chan->appInfo.appType == APP_TYPE_AUTH &&
-        strcpy_s(peerUdid, UDID_BUF_LEN, chan->appInfo.peerData.deviceId) == EOK) {
-        extra.peerUdid = peerUdid;
+        strcpy_s(nodeInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, chan->appInfo.peerData.deviceId) == EOK) {
+        extra.peerUdid = nodeInfo.deviceInfo.deviceUdid;
     } else if (chan->appInfo.appType != APP_TYPE_AUTH &&
-        LnnGetNetworkIdByUuid(chan->appInfo.peerData.deviceId, peerNetworkId, NETWORK_ID_BUF_LEN) == SOFTBUS_OK &&
-        LnnGetRemoteStrInfo(peerNetworkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN) == SOFTBUS_OK) {
-        extra.peerUdid = peerUdid;
+        LnnGetRemoteNodeInfoById(chan->appInfo.peerData.deviceId, CATEGORY_UUID, &nodeInfo) == SOFTBUS_OK) {
+        extra.peerUdid = nodeInfo.deviceInfo.deviceUdid;
+        extra.peerDevVer = nodeInfo.deviceInfo.deviceVersion;
     }
 
     TransCreateConnByConnId(msg->connId, (bool)chan->isServer);
