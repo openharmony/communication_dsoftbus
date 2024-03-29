@@ -128,7 +128,8 @@ static bool IsEnableWlan2P4G(const char *networkId)
         return false;
     }
     if (((local & (1 << BIT_WIFI_24G)) || (local & (1 << BIT_ETH)) || (local & (1 << BIT_WIFI_5G))) &&
-        ((remote & (1 << BIT_WIFI_24G)) || (remote & (1 << BIT_ETH)) || (local & (1 << BIT_WIFI_5G)))) {
+        ((remote & (1 << BIT_WIFI_24G)) || (remote & (1 << BIT_ETH)) ||
+        (remote & (1 << BIT_WIFI_5G)) || (local & (1 << BIT_WIFI_5G)))) {
         return true;
     }
     LNN_LOGE(LNN_LANE, "2.4G capa disable, local=%{public}d, remote=%{public}d", local, remote);
@@ -165,7 +166,8 @@ static bool IsEnableWlan5G(const char *networkId)
         return false;
     }
     if (((local & (1 << BIT_WIFI_5G)) || (local & (1 << BIT_ETH)) || (local & (1 << BIT_WIFI_24G))) &&
-        ((remote & (1 << BIT_WIFI_5G)) || (remote & (1 << BIT_ETH)) || (local & (1 << BIT_WIFI_24G)))) {
+        ((remote & (1 << BIT_WIFI_5G)) || (remote & (1 << BIT_ETH)) ||
+        (remote & (1 << BIT_WIFI_24G)) || (local & (1 << BIT_WIFI_24G)))) {
         return true;
     }
     LNN_LOGE(LNN_LANE, "5G capa disable, local=%{public}d, remote=%{public}d", local, remote);
