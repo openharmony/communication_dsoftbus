@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,6 +40,8 @@ int32_t ClientIpcOnChannelClosed(ChannelMsg *data);
 int32_t ClientIpcOnChannelMsgReceived(ChannelMsg *data, TransReceiveData *receiveData);
 int32_t ClientIpcOnChannelQosEvent(const char *pkgName, const QosParam *param);
 int32_t InformPermissionChange(int32_t state, const char *pkgName, int32_t pid);
+int32_t ClientIpcSetChannelInfo(
+    const char *pkgName, const char *sessionName, int32_t sessionId, const TransInfo *transInfo, int32_t pid);
 
 #ifdef __cplusplus
 }
