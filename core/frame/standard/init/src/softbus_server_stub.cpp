@@ -546,6 +546,10 @@ int32_t SoftBusServerStub::RemoveSessionServerInner(MessageParcel &data, Message
         goto EXIT;
     }
 
+    if (!CheckUidAndPid(sessionName, callingUid, callingPid)) {
+        COMM_LOGE(COMM_SVC, "Check Uid and Pid failed!");
+        return SOFTBUS_TRANS_CHECK_PID_ERROR;
+    }
     retReply = RemoveSessionServer(pkgName, sessionName);
 EXIT:
     if (!reply.WriteInt32(retReply)) {
