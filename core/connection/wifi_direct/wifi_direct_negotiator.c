@@ -262,7 +262,7 @@ static bool IsMessageNeedPending(struct WifiDirectNegotiator *self, struct WifiD
         struct WifiDirectProcessor *p2pV2Processor =
             GetWifiDirectProcessorFactory()->createProcessor(WIFI_DIRECT_PROCESSOR_TYPE_P2P_V2);
         if (self->currentProcessor == hmlProcessor && processor == p2pV2Processor) {
-            return hmlProcessor->isMessageNeedPending(cmdType, msg);
+            return p2pV2Processor->isMessageNeedPending(cmdType, msg);
         }
         return true;
     }
@@ -315,7 +315,10 @@ static bool ProcessParallelMessage(enum WifiDirectNegotiateCmdType type, struct 
 {
     struct WifiDirectProcessor *hmlProcessor =
         GetWifiDirectProcessorFactory()->createProcessor(WIFI_DIRECT_PROCESSOR_TYPE_HML);
-    if (type != CMD_CONN_V2_REQ_3 || processor != hmlProcessor || processor->isMessageNeedPending(type, command->msg)) {
+    struct WifiDirectProcessor *p2pV2Processor =
+            GetWifiDirectProcessorFactory()->createProcessor(WIFI_DIRECT_PROCESSOR_TYPE_P2P_V2);
+    if (type != CMD_CONN_V2_REQ_3 || processor != hmlProcessor || processor != p2pV2Processor ||
+        processor->isMessageNeedPending(type, command->msg)) {
         return false;
     }
     if (processor->processParallelNegotiateMessage == NULL) {
