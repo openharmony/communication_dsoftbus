@@ -907,7 +907,7 @@ static void ReportAuthRequestFailed(uint32_t requestId, int32_t reason)
     if (CheckAuthConnCallback(&request.connCb)) {
         PerformAuthConnCallback(request.requestId, reason, AUTH_INVALID_ID);
     } else {
-        AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+        AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = request.connInfo.type };
         PerformVerifyCallback(request.requestId, reason, authHandle, NULL);
     }
     DelAuthRequest(request.requestId);
