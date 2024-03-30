@@ -20,6 +20,7 @@
 #include "bus_center_event.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
+#include "lnn_distributed_net_ledger.h"
 #include "securec.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_hitrace.h"
@@ -578,8 +579,8 @@ static void TransOnExchangeUdpInfoRequest(AuthHandle authHandle, int64_t seq, co
         .channelType = CHANNEL_TYPE_UDP,
         .authId = authHandle.authId
     };
-    char peerNetworkId[NETWORK_ID_BUF_LEN] = {0};
-    char peerUdid[UDID_BUF_LEN] = {0};
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     int32_t ret = ParseRequestAppInfo(authHandle, msg, &info);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get appinfo failed. ret=%{public}d", ret);
@@ -587,9 +588,9 @@ static void TransOnExchangeUdpInfoRequest(AuthHandle authHandle, int64_t seq, co
         goto ERR_EXIT;
     }
     if (info.udpChannelOptType == TYPE_UDP_CHANNEL_OPEN) {
-        if (LnnGetNetworkIdByUuid(info.peerData.deviceId, peerNetworkId, NETWORK_ID_BUF_LEN) == SOFTBUS_OK &&
-            LnnGetRemoteStrInfo(peerNetworkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN) == SOFTBUS_OK) {
-            extra.peerUdid = peerUdid;
+        if (LnnGetRemoteNodeInfoById(info.peerData.deviceId, CATEGORY_UUID, &nodeInfo) == SOFTBUS_OK) {
+            extra.peerUdid = nodeInfo.deviceInfo.deviceUdid;
+            extra.peerDevVer = nodeInfo.deviceInfo.deviceVersion;
         }
         extra.socketName = info.myData.sessionName;
         extra.peerChannelId = info.peerData.channelId;

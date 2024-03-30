@@ -77,6 +77,7 @@ typedef struct {
     int32_t btFlow;            // BT_FLOW
     const char *peerNetworkId; // PEER_NET_ID
     const char *peerUdid;      // PEER_UDID
+    const char *peerDevVer;    // PEER_DEV_VER
     const char *callerPkg;     // HOST_PKG
     const char *calleePkg;     // TO_CALL_PKG
 } TransEventExtra;
