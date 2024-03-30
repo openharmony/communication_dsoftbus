@@ -300,6 +300,8 @@ int32_t TransServerProxy::OpenSession(const SessionParam *param, TransInfo *info
     WRITE_PARCEL_WITH_RET(data, CString, param->peerSessionName, SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
     WRITE_PARCEL_WITH_RET(data, CString, param->peerDeviceId, SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
     WRITE_PARCEL_WITH_RET(data, CString, param->groupId, SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
+    WRITE_PARCEL_WITH_RET(data, Bool, param->isAsync, SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED);
+    WRITE_PARCEL_WITH_RET(data, Int32, param->sessionId, SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED);
     if (!TransWriteSessionAttrs(param->attr, data)) {
         TRANS_LOGE(TRANS_SDK, "OpenSession write attr failed!");
         return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;
@@ -321,6 +323,9 @@ int32_t TransServerProxy::OpenSession(const SessionParam *param, TransInfo *info
     if (transSerializer == nullptr) {
         TRANS_LOGE(TRANS_SDK, "OpenSession read TransSerializer failed!");
         return SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED;
+    }
+    if (param->isAsync) {
+        return transSerializer->ret;
     }
     info->channelId = transSerializer->transInfo.channelId;
     info->channelType = transSerializer->transInfo.channelType;

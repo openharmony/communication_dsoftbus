@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -106,6 +106,7 @@ enum SoftBusFuncId {
     CLIENT_ON_REFRESH_LNN_RESULT,
     CLIENT_ON_REFRESH_DEVICE_FOUND,
     CLIENT_ON_PERMISSION_CHANGE,
+    CLIENT_SET_CHANNEL_INFO,
 };
 
 #ifdef __cplusplus

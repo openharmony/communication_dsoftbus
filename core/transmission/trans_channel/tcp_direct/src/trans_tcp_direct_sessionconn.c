@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -353,4 +353,40 @@ int32_t TcpTranGetAppInfobyChannelId(int32_t channelId, AppInfo* appInfo)
     ReleaseSessonConnLock();
     TRANS_LOGE(TRANS_CTRL, "not find: channelId=%{public}d", channelId);
     return SOFTBUS_NOT_FIND;
+}
+
+int32_t *GetChannelIdsByAuthIdAndStatus(int32_t *num, int64_t authId, uint32_t status)
+{
+    if (num == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "Invaild param");
+        return NULL;
+    }
+    TRANS_LOGD(TRANS_CTRL, "AuthId=%{public}" PRId64 ",status=%{public}d", authId, status);
+    if (GetSessionConnLock() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "GetSessionConnLock failed");
+        return NULL;
+    }
+    SessionConn *connInfo = NULL;
+    int32_t count = 0;
+    LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
+        if (connInfo->authHandle.authId == authId && connInfo->status == status) {
+            count++;
+        }
+    }
+    if (count == 0) {
+        ReleaseSessonConnLock();
+        TRANS_LOGE(TRANS_CTRL, "Not find channle id with authId=%{public}" PRId64 ",status=%{public}d", authId, status);
+        return NULL;
+    }
+    *num = count;
+    connInfo = NULL;
+    int32_t tmp = 0;
+    int32_t *result = (int32_t *)SoftBusCalloc(count * sizeof(int32_t));
+    LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
+        if (connInfo->authHandle.authId == authId && connInfo->status == status) {
+            result[tmp++] = connInfo->channelId;
+        }
+    }
+    ReleaseSessonConnLock();
+    return result;
 }

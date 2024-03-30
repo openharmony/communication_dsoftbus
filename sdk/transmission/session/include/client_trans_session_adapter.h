@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef CLIENT_TRANS_SESSION_ADAPTER_H
 #define CLIENT_TRANS_SESSION_ADAPTER_H
 
+#include <stdbool.h>
 #include <stdint.h>
 #include "socket.h"
 
@@ -25,7 +26,7 @@ extern "C" {
 int32_t CreateSocket(const char *pkgName, const char *sessionName);
 int32_t ClientAddSocket(const SocketInfo *info, int32_t *sessionId);
 int32_t ClientListen(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener);
-int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener);
+int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener, bool isAsync);
 void ClientShutdown(int32_t socket);
 int32_t GetSocketMtuSize(int32_t socket, uint32_t *mtuSize);
 #ifdef __cplusplus

@@ -25,7 +25,8 @@
 #include "trans_channel_callback.h"
 #include "softbus_def.h"
 #include "softbus_server_frame.h"
-
+#include "trans_channel_common.h"
+#include "trans_channel_common.c"
 #include "trans_lane_pending_ctl.c"
 #include "trans_channel_callback.c"
 #include "trans_channel_manager.c"
@@ -641,12 +642,12 @@ HWTEST_F(TransChannelManagerTest, TransGetLocalConfig001, TestSize.Level1)
     int32_t businessType = 0;
     uint32_t len = 0;
 
-    int32_t ret = TransGetLocalConfig(channelType, businessType, &len);
+    int32_t ret = TransCommonGetLocalConfig(channelType, businessType, &len);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     channelType = CHANNEL_TYPE_AUTH;
     businessType = BUSINESS_TYPE_BYTE;
-    ret = TransGetLocalConfig(channelType, businessType, &len);
+    ret = TransCommonGetLocalConfig(channelType, businessType, &len);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 } // OHOS

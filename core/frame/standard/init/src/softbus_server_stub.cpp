@@ -626,6 +626,8 @@ static void ReadSessionInfo(MessageParcel& data, SessionParam &param)
     param.peerSessionName = data.ReadCString();
     param.peerDeviceId = data.ReadCString();
     param.groupId = data.ReadCString();
+    param.isAsync = data.ReadBool();
+    param.sessionId = data.ReadInt32();
 }
 
 int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &reply)
