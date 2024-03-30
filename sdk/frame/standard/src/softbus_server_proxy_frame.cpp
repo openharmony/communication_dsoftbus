@@ -39,6 +39,7 @@
 #include "softbus_server_ipc_interface_code.h"
 #include "softbus_server_proxy_standard.h"
 #include "trans_server_proxy.h"
+#include <unistd.h>
 
 namespace {
 OHOS::sptr<OHOS::IRemoteObject> g_serverProxy = nullptr;
@@ -204,6 +205,12 @@ int32_t RestartEventCallbackRegister(RestartEventCallback callback)
 
 int32_t ClientStubInit(void)
 {
+    int32_t callingPid = (int32_t)(OHOS::IPCSkeleton::GetCallingPid());
+    int32_t selfPid = (int32_t)getpid();
+    if (callingPid == selfPid) {
+        g_serverProxy = g_serverProxy == nullptr ? GetSystemAbility() : g_serverProxy;
+        return SOFTBUS_OK;
+    }
     if (ServerProxyInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_SDK, "ServerProxyInit failed\n");
         return SOFTBUS_ERR;

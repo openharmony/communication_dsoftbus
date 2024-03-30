@@ -35,6 +35,7 @@
 #include "trans_session_service.h"
 #include "trans_spec_object.h"
 #include "lnn_lane_interface.h"
+#include <unistd.h>
 
 namespace OHOS {
 REGISTER_SYSTEM_ABILITY_BY_ID(SoftBusServer, SOFTBUS_SERVER_SA_ID, true);
@@ -95,8 +96,12 @@ int32_t SoftBusServer::SoftbusRegisterService(const char *clientPkgName, const s
         COMM_LOGE(COMM_SVC, "DeathRecipient object is nullptr");
         return SOFTBUS_ERR;
     }
+    int32_t callingPid = pid;
+    int32_t selfPid = (int32_t)getpid();
     bool ret = object->AddDeathRecipient(abilityDeath);
-    if (!ret) {
+    if (callingPid == selfPid) {
+        COMM_LOGI(COMM_SVC, "this is spe pid");
+    } else if (!ret) {
         COMM_LOGE(COMM_SVC, "AddDeathRecipient failed");
         return SOFTBUS_ERR;
     }
