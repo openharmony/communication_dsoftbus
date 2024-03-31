@@ -1013,6 +1013,11 @@ static int32_t DecryptMessage(int32_t channelId, const TdcPacketHead *pktHead, c
     uint8_t **outData, uint32_t *outDataLen)
 {
     int64_t authId = GetAuthIdByChannelInfo(channelId, pktHead->seq, pktHead->flags);
+    if (authId == AUTH_INVALID_ID && pktHead->flags == FLAG_P2P) {
+        TRANS_LOGW(TRANS_CTRL, "get p2p authId fail, peer device may be legacyOs, retry hml");
+        // we don't know peer device is legacyOs or not, so retry hml when flag is p2p and get auth failed
+        authId = GetAuthIdByChannelInfo(channelId, pktHead->seq, FLAG_ENHANCE_P2P);
+    }
     if (authId == AUTH_INVALID_ID) {
         TRANS_LOGE(TRANS_CTRL, "srv process recv data: get authId fail.");
         return SOFTBUS_NOT_FIND;
