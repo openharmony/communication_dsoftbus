@@ -301,12 +301,12 @@ static int32_t SendEachSeparately(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnceMsgP
     LNN_LOGD(LNN_HEART_BEAT, "SendEachSeparately enter, hbType=%{public}d, isRelayV0=%{public}d", registedHbType,
         isRelayV0);
     bool wakeupFlag = mode != NULL ? mode->wakeupFlag : false;
+    msgPara->isNeedUpdataData = false;
     if (LnnPostSendBeginMsgToHbFsm(hbFsm, registedHbType, wakeupFlag, msgPara, 0) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB send once first begin fail, hbType=%{public}d", registedHbType);
         return SOFTBUS_ERR;
     }
 
-    uint32_t i;
     uint32_t sendCnt = isRelayV0 ? 1 : HB_SEND_SEPARATELY_CNT;
     LnnHeartbeatType splitHbType = registedHbType;
     (void)LnnVisitHbTypeSet(VisitClearNoneSplitHbType, &splitHbType, NULL);
@@ -316,7 +316,7 @@ static int32_t SendEachSeparately(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnceMsgP
         .isRelay = msgPara->isRelay,
         .isLastEnd = false,
     };
-    for (i = 1; i < sendCnt; ++i) {
+    for (uint32_t i = 1; i < sendCnt; ++i) {
         if (splitHbType < HEARTBEAT_TYPE_MIN) {
             break;
         }
@@ -326,6 +326,7 @@ static int32_t SendEachSeparately(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnceMsgP
                 return SOFTBUS_ERR;
             }
             msgPara->isSyncData = true;
+            msgPara->isNeedUpdataData = true;
             if (LnnPostSendBeginMsgToHbFsm(hbFsm, splitHbType, wakeupFlag, msgPara,
                 i * HB_SEND_EACH_SEPARATELY_LEN) != SOFTBUS_OK) {
                 msgPara->isSyncData = false;
