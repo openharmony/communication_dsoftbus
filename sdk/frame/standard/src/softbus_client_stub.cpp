@@ -309,6 +309,7 @@ int32_t SoftBusClientStub::OnChannelOpenedInner(MessageParcel &data, MessageParc
         COMM_LOGE(COMM_SDK, "OnChannelOpenedInner data config failed!");
         return SOFTBUS_ERR;
     }
+    data.ReadInt32(channel.linkType);
 
     int ret = OnChannelOpened(sessionName, &channel);
     bool res = reply.WriteInt32(ret);

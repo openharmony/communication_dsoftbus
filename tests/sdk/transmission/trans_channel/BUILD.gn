@@ -215,6 +215,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
       "$dsoftbus_root_path/core/frame/common/include",
       "$dsoftbus_root_path/core/transmission/common/include",
+      "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     ]
     deps = trans_sdk_test_common_deps
     deps += trans_sdk_proxy_test_deps
