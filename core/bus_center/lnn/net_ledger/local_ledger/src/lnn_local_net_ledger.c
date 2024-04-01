@@ -759,6 +759,9 @@ static int32_t InitLocalDeviceInfo(DeviceBasicInfo *info)
     if (GetCommonOsVersion(info->osVersion, OS_VERSION_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get os version failed");
     }
+    if (GetCommonDeviceVersion(info->deviceVersion, DEVICE_VERSION_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get device version failed");
+    }
     if (LnnGetUnifiedDeviceName(info->unifiedName, DEVICE_NAME_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get unifiedName fail");
     }
@@ -1734,7 +1737,9 @@ static int32_t SoftBusDumpBusCenterParameter(int fd)
     SOFTBUS_DPRINTF(fd, (IsLinkEnabled(LANE_WLAN_5G) ||
         IsLinkEnabled(LANE_WLAN_2P4G)) ?
         "wlan parameter: on\n" : "wlan parameter: off\n");
-    SOFTBUS_DPRINTF(fd, IsLinkEnabled(LANE_BLE) ?
+    SOFTBUS_DPRINTF(fd, IsLinkEnabled(LANE_COC_DIRECT) ?
+        "coc parameter: on\n" : "coc parameter: off\n");
+    SOFTBUS_DPRINTF(fd, IsLinkEnabled(LANE_BLE_DIRECT) ?
         "ble parameter: on\n" : "ble parameter: off\n");
     return SOFTBUS_OK;
 }

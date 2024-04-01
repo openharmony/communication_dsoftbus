@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,7 +51,8 @@ public:
 
     virtual int32_t OnChannelQosEvent(int32_t channelId, int32_t channelType, int32_t eventId, int32_t tvCount,
                                       const QosTv *tvList);
-
+    virtual int32_t SetChannelInfo(const char *sessionName, int32_t sessionId, int32_t channelId, int32_t channelType);
+    
     virtual int32_t OnJoinLNNResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode);
 
     virtual int32_t OnJoinMetaNodeResult(void *addr, uint32_t addrTypeLen, void *metaInfo, uint32_t infoLen,

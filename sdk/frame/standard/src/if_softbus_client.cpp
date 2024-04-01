@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,6 +75,13 @@ int32_t ISoftBusClient::OnChannelClosed(int32_t channelId, int32_t channelType)
 
 int32_t ISoftBusClient::OnChannelQosEvent(int32_t channelId, int32_t channelType, int32_t eventId, int32_t tvCount,
                                           const QosTv *tvList)
+{
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+    return SOFTBUS_OK;
+}
+
+int32_t ISoftBusClient::SetChannelInfo(const char *sessionName, int32_t sessionId,
+                                       int32_t channelId, int32_t channelType)
 {
     COMM_LOGI(COMM_EVENT, "ipc default impl");
     return SOFTBUS_OK;

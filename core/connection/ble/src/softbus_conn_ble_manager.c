@@ -1242,7 +1242,12 @@ static bool ConnectionCompareByUdidIgnoreAddress(ConnBleConnection *connection,
 {
     ConnBleInnerComplementDeviceId(connection);
     if (StrCmpIgnoreCase(connection->addr, option->udidAddressOption.addr) != 0) {
-        CONN_LOGD(CONN_BLE, "ble mac address are different. connectionId=%{public}u", connection->connectionId);
+        char animizeAddr[BT_MAC_LEN] = { 0 };
+        char optionAnimizeAddr[BT_MAC_LEN] = { 0 };
+        ConvertAnonymizeMacAddress(animizeAddr, BT_MAC_LEN, connection->addr, BT_MAC_LEN);
+        ConvertAnonymizeMacAddress(optionAnimizeAddr, BT_MAC_LEN, option->udidAddressOption.addr, BT_MAC_LEN);
+        CONN_LOGW(CONN_BLE, "ble mac address are different. connectionId=%{public}u, addr=%{public}s, "
+            "optionaddr=%{public}s", connection->connectionId, animizeAddr, optionAnimizeAddr);
     }
     return IsSameDevice(connection->udid, option->udidAddressOption.udid) &&
         ((BleProtocolType)option->udidAddressOption.protocol == BLE_PROTOCOL_ANY ?

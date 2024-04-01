@@ -85,6 +85,14 @@ static void CreateDataShareHelperInstance(void)
     LNN_LOGI(LNN_STATE, "exit success.");
 }
 
+static void ReleaseDataShareHelperInstance(void)
+{
+    if (g_dataShareHelper != nullptr) {
+        g_dataShareHelper.reset();
+        LNN_LOGI(LNN_STATE, "release instance success.");
+    }
+}
+
 static int32_t GetDeviceNameFromDataShareHelper(char *deviceName, uint32_t len)
 {
     if (g_dataShareHelper == nullptr) {
@@ -154,6 +162,11 @@ int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len)
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
+}
+
+void LnnReleaseDatashareHelper(void)
+{
+    OHOS::BusCenter::ReleaseDataShareHelperInstance();
 }
 
 int32_t LnnInitGetDeviceName(LnnDeviceNameHandler handler)
