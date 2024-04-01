@@ -71,6 +71,7 @@ typedef struct {
     int32_t idType;
     NormalizedType normalizedType;
     SessionKey *normalizedKey;
+    int64_t normalizedIndex;
 } AuthSessionInfo;
 
 typedef struct {

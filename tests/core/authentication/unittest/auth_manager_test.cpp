@@ -269,8 +269,8 @@ HWTEST_F(AuthManagerTest, AUTH_MANAGER_GET_SESSION_KEY_TEST_001, TestSize.Level1
     info.version = SOFTBUS_OLD_V2;
     EXPECT_TRUE(AuthManagerSetSessionKey(AUTH_SEQ_1, &info, &sessionKey, true) == SOFTBUS_OK);
     EXPECT_TRUE(AuthManagerGetSessionKey(AUTH_SEQ_1, &info, &tmpKey) == SOFTBUS_OK);
-    RemoveAuthSessionKeyByIndex(AUTH_SEQ_3, KEY_INDEX);
-    RemoveAuthSessionKeyByIndex(AUTH_SEQ_1, KEY_INDEX);
+    RemoveAuthSessionKeyByIndex(AUTH_SEQ_3, KEY_INDEX, AUTH_LINK_TYPE_BLE);
+    RemoveAuthSessionKeyByIndex(AUTH_SEQ_1, KEY_INDEX, AUTH_LINK_TYPE_BLE);
     AuthHandle authHandle1 = {.authId = AUTH_SEQ_3, .type = AUTH_LINK_TYPE_BLE};
     AuthHandle authHandle2 = {.authId = AUTH_SEQ_1, .type = AUTH_LINK_TYPE_WIFI};
     RemoveAuthManagerByAuthId(authHandle1);
