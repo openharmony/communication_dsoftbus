@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -27,5 +27,7 @@ if (dsoftbus_feature_proxy_file == true) {
   trans_proxy_channel_sdk_src += [ "$dsoftbus_sdk_path/transmission/trans_channel/proxy/src/client_trans_proxy_file_manager_virtual.c" ]
 }
 
-trans_proxy_channel_sdk_inc =
-    [ "$dsoftbus_sdk_path/transmission/trans_channel/proxy/include/" ]
+trans_proxy_channel_sdk_inc = [
+  "$dsoftbus_sdk_path/transmission/trans_channel/proxy/include/",
+  "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+]

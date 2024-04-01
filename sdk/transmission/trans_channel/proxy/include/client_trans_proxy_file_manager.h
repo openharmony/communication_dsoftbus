@@ -34,7 +34,8 @@
 
 #define FILE_MAGIC_NUMBER 0xBABEFACE
 
-#define PROXY_MAX_PACKET_SIZE (4096 - 48)
+#define PROXY_BR_MAX_PACKET_SIZE (4096 - 48)
+#define PROXY_BLE_MAX_PACKET_SIZE (1024 - 48)
 
 #define FRAME_MAGIC_OFFSET 4
 #define FRAME_LEN_OFFSET 8
@@ -151,6 +152,7 @@ typedef struct {
     uint64_t checkSumCRC;
     FileListener fileListener;
     FilesInfo totalInfo;
+    uint32_t packetSize;
 } SendListenerInfo;
 
 int32_t ClinetTransProxyFileManagerInit(void);
