@@ -81,7 +81,7 @@ enum BleConnectionCompareType {
     BLE_CONNECTION_COMPARE_TYPE_CONNECTION_ID,
     BLE_CONNECTION_COMPARE_TYPE_ADDRESS,
     BLE_CONNECTION_COMPARE_TYPE_UNDERLAY_HANDLE,
-    BLE_CONNECTION_COMPARE_TYPE_UDID_DIFF_ADDRESS,
+    BLE_CONNECTION_COMPARE_TYPE_UDID_IGNORE_ADDRESS,
     BLE_CONNECTION_COMPARE_TYPE_UDID_CLIENT_SIDE,
 };
 
@@ -1237,11 +1237,19 @@ static bool ConnectionCompareByUnderlayHandle(ConnBleConnection *connection, con
                 connection->protocol == (BleProtocolType)option->underlayerHandleOption.protocol);
 }
 
-static bool ConnectionCompareByUdidDiffAddress(ConnBleConnection *connection, const BleConnectionCompareOption *option)
+static bool ConnectionCompareByUdidIgnoreAddress(ConnBleConnection *connection,
+    const BleConnectionCompareOption *option)
 {
     ConnBleInnerComplementDeviceId(connection);
-    return StrCmpIgnoreCase(connection->addr, option->udidAddressOption.addr) != 0 &&
-        IsSameDevice(connection->udid, option->udidAddressOption.udid) &&
+    if (StrCmpIgnoreCase(connection->addr, option->udidAddressOption.addr) != 0) {
+        char animizeAddr[BT_MAC_LEN] = { 0 };
+        char optionAnimizeAddr[BT_MAC_LEN] = { 0 };
+        ConvertAnonymizeMacAddress(animizeAddr, BT_MAC_LEN, connection->addr, BT_MAC_LEN);
+        ConvertAnonymizeMacAddress(optionAnimizeAddr, BT_MAC_LEN, option->udidAddressOption.addr, BT_MAC_LEN);
+        CONN_LOGW(CONN_BLE, "ble mac address are different. connectionId=%{public}u, addr=%{public}s, "
+            "optionaddr=%{public}s", connection->connectionId, animizeAddr, optionAnimizeAddr);
+    }
+    return IsSameDevice(connection->udid, option->udidAddressOption.udid) &&
         ((BleProtocolType)option->udidAddressOption.protocol == BLE_PROTOCOL_ANY ?
                 true :
                 connection->protocol == (BleProtocolType)option->udidAddressOption.protocol);
@@ -1269,8 +1277,8 @@ static ConnBleConnection *GetConnectionByOption(const BleConnectionCompareOption
         case BLE_CONNECTION_COMPARE_TYPE_UNDERLAY_HANDLE:
             compareFunc = ConnectionCompareByUnderlayHandle;
             break;
-        case BLE_CONNECTION_COMPARE_TYPE_UDID_DIFF_ADDRESS:
-            compareFunc = ConnectionCompareByUdidDiffAddress;
+        case BLE_CONNECTION_COMPARE_TYPE_UDID_IGNORE_ADDRESS:
+            compareFunc = ConnectionCompareByUdidIgnoreAddress;
             break;
         case BLE_CONNECTION_COMPARE_TYPE_UDID_CLIENT_SIDE:
             compareFunc = ConnectionCompareByUdidClientSide;
@@ -1344,7 +1352,7 @@ ConnBleConnection *ConnBleGetConnectionByHandle(int32_t underlayerHandle, ConnSi
 ConnBleConnection *ConnBleGetConnectionByUdid(const char *addr, const char *udid, BleProtocolType protocol)
 {
     BleConnectionCompareOption option = {
-        .type = BLE_CONNECTION_COMPARE_TYPE_UDID_DIFF_ADDRESS,
+        .type = BLE_CONNECTION_COMPARE_TYPE_UDID_IGNORE_ADDRESS,
         .udidAddressOption = {
             .addr = addr,
             .udid = udid,
