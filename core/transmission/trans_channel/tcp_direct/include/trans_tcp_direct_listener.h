@@ -29,7 +29,7 @@ typedef struct {
     ListenerModule moudleType;
 } HmlListenerInfo;
 
-int32_t GetCipherFlagByAuthId(AuthHandle authHandle, uint32_t *flag, bool *isAuthServer);
+int32_t GetCipherFlagByAuthId(AuthHandle authHandle, uint32_t *flag, bool *isAuthServer, bool isLegacyOs);
 
 int32_t TransTdcStartSessionListener(ListenerModule module, const LocalListenerInfo *info);
 

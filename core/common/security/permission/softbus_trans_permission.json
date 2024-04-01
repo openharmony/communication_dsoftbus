@@ -416,5 +416,18 @@
         "ACTIONS": "create,open"
       }
     ]
+  },
+  {
+    "SESSION_NAME": "SPE",
+    "REGEXP": "false",
+    "DEVID": "NETWORKID",
+    "SEC_LEVEL": "public",
+    "APP_INFO": [
+      {
+        "PKG_NAME": "com.huawei.nearby",
+        "TYPE": "self_app",
+        "ACTIONS": "create,open"
+      }
+    ]
   }
 ]

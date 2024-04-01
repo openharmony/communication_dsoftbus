@@ -133,7 +133,14 @@ int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned
     };
     if (!isServer) {
         extra.peerUdid = appInfo->appType == APP_TYPE_AUTH ? appInfo->peerData.deviceId : NULL;
-        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
+        if (extra.result == EVENT_STAGE_RESULT_FAILED) {
+            extra.socketName = appInfo->myData.sessionName;
+            extra.callerPkg = appInfo->myData.pkgName;
+            extra.linkType = appInfo->connectType;
+            TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
+        } else {
+            TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
+        }
     } else if (ret != SOFTBUS_OK) {
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     }

@@ -46,6 +46,7 @@ typedef struct {
     uint16_t deviceTypeId;
     int32_t osType;
     char osVersion[OS_VERSION_BUF_LEN];
+    char deviceVersion[DEVICE_VERSION_BUF_LEN];
 } DeviceBasicInfo;
 
 int32_t LnnSetDeviceName(DeviceBasicInfo *info, const char *name);

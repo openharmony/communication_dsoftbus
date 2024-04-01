@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -106,9 +106,20 @@ int32_t Bind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocket
 {
     TRANS_LOGI(TRANS_SDK, "Bind: socket=%{public}d", socket);
     if (IsSessionExceedLimit()) {
+        TRANS_LOGE(TRANS_SDK, "Bind failed, over session num limit");
         return SOFTBUS_TRANS_SESSION_CNT_EXCEEDS_LIMIT;
     }
-    return ClientBind(socket, qos, qosCount, listener);
+    return ClientBind(socket, qos, qosCount, listener, false);
+}
+
+int32_t BindAsync(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener)
+{
+    TRANS_LOGI(TRANS_SDK, "Bind async socket=%{public}d", socket);
+    if (IsSessionExceedLimit()) {
+        TRANS_LOGE(TRANS_SDK, "Bind async failed, over session num limit");
+        return SOFTBUS_TRANS_SESSION_CNT_EXCEEDS_LIMIT;
+    }
+    return ClientBind(socket, qos, qosCount, listener, true);
 }
 
 void Shutdown(int32_t socket)
