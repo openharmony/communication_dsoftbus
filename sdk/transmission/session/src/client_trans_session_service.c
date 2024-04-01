@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -222,6 +222,23 @@ static void PrintSessionName(const char *mySessionName, const char *peerSessionN
     AnonymizeFree(tmpPeerName);
 }
 
+static SessionAttribute *BuildParamSessionAttribute(const SessionAttribute *attr)
+{
+    SessionAttribute *tmpAttr = (SessionAttribute *)SoftBusCalloc(sizeof(SessionAttribute));
+    if (tmpAttr == NULL) {
+        TRANS_LOGE(TRANS_SDK, "SoftBusCalloc SessionAttribute failed");
+        return NULL;
+    }
+    if (memcpy_s(tmpAttr, sizeof(SessionAttribute), attr, sizeof(SessionAttribute)) != EOK) {
+        TRANS_LOGE(TRANS_SDK, "memcpy_s SessionAttribute failed");
+        SoftBusFree(tmpAttr);
+        return NULL;
+    }
+    tmpAttr->fastTransData = NULL;
+    tmpAttr->fastTransDataSize = 0;
+    return tmpAttr;
+}
+
 int OpenSession(const char *mySessionName, const char *peerSessionName, const char *peerNetworkId,
     const char *groupId, const SessionAttribute *attr)
 {
@@ -230,18 +247,11 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
         return ret;
     }
     PrintSessionName(mySessionName, peerSessionName);
-    SessionAttribute *tmpAttr = (SessionAttribute *)SoftBusCalloc(sizeof(SessionAttribute));
+    SessionAttribute *tmpAttr = BuildParamSessionAttribute(attr);
     if (tmpAttr == NULL) {
-        TRANS_LOGE(TRANS_SDK, "SoftBusCalloc SessionAttribute failed");
+        TRANS_LOGE(TRANS_SDK, "Build SessionAttribute failed");
         return SOFTBUS_ERR;
     }
-    if (memcpy_s(tmpAttr, sizeof(SessionAttribute), attr, sizeof(SessionAttribute)) != EOK) {
-        TRANS_LOGE(TRANS_SDK, "memcpy_s SessionAttribute failed");
-        SoftBusFree(tmpAttr);
-        return SOFTBUS_ERR;
-    }
-    tmpAttr->fastTransData = NULL;
-    tmpAttr->fastTransDataSize = 0;
     SessionParam param = {
         .sessionName = mySessionName,
         .peerSessionName = peerSessionName,
@@ -266,7 +276,8 @@ int OpenSession(const char *mySessionName, const char *peerSessionName, const ch
         TRANS_LOGE(TRANS_SDK, "add session err: ret=%{public}d", ret);
         return ret;
     }
-
+    param.isAsync = false;
+    param.sessionId = sessionId;
     TransInfo transInfo;
     (void)memset_s(&transInfo, sizeof(TransInfo), 0, sizeof(TransInfo));
     ret = ServerIpcOpenSession(&param, &transInfo);
@@ -500,9 +511,9 @@ int OpenSessionSync(const char *mySessionName, const char *peerSessionName, cons
         TRANS_LOGE(TRANS_SDK, "add session err: ret=%{public}d", ret);
         return ret;
     }
-
-    TransInfo transInfo;
-    (void)memset_s(&transInfo, sizeof(TransInfo), 0, sizeof(TransInfo));
+    param.isAsync = false;
+    param.sessionId = sessionId;
+    TransInfo transInfo = {0};
     ret = ServerIpcOpenSession(&param, &transInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "open session ipc err: ret=%{public}d", ret);
@@ -522,8 +533,7 @@ int OpenSessionSync(const char *mySessionName, const char *peerSessionName, cons
         (void)ClientDeleteSession(sessionId);
         return SOFTBUS_TRANS_SESSION_NO_ENABLE;
     }
-    TRANS_LOGI(TRANS_SDK, "ok: sessionId=%{public}d, channelId=%{public}d",
-        sessionId, transInfo.channelId);
+    TRANS_LOGI(TRANS_SDK, "ok: sessionId=%{public}d, channelId=%{public}d", sessionId, transInfo.channelId);
     return sessionId;
 }
 
@@ -970,6 +980,19 @@ static bool IsValidSocketListener(const ISocketListener *listener, bool isListen
     return true;
 }
 
+static bool IsValidAsyncBindSocketListener(const ISocketListener *listener, bool isAsync)
+{
+    if (isAsync && (listener->OnBind == NULL)) {
+        TRANS_LOGE(TRANS_SDK, "no OnBind callback function of async bind");
+        return false;
+    }
+    if (isAsync && (listener->OnError == NULL)) {
+        TRANS_LOGE(TRANS_SDK, "no onError callback function of async bind");
+        return false;
+    }
+    return true;
+}
+
 static bool IsValidQosInfo(const QosTV qos[], uint32_t qosCount)
 {
     return (qos == NULL) ? (qosCount == 0) : (qosCount <= QOS_TYPE_BUTT);
@@ -1003,9 +1026,10 @@ static int32_t GetMaxIdleTimeout(const QosTV *qos, uint32_t qosCount, uint32_t *
     return SOFTBUS_OK;
 }
 
-int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener)
+int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener, bool isAsync)
 {
-    if (!IsValidSessionId(socket) || !IsValidSocketListener(listener, false) || !IsValidQosInfo(qos, qosCount)) {
+    if (!IsValidSessionId(socket) || !IsValidSocketListener(listener, false) ||
+        !IsValidAsyncBindSocketListener(listener, isAsync) || !IsValidQosInfo(qos, qosCount)) {
         TRANS_LOGE(TRANS_SDK, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -1022,34 +1046,37 @@ int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t qosCount, const I
         TRANS_LOGE(TRANS_SDK, "ClientBind get maximum idle time failed, ret=%d", ret);
         return ret;
     }
-
+    (void)SetSessionIsAsyncById(socket, isAsync);
     TransInfo transInfo;
-    ret = ClientIpcOpenSession(socket, qos, qosCount, &transInfo);
+    ret = ClientIpcOpenSession(socket, qos, qosCount, &transInfo, isAsync);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "ClientBind open session failed, ret=%{public}d", ret);
         return ret;
     }
+    if (!isAsync) {
+        ret = ClientSetChannelBySessionId(socket, &transInfo);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "set channel failed");
+            return ret;
+        }
 
-    ret = ClientSetChannelBySessionId(socket, &transInfo);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "set channel failed");
-        return ret;
+        ret = CheckSessionIsOpened(socket);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "CheckSessionIsOpened err, ret=%{public}d", ret);
+            return SOFTBUS_TRANS_SESSION_NO_ENABLE;
+        }
     }
-
-    ret = CheckSessionIsOpened(socket);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "CheckSessionIsOpened err, ret=%{public}d", ret);
-        return SOFTBUS_TRANS_SESSION_NO_ENABLE;
-    }
-
     ret = ClientSetSocketState(socket, maxIdleTimeout, SESSION_ROLE_CLIENT);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "set session role failed, ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
-
-    TRANS_LOGI(TRANS_SDK, "Bind ok: socket=%{public}d, channelId=%{public}d, channelType=%{public}d", socket,
-        transInfo.channelId, transInfo.channelType);
+    if (!isAsync) {
+        TRANS_LOGI(TRANS_SDK, "Bind ok: socket=%{public}d, channelId=%{public}d, channelType=%{public}d", socket,
+            transInfo.channelId, transInfo.channelType);
+    } else {
+        TRANS_LOGI(TRANS_SDK, "Bind async ok: socket=%{public}d", socket);
+    }
     return SOFTBUS_OK;
 }
 

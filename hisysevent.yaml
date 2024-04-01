@@ -211,6 +211,7 @@ TRANSPORT_BEHAVIOR:
   PEER_CHAN_ID: { type: INT32, desc: peer channel id }
   PEER_NET_ID: { type: STRING, desc: peer device net id }
   PEER_UDID: { type: STRING, desc: peer udid }
+  PEER_DEV_VER: { type: STRING, desc: peer device build version }
 
 TRANSPORT_AUDIT:
   __BASE: {type: SECURITY, level: CRITICAL, desc: transport recurity audit }
