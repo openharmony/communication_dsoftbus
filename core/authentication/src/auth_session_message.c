@@ -404,7 +404,10 @@ static void PackFastAuth(JsonObj *obj, AuthSessionInfo *info)
         info->isSupportFastAuth = false;
         return;
     }
-    AUTH_LOGI(AUTH_FSM, "udidHashHexStr=%{public}s", udidHashHexStr);
+    char *anonyUdidHash = NULL;
+    Anonymize(udidHashHexStr, &anonyUdidHash);
+    AUTH_LOGI(AUTH_FSM, "udidHashHexStr=%{public}s", anonyUdidHash);
+    AnonymizeFree(anonyUdidHash);
     if (info->connInfo.type != AUTH_LINK_TYPE_ENHANCED_P2P &&
         !IsPotentialTrustedDevice(ID_TYPE_DEVID, (const char *)udidHashHexStr, false, false)) {
         AUTH_LOGI(AUTH_FSM, "not potential trusted realtion, bypass fastAuthProc");
