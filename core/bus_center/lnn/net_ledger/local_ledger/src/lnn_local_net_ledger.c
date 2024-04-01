@@ -759,6 +759,9 @@ static int32_t InitLocalDeviceInfo(DeviceBasicInfo *info)
     if (GetCommonOsVersion(info->osVersion, OS_VERSION_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get os version failed");
     }
+    if (GetCommonDeviceVersion(info->deviceVersion, DEVICE_VERSION_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get device version failed");
+    }
     if (LnnGetUnifiedDeviceName(info->unifiedName, DEVICE_NAME_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get unifiedName fail");
     }

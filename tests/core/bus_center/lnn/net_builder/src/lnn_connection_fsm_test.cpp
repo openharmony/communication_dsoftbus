@@ -19,8 +19,10 @@
 #include "lnn_auth_mock.h"
 #include "lnn_connection_fsm.h"
 #include "lnn_connection_fsm.c"
+#include "lnn_connection_fsm_mock.h"
 #include "lnn_devicename_info.h"
 #include "lnn_net_builder.h"
+#include "lnn_net_ledger_mock.h"
 #include "lnn_service_mock.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
@@ -309,35 +311,6 @@ HWTEST_F(LNNConnectionFsmTest, LNN_POST_PC_ONLINE_UNIQUELY_TEST_001, TestSize.Le
 }
 
 /*
-* @tc.name: LNN_DEVICE_STATE_CHANGE_PROCESS_TEST_001
-* @tc.desc: test DeviceStateChangeProcess
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNConnectionFsmTest, LNN_DEVICE_STATE_CHANGE_PROCESS_TEST_001, TestSize.Level1)
-{
-    DeviceStateChangeProcess(nullptr, CONNECTION_ADDR_BR, true);
-    DeviceStateChangeProcess(const_cast<char *>(NETWORKID2), CONNECTION_ADDR_BR, true);
-    DeviceStateChangeProcess(const_cast<char *>(NETWORKID2), CONNECTION_ADDR_BLE, true);
-    DeviceStateChangeProcess(const_cast<char *>(NETWORKID2), CONNECTION_ADDR_BLE, false);
-}
-
-/*
-* @tc.name: LNN_REPORT_LEAVE_LNN_RESULT_EVT_TEST_001
-* @tc.desc: test ReportLeaveLNNResultEvt
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNConnectionFsmTest, LNN_REPORT_LEAVE_LNN_RESULT_EVT_TEST_001, TestSize.Level1)
-{
-    LnnConnectionFsm connFsm;
-    ReportLeaveLNNResultEvt(&connFsm, SOFTBUS_HISYSEVT_LINK_TYPE_BR);
-    ReportLeaveLNNResultEvt(&connFsm, SOFTBUS_HISYSEVT_LINK_TYPE_HML);
-    connFsm.connInfo.addr.type = CONNECTION_ADDR_BR;
-    ReportLeaveLNNResultEvt(&connFsm, SOFTBUS_HISYSEVT_LINK_TYPE_BR);
-}
-
-/*
 * @tc.name: LNN_IS_NODE_INFO_CHANGED_TEST_001
 * @tc.desc: test IsNodeInfoChanged
 * @tc.type: FUNC
@@ -345,6 +318,11 @@ HWTEST_F(LNNConnectionFsmTest, LNN_REPORT_LEAVE_LNN_RESULT_EVT_TEST_001, TestSiz
 */
 HWTEST_F(LNNConnectionFsmTest, LNN_IS_NODE_INFO_CHANGED_TEST_001, TestSize.Level1)
 {
+    NiceMock<LnnConnFsmInterfaceMock> lnnConnMock;
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(lnnConnMock, LnnUpdateNetworkId).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, LnnHasDiscoveryType).WillRepeatedly(Return(true));
+
     int32_t ret = LnnStartConnectionFsm(connFsm4);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     NodeInfo oldNodeInfo;

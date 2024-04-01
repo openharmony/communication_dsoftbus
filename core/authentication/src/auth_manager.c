@@ -572,6 +572,12 @@ static AuthManager *GetExistAuthManager(int64_t authSeq, const AuthSessionInfo *
         return NewAuthManager(authSeq, info);
     }
     auth->connId[info->connInfo.type] = info->connId;
+    if (strcpy_s(auth->uuid, UUID_BUF_LEN, info->uuid) != EOK) {
+        char *anonyUuid = NULL;
+        Anonymize(info->uuid, &anonyUuid);
+        AUTH_LOGE(AUTH_FSM, "str copy uuid fail, uuid=%{public}s", anonyUuid);
+        AnonymizeFree(anonyUuid);
+    }
     if (memcpy_s(&auth->connInfo[info->connInfo.type], sizeof(AuthConnInfo),
         &info->connInfo, sizeof(AuthConnInfo)) != EOK) {
         AUTH_LOGE(AUTH_FSM, "connInfo cpy fail");
@@ -910,7 +916,7 @@ static void ReportAuthRequestFailed(uint32_t requestId, int32_t reason)
     if (CheckAuthConnCallback(&request.connCb)) {
         PerformAuthConnCallback(request.requestId, reason, AUTH_INVALID_ID);
     } else {
-        AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+        AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = request.connInfo.type };
         PerformVerifyCallback(request.requestId, reason, authHandle, NULL);
     }
     DelAuthRequest(request.requestId);

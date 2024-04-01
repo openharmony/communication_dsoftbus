@@ -133,6 +133,11 @@ int32_t GetCommonOsVersion(char *value, uint32_t len)
     return GetLocalLedgerDepsInterface()->GetCommonOsVersion(value, len);
 }
 
+int32_t GetCommonDeviceVersion(char *value, uint32_t len)
+{
+    return GetLocalLedgerDepsInterface()->GetCommonDeviceVersion(value, len);
+}
+
 int32_t GetDeviceSecurityLevel(int32_t *level)
 {
     return GetLocalLedgerDepsInterface()->GetDeviceSecurityLevel(level);

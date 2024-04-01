@@ -50,6 +50,8 @@ int32_t TransGetUidAndPid(const char *sessionName, int32_t *uid, int32_t *pid);
 void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid,
     const char *peerIp, int32_t routeType);
 
+bool CheckUidAndPid(const char *sessionName, pid_t callingUid, pid_t callingPid);
+
 #ifdef __cplusplus
 }
 #endif
