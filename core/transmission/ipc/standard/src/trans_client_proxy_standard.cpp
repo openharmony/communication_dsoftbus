@@ -103,6 +103,7 @@ int32_t TransClientProxy::MessageParcelWrite(MessageParcel &data, const char *se
     WRITE_PARCEL_WITH_RET(data, Int32, channel->algorithm, SOFTBUS_ERR);
     WRITE_PARCEL_WITH_RET(data, Int32, channel->crc, SOFTBUS_ERR);
     WRITE_PARCEL_WITH_RET(data, Uint32, channel->dataConfig, SOFTBUS_ERR);
+    WRITE_PARCEL_WITH_RET(data, Int32, channel->linkType, SOFTBUS_ERR);
 
     return SOFTBUS_OK;
 }
