@@ -18,6 +18,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "auth_interface.h"
 #include "lnn_node_info.h"
 #include "softbus_def.h"
 #include "softbus_common.h"
@@ -38,7 +39,7 @@ typedef struct {
 
 void AuthLoadDeviceKey(void);
 void AuthUpdateCreateTime(const char *udidHash, int32_t keyType, bool isServer);
-int32_t AuthInsertDeviceKey(const NodeInfo *deviceInfo, const AuthDeviceKeyInfo *deviceKey);
+int32_t AuthInsertDeviceKey(const NodeInfo *deviceInfo, const AuthDeviceKeyInfo *deviceKey, AuthLinkType type);
 void AuthRemoveDeviceKeyByUdid(const char *udidOrHash);
 int32_t AuthFindDeviceKey(const char *udidHash, int32_t keyType, AuthDeviceKeyInfo *deviceKey);
 void AuthUpdateKeyIndex(const char *udidHash, int32_t keyType, int64_t index, bool isServer);

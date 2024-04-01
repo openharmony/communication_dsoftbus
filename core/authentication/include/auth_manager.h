@@ -53,7 +53,7 @@ typedef struct {
     ListNode node;
 } AuthManager;
 
-int32_t AuthManagerSetSessionKey(int64_t authSeq, const AuthSessionInfo *info, const SessionKey *sessionKey,
+int32_t AuthManagerSetSessionKey(int64_t authSeq, AuthSessionInfo *info, const SessionKey *sessionKey,
     bool isConnect);
 int32_t AuthManagerGetSessionKey(int64_t authSeq, const AuthSessionInfo *info, SessionKey *sessionKey);
 
@@ -64,7 +64,7 @@ void AuthManagerSetAuthFinished(int64_t authSeq, const AuthSessionInfo *info);
 /* Note: must call DelAuthManager to free. */
 AuthManager *GetAuthManagerByAuthId(int64_t authId);
 AuthManager *GetAuthManagerByConnInfo(const AuthConnInfo *connInfo, bool isServer);
-void RemoveAuthSessionKeyByIndex(int64_t authId, int32_t index);
+void RemoveAuthSessionKeyByIndex(int64_t authId, int32_t index, AuthLinkType type);
 void DelAuthManager(AuthManager *auth, int32_t type);
 void DelDupAuthManager(AuthManager *auth);
 void RemoveAuthManagerByAuthId(AuthHandle authHandle);
