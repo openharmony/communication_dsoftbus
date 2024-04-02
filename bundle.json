@@ -57,6 +57,7 @@
         "device_auth",
         "device_info_manager",
         "drivers_interface_wlan",
+        "hicollie",
         "hisysevent",
         "hitrace",
         "hilog",
