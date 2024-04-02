@@ -139,8 +139,8 @@ int32_t ConnGattClientConnect(ConnBleConnection *connection)
         status = ConnPostMsgToLooper(&g_bleGattClientAsyncHandler, MSG_CLIENT_WAIT_FAST_CONNECT_TIMEOUT,
             connection->connectionId, 0, 0, BLE_FAST_CONNECT_TIMEOUT);
         if (status != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BLE, "post msg to looper failed: connection id=%{public}u, 
-                underlayer handler handle=%{public}d, error=%{public}d",
+            CONN_LOGE(CONN_BLE, "post msg to looper failed: connection id=%{public}u, "
+                "underlayer handler handle=%{public}d, error=%{public}d",
                 connection->connectionId, underlayerHandle, status);
         }
     }
@@ -264,18 +264,15 @@ static void ConnectedMsgHandler(const CommonStatusContext *ctx)
 static void ClientWaitFastConnectTimeoutMsgHandler(uint32_t connectionId)
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
-    if (connection == NULL) {
-        CONN_LOGE(CONN_BLE, "ble client wait fastest connection timeout msg handler failed:connection not exist,
-            connectionId=%{public}u", connectionId);
-    }
-    CONN_LOGI(CONN_BLE, "ble client wait fastest connection timeout msg handler,
-        connect failed, connectionId=%{public}u" connectionId);
+    CONN_CHECK_AND_RETURN_LOGE(connection != NULL, CONN_BLE, "ble client wait fastest connection "
+        "timeout msg handler failed:connection not exist, connId=%{public}u", connectionId);
+    CONN_LOGI(CONN_BLE, "ble client wait fastest connection timeout msg handler, "
+        "connect failed, connId=%{public}u" connectionId);
     int32_t rc = SOFTBUS_CONN_BLE_CONNECT_TIMEOUT_ERR;
     do {
         int32_t status = SoftBusMutexLock(&connection->lock);
         if (status != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BLE, "ATTENTION UNEXPECTED ERROR! try to lock failed,
-                connectionId=%{public}u, error=%{public}d", connectionId, status);
+            CONN_LOGE(CONN_BLE, "try to lock failed, connId=%{public}u, error=%{public}d", connectionId, status);
             rc = SOFTBUS_LOCK_ERR;
             break;
         }
@@ -885,6 +882,7 @@ static void BleGattClientMsgHandler(SoftBusMessage *msg)
             break;
         case MSG_CLIENT_WAIT_FAST_CONNECT_TIMEOUT:
             ClientWaitFastConnectTimeoutMsgHandler((uint32_t)msg->arg1);
+            break;
         default:
             CONN_LOGW(CONN_BLE,
                 "ATTENTION, ble gatt client looper receive unexpected msg just ignore, FIX "

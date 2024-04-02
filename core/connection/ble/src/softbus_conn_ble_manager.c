@@ -82,7 +82,7 @@ enum BleConnectionCompareType {
     BLE_CONNECTION_COMPARE_TYPE_CONNECTION_ID,
     BLE_CONNECTION_COMPARE_TYPE_ADDRESS,
     BLE_CONNECTION_COMPARE_TYPE_UNDERLAY_HANDLE,
-    BLE_CONNECTION_COMPARE_TYPE_UDID_DIFF_ADDRESS,
+    BLE_CONNECTION_COMPARE_TYPE_UDID_IGNORE_ADDRESS,
     BLE_CONNECTION_COMPARE_TYPE_UDID_CLIENT_SIDE,
 };
 
@@ -1251,11 +1251,19 @@ static bool ConnectionCompareByUnderlayHandle(ConnBleConnection *connection, con
                 connection->protocol == (BleProtocolType)option->underlayerHandleOption.protocol);
 }
 
-static bool ConnectionCompareByUdidDiffAddress(ConnBleConnection *connection, const BleConnectionCompareOption *option)
+static bool ConnectionCompareByUdidIgnoreAddress(ConnBleConnection *connection,
+    const BleConnectionCompareOption *option)
 {
     ConnBleInnerComplementDeviceId(connection);
-    return StrCmpIgnoreCase(connection->addr, option->udidAddressOption.addr) != 0 &&
-        IsSameDevice(connection->udid, option->udidAddressOption.udid) &&
+    if (StrCmpIgnoreCase(connection->addr, option->udidAddressOption.addr) != 0) {
+        char animizeAddr[BT_MAC_LEN] = { 0 };
+        char optionAnimizeAddr[BT_MAC_LEN] = { 0 };
+        ConvertAnonymizeMacAddress(animizeAddr, BT_MAC_LEN, connection->addr, BT_MAC_LEN);
+        ConvertAnonymizeMacAddress(optionAnimizeAddr, BT_MAC_LEN, option->udidAddressOption.addr, BT_MAC_LEN);
+        CONN_LOGW(CONN_BLE, "ble mac address are different. connectionId=%{public}u, addr=%{public}s, "
+            "optionaddr=%{public}s", connection->connectionId, animizeAddr, optionAnimizeAddr);
+    }
+    return IsSameDevice(connection->udid, option->udidAddressOption.udid) &&
         ((BleProtocolType)option->udidAddressOption.protocol == BLE_PROTOCOL_ANY ?
                 true :
                 connection->protocol == (BleProtocolType)option->udidAddressOption.protocol);
@@ -1283,8 +1291,8 @@ static ConnBleConnection *GetConnectionByOption(const BleConnectionCompareOption
         case BLE_CONNECTION_COMPARE_TYPE_UNDERLAY_HANDLE:
             compareFunc = ConnectionCompareByUnderlayHandle;
             break;
-        case BLE_CONNECTION_COMPARE_TYPE_UDID_DIFF_ADDRESS:
-            compareFunc = ConnectionCompareByUdidDiffAddress;
+        case BLE_CONNECTION_COMPARE_TYPE_UDID_IGNORE_ADDRESS:
+            compareFunc = ConnectionCompareByUdidIgnoreAddress;
             break;
         case BLE_CONNECTION_COMPARE_TYPE_UDID_CLIENT_SIDE:
             compareFunc = ConnectionCompareByUdidClientSide;
@@ -1358,7 +1366,7 @@ ConnBleConnection *ConnBleGetConnectionByHandle(int32_t underlayerHandle, ConnSi
 ConnBleConnection *ConnBleGetConnectionByUdid(const char *addr, const char *udid, BleProtocolType protocol)
 {
     BleConnectionCompareOption option = {
-        .type = BLE_CONNECTION_COMPARE_TYPE_UDID_DIFF_ADDRESS,
+        .type = BLE_CONNECTION_COMPARE_TYPE_UDID_IGNORE_ADDRESS,
         .udidAddressOption = {
             .addr = addr,
             .udid = udid,
@@ -1419,10 +1427,8 @@ int32_t ConnBleKeepAlive(uint32_t connectionId, uint32_t requestId, uint32_t tim
     CONN_CHECK_AND_RETURN_RET_LOGW(time != 0 && time <= BLE_CONNECT_KEEP_ALIVE_TIMEOUT_MILLIS,
         SOFTBUS_INVALID_ID_PARAM, CONN_BLE, "time is invaliad, time=%{public}u", time);
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
-    if (connection == NULL) {
-        CONN_LOGD(CONN_BLE, "connection not exist, connectionId=%u", connectionId);
-        return SOFTBUS_ERR;
-    }
+    CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL, SOFTBUS_ERR, CONN_BLE,
+        "connection not exist, connectionId=%{public}u", connectionId);
     int32_t status = ConnBleUpdateConnectionRc(connection, 0, 1);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "update rc failed, status=%{public}d, connectionId=%{public}u, requestId=%{public}u",
@@ -1432,17 +1438,15 @@ int32_t ConnBleKeepAlive(uint32_t connectionId, uint32_t requestId, uint32_t tim
     }
     ConnBleReturnConnection(&connection);
     ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MRG_MSG_KEEP_ALIVE_TIMEOUT, connectionId, requestId, NULL, time);
-    CONN_LOGI(CONN_BLE, "ble keep alive success, duration time is %{public}u", time);
+    CONN_LOGI(CONN_BLE, "ble keep alive success, duration time is %{public}u, connId=%{public}u", time, connectionId);
     return SOFTBUS_OK;
 }
 
 int32_t ConnBleRemoveKeepAlive(uint32_t connectionId, uint32_t requestId)
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
-    if (connection == NULL) {
-        CONN_LOGD(CONN_BLE, "connection not exist, connectionId=%u", connectionId);
-        return SOFTBUS_ERR;
-    }
+    CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL, SOFTBUS_ERR, CONN_BLE,
+        "connection not exist, connectionId=%{public}u", connectionId);
     bool isExist = false;
     ConnRemoveMsgFromLooper(
         &g_bleManagerSyncHandler, BLE_MRG_MSG_KEEP_ALIVE_TIMEOUT, connectionId, requestId, &isExist);
