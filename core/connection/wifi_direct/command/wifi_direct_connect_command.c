@@ -169,6 +169,13 @@ static int32_t OpenLink(struct WifiDirectConnectCommand *command)
 
     SetWifiDirectStatisticType(connectInfo);
     struct WifiDirectDecisionCenter *decisionCenter = GetWifiDirectDecisionCenter();
+
+    struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(IF_NAME_HML);
+    int count = info->getInt(info, II_KEY_CONNECTED_DEVICE_COUNT, 0);
+    if (connectInfo->connectType != WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P) {
+        CONN_CHECK_AND_RETURN_RET_LOGE(count < MAX_CONNECTED_DEVICE_COUNT, ERROR_HML_BEYOND_MAX_LINK_NUM,
+            CONN_WIFI_DIRECT, "The number of connection has reached the maximum");
+    }
     struct WifiDirectProcessor *processor =
         decisionCenter->getProcessorByChannelAndConnectType(connectInfo->negoChannel, connectInfo->connectType);
     CONN_CHECK_AND_RETURN_RET_LOGW(processor != NULL, ERROR_WIFI_DIRECT_NO_SUITABLE_PROTOCOL, CONN_WIFI_DIRECT,
