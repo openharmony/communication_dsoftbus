@@ -264,10 +264,8 @@ static void ConnectedMsgHandler(const CommonStatusContext *ctx)
 static void ClientWaitFastConnectTimeoutMsgHandler(uint32_t connectionId)
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
-    CONN_CHECK_AND_RETURN_LOGE(connection != NULL, CONN_BLE, "ble client wait fastest connection "
-        "timeout msg handler failed:connection not exist, connId=%{public}u", connectionId);
-    CONN_LOGI(CONN_BLE, "ble client wait fastest connection timeout msg handler, "
-        "connect failed, connId=%{public}u" connectionId);
+    CONN_CHECK_AND_RETURN_LOGE(connection != NULL, CONN_BLE, "connection not exist, connId=%{public}u", connectionId);
+    CONN_LOGI(CONN_BLE, "connect failed, connId=%{public}u" connectionId);
     int32_t rc = SOFTBUS_CONN_BLE_CONNECT_TIMEOUT_ERR;
     do {
         int32_t status = SoftBusMutexLock(&connection->lock);
