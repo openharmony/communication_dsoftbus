@@ -20,10 +20,10 @@ softbus_adapter_common = "${dsoftbus_root_path}/adapter/common"
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
     build_type = "static_library"
-    libsec_deps = "//third_party/bounds_checking_function:libsec_static"
+    libsec_external_deps = [ "bounds_checking_function:libsec_static" ]
   } else {
     build_type = "shared_library"
-    libsec_deps = "//third_party/bounds_checking_function:libsec_shared"
+    libsec_external_deps = [ "bounds_checking_function:libsec_shared" ]
   }
   config("dsoftbus_dump_interface_lite") {
     include_dirs = [
@@ -44,7 +44,6 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/interfaces/kits/transport",
       "$hilog_lite_include_path",
       "//third_party/cJSON",
-      "//third_party/bounds_checking_function/include",
     ]
     sources = [
       "softbus_hidumper.c",
@@ -59,7 +58,7 @@ if (defined(ohos_lite)) {
       "softbus_hidumper_trans_virtual.c",
       "softbus_hidumper_util_virtual.c",
     ]
-    deps = [ "$libsec_deps" ]
+    external_deps = libsec_external_deps
     public_configs = [ ":dsoftbus_dump_interface_lite" ]
   }
 } else {
@@ -93,7 +92,6 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/connection/interface",
       "$dsoftbus_root_path/core/connection/wifi_direct/utils",
       "//third_party/cJSON",
-      "//third_party/bounds_checking_function/include",
     ]
     include_dirs += trans_common_inc
     sources = [
@@ -126,11 +124,14 @@ if (defined(ohos_lite)) {
       "$dsoftbus_dfx_path/event:softbus_dfx_event",
       "$dsoftbus_dfx_path/log:softbus_dfx_log",
       "$dsoftbus_root_path/adapter:softbus_adapter",
-      "//third_party/bounds_checking_function:libsec_shared",
       "//third_party/cJSON:cjson",
-      "//third_party/sqlite:sqlite",
+    ]
+    public_external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "sqlite:sqlite",
     ]
     external_deps = [
+      "bounds_checking_function:libsec_shared",
       "hilog:libhilog",
       "hisysevent:libhisysevent",
       "hisysevent:libhisyseventmanager",
