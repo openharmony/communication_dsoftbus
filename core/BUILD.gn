@@ -18,7 +18,7 @@ if (defined(ohos_lite)) {
     if (ohos_kernel_type == "liteos_m") {
       features = [
         "frame:softbus_server_frame",
-        "common:softbus_utils",
+        "$dsoftbus_root_path/core/common:softbus_utils",
         "$dsoftbus_root_path/adapter:softbus_adapter",
       ]
     } else {
