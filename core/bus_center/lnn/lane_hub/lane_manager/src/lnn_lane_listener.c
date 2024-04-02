@@ -378,7 +378,8 @@ static void LnnOnWifiDirectDeviceOnline(const char *peerMac, const char *peerIp,
     }
 }
 
-static void LnnOnWifiDirectDeviceOffline(const char *peerMac, const char *peerIp, const char *peerUuid, const char *localIp)
+static void LnnOnWifiDirectDeviceOffline(const char *peerMac, const char *peerIp, const char *peerUuid,
+    const char *localIp)
 {
     LNN_LOGD(LNN_LANE, "lnn wifiDerectDevice offline");
     if (peerMac == NULL || peerUuid == NULL || peerIp == NULL) {
