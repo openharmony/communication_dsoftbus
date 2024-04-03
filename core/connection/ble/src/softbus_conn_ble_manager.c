@@ -1157,7 +1157,7 @@ static void BleReset(int32_t reason)
 static void BleKeepAliveTimeout(uint32_t connectionId, uint32_t requestId)
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
-    CONN_CHECK_AND_RETURN_LOGW(connetion != NULL, CONN_BLE,
+    CONN_CHECK_AND_RETURN_LOGW(connection != NULL, CONN_BLE,
         "connection not exist, connectionId=%{public}u", connectionId);
     int32_t status = ConnBleUpdateConnectionRc(connection, 0, -1);
     if (status != SOFTBUS_OK) {
@@ -1425,7 +1425,7 @@ void NotifyReusedConnected(uint32_t connectionId, uint16_t challengeCode)
 int32_t ConnBleKeepAlive(uint32_t connectionId, uint32_t requestId, uint32_t time)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(time != 0 && time <= BLE_CONNECT_KEEP_ALIVE_TIMEOUT_MILLIS,
-        SOFTBUS_INVALID_ID_PARAM, CONN_BLE, "time is invaliad, time=%{public}u", time);
+        SOFTBUS_INVALID_PARAM, CONN_BLE, "time is invaliad, time=%{public}u", time);
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
     CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL, SOFTBUS_ERR, CONN_BLE,
         "connection not exist, connectionId=%{public}u", connectionId);

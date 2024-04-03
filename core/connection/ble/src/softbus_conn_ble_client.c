@@ -265,7 +265,7 @@ static void ClientWaitFastConnectTimeoutMsgHandler(uint32_t connectionId)
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
     CONN_CHECK_AND_RETURN_LOGE(connection != NULL, CONN_BLE, "connection not exist, connId=%{public}u", connectionId);
-    CONN_LOGI(CONN_BLE, "connect failed, connId=%{public}u" connectionId);
+    CONN_LOGI(CONN_BLE, "connect failed, connId=%{public}u", connectionId);
     int32_t rc = SOFTBUS_CONN_BLE_CONNECT_TIMEOUT_ERR;
     do {
         int32_t status = SoftBusMutexLock(&connection->lock);
@@ -276,7 +276,7 @@ static void ClientWaitFastConnectTimeoutMsgHandler(uint32_t connectionId)
         }
         connection->state = BLE_CONNECTION_STATE_CLOSED;
         (void)SoftBusMutexUnlock(&connection->lock);
-    } while (false)
+    } while (false);
     g_clientEventListener.onClientFailed(connectionId, rc);
     ConnBleReturnConnection(&connection);
 }
