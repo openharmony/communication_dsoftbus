@@ -101,5 +101,10 @@ int32_t LnnNotifyEmptySessionKey(int64_t authId)
 {
     return GetCommonInterface()->LnnNotifyEmptySessionKey(authId);
 }
+
+int32_t LnnNotifyLeaveLnnByAuthHandle(AuthHandle *authHandle)
+{
+    return GetCommonInterface()->LnnNotifyLeaveLnnByAuthHandle(authHandle);
+}
 }
 } // namespace OHOS
