@@ -390,7 +390,7 @@ HWTEST_F(AuthTest, ENCRYPT_INNER_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     SoftBusFree(outData);
     ListInit(&list);
-    ret = AddSessionKey(&list, TO_INT32(authSeq), &sessionKey);
+    ret = AddSessionKey(&list, TO_INT32(authSeq), &sessionKey, AUTH_LINK_TYPE_WIFI);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     inLen = CRYPT_DATA_LEN;
     ret = EncryptInner(&list, inData, inLen, &outData, &outLen);
@@ -432,7 +432,7 @@ HWTEST_F(AuthTest, DENCRYPT_INNER_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     SoftBusFree(outData);
     ListInit(&list);
-    ret = AddSessionKey(&list, TO_INT32(authSeq), &sessionKey);
+    ret = AddSessionKey(&list, TO_INT32(authSeq), &sessionKey, AUTH_LINK_TYPE_WIFI);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     inLen = CRYPT_DATA_LEN;
     ret = DecryptInner(&list, inData, inLen, &outData, &outLen);
@@ -1689,12 +1689,12 @@ HWTEST_F(AuthTest, ADD_SESSION_KEY_Test_001, TestSize.Level1)
     SessionKey *key = nullptr;
     SessionKey keyValue;
     SessionKeyList listValue;
-    int32_t ret = AddSessionKey(list, index, key);
+    int32_t ret = AddSessionKey(list, index, key, AUTH_LINK_TYPE_WIFI);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     (void)memset_s(&keyValue, sizeof(SessionKey), 0, sizeof(SessionKey));
     (void)memset_s(&listValue, sizeof(SessionKeyList), 0, sizeof(SessionKeyList));
     ListInit(&listValue);
-    ret = AddSessionKey(&listValue, index, &keyValue);
+    ret = AddSessionKey(&listValue, index, &keyValue, AUTH_LINK_TYPE_WIFI);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -1947,5 +1947,28 @@ HWTEST_F(AuthTest, AUTH_ON_CONNECT_EVENT_Test_001, TestSize.Level1)
     (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     int32_t ret = OnConnectEvent(module, cfd, &option);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+/*
+ * @tc.name: GetLatestAvailableSessionKeyTimeTest
+ * @tc.desc: set and get session key available sessionKey
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthTest, AUTH_SET_AND_SET_SESSIONKEY_AVAILABLE_Test_001, TestSize.Level1)
+{
+    SessionKeyList list = { 0 };
+    SessionKey sessionKey = { { 0 }, TEST_DATA_LEN };
+    int32_t index = 0;
+    ListInit(&list);
+    int32_t ret = AddSessionKey(&list, index, &sessionKey);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    uint64_t time = GetLatestAvailableSessionKeyTime(&list);
+    EXPECT_TRUE(time == 0);
+    ret = SetSessionKeyAvailable(&list, 0);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    time = GetLatestAvailableSessionKeyTime(&list);
+    EXPECT_TRUE(time != 0);
+    DestroySessionKeyList(&list);
 }
 } // namespace OHOS
