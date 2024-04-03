@@ -208,7 +208,6 @@ static SoftbusListenerNode *CreateSpecifiedListenerModule(ListenerModule module)
 
 int32_t InitBaseListener(void)
 {
-    // This function is invoked by both the client and server.
     // flag : if the client and server are in the same process, this function can be executed only once.
     static bool flag = false;
     if (flag) {
