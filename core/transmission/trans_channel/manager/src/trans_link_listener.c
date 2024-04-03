@@ -34,7 +34,7 @@ static void OnWifiDirectDeviceOffLine(const char *peerMac, const char *peerIp, c
     const char *localIp)
 {
     TRANS_CHECK_AND_RETURN_LOGW(peerUuid, TRANS_SVC, "peer uuid is null");
-    TRANS_CHECK_AND_RETURN_LOGW(localIp, TRANS_SVC, "peer uuid is null");
+    TRANS_CHECK_AND_RETURN_LOGW(localIp, TRANS_SVC, "localIp is null");
     NodeInfo nodeInfo;
     TransConnType connType = TRANS_CONN_ALL;
     memset_s(&nodeInfo, sizeof(nodeInfo), 0, sizeof(nodeInfo));
