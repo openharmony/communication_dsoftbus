@@ -137,6 +137,7 @@ void DelAuthManager(AuthManager *auth, int32_t type)
     if (type != AUTH_LINK_TYPE_MAX) {
         if (auth->connId[type] == 0) {
             AUTH_LOGE(AUTH_FSM, "authManager has been deleted, authId=%{public}" PRId64, auth->authId);
+            AnonymizeFree(anonyUdid);
             return;
         }
         auth->connId[type] = 0;
@@ -145,6 +146,7 @@ void DelAuthManager(AuthManager *auth, int32_t type)
             if (auth->connId[i] == 0) {
                 continue;
             }
+            ClearSessionkeyByAuthLinkType(auth->authId, &auth->sessionKeyList, (AuthLinkType)type);
             AUTH_LOGI(AUTH_FSM, "only clear connInfo, udid=%{public}s, side=%{public}s, type=%{public}d,"
                 " authId=%{public}" PRId64, anonyUdid, GetAuthSideStr(auth->isServer), type, auth->authId);
             AnonymizeFree(anonyUdid);
@@ -331,7 +333,7 @@ static int32_t UpdateAuthManagerByAuthId(
     return SOFTBUS_OK;
 }
 
-void RemoveAuthSessionKeyByIndex(int64_t authId, int32_t index)
+void RemoveAuthSessionKeyByIndex(int64_t authId, int32_t index, AuthLinkType type)
 {
     if (!RequireAuthLock()) {
         return;
@@ -342,7 +344,7 @@ void RemoveAuthSessionKeyByIndex(int64_t authId, int32_t index)
         AUTH_LOGI(AUTH_CONN, "auth manager already removed, authId=%{public}" PRId64, authId);
         return;
     }
-    RemoveSessionkeyByIndex(&auth->sessionKeyList, index);
+    RemoveSessionkeyByIndex(&auth->sessionKeyList, index, type);
     char udid[UDID_BUF_LEN] = { 0 };
     (void)memcpy_s(udid, UDID_BUF_LEN, auth->udid, UDID_BUF_LEN);
     ReleaseAuthLock();
@@ -350,6 +352,10 @@ void RemoveAuthSessionKeyByIndex(int64_t authId, int32_t index)
     if (IsListEmpty(&auth->sessionKeyList)) {
         AUTH_LOGI(AUTH_CONN, "auth key clear empty, Lnn offline. authId=%{public}" PRId64, authId);
         LnnNotifyEmptySessionKey(authId);
+    } else if (!CheckSessionKeyListExistType(&auth->sessionKeyList, type)) {
+        AUTH_LOGI(AUTH_CONN, "auth key type=%{public}d clear, Lnn offline. authId=%{public}" PRId64, type, authId);
+        AuthHandle authHandle = { .authId = authId, .type = type };
+        LnnNotifyLeaveLnnByAuthHandle(&authHandle);
     }
 }
 
@@ -561,6 +567,25 @@ static int64_t GetActiveAuthIdByConnInfo(const AuthConnInfo *connInfo, bool judg
     return authId;
 }
 
+static int32_t ProcessSessionKey(SessionKeyList *list, int32_t *index, int64_t authSeq, const SessionKey *key,
+    AuthSessionInfo *info)
+{
+    if (info->normalizedType == NORMALIZED_SUPPORT) {
+        if (SetSessionKeyAuthLinkType(list, info->normalizedIndex, info->connInfo.type) == SOFTBUS_OK) {
+            AUTH_LOGI(AUTH_FSM, "index is alread exist");
+            return SOFTBUS_OK;
+        }
+        *index = info->normalizedIndex;
+    }
+    if (AddSessionKey(list, *index, key, info->connInfo.type) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "failed to add a sessionKey");
+        return SOFTBUS_ERR;
+    }
+    AUTH_LOGI(AUTH_FSM, "authSeq=%{public}" PRId64 ",add session key index=%{public}d, new type=%{public}d",
+        authSeq, *index, info->connInfo.type);
+    return SOFTBUS_OK;
+}
+
 static AuthManager *GetExistAuthManager(int64_t authSeq, const AuthSessionInfo *info)
 {
     if (info->normalizedType == NORMALIZED_NOT_SUPPORT) {
@@ -618,8 +643,8 @@ static AuthManager *AuthManagerIsExist(int64_t authSeq, const AuthSessionInfo *i
     return auth;
 }
 
-int32_t AuthManagerSetSessionKey(int64_t authSeq, const AuthSessionInfo *info,
-    const SessionKey *sessionKey, bool isConnect)
+int32_t AuthManagerSetSessionKey(int64_t authSeq, AuthSessionInfo *info, const SessionKey *sessionKey,
+    bool isConnect)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "info is NULL");
     AUTH_CHECK_AND_RETURN_RET_LOGE(sessionKey != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "sessionKey is NULL");
@@ -647,7 +672,7 @@ int32_t AuthManagerSetSessionKey(int64_t authSeq, const AuthSessionInfo *info,
     if ((info->isSupportFastAuth) && (info->version <= SOFTBUS_OLD_V2)) {
         sessionKeyIndex = TO_INT32(info->oldIndex);
     }
-    if (AddSessionKey(&auth->sessionKeyList, sessionKeyIndex, sessionKey) != SOFTBUS_OK) {
+    if (ProcessSessionKey(&auth->sessionKeyList, &sessionKeyIndex, authSeq, sessionKey, info) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "failed to add a sessionkey");
         if (isNewCreated) {
             DelAuthManager(auth, info->connInfo.type);
@@ -863,7 +888,7 @@ static int32_t StartReconnectDevice(
     request.addTime = GetCurrentTimeMs();
     request.isFastAuth = true;
     if (connInfo->type == AUTH_LINK_TYPE_BR) {
-        request.connInfo.info.brInfo.connectionId = auth->connId;
+        request.connInfo.info.brInfo.connectionId = auth->connId[AUTH_LINK_TYPE_BR];
     }
     if (AddAuthRequest(&request) == 0) {
         AUTH_LOGE(AUTH_CONN, "add reconnect request fail, requestId=%{public}u", requestId);
@@ -948,7 +973,15 @@ void AuthManagerSetAuthPassed(int64_t authSeq, const AuthSessionInfo *info)
             GetAuthSideStr(info->isServer));
         return;
     }
-    (void)SetSessionKeyAvailable(&auth->sessionKeyList, TO_INT32(authSeq));
+    int64_t index = authSeq;
+    if (info->normalizedType == NORMALIZED_SUPPORT) {
+        index = info->normalizedIndex;
+    }
+    if (SetSessionKeyAvailable(&auth->sessionKeyList, TO_INT32(index)) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "set sessionKey available fail, index=%{public}d", TO_INT32(index));
+        ReleaseAuthLock();
+        return;
+    }
     auth->hasAuthPassed = true;
     if (info->nodeInfo.p2pInfo.p2pMac[0] != '\0') {
         if (strcpy_s(auth->p2pMac, sizeof(auth->p2pMac), info->nodeInfo.p2pInfo.p2pMac)) {
@@ -1086,7 +1119,7 @@ static void HandleBleConnectResult(uint32_t requestId, int64_t authId, uint64_t 
     } while (FindAuthRequestByConnInfo(&request.connInfo, &request) == SOFTBUS_OK);
 }
 
-static int32_t GenerateUdidShortHash(const char *udid, uint8_t *hash)
+static int32_t GenerateUdidHash(const char *udid, uint8_t *hash)
 {
     if (SoftBusGenerateStrHash((uint8_t *)udid, strlen(udid), hash) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "generate udidHash fail");
@@ -1106,7 +1139,8 @@ static int32_t GetUdidShortHash(const AuthConnInfo *connInfo, char *udidBuf, uin
                 AUTH_LOGE(AUTH_FSM, "get udid by brMac fail.");
                 return SOFTBUS_ERR;
             }
-            if (GenerateUdidShortHash(udid, hash) != SOFTBUS_OK) {
+            if (GenerateUdidHash(udid, hash) != SOFTBUS_OK) {
+                AUTH_LOGE(AUTH_FSM, "GenerateUdidHash fail.");
                 return SOFTBUS_ERR;
             }
             break;
@@ -1123,7 +1157,8 @@ static int32_t GetUdidShortHash(const AuthConnInfo *connInfo, char *udidBuf, uin
             break;
         case AUTH_LINK_TYPE_P2P:
         case AUTH_LINK_TYPE_ENHANCED_P2P:
-            if (GenerateUdidShortHash(connInfo->info.ipInfo.udid, hash) != SOFTBUS_OK) {
+            if (GenerateUdidHash(connInfo->info.ipInfo.udid, hash) != SOFTBUS_OK) {
+                AUTH_LOGE(AUTH_FSM, "GenerateUdidHash fail.");
                 return SOFTBUS_ERR;
             }
             break;
@@ -1432,12 +1467,12 @@ static void HandleDecryptFailData(
         &decData, &decDataLen) == SOFTBUS_OK) {
         ReleaseAuthLock();
         SoftBusFree(decData);
-        RemoveAuthSessionKeyByIndex(auth[0]->authId, index);
+        RemoveAuthSessionKeyByIndex(auth[0]->authId, index, connInfo->type);
     } else if (auth[1] != NULL && DecryptInner(&auth[1]->sessionKeyList, data, head->len,
         &decData, &decDataLen) == SOFTBUS_OK) {
         ReleaseAuthLock();
         SoftBusFree(decData);
-        RemoveAuthSessionKeyByIndex(auth[1]->authId, index);
+        RemoveAuthSessionKeyByIndex(auth[1]->authId, index, connInfo->type);
     } else {
         ReleaseAuthLock();
         AUTH_LOGE(AUTH_CONN, "decrypt trans data fail.");

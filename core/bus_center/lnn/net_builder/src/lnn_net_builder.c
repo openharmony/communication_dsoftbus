@@ -1858,6 +1858,7 @@ static void OnReAuthVerifyPassed(uint32_t requestId, AuthHandle authHandle, cons
         LNN_LOGI(LNN_BUILDER, "fsmId=%{public}u start a connection fsm, authId=%{public}" PRId64,
             connFsm->id, authHandle.authId);
         if (LnnSendAuthResultMsgToConnFsm(connFsm, SOFTBUS_OK) != SOFTBUS_OK) {
+            SoftBusFree(connFsm->connInfo.nodeInfo);
             connFsm->connInfo.nodeInfo = NULL;
             StopConnectionFsm(connFsm);
         }
@@ -2234,6 +2235,18 @@ static void UpdateLocalNetCapability(void)
         (void)LnnClearNetCapability(&netCapability, BIT_WIFI_P2P);
         (void)LnnClearNetCapability(&netCapability, BIT_WIFI_24G);
         (void)LnnClearNetCapability(&netCapability, BIT_WIFI_5G);
+    } else {
+        SoftBusBand band = SoftBusGetLinkBand();
+        if (band == BAND_24G) {
+            (void)LnnSetNetCapability(&netCapability, BIT_WIFI_24G);
+            (void)LnnClearNetCapability(&netCapability, BIT_WIFI_5G);
+        } else if (band == BAND_5G) {
+            (void)LnnSetNetCapability(&netCapability, BIT_WIFI_5G);
+            (void)LnnClearNetCapability(&netCapability, BIT_WIFI_24G);
+        } else {
+            (void)LnnSetNetCapability(&netCapability, BIT_WIFI_5G);
+            (void)LnnSetNetCapability(&netCapability, BIT_WIFI_24G);
+        }
     }
 
     if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, netCapability) != SOFTBUS_OK) {
@@ -2612,6 +2625,23 @@ int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrTy
     para->addrType = addrType;
     if (PostMessageToHandler(MSG_TYPE_LEAVE_SPECIFIC, para) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "post leave specific msg failed");
+        SoftBusFree(para);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnNotifyLeaveLnnByAuthHandle(AuthHandle *authHandle)
+{
+    AuthHandle *para = NULL;
+    para = (AuthHandle *)SoftBusMalloc(sizeof(AuthHandle));
+    if (para == NULL) {
+        LNN_LOGE(LNN_BUILDER, "malloc para fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    *para = *authHandle;
+    if (PostMessageToHandler(MSG_TYPE_DEVICE_DISCONNECT, para) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "post device disconnect fail");
         SoftBusFree(para);
         return SOFTBUS_ERR;
     }

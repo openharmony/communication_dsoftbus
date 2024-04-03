@@ -1632,6 +1632,10 @@ static void BleDirectlyOnlineProc(NodeInfo *info)
             LNN_LOGE(LNN_LEDGER, "strcpy_s networkId fail");
             return;
         }
+        if (strcpy_s(deviceInfo.uuid, sizeof(deviceInfo.uuid), info->uuid) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "strcpy_s uuid fail");
+            return;
+        }
         if (LnnSaveRemoteDeviceInfo(&deviceInfo) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "save remote devInfo fail");
             return;
