@@ -92,6 +92,14 @@ typedef struct {
     char *pkgName;
 } IdContainer;
 
+#define DFX_RECORD_DISC_CALL_START(infoNode, packageName, interfaceType)   \
+    do {                                                                   \
+        DiscEventExtra extra = { 0 };                                      \
+        DiscEventExtraInit(&extra);                                        \
+        BuildDiscCallEvent(&extra, infoNode, packageName, interfaceType);  \
+        DISC_EVENT(EVENT_SCENE_DISC, EVENT_STAGE_CALL_INTERFACE, extra);   \
+    } while (0)
+
 static void UpdateDiscEventAndReport(DiscEventExtra *extra, const DeviceInfo *device)
 {
     if (device == NULL) {
@@ -139,6 +147,22 @@ static void DfxRecordStartDiscoveryDevice(DiscInfo *infoNode)
     infoNode->statistics.discTimes = 0;
 }
 
+static void UpdateDdmpStartDiscoveryTime(DiscInfo *info)
+{
+    if (info->medium != AUTO && info->medium != COAP) {
+        DISC_LOGD(DISC_CONTROL, "no need update ddmp start discovery time");
+        return;
+    }
+
+    DiscInfo *infoNode = NULL;
+    LIST_FOR_EACH_ENTRY(infoNode, &(g_capabilityList[DDMP_CAPABILITY_BITMAP]), DiscInfo, capNode) {
+        if (infoNode->statistics.repTimes == 0) {
+            DISC_LOGD(DISC_CONTROL, "update ddmp callback id=%{public}d", infoNode->id);
+            infoNode->statistics.startTime = info->statistics.startTime;
+        }
+    }
+}
+
 static void DfxRecordDeviceFound(DiscInfo *infoNode, const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions)
 {
     DISC_LOGD(DISC_CONTROL, "record device found");
@@ -173,22 +197,19 @@ static bool IsBitmapSet(const uint32_t *bitMap, uint32_t pos)
     return ((1U << pos) & (*bitMap)) ? true : false;
 }
 
-static void DfxRecordCallInterfaceStart(const DiscInfo *info, const char *packageName, const InterfaceFuncType type)
+static void BuildDiscCallEvent(DiscEventExtra *extra, const DiscInfo *info, const char *packageName,
+    const InterfaceFuncType type)
 {
-    DiscEventExtra extra = { 0 };
-    DiscEventExtraInit(&extra);
-    extra.interFuncType = type + 1;
+    DISC_CHECK_AND_RETURN_LOGE(extra != NULL, DISC_CONTROL, "discEventExtra is null");
 
     if (info != NULL) {
-        extra.discType = info->medium + 1;
-        extra.discMode = info->mode;
+        extra->discType = info->medium + 1;
+        extra->discMode = info->mode;
     }
-    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
-    if (packageName != NULL && IsValidString(packageName, PKG_NAME_SIZE_MAX - 1) && strncpy_s(pkgName,
-        PKG_NAME_SIZE_MAX, packageName, PKG_NAME_SIZE_MAX - 1) == EOK) {
-        extra.callerPkg = pkgName;
+    if (IsValidString(packageName, PKG_NAME_SIZE_MAX - 1)) {
+        extra->callerPkg = packageName;
     }
-    DISC_EVENT(EVENT_SCENE_DISC, EVENT_STAGE_CALL_INTERFACE, extra);
+    extra->interFuncType = type + 1;
 }
 
 static int32_t CallSpecificInterfaceFunc(const InnerOption *option,
@@ -216,7 +237,6 @@ static int32_t CallSpecificInterfaceFunc(const InnerOption *option,
 
 static int32_t CallInterfaceByMedium(const DiscInfo *info, const char *packageName, const InterfaceFuncType type)
 {
-    DfxRecordCallInterfaceStart(info, packageName, type);
     switch (info->medium) {
         case COAP:
             return CallSpecificInterfaceFunc(&(info->option), g_discCoapInterface, info->mode, type);
@@ -707,6 +727,7 @@ static int32_t InnerPublishService(const char *packageName, DiscInfo *info, cons
             break;
         }
 
+        DFX_RECORD_DISC_CALL_START(info, packageName, PUBLISH_FUNC);
         ret = CallInterfaceByMedium(info, packageName, PUBLISH_FUNC);
         if (ret != SOFTBUS_OK) {
             DISC_LOGE(DISC_CONTROL, "call interface by medium failed");
@@ -733,6 +754,7 @@ static int32_t InnerUnPublishService(const char *packageName, int32_t publishId,
             break;
         }
 
+        DFX_RECORD_DISC_CALL_START(infoNode, packageName, UNPUBLISH_FUNC);
         ret = CallInterfaceByMedium(infoNode, packageName, UNPUBLISH_FUNC);
         if (ret != SOFTBUS_OK) {
             DISC_LOGE(DISC_CONTROL, "call interface by medium failed");
@@ -764,6 +786,8 @@ static int32_t InnerStartDiscovery(const char *packageName, DiscInfo *info, cons
             break;
         }
 
+        UpdateDdmpStartDiscoveryTime(info);
+        DFX_RECORD_DISC_CALL_START(info, packageName, STARTDISCOVERTY_FUNC);
         ret = CallInterfaceByMedium(info, packageName, STARTDISCOVERTY_FUNC);
         if (ret != SOFTBUS_OK) {
             DISC_LOGE(DISC_CONTROL, "call interface by medium failed");
@@ -791,6 +815,7 @@ static int32_t InnerStopDiscovery(const char *packageName, int32_t subscribeId, 
             break;
         }
 
+        DFX_RECORD_DISC_CALL_START(infoNode, packageName, STOPDISCOVERY_FUNC);
         ret = CallInterfaceByMedium(infoNode, packageName, STOPDISCOVERY_FUNC);
         if (ret != SOFTBUS_OK) {
             DISC_LOGE(DISC_CONTROL, "call interface by medium failed");
