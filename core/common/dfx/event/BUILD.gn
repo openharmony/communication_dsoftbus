@@ -58,7 +58,6 @@ if (defined(ohos_lite)) {
       "$dsoftbus_dfx_path/interface/include",
       "$dsoftbus_root_path/interfaces/kits/bus_center",
       "$dsoftbus_root_path/interfaces/kits/common",
-      "//third_party/bounds_checking_function/include",
       "src",
     ]
     sources = [
@@ -78,9 +77,9 @@ if (defined(ohos_lite)) {
     deps = [
       "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
       "$dsoftbus_dfx_path/log:softbus_dfx_log",
-      "//third_party/bounds_checking_function:libsec_shared",
     ]
     external_deps = [
+      "bounds_checking_function:libsec_shared",
       "hilog:libhilog",
       "hisysevent:libhisysevent",
     ]

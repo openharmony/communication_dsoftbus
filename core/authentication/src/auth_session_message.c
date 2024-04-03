@@ -448,7 +448,7 @@ static int32_t PackNormalizedKeyValue(JsonObj *obj, SessionKey *sessionKey)
         SoftBusFree(data);
         return SOFTBUS_ERR;
     }
-    JSON_AddStringToObject(obj, NORMALIZED_DATA, encNormalizedKey);
+    (void)JSON_AddStringToObject(obj, NORMALIZED_DATA, encNormalizedKey);
     AUTH_LOGI(AUTH_FSM, "pack normalize value succ");
     SoftBusFree(data);
     return SOFTBUS_OK;
@@ -476,12 +476,17 @@ static void PackNormalizedKey(JsonObj *obj, AuthSessionInfo *info, const NodeInf
         return;
     }
     info->normalizedKey = (SessionKey *)SoftBusCalloc(sizeof(SessionKey));
+    if (info->normalizedKey == NULL) {
+        AUTH_LOGE(AUTH_FSM, "malloc fail");
+        return;
+    }
     AuthDeviceKeyInfo deviceKey;
     (void)memset_s(&deviceKey, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
     if (AuthFindLatestNormalizeKey((char *)udidHashHexStr, &deviceKey) != SOFTBUS_OK) {
         AUTH_LOGW(AUTH_FSM, "can't find device key");
         return;
     }
+    info->normalizedIndex = deviceKey.keyIndex;
     info->normalizedKey->len = deviceKey.keyLen;
     if (memcpy_s(info->normalizedKey->value, sizeof(info->normalizedKey->value),
         deviceKey.deviceKey, sizeof(deviceKey.deviceKey)) != EOK) {
@@ -637,6 +642,10 @@ static void UnpackNormalizedKey(JsonObj *obj, AuthSessionInfo *info, bool isSupp
         return;
     }
     info->normalizedKey = (SessionKey *)SoftBusCalloc(sizeof(SessionKey));
+    if (info->normalizedKey == NULL) {
+        AUTH_LOGE(AUTH_FSM, "malloc fail");
+        return;
+    }
     uint8_t udidHash[SHA_256_HASH_LEN] = {0};
     int ret = SoftBusGenerateStrHash((uint8_t *)info->udid, strlen(info->udid), udidHash);
     if (ret != SOFTBUS_OK) {
@@ -654,6 +663,7 @@ static void UnpackNormalizedKey(JsonObj *obj, AuthSessionInfo *info, bool isSupp
         AUTH_LOGE(AUTH_FSM, "normalize decrypt fail.");
         return;
     }
+    info->normalizedIndex = deviceKey.keyIndex;
     info->normalizedType = NORMALIZED_SUPPORT;
     info->normalizedKey->len = deviceKey.keyLen;
     if (memcpy_s(info->normalizedKey->value, sizeof(info->normalizedKey->value),
@@ -1895,17 +1905,21 @@ static void GetDumpSessionKeyList(int64_t authSeq, const AuthSessionInfo *info, 
 {
     ListInit(list);
     SessionKey sessionKey;
-    if (AuthManagerGetSessionKey(authSeq, info, &sessionKey) != SOFTBUS_OK) {
+    int64_t index = authSeq;
+    if (info->normalizedType == NORMALIZED_SUPPORT) {
+        index = info->normalizedIndex;
+    }
+    if (AuthManagerGetSessionKey(index, info, &sessionKey) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "get session key fail");
         return;
     }
-    if (AddSessionKey(list, TO_INT32(authSeq), &sessionKey) != SOFTBUS_OK) {
+    if (AddSessionKey(list, TO_INT32(index), &sessionKey, info->connInfo.type) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "add session key fail");
         (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
         return;
     }
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
-    if (SetSessionKeyAvailable(list, TO_INT32(authSeq)) != SOFTBUS_OK) {
+    if (SetSessionKeyAvailable(list, TO_INT32(index)) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "set session key available fail");
     }
 }
