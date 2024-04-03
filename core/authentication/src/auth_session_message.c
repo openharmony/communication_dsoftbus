@@ -486,6 +486,7 @@ static void PackNormalizedKey(JsonObj *obj, AuthSessionInfo *info, const NodeInf
         AUTH_LOGW(AUTH_FSM, "can't find device key");
         return;
     }
+    info->normalizedIndex = deviceKey.keyIndex;
     info->normalizedKey->len = deviceKey.keyLen;
     if (memcpy_s(info->normalizedKey->value, sizeof(info->normalizedKey->value),
         deviceKey.deviceKey, sizeof(deviceKey.deviceKey)) != EOK) {
@@ -662,6 +663,7 @@ static void UnpackNormalizedKey(JsonObj *obj, AuthSessionInfo *info, bool isSupp
         AUTH_LOGE(AUTH_FSM, "normalize decrypt fail.");
         return;
     }
+    info->normalizedIndex = deviceKey.keyIndex;
     info->normalizedType = NORMALIZED_SUPPORT;
     info->normalizedKey->len = deviceKey.keyLen;
     if (memcpy_s(info->normalizedKey->value, sizeof(info->normalizedKey->value),
@@ -1903,17 +1905,21 @@ static void GetDumpSessionKeyList(int64_t authSeq, const AuthSessionInfo *info, 
 {
     ListInit(list);
     SessionKey sessionKey;
-    if (AuthManagerGetSessionKey(authSeq, info, &sessionKey) != SOFTBUS_OK) {
+    int64_t index = authSeq;
+    if (info->normalizedType == NORMALIZED_SUPPORT) {
+        index = info->normalizedIndex;
+    }
+    if (AuthManagerGetSessionKey(index, info, &sessionKey) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "get session key fail");
         return;
     }
-    if (AddSessionKey(list, TO_INT32(authSeq), &sessionKey) != SOFTBUS_OK) {
+    if (AddSessionKey(list, TO_INT32(index), &sessionKey, info->connInfo.type) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "add session key fail");
         (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
         return;
     }
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
-    if (SetSessionKeyAvailable(list, TO_INT32(authSeq)) != SOFTBUS_OK) {
+    if (SetSessionKeyAvailable(list, TO_INT32(index)) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "set session key available fail");
     }
 }

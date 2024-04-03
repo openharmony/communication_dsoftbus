@@ -2631,6 +2631,23 @@ int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrTy
     return SOFTBUS_OK;
 }
 
+int32_t LnnNotifyLeaveLnnByAuthHandle(AuthHandle *authHandle)
+{
+    AuthHandle *para = NULL;
+    para = (AuthHandle *)SoftBusMalloc(sizeof(AuthHandle));
+    if (para == NULL) {
+        LNN_LOGE(LNN_BUILDER, "malloc para fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    *para = *authHandle;
+    if (PostMessageToHandler(MSG_TYPE_DEVICE_DISCONNECT, para) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "post device disconnect fail");
+        SoftBusFree(para);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t LnnNotifyEmptySessionKey(int64_t authId)
 {
     int64_t *para = NULL;
