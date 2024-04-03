@@ -160,7 +160,7 @@ static bool IsNeedExchangeNetworkId(uint32_t feature, AuthCapability capaBit)
 
 static void AddUdidInfo(uint32_t requestId, bool isServer, AuthConnInfo *connInfo)
 {
-    if (isServer || connInfo->type != AUTH_LINK_TYPE_ENHANCED_P2P) {
+    if (isServer || (connInfo->type != AUTH_LINK_TYPE_ENHANCED_P2P && connInfo->type != AUTH_LINK_TYPE_P2P)) {
         AUTH_LOGD(AUTH_FSM, "is not server or enhancedP2p");
         return;
     }
@@ -1141,35 +1141,6 @@ static int32_t PostMessageToAuthFsmByConnId(int32_t msgType, uint64_t connId, bo
 static void SetAuthStartTime(AuthFsm *authFsm)
 {
     authFsm->statisticData.startAuthTime = LnnUpTimeMs();
-}
-
-static int32_t AuthSessionChangeNormalizedType(int64_t authSeq, NormalizedType type)
-{
-    if (!RequireAuthLock()) {
-        return SOFTBUS_LOCK_ERR;
-    }
-    AuthFsm *authFsm = GetAuthFsmByAuthSeq(authSeq);
-    if (authFsm == NULL) {
-        AUTH_LOGE(AUTH_FSM, "auth fsm not found. authSeq=%{public}" PRId64 "", authSeq);
-        ReleaseAuthLock();
-        return SOFTBUS_ERR;
-    }
-    authFsm->info.normalizedType = type;
-    ReleaseAuthLock();
-    return SOFTBUS_OK;
-}
-
-int32_t AuthRecoverySessionKey(int64_t authSeq, SessionKey sessionKey)
-{
-    if (AuthSessionChangeNormalizedType(authSeq, NORMALIZED_SUPPORT) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
-    int32_t ret = AuthSessionSaveSessionKey(authSeq, sessionKey.value, sessionKey.len);
-    if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "post save sessionKey event");
-        return ret;
-    }
-    return AuthSessionHandleAuthFinish(authSeq);
 }
 
 int32_t AuthSessionStartAuth(int64_t authSeq, uint32_t requestId,

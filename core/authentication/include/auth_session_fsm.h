@@ -101,7 +101,6 @@ int32_t AuthSessionHandleDeviceNotTrusted(const char *udid);
 int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId);
 AuthFsm *GetAuthFsmByConnId(uint64_t connId, bool isServer);
 void AuthSessionFsmExit(void);
-int32_t AuthRecoverySessionKey(int64_t authSeq, SessionKey sessionKey);
 
 #ifdef __cplusplus
 #if __cplusplus

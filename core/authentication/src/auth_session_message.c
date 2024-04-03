@@ -448,7 +448,7 @@ static int32_t PackNormalizedKeyValue(JsonObj *obj, SessionKey *sessionKey)
         SoftBusFree(data);
         return SOFTBUS_ERR;
     }
-    JSON_AddStringToObject(obj, NORMALIZED_DATA, encNormalizedKey);
+    (void)JSON_AddStringToObject(obj, NORMALIZED_DATA, encNormalizedKey);
     AUTH_LOGI(AUTH_FSM, "pack normalize value succ");
     SoftBusFree(data);
     return SOFTBUS_OK;
@@ -476,6 +476,10 @@ static void PackNormalizedKey(JsonObj *obj, AuthSessionInfo *info, const NodeInf
         return;
     }
     info->normalizedKey = (SessionKey *)SoftBusCalloc(sizeof(SessionKey));
+    if (info->normalizedKey == NULL) {
+        AUTH_LOGE(AUTH_FSM, "malloc fail");
+        return;
+    }
     AuthDeviceKeyInfo deviceKey;
     (void)memset_s(&deviceKey, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
     if (AuthFindLatestNormalizeKey((char *)udidHashHexStr, &deviceKey) != SOFTBUS_OK) {
@@ -637,6 +641,10 @@ static void UnpackNormalizedKey(JsonObj *obj, AuthSessionInfo *info, bool isSupp
         return;
     }
     info->normalizedKey = (SessionKey *)SoftBusCalloc(sizeof(SessionKey));
+    if (info->normalizedKey == NULL) {
+        AUTH_LOGE(AUTH_FSM, "malloc fail");
+        return;
+    }
     uint8_t udidHash[SHA_256_HASH_LEN] = {0};
     int ret = SoftBusGenerateStrHash((uint8_t *)info->udid, strlen(info->udid), udidHash);
     if (ret != SOFTBUS_OK) {

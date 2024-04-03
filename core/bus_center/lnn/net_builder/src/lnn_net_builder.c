@@ -1858,6 +1858,7 @@ static void OnReAuthVerifyPassed(uint32_t requestId, AuthHandle authHandle, cons
         LNN_LOGI(LNN_BUILDER, "fsmId=%{public}u start a connection fsm, authId=%{public}" PRId64,
             connFsm->id, authHandle.authId);
         if (LnnSendAuthResultMsgToConnFsm(connFsm, SOFTBUS_OK) != SOFTBUS_OK) {
+            SoftBusFree(connFsm->connInfo.nodeInfo);
             connFsm->connInfo.nodeInfo = NULL;
             StopConnectionFsm(connFsm);
         }
