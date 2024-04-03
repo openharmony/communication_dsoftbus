@@ -1961,7 +1961,7 @@ HWTEST_F(AuthTest, AUTH_SET_AND_SET_SESSIONKEY_AVAILABLE_Test_001, TestSize.Leve
     SessionKey sessionKey = { { 0 }, TEST_DATA_LEN };
     int32_t index = 0;
     ListInit(&list);
-    int32_t ret = AddSessionKey(&list, index, &sessionKey);
+    int32_t ret = AddSessionKey(&list, index, &sessionKey, AUTH_LINK_TYPE_WIFI);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     uint64_t time = GetLatestAvailableSessionKeyTime(&list);
     EXPECT_TRUE(time == 0);
