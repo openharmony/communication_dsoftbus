@@ -1948,4 +1948,27 @@ HWTEST_F(AuthTest, AUTH_ON_CONNECT_EVENT_Test_001, TestSize.Level1)
     int32_t ret = OnConnectEvent(module, cfd, &option);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
+
+/*
+ * @tc.name: GetLatestAvailableSessionKeyTimeTest
+ * @tc.desc: set and get session key available sessionKey
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthTest, AUTH_SET_AND_SET_SESSIONKEY_AVAILABLE_Test_001, TestSize.Level1)
+{
+    SessionKeyList list = { 0 };
+    SessionKey sessionKey = { { 0 }, TEST_DATA_LEN };
+    int32_t index = 0;
+    ListInit(&list);
+    int32_t ret = AddSessionKey(&list, index, &sessionKey);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    uint64_t time = GetLatestAvailableSessionKeyTime(&list);
+    EXPECT_TRUE(time == 0);
+    ret = SetSessionKeyAvailable(&list, 0);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    time = GetLatestAvailableSessionKeyTime(&list);
+    EXPECT_TRUE(time != 0);
+    DestroySessionKeyList(&list);
+}
 } // namespace OHOS
