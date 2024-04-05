@@ -28,7 +28,6 @@
 #include "lnn_device_info_recovery.h"
 #include "lnn_parameter_utils.h"
 #include "lnn_log.h"
-#include "lnn_ohos_account.h"
 #include "lnn_p2p_info.h"
 #include "lnn_feature_capability.h"
 #include "lnn_settingdata_event_monitor.h"
@@ -1831,10 +1830,6 @@ int32_t LnnInitLocalLedgerDelay(void)
     DeviceBasicInfo *deviceInfo = &nodeInfo->deviceInfo;
     if (GetCommonDevInfo(COMM_DEVICE_KEY_UDID, deviceInfo->deviceUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "GetCommonDevInfo: COMM_DEVICE_KEY_UDID failed");
-        return SOFTBUS_ERR;
-    }
-    if (LnnInitOhosAccount() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "init default ohos account failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

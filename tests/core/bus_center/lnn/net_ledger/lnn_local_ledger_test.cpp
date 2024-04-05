@@ -150,7 +150,6 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_003, TestSize.Level1)
 {
     LocalLedgerDepsInterfaceMock localLedgerMock;
     EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_, _, _)).WillRepeatedly(Return(SOFTBUS_ERR));
-    EXPECT_CALL(localLedgerMock, LnnInitOhosAccount()).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_TRUE(LnnInitLocalLedgerDelay() == SOFTBUS_ERR);
 }
 
@@ -250,7 +249,6 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_008, TestSize.Level1)
 {
     LocalLedgerDepsInterfaceMock localLedgerMock;
     EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(localLedgerMock, LnnInitOhosAccount()).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_TRUE(LnnInitLocalLedgerDelay() == SOFTBUS_ERR);
 }
 
@@ -267,7 +265,6 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_009, TestSize.Level1)
     EXPECT_CALL(localLedgerMock, LnnGetFeatureCapabilty()).WillRepeatedly(Return(FEATURE));
     EXPECT_CALL(localLedgerMock, GetCommonOsType(_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, GetCommonOsVersion(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(localLedgerMock, LnnInitOhosAccount()).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_TRUE(LnnInitLocalLedgerDelay() == SOFTBUS_OK);
 }
 
