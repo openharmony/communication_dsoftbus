@@ -1168,7 +1168,7 @@ void LnnUpdateStateVersion()
 
 static int32_t LlGetStaticCapLen(void *buf, uint32_t len)
 {
-    if (buf == NULL || len > sizeof(int32_t)) {
+    if (buf == NULL || len < sizeof(int64_t)) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
