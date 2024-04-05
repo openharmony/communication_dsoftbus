@@ -2326,6 +2326,12 @@ int32_t LnnInitNetBuilderDelay(void)
     return SOFTBUS_OK;
 }
 
+int32_t LnnProcessAccountDelay(void)
+{
+    EhLoginEventHandler();
+    return SOFTBUS_OK;
+}
+
 void LnnDeinitNetBuilder(void)
 {
     LnnConnectionFsm *item = NULL;
