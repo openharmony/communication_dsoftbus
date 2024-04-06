@@ -17,10 +17,11 @@
 
 #include <securec.h>
 
-#include "lnn_trans_lane.h"
 #include "anonymizer.h"
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_lane.h"
+#include "lnn_lane_common.h"
 #include "lnn_lane_def.h"
 #include "lnn_lane_score.h"
 #include "lnn_lane_link_p2p.h"
@@ -31,7 +32,7 @@
 #include "lnn_network_manager.h"
 #include "lnn_node_info.h"
 #include "lnn_physical_subnet_manager.h"
-#include "lnn_lane_common.h"
+#include "lnn_trans_lane.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_conn_ble_connection.h"

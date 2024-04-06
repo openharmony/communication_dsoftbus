@@ -14,6 +14,7 @@
  */
 
 #include "lnn_lane_link_deps_mock.h"
+#include "softbus_error_code.h"
 
 using namespace testing::ext;
 using namespace testing;
@@ -35,10 +36,60 @@ static LaneLinkDepsInterface *GetLaneLinkDepsInterface()
     return reinterpret_cast<LaneLinkDepsInterface *>(g_laneLinkDepsInterface);
 }
 
-extern "C" {
-int32_t GetTransOptionByLaneReqId(uint32_t laneReqId, TransOption *reqInfo)
+int32_t LaneLinkDepsInterfaceMock::ActionOfChannelOpenFailed(int32_t requestId, const char *networkId,
+    const TransProxyPipelineChannelOption *option, const ITransProxyPipelineCallback *callback)
 {
-    return GetLaneLinkDepsInterface()->GetTransOptionByLaneReqId(laneReqId, reqInfo);
+    callback->onChannelOpenFailed(requestId, SOFTBUS_ERR);
+    return SOFTBUS_OK;
+}
+
+int32_t LaneLinkDepsInterfaceMock::ActionOfChannelOpened(int32_t requestId, const char *networkId,
+    const TransProxyPipelineChannelOption *option, const ITransProxyPipelineCallback *callback)
+{
+    callback->onChannelOpened(requestId, 1);
+    return SOFTBUS_OK;
+}
+
+extern "C" {
+int32_t GetTransReqInfoByLaneReqId(uint32_t laneReqId, TransOption *reqInfo)
+{
+    return GetLaneLinkDepsInterface()->GetTransReqInfoByLaneReqId(laneReqId, reqInfo);
+}
+
+struct WifiDirectManager *GetWifiDirectManager(void)
+{
+    return GetLaneLinkDepsInterface()->GetWifiDirectManager();
+}
+
+struct WifiDirectUtils *GetWifiDirectUtils(void)
+{
+    return GetLaneLinkDepsInterface()->GetWifiDirectUtils();
+}
+
+int32_t TransProxyPipelineGenRequestId(void)
+{
+    return GetLaneLinkDepsInterface()->TransProxyPipelineGenRequestId();
+}
+
+int32_t TransProxyPipelineOpenChannel(int32_t requestId, const char *networkId,
+    const TransProxyPipelineChannelOption *option, const ITransProxyPipelineCallback *callback)
+{
+    return GetLaneLinkDepsInterface()->TransProxyPipelineOpenChannel(requestId, networkId, option, callback);
+}
+
+int32_t TransProxyPipelineCloseChannel(int32_t channelId)
+{
+    return GetLaneLinkDepsInterface()->TransProxyPipelineCloseChannel(channelId);
+}
+
+int32_t TransProxyPipelineCloseChannelDelay(int32_t channelId)
+{
+    return GetLaneLinkDepsInterface()->TransProxyPipelineCloseChannelDelay(channelId);
+}
+
+int32_t FindLaneResourceByLinkType(const char *peerUdid, LaneLinkType type, LaneResource *resource)
+{
+    return GetLaneLinkDepsInterface()->FindLaneResourceByLinkType(peerUdid, type, resource);
 }
 }
 } // namespace OHOS
