@@ -1078,6 +1078,77 @@ static bool CheckHasBrConnection(const char *peerNetWorkId)
     return CheckActiveConnection(&connOpt);
 }
 
+static bool CheckHasVaildAuthConn(const char *uuid)
+{
+    if (AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_WIFI, false) ||
+        AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_BR, true) ||
+        AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_BLE, true)) {
+        return true;
+    }
+    return false;
+}
+
+static bool IsSupportWifiDirect(const char *networkId)
+{
+    uint64_t local = 0;
+    uint64_t remote = 0;
+    if (GetFeatureCap(networkId, &local, &remote) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "GetFeatureCap error");
+        return false;
+    }
+    return ((local & (1 << BIT_BLE_TRIGGER_CONNECTION)) != 0) && ((remote & (1 << BIT_BLE_TRIGGER_CONNECTION)) != 0) &&
+        GetWifiDirectUtils()->supportHmlTwo();
+}
+
+static bool IsSupportProxyNego(const char *networkId)
+{
+    uint64_t local = 0;
+    uint64_t remote = 0;
+    if (GetFeatureCap(networkId, &local, &remote) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "GetFeatureCap error");
+        return false;
+    }
+    return ((local & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) != 0) &&
+        ((remote & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) != 0);
+}
+
+static int32_t TriggerWifiDirectProcess(const LinkRequest *request, const char *uuid, uint32_t laneLinkReqId,
+    const LaneLinkCb *callback)
+{
+    int32_t ret = SOFTBUS_ERR;
+    if (CheckHasVaildAuthConn(uuid)) {
+        LNN_LOGI(LNN_LANE, "open auth trigger to connect, laneReqId=%{public}u", laneLinkReqId);
+        ret = OpenAuthTriggerToConn(request, laneLinkReqId, callback);
+    } else {
+        LNN_LOGI(LNN_LANE, "open ble trigger to connect, laneReqId=%{public}u", laneLinkReqId);
+        ret = OpenBleTriggerToConn(request, laneLinkReqId, callback);
+    }
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LANE, "open trigger to connect p2p, laneReqId=%{public}u", laneLinkReqId);
+        ret = OpenAuthTriggerToConn(request, laneLinkReqId, callback);
+    }
+    return ret;
+}
+
+static int32_t NegoWifiDirectProcess(const LinkRequest *request, const char *uuid, uint32_t laneLinkReqId,
+    const LaneLinkCb *callback)
+{
+    int32_t ret = SOFTBUS_ERR;
+    if (CheckHasVaildAuthConn(uuid) || CheckHasBrConnection(request->peerNetworkId)) {
+        LNN_LOGI(LNN_LANE, "open active auth nego to connect, laneReqId=%{public}u", laneLinkReqId);
+        ret = OpenAuthToConnP2p(request, laneLinkReqId, callback);
+    }
+    if (IsSupportProxyNego(request->peerNetworkId) && ret != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LANE, "open channel to connect p2p, laneReqId=%{public}u", laneLinkReqId);
+        ret = OpenProxyChannelToConnP2p(request, laneLinkReqId, callback);
+    }
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LANE, "open nego to connect p2p, laneReqId=%{public}u", laneLinkReqId);
+        ret = OpenAuthToConnP2p(request, laneLinkReqId, callback);
+    }
+    return ret;
+}
+
 static int32_t LnnSelectDirectLink(const LinkRequest *request, uint32_t laneLinkReqId, const LaneLinkCb *callback)
 {
     char uuid[UUID_BUF_LEN] = { 0 };
@@ -1085,44 +1156,12 @@ static int32_t LnnSelectDirectLink(const LinkRequest *request, uint32_t laneLink
         LNN_LOGE(LNN_LANE, "get peer uuid fail");
         return SOFTBUS_ERR;
     }
-    uint64_t local = 0;
-    uint64_t remote = 0;
-    if (GetFeatureCap(request->peerNetworkId, &local, &remote) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "GetFeatureCap error");
-        return SOFTBUS_ERR;
-    }
     int32_t ret = SOFTBUS_ERR;
-    if (AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_WIFI, false) ||
-        AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_BR, true) ||
-        AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_BLE, true)) {
-        if ((local & (1 << BIT_BLE_TRIGGER_CONNECTION)) != 0 && (remote & (1 << BIT_BLE_TRIGGER_CONNECTION)) != 0 &&
-            GetWifiDirectUtils()->supportHmlTwo()) {
-            LNN_LOGI(LNN_LANE, "open auth trigger to connect, laneReqId=%{public}u", laneLinkReqId);
-            ret = OpenAuthTriggerToConn(request, laneLinkReqId, callback);
-        }
-        if (ret != SOFTBUS_OK) {
-            LNN_LOGI(LNN_LANE, "open active auth nego to connect, laneReqId=%{public}u", laneLinkReqId);
-            ret = OpenAuthToConnP2p(request, laneLinkReqId, callback);
-        }
-    }
-    if (CheckHasBrConnection(request->peerNetworkId) && ret != SOFTBUS_OK) {
-        LNN_LOGI(LNN_LANE, "open new br auth to connect p2p, laneReqId=%{public}u", laneLinkReqId);
-        ret = OpenAuthToConnP2p(request, laneLinkReqId, callback);
-    }
-    if ((local & (1 << BIT_BLE_TRIGGER_CONNECTION)) != 0 && (remote & (1 << BIT_BLE_TRIGGER_CONNECTION)) != 0 &&
-        ret != SOFTBUS_OK && GetWifiDirectUtils()->supportHmlTwo()) {
-        LNN_LOGI(LNN_LANE, "open ble trigger to connect, laneReqId=%{public}u", laneLinkReqId);
-        ret = OpenBleTriggerToConn(request, laneLinkReqId, callback);
-    }
-    if (((local & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) != 0) &&
-        ((remote & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) != 0) &&
-          ret != SOFTBUS_OK) {
-            LNN_LOGI(LNN_LANE, "open channel to connect p2p, laneReqId=%{public}u", laneLinkReqId);
-            ret = OpenProxyChannelToConnP2p(request, laneLinkReqId, callback);
+    if (IsSupportWifiDirect(request->peerNetworkId)) {
+        ret = TriggerWifiDirectProcess(request, uuid, laneLinkReqId, callback);
     }
     if (ret != SOFTBUS_OK) {
-        LNN_LOGI(LNN_LANE, "open auth to connect p2p, laneReqId=%{public}u", laneLinkReqId);
-        ret = OpenAuthToConnP2p(request, laneLinkReqId, callback);
+        ret = NegoWifiDirectProcess(request, uuid, laneLinkReqId, callback);
     }
     return ret;
 }
