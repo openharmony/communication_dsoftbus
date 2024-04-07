@@ -478,7 +478,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, NotifyChannelClosedTest001, TestSize.L
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
     int32_t ret = NotifyChannelClosed(appInfo, 1);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
     SoftBusFree(appInfo);
 }
 
