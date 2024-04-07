@@ -151,7 +151,7 @@ HWTEST_F(ClientTransSessionImplTest, ClientTransSessionServerImplTest002, TestSi
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     ret = testSessionServiceImpl.GrantPermission(uid, pid, g_pkgName2);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
 
     int sessionId = 1;
     ret = testSessionServiceImpl.OpenSessionCallback(sessionId);
