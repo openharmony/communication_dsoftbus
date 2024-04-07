@@ -189,7 +189,8 @@ static void DfxRecordBleConnectFail(
         .costTime = costTime,
         .peerBleMac = device->addr,
         .errcode = reason,
-        .result = EVENT_STAGE_RESULT_FAILED
+        .result = EVENT_STAGE_RESULT_FAILED,
+        .peerUdid = device->udid,
     };
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
     ConnAlarmExtra extraAlarm = {

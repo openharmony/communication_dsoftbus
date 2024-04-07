@@ -644,8 +644,8 @@ static void ProcessConnectError(ConnBrDevice *connectingDevice, ConnBrConnection
             result = it->result;
         }
     }
-    if (result == CONN_BR_CONNECT_UNDERLAYER_ERROR_PAGE_TIMEOUT) {
-        error = SOFTBUS_CONN_BR_UNDERLAY_PAGE_TIMEOUT_ERR;
+    if (result != 0) {
+        error = SOFTBUS_ERRNO(CONN_UNDERLAY_BLUETOOTH_MODULE_CODE) + result;
     }
     NotifyDeviceConnectResult(connectingDevice, NULL, false, error);
 }
