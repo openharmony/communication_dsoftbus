@@ -35,6 +35,39 @@ static ConnectionBleManagerInterface *GetConnectionBleInterface()
     return reinterpret_cast<ConnectionBleManagerInterface *>(g_connectionBleManagerInterface);
 }
 
+bool ConnectionBleManagerInterfaceMock::ActionOfGetdelta(
+    const cJSON *json, const char * const str, int32_t *target)
+{
+    (void)json;
+    (void)str;
+    if (target != NULL) {
+        *target = -1;
+    }
+    return true;
+}
+
+bool ConnectionBleManagerInterfaceMock::ActionOfGetPeerRc1(
+    const cJSON *json, const char * const str, int32_t *target)
+{
+    (void)json;
+    (void)str;
+    if (target != NULL) {
+        *target = 1;
+    }
+    return true;
+}
+
+bool ConnectionBleManagerInterfaceMock::ActionOfGetPeerRc0(
+    const cJSON *json, const char * const str, int32_t *target)
+{
+    (void)json;
+    (void)str;
+    if (target != NULL) {
+        *target = 0;
+    }
+    return true;
+}
+
 extern "C" {
 int ConnBlePostBytesInner(uint32_t connectionId, uint8_t *data, uint32_t dataLen, int32_t pid, int32_t flag,
     int32_t module, int64_t seq, PostBytesFinishAction postBytesFinishAction)
@@ -149,16 +182,24 @@ int32_t ConnGattServerDisconnect(ConnBleConnection *connection)
     return GetConnectionBleInterface()->ConnGattServerDisconnect(connection);
 }
 
-int32_t ConnGattInitClientModule(
-    SoftBusLooper *looper, const ConnBleClientEventListener *listener)
+int32_t ConnGattInitClientModule(SoftBusLooper *looper, const ConnBleClientEventListener *listener)
 {
     return GetConnectionBleInterface()->ConnGattInitClientModule(looper, listener);
 }
 
-int32_t ConnGattInitServerModule(
-    SoftBusLooper *looper, const ConnBleServerEventListener *listener)
+int32_t ConnGattInitServerModule(SoftBusLooper *looper, const ConnBleServerEventListener *listener)
 {
     return GetConnectionBleInterface()->ConnGattInitServerModule(looper, listener);
+}
+
+bool GetJsonObjectSignedNumberItem(const cJSON *json, const char * const str, int32_t *target)
+{
+    return GetConnectionBleInterface()->GetJsonObjectSignedNumberItem(json, str, target);
+}
+
+bool GetJsonObjectNumber16Item(const cJSON *json, const char * const str, uint16_t *target)
+{
+    return GetConnectionBleInterface()->GetJsonObjectNumber16Item(json, str, target);
 }
 }
 } // namespace OHOS
