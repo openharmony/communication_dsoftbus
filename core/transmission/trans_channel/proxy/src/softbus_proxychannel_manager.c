@@ -617,15 +617,20 @@ int32_t TransProxyGetAuthId(int32_t channelId, AuthHandle *authHandle)
 
 int32_t TransProxyGetSessionKeyByChanId(int32_t channelId, char *sessionKey, uint32_t sessionKeySize)
 {
-    ProxyChannelInfo *item = NULL;
-
-    if (g_proxyChannelList == NULL) {
-        return SOFTBUS_ERR;
+    if (sessionKey == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
     }
 
+    if (g_proxyChannelList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "proxy channel list not init");
+        return SOFTBUS_NO_INIT;
+    }
+
+    ProxyChannelInfo *item = NULL;
     if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
 
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
@@ -637,14 +642,15 @@ int32_t TransProxyGetSessionKeyByChanId(int32_t channelId, char *sessionKey, uin
                 sizeof(item->appInfo.sessionKey)) != EOK) {
                 TRANS_LOGE(TRANS_CTRL, "memcpy_s fail!");
                 (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
-                return SOFTBUS_ERR;
+                return SOFTBUS_MEM_ERR;
             }
             (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
             return SOFTBUS_OK;
         }
     }
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
-    return SOFTBUS_ERR;
+    TRANS_LOGE(TRANS_CTRL, "not found ChannelInfo by channelId=%{public}d", channelId);
+    return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
 }
 
 static inline void TransProxyProcessErrMsg(ProxyChannelInfo *info, int32_t errCode)
@@ -1119,12 +1125,12 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
         (TransProxyAckHandshake(msg->connId, chan, ret) != SOFTBUS_OK)) {
         TRANS_LOGE(TRANS_CTRL, "ErrHandshake fail, connId=%{public}u.", msg->connId);
     }
-    char tmpSocketName[SESSION_NAME_SIZE_MAX] = {0};
+    char tmpSocketName[SESSION_NAME_SIZE_MAX] = { 0 };
     if (memcpy_s(tmpSocketName, SESSION_NAME_SIZE_MAX, chan->appInfo.myData.sessionName,
         strlen(chan->appInfo.myData.sessionName)) != EOK) {
         ReleaseProxyChannelId(chan->channelId);
         SoftBusFree(chan);
-        TRANS_LOGE(TRANS_CTRL, "memcpy failed");
+        TRANS_LOGE(TRANS_CTRL, "memcpy socketName failed");
         return;
     }
     NodeInfo nodeInfo;
@@ -1699,7 +1705,7 @@ int32_t TransProxyGetNameByChanId(int32_t chanId, char *pkgName, char *sessionNa
     if (strcpy_s(sessionName, sessionLen, chan->appInfo.myData.sessionName) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "strcpy_s failed");
         SoftBusFree(chan);
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     SoftBusFree(chan);
     return SOFTBUS_OK;

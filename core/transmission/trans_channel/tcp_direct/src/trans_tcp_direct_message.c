@@ -232,7 +232,7 @@ static int32_t PackBytes(int32_t channelId, const char *data, TdcPacketHead *pac
 
     PackTdcPacketHead(packetHead);
     if (memcpy_s(buffer, bufLen, packetHead, sizeof(TdcPacketHead)) != EOK) {
-        TRANS_LOGE(TRANS_BYTES, "buffer copy fail");
+        TRANS_LOGE(TRANS_BYTES, "memcpy_s buffer fail");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -356,7 +356,7 @@ static int32_t GetServerSideIpInfo(SessionConn *conn, char *ip, uint32_t len)
     }
     if (strcpy_s(ip, len, myIp)) {
         TRANS_LOGE(TRANS_CTRL, "copy str failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -399,7 +399,7 @@ static int32_t GetClientSideIpInfo(SessionConn *conn, char *ip, uint32_t len)
     }
     if (strcpy_s(ip, len, conn->appInfo.myData.addr)) {
         TRANS_LOGE(TRANS_CTRL, "copy str failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -976,7 +976,7 @@ static int64_t GetAuthIdByChannelInfo(int32_t channelId, uint64_t seq, uint32_t 
 {
     int64_t authId = GetAuthIdByChanId(channelId);
     if (authId != AUTH_INVALID_ID) {
-        TRANS_LOGI(TRANS_CTRL, "authId is not AUTH_INVALID_ID");
+        TRANS_LOGI(TRANS_CTRL, "authId=%{public}" PRId64 " is not AUTH_INVALID_ID", authId);
         return authId;
     }
     AppInfo appInfo;
@@ -1165,7 +1165,7 @@ static int32_t TransTdcUpdateDataBufWInfo(int32_t channelId, char *recvBuf, int3
 {
     if (recvBuf == NULL) {
         TRANS_LOGW(TRANS_CTRL, "invalid param.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (g_tcpSrvDataList == NULL) {
         TRANS_LOGE(TRANS_CTRL, "srv data list empty.");
@@ -1173,7 +1173,7 @@ static int32_t TransTdcUpdateDataBufWInfo(int32_t channelId, char *recvBuf, int3
     }
     if (SoftBusMutexLock(&g_tcpSrvDataList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     ServerDataBuf *item = NULL;
     ServerDataBuf *nextItem = NULL;
@@ -1190,8 +1190,8 @@ static int32_t TransTdcUpdateDataBufWInfo(int32_t channelId, char *recvBuf, int3
         }
         if (memcpy_s(item->w, recvLen, recvBuf, recvLen) != EOK) {
             (void)SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
-            TRANS_LOGE(TRANS_CTRL, "trans tdc memcpy failed. channelId=%{public}d", channelId);
-            return SOFTBUS_ERR;
+            TRANS_LOGE(TRANS_CTRL, "memcpy_s trans tdc failed. channelId=%{public}d", channelId);
+            return SOFTBUS_MEM_ERR;
         }
         item->w += recvLen;
         (void)SoftBusMutexUnlock(&g_tcpSrvDataList->lock);

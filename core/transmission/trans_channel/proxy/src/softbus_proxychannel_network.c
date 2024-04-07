@@ -106,7 +106,7 @@ int TransRegisterNetworkingChannelListener(const char *sessionName, const INetwo
 
     if (strcpy_s(g_listeners[unuse].sessionName, SESSION_NAME_SIZE_MAX, sessionName) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "strcpy_s session name failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     g_listeners[unuse].listener = *listener;
     TRANS_LOGI(TRANS_CTRL, "register net listener ok");
