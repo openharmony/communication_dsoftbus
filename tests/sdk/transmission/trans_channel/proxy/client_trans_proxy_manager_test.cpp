@@ -265,7 +265,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyGetInfoByChannelIdTest, Te
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = ClientTransProxyGetInfoByChannelId(channelId, &info);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
 }
 
 /**

@@ -57,14 +57,14 @@ static int32_t AcceptSessionAsServer(const char *sessionName, const ChannelInfo 
         strcpy_s(session->info.groupId, GROUP_ID_SIZE_MAX, channel->groupId) != EOK) {
         TRANS_LOGE(TRANS_SDK, "client or peer session name, device id, group id failed");
         SoftBusFree(session);
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
 
     int32_t ret = ClientAddNewSession(sessionName, session);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "client add session failed");
+        TRANS_LOGE(TRANS_SDK, "client add session failed, ret=%{public}d", ret);
         SoftBusFree(session);
-        return SOFTBUS_ERR;
+        return ret;
     }
     *sessionId = session->sessionId;
     TRANS_LOGE(TRANS_SDK, "ok");
@@ -80,13 +80,13 @@ static int32_t GetSessionCallbackByChannelId(int32_t channelId, int32_t channelT
     }
     int32_t ret = ClientGetSessionIdByChannelId(channelId, channelType, sessionId);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "get sessionId failed, channelId=%{public}d", channelId);
-        return SOFTBUS_ERR;
+        TRANS_LOGE(TRANS_SDK, "get sessionId failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
+        return ret;
     }
     ret = ClientGetSessionCallbackById(*sessionId, listener);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "get session listener failed");
-        return SOFTBUS_ERR;
+        TRANS_LOGE(TRANS_SDK, "get session listener failed, ret=%{public}d", ret);
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -101,13 +101,13 @@ static int32_t GetSocketCallbackAdapterByChannelId(int32_t channelId, int32_t ch
 
     int32_t ret = ClientGetSessionIdByChannelId(channelId, channelType, sessionId);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "get sessionId failed, channelId=%{public}d", channelId);
-        return SOFTBUS_ERR;
+        TRANS_LOGE(TRANS_SDK, "get sessionId failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
+        return ret;
     }
     ret = ClientGetSessionCallbackAdapterById(*sessionId, sessionCallback, isServer);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "get socket callback failed");
-        return SOFTBUS_ERR;
+        TRANS_LOGE(TRANS_SDK, "get socket callback failed, ret=%{public}d", ret);
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -122,8 +122,8 @@ static int32_t TransOnBindSuccess(int32_t sessionId, const ISocketListener *sock
     PeerSocketInfo info;
     int32_t ret = ClientGetPeerSocketInfoById(sessionId, &info);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "Get peer socket info failed");
-        return SOFTBUS_ERR;
+        TRANS_LOGE(TRANS_SDK, "Get peer socket info failed, ret=%{public}d", ret);
+        return ret;
     }
 
     (void)socketCallback->OnBind(sessionId, info);
@@ -182,8 +182,8 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const C
     (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
     int32_t ret = ClientGetSessionCallbackAdapterByName(sessionName, &sessionCallback);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "get session listener failed");
-        return SOFTBUS_ERR;
+        TRANS_LOGE(TRANS_SDK, "get session listener failed, ret=%{public}d", ret);
+        return ret;
     }
 
     int32_t sessionId = INVALID_SESSION_ID;
@@ -279,7 +279,7 @@ NO_SANITIZE("cfi") int32_t TransOnSessionClosed(int32_t channelId, int32_t chann
     ret = ClientDeleteSession(sessionId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "client delete session failed");
-        return SOFTBUS_ERR;
+        return ret;
     }
     TRANS_LOGI(TRANS_SDK, "ok, sessionId=%{public}d", sessionId);
     return SOFTBUS_OK;
@@ -288,15 +288,17 @@ NO_SANITIZE("cfi") int32_t TransOnSessionClosed(int32_t channelId, int32_t chann
 static int32_t ProcessReceivedFileData(int32_t sessionId, int32_t channelId, const char *data, uint32_t len,
     SessionPktType type)
 {
-    char sessionName[SESSION_NAME_SIZE_MAX] = {0};
-    if (ClientGetSessionDataById(sessionId, sessionName, SESSION_NAME_SIZE_MAX, KEY_SESSION_NAME) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_FILE, "get session name failed");
-        return SOFTBUS_ERR;
+    char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
+    int32_t ret = ClientGetSessionDataById(sessionId, sessionName, SESSION_NAME_SIZE_MAX, KEY_SESSION_NAME);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_FILE, "get sessionName by sessionId=%{public}d failed, ret=%{public}d", sessionId, ret);
+        return ret;
     }
 
-    if (ProcessFileFrameData(sessionId, channelId, data, len, type) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_FILE, "process fileframe data failed");
-        return SOFTBUS_ERR;
+    ret = ProcessFileFrameData(sessionId, channelId, data, len, type);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_FILE, "process file frame data failed, ret=%{public}d", ret);
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -349,7 +351,7 @@ NO_SANITIZE("cfi") int32_t TransOnDataReceived(int32_t channelId, int32_t channe
             break;
         default:
             TRANS_LOGE(TRANS_FILE, "revc unknown session type");
-            return SOFTBUS_ERR;
+            return SOFTBUS_TRANS_INVALID_SESSION_TYPE;
     }
 
     return SOFTBUS_OK;

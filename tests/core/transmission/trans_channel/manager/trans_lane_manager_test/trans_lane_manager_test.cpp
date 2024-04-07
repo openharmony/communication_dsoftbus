@@ -145,7 +145,7 @@ HWTEST_F(TransLaneManagerTest, TransLaneMgrAddLane001, TestSize.Level1)
 
     TransLaneMgrDeinit();
     int32_t ret = TransLaneMgrAddLane(channelId, channelType, connInfo, laneReqId, myData);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransLaneMgrInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -156,7 +156,7 @@ HWTEST_F(TransLaneManagerTest, TransLaneMgrAddLane001, TestSize.Level1)
     ret = TransLaneMgrInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransLaneMgrAddLane(channelId, channelType, NULL, laneReqId, myData);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     channelId = 1;
     channelType = 2;
