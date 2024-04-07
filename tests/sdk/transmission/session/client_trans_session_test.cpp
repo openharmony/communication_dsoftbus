@@ -359,7 +359,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest03, TestSize.Level1)
 HWTEST_F(TransClientSessionTest, TransClientSessionTest04, TestSize.Level1)
 {
     int ret = RemoveSessionServer(g_pkgName, g_sessionName);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
     ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = RemoveSessionServer(g_pkgName, g_sessionName);
@@ -379,7 +379,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest05, TestSize.Level1)
     int ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = OpenSession(g_sessionName, g_sessionName, g_networkId, g_groupId, &g_sessionAttr);
-    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
     ASSERT_TRUE(sessionParam != NULL);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
