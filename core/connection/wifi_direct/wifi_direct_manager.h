@@ -27,7 +27,7 @@ extern "C" {
 struct WifiDirectStatusListener {
     void (*onLocalRoleChange)(enum WifiDirectRole myRole);
     void (*onDeviceOnLine)(const char *remoteMac, const char *remoteIp, const char *remoteUuid);
-    void (*onDeviceOffLine)(const char *remoteMac, const char *remoteIp, const char *remoteUuid);
+    void (*onDeviceOffLine)(const char *remoteMac, const char *remoteIp, const char *remoteUuid, const char *localIp);
 };
 
 enum WifiDirectListenerModule {

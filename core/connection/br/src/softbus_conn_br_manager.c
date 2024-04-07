@@ -330,7 +330,7 @@ static void KeepAliveBleIfSameAddress(ConnBrDevice *device)
     uint32_t connectionId = 0;
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, device->addr, BT_MAC_LEN);
-    ConnBleConnection *bleConnection = ConnBleGetConnectionByAddr(device->addr, CONN_SIDE_CLIENT, BLE_GATT);
+    ConnBleConnection *bleConnection = ConnBleGetConnectionByAddr(device->addr, CONN_SIDE_ANY, BLE_GATT);
     CONN_CHECK_AND_RETURN_LOGW(
         bleConnection != NULL, CONN_BR, "can not get ble conn, no need to keep alive");
     connectionId = bleConnection->connectionId;
