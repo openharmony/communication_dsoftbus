@@ -29,6 +29,8 @@
 #define USER_TIMEOUT_MS             (15 * 1000)   // 15s
 #define SOFTBUS_TCP_USER_TIME USER_TIMEOUT_MS
 #define SOFTBUS_CONN_TCP_USER_TIME  (35 * 1000)   // 35s
+#define ADDR_FEATURE_IPV6           ':'
+#define ADDR_SPLIT_IPV6             "%"
 
 #ifndef __LITEOS_M__
 static int SetReusePort(int fd, int on)
@@ -156,25 +158,63 @@ static void SetClientOption(int fd)
     (void)ConnSetTcpUserTimeOut(fd, SOFTBUS_TCP_USER_TIME);
 }
 
-static int BindLocalIP(int fd, const char *localIP, uint16_t port)
+static int BindLocalIpv6IP(int32_t domain, int fd, const char *localIP, uint16_t port)
 {
-    SoftBusSockAddrIn addr;
-
-    if (memset_s(&addr, sizeof(addr), 0, sizeof(addr)) != EOK) {
-        CONN_LOGW(CONN_COMMON, "memset failed");
+    SoftBusSockAddrIn6 addrIn6;
+    if (memset_s(&addrIn6, sizeof(addrIn6), 0, sizeof(addrIn6)) != EOK) {
+        CONN_LOGW(CONN_COMMON, "addrIn6 memset failed");
     }
-
-    addr.sinFamily = SOFTBUS_AF_INET;
-    int rc = SoftBusInetPtoN(SOFTBUS_AF_INET, localIP, &addr.sinAddr);
-    if (rc != SOFTBUS_ADAPTER_OK) {
-        CONN_LOGE(CONN_COMMON, "SoftBusInetPtoN rc=%{public}d", rc);
-        return SOFTBUS_ERR;
+    addrIn6.sin6Family = domain;
+    char *addr = NULL;
+    char *ifName = NULL;
+    char *nextToken = NULL;
+    char tmpIp[IP_LEN] = { 0 };
+    if (strcpy_s(tmpIp, sizeof(tmpIp), localIP) != EOK) {
+        CONN_LOGE(CONN_COMMON, "copy local id failed");
+        return SOFTBUS_MEM_ERR;
     }
-    addr.sinPort = SoftBusHtoNs(port);
-    rc = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketBind(fd, (SoftBusSockAddr *)&addr, sizeof(addr)));
-    if (rc < 0) {
+    addr = strtok_s(tmpIp, ADDR_SPLIT_IPV6, &nextToken);
+    if (addr == NULL) {
+        addr = "";
+    }
+    ifName = strtok_s(NULL, ADDR_SPLIT_IPV6, &nextToken);
+    if (ifName != NULL) {
+        addrIn6.sin6ScopeId = SoftBusIfNameToIndex(ifName);
+    }
+    int rc = SoftBusInetPtoN(domain, addr, &addrIn6.sin6Addr);
+    if (rc != SOFTBUS_ADAPTER_OK)
+    {
+        CONN_LOGE(CONN_COMMON, "ipv6 SoftBusInetPtoN rc=%{public}d", rc);
+        return rc;
+    }
+    addrIn6.sin6Port = SoftBusHtoNs(port);
+    return SOFTBUS_TEMP_FAILURE_RETRY(
+        SoftBusSocketBind(fd, (SoftBusSockAddr *)&addrIn6, sizeof(SoftBusSockAddrIn6)));
+}
+
+static int BindLocalIP(int32_t domain, int fd, const char *localIP, uint16_t port)
+{
+    int rc = SOFTBUS_OK;
+    if (domain == SOFTBUS_AF_INET6) {
+        rc = BindLocalIpv6IP(domain, fd, localIP, port);
+    } else {
+        SoftBusSockAddrIn addrIn;
+        if (memset_s(&addrIn, sizeof(addrIn), 0, sizeof(addrIn)) != EOK) {
+            CONN_LOGW(CONN_COMMON, "addrIn memset failed");
+        }
+        addrIn.sinFamily = domain;
+        int rc = SoftBusInetPtoN(domain, localIP, &addrIn.sinAddr);
+        if (rc != SOFTBUS_ADAPTER_OK) {
+            CONN_LOGE(CONN_COMMON, "ipv4 SoftBusInetPtoN rc=%{public}d", rc);
+            return rc;
+        }
+        addrIn.sinPort = SoftBusHtoNs(port);
+        rc = SOFTBUS_TEMP_FAILURE_RETRY(
+            SoftBusSocketBind(fd, (SoftBusSockAddr *)&addrIn, sizeof(SoftBusSockAddrIn)));
+    }
+    if (rc < SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "bind fd=%{public}d, rc=%{public}d", fd, rc);
-        return SOFTBUS_ERR;
+        return rc;
     }
     return SOFTBUS_OK;
 }
@@ -189,27 +229,36 @@ int32_t SetIpTos(int fd, uint32_t tos)
     return SOFTBUS_OK;
 }
 
+int32_t GetDomainByAddr(const char *addr)
+{
+    if (strchr(addr, ADDR_FEATURE_IPV6) != NULL) {
+        return SOFTBUS_AF_INET6;
+    }
+    return SOFTBUS_AF_INET;
+}
+
 static int32_t OpenTcpServerSocket(const LocalListenerInfo *option)
 {
     if (option == NULL) {
         CONN_LOGE(CONN_COMMON, "null ptr!");
-        return -1;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (option->type != CONNECT_TCP && option->type != CONNECT_P2P) {
         CONN_LOGE(CONN_COMMON, "bad type! type=%{public}d", option->type);
-        return -1;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (option->socketOption.port < 0) {
         CONN_LOGE(CONN_COMMON, "bad port! port=%{public}d", option->socketOption.port);
-        return -1;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     int fd;
+    int32_t domain = GetDomainByAddr(option->socketOption.addr);
     int ret = SoftBusSocketCreate(
-        SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM | SOFTBUS_SOCK_CLOEXEC | SOFTBUS_SOCK_NONBLOCK, 0, (int32_t *)&fd);
+        domain, SOFTBUS_SOCK_STREAM | SOFTBUS_SOCK_CLOEXEC | SOFTBUS_SOCK_NONBLOCK, 0, (int32_t *)&fd);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "Create socket failed! ret=%{public}d", ret);
-        return -1;
+        return ret;
     }
 
     SetServerOption(fd);
@@ -217,17 +266,17 @@ static int32_t OpenTcpServerSocket(const LocalListenerInfo *option)
     if (option->socketOption.moduleId >= AUTH_P2P && option->socketOption.moduleId <= AUTH_ENHANCED_P2P_END) {
         (void)ConnSetTcpUserTimeOut(fd, SOFTBUS_CONN_TCP_USER_TIME);
     }
-    ret = BindLocalIP(fd, option->socketOption.addr, (uint16_t)option->socketOption.port);
+    ret = BindLocalIP(domain, fd, option->socketOption.addr, (uint16_t)option->socketOption.port);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "BindLocalIP ret=%{public}d", ret);
         ConnShutdownSocket(fd);
-        return -1;
+        return ret;
     }
     CONN_LOGI(CONN_COMMON, "server listen tcp socket, fd=%{public}d", fd);
     return fd;
 }
 
-static int32_t BindTcpClientAddr(int fd, const char *inputAddr)
+static int32_t BindTcpClientAddr(int32_t domain, int fd, const char *inputAddr)
 {
     if (inputAddr == NULL) {
         return SOFTBUS_OK;
@@ -235,12 +284,54 @@ static int32_t BindTcpClientAddr(int fd, const char *inputAddr)
 
     const char *bindAddr = NULL;
     if (strcmp(inputAddr, BIND_ADDR_ALL) == 0) {
-        bindAddr = "0.0.0.0";
+        if (domain == SOFTBUS_AF_INET6) {
+            bindAddr = "::";
+        } else {
+            bindAddr = "0.0.0.0";
+        }
     } else {
         CONN_LOGI(CONN_COMMON, "using specified bind addr");
         bindAddr = inputAddr;
     }
-    return BindLocalIP(fd, bindAddr, 0);
+    return BindLocalIP(domain, fd, bindAddr, 0);
+}
+
+static int32_t SocketConnect(int32_t fd, int32_t domain, const ConnectOption *option)
+{
+    if (domain == SOFTBUS_AF_INET6) {
+        SoftBusSockAddrIn6 addrIn6;
+        if (memset_s(&addrIn6, sizeof(addrIn6), 0, sizeof(addrIn6)) != EOK) {
+            CONN_LOGW(CONN_COMMON, "addrIn6 memset failed");
+        }
+        addrIn6.sin6Family = domain;
+        char *addr = NULL;
+        char *ifName = NULL;
+        char *nextToken = NULL;
+        char tmpIp[IP_LEN] = { 0 };
+        if (strcpy_s(tmpIp, sizeof(tmpIp), option->socketOption.addr) != EOK) {
+            CONN_LOGE(CONN_COMMON, "copy local id failed");
+            return SOFTBUS_MEM_ERR;
+        }
+        addr = strtok_s(tmpIp, ADDR_SPLIT_IPV6, &nextToken);
+        if (addr == NULL) {
+            addr = "";
+        }
+        ifName = strtok_s(NULL, ADDR_SPLIT_IPV6, &nextToken);
+        if (ifName != NULL) {
+            addrIn6.sin6ScopeId = SoftBusIfNameToIndex(ifName);
+        }
+        SoftBusInetPtoN(domain, addr, &addrIn6.sin6Addr);
+        addrIn6.sin6Port = SoftBusHtoNs((uint16_t)option->socketOption.port);
+        return SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketConnect(fd, (SoftBusSockAddr *)&addrIn6));
+    }
+    SoftBusSockAddrIn addrIn;
+    if (memset_s(&addrIn, sizeof(addrIn), 0, sizeof(addrIn)) != EOK) {
+        CONN_LOGW(CONN_COMMON, "addrIn memset failed");
+    }
+    addrIn.sinFamily = domain;
+    SoftBusInetPtoN(domain, option->socketOption.addr, &addrIn.sinAddr);
+    addrIn.sinPort = SoftBusHtoNs((uint16_t)option->socketOption.port);
+    return SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketConnect(fd, (SoftBusSockAddr *)&addrIn));
 }
 
 static int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp, bool isNonBlock)
@@ -256,7 +347,15 @@ static int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp
     ConvertAnonymizeIpAddress(animizedIp, IP_LEN, option->socketOption.addr, IP_LEN);
 
     int32_t fd = -1;
-    int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &fd);
+    int32_t domain = -1;
+    if (strcmp(option->socketOption.addr, "") == 0)
+    {
+        domain = GetDomainByAddr(myIp);
+        CONN_LOGW(CONN_COMMON, "socket option addr is null, get my addr domain id");
+    } else {
+        domain = GetDomainByAddr(option->socketOption.addr);
+    }
+    int32_t ret = SoftBusSocketCreate(domain, SOFTBUS_SOCK_STREAM, 0, &fd);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "create socket failed, serverIp=%{public}s, serverPort=%{public}d, error=%{public}d",
             animizedIp, option->socketOption.port, ret);
@@ -266,26 +365,21 @@ static int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp
         CONN_LOGE(CONN_COMMON, "set nonblock failed, serverIp=%{public}s, serverPort=%{public}d, fd=%{public}d",
             animizedIp, option->socketOption.port, fd);
         SoftBusSocketClose(fd);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
     }
     SetClientOption(fd);
     // tcp user timeout on the Client
     if (option->socketOption.moduleId >= AUTH_P2P && option->socketOption.moduleId <= AUTH_ENHANCED_P2P_END) {
         (void)ConnSetTcpUserTimeOut(fd, SOFTBUS_CONN_TCP_USER_TIME);
     }
-    ret = BindTcpClientAddr(fd, myIp);
+    ret = BindTcpClientAddr(domain, fd, myIp);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "bind client address failed, serverIp=%{public}s, serverPort=%{public}d, "
             "error=%{public}d", animizedIp, option->socketOption.port, ret);
         ConnShutdownSocket(fd);
         return ret;
     }
-
-    SoftBusSockAddrIn addr = { 0 };
-    addr.sinFamily = SOFTBUS_AF_INET;
-    SoftBusInetPtoN(SOFTBUS_AF_INET, option->socketOption.addr, &addr.sinAddr);
-    addr.sinPort = SoftBusHtoNs((uint16_t)option->socketOption.port);
-    ret = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketConnect(fd, (SoftBusSockAddr *)&addr));
+    ret = SocketConnect(fd, domain, option);
     if ((ret != SOFTBUS_ADAPTER_OK) && (ret != SOFTBUS_ADAPTER_SOCKET_EINPROGRESS) &&
         (ret != SOFTBUS_ADAPTER_SOCKET_EAGAIN)) {
         CONN_LOGE(CONN_COMMON, "client connect failed, serverIp=%{public}s, serverPort=%{public}d, fd=%{public}d, "
@@ -300,14 +394,17 @@ static int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp
 
 static int32_t GetTcpSockPort(int32_t fd)
 {
-    SoftBusSockAddrIn addr;
-
-    int rc = SoftBusSocketGetLocalName(fd, (SoftBusSockAddr *)&addr);
+    SoftBusSockAddr addr;
+    int rc = SoftBusSocketGetLocalName(fd, &addr);
     if (rc != 0) {
         CONN_LOGE(CONN_COMMON, "GetTcpSockPort. fd=%{public}d, rc=%{public}d", fd, rc);
         return rc;
     }
-    return SoftBusNtoHs(addr.sinPort);
+    if (addr.saFamily == SOFTBUS_AF_INET6)
+    {
+        return SoftBusNtoHs(((SoftBusSockAddrIn6 *)&addr)->sin6Port);
+    }
+    return SoftBusNtoHs(((SoftBusSockAddrIn *)&addr)->sinPort);
 }
 
 int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds)
@@ -379,25 +476,31 @@ int32_t ConnSetTcpUserTimeOut(int32_t fd, uint32_t millSec)
 #endif
 static int32_t AcceptTcpClient(int32_t fd, ConnectOption *clientAddr, int32_t *cfd)
 {
-    SoftBusSockAddrIn addr;
+    SoftBusSockAddr addr;
     if (memset_s(&addr, sizeof(addr), 0, sizeof(addr)) != EOK) {
         CONN_LOGE(CONN_COMMON, "memset failed");
         return SOFTBUS_MEM_ERR;
     }
 
-    int32_t ret =
-        SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketAccept(fd, (SoftBusSockAddr *)&addr, cfd));
+    int32_t ret = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketAccept(fd, &addr, cfd));
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "accept failed, ret=%{public}" PRId32 ", cfd=%{public}d, fd=%{public}d", ret, *cfd, fd);
         return ret;
     }
 
-    if (clientAddr != NULL) {
-        clientAddr->type = CONNECT_TCP;
-        SoftBusInetNtoP(
-            SOFTBUS_AF_INET, &addr.sinAddr, clientAddr->socketOption.addr, sizeof(clientAddr->socketOption.addr));
-        clientAddr->socketOption.port = GetTcpSockPort(*cfd);
-        clientAddr->socketOption.protocol = LNN_PROTOCOL_IP;
+    if (clientAddr == NULL) {
+        return SOFTBUS_OK;
+    }
+
+    clientAddr->type = CONNECT_TCP;
+    clientAddr->socketOption.port = GetTcpSockPort(*cfd);
+    clientAddr->socketOption.protocol = LNN_PROTOCOL_IP;
+    if (addr.saFamily == SOFTBUS_AF_INET6) {
+        SoftBusInetNtoP(SOFTBUS_AF_INET6,&((SoftBusSockAddrIn6 *)&addr)->sin6Addr,
+            clientAddr->socketOption.addr, sizeof(clientAddr->socketOption.addr));
+    } else {
+        SoftBusInetNtoP(SOFTBUS_AF_INET, &((SoftBusSockAddrIn *)&addr)->sinAddr,
+            clientAddr->socketOption.addr, sizeof(clientAddr->socketOption.addr));
     }
     return SOFTBUS_OK;
 }
