@@ -74,12 +74,14 @@
         "sqlite",
         "wifi",
         "wifi_enhance",
-        "netmanager_base"
+        "netmanager_base",
+        "bounds_checking_function",
+        "cJSON",
+        "libcoap"
       ],
       "third_party": [
         "bounds_checking_function",
         "cJSON",
-        "libcoap",
         "mbedtls",
         "openssl",
         "sqlite"
