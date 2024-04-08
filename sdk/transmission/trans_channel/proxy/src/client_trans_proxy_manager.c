@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -197,6 +197,30 @@ int32_t ClientTransProxyGetInfoByChannelId(int32_t channelId, ProxyChannelInfoDe
     return SOFTBUS_ERR;
 }
 
+int32_t ClientTransProxyGetLinkTypeByChannelId(int32_t channelId, int32_t *linkType)
+{
+    if (linkType == NULL) {
+        TRANS_LOGE(TRANS_SDK, "param invalid.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_proxyChannelInfoList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    ClientProxyChannelInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &(g_proxyChannelInfoList->list), ClientProxyChannelInfo, node) {
+        if (item->channelId == channelId) {
+            *linkType = item->detail.linkType;
+            (void)SoftBusMutexUnlock(&g_proxyChannelInfoList->lock);
+            return SOFTBUS_OK;
+        }
+    }
+
+    (void)SoftBusMutexUnlock(&g_proxyChannelInfoList->lock);
+    TRANS_LOGE(TRANS_SDK, "can not find proxy channelId=%{public}d", channelId);
+    return SOFTBUS_NOT_FIND;
+}
+
 int32_t ClientTransProxyAddChannelInfo(ClientProxyChannelInfo *info)
 {
     if (info == NULL) {
@@ -262,6 +286,7 @@ static ClientProxyChannelInfo* ClientTransProxyCreateChannelInfo(const ChannelIn
     info->channelId = channel->channelId;
     info->detail.isEncrypted = channel->isEncrypt;
     info->detail.sequence = 0;
+    info->detail.linkType = channel->linkType;
     return info;
 }
 
@@ -789,7 +814,7 @@ int32_t ClientTransProxyOnDataReceived(int32_t channelId,
         return g_sessionCb.OnDataReceived(channelId, CHANNEL_TYPE_PROXY, data, len, TRANS_SESSION_BYTES);
     }
 
-    return ClientTransProxySliceProc(channelId, data, len);
+    return ClientTransProxySliceProc(channelId, (char *)data, len);
 }
 
 void ClientTransProxyCloseChannel(int32_t channelId)
@@ -830,7 +855,7 @@ static int32_t ClientTransProxyPackBytes(int32_t channelId, ClientProxyDataInfo 
         return SOFTBUS_ERR;
     }
     dataInfo->outLen = dataInfo->inLen + OVERHEAD_LEN + sizeof(PacketHead);
-    dataInfo->outData = SoftBusCalloc(dataInfo->outLen);
+    dataInfo->outData = (uint8_t *)SoftBusCalloc(dataInfo->outLen);
     if (dataInfo->outData == NULL) {
         TRANS_LOGE(TRANS_SDK, "calloc error");
         return SOFTBUS_MEM_ERR;
@@ -884,7 +909,7 @@ int32_t TransProxyPackAndSendData(int32_t channelId, const void *data, uint32_t 
         int32_t dataLen = (int32_t)((i == (sliceNum - 1)) ? (dataInfo.outLen - i * SLICE_LEN) : SLICE_LEN);
         int32_t offset = (int32_t)(i * SLICE_LEN);
 
-        uint8_t* sliceData = SoftBusMalloc(dataLen + sizeof(SliceHead));
+        uint8_t *sliceData = (uint8_t *)SoftBusMalloc(dataLen + sizeof(SliceHead));
         if (sliceData == NULL) {
             TRANS_LOGE(TRANS_SDK, "malloc slice data error, channelId=%{public}d", channelId);
             return SOFTBUS_ERR;

@@ -130,7 +130,7 @@ int32_t CallMethodAsync(WorkFunction function, void *data, int64_t delayTimeMs)
 int32_t WifiDirectWorkQueueInit(void)
 {
     CONN_LOGI(CONN_INIT, "init enter");
-    SoftBusLooper *looper = CreateNewLooper("WDWQLooper");
+    SoftBusLooper *looper = CreateNewLooper("WDWQ_Lp");
     if (looper == NULL) {
         CONN_LOGE(CONN_INIT, "create looper failed");
         return SOFTBUS_ERR;

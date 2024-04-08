@@ -694,7 +694,7 @@ static void TryAsMasterNodeNextLoop(FsmStateMachine *fsm)
         LNN_LOGE(LNN_HEART_BEAT, "try as master node get gearmode fail");
         return;
     }
-    delayMillis = (uint64_t)mode.cycle * HB_TIME_FACTOR + HB_NOTIFY_DEV_LOST_DELAY_LEN;
+    delayMillis = (uint64_t)mode.cycle * HB_TIME_FACTOR + HB_NOTIFY_MASTER_NODE_DELAY_LEN;
     if (LnnFsmPostMessageDelay(fsm, EVENT_HB_AS_MASTER_NODE, NULL, delayMillis) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "try as master node post msg fail");
         return;
@@ -1064,7 +1064,7 @@ static int32_t InitHeartbeatFsm(LnnHeartbeatFsm *hbFsm)
         LNN_LOGE(LNN_HEART_BEAT, "format fsm name fail");
         return SOFTBUS_ERR;
     }
-    SoftBusLooper *looper = CreateNewLooper("Heartbeat-Looper");
+    SoftBusLooper *looper = CreateNewLooper("Heartbeat_Lp");
     if (looper == NULL) {
         LNN_LOGE(LNN_HEART_BEAT, "create looper fail");
         return SOFTBUS_ERR;
@@ -1170,6 +1170,7 @@ int32_t LnnPostSendBeginMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type
     custData->wakeupFlag = wakeupFlag;
     custData->isRelay = msgPara->isRelay;
     custData->isSyncData = msgPara->isSyncData;
+    custData->isNeedUpdataData = msgPara->isNeedUpdataData;
     custData->isFirstBegin = delayMillis == 0 ? true : false;
     if (LnnFsmPostMessageDelay(&hbFsm->fsm, EVENT_HB_SEND_ONE_BEGIN, (void *)custData, delayMillis) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "post send begin msg to hbFsm fail");

@@ -286,7 +286,7 @@ void DefaultNegotiateChannelConstructor(struct DefaultNegotiateChannel *self, Au
     }
 
     char networkId[NETWORK_ID_BUF_LEN] = {0};
-    ret = LnnGetNetworkIdByUdid(self->remoteDeviceId, networkId, sizeof(networkId));
+    ret = LnnGetNetworkIdByUuid(self->remoteDeviceId, networkId, sizeof(networkId));
     if (ret != SOFTBUS_OK) {
         CONN_LOGW(CONN_WIFI_DIRECT, "get networkId failed");
         GetInfoFromInnerLink(self);

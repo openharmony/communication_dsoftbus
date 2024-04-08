@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -215,7 +215,6 @@
         "TransOnChannelOpenFailed";
         "ProxyChannelSendFile";
         "ClientDeathProcTask";
-        "TransBroadCastReInit";
         "NotifyAuthSuccess";
         "GetPeerPidInner";
         "StartNStackXDFileClient";
@@ -357,6 +356,7 @@
         "ClientDeleteEventListener";
         "TransProxyPackAndSendData";
         "ClientTransProxyGetInfoByChannelId";
+        "ClientTransProxyGetLinkTypeByChannelId";
         "EnableDiscoveryPolicy";
         "SetDiscoveryPolicy";
         "CreateMetaSocketServer";
@@ -366,6 +366,7 @@
         "SendMetaData";
         "Socket";
         "Bind";
+        "BindAsync";
         "Listen";
         "Shutdown";
         "CreateSocket";
@@ -384,6 +385,10 @@
         "ClientGetPeerSocketInfoById";
         "ClientGetSessionNameByChannelId";
         "TransSetSocketFileListener";
+        "SetSessionIsAsyncById";
+        "TransSetChannelInfo";
+        "ClientTransSetChannelInfo";
+        "ClientGetSessionIsAsyncBySessionId";
         "EvaluateQos";
         "GetMtuSize";
         "DBinderGrantPermission";
@@ -396,6 +401,7 @@
         "IsSessionExceedLimit";
         "DiscRecoveryPublish";
         "DiscRecoverySubscribe";
+        "DiscRecoveryPolicy";
         "ClientRawStreamEncryptOptGet";
         "ClientRawStreamEncryptDefOptGet";
         extern "C++" {
@@ -447,6 +453,7 @@
             "non-virtual thunk to OHOS::SoftBusClientStub::OnChannelOpenFailed(int, int, int)";
             "non-virtual thunk to OHOS::SoftBusClientStub::OnChannelOpened(char const*, ChannelInfo const*)";
             "non-virtual thunk to OHOS::SoftBusClientStub::OnChannelQosEvent(int, int, int, int, QosTv const*)";
+            "non-virtual thunk to OHOS::SoftBusClientStub::SetChannelInfo(char const*, int, int, int)";
             "non-virtual thunk to OHOS::SoftBusClientStub::OnDeviceFound(DeviceInfo const*)";
             "non-virtual thunk to OHOS::SoftBusClientStub::OnDiscoverFailed(int, int)";
             "non-virtual thunk to OHOS::SoftBusClientStub::OnDiscoverySuccess(int)";

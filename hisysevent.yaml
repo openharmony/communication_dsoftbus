@@ -182,6 +182,7 @@ BUSCENTER_AUDIT:
   PEER_DEV_TYPE: {type: INT32, desc: peer device type }
   ATTACK_TIMES: {type: INT32, desc: attack times }
   BE_ATTACKED_PORT: {type: INT32, desc: be attacked port }
+  HEARTBEAT_EVENT_TYPE: {type: INT32, desc: heartbeat event type }
 
 TRANSPORT_BEHAVIOR:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: transport behavior }
@@ -210,6 +211,7 @@ TRANSPORT_BEHAVIOR:
   PEER_CHAN_ID: { type: INT32, desc: peer channel id }
   PEER_NET_ID: { type: STRING, desc: peer device net id }
   PEER_UDID: { type: STRING, desc: peer udid }
+  PEER_DEV_VER: { type: STRING, desc: peer device build version }
 
 TRANSPORT_AUDIT:
   __BASE: {type: SECURITY, level: CRITICAL, desc: transport recurity audit }

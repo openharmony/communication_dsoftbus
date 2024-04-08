@@ -81,7 +81,7 @@ enum BleConnectionCompareType {
     BLE_CONNECTION_COMPARE_TYPE_CONNECTION_ID,
     BLE_CONNECTION_COMPARE_TYPE_ADDRESS,
     BLE_CONNECTION_COMPARE_TYPE_UNDERLAY_HANDLE,
-    BLE_CONNECTION_COMPARE_TYPE_UDID_DIFF_ADDRESS,
+    BLE_CONNECTION_COMPARE_TYPE_UDID_IGNORE_ADDRESS,
     BLE_CONNECTION_COMPARE_TYPE_UDID_CLIENT_SIDE,
 };
 
@@ -777,9 +777,9 @@ static bool IsSameDevice(const char *leftIdentifier, const char *rightIdentifier
     char leftHashStr[HEXIFY_LEN(SHORT_UDID_HASH_LEN)] = { 0 };
     char rightHashStr[HEXIFY_LEN(SHORT_UDID_HASH_LEN)] = { 0 };
     if (ConvertBytesToHexString(leftHashStr, HEXIFY_LEN(SHORT_UDID_HASH_LEN), leftHash, SHORT_UDID_HASH_LEN) !=
-            SOFTBUS_OK ||
+        SOFTBUS_OK ||
         ConvertBytesToHexString(rightHashStr, HEXIFY_LEN(SHORT_UDID_HASH_LEN), rightHash, SHORT_UDID_HASH_LEN) !=
-            SOFTBUS_OK) {
+        SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "convert bytes to array failed");
         return false;
     }
@@ -1237,11 +1237,19 @@ static bool ConnectionCompareByUnderlayHandle(ConnBleConnection *connection, con
                 connection->protocol == (BleProtocolType)option->underlayerHandleOption.protocol);
 }
 
-static bool ConnectionCompareByUdidDiffAddress(ConnBleConnection *connection, const BleConnectionCompareOption *option)
+static bool ConnectionCompareByUdidIgnoreAddress(ConnBleConnection *connection,
+    const BleConnectionCompareOption *option)
 {
     ConnBleInnerComplementDeviceId(connection);
-    return StrCmpIgnoreCase(connection->addr, option->udidAddressOption.addr) != 0 &&
-        IsSameDevice(connection->udid, option->udidAddressOption.udid) &&
+    if (StrCmpIgnoreCase(connection->addr, option->udidAddressOption.addr) != 0) {
+        char animizeAddr[BT_MAC_LEN] = { 0 };
+        char optionAnimizeAddr[BT_MAC_LEN] = { 0 };
+        ConvertAnonymizeMacAddress(animizeAddr, BT_MAC_LEN, connection->addr, BT_MAC_LEN);
+        ConvertAnonymizeMacAddress(optionAnimizeAddr, BT_MAC_LEN, option->udidAddressOption.addr, BT_MAC_LEN);
+        CONN_LOGW(CONN_BLE, "ble mac address are different. connectionId=%{public}u, addr=%{public}s, "
+            "optionaddr=%{public}s", connection->connectionId, animizeAddr, optionAnimizeAddr);
+    }
+    return IsSameDevice(connection->udid, option->udidAddressOption.udid) &&
         ((BleProtocolType)option->udidAddressOption.protocol == BLE_PROTOCOL_ANY ?
                 true :
                 connection->protocol == (BleProtocolType)option->udidAddressOption.protocol);
@@ -1269,8 +1277,8 @@ static ConnBleConnection *GetConnectionByOption(const BleConnectionCompareOption
         case BLE_CONNECTION_COMPARE_TYPE_UNDERLAY_HANDLE:
             compareFunc = ConnectionCompareByUnderlayHandle;
             break;
-        case BLE_CONNECTION_COMPARE_TYPE_UDID_DIFF_ADDRESS:
-            compareFunc = ConnectionCompareByUdidDiffAddress;
+        case BLE_CONNECTION_COMPARE_TYPE_UDID_IGNORE_ADDRESS:
+            compareFunc = ConnectionCompareByUdidIgnoreAddress;
             break;
         case BLE_CONNECTION_COMPARE_TYPE_UDID_CLIENT_SIDE:
             compareFunc = ConnectionCompareByUdidClientSide;
@@ -1344,7 +1352,7 @@ ConnBleConnection *ConnBleGetConnectionByHandle(int32_t underlayerHandle, ConnSi
 ConnBleConnection *ConnBleGetConnectionByUdid(const char *addr, const char *udid, BleProtocolType protocol)
 {
     BleConnectionCompareOption option = {
-        .type = BLE_CONNECTION_COMPARE_TYPE_UDID_DIFF_ADDRESS,
+        .type = BLE_CONNECTION_COMPARE_TYPE_UDID_IGNORE_ADDRESS,
         .udidAddressOption = {
             .addr = addr,
             .udid = udid,
@@ -1651,6 +1659,12 @@ static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId,
         ctx->psm = option->bleOption.psm;
     }
     ctx->challengeCode = option->bleOption.challengeCode;
+    CONN_LOGI(CONN_BLE,
+        "ble connect device: receive connect request, "
+        "reqId=%{public}u, addr=%{public}s, protocol=%{public}d, udid=%{public}s, "
+        "fastestConnectEnable=%{public}d, connectTraceId=%{public}u",
+        requestId, anomizeAddress, ctx->protocol, anomizeUdid, ctx->fastestConnectEnable,
+        ctx->statistics.connectTraceId);
     status = ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_CONNECT_REQUEST, 0, 0, ctx, 0);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE,
@@ -1669,12 +1683,6 @@ static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId,
         .result = EVENT_STAGE_RESULT_OK
     };
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_DEVICE, extra);
-    CONN_LOGI(CONN_BLE,
-        "ble connect device: receive connect request, "
-        "reqId=%{public}u, addr=%{public}s, protocol=%{public}d, udid=%{public}s, "
-        "fastestConnectEnable=%{public}d, connectTraceId=%{public}u",
-        requestId, anomizeAddress, ctx->protocol, anomizeUdid, ctx->fastestConnectEnable,
-        ctx->statistics.connectTraceId);
     return SOFTBUS_OK;
 }
 
@@ -2133,7 +2141,7 @@ static int32_t ConflictGetConnection(const char *udid)
 
 static int32_t BleInitLooper(void)
 {
-    g_bleManagerSyncHandler.handler.looper = CreateNewLooper("conn_ble_looper");
+    g_bleManagerSyncHandler.handler.looper = CreateNewLooper("Conn_Ble_lp");
     if (g_bleManagerSyncHandler.handler.looper == NULL) {
         CONN_LOGE(CONN_INIT, "init conn ble looper failed");
         return SOFTBUS_ERR;

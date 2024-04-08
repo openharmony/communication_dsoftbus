@@ -66,6 +66,8 @@ private:
 
     int32_t GetSessionListenerOnSessionOpened(int32_t sessionId,
         std::shared_ptr<ISessionListener> &listener, std::shared_ptr<Session> &session);
+
+    int32_t CreateSession(int32_t sessionId, const std::shared_ptr<Session> &session);
 };
 } // namespace SoftBus
 } // namespace Communication

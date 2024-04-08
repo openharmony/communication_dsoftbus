@@ -48,7 +48,7 @@ enum P2pEntityTimeoutEvent;
     void (*handleConnectStateChange)(struct P2pEntityState *self, enum WifiDirectP2pConnectState state);         \
                                                                                                                  \
     bool isInited;                                                                                               \
-    const char *name;
+    const char *name
 
 struct P2pEntityState {
     P2P_ENTITY_STATE_BASE;

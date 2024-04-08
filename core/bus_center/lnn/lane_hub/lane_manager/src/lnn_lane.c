@@ -313,6 +313,8 @@ static LnnLaneManager g_LaneManager = {
     .applyLaneReqId = ApplyLaneReqId,
     .lnnRequestLane = LnnRequestLaneByQos,
     .lnnFreeLane = LnnFreeLane,
+    .registerLaneListener = RegisterLaneListener,
+    .unRegisterLaneListener = UnRegisterLaneListener,
 };
 
 LnnLaneManager* GetLaneManager(void)
@@ -417,6 +419,10 @@ int32_t InitLane(void)
     }
     if (InitLaneLink() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "[InitLane]init laneLink fail");
+        return SOFTBUS_ERR;
+    }
+    if (InitLaneListener() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "[InitLane]init laneListener fail");
         return SOFTBUS_ERR;
     }
     if (LaneDelayInit() != SOFTBUS_OK) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -527,7 +527,7 @@ static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSO
 
     struct WifiDirectManager *pManager = GetWifiDirectManager();
     if (pManager != NULL && pManager->getLocalIpByRemoteIp != NULL) {
-        int32_t ret = pManager->getLocalIpByRemoteIp(peerIp, myIp, sizeof(myIp));
+        ret = pManager->getLocalIpByRemoteIp(peerIp, myIp, sizeof(myIp));
         if (ret != SOFTBUS_OK) {
             OutputAnonymizeIpAddress(myIp, peerIp);
             TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
@@ -740,7 +740,18 @@ static void OnAuthDataRecv(AuthHandle authHandle, const AuthTransData *data)
 
 static void OnAuthChannelClose(AuthHandle authHandle)
 {
-    TRANS_LOGW(TRANS_CTRL, "authId=%{public}" PRId64, authHandle.authId);
+    int32_t num = 0;
+    int32_t *channelIds = GetChannelIdsByAuthIdAndStatus(&num, authHandle.authId, TCP_DIRECT_CHANNEL_STATUS_VERIFY_P2P);
+    if (channelIds == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "Fail to get channel ids with auth id %{public}" PRId64, authHandle.authId);
+        return;
+    }
+    TRANS_LOGW(TRANS_CTRL, "AuthId=%{public}" PRId64 ",channelIds num=%{public}d", authHandle.authId, num);
+    int32_t i;
+    for (i = 0; i < num; i++) {
+        (void)OnChannelOpenFail(channelIds[i], SOFTBUS_TRANS_OPEN_AUTH_CHANNANEL_FAILED);
+    }
+    SoftBusFree(channelIds);
 }
 
 static int32_t OpenNewAuthConn(const AppInfo *appInfo, SessionConn *conn,

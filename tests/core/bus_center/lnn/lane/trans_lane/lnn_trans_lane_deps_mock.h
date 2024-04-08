@@ -50,6 +50,10 @@ public:
     virtual void FreeLaneReqId(uint32_t laneReqId) = 0;
     virtual void HandleLaneReliabilityTime(void) = 0;
     virtual int32_t SelectExpectLaneByParameter(LanePreferredLinkList *setRecommendLinkList) = 0;
+    virtual int32_t AddLaneBusinessInfoItem(LaneType laneType, const LaneLinkInfo *laneLinkInfo) = 0;
+    virtual int32_t DelLaneBusinessInfoItem(LaneType laneType, const LaneLinkInfo *laneLinkInfo) = 0;
+    virtual int32_t LaneLinkupNotify(const char *peerUdid, const LaneLinkInfo *laneLinkInfo) =0;
+    virtual int32_t LaneLinkdownNotify(const char *peerUdid, const LaneLinkInfo *laneLinkInfo) =0;
 };
 
 class TransLaneDepsInterfaceMock : public TransLaneDepsInterface {
@@ -74,6 +78,10 @@ public:
     MOCK_METHOD1(FreeLaneReqId, void (uint32_t laneReqId));
     MOCK_METHOD0(HandleLaneReliabilityTime, void ());
     MOCK_METHOD1(SelectExpectLaneByParameter, int32_t (LanePreferredLinkList *));
+    MOCK_METHOD2(AddLaneBusinessInfoItem, int32_t (LaneType laneType, const LaneLinkInfo *laneLinkInfo));
+    MOCK_METHOD2(DelLaneBusinessInfoItem, int32_t (LaneType laneType, const LaneLinkInfo *laneLinkInfo));
+    MOCK_METHOD2(LaneLinkupNotify, int32_t (const char *peerUdid, const LaneLinkInfo *laneLinkInfo));
+    MOCK_METHOD2(LaneLinkdownNotify, int32_t (const char *peerUdid, const LaneLinkInfo *laneLinkInfo));
 };
 } // namespace OHOS
 #endif // LNN_TRANS_LANE_DEPS_MOCK_H

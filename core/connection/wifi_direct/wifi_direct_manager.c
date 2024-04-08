@@ -57,7 +57,11 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *connectInfo, struct W
 
     char uuid[UUID_BUF_LEN] = {0};
     int32_t ret = LnnGetRemoteStrInfo(connectInfo->remoteNetworkId, STRING_KEY_UUID, uuid, sizeof(uuid));
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, CONN_WIFI_DIRECT, "get uuid failed");
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "get uuid failed");
+        // fall-through
+    }
+    
     ret = GetWifiDirectRoleOption()->getExpectedRole(connectInfo->remoteNetworkId, connectInfo->connectType,
                                                      &connectInfo->expectApiRole, &connectInfo->isStrict);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get expected role failed");
@@ -299,7 +303,7 @@ static void OnInterfaceInfoChange(struct InterfaceInfo *info)
 
     char *newLocalMac = info->getString(info, II_KEY_BASE_MAC, "");
     CONN_LOGI(CONN_WIFI_DIRECT, "newLocalMac=%{public}s, oldLocalMac=%{public}s",
-          WifiDirectAnonymizeMac(newLocalMac), WifiDirectAnonymizeMac(self->localMac));
+        WifiDirectAnonymizeMac(newLocalMac), WifiDirectAnonymizeMac(self->localMac));
     if (strcmp(newLocalMac, self->localMac) != 0) {
         if (strcpy_s(self->localMac, sizeof(self->localMac), newLocalMac) != EOK) {
             CONN_LOGW(CONN_WIFI_DIRECT, "copy local mac failed");
@@ -315,7 +319,9 @@ static void OnInnerLinkChange(struct InnerLink *innerLink, bool isStateChange)
     enum InnerLinkState state = innerLink->getInt(innerLink, IL_KEY_STATE, INNER_LINK_STATE_INVALID);
     char *remoteMac = innerLink->getString(innerLink, IL_KEY_REMOTE_BASE_MAC, "");
     char remoteIp[IP_ADDR_STR_LEN] = {0};
+    char localIp[IP_ADDR_STR_LEN] = { 0 };
     innerLink->getRemoteIpString(innerLink, remoteIp, sizeof(remoteIp));
+    innerLink->getLocalIpString(innerLink, localIp, sizeof(localIp));
     const char *remoteUuid = innerLink->getString(innerLink, IL_KEY_DEVICE_ID, "");
 
     if (!isStateChange) {
@@ -337,7 +343,7 @@ static void OnInnerLinkChange(struct InnerLink *innerLink, bool isStateChange)
             WifiDirectAnonymizeDeviceId(remoteUuid));
         for (uint32_t index = 0; index < MODULE_TYPE_MAX; index++) {
             if (self->listeners[index].onDeviceOffLine != NULL) {
-                self->listeners[index].onDeviceOffLine(remoteMac, remoteIp, remoteUuid);
+                self->listeners[index].onDeviceOffLine(remoteMac, remoteIp, remoteUuid, localIp);
             }
         }
     } else {

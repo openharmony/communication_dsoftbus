@@ -1632,6 +1632,10 @@ static void BleDirectlyOnlineProc(NodeInfo *info)
             LNN_LOGE(LNN_LEDGER, "strcpy_s networkId fail");
             return;
         }
+        if (strcpy_s(deviceInfo.uuid, sizeof(deviceInfo.uuid), info->uuid) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "strcpy_s uuid fail");
+            return;
+        }
         if (LnnSaveRemoteDeviceInfo(&deviceInfo) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "save remote devInfo fail");
             return;
@@ -3076,4 +3080,28 @@ bool LnnSetDLWifiDirectAddr(const char *networkId, const char *addr)
 EXIT:
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return false;
+}
+
+int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType)
+{
+    if (networkId == NULL || osType == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    NodeInfo *nodeInfo = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
+    if (nodeInfo == NULL) {
+        SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        char *anonyNetworkId = NULL;
+        Anonymize(networkId, &anonyNetworkId);
+        LNN_LOGE(LNN_LEDGER, "get info by networkId=%{public}s failed", anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
+        return SOFTBUS_NOT_FIND;
+    }
+    *osType = nodeInfo->deviceInfo.osType;
+    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    return SOFTBUS_OK;
 }

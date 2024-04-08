@@ -74,6 +74,18 @@ void CommonEventMonitor::OnReceiveEvent(const CommonEventData &data)
     if (screenState != SOFTBUS_SCREEN_UNKNOWN) {
         LnnNotifyScreenStateChangeEvent(screenState);
     }
+
+    SoftBusAccountState state = SOFTBUS_ACCOUNT_UNKNOWN;
+    if (action == CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGIN) {
+        state = SOFTBUS_ACCOUNT_LOG_IN;
+    } else if (action == CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOUT ||
+        action == CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOFF) {
+        state = SOFTBUS_ACCOUNT_LOG_OUT;
+    }
+
+    if (state != SOFTBUS_ACCOUNT_UNKNOWN) {
+        LnnNotifyAccountStateChangeEvent(state);
+    }
 }
 
 class SubscribeEvent {
@@ -88,6 +100,9 @@ int32_t SubscribeEvent::SubscribeCommonEvent()
     MatchingSkills matchingSkills;
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SCREEN_ON);
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGIN);
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOUT);
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOFF);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_USER_UNLOCKED);
     CommonEventSubscribeInfo subscriberInfo(matchingSkills);

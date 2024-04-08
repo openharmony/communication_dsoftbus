@@ -41,6 +41,8 @@ namespace OHOS {
 using namespace testing::ext;
 using namespace testing;
 
+constexpr char NODE_IP[] = "127.31.0.1";
+constexpr char NODE_MAC[] = "de:4f";
 constexpr char NODE_NETWORK_ID[] = "111122223333abcdef";
 constexpr uint32_t DEFAULT_SELECT_NUM = 4;
 constexpr uint32_t DEFAULT_QOSINFO_MIN_BW = 10;
@@ -159,13 +161,6 @@ static void OnLaneStateChange(uint32_t laneReqId, LaneState state)
     CondSignal();
 }
 
-static void OnLaneLinkException(uint32_t reqId, int32_t reason)
-{
-    (void)reqId;
-    (void)reason;
-    return;
-}
-
 static void OnLaneLinkFail(uint32_t reqId, int32_t reason)
 {
     (void)reqId;
@@ -201,6 +196,8 @@ HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_001, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<2>(16), Return(SOFTBUS_OK)));
     LnnWifiAdpterInterfaceMock wifiMock;
     wifiMock.SetDefaultResult();
+    NiceMock<IsLinkEnabledDepsInterfaceMock> enabledMock;
+    EXPECT_CALL(enabledMock, IsLinkEnabled).WillRepeatedly(Return(false));
 
     LaneRequestOption requestOption;
     (void)memset_s(&requestOption, sizeof(LaneRequestOption), 0, sizeof(LaneRequestOption));
@@ -238,6 +235,8 @@ HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_002, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<2>(16), Return(SOFTBUS_OK)));
     LnnWifiAdpterInterfaceMock wifiMock;
     wifiMock.SetDefaultResult();
+    NiceMock<IsLinkEnabledDepsInterfaceMock> enabledMock;
+    EXPECT_CALL(enabledMock, IsLinkEnabled).WillRepeatedly(Return(false));
 
     LaneRequestOption requestOption;
     (void)memset_s(&requestOption, sizeof(LaneRequestOption), 0, sizeof(LaneRequestOption));
@@ -275,6 +274,8 @@ HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_003, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<2>(16), Return(SOFTBUS_OK)));
     LnnWifiAdpterInterfaceMock wifiMock;
     wifiMock.SetDefaultResult();
+    NiceMock<IsLinkEnabledDepsInterfaceMock> enabledMock;
+    EXPECT_CALL(enabledMock, IsLinkEnabled).WillRepeatedly(Return(false));
 
     LaneRequestOption requestOption;
     (void)memset_s(&requestOption, sizeof(LaneRequestOption), 0, sizeof(LaneRequestOption));
@@ -312,6 +313,8 @@ HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_004, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<2>(32), Return(SOFTBUS_OK)));
     LnnWifiAdpterInterfaceMock wifiMock;
     wifiMock.SetDefaultResult();
+    NiceMock<IsLinkEnabledDepsInterfaceMock> enabledMock;
+    EXPECT_CALL(enabledMock, IsLinkEnabled).WillRepeatedly(Return(false));
 
     LaneRequestOption requestOption;
     (void)memset_s(&requestOption, sizeof(LaneRequestOption), 0, sizeof(LaneRequestOption));
@@ -349,6 +352,8 @@ HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_005, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<2>(32), Return(SOFTBUS_OK)));
     LnnWifiAdpterInterfaceMock wifiMock;
     wifiMock.SetDefaultResult();
+    NiceMock<IsLinkEnabledDepsInterfaceMock> enabledMock;
+    EXPECT_CALL(enabledMock, IsLinkEnabled).WillRepeatedly(Return(false));
 
     LaneRequestOption requestOption;
     (void)memset_s(&requestOption, sizeof(LaneRequestOption), 0, sizeof(LaneRequestOption));
@@ -386,6 +391,8 @@ HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_006, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<2>(32), Return(SOFTBUS_OK)));
     LnnWifiAdpterInterfaceMock wifiMock;
     wifiMock.SetDefaultResult();
+    NiceMock<IsLinkEnabledDepsInterfaceMock> enabledMock;
+    EXPECT_CALL(enabledMock, IsLinkEnabled).WillRepeatedly(Return(false));
 
     LaneRequestOption requestOption;
     (void)memset_s(&requestOption, sizeof(LaneRequestOption), 0, sizeof(LaneRequestOption));
@@ -423,6 +430,8 @@ HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_007, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<2>(32), Return(SOFTBUS_OK)));
     LnnWifiAdpterInterfaceMock wifiMock;
     wifiMock.SetDefaultResult();
+    NiceMock<IsLinkEnabledDepsInterfaceMock> enabledMock;
+    EXPECT_CALL(enabledMock, IsLinkEnabled).WillRepeatedly(Return(false));
 
     LaneRequestOption requestOption;
     (void)memset_s(&requestOption, sizeof(LaneRequestOption), 0, sizeof(LaneRequestOption));
@@ -459,6 +468,8 @@ HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_008, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<2>(32), Return(SOFTBUS_OK)));
     LnnWifiAdpterInterfaceMock wifiMock;
     wifiMock.SetDefaultResult();
+    NiceMock<IsLinkEnabledDepsInterfaceMock> enabledMock;
+    EXPECT_CALL(enabledMock, IsLinkEnabled).WillRepeatedly(Return(false));
 
     LaneRequestOption requestOption;
     (void)memset_s(&requestOption, sizeof(LaneRequestOption), 0, sizeof(LaneRequestOption));
@@ -495,6 +506,8 @@ HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_009, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<2>(32), Return(SOFTBUS_OK)));
     LnnWifiAdpterInterfaceMock wifiMock;
     wifiMock.SetDefaultResult();
+    NiceMock<IsLinkEnabledDepsInterfaceMock> enabledMock;
+    EXPECT_CALL(enabledMock, IsLinkEnabled).WillRepeatedly(Return(false));
 
     LaneRequestOption requestOption;
     (void)memset_s(&requestOption, sizeof(LaneRequestOption), 0, sizeof(LaneRequestOption));
@@ -518,6 +531,8 @@ HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_009, TestSize.Level1)
 */
 HWTEST_F(LNNLaneMockTest, LANE_REQUEST_Test_010, TestSize.Level1)
 {
+    NiceMock<IsLinkEnabledDepsInterfaceMock> enabledMock;
+    EXPECT_CALL(enabledMock, IsLinkEnabled).WillRepeatedly(Return(false));
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
     uint32_t laneReqId = laneManager->applyLaneReqId(laneType);
@@ -747,6 +762,63 @@ HWTEST_F(LNNLaneMockTest, LNN_LANE_PROFILE_001, TestSize.Level1)
 }
 
 /*
+* @tc.name: LNN_COMP_LANE_RESOURCE_001
+* @tc.desc: CompLaneResource
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_COMP_LANE_RESOURCE_001, TestSize.Level1)
+{
+    LaneResource laneResourceItemSrc;
+    (void)memset_s(&laneResourceItemSrc, sizeof(LaneResource), 0, sizeof(LaneResource));
+    LaneResource laneResourceItemDst;
+    (void)memset_s(&laneResourceItemDst, sizeof(LaneResource), 0, sizeof(LaneResource));
+    laneResourceItemSrc.type = LANE_BR;
+    (void)strncpy_s(laneResourceItemSrc.linkInfo.br.brMac, BT_MAC_LEN, NODE_MAC, strlen(NODE_MAC));
+    bool ret = CompLaneResource(&laneResourceItemSrc, &laneResourceItemDst);
+    EXPECT_EQ(ret, false);
+    (void)strncpy_s(laneResourceItemDst.linkInfo.br.brMac, BT_MAC_LEN, NODE_MAC, strlen(NODE_MAC));
+    ret = CompLaneResource(&laneResourceItemSrc, &laneResourceItemDst);
+    EXPECT_EQ(ret, true);
+
+    laneResourceItemSrc.type = LANE_BLE;
+    (void)strncpy_s(laneResourceItemSrc.linkInfo.ble.bleMac, BT_MAC_LEN, NODE_MAC, strlen(NODE_MAC));
+    ret = CompLaneResource(&laneResourceItemSrc, &laneResourceItemDst);
+    EXPECT_EQ(ret, false);
+    (void)strncpy_s(laneResourceItemDst.linkInfo.ble.bleMac, BT_MAC_LEN, NODE_MAC, strlen(NODE_MAC));
+    ret = CompLaneResource(&laneResourceItemSrc, &laneResourceItemDst);
+    EXPECT_EQ(ret, true);
+
+    laneResourceItemSrc.type = LANE_P2P;
+    (void)strncpy_s(laneResourceItemSrc.linkInfo.p2p.connInfo.peerIp, IP_LEN, NODE_IP, strlen(NODE_IP));
+    ret = CompLaneResource(&laneResourceItemSrc, &laneResourceItemDst);
+    EXPECT_EQ(ret, false);
+    (void)strncpy_s(laneResourceItemDst.linkInfo.p2p.connInfo.peerIp, IP_LEN, NODE_IP, strlen(NODE_IP));
+    ret = CompLaneResource(&laneResourceItemSrc, &laneResourceItemDst);
+    EXPECT_EQ(ret, true);
+
+    laneResourceItemSrc.type = LANE_WLAN_5G;
+    (void)strncpy_s(laneResourceItemSrc.linkInfo.wlan.connInfo.addr, MAX_SOCKET_ADDR_LEN,
+        NODE_IP, strlen(NODE_IP));
+    ret = CompLaneResource(&laneResourceItemSrc, &laneResourceItemDst);
+    EXPECT_EQ(ret, false);
+    (void)strncpy_s(laneResourceItemDst.linkInfo.wlan.connInfo.addr, MAX_SOCKET_ADDR_LEN,
+        NODE_IP, strlen(NODE_IP));
+    ret = CompLaneResource(&laneResourceItemSrc, &laneResourceItemDst);
+    EXPECT_EQ(ret, true);
+
+    laneResourceItemSrc.type = LANE_BLE_DIRECT;
+    (void)strncpy_s(laneResourceItemSrc.linkInfo.bleDirect.networkId, NETWORK_ID_BUF_LEN,
+        NODE_NETWORK_ID, strlen(NODE_NETWORK_ID));
+    ret = CompLaneResource(&laneResourceItemSrc, &laneResourceItemDst);
+    EXPECT_EQ(ret, false);
+    (void)strncpy_s(laneResourceItemDst.linkInfo.bleDirect.networkId, NETWORK_ID_BUF_LEN,
+        NODE_NETWORK_ID, strlen(NODE_NETWORK_ID));
+    ret = CompLaneResource(&laneResourceItemSrc, &laneResourceItemDst);
+    EXPECT_EQ(ret, true);
+}
+
+/*
 * @tc.name: LNN_SELECT_LANE_001
 * @tc.desc: SelectLane
 * @tc.type: FUNC
@@ -896,7 +968,6 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_001, TestSize.Level1)
     LaneLinkCb cb = {
         .OnLaneLinkSuccess = OnLaneLinkSuccess,
         .OnLaneLinkFail = OnLaneLinkFail,
-        .OnLaneLinkException = OnLaneLinkException,
     };
     int32_t ret;
     LnnWifiAdpterInterfaceMock wifiMock;
@@ -909,10 +980,6 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_001, TestSize.Level1)
 
     ret = BuildLink(&reqInfo, 0, &cb);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-
-    cb.OnLaneLinkException = nullptr;
-    ret = BuildLink(&reqInfo, 0, &cb);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 
     cb.OnLaneLinkFail = nullptr;
     ret = BuildLink(&reqInfo, 0, &cb);
@@ -958,7 +1025,6 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_002, TestSize.Level1)
     LaneLinkCb cb = {
         .OnLaneLinkSuccess = OnLaneLinkSuccess,
         .OnLaneLinkFail = OnLaneLinkFail,
-        .OnLaneLinkException = OnLaneLinkException,
     };
     int32_t ret;
     NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
@@ -989,7 +1055,6 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_003, TestSize.Level1)
     LaneLinkCb cb = {
         .OnLaneLinkSuccess = OnLaneLinkSuccess,
         .OnLaneLinkFail = OnLaneLinkFail,
-        .OnLaneLinkException = OnLaneLinkException,
     };
     int32_t ret;
     LnnWifiAdpterInterfaceMock wifiMock;
@@ -1031,7 +1096,6 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_004, TestSize.Level1)
     LaneLinkCb cb = {
         .OnLaneLinkSuccess = OnLaneLinkSuccess,
         .OnLaneLinkFail = OnLaneLinkFail,
-        .OnLaneLinkException = OnLaneLinkException,
     };
 
     reqInfo.linkType = LANE_BLE;
@@ -1065,7 +1129,6 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_005, TestSize.Level1)
     LaneLinkCb cb = {
         .OnLaneLinkSuccess = OnLaneLinkSuccess,
         .OnLaneLinkFail = OnLaneLinkFail,
-        .OnLaneLinkException = OnLaneLinkException,
     };
 
     (void)memset_s(&reqInfo, sizeof(LinkRequest), 0, sizeof(LinkRequest));
@@ -1102,7 +1165,6 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_006, TestSize.Level1)
     LaneLinkCb cb = {
         .OnLaneLinkSuccess = OnLaneLinkSuccess,
         .OnLaneLinkFail = OnLaneLinkFail,
-        .OnLaneLinkException = OnLaneLinkException,
     };
     LinkRequest *request = (LinkRequest *)SoftBusCalloc(sizeof(LinkRequest));
     if (request == nullptr) {
@@ -1138,7 +1200,6 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_007, TestSize.Level1)
     LaneLinkCb cb = {
         .OnLaneLinkSuccess = OnLaneLinkSuccess,
         .OnLaneLinkFail = OnLaneLinkFail,
-        .OnLaneLinkException = OnLaneLinkException,
     };
     LinkRequest *request = (LinkRequest *)SoftBusCalloc(sizeof(LinkRequest));
     if (request == nullptr) {
@@ -1177,7 +1238,6 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_008, TestSize.Level1)
     LaneLinkCb cb = {
         .OnLaneLinkSuccess = OnLaneLinkSuccess,
         .OnLaneLinkFail = OnLaneLinkFail,
-        .OnLaneLinkException = OnLaneLinkException,
     };
 
     reqInfo.linkType = LANE_COC;
@@ -1214,7 +1274,6 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_009, TestSize.Level1)
     LaneLinkCb cb = {
         .OnLaneLinkSuccess = OnLaneLinkSuccess,
         .OnLaneLinkFail = OnLaneLinkFail,
-        .OnLaneLinkException = OnLaneLinkException,
     };
     LinkRequest *request = (LinkRequest *)SoftBusCalloc(sizeof(LinkRequest));
     if (request == nullptr) {
@@ -1253,7 +1312,6 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_010, TestSize.Level1)
     LaneLinkCb cb = {
         .OnLaneLinkSuccess = OnLaneLinkSuccess,
         .OnLaneLinkFail = OnLaneLinkFail,
-        .OnLaneLinkException = OnLaneLinkException,
     };
     ConnBleConnection *connection = (ConnBleConnection *)SoftBusCalloc(sizeof(ConnBleConnection));
     if (connection == nullptr) {
@@ -1390,7 +1448,6 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_EXPECT_LANES_BY_QOS_002, TestSize.Level1)
 HWTEST_F(LNNLaneMockTest, LNN_SELECT_EXPECT_LANE_BY_PARAMETER_001, TestSize.Level1)
 {
     NiceMock<IsLinkEnabledDepsInterfaceMock> enabledMock;
-    EXPECT_CALL(enabledMock, IsLinkEnabled).WillOnce(Return(true));
     int32_t ret = SelectExpectLaneByParameter(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
@@ -1495,7 +1552,27 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_EXPECT_LANE_BY_PARAMETER_007, TestSize.Leve
     LanePreferredLinkList linkList;
 
     EXPECT_CALL(enabledMock, IsLinkEnabled).WillOnce(Return(false)).WillOnce(Return(false)).
-        WillOnce(Return(false)).WillOnce(Return(false)).WillOnce(Return(false));
+        WillOnce(Return(false)).WillOnce(Return(false)).WillOnce(Return(false)).
+        WillOnce(Return(false)).WillOnce(Return(true));
+
+    int32_t ret = SelectExpectLaneByParameter(&linkList);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LNN_SELECT_EXPECT_LANE_BY_PARAMETER_008
+* @tc.desc: SelectExpectLaneByParameter
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_SELECT_EXPECT_LANE_BY_PARAMETER_008, TestSize.Level1)
+{
+    NiceMock<IsLinkEnabledDepsInterfaceMock> enabledMock;
+    LanePreferredLinkList linkList;
+
+    EXPECT_CALL(enabledMock, IsLinkEnabled).WillOnce(Return(false)).WillOnce(Return(false)).
+        WillOnce(Return(false)).WillOnce(Return(false)).WillOnce(Return(false)).
+        WillOnce(Return(false)).WillOnce(Return(false));
 
     int32_t ret = SelectExpectLaneByParameter(&linkList);
     EXPECT_EQ(ret, SOFTBUS_ERR);
@@ -1580,7 +1657,6 @@ HWTEST_F(LNNLaneMockTest, LANE_DETECT_RELIABILITY_001, TestSize.Level1)
     LaneLinkCb cb = {
         .OnLaneLinkSuccess = OnLaneLinkSuccess,
         .OnLaneLinkFail = OnLaneLinkFail,
-        .OnLaneLinkException = OnLaneLinkException,
     };
 
     LaneLinkInfo linkInfo;
@@ -1619,7 +1695,6 @@ HWTEST_F(LNNLaneMockTest, LANE_DETECT_RELIABILITY_002, TestSize.Level1)
     LaneLinkCb cb = {
         .OnLaneLinkSuccess = OnLaneLinkSuccess,
         .OnLaneLinkFail = OnLaneLinkFail,
-        .OnLaneLinkException = OnLaneLinkException,
     };
 
     LaneLinkInfo linkInfo;
@@ -1676,7 +1751,6 @@ HWTEST_F(LNNLaneMockTest, LANE_DETECT_RELIABILITY_003, TestSize.Level1)
     LaneLinkCb cb = {
         .OnLaneLinkSuccess = OnLaneLinkSuccess,
         .OnLaneLinkFail = OnLaneLinkFail,
-        .OnLaneLinkException = OnLaneLinkException,
     };
 
     LaneLinkInfo linkInfo;

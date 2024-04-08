@@ -30,6 +30,7 @@
 #include "lnn_device_info.h"
 #include "lnn_device_info_recovery.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_event.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_link_finder.h"
@@ -525,6 +526,7 @@ static void CompleteLeaveLNN(LnnConnectionFsm *connFsm, const char *networkId, i
     }
     NotifyLeaveResult(connFsm, networkId, retCode);
     if (needReportOffline) {
+        LnnStopOfflineTimingByHeartbeat(networkId, connInfo->addr.type);
         LnnNotifyOnlineState(false, &basic);
     } else if (retCode == SOFTBUS_OK) {
         LnnNotifySingleOffLineEvent(&connInfo->addr, &basic);
@@ -594,6 +596,21 @@ static int32_t LnnRecoveryBroadcastKey()
     return SOFTBUS_OK;
 }
 
+static void DfxRecordConnAuthStart(const AuthConnInfo *connInfo, LnnConnectionFsm *connFsm, uint32_t requestId)
+{
+    LnnEventExtra extra = { 0 };
+    LnnEventExtraInit(&extra);
+    extra.authRequestId = (int32_t)requestId;
+
+    if (connInfo != NULL) {
+        extra.authLinkType = connInfo->type;
+    }
+    if (connFsm != NULL && IsValidString(connFsm->pkgName, PKG_NAME_SIZE_MAX - 1)) {
+        extra.callerPkg = connFsm->pkgName;
+    }
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH, extra);
+}
+
 static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
 {
     int32_t rc;
@@ -633,6 +650,7 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
             }
         }
     }
+    DfxRecordConnAuthStart(&authConn, connFsm, connInfo->requestId);
     if (AuthStartVerify(&authConn, connInfo->requestId, LnnGetVerifyCallback(), true) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "auth verify device failed. [id=%{public}u]", connFsm->id);
         CompleteJoinLNN(connFsm, NULL, SOFTBUS_ERR);
@@ -747,44 +765,107 @@ static bool AuthStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para)
     return true;
 }
 
-static bool IsNodeInfoChanged(const LnnConnectionFsm *connFsm, const NodeInfo *oldNodeInfo,
-    const NodeInfo *newNodeInfo, ConnectionAddrType *type)
+static bool IsBasicNodeInfoChanged(const NodeInfo *oldNodeInfo, const NodeInfo *newNodeInfo, bool isUpdate)
 {
     if (strcmp(newNodeInfo->networkId, oldNodeInfo->networkId) != 0) {
-        LNN_LOGI(LNN_BUILDER, "networkId changed. [id=%{public}u]", connFsm->id);
-        *type = CONNECTION_ADDR_MAX;
-        (void)LnnUpdateNetworkId(newNodeInfo);
+        char *newNetworkId = NULL;
+        char *oldNetworkId = NULL;
+        Anonymize(newNodeInfo->networkId, &newNetworkId);
+        Anonymize(oldNodeInfo->networkId, &oldNetworkId);
+        LNN_LOGI(LNN_BUILDER, "networkId changed %{public}s -> %{public}s", oldNetworkId, newNetworkId);
+        AnonymizeFree(newNetworkId);
+        AnonymizeFree(oldNetworkId);
+        if (isUpdate) {
+            (void)LnnUpdateNetworkId(newNodeInfo);
+        }
         return true;
     }
-    if (connFsm->connInfo.addr.type != CONNECTION_ADDR_ETH && connFsm->connInfo.addr.type != CONNECTION_ADDR_WLAN) {
-        LNN_LOGI(LNN_BUILDER, "[id=%{public}u] type=%{public}d is not expected",
-            connFsm->id, connFsm->connInfo.addr.type);
-        return false;
+    if (strcmp(newNodeInfo->uuid, oldNodeInfo->uuid) != 0) {
+        char *newUuid = NULL;
+        char *oldUuid = NULL;
+        Anonymize(newNodeInfo->uuid, &newUuid);
+        Anonymize(oldNodeInfo->uuid, &oldUuid);
+        LNN_LOGI(LNN_BUILDER, "uuid changed %{public}s -> %{public}s", oldUuid, newUuid);
+        AnonymizeFree(newUuid);
+        AnonymizeFree(oldUuid);
+        return true;
     }
+    if (strcmp(newNodeInfo->softBusVersion, oldNodeInfo->softBusVersion) != 0) {
+        char *newSoftBusVersion = NULL;
+        char *oldSoftBusVersion = NULL;
+        Anonymize(newNodeInfo->softBusVersion, &newSoftBusVersion);
+        Anonymize(oldNodeInfo->softBusVersion, &oldSoftBusVersion);
+        LNN_LOGI(LNN_BUILDER, "uuid changed %{public}s -> %{public}s", oldSoftBusVersion, newSoftBusVersion);
+        AnonymizeFree(newSoftBusVersion);
+        AnonymizeFree(oldSoftBusVersion);
+    }
+    return false;
+}
+
+static bool IsWifiConnectInfoChanged(const NodeInfo *oldNodeInfo, const NodeInfo *newNodeInfo)
+{
     if (!LnnHasDiscoveryType(oldNodeInfo, DISCOVERY_TYPE_WIFI)) {
-        LNN_LOGI(LNN_BUILDER, "oldNodeInfo not have wifi, [id=%{public}u], discoveryType=%{public}u",
-            connFsm->id, oldNodeInfo->discoveryType);
+        LNN_LOGI(LNN_BUILDER, "oldNodeInfo not have wifi, discoveryType=%{public}u", oldNodeInfo->discoveryType);
         return false;
     }
     if (strcmp(newNodeInfo->connectInfo.deviceIp, oldNodeInfo->connectInfo.deviceIp) != 0) {
-        LNN_LOGI(LNN_BUILDER, "peer IP changed. [id=%{public}u]", connFsm->id);
-        *type = connFsm->connInfo.addr.type;
+        char *newIp = NULL;
+        char *oldIp = NULL;
+        Anonymize(newNodeInfo->connectInfo.deviceIp, &newIp);
+        Anonymize(oldNodeInfo->connectInfo.deviceIp, &oldIp);
+        LNN_LOGI(LNN_BUILDER, "peer ip changed %{public}s -> %{public}s", oldIp, newIp);
+        AnonymizeFree(newIp);
+        AnonymizeFree(oldIp);
         return true;
     }
     if (newNodeInfo->connectInfo.authPort != oldNodeInfo->connectInfo.authPort) {
-        LNN_LOGI(LNN_BUILDER, "peer auth port changed. [id=%{public}u]", connFsm->id);
-        *type = connFsm->connInfo.addr.type;
+        LNN_LOGI(LNN_BUILDER, "peer auth port changed");
         return true;
     }
     if (newNodeInfo->connectInfo.proxyPort != oldNodeInfo->connectInfo.proxyPort) {
-        LNN_LOGI(LNN_BUILDER, "peer proxy port changed. [id=%{public}u]", connFsm->id);
-        *type = connFsm->connInfo.addr.type;
+        LNN_LOGI(LNN_BUILDER, "peer auth port changed");
         return true;
     }
     if (newNodeInfo->connectInfo.sessionPort != oldNodeInfo->connectInfo.sessionPort) {
-        LNN_LOGI(LNN_BUILDER, "peer session port changed. [id=%{public}u]", connFsm->id);
-        *type = connFsm->connInfo.addr.type;
+        LNN_LOGI(LNN_BUILDER, "peer auth port changed");
         return true;
+    }
+    return false;
+}
+
+static bool IsNodeInfoChanged(const LnnConnectionFsm *connFsm, const NodeInfo *oldNodeInfo,
+    const NodeInfo *newNodeInfo, ConnectionAddrType *type)
+{
+    if (IsBasicNodeInfoChanged(oldNodeInfo, newNodeInfo, true)) {
+        *type = CONNECTION_ADDR_MAX;
+        return true;
+    }
+    if (connFsm->connInfo.addr.type == CONNECTION_ADDR_ETH || connFsm->connInfo.addr.type == CONNECTION_ADDR_WLAN) {
+        if (IsWifiConnectInfoChanged(oldNodeInfo, newNodeInfo)) {
+            *type = connFsm->connInfo.addr.type;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool LnnIsNeedCleanConnectionFsm(const NodeInfo *nodeInfo, ConnectionAddrType type)
+{
+    NodeInfo oldNodeInfo ;
+    (void)memset_s(&oldNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+
+    int32_t ret = LnnGetRemoteNodeInfoById(nodeInfo->deviceInfo.deviceUdid, CATEGORY_UDID, &oldNodeInfo);
+    if (ret != SOFTBUS_OK || !LnnIsNodeOnline(nodeInfo)) {
+        LNN_LOGW(LNN_BUILDER, "device is node online");
+        return false;
+    }
+    if (IsBasicNodeInfoChanged(&oldNodeInfo, nodeInfo, false)) {
+        return true;
+    }
+    if (type == CONNECTION_ADDR_ETH || type == CONNECTION_ADDR_WLAN) {
+        if (IsWifiConnectInfoChanged(&oldNodeInfo, nodeInfo)) {
+            return true;
+        }
     }
     return false;
 }

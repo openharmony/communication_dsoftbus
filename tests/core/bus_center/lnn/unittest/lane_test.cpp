@@ -144,11 +144,6 @@ static void NotifyWlanLinkFail(uint32_t reqId, int32_t reason)
     printf("WLAN: reqId:0x%x, fail reason:%d\n", reqId, reason);
 }
 
-static void NotifyWlanLinkException(uint32_t reqId, int32_t reason)
-{
-    printf("WLAN: reqId:0x%x, exception reason:%d\n", reqId, reason);
-}
-
 static void NotifyBrLinkSuccess(uint32_t reqId, const LaneLinkInfo *linkInfo)
 {
     EXPECT_TRUE(linkInfo->type == LANE_BR);
@@ -157,11 +152,6 @@ static void NotifyBrLinkSuccess(uint32_t reqId, const LaneLinkInfo *linkInfo)
 }
 
 static void NotifyBrLinkFail(uint32_t reqId, int32_t reason)
-{
-    printf("BR: reqId:0x%x, reason:%d\n", reqId, reason);
-}
-
-static void NotifyBrLinkException(uint32_t reqId, int32_t reason)
 {
     printf("BR: reqId:0x%x, reason:%d\n", reqId, reason);
 }
@@ -351,7 +341,6 @@ HWTEST_F(LaneTest, LANE_LINK_Test_001, TestSize.Level1)
     LaneLinkCb linkCb = {
         .OnLaneLinkSuccess = NotifyWlanLinkSuccess,
         .OnLaneLinkFail = NotifyWlanLinkFail,
-        .OnLaneLinkException = NotifyWlanLinkException,
     };
     uint32_t requestId = 0x5A5A;
     ret = BuildLink(&reqInfo, requestId, &linkCb);
@@ -377,7 +366,6 @@ HWTEST_F(LaneTest, LANE_LINK_Test_002, TestSize.Level1)
     LaneLinkCb linkCb = {
         .OnLaneLinkSuccess = NotifyBrLinkSuccess,
         .OnLaneLinkFail = NotifyBrLinkFail,
-        .OnLaneLinkException = NotifyBrLinkException,
     };
     uint32_t requestId = 0x5A5A;
     ret = BuildLink(&reqInfo, requestId, &linkCb);

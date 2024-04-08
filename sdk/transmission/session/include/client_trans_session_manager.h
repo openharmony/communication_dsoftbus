@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,6 +66,7 @@ typedef struct {
     LinkType linkType[LINK_TYPE_MAX];
     uint32_t dataConfig;
     bool isEncyptedRawStream;
+    bool isAsync;
 } SessionInfo;
 
 typedef struct {
@@ -124,6 +125,8 @@ int32_t GetEncryptByChannelId(int32_t channelId, int32_t channelType, int32_t *d
 
 int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, int32_t *sessionId);
 
+int32_t ClientGetSessionIsAsyncBySessionId(int32_t sessionId, bool *isAsync);
+
 int32_t ClientGetRouteTypeByChannelId(int32_t channelId, int32_t channelType, int32_t *routeType);
 
 int32_t ClientGetDataConfigByChannelId(int32_t channelId, int32_t channelType, uint32_t *dataConfig);
@@ -168,7 +171,8 @@ int32_t ClientAddSocketSession(const SessionParam *param, bool isEncyptedRawStre
 
 int32_t ClientSetListenerBySessionId(int32_t sessionId, const ISocketListener *listener, bool isServer);
 
-int32_t ClientIpcOpenSession(int32_t sessionId, const QosTV *qos, uint32_t qosCount, TransInfo *transInfo);
+int32_t ClientIpcOpenSession(
+    int32_t sessionId, const QosTV *qos, uint32_t qosCount, TransInfo *transInfo, bool isAsync);
 
 int32_t ClientSetSocketState(int32_t socket, uint32_t maxIdleTimeout, SessionRole role);
 
@@ -187,6 +191,11 @@ int32_t ClientGetSessionNameByChannelId(int32_t channelId, int32_t channelType, 
 int32_t ClientRawStreamEncryptDefOptGet(const char *sessionName, bool *isEncrypt);
 
 int32_t ClientRawStreamEncryptOptGet(int32_t channelId, int32_t channelType, bool *isEncrypt);
+
+int32_t SetSessionIsAsyncById(int32_t sessionId, bool isAsync);
+
+int32_t ClientTransSetChannelInfo(const char *sessionName, int32_t sessionId, int32_t channelId, int32_t channelType);
+
 #ifdef __cplusplus
 }
 #endif

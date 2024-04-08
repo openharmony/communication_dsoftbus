@@ -58,6 +58,11 @@ public:
 
 void WifiDirectDataTest::SetUpTestCase() {}
 
+static int32_t GetDeviceId(struct WifiDirectNegotiateChannel *base, char *deviceId, size_t deviceIdSize)
+{
+    return SOFTBUS_OK;
+}
+
 // interface_info.c
 /*
 * @tc.name: testGetKeySize001
@@ -2004,6 +2009,24 @@ HWTEST_F(WifiDirectDataTest, testLinkManagerRecycleLinkId002, TestSize.Level1)
     const char* remoteMac = "00:11:22:33:44:55";
     self->recycleLinkId(linkId, remoteMac);
     EXPECT_TRUE(linkId == 1);
+}
+
+/*
+* @tc.name: testDump001
+* @tc.desc: test clearNegotiateChannelForLink001
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(WifiDirectDataTest, testLinkManagerclearNegotiateChannelForLink001, TestSize.Level1)
+{
+    struct LinkManager* self = GetLinkManager();
+    LinkManagerInit();
+    struct WifiDirectNegotiateChannel *channel =
+        (struct WifiDirectNegotiateChannel *)SoftBusCalloc(sizeof(WifiDirectNegotiateChannel));
+    channel->getDeviceId = GetDeviceId;
+    enum WifiDirectLinkType linktype = WIFI_DIRECT_LINK_TYPE_P2P;
+    self->setNegotiateChannelForLink(channel, linktype);
+    EXPECT_TRUE(self != nullptr);
 }
 
 /*

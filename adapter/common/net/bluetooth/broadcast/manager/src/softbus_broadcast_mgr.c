@@ -263,7 +263,8 @@ static void BcStartBroadcastingCallback(int32_t adapterBcId, int32_t status)
 
 static void BcStopBroadcastingCallback(int32_t adapterBcId, int32_t status)
 {
-    DISC_LOGI(DISC_BLE, "enter. adapterBcId=%{public}d", adapterBcId);
+    static uint32_t callCount = 0;
+    DISC_LOGI(DISC_BLE, "enter. adapterBcId=%{public}d, callCount=%{public}u", adapterBcId, callCount++);
     for (uint32_t managerId = 0; managerId < BC_NUM_MAX; managerId++) {
         int32_t ret = SoftBusMutexLock(&g_bcLock);
         DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BLE, "mutex err!");
@@ -458,13 +459,13 @@ static bool CheckScanResultDataIsMatch(const uint32_t managerId, BroadcastPayloa
 
 static void DumpSoftbusData(const char *description, uint16_t len, const uint8_t *data)
 {
-    DISC_CHECK_AND_RETURN_LOGE(description != NULL, DISC_BLE, "data is null!");
-    DISC_CHECK_AND_RETURN_LOGE(len != 0, DISC_BLE, "len is 0!");
-    DISC_CHECK_AND_RETURN_LOGE(data != NULL, DISC_BLE, "data is null!");
+    DISC_CHECK_AND_RETURN_LOGE(description != NULL, DISC_BLE, "description is null!");
+    DISC_CHECK_AND_RETURN_LOGE(len != 0, DISC_BLE, "description=%{public}s, len is 0!", description);
+    DISC_CHECK_AND_RETURN_LOGE(data != NULL, DISC_BLE, "description=%{public}s, data is null!", description);
 
     int32_t hexLen = HEXIFY_LEN(len);
     char *softbusData = (char *)SoftBusCalloc(sizeof(char) * hexLen);
-    DISC_CHECK_AND_RETURN_LOGE(softbusData != NULL, DISC_BLE, "malloc failed!");
+    DISC_CHECK_AND_RETURN_LOGE(softbusData != NULL, DISC_BLE, "description=%{public}s, malloc failed!", description);
 
     (void)ConvertBytesToHexString(softbusData, hexLen, data, len);
     DISC_LOGD(DISC_BLE, "description=%{public}s, softbusData=%{public}s", description, softbusData);
@@ -661,7 +662,8 @@ static SoftbusScanCallback g_softbusBcBleScanCb = {
 
 int32_t RegisterBroadcaster(BaseServiceType srvType, int32_t *bcId, const BroadcastCallback *cb)
 {
-    DISC_LOGI(DISC_BLE, "enter.");
+    static uint32_t callCount = 0;
+    DISC_LOGI(DISC_BLE, "enter. callCount=%{public}u", callCount++);
     int32_t ret = SOFTBUS_OK;
     int32_t adapterBcId = -1;
     DISC_CHECK_AND_RETURN_RET_LOGE(srvType >= 0 && srvType < SRV_TYPE_BUTT, SOFTBUS_INVALID_PARAM, DISC_BLE,
@@ -807,7 +809,8 @@ static bool CheckSrvRegistered(BaseServiceType srvType)
 
 int32_t RegisterScanListener(BaseServiceType srvType, int32_t *listenerId, const ScanCallback *cb)
 {
-    DISC_LOGI(DISC_BLE, "enter.");
+    static uint32_t callCount = 0;
+    DISC_LOGI(DISC_BLE, "enter. callCount=%{public}u", callCount++);
     int32_t ret = SOFTBUS_OK;
     int32_t adapterScanId = -1;
     DISC_CHECK_AND_RETURN_RET_LOGE(srvType >= 0 && srvType < SRV_TYPE_BUTT, SOFTBUS_INVALID_PARAM, DISC_BLE,
@@ -1276,7 +1279,8 @@ static int64_t MgrGetSysTime(void)
 
 int32_t StartBroadcasting(int32_t bcId, const BroadcastParam *param, const BroadcastPacket *packet)
 {
-    DISC_LOGI(DISC_BLE, "enter. bcId=%{public}d", bcId);
+    static uint32_t callCount = 0;
+    DISC_LOGI(DISC_BLE, "enter. bcId=%{public}d, callCount=%{public}u", bcId, callCount++);
     DISC_CHECK_AND_RETURN_RET_LOGE(param != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid param!");
     DISC_CHECK_AND_RETURN_RET_LOGE(packet != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid param packet!");
     DISC_CHECK_AND_RETURN_RET_LOGE(packet->bcData.payload != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE,
@@ -1339,7 +1343,8 @@ int32_t UpdateBroadcasting(int32_t bcId, const BroadcastParam *param, const Broa
 
 int32_t SetBroadcastingData(int32_t bcId, const BroadcastPacket *packet)
 {
-    DISC_LOGI(DISC_BLE, "enter. bcId=%{public}d", bcId);
+    static uint32_t callCount = 0;
+    DISC_LOGI(DISC_BLE, "enter. bcId=%{public}d, callCount=%{public}u", bcId, callCount++);
     DISC_CHECK_AND_RETURN_RET_LOGE(packet != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid param packet!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_ERR, DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->SetBroadcastingData != NULL,
@@ -1383,7 +1388,8 @@ int32_t SetBroadcastingData(int32_t bcId, const BroadcastPacket *packet)
 
 int32_t StopBroadcasting(int32_t bcId)
 {
-    DISC_LOGI(DISC_BLE, "enter. bcId=%{public}d", bcId);
+    static uint32_t callCount = 0;
+    DISC_LOGI(DISC_BLE, "enter. bcId=%{public}d, callCount=%{public}u", bcId, callCount++);
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_ERR, DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->StopBroadcasting != NULL,
                                    SOFTBUS_ERR, DISC_BLE, "function is null!");
@@ -1506,7 +1512,8 @@ static int32_t StartScanSub(int32_t listenerId)
 
 int32_t StartScan(int32_t listenerId, const BcScanParams *param)
 {
-    DISC_LOGI(DISC_BLE, "enter. listenerId=%{public}d", listenerId);
+    static uint32_t callCount = 0;
+    DISC_LOGI(DISC_BLE, "enter. listenerId=%{public}d, callCount=%{public}u", listenerId, callCount++);
     DISC_CHECK_AND_RETURN_RET_LOGE(param != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid param!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_ERR, DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->StartScan != NULL,
@@ -1539,7 +1546,8 @@ int32_t StartScan(int32_t listenerId, const BcScanParams *param)
 
 int32_t StopScan(int32_t listenerId)
 {
-    DISC_LOGI(DISC_BLE, "enter. listenerId=%{public}d", listenerId);
+    static uint32_t callCount = 0;
+    DISC_LOGI(DISC_BLE, "enter. listenerId=%{public}d, callCount=%{public}u", listenerId, callCount++);
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_ERR, DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->StopScan != NULL,
                                    SOFTBUS_ERR, DISC_BLE, "function is null!");

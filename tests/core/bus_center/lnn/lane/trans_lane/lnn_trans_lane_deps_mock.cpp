@@ -116,5 +116,21 @@ int32_t SelectExpectLaneByParameter(LanePreferredLinkList *setRecommendLinkList)
 {
     return GetTransLaneIf()->SelectExpectLaneByParameter(setRecommendLinkList);
 }
+int32_t AddLaneBusinessInfoItem(LaneType laneType, const LaneLinkInfo *laneLinkInfo)
+{
+    return GetTransLaneIf()->AddLaneBusinessInfoItem(laneType, laneLinkInfo);
+}
+int32_t DelLaneBusinessInfoItem(LaneType laneType, const LaneLinkInfo *laneLinkInfo)
+{
+    return GetTransLaneIf()->DelLaneBusinessInfoItem(laneType, laneLinkInfo);
+}
+int32_t LaneLinkupNotify(const char *peerUdid, const LaneLinkInfo *laneLinkInfo)
+{
+    return GetTransLaneIf()->LaneLinkupNotify(peerUdid, laneLinkInfo);
+}
+int32_t LaneLinkdownNotify(const char *peerUdid, const LaneLinkInfo *laneLinkInfo)
+{
+    return GetTransLaneIf()->LaneLinkdownNotify(peerUdid, laneLinkInfo);
+}
 }
 } // namespace OHOS

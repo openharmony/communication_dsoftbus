@@ -33,7 +33,9 @@ typedef struct {
     int32_t index;
     SessionKey key;
     uint64_t lastUseTime;
+    bool isAvailable;
     ListNode node;
+    uint32_t type;
 } SessionKeyItem;
 
 static void RemoveOldKey(SessionKeyList *list)
@@ -46,17 +48,57 @@ static void RemoveOldKey(SessionKeyList *list)
     if (num <= SESSION_KEY_MAX_NUM) {
         return;
     }
-    item = LIST_ENTRY(GET_LIST_HEAD(list), SessionKeyItem, node);
-    ListDelete(&item->node);
-    AUTH_LOGI(AUTH_FSM, "session key num reach max, remove the oldest, index=%{public}d", item->index);
-    (void)memset_s(&item->key, sizeof(SessionKey), 0, sizeof(SessionKey));
-    SoftBusFree(item);
+    
+    SessionKeyItem *oldKey = NULL;
+    uint64_t oldKeyUseTime = UINT64_MAX;
+    LIST_FOR_EACH_ENTRY(item, (const ListNode *)list, SessionKeyItem, node) {
+        if (item->lastUseTime < oldKeyUseTime) {
+            oldKeyUseTime = item->lastUseTime;
+            oldKey = item;
+        }
+    }
+    if (oldKey == NULL) {
+        AUTH_LOGE(AUTH_FSM, "remove session key fail");
+        return;
+    }
+    ListDelete(&oldKey->node);
+    AUTH_LOGI(AUTH_FSM, "session key num reach max, remove the oldest, index=%{public}d, type=%{public}u",
+        oldKey->index, oldKey->type);
+    (void)memset_s(&oldKey->key, sizeof(SessionKey), 0, sizeof(SessionKey));
+    SoftBusFree(oldKey);
 }
 
 void InitSessionKeyList(SessionKeyList *list)
 {
     AUTH_CHECK_AND_RETURN_LOGE(list != NULL, AUTH_FSM, "list is NULL");
     ListInit(list);
+}
+
+static bool SessionKeyHasAuthLinkType(uint32_t authType, AuthLinkType type)
+{
+    return (authType & (1 << (uint32_t)type)) != 0;
+}
+
+static void SetAuthLinkType(uint32_t *authType, AuthLinkType type)
+{
+    *authType = (*authType) | (1 << (uint32_t)type);
+}
+
+static void ClearAuthLinkType(uint32_t *authType, AuthLinkType type)
+{
+    *authType = (*authType) & (~(1 << (uint32_t)type));
+}
+
+bool CheckSessionKeyListExistType(const SessionKeyList *list, AuthLinkType type)
+{
+    CHECK_NULL_PTR_RETURN_VALUE(list, false);
+    SessionKeyItem *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, list, SessionKeyItem, node) {
+        if (SessionKeyHasAuthLinkType(item->type, type)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 int32_t DupSessionKeyList(const SessionKeyList *srcList, SessionKeyList *dstList)
@@ -72,7 +114,7 @@ int32_t DupSessionKeyList(const SessionKeyList *srcList, SessionKeyList *dstList
             DestroySessionKeyList(dstList);
             return SOFTBUS_MALLOC_ERR;
         }
-        ListTailInsert(dstList, &newItem->node);
+        ListNodeInsert(dstList, &newItem->node);
     }
     return SOFTBUS_OK;
 }
@@ -95,24 +137,65 @@ bool HasSessionKey(const SessionKeyList *list)
     return !IsListEmpty(list);
 }
 
-int32_t AddSessionKey(SessionKeyList *list, int32_t index, const SessionKey *key)
+uint64_t GetLatestAvailableSessionKeyTime(const SessionKeyList *list)
+{
+    CHECK_NULL_PTR_RETURN_VALUE(list, 0);
+    SessionKeyItem *item = NULL;
+    SessionKeyItem *latestKey = NULL;
+    uint64_t latestTime = 0;
+    LIST_FOR_EACH_ENTRY(item, (const ListNode *)list, SessionKeyItem, node) {
+        if (!item->isAvailable) {
+            continue;
+        }
+        if (item->lastUseTime > latestTime) {
+            latestTime = item->lastUseTime;
+            latestKey = item;
+        }
+    }
+    if (latestKey == NULL) {
+        return 0;
+    }
+    AUTH_LOGI(AUTH_FSM, "find index=%{public}d, time=%{public}" PRId64 ", type=%{public}u", latestKey->index,
+        latestTime, latestKey->type);
+    return latestTime;
+}
+
+int32_t SetSessionKeyAvailable(SessionKeyList *list, int32_t index)
+{
+    CHECK_NULL_PTR_RETURN_VALUE(list, SOFTBUS_INVALID_PARAM);
+    SessionKeyItem *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, (const ListNode *)list, SessionKeyItem, node) {
+        if (item->index != index) {
+            continue;
+        }
+        item->isAvailable = true;
+        AUTH_LOGI(AUTH_FSM, "index=%{public}d, set available", index);
+        return SOFTBUS_OK;
+    }
+    AUTH_LOGE(AUTH_FSM, "can't find sessionKey, index=%{public}d", index);
+    return SOFTBUS_ERR;
+}
+
+int32_t AddSessionKey(SessionKeyList *list, int32_t index, const SessionKey *key, AuthLinkType type)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(key != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "key is NULL");
     AUTH_CHECK_AND_RETURN_RET_LOGE(list != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "list is NULL");
     AUTH_LOGD(AUTH_FSM, "keyLen=%{public}d", key->len);
-    SessionKeyItem *item = (SessionKeyItem *)SoftBusMalloc(sizeof(SessionKeyItem));
+    SessionKeyItem *item = (SessionKeyItem *)SoftBusCalloc(sizeof(SessionKeyItem));
     if (item == NULL) {
         AUTH_LOGE(AUTH_FSM, "malloc SessionKeyItem fail");
         return SOFTBUS_MALLOC_ERR;
     }
+    item->isAvailable = false;
     item->index = index;
     item->lastUseTime = GetCurrentTimeMs();
+    SetAuthLinkType(&item->type, type);
     if (memcpy_s(&item->key, sizeof(item->key), key, sizeof(SessionKey)) != EOK) {
         AUTH_LOGE(AUTH_FSM, "add session key fail");
         SoftBusFree(item);
         return SOFTBUS_MEM_ERR;
     }
-    ListTailInsert((ListNode *)list, &item->node);
+    ListNodeInsert((ListNode *)list, &item->node);
     RemoveOldKey(list);
     return SOFTBUS_OK;
 }
@@ -126,19 +209,48 @@ int32_t GetLatestSessionKey(const SessionKeyList *list, int32_t *index, SessionK
         AUTH_LOGE(AUTH_FSM, "session key list is empty");
         return SOFTBUS_ERR;
     }
-    SessionKeyItem *item = LIST_ENTRY(GET_LIST_TAIL((const ListNode *)list), SessionKeyItem, node);
-    if (item == NULL) {
+    SessionKeyItem *item = NULL;
+    SessionKeyItem *latestKey = NULL;
+    uint64_t latestTime = 0;
+    LIST_FOR_EACH_ENTRY(item, (const ListNode *)list, SessionKeyItem, node) {
+        if (!item->isAvailable) {
+            continue;
+        }
+        if (item->lastUseTime > latestTime) {
+            latestTime = item->lastUseTime;
+            latestKey = item;
+        }
+    }
+    if (latestKey == NULL) {
         AUTH_LOGE(AUTH_FSM, "invalid session key item");
         return SOFTBUS_ERR;
     }
-    if (memcpy_s(key, sizeof(SessionKey), &item->key, sizeof(item->key)) != EOK) {
+    if (memcpy_s(key, sizeof(SessionKey), &latestKey->key, sizeof(latestKey->key)) != EOK) {
         AUTH_LOGE(AUTH_FSM, "copy session key fail.");
         return SOFTBUS_MEM_ERR;
     }
-    item->lastUseTime = GetCurrentTimeMs();
-    *index = item->index;
-    AUTH_LOGI(AUTH_FSM, "get session key succ, index=%{public}d", item->index);
+    latestKey->lastUseTime = GetCurrentTimeMs();
+    *index = latestKey->index;
+    AUTH_LOGI(AUTH_FSM, "get session key succ, index=%{public}d, type=%{public}u", latestKey->index,
+        latestKey->type);
     return SOFTBUS_OK;
+}
+
+int32_t SetSessionKeyAuthLinkType(const SessionKeyList *list, int32_t index, AuthLinkType type)
+{
+    CHECK_NULL_PTR_RETURN_VALUE(list, SOFTBUS_INVALID_PARAM);
+    SessionKeyItem *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, (const ListNode *)list, SessionKeyItem, node) {
+        if (item->index != index) {
+            continue;
+        }
+        SetAuthLinkType(&item->type, type);
+        AUTH_LOGI(AUTH_FSM, "sessionKey add type, index=%{public}d, newType=%{public}d, type=%{public}u",
+            index, type, item->type);
+        return SOFTBUS_OK;
+    }
+    AUTH_LOGI(AUTH_FSM, "not found sessionKey, index=%{public}d", index);
+    return SOFTBUS_ERR;
 }
 
 int32_t GetSessionKeyByIndex(const SessionKeyList *list, int32_t index, SessionKey *key)
@@ -158,11 +270,11 @@ int32_t GetSessionKeyByIndex(const SessionKeyList *list, int32_t index, SessionK
         AUTH_LOGI(AUTH_FSM, "get session key succ, index=%{public}d", index);
         return SOFTBUS_OK;
     }
-    AUTH_LOGE(AUTH_FSM, "session key not found, index=%{public}d", index);
+    AUTH_LOGE(AUTH_FSM, "session key not found, index=%{public}d, type=%{public}u", index, item->type);
     return SOFTBUS_ERR;
 }
 
-void RemoveSessionkeyByIndex(SessionKeyList *list, int32_t index)
+void RemoveSessionkeyByIndex(SessionKeyList *list, int32_t index, AuthLinkType type)
 {
     AUTH_CHECK_AND_RETURN_LOGE(list != NULL, AUTH_FSM, "list is NULL");
     bool isFind = false;
@@ -174,10 +286,35 @@ void RemoveSessionkeyByIndex(SessionKeyList *list, int32_t index)
         }
     }
     if (isFind) {
-        ListDelete(&item->node);
-        SoftBusFree(item);
+        ClearAuthLinkType(&item->type, type);
+        if (item->type == 0) {
+            AUTH_LOGI(AUTH_FSM, "Remove Session key, index=%{public}d", index);
+            ListDelete(&item->node);
+            SoftBusFree(item);
+        } else {
+            AUTH_LOGI(AUTH_FSM, "Remove Session key type, index=%{public}d, type=%{public}u", index, item->type);
+        }
     } else {
         AUTH_LOGE(AUTH_FSM, "Remove Session key not found, index=%{public}d", index);
+    }
+}
+
+void ClearSessionkeyByAuthLinkType(int64_t authId, SessionKeyList *list, AuthLinkType type)
+{
+    CHECK_NULL_PTR_RETURN_VOID(list);
+    SessionKeyItem *item = NULL;
+    SessionKeyItem *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, list, SessionKeyItem, node) {
+        if (!SessionKeyHasAuthLinkType(item->type, type)) {
+            continue;
+        }
+        ClearAuthLinkType(&item->type, type);
+        if (item->type == 0) {
+            ListDelete(&item->node);
+            SoftBusFree(item);
+            AUTH_LOGI(AUTH_FSM, "remove sessionkey, type=%{public}d, index=%{public}d, authId=%{public}" PRId64,
+                type, item->index, authId);
+        }
     }
 }
 

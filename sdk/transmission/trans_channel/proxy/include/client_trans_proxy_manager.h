@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,7 @@ typedef struct {
     int32_t isEncrypted;
     int32_t sequence;
     char sessionKey[SESSION_KEY_LENGTH];
+    int32_t linkType;
 }ProxyChannelInfoDetail;
 
 typedef struct {
@@ -64,6 +65,8 @@ int32_t ClientTransProxyInit(const IClientSessionCallBack *cb);
 void ClientTransProxyDeinit(void);
 
 int32_t ClientTransProxyGetInfoByChannelId(int32_t channelId, ProxyChannelInfoDetail *info);
+
+int32_t ClientTransProxyGetLinkTypeByChannelId(int32_t channelId, int32_t *linkType);
 
 int32_t ClientTransProxyAddChannelInfo(ClientProxyChannelInfo *info);
 
