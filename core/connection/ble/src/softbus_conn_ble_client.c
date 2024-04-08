@@ -39,6 +39,7 @@ enum ClientLoopMsgType {
     MSG_CLIENT_DISCONNECTED,
     MSG_CLIENT_MTU_SETTED,
     MSG_CLIENT_WAIT_DISCONNECT_TIMEOUT,
+    MSG_CLIENT_WAIT_FAST_CONNECT_TIMEOUT,
 };
 
 enum RetrySearchServiceReason {
@@ -122,7 +123,9 @@ int32_t ConnGattClientConnect(ConnBleConnection *connection)
     status = SoftbusGattcRegisterCallback(&g_gattcCallback, underlayerHandle);
     CONN_CHECK_AND_RETURN_RET_LOGW(status == SOFTBUS_OK, status, CONN_BLE, "client connect %{public}u failed: convert "
         "string mac to binary fail, err=%{public}d", connection->connectionId, status);
+    bool setFastestConn = true;
     if (connection->fastestConnectEnable && SoftbusGattcSetFastestConn(underlayerHandle) != SOFTBUS_OK) {
+        setFastestConn = false;
         CONN_LOGW(CONN_BLE, "enable ble fastest connection failed, it is not a big deal, go ahead");
     }
     ConnEventExtra extra = {
@@ -131,6 +134,17 @@ int32_t ConnGattClientConnect(ConnBleConnection *connection)
         .result = EVENT_STAGE_RESULT_OK
     };
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_INVOKE_PROTOCOL, extra);
+
+    if (connection->fastestConnectEnable && setFastestConn) {
+        status = ConnPostMsgToLooper(&g_bleGattClientAsyncHandler, MSG_CLIENT_WAIT_FAST_CONNECT_TIMEOUT,
+            connection->connectionId, 0, 0, BLE_FAST_CONNECT_TIMEOUT);
+        if (status != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BLE, "post msg to looper failed: connection id=%{public}u, "
+                "underlayer handler handle=%{public}d, error=%{public}d",
+                connection->connectionId, underlayerHandle, status);
+        }
+    }
+
     status = SoftbusGattcConnect(underlayerHandle, &binaryAddr);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "client connect failed: underlayer connect failed, connectionId=%{public}u, err=%{public}d",
@@ -163,6 +177,18 @@ static void BleGattcConnStateCallback(int32_t underlayerHandle, int32_t state, i
     if (state != SOFTBUS_BT_CONNECT && state != SOFTBUS_BT_DISCONNECT) {
         return;
     }
+
+    ConnBleConnection *connection = ConnBleGetConnectionByHandle(underlayerHandle, CONN_SIDE_CLIENT, BLE_GATT);
+    if (connection == NULL) {
+        CONN_LOGE(CONN_BLE,
+            "ble client connected msg handler failed: connection not exist, "
+            "underlayer handle=%{public}d", underlayerHandle);
+        (void)SoftbusGattcUnRegister(underlayerHandle);
+        return;
+    }
+    ConnRemoveMsgFromLooper(
+        &g_bleGattClientAsyncHandler, MSG_CLIENT_WAIT_FAST_CONNECT_TIMEOUT, connection->connectionId, 0, NULL);
+    ConnBleReturnConnection(&connection);
 
     CommonStatusContext *ctx = (CommonStatusContext *)SoftBusCalloc(sizeof(CommonStatusContext));
     if (ctx == NULL) {
@@ -232,6 +258,26 @@ static void ConnectedMsgHandler(const CommonStatusContext *ctx)
     if (rc != SOFTBUS_OK) {
         g_clientEventListener.onClientFailed(connection->connectionId, rc);
     }
+    ConnBleReturnConnection(&connection);
+}
+
+static void ClientWaitFastConnectTimeoutMsgHandler(uint32_t connectionId)
+{
+    ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
+    CONN_CHECK_AND_RETURN_LOGE(connection != NULL, CONN_BLE, "connection not exist, connId=%{public}u", connectionId);
+    CONN_LOGI(CONN_BLE, "connect failed, connId=%{public}u", connectionId);
+    int32_t rc = SOFTBUS_CONN_BLE_CONNECT_TIMEOUT_ERR;
+    do {
+        int32_t status = SoftBusMutexLock(&connection->lock);
+        if (status != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BLE, "try to lock failed, connId=%{public}u, error=%{public}d", connectionId, status);
+            rc = SOFTBUS_LOCK_ERR;
+            break;
+        }
+        connection->state = BLE_CONNECTION_STATE_CLOSED;
+        (void)SoftBusMutexUnlock(&connection->lock);
+    } while (false);
+    g_clientEventListener.onClientFailed(connectionId, rc);
     ConnBleReturnConnection(&connection);
 }
 
@@ -648,6 +694,7 @@ static void DisconnectedMsgHandler(const CommonStatusContext *ctx)
         if (status != SOFTBUS_OK) {
             CONN_LOGE(CONN_BLE, "lock failed, connId=%{public}u, err=%{public}d", connectionId, status);
             rc = SOFTBUS_LOCK_ERR;
+            break;
         }
         state = connection->state;
         connection->state = BLE_CONNECTION_STATE_CLOSED;
@@ -831,6 +878,9 @@ static void BleGattClientMsgHandler(SoftBusMessage *msg)
         case MSG_CLIENT_WAIT_DISCONNECT_TIMEOUT:
             ClientWaitDiconnetTimeoutMsgHandler((uint32_t)msg->arg1);
             break;
+        case MSG_CLIENT_WAIT_FAST_CONNECT_TIMEOUT:
+            ClientWaitFastConnectTimeoutMsgHandler((uint32_t)msg->arg1);
+            break;
         default:
             CONN_LOGW(CONN_BLE,
                 "ATTENTION, ble gatt client looper receive unexpected msg just ignore, FIX "
@@ -847,7 +897,8 @@ static int BleCompareGattClientLooperEventFunc(const SoftBusMessage *msg, void *
         return COMPARE_FAILED;
     }
     switch (ctx->what) {
-        case MSG_CLIENT_WAIT_DISCONNECT_TIMEOUT: {
+        case MSG_CLIENT_WAIT_DISCONNECT_TIMEOUT:
+        case MSG_CLIENT_WAIT_FAST_CONNECT_TIMEOUT: {
             if (msg->arg1 == ctx->arg1) {
                 return COMPARE_SUCCESS;
             }
