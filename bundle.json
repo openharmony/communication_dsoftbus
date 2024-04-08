@@ -38,7 +38,6 @@
       "dsoftbus_feature_product_config_path",
       "dsoftbus_feature_ifname_prefix",
       "dsoftbus_feature_lnn_wifiservice_dependence",
-      "dsoftbus_standard_feature_dfinder_support_multi_nif",
       "dsoftbus_feature_protocol_newip",
       "dsoftbus_feature_ex_kits",
       "dsoftbus_feature_wifi_notify"
