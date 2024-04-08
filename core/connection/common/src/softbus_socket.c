@@ -313,55 +313,89 @@ int32_t ConnGetLocalSocketPort(int32_t fd)
 
 int32_t ConnGetPeerSocketAddr(int32_t fd, SocketAddr *socketAddr)
 {
-    SoftBusSockAddrIn addr;
+    SoftBusSockAddr addr;
     if (socketAddr == NULL) {
         CONN_LOGW(CONN_COMMON, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    int rc = SoftBusSocketGetPeerName(fd, (SoftBusSockAddr *)&addr);
+    int rc = SoftBusSocketGetPeerName(fd, &addr);
     if (rc != 0) {
         CONN_LOGE(CONN_COMMON, "GetPeerName fd=%{public}d, rc=%{public}d", fd, rc);
         return SOFTBUS_ERR;
     }
-    if (SoftBusInetNtoP(SOFTBUS_AF_INET, (void *)&addr.sinAddr, socketAddr->addr, sizeof(socketAddr->addr)) == NULL) {
+    const char *ret = NULL;
+    if (addr.saFamily == SOFTBUS_AF_INET6) {
+        ret = SoftBusInetNtoP(SOFTBUS_AF_INET6, (void *)&((SoftBusSockAddrIn6 *)&addr)->sin6Addr,
+            socketAddr->addr, sizeof(socketAddr->addr));
+        socketAddr->port = SoftBusNtoHs(((SoftBusSockAddrIn6 *)&addr)->sin6Port);
+    } else {
+        ret = SoftBusInetNtoP(SOFTBUS_AF_INET, (void *)&((SoftBusSockAddrIn *)&addr)->sinAddr,
+            socketAddr->addr, sizeof(socketAddr->addr));
+        socketAddr->port = SoftBusNtoHs(((SoftBusSockAddrIn *)&addr)->sinPort);
+    }
+    if (ret == NULL) {
         CONN_LOGE(CONN_COMMON, "InetNtoP fail. fd=%{public}d", fd);
         return SOFTBUS_ERR;
     }
-    socketAddr->port = SoftBusNtoHs(addr.sinPort);
     return SOFTBUS_OK;
 }
 
 int32_t ConnPreAssignPort(void)
 {
+    return ConnPreAssignPortV1(SOFTBUS_AF_INET);
+}
+
+int32_t ConnPreAssignPortV1(int32_t domain)
+{
     int socketFd = -1;
-    int ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
+    int ret = SoftBusSocketCreate(domain, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     if (ret < 0) {
         CONN_LOGE(CONN_COMMON, "create socket failed, ret=%{public}d", ret);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
     }
     int reuse = 1;
     ret = SoftBusSocketSetOpt(socketFd, SOL_SOCKET, SO_REUSEPORT, &reuse, sizeof(reuse));
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "set reuse port option failed");
         SoftBusSocketClose(socketFd);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
     }
-    SoftBusSockAddrIn addr = {
-        .sinFamily = SOFTBUS_AF_INET,
-        .sinPort = 0,
-    };
-    ret = SoftBusInetPtoN(SOFTBUS_AF_INET, "0.0.0.0", &addr.sinAddr);
-    if (ret != SOFTBUS_ADAPTER_OK) {
-        SoftBusSocketClose(socketFd);
-        CONN_LOGE(CONN_COMMON, "convert address to net order failed");
-        return SOFTBUS_ERR;
+    const char *srcAddr = NULL;
+    if (domain == SOFTBUS_AF_INET6) {
+        SoftBusSockAddrIn6 addrIn6;
+        if (memset_s(&addrIn6, sizeof(addrIn6), 0, sizeof(addrIn6)) != EOK) {
+            CONN_LOGW(CONN_COMMON, "addrIn6 memset failed");
+        }
+        addrIn6.sin6Family = domain;
+        addrIn6.sin6Port = 0;
+        srcAddr = "::";
+        ret = SoftBusInetPtoN(domain, srcAddr, &addrIn6.sin6Addr);
+        if (ret != SOFTBUS_ADAPTER_OK) {
+            SoftBusSocketClose(socketFd);
+            CONN_LOGE(CONN_COMMON, "convert address to net order failed");
+            return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
+        }
+        ret = SoftBusSocketBind(socketFd, (SoftBusSockAddr *)&addrIn6, sizeof(SoftBusSockAddrIn6));
+    } else {
+        SoftBusSockAddrIn addrIn;
+        if (memset_s(&addrIn, sizeof(addrIn), 0, sizeof(addrIn)) != EOK) {
+            CONN_LOGW(CONN_COMMON, "addrIn memset failed");
+        }
+        addrIn.sinFamily = domain;
+        addrIn.sinPort = 0;
+        srcAddr = "0.0.0.0";
+        ret = SoftBusInetPtoN(domain, srcAddr, &addrIn.sinAddr);
+        if (ret != SOFTBUS_ADAPTER_OK) {
+            SoftBusSocketClose(socketFd);
+            CONN_LOGE(CONN_COMMON, "convert address to net order failed");
+            return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
+        }
+        ret = SoftBusSocketBind(socketFd, (SoftBusSockAddr *)&addrIn, sizeof(SoftBusSockAddrIn));
     }
-
-    ret = SoftBusSocketBind(socketFd, (SoftBusSockAddr *)&addr, sizeof(SoftBusSockAddrIn));
     if (ret != SOFTBUS_ADAPTER_OK) {
         SoftBusSocketClose(socketFd);
         CONN_LOGE(CONN_COMMON, "bind address failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
     }
     return socketFd;
 }
