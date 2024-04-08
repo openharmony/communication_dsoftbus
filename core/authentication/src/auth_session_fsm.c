@@ -648,7 +648,10 @@ static void UpdateUdidHashIfEmpty(AuthFsm *authFsm, AuthSessionInfo *info)
 {
     if (info->connInfo.type == AUTH_LINK_TYPE_BLE && strlen(info->udid) != 0 &&
         authFsm->info.connInfo.info.bleInfo.deviceIdHash[0] == '\0') {
-        AUTH_LOGW(AUTH_FSM, "udidhash is empty");
+        char *anonyUdid = NULL;
+        Anonymize(info->udid, &anonyUdid);
+        AUTH_LOGW(AUTH_FSM, "udidhash is empty, udid=%{public}s", anonyUdid);
+        AnonymizeFree(anonyUdid);
         if (SoftBusGenerateStrHash((unsigned char *)info->udid, strlen(info->udid),
             (unsigned char *)authFsm->info.connInfo.info.bleInfo.deviceIdHash) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_FSM, "generate udidhash fail");
