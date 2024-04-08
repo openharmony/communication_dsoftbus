@@ -24,7 +24,6 @@ extern "C" {
 
 int32_t LnnInitNetLedger(void);
 int32_t LnnInitNetLedgerDelay(void);
-int32_t LnnInitAccountInfoDelay(void);
 void LnnDeinitNetLedger(void);
 
 #ifdef __cplusplus

@@ -48,12 +48,7 @@ int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len)
     }
     (void)memset_s(accountInfo, len * HEXIFY_UNIT_LEN, '0', len * HEXIFY_UNIT_LEN);
     uint32_t size = 0;
-    int32_t ret = GetOsAccountId(accountInfo, len * HEXIFY_UNIT_LEN, &size);
-    if (ret == SOFTBUS_NOT_LOGIN) {
-        SoftBusFree(accountInfo);
-        return SOFTBUS_OK;
-    }
-    if (ret != SOFTBUS_OK) {
+    if (GetOsAccountId(accountInfo, len * HEXIFY_UNIT_LEN, &size) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "get osAccountId fail");
         SoftBusFree(accountInfo);
         return SOFTBUS_ERR;
@@ -71,13 +66,19 @@ int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len)
 int32_t LnnInitOhosAccount(void)
 {
     uint8_t accountHash[SHA_256_HASH_LEN] = {0};
-    int32_t ret = LnnGetOhosAccountInfo(accountHash, SHA_256_HASH_LEN);
-    (void)LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN);
+
+    if (LnnGetOhosAccountInfo(accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        if (SoftBusGenerateStrHash(reinterpret_cast<const unsigned char *>(DEFAULT_USER_ID.c_str()),
+            DEFAULT_USER_ID.length(), reinterpret_cast<unsigned char *>(accountHash)) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_STATE, "InitOhosAccount generate default str hash fail");
+            return SOFTBUS_ERR;
+        }
+    }
     int64_t accountId = GetCurrentAccount();
     (void)LnnSetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, accountId);
-    LNN_LOGI(LNN_STATE, "init accountHash. accountHash[0]=%{public}02X, accountHash[1]=%{public}02X, ret=%{public}d",
-        accountHash[0], accountHash[1], ret);
-    return ret;
+    LNN_LOGD(LNN_STATE, "init accountHash. accountHash[0]=%{public}02X, accountHash[1]=%{public}02X",
+        accountHash[0], accountHash[1]);
+    return LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN);
 }
 
 void LnnUpdateOhosAccount(void)
