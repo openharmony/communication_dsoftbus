@@ -17,9 +17,6 @@ import("$DSOFTBUS_ROOT_PATH/dsoftbus.gni")
 
 NSTACKX_ROOT = "$DSOFTBUS_ROOT_PATH/components/nstackx"
 cflags = [ "-DENABLE_USER_LOG" ]
-if (dsoftbus_feature_ifname_prefix) {
-  cflags += [ "-DETH_DEV_NAME_PRE=\"br\"" ]
-}
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   if (ohos_kernel_type == "liteos_a" || ohos_kernel_type == "liteos_m") {
