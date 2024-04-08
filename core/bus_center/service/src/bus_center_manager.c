@@ -40,7 +40,7 @@
 #define WATCHDOG_TASK_NAME "LNN_WATCHDOG_TASK"
 #define WATCHDOG_INTERVAL_TIME 10000
 #define WATCHDOG_DELAY_TIME 5000
-#define DEFAULT_DELAY_LEN 1000
+#define DEFAULT_DELAY_LEN 1500
 #define RETRY_MAX 10
 
 int32_t __attribute__((weak)) InitNodeAddrAllocator(void)
@@ -58,9 +58,11 @@ void __attribute__((weak)) RouteLSDeinit(void) {}
 typedef int32_t (*LnnInitDelayImpl)(void);
 
 typedef enum {
-    INIT_LOCAL_LEDGER_DELAY_TYPE = 0,
+    INIT_ACCOUNT_INFO_DELAY_TYPE = 0,
+    INIT_LOCAL_LEDGER_DELAY_TYPE,
     INIT_NETWORK_MANAGER_DELAY_TYPE,
     INIT_NETBUILDER_DELAY_TYPE,
+    INIT_PROCESS_ACCOUNT_DELAY_TYPE,
     INIT_LANEHUB_DELAY_TYPE,
     INIT_DELAY_MAX_TYPE,
 } InitDelayType;
@@ -86,6 +88,10 @@ static void WatchdogProcess(void)
 
 static LnnLocalConfigInit g_lnnLocalConfigInit = {
     .initDelayImpl = {
+        [INIT_ACCOUNT_INFO_DELAY_TYPE] = {
+            .implInit = LnnInitAccountInfoDelay,
+            .isInit = false,
+        },
         [INIT_LOCAL_LEDGER_DELAY_TYPE] = {
             .implInit = LnnInitNetLedgerDelay,
             .isInit = false,
@@ -96,6 +102,10 @@ static LnnLocalConfigInit g_lnnLocalConfigInit = {
         },
         [INIT_NETBUILDER_DELAY_TYPE] = {
             .implInit = LnnInitNetBuilderDelay,
+            .isInit = false,
+        },
+        [INIT_PROCESS_ACCOUNT_DELAY_TYPE] = {
+            .implInit = LnnProcessAccountDelay,
             .isInit = false,
         },
         [INIT_LANEHUB_DELAY_TYPE] = {
@@ -133,6 +143,12 @@ static void BusCenterServerDelayInit(void *para)
         if (i == INIT_LANEHUB_DELAY_TYPE &&
             !g_lnnLocalConfigInit.initDelayImpl[INIT_LOCAL_LEDGER_DELAY_TYPE].isInit) {
             continue;
+        }
+        /* if init account failed for the first time, do it after retry success*/
+        if (i == INIT_PROCESS_ACCOUNT_DELAY_TYPE) {
+            if (!g_lnnLocalConfigInit.initDelayImpl[INIT_ACCOUNT_INFO_DELAY_TYPE].isInit || retry == 0) {
+                continue;
+            }
         }
         if (!g_lnnLocalConfigInit.initDelayImpl[i].isInit &&
             g_lnnLocalConfigInit.initDelayImpl[i].implInit() != SOFTBUS_OK) {

@@ -121,6 +121,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_ADD_ONLINE_NODE_Test_001, TestSize.Level
     (void)strncpy_s(info.networkId, NETWORK_ID_BUF_LEN, NODE1_NETWORK_ID, strlen(NODE1_NETWORK_ID));
     (void)strncpy_s(info.connectInfo.macAddr, MAC_LEN, NODE1_BT_MAC, strlen(NODE1_BT_MAC));
     EXPECT_TRUE(REPORT_NONE == LnnAddOnlineNode(&info));
+    DfxRecordLnnAddOnlineNodeEnd(&info, 1, SOFTBUS_OK);
 }
 
 /*
@@ -283,6 +284,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_SET_NODE_OFFLINE_Test_001, TestSize.Leve
 {
     EXPECT_TRUE(REPORT_NONE == LnnSetNodeOffline(NODE1_UDID, CONNECTION_ADDR_WLAN, AUTH_ID));
     EXPECT_TRUE(REPORT_NONE == LnnSetNodeOffline(NODE2_UDID, CONNECTION_ADDR_WLAN, AUTH_ID));
+    DfxRecordLnnSetNodeOfflineEnd(NODE1_UDID, 1, SOFTBUS_OK);
 }
 
 /*

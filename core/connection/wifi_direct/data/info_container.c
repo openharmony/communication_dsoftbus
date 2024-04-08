@@ -290,6 +290,10 @@ static void DumpStringContentWithFd(struct InfoContainerKeyProperty *keyProperty
         dprintf(fd, "%s=%s\n", keyProperty->content, WifiDirectAnonymizeIp(self->getString(self, key, "")));
     } else if (keyProperty->flag & DEVICE_ID_FLAG) {
         dprintf(fd, "%s=%s\n", keyProperty->content, WifiDirectAnonymizeDeviceId(self->getString(self, key, "")));
+    } else if (keyProperty->flag & PSK_FLAG)  {
+        dprintf(fd, "%s=%s\n", keyProperty->content, WifiDirectAnonymizePsk(self->getString(self, key, "")));
+    } else if (keyProperty->flag & SSID_FLAG) {
+        dprintf(fd, "%s=**\n", keyProperty->content);
     } else {
         dprintf(fd, "%s=%s\n", keyProperty->content, self->getString(self, key, ""));
     }
@@ -306,6 +310,11 @@ static void DumpStringContent(struct InfoContainerKeyProperty *keyProperty, stru
     } else if (keyProperty->flag & DEVICE_ID_FLAG) {
         CONN_LOGI(CONN_WIFI_DIRECT, "%{public}s=%{public}s", keyProperty->content,
             WifiDirectAnonymizeDeviceId(self->getString(self, key, "")));
+    } else if (keyProperty->flag & PSK_FLAG) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "%{public}s=%{public}s", keyProperty->content,
+            WifiDirectAnonymizePsk(self->getString(self, key, "")));
+    } else if (keyProperty->flag & SSID_FLAG) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "%{public}s=**", keyProperty->content);
     } else {
         CONN_LOGI(CONN_WIFI_DIRECT, "%{public}s=%{public}s", keyProperty->content,
             self->getString(self, key, ""));

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,9 +35,11 @@ typedef struct {
     const char *peerDeviceId;
     const char *groupId;
     const SessionAttribute *attr;
-    bool isQosLane;
     QosTV qos[QOS_TYPE_BUTT];
     uint32_t qosCount;
+    int32_t sessionId;
+    bool isQosLane;
+    bool isAsync;
 } SessionParam;
 
 typedef struct {

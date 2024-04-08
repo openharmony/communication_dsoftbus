@@ -51,7 +51,9 @@ enum InfoContainerEntryType {
 #define MAC_ADDR_FLAG (1 << 2)
 #define IP_ADDR_FLAG (1 << 2)
 #define DEVICE_ID_FLAG (1 << 3)
-#define DUMP_FLAG (1 << 4)
+#define SSID_FLAG (1 << 4)
+#define PSK_FLAG (1 << 5)
+#define DUMP_FLAG (1 << 6)
 
 struct InfoContainerKeyProperty {
     uint32_t tag;
@@ -113,7 +115,7 @@ static struct InfoContainerKeyProperty type##KeyProperties[max]
         size_t count;                                                                               \
         size_t size;                                                                                \
         bool remove;                                                                                \
-    } entries[max];
+    } entries[max]
 
 struct InfoContainer {
     INFO_CONTAINER_BASE(InfoContainer, 0);

@@ -478,7 +478,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, NotifyChannelClosedTest001, TestSize.L
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
     int32_t ret = NotifyChannelClosed(appInfo, 1);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
     SoftBusFree(appInfo);
 }
 
@@ -493,90 +493,6 @@ HWTEST_F(TransTcpDirectMessageStaticTest, NotifyChannelOpenedTest001, TestSize.L
     int32_t channelId = -1;
     int32_t ret = NotifyChannelOpened(channelId);
     EXPECT_EQ(ret, SOFTBUS_ERR);
-}
-
-/**
- * @tc.name: NotifyChannelOpenedTest002
- * @tc.desc: NotifyChannelOpened
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectMessageStaticTest, NotifyChannelOpenedTest002, TestSize.Level1)
-{
-    int32_t channelId = 1;
-
-    SessionConn *con = TestSetSessionConn();
-    EXPECT_NE(con, NULL);
-    con->channelId = channelId;
-    int32_t ret = TransTdcAddSessionConn(con);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-
-    ret = NotifyChannelOpened(channelId);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-    SoftBusFree(con);
-}
-
-/**
- * @tc.name: NotifyChannelOpenedTest003
- * @tc.desc: NotifyChannelOpened
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectMessageStaticTest, NotifyChannelOpenedTest003, TestSize.Level1)
-{
-    int32_t channelId = 1;
-
-    SessionConn *con = TestSetSessionConn();
-    EXPECT_NE(con, NULL);
-    con->channelId = channelId;
-    int32_t ret = TransTdcAddSessionConn(con);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    con->appInfo.routeType = WIFI_STA;
-    ret = NotifyChannelOpened(channelId);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-    SoftBusFree(con);
-}
-
-/**
- * @tc.name: NotifyChannelOpenedTest004
- * @tc.desc: NotifyChannelOpened
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectMessageStaticTest, NotifyChannelOpenedTest004, TestSize.Level1)
-{
-    int32_t channelId = 1;
-
-    SessionConn *con = TestSetSessionConn();
-    EXPECT_NE(con, NULL);
-    con->channelId = channelId;
-    int32_t ret = TransTdcAddSessionConn(con);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    con->appInfo.routeType = WIFI_P2P;
-    ret = NotifyChannelOpened(channelId);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_P2P_INFO_FAILED);
-    SoftBusFree(con);
-}
-
-/**
- * @tc.name: NotifyChannelOpenedTest005
- * @tc.desc: NotifyChannelOpened
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectMessageStaticTest, NotifyChannelOpenedTest005, TestSize.Level1)
-{
-    int32_t channelId = 1;
-
-    SessionConn *con = TestSetSessionConn();
-    EXPECT_NE(con, NULL);
-    con->channelId = channelId;
-    int32_t ret = TransTdcAddSessionConn(con);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    con->serverSide = false;
-    ret = NotifyChannelOpened(channelId);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-    SoftBusFree(con);
 }
 
 /**

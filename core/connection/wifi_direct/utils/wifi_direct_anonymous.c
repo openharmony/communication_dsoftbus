@@ -23,13 +23,20 @@
 #define DEVICE_ID_PREFIX_LEN 4
 #define DEVICE_ID_SUFFIX_LEN 4
 #define DEVICE_ID_BUF_LEN (DEVICE_ID_PREFIX_LEN + 2 + DEVICE_ID_SUFFIX_LEN + 1)
+#define PSK_PREFIX_LEN 1
+#define PSK_SUFFIX_LEN 3
+#define PSK_BUF_LEN (PSK_PREFIX_LEN + 2 + PSK_SUFFIX_LEN + 1)
 
 static __thread int32_t g_macIndex;
 static __thread int32_t g_ipIndex;
 static __thread int32_t g_deviceIdIndex;
+static __thread int32_t g_pskIndex;
+static __thread int32_t g_ptkIndex;
 static __thread char g_anonymousMac[ANONYMOUS_BUF_NUM][MAC_ADDR_STR_LEN];
 static __thread char g_anonymousIp[ANONYMOUS_BUF_NUM][IP_ADDR_STR_LEN];
 static __thread char g_anonymousDeviceId[ANONYMOUS_BUF_NUM][DEVICE_ID_BUF_LEN];
+static __thread char g_anonymousPsk[ANONYMOUS_BUF_NUM][WIFI_DIRECT_PSK_LEN];
+static __thread char g_anonymousPtk[ANONYMOUS_BUF_NUM][WIFI_DIRECT_PTK_LEN];
 
 const char* WifiDirectAnonymizeMac(const char *mac)
 {
@@ -78,4 +85,38 @@ const char* WifiDirectAnonymizeDeviceId(const char *deviceId)
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == EOK, NULL, CONN_WIFI_DIRECT, "copy string failed");
 
     return g_anonymousDeviceId[g_deviceIdIndex];
+}
+
+const char* WifiDirectAnonymizePsk(const char *psk)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGW(psk != NULL, "", CONN_WIFI_DIRECT, "psk is null");
+    size_t len = strlen(psk);
+    CONN_CHECK_AND_RETURN_RET_LOGW(len > PSK_BUF_LEN, "", CONN_WIFI_DIRECT, "len invalid");
+
+    g_pskIndex = (g_pskIndex + 1) % ANONYMOUS_BUF_NUM;
+    int32_t ret = strncpy_s(g_anonymousPsk[g_pskIndex], PSK_BUF_LEN, psk, PSK_PREFIX_LEN);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == EOK, NULL, CONN_WIFI_DIRECT, "copy string failed");
+    ret = strcat_s(g_anonymousPsk[g_pskIndex], PSK_BUF_LEN, "**");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == EOK, NULL, CONN_WIFI_DIRECT, "copy string failed");
+    ret = strcat_s(g_anonymousPsk[g_pskIndex], PSK_BUF_LEN, psk + len - PSK_SUFFIX_LEN);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == EOK, NULL, CONN_WIFI_DIRECT, "copy string failed");
+
+    return g_anonymousPsk[g_pskIndex];
+}
+
+const char* WifiDirectAnonymizePtk(const char *ptk)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGW(ptk != NULL, "", CONN_WIFI_DIRECT, "ptk is null");
+    size_t len = strlen(ptk);
+    CONN_CHECK_AND_RETURN_RET_LOGW(len < WIFI_DIRECT_PTK_LEN, "", CONN_WIFI_DIRECT, "len invalid");
+
+    g_ptkIndex = (g_ptkIndex + 1) % ANONYMOUS_BUF_NUM;
+    int32_t ret = strncpy_s(g_anonymousPtk[g_ptkIndex], WIFI_DIRECT_PTK_LEN, ptk, DEVICE_ID_PREFIX_LEN);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == EOK, NULL, CONN_WIFI_DIRECT, "copy string failed");
+    ret = strcat_s(g_anonymousPtk[g_ptkIndex], WIFI_DIRECT_PTK_LEN, "**");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == EOK, NULL, CONN_WIFI_DIRECT, "copy string failed");
+    ret = strcat_s(g_anonymousPtk[g_ptkIndex], WIFI_DIRECT_PTK_LEN, ptk + len - DEVICE_ID_SUFFIX_LEN);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == EOK, NULL, CONN_WIFI_DIRECT, "copy string failed");
+
+    return g_anonymousPtk[g_ptkIndex];
 }

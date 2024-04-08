@@ -55,6 +55,10 @@ static ModuleListener g_moduleListener[] = {
     {
         .module = MODULE_TIME_SYNC,
         .listener = { NULL, NULL },
+    },
+    {
+        .module = MODULE_P2P_NETWORKING_SYNC,
+        .listener = { NULL, NULL },
     }
 };
 
@@ -187,6 +191,10 @@ int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta
 /* for ProxyChannel & P2P TcpDirectchannel */
 void AuthGetLatestIdByUuid(const char *uuid, AuthLinkType type, bool isMeta, AuthHandle *authHandle)
 {
+    if (authHandle == NULL) {
+        AUTH_LOGE(AUTH_CONN, "authHandle is null");
+        return;
+    }
     authHandle->authId = AUTH_INVALID_ID;
     if (isMeta) {
         return;
@@ -210,6 +218,25 @@ int64_t AuthGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer, bool
     return AuthDeviceGetIdByUuid(uuid, type, isServer);
 }
 
+static int32_t FillAuthSessionInfo(AuthSessionInfo *info, const NodeInfo *nodeInfo, uint32_t requestId,
+    AuthDeviceKeyInfo *keyInfo, const AuthConnInfo *connInfo)
+{
+    bool isSupportNormalizedKey = IsSupportFeatureByCapaBit(nodeInfo->authCapacity, BIT_SUPPORT_NORMALIZED_LINK);
+    info->requestId = requestId;
+    info->isServer = keyInfo->isServerSide;
+    info->connId = keyInfo->keyIndex;
+    info->connInfo = *connInfo;
+    info->version = SOFTBUS_NEW_V2;
+    info->normalizedType = isSupportNormalizedKey ? NORMALIZED_SUPPORT : NORMALIZED_NOT_SUPPORT;
+    info->normalizedIndex = keyInfo->keyIndex;
+    if (strcpy_s(info->uuid, sizeof(info->uuid), nodeInfo->uuid) != EOK ||
+        strcpy_s(info->udid, sizeof(info->udid), nodeInfo->deviceInfo.deviceUdid) != EOK) {
+        AUTH_LOGE(AUTH_KEY, "restore manager fail because copy uuid/udid fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t AuthRestoreAuthManager(const char *udidHash,
     const AuthConnInfo *connInfo, uint32_t requestId, NodeInfo *nodeInfo, int64_t *authId)
 {
@@ -230,19 +257,11 @@ int32_t AuthRestoreAuthManager(const char *udidHash,
         return SOFTBUS_ERR;
     }
     AuthSessionInfo info;
-    SessionKey sessionKey;
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    SessionKey sessionKey;
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
-    bool isSupportNormalizedKey = IsSupportFeatureByCapaBit(nodeInfo->authCapacity, BIT_SUPPORT_NORMALIZED_LINK);
-    info.requestId = requestId;
-    info.isServer = keyInfo.isServerSide;
-    info.connId = keyInfo.keyIndex;
-    info.connInfo = *connInfo;
-    info.version = SOFTBUS_NEW_V2;
-    info.normalizedType = isSupportNormalizedKey ? NORMALIZED_SUPPORT : NORMALIZED_NOT_SUPPORT;
-    if (strcpy_s(info.uuid, sizeof(info.uuid), nodeInfo->uuid) != EOK ||
-        strcpy_s(info.udid, sizeof(info.udid), nodeInfo->deviceInfo.deviceUdid) != EOK) {
-        AUTH_LOGW(AUTH_KEY, "restore manager fail because copy uuid/udid fail");
+    if (FillAuthSessionInfo(&info, nodeInfo, requestId, &keyInfo, connInfo) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_KEY, "fill authSessionInfo fail");
         return SOFTBUS_ERR;
     }
     if (memcpy_s(sessionKey.value, sizeof(sessionKey.value), keyInfo.deviceKey, sizeof(keyInfo.deviceKey)) != EOK) {
@@ -251,6 +270,7 @@ int32_t AuthRestoreAuthManager(const char *udidHash,
     }
     sessionKey.len = keyInfo.keyLen;
     if (AuthManagerSetSessionKey(keyInfo.keyIndex, &info, &sessionKey, false) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_KEY, "set sessionkey fail, index=%{public}" PRId64, keyInfo.keyIndex);
         return SOFTBUS_ERR;
     }
     AuthManager *auth = GetAuthManagerByConnInfo(&info.connInfo, info.isServer);

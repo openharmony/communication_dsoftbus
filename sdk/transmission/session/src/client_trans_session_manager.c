@@ -425,7 +425,7 @@ static SessionInfo *CreateNewSession(const SessionParam *param)
     session->isEnable = false;
     session->info.flag = param->attr->dataType;
     session->isEncrypt = true;
-
+    session->isAsync =  false;
     return session;
 }
 
@@ -955,6 +955,42 @@ int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, in
 
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     TRANS_LOGE(TRANS_SDK, "not found session with channelId=%{public}d", channelId);
+    return SOFTBUS_ERR;
+}
+
+int32_t ClientGetSessionIsAsyncBySessionId(int32_t sessionId, bool *isAsync)
+{
+    if ((sessionId < 0) || (isAsync == NULL)) {
+        TRANS_LOGW(TRANS_SDK, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (g_clientSessionServerList == NULL) {
+        TRANS_LOGE(TRANS_INIT, "entry list  not init");
+        return SOFTBUS_TRANS_SESSION_SERVER_NOINIT;
+    }
+    if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != 0) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        if (IsListEmpty(&serverNode->sessionList)) {
+            continue;
+        }
+
+        LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
+            if (sessionNode->sessionId == sessionId) {
+                *isAsync = sessionNode->isAsync;
+                (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+                return SOFTBUS_OK;
+            }
+        }
+    }
+
+    (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+    TRANS_LOGE(TRANS_SDK, "not found session with sessionId=%{public}d", sessionId);
     return SOFTBUS_ERR;
 }
 
@@ -1686,18 +1722,19 @@ int32_t ClientDeleteSocketSession(int32_t sessionId)
         return SOFTBUS_OK;
     }
 
-    // calling the ipc interface by locking here may block other threads for a long time
-    ret = ServerIpcRemoveSessionServer(pkgName, sessionName);
+    ret = TryDeleteEmptySessionServer(sessionName);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "remove session server failed, ret=%{public}d.", ret);
+        TRANS_LOGE(TRANS_SDK, "delete empty session server failed, ret=%{public}d", ret);
         return ret;
     }
 
-    ret = TryDeleteEmptySessionServer(sessionName);
+    // calling the ipc interface by locking here may block other threads for a long time
+    ret = ServerIpcRemoveSessionServer(pkgName, sessionName);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "remove session server failed, ret=%{public}d", ret);
         return ret;
     }
+
     return SOFTBUS_OK;
 }
 
@@ -1794,6 +1831,7 @@ static SessionInfo *CreateNewSocketSession(const SessionParam *param)
     session->info.flag = param->attr->dataType;
     session->info.streamType = param->attr->attr.streamAttr.streamType;
     session->isEncrypt = true;
+    session->isAsync = false;
     return session;
 }
 
@@ -1919,7 +1957,23 @@ static int32_t CheckBindSocketInfo(const SessionInfo *session)
     return SOFTBUS_OK;
 }
 
-int32_t ClientIpcOpenSession(int32_t sessionId, const QosTV *qos, uint32_t qosCount, TransInfo *transInfo)
+static void FillSessionParam(SessionParam *param, SessionAttribute *tmpAttr,
+    ClientSessionServer *serverNode, SessionInfo *sessionNode)
+{
+    tmpAttr->fastTransData = NULL;
+    tmpAttr->fastTransDataSize = 0;
+    tmpAttr->dataType = sessionNode->info.flag;
+    tmpAttr->attr.streamAttr.streamType = sessionNode->info.streamType;
+    tmpAttr->linkTypeNum = 0;
+    param->sessionName = serverNode->sessionName;
+    param->peerSessionName = sessionNode->info.peerSessionName;
+    param->peerDeviceId = sessionNode->info.peerDeviceId;
+    param->groupId = "reserved";
+    param->attr = tmpAttr;
+    param->isQosLane = true;
+}
+
+int32_t ClientIpcOpenSession(int32_t sessionId, const QosTV *qos, uint32_t qosCount, TransInfo *transInfo, bool isAsync)
 {
     if (sessionId < 0 || transInfo == NULL) {
         TRANS_LOGE(TRANS_SDK, "Invalid param");
@@ -1953,19 +2007,8 @@ int32_t ClientIpcOpenSession(int32_t sessionId, const QosTV *qos, uint32_t qosCo
 
     SessionAttribute tmpAttr;
     (void)memset_s(&tmpAttr, sizeof(SessionAttribute), 0, sizeof(SessionAttribute));
-    tmpAttr.fastTransData = NULL;
-    tmpAttr.fastTransDataSize = 0;
-    tmpAttr.dataType = sessionNode->info.flag;
-    tmpAttr.attr.streamAttr.streamType = sessionNode->info.streamType;
-    tmpAttr.linkTypeNum = 0;
-    SessionParam param = {
-        .sessionName = serverNode->sessionName,
-        .peerSessionName = sessionNode->info.peerSessionName,
-        .peerDeviceId = sessionNode->info.peerDeviceId,
-        .groupId = "reserved",
-        .attr = &tmpAttr,
-        .isQosLane = true,
-    };
+    SessionParam param;
+    FillSessionParam(&param, &tmpAttr, serverNode, sessionNode);
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
 
     param.qosCount = qosCount;
@@ -1973,7 +2016,8 @@ int32_t ClientIpcOpenSession(int32_t sessionId, const QosTV *qos, uint32_t qosCo
         TRANS_LOGE(TRANS_SDK, "memcpy qos failed");
         return SOFTBUS_MEM_ERR;
     }
-
+    param.isAsync = isAsync;
+    param.sessionId = sessionId;
     ret = ServerIpcOpenSession(&param, transInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "open session ipc err: ret=%{public}d", ret);
@@ -2359,4 +2403,79 @@ int32_t ClientRawStreamEncryptOptGet(int32_t channelId, int32_t channelType, boo
     (void)SoftBusMutexUnlock(&g_clientSessionServerList->lock);
     TRANS_LOGE(TRANS_SDK, "not found session by channelId=%{public}d", channelId);
     return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+}
+
+int32_t SetSessionIsAsyncById(int32_t sessionId, bool isAsync)
+{
+    if (sessionId <= 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid sessionId");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (g_clientSessionServerList == NULL) {
+        TRANS_LOGE(TRANS_INIT, "entry list not init");
+        return SOFTBUS_TRANS_SESSION_SERVER_NOINIT;
+    }
+
+    if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != 0) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        if (IsListEmpty(&serverNode->sessionList)) {
+            continue;
+        }
+        LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
+            if (sessionNode->sessionId == sessionId) {
+                sessionNode->isAsync = isAsync;
+                (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+                return SOFTBUS_OK;
+            }
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+    return SOFTBUS_ERR;
+}
+
+int32_t ClientTransSetChannelInfo(const char *sessionName, int32_t sessionId, int32_t channelId, int32_t channelType)
+{
+    if (sessionName == NULL || sessionId <= 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid session info");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (g_clientSessionServerList == NULL) {
+        TRANS_LOGE(TRANS_INIT, "entry list not init");
+        return SOFTBUS_TRANS_SESSION_SERVER_NOINIT;
+    }
+
+    if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != 0) {
+        TRANS_LOGE(TRANS_MSG, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        if ((strcmp(serverNode->sessionName, sessionName) != 0) || IsListEmpty(&serverNode->sessionList)) {
+            continue;
+        }
+
+        LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
+            if (sessionNode->sessionId == sessionId) {
+                sessionNode->channelId = channelId;
+                sessionNode->channelType = (ChannelType)channelType;
+                (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+                return SOFTBUS_OK;
+            }
+        }
+    }
+
+    (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+    TRANS_LOGE(TRANS_MSG, "not found session info with sessionId=%{public}d", sessionId);
+    return SOFTBUS_ERR;
 }

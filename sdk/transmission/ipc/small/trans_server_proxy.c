@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -209,6 +209,8 @@ int32_t ServerIpcOpenSession(const SessionParam *param, TransInfo *info)
     WriteString(&request, param->peerSessionName);
     WriteString(&request, param->peerDeviceId);
     WriteString(&request, param->groupId);
+    WriteBool(&request, param->isAsync);
+    WriteInt32(&request, param->sessionId);
     if (!TransWriteIpcSessionAttrs(&request, param->attr)) {
         TRANS_LOGE(TRANS_SDK, "OpenSession write attr failed!");
         return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;
@@ -226,6 +228,9 @@ int32_t ServerIpcOpenSession(const SessionParam *param, TransInfo *info)
     if (ans != EC_SUCCESS) {
         TRANS_LOGE(TRANS_SDK, "callback ret=%{public}d", transSerializer.ret);
         return SOFTBUS_TRANS_PROXY_INVOKE_FAILED;
+    }
+    if (param->isAsync) {
+        return transSerializer.ret;
     }
     info->channelId = transSerializer.transInfo.channelId;
     info->channelType = transSerializer.transInfo.channelType;
@@ -274,6 +279,27 @@ int32_t ServerIpcNotifyAuthSuccess(int32_t channelId, int32_t channelType)
     if (ans != EC_SUCCESS) {
         TRANS_LOGE(TRANS_SDK, "callback ret=%{public}d", ret);
         return SOFTBUS_ERR;
+    }
+    return ret;
+}
+
+int32_t ServerIpcReleaseResources(int32_t channelId)
+{
+    uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
+    IpcIo request = {0};
+    IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
+    WriteInt32(&request, channelId);
+
+    int32_t ret = SOFTBUS_ERR;
+    /* sync */
+    if (g_serverProxy == NULL) {
+        TRANS_LOGE(TRANS_SDK, "server proxy not init");
+        return SOFTBUS_NO_INIT;
+    }
+    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_RELEASE_RESOURCES, &request, &ret, ProxyCallback);
+    if (ans != EC_SUCCESS) {
+        TRANS_LOGE(TRANS_SDK, "callback ret=%{public}d", ret);
+        return SOFTBUS_IPC_ERR;
     }
     return ret;
 }

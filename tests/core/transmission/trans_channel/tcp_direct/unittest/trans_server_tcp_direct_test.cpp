@@ -218,8 +218,9 @@ HWTEST_F(TransServerTcpDirectTest, GetCipherFlagByAuthId001, TestSize.Level1)
     AuthHandle authHandle = { .authId = 0, .type = AUTH_LINK_TYPE_WIFI };
     uint32_t flag = 0;
     bool isAuthServer = false;
+    bool isLegacyOs = false;
 
-    int32_t ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer);
+    int32_t ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer, isLegacyOs);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
@@ -236,8 +237,9 @@ HWTEST_F(TransServerTcpDirectTest, GetCipherFlagByAuthId002, TestSize.Level1)
     ASSERT_EQ(ret, SOFTBUS_OK);
     uint32_t flag = 0;
     bool isAuthServer = false;
+    bool isLegacyOs = false;
 
-    ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer);
+    ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer, isLegacyOs);
     EXPECT_EQ(ret, SOFTBUS_ERR);
     EXPECT_EQ(ret, SOFTBUS_ERR);
     EXPECT_FALSE(isAuthServer);
@@ -257,7 +259,7 @@ HWTEST_F(TransServerTcpDirectTest, StartVerifySession001, TestSize.Level1)
     ASSERT_TRUE(info != nullptr);
 
     SessionKey sessionKey;
-
+    info->connInfo.type = AUTH_LINK_TYPE_WIFI;
     int32_t ret = AuthManagerSetSessionKey(authSeq, info, &sessionKey, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 

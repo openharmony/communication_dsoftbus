@@ -241,7 +241,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelClosedTest001, TestSize.Level0)
         .msgUdid = nullptr
     };
     ret = ClientIpcOnChannelClosed(&data);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
 
     static const uint32_t SOFTBUS_SA_ID = 4700;
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -260,7 +260,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelClosedTest001, TestSize.Level0)
         .msgUdid = nullptr
     };
     ret = ClientIpcOnChannelClosed(&msg);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 
 /**

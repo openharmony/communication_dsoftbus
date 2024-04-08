@@ -28,6 +28,8 @@
 #include "softbus_server_frame.h"
 #include "softbus_trans_def.h"
 #include "trans_channel_limit.h"
+#include "trans_channel_common.h"
+#include "trans_channel_common.c"
 #include "trans_channel_manager.h"
 #include "trans_lane_pending_ctl.c"
 #include "trans_session_manager.h"
@@ -142,17 +144,17 @@ HWTEST_F(TransLaneTest, TransLaneTest002, TestSize.Level1)
     int32_t ret = TransAddLaneReqFromPendingList(laneReqId);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = TransDelLaneReqFromPendingList(invalidId);
+    ret = TransDelLaneReqFromPendingList(invalidId, false);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
-    ret = TransDelLaneReqFromPendingList(laneReqId);
+    ret = TransDelLaneReqFromPendingList(laneReqId, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     TransReqLanePendingDeinit();
     ret = TransAddLaneReqFromPendingList(laneReqId);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
-    ret = TransDelLaneReqFromPendingList(laneReqId);
+    ret = TransDelLaneReqFromPendingList(laneReqId, false);
     EXPECT_EQ(SOFTBUS_ERR, ret);
     TransReqLanePendingDeinit();
 }
@@ -187,7 +189,7 @@ HWTEST_F(TransLaneTest, TransLaneTest003, TestSize.Level1)
     ret = TransGetLaneReqItemByLaneReqId(laneReqId, &bSucc, NULL, &errCode);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
-    ret = TransDelLaneReqFromPendingList(laneReqId);
+    ret = TransDelLaneReqFromPendingList(laneReqId, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     TransReqLanePendingDeinit();
@@ -219,21 +221,21 @@ HWTEST_F(TransLaneTest, TransLaneTest004, TestSize.Level1)
     int32_t ret = TransAddLaneReqFromPendingList(laneReqId);
     ASSERT_TRUE(ret == SOFTBUS_OK);
 
-    ret = TransUpdateLaneConnInfoByLaneReqId(invalidId, bSucc, connInfo, errCode);
+    ret = TransUpdateLaneConnInfoByLaneReqId(invalidId, bSucc, connInfo, false, errCode);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
-    ret = TransUpdateLaneConnInfoByLaneReqId(laneReqId, bSucc, connInfo, errCode);
+    ret = TransUpdateLaneConnInfoByLaneReqId(laneReqId, bSucc, connInfo, false, errCode);
     EXPECT_EQ(SOFTBUS_OK, ret);
     
     connInfo->connInfo.p2p.protocol = 1;
-    ret = TransUpdateLaneConnInfoByLaneReqId(laneReqId, bSucc, connInfo, errCode);
+    ret = TransUpdateLaneConnInfoByLaneReqId(laneReqId, bSucc, connInfo, false, errCode);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = TransDelLaneReqFromPendingList(laneReqId);
+    ret = TransDelLaneReqFromPendingList(laneReqId, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
     TransReqLanePendingDeinit();
     
-    ret = TransUpdateLaneConnInfoByLaneReqId(laneReqId, bSucc, connInfo, errCode);
+    ret = TransUpdateLaneConnInfoByLaneReqId(laneReqId, bSucc, connInfo, false, errCode);
     EXPECT_EQ(SOFTBUS_ERR, ret);
     TransReqLanePendingDeinit();
     SoftBusFree(connInfo);
@@ -260,7 +262,7 @@ HWTEST_F(TransLaneTest, TransLaneTest005, TestSize.Level1)
     connInfo->connInfo.p2p.protocol = 1;
     TransOnLaneRequestSuccess(laneReqId, connInfo);
 
-    ret = TransDelLaneReqFromPendingList(laneReqId);
+    ret = TransDelLaneReqFromPendingList(laneReqId, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
     TransReqLanePendingDeinit();
     SoftBusFree(connInfo);
@@ -288,7 +290,7 @@ HWTEST_F(TransLaneTest, TransLaneTest006, TestSize.Level1)
     connInfo->connInfo.p2p.protocol = 1;
     TransOnLaneRequestFail(laneReqId, reason);
 
-    ret = TransDelLaneReqFromPendingList(laneReqId);
+    ret = TransDelLaneReqFromPendingList(laneReqId, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
     TransReqLanePendingDeinit();
     SoftBusFree(connInfo);
@@ -303,7 +305,7 @@ HWTEST_F(TransLaneTest, TransLaneTest006, TestSize.Level1)
 HWTEST_F(TransLaneTest, TransLaneTest007, TestSize.Level1)
 {
     uint32_t laneReqId = 1;
-    LaneState state = LANE_STATE_EXCEPTION;
+    LaneState state = LANE_STATE_LINKUP;
     TransOnLaneStateChange(laneReqId, state);
 
     int32_t ret = GetStreamLaneType(RAW_STREAM);
@@ -456,13 +458,13 @@ HWTEST_F(TransLaneTest, TransLaneTest012, TestSize.Level1)
 
     LaneConnInfo connInfo;
     connInfo.type = LANE_WLAN_5G;
-    ret = TransUpdateLaneConnInfoByLaneReqId(laneReqId, bSucc, &connInfo, SOFTBUS_OK);
+    ret = TransUpdateLaneConnInfoByLaneReqId(laneReqId, bSucc, &connInfo, false, SOFTBUS_OK);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransWaitingRequestCallback(laneReqId);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    (void)TransDelLaneReqFromPendingList(laneReqId);
+    (void)TransDelLaneReqFromPendingList(laneReqId, false);
     TransReqLanePendingDeinit();
 
     ret = TransWaitingRequestCallback(laneReqId);
@@ -513,7 +515,7 @@ HWTEST_F(TransLaneTest, TransLaneTest013, TestSize.Level1)
     ret = TransAddLaneReqToPendingAndWaiting(laneMgr, laneReqId, &requestOption);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
-    (void)TransDelLaneReqFromPendingList(laneReqId);
+    (void)TransDelLaneReqFromPendingList(laneReqId, false);
     LnnDeinitDistributedLedger();
     TransReqLanePendingDeinit();
 }
@@ -543,7 +545,7 @@ HWTEST_F(TransLaneTest, TransLaneTest014, TestSize.Level1)
     ret = TransGetLaneInfoByOption(false, &requestOption, &connInfo, &laneReqId);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
-    ret = TransUpdateLaneConnInfoByLaneReqId(laneReqId, true, &connInfo, errCode);
+    ret = TransUpdateLaneConnInfoByLaneReqId(laneReqId, true, &connInfo, false, errCode);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     ret = TransGetLaneInfoByOption(false, &requestOption, &connInfo, &laneReqId);

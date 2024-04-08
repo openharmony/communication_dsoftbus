@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -175,6 +175,8 @@ int32_t ServerOpenSession(IpcIo *req, IpcIo *reply)
     param.peerSessionName = (const char *)ReadString(req, &size);
     param.peerDeviceId = (const char *)ReadString(req, &size);
     param.groupId = (const char *)ReadString(req, &size);
+    ReadBool(req, &param.isAsync);
+    ReadInt32(req, &param.sessionId);
     ServerReadSessionAttrs(req, &getAttr);
     param.attr = &getAttr;
 
@@ -296,5 +298,22 @@ int32_t ServerSendSessionMsg(IpcIo *req, IpcIo *reply)
     const void *data = (const void *)ReadBuffer(req, size);
     int32_t ret = TransSendMsg(channelId, channelType, data, size, msgType);
     WriteInt32(reply, ret);
+    return ret;
+}
+
+int32_t ServerReleaseResources(IpcIo *req, IpcIo *reply)
+{
+    TRANS_LOGI(TRANS_CTRL, "ipc server pop");
+    if (req == NULL || reply == NULL) {
+        TRANS_LOGW(TRANS_CTRL, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t channelId = 0;
+    if (!ReadInt32(req, &channelId)) {
+        TRANS_LOGE(TRANS_CTRL, "failed to read channelId");
+        return SOFTBUS_IPC_ERR;
+    }
+
+    int32_t ret = TransReleaseUdpResources(channelId);
     return ret;
 }

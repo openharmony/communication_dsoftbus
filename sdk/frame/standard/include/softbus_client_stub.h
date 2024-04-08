@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,6 +40,7 @@ public:
         uint32_t len, int32_t type) override;
     int32_t OnChannelQosEvent(int32_t channelId, int32_t channelType, int32_t eventId, int32_t tvCount,
         const QosTv *tvList) override;
+    int32_t SetChannelInfo(const char *sessionName, int32_t sessionId, int32_t channelId, int32_t channelType) override;
     int32_t OnJoinLNNResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode) override;
     int32_t OnLeaveLNNResult(const char *networkId, int retCode) override;
     int32_t OnNodeOnlineStateChanged(const char *pkgName, bool isOnline, void *info, uint32_t infoTypeLen) override;
@@ -61,6 +62,7 @@ private:
     int32_t OnChannelClosedInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnChannelMsgReceivedInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnChannelQosEventInner(MessageParcel &data, MessageParcel &reply);
+    int32_t SetChannelInfoInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnJoinLNNResultInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnLeaveLNNResultInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnNodeOnlineStateChangedInner(MessageParcel &data, MessageParcel &reply);

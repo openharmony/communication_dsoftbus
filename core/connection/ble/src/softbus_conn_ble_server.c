@@ -24,6 +24,8 @@
 #include "softbus_conn_ble_manager.h"
 #include "softbus_conn_common.h"
 #include "softbus_def.h"
+#include "softbus_errcode.h"
+#include "softbus_type_def.h"
 #include "softbus_utils.h"
 
 enum GattServerState {
@@ -104,7 +106,7 @@ static int BleCompareGattServerLooperEventFunc(const SoftBusMessage *msg, void *
 static const int32_t MAX_SERVICE_CHAR_NUM = 8;
 static SoftBusHandlerWrapper g_bleGattServerAsyncHandler = {
     .handler = {
-        .name = (char *)("BleGattServerAsyncHandler"),
+        .name = "BleGattServerAsyncHandler",
         .HandleMessage = BleGattServerMsgHandler,
         // assign when initiation
         .looper = NULL,
@@ -157,7 +159,11 @@ static void ResetServerState()
         SoftBusGattsDeleteService(serviceHandle);
     }
     ConnRemoveMsgFromLooper(&g_bleGattServerAsyncHandler, MSG_SERVER_WAIT_START_SERVER_TIMEOUT, 0, 0, NULL);
-    SoftBusUnRegisterGattsCallbacks();
+    SoftBusBtUuid uuid = {
+        .uuid = SOFTBUS_SERVICE_UUID,
+        .uuidLen = strlen(SOFTBUS_SERVICE_UUID),
+    };
+    SoftBusUnRegisterGattsCallbacks(uuid);
 }
 
 int32_t ConnGattServerStartService(void)
@@ -182,7 +188,7 @@ int32_t ConnGattServerStartService(void)
         return status;
     }
     SoftBusBtUuid uuid = {
-        .uuid = (char *)SOFTBUS_SERVICE_UUID,
+        .uuid = SOFTBUS_SERVICE_UUID,
         .uuidLen = strlen(SOFTBUS_SERVICE_UUID),
     };
     status = SoftBusGattsAddService(uuid, true, MAX_SERVICE_CHAR_NUM);
@@ -200,7 +206,6 @@ static void BleServiceAddCallback(int32_t status, SoftBusBtUuid *uuid, int32_t s
 {
     CONN_LOGI(CONN_BLE,
         "gatt server callback, server added, srvcHandle=%{public}u, status=%{public}d", srvcHandle, status);
-    CONN_CHECK_AND_RETURN_LOGE(uuid != NULL, CONN_BLE, "uuid is null");
     ServiceAddMsgContext *ctx = (ServiceAddMsgContext *)SoftBusCalloc(sizeof(ServiceAddMsgContext) + uuid->uuidLen);
     CONN_CHECK_AND_RETURN_LOGE(ctx != NULL, CONN_BLE,
         "receive gatt server callback, server added handle failed: calloc service add msg context failed");
@@ -227,6 +232,7 @@ static void BleServiceAddMsgHandler(const ServiceAddMsgContext *ctx)
         if (ctx->uuid.uuidLen != strlen(SOFTBUS_SERVICE_UUID) ||
             memcmp(ctx->uuid.uuid, SOFTBUS_SERVICE_UUID, ctx->uuid.uuidLen) != 0) {
             rc = SOFTBUS_CONN_BLE_UNDERLAY_UNKNOWN_SERVICE_ERR;
+            CONN_LOGE(CONN_BLE, "unknow service id, err=%{public}d", rc);
             break;
         }
         if (ctx->status != SOFTBUS_OK) {
@@ -254,8 +260,8 @@ static void BleServiceAddMsgHandler(const ServiceAddMsgContext *ctx)
         };
         rc = SoftBusGattsAddCharacteristic(ctx->srvcHandle, uuid,
             SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_READ | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE_NO_RSP |
-                SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_NOTIFY |
-                SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_INDICATE,
+            SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_NOTIFY |
+            SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_INDICATE,
             SOFTBUS_GATT_PERMISSION_READ | SOFTBUS_GATT_PERMISSION_WRITE);
         if (rc != SOFTBUS_OK) {
             CONN_LOGW(CONN_BLE, "underlayer add characteristic failed, err=%{public}d", rc);
@@ -279,8 +285,9 @@ static void BleServiceAddMsgHandler(const ServiceAddMsgContext *ctx)
 static void BleCharacteristicAddCallback(
     int32_t status, SoftBusBtUuid *uuid, int32_t srvcHandle, int32_t characteristicHandle)
 {
-    CONN_LOGI(CONN_BLE, "gatt server callback, characteristic added, srvcHandle=%{public}u,"
-        "characteristicHandle=%{public}d, status=%{public}d", srvcHandle, characteristicHandle, status);
+    CONN_LOGI(CONN_BLE, "gatt server callback, characteristic added, srvcHandle=%{public}u, "
+        "characteristicHandle=%{public}u, status=%{public}d",
+        srvcHandle, characteristicHandle, status);
     CharacteristicAddMsgContext *ctx =
         (CharacteristicAddMsgContext *)SoftBusCalloc(sizeof(CharacteristicAddMsgContext) + uuid->uuidLen);
     CONN_CHECK_AND_RETURN_LOGE(ctx != NULL, CONN_BLE, "calloc characteristic add msg failed");
@@ -361,7 +368,7 @@ static void BleCharacteristicAddMsgHandler(const CharacteristicAddMsgContext *ct
         }
 
         SoftBusBtUuid uuid = {
-            .uuid = (char *)SOFTBUS_DESCRIPTOR_CONFIGURE_UUID,
+            .uuid = SOFTBUS_DESCRIPTOR_CONFIGURE_UUID,
             .uuidLen = strlen(SOFTBUS_DESCRIPTOR_CONFIGURE_UUID),
         };
         rc = SoftBusGattsAddDescriptor(
@@ -383,6 +390,7 @@ static void BleCharacteristicAddMsgHandler(const CharacteristicAddMsgContext *ct
         g_serverEventListener.onServerStarted(BLE_GATT, rc);
     }
 }
+
 
 static void BleDescriptorAddCallback(int32_t status, SoftBusBtUuid *uuid, int32_t srvcHandle, int32_t descriptorHandle)
 {
@@ -416,7 +424,7 @@ static void BleDescriptorAddMsgHandler(DescriptorAddMsgContext *ctx)
         if (ctx->uuid.uuidLen != strlen(SOFTBUS_DESCRIPTOR_CONFIGURE_UUID) ||
             memcmp(ctx->uuid.uuid, SOFTBUS_DESCRIPTOR_CONFIGURE_UUID, ctx->uuid.uuidLen) != 0) {
             rc = SOFTBUS_CONN_BLE_UNDERLAY_UNKNOWN_DESCRIPTOR_ERR;
-            CONN_LOGE(CONN_BLE, "unkown descriptor");
+            CONN_LOGE(CONN_BLE, "unkown desciptor uuid, err=%{public}d", rc);
             break;
         }
         rc = SoftBusMutexLock(&g_serverState.lock);
@@ -466,7 +474,7 @@ static int32_t BleNetDescriptorAddMsgHandler(DescriptorAddMsgContext *ctx)
         return rc;
     }
     SoftBusBtUuid uuid = {
-        .uuid = (char *)SOFTBUS_CHARA_BLECONN_UUID,
+        .uuid = SOFTBUS_CHARA_BLECONN_UUID,
         .uuidLen = strlen(SOFTBUS_CHARA_BLECONN_UUID),
     };
     rc = SoftBusGattsAddCharacteristic(ctx->srvcHandle, uuid,
@@ -478,8 +486,8 @@ static int32_t BleNetDescriptorAddMsgHandler(DescriptorAddMsgContext *ctx)
         CONN_LOGE(CONN_BLE, "underlayer add characteristic failed, err=%{public}d", rc);
         return SOFTBUS_CONN_BLE_UNDERLAY_CHARACTERISTIC_ADD_ERR;
     }
-    rc =
-        UpdateBleServerStateInOrder(BLE_SERVER_STATE_NET_DISCRIPTOR_ADDED, BLE_SERVER_STATE_CONN_CHARACTERISTIC_ADDING);
+    rc = UpdateBleServerStateInOrder(
+        BLE_SERVER_STATE_NET_DISCRIPTOR_ADDED, BLE_SERVER_STATE_CONN_CHARACTERISTIC_ADDING);
     if (rc != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "update server state failed, err=%{public}d", ctx->status);
         return rc;
@@ -590,7 +598,6 @@ static void BleServerWaitStartServerTimeoutHandler(void)
     }
 }
 
-// server accepted(be connected) not need switch thread, as it just save the connection globally
 static void BleConnectServerCallback(int32_t underlayerHandle, const SoftBusBtAddr *btAddr)
 {
     CONN_LOGI(CONN_BLE,
@@ -613,14 +620,14 @@ static void BleConnectServerCallback(int32_t underlayerHandle, const SoftBusBtAd
 
     ConnBleConnection *connection = ConnBleGetConnectionByHandle(underlayerHandle, CONN_SIDE_SERVER, BLE_GATT);
     if (connection != NULL) {
-        CONN_LOGI(CONN_BLE, "connection exist, ignore, connId=%{public}u, address=%{public}s",
-            connection->connectionId, anomizeAddress);
+        CONN_LOGI(CONN_BLE, "server connected handle trace, connection exist, ignore, connection id=%{public}u,"
+            "address=%{public}s", connection->connectionId, anomizeAddress);
         ConnBleReturnConnection(&connection);
         return;
     }
     connection = ConnBleCreateConnection(address, BLE_GATT, CONN_SIDE_SERVER, underlayerHandle, false);
     if (connection == NULL) {
-        CONN_LOGE(CONN_BLE, "create connection failed, disconnect this connection, address=%{public}s", anomizeAddress);
+        CONN_LOGI(CONN_BLE, "create connection failed,disconnect this connection,address=%{public}s", anomizeAddress);
         SoftBusGattsDisconnect(*btAddr, underlayerHandle);
         return;
     }
@@ -648,12 +655,10 @@ static void BleMtuChangeCallback(int32_t underlayerHandle, int32_t mtu)
     }
     ConnRemoveMsgFromLooper(
         &g_bleGattServerAsyncHandler, MSG_SERVER_WAIT_MTU_TIMEOUT, connection->connectionId, 0, NULL);
-
     int32_t status = SoftBusMutexLock(&connection->lock);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "try to lock failed, connId=%{public}u, err=%{public}d", connection->connectionId, status);
         if (ConnGattServerDisconnect(connection) != SOFTBUS_OK) {
-            // if failed, notify connect disconnet directly, manager will remove connection
             g_serverEventListener.onServerConnectionClosed(
                 connection->connectionId, SOFTBUS_CONN_BLE_DISCONNECT_DIRECTLY_ERR);
             ConnBleReturnConnection(&connection);
@@ -670,8 +675,8 @@ static void BleMtuChangeCallback(int32_t underlayerHandle, int32_t mtu)
 static void BleServerWaitMtuTimeoutHandler(uint32_t connectionId)
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
-    CONN_CHECK_AND_RETURN_LOGW(connection != NULL, CONN_BLE,
-        "ble server wait mtu timeout handle failed: connection not exist, connId=%{public}u", connectionId);
+    CONN_CHECK_AND_RETURN_LOGE(connection != NULL, CONN_BLE, "ble server wait mtu timeout handle failed:connection "
+        "not exist, connId=%{public}u", connectionId);
     int32_t status = ConnGattServerDisconnect(connection);
     CONN_LOGI(CONN_BLE, "ble server wait mtu timeout, disconnect connection, connId=%{public}u, status=%{public}d",
         connectionId, status);
@@ -701,7 +706,8 @@ int32_t ConnGattServerStopService(void)
                 status = SOFTBUS_CONN_BLE_UNDERLAY_SERVICE_STOP_ERR;
                 break;
             }
-            status = UpdateBleServerStateInOrder(BLE_SERVER_STATE_SERVICE_STARTED, BLE_SERVER_STATE_SERVICE_STOPPING);
+            status = UpdateBleServerStateInOrder(
+                BLE_SERVER_STATE_SERVICE_STARTED, BLE_SERVER_STATE_SERVICE_STOPPING);
             if (status != SOFTBUS_OK) {
                 CONN_LOGE(CONN_BLE, "update server state failed, err=%{public}d", status);
                 break;
@@ -718,7 +724,7 @@ int32_t ConnGattServerStopService(void)
     if (status != SOFTBUS_OK) {
         ConnRemoveMsgFromLooper(&g_bleGattServerAsyncHandler, MSG_SERVER_WAIT_START_SERVER_TIMEOUT, 0, 0, NULL);
         ResetServerState();
-        // After a service is forcibly stopped, the service is successfully stopped
+        // After a service is forcibly stopped, the service is successfully stopped.
         g_serverEventListener.onServerClosed(BLE_GATT, SOFTBUS_OK);
         status = SOFTBUS_OK;
     }
@@ -783,7 +789,6 @@ static void BleServiceStopMsgHandler(CommonStatusMsgContext *ctx)
     if (rc != SOFTBUS_OK) {
         ResetServerState();
         ConnRemoveMsgFromLooper(&g_bleGattServerAsyncHandler, MSG_SERVER_WAIT_STOP_SERVER_TIMEOUT, 0, 0, NULL);
-        // After a service is forcibly stopped, the service is successfully stopped
         g_serverEventListener.onServerClosed(BLE_GATT, SOFTBUS_OK);
     }
 }
@@ -831,14 +836,17 @@ static void BleServiceDeleteMsgHandler(const CommonStatusMsgContext *ctx)
         g_serverState.netCharacteristicHandle = -1;
         g_serverState.netDescriptorHandle = -1;
         (void)SoftBusMutexUnlock(&g_serverState.lock);
-        SoftBusUnRegisterGattsCallbacks();
+        SoftBusBtUuid uuid = {
+            .uuid = SOFTBUS_SERVICE_UUID,
+            .uuidLen = strlen(SOFTBUS_SERVICE_UUID),
+        };
+        SoftBusUnRegisterGattsCallbacks(uuid);
     } while (false);
 
     if (rc != SOFTBUS_OK) {
         ResetServerState();
     }
     ConnRemoveMsgFromLooper(&g_bleGattServerAsyncHandler, MSG_SERVER_WAIT_STOP_SERVER_TIMEOUT, 0, 0, NULL);
-    // After a service is forcibly stopped, the service is successfully stopped
     g_serverEventListener.onServerClosed(BLE_GATT, SOFTBUS_OK);
 }
 
@@ -965,7 +973,8 @@ int32_t ConnGattServerDisconnect(ConnBleConnection *connection)
         ConnPostMsgToLooper(&g_bleGattServerAsyncHandler, MSG_SERVER_WAIT_DICONNECT_TIMEOUT, connection->connectionId,
             0, NULL, UNDERLAY_CONNECTION_DISCONNECT_TIMEOUT);
     }
-    CONN_LOGI(CONN_BLE, "ble server connection %{public}u disconnect, handle=%{public}d, status=%{public}d",
+    CONN_LOGI(CONN_BLE,
+        "ble server connection disconnect, connectionId=%{public}u, handle=%{public}d, status=%{public}d",
         connection->connectionId, underlayerHandle, status);
     return status;
 }
@@ -1036,6 +1045,7 @@ static void BleRequestWriteCallback(SoftBusGattWriteRequest writeCbPara)
     if (writeCbPara.needRsp) {
         BleSendGattRsp(&writeCbPara);
     }
+
     if (writeCbPara.attrHandle == g_serverState.netDescriptorHandle ||
         writeCbPara.attrHandle == g_serverState.connDescriptorHandle) {
         return;
@@ -1043,7 +1053,9 @@ static void BleRequestWriteCallback(SoftBusGattWriteRequest writeCbPara)
     int32_t underlayerHandle = writeCbPara.connId;
     ConnBleConnection *connection = ConnBleGetConnectionByHandle(underlayerHandle, CONN_SIDE_SERVER, BLE_GATT);
     if (connection == NULL) {
-        CONN_LOGE(CONN_BLE, "connection not exist,  underlayer handle=%{public}d", underlayerHandle);
+        CONN_LOGE(CONN_BLE,
+            "gatt server callback, request write failed: connection not exist, underlayer handle=%{public}d",
+            underlayerHandle);
         return;
     }
 
@@ -1053,8 +1065,9 @@ static void BleRequestWriteCallback(SoftBusGattWriteRequest writeCbPara)
     } else if (writeCbPara.attrHandle == g_serverState.connCharacteristicHandle) {
         isConnCharacteristic = true;
     } else {
-        CONN_LOGE(CONN_BLE, "not NET or CONN characteristic, connId=%{public}u, underlayeHandle=%{public}d, "
-              "attrHandle=%{public}d, netCharateristicHandle=%{public}d, connCharateristicHandle=%{public}d",
+        CONN_LOGE(CONN_BLE,
+            "request write failed: not NET or CONN characteristic, connId=%{public}u, underlayerHandle=%{public}d, "
+            "attrHandle=%{public}d, netCharateristicHandle=%{public}d, connCharateristicHandle=%{public}d",
             connection->connectionId, underlayerHandle, writeCbPara.attrHandle, g_serverState.netCharacteristicHandle,
             g_serverState.connCharacteristicHandle);
         ConnBleReturnConnection(&connection);
@@ -1169,30 +1182,36 @@ static int32_t BleRegisterGattServerCallback(void)
         .NotifySentCallback = BleNotifySentCallback,
         .MtuChangeCallback = BleMtuChangeCallback,
     };
-    return SoftBusRegisterGattsCallbacks(&bleGattsCallback);
+    SoftBusBtUuid serviceUuid = {
+        .uuid = SOFTBUS_SERVICE_UUID,
+        .uuidLen = strlen(SOFTBUS_SERVICE_UUID),
+    };
+    return SoftBusRegisterGattsCallbacks(&bleGattsCallback, serviceUuid, DEFAULT_MTU_SIZE);
 }
 
 int32_t ConnGattInitServerModule(SoftBusLooper *looper, const ConnBleServerEventListener *listener)
 {
-    CONN_CHECK_AND_RETURN_RET_LOGW(looper != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT,
-        "init ble server failed, invalid param, looper is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(looper != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT, "invalid param, looper is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(listener != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT,
-        "init ble server failed, invalid param, listener is null");
+        "invalid param, listener is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(listener->onServerStarted != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT,
-        "init ble server failed, invalid param, listener onServerStarted is null");
+        "invalid param, listener onServerStarted is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(listener->onServerClosed != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT,
-        "init ble server failed, invalid param, listener onServerClosed is null");
+        "invalid param, listener onServerClosed is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(listener->onServerAccepted != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT,
-        "init ble server failed, invalid param, listener onServerAccepted is null");
+        "invalid param, listener onServerAccepted is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(listener->onServerDataReceived != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT,
-        "init ble server failed, invalid param, listener onServerDataReceived is null");
+        "invalid param, listener onServerDataReceived is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(listener->onServerConnectionClosed != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT,
-        "init ble server failed, invalid param, listener onServerConnectionClosed is null");
-
-    int32_t status = SoftBusMutexInit(&g_serverState.lock, NULL);
+        "invalid param, listener onServerConnectionClosed is null");
+    int32_t status = InitSoftbusAdapterServer();
+    CONN_CHECK_AND_RETURN_RET_LOGW(status == SOFTBUS_OK, status, CONN_INIT,
+        "init softbus adapter failed, err=%{public}d", status);
+    status = SoftBusMutexInit(&g_serverState.lock, NULL);
     CONN_CHECK_AND_RETURN_RET_LOGW(status == SOFTBUS_OK, status, CONN_INIT,
         "init ble server failed: init server state lock failed, err=%{public}d", status);
     g_bleGattServerAsyncHandler.handler.looper = looper;
     g_serverEventListener = *listener;
+
     return SOFTBUS_OK;
 }

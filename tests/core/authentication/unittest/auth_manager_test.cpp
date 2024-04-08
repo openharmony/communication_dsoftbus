@@ -269,8 +269,8 @@ HWTEST_F(AuthManagerTest, AUTH_MANAGER_GET_SESSION_KEY_TEST_001, TestSize.Level1
     info.version = SOFTBUS_OLD_V2;
     EXPECT_TRUE(AuthManagerSetSessionKey(AUTH_SEQ_1, &info, &sessionKey, true) == SOFTBUS_OK);
     EXPECT_TRUE(AuthManagerGetSessionKey(AUTH_SEQ_1, &info, &tmpKey) == SOFTBUS_OK);
-    RemoveAuthSessionKeyByIndex(AUTH_SEQ_3, KEY_INDEX);
-    RemoveAuthSessionKeyByIndex(AUTH_SEQ_1, KEY_INDEX);
+    RemoveAuthSessionKeyByIndex(AUTH_SEQ_3, KEY_INDEX, AUTH_LINK_TYPE_BLE);
+    RemoveAuthSessionKeyByIndex(AUTH_SEQ_1, KEY_INDEX, AUTH_LINK_TYPE_BLE);
     AuthHandle authHandle1 = {.authId = AUTH_SEQ_3, .type = AUTH_LINK_TYPE_BLE};
     AuthHandle authHandle2 = {.authId = AUTH_SEQ_1, .type = AUTH_LINK_TYPE_WIFI};
     RemoveAuthManagerByAuthId(authHandle1);
@@ -399,11 +399,11 @@ HWTEST_F(AuthManagerTest, HANDLE_RECONNECT_RESULT_TEST_001, TestSize.Level1)
     EXPECT_TRUE(AddAuthRequest(&request) == SOFTBUS_OK);
     HandleBleConnectResult(REQUEST_ID_1, AUTH_SEQ, CONN_ID, SOFTBUS_OK, 0);
     HandleBleConnectResult(REQUEST_ID, AUTH_SEQ, CONN_ID, SOFTBUS_OK, 0);
-    DfxRecordLnnConnectEnd(CONN_ID_1, nullptr, SOFTBUS_OK);
+    DfxRecordLnnConnectEnd(REQUEST_ID_1, CONN_ID_1, nullptr, SOFTBUS_OK);
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     connInfo.type = AUTH_LINK_TYPE_WIFI;
-    DfxRecordLnnConnectEnd(CONN_ID_1, &connInfo, SOFTBUS_OK);
+    DfxRecordLnnConnectEnd(REQUEST_ID_1, CONN_ID_1, &connInfo, SOFTBUS_OK);
     OnConnectResult(REQUEST_ID_1, CONN_ID_1, SOFTBUS_OK, &connInfo);
     OnConnectResult(REQUEST_ID, CONN_ID_1, SOFTBUS_OK, &connInfo);
     connInfo.type = AUTH_LINK_TYPE_BLE;
@@ -475,7 +475,7 @@ HWTEST_F(AuthManagerTest, AUTH_DEVICE_GET_P2P_CONN_INFO_TEST_001, TestSize.Level
 {
     uint64_t connId = CONN_ID;
     HandleDisconnectedEvent(reinterpret_cast<void *>(&connId));
-    AuthHandle authHandle = { .authId = AUTH_SEQ_1, .type = AUTH_LINK_TYPE_BLE };
+    AuthHandle authHandle = { .authId = AUTH_SEQ_1, .type = AUTH_LINK_TYPE_WIFI };
     AuthHandleLeaveLNN(authHandle);
     authHandle.authId = AUTH_SEQ;
     AuthHandleLeaveLNN(authHandle);
@@ -484,8 +484,12 @@ HWTEST_F(AuthManagerTest, AUTH_DEVICE_GET_P2P_CONN_INFO_TEST_001, TestSize.Level
     EXPECT_TRUE(AuthDeviceGetP2pConnInfo(UUID_TEST, nullptr) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(AuthDeviceGetP2pConnInfo(UUID_TEST, &connInfo) == SOFTBUS_AUTH_NOT_FOUND);
     AuthSessionInfo info;
-    SetAuthSessionInfo(&info, CONN_ID, false, AUTH_LINK_TYPE_BLE);
+    connInfo.type = AUTH_LINK_TYPE_WIFI;
+    info.connInfo.type = AUTH_LINK_TYPE_WIFI;
+    (void)strcpy_s(info.uuid, sizeof(info.uuid), UUID_TEST);
+    SetAuthSessionInfo(&info, CONN_ID, false, AUTH_LINK_TYPE_WIFI);
     EXPECT_TRUE(NewAuthManager(authHandle.authId, &info) != nullptr);
+    AuthManagerSetAuthPassed(authHandle.authId, &info);
     EXPECT_TRUE(AuthDeviceGetPreferConnInfo(UUID_TEST, &connInfo) == SOFTBUS_OK);
     EXPECT_TRUE(AuthDeviceCheckConnInfo(UUID_TEST, AUTH_LINK_TYPE_WIFI, false) == true);
     EXPECT_TRUE(AuthDeviceCheckConnInfo(UUID_TEST, AUTH_LINK_TYPE_P2P, false) == false);
@@ -524,7 +528,7 @@ HWTEST_F(AuthManagerTest, AUTH_DEVICE_OPEN_CONN_TEST_001, TestSize.Level1)
  */
 HWTEST_F(AuthManagerTest, AUTH_GET_LATEST_AUTH_SEQ_LIST_TEST_001, TestSize.Level1)
 {
-    AuthHandle authHandle = { .authId = AUTH_SEQ_3, .type = AUTH_LINK_TYPE_WIFI };
+    AuthHandle authHandle = { .authId = AUTH_SEQ_3, .type = AUTH_LINK_TYPE_BLE  };
     authHandle.authId = AUTH_SEQ;
     AuthDeviceCloseConn(authHandle);
     AuthDeviceCloseConn(authHandle);
@@ -588,5 +592,23 @@ HWTEST_F(AuthManagerTest, AUTH_DEVICE_GET_SERVER_SIDE_TEST_001, TestSize.Level1)
     EXPECT_TRUE(AuthDeviceGetServerSide(AUTH_SEQ, &isServer) == SOFTBUS_OK);
     EXPECT_TRUE(AuthDeviceGetServerSide(AUTH_SEQ, nullptr) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(AuthDeviceGetServerSide(AUTH_SEQ_3, &isServer) == SOFTBUS_AUTH_NOT_FOUND);
+}
+
+/*
+ * @tc.name: AUTH_VERIFY_AFTER_NOTIFY_NORMALIZE_TEST_001
+ * @tc.desc: AuthVerifyAfterNotifyNormalize test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthManagerTest, AUTH_VERIFY_AFTER_NOTIFY_NORMALIZE_TEST_001, TestSize.Level1)
+{
+    NormalizeRequest request;
+
+    (void)memset_s(&request, sizeof(NormalizeRequest), 0, sizeof(NormalizeRequest));
+    EXPECT_TRUE(AuthVerifyAfterNotifyNormalize(nullptr) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(AuthVerifyAfterNotifyNormalize(&request) != SOFTBUS_OK);
+    EXPECT_TRUE(LooperInit() == SOFTBUS_OK);
+    EXPECT_TRUE(AuthVerifyAfterNotifyNormalize(&request) == SOFTBUS_OK);
+    LooperDeinit();
 }
 } // namespace OHOS

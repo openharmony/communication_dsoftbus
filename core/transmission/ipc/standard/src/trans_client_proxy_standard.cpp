@@ -103,6 +103,7 @@ int32_t TransClientProxy::MessageParcelWrite(MessageParcel &data, const char *se
     WRITE_PARCEL_WITH_RET(data, Int32, channel->algorithm, SOFTBUS_ERR);
     WRITE_PARCEL_WITH_RET(data, Int32, channel->crc, SOFTBUS_ERR);
     WRITE_PARCEL_WITH_RET(data, Uint32, channel->dataConfig, SOFTBUS_ERR);
+    WRITE_PARCEL_WITH_RET(data, Int32, channel->linkType, SOFTBUS_ERR);
 
     return SOFTBUS_OK;
 }
@@ -227,7 +228,7 @@ int32_t TransClientProxy::OnChannelClosed(int32_t channelId, int32_t channelType
         return SOFTBUS_ERR;
     }
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     int32_t ret = remote->SendRequest(CLIENT_ON_CHANNEL_CLOSED, data, reply, option);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "OnChannelClosed send request failed, ret=%{public}d", ret);
@@ -336,6 +337,43 @@ int32_t TransClientProxy::OnChannelQosEvent(int32_t channelId, int32_t channelTy
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
+}
+
+int32_t TransClientProxy::SetChannelInfo(
+    const char *sessionName, int32_t sessionId, int32_t channelId, int32_t channelType)
+{
+    if (sessionName == nullptr) {
+        TRANS_LOGE(TRANS_CTRL, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TRANS_LOGE(TRANS_CTRL, "Remote is nullptr");
+        return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TRANS_LOGE(TRANS_CTRL, "Write InterfaceToken failed!");
+        return SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED;
+    }
+    WRITE_PARCEL_WITH_RET(data, CString, sessionName, SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
+    WRITE_PARCEL_WITH_RET(data, Int32, sessionId, SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED);
+    WRITE_PARCEL_WITH_RET(data, Int32, channelId, SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED);
+    WRITE_PARCEL_WITH_RET(data, Int32, channelType, SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED);
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(CLIENT_SET_CHANNEL_INFO, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "Send request failed, ret=%{public}d", ret);
+        return SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED;
+    }
+    int32_t serverRet;
+    if (!reply.ReadInt32(serverRet)) {
+        TRANS_LOGE(TRANS_CTRL, "read serverRet failed");
+        return SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED;
+    }
+    return serverRet;
 }
 
 void TransClientProxy::OnDeviceFound(const DeviceInfo *device)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,4 +55,12 @@ int32_t ClientIpcOnChannelQosEvent(const char *pkgName, const QosParam *param)
     (void)pkgName;
     (void)param;
     return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ClientIpcSetChannelInfo(
+    const char *pkgName, const char *sessionName, int32_t sessionId, const TransInfo *transInfo, int32_t pid)
+{
+    (void)pkgName;
+    (void)pid;
+    return TransSetChannelInfo(sessionName, sessionId, transInfo->channelId, transInfo->channelType);
 }

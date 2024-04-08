@@ -20,6 +20,7 @@
 #include "access_control.h"
 #include "anonymizer.h"
 #include "bus_center_manager.h"
+#include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_qos.h"
 #include "lnn_network_manager.h"
 #include "session.h"
@@ -35,6 +36,7 @@
 #include "softbus_utils.h"
 #include "trans_auth_manager.h"
 #include "trans_channel_callback.h"
+#include "trans_channel_common.h"
 #include "trans_event.h"
 #include "trans_lane_manager.h"
 #include "trans_lane_pending_ctl.h"
@@ -45,7 +47,6 @@
 #include "trans_tcp_direct_sessionconn.h"
 #include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation.h"
-#include "wifi_direct_manager.h"
 
 #define MIGRATE_ENABLE 2
 #define MIGRATE_SUPPORTED 1
@@ -62,12 +63,6 @@ static SoftBusMutex g_myIdLock;
 static unsigned long g_proxyChanIdBits[MAX_PROXY_CHANNEL_ID_COUNT / BIT_NUM / sizeof(long)] = {0};
 static uint32_t g_proxyIdMark = 0;
 static uint32_t g_channelIdCount = 0;
-
-typedef struct {
-    int32_t channelType;
-    int32_t businessType;
-    ConfigType configType;
-} ConfigTypeMap;
 
 static int32_t GenerateTdcChannelId()
 {
@@ -198,235 +193,6 @@ void TransChannelDeinit(void)
     SoftBusMutexDestroy(&g_myIdLock);
 }
 
-static int32_t CopyAppInfoFromSessionParam(AppInfo* appInfo, const SessionParam* param)
-{
-    if (param == NULL || param->attr == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "parm is null");
-        return SOFTBUS_ERR;
-    }
-    if (param->attr->fastTransData != NULL && param->attr->fastTransDataSize > 0 &&
-        param->attr->fastTransDataSize <= MAX_FAST_DATA_LEN) {
-        if (appInfo->businessType == BUSINESS_TYPE_FILE || appInfo->businessType == BUSINESS_TYPE_STREAM) {
-            TRANS_LOGE(TRANS_CTRL, "not support send fast data");
-            return SOFTBUS_ERR;
-        }
-        appInfo->fastTransData = (uint8_t*)SoftBusCalloc(param->attr->fastTransDataSize);
-        if (appInfo->fastTransData == NULL) {
-            return SOFTBUS_ERR;
-        }
-        if (memcpy_s((char *)appInfo->fastTransData, param->attr->fastTransDataSize,
-            (const char *)param->attr->fastTransData, param->attr->fastTransDataSize) != EOK) {
-            TRANS_LOGE(TRANS_CTRL, "memcpy_s err");
-            return SOFTBUS_ERR;
-        }
-    }
-    appInfo->fastTransDataSize = param->attr->fastTransDataSize;
-    if (TransGetUidAndPid(param->sessionName, &appInfo->myData.uid, &appInfo->myData.pid) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
-    if (strcpy_s(appInfo->groupId, sizeof(appInfo->groupId), param->groupId) != EOK) {
-        return SOFTBUS_ERR;
-    }
-    if (strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), param->sessionName) != EOK) {
-        return SOFTBUS_ERR;
-    }
-    if (strcpy_s(appInfo->peerNetWorkId, sizeof(appInfo->peerNetWorkId), param->peerDeviceId) != EOK) {
-        return SOFTBUS_ERR;
-    }
-    if (TransGetPkgNameBySessionName(param->sessionName, appInfo->myData.pkgName, PKG_NAME_SIZE_MAX) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
-    if (strcpy_s(appInfo->peerData.sessionName, sizeof(appInfo->peerData.sessionName), param->peerSessionName) != 0) {
-        return SOFTBUS_ERR;
-    }
-    if (LnnGetRemoteStrInfo(param->peerDeviceId, STRING_KEY_UUID,
-        appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId)) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get remote node uuid err");
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
-static AppInfo *GetAppInfo(const SessionParam *param)
-{
-    char *tmpId = NULL;
-    Anonymize(param->peerDeviceId, &tmpId);
-    TRANS_LOGI(TRANS_CTRL, "GetAppInfo, deviceId=%{public}s", tmpId);
-    AnonymizeFree(tmpId);
-    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    if (appInfo == NULL) {
-        return NULL;
-    }
-    appInfo->appType = APP_TYPE_NORMAL;
-    appInfo->myData.apiVersion = API_V2;
-    if (param->attr->dataType == TYPE_STREAM) {
-        appInfo->businessType = BUSINESS_TYPE_STREAM;
-        appInfo->streamType = (StreamType)param->attr->attr.streamAttr.streamType;
-    } else if (param->attr->dataType == TYPE_FILE) {
-        appInfo->businessType = BUSINESS_TYPE_FILE;
-    } else if (param->attr->dataType == TYPE_MESSAGE) {
-        appInfo->businessType = BUSINESS_TYPE_MESSAGE;
-    } else if (param->attr->dataType == TYPE_BYTES) {
-        appInfo->businessType = BUSINESS_TYPE_BYTE;
-    }
-    if (LnnGetLocalStrInfo(STRING_KEY_UUID, appInfo->myData.deviceId,
-        sizeof(appInfo->myData.deviceId)) != SOFTBUS_OK) {
-        goto EXIT_ERR;
-    }
-    if (CopyAppInfoFromSessionParam(appInfo, param) != SOFTBUS_OK) {
-        goto EXIT_ERR;
-    }
-
-    appInfo->fd = -1;
-    appInfo->peerData.apiVersion = API_V2;
-    appInfo->encrypt = APP_INFO_FILE_FEATURES_SUPPORT;
-    appInfo->algorithm = APP_INFO_ALGORITHM_AES_GCM_256;
-    appInfo->crc = APP_INFO_FILE_FEATURES_SUPPORT;
-    appInfo->autoCloseTime = 0;
-    appInfo->myHandleId = -1;
-    appInfo->peerHandleId = -1;
-    appInfo->timeStart = GetSoftbusRecordTimeMillis();
-    appInfo->firstTokenId = TransACLGetFirstTokenID();
-
-    TRANS_LOGD(TRANS_CTRL, "GetAppInfo ok");
-    return appInfo;
-EXIT_ERR:
-    if (appInfo != NULL) {
-        if (appInfo->fastTransData != NULL) {
-            SoftBusFree((void*)appInfo->fastTransData);
-        }
-        SoftBusFree(appInfo);
-    }
-    return NULL;
-}
-
-static ChannelType TransGetChannelType(const SessionParam *param, const int32_t type)
-{
-    LaneTransType transType = TransGetLaneTransTypeBySession(param);
-    if (transType == LANE_T_BUTT) {
-        return CHANNEL_TYPE_BUTT;
-    }
-
-    if (type == LANE_BR || type == LANE_BLE || type == LANE_BLE_DIRECT ||
-        type == LANE_COC || type == LANE_COC_DIRECT) {
-        return CHANNEL_TYPE_PROXY;
-    } else if (transType == LANE_T_FILE || transType == LANE_T_COMMON_VIDEO || transType == LANE_T_COMMON_VOICE ||
-        transType == LANE_T_RAW_STREAM) {
-        return CHANNEL_TYPE_UDP;
-    } else if ((transType == LANE_T_MSG) && (type != LANE_P2P) && (type != LANE_P2P_REUSE) &&
-        (type != LANE_HML)) {
-        return CHANNEL_TYPE_PROXY;
-    }
-    return CHANNEL_TYPE_TCP_DIRECT;
-}
-
-static int32_t TransOpenChannelProc(ChannelType type, AppInfo *appInfo, const ConnectOption *connOpt,
-    int32_t *channelId)
-{
-    if (type == CHANNEL_TYPE_BUTT) {
-        TRANS_LOGE(TRANS_CTRL, "open invalid channel type.");
-        return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
-    }
-    int32_t ret = SOFTBUS_ERR;
-    if (type == CHANNEL_TYPE_UDP) {
-        ret = TransOpenUdpChannel(appInfo, connOpt, channelId);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "open udp channel err");
-            return ret;
-        }
-    } else if (type == CHANNEL_TYPE_PROXY) {
-        ret = TransProxyOpenProxyChannel(appInfo, connOpt, channelId);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "open proxy channel err");
-            return ret;
-        }
-    } else {
-        ret = TransOpenDirectChannel(appInfo, connOpt, channelId);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "open direct channel err");
-            return ret;
-        }
-    }
-    return SOFTBUS_OK;
-}
-
-static const ConfigTypeMap g_configTypeMap[] = {
-    {CHANNEL_TYPE_AUTH, BUSINESS_TYPE_BYTE, SOFTBUS_INT_AUTH_MAX_BYTES_LENGTH},
-    {CHANNEL_TYPE_AUTH, BUSINESS_TYPE_MESSAGE, SOFTBUS_INT_AUTH_MAX_MESSAGE_LENGTH},
-    {CHANNEL_TYPE_PROXY, BUSINESS_TYPE_BYTE, SOFTBUS_INT_MAX_BYTES_NEW_LENGTH},
-    {CHANNEL_TYPE_PROXY, BUSINESS_TYPE_MESSAGE, SOFTBUS_INT_MAX_MESSAGE_NEW_LENGTH},
-    {CHANNEL_TYPE_TCP_DIRECT, BUSINESS_TYPE_BYTE, SOFTBUS_INT_MAX_BYTES_NEW_LENGTH},
-    {CHANNEL_TYPE_TCP_DIRECT, BUSINESS_TYPE_MESSAGE, SOFTBUS_INT_MAX_MESSAGE_NEW_LENGTH},
-};
-
-static int32_t FindConfigType(int32_t channelType, int32_t businessType)
-{
-    for (uint32_t i = 0; i < sizeof(g_configTypeMap) / sizeof(ConfigTypeMap); i++) {
-        if ((g_configTypeMap[i].channelType == channelType) && (g_configTypeMap[i].businessType == businessType)) {
-            return g_configTypeMap[i].configType;
-        }
-    }
-    return SOFTBUS_CONFIG_TYPE_MAX;
-}
-
-static int TransGetLocalConfig(int32_t channelType, int32_t businessType, uint32_t *len)
-{
-    ConfigType configType = (ConfigType)FindConfigType(channelType, businessType);
-    if (configType == SOFTBUS_CONFIG_TYPE_MAX) {
-        TRANS_LOGE(TRANS_CTRL, "Invalid channelType=%{public}d businessType=%{public}d",
-            channelType, businessType);
-        return SOFTBUS_INVALID_PARAM;
-    }
-    uint32_t maxLen;
-    if (SoftbusGetConfig(configType, (unsigned char *)&maxLen, sizeof(maxLen)) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get fail configType=%{public}d", configType);
-        return SOFTBUS_GET_CONFIG_VAL_ERR;
-    }
-    *len = maxLen;
-    TRANS_LOGI(TRANS_CTRL, "get appinfo local config len=%{public}d", *len);
-    return SOFTBUS_OK;
-}
-
-static void FillAppInfo(AppInfo *appInfo, const SessionParam *param,
-    TransInfo *transInfo, LaneConnInfo *connInfo)
-{
-    transInfo->channelType = TransGetChannelType(param, connInfo->type);
-    appInfo->linkType = connInfo->type;
-    appInfo->channelType = transInfo->channelType;
-    (void)TransGetLocalConfig(appInfo->channelType, appInfo->businessType, &appInfo->myData.dataConfig);
-    if (connInfo->type == LANE_P2P || connInfo->type == LANE_HML) {
-        if (strcpy_s(appInfo->myData.addr, IP_LEN, connInfo->connInfo.p2p.localIp) != EOK) {
-            TRANS_LOGE(TRANS_CTRL, "copy local ip failed");
-        }
-    } else if (connInfo->type == LANE_P2P_REUSE) {
-        struct WifiDirectManager *mgr = GetWifiDirectManager();
-        if (mgr != NULL && mgr->getLocalIpByRemoteIp != NULL) {
-            int32_t ret = mgr->getLocalIpByRemoteIp(connInfo->connInfo.wlan.addr, appInfo->myData.addr, IP_LEN);
-            if (ret != SOFTBUS_OK) {
-                TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
-            }
-        }
-    }
-}
-
-static void TransOpenChannelSetModule(int32_t channelType, ConnectOption *connOpt)
-{
-    if (connOpt->type != CONNECT_TCP || connOpt->socketOption.protocol != LNN_PROTOCOL_NIP) {
-        return;
-    }
-
-    int32_t module = UNUSE_BUTT;
-    if (channelType == CHANNEL_TYPE_PROXY) {
-        module = LnnGetProtocolListenerModule(connOpt->socketOption.protocol, LNN_LISTENER_MODE_PROXY);
-    } else if (channelType == CHANNEL_TYPE_TCP_DIRECT) {
-        module = LnnGetProtocolListenerModule(connOpt->socketOption.protocol, LNN_LISTENER_MODE_DIRECT);
-    }
-    if (module != UNUSE_BUTT) {
-        connOpt->socketOption.moduleId = module;
-    }
-    TRANS_LOGI(TRANS_CTRL, "set nip moduleId=%{public}d", connOpt->socketOption.moduleId);
-}
-
 int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
 {
     if (param == NULL || transInfo == NULL) {
@@ -434,27 +200,41 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         return SOFTBUS_INVALID_PARAM;
     }
     TRANS_LOGI(TRANS_CTRL, "server TransOpenChannel");
+    int32_t ret = INVALID_CHANNEL_ID;
+    uint32_t laneReqId = 0;
+    // async bind will back after request choose lane
+    if (param->isAsync) {
+        uint32_t firstTokenId = TransACLGetFirstTokenID();
+        ret = TransAsyncGetLaneInfo(param, &laneReqId, firstTokenId);
+        if (ret != SOFTBUS_OK) {
+            char *tmpSessionName = NULL;
+            Anonymize(param->sessionName, &tmpSessionName);
+            TRANS_LOGE(TRANS_CTRL, "Async get Lane failed, sessionName=%{public}s, sessionId=%{public}d",
+                tmpSessionName, param->sessionId);
+            AnonymizeFree(tmpSessionName);
+        }
+        return ret;
+    }
+    int32_t errCode = INVALID_CHANNEL_ID;
     int64_t timeStart = GetSoftbusRecordTimeMillis();
     transInfo->channelId = INVALID_CHANNEL_ID;
     transInfo->channelType = CHANNEL_TYPE_BUTT;
     LaneConnInfo connInfo;
-    uint32_t laneReqId = 0;
     ConnectOption connOpt;
     (void)memset_s(&connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
-    int32_t ret = INVALID_CHANNEL_ID;
-    int32_t errCode = INVALID_CHANNEL_ID;
-
-    AppInfo *appInfo = GetAppInfo(param);
+    AppInfo *appInfo = TransCommonGetAppInfo(param);
     TRANS_CHECK_AND_RETURN_RET_LOGW(!(appInfo == NULL), INVALID_CHANNEL_ID, TRANS_CTRL, "GetAppInfo is null.");
-    char peerUdid[UDID_BUF_LEN] = {0};
-    int32_t udidRet = LnnGetRemoteStrInfo(appInfo->peerNetWorkId, STRING_KEY_DEV_UDID, peerUdid, sizeof(peerUdid));
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    int32_t peerRet = LnnGetRemoteNodeInfoById(appInfo->peerNetWorkId, CATEGORY_NETWORK_ID, &nodeInfo);
     TransEventExtra extra = {
         .calleePkg = NULL,
         .callerPkg = appInfo->myData.pkgName,
         .socketName = appInfo->myData.sessionName,
         .dataType = appInfo->businessType,
         .peerNetworkId = appInfo->peerNetWorkId,
-        .peerUdid = udidRet == SOFTBUS_OK ? peerUdid : NULL,
+        .peerUdid = peerRet == SOFTBUS_OK ? nodeInfo.deviceInfo.deviceUdid : NULL,
+        .peerDevVer = peerRet == SOFTBUS_OK ? nodeInfo.deviceInfo.deviceVersion : NULL,
         .result = EVENT_STAGE_RESULT_OK
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_START, extra);
@@ -509,20 +289,8 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         transInfo->channelId, transInfo->channelType);
     return SOFTBUS_OK;
 EXIT_ERR:
-    extra.channelId = transInfo->channelId;
-    extra.errcode = ret;
-    extra.costTime = GetSoftbusRecordTimeMillis() - timeStart;
-    extra.result = EVENT_STAGE_RESULT_FAILED;
-    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
-    TransAlarmExtra extraAlarm = {
-        .conflictName = NULL,
-        .conflictedName = NULL,
-        .occupyedName = NULL,
-        .permissionName = NULL,
-        .errcode = ret,
-        .sessionName = appInfo->myData.sessionName,
-    };
-    TRANS_ALARM(OPEN_SESSION_FAIL_ALARM, CONTROL_ALARM_TYPE, extraAlarm);
+    ReportTransOpenChannelEndEvent(extra, transInfo, timeStart, ret);
+    ReportTransAlarmEvent(appInfo, ret);
     if (appInfo->fastTransData != NULL) {
         SoftBusFree((void*)appInfo->fastTransData);
     }
@@ -568,7 +336,8 @@ static AppInfo *GetAuthAppInfo(const char *mySessionName)
         TRANS_LOGE(TRANS_CTRL, "GetAuthAppInfo get PkgName failed");
         goto EXIT_ERR;
     }
-    if (TransGetLocalConfig(appInfo->channelType, appInfo->businessType, &appInfo->myData.dataConfig) != SOFTBUS_OK) {
+    if (TransCommonGetLocalConfig(appInfo->channelType, appInfo->businessType, &appInfo->myData.dataConfig) !=
+        SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "GetAuthAppInfo get local data config failed");
         goto EXIT_ERR;
     }
@@ -776,40 +545,7 @@ int32_t TransReleaseUdpResources(int32_t channelId)
 
 int32_t TransCloseChannel(int32_t channelId, int32_t channelType)
 {
-    TRANS_LOGI(TRANS_CTRL, "close channel: channelId=%{public}d, channelType=%{public}d", channelId, channelType);
-    int32_t ret = SOFTBUS_ERR;
-    switch (channelType) {
-        case CHANNEL_TYPE_PROXY:
-            (void)TransLaneMgrDelLane(channelId, channelType);
-            ret = TransProxyCloseProxyChannel(channelId);
-            break;
-        case CHANNEL_TYPE_TCP_DIRECT:
-            (void)TransLaneMgrDelLane(channelId, channelType);
-            ret = SOFTBUS_OK;
-            break;
-        case CHANNEL_TYPE_UDP:
-            (void)NotifyQosChannelClosed(channelId, channelType);
-            (void)TransLaneMgrDelLane(channelId, channelType);
-            ret = TransCloseUdpChannel(channelId);
-            break;
-        case CHANNEL_TYPE_AUTH:
-            ret = TransCloseAuthChannel(channelId);
-            break;
-        default:
-            break;
-    }
-    TransEventExtra extra = {
-        .socketName = NULL,
-        .peerNetworkId = NULL,
-        .calleePkg = NULL,
-        .callerPkg = NULL,
-        .channelId = channelId,
-        .channelType = channelType,
-        .errcode = ret,
-        .result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED
-    };
-    TRANS_EVENT(EVENT_SCENE_CLOSE_CHANNEL_ACTIVE, EVENT_STAGE_CLOSE_CHANNEL, extra);
-    return ret;
+    return TransCommonCloseChannel(channelId, channelType);
 }
 
 int32_t TransSendMsg(int32_t channelId, int32_t channelType, const void *data, uint32_t len,

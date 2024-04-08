@@ -112,6 +112,7 @@
 #define PKG_VERSION "PKG_VERSION"
 #define OS_TYPE "OS_TYPE"
 #define OS_VERSION "OS_VERSION"
+#define DEVICE_VERSION "DEVICE_VERSION"
 #define WIFI_VERSION "WIFI_VERSION"
 #define BLE_VERSION "BLE_VERSION"
 #define HML_MAC "HML_MAC"
@@ -163,7 +164,7 @@
 #define DEVICE_ID_STR_LEN 64 // for bt v1
 #define DEFAULT_BATTERY_LEVEL 100
 #define DEFAULT_NODE_WEIGHT 100
-#define BASE64_OFFLINE_CODE_LEN ((OFFLINE_CODE_BYTE_SIZE / 3 + 1) * 4 + 1)
+#define BASE64_OFFLINE_CODE_LEN 16
 #define DEFAULT_WIFI_BUFF_SIZE 32768 // 32k
 #define DEFAULT_BR_BUFF_SIZE 4096 // 4k
 #define DEFAULT_BLE_TIMESTAMP (roundl(pow(2, 63)) - 1)
@@ -447,7 +448,7 @@ static int32_t PackNormalizedKeyValue(JsonObj *obj, SessionKey *sessionKey)
         SoftBusFree(data);
         return SOFTBUS_ERR;
     }
-    JSON_AddStringToObject(obj, NORMALIZED_DATA, encNormalizedKey);
+    (void)JSON_AddStringToObject(obj, NORMALIZED_DATA, encNormalizedKey);
     AUTH_LOGI(AUTH_FSM, "pack normalize value succ");
     SoftBusFree(data);
     return SOFTBUS_OK;
@@ -475,12 +476,17 @@ static void PackNormalizedKey(JsonObj *obj, AuthSessionInfo *info, const NodeInf
         return;
     }
     info->normalizedKey = (SessionKey *)SoftBusCalloc(sizeof(SessionKey));
+    if (info->normalizedKey == NULL) {
+        AUTH_LOGE(AUTH_FSM, "malloc fail");
+        return;
+    }
     AuthDeviceKeyInfo deviceKey;
     (void)memset_s(&deviceKey, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
     if (AuthFindLatestNormalizeKey((char *)udidHashHexStr, &deviceKey) != SOFTBUS_OK) {
         AUTH_LOGW(AUTH_FSM, "can't find device key");
         return;
     }
+    info->normalizedIndex = deviceKey.keyIndex;
     info->normalizedKey->len = deviceKey.keyLen;
     if (memcpy_s(info->normalizedKey->value, sizeof(info->normalizedKey->value),
         deviceKey.deviceKey, sizeof(deviceKey.deviceKey)) != EOK) {
@@ -636,6 +642,10 @@ static void UnpackNormalizedKey(JsonObj *obj, AuthSessionInfo *info, bool isSupp
         return;
     }
     info->normalizedKey = (SessionKey *)SoftBusCalloc(sizeof(SessionKey));
+    if (info->normalizedKey == NULL) {
+        AUTH_LOGE(AUTH_FSM, "malloc fail");
+        return;
+    }
     uint8_t udidHash[SHA_256_HASH_LEN] = {0};
     int ret = SoftBusGenerateStrHash((uint8_t *)info->udid, strlen(info->udid), udidHash);
     if (ret != SOFTBUS_OK) {
@@ -653,6 +663,7 @@ static void UnpackNormalizedKey(JsonObj *obj, AuthSessionInfo *info, bool isSupp
         AUTH_LOGE(AUTH_FSM, "normalize decrypt fail.");
         return;
     }
+    info->normalizedIndex = deviceKey.keyIndex;
     info->normalizedType = NORMALIZED_SUPPORT;
     info->normalizedKey->len = deviceKey.keyLen;
     if (memcpy_s(info->normalizedKey->value, sizeof(info->normalizedKey->value),
@@ -1092,6 +1103,11 @@ static void PackOsInfo(JsonObj *json, const NodeInfo *info)
     (void)JSON_AddStringToObject(json, OS_VERSION, info->deviceInfo.osVersion);
 }
 
+static void PackDeviceVersion(JsonObj *json, const NodeInfo *info)
+{
+    (void)JSON_AddStringToObject(json, DEVICE_VERSION, info->deviceInfo.deviceVersion);
+}
+
 static void PackCommP2pInfo(JsonObj *json, const NodeInfo *info)
 {
     (void)JSON_AddInt32ToObject(json, P2P_ROLE, LnnGetP2pRole(info));
@@ -1309,6 +1325,7 @@ static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion ve
         return SOFTBUS_ERR;
     }
     PackOsInfo(json, info);
+    PackDeviceVersion(json, info);
     PackCommonFastAuth(json, info);
     if (!PackCipherKeySyncMsg(json)) {
         AUTH_LOGE(AUTH_FSM, "PackCipherKeySyncMsg failed.");
@@ -1410,6 +1427,7 @@ static void UnpackCommon(const JsonObj *json, NodeInfo *info, SoftBusVersion ver
         AUTH_LOGD(AUTH_FSM, "info->deviceInfo.osType: %{public}d", info->deviceInfo.osType);
     }
     OptString(json, OS_VERSION, info->deviceInfo.osVersion, OS_VERSION_BUF_LEN, "");
+    OptString(json, DEVICE_VERSION, info->deviceInfo.deviceVersion, DEVICE_VERSION_BUF_LEN, "");
 
     // IS_SUPPORT_TCP_HEARTBEAT
     OptInt(json, NEW_CONN_CAP, (int32_t *)&info->netCapacity, -1);
@@ -1850,17 +1868,20 @@ static int32_t PostDeviceIdNew(int64_t authSeq, const AuthSessionInfo *info)
     return SOFTBUS_OK;
 }
 
-static void DfxRecordLnnPostDeviceIdStart(int64_t authSeq)
+static void DfxRecordLnnPostDeviceIdStart(int64_t authSeq, const AuthSessionInfo *info)
 {
     LnnEventExtra extra = { 0 };
     LnnEventExtraInit(&extra);
     extra.authId = (int32_t)authSeq;
+    if (info != NULL) {
+        extra.authRequestId = (int32_t)info->requestId;
+    }
     LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_DEVICE_ID_POST, extra);
 }
 
 int32_t PostDeviceIdMessage(int64_t authSeq, const AuthSessionInfo *info)
 {
-    DfxRecordLnnPostDeviceIdStart(authSeq);
+    DfxRecordLnnPostDeviceIdStart(authSeq, info);
     AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "info is NULL");
     if (info->version == SOFTBUS_OLD_V1) {
         return PostDeviceIdV1(authSeq, info);
@@ -1880,33 +1901,43 @@ int32_t ProcessDeviceIdMessage(AuthSessionInfo *info, const uint8_t *data, uint3
     return UnpackDeviceIdJson((const char *)data, len, info);
 }
 
-static void GetSessionKeyList(int64_t authSeq, const AuthSessionInfo *info, SessionKeyList *list)
+static void GetDumpSessionKeyList(int64_t authSeq, const AuthSessionInfo *info, SessionKeyList *list)
 {
     ListInit(list);
     SessionKey sessionKey;
-    if (AuthManagerGetSessionKey(authSeq, info, &sessionKey) != SOFTBUS_OK) {
+    int64_t index = authSeq;
+    if (info->normalizedType == NORMALIZED_SUPPORT) {
+        index = info->normalizedIndex;
+    }
+    if (AuthManagerGetSessionKey(index, info, &sessionKey) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "get session key fail");
         return;
     }
-    if (AddSessionKey(list, TO_INT32(authSeq), &sessionKey) != SOFTBUS_OK) {
+    if (AddSessionKey(list, TO_INT32(index), &sessionKey, info->connInfo.type) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "add session key fail");
         (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
         return;
     }
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
+    if (SetSessionKeyAvailable(list, TO_INT32(index)) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "set session key available fail");
+    }
 }
 
-static void DfxRecordLnnPostDeviceInfoStart(int64_t authSeq)
+static void DfxRecordLnnPostDeviceInfoStart(int64_t authSeq, const AuthSessionInfo *info)
 {
     LnnEventExtra extra = { 0 };
     LnnEventExtraInit(&extra);
     extra.authId = (int32_t)authSeq;
+    if (info != NULL) {
+        extra.authRequestId = (int32_t)info->requestId;
+    }
     LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH_DEVICE_INFO_POST, extra);
 }
 
 int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
 {
-    DfxRecordLnnPostDeviceInfoStart(authSeq);
+    DfxRecordLnnPostDeviceInfoStart(authSeq, info);
     AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "info is NULL");
     char *msg = PackDeviceInfoMessage(info->connInfo.type, info->version, false, info->uuid);
     if (msg == NULL) {
@@ -1938,7 +1969,7 @@ int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
         inputLen = strlen(msg) + 1;
     }
     SessionKeyList sessionKeyList;
-    GetSessionKeyList(authSeq, info, &sessionKeyList);
+    GetDumpSessionKeyList(authSeq, info, &sessionKeyList);
     if (EncryptInner(&sessionKeyList, inputData, inputLen, &data, &dataLen) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "encrypt device info fail");
         JSON_Free(msg);
@@ -1947,6 +1978,7 @@ int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
     }
     JSON_Free(msg);
     SoftBusFree(compressData);
+    DestroySessionKeyList(&sessionKeyList);
     if (info->connInfo.type == AUTH_LINK_TYPE_WIFI && info->isServer) {
         compressFlag = FLAG_RELAY_DEVICE_INFO;
         authSeq = 0;
@@ -1974,11 +2006,12 @@ int32_t ProcessDeviceInfoMessage(int64_t authSeq, AuthSessionInfo *info, const u
     uint8_t *msg = NULL;
     uint32_t msgSize = 0;
     SessionKeyList sessionKeyList;
-    GetSessionKeyList(authSeq, info, &sessionKeyList);
+    GetDumpSessionKeyList(authSeq, info, &sessionKeyList);
     if (DecryptInner(&sessionKeyList, data, len, &msg, &msgSize) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "decrypt device info fail");
         return SOFTBUS_DECRYPT_ERR;
     }
+    DestroySessionKeyList(&sessionKeyList);
     uint8_t *decompressData = NULL;
     uint32_t decompressLen = 0;
     if ((info->connInfo.type != AUTH_LINK_TYPE_WIFI) && info->isSupportCompress) {
@@ -2106,6 +2139,10 @@ bool IsFlushDevicePacket(const AuthConnInfo *connInfo, const AuthDataHead *head,
 int32_t PostVerifyDeviceMessage(const AuthManager *auth, int32_t flagRelay, AuthLinkType type)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(auth != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "auth is NULL");
+    if (type < AUTH_LINK_TYPE_WIFI || type >= AUTH_LINK_TYPE_MAX) {
+        AUTH_LOGE(AUTH_FSM, "type error, type=%{public}d", type);
+        return SOFTBUS_ERR;
+    }
     char *msg = PackVerifyDeviceMessage(auth->uuid);
     if (msg == NULL) {
         AUTH_LOGE(AUTH_FSM, "pack verify device msg fail");

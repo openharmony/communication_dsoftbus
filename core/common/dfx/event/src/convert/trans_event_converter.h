@@ -54,10 +54,11 @@ TRANS_ASSIGNER(Int32, PeerChannelId, peerChannelId)
 TRANS_ASSIGNER(Int32, BtFlow, btFlow)
 TRANS_ASSIGNER(AnonymizeString, PeerNetworkId, peerNetworkId)
 TRANS_ASSIGNER(AnonymizeString, PeerUdid, peerUdid)
+TRANS_ASSIGNER(String, PeerDevVer, peerDevVer)
 TRANS_ASSIGNER(String, CallerPkg, callerPkg)
 TRANS_ASSIGNER(String, CalleePkg, calleePkg)
 
-#define TRANS_ASSIGNER_SIZE 22 // Size of g_transAssigners
+#define TRANS_ASSIGNER_SIZE 23 // Size of g_transAssigners
 static const HiSysEventParamAssigner g_transAssigners[] = {
     { "STAGE_RES",        HISYSEVENT_INT32,  TransAssignerResult        },
     { "ERROR_CODE",       HISYSEVENT_INT32,  TransAssignerErrcode       },
@@ -79,6 +80,7 @@ static const HiSysEventParamAssigner g_transAssigners[] = {
     { "BT_FLOW",          HISYSEVENT_INT32,  TransAssignerBtFlow        },
     { "PEER_NET_ID",      HISYSEVENT_STRING, TransAssignerPeerNetworkId },
     { "PEER_UDID",        HISYSEVENT_STRING, TransAssignerPeerUdid      },
+    { "PEER_DEV_VER",     HISYSEVENT_STRING, TransAssignerPeerDevVer    },
     { "HOST_PKG",         HISYSEVENT_STRING, TransAssignerCallerPkg     },
     { "TO_CALL_PKG",      HISYSEVENT_STRING, TransAssignerCalleePkg     },
     // Modification Note: remember updating TRANS_ASSIGNER_SIZE

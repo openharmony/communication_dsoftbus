@@ -134,6 +134,9 @@ HWTEST_F(AuthHichainTest, ON_REQUEST_TEST_001, TestSize.Level1)
     const char *groupInfo;
     OnDeviceBound(NULL, groupInfo);
     OnDeviceBound(udid, groupInfo);
+
+    DfxRecordLnnExchangekeyEnd(authSeq, SOFTBUS_OK);
+    DfxRecordLnnEndHichainEnd(authSeq, SOFTBUS_OK);
 }
 
 /*

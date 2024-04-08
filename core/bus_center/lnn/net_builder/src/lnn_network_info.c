@@ -200,6 +200,9 @@ static void SendNetCapabilityToRemote(uint32_t netCapability, uint32_t type)
             LNN_LOGE(LNN_BUILDER,
                 "sync network info ret=%{public}d, deviceName=%{public}s.", ret, netInfo[i].deviceName);
         }
+        if ((type & (1 << (uint32_t)DISCOVERY_TYPE_WIFI)) != 0 && !LnnHasCapability(netCapability, BIT_BLE)) {
+            LnnSendP2pSyncInfoMsg(netInfo[i].networkId, netCapability);
+        }
     }
     SoftBusFree(netInfo);
     SoftBusFree(msg);
@@ -240,20 +243,49 @@ static void LnnClearNetworkCapability(uint32_t *capability)
     (void)LnnClearNetCapability(capability, BIT_WIFI_24G);
 }
 
+static void LnnSetNetBandCapability(uint32_t *capability)
+{
+    SoftBusBand band = SoftBusGetLinkBand();
+    if (band == BAND_24G) {
+        (void)LnnSetNetCapability(capability, BIT_WIFI_24G);
+        (void)LnnClearNetCapability(capability, BIT_WIFI_5G);
+    } else if (band == BAND_5G) {
+        (void)LnnSetNetCapability(capability, BIT_WIFI_5G);
+        (void)LnnClearNetCapability(capability, BIT_WIFI_24G);
+    } else {
+        (void)LnnSetNetCapability(capability, BIT_WIFI_5G);
+        (void)LnnSetNetCapability(capability, BIT_WIFI_24G);
+    }
+}
+
+static void LnnClearNetBandCapability(uint32_t *capability)
+{
+    if (!g_isApEnable) {
+        (void)LnnClearNetCapability(capability, BIT_WIFI_5G);
+        (void)LnnClearNetCapability(capability, BIT_WIFI_24G);
+    }
+}
+
 static void GetNetworkCapability(SoftBusWifiState wifiState, uint32_t *capability, bool *needSync)
 {
     switch (wifiState) {
         case SOFTBUS_WIFI_OBTAINING_IPADDR:
-            LnnSetNetworkCapability(capability);
+            (void)LnnSetNetCapability(capability, BIT_WIFI);
             break;
         case SOFTBUS_WIFI_ENABLED:
             g_isWifiEnable = true;
-            LnnSetNetworkCapability(capability);
+            (void)LnnSetNetCapability(capability, BIT_WIFI);
             (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
             *needSync = true;
             break;
         case SOFTBUS_WIFI_CONNECTED:
-            LnnSetNetworkCapability(capability);
+            (void)LnnSetNetCapability(capability, BIT_WIFI);
+            LnnSetNetBandCapability(capability);
+            *needSync = true;
+            break;
+        case SOFTBUS_WIFI_DISCONNECTED:
+            LnnClearNetBandCapability(capability);
+            *needSync = true;
             break;
         case SOFTBUS_WIFI_DISABLED:
             g_isWifiEnable = false;

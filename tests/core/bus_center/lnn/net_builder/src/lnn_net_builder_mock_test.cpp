@@ -739,7 +739,7 @@ HWTEST_F(LNNNetBuilderMockTest, FIND_CONNECTION_FSM_TEST_001, TestSize.Level1)
 
     EXPECT_TRUE(FindConnectionFsmByRequestId(REQUEST_ID) != nullptr);
     EXPECT_TRUE(FindConnectionFsmByRequestId(REQUEST_ID_ADD) == nullptr);
-    AuthHandle authHandle = { .authId = AUTH_ID, .type = AUTH_LINK_TYPE_WIFI };
+    AuthHandle authHandle = { .authId = AUTH_ID, .type = AUTH_LINK_TYPE_BR };
     AuthHandle authHandle2 = {.authId = AUTH_ID_ADD, .type = AUTH_LINK_TYPE_WIFI };
     EXPECT_TRUE(FindConnectionFsmByAuthHandle(&authHandle) != nullptr);
     EXPECT_TRUE(FindConnectionFsmByAuthHandle(&authHandle2) == nullptr);
@@ -1078,8 +1078,6 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_VERIFY_PASS_TEST_004, TestSize.Le
     ListAdd(&g_netBuilder.fsmList, &connFsm->node);
 
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
-    EXPECT_CALL(NetBuilderMock, LnnConvAddrTypeToDiscType(_)).WillOnce(Return(DISCOVERY_TYPE_WIFI));
-    EXPECT_CALL(NetBuilderMock, LnnUpdateNodeInfo(_)).WillOnce(Return(SOFTBUS_ERR));
     void *para = reinterpret_cast<void *>(msgPara);
     EXPECT_TRUE(ProcessDeviceVerifyPass(para) == SOFTBUS_ERR);
     ListDelete(&connFsm->node);
@@ -1359,6 +1357,7 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_SEND_JOIN_LNN_REQUEST_TEST_001, TestSize.Lev
     EXPECT_TRUE(TrySendJoinLNNRequest(nullptr, true, false) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(TrySendJoinLNNRequest(para, true, false) == SOFTBUS_ERR);
 
+    DfxRecordLnnAuthStart(nullptr, para, 0);
     ListDelete(&connFsm->node);
     SoftBusFree(connFsm);
 }
@@ -1557,6 +1556,7 @@ HWTEST_F(LNNNetBuilderMockTest, FIND_NODE_INFO_BY_RQUESTID_TEST_001, TestSize.Le
     ListInit(&connFsm->node);
     connFsm->connInfo.requestId = REQUEST_ID;
     connFsm->isDead = false;
+    connFsm->connInfo.nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
     ListAdd(&g_netBuilder.fsmList, &connFsm->node);
 
     ConnectionAddr addr;
@@ -1566,9 +1566,10 @@ HWTEST_F(LNNNetBuilderMockTest, FIND_NODE_INFO_BY_RQUESTID_TEST_001, TestSize.Le
     ret = FindRequestIdByAddr(&addr, &requestId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     NodeInfo *info = FindNodeInfoByRquestId(requestId);
-    EXPECT_TRUE(info == nullptr);
+    EXPECT_TRUE(info != nullptr);
 
     ListDelete(&connFsm->node);
+    SoftBusFree(connFsm->connInfo.nodeInfo);
     SoftBusFree(connFsm);
 }
 

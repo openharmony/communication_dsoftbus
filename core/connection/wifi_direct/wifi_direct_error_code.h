@@ -333,6 +333,9 @@ enum WifiDirectErrorCode {
     /* Error code wait HML_DISCONNECT_GROUP timeout */
     ERROR_HML_DISCONNECT_GROUP_TIMEOUT = ERROR_BASE - 6617,
 
+    /* Error code with ERROR_HML_BEYOND_MAX_LINK_NUM */
+    ERROR_HML_BEYOND_MAX_LINK_NUM = ERROR_BASE - 6618,
+
     /* Error code representing end position of wifi direct errors */
     ERROR_WIFI_DIRECT_END = ERROR_BASE - 6999,
 };

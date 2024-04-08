@@ -18,6 +18,7 @@ dsoftbus_trans_channel_common_path =
 trans_channel_common_src = [
   "$dsoftbus_trans_channel_common_path/src/trans_lane_pending_ctl.c",
   "$dsoftbus_trans_channel_common_path/src/trans_channel_limit.c",
+  "$dsoftbus_trans_channel_common_path/src/trans_channel_common.c",
 ]
 trans_channel_common_inc = [ "$dsoftbus_trans_channel_common_path/include" ]
 trans_channel_common_deps = []

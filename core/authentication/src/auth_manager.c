@@ -59,9 +59,20 @@ static GroupChangeListener g_groupChangeListener = { 0 };
 static AuthTransCallback g_transCallback = { 0 };
 static bool g_regDataChangeListener = false;
 
+static bool CheckAuthConnInfoType(const AuthConnInfo *connInfo)
+{
+    AUTH_CHECK_AND_RETURN_RET_LOGE(connInfo != NULL, false, AUTH_FSM, "connInfo is null");
+    if (connInfo->type >= AUTH_LINK_TYPE_WIFI && connInfo->type < AUTH_LINK_TYPE_MAX) {
+        return true;
+    }
+    return false;
+}
+
 /* Auth Manager */
 AuthManager *NewAuthManager(int64_t authSeq, const AuthSessionInfo *info)
 {
+    AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, NULL, AUTH_FSM, "info is null");
+    AUTH_CHECK_AND_RETURN_RET_LOGE(CheckAuthConnInfoType(&info->connInfo), NULL, AUTH_FSM, "connInfo type error");
     AuthManager *auth = (AuthManager *)SoftBusCalloc(sizeof(AuthManager));
     if (auth == NULL) {
         AUTH_LOGW(AUTH_FSM, "malloc AuthManager fail");
@@ -126,6 +137,7 @@ void DelAuthManager(AuthManager *auth, int32_t type)
     if (type != AUTH_LINK_TYPE_MAX) {
         if (auth->connId[type] == 0) {
             AUTH_LOGE(AUTH_FSM, "authManager has been deleted, authId=%{public}" PRId64, auth->authId);
+            AnonymizeFree(anonyUdid);
             return;
         }
         auth->connId[type] = 0;
@@ -134,6 +146,7 @@ void DelAuthManager(AuthManager *auth, int32_t type)
             if (auth->connId[i] == 0) {
                 continue;
             }
+            ClearSessionkeyByAuthLinkType(auth->authId, &auth->sessionKeyList, (AuthLinkType)type);
             AUTH_LOGI(AUTH_FSM, "only clear connInfo, udid=%{public}s, side=%{public}s, type=%{public}d,"
                 " authId=%{public}" PRId64, anonyUdid, GetAuthSideStr(auth->isServer), type, auth->authId);
             AnonymizeFree(anonyUdid);
@@ -320,7 +333,7 @@ static int32_t UpdateAuthManagerByAuthId(
     return SOFTBUS_OK;
 }
 
-void RemoveAuthSessionKeyByIndex(int64_t authId, int32_t index)
+void RemoveAuthSessionKeyByIndex(int64_t authId, int32_t index, AuthLinkType type)
 {
     if (!RequireAuthLock()) {
         return;
@@ -331,7 +344,7 @@ void RemoveAuthSessionKeyByIndex(int64_t authId, int32_t index)
         AUTH_LOGI(AUTH_CONN, "auth manager already removed, authId=%{public}" PRId64, authId);
         return;
     }
-    RemoveSessionkeyByIndex(&auth->sessionKeyList, index);
+    RemoveSessionkeyByIndex(&auth->sessionKeyList, index, type);
     char udid[UDID_BUF_LEN] = { 0 };
     (void)memcpy_s(udid, UDID_BUF_LEN, auth->udid, UDID_BUF_LEN);
     ReleaseAuthLock();
@@ -339,6 +352,10 @@ void RemoveAuthSessionKeyByIndex(int64_t authId, int32_t index)
     if (IsListEmpty(&auth->sessionKeyList)) {
         AUTH_LOGI(AUTH_CONN, "auth key clear empty, Lnn offline. authId=%{public}" PRId64, authId);
         LnnNotifyEmptySessionKey(authId);
+    } else if (!CheckSessionKeyListExistType(&auth->sessionKeyList, type)) {
+        AUTH_LOGI(AUTH_CONN, "auth key type=%{public}d clear, Lnn offline. authId=%{public}" PRId64, type, authId);
+        AuthHandle authHandle = { .authId = authId, .type = type };
+        LnnNotifyLeaveLnnByAuthHandle(&authHandle);
     }
 }
 
@@ -434,6 +451,8 @@ AuthManager *GetAuthManagerByAuthId(int64_t authId)
 
 AuthManager *GetAuthManagerByConnInfo(const AuthConnInfo *connInfo, bool isServer)
 {
+    AUTH_CHECK_AND_RETURN_RET_LOGE(connInfo != NULL, NULL, AUTH_FSM, "info is null");
+    AUTH_CHECK_AND_RETURN_RET_LOGE(CheckAuthConnInfoType(connInfo), NULL, AUTH_FSM, "connInfo type error");
     if (!RequireAuthLock()) {
         return NULL;
     }
@@ -475,7 +494,7 @@ static int64_t GetLatestIdByConnInfo(const AuthConnInfo *connInfo)
         return AUTH_INVALID_ID;
     }
     if (!RequireAuthLock()) {
-        return SOFTBUS_LOCK_ERR;
+        return AUTH_INVALID_ID;
     }
     uint32_t num = 0;
     const AuthManager *auth[2] = { NULL, NULL }; /* 2: client + server */
@@ -548,6 +567,25 @@ static int64_t GetActiveAuthIdByConnInfo(const AuthConnInfo *connInfo, bool judg
     return authId;
 }
 
+static int32_t ProcessSessionKey(SessionKeyList *list, int32_t *index, int64_t authSeq, const SessionKey *key,
+    AuthSessionInfo *info)
+{
+    if (info->normalizedType == NORMALIZED_SUPPORT) {
+        if (SetSessionKeyAuthLinkType(list, info->normalizedIndex, info->connInfo.type) == SOFTBUS_OK) {
+            AUTH_LOGI(AUTH_FSM, "index is alread exist");
+            return SOFTBUS_OK;
+        }
+        *index = info->normalizedIndex;
+    }
+    if (AddSessionKey(list, *index, key, info->connInfo.type) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "failed to add a sessionKey");
+        return SOFTBUS_ERR;
+    }
+    AUTH_LOGI(AUTH_FSM, "authSeq=%{public}" PRId64 ",add session key index=%{public}d, new type=%{public}d",
+        authSeq, *index, info->connInfo.type);
+    return SOFTBUS_OK;
+}
+
 static AuthManager *GetExistAuthManager(int64_t authSeq, const AuthSessionInfo *info)
 {
     if (info->normalizedType == NORMALIZED_NOT_SUPPORT) {
@@ -559,6 +597,12 @@ static AuthManager *GetExistAuthManager(int64_t authSeq, const AuthSessionInfo *
         return NewAuthManager(authSeq, info);
     }
     auth->connId[info->connInfo.type] = info->connId;
+    if (strcpy_s(auth->uuid, UUID_BUF_LEN, info->uuid) != EOK) {
+        char *anonyUuid = NULL;
+        Anonymize(info->uuid, &anonyUuid);
+        AUTH_LOGE(AUTH_FSM, "str copy uuid fail, uuid=%{public}s", anonyUuid);
+        AnonymizeFree(anonyUuid);
+    }
     if (memcpy_s(&auth->connInfo[info->connInfo.type], sizeof(AuthConnInfo),
         &info->connInfo, sizeof(AuthConnInfo)) != EOK) {
         AUTH_LOGE(AUTH_FSM, "connInfo cpy fail");
@@ -599,11 +643,13 @@ static AuthManager *AuthManagerIsExist(int64_t authSeq, const AuthSessionInfo *i
     return auth;
 }
 
-int32_t AuthManagerSetSessionKey(int64_t authSeq, const AuthSessionInfo *info,
-    const SessionKey *sessionKey, bool isConnect)
+int32_t AuthManagerSetSessionKey(int64_t authSeq, AuthSessionInfo *info, const SessionKey *sessionKey,
+    bool isConnect)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "info is NULL");
     AUTH_CHECK_AND_RETURN_RET_LOGE(sessionKey != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "sessionKey is NULL");
+    AUTH_CHECK_AND_RETURN_RET_LOGE(CheckAuthConnInfoType(&info->connInfo), SOFTBUS_INVALID_PARAM,
+        AUTH_FSM, "connInfo type error");
     AUTH_LOGI(AUTH_FSM, "SetSessionKey: authSeq=%{public}" PRId64 ", side=%{public}s, requestId=%{public}u", authSeq,
         GetAuthSideStr(info->isServer), info->requestId);
     if (!RequireAuthLock()) {
@@ -626,7 +672,7 @@ int32_t AuthManagerSetSessionKey(int64_t authSeq, const AuthSessionInfo *info,
     if ((info->isSupportFastAuth) && (info->version <= SOFTBUS_OLD_V2)) {
         sessionKeyIndex = TO_INT32(info->oldIndex);
     }
-    if (AddSessionKey(&auth->sessionKeyList, sessionKeyIndex, sessionKey) != SOFTBUS_OK) {
+    if (ProcessSessionKey(&auth->sessionKeyList, &sessionKeyIndex, authSeq, sessionKey, info) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "failed to add a sessionkey");
         if (isNewCreated) {
             DelAuthManager(auth, info->connInfo.type);
@@ -638,21 +684,25 @@ int32_t AuthManagerSetSessionKey(int64_t authSeq, const AuthSessionInfo *info,
     if (auth->connInfo[info->connInfo.type].type == AUTH_LINK_TYPE_WIFI && !auth->isServer) {
         ScheduleUpdateSessionKey(authHandle, SCHEDULE_UPDATE_SESSION_KEY_PERIOD);
     }
+    int32_t ret = SOFTBUS_OK;
     if (!isConnect) {
+        ret = SetSessionKeyAvailable(&auth->sessionKeyList, sessionKeyIndex);
         auth->hasAuthPassed = true;
     }
     AUTH_LOGI(AUTH_FSM,
         "auth manager. authId=%{public}" PRId64 ", authSeq=%{public}" PRId64
-        ", index=%{public}d, lastVerifyTime=%{public}" PRId64,
-        auth->authId, authSeq, sessionKeyIndex, auth->lastVerifyTime);
+        ", index=%{public}d, lastVerifyTime=%{public}" PRId64 ", ret=%{public}d",
+        auth->authId, authSeq, sessionKeyIndex, auth->lastVerifyTime, ret);
     ReleaseAuthLock();
-    return SOFTBUS_OK;
+    return ret;
 }
 
 int32_t AuthManagerGetSessionKey(int64_t authSeq, const AuthSessionInfo *info, SessionKey *sessionKey)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "info is NULL");
     AUTH_CHECK_AND_RETURN_RET_LOGE(sessionKey != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "sessionKey is NULL");
+    AUTH_CHECK_AND_RETURN_RET_LOGE(CheckAuthConnInfoType(&info->connInfo), SOFTBUS_INVALID_PARAM,
+        AUTH_FSM, "connInfo type error");
     AUTH_LOGI(AUTH_FSM, "GetSessionKey: authSeq=%{public}" PRId64 ", side=%{public}s, requestId=%{public}u", authSeq,
         GetAuthSideStr(info->isServer), info->requestId);
     if (!RequireAuthLock()) {
@@ -760,16 +810,6 @@ static int32_t RetryRegTrustDataChangeListener()
         (void)SoftBusSleepMs(RETRY_REGDATA_MILLSECONDS);
     }
     return SOFTBUS_ERR;
-}
-
-static void DfxRecordLnnAuthStart(const AuthConnInfo *connInfo)
-{
-    LnnEventExtra extra = { 0 };
-    LnnEventExtraInit(&extra);
-    if (connInfo != NULL) {
-        extra.authLinkType = connInfo->type;
-    }
-    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH, extra);
 }
 
 static int32_t StartVerifyDevice(uint32_t requestId, const AuthConnInfo *connInfo, const AuthVerifyCallback *verifyCb,
@@ -898,7 +938,7 @@ static void ReportAuthRequestFailed(uint32_t requestId, int32_t reason)
     if (CheckAuthConnCallback(&request.connCb)) {
         PerformAuthConnCallback(request.requestId, reason, AUTH_INVALID_ID);
     } else {
-        AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+        AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = request.connInfo.type };
         PerformVerifyCallback(request.requestId, reason, authHandle, NULL);
     }
     DelAuthRequest(request.requestId);
@@ -915,6 +955,7 @@ static void ReportAuthRequestFailed(uint32_t requestId, int32_t reason)
 void AuthManagerSetAuthPassed(int64_t authSeq, const AuthSessionInfo *info)
 {
     AUTH_CHECK_AND_RETURN_LOGE(info != NULL, AUTH_FSM, "info is null");
+    AUTH_CHECK_AND_RETURN_LOGE(CheckAuthConnInfoType(&info->connInfo), AUTH_FSM, "connInfo type error");
     AUTH_LOGI(AUTH_FSM, "SetAuthPassed: authSeq=%{public}" PRId64 ", side=%{public}s, requestId=%{public}u", authSeq,
         GetAuthSideStr(info->isServer), info->requestId);
 
@@ -929,7 +970,15 @@ void AuthManagerSetAuthPassed(int64_t authSeq, const AuthSessionInfo *info)
             GetAuthSideStr(info->isServer));
         return;
     }
-
+    int64_t index = authSeq;
+    if (info->normalizedType == NORMALIZED_SUPPORT) {
+        index = info->normalizedIndex;
+    }
+    if (SetSessionKeyAvailable(&auth->sessionKeyList, TO_INT32(index)) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "set sessionKey available fail, index=%{public}d", TO_INT32(index));
+        ReleaseAuthLock();
+        return;
+    }
     auth->hasAuthPassed = true;
     if (info->nodeInfo.p2pInfo.p2pMac[0] != '\0') {
         if (strcpy_s(auth->p2pMac, sizeof(auth->p2pMac), info->nodeInfo.p2pInfo.p2pMac)) {
@@ -949,6 +998,7 @@ void AuthManagerSetAuthPassed(int64_t authSeq, const AuthSessionInfo *info)
 void AuthManagerSetAuthFailed(int64_t authSeq, const AuthSessionInfo *info, int32_t reason)
 {
     AUTH_CHECK_AND_RETURN_LOGE(info != NULL, AUTH_FSM, "auth session info is null");
+    AUTH_CHECK_AND_RETURN_LOGE(CheckAuthConnInfoType(&info->connInfo), AUTH_FSM, "connInfo type error");
     AUTH_LOGE(AUTH_FSM, "SetAuthFailed: authSeq=%{public}" PRId64 ", requestId=%{public}u, reason=%{public}d", authSeq,
         info->requestId, reason);
     AuthManager *auth = GetAuthManagerByConnInfo(&info->connInfo, info->isServer);
@@ -1066,7 +1116,7 @@ static void HandleBleConnectResult(uint32_t requestId, int64_t authId, uint64_t 
     } while (FindAuthRequestByConnInfo(&request.connInfo, &request) == SOFTBUS_OK);
 }
 
-static int32_t GenerateUdidShortHash(const char *udid, uint8_t *hash)
+static int32_t GenerateUdidHash(const char *udid, uint8_t *hash)
 {
     if (SoftBusGenerateStrHash((uint8_t *)udid, strlen(udid), hash) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "generate udidHash fail");
@@ -1086,7 +1136,8 @@ static int32_t GetUdidShortHash(const AuthConnInfo *connInfo, char *udidBuf, uin
                 AUTH_LOGE(AUTH_FSM, "get udid by brMac fail.");
                 return SOFTBUS_ERR;
             }
-            if (GenerateUdidShortHash(udid, hash) != SOFTBUS_OK) {
+            if (GenerateUdidHash(udid, hash) != SOFTBUS_OK) {
+                AUTH_LOGE(AUTH_FSM, "GenerateUdidHash fail.");
                 return SOFTBUS_ERR;
             }
             break;
@@ -1103,7 +1154,8 @@ static int32_t GetUdidShortHash(const AuthConnInfo *connInfo, char *udidBuf, uin
             break;
         case AUTH_LINK_TYPE_P2P:
         case AUTH_LINK_TYPE_ENHANCED_P2P:
-            if (GenerateUdidShortHash(connInfo->info.ipInfo.udid, hash) != SOFTBUS_OK) {
+            if (GenerateUdidHash(connInfo->info.ipInfo.udid, hash) != SOFTBUS_OK) {
+                AUTH_LOGE(AUTH_FSM, "GenerateUdidHash fail.");
                 return SOFTBUS_ERR;
             }
             break;
@@ -1123,10 +1175,11 @@ static int32_t GetUdidShortHash(const AuthConnInfo *connInfo, char *udidBuf, uin
 }
 
 
-static void DfxRecordLnnConnectEnd(uint64_t connId, const AuthConnInfo *connInfo, int32_t reason)
+static void DfxRecordLnnConnectEnd(uint32_t requestId, uint64_t connId, const AuthConnInfo *connInfo, int32_t reason)
 {
     LnnEventExtra extra = { 0 };
     LnnEventExtraInit(&extra);
+    extra.authRequestId = (int32_t)requestId;
     extra.connectionId = (int32_t)connId;
     extra.errcode = reason;
     extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
@@ -1171,7 +1224,7 @@ static uint32_t AddConcurrentAuthRequest(const AuthConnInfo *connInfo, AuthReque
 
 static void OnConnectResult(uint32_t requestId, uint64_t connId, int32_t result, const AuthConnInfo *connInfo)
 {
-    DfxRecordLnnConnectEnd(connId, connInfo, result);
+    DfxRecordLnnConnectEnd(requestId, connId, connInfo, result);
     AUTH_LOGI(AUTH_CONN, "OnConnectResult: requestId=%{public}u, result=%{public}d", requestId, result);
     AuthRequest request;
     if (GetAuthRequest(requestId, &request) != SOFTBUS_OK) {
@@ -1224,9 +1277,14 @@ static void HandleDeviceIdData(
             AUTH_LOGE(AUTH_FSM, "local device NOT support as server, ignore auth seq=%{public}" PRId64, head->seq);
             return;
         }
+        if (!RequireAuthLock()) {
+            AUTH_LOGE(AUTH_FSM, "lock fail");
+            return;
+        }
         AuthFsm *fsm = GetAuthFsmByConnId(connId, true);
         if ((fsm != NULL && fsm->info.idType == EXCHANGE_NETWORKID) ||
             (fsm != NULL && fsm->info.idType == EXCHANGE_FAIL)) {
+            ReleaseAuthLock();
             ret = AuthSessionProcessDevIdData(head->seq, data, head->len);
             if (ret != SOFTBUS_OK) {
                 AUTH_LOGE(AUTH_FSM,
@@ -1236,9 +1294,11 @@ static void HandleDeviceIdData(
         }
         if (fsm != NULL && fsm->info.idType == EXCHANHE_UDID) {
             AUTH_LOGE(AUTH_FSM, "the same connId fsm not support, ignore auth seq=%{public}" PRId64, head->seq);
+            ReleaseAuthLock();
             HandleRepeatDeviceIdDataDelay(connId, connInfo, fromServer, head, data);
             return;
         }
+        ReleaseAuthLock();
         ret = AuthSessionStartAuth(head->seq, AuthGenRequestId(), connId, connInfo, true, true);
         if (ret != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_FSM,
@@ -1404,12 +1464,12 @@ static void HandleDecryptFailData(
         &decData, &decDataLen) == SOFTBUS_OK) {
         ReleaseAuthLock();
         SoftBusFree(decData);
-        RemoveAuthSessionKeyByIndex(auth[0]->authId, index);
+        RemoveAuthSessionKeyByIndex(auth[0]->authId, index, connInfo->type);
     } else if (auth[1] != NULL && DecryptInner(&auth[1]->sessionKeyList, data, head->len,
         &decData, &decDataLen) == SOFTBUS_OK) {
         ReleaseAuthLock();
         SoftBusFree(decData);
-        RemoveAuthSessionKeyByIndex(auth[1]->authId, index);
+        RemoveAuthSessionKeyByIndex(auth[1]->authId, index, connInfo->type);
     } else {
         ReleaseAuthLock();
         AUTH_LOGE(AUTH_CONN, "decrypt trans data fail.");
@@ -1513,11 +1573,12 @@ uint32_t AuthGenRequestId(void)
 int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
     const AuthVerifyCallback *callback, bool isFastAuth)
 {
-    DfxRecordLnnAuthStart(connInfo);
     if (connInfo == NULL || !CheckVerifyCallback(callback)) {
         AUTH_LOGE(AUTH_CONN, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
+    AUTH_CHECK_AND_RETURN_RET_LOGE(CheckAuthConnInfoType(connInfo), SOFTBUS_INVALID_PARAM,
+        AUTH_FSM, "connInfo type error");
     return StartVerifyDevice(requestId, connInfo, callback, NULL, isFastAuth);
 }
 
@@ -1578,7 +1639,7 @@ static int32_t TryGetBrConnInfo(const char *uuid, AuthConnInfo *connInfo)
 {
     char networkId[NETWORK_ID_BUF_LEN] = { 0 };
     if (LnnGetNetworkIdByUuid(uuid, networkId, sizeof(networkId)) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get networkdId by uuid fail");
+        AUTH_LOGE(AUTH_CONN, "get networkId by uuid fail");
         return SOFTBUS_AUTH_GET_BR_CONN_INFO_FAIL;
     }
 
@@ -1658,6 +1719,8 @@ int32_t AuthDeviceOpenConn(const AuthConnInfo *info, uint32_t requestId, const A
         AUTH_LOGE(AUTH_CONN, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
+    AUTH_CHECK_AND_RETURN_RET_LOGE(CheckAuthConnInfoType(info), SOFTBUS_INVALID_PARAM,
+        AUTH_FSM, "connInfo type error");
     AUTH_LOGI(AUTH_CONN, "open auth conn: connType=%{public}d, requestId=%{public}u", info->type, requestId);
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = info->type };
     bool judgeTimeOut = false;
@@ -1777,6 +1840,37 @@ void UnregGroupChangeListener(void)
     g_groupChangeListener.onDeviceBound = NULL;
 }
 
+int32_t AuthGetLatestAuthSeqListByType(const char *udid, int64_t *seqList, uint64_t *authVerifyTime, DiscoveryType type)
+{
+    if (udid == NULL || udid[0] == '\0' || seqList == NULL || authVerifyTime == NULL) {
+        AUTH_LOGE(AUTH_CONN, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!RequireAuthLock()) {
+        AUTH_LOGE(AUTH_CONN, "lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    const AuthManager *authClient = NULL;
+    const AuthManager *authServer = NULL;
+    authClient = FindAuthManagerByUdid(udid, ConvertToAuthLinkType(type), false);
+    authServer = FindAuthManagerByUdid(udid, ConvertToAuthLinkType(type), true);
+    if (authClient == NULL && authServer == NULL) {
+        AUTH_LOGE(AUTH_CONN, "authManager not found");
+        ReleaseAuthLock();
+        return SOFTBUS_ERR;
+    }
+    if (authClient != NULL) {
+        seqList[0] = authClient->lastAuthSeq;
+        authVerifyTime[0] = authClient->lastVerifyTime;
+    }
+    if (authServer != NULL) {
+        seqList[1] = authServer->lastAuthSeq;
+        authVerifyTime[1] = authServer->lastVerifyTime;
+    }
+    ReleaseAuthLock();
+    return SOFTBUS_OK;
+}
+
 int32_t AuthGetLatestAuthSeqList(const char *udid, int64_t *seqList, uint32_t num)
 {
     if (udid == NULL || udid[0] == '\0' || seqList == NULL || num != DISCOVERY_TYPE_COUNT) {
@@ -1843,9 +1937,13 @@ void AuthDeviceGetLatestIdByUuid(const char *uuid, AuthLinkType type, AuthHandle
     authHandle->authId = AUTH_INVALID_ID;
     uint64_t latestVerifyTime = 0;
     for (uint32_t i = 0; i < num; i++) {
-        if (auth[i] != NULL && auth[i]->lastVerifyTime > latestVerifyTime) {
+        uint64_t tmpTime = 0;
+        if (auth[i] != NULL) {
+            tmpTime = GetLatestAvailableSessionKeyTime(&auth[i]->sessionKeyList);
+        }
+        if (tmpTime > latestVerifyTime) {
             authHandle->authId = auth[i]->authId;
-            latestVerifyTime = auth[i]->lastVerifyTime;
+            latestVerifyTime = tmpTime;
         }
     }
     ReleaseAuthLock();
@@ -1858,12 +1956,44 @@ void AuthDeviceGetLatestIdByUuid(const char *uuid, AuthLinkType type, AuthHandle
     AnonymizeFree(anonyUuid);
 }
 
+NO_SANITIZE("cfi") int64_t AuthP2pGetLatestIdByUuid(const char *uuid)
+{
+    if (uuid == NULL || uuid[0] == '\0') {
+        AUTH_LOGE(AUTH_CONN, "uuid is empty.");
+        return AUTH_INVALID_ID;
+    }
+    if (!RequireAuthLock()) {
+        return AUTH_INVALID_ID;
+    }
+    uint32_t num = 0;
+    const AuthManager *auth[2] = { NULL, NULL }; /* 2: P2P * (Cleint + Server) */
+    auth[num++] = FindAuthManagerByUuid(uuid, AUTH_LINK_TYPE_P2P, false);
+    auth[num++] = FindAuthManagerByUuid(uuid, AUTH_LINK_TYPE_P2P, true);
+    int64_t latestAuthId = AUTH_INVALID_ID;
+    uint64_t latestVerifyTime = 0;
+    for (uint32_t i = 0; i < num; i++) {
+        if (auth[i] != NULL && auth[i]->lastVerifyTime > latestVerifyTime) {
+            latestAuthId = auth[i]->authId;
+            latestVerifyTime = auth[i]->lastVerifyTime;
+        }
+    }
+    ReleaseAuthLock();
+    char *anonyUuid = NULL;
+    Anonymize(uuid, &anonyUuid);
+    AUTH_LOGD(AUTH_CONN, "latest p2p auth manager[%{public}" PRId64 "] found, lastVerifyTime=%{public}" PRId64
+    ", uuid:%{public}s", latestAuthId, latestVerifyTime, anonyUuid);
+    AnonymizeFree(anonyUuid);
+    return latestAuthId;
+}
+
 int64_t AuthDeviceGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer)
 {
     if (connInfo == NULL) {
         AUTH_LOGE(AUTH_CONN, "connInfo is null");
         return AUTH_INVALID_ID;
     }
+    AUTH_CHECK_AND_RETURN_RET_LOGE(CheckAuthConnInfoType(connInfo), AUTH_INVALID_ID,
+        AUTH_FSM, "connInfo type error");
     return GetAuthIdByConnInfo(connInfo, isServer);
 }
 

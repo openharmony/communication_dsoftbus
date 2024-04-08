@@ -35,21 +35,22 @@ common_utils_src = [
   "dfx/hisysevent_adapter/softbus_hisysevt_discreporter.c",
   "dfx/hisysevent_adapter/softbus_hisysevt_transreporter.c",
 ]
+external_deps = []
 
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
     diff_deps = [
       "$hilog_lite_deps_path",
       "//build/lite/config/component/cJSON:cjson_static",
-      "//third_party/bounds_checking_function:libsec_static",
     ]
+    diff_external_deps = [ "bounds_checking_function:libsec_static" ]
     build_type = "static_library"
   } else {
     diff_deps = [
       "$hilog_lite_deps_path",
       "//build/lite/config/component/cJSON:cjson_shared",
-      "//third_party/bounds_checking_function:libsec_shared",
     ]
+    diff_external_deps = [ "bounds_checking_function:libsec_shared" ]
     build_type = "shared_library"
   }
   config("dsoftbus_utils_interface") {
@@ -110,6 +111,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/adapter:softbus_adapter",
     ]
     deps += diff_deps
+    external_deps += diff_external_deps
     public_configs = [ ":dsoftbus_utils_interface" ]
   }
 } else {
@@ -152,7 +154,6 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/components/nstackx/nstackx_util/interface",
       "$dsoftbus_root_path/components/nstackx/nstackx_ctrl/interface",
       "//third_party/cJSON",
-      "//third_party/bounds_checking_function/include",
     ]
     include_dirs += conn_common_inc + trans_common_inc
     dfx_source = [
@@ -180,8 +181,9 @@ if (defined(ohos_lite)) {
       "$dsoftbus_dfx_path/log:softbus_dfx_log",
       "$dsoftbus_root_path/adapter:softbus_adapter",
       "//third_party/cJSON:cjson",
-      "//third_party/sqlite:sqlite",
     ]
+    public_external_deps = [ "sqlite:sqlite" ]
+    external_deps += [ "bounds_checking_function:libsec_shared" ]
     if (!enhanced) {
       cflags += [ "-DFILLP_ENHANCED" ]
       public_deps += [
@@ -192,7 +194,7 @@ if (defined(ohos_lite)) {
       ]
     }
     if (is_standard_system) {
-      external_deps = [
+      external_deps += [
         "hilog:libhilog",
         "hisysevent:libhisysevent",
       ]
