@@ -58,7 +58,6 @@ typedef struct {
 
 int32_t LnnInitNetBuilder(void);
 int32_t LnnInitNetBuilderDelay(void);
-int32_t LnnProcessAccountDelay(void);
 void LnnDeinitNetBuilder(void);
 
 int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, bool isNeedConnect);
