@@ -1917,9 +1917,9 @@ int32_t NSTACKX_SendNotification(const NSTACKX_NotificationConfig *config)
     if (CheckNotificationConfig(config) != NSTACKX_EOK) {
         return NSTACKX_EINVAL;
     }
-    NSTACKX_NotificationConfig *dupConfig = (NSTACKX_NotificationConfig *)malloc(sizeof(NSTACKX_NotificationConfig));
+    NSTACKX_NotificationConfig *dupConfig = (NSTACKX_NotificationConfig *)calloc(1, sizeof(NSTACKX_NotificationConfig));
     if (dupConfig == NULL) {
-        DFINDER_LOGE(TAG, "malloc for notification config fail, size wanted: %zu", sizeof(NSTACKX_NotificationConfig));
+        DFINDER_LOGE(TAG, "calloc for notification config fail, size wanted: %zu", sizeof(NSTACKX_NotificationConfig));
         return NSTACKX_ENOMEM;
     }
     dupConfig->msg = (char *)calloc((config->msgLen + 1), sizeof(char));
@@ -1928,9 +1928,9 @@ int32_t NSTACKX_SendNotification(const NSTACKX_NotificationConfig *config)
         free(dupConfig);
         return NSTACKX_ENOMEM;
     }
-    dupConfig->intervalsMs = (uint16_t *)malloc(sizeof(uint16_t) * (config->intervalLen));
+    dupConfig->intervalsMs = (uint16_t *)calloc(config->intervalLen, sizeof(uint16_t));
     if (dupConfig->intervalsMs == NULL) {
-        DFINDER_LOGE(TAG, "malloc for intervals fail, size wanted: %zu", sizeof(uint32_t) * (config->intervalLen));
+        DFINDER_LOGE(TAG, "calloc for intervals fail, size wanted: %zu", sizeof(uint16_t) * (config->intervalLen));
         free(dupConfig->msg);
         free(dupConfig);
         return NSTACKX_ENOMEM;
@@ -1964,6 +1964,10 @@ int32_t NSTACKX_StopSendNotification(uint8_t businessType)
     if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
         DFINDER_LOGE(TAG, "dfinder not inited");
         return NSTACKX_EFAILED;
+    }
+    if (businessType >= NSTACKX_BUSINESS_TYPE_MAX) {
+        DFINDER_LOGE(TAG, "invalid business type %hhu to stop send notification", businessType);
+        return NSTACKX_EINVAL;
     }
     if (PostEvent(&g_eventNodeChain, g_epollfd, NotificationStop, NULL) != NSTACKX_EOK) {
         DFINDER_LOGE(TAG, "post event failed to run stop device discover");
