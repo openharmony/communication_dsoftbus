@@ -104,7 +104,6 @@ HWTEST_F(AdapterBleGattClientTest, SoftbusGattcRegister, TestSize.Level3)
 {
     MockBluetooth mocker;
     MockAll(mocker);
-
     EXPECT_CALL(mocker, BleGattcRegister).Times(1).WillOnce(Return(0));
     EXPECT_EQ(SoftbusGattcRegister(), -1);
 
@@ -120,13 +119,16 @@ HWTEST_F(AdapterBleGattClientTest, SoftbusGattcRegister, TestSize.Level3)
  */
 HWTEST_F(AdapterBleGattClientTest, SoftbusGattcUnRegister, TestSize.Level3)
 {
+    InitSoftbusAdapterClient();
     MockBluetooth mocker;
     MockAll(mocker);
     EXPECT_CALL(mocker, BleGattcUnRegister).Times(1).WillOnce(Return(OHOS_BT_STATUS_FAIL));
     EXPECT_EQ(SoftbusGattcUnRegister(1), SOFTBUS_GATTC_INTERFACE_FAILED);
 
+    int32_t clientId = 10;
+    SoftbusGattcRegisterCallback(GetStubGattcCallback(), clientId);
     EXPECT_CALL(mocker, BleGattcUnRegister).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
-    EXPECT_EQ(SoftbusGattcUnRegister(1), SOFTBUS_OK);
+    EXPECT_EQ(SoftbusGattcUnRegister(clientId), SOFTBUS_OK);
 }
 
 /**
@@ -296,13 +298,12 @@ HWTEST_F(AdapterBleGattClientTest, SoftbusGattcConfigureMtuSize, TestSize.Level3
  */
 HWTEST_F(AdapterBleGattClientTest, GattClientConnectCycle, TestSize.Level3)
 {
-    SoftbusGattcRegisterCallback(GetStubGattcCallback());
     MockBluetooth mocker;
     MockAll(mocker);
 
     auto clientId = SoftbusGattcRegister();
     ASSERT_NE(clientId, -1);
-
+    SoftbusGattcRegisterCallback(GetStubGattcCallback(), clientId);
     SoftBusBtAddr addr = {
         .addr = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66}
     };
