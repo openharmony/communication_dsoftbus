@@ -1220,7 +1220,10 @@ static uint32_t AddConcurrentAuthRequest(const AuthConnInfo *connInfo, AuthReque
             return num;
         }
         num = AddNormalizeRequest(&normalizeRequest);
-        AUTH_LOGI(AUTH_CONN, "add normalize queue, num=%{public}d, udidHash=%{public}s", num, udidHashHexStr);
+        char *anonyUdidHash = NULL;
+        Anonymize(udidHashHexStr, &anonyUdidHash);
+        AUTH_LOGI(AUTH_CONN, "add normalize queue, num=%{public}d, udidHash=%{public}s", num, anonyUdidHash);
+        AnonymizeFree(anonyUdidHash);
     }
     return num;
 }
