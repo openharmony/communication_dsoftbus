@@ -491,7 +491,7 @@ static void OnP2pNetworkingDataRecv(AuthHandle authHandle, const AuthTransData *
         LNN_LOGE(LNN_BUILDER, "invalid param");
         return;
     }
-    LNN_LOGI(LNN_BUILDER, "authId=%" PRId64 ", module=%{public}d, seq=%{public}" PRId64 ", len=%{public}u.",
+    LNN_LOGI(LNN_BUILDER, "authId=%{public}" PRId64 ", module=%{public}d, seq=%{public}" PRId64 ", len=%{public}u.",
         authHandle.authId, data->module, data->seq, data->len);
     if (data->module != MODULE_P2P_NETWORKING_SYNC) {
         LNN_LOGE(LNN_BUILDER, "data->module is not MODULE_P2P_NETWORKING_SYNC");
@@ -755,7 +755,7 @@ int32_t LnnSendSyncInfoMsg(LnnSyncInfoType type, const char *networkId,
     return rc;
 }
 
-static void SetAuthdataInfoParam(AuthTransData *dataInfo, char *msg)
+static void FillAuthdataInfo(AuthTransData *dataInfo, char *msg)
 {
     dataInfo->module = MODULE_P2P_NETWORKING_SYNC;
     dataInfo->flag = 0;
@@ -764,21 +764,41 @@ static void SetAuthdataInfoParam(AuthTransData *dataInfo, char *msg)
     dataInfo->data = (const uint8_t *)msg;
 }
 
-NO_SANITIZE("cfi") int32_t LnnSendP2pSyncInfoMsg(const char *networkId, uint32_t netCapability)
+static int32_t GetAuthHandleByNetworkId(const char *networkId, AuthHandle *authHandle)
 {
     char uuid[UUID_BUF_LEN] = {0};
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
+    (void)LnnConvertDlId(networkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN);
+    AuthDeviceGetLatestIdByUuid(uuid, AUTH_LINK_TYPE_P2P, authHandle);
+    if (authHandle->authId != AUTH_INVALID_ID) {
+        LNN_LOGI(LNN_BUILDER, "find p2p authHandle, networkId:%{public}s", anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
+        return SOFTBUS_OK;
+    }
+    AuthDeviceGetLatestIdByUuid(uuid, AUTH_LINK_TYPE_ENHANCED_P2P, authHandle);
+    if (authHandle->authId != AUTH_INVALID_ID) {
+        LNN_LOGI(LNN_BUILDER, "find hml authHandle, networkId:%{public}s", anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
+        return SOFTBUS_OK;
+    }
+    AnonymizeFree(anonyNetworkId);
+    return SOFTBUS_ERR;
+}
+
+int32_t LnnSendP2pSyncInfoMsg(const char *networkId, uint32_t netCapability)
+{
     char *anonyNetworkId = NULL;
     if (networkId == NULL) {
         LNN_LOGE(LNN_BUILDER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     Anonymize(networkId, &anonyNetworkId);
-    (void)LnnConvertDlId(networkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN);
-    AuthHandle authHandle = { .authId = AuthP2pGetLatestIdByUuid(uuid) };
-    if (authHandle.authId == AUTH_INVALID_ID) {
-        LNN_LOGW(LNN_BUILDER, "not find p2p auth manager, no need to sync, networkId:%{public}s", anonyNetworkId);
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+    if (GetAuthHandleByNetworkId(networkId, &authHandle) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get authHandle fail, networkId:%{public}s", anonyNetworkId);
         AnonymizeFree(anonyNetworkId);
-        return SOFTBUS_OK;
+        return SOFTBUS_ERR;
     }
     int64_t authSeq[2] = {0};
     uint64_t authVerifyTime[2] = {0};
@@ -798,11 +818,11 @@ NO_SANITIZE("cfi") int32_t LnnSendP2pSyncInfoMsg(const char *networkId, uint32_t
         return SOFTBUS_ERR;
     }
     AuthTransData dataInfo = {0};
-    SetAuthdataInfoParam(&dataInfo, msg);
-    cJSON_free(msg);
+    FillAuthdataInfo(&dataInfo, msg);
     if (SoftBusGenerateRandomArray((uint8_t *)&dataInfo.seq, sizeof(int64_t)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "generate seq fail");
         AnonymizeFree(anonyNetworkId);
+        cJSON_free(msg);
         return SOFTBUS_ERR;
     }
     if (AuthPostTransData(authHandle, &dataInfo) == SOFTBUS_OK) {
@@ -813,5 +833,6 @@ NO_SANITIZE("cfi") int32_t LnnSendP2pSyncInfoMsg(const char *networkId, uint32_t
         LNN_LOGE(LNN_BUILDER, "post trans data fail, networkId:%{public}s", anonyNetworkId);
     }
     AnonymizeFree(anonyNetworkId);
+    cJSON_free(msg);
     return SOFTBUS_OK;
 }
