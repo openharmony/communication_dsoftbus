@@ -26,7 +26,7 @@ public:
     LaneLinkDepsInterface() {};
     virtual ~LaneLinkDepsInterface() {};
 
-    virtual int32_t GetTransOptionByLaneReqId(uint32_t laneReqId, TransOption *reqInfo) = 0;
+    virtual int32_t GetTransReqInfoByLaneReqId(uint32_t laneReqId, TransOption *reqInfo) = 0;
 };
 
 class LaneLinkDepsInterfaceMock : public LaneLinkDepsInterface {
@@ -34,7 +34,7 @@ public:
     LaneLinkDepsInterfaceMock();
     ~LaneLinkDepsInterfaceMock() override;
 
-    MOCK_METHOD2(GetTransOptionByLaneReqId, int32_t (uint32_t laneReqId, TransOption *reqInfo));
+    MOCK_METHOD2(GetTransReqInfoByLaneReqId, int32_t (uint32_t laneReqId, TransOption *reqInfo));
 };
 } // namespace OHOS
 #endif // LNN_LANE_LINK_DEPS_MOCK_H

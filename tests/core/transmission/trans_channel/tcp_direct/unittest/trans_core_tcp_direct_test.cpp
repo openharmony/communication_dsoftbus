@@ -219,7 +219,8 @@ HWTEST_F(TransCoreTcpDirectTest, TransOpenDirectChannelTest003, TestSize.Level1)
     ConnectOption connOpt;
     int32_t channelId = 0;
     (void)memset_s(&connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
-    uint32_t laneReqId = 0;
+    uint32_t laneHandle = 1;
+    bool isQosLane = false;
     attr.dataType = 1;
     attr.linkTypeNum = 0;
     SessionParam param = {
@@ -240,7 +241,7 @@ HWTEST_F(TransCoreTcpDirectTest, TransOpenDirectChannelTest003, TestSize.Level1)
     appInfo->crc = APP_INFO_FILE_FEATURES_SUPPORT;
     (void)memcpy_s(appInfo->myData.addr, IP_LEN, g_ip, strlen(g_ip));
 
-    int32_t ret = TransGetLaneInfo(&param, &connInfo, &laneReqId);
+    int32_t ret = TransGetLaneInfo(&param, &connInfo, &laneHandle, &isQosLane);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     ret = TransGetConnectOptByConnInfo(&connInfo, &connOpt);

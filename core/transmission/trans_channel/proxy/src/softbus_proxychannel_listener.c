@@ -295,7 +295,7 @@ static int32_t TransProxyGetAppInfo(const char *sessionName, const char *peerNet
 static int32_t TransGetConnectOption(
     const char *peerNetworkId, ConnectOption *connOpt, const LanePreferredLinkList *preferred)
 {
-    uint32_t laneReqId = 0;
+    uint32_t laneHandle = INVALID_LANE_REQ_ID;
     LaneConnInfo connInfo;
     LaneRequestOption option;
     (void)memset_s(&option, sizeof(LaneRequestOption), 0, sizeof(LaneRequestOption));
@@ -316,19 +316,18 @@ static int32_t TransGetConnectOption(
         }
         option.requestInfo.trans.expectedLink.linkTypeNum = preferred->linkTypeNum;
     }
-
-    if (TransGetLaneInfoByOption(false, &option, &connInfo, &laneReqId) != SOFTBUS_OK) {
+    if (TransGetLaneInfoByOption(&option, &connInfo, &laneHandle) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
-    TRANS_LOGI(TRANS_CTRL, "net channel lane info. laneReqId=%{public}u, type=%{public}d", laneReqId, connInfo.type);
+    TRANS_LOGI(TRANS_CTRL, "net channel lane info. laneHandle=%{public}u, type=%{public}d", laneHandle, connInfo.type);
     if (TransGetConnectOptByConnInfo(&connInfo, connOpt) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
-    LnnFreeLane(laneReqId);
+    LnnFreeLane(laneHandle);
     return SOFTBUS_OK;
 EXIT_ERR:
-    if (laneReqId != 0) {
-        LnnFreeLane(laneReqId);
+    if (laneHandle != 0) {
+        LnnFreeLane(laneHandle);
     }
     return SOFTBUS_TRANS_GET_LANE_INFO_ERR;
 }
