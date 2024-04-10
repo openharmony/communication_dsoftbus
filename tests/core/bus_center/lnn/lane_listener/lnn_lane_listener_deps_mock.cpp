@@ -36,14 +36,6 @@ static LaneListenerDepsInterface *GetLaneListenerDepsInterface()
 }
 
 extern "C" {
-bool CompLaneResource(const LaneResource *src, const LaneResource *dst)
-{
-    return GetLaneListenerDepsInterface()->CompLaneResource(src, dst);
-}
-int32_t ConvertToLaneResource(const LaneLinkInfo *linkInfo, LaneResource *laneResourceInfo)
-{
-    return GetLaneListenerDepsInterface()->ConvertToLaneResource(linkInfo, laneResourceInfo);
-}
 int32_t FreeLaneResource(const LaneResource *resourceItem)
 {
     return GetLaneListenerDepsInterface()->FreeLaneResource(resourceItem);
@@ -52,13 +44,17 @@ int32_t LaneInfoProcess(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, La
 {
     return GetLaneListenerDepsInterface()->LaneInfoProcess(linkInfo, connInfo, profile);
 }
-int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info)
-{
-    return GetLaneListenerDepsInterface()->LnnGetRemoteNodeInfoById(id, type, info);
-}
 int32_t PostLaneStateChangeMessage(LaneState state, const char *peerUdid, const LaneLinkInfo *laneLinkInfo)
 {
     return GetLaneListenerDepsInterface()->PostLaneStateChangeMessage(state, peerUdid, laneLinkInfo);
+}
+int32_t FindLaneResourceByLinkAddr(const LaneLinkInfo *infoItem, LaneResource *resourceItem)
+{
+    return GetLaneListenerDepsInterface()->FindLaneResourceByLinkAddr(infoItem, resourceItem);
+}
+uint64_t ApplyLaneId(const char* activeUdid, const char* passiveUdid, LaneLinkType linkType)
+{
+    return GetLaneListenerDepsInterface()->ApplyLaneId(activeUdid, passiveUdid, linkType);
 }
 }
 } // namespace OHOS

@@ -36,6 +36,7 @@
 static void GetFileDefaultLink(LaneLinkType *linkList, uint32_t *listNum)
 {
     linkList[(*listNum)++] = LANE_WLAN_5G;
+    linkList[(*listNum)++] = LANE_HML;
     linkList[(*listNum)++] = LANE_P2P;
     linkList[(*listNum)++] = LANE_WLAN_2P4G;
     linkList[(*listNum)++] = LANE_BR;
@@ -44,6 +45,7 @@ static void GetFileDefaultLink(LaneLinkType *linkList, uint32_t *listNum)
 static void GetStreamDefaultLink(LaneLinkType *linkList, uint32_t *listNum)
 {
     linkList[(*listNum)++] = LANE_WLAN_5G;
+    linkList[(*listNum)++] = LANE_HML;
     linkList[(*listNum)++] = LANE_P2P;
     linkList[(*listNum)++] = LANE_WLAN_2P4G;
 }
@@ -182,7 +184,6 @@ static void SelectByPreferredLink(const char *networkId, const LaneSelectParam *
     }
     return;
 }
-
 static void SelectByDefaultLink(const char *networkId, const LaneSelectParam *request,
     LaneLinkType *resList, uint32_t *resNum)
 {
@@ -416,11 +417,8 @@ int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *req
     recommendList->linkTypeNum = 0;
     for (uint32_t i = 0; i < laneLinkList.linkTypeNum; i++) {
         recommendList->linkType[recommendList->linkTypeNum] = laneLinkList.linkType[i];
-        LNN_LOGI(LNN_LANE, "expect linklist linkTypeNum=%{public}u, priorityLinkType=%{public}d",
-            recommendList->linkTypeNum, laneLinkList.linkType[i]);
         recommendList->linkTypeNum++;
     }
-
     if (AdjustLanePriority(networkId, request, recommendList->linkType,
         recommendList->linkTypeNum) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "AdjustLanePriority fail");
