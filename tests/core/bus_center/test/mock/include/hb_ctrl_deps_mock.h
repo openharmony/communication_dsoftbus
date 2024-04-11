@@ -37,6 +37,7 @@ public:
     virtual bool IsEnableSoftBusHeartbeat(void) = 0;
     virtual void LnnUpdateOhosAccount(void) = 0;
     virtual int32_t LnnHbMediumMgrSetParam(const LnnHeartbeatMediumParam *param) = 0;
+    virtual int32_t AuthSendKeepAlive(const char *uuid, ModeCycle cycle) = 0;
 };
 class HeartBeatCtrlDepsInterfaceMock : public HeartBeatCtrlDepsInterface {
 public:
@@ -51,6 +52,7 @@ public:
     MOCK_METHOD0(IsEnableSoftBusHeartbeat, bool (void));
     MOCK_METHOD0(LnnUpdateOhosAccount, void (void));
     MOCK_METHOD1(LnnHbMediumMgrSetParam, int32_t(const LnnHeartbeatMediumParam *));
+    MOCK_METHOD2(AuthSendKeepAlive, int32_t(const char *, ModeCycle));
 };
 } // namespace OHOS
 #endif // HEARTBEAT_CTRL_DEPS_H
