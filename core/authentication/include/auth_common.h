@@ -81,6 +81,11 @@ if (expression) { \
 #define AUTH_REQUEST_TIMTOUR 30000
 #define SHORT_HASH_LEN 8
 
+#define SOFTBUS_SUB_SYSTEM 203
+#define SOFTBUS_AUTH_MODULE 3
+#define SOFTBUS_HICHAIN_MAX (-((SOFTBUS_SUB_SYSTEM << 21) | (SOFTBUS_AUTH_MODULE << 16) | 0x0001))
+#define SOFTBUS_HICHAIN_MIN (-((SOFTBUS_SUB_SYSTEM << 21) | (SOFTBUS_AUTH_MODULE << 16) | 0x10FF))
+
 #define TO_INT32(value) ((int32_t)(((uint32_t)(value)) & INT32_MASK))
 #define TO_UINT32(value) ((uint32_t)(((uint32_t)(value)) & INT32_MASK))
 

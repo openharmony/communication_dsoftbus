@@ -122,7 +122,7 @@ HWTEST_F(TransChannelManagerTest, CopyAppInfoFromSessionParam001, TestSize.Level
     (void)memcpy_s(appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX, "test", DEVICE_ID_SIZE_MAX);
 
     int32_t ret = CopyAppInfoFromSessionParam(appInfo, sessionParam);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     SoftBusFree(appInfo);
     SoftBusFree(sessionParam);
@@ -396,7 +396,7 @@ HWTEST_F(TransChannelManagerTest, TransRippleStats001, TestSize.Level1)
     memset_s(trafficStats, sizeof(TrafficStats), 0, sizeof(TrafficStats));
 
     int32_t ret = TransRippleStats(channelId, channelType, trafficStats);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransRippleStats(channelId, channelType, NULL);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);

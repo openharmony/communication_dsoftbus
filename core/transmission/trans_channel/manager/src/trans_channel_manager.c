@@ -522,7 +522,7 @@ int32_t TransRippleStats(int32_t channelId, int32_t channelType, const TrafficSt
     (void)memset_s(&rptdata, sizeof(rptdata), 0, sizeof(rptdata));
     if (memcpy_s(&rptdata.stats, sizeof(rptdata.stats), data->stats, sizeof(data->stats)) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "memcpy fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     // modify with laneId
     uint64_t laneId = INVALID_LANE_ID;

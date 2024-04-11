@@ -1555,7 +1555,7 @@ static int32_t UpdateFileReceivePath(int32_t sessionId, FileListener *fileListen
     if (strcpy_s(fileListener->rootDir, FILE_RECV_ROOT_DIR_SIZE_MAX, absPath) != EOK) {
         TRANS_LOGE(TRANS_FILE, "failed to strcpy the file receive path");
         SoftBusFree(absPath);
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     SoftBusFree(absPath);
     return SOFTBUS_OK;

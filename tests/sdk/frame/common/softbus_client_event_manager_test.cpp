@@ -175,7 +175,7 @@ HWTEST_F(SoftbusClientEventManagerTest, DelClientPkgName001, TestSize.Level1)
 {
     const char *pkgName = "000";
     int32_t ret = InitSoftBus(NULL);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PKGNAME, ret);
 
     ret = InitSoftBus(pkgName);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -217,7 +217,7 @@ HWTEST_F(SoftbusClientEventManagerTest, CheckPackageName001, TestSize.Level1)
     ret = AddClientPkgName(pkgName);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = AddClientPkgName(pkgName);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PKGNAME, ret);
 
     DelClientPkgName(pkgName);
     FreeClientPkgName();
