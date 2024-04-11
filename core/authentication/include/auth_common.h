@@ -47,6 +47,8 @@ typedef enum {
     DATA_TYPE_META_NEGOTIATION = 0xFFFF0006,
     /* data type for decrypt fail */
     DATA_TYPE_DECRYPT_FAIL = 0xFFFF0007,
+    /* data type for info ack */
+    DATA_TYPE_META_DEVICE_INFO_ACK = 0xFFFF0008,
 } AuthDataType;
 
 #define CLIENT_SIDE_FLAG 0
