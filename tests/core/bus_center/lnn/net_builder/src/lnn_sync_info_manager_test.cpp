@@ -16,6 +16,8 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
+#include "auth_interface.h"
+#include "lnn_net_ledger_mock.h"
 #include "lnn_sync_info_manager.h"
 #include "lnn_trans_mock.h"
 #include "lnn_service_mock.h"
@@ -26,7 +28,7 @@ namespace OHOS {
 using namespace testing;
 using namespace testing::ext;
 
-constexpr char NETWORLID[65] = "abcdefg";
+constexpr char NETWORKID[65] = "abcdefg";
 constexpr uint8_t MSG[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 constexpr uint32_t LEN = 10;
 constexpr uint32_t LENGTH = 8192;
@@ -113,10 +115,30 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_UNREG_SYNC_INFO_HANDLER_TEST_001, TestSize.
 */
 HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_SYNC_INFO_MSG_TEST_001, TestSize.Level1)
 {
-    int32_t ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_COUNT, NETWORLID, MSG, LEN, Complete);
+    int32_t ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_COUNT, NETWORKID, MSG, LEN, Complete);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 
-    ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_ROUTE_LSU, NETWORLID, MSG, LENGTH, Complete);
+    ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_ROUTE_LSU, NETWORKID, MSG, LENGTH, Complete);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+/*
+* @tc.name: LNN_SEND_P2P_SYNC_INFO_MSG_TEST_001
+* @tc.desc: LnnSendP2pSyncInfoMsg test
+* @tc.type: FUNC
+* @tc.require: I5OMIK
+*/
+HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_001, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    uint32_t netCapability = 0;
+    int32_t ret = LnnSendP2pSyncInfoMsg(nullptr, netCapability);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_CALL(ledgerMock, AuthDeviceGetLatestIdByUuid)
+        .WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAuthHandle);
+    EXPECT_CALL(ledgerMock, AuthGetLatestAuthSeqListByType)
+        .WillRepeatedly(LnnNetLedgertInterfaceMock::ActionOfLnnGetAuthSeqList);
+    ret = LnnSendP2pSyncInfoMsg(NETWORKID, netCapability);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 } // namespace OHOS
