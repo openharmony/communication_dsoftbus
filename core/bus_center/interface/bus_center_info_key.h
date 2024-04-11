@@ -25,6 +25,8 @@ extern "C" {
 #define ID_MAX_LEN 72
 #define VERSION_MAX_LEN 16
 #define MAC_LEN 18
+#define OH_OS_TYPE 10
+#define HO_OS_TYPE 11
 
 typedef enum {
     STRING_KEY_BEGIN = 0,
