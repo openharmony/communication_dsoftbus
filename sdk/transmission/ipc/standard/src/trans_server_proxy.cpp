@@ -155,7 +155,7 @@ int32_t ServerIpcNotifyAuthSuccess(int32_t channelId, int32_t channelType)
     return g_serverProxy->NotifyAuthSuccess(channelId, channelType);
 }
 
-int32_t ServerIpcCloseChannel(int32_t channelId, int32_t channelType)
+int32_t ServerIpcCloseChannel(const char *sessionName, int32_t channelId, int32_t channelType)
 {
     if (g_serverProxy == nullptr) {
         TRANS_LOGE(TRANS_SDK, "softbus server g_serverProxy is nullptr!");
@@ -165,7 +165,7 @@ int32_t ServerIpcCloseChannel(int32_t channelId, int32_t channelType)
         TRANS_LOGE(TRANS_SDK, "invalid channel Id!");
         return SOFTBUS_ERR;
     }
-    return g_serverProxy->CloseChannel(channelId, channelType);
+    return g_serverProxy->CloseChannel(sessionName, channelId, channelType);
 }
 
 int32_t ServerIpcReleaseResources(int32_t channelId)

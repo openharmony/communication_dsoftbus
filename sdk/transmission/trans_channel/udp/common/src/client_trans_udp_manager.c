@@ -319,7 +319,7 @@ int32_t TransOnUdpChannelOpenFailed(int32_t channelId, int32_t errCode)
 
 static int32_t ClosePeerUdpChannel(int32_t channelId)
 {
-    return ServerIpcCloseChannel(channelId, CHANNEL_TYPE_UDP);
+    return ServerIpcCloseChannel(NULL, channelId, CHANNEL_TYPE_UDP);
 }
 
 static int32_t RleaseUdpResources(int32_t channelId)

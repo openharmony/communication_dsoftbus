@@ -31,6 +31,8 @@
         }                                                                              \
     } while (false)
 
+#define CHANNEL_TYPE_UNDEFINED (-1)
+
 namespace OHOS {
 static uint32_t g_getSystemAbilityId = 2;
 const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
@@ -413,7 +415,7 @@ int32_t TransServerProxy::NotifyAuthSuccess(int32_t channelId, int32_t channelTy
     return serverRet;
 }
 
-int32_t TransServerProxy::CloseChannel(int32_t channelId, int32_t channelType)
+int32_t TransServerProxy::CloseChannel(const char *sessionName, int32_t channelId, int32_t channelType)
 {
     sptr<IRemoteObject> remote = GetSystemAbility();
     if (remote == nullptr) {
@@ -433,7 +435,12 @@ int32_t TransServerProxy::CloseChannel(int32_t channelId, int32_t channelType)
         TRANS_LOGE(TRANS_SDK, "CloseChannel write channel type failed!");
         return SOFTBUS_ERR;
     }
-
+    if (channelType == CHANNEL_TYPE_UNDEFINED) {
+        if (!data.WriteCString(sessionName)) {
+            TRANS_LOGE(TRANS_SDK, "CloseChannel write session name failed!");
+            return SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED;
+        }
+    }
     MessageParcel reply;
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_CLOSE_CHANNEL, data, reply, option);

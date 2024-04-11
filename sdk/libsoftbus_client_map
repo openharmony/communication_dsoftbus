@@ -389,6 +389,8 @@
         "TransSetChannelInfo";
         "ClientTransSetChannelInfo";
         "ClientGetSessionIsAsyncBySessionId";
+        "GetSessionStateAndSessionNameBySessionId";
+        "SetSessionStateBySessionId";
         "EvaluateQos";
         "GetMtuSize";
         "DBinderGrantPermission";
