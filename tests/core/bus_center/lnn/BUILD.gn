@@ -1505,6 +1505,7 @@ ohos_unittest("LNNTransLaneMockTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_reliability.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_trans_lane.c",
     "lane/src/lnn_lane_deps_mock.cpp",
+    "lane/src/lnn_wifi_adpter_mock.cpp",
     "lane/trans_lane/lnn_trans_lane_deps_mock.cpp",
     "lane/trans_lane/lnn_trans_lane_test.cpp",
   ]
@@ -1642,6 +1643,7 @@ ohos_unittest("LNNDiscoveryInterfaceTest") {
 ohos_unittest("LNNLaneListenerTest") {
   module_out_path = module_output_path
   sources = [
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/src/lnn_lane_deps_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane_listener/lnn_lane_listener_deps_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane_listener/lnn_lane_listener_test.cpp",
   ]

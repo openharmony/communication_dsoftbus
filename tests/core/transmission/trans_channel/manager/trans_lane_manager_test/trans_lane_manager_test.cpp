@@ -137,30 +137,32 @@ HWTEST_F(TransLaneManagerTest, TransLaneMgrAddLane001, TestSize.Level1)
 {
     int32_t channelId = 2112;
     int32_t channelType = 2112;
-    uint32_t laneReqId = 1;
+    uint32_t laneHandle = 1;
+    bool isQosLane = false;
+
     AppInfoData *myData = (AppInfoData *)SoftBusCalloc(sizeof(AppInfoData));
     ASSERT_TRUE(myData != nullptr);
     LaneConnInfo *connInfo = (LaneConnInfo *)SoftBusCalloc(sizeof(LaneConnInfo));
     ASSERT_TRUE(connInfo != nullptr);
 
     TransLaneMgrDeinit();
-    int32_t ret = TransLaneMgrAddLane(channelId, channelType, connInfo, laneReqId, myData);
+    int32_t ret = TransLaneMgrAddLane(channelId, channelType, connInfo, laneHandle, isQosLane, myData);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransLaneMgrInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransLaneMgrAddLane(channelId, channelType, connInfo, laneReqId, myData);
+    ret = TransLaneMgrAddLane(channelId, channelType, connInfo, laneHandle, isQosLane, myData);
     EXPECT_EQ(SOFTBUS_OK, ret);
     TransLaneMgrDeinit();
 
     ret = TransLaneMgrInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransLaneMgrAddLane(channelId, channelType, NULL, laneReqId, myData);
+    ret = TransLaneMgrAddLane(channelId, channelType, NULL, laneHandle, isQosLane, myData);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     channelId = 1;
     channelType = 2;
-    ret = TransLaneMgrAddLane(channelId, channelType, connInfo, laneReqId, myData);
+    ret = TransLaneMgrAddLane(channelId, channelType, connInfo, laneHandle, isQosLane, myData);
     EXPECT_EQ(SOFTBUS_OK, ret);
     if (myData != NULL) {
         SoftBusFree(myData);
@@ -225,15 +227,15 @@ HWTEST_F(TransLaneManagerTest, TransLaneMgrDeathCallback001, TestSize.Level1)
 HWTEST_F(TransLaneManagerTest, TransGetLaneReqIdByChannelId001, TestSize.Level1)
 {
     int32_t channelId = 2112;
-    uint32_t laneReqId = 22;
+    uint32_t laneHandle = 22;
 
-    int32_t ret = TransGetLaneReqIdByChannelId(channelId, NULL);
+    int32_t ret = TransGetLaneHandleByChannelId(channelId, NULL);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransLaneMgrInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
     channelId = -1;
-    ret = TransGetLaneReqIdByChannelId(channelId, &laneReqId);
+    ret = TransGetLaneHandleByChannelId(channelId, &laneHandle);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 
@@ -247,21 +249,21 @@ HWTEST_F(TransLaneManagerTest, TransGetChannelInfoByLaneReqId001, TestSize.Level
 {
     int32_t channelId = 2112;
     int32_t channelType = 2112;
-    uint32_t laneReqId = 0;
+    uint32_t laneHandle = 0;
 
     int32_t ret = TransLaneMgrInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
     TransLaneMgrDeinit();
 
-    ret = TransGetChannelInfoByLaneReqId(laneReqId, NULL, &channelType);
+    ret = TransGetChannelInfoByLaneHandle(laneHandle, NULL, &channelType);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = TransGetChannelInfoByLaneReqId(laneReqId, &channelId, NULL);
+    ret = TransGetChannelInfoByLaneHandle(laneHandle, &channelId, NULL);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransLaneMgrInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransGetChannelInfoByLaneReqId(laneReqId, &channelId, &channelType);
+    ret = TransGetChannelInfoByLaneHandle(laneHandle, &channelId, &channelType);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 } // OHOS
