@@ -22,6 +22,7 @@
 #include "auth_interface.h"
 #include "auth_device_common_key.h"
 #include "bus_center_manager.h"
+#include "bus_center_info_key.h"
 #include "common_list.h"
 #include "lnn_ble_heartbeat.h"
 #include "lnn_ble_lpdevice.h"
@@ -388,7 +389,7 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp)
         LNN_LOGE(LNN_HEART_BEAT, "don't support ble direct online because update device info fail ret=%{public}d", ret);
         return true;
     }
-    if (!IsCipherManagerFindKey(deviceInfo.deviceInfo.deviceUdid)) {
+    if ((deviceInfo.deviceInfo.osType == OH_OS_TYPE) && (!IsCipherManagerFindKey(deviceInfo.deviceInfo.deviceUdid))) {
         LNN_LOGE(LNN_HEART_BEAT, "don't support ble direct online because broadcast key");
         return true;
     }
