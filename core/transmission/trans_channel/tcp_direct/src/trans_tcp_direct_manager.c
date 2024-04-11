@@ -244,7 +244,7 @@ static int32_t TransUpdAppInfo(AppInfo *appInfo, const ConnectOption *connInfo)
     appInfo->peerData.port = connInfo->socketOption.port;
     if (strcpy_s(appInfo->peerData.addr, sizeof(appInfo->peerData.addr), connInfo->socketOption.addr) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "TransUpdAppInfo cpy fail");
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     appInfo->routeType = connInfo->type == CONNECT_TCP ? WIFI_STA : WIFI_P2P;
     appInfo->protocol = connInfo->socketOption.protocol;

@@ -529,11 +529,11 @@ static int32_t GetAppInfo(const char *sessionName, int32_t channelId, AppInfo *a
     }
     if (strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), sessionName) != EOK) {
         TRANS_LOGE(TRANS_SVC, "copy sessionName failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     appInfo->peerData.apiVersion = API_V2;
     if (strcpy_s(appInfo->peerData.sessionName, sizeof(appInfo->peerData.sessionName), sessionName) != EOK) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     if (TransGetLocalConfig(appInfo->channelType, appInfo->businessType, &appInfo->myData.dataConfig) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
@@ -765,7 +765,7 @@ int32_t TransOpenAuthMsgChannel(const char *sessionName, const ConnectOption *co
     if (strcpy_s(channel->appInfo.reqId, REQ_ID_SIZE_MAX, reqId) != EOK) {
         SoftBusFree(channel);
         TRANS_LOGE(TRANS_SVC, "TransOpenAuthMsgChannel strcpy_s reqId failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     if (memcpy_s(&channel->connOpt, sizeof(ConnectOption), connOpt, sizeof(ConnectOption)) != EOK) {
         SoftBusFree(channel);
@@ -887,7 +887,7 @@ int32_t TransAuthGetConnOptionByChanId(int32_t channelId, ConnectOption *connOpt
 
     if (memcpy_s(connOpt, sizeof(ConnectOption), &(chanInfo.connOpt), sizeof(ConnectOption)) != EOK) {
         TRANS_LOGE(TRANS_SVC, "auth channel connopt memcpy fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -922,7 +922,7 @@ int32_t TransAuthGetAppInfoByChanId(int32_t channelId, AppInfo *appInfo)
             if (memcpy_s(appInfo, sizeof(AppInfo), &info->appInfo, sizeof(AppInfo)) != EOK) {
                 (void)SoftBusMutexUnlock(&g_authChannelList->lock);
                 TRANS_LOGE(TRANS_SVC, "auth channel appinfo memcpy fail");
-                return SOFTBUS_ERR;
+                return SOFTBUS_MEM_ERR;
             }
             (void)SoftBusMutexUnlock(&g_authChannelList->lock);
             return SOFTBUS_OK;
