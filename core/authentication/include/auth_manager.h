@@ -53,6 +53,11 @@ typedef struct {
     ListNode node;
 } AuthManager;
 
+typedef struct {
+    int32_t messageType;
+    ModeCycle cycle;
+} DeviceMessageParse;
+
 int32_t AuthManagerSetSessionKey(int64_t authSeq, AuthSessionInfo *info, const SessionKey *sessionKey,
     bool isConnect);
 int32_t AuthManagerGetSessionKey(int64_t authSeq, const AuthSessionInfo *info, SessionKey *sessionKey);

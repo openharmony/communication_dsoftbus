@@ -107,6 +107,7 @@ HWTEST_F(HeartBeatCtrlTest, LNN_SHIFT_LNN_GEAR_TEST_001, TestSize.Level1)
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(distributeNetLedgerMock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
     EXPECT_CALL(hbCtrlDepsMock, AuthFlushDevice).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbCtrlDepsMock, AuthSendKeepAlive).WillRepeatedly(Return(SOFTBUS_OK));
 
     GearMode mode;
     int32_t ret = LnnShiftLNNGear(nullptr, CALLERID, TARGETNETWORKID, &mode);

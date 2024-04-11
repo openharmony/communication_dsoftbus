@@ -195,6 +195,10 @@
 #define BLE_CONNECTION_CLOSE_DELAY (10 * 1000L)
 #define BLE_MAC_AUTO_REFRESH_SWITCH 1
 
+/* Tcp KeepALive */
+#define TIME "TIME"
+#define CODE_KEEP_ALIVE 3
+
 static void OptString(const JsonObj *json, const char * const key,
     char *target, uint32_t targetLen, const char *defaultValue)
 {
@@ -2101,7 +2105,26 @@ static char *PackVerifyDeviceMessage(const char *uuid)
     return msg;
 }
 
-bool IsFlushDevicePacket(const AuthConnInfo *connInfo, const AuthDataHead *head, const uint8_t *data, bool isServer)
+static char *PackKeepAliveMessage(const char *uuid, ModeCycle cycle)
+{
+    JsonObj *obj = JSON_CreateObject();
+    if (obj == NULL) {
+        AUTH_LOGE(AUTH_FSM, "create json fail");
+        return NULL;
+    }
+    if (!JSON_AddInt32ToObject(obj, CODE, CODE_KEEP_ALIVE) || !JSON_AddStringToObject(obj, DEVICE_ID, uuid) ||
+        !JSON_AddInt32ToObject(obj, TIME, cycle)) {
+        AUTH_LOGE(AUTH_FSM, "add uuid or cycle fail");
+        JSON_Delete(obj);
+        return NULL;
+    }
+    char *msg = JSON_PrintUnformatted(obj);
+    JSON_Delete(obj);
+    return msg;
+}
+
+bool IsDeviceMessagePacket(const AuthConnInfo *connInfo, const AuthDataHead *head, const uint8_t *data, bool isServer,
+    DeviceMessageParse *messageParse)
 {
     if (connInfo->type != AUTH_LINK_TYPE_WIFI) {
         return false;
@@ -2128,11 +2151,20 @@ bool IsFlushDevicePacket(const AuthConnInfo *connInfo, const AuthDataHead *head,
         return false;
     }
     bool result = false;
-    int32_t verifyDevice = 0;
-    if (!JSON_GetInt32FromOject(json, CODE, &verifyDevice)) {
-        AUTH_LOGE(AUTH_FSM, "parse device info fail");
+    if (!JSON_GetInt32FromOject(json, CODE, &messageParse->messageType)) {
+        AUTH_LOGE(AUTH_FSM, "parse messageType fail");
     }
-    if (verifyDevice == CODE_VERIFY_DEVICE) {
+    AUTH_LOGI(AUTH_FSM, "messageType=%{public}d", messageParse->messageType);
+    if (messageParse->messageType == CODE_VERIFY_DEVICE) {
+        result = true;
+    } else if (messageParse->messageType == CODE_KEEP_ALIVE) {
+        if (!JSON_GetInt32FromOject(json, TIME, (int32_t *)&messageParse->cycle)) {
+            AUTH_LOGE(AUTH_FSM, "parse keepAlive cycle fail");
+            JSON_Delete(json);
+            SoftBusFree(decData);
+            return result;
+        }
+        AUTH_LOGE(AUTH_FSM, "cycle=%{public}d", messageParse->cycle);
         result = true;
     }
     JSON_Delete(json);
@@ -2140,14 +2172,20 @@ bool IsFlushDevicePacket(const AuthConnInfo *connInfo, const AuthDataHead *head,
     return result;
 }
 
-int32_t PostVerifyDeviceMessage(const AuthManager *auth, int32_t flagRelay, AuthLinkType type)
+int32_t PostDeviceMessage(
+    const AuthManager *auth, int32_t flagRelay, AuthLinkType type, const DeviceMessageParse *messageParse)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(auth != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "auth is NULL");
     if (type < AUTH_LINK_TYPE_WIFI || type >= AUTH_LINK_TYPE_MAX) {
         AUTH_LOGE(AUTH_FSM, "type error, type=%{public}d", type);
         return SOFTBUS_ERR;
     }
-    char *msg = PackVerifyDeviceMessage(auth->uuid);
+    char *msg = NULL;
+    if (messageParse->messageType == CODE_VERIFY_DEVICE) {
+        msg = PackVerifyDeviceMessage(auth->uuid);
+    } else if (messageParse->messageType == CODE_KEEP_ALIVE) {
+        msg = PackKeepAliveMessage(auth->uuid, messageParse->cycle);
+    }
     if (msg == NULL) {
         AUTH_LOGE(AUTH_FSM, "pack verify device msg fail");
         return SOFTBUS_ERR;
