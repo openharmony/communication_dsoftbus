@@ -549,11 +549,13 @@ HWTEST_F(AuthManagerTest, AUTH_GET_LATEST_AUTH_SEQ_LIST_TEST_001, TestSize.Level
  */
 HWTEST_F(AuthManagerTest, AUTH_DEVICE_ENCRYPT_TEST_001, TestSize.Level1)
 {
+    AuthHandle authHandle = { .authId = AUTH_SEQ_3, .type = AUTH_LINK_TYPE_WIFI };
     uint8_t outData[LENTH] = {0};
     uint32_t outLen = LENTH;
-    EXPECT_TRUE(AuthDeviceEncrypt(AUTH_SEQ_3, TMP_IN_DATA,
+    EXPECT_TRUE(AuthDeviceEncrypt(&authHandle, TMP_IN_DATA,
         TMP_DATA_LEN, outData, &outLen) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(AuthDeviceEncrypt(AUTH_SEQ, TMP_IN_DATA,
+    authHandle.authId = AUTH_SEQ;
+    EXPECT_TRUE(AuthDeviceEncrypt(&authHandle, TMP_IN_DATA,
         TMP_DATA_LEN, outData, &outLen) == SOFTBUS_INVALID_PARAM);
 }
 

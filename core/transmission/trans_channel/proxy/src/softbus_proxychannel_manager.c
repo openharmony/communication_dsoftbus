@@ -934,8 +934,7 @@ static void ConstructProxyChannelInfo(
     chan->myId = newChanId;
     chan->channelId = newChanId;
     chan->peerId = msg->msgHead.peerId;
-    chan->authHandle.authId = msg->authId;
-    chan->authHandle.type = ConvertConnectType2AuthLinkType(info->type);
+    chan->authHandle = msg->authHandle;
     chan->type = info->type;
     if (chan->type == CONNECT_BLE || chan->type == CONNECT_BLE_DIRECT) {
         chan->blePrototolType = info->bleInfo.protocol;
@@ -1196,21 +1195,6 @@ EXIT_ERR:
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_REPLY, extra);
 }
 
-static int32_t ProcessBadKeyMsg(const ProxyMessage *msg)
-{
-    ConnectType type;
-    if (ConnGetTypeByConnectionId(msg->connId, &type) != SOFTBUS_OK) {
-        return SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT;
-    }
-    bool isBle = ((msg->msgHead.cipher & USE_BLE_CIPHER) != 0);
-    AuthLinkType authType = ConvertConnectType2AuthLinkType(type);
-    if (isBle && authType == AUTH_LINK_TYPE_BR) {
-        authType = AUTH_LINK_TYPE_BLE;
-    }
-    RemoveAuthSessionKeyByIndex(msg->authId, msg->keyIndex, authType);
-    return SOFTBUS_OK;
-}
-
 void TransProxyProcessResetMsg(const ProxyMessage *msg)
 {
     ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
@@ -1270,8 +1254,8 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
     (void)TransProxyCloseConnChannelReset(msg->connId, (info->isServer == 0), info->isServer);
     if ((msg->msgHead.cipher & BAD_CIPHER) == BAD_CIPHER) {
         TRANS_LOGE(TRANS_CTRL, "clear bad key cipher=%{public}d, authId=%{public}" PRId64 ", keyIndex=%{public}d",
-            msg->msgHead.cipher, msg->authId, msg->keyIndex);
-        (void)ProcessBadKeyMsg(msg);
+            msg->msgHead.cipher, msg->authHandle.authId, msg->keyIndex);
+        RemoveAuthSessionKeyByIndex(msg->authHandle.authId, msg->keyIndex, (AuthLinkType)msg->authHandle.type);
     }
     SoftBusFree(info);
 }

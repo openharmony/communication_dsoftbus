@@ -386,33 +386,34 @@ HWTEST_F(TransTcpDirectMessageTest, GetAppInfoByIdTest0010, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetAuthIdByChanIdTest0011
- * @tc.desc: SetAuthIdByChanId, use the wrong parameter.
+ * @tc.name: SetAuthHandleByChanIdTest0011
+ * @tc.desc: SetAuthHandleByChanId, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectMessageTest, SetAuthIdByChanIdTest0011, TestSize.Level1)
+HWTEST_F(TransTcpDirectMessageTest, SetAuthHandleByChanIdTest0011, TestSize.Level1)
 {
     int32_t channelId = 1;
-    int64_t authId = 1;
-    int32_t ret = SetAuthIdByChanId(channelId, authId);
+    AuthHandle authHandle = { .authId = 1, .type = 1 };
+    int32_t ret = SetAuthHandleByChanId(channelId, &authHandle);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     channelId = 0;
-    ret = SetAuthIdByChanId(channelId, authId);
+    ret = SetAuthHandleByChanId(channelId, &authHandle);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /**
- * @tc.name: GetAuthIdByChanIdTest0012
- * @tc.desc: GetAuthIdByChanId, use the wrong parameter.
+ * @tc.name: GetAuthHandleByChanIdTest0012
+ * @tc.desc: GetAuthHandleByChanId, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectMessageTest, GetAuthIdByChanIdTest0012, TestSize.Level1)
+HWTEST_F(TransTcpDirectMessageTest, GetAuthHandleByChanIdTest0012, TestSize.Level1)
 {
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
     int32_t channelId = 1;
-    int64_t ret = GetAuthIdByChanId(channelId);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    int32_t ret = GetAuthHandleByChanId(channelId, &authHandle);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t res = TransTcpDirectInit(cb);
@@ -423,8 +424,8 @@ HWTEST_F(TransTcpDirectMessageTest, GetAuthIdByChanIdTest0012, TestSize.Level1)
     EXPECT_TRUE(res == SOFTBUS_OK);
 
     channelId = 0;
-    ret = GetAuthIdByChanId(channelId);
-    EXPECT_TRUE(ret == AUTH_INVALID_ID);
+    ret = GetAuthHandleByChanId(channelId, &authHandle);
+    EXPECT_EQ(authHandle.authId, AUTH_INVALID_ID);
     TransTcpDirectDeinit();
 }
 
