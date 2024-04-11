@@ -917,7 +917,7 @@ int32_t TransProxyGetConnInfoByConnId(uint32_t connId, ConnectOption *connInfo)
 {
     if (connInfo == NULL) {
         TRANS_LOGW(TRANS_CTRL, "invalid param.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
     if (g_proxyConnectionList == NULL) {
@@ -927,16 +927,16 @@ int32_t TransProxyGetConnInfoByConnId(uint32_t connId, ConnectOption *connInfo)
 
     if (SoftBusMutexLock(&g_proxyConnectionList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
 
     ProxyConnInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_proxyConnectionList->list, ProxyConnInfo, node) {
         if (item->connId == connId) {
             if (memcpy_s(connInfo, sizeof(ConnectOption), &(item->connInfo), sizeof(ConnectOption)) != EOK) {
-                TRANS_LOGE(TRANS_CTRL, "proxy connoption memcpy failed. connId=%{public}u", connId);
+                TRANS_LOGE(TRANS_CTRL, "memcpy_s connInfo failed. connId=%{public}u", connId);
                 (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
-                return SOFTBUS_ERR;
+                return SOFTBUS_MEM_ERR;
             }
             (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
             return SOFTBUS_OK;
@@ -944,6 +944,6 @@ int32_t TransProxyGetConnInfoByConnId(uint32_t connId, ConnectOption *connInfo)
     }
     (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
     TRANS_LOGE(TRANS_INIT, "proxy conn node not found. connId=%{public}u", connId);
-    return SOFTBUS_ERR;
+    return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
 }
 

@@ -135,7 +135,7 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest002, TestSize.Level0)
     StreamFrameInfo tmpf = {};
     for (int32_t times = 0; times < sendTimes; times++) {
         ret = SendStream(sessionId, &d1, &d2, &tmpf);
-        EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_SESSION_ID);
+        EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
         sleep(1);
     }
     EXPECT_EQ(g_qosEventCount[sessionId], 0);
@@ -182,7 +182,7 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest003, TestSize.Level0)
     StreamFrameInfo tmpf = {};
     for (int32_t times = 0; times < sendTimes; times++) {
         ret = SendStream(sessionId, &d1, &d2, &tmpf);
-        EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_SESSION_ID);
+        EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
         sleep(1);
     }
     EXPECT_EQ(g_qosEventCount[sessionId], 0);
@@ -302,7 +302,7 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest005, TestSize.Level0)
     d1.bufLen = 1000;
     for (int32_t times = 0; times < sendTimes; times++) {
         ret = SendStream(sessionId, &d1, &d2, &tmpf);
-        EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_SESSION_ID);
+        EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
         sleep(1);
     }
     smallSpeed = CalSendBits(g_speedStat[sessionId]) - bigSpeed;
@@ -353,7 +353,7 @@ HWTEST_F(TransQosStatClientTest, QosStatClientTest006, TestSize.Level0)
     StreamFrameInfo tmpf = {};
     for (int32_t times = 0; times < sendTimes; times++) {
         ret = SendStream(sessionId, &d1, &d2, &tmpf);
-        EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_SESSION_ID);
+        EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
         sleep(1);
     }
     bigSpeed = CalSendBits(g_speedStat[sessionId]);

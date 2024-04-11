@@ -365,16 +365,16 @@ HWTEST_F(TransTcpDirectTest, TransClientGetTdcDataBufByChannelTest001, TestSize.
     size_t len = BUF_LEN;
 
     ret = TransClientGetTdcDataBufByChannel(channelId, NULL, NULL);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransClientGetTdcDataBufByChannel(channelId, &fd, &len);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     ret = TransDataListInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransClientGetTdcDataBufByChannel(channelId, &fd, &len);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND, ret);
 
     ret = TransAddDataBufNode(channelId, fd);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -403,16 +403,16 @@ HWTEST_F(TransTcpDirectTest, TransClientUpdateTdcDataBufWInfoTest001, TestSize.L
     int recvLen = MAX_LEN;
 
     ret = TransClientUpdateTdcDataBufWInfo(channelId, NULL, recvLen);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransClientUpdateTdcDataBufWInfo(channelId, const_cast<char *>(recvBuf), recvLen);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     ret = TransDataListInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransClientUpdateTdcDataBufWInfo(channelId, const_cast<char *>(recvBuf), recvLen);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND, ret);
 
     ret = TransAddDataBufNode(channelId, fd);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -443,7 +443,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcRecvDataTest001, TestSize.Level0)
     int fd = -1;
 
     ret = TransTdcRecvData(channelId);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     ret = TransDataListInit();
     ASSERT_EQ(ret, SOFTBUS_OK);

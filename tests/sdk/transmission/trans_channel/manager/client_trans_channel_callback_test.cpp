@@ -197,7 +197,7 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelClosedTest001, TestSize.L
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_UDP, SHUTDOWN_REASON_UNKNOWN);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, ret);
 
     ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_TCP_DIRECT, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -238,7 +238,7 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelQosEventTest001, TestSize
         .type = WIFI_CHANNEL_QUALITY,
     };
     int ret = TransOnChannelQosEvent(channelId, CHANNEL_TYPE_UDP, eventId, tvCount, &tvList);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, ret);
 
     ret = TransOnChannelQosEvent(channelId, CHANNEL_TYPE_BUTT, eventId, tvCount, &tvList);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);

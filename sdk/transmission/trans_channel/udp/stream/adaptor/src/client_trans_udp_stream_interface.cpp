@@ -107,7 +107,7 @@ int32_t SendVtpStream(int32_t channelId, const StreamData *inData, const StreamD
         int32_t ret = memcpy_s(data.buffer.get(), data.bufLen, inData->buf, inData->bufLen);
         if (ret != EOK) {
             TRANS_LOGE(TRANS_STREAM, "Failed to memcpy data! ret=%{public}d", ret);
-            return SOFTBUS_ERR;
+            return SOFTBUS_MEM_ERR;
         }
         if (ext != nullptr && ext->bufLen > 0) {
             data.extBuffer = std::make_unique<char[]>(ext->bufLen);
@@ -115,7 +115,7 @@ int32_t SendVtpStream(int32_t channelId, const StreamData *inData, const StreamD
             ret = memcpy_s(data.extBuffer.get(), data.extLen, ext->buf, ext->bufLen);
             if (ret != EOK) {
                 TRANS_LOGE(TRANS_STREAM, "Failed to memcpy ext! ret=%{public}d", ret);
-                return SOFTBUS_ERR;
+                return SOFTBUS_MEM_ERR;
             }
         }
 

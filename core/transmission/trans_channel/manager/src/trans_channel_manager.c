@@ -495,15 +495,15 @@ int32_t TransRippleStats(int32_t channelId, int32_t channelType, const TrafficSt
     uint32_t laneReqId;
     int32_t ret = TransGetLaneReqIdByChannelId(channelId, &laneReqId);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get laneReqId fail, streamStatsInfo cannot be processed");
-        return SOFTBUS_ERR;
+        TRANS_LOGE(TRANS_CTRL, "get laneReqId fail, streamStatsInfo cannot be processed, ret=%{public}d", ret);
+        return ret;
     }
     TRANS_LOGI(TRANS_CTRL, "transRippleStats channelId=%{public}d, laneReqId=0x%{public}x", channelId, laneReqId);
     LnnRippleData rptdata;
     (void)memset_s(&rptdata, sizeof(rptdata), 0, sizeof(rptdata));
     if (memcpy_s(&rptdata.stats, sizeof(rptdata.stats), data->stats, sizeof(data->stats)) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "memcpy fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     // modify with laneId
     uint64_t laneId = INVALID_LANE_ID;

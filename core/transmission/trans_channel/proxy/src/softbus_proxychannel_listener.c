@@ -275,11 +275,13 @@ static int32_t TransProxyGetAppInfo(const char *sessionName, const char *peerNet
         return SOFTBUS_ERR;
     }
     if (strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), sessionName) != EOK) {
-        return SOFTBUS_ERR;
+        TRANS_LOGE(TRANS_CTRL, "strcpy_s my sessionName failed");
+        return SOFTBUS_STRCPY_ERR;
     }
     appInfo->peerData.apiVersion = API_V2;
     if (strcpy_s(appInfo->peerData.sessionName, sizeof(appInfo->peerData.sessionName), sessionName) != EOK) {
-        return SOFTBUS_ERR;
+        TRANS_LOGE(TRANS_CTRL, "strcpy_s peer sessionName failed");
+        return SOFTBUS_STRCPY_ERR;
     }
 
     ret = LnnGetRemoteStrInfo(peerNetworkId, STRING_KEY_UUID,
@@ -308,7 +310,7 @@ static int32_t TransGetConnectOption(
     if (memcpy_s(option.requestInfo.trans.networkId, NETWORK_ID_BUF_LEN,
         peerNetworkId, NETWORK_ID_BUF_LEN) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "memcpy networkId failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     if (preferred != NULL) {
         for (uint32_t i = 0; i < preferred->linkTypeNum; i++) {

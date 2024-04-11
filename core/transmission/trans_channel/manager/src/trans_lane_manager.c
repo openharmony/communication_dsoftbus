@@ -138,13 +138,13 @@ void TransLaneMgrDeinit(void)
 int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LaneConnInfo *connInfo,
     uint32_t laneReqId, AppInfoData *myData)
 {
-    if (g_channelLaneList == NULL || connInfo == NULL) {
-        return SOFTBUS_ERR;
+    if (g_channelLaneList == NULL || connInfo == NULL || myData == NULL) {
+        return SOFTBUS_INVALID_PARAM;
     }
 
     TransLaneInfo *newLane = (TransLaneInfo *)SoftBusCalloc(sizeof(TransLaneInfo));
     if (newLane == NULL) {
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     newLane->channelId = channelId;
     newLane->channelType = channelType;
@@ -152,12 +152,12 @@ int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LaneConnInfo
     newLane->pid = myData->pid;
     if (memcpy_s(&(newLane->laneConnInfo), sizeof(LaneConnInfo), connInfo, sizeof(LaneConnInfo)) != EOK) {
         SoftBusFree(newLane);
-        TRANS_LOGE(TRANS_SVC, "memcpy failed.");
-        return SOFTBUS_ERR;
+        TRANS_LOGE(TRANS_SVC, "memcpy connInfo failed");
+        return SOFTBUS_MEM_ERR;
     }
     if (strcpy_s(newLane->pkgName, sizeof(newLane->pkgName), myData->pkgName) != EOK) {
         SoftBusFree(newLane);
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     if (SoftBusMutexLock(&(g_channelLaneList->lock)) != 0) {
         SoftBusFree(newLane);
