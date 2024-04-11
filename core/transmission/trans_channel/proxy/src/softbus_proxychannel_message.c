@@ -250,14 +250,14 @@ int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg)
                 msg->connId, msg->msgHead.myId, msg->msgHead.type);
             return SOFTBUS_AUTH_NOT_FOUND;
         }
-        msg->authId = authHandle.authId;
+        msg->authHandle = authHandle;
         uint32_t decDataLen = AuthGetDecryptSize((uint32_t)msg->dateLen);
         uint8_t *decData = (uint8_t *)SoftBusCalloc(decDataLen);
         if (decData == NULL) {
             return SOFTBUS_MALLOC_ERR;
         }
         msg->keyIndex = (int32_t)SoftBusLtoHl(*(uint32_t *)msg->data);
-        if (AuthDecrypt(authHandle.authId, (uint8_t *)msg->data, (uint32_t)msg->dateLen,
+        if (AuthDecrypt(&authHandle, (uint8_t *)msg->data, (uint32_t)msg->dateLen,
             decData, &decDataLen) != SOFTBUS_OK) {
             SoftBusFree(decData);
             TRANS_LOGE(TRANS_CTRL, "parse msg decrypt fail");
@@ -319,7 +319,7 @@ static int32_t PackEncryptedMessage(ProxyMessageHead *msg, AuthHandle authHandle
     TransProxyPackMessageHead(msg, buf + ConnGetHeadSize(), PROXY_CHANNEL_HEAD_LEN);
     uint8_t *encData = buf + ConnGetHeadSize() + PROXY_CHANNEL_HEAD_LEN;
     uint32_t encDataLen = size - ConnGetHeadSize() - PROXY_CHANNEL_HEAD_LEN;
-    if (AuthEncrypt(authHandle.authId, dataInfo->inData, dataInfo->inLen, encData, &encDataLen) != SOFTBUS_OK) {
+    if (AuthEncrypt(&authHandle, dataInfo->inData, dataInfo->inLen, encData, &encDataLen) != SOFTBUS_OK) {
         SoftBusFree(buf);
         TRANS_LOGE(TRANS_CTRL, "pack msg encrypt fail, myChannelId=%{public}d", msg->myId);
         return SOFTBUS_ENCRYPT_ERR;
