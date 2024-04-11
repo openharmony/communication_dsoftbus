@@ -123,7 +123,7 @@ ssize_t StreamAdaptor::Encrypt(const void *in, ssize_t inLen, void *out, ssize_t
     cipherKey.keyLen = SESSION_KEY_LENGTH;
     if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey.first, sessionKey.second) != EOK) {
         TRANS_LOGE(TRANS_STREAM, "memcpy key error.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
 
     int ret = SoftBusEncryptData(&cipherKey, reinterpret_cast<const unsigned char *>(in), inLen,
@@ -150,7 +150,7 @@ ssize_t StreamAdaptor::Decrypt(const void *in, ssize_t inLen, void *out, ssize_t
     cipherKey.keyLen = SESSION_KEY_LENGTH; // 256 bit encryption
     if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey.first, sessionKey.second) != EOK) {
         TRANS_LOGE(TRANS_STREAM, "memcpy key error.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     int ret = SoftBusDecryptData(&cipherKey, reinterpret_cast<const unsigned char *>(in), inLen,
         reinterpret_cast<unsigned char *>(out), reinterpret_cast<unsigned int *>(&outLen));

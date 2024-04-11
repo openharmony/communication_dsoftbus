@@ -57,19 +57,19 @@ bool IsPathValid(char *filePath)
 int32_t GetAndCheckRealPath(const char *filePath, char *absPath)
 {
     if ((filePath == NULL) || (absPath == NULL)) {
-        TRANS_LOGE(TRANS_FILE, "input invalid");
-        return SOFTBUS_ERR;
+        TRANS_LOGE(TRANS_FILE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
     }
 
     if (SoftBusRealPath(filePath, absPath) == NULL) {
         TRANS_LOGE(TRANS_FILE, "softbus realpath failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_FILE_ERR;
     }
 
     int32_t pathLength = (int32_t)(strlen(absPath));
     if (pathLength > (MAX_FILE_PATH_NAME_LEN - 1)) {
         TRANS_LOGE(TRANS_FILE, "pathLength is too large. pathLength=%{public}d", pathLength);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     return SOFTBUS_OK;
 }
@@ -195,8 +195,8 @@ const char *TransGetFileName(const char *path)
 int32_t FileListToBuffer(const char **destFile, uint32_t fileCnt, FileListBuffer *outbufferInfo)
 {
     if (destFile == NULL || outbufferInfo == NULL || fileCnt == 0) {
-        TRANS_LOGE(TRANS_FILE, "bad input");
-        return SOFTBUS_ERR;
+        TRANS_LOGE(TRANS_FILE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
     }
     int32_t errCode = SOFTBUS_OK;
     uint32_t totalLength = 0;
@@ -288,7 +288,7 @@ int32_t FileLock(int32_t fd, int32_t type, bool isBlock)
 {
     if (fd < 0) {
         TRANS_LOGE(TRANS_FILE, "[FileLock] invalid file handle");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     struct flock fl = {0};
     fl.l_type = (short)(type == SOFTBUS_F_RDLCK ? F_RDLCK : F_WRLCK);
@@ -317,7 +317,7 @@ int32_t TryFileLock(int32_t fd, int32_t type, int32_t retryTimes)
             SoftBusSleepMs(TRY_LOCK_WAIT_TIME);
             continue;
         } else {
-            return SOFTBUS_ERR;
+            return SOFTBUS_FILE_ERR;
         }
     }
     return SOFTBUS_FILE_BUSY;
@@ -336,7 +336,7 @@ int32_t FileUnLock(int32_t fd)
     fl.l_len = 0;
     if (fcntl(fd, F_SETLK, &fl) < 0) {
         TRANS_LOGE(TRANS_FILE, "unLock file failed, errno=%{public}d", errno);
-        return SOFTBUS_ERR;
+        return SOFTBUS_FILE_ERR;
     }
     TRANS_LOGE(TRANS_FILE, "unLock file success");
     return SOFTBUS_OK;

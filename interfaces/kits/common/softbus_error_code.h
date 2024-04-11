@@ -238,6 +238,9 @@ enum SoftBusErrNo {
     SOFTBUS_TRANS_MSG_BUILD_PAYLOAD_FAIL, // build broadcast payload fail
     SOFTBUS_TRANS_MSG_INIT_FAIL, // notification message init fail
     SOFTBUS_TRANS_MSG_REPLACE_PAYLOAD_FAIL, // replace payload without stopping the broadcast fail
+    SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND,
+    SOFTBUS_TRANS_TDC_CHANNEL_ALREADY_EXIST, // receive repeat tdc channel open request
+    SOFTBUS_TRANS_UDP_SET_CHANNEL_FAILED,
 
     /* errno begin: -((203 << 21) | (3 << 16) | 0xFFFF) */
     SOFTBUS_AUTH_ERR_BASE = SOFTBUS_ERRNO(AUTH_SUB_MODULE_CODE),

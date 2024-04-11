@@ -66,7 +66,7 @@ static int32_t AddClientPkgName(const char *pkgName)
 {
     if (!CheckPkgNameInfo(pkgName)) {
         COMM_LOGE(COMM_SDK, "check PkgNameInfo invalid.");
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_INVALID_PKGNAME;
     }
     if (SoftBusMutexLock(&g_pkgNameLock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_SDK, "lock init failed");
@@ -79,10 +79,10 @@ static int32_t AddClientPkgName(const char *pkgName)
         return SOFTBUS_MALLOC_ERR;
     }
     if (strcpy_s(info->pkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
-        COMM_LOGE(COMM_SDK, "Add strcpy_s failed.");
+        COMM_LOGE(COMM_SDK, "strcpy_s pkgName failed.");
         SoftBusFree(info);
         SoftBusMutexUnlock(&g_pkgNameLock);
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     ListInit(&info->node);
     ListAdd(&g_pkgNameList, &info->node);
@@ -216,7 +216,7 @@ int32_t InitSoftBus(const char *pkgName)
 {
     if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1)) {
         COMM_LOGE(COMM_SDK, "init softbus sdk fail. Package name is empty or length exceeds");
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_INVALID_PKGNAME;
     }
     if (SoftBusMutexInit(&g_pkgNameLock, NULL) != SOFTBUS_OK) {
         COMM_LOGE(COMM_SDK, "lock init pkgName failed");
@@ -238,7 +238,7 @@ int32_t InitSoftBus(const char *pkgName)
     if (AddClientPkgName(pkgName) != SOFTBUS_OK) {
         SoftBusMutexUnlock(&g_isInitedLock);
         COMM_LOGE(COMM_SDK, "AddClientPkgName failed.");
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_INVALID_PKGNAME;
     }
     if (SoftBusTimerInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_SDK, "client timer init fail");
@@ -252,6 +252,7 @@ int32_t InitSoftBus(const char *pkgName)
         COMM_LOGE(COMM_SDK, "service init fail");
         goto EXIT;
     }
+
     if (ClientRegisterService(pkgName) != SOFTBUS_OK) {
         COMM_LOGE(COMM_SDK, "ClientRegisterService fail");
         goto EXIT;
@@ -263,7 +264,7 @@ int32_t InitSoftBus(const char *pkgName)
 EXIT:
     FreeClientPkgName();
     SoftBusMutexUnlock(&g_isInitedLock);
-    return SOFTBUS_ERR;
+    return SOFTBUS_NO_INIT;
 }
 
 uint32_t GetSoftBusClientNameList(char *pkgList[], uint32_t len)

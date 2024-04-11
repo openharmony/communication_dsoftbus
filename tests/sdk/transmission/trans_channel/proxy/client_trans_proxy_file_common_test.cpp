@@ -187,14 +187,14 @@ HWTEST_F(ClientTransProxyFileCommonTest, ClinetTransProxyFilePathTest, TestSize.
     EXPECT_EQ(true, result);
 
     int ret = GetAndCheckRealPath(nullptr, const_cast<char*>(g_fileSet1[0]));
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     char absPath[PATH_MAX] = {0};
     ret = GetAndCheckRealPath(g_fileSet1[0], absPath);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
 
     ret = GetAndCheckRealPath(g_fileSet1[2], absPath);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
 
     result = CheckDestFilePathValid(nullptr);
     EXPECT_EQ(false, result);
@@ -290,7 +290,7 @@ HWTEST_F(ClientTransProxyFileCommonTest, FileLockTest, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_FILE_BUSY, ret);
 
     ret = TryFileLock(TEST_FD, SOFTBUS_F_RDLCK, TEST_RETRY_TIMES);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
 
     ret = TryFileLock(fd, SOFTBUS_F_RDLCK, TEST_RETRY_TIMES);
     EXPECT_NE(SOFTBUS_OK, ret);

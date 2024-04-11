@@ -382,7 +382,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetSessionKeyByChanIdTest002,
 
     channelId = TEST_MESSAGE_CHANNEL_VALID_ID;
     ret = TransProxyGetSessionKeyByChanId(channelId, sessionKey, sessionKeySize);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /**

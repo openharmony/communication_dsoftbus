@@ -391,7 +391,8 @@ static int32_t TransGetLaneReqItemByLaneHandle(uint32_t laneHandle, bool *bSucc,
             *errCode = item->errCode;
             if (memcpy_s(connInfo, sizeof(LaneConnInfo), &(item->connInfo), sizeof(LaneConnInfo)) != EOK) {
                 (void)SoftBusMutexUnlock(&(g_reqLanePendingList->lock));
-                return SOFTBUS_ERR;
+                TRANS_LOGE(TRANS_SVC, "memcpy_s connInfo failed");
+                return SOFTBUS_MEM_ERR;
             }
             (void)SoftBusMutexUnlock(&(g_reqLanePendingList->lock));
             return SOFTBUS_OK;
@@ -1244,7 +1245,7 @@ static int32_t SetP2pConnInfo(const P2pConnInfo *p2pInfo, ConnectOption *connOpt
     connOpt->type = CONNECT_P2P;
     if (strcpy_s(connOpt->socketOption.addr, sizeof(connOpt->socketOption.addr), p2pInfo->peerIp) != EOK) {
         TRANS_LOGE(TRANS_SVC, "set p2p localIp err");
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     connOpt->socketOption.protocol = LNN_PROTOCOL_IP;
     connOpt->socketOption.port = -1;
@@ -1257,7 +1258,7 @@ static int32_t SetP2pReusesConnInfo(const WlanConnInfo *connInfo, ConnectOption 
     connOpt->socketOption.protocol = connInfo->protocol;
     if (strcpy_s(connOpt->socketOption.addr, sizeof(connOpt->socketOption.addr), connInfo->addr) != EOK) {
         TRANS_LOGE(TRANS_SVC, "set p2p reuse localIp err");
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -1269,7 +1270,7 @@ static int32_t SetWlanConnInfo(const WlanConnInfo *connInfo, ConnectOption *conn
     connOpt->socketOption.protocol = connInfo->protocol;
     if (strcpy_s(connOpt->socketOption.addr, sizeof(connOpt->socketOption.addr), connInfo->addr) != EOK) {
         TRANS_LOGE(TRANS_SVC, "set wlan localIp err");
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -1277,10 +1278,9 @@ static int32_t SetWlanConnInfo(const WlanConnInfo *connInfo, ConnectOption *conn
 static int32_t SetBrConnInfo(const BrConnInfo *brInfo, ConnectOption *connOpt)
 {
     connOpt->type = CONNECT_BR;
-    if (strcpy_s(connOpt->brOption.brMac, sizeof(connOpt->brOption.brMac),
-            brInfo->brMac) != EOK) {
+    if (strcpy_s(connOpt->brOption.brMac, sizeof(connOpt->brOption.brMac), brInfo->brMac) != EOK) {
         TRANS_LOGE(TRANS_SVC, "set br mac err");
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
 
     return SOFTBUS_OK;
@@ -1289,15 +1289,14 @@ static int32_t SetBrConnInfo(const BrConnInfo *brInfo, ConnectOption *connOpt)
 static int32_t SetBleConnInfo(const BleConnInfo *bleInfo, ConnectOption *connOpt)
 {
     connOpt->type = CONNECT_BLE;
-    if (strcpy_s(connOpt->bleOption.bleMac, sizeof(connOpt->bleOption.bleMac),
-            bleInfo->bleMac) != EOK) {
+    if (strcpy_s(connOpt->bleOption.bleMac, sizeof(connOpt->bleOption.bleMac), bleInfo->bleMac) != EOK) {
         TRANS_LOGE(TRANS_SVC, "set ble mac err");
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     if (memcpy_s(connOpt->bleOption.deviceIdHash, sizeof(connOpt->bleOption.deviceIdHash),
             bleInfo->deviceIdHash, sizeof(bleInfo->deviceIdHash)) != EOK) {
-        TRANS_LOGE(TRANS_SVC, "set deviceId hash err");
-        return SOFTBUS_ERR;
+        TRANS_LOGE(TRANS_SVC, "memcpy_s deviceId hash err");
+        return SOFTBUS_MEM_ERR;
     }
     connOpt->bleOption.protocol = bleInfo->protoType;
     connOpt->bleOption.psm = bleInfo->psm;
@@ -1309,7 +1308,7 @@ static int32_t SetBleDirectConnInfo(const BleDirectConnInfo *bleDirect, ConnectO
 {
     if (strcpy_s(connOpt->bleDirectOption.networkId, NETWORK_ID_BUF_LEN, bleDirect->networkId) != EOK) {
         TRANS_LOGW(TRANS_SVC, "set networkId err.");
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     connOpt->type = CONNECT_BLE_DIRECT;
     connOpt->bleDirectOption.protoType = bleDirect->protoType;
@@ -1322,7 +1321,7 @@ static int32_t SetHmlConnectInfo(const P2pConnInfo *p2pInfo, ConnectOption *conn
     connOpt->type = CONNECT_HML;
     if (strcpy_s(connOpt->socketOption.addr, sizeof(connOpt->socketOption.addr), p2pInfo->peerIp) != EOK) {
         TRANS_LOGE(TRANS_SVC, "set hml localIp err");
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     connOpt->socketOption.protocol = LNN_PROTOCOL_IP;
     connOpt->socketOption.port = -1;
