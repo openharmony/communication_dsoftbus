@@ -823,7 +823,7 @@ void ClientTransProxyCloseChannel(int32_t channelId)
     (void)ClientTransProxyDelChannelInfo(channelId);
     (void)TransProxyDelSliceProcessorByChannelId(channelId);
     TRANS_LOGI(TRANS_SDK, "TransCloseProxyChannel, channelId=%{public}d", channelId);
-    if (ServerIpcCloseChannel(channelId, CHANNEL_TYPE_PROXY) != SOFTBUS_OK) {
+    if (ServerIpcCloseChannel(NULL, channelId, CHANNEL_TYPE_PROXY) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "server close err. channelId=%{public}d", channelId);
     }
 }

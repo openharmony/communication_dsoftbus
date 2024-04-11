@@ -217,7 +217,7 @@ static SessionInfo *TestGenerateSession(const SessionParam *param)
     session->algorithm = TRANS_TEST_ALGORITHM;
     session->fileEncrypt = TRANS_TEST_FILE_ENCRYPT;
     session->crc = TRANS_TEST_CRC;
-
+    session->sessionState = SESSION_STATE_INIT;
     return session;
 }
 
@@ -379,7 +379,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest05, TestSize.Level1)
     int ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = OpenSession(g_sessionName, g_sessionName, g_networkId, g_groupId, &g_sessionAttr);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, -1);
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
     ASSERT_TRUE(sessionParam != NULL);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
@@ -557,7 +557,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest10, TestSize.Level1)
     ASSERT_TRUE(session != NULL);
     session->isEnable = true;
     ret = CheckSessionIsOpened(TRANS_TEST_CHANNEL_ID);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_GET_CHANNEL_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
     ret = ClientAddNewSession(g_sessionName, session);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, &sessionId);
