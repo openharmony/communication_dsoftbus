@@ -48,7 +48,7 @@
 
 typedef struct {
     ListNode node;
-    uint32_t laneReqId;
+    uint32_t laneHandle;
     int32_t errCode;
     SoftBusCond cond;
     bool bSucc;
@@ -149,9 +149,10 @@ void TransReqLanePendingDeinit(void)
     g_asyncReqLanePendingList = NULL;
 }
 
-static int32_t TransDelLaneReqFromPendingList(uint32_t laneReqId, bool isAsync)
+static int32_t TransDelLaneReqFromPendingList(uint32_t laneHandle, bool isAsync)
 {
-    TRANS_LOGD(TRANS_SVC, "del tran request from pending laneReqId=%{public}u, isAsync=%{public}d", laneReqId, isAsync);
+    TRANS_LOGD(TRANS_SVC, "del tran request from pending laneHandle=%{public}u, isAsync=%{public}d",
+        laneHandle, isAsync);
     SoftBusList *pendingList = isAsync ? g_asyncReqLanePendingList : g_reqLanePendingList;
     if (pendingList == NULL) {
         TRANS_LOGE(TRANS_SVC, "lane pending list no init.");
@@ -165,12 +166,12 @@ static int32_t TransDelLaneReqFromPendingList(uint32_t laneReqId, bool isAsync)
     TransReqLaneItem *laneItem = NULL;
     TransReqLaneItem *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(laneItem, next, &(pendingList->list), TransReqLaneItem, node) {
-        if (laneItem->laneReqId == laneReqId) {
+        if (laneItem->laneHandle == laneHandle) {
             if (!isAsync) {
                 (void)SoftBusCondDestroy(&laneItem->cond);
             }
             ListDelete(&(laneItem->node));
-            TRANS_LOGI(TRANS_SVC, "delete laneReqId = %{public}u", laneItem->laneReqId);
+            TRANS_LOGI(TRANS_SVC, "delete laneHandle = %{public}u", laneItem->laneHandle);
             pendingList->cnt--;
             if (isAsync) {
                 DestroyAsyncReqItemParam(&(laneItem->param));
@@ -181,11 +182,11 @@ static int32_t TransDelLaneReqFromPendingList(uint32_t laneReqId, bool isAsync)
         }
     }
     (void)SoftBusMutexUnlock(&(pendingList->lock));
-    TRANS_LOGE(TRANS_SVC, "trans lane request not found, laneReqId=%{public}u", laneReqId);
+    TRANS_LOGE(TRANS_SVC, "trans lane request not found, laneHandle=%{public}u", laneHandle);
     return SOFTBUS_ERR;
 }
 
-static int32_t TransAddLaneReqFromPendingList(uint32_t laneReqId)
+static int32_t TransAddLaneReqFromPendingList(uint32_t laneHandle)
 {
     if (g_reqLanePendingList == NULL) {
         TRANS_LOGE(TRANS_SVC, "lane pending list no init.");
@@ -198,7 +199,7 @@ static int32_t TransAddLaneReqFromPendingList(uint32_t laneReqId)
         return SOFTBUS_MALLOC_ERR;
     }
     item->errCode = SOFTBUS_ERR;
-    item->laneReqId = laneReqId;
+    item->laneHandle = laneHandle;
     item->bSucc = false;
     item->isFinished = false;
 
@@ -218,19 +219,36 @@ static int32_t TransAddLaneReqFromPendingList(uint32_t laneReqId)
     g_reqLanePendingList->cnt++;
     (void)SoftBusMutexUnlock(&g_reqLanePendingList->lock);
 
-    TRANS_LOGI(TRANS_SVC, "add tran request to pending laneReqId=%{public}u", laneReqId);
+    TRANS_LOGI(TRANS_SVC, "add tran request to pending laneHandle=%{public}u", laneHandle);
     return SOFTBUS_OK;
 }
 
-static void ReportTransEventExtra(const SessionParam *param, const LaneConnInfo *connInfo, const uint32_t *laneReqId,
+static void ReportTransEventExtra(const SessionParam *param, const LaneConnInfo *connInfo, const uint32_t *laneHandle,
     LaneRequestOption requestOption, int32_t ret)
 {
-    TransEventExtra extra = { .calleePkg = NULL,
+    TransEventExtra extra = {
+        .calleePkg = NULL,
         .callerPkg = NULL,
         .socketName = param->sessionName,
-        .laneId = (int32_t)*laneReqId,
+        .laneId = (int32_t)*laneHandle,
         .peerNetworkId = param->peerDeviceId,
         .laneTransType = requestOption.requestInfo.trans.transType,
+        .linkType = connInfo->type,
+        .errcode = ret,
+        .result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED };
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_SELECT_LANE, extra);
+}
+
+static void ReportTransEventExtraWithAllocInfo(const SessionParam *param, const LaneConnInfo *connInfo,
+    const uint32_t *laneHandle, LaneAllocInfo allocInfo, int32_t ret)
+{
+    TransEventExtra extra = {
+        .calleePkg = NULL,
+        .callerPkg = NULL,
+        .socketName = param->sessionName,
+        .laneId = (int32_t)*laneHandle,
+        .peerNetworkId = param->peerDeviceId,
+        .laneTransType = allocInfo.transType,
         .linkType = connInfo->type,
         .errcode = ret,
         .result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED };
@@ -314,7 +332,8 @@ static int32_t CopyAsyncReqItemSessionParam(const SessionParam *source, SessionP
     return CopyAsyncReqItemSessionParamIds(source, target);
 }
 
-static int32_t TransAddAsyncLaneReqFromPendingList(uint32_t laneReqId, const SessionParam *param, uint32_t firstTokenId)
+static int32_t TransAddAsyncLaneReqFromPendingList(uint32_t laneHandle, const SessionParam *param,
+    uint32_t firstTokenId)
 {
     if (g_asyncReqLanePendingList == NULL) {
         TRANS_LOGE(TRANS_SVC, "lane pending list no init.");
@@ -327,7 +346,7 @@ static int32_t TransAddAsyncLaneReqFromPendingList(uint32_t laneReqId, const Ses
         return SOFTBUS_MALLOC_ERR;
     }
     item->errCode = SOFTBUS_ERR;
-    item->laneReqId = laneReqId;
+    item->laneHandle = laneHandle;
     item->bSucc = false;
     item->isFinished = false;
     item->firstTokenId = firstTokenId;
@@ -350,16 +369,13 @@ static int32_t TransAddAsyncLaneReqFromPendingList(uint32_t laneReqId, const Ses
     ListAdd(&(g_asyncReqLanePendingList->list), &(item->node));
     g_asyncReqLanePendingList->cnt++;
     (void)SoftBusMutexUnlock(&g_asyncReqLanePendingList->lock);
-    TRANS_LOGI(TRANS_SVC, "add async request to pending list laneReqId=%{public}u", laneReqId);
+    TRANS_LOGI(TRANS_SVC, "add async request to pending list laneHandle=%{public}u", laneHandle);
     return SOFTBUS_OK;
 }
 
-static int32_t TransGetLaneReqItemByLaneReqId(uint32_t laneReqId, bool *bSucc, LaneConnInfo *connInfo, int32_t *errCode)
+static int32_t TransGetLaneReqItemByLaneHandle(uint32_t laneHandle, bool *bSucc, LaneConnInfo *connInfo,
+    int32_t *errCode)
 {
-    if (bSucc == NULL || connInfo == NULL) {
-        TRANS_LOGE(TRANS_SVC, "param err.");
-        return SOFTBUS_ERR;
-    }
     if (g_reqLanePendingList == NULL) {
         TRANS_LOGE(TRANS_SVC, "lane request list hasn't init.");
         return SOFTBUS_ERR;
@@ -368,10 +384,9 @@ static int32_t TransGetLaneReqItemByLaneReqId(uint32_t laneReqId, bool *bSucc, L
         TRANS_LOGE(TRANS_SVC, "lock failed.");
         return SOFTBUS_LOCK_ERR;
     }
-
     TransReqLaneItem *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &(g_reqLanePendingList->list), TransReqLaneItem, node) {
-        if (item->laneReqId == laneReqId) {
+        if (item->laneHandle == laneHandle) {
             *bSucc = item->bSucc;
             *errCode = item->errCode;
             if (memcpy_s(connInfo, sizeof(LaneConnInfo), &(item->connInfo), sizeof(LaneConnInfo)) != EOK) {
@@ -384,11 +399,11 @@ static int32_t TransGetLaneReqItemByLaneReqId(uint32_t laneReqId, bool *bSucc, L
         }
     }
     (void)SoftBusMutexUnlock(&(g_reqLanePendingList->lock));
-    TRANS_LOGE(TRANS_SVC, "trans lane request not found. laneReqId=%{public}u", laneReqId);
+    TRANS_LOGE(TRANS_SVC, "trans lane request not found. laneHandle=%{public}u", laneHandle);
     return SOFTBUS_ERR;
 }
 
-static int32_t TransGetLaneReqItemParamByLaneReqId(uint32_t laneReqId, SessionParam *param, uint32_t *firstTokenId)
+static int32_t TransGetLaneReqItemParamByLaneHandle(uint32_t laneHandle, SessionParam *param, uint32_t *firstTokenId)
 {
     if (param == NULL) {
         TRANS_LOGE(TRANS_SVC, "param err.");
@@ -405,7 +420,7 @@ static int32_t TransGetLaneReqItemParamByLaneReqId(uint32_t laneReqId, SessionPa
 
     TransReqLaneItem *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &(g_asyncReqLanePendingList->list), TransReqLaneItem, node) {
-        if (item->laneReqId == laneReqId) {
+        if (item->laneHandle == laneHandle) {
             *firstTokenId = item->firstTokenId;
             if (memcpy_s(param, sizeof(SessionParam), &(item->param), sizeof(SessionParam)) != EOK) {
                 (void)SoftBusMutexUnlock(&(g_asyncReqLanePendingList->lock));
@@ -417,17 +432,17 @@ static int32_t TransGetLaneReqItemParamByLaneReqId(uint32_t laneReqId, SessionPa
         }
     }
     (void)SoftBusMutexUnlock(&(g_asyncReqLanePendingList->lock));
-    TRANS_LOGE(TRANS_SVC, "trans lane request not found. laneReqId=%{public}u", laneReqId);
+    TRANS_LOGE(TRANS_SVC, "trans lane request not found. laneHandle=%{public}u", laneHandle);
     return SOFTBUS_ERR;
 }
 
-static int32_t TransUpdateLaneConnInfoByLaneReqId(uint32_t laneReqId, bool bSucc,
-    const LaneConnInfo *connInfo, bool isAsync, int32_t errCode)
+static int32_t TransUpdateLaneConnInfoByLaneHandle(uint32_t laneHandle, bool bSucc, const LaneConnInfo *connInfo,
+    bool isAsync, int32_t errCode)
 {
     SoftBusList *pendingList = isAsync ? g_asyncReqLanePendingList : g_reqLanePendingList;
     if (pendingList == NULL) {
         TRANS_LOGE(TRANS_SVC, "lane pending list no init.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&(pendingList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "lock failed.");
@@ -436,7 +451,7 @@ static int32_t TransUpdateLaneConnInfoByLaneReqId(uint32_t laneReqId, bool bSucc
 
     TransReqLaneItem *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &(pendingList->list), TransReqLaneItem, node) {
-        if (item->laneReqId == laneReqId) {
+        if (item->laneHandle == laneHandle) {
             item->bSucc = bSucc;
             item->errCode = errCode;
             if ((connInfo != NULL) &&
@@ -453,22 +468,31 @@ static int32_t TransUpdateLaneConnInfoByLaneReqId(uint32_t laneReqId, bool bSucc
         }
     }
     (void)SoftBusMutexUnlock(&(pendingList->lock));
-    TRANS_LOGE(TRANS_SVC, "trans lane request not found. laneReqId=%{public}u", laneReqId);
+    TRANS_LOGE(TRANS_SVC, "trans lane request not found. laneHandle=%{public}u", laneHandle);
     return SOFTBUS_ERR;
 }
 
-static void TransOnLaneRequestSuccess(uint32_t laneReqId, const LaneConnInfo *connInfo)
+static void TransOnLaneRequestSuccess(uint32_t laneHandle, const LaneConnInfo *connInfo)
 {
-    TRANS_LOGI(TRANS_SVC, "request success. laneReqId=%{public}u", laneReqId);
-    int ret = TransUpdateLaneConnInfoByLaneReqId(laneReqId, true, connInfo, false, SOFTBUS_OK);
+    TRANS_LOGI(TRANS_SVC, "request success. laneHandle=%{public}u", laneHandle);
+    int32_t ret = TransUpdateLaneConnInfoByLaneHandle(laneHandle, true, connInfo, false, SOFTBUS_OK);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "update lane connInfo failed, laneReqId=%{public}u, ret=%{public}d", laneReqId, ret);
+        TRANS_LOGE(TRANS_SVC, "update lane connInfo failed, laneHandle=%{public}u, ret=%{public}d", laneHandle, ret);
     }
-    return;
 }
 
-static void TransAsyncOpenChannelProc(
-    uint32_t laneReqId, SessionParam *param, AppInfo *appInfo, TransEventExtra extra, LaneConnInfo *connInnerInfo)
+static void TransOnLaneAllocSuccess(uint32_t laneHandle, const LaneConnInfo *connInfo)
+{
+    TRANS_LOGI(TRANS_SVC, "request success. laneHandle=%{public}u, laneId=%{public}" PRIu64 "",
+        laneHandle, connInfo->laneId);
+    int32_t ret = TransUpdateLaneConnInfoByLaneHandle(laneHandle, true, connInfo, false, SOFTBUS_OK);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "update lane connInfo failed, laneHandle=%{public}u, ret=%{public}d", laneHandle, ret);
+    }
+}
+
+static void TransAsyncOpenChannelProc(uint32_t laneHandle, SessionParam *param, AppInfo *appInfo,
+    TransEventExtra extra, LaneConnInfo *connInnerInfo)
 {
     int64_t timeStart = GetSoftbusRecordTimeMillis();
     TransInfo transInfo = { .channelId = INVALID_CHANNEL_ID, .channelType = CHANNEL_TYPE_BUTT};
@@ -485,7 +509,7 @@ static void TransAsyncOpenChannelProc(
     extra.linkType = connOpt.type;
     FillAppInfo(appInfo, param, &transInfo, connInnerInfo);
     TransOpenChannelSetModule(transInfo.channelType, &connOpt);
-    TRANS_LOGI(TRANS_SVC, "laneReqId=%{public}u, channelType=%{public}u", laneReqId, transInfo.channelType);
+    TRANS_LOGI(TRANS_SVC, "laneHandle=%{public}u, , channelType=%{public}u", laneHandle, transInfo.channelType);
     errCode = TransOpenChannelProc((ChannelType)transInfo.channelType, appInfo, &connOpt, &(transInfo.channelId));
     if (errCode != SOFTBUS_OK) {
         SoftbusReportTransErrorEvt(SOFTBUS_TRANS_CREATE_CHANNEL_ERR);
@@ -495,15 +519,19 @@ static void TransAsyncOpenChannelProc(
         goto EXIT_ERR;
     }
     if (param->isAsync && ClientIpcSetChannelInfo(appInfo->myData.pkgName, param->sessionName,
-                                                  param->sessionId, &transInfo, appInfo->myData.pid) != SOFTBUS_OK) {
+        param->sessionId, &transInfo, appInfo->myData.pid) != SOFTBUS_OK) {
         CallBackOpenChannelFailed(param, appInfo, errCode);
         TransCommonCloseChannel(transInfo.channelId, transInfo.channelType);
         goto EXIT_ERR;
     }
     if (((ChannelType)transInfo.channelType == CHANNEL_TYPE_TCP_DIRECT) && (connOpt.type != CONNECT_P2P)) {
-        LnnFreeLane(laneReqId);
-    } else if (TransLaneMgrAddLane(transInfo.channelId, transInfo.channelType, connInnerInfo, laneReqId,
-                                   &(appInfo->myData)) != SOFTBUS_OK) {
+        if (param->isQosLane) {
+            GetLaneManager()->lnnFreeLane(laneHandle);
+            return;
+        }
+        LnnFreeLane(laneHandle);
+    } else if (TransLaneMgrAddLane(transInfo.channelId, transInfo.channelType, connInnerInfo,
+        laneHandle, param->isQosLane, &(appInfo->myData)) != SOFTBUS_OK) {
         SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName, appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL,
             GetSoftbusRecordTimeMillis() - timeStart);
         TransCommonCloseChannel(transInfo.channelId, transInfo.channelType);
@@ -513,21 +541,21 @@ static void TransAsyncOpenChannelProc(
 EXIT_ERR:
     ReportTransOpenChannelEndEvent(extra, &transInfo, timeStart, errCode);
     ReportTransAlarmEvent(appInfo, errCode);
-    if (laneReqId != 0) {
-        LnnFreeLane(laneReqId);
+    if (laneHandle != 0) {
+        if (param->isQosLane) {
+            GetLaneManager()->lnnFreeLane(laneHandle);
+        } else {
+            LnnFreeLane(laneHandle);
+        }
     }
     TRANS_LOGE(TRANS_SVC, "server TransOpenChannel err, ret=%{public}d", errCode);
     return;
 }
 
-static void TransOnAsyncLaneRequestSuccess(uint32_t laneReqId, const LaneConnInfo *connInfo)
+static void TransOnAsyncLaneAllocSuccess(uint32_t laneHandle, const LaneConnInfo *connInfo)
 {
-    TRANS_LOGI(TRANS_SVC, "request success. laneReqId=%{public}u", laneReqId);
-    int32_t ret = TransUpdateLaneConnInfoByLaneReqId(laneReqId, true, connInfo, true, SOFTBUS_OK);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "update lane connInfo failed, laneReqId=%{public}u, ret=%{public}d", laneReqId, ret);
-        return;
-    }
+    TRANS_LOGI(TRANS_SVC, "request success. laneHandle=%{public}u, laneId=%{public}" PRIu64 "",
+        laneHandle, connInfo->laneId);
     LaneConnInfo tmpConnInfo;
     if (memcpy_s(&tmpConnInfo, sizeof(LaneConnInfo), connInfo, sizeof(LaneConnInfo)) != EOK) {
         TRANS_LOGE(TRANS_SVC, "memcpy tmpConnInfo failed");
@@ -535,17 +563,17 @@ static void TransOnAsyncLaneRequestSuccess(uint32_t laneReqId, const LaneConnInf
     }
     SessionParam param;
     uint32_t firstTokenId = 0;
-    ret = TransGetLaneReqItemParamByLaneReqId(laneReqId, &param, &firstTokenId);
+    int32_t ret = TransGetLaneReqItemParamByLaneHandle(laneHandle, &param, &firstTokenId);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "get lane req item failed. laneReqId=%{public}u, ret=%{public}d", laneReqId, ret);
-        (void)TransDelLaneReqFromPendingList(laneReqId, true);
+        TRANS_LOGE(TRANS_SVC, "get lane req item failed. laneHandle=%{public}u, ret=%{public}d", laneHandle, ret);
+        (void)TransDelLaneReqFromPendingList(laneHandle, true);
         return;
     }
-    LaneTransType transType = TransGetLaneTransTypeBySession(&param);
-    LaneRequestOption requestOption = {
-        .requestInfo.trans.transType = transType,
+    LaneTransType transType = (LaneTransType)TransGetLaneTransTypeBySession(&param);
+    LaneAllocInfo laneAllocInfo = {
+        .transType = transType,
     };
-    ReportTransEventExtra(&param, &tmpConnInfo, &laneReqId, requestOption, SOFTBUS_OK);
+    ReportTransEventExtraWithAllocInfo(&param, &tmpConnInfo, &laneHandle, laneAllocInfo, SOFTBUS_OK);
     AppInfo *appInfo = TransCommonGetAppInfo(&param);
     TRANS_CHECK_AND_RETURN_LOGW(!(appInfo == NULL), TRANS_SVC, "GetAppInfo is null.");
     appInfo->firstTokenId = firstTokenId;
@@ -561,66 +589,134 @@ static void TransOnAsyncLaneRequestSuccess(uint32_t laneReqId, const LaneConnInf
         .result = EVENT_STAGE_RESULT_OK
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_START, extra);
-    TransAsyncOpenChannelProc(laneReqId, &param, appInfo, extra, &tmpConnInfo);
+    TransAsyncOpenChannelProc(laneHandle, &param, appInfo, extra, &tmpConnInfo);
     if (appInfo->fastTransData != NULL) {
         SoftBusFree((void*)(appInfo->fastTransData));
     }
     SoftBusFree(appInfo);
-    (void)TransDelLaneReqFromPendingList(laneReqId, true);
+    (void)TransDelLaneReqFromPendingList(laneHandle, true);
 }
 
-static void TransOnLaneRequestFail(uint32_t laneReqId, int32_t reason)
+static void TransOnAsyncLaneAllocFail(uint32_t laneHandle, int32_t reason)
 {
-    TRANS_LOGI(TRANS_SVC, "request failed, laneReqId=%{public}u, reason=%{public}d", laneReqId, reason);
-    int32_t ret = TransUpdateLaneConnInfoByLaneReqId(laneReqId, false, NULL, false, reason);
+    TRANS_LOGI(TRANS_SVC, "request failed, laneHandle=%{public}u, reason=%{public}d", laneHandle, reason);
+    SessionParam param;
+    uint32_t firstTokenId = 0;
+    int32_t ret = TransGetLaneReqItemParamByLaneHandle(laneHandle, &param, &firstTokenId);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "update lane connInfo failed, laneReqId=%{public}u, ret=%{public}d", laneReqId, ret);
+        TRANS_LOGE(TRANS_SVC, "get lane req item failed. laneHandle=%{public}u, ret=%{public}d", laneHandle, ret);
+        (void)TransDelLaneReqFromPendingList(laneHandle, true);
+        return;
     }
-    return;
+    LaneTransType transType = (LaneTransType)TransGetLaneTransTypeBySession(&param);
+    LaneAllocInfo laneAllocInfo = {
+        .transType = transType,
+    };
+    LaneConnInfo connInfo = {
+        .type = LANE_LINK_TYPE_BUTT, // failed case unknow type
+    };
+    ReportTransEventExtraWithAllocInfo(&param, &connInfo, &laneHandle, laneAllocInfo, SOFTBUS_ERR);
+    AppInfo *appInfo = TransCommonGetAppInfo(&param);
+    TRANS_CHECK_AND_RETURN_LOGW(!(appInfo == NULL), TRANS_SVC, "GetAppInfo is null.");
+    appInfo->firstTokenId = firstTokenId;
+    CallBackOpenChannelFailed(&param, appInfo, reason);
+    (void)TransDelLaneReqFromPendingList(laneHandle, true);
+    if (appInfo->fastTransData != NULL) {
+        SoftBusFree((void*)appInfo->fastTransData);
+    }
+    SoftBusFree(appInfo);
 }
 
-static void TransOnAsyncLaneRequestFail(uint32_t laneReqId, int32_t reason)
+static void TransOnAsyncLaneRequestSuccess(uint32_t laneHandle, const LaneConnInfo *connInfo)
 {
-    TRANS_LOGI(TRANS_SVC, "request failed, laneReqId=%{public}u, reason=%{public}d", laneReqId, reason);
-    int32_t ret = TransUpdateLaneConnInfoByLaneReqId(laneReqId, false, NULL, true, reason);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "update lane connInfo failed, laneReqId=%{public}u, ret=%{public}d", laneReqId, ret);
+    TRANS_LOGI(TRANS_SVC, "request success. laneHandle=%{public}u", laneHandle);
+    LaneConnInfo tmpConnInfo;
+    if (memcpy_s(&tmpConnInfo, sizeof(LaneConnInfo), connInfo, sizeof(LaneConnInfo)) != EOK) {
+        TRANS_LOGE(TRANS_SVC, "memcpy tmpConnInfo failed");
         return;
     }
     SessionParam param;
     uint32_t firstTokenId = 0;
-    ret = TransGetLaneReqItemParamByLaneReqId(laneReqId, &param, &firstTokenId);
+    int32_t ret = TransGetLaneReqItemParamByLaneHandle(laneHandle, &param, &firstTokenId);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "get lane req item failed. laneReqId=%{public}u, ret=%{public}d", laneReqId, ret);
-        (void)TransDelLaneReqFromPendingList(laneReqId, true);
+        TRANS_LOGE(TRANS_SVC, "get lane req item failed. laneHandle=%{public}u, ret=%{public}d", laneHandle, ret);
+        (void)TransDelLaneReqFromPendingList(laneHandle, true);
         return;
     }
-    LaneTransType transType = TransGetLaneTransTypeBySession(&param);
+    LaneTransType transType = (LaneTransType)TransGetLaneTransTypeBySession(&param);
+    LaneRequestOption requestOption = {
+        .requestInfo.trans.transType = transType,
+    };
+    ReportTransEventExtra(&param, &tmpConnInfo, &laneHandle, requestOption, SOFTBUS_OK);
+    AppInfo *appInfo = TransCommonGetAppInfo(&param);
+    TRANS_CHECK_AND_RETURN_LOGW(!(appInfo == NULL), TRANS_SVC, "GetAppInfo is null.");
+    appInfo->firstTokenId = firstTokenId;
+    char peerUdid[UDID_BUF_LEN] = {0};
+    int32_t udidRet = LnnGetRemoteStrInfo(appInfo->peerNetWorkId, STRING_KEY_DEV_UDID, peerUdid, sizeof(peerUdid));
+    TransEventExtra extra = {
+        .calleePkg = NULL,
+        .callerPkg = appInfo->myData.pkgName,
+        .socketName = appInfo->myData.sessionName,
+        .dataType = appInfo->businessType,
+        .peerNetworkId = appInfo->peerNetWorkId,
+        .peerUdid = udidRet == SOFTBUS_OK ? peerUdid : NULL,
+        .result = EVENT_STAGE_RESULT_OK
+    };
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_START, extra);
+    TransAsyncOpenChannelProc(laneHandle, &param, appInfo, extra, &tmpConnInfo);
+    if (appInfo->fastTransData != NULL) {
+        SoftBusFree((void*)(appInfo->fastTransData));
+    }
+    SoftBusFree(appInfo);
+    (void)TransDelLaneReqFromPendingList(laneHandle, true);
+}
+
+static void TransOnLaneRequestFail(uint32_t laneHandle, int32_t reason)
+{
+    TRANS_LOGI(TRANS_SVC, "request failed, laneHandle=%{public}u, reason=%{public}d", laneHandle, reason);
+    int32_t ret = TransUpdateLaneConnInfoByLaneHandle(laneHandle, false, NULL, false, reason);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "update lane connInfo failed, laneHandle=%{public}u, ret=%{public}d", laneHandle, ret);
+    }
+}
+
+static void TransOnLaneAllocFail(uint32_t laneHandle, int32_t reason)
+{
+    TRANS_LOGI(TRANS_SVC, "request failed, laneHandle=%{public}u, reason=%{public}d", laneHandle, reason);
+    int32_t ret = TransUpdateLaneConnInfoByLaneHandle(laneHandle, false, NULL, false, reason);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "update lane connInfo failed, laneHandle=%{public}u, ret=%{public}d", laneHandle, ret);
+    }
+}
+
+static void TransOnAsyncLaneRequestFail(uint32_t laneHandle, int32_t reason)
+{
+    TRANS_LOGI(TRANS_SVC, "request failed, laneHandle=%{public}u, reason=%{public}d", laneHandle, reason);
+    SessionParam param;
+    uint32_t firstTokenId = 0;
+    int32_t ret = TransGetLaneReqItemParamByLaneHandle(laneHandle, &param, &firstTokenId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "get lane req item failed. laneHandle=%{public}u, ret=%{public}d", laneHandle, ret);
+        (void)TransDelLaneReqFromPendingList(laneHandle, true);
+        return;
+    }
+    LaneTransType transType = (LaneTransType)TransGetLaneTransTypeBySession(&param);
     LaneRequestOption requestOption = {
         .requestInfo.trans.transType = transType,
     };
     LaneConnInfo connInfo = {
         .type = LANE_LINK_TYPE_BUTT, // failed case unknow type
     };
-    ReportTransEventExtra(&param, &connInfo, &laneReqId, requestOption, SOFTBUS_ERR);
+    ReportTransEventExtra(&param, &connInfo, &laneHandle, requestOption, SOFTBUS_ERR);
     AppInfo *appInfo = TransCommonGetAppInfo(&param);
     TRANS_CHECK_AND_RETURN_LOGW(!(appInfo == NULL), TRANS_SVC, "GetAppInfo is null.");
     appInfo->firstTokenId = firstTokenId;
     CallBackOpenChannelFailed(&param, appInfo, reason);
-    (void)TransDelLaneReqFromPendingList(laneReqId, true);
+    (void)TransDelLaneReqFromPendingList(laneHandle, true);
     if (appInfo->fastTransData != NULL) {
         SoftBusFree((void*)appInfo->fastTransData);
     }
     SoftBusFree(appInfo);
-    return;
-}
-
-static void TransOnLaneStateChange(uint32_t laneReqId, LaneState state)
-{
-    /* current no treatment */
-    (void)laneReqId;
-    (void)state;
-    return;
 }
 
 static const LaneLinkType g_laneMap[LINK_TYPE_MAX + 1] = {
@@ -674,7 +770,7 @@ static bool IsShareSession(const char *sessionName)
     return true;
 }
 
-static bool PeerDeviceIsDoubleFrame(const char *peerNetworkId, const char *sessionName)
+static bool PeerDeviceIsLegacyOs(const char *peerNetworkId, const char *sessionName)
 {
     uint32_t authCapacity;
     if (LnnGetDLAuthCapacity(peerNetworkId, &authCapacity) != SOFTBUS_OK) {
@@ -719,7 +815,6 @@ static void ModuleLaneAdapter(LanePreferredLinkList *preferred, bool *isQosLane)
 
 static void TransGetQosInfo(const SessionParam *param, QosInfo *qosInfo, bool *isQosLane)
 {
-    *isQosLane = param->isQosLane;
     if (!(*isQosLane)) {
         TRANS_LOGD(TRANS_SVC, "not support qos lane");
         return;
@@ -755,6 +850,57 @@ static void TransGetBleMac(const SessionParam *param, LaneRequestOption *request
 }
 #endif
 
+#ifdef SOFTBUS_MINI_SYSTEM
+static void TransGetBleMacForAllocLane(const SessionParam *param, LaneAllocInfo *allocInfo)
+{
+    if (LnnGetRemoteStrInfo(allocInfo->networkId, STRING_KEY_BLE_MAC,
+        allocInfo->extendInfo.peerBleMac, BT_MAC_LEN) != SOFTBUS_OK) {
+        if (strcpy_s(allocInfo->extendInfo.peerBleMac, BT_MAC_LEN, "") != EOK) {
+            TRANS_LOGE(TRANS_SVC, "strcpy fail");
+        }
+        TRANS_LOGW(TRANS_SVC, "allocInfo get ble mac fail.");
+    }
+}
+#endif
+
+static int32_t GetAllocInfoBySessionParam(const SessionParam *param, LaneAllocInfo *allocInfo, bool *isQosLane)
+{
+    allocInfo->type = LANE_TYPE_TRANS;
+    if (memcpy_s(allocInfo->networkId, NETWORK_ID_BUF_LEN, param->peerDeviceId, NETWORK_ID_BUF_LEN) != EOK) {
+        TRANS_LOGE(TRANS_SVC, "memcpy networkId failed.");
+        return SOFTBUS_MEM_ERR;
+    }
+    LaneTransType transType = (LaneTransType)TransGetLaneTransTypeBySession(param);
+    if (transType == LANE_T_BUTT) {
+        return SOFTBUS_TRANS_INVALID_SESSION_TYPE;
+    }
+    allocInfo->extendInfo.networkDelegate = false;
+    if (strcmp(param->sessionName, SESSION_NAME_PHONEPAD) == 0 ||
+        strcmp(param->sessionName, SESSION_NAME_CASTPLUS) == 0) {
+        allocInfo->extendInfo.networkDelegate = true;
+    }
+    allocInfo->transType = transType;
+    allocInfo->acceptableProtocols = LNN_PROTOCOL_ALL ^ LNN_PROTOCOL_NIP;
+    TransGetQosInfo(param, &allocInfo->qosRequire, isQosLane);
+
+    NodeInfo info;
+    int32_t ret = LnnGetRemoteNodeInfoById(allocInfo->networkId, CATEGORY_NETWORK_ID, &info);
+    if ((ret == SOFTBUS_OK) && LnnHasDiscoveryType(&info, DISCOVERY_TYPE_LSA)) {
+        allocInfo->acceptableProtocols |= LNN_PROTOCOL_NIP;
+    }
+#ifdef SOFTBUS_MINI_SYSTEM
+    // get ble mac only on mini system
+    TransGetBleMacForAllocLane(param, allocInfo);
+#endif
+    int32_t uid;
+    ret = TransGetUidAndPid(param->sessionName, &uid, &(allocInfo->pid));
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "transGetUidAndPid failed");
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t GetRequestOptionBySessionParam(const SessionParam *param, LaneRequestOption *requestOption,
     bool *isQosLane)
 {
@@ -765,7 +911,7 @@ static int32_t GetRequestOptionBySessionParam(const SessionParam *param, LaneReq
         return SOFTBUS_MEM_ERR;
     }
 
-    LaneTransType transType = TransGetLaneTransTypeBySession(param);
+    LaneTransType transType = (LaneTransType)TransGetLaneTransTypeBySession(param);
     if (transType == LANE_T_BUTT) {
         return SOFTBUS_TRANS_INVALID_SESSION_TYPE;
     }
@@ -781,7 +927,6 @@ static int32_t GetRequestOptionBySessionParam(const SessionParam *param, LaneReq
     requestOption->requestInfo.trans.transType = transType;
     requestOption->requestInfo.trans.expectedBw = 0; /* init expectBW */
     requestOption->requestInfo.trans.acceptableProtocols = LNN_PROTOCOL_ALL ^ LNN_PROTOCOL_NIP;
-    TransGetQosInfo(param, &requestOption->requestInfo.trans.qosRequire, isQosLane);
 
     NodeInfo info;
     int32_t ret = LnnGetRemoteNodeInfoById(requestOption->requestInfo.trans.networkId, CATEGORY_NETWORK_ID, &info);
@@ -801,7 +946,7 @@ static int32_t GetRequestOptionBySessionParam(const SessionParam *param, LaneReq
 
     TransformSessionPreferredToLanePreferred(param, &(requestOption->requestInfo.trans.expectedLink),
         &requestOption->requestInfo.trans);
-    if (PeerDeviceIsDoubleFrame(param->peerDeviceId, param->sessionName) || IsMeshSync(param->sessionName)) {
+    if (PeerDeviceIsLegacyOs(param->peerDeviceId, param->sessionName) || IsMeshSync(param->sessionName)) {
         ModuleLaneAdapter(&(requestOption->requestInfo.trans.expectedLink), isQosLane);
         TRANS_LOGI(TRANS_SVC, "adapt double frame device and mesh, isQosLane=%{public}d", *isQosLane);
     }
@@ -828,7 +973,7 @@ static int32_t TransSoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, uint
     return SoftBusCondWait(cond, mutex, &tv);
 }
 
-static int32_t TransWaitingRequestCallback(uint32_t laneReqId)
+static int32_t TransWaitingRequestCallback(uint32_t laneHandle)
 {
     if (g_reqLanePendingList == NULL) {
         TRANS_LOGE(TRANS_SVC, "lane request list hasn't init.");
@@ -841,155 +986,255 @@ static int32_t TransWaitingRequestCallback(uint32_t laneReqId)
     bool isFound = false;
     TransReqLaneItem *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &(g_reqLanePendingList->list), TransReqLaneItem, node) {
-        if (item->laneReqId == laneReqId) {
+        if (item->laneHandle == laneHandle) {
             isFound = true;
             break;
         }
     }
     if (!isFound) {
         (void)SoftBusMutexUnlock(&(g_reqLanePendingList->lock));
-        TRANS_LOGI(TRANS_SVC, "not found laneReqId in pending. laneReqId=%{public}u", laneReqId);
+        TRANS_LOGI(TRANS_SVC, "not found laneHandle in pending. laneHandle=%{public}u", laneHandle);
         return SOFTBUS_ERR;
     }
     if (item->isFinished == false) {
         int32_t rc = TransSoftBusCondWait(&item->cond, &g_reqLanePendingList->lock, 0);
         if (rc != SOFTBUS_OK) {
             (void)SoftBusMutexUnlock(&(g_reqLanePendingList->lock));
-            TRANS_LOGI(TRANS_SVC, "wait cond failed laneReqId=%{public}u", laneReqId);
+            TRANS_LOGI(TRANS_SVC, "wait cond failed laneHandle=%{public}u", laneHandle);
             return rc;
         }
     }
     (void)SoftBusMutexUnlock(&(g_reqLanePendingList->lock));
-    TRANS_LOGI(TRANS_SVC, "receive lane cond laneReqId=%{public}u", laneReqId);
+    TRANS_LOGI(TRANS_SVC, "receive lane cond laneHandle=%{public}u", laneHandle);
     return SOFTBUS_OK;
 }
 
-static int32_t TransAddLaneReqToPendingAndWaiting(bool isQosLane, uint32_t laneReqId,
-    const LaneRequestOption *requestOption)
+static int32_t TransAddLaneReqToPendingAndWaiting(uint32_t laneHandle, const LaneRequestOption *requestOption)
 {
-    if (requestOption == NULL) {
-        TRANS_LOGE(TRANS_SVC, "param error.");
-        return SOFTBUS_ERR;
-    }
-
-    int32_t ret = TransAddLaneReqFromPendingList(laneReqId);
+    int32_t ret = TransAddLaneReqFromPendingList(laneHandle);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "add laneReqId to pending failed. laneReqId=%{public}u", laneReqId);
-        return SOFTBUS_ERR;
+        TRANS_LOGE(TRANS_SVC, "add laneHandle to pending failed. laneHandle=%{public}u, ret=%{public}d",
+            laneHandle, ret);
+        return ret;
     }
-
     ILaneListener listener;
     listener.OnLaneRequestSuccess = TransOnLaneRequestSuccess;
     listener.OnLaneRequestFail = TransOnLaneRequestFail;
-    listener.OnLaneStateChange = TransOnLaneStateChange;
-    if (isQosLane) {
-        // lane by qos
-        ret = GetLaneManager()->lnnRequestLane(laneReqId, requestOption, &listener);
-    } else {
-        ret = LnnRequestLane(laneReqId, requestOption, &listener);
-    }
+    ret = LnnRequestLane(laneHandle, requestOption, &listener);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "trans request lane failed.");
-        (void)TransDelLaneReqFromPendingList(laneReqId, false);
+        TRANS_LOGE(TRANS_SVC, "trans request lane failed. ret=%{public}d", ret);
+        (void)TransDelLaneReqFromPendingList(laneHandle, false);
+        return ret;
+    }
+    TRANS_LOGI(TRANS_SVC, "add laneHandle to pending and start waiting. laneHandle=%{public}u", laneHandle);
+    if (TransWaitingRequestCallback(laneHandle) != SOFTBUS_OK) {
+        (void)TransDelLaneReqFromPendingList(laneHandle, false);
         return SOFTBUS_ERR;
     }
-    TRANS_LOGI(TRANS_SVC, "add laneReqId to pending and start waiting. laneReqId=%{public}u", laneReqId);
-    if (TransWaitingRequestCallback(laneReqId) != SOFTBUS_OK) {
-        (void)TransDelLaneReqFromPendingList(laneReqId, false);
-        return SOFTBUS_ERR;
-    }
-
     return SOFTBUS_OK;
 }
 
-int32_t TransGetLaneInfoByOption(bool isQosLane, const LaneRequestOption *requestOption, LaneConnInfo *connInfo,
-    uint32_t *laneReqId)
+static int32_t TransAddLaneAllocToPendingAndWaiting(uint32_t laneHandle, const LaneAllocInfo *allocInfo)
 {
-    if ((requestOption == NULL) || (connInfo == NULL) || (laneReqId == NULL)) {
-        TRANS_LOGE(TRANS_SVC, "get lane info by option param error.");
+    int32_t ret = TransAddLaneReqFromPendingList(laneHandle);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "add laneHandle to pending failed. laneHandle=%{public}u, ret=%{public}d",
+            laneHandle, ret);
+        return ret;
+    }
+    LaneAllocListener allocListener;
+    allocListener.OnLaneAllocSuccess = TransOnLaneAllocSuccess;
+    allocListener.OnLaneAllocFail = TransOnLaneAllocFail;
+    ret = GetLaneManager()->lnnAllocLane(laneHandle, allocInfo, &allocListener);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "trans request lane failed, ret=%{public}d", ret);
+        (void)TransDelLaneReqFromPendingList(laneHandle, false);
+        return ret;
+    }
+    TRANS_LOGI(TRANS_SVC, "add laneHandle to pending and start waiting. laneHandle=%{public}u", laneHandle);
+    if (TransWaitingRequestCallback(laneHandle) != SOFTBUS_OK) {
+        (void)TransDelLaneReqFromPendingList(laneHandle, false);
         return SOFTBUS_ERR;
     }
+    return SOFTBUS_OK;
+}
 
-    *laneReqId = GetLaneManager()->applyLaneReqId(LANE_TYPE_TRANS);
-    if (TransAddLaneReqToPendingAndWaiting(isQosLane, *laneReqId, requestOption) != SOFTBUS_OK) {
+int32_t TransGetLaneInfoByOption(const LaneRequestOption *requestOption, LaneConnInfo *connInfo, uint32_t *laneHandle)
+{
+    if ((requestOption == NULL) || (connInfo == NULL) || (laneHandle == NULL)) {
+        TRANS_LOGE(TRANS_SVC, "get lane info by option param error.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *laneHandle = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_TRANS);
+    if (TransAddLaneReqToPendingAndWaiting(*laneHandle, requestOption) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "trans add lane to pending list failed.");
         return SOFTBUS_ERR;
     }
     bool bSuccess = false;
     int32_t errCode = SOFTBUS_ERR;
-    if (TransGetLaneReqItemByLaneReqId(*laneReqId, &bSuccess, connInfo, &errCode) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "get lane req item failed. laneReqId=%{public}u.", *laneReqId);
-        (void)TransDelLaneReqFromPendingList(*laneReqId, false);
-        return SOFTBUS_ERR;
+    if (TransGetLaneReqItemByLaneHandle(*laneHandle, &bSuccess, connInfo, &errCode) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "get lane req item failed. laneHandle=%{public}u, errCode=%{public}d",
+            *laneHandle, errCode);
+        (void)TransDelLaneReqFromPendingList(*laneHandle, false);
+        return errCode;
     }
 
-    int32_t ret = SOFTBUS_OK;
-    if (!bSuccess) {
-        ret = errCode;
-        TRANS_LOGE(TRANS_SVC, "request lane conninfo failed. laneReqId=%{public}u.", *laneReqId);
-    }
-    TRANS_LOGI(TRANS_SVC, "request lane conninfo success. laneReqId=%{public}u.", *laneReqId);
-    (void)TransDelLaneReqFromPendingList(*laneReqId, false);
-    return ret;
+    TRANS_LOGI(TRANS_SVC, "request lane conninfo end. laneHandle=%{public}u. errCode=%{public}d",
+        *laneHandle, errCode);
+    (void)TransDelLaneReqFromPendingList(*laneHandle, false);
+    return errCode;
 }
 
-int32_t TransGetLaneInfo(const SessionParam *param, LaneConnInfo *connInfo, uint32_t *laneReqId)
+int32_t TransGetLaneInfoByQos(const LaneAllocInfo *allocInfo, LaneConnInfo *connInfo, uint32_t *laneHandle)
 {
-    if ((param == NULL) || (connInfo == NULL) || (laneReqId == NULL)) {
+    if ((allocInfo == NULL) || (connInfo == NULL) || (laneHandle == NULL)) {
         TRANS_LOGE(TRANS_SVC, "get lane info param error.");
         return SOFTBUS_INVALID_PARAM;
     }
-
-    LaneRequestOption requestOption;
-    (void)memset_s(&requestOption, sizeof(LaneRequestOption), 0, sizeof(LaneRequestOption));
-    bool isQosLane = false;
-    if (GetRequestOptionBySessionParam(param, &requestOption, &isQosLane) != SOFTBUS_OK) {
+    *laneHandle = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_TRANS);
+    if (TransAddLaneAllocToPendingAndWaiting(*laneHandle, allocInfo) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "trans add lane to pending list failed.");
         return SOFTBUS_ERR;
     }
+    bool bSuccess = false;
+    int32_t errCode = SOFTBUS_ERR;
+    if (TransGetLaneReqItemByLaneHandle(*laneHandle, &bSuccess, connInfo, &errCode) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "get lane req item failed. laneHandle=%{public}u, errCode=%{public}d",
+            *laneHandle, errCode);
+        (void)TransDelLaneReqFromPendingList(*laneHandle, false);
+        return errCode;
+    }
 
-    int32_t ret = TransGetLaneInfoByOption(isQosLane, &requestOption, connInfo, laneReqId);
-    ReportTransEventExtra(param, connInfo, laneReqId, requestOption, ret);
+    TRANS_LOGI(TRANS_SVC, "request lane conninfo end. laneHandle=%{public}u. errCode=%{public}d",
+        *laneHandle, errCode);
+    (void)TransDelLaneReqFromPendingList(*laneHandle, false);
+    return errCode;
+}
+
+int32_t TransGetLaneInfo(const SessionParam *param, LaneConnInfo *connInfo, uint32_t *laneHandle, bool *isQosLane)
+{
+    if (param == NULL || connInfo == NULL || laneHandle == NULL || isQosLane == NULL) {
+        TRANS_LOGE(TRANS_SVC, "get lane info param error.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *isQosLane = param->isQosLane;
+    LaneRequestOption requestOption;
+    (void)memset_s(&requestOption, sizeof(LaneRequestOption), 0, sizeof(LaneRequestOption));
+    int32_t ret = GetRequestOptionBySessionParam(param, &requestOption, isQosLane);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "get lane info by option failed.");
+        TRANS_LOGE(TRANS_SVC, "get request option failed. laneHandle=%{public}u, ret=%{public}d", *laneHandle, ret);
         return ret;
+    }
+    if (!(*isQosLane)) {
+        ret = TransGetLaneInfoByOption(&requestOption, connInfo, laneHandle);
+        ReportTransEventExtra(param, connInfo, laneHandle, requestOption, ret);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SVC, "get lane info by option failed, ret=%{public}d", ret);
+            return ret;
+        }
+    } else {
+        LaneAllocInfo allocInfo;
+        (void)memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo));
+        ret = GetAllocInfoBySessionParam(param, &allocInfo, isQosLane);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SVC, "get alloc Info failed. laneHandle=%{public}u, ret=%{public}d", *laneHandle, ret);
+            return ret;
+        }
+        ret = TransGetLaneInfoByQos(&allocInfo, connInfo, laneHandle);
+        ReportTransEventExtraWithAllocInfo(param, connInfo, laneHandle, allocInfo, ret);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SVC, "get lane info by allocInfo failed, ret=%{public}d", ret);
+            return ret;
+        }
     }
     return SOFTBUS_OK;
 }
 
-int32_t TransAsyncGetLaneInfo(const SessionParam *param, uint32_t *laneReqId, uint32_t firstTokenId)
+int32_t TransAsyncGetLaneInfoByOption(const SessionParam *param, const LaneRequestOption *requestOption,
+    uint32_t *laneHandle, uint32_t firstTokenId)
 {
-    if ((param == NULL) || (laneReqId == NULL)) {
-        TRANS_LOGE(TRANS_SVC, "get lane info param error.");
+    if (param == NULL || requestOption == NULL || laneHandle == NULL) {
+        TRANS_LOGE(TRANS_SVC, "async get lane info param error.");
         return SOFTBUS_INVALID_PARAM;
     }
-    LaneRequestOption requestOption;
-    (void)memset_s(&requestOption, sizeof(LaneRequestOption), 0, sizeof(LaneRequestOption));
-    bool isQosLane = false;
-    int32_t ret = GetRequestOptionBySessionParam(param, &requestOption, &isQosLane);
+    *laneHandle = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_TRANS);
+    int32_t ret = TransAddAsyncLaneReqFromPendingList(*laneHandle, param, firstTokenId);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "get request option failed. laneReqId=%{public}u, ret=%{public}d", *laneReqId, ret);
-        return ret;
-    }
-    *laneReqId = GetLaneManager()->applyLaneReqId(LANE_TYPE_TRANS);
-    ret = TransAddAsyncLaneReqFromPendingList(*laneReqId, param, firstTokenId);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "add laneReqId to pending failed. laneReqId=%{public}u, ret=%{public}d", *laneReqId, ret);
+        TRANS_LOGE(TRANS_SVC, "add laneHandle to pending failed. laneHandle=%{public}u, ret=%{public}d",
+            *laneHandle, ret);
         return ret;
     }
     ILaneListener listener;
     listener.OnLaneRequestSuccess = TransOnAsyncLaneRequestSuccess;
     listener.OnLaneRequestFail = TransOnAsyncLaneRequestFail;
-    listener.OnLaneStateChange = TransOnLaneStateChange;
-    if (isQosLane) {
-        // lane by qos
-        ret = GetLaneManager()->lnnRequestLane(*laneReqId, &requestOption, &listener);
-    } else {
-        ret = LnnRequestLane(*laneReqId, &requestOption, &listener);
-    }
+    ret = LnnRequestLane(*laneHandle, requestOption, &listener);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "trans request lane failed.");
-        (void)TransDelLaneReqFromPendingList(*laneReqId, true);
+        TRANS_LOGE(TRANS_SVC, "trans request lane failed, ret=%{public}d", ret);
+        (void)TransDelLaneReqFromPendingList(*laneHandle, true);
         return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t TransAsyncGetLaneInfoByQos(const SessionParam *param, const LaneAllocInfo *allocInfo,
+    uint32_t *laneHandle, uint32_t firstTokenId)
+{
+    if (param == NULL || allocInfo == NULL || laneHandle == NULL) {
+        TRANS_LOGE(TRANS_SVC, "async get lane info param error.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *laneHandle = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_TRANS);
+    int32_t ret = TransAddAsyncLaneReqFromPendingList(*laneHandle, param, firstTokenId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "add laneHandle to pending failed. laneHandle=%{public}u, ret=%{public}d",
+            *laneHandle, ret);
+        return ret;
+    }
+    LaneAllocListener allocListener;
+    allocListener.OnLaneAllocSuccess = TransOnAsyncLaneAllocSuccess;
+    allocListener.OnLaneAllocFail = TransOnAsyncLaneAllocFail;
+    ret = GetLaneManager()->lnnAllocLane(*laneHandle, allocInfo, &allocListener);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "trans request lane failed, ret=%{public}d", ret);
+        (void)TransDelLaneReqFromPendingList(*laneHandle, true);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t TransAsyncGetLaneInfo(const SessionParam *param, uint32_t *laneHandle, uint32_t firstTokenId, bool *isQosLane)
+{
+    if (param == NULL || laneHandle == NULL || isQosLane == NULL) {
+        TRANS_LOGE(TRANS_SVC, "async get lane info param error.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *isQosLane = param->isQosLane;
+    LaneRequestOption requestOption;
+    (void)memset_s(&requestOption, sizeof(LaneRequestOption), 0, sizeof(LaneRequestOption));
+    int32_t ret = GetRequestOptionBySessionParam(param, &requestOption, isQosLane);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "get request option failed. laneHandle=%{public}u, ret=%{public}d", *laneHandle, ret);
+        return ret;
+    }
+    if (!(*isQosLane)) {
+        ret = TransAsyncGetLaneInfoByOption(param, &requestOption, laneHandle, firstTokenId);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SVC, "get lane info by option failed, ret=%{public}d", ret);
+            return ret;
+        }
+    } else {
+        LaneAllocInfo allocInfo;
+        (void)memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo));
+        ret = GetAllocInfoBySessionParam(param, &allocInfo, isQosLane);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SVC, "get alloc Info failed. laneHandle=%{public}u, ret=%{public}d", *laneHandle, ret);
+            return ret;
+        }
+        ret = TransAsyncGetLaneInfoByQos(param, &allocInfo, laneHandle, firstTokenId);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SVC, "get lane info by allocInfo failed, ret=%{public}d", ret);
+            return ret;
+        }
     }
     return SOFTBUS_OK;
 }

@@ -201,11 +201,12 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     }
     TRANS_LOGI(TRANS_CTRL, "server TransOpenChannel");
     int32_t ret = INVALID_CHANNEL_ID;
-    uint32_t laneReqId = 0;
+    uint32_t laneHandle = INVALID_LANE_REQ_ID;
+    bool isQosLane = false;
     // async bind will back after request choose lane
     if (param->isAsync) {
         uint32_t firstTokenId = TransACLGetFirstTokenID();
-        ret = TransAsyncGetLaneInfo(param, &laneReqId, firstTokenId);
+        ret = TransAsyncGetLaneInfo(param, &laneHandle, firstTokenId, &isQosLane);
         if (ret != SOFTBUS_OK) {
             char *tmpSessionName = NULL;
             Anonymize(param->sessionName, &tmpSessionName);
@@ -238,16 +239,27 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         .result = EVENT_STAGE_RESULT_OK
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_START, extra);
-    errCode = TransGetLaneInfo(param, &connInfo, &laneReqId);
+    errCode = TransGetLaneInfo(param, &connInfo, &laneHandle, &isQosLane);
     char *tmpName = NULL;
     if (errCode != SOFTBUS_OK) {
         SoftbusReportTransErrorEvt(SOFTBUS_TRANS_GET_LANE_INFO_ERR);
+        if (!isQosLane) {
+            goto EXIT_ERR;
+        }
+        ReportTransOpenChannelEndEvent(extra, transInfo, timeStart, ret);
+        ReportTransAlarmEvent(appInfo, ret);
+        if (appInfo->fastTransData != NULL) {
+            SoftBusFree((void*)appInfo->fastTransData);
+        }
+        SoftBusFree(appInfo);
         ret = errCode;
-        goto EXIT_ERR;
+        TRANS_LOGE(TRANS_CTRL, "server TransOpenChannel err, ret=%{public}d", ret);
+        return ret;
     }
     Anonymize(param->sessionName, &tmpName);
     TRANS_LOGI(TRANS_CTRL,
-        "sessionName=%{public}s, laneReqId=%{public}u, linkType=%{public}u.", tmpName, laneReqId, connInfo.type);
+        "sessionName=%{public}s, laneHandle=%{public}u, linkType=%{public}u.",
+        tmpName, laneHandle, connInfo.type);
     AnonymizeFree(tmpName);
     errCode = TransGetConnectOptByConnInfo(&connInfo, &connOpt);
     if (errCode != SOFTBUS_OK) {
@@ -260,7 +272,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     extra.linkType = connOpt.type;
     FillAppInfo(appInfo, param, transInfo, &connInfo);
     TransOpenChannelSetModule(transInfo->channelType, &connOpt);
-    TRANS_LOGI(TRANS_CTRL, "laneReqId=%{public}u, channelType=%{public}u", laneReqId, transInfo->channelType);
+    TRANS_LOGI(TRANS_CTRL, "laneHandle=%{public}u, channelType=%{public}u", laneHandle, transInfo->channelType);
     errCode = TransOpenChannelProc((ChannelType)transInfo->channelType, appInfo, &connOpt,
         &(transInfo->channelId));
     if (errCode != SOFTBUS_OK) {
@@ -270,11 +282,14 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
             appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, GetSoftbusRecordTimeMillis() - timeStart);
         goto EXIT_ERR;
     }
-
     if (((ChannelType)transInfo->channelType == CHANNEL_TYPE_TCP_DIRECT) && (connOpt.type != CONNECT_P2P)) {
-        LnnFreeLane(laneReqId);
-    } else if (TransLaneMgrAddLane(transInfo->channelId, transInfo->channelType,
-        &connInfo, laneReqId, &appInfo->myData) != SOFTBUS_OK) {
+        if (isQosLane) {
+            GetLaneManager()->lnnFreeLane(laneHandle);
+        } else {
+            LnnFreeLane(laneHandle);
+        }
+    } else if (TransLaneMgrAddLane(transInfo->channelId, transInfo->channelType, &connInfo,
+        laneHandle, isQosLane, &appInfo->myData) != SOFTBUS_OK) {
         SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName,
             appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, GetSoftbusRecordTimeMillis() - timeStart);
         TransCloseChannel(transInfo->channelId, transInfo->channelType);
@@ -295,8 +310,12 @@ EXIT_ERR:
         SoftBusFree((void*)appInfo->fastTransData);
     }
     SoftBusFree(appInfo);
-    if (laneReqId != 0) {
-        LnnFreeLane(laneReqId);
+    if (laneHandle != 0) {
+        if (isQosLane) {
+            GetLaneManager()->lnnFreeLane(laneHandle);
+        } else {
+            LnnFreeLane(laneHandle);
+        }
     }
     TRANS_LOGE(TRANS_CTRL, "server TransOpenChannel err");
     return ret;
@@ -434,13 +453,13 @@ int32_t TransStreamStats(int32_t channelId, int32_t channelType, const StreamSen
         TRANS_LOGE(TRANS_STREAM, "streamStats data is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    uint32_t laneReqId;
-    int32_t ret = TransGetLaneReqIdByChannelId(channelId, &laneReqId);
+    uint32_t laneHandle;
+    int32_t ret = TransGetLaneHandleByChannelId(channelId, &laneHandle);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_STREAM, "get laneReqId fail, streamStatsInfo cannot be processed");
+        TRANS_LOGE(TRANS_STREAM, "get laneHandle fail, streamStatsInfo cannot be processed");
         return SOFTBUS_ERR;
     }
-    TRANS_LOGI(TRANS_STREAM, "transStreamStats channelId=%{public}d, laneReqId=0x%{public}x", channelId, laneReqId);
+    TRANS_LOGI(TRANS_STREAM, "transStreamStats channelId=%{public}d, laneHandle=0x%{public}x", channelId, laneHandle);
     // modify with laneId
     uint64_t laneId = INVALID_LANE_ID;
     LaneIdStatsInfo info;
@@ -457,11 +476,11 @@ int32_t TransRequestQos(int32_t channelId, int32_t chanType, int32_t appType, in
 {
     (void)chanType;
     (void)appType;
-    uint32_t laneReqId;
-    int32_t ret = TransGetLaneReqIdByChannelId(channelId, &laneReqId);
+    uint32_t laneHandle;
+    int32_t ret = TransGetLaneHandleByChannelId(channelId, &laneHandle);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_QOS, "get laneReqId fail, transRequestQos cannot be processed");
-        return SOFTBUS_ERR;
+        TRANS_LOGE(TRANS_QOS, "get laneHandle fail, transRequestQos cannot be processed");
+        return ret;
     }
     // modify with laneId
     uint64_t laneId = INVALID_LANE_ID;
@@ -492,13 +511,13 @@ int32_t TransRippleStats(int32_t channelId, int32_t channelType, const TrafficSt
         TRANS_LOGE(TRANS_CTRL, "rippleStats data is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    uint32_t laneReqId;
-    int32_t ret = TransGetLaneReqIdByChannelId(channelId, &laneReqId);
+    uint32_t laneHandle;
+    int32_t ret = TransGetLaneHandleByChannelId(channelId, &laneHandle);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get laneReqId fail, streamStatsInfo cannot be processed, ret=%{public}d", ret);
-        return ret;
+        TRANS_LOGE(TRANS_CTRL, "get laneHandle fail, streamStatsInfo cannot be processed");
+        return SOFTBUS_ERR;
     }
-    TRANS_LOGI(TRANS_CTRL, "transRippleStats channelId=%{public}d, laneReqId=0x%{public}x", channelId, laneReqId);
+    TRANS_LOGI(TRANS_CTRL, "transRippleStats channelId=%{public}d, laneHandle=0x%{public}x", channelId, laneHandle);
     LnnRippleData rptdata;
     (void)memset_s(&rptdata, sizeof(rptdata), 0, sizeof(rptdata));
     if (memcpy_s(&rptdata.stats, sizeof(rptdata.stats), data->stats, sizeof(data->stats)) != EOK) {
