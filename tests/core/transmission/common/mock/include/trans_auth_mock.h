@@ -70,9 +70,9 @@ public:
         uint32_t keyLen, uint32_t requestId, int32_t callingPid, const AuthVerifyCallback *callBack) = 0;
     virtual void AuthMetaReleaseVerify(int64_t authId) = 0;
 
-    virtual int32_t AuthEncrypt(int64_t authId, const uint8_t *inData,
+    virtual int32_t AuthEncrypt(AuthHandle *authHandle, const uint8_t *inData,
         uint32_t inLen, uint8_t *outData, uint32_t *outLen) = 0;
-    virtual int32_t AuthDecrypt(int64_t authId, const uint8_t *inData,
+    virtual int32_t AuthDecrypt(AuthHandle *authHandle, const uint8_t *inData,
         uint32_t inLen, uint8_t *outData, uint32_t *outLen) = 0;
 
     virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
@@ -131,8 +131,8 @@ public:
     MOCK_METHOD6(AuthMetaStartVerify, int32_t (uint32_t, const uint8_t *,
         uint32_t, uint32_t, int32_t, const AuthVerifyCallback *));
     MOCK_METHOD1(AuthMetaReleaseVerify, void (int64_t));
-    MOCK_METHOD5(AuthEncrypt, int32_t (int64_t, const uint8_t *, uint32_t, uint8_t *, uint32_t *));
-    MOCK_METHOD5(AuthDecrypt, int32_t (int64_t, const uint8_t *, uint32_t, uint8_t *, uint32_t *));
+    MOCK_METHOD5(AuthEncrypt, int32_t (AuthHandle *, const uint8_t *, uint32_t, uint8_t *, uint32_t *));
+    MOCK_METHOD5(AuthDecrypt, int32_t (AuthHandle *, const uint8_t *, uint32_t, uint8_t *, uint32_t *));
 
     MOCK_METHOD3(LnnGetLocalStrInfo, int32_t (InfoKey, char *, uint32_t));
     MOCK_METHOD3(LnnGetNetworkIdByUuid, int32_t (const char *, char *, uint32_t));

@@ -283,26 +283,34 @@ int32_t AuthRestoreAuthManager(const char *udidHash,
     return SOFTBUS_OK;
 }
 
-int32_t AuthEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
+int32_t AuthEncrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
     uint32_t *outLen)
 {
-    AuthManager *auth = GetAuthManagerByAuthId(authId);
+    if (authHandle == NULL) {
+        AUTH_LOGE(AUTH_KEY, "authHandle is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    AuthManager *auth = GetAuthManagerByAuthId(authHandle->authId);
     if (auth != NULL) {
         DelDupAuthManager(auth);
-        return AuthDeviceEncrypt(authId, inData, inLen, outData, outLen);
+        return AuthDeviceEncrypt(authHandle, inData, inLen, outData, outLen);
     }
-    return AuthMetaEncrypt(authId, inData, inLen, outData, outLen);
+    return AuthMetaEncrypt(authHandle->authId, inData, inLen, outData, outLen);
 }
 
-int32_t AuthDecrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
+int32_t AuthDecrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
     uint32_t *outLen)
 {
-    AuthManager *auth = GetAuthManagerByAuthId(authId);
+    if (authHandle == NULL) {
+        AUTH_LOGE(AUTH_KEY, "authHandle is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    AuthManager *auth = GetAuthManagerByAuthId(authHandle->authId);
     if (auth != NULL) {
         DelDupAuthManager(auth);
-        return AuthDeviceDecrypt(authId, inData, inLen, outData, outLen);
+        return AuthDeviceDecrypt(authHandle, inData, inLen, outData, outLen);
     }
-    return AuthMetaDecrypt(authId, inData, inLen, outData, outLen);
+    return AuthMetaDecrypt(authHandle->authId, inData, inLen, outData, outLen);
 }
 
 int32_t AuthSetP2pMac(int64_t authId, const char *p2pMac)
