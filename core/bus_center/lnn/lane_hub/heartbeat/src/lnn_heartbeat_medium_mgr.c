@@ -59,6 +59,7 @@ static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, int32_t weight, int32_
     LnnHeartbeatType hbType, bool isOnlineDirectly, HbRespData *hbResp);
 static int32_t HbMediumMgrRecvHigherWeight(const char *udidHash, int32_t weight, ConnectionAddrType type,
     bool isReElect);
+static void HbMediumMgrRecvSensorHubInfo(const char *networkId, uint64_t nowTime);
 
 static LnnHeartbeatMediumMgr *g_hbMeidumMgr[HB_MAX_TYPE_COUNT] = {0};
 
@@ -66,6 +67,7 @@ static LnnHeartbeatMediumMgrCb g_hbMediumMgrCb = {
     .onRelay = HbMediumMgrRelayProcess,
     .onReceive = HbMediumMgrRecvProcess,
     .onRecvHigherWeight = HbMediumMgrRecvHigherWeight,
+    .onRecvSensorHubInfo = HbMediumMgrRecvSensorHubInfo,
 };
 
 static SoftBusList *g_hbRecvList = NULL;
@@ -496,17 +498,19 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, int32_t weight,
         (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
         return SOFTBUS_OK;
     }
-    if (!device->isOnline || HbIsRepeatedJoinLnnRequest(storedInfo, nowTime)) {
+    if (HbIsRepeatedJoinLnnRequest(storedInfo, nowTime)) {
         Anonymize(device->devId, &anonyUdid);
-        LNN_LOGD(LNN_HEART_BEAT,
-            "recv but ignore repeated join lnn request, udidHash=%{public}s, isNeedOnline=%{public}d",
-            anonyUdid, device->isOnline);
-            AnonymizeFree(anonyUdid);
+        LNN_LOGD(LNN_HEART_BEAT, "recv but ignore repeated join lnn request, udidHash=%{public}s", anonyUdid);
+        AnonymizeFree(anonyUdid);
         (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
         return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
     }
     (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
     bool isConnect = IsNeedConnectOnLine(device, hbResp);
+    if (isConnect && !device->isOnline) {
+        LNN_LOGD(LNN_HEART_BEAT, "ignore lnn request, not support connect");
+        return SOFTBUS_NETWORK_NOT_CONNECTABLE;
+    }
     Anonymize(device->devId, &anonyUdid);
     LNN_LOGI(LNN_HEART_BEAT,
         "heartbeat(HB) find device, udidHash=%{public}s, ConnectionAddrType=%{public}02X, isConnect=%{public}d",
@@ -575,6 +579,14 @@ static int32_t HbMediumMgrRecvHigherWeight(const char *udidHash, int32_t weight,
     AnonymizeFree(anonyUdid);
     AnonymizeFree(anonyMasterUdid);
     return SOFTBUS_OK;
+}
+
+static void HbMediumMgrRecvSensorHubInfo(const char *networkId, uint64_t nowTime)
+{
+    if (HbUpdateOfflineTimingByRecvInfo(
+        networkId, CONNECTION_ADDR_BLE, HEARTBEAT_TYPE_BLE_V0, nowTime) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "HB medium mgr update time stamp fail");
+    }
 }
 
 static void HbMediumMgrRelayProcess(const char *udidHash, ConnectionAddrType type,
