@@ -28,6 +28,7 @@
 #include "auth_manager.h"
 #include "auth_request.h"
 #include "bus_center_manager.h"
+#include "bus_center_info_key.h"
 #include "lnn_cipherkey_manager.h"
 #include "lnn_common_utils.h"
 #include "lnn_compress.h"
@@ -148,7 +149,6 @@
 #define BROADCAST_CIPHER_IV "BROADCAST_CIPHER_IV"
 #define IRK "IRK"
 #define PUB_MAC "PUB_MAC"
-#define OH_OS_TYPE 10
 #define DEVICE_SECURITY_LEVEL "DEVICE_SECURITY_LEVEL"
 
 #define FLAG_COMPRESS_DEVICE_INFO 1
