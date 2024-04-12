@@ -91,6 +91,7 @@ uint64_t ApplyLaneId(const char *activeUdid, const char *passiveUdid, LaneLinkTy
         AnonymizeFree(anonyPassiveUdid);
         return laneId;
     }
+    LNN_LOGE(LNN_LANE, "memcpy laneId param bytes fail");
     return INVALID_LANE_ID;
 }
 
@@ -262,6 +263,7 @@ int32_t FindLaneResourceByLinkType(const char *peerUdid, LaneLinkType type, Lane
         return SOFTBUS_INVALID_PARAM;
     }
     if (LaneLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "lane lock fail");
         return SOFTBUS_LOCK_ERR;
     }
     LaneResource *item = NULL;
@@ -269,6 +271,7 @@ int32_t FindLaneResourceByLinkType(const char *peerUdid, LaneLinkType type, Lane
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResource.list, LaneResource, node) {
         if (strcmp(peerUdid, item->link.peerUdid) == 0 && type == item->link.type) {
             if (memcpy_s(resource, sizeof(LaneResource), item, sizeof(LaneResource)) != EOK) {
+                LNN_LOGE(LNN_LANE, "memcpy lane resource fail");
                 LaneUnlock();
                 return SOFTBUS_MEM_ERR;
             }
@@ -277,6 +280,10 @@ int32_t FindLaneResourceByLinkType(const char *peerUdid, LaneLinkType type, Lane
         }
     }
     LaneUnlock();
+    char *anonyPeerUdid = NULL;
+    Anonymize(peerUdid, &anonyPeerUdid);
+    LNN_LOGE(LNN_LANE, "no find lane resource by linktype=%{public}d, peerUdid=%{public}s", type, anonyPeerUdid);
+    AnonymizeFree(anonyPeerUdid);
     return SOFTBUS_ERR;
 }
 
@@ -286,6 +293,7 @@ int32_t FindLaneResourceByLinkAddr(const LaneLinkInfo *info, LaneResource *resou
         return SOFTBUS_INVALID_PARAM;
     }
     if (LaneLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "lane lock fail");
         return SOFTBUS_LOCK_ERR;
     }
     LaneResource* item = GetValidLaneResource(info);
@@ -295,6 +303,7 @@ int32_t FindLaneResourceByLinkAddr(const LaneLinkInfo *info, LaneResource *resou
         return SOFTBUS_ERR;
     }
     if (memcpy_s(resource, sizeof(LaneResource), item, sizeof(LaneResource)) != EOK) {
+        LNN_LOGE(LNN_LANE, "memcpy lane resource fail");
         LaneUnlock();
         return SOFTBUS_MEM_ERR;
     }
@@ -308,6 +317,7 @@ int32_t FindLaneResourceByLaneId(uint64_t laneId, LaneResource *resource)
         return SOFTBUS_INVALID_PARAM;
     }
     if (LaneLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "lane lock fail");
         return SOFTBUS_LOCK_ERR;
     }
     LaneResource *item = NULL;
@@ -315,6 +325,7 @@ int32_t FindLaneResourceByLaneId(uint64_t laneId, LaneResource *resource)
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResource.list, LaneResource, node) {
         if (item->laneId == laneId) {
             if (memcpy_s(resource, sizeof(LaneResource), item, sizeof(LaneResource)) != EOK) {
+                LNN_LOGE(LNN_LANE, "memcpy lane resource fail");
                 LaneUnlock();
                 return SOFTBUS_MEM_ERR;
             }

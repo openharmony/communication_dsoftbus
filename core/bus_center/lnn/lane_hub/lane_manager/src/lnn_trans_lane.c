@@ -288,10 +288,12 @@ static TransReqInfo *CreateReqNodeWithQos(uint32_t laneReqId, const LaneAllocInf
         return NULL;
     }
     if (memcpy_s(&newNode->listener, sizeof(LaneAllocListener), listener, sizeof(LaneAllocListener)) != EOK) {
+        LNN_LOGE(LNN_LANE, "memcpy fail for lane alloc listener");
         SoftBusFree(newNode);
         return NULL;
     }
     if (memcpy_s(&newNode->allocInfo, sizeof(LaneAllocInfo), allocInfo, sizeof(LaneAllocInfo)) != EOK) {
+        LNN_LOGE(LNN_LANE, "memcpy fail for lane alloc info");
         SoftBusFree(newNode);
         return NULL;
     }
@@ -527,14 +529,17 @@ static int32_t CancelLane(uint32_t laneReqId)
         if (item->isWithQos && item->laneReqId == laneReqId) {
             if (item->isNotified) {
                 Unlock();
+                LNN_LOGE(LNN_LANE, "cancel lane fail, lane result has notified, laneReqId=%{public}u", laneReqId);
                 return SOFTBUS_ERR;
             }
             item->isCanceled = true;
             Unlock();
+            LNN_LOGI(LNN_LANE, "cancel lane succ, laneReqId=%{public}u", laneReqId);
             return SOFTBUS_OK;
         }
     }
     Unlock();
+    LNN_LOGE(LNN_LANE, "cancel lane fail, lane reqinfo not find, laneReqId=%{public}u", laneReqId);
     return SOFTBUS_ERR;
 }
 
@@ -585,11 +590,12 @@ static int32_t Free(uint32_t laneReqId)
             Unlock();
             Freelink(laneReqId, item->laneId, type);
             SoftBusFree(item);
-            FreeLaneReqId(item->laneReqId);
+            FreeLaneReqId(laneReqId);
             return SOFTBUS_OK;
         }
     }
     Unlock();
+    LNN_LOGI(LNN_LANE, "no find lane need free, laneReqId=%{public}u", laneReqId);
     FreeLaneReqId(laneReqId);
     return SOFTBUS_OK;
 }
@@ -651,6 +657,7 @@ static void NotifyLaneAllocSuccess(uint32_t laneReqId, uint64_t laneId, const La
         return;
     }
     if (reqInfo.isWithQos && reqInfo.isCanceled) {
+        LNN_LOGI(LNN_LANE, "lane has canceled not need notify succ, laneReqId=%{public}u", laneReqId);
         (void)Free(laneReqId);
         return;
     }
@@ -682,6 +689,7 @@ static void NotifyLaneAllocFail(uint32_t laneReqId, int32_t reason)
         return;
     }
     if (reqInfo.isWithQos && reqInfo.isCanceled) {
+        LNN_LOGI(LNN_LANE, "lane has canceled not need notify fail, laneReqId=%{public}u", laneReqId);
         DeleteRequestNode(laneReqId);
         FreeLaneReqId(laneReqId);
         return;
@@ -718,9 +726,11 @@ static int32_t CreateLinkRequestNode(const LaneLinkNodeInfo *nodeInfo, LinkReque
     requestInfo->psm = nodeInfo->psm;
     if (memcpy_s(requestInfo->peerNetworkId, NETWORK_ID_BUF_LEN,
         nodeInfo->networkId, NETWORK_ID_BUF_LEN) != EOK) {
+        LNN_LOGE(LNN_LANE, "memcpy networkId fail");
         return SOFTBUS_ERR;
     }
     if (memcpy_s(requestInfo->peerBleMac, MAX_MAC_LEN, nodeInfo->peerBleMac, MAX_MAC_LEN) != EOK) {
+        LNN_LOGE(LNN_LANE, "memcpy peerBleMac fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
