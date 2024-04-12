@@ -508,12 +508,12 @@ static void NotifyLinkFail(AsyncResultType type, int32_t requestId, int32_t reas
     P2pLinkReqList reqInfo;
     (void)memset_s(&reqInfo, sizeof(P2pLinkReqList), 0, sizeof(P2pLinkReqList));
     if (GetP2pLinkReqByReqId(type, requestId, &reqInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get p2p link req fail, type=%{public}d, requestId=%{public}d", type, requestId);
         return;
     }
-    if (DelP2pLinkReqByReqId(type, requestId) != SOFTBUS_OK) {
-        return;
-    }
+    (void)DelP2pLinkReqByReqId(type, requestId);
     if (reqInfo.laneRequestInfo.cb.OnLaneLinkFail != NULL) {
+        LNN_LOGE(LNN_LANE, "wifidirect conn fail, laneReqId=%{public}u ", reqInfo.laneRequestInfo.laneLinkReqId);
         reqInfo.laneRequestInfo.cb.OnLaneLinkFail(reqInfo.laneRequestInfo.laneLinkReqId, reason);
     }
     if (reqInfo.auth.authHandle.authId != INVAILD_AUTH_ID) {
@@ -524,49 +524,57 @@ static void NotifyLinkFail(AsyncResultType type, int32_t requestId, int32_t reas
     }
 }
 
-static void CopyLinkInfoToLinkedList(const P2pLinkReqList *linkReqInfo, P2pLinkedList *linkedInfo)
+static int32_t AddNewP2pLinkedInfo(const P2pLinkReqList *reqInfo, int32_t linkId)
 {
-    linkedInfo->pid = linkReqInfo->laneRequestInfo.pid;
-    linkedInfo->laneLinkReqId = linkReqInfo->laneRequestInfo.laneLinkReqId;
-    linkedInfo->auth.authHandle.authId = INVAILD_AUTH_ID;
-    linkedInfo->auth.requestId = -1;
-    linkedInfo->p2pLinkDownReqId = -1;
-    if (LnnGetRemoteStrInfo(linkReqInfo->laneRequestInfo.networkId, STRING_KEY_P2P_MAC,
-        linkedInfo->remoteMac, sizeof(linkedInfo->remoteMac)) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get remote p2p mac fail");
-        return;
+    if (LinkLock() != 0) {
+        LNN_LOGE(LNN_LANE, "lock fail");
+        return SOFTBUS_LOCK_ERR;
     }
+    P2pLinkedList *newNode = (P2pLinkedList *)SoftBusCalloc(sizeof(P2pLinkedList));
+    if (newNode == NULL) {
+        LNN_LOGE(LNN_LANE, "malloc fail");
+        LinkUnlock();
+        return SOFTBUS_MALLOC_ERR;
+    }
+    newNode->p2pModuleLinkId = linkId;
+    newNode->pid = reqInfo->laneRequestInfo.pid;
+    newNode->laneLinkReqId = reqInfo->laneRequestInfo.laneLinkReqId;
+    newNode->auth.authHandle.authId = INVAILD_AUTH_ID;
+    newNode->auth.requestId = -1;
+    newNode->p2pLinkDownReqId = -1;
+    if (LnnGetRemoteStrInfo(reqInfo->laneRequestInfo.networkId, STRING_KEY_P2P_MAC,
+        newNode->remoteMac, sizeof(newNode->remoteMac)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get remote p2p mac fail");
+        SoftBusFree(newNode);
+        LinkUnlock();
+        return SOFTBUS_ERR;
+    }
+    ListTailInsert(g_p2pLinkedList, &newNode->node);
+    LinkUnlock();
+    return SOFTBUS_OK;
 }
 
 static void NotifyLinkSucc(AsyncResultType type, int32_t requestId, LaneLinkInfo *linkInfo, int32_t linkId)
 {
+    LNN_LOGI(LNN_LANE, "type=%{public}d, requestId=%{public}d, linkId=%{public}d", type, requestId, linkId);
     P2pLinkReqList reqInfo;
     (void)memset_s(&reqInfo, sizeof(P2pLinkReqList), 0, sizeof(P2pLinkReqList));
     if (GetP2pLinkReqByReqId(type, requestId, &reqInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get p2p link req fail, type=%{public}d, requestId=%{public}d", type, requestId);
         return;
     }
-    if (DelP2pLinkReqByReqId(type, requestId) != SOFTBUS_OK) {
-        return;
-    }
-
-    if (LinkLock() != 0) {
-        LNN_LOGE(LNN_LANE, "lock fail");
-        return;
-    }
-    P2pLinkedList *newNode = (P2pLinkedList *)SoftBusMalloc(sizeof(P2pLinkedList));
-    if (newNode == NULL) {
-        LNN_LOGE(LNN_LANE, "malloc fail");
-        LinkUnlock();
-        return;
-    }
-    newNode->p2pModuleLinkId = linkId;
-    CopyLinkInfoToLinkedList(&reqInfo, newNode);
-    ListTailInsert(g_p2pLinkedList, &newNode->node);
-    LinkUnlock();
-    if (reqInfo.laneRequestInfo.cb.OnLaneLinkSuccess != NULL) {
+    (void)DelP2pLinkReqByReqId(type, requestId);
+    if (AddNewP2pLinkedInfo(&reqInfo, linkId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "add new p2p linked info fail, laneReqId=%{public}u ", reqInfo.laneRequestInfo.laneLinkReqId);
+        if (reqInfo.laneRequestInfo.cb.OnLaneLinkFail != NULL) {
+            reqInfo.laneRequestInfo.cb.OnLaneLinkFail(reqInfo.laneRequestInfo.laneLinkReqId, SOFTBUS_ERR);
+        }
+    } else {
+        if (reqInfo.laneRequestInfo.cb.OnLaneLinkSuccess != NULL) {
             LNN_LOGI(LNN_LANE, "wifidirect conn succ, laneReqId=%{public}u, linktype=%{public}d, requestId=%{public}d, "
             "linkId=%{public}d", reqInfo.laneRequestInfo.laneLinkReqId, linkInfo->type, requestId, linkId);
-        reqInfo.laneRequestInfo.cb.OnLaneLinkSuccess(reqInfo.laneRequestInfo.laneLinkReqId, linkInfo);
+            reqInfo.laneRequestInfo.cb.OnLaneLinkSuccess(reqInfo.laneRequestInfo.laneLinkReqId, linkInfo);
+        }
     }
     if (reqInfo.auth.authHandle.authId != INVAILD_AUTH_ID) {
         AuthCloseConn(reqInfo.auth.authHandle);
