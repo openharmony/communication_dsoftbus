@@ -94,7 +94,7 @@ static BcScanFilter *GetBcScanFilter(void)
 
     BcScanFilter *filter = static_cast<BcScanFilter *>(SoftBusCalloc(sizeof(BcScanFilter)));
     DISC_CHECK_AND_RETURN_RET_LOGW(filter != nullptr, nullptr, DISC_TEST, "malloc filter failed");
-    
+
     unsigned char *data = static_cast<unsigned char *>(SoftBusCalloc(serviceDataLength));
     unsigned char *mask = static_cast<unsigned char *>(SoftBusCalloc(serviceDataLength));
     if (data == nullptr || mask == nullptr) {
@@ -354,7 +354,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastRegisterBroadcaster003, TestSi
     }
 
     EXPECT_EQ(SOFTBUS_ERR, RegisterBroadcaster(SRV_TYPE_DIS, &bcId[BC_NUM_MAX], GetBroadcastCallback()));
-    
+
     for (int32_t i = 0; i < BC_NUM_MAX; i++) {
         EXPECT_EQ(SOFTBUS_OK, UnRegisterBroadcaster(bcId[i]));
     }
@@ -485,9 +485,9 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastRegisterScanListener003, TestS
     EXPECT_EQ(SOFTBUS_ERR, RegisterScanListener(SRV_TYPE_DIS, &listenerId, GetScanCallback()));
     EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(listenerId));
 
-    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_SH, &listenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_SH_BURST, &listenerId, GetScanCallback()));
     EXPECT_TRUE(listenerId >= 0);
-    EXPECT_EQ(SOFTBUS_ERR, RegisterScanListener(SRV_TYPE_SH, &listenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_ERR, RegisterScanListener(SRV_TYPE_SH_BURST, &listenerId, GetScanCallback()));
     EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(listenerId));
 
     EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
