@@ -64,6 +64,7 @@ ohos_unittest("HeartBeatMediumTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
   ]
 
   deps = [
@@ -133,6 +134,7 @@ ohos_unittest("HeartBeatFSMTest") {
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/connection/wifi_direct",
+    "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/mlps/include",
   ]
 
   deps = [

@@ -56,7 +56,10 @@ if (dsoftbus_feature_lnn_net) {
       "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/net_builder/fast_online/lnn_device_info_recovery.c",
       "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/net_builder/fast_online/lnn_secure_storage.c",
     ]
-    bus_center_builder_inc = [ "$dsoftbus_root_path/dsoftbus_enhance/core/connection/wifi_direct/adapter/single" ]
+    bus_center_builder_inc = [
+      "$dsoftbus_root_path/dsoftbus_enhance/core/connection/wifi_direct/adapter/single",
+      "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/mlps/include",
+    ]
   }
 } else {
   bus_center_builder_src = [
@@ -72,6 +75,7 @@ bus_center_builder_inc += [
   "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
   "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
+  "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
 ]
 bus_center_builder_deps = []
 
