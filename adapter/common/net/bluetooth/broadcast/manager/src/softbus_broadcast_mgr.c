@@ -173,7 +173,7 @@ int32_t InitBroadcastMgr(void)
     }
     int32_t ret = BcManagerLockInit();
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "lock init fail!");
-    
+
     SoftbusBleAdapterInit();
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_ERR, DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->Init != NULL,
@@ -511,7 +511,7 @@ static int32_t BuildBroadcastPacket(const SoftbusBroadcastData *softbusBcData, B
 
     // 2.1. Build broadcast payload.
     int32_t maxPayloadLen = (softbusBcData->isSupportFlag) ? BC_DATA_MAX_LEN : (BC_DATA_MAX_LEN + BC_FLAG_LEN);
-    
+
     int32_t ret = BuildBcPayload(maxPayloadLen, &(softbusBcData->bcData), &(packet->bcData));
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "build broadcast payload failed!");
 
@@ -737,7 +737,7 @@ int32_t UnRegisterBroadcaster(int32_t bcId)
         SoftBusMutexUnlock(&g_bcLock);
         return SOFTBUS_INVALID_PARAM;
     }
-    
+
     if (g_bcManager[bcId].isAdvertising) {
         SoftBusMutexUnlock(&g_bcLock);
         (void)g_interface[g_interfaceId]->StopBroadcasting(g_bcManager[bcId].adapterBcId);
@@ -766,7 +766,7 @@ static int32_t RegisterScanListenerSub(BaseServiceType srvType, int32_t *adapter
 {
     int32_t ret;
 
-    if (srvType == SRV_TYPE_SH) {
+    if (srvType == SRV_TYPE_SH_BURST || srvType == SRV_TYPE_SH_HB) {
         if (g_isLpScanCbReg) {
             *adapterScanId = g_adapterLpScannerId;
             DISC_LOGE(DISC_BLE, "service is already registered. srvType=%{public}s", GetSrvType(srvType));
@@ -926,21 +926,6 @@ static void CovertSoftBusBcScanFilters(const BcScanFilter *filter, uint8_t size,
     }
 }
 
-static void BuildSoftBusBcScanFilters(int32_t listenerId, SoftBusBcScanFilter **adapterFilter, int32_t *filterSize)
-{
-    DISC_LOGD(DISC_BLE, "enter.");
-    uint8_t size = g_scanManager[listenerId].filterSize;
-    BcScanFilter *filter = g_scanManager[listenerId].filter;
-
-    *adapterFilter = (SoftBusBcScanFilter *)SoftBusCalloc(sizeof(SoftBusBcScanFilter) * size);
-    if (*adapterFilter == NULL) {
-        return;
-    }
-    *filterSize = size;
-
-    CovertSoftBusBcScanFilters(filter, size, *adapterFilter);
-}
-
 static void CombineSoftbusBcScanFilters(int32_t listenerId, SoftBusBcScanFilter **adapterFilter, int32_t *filterSize)
 {
     DISC_LOGD(DISC_BLE, "enter.");
@@ -979,11 +964,6 @@ static void CombineSoftbusBcScanFilters(int32_t listenerId, SoftBusBcScanFilter 
 
 static void GetBcScanFilters(int32_t listenerId, SoftBusBcScanFilter **adapterFilter, int32_t *filterSize)
 {
-    int32_t adapterScanId = g_scanManager[listenerId].adapterScanId;
-    if (adapterScanId == g_adapterLpScannerId) {
-        BuildSoftBusBcScanFilters(listenerId, adapterFilter, filterSize);
-        return;
-    }
     CombineSoftbusBcScanFilters(listenerId, adapterFilter, filterSize);
 }
 
@@ -1012,7 +992,7 @@ static void BuildSoftBusBcScanParams(const BcScanParams *param, SoftBusBcScanPar
 {
     DISC_LOGD(DISC_BLE, "enter.");
     (void)memset_s(adapterParam, sizeof(SoftBusBcScanParams), 0x0, sizeof(SoftBusBcScanParams));
-    
+
     // convert params
     adapterParam->scanInterval = param->scanInterval;
     adapterParam->scanWindow = param->scanWindow;
@@ -1252,7 +1232,7 @@ static int32_t BuildSoftbusBroadcastData(const BroadcastPacket *packet, SoftbusB
     int32_t maxPayloadLen = (packet->isSupportFlag) ? BC_DATA_MAX_LEN : (BC_DATA_MAX_LEN + BC_FLAG_LEN);
     int32_t ret = BuildSoftbusBcPayload(maxPayloadLen, &(packet->bcData), &(softbusBcData->bcData));
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "BuildSoftbusBcPayload fail!");
-    
+
     // 2. Build response broadcast paylod.
     if (packet->rspData.payload != NULL) {
         maxPayloadLen = RSP_DATA_MAX_LEN;
@@ -1337,7 +1317,7 @@ int32_t UpdateBroadcasting(int32_t bcId, const BroadcastParam *param, const Broa
 
     int ret = StopBroadcasting(bcId);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "StopBroadcasting fail");
-    
+
     return StartBroadcasting(bcId, param, packet);
 }
 
@@ -1642,11 +1622,14 @@ bool BroadcastIsLpDeviceAvailable(void)
     return g_interface[g_interfaceId]->IsLpDeviceAvailable();
 }
 
-bool BroadcastSetAdvDeviceParam(const LpBroadcastParam *bcParam, const LpScanParam *scanParam)
+bool BroadcastSetAdvDeviceParam(SensorHubServerType type, const LpBroadcastParam *bcParam,
+    const LpScanParam *scanParam)
 {
     DISC_LOGI(DISC_BLE, "enter.");
     DISC_CHECK_AND_RETURN_RET_LOGE(bcParam != NULL, false, DISC_BLE, "invalid param bcParam!");
     DISC_CHECK_AND_RETURN_RET_LOGE(scanParam != NULL, false, DISC_BLE, "invalid param scanParam!");
+    DISC_CHECK_AND_RETURN_RET_LOGE(type < SOFTBUS_UNKNOW_TYPE && type >= SOFTBUS_HEARTBEAT_TYPE,
+        false, DISC_BLE, "invalid app type!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, false, DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->SetAdvFilterParam != NULL,
                                    false, DISC_BLE, "function is null!");
@@ -1677,7 +1660,7 @@ bool BroadcastSetAdvDeviceParam(const LpBroadcastParam *bcParam, const LpScanPar
     scanDstParam.filterSize = filterNum;
     CovertSoftBusBcScanFilters(scanFilter, filterNum, scanDstParam.filter);
 
-    ret = g_interface[g_interfaceId]->SetAdvFilterParam(&bcDstParam, &scanDstParam);
+    ret = g_interface[g_interfaceId]->SetAdvFilterParam(type, &bcDstParam, &scanDstParam);
     if (!ret) {
         DISC_LOGE(DISC_BLE, "call from adapter fail!");
         SoftBusFree(scanDstParam.filter);
