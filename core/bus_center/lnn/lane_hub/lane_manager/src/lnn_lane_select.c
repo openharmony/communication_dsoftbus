@@ -426,3 +426,19 @@ int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *req
     }
     return SOFTBUS_OK;
 }
+
+int32_t SelectAuthLane(const char *networkId, LanePreferredLinkList *request,
+    LanePreferredLinkList *recommendList)
+{
+    if ((networkId == NULL) || (request == NULL) || (recommendList == NULL)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    recommendList->linkTypeNum = 0;
+    for (uint32_t i = 0; i < request->linkTypeNum; ++i) {
+        if (IsValidLane(networkId, request->linkType[i])) {
+            recommendList->linkType[recommendList->linkTypeNum] = request->linkType[i];
+            recommendList->linkTypeNum++;
+        }
+    }
+    return SOFTBUS_OK;
+}

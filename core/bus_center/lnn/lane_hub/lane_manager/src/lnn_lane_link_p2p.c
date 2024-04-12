@@ -517,7 +517,7 @@ static void NotifyLinkFail(AsyncResultType type, int32_t requestId, int32_t reas
         reqInfo.laneRequestInfo.cb.OnLaneLinkFail(reqInfo.laneRequestInfo.laneLinkReqId, reason);
     }
     if (reqInfo.auth.authHandle.authId != INVAILD_AUTH_ID) {
-        AuthCloseConn(reqInfo.auth.authHandle);
+        AuthFreeConn(&reqInfo.auth.authHandle);
     }
     if (reqInfo.proxyChannelInfo.channelId > 0) {
         TransProxyPipelineCloseChannel(reqInfo.proxyChannelInfo.channelId);
@@ -569,7 +569,7 @@ static void NotifyLinkSucc(AsyncResultType type, int32_t requestId, LaneLinkInfo
         reqInfo.laneRequestInfo.cb.OnLaneLinkSuccess(reqInfo.laneRequestInfo.laneLinkReqId, linkInfo);
     }
     if (reqInfo.auth.authHandle.authId != INVAILD_AUTH_ID) {
-        AuthCloseConn(reqInfo.auth.authHandle);
+        AuthFreeConn(&reqInfo.auth.authHandle);
     }
     if (reqInfo.proxyChannelInfo.channelId > 0) {
         TransProxyPipelineCloseChannelDelay(reqInfo.proxyChannelInfo.channelId);
@@ -998,13 +998,6 @@ FAIL:
 
 static int32_t OpenAuthTriggerToConn(const LinkRequest *request, uint32_t laneLinkReqId, const LaneLinkCb *callback)
 {
-    AuthConnInfo connInfo;
-    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
-    bool isMetaAuth = GetAuthType(request->peerNetworkId);
-    if (GetPreferAuth(request->peerNetworkId, &connInfo, isMetaAuth) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "no auth conn exist");
-        return SOFTBUS_ERR;
-    }
     uint32_t authRequestId = AuthGenRequestId();
     int32_t ret = AddP2pLinkReqItem(ASYNC_RESULT_AUTH, (int32_t)authRequestId, laneLinkReqId, request, callback);
     if (ret != SOFTBUS_OK) {
@@ -1014,10 +1007,10 @@ static int32_t OpenAuthTriggerToConn(const LinkRequest *request, uint32_t laneLi
 
     AuthConnCallback cb = {
         .onConnOpened = OnAuthTriggerConnOpened,
-        .onConnOpenFailed = OnAuthConnOpenFailed
+        .onConnOpenFailed = OnAuthConnOpenFailed,
     };
-    LNN_LOGI(LNN_LANE, "open auth trigger with authRequestId=%{public}u", authRequestId);
-    if (AuthOpenConn(&connInfo, authRequestId, &cb, isMetaAuth) != SOFTBUS_OK) {
+    LNN_LOGI(LNN_LANE, "auth alloc conn with authRequestId=%{public}u", authRequestId);
+    if (AuthAllocConn(request->peerNetworkId, authRequestId, &cb) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "open auth conn fail");
         DelConnRequestItem(authRequestId, INVALID_P2P_REQUEST_ID);
         return SOFTBUS_ERR;
@@ -1215,7 +1208,8 @@ static int32_t ConnectWifiDirectWithReuse(const LinkRequest *request,
 
 static int32_t TryWifiDirectReuse(const LinkRequest *request, uint32_t laneLinkReqId, const LaneLinkCb *callback)
 {
-    if (laneLinkReqId != INVALID_LANE_REQ_ID) {
+    if (request->linkType != LANE_HML && request->linkType != LANE_P2P) {
+        LNN_LOGE(LNN_LANE, "not support wifi direct reuse");
         return SOFTBUS_ERR;
     }
     char peerUdid[UDID_BUF_LEN] = {0};

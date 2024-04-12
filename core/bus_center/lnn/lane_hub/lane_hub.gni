@@ -40,6 +40,7 @@ bus_center_hub_deps =
 if (dsoftbus_feature_lnn_net) {
   bus_center_hub_src = [
     "$core_lane_hub_path/common/src/lnn_lane_hub.c",
+    "$core_lane_hub_path/lane_manager/src/lnn_ctrl_lane.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane_link.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane_common.c",
