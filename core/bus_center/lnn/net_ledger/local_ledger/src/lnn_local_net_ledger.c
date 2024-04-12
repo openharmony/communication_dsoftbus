@@ -49,8 +49,6 @@
 #define SUPPORT_EXCHANGE_NETWORKID 1
 #define SUPPORT_NORMALIZED_LINK 2
 #define DEFAULT_CONN_SUB_FEATURE 1
-#define OH_OS_TYPE 10
-#define HO_OS_TYPE 11
 
 typedef struct {
     NodeInfo localInfo;
