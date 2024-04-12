@@ -734,6 +734,10 @@ bool CheckActiveAuthConnection(const AuthConnInfo *connInfo)
         AUTH_LOGE(AUTH_CONN, "convert to connect option fail, connType=%{public}d.", connInfo->type);
         return false;
     }
+    if (connInfo->type == AUTH_LINK_TYPE_BLE)
+    {
+        connOpt.bleOption.protocol = BLE_PROTOCOL_ANY;
+    }
     return CheckActiveConnection(&connOpt);
 }
 
