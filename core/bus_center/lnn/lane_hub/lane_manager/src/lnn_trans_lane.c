@@ -20,6 +20,7 @@
 #include "anonymizer.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
+#include "lnn_ctrl_lane.h"
 #include "lnn_lane.h"
 #include "lnn_lane_common.h"
 #include "lnn_lane_def.h"
@@ -575,7 +576,7 @@ static int32_t Free(uint32_t laneReqId)
         LNN_LOGE(LNN_LANE, "get lock fail");
         return SOFTBUS_ERR;
     }
-    LaneType type = laneReqId >> LANE_REQ_ID_TYPE_SHIFT;
+    LaneType type = (LaneType)(laneReqId >> LANE_REQ_ID_TYPE_SHIFT);
     TransReqInfo *item = NULL;
     TransReqInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_requestList->list, TransReqInfo, node) {
@@ -733,7 +734,8 @@ static void LaneTriggerLink(SoftBusMessage *msg)
         .OnLaneLinkSuccess = LinkSuccess,
         .OnLaneLinkFail = LinkFail,
     };
-    LinkRequest requestInfo = { 0 };
+    LinkRequest requestInfo;
+    (void)memset_s(&requestInfo, sizeof(LinkRequest), 0, sizeof(LinkRequest));
     if (Lock() != SOFTBUS_OK) {
         return;
     }
@@ -896,7 +898,8 @@ static void MsgHandler(SoftBusMessage *msg)
 
 static int32_t InitLooper(void)
 {
-    g_laneLoopHandler.name = "transLaneLooper";
+    char name[] = "transLaneLooper";
+    g_laneLoopHandler.name = name;
     g_laneLoopHandler.HandleMessage = MsgHandler;
     g_laneLoopHandler.looper = GetLooper(LOOP_TYPE_LANE);
     if (g_laneLoopHandler.looper == NULL) {
@@ -1060,4 +1063,68 @@ int32_t PostLaneStateChangeMessage(LaneState state, const char *peerUdid, const 
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
+}
+
+static int32_t AllocAuthLane(uint32_t laneHandle, const LaneAllocInfo *allocInfo, const LaneAllocListener *listener)
+{
+    AuthLinkTypeList authList;
+    if (memset_s(&authList, sizeof(AuthLinkTypeList), 0, sizeof(AuthLinkTypeList)) != EOK) {
+        LNN_LOGE(LNN_LANE, "memset_s authList fail");
+        return SOFTBUS_ERR;
+    }
+    if (GetAuthLinkTypeList(allocInfo->networkId, &authList) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get authList fail");
+        return SOFTBUS_ERR;
+    }
+
+    LanePreferredLinkList request;
+    if (memset_s(&request, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList)) != EOK) {
+        LNN_LOGE(LNN_LANE, "memset_s request fail");
+        return SOFTBUS_ERR;
+    }
+    if (ConvertAuthLinkToLaneLink(&authList, &request) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "convert authLink to laneLink fail");
+        return SOFTBUS_ERR;
+    }
+    LanePreferredLinkList *recommendLinkList = (LanePreferredLinkList *)SoftBusCalloc(sizeof(LanePreferredLinkList));
+    if (recommendLinkList == NULL) {
+        LNN_LOGE(LNN_LANE, "calloc recommendLinkList fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    recommendLinkList->linkTypeNum = 0;
+    if (SelectAuthLane(allocInfo->networkId, &request, recommendLinkList) != SOFTBUS_OK ||
+        recommendLinkList->linkTypeNum == 0) {
+        SoftBusFree(recommendLinkList);
+        LNN_LOGE(LNN_LANE, "no abailable link resources, laneHandle=%{public}u", laneHandle);
+        return SOFTBUS_ERR;
+    }
+    for (uint32_t i = 0; i < recommendLinkList->linkTypeNum; ++i) {
+        LNN_LOGI(LNN_LANE, "auth expect recommendLinkList nums=%{public}u, priority=%{public}u, link=%{public}u",
+            recommendLinkList->linkTypeNum, i, recommendLinkList->linkType[i]);
+    }
+    if (StartTriggerLink(laneHandle, allocInfo, listener, recommendLinkList) != SOFTBUS_OK) {
+        SoftBusFree(recommendLinkList);
+        LNN_LOGE(LNN_LANE, "trigger link fail, laneHandle=%{public}u", laneHandle);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t CtrlAlloc(uint32_t laneHandle, const LaneAllocInfo *allocInfo, const LaneAllocListener *listener)
+{
+    if (laneHandle == INVALID_LANE_REQ_ID || allocInfo == NULL || allocInfo->type != LANE_TYPE_CTRL) {
+        LNN_LOGE(LNN_LANE, "param invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (AllocAuthLane(laneHandle, allocInfo, listener) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "alloc valid lane fail, laneHandle=%{public}u", laneHandle);
+        FreeLaneReqId(laneHandle);
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t CtrlFree(uint32_t laneHandle)
+{
+    return Free(laneHandle);
 }

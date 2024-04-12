@@ -34,10 +34,13 @@
 #include "softbus_errcode.h"
 #include "softbus_adapter_json.h"
 #include "softbus_socket.h"
+#include "lnn_ctrl_lane.h"
 #include "lnn_lane_score.h"
+#include "lnn_lane_interface.h"
 
 namespace OHOS {
 using namespace testing::ext;
+using namespace testing;
 constexpr uint32_t TEST_DATA_LEN = 30;
 constexpr uint32_t BLE_CONNID = 196609;
 constexpr uint32_t BR_CONNID = 65570;
@@ -1201,5 +1204,42 @@ HWTEST_F(AuthOtherTest, SYNC_DEVINFO_STATE_PROCESS_TEST_001, TestSize.Level1)
     ret = SyncDevInfoStateProcess(testFsm, msgType, NULL);
     EXPECT_TRUE(ret == false);
     SoftBusFree(testFsm);
+}
+
+/*
+ * @tc.name: GET_AUTH_CONN_001
+ * @tc.desc: get auth conn test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, GET_AUTH_CONN_001, TestSize.Level1)
+{
+    const char *uuid = "testuuid123";
+
+    AuthConnInfo *connInfo = (AuthConnInfo *)SoftBusCalloc(sizeof(AuthConnInfo));
+    ASSERT_TRUE(connInfo != nullptr);
+
+    int32_t ret = GetAuthConn(uuid, LANE_BR, nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+
+    ret = GetAuthConn(nullptr, LANE_BR, connInfo);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+
+    ret = GetAuthConn(uuid, LANE_BR, connInfo);
+    EXPECT_TRUE(ret == SOFTBUS_AUTH_NOT_FOUND);
+
+    ret = GetAuthConn(uuid, LANE_BLE, connInfo);
+    EXPECT_TRUE(ret == SOFTBUS_AUTH_NOT_FOUND);
+
+    ret = GetAuthConn(uuid, LANE_P2P, connInfo);
+    EXPECT_TRUE(ret == SOFTBUS_AUTH_NOT_FOUND);
+
+    ret = GetAuthConn(uuid, LANE_HML, connInfo);
+    EXPECT_TRUE(ret == SOFTBUS_AUTH_NOT_FOUND);
+
+    ret = GetAuthConn(uuid, LANE_WLAN_2P4G, connInfo);
+    EXPECT_TRUE(ret == SOFTBUS_AUTH_NOT_FOUND);
+
+    SoftBusFree(connInfo);
 }
 } // namespace OHOS
