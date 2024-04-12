@@ -877,6 +877,7 @@ static int32_t StartReconnectDevice(
         return SOFTBUS_AUTH_NOT_FOUND;
     }
     ConnSideType sideType = GetConnSideType(auth->connId[connInfo->type]);
+    uint64_t connId = auth->connId[AUTH_LINK_TYPE_BR];
     DelDupAuthManager(auth);
 
     AuthRequest request;
@@ -889,7 +890,7 @@ static int32_t StartReconnectDevice(
     request.addTime = GetCurrentTimeMs();
     request.isFastAuth = true;
     if (connInfo->type == AUTH_LINK_TYPE_BR) {
-        request.connInfo.info.brInfo.connectionId = auth->connId[AUTH_LINK_TYPE_BR];
+        request.connInfo.info.brInfo.connectionId = GetConnId(connId);
     }
     if (AddAuthRequest(&request) == 0) {
         AUTH_LOGE(AUTH_CONN, "add reconnect request fail, requestId=%{public}u", requestId);
