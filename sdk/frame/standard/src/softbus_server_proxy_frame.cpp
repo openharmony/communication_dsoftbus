@@ -203,11 +203,15 @@ int32_t RestartEventCallbackRegister(RestartEventCallback callback)
     return SOFTBUS_OK;
 }
 
+static bool g_deathRecipientFlag = true;
+void SetDeathRecipientFlag(bool flag)
+{
+    g_deathRecipientFlag = flag;
+}
+
 int32_t ClientStubInit(void)
 {
-    int32_t callingPid = (int32_t)(OHOS::IPCSkeleton::GetCallingPid());
-    int32_t selfPid = (int32_t)getpid();
-    if (callingPid == selfPid) {
+    if (!g_deathRecipientFlag) {
         g_serverProxy = g_serverProxy == nullptr ? GetSystemAbility() : g_serverProxy;
         return SOFTBUS_OK;
     }
