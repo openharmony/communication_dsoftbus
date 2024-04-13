@@ -238,6 +238,7 @@ static char *GetSrvType(BaseServiceType srvType)
 
 static void BcStartBroadcastingCallback(int32_t adapterBcId, int32_t status)
 {
+    static uint32_t callCount = 0;
     DISC_LOGI(DISC_BLE, "enter. adapterBcId=%{public}d", adapterBcId);
     for (uint32_t managerId = 0; managerId < BC_NUM_MAX; managerId++) {
         int32_t ret = SoftBusMutexLock(&g_bcLock);
@@ -249,8 +250,8 @@ static void BcStartBroadcastingCallback(int32_t adapterBcId, int32_t status)
             SoftBusMutexUnlock(&g_bcLock);
             continue;
         }
-        DISC_LOGI(DISC_BLE, "srvType=%{public}s, managerId=%{public}u, adapterBcId=%{public}d, status=%{public}d",
-            GetSrvType(bcManager->srvType), managerId, adapterBcId, status);
+        DISC_LOGI(DISC_BLE, "srvType=%{public}s, managerId=%{public}u, adapterBcId=%{public}d, status=%{public}d,"
+            "callCount=%{public}u", GetSrvType(bcManager->srvType), managerId, adapterBcId, status, callCount++);
         if (status == SOFTBUS_BC_STATUS_SUCCESS) {
             bcManager->isAdvertising = true;
             SoftBusCondSignal(&bcManager->cond);
@@ -1294,8 +1295,9 @@ int32_t StartBroadcasting(int32_t bcId, const BroadcastParam *param, const Broad
     }
     SoftbusBroadcastParam adapterParam;
     ConvertBcParams(param, &adapterParam);
-    DISC_LOGI(DISC_BLE, "start service srvType=%{public}s, bcId=%{public}d, adapterId=%{public}d",
-              GetSrvType(g_bcManager[bcId].srvType), bcId, g_bcManager[bcId].adapterBcId);
+    DISC_LOGI(DISC_BLE, "start service srvType=%{public}s, bcId=%{public}d, adapterId=%{public}d,"
+        "callCount=%{public}u", GetSrvType(g_bcManager[bcId].srvType), bcId,
+        g_bcManager[bcId].adapterBcId, callCount++);
     SoftBusMutexUnlock(&g_bcLock);
     ret = g_interface[g_interfaceId]->StartBroadcasting(g_bcManager[bcId].adapterBcId, &adapterParam, &softbusBcData);
     g_bcManager[bcId].time = MgrGetSysTime();
@@ -1459,6 +1461,7 @@ static bool NeedUpdateScan(int32_t listenerId)
 
 static int32_t StartScanSub(int32_t listenerId)
 {
+    static uint32_t callCount = 0;
     SoftBusBcScanParams adapterParam;
     BuildSoftBusBcScanParams(&g_scanManager[listenerId].param, &adapterParam);
 
@@ -1476,8 +1479,9 @@ static int32_t StartScanSub(int32_t listenerId)
     DISC_CHECK_AND_RETURN_RET_LOGE(filterSize > 0, SOFTBUS_ERR, DISC_BLE, "fitersize is 0!");
     DumpBcScanFilter(adapterFilter, filterSize);
 
-    DISC_LOGI(DISC_BLE, "start service srvType=%{public}s, listenerId=%{public}d, adapterId=%{public}d",
-              GetSrvType(g_scanManager[listenerId].srvType), listenerId, g_scanManager[listenerId].adapterScanId);
+    DISC_LOGI(DISC_BLE, "start service srvType=%{public}s, listenerId=%{public}d, adapterId=%{public}d,"
+        "callCount=%{public}u", GetSrvType(g_scanManager[listenerId].srvType), listenerId,
+        g_scanManager[listenerId].adapterScanId, callCount++);
     int32_t ret = g_interface[g_interfaceId]->StartScan(g_scanManager[listenerId].adapterScanId, &adapterParam,
         adapterFilter, filterSize);
     SoftBusFree(adapterFilter);
