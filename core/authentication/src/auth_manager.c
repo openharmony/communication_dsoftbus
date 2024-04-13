@@ -50,6 +50,8 @@
 #define RETRY_REGDATA_TIMES                3
 #define RETRY_REGDATA_MILLSECONDS          300
 #define DELAY_REG_DP_TIME                  10000
+#define CODE_VERIFY_DEVICE                 2
+#define CODE_KEEP_ALIVE                    3
 
 static ListNode g_authClientList = { &g_authClientList, &g_authClientList };
 static ListNode g_authServerList = { &g_authServerList, &g_authServerList };
@@ -1332,7 +1334,7 @@ static void HandleAuthData(const AuthConnInfo *connInfo, const AuthDataHead *hea
     }
 }
 
-static void FlushDeviceProcess(const AuthConnInfo *connInfo, bool isServer)
+static void FlushDeviceProcess(const AuthConnInfo *connInfo, bool isServer, DeviceMessageParse *messageParse)
 {
     if (!RequireAuthLock()) {
         return;
@@ -1344,7 +1346,7 @@ static void FlushDeviceProcess(const AuthConnInfo *connInfo, bool isServer)
         AUTH_LOGE(AUTH_FSM, "auth manager not found");
         return;
     }
-    if (PostVerifyDeviceMessage(auth, FLAG_REPLY, connInfo->type) == SOFTBUS_OK) {
+    if (PostDeviceMessage(auth, FLAG_REPLY, connInfo->type, messageParse) == SOFTBUS_OK) {
         AUTH_LOGI(AUTH_FSM, "post flush device ok");
     }
     ReleaseAuthLock();
@@ -1355,12 +1357,17 @@ static void HandleDeviceInfoData(
     uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
 {
     int32_t ret = SOFTBUS_OK;
-    if (IsFlushDevicePacket(connInfo, head, data, !fromServer)) {
-        if (head->flag == 0) {
+    DeviceMessageParse messageParse = { 0 };
+    if (IsDeviceMessagePacket(connInfo, head, data, !fromServer, &messageParse)) {
+        if (head->flag == 0 && messageParse.messageType == CODE_VERIFY_DEVICE) {
             AUTH_LOGE(AUTH_FSM, "flush device need relay");
-            FlushDeviceProcess(connInfo, !fromServer);
+            FlushDeviceProcess(connInfo, !fromServer, &messageParse);
+        } else if (head->flag == 0 && messageParse.messageType == CODE_KEEP_ALIVE) {
+            if (AuthSetTcpKeepAlive(connInfo, messageParse.cycle) != SOFTBUS_OK) {
+                AUTH_LOGE(AUTH_FSM, "set tcp keepalive fail");
+            }
         } else {
-            AUTH_LOGE(AUTH_FSM, "flush device not need relay");
+            AUTH_LOGE(AUTH_FSM, "device message not need relay");
         }
         return;
     }
@@ -1619,17 +1626,14 @@ void AuthHandleLeaveLNN(AuthHandle authHandle)
     ReleaseAuthLock();
 }
 
-int32_t AuthFlushDevice(const char *uuid)
+static int32_t PostDeviceMessageByUuid(const char *uuid, int32_t messageType, ModeCycle cycle)
 {
-    if (uuid == NULL || uuid[0] == '\0') {
-        AUTH_LOGE(AUTH_CONN, "uuid is empty");
-        return SOFTBUS_INVALID_PARAM;
-    }
     if (!RequireAuthLock()) {
         return SOFTBUS_LOCK_ERR;
     }
     uint32_t num = 0;
     int32_t ret = SOFTBUS_ERR;
+    DeviceMessageParse messageParse = { messageType, cycle };
     AuthManager *auth[2] = { NULL, NULL }; /* 2: WiFi * (Client + Server) */
     auth[num++] = FindAuthManagerByUuid(uuid, AUTH_LINK_TYPE_WIFI, false);
     auth[num++] = FindAuthManagerByUuid(uuid, AUTH_LINK_TYPE_WIFI, true);
@@ -1637,12 +1641,62 @@ int32_t AuthFlushDevice(const char *uuid)
         if (auth[i] == NULL) {
             continue;
         }
-        if (PostVerifyDeviceMessage(auth[i], FLAG_ACTIVE, AUTH_LINK_TYPE_WIFI) == SOFTBUS_OK) {
-            ret = SOFTBUS_OK;
+        ret = PostDeviceMessage(auth[i], FLAG_ACTIVE, AUTH_LINK_TYPE_WIFI, &messageParse);
+        if (ret != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_CONN, "%{public}d:messageType=%{public}d, post device message fail", i, messageType);
+            ReleaseAuthLock();
+            return ret;
         }
     }
     ReleaseAuthLock();
     return ret;
+}
+
+static int32_t SetLocalDeviceTcpKeepAlive(const char *uuid, ModeCycle cycle)
+{
+    int32_t ret = SOFTBUS_ERR;
+    AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(connInfo), 0, sizeof(connInfo));
+    ret = GetAuthConnInfoByUuid(uuid, AUTH_LINK_TYPE_WIFI, &connInfo);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "get AuthConnInfo by uuid fail");
+        return ret;
+    }
+    ret = AuthSetTcpKeepAlive(&connInfo, cycle);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "set tcp keepalive fail");
+    }
+    return ret;
+}
+
+int32_t AuthFlushDevice(const char *uuid)
+{
+    if (uuid == NULL || uuid[0] == '\0') {
+        AUTH_LOGE(AUTH_CONN, "uuid is empty");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (PostDeviceMessageByUuid(uuid, CODE_VERIFY_DEVICE, DEFT_FREQ_CYCLE) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "post flush device message by uuid fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t AuthSendKeepAlive(const char *uuid, ModeCycle cycle)
+{
+    if (uuid == NULL || uuid[0] == '\0' || cycle < HIGH_FREQ_CYCLE || cycle > DEFT_FREQ_CYCLE) {
+        AUTH_LOGE(AUTH_CONN, "uuid is empty or invalid cycle");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SetLocalDeviceTcpKeepAlive(uuid, cycle) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "set local device tcp keepalive fail");
+        return SOFTBUS_ERR;
+    }
+    if (PostDeviceMessageByUuid(uuid, CODE_KEEP_ALIVE, cycle) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "post device keepalive message by uuid fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
 }
 
 static int32_t TryGetBrConnInfo(const char *uuid, AuthConnInfo *connInfo)

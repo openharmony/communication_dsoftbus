@@ -377,6 +377,41 @@ int32_t ConnSetTcpUserTimeOut(int32_t fd, uint32_t millSec)
 }
 
 #endif
+
+int32_t ConnSetTcpKeepAliveOption(
+    int32_t fd, ModeCycle cycle, int32_t keepAliveIntvl, int32_t keepAliveCount, uint32_t userTimeOut)
+{
+    if (fd < 0 || keepAliveIntvl < 0 || keepAliveCount < 0 || userTimeOut < 0) {
+        CONN_LOGE(CONN_COMMON, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_TCP, SOFTBUS_TCP_KEEPIDLE, &cycle, sizeof(cycle)) !=
+        SOFTBUS_OK) {
+        CONN_LOGE(CONN_COMMON, "set TCP_KEEPIDLE failed");
+        return SOFTBUS_ERR;
+    }
+    if (SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_TCP, SOFTBUS_TCP_KEEPINTVL, &keepAliveIntvl, sizeof(keepAliveIntvl)) !=
+        SOFTBUS_OK) {
+        CONN_LOGE(CONN_COMMON, "set TCP_KEEPINTVL failed");
+        return SOFTBUS_ERR;
+    }
+    if (SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_TCP, SOFTBUS_TCP_KEEPCNT, &keepAliveCount, sizeof(keepAliveCount)) !=
+        SOFTBUS_OK) {
+        CONN_LOGE(CONN_COMMON, "set TCP_KEEPCNT failed");
+        return SOFTBUS_ERR;
+    }
+    if (ConnSetTcpUserTimeOut(fd, userTimeOut) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_COMMON, "set TCP_USER_TIMEOUT failed,fd = %{public}d.", fd);
+        return SOFTBUS_ERR;
+    }
+
+    CONN_LOGI(CONN_COMMON,
+        "set tcp keepAlive successful, fd=%{public}d, keepAliveIdle=%{public}d, keepAliveIntvl=%{public}d, "
+        "keepAliveCount=%{public}d, userTimeOut=%{public}u",
+        fd, cycle, keepAliveIntvl, keepAliveCount, userTimeOut);
+    return SOFTBUS_OK;
+}
+
 static int32_t AcceptTcpClient(int32_t fd, ConnectOption *clientAddr, int32_t *cfd)
 {
     SoftBusSockAddrIn addr;
