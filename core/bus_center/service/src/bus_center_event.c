@@ -608,6 +608,7 @@ void LnnNotifySingleOffLineEvent(const ConnectionAddr *addr, NodeBasicInfo *basi
         LNN_LOGW(LNN_EVENT, "addr or basicInfo is null");
         return;
     }
+	//fyh
     LnnSingleNetworkOffLineEvent event = {.basic.event = LNN_EVENT_SINGLE_NETWORK_OFFLINE, .type = addr->type};
     event.basic.event = LNN_EVENT_SINGLE_NETWORK_OFFLINE;
     event.type = addr->type;
