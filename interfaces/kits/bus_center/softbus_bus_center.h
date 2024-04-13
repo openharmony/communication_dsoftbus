@@ -521,6 +521,18 @@ typedef struct {
 } MetaNodeInfo;
 
 /**
+ * @brief Defines an action mode, see {@link ModeAction}.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+typedef enum {
+    FLUSH_DEVICE_LIST,           /**< The action of flush device list */
+    CHANGE_TCP_KEEPALIVE,        /**< The action of change tcp keepalive */
+    ACTION_MAX                   /**< The action max */
+} ModeAction;
+
+/**
  * @brief Defines heartbeat mode parameter, see {@link GearMode}.
  *
  * @since 1.0
@@ -530,6 +542,7 @@ typedef struct {
     ModeCycle cycle;        /**< Heartbeat mode cycle */
     ModeDuration duration;  /**< Heartbeat mode duration */
     bool wakeupFlag;        /**< Heartbeat wakeup peer device or not */
+    ModeAction action;      /**< Heartbeat mode action */
 } GearMode;
 
 /**
