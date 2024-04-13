@@ -24,6 +24,7 @@ extern "C" {
 
 int32_t ClientStubInit(void);
 int32_t ClientRegisterService(const char *pkgName);
+void SetDeathRecipientFlag(bool flag);
 
 #ifdef __cplusplus
 }

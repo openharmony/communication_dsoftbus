@@ -404,6 +404,7 @@
         "DiscRecoveryPolicy";
         "ClientRawStreamEncryptOptGet";
         "ClientRawStreamEncryptDefOptGet";
+        "SetDeathRecipientFlag";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;
