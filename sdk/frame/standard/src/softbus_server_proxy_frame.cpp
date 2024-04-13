@@ -142,6 +142,8 @@ static int32_t ServerProxyInit(void)
 
 static RestartEventCallback g_restartEventCallback = nullptr;
 
+static RestartEventCallback g_restartMetaCallback = nullptr;
+
 static void RestartEventNotify(void)
 {
     if (g_restartEventCallback == nullptr) {
@@ -154,6 +156,20 @@ static void RestartEventNotify(void)
         return;
     }
     COMM_LOGI(COMM_SDK, "Restart event notify success!\n");
+}
+
+static void RestartMetaNotify(void)
+{
+    if (g_restartMetaCallback == nullptr) {
+        COMM_LOGI(COMM_SDK, "Restart meta notify is not used!\n");
+        return;
+    }
+    if (g_restartMetaCallback() != SOFTBUS_OK) {
+        RestartMetaCallbackUnregister();
+        COMM_LOGE(COMM_SDK, "Restart meta notify failed!\n");\
+        return;
+    }
+    COMM_LOGI(COMM_SDK, "Restart meta notify success!\n");
 }
 
 void ClientDeathProcTask(void)
@@ -182,6 +198,7 @@ void ClientDeathProcTask(void)
     BusCenterServerProxyInit();
     InnerRegisterService();
     RestartEventNotify();
+    RestartMetaNotify();
     DiscRecoveryPublish();
     DiscRecoverySubscribe();
     DiscRecoveryPolicy();
@@ -192,6 +209,11 @@ void RestartEventCallbackUnregister(void)
     g_restartEventCallback = nullptr;
 }
 
+void RestartMetaCallbackUnregister(void)
+{
+    g_restartMetaCallback = nullptr;
+}
+
 int32_t RestartEventCallbackRegister(RestartEventCallback callback)
 {
     if (callback == nullptr) {
@@ -200,6 +222,17 @@ int32_t RestartEventCallbackRegister(RestartEventCallback callback)
     }
     g_restartEventCallback = callback;
     COMM_LOGI(COMM_SDK, "Restart event callback register success!\n");
+    return SOFTBUS_OK;
+}
+
+int32_t RestartMetaCallbackRegister(RestartEventCallback callback)
+{
+    if (callback == nullptr) {
+        COMM_LOGE(COMM_SDK, "Restart meta callback register param is invalid!\n");
+        return SOFTBUS_ERR;
+    }
+    g_restartMetaCallback = callback;
+    COMM_LOGI(COMM_SDK, "Restart meta callback register success!\n");
     return SOFTBUS_OK;
 }
 
