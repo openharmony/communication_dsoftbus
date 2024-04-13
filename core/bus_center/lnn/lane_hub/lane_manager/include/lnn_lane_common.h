@@ -36,4 +36,4 @@ void LnnDeinitLaneLooper(void);
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif // LNN_LANE_COMMON_H
