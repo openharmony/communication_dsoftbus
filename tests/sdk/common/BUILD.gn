@@ -33,14 +33,11 @@ if (defined(ohos_lite)) {
     include_dirs = [
       "include",
       "$dsoftbus_root_path/interfaces/kits/common",
-      "//base/security/access_token/interfaces/innerkits/token_setproc/include",
-      "//base/security/access_token/interfaces/innerkits/nativetoken/include",
-      "//base/security/access_token/interfaces/innerkits/accesstoken/include",
     ]
-    deps = [
-      "//base/security/access_token/interfaces/innerkits/accesstoken:libaccesstoken_sdk",
-      "//base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",
-      "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
+    external_deps = [
+      "access_token:libaccesstoken_sdk",
+      "access_token:libnativetoken",
+      "access_token:libtoken_setproc",
     ]
     cflags = [
       "-Wall",
