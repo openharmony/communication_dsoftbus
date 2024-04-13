@@ -134,6 +134,11 @@ typedef enum {
     QUERY_RESULT_REQUEST_ILLEGAL,
 } QueryResult;
 
+typedef enum {
+    LANE_RTT_LEVEL_DEFAULT = 0,
+    LANE_RTT_LEVEL_LOW = 1,
+} LaneRttLevel;
+
 typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];
     LaneTransType transType;
@@ -148,6 +153,7 @@ typedef struct {
     uint32_t minBW;
     uint32_t maxLaneLatency;
     uint32_t minLaneLatency;
+    LaneRttLevel rttLevel;
 } QosInfo;
 
 typedef struct {
