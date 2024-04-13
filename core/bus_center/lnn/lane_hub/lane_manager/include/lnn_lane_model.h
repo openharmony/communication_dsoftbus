@@ -41,4 +41,4 @@ void UnbindLaneIdFromProfile(uint64_t laneId, uint32_t profileId);
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif // LNN_LANE_MODEL_H
