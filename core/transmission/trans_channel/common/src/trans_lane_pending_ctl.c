@@ -831,6 +831,8 @@ static void TransGetQosInfo(const SessionParam *param, QosInfo *qosInfo, bool *i
             case QOS_TYPE_MIN_LATENCY:
                 qosInfo->minLaneLatency = param->qos[i].value;
                 break;
+            case QOS_TYPE_RTT_LEVEL:
+                qosInfo->rttLevel = (LaneRttLevel)((param->qos[i].value > 0) ? param->qos[i].value : 0);
             default:
                 break;
         }
