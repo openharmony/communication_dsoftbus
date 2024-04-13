@@ -609,13 +609,11 @@ void LnnNotifySingleOffLineEvent(const ConnectionAddr *addr, NodeBasicInfo *basi
         return;
     }
     NodeInfo info;
-    // 根据basicInfo里的networkid找nodeinfo,找不到也上报
-	(void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-	if (LnnGetRemoteNodeInfoById(basicInfo->networkId, CATEGORY_NETWORK_ID, &info) == SOFTBUS_OK) {
-		// 就在这个函数里判断nodeinfo里有wifi的发现类型，就不通知了
-		if ((LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI) && LnnConvAddrTypeToDiscType(addr->type) == DISCOVERY_TYPE_WIFI)) {
-			return;
-		}
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(basicInfo->networkId, CATEGORY_NETWORK_ID, &info) == SOFTBUS_OK) {
+        if ((LnnHasDiscoveryType(info, DISCOVERY_TYPE_WIFI) && LnnConvAddrTypeToDiscType(addr->type) == DISCOVERY_TYPE_WIFI)) {
+            return;
+        }
     }
     LnnSingleNetworkOffLineEvent event = {.basic.event = LNN_EVENT_SINGLE_NETWORK_OFFLINE, .type = addr->type};
     event.basic.event = LNN_EVENT_SINGLE_NETWORK_OFFLINE;
