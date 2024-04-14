@@ -307,12 +307,6 @@ void FreeBtFilter(BleScanNativeFilter *nativeFilter, int32_t filterSize)
     while (filterSize-- > 0) {
         SoftBusFree((nativeFilter + filterSize)->serviceData);
         SoftBusFree((nativeFilter + filterSize)->serviceDataMask);
-        if ((nativeFilter + filterSize)->manufactureData != NULL) {
-            SoftBusFree((nativeFilter + filterSize)->manufactureData);
-        }
-        if ((nativeFilter + filterSize)->manufactureDataMask != NULL) {
-            SoftBusFree((nativeFilter + filterSize)->manufactureDataMask);
-        }
     }
     SoftBusFree(nativeFilter);
 }

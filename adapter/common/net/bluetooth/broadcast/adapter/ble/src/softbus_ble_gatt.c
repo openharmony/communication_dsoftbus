@@ -725,6 +725,14 @@ static int32_t SetBtUuidByBroadCastType(SensorHubServerType type, BtUuid *btUuid
     return SOFTBUS_OK;
 }
 
+static void FreeManufactureData(BleScanNativeFilter *nativeFilter, int32_t filterSize)
+{
+    while (filterSize-- > 0) {
+        SoftBusFree((nativeFilter + filterSize)->manufactureData);
+        SoftBusFree((nativeFilter + filterSize)->manufactureDataMask);
+    }
+}
+
 static bool SetLpParam(SensorHubServerType type,
     const SoftBusLpBroadcastParam *bcParam, const SoftBusLpScanParam *scanParam)
 {
@@ -734,10 +742,7 @@ static bool SetLpParam(SensorHubServerType type,
     lpParam.scanConfig = &scanConfig;
     lpParam.rawData.advData = (unsigned char *)AssembleAdvData(&bcParam->advData,
         (uint16_t *)&lpParam.rawData.advDataLen);
-    if (lpParam.rawData.advData == NULL) {
-        DISC_LOGE(DISC_BLE_ADAPTER, "assemble adv data failed, advHandle=%{public}d", bcParam->advHandle);
-        return SOFTBUS_ERR;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(lpParam.rawData.advData != NULL, SOFTBUS_ERR, DISC_BLE, "assemble adv data failed");
     if (SetBtUuidByBroadCastType(type, &lpParam.uuid) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE_ADAPTER, "set bt uuid fail, advHandle=%{public}d", bcParam->advHandle);
         return SOFTBUS_ERR;
@@ -770,6 +775,9 @@ static bool SetLpParam(SensorHubServerType type,
     lpParam.advHandle = bcParam->advHandle;
     lpParam.duration = LP_ADV_DURATION_MS;
     int ret = SetLpDeviceParam(&lpParam);
+    if (type == SOFTBUS_HEARTBEAT_TYPE) {
+        FreeManufactureData(lpParam.filter, scanParam->filterSize);
+    }
     FreeBtFilter(lpParam.filter, scanParam->filterSize);
     SoftBusFree(lpParam.rawData.advData);
     SoftBusFree(lpParam.rawData.rspData);
