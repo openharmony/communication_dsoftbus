@@ -58,6 +58,7 @@
         "device_auth",
         "device_info_manager",
         "drivers_interface_wlan",
+        "json",
         "hicollie",
         "hisysevent",
         "hitrace",
@@ -82,6 +83,7 @@
       "third_party": [
         "bounds_checking_function",
         "cJSON",
+        "json",
         "mbedtls",
         "openssl",
         "sqlite"
