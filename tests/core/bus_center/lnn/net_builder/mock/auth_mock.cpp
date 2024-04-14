@@ -90,3 +90,4 @@ int32_t AuthSendKeepAlive(const char *uuid, ModeCycle cycle)
     return GetAuthInterface()->AuthSendKeepAlive(uuid, cycle);
 }
 }
+}
