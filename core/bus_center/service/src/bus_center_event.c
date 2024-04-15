@@ -612,7 +612,9 @@ void LnnNotifySingleOffLineEvent(const ConnectionAddr *addr, NodeBasicInfo *basi
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (LnnGetRemoteNodeInfoById(basicInfo->networkId, CATEGORY_NETWORK_ID, &info) == SOFTBUS_OK) {
-        if ((LnnHasDiscoveryType(&info, DISCOVERY_TYPE_WIFI) && LnnConvAddrTypeToDiscType(addr->type) == DISCOVERY_TYPE_WIFI)) {
+        if ((LnnHasDiscoveryType(&info, DISCOVERY_TYPE_WIFI) &&
+            LnnConvAddrTypeToDiscType(addr->type) == DISCOVERY_TYPE_WIFI)) {
+            LNN_LOGI(LNN_EVENT, "Two-way WIFI LNN not completely offline, not need to report offline");
             return;
         }
     }
