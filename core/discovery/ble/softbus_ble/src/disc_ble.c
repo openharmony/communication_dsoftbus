@@ -901,7 +901,7 @@ static int32_t StartAdvertiser(int32_t adv)
         DfxRecordAdevertiserEnd(adv, ret);
         DestroyBleConfigAdvData(&packet);
         DISC_LOGE(DISC_BLE, "start adv failed, adv=%{public}d", adv);
-        return SOFTBUS_DISCOVER_START_BROADCAST_FAIL;
+        return SOFTBUS_DISCOVER_BLE_START_BROADCAST_FAIL;
     }
     DfxRecordAdevertiserEnd(adv, SOFTBUS_OK);
     UpdateInfoManager(adv, false);
@@ -953,7 +953,7 @@ static int32_t UpdateAdvertiser(int32_t adv)
     if (UpdateBroadcasting(advertiser->channel, &advParam, &packet) != SOFTBUS_OK) {
         DestroyBleConfigAdvData(&packet);
         DISC_LOGE(DISC_BLE, "UpdateAdv failed");
-        return SOFTBUS_DISCOVER_START_BROADCAST_FAIL;
+        return SOFTBUS_DISCOVER_BLE_START_BROADCAST_FAIL;
     }
     UpdateInfoManager(adv, false);
     DestroyBleConfigAdvData(&packet);
@@ -1020,7 +1020,7 @@ static int32_t StopScaner(void)
     }
     if (StopScan(g_bleListener.scanListenerId) != SOFTBUS_OK) {
         DISC_LOGI(DISC_BLE, "StopScaner failed");
-        return SOFTBUS_DISCOVER_END_SCAN_FAIL;
+        return SOFTBUS_DISCOVER_BLE_END_SCAN_FAIL;
     }
     DISC_LOGI(DISC_BLE, "success");
     return SOFTBUS_OK;
