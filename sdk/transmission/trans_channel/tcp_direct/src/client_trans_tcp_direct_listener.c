@@ -64,7 +64,7 @@ static int32_t ClientTdcOnDataEvent(ListenerModule module, int events, int32_t f
     (void)memset_s(&channel, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
     if (TransTdcGetInfoByFd(fd, &channel) == NULL) {
         TRANS_LOGE(TRANS_SDK, "can not match fd. fd=%{public}d", fd);
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
 
     if (events == SOFTBUS_SOCKET_IN) {
@@ -75,11 +75,11 @@ static int32_t ClientTdcOnDataEvent(ListenerModule module, int events, int32_t f
             return SOFTBUS_OK;
         }
         if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_SDK, "client process data fail, channelId=%{public}d", channelId);
+            TRANS_LOGE(TRANS_SDK, "client process data fail, channelId=%{public}d, ret=%{public}d", channelId, ret);
             TransDelDataBufNode(channelId);
             TransTdcCloseChannel(channelId);
             ClientTransTdcOnSessionClosed(channelId, SHUTDOWN_REASON_RECV_DATA_ERR);
-            return SOFTBUS_ERR;
+            return ret;
         }
     }
     return SOFTBUS_OK;
@@ -91,7 +91,7 @@ int32_t TransTdcCreateListener(int32_t fd)
     TdcLockInit();
     if (SoftBusMutexLock(&g_lock.lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "lock failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     if (isInitedFlag == false) {
         isInitedFlag = true;
@@ -100,11 +100,11 @@ int32_t TransTdcCreateListener(int32_t fd)
             .onConnectEvent = ClientTdcOnConnectEvent,
             .onDataEvent = ClientTdcOnDataEvent,
         };
-
-        if (StartBaseClient(DIRECT_CHANNEL_CLIENT, &listener) != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_SDK, "start sdk base listener failed.");
+        int32_t ret = StartBaseClient(DIRECT_CHANNEL_CLIENT, &listener);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "start sdk base listener failed, ret=%{public}d", ret);
             SoftBusMutexUnlock(&g_lock.lock);
-            return SOFTBUS_ERR;
+            return ret;
         }
         TRANS_LOGI(TRANS_SDK, "create sdk listener success.");
     }

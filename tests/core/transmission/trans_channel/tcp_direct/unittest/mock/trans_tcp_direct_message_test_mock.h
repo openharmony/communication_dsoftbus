@@ -35,7 +35,8 @@ public:
     virtual ~TransTcpDirectMessageInterface() {};
     virtual SoftBusList *CreateSoftBusList() = 0;
     virtual int64_t GetAuthIdByChanId(int32_t channelId) = 0;
-    virtual int32_t AuthEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
+    virtual int32_t GetAuthHandleByChanId(int32_t channelId, AuthHandle *authHandle) = 0;
+    virtual int32_t AuthEncrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
         uint32_t *outLen) = 0;
     virtual SessionConn *GetSessionConnById(int32_t channelId, SessionConn *conn) = 0;
     virtual ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_t len, int32_t timeout) = 0;
@@ -56,8 +57,8 @@ public:
     virtual int32_t GetAppInfoById(int32_t channelId, AppInfo *appInfo) = 0;
     virtual int32_t GetRemoteUuidByIp(const char *remoteIp, char *localIp, int32_t localIpSize) = 0;
     virtual cJSON* cJSON_Parse(const char *value) = 0;
-    virtual int32_t SetAuthIdByChanId(int32_t channelId, int64_t authId) = 0;
-    virtual int32_t AuthDecrypt(int64_t authId, const uint8_t *inData,
+    virtual int32_t SetAuthHandleByChanId(int32_t channelId, AuthHandle *authHandle) = 0;
+    virtual int32_t AuthDecrypt(AuthHandle *authHandle, const uint8_t *inData,
         uint32_t inLen, uint8_t *outData, uint32_t *outLen) = 0;
 };
 
@@ -67,7 +68,8 @@ public:
     ~TransTcpDirectMessageInterfaceMock() override;
     MOCK_METHOD0(CreateSoftBusList, SoftBusList * ());
     MOCK_METHOD1(GetAuthIdByChanId, int64_t (int32_t channelId));
-    MOCK_METHOD5(AuthEncrypt, int32_t (int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
+    MOCK_METHOD2(GetAuthHandleByChanId, int32_t (int32_t channelId, AuthHandle *authHandle));
+    MOCK_METHOD5(AuthEncrypt, int32_t (AuthHandle *authHandle, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
         uint32_t *outLen));
     MOCK_METHOD2(GetSessionConnById, SessionConn * (int32_t channelId, SessionConn *conn));
     MOCK_METHOD4(ConnSendSocketData, ssize_t (int32_t fd, const char *buf, size_t len, int32_t timeout));
@@ -88,8 +90,8 @@ public:
     MOCK_METHOD2(GetAppInfoById, int32_t (int32_t channelId, AppInfo *appInfo));
     MOCK_METHOD3(GetRemoteUuidByIp, int32_t (const char *remoteIp, char *localIp, int32_t localIpSize));
     MOCK_METHOD1(cJSON_Parse, cJSON * (const char *value));
-    MOCK_METHOD2(SetAuthIdByChanId, int32_t (int32_t channelId, int64_t authId));
-    MOCK_METHOD5(AuthDecrypt, int32_t (int64_t authId, const uint8_t *inData,
+    MOCK_METHOD2(SetAuthHandleByChanId, int32_t (int32_t channelId, AuthHandle *authHandle));
+    MOCK_METHOD5(AuthDecrypt, int32_t (AuthHandle *authHandle, const uint8_t *inData,
         uint32_t inLen, uint8_t *outData, uint32_t *outLen));
 };
 } // namespace OHOS

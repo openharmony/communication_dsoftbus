@@ -99,6 +99,7 @@ typedef struct {
 } WlanConnInfo;
 
 typedef struct {
+    uint64_t laneId;
     LaneLinkType type;
     union {
         BrConnInfo br;
@@ -110,9 +111,13 @@ typedef struct {
 } LaneConnInfo;
 
 typedef struct {
+    void (*OnLaneAllocSuccess)(uint32_t laneHandle, const LaneConnInfo *info);
+    void (*OnLaneAllocFail)(uint32_t laneHandle, int32_t errCode);
+} LaneAllocListener;
+
+typedef struct {
     void (*OnLaneRequestSuccess)(uint32_t laneReqId, const LaneConnInfo *info);
     void (*OnLaneRequestFail)(uint32_t laneReqId, int32_t errCode);
-    void (*OnLaneStateChange)(uint32_t laneReqId, LaneState state);
 } ILaneListener;
 
 typedef enum {
@@ -129,6 +134,11 @@ typedef enum {
     QUERY_RESULT_REQUEST_ILLEGAL,
 } QueryResult;
 
+typedef enum {
+    LANE_RTT_LEVEL_DEFAULT = 0,
+    LANE_RTT_LEVEL_LOW = 1,
+} LaneRttLevel;
+
 typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];
     LaneTransType transType;
@@ -143,18 +153,16 @@ typedef struct {
     uint32_t minBW;
     uint32_t maxLaneLatency;
     uint32_t minLaneLatency;
+    LaneRttLevel rttLevel;
 } QosInfo;
 
 typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];
-    QosInfo qosRequire;
     LaneTransType transType;
     bool networkDelegate;
     bool p2pOnly;
     ProtocolType acceptableProtocols;
     int32_t pid;
-    bool isWithQos;
-    //OldInfo
     char peerBleMac[MAX_MAC_LEN];
     //'psm' is valid only when 'expectedlink' contains 'LANE_COC'
     int32_t psm;
@@ -176,10 +184,28 @@ typedef struct {
 } LaneStatusListener;
 
 typedef struct {
+    char peerBleMac[MAX_MAC_LEN];
+    bool networkDelegate;
+} AllocExtendInfo;
+
+typedef struct {
+    LaneType type;
+    char networkId[NETWORK_ID_BUF_LEN];
+    QosInfo qosRequire;
+    LaneTransType transType;
+    int32_t pid;
+    ProtocolType acceptableProtocols;
+    AllocExtendInfo extendInfo;
+} LaneAllocInfo;
+
+typedef struct {
     int32_t (*lnnQueryLaneResource)(const LaneQueryInfo *queryInfo, const QosInfo *qosInfo);
-    uint32_t (*applyLaneReqId)(LaneType type);
-    int32_t (*lnnRequestLane)(uint32_t laneReqId, const LaneRequestOption *request, const ILaneListener *listener);
-    int32_t (*lnnFreeLane)(uint32_t laneReqId);
+    uint32_t (*lnnGetLaneHandle)(LaneType type);
+    int32_t (*lnnAllocLane)(uint32_t laneHandle, const LaneAllocInfo *allocInfo, const LaneAllocListener *listener);
+    int32_t (*lnnReAllocLane)(uint32_t laneHandle, uint64_t laneId, const LaneAllocInfo *allocInfo,
+        const LaneAllocListener *listener);
+    int32_t (*lnnCancelLane)(uint32_t laneHandle);
+    int32_t (*lnnFreeLane)(uint32_t laneHandle);
     int32_t (*registerLaneListener)(LaneType type, const LaneStatusListener *listener);
     int32_t (*unRegisterLaneListener)(LaneType type);
 } LnnLaneManager;

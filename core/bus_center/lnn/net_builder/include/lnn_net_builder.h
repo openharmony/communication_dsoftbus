@@ -71,6 +71,7 @@ int32_t LnnNotifyNodeStateChanged(const ConnectionAddr *addr);
 int32_t LnnNotifyMasterElect(const char *networkId, const char *masterUdid, int32_t masterWeight);
 int32_t LnnNotifyAuthHandleLeaveLNN(AuthHandle authHandle);
 int32_t LnnNotifyEmptySessionKey(int64_t authId);
+int32_t LnnNotifyLeaveLnnByAuthHandle(AuthHandle *authHandle);
 int32_t LnnUpdateNodeAddr(const char *addr);
 int32_t FindRequestIdByAddr(ConnectionAddr *connetionAddr, uint32_t *requestId);
 NodeInfo *FindNodeInfoByRquestId(uint32_t requestId);

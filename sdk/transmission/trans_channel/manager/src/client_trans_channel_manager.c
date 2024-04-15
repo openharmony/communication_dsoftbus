@@ -85,7 +85,7 @@ int32_t ClientTransCloseChannel(int32_t channelId, int32_t type)
     return ret;
 }
 
-int32_t ClientTransChannelSendBytes(int32_t channelId, int32_t type, const void *data, uint32_t len)
+int32_t ClientTransChannelSendBytes(int32_t channelId, int32_t channelType, const void *data, uint32_t len)
 {
     if ((data == NULL) || (len == 0)) {
         TRANS_LOGW(TRANS_BYTES, "Invalid param");
@@ -93,7 +93,7 @@ int32_t ClientTransChannelSendBytes(int32_t channelId, int32_t type, const void 
     }
 
     int32_t ret = SOFTBUS_OK;
-    switch (type) {
+    switch (channelType) {
         case CHANNEL_TYPE_AUTH:
             ret = TransAuthChannelSendBytes(channelId, data, len);
             break;
@@ -104,13 +104,13 @@ int32_t ClientTransChannelSendBytes(int32_t channelId, int32_t type, const void 
             ret = TransTdcSendBytes(channelId, data, len);
             break;
         default:
-            TRANS_LOGE(TRANS_SDK, "Invalid type");
-            return SOFTBUS_ERR;
+            TRANS_LOGE(TRANS_SDK, "Invalid channelType=%{public}d", channelType);
+            return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }
     return ret;
 }
 
-int32_t ClientTransChannelSendMessage(int32_t channelId, int32_t type, const void *data, uint32_t len)
+int32_t ClientTransChannelSendMessage(int32_t channelId, int32_t channelType, const void *data, uint32_t len)
 {
     if ((data == NULL) || (len == 0)) {
         TRANS_LOGW(TRANS_MSG, "Invalid param.");
@@ -118,7 +118,7 @@ int32_t ClientTransChannelSendMessage(int32_t channelId, int32_t type, const voi
     }
 
     int32_t ret = SOFTBUS_OK;
-    switch (type) {
+    switch (channelType) {
         case CHANNEL_TYPE_AUTH:
             ret = TransAuthChannelSendMessage(channelId, data, len);
             break;
@@ -129,13 +129,13 @@ int32_t ClientTransChannelSendMessage(int32_t channelId, int32_t type, const voi
             ret = TransTdcSendMessage(channelId, data, len);
             break;
         default:
-            TRANS_LOGE(TRANS_MSG, "Invalid type.");
+            TRANS_LOGE(TRANS_MSG, "Invalid channelType=%{public}d", channelType);
             return SOFTBUS_TRANS_CHANNEL_TYPE_INVALID;
     }
     return ret;
 }
 
-int32_t ClientTransChannelSendStream(int32_t channelId, int32_t type, const StreamData *data,
+int32_t ClientTransChannelSendStream(int32_t channelId, int32_t channelType, const StreamData *data,
     const StreamData *ext, const StreamFrameInfo *param)
 {
     if ((data == NULL) || (ext == NULL) || (param == NULL)) {
@@ -144,22 +144,22 @@ int32_t ClientTransChannelSendStream(int32_t channelId, int32_t type, const Stre
     }
 
     int32_t ret = SOFTBUS_OK;
-    switch (type) {
+    switch (channelType) {
         case CHANNEL_TYPE_UDP:
             ret = TransUdpChannelSendStream(channelId, data, ext, param);
             break;
         default:
-            TRANS_LOGE(TRANS_STREAM, "unsupport channelType=%{public}d.", type);
+            TRANS_LOGE(TRANS_STREAM, "unsupport channelType=%{public}d.", channelType);
             return SOFTBUS_TRANS_CHANNEL_TYPE_INVALID;
     }
     return ret;
 }
 
-int32_t ClientTransChannelSendFile(int32_t channelId, int32_t type, const char *sFileList[],
+int32_t ClientTransChannelSendFile(int32_t channelId, int32_t channelType, const char *sFileList[],
     const char *dFileList[], uint32_t fileCnt)
 {
     int32_t ret = SOFTBUS_OK;
-    switch (type) {
+    switch (channelType) {
         case CHANNEL_TYPE_UDP:
             ret = TransUdpChannelSendFile(channelId, sFileList, dFileList, fileCnt);
             break;
@@ -167,7 +167,7 @@ int32_t ClientTransChannelSendFile(int32_t channelId, int32_t type, const char *
             ret = TransProxyChannelSendFile(channelId, sFileList, dFileList, fileCnt);
             break;
         default:
-            TRANS_LOGE(TRANS_FILE, "unsupport channelType=%{public}d.", type);
+            TRANS_LOGE(TRANS_FILE, "unsupport channelType=%{public}d.", channelType);
             return SOFTBUS_TRANS_CHANNEL_TYPE_INVALID;
     }
     return ret;

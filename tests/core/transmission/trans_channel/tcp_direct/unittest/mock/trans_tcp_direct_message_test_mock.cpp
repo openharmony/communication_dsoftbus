@@ -46,10 +46,15 @@ int64_t GetAuthIdByChanId(int32_t channelId)
     return GetTransTcpDirectMessageInterface()->GetAuthIdByChanId(channelId);
 }
 
-int32_t AuthEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
+int32_t GetAuthHandleByChanId(int32_t channelId, AuthHandle *authHandle)
+{
+    return GetTransTcpDirectMessageInterface()->GetAuthHandleByChanId(channelId, authHandle);
+}
+
+int32_t AuthEncrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
     uint32_t *outLen)
 {
-    return GetTransTcpDirectMessageInterface()->AuthEncrypt(authId, inData, inLen, outData, outLen);
+    return GetTransTcpDirectMessageInterface()->AuthEncrypt(authHandle, inData, inLen, outData, outLen);
 }
 
 SessionConn *GetSessionConnById(int32_t channelId, SessionConn *conn)
@@ -137,14 +142,14 @@ int32_t GetRemoteUuidByIp(const char *remoteIp, char *localIp, int32_t localIpSi
     return GetTransTcpDirectMessageInterface()->GetRemoteUuidByIp(remoteIp, localIp, localIpSize);
 }
 
-int32_t SetAuthIdByChanId(int32_t channelId, int64_t authId)
+int32_t SetAuthHandleByChanId(int32_t channelId, AuthHandle *authHandle)
 {
-    return GetTransTcpDirectMessageInterface()->SetAuthIdByChanId(channelId, authId);
+    return GetTransTcpDirectMessageInterface()->SetAuthHandleByChanId(channelId, authHandle);
 }
 
-int32_t AuthDecrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
+int32_t AuthDecrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
 {
-    return GetTransTcpDirectMessageInterface()->AuthDecrypt(authId, inData, inLen, outData, outLen);
+    return GetTransTcpDirectMessageInterface()->AuthDecrypt(authHandle, inData, inLen, outData, outLen);
 }
 
 cJSON* cJSON_Parse(const char *value)

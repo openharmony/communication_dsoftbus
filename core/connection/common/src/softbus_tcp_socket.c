@@ -23,11 +23,12 @@
 #include "softbus_errcode.h"
 #include "softbus_socket.h"
 
-#define M_BYTES               0x100000
-#define SEND_BUF_SIZE         (4 * M_BYTES) // 4M
-#define RECV_BUF_SIZE         (6 * M_BYTES) // 6M
-#define USER_TIMEOUT_MS       (15 * 1000)   // 15s
+#define M_BYTES                     0x100000
+#define SEND_BUF_SIZE               (4 * M_BYTES) // 4M
+#define RECV_BUF_SIZE               (6 * M_BYTES) // 6M
+#define USER_TIMEOUT_MS             (15 * 1000)   // 15s
 #define SOFTBUS_TCP_USER_TIME USER_TIMEOUT_MS
+#define SOFTBUS_CONN_TCP_USER_TIME  (35 * 1000)   // 35s
 
 #ifndef __LITEOS_M__
 static int SetReusePort(int fd, int on)
@@ -212,6 +213,10 @@ static int32_t OpenTcpServerSocket(const LocalListenerInfo *option)
     }
 
     SetServerOption(fd);
+    // tcp user timeout on the Server
+    if (option->socketOption.moduleId >= AUTH_P2P && option->socketOption.moduleId <= AUTH_ENHANCED_P2P_END) {
+        (void)ConnSetTcpUserTimeOut(fd, SOFTBUS_CONN_TCP_USER_TIME);
+    }
     ret = BindLocalIP(fd, option->socketOption.addr, (uint16_t)option->socketOption.port);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "BindLocalIP ret=%{public}d", ret);
@@ -258,18 +263,20 @@ static int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp
         return ret;
     }
     if (isNonBlock && ConnToggleNonBlockMode(fd, true) != SOFTBUS_OK) {
-        CONN_LOGE(
-            CONN_COMMON, "set nonblock failed, serverIp=%{public}s, serverPort=%{public}d, fd=%{public}d", animizedIp,
-            option->socketOption.port, fd);
+        CONN_LOGE(CONN_COMMON, "set nonblock failed, serverIp=%{public}s, serverPort=%{public}d, fd=%{public}d",
+            animizedIp, option->socketOption.port, fd);
         SoftBusSocketClose(fd);
         return SOFTBUS_ERR;
     }
     SetClientOption(fd);
+    // tcp user timeout on the Client
+    if (option->socketOption.moduleId >= AUTH_P2P && option->socketOption.moduleId <= AUTH_ENHANCED_P2P_END) {
+        (void)ConnSetTcpUserTimeOut(fd, SOFTBUS_CONN_TCP_USER_TIME);
+    }
     ret = BindTcpClientAddr(fd, myIp);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(
-            CONN_COMMON, "bind client address failed, serverIp=%{public}s, serverPort=%{public}d, error=%{public}d",
-            animizedIp, option->socketOption.port, ret);
+        CONN_LOGE(CONN_COMMON, "bind client address failed, serverIp=%{public}s, serverPort=%{public}d, "
+            "error=%{public}d", animizedIp, option->socketOption.port, ret);
         ConnShutdownSocket(fd);
         return ret;
     }
@@ -281,10 +288,8 @@ static int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp
     ret = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketConnect(fd, (SoftBusSockAddr *)&addr));
     if ((ret != SOFTBUS_ADAPTER_OK) && (ret != SOFTBUS_ADAPTER_SOCKET_EINPROGRESS) &&
         (ret != SOFTBUS_ADAPTER_SOCKET_EAGAIN)) {
-        CONN_LOGE(CONN_COMMON,
-            "client connect failed, serverIp=%{public}s, serverPort=%{public}d, fd=%{public}d, error=%{public}d, "
-            "errno=%{public}d",
-            animizedIp, option->socketOption.port, fd, ret, errno);
+        CONN_LOGE(CONN_COMMON, "client connect failed, serverIp=%{public}s, serverPort=%{public}d, fd=%{public}d, "
+            "error=%{public}d, errno=%{public}d", animizedIp, option->socketOption.port, fd, ret, errno);
         ConnShutdownSocket(fd);
         return ret;
     }
@@ -372,6 +377,41 @@ int32_t ConnSetTcpUserTimeOut(int32_t fd, uint32_t millSec)
 }
 
 #endif
+
+int32_t ConnSetTcpKeepAliveOption(
+    int32_t fd, ModeCycle cycle, int32_t keepAliveIntvl, int32_t keepAliveCount, uint32_t userTimeOut)
+{
+    if (fd < 0 || keepAliveIntvl < 0 || keepAliveCount < 0 || userTimeOut < 0) {
+        CONN_LOGE(CONN_COMMON, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_TCP, SOFTBUS_TCP_KEEPIDLE, &cycle, sizeof(cycle)) !=
+        SOFTBUS_OK) {
+        CONN_LOGE(CONN_COMMON, "set TCP_KEEPIDLE failed");
+        return SOFTBUS_ERR;
+    }
+    if (SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_TCP, SOFTBUS_TCP_KEEPINTVL, &keepAliveIntvl, sizeof(keepAliveIntvl)) !=
+        SOFTBUS_OK) {
+        CONN_LOGE(CONN_COMMON, "set TCP_KEEPINTVL failed");
+        return SOFTBUS_ERR;
+    }
+    if (SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_TCP, SOFTBUS_TCP_KEEPCNT, &keepAliveCount, sizeof(keepAliveCount)) !=
+        SOFTBUS_OK) {
+        CONN_LOGE(CONN_COMMON, "set TCP_KEEPCNT failed");
+        return SOFTBUS_ERR;
+    }
+    if (ConnSetTcpUserTimeOut(fd, userTimeOut) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_COMMON, "set TCP_USER_TIMEOUT failed,fd = %{public}d.", fd);
+        return SOFTBUS_ERR;
+    }
+
+    CONN_LOGI(CONN_COMMON,
+        "set tcp keepAlive successful, fd=%{public}d, keepAliveIdle=%{public}d, keepAliveIntvl=%{public}d, "
+        "keepAliveCount=%{public}d, userTimeOut=%{public}u",
+        fd, cycle, keepAliveIntvl, keepAliveCount, userTimeOut);
+    return SOFTBUS_OK;
+}
+
 static int32_t AcceptTcpClient(int32_t fd, ConnectOption *clientAddr, int32_t *cfd)
 {
     SoftBusSockAddrIn addr;

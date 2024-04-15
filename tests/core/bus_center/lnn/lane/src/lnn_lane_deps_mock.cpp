@@ -162,7 +162,10 @@ int32_t LnnGetRemoteNumU64Info(const char *networkId, InfoKey key, uint64_t *inf
 {
     return GetLaneDepsInterface()->LnnGetRemoteNumU64Info(networkId, key, info);
 }
-
+int32_t LnnGetNetworkIdByUdid(const char *udid, char *buf, uint32_t len)
+{
+    return GetLaneDepsInterface()->LnnGetNetworkIdByUdid(udid, buf, len);
+}
 bool AuthDeviceCheckConnInfo(const char *uuid, AuthLinkType type, bool checkConnection)
 {
     return GetLaneDepsInterface()->AuthDeviceCheckConnInfo(uuid, type, checkConnection);
@@ -207,9 +210,9 @@ int32_t TransProxyCloseProxyChannel(int32_t channelId)
 {
     return GetLaneDepsInterface()->TransProxyCloseProxyChannel(channelId);
 }
-LaneResource *LaneResourceIsExist(LaneResource *resourceItem)
+LaneResource *GetValidLaneResource(LaneResource *resourceItem)
 {
-    return GetLaneDepsInterface()->LaneResourceIsExist(resourceItem);
+    return GetLaneDepsInterface()->GetValidLaneResource(resourceItem);
 }
 
 int64_t GetAuthIdByConnInfo(const AuthConnInfo *connInfo)

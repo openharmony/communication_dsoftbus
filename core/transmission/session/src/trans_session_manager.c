@@ -208,6 +208,34 @@ int32_t TransSessionServerDelItem(const char *sessionName)
     return SOFTBUS_OK;
 }
 
+bool CheckUidAndPid(const char *sessionName, pid_t callingUid, pid_t callingPid)
+{
+    if (sessionName == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "Parameter sessionName is empty");
+        return false;
+    }
+    if (g_sessionServerList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "sessionServer is empty");
+        return false;
+    }
+    if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "Lock failure");
+        return false;
+    }
+
+    SessionServer *pos = NULL;
+    LIST_FOR_EACH_ENTRY(pos, &g_sessionServerList->list, SessionServer, node) {
+        if (strcmp(pos->sessionName, sessionName) == 0 &&
+            pos->uid == callingUid && pos->pid == callingPid) {
+            (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+            return true;
+        }
+    }
+
+    (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+    return false;
+}
+
 void TransDelItemByPackageName(const char *pkgName, int32_t pid)
 {
     if (pkgName == NULL || g_sessionServerList == NULL) {
@@ -255,7 +283,7 @@ int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uin
             (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
             if (ret != EOK) {
                 TRANS_LOGE(TRANS_CTRL, "strcpy_s error ret, ret=%{public}d", ret);
-                return SOFTBUS_ERR;
+                return SOFTBUS_STRCPY_ERR;
             }
             return SOFTBUS_OK;
         }

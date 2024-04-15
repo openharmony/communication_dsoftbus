@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@ int32_t ClientOnChannelOpened(IpcIo *data, IpcIo *reply);
 int32_t ClientOnChannelOpenfailed(IpcIo *data, IpcIo *reply);
 int32_t ClientOnChannelClosed(IpcIo *data, IpcIo *reply);
 int32_t ClientOnChannelMsgreceived(IpcIo *data, IpcIo *reply);
+int32_t ClientSetChannelInfo(IpcIo *data, IpcIo *reply);
 
 #ifdef __cplusplus
 }

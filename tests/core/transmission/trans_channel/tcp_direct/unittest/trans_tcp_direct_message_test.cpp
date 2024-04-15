@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -386,33 +386,34 @@ HWTEST_F(TransTcpDirectMessageTest, GetAppInfoByIdTest0010, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetAuthIdByChanIdTest0011
- * @tc.desc: SetAuthIdByChanId, use the wrong parameter.
+ * @tc.name: SetAuthHandleByChanIdTest0011
+ * @tc.desc: SetAuthHandleByChanId, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectMessageTest, SetAuthIdByChanIdTest0011, TestSize.Level1)
+HWTEST_F(TransTcpDirectMessageTest, SetAuthHandleByChanIdTest0011, TestSize.Level1)
 {
     int32_t channelId = 1;
-    int64_t authId = 1;
-    int32_t ret = SetAuthIdByChanId(channelId, authId);
+    AuthHandle authHandle = { .authId = 1, .type = 1 };
+    int32_t ret = SetAuthHandleByChanId(channelId, &authHandle);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     channelId = 0;
-    ret = SetAuthIdByChanId(channelId, authId);
+    ret = SetAuthHandleByChanId(channelId, &authHandle);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /**
- * @tc.name: GetAuthIdByChanIdTest0012
- * @tc.desc: GetAuthIdByChanId, use the wrong parameter.
+ * @tc.name: GetAuthHandleByChanIdTest0012
+ * @tc.desc: GetAuthHandleByChanId, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectMessageTest, GetAuthIdByChanIdTest0012, TestSize.Level1)
+HWTEST_F(TransTcpDirectMessageTest, GetAuthHandleByChanIdTest0012, TestSize.Level1)
 {
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
     int32_t channelId = 1;
-    int64_t ret = GetAuthIdByChanId(channelId);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    int32_t ret = GetAuthHandleByChanId(channelId, &authHandle);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t res = TransTcpDirectInit(cb);
@@ -423,8 +424,8 @@ HWTEST_F(TransTcpDirectMessageTest, GetAuthIdByChanIdTest0012, TestSize.Level1)
     EXPECT_TRUE(res == SOFTBUS_OK);
 
     channelId = 0;
-    ret = GetAuthIdByChanId(channelId);
-    EXPECT_TRUE(ret == AUTH_INVALID_ID);
+    ret = GetAuthHandleByChanId(channelId, &authHandle);
+    EXPECT_EQ(authHandle.authId, AUTH_INVALID_ID);
     TransTcpDirectDeinit();
 }
 
@@ -565,7 +566,7 @@ HWTEST_F(TransTcpDirectMessageTest, TransGetLocalConfigTest001, TestSize.Level1)
     int32_t channelType = -1;
     int32_t bussinessType = BUSINESS_TYPE_BYTE;
     uint32_t len;
-    int32_t ret = TransGetLocalConfig(channelType, bussinessType, &len);
+    int32_t ret = TransCommonGetLocalConfig(channelType, bussinessType, &len);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -580,7 +581,47 @@ HWTEST_F(TransTcpDirectMessageTest, TransGetLocalConfigTest002, TestSize.Level1)
     int32_t channelType = CHANNEL_TYPE_TCP_DIRECT;
     int32_t bussinessType = BUSINESS_TYPE_BYTE;
     uint32_t len;
-    int32_t ret = TransGetLocalConfig(channelType, bussinessType, &len);
+    int32_t ret = TransCommonGetLocalConfig(channelType, bussinessType, &len);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
+
+/**
+ * @tc.name: TransGetChannelIdsByAuthIdAndStatus001
+ * @tc.desc: TransGetLocalConfig
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageTest, TransGetChannelIdsByAuthIdAndStatus001, TestSize.Level1)
+{
+    const IServerChannelCallBack *cb = TransServerGetChannelCb();
+    int32_t ret = TransTcpDirectInit(cb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SessionConn *con = TestSetSessionConn();
+    con->status = TCP_DIRECT_CHANNEL_STATUS_AUTH_CHANNEL;
+    ret = TransTdcAddSessionConn(con);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SessionConn *con2 = TestSetSessionConn();
+    con2->status = TCP_DIRECT_CHANNEL_STATUS_VERIFY_P2P;
+    con2->channelId = 1;
+    ret = TransTdcAddSessionConn(con2);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SessionConn *con3 = TestSetSessionConn();
+    con3->status = TCP_DIRECT_CHANNEL_STATUS_VERIFY_P2P;
+    con3->channelId = 2;
+    ret = TransTdcAddSessionConn(con3);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    int count = 0;
+    int32_t *channelId = GetChannelIdsByAuthIdAndStatus(&count, 1, TCP_DIRECT_CHANNEL_STATUS_VERIFY_P2P);
+    EXPECT_EQ(count, 2);
+    EXPECT_EQ(channelId[0], 1);
+    EXPECT_EQ(channelId[1], 2);
+    SoftBusFree(con);
+    SoftBusFree(con2);
+    SoftBusFree(con3);
+    SoftBusFree(channelId);
 }
+} // namespace OHOS

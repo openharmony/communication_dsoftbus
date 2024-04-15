@@ -110,7 +110,7 @@ static int32_t GetRemoteBtMacByUdidHash(const uint8_t *udidHash, uint32_t udidHa
 
 static int32_t TransProxyGetAuthConnInfo(uint32_t connId, AuthConnInfo *connInfo)
 {
-    ConnectionInfo info = {0};
+    ConnectionInfo info = { 0 };
     if (ConnGetConnectionInfo(connId, &info) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "ConnGetConnectionInfo fail, connId=%{public}u", connId);
         return SOFTBUS_ERR;
@@ -119,26 +119,26 @@ static int32_t TransProxyGetAuthConnInfo(uint32_t connId, AuthConnInfo *connInfo
         case CONNECT_TCP:
             connInfo->type = AUTH_LINK_TYPE_WIFI;
             if (strcpy_s(connInfo->info.ipInfo.ip, IP_LEN, info.socketInfo.addr) != EOK) {
-                TRANS_LOGE(TRANS_CTRL, "copy ip fail.");
-                return SOFTBUS_MEM_ERR;
+                TRANS_LOGE(TRANS_CTRL, "strcpy_s ip fail.");
+                return SOFTBUS_STRCPY_ERR;
             }
             break;
         case CONNECT_BR:
             connInfo->type = AUTH_LINK_TYPE_BR;
             if (strcpy_s(connInfo->info.brInfo.brMac, BT_MAC_LEN, info.brInfo.brMac) != EOK) {
-                TRANS_LOGE(TRANS_CTRL, "copy brMac fail.");
-                return SOFTBUS_MEM_ERR;
+                TRANS_LOGE(TRANS_CTRL, "strcpy_s brMac fail.");
+                return SOFTBUS_STRCPY_ERR;
             }
             break;
         case CONNECT_BLE:
             connInfo->type = AUTH_LINK_TYPE_BLE;
             if (strcpy_s(connInfo->info.bleInfo.bleMac, BT_MAC_LEN, info.bleInfo.bleMac) != EOK) {
-                TRANS_LOGE(TRANS_CTRL, "copy brMac fail.");
-                return SOFTBUS_MEM_ERR;
+                TRANS_LOGE(TRANS_CTRL, "strcpy_s brMac fail.");
+                return SOFTBUS_STRCPY_ERR;
             }
             if (memcpy_s(connInfo->info.bleInfo.deviceIdHash, UDID_HASH_LEN,
                 info.bleInfo.deviceIdHash, UDID_HASH_LEN) != EOK) {
-                TRANS_LOGE(TRANS_CTRL, "copy brMac fail.");
+                TRANS_LOGE(TRANS_CTRL, "memcpy_s brMac fail.");
                 return SOFTBUS_MEM_ERR;
             }
             connInfo->info.bleInfo.protocol = info.bleInfo.protocol;
@@ -177,7 +177,7 @@ static int32_t ConvertBleConnInfo2BrConnInfo(AuthConnInfo *connInfo)
     }
     if (strcpy_s(connInfo->info.brInfo.brMac, BT_MAC_LEN, brMac) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "copy br mac fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     connInfo->type = AUTH_LINK_TYPE_BR;
     return SOFTBUS_OK;
@@ -222,7 +222,7 @@ int32_t GetBrMacFromConnInfo(uint32_t connId, char *peerBrMac, uint32_t len)
     }
     if (strcpy_s(peerBrMac, len, connInfo.info.brInfo.brMac) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "copy brMac fail.");
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -250,14 +250,14 @@ int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg)
                 msg->connId, msg->msgHead.myId, msg->msgHead.type);
             return SOFTBUS_AUTH_NOT_FOUND;
         }
-        msg->authId = authHandle.authId;
+        msg->authHandle = authHandle;
         uint32_t decDataLen = AuthGetDecryptSize((uint32_t)msg->dateLen);
         uint8_t *decData = (uint8_t *)SoftBusCalloc(decDataLen);
         if (decData == NULL) {
-            return SOFTBUS_ERR;
+            return SOFTBUS_MALLOC_ERR;
         }
         msg->keyIndex = (int32_t)SoftBusLtoHl(*(uint32_t *)msg->data);
-        if (AuthDecrypt(authHandle.authId, (uint8_t *)msg->data, (uint32_t)msg->dateLen,
+        if (AuthDecrypt(&authHandle, (uint8_t *)msg->data, (uint32_t)msg->dateLen,
             decData, &decDataLen) != SOFTBUS_OK) {
             SoftBusFree(decData);
             TRANS_LOGE(TRANS_CTRL, "parse msg decrypt fail");
@@ -268,11 +268,11 @@ int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg)
     } else {
         uint8_t *allocData = (uint8_t *)SoftBusCalloc((uint32_t)msg->dateLen);
         if (allocData == NULL) {
-            return SOFTBUS_ERR;
+            return SOFTBUS_MALLOC_ERR;
         }
         if (memcpy_s(allocData, msg->dateLen, msg->data, msg->dateLen) != EOK) {
             SoftBusFree(allocData);
-            return SOFTBUS_ERR;
+            return SOFTBUS_MEM_ERR;
         }
         msg->data = (char *)allocData;
     }
@@ -319,7 +319,7 @@ static int32_t PackEncryptedMessage(ProxyMessageHead *msg, AuthHandle authHandle
     TransProxyPackMessageHead(msg, buf + ConnGetHeadSize(), PROXY_CHANNEL_HEAD_LEN);
     uint8_t *encData = buf + ConnGetHeadSize() + PROXY_CHANNEL_HEAD_LEN;
     uint32_t encDataLen = size - ConnGetHeadSize() - PROXY_CHANNEL_HEAD_LEN;
-    if (AuthEncrypt(authHandle.authId, dataInfo->inData, dataInfo->inLen, encData, &encDataLen) != SOFTBUS_OK) {
+    if (AuthEncrypt(&authHandle, dataInfo->inData, dataInfo->inLen, encData, &encDataLen) != SOFTBUS_OK) {
         SoftBusFree(buf);
         TRANS_LOGE(TRANS_CTRL, "pack msg encrypt fail, myChannelId=%{public}d", msg->myId);
         return SOFTBUS_ENCRYPT_ERR;
@@ -879,11 +879,11 @@ int32_t TransProxyUnpackIdentity(const char *msg, char *identity, uint32_t ident
 static int32_t TransProxyEncryptFastData(const char *sessionKey, int32_t seq, const char *in, uint32_t inLen,
     char *out, uint32_t *outLen)
 {
-    AesGcmCipherKey cipherKey = {0};
+    AesGcmCipherKey cipherKey = { 0 };
     cipherKey.keyLen = SESSION_KEY_LENGTH;
     if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey, SESSION_KEY_LENGTH) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "memcpy key error.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
 
     int ret = SoftBusEncryptDataWithSeq(&cipherKey, (unsigned char*)in, inLen,
@@ -891,7 +891,7 @@ static int32_t TransProxyEncryptFastData(const char *sessionKey, int32_t seq, co
     (void)memset_s(cipherKey.key, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
 
     if (ret != SOFTBUS_OK || *outLen != inLen + OVERHEAD_LEN) {
-        TRANS_LOGE(TRANS_CTRL, "encrypt error.");
+        TRANS_LOGE(TRANS_CTRL, "encrypt error, ret=%{public}d.", ret);
         return SOFTBUS_ENCRYPT_ERR;
     }
     return SOFTBUS_OK;
@@ -917,7 +917,7 @@ static int32_t TransProxyPackFastDataHead(ProxyDataInfo *dataInfo, const AppInfo
     dataInfo->outData = (uint8_t *)SoftBusCalloc(dataInfo->outLen);
     if (dataInfo->outData == NULL) {
         TRANS_LOGE(TRANS_CTRL, "calloc error");
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
 
     int32_t seq = g_proxyPktHeadSeq++;
@@ -950,13 +950,13 @@ static int32_t TransProxyMessageData(const AppInfo *appInfo, ProxyDataInfo *data
     dataInfo->inData = (uint8_t *)SoftBusMalloc(appInfo->fastTransDataSize);
     if (dataInfo->inData == NULL) {
         TRANS_LOGE(TRANS_CTRL, "malloc error");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     uint16_t fastDataSize = appInfo->fastTransDataSize;
     if (memcpy_s(dataInfo->inData, fastDataSize, appInfo->fastTransData, fastDataSize) != EOK) {
-        TRANS_LOGE(TRANS_CTRL, "memcpy_s error");
+        TRANS_LOGE(TRANS_CTRL, "memcpy_s fastTransData error.");
         SoftBusFree(dataInfo->inData);
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     dataInfo->inLen = fastDataSize;
     return SOFTBUS_OK;
@@ -967,7 +967,7 @@ static int32_t TransProxyByteData(const AppInfo *appInfo, ProxyDataInfo *dataInf
     dataInfo->inData = (uint8_t *)SoftBusMalloc(appInfo->fastTransDataSize + sizeof(SessionHead));
     if (dataInfo->inData == NULL) {
         TRANS_LOGE(TRANS_CTRL, "malloc error");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     uint16_t fastDataSize = appInfo->fastTransDataSize;
     SessionHead *sessionHead = (SessionHead*)dataInfo->inData;
@@ -975,9 +975,9 @@ static int32_t TransProxyByteData(const AppInfo *appInfo, ProxyDataInfo *dataInf
     sessionHead->packetFlag = (appInfo->businessType == BUSINESS_TYPE_BYTE) ? FLAG_BYTES : FLAG_MESSAGE;
     sessionHead->shouldAck = 0;
     if (memcpy_s(dataInfo->inData + sizeof(SessionHead), fastDataSize, appInfo->fastTransData, fastDataSize) != EOK) {
-        TRANS_LOGE(TRANS_CTRL, "memcpy_s error");
+        TRANS_LOGE(TRANS_CTRL, "memcpy_s fastTransData error.");
         SoftBusFree(dataInfo->inData);
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     dataInfo->inLen = fastDataSize + sizeof(SessionHead);
     return SOFTBUS_OK;

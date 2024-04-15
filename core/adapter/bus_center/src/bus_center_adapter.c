@@ -35,15 +35,14 @@
 #define DEFAULT_DEVICE_NAME "OpenHarmony"
 #define OHOS_API_VERSION    "const.ohos.apiversion"
 #define OHOS_BOOT_SN        "ohos.boot.sn"
-#define OS_VERSION          "const.ohos.fullname" /* Read osversion by the string */
+#define OS_VERSION          "const.ohos.fullname"      /* Read osversion by the string */
+#define DEVICE_VERSION      "const.build.ver.physical" /* Read deviceversion by the string */
 #define VERSION_SDK         "ro.build.version.sdk"
 #define UNDEFINED_VALUE     "undefined"
 #define OHOS_DEVICE_SECURITY_LEVEL "const.security.device_security_level"
 #define OHOS_TYPE_UNKNOWN   (-1)
 #define API_VERSION_LEN     10
 #define VERSION_SDK_LEN     10
-#define OH_OS_TYPE          10
-#define HO_OS_TYPE          11
 #define SN_LEN              32
 
 typedef struct {
@@ -229,6 +228,33 @@ int32_t GetCommonOsVersion(char *value, uint32_t len)
         return SOFTBUS_ERR;
     }
     SoftBusFree(osVersion);
+    return SOFTBUS_OK;
+}
+
+int32_t GetCommonDeviceVersion(char *value, uint32_t len)
+{
+    if (value == NULL) {
+        LNN_LOGE(LNN_STATE, "para error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    char *deviceVersion = (char *)SoftBusCalloc(DEVICE_VERSION_BUF_LEN);
+    if (deviceVersion == NULL) {
+        LNN_LOGE(LNN_STATE, "calloc deviceVersion failed!");
+        return SOFTBUS_MEM_ERR;
+    }
+    GetParameter(DEVICE_VERSION, UNDEFINED_VALUE, deviceVersion, DEVICE_VERSION_BUF_LEN);
+    if (strcmp(deviceVersion, UNDEFINED_VALUE) != 0) {
+        if (strcpy_s(value, len, deviceVersion) != EOK) {
+            LNN_LOGE(LNN_STATE, "strcpy_s deviceVersion failed.");
+            SoftBusFree(deviceVersion);
+            return SOFTBUS_MEM_ERR;
+        }
+    } else {
+        LNN_LOGE(LNN_STATE, "get invalid deviceVersion, deviceVersion= %{public}s", UNDEFINED_VALUE);
+        SoftBusFree(deviceVersion);
+        return SOFTBUS_ERR;
+    }
+    SoftBusFree(deviceVersion);
     return SOFTBUS_OK;
 }
 

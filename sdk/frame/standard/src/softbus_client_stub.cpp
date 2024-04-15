@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,6 +73,8 @@ SoftBusClientStub::SoftBusClientStub()
         &SoftBusClientStub::OnRefreshDeviceFoundInner;
     memberFuncMap_[CLIENT_ON_PERMISSION_CHANGE] =
         &SoftBusClientStub::OnClientPermissonChangeInner;
+    memberFuncMap_[CLIENT_SET_CHANNEL_INFO] =
+        &SoftBusClientStub::SetChannelInfoInner;
 }
 
 int32_t SoftBusClientStub::OnRemoteRequest(uint32_t code,
@@ -211,6 +213,12 @@ int32_t SoftBusClientStub::OnChannelQosEvent(int32_t channelId, int32_t channelT
     return TransOnChannelQosEvent(channelId, channelType, eventId, tvCount, tvList);
 }
 
+int32_t SoftBusClientStub::SetChannelInfo(
+    const char *sessionName, int32_t sessionId, int32_t channelId, int32_t channelType)
+{
+    return TransSetChannelInfo(sessionName, sessionId, channelId, channelType);
+}
+
 int32_t SoftBusClientStub::OnChannelOpenedInner(MessageParcel &data, MessageParcel &reply)
 {
     const char *sessionName = data.ReadCString();
@@ -301,6 +309,7 @@ int32_t SoftBusClientStub::OnChannelOpenedInner(MessageParcel &data, MessageParc
         COMM_LOGE(COMM_SDK, "OnChannelOpenedInner data config failed!");
         return SOFTBUS_ERR;
     }
+    data.ReadInt32(channel.linkType);
 
     int ret = OnChannelOpened(sessionName, &channel);
     bool res = reply.WriteInt32(ret);
@@ -456,6 +465,37 @@ int32_t SoftBusClientStub::OnChannelQosEventInner(MessageParcel &data, MessagePa
     bool res = reply.WriteInt32(ret);
     if (!res) {
         COMM_LOGE(COMM_SDK, "OnChannelQosEventInner write reply failed!");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusClientStub::SetChannelInfoInner(MessageParcel &data, MessageParcel &reply)
+{
+    const char *sessionName = data.ReadCString();
+    if (sessionName == nullptr) {
+        COMM_LOGE(COMM_SDK, "read sessionName failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t sessionId;
+    if (!data.ReadInt32(sessionId)) {
+        COMM_LOGE(COMM_SDK, "read sessionId failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t channelId;
+    if (!data.ReadInt32(channelId)) {
+        COMM_LOGE(COMM_SDK, "read channelId failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t channelType;
+    if (!data.ReadInt32(channelType)) {
+        COMM_LOGE(COMM_SDK, "read channelType failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    int ret = SetChannelInfo(sessionName, sessionId, channelId, channelType);
+    bool res = reply.WriteInt32(ret);
+    if (!res) {
+        COMM_LOGE(COMM_SDK, "write reply failed!");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

@@ -32,8 +32,12 @@
 #include "trans_log.h"
 #include "trans_tcp_direct_message.h"
 #include "trans_tcp_direct_sessionconn.h"
+#include "lnn_distributed_net_ledger.h"
 
 #define ID_OFFSET (1)
+#define OHOS_TYPE_UNKNOWN (-1)
+#define OH_OS_TYPE 10
+#define HO_OS_TYPE 11
 
 uint32_t SwitchAuthLinkTypeToFlagType(AuthLinkType type)
 {
@@ -51,7 +55,7 @@ uint32_t SwitchAuthLinkTypeToFlagType(AuthLinkType type)
     }
 }
 
-int32_t GetCipherFlagByAuthId(AuthHandle authHandle, uint32_t *flag, bool *isAuthServer)
+int32_t GetCipherFlagByAuthId(AuthHandle authHandle, uint32_t *flag, bool *isAuthServer, bool isLegacyOs)
 {
     if (flag == NULL || isAuthServer == NULL) {
         TRANS_LOGE(TRANS_CTRL, "param invalid");
@@ -66,9 +70,34 @@ int32_t GetCipherFlagByAuthId(AuthHandle authHandle, uint32_t *flag, bool *isAut
         TRANS_LOGE(TRANS_CTRL, "get authinfo fail authId=%{public}" PRId64, authHandle.authId);
         return SOFTBUS_ERR;
     }
+    // In order to be compatible with legacyOs versions that only has AUTH_P2P
+    if (isLegacyOs && info.type == AUTH_LINK_TYPE_ENHANCED_P2P) {
+        *flag = FLAG_P2P;
+        TRANS_LOGW(TRANS_CTRL,
+            "peer device is legacyOs, change flag form P2P_ENHANCE to P2P flag=0x%{public}x", *flag);
+        return SOFTBUS_OK;
+    }
     *flag = SwitchAuthLinkTypeToFlagType(info.type);
     TRANS_LOGI(TRANS_CTRL, "get auth link type=%{public}d, flag=0x%{public}x", info.type, *flag);
     return SOFTBUS_OK;
+}
+
+static bool IsPeerDeviceLegacyOs(const char *networkId)
+{
+    int32_t osType = OH_OS_TYPE;
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
+    int32_t ret = LnnGetOsTypeByNetworkId(networkId, &osType);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get osType by networkId=%{public}s failed, ret=%{public}d", anonyNetworkId, ret);
+        AnonymizeFree(anonyNetworkId);
+        return false;
+    }
+    TRANS_LOGI(TRANS_CTRL, "peer device osType=%{public}d networkId=%{public}s", osType, anonyNetworkId);
+    AnonymizeFree(anonyNetworkId);
+
+    // peer device legacyOs when osType is not OH_OS_TYPE
+    return (osType == OH_OS_TYPE) ? false : true;
 }
 
 static int32_t StartVerifySession(SessionConn *conn)
@@ -81,7 +110,8 @@ static int32_t StartVerifySession(SessionConn *conn)
     SetSessionKeyByChanId(conn->channelId, conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey));
     bool isAuthServer = false;
     uint32_t cipherFlag = FLAG_WIFI;
-    if (GetCipherFlagByAuthId(conn->authHandle, &cipherFlag, &isAuthServer)) {
+    bool isLegacyOs = IsPeerDeviceLegacyOs(conn->appInfo.peerNetWorkId);
+    if (GetCipherFlagByAuthId(conn->authHandle, &cipherFlag, &isAuthServer, isLegacyOs)) {
         TRANS_LOGE(TRANS_CTRL, "get cipher flag failed");
         return SOFTBUS_TRANS_GET_CIPHER_FAILED;
     }
@@ -143,7 +173,7 @@ static int32_t CreateSessionConnNode(ListenerModule module, int fd, int32_t chan
         EOK) {
         TRANS_LOGE(TRANS_CTRL, "copy ip to app info failed.");
         SoftBusFree(conn);
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     conn->appInfo.protocol = clientAddr->socketOption.protocol;
 
@@ -151,7 +181,7 @@ static int32_t CreateSessionConnNode(ListenerModule module, int fd, int32_t chan
     if (strcpy_s(conn->appInfo.myData.authState, sizeof(conn->appInfo.myData.authState), authState) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "copy auth state to app info failed.");
         SoftBusFree(conn);
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     if (TransTdcAddSessionConn(conn) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "add session conn node failed.");

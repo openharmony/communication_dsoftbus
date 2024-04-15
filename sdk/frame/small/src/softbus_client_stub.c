@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,6 +61,7 @@ static struct SoftBusIpcClientCmd g_softBusIpcClientCmdTbl[] = {
     { CLIENT_ON_CHANNEL_OPENFAILED, ClientOnChannelOpenfailed },
     { CLIENT_ON_CHANNEL_CLOSED, ClientOnChannelClosed },
     { CLIENT_ON_CHANNEL_MSGRECEIVED, ClientOnChannelMsgreceived },
+    { CLIENT_SET_CHANNEL_INFO, ClientSetChannelInfo },
 };
 
 static int ClientIpcInterfaceMsgHandle(uint32_t code, IpcIo *data, IpcIo *reply, MessageOption option)

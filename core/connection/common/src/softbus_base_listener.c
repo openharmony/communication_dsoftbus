@@ -208,6 +208,13 @@ static SoftbusListenerNode *CreateSpecifiedListenerModule(ListenerModule module)
 
 int32_t InitBaseListener(void)
 {
+    // flag : if the client and server are in the same process, this function can be executed only once.
+    static bool flag = false;
+    if (flag) {
+        return SOFTBUS_OK;
+    }
+    flag = true;
+
     // stop select thread need re-enter lock
     SoftBusMutexAttr attr = {
         .type = SOFTBUS_MUTEX_RECURSIVE,

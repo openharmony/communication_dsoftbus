@@ -600,18 +600,19 @@ HWTEST_F(AuthSessionMessageTest, UnpackDeviceInfoMessage_TEST_001, TestSize.Leve
 }
 
 /*
- * @tc.name: IsFlushDevicePacket_TEST_001
- * @tc.desc: IsFlushDevicePacket test
+ * @tc.name: IsDeviceMessagePacket_TEST_001
+ * @tc.desc: IsDeviceMessagePacket test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthSessionMessageTest, IsFlushDevicePacket_TEST_001, TestSize.Level1)
+HWTEST_F(AuthSessionMessageTest, IsDeviceMessagePacket_TEST_001, TestSize.Level1)
 {
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    DeviceMessageParse messageParse = { 0 };
     connInfo.type = AUTH_LINK_TYPE_BLE;
-    EXPECT_TRUE(!IsFlushDevicePacket(&connInfo, nullptr, nullptr, true));
+    EXPECT_TRUE(!IsDeviceMessagePacket(&connInfo, nullptr, nullptr, true, &messageParse));
     connInfo.type = AUTH_LINK_TYPE_WIFI;
-    EXPECT_TRUE(!IsFlushDevicePacket(&connInfo, nullptr, nullptr, true));
+    EXPECT_TRUE(!IsDeviceMessagePacket(&connInfo, nullptr, nullptr, true, &messageParse));
 }
 } // namespace OHOS

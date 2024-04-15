@@ -76,5 +76,10 @@ int32_t LnnHbMediumMgrSetParam(const LnnHeartbeatMediumParam *param)
 {
     return HeartBeatCtrlDepsInterface()->LnnHbMediumMgrSetParam(param);
 }
+
+int32_t AuthSendKeepAlive(const char *uuid, ModeCycle cycle)
+{
+    return HeartBeatCtrlDepsInterface()->AuthSendKeepAlive(uuid, cycle);
+}
 }
 } // namespace OHOS

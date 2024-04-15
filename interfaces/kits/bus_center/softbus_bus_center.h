@@ -156,6 +156,14 @@ extern "C" {
 #define OS_VERSION_BUF_LEN 128
 
 /**
+ * @brief Indicates the length of device version buffer, including the terminating null character <b>\0</b>.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+#define DEVICE_VERSION_BUF_LEN 128
+
+/**
  * @brief Enumerates keys for an online device.
  * The key can be obtained via {@link GetNodeKeyInfo}.
  *
@@ -513,6 +521,18 @@ typedef struct {
 } MetaNodeInfo;
 
 /**
+ * @brief Defines an action mode, see {@link ModeAction}.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+typedef enum {
+    FLUSH_DEVICE_LIST,           /**< The action of flush device list */
+    CHANGE_TCP_KEEPALIVE,        /**< The action of change tcp keepalive */
+    ACTION_MAX                   /**< The action max */
+} ModeAction;
+
+/**
  * @brief Defines heartbeat mode parameter, see {@link GearMode}.
  *
  * @since 1.0
@@ -522,6 +542,7 @@ typedef struct {
     ModeCycle cycle;        /**< Heartbeat mode cycle */
     ModeDuration duration;  /**< Heartbeat mode duration */
     bool wakeupFlag;        /**< Heartbeat wakeup peer device or not */
+    ModeAction action;      /**< Heartbeat mode action */
 } GearMode;
 
 /**

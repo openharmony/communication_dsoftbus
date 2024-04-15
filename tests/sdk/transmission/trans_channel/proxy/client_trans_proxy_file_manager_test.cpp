@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "securec.h"
 
 #include "client_trans_proxy_file_manager.c"
+#include "client_trans_proxy_manager.c"
 #include "client_trans_session_manager.c"
 #include "client_trans_file_listener.h"
 #include "softbus_def.h"
@@ -66,6 +67,7 @@ char g_writeData[128] = "test111111111111111111111111111111111111111111111111111
 const char *g_rootDir = "/data";
 const char *g_destFile = "test.txt";
 char g_recvFile[] = "/data/test.txt";
+const char *g_sessionKey = "www.huaweitest.com";
 
 SessionAttribute g_attr = {
     .dataType = TYPE_MESSAGE,
@@ -182,10 +184,11 @@ void ClientTransProxyFileManagerTest::SetUpTestCase(void)
     g_fileSs = fopen(g_testProxyFileList[1], "w+");
     EXPECT_NE(g_fileSs, nullptr);
     ret = fprintf(g_fileSs, "%s", "Hello world!\n");
-    EXPECT_LT(ret, 0);
+    EXPECT_LT(0, ret);
     g_fd = open(TEST_FILE_PATH, O_RDWR | O_CREAT, S_IRWXU);
     EXPECT_NE(g_fd, -1);
     write(g_fd, g_writeData, sizeof(g_writeData));
+    ClientTransProxyListInit();
 }
 
 void ClientTransProxyFileManagerTest::TearDownTestCase(void)
@@ -207,6 +210,7 @@ void ClientTransProxyFileManagerTest::TearDownTestCase(void)
     ret = remove(TEST_FILE_PATH);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ClinetTransProxyFileManagerDeinit();
+    ClientTransProxyListDeinit();
 }
 
 /**
@@ -273,14 +277,25 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransRecvFileFrameDataTest001, T
     int ret = ProcessRecvFileFrameData(sessionId, channelId, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
+    ChannelInfo *channel = (ChannelInfo *)SoftBusMalloc(sizeof(ChannelInfo));
+    ASSERT_TRUE(channel != nullptr);
+    channel->channelId = 1;
+    channel->isEncrypt = 0;
+    channel->linkType = LANE_BR;
+    channel->sessionKey = (char *)g_sessionKey;
+    ret = ClientTransProxyAddChannelInfo(ClientTransProxyCreateChannelInfo(channel));
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(channel);
     FileFrame fileFrame;
-    fileFrame.frameLength = PROXY_MAX_PACKET_SIZE + 1;
+    fileFrame.frameLength = PROXY_BR_MAX_PACKET_SIZE + 1;
     ret = ProcessRecvFileFrameData(sessionId, channelId, &fileFrame);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     fileFrame.frameType = TRANS_SESSION_FILE_FIRST_FRAME;
     ret = ProcessRecvFileFrameData(sessionId, channelId, &fileFrame);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = ClientTransProxyDelChannelInfo(1);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
@@ -294,11 +309,20 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransRecvFileFrameDataTest002, T
     int32_t channelId = 1;
     int32_t sessionId = 1;
 
+    ChannelInfo *channel = (ChannelInfo *)SoftBusMalloc(sizeof(ChannelInfo));
+    ASSERT_TRUE(channel != nullptr);
+    channel->channelId = 1;
+    channel->isEncrypt = 0;
+    channel->linkType = LANE_BR;
+    channel->sessionKey = (char *)g_sessionKey;
+    int32_t ret = ClientTransProxyAddChannelInfo(ClientTransProxyCreateChannelInfo(channel));
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(channel);
     FileFrame fileFrame;
-    fileFrame.frameLength = PROXY_MAX_PACKET_SIZE - 1;
+    fileFrame.frameLength = PROXY_BR_MAX_PACKET_SIZE - 1;
  
     fileFrame.frameType = TRANS_SESSION_FILE_FIRST_FRAME;
-    int ret = ProcessRecvFileFrameData(sessionId, channelId, &fileFrame);
+    ret = ProcessRecvFileFrameData(sessionId, channelId, &fileFrame);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     fileFrame.frameType = TRANS_SESSION_FILE_ONGOINE_FRAME;
@@ -336,6 +360,8 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransRecvFileFrameDataTest002, T
     fileFrame.frameType = -1;
     ret = ProcessRecvFileFrameData(sessionId, channelId, &fileFrame);
     EXPECT_EQ(SOFTBUS_ERR, ret);
+    ret = ClientTransProxyDelChannelInfo(1);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
@@ -459,13 +485,16 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetAndCheckFileSizeTes
 {
     uint64_t fileSize = 0;
     uint64_t frameNum = 0;
-    int ret = GetAndCheckFileSize(nullptr, &fileSize, &frameNum, APP_INFO_FILE_FEATURES_SUPPORT);
+    int ret =
+        GetAndCheckFileSize(nullptr, &fileSize, &frameNum, APP_INFO_FILE_FEATURES_SUPPORT, PROXY_BLE_MAX_PACKET_SIZE);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = GetAndCheckFileSize(g_testProxyFileList[0], &fileSize, &frameNum, APP_INFO_FILE_FEATURES_SUPPORT);
+    ret = GetAndCheckFileSize(
+        g_testProxyFileList[0], &fileSize, &frameNum, APP_INFO_FILE_FEATURES_SUPPORT, PROXY_BLE_MAX_PACKET_SIZE);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = GetAndCheckFileSize(g_testProxyFileList[1], &fileSize, &frameNum, APP_INFO_FILE_FEATURES_NO_SUPPORT);
+    ret = GetAndCheckFileSize(
+        g_testProxyFileList[1], &fileSize, &frameNum, APP_INFO_FILE_FEATURES_NO_SUPPORT, PROXY_BLE_MAX_PACKET_SIZE);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -660,6 +689,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyPackFileDataTest001, T
     uint64_t fileOffset = 0;
     SendListenerInfo info;
     info.fd = g_fd;
+    info.packetSize = PROXY_BLE_MAX_PACKET_SIZE;
     uint32_t seq = TEST_SEQ;
     int64_t len = PackReadFileData(&fileFrame, readLength, fileOffset, &info);
     EXPECT_TRUE(len == -1);
@@ -926,6 +956,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileTransStartInfoTest
     info.crc = APP_INFO_FILE_FEATURES_SUPPORT;
     info.sessionId = 1;
     info.channelId = 1;
+    info.packetSize = PROXY_BLE_MAX_PACKET_SIZE;
 
     ret = PackFileTransStartInfo(&fileFrame, g_testProxyFileList[0], TEST_FILE_TEST_TXT_FILE, &info);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -1660,6 +1691,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyPackFileDataTest002, T
     uint64_t fileOffset = 0;
     SendListenerInfo info;
     info.fd = g_fd;
+    info.packetSize = PROXY_BLE_MAX_PACKET_SIZE;
     uint32_t seq = TEST_SEQ;
     int64_t len = PackReadFileData(&fileFrame, readLength, fileOffset, &info);
     EXPECT_NE(SOFTBUS_ERR, len);
@@ -1853,5 +1885,50 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyChannelSendFileTest001
     fileCnt = 12; // 为满足if条件语句大于10，所以赋值12
     ret = TransProxyChannelSendFile(channelId, sFileList, dFileList, fileCnt);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: CheckFrameLengthTest
+ * @tc.desc: client trans proxy channel send file test, use normal and error parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyFileManagerTest, CheckFrameLengthTest, TestSize.Level0)
+{
+    int32_t ret = CheckFrameLength(1, PROXY_BR_MAX_PACKET_SIZE);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+
+    ChannelInfo *channel1 = (ChannelInfo *)SoftBusMalloc(sizeof(ChannelInfo));
+    ASSERT_TRUE(channel1 != nullptr);
+    channel1->channelId = 1;
+    channel1->isEncrypt = 0;
+    channel1->linkType = LANE_BR;
+    channel1->sessionKey = (char *)g_sessionKey;
+    ret = ClientTransProxyAddChannelInfo(ClientTransProxyCreateChannelInfo(channel1));
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = CheckFrameLength(1, PROXY_BR_MAX_PACKET_SIZE + 1);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = CheckFrameLength(1, PROXY_BR_MAX_PACKET_SIZE - 1);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ChannelInfo *channel2 = (ChannelInfo *)SoftBusMalloc(sizeof(ChannelInfo));
+    ASSERT_TRUE(channel2 != nullptr);
+    channel2->channelId = 2;
+    channel2->isEncrypt = 0;
+    channel2->linkType = LANE_BLE_DIRECT;
+    channel2->sessionKey = (char *)g_sessionKey;
+    ret = ClientTransProxyAddChannelInfo(ClientTransProxyCreateChannelInfo(channel2));
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = CheckFrameLength(2, PROXY_BLE_MAX_PACKET_SIZE + 1);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = CheckFrameLength(2, PROXY_BLE_MAX_PACKET_SIZE - 1);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = ClientTransProxyDelChannelInfo(1);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = ClientTransProxyDelChannelInfo(2);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(channel1);
+    SoftBusFree(channel2);
 }
 } // namespace OHOS

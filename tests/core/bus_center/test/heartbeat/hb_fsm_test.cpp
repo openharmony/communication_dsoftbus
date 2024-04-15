@@ -391,19 +391,19 @@ HWTEST_F(HeartBeatFSMTest, ProcessLostHeartbeatTest_01, TestSize.Level1)
     const char *udid = "testuuid";
     EXPECT_CALL(distriLedgerMock, LnnConvertDLidToUdid).WillRepeatedly(Return(udid));
     ON_CALL(lnnNetLedgerMock, LnnGetLocalNumU64Info).WillByDefault(Return(SOFTBUS_OK));
-    int32_t ret = ProcessLostHeartbeat(nullptr, CONNECTION_ADDR_BLE, false);
+    int32_t ret = ProcessLostHeartbeat(nullptr, HEARTBEAT_TYPE_BLE_V0, false);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     EXPECT_CALL(distriLedgerMock, LnnGetOnlineStateById).WillOnce(Return(false)).WillRepeatedly(Return(true));
     EXPECT_CALL(lnnNetLedgerMock, LnnGetRemoteNodeInfoById)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    ret = ProcessLostHeartbeat(TEST_NETWORK_ID, CONNECTION_ADDR_BLE, false);
+    ret = ProcessLostHeartbeat(TEST_NETWORK_ID, HEARTBEAT_TYPE_BLE_V0, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = ProcessLostHeartbeat(TEST_NETWORK_ID, CONNECTION_ADDR_BR, false);
+    ret = ProcessLostHeartbeat(TEST_NETWORK_ID, HEARTBEAT_TYPE_BLE_V0, false);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = ProcessLostHeartbeat(TEST_NETWORK_ID, CONNECTION_ADDR_BLE, false);
+    ret = ProcessLostHeartbeat(TEST_NETWORK_ID, HEARTBEAT_TYPE_BLE_V0, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = ProcessLostHeartbeat(TEST_NETWORK_ID, CONNECTION_ADDR_ETH, false);
+    ret = ProcessLostHeartbeat(TEST_NETWORK_ID, HEARTBEAT_TYPE_TCP_FLUSH, false);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     SoftBusSleepMs(20);
 }
