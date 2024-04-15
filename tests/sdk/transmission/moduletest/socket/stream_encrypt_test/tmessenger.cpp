@@ -22,6 +22,8 @@
 #include "tmessenger.h"
 
 namespace OHOS {
+static constexpr uint32_t WAIT_RESP_TIME = 1;
+
 std::string Request::Encode() const
 {
     return std::to_string(static_cast<int32_t>(cmd_));
@@ -194,9 +196,9 @@ int32_t TMessenger::StartConnect(const std::string &pkgName, const std::string &
     }
 
     SocketInfo info = {
-        .pkgName = (char *)(pkgName.c_str()),
-        .name = (char *)(myName.c_str()),
-        .peerName = (char *)(peerName.c_str()),
+        .pkgName = const_cast<char *>(pkgName.c_str()),
+        .name = const_cast<char *>(myName.c_str()),
+        .peerName = const_cast<char *>(peerName.c_str()),
         .peerNetworkId = nullptr,
         .dataType = DATA_TYPE_MESSAGE,
     };
@@ -242,7 +244,7 @@ void TMessenger::OnBind(int32_t socket, PeerSocketInfo info)
 
 void TMessenger::OnMessage(int32_t socket, const void *data, uint32_t dataLen)
 {
-    std::string result((char *)data, dataLen);
+    std::string result(static_cast<const char *>(data), dataLen);
     TMessenger::GetInstance().OnMessageRecv(result);
 }
 
@@ -290,6 +292,7 @@ void TMessenger::OnMessageRecv(const std::string &result)
 void TMessenger::OnRequest()
 {
     std::thread t([&] {
+        std::this_thread::sleep_for(std::chrono::seconds(WAIT_RESP_TIME));
         std::shared_ptr<Response> resp = onQuery_();
         Message msg { *resp };
         int ret = Send(msg);
