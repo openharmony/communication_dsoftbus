@@ -74,7 +74,7 @@ static int32_t FillRspSettings(NSTACKX_ResponseSettings *settings, const DeviceI
     }
     return SOFTBUS_OK;
 EXIT:
-    if(settings->businessData != NULL) {
+    if (settings->businessData != NULL) {
         SoftBusFree(settings->businessData);
         settings->businessData = NULL;
     }
