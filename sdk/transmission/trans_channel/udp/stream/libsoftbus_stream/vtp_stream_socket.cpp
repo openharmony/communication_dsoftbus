@@ -483,6 +483,7 @@ void VtpStreamSocket::DestroyStreamSocket()
         return;
     }
     if (listenFd_ != -1) {
+        TRANS_LOGI(TRANS_STREAM, "listenFd_ enter FtClose");
         FtClose(listenFd_);
         listenFd_ = -1;
     }
@@ -490,11 +491,13 @@ void VtpStreamSocket::DestroyStreamSocket()
     if (streamFd_ != -1) {
         RemoveStreamSocketLock(streamFd_); /* remove the socket lock from the map */
         RemoveStreamSocketListener(streamFd_); /* remove the socket listener from the map */
+        TRANS_LOGI(TRANS_STREAM, "streamFd_ enter FtClose");
         FtClose(streamFd_);
         streamFd_ = -1;
     }
 
     if (epollFd_ != -1) {
+        TRANS_LOGI(TRANS_STREAM, "epollFd_ enter FtClose");
         FtClose(epollFd_);
         epollFd_ = -1;
     }

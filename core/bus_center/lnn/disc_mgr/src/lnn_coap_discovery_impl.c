@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "anonymizer.h"
 #include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "lnn_log.h"
@@ -51,13 +52,17 @@ static void DeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions 
         return;
     }
     (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
+    char *anonyDevId = NULL;
+    Anonymize(device->devId, &anonyDevId);
     // devId format is hex hash string here
-    LNN_LOGI(LNN_BUILDER, "DeviceFound devName=%{public}s, devId=%{public}s", device->devName, device->devId);
+    LNN_LOGI(LNN_BUILDER, "DeviceFound devName=%{public}s, devId=%{public}s", device->devName, anonyDevId);
     if (!AuthIsPotentialTrusted(device)) {
         LNN_LOGW(LNN_BUILDER, "discovery device is not potential trusted, devId=%{public}s, "
-            "accountHash=%{public}02X%{public}02X", device->devId, device->accountHash[0], device->accountHash[1]);
+            "accountHash=%{public}02X%{public}02X", anonyDevId, device->accountHash[0], device->accountHash[1]);
+        AnonymizeFree(anonyDevId);
         return;
     }
+    AnonymizeFree(anonyDevId);
     if (device->addr[0].type != CONNECTION_ADDR_WLAN && device->addr[0].type != CONNECTION_ADDR_ETH) {
         LNN_LOGE(LNN_BUILDER, "discovery get invalid addrType=%{public}d", device->addr[0].type);
         return;

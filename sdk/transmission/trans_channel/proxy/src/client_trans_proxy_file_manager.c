@@ -25,6 +25,7 @@
 #include "client_trans_pending.h"
 #include "client_trans_proxy_manager.h"
 #include "client_trans_session_manager.h"
+#include "lnn_lane_interface.h"
 #include "softbus_adapter_errcode.h"
 #include "softbus_adapter_file.h"
 #include "softbus_adapter_mem.h"
@@ -263,7 +264,7 @@ static int64_t PackReadFileData(FileFrame *fileFrame, uint64_t readLength, uint6
     if (info->crc == APP_INFO_FILE_FEATURES_SUPPORT) {
         uint64_t dataLen = len + FRAME_DATA_SEQ_OFFSET;
         fileFrame->frameLength = FRAME_HEAD_LEN + dataLen + FRAME_CRC_LEN;
-        if (fileFrame->frameLength > PROXY_MAX_PACKET_SIZE) {
+        if (fileFrame->frameLength > info->packetSize) {
             TRANS_LOGE(TRANS_FILE, "frameLength invalid. frameLength=%{public}u", fileFrame->frameLength);
             return SOFTBUS_ERR;
         }
@@ -276,7 +277,7 @@ static int64_t PackReadFileData(FileFrame *fileFrame, uint64_t readLength, uint6
         info->checkSumCRC += crc;
     } else {
         fileFrame->frameLength = FRAME_DATA_SEQ_OFFSET + len;
-        if (fileFrame->frameLength > PROXY_MAX_PACKET_SIZE) {
+        if (fileFrame->frameLength > info->packetSize) {
             TRANS_LOGE(TRANS_FILE, "frameLength invalid. frameLength=%{public}u", fileFrame->frameLength);
             return SOFTBUS_ERR;
         }
@@ -295,7 +296,7 @@ static int64_t PackReadFileRetransData(FileFrame *fileFrame, uint32_t seq, uint6
     }
     uint64_t dataLen = len + FRAME_DATA_SEQ_OFFSET;
     fileFrame->frameLength = FRAME_HEAD_LEN + dataLen + FRAME_CRC_LEN;
-    if (fileFrame->frameLength > PROXY_MAX_PACKET_SIZE) {
+    if (fileFrame->frameLength > info->packetSize) {
         TRANS_LOGE(TRANS_FILE, "frameLength invalid. frameLength=%{public}u", fileFrame->frameLength);
         return SOFTBUS_ERR;
     }
@@ -362,14 +363,14 @@ static int32_t RetransFileFrameBySeq(const SendListenerInfo *info, int32_t seq)
         return SOFTBUS_INVALID_PARAM;
     }
     FileFrame fileFrame = {0};
-    fileFrame.data = (uint8_t *)SoftBusCalloc(PROXY_MAX_PACKET_SIZE);
+    fileFrame.data = (uint8_t *)SoftBusCalloc(info->packetSize);
     if (fileFrame.data == NULL) {
         TRANS_LOGE(TRANS_FILE, "data calloc fail");
         return SOFTBUS_MALLOC_ERR;
     }
     fileFrame.magic = FILE_MAGIC_NUMBER;
     fileFrame.fileData = fileFrame.data + FRAME_HEAD_LEN;
-    uint64_t frameDataSize = PROXY_MAX_PACKET_SIZE - FRAME_HEAD_LEN - FRAME_DATA_SEQ_OFFSET - FRAME_CRC_LEN;
+    uint64_t frameDataSize = info->packetSize - FRAME_HEAD_LEN - FRAME_DATA_SEQ_OFFSET - FRAME_CRC_LEN;
     uint64_t fileOffset = frameDataSize * ((uint32_t)seq - 1);
     if (fileOffset >= info->fileSize) {
         TRANS_LOGE(TRANS_FILE, "retrans file frame failed, seq=%{public}d", seq);
@@ -668,7 +669,7 @@ static int32_t PackFileTransStartInfo(FileFrame *fileFrame, const char *destFile
     if (info->crc == APP_INFO_FILE_FEATURES_SUPPORT) {
         uint64_t dataLen = len + FRAME_DATA_SEQ_OFFSET + sizeof(uint64_t);
         fileFrame->frameLength = FRAME_HEAD_LEN + dataLen;
-        if (fileFrame->frameLength > PROXY_MAX_PACKET_SIZE) {
+        if (fileFrame->frameLength > info->packetSize) {
             TRANS_LOGE(TRANS_FILE, "frameLength overSize");
             return SOFTBUS_ERR;
         }
@@ -676,7 +677,7 @@ static int32_t PackFileTransStartInfo(FileFrame *fileFrame, const char *destFile
         (*(uint32_t *)(fileFrame->data)) = fileFrame->magic;
         (*(uint64_t *)(fileFrame->data + FRAME_MAGIC_OFFSET)) = dataLen;
         (*(uint32_t *)(fileFrame->fileData)) =
-            PROXY_MAX_PACKET_SIZE - FRAME_HEAD_LEN - FRAME_DATA_SEQ_OFFSET - FRAME_CRC_LEN;
+            info->packetSize - FRAME_HEAD_LEN - FRAME_DATA_SEQ_OFFSET - FRAME_CRC_LEN;
         (*(uint64_t *)(fileFrame->fileData + FRAME_DATA_SEQ_OFFSET)) = fileSize;
         if (memcpy_s(fileFrame->fileData + FRAME_DATA_SEQ_OFFSET + sizeof(uint64_t), len, destFile, len) != EOK) {
             return SOFTBUS_MEM_ERR;
@@ -684,7 +685,7 @@ static int32_t PackFileTransStartInfo(FileFrame *fileFrame, const char *destFile
     } else {
         // seq(4byte) + fileName
         fileFrame->frameLength = FRAME_DATA_SEQ_OFFSET + len;
-        if (fileFrame->frameLength > PROXY_MAX_PACKET_SIZE) {
+        if (fileFrame->frameLength > info->packetSize) {
             return SOFTBUS_ERR;
         }
         (*(int32_t *)(fileFrame->fileData)) = info->channelId;
@@ -750,7 +751,8 @@ static int32_t UnpackFileTransStartInfo(FileFrame *fileFrame, const FileRecipien
     return SOFTBUS_OK;
 }
 
-static int32_t GetAndCheckFileSize(const char *sourceFile, uint64_t *fileSize, uint64_t *frameNum, int32_t crc)
+static int32_t GetAndCheckFileSize(
+    const char *sourceFile, uint64_t *fileSize, uint64_t *frameNum, int32_t crc, uint32_t packetSize)
 {
     if ((sourceFile == NULL) || (fileSize == NULL) || (frameNum == NULL)) {
         TRANS_LOGE(TRANS_FILE, "get file size num params invalid");
@@ -767,7 +769,7 @@ static int32_t GetAndCheckFileSize(const char *sourceFile, uint64_t *fileSize, u
         return SOFTBUS_FILE_ERR;
     }
 
-    uint64_t oneFrameSize = PROXY_MAX_PACKET_SIZE - FRAME_DATA_SEQ_OFFSET;
+    uint64_t oneFrameSize = packetSize - FRAME_DATA_SEQ_OFFSET;
     if (crc == APP_INFO_FILE_FEATURES_SUPPORT) {
         oneFrameSize -= (FRAME_HEAD_LEN + FRAME_CRC_LEN);
     }
@@ -989,7 +991,7 @@ static int32_t FileToFrame(SendListenerInfo *sendInfo, uint64_t frameNum,
     const char *destFile, uint64_t fileSize)
 {
     FileFrame fileFrame = {0};
-    fileFrame.data = (uint8_t *)SoftBusCalloc(PROXY_MAX_PACKET_SIZE);
+    fileFrame.data = (uint8_t *)SoftBusCalloc(sendInfo->packetSize);
     if (fileFrame.data == NULL) {
         return SOFTBUS_ERR;
     }
@@ -997,7 +999,7 @@ static int32_t FileToFrame(SendListenerInfo *sendInfo, uint64_t frameNum,
     fileFrame.fileData = fileFrame.data;
     uint64_t fileOffset = 0;
     uint64_t remainedSendSize = fileSize;
-    uint64_t frameDataSize = PROXY_MAX_PACKET_SIZE - FRAME_DATA_SEQ_OFFSET;
+    uint64_t frameDataSize = sendInfo->packetSize - FRAME_DATA_SEQ_OFFSET;
     if (sendInfo->crc == APP_INFO_FILE_FEATURES_SUPPORT) {
         fileFrame.fileData = fileFrame.data + FRAME_HEAD_LEN;
         frameDataSize -= (FRAME_HEAD_LEN + FRAME_CRC_LEN);
@@ -1036,7 +1038,7 @@ static int32_t FileToFrame(SendListenerInfo *sendInfo, uint64_t frameNum,
         } else if (sendInfo->fileListener.sendListener.OnSendFileProcess != NULL) {
             sendInfo->fileListener.sendListener.OnSendFileProcess(sendInfo->channelId, fileOffset, fileSize);
         }
-        (void)memset_s(fileFrame.data, PROXY_MAX_PACKET_SIZE, 0, PROXY_MAX_PACKET_SIZE);
+        (void)memset_s(fileFrame.data, sendInfo->packetSize, 0, sendInfo->packetSize);
     }
     TRANS_LOGI(TRANS_FILE, "send crc check sum");
     if (SendFileCrcCheckSum(sendInfo) != SOFTBUS_OK) {
@@ -1072,7 +1074,7 @@ static int32_t FileToFrameAndSendFile(SendListenerInfo *sendInfo, const char *so
     }
     uint64_t fileSize = 0;
     uint64_t frameNum = 0;
-    if (GetAndCheckFileSize(absSrcPath, &fileSize, &frameNum, sendInfo->crc) != SOFTBUS_OK) {
+    if (GetAndCheckFileSize(absSrcPath, &fileSize, &frameNum, sendInfo->crc, sendInfo->packetSize) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE,
             "absSrcPath size err. channelId=%{public}d, absSrcPath=%{public}s", sendInfo->channelId, absSrcPath);
         SoftBusFree(absSrcPath);
@@ -1268,7 +1270,7 @@ static int32_t GetSendListenerInfoByChannelId(int32_t channelId, SendListenerInf
         TRANS_LOGE(TRANS_FILE, "get sessionId failed, channelId=%{public}d", channelId);
         return SOFTBUS_ERR;
     }
-    char sessionName[SESSION_NAME_SIZE_MAX] = {0};
+    char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
     if (ClientGetSessionDataById(sessionId, sessionName, SESSION_NAME_SIZE_MAX, KEY_SESSION_NAME) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "get sessionId name failed");
         return SOFTBUS_ERR;
@@ -1280,6 +1282,17 @@ static int32_t GetSendListenerInfoByChannelId(int32_t channelId, SendListenerInf
     if (TransGetFileListener(sessionName, &(info->fileListener)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "get file listener failed");
         return SOFTBUS_ERR;
+    }
+    int32_t linkType;
+    ret = ClientTransProxyGetLinkTypeByChannelId(channelId, &linkType);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_FILE, "client trans proxy get info by ChannelId fail");
+        return ret;
+    }
+    if (linkType == LANE_BR) {
+        info->packetSize = PROXY_BR_MAX_PACKET_SIZE;
+    } else {
+        info->packetSize = PROXY_BLE_MAX_PACKET_SIZE;
     }
     info->channelId = channelId;
     info->sessionId = sessionId;
@@ -1542,7 +1555,7 @@ static int32_t UpdateFileReceivePath(int32_t sessionId, FileListener *fileListen
     if (strcpy_s(fileListener->rootDir, FILE_RECV_ROOT_DIR_SIZE_MAX, absPath) != EOK) {
         TRANS_LOGE(TRANS_FILE, "failed to strcpy the file receive path");
         SoftBusFree(absPath);
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     SoftBusFree(absPath);
     return SOFTBUS_OK;
@@ -2212,17 +2225,30 @@ static int32_t ProcessFileAckResponse(int32_t sessionId, const FileFrame *frame)
     return SOFTBUS_NOT_FIND;
 }
 
+static int32_t CheckFrameLength(int32_t channelId, uint32_t frameLength)
+{
+    int32_t linkType;
+    int32_t ret = ClientTransProxyGetLinkTypeByChannelId(channelId, &linkType);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_FILE, "client trans proxy get info by ChannelId fail");
+        return ret;
+    }
+    uint32_t packetSize = linkType == LANE_BR ? PROXY_BR_MAX_PACKET_SIZE : PROXY_BLE_MAX_PACKET_SIZE;
+    return frameLength > packetSize ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+}
+
 int32_t ProcessRecvFileFrameData(int32_t sessionId, int32_t channelId, const FileFrame *oneFrame)
 {
     if (oneFrame == NULL) {
         TRANS_LOGE(TRANS_FILE, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (oneFrame->frameLength > PROXY_MAX_PACKET_SIZE) {
-        TRANS_LOGE(TRANS_FILE, "len > PROXY_MAX_PACKET_SIZE");
-        return SOFTBUS_ERR;
-    }
     int32_t ret;
+    ret = CheckFrameLength(channelId, oneFrame->frameLength);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_FILE, "frameLength is invalid;");
+        return ret;
+    }
     switch (oneFrame->frameType) {
         case TRANS_SESSION_FILE_FIRST_FRAME:
             TRANS_LOGI(TRANS_FILE, "create file from frame start sessionId=%{public}d", sessionId);

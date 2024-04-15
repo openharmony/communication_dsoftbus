@@ -120,6 +120,10 @@ enum SoftBusErrNo {
     /* internal error */
     SOFTBUS_ERR,
 
+    SOFTBUS_NOT_LOGIN, // not login hw account
+    SOFTBUS_NOT_SAME_ACCOUNT, // check whether the accounts are the same
+    SOFTBUS_NO_ONLINE_DEVICE, // there is no network online device
+
     /* errno begin: -((203 << 21) | (5 << 16) | 0xFFFF) */
     SOFTBUS_TRANS_ERR_BASE = SOFTBUS_ERRNO(TRANS_SUB_MODULE_CODE),
     SOFTBUS_TRANS_INVALID_SESSION_ID,
@@ -238,13 +242,14 @@ enum SoftBusErrNo {
     SOFTBUS_TRANS_DECRYPT_ERR,
     SOFTBUS_TRANS_BAD_KEY, // Send badkey notification for offline events
     SOFTBUS_TRANS_CHECK_PID_ERROR,
-    SOFTBUS_TRANS_NOT_LOGIN,
-    SOFTBUS_TRANS_NOT_SAME_ACCOUNT,
     SOFTBUS_TRANS_GET_LOCAL_UID_FAIL, // get local userId fail
     SOFTBUS_TRANS_MSG_BUILD_BC_PARAM_FAIL, // build broadcast params fail
     SOFTBUS_TRANS_MSG_BUILD_PAYLOAD_FAIL, // build broadcast payload fail
     SOFTBUS_TRANS_MSG_INIT_FAIL, // notification message init fail
     SOFTBUS_TRANS_MSG_REPLACE_PAYLOAD_FAIL, // replace payload without stopping the broadcast fail
+    SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND,
+    SOFTBUS_TRANS_TDC_CHANNEL_ALREADY_EXIST, // receive repeat tdc channel open request
+    SOFTBUS_TRANS_UDP_SET_CHANNEL_FAILED,
 
     /* errno begin: -((203 << 21) | (3 << 16) | 0xFFFF) */
     SOFTBUS_AUTH_ERR_BASE = SOFTBUS_ERRNO(AUTH_SUB_MODULE_CODE),
@@ -272,7 +277,7 @@ enum SoftBusErrNo {
     SOFTBUS_AUTH_CONN_START_ERR,
     SOFTBUS_AUTH_START_ERR,
     SOFTBUS_AUTH_EXCHANGE_DEVICE_INFO_START_ERR,
-    
+
     /* errno begin: -((203 << 21) | (4 << 16) | 0xFFFF) */
     SOFTBUS_NETWORK_ERR_BASE = SOFTBUS_ERRNO(LNN_SUB_MODULE_CODE),
     SOFTBUS_NETWORK_CONN_FSM_DEAD,
@@ -290,6 +295,7 @@ enum SoftBusErrNo {
     SOFTBUS_NETWORK_HEARTBEAT_UNTRUSTED,
     SOFTBUS_NETWORK_HEARTBEAT_EMPTY_LIST,
     SOFTBUS_NETWORK_NODE_OFFLINE,
+    SOFTBUS_NETWORK_NOT_CONNECTABLE,
     SOFTBUS_NETWORK_NODE_DIRECT_ONLINE,
     SOFTBUS_NETWORK_NOT_INIT,
     SOFTBUS_NETWORK_LOOPER_ERR,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -238,4 +238,36 @@ int32_t ClientIpcOnChannelQosEvent(const char *pkgName, const QosParam *param)
     (void)pkgName;
     (void)param;
     return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ClientIpcSetChannelInfo(
+    const char *pkgName, const char *sessionName, int32_t sessionId, const TransInfo *transInfo, int32_t pid)
+{
+    if (pkgName == NULL || sessionName == NULL || transInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    (void)pid;
+    TRANS_LOGI(TRANS_CTRL, "Set channel info ipc server push");
+    IpcIo io;
+    uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN];
+    IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN, 0);
+    WriteString(&io, sessionName);
+    WriteInt32(&io, sessionId);
+    WriteInt32(&io, transInfo->channelId);
+    WriteInt32(&io, transInfo->channelType);
+    SvcIdentity svc = {0};
+    int32_t ret = GetSvcIdentityByPkgName(pkgName, &svc);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get svc failed, ret=%{public}d", ret);
+        return SOFTBUS_ERR;
+    }
+    MessageOption option;
+    MessageOptionInit(&option);
+    option.flags = TF_OP_ASYNC;
+    ret = SendRequest(svc, CLIENT_SET_CHANNEL_INFO, &io, NULL, option, NULL);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "SendRequest failed, ret=%{public}d", ret);
+    }
+    return ret;
 }

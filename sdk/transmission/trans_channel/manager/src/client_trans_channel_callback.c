@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,6 +73,9 @@ int32_t TransOnChannelOpenFailed(int32_t channelId, int32_t channelType, int32_t
             return ClientTransTdcOnChannelOpenFailed(channelId, errCode);
         case CHANNEL_TYPE_UDP:
             return TransOnUdpChannelOpenFailed(channelId, errCode);
+        case CHANNEL_TYPE_UNDEFINED:
+            // channelId is sessionId
+            return GetClientSessionCb()->OnSessionOpenFailed(channelId, channelType, errCode);
         default:
             return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }
@@ -144,4 +147,9 @@ int32_t TransOnChannelQosEvent(int32_t channelId, int32_t channelType, int32_t e
         default:
             return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }
+}
+
+int32_t TransSetChannelInfo(const char* sessionName, int32_t sessionId, int32_t channleId, int32_t channelType)
+{
+    return ClientTransSetChannelInfo(sessionName, sessionId, channleId, channelType);
 }

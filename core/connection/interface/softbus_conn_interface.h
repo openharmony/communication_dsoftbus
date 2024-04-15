@@ -156,6 +156,7 @@ typedef struct {
 } ConnectResult;
 
 struct BrOption {
+    uint32_t connectionId;
     char brMac[BT_MAC_LEN];
     ConnSideType sideType;
 };

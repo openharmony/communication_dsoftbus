@@ -39,6 +39,7 @@
 #include "softbus_server_ipc_interface_code.h"
 #include "softbus_server_proxy_standard.h"
 #include "trans_server_proxy.h"
+#include <unistd.h>
 
 namespace {
 OHOS::sptr<OHOS::IRemoteObject> g_serverProxy = nullptr;
@@ -180,10 +181,10 @@ void ClientDeathProcTask(void)
     TransServerProxyInit();
     BusCenterServerProxyInit();
     InnerRegisterService();
-    TransBroadCastReInit();
+    RestartEventNotify();
     DiscRecoveryPublish();
     DiscRecoverySubscribe();
-    RestartEventNotify();
+    DiscRecoveryPolicy();
 }
 
 void RestartEventCallbackUnregister(void)
@@ -197,17 +198,23 @@ int32_t RestartEventCallbackRegister(RestartEventCallback callback)
         COMM_LOGE(COMM_SDK, "Restart event callback register param is invalid!\n");
         return SOFTBUS_ERR;
     }
-    if (g_restartEventCallback != nullptr) {
-        COMM_LOGE(COMM_SDK, "Restart event callback register failed!\n");
-        return SOFTBUS_ERR;
-    }
     g_restartEventCallback = callback;
     COMM_LOGI(COMM_SDK, "Restart event callback register success!\n");
     return SOFTBUS_OK;
 }
 
+static bool g_deathRecipientFlag = true;
+void SetDeathRecipientFlag(bool flag)
+{
+    g_deathRecipientFlag = flag;
+}
+
 int32_t ClientStubInit(void)
 {
+    if (!g_deathRecipientFlag) {
+        g_serverProxy = g_serverProxy == nullptr ? GetSystemAbility() : g_serverProxy;
+        return SOFTBUS_OK;
+    }
     if (ServerProxyInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_SDK, "ServerProxyInit failed\n");
         return SOFTBUS_ERR;

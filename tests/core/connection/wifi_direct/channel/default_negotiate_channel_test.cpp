@@ -188,10 +188,12 @@ HWTEST_F(WifiDirectChannelTest, testDirectChannelTest003, TestSize.Level0)
     AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     DefaultNegotiateChannel *base = DefaultNegotiateChannelNew(authHandle);
     EXPECT_NE(base, nullptr);
+    char dstMac[10] = {};
     char p2pMac[] = {'p', '2', 'p', 'M', 'a', 'c'};
-    size_t p2pMacSize = sizeof(p2pMac) / sizeof(p2pMac[0]);
-    int32_t ret = base->getP2pMac((WifiDirectNegotiateChannel*)base, p2pMac, p2pMacSize);
-    EXPECT_EQ(SOFTBUS_NOT_IMPLEMENT, ret);
+    base->setP2pMac((WifiDirectNegotiateChannel*)base, p2pMac);
+    size_t p2pMacSize = sizeof(dstMac) / sizeof(dstMac[0]);
+    int32_t ret = base->getP2pMac((WifiDirectNegotiateChannel*)base, dstMac, p2pMacSize);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 };
 
 /*

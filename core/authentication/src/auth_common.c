@@ -303,6 +303,7 @@ int32_t ConvertToConnectOption(const AuthConnInfo *connInfo, ConnectOption *opti
                 AUTH_LOGE(AUTH_CONN, "copy brMac fail");
                 return SOFTBUS_MEM_ERR;
             }
+            option->brOption.connectionId = connInfo->info.brInfo.connectionId;
             break;
         case AUTH_LINK_TYPE_BLE:
             option->type = CONNECT_BLE;

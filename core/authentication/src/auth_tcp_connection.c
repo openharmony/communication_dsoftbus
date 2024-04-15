@@ -27,6 +27,7 @@
 #include "softbus_base_listener.h"
 #include "softbus_def.h"
 #include "softbus_socket.h"
+#include "softbus_tcp_socket.h"
 
 #define MAGIC_NUMBER  0xBABEFACE
 #define AUTH_PKT_HEAD_LEN 24
@@ -591,4 +592,77 @@ int32_t AuthPostChannelData(int32_t channelId, const AuthChannelData *data)
         .len = data->len,
     };
     return SocketPostBytes(channelId, &head, data->data);
+}
+
+static int32_t GetTcpKeepAliveOptionByCycle(
+    ModeCycle cycle, int32_t *keepAliveIntvl, int32_t *keepAliveCount, uint32_t *userTimeOut)
+{
+    if (keepAliveIntvl == NULL || keepAliveCount == NULL || userTimeOut == NULL) {
+        AUTH_LOGE(AUTH_CONN, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    switch (cycle) {
+        case HIGH_FREQ_CYCLE:
+            *keepAliveIntvl = KEEP_ALIVE_INTERVAL;
+            *keepAliveCount = KEEP_ALIVE_HIGH_COUNT;
+            *userTimeOut = KEEP_ALIVE_HIGH_USER_TIMEOUT;
+            break;
+        case MID_FREQ_CYCLE:
+            *keepAliveIntvl = KEEP_ALIVE_INTERVAL;
+            *keepAliveCount = KEEP_ALIVE_MID_COUNT;
+            *userTimeOut = KEEP_ALIVE_MID_USER_TIMEOUT;
+            break;
+        case LOW_FREQ_CYCLE:
+            *keepAliveIntvl = KEEP_ALIVE_INTERVAL;
+            *keepAliveCount = KEEP_ALIVE_LOW_COUNT;
+            *userTimeOut = KEEP_ALIVE_LOW_USER_TIMEOUT;
+            break;
+        case DEFT_FREQ_CYCLE:
+            *keepAliveIntvl = KEEP_ALIVE_INTERVAL;
+            *keepAliveCount = KEEP_ALIVE_DEFT_COUNT;
+            *userTimeOut = KEEP_ALIVE_DEFT_USER_TIMEOUT;
+            break;
+        default:
+            AUTH_LOGE(AUTH_CONN, "no match cycle, cycle=%{public}d", cycle);
+            break;
+    } 
+    return SOFTBUS_OK;
+}
+
+static int32_t SetTcpKeepAliveOption(int32_t fd, ModeCycle cycle)
+{
+    int32_t keepAliveIntvl = 0;
+    int32_t keepAliveCount = 0;
+    uint32_t userTimeOut = 0;
+
+    if (GetTcpKeepAliveOptionByCycle(cycle, &keepAliveIntvl, &keepAliveCount, &userTimeOut) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "get tcp keepAlive option by cycle fail");
+        return SOFTBUS_ERR;
+    }
+    if (ConnSetTcpKeepAliveOption(fd, cycle, keepAliveIntvl, keepAliveCount, userTimeOut) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "conn set tcp keepAlive option fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t AuthSetTcpKeepAliveOption(int32_t fd, ModeCycle cycle)
+{
+    if (fd < 0 || cycle < HIGH_FREQ_CYCLE || cycle > DEFT_FREQ_CYCLE) {
+        AUTH_LOGE(AUTH_CONN, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    AUTH_LOGI(AUTH_CONN, "fd=%{public}d, cycle=%{public}d", fd, cycle);
+    if (SetTcpKeepAliveOption(fd, cycle) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "set tcp keepAlive option fail");
+        return SOFTBUS_ERR;
+    }
+
+    int32_t enable = 1;
+    if (SoftBusSocketSetOpt(fd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_KEEPALIVE, &enable, sizeof(enable)) !=
+        SOFTBUS_ADAPTER_OK) {
+        AUTH_LOGE(AUTH_CONN, "set SO_KEEPALIVE fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
 }

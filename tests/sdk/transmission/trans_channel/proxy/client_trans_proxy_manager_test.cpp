@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -265,7 +265,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyGetInfoByChannelIdTest, Te
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = ClientTransProxyGetInfoByChannelId(channelId, &info);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
 }
 
 /**
@@ -290,5 +290,22 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxyPackAndSendDataTest, TestSize.Le
     ret = TransProxyPackAndSendData(channelId,
         static_cast<const void *>(data), len, &info, pktType);
     EXPECT_EQ(SOFTBUS_ERR, ret);
+}
+
+/**
+ * @tc.name: ClientTransProxyGetLinkTypeByChannelId
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given linkType or data is null.
+ * @tc.desc: Should return SOFTBUS_NOT_FIND when get link type failed.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyGetLinkTypeByChannelIdTest, TestSize.Level0)
+{
+    int32_t channelId = -1;
+    int32_t ret = ClientTransProxyGetLinkTypeByChannelId(channelId, NULL);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    int32_t linkType;
+    ret = ClientTransProxyGetLinkTypeByChannelId(channelId, &linkType);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 }
 } // namespace OHOS

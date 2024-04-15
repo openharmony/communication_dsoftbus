@@ -25,6 +25,7 @@
 #include "auth_log.h"
 #include "auth_manager.h"
 #include "auth_meta_manager.h"
+#include "auth_tcp_connection.h"
 #include "bus_center_manager.h"
 #include "customized_security_protocol.h"
 #include "lnn_decision_db.h"
@@ -33,6 +34,7 @@
 #include "softbus_def.h"
 
 #define SHORT_ACCOUNT_HASH_LEN 2
+#define AUTH_COUNT             2
 
 typedef struct {
     int32_t module;
@@ -191,6 +193,10 @@ int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta
 /* for ProxyChannel & P2P TcpDirectchannel */
 void AuthGetLatestIdByUuid(const char *uuid, AuthLinkType type, bool isMeta, AuthHandle *authHandle)
 {
+    if (authHandle == NULL) {
+        AUTH_LOGE(AUTH_CONN, "authHandle is null");
+        return;
+    }
     authHandle->authId = AUTH_INVALID_ID;
     if (isMeta) {
         return;
@@ -214,6 +220,51 @@ int64_t AuthGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer, bool
     return AuthDeviceGetIdByUuid(uuid, type, isServer);
 }
 
+static int32_t FillAuthSessionInfo(AuthSessionInfo *info, const NodeInfo *nodeInfo, uint32_t requestId,
+    AuthDeviceKeyInfo *keyInfo, const AuthConnInfo *connInfo)
+{
+    bool isSupportNormalizedKey = IsSupportFeatureByCapaBit(nodeInfo->authCapacity, BIT_SUPPORT_NORMALIZED_LINK);
+    info->requestId = requestId;
+    info->isServer = keyInfo->isServerSide;
+    info->connId = keyInfo->keyIndex;
+    info->connInfo = *connInfo;
+    info->version = SOFTBUS_NEW_V2;
+    info->normalizedType = isSupportNormalizedKey ? NORMALIZED_SUPPORT : NORMALIZED_NOT_SUPPORT;
+    info->normalizedIndex = keyInfo->keyIndex;
+    if (strcpy_s(info->uuid, sizeof(info->uuid), nodeInfo->uuid) != EOK ||
+        strcpy_s(info->udid, sizeof(info->udid), nodeInfo->deviceInfo.deviceUdid) != EOK) {
+        AUTH_LOGE(AUTH_KEY, "restore manager fail because copy uuid/udid fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t AuthSetTcpKeepAlive(const AuthConnInfo *connInfo, ModeCycle cycle)
+{
+    if (connInfo == NULL) {
+        AUTH_LOGE(AUTH_CONN, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = SOFTBUS_ERR;
+    AuthManager *auth[AUTH_COUNT] = { NULL, NULL }; /* 2: WiFi * (Client + Server) */
+    auth[0] = GetAuthManagerByConnInfo(connInfo, false);
+    auth[1] = GetAuthManagerByConnInfo(connInfo, true);
+    for (uint32_t i = 0; i < AUTH_COUNT; i++) {
+        if (auth[i] == NULL) {
+            continue;
+        }
+        ret = AuthSetTcpKeepAliveOption(GetFd(auth[i]->connId[AUTH_LINK_TYPE_WIFI]), cycle);
+        if (ret != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_CONN, "auth set tcp keepalive option fail");
+            break;
+        }
+    }
+    DelDupAuthManager(auth[1]);
+    DelDupAuthManager(auth[0]);
+    return ret;
+}
+
 int32_t AuthRestoreAuthManager(const char *udidHash,
     const AuthConnInfo *connInfo, uint32_t requestId, NodeInfo *nodeInfo, int64_t *authId)
 {
@@ -234,19 +285,11 @@ int32_t AuthRestoreAuthManager(const char *udidHash,
         return SOFTBUS_ERR;
     }
     AuthSessionInfo info;
-    SessionKey sessionKey;
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    SessionKey sessionKey;
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
-    bool isSupportNormalizedKey = IsSupportFeatureByCapaBit(nodeInfo->authCapacity, BIT_SUPPORT_NORMALIZED_LINK);
-    info.requestId = requestId;
-    info.isServer = keyInfo.isServerSide;
-    info.connId = keyInfo.keyIndex;
-    info.connInfo = *connInfo;
-    info.version = SOFTBUS_NEW_V2;
-    info.normalizedType = isSupportNormalizedKey ? NORMALIZED_SUPPORT : NORMALIZED_NOT_SUPPORT;
-    if (strcpy_s(info.uuid, sizeof(info.uuid), nodeInfo->uuid) != EOK ||
-        strcpy_s(info.udid, sizeof(info.udid), nodeInfo->deviceInfo.deviceUdid) != EOK) {
-        AUTH_LOGW(AUTH_KEY, "restore manager fail because copy uuid/udid fail");
+    if (FillAuthSessionInfo(&info, nodeInfo, requestId, &keyInfo, connInfo) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_KEY, "fill authSessionInfo fail");
         return SOFTBUS_ERR;
     }
     if (memcpy_s(sessionKey.value, sizeof(sessionKey.value), keyInfo.deviceKey, sizeof(keyInfo.deviceKey)) != EOK) {
@@ -255,6 +298,7 @@ int32_t AuthRestoreAuthManager(const char *udidHash,
     }
     sessionKey.len = keyInfo.keyLen;
     if (AuthManagerSetSessionKey(keyInfo.keyIndex, &info, &sessionKey, false) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_KEY, "set sessionkey fail, index=%{public}" PRId64, keyInfo.keyIndex);
         return SOFTBUS_ERR;
     }
     AuthManager *auth = GetAuthManagerByConnInfo(&info.connInfo, info.isServer);
@@ -267,26 +311,34 @@ int32_t AuthRestoreAuthManager(const char *udidHash,
     return SOFTBUS_OK;
 }
 
-int32_t AuthEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
+int32_t AuthEncrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
     uint32_t *outLen)
 {
-    AuthManager *auth = GetAuthManagerByAuthId(authId);
+    if (authHandle == NULL) {
+        AUTH_LOGE(AUTH_KEY, "authHandle is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    AuthManager *auth = GetAuthManagerByAuthId(authHandle->authId);
     if (auth != NULL) {
         DelDupAuthManager(auth);
-        return AuthDeviceEncrypt(authId, inData, inLen, outData, outLen);
+        return AuthDeviceEncrypt(authHandle, inData, inLen, outData, outLen);
     }
-    return AuthMetaEncrypt(authId, inData, inLen, outData, outLen);
+    return AuthMetaEncrypt(authHandle->authId, inData, inLen, outData, outLen);
 }
 
-int32_t AuthDecrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
+int32_t AuthDecrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
     uint32_t *outLen)
 {
-    AuthManager *auth = GetAuthManagerByAuthId(authId);
+    if (authHandle == NULL) {
+        AUTH_LOGE(AUTH_KEY, "authHandle is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    AuthManager *auth = GetAuthManagerByAuthId(authHandle->authId);
     if (auth != NULL) {
         DelDupAuthManager(auth);
-        return AuthDeviceDecrypt(authId, inData, inLen, outData, outLen);
+        return AuthDeviceDecrypt(authHandle, inData, inLen, outData, outLen);
     }
-    return AuthMetaDecrypt(authId, inData, inLen, outData, outLen);
+    return AuthMetaDecrypt(authHandle->authId, inData, inLen, outData, outLen);
 }
 
 int32_t AuthSetP2pMac(int64_t authId, const char *p2pMac)

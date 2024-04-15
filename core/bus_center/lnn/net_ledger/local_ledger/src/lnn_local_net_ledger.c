@@ -49,8 +49,6 @@
 #define SUPPORT_EXCHANGE_NETWORKID 1
 #define SUPPORT_NORMALIZED_LINK 2
 #define DEFAULT_CONN_SUB_FEATURE 1
-#define OH_OS_TYPE 10
-#define HO_OS_TYPE 11
 
 typedef struct {
     NodeInfo localInfo;
@@ -758,6 +756,9 @@ static int32_t InitLocalDeviceInfo(DeviceBasicInfo *info)
     }
     if (GetCommonOsVersion(info->osVersion, OS_VERSION_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get os version failed");
+    }
+    if (GetCommonDeviceVersion(info->deviceVersion, DEVICE_VERSION_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get device version failed");
     }
     if (LnnGetUnifiedDeviceName(info->unifiedName, DEVICE_NAME_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get unifiedName fail");
@@ -1734,7 +1735,9 @@ static int32_t SoftBusDumpBusCenterParameter(int fd)
     SOFTBUS_DPRINTF(fd, (IsLinkEnabled(LANE_WLAN_5G) ||
         IsLinkEnabled(LANE_WLAN_2P4G)) ?
         "wlan parameter: on\n" : "wlan parameter: off\n");
-    SOFTBUS_DPRINTF(fd, IsLinkEnabled(LANE_BLE) ?
+    SOFTBUS_DPRINTF(fd, IsLinkEnabled(LANE_COC_DIRECT) ?
+        "coc parameter: on\n" : "coc parameter: off\n");
+    SOFTBUS_DPRINTF(fd, IsLinkEnabled(LANE_BLE_DIRECT) ?
         "ble parameter: on\n" : "ble parameter: off\n");
     return SOFTBUS_OK;
 }

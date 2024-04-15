@@ -226,6 +226,7 @@ static int32_t ConvertCtxToDevice(ConnBrDevice **outDevice, const ConnBrConnectR
         SoftBusFree(request);
         return status;
     }
+    device->connectionId = ctx->connectionId;
     ListAdd(&device->requests, &request->node);
     *outDevice = device;
     return SOFTBUS_OK;
@@ -267,6 +268,9 @@ static void NotifyDeviceConnectResult(
 {
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, device->addr, BT_MAC_LEN);
+    int32_t status = ConnBleRemoveKeepAlive(
+        device->bleKeepAliveInfo.keepAliveBleConnectionId, device->bleKeepAliveInfo.keepAliveBleRequestId);
+    CONN_LOGD(CONN_BR, "remove ble keep alive res=%{public}d", status);
 
     ConnBrRequest *it = NULL;
     if (connection == NULL) {
@@ -290,7 +294,7 @@ static void NotifyDeviceConnectResult(
     }
 
     ConnectionInfo info = { 0 };
-    int32_t status = Convert2ConnectionInfo(connection, &info);
+    status = Convert2ConnectionInfo(connection, &info);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BR, "convert br connection info failed, error=%{public}d", status);
     }
@@ -321,34 +325,26 @@ static void NotifyDeviceConnectResult(
     }
 }
 
-static void PendingIfBleSameAddress(const char *addr)
+static void KeepAliveBleIfSameAddress(ConnBrDevice *device)
 {
     uint32_t connectionId = 0;
-    do {
-        ConnBleConnection *bleConnection = ConnBleGetConnectionByAddr(addr, CONN_SIDE_ANY, BLE_GATT);
-        CONN_CHECK_AND_RETURN_LOGW(
-            bleConnection != NULL, CONN_BR, "can not get ble connection, no need to pend BR connection");
-        connectionId = bleConnection->connectionId;
-        ConnBleReturnConnection(&bleConnection);
-    } while (false);
     char anomizeAddress[BT_MAC_LEN] = { 0 };
-    ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, addr, BT_MAC_LEN);
-    ConnectOption options;
-    (void)memset_s(&options, sizeof(options), 0, sizeof(options));
-    options.type = CONNECT_BR;
-    if (strcpy_s(options.brOption.brMac, BT_MAC_LEN, addr) != EOK) {
-        CONN_LOGE(CONN_BR, "copy br mac fail, address=%{public}s", anomizeAddress);
-        return;
-    }
-    int32_t status = BrPendConnection(&options, BR_WAIT_BLE_DISCONNECTED_PEND_MILLIS);
+    ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, device->addr, BT_MAC_LEN);
+    ConnBleConnection *bleConnection = ConnBleGetConnectionByAddr(device->addr, CONN_SIDE_ANY, BLE_GATT);
+    CONN_CHECK_AND_RETURN_LOGW(
+        bleConnection != NULL, CONN_BR, "can not get ble conn, no need to keep alive");
+    connectionId = bleConnection->connectionId;
+    ConnBleReturnConnection(&bleConnection);
+    device->bleKeepAliveInfo.keepAliveBleRequestId = ConnGetNewRequestId(MODULE_CONNECTION);
+    device->bleKeepAliveInfo.keepAliveBleConnectionId = connectionId;
+    int32_t status = ConnBleKeepAlive(
+        connectionId, device->bleKeepAliveInfo.keepAliveBleRequestId, BLE_CONNECT_KEEP_ALIVE_TIMEOUT_MILLIS);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "br pend connection failed, address=%{public}s, error=%{public}d", anomizeAddress, status);
+        CONN_LOGE(CONN_BR, "ble keep alive failed, connId=%{public}u, requestId=%{public}u", connectionId,
+            device->bleKeepAliveInfo.keepAliveBleRequestId);
         return;
     }
-    CONN_LOGI(CONN_BR,
-        "there is a ble connection connected with the same address, pending br connection, "
-        "address=%{public}s, connectionId=%{public}u",
-        anomizeAddress, connectionId);
+    CONN_LOGI(CONN_BR, "keep ble alive, addr=%{public}s, connId=%{public}u", anomizeAddress, connectionId);
     return;
 }
 
@@ -361,6 +357,7 @@ static int32_t ConnectDeviceDirectly(ConnBrDevice *device, const char *anomizeAd
         return SOFTBUS_CONN_BR_INTERNAL_ERR;
     }
     char *address = NULL;
+    KeepAliveBleIfSameAddress(device);
     do {
         address = (char *)SoftBusCalloc(BT_MAC_LEN);
         if (address == NULL || strcpy_s(address, BT_MAC_LEN, device->addr) != EOK) {
@@ -474,7 +471,6 @@ static void AttempReuseConnect(ConnBrDevice *device, DeviceAction actionIfAbsent
     ConnBrConnection *clientConnection = ConnBrGetConnectionByAddr(device->addr, CONN_SIDE_CLIENT);
     ConnBrConnection *serverConnection = ConnBrGetConnectionByAddr(device->addr, CONN_SIDE_SERVER);
     if (clientConnection == NULL && serverConnection == NULL) {
-        PendingIfBleSameAddress(device->addr);
         if (CheckPending(device->addr)) {
             device->state = BR_DEVICE_STATE_PENDING;
             PendingDevice(device, anomizeAddress);
@@ -488,7 +484,15 @@ static void AttempReuseConnect(ConnBrDevice *device, DeviceAction actionIfAbsent
         }
         return;
     }
+    ConnBrConnection *connection = ConnBrGetConnectionById(device->connectionId);
     do {
+        if (connection != NULL && strcmp(device->addr, connection->addr) == 0 &&
+            BrReuseConnection(device, connection)) {
+            CONN_LOGI(CONN_BR, "reuse by connId, addr=%{public}s, connId=%{public}u", anomizeAddress,
+                connection->connectionId);
+            FreeDevice(device);
+            break;
+        }
         if (clientConnection != NULL && BrReuseConnection(device, clientConnection)) {
             FreeDevice(device);
             CONN_LOGI(CONN_BR, "reuse client, addr=%{public}s, connectionId=%{public}u", anomizeAddress,
@@ -510,6 +514,9 @@ static void AttempReuseConnect(ConnBrDevice *device, DeviceAction actionIfAbsent
     }
     if (serverConnection != NULL) {
         ConnBrReturnConnection(&serverConnection);
+    }
+    if (connection != NULL) {
+        ConnBrReturnConnection(&connection);
     }
 }
 
@@ -1401,6 +1408,7 @@ static int32_t BrConnectDevice(const ConnectOption *option, uint32_t requestId, 
         return SOFTBUS_STRCPY_ERR;
     }
     ctx->result = *result;
+    ctx->connectionId = option->brOption.connectionId;
     int32_t status = ConnPostMsgToLooper(&g_brManagerAsyncHandler, MSG_CONNECT_REQUEST, 0, 0, ctx, 0);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BR, "post msg to looper failed, requestId=%{public}u, addr=%{public}s, error=%{public}d",

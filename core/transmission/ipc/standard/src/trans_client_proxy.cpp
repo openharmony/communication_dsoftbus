@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -111,11 +111,6 @@ int32_t ClientIpcOnChannelLinkDown(ChannelMsg *data, const char *networkId, cons
     return SOFTBUS_OK;
 }
 
-static void CallProxyOnChannelClosed(sptr<TransClientProxy> clientProxy, ChannelMsg *data)
-{
-    clientProxy->OnChannelClosed(data->msgChannelId, data->msgChannelType);
-}
-
 int32_t ClientIpcOnChannelClosed(ChannelMsg *data)
 {
     if (data == nullptr) {
@@ -127,12 +122,42 @@ int32_t ClientIpcOnChannelClosed(ChannelMsg *data)
         TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr!");
         return SOFTBUS_ERR;
     }
-    std::future<void> task = std::async([clientProxy, data]() {
-        CallProxyOnChannelClosed(clientProxy, data);
+    int32_t ret = clientProxy->OnChannelClosed(data->msgChannelId, data->msgChannelType);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "OnChannelClosed failed, ret=%{public}d", ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+static void CallProxySetChannelInfo(
+    const sptr<TransClientProxy> &clientProxy, const char *sessionName, int32_t sessionId, const TransInfo *transInfo)
+{
+    clientProxy->SetChannelInfo(sessionName, sessionId, transInfo->channelId, transInfo->channelType);
+}
+
+int32_t ClientIpcSetChannelInfo(
+    const char *pkgName, const char *sessionName, int32_t sessionId, const TransInfo *transInfo, int32_t pid)
+{
+    if (pkgName == nullptr || sessionName == nullptr || transInfo == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    sptr<TransClientProxy> clientProxy = GetClientProxy(pkgName, pid);
+    if (clientProxy == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "Softbus client proxy is nullptr!, pkgName=%{public}s pid=%{public}d", pkgName, pid);
+        return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
+    }
+    std::future<void> task = std::async([clientProxy, sessionName, sessionId, transInfo]() {
+        CallProxySetChannelInfo(clientProxy, sessionName, sessionId, transInfo);
     });
     if (task.wait_for(std::chrono::seconds(IPC_OPT_TIMEOUT_S)) != std::future_status::ready) {
-        TRANS_LOGE(TRANS_SDK, "CallProxyOnChannelClosed timeout!");
-        return SOFTBUS_ERR;
+        char *tmpName = NULL;
+        Anonymize(sessionName, &tmpName);
+        TRANS_LOGE(TRANS_SDK, "ClientIpcSetChannelInfo timeout!, pkgName=%{public}s sessionName=%{public}s", pkgName,
+            tmpName);
+        AnonymizeFree(tmpName);
+        return SOFTBUS_TIMOUT;
     }
     return SOFTBUS_OK;
 }

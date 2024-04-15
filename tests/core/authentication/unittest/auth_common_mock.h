@@ -47,6 +47,7 @@ public:
     virtual int32_t LnnGetAllOnlineNodeNum(int32_t *nodeNum) = 0;
     virtual int32_t LnnSetLocalStrInfo(InfoKey key, const char *info) = 0;
     virtual int32_t LnnNotifyEmptySessionKey(int64_t authId) = 0;
+    virtual int32_t LnnNotifyLeaveLnnByAuthHandle(AuthHandle *authHandle);
 };
 class AuthCommonInterfaceMock : public AuthCommonInterface {
 public:
@@ -65,6 +66,7 @@ public:
     MOCK_METHOD1(LnnGetAllOnlineNodeNum, int32_t (int32_t *));
     MOCK_METHOD2(LnnSetLocalStrInfo, int32_t (InfoKey, const char *));
     MOCK_METHOD1(LnnNotifyEmptySessionKey, int32_t (int64_t));
+    MOCK_METHOD1(LnnNotifyLeaveLnnByAuthHandle, int32_t (AuthHandle *));
 };
 } // namespace OHOS
 #endif // AUTH_COMMON_MOCK_H

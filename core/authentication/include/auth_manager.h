@@ -40,7 +40,7 @@ typedef struct {
     AuthConnInfo connInfo[AUTH_LINK_TYPE_MAX];
     uint64_t lastActiveTime;
     /* 密钥信息 */
-    int64_t lastAuthSeq;
+    int64_t lastAuthSeq[AUTH_LINK_TYPE_MAX];
     uint64_t lastVerifyTime;
     SessionKeyList sessionKeyList;
     /* 设备信息 */
@@ -53,7 +53,12 @@ typedef struct {
     ListNode node;
 } AuthManager;
 
-int32_t AuthManagerSetSessionKey(int64_t authSeq, const AuthSessionInfo *info, const SessionKey *sessionKey,
+typedef struct {
+    int32_t messageType;
+    ModeCycle cycle;
+} DeviceMessageParse;
+
+int32_t AuthManagerSetSessionKey(int64_t authSeq, AuthSessionInfo *info, const SessionKey *sessionKey,
     bool isConnect);
 int32_t AuthManagerGetSessionKey(int64_t authSeq, const AuthSessionInfo *info, SessionKey *sessionKey);
 
@@ -64,7 +69,7 @@ void AuthManagerSetAuthFinished(int64_t authSeq, const AuthSessionInfo *info);
 /* Note: must call DelAuthManager to free. */
 AuthManager *GetAuthManagerByAuthId(int64_t authId);
 AuthManager *GetAuthManagerByConnInfo(const AuthConnInfo *connInfo, bool isServer);
-void RemoveAuthSessionKeyByIndex(int64_t authId, int32_t index);
+void RemoveAuthSessionKeyByIndex(int64_t authId, int32_t index, AuthLinkType type);
 void DelAuthManager(AuthManager *auth, int32_t type);
 void DelDupAuthManager(AuthManager *auth);
 void RemoveAuthManagerByAuthId(AuthHandle authHandle);
@@ -78,13 +83,14 @@ bool AuthDeviceCheckConnInfo(const char* uuid, AuthLinkType type, bool checkConn
 
 /* for ProxyChannel & P2P TcpDirectchannel */
 void AuthDeviceGetLatestIdByUuid(const char *uuid, AuthLinkType type, AuthHandle *authHandle);
-int64_t AuthP2pGetLatestIdByUuid(const char *uuid);
 int64_t AuthDeviceGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer);
 int64_t AuthDeviceGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer);
 AuthManager *NewAuthManager(int64_t authSeq, const AuthSessionInfo *info);
 
-int32_t AuthDeviceEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen);
-int32_t AuthDeviceDecrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen);
+int32_t AuthDeviceEncrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
+    uint32_t *outLen);
+int32_t AuthDeviceDecrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
+    uint32_t *outLen);
 int32_t AuthDeviceSetP2pMac(int64_t authId, const char *p2pMac);
 
 int32_t AuthVerifyAfterNotifyNormalize(NormalizeRequest *request);

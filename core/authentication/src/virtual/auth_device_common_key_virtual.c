@@ -28,10 +28,11 @@ void AuthUpdateCreateTime(const char *udidHash, int32_t keyType, bool isServer)
     (void)isServer;
 }
 
-int32_t AuthInsertDeviceKey(const NodeInfo *deviceInfo, const AuthDeviceKeyInfo *deviceKey)
+int32_t AuthInsertDeviceKey(const NodeInfo *deviceInfo, const AuthDeviceKeyInfo *deviceKey, AuthLinkType type)
 {
     (void)deviceInfo;
     (void)deviceKey;
+    (void)type;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 

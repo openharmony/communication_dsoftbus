@@ -43,10 +43,6 @@ static bool IsNeedRetry(struct WifiDirectCommand *base, int32_t reason)
 
 static int32_t PreferNegotiateChannelForConnectInfo(struct InnerLink *link, struct WifiDirectConnectInfo *connectInfo)
 {
-    if (connectInfo->negoChannel != NULL) {
-        CONN_LOGD(CONN_WIFI_DIRECT, "prefer input channel");
-        return SOFTBUS_OK;
-    }
     struct WifiDirectNegotiateChannel *channel = link->getPointer(link, IL_KEY_NEGO_CHANNEL, NULL);
     if (channel != NULL) {
         CONN_LOGD(CONN_WIFI_DIRECT, "prefer inner link channel");
@@ -56,6 +52,10 @@ static int32_t PreferNegotiateChannelForConnectInfo(struct InnerLink *link, stru
         connectInfo->negoChannel = channel->duplicate(channel);
         CONN_CHECK_AND_RETURN_RET_LOGW(connectInfo->negoChannel != NULL, SOFTBUS_MALLOC_ERR, CONN_WIFI_DIRECT,
                                        "new channel failed");
+        return SOFTBUS_OK;
+    }
+    if (connectInfo->negoChannel != NULL) {
+        CONN_LOGD(CONN_WIFI_DIRECT, "prefer input channel");
         return SOFTBUS_OK;
     }
 
@@ -169,6 +169,12 @@ static int32_t OpenLink(struct WifiDirectConnectCommand *command)
 
     SetWifiDirectStatisticType(connectInfo);
     struct WifiDirectDecisionCenter *decisionCenter = GetWifiDirectDecisionCenter();
+    struct InterfaceInfo *info = GetResourceManager()->getInterfaceInfo(IF_NAME_HML);
+    if (connectInfo->connectType != WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P && info != NULL) {
+        int count = info->getInt(info, II_KEY_CONNECTED_DEVICE_COUNT, 0);
+        CONN_CHECK_AND_RETURN_RET_LOGE(count < MAX_CONNECTED_DEVICE_COUNT, ERROR_HML_BEYOND_MAX_LINK_NUM,
+            CONN_WIFI_DIRECT, "The number of connection has reached the maximum");
+    }
     struct WifiDirectProcessor *processor =
         decisionCenter->getProcessorByChannelAndConnectType(connectInfo->negoChannel, connectInfo->connectType);
     CONN_CHECK_AND_RETURN_RET_LOGW(processor != NULL, ERROR_WIFI_DIRECT_NO_SUITABLE_PROTOCOL, CONN_WIFI_DIRECT,

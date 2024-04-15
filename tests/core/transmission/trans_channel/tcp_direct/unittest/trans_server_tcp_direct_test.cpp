@@ -218,8 +218,9 @@ HWTEST_F(TransServerTcpDirectTest, GetCipherFlagByAuthId001, TestSize.Level1)
     AuthHandle authHandle = { .authId = 0, .type = AUTH_LINK_TYPE_WIFI };
     uint32_t flag = 0;
     bool isAuthServer = false;
+    bool isLegacyOs = false;
 
-    int32_t ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer);
+    int32_t ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer, isLegacyOs);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
@@ -236,8 +237,9 @@ HWTEST_F(TransServerTcpDirectTest, GetCipherFlagByAuthId002, TestSize.Level1)
     ASSERT_EQ(ret, SOFTBUS_OK);
     uint32_t flag = 0;
     bool isAuthServer = false;
+    bool isLegacyOs = false;
 
-    ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer);
+    ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer, isLegacyOs);
     EXPECT_EQ(ret, SOFTBUS_ERR);
     EXPECT_EQ(ret, SOFTBUS_ERR);
     EXPECT_FALSE(isAuthServer);
@@ -431,8 +433,8 @@ HWTEST_F(TransServerTcpDirectTest, OpenTcpDirectChannel001, TestSize.Level1)
 HWTEST_F(TransServerTcpDirectTest, PackBytes001, TestSize.Level1)
 {
     int32_t channelId = g_conn->channelId;
-
-    int32_t ret = SetAuthIdByChanId(channelId, 1);
+    AuthHandle authHandle = { .authId = 1, .type = 1};
+    int32_t ret = SetAuthHandleByChanId(channelId, &authHandle);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
@@ -482,27 +484,25 @@ HWTEST_F(TransServerTcpDirectTest, ProcessReceivedData001, TestSize.Level1)
 
 /**
  * trans_tcp_direct_sessionconn.c
- * @tc.name: GetAuthIdByChanId001
- * @tc.desc: GetAuthIdByChanId, start channel with wrong parms.
+ * @tc.name: GetAuthHandleByChanId001
+ * @tc.desc: GetAuthHandleByChanId, start channel with wrong parms.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransServerTcpDirectTest, GetAuthIdByChanId001, TestSize.Level1)
+HWTEST_F(TransServerTcpDirectTest, GetAuthHandleByChanId001, TestSize.Level1)
 {
     AppInfo appInfo;
-    int32_t authId = AUTH_INVALID_ID;
-    
     int32_t ret = GetAppInfoById(g_conn->channelId, &appInfo);
     EXPECT_TRUE(ret != SOFTBUS_OK);
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+    ret = GetAuthHandleByChanId(g_conn->channelId, &authHandle);
+    EXPECT_TRUE(authHandle.authId == AUTH_INVALID_ID);
 
-    authId = GetAuthIdByChanId(g_conn->channelId);
-    EXPECT_TRUE(authId == AUTH_INVALID_ID);
-
-    ret = SetAuthIdByChanId(g_conn->channelId, AUTH_INVALID_ID);
+    ret = SetAuthHandleByChanId(g_conn->channelId, &authHandle);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
-    authId = GetAuthIdByChanId(g_conn->channelId);
-    EXPECT_TRUE(authId == AUTH_INVALID_ID);
+    ret = GetAuthHandleByChanId(g_conn->channelId, &authHandle);
+    EXPECT_TRUE(authHandle.authId == AUTH_INVALID_ID);
 }
 
 /**

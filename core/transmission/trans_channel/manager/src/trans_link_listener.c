@@ -30,31 +30,19 @@
 #define HML_IP_PREFIX "172.30."
 #define COMBINE_TYPE(routeType, connType) ((routeType) | ((uint8_t)(connType) << 8))
 
-static void OnWifiDirectDeviceOffLine(const char *peerMac, const char *peerIp, const char *peerUuid)
+static void OnWifiDirectDeviceOffLine(const char *peerMac, const char *peerIp, const char *peerUuid,
+    const char *localIp)
 {
     TRANS_CHECK_AND_RETURN_LOGW(peerUuid, TRANS_SVC, "peer uuid is null");
-
+    TRANS_CHECK_AND_RETURN_LOGW(localIp, TRANS_SVC, "localIp is null");
     NodeInfo nodeInfo;
     TransConnType connType = TRANS_CONN_ALL;
     memset_s(&nodeInfo, sizeof(nodeInfo), 0, sizeof(nodeInfo));
     int32_t ret = LnnGetRemoteNodeInfoById(peerUuid, CATEGORY_UUID, &nodeInfo);
     TRANS_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, TRANS_SVC, "LnnGetRemoteNodeInfoById failed");
 
-    char myIp[IP_LEN] = {0};
-    struct WifiDirectManager *mgr = GetWifiDirectManager();
-    if (mgr == NULL || mgr->getLocalIpByRemoteIp == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "GetWifiDirectManager failed");
-        return;
-    }
-
-    ret = mgr->getLocalIpByRemoteIp(peerIp, myIp, sizeof(myIp));
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
-        return;
-    }
-
-    if (strncmp(myIp, HML_IP_PREFIX, NETWORK_ID_LEN) == 0) {
-        ListenerModule type = GetMoudleByHmlIp(myIp);
+    if (strncmp(localIp, HML_IP_PREFIX, NETWORK_ID_LEN) == 0) {
+        ListenerModule type = GetMoudleByHmlIp(localIp);
         if (type != UNUSE_BUTT) {
             StopHmlListener(type);
             TRANS_LOGI(TRANS_SVC, "StopHmlListener succ");

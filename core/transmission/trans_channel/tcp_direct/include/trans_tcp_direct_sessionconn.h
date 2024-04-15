@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,8 +77,9 @@ SessionConn *GetSessionConnById(int32_t channelId, SessionConn *conn);
 int32_t SetAppInfoById(int32_t channelId, const AppInfo *appInfo);
 int32_t GetAppInfoById(int32_t channelId, AppInfo *appInfo);
 
-int32_t SetAuthIdByChanId(int32_t channelId, int64_t authId);
+int32_t SetAuthHandleByChanId(int32_t channelId, AuthHandle *authHandle);
 int64_t GetAuthIdByChanId(int32_t channelId);
+int32_t GetAuthHandleByChanId(int32_t channelId, AuthHandle *authHandle);
 
 void TransDelSessionConnById(int32_t channelId);
 
@@ -89,6 +90,8 @@ void SetSessionKeyByChanId(int32_t chanId, const char *sessionKey, int32_t keyLe
 int32_t SetSessionConnStatusById(int32_t channelId, uint32_t status);
 
 int32_t TcpTranGetAppInfobyChannelId(int32_t channelId, AppInfo* appInfo);
+
+int32_t *GetChannelIdsByAuthIdAndStatus(int32_t *num, int64_t authId, uint32_t status);
 
 #ifdef __cplusplus
 #if __cplusplus

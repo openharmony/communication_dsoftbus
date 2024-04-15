@@ -30,15 +30,14 @@ extern "C" {
 int32_t TransReqLanePendingInit(void);
 void TransReqLanePendingDeinit(void);
 
-LaneTransType TransGetLaneTransTypeBySession(const SessionParam *param);
 int32_t TransGetConnectOptByConnInfo(const LaneConnInfo *info, ConnectOption *connOpt);
-int32_t TransGetLaneInfo(const SessionParam *param, LaneConnInfo *connInfo, uint32_t *laneReqId);
-int32_t TransGetLaneInfoByOption(bool isQosLane, const LaneRequestOption *requestOption, LaneConnInfo *connInfo,
-    uint32_t *laneReqId);
+int32_t TransGetLaneInfo(const SessionParam *param, LaneConnInfo *connInfo, uint32_t *laneHandle, bool *isQosLane);
+int32_t TransAsyncGetLaneInfo(const SessionParam *param, uint32_t *laneHandle, uint32_t firstTokenId, bool *isQosLane);
+int32_t TransGetLaneInfoByOption(const LaneRequestOption *requestOption, LaneConnInfo *connInfo, uint32_t *laneHandle);
+int32_t TransGetLaneInfoByQos(const LaneAllocInfo *allocInfo, LaneConnInfo *connInfo, uint32_t *laneHandle);
 bool TransGetAuthTypeByNetWorkId(const char *peerNetWorkId);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 #endif
-
