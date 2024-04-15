@@ -27,6 +27,7 @@
 #include "lnn_log.h"
 #include "lnn_network_id.h"
 #include "lnn_p2p_info.h"
+#include "lnn_connection_addr_utils.h"
 #include "message_handler.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
@@ -607,6 +608,15 @@ void LnnNotifySingleOffLineEvent(const ConnectionAddr *addr, NodeBasicInfo *basi
     if (addr == NULL || basicInfo == NULL) {
         LNN_LOGW(LNN_EVENT, "addr or basicInfo is null");
         return;
+    }
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(basicInfo->networkId, CATEGORY_NETWORK_ID, &info) == SOFTBUS_OK) {
+        if ((LnnHasDiscoveryType(&info, DISCOVERY_TYPE_WIFI) &&
+            LnnConvAddrTypeToDiscType(addr->type) == DISCOVERY_TYPE_WIFI)) {
+            LNN_LOGI(LNN_EVENT, "Two-way WIFI LNN not completely offline, not need to report offline");
+            return;
+        }
     }
     LnnSingleNetworkOffLineEvent event = {.basic.event = LNN_EVENT_SINGLE_NETWORK_OFFLINE, .type = addr->type};
     event.basic.event = LNN_EVENT_SINGLE_NETWORK_OFFLINE;
