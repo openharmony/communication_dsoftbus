@@ -98,8 +98,10 @@ int32_t DiscCoapSendRsp(const DeviceInfo *deviceInfo, uint8_t bType)
     if (ret != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "disc send response failed, ret=%{public}d", ret);
     }
-    SoftBusFree(settings->businessData);
-    settings->businessData = NULL;
+    if (settings->businessData != NULL) {
+        SoftBusFree(settings->businessData);
+        settings->businessData = NULL;
+    }
     SoftBusFree(settings);
     return ret;
 }
