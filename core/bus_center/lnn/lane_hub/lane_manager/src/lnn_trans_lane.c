@@ -1010,7 +1010,7 @@ int32_t GetTransReqInfoByLaneReqId(uint32_t laneReqId, TransReqInfo *reqInfo)
 
 int32_t PostDetectTimeoutMessage(uint32_t detectId, uint64_t delayMillis)
 {
-    LNN_LOGI(LNN_LANE, "post timeout message, detect=%{public}u", detectId);
+    LNN_LOGI(LNN_LANE, "post timeout message, detectId=%{public}u", detectId);
     return LnnLanePostMsgToHandler(MSG_TYPE_LANE_DETECT_TIMEOUT, detectId, 0, NULL, delayMillis);
 }
 
