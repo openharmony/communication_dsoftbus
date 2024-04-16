@@ -407,7 +407,7 @@ HWTEST_F(TransIpcStandardTest, GrantPermissionTest001, TestSize.Level0)
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 
     ret = transServerProxy.GrantPermission(UUID, PID, g_sessionName);
-    EXPECT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
 }
 
 /**
