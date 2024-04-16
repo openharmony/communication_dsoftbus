@@ -426,16 +426,17 @@ HWTEST_F(AuthManagerTest, TRY_GET_BR_CONN_INFO_TEST_001, TestSize.Level1)
     AuthConnInfo connInfo;
     AuthDataHead head;
     uint8_t data[] = "testdata";
+    DeviceMessageParse messageParse = { CODE_VERIFY_DEVICE, DEFT_FREQ_CYCLE };
     HandleAuthData(&connInfo, &head, data);
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     connInfo.type = AUTH_LINK_TYPE_WIFI;
     ASSERT_TRUE(memcpy_s(connInfo.info.ipInfo.ip, IP_LEN, INVALID_IP_TEST, strlen(INVALID_IP_TEST)) == EOK);
-    FlushDeviceProcess(&connInfo, true);
+    FlushDeviceProcess(&connInfo, true, &messageParse);
     HandleConnectionData(CONN_ID_1, &connInfo, false, &head, nullptr);
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     connInfo.type = AUTH_LINK_TYPE_WIFI;
     ASSERT_TRUE(memcpy_s(connInfo.info.ipInfo.ip, IP_LEN, IP_TEST, strlen(IP_TEST)) == EOK);
-    FlushDeviceProcess(&connInfo, true);
+    FlushDeviceProcess(&connInfo, true, &messageParse);
     HandleConnectionData(CONN_ID_1, &connInfo, false, &head, nullptr);
     connInfo.type = AUTH_LINK_TYPE_BLE;
     HandleDeviceInfoData(CONN_ID_1, &connInfo, true, &head, nullptr);
@@ -549,11 +550,13 @@ HWTEST_F(AuthManagerTest, AUTH_GET_LATEST_AUTH_SEQ_LIST_TEST_001, TestSize.Level
  */
 HWTEST_F(AuthManagerTest, AUTH_DEVICE_ENCRYPT_TEST_001, TestSize.Level1)
 {
+    AuthHandle authHandle = { .authId = AUTH_SEQ_3, .type = AUTH_LINK_TYPE_WIFI };
     uint8_t outData[LENTH] = {0};
     uint32_t outLen = LENTH;
-    EXPECT_TRUE(AuthDeviceEncrypt(AUTH_SEQ_3, TMP_IN_DATA,
+    EXPECT_TRUE(AuthDeviceEncrypt(&authHandle, TMP_IN_DATA,
         TMP_DATA_LEN, outData, &outLen) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(AuthDeviceEncrypt(AUTH_SEQ, TMP_IN_DATA,
+    authHandle.authId = AUTH_SEQ;
+    EXPECT_TRUE(AuthDeviceEncrypt(&authHandle, TMP_IN_DATA,
         TMP_DATA_LEN, outData, &outLen) == SOFTBUS_INVALID_PARAM);
 }
 

@@ -120,6 +120,7 @@ lnn_mock_test_include_dirs = [
   "$dsoftbus_root_path/core/connection/wifi_direct",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
   "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single",
+  "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
 ]
 
 lnn_mock_test_deps = [
@@ -1505,6 +1506,7 @@ ohos_unittest("LNNTransLaneMockTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_reliability.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_trans_lane.c",
     "lane/src/lnn_lane_deps_mock.cpp",
+    "lane/src/lnn_wifi_adpter_mock.cpp",
     "lane/trans_lane/lnn_trans_lane_deps_mock.cpp",
     "lane/trans_lane/lnn_trans_lane_test.cpp",
   ]
@@ -1642,6 +1644,7 @@ ohos_unittest("LNNDiscoveryInterfaceTest") {
 ohos_unittest("LNNLaneListenerTest") {
   module_out_path = module_output_path
   sources = [
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/src/lnn_lane_deps_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane_listener/lnn_lane_listener_deps_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane_listener/lnn_lane_listener_test.cpp",
   ]
@@ -1744,6 +1747,7 @@ if (!defined(ohos_lite) && enhanced_test) {
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
       "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
       "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
+      "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/mlps/include",
     ]
     include_dirs += bus_center_decision_center_inc
 

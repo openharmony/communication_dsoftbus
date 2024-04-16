@@ -31,7 +31,8 @@ void TransProxyonMessageReceivedTest(const uint8_t* data, size_t size)
     }
     ProxyMessage msg;
     ProxyMessageHead mad;
-    msg.authId = *(reinterpret_cast<const int64_t*>(data));
+    msg.authHandle.authId = *(reinterpret_cast<const int64_t*>(data));
+    msg.authHandle.type = *(reinterpret_cast<const int32_t*>(data));
     msg.connId = *(reinterpret_cast<const uint32_t*>(data));
     msg.dateLen = *(reinterpret_cast<const int32_t*>(data));
     mad.type = *(reinterpret_cast<const uint8_t*>(data));

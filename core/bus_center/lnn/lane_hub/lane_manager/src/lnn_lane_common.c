@@ -220,47 +220,6 @@ void LnnDeleteData(Map *map, uint32_t key)
     }
 }
 
-bool CompLaneResource(const LaneResource *src, const LaneResource *dst)
-{
-    switch (src->type) {
-        case LANE_BR:
-            if (strncmp(src->linkInfo.br.brMac, dst->linkInfo.br.brMac, BT_MAC_LEN) != 0) {
-                return false;
-            }
-            break;
-        case LANE_BLE:
-        case LANE_COC:
-            if (strncmp(src->linkInfo.ble.bleMac, dst->linkInfo.ble.bleMac, BT_MAC_LEN) != 0) {
-                return false;
-            }
-            break;
-        case LANE_P2P:
-        case LANE_HML:
-            if (strncmp(src->linkInfo.p2p.connInfo.peerIp, dst->linkInfo.p2p.connInfo.peerIp, IP_LEN) != 0) {
-                return false;
-            }
-            break;
-        case LANE_WLAN_5G:
-        case LANE_WLAN_2P4G:
-        case LANE_P2P_REUSE:
-        case LANE_ETH:
-            if (strncmp(src->linkInfo.wlan.connInfo.addr, dst->linkInfo.wlan.connInfo.addr,
-                MAX_SOCKET_ADDR_LEN) != 0) {
-                return false;
-            }
-            break;
-        case LANE_BLE_DIRECT:
-        case LANE_COC_DIRECT:
-            if (strcmp(src->linkInfo.bleDirect.networkId, dst->linkInfo.bleDirect.networkId) != 0) {
-                return false;
-            }
-            break;
-        default:
-            return false;
-    }
-    return true;
-}
-
 uint64_t LnnGetSysTimeMs(void)
 {
     return SoftBusGetSysTimeMs();

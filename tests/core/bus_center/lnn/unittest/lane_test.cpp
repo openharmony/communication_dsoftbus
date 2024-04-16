@@ -48,6 +48,7 @@ constexpr uint32_t DEFAULT_QOSINFO_MAX_LATENCY = 10000;
 constexpr uint32_t DEFAULT_QOSINFO_MIN_LATENCY = 2500;
 constexpr uint32_t LOW_BW = 500 * 1024;
 constexpr uint32_t HIGH_BW = 160 * 1024 * 1024;
+constexpr uint32_t LANE_REQ_ID_TYPE_SHIFT = 28;
 
 static NodeInfo g_nodeInfo;
 constexpr int32_t DEFAULT_PID = 0;
@@ -172,27 +173,19 @@ static const char *GetLinkType(LaneLinkType type)
     }
 }
 
-static void OnLaneRequestSuccess(uint32_t laneReqId, const LaneConnInfo *info)
+static void OnLaneRequestSuccess(uint32_t laneHandle, const LaneConnInfo *info)
 {
-    printf("LaneRequestSucc: laneReqId:0x%x, linkType:%s\n", laneReqId, GetLinkType(info->type));
+    printf("LaneRequestSucc: laneReqId:0x%x, linkType:%s\n", laneHandle, GetLinkType(info->type));
     const LnnLaneManager *laneManager = GetLaneManager();
-    int32_t ret = laneManager->lnnFreeLane(laneReqId);
+    int32_t ret = laneManager->lnnFreeLane(laneHandle);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
-static void OnLaneRequestFail(uint32_t laneReqId, int32_t errCode)
+static void OnLaneRequestFail(uint32_t laneHandle, int32_t errCode)
 {
-    printf("LaneRequestFail: laneReqId:0x%x, reason:%d\n", laneReqId, errCode);
+    printf("LaneRequestFail: laneReqId:0x%x, reason:%d\n", laneHandle, errCode);
     const LnnLaneManager *laneManager = GetLaneManager();
-    int32_t ret = laneManager->lnnFreeLane(laneReqId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-}
-
-static void OnLaneStateChange(uint32_t laneReqId, LaneState state)
-{
-    printf("LaneStateChange: laneReqId:0x%x, state:%d\n", laneReqId, state);
-    const LnnLaneManager *laneManager = GetLaneManager();
-    int32_t ret = laneManager->lnnFreeLane(laneReqId);
+    int32_t ret = laneManager->lnnFreeLane(laneHandle);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -206,10 +199,10 @@ HWTEST_F(LaneTest, LANE_REQ_ID_APPLY_Test_001, TestSize.Level1)
 {
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
-    uint32_t laneReqId = laneManager->applyLaneReqId(laneType);
+    uint32_t laneReqId = laneManager->lnnGetLaneHandle(laneType);
     EXPECT_TRUE(laneReqId != INVALID_LANE_REQ_ID);
-    int32_t ret = laneManager->lnnFreeLane(laneReqId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(laneType, laneReqId >> LANE_REQ_ID_TYPE_SHIFT);
+    FreeLaneReqId(laneReqId);
 }
 
 /*
@@ -229,14 +222,14 @@ HWTEST_F(LaneTest, LANE_REQ_ID_APPLY_Test_002, TestSize.Level1)
     const LnnLaneManager *laneManager = GetLaneManager();
     uint32_t i;
     for (i = 0; i < MAX_LANE_REQ_ID_NUM; i++) {
-        laneReqId = laneManager->applyLaneReqId(laneType);
+        laneReqId = laneManager->lnnGetLaneHandle(laneType);
         EXPECT_TRUE(laneReqId != INVALID_LANE_REQ_ID);
         laneReqIdList[i] = laneReqId;
     }
-    laneReqId = laneManager->applyLaneReqId(laneType);
+    laneReqId = laneManager->lnnGetLaneHandle(laneType);
     EXPECT_TRUE(laneReqId == INVALID_LANE_REQ_ID);
     for (i = 0; i < MAX_LANE_REQ_ID_NUM; i++) {
-        EXPECT_EQ(laneManager->lnnFreeLane(laneReqIdList[i]), SOFTBUS_OK);
+        FreeLaneReqId(laneReqIdList[i]);
     }
     SoftBusFree(laneReqIdList);
 }
@@ -381,29 +374,27 @@ HWTEST_F(LaneTest, LANE_LINK_Test_002, TestSize.Level1)
 HWTEST_F(LaneTest, TRANS_LANE_ALLOC_Test_001, TestSize.Level1)
 {
     const LnnLaneManager *laneManager = GetLaneManager();
-    uint32_t laneReqId = laneManager->applyLaneReqId(LANE_TYPE_TRANS);
+    uint32_t laneReqId = laneManager->lnnGetLaneHandle(LANE_TYPE_TRANS);
     EXPECT_TRUE(laneReqId != INVALID_LANE_REQ_ID);
-    LaneRequestOption request;
-    (void)memset_s(&request, sizeof(LaneRequestOption), 0, sizeof(LaneRequestOption));
-    request.type = LANE_TYPE_TRANS;
-    TransOption *trans = &request.requestInfo.trans;
-    int32_t ret = memcpy_s(trans->networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, sizeof(NODE_NETWORK_ID));
+    LaneAllocInfo allocInfo;
+    (void)memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo));
+    allocInfo.type = LANE_TYPE_TRANS;
+    allocInfo.transType = LANE_T_RAW_STREAM;
+    int32_t ret = memcpy_s(allocInfo.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, sizeof(NODE_NETWORK_ID));
     EXPECT_TRUE(ret == EOK);
-    trans->transType = LANE_T_RAW_STREAM;
-    trans->pid = DEFAULT_PID;
-    trans->qosRequire.minBW = DEFAULT_QOSINFO_MIN_BW + HIGH_BW;
-    trans->qosRequire.maxLaneLatency = DEFAULT_QOSINFO_MAX_LATENCY;
-    trans->qosRequire.minLaneLatency = DEFAULT_QOSINFO_MIN_LATENCY;
-    ILaneListener listener = {
-        .OnLaneRequestSuccess = OnLaneRequestSuccess,
-        .OnLaneRequestFail = OnLaneRequestFail,
-        .OnLaneStateChange = OnLaneStateChange,
+    allocInfo.pid = DEFAULT_PID;
+    allocInfo.qosRequire.minBW = DEFAULT_QOSINFO_MIN_BW + HIGH_BW;
+    allocInfo.qosRequire.maxLaneLatency = DEFAULT_QOSINFO_MAX_LATENCY;
+    allocInfo.qosRequire.minLaneLatency = DEFAULT_QOSINFO_MIN_LATENCY;
+    LaneAllocListener listener = {
+        .OnLaneAllocSuccess = OnLaneRequestSuccess,
+        .OnLaneAllocFail = OnLaneRequestFail,
     };
-    ret = laneManager->lnnRequestLane(laneReqId, &request, &listener);
+    ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &listener);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
-    trans->qosRequire.minBW = DEFAULT_QOSINFO_MIN_BW + LOW_BW;
-    ret = laneManager->lnnRequestLane(laneReqId, &request, &listener);
+    allocInfo.qosRequire.minBW = DEFAULT_QOSINFO_MIN_BW + LOW_BW;
+    ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &listener);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     SoftBusSleepMs(5);
 }

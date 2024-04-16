@@ -48,7 +48,13 @@ constexpr uint32_t ENCRYPT_OVER_HEAD_LEN_TEST = 32;
 constexpr char P2P_MAC[BT_MAC_LEN] = "01:02:03:04:05:06";
 constexpr char P2P_MAC2[BT_MAC_LEN] = { 0 };
 constexpr char UUID_TEST[UUID_BUF_LEN] = "0123456789ABC";
-constexpr char UUID_TEST2[UUID_BUF_LEN] = {0};
+constexpr char UUID_TEST2[UUID_BUF_LEN] = { 0 };
+#define CODE_VERIFY_DEVICE 2
+#define CODE_KEEP_ALIVE    3
+#define LINK_TYPE          8
+#define CLIENT_PORT        6666
+#define KEEPALIVE_TIME     601
+const char *Ip = "127.0.0.1";
 
 class AuthTest : public testing::Test {
 public:
@@ -368,32 +374,32 @@ HWTEST_F(AuthTest, ENCRYPT_INNER_Test_001, TestSize.Level1)
     SessionKey sessionKey = { { 0 }, TEST_DATA_LEN };
     int64_t authSeq = 0;
     const uint8_t inData[CRYPT_DATA_LEN] = { 0 };
-    uint32_t inLen = CRYPT_DATA_LEN;
     uint8_t *outData = nullptr;
     uint32_t outLen = 0;
     int32_t ret;
-
-    ret = EncryptInner(nullptr, inData, inLen, &outData, &outLen);
+    InDataInfo inDataInfo = { .inData = nullptr, .inLen = CRYPT_DATA_LEN };
+    ret = EncryptInner(&list, AUTH_LINK_TYPE_WIFI, &inDataInfo, &outData, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     SoftBusFree(outData);
-    ret = EncryptInner(&list, nullptr, inLen, &outData, &outLen);
+    inDataInfo.inData = inData;
+    ret = EncryptInner(nullptr, AUTH_LINK_TYPE_WIFI, &inDataInfo, &outData, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     SoftBusFree(outData);
-    ret = EncryptInner(&list, inData, inLen, nullptr, &outLen);
+    ret = EncryptInner(&list, AUTH_LINK_TYPE_WIFI, &inDataInfo, nullptr, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     SoftBusFree(outData);
-    ret = EncryptInner(&list, inData, inLen, &outData, nullptr);
+    ret = EncryptInner(&list, AUTH_LINK_TYPE_WIFI, &inDataInfo, &outData, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     SoftBusFree(outData);
-    inLen = 0;
-    ret = EncryptInner(&list, inData, inLen, &outData, nullptr);
+    inDataInfo.inLen = 0;
+    ret = EncryptInner(&list, AUTH_LINK_TYPE_WIFI, &inDataInfo, &outData, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     SoftBusFree(outData);
     ListInit(&list);
     ret = AddSessionKey(&list, TO_INT32(authSeq), &sessionKey, AUTH_LINK_TYPE_WIFI);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    inLen = CRYPT_DATA_LEN;
-    ret = EncryptInner(&list, inData, inLen, &outData, &outLen);
+    inDataInfo.inLen = CRYPT_DATA_LEN;
+    ret = EncryptInner(&list, AUTH_LINK_TYPE_WIFI, &inDataInfo, &outData, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_ENCRYPT_ERR);
     SoftBusFree(outData);
 }
@@ -410,32 +416,32 @@ HWTEST_F(AuthTest, DENCRYPT_INNER_Test_001, TestSize.Level1)
     SessionKey sessionKey = { { 0 }, TEST_DATA_LEN };
     int64_t authSeq = 0;
     const uint8_t inData[CRYPT_DATA_LEN] = { 0 };
-    uint32_t inLen = CRYPT_DATA_LEN;
     uint8_t *outData = nullptr;
     uint32_t outLen = 0;
     int32_t ret;
-
-    ret = DecryptInner(nullptr, inData, inLen, &outData, &outLen);
+    InDataInfo inDataInfo = { .inData = nullptr, .inLen = CRYPT_DATA_LEN };
+    ret = DecryptInner(&list, AUTH_LINK_TYPE_WIFI, &inDataInfo, &outData, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     SoftBusFree(outData);
-    ret = DecryptInner(&list, nullptr, inLen, &outData, &outLen);
+    inDataInfo.inData = inData;
+    ret = DecryptInner(nullptr, AUTH_LINK_TYPE_WIFI, &inDataInfo, &outData, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     SoftBusFree(outData);
-    ret = DecryptInner(&list, inData, inLen, nullptr, &outLen);
+    ret = DecryptInner(&list, AUTH_LINK_TYPE_WIFI, &inDataInfo, nullptr, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     SoftBusFree(outData);
-    ret = DecryptInner(&list, inData, inLen, &outData, nullptr);
+    ret = DecryptInner(&list, AUTH_LINK_TYPE_WIFI, &inDataInfo, &outData, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     SoftBusFree(outData);
-    inLen = 0;
-    ret = DecryptInner(&list, inData, inLen, &outData, &outLen);
+    inDataInfo.inLen = 0;
+    ret = DecryptInner(&list, AUTH_LINK_TYPE_WIFI, &inDataInfo, &outData, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     SoftBusFree(outData);
     ListInit(&list);
     ret = AddSessionKey(&list, TO_INT32(authSeq), &sessionKey, AUTH_LINK_TYPE_WIFI);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    inLen = CRYPT_DATA_LEN;
-    ret = DecryptInner(&list, inData, inLen, &outData, &outLen);
+    inDataInfo.inLen = CRYPT_DATA_LEN;
+    ret = DecryptInner(&list, AUTH_LINK_TYPE_WIFI, &inDataInfo, &outData, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_DECRYPT_ERR);
     SoftBusFree(outData);
 }
@@ -532,18 +538,45 @@ HWTEST_F(AuthTest, POST_HICHAIN_AUTH_MESSAGE_Test_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: POST_VERIFY_DEVICE_MESSAGE_001
- * @tc.desc: post verify device message test
+ * @tc.name: POST_DEVICE_MESSAGE_Test_001
+ * @tc.desc: post device message test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthTest, POST_VERIFY_DEVICE_MESSAGE_001, TestSize.Level1)
+HWTEST_F(AuthTest, POST_DEVICE_MESSAGE_Test_001, TestSize.Level1)
 {
     AuthManager auth = { 0 };
     int32_t flagRelay = 1;
+    DeviceMessageParse messageParse = { CODE_VERIFY_DEVICE, DEFT_FREQ_CYCLE };
     InitSessionKeyList(&auth.sessionKeyList);
-    int32_t ret = PostVerifyDeviceMessage(&auth, flagRelay, AUTH_LINK_TYPE_WIFI);
+    int32_t ret = PostDeviceMessage(&auth, flagRelay, AUTH_LINK_TYPE_WIFI, &messageParse);
     EXPECT_TRUE(ret == SOFTBUS_ENCRYPT_ERR);
+    messageParse.messageType = CODE_KEEP_ALIVE;
+    ret = PostDeviceMessage(&auth, flagRelay, AUTH_LINK_TYPE_WIFI, &messageParse);
+    EXPECT_TRUE(ret == SOFTBUS_ENCRYPT_ERR);
+}
+
+/*
+ * @tc.name: POST_DEVICE_MESSAGE_Test_002
+ * @tc.desc: post device message test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthTest, POST_DEVICE_MESSAGE_Test_002, TestSize.Level1)
+{
+    const AuthManager *auth = nullptr;
+    AuthManager authManager;
+    int32_t flagRelay = 1;
+    int32_t type = 0;
+    DeviceMessageParse messageParse = { CODE_VERIFY_DEVICE, DEFT_FREQ_CYCLE };
+    (void)memset_s(&authManager, sizeof(AuthManager), 0, sizeof(AuthManager));
+    int32_t ret = PostDeviceMessage(auth, flagRelay, AUTH_LINK_TYPE_WIFI, &messageParse);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = PostDeviceMessage(&authManager, flagRelay, AuthLinkType(type), &messageParse);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    type = LINK_TYPE;
+    ret = PostDeviceMessage(&authManager, flagRelay, AuthLinkType(type), &messageParse);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
 /*
@@ -772,6 +805,30 @@ HWTEST_F(AuthTest, AUTH_FLUSH_DEVICE_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     uuid[0] = '1';
     ret = AuthFlushDevice(const_cast<const char *>(uuid));
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+/*
+ * @tc.name: AUTH_SEND_KEEP_ALIVE_Test_001
+ * @tc.desc: auth send keep alive test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthTest, AUTH_SEND_KEEP_ALIVE_Test_001, TestSize.Level1)
+{
+    char uuid[TEST_DATA_LEN] = "testdata";
+    int32_t time = 0;
+    int32_t ret;
+
+    ret = AuthSendKeepAlive(nullptr, HIGH_FREQ_CYCLE);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = AuthSendKeepAlive(uuid, (ModeCycle)time);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    uuid[0] = '\0';
+    ret = AuthSendKeepAlive(const_cast<const char *>(uuid), HIGH_FREQ_CYCLE);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    uuid[0] = '1';
+    ret = AuthSendKeepAlive(const_cast<const char *>(uuid), HIGH_FREQ_CYCLE);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
@@ -1046,6 +1103,25 @@ HWTEST_F(AuthTest, AUTH_GET_ID_BY_P2P_MAC_Test_001, TestSize.Level1)
 }
 
 /*
+ * @tc.name: AUTH_SET_TCP_KEEPALIVE_Test_001
+ * @tc.desc: auth set tcp keepalive test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthTest, AUTH_SET_TCP_KEEPALIVE_Test_001, TestSize.Level1)
+{
+    int32_t ret;
+    AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(connInfo), 0, sizeof(connInfo));
+
+    ret = AuthSetTcpKeepAlive(nullptr, HIGH_FREQ_CYCLE);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    connInfo.type = AUTH_LINK_TYPE_WIFI;
+    ret = AuthSetTcpKeepAlive(&connInfo, HIGH_FREQ_CYCLE);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+/*
  * @tc.name: AUTH_ENCRYPT_Test_001
  * @tc.desc: auth encrypt test
  * @tc.type: FUNC
@@ -1065,18 +1141,18 @@ HWTEST_F(AuthTest, AUTH_ENCRYPT_Test_001, TestSize.Level1)
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
     info.isServer = true;
     info.connInfo.type = AUTH_LINK_TYPE_BLE;
-
+    AuthHandle authHandle = { .authId = authId, .type = AUTH_LINK_TYPE_WIFI };
     AuthManager *auth = NewAuthManager(authId, &info);
     EXPECT_TRUE(auth != nullptr);
-    ret = AuthEncrypt(authId, nullptr, inLen, outData, &outLen);
+    ret = AuthEncrypt(&authHandle, nullptr, inLen, outData, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = AuthEncrypt(authId, inData, inLen, nullptr, &outLen);
+    ret = AuthEncrypt(&authHandle, inData, inLen, nullptr, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = AuthEncrypt(authId, inData, inLen, outData, nullptr);
+    ret = AuthEncrypt(&authHandle, inData, inLen, outData, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = AuthEncrypt(authId, inData, errLen, outData, &outLen);
+    ret = AuthEncrypt(&authHandle, inData, errLen, outData, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = AuthEncrypt(authId, inData, inLen, outData, &errLen);
+    ret = AuthEncrypt(&authHandle, inData, inLen, outData, &errLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     DelAuthManager(auth, AUTH_LINK_TYPE_MAX);
 }
@@ -1101,20 +1177,20 @@ HWTEST_F(AuthTest, AUTH_DECRYPT_Test_001, TestSize.Level1)
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
     info.isServer = true;
     info.connInfo.type = AUTH_LINK_TYPE_BLE;
-
+    AuthHandle authHandle = { .authId = authId, .type = AUTH_LINK_TYPE_WIFI };
     AuthManager *auth = NewAuthManager(authId, &info);
     EXPECT_TRUE(auth != nullptr);
-    ret = AuthDecrypt(authId, nullptr, inLen, outData, &outLen);
+    ret = AuthDecrypt(&authHandle, nullptr, inLen, outData, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = AuthDecrypt(authId, inData, inLen, nullptr, &outLen);
+    ret = AuthDecrypt(&authHandle, inData, inLen, nullptr, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = AuthDecrypt(authId, inData, inLen, outData, nullptr);
+    ret = AuthDecrypt(&authHandle, inData, inLen, outData, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = AuthDecrypt(authId, inData, errLen, outData, &outLen);
+    ret = AuthDecrypt(&authHandle, inData, errLen, outData, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = AuthDecrypt(authId, inData, inLen, outData, &errLen);
+    ret = AuthDecrypt(&authHandle, inData, inLen, outData, &errLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = AuthDecrypt(authId, inData, inLen, outData, &outLen);
+    ret = AuthDecrypt(&authHandle, inData, inLen, outData, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_ENCRYPT_ERR);
     DelAuthManager(auth, AUTH_LINK_TYPE_MAX);
 }
@@ -1710,10 +1786,10 @@ HWTEST_F(AuthTest, ENCRYPT_DATA_Test_001, TestSize.Level1)
     SessionKeyList listValue;
     (void)memset_s(&listValue, sizeof(SessionKeyList), 0, sizeof(SessionKeyList));
     uint8_t indata[TEST_DATA_LEN] = "1234";
-    int32_t inLen = TEST_DATA_LEN;
     uint8_t outData[TEST_DATA_LEN];
     uint32_t outLen = TEST_DATA_LEN;
-    int32_t ret = EncryptData(list, indata, inLen, outData, &outLen);
+    InDataInfo inDataInfo = { .inData = indata, .inLen = TEST_DATA_LEN };
+    int32_t ret = EncryptData(list, AUTH_LINK_TYPE_WIFI, &inDataInfo, outData, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
@@ -1727,10 +1803,10 @@ HWTEST_F(AuthTest, DECRYPT_DATA_Test_001, TestSize.Level1)
 {
     SessionKeyList *list = nullptr;
     uint8_t indata[TEST_DATA_LEN] = "1234";
-    int32_t inLenValue = ENCRYPT_OVER_HEAD_LEN_TEST + 1;
     uint8_t outData[TEST_DATA_LEN];
     uint32_t outLen = TEST_DATA_LEN;
-    int32_t ret = DecryptData(list, indata, inLenValue, outData, &outLen);
+    InDataInfo inDataInfo = { .inData = indata, .inLen = ENCRYPT_OVER_HEAD_LEN_TEST + 1 };
+    int32_t ret = DecryptData(list, AUTH_LINK_TYPE_WIFI, &inDataInfo, outData, &outLen);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
@@ -1786,22 +1862,6 @@ HWTEST_F(AuthTest, PROCESS_DEVICE_ID_MESSAGE_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = ProcessDeviceIdMessage(&infoValue, data, sizeof(data));
     EXPECT_TRUE(ret != SOFTBUS_OK);
-}
-
-/*
- * @tc.name: POST_VERIFY_DEVICE_MESSAGE_Test_001
- * @tc.desc: Post Verify Device Message test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthTest, POST_VERIFY_DEVICE_MESSAGE_Test_001, TestSize.Level1)
-{
-    const AuthManager *auth = nullptr;
-    AuthManager authValue;
-    int32_t flagRelay = 1;
-    (void)memset_s(&authValue, sizeof(AuthManager), 0, sizeof(AuthManager));
-    int32_t ret = PostVerifyDeviceMessage(auth, flagRelay, AUTH_LINK_TYPE_WIFI);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
 /*
@@ -1963,12 +2023,112 @@ HWTEST_F(AuthTest, AUTH_SET_AND_SET_SESSIONKEY_AVAILABLE_Test_001, TestSize.Leve
     ListInit(&list);
     int32_t ret = AddSessionKey(&list, index, &sessionKey, AUTH_LINK_TYPE_WIFI);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    uint64_t time = GetLatestAvailableSessionKeyTime(&list);
+    uint64_t time = GetLatestAvailableSessionKeyTime(&list, AUTH_LINK_TYPE_WIFI);
     EXPECT_TRUE(time == 0);
     ret = SetSessionKeyAvailable(&list, 0);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    time = GetLatestAvailableSessionKeyTime(&list);
+    time = GetLatestAvailableSessionKeyTime(&list, AUTH_LINK_TYPE_WIFI);
     EXPECT_TRUE(time != 0);
     DestroySessionKeyList(&list);
+}
+
+/*
+ * @tc.name: AUTH_SET_TCP_KEEPALIVE_OPTION_Test_001
+ * @tc.desc: Auth Set Tcp Keepalive option test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthTest, AUTH_SET_TCP_KEEPALIVE_OPTION_Test_001, TestSize.Level1)
+{
+    int32_t fd = -1;
+    int32_t cycle = 0;
+
+    int32_t ret = AuthSetTcpKeepAliveOption(fd, HIGH_FREQ_CYCLE);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    fd = 1;
+    ret = AuthSetTcpKeepAliveOption(fd, (ModeCycle)cycle);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    cycle = KEEPALIVE_TIME;
+    ret = AuthSetTcpKeepAliveOption(fd, (ModeCycle)cycle);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: AUTH_SET_TCP_KEEPALIVE_OPTION_Test_002
+ * @tc.desc: Auth Set Tcp Keepalive option test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthTest, AUTH_SET_TCP_KEEPALIVE_OPTION_Test_002, TestSize.Level1)
+{
+    int32_t fd = 1;
+
+    int32_t ret = AuthSetTcpKeepAliveOption(fd, HIGH_FREQ_CYCLE);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = AuthSetTcpKeepAliveOption(fd, MID_FREQ_CYCLE);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = AuthSetTcpKeepAliveOption(fd, LOW_FREQ_CYCLE);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = AuthSetTcpKeepAliveOption(fd, DEFT_FREQ_CYCLE);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
+}
+
+/*
+ * @tc.name: AUTH_SET_TCP_KEEPALIVE_OPTION_Test_003
+ * @tc.desc: Auth Set Tcp Keepalive option test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthTest, AUTH_SET_TCP_KEEPALIVE_OPTION_Test_003, TestSize.Level1)
+{
+    const SocketInterface *tcp = GetTcpProtocol();
+    ASSERT_NE(tcp, nullptr);
+
+    int port = CLIENT_PORT;
+    LocalListenerInfo info = {};
+    info.type = CONNECT_TCP;
+    info.socketOption.port = port;
+    info.socketOption.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
+    (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
+    int fd = tcp->OpenServerSocket(&info);
+
+    int32_t ret = AuthSetTcpKeepAliveOption(fd, HIGH_FREQ_CYCLE);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = AuthSetTcpKeepAliveOption(fd, MID_FREQ_CYCLE);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = AuthSetTcpKeepAliveOption(fd, LOW_FREQ_CYCLE);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = AuthSetTcpKeepAliveOption(fd, DEFT_FREQ_CYCLE);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: GET_TCP_KEEPALIVE_OPTION_BY_CYCLE_Test_001
+ * @tc.desc: Get Tcp Keepalive Option By Cycle test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthTest, GET_TCP_KEEPALIVE_OPTION_BY_CYCLE_Test_001, TestSize.Level1)
+{
+    int32_t keepAliveIntvl = 0;
+    int32_t keepAliveCount = 0;
+    uint32_t userTimeOut = 0;
+
+    int32_t ret = GetTcpKeepAliveOptionByCycle(HIGH_FREQ_CYCLE, nullptr, &keepAliveCount, &userTimeOut);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = GetTcpKeepAliveOptionByCycle(HIGH_FREQ_CYCLE, &keepAliveIntvl, nullptr, &userTimeOut);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    ret = GetTcpKeepAliveOptionByCycle(HIGH_FREQ_CYCLE, &keepAliveIntvl, &keepAliveCount, nullptr);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+
+    ret = GetTcpKeepAliveOptionByCycle(HIGH_FREQ_CYCLE, &keepAliveIntvl, &keepAliveCount, &userTimeOut);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = GetTcpKeepAliveOptionByCycle(MID_FREQ_CYCLE, &keepAliveIntvl, &keepAliveCount, &userTimeOut);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = GetTcpKeepAliveOptionByCycle(LOW_FREQ_CYCLE, &keepAliveIntvl, &keepAliveCount, &userTimeOut);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = GetTcpKeepAliveOptionByCycle(DEFT_FREQ_CYCLE, &keepAliveIntvl, &keepAliveCount, &userTimeOut);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 } // namespace OHOS

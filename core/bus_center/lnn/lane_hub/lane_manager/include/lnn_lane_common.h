@@ -29,7 +29,6 @@ int32_t LaneInfoProcess(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, La
 int32_t LnnCreateData(Map *map, uint32_t key, const void *value, uint32_t valueSize);
 void *LnnReadData(const Map *map, uint32_t key);
 void LnnDeleteData(Map *map, uint32_t key);
-bool CompLaneResource(const LaneResource *src, const LaneResource *dst);
 uint64_t LnnGetSysTimeMs(void);
 int32_t LnnInitLaneLooper(void);
 void LnnDeinitLaneLooper(void);
