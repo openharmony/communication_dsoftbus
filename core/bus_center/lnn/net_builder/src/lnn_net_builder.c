@@ -1903,6 +1903,7 @@ int32_t FindRequestIdByAddr(ConnectionAddr *connetionAddr, uint32_t *requestId)
 {
     if (requestId == NULL) {
         LNN_LOGE(LNN_BUILDER, "requestId is null");
+        return SOFTBUS_INVALID_PARAM;
     }
     LnnConnectionFsm *connFsm = FindConnectionFsmByAddr(connetionAddr, false);
     if (connFsm == NULL || connFsm->isDead) {
