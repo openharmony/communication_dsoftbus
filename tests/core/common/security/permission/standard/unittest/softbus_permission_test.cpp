@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -153,9 +153,7 @@ HWTEST_F(SoftbusPermissionTest, RemoveTransPermissionTest001, TestSize.Level0)
  */
 HWTEST_F(SoftbusPermissionTest, CheckDynamicPermissionTest001, TestSize.Level0)
 {
-    int32_t ret;
-
-    ret = CheckDynamicPermission();
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    int32_t ret = CheckDynamicPermission();
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
 }
 } // namespace OHOS
