@@ -358,6 +358,16 @@ bool LnnIsSupportBurstFeature(const char *networkId)
         IsFeatureSupport(peerFeature, BIT_BLE_SUPPORT_SENSORHUB_HEARTBEAT);
 }
 
+bool LnnIsLocalSupportBurstFeature(void)
+{
+    uint64_t localFeature;
+    if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &localFeature) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "get local feature fail");
+        return false;
+    }
+    return IsFeatureSupport(localFeature, BIT_BLE_SUPPORT_SENSORHUB_HEARTBEAT);
+}
+
 void LnnDumpLocalBasicInfo(void)
 {
     char *anonyIp = NULL;

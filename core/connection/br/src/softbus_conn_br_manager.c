@@ -489,7 +489,7 @@ static void AttempReuseConnect(ConnBrDevice *device, DeviceAction actionIfAbsent
         if (connection != NULL && strcmp(device->addr, connection->addr) == 0 &&
             BrReuseConnection(device, connection)) {
             CONN_LOGI(CONN_BR, "reuse by connId, addr=%{public}s, connId=%{public}u", anomizeAddress,
-                clientConnection->connectionId);
+                connection->connectionId);
             FreeDevice(device);
             break;
         }

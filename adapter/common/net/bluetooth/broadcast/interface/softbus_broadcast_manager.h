@@ -285,7 +285,8 @@ bool BroadcastIsLpDeviceAvailable(void);
  * @since 4.1
  * @version 1.0
  */
-bool BroadcastSetAdvDeviceParam(const LpBroadcastParam *bcParam, const LpScanParam *scanParam);
+bool BroadcastSetAdvDeviceParam(SensorHubServerType type, const LpBroadcastParam *bcParam,
+    const LpScanParam *scanParam);
 
 /**
  * @brief Obtain the advHandle using advId.

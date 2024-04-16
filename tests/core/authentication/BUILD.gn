@@ -705,6 +705,47 @@ ohos_unittest("AuthSessionFsmTest") {
   }
 }
 
+ohos_unittest("AuthSessionKeyTest") {
+  module_out_path = module_output_path
+  sources = [ "unittest/auth_session_key_test.cpp" ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "unittest/common/",
+    "//third_party/bounds_checking_function/include",
+    "$dsoftbus_root_path/core/authentication/src",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    "//third_party/bounds_checking_function:libsec_shared",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "device_auth:deviceauth_sdk",
+      "hilog:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+  }
+}
+
 ohos_unittest("AuthNormalizeRequestTest") {
   module_out_path = module_output_path
   sources = [ "unittest/auth_normalize_request_test.cpp" ]
@@ -749,6 +790,7 @@ group("unittest") {
     ":AuthNormalizeRequestTest",
     ":AuthOtherTest",
     ":AuthSessionFsmTest",
+    ":AuthSessionKeyTest",
     ":AuthSessionMessageTest",
     ":AuthTcpConnectionTest",
     ":AuthTest",

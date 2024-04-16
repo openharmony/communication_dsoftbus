@@ -152,7 +152,8 @@ static bool MockIsLpDeviceAvailable(void)
     return true;
 }
 
-static bool MockSetAdvFilterParam(const SoftBusLpBroadcastParam *bcParam, const SoftBusLpScanParam *scanParam)
+static bool MockSetAdvFilterParam(SensorHubServerType type,
+    const SoftBusLpBroadcastParam *bcParam, const SoftBusLpScanParam *scanParam)
 {
     return SOFTBUS_OK;
 }

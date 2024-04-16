@@ -25,6 +25,9 @@
 #define UUID_LEN 2
 #define UUID_MASK_LEN 2
 #define ID_LEN 2
+#define MANUFACTURE_DATA_LEN 2
+#define MANUFACTURE_DATA_UUID_LOW 0x7D
+#define MANUFACTURE_DATA_UUID_HIGH  0x02
 
 int32_t BtStatusToSoftBus(BtStatus btStatus)
 {
@@ -273,6 +276,29 @@ void SoftbusFilterToBt(BleScanNativeFilter *nativeFilter, const SoftBusBcScanFil
         (nativeFilter + filterSize)->serviceData = (unsigned char *)serviceData;
         (nativeFilter + filterSize)->serviceDataLength = (unsigned int)serviceDataLen;
         (nativeFilter + filterSize)->serviceDataMask = (unsigned char *)serviceDataMask;
+    }
+}
+
+void SoftbusSetManufactureData(BleScanNativeFilter *nativeFilter, uint8_t filterSize)
+{
+    while (filterSize-- > 0) {
+        uint8_t *manufactureData = (uint8_t *)SoftBusCalloc(MANUFACTURE_DATA_LEN);
+        if (manufactureData == NULL) {
+            return;
+        }
+        manufactureData[0] = MANUFACTURE_DATA_UUID_LOW & BC_BYTE_MASK;
+        manufactureData[1] = MANUFACTURE_DATA_UUID_HIGH & BC_BYTE_MASK;
+        uint8_t *manufactureMask = (uint8_t *)SoftBusCalloc(MANUFACTURE_DATA_LEN);
+        if (manufactureMask == NULL) {
+            SoftBusFree(manufactureData);
+            return;
+        }
+        manufactureMask[0] = BC_BYTE_MASK;
+        manufactureMask[1] = BC_BYTE_MASK;
+        (nativeFilter + filterSize)->manufactureData = manufactureData;
+        (nativeFilter + filterSize)->manufactureDataLength = MANUFACTURE_DATA_LEN;
+        (nativeFilter + filterSize)->manufactureDataMask = manufactureMask;
+        (nativeFilter + filterSize)->manufactureId = filterSize + 1;
     }
 }
 

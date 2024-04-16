@@ -53,6 +53,11 @@ typedef struct {
     ListNode node;
 } AuthManager;
 
+typedef struct {
+    int32_t messageType;
+    ModeCycle cycle;
+} DeviceMessageParse;
+
 int32_t AuthManagerSetSessionKey(int64_t authSeq, AuthSessionInfo *info, const SessionKey *sessionKey,
     bool isConnect);
 int32_t AuthManagerGetSessionKey(int64_t authSeq, const AuthSessionInfo *info, SessionKey *sessionKey);
@@ -82,8 +87,10 @@ int64_t AuthDeviceGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer);
 int64_t AuthDeviceGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer);
 AuthManager *NewAuthManager(int64_t authSeq, const AuthSessionInfo *info);
 
-int32_t AuthDeviceEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen);
-int32_t AuthDeviceDecrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen);
+int32_t AuthDeviceEncrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
+    uint32_t *outLen);
+int32_t AuthDeviceDecrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
+    uint32_t *outLen);
 int32_t AuthDeviceSetP2pMac(int64_t authId, const char *p2pMac);
 
 int32_t AuthVerifyAfterNotifyNormalize(NormalizeRequest *request);

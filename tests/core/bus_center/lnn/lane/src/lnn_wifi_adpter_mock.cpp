@@ -66,5 +66,9 @@ int32_t LnnConnectP2p(const LinkRequest *request, uint32_t laneLinkReqId, const 
 {
     return GetWifiAdpterInterface()->LnnConnectP2p(request, laneLinkReqId, callback);
 }
+int32_t UpdateP2pLinkedInfo(uint32_t laneReqId, uint64_t laneId)
+{
+    return GetWifiAdpterInterface()->UpdateP2pLinkedInfo(laneReqId, laneId);
+}
 }
 }

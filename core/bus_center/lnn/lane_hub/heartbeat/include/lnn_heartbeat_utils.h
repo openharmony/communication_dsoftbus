@@ -50,7 +50,7 @@ extern "C" {
 #define HB_SEND_EACH_SEPARATELY_LEN (2 * HB_TIME_FACTOR) // Split and send a single heartbeat
 #define HB_SEND_SEPARATELY_CNT (HB_SEND_ONCE_LEN / HB_SEND_EACH_SEPARATELY_LEN)
 
-#define HB_MAX_TYPE_COUNT 5
+#define HB_MAX_TYPE_COUNT 6
 
 // heartbeat type
 #define HEARTBEAT_TYPE_MIN              (0x1L)
@@ -59,7 +59,8 @@ extern "C" {
 #define HEARTBEAT_TYPE_BLE_V1           (0x1L << 2)
 #define HEARTBEAT_TYPE_TCP_FLUSH        (0x1L << 3)
 #define HEARTBEAT_TYPE_BLE_V3           (0x1L << 4)
-#define HEARTBEAT_TYPE_MAX              (0x1L << 5)
+#define HEARTBEAT_TYPE_BLE_V4           (0x1L << 5) // for heartbeat to sh
+#define HEARTBEAT_TYPE_MAX              (0x1L << 6)
 
 #define NORMAL_STRATEGY 1
 #define HIGH_PERFORMANCE_STRATEGY 2
@@ -121,6 +122,7 @@ int32_t LnnGetShortAccountHash(uint8_t *accountHash, uint32_t len);
 int32_t LnnGenerateHexStringHash(const unsigned char *str, char *hashStr, uint32_t len);
 int32_t LnnGenerateBtMacHash(const char *btMac, int32_t brMacLen, char *brMacHash, int32_t hashLen);
 bool LnnIsSupportBurstFeature(const char *networkId);
+bool LnnIsLocalSupportBurstFeature(void);
 void LnnDumpLocalBasicInfo(void);
 
 #ifdef __cplusplus

@@ -56,7 +56,6 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
         "$dsoftbus_root_path/core/common/dfx/interface/include",
         "$softbus_adapter_config/spec_config",
-        "//base/security/device_auth/interfaces/inner_api",
       ]
       sources = dsoftbus_server_common_src
       sources += [
@@ -87,6 +86,7 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/core/common/dfx/hidumper_adapter:softbus_dfx_dump",
         "//build/lite/config/component/cJSON:cjson_static",
       ]
+      external_deps = [ "device_auth:deviceauth_sdk" ]
       public_deps =
           [ "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log" ]
       if (support_bluetooth &&
@@ -114,9 +114,7 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/interfaces/kits/transport",
         "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
         "$dsoftbus_root_path/core/common/dfx/interface/include",
-        "//base/security/device_auth/interfaces/inner_api",
         "//commonlibrary/utils_lite/include",
-        "//third_party/bounds_checking_function/include",
       ]
       sources = dsoftbus_server_common_src
       sources += [
@@ -144,6 +142,10 @@ if (defined(ohos_lite)) {
         "//build/lite/config/component/cJSON:cjson_shared",
         "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
         "//foundation/systemabilitymgr/samgr_lite/samgr:samgr",
+      ]
+      external_deps = [
+        "bounds_checking_function:libsec_shared",
+        "device_auth:deviceauth_sdk",
       ]
       public_deps =
           [ "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log" ]
@@ -207,13 +209,6 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common/dfx/hidumper_adapter/include",
       "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
       "$dsoftbus_root_path/core/common/dfx/interface/include",
-      "//base/security/access_token/interfaces/innerkits/privacy/include",
-      "//foundation/bundlemanager/bundle_framework/interfaces/inner_api/appexecfwk_core/include/bundlemgr",
-      "//foundation/bundlemanager/bundle_framework/interfaces/inner_api/appexecfwk_base/include",
-      "//base/notification/common_event_service/interfaces/inner_api",
-      "//foundation/ability/ability_base/interfaces/kits/native/want/include",
-      "//foundation/ability/ability_base/interfaces/kits/native/uri/include",
-      "//foundation/ability/ability_base/interfaces/inner_api/base/include",
     ]
     sources = dsoftbus_server_common_src
     sources += [

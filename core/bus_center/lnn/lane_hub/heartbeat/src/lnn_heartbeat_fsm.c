@@ -759,8 +759,9 @@ static bool ProcOfflineWithoutSoftbus(const char *networkId, ConnectionAddrType 
     return false;
 }
 
-static int32_t ProcessLostHeartbeat(const char *networkId, ConnectionAddrType addrType, bool isWakeUp)
+static int32_t ProcessLostHeartbeat(const char *networkId, LnnHeartbeatType type, bool isWakeUp)
 {
+    ConnectionAddrType addrType = LnnConvertHbTypeToConnAddrType(type);
     char udidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = {0};
     char *anonyNetworkId = NULL;
     if (networkId == NULL) {
@@ -787,8 +788,8 @@ static int32_t ProcessLostHeartbeat(const char *networkId, ConnectionAddrType ad
         }
         return SOFTBUS_OK;
     }
-    if (LnnIsSupportBurstFeature(networkId) && isWakeUp) {
-        LNN_LOGI(LNN_HEART_BEAT, "is support burst and is not wakeup, don't check");
+    if (LnnIsSupportBurstFeature(networkId) && !(isWakeUp || type == HEARTBEAT_TYPE_BLE_V0)) {
+        LNN_LOGI(LNN_HEART_BEAT, "is support burst and is not wakeup or V0, don't check");
         return SOFTBUS_OK;
     }
     const char *udid = LnnConvertDLidToUdid(networkId, CATEGORY_NETWORK_ID);
@@ -879,7 +880,7 @@ static void CheckDevStatusByNetworkId(LnnHeartbeatFsm *hbFsm, const char *networ
         AnonymizeFree(anonyNetworkId);
         return;
     }
-    if (ProcessLostHeartbeat(networkId, LnnConvertHbTypeToConnAddrType(hbType), msgPara->isWakeUp) != SOFTBUS_OK) {
+    if (ProcessLostHeartbeat(networkId, hbType, msgPara->isWakeUp) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "process dev lost err, networkId=%{public}s", anonyNetworkId);
     }
     AnonymizeFree(anonyNetworkId);
@@ -921,8 +922,8 @@ static void CheckDevStatusForScreenOff(LnnHeartbeatFsm *hbFsm, const char *netwo
         return;
     }
     AnonymizeFree(anonyNetworkId);
-    if (LnnIsSupportBurstFeature(networkId)) {
-        LNN_LOGI(LNN_HEART_BEAT, "target device support burst, screen off don't need offline");
+    if (LnnIsLocalSupportBurstFeature()) {
+        LNN_LOGI(LNN_HEART_BEAT, "local device support sh, no need offline");
         return;
     }
     if (LnnRequestLeaveSpecific(networkId, LnnConvertHbTypeToConnAddrType(hbType)) != SOFTBUS_OK) {

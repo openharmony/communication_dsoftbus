@@ -25,7 +25,8 @@
 
 #define GATT_ADV_MAX_NUM       16
 #define GATT_SCAN_MAX_NUM      2
-#define LP_BT_UUID             "43d4a49f-604d-45b5-9302-4ddbbfd538fd"
+#define LP_BT_UUID_BURST       "43d4a49f-604d-45b5-9302-4ddbbfd538fd"
+#define LP_BT_UUID_HEARTBEAT   "43d4a49f-605d-45b5-9302-4ddbbfd538fd"
 #define LP_DELIVERY_MODE_REPLY 0xF0
 #define LP_ADV_DURATION_MS     0
 #define SCAN_CHANNEL_0         0
@@ -707,7 +708,33 @@ static bool IsLpAvailable(void)
     return ret;
 }
 
-static bool SetLpParam(const SoftBusLpBroadcastParam *bcParam, const SoftBusLpScanParam *scanParam)
+static int32_t SetBtUuidByBroadCastType(SensorHubServerType type, BtUuid *btUuid)
+{
+    switch (type) {
+        case SOFTBUS_HEARTBEAT_TYPE:
+            btUuid->uuid = LP_BT_UUID_HEARTBEAT;
+            break;
+        case SOFTBUS_BURST_TYPE:
+            btUuid->uuid = LP_BT_UUID_BURST;
+            break;
+        default:
+            DISC_LOGE(DISC_BLE_ADAPTER, "invalid type, type=%{public}d", type);
+            return SOFTBUS_ERR;
+    }
+    btUuid->uuidLen = (unsigned char)strlen(btUuid->uuid);
+    return SOFTBUS_OK;
+}
+
+static void FreeManufactureData(BleScanNativeFilter *nativeFilter, int32_t filterSize)
+{
+    while (filterSize-- > 0) {
+        SoftBusFree((nativeFilter + filterSize)->manufactureData);
+        SoftBusFree((nativeFilter + filterSize)->manufactureDataMask);
+    }
+}
+
+static bool SetLpParam(SensorHubServerType type,
+    const SoftBusLpBroadcastParam *bcParam, const SoftBusLpScanParam *scanParam)
 {
     BleScanConfigs scanConfig = {};
     scanConfig.scanMode = GetBtScanMode(scanParam->scanParam.scanInterval, scanParam->scanParam.scanWindow);
@@ -715,8 +742,9 @@ static bool SetLpParam(const SoftBusLpBroadcastParam *bcParam, const SoftBusLpSc
     lpParam.scanConfig = &scanConfig;
     lpParam.rawData.advData = (unsigned char *)AssembleAdvData(&bcParam->advData,
         (uint16_t *)&lpParam.rawData.advDataLen);
-    if (lpParam.rawData.advData == NULL) {
-        DISC_LOGE(DISC_BLE_ADAPTER, "assemble adv data failed, advHandle=%{public}d", bcParam->advHandle);
+    DISC_CHECK_AND_RETURN_RET_LOGE(lpParam.rawData.advData != NULL, SOFTBUS_ERR, DISC_BLE, "assemble adv data failed");
+    if (SetBtUuidByBroadCastType(type, &lpParam.uuid) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_BLE_ADAPTER, "set bt uuid fail, advHandle=%{public}d", bcParam->advHandle);
         return SOFTBUS_ERR;
     }
     if (bcParam->advData.rspData.payloadLen > 0 && bcParam->advData.rspData.payload != NULL) {
@@ -735,19 +763,21 @@ static bool SetLpParam(const SoftBusLpBroadcastParam *bcParam, const SoftBusLpSc
         DISC_LOGE(DISC_BLE_ADAPTER, "malloc native filter failed, advHandle=%{public}d", bcParam->advHandle);
         return SOFTBUS_MALLOC_ERR;
     }
+    if (type == SOFTBUS_HEARTBEAT_TYPE) {
+        SoftbusSetManufactureData(lpParam.filter, scanParam->filterSize);
+    }
     SoftbusFilterToBt(lpParam.filter, scanParam->filter, scanParam->filterSize);
     lpParam.filterSize = (unsigned int)scanParam->filterSize;
     SoftbusAdvParamToBt(&bcParam->advParam, &lpParam.advParam);
-    BtUuid btUuid = {};
-    btUuid.uuid = LP_BT_UUID;
-    btUuid.uuidLen = (unsigned char)strlen(LP_BT_UUID);
-    lpParam.uuid = btUuid;
     lpParam.activeDeviceInfo = NULL;
     lpParam.activeDeviceSize = 0;
     lpParam.deliveryMode = LP_DELIVERY_MODE_REPLY;
     lpParam.advHandle = bcParam->advHandle;
     lpParam.duration = LP_ADV_DURATION_MS;
     int ret = SetLpDeviceParam(&lpParam);
+    if (type == SOFTBUS_HEARTBEAT_TYPE) {
+        FreeManufactureData(lpParam.filter, scanParam->filterSize);
+    }
     FreeBtFilter(lpParam.filter, scanParam->filterSize);
     SoftBusFree(lpParam.rawData.advData);
     SoftBusFree(lpParam.rawData.rspData);

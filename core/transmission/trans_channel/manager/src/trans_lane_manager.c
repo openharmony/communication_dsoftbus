@@ -33,8 +33,9 @@ typedef struct {
     int32_t channelType;
     char pkgName[PKG_NAME_SIZE_MAX];
     int32_t pid;
-    uint32_t laneReqId;
+    uint32_t laneHandle;
     LaneConnInfo laneConnInfo;
+    bool isQosLane;
 } TransLaneInfo;
 
 static SoftBusList *g_channelLaneList = NULL;
@@ -126,7 +127,11 @@ void TransLaneMgrDeinit(void)
     TransLaneInfo *nextLaneItem = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(laneItem, nextLaneItem, &g_channelLaneList->list, TransLaneInfo, node) {
         ListDelete(&(laneItem->node));
-        LnnFreeLane(laneItem->laneReqId);
+        if (laneItem->isQosLane) {
+            GetLaneManager()->lnnFreeLane(laneItem->laneHandle);
+        } else {
+            LnnFreeLane(laneItem->laneHandle);
+        }
         SoftBusFree(laneItem);
     }
     g_channelLaneList->cnt = 0;
@@ -136,19 +141,19 @@ void TransLaneMgrDeinit(void)
 }
 
 int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LaneConnInfo *connInfo,
-    uint32_t laneReqId, AppInfoData *myData)
+    uint32_t laneHandle, bool isQosLane, AppInfoData *myData)
 {
     if (g_channelLaneList == NULL || connInfo == NULL || myData == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-
     TransLaneInfo *newLane = (TransLaneInfo *)SoftBusCalloc(sizeof(TransLaneInfo));
     if (newLane == NULL) {
         return SOFTBUS_MALLOC_ERR;
     }
     newLane->channelId = channelId;
     newLane->channelType = channelType;
-    newLane->laneReqId = laneReqId;
+    newLane->laneHandle = laneHandle;
+    newLane->isQosLane = isQosLane;
     newLane->pid = myData->pid;
     if (memcpy_s(&(newLane->laneConnInfo), sizeof(LaneConnInfo), connInfo, sizeof(LaneConnInfo)) != EOK) {
         SoftBusFree(newLane);
@@ -157,6 +162,7 @@ int32_t TransLaneMgrAddLane(int32_t channelId, int32_t channelType, LaneConnInfo
     }
     if (strcpy_s(newLane->pkgName, sizeof(newLane->pkgName), myData->pkgName) != EOK) {
         SoftBusFree(newLane);
+        TRANS_LOGE(TRANS_SVC, "strcpy failed.");
         return SOFTBUS_STRCPY_ERR;
     }
     if (SoftBusMutexLock(&(g_channelLaneList->lock)) != 0) {
@@ -203,7 +209,11 @@ int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType)
             TRANS_LOGI(TRANS_CTRL, "delete channelId=%{public}d, channelType = %{public}d",
                 laneItem->channelId, laneItem->channelType);
             g_channelLaneList->cnt--;
-            LnnFreeLane(laneItem->laneReqId);
+            if (laneItem->isQosLane) {
+                GetLaneManager()->lnnFreeLane(laneItem->laneHandle);
+            } else {
+                LnnFreeLane(laneItem->laneHandle);
+            }
             SoftBusFree(laneItem);
             (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
             return SOFTBUS_OK;
@@ -234,7 +244,11 @@ void TransLaneMgrDeathCallback(const char *pkgName, int32_t pid)
             g_channelLaneList->cnt--;
             TRANS_LOGI(TRANS_SVC, "death del lane. pkgName=%{public}s, channelId=%{public}d, channelType=%{public}d",
                 pkgName, laneItem->channelId, laneItem->channelType);
-            LnnFreeLane(laneItem->laneReqId);
+            if (laneItem->isQosLane) {
+                GetLaneManager()->lnnFreeLane(laneItem->laneHandle);
+            } else {
+                LnnFreeLane(laneItem->laneHandle);
+            }
             SoftBusFree(laneItem);
             (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
             return;
@@ -244,9 +258,9 @@ void TransLaneMgrDeathCallback(const char *pkgName, int32_t pid)
     return;
 }
 
-int32_t TransGetLaneReqIdByChannelId(int32_t channelId, uint32_t *laneReqId)
+int32_t TransGetLaneHandleByChannelId(int32_t channelId, uint32_t *laneHandle)
 {
-    if ((laneReqId == NULL) || (g_channelLaneList == NULL)) {
+    if (g_channelLaneList == NULL || laneHandle == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&(g_channelLaneList->lock)) != 0) {
@@ -255,7 +269,7 @@ int32_t TransGetLaneReqIdByChannelId(int32_t channelId, uint32_t *laneReqId)
     TransLaneInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &(g_channelLaneList->list), TransLaneInfo, node) {
         if (item->channelId == channelId) {
-            *laneReqId = item->laneReqId;
+            *laneHandle = item->laneHandle;
             (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
             return SOFTBUS_OK;
         }
@@ -264,9 +278,9 @@ int32_t TransGetLaneReqIdByChannelId(int32_t channelId, uint32_t *laneReqId)
     return SOFTBUS_ERR;
 }
 
-int32_t TransGetChannelInfoByLaneReqId(uint32_t laneReqId, int32_t *channelId, int32_t *channelType)
+int32_t TransGetChannelInfoByLaneHandle(uint32_t laneHandle, int32_t *channelId, int32_t *channelType)
 {
-    if ((channelId == NULL) || (channelType == NULL) || (g_channelLaneList == NULL)) {
+    if (g_channelLaneList == NULL || channelId == NULL || channelType == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&(g_channelLaneList->lock)) != 0) {
@@ -274,7 +288,7 @@ int32_t TransGetChannelInfoByLaneReqId(uint32_t laneReqId, int32_t *channelId, i
     }
     TransLaneInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &(g_channelLaneList->list), TransLaneInfo, node) {
-        if (item->laneReqId == laneReqId) {
+        if (item->laneHandle == laneHandle) {
             *channelId = item->channelId;
             *channelType = item->channelType;
             (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
