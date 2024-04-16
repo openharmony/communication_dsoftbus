@@ -15,6 +15,8 @@
 
 #include "softbus_server_stub.h"
 
+#include <string>
+
 #include "accesstoken_kit.h"
 #include "access_control.h"
 #include "access_token.h"
@@ -278,121 +280,127 @@ int32_t SoftBusServerStub::OnRemoteRequest(uint32_t code,
 
 int32_t SoftBusServerStub::StartDiscoveryInner(MessageParcel &data, MessageParcel &reply)
 {
-    SubscribeInfo subInfo;
-    (void)memset_s(&subInfo, sizeof(SubscribeInfo), 0, sizeof(SubscribeInfo));
     const char *pkgName = data.ReadCString();
-    if (pkgName == nullptr) {
-        COMM_LOGE(COMM_SVC, "StartDiscoveryInner read pkgName failed!");
-        return SOFTBUS_ERR;
+    COMM_CHECK_AND_RETURN_RET_LOGE(pkgName != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read pkgName failed");
+    uint32_t pkgNameLen = strnlen(pkgName, PKG_NAME_SIZE_MAX);
+    COMM_CHECK_AND_RETURN_RET_LOGE(0 <= pkgNameLen && pkgNameLen < PKG_NAME_SIZE_MAX, SOFTBUS_INVALID_PKGNAME, COMM_SVC,
+        "pkgName invalid");
+    SoftbusRecordCalledApiInfo(pkgName, SERVER_START_DISCOVERY);
+
+    SubscribeInfo info = {0};
+    int32_t value = 0;
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(info.subscribeId), SOFTBUS_IPC_ERR, COMM_SVC,
+        "read subscribeId failed");
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(value), SOFTBUS_IPC_ERR, COMM_SVC, "read mode failed");
+    COMM_CHECK_AND_RETURN_RET_LOGE(value == DISCOVER_MODE_PASSIVE || value == DISCOVER_MODE_ACTIVE,
+        SOFTBUS_INVALID_PARAM, COMM_SVC, "mode invalid");
+    info.mode = static_cast<DiscoverMode>(value);
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(value), SOFTBUS_IPC_ERR, COMM_SVC, "read medium failed");
+    COMM_CHECK_AND_RETURN_RET_LOGE(0 <= value && value < MEDIUM_BUTT, SOFTBUS_INVALID_PARAM, COMM_SVC,
+        "medium invalid");
+    info.medium = static_cast<ExchangeMedium>(value);
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(value), SOFTBUS_IPC_ERR, COMM_SVC, "read freq failed");
+    COMM_CHECK_AND_RETURN_RET_LOGE(0 <= value && value < FREQ_BUTT, SOFTBUS_INVALID_PARAM, COMM_SVC, "freq invalid");
+    info.freq = static_cast<ExchangeFreq>(value);
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadBool(info.isSameAccount), SOFTBUS_IPC_ERR, COMM_SVC,
+        "read isSameAccount failed");
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadBool(info.isWakeRemote), SOFTBUS_IPC_ERR, COMM_SVC,
+        "read isWakeRemote failed");
+
+    info.capability = data.ReadCString();
+    COMM_CHECK_AND_RETURN_RET_LOGE(info.capability != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read capability failed");
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadUint32(info.dataLen), SOFTBUS_IPC_ERR, COMM_SVC, "read dataLen failed");
+    if (info.dataLen > 0 && info.dataLen < MAX_CAPABILITYDATA_LEN) {
+        const char *capabilityData = data.ReadCString();
+        COMM_CHECK_AND_RETURN_RET_LOGE(capabilityData != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read capaData failed");
+        COMM_CHECK_AND_RETURN_RET_LOGE(strnlen(capabilityData, info.dataLen) == info.dataLen,
+            SOFTBUS_INVALID_PARAM, COMM_SVC, "capabilityData invalid");
+        info.capabilityData = const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(capabilityData));
+    } else {
+        info.capabilityData = nullptr;
+        info.dataLen = 0;
     }
 
-    uint32_t code = SERVER_START_DISCOVERY;
-    SoftbusRecordCalledApiInfo(pkgName, code);
-    subInfo.subscribeId = data.ReadInt32();
-    subInfo.mode = (DiscoverMode)data.ReadInt32();
-    subInfo.medium = (ExchangeMedium)data.ReadInt32();
-    subInfo.freq = (ExchangeFreq)data.ReadInt32();
-    subInfo.isSameAccount = data.ReadBool();
-    subInfo.isWakeRemote = data.ReadBool();
-    subInfo.capability = data.ReadCString();
-    if (subInfo.capability == nullptr) {
-        COMM_LOGE(COMM_SVC, "StartDiscoveryInner read capability failed!");
-        return SOFTBUS_ERR;
-    }
-    subInfo.dataLen = data.ReadUint32();
-    if (subInfo.dataLen > 0 && subInfo.dataLen < MAX_CAPABILITYDATA_LEN) {
-        subInfo.capabilityData = const_cast<unsigned char *>(
-            reinterpret_cast<const unsigned char *>(data.ReadCString()));
-        if (subInfo.capabilityData == nullptr) {
-            COMM_LOGE(COMM_SVC, "StartDiscoveryInner read capabilityData failed!");
-            return SOFTBUS_ERR;
-        }
-    } else {
-        subInfo.capabilityData = nullptr;
-        subInfo.dataLen = 0;
-    }
-    int32_t retReply = StartDiscovery(pkgName, &subInfo);
-    if (!reply.WriteInt32(retReply)) {
-        COMM_LOGE(COMM_SVC, "StartDiscoveryInner write reply failed!");
-        return SOFTBUS_ERR;
-    }
+    int32_t retReply = StartDiscovery(pkgName, &info);
+    COMM_CHECK_AND_RETURN_RET_LOGE(reply.WriteInt32(retReply), SOFTBUS_IPC_ERR, COMM_SVC, "write reply failed");
     return SOFTBUS_OK;
 }
 
 int32_t SoftBusServerStub::StopDiscoveryInner(MessageParcel &data, MessageParcel &reply)
 {
     const char *pkgName = data.ReadCString();
-    if (pkgName == nullptr) {
-        COMM_LOGE(COMM_SVC, "StopDiscoveryInner read pkgName failed!");
-        return SOFTBUS_ERR;
-    }
-    uint32_t code = SERVER_STOP_DISCOVERY;
-    SoftbusRecordCalledApiInfo(pkgName, code);
-    int32_t subscribeId = data.ReadInt32();
-    COMM_LOGI(COMM_SVC, "StopDiscoveryInner pkgName=%{public}s, subscribeId=%{public}d!\n", pkgName, subscribeId);
+    COMM_CHECK_AND_RETURN_RET_LOGE(pkgName != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read pkgName failed");
+    uint32_t pkgNameLen = strnlen(pkgName, PKG_NAME_SIZE_MAX);
+    COMM_CHECK_AND_RETURN_RET_LOGE(0 <= pkgNameLen && pkgNameLen < PKG_NAME_SIZE_MAX, SOFTBUS_INVALID_PKGNAME, COMM_SVC,
+        "pkgName invalid");
+    SoftbusRecordCalledApiInfo(pkgName, SERVER_STOP_DISCOVERY);
+
+    int32_t subscribeId = 0;
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(subscribeId), SOFTBUS_IPC_ERR, COMM_SVC, "read subscribeId failed");
+
     int32_t retReply = StopDiscovery(pkgName, subscribeId);
-    if (!reply.WriteInt32(retReply)) {
-        COMM_LOGE(COMM_SVC, "StopDiscoveryInner write reply failed!");
-        return SOFTBUS_ERR;
-    }
+    COMM_CHECK_AND_RETURN_RET_LOGE(reply.WriteInt32(retReply), SOFTBUS_IPC_ERR, COMM_SVC, "write reply failed");
     return SOFTBUS_OK;
 }
 
 int32_t SoftBusServerStub::PublishServiceInner(MessageParcel &data, MessageParcel &reply)
 {
-    PublishInfo pubInfo;
-    (void)memset_s(&pubInfo, sizeof(PublishInfo), 0, sizeof(PublishInfo));
     const char *pkgName = data.ReadCString();
-    if (pkgName == nullptr) {
-        COMM_LOGE(COMM_SVC, "PublishServiceInner read pkgName failed!");
-        return SOFTBUS_ERR;
-    }
-    uint32_t code = SERVER_PUBLISH_SERVICE;
-    SoftbusRecordCalledApiInfo(pkgName, code);
-    pubInfo.publishId = data.ReadInt32();
-    pubInfo.mode = (DiscoverMode)data.ReadInt32();
-    pubInfo.medium = (ExchangeMedium)data.ReadInt32();
-    pubInfo.freq = (ExchangeFreq)data.ReadInt32();
-    pubInfo.capability = data.ReadCString();
-    if (pubInfo.capability == nullptr) {
-        COMM_LOGE(COMM_SVC, "PublishServiceInner read capability failed!");
-        return SOFTBUS_ERR;
-    }
-    pubInfo.dataLen = data.ReadUint32();
-    if (pubInfo.dataLen > 0 && pubInfo.dataLen < MAX_CAPABILITYDATA_LEN) {
-        pubInfo.capabilityData = const_cast<unsigned char *>(
-            reinterpret_cast<const unsigned char*>(data.ReadCString()));
-        if (pubInfo.capabilityData == nullptr) {
-            COMM_LOGE(COMM_SVC, "PublishServiceInner read capabilityData failed!");
-            return SOFTBUS_ERR;
-        }
+    COMM_CHECK_AND_RETURN_RET_LOGE(pkgName != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read pkgName failed");
+    uint32_t pkgNameLen = strnlen(pkgName, PKG_NAME_SIZE_MAX);
+    COMM_CHECK_AND_RETURN_RET_LOGE(0 <= pkgNameLen && pkgNameLen < PKG_NAME_SIZE_MAX, SOFTBUS_INVALID_PKGNAME, COMM_SVC,
+        "pkgName invalid");
+    SoftbusRecordCalledApiInfo(pkgName, SERVER_PUBLISH_SERVICE);
+
+    PublishInfo info = {0};
+    int32_t value = 0;
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(info.publishId), SOFTBUS_IPC_ERR, COMM_SVC,
+        "read publishId failed");
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(value), SOFTBUS_IPC_ERR, COMM_SVC, "read mode failed");
+    COMM_CHECK_AND_RETURN_RET_LOGE(value == DISCOVER_MODE_PASSIVE || value == DISCOVER_MODE_ACTIVE,
+        SOFTBUS_INVALID_PARAM, COMM_SVC, "mode invalid");
+    info.mode = static_cast<DiscoverMode>(value);
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(value), SOFTBUS_IPC_ERR, COMM_SVC, "read medium failed");
+    COMM_CHECK_AND_RETURN_RET_LOGE(0 <= value && value < MEDIUM_BUTT, SOFTBUS_INVALID_PARAM, COMM_SVC,
+        "medium invalid");
+    info.medium = static_cast<ExchangeMedium>(value);
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(value), SOFTBUS_IPC_ERR, COMM_SVC, "read freq failed");
+    COMM_CHECK_AND_RETURN_RET_LOGE(0 <= value && value < FREQ_BUTT, SOFTBUS_INVALID_PARAM, COMM_SVC, "freq invalid");
+    info.freq = static_cast<ExchangeFreq>(value);
+
+    info.capability = data.ReadCString();
+    COMM_CHECK_AND_RETURN_RET_LOGE(info.capability != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read capability failed");
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadUint32(info.dataLen), SOFTBUS_IPC_ERR, COMM_SVC, "read dataLen failed");
+    if (info.dataLen > 0 && info.dataLen < MAX_CAPABILITYDATA_LEN) {
+        const char *capabilityData = data.ReadCString();
+        COMM_CHECK_AND_RETURN_RET_LOGE(capabilityData != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read capaData failed");
+        COMM_CHECK_AND_RETURN_RET_LOGE(strnlen(capabilityData, info.dataLen) == info.dataLen,
+            SOFTBUS_INVALID_PARAM, COMM_SVC, "capabilityData invalid");
+        info.capabilityData = const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(capabilityData));
     } else {
-        pubInfo.capabilityData = nullptr;
-        pubInfo.dataLen = 0;
+        info.capabilityData = nullptr;
+        info.dataLen = 0;
     }
-    int32_t retReply = PublishService(pkgName, &pubInfo);
-    if (!reply.WriteInt32(retReply)) {
-        COMM_LOGE(COMM_SVC, "PublishServiceInner write reply failed!");
-        return SOFTBUS_ERR;
-    }
+
+    int32_t retReply = PublishService(pkgName, &info);
+    COMM_CHECK_AND_RETURN_RET_LOGE(reply.WriteInt32(retReply), SOFTBUS_IPC_ERR, COMM_SVC, "write reply failed");
     return SOFTBUS_OK;
 }
 
 int32_t SoftBusServerStub::UnpublishServiceInner(MessageParcel &data, MessageParcel &reply)
 {
     const char *pkgName = data.ReadCString();
-    if (pkgName == nullptr) {
-        COMM_LOGE(COMM_SVC, "UnpublishServiceInner read pkgName failed!");
-        return SOFTBUS_ERR;
-    }
-    uint32_t code = SERVER_UNPUBLISH_SERVICE;
-    SoftbusRecordCalledApiInfo(pkgName, code);
-    int32_t publishId = data.ReadInt32();
+    COMM_CHECK_AND_RETURN_RET_LOGE(pkgName != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read pkgName failed");
+    uint32_t pkgNameLen = strnlen(pkgName, PKG_NAME_SIZE_MAX);
+    COMM_CHECK_AND_RETURN_RET_LOGE(0 <= pkgNameLen && pkgNameLen < PKG_NAME_SIZE_MAX, SOFTBUS_INVALID_PKGNAME, COMM_SVC,
+        "pkgName invalid");
+    SoftbusRecordCalledApiInfo(pkgName, SERVER_UNPUBLISH_SERVICE);
+
+    int32_t publishId = 0;
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(publishId), SOFTBUS_IPC_ERR, COMM_SVC, "read publishId failed");
+
     int32_t retReply = UnPublishService(pkgName, publishId);
-    if (!reply.WriteInt32(retReply)) {
-        COMM_LOGE(COMM_SVC, "UnpublishServiceInner write reply failed!");
-        return SOFTBUS_ERR;
-    }
+    COMM_CHECK_AND_RETURN_RET_LOGE(reply.WriteInt32(retReply), SOFTBUS_IPC_ERR, COMM_SVC, "write reply failed");
     return SOFTBUS_OK;
 }
 
@@ -1280,73 +1288,57 @@ EXIT:
 
 int32_t SoftBusServerStub::PublishLNNInner(MessageParcel &data, MessageParcel &reply)
 {
+    COMM_LOGI(COMM_SVC, "enter");
     const char *clientName = data.ReadCString();
-    if (clientName == nullptr) {
-        COMM_LOGE(COMM_SVC, "SoftbusPublishLNNInner read clientName failed!");
-        return SOFTBUS_IPC_ERR;
-    }
-    PublishInfo info;
-    int32_t mode;
-    int32_t medium;
-    int32_t freq;
-    (void)memset_s(&info, sizeof(PublishInfo), 0, sizeof(PublishInfo));
-    if (!data.ReadInt32(info.publishId) || !data.ReadInt32(mode) || !data.ReadInt32(medium) ||
-        !data.ReadInt32(freq)) {
-        COMM_LOGE(COMM_SVC, "SoftbusPublishLNNInner read common publish info failed!");
-        return SOFTBUS_IPC_ERR;
-    }
-    info.mode = (DiscoverMode)mode;
-    info.medium = (ExchangeMedium)medium;
-    info.freq = (ExchangeFreq)freq;
+    COMM_CHECK_AND_RETURN_RET_LOGE(clientName != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read clientName failed");
+
+    PublishInfo info = {0};
+    int32_t value = 0;
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(info.publishId), SOFTBUS_IPC_ERR, COMM_SVC,
+        "read publishId failed");
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(value), SOFTBUS_IPC_ERR, COMM_SVC, "read mode failed");
+    COMM_CHECK_AND_RETURN_RET_LOGE(value == DISCOVER_MODE_PASSIVE || value == DISCOVER_MODE_ACTIVE,
+        SOFTBUS_INVALID_PARAM, COMM_SVC, "mode invalid");
+    info.mode = static_cast<DiscoverMode>(value);
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(value), SOFTBUS_IPC_ERR, COMM_SVC, "read medium failed");
+    COMM_CHECK_AND_RETURN_RET_LOGE(0 <= value && value < MEDIUM_BUTT, SOFTBUS_INVALID_PARAM, COMM_SVC,
+        "medium invalid");
+    info.medium = static_cast<ExchangeMedium>(value);
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(value), SOFTBUS_IPC_ERR, COMM_SVC, "read freq failed");
+    COMM_CHECK_AND_RETURN_RET_LOGE(0 <= value && value < FREQ_BUTT, SOFTBUS_INVALID_PARAM, COMM_SVC, "freq invalid");
+    info.freq = static_cast<ExchangeFreq>(value);
+
     info.capability = data.ReadCString();
-    if (info.capability == nullptr) {
-        COMM_LOGE(COMM_SVC, "SoftbusPublishLNNInner read capability failed!");
-        return SOFTBUS_IPC_ERR;
-    }
-    if (!data.ReadUint32(info.dataLen)) {
-        COMM_LOGE(COMM_SVC, "SoftbusPublishLNNInner read dataLen failed!");
-        return SOFTBUS_IPC_ERR;
-    }
+    COMM_CHECK_AND_RETURN_RET_LOGE(info.capability != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read capability failed");
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadUint32(info.dataLen), SOFTBUS_IPC_ERR, COMM_SVC, "read dataLen failed");
     if (info.dataLen > 0 && info.dataLen < MAX_CAPABILITYDATA_LEN) {
-        info.capabilityData = const_cast<unsigned char *>(
-            reinterpret_cast<const unsigned char*>(data.ReadCString()));
-        if (info.capabilityData == nullptr) {
-            COMM_LOGE(COMM_SVC, "SoftbusPublishLNNInner read capabilityData failed!");
-            return SOFTBUS_IPC_ERR;
-        }
+        const char *capabilityData = data.ReadCString();
+        COMM_CHECK_AND_RETURN_RET_LOGE(capabilityData != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read capaData failed");
+        COMM_CHECK_AND_RETURN_RET_LOGE(strnlen(capabilityData, info.dataLen) == info.dataLen,
+            SOFTBUS_INVALID_PARAM, COMM_SVC, "capabilityData invalid");
+        info.capabilityData = const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(capabilityData));
     } else {
         info.capabilityData = nullptr;
         info.dataLen = 0;
     }
-    if (!data.ReadBool(info.ranging)) {
-        COMM_LOGE(COMM_SVC, "SoftbusPublishLNNInner read ranging failed!");
-        return SOFTBUS_IPC_ERR;
-    }
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadBool(info.ranging), SOFTBUS_IPC_ERR, COMM_SVC, "read ranging failed");
+
     int32_t retReply = PublishLNN(clientName, &info);
-    if (!reply.WriteInt32(retReply)) {
-        COMM_LOGE(COMM_SVC, "SoftbusPublishLNNInner write reply failed!");
-        return SOFTBUS_IPC_ERR;
-    }
+    COMM_CHECK_AND_RETURN_RET_LOGE(reply.WriteInt32(retReply), SOFTBUS_IPC_ERR, COMM_SVC, "write reply failed");
     return SOFTBUS_OK;
 }
 
 int32_t SoftBusServerStub::StopPublishLNNInner(MessageParcel &data, MessageParcel &reply)
 {
+    COMM_LOGI(COMM_SVC, "enter");
     const char *clientName = data.ReadCString();
-    if (clientName == nullptr) {
-        COMM_LOGE(COMM_SVC, "SoftbusStopPublishLNNInner read clientName failed!");
-        return SOFTBUS_IPC_ERR;
-    }
-    int32_t publishId;
-    if (!data.ReadInt32(publishId)) {
-        COMM_LOGE(COMM_SVC, "SoftbusStopPublishLNNInner read publishId failed!");
-        return SOFTBUS_IPC_ERR;
-    }
+    COMM_CHECK_AND_RETURN_RET_LOGE(clientName != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read clientName failed");
+
+    int32_t publishId = 0;
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(publishId), SOFTBUS_IPC_ERR, COMM_SVC, "read publishId failed");
+
     int32_t retReply = StopPublishLNN(clientName, publishId);
-    if (!reply.WriteInt32(retReply)) {
-        COMM_LOGE(COMM_SVC, "SoftbusStopPublishLNNInner write reply failed!");
-        return SOFTBUS_IPC_ERR;
-    }
+    COMM_CHECK_AND_RETURN_RET_LOGE(reply.WriteInt32(retReply), SOFTBUS_IPC_ERR, COMM_SVC, "write reply failed");
     return SOFTBUS_OK;
 }
 
@@ -1354,52 +1346,44 @@ int32_t SoftBusServerStub::RefreshLNNInner(MessageParcel &data, MessageParcel &r
 {
     COMM_LOGI(COMM_SVC, "enter");
     const char *clientName = data.ReadCString();
-    if (clientName == nullptr) {
-        COMM_LOGE(COMM_SVC, "SoftbusRefreshLNNInner read clientName failed!");
-        return SOFTBUS_IPC_ERR;
-    }
-    SubscribeInfo info;
-    int32_t mode;
-    int32_t medium;
-    int32_t freq;
-    (void)memset_s(&info, sizeof(SubscribeInfo), 0, sizeof(SubscribeInfo));
-    if (!data.ReadInt32(info.subscribeId) || !data.ReadInt32(mode) || !data.ReadInt32(medium) ||
-        !data.ReadInt32(freq)) {
-        COMM_LOGE(COMM_SVC, "SoftbusRefreshLNNInner read common subscribe info failed!");
-        return SOFTBUS_IPC_ERR;
-    }
-    info.mode = (DiscoverMode)mode;
-    info.medium = (ExchangeMedium)medium;
-    info.freq = (ExchangeFreq)freq;
-    if (!data.ReadBool(info.isSameAccount) || !data.ReadBool(info.isWakeRemote)) {
-        COMM_LOGE(COMM_SVC, "SoftbusRefreshLNNInner read subscribe info flag failed!");
-        return SOFTBUS_IPC_ERR;
-    }
+    COMM_CHECK_AND_RETURN_RET_LOGE(clientName != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read clientName failed");
+
+    SubscribeInfo info = {0};
+    int32_t value = 0;
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(info.subscribeId), SOFTBUS_IPC_ERR, COMM_SVC,
+        "read subscribeId failed");
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(value), SOFTBUS_IPC_ERR, COMM_SVC, "read mode failed");
+    COMM_CHECK_AND_RETURN_RET_LOGE(value == DISCOVER_MODE_PASSIVE || value == DISCOVER_MODE_ACTIVE,
+        SOFTBUS_INVALID_PARAM, COMM_SVC, "mode invalid");
+    info.mode = static_cast<DiscoverMode>(value);
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(value), SOFTBUS_IPC_ERR, COMM_SVC, "read medium failed");
+    COMM_CHECK_AND_RETURN_RET_LOGE(0 <= value && value < MEDIUM_BUTT, SOFTBUS_INVALID_PARAM, COMM_SVC,
+        "medium invalid");
+    info.medium = static_cast<ExchangeMedium>(value);
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(value), SOFTBUS_IPC_ERR, COMM_SVC, "read freq failed");
+    COMM_CHECK_AND_RETURN_RET_LOGE(0 <= value && value < FREQ_BUTT, SOFTBUS_INVALID_PARAM, COMM_SVC, "freq invalid");
+    info.freq = static_cast<ExchangeFreq>(value);
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadBool(info.isSameAccount), SOFTBUS_IPC_ERR, COMM_SVC,
+        "read isSameAccount failed");
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadBool(info.isWakeRemote), SOFTBUS_IPC_ERR, COMM_SVC,
+        "read isWakeRemote failed");
+
     info.capability = data.ReadCString();
-    if (info.capability == nullptr) {
-        COMM_LOGE(COMM_SVC, "SoftbusRefreshLNNInner read capability failed!");
-        return SOFTBUS_IPC_ERR;
-    }
-    if (!data.ReadUint32(info.dataLen)) {
-        COMM_LOGE(COMM_SVC, "SoftbusRefreshLNNInner read dataLen failed!");
-        return SOFTBUS_IPC_ERR;
-    }
+    COMM_CHECK_AND_RETURN_RET_LOGE(info.capability != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read capability failed");
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadUint32(info.dataLen), SOFTBUS_IPC_ERR, COMM_SVC, "read dataLen failed");
     if (info.dataLen > 0 && info.dataLen < MAX_CAPABILITYDATA_LEN) {
-        info.capabilityData = const_cast<unsigned char *>(
-            reinterpret_cast<const unsigned char*>(data.ReadCString()));
-        if (info.capabilityData == nullptr) {
-            COMM_LOGE(COMM_SVC, "SoftbusRefreshLNNInner read capabilityData failed!");
-            return SOFTBUS_IPC_ERR;
-        }
+        const char *capabilityData = data.ReadCString();
+        COMM_CHECK_AND_RETURN_RET_LOGE(capabilityData != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read capaData failed");
+        COMM_CHECK_AND_RETURN_RET_LOGE(strnlen(capabilityData, info.dataLen) == info.dataLen,
+            SOFTBUS_INVALID_PARAM, COMM_SVC, "capabilityData invalid");
+        info.capabilityData = const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(capabilityData));
     } else {
         info.capabilityData = nullptr;
         info.dataLen = 0;
     }
+
     int32_t retReply = RefreshLNN(clientName, &info);
-    if (!reply.WriteInt32(retReply)) {
-        COMM_LOGE(COMM_SVC, "SoftbusRefreshLNNInner write reply failed!");
-        return SOFTBUS_IPC_ERR;
-    }
+    COMM_CHECK_AND_RETURN_RET_LOGE(reply.WriteInt32(retReply), SOFTBUS_IPC_ERR, COMM_SVC, "write reply failed");
     return SOFTBUS_OK;
 }
 
@@ -1407,20 +1391,13 @@ int32_t SoftBusServerStub::StopRefreshLNNInner(MessageParcel &data, MessageParce
 {
     COMM_LOGI(COMM_SVC, "enter");
     const char *clientName = data.ReadCString();
-    if (clientName == nullptr) {
-        COMM_LOGE(COMM_SVC, "SoftbusStopRefreshLNNInner read clientName failed!");
-        return SOFTBUS_IPC_ERR;
-    }
-    int32_t refreshId;
-    if (!data.ReadInt32(refreshId)) {
-        COMM_LOGE(COMM_SVC, "SoftbusStopRefreshLNNInner read refreshId failed!");
-        return SOFTBUS_IPC_ERR;
-    }
+    COMM_CHECK_AND_RETURN_RET_LOGE(clientName != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read clientName failed");
+
+    int32_t refreshId = 0;
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(refreshId), SOFTBUS_IPC_ERR, COMM_SVC, "read refreshId failed");
+
     int32_t retReply = StopRefreshLNN(clientName, refreshId);
-    if (!reply.WriteInt32(retReply)) {
-        COMM_LOGE(COMM_SVC, "SoftbusStopRefreshLNNInner write reply failed!");
-        return SOFTBUS_IPC_ERR;
-    }
+    COMM_CHECK_AND_RETURN_RET_LOGE(reply.WriteInt32(retReply), SOFTBUS_IPC_ERR, COMM_SVC, "write reply failed");
     return SOFTBUS_OK;
 }
 
