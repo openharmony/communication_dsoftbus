@@ -74,10 +74,6 @@ static int32_t FillRspSettings(NSTACKX_ResponseSettings *settings, const DeviceI
     }
     return SOFTBUS_OK;
 EXIT:
-    if (settings->businessData != NULL) {
-        SoftBusFree(settings->businessData);
-        settings->businessData = NULL;
-    }
     return SOFTBUS_STRCPY_ERR;
 }
 
@@ -97,10 +93,6 @@ int32_t DiscCoapSendRsp(const DeviceInfo *deviceInfo, uint8_t bType)
     int32_t ret = NSTACKX_SendDiscoveryRsp(settings);
     if (ret != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "disc send response failed, ret=%{public}d", ret);
-    }
-    if (settings->businessData != NULL) {
-        SoftBusFree(settings->businessData);
-        settings->businessData = NULL;
     }
     SoftBusFree(settings);
     return ret;
