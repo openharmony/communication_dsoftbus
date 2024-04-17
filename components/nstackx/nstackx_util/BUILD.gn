@@ -57,7 +57,6 @@ if (defined(ohos_lite)) {
         "interface",
         "platform/liteos",
         "$NSTACKX_ROOT/nstackx_core/",
-        "//third_party/bounds_checking_function/include/",
         "$hilog_lite_include_path",
         "$utils_lite_include_path",
       ]
@@ -99,7 +98,6 @@ if (defined(ohos_lite)) {
           "interface",
           "platform/liteos",
           "$NSTACKX_ROOT/nstackx_core/",
-          "//third_party/bounds_checking_function/include/",
           "$hilog_lite_include_path",
           "$utils_lite_include_path",
         ]
@@ -120,10 +118,10 @@ if (defined(ohos_lite)) {
           "platform/liteos/sys_timer.c",
           "platform/liteos/sys_util.c",
         ]
-        deps = [
-          "$hilog_lite_deps_path",
-          "//third_party/bounds_checking_function:libsec_shared",
-          "//third_party/mbedtls",
+        deps = [ "$hilog_lite_deps_path" ]
+        external_deps = [
+          "bounds_checking_function:libsec_shared",
+          "mbedtls:mbedtls_shared",
         ]
       } else if (ohos_kernel_type == "linux") {
         cflags += [
@@ -138,7 +136,6 @@ if (defined(ohos_lite)) {
           "interface",
           "platform/unix",
           "$NSTACKX_ROOT/nstackx_core/",
-          "//third_party/bounds_checking_function/include/",
           "$hilog_lite_include_path",
           "$utils_lite_include_path",
         ]
@@ -159,10 +156,10 @@ if (defined(ohos_lite)) {
           "platform/unix/sys_timer.c",
           "platform/unix/sys_util.c",
         ]
-        deps = [
-          "$hilog_lite_deps_path",
-          "//third_party/mbedtls",
-          "//third_party/mbedtls:mbedtls_shared",
+        deps = [ "$hilog_lite_deps_path" ]
+        external_deps = [
+          "bounds_checking_function:libsec_shared",
+          "mbedtls:mbedtls_shared",
         ]
       }
       public_configs = [ ":nstackx_util_header" ]
@@ -204,9 +201,6 @@ if (defined(ohos_lite)) {
       "interface",
       "platform/unix",
       "$NSTACKX_ROOT/nstackx_core/",
-      "//commonlibrary/c_utils/base/include/",
-      "//third_party/bounds_checking_function/include",
-      "//base/hiviewdfx/hilog/interfaces/native/innerkits/",
     ]
     sources = [
       "core/nstackx_dev.c",
@@ -226,11 +220,12 @@ if (defined(ohos_lite)) {
       "platform/unix/sys_util.c",
     ]
 
-    deps = [
-      "//third_party/bounds_checking_function:libsec_shared",
-      "//third_party/mbedtls",
+    external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "c_utils:utilsbase",
+      "hilog:libhilog",
+      "mbedtls:mbedtls_shared",
     ]
-    external_deps = [ "hilog:libhilog" ]
     public_configs = [ ":nstackx_util_header" ]
     innerapi_tags = [ "platformsdk_indirect" ]
     part_name = "dsoftbus"
