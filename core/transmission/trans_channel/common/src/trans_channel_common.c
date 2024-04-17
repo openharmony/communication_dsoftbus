@@ -29,6 +29,7 @@
 #include "trans_auth_manager.h"
 #include "trans_event.h"
 #include "trans_lane_manager.h"
+#include "trans_lane_pending_ctl.h"
 #include "trans_log.h"
 #include "trans_session_manager.h"
 #include "trans_tcp_direct_manager.h"
@@ -43,7 +44,7 @@ typedef struct {
     ConfigType configType;
 } ConfigTypeMap;
 
-static const ConfigTypeMap G_CONFIG_TYPE_MAP[] = {
+static const ConfigTypeMap g_configTypeMap[] = {
     { CHANNEL_TYPE_AUTH,       BUSINESS_TYPE_BYTE,    SOFTBUS_INT_AUTH_MAX_BYTES_LENGTH  },
     { CHANNEL_TYPE_AUTH,       BUSINESS_TYPE_MESSAGE, SOFTBUS_INT_AUTH_MAX_MESSAGE_LENGTH},
     { CHANNEL_TYPE_PROXY,      BUSINESS_TYPE_BYTE,    SOFTBUS_INT_MAX_BYTES_NEW_LENGTH   },
@@ -54,9 +55,10 @@ static const ConfigTypeMap G_CONFIG_TYPE_MAP[] = {
 
 static int32_t FindConfigType(int32_t channelType, int32_t businessType)
 {
-    for (uint32_t i = 0; i < sizeof(G_CONFIG_TYPE_MAP) / sizeof(ConfigTypeMap); i++) {
-        if ((G_CONFIG_TYPE_MAP[i].channelType == channelType) && (G_CONFIG_TYPE_MAP[i].businessType == businessType)) {
-            return G_CONFIG_TYPE_MAP[i].configType;
+    const int32_t configTypeMapLength = sizeof(g_configTypeMap) / sizeof(ConfigTypeMap);
+    for (uint32_t i = 0; i < configTypeMapLength; i++) {
+        if ((g_configTypeMap[i].channelType == channelType) && (g_configTypeMap[i].businessType == businessType)) {
+            return g_configTypeMap[i].configType;
         }
     }
     return SOFTBUS_CONFIG_TYPE_MAX;
@@ -75,6 +77,19 @@ static LaneTransType GetStreamLaneType(int32_t streamType)
             break;
     }
     return LANE_T_BUTT;
+}
+
+static void BuildTransCloseChannelEventExtra(
+    TransEventExtra *extra, int32_t channelId, int32_t channelType, int32_t ret)
+{
+    extra->socketName = NULL;
+    extra->peerNetworkId = NULL;
+    extra->calleePkg = NULL;
+    extra->callerPkg = NULL;
+    extra->channelId = channelId;
+    extra->channelType = channelType;
+    extra->errcode = ret;
+    extra->result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
 }
 
 LaneTransType TransGetLaneTransTypeBySession(const SessionParam *param)
@@ -317,60 +332,146 @@ int32_t TransOpenChannelProc(ChannelType type, AppInfo *appInfo, const ConnectOp
     return SOFTBUS_OK;
 }
 
-int32_t TransCommonCloseChannel(int32_t channelId, int32_t channelType)
+static int32_t CancelWaitLaneState(const char *sessionName, int32_t sessionId)
+{
+    uint32_t laneHandle = 0;
+    bool isAsync = true;
+    bool isQosLane = false;
+    int32_t ret = TransGetSocketChannelLaneInfoBySession(sessionName, sessionId, &laneHandle, &isQosLane, &isAsync);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, TRANS_CTRL, ret, "get socket channel lane info failed, ret=%{public}d", ret);
+    TRANS_LOGI(TRANS_CTRL, "wait lane state, sessionId=%{public}d, laneHandle=%{public}u", sessionId, laneHandle);
+    if (isQosLane && laneHandle != 0) {
+        GetLaneManager()->lnnCancelLane(laneHandle);
+    }
+    if (!isAsync && laneHandle != 0) {
+        TransCancelLaneItemCondByLaneHandle(laneHandle, false, false, SOFTBUS_TRANS_STOP_BIND_BY_CANCEL);
+    }
+    TransFreeLane(laneHandle, isQosLane);
+    (void)TransDeleteSocketChannelInfoBySession(sessionName, sessionId);
+    return SOFTBUS_OK;
+}
+
+int32_t TransCommonCloseChannel(const char *sessionName, int32_t channelId, int32_t channelType)
 {
     TRANS_LOGI(TRANS_CTRL, "close channel: channelId=%{public}d, channelType=%{public}d", channelId, channelType);
     int32_t ret = SOFTBUS_ERR;
-    switch (channelType) {
-        case CHANNEL_TYPE_PROXY:
-            (void)TransLaneMgrDelLane(channelId, channelType);
-            ret = TransProxyCloseProxyChannel(channelId);
-            break;
-        case CHANNEL_TYPE_TCP_DIRECT:
-            (void)TransLaneMgrDelLane(channelId, channelType);
-            ret = SOFTBUS_OK;
-            break;
-        case CHANNEL_TYPE_UDP:
-            (void)NotifyQosChannelClosed(channelId, channelType);
-            (void)TransLaneMgrDelLane(channelId, channelType);
-            ret = TransCloseUdpChannel(channelId);
-            break;
-        case CHANNEL_TYPE_AUTH:
-            ret = TransCloseAuthChannel(channelId);
-            break;
-        default:
-            break;
+    if (channelType == CHANNEL_TYPE_UNDEFINED) {
+        CoreSessionState state = CORE_SESSION_STATE_INIT;
+        ret = TransGetSocketChannelStateBySession(sessionName, channelId, &state);
+        TRANS_CHECK_AND_RETURN_RET_LOGE(
+            ret == SOFTBUS_OK, TRANS_CTRL, ret, "get socket channel info failed, ret=%{public}d", ret);
+        (void)TransSetSocketChannelStateBySession(sessionName, channelId, CORE_SESSION_STATE_CANCELLING);
+        if (state == CORE_SESSION_STATE_WAIT_LANE) {
+            ret = CancelWaitLaneState(sessionName, channelId);
+            TRANS_CHECK_AND_RETURN_RET_LOGE(
+                ret == SOFTBUS_OK, TRANS_CTRL, ret, "cancel wait lane failed, ret=%{public}d", ret);
+        }
+    } else {
+        (void)TransSetSocketChannelStateByChannel(channelId, channelType, CORE_SESSION_STATE_CANCELLING);
+        switch (channelType) {
+            case CHANNEL_TYPE_PROXY:
+                (void)TransLaneMgrDelLane(channelId, channelType);
+                ret = TransProxyCloseProxyChannel(channelId);
+                break;
+            case CHANNEL_TYPE_TCP_DIRECT:
+                (void)TransLaneMgrDelLane(channelId, channelType);
+                ret = SOFTBUS_OK;
+                break;
+            case CHANNEL_TYPE_UDP:
+                (void)NotifyQosChannelClosed(channelId, channelType);
+                (void)TransLaneMgrDelLane(channelId, channelType);
+                ret = TransCloseUdpChannel(channelId);
+                break;
+            case CHANNEL_TYPE_AUTH:
+                ret = TransCloseAuthChannel(channelId);
+                break;
+            default:
+                TRANS_LOGE(TRANS_CTRL, "Unknow channel type, type=%{public}d", channelType);
+                break;
+        }
+        (void)TransDeleteSocketChannelInfoByChannel(channelId, channelType);
     }
-    TransEventExtra extra = { .socketName = NULL,
-        .peerNetworkId = NULL,
-        .calleePkg = NULL,
-        .callerPkg = NULL,
-        .channelId = channelId,
-        .channelType = channelType,
-        .errcode = ret,
-        .result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED };
+    TransEventExtra extra;
+    BuildTransCloseChannelEventExtra(&extra, channelId, channelType, ret);
     TRANS_EVENT(EVENT_SCENE_CLOSE_CHANNEL_ACTIVE, EVENT_STAGE_CLOSE_CHANNEL, extra);
     return ret;
 }
 
-void ReportTransOpenChannelEndEvent(TransEventExtra extra, TransInfo *transInfo, int64_t timeStart, int32_t ret)
+void TransBuildTransOpenChannelStartEvent(TransEventExtra *extra, AppInfo *appInfo, NodeInfo *nodeInfo, int32_t peerRet) 
 {
-    extra.channelId = transInfo->channelId;
-    extra.errcode = ret;
-    extra.costTime = GetSoftbusRecordTimeMillis() - timeStart;
-    extra.result = EVENT_STAGE_RESULT_FAILED;
-    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
+    if (extra == NULL || appInfo == NULL || nodeInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return;
+    }
+    extra->calleePkg = NULL;
+    extra->callerPkg = appInfo->myData.pkgName;
+    extra->socketName = appInfo->myData.sessionName;
+    extra->dataType = appInfo->businessType;
+    extra->peerNetworkId = appInfo->peerNetWorkId;
+    extra->peerUdid = peerRet == SOFTBUS_OK ? nodeInfo->deviceInfo.deviceUdid : NULL,
+    extra->peerDevVer = peerRet == SOFTBUS_OK ? nodeInfo->deviceInfo.deviceVersion : NULL,
+    extra->result = EVENT_STAGE_RESULT_OK;
 }
 
-void ReportTransAlarmEvent(AppInfo *appInfo, int32_t ret)
+void TransBuildTransOpenChannelEndEvent(TransEventExtra *extra, TransInfo *transInfo, int64_t timeStart, int32_t ret)
 {
-    TransAlarmExtra extraAlarm = {
-        .conflictName = NULL,
-        .conflictedName = NULL,
-        .occupyedName = NULL,
-        .permissionName = NULL,
-        .errcode = ret,
-        .sessionName = appInfo->myData.sessionName,
-    };
-    TRANS_ALARM(OPEN_SESSION_FAIL_ALARM, CONTROL_ALARM_TYPE, extraAlarm);
+    if (extra == NULL || transInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return;
+    }
+    extra->channelId = transInfo->channelId;
+    extra->errcode = ret;
+    extra->costTime = GetSoftbusRecordTimeMillis() - timeStart;
+    extra->result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+}
+
+void TransBuildTransOpenChannelCancelEvent(TransEventExtra *extra, TransInfo *transInfo, int64_t timeStart, int32_t ret)
+{
+    if (extra == NULL || transInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return;
+    }
+    extra->channelId = transInfo->channelId;
+    extra->errcode = ret;
+    extra->costTime = GetSoftbusRecordTimeMillis() - timeStart;
+    extra->result = EVENT_STAGE_RESULT_CANCELED;
+}
+
+void TransBuildTransAlarmEvent(TransAlarmExtra *extraAlarm, AppInfo *appInfo, int32_t ret)
+{
+    if (extraAlarm == NULL || appInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return;
+    }
+    extraAlarm->conflictName = NULL;
+    extraAlarm->conflictedName = NULL;
+    extraAlarm->occupyedName = NULL;
+    extraAlarm->permissionName = NULL;
+    extraAlarm->errcode = ret;
+    extraAlarm->sessionName = appInfo->myData.sessionName;
+}
+
+void TransFreeAppInfo(AppInfo *appInfo)
+{
+    if (appInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return;
+    }
+    if (appInfo->fastTransData != NULL) {
+        SoftBusFree((void *)(appInfo->fastTransData));
+    }
+    SoftBusFree(appInfo);
+}
+
+void TransFreeLane(uint32_t laneHandle, bool isQosLane)
+{
+    TRANS_LOGI(TRANS_CTRL, "Trans free lane laneHandle=%{public}u, isQosLane=%{public}d", laneHandle, isQosLane);
+    if (laneHandle != 0) {
+        if (isQosLane) {
+            GetLaneManager()->lnnFreeLane(laneHandle);
+            return;
+        }
+        LnnFreeLane(laneHandle);
+    }
 }
