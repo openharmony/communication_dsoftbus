@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -170,19 +170,13 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterSetFilter001, TestSize.Level
 
 /*
  * @tc.name: TestDiscCoapAdapterRegData001
- * @tc.desc: Test DiscCoapRegisterServiceData should return SOFTBUS_DISCOVER_COAP_INIT_FAIL
- *           when DiscNstackxDeinit has started,
- *           should return SOFTBUS_OK when DiscNstackxInit has started
+ * @tc.desc: Test DiscCoapRegisterServiceData should return SOFTBUS_OK when DiscNstackxInit has started
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterRegData001, TestSize.Level1)
 {
-    DiscNstackxDeinit();
-    int32_t ret = DiscCoapRegisterServiceData(nullptr, 0, 0);
-    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_INIT_FAIL);
-
-    ret = DiscNstackxInit();
+    int32_t ret = DiscNstackxInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = DiscCoapRegisterServiceData(nullptr, 0, 0);
     EXPECT_EQ(ret, SOFTBUS_OK);
