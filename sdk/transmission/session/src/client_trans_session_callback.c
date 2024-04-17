@@ -52,6 +52,7 @@ static int32_t AcceptSessionAsServer(const char *sessionName, const ChannelInfo 
     session->crc = channel->crc;
     session->dataConfig = channel->dataConfig;
     session->isAsync = false;
+    session->sessionState = SESSION_STATE_OPENED;
     if (strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, channel->peerSessionName) != EOK ||
         strcpy_s(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX, channel->peerDeviceId) != EOK ||
         strcpy_s(session->info.groupId, GROUP_ID_SIZE_MAX, channel->groupId) != EOK) {
@@ -201,7 +202,14 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const C
         TRANS_LOGE(TRANS_SDK, "accept session failed, ret=%{public}d", ret);
         return ret;
     }
-
+    SessionState sessionState = SESSION_STATE_INIT;
+    GetSessionStateAndSessionNameBySessionId(sessionId, NULL, &sessionState);
+    if (sessionState == SESSION_STATE_CANCELLING) {
+        TRANS_LOGI(TRANS_SDK, "session is cancelling, no need call back");
+        (void)ClientDeleteSession(sessionId);
+        return SOFTBUS_TRANS_STOP_BIND_BY_CANCEL;
+    }
+    SetSessionStateBySessionId(sessionId, SESSION_STATE_CALLBACK_FINISHED);
     if (sessionCallback.isSocketListener) {
         return handelOnBindSuccess(sessionId, sessionCallback, channel->isServer);
     }
