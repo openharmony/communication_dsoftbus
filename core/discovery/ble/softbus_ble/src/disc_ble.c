@@ -346,6 +346,7 @@ static int32_t ScanFilter(const BroadcastReportInfo *reportInfo)
 
 static void ProcessDisConPacket(const BroadcastReportInfo *reportInfo, DeviceInfo *foundInfo)
 {
+    static uint32_t callCount = 0;
     DeviceWrapper device = {
         .info = foundInfo,
         .power = SOFTBUS_ILLEGAL_BLE_POWER
@@ -359,7 +360,7 @@ static void ProcessDisConPacket(const BroadcastReportInfo *reportInfo, DeviceInf
         return;
     }
     if ((foundInfo->capabilityBitmap[0] & g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].capBitMap[0]) == 0x0) {
-        DISC_LOGI(DISC_BLE, "don't match passive publish capBitMap");
+        DISC_LOGI(DISC_BLE, "don't match passive publish capBitMap, callCount=%{public}u", callCount++);
         (void)SoftBusMutexUnlock(&g_bleInfoLock);
         return;
     }
