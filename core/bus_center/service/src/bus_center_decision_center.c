@@ -29,7 +29,7 @@
 
 #define HCI_ERR_BR_CONN_PAGE_TIMEOUT 0x04
 #define HCI_ERR_BR_CONN_PEER_NOT_SUPORT_SDP_RECODE 0x54
-#define HCI_ERR_BR_DISCONNECTION 0x57
+#define HCI_ERR_BR_CONN_ACL_RECREATE 0x57
 
 #define BR_PAGETIMEOUT_OFFLINE_COUNT 3
 #define BR_SDP_NOT_SUPORT_OFFLINE_COUNT 2
@@ -60,7 +60,7 @@ static void LeaveSpecificBrNetwork(const char *addr)
     if (ret != SOFTBUS_OK) {
         LNN_LOGW(LNN_STATE, "leave br network failed, ret=%{public}d", ret);
     }
-    LNN_LOGI(LNN_STATE, "leave br and ble network finished");
+    LNN_LOGI(LNN_STATE, "leave br network finished");
 }
 static void LeaveSpecificBrBleNetwork(const char *addr)
 {
@@ -85,11 +85,10 @@ static void LeaveSpecificBrBleNetwork(const char *addr)
 static void HandleBrConnectException(const ConnectOption *option, int32_t errorCode)
 {
     if (errorCode != HCI_ERR_BR_CONN_PAGE_TIMEOUT && errorCode != HCI_ERR_BR_CONN_PEER_NOT_SUPORT_SDP_RECODE &&
-        errorCode != HCI_ERR_BR_DISCONNECTION) {
+        errorCode != HCI_ERR_BR_CONN_ACL_RECREATE) {
         return;
     }
-    if (errCode == HCI_ERR_BR_DISCONNECTION) {
-        LNN_LOGI(LNN_STATE, "exception connect info: errorCode=%{public}d", errorCode);
+    if (errorCode == HCI_ERR_BR_CONN_ACL_RECREATE) {
         LeaveSpecificBrNetwork(option->brOption.brMac);
         return;
     }
