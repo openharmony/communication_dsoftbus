@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <string>
 
+#include "anonymizer.h"
 #include "bus_center_manager.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_local_net_ledger.h"
@@ -31,7 +32,6 @@
 #include "softbus_bus_center.h"
 #include "softbus_config_type.h"
 #include "softbus_errcode.h"
-#include "softbus_error_code.h"
 
 namespace OHOS {
 namespace LnnNetManager {
@@ -54,8 +54,8 @@ public:
         const std::string &addr, const std::string &ifName, int32_t flags, int32_t scope) override;
 };
 
-static int32_t g_eth_count;
-static SoftBusMutex g_eth_count_lock;
+static int32_t g_ethCount;
+static SoftBusMutex g_ethCountLock;
 
 int32_t LnnNetManagerListener::OnInterfaceAdded(const std::string &ifName)
 {
@@ -69,76 +69,69 @@ int32_t LnnNetManagerListener::OnInterfaceRemoved(const std::string &ifName)
     return SOFTBUS_OK;
 }
 
-int32_t LnnNetManagerListener::OnInterfaceChanged(const std::string &ifName, bool up)
+int32_t LnnNetManagerListener::OnInterfaceChanged(const std::string &ifName, bool isUp)
 {
-    LNN_LOGI(LNN_BUILDER, "ifName=%{public}s, up=%{public}s", ifName.c_str(), up ? "true" : "false");
+    LNN_LOGI(LNN_BUILDER, "ifName=%{public}s, isUp=%{public}s", ifName.c_str(), isUp ? "true" : "false");
     return SOFTBUS_OK;
 }
 
-int32_t LnnNetManagerListener::OnInterfaceLinkStateChanged(const std::string &ifName, bool up)
+int32_t LnnNetManagerListener::OnInterfaceLinkStateChanged(const std::string &ifName, bool isUp)
 {
-    LNN_LOGI(LNN_BUILDER, "ifName=%{public}s, up=%{public}s", ifName.c_str(), up ? "true" : "false");
+    LNN_LOGI(LNN_BUILDER, "ifName=%{public}s, isUp=%{public}s", ifName.c_str(), isUp ? "true" : "false");
     uint32_t netCapability = 0;
     if (LnnGetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t *)&netCapability) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get cap from local ledger fail");
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_BUILDER, "get cap from local ledger1 netCapability=%{public}d", netCapability);
-    if (up) {
+    if (SoftBusMutexLock(&g_ethCountLock) != 0) {
+        LNN_LOGE(LNN_BUILDER, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    if (isUp) {
         // update eth
-        if (g_eth_count == 0) {
+        if (g_ethCount == 0) {
             LNN_LOGI(LNN_BUILDER, "LnnSetNetCapability");
             (void)LnnSetNetCapability(&netCapability, BIT_ETH);
         }
-        if (SoftBusMutexLock(&g_eth_count_lock) != 0) {
-            LNN_LOGE(LNN_BUILDER, "lock failed");
-            return SOFTBUS_LOCK_ERR;
-        }
-        g_eth_count = g_eth_count + 1;
-        (void)SoftBusMutexUnlock(&g_eth_count_lock);
-
-        if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, netCapability) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_INIT, "set cap to local ledger fail");
-        }
+        ++g_ethCount;
     } else {
         // remove eth
-        if (g_eth_count == 0) {
-            LNN_LOGE(LNN_BUILDER, "OnInterfaceLinkStateChanged callback err");
+        if (g_ethCount == 0) {
+            LNN_LOGI(LNN_BUILDER, "do not have eth to be removed");
+            (void)SoftBusMutexUnlock(&g_ethCountLock);
             return SOFTBUS_ERR;
         }
-        if (SoftBusMutexLock(&g_eth_count_lock) != 0) {
-            LNN_LOGE(LNN_BUILDER, "lock failed");
-            return SOFTBUS_LOCK_ERR;
-        }
-        g_eth_count = g_eth_count - 1;
-        (void)SoftBusMutexUnlock(&g_eth_count_lock);
-        if (g_eth_count == 0) {
+        --g_ethCount;
+        if (g_ethCount == 0) {
             LNN_LOGI(LNN_BUILDER, "LnnClearNetCapability");
             (void)LnnClearNetCapability(&netCapability, BIT_ETH);
-
-            if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, netCapability) != SOFTBUS_OK) {
-                LNN_LOGE(LNN_INIT, "set cap to local ledger fail");
-            }
         }
     }
-    if (LnnGetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t *)&netCapability) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "get cap from local ledger fail");
+    (void)SoftBusMutexUnlock(&g_ethCountLock);
+    if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, netCapability) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "set cap to local ledger fail");
         return SOFTBUS_ERR;
     }
-    LNN_LOGI(LNN_BUILDER, "get cap from local ledger netCapability=%{public}d", netCapability);
+    LNN_LOGI(LNN_BUILDER, "local ledger netCapability=%{public}u", netCapability);
     return SOFTBUS_OK;
 }
 
 int32_t LnnNetManagerListener::OnInterfaceAddressUpdated(
     const std::string &addr, const std::string &ifName, int32_t flags, int32_t scope)
 {
-    LNN_LOGI(LNN_BUILDER, "ifName=%{public}s, addr=%{public}s", ifName.c_str(), addr.c_str());
+    char *anonyAddr = NULL;
+    Anonymize(addr.c_str(), &anonyAddr);
+    LNN_LOGI(LNN_BUILDER, "ifName=%{public}s, addr=%{public}s", ifName.c_str(), anonyAddr);
+    AnonymizeFree(anonyAddr);
     return SOFTBUS_OK;
 }
 int32_t LnnNetManagerListener::OnInterfaceAddressRemoved(
     const std::string &addr, const std::string &ifName, int32_t flags, int32_t scope)
 {
-    LNN_LOGI(LNN_BUILDER, "ifName=%{public}s, up=%{public}s", ifName.c_str(), addr.c_str());
+    char *anonyAddr = NULL;
+    Anonymize(addr.c_str(), &anonyAddr);
+    LNN_LOGI(LNN_BUILDER, "ifName=%{public}s, addr=%{public}s", ifName.c_str(), anonyAddr);
+    AnonymizeFree(anonyAddr);
     return SOFTBUS_OK;
 }
 
@@ -153,9 +146,9 @@ static void RegEthernetEvent(void *para)
         LNN_LOGE(LNN_BUILDER, "new lnnNetManagerListener fail");
         return;
     }
-    OHOS::LnnNetManager::g_eth_count = 0;
-    if (SoftBusMutexInit(&OHOS::LnnNetManager::g_eth_count_lock, nullptr) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "init g_eth_count_lock fail");
+    OHOS::LnnNetManager::g_ethCount = 0;
+    if (SoftBusMutexInit(&OHOS::LnnNetManager::g_ethCountLock, nullptr) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "init g_ethCountLock fail");
         return;
     }
     int32_t ret =
