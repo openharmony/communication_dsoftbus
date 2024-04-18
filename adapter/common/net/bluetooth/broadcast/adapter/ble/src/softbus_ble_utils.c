@@ -242,6 +242,7 @@ void SoftbusFilterToBt(BleScanNativeFilter *nativeFilter, const SoftBusBcScanFil
             (unsigned int)(filter + filterSize)->manufactureDataLength;
         (nativeFilter + filterSize)->manufactureDataMask = (unsigned char *)(filter + filterSize)->manufactureDataMask;
         (nativeFilter + filterSize)->manufactureId = (unsigned short)(filter + filterSize)->manufactureId;
+        (nativeFilter + filterSize)->advIndReport = (filter + filterSize)->advIndReport;
 
         if ((filter + filterSize)->serviceData == NULL || (filter + filterSize)->serviceDataMask == NULL) {
             continue;
@@ -314,6 +315,7 @@ void FreeBtFilter(BleScanNativeFilter *nativeFilter, int32_t filterSize)
 void DumpBleScanFilter(BleScanNativeFilter *nativeFilter, int32_t filterSize)
 {
     while (filterSize-- > 0) {
+        bool advIndReport = (nativeFilter + filterSize)->advIndReport;
         uint32_t len = (nativeFilter + filterSize)->serviceDataLength;
         if (len == 0) {
             continue;
@@ -331,8 +333,8 @@ void DumpBleScanFilter(BleScanNativeFilter *nativeFilter, int32_t filterSize)
         (void)ConvertBytesToHexString(serviceData, hexLen, (nativeFilter + filterSize)->serviceData, len);
         (void)ConvertBytesToHexString(serviceDataMask, hexLen, (nativeFilter + filterSize)->serviceDataMask, len);
         DISC_LOGD(DISC_BLE_ADAPTER,
-            "BLE Scan Filter size=%{public}d, serviceData=%{public}s, serviceDataMask=%{public}s",
-            filterSize, serviceData, serviceDataMask);
+            "BLE Scan Filter size=%{public}d, serviceData=%{public}s, serviceDataMask=%{public}s,"
+            "advIndReport=%{public}d", filterSize, serviceData, serviceDataMask, advIndReport);
         SoftBusFree(serviceData);
         SoftBusFree(serviceDataMask);
     }
