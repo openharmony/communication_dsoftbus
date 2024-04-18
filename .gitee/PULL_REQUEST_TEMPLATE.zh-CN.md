@@ -8,7 +8,7 @@
 
 
 ### 验证结果（新增、改动、可能影响的功能）
-
+ 
 
 ### 日志规范自检：
 - [ ]  【规则】高频代码的正常流程中禁止打印日志
@@ -32,7 +32,7 @@
 - [ ] 【内存管理】内存申请后必须判空，判断内存申请是否成功；
 - [ ] 【内存管理】全局变量释放内存后必须置空，循环体中释放变量内存后确认是否需要置空；
 - [ ] 【内存管理】正则表达式构造后需释放资源，regcomp/regexec与regfree必须成对使用；
-- [ ] 【内存管理】json对象创建以后需要释放内存，cJSON_Parse与cJSON_Delete，JSON_PrintUnformatted与JSON_Free成对使用；
+- [ ] 【内存管理】json使用需释放内存，cJSON_Parse与cJSON_Delete，JSON_PrintUnformatted与JSON_Free成对使用；
 - [ ] 【内存管理】匿名化打印接口Anonymize与AnonymizeFree必须成对使用；
 - [ ] 【敏感信息】禁止打印密钥、文件路径、内存地址等敏感信息；
 - [ ] 【敏感信息】堆、栈密钥使用后必须清零；
@@ -46,5 +46,6 @@
 - [ ] 【权限校验】新增sdk IPC接口必须有权限校验流程，校验方案需经过MDEG评审；
 - [ ] 【外部输入校验】外部传入的路径要做规范化校验，对路径中的.、..、../等特殊字符严格校验；
 - [ ] 【外部输入校验】新增外部输入处理需考虑完整校验方案，外部输入校验需经过MDEG评审，并有相应fuzz、UT用例；
+- [ ] 【外部输入校验】新增外部输入处理需考虑完整校验方案，方案需经过MDEG评审，并有相应fuzz、UT用例；
 - [ ] 【常见问题】修改单个函数时，如果涉及新增异常返回分支，必须排查是否需要释放锁、内存、fd等资源；
-- [ ] 【常见问题】CHECK_AND_RETURN_LOG_INNER、CHECK_AND_RETURN_RET_LOG_INNER等宏需要确认是否存在未释放资源；
+- [ ] 【常见问题】CHECK_AND_RETURN_LOG_INNER、CHECK_AND_RETURN_RET_LOG_INNER等宏确认无资源漏释放；
