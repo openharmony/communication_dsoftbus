@@ -144,7 +144,7 @@ static int32_t TransOnBindFailed(int32_t sessionId, const ISocketListener *socke
     return SOFTBUS_OK;
 }
 
-static int32_t handelOnBindSuccess(int32_t sessionId, SessionListenerAdapter sessionCallback, bool isServer)
+static int32_t HandleOnBindSuccess(int32_t sessionId, SessionListenerAdapter sessionCallback, bool isServer)
 {
     // async bind call back client and server， sync bind only call back server.
     bool isAsync = true;
@@ -165,12 +165,8 @@ static int32_t handelOnBindSuccess(int32_t sessionId, SessionListenerAdapter ses
     return ret;
 }
 
-NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel, SessionType flag)
+static void AnonymizeLogTransOnSessionOpenedInfo(const char *sessionName, const ChannelInfo *channel, SessionType flag)
 {
-    if ((sessionName == NULL) || (channel == NULL)) {
-        TRANS_LOGW(TRANS_SDK, "Invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
     char *tmpName = NULL;
     Anonymize(sessionName, &tmpName);
     TRANS_LOGI(TRANS_SDK,
@@ -178,7 +174,15 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const C
         "isServer=%{public}d, type=%{public}d, crc=%{public}d",
         tmpName, channel->channelId, channel->channelType, flag, channel->isServer, channel->routeType, channel->crc);
     AnonymizeFree(tmpName);
+}
 
+NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel, SessionType flag)
+{
+    if ((sessionName == NULL) || (channel == NULL)) {
+        TRANS_LOGW(TRANS_SDK, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    AnonymizeLogTransOnSessionOpenedInfo(sessionName, channel, flag);
     SessionListenerAdapter sessionCallback;
     (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
     int32_t ret = ClientGetSessionCallbackAdapterByName(sessionName, &sessionCallback);
@@ -211,7 +215,7 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const C
     }
     SetSessionStateBySessionId(sessionId, SESSION_STATE_CALLBACK_FINISHED);
     if (sessionCallback.isSocketListener) {
-        return handelOnBindSuccess(sessionId, sessionCallback, channel->isServer);
+        return HandleOnBindSuccess(sessionId, sessionCallback, channel->isServer);
     }
     TRANS_LOGI(TRANS_SDK, "trigger session open callback");
     if ((sessionCallback.session.OnSessionOpened == NULL) ||

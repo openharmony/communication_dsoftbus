@@ -1088,23 +1088,15 @@ int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t qosCount, const I
     }
     if (!isAsync) {
         ret = ClientSetChannelBySessionId(socket, &transInfo);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_SDK, "set channel by socket=%{public}d failed, ret=%{public}d", socket, ret);
-            return SOFTBUS_TRANS_SESSION_SET_CHANNEL_FAILED;
-        }
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_TRANS_SESSION_SET_CHANNEL_FAILED, TRANS_SDK,
+            "set channel by socket=%{public}d failed, ret=%{public}d", socket, ret);
         SetSessionStateBySessionId(socket, SESSION_STATE_OPENED);
         ret = CheckSessionIsOpened(socket);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_SDK, "CheckSessionIsOpened err, ret=%{public}d", ret);
-            (void)ClientDeleteSession(socket);
-            return SOFTBUS_TRANS_SESSION_NO_ENABLE;
-        }
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_TRANS_SESSION_NO_ENABLE, TRANS_SDK,
+            "CheckSessionIsOpened err, ret=%{public}d", ret);
     }
     ret = ClientSetSocketState(socket, maxIdleTimeout, SESSION_ROLE_CLIENT);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "set session role failed, ret=%{public}d", ret);
-        return ret;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "set session role failed, ret=%{public}d", ret);
     if (!isAsync) {
         TRANS_LOGI(TRANS_SDK, "Bind ok: socket=%{public}d, channelId=%{public}d, channelType=%{public}d", socket,
             transInfo.channelId, transInfo.channelType);

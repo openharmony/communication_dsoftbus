@@ -781,6 +781,10 @@ int32_t SoftBusServerStub::CloseChannelInner(MessageParcel &data, MessageParcel 
     pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
     if (channelType == CHANNEL_TYPE_UNDEFINED) {
         sessionName = data.ReadCString();
+        if (sessionName == nullptr) {
+            COMM_LOGE(COMM_SVC, "CloseChannelInner get param failed!");
+            return SOFTBUS_IPC_ERR;
+        }
         int32_t ret = TransGetAndComparePidBySession(callingPid, sessionName, channelId);
         if (ret != SOFTBUS_OK) {
             COMM_LOGE(COMM_SVC, "Pid can not close channel, pid = %{public}d, sessionId = %{public}d, ret = %{public}d",
