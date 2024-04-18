@@ -50,6 +50,7 @@
 
 #define DATA_SIZE 32
 #define DISCOVERY_TYPE_MASK 0x7FFF
+#define DEVICE_TYPE_SIZE_LEN 3
 
 typedef enum {
     STATE_AUTH_INDEX = 0,
@@ -405,6 +406,46 @@ static void SetLnnConnNodeInfo(
         connInfo->nodeInfo->deviceInfo.deviceUdid, connInfo->addr.type, relation[connInfo->addr.type], true);
 }
 
+static void DfxRecordLnnAddOnlineNodeEnd(NodeInfo *info, int32_t onlineNum, int32_t reason)
+{
+    LnnEventExtra extra = { 0 };
+    LnnEventExtraInit(&extra);
+    extra.onlineNum = onlineNum;
+    extra.errcode = reason;
+    extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+    if (info == NULL) {
+        LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, extra);
+        return;
+    }
+
+    char netWorkId[NETWORK_ID_BUF_LEN] = { 0 };
+    if (strcpy_s(netWorkId, NETWORK_ID_BUF_LEN, info->networkId) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "strcpy_s netWorkId fail");
+        return;
+    }
+    char udidData[UDID_BUF_LEN] = { 0 };
+    if (strcpy_s(udidData, UDID_BUF_LEN, info->deviceInfo.deviceUdid) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "strcpy_s udidData fail");
+        return;
+    }
+    char bleMacAddr[MAC_LEN] = { 0 };
+    if (strcpy_s(bleMacAddr, MAC_LEN, info->connectInfo.bleMacAddr) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "strcpy_s bleMacAddr fail");
+        return;
+    }
+    char deviceType[DEVICE_TYPE_SIZE_LEN + 1] = { 0 };
+    if (snprintf_s(deviceType, DEVICE_TYPE_SIZE_LEN + 1, DEVICE_TYPE_SIZE_LEN, "%X",
+        info->deviceInfo.deviceTypeId) < 0) {
+        LNN_LOGE(LNN_BUILDER, "snprintf_s deviceType fail");
+        return;
+    }
+    extra.peerNetworkId = netWorkId;
+    extra.peerUdid = udidData;
+    extra.peerBleMac = bleMacAddr;
+    extra.peerDeviceType = deviceType;
+    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, extra);
+}
+
 static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, int32_t retCode)
 {
     LnnConntionInfo *connInfo = &connFsm->connInfo;
@@ -425,6 +466,21 @@ static void CompleteJoinLNN(LnnConnectionFsm *connFsm, const char *networkId, in
         NotifyJoinResult(connFsm, networkId, retCode);
         AuthHandleLeaveLNN(connInfo->authHandle);
     }
+    
+    if ((connInfo->flag & LNN_CONN_INFO_FLAG_JOIN_PASSIVE) == 0) {
+        int32_t infoNum = 0;
+        NodeBasicInfo *info = NULL;
+        bool isSuccessFlag = true;
+        if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "Lnn get online node fail");
+            isSuccessFlag = false;
+        }
+        if (isSuccessFlag) {
+            DfxRecordLnnAddOnlineNodeEnd(connInfo->nodeInfo, infoNum, retCode);
+            SoftBusFree(info);
+        }
+    }
+
     if (connInfo->nodeInfo != NULL) {
         SoftBusFree(connInfo->nodeInfo);
         connInfo->nodeInfo = NULL;
