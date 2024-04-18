@@ -487,7 +487,7 @@ static void ProcessDisNonPacket(const BroadcastReportInfo *reportInfo, char rssi
     add.medium = BLE;
 
     if (ProcessHashAccount(foundInfo)) {
-        DISC_LOGI(DISC_BLE, "start report found device");
+        DISC_LOGD(DISC_BLE, "start report found device");
         uint32_t tempCap = 0;
         DeConvertBitMap(&tempCap, foundInfo->capabilityBitmap, foundInfo->capabilityBitmapNum);
         if (tempCap == 0) {
