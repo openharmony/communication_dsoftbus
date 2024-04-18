@@ -310,9 +310,14 @@ HWTEST_F(TransLaneManagerTest, TransSocketChannelInfoTest001, TestSize.Level1)
     ret = TransGetSocketChannelStateByChannel(channelId, channelType, &state);
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_EQ(state, CORE_SESSION_STATE_CANCELLING);
+    int32_t pid = -1;
+    ret = TransGetPidFromSocketChannelInfoBySession(sessionName, sessionId, &pid);
+    EXPECT_EQ(pid, 0);
     ret = TransDeleteSocketChannelInfoByChannel(channelId, channelType);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransDeleteSocketChannelInfoBySession(sessionName, sessionId);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+    ret = TransDeleteSocketChannelInfoByPid(pid);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
     TransSocketLaneMgrDeinit();
     ret = TransAddSocketChannelInfo(
