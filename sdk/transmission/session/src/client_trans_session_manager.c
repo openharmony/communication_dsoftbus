@@ -1244,16 +1244,8 @@ static int32_t ClientTransGetTdcIp(int32_t channelId, char *myIp, int32_t ipLen)
         return SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
     }
 
-    SocketAddr socket;
-    // The local and peer IP belong to the same network segment, and the type can also be determined by the peer IP
-    int32_t ret = ConnGetPeerSocketAddr(channel.detail.fd, &socket);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "get peer socket addr by fd=%{public}d failed, ret=%{public}d", channel.detail.fd, ret);
-        return ret;
-    }
-
-    if (strcpy_s(myIp, ipLen, socket.addr) != EOK) {
-        TRANS_LOGE(TRANS_SDK, "strcpy_s ip failed, len=%{public}zu", strlen(socket.addr));
+    if (strcpy_s(myIp, ipLen, channel.detail.myIp) != EOK) {
+        TRANS_LOGE(TRANS_SDK, "strcpy_s ip failed, len=%{public}zu", strlen(channel.detail.myIp));
         return SOFTBUS_STRCPY_ERR;
     }
 

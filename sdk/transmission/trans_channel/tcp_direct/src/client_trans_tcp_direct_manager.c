@@ -153,6 +153,11 @@ static TcpDirectChannelInfo *TransGetNewTcpChannel(const ChannelInfo *channel)
         TRANS_LOGE(TRANS_SDK, "sessionKey copy failed");
         return NULL;
     }
+    if (strcpy_s(item->detail.myIp, IP_LEN, channel->myIp) != EOK) {
+        SoftBusFree(item);
+        TRANS_LOGE(TRANS_SDK, "myIp copy failed");
+        return NULL;
+    }
     return item;
 }
 
