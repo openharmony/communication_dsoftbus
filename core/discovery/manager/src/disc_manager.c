@@ -445,7 +445,7 @@ static int32_t CheckSubscribeInfo(const SubscribeInfo *info)
 
 static void SetDiscItemCallback(DiscItem *itemNode, const InnerCallback *cb, const ServiceType type)
 {
-    if ((type != SUBSCRIBE_INNER_SERVICE) && (type != SUBSCRIBE_SERVICE)) {
+    if ((type != SUBSCRIBE_INNER_SERVICE && type != SUBSCRIBE_SERVICE) || cb == NULL) {
         return;
     }
     if (type == SUBSCRIBE_SERVICE) {
