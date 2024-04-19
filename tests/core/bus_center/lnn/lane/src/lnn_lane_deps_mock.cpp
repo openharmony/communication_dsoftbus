@@ -24,7 +24,7 @@ using namespace testing;
 
 namespace OHOS {
 void *g_laneDepsInterface;
-static SoftbusBaseListener g_baseListener;
+static SoftbusBaseListener g_baseListener = {0};
 LaneDepsInterfaceMock::LaneDepsInterfaceMock()
 {
     g_laneDepsInterface = reinterpret_cast<void *>(this);
@@ -57,32 +57,46 @@ void LaneDepsInterfaceMock::SetDefaultResult(NodeInfo *info)
     ON_CALL(*this, LnnGetRemoteNumU64Info).WillByDefault(Return(SOFTBUS_OK));
 }
 
-void LaneDepsInterfaceMock::SetDefaultResultForAlloc(int32_t netCapLocal, int32_t netCapRemotem,
-    int32_t featureCapLocal, int32_t featureCapRemote)
+void LaneDepsInterfaceMock::SetDefaultResultForAlloc(int32_t localNetCap, int32_t remoteNetCap,
+    int32_t localFeatureCap, int32_t remoteFeatureCap)
 {
     EXPECT_CALL(*this, LnnGetLocalNumInfo)
-        .WillRepeatedly(DoAll(SetArgPointee<1>(netCapLocal), Return(SOFTBUS_OK)));
+        .WillRepeatedly(DoAll(SetArgPointee<1>(localNetCap), Return(SOFTBUS_OK)));
     EXPECT_CALL(*this, LnnGetRemoteNumInfo)
-        .WillRepeatedly(DoAll(SetArgPointee<2>(netCapRemotem), Return(SOFTBUS_OK)));
+        .WillRepeatedly(DoAll(SetArgPointee<2>(remoteNetCap), Return(SOFTBUS_OK)));
     EXPECT_CALL(*this, LnnGetLocalNumU64Info)
-        .WillRepeatedly(DoAll(SetArgPointee<1>(featureCapLocal), Return(SOFTBUS_OK)));
+        .WillRepeatedly(DoAll(SetArgPointee<1>(localFeatureCap), Return(SOFTBUS_OK)));
     EXPECT_CALL(*this, LnnGetRemoteNumU64Info)
-        .WillRepeatedly(DoAll(SetArgPointee<2>(featureCapRemote), Return(SOFTBUS_OK)));
+        .WillRepeatedly(DoAll(SetArgPointee<2>(remoteFeatureCap), Return(SOFTBUS_OK)));
     EXPECT_CALL(*this, LnnGetRemoteStrInfo).WillRepeatedly(ActionOfGetRemoteStrInfo);
     EXPECT_CALL(*this, SoftBusGenerateStrHash).WillRepeatedly(ActionOfGenerateStrHash);
 }
 
 int32_t LaneDepsInterfaceMock::ActionOfGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash)
 {
-    (void)strcpy_s((char *)hash, SHA_HASH_LEN, "1234567890123456");
+    (void)str;
+    (void)len;
+    if (hash == nullptr) {
+        GTEST_LOG_(ERROR) << "invalid param";
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strcpy_s((char *)hash, SHA_HASH_LEN, "1234567890123456") != EOK) {
+        return SOFTBUS_STRCPY_ERR;
+    }
     return SOFTBUS_OK;
 }
 
 int32_t LaneDepsInterfaceMock::ActionOfGetRemoteStrInfo(const char *netWorkId, InfoKey key, char *info, uint32_t len)
 {
+    (void)netWorkId;
+    (void)len;
+    if (info == nullptr) {
+        GTEST_LOG_(ERROR) << "invalid param";
+        return SOFTBUS_INVALID_PARAM;
+    }
     char peerUdid[] = "111122223333abcdef";
     char brMac[] = "00:11:22:33:44:55";
-    switch(key) {
+    switch (key) {
         case STRING_KEY_BT_MAC:
             if (strncpy_s(info, BT_MAC_LEN, brMac, strlen(brMac)) != EOK) {
                 return SOFTBUS_STRCPY_ERR;
@@ -98,6 +112,7 @@ int32_t LaneDepsInterfaceMock::ActionOfGetRemoteStrInfo(const char *netWorkId, I
 
 int32_t LaneDepsInterfaceMock::ActionOfStartBaseClient(ListenerModule module, const SoftbusBaseListener *listener)
 {
+    (void)module;
     GTEST_LOG_(INFO) << "ActionOfStartBaseClient enter";
     if (listener == nullptr) {
         GTEST_LOG_(INFO) << "invalid listener";
@@ -109,6 +124,7 @@ int32_t LaneDepsInterfaceMock::ActionOfStartBaseClient(ListenerModule module, co
 
 int32_t LaneDepsInterfaceMock::ActionOfAddTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
 {
+    (void)trigger;
     GTEST_LOG_(INFO) << "ActionOfAddTrigger enter";
     if (g_baseListener.onDataEvent == nullptr) {
         GTEST_LOG_(INFO) << "invalid lane onDataEvent";
