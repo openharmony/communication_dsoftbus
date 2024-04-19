@@ -1216,7 +1216,7 @@ int32_t DiscMgrInit(void)
     if (g_discoveryInfoList == NULL) {
        DISC_LOGE(DISC_INIT, "init discovery Info List failed");
        DestroySoftBusList(g_publishInfoList);
-       g_publishInfoList == NULL;
+       g_publishInfoList = NULL;
        return SOFTBUS_DISCOVER_MANAGER_INIT_FAIL;
     }
 
