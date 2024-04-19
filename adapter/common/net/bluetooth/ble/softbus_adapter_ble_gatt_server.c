@@ -357,6 +357,25 @@ static void BleConnectServerCallback(int connId, int serverId, const BdAddr *bdA
     SoftBusFree(nodes);
 }
 
+static void RemoveConnId(int32_t connId)
+{
+    CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_softBusGattsManager->lock) == SOFTBUS_OK,
+        CONN_BLE, "try to lock failed, connId=%{public}d", connId);
+    SoftBusGattsManager *manager = NULL;
+    LIST_FOR_EACH_ENTRY(manager, &g_softBusGattsManager->list, SoftBusGattsManager, node) {
+        ServerConnection *it = NULL;
+        ServerConnection *next = NULL;
+        LIST_FOR_EACH_ENTRY_SAFE(it, next, &manager->connections, ServerConnection, node) {
+            if (it->connId == connId) {
+                ListDelete(&it->node);
+                SoftBusFree(it);
+                break;
+            }
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_softBusGattsManager->lock);
+}
+
 static void BleDisconnectServerCallback(int connId, int serverId, const BdAddr *bdAddr)
 {
     if (bdAddr == NULL) {
@@ -374,6 +393,7 @@ static void BleDisconnectServerCallback(int connId, int serverId, const BdAddr *
         CONN_LOGI(CONN_BLE, "find callback by connId %{public}d failed", connId);
         return;
     }
+    RemoveConnId(connId);
     callback.DisconnectServerCallback(connId, (SoftBusBtAddr *)bdAddr);
 }
 
@@ -613,10 +633,13 @@ static void FindCallbackByConnId(int32_t connId, SoftBusGattsCallback *callback)
     CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_softBusGattsManager->lock) == SOFTBUS_OK,
         CONN_BLE, "try to lock failed, connId=%{public}d", connId);
     SoftBusGattsManager *it = NULL;
+    ServerConnection *connections = NULL;
     LIST_FOR_EACH_ENTRY(it, &g_softBusGattsManager->list, SoftBusGattsManager, node) {
-        if (it->connId == connId) {
-            *callback = it->callback;
-            break;
+        LIST_FOR_EACH_ENTRY(connections, &it->connections, ServerConnection, node) {
+            if (connections->connId == connId) {
+                *callback = it->callback;
+                break;
+            }
         }
     }
     (void)SoftBusMutexUnlock(&g_softBusGattsManager->lock);
@@ -624,13 +647,25 @@ static void FindCallbackByConnId(int32_t connId, SoftBusGattsCallback *callback)
 
 static void FindCallbackByMtuAndSetConnId(int32_t mtu, SoftBusGattsCallback *callback, int32_t connId)
 {
+    FindCallbackByConnId(connId, callback);
+    if (callback->MtuChangeCallback != NULL) {
+        CONN_LOGW(CONN_BLE, "connId exist=%{public}d", connId);
+        return;
+    }
     CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_softBusGattsManager->lock) == SOFTBUS_OK, CONN_BLE,
         "try to lock failed, mtu=%{public}d", mtu);
     SoftBusGattsManager *it = NULL;
     LIST_FOR_EACH_ENTRY(it, &g_softBusGattsManager->list, SoftBusGattsManager, node) {
         if (it->expectedMtu == mtu) {
+            ServerConnection *serverConn = (ServerConnection *)SoftBusCalloc(sizeof(ServerConnection));
+            if (serverConn == NULL) {
+                CONN_LOGE(CONN_BLE, "calloc failed, connId=%{public}d", connId);
+                break;
+            }
+            serverConn->connId = connId;
+            ListInit(&serverConn->node);
+            ListAdd(&it->connections, &serverConn->node);
             *callback = it->callback;
-            it->connId = connId;
             break;
         }
     }
@@ -677,9 +712,9 @@ static int32_t CreateAndAddGattsManager(SoftBusGattsCallback *callback, SoftBusB
     gattsManager->serviceUuid = serviceUuid;
     gattsManager->callback = *callback;
     gattsManager->handle = -1;
-    gattsManager->connId = -1;
     gattsManager->expectedMtu = expectedMtu;
 
+    ListInit(&gattsManager->connections);
     ListInit(&gattsManager->node);
     ListAdd(&g_softBusGattsManager->list, &gattsManager->node);
     g_softBusGattsManager->cnt++;
