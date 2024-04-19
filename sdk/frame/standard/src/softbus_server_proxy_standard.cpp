@@ -147,8 +147,9 @@ int32_t SoftBusServerProxyFrame::ReleaseResources(int32_t channelId)
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusServerProxyFrame::CloseChannel(int32_t channelId, int32_t channelType)
+int32_t SoftBusServerProxyFrame::CloseChannel(const char *sessionName, int32_t channelId, int32_t channelType)
 {
+    (void)sessionName;
     (void)channelId;
     (void)channelType;
     return SOFTBUS_OK;

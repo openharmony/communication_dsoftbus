@@ -132,7 +132,7 @@ string TestGetMsgPack()
 HWTEST_F(TransTcpDirectP2pTest, StartNewP2pListenerTest001, TestSize.Level1)
 {
     int32_t ret = StartNewP2pListener(nullptr, &g_port);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_STRCPY_ERR);
 
     ret = StartNewP2pListener(g_ip, &g_port);
     EXPECT_EQ(ret, SOFTBUS_ERR);
@@ -280,7 +280,7 @@ HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pRequestTest001, TestSize.Level1)
 HWTEST_F(TransTcpDirectP2pTest, ConnectTcpDirectPeerTest001, TestSize.Level1)
 {
     int32_t ret = ConnectTcpDirectPeer(nullptr, g_port);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_STRCPY_ERR);
 
     ret = ConnectTcpDirectPeer(g_addr, g_port);
     EXPECT_EQ(ret, SOFTBUS_ERR);
@@ -442,7 +442,7 @@ HWTEST_F(TransTcpDirectP2pTest, StartNewHmlListenerTest001, TestSize.Level1)
 {
     ListenerModule moduleType = UNUSE_BUTT;
     int32_t ret = StartNewHmlListener(nullptr, &g_port, &moduleType);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_STRCPY_ERR);
 
     ret = StartNewHmlListener(g_ip, &g_port, &moduleType);
     EXPECT_EQ(ret, SOFTBUS_ERR);

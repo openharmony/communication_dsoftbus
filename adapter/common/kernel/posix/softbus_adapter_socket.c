@@ -146,7 +146,7 @@ int32_t SoftBusSocketGetLocalName(int32_t socketFd, SoftBusSockAddr *addr)
         COMM_LOGE(COMM_ADAPTER, "get local name invalid input");
         return SOFTBUS_ADAPTER_ERR;
     }
-    uint32_t len = sizeof(SoftBusSockAddr);
+    uint32_t len = sizeof(*addr);
     int32_t ret = getsockname(socketFd, (struct sockaddr *)addr, (socklen_t *)&len);
     if (ret != 0) {
         COMM_LOGE(COMM_ADAPTER, "getsockname errno=%{public}s", strerror(errno));
@@ -161,7 +161,8 @@ int32_t SoftBusSocketGetPeerName(int32_t socketFd, SoftBusSockAddr *addr)
         COMM_LOGE(COMM_ADAPTER, "get peer name invalid input");
         return SOFTBUS_ADAPTER_ERR;
     }
-    uint32_t len = sizeof(SoftBusSockAddr);
+
+    uint32_t len = sizeof(*addr);
     int32_t ret = getpeername(socketFd, (struct sockaddr *)addr, (socklen_t *)&len);
     if (ret != 0) {
         COMM_LOGE(COMM_ADAPTER, "getpeername errno=%{public}s", strerror(errno));
@@ -206,7 +207,7 @@ int32_t SoftBusSocketAccept(int32_t socketFd, SoftBusSockAddr *addr, int32_t *ac
         return SOFTBUS_ADAPTER_INVALID_PARAM;
     }
 
-    uint32_t len = sizeof(SoftBusSockAddr);
+    uint32_t len = sizeof(*addr);
     int32_t ret = accept(socketFd, (struct sockaddr *)addr, (socklen_t *)&len);
     if (ret < 0) {
         COMM_LOGE(COMM_ADAPTER, "accept strerror=%{public}s, errno=%{public}d", strerror(errno), errno);
@@ -218,10 +219,13 @@ int32_t SoftBusSocketAccept(int32_t socketFd, SoftBusSockAddr *addr, int32_t *ac
     return SOFTBUS_ADAPTER_OK;
 }
 
-int32_t SoftBusSocketConnect(int32_t socketFd, const SoftBusSockAddr *addr)
+int32_t SoftBusSocketConnect(int32_t socketFd, const SoftBusSockAddr *addr, int32_t addrLen)
 {
-    uint32_t len = sizeof(SoftBusSockAddr);
-    int32_t ret = connect(socketFd, (struct sockaddr *)addr, (socklen_t)len);
+    if (addr == NULL || addrLen < 0) {
+        COMM_LOGE(COMM_ADAPTER, "socket connect invalid input");
+        return SOFTBUS_ADAPTER_ERR;
+    }
+    int32_t ret = connect(socketFd, (struct sockaddr *)addr, (socklen_t)addrLen);
     if (ret < 0) {
         COMM_LOGE(COMM_ADAPTER, "connect=%{public}s", strerror(errno));
         int32_t result = GetErrorCode();
@@ -478,6 +482,19 @@ uint32_t SoftBusInetAddr(const char *cp)
 uint32_t SoftBusIfNameToIndex(const char *name)
 {
     return if_nametoindex(name);
+}
+
+int32_t SoftBusIndexToIfName(int32_t index, char *ifname, uint32_t nameLen)
+{
+    if (index < 0 || ifname == NULL || nameLen < IF_NAME_SIZE) {
+        COMM_LOGE(COMM_ADAPTER, "Invalid parm nameLen=%{public}d", nameLen);
+        return SOFTBUS_ADAPTER_ERR;
+    }
+    if (if_indextoname(index, ifname) == NULL) {
+        COMM_LOGE(COMM_ADAPTER, "get ifname faild! errno=%{public}s", strerror(errno));
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return SOFTBUS_ADAPTER_OK;
 }
 
 static bool IsLittleEndian(void)

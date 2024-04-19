@@ -36,7 +36,6 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
-#include "lnn_ohos_account.h"
 
 int32_t LnnInitNetLedger(void)
 {
@@ -157,16 +156,6 @@ static void LnnRestoreLocalDeviceInfo()
     LoadBleBroadcastKey();
     LnnLoadLocalBroadcastCipherKey();
     LNN_LOGI(LNN_LEDGER, "load remote deviceInfo devicekey success");
-}
-
-int32_t LnnInitAccountInfoDelay(void)
-{
-    if (LnnInitOhosAccount() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "init default ohos account failed");
-        return SOFTBUS_ERR;
-    }
-    LNN_LOGI(LNN_LEDGER, "init success");
-    return SOFTBUS_OK;
 }
 
 int32_t LnnInitNetLedgerDelay(void)

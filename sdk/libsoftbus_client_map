@@ -389,6 +389,8 @@
         "TransSetChannelInfo";
         "ClientTransSetChannelInfo";
         "ClientGetSessionIsAsyncBySessionId";
+        "GetSessionStateAndSessionNameBySessionId";
+        "SetSessionStateBySessionId";
         "EvaluateQos";
         "GetMtuSize";
         "DBinderGrantPermission";
@@ -404,6 +406,7 @@
         "DiscRecoveryPolicy";
         "ClientRawStreamEncryptOptGet";
         "ClientRawStreamEncryptDefOptGet";
+        "SetDeathRecipientFlag";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;

@@ -36,6 +36,7 @@ typedef struct {
     bool isAvailable;
     ListNode node;
     uint32_t type;
+    uint64_t useTime[AUTH_LINK_TYPE_MAX];
 } SessionKeyItem;
 
 static void RemoveOldKey(SessionKeyList *list)
@@ -89,6 +90,21 @@ static void ClearAuthLinkType(uint32_t *authType, AuthLinkType type)
     *authType = (*authType) & (~(1 << (uint32_t)type));
 }
 
+static void UpdateLatestUseTime(SessionKeyItem *item, AuthLinkType type)
+{
+    if (item->lastUseTime != item->useTime[type]) {
+        item->useTime[type] = 0;
+        return;
+    }
+    item->useTime[type] = 0;
+    item->lastUseTime = 0;
+    for (uint32_t i = AUTH_LINK_TYPE_WIFI; i < AUTH_LINK_TYPE_MAX; i++) {
+        if (item->useTime[i] > item->lastUseTime) {
+            item->lastUseTime = item->useTime[i];
+        }
+    }
+}
+
 bool CheckSessionKeyListExistType(const SessionKeyList *list, AuthLinkType type)
 {
     CHECK_NULL_PTR_RETURN_VALUE(list, false);
@@ -137,9 +153,13 @@ bool HasSessionKey(const SessionKeyList *list)
     return !IsListEmpty(list);
 }
 
-uint64_t GetLatestAvailableSessionKeyTime(const SessionKeyList *list)
+uint64_t GetLatestAvailableSessionKeyTime(const SessionKeyList *list, AuthLinkType type)
 {
     CHECK_NULL_PTR_RETURN_VALUE(list, 0);
+    if (type < AUTH_LINK_TYPE_WIFI || type >= AUTH_LINK_TYPE_MAX) {
+        AUTH_LOGE(AUTH_FSM, "type error");
+        return 0;
+    }
     SessionKeyItem *item = NULL;
     SessionKeyItem *latestKey = NULL;
     uint64_t latestTime = 0;
@@ -147,16 +167,17 @@ uint64_t GetLatestAvailableSessionKeyTime(const SessionKeyList *list)
         if (!item->isAvailable) {
             continue;
         }
-        if (item->lastUseTime > latestTime) {
-            latestTime = item->lastUseTime;
+        if (item->useTime[type] > latestTime) {
+            latestTime = item->useTime[type];
             latestKey = item;
         }
     }
     if (latestKey == NULL) {
+        DumpSessionkeyList(list);
         return 0;
     }
-    AUTH_LOGI(AUTH_FSM, "find index=%{public}d, time=%{public}" PRId64 ", type=%{public}u", latestKey->index,
-        latestTime, latestKey->type);
+    AUTH_LOGI(AUTH_FSM, "latestUseTime=%{public}" PRIu64 ", type=%{public}d, index=%{public}d, time=%{public}" PRIu64
+        ", all type=%{public}u", latestKey->lastUseTime, type, latestKey->index, latestTime, latestKey->type);
     return latestTime;
 }
 
@@ -180,6 +201,10 @@ int32_t AddSessionKey(SessionKeyList *list, int32_t index, const SessionKey *key
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(key != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "key is NULL");
     AUTH_CHECK_AND_RETURN_RET_LOGE(list != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "list is NULL");
+    if (type < AUTH_LINK_TYPE_WIFI || type >= AUTH_LINK_TYPE_MAX) {
+        AUTH_LOGE(AUTH_FSM, "type error");
+        return SOFTBUS_INVALID_PARAM;
+    }
     AUTH_LOGD(AUTH_FSM, "keyLen=%{public}d", key->len);
     SessionKeyItem *item = (SessionKeyItem *)SoftBusCalloc(sizeof(SessionKeyItem));
     if (item == NULL) {
@@ -189,6 +214,7 @@ int32_t AddSessionKey(SessionKeyList *list, int32_t index, const SessionKey *key
     item->isAvailable = false;
     item->index = index;
     item->lastUseTime = GetCurrentTimeMs();
+    item->useTime[type] = item->lastUseTime;
     SetAuthLinkType(&item->type, type);
     if (memcpy_s(&item->key, sizeof(item->key), key, sizeof(SessionKey)) != EOK) {
         AUTH_LOGE(AUTH_FSM, "add session key fail");
@@ -200,11 +226,15 @@ int32_t AddSessionKey(SessionKeyList *list, int32_t index, const SessionKey *key
     return SOFTBUS_OK;
 }
 
-int32_t GetLatestSessionKey(const SessionKeyList *list, int32_t *index, SessionKey *key)
+int32_t GetLatestSessionKey(const SessionKeyList *list, AuthLinkType type, int32_t *index, SessionKey *key)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(list != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "list is NULL");
     AUTH_CHECK_AND_RETURN_RET_LOGE(index != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "index is NULL");
     AUTH_CHECK_AND_RETURN_RET_LOGE(key != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "key is NULL");
+    if (type < AUTH_LINK_TYPE_WIFI || type >= AUTH_LINK_TYPE_MAX) {
+        AUTH_LOGE(AUTH_FSM, "type error");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (IsListEmpty((const ListNode *)list)) {
         AUTH_LOGE(AUTH_FSM, "session key list is empty");
         return SOFTBUS_ERR;
@@ -213,7 +243,7 @@ int32_t GetLatestSessionKey(const SessionKeyList *list, int32_t *index, SessionK
     SessionKeyItem *latestKey = NULL;
     uint64_t latestTime = 0;
     LIST_FOR_EACH_ENTRY(item, (const ListNode *)list, SessionKeyItem, node) {
-        if (!item->isAvailable) {
+        if (!item->isAvailable || !SessionKeyHasAuthLinkType(item->type, type)) {
             continue;
         }
         if (item->lastUseTime > latestTime) {
@@ -223,6 +253,7 @@ int32_t GetLatestSessionKey(const SessionKeyList *list, int32_t *index, SessionK
     }
     if (latestKey == NULL) {
         AUTH_LOGE(AUTH_FSM, "invalid session key item");
+        DumpSessionkeyList(list);
         return SOFTBUS_ERR;
     }
     if (memcpy_s(key, sizeof(SessionKey), &latestKey->key, sizeof(latestKey->key)) != EOK) {
@@ -230,21 +261,28 @@ int32_t GetLatestSessionKey(const SessionKeyList *list, int32_t *index, SessionK
         return SOFTBUS_MEM_ERR;
     }
     latestKey->lastUseTime = GetCurrentTimeMs();
+    latestKey->useTime[type] = latestKey->lastUseTime;
     *index = latestKey->index;
-    AUTH_LOGI(AUTH_FSM, "get session key succ, index=%{public}d, type=%{public}u", latestKey->index,
-        latestKey->type);
+    AUTH_LOGI(AUTH_FSM, "get session key succ, index=%{public}d, type=%{public}u, time=%{public}" PRIu64,
+        latestKey->index, latestKey->type, latestKey->lastUseTime);
     return SOFTBUS_OK;
 }
 
 int32_t SetSessionKeyAuthLinkType(const SessionKeyList *list, int32_t index, AuthLinkType type)
 {
     CHECK_NULL_PTR_RETURN_VALUE(list, SOFTBUS_INVALID_PARAM);
+    if (type < AUTH_LINK_TYPE_WIFI || type >= AUTH_LINK_TYPE_MAX) {
+        AUTH_LOGE(AUTH_FSM, "type error");
+        return SOFTBUS_INVALID_PARAM;
+    }
     SessionKeyItem *item = NULL;
     LIST_FOR_EACH_ENTRY(item, (const ListNode *)list, SessionKeyItem, node) {
         if (item->index != index) {
             continue;
         }
         SetAuthLinkType(&item->type, type);
+        item->lastUseTime = GetCurrentTimeMs();
+        item->useTime[type] = item->lastUseTime;
         AUTH_LOGI(AUTH_FSM, "sessionKey add type, index=%{public}d, newType=%{public}d, type=%{public}u",
             index, type, item->type);
         return SOFTBUS_OK;
@@ -253,10 +291,14 @@ int32_t SetSessionKeyAuthLinkType(const SessionKeyList *list, int32_t index, Aut
     return SOFTBUS_ERR;
 }
 
-int32_t GetSessionKeyByIndex(const SessionKeyList *list, int32_t index, SessionKey *key)
+int32_t GetSessionKeyByIndex(const SessionKeyList *list, int32_t index, AuthLinkType type, SessionKey *key)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(list != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "list is NULL");
     AUTH_CHECK_AND_RETURN_RET_LOGE(key != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "key is NULL");
+    if (type < AUTH_LINK_TYPE_WIFI || type >= AUTH_LINK_TYPE_MAX) {
+        AUTH_LOGE(AUTH_FSM, "type error");
+        return SOFTBUS_INVALID_PARAM;
+    }
     SessionKeyItem *item = NULL;
     LIST_FOR_EACH_ENTRY(item, (const ListNode *)list, SessionKeyItem, node) {
         if (item->index != index) {
@@ -267,7 +309,8 @@ int32_t GetSessionKeyByIndex(const SessionKeyList *list, int32_t index, SessionK
             return SOFTBUS_MEM_ERR;
         }
         item->lastUseTime = GetCurrentTimeMs();
-        AUTH_LOGI(AUTH_FSM, "get session key succ, index=%{public}d", index);
+        item->useTime[type] = item->lastUseTime;
+        AUTH_LOGI(AUTH_FSM, "get session key succ, index=%{public}d, time=%{public}" PRIu64, index, item->lastUseTime);
         return SOFTBUS_OK;
     }
     AUTH_LOGE(AUTH_FSM, "session key not found, index=%{public}d, type=%{public}u", index, item->type);
@@ -292,6 +335,7 @@ void RemoveSessionkeyByIndex(SessionKeyList *list, int32_t index, AuthLinkType t
             ListDelete(&item->node);
             SoftBusFree(item);
         } else {
+            UpdateLatestUseTime(item, type);
             AUTH_LOGI(AUTH_FSM, "Remove Session key type, index=%{public}d, type=%{public}u", index, item->type);
         }
     } else {
@@ -314,21 +358,23 @@ void ClearSessionkeyByAuthLinkType(int64_t authId, SessionKeyList *list, AuthLin
             SoftBusFree(item);
             AUTH_LOGI(AUTH_FSM, "remove sessionkey, type=%{public}d, index=%{public}d, authId=%{public}" PRId64,
                 type, item->index, authId);
+        } else {
+            UpdateLatestUseTime(item, type);
         }
     }
 }
 
-int32_t EncryptData(const SessionKeyList *list, const uint8_t *inData, uint32_t inLen,
+int32_t EncryptData(const SessionKeyList *list, AuthLinkType type, const InDataInfo *inDataInfo,
     uint8_t *outData, uint32_t *outLen)
 {
-    if (list == NULL || inData == NULL || inLen == 0 || outData == NULL ||
-        *outLen < (inLen + ENCRYPT_OVER_HEAD_LEN)) {
+    if (list == NULL || inDataInfo == NULL || inDataInfo->inData == NULL || inDataInfo->inLen == 0 ||
+        outData == NULL || *outLen < (inDataInfo->inLen + ENCRYPT_OVER_HEAD_LEN)) {
         AUTH_LOGE(AUTH_FSM, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t index = 0;
     SessionKey sessionKey;
-    if (GetLatestSessionKey(list, &index, &sessionKey) != SOFTBUS_OK) {
+    if (GetLatestSessionKey(list, type, &index, &sessionKey) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "get key fail");
         return SOFTBUS_ENCRYPT_ERR;
     }
@@ -341,7 +387,8 @@ int32_t EncryptData(const SessionKeyList *list, const uint8_t *inData, uint32_t 
         return SOFTBUS_MEM_ERR;
     }
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
-    int32_t ret = SoftBusEncryptDataWithSeq(&cipherKey, inData, inLen, outData + ENCRYPT_INDEX_LEN, outLen, index);
+    int32_t ret = SoftBusEncryptDataWithSeq(&cipherKey, inDataInfo->inData, inDataInfo->inLen,
+        outData + ENCRYPT_INDEX_LEN, outLen, index);
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "SoftBusEncryptDataWithSeq fail=%{public}d", ret);
@@ -351,18 +398,18 @@ int32_t EncryptData(const SessionKeyList *list, const uint8_t *inData, uint32_t 
     return SOFTBUS_OK;
 }
 
-int32_t DecryptData(const SessionKeyList *list, const uint8_t *inData, uint32_t inLen,
+int32_t DecryptData(const SessionKeyList *list, AuthLinkType type, const InDataInfo *inDataInfo,
     uint8_t *outData, uint32_t *outLen)
 {
-    if (list == NULL || inData == NULL || outData == NULL || inLen <= ENCRYPT_OVER_HEAD_LEN ||
-        *outLen < (inLen - ENCRYPT_OVER_HEAD_LEN)) {
+    if (list == NULL || inDataInfo == NULL || inDataInfo->inData == NULL || outData == NULL ||
+        inDataInfo->inLen <= ENCRYPT_OVER_HEAD_LEN || *outLen < (inDataInfo->inLen - ENCRYPT_OVER_HEAD_LEN)) {
         AUTH_LOGE(AUTH_FSM, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     /* unpack key index */
-    int32_t index = (int32_t)SoftBusLtoHl(*(uint32_t *)inData);
+    int32_t index = (int32_t)SoftBusLtoHl(*(uint32_t *)inDataInfo->inData);
     SessionKey sessionKey;
-    if (GetSessionKeyByIndex(list, index, &sessionKey) != SOFTBUS_OK) {
+    if (GetSessionKeyByIndex(list, index, type, &sessionKey) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "get key fail");
         return SOFTBUS_DECRYPT_ERR;
     }
@@ -373,8 +420,8 @@ int32_t DecryptData(const SessionKeyList *list, const uint8_t *inData, uint32_t 
         return SOFTBUS_MEM_ERR;
     }
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
-    int32_t ret = SoftBusDecryptDataWithSeq(&cipherKey, inData + ENCRYPT_INDEX_LEN, inLen - ENCRYPT_INDEX_LEN,
-        outData, outLen, index);
+    int32_t ret = SoftBusDecryptDataWithSeq(&cipherKey, inDataInfo->inData + ENCRYPT_INDEX_LEN,
+        inDataInfo->inLen - ENCRYPT_INDEX_LEN, outData, outLen, index);
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "SoftBusDecryptDataWithSeq fail=%{public}d", ret);
@@ -383,20 +430,21 @@ int32_t DecryptData(const SessionKeyList *list, const uint8_t *inData, uint32_t 
     return SOFTBUS_OK;
 }
 
-int32_t EncryptInner(const SessionKeyList *list, const uint8_t *inData, uint32_t inLen,
+int32_t EncryptInner(const SessionKeyList *list, AuthLinkType type, const InDataInfo *inDataInfo,
     uint8_t **outData, uint32_t *outLen)
 {
-    if (list == NULL || inData == NULL || inLen == 0 || outData == NULL || outLen == NULL) {
+    if (list == NULL || inDataInfo == NULL || inDataInfo->inData == NULL || inDataInfo->inLen == 0 ||
+        outData == NULL || outLen == NULL) {
         AUTH_LOGE(AUTH_FSM, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    uint32_t encDataLen = inLen + ENCRYPT_OVER_HEAD_LEN;
+    uint32_t encDataLen = inDataInfo->inLen + ENCRYPT_OVER_HEAD_LEN;
     uint8_t *encData = (uint8_t *)SoftBusCalloc(encDataLen);
     if (encData == NULL) {
         AUTH_LOGE(AUTH_FSM, "malloc encrypt data fail");
         return SOFTBUS_MALLOC_ERR;
     }
-    if (EncryptData(list, inData, inLen, encData, &encDataLen) != SOFTBUS_OK) {
+    if (EncryptData(list, type, inDataInfo, encData, &encDataLen) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "encrypt data fail");
         SoftBusFree(encData);
         return SOFTBUS_ENCRYPT_ERR;
@@ -406,20 +454,21 @@ int32_t EncryptInner(const SessionKeyList *list, const uint8_t *inData, uint32_t
     return SOFTBUS_OK;
 }
 
-int32_t DecryptInner(const SessionKeyList *list, const uint8_t *inData, uint32_t inLen,
+int32_t DecryptInner(const SessionKeyList *list, AuthLinkType type, const InDataInfo *inDataInfo,
     uint8_t **outData, uint32_t *outLen)
 {
-    if (list == NULL || inData == NULL || inLen <= ENCRYPT_OVER_HEAD_LEN || outData == NULL || outLen == NULL) {
+    if (list == NULL || inDataInfo == NULL || inDataInfo->inData == NULL ||
+        inDataInfo->inLen <= ENCRYPT_OVER_HEAD_LEN || outData == NULL || outLen == NULL) {
         AUTH_LOGE(AUTH_FSM, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    uint32_t decDataLen = inLen - ENCRYPT_OVER_HEAD_LEN + 1; /* for '\0' */
+    uint32_t decDataLen = inDataInfo->inLen - ENCRYPT_OVER_HEAD_LEN + 1; /* for '\0' */
     uint8_t *decData = (uint8_t *)SoftBusCalloc(decDataLen);
     if (decData == NULL) {
         AUTH_LOGE(AUTH_FSM, "malloc decrypt data fail");
         return SOFTBUS_MALLOC_ERR;
     }
-    if (DecryptData(list, inData, inLen, decData, &decDataLen) != SOFTBUS_OK) {
+    if (DecryptData(list, type, inDataInfo, decData, &decDataLen) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "decrypt data fail");
         SoftBusFree(decData);
         return SOFTBUS_DECRYPT_ERR;
@@ -436,13 +485,16 @@ void DumpSessionkeyList(const SessionKeyList *list)
     uint32_t keyNum = 0;
     SessionKeyItem *item = NULL;
     LIST_FOR_EACH_ENTRY(item, (const ListNode *)list, SessionKeyItem, node) {
-        AUTH_LOGD(AUTH_FSM,
+        AUTH_LOGI(AUTH_FSM,
             "[Dump] SessionKey keyNum=%{public}d, index=%{public}d, keyLen=%{public}u, key=XX, "
-            "lastUseTime=%{public}" PRIu64 "",
-            keyNum, item->index, item->key.len, item->lastUseTime);
+            "lastUseTime=%{public}" PRIu64 ", type=%{public}u, useTime=%{public}" PRIu64
+            ", %{public}" PRIu64 ", %{public}" PRIu64 ", %{public}" PRIu64 ", %{public}" PRIu64,
+            keyNum, item->index, item->key.len, item->lastUseTime, item->type, item->useTime[AUTH_LINK_TYPE_WIFI],
+            item->useTime[AUTH_LINK_TYPE_BR], item->useTime[AUTH_LINK_TYPE_BLE], item->useTime[AUTH_LINK_TYPE_P2P],
+            item->useTime[AUTH_LINK_TYPE_ENHANCED_P2P]);
         keyNum++;
     }
-    AUTH_LOGD(AUTH_FSM, "[Dump] SessionKey total num=%{public}u", keyNum);
+    AUTH_LOGI(AUTH_FSM, "[Dump] SessionKey total num=%{public}u", keyNum);
 }
 
 static void HandleUpdateSessionKeyEvent(const void *obj)

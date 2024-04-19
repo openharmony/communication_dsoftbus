@@ -283,7 +283,7 @@ int32_t TransGetPkgNameBySessionName(const char *sessionName, char *pkgName, uin
             (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
             if (ret != EOK) {
                 TRANS_LOGE(TRANS_CTRL, "strcpy_s error ret, ret=%{public}d", ret);
-                return SOFTBUS_ERR;
+                return SOFTBUS_STRCPY_ERR;
             }
             return SOFTBUS_OK;
         }

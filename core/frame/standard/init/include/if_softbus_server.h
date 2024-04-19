@@ -40,7 +40,7 @@ public:
     virtual int32_t OpenSession(const SessionParam *param, TransInfo *info) = 0;
     virtual int32_t OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo) = 0;
     virtual int32_t NotifyAuthSuccess(int32_t channelId, int32_t channelType) = 0;
-    virtual int32_t CloseChannel(int32_t channelId, int32_t channelType) = 0;
+    virtual int32_t CloseChannel(const char *sessionName, int32_t channelId, int32_t channelType) = 0;
     virtual int32_t ReleaseResources(int32_t channelId) = 0;
     virtual int32_t SendMessage(int32_t channelId, int32_t channelType,
         const void *data, uint32_t len, int32_t msgType) = 0;

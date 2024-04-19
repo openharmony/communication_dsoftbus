@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,40 +32,42 @@ public:
 
     ~SessionServiceImpl() override = default;
 
-    int CreateSessionServer(const std::string &pkgName, const std::string &sessionName,
+    int32_t CreateSessionServer(const std::string &pkgName, const std::string &sessionName,
         std::shared_ptr<ISessionListener> listener) override;
 
-    int RemoveSessionServer(const std::string &pkgName, const std::string &sessionName) override;
+    int32_t RemoveSessionServer(const std::string &pkgName, const std::string &sessionName) override;
 
     std::shared_ptr<Session> OpenSession(const std::string &mySessionName, const std::string &peerSessionName,
-        const std::string &peerNetworkId, const std::string &groupId, int flags) override;
+        const std::string &peerNetworkId, const std::string &groupId, int32_t flags) override;
 
-    int CloseSession(std::shared_ptr<Session> session) override;
+    int32_t CloseSession(std::shared_ptr<Session> session) override;
 
-    int GrantPermission(int uid, int pid, const std::string &busName) override;
+    int32_t GrantPermission(int32_t uid, int32_t pid, const std::string &busName) override;
 
-    int RemovePermission(const std::string &busName) override;
+    int32_t RemovePermission(const std::string &busName) override;
 
-    int OpenSessionCallback(int sessionId);
+    int32_t OpenSessionCallback(int32_t sessionId);
 
-    void CloseSessionCallback(int sessionId);
+    void CloseSessionCallback(int32_t sessionId);
 
-    void BytesReceivedCallback(int sessionId, const void *data, unsigned int len);
+    void BytesReceivedCallback(int32_t sessionId, const void *data, uint32_t len);
 
-    void MessageReceivedCallback(int sessionId, const void *data, unsigned int len);
+    void MessageReceivedCallback(int32_t sessionId, const void *data, uint32_t len);
 
 private:
     static std::mutex listenerMutex_;
     static std::map<std::string, std::shared_ptr<ISessionListener>> listenerMap_;
 
     static std::mutex sessionMutex_;
-    static std::map<int, std::shared_ptr<Session>> sessionMap_;
+    static std::map<int32_t, std::shared_ptr<Session>> sessionMap_;
 
-    int GetSessionListener(int sessionId, std::shared_ptr<ISessionListener> &listener,
+    int32_t GetSessionListener(int32_t sessionId, std::shared_ptr<ISessionListener> &listener,
         std::shared_ptr<Session> &session);
 
-    int GetSessionListenerOnSessionOpened(int sessionId,
+    int32_t GetSessionListenerOnSessionOpened(int32_t sessionId,
         std::shared_ptr<ISessionListener> &listener, std::shared_ptr<Session> &session);
+
+    int32_t CreateSession(int32_t sessionId, const std::shared_ptr<Session> &session);
 };
 } // namespace SoftBus
 } // namespace Communication

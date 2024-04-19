@@ -546,13 +546,13 @@ HWTEST_F(SoftbusConnCommonTest, testSocket002, TestSize.Level1)
 {
     int ret;
     ret = ConnGetPeerSocketAddr(INVALID_FD, &g_socketAddr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TCP_SOCKET_ERR, ret);
 
     ret = ConnGetPeerSocketAddr(TEST_FD, NULL);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = ConnGetPeerSocketAddr(TEST_FD, &g_socketAddr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TCP_SOCKET_ERR, ret);
 };
 
 /*

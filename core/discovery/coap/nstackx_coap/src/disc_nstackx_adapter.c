@@ -50,7 +50,6 @@
 
 static NSTACKX_LocalDeviceInfo *g_localDeviceInfo = NULL;
 static DiscInnerCallback *g_discCoapInnerCb = NULL;
-static char *g_capabilityData = NULL;
 static int32_t NstackxLocalDevInfoDump(int fd);
 
 static int32_t FillRspSettings(NSTACKX_ResponseSettings *settings, const DeviceInfo *deviceInfo, uint8_t bType)
@@ -74,8 +73,6 @@ static int32_t FillRspSettings(NSTACKX_ResponseSettings *settings, const DeviceI
     }
     return SOFTBUS_OK;
 EXIT:
-    SoftBusFree(settings->businessData);
-    settings->businessData = NULL;
     return SOFTBUS_STRCPY_ERR;
 }
 
@@ -96,8 +93,6 @@ int32_t DiscCoapSendRsp(const DeviceInfo *deviceInfo, uint8_t bType)
     if (ret != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "disc send response failed, ret=%{public}d", ret);
     }
-    SoftBusFree(settings->businessData);
-    settings->businessData = NULL;
     SoftBusFree(settings);
     return ret;
 }
@@ -231,9 +226,6 @@ int32_t DiscCoapSetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capab
 
 int32_t DiscCoapRegisterServiceData(const unsigned char *capabilityData, uint32_t dataLen, uint32_t capability)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(g_capabilityData != NULL, SOFTBUS_DISCOVER_COAP_INIT_FAIL,
-        DISC_COAP, "g_capabilityData=NULL");
-
     int32_t authPort = 0;
     int32_t ret = LnnGetLocalNumInfo(NUM_KEY_AUTH_PORT, &authPort);
     if (ret != SOFTBUS_OK) {
@@ -246,15 +238,10 @@ int32_t DiscCoapRegisterServiceData(const unsigned char *capabilityData, uint32_
         return SOFTBUS_ERR;
     }
     // capabilityData can be NULL, it will be check in this func
-    ret = DiscCoapFillServiceData(capability, (const char *)capabilityData, dataLen, g_capabilityData);
+    ret = DiscCoapFillServiceData(capability, (const char *)capabilityData, dataLen, serviceData,
+        NSTACKX_MAX_SERVICE_DATA_LEN);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, DISC_COAP,
         "fill service data failed. ret=%{public}d", ret);
-
-    if (strlen(g_capabilityData) != 0 &&
-        sprintf_s(serviceData, NSTACKX_MAX_SERVICE_DATA_LEN, "%s%s", serviceData, g_capabilityData) < 0) {
-        DISC_LOGE(DISC_COAP, "write capability data to service data failed.");
-        return SOFTBUS_ERR;
-    }
 
     ret = NSTACKX_RegisterServiceData(serviceData);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, DISC_COAP,
@@ -543,11 +530,6 @@ static void DeinitLocalInfo(void)
         g_localDeviceInfo = NULL;
     }
 
-    if (g_capabilityData != NULL) {
-        SoftBusFree(g_capabilityData);
-        g_capabilityData = NULL;
-    }
-
     if (g_discCoapInnerCb != NULL) {
         SoftBusFree(g_discCoapInnerCb);
         g_discCoapInnerCb = NULL;
@@ -559,13 +541,6 @@ static int32_t InitLocalInfo(void)
     if (g_localDeviceInfo == NULL) {
         g_localDeviceInfo = (NSTACKX_LocalDeviceInfo *)SoftBusCalloc(sizeof(NSTACKX_LocalDeviceInfo));
         if (g_localDeviceInfo == NULL) {
-            return SOFTBUS_MEM_ERR;
-        }
-    }
-    if (g_capabilityData == NULL) {
-        g_capabilityData = (char *)SoftBusCalloc(NSTACKX_MAX_SERVICE_DATA_LEN);
-        if (g_capabilityData == NULL) {
-            DeinitLocalInfo();
             return SOFTBUS_MEM_ERR;
         }
     }
@@ -631,8 +606,6 @@ static int32_t NstackxLocalDevInfoDump(int fd)
     SOFTBUS_DPRINTF(fd, "deviceType                          : %d\n", g_localDeviceInfo->deviceType);
     SOFTBUS_DPRINTF(fd, "version                             : %s\n", g_localDeviceInfo->version);
     SOFTBUS_DPRINTF(fd, "businessType                        : %d\n", g_localDeviceInfo->businessType);
-    SOFTBUS_DPRINTF(fd, "\n-----------------NstackxCapDataInfo-------------------\n");
-    SOFTBUS_DPRINTF(fd, "capabilityData                      : %s\n", g_capabilityData);
 
     return SOFTBUS_OK;
 }

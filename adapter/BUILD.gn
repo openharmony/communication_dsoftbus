@@ -48,7 +48,6 @@ if (defined(ohos_lite)) {
     "$dsoftbus_root_path/core/common/dfx/interface/include",
     "$dsoftbus_root_path/interfaces/kits",
     "$dsoftbus_root_path/interfaces/kits/common",
-    "//third_party/json/include",
   ]
 
   if (ohos_kernel_type == "liteos_m") {
@@ -58,6 +57,7 @@ if (defined(ohos_lite)) {
       external_deps = [
         "bounds_checking_function:libsec_static",
         "init:libbegetutil",
+        "json:nlohmann_json_static",
       ]
       if (board_name == "hispark_pegasus") {
         include_dirs +=
@@ -97,7 +97,7 @@ if (defined(ohos_lite)) {
       }
 
       if (board_name == "v200zr") {
-        include_dirs += [ "//third_party/json/include" ]
+        external_deps += [ "json:nlohmann_json_static" ]
         sources = []
         sources = [
           "$softbus_adapter_common/dfx/softbus_adapter_hisysevent_mini.c",
@@ -183,6 +183,7 @@ if (defined(ohos_lite)) {
         "bounds_checking_function:libsec_shared",
         "init:libbegetutil",
       ]
+      external_deps += [ "json:nlohmann_json_static" ]
 
       if (dsoftbus_feature_encrypt == 0) {
         sources += [
@@ -223,12 +224,12 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common/dfx/interface/include",
       "$dsoftbus_root_path/interfaces/kits",
       "$dsoftbus_root_path/interfaces/kits/common",
-      "//third_party/json/include",
     ]
     external_deps = [
       "bounds_checking_function:libsec_shared",
       "c_utils:utilsbase",
     ]
+    external_deps += [ "json:nlohmann_json_static" ]
     sources = [
       "$softbus_adapter_common/dfx/softbus_adapter_hisysevent.cpp",
       "$softbus_adapter_common/dfx/softbus_adapter_hitrace.c",
@@ -275,7 +276,6 @@ if (defined(ohos_lite)) {
       ]
     }
 
-    external_deps = []
     if (enhanced_range && defined(global_parts_info.msdp_algorithm)) {
       sources += [ "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/range/softbus_adapter_range.c" ]
       external_deps += [ "algorithm:msdp_ble_range" ]

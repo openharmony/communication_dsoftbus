@@ -26,6 +26,10 @@ extern "C" {
 #endif
 
 #define SA_DATA_SIZE (26)
+#define ADDR_IN6_8_SIZE (16)
+#define ADDR_IN6_16_SIZE (8)
+#define ADDR_IN6_32_SIZE (4)
+#define IF_NAME_SIZE (16)
 
 #if defined(__aarch64__) || defined(__x86_64__) || (defined(__riscv) && (__riscv_xlen == 64))
 #define ADDR_IN_RESER_SIZE (4)
@@ -111,9 +115,9 @@ typedef struct {
 
 typedef struct {
     union {
-        uint8_t sA6ddr8[16];
-        uint8_t sA6ddr16[8];
-        uint8_t sA6ddr32[4];
+        uint8_t sA6ddr8[ADDR_IN6_8_SIZE];
+        uint8_t sA6ddr16[ADDR_IN6_16_SIZE];
+        uint8_t sA6ddr32[ADDR_IN6_32_SIZE];
     } sA6ddr;
 } SoftBusIn6Addr;
 
@@ -140,7 +144,7 @@ int32_t SoftBusSocketGetPeerName(int32_t socketFd, SoftBusSockAddr *addr);
 int32_t SoftBusSocketBind(int32_t socketFd, SoftBusSockAddr *addr, int32_t addrLen);
 int32_t SoftBusSocketListen(int32_t socketFd, int32_t backLog);
 int32_t SoftBusSocketAccept(int32_t socketFd, SoftBusSockAddr *addr, int32_t *acceptFd);
-int32_t SoftBusSocketConnect(int32_t socketFd, const SoftBusSockAddr *addr);
+int32_t SoftBusSocketConnect(int32_t socketFd, const SoftBusSockAddr *addr, int32_t addrLen);
 
 void SoftBusSocketFdZero(SoftBusFdSet *set);
 void SoftBusSocketFdSet(int32_t socketFd, SoftBusFdSet *set);
@@ -185,6 +189,7 @@ uint16_t SoftBusBEtoLEs(uint16_t value);
 
 uint32_t SoftBusInetAddr(const char *cp);
 uint32_t SoftBusIfNameToIndex(const char *name);
+int32_t SoftBusIndexToIfName(int32_t index, char *ifname, uint32_t nameLen);
 
 int32_t SoftBusSocketGetError(int32_t socketFd);
 

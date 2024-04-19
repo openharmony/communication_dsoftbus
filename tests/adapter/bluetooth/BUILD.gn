@@ -91,11 +91,11 @@ if (!defined(ohos_lite)) {
     if (support_bluetooth &&
         (dsoftbus_feature_conn_ble || dsoftbus_feature_conn_br)) {
       deps += [
+        ":AdapterBleGattClientTest",
+        ":AdapterBleGattServerTest",
+        ":AdapterBtCommonTest",
+        ":AdapterBtUtilsTest",
         "broadcast:unittest",
-        # ":AdapterBleGattClientTest",
-        # ":AdapterBleGattServerTest",
-        # ":AdapterBtCommonTest",
-        # ":AdapterBtUtilsTest",
       ]
     }
   }
