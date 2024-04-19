@@ -58,6 +58,7 @@
         "device_auth",
         "device_info_manager",
         "drivers_interface_wlan",
+        "json",
         "hicollie",
         "hisysevent",
         "hitrace",
@@ -77,11 +78,13 @@
         "netmanager_base",
         "bounds_checking_function",
         "cJSON",
+        "mbedtls",
         "libcoap"
       ],
       "third_party": [
         "bounds_checking_function",
         "cJSON",
+        "json",
         "mbedtls",
         "openssl",
         "sqlite"

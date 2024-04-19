@@ -300,7 +300,7 @@ HWTEST_F(TransIpcStandardTest, CloseChannelTest001, TestSize.Level0)
     TransServerProxy transServerProxy(nullptr);
     int32_t channelId = -1;
     int32_t channelType = CHANNEL_TYPE_AUTH;
-    int32_t ret = transServerProxy.CloseChannel(channelId, channelType);
+    int32_t ret = transServerProxy.CloseChannel(nullptr, channelId, channelType);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 
@@ -407,7 +407,7 @@ HWTEST_F(TransIpcStandardTest, GrantPermissionTest001, TestSize.Level0)
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 
     ret = transServerProxy.GrantPermission(UUID, PID, g_sessionName);
-    EXPECT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
 }
 
 /**
@@ -615,16 +615,16 @@ HWTEST_F(TransIpcStandardTest, ServerIpcCloseChannelTest001, TestSize.Level0)
 {
     int32_t channelId = 0;
     int32_t chanType = CHANNEL_TYPE_AUTH;
-    int32_t ret = ServerIpcCloseChannel(channelId, chanType);
+    int32_t ret = ServerIpcCloseChannel(nullptr, channelId, chanType);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 
     ret = TransServerProxyInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
 
-    ret = ServerIpcCloseChannel(-1, chanType);
+    ret = ServerIpcCloseChannel(nullptr, -1, chanType);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 
-    ret = ServerIpcCloseChannel(channelId, chanType);
+    ret = ServerIpcCloseChannel(nullptr, channelId, chanType);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     TransClientDeinit();
