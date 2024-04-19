@@ -39,6 +39,7 @@
 
 #define WLAN_IFACE_NAME_PREFIX "wlan"
 #define INVALID_IP_ADDR        "0.0.0.0"
+#define LOOPBACK_IP_ADDR       "127.0.0.1"
 #define DISC_FREQ_COUNT_MASK   0xFFFF
 #define DISC_FREQ_DURATION_BIT 16
 #define DISC_USECOND           1000
@@ -280,6 +281,22 @@ int32_t DiscCoapRegisterCapabilityData(const unsigned char *capabilityData, uint
     return SOFTBUS_OK;
 }
 
+static bool IsNetworkValid(void)
+{
+    char localIp[IP_LEN] = {0};
+    if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, IP_LEN) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_COAP, "get local ip failed");
+        return false;
+    }
+    if (strcmp(localIp, LOOPBACK_IP_ADDR) == 0 ||
+        strcmp(localIp, INVALID_IP_ADDR) == 0 ||
+        strcmp(localIp, "") == 0) {
+        DISC_LOGE(DISC_COAP, "invalid localIp: loopback or null");
+        return false;
+    }
+    return true;
+}
+
 static int32_t GetDiscFreq(int32_t freq, uint32_t *discFreq)
 {
     uint32_t arrayFreq[FREQ_BUTT] = {0};
@@ -324,6 +341,7 @@ int32_t DiscCoapStartDiscovery(DiscCoapOption *option)
         SOFTBUS_INVALID_PARAM, DISC_COAP, "option->mode is invalid");
     DISC_CHECK_AND_RETURN_RET_LOGE(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
         DISC_COAP, "invalid freq. freq=%{public}d", option->freq);
+    DISC_CHECK_AND_RETURN_RET_LOGE(IsNetworkValid(), SOFTBUS_NETWORK_NOT_FOUND, DISC_COAP, "netif not works");
 
     NSTACKX_DiscoverySettings *discSet = (NSTACKX_DiscoverySettings *)SoftBusCalloc(sizeof(NSTACKX_DiscoverySettings));
     DISC_CHECK_AND_RETURN_RET_LOGE(discSet != NULL, SOFTBUS_MEM_ERR, DISC_COAP, "malloc disc settings failed");
