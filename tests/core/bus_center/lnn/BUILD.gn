@@ -19,6 +19,15 @@ import("../../../../dsoftbus.gni")
 module_output_path = "dsoftbus/LNN"
 dsoftbus_root_path = "../../../.."
 
+native_source_path = rebase_path("$dsoftbus_root_path")
+dep_dir = "dsoftbus_enhance/core/bus_center/lnn/lane_hub"
+enhanced_test = exec_script("$dsoftbus_root_path/check_sub_module.py",
+                            [
+                              "$native_source_path",
+                              "$dep_dir",
+                            ],
+                            "value")
+
 bus_center_unittest_dirs = [
   "$dsoftbus_root_path/core/bus_center/service/include",
   "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
@@ -1285,7 +1294,6 @@ ohos_unittest("LNNLaneMockTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_link.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_listener.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_model.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_score_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_select.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_select_rule.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_trans_lane.c",
@@ -1334,6 +1342,19 @@ ohos_unittest("LNNLaneMockTest") {
     "$dsoftbus_root_path/core/connection/ble/include",
     "$dsoftbus_root_path/core/connection/wifi_direct",
   ]
+
+  if (enhanced_test) {
+    sources += [
+      "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/lane/lnn_lane_score.c",
+    ]
+    include_dirs += [
+      "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/lane_channel_rating/include",
+    ]
+  } else {
+    sources += [
+      "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_score_virtual.c",
+    ]
+  }
 
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
@@ -1689,15 +1710,6 @@ ohos_unittest("LNNLaneListenerTest") {
     ]
   }
 }
-
-native_source_path = rebase_path("$dsoftbus_root_path")
-dep_dir = "dsoftbus_enhance/core/bus_center/lnn/lane_hub"
-enhanced_test = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                            [
-                              "$native_source_path",
-                              "$dep_dir",
-                            ],
-                            "value")
 
 if (!defined(ohos_lite) && enhanced_test) {
   ohos_unittest("LNNDbMockTest") {

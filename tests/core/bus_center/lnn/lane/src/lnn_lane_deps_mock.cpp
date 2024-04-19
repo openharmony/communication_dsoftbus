@@ -15,6 +15,7 @@
 
 #include "lnn_lane_deps_mock.h"
 #include "softbus_error_code.h"
+#include "softbus_socket.h"
 
 const static uint16_t SHA_HASH_LEN = 32;
 
@@ -23,6 +24,7 @@ using namespace testing;
 
 namespace OHOS {
 void *g_laneDepsInterface;
+static SoftbusBaseListener g_baseListener;
 LaneDepsInterfaceMock::LaneDepsInterfaceMock()
 {
     g_laneDepsInterface = reinterpret_cast<void *>(this);
@@ -55,10 +57,60 @@ void LaneDepsInterfaceMock::SetDefaultResult(NodeInfo *info)
     ON_CALL(*this, LnnGetRemoteNumU64Info).WillByDefault(Return(SOFTBUS_OK));
 }
 
+void LaneDepsInterfaceMock::SetDefaultResultForAlloc(int32_t netCapLocal, int32_t netCapRemotem,
+    int32_t featureCapLocal, int32_t featureCapRemote)
+{
+    EXPECT_CALL(*this, LnnGetLocalNumInfo)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(netCapLocal), Return(SOFTBUS_OK)));
+    EXPECT_CALL(*this, LnnGetRemoteNumInfo)
+        .WillRepeatedly(DoAll(SetArgPointee<2>(netCapRemotem), Return(SOFTBUS_OK)));
+    EXPECT_CALL(*this, LnnGetLocalNumU64Info)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(featureCapLocal), Return(SOFTBUS_OK)));
+    EXPECT_CALL(*this, LnnGetRemoteNumU64Info)
+        .WillRepeatedly(DoAll(SetArgPointee<2>(featureCapRemote), Return(SOFTBUS_OK)));
+    EXPECT_CALL(*this, LnnGetRemoteStrInfo).WillRepeatedly(ActionOfGetRemoteStrInfo);
+    EXPECT_CALL(*this, SoftBusGenerateStrHash).WillRepeatedly(ActionOfGenerateStrHash);
+}
+
 int32_t LaneDepsInterfaceMock::ActionOfGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash)
 {
     (void)strcpy_s((char *)hash, SHA_HASH_LEN, "1234567890123456");
     return SOFTBUS_OK;
+}
+
+int32_t LaneDepsInterfaceMock::ActionOfGetRemoteStrInfo(const char *netWorkId, InfoKey key, char *info, uint32_t len)
+{
+    char peerUdid[] = "111122223333abcdef";
+    char brMac[] = "00:11:22:33:44:55";
+    switch(key) {
+        case STRING_KEY_BT_MAC:
+            (void)strncpy_s(info, BT_MAC_LEN, brMac, strlen(brMac));
+            break;
+        default:
+            (void)strncpy_s(info, UDID_BUF_LEN, peerUdid, strlen(peerUdid));
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LaneDepsInterfaceMock::ActionOfStartBaseClient(ListenerModule module, const SoftbusBaseListener *listener)
+{
+    GTEST_LOG_(INFO) << "ActionOfStartBaseClient enter";
+    if (listener == nullptr) {
+        GTEST_LOG_(INFO) << "invalid listener";
+        return SOFTBUS_OK;
+    }
+    g_baseListener.onDataEvent = listener->onDataEvent;
+    return SOFTBUS_OK;
+}
+
+int32_t LaneDepsInterfaceMock::ActionOfAddTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
+{
+    GTEST_LOG_(INFO) << "ActionOfAddTrigger enter";
+    if (g_baseListener.onDataEvent == nullptr) {
+        GTEST_LOG_(INFO) << "invalid lane onDataEvent";
+        return SOFTBUS_OK;
+    }
+    return g_baseListener.onDataEvent(module, SOFTBUS_SOCKET_OUT, fd);
 }
 
 extern "C" {
@@ -248,6 +300,11 @@ int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
 int32_t QueryLaneResource(const LaneQueryInfo *queryInfo, const QosInfo *qosInfo)
 {
     return GetLaneDepsInterface()->QueryLaneResource(queryInfo, qosInfo);
+}
+
+ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_t len, int32_t timeout)
+{
+    return GetLaneDepsInterface()->ConnSendSocketData(fd, buf, len, timeout);
 }
 }
 } // namespace OHOS
