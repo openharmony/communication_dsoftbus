@@ -44,6 +44,7 @@ enum InnerLinkKey {
     IL_KEY_NEGO_CHANNEL = 16,
     IL_KEY_LOCAL_PORT = 17,
     IL_KEY_LISTENER_MODULE_ID = 18,
+    IL_KEY_IS_SOURCE = 19,
 
     IL_KEY_MAX
 };
