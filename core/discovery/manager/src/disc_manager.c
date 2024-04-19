@@ -1213,8 +1213,12 @@ int32_t DiscMgrInit(void)
     DISC_CHECK_AND_RETURN_RET_LOGE(g_publishInfoList != NULL, SOFTBUS_DISCOVER_MANAGER_INIT_FAIL, DISC_INIT,
         "init publish info list failed");
     g_discoveryInfoList = CreateSoftBusList();
-    DISC_CHECK_AND_RETURN_RET_LOGE(g_discoveryInfoList != NULL, SOFTBUS_DISCOVER_MANAGER_INIT_FAIL, DISC_INIT,
-        "init discovery info list failed");
+    if (g_discoveryInfoList == NULL) {
+       DISC_LOGE(DISC_INIT, "init discovery Info List failed");
+       DestroySoftBusList(g_publishInfoList);
+       g_publishInfoList = NULL;
+       return SOFTBUS_DISCOVER_MANAGER_INIT_FAIL;
+    }
 
     for (int32_t i = 0; i < CAPABILITY_MAX_BITNUM; i++) {
         ListInit(&g_capabilityList[i]);
