@@ -38,6 +38,11 @@ int SoftBusDisableBt(void)
     return SOFTBUS_ERR;
 }
 
+int SoftBusGetBrState(void)
+{
+    return BR_DISABLE;
+}
+
 int SoftBusGetBtMacAddr(SoftBusBtAddr *mac)
 {
     return SOFTBUS_OK;
