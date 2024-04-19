@@ -47,13 +47,14 @@ bool IsPotentialTrustedDeviceDp(const char *deviceIdHash)
         LNN_LOGE(LNN_STATE, "deviceIdHash is null");
         return false;
     }
-    LNN_LOGI(LNN_STATE, "deviceIdHash=%{public}s", deviceIdHash);
     std::vector<OHOS::DistributedDeviceProfile::TrustDeviceProfile> trustDevices;
     int32_t ret = DpClient::GetInstance().GetAllTrustDeviceProfile(trustDevices);
     if (ret != OHOS::DistributedDeviceProfile::DP_SUCCESS || trustDevices.empty()) {
         LNN_LOGE(LNN_STATE, "GetAllTrustDeviceProfile ret=%{public}d, size=%{public}zu", ret, trustDevices.size());
         return false;
     }
+    char *anonyDeviceIdHash = nullptr;
+    Anonymize(deviceIdHash, &anonyDeviceIdHash);
     for (const auto &trustDevice : trustDevices) {
         if (trustDevice.GetDeviceIdType() != (int32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID ||
             trustDevice.GetDeviceId().empty()) {
@@ -61,7 +62,7 @@ bool IsPotentialTrustedDeviceDp(const char *deviceIdHash)
         }
         char *anonyUdid = nullptr;
         Anonymize(trustDevice.GetDeviceId().c_str(), &anonyUdid);
-        LNN_LOGI(LNN_STATE, "udid=%{public}s", anonyUdid);
+        LNN_LOGI(LNN_STATE, "udid=%{public}s, deviceIdHash=%{public}s", anonyUdid, anonyDeviceIdHash);
         AnonymizeFree(anonyUdid);
         uint8_t udidHash[SHA_256_HASH_LEN] = {0};
         char hashStr[CUST_UDID_LEN + 1] = {0};
@@ -76,11 +77,13 @@ bool IsPotentialTrustedDeviceDp(const char *deviceIdHash)
             continue;
         }
         if (strncmp(hashStr, deviceIdHash, strlen(deviceIdHash)) == 0) {
-            LNN_LOGI(LNN_STATE, "device trusted in dp continue verify, deviceIdHash=%{public}s", deviceIdHash);
+            LNN_LOGI(LNN_STATE, "device trusted in dp continue verify, deviceIdHash=%{public}s", anonyDeviceIdHash);
+            AnonymizeFree(anonyDeviceIdHash);
             return true;
         }
     }
-    LNN_LOGI(LNN_STATE, "device is not trusted in dp, deviceIdHash=%{public}s", deviceIdHash);
+    LNN_LOGI(LNN_STATE, "device is not trusted in dp, deviceIdHash=%{public}s", anonyDeviceIdHash);
+    AnonymizeFree(anonyDeviceIdHash);
     return false;
 }
 
