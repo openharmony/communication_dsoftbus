@@ -110,6 +110,11 @@ int SoftBusGetBtState()
     return BleMock::GetMock()->SoftBusGetBtState();
 }
 
+int SoftBusGetBrState()
+{
+    return BleMock::GetMock()->SoftBusGetBrState();
+}
+
 /* definition for class BleMock */
 BleMock::BleMock()
 {
@@ -319,29 +324,6 @@ int32_t BleMock::ActionOfSetAdvDataForPassivePublish(int32_t bcId, const Broadca
     return SOFTBUS_OK;
 }
 
-int32_t BleMock::ActionOfUpdateAdvForActiveDiscovery(
-    int32_t bcId, const BroadcastParam *param, const BroadcastPacket *packet)
-{
-    ShowAdvData(bcId, packet);
-
-    if (packet->bcData.payloadLen != sizeof(activeDiscoveryAdvData2) ||
-        packet->rspData.payloadLen != sizeof(activeDiscoveryRspData2) ||
-        memcmp(packet->bcData.payload, activeDiscoveryAdvData2, packet->bcData.payloadLen) != 0 ||
-        memcmp(packet->rspData.payload, activeDiscoveryRspData2, packet->rspData.payloadLen) != 0) {
-        isAsyncAdvertiseSuccess = false;
-        GetMock()->AsyncAdvertiseDone();
-        return SOFTBUS_ERR;
-    }
-
-    if (advCallback) {
-        advCallback->OnUpdateBroadcastingCallback(bcId, SOFTBUS_BT_STATUS_SUCCESS);
-    }
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_LOCK_LOCKED_MS));
-    GetMock()->AsyncAdvertiseDone();
-    return SOFTBUS_OK;
-}
-
 int32_t BleMock::ActionOfUpdateAdvForPassivePublish(
     int32_t bcId, const BroadcastParam *param, const BroadcastPacket *packet)
 {
@@ -375,6 +357,11 @@ int32_t BleMock::ActionOfGetBtMacAddr(SoftBusBtAddr *mac)
 int32_t BleMock::ActionOfGetBtState()
 {
     return btState ? BLE_ENABLE : BLE_DISABLE;
+}
+
+int32_t BleMock::ActionOfGetBrState()
+{
+    return brState ? BR_ENABLE : BR_DISABLE;
 }
 
 void BleMock::InjectPassiveNonPacket()
@@ -417,7 +404,7 @@ void BleMock::InjectActiveConPacket()
 {
     if (scanListener && scanListener->OnReportScanDataCallback) {
         constexpr uint32_t advLen = sizeof(activeDiscoveryAdvData);
-        constexpr uint32_t rspLen = sizeof(activeDiscoveryRspData2);
+        constexpr uint32_t rspLen = sizeof(activeDiscoveryRspData);
         BroadcastReportInfo reportInfo = {};
         reportInfo.packet.bcData.id = BLE_UUID;
         reportInfo.packet.bcData.type = BC_DATA_TYPE_SERVICE;
@@ -425,7 +412,7 @@ void BleMock::InjectActiveConPacket()
         reportInfo.packet.rspData.type = BC_DATA_TYPE_MANUFACTURER;
         reportInfo.packet.bcData.payload = &activeDiscoveryAdvData[0];
         reportInfo.packet.bcData.payloadLen = advLen;
-        reportInfo.packet.rspData.payload = &activeDiscoveryRspData2[0];
+        reportInfo.packet.rspData.payload = &activeDiscoveryRspData[0];
         reportInfo.packet.rspData.payloadLen = rspLen;
         scanListener->OnReportScanDataCallback(SCAN_LISTENER_ID, &reportInfo);
     }
@@ -471,6 +458,7 @@ void BleMock::SetupSuccessStub()
     EXPECT_CALL(*this, InitBroadcastMgr).WillRepeatedly(BleMock::ActionOfInitBroadcastMgr);
     EXPECT_CALL(*this, DeInitBroadcastMgr).WillRepeatedly(BleMock::ActionOfDeInitBroadcastMgr);
     EXPECT_CALL(*this, SoftBusGetBtState).WillRepeatedly(BleMock::ActionOfGetBtState);
+    EXPECT_CALL(*this, SoftBusGetBrState).WillRepeatedly(BleMock::ActionOfGetBrState);
     EXPECT_CALL(*this, SoftBusAddBtStateListener(NotNull())).WillRepeatedly(BleMock::ActionOfAddBtStateListener);
     EXPECT_CALL(*this, SoftBusRemoveBtStateListener).WillRepeatedly(BleMock::ActionOfRemoveBtStateListener);
     EXPECT_CALL(*this, StartBroadcasting).WillRepeatedly(BleMock::ActionOfStartBroadcasting);
