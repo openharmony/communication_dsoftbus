@@ -58,6 +58,7 @@ constexpr uint32_t HIGH_BW = 160 * 1024 * 1024;
 constexpr uint32_t PORT_A = 22;
 constexpr uint32_t PORT_B = 25;
 constexpr uint32_t FD = 888;
+constexpr uint32_t SLEEP_FOR_LOOP_COMPLETION_MS = 50;
 
 static SoftBusCond g_cond = {0};
 static SoftBusMutex g_lock = {0};
@@ -175,6 +176,7 @@ static void OnLaneLinkSuccess(uint32_t reqId, const LaneLinkInfo *linkInfo)
 
 static void OnLaneAllocSuccessForHml(uint32_t laneHandle, const LaneConnInfo *info)
 {
+    (void)laneHandle;
     ASSERT_NE(info, nullptr) << "invalid connInfo";
     GTEST_LOG_(INFO) << "alloc lane successful, linkType=" << info->type;
     EXPECT_EQ(info->type, LANE_HML);
@@ -182,6 +184,7 @@ static void OnLaneAllocSuccessForHml(uint32_t laneHandle, const LaneConnInfo *in
 
 static void OnLaneAllocSuccessForP2p(uint32_t laneHandle, const LaneConnInfo *info)
 {
+    (void)laneHandle;
     ASSERT_NE(info, nullptr) << "invalid connInfo";
     GTEST_LOG_(INFO) << "alloc lane successful, linkType=" << info->type;
     EXPECT_EQ(info->type, LANE_P2P);
@@ -189,6 +192,7 @@ static void OnLaneAllocSuccessForP2p(uint32_t laneHandle, const LaneConnInfo *in
 
 static void OnLaneAllocSuccessForBr(uint32_t laneHandle, const LaneConnInfo *info)
 {
+    (void)laneHandle;
     ASSERT_NE(info, nullptr) << "invalid connInfo";
     GTEST_LOG_(INFO) << "alloc lane successful, linkType=" << info->type;
     EXPECT_EQ(info->type, LANE_BR);
@@ -196,6 +200,7 @@ static void OnLaneAllocSuccessForBr(uint32_t laneHandle, const LaneConnInfo *inf
 
 static void OnLaneAllocSuccessForWlan5g(uint32_t laneHandle, const LaneConnInfo *info)
 {
+    (void)laneHandle;
     ASSERT_NE(info, nullptr) << "invalid connInfo";
     GTEST_LOG_(INFO) << "alloc lane successful, linkType=" << info->type;
     EXPECT_EQ(info->type, LANE_WLAN_5G);
@@ -619,7 +624,7 @@ HWTEST_F(LNNLaneMockTest, LANE_RE_ALLOC_Test_002, TestSize.Level1)
     CreateAllocInfoForAllocTest(laneType, LANE_T_MSG, DEFAULT_QOSINFO_MIN_BW + HIGH_BW, &allocInfo);
     ret = laneManager->lnnReAllocLane(laneReqId, LANE_ID_BASE, &allocInfo, &listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    std::this_thread::sleep_for(std::chrono::milliseconds(50)); // delay 200ms for looper completion.
+    std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_FOR_LOOP_COMPLETION_MS));
     ret = DelLaneResourceByLaneId(LANE_ID_BASE);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = laneManager->lnnFreeLane(laneReqId);
@@ -669,7 +674,7 @@ HWTEST_F(LNNLaneMockTest, LANE_RE_ALLOC_Test_003, TestSize.Level1)
     CreateAllocInfoForAllocTest(laneType, LANE_T_MSG, DEFAULT_QOSINFO_MIN_BW + MID_BW, &allocInfo);
     ret = laneManager->lnnReAllocLane(laneReqId, LANE_ID_BASE, &allocInfo, &listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    std::this_thread::sleep_for(std::chrono::milliseconds(50)); // delay 200ms for looper completion.
+    std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_FOR_LOOP_COMPLETION_MS));
     ret = DelLaneResourceByLaneId(LANE_ID_BASE);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = laneManager->lnnFreeLane(laneReqId);
@@ -711,7 +716,7 @@ HWTEST_F(LNNLaneMockTest, LANE_RE_ALLOC_Test_004, TestSize.Level1)
     CreateAllocInfoForAllocTest(laneType, LANE_T_MSG, DEFAULT_QOSINFO_MIN_BW + LOW_BW, &allocInfo);
     ret = laneManager->lnnReAllocLane(laneReqId, LANE_ID_BASE, &allocInfo, &listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    std::this_thread::sleep_for(std::chrono::milliseconds(50)); // delay 200ms for looper completion.
+    std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_FOR_LOOP_COMPLETION_MS));
     ret = DelLaneResourceByLaneId(LANE_ID_BASE);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = laneManager->lnnFreeLane(laneReqId);
@@ -753,7 +758,7 @@ HWTEST_F(LNNLaneMockTest, LANE_RE_ALLOC_Test_005, TestSize.Level1)
     CreateAllocInfoForAllocTest(laneType, LANE_T_MSG, LOW_BW - DEFAULT_QOSINFO_MIN_BW, &allocInfo);
     ret = laneManager->lnnReAllocLane(laneReqId, LANE_ID_BASE, &allocInfo, &listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    std::this_thread::sleep_for(std::chrono::milliseconds(50)); // delay 200ms for looper completion.
+    std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_FOR_LOOP_COMPLETION_MS));
     ret = DelLaneResourceByLaneId(LANE_ID_BASE);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = laneManager->lnnFreeLane(laneReqId);
@@ -792,7 +797,7 @@ HWTEST_F(LNNLaneMockTest, LANE_CANCEL_Test_001, TestSize.Level1)
     CreateAllocInfoForAllocTest(laneType, LANE_T_MSG, DEFAULT_QOSINFO_MIN_BW + HIGH_BW, &allocInfo);
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    std::this_thread::sleep_for(std::chrono::milliseconds(50)); // delay 200ms for looper completion.
+    std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_FOR_LOOP_COMPLETION_MS));
     ret = laneManager->lnnCancelLane(laneReqId);
     EXPECT_EQ(ret, SOFTBUS_ERR);
     ret = laneManager->lnnFreeLane(laneReqId);
@@ -834,7 +839,7 @@ HWTEST_F(LNNLaneMockTest, LANE_CANCEL_Test_002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = laneManager->lnnCancelLane(laneReqId);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    std::this_thread::sleep_for(std::chrono::milliseconds(100)); // delay 200ms for looper completion.
+    std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_FOR_LOOP_COMPLETION_MS * 2));
     LnnWifiAdpterInterfaceMock::delayNotifyLinkSuccess = false;
     ret = laneManager->lnnFreeLane(laneReqId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -872,7 +877,7 @@ HWTEST_F(LNNLaneMockTest, LANE_CANCEL_Test_003, TestSize.Level1)
     CreateAllocInfoForAllocTest(laneType, LANE_T_MSG, DEFAULT_QOSINFO_MIN_BW + HIGH_BW, &allocInfo);
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    std::this_thread::sleep_for(std::chrono::milliseconds(50)); // delay 200ms for looper completion.
+    std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_FOR_LOOP_COMPLETION_MS));
     ret = laneManager->lnnFreeLane(laneReqId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = laneManager->lnnCancelLane(laneReqId);

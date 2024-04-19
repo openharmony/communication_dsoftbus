@@ -24,6 +24,8 @@
 using namespace testing;
 using namespace testing::ext;
 
+constexpr uint32_t SLEEP_FOR_LOOP_COMPLETION_MS = 50;
+
 namespace OHOS {
 void *g_wifiAdpterInterface;
 LnnWifiAdpterInterfaceMock::LnnWifiAdpterInterfaceMock()
@@ -47,9 +49,14 @@ void LnnWifiAdpterInterfaceMock::SetDefaultResult()
 }
 
 bool LnnWifiAdpterInterfaceMock::delayNotifyLinkSuccess = false;
-int32_t LnnWifiAdpterInterfaceMock::ActionOfLnnConnectP2p(const LinkRequest *request, uint32_t laneLinkReqId, const LaneLinkCb *callback)
+int32_t LnnWifiAdpterInterfaceMock::ActionOfLnnConnectP2p(const LinkRequest *request, uint32_t laneLinkReqId,
+    const LaneLinkCb *callback)
 {
     GTEST_LOG_(INFO) << "ActionOfLnnConnectP2p enter";
+    if (request == nullptr || callback == nullptr) {
+        GTEST_LOG_(ERROR) << "invalid param";
+        return SOFTBUS_INVALID_PARAM;
+    }
     LaneLinkInfo linkInfo;
     if (memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo)) != EOK) {
         return SOFTBUS_MEM_ERR;
@@ -57,7 +64,7 @@ int32_t LnnWifiAdpterInterfaceMock::ActionOfLnnConnectP2p(const LinkRequest *req
     linkInfo.type = request->linkType;
     if (delayNotifyLinkSuccess) {
         GTEST_LOG_(INFO) << "delay notify laneLinkSuccess after 50ms";
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_FOR_LOOP_COMPLETION_MS));
     }
     callback->OnLaneLinkSuccess(laneLinkReqId, &linkInfo);
     return SOFTBUS_OK;

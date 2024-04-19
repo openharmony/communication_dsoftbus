@@ -1344,16 +1344,10 @@ ohos_unittest("LNNLaneMockTest") {
   ]
 
   if (enhanced_test) {
-    sources += [
-      "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/lane/lnn_lane_score.c",
-    ]
-    include_dirs += [
-      "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/lane_channel_rating/include",
-    ]
+    sources += [ "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/lane/lnn_lane_score.c" ]
+    include_dirs += [ "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/lane_channel_rating/include" ]
   } else {
-    sources += [
-      "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_score_virtual.c",
-    ]
+    sources += [ "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_score_virtual.c" ]
   }
 
   deps = [

@@ -126,8 +126,8 @@ public:
     MOCK_METHOD2(QueryLaneResource, int32_t (const LaneQueryInfo *, const QosInfo *));
     MOCK_METHOD4(ConnSendSocketData, ssize_t (int32_t fd, const char *buf, size_t len, int32_t timeout));
     void SetDefaultResult(NodeInfo *info);
-    void SetDefaultResultForAlloc(int32_t netCapLocal, int32_t netCapRemotem,
-        int32_t featureCapLocal, int32_t featureCapRemote);
+    void SetDefaultResultForAlloc(int32_t localNetCap, int32_t remoteNetCap,
+        int32_t localFeatureCap, int32_t remoteFeatureCap);
     static int32_t ActionOfGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash);
     static int32_t ActionOfGetRemoteStrInfo(const char *netWorkId, InfoKey key, char *info, uint32_t len);
     static int32_t ActionOfStartBaseClient(ListenerModule module, const SoftbusBaseListener *listener);
