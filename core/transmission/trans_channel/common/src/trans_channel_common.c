@@ -271,6 +271,7 @@ AppInfo *TransCommonGetAppInfo(const SessionParam *param)
     appInfo->peerHandleId = -1;
     appInfo->timeStart = GetSoftbusRecordTimeMillis();
     appInfo->firstTokenId = TransACLGetFirstTokenID();
+    appInfo->isClient = true;
 
     TRANS_LOGD(TRANS_CTRL, "GetAppInfo ok");
     return appInfo;
