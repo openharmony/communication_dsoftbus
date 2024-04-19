@@ -84,10 +84,14 @@ int32_t LaneDepsInterfaceMock::ActionOfGetRemoteStrInfo(const char *netWorkId, I
     char brMac[] = "00:11:22:33:44:55";
     switch(key) {
         case STRING_KEY_BT_MAC:
-            (void)strncpy_s(info, BT_MAC_LEN, brMac, strlen(brMac));
+            if (strncpy_s(info, BT_MAC_LEN, brMac, strlen(brMac)) != EOK) {
+                return SOFTBUS_STRCPY_ERR;
+            }
             break;
         default:
-            (void)strncpy_s(info, UDID_BUF_LEN, peerUdid, strlen(peerUdid));
+            if (strncpy_s(info, UDID_BUF_LEN, peerUdid, strlen(peerUdid)) != EOK) {
+                return SOFTBUS_STRCPY_ERR;
+            }
     }
     return SOFTBUS_OK;
 }

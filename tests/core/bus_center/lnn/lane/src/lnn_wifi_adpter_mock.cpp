@@ -51,7 +51,9 @@ int32_t LnnWifiAdpterInterfaceMock::ActionOfLnnConnectP2p(const LinkRequest *req
 {
     GTEST_LOG_(INFO) << "ActionOfLnnConnectP2p enter";
     LaneLinkInfo linkInfo;
-    (void)memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
+    if (memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo)) != EOK) {
+        return SOFTBUS_MEM_ERR;
+    }
     linkInfo.type = request->linkType;
     if (delayNotifyLinkSuccess) {
         GTEST_LOG_(INFO) << "delay notify laneLinkSuccess after 50ms";
