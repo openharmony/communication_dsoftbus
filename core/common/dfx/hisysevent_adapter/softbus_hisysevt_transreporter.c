@@ -660,6 +660,7 @@ static int32_t SoftbusReportCalledAPIEvt(void)
     }
     if (SoftBusMutexLock(&g_calledApiInfoList->lock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_EVENT, "SoftbusReportCalledAPIEvt lock fail");
+        SoftbusFreeEvtReportMsg(msg);
         return SOFTBUS_LOCK_ERR;
     }
     char appName[SOFTBUS_HISYSEVT_PARAM_LEN];
@@ -695,6 +696,7 @@ static int32_t SoftbusReportCalledAPICntEvt(void)
         return SOFTBUS_ERR;
     }
     if (SoftBusMutexLock(&g_calledApiCntlist->lock) != SOFTBUS_OK) {
+        SoftbusFreeEvtReportMsg(msg);
         return SOFTBUS_LOCK_ERR;
     }
     CalledApiCntStruct *apiCntItem = NULL;

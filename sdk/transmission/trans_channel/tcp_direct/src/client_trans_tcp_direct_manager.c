@@ -107,7 +107,7 @@ TcpDirectChannelInfo *TransTdcGetInfoByFd(int32_t fd, TcpDirectChannelInfo *info
 void TransTdcCloseChannel(int32_t channelId)
 {
     TRANS_LOGI(TRANS_SDK, "Close tdc Channel, channelId=%{public}d.", channelId);
-    if (ServerIpcCloseChannel(channelId, CHANNEL_TYPE_TCP_DIRECT) != SOFTBUS_OK) {
+    if (ServerIpcCloseChannel(NULL, channelId, CHANNEL_TYPE_TCP_DIRECT) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "close server tdc channelId=%{public}d err.", channelId);
     }
 
@@ -151,6 +151,11 @@ static TcpDirectChannelInfo *TransGetNewTcpChannel(const ChannelInfo *channel)
     if (memcpy_s(item->detail.sessionKey, SESSION_KEY_LENGTH, channel->sessionKey, SESSION_KEY_LENGTH) != EOK) {
         SoftBusFree(item);
         TRANS_LOGE(TRANS_SDK, "sessionKey copy failed");
+        return NULL;
+    }
+    if (strcpy_s(item->detail.myIp, IP_LEN, channel->myIp) != EOK) {
+        SoftBusFree(item);
+        TRANS_LOGE(TRANS_SDK, "myIp copy failed");
         return NULL;
     }
     return item;

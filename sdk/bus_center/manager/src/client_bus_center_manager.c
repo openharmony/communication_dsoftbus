@@ -555,18 +555,13 @@ static int32_t DiscoveryMsgListDeInit()
         LNN_LOGI(LNN_STATE, "disc msg list no need deInit");
         return SOFTBUS_OK;
     }
-    LNN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexInit(&g_isInitedLock, NULL) == SOFTBUS_OK,
-        SOFTBUS_LOCK_ERR, LNN_STATE, "lock init failed");
-    LNN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_isInitedLock) == SOFTBUS_OK,
-        SOFTBUS_LOCK_ERR, LNN_STATE, "lock failed");
-
+    (void)SoftBusMutexDestroy(&g_isInitedLock);
     DestroySoftBusList(g_publishMsgList);
     DestroySoftBusList(g_discoveryMsgList);
     g_publishMsgList = NULL;
     g_discoveryMsgList = NULL;
     g_isInited = false;
 
-    (void)SoftBusMutexUnlock(&g_isInitedLock);
     LNN_LOGI(LNN_STATE, "disc list deinit success");
     return SOFTBUS_OK;
 }
