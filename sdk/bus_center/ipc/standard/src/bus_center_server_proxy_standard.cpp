@@ -158,8 +158,9 @@ int32_t BusCenterServerProxy::ReleaseResources(int32_t channelId)
     return SOFTBUS_OK;
 }
 
-int32_t BusCenterServerProxy::CloseChannel(int32_t channelId, int32_t channelType)
+int32_t BusCenterServerProxy::CloseChannel(const char *sessionName, int32_t channelId, int32_t channelType)
 {
+    (void)sessionName;
     (void)channelId;
     (void)channelType;
     return SOFTBUS_OK;

@@ -34,6 +34,20 @@
 #define KEY_LENGTH 16 /* Note: WinPc's special nearby only support 128 bits key */
 #define ONTRANSMIT_MAX_DATA_BUFFER_LEN 5120 /* 5 × 1024 */
 
+#define HICHAIN_DAS_ERRCODE_MIN    0xF0000001
+#define HICHAIN_DAS_ERRCODE_MAX    0xF00010FF
+#define HICHAIN_COMMON_ERRCODE_MIN 0x0001
+#define HICHAIN_COMMON_ERRCODE_MAX 0xFFFF
+#define MASK_HIGH_4BIT             0xF000
+#define MASK_LOW_8BIT              0x00FF
+#define MASK_LOW_16BIT             0xFFFF
+#define ERRCODE_OR_BIT             0x1000
+#define ERRCODE_SHIFT_21BIT        21
+#define ERRCODE_SHIFT_16BIT        16
+#define ERRCODE_SHIFT_12BIT        12
+#define ERRCODE_SHIFT_8BIT         8
+
+
 typedef struct {
     char groupId[GROUPID_BUF_LEN];
     GroupType groupType;
@@ -128,13 +142,36 @@ static void OnFinish(int64_t authSeq, int operationCode, const char *returnData)
     (void)AuthSessionHandleAuthFinish(authSeq);
 }
 
+static void GetSoftbusHichainAuthErrorCode(int32_t hichainErrCode, int32_t *softbusErrCode)
+{
+    if (hichainErrCode >= HICHAIN_DAS_ERRCODE_MIN && hichainErrCode <= HICHAIN_DAS_ERRCODE_MAX) {
+        *softbusErrCode = hichainErrCode & MASK_LOW_16BIT;
+        *softbusErrCode = -(((SOFTBUS_SUB_SYSTEM) << ERRCODE_SHIFT_21BIT) |
+            ((AUTH_SUB_MODULE_CODE) << ERRCODE_SHIFT_16BIT) | (*softbusErrCode | ERRCODE_OR_BIT));
+    } else if (hichainErrCode >= HICHAIN_COMMON_ERRCODE_MIN && hichainErrCode <= HICHAIN_COMMON_ERRCODE_MAX) {
+        uint32_t high4bit = 0;
+        int32_t tempCode = 0;
+        high4bit = hichainErrCode & MASK_HIGH_4BIT;
+        high4bit = high4bit >> ERRCODE_SHIFT_12BIT;
+        tempCode = hichainErrCode & MASK_LOW_8BIT;
+        *softbusErrCode = -(((SOFTBUS_SUB_SYSTEM) << ERRCODE_SHIFT_21BIT) |
+            ((AUTH_SUB_MODULE_CODE) << ERRCODE_SHIFT_16BIT) | (tempCode | (high4bit << ERRCODE_SHIFT_8BIT)));
+    } else {
+        *softbusErrCode = hichainErrCode;
+        AUTH_LOGI(AUTH_HICHAIN, "unknow hichain errcode=%{public}d", hichainErrCode);
+    }
+}
+
 static void OnError(int64_t authSeq, int operationCode, int errCode, const char *errorReturn)
 {
     (void)operationCode;
     (void)errorReturn;
     DfxRecordLnnEndHichainEnd(authSeq, errCode);
-    AUTH_LOGE(AUTH_HICHAIN, "hichain OnError: authSeq=%{public}" PRId64 ", errCode=%{public}d", authSeq, errCode);
-    (void)AuthSessionHandleAuthError(authSeq, SOFTBUS_AUTH_HICHAIN_AUTH_ERROR);
+    int32_t authErrCode = 0;
+    (void)GetSoftbusHichainAuthErrorCode(errCode, &authErrCode);
+    AUTH_LOGE(AUTH_HICHAIN, "hichain OnError: authSeq=%{public}" PRId64 ", errCode=%{public}d authErrCode=%{public}d",
+        authSeq, errCode, authErrCode);
+    (void)AuthSessionHandleAuthError(authSeq, authErrCode);
 }
 
 static char *OnRequest(int64_t authSeq, int operationCode, const char *reqParams)

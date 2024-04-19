@@ -173,7 +173,7 @@ static int32_t CreateSessionConnNode(ListenerModule module, int fd, int32_t chan
         EOK) {
         TRANS_LOGE(TRANS_CTRL, "copy ip to app info failed.");
         SoftBusFree(conn);
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     conn->appInfo.protocol = clientAddr->socketOption.protocol;
 
@@ -181,7 +181,7 @@ static int32_t CreateSessionConnNode(ListenerModule module, int fd, int32_t chan
     if (strcpy_s(conn->appInfo.myData.authState, sizeof(conn->appInfo.myData.authState), authState) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "copy auth state to app info failed.");
         SoftBusFree(conn);
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     if (TransTdcAddSessionConn(conn) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "add session conn node failed.");

@@ -132,11 +132,11 @@ HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_003, TestSize.Level1)
     EXPECT_TRUE(transObj != nullptr);
     transObj->Init(nullptr);
     uint32_t laneReqId = 1;
-    LaneRequestOption request;
-    request.type = LANE_TYPE_TRANS;
+    LaneAllocInfo allocInfo;
+    allocInfo.type = LANE_TYPE_TRANS;
     EXPECT_CALL(laneMock, SelectExpectLaneByParameter).WillOnce(Return(SOFTBUS_ERR));
     EXPECT_CALL(laneMock, SelectExpectLanesByQos).WillOnce(Return(SOFTBUS_OK));
-    int32_t ret = transObj->allocLaneByQos(laneReqId, (const LaneRequestOption *)&request, nullptr);
+    int32_t ret = transObj->AllocLaneByQos(laneReqId, (const LaneAllocInfo *)&allocInfo, nullptr);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     std::this_thread::sleep_for(std::chrono::milliseconds(200)); // delay 200ms for looper completion.
     transObj->Deinit();
@@ -233,10 +233,6 @@ HWTEST_F(LNNTransLaneMockTest, LNN_LANE_DELETE_LANE_BUSINESS_INFO_001, TestSize.
     transObj->Init(nullptr);
     TransLaneDepsInterfaceMock transLaneMock;
     EXPECT_CALL(transLaneMock, DelLaneBusinessInfoItem).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(transLaneMock, FindLaneLinkInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(transLaneMock, ConvertToLaneResource).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(transLaneMock, DelLaneResourceItemWithDelay)
-        .WillRepeatedly(DoAll(SetArgPointee<2>(true), Return(SOFTBUS_OK)));
     int32_t ret = transObj->FreeLane(LANE_REQ_ID);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     transObj->Deinit();

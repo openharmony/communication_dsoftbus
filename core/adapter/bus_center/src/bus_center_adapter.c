@@ -43,8 +43,6 @@
 #define OHOS_TYPE_UNKNOWN   (-1)
 #define API_VERSION_LEN     10
 #define VERSION_SDK_LEN     10
-#define OH_OS_TYPE          10
-#define HO_OS_TYPE          11
 #define SN_LEN              32
 
 typedef struct {

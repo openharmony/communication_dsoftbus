@@ -307,8 +307,9 @@ int32_t DiscServerProxy::ReleaseResources(int32_t channelId)
     return SOFTBUS_OK;
 }
 
-int32_t DiscServerProxy::CloseChannel(int32_t channelId, int32_t channelType)
+int32_t DiscServerProxy::CloseChannel(const char *sessionName, int32_t channelId, int32_t channelType)
 {
+    (void)sessionName;
     (void)channelId;
     (void)channelType;
     return SOFTBUS_OK;

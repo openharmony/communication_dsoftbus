@@ -217,7 +217,7 @@ int32_t GetAppInfoById(int32_t channelId, AppInfo *appInfo)
     return SOFTBUS_ERR;
 }
 
-int32_t SetAuthIdByChanId(int32_t channelId, int64_t authId)
+int32_t SetAuthHandleByChanId(int32_t channelId, AuthHandle *authHandle)
 {
     SessionConn *conn = NULL;
     if (GetSessionConnLock() != SOFTBUS_OK) {
@@ -225,7 +225,7 @@ int32_t SetAuthIdByChanId(int32_t channelId, int64_t authId)
     }
     LIST_FOR_EACH_ENTRY(conn, &g_sessionConnList->list, SessionConn, node) {
         if (conn->channelId == channelId) {
-            conn->authHandle.authId = authId;
+            conn->authHandle = *authHandle;
             ReleaseSessonConnLock();
             return SOFTBUS_OK;
         }
@@ -250,6 +250,29 @@ int64_t GetAuthIdByChanId(int32_t channelId)
     }
     ReleaseSessonConnLock();
     return AUTH_INVALID_ID;
+}
+
+int32_t GetAuthHandleByChanId(int32_t channelId, AuthHandle *authHandle)
+{
+    if (authHandle == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "authHandle is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    authHandle->authId = AUTH_INVALID_ID;
+    SessionConn *conn = NULL;
+    if (GetSessionConnLock() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    LIST_FOR_EACH_ENTRY(conn, &g_sessionConnList->list, SessionConn, node) {
+        if (conn->channelId == channelId) {
+            *authHandle = conn->authHandle;
+            ReleaseSessonConnLock();
+            return SOFTBUS_OK;
+        }
+    }
+    ReleaseSessonConnLock();
+    return SOFTBUS_ERR;
 }
 
 void TransDelSessionConnById(int32_t channelId)

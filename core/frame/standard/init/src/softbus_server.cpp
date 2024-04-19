@@ -187,9 +187,9 @@ int32_t SoftBusServer::ReleaseResources(int32_t channelId)
     return TransReleaseUdpResources(channelId);
 }
 
-int32_t SoftBusServer::CloseChannel(int32_t channelId, int32_t channelType)
+int32_t SoftBusServer::CloseChannel(const char *sessionName, int32_t channelId, int32_t channelType)
 {
-    return TransCloseChannel(channelId, channelType);
+    return TransCloseChannel(sessionName, channelId, channelType);
 }
 
 int32_t SoftBusServer::SendMessage(int32_t channelId, int32_t channelType, const void *data,

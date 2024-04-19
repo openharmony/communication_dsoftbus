@@ -40,6 +40,8 @@ void BtScanResultToSoftbus(const BtScanResultData *src, SoftBusBcScanResult *dst
 
 void SoftbusFilterToBt(BleScanNativeFilter *nativeFilter, const SoftBusBcScanFilter *filter, uint8_t filterSize);
 
+void SoftbusSetManufactureData(BleScanNativeFilter *nativeFilter, uint8_t filterSize);
+
 void FreeBtFilter(BleScanNativeFilter *nativeFilter, int32_t filterSize);
 
 void DumpBleScanFilter(BleScanNativeFilter *nativeFilter, int32_t filterSize);

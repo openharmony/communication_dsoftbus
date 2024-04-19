@@ -104,15 +104,15 @@ static void SocketServiceStart(int localFlag)
     }
 
     while (1) {
-        memset_s(&buf, sizeof(struct SocketProtocol), 0, sizeof(struct SocketProtocol));
+        (void)memset_s(&buf, sizeof(struct SocketProtocol), 0, sizeof(struct SocketProtocol));
         ret = SoftBusSocketRecv(acceptFd, (void *)&buf, sizeof(struct SocketProtocol), 0);
         EXPECT_TRUE(ret != -1);
         if (buf.cmd == CMD_EXIT) {
             break;
         } else if (buf.cmd == CMD_RECV) {
-            memset_s(&buf, sizeof(struct SocketProtocol), 0, sizeof(struct SocketProtocol));
+            (void)memset_s(&buf, sizeof(struct SocketProtocol), 0, sizeof(struct SocketProtocol));
             buf.cmd = CMD_REPLY;
-            (void)strncpy_s(buf.data, sizeof(buf.data), "Beautiful World!", sizeof(buf.data));
+            (void)strcpy_s(buf.data, sizeof(buf.data), "Beautiful World!");
             ret = SoftBusSocketSend(acceptFd, (void *)&buf, sizeof(struct SocketProtocol), 0);
             EXPECT_TRUE(ret != -1);
         } else {
@@ -141,7 +141,7 @@ static void SocketIpv6ServiceStart(int localFlag)
 
     ret = SoftBusSocketSetOpt(socketFd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_REUSEADDR, &optVal, sizeof(optVal));
     EXPECT_EQ(0, ret);
-    SoftBusSockAddrIn6 addrIn6;
+    SoftBusSockAddrIn6 addrIn6 = {0};
     addrIn6.sin6Family = SOFTBUS_AF_INET6;
     addrIn6.sin6Port = SoftBusHtoNs(TEST_IPV6_PORT);
     const char *srcAddr = "::1";
@@ -157,7 +157,7 @@ static void SocketIpv6ServiceStart(int localFlag)
 
     if (localFlag) {
         char serviceIP[46];
-        SoftBusSockAddrIn6 serviceAddr6;
+        SoftBusSockAddrIn6 serviceAddr6 = {0};
         SoftBusSocketGetLocalName(acceptFd, (SoftBusSockAddr *)&serviceAddr6);
         SoftBusInetNtoP(SOFTBUS_AF_INET6, &serviceAddr6.sin6Addr, serviceIP, sizeof(serviceIP));
         uint16_t port = SoftBusNtoHs(serviceAddr6.sin6Port);
@@ -165,15 +165,15 @@ static void SocketIpv6ServiceStart(int localFlag)
     }
 
     while (1) {
-        memset_s(&buf, sizeof(struct SocketProtocol), 0, sizeof(struct SocketProtocol));
+        (void)memset_s(&buf, sizeof(struct SocketProtocol), 0, sizeof(struct SocketProtocol));
         ret = SoftBusSocketRecv(acceptFd, (void *)&buf, sizeof(struct SocketProtocol), 0);
         EXPECT_TRUE(ret != -1);
         if (buf.cmd == CMD_EXIT) {
             break;
         } else if (buf.cmd == CMD_RECV) {
-            memset_s(&buf, sizeof(struct SocketProtocol), 0, sizeof(struct SocketProtocol));
+            (void)memset_s(&buf, sizeof(struct SocketProtocol), 0, sizeof(struct SocketProtocol));
             buf.cmd = CMD_REPLY;
-            (void)strncpy_s(buf.data, sizeof(buf.data), "Beautiful World!", sizeof(buf.data));
+            (void)strcpy_s(buf.data, sizeof(buf.data), "Beautiful World!");
             ret = SoftBusSocketSend(acceptFd, (void *)&buf, sizeof(struct SocketProtocol), 0);
             EXPECT_TRUE(ret != -1);
         } else {
@@ -201,14 +201,14 @@ static void ClientConnect(int32_t *socketFd)
     };
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, socketFd);
     EXPECT_EQ(0, ret);
-    ret = SoftBusSocketConnect(*socketFd, (SoftBusSockAddr *)&serAddr);
+    ret = SoftBusSocketConnect(*socketFd, (SoftBusSockAddr *)&serAddr, sizeof(SoftBusSockAddrIn));
     EXPECT_EQ(0, ret);
 }
 
 static void ClientIpv6Connect(int32_t *socketFd)
 {
     EXPECT_TRUE(socketFd != nullptr);
-    SoftBusSockAddrIn6 addrIn6;
+    SoftBusSockAddrIn6 addrIn6 = {0};
     addrIn6.sin6Family = SOFTBUS_AF_INET6;
     addrIn6.sin6Port = SoftBusHtoNs(TEST_IPV6_PORT);
     const char *srcAddr = "::1";
@@ -216,7 +216,7 @@ static void ClientIpv6Connect(int32_t *socketFd)
     addrIn6.sin6ScopeId = SoftBusIfNameToIndex("lo");
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET6, SOFTBUS_SOCK_STREAM, 0, socketFd);
     EXPECT_EQ(0, ret);
-    ret = SoftBusSocketConnect(*socketFd, (SoftBusSockAddr *)&addrIn6);
+    ret = SoftBusSocketConnect(*socketFd, (SoftBusSockAddr *)&addrIn6, sizeof(SoftBusSockAddrIn6));
     EXPECT_EQ(0, ret);
 }
 
@@ -592,7 +592,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetLocalNameTest005, TestSize.L
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetLocalNameTest006, TestSize.Level0)
 {
     int32_t socketFd = -1;
-    SoftBusSockAddrIn6 clientAddr6;
+    SoftBusSockAddrIn6 clientAddr6 = {0};
     int32_t ret = SoftBusSocketGetLocalName(socketFd, (SoftBusSockAddr *)&clientAddr6);
     EXPECT_EQ(SOFTBUS_ADAPTER_ERR, ret);
 }
@@ -617,7 +617,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetLocalNameTest007, TestSize.L
 
     ClientIpv6Connect(&socketFd);
 
-    SoftBusSockAddrIn6 clientAddr6;
+    SoftBusSockAddrIn6 clientAddr6 = {0};
     ret = SoftBusSocketGetLocalName(socketFd, (SoftBusSockAddr *)&clientAddr6);
     EXPECT_EQ(SOFTBUS_ADAPTER_OK, ret);
 
@@ -763,7 +763,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketGetPeerNameTest006, TestSize.Le
     ClientIpv6Connect(&socketFd);
 
     char serviceIP[46];
-    SoftBusSockAddrIn6 serviceAddr6;
+    SoftBusSockAddrIn6 serviceAddr6 {0};
 
     ret = SoftBusSocketGetPeerName(socketFd, (SoftBusSockAddr *)&serviceAddr6);
     EXPECT_EQ(0, ret);
@@ -788,7 +788,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketBind001, TestSize.Level0)
     };
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
-    ret = SoftBusSocketBind(socketFd, &addr, sizeof(SoftBusSockAddr));
+    ret = SoftBusSocketBind(socketFd, &addr, sizeof(SoftBusSockAddrIn));
     EXPECT_EQ(0, ret);
     ret = SoftBusSocketClose(socketFd);
     EXPECT_EQ(0, ret);
@@ -808,7 +808,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketBind002, TestSize.Level0)
     };
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
-    ret = SoftBusSocketBind(socketFd, &addr, sizeof(SoftBusSockAddr) - 13);
+    ret = SoftBusSocketBind(socketFd, &addr, sizeof(SoftBusSockAddrIn) - 1);
     EXPECT_NE(0, ret);
     ret = SoftBusSocketClose(socketFd);
     EXPECT_EQ(0, ret);
@@ -826,7 +826,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketBind003, TestSize.Level0)
     SoftBusSockAddr addr = {
         .saFamily = SOFTBUS_AF_INET,
     };
-    int32_t ret = SoftBusSocketBind(socketFd, &addr, sizeof(SoftBusSockAddr));
+    int32_t ret = SoftBusSocketBind(socketFd, &addr, sizeof(SoftBusSockAddrIn));
     EXPECT_NE(0, ret);
 }
 
@@ -841,7 +841,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketBind004, TestSize.Level0)
     int32_t socketFd = -1;
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
-    ret = SoftBusSocketBind(socketFd, NULL, sizeof(SoftBusSockAddr));
+    ret = SoftBusSocketBind(socketFd, NULL, sizeof(SoftBusSockAddrIn));
     EXPECT_EQ(-1, ret);
     ret = SoftBusSocketClose(socketFd);
     EXPECT_EQ(0, ret);
@@ -856,7 +856,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketBind004, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketBind005, TestSize.Level0)
 {
     int32_t socketFd = -1;
-    SoftBusSockAddrIn6 addrIn6;
+    SoftBusSockAddrIn6 addrIn6 = {0};
     addrIn6.sin6Family = SOFTBUS_AF_INET6;
     addrIn6.sin6Port = SoftBusHtoNs(TEST_IPV6_PORT);
     const char *srcAddr = "::1";
@@ -864,7 +864,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketBind005, TestSize.Level0)
     addrIn6.sin6ScopeId = SoftBusIfNameToIndex("lo");
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET6, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
-    ret = SoftBusSocketBind(socketFd, (SoftBusSockAddr *)&addrIn6, sizeof(SoftBusSockAddr));
+    ret = SoftBusSocketBind(socketFd, (SoftBusSockAddr *)&addrIn6, sizeof(SoftBusSockAddrIn6));
     EXPECT_EQ(0, ret);
     ret = SoftBusSocketClose(socketFd);
     EXPECT_EQ(0, ret);
@@ -886,7 +886,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketListen001, TestSize.Level0)
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
 
-    ret = SoftBusSocketBind(socketFd, &addr, sizeof(SoftBusSockAddr));
+    ret = SoftBusSocketBind(socketFd, &addr, sizeof(SoftBusSockAddrIn));
     EXPECT_EQ(0, ret);
 
     ret = SoftBusSocketListen(socketFd, backLog);
@@ -912,7 +912,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketListen002, TestSize.Level0)
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
 
-    ret = SoftBusSocketBind(socketFd, &addr, sizeof(SoftBusSockAddr));
+    ret = SoftBusSocketBind(socketFd, &addr, sizeof(SoftBusSockAddrIn));
     EXPECT_EQ(0, ret);
 
     ret = SoftBusSocketListen(socketFd, backLog);
@@ -947,7 +947,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketListen004, TestSize.Level0)
 {
     int32_t socketFd = -1;
     int32_t backLog = 2;
-    SoftBusSockAddrIn6 addrIn6;
+    SoftBusSockAddrIn6 addrIn6 = {0};
     addrIn6.sin6Family = SOFTBUS_AF_INET6;
     addrIn6.sin6Port = SoftBusHtoNs(TEST_IPV6_PORT);
     const char *srcAddr = "::1";
@@ -956,7 +956,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketListen004, TestSize.Level0)
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET6, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
 
-    ret = SoftBusSocketBind(socketFd, (SoftBusSockAddr *)&addrIn6, sizeof(SoftBusSockAddr));
+    ret = SoftBusSocketBind(socketFd, (SoftBusSockAddr *)&addrIn6, sizeof(SoftBusSockAddrIn6));
     EXPECT_EQ(0, ret);
 
     ret = SoftBusSocketListen(socketFd, backLog);
@@ -1077,7 +1077,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketConnect002, TestSize.Level0)
     SoftBusSockAddr addr = {
         .saFamily = SOFTBUS_AF_INET,
     };
-    int32_t ret = SoftBusSocketConnect(socketFd, &addr);
+    int32_t ret = SoftBusSocketConnect(socketFd, &addr, sizeof(SoftBusSockAddrIn));
     EXPECT_NE(0, ret);
 }
 
@@ -1092,7 +1092,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketConnect003, TestSize.Level0)
     int32_t socketFd = -1;
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
-    ret = SoftBusSocketConnect(socketFd, NULL);
+    ret = SoftBusSocketConnect(socketFd, NULL, -1);
     EXPECT_TRUE(ret < 0);
     ret = SoftBusSocketClose(socketFd);
     EXPECT_EQ(0, ret);
@@ -1116,7 +1116,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketConnect004, TestSize.Level0)
     };
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
-    ret = SoftBusSocketConnect(socketFd, (SoftBusSockAddr *)&serAddr);
+    ret = SoftBusSocketConnect(socketFd, (SoftBusSockAddr *)&serAddr, sizeof(SoftBusSockAddrIn));
     EXPECT_NE(0, ret);
     ret = SoftBusSocketClose(socketFd);
     EXPECT_EQ(0, ret);
@@ -1131,15 +1131,15 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketConnect004, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketConnect005, TestSize.Level0)
 {
     int32_t socketFd = -1;
-    SoftBusSockAddrIn6 addrIn6;
+    SoftBusSockAddrIn6 addrIn6 = {0};
     addrIn6.sin6Family = SOFTBUS_AF_INET6;
     addrIn6.sin6Port = SoftBusHtoNs(TEST_PORT);
     const char *srcAddr = "::1";
     SoftBusInetPtoN(SOFTBUS_AF_INET6, srcAddr, &addrIn6.sin6Addr);
     addrIn6.sin6ScopeId = SoftBusIfNameToIndex("lo");
-    int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
+    int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET6, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
-    ret = SoftBusSocketConnect(socketFd, (SoftBusSockAddr *)&addrIn6);
+    ret = SoftBusSocketConnect(socketFd, (SoftBusSockAddr *)&addrIn6, sizeof(SoftBusSockAddrIn6));
     EXPECT_NE(0, ret);
     ret = SoftBusSocketClose(socketFd);
     EXPECT_EQ(0, ret);
@@ -1498,11 +1498,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendTest002, TestSize.Level0)
     struct SocketProtocol buf = {0};
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
-    ret = SoftBusSocketConnect(socketFd, (SoftBusSockAddr *)&serAddr);
+    ret = SoftBusSocketConnect(socketFd, (SoftBusSockAddr *)&serAddr, sizeof(SoftBusSockAddrIn));
     EXPECT_EQ(0, ret);
     ret = SoftBusSocketSend(socketFd, NULL, 0, 0);
     EXPECT_TRUE(ret <= 0);
-    memset_s(&buf, sizeof(struct SocketProtocol), 0, sizeof(struct SocketProtocol));
+    (void)memset_s(&buf, sizeof(struct SocketProtocol), 0, sizeof(struct SocketProtocol));
     buf.cmd = CMD_EXIT;
     ret = SoftBusSocketSend(socketFd, (void *)&buf, sizeof(struct SocketProtocol), 0);
     EXPECT_TRUE(ret != -1);
@@ -1536,13 +1536,13 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendTest003, TestSize.Level0)
     struct SocketProtocol buf = {0};
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
-    ret = SoftBusSocketConnect(socketFd, (SoftBusSockAddr *)&serAddr);
+    ret = SoftBusSocketConnect(socketFd, (SoftBusSockAddr *)&serAddr, sizeof(SoftBusSockAddrIn));
     EXPECT_EQ(0, ret);
     buf.cmd = CMD_RECV;
     (void)strncpy_s(buf.data, sizeof(buf.data), "Happy New Year!", sizeof(buf.data));
     ret = SoftBusSocketSend(socketFd, (void *)&buf, 0, 0);
     EXPECT_TRUE(ret <= 0);
-    memset_s(&buf, sizeof(struct SocketProtocol), 0, sizeof(struct SocketProtocol));
+    (void)memset_s(&buf, sizeof(struct SocketProtocol), 0, sizeof(struct SocketProtocol));
     buf.cmd = CMD_EXIT;
     ret = SoftBusSocketSend(socketFd, (void *)&buf, sizeof(struct SocketProtocol), 0);
     EXPECT_TRUE(ret != -1);
@@ -1590,7 +1590,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendToTest001, TestSize.Level0)
         .saFamily = SOFTBUS_AF_INET,
     };
     struct SocketProtocol buf = {0};
-    int32_t ret = SoftBusSocketSendTo(socketFd, (void *)&buf, sizeof(buf), 0, &addr, sizeof(SoftBusSockAddr));
+    int32_t ret = SoftBusSocketSendTo(socketFd, (void *)&buf, sizeof(buf), 0, &addr, sizeof(SoftBusSockAddrIn));
     EXPECT_EQ(-1, ret);
 }
 
@@ -1618,7 +1618,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendToTest002, TestSize.Level0)
 
     buf.cmd = CMD_RECV;
     (void)strncpy_s(buf.data, sizeof(buf.data), "Happy New Year!", sizeof(buf.data));
-    int32_t ret = SoftBusSocketSendTo(socketFd, (void *)&buf, sizeof(buf), 0, &addr, sizeof(SoftBusSockAddr));
+    int32_t ret = SoftBusSocketSendTo(socketFd, (void *)&buf, sizeof(buf), 0, &addr, sizeof(SoftBusSockAddrIn));
     EXPECT_TRUE(ret >= 0);
 
     ClientExit(socketFd);
@@ -1646,7 +1646,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendToTest003, TestSize.Level0)
     };
     ClientConnect(&socketFd);
 
-    int32_t ret = SoftBusSocketSendTo(socketFd, NULL, sizeof(buf), 0, &addr, sizeof(SoftBusSockAddr));
+    int32_t ret = SoftBusSocketSendTo(socketFd, NULL, sizeof(buf), 0, &addr, sizeof(SoftBusSockAddrIn));
     EXPECT_TRUE(ret == -1);
 
     ClientExit(socketFd);
@@ -1671,7 +1671,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendToTest004, TestSize.Level0)
     struct SocketProtocol buf = {0};
     ClientConnect(&socketFd);
 
-    int32_t ret = SoftBusSocketSendTo(socketFd, (void *)&buf, sizeof(buf), 0, NULL, sizeof(SoftBusSockAddr));
+    int32_t ret = SoftBusSocketSendTo(socketFd, (void *)&buf, sizeof(buf), 0, NULL, sizeof(SoftBusSockAddrIn));
     EXPECT_EQ(SOFTBUS_ADAPTER_ERR, ret);
 
     ClientExit(socketFd);
@@ -1728,7 +1728,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendToTest006, TestSize.Level0)
     };
     ClientConnect(&socketFd);
 
-    int32_t ret = SoftBusSocketSendTo(socketFd, (void *)&buf, 0, 0, &addr, sizeof(SoftBusSockAddr));
+    int32_t ret = SoftBusSocketSendTo(socketFd, (void *)&buf, 0, 0, &addr, sizeof(SoftBusSockAddrIn));
     EXPECT_TRUE(ret == 0);
 
     ClientExit(socketFd);
@@ -1750,7 +1750,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendTest007, TestSize.Level0)
     }
     sleep(1);
     int32_t socketFd = -1;
-    SoftBusSockAddrIn6 addrIn6;
+    SoftBusSockAddrIn6 addrIn6 = {0};
     addrIn6.sin6Family = SOFTBUS_AF_INET6;
     addrIn6.sin6Port = SoftBusHtoNs(TEST_IPV6_PORT);
     const char *srcAddr = "::1";
@@ -1759,11 +1759,11 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketSendTest007, TestSize.Level0)
     struct SocketProtocol buf = {0};
     int32_t ret = SoftBusSocketCreate(SOFTBUS_AF_INET6, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     EXPECT_EQ(0, ret);
-    ret = SoftBusSocketConnect(socketFd, (SoftBusSockAddr *)&addrIn6);
+    ret = SoftBusSocketConnect(socketFd, (SoftBusSockAddr *)&addrIn6, sizeof(SoftBusSockAddrIn6));
     EXPECT_EQ(0, ret);
     ret = SoftBusSocketSend(socketFd, NULL, 0, 0);
     EXPECT_TRUE(ret <= 0);
-    memset_s(&buf, sizeof(struct SocketProtocol), 0, sizeof(struct SocketProtocol));
+    (void)memset_s(&buf, sizeof(struct SocketProtocol), 0, sizeof(struct SocketProtocol));
     buf.cmd = CMD_EXIT;
     ret = SoftBusSocketSend(socketFd, (void *)&buf, sizeof(struct SocketProtocol), 0);
     EXPECT_TRUE(ret != -1);
@@ -1809,7 +1809,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketRecvTest002, TestSize.Level0)
     int32_t ret = SoftBusSocketSend(socketFd, (void *)&buf, sizeof(struct SocketProtocol), 0);
     EXPECT_TRUE(ret != -1);
 
-    memset_s(&buf, sizeof(struct SocketProtocol), 0, sizeof(struct SocketProtocol));
+    (void)memset_s(&buf, sizeof(struct SocketProtocol), 0, sizeof(struct SocketProtocol));
     ret = SoftBusSocketRecv(socketFd, (void *)&buf, sizeof(struct SocketProtocol), 0);
     EXPECT_TRUE(ret != -1);
 
@@ -2223,7 +2223,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketFullFunc001, TestSize.Level0)
     EXPECT_TRUE(ret >= 0);
     printf("data is %s\n", buf.data);
 
-    memset_s(&buf, sizeof(struct SocketProtocol), 0, sizeof(struct SocketProtocol));
+    (void)memset_s(&buf, sizeof(struct SocketProtocol), 0, sizeof(struct SocketProtocol));
     ret = SoftBusSocketRecv(socketFd, (void *)&buf, sizeof(struct SocketProtocol), 0);
     EXPECT_TRUE(ret >= 0);
     printf("data is %s\n", buf.data);

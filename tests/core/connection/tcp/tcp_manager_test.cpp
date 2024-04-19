@@ -892,7 +892,7 @@ HWTEST_F(TcpManagerTest, testTcpManager023, TestSize.Level1)
     ConnectOption option = {
         .type = CONNECT_TCP,
         .socketOption = {
-            .addr = {0},
+            .addr = "127.0.0.1",
             .port = CLIENTPORT,
             .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP
@@ -926,7 +926,7 @@ HWTEST_F(TcpManagerTest, testTcpManager024, TestSize.Level1)
     ConnectOption option = {
         .type = CONNECT_TCP,
         .socketOption = {
-            .addr = {0},
+            .addr = "127.0.0.1",
             .port = CLIENTPORT,
             .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP
@@ -957,7 +957,7 @@ HWTEST_F(TcpManagerTest, testTcpManager025, TestSize.Level1)
     ConnectOption option = {
         .type = CONNECT_TCP,
         .socketOption = {
-            .addr = {0},
+            .addr = "127.0.0.1",
             .port = CLIENTPORT,
             .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP
@@ -993,7 +993,7 @@ HWTEST_F(TcpManagerTest, testTcpManager026, TestSize.Level1)
     ConnectOption option = {
         .type = CONNECT_TCP,
         .socketOption = {
-            .addr = {0},
+            .addr = "127.0.0.1",
             .port = CLIENTPORT,
             .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP
@@ -1033,7 +1033,7 @@ HWTEST_F(TcpManagerTest, testTcpManager027, TestSize.Level1)
     ConnectOption option = {
         .type = CONNECT_TCP,
         .socketOption = {
-            .addr = {0},
+            .addr = "127.0.0.1",
             .port = CLIENTPORT,
             .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP
@@ -1382,7 +1382,7 @@ HWTEST_F(TcpManagerTest, testTcpManager039, TestSize.Level1)
     ConnectOption option = {
         .type = CONNECT_TCP,
         .socketOption = {
-            .addr = {0},
+            .addr = "127.0.0.1",
             .port = CLIENTPORT,
             .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP
@@ -1458,7 +1458,7 @@ HWTEST_F(TcpManagerTest, testTcpManager042, TestSize.Level1)
     ConnectOption option = {
         .type = CONNECT_TCP,
         .socketOption = {
-            .addr = "",
+            .addr = "127.0.0.1",
             .port = CLIENTPORT,
             .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP
@@ -1512,7 +1512,7 @@ HWTEST_F(TcpManagerTest, testTcpManager044, TestSize.Level1)
     ConnectOption option = {
         .type = CONNECT_TCP,
         .socketOption = {
-            .addr = {0},
+            .addr = "127.0.0.1",
             .port = CLIENTPORT,
             .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP
@@ -1624,7 +1624,7 @@ HWTEST_F(TcpManagerTest, testTcpManager048, TestSize.Level1)
     ConnectOption option = {
         .type = CONNECT_TCP,
         .socketOption = {
-            .addr = {0},
+            .addr = "::1%lo",
             .port = CLIENTPORT,
             .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP
@@ -1744,7 +1744,7 @@ HWTEST_F(TcpManagerTest, testTcpManager052, TestSize.Level1)
     ConnectOption option = {
         .type = CONNECT_TCP,
         .socketOption = {
-            .addr = {0},
+            .addr = "::1%lo",
             .port = CLIENTPORT,
             .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP

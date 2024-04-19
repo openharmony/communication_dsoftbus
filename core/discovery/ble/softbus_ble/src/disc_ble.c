@@ -346,6 +346,7 @@ static int32_t ScanFilter(const BroadcastReportInfo *reportInfo)
 
 static void ProcessDisConPacket(const BroadcastReportInfo *reportInfo, DeviceInfo *foundInfo)
 {
+    static uint32_t callCount = 0;
     DeviceWrapper device = {
         .info = foundInfo,
         .power = SOFTBUS_ILLEGAL_BLE_POWER
@@ -359,7 +360,7 @@ static void ProcessDisConPacket(const BroadcastReportInfo *reportInfo, DeviceInf
         return;
     }
     if ((foundInfo->capabilityBitmap[0] & g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].capBitMap[0]) == 0x0) {
-        DISC_LOGI(DISC_BLE, "don't match passive publish capBitMap");
+        DISC_LOGI(DISC_BLE, "don't match passive publish capBitMap, callCount=%{public}u", callCount++);
         (void)SoftBusMutexUnlock(&g_bleInfoLock);
         return;
     }
@@ -454,6 +455,7 @@ static int32_t RangeDevice(DeviceInfo *device, char rssi, int8_t power)
 
 static void ProcessDisNonPacket(const BroadcastReportInfo *reportInfo, char rssi, DeviceInfo *foundInfo)
 {
+    static uint32_t callCount = 0;
     DeviceWrapper device = {
         .info = foundInfo,
         .power = SOFTBUS_ILLEGAL_BLE_POWER
@@ -487,7 +489,7 @@ static void ProcessDisNonPacket(const BroadcastReportInfo *reportInfo, char rssi
     add.medium = BLE;
 
     if (ProcessHashAccount(foundInfo)) {
-        DISC_LOGD(DISC_BLE, "start report found device");
+        DISC_LOGI(DISC_BLE, "start report found device, callCount=%{public}u", callCount++);
         uint32_t tempCap = 0;
         DeConvertBitMap(&tempCap, foundInfo->capabilityBitmap, foundInfo->capabilityBitmapNum);
         if (tempCap == 0) {
@@ -901,7 +903,7 @@ static int32_t StartAdvertiser(int32_t adv)
         DfxRecordAdevertiserEnd(adv, ret);
         DestroyBleConfigAdvData(&packet);
         DISC_LOGE(DISC_BLE, "start adv failed, adv=%{public}d", adv);
-        return SOFTBUS_DISCOVER_START_BROADCAST_FAIL;
+        return SOFTBUS_DISCOVER_BLE_START_BROADCAST_FAIL;
     }
     DfxRecordAdevertiserEnd(adv, SOFTBUS_OK);
     UpdateInfoManager(adv, false);
@@ -953,7 +955,7 @@ static int32_t UpdateAdvertiser(int32_t adv)
     if (UpdateBroadcasting(advertiser->channel, &advParam, &packet) != SOFTBUS_OK) {
         DestroyBleConfigAdvData(&packet);
         DISC_LOGE(DISC_BLE, "UpdateAdv failed");
-        return SOFTBUS_DISCOVER_START_BROADCAST_FAIL;
+        return SOFTBUS_DISCOVER_BLE_START_BROADCAST_FAIL;
     }
     UpdateInfoManager(adv, false);
     DestroyBleConfigAdvData(&packet);
@@ -1020,7 +1022,7 @@ static int32_t StopScaner(void)
     }
     if (StopScan(g_bleListener.scanListenerId) != SOFTBUS_OK) {
         DISC_LOGI(DISC_BLE, "StopScaner failed");
-        return SOFTBUS_DISCOVER_END_SCAN_FAIL;
+        return SOFTBUS_DISCOVER_BLE_END_SCAN_FAIL;
     }
     DISC_LOGI(DISC_BLE, "success");
     return SOFTBUS_OK;
@@ -1800,7 +1802,7 @@ DiscoveryBleDispatcherInterface *DiscSoftBusBleInit(DiscInnerCallback *callback)
         return NULL;
     }
 
-    if (DiscBleLooperInit() != SOFTBUS_OK || InitBleListener() != SOFTBUS_OK || InitAdvertiser() != SOFTBUS_OK)  {
+    if (DiscBleLooperInit() != SOFTBUS_OK || InitAdvertiser() != SOFTBUS_OK || InitBleListener() != SOFTBUS_OK)  {
         DiscSoftBusBleDeinit();
         return NULL;
     }

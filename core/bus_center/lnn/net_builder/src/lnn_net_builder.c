@@ -19,6 +19,7 @@
 #include <inttypes.h>
 
 #include "anonymizer.h"
+#include "auth_common.h"
 #include "auth_deviceprofile.h"
 #include "auth_interface.h"
 #include "auth_request.h"
@@ -1868,11 +1869,10 @@ static void OnReAuthVerifyPassed(uint32_t requestId, AuthHandle authHandle, cons
 static void OnReAuthVerifyFailed(uint32_t requestId, int32_t reason)
 {
     LNN_LOGI(LNN_BUILDER, "verify failed. requestId=%{public}u, reason=%{public}d", requestId, reason);
-    if (reason != SOFTBUS_AUTH_HICHAIN_AUTH_ERROR) {
-        return;
+    if (reason >= SOFTBUS_HICHAIN_MIN && reason <= SOFTBUS_HICHAIN_MAX) {
+        AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+        PostVerifyResult(requestId, reason, authHandle, NULL);
     }
-    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
-    PostVerifyResult(requestId, reason, authHandle, NULL);
 }
 
 static AuthVerifyCallback g_reAuthVerifyCallback = {
@@ -1903,6 +1903,7 @@ int32_t FindRequestIdByAddr(ConnectionAddr *connetionAddr, uint32_t *requestId)
 {
     if (requestId == NULL) {
         LNN_LOGE(LNN_BUILDER, "requestId is null");
+        return SOFTBUS_INVALID_PARAM;
     }
     LnnConnectionFsm *connFsm = FindConnectionFsmByAddr(connetionAddr, false);
     if (connFsm == NULL || connFsm->isDead) {
@@ -2323,12 +2324,6 @@ int32_t LnnInitNetBuilderDelay(void)
         LNN_LOGE(LNN_INIT, "fast offline init fail!");
         return SOFTBUS_ERR;
     }
-    return SOFTBUS_OK;
-}
-
-int32_t LnnProcessAccountDelay(void)
-{
-    EhLoginEventHandler();
     return SOFTBUS_OK;
 }
 

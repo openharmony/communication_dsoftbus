@@ -38,8 +38,6 @@ int32_t SetIpTos(int fd, uint32_t tos);
 int32_t ConnSetTcpKeepAliveOption(
     int32_t fd, ModeCycle cycle, int32_t keepAliveIntvl, int32_t keepAliveCount, uint32_t userTimeOut);
 
-int32_t GetDomainByAddr(const char *addr);
-
 #ifdef __cplusplus
 #if __cplusplus
 }

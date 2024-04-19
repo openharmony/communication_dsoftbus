@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -194,7 +194,7 @@ HWTEST_F(ClientTransStreamTest, TransSendStream001, TestSize.Level0)
 
     int32_t channelId = 12;
     int ret = TransSendStream(channelId, dataStreamData, extStreamData, paramStreamFrameInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     if (dataStreamData != nullptr) {
         SoftBusFree(dataStreamData);

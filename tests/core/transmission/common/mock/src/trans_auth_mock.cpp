@@ -192,16 +192,16 @@ void AuthMetaReleaseVerify(int64_t authId)
     return GetTransAuthInterface()->AuthMetaReleaseVerify(authId);
 }
 
-int32_t AuthEncrypt(int64_t authId, const uint8_t *inData,
+int32_t AuthEncrypt(AuthHandle *authHandle, const uint8_t *inData,
     uint32_t inLen, uint8_t *outData, uint32_t *outLen)
 {
-    return GetTransAuthInterface()->AuthEncrypt(authId, inData, inLen, outData, outLen);
+    return GetTransAuthInterface()->AuthEncrypt(authHandle, inData, inLen, outData, outLen);
 }
 
-int32_t AuthDecrypt(int64_t authId, const uint8_t *inData,
+int32_t AuthDecrypt(AuthHandle *authHandle, const uint8_t *inData,
     uint32_t inLen, uint8_t *outData, uint32_t *outLen)
 {
-    return GetTransAuthInterface()->AuthDecrypt(authId, inData, inLen, outData, outLen);
+    return GetTransAuthInterface()->AuthDecrypt(authHandle, inData, inLen, outData, outLen);
 }
 
 int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)

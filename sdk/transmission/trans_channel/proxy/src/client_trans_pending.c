@@ -92,7 +92,7 @@ int32_t CreatePendingPacket(uint32_t id, uint64_t seq)
     if (SoftBusMutexInit(&pending->lock, NULL) != SOFTBUS_OK) {
         SoftBusFree(pending);
         TRANS_LOGE(TRANS_SDK, "init lock fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     if (SoftBusCondInit(&pending->cond) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "condInit fail");
@@ -167,8 +167,13 @@ static int32_t TransPendWaitTime(const PendingPacket *pending, TransPendData *da
 
 int32_t GetPendingPacketData(uint32_t id, uint64_t seq, uint32_t waitMillis, bool isDelete, TransPendData *data)
 {
-    if (data == NULL || SoftBusMutexLock(&g_pendingLock) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+    if (data == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_pendingLock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "mutex lock fail");
+        return SOFTBUS_LOCK_ERR;
     }
     PendingPacket *pending = NULL;
     PendingPacket *item = NULL;
@@ -204,6 +209,10 @@ EXIT:
 
 int32_t SetPendingPacketData(uint32_t id, uint64_t seq, const TransPendData *data)
 {
+    if (data == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (SoftBusMutexLock(&g_pendingLock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "mutex lock fail");
         return SOFTBUS_LOCK_ERR;
@@ -228,5 +237,5 @@ int32_t SetPendingPacketData(uint32_t id, uint64_t seq, const TransPendData *dat
         }
     }
     (void)SoftBusMutexUnlock(&g_pendingLock);
-    return SOFTBUS_ERR;
+    return SOFTBUS_NOT_FIND;
 }

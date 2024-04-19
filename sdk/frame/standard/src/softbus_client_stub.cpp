@@ -238,6 +238,11 @@ int32_t SoftBusClientStub::OnChannelOpenedInner(MessageParcel &data, MessageParc
     }
     if (channel.channelType == CHANNEL_TYPE_TCP_DIRECT) {
         channel.fd = data.ReadFileDescriptor();
+        channel.myIp = (char *)data.ReadCString();
+        if (channel.myIp == nullptr) {
+            COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read myIp failed!");
+            return SOFTBUS_IPC_ERR;
+        }
     }
     if (!data.ReadBool(channel.isServer)) {
         COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read retCode failed!");

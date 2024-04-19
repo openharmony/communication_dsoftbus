@@ -61,6 +61,7 @@ public:
         BleProtocolType protocol) = 0;
     virtual int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info) = 0;
     virtual int32_t LnnGetRemoteNumU64Info(const char *networkId, InfoKey key, uint64_t *info) = 0;
+    virtual int32_t LnnGetNetworkIdByUdid(const char *udid, char *buf, uint32_t len) = 0;
     virtual bool AuthDeviceCheckConnInfo(const char *uuid, AuthLinkType type, bool checkConnection) = 0;
     virtual uint32_t AuthGenRequestId(void) = 0;
     virtual int32_t AuthPostTransData(AuthHandle authHandle, const AuthTransData *dataInfo) = 0;
@@ -70,7 +71,7 @@ public:
     virtual void ConnBleReturnConnection(ConnBleConnection **connection) = 0;
     virtual bool ConnBleDirectIsEnable(BleProtocolType protocol) = 0;
     virtual int32_t TransProxyCloseProxyChannel(int32_t channelId) = 0;
-    virtual LaneResource *LaneResourceIsExist(LaneResource *resourceItem) = 0;
+    virtual LaneResource *GetValidLaneResource(LaneResource *resourceItem) = 0;
 
     virtual int64_t GetAuthIdByConnInfo(const AuthConnInfo *connInfo) = 0;
     virtual int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash) = 0;
@@ -105,6 +106,7 @@ public:
     MOCK_METHOD3(ConnBleGetConnectionByUdid, ConnBleConnection *(const char *, const char *, BleProtocolType));
     MOCK_METHOD2(LnnGetLocalNumU64Info, int32_t (InfoKey, uint64_t *));
     MOCK_METHOD3(LnnGetRemoteNumU64Info, int32_t (const char *, InfoKey, uint64_t *));
+    MOCK_METHOD3(LnnGetNetworkIdByUdid, int32_t (const char *udid, char *buf, uint32_t len));
     MOCK_METHOD3(AuthDeviceCheckConnInfo, bool (const char *, AuthLinkType, bool));
     MOCK_METHOD0(AuthGenRequestId, uint32_t ());
     MOCK_METHOD2(AuthPostTransData, int32_t (AuthHandle, const AuthTransData *));
@@ -114,7 +116,7 @@ public:
     MOCK_METHOD1(ConnBleReturnConnection, void (ConnBleConnection **));
     MOCK_METHOD1(ConnBleDirectIsEnable, bool (BleProtocolType));
     MOCK_METHOD1(TransProxyCloseProxyChannel, int32_t(int32_t));
-    MOCK_METHOD1(LaneResourceIsExist, LaneResource* (LaneResource *));
+    MOCK_METHOD1(GetValidLaneResource, LaneResource* (LaneResource *));
     MOCK_METHOD1(GetAuthIdByConnInfo, int64_t(const AuthConnInfo *));
     MOCK_METHOD3(SoftBusGenerateStrHash, int32_t (const unsigned char *, uint32_t, unsigned char *));
     MOCK_METHOD2(StartBaseClient, int32_t (ListenerModule module, const SoftbusBaseListener *listener));

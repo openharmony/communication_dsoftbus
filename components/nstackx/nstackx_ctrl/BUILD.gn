@@ -45,7 +45,6 @@ base_src = [
 base_include_dirs = [
   "interface",
   "include",
-  "//third_party/cJSON",
   "../nstackx_util/interface",
 ]
 
@@ -82,15 +81,7 @@ if (!defined(ohos_lite) ||
     "core/nstackx_statistics.c",
     "core/nstackx_smartgenius.c",
   ]
-  standard_small_diff_include_dirs = [
-    "include/coap_discover",
-    "//third_party/libcoap/include",
-  ]
-  standard_small_deps = [
-    "../nstackx_util:nstackx_util.open",
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//third_party/libcoap:libcoap",
-  ]
+  standard_small_diff_include_dirs = [ "include/coap_discover" ]
   cflags += [ "-DDFINDER_MGT_MSG_LOG" ]
 }
 
@@ -106,6 +97,7 @@ if (defined(ohos_lite)) {
       sources += mini_diff_src
       include_dirs = base_include_dirs
       include_dirs += mini_diff_include_dirs
+      include_dirs += [ "//third_party/cJSON" ]
       public_configs = [ ":nstackx_ctrl_interface" ]
       deps = [ "../nstackx_util:nstackx_util.open" ]
       if (board_toolchain_type != "iccarm") {
@@ -130,8 +122,14 @@ if (defined(ohos_lite)) {
       include_dirs = base_include_dirs
       include_dirs += standard_small_diff_include_dirs
       public_configs = [ ":nstackx_ctrl_interface" ]
-      deps = standard_small_deps
-      deps += [ "//build/lite/config/component/cJSON:cjson_shared" ]
+      deps = [
+        "../nstackx_util:nstackx_util.open",
+        "//build/lite/config/component/cJSON:cjson_shared",
+      ]
+      external_deps = [
+        "bounds_checking_function:libsec_shared",
+        "libcoap:libcoap",
+      ]
       if (ohos_kernel_type == "liteos_a") {
         cflags += [
           "-DNSTACKX_WITH_LITEOS",
@@ -166,13 +164,14 @@ if (defined(ohos_lite)) {
     sources += standard_small_diff_src
     include_dirs = base_include_dirs
     include_dirs += standard_small_diff_include_dirs
-    include_dirs += [
-      "//third_party/bounds_checking_function/include",
-      "../nstackx_util/platform/unix",
-    ]
+    include_dirs += [ "../nstackx_util/platform/unix" ]
     public_configs = [ ":nstackx_ctrl_interface" ]
-    deps = standard_small_deps
-    deps += [ "//third_party/cJSON:cjson" ]
+    deps = [ "../nstackx_util:nstackx_util.open" ]
+    external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "cJSON:cjson",
+      "libcoap:libcoap",
+    ]
     subsystem_name = "communication"
     innerapi_tags = [ "platformsdk_indirect" ]
     part_name = "dsoftbus"

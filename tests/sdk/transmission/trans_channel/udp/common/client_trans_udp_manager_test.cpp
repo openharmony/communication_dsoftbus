@@ -154,7 +154,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenedTest002, TestSize.Lev
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     ret = TransOnUdpChannelClosed(channel.channelId, SHUTDOWN_REASON_UNKNOWN);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, ret);
 
     channel.businessType = BUSINESS_TYPE_FILE;
     ret = TransOnUdpChannelOpened(strSessionName, &channel, &udpPort);
@@ -167,7 +167,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenedTest002, TestSize.Lev
 
     channel.businessType = TEST_COUNT;
     ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH, ret);
 }
 
 /**
@@ -208,7 +208,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenedTest003, TestSize.Lev
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     ret = TransOnUdpChannelQosEvent(TEST_CHANNELID, TEST_EVENT_ID, TEST_COUNT, &tvList);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, ret);
 
     channel.businessType = BUSINESS_TYPE_BUTT;
     ret = TransOnUdpChannelOpenFailed(TEST_CHANNELID, TEST_ERRCODE);
@@ -241,7 +241,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelClosedTest001, TestSize.Lev
 {
     int32_t ret;
     ret = TransOnUdpChannelClosed(TEST_CHANNELID, SHUTDOWN_REASON_UNKNOWN);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, ret);
 }
 
 /**
@@ -255,7 +255,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelQosEventTest001, TestSize.L
     int32_t ret;
     QosTv tvList;
     ret = TransOnUdpChannelQosEvent(TEST_CHANNELID, TEST_EVENT_ID, TEST_COUNT, &tvList);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, ret);
 }
 
 /**
@@ -268,7 +268,7 @@ HWTEST_F(ClientTransUdpManagerTest, ClientTransCloseUdpChannelTest001, TestSize.
 {
     int32_t ret;
     ret = ClientTransCloseUdpChannel(TEST_CHANNELID, SHUTDOWN_REASON_UNKNOWN);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, ret);
 }
 
 /**
@@ -363,11 +363,11 @@ HWTEST_F(ClientTransUdpManagerTest, TransGetUdpChannelByFileIdTest001, TestSize.
     UdpChannel udpChannel;
     (void)memset_s(&udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
     ret = TransGetUdpChannelByFileId(TEST_DATA_TYPE, &udpChannel);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND, ret);
 
     ClientTransUdpMgrDeinit();
     ret = TransGetUdpChannelByFileId(TEST_DATA_TYPE, &udpChannel);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 }
 
 /**

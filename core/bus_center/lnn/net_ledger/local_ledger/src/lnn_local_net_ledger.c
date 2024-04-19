@@ -28,6 +28,7 @@
 #include "lnn_device_info_recovery.h"
 #include "lnn_parameter_utils.h"
 #include "lnn_log.h"
+#include "lnn_ohos_account.h"
 #include "lnn_p2p_info.h"
 #include "lnn_feature_capability.h"
 #include "lnn_settingdata_event_monitor.h"
@@ -48,8 +49,6 @@
 #define SUPPORT_EXCHANGE_NETWORKID 1
 #define SUPPORT_NORMALIZED_LINK 2
 #define DEFAULT_CONN_SUB_FEATURE 1
-#define OH_OS_TYPE 10
-#define HO_OS_TYPE 11
 
 typedef struct {
     NodeInfo localInfo;
@@ -1168,11 +1167,11 @@ void LnnUpdateStateVersion()
 
 static int32_t LlGetStaticCapLen(void *buf, uint32_t len)
 {
-    if (buf == NULL || len < sizeof(int32_t)) {
+    if (buf == NULL || len > sizeof(int32_t)) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    *((int32_t *)buf) = g_localNetLedger.localInfo.staticCapLen;
+    *((int64_t *)buf) = g_localNetLedger.localInfo.staticCapLen;
     return SOFTBUS_OK;
 }
 
@@ -1830,6 +1829,10 @@ int32_t LnnInitLocalLedgerDelay(void)
     DeviceBasicInfo *deviceInfo = &nodeInfo->deviceInfo;
     if (GetCommonDevInfo(COMM_DEVICE_KEY_UDID, deviceInfo->deviceUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "GetCommonDevInfo: COMM_DEVICE_KEY_UDID failed");
+        return SOFTBUS_ERR;
+    }
+    if (LnnInitOhosAccount() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "init default ohos account failed");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;

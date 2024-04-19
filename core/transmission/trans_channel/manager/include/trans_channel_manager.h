@@ -46,7 +46,7 @@ int32_t TransNotifyAuthSuccess(int32_t channelId, int32_t channelType);
 
 int32_t TransReleaseUdpResources(int32_t channelId);
 
-int32_t TransCloseChannel(int32_t channelId, int32_t channelType);
+int32_t TransCloseChannel(const char *sessionName, int32_t channelId, int32_t channelType);
 
 int32_t TransSendMsg(int32_t channelId, int32_t channelType, const void *data, uint32_t len, int32_t msgType);
 
@@ -56,6 +56,8 @@ int32_t TransGetNameByChanId(const TransInfo *info, char *pkgName, char *session
     uint16_t pkgLen, uint16_t sessionNameLen);
 
 int32_t TransGetAndComparePid(pid_t pid, int32_t channelId, int32_t channelType);
+
+int32_t TransGetAndComparePidBySession(pid_t pid, const char *sessionName, int32_t sessionId);
 
 int32_t TransGetAppInfoByChanId(int32_t channelId, int32_t channelType, AppInfo* appInfo);
 

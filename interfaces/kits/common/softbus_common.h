@@ -440,6 +440,8 @@ typedef enum {
     MID_FREQ_CYCLE = 60,
     /**< Heartbeat interval 5 * 60 sec */
     LOW_FREQ_CYCLE = 5 * 60,
+    /**< Heartbeat interval 10 * 60 sec */
+    DEFT_FREQ_CYCLE = 10 * 60,
 } ModeCycle;
 
 /**
