@@ -142,7 +142,7 @@ static void CondWait(void)
 static void OnLaneAllocSuccess(uint32_t laneHandle, const LaneConnInfo *info)
 {
     ASSERT_NE(info, nullptr) << "invalid info";
-    GTEST_LOG_(INFO) << "alloc lane success, laneReqId=" << laneHandle << ", linkType=" << info->type;
+    GTEST_LOG_(INFO) << "alloc lane successful, laneReqId=" << laneHandle << ", linkType=" << info->type;
     const LnnLaneManager *laneManager = GetLaneManager();
     int32_t ret = laneManager->lnnFreeLane(laneHandle);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -151,7 +151,7 @@ static void OnLaneAllocSuccess(uint32_t laneHandle, const LaneConnInfo *info)
 
 static void OnLaneAllocFail(uint32_t laneHandle, int32_t errCode)
 {
-    GTEST_LOG_(INFO) << "alloc lane fail, laneReqId=" << laneHandle;
+    GTEST_LOG_(INFO) << "alloc lane failed, laneReqId=" << laneHandle;
     (void)errCode;
     const LnnLaneManager *laneManager = GetLaneManager();
     int32_t ret = laneManager->lnnFreeLane(laneHandle);
@@ -176,38 +176,44 @@ static void OnLaneLinkSuccess(uint32_t reqId, const LaneLinkInfo *linkInfo)
 static void OnLaneAllocSuccessForHml(uint32_t laneHandle, const LaneConnInfo *info)
 {
     ASSERT_NE(info, nullptr) << "invalid connInfo";
-    GTEST_LOG_(INFO) << "alloc lane success, linkType=" << info->type;
+    GTEST_LOG_(INFO) << "alloc lane successful, linkType=" << info->type;
     EXPECT_EQ(info->type, LANE_HML);
 }
 
 static void OnLaneAllocSuccessForP2p(uint32_t laneHandle, const LaneConnInfo *info)
 {
     ASSERT_NE(info, nullptr) << "invalid connInfo";
-    GTEST_LOG_(INFO) << "alloc lane success, linkType=" << info->type;
+    GTEST_LOG_(INFO) << "alloc lane successful, linkType=" << info->type;
     EXPECT_EQ(info->type, LANE_P2P);
 }
 
 static void OnLaneAllocSuccessForBr(uint32_t laneHandle, const LaneConnInfo *info)
 {
     ASSERT_NE(info, nullptr) << "invalid connInfo";
-    GTEST_LOG_(INFO) << "alloc lane success, linkType=" << info->type;
+    GTEST_LOG_(INFO) << "alloc lane successful, linkType=" << info->type;
     EXPECT_EQ(info->type, LANE_BR);
 }
 
 static void OnLaneAllocSuccessForWlan5g(uint32_t laneHandle, const LaneConnInfo *info)
 {
     ASSERT_NE(info, nullptr) << "invalid connInfo";
-    GTEST_LOG_(INFO) << "alloc lane success, linkType=" << info->type;
+    GTEST_LOG_(INFO) << "alloc lane successful, linkType=" << info->type;
     EXPECT_EQ(info->type, LANE_WLAN_5G);
 }
 
 static int32_t AddLaneResourceForAllocTest(LaneLinkType linkType)
 {
     LaneLinkInfo linkInfo;
-    (void)memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
+    if (memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo)) != EOK) {
+        return SOFTBUS_MEM_ERR;
+    }
     linkInfo.type = linkType;
-    (void)strncpy_s(linkInfo.linkInfo.p2p.connInfo.peerIp, IP_LEN, PEER_IP_HML, strlen(PEER_IP_HML));
-    (void)strncpy_s(linkInfo.peerUdid, UDID_BUF_LEN, PEER_UDID, strlen(PEER_UDID));
+    if (strncpy_s(linkInfo.linkInfo.p2p.connInfo.peerIp, IP_LEN, PEER_IP_HML, strlen(PEER_IP_HML)) != EOK) {
+        return SOFTBUS_STRCPY_ERR;
+    }
+    if (strncpy_s(linkInfo.peerUdid, UDID_BUF_LEN, PEER_UDID, strlen(PEER_UDID)) != EOK) {
+        return SOFTBUS_STRCPY_ERR;
+    }
     return AddLaneResourceToPool(&linkInfo, LANE_ID_BASE, false);
 }
 
@@ -216,8 +222,8 @@ static void CreateAllocInfoForAllocTest(LaneType laneType, LaneTransType transTy
 {
     ASSERT_NE(allocInfo, nullptr) << "invalid allocInfo";
     allocInfo->type = laneType;
-    (void)strncpy_s(allocInfo->networkId, NETWORK_ID_BUF_LEN,
-        NODE_NETWORK_ID, strlen(NODE_NETWORK_ID));
+    ASSERT_EQ(strncpy_s(allocInfo->networkId, NETWORK_ID_BUF_LEN,
+        NODE_NETWORK_ID, strlen(NODE_NETWORK_ID)), EOK);
     allocInfo->transType = transType;
     allocInfo->qosRequire.minBW = minBW;
     allocInfo->qosRequire.maxLaneLatency = DEFAULT_QOSINFO_MAX_LATENCY;
@@ -558,7 +564,7 @@ HWTEST_F(LNNLaneMockTest, LANE_RE_ALLOC_Test_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_ERR);
 
     LaneAllocInfo allocInfo;
-    (void)memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo));
+    ASSERT_EQ(memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo)), EOK);
     allocInfo.type = LANE_TYPE_BUTT;
 
     ret = laneManager->lnnReAllocLane(laneReqId, LANE_ID_BASE, &allocInfo, nullptr);
@@ -609,7 +615,7 @@ HWTEST_F(LNNLaneMockTest, LANE_RE_ALLOC_Test_002, TestSize.Level1)
     mock.SetDefaultResultForAlloc(63, 63, 8, 8);
 
     LaneAllocInfo allocInfo;
-    (void)memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo));
+    ASSERT_EQ(memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo)), EOK);
     CreateAllocInfoForAllocTest(laneType, LANE_T_MSG, DEFAULT_QOSINFO_MIN_BW + HIGH_BW, &allocInfo);
     ret = laneManager->lnnReAllocLane(laneReqId, LANE_ID_BASE, &allocInfo, &listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -659,7 +665,7 @@ HWTEST_F(LNNLaneMockTest, LANE_RE_ALLOC_Test_003, TestSize.Level1)
     EXPECT_CALL(mock, ConnSendSocketData).WillRepeatedly(Return(sizeof(buf)));
 
     LaneAllocInfo allocInfo;
-    (void)memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo));
+    ASSERT_EQ(memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo)), EOK);
     CreateAllocInfoForAllocTest(laneType, LANE_T_MSG, DEFAULT_QOSINFO_MIN_BW + MID_BW, &allocInfo);
     ret = laneManager->lnnReAllocLane(laneReqId, LANE_ID_BASE, &allocInfo, &listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -701,7 +707,7 @@ HWTEST_F(LNNLaneMockTest, LANE_RE_ALLOC_Test_004, TestSize.Level1)
     mock.SetDefaultResultForAlloc(63, 63, 8, 8);
 
     LaneAllocInfo allocInfo;
-    (void)memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo));
+    ASSERT_EQ(memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo)), EOK);
     CreateAllocInfoForAllocTest(laneType, LANE_T_MSG, DEFAULT_QOSINFO_MIN_BW + LOW_BW, &allocInfo);
     ret = laneManager->lnnReAllocLane(laneReqId, LANE_ID_BASE, &allocInfo, &listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -743,7 +749,7 @@ HWTEST_F(LNNLaneMockTest, LANE_RE_ALLOC_Test_005, TestSize.Level1)
     mock.SetDefaultResultForAlloc(15, 15, 8, 8);
 
     LaneAllocInfo allocInfo;
-    (void)memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo));
+    ASSERT_EQ(memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo)), EOK);
     CreateAllocInfoForAllocTest(laneType, LANE_T_MSG, LOW_BW - DEFAULT_QOSINFO_MIN_BW, &allocInfo);
     ret = laneManager->lnnReAllocLane(laneReqId, LANE_ID_BASE, &allocInfo, &listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -782,7 +788,7 @@ HWTEST_F(LNNLaneMockTest, LANE_CANCEL_Test_001, TestSize.Level1)
     mock.SetDefaultResultForAlloc(63, 63, 0, 0);
 
     LaneAllocInfo allocInfo;
-    (void)memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo));
+    ASSERT_EQ(memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo)), EOK);
     CreateAllocInfoForAllocTest(laneType, LANE_T_MSG, DEFAULT_QOSINFO_MIN_BW + HIGH_BW, &allocInfo);
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -822,7 +828,7 @@ HWTEST_F(LNNLaneMockTest, LANE_CANCEL_Test_002, TestSize.Level1)
     mock.SetDefaultResultForAlloc(63, 63, 0, 0);
 
     LaneAllocInfo allocInfo;
-    (void)memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo));
+    ASSERT_EQ(memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo)), EOK);
     CreateAllocInfoForAllocTest(laneType, LANE_T_MSG, DEFAULT_QOSINFO_MIN_BW + HIGH_BW, &allocInfo);
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -862,7 +868,7 @@ HWTEST_F(LNNLaneMockTest, LANE_CANCEL_Test_003, TestSize.Level1)
     mock.SetDefaultResultForAlloc(63, 63, 0, 0);
 
     LaneAllocInfo allocInfo;
-    (void)memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo));
+    ASSERT_EQ(memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo)), EOK);
     CreateAllocInfoForAllocTest(laneType, LANE_T_MSG, DEFAULT_QOSINFO_MIN_BW + HIGH_BW, &allocInfo);
     int32_t ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -1922,13 +1928,13 @@ HWTEST_F(LNNLaneMockTest, LANE_DECISION_MODELS_001, TestSize.Level1)
 HWTEST_F(LNNLaneMockTest, LANE_FIND_LANERESOURCE_BY_LINKADDR_001, TestSize.Level1)
 {
     LaneLinkInfo linkInfo;
-    (void)memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
+    ASSERT_EQ(memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo)), EOK);
     linkInfo.type = LANE_HML;
-    (void)strncpy_s(linkInfo.linkInfo.p2p.connInfo.peerIp, IP_LEN, PEER_IP_HML, strlen(PEER_IP_HML));
-    (void)strncpy_s(linkInfo.peerUdid, UDID_BUF_LEN, PEER_UDID, strlen(PEER_UDID));
+    ASSERT_EQ(strncpy_s(linkInfo.linkInfo.p2p.connInfo.peerIp, IP_LEN, PEER_IP_HML, strlen(PEER_IP_HML)), EOK);
+    ASSERT_EQ(strncpy_s(linkInfo.peerUdid, UDID_BUF_LEN, PEER_UDID, strlen(PEER_UDID)), EOK);
 
     LaneResource laneResourse;
-    (void)memset_s(&laneResourse, sizeof(LaneResource), 0, sizeof(LaneResource));
+    ASSERT_EQ(memset_s(&laneResourse, sizeof(LaneResource), 0, sizeof(LaneResource)), EOK);
     int32_t ret = FindLaneResourceByLinkAddr(nullptr, &laneResourse);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
@@ -1945,16 +1951,16 @@ HWTEST_F(LNNLaneMockTest, LANE_FIND_LANERESOURCE_BY_LINKADDR_001, TestSize.Level
     clientRef++;
 
     LaneLinkInfo linkInfoFind;
-    (void)memset_s(&linkInfoFind, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
+    ASSERT_EQ(memset_s(&linkInfoFind, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo)), EOK);
     linkInfoFind.type = LANE_HML;
     ret = FindLaneResourceByLinkAddr(&linkInfoFind, &laneResourse);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 
-    (void)strncpy_s(linkInfoFind.peerUdid, UDID_BUF_LEN, PEER_UDID, strlen(PEER_UDID));
+    ASSERT_EQ(strncpy_s(linkInfoFind.peerUdid, UDID_BUF_LEN, PEER_UDID, strlen(PEER_UDID)), EOK);
     ret = FindLaneResourceByLinkAddr(&linkInfoFind, &laneResourse);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 
-    (void)strncpy_s(linkInfoFind.linkInfo.p2p.connInfo.peerIp, IP_LEN, PEER_IP_HML, strlen(PEER_IP_HML));
+    ASSERT_EQ(strncpy_s(linkInfoFind.linkInfo.p2p.connInfo.peerIp, IP_LEN, PEER_IP_HML, strlen(PEER_IP_HML)), EOK);
     ret = FindLaneResourceByLinkAddr(&linkInfoFind, &laneResourse);
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_FALSE(laneResourse.isServerSide);
@@ -1977,13 +1983,13 @@ HWTEST_F(LNNLaneMockTest, LANE_FIND_LANERESOURCE_BY_LINKADDR_001, TestSize.Level
 HWTEST_F(LNNLaneMockTest, LANE_FIND_LANERESOURCE_BY_LINKTYPE_001, TestSize.Level1)
 {
     LaneLinkInfo linkInfo;
-    (void)memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
+    ASSERT_EQ(memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo)), EOK);
     linkInfo.type = LANE_HML;
-    (void)strncpy_s(linkInfo.linkInfo.p2p.connInfo.peerIp, IP_LEN, PEER_IP_HML, strlen(PEER_IP_HML));
-    (void)strncpy_s(linkInfo.peerUdid, UDID_BUF_LEN, PEER_UDID, strlen(PEER_UDID));
+    ASSERT_EQ(strncpy_s(linkInfo.linkInfo.p2p.connInfo.peerIp, IP_LEN, PEER_IP_HML, strlen(PEER_IP_HML)), EOK);
+    ASSERT_EQ(strncpy_s(linkInfo.peerUdid, UDID_BUF_LEN, PEER_UDID, strlen(PEER_UDID)), EOK);
 
     LaneResource laneResourse;
-    (void)memset_s(&laneResourse, sizeof(LaneResource), 0, sizeof(LaneResource));
+    ASSERT_EQ(memset_s(&laneResourse, sizeof(LaneResource), 0, sizeof(LaneResource)), EOK);
     int32_t ret = FindLaneResourceByLinkType(nullptr, LANE_HML, &laneResourse);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
@@ -2030,13 +2036,13 @@ HWTEST_F(LNNLaneMockTest, LANE_FIND_LANERESOURCE_BY_LINKTYPE_001, TestSize.Level
 HWTEST_F(LNNLaneMockTest, LANE_FIND_LANERESOURCE_BY_LANEID_001, TestSize.Level1)
 {
     LaneLinkInfo linkInfo;
-    (void)memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
+    ASSERT_EQ(memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo)), EOK);
     linkInfo.type = LANE_HML;
-    (void)strncpy_s(linkInfo.linkInfo.p2p.connInfo.peerIp, IP_LEN, PEER_IP_HML, strlen(PEER_IP_HML));
-    (void)strncpy_s(linkInfo.peerUdid, UDID_BUF_LEN, PEER_UDID, strlen(PEER_UDID));
+    ASSERT_EQ(strncpy_s(linkInfo.linkInfo.p2p.connInfo.peerIp, IP_LEN, PEER_IP_HML, strlen(PEER_IP_HML)), EOK);
+    ASSERT_EQ(strncpy_s(linkInfo.peerUdid, UDID_BUF_LEN, PEER_UDID, strlen(PEER_UDID)), EOK);
 
     LaneResource laneResourse;
-    (void)memset_s(&laneResourse, sizeof(LaneResource), 0, sizeof(LaneResource));
+    ASSERT_EQ(memset_s(&laneResourse, sizeof(LaneResource), 0, sizeof(LaneResource)), EOK);
     uint64_t laneId = INVALID_LANE_ID;
     int32_t ret = FindLaneResourceByLaneId(laneId, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -2226,10 +2232,10 @@ HWTEST_F(LNNLaneMockTest, LANE_INIT_RELIABLITY_001, TestSize.Level1)
 HWTEST_F(LNNLaneMockTest, LANE_DEL_AND_ADD_LANERESOURCEITEM_001, TestSize.Level1)
 {
     LaneLinkInfo linkInfo;
-    (void)memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
+    ASSERT_EQ(memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo)), EOK);
     linkInfo.type = LANE_HML;
-    (void)strncpy_s(linkInfo.linkInfo.p2p.connInfo.peerIp, IP_LEN, PEER_IP_HML, strlen(PEER_IP_HML));
-    (void)strncpy_s(linkInfo.peerUdid, UDID_BUF_LEN, PEER_UDID, strlen(PEER_UDID));
+    ASSERT_EQ(strncpy_s(linkInfo.linkInfo.p2p.connInfo.peerIp, IP_LEN, PEER_IP_HML, strlen(PEER_IP_HML)), EOK);
+    ASSERT_EQ(strncpy_s(linkInfo.peerUdid, UDID_BUF_LEN, PEER_UDID, strlen(PEER_UDID)), EOK);
 
     uint64_t laneId = INVALID_LANE_ID;
     int32_t ret = AddLaneResourceToPool(nullptr, laneId, false);
@@ -2247,7 +2253,7 @@ HWTEST_F(LNNLaneMockTest, LANE_DEL_AND_ADD_LANERESOURCEITEM_001, TestSize.Level1
     clientRef++;
 
     LaneResource laneResourse;
-    (void)memset_s(&laneResourse, sizeof(LaneResource), 0, sizeof(LaneResource));
+    ASSERT_EQ(memset_s(&laneResourse, sizeof(LaneResource), 0, sizeof(LaneResource)), EOK);
     ret = FindLaneResourceByLaneId(laneId, &laneResourse);
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_FALSE(laneResourse.isServerSide);
@@ -2279,10 +2285,10 @@ HWTEST_F(LNNLaneMockTest, LANE_DEL_AND_ADD_LANERESOURCEITEM_001, TestSize.Level1
 HWTEST_F(LNNLaneMockTest, LANE_DEL_AND_ADD_LANERESOURCEITEM_002, TestSize.Level1)
 {
     LaneLinkInfo linkInfo;
-    (void)memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
+    ASSERT_EQ(memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo)), EOK);
     linkInfo.type = LANE_HML;
-    (void)strncpy_s(linkInfo.linkInfo.p2p.connInfo.peerIp, IP_LEN, PEER_IP_HML, strlen(PEER_IP_HML));
-    (void)strncpy_s(linkInfo.peerUdid, UDID_BUF_LEN, PEER_UDID, strlen(PEER_UDID));
+    ASSERT_EQ(strncpy_s(linkInfo.linkInfo.p2p.connInfo.peerIp, IP_LEN, PEER_IP_HML, strlen(PEER_IP_HML)), EOK);
+    ASSERT_EQ(strncpy_s(linkInfo.peerUdid, UDID_BUF_LEN, PEER_UDID, strlen(PEER_UDID)), EOK);
 
     uint64_t laneId = INVALID_LANE_ID;
     int32_t ret = AddLaneResourceToPool(nullptr, laneId, true);
@@ -2300,7 +2306,7 @@ HWTEST_F(LNNLaneMockTest, LANE_DEL_AND_ADD_LANERESOURCEITEM_002, TestSize.Level1
     EXPECT_EQ(ret, SOFTBUS_ERR);
 
     LaneResource laneResourse;
-    (void)memset_s(&laneResourse, sizeof(LaneResource), 0, sizeof(LaneResource));
+    ASSERT_EQ(memset_s(&laneResourse, sizeof(LaneResource), 0, sizeof(LaneResource)), EOK);
     ret = FindLaneResourceByLaneId(laneId, &laneResourse);
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_TRUE(laneResourse.isServerSide);
