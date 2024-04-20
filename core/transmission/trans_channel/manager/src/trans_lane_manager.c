@@ -159,6 +159,8 @@ void TransLaneMgrDeinit(void)
     LIST_FOR_EACH_ENTRY_SAFE(laneItem, nextLaneItem, &g_channelLaneList->list, TransLaneInfo, node) {
         ListDelete(&(laneItem->node));
         if (laneItem->isQosLane) {
+            TRANS_CHECK_AND_RETURN_LOGE(GetLaneManager() != NULL, TRANS_CTRL, "GetLaneManager is null");
+            TRANS_CHECK_AND_RETURN_LOGE(GetLaneManager()->lnnFreeLane != NULL, TRANS_CTRL, "lnnFreeLane is null");
             GetLaneManager()->lnnFreeLane(laneItem->laneHandle);
         } else {
             LnnFreeLane(laneItem->laneHandle);
@@ -263,6 +265,10 @@ int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType)
                 laneItem->channelId, laneItem->channelType);
             g_channelLaneList->cnt--;
             if (laneItem->isQosLane) {
+                TRANS_CHECK_AND_RETURN_RET_LOGE(GetLaneManager() != NULL, SOFTBUS_TRANS_GET_LANE_INFO_ERR,
+                    TRANS_CTRL, "GetLaneManager is null");
+                TRANS_CHECK_AND_RETURN_RET_LOGE(GetLaneManager()->lnnFreeLane != NULL,
+                    SOFTBUS_TRANS_GET_LANE_INFO_ERR, TRANS_CTRL, "lnnFreeLane is null");
                 GetLaneManager()->lnnFreeLane(laneItem->laneHandle);
             } else {
                 LnnFreeLane(laneItem->laneHandle);
@@ -280,6 +286,7 @@ int32_t TransLaneMgrDelLane(int32_t channelId, int32_t channelType)
 
 void TransLaneMgrDeathCallback(const char *pkgName, int32_t pid)
 {
+    (void)TransDeleteSocketChannelInfoByPid(pid);
     if (pkgName == NULL || g_channelLaneList == NULL) {
         TRANS_LOGE(TRANS_INIT, "trans lane manager hasn't init.");
         return;
@@ -298,6 +305,8 @@ void TransLaneMgrDeathCallback(const char *pkgName, int32_t pid)
             TRANS_LOGI(TRANS_SVC, "death del lane. pkgName=%{public}s, channelId=%{public}d, channelType=%{public}d",
                 pkgName, laneItem->channelId, laneItem->channelType);
             if (laneItem->isQosLane) {
+                TRANS_CHECK_AND_RETURN_LOGE(GetLaneManager() != NULL, TRANS_CTRL, "GetLaneManager is null");
+                TRANS_CHECK_AND_RETURN_LOGE(GetLaneManager()->lnnFreeLane != NULL, TRANS_CTRL, "lnnFreeLane is null");
                 GetLaneManager()->lnnFreeLane(laneItem->laneHandle);
             } else {
                 LnnFreeLane(laneItem->laneHandle);
@@ -462,7 +471,7 @@ int32_t TransUpdateSocketChannelInfoBySession(
 
 int32_t TransUpdateSocketChannelLaneInfoBySession(
     const char *sessionName, int32_t sessionId, uint32_t laneHandle, bool isQosLane, bool isAsync)
-{ 
+{
     if (sessionName == NULL) {
         TRANS_LOGE(TRANS_SVC, "Invaild param, sessionName is null");
         return SOFTBUS_TRANS_INVALID_SESSION_NAME;
@@ -515,14 +524,14 @@ int32_t TransDeleteSocketChannelInfoBySession(const char *sessionName, int32_t s
     LIST_FOR_EACH_ENTRY_SAFE(socketItem, next, &(g_socketChannelList->list), SocketWithChannelInfo, node) {
         if (strcmp(socketItem->sessionName, sessionName) == 0 && socketItem->sessionId == sessionId) {
             ListDelete(&(socketItem->node));
-            char *tmpName = NULL;
-            Anonymize(sessionName, &tmpName);
-            TRANS_LOGI(TRANS_CTRL, "delete socket channel info, sessionName=%{public}s, sessionId=%{public}d",
-                tmpName, socketItem->sessionId);
-            AnonymizeFree(tmpName);
             g_socketChannelList->cnt--;
             SoftBusFree(socketItem);
             (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
+            char *tmpName = NULL;
+            Anonymize(sessionName, &tmpName);
+            TRANS_LOGI(TRANS_CTRL, "delete socket channel info, sessionName=%{public}s, sessionId=%{public}d",
+                tmpName, sessionId);
+            AnonymizeFree(tmpName);
             return SOFTBUS_OK;
         }
     }
@@ -546,17 +555,43 @@ int32_t TransDeleteSocketChannelInfoByChannel(int32_t channelId, int32_t channel
     LIST_FOR_EACH_ENTRY_SAFE(socketItem, next, &(g_socketChannelList->list), SocketWithChannelInfo, node) {
         if (socketItem->channelId == channelId && socketItem->channelType == channelType) {
             ListDelete(&(socketItem->node));
-            TRANS_LOGI(TRANS_CTRL, "delete socket channel info, channelId=%{public}d, channelType=%{public}d",
-                channelId, channelType);
             g_socketChannelList->cnt--;
             SoftBusFree(socketItem);
             (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
+            TRANS_LOGI(TRANS_CTRL, "delete socket channel info, channelId=%{public}d, channelType=%{public}d",
+                channelId, channelType);
             return SOFTBUS_OK;
         }
     }
     (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
     TRANS_LOGD(
         TRANS_SVC, "socket info not found. channelId=%{public}d, channelType=%{public}d", channelId, channelType);
+    return SOFTBUS_NOT_FIND;
+}
+
+int32_t TransDeleteSocketChannelInfoByPid(int32_t pid)
+{
+    if (g_socketChannelList == NULL) {
+        TRANS_LOGE(TRANS_INIT, "socket info manager hasn't init.");
+        return SOFTBUS_NO_INIT;
+    }
+    if (SoftBusMutexLock(&(g_socketChannelList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    SocketWithChannelInfo *socketItem = NULL;
+    SocketWithChannelInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(socketItem, next, &(g_socketChannelList->list), SocketWithChannelInfo, node) {
+        if (socketItem->pid == pid) {
+            ListDelete(&(socketItem->node));
+            g_socketChannelList->cnt--;
+            SoftBusFree(socketItem);
+            (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
+            TRANS_LOGI(TRANS_CTRL, "delete socket channel info, pid=%{public}d", pid);
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
     return SOFTBUS_NOT_FIND;
 }
 
