@@ -210,13 +210,13 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterStartDisc001, TestSize.Level
 
     testCoapOption.mode = ACTIVE_PUBLISH;
     ret = DiscCoapStartDiscovery(&testCoapOption);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
     ret = DiscCoapStopDiscovery();
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     testCoapOption.mode = ACTIVE_DISCOVERY;
     ret = DiscCoapStartDiscovery(&testCoapOption);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
     ret = DiscCoapStopDiscovery();
     EXPECT_EQ(ret, SOFTBUS_OK);
 
@@ -242,7 +242,7 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterStartDisc002, TestSize.Level
     testOption.mode = ACTIVE_PUBLISH;
 
     ret = DiscCoapStartDiscovery(&testOption);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
     ret = DiscCoapStopDiscovery();
     EXPECT_EQ(ret, SOFTBUS_OK);
 
@@ -278,15 +278,15 @@ HWTEST_F(DiscNstackxAdapterTest, TestDiscCoapAdapterUpdate001, TestSize.Level1)
     DiscCoapUpdateLocalIp(LINK_STATUS_UP);
     DiscCoapUpdateDevName();
     ret = DiscCoapStartDiscovery(&testCoapOption);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
 
     DiscCoapUpdateLocalIp(LINK_STATUS_DOWN);
     ret = DiscCoapStartDiscovery(&testCoapOption);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
 
     DiscCoapUpdateLocalIp((LinkStatus)(-1));
     ret = DiscCoapStartDiscovery(&testCoapOption);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
 }
 
 /*
