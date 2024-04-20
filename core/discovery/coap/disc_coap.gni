@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -29,6 +29,7 @@ disc_coap_inc = [
   "$dsoftbus_root_path/core/discovery/coap/interface",
   "$dsoftbus_root_path/core/discovery/coap/common/include",
   "$dsoftbus_root_path/core/discovery/coap/nstackx_coap/include",
+  "$dsoftbus_root_path/interfaces/inner_kits/lnn",
   "$dsoftbus_root_path/interfaces/kits/bus_center",
   "$dsoftbus_root_path/interfaces/kits/common",
   "$dsoftbus_root_path/interfaces/kits/discovery",

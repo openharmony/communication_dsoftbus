@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,6 +41,10 @@ void LnnHbOnTrustedRelationReduced(void);
 
 int32_t LnnInitHeartbeat(void);
 void LnnDeinitHeartbeat(void);
+
+int32_t LnnTriggerDataLevelHeartBeat();
+void LnnRegDataLevelChangeCb(const IDataLevelChangeCallback *callback);
+void LnnUnregDataLevelChangeCb();
 
 #ifdef __cplusplus
 }

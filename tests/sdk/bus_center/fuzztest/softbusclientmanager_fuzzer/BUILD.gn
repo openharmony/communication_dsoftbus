@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -23,7 +23,10 @@ dsoftbus_root_path = "../../../../.."
 ohos_fuzztest("SoftBusClientManagerFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
   fuzz_config_file = "$dsoftbus_root_path/tests/sdk/bus_center/fuzztest/softbusclientmanager_fuzzer"
-  include_dirs = [ "$dsoftbus_root_path/sdk/bus_center/manager/include" ]
+  include_dirs = [
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/sdk/bus_center/manager/include",
+  ]
   cflags = [
     "-g",
     "-O0",

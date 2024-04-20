@@ -232,6 +232,23 @@ int32_t SoftBusServer::SetNodeDataChangeFlag(const char *pkgName, const char *ne
     return LnnIpcSetNodeDataChangeFlag(pkgName, networkId, dataChangeFlag);
 }
 
+int32_t SoftBusServer::RegDataLevelChangeCb(const char *pkgName)
+{
+    int32_t callingPid = (int32_t)OHOS::IPCSkeleton::GetCallingPid();
+    return LnnIpcRegDataLevelChangeCb(pkgName, callingPid);
+}
+
+int32_t SoftBusServer::UnregDataLevelChangeCb(const char *pkgName)
+{
+    int32_t callingPid = (int32_t)OHOS::IPCSkeleton::GetCallingPid();
+    return LnnIpcUnregDataLevelChangeCb(pkgName, callingPid);
+}
+
+int32_t SoftBusServer::SetDataLevel(const DataLevel *dataLevel)
+{
+    return LnnIpcSetDataLevel(dataLevel);
+}
+
 int32_t SoftBusServer::StartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy,
     int32_t period)
 {

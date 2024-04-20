@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 #include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "lnn_async_callback_utils.h"
+#include "lnn_ble_heartbeat.h"
 #include "lnn_common_utils.h"
 #include "lnn_decision_center.h"
 #include "lnn_distributed_net_ledger.h"
@@ -907,4 +908,24 @@ void LnnDeinitHeartbeat(void)
     LnnUnregisterEventHandler(LNN_EVENT_USER_STATE_CHANGED, HbUserBackgroundEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_NIGHT_MODE_CHANGED, HbNightModeStateEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_OOBE_STATE_CHANGED, HbOOBEStateEventHandler);
+}
+
+int32_t LnnTriggerDataLevelHeartBeat()
+{
+    LNN_LOGD(LNN_HEART_BEAT, "LnnTriggerDataLevelHeartBeat");
+    if (LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V1, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "ctrl start single ble heartbeat fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+void LnnRegDataLevelChangeCb(const IDataLevelChangeCallback *callback)
+{
+    LnnBleHbRegDataLevelChangeCb(callback);
+}
+
+void LnnUnregDataLevelChangeCb()
+{
+    LnnBleHbUnregDataLevelChangeCb();
 }
