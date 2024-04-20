@@ -791,4 +791,40 @@ HWTEST_F(TransLaneTest, TransLaneTest024, TestSize.Level1)
     SoftBusFree(p2pInfo);
     SoftBusFree(connOpt);
 }
+
+/**
+ * @tc.name: TransLaneTest025
+ * @tc.desc: trans get lane info by Qos.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneTest, TransLaneTest025, TestSize.Level1)
+{
+    (void)TransReqLanePendingInit();
+    uint32_t laneHandle = 1;
+    uint32_t errCode = SOFTBUS_OK;
+    LaneAllocInfo allocInfo = {
+        .type = LANE_TYPE_TRANS,
+    };
+    LaneConnInfo connInfo;
+    int32_t ret = TransGetLaneInfoByQos(NULL, &connInfo, &laneHandle);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = TransGetLaneInfoByQos(&allocInfo, &connInfo, &laneHandle);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    (void)InitLane();
+    ret = TransGetLaneInfoByQos(&allocInfo, &connInfo, &laneHandle);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    ret = TransUpdateLaneConnInfoByLaneHandle(laneHandle, true, &connInfo, false, errCode);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    ret = TransGetLaneInfoByQos(&allocInfo, &connInfo, &laneHandle);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    (void)LnnFreeLane(laneHandle);
+    DeinitLane();
+    TransReqLanePendingDeinit();
+}
 } // namespace OHOS
