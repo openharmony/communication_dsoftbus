@@ -140,6 +140,36 @@ int32_t ServerIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkI
     return ret;
 }
 
+int32_t ServerIpcRegDataLevelChangeCb(const char *pkgName)
+{
+    if (g_serverProxy == nullptr) {
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
+        return SOFTBUS_SERVER_NOT_INIT;
+    }
+    int ret = g_serverProxy->RegDataLevelChangeCb(pkgName);
+    return ret;
+}
+
+int32_t ServerIpcUnregDataLevelChangeCb(const char *pkgName)
+{
+    if (g_serverProxy == nullptr) {
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
+        return SOFTBUS_SERVER_NOT_INIT;
+    }
+    int ret = g_serverProxy->UnregDataLevelChangeCb(pkgName);
+    return ret;
+}
+
+int32_t ServerIpcSetDataLevel(const DataLevel *dataLevel)
+{
+    if (g_serverProxy == nullptr) {
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
+        return SOFTBUS_SERVER_NOT_INIT;
+    }
+    int ret = g_serverProxy->SetDataLevel(dataLevel);
+    return ret;
+}
+
 int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen)
 {
     if (g_serverProxy == nullptr) {

@@ -186,6 +186,30 @@ extern "C" {
 #define DATA_CHANGE_FLAG_BUF_LEN 2
 
 /**
+ * @brief Indicates the maximum length of the database dynamic level in <b>IDataLevelCb</b>.
+ *
+ */
+#define DATA_DYNAMIC_LEVEL_BUF_LEN 2
+
+/**
+ * @brief Indicates the maximum length of the database static level in <b>IDataLevelCb</b>.
+ *
+ */
+#define DATA_STATIC_LEVEL_BUF_LEN 2
+
+/**
+ * @brief Indicates the maximum length of the database switch level in <b>IDataLevelCb</b>.
+ *
+ */
+#define DATA_SWITCH_LEVEL_BUF_LEN 4
+
+/**
+ * @brief Indicates the maximum length of the database switch length in <b>IDataLevelCb</b>.
+ *
+ */
+#define DATA_SWITCH_LENGTH_BUF_LEN 2
+
+/**
  * @brief Indicates the maximum length of the node address.
  *
  */

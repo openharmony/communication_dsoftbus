@@ -49,6 +49,7 @@ public:
     void OnPublishLNNResult(int32_t publishId, int32_t reason) override;
     void OnRefreshLNNResult(int32_t refreshId, int32_t reason) override;
     void OnRefreshDeviceFound(const void *device, uint32_t deviceLen) override;
+    void OnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo) override;
 
 private:
     int32_t OnDeviceFoundInner(MessageParcel &data, MessageParcel &reply);
@@ -72,6 +73,7 @@ private:
     int32_t OnRefreshLNNResultInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnRefreshDeviceFoundInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnClientPermissonChangeInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnDataLevelChangedInner(MessageParcel &data, MessageParcel &reply);
 
     using SoftBusClientStubFunc =
         int32_t (SoftBusClientStub::*)(MessageParcel &data, MessageParcel &reply);

@@ -16,6 +16,8 @@
 #ifndef CLIENT_BUS_CENTER_MANAGER_H
 #define CLIENT_BUS_CENTER_MANAGER_H
 
+#include "data_level.h"
+#include "data_level_inner.h"
 #include "softbus_bus_center.h"
 
 #ifdef __cplusplus
@@ -34,6 +36,10 @@ int32_t GetLocalNodeDeviceInfoInner(const char *pkgName, NodeBasicInfo *info);
 int32_t GetNodeKeyInfoInner(const char *pkgName, const char *networkId,
     NodeDeviceInfoKey key, uint8_t *info, int32_t infoLen);
 int32_t SetNodeDataChangeFlagInner(const char *pkgName, const char *networkId, uint16_t dataChangeFlag);
+int32_t RegDataLevelChangeCbInner(const char *pkgName, IDataLevelCb *callback);
+int32_t UnregDataLevelChangeCbInner(const char *pkgName);
+int32_t SetDataLevelInner(const DataLevel *dataLevel);
+
 int32_t StartTimeSyncInner(const char *pkgName, const char *targetNetworkId, TimeSyncAccuracy accuracy,
     TimeSyncPeriod period, ITimeSyncCb *cb);
 int32_t StopTimeSyncInner(const char *pkgName, const char *targetNetworkId);
@@ -55,6 +61,7 @@ int32_t LnnOnTimeSyncResult(const void *info, int retCode);
 void LnnOnPublishLNNResult(int32_t publishId, int32_t reason);
 void LnnOnRefreshLNNResult(int32_t refreshId, int32_t reason);
 void LnnOnRefreshDeviceFound(const void *device);
+void LnnOnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo);
 
 int32_t DiscRecoveryPublish(void);
 int32_t DiscRecoverySubscribe(void);

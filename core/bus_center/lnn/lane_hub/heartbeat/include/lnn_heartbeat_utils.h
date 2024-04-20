@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include <stdint.h>
 
 #include "softbus_common.h"
+#include "data_level_inner.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -103,12 +104,19 @@ typedef enum {
 typedef struct {
     uint8_t capabiltiy;
     int16_t stateVersion;
+    uint16_t staticLevel;
+    uint16_t switchLength;
+    uint32_t switchLevel;
 } HbRespData;
 #define STATE_VERSION_INVALID (-1)
 #define ENABLE_COC_CAP (1 << 0)
 #define P2P_GO (1 << 1)
 #define P2P_GC (1 << 2)
 #define ENABLE_WIFI_CAP (1 << 3)
+
+typedef struct {
+    int32_t (*OnDataLevelChanged)(const char *networkId, const DataLevelInfo *dataLevelInfo);
+} IDataLevelChangeCallback;
 
 typedef bool (*VisitHbTypeCb)(LnnHeartbeatType *typeSet, LnnHeartbeatType eachType, void *data);
 bool LnnVisitHbTypeSet(VisitHbTypeCb callback, LnnHeartbeatType *typeSet, void *data);
