@@ -30,6 +30,7 @@
 #include "softbus_qos.h"
 #include "softbus_server_death_recipient.h"
 #include "softbus_server_frame.h"
+#include "softbus_utils.h"
 #include "system_ability_definition.h"
 #include "trans_channel_manager.h"
 #include "trans_session_service.h"
@@ -403,14 +404,18 @@ static void ConvertQosInfo(const QosTV *qos, uint32_t qosCount, QosInfo *qosInfo
 int32_t SoftBusServer::EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos,
     uint32_t qosCount)
 {
-    if (peerNetworkId == NULL || dataType >= DATA_TYPE_BUTT || qosCount > QOS_TYPE_BUTT) {
+    if (!IsValidString(peerNetworkId, NETWORK_ID_BUF_LEN - 1) || dataType >= DATA_TYPE_BUTT
+        || qosCount > QOS_TYPE_BUTT) {
         COMM_LOGE(COMM_SVC, "SoftBusServer invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
     LaneQueryInfo info;
     (void)memset_s(&info, sizeof(LaneQueryInfo), 0, sizeof(LaneQueryInfo));
-    (void)memcpy_s(info.networkId, NETWORK_ID_BUF_LEN, peerNetworkId, NETWORK_ID_BUF_LEN);
+    if (strcpy_s(info.networkId, NETWORK_ID_BUF_LEN, peerNetworkId) != EOK) {
+        COMM_LOGE(COMM_SVC, "STRCPY fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
     info.transType = ConvertTransType(dataType);
 
     QosInfo qosInfo;

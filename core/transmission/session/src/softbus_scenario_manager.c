@@ -326,7 +326,7 @@ static void ScenarioManagerDelBusinessType(ScenarioManager *manager,
         default:
             break;
     }
-    if (singleCount == NULL) {
+    if (singleCount == NULL || itemCount == NULL) {
         TRANS_LOGE(TRANS_CTRL, "business type not supported!");
         return;
     }
