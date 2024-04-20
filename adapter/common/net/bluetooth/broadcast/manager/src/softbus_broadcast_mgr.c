@@ -932,6 +932,7 @@ static void CovertSoftBusBcScanFilters(const BcScanFilter *filter, uint8_t size,
         (adapterFilter + size)->manufactureDataLength = (filter + size)->manufactureDataLength;
         (adapterFilter + size)->manufactureData = (filter + size)->manufactureData;
         (adapterFilter + size)->manufactureDataMask = (filter + size)->manufactureDataMask;
+        (adapterFilter + size)->advIndReport = (filter + size)->advIndReport;
     }
 }
 
