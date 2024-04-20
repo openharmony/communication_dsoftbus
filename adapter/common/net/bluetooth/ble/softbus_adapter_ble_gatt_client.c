@@ -25,6 +25,7 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
+#include "softbus_common.h"
 
 #include "conn_log.h"
 #include "softbus_type_def.h"
@@ -34,9 +35,17 @@
 #define INVALID_ID   (-1)
 
 static void GetGattcCallback(int32_t clientId, SoftBusGattcCallback *cb);
+static int32_t SoftbusGattcAddMacAddrToList(int32_t clientId, const SoftBusBtAddr *addr);
+static void SoftbusGattcDeleteMacAddrFromList(int32_t clientId);
 
 static BtGattClientCallbacks g_btGattClientCallbacks = { 0 };
 static SoftBusList *g_softBusGattcManager = NULL;
+static SoftBusList *g_btAddrs = NULL;
+typedef struct {
+    ListNode node;
+    char addr[BT_MAC_LEN];
+    int32_t clientId;
+} BleConnMac;
 
 static void GattcConnectionStateChangedCallback(int clientId, int connectionState, int status)
 {
@@ -235,6 +244,66 @@ int32_t SoftbusGattcUnRegister(int32_t clientId)
     return ret;
 }
 
+bool SoftbusGattcCheckExistConnectionByAddr(const SoftBusBtAddr *btAddr)
+{
+    bool isExist = false;
+    CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_btAddrs->lock) == SOFTBUS_OK,
+        false, CONN_BLE, "try to lock failed");
+    BleConnMac *it = NULL;
+    BleConnMac *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(it, next, &g_btAddrs->list, BleConnMac, node) {
+        if (StrCmpIgnoreCase((const char *)it->addr, (const char *)btAddr->addr) == 0) {
+            isExist = true;
+            break;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_btAddrs->lock);
+    return isExist;
+}
+
+static int32_t SoftbusGattcAddMacAddrToList(int32_t clientId, const SoftBusBtAddr *addr)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGE(g_btAddrs != NULL, SOFTBUS_ERR, CONN_BLE, "btAddr is null");
+    BleConnMac *bleConnAddr = (BleConnMac *)SoftBusCalloc(sizeof(BleConnMac));
+    if (bleConnAddr == NULL) {
+        CONN_LOGE(CONN_BLE, "calloc failed");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    ListInit(&bleConnAddr->node);
+    int32_t status = ConvertBtMacToStr(bleConnAddr->addr, BT_MAC_LEN, addr->addr, BT_ADDR_LEN);
+    if (status != SOFTBUS_OK) {
+        SoftBusFree(bleConnAddr);
+        CONN_LOGE(CONN_BLE, "convert bt mac to str fail, error=%{public}d", status);
+        return SOFTBUS_ERR;
+    }
+    bleConnAddr->clientId = clientId;
+
+    if (SoftBusMutexLock(&g_btAddrs->lock) != SOFTBUS_OK) {
+        SoftBusFree(bleConnAddr);
+        CONN_LOGE(CONN_BLE, "try to lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    ListAdd(&g_btAddrs->list, &bleConnAddr->node);
+    (void)SoftBusMutexUnlock(&g_btAddrs->lock);
+    return SOFTBUS_OK;
+}
+
+static void SoftbusGattcDeleteMacAddrFromList(int32_t clientId)
+{
+    CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_btAddrs->lock) == SOFTBUS_OK,
+        CONN_BLE, "try to lock failed, clientId=%{public}d", clientId);
+    BleConnMac *it = NULL;
+    BleConnMac *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(it, next, &g_btAddrs->list, BleConnMac, node) {
+        if (it->clientId == clientId) {
+            ListDelete(&it->node);
+            SoftBusFree(it);
+            break;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_btAddrs->lock);
+}
+
 int32_t SoftbusGattcConnect(int32_t clientId, SoftBusBtAddr *addr)
 {
     BdAddr bdAddr;
@@ -249,6 +318,12 @@ int32_t SoftbusGattcConnect(int32_t clientId, SoftBusBtAddr *addr)
         return SOFTBUS_GATTC_INTERFACE_FAILED;
     }
 
+    status = SoftbusGattcAddMacAddrToList(clientId, addr);
+    if (status != SOFTBUS_OK) {
+         CONN_LOGE(CONN_BLE, "add mac addr fail, status=%{public}d", status);
+         return SOFTBUS_ERR;
+    }
+
     return SOFTBUS_OK;
 }
 
@@ -259,6 +334,8 @@ int32_t SoftbusBleGattcDisconnect(int32_t clientId, bool refreshGatt)
         CONN_LOGE(CONN_BLE, "BleGattcDisconnect error");
         return SOFTBUS_GATTC_INTERFACE_FAILED;
     }
+
+    SoftbusGattcDeleteMacAddrFromList(clientId);
     return SOFTBUS_OK;
 }
 
@@ -384,6 +461,12 @@ int32_t InitSoftbusAdapterClient(void)
 {
     g_softBusGattcManager = CreateSoftBusList();
     if (g_softBusGattcManager == NULL) {
+        return SOFTBUS_ERR;
+    }
+    g_btAddrs = CreateSoftBusList();
+    if (g_btAddrs == NULL) {
+        DestroySoftBusList(g_softBusGattcManager);
+        g_softBusGattcManager = NULL;
         return SOFTBUS_ERR;
     }
     g_btGattClientCallbacks.ConnectionStateCb = GattcConnectionStateChangedCallback;
