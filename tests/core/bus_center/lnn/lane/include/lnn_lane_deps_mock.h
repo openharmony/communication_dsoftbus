@@ -72,7 +72,6 @@ public:
     virtual bool ConnBleDirectIsEnable(BleProtocolType protocol) = 0;
     virtual int32_t TransProxyCloseProxyChannel(int32_t channelId) = 0;
     virtual LaneResource *GetValidLaneResource(LaneResource *resourceItem) = 0;
-
     virtual int64_t GetAuthIdByConnInfo(const AuthConnInfo *connInfo) = 0;
     virtual int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash) = 0;
     virtual int32_t StartBaseClient(ListenerModule module, const SoftbusBaseListener *listener) = 0;
@@ -80,6 +79,7 @@ public:
     virtual int32_t ConnOpenClientSocket(const ConnectOption *option, const char *bindAddr, bool isNonBlock) = 0;
     virtual int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType trigger) = 0;
     virtual int32_t QueryLaneResource(const LaneQueryInfo *queryInfo, const QosInfo *qosInfo) = 0;
+    virtual ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_t len, int32_t timeout) = 0;
 };
 
 class LaneDepsInterfaceMock : public LaneDepsInterface {
@@ -124,8 +124,14 @@ public:
     MOCK_METHOD3(ConnOpenClientSocket, int32_t (const ConnectOption *option, const char *bindAddr, bool isNonBlock));
     MOCK_METHOD3(AddTrigger, int32_t (ListenerModule module, int32_t fd, TriggerType trigger));
     MOCK_METHOD2(QueryLaneResource, int32_t (const LaneQueryInfo *, const QosInfo *));
+    MOCK_METHOD4(ConnSendSocketData, ssize_t (int32_t fd, const char *buf, size_t len, int32_t timeout));
     void SetDefaultResult(NodeInfo *info);
+    void SetDefaultResultForAlloc(int32_t localNetCap, int32_t remoteNetCap,
+        int32_t localFeatureCap, int32_t remoteFeatureCap);
     static int32_t ActionOfGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash);
+    static int32_t ActionOfGetRemoteStrInfo(const char *netWorkId, InfoKey key, char *info, uint32_t len);
+    static int32_t ActionOfStartBaseClient(ListenerModule module, const SoftbusBaseListener *listener);
+    static int32_t ActionOfAddTrigger(ListenerModule module, int32_t fd, TriggerType trigger);
 };
 } // namespace OHOS
 #endif // LNN_LANE_DEPS_MOCK_H
