@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,6 +56,9 @@ private:
     int32_t GetLocalDeviceInfoInner(MessageParcel &data, MessageParcel &reply);
     int32_t GetNodeKeyInfoInner(MessageParcel &data, MessageParcel &reply);
     int32_t SetNodeDataChangeFlagInner(MessageParcel &data, MessageParcel &reply);
+    int32_t RegDataLevelChangeCbInner(MessageParcel &data, MessageParcel &reply);
+    int32_t UnregDataLevelChangeCbInner(MessageParcel &data, MessageParcel &reply);
+    int32_t SetDataLevelInner(MessageParcel &data, MessageParcel &reply);
     int32_t StartTimeSyncInner(MessageParcel &data, MessageParcel &reply);
     int32_t StopTimeSyncInner(MessageParcel &data, MessageParcel &reply);
     int32_t QosReportInner(MessageParcel &data, MessageParcel &reply);

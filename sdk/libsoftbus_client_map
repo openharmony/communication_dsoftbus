@@ -130,6 +130,9 @@
         "UnregNodeDeviceStateCb";
         "DeactiveMetaNodeInner";
         "SetNodeDataChangeFlag";
+        "RegDataLevelChangeCb";
+        "UnregDataLevelChangeCb";
+        "SetDataLevel";
         "TransTdcReleaseFd";
         "TransTdcGetSessionKey";
         "TransFileInit";
@@ -148,6 +151,9 @@
         "TransTdcGetInfoByIdWithIncSeq";
         "PublishLNNInner";
         "ServerIpcSetNodeDataChangeFlag";
+        "ServerIpcRegDataLevelChangeCb";
+        "ServerIpcUnregDataLevelChangeCb";
+        "ServerIpcSetDataLevel";
         "ClientTransChannelDeinit";
         "GetPeerDeviceIdInner";
         "ClientTransProxyOnChannelOpenFailed";
@@ -315,6 +321,9 @@
         "GrantPermissionInner";
         "LeaveMetaNode";
         "SetNodeDataChangeFlagInner";
+        "RegDataLevelChangeCbInner";
+        "UnregDataLevelChangeCbInner";
+        "SetDataLevelInner";
         "ServerIpcSendMessage";
         "ClientTransAuthOnChannelOpenFailed";
         "ServerIpcQosReport";
@@ -407,6 +416,7 @@
         "ClientRawStreamEncryptOptGet";
         "ClientRawStreamEncryptDefOptGet";
         "SetDeathRecipientFlag";
+        "LnnOnDataLevelChanged";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;

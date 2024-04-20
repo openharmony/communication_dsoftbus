@@ -746,6 +746,24 @@ int32_t TransServerProxy::SetNodeDataChangeFlag(const char *pkgName, const char 
     return SOFTBUS_OK;
 }
 
+int32_t TransServerProxy::RegDataLevelChangeCb(const char *pkgName)
+{
+    (void)pkgName;
+    return SOFTBUS_OK;
+}
+
+int32_t TransServerProxy::UnregDataLevelChangeCb(const char *pkgName)
+{
+    (void)pkgName;
+    return SOFTBUS_OK;
+}
+
+int32_t TransServerProxy::SetDataLevel(const DataLevel *dataLevel)
+{
+    (void)dataLevel;
+    return SOFTBUS_OK;
+}
+
 int32_t TransServerProxy::StartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy,
     int32_t period)
 {
