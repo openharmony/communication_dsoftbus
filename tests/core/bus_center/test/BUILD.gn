@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -64,6 +64,7 @@ ohos_unittest("HeartBeatMediumTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
   ]
 
@@ -135,6 +136,7 @@ ohos_unittest("HeartBeatFSMTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/connection/wifi_direct",
     "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/mlps/include",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
   ]
 
   deps = [
@@ -255,6 +257,7 @@ ohos_unittest("HeartBeatUtilsTest") {
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/connection/wifi_direct",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
   ]
 
   deps = [
@@ -330,6 +333,7 @@ ohos_unittest("HeartBeatCtrlTest") {
     "$dsoftbus_root_path/core/bus_center/ipc/include",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/net_buscenter",
     "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
   ]
 
   deps = [

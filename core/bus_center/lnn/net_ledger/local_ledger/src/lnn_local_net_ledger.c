@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -718,6 +718,78 @@ static int32_t L1GetNodeDataChangeFlag(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t L1GetDataDynamicLevel(void *buf, uint32_t len)
+{
+    if (buf == NULL || len != DATA_DYNAMIC_LEVEL_BUF_LEN) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((uint16_t *)buf) = (uint16_t)LnnGetDataDynamicLevel(&g_localNetLedger.localInfo);
+    return SOFTBUS_OK;
+}
+
+static int32_t UpdateDataDynamicLevel(const void *buf)
+{
+    if (buf == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    return LnnSetDataDynamicLevel(info, *(uint16_t *)buf);
+}
+
+static int32_t L1GetDataStaticLevel(void *buf, uint32_t len)
+{
+    if (buf == NULL || len != DATA_STATIC_LEVEL_BUF_LEN) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((uint16_t *)buf) = (uint16_t)LnnGetDataStaticLevel(&g_localNetLedger.localInfo);
+    return SOFTBUS_OK;
+}
+
+static int32_t UpdateDataStaticLevel(const void *buf)
+{
+    if (buf == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    return LnnSetDataStaticLevel(info, *(uint16_t *)buf);
+}
+
+static int32_t L1GetDataSwitchLevel(void *buf, uint32_t len)
+{
+    if (buf == NULL || len != DATA_SWITCH_LEVEL_BUF_LEN) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((uint32_t *)buf) = (uint32_t)LnnGetDataSwitchLevel(&g_localNetLedger.localInfo);
+    return SOFTBUS_OK;
+}
+
+static int32_t UpdateDataSwitchLevel(const void *buf)
+{
+    if (buf == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    return LnnSetDataSwitchLevel(info, *(uint32_t *)buf);
+}
+
+static int32_t L1GetDataSwitchLength(void *buf, uint32_t len)
+{
+    if (buf == NULL || len != DATA_SWITCH_LENGTH_BUF_LEN) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((uint16_t *)buf) = (uint16_t)LnnGetDataSwitchLength(&g_localNetLedger.localInfo);
+    return SOFTBUS_OK;
+}
+
+static int32_t UpdateDataSwitchLength(const void *buf)
+{
+    if (buf == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    return LnnSetDataSwitchLength(info, *(uint16_t *)buf);
+}
+
 static int32_t LocalGetNodeAccountId(void *buf, uint32_t len)
 {
     if (buf == NULL || len != sizeof(int64_t)) {
@@ -1404,6 +1476,10 @@ static LocalLedgerKey g_localKeyTable[] = {
     {NUM_KEY_STA_FREQUENCY, -1, L1GetStaFrequency, UpdateStaFrequency},
     {NUM_KEY_TRANS_PROTOCOLS, sizeof(int64_t), LlGetSupportedProtocols, LlUpdateSupportedProtocols},
     {NUM_KEY_DATA_CHANGE_FLAG, sizeof(int16_t), L1GetNodeDataChangeFlag, UpdateNodeDataChangeFlag},
+    {NUM_KEY_DATA_DYNAMIC_LEVEL, sizeof(uint16_t), L1GetDataDynamicLevel, UpdateDataDynamicLevel},
+    {NUM_KEY_DATA_STATIC_LEVEL, sizeof(uint16_t), L1GetDataStaticLevel, UpdateDataStaticLevel},
+    {NUM_KEY_DATA_SWITCH_LEVEL, sizeof(uint32_t), L1GetDataSwitchLevel, UpdateDataSwitchLevel},
+    {NUM_KEY_DATA_SWITCH_LENGTH, sizeof(uint16_t), L1GetDataSwitchLength, UpdateDataSwitchLength},
     {NUM_KEY_ACCOUNT_LONG, sizeof(int64_t), LocalGetNodeAccountId, LocalUpdateNodeAccountId},
     {NUM_KEY_BLE_START_TIME, sizeof(int64_t), LocalGetNodeBleStartTime, LocalUpdateBleStartTime},
     {NUM_KEY_STATIC_CAP_LEN, sizeof(int32_t), LlGetStaticCapLen, LlUpdateStaticCapLen},
@@ -1633,6 +1709,11 @@ int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
     return LnnGetLocalInfo(key, (void*)info, sizeof(int32_t));
 }
 
+int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info)
+{
+    return LnnSetLocalInfo(key, (void*)&info);
+}
+
 int32_t LnnGetLocalNum64Info(InfoKey key, int64_t *info)
 {
     return LnnGetLocalInfo(key, (void*)info, sizeof(int64_t));
@@ -1658,7 +1739,22 @@ int32_t LnnSetLocalNum16Info(InfoKey key, int16_t info)
     return LnnSetLocalInfo(key, (void*)&info);
 }
 
-int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info)
+int32_t LnnGetLocalNumU16Info(InfoKey key, uint16_t *info)
+{
+    return LnnGetLocalInfo(key, (void*)info, sizeof(uint16_t));
+}
+
+int32_t LnnSetLocalNumU16Info(InfoKey key, uint16_t info)
+{
+    return LnnSetLocalInfo(key, (void*)&info);
+}
+
+int32_t LnnGetLocalNumU32Info(InfoKey key, uint32_t *info)
+{
+    return LnnGetLocalInfo(key, (void*)info, sizeof(uint32_t));
+}
+
+int32_t LnnSetLocalNumU32Info(InfoKey key, uint32_t info)
 {
     return LnnSetLocalInfo(key, (void*)&info);
 }
