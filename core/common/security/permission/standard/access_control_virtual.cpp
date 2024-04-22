@@ -30,3 +30,8 @@ uint32_t TransACLGetFirstTokenID()
 {
     return SOFTBUS_OK;
 }
+
+uint32_t TransACLGetCallingTokenID()
+{
+    return SOFTBUS_OK;
+}
