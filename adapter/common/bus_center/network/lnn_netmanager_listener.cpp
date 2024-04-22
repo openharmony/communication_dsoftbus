@@ -56,6 +56,7 @@ public:
 
 static int32_t g_ethCount;
 static SoftBusMutex g_ethCountLock;
+static OHOS::sptr<OHOS::NetManagerStandard::NetInterfaceStateCallbackStub> g_lnnNetManagerListener = nullptr;
 
 int32_t LnnNetManagerListener::OnInterfaceAdded(const std::string &ifName)
 {
@@ -79,9 +80,10 @@ int32_t LnnNetManagerListener::OnInterfaceLinkStateChanged(const std::string &if
 {
     LNN_LOGI(LNN_BUILDER, "ifName=%{public}s, isUp=%{public}s", ifName.c_str(), isUp ? "true" : "false");
     uint32_t netCapability = 0;
-    if (LnnGetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t *)&netCapability) != SOFTBUS_OK) {
+    int32_t ret = LnnGetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t *)&netCapability);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get cap from local ledger fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
     if (SoftBusMutexLock(&g_ethCountLock) != 0) {
         LNN_LOGE(LNN_BUILDER, "lock failed");
@@ -99,7 +101,7 @@ int32_t LnnNetManagerListener::OnInterfaceLinkStateChanged(const std::string &if
         if (g_ethCount == 0) {
             LNN_LOGI(LNN_BUILDER, "do not have eth to be removed");
             (void)SoftBusMutexUnlock(&g_ethCountLock);
-            return SOFTBUS_ERR;
+            return SOFTBUS_INVALID_NUM;
         }
         --g_ethCount;
         if (g_ethCount == 0) {
@@ -108,9 +110,10 @@ int32_t LnnNetManagerListener::OnInterfaceLinkStateChanged(const std::string &if
         }
     }
     (void)SoftBusMutexUnlock(&g_ethCountLock);
-    if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, netCapability) != SOFTBUS_OK) {
+    ret = LnnSetLocalNumInfo(NUM_KEY_NET_CAP, netCapability);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "set cap to local ledger fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
     LNN_LOGI(LNN_BUILDER, "local ledger netCapability=%{public}u", netCapability);
     return SOFTBUS_OK;
@@ -140,21 +143,23 @@ int32_t LnnNetManagerListener::OnInterfaceAddressRemoved(
 static void RegEthernetEvent(void *para)
 {
     (void)para;
-    OHOS::sptr<OHOS::NetManagerStandard::NetInterfaceStateCallbackStub> lnnNetManagerListener =
-        new (std::nothrow) OHOS::LnnNetManager::LnnNetManagerListener;
-    if (lnnNetManagerListener == nullptr) {
+    OHOS::LnnNetManager::g_lnnNetManagerListener = new (std::nothrow) OHOS::LnnNetManager::LnnNetManagerListener;
+    if (OHOS::LnnNetManager::g_lnnNetManagerListener == nullptr) {
         LNN_LOGE(LNN_BUILDER, "new lnnNetManagerListener fail");
         return;
     }
     OHOS::LnnNetManager::g_ethCount = 0;
     if (SoftBusMutexInit(&OHOS::LnnNetManager::g_ethCountLock, nullptr) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "init g_ethCountLock fail");
+        delete (OHOS::LnnNetManager::g_lnnNetManagerListener);
         return;
     }
-    int32_t ret =
-        OHOS::NetManagerStandard::NetConnClient::GetInstance().RegisterNetInterfaceCallback(lnnNetManagerListener);
+    int32_t ret = OHOS::NetManagerStandard::NetConnClient::GetInstance().RegisterNetInterfaceCallback(
+        OHOS::LnnNetManager::g_lnnNetManagerListener);
     if (ret != OHOS::NetManagerStandard::NETMANAGER_EXT_SUCCESS) {
         LNN_LOGE(LNN_BUILDER, "RegisterIfacesStateChanged fail, ret=%{public}d", ret);
+        SoftBusMutexDestroy(&OHOS::LnnNetManager::g_ethCountLock);
+        delete (OHOS::LnnNetManager::g_lnnNetManagerListener);
         return;
     }
     LNN_LOGI(LNN_BUILDER, "RegisterIfacesStateChanged succ");
@@ -170,4 +175,13 @@ int32_t LnnInitNetManagerMonitorImpl(void)
         return ret;
     }
     return SOFTBUS_OK;
+}
+
+void LnnDeinitNetManagerMonitorImpl(void)
+{
+    if (OHOS::LnnNetManager::g_lnnNetManagerListener != nullptr) {
+        delete (OHOS::LnnNetManager::g_lnnNetManagerListener);
+        OHOS::LnnNetManager::g_lnnNetManagerListener = nullptr;
+    }
+    (void)SoftBusMutexDestroy(&OHOS::LnnNetManager::g_ethCountLock);
 }
