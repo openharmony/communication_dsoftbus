@@ -285,6 +285,35 @@ HWTEST_F(TransAuthChannelTest, TransSendAuthMsgTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnAuthChannelDataRecvTest001
+ * @tc.desc: OnAuthChannelDataRecvTest001, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransAuthChannelTest, OnAuthChannelDataRecvTest001, TestSize.Level1)
+{
+    int32_t authId = TRANS_TEST_AUTH_ID;
+    AuthChannelData *data = (AuthChannelData*)SoftBusCalloc(sizeof(AuthChannelData));
+    ASSERT_TRUE(data != NULL);
+
+    OnAuthChannelDataRecv(authId, NULL);
+
+    data->data = NULL;
+    OnAuthChannelDataRecv(authId, data);
+
+    data->data = (uint8_t *)TEST_AUTH_DATA;
+    data->len = strlen(TEST_AUTH_DATA) + 1;
+    data->flag = AUTH_CHANNEL_REQ;
+    OnAuthChannelDataRecv(authId, data);
+
+    data->flag = AUTH_CHANNEL_REPLY;
+    OnAuthChannelDataRecv(authId, data);
+
+    data->flag = -1;
+    OnAuthChannelDataRecv(authId, data);
+}
+
+/**
  * @tc.name: OnAuthMsgDataRecvTest001
  * @tc.desc: OnAuthMsgDataRecvTest001, use the wrong parameter.
  * @tc.type: FUNC
