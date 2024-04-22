@@ -337,6 +337,7 @@ static AppInfo *GetAuthAppInfo(const char *mySessionName)
     appInfo->businessType = BUSINESS_TYPE_BYTE;
     appInfo->channelType = CHANNEL_TYPE_AUTH;
     appInfo->timeStart = GetSoftbusRecordTimeMillis();
+    appInfo->isClient = true;
     if (TransGetUidAndPid(mySessionName, &appInfo->myData.uid, &appInfo->myData.pid) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "GetAuthAppInfo GetUidAndPid failed");
         goto EXIT_ERR;
