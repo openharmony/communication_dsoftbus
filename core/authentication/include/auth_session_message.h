@@ -36,8 +36,10 @@ typedef struct {
     SoftBusVersion version;
 } DevInfoData;
 
-char *PackDeviceInfoMessage(int32_t linkType, SoftBusVersion version, bool isMetaAuth, const char *remoteUuid);
-int32_t UnpackDeviceInfoMessage(const DevInfoData *devInfo, NodeInfo *nodeInfo, bool isMetaAuth);
+char *PackDeviceInfoMessage(int32_t linkType, SoftBusVersion version, bool isMetaAuth, const char *remoteUuid,
+    const AuthSessionInfo *info);
+int32_t UnpackDeviceInfoMessage(const DevInfoData *devInfo, NodeInfo *nodeInfo, bool isMetaAuth,
+    const AuthSessionInfo *info);
 
 int32_t PostDeviceIdMessage(int64_t authSeq, const AuthSessionInfo *info);
 int32_t ProcessDeviceIdMessage(AuthSessionInfo *info, const uint8_t *data, uint32_t len);
