@@ -32,9 +32,9 @@ libsoftbus_stream_inc = [
 
 if (enhanced) {
   libsoftbus_stream_inc += [
-        "$dsoftbus_root_path/components/nstackx_enhanced/fillp/include/",
-        "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_adapter/include/",
-      ]
+    "$dsoftbus_root_path/components/nstackx_enhanced/fillp/include/",
+    "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_adapter/include/",
+  ]
 } else {
   libsoftbus_stream_inc +=
       [ "$dsoftbus_root_path/components/nstackx/fillp/include/" ]
