@@ -106,6 +106,7 @@ std::string InnerLink::GetLocalDynamicMac() const
 {
     return Get(InnerLinKey::LOCAL_DYNAMIC_MAC, std::string(""));
 }
+
 void InnerLink::SetLocalDynamicMac(const std::string &mac)
 {
     Set(InnerLinKey::LOCAL_DYNAMIC_MAC, mac);
@@ -210,6 +211,7 @@ int InnerLink::GetLocalPort() const
 {
     return Get(InnerLinKey::LOCAL_PORT, -1);
 }
+
 void InnerLink::SetLocalPort(int port)
 {
     Set(InnerLinKey::LOCAL_PORT, port);
