@@ -159,7 +159,6 @@ void P2pV1Processor::WaitingReuseResponseState()
 
 void P2pV1Processor::ProcessConnectCommand(std::shared_ptr<ConnectCommand> &command)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     connectCommand_ = command;
     Exclusive(connectCommand_->GetRemoteDeviceId());
 
@@ -181,15 +180,12 @@ void P2pV1Processor::ProcessConnectCommand(std::shared_ptr<ConnectCommand> &comm
 
 void P2pV1Processor::ProcessDisconnectCommand(std::shared_ptr<DisconnectCommand> &command)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
-
     Exclusive(command->GetRemoteDeviceId());
     canAcceptNegotiateData_ = false;
 
     auto linkId = command->GetDisconnectInfo().info_.linkId;
     auto requestId = command->GetDisconnectInfo().info_.requestId;
     CONN_LOGI(CONN_WIFI_DIRECT, "disconnect device, linkId=%{public}d", linkId);
-
     std::string remoteMac;
     size_t refCnt = 0;
     LinkManager::GetInstance().ProcessIfPresent(
@@ -252,7 +248,6 @@ void P2pV1Processor::ProcessDisconnectCommand(std::shared_ptr<DisconnectCommand>
 
 void P2pV1Processor::ProcessNegotiateCommandAtAvailableState(std::shared_ptr<NegotiateCommand> &command)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     Exclusive(command->GetRemoteDeviceId());
 
     bool reply = true;
@@ -302,7 +297,6 @@ void P2pV1Processor::ProcessNegotiateCommandAtAvailableState(std::shared_ptr<Neg
 
 void P2pV1Processor::ProcessNegotiateCommandAtWaitingReqResponseState(std::shared_ptr<NegotiateCommand> &command)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     auto msgType = command->GetNegotiateMessage().GetLegacyP2pCommandType();
     int32_t ret = SOFTBUS_ERR;
     switch (msgType) {
@@ -327,7 +321,6 @@ void P2pV1Processor::ProcessNegotiateCommandAtWaitingReqResponseState(std::share
 
 void P2pV1Processor::ProcessNegotiateCommandAtWaitingRequestState(std::shared_ptr<NegotiateCommand> &command)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     auto msgType = command->GetNegotiateMessage().GetLegacyP2pCommandType();
     int32_t ret = SOFTBUS_OK;
     switch (msgType) {
@@ -352,7 +345,6 @@ void P2pV1Processor::ProcessNegotiateCommandAtWaitingRequestState(std::shared_pt
 
 void P2pV1Processor::ProcessNegotiateCommandAtWaitingReuseResponseState(std::shared_ptr<NegotiateCommand> &command)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     int32_t ret = SOFTBUS_OK;
     auto msgType = command->GetNegotiateMessage().GetLegacyP2pCommandType();
     switch (msgType) {
@@ -370,7 +362,6 @@ void P2pV1Processor::ProcessNegotiateCommandAtWaitingReuseResponseState(std::sha
 
 void P2pV1Processor::ProcessNegotiateCommandAtWaitingAuthHandShakeState(std::shared_ptr<NegotiateCommand> &command)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     auto msgType = command->GetNegotiateMessage().GetLegacyP2pCommandType();
     switch (msgType) {
         case LegacyCommandType::CMD_CTRL_CHL_HANDSHAKE:
@@ -386,7 +377,6 @@ void P2pV1Processor::ProcessNegotiateCommandAtWaitingAuthHandShakeState(std::sha
 
 void P2pV1Processor::ProcessNegotiateCommandAtWaitingClientJoiningState(std::shared_ptr<NegotiateCommand> &command)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     int32_t ret = SOFTBUS_OK;
     auto msgType = command->GetNegotiateMessage().GetLegacyP2pCommandType();
     switch (msgType) {
@@ -414,7 +404,6 @@ void P2pV1Processor::ProcessNegotiateCommandAtWaitingClientJoiningState(std::sha
 
 void P2pV1Processor::ProcessAuthConnEvent(std::shared_ptr<AuthOpenEvent> &event)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     StopTimer();
     if (event->reason_ != SOFTBUS_OK) {
         CONN_LOGE(CONN_WIFI_DIRECT, "auth connect failed, error=%{public}d", event->reason_);
@@ -511,8 +500,6 @@ int P2pV1Processor::CreateLink()
 
 int P2pV1Processor::CreateLinkAsNone()
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
-
     bool p2pEnable = false;
     InterfaceManager::GetInstance().ReadInterface(InterfaceInfo::P2P, [&p2pEnable](const InterfaceInfo &interface) {
         p2pEnable = interface.IsEnable();
@@ -555,7 +542,6 @@ int P2pV1Processor::CreateLinkAsNone()
 
 int P2pV1Processor::CreateLinkAsGo()
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     auto ret = ReuseP2p();
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "reuse p2p failed, error=%{public}d", ret);
 
@@ -596,8 +582,6 @@ int P2pV1Processor::CreateLinkAsGc()
 
 int P2pV1Processor::ProcessConnectRequest(std::shared_ptr<NegotiateCommand> &command)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
-
     auto msg = command->GetNegotiateMessage();
     auto peerRole = msg.GetLegacyP2pRole();
     auto expectRole = msg.GetLegacyP2pExpectedRole();
@@ -902,7 +886,6 @@ int P2pV1Processor::ProcessNoAvailableInterface(std::shared_ptr<NegotiateCommand
 
 int P2pV1Processor::ProcessConflictRequest(std::shared_ptr<NegotiateCommand> &command)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     auto localMac = P2pAdapter::GetMacAddress();
     auto remoteMac = command->GetNegotiateMessage().GetLegacyP2pMac();
 
@@ -943,7 +926,6 @@ int P2pV1Processor::ProcessConflictRequest(std::shared_ptr<NegotiateCommand> &co
 
 int P2pV1Processor::ProcessReuseRequest(std::shared_ptr<NegotiateCommand> &command)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     auto msg = command->GetNegotiateMessage();
     auto remoteMac = msg.GetLegacyP2pMac();
     auto result = V1_ERROR_REUSE_FAILED;
@@ -988,8 +970,6 @@ Failed:
 
 int P2pV1Processor::ProcessReuseResponse(std::shared_ptr<NegotiateCommand> &command)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
-
     auto msg = command->GetNegotiateMessage();
     auto result = ErrorCodeFromV1ProtocolCode(static_cast<int32_t>(msg.GetLegacyP2pResult()));
     auto remoteMac = msg.GetLegacyP2pMac();
@@ -1026,7 +1006,6 @@ int P2pV1Processor::ProcessReuseResponse(std::shared_ptr<NegotiateCommand> &comm
 
 int P2pV1Processor::ProcessDisconnectRequest(std::shared_ptr<NegotiateCommand> &command)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     int reuseCountOld = 0;
     auto ret =
         InterfaceManager::GetInstance().UpdateInterface(InterfaceInfo::P2P, [&reuseCountOld](InterfaceInfo &interface) {
@@ -1049,7 +1028,6 @@ int P2pV1Processor::ProcessDisconnectRequest(std::shared_ptr<NegotiateCommand> &
 
 int P2pV1Processor::ProcessGetInterfaceInfoRequest(std::shared_ptr<NegotiateCommand> &command)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     auto msg = command->GetNegotiateMessage();
     auto interfaceName = msg.GetLegacyInterfaceName();
 
@@ -1065,7 +1043,6 @@ int P2pV1Processor::ProcessGetInterfaceInfoRequest(std::shared_ptr<NegotiateComm
 
 int P2pV1Processor::ProcessAuthHandShakeRequest(std::shared_ptr<NegotiateCommand> &command)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     auto channel = command->GetNegotiateChannel();
     auto remoteDeviceId = command->GetRemoteDeviceId();
 
@@ -1156,7 +1133,6 @@ int P2pV1Processor::BuildHandShakeMessage(NegotiateMessage &msgOut)
 
 int P2pV1Processor::ProcessConnectResponseAtWaitingReqResponseState(std::shared_ptr<NegotiateCommand> &command)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     StopTimer();
     LinkInfo::LinkMode myRole = LinkInfo::LinkMode::NONE;
     auto ret =
@@ -1176,7 +1152,6 @@ int P2pV1Processor::ProcessConnectResponseAtWaitingReqResponseState(std::shared_
 
 int P2pV1Processor::ProcessConnectResponseAtWaitingClientJoiningState(std::shared_ptr<NegotiateCommand> &command)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     LinkInfo::LinkMode myRole = LinkInfo::LinkMode::NONE;
     auto ret =
         InterfaceManager::GetInstance().ReadInterface(InterfaceInfo::P2P, [&myRole](const InterfaceInfo &interface) {
@@ -1195,7 +1170,6 @@ int P2pV1Processor::ProcessConnectResponseAtWaitingClientJoiningState(std::share
 
 int P2pV1Processor::ProcessConnectResponseAsGo(std::shared_ptr<NegotiateCommand> &command)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     auto msg = command->GetNegotiateMessage();
     auto contentType = msg.GetLegacyP2pContentType();
     if (contentType != LegacyContentType::RESULT) {
@@ -1234,12 +1208,11 @@ int P2pV1Processor::ProcessConnectResponseAsGo(std::shared_ptr<NegotiateCommand>
 
 int P2pV1Processor::ProcessConnectResponseAsNone(std::shared_ptr<NegotiateCommand> &command)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     auto msg = command->GetNegotiateMessage();
     auto remoteConfig = msg.GetLegacyP2pWifiConfigInfo();
     if (!remoteConfig.empty()) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "[debug] remoteConfigSize=%{public}zu, remoteConfig=%{public}s",
-            remoteConfig.size(), remoteConfig.c_str());
+        CONN_LOGI(CONN_WIFI_DIRECT, "remoteConfigSize=%{public}zu, remoteConfig=%{public}s", remoteConfig.size(),
+            remoteConfig.c_str());
         int32_t ret = P2pAdapter::SetPeerWifiConfigInfo(remoteConfig);
         CONN_CHECK_AND_RETURN_RET_LOGW(
             ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "set wifi cfg failed, error=%{public}d", ret);
@@ -1265,7 +1238,6 @@ int P2pV1Processor::ProcessConnectResponseAsNone(std::shared_ptr<NegotiateComman
 
 int P2pV1Processor::ProcessConnectResponseWithGoInfoAsNone(std::shared_ptr<NegotiateCommand> &command)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     auto msg = command->GetNegotiateMessage();
     auto ret = ConnectGroup(msg, command->GetNegotiateChannel());
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, V1_ERROR_CONNECT_GROUP_FAILED, CONN_WIFI_DIRECT,
@@ -1289,7 +1261,6 @@ int P2pV1Processor::ProcessConnectResponseWithGoInfoAsNone(std::shared_ptr<Negot
 
 int P2pV1Processor::ProcessConnectResponseWithGcInfoAsNone(std::shared_ptr<NegotiateCommand> &command)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     auto msg = command->GetNegotiateMessage();
     auto ret = CreateGroup(msg);
     CONN_CHECK_AND_RETURN_RET_LOGW(
@@ -1309,13 +1280,10 @@ int P2pV1Processor::ProcessConnectResponseWithGcInfoAsNone(std::shared_ptr<Negot
 
 int P2pV1Processor::CreateGroup(const NegotiateMessage &msg)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     auto isRemoteWideBandSupported = msg.GetLegacyP2pWideBandSupported();
     auto stationFrequency = msg.GetLegacyP2pStationFrequency();
-
     auto channelListString = msg.GetLegacyP2pGcChannelList();
     auto channels = WifiDirectUtils::StringToChannelList(channelListString);
-
     auto finalFrequency = ChooseFrequency(stationFrequency, channels);
     CONN_CHECK_AND_RETURN_RET_LOGW(finalFrequency > 0, finalFrequency, CONN_WIFI_DIRECT,
         "choose frequency failed, frequency=%{public}d", finalFrequency);
@@ -1345,7 +1313,6 @@ int P2pV1Processor::CreateGroup(const NegotiateMessage &msg)
         InterfaceInfo::P2P, [&localMac, &localIp](InterfaceInfo &interface) {
             localMac = interface.GetBaseMac();
             localIp = interface.GetIpString().ToIpString();
-
             auto reuseCount = interface.GetReuseCount();
             interface.SetReuseCount(reuseCount + 1);
             CONN_LOGI(CONN_WIFI_DIRECT, "reuseCount=%{public}d", interface.GetReuseCount());
@@ -1360,7 +1327,6 @@ int P2pV1Processor::CreateGroup(const NegotiateMessage &msg)
             link.SetLocalIpv4(localIp);
             link.SetRemoteBaseMac(remoteMac);
             link.SetRemoteIpv4(remoteIp);
-
             link.SetState(InnerLink::LinkState::CONNECTING);
         });
     CONN_CHECK_AND_RETURN_RET_LOGW(success, SOFTBUS_ERR, CONN_WIFI_DIRECT, "update inner link failed");
@@ -1423,7 +1389,6 @@ int P2pV1Processor::ConnectGroup(const NegotiateMessage &msg, const std::shared_
 
 bool P2pV1Processor::IsNeedDhcp(const std::string &gcIp, const std::string &groupConfig)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     if (gcIp.empty()) {
         CONN_LOGI(CONN_WIFI_DIRECT, "gcIp is empty, DHCP is true");
         return true;
@@ -1477,7 +1442,6 @@ int P2pV1Processor::ChooseFrequency(int gcFreq, const std::vector<int> &gcChanne
 
 int P2pV1Processor::DestroyGroup()
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     P2pAdapter::DestroyGroupParam param { IF_NAME_P2P };
     auto result = P2pEntity::GetInstance().DestroyGroup(param);
     CONN_CHECK_AND_RETURN_RET_LOGW(result.errorCode_ == SOFTBUS_OK, result.errorCode_, CONN_WIFI_DIRECT,
@@ -1487,7 +1451,6 @@ int P2pV1Processor::DestroyGroup()
 
 int P2pV1Processor::ReuseP2p()
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     auto ret = P2pEntity::GetInstance().ReuseLink();
     CONN_CHECK_AND_RETURN_RET_LOGW(
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "reuse link failed, error=%{public}d", ret);
@@ -1501,8 +1464,6 @@ int P2pV1Processor::ReuseP2p()
 
 int P2pV1Processor::ReuseLink(const std::shared_ptr<ConnectCommand> &command, InnerLink &link)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
-
     auto requestId = command->GetConnectInfo().info_.requestId;
     auto pid = command->GetConnectInfo().info_.pid;
     bool isBeingUsedByLocal = link.IsBeingUsedByLocal();
@@ -1535,7 +1496,6 @@ int P2pV1Processor::ReuseLink(const std::shared_ptr<ConnectCommand> &command, In
 
 std::string P2pV1Processor::GetGoMac(LinkInfo::LinkMode myRole)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     if (myRole == LinkInfo::LinkMode::NONE) {
         return "";
     }
@@ -1560,7 +1520,6 @@ std::string P2pV1Processor::GetGoMac(LinkInfo::LinkMode myRole)
 
 int P2pV1Processor::StartAuthListening(const std::string &localIp)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     int port = 0;
     auto ret =
         InterfaceManager::GetInstance().ReadInterface(InterfaceInfo::P2P, [&port](const InterfaceInfo &interface) {
@@ -1590,7 +1549,6 @@ int P2pV1Processor::StartAuthListening(const std::string &localIp)
 
 int P2pV1Processor::OpenAuthConnection(const NegotiateMessage &msg, const std::shared_ptr<NegotiateChannel> &channel)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     AuthNegotiateChannel::OpenParam param {};
     param.type = AUTH_LINK_TYPE_P2P;
     param.remoteUuid = msg.GetRemoteDeviceId();
@@ -1614,9 +1572,7 @@ int P2pV1Processor::OpenAuthConnection(const NegotiateMessage &msg, const std::s
 
 int P2pV1Processor::RemoveLink(const std::string &remoteDeviceId)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     LinkManager::GetInstance().RemoveLink(InnerLink::LinkType::P2P, remoteDeviceId);
-
     P2pEntity::GetInstance().CancelNewClientJoining(clientJoiningMac_);
     int reuseCount = 0;
     auto ret = InterfaceManager::GetInstance().ReadInterface(
@@ -1806,7 +1762,6 @@ void P2pV1Processor::StopTimer()
 
 void P2pV1Processor::Terminate()
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     StopTimer();
     RemoveExclusive();
     throw ProcessorTerminate();
