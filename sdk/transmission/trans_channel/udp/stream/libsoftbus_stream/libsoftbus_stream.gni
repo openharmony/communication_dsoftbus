@@ -62,9 +62,7 @@ if (defined(ohos_lite)) {
   libsoftbus_stream_deps += [ "//third_party/openssl/ohos_lite:openssl_shared" ]
 } else {
   if (enhanced) {
-    libsoftbus_stream_src += [
-      "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_adapter/src/softbus_fillp_inner_api.c",
-    ]
+    libsoftbus_stream_src += [ "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_adapter/src/softbus_fillp_inner_api.c" ]
     libsoftbus_stream_deps = [
       "$dsoftbus_root_path/components/nstackx_enhanced/fillp:FillpSo",
       "//third_party/bounds_checking_function:libsec_shared",
