@@ -28,6 +28,7 @@ extern "C" {
 int32_t TransCheckClientAccessControl(const char *peerNetworkId);
 int32_t TransCheckServerAccessControl(uint32_t firstCallingId);
 uint32_t TransACLGetFirstTokenID();
+uint32_t TransACLGetCallingTokenID();
 
 #ifdef __cplusplus
 #if __cplusplus
