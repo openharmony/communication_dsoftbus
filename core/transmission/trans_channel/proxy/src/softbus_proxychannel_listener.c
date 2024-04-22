@@ -173,7 +173,7 @@ int32_t OnProxyChannelOpenFailed(int32_t channelId, const AppInfo *appInfo, int3
     int64_t timediff = GetSoftbusRecordTimeMillis() - timeStart;
     int8_t isServer;
 
-    if (TransProxyGetChannelIsServer(channelId, &isServer) == SOFTBUS_OK && !isServer) {
+    if ((TransProxyGetChannelIsServer(channelId, &isServer) == SOFTBUS_OK && !isServer) || appInfo->isClient) {
         TransEventExtra extra = {
             .calleePkg = NULL,
             .peerNetworkId = appInfo->peerData.deviceId,
