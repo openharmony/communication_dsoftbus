@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include <csignal>
+
 #include <gtest/gtest.h>
 
 #include "data/inner_link.h"
@@ -106,7 +107,7 @@ HWTEST_F(InnerLinkTest, SetAndGetBool, TestSize.Level1)
 {
     InnerLink info("");
     EXPECT_EQ(info.IsBeingUsedByLocal(), false);
-    WifiDirectLink link{};
+    WifiDirectLink link {};
     info.GenerateLink(6, 8, link);
     EXPECT_EQ(info.IsBeingUsedByLocal(), true);
 
