@@ -16,15 +16,16 @@
 #include "inner_link.h"
 
 #include "securec.h"
+
 #include "nlohmann/json.hpp"
 
 #include "conn_log.h"
 #include "softbus_adapter_timer.h"
 
-#include "wifi_direct_ip_manager.h"
 #include "channel/auth_negotiate_channel.h"
 #include "data/link_manager.h"
 #include "utils/wifi_direct_anonymous.h"
+#include "wifi_direct_ip_manager.h"
 
 namespace OHOS::SoftBus {
 InnerLink::InnerLink(const std::string &remoteMac)
@@ -51,8 +52,8 @@ InnerLink::~InnerLink()
     }
     if (!GetLocalIpv4().empty() && !GetRemoteIpv4().empty() && !GetRemoteBaseMac().empty()) {
         CONN_LOGI(CONN_WIFI_DIRECT, "release ip");
-        WifiDirectIpManager::GetInstance().ReleaseIpv4(GetLocalInterface(), Ipv4Info(GetLocalIpv4()),
-                                                       Ipv4Info(GetRemoteIpv4()), GetRemoteBaseMac());
+        WifiDirectIpManager::GetInstance().ReleaseIpv4(
+            GetLocalInterface(), Ipv4Info(GetLocalIpv4()), Ipv4Info(GetRemoteIpv4()), GetRemoteBaseMac());
     }
 }
 
@@ -345,4 +346,4 @@ void InnerLink::Dump() const
     object["LINKS"] = linkIdArrayObject;
     CONN_LOGI(CONN_WIFI_DIRECT, "%{public}s", object.dump().c_str());
 }
-}
+} // namespace OHOS::SoftBus
