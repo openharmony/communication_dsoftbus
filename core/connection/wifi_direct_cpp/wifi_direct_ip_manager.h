@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#ifndef CE66E287_6412_4810_9D46_3A9174271896
-#define CE66E287_6412_4810_9D46_3A9174271896
-
 #ifndef WIFI_DIRECT_IP_MANAGER_H
 #define WIFI_DIRECT_IP_MANAGER_H
 
@@ -30,9 +27,6 @@
 #include "data/ipv4_info.h"
 
 namespace OHOS::SoftBus {
-static constexpr int32_t EUI_64_IDENTIFIER_LEN = 64;
-static constexpr int32_t LOCAL_NETWORK_ID = 99;
-
 class WifiDirectIpManager {
 public:
     static WifiDirectIpManager& GetInstance()
@@ -62,7 +56,6 @@ public:
         mutex_.unlock();
     }
 
-private:
     static std::string ApplySubNet(const std::vector<Ipv4Info> &localArray, const std::vector<Ipv4Info> &remoteArray);
     static std::vector<std::string> GetHmlAllUsedIpv4(std::initializer_list<std::vector<Ipv4Info> *> all);
     static std::bitset<EUI_64_IDENTIFIER_LEN> GetEUI64Identifier(const std::string &mac);
@@ -78,12 +71,12 @@ private:
         const std::string &interface, const std::string &ipString, const std::string &macString);
     static int32_t DeleteStaticArp(
         const std::string &interface, const std::string &ipString, const std::string &macString);
+private:
     std::set<std::string> ips_;
     std::map<std::string, std::string> arps_;
     std::recursive_mutex mutex_;
+    static constexpr int32_t EUI_64_IDENTIFIER_LEN = 64;
+    static constexpr int32_t LOCAL_NETWORK_ID = 99;
 };
 } // namespace OHOS::SoftBus
 #endif /* WIFI_DIRECT_IP_MANAGER_H */
-
-
-#endif /* CE66E287_6412_4810_9D46_3A9174271896 */

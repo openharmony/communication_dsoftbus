@@ -13,11 +13,9 @@
  * limitations under the License.
  */
 
-// #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <iostream>
 #include <string>
-#define private public
 #include "net_conn_client.h"
 #include "softbus_error_code.h"
 #include "wifi_direct_ip_manager.h"
@@ -60,10 +58,6 @@ HWTEST_F(WifiDirectIpManagerTest, ApplyIpv6, TestSize.Level1)
     std::string ipv6 = WifiDirectIpManager::GetInstance().ApplyIpv6(mac);
     std::cout << ipv6 << std::endl;
     EXPECT_EQ(ipv6.empty(), true);
-
-    // mac = "00:00:02:0d:48:91";
-    // ipv6 = WifiDirectIpManager::GetInstance().ApplyIpv6(mac);
-    // EXPECT_EQ(ipv6.empty(), false);
 }
 
 /*
@@ -114,7 +108,6 @@ HWTEST_F(WifiDirectIpManagerTest, ApplyIpv4, TestSize.Level1)
  */
 HWTEST_F(WifiDirectIpManagerTest, ConfigAndReleaseIpv4, TestSize.Level1)
 {
-
     NetManagerStandard::MockNetConnClient client;
 
     std::string interface("p2p0");

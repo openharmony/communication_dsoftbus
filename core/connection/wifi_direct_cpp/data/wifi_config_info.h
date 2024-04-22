@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#ifndef A352917D_5047_4B10_9632_B39928CDC4D4
-#define A352917D_5047_4B10_9632_B39928CDC4D4
-
 #ifndef WIFI_CONFIG_INFO_H
 #define WIFI_CONFIG_INFO_H
 
@@ -39,19 +36,18 @@ enum class WifiConfigInfoKey {
     P2P_CHANNEL_LIST = 13,
     STA_PWD = 14,
     STA_ENCRYPT_MODE = 15,
-    IS_CONNECTED_TO_HUAWEI_ROUTER = 16,
+    IS_CONNECTED_TO_HW_ROUTER = 16,
     DEVICE_TYPE = 17,
     IGNORE = 18,
     DEVICE_ID = 19,
     INTERFACE_INFO_ARRAY = 20,
-
     WC_KEY_MAX,
 };
 
 class WifiConfigInfo : public Serializable, public InfoContainer<WifiConfigInfoKey> {
 public:
     WifiConfigInfo();
-    WifiConfigInfo(std::vector<uint8_t> config);
+    explicit WifiConfigInfo(std::vector<uint8_t> config);
     ~WifiConfigInfo();
     int Marshalling(WifiDirectProtocol &protocol, std::vector<uint8_t> &output) const override;
     int Unmarshalling(WifiDirectProtocol &protocol, const std::vector<uint8_t> &input) override;
@@ -70,8 +66,4 @@ private:
     void UnmarshallingInterfaceArray(WifiDirectProtocol &protocol, uint8_t *data, size_t size);
 };
 } // namespace OHOS::SoftBus
-
-#endif // OHOS_TRUNK_WIFI_CONFIG_INFO_H
-
-
-#endif /* A352917D_5047_4B10_9632_B39928CDC4D4 */
+#endif // WIFI_CONFIG_INFO_H
