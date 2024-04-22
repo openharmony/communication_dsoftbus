@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include "wifi_direct_manager.h"
 #include <atomic>
 #include <list>
 #include <mutex>
 #include <securec.h>
+#include "wifi_direct_manager.h"
 #include "conn_log.h"
 #include "softbus_error_code.h"
 #include "wifi_direct_initiator.h"
@@ -27,6 +27,7 @@
 #include "utils/wifi_direct_anonymous.h"
 #include "adapter/p2p_adapter.h"
 #include "utils/duration_statistic.h"
+#include "conn_event.h"
 
 static std::atomic<uint32_t> g_requestId = 0;
 static std::recursive_mutex g_listenerLock;
@@ -37,6 +38,27 @@ static bool g_listenerModuleIds[AUTH_ENHANCED_P2P_NUM];
 static uint32_t GetRequestId()
 {
     return g_requestId++;
+}
+
+static void SetElementType(struct WifiDirectConnectInfo *info)
+{
+    if (info->connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P) {
+        info->linkType = STATISTIC_P2P;
+    } else if (info->connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML) {
+        info->linkType = STATISTIC_HML;
+    } else if (info->connectType == WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML) {
+        info->linkType = STATISTIC_TRIGGER_HML;
+        info->bootLinkType = STATISTIC_NONE;
+    } else if (info->connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML) {
+        info->linkType = STATISTIC_TRIGGER_HML;
+    }
+
+    WifiDirectNegoChannelType type = info->negoChannel.type;
+    if (type == NEGO_CHANNEL_AUTH) {
+        info->bootLinkType = STATISTIC_WLAN;
+    } else if (type == NEGO_CHANNEL_COC) {
+        info->bootLinkType = STATISTIC_COC;
+    }
 }
 
 static ListenerModule AllocateListenerModuleId()
@@ -89,7 +111,19 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *info, struct WifiDire
     OHOS::SoftBus::DurationStatistic::GetInstance().Record(info->requestId, OHOS::SoftBus::TotalStart);
     CONN_CHECK_AND_RETURN_RET_LOGW(info != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "info is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(callback != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "callback is null");
-    return OHOS::SoftBus::WifiDirectSchedulerFactory::GetInstance().GetScheduler().ConnectDevice(*info, *callback);
+
+    ConnEventExtra extra = { .requestId = static_cast<int32_t>(info->requestId),
+        .linkType = info->connectType,
+        .expectRole = static_cast<int32_t>(info->expectApiRole),
+        .peerIp = info->remoteMac };
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_START, extra);
+    SetElementType(info);
+    int32_t ret =
+        OHOS::SoftBus::WifiDirectSchedulerFactory::GetInstance().GetScheduler().ConnectDevice(*info, *callback);
+    extra.errcode = ret;
+    extra.result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_INVOKE_PROTOCOL, extra);
+    return ret;
 }
 
 static int32_t DisconnectDevice(struct WifiDirectDisconnectInfo *info, struct WifiDirectDisconnectCallback *callback)
