@@ -15,6 +15,8 @@
 
 #include "softbus_adapter_json.h"
 
+#include <vector>
+
 #include "comm_log.h"
 #include "nlohmann/json.hpp"
 #include "securec.h"
@@ -325,5 +327,49 @@ bool JSON_GetStringArrayFromOject(const JsonObj *obj, const char *key, char **va
         i++;
     }
     *len = item.size();
+    return true;
+}
+
+bool JSON_AddBytesToObject(JsonObj *obj, const char *key, uint8_t *value, uint32_t size)
+{
+    if (obj == nullptr || key == nullptr || value == nullptr || size == 0) {
+        COMM_LOGE(COMM_ADAPTER, "input invalid");
+        return false;
+    }
+    std::vector<uint8_t> bytes(value, value + size);
+    nlohmann::json *json = reinterpret_cast<nlohmann::json *>(obj->context);
+    if (json == nullptr) {
+        COMM_LOGE(COMM_ADAPTER, "invalid json param");
+        return false;
+    }
+    (*json)[key] = bytes;
+    return true;
+}
+
+bool JSON_GetBytesFromObject(const JsonObj *obj, const char *key, uint8_t *value, uint32_t bufLen, uint32_t *size)
+{
+    if (obj == nullptr || key == nullptr || value == nullptr || bufLen == 0 || size == nullptr) {
+        COMM_LOGE(COMM_ADAPTER, "input invalid");
+        return false;
+    }
+    nlohmann::json *json = reinterpret_cast<nlohmann::json *>(obj->context);
+    if (json == nullptr) {
+        COMM_LOGE(COMM_ADAPTER, "invaild json param");
+        return false;
+    }
+    if (json->count(key) <= 0) {
+        COMM_LOGE(COMM_ADAPTER, "key does not exist");
+        return false;
+    }
+    std::vector<uint8_t> bytes = (*json)[key];
+    if (bufLen < bytes.size()) {
+        COMM_LOGE(COMM_ADAPTER, "item size invalid, size=%{public}zu", bytes.size());
+        return false;
+    }
+    if (memcpy_s(value, bufLen, bytes.data(), bytes.size()) != EOK) {
+        COMM_LOGE(COMM_ADAPTER, "memcpy fail");
+        return false;
+    }
+    *size = bytes.size();
     return true;
 }

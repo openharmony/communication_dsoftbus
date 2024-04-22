@@ -99,6 +99,7 @@ ohos_unittest("AuthEnhanceMockTest") {
     "$dsoftbus_root_path/core/authentication/src/auth_session_key.c",
     "$dsoftbus_root_path/core/authentication/src/auth_session_message.c",
     "$dsoftbus_root_path/core/authentication/src/auth_tcp_connection.c",
+    "$dsoftbus_root_path/core/authentication/src/virtual/auth_attest_virtual.c",
     "$dsoftbus_root_path/core/authentication/src/virtual/auth_device_common_key_virtual.c",
     "$dsoftbus_root_path/core/authentication/src/virtual/auth_hichain_system_ability_monitor_virtual.c",
     "$dsoftbus_root_path/core/authentication/src/virtual/auth_meta_manager_virtual.c",
