@@ -101,6 +101,23 @@ enum IpAddrType {
     IPV6
 };
 
+enum StatisticLinkType {
+    STATISTIC_P2P = 0,
+    STATISTIC_HML = 1,
+    STATISTIC_TRIGGER_HML = 2,
+    STATISTIC_LINK_TYPE_NUM = 3,
+};
+
+enum StatisticBootLinkType {
+    STATISTIC_NONE = 0,
+    STATISTIC_WLAN = 1,
+    STATISTIC_BLE = 2,
+    STATISTIC_BR = 3,
+    STATISTIC_COC = 4,
+    STATISTIC_RENEGOTIATE = 5,
+    STATISTIC_BOOT_LINK_TYPE_NUM = 6,
+};
+
 struct WifiDirectConnectInfo {
     uint32_t requestId;
     int32_t pid;
@@ -113,6 +130,11 @@ struct WifiDirectConnectInfo {
     bool isNetworkDelegate;
     uint32_t bandWidth;
     enum IpAddrType ipAddrType;
+    enum StatisticLinkType linkType;
+    enum StatisticBootLinkType bootLinkType;
+    int renegotiate;
+    int reuse;
+    int costTime;
 };
 
 struct WifiDirectDisconnectInfo {
