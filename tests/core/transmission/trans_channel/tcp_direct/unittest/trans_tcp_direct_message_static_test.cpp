@@ -368,7 +368,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, ProcessReceivedData0011, TestSize.Leve
     int32_t channelId = 1;
     int32_t ret;
     ret = ProcessReceivedData(channelId, 0);
-    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 }
 
 /**
@@ -383,7 +383,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcSrvProcData0012, TestSize.Leve
     int32_t ret;
 
     ret = TransTdcSrvProcData(DIRECT_CHANNEL_SERVER_P2P, channelId, 0);
-    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED);
 }
 
 /**
