@@ -79,12 +79,6 @@ config("dsoftbus_sdk_interface") {
     include_dirs +=
         [ "$dsoftbus_root_path/dsoftbus_enhance/interfaces/kits/bus_center" ]
   }
-
-  if (enhanced) {
-    include_dirs += [
-      "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_adapter/include",
-    ]
-  }
 }
 
 target(build_type, "softbus_client") {
