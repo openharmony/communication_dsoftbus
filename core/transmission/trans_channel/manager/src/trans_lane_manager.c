@@ -299,11 +299,11 @@ void TransLaneMgrDeathCallback(const char *pkgName, int32_t pid)
     TransLaneInfo *laneItem = NULL;
     TransLaneInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(laneItem, next, &(g_channelLaneList->list), TransLaneInfo, node) {
-        if ((strcmp(laneItem->pkgName, pkgName) == 0) && (laneItem->pid == pid)) {
+        if (laneItem->pid == pid) {
             ListDelete(&(laneItem->node));
             g_channelLaneList->cnt--;
             TRANS_LOGI(TRANS_SVC, "death del lane. pkgName=%{public}s, channelId=%{public}d, channelType=%{public}d",
-                pkgName, laneItem->channelId, laneItem->channelType);
+                laneItem->pkgName, laneItem->channelId, laneItem->channelType);
             if (laneItem->isQosLane) {
                 TRANS_CHECK_AND_RETURN_LOGE(GetLaneManager() != NULL, TRANS_CTRL, "GetLaneManager is null");
                 TRANS_CHECK_AND_RETURN_LOGE(GetLaneManager()->lnnFreeLane != NULL, TRANS_CTRL, "lnnFreeLane is null");
@@ -312,8 +312,6 @@ void TransLaneMgrDeathCallback(const char *pkgName, int32_t pid)
                 LnnFreeLane(laneItem->laneHandle);
             }
             SoftBusFree(laneItem);
-            (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
-            return;
         }
     }
     (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
@@ -579,6 +577,7 @@ int32_t TransDeleteSocketChannelInfoByPid(int32_t pid)
         TRANS_LOGE(TRANS_SVC, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
+    int32_t delCount = 0;
     SocketWithChannelInfo *socketItem = NULL;
     SocketWithChannelInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(socketItem, next, &(g_socketChannelList->list), SocketWithChannelInfo, node) {
@@ -586,12 +585,15 @@ int32_t TransDeleteSocketChannelInfoByPid(int32_t pid)
             ListDelete(&(socketItem->node));
             g_socketChannelList->cnt--;
             SoftBusFree(socketItem);
-            (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
-            TRANS_LOGI(TRANS_CTRL, "delete socket channel info, pid=%{public}d", pid);
-            return SOFTBUS_OK;
+            delCount++;
         }
     }
     (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
+    if (delCount > 0) {
+        TRANS_LOGI(TRANS_CTRL, "delete socket channel info, pid=%{public}d delete count=%{public}d",
+            pid, delCount);
+        return SOFTBUS_OK;
+    }
     return SOFTBUS_NOT_FIND;
 }
 
