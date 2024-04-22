@@ -78,9 +78,9 @@ HWTEST_F(TransClientSdkAuthManagerTest, TransClientSdkAuthManagerTest003, TestSi
     uint32_t len = -1;
     SessionPktType type = TRANS_SESSION_BYTES;
     int32_t ret = ClientTransAuthOnDataReceived(channelId, NULL, len, type);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = ClientTransAuthOnDataReceived(channelId, NULL, len, type);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS

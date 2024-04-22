@@ -67,7 +67,7 @@ HWTEST_F(ClientTransStreamTest, RegisterStreamCb001, TestSize.Level0)
 
     IClientSessionCallBack *cb = GetClientSessionCb();
     int32_t ret = ClientTransUdpMgrInit(cb);
-    ASSERT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     RegisterStreamCb(streamCb);
     SetStreamChannelStatus(channelId, status);
 
@@ -119,7 +119,7 @@ HWTEST_F(ClientTransStreamTest, OnQosEvent001, TestSize.Level0)
 
     IClientSessionCallBack *cb = GetClientSessionCb();
     int32_t ret = ClientTransUdpMgrInit(cb);
-    ASSERT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     OnQosEvent(channelId, eventId, tvCount, tvList);
 
     ClientTransUdpMgrDeinit();
@@ -153,7 +153,7 @@ HWTEST_F(ClientTransStreamTest, OnFrameStats001, TestSize.Level0)
     
     IClientSessionCallBack *cb = GetClientSessionCb();
     int32_t ret = ClientTransUdpMgrInit(cb);
-    ASSERT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     RegisterStreamCb(streamCb);
  
     OnFrameStats(channelId, dataStreamSendStats);

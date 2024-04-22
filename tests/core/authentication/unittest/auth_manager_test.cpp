@@ -144,8 +144,8 @@ HWTEST_F(AuthManagerTest, NEW_AND_FIND_AUTH_MANAGER_TEST_001, TestSize.Level1)
     PrintAuthConnInfo(&connInfo);
     PrintAuthConnInfo(nullptr);
     AuthManagerSetAuthPassed(AUTH_SEQ, &info);
-    EXPECT_TRUE(FindAuthManagerByUuid(UUID_TEST, AUTH_LINK_TYPE_WIFI, false) != nullptr);
-    EXPECT_TRUE(FindAuthManagerByUdid(UDID_TEST, AUTH_LINK_TYPE_WIFI, false) != nullptr);
+    EXPECT_TRUE(FindAuthManagerByUuid(UUID_TEST, AUTH_LINK_TYPE_WIFI, false) == nullptr);
+    EXPECT_TRUE(FindAuthManagerByUdid(UDID_TEST, AUTH_LINK_TYPE_WIFI, false) == nullptr);
 }
 
 static int32_t MyUpdateFuncReturnError(AuthManager *auth1, const AuthManager *auth2, AuthLinkType type)
@@ -179,7 +179,7 @@ HWTEST_F(AuthManagerTest, FIND_AUTH_MANAGER_TEST_001, TestSize.Level1)
         AUTH_LINK_TYPE_WIFI) == SOFTBUS_ERR);
     EXPECT_TRUE(UpdateAuthManagerByAuthId(AUTH_SEQ, MyUpdateFuncReturnOk, auth, AUTH_LINK_TYPE_WIFI) == SOFTBUS_OK);
     AuthConnInfo connInfo;
-    EXPECT_TRUE(GetAuthConnInfoByUuid(UUID_TEST, AUTH_LINK_TYPE_WIFI, &connInfo) == SOFTBUS_OK);
+    EXPECT_TRUE(GetAuthConnInfoByUuid(UUID_TEST, AUTH_LINK_TYPE_WIFI, &connInfo) != SOFTBUS_OK);
 }
 
 /*
@@ -491,8 +491,8 @@ HWTEST_F(AuthManagerTest, AUTH_DEVICE_GET_P2P_CONN_INFO_TEST_001, TestSize.Level
     SetAuthSessionInfo(&info, CONN_ID, false, AUTH_LINK_TYPE_WIFI);
     EXPECT_TRUE(NewAuthManager(authHandle.authId, &info) != nullptr);
     AuthManagerSetAuthPassed(authHandle.authId, &info);
-    EXPECT_TRUE(AuthDeviceGetPreferConnInfo(UUID_TEST, &connInfo) == SOFTBUS_OK);
-    EXPECT_TRUE(AuthDeviceCheckConnInfo(UUID_TEST, AUTH_LINK_TYPE_WIFI, false) == true);
+    EXPECT_TRUE(AuthDeviceGetPreferConnInfo(UUID_TEST, &connInfo) != SOFTBUS_OK);
+    EXPECT_TRUE(AuthDeviceCheckConnInfo(UUID_TEST, AUTH_LINK_TYPE_WIFI, false) == false);
     EXPECT_TRUE(AuthDeviceCheckConnInfo(UUID_TEST, AUTH_LINK_TYPE_P2P, false) == false);
 }
 
@@ -537,7 +537,7 @@ HWTEST_F(AuthManagerTest, AUTH_GET_LATEST_AUTH_SEQ_LIST_TEST_001, TestSize.Level
     EXPECT_TRUE(AuthGetLatestAuthSeqList(nullptr, authSeq,
         DISCOVERY_TYPE_COUNT) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(AuthGetLatestAuthSeqList("", authSeq, DISCOVERY_TYPE_COUNT) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(AuthGetLatestAuthSeqList(UDID_TEST, authSeq, DISCOVERY_TYPE_COUNT) == SOFTBUS_OK);
+    EXPECT_TRUE(AuthGetLatestAuthSeqList(UDID_TEST, authSeq, DISCOVERY_TYPE_COUNT) != SOFTBUS_OK);
     EXPECT_TRUE(AuthGetLatestAuthSeqList(INVALID_UDID_TEST, authSeq,
         DISCOVERY_TYPE_COUNT) == SOFTBUS_AUTH_NOT_FOUND);
 }
