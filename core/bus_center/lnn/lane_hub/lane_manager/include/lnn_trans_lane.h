@@ -51,4 +51,4 @@ int32_t PostLaneStateChangeMessage(LaneState state, const char *peerUdid, const 
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif // LNN_TRANS_LANE_H

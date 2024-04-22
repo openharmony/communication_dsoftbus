@@ -354,10 +354,10 @@ void ClearSessionkeyByAuthLinkType(int64_t authId, SessionKeyList *list, AuthLin
         }
         ClearAuthLinkType(&item->type, type);
         if (item->type == 0) {
-            ListDelete(&item->node);
-            SoftBusFree(item);
             AUTH_LOGI(AUTH_FSM, "remove sessionkey, type=%{public}d, index=%{public}d, authId=%{public}" PRId64,
                 type, item->index, authId);
+            ListDelete(&item->node);
+            SoftBusFree(item);
         } else {
             UpdateLatestUseTime(item, type);
         }
