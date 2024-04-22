@@ -55,6 +55,7 @@ static LnnDeinitEventMonitorImpl g_monitorImplDeinit[MONITOR_IMPL_MAX_TYPE] = {
     LnnDeinitBtStateMonitorImpl,
     LnnDeinitProductMonitorImpl,
     LnnDeinitDriverMonitorImpl,
+    LnnDeinitNetManagerMonitorImpl,
 };
 
 int32_t LnnInitEventMonitor(void)
