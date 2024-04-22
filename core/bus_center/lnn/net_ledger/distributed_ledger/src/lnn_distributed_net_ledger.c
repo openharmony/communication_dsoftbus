@@ -52,7 +52,6 @@
 #define BLE_ADV_LOST_TIME 5000
 #define LONG_TO_STRING_MAX_LEN 21
 #define LNN_COMMON_LEN_64 8
-#define DEVICE_TYPE_SIZE_LEN 3
 #define SOFTBUS_BUSCENTER_DUMP_REMOTEDEVICEINFO "remote_device_info"
 
 #define RETURN_IF_GET_NODE_VALID(networkId, buf, info)                                \
@@ -1716,38 +1715,6 @@ static void GetNodeInfoDiscovery(NodeInfo *oldInfo, NodeInfo *info, NodeInfoAbil
     }
 }
 
-static void DfxRecordLnnAddOnlineNodeEnd(NodeInfo *info, int32_t onlineNum, int32_t reason)
-{
-    LnnEventExtra extra = { 0 };
-    LnnEventExtraInit(&extra);
-    extra.onlineNum = onlineNum;
-    extra.errcode = reason;
-    extra.result = (reason == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
-    if (info == NULL) {
-        LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, extra);
-        return;
-    }
-
-    char netWorkId[NETWORK_ID_BUF_LEN] = { 0 };
-    if (strncpy_s(netWorkId, NETWORK_ID_BUF_LEN, info->networkId, NETWORK_ID_BUF_LEN - 1) == EOK) {
-        extra.peerNetworkId = netWorkId;
-    }
-    char udidData[UDID_BUF_LEN] = { 0 };
-    if (strncpy_s(udidData, UDID_BUF_LEN, info->deviceInfo.deviceUdid, UDID_BUF_LEN - 1) == EOK) {
-        extra.peerUdid = udidData;
-    }
-    char bleMacAddr[MAC_LEN] = { 0 };
-    if (strncpy_s(bleMacAddr, MAC_LEN, info->connectInfo.bleMacAddr, MAC_LEN - 1) == EOK) {
-        extra.peerBleMac = bleMacAddr;
-    }
-    char deviceType[DEVICE_TYPE_SIZE_LEN + 1] = { 0 };
-    if (snprintf_s(deviceType, DEVICE_TYPE_SIZE_LEN + 1, DEVICE_TYPE_SIZE_LEN, "%03X",
-        info->deviceInfo.deviceTypeId) >= 0) {
-        extra.peerDeviceType = deviceType;
-    }
-    LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_JOIN_LNN_END, extra);
-}
-
 static void DfxRecordLnnSetNodeOfflineEnd(const char *udid, int32_t onlineNum, int32_t reason)
 {
     LnnEventExtra extra = { 0 };
@@ -1831,7 +1798,6 @@ ReportCategory LnnAddOnlineNode(NodeInfo *info)
             OnlinePreventBrConnection(info);
         }
         InsertToProfile(info);
-        DfxRecordLnnAddOnlineNodeEnd(info, (int32_t)MapGetSize(&map->udidMap), SOFTBUS_OK);
         return REPORT_ONLINE;
     }
     if (infoAbility.isMigrateEvent) {
