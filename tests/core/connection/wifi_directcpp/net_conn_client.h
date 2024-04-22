@@ -1,11 +1,24 @@
-#ifndef C7591547_D85C_4729_B42E_672BF3B7FF87
-#define C7591547_D85C_4729_B42E_672BF3B7FF87
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #ifndef NET_CONN_CLIENT
 #define NET_CONN_CLIENT
 #include <atomic>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <stdint.h>
+#include <cstdint>
 #include <string>
 
 namespace OHOS::NetManagerStandard {
@@ -56,7 +69,4 @@ private:
     static inline std::atomic<MockNetConnClient *> mock = nullptr;
 };
 } // namespace OHOS::NetManagerStandard
-#endif /* NET_CONN_CLIENT */
-
-
-#endif /* C7591547_D85C_4729_B42E_672BF3B7FF87 */
+#endif

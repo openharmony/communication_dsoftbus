@@ -66,8 +66,13 @@ int WifiConfigInfo::Marshalling(WifiDirectProtocol &protocol, std::vector<uint8_
 
 void WifiConfigInfo::UnmarshallingInterfaceArray(WifiDirectProtocol &protocol, uint8_t *data, size_t size)
 {
+    if (data == nullptr) {
+        CONN_LOGW(CONN_WIFI_DIRECT, "invalil para data");
+        return;
+    }
     WifiDirectProtocol *pro = WifiDirectProtocolFactory::CreateProtocol(protocol.GetType());
     if (pro == nullptr) {
+        CONN_LOGW(CONN_WIFI_DIRECT, "create protocol failed");
         return;
     }
     pro->SetFormat(ProtocolFormat { TlvProtocol::TLV_TAG_SIZE, TlvProtocol::TLV_LENGTH_SIZE1 });
