@@ -37,4 +37,4 @@ typedef struct {
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif // LNN_LANE_ASSIGN_H

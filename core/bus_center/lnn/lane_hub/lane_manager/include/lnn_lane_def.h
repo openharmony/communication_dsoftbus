@@ -82,4 +82,4 @@ typedef enum {
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif // LNN_LANE_DEF_H
