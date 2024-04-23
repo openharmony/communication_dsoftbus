@@ -249,7 +249,7 @@ static int32_t GetRemoteUuidByIp(const char *remoteIp, char *uuid, int32_t uuidS
     return SOFTBUS_OK;
 }
 
-static void NotifyOnline(const char *remoteMac, const char *remoteIp, const char *remoteUuid)
+static void NotifyOnline(const char *remoteMac, const char *remoteIp, const char *remoteUuid, bool isSource)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "remoteMac=%{public}s, remoteIp=%{public}s remoteUuid=%{public}s",
               OHOS::SoftBus::WifiDirectAnonymizeMac(remoteMac).c_str(),
@@ -258,7 +258,7 @@ static void NotifyOnline(const char *remoteMac, const char *remoteIp, const char
     std::lock_guard lock(g_listenerLock);
     for (auto listener : g_listeners) {
         if (listener.onDeviceOnLine != nullptr) {
-            listener.onDeviceOnLine(remoteMac, remoteIp, remoteUuid);
+            listener.onDeviceOnLine(remoteMac, remoteIp, remoteUuid, isSource);
         }
     }
 }
