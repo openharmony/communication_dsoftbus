@@ -24,7 +24,7 @@ InfoContainer<WifiConfigInfoKey>::KeyTypeTable InfoContainer<WifiConfigInfoKey>:
     { WifiConfigInfoKey::DEVICE_ID,           Serializable::ValueType::STRING              },
 };
 
-WifiConfigInfo::WifiConfigInfo(std::vector<uint8_t> config)
+WifiConfigInfo::WifiConfigInfo(std::vector<uint8_t> &config)
 {
     WifiDirectProtocol *pro = WifiDirectProtocolFactory::CreateProtocol(ProtocolType::TLV);
     if (pro == nullptr) {
@@ -33,6 +33,7 @@ WifiConfigInfo::WifiConfigInfo(std::vector<uint8_t> config)
     }
     pro->SetFormat(ProtocolFormat { TlvProtocol::TLV_TAG_SIZE, TlvProtocol::TLV_LENGTH_SIZE1 });
     Unmarshalling(*pro, config);
+    delete pro;
 }
 
 WifiConfigInfo::~WifiConfigInfo() { }
@@ -80,6 +81,7 @@ void WifiConfigInfo::UnmarshallingInterfaceArray(WifiDirectProtocol &protocol, u
     InterfaceInfo info;
     std::vector<uint8_t> input(data, data + size);
     info.Unmarshalling(*pro, input);
+    delete pro;
     auto interfaceArray = GetInterfaceInfoArray();
     interfaceArray.push_back(info);
     SetInterfaceInfoArray(interfaceArray);
@@ -93,6 +95,17 @@ void WifiConfigInfo::SetInterfaceInfoArray(const std::vector<InterfaceInfo> &val
 std::vector<InterfaceInfo> WifiConfigInfo::GetInterfaceInfoArray() const
 {
     return Get(WifiConfigInfoKey::INTERFACE_INFO_ARRAY, std::vector<InterfaceInfo>());
+}
+
+InterfaceInfo WifiConfigInfo::GetInterfaceInfo(const std::string &name) const
+{
+    auto interfaces = GetInterfaceInfoArray();
+    for (const auto &interface : interfaces) {
+        if (name == interface.GetName()) {
+            return interface;
+        }
+    }
+    return {};
 }
 
 void WifiConfigInfo::SetDeviceId(const std::string &value)

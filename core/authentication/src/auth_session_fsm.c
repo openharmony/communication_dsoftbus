@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "anonymizer.h"
+#include "auth_attest_interface.h"
 #include "auth_connection.h"
 #include "auth_device_common_key.h"
 #include "auth_hichain.h"
@@ -762,6 +763,8 @@ static void HandleMsgSaveSessionKey(AuthFsm *authFsm, const MessagePara *para)
         AUTH_LOGE(AUTH_FSM, "auth fsm save session key fail. authSeq=%{public}" PRId64 "", authFsm->authSeq);
     }
 
+    (void)CalcHKDF((uint8_t *)(&sessionKey.value), sessionKey.len,
+        (uint8_t *)(&authFsm->info.sessionKeyRandomNum), sizeof(authFsm->info.sessionKeyRandomNum));
     (void)memset_s(&sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
     if (LnnGenerateLocalPtk(authFsm->info.udid, authFsm->info.uuid) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "generate ptk fail");

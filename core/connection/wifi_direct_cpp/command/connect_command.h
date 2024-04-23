@@ -18,11 +18,13 @@
 #include "wifi_direct_command.h"
 #include "wifi_direct_types.h"
 #include "channel/negotiate_channel.h"
+#include "data/wifi_config_info.h"
 
 namespace OHOS::SoftBus {
 struct ConnectInfo {
     WifiDirectConnectInfo info_;
     std::shared_ptr<NegotiateChannel> channel_;
+    std::shared_ptr<WifiConfigInfo> wifiConfigInfo_;
 };
 
 class ConnectCommand : public WifiDirectCommand {
@@ -36,16 +38,16 @@ public:
         return CommandType::CONNECT_COMMAND;
     }
 
-    ConnectInfo GetConnectInfo() const;
+    ConnectInfo& GetConnectInfo();
     WifiDirectConnectCallback GetConnectCallback() const;
-    void PreferNegotiateChannel();
+    virtual void PreferNegotiateChannel();
     void SetRetried(bool retried) { hasRetried_ = retried; }
     bool HasRetried() const { return hasRetried_; }
 
     void OnSuccess(const WifiDirectLink &link) const;
     void OnFailure(WifiDirectErrorCode reason) const;
 
-private:
+protected:
     ConnectInfo info_;
     WifiDirectConnectCallback callback_;
     mutable std::string remoteDeviceId_;

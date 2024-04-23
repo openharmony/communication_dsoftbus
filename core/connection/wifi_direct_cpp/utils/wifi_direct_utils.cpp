@@ -71,7 +71,7 @@ void WifiDirectUtils::IntToBytes(uint32_t data, uint32_t len, std::vector<uint8_
     if (memcpy_s(result.data(), len, &data, len) != EOK) {
         return;
     }
-    out = result;
+    out.insert(out.end(), result.begin(), result.end());
 }
 
 static constexpr int BYTE_HEX_BUF_LEN = 4;
@@ -166,9 +166,7 @@ std::string WifiDirectUtils::GetLocalUuid()
 static constexpr int PTK_128BIT_LEN = 16;
 std::vector<uint8_t> WifiDirectUtils::GetLocalPtk(const std::string &remoteNetworkId)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "remoteNetworkId=%{public}s", WifiDirectAnonymizeDeviceId(remoteNetworkId).c_str());
     auto remoteUuid = NetworkIdToUuid(remoteNetworkId);
-    CONN_LOGI(CONN_WIFI_DIRECT, "remoteUuid=%{public}s", WifiDirectAnonymizeDeviceId(remoteUuid).c_str());
     std::vector<uint8_t> result;
     uint8_t ptkBytes[PTK_DEFAULT_LEN] {};
     auto ret = LnnGetLocalPtkByUuid(remoteUuid.c_str(), (char *)ptkBytes, sizeof(ptkBytes));
@@ -179,7 +177,6 @@ std::vector<uint8_t> WifiDirectUtils::GetLocalPtk(const std::string &remoteNetwo
 
 std::vector<uint8_t> WifiDirectUtils::GetRemotePtk(const std::string &remoteNetworkId)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "remoteNetworkId=%{public}s", WifiDirectAnonymizeDeviceId(remoteNetworkId).c_str());
     std::vector<uint8_t> result;
     uint8_t ptkBytes[PTK_DEFAULT_LEN] = { 0 };
     int32_t ret = LnnGetRemoteByteInfo(remoteNetworkId.c_str(), BYTE_KEY_REMOTE_PTK, ptkBytes, sizeof(ptkBytes));
@@ -254,7 +251,8 @@ std::vector<Ipv4Info> WifiDirectUtils::GetLocalIpv4Infos()
 
     struct ifaddrs *ifa = nullptr;
     for (ifa = ifAddr; ifa != nullptr; ifa = ifa->ifa_next) {
-        if (ifa->ifa_addr == nullptr || ifa->ifa_addr->sa_family != AF_INET || ifa->ifa_netmask == nullptr) {
+        if (ifa->ifa_addr == nullptr || ifa->ifa_addr->sa_family != AF_INET || ifa->ifa_netmask == nullptr ||
+            strcmp(ifa->ifa_name, "chba0") != 0) {
             continue;
         }
         char ip[IP_LEN] {};
@@ -388,6 +386,16 @@ WifiDirectRole WifiDirectUtils::ToWifiDirectRole(LinkInfo::LinkMode mode)
             return WifiDirectRole::WIFI_DIRECT_ROLE_HML;
         default:
             return WifiDirectRole::WIFI_DIRECT_ROLE_INVALID;
+    }
+}
+
+void WifiDirectUtils::ShowLinkInfoList(const std::string &banana, const std::vector<LinkInfo> &inkList)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "banana=%{public}s", banana.c_str());
+
+    for (const LinkInfo &info : inkList) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "interface=%{public}s, mode=%{public}d", info.GetLocalInterface().c_str(),
+            static_cast<int>(info.GetLocalLinkMode()));
     }
 }
 } // namespace OHOS::SoftBus

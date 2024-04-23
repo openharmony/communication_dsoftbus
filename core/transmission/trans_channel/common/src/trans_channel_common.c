@@ -479,7 +479,7 @@ void TransFreeAppInfo(AppInfo *appInfo)
 void TransFreeLane(uint32_t laneHandle, bool isQosLane)
 {
     TRANS_LOGI(TRANS_CTRL, "Trans free lane laneHandle=%{public}u, isQosLane=%{public}d", laneHandle, isQosLane);
-    if (laneHandle != 0) {
+    if (laneHandle != INVALID_LANE_REQ_ID) {
         if (isQosLane) {
             TRANS_CHECK_AND_RETURN_LOGE(GetLaneManager() != NULL, TRANS_CTRL, "GetLaneManager is null");
             TRANS_CHECK_AND_RETURN_LOGE(GetLaneManager()->lnnFreeLane != NULL, TRANS_CTRL, "lnnFreeLane is null");

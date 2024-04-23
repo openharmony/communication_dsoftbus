@@ -117,6 +117,7 @@ int WifiDirectScheduler::ScheduleActiveCommand(const std::shared_ptr<WifiDirectC
 {
     auto remoteDeviceId = command->GetRemoteDeviceId();
     if (remoteDeviceId.empty()) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "remoteDeviceId emtpy");
         return SOFTBUS_ERR;
     }
 
