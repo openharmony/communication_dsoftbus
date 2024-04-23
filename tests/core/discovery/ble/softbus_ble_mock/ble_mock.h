@@ -54,6 +54,7 @@ public:
 
     virtual int SoftBusGetBtMacAddr(SoftBusBtAddr *mac) = 0;
     virtual int SoftBusGetBtState() = 0;
+    virtual int SoftBusGetBrState() = 0;
 };
 
 class BleMock : public BleInterface {
@@ -88,6 +89,7 @@ public:
         (override));
     MOCK_METHOD(int, SoftBusGetBtMacAddr, (SoftBusBtAddr * mac), (override));
     MOCK_METHOD(int, SoftBusGetBtState, (), (override));
+    MOCK_METHOD(int, SoftBusGetBrState, (), (override));
 
     void SetupSuccessStub();
     void AsyncAdvertiseDone();
@@ -109,14 +111,13 @@ public:
     static int32_t ActionOfStartBroadcasting(int32_t bcId, const BroadcastParam *param, const BroadcastPacket *packet);
     static int32_t ActionOfStopBroadcasting(int32_t bcId);
     static int32_t ActionOfSetAdvDataForActiveDiscovery(int32_t bcId, const BroadcastPacket *packet);
-    static int32_t ActionOfUpdateAdvForActiveDiscovery(
-        int32_t bcId, const BroadcastParam *param, const BroadcastPacket *packet);
     static int32_t ActionOfSetAdvDataForActivePublish(int32_t bcId, const BroadcastPacket *packet);
     static int32_t ActionOfSetAdvDataForPassivePublish(int32_t bcId, const BroadcastPacket *packet);
     static int32_t ActionOfUpdateAdvForPassivePublish(
         int32_t bcId, const BroadcastParam *param, const BroadcastPacket *packet);
     static int32_t ActionOfGetBtMacAddr(SoftBusBtAddr *mac);
     static int32_t ActionOfGetBtState();
+    static int32_t ActionOfGetBrState();
 
     static void InjectPassiveNonPacket();
     static void InjectActiveNonPacket();
@@ -138,14 +139,12 @@ public:
     static inline bool isAdvertising {};
     static inline bool isScanning {};
     static inline bool btState {};
+    static inline bool brState = true;
     static inline uint8_t btMacAddr[] = { 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f };
 
-    static inline uint8_t activeDiscoveryAdvData[] = { 0x04, 0x05, 0x90, 0x00, 0x00, 0x02, 0x00, 0x18, 0xE8, 0x31, 0xF7,
+    static inline uint8_t activeDiscoveryAdvData[] = { 0x04, 0x05, 0x90, 0x00, 0x00, 0x12, 0x00, 0x18, 0xE8, 0x31, 0xF7,
         0x63, 0x0B, 0x76, 0x19, 0xAE, 0x21, 0x0E, 0x3A, 0x4D, 0x79, 0x20, 0x44, 0x65 };
-    static inline uint8_t activeDiscoveryAdvData2[] = { 0x04, 0x05, 0x90, 0x00, 0x00, 0x12, 0x00, 0x18, 0xE8, 0x31,
-        0xF7, 0x63, 0x0B, 0x76, 0x19, 0xAE, 0x21, 0x0E, 0x3A, 0x4D, 0x79, 0x20, 0x44, 0x65 };
-    static inline uint8_t activeDiscoveryRspData[] = { 0x76, 0x69, 0x63, 0x65 };
-    static inline uint8_t activeDiscoveryRspData2[] = { 0x76, 0x69, 0x63, 0x65, 0x00 };
+    static inline uint8_t activeDiscoveryRspData[] = { 0x76, 0x69, 0x63, 0x65, 0x00 };
 
     static inline uint8_t activePublishAdvData[] = { 0x04, 0x05, 0x10, 0x00, 0x00, 0x02, 0x00, 0x18, 0xE8, 0x31, 0xF7,
         0x63, 0x0B, 0x76, 0x19, 0xAE, 0x21, 0x0E, 0x3A, 0x4D, 0x79, 0x20, 0x44, 0x65 };

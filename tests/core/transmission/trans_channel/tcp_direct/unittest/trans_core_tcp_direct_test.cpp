@@ -241,7 +241,7 @@ HWTEST_F(TransCoreTcpDirectTest, TransOpenDirectChannelTest003, TestSize.Level1)
     (void)memcpy_s(appInfo->myData.addr, IP_LEN, g_ip, strlen(g_ip));
 
     int32_t ret = TransGetLaneInfo(&param, &connInfo, &laneHandle);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_PID_FAILED);
 
     ret = TransGetConnectOptByConnInfo(&connInfo, &connOpt);
     EXPECT_TRUE(ret == SOFTBUS_OK);

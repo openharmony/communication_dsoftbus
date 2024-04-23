@@ -299,11 +299,11 @@ void TransLaneMgrDeathCallback(const char *pkgName, int32_t pid)
     TransLaneInfo *laneItem = NULL;
     TransLaneInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(laneItem, next, &(g_channelLaneList->list), TransLaneInfo, node) {
-        if (laneItem->pid == pid) {
+        if ((strcmp(laneItem->pkgName, pkgName) == 0) && (laneItem->pid == pid)) {
             ListDelete(&(laneItem->node));
             g_channelLaneList->cnt--;
             TRANS_LOGI(TRANS_SVC, "death del lane. pkgName=%{public}s, channelId=%{public}d, channelType=%{public}d",
-                laneItem->pkgName, laneItem->channelId, laneItem->channelType);
+                pkgName, laneItem->channelId, laneItem->channelType);
             if (laneItem->isQosLane) {
                 TRANS_CHECK_AND_RETURN_LOGE(GetLaneManager() != NULL, TRANS_CTRL, "GetLaneManager is null");
                 TRANS_CHECK_AND_RETURN_LOGE(GetLaneManager()->lnnFreeLane != NULL, TRANS_CTRL, "lnnFreeLane is null");
@@ -312,6 +312,8 @@ void TransLaneMgrDeathCallback(const char *pkgName, int32_t pid)
                 LnnFreeLane(laneItem->laneHandle);
             }
             SoftBusFree(laneItem);
+            (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));
+            return;
         }
     }
     (void)SoftBusMutexUnlock(&(g_channelLaneList->lock));

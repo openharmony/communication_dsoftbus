@@ -88,6 +88,7 @@ typedef enum {
     PROCESS_TIME_OUT,
     RECOVERY,
     TURN_OFF,
+    BR_STATE_CHANGED,
 } DISC_BLE_MESSAGE;
 
 typedef struct {
@@ -563,7 +564,7 @@ static void BleOnScanStop(int listenerId, int status)
     g_isScanning = false;
 }
 
-static void BleOnStateChanged(int32_t listenerId, int32_t state)
+static void BtOnStateChanged(int32_t listenerId, int32_t state)
 {
     DiscEventExtra extra = { 0 };
     DiscEventExtraInit(&extra);
@@ -575,18 +576,24 @@ static void BleOnStateChanged(int32_t listenerId, int32_t state)
         case SOFTBUS_BT_STATE_TURN_ON:
             DISC_LOGI(DISC_CONTROL, "bt turn on");
             msg = CreateBleHandlerMsg(RECOVERY, 0, 0, NULL);
-            DISC_CHECK_AND_RETURN_LOGW(msg != NULL, DISC_CONTROL, "create msg failed");
-            g_discBleHandler.looper->PostMessage(g_discBleHandler.looper, msg);
             break;
         case SOFTBUS_BT_STATE_TURN_OFF:
             DISC_LOGI(DISC_CONTROL, "bt turn off");
             msg = CreateBleHandlerMsg(TURN_OFF, 0, 0, NULL);
-            DISC_CHECK_AND_RETURN_LOGW(msg != NULL, DISC_CONTROL, "create msg failed");
-            g_discBleHandler.looper->PostMessage(g_discBleHandler.looper, msg);
+            break;
+        case SOFTBUS_BR_STATE_TURN_ON:
+            DISC_LOGI(DISC_CONTROL, "br turn on");
+            msg = CreateBleHandlerMsg(BR_STATE_CHANGED, SOFTBUS_BR_STATE_TURN_ON, 0, NULL);
+            break;
+        case SOFTBUS_BR_STATE_TURN_OFF:
+            DISC_LOGI(DISC_CONTROL, "br turn off");
+            msg = CreateBleHandlerMsg(BR_STATE_CHANGED, SOFTBUS_BR_STATE_TURN_OFF, 0, NULL);
             break;
         default:
-            break;
+            return;
     }
+    DISC_CHECK_AND_RETURN_LOGE(msg != NULL, DISC_CONTROL, "create msg failed");
+    g_discBleHandler.looper->PostMessage(g_discBleHandler.looper, msg);
 }
 
 static BroadcastCallback g_advCallback = {
@@ -603,7 +610,7 @@ static ScanCallback g_scanListener = {
 };
 
 static SoftBusBtStateListener g_stateChangedListener = {
-    .OnBtStateChanged = BleOnStateChanged,
+    .OnBtStateChanged = BtOnStateChanged,
     .OnBtAclStateChanged = NULL,
 };
 
@@ -763,7 +770,7 @@ static void AssembleNonOptionalTlv(DeviceInfo *info, BroadcastData *broadcastDat
     }
     if (g_recvMessageInfo.numNeedBrMac > 0) {
         SoftBusBtAddr addr;
-        if (SoftBusGetBtMacAddr(&addr) == SOFTBUS_OK) {
+        if (SoftBusGetBrState() == BR_ENABLE && SoftBusGetBtMacAddr(&addr) == SOFTBUS_OK) {
             (void)AssembleTLV(broadcastData, TLV_TYPE_BR_MAC, (const void *)&addr.addr, BT_ADDR_LEN);
         }
     }
@@ -950,9 +957,7 @@ static int32_t UpdateAdvertiser(int32_t adv)
         DISC_LOGE(DISC_BLE, "BuildBleConfigAdvData failed");
         return SOFTBUS_DISCOVER_BLE_BUILD_CONFIG_ADV_DATA_FAIL;
     }
-    BroadcastParam advParam = {};
-    BuildAdvParam(&advParam);
-    if (UpdateBroadcasting(advertiser->channel, &advParam, &packet) != SOFTBUS_OK) {
+    if (SetBroadcastingData(advertiser->channel, &packet) != SOFTBUS_OK) {
         DestroyBleConfigAdvData(&packet);
         DISC_LOGE(DISC_BLE, "UpdateAdv failed");
         return SOFTBUS_DISCOVER_BLE_START_BROADCAST_FAIL;
@@ -1667,7 +1672,25 @@ static void ProcessTimeout(SoftBusMessage *msg)
 {
     DISC_LOGD(DISC_BLE, "enter");
     RemoveRecvMessage(msg->arg1);
-    UpdateAdvertiser(NON_ADV_ID);
+    if (g_bleAdvertiser[NON_ADV_ID].isAdvertising) {
+        UpdateAdvertiser(NON_ADV_ID);
+    }
+}
+
+static void OnBrStateChanged(SoftBusMessage *msg)
+{
+    (void)msg;
+    DISC_LOGD(DISC_BLE, "enter");
+    if (g_bleAdvertiser[NON_ADV_ID].isAdvertising) {
+        int32_t ret = SoftBusMutexLock(&g_recvMessageInfo.lock);
+        DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BLE, "lock failed");
+        int32_t numNeedBrMac = g_recvMessageInfo.numNeedBrMac;
+        SoftBusMutexUnlock(&g_recvMessageInfo.lock);
+
+        if (numNeedBrMac > 0) {
+            UpdateAdvertiser(NON_ADV_ID);
+        }
+    }
 }
 
 static void DiscBleMsgHandler(SoftBusMessage *msg)
@@ -1710,6 +1733,9 @@ static void DiscBleMsgHandler(SoftBusMessage *msg)
             break;
         case TURN_OFF:
             BleDiscTurnOff(msg);
+            break;
+        case BR_STATE_CHANGED:
+            OnBrStateChanged(msg);
             break;
         default:
             DISC_LOGW(DISC_BLE, "wrong msg what=%{public}d", msg->what);

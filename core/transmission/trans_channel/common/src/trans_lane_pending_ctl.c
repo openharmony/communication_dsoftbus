@@ -800,7 +800,7 @@ static int32_t GetAllocInfoBySessionParam(const SessionParam *param, LaneAllocIn
 
     if (PeerDeviceIsLegacyOs(param->peerDeviceId, param->sessionName) || IsMeshSync(param->sessionName)) {
         allocInfo->qosRequire.minBW = MESH_MAGIC_NUMBER;
-        TRANS_LOGI(TRANS_SVC, "adapt double frame device and mesh, isQosLane=%{public}d", param->isQosLane);
+        TRANS_LOGI(TRANS_SVC, "adapt legacy os device and mesh, isQosLane=%{public}d", param->isQosLane);
     }
 
     NodeInfo info;
@@ -868,7 +868,7 @@ static int32_t GetRequestOptionBySessionParam(const SessionParam *param, LaneReq
     if (!(param->isQosLane) &&
         (PeerDeviceIsLegacyOs(param->peerDeviceId, param->sessionName) || IsMeshSync(param->sessionName))) {
         ModuleLaneAdapter(&(requestOption->requestInfo.trans.expectedLink));
-        TRANS_LOGI(TRANS_SVC, "adapt double frame device and mesh, isQosLane=%{public}d", param->isQosLane);
+        TRANS_LOGI(TRANS_SVC, "adapt legacy os device and mesh, isQosLane=%{public}d", param->isQosLane);
     }
     return SOFTBUS_OK;
 }
@@ -1070,7 +1070,7 @@ int32_t TransGetLaneInfo(const SessionParam *param, LaneConnInfo *connInfo, uint
     if (!(param->isQosLane)) {
         LaneRequestOption requestOption;
         (void)memset_s(&requestOption, sizeof(LaneRequestOption), 0, sizeof(LaneRequestOption));
-        ret = = GetRequestOptionBySessionParam(param, &requestOption);
+        ret = GetRequestOptionBySessionParam(param, &requestOption);
         TRANS_CHECK_AND_RETURN_RET_LOGE(
             ret == SOFTBUS_OK, ret, TRANS_SVC, "get request option failed ret=%{public}d", ret);
         ret = TransGetLaneInfoByOption(&requestOption, connInfo, laneHandle);
@@ -1160,7 +1160,7 @@ int32_t TransAsyncGetLaneInfoByQos(const SessionParam *param, const LaneAllocInf
     *laneHandle = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_TRANS);
     TransUpdateSocketChannelLaneInfoBySession(
         param->sessionName, param->sessionId, *laneHandle, param->isQosLane, param->isAsync);
-    int32_t ret = TransAddAsyncLaneReqFromPendingList(*laneHandle, param, firstTokenId, param->isQosLane);
+    int32_t ret = TransAddAsyncLaneReqFromPendingList(*laneHandle, param, firstTokenId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(
             TRANS_SVC, "add laneHandle=%{public}u to async pending list failed, ret=%{public}d", *laneHandle, ret);

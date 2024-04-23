@@ -190,7 +190,7 @@ int32_t NotifyUdpChannelOpenFailed(const AppInfo *info, int32_t errCode)
         .errcode = errCode,
         .result = EVENT_STAGE_RESULT_FAILED
     };
-    if (TransGetUdpChannelById(info->myData.channelId, &channel) == SOFTBUS_OK && channel.clientSide) {
+    if (info->isClient) {
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     } else {
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_OPEN_CHANNEL_END, extra);
@@ -947,7 +947,6 @@ int32_t TransOpenUdpChannel(AppInfo *appInfo, const ConnectOption *connOpt, int3
     }
     newChannel->seq = GenerateSeq(false);
     newChannel->status = UDP_CHANNEL_STATUS_INIT;
-    newChannel->clientSide = true;
     int32_t ret = SOFTBUS_ERR;
     ret = TransAddUdpChannel(newChannel);
     if (ret != SOFTBUS_OK) {

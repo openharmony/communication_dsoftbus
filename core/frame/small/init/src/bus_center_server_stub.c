@@ -260,6 +260,27 @@ int32_t ServerSetNodeDataChangeFlag(IpcIo *req, IpcIo *reply)
     return SOFTBUS_OK;
 }
 
+int32_t ServerRegDataLevelChangeCb(IpcIo *req, IpcIo *reply)
+{
+    (void)req;
+    (void)reply;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerUnregDataLevelChangeCb(IpcIo *req, IpcIo *reply)
+{
+    (void)req;
+    (void)reply;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerSetDataLevel(IpcIo *req, IpcIo *reply)
+{
+    (void)req;
+    (void)reply;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
 int32_t ServerStartTimeSync(IpcIo *req, IpcIo *reply)
 {
     LNN_LOGD(LNN_STATE, "ServerStartTimeSync ipc server pop");
