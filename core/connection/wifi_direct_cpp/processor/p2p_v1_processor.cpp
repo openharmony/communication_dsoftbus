@@ -1442,7 +1442,7 @@ int P2pV1Processor::ChooseFrequency(int gcFreq, const std::vector<int> &gcChanne
 
 int P2pV1Processor::DestroyGroup()
 {
-    P2pAdapter::DestroyGroupParam param { IF_NAME_P2P };
+    P2pAdapter::DestroyGroupParam param { P2P_IF_NAME };
     auto result = P2pEntity::GetInstance().DestroyGroup(param);
     CONN_CHECK_AND_RETURN_RET_LOGW(result.errorCode_ == SOFTBUS_OK, result.errorCode_, CONN_WIFI_DIRECT,
         "copy interface failed, error=%{public}d", result.errorCode_);
@@ -1588,7 +1588,7 @@ int P2pV1Processor::RemoveLink(const std::string &remoteDeviceId)
         return SOFTBUS_OK;
     }
 
-    P2pAdapter::DestroyGroupParam param { IF_NAME_P2P };
+    P2pAdapter::DestroyGroupParam param { P2P_IF_NAME };
     auto result = P2pEntity::GetInstance().Disconnect(param);
     CONN_CHECK_AND_RETURN_RET_LOGW(result.errorCode_ == SOFTBUS_OK, result.errorCode_, CONN_WIFI_DIRECT,
         "entity disconnect failed, error=%{public}d", result.errorCode_);

@@ -35,6 +35,7 @@ ohos_static_library("wifi_direct") {
     "//third_party/googletest/googletest/include",
     "//third_party/googletest/googletest/src",
     "//third_party/bounds_checking_function/include",
+    "$dsoftbus_root_path/adapter/common/net/wifi/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
@@ -55,6 +56,7 @@ ohos_static_library("wifi_direct") {
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
   ]
 
@@ -65,7 +67,9 @@ ohos_static_library("wifi_direct") {
     wifi_direct_connection_src += [
       "$wifi_direct_path/adapter/p2p_adapter.cpp",
       "$wifi_direct_path/channel/auth_negotiate_channel.cpp",
+      "$wifi_direct_path/channel/proxy_negotiate_channel.cpp",
       "$wifi_direct_path/command/connect_command.cpp",
+      "$wifi_direct_path/command/command_factory.cpp",
       "$wifi_direct_path/command/disconnect_command.cpp",
       "$wifi_direct_path/command/negotiate_command.cpp",
       "$wifi_direct_path/command/processor_selector_factory.cpp",
@@ -91,7 +95,6 @@ ohos_static_library("wifi_direct") {
       "$wifi_direct_path/protocol/json_protocol.cpp",
       "$wifi_direct_path/protocol/tlv_protocol.cpp",
       "$wifi_direct_path/utils/wifi_direct_anonymous.cpp",
-      "$wifi_direct_path/utils/wifi_direct_statistic.cpp",
       "$wifi_direct_path/utils/duration_statistic.cpp",
       "$wifi_direct_path/utils/wifi_direct_trace.cpp",
       "$wifi_direct_path/utils/wifi_direct_utils.cpp",
