@@ -2310,6 +2310,7 @@ ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback)
         .CheckActiveConnection = BleCheckActiveConnection,
         .UpdateConnection = BleUpdateConnection,
         .PreventConnection = NULL,
+        .ConfigPostLimit = ConnBleTransConfigPostLimit,
     };
     CONN_LOGI(CONN_INIT, "conn init ble successfully");
     return &bleFuncInterface;
