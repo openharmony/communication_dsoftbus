@@ -18,6 +18,7 @@
 #include "softbus_error_code.h"
 
 namespace OHOS::SoftBus {
+static constexpr int LENGTH_HEADER = 2;
 template <>
 InfoContainer<WifiConfigInfoKey>::KeyTypeTable InfoContainer<WifiConfigInfoKey>::keyTypeTable_ = {
     {WifiConfigInfoKey::INTERFACE_INFO_ARRAY, Serializable::ValueType::INTERFACE_INFO_ARRAY},
@@ -26,13 +27,15 @@ InfoContainer<WifiConfigInfoKey>::KeyTypeTable InfoContainer<WifiConfigInfoKey>:
 
 WifiConfigInfo::WifiConfigInfo(std::vector<uint8_t> &config)
 {
+    std::vector<uint8_t> configInfo = config;
+    configInfo.erase(configInfo.begin(), configInfo.begin() + LENGTH_HEADER);
     WifiDirectProtocol *pro = WifiDirectProtocolFactory::CreateProtocol(ProtocolType::TLV);
     if (pro == nullptr) {
         CONN_LOGE(CONN_WIFI_DIRECT, "create tlv protocol failed");
         return;
     }
     pro->SetFormat(ProtocolFormat { TlvProtocol::TLV_TAG_SIZE, TlvProtocol::TLV_LENGTH_SIZE1 });
-    Unmarshalling(*pro, config);
+    Unmarshalling(*pro, configInfo);
     delete pro;
 }
 
@@ -60,8 +63,35 @@ int WifiConfigInfo::Unmarshalling(WifiDirectProtocol &protocol, const std::vecto
     return SOFTBUS_OK;
 }
 
+void WifiConfigInfo::MarshallingInterfaceArray(WifiDirectProtocol &protocol) const
+{
+    auto interfaceArray = GetInterfaceInfoArray();
+    for (const auto &interface : interfaceArray) {
+        WifiDirectProtocol *pro = WifiDirectProtocolFactory::CreateProtocol(protocol.GetType());
+        if (pro != nullptr) {
+            std::vector<uint8_t> interfaceOutput;
+            pro->SetFormat(protocol.GetFormat());
+            interface.Marshalling(*pro, interfaceOutput);
+            protocol.Write(static_cast<int>(WifiConfigInfoKey::INTERFACE_INFO_ARRAY),
+                Serializable::ValueType::INTERFACE_INFO_ARRAY, interfaceOutput.data(), interfaceOutput.size());
+            delete pro;
+        }
+    }
+}
+
 int WifiConfigInfo::Marshalling(WifiDirectProtocol &protocol, std::vector<uint8_t> &output) const
 {
+    for (const auto &[key, value] : values_) {
+        auto type = keyTypeTable_[key];
+        switch (type) {
+            case Serializable::ValueType::INTERFACE_INFO_ARRAY:
+                MarshallingInterfaceArray(protocol);
+                break;
+            default:
+                continue;
+        }
+    }
+    protocol.GetOutput(output);
     return SOFTBUS_OK;
 }
 

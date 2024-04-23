@@ -51,6 +51,7 @@ constexpr uint8_t DEVICE_ID_HASH[UDID_HASH_LEN] = "123456789";
 constexpr char PEER_UID[MAX_ACCOUNT_HASH_LEN] = "123456789uditest";
 constexpr uint8_t KEY_VALUE[SESSION_KEY_LENGTH] = "123456keytest";
 constexpr uint8_t TMP_IN_DATA[TMP_DATA_LEN] = "tmpInData";
+static const int32_t TEST_DATA_LEN = 600;
 
 class AuthManagerTest : public testing::Test {
 public:
@@ -119,7 +120,8 @@ HWTEST_F(AuthManagerTest, NEW_AND_FIND_AUTH_MANAGER_TEST_001, TestSize.Level1)
 {
     AuthSessionInfo info;
     SetAuthSessionInfo(&info, CONN_ID, false, AUTH_LINK_TYPE_WIFI);
-    EXPECT_TRUE(NewAuthManager(AUTH_SEQ, &info) != nullptr);
+    AuthManager *auth = NewAuthManager(AUTH_SEQ, &info);
+    EXPECT_TRUE(auth != nullptr);
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     connInfo.type = AUTH_LINK_TYPE_WIFI;
@@ -143,6 +145,9 @@ HWTEST_F(AuthManagerTest, NEW_AND_FIND_AUTH_MANAGER_TEST_001, TestSize.Level1)
     connInfo.type = AUTH_LINK_TYPE_P2P;
     PrintAuthConnInfo(&connInfo);
     PrintAuthConnInfo(nullptr);
+    SessionKey sessionKey = { { 0 }, TEST_DATA_LEN };
+    AddSessionKey(&auth->sessionKeyList, AUTH_SEQ, &sessionKey, AUTH_LINK_TYPE_WIFI);
+    SetSessionKeyAvailable(&auth->sessionKeyList, AUTH_SEQ);
     AuthManagerSetAuthPassed(AUTH_SEQ, &info);
     EXPECT_EQ(FindAuthManagerByUuid(UUID_TEST, AUTH_LINK_TYPE_WIFI, false), nullptr);
     EXPECT_EQ(FindAuthManagerByUdid(UDID_TEST, AUTH_LINK_TYPE_WIFI, false), nullptr);
@@ -489,7 +494,11 @@ HWTEST_F(AuthManagerTest, AUTH_DEVICE_GET_P2P_CONN_INFO_TEST_001, TestSize.Level
     info.connInfo.type = AUTH_LINK_TYPE_WIFI;
     (void)strcpy_s(info.uuid, sizeof(info.uuid), UUID_TEST);
     SetAuthSessionInfo(&info, CONN_ID, false, AUTH_LINK_TYPE_WIFI);
-    EXPECT_TRUE(NewAuthManager(authHandle.authId, &info) != nullptr);
+    AuthManager *auth = NewAuthManager(authHandle.authId, &info);
+    EXPECT_TRUE(auth != nullptr);
+    SessionKey sessionKey = { { 0 }, TEST_DATA_LEN };
+    AddSessionKey(&auth->sessionKeyList, AUTH_SEQ, &sessionKey, AUTH_LINK_TYPE_WIFI);
+    SetSessionKeyAvailable(&auth->sessionKeyList, AUTH_SEQ);
     AuthManagerSetAuthPassed(authHandle.authId, &info);
     EXPECT_EQ(AuthDeviceGetPreferConnInfo(UUID_TEST, &connInfo), SOFTBUS_AUTH_GET_BR_CONN_INFO_FAIL);
     EXPECT_EQ(AuthDeviceCheckConnInfo(UUID_TEST, AUTH_LINK_TYPE_WIFI, false), false);
@@ -613,5 +622,31 @@ HWTEST_F(AuthManagerTest, AUTH_VERIFY_AFTER_NOTIFY_NORMALIZE_TEST_001, TestSize.
     EXPECT_TRUE(LooperInit() == SOFTBUS_OK);
     EXPECT_TRUE(AuthVerifyAfterNotifyNormalize(&request) == SOFTBUS_OK);
     LooperDeinit();
+}
+/*
+ * @tc.name: AUTH_GET_LATEST_AUTH_SEQ_LIST_BY_TYPE_TEST_001
+ * @tc.desc: AuthGetLatestAuthSeqListByType test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthManagerTest, AUTH_GET_LATEST_AUTH_SEQ_LIST_BY_TYPE_TEST_001, TestSize.Level1)
+{
+    AuthSessionInfo info;
+    SetAuthSessionInfo(&info, CONN_ID, false, AUTH_LINK_TYPE_BLE);
+    AuthManager *auth = NewAuthManager(AUTH_SEQ, &info);
+    EXPECT_TRUE(auth != nullptr);
+    SessionKey sessionKey = { { 0 }, TEST_DATA_LEN };
+    AddSessionKey(&auth->sessionKeyList, AUTH_SEQ, &sessionKey, AUTH_LINK_TYPE_BLE);
+    SetSessionKeyAvailable(&auth->sessionKeyList, AUTH_SEQ);
+    AuthManagerSetAuthPassed(AUTH_SEQ, &info);
+    auth->lastAuthSeq[AUTH_LINK_TYPE_BLE] = AUTH_SEQ;
+    int64_t authSeq[DISCOVERY_TYPE_COUNT] = { 0 };
+    uint64_t authVerifyTime[2] = { 0 };
+    int32_t ret = AuthGetLatestAuthSeqListByType(nullptr, authSeq, authVerifyTime, DISCOVERY_TYPE_BLE);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    int32_t ret1 = AuthGetLatestAuthSeqListByType("", authSeq, authVerifyTime, DISCOVERY_TYPE_BLE);
+    EXPECT_TRUE(ret1 == SOFTBUS_INVALID_PARAM);
+    int32_t ret2 = AuthGetLatestAuthSeqListByType(UDID_TEST, authSeq, authVerifyTime, DISCOVERY_TYPE_BLE);
+    EXPECT_TRUE(ret2 == SOFTBUS_OK);
 }
 } // namespace OHOS
