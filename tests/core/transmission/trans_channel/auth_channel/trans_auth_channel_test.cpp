@@ -167,7 +167,7 @@ HWTEST_F(TransAuthChannelTest, TransAuthInitTest001, TestSize.Level1)
     (void)TransAuthInit(&cb);
 
     int32_t ret = TransAuthInit(NULL);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     TransAuthDeinit();
 }
 
@@ -196,14 +196,14 @@ HWTEST_F(TransAuthChannelTest, TransOpenAuthMsgChannelTest001, TestSize.Level1)
     IServerChannelCallBack cb;
     (void)TransAuthInit(&cb);
     int32_t ret = TransOpenAuthMsgChannel(TEST_SESSION_NAME, NULL, &channelId, NULL);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransOpenAuthMsgChannel(TEST_SESSION_NAME, &connInfo, NULL, NULL);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     connInfo.type = CONNECT_BR;
     ret = TransOpenAuthMsgChannel(TEST_SESSION_NAME, &connInfo, &channelId, NULL);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     TransAuthDeinit();
 }
 
@@ -238,7 +238,7 @@ HWTEST_F(TransAuthChannelTest, TransOpenAuthMsgChannelTest002, TestSize.Level1)
 
     const char *data = TEST_AUTH_DATA;
     ret = TransSendAuthMsg(channelId, data, strlen(data));
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_AUTH_CHANNEL_NOT_FOUND);
     TransAuthDeinit();
 }
 
@@ -269,16 +269,16 @@ HWTEST_F(TransAuthChannelTest, TransSendAuthMsgTest001, TestSize.Level1)
     }
     channelId = channel->appInfo.myData.channelId;
     int32_t ret = TransSendAuthMsg(channelId, NULL, len);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = TransSendAuthMsg(channelId, data, 0);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = TransSendAuthMsg(-1, data, len);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = TransSendAuthMsg(channelId, data, len);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     (void)TransCloseAuthChannel(channelId);
     TransAuthDeinit();
@@ -325,7 +325,7 @@ HWTEST_F(TransAuthChannelTest, OnAuthMsgDataRecvTest001, TestSize.Level1)
     AuthChannelData data;
     IServerChannelCallBack cb;
     int32_t ret = TransAuthInit(&cb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     OnAuthMsgDataRecv(authId, NULL);
 
     data.data = NULL;
@@ -349,10 +349,10 @@ HWTEST_F(TransAuthChannelTest, TransPostAuthChannelMsgTest001, TestSize.Level1)
     int32_t flag = 1;
 
     int32_t ret = TransPostAuthChannelMsg(NULL, authId, flag);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransPostAuthChannelMsg(&appInfo, authId, flag);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 }
 
 /**
@@ -368,7 +368,7 @@ HWTEST_F(TransAuthChannelTest, TransPostAuthChannelErrMsgTest001, TestSize.Level
     const char *errMsg = "test error msg.";
     IServerChannelCallBack cb;
     int32_t ret = TransAuthInit(&cb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     TransPostAuthChannelErrMsg(authId, errcode, NULL);
     TransPostAuthChannelErrMsg(authId, errcode, errMsg);
     TransAuthDeinit();
@@ -1164,7 +1164,7 @@ HWTEST_F(TransAuthChannelTest, TransOpenAuthMsgChannelTest003, TestSize.Level1)
     ASSERT_EQ(ret, SOFTBUS_OK);
 
     ret = TransOpenAuthMsgChannel(g_sessionName, &connInfo, &channelId, NULL);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_STRCPY_ERR);
 
     TransSessionMgrDeinit();
     TransAuthDeinit();

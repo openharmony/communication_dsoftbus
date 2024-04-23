@@ -86,7 +86,7 @@ public:
         g_channelCallBack.GetPkgNameBySessionName = TransGetPkgNameBySessionName;
         g_channelCallBack.GetUidAndPidBySessionName = TransGetUidAndPid;
         int32_t ret = TransTdcSetCallBack(&g_channelCallBack);
-        EXPECT_TRUE(ret == SOFTBUS_OK);
+        EXPECT_EQ(ret, SOFTBUS_OK);
     }
     ~TransTcpDirectCallbackTest()
     {}

@@ -147,7 +147,7 @@ void TestAddProxyChannel(int32_t channelId, AppType appType, ProxyChannelStatus 
     chan->status = status;
     appInfo.appType = appType;
     int32_t ret = TransProxyCreateChanInfo(chan, chan->channelId, &appInfo);
-    ASSERT_TRUE(SOFTBUS_OK == ret);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**

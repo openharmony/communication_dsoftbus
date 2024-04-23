@@ -105,7 +105,7 @@ void TestMessageAddProxyChannel(int32_t channelId, AppType appType, const char *
     chan->status = status;
     appInfo.appType = appType;
     int32_t ret = TransProxyCreateChanInfo(chan, chan->channelId, &appInfo);
-    ASSERT_TRUE(SOFTBUS_OK == ret);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 int32_t TestGetUidAndPidSuccess(const char *sessionName, int32_t *uid, int32_t *pid)
