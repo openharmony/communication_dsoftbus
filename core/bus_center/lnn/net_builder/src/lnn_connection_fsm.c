@@ -561,31 +561,33 @@ static void TryCancelJoinProcedure(LnnConnectionFsm *connFsm)
 
 static int32_t LnnRecoveryBroadcastKey()
 {
+    int32_t ret = SOFTBUS_ERR;
     if (LnnLoadLocalBroadcastCipherKey() != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "load BroadcastCipherInfo fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
     BroadcastCipherKey broadcastKey;
     (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-    if (LnnGetLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "get local info failed");
-        return SOFTBUS_ERR;
-    }
-    if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_KEY, broadcastKey.cipherInfo.key,
-        SESSION_KEY_LENGTH) != SOFTBUS_OK) {
-        (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-        LNN_LOGE(LNN_BUILDER, "set key failed");
-        return SOFTBUS_ERR;
-    }
-    if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_IV, broadcastKey.cipherInfo.iv,
-        BROADCAST_IV_LEN) != SOFTBUS_OK) {
-        (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-        LNN_LOGE(LNN_BUILDER, "set iv failed");
-        return SOFTBUS_ERR;
-    }
+    do {
+        if (LnnGetLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "get local info failed");
+            break;
+        }
+        if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_KEY, broadcastKey.cipherInfo.key,
+            SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "set key failed");
+            break;
+        }
+        if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_IV, broadcastKey.cipherInfo.iv,
+            BROADCAST_IV_LEN) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "set iv failed");
+            break;
+        }
+        LNN_LOGI(LNN_BUILDER, "recovery broadcastKey success!");
+        ret = SOFTBUS_OK;
+    } while (0);
     (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-    LNN_LOGI(LNN_BUILDER, "recovery broadcastKey success!");
-    return SOFTBUS_OK;
+    return ret;
 }
 
 static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
