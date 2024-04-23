@@ -786,7 +786,7 @@ static bool VerifySessionInfoIdType(const AuthSessionInfo *info, JsonObj *obj, c
     return true;
 }
 
-static void PackUDIDAbatementFlag(JsonObj *obj, AuthSessionInfo *info)
+static void PackUDIDAbatementFlag(JsonObj *obj, const AuthSessionInfo *info)
 {
     if (IsSupportUDIDAbatement() && !JSON_AddBoolToObject(obj, IS_NEED_PACK_CERT, IsNeedUDIDAbatement(info))) {
         AUTH_LOGE(AUTH_FSM, "add pack cert flag fail.");
@@ -850,7 +850,7 @@ static char *PackDeviceIdJson(const AuthSessionInfo *info)
     if (info->isServer && info->connInfo.type == AUTH_LINK_TYPE_WIFI) {
         GenerateUdidShortHash(info->udid, (char *)info->connInfo.info.ipInfo.deviceIdHash, UDID_HASH_LEN);
     }
-    PackUDIDAbatementFlag(obj, (AuthSessionInfo *)info);
+    PackUDIDAbatementFlag(obj, info);
     char *msg = JSON_PrintUnformatted(obj);
     JSON_Delete(obj);
     return msg;
@@ -1745,7 +1745,7 @@ static int32_t UnpackDeviceInfoBtV1(const JsonObj *json, NodeInfo *info)
 
 static int32_t PackCertificateInfo(JsonObj *json, const AuthSessionInfo *info)
 {
-    if (!IsSupportUDIDAbatement() || !info->isNeedPackCert) {
+    if (info == NULL || !IsSupportUDIDAbatement() || !info->isNeedPackCert) {
         AUTH_LOGI(AUTH_FSM, "device not support udid abatement or no need");
         return SOFTBUS_OK;
     }
@@ -1774,7 +1774,7 @@ static int32_t PackCertificateInfo(JsonObj *json, const AuthSessionInfo *info)
 
 static int32_t UnpackCertificateInfo(JsonObj *json, NodeInfo *nodeInfo, const AuthSessionInfo *info)
 {
-    if (!IsSupportUDIDAbatement() || !IsNeedUDIDAbatement(info)) {
+    if (info == NULL || !IsSupportUDIDAbatement() || !IsNeedUDIDAbatement(info)) {
         AUTH_LOGI(AUTH_FSM, "device not support udid abatement or no need");
         return SOFTBUS_OK;
     }
@@ -1811,7 +1811,7 @@ char *PackDeviceInfoMessage(int32_t linkType, SoftBusVersion version, bool isMet
 {
     AUTH_LOGI(AUTH_FSM, "connType=%{public}d", linkType);
     const NodeInfo *nodeInfo = LnnGetLocalNodeInfo();
-    if (info == NULL) {
+    if (nodeInfo == NULL) {
         AUTH_LOGE(AUTH_FSM, "local info is null");
         return NULL;
     }

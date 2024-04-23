@@ -380,6 +380,7 @@ static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *ch
         CONN_LOGI(CONN_WIFI_DIRECT, "queue negotiate command");
         GetWifiDirectCommandManager()->enqueueCommand(command);
     } else {
+        self->startWatchDog();
         self->updateCurrentRemoteDeviceId(channel);
         self->currentProcessor = processor;
         CONN_LOGI(CONN_WIFI_DIRECT, "currentProcessor=%{public}s", processor->name);

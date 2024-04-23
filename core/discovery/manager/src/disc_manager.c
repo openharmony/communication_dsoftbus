@@ -325,13 +325,14 @@ static bool IsInnerModule(const DiscInfo *infoNode)
 static void InnerDeviceFound(DiscInfo *infoNode, const DeviceInfo *device,
                                                 const InnerDeviceInfoAddtions *additions)
 {
-    if (IsInnerModule(infoNode) == false) {
+    if (infoNode->item != NULL && infoNode->item->callback.serverCb.OnServerDeviceFound != NULL &&
+        !IsInnerModule(infoNode)) {
         (void)infoNode->item->callback.serverCb.OnServerDeviceFound(infoNode->item->packageName, device, additions);
         return;
     }
 
     DISC_LOGD(DISC_CONTROL, "call from inner module.");
-    if (infoNode->item->callback.innerCb.OnDeviceFound != NULL) {
+    if (infoNode->item != NULL && infoNode->item->callback.innerCb.OnDeviceFound != NULL) {
         DfxRecordDeviceFound(infoNode, device, additions);
         infoNode->item->callback.innerCb.OnDeviceFound(device, additions);
     }
@@ -1090,6 +1091,7 @@ static IdContainer* CreateIdContainer(int32_t id, const char *pkgName)
 
     if (strcpy_s(container->pkgName, nameLen, pkgName) != EOK) {
         DISC_LOGE(DISC_CONTROL, "strcpy_s failed");
+        SoftBusFree(container->pkgName);
         SoftBusFree(container);
         return NULL;
     }

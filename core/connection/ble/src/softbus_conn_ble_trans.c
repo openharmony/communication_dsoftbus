@@ -27,11 +27,13 @@
 #include "softbus_conn_common.h"
 #include "softbus_datahead_transform.h"
 #include "softbus_def.h"
+#include "softbus_conn_flow_control.h"
 
 static const int32_t MTU_HEADER_SIZE = 3;
 static const size_t BLE_TRANS_HEADER_SIZE = sizeof(BleTransHeader);
 
 static ConnBleTransEventListener g_transEventListener = { 0 };
+static struct ConnSlideWindowController *g_flowController = NULL;
 
 static int32_t UnpackTransHeader(uint8_t *data, uint32_t dataLen, BleTransHeader *header)
 {
@@ -216,6 +218,7 @@ uint8_t *ConnGattTransRecv(
             connectionId, dataLen, header.seq, header.total, header.size, header.offset, buffer->seq, buffer->total,
             buffer->received);
         DiscardBuffer(buffer, false);
+        return NULL;
     }
 
     uint32_t offset = 0;
@@ -471,6 +474,23 @@ int64_t ConnBlePackCtlMessage(BleCtlMessageSerializationContext ctx, uint8_t **o
     return seq;
 }
 
+int32_t ConnBleTransConfigPostLimit(const LimitConfiguration *configuration)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        configuration != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT, "invalid param, configuration is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(configuration->type == CONNECT_BLE, SOFTBUS_INVALID_PARAM, CONN_INIT,
+        "invalid param, not ble type, type=%{public}d", configuration->type);
+    int32_t ret = SOFTBUS_OK;
+    if (!configuration->active) {
+        ret = g_flowController->disable(g_flowController);
+    } else {
+        ret = g_flowController->enable(g_flowController, configuration->windowInMillis, configuration->quotaInBytes);
+    }
+    CONN_LOGI(CONN_BR, "config br post limit, active=%d, windows=%{public}d millis, quota=%{public}d bytes, result=%d",
+        configuration->active, configuration->windowInMillis, configuration->quotaInBytes, ret);
+    return ret;
+}
+
 uint8_t *ConnCocTransRecv(uint32_t connectionId, LimitedBuffer *buffer, int32_t *outLen)
 {
     uint32_t pktHeadLen = sizeof(ConnPktHead);
@@ -560,17 +580,26 @@ void *BleSendTask(void *arg)
             continue;
         }
 
-        switch (connection->protocol) {
-            case BLE_GATT:
-                status = ConnGattTransSend(connection, sendNode->data, sendNode->dataLen, sendNode->module);
+        uint32_t sentLen = 0;
+        while (sentLen < sendNode->dataLen) {
+            int32_t amount = g_flowController->apply(g_flowController, (int32_t)(sendNode->dataLen - sentLen));
+            switch (connection->protocol) {
+                case BLE_GATT:
+                    status = ConnGattTransSend(connection, sendNode->data + sentLen, amount, sendNode->module);
+                    break;
+                case BLE_COC:
+                    status = ConnCocTransSend(connection, sendNode->data + sentLen, amount, sendNode->module);
+                    break;
+                default:
+                    CONN_LOGE(CONN_BLE, "ble connection trans send failed, connectionId=%{public}u, protocol=%{public}d",
+                        connection->connectionId, connection->protocol);
+                    status = SOFTBUS_ERR;
+                    break;
+            }
+            if (status != SOFTBUS_OK){
                 break;
-            case BLE_COC:
-                status = ConnCocTransSend(connection, sendNode->data, sendNode->dataLen, sendNode->module);
-                break;
-            default:
-                CONN_LOGE(CONN_BLE, "ble connecion trans send failed, connectionId=%{public}u, protocol=%{public}d",
-                    connection->connectionId, connection->protocol);
-                break;
+            }
+            sentLen += (uint32_t)amount;
         }
         ConnBleReturnConnection(&connection);
         g_transEventListener.onPostBytesFinished(sendNode->connectionId, sendNode->dataLen, sendNode->pid,
@@ -590,6 +619,10 @@ int32_t ConnBleInitTransModule(ConnBleTransEventListener *listener)
     CONN_CHECK_AND_RETURN_RET_LOGW(listener->onPostBytesFinished != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT,
         "init ble trans failed: invalid param, listener onPostByteFinshed is null");
 
+    struct ConnSlideWindowController *controller = ConnSlideWindowControllerNew();
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        controller, SOFTBUS_ERR, CONN_INIT, "init br trans module failed: init flow controller failed");
+
     int32_t status = ConnBleInitSendQueue();
     CONN_CHECK_AND_RETURN_RET_LOGW(
         status == SOFTBUS_OK, status, CONN_INIT, "init ble trans failed: init send queue failed, err=%{public}d",
@@ -600,5 +633,6 @@ int32_t ConnBleInitTransModule(ConnBleTransEventListener *listener)
         status == SOFTBUS_OK, status, CONN_INIT, "init ble trans failed: start send task failed, err=%{public}d",
         status);
     g_transEventListener = *listener;
+    g_flowController = controller;
     return SOFTBUS_OK;
 }

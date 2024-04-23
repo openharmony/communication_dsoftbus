@@ -756,6 +756,11 @@ static void TryDisconnectAllConnection(const LnnConnectionFsm *connFsm)
             }
         }
     }
+    if (addr1->type == CONNECTION_ADDR_BR) {
+        LNN_LOGI(
+            LNN_BUILDER, "not disconnect all connection. fsmId=%{public}u, type=%{public}d", connFsm->id, addr1->type);
+        return;
+    }
     LNN_LOGI(LNN_BUILDER, "disconnect all connection. fsmId=%{public}u, type=%{public}d", connFsm->id, addr1->type);
     if (LnnConvertAddrToOption(addr1, &option)) {
         ConnDisconnectDeviceAllConn(&option);
