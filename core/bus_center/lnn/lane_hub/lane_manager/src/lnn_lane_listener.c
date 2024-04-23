@@ -337,7 +337,7 @@ static int32_t GetStateNotifyInfo(const char *peerIp, const char *peerUuid, char
     return SOFTBUS_OK;
 }
 
-static void LnnOnWifiDirectDeviceOnline(const char *peerMac, const char *peerIp, const char *peerUuid)
+static void LnnOnWifiDirectDeviceOnline(const char *peerMac, const char *peerIp, const char *peerUuid, bool isSource)
 {
     LNN_LOGD(LNN_LANE, "lnn wifiDerectDevice online");
     if (peerMac == NULL || peerUuid == NULL || peerIp == NULL) {

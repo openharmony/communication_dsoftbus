@@ -51,7 +51,7 @@ struct DeviceInfo;
 char *PrepareServiceDiscover(const char *localIpStr, uint8_t isBroadcast, uint8_t businessType);
 int32_t ParseServiceDiscover(const uint8_t *buf, struct DeviceInfo *deviceInfo, char **remoteUrlPtr);
 char *PrepareServiceNotification(void);
-int32_t ParseServiceNotification(const uint8_t *buf, NotificationConfig *config);
+int32_t ParseServiceNotification(const uint8_t *buf, NSTACKX_NotificationConfig *config);
 
 #ifdef __cplusplus
 }

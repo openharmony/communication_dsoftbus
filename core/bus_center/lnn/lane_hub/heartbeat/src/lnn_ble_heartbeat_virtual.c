@@ -93,3 +93,12 @@ int32_t HbUpdateBleScanFilter(int32_t listenerId, LnnHeartbeatType type)
     (void)type;
     return SOFTBUS_OK;
 }
+
+void LnnBleHbRegDataLevelChangeCb(const IDataLevelChangeCallback *callback)
+{
+    (void)callback;
+}
+
+void LnnBleHbUnregDataLevelChangeCb()
+{
+}

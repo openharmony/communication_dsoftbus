@@ -59,6 +59,7 @@ if (defined(ohos_lite)) {
 config("dsoftbus_sdk_interface") {
   include_dirs = [
     "$dsoftbus_root_path/interfaces/kits",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",

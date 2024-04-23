@@ -42,7 +42,7 @@ void Coverity_Tainted_Set(void *buf);
 bool GetIsNotifyPerDevice(void);
 void NotifyDeviceListChanged(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceCount);
 void NotifyDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceCount);
-void NotificationReceived(const NotificationConfig *notification);
+void NotificationReceived(const NSTACKX_NotificationConfig *notification);
 
 #ifndef DFINDER_USE_MINI_NSTACKX
 void NotifyMsgReceived(const char *moduleName, const char *deviceId, const uint8_t *data,
@@ -54,7 +54,7 @@ List *GetMainLoopEvendChain(void);
 uint32_t GetDefaultDiscoverInterval(uint32_t discoverCount);
 int32_t CheckBusinessTypeReplyUnicast(uint8_t businessType);
 int32_t GetServiceDiscoverInfo(const uint8_t *buf, size_t size, struct DeviceInfo *deviceInfo, char **remoteUrlPtr);
-int32_t GetServiceNotificationInfo(const uint8_t *buf, size_t size, NotificationConfig *notification);
+int32_t GetServiceNotificationInfo(const uint8_t *buf, size_t size, NSTACKX_NotificationConfig *notification);
 List *GetEventNodeChain(void);
 EpollDesc GetEpollFD(void);
 

@@ -124,6 +124,7 @@ typedef struct {
     const uint8_t *fastTransData;
     uint16_t fastTransDataSize;
     int32_t firstTokenId;
+    bool isClient;
 } AppInfo;
 
 #ifdef __cplusplus

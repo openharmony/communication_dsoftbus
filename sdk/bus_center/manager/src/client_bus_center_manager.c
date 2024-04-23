@@ -69,6 +69,7 @@ typedef struct {
     int32_t nodeStateCbListCnt;
     IPublishCb publishCb;
     IRefreshCallback refreshCb;
+    IDataLevelCb dataLevelCb;
     bool isInit;
     SoftBusMutex lock;
 } BusCenterClient;
@@ -90,6 +91,7 @@ static BusCenterClient g_busCenterClient = {
     .publishCb.OnPublishResult = NULL,
     .refreshCb.OnDeviceFound = NULL,
     .refreshCb.OnDiscoverResult = NULL,
+    .dataLevelCb.OnDataLevelChanged = NULL,
     .isInit = false,
 };
 
@@ -584,6 +586,7 @@ void BusCenterClientDeinit(void)
     if (SoftBusMutexUnlock(&g_busCenterClient.lock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "unlock in deinit");
     }
+    g_busCenterClient.dataLevelCb.OnDataLevelChanged = NULL;
     BusCenterServerProxyDeInit();
 }
 
@@ -652,6 +655,37 @@ int32_t SetNodeDataChangeFlagInner(const char *pkgName, const char *networkId, u
     int ret = ServerIpcSetNodeDataChangeFlag(pkgName, networkId, dataChangeFlag);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "Server SetNodeDataChangeFlag failed, ret=%{public}d", ret);
+    }
+    return ret;
+}
+
+int32_t RegDataLevelChangeCbInner(const char *pkgName, IDataLevelCb *callback)
+{
+    LNN_LOGI(LNN_STATE, "RegDataLevelChangeCbInner enter");
+    g_busCenterClient.dataLevelCb = *callback;
+    int ret = ServerIpcRegDataLevelChangeCb(pkgName);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "Server RegDataLevelChangeCb failed, ret=%{public}d", ret);
+    }
+    return ret;
+}
+
+int32_t UnregDataLevelChangeCbInner(const char *pkgName)
+{
+    LNN_LOGI(LNN_STATE, "UnregDataLevelChangeCbInner enter");
+    g_busCenterClient.dataLevelCb.OnDataLevelChanged = NULL;
+    int ret = ServerIpcUnregDataLevelChangeCb(pkgName);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "Server UnregDataLevelChangeCb failed, ret=%{public}d", ret);
+    }
+    return ret;
+}
+
+int32_t SetDataLevelInner(const DataLevel *dataLevel)
+{
+    int ret = ServerIpcSetDataLevel(dataLevel);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "Server SetDataLevel failed, ret=%{public}d", ret);
     }
     return ret;
 }
@@ -1172,6 +1206,21 @@ void LnnOnRefreshDeviceFound(const void *device)
     if (g_busCenterClient.refreshCb.OnDeviceFound != NULL) {
         g_busCenterClient.refreshCb.OnDeviceFound((const DeviceInfo *)device);
     }
+}
+
+void LnnOnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo)
+{
+    if (g_busCenterClient.dataLevelCb.OnDataLevelChanged == NULL) {
+        LNN_LOGW(LNN_STATE, "data level callback is null");
+        return;
+    }
+    DataLevel dataLevel = {
+        .dynamicLevel = dataLevelInfo->dynamicLevel,
+        .staticLevel = dataLevelInfo->staticLevel,
+        .switchLevel = dataLevelInfo->switchLevel,
+        .switchLength = dataLevelInfo->switchLength
+    };
+    g_busCenterClient.dataLevelCb.OnDataLevelChanged(networkId, dataLevel);
 }
 
 int32_t DiscRecoveryPublish()

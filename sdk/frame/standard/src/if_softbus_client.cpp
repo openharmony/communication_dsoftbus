@@ -144,4 +144,9 @@ void ISoftBusClient::OnRefreshDeviceFound(const void *device, uint32_t deviceLen
 {
     COMM_LOGI(COMM_EVENT, "ipc default impl");
 }
+
+void ISoftBusClient::OnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo)
+{
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+}
 } // namespace OHOS
