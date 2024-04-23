@@ -313,12 +313,7 @@ static void ProcessNegotiateMessageWhenProcessorInvalid(struct NegotiateMessage 
 static bool ProcessParallelMessage(enum WifiDirectNegotiateCmdType type, struct WifiDirectCommand *command,
                                    struct WifiDirectProcessor *processor)
 {
-    struct WifiDirectProcessor *hmlProcessor =
-        GetWifiDirectProcessorFactory()->createProcessor(WIFI_DIRECT_PROCESSOR_TYPE_HML);
-    struct WifiDirectProcessor *p2pV2Processor =
-        GetWifiDirectProcessorFactory()->createProcessor(WIFI_DIRECT_PROCESSOR_TYPE_P2P_V2);
-    if (type != CMD_CONN_V2_REQ_3 || processor != hmlProcessor || processor != p2pV2Processor ||
-        processor->isMessageNeedPending(type, command->msg)) {
+    if (type != CMD_CONN_V2_REQ_3 || processor->isMessageNeedPending(type, command->msg)) {
         return false;
     }
     if (processor->processParallelNegotiateMessage == NULL) {
@@ -385,7 +380,6 @@ static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *ch
         CONN_LOGI(CONN_WIFI_DIRECT, "queue negotiate command");
         GetWifiDirectCommandManager()->enqueueCommand(command);
     } else {
-        self->startWatchDog();
         self->updateCurrentRemoteDeviceId(channel);
         self->currentProcessor = processor;
         CONN_LOGI(CONN_WIFI_DIRECT, "currentProcessor=%{public}s", processor->name);
