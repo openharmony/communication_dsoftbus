@@ -38,6 +38,7 @@ public:
     std::string ApplyIpv6(const std::string &mac);
     int32_t ApplyIpv4(const std::vector<Ipv4Info> &localArray, const std::vector<Ipv4Info> &remoteArray,
                       Ipv4Info &source, Ipv4Info &sink);
+    int32_t ConfigIpv6(const std::string &interface, const std::string &ip);
     int32_t ConfigIpv4(
         const std::string &interface, const Ipv4Info &local, const Ipv4Info &remote, const std::string &remoteMac);
     void ReleaseIpv4(
@@ -55,6 +56,9 @@ public:
         CONN_LOGD(CONN_WIFI_DIRECT, "unlock");
         mutex_.unlock();
     }
+
+    static constexpr int32_t EUI_64_IDENTIFIER_LEN = 64;
+    static constexpr int32_t LOCAL_NETWORK_ID = 99;
 
     static std::string ApplySubNet(const std::vector<Ipv4Info> &localArray, const std::vector<Ipv4Info> &remoteArray);
     static std::vector<std::string> GetHmlAllUsedIpv4(std::initializer_list<std::vector<Ipv4Info> *> all);
@@ -75,8 +79,6 @@ private:
     std::set<std::string> ips_;
     std::map<std::string, std::string> arps_;
     std::recursive_mutex mutex_;
-    static constexpr int32_t EUI_64_IDENTIFIER_LEN = 64;
-    static constexpr int32_t LOCAL_NETWORK_ID = 99;
 };
 } // namespace OHOS::SoftBus
 #endif /* WIFI_DIRECT_IP_MANAGER_H */
