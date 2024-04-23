@@ -298,11 +298,11 @@ static int32_t LnnAllocLane(uint32_t laneReqId, const LaneAllocInfo *allocInfo, 
 {
     if (!AllocInfoCheck(allocInfo, listener)) {
         LNN_LOGE(LNN_LANE, "lane alloc info invalid");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (g_laneObject[allocInfo->type] == NULL) {
         LNN_LOGE(LNN_LANE, "laneType is not supported. laneType=%{public}d", allocInfo->type);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     LNN_LOGI(LNN_LANE, "alloc lane enter, laneReqId=%{public}u, laneType=%{public}d, transType=%{public}d, "
         "minBW=%{public}u, maxLaneLatency=%{public}u, minLaneLatency=%{public}u",
@@ -313,7 +313,7 @@ static int32_t LnnAllocLane(uint32_t laneReqId, const LaneAllocInfo *allocInfo, 
     int32_t result = g_laneObject[allocInfo->type]->AllocLaneByQos(laneReqId, allocInfo, listener);
     if (result != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "alloc lane fail, laneReqId=%{public}u, result=%{public}d", laneReqId, result);
-        return SOFTBUS_ERR;
+        return result;
     }
     return SOFTBUS_OK;
 }
