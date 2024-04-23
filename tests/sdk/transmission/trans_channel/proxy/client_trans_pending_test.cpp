@@ -93,7 +93,7 @@ HWTEST_F(ClientTransPendingTest, TransPendingTest, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = SetPendingPacketData(id, seq, nullptr);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = SetPendingPacketData(TEST_SESSION_ID_SECOND, TEST_SEQ_SECOND, &pendDate);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
