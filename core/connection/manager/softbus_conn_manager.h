@@ -106,6 +106,12 @@ typedef struct {
      * @return <b>SOFTBUS_OK</b> if prevent connect other devices successfully, others if failed.
      */
     int32_t (*PreventConnection)(const ConnectOption *option, uint32_t time);
+
+    /**
+     * @brief Config flow control of posting data
+     * @param configuration flow control configuration of posting data
+     */
+    int32_t (*ConfigPostLimit)(const LimitConfiguration *configuration);
 } ConnectFuncInterface;
 
 #define MAGIC_NUMBER  0xBABEFACE
