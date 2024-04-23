@@ -142,7 +142,7 @@ void P2pAvailableState::OnP2pConnectionChangeEvent(
         CONN_WIFI_DIRECT, "joiningClientCount=%{public}zu, reuseCount=%{public}d", joiningClientCount, reuseCount);
     if (groupInfo->clientDevices.empty() && joiningClientCount == 0 && reuseCount > 0) {
         CONN_LOGI(CONN_WIFI_DIRECT, "gc disconnected abnormally");
-        P2pAdapter::DestroyGroupParam param{IF_NAME_P2P};
+        P2pAdapter::DestroyGroupParam param{P2P_IF_NAME};
         P2pAdapter::P2pShareLinkRemoveGroup(param);
     }
 }

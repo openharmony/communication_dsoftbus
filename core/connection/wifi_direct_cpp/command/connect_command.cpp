@@ -23,11 +23,15 @@
 #include "utils/wifi_direct_utils.h"
 
 namespace OHOS::SoftBus {
-ConnectCommand::ConnectCommand(const WifiDirectConnectInfo &info, const WifiDirectConnectCallback &callback) :
-    callback_(callback)
+ConnectCommand::ConnectCommand(const WifiDirectConnectInfo &info, const WifiDirectConnectCallback &callback)
+    : callback_(callback)
 {
     info_.info_ = info;
-    remoteDeviceId_ = WifiDirectUtils::NetworkIdToUuid(info_.info_.remoteNetworkId);
+    if (strlen(info.remoteNetworkId) != 0) {
+        remoteDeviceId_ = WifiDirectUtils::NetworkIdToUuid(info_.info_.remoteNetworkId);
+        return;
+    }
+    CONN_LOGE(CONN_WIFI_DIRECT, "remoteNetworkId empty!!");
 }
 
 std::string ConnectCommand::GetRemoteDeviceId() const
@@ -50,7 +54,7 @@ std::shared_ptr<WifiDirectProcessor> ConnectCommand::GetProcessor()
     return (*selector)(info_.info_);
 }
 
-ConnectInfo ConnectCommand::GetConnectInfo() const
+ConnectInfo& ConnectCommand::GetConnectInfo()
 {
     return info_;
 }
