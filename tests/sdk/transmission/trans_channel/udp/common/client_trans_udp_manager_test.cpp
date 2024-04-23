@@ -426,6 +426,6 @@ HWTEST_F(ClientTransUdpManagerTest, ClientTransUdpManagerTest001, TestSize.Level
 
     IClientSessionCallBack *cb = GetClientSessionCb();
     ret = ClientTransUdpMgrInit(cb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 } // namespace OHOS

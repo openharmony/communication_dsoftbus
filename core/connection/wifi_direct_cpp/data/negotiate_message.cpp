@@ -112,6 +112,7 @@ static std::map<NegotiateMessageType, std::string> g_messageNameMap = {
     { NegotiateMessageType::CMD_RENEGOTIATE_REQ,         "CMD_RENEGOTIATE_REQ"         },
     { NegotiateMessageType::CMD_RENEGOTIATE_RESP,        "CMD_RENEGOTIATE_RESP"        },
     { NegotiateMessageType::CMD_AUTH_HAND_SHAKE,         "CMD_AUTH_HAND_SHAKE"         },
+    { NegotiateMessageType::CMD_V3_REQ,                  "CMD_V3_REQ"                  },
 };
 
 static std::map<LegacyCommandType, std::string> g_legacyMessageNameMap = {

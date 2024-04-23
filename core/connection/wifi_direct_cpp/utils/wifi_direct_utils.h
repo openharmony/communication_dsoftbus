@@ -77,6 +77,7 @@ public:
     static std::vector<int> StringToChannelList(std::string channels);
 
     static WifiDirectRole ToWifiDirectRole(LinkInfo::LinkMode mode);
+    static void ShowLinkInfoList(const std::string &banana, const std::vector<LinkInfo> &inkList);
 };
 }
 

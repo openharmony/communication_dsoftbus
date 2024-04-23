@@ -339,11 +339,17 @@ enum WifiDirectErrorCode {
     /* Error code switch notify timeout */
     ERROR_HML_SWITCH_NOTIFY_TIMEOUT = ERROR_BASE - 6619,
 
-    /* Error code need renegotiate*/
+    /* Error code need renegotiate */
     ERROR_HML_NEED_RENEGOTIATE = ERROR_BASE - 6620,
 
-    /* Error code need renegotiate*/
+    /* Error code need renegotiate */
     ERROR_HML_PRE_ASSIGN_PORT_FAILED = ERROR_BASE - 6621,
+
+    /* Error code no negotiate channel */
+    ERROR_NO_NEGO_CHANNEL = ERROR_BASE - 6622,
+
+    /* Error code parallelism conflict */
+    ERROR_PARALLELISM_CONFLICT = ERROR_BASE - 6623,
 
     /* Error code representing end position of wifi direct errors */
     ERROR_WIFI_DIRECT_END = ERROR_BASE - 6999,
