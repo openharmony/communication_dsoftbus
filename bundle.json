@@ -55,6 +55,7 @@
         "data_share",
         "device_auth",
         "device_info_manager",
+        "device_certificate_manager",
         "drivers_interface_wlan",
         "json",
         "hicollie",
