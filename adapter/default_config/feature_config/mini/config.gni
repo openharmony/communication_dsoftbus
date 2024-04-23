@@ -38,10 +38,8 @@ declare_args() {
   dsoftbus_feature_lnn_wifiservice_dependence = false
 
   dsoftbus_feature_build_shared_sdk = false
-  dsoftbus_feature_ifname_prefix = false
 
   dsoftbus_feature_encrypt = 0
-  dsoftbus_standard_feature_dfinder_support_multi_nif = false
 
   dsoftbus_feature_ex_kits = false
   dsoftbus_feature_proxy_file = false

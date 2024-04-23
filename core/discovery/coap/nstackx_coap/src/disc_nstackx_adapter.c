@@ -176,7 +176,7 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
     SoftBusFree(discDeviceInfo);
 }
 
-static void OnNotificationReceived(const NotificationConfig *notification)
+static void OnNotificationReceived(const NSTACKX_NotificationConfig *notification)
 {
     DiscCoapReportNotification(notification);
 }
