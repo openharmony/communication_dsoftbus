@@ -222,6 +222,13 @@ typedef struct {
     };
 } LocalListenerInfo;
 
+typedef struct {
+    ConnectType type;
+    bool active;
+    int32_t windowInMillis;
+    int32_t quotaInBytes;
+} LimitConfiguration;
+
 /**
  * @ingroup softbus_conn_manager
  * @brief Get connection header size.
@@ -415,6 +422,13 @@ int32_t ConnPreventConnection(const ConnectOption *option, uint32_t time);
  * @return <b>SOFTBUS_OK</b> if prevent connect other devices successfully, others if failed.
  */
 int32_t ConnGetTypeByConnectionId(uint32_t connectionId, ConnectType *type);
+
+/**
+ * @ingroup Softbus_conn_manager
+ * @param configuration flow control configuration of posting data
+ * @return <b>SOFTBUS_OK</b> if success, others if failed.
+ */
+int32_t ConnConfigPostLimit(const LimitConfiguration *configuration);
 
 #ifdef __cplusplus
 #if __cplusplus

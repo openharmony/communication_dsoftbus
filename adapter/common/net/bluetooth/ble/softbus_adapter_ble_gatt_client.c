@@ -22,10 +22,10 @@
 
 #include "common_list.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
-#include "softbus_common.h"
 
 #include "conn_log.h"
 #include "softbus_type_def.h"
@@ -249,8 +249,6 @@ bool SoftbusGattcCheckExistConnectionByAddr(const SoftBusBtAddr *btAddr)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(btAddr != NULL, false, CONN_BLE, "btAddr is NULL");
     bool isExist = false;
-    BleConnMac *it = NULL;
-    BleConnMac *next = NULL;
     char macStr[BT_MAC_LEN] = {0};
     if (ConvertBtMacToStr(macStr, BT_MAC_LEN, btAddr->addr, sizeof(btAddr->addr)) != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "convert bt mac to str fail!");
@@ -258,6 +256,8 @@ bool SoftbusGattcCheckExistConnectionByAddr(const SoftBusBtAddr *btAddr)
     }
     CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_btAddrs->lock) == SOFTBUS_OK,
         false, CONN_BLE, "try to lock failed");
+    BleConnMac *it = NULL;
+    BleConnMac *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(it, next, &g_btAddrs->list, BleConnMac, node) {
         if (StrCmpIgnoreCase((const char *)it->addr, (const char *)macStr) == 0) {
             isExist = true;
@@ -310,22 +310,21 @@ static void SoftbusGattcDeleteMacAddrFromList(int32_t clientId)
 
 int32_t SoftbusGattcConnect(int32_t clientId, SoftBusBtAddr *addr)
 {
-    BdAddr bdAddr;
+    BdAddr bdAddr = {0};
     if (memcpy_s(bdAddr.addr, OHOS_BD_ADDR_LEN, addr->addr, BT_ADDR_LEN) != EOK) {
         CONN_LOGE(CONN_BLE, "memcpy error");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t status = BleOhosStatusToSoftBus(
+    int32_t status = SoftbusGattcAddMacAddrToList(clientId, addr);
+    if (status != SOFTBUS_OK) {
+        // fall-through
+        CONN_LOGW(CONN_BLE, "add mac addr fail, status=%{public}d", status);
+    }
+    status = BleOhosStatusToSoftBus(
         BleGattcConnect(clientId, &g_btGattClientCallbacks, &bdAddr, false, OHOS_BT_TRANSPORT_TYPE_LE));
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "status=%{public}d", status);
         return SOFTBUS_GATTC_INTERFACE_FAILED;
-    }
-
-    status = SoftbusGattcAddMacAddrToList(clientId, addr);
-    if (status != SOFTBUS_OK) {
-        // fall-through
-        CONN_LOGW(CONN_BLE, "add mac addr fail, status=%{public}d", status);
     }
 
     return SOFTBUS_OK;
