@@ -30,9 +30,10 @@ extern "C" {
 
 typedef struct {
     int32_t (*OnChannelOpened)(const char *pkgName, int32_t pid, const char *sessionName, const ChannelInfo *channel);
-    int32_t (*OnChannelClosed)(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType);
-    int32_t (*OnChannelOpenFailed)(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType,
-        int32_t errCode);
+    int32_t (*OnChannelClosed)(
+        const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType, int32_t messageType);
+    int32_t (*OnChannelOpenFailed)(
+        const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType, int32_t errCode);
     int32_t (*OnDataReceived)(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType,
         TransReceiveData* receiveData);
     int32_t (*OnQosEvent)(const char *pkgName, const QosParam *param);

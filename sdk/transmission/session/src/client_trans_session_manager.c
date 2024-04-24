@@ -44,6 +44,7 @@ static void ClientTransSessionTimerProc(void);
 
 static int32_t g_sessionIdNum = 0;
 static int32_t g_sessionId = 1;
+static int32_t g_closingNum = 0;
 static SoftBusList *g_clientSessionServerList = NULL;
 
 typedef struct {
@@ -153,11 +154,11 @@ static bool SessionIdIsAvailable(int32_t sessionId)
 
 static int32_t GenerateSessionId(void)
 {
-    if (g_sessionIdNum >= MAX_SESSION_ID) {
+    if (g_sessionIdNum >= g_closingNum && g_sessionIdNum - g_closingNum >= MAX_SESSION_ID) {
         TRANS_LOGE(TRANS_SDK, "sessionid num cross the line error");
         return INVALID_SESSION_ID;
     }
-    int32_t cnt = MAX_SESSION_ID + 1;
+    int32_t cnt = MAX_SESSION_ID + g_closingNum + 1;
     int32_t id = INVALID_SESSION_ID;
 
     while (cnt) {
@@ -179,6 +180,9 @@ static void DestroySessionId(void)
 {
     if (g_sessionIdNum > 0) {
         g_sessionIdNum--;
+    }
+    if (g_closingNum > 0) {
+        g_closingNum--;
     }
     return;
 }
@@ -2506,6 +2510,18 @@ int32_t GetSessionStateAndSessionNameBySessionId(int32_t sessionId, char *sessio
     return SOFTBUS_OK;
 }
 
+static void AddSessionStateClosing(void)
+{
+    g_closingNum++;
+}
+
+void DelSessionStateClosing(void)
+{
+    if (g_closingNum > 0) {
+        g_closingNum--;
+    }
+}
+
 int32_t SetSessionStateBySessionId(int32_t sessionId, SessionState sessionState)
 {
     if (sessionId <= 0) {
@@ -2532,6 +2548,9 @@ int32_t SetSessionStateBySessionId(int32_t sessionId, SessionState sessionState)
     }
 
     sessionNode->sessionState = sessionState;
+    if (sessionState == SESSION_STATE_CLOSING) {
+        AddSessionStateClosing();
+    }
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     return SOFTBUS_OK;
 }
