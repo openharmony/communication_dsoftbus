@@ -94,6 +94,9 @@ public:
     virtual bool LnnSetDLWifiDirectAddr(const char *networkId, const char *addr) = 0;
     virtual bool IsActiveOsAccountUnlocked(void) = 0;
     virtual int32_t GetActiveOsAccountIds(void) = 0;
+    virtual int32_t AuthDeviceGetLatestIdByUuid(const char *uuid, AuthLinkType type, AuthHandle *authHandle) = 0;
+    virtual int32_t AuthGetLatestAuthSeqListByType(const char *udid, int64_t *seqList, uint64_t *authVerifyTime,
+        DiscoveryType type) = 0;
 };
 class LnnNetLedgertInterfaceMock : public LnnNetLedgerInterface {
 public:
@@ -160,6 +163,8 @@ public:
     MOCK_METHOD2(LnnGetLocalNumU64Info, int32_t(InfoKey, uint64_t *));
     MOCK_METHOD0(IsActiveOsAccountUnlocked, bool (void));
     MOCK_METHOD0(GetActiveOsAccountIds, int32_t (void));
+    MOCK_METHOD3(AuthDeviceGetLatestIdByUuid, int32_t (const char *, AuthLinkType, AuthHandle *));
+    MOCK_METHOD4(AuthGetLatestAuthSeqListByType, int32_t (const char *, int64_t *, uint64_t *, DiscoveryType));
     static int32_t ActionOfLnnGetAllOnline(NodeBasicInfo **info, int32_t *infoNum);
     static int32_t ActionOfLnnConvertDlId(const char *srcId, IdCategory srcIdType, IdCategory dstIdType,
         char *dstIdBuf, uint32_t dstIdBufLen);
@@ -175,6 +180,9 @@ public:
     static int32_t ActionOfLnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len);
     static int32_t ActionOfLnnGetLocalStrInfo1(InfoKey key, char *info, uint32_t len);
     static int32_t ActionOfLnnGetLocalStrInfo2(InfoKey key, char *info, uint32_t len);
+    static int32_t ActionOfLnnGetAuthHandle(const char *uuid, AuthLinkType type, AuthHandle *authHandle);
+    static int32_t ActionOfLnnGetAuthSeqList(const char *udid, int64_t *seqList, uint64_t *authVerifyTime,
+        DiscoveryType type);
 
     static inline std::string localId = "6c38a1a0a8476679d0da6b24ec1e99eac67857244586e781bb8a07c77f636a3f";
     static inline std::string peerId = "54fec99a89886bef18373f0742661809b83b2d5dac9afbaf1728b940b9d51cb5";

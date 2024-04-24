@@ -50,4 +50,4 @@ int32_t DecideAvailableLane(const char *networkId, const LaneSelectParam *reques
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif // LNN_SELECT_RULE_H

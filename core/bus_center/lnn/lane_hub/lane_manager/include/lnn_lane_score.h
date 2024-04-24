@@ -48,4 +48,4 @@ int32_t LnnGetAllChannelScore(LnnChannelScore **scoreList, uint32_t *listSize);
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif // LNN_LANE_SCORE_H

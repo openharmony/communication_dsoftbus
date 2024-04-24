@@ -120,4 +120,4 @@ int32_t ClearLaneResourceByLaneId(uint64_t laneId);
 #ifdef __cplusplus
 }
 #endif
-#endif /* LNN_LANE_LINK_H */
+#endif // LNN_LANE_LINK_H

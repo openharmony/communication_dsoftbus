@@ -53,4 +53,4 @@ void DelLogicAndLaneRelationship(uint64_t laneId);
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif // LNN_TRANS_LANE_H
