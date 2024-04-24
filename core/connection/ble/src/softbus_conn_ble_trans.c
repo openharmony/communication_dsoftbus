@@ -218,6 +218,7 @@ uint8_t *ConnGattTransRecv(
             connectionId, dataLen, header.seq, header.total, header.size, header.offset, buffer->seq, buffer->total,
             buffer->received);
         DiscardBuffer(buffer, false);
+        return NULL;
     }
 
     uint32_t offset = 0;
