@@ -327,13 +327,6 @@ static int32_t GetServerSideIpInfo(SessionConn *conn, char *ip, uint32_t len)
             TRANS_LOGE(TRANS_CTRL, "NotifyChannelOpened get local ip fail");
             return SOFTBUS_TRANS_GET_LOCAL_IP_FAILED;
         }
-        if (LnnSetLocalStrInfo(STRING_KEY_WLAN_IP, myIp) != SOFTBUS_OK) {
-            TRANS_LOGW(TRANS_CTRL, "ServerSide wifi set local ip fail");
-        }
-        if (LnnSetDLP2pIp(conn->appInfo.peerData.deviceId, CATEGORY_UUID,
-            conn->appInfo.peerData.addr) != SOFTBUS_OK) {
-            TRANS_LOGW(TRANS_CTRL, "ServerSide wifi set peer ip fail");
-        }
     } else if (conn->appInfo.routeType == WIFI_P2P) {
         struct WifiDirectManager *mgr = GetWifiDirectManager();
         if (mgr == NULL || mgr->getLocalIpByRemoteIp == NULL) {
@@ -369,13 +362,6 @@ static int32_t GetClientSideIpInfo(SessionConn *conn, char *ip, uint32_t len)
         if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, myIp, sizeof(myIp)) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "NotifyChannelOpened get local ip fail");
             return SOFTBUS_TRANS_GET_LOCAL_IP_FAILED;
-        }
-        if (LnnSetLocalStrInfo(STRING_KEY_WLAN_IP, myIp) != SOFTBUS_OK) {
-            TRANS_LOGW(TRANS_CTRL, "Client wifi set local ip fail");
-        }
-        if (LnnSetDLP2pIp(conn->appInfo.peerData.deviceId, CATEGORY_UUID,
-            conn->appInfo.peerData.addr) != SOFTBUS_OK) {
-            TRANS_LOGW(TRANS_CTRL, "Client wifi set peer ip fail");
         }
     } else if (conn->appInfo.routeType == WIFI_P2P) {
         struct WifiDirectManager *mgr = GetWifiDirectManager();

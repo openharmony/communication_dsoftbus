@@ -86,7 +86,7 @@ HWTEST_F(TransClientProxyTest, InformPermissionChangeTest001, TestSize.Level0)
     sptr<IRemoteObject::DeathRecipient> abilityDeath = new (std::nothrow) SoftBusDeathRecipient();
     ASSERT_TRUE(abilityDeath != nullptr);
     ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(g_pkgName, remoteObject, abilityDeath, TEST_PID);
-    ASSERT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     ret = InformPermissionChange(TEST_STATE, g_pkgName, TEST_PID);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
@@ -135,7 +135,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenedTest001, TestSize.Level0)
     sptr<IRemoteObject::DeathRecipient> abilityDeath = new (std::nothrow) SoftBusDeathRecipient();
     ASSERT_TRUE(abilityDeath != nullptr);
     ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(g_pkgName, remoteObject, abilityDeath, TEST_PID);
-    ASSERT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     ret = ClientIpcOnChannelOpened(g_pkgName, g_sessionName, &channel, TEST_PID);
     EXPECT_EQ(SOFTBUS_ERR, ret);
     
@@ -171,7 +171,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenFailedTest001, TestSize.Lev
     sptr<IRemoteObject::DeathRecipient> abilityDeath = new (std::nothrow) SoftBusDeathRecipient();
     ASSERT_TRUE(abilityDeath != nullptr);
     ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(g_pkgName, remoteObject, abilityDeath, TEST_PID);
-    ASSERT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     ChannelMsg msg = {
         .msgChannelId = TEST_CHANNELID,
         .msgChannelType = TEST_CHANNELTYPE,
@@ -211,7 +211,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelLinkDownTest001, TestSize.Level
     sptr<IRemoteObject::DeathRecipient> abilityDeath = new (std::nothrow) SoftBusDeathRecipient();
     ASSERT_TRUE(abilityDeath != nullptr);
     ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(g_pkgName, remoteObject, abilityDeath, TEST_PID);
-    ASSERT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     ChannelMsg msg = {
         .msgPid = TEST_PID,
         .msgPkgName = g_pkgName,
@@ -241,7 +241,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelClosedTest001, TestSize.Level0)
         .msgUdid = nullptr
     };
     ret = ClientIpcOnChannelClosed(&data);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     static const uint32_t SOFTBUS_SA_ID = 4700;
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -250,7 +250,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelClosedTest001, TestSize.Level0)
     sptr<IRemoteObject::DeathRecipient> abilityDeath = new (std::nothrow) SoftBusDeathRecipient();
     ASSERT_TRUE(abilityDeath != nullptr);
     ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(g_pkgName, remoteObject, abilityDeath, TEST_PID);
-    ASSERT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     ChannelMsg msg = {
         .msgChannelId = TEST_CHANNELID,
         .msgChannelType = TEST_CHANNELTYPE,
@@ -260,7 +260,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelClosedTest001, TestSize.Level0)
         .msgUdid = nullptr
     };
     ret = ClientIpcOnChannelClosed(&msg);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
@@ -297,7 +297,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelMsgReceivedTest001, TestSize.Le
     sptr<IRemoteObject::DeathRecipient> abilityDeath = new (std::nothrow) SoftBusDeathRecipient();
     ASSERT_TRUE(abilityDeath != nullptr);
     ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(g_pkgName, remoteObject, abilityDeath, TEST_PID);
-    ASSERT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     ChannelMsg msg = {
         .msgChannelId = TEST_CHANNELID,
         .msgChannelType = TEST_CHANNELTYPE,
@@ -339,7 +339,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelQosEventTest001, TestSize.Level
     sptr<IRemoteObject::DeathRecipient> abilityDeath = new (std::nothrow) SoftBusDeathRecipient();
     ASSERT_TRUE(abilityDeath != nullptr);
     ret = SoftbusClientInfoManager::GetInstance().SoftbusAddService(g_pkgName, remoteObject, abilityDeath, TEST_PID);
-    ASSERT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     ret = ClientIpcOnChannelQosEvent(g_pkgName, &param);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }

@@ -343,7 +343,7 @@ static void BleConnectServerCallback(int connId, int serverId, const BdAddr *bdA
     }
 
     if (SoftbusGattcCheckExistConnectionByAddr((SoftBusBtAddr *)bdAddr)) {
-        CONN_LOGE(CONN_BLE, "ble client exist connection by addr.");
+        CONN_LOGW(CONN_BLE, "ble client exist connection by addr.");
         return;
     }
 

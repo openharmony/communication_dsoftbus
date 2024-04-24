@@ -174,6 +174,9 @@ void SoftBusServerStub::InitMemberFuncMap()
     memberFuncMap_[SERVER_GET_LOCAL_DEVICE_INFO] = &SoftBusServerStub::GetLocalDeviceInfoInner;
     memberFuncMap_[SERVER_GET_NODE_KEY_INFO] = &SoftBusServerStub::GetNodeKeyInfoInner;
     memberFuncMap_[SERVER_SET_NODE_DATA_CHANGE_FLAG] = &SoftBusServerStub::SetNodeDataChangeFlagInner;
+    memberFuncMap_[SERVER_REG_DATA_LEVEL_CHANGE_CB] = &SoftBusServerStub::RegDataLevelChangeCbInner;
+    memberFuncMap_[SERVER_UNREG_DATA_LEVEL_CHANGE_CB] = &SoftBusServerStub::UnregDataLevelChangeCbInner;
+    memberFuncMap_[SERVER_SET_DATA_LEVEL] = &SoftBusServerStub::SetDataLevelInner;
     memberFuncMap_[SERVER_START_TIME_SYNC] = &SoftBusServerStub::StartTimeSyncInner;
     memberFuncMap_[SERVER_STOP_TIME_SYNC] = &SoftBusServerStub::StopTimeSyncInner;
     memberFuncMap_[SERVER_QOS_REPORT] = &SoftBusServerStub::QosReportInner;
@@ -216,6 +219,9 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_GET_LOCAL_DEVICE_INFO] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_GET_NODE_KEY_INFO] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_SET_NODE_DATA_CHANGE_FLAG] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_REG_DATA_LEVEL_CHANGE_CB] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_UNREG_DATA_LEVEL_CHANGE_CB] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_SET_DATA_LEVEL] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_START_TIME_SYNC] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_STOP_TIME_SYNC] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_QOS_REPORT] = nullptr;
@@ -259,13 +265,13 @@ int32_t SoftBusServerStub::OnRemoteRequest(
             COMM_LOGE(COMM_SVC, "access token permission denied! permission=%{public}s", permission);
             pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
             TransAlarmExtra extra = {
+                .callerPid = (int32_t)callingPid,
+                .methodId = (int32_t)code,
                 .conflictName = NULL,
                 .conflictedName = NULL,
                 .occupyedName = NULL,
-                .sessionName = NULL,
-                .callerPid = (int32_t)callingPid,
-                .methodId = (int32_t)code,
                 .permissionName = permission,
+                .sessionName = NULL,
             };
             TRANS_ALARM(NO_PERMISSION_ALARM, CONTROL_ALARM_TYPE, extra);
             return SOFTBUS_ACCESS_TOKEN_DENIED;
@@ -1100,6 +1106,70 @@ int32_t SoftBusServerStub::SetNodeDataChangeFlagInner(MessageParcel &data, Messa
         return SOFTBUS_IPC_ERR;
     }
     return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::RegDataLevelChangeCbInner(MessageParcel &data, MessageParcel &reply)
+{
+#ifndef ENHANCED_FLAG
+    (void)data;
+    (void)reply;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+#else
+    const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr) {
+        COMM_LOGE(COMM_SVC, "RegDataLevelChangeCbInner read pkgName failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t retReply = RegDataLevelChangeCb(pkgName);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "RegDataLevelChangeCbInner write reply failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+#endif
+}
+
+int32_t SoftBusServerStub::UnregDataLevelChangeCbInner(MessageParcel &data, MessageParcel &reply)
+{
+#ifndef ENHANCED_FLAG
+    (void)data;
+    (void)reply;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+#else
+    const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr) {
+        COMM_LOGE(COMM_SVC, "UnregDataLevelChangeCbInner read pkgName failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t retReply = UnregDataLevelChangeCb(pkgName);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "UnregDataLevelChangeCbInner write reply failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+#endif
+}
+
+int32_t SoftBusServerStub::SetDataLevelInner(MessageParcel &data, MessageParcel &reply)
+{
+#ifndef ENHANCED_FLAG
+    (void)data;
+    (void)reply;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+#else
+    DataLevel *dataLevel = (DataLevel*)data.ReadRawData(sizeof(DataLevel));
+    if (dataLevel == nullptr) {
+        COMM_LOGE(COMM_SVC, "SetDataLevelInner read networkid failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+
+    int32_t retReply = SetDataLevel(dataLevel);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "SetDataLevelInner write reply failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+#endif
 }
 
 int32_t SoftBusServerStub::StartTimeSyncInner(MessageParcel &data, MessageParcel &reply)

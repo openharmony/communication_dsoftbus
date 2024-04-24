@@ -102,6 +102,9 @@ static ApiNameIdMap g_apiNameIdMapTbl[] = {
     {SERVER_GET_LOCAL_DEVICE_INFO, "GetLocalDeviceInfo"},
     {SERVER_GET_NODE_KEY_INFO, "GetNodeKeyInfo"},
     {SERVER_SET_NODE_DATA_CHANGE_FLAG, "SetNodeDataChangeFlag"},
+    {SERVER_REG_DATA_LEVEL_CHANGE_CB, "RegDataChangeLevelCb"},
+    {SERVER_UNREG_DATA_LEVEL_CHANGE_CB, "UnregDataChangeLevelCb"},
+    {SERVER_SET_DATA_LEVEL, "SetDataLevel"},
     {SERVER_START_TIME_SYNC, "StartTimeSync"},
     {SERVER_STOP_TIME_SYNC, "StopTimeSync"},
     {SERVER_QOS_REPORT, "QosReport"},
@@ -293,6 +296,7 @@ void SoftbusRecordCalledApiInfo(const char *appName, uint32_t code)
     char *apiName = GetApiNameByCode(code);
     if (apiName == NULL) {
         (void)SoftBusMutexUnlock(&g_calledApiInfoList->lock);
+        COMM_LOGE(COMM_EVENT, "GetApiNameByCode fail");
         return;
     }
 
@@ -307,6 +311,7 @@ void SoftbusRecordCalledApiInfo(const char *appName, uint32_t code)
                 if (strcmp(apiCntNode->apiName, apiName) == 0) {
                     isApiDiff = false;
                     apiCntNode->calledtotalCnt++;
+                    COMM_LOGD(COMM_EVENT, "cmpare apiName success");
                     break;
                 }
             }
@@ -321,6 +326,7 @@ void SoftbusRecordCalledApiInfo(const char *appName, uint32_t code)
         }
         ListAdd(&g_calledApiInfoList->list, &apiInfoNode->node);
         g_calledApiInfoList->cnt++;
+        COMM_LOGD(COMM_EVENT, "GetNewApiInfo success");
     }
     if ((isAppDiff == false) && (isApiDiff == true)) {
         apiInfoNode = NULL;
@@ -334,6 +340,7 @@ void SoftbusRecordCalledApiInfo(const char *appName, uint32_t code)
                 }
                 ListAdd(&apiInfoNode->apiCntList, &apiCntNode->node);
                 apiInfoNode->cnt++;
+                COMM_LOGD(COMM_EVENT, "GetNewApiCnt success");
             }
         }
     }

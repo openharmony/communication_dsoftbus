@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -99,6 +99,7 @@ ohos_unittest("AuthEnhanceMockTest") {
     "$dsoftbus_root_path/core/authentication/src/auth_session_key.c",
     "$dsoftbus_root_path/core/authentication/src/auth_session_message.c",
     "$dsoftbus_root_path/core/authentication/src/auth_tcp_connection.c",
+    "$dsoftbus_root_path/core/authentication/src/virtual/auth_attest_virtual.c",
     "$dsoftbus_root_path/core/authentication/src/virtual/auth_device_common_key_virtual.c",
     "$dsoftbus_root_path/core/authentication/src/virtual/auth_hichain_system_ability_monitor_virtual.c",
     "$dsoftbus_root_path/core/authentication/src/virtual/auth_meta_manager_virtual.c",
@@ -142,6 +143,7 @@ ohos_unittest("AuthEnhanceMockTest") {
     "$dsoftbus_root_path/core/frame/common/include",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/common",
@@ -243,6 +245,7 @@ ohos_unittest("AuthTestCallBackTest") {
     "$dsoftbus_root_path/core/frame/common/include",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/interfaces/inner_kits/transport",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/common",
@@ -433,6 +436,7 @@ ohos_unittest("AuthHichainTest") {
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/frame/$os_type/init/include",
     "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/interfaces/inner_kits/transport",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,9 @@ int32_t ServerGetAllOnlineNodeInfo(IpcIo *req, IpcIo *reply);
 int32_t ServerGetLocalDeviceInfo(IpcIo *req, IpcIo *reply);
 int32_t ServerGetNodeKeyInfo(IpcIo *req, IpcIo *reply);
 int32_t ServerSetNodeDataChangeFlag(IpcIo *req, IpcIo *reply);
+int32_t ServerRegDataLevelChangeCb(IpcIo *req, IpcIo *reply);
+int32_t ServerUnregDataLevelChangeCb(IpcIo *req, IpcIo *reply);
+int32_t ServerSetDataLevel(IpcIo *req, IpcIo *reply);
 int32_t ServerStartTimeSync(IpcIo *req, IpcIo *reply);
 int32_t ServerStopTimeSync(IpcIo *req, IpcIo *reply);
 int32_t ServerPublishLNN(IpcIo *req, IpcIo *reply);

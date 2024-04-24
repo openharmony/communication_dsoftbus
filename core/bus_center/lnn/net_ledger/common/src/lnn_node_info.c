@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,11 @@
 
 #include "lnn_log.h"
 #include "softbus_errcode.h"
+
+#define DYNAMIC_LEVEL_INVALID 0xFFFF
+#define STATIC_LEVEL_INVALID 0xFFFF
+#define SWITCH_LEVEL_INVALID 0xFFFFFFFF
+#define SWTICH_LENGTH_INVALID 0xFFFF
 
 bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type)
 {
@@ -389,6 +394,82 @@ uint16_t LnnGetDataChangeFlag(const NodeInfo *info)
         return 0;
     }
     return info->dataChangeFlag;
+}
+
+uint16_t LnnGetDataDynamicLevel(const NodeInfo *info)
+{
+    if (info == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return DYNAMIC_LEVEL_INVALID;
+    }
+    return info->dataDynamicLevel;
+}
+
+int32_t LnnSetDataDynamicLevel(NodeInfo *info, uint16_t dataDynamicLevel)
+{
+    if (info == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    info->dataDynamicLevel = dataDynamicLevel;
+    return SOFTBUS_OK;
+}
+
+uint16_t LnnGetDataStaticLevel(const NodeInfo *info)
+{
+    if (info == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return STATIC_LEVEL_INVALID;
+    }
+    return info->dataStaticLevel;
+}
+
+int32_t LnnSetDataStaticLevel(NodeInfo *info, uint16_t dataStaticLevel)
+{
+    if (info == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    info->dataStaticLevel = dataStaticLevel;
+    return SOFTBUS_OK;
+}
+
+uint32_t LnnGetDataSwitchLevel(const NodeInfo *info)
+{
+    if (info == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SWITCH_LEVEL_INVALID;
+    }
+    return info->dataSwitchLevel;
+}
+
+int32_t LnnSetDataSwitchLevel(NodeInfo *info, uint32_t dataSwitchLevel)
+{
+    if (info == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    info->dataSwitchLevel = dataSwitchLevel;
+    return SOFTBUS_OK;
+}
+
+uint16_t LnnGetDataSwitchLength(const NodeInfo *info)
+{
+    if (info == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SWTICH_LENGTH_INVALID;
+    }
+    return info->dataSwitchLength;
+}
+
+int32_t LnnSetDataSwitchLength(NodeInfo *info, uint16_t dataSwitchLength)
+{
+    if (info == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    info->dataSwitchLength = dataSwitchLength;
+    return SOFTBUS_OK;
 }
 
 int32_t LnnSetP2pGoMac(NodeInfo *info, const char *goMac)

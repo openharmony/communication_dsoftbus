@@ -1822,10 +1822,12 @@ HWTEST_F(AuthTest, UNPACK_DEVICE_INFO_MESSAGE_Test_001, TestSize.Level1)
     int32_t linkType = 1;
     SoftBusVersion version = SOFTBUS_OLD_V1;
     NodeInfo nodeInfo;
+    AuthSessionInfo info;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
     bool isMetaAuth = false;
     DevInfoData devInfo = {msg, 0, linkType, version};
-    int32_t ret = UnpackDeviceInfoMessage(&devInfo, &nodeInfo, isMetaAuth);
+    int32_t ret = UnpackDeviceInfoMessage(&devInfo, &nodeInfo, isMetaAuth, &info);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 

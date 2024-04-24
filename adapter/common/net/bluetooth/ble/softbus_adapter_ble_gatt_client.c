@@ -241,18 +241,25 @@ int32_t SoftbusGattcUnRegister(int32_t clientId)
         }
     }
     (void)SoftBusMutexUnlock(&g_softBusGattcManager->lock);
+    SoftbusGattcDeleteMacAddrFromList(clientId);
     return ret;
 }
 
 bool SoftbusGattcCheckExistConnectionByAddr(const SoftBusBtAddr *btAddr)
 {
+    CONN_CHECK_AND_RETURN_RET_LOGE(btAddr != NULL, false, CONN_BLE, "btAddr is NULL");
     bool isExist = false;
-    CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_btAddrs->lock) == SOFTBUS_OK,
-        false, CONN_BLE, "try to lock failed");
     BleConnMac *it = NULL;
     BleConnMac *next = NULL;
+    char macStr[BT_MAC_LEN] = {0};
+    if (ConvertBtMacToStr(macStr, BT_MAC_LEN, btAddr->addr, sizeof(btAddr->addr)) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BLE, "convert bt mac to str fail!");
+        return isExist;
+    }
+    CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_btAddrs->lock) == SOFTBUS_OK,
+        false, CONN_BLE, "try to lock failed");
     LIST_FOR_EACH_ENTRY_SAFE(it, next, &g_btAddrs->list, BleConnMac, node) {
-        if (StrCmpIgnoreCase((const char *)it->addr, (const char *)btAddr->addr) == 0) {
+        if (StrCmpIgnoreCase((const char *)it->addr, (const char *)macStr) == 0) {
             isExist = true;
             break;
         }
@@ -263,12 +270,9 @@ bool SoftbusGattcCheckExistConnectionByAddr(const SoftBusBtAddr *btAddr)
 
 static int32_t SoftbusGattcAddMacAddrToList(int32_t clientId, const SoftBusBtAddr *addr)
 {
-    CONN_CHECK_AND_RETURN_RET_LOGE(g_btAddrs != NULL, SOFTBUS_ERR, CONN_BLE, "btAddr is null");
     BleConnMac *bleConnAddr = (BleConnMac *)SoftBusCalloc(sizeof(BleConnMac));
-    if (bleConnAddr == NULL) {
-        CONN_LOGE(CONN_BLE, "calloc failed");
-        return SOFTBUS_MALLOC_ERR;
-    }
+    CONN_CHECK_AND_RETURN_RET_LOGE(bleConnAddr != NULL, SOFTBUS_MALLOC_ERR, CONN_BLE,
+        "calloc failed, clientId=%{public}d", clientId);
     ListInit(&bleConnAddr->node);
     int32_t status = ConvertBtMacToStr(bleConnAddr->addr, BT_MAC_LEN, addr->addr, BT_ADDR_LEN);
     if (status != SOFTBUS_OK) {
@@ -320,8 +324,8 @@ int32_t SoftbusGattcConnect(int32_t clientId, SoftBusBtAddr *addr)
 
     status = SoftbusGattcAddMacAddrToList(clientId, addr);
     if (status != SOFTBUS_OK) {
-         CONN_LOGE(CONN_BLE, "add mac addr fail, status=%{public}d", status);
-         return SOFTBUS_ERR;
+        // fall-through
+        CONN_LOGW(CONN_BLE, "add mac addr fail, status=%{public}d", status);
     }
 
     return SOFTBUS_OK;
@@ -334,8 +338,6 @@ int32_t SoftbusBleGattcDisconnect(int32_t clientId, bool refreshGatt)
         CONN_LOGE(CONN_BLE, "BleGattcDisconnect error");
         return SOFTBUS_GATTC_INTERFACE_FAILED;
     }
-
-    SoftbusGattcDeleteMacAddrFromList(clientId);
     return SOFTBUS_OK;
 }
 
