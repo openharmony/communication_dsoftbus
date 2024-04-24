@@ -28,7 +28,7 @@ struct DisconnectInfo {
 
 class DisconnectCommand : public WifiDirectCommand {
 public:
-    DisconnectCommand(WifiDirectDisconnectInfo &info, WifiDirectDisconnectCallback &callback);
+    DisconnectCommand(const WifiDirectDisconnectInfo &info, const WifiDirectDisconnectCallback &callback);
 
     std::string GetRemoteDeviceId() const override;
     std::shared_ptr<WifiDirectProcessor> GetProcessor() override;
@@ -43,7 +43,7 @@ public:
     void OnSuccess() const;
     void OnFailure(WifiDirectErrorCode reason) const;
 
-private:
+protected:
     DisconnectInfo info_;
     WifiDirectDisconnectCallback callback_;
     mutable std::string remoteDeviceId_;
