@@ -265,13 +265,13 @@ int32_t SoftBusServerStub::OnRemoteRequest(
             COMM_LOGE(COMM_SVC, "access token permission denied! permission=%{public}s", permission);
             pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
             TransAlarmExtra extra = {
+                .callerPid = (int32_t)callingPid,
+                .methodId = (int32_t)code,
                 .conflictName = NULL,
                 .conflictedName = NULL,
                 .occupyedName = NULL,
-                .sessionName = NULL,
-                .callerPid = (int32_t)callingPid,
-                .methodId = (int32_t)code,
                 .permissionName = permission,
+                .sessionName = NULL,
             };
             TRANS_ALARM(NO_PERMISSION_ALARM, CONTROL_ALARM_TYPE, extra);
             return SOFTBUS_ACCESS_TOKEN_DENIED;
