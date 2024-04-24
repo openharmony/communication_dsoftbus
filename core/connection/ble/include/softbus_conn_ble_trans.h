@@ -21,6 +21,7 @@
 #include "common_list.h"
 #include "softbus_error_code.h"
 #include "softbus_conn_common.h"
+#include "softbus_conn_manager.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -83,6 +84,7 @@ uint8_t *ConnGattTransRecv(
 uint8_t *ConnCocTransRecv(
     uint32_t connectionId, LimitedBuffer *buffer, int32_t *outLen);
 int64_t ConnBlePackCtlMessage(BleCtlMessageSerializationContext ctx, uint8_t **outData, uint32_t *outLen);
+int32_t ConnBleTransConfigPostLimit(const LimitConfiguration *configuration);
 
 int32_t ConnBleInitTransModule(ConnBleTransEventListener *listener);
 

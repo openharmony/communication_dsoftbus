@@ -130,6 +130,7 @@ ohos_unittest("BleConnectionManagerTest") {
     "$dsoftbus_root_path/core/connection/ble/src/ble_protocol_interface_factory.c",
     "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_connection.c",
     "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_manager.c",
+    "$dsoftbus_root_path/core/connection/manager/softbus_conn_flow_control.c",
     "$dsoftbus_root_path/core/connection/manager/softbus_conn_manager.c",
     "$dsoftbus_root_path/tests/core/connection/ble/mock/connection_ble_manager_mock.cpp",
     "connection_ble_manager_test.cpp",
@@ -165,6 +166,7 @@ ohos_unittest("BleTransTest") {
   sources = [
     "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_send_queue.c",
     "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_trans.c",
+    "$dsoftbus_root_path/core/connection/manager/softbus_conn_flow_control.c",
     "$dsoftbus_root_path/tests/core/connection/ble/mock/connection_ble_trans_mock.cpp",
     "connection_ble_trans_test.cpp",
   ]

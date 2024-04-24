@@ -55,5 +55,9 @@ ohos_unittest("ConnectionManagerTest") {
     "c_utils:utils",
     "hilog:libhilog",
   ]
-  sources = [ "connection_manager_test.cpp" ]
+  sources = [
+    "$dsoftbus_root_path/core/connection/manager/softbus_conn_flow_control.c",
+    "connection_flow_control_test.cpp",
+    "connection_manager_test.cpp",
+  ]
 }
