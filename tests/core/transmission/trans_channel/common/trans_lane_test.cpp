@@ -559,7 +559,6 @@ HWTEST_F(TransLaneTest, TransLaneTest015, TestSize.Level1)
 {
     (void)TransReqLanePendingInit();
     uint32_t laneHandle = 1;
-    bool isQosLane = false;
 
     LaneConnInfo connInfo = {
         .type = LANE_P2P,
@@ -580,7 +579,7 @@ HWTEST_F(TransLaneTest, TransLaneTest015, TestSize.Level1)
     };
     SessionParam *sessionParam = GenerateParamTest(&sessionNormalAttr);
     SoftBusFree(sessionParam);
-    ret = TransGetLaneInfo(NULL, &connInfo, &laneHandle, &isQosLane);
+    ret = TransGetLaneInfo(NULL, &connInfo, &laneHandle);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     TransSessionServerDelItem(g_sessionName);
