@@ -47,7 +47,6 @@ public:
 
     void OnSuccess(const WifiDirectLink &link) const;
     void OnFailure(WifiDirectErrorCode reason) const;
-    void FillConnEventExtra(ConnEventExtra extra) const;
 
 protected:
     ConnectInfo info_;
