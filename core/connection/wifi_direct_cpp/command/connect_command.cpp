@@ -21,6 +21,7 @@
 #include "data/link_manager.h"
 #include "processor_selector_factory.h"
 #include "utils/wifi_direct_utils.h"
+#include "utils/duration_statistic.h"
 
 namespace OHOS::SoftBus {
 ConnectCommand::ConnectCommand(const WifiDirectConnectInfo &info, const WifiDirectConnectCallback &callback)
@@ -66,12 +67,14 @@ WifiDirectConnectCallback ConnectCommand::GetConnectCallback() const
 
 void ConnectCommand::OnSuccess(const WifiDirectLink &link) const
 {
+    DfxRecord(true, OK);
     CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}u linkId=%{public}d", info_.info_.requestId, link.linkId);
     callback_.onConnectSuccess(info_.info_.requestId, &link);
 }
 
 void ConnectCommand::OnFailure(WifiDirectErrorCode reason) const
 {
+    DfxRecord(false, reason);
     CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}u reason=%{public}d", info_.info_.requestId, reason);
     callback_.onConnectFailure(info_.info_.requestId, reason);
 }
@@ -93,5 +96,67 @@ void ConnectCommand::PreferNegotiateChannel()
 
     CONN_LOGI(CONN_WIFI_DIRECT, "prefer inner channel");
     info_.channel_ = innerLink->GetNegotiateChannel();
+}
+
+void ConnectCommand::DfxRecord(bool isSuccess, WifiDirectErrorCode reason) const
+{
+    if (isSuccess) {
+        DurationStatistic::GetInstance().Record(info_.info_.requestId, TotalEnd);
+        DurationStatistic::GetInstance().End(info_.info_.requestId);
+        DurationStatistic::GetInstance().Clear(info_.info_.requestId);
+
+        ConnEventExtra extra = {
+            .result = EVENT_STAGE_RESULT_OK,
+            .requestId = static_cast<int32_t>(info_.info_.requestId),
+        };
+        FillConnEventExtra(extra);
+        CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
+    } else {
+        DurationStatistic::GetInstance().Clear(info_.info_.requestId);
+        ConnEventExtra extra = {
+            .result = EVENT_STAGE_RESULT_FAILED,
+            .errcode = reason,
+            .requestId = static_cast<int32_t>(info_.info_.requestId),
+        };
+        FillConnEventExtra(extra);
+        CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
+    }
+}
+
+void ConnectCommand::FillConnEventExtra(ConnEventExtra &extra) const
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "FillConnEventExtra enter");
+    extra.peerIp = nullptr;
+    extra.peerBleMac = nullptr;
+    extra.peerBrMac = nullptr;
+    extra.peerWifiMac = nullptr;
+    extra.peerPort = nullptr;
+    extra.peerNetworkId = nullptr;
+    extra.localNetworkId = nullptr;
+    extra.calleePkg = nullptr;
+    extra.callerPkg = nullptr;
+    extra.lnnType = nullptr;
+    extra.challengeCode = nullptr;
+
+    enum StatisticLinkType type = info_.info_.linkType;
+    if (type == STATISTIC_P2P) {
+        extra.linkType = CONNECT_P2P;
+    } else if (type == STATISTIC_HML) {
+        extra.linkType = CONNECT_HML;
+    } else {
+        extra.linkType = CONNECT_TRIGGER_HML;
+    }
+
+    extra.bootLinkType = info_.info_.bootLinkType;
+    extra.isRenegotiate = info_.info_.renegotiate;
+    extra.isReuse = info_.info_.reuse;
+    DurationStatistic instance = DurationStatistic::GetInstance();
+    std::map<DurationStatisticEvent, uint64_t> map = instance.stateTimeMap[info_.info_.requestId];
+    uint64_t startTime = map[TotalStart];
+    uint64_t endTime = map[TotalEnd];
+    if (startTime != 0 && endTime != 0) {
+        extra.costTime = int32_t(endTime - startTime);
+        extra.negotiateTime = int32_t(endTime - startTime);
+    }
 }
 } // namespace OHOS::SoftBus
