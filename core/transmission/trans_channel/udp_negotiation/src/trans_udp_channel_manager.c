@@ -62,7 +62,7 @@ static void NotifyTimeOutUdpChannel(ListNode *udpChannelList)
             (void)NotifyUdpChannelOpenFailed(&(udpChannel->info), SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
         } else if (udpChannel->info.udpChannelOptType == TYPE_UDP_CHANNEL_CLOSE) {
             TRANS_LOGW(TRANS_CTRL, "close udp channel time out, notify close.");
-            (void)NotifyUdpChannelClosed(&(udpChannel->info));
+            (void)NotifyUdpChannelClosed(&(udpChannel->info), MESSAGE_TYPE_NOMAL);
         }
         ListDelete(&(udpChannel->node));
         SoftBusFree(udpChannel);
@@ -213,7 +213,7 @@ static void NotifyUdpChannelCloseInList(ListNode *udpChannelList)
     UdpChannelInfo *udpChannel = NULL;
     UdpChannelInfo *udpChannelNext = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(udpChannel, udpChannelNext, udpChannelList, UdpChannelInfo, node) {
-        (void)NotifyUdpChannelClosed(&udpChannel->info);
+        (void)NotifyUdpChannelClosed(&udpChannel->info, MESSAGE_TYPE_NOMAL);
 
         ListDelete(&(udpChannel->node));
         TRANS_LOGI(TRANS_CTRL, "channelId=%{public}" PRId64, udpChannel->info.myData.channelId);
