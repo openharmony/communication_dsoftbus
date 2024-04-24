@@ -219,6 +219,25 @@ int32_t SoftBusServerProxyFrame::SetNodeDataChangeFlag(const char *pkgName, cons
     return SOFTBUS_OK;
 }
 
+int32_t SoftBusServerProxyFrame::RegDataLevelChangeCb(const char *pkgName)
+{
+    (void)pkgName;
+    return SOFTBUS_OK;
+}
+
+
+int32_t SoftBusServerProxyFrame::UnregDataLevelChangeCb(const char *pkgName)
+{
+    (void)pkgName;
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerProxyFrame::SetDataLevel(const DataLevel *dataLevel)
+{
+    (void)dataLevel;
+    return SOFTBUS_OK;
+}
+
 int32_t SoftBusServerProxyFrame::StartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy,
     int32_t period)
 {

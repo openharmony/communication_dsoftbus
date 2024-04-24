@@ -41,12 +41,14 @@ public:
     ~LnnWifiAdpterInterfaceMock() override;
     MOCK_METHOD1(SoftBusGetLinkedInfo, int32_t (SoftBusWifiLinkedInfo*));
     MOCK_METHOD0(SoftBusGetLinkBand, SoftBusBand ());
-
-    void SetDefaultResult(void);
     MOCK_METHOD3(LnnDisconnectP2p, void (const char *, int32_t, uint32_t));
     MOCK_METHOD0(LnnDestroyP2p, void ());
     MOCK_METHOD3(LnnConnectP2p, int32_t (const LinkRequest *, uint32_t, const LaneLinkCb *));
     MOCK_METHOD2(UpdateP2pLinkedInfo, int32_t (uint32_t laneReqId, uint64_t laneId));
+    void SetDefaultResult(void);
+    static int32_t ActionOfLnnConnectP2p(const LinkRequest *request, uint32_t laneLinkReqId,
+        const LaneLinkCb *callback);
+    static bool delayNotifyLinkSuccess;
 };
 
 } // namespace OHOS

@@ -478,4 +478,10 @@ void TransClientProxy::OnRefreshDeviceFound(const void *device, uint32_t deviceL
     (void)device;
     (void)deviceLen;
 }
+
+void TransClientProxy::OnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo)
+{
+    (void)networkId;
+    (void)dataLevelInfo;
+}
 } // namespace OHOS

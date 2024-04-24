@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,6 +52,24 @@ int32_t ServerIpcGetNodeKeyInfo(const char *pkgName, const char *networkId, int 
 int32_t ServerIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag)
 {
     return LnnIpcSetNodeDataChangeFlag(pkgName, networkId, dataChangeFlag);
+}
+
+int32_t ServerIpcRegDataLevelChangeCb(const char *pkgName)
+{
+    (void)pkgName;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerIpcUnregDataLevelChangeCb(const char *pkgName)
+{
+    (void)pkgName;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerIpcSetDataLevel(const DataLevel *dataLevel)
+{
+    (void)dataLevel;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
 int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen)

@@ -1339,7 +1339,6 @@ void LnnDisconnectP2p(const char *networkId, uint32_t laneReqId)
         DisconnectP2pWithoutAuthConn(pid, mac, linkId);
         DelP2pLinkedByLinkId(linkId);
     }
-    return;
 }
 
 void LnnDestroyP2p(void)

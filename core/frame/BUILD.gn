@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -49,6 +49,7 @@ if (defined(ohos_lite)) {
       include_dirs = dsoftbus_server_common_inc
       include_dirs += [
         "$dsoftbus_root_path/core/frame/common/include",
+        "$dsoftbus_root_path/interfaces/inner_kits/lnn",
         "$dsoftbus_root_path/interfaces/kits",
         "$dsoftbus_root_path/interfaces/kits/bus_center",
         "$dsoftbus_root_path/interfaces/kits/transport",
@@ -258,6 +259,11 @@ if (defined(ohos_lite)) {
           defined(global_parts_info.bundlemanager_bundle_framework)) {
         external_deps += [ "bundle_framework:appexecfwk_core" ]
         cflags = [ "-DSUPPORT_BUNDLENAME" ]
+      }
+
+      if (enhanced) {
+        cflags += [ "-DENHANCED_FLAG" ]
+        external_deps += [ "device_certificate_manager:device_cert_mgr_sdk" ]
       }
     }
 

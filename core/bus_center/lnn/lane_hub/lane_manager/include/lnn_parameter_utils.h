@@ -28,4 +28,4 @@ bool IsLinkEnabled(LaneLinkType parameter);
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif // LNN_PARAMETER_UTILS_H

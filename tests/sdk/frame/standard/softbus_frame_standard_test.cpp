@@ -311,7 +311,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnChannelOpenedInnerTest001, TestSize.Leve
     data.WriteCString("OnChannelOpenedInnerTest");
     data.WriteInt32(0);
     data.WriteInt32(0);
-    EXPECT_EQ(g_stub->OnChannelOpenedInner(data, reply), SOFTBUS_ERR);
+    EXPECT_EQ(g_stub->OnChannelOpenedInner(data, reply), SOFTBUS_IPC_ERR);
 
     data.WriteCString("OnChannelOpenedInnerTest");
     data.WriteInt32(0);

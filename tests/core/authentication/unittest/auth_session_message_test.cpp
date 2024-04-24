@@ -583,8 +583,10 @@ HWTEST_F(AuthSessionMessageTest, UnpackDeviceInfoMessage_TEST_001, TestSize.Leve
 {
     DevInfoData devInfo;
     NodeInfo nodeInfo;
+    AuthSessionInfo info;
     (void)memset_s(&devInfo, sizeof(DevInfoData), 0, sizeof(DevInfoData));
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
     JsonObj *obj = JSON_CreateObject();
     EXPECT_TRUE(obj != nullptr);
     JSON_AddInt32ToObject(obj, EXCHANGE_ID_TYPE, EXCHANGE_FAIL);
@@ -592,10 +594,10 @@ HWTEST_F(AuthSessionMessageTest, UnpackDeviceInfoMessage_TEST_001, TestSize.Leve
     devInfo.msg = msg;
     devInfo.len = strlen(msg);
     devInfo.linkType = AUTH_LINK_TYPE_BLE;
-    EXPECT_TRUE(UnpackDeviceInfoMessage(&devInfo, &nodeInfo, false) == SOFTBUS_OK);
+    EXPECT_TRUE(UnpackDeviceInfoMessage(&devInfo, &nodeInfo, false, &info) == SOFTBUS_OK);
     devInfo.linkType = AUTH_LINK_TYPE_WIFI;
     nodeInfo.feature = 511;
-    EXPECT_TRUE(UnpackDeviceInfoMessage(&devInfo, &nodeInfo, false) == SOFTBUS_ERR);
+    EXPECT_TRUE(UnpackDeviceInfoMessage(&devInfo, &nodeInfo, false, &info) == SOFTBUS_ERR);
     JSON_Delete(obj);
 }
 

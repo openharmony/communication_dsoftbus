@@ -220,7 +220,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         param->sessionName, param->sessionId, INVALID_CHANNEL_ID, CHANNEL_TYPE_UNDEFINED, CORE_SESSION_STATE_INIT);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "Add socket channel record failed.");
     if (param->isAsync) {
-        uint32_t firstTokenId = TransACLGetFirstTokenID();
+        uint32_t firstTokenId = TransACLGetCallingTokenID();
         ret = TransAsyncGetLaneInfo(param, &laneHandle, firstTokenId, &isQosLane);
         if (ret != SOFTBUS_OK) {
             char *tmpSessionName = NULL;
@@ -337,6 +337,7 @@ static AppInfo *GetAuthAppInfo(const char *mySessionName)
     appInfo->businessType = BUSINESS_TYPE_BYTE;
     appInfo->channelType = CHANNEL_TYPE_AUTH;
     appInfo->timeStart = GetSoftbusRecordTimeMillis();
+    appInfo->isClient = true;
     if (TransGetUidAndPid(mySessionName, &appInfo->myData.uid, &appInfo->myData.pid) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "GetAuthAppInfo GetUidAndPid failed");
         goto EXIT_ERR;

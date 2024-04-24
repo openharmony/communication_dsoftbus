@@ -42,4 +42,4 @@ void FreeLaneReqId(uint32_t laneReqId);
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif // LNN_LANE_H

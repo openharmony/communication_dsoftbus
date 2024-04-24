@@ -384,7 +384,6 @@ static void TransProxyReleaseChannelList(ListNode *proxyChannelList, int32_t err
         } else {
             OnProxyChannelClosed(removeNode->channelId, &(removeNode->appInfo));
         }
-        TransProxyCloseProxyOtherRes(removeNode->channelId, removeNode);
     }
 }
 

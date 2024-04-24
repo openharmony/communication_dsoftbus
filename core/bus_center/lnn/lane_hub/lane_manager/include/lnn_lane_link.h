@@ -119,4 +119,4 @@ uint64_t ApplyLaneId(const char *activeUdid, const char *passiveUdid, LaneLinkTy
 #ifdef __cplusplus
 }
 #endif
-#endif /* LNN_LANE_LINK_H */
+#endif // LNN_LANE_LINK_H
