@@ -65,34 +65,16 @@ WifiDirectConnectCallback ConnectCommand::GetConnectCallback() const
     return callback_;
 }
 
-NO_SANITIZE("cfi") void ConnectCommand::OnSuccess(const WifiDirectLink &link) const
+void ConnectCommand::OnSuccess(const WifiDirectLink &link) const
 {
-    DurationStatistic::GetInstance().Record(info_.info_.requestId, TotalEnd);
-    DurationStatistic::GetInstance().End(info_.info_.requestId);
-    DurationStatistic::GetInstance().Clear(info_.info_.requestId);
-    
-    ConnEventExtra extra = {
-        .result = EVENT_STAGE_RESULT_OK,
-        .requestId = static_cast<int32_t>(info_.info_.requestId),
-    };
-    FillConnEventExtra(extra);
-    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
-    
+    DfxRecord(true, OK);
     CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}u linkId=%{public}d", info_.info_.requestId, link.linkId);
     callback_.onConnectSuccess(info_.info_.requestId, &link);
 }
 
-NO_SANITIZE("cfi") void ConnectCommand::OnFailure(WifiDirectErrorCode reason) const
+void ConnectCommand::OnFailure(WifiDirectErrorCode reason) const
 {
-    DurationStatistic::GetInstance().Clear(info_.info_.requestId);
-    ConnEventExtra extra = {
-        .result = EVENT_STAGE_RESULT_FAILED,
-        .errcode = reason,
-        .requestId = static_cast<int32_t>(info_.info_.requestId),
-    };
-    FillConnEventExtra(extra);
-    CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
-    
+    DfxRecord(false, reason);
     CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}u reason=%{public}d", info_.info_.requestId, reason);
     callback_.onConnectFailure(info_.info_.requestId, reason);
 }
@@ -116,7 +98,32 @@ void ConnectCommand::PreferNegotiateChannel()
     info_.channel_ = innerLink->GetNegotiateChannel();
 }
 
-void ConnectCommand::FillConnEventExtra(ConnEventExtra extra) const
+void ConnectCommand::DfxRecord(bool isSuccess, WifiDirectErrorCode reason) const
+{
+    if (isSuccess) {
+        DurationStatistic::GetInstance().Record(info_.info_.requestId, TotalEnd);
+        DurationStatistic::GetInstance().End(info_.info_.requestId);
+        DurationStatistic::GetInstance().Clear(info_.info_.requestId);
+
+        ConnEventExtra extra = {
+            .result = EVENT_STAGE_RESULT_OK,
+            .requestId = static_cast<int32_t>(info_.info_.requestId),
+        };
+        FillConnEventExtra(extra);
+        CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
+    } else {
+        DurationStatistic::GetInstance().Clear(info_.info_.requestId);
+        ConnEventExtra extra = {
+            .result = EVENT_STAGE_RESULT_FAILED,
+            .errcode = reason,
+            .requestId = static_cast<int32_t>(info_.info_.requestId),
+        };
+        FillConnEventExtra(extra);
+        CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
+    }
+}
+
+void ConnectCommand::FillConnEventExtra(ConnEventExtra &extra) const
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "FillConnEventExtra enter");
     extra.peerIp = nullptr;
@@ -130,7 +137,7 @@ void ConnectCommand::FillConnEventExtra(ConnEventExtra extra) const
     extra.callerPkg = nullptr;
     extra.lnnType = nullptr;
     extra.challengeCode = nullptr;
-    
+
     enum StatisticLinkType type = info_.info_.linkType;
     if (type == STATISTIC_P2P) {
         extra.linkType = CONNECT_P2P;

@@ -54,6 +54,9 @@ protected:
     WifiDirectConnectCallback callback_;
     mutable std::string remoteDeviceId_;
     bool hasRetried_ = false;
+
+    void DfxRecord(bool isSuccess, WifiDirectErrorCode reason) const;
+    void FillConnEventExtra(ConnEventExtra &extra) const;
 };
 }
 #endif
