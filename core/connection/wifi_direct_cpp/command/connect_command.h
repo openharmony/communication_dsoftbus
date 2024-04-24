@@ -19,6 +19,7 @@
 #include "wifi_direct_types.h"
 #include "channel/negotiate_channel.h"
 #include "data/wifi_config_info.h"
+#include "conn_event.h"
 
 namespace OHOS::SoftBus {
 struct ConnectInfo {
@@ -46,6 +47,7 @@ public:
 
     void OnSuccess(const WifiDirectLink &link) const;
     void OnFailure(WifiDirectErrorCode reason) const;
+    void FillConnEventExtra(ConnEventExtra extra) const;
 
 protected:
     ConnectInfo info_;
