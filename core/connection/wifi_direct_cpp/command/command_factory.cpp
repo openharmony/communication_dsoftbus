@@ -24,15 +24,29 @@ CommandFactory& CommandFactory::GetInstance()
 std::shared_ptr<ConnectCommand> CommandFactory::CreateConnectCommand(const WifiDirectConnectInfo &info,
                                                                      const WifiDirectConnectCallback &callback)
 {
-    if (creator_ == nullptr) {
+    if (connectCreator_ == nullptr) {
         return std::make_shared<ConnectCommand>(info, callback);
     }
-    return creator_(info, callback);
+    return connectCreator_(info, callback);
 }
 
-void CommandFactory::Register(const Creator &creator)
+std::shared_ptr<DisconnectCommand> CommandFactory::CreateDisconnectCommand(const WifiDirectDisconnectInfo &info,
+                                                                           const WifiDirectDisconnectCallback &callback)
 {
-    creator_ = creator;
+    if (disconnectCreator_ == nullptr) {
+        return std::make_shared<DisconnectCommand>(info, callback);
+    }
+    return disconnectCreator_(info, callback);
+}
+
+void CommandFactory::Register(const ConnectCreator &creator)
+{
+    connectCreator_ = creator;
+}
+
+void CommandFactory::Register(const DisconnectCreator &creator)
+{
+    disconnectCreator_ = creator;
 }
 }
 

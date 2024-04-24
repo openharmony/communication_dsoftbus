@@ -19,19 +19,27 @@
 #include <functional>
 #include <memory>
 #include "connect_command.h"
+#include "disconnect_command.h"
 
 namespace OHOS::SoftBus {
 class CommandFactory {
 public:
+    using ConnectCreator = std::function<std::shared_ptr<ConnectCommand>(const WifiDirectConnectInfo&,
+                                                                         const WifiDirectConnectCallback&)>;
+    using DisconnectCreator = std::function<std::shared_ptr<DisconnectCommand>(const WifiDirectDisconnectInfo&,
+                                                                               const WifiDirectDisconnectCallback&)>;
     static CommandFactory& GetInstance();
+
     std::shared_ptr<ConnectCommand> CreateConnectCommand(const WifiDirectConnectInfo &info,
                                                          const WifiDirectConnectCallback &callback);
-    using Creator = std::function<std::shared_ptr<ConnectCommand>(const WifiDirectConnectInfo&,
-                                                                  const WifiDirectConnectCallback&)>;
-    void Register(const Creator &creator);
+    std::shared_ptr<DisconnectCommand> CreateDisconnectCommand(const WifiDirectDisconnectInfo &info,
+                                                               const WifiDirectDisconnectCallback &callback);
+    void Register(const ConnectCreator &creator);
+    void Register(const DisconnectCreator &creator);
 
 private:
-    Creator creator_;
+    ConnectCreator connectCreator_;
+    DisconnectCreator disconnectCreator_;
 };
 }
 #endif

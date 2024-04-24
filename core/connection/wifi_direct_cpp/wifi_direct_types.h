@@ -88,6 +88,7 @@ enum WifiDirectNegoChannelType {
     NEGO_CHANNEL_AUTH = 1,
     NEGO_CHANNEL_COC = 2,
     NEGO_CHANNEL_ACTION = 3,
+    NEGO_CHANNEL_SHARE = 4,
 };
 
 struct WifiDirectNegotiateChannel {
