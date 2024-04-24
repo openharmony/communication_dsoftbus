@@ -220,4 +220,4 @@ int32_t LnnFreeLane(uint32_t laneReqId);
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif // LNN_LANE_INTERFACE_H

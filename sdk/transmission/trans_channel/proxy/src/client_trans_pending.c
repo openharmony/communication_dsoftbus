@@ -209,10 +209,6 @@ EXIT:
 
 int32_t SetPendingPacketData(uint32_t id, uint64_t seq, const TransPendData *data)
 {
-    if (data == NULL) {
-        TRANS_LOGE(TRANS_SDK, "invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
     if (SoftBusMutexLock(&g_pendingLock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "mutex lock fail");
         return SOFTBUS_LOCK_ERR;

@@ -44,4 +44,4 @@ int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *req
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif // LNN_LANE_SELECT_H

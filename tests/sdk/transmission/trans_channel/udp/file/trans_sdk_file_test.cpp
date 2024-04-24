@@ -111,9 +111,9 @@ void TransSdkFileTest::SetUpTestCase(void)
 {
     IClientSessionCallBack *cb = GetClientSessionCb();
     int32_t ret = ClientTransUdpMgrInit(cb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = TransFileInit();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 void TransSdkFileTest::TearDownTestCase(void)
@@ -183,14 +183,14 @@ void GenerateAndAddUdpChannel(UdpChannel *channel)
 {
     IClientSessionCallBack *cb = GetClientSessionCb();
     int32_t ret = ClientTransUdpMgrInit(cb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     channel->channelId = 1;
     channel->dfileId = 1;
     channel->businessType = BUSINESS_TYPE_STREAM;
     memcpy_s(channel->info.mySessionName, SESSION_NAME_SIZE_MAX,
         "normal sessionName", strlen("normal sessionName"));
     ret = ClientTransAddUdpChannel(channel);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 static void SocketFileCallbackFuncTest(int32_t socket, FileEvent *event)
@@ -210,10 +210,10 @@ HWTEST_F(TransSdkFileTest, TransFileListenerTest001, TestSize.Level0)
     TransFileDeinit();
 
     int32_t ret = TransFileInit();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransFileInit();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     TransFileDeinit();
     TransFileDeinit();
@@ -228,20 +228,20 @@ HWTEST_F(TransSdkFileTest, TransFileListenerTest001, TestSize.Level0)
 HWTEST_F(TransSdkFileTest, TransFileListenerTest002, TestSize.Level0)
 {
     int32_t ret = TransFileInit();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     const char* rootDir = "rootDir";
     const char* sessionName = "file receive";
     ret = TransSetFileReceiveListener(sessionName, &g_fileRecvListener, rootDir);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransSetFileReceiveListener(sessionName, &g_fileRecvListener, rootDir);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     TransDeleteFileListener(sessionName);
     TransFileDeinit();
 
     ret = TransSetFileReceiveListener(sessionName, &g_fileRecvListener, rootDir);
-    EXPECT_TRUE(ret == SOFTBUS_TRANS_FILE_LISTENER_NOT_INIT);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_FILE_LISTENER_NOT_INIT);
     
     TransFileDeinit();
 }
@@ -255,14 +255,14 @@ HWTEST_F(TransSdkFileTest, TransFileListenerTest002, TestSize.Level0)
 HWTEST_F(TransSdkFileTest, TransFileListenerTest003, TestSize.Level0)
 {
     int32_t ret = TransFileInit();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     const char* rootDir = "rootDir";
     const char* sessionName = "file receive";
     const char* inValidName = "invald file receive";
     TransDeleteFileListener(NULL);
 
     ret = TransSetFileReceiveListener(sessionName, &g_fileRecvListener, rootDir);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     TransDeleteFileListener(inValidName);
     
     TransDeleteFileListener(sessionName);
@@ -281,19 +281,19 @@ HWTEST_F(TransSdkFileTest, TransFileListenerTest003, TestSize.Level0)
 HWTEST_F(TransSdkFileTest, TransFileListenerTest004, TestSize.Level0)
 {
     int32_t ret = TransFileInit();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     const char* sessionName = "file send";
     ret = TransSetFileSendListener(sessionName, &g_fileSendListener);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransSetFileSendListener(sessionName, &g_fileSendListener);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     TransDeleteFileListener(sessionName);
     TransFileDeinit();
 
     ret = TransSetFileSendListener(sessionName, &g_fileSendListener);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_FILE_LISTENER_NOT_INIT);
 }
 
 /**
@@ -305,7 +305,7 @@ HWTEST_F(TransSdkFileTest, TransFileListenerTest004, TestSize.Level0)
 HWTEST_F(TransSdkFileTest, TransFileListenerTest005, TestSize.Level0)
 {
     int32_t ret = TransFileInit();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     const char* rootDir = "rootDir";
     const char* sessionName = "file receive";
     const char* inValidName = "invald file receive";
@@ -314,21 +314,21 @@ HWTEST_F(TransSdkFileTest, TransFileListenerTest005, TestSize.Level0)
         return;
     }
     ret = TransSetFileReceiveListener(sessionName, &g_fileRecvListener, rootDir);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransSetFileSendListener(sessionName, &g_fileSendListener);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransGetFileListener(inValidName, fileListener);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = TransGetFileListener(sessionName, fileListener);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     TransDeleteFileListener(sessionName);
     TransFileDeinit();
 
     ret = TransGetFileListener(sessionName, fileListener);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_FILE_LISTENER_NOT_INIT);
     SoftBusFree(fileListener);
 }
 
@@ -342,7 +342,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest001, TestSize.Level0)
 {
     IClientSessionCallBack *cb = GetClientSessionCb();
     int32_t ret = ClientTransUdpMgrInit(cb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     UdpChannelMgrCb *fileCb = NULL;
     RegisterFileCb(NULL);
@@ -361,9 +361,9 @@ HWTEST_F(TransSdkFileTest, TransFileTest002, TestSize.Level0)
 {
     IClientSessionCallBack *cb = GetClientSessionCb();
     int32_t ret = ClientTransUdpMgrInit(cb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = TransFileInit();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     const char* sessionName = "file send";
     ChannelInfo *channelInfo = (ChannelInfo *)SoftBusCalloc(sizeof(ChannelInfo));
     if (channelInfo == NULL) {
@@ -373,26 +373,26 @@ HWTEST_F(TransSdkFileTest, TransFileTest002, TestSize.Level0)
     int32_t filePort = 22;
 
     ret = ClientTransAddUdpChannel(channel);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransSetFileSendListener(sessionName, &g_fileSendListener);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransOnFileChannelOpened(sessionName, channelInfo, NULL);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     (void)strcpy_s(channelInfo->myIp, strlen("127.0.0.5") + 1, "127.0.0.5");
     (void)strcpy_s(channelInfo->sessionKey, strlen("session key") + 1, "session key");
 
     ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     channelInfo->isServer = false;
     ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
     ClientTransUdpMgrDeinit();
 }
 
@@ -418,13 +418,13 @@ HWTEST_F(TransSdkFileTest, TransFileTest003, TestSize.Level0)
     DFileMsgType msgType = DFILE_ON_BIND;
     FileSendListener(channel->dfileId, msgType, msgData);
     int32_t ret = ClientTransAddUdpChannel(channel);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransSetFileSendListener(g_mySessionName, sendListener);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransOnFileChannelOpened(g_mySessionName, channelInfo, &filePort);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     TransDeleteFileListener(g_mySessionName);
     TransFileDeinit();
@@ -440,7 +440,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest003, TestSize.Level0)
 HWTEST_F(TransSdkFileTest, TransFileTest004, TestSize.Level0)
 {
     int32_t ret = TransFileInit();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     DFileMsgType msgType = DFILE_ON_CONNECT_SUCCESS;
     DFileMsg msgData = {};
     UdpChannel *channel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
@@ -461,7 +461,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest004, TestSize.Level0)
     FileSendListener(channel->dfileId, msgType, &msgData);
 
     ret = TransSetFileSendListener(channel->info.mySessionName, &g_fileSendListener);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     FileSendListener(channel->dfileId, msgType, &msgData);
 
@@ -497,7 +497,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest004, TestSize.Level0)
 HWTEST_F(TransSdkFileTest, TransFileTest005, TestSize.Level0)
 {
     int32_t ret = TransFileInit();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     DFileMsgType msgType = DFILE_ON_CONNECT_SUCCESS;
     DFileMsg msgData = {};
     UdpChannel *channel = (UdpChannel*)SoftBusCalloc(sizeof(UdpChannel));
@@ -510,7 +510,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest005, TestSize.Level0)
 
     string rootDir = "rootDir";
     ret = TransSetFileReceiveListener(channel->info.mySessionName, &g_fileRecvListener, rootDir.c_str());
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     msgType = DFILE_ON_FILE_LIST_RECEIVED;
     FileReceiveListener(channel->dfileId, msgType, &msgData);
@@ -548,9 +548,9 @@ HWTEST_F(TransSdkFileTest, TransFileTest006, TestSize.Level0)
 {
     IClientSessionCallBack *cb = GetClientSessionCb();
     int32_t ret = ClientTransUdpMgrInit(cb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = TransFileInit();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     const char* sessionName = "file send";
     IFileSendListener *sendListener;
     ChannelInfo *channelInfo = (ChannelInfo *)SoftBusCalloc(sizeof(ChannelInfo));
@@ -561,26 +561,26 @@ HWTEST_F(TransSdkFileTest, TransFileTest006, TestSize.Level0)
     int32_t filePort = 22;
 
     ret = ClientTransAddUdpChannel(channel);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransSetFileSendListener(sessionName, sendListener);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 
     ret = TransOnFileChannelOpened(sessionName, channelInfo, NULL);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     (void)strcpy_s(channelInfo->myIp, strlen("127.0.0.5") + 1, "127.0.0.5");
     (void)strcpy_s(channelInfo->sessionKey, strlen("session key") + 1, "session key");
 
     ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     channelInfo->isServer = false;
     ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
     ClientTransUdpMgrDeinit();
 }
 
@@ -607,13 +607,13 @@ HWTEST_F(TransSdkFileTest, TransFileTest007, TestSize.Level0)
     FileSendListener(channel->dfileId, msgType, msgData);
 
     int32_t ret = ClientTransAddUdpChannel(channel);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransSetFileSendListener(g_mySessionName, sendListener);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     
     ret = TransOnFileChannelOpened(g_mySessionName, channelInfo, &filePort);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
     
     TransCloseFileChannel(channel->dfileId);
     
@@ -636,10 +636,10 @@ HWTEST_F(TransSdkFileTest, TransFileTest008, TestSize.Level0)
     const char *fileList = "/file not null list/";
     uint32_t fileCnt = 0;
     int32_t ret = TransSendFile(sessionId, &sFileList, &dFileList, fileCnt);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_TRUE(ret);
 
     ret = TransSendFile(sessionId, &fileList, &dFileList, fileCnt);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_TRUE(ret);
 }
 
 /**
@@ -653,10 +653,10 @@ HWTEST_F(TransSdkFileTest, TransFileTest009, TestSize.Level0)
     int fd = socket(AF_INET, SOCK_STREAM, 0);
     int on = 65536;
     int ret = SetReuseAddr(fd, on);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     
     ret = SetReuseAddr(0, on);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 }
 
 /**
@@ -670,10 +670,10 @@ HWTEST_F(TransSdkFileTest, TransFileTest010, TestSize.Level0)
     int fd = socket(AF_INET, SOCK_STREAM, 0);
     int on = 65536;
     int ret = SetReusePort(fd, on);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     
     ret = SetReusePort(0, on);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 }
 
 /**
@@ -686,13 +686,13 @@ HWTEST_F(TransSdkFileTest, TransFileTest011, TestSize.Level0)
 {
     int port = 5683;
     int ret = OpenTcpServer("127.0.0.1", port);
-    EXPECT_TRUE(ret != SOFTBUS_ERR);
+    EXPECT_TRUE(ret);
 
     ret = OpenTcpServer("280567565", port);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = OpenTcpServer("127.0.0.1", 0);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_TRUE(ret);
 }
 
 /**
@@ -707,13 +707,13 @@ HWTEST_F(TransSdkFileTest, TransFileTest012, TestSize.Level0)
     uint32_t keyLen = 8;
     int32_t filePort = 25;
     int32_t ret = StartNStackXDFileServer(NULL, &key, keyLen, g_fileMsgRecviver, &filePort);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = StartNStackXDFileServer("127.0.0.1", &key, keyLen, g_fileMsgRecviver, NULL);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = ConnInitSockets();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     (void)StartNStackXDFileServer("127.0.0.1", &key, keyLen, g_fileMsgRecviver, &filePort);
     ConnDeinitSockets();
 }
@@ -730,7 +730,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest013, TestSize.Level0)
     uint32_t keyLen = 8;
     int32_t peerPort = 25;
     int32_t ret = StartNStackXDFileClient(NULL, peerPort, &key, keyLen, g_fileMsgRecviver);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     (void)StartNStackXDFileClient("127.0.0.1", peerPort, &key, keyLen, g_fileMsgRecviver);
 }
 

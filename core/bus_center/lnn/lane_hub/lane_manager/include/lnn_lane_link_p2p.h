@@ -29,4 +29,4 @@ void LnnDestroyP2p(void);
 #ifdef __cplusplus
 }
 #endif
-#endif /* LNN_LANE_LINK_P2P_H */
+#endif // LNN_LANE_LINK_P2P_H

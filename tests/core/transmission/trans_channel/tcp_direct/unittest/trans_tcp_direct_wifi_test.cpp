@@ -206,7 +206,7 @@ HWTEST_F(TransTcpDirectWifiTest, OpenTcpDirectChannelTest005, TestSize.Level1)
         .WillByDefault(DoAll(SetArgPointee<3>(AuthHandle{.authId = AUTH_INVALID_ID}), Return()));
     EXPECT_CALL(TcpWifiMock, CreateNewSessinConn).WillOnce(Return(conn));
     int32_t ret = OpenTcpDirectChannel(appInfo, connInfo, &channelId);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED, ret);
 
     SoftBusFree(appInfo);
     SoftBusFree(connInfo);
