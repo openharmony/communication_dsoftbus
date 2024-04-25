@@ -60,7 +60,7 @@ int32_t GetWlanLinkedFrequency(void)
     int32_t ret = LnnGetWlanLinkedInfo(&info);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get linked info fail, reason=%{public}d", ret);
-        return SOFTBUS_ERR;
+        return ret;
     }
     LNN_LOGI(LNN_LANE, "wlan linked frequency=%{public}d", info.frequency);
     return info.frequency;
