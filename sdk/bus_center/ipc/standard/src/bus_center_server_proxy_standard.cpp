@@ -978,7 +978,7 @@ int32_t BusCenterServerProxy::GetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *i
 int32_t BusCenterServerProxy::ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
     const GearMode *mode)
 {
-    if (pkgName == nullptr) {
+    if (pkgName == nullptr || callerId == nullptr || mode == nullptr) {
         LNN_LOGE(LNN_EVENT, "params are nullptr");
         return SOFTBUS_INVALID_PARAM;
     }
