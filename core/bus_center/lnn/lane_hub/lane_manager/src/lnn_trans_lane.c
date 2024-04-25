@@ -47,8 +47,6 @@ typedef enum {
     MSG_TYPE_LANE_TRIGGER_LINK = 0,
     MSG_TYPE_LANE_LINK_SUCCESS,
     MSG_TYPE_LANE_LINK_FAIL,
-    MSG_TYPE_GUIDE_CHANNEL_TRIGGER,
-    MSG_TYPE_GUIDE_CHANNEL_FAIL,
     MSG_TYPE_LANE_STATE_CHANGE,
     MSG_TYPE_DELAY_DESTROY_LINK,
     MSG_TYPE_LANE_DETECT_TIMEOUT,
@@ -84,12 +82,6 @@ typedef struct {
     char peerUdid[UDID_BUF_LEN];
     LaneLinkInfo laneLinkInfo;
 } StateNotifyInfo;
-
-typedef struct {
-    AsyncResultType type;
-    int32_t requestId;
-    int32_t reason;
-} GuideFailedInfo;
 
 static ListNode g_multiLinkList;
 static SoftBusMutex g_transLaneMutex;
@@ -814,33 +806,6 @@ static void LaneLinkFail(SoftBusMessage *msg)
     }
 }
 
-static void GuideChannelTrigger(SoftBusMessage *msg)
-{
-    uint32_t laneReqId = (uint32_t)msg->arg1;
-    LaneLinkType linkType = (LaneLinkType)msg->arg2;
-    BuildGuideChannel(laneReqId, linkType);
-}
-
-static void GuideChannelFail(SoftBusMessage *msg)
-{
-    if (msg->obj == NULL) {
-        LNN_LOGE(LNN_LANE, "invalid msg->obj");
-        return;
-    }
-    GuideFailedInfo *info = (GuideFailedInfo *)msg->obj;
-    uint32_t laneReqId = INVALID_LANE_REQ_ID;
-    LaneLinkType linkType = LANE_LINK_TYPE_BUTT;
-    if (!GuideChannelIsRetry(info->type, info->requestId, info->reason, &laneReqId, &linkType)) {
-        SoftBusFree(info);
-        return;
-    }
-    SoftBusFree(info);
-    LNN_LOGI(LNN_LANE, "continue to select guide channel.");
-    if (LnnLanePostMsgToHandler(MSG_TYPE_GUIDE_CHANNEL_TRIGGER, laneReqId, linkType, NULL, 0) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "post guide channel trigger msg err.");
-    }
-}
-
 static void LaneStateChange(SoftBusMessage *msg)
 {
     if (msg->obj == NULL) {
@@ -895,12 +860,6 @@ static void MsgHandler(SoftBusMessage *msg)
             break;
         case MSG_TYPE_LANE_LINK_FAIL:
             LaneLinkFail(msg);
-            break;
-        case MSG_TYPE_GUIDE_CHANNEL_TRIGGER:
-            GuideChannelTrigger(msg);
-            break;
-        case MSG_TYPE_GUIDE_CHANNEL_FAIL:
-            GuideChannelFail(msg);
             break;
         case MSG_TYPE_LANE_STATE_CHANGE:
             LaneStateChange(msg);
@@ -1054,6 +1013,7 @@ int32_t PostDelayDestroyMessage(uint32_t laneReqId, uint64_t laneId, uint64_t de
         laneReqId, laneId);
     return LnnLanePostMsgToHandler(MSG_TYPE_DELAY_DESTROY_LINK, laneReqId, laneId, NULL, delayMillis);
 }
+
 int32_t PostLaneStateChangeMessage(LaneState state, const char *peerUdid, const LaneLinkInfo *laneLinkInfo)
 {
     LNN_LOGI(LNN_LANE, "post lane state change msg, state=%{public}d", state);
