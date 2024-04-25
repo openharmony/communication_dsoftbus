@@ -106,7 +106,7 @@ int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
     const AuthVerifyCallback *callback, bool isFastAuth);
 void AuthHandleLeaveLNN(AuthHandle authHandle);
 int32_t AuthFlushDevice(const char *uuid);
-int32_t AuthSendKeepAlive(const char *uuid, ModeCycle cycle);
+int32_t AuthSendKeepaliveOption(const char *uuid, ModeCycle cycle);
 
 int32_t AuthMetaStartVerify(uint32_t connectionId, const uint8_t *key, uint32_t keyLen,
     uint32_t requestId, int32_t callingPid, const AuthVerifyCallback *callBack);
@@ -169,7 +169,6 @@ int32_t AuthGetLatestAuthSeqListByType(const char *udid, int64_t *seqList, uint6
 void AuthGetLatestIdByUuid(const char *uuid, AuthLinkType type, bool isMeta, AuthHandle *authHandle);
 int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer, bool isMeta);
 int64_t AuthGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer, bool isMeta);
-int32_t AuthSetTcpKeepAlive(const AuthConnInfo *connInfo, ModeCycle cycle);
 
 uint32_t AuthGetEncryptSize(uint32_t inLen);
 uint32_t AuthGetDecryptSize(uint32_t inLen);

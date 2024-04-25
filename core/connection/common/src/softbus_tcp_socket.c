@@ -310,49 +310,39 @@ static int32_t GetTcpSockPort(int32_t fd)
     return SoftBusNtoHs(addr.sinPort);
 }
 
-int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds)
+int32_t ConnSetTcpKeepalive(int32_t fd, int32_t seconds, int32_t keepAliveIntvl, int32_t keepAliveCount)
 {
-#define KEEP_ALIVE_COUNT 5
-    if (fd < 0) {
-        CONN_LOGW(CONN_COMMON, "ConnSetTcpKeepAlive invalid param");
-        return -1;
+    if (fd <= 0 || seconds <= 0 || keepAliveIntvl <= 0 || keepAliveCount <= 0) {
+        CONN_LOGE(CONN_COMMON, "ConnSetTcpKeepalive invalid param");
+        return SOFTBUS_INVALID_PARAM;
     }
 
     int32_t rc;
-    int32_t enable;
-    if (seconds > 0) {
-        enable = 1;
-        rc = SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_TCP, SOFTBUS_TCP_KEEPIDLE, &seconds, sizeof(seconds));
-        if (rc != 0) {
-            CONN_LOGE(CONN_COMMON, "set TCP_KEEPIDLE failed");
-            return -1;
-        }
-
-        int32_t keepAliveCnt = KEEP_ALIVE_COUNT;
-        rc = SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_TCP, SOFTBUS_TCP_KEEPCNT, &keepAliveCnt, sizeof(keepAliveCnt));
-        if (rc != 0) {
-            CONN_LOGE(CONN_COMMON, "set TCP_KEEPCNT failed");
-            return -1;
-        }
-
-        // Keepalive interval changed from 15s to 2s
-        int32_t keepAliveIntvl = 2;
-        rc = SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_TCP, SOFTBUS_TCP_KEEPINTVL, &keepAliveIntvl,
-            sizeof(keepAliveIntvl));
-        if (rc != 0) {
-            CONN_LOGE(CONN_COMMON, "set TCP_KEEPINTVL failed");
-            return -1;
-        }
-    } else {
-        enable = 0;
+    rc = SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_TCP, SOFTBUS_TCP_KEEPIDLE, &seconds, sizeof(seconds));
+    if (rc != SOFTBUS_ADAPTER_OK) {
+        CONN_LOGE(CONN_COMMON, "set TCP_KEEPIDLE failed");
+        return SOFTBUS_ADAPTER_ERR;
     }
 
+    rc = SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_TCP, SOFTBUS_TCP_KEEPCNT, &keepAliveCount, sizeof(keepAliveCount));
+    if (rc != SOFTBUS_ADAPTER_OK) {
+        CONN_LOGE(CONN_COMMON, "set TCP_KEEPCNT failed");
+        return SOFTBUS_ADAPTER_ERR;
+    }
+
+    rc = SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_TCP, SOFTBUS_TCP_KEEPINTVL, &keepAliveIntvl, sizeof(keepAliveIntvl));
+    if (rc != SOFTBUS_ADAPTER_OK) {
+        CONN_LOGE(CONN_COMMON, "set TCP_KEEPINTVL failed");
+        return SOFTBUS_ADAPTER_ERR;
+    }
+
+    int32_t enable = 1;
     rc = SoftBusSocketSetOpt(fd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_KEEPALIVE, &enable, sizeof(enable));
-    if (rc != 0) {
+    if (rc != SOFTBUS_ADAPTER_OK) {
         CONN_LOGE(CONN_COMMON, "set SO_KEEPALIVE failed");
-        return -1;
+        return SOFTBUS_ADAPTER_ERR;
     }
-    return 0;
+    return SOFTBUS_OK;
 }
 
 #ifdef TCP_USER_TIMEOUT
@@ -360,13 +350,14 @@ int32_t ConnSetTcpUserTimeOut(int32_t fd, uint32_t millSec)
 {
     if (fd < 0) {
         CONN_LOGE(CONN_COMMON, "ConnSetTcpUserTimeOut invalid param");
-        return -1;
+        return SOFTBUS_ADAPTER_ERR;
     }
-    if (SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_TCP, SOFTBUS_TCP_USER_TIMEOUT, &millSec, sizeof(millSec)) != 0) {
+    if (SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_TCP, SOFTBUS_TCP_USER_TIMEOUT, &millSec, sizeof(millSec)) !=
+        SOFTBUS_ADAPTER_OK) {
         CONN_LOGE(CONN_COMMON, "set SOFTBUS_TCP_USER_TIMEOUT failed");
-        return -1;
+        return SOFTBUS_ADAPTER_ERR;
     }
-    return 0;
+    return SOFTBUS_OK;
 }
 #else
 int32_t ConnSetTcpUserTimeOut(int32_t fd, uint32_t millSec)
@@ -377,40 +368,6 @@ int32_t ConnSetTcpUserTimeOut(int32_t fd, uint32_t millSec)
 }
 
 #endif
-
-int32_t ConnSetTcpKeepAliveOption(
-    int32_t fd, ModeCycle cycle, int32_t keepAliveIntvl, int32_t keepAliveCount, uint32_t userTimeOut)
-{
-    if (fd < 0 || keepAliveIntvl < 0 || keepAliveCount < 0 || userTimeOut < 0) {
-        CONN_LOGE(CONN_COMMON, "invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_TCP, SOFTBUS_TCP_KEEPIDLE, &cycle, sizeof(cycle)) !=
-        SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "set TCP_KEEPIDLE failed");
-        return SOFTBUS_ERR;
-    }
-    if (SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_TCP, SOFTBUS_TCP_KEEPINTVL, &keepAliveIntvl, sizeof(keepAliveIntvl)) !=
-        SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "set TCP_KEEPINTVL failed");
-        return SOFTBUS_ERR;
-    }
-    if (SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_TCP, SOFTBUS_TCP_KEEPCNT, &keepAliveCount, sizeof(keepAliveCount)) !=
-        SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "set TCP_KEEPCNT failed");
-        return SOFTBUS_ERR;
-    }
-    if (ConnSetTcpUserTimeOut(fd, userTimeOut) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "set TCP_USER_TIMEOUT failed,fd = %{public}d.", fd);
-        return SOFTBUS_ERR;
-    }
-
-    CONN_LOGI(CONN_COMMON,
-        "set tcp keepAlive successful, fd=%{public}d, keepAliveIdle=%{public}d, keepAliveIntvl=%{public}d, "
-        "keepAliveCount=%{public}d, userTimeOut=%{public}u",
-        fd, cycle, keepAliveIntvl, keepAliveCount, userTimeOut);
-    return SOFTBUS_OK;
-}
 
 static int32_t AcceptTcpClient(int32_t fd, ConnectOption *clientAddr, int32_t *cfd)
 {

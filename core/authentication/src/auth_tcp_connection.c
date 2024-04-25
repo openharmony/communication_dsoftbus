@@ -31,8 +31,14 @@
 
 #define MAGIC_NUMBER  0xBABEFACE
 #define AUTH_PKT_HEAD_LEN 24
-#define AUTH_KEEP_ALIVE_TIME_INTERVAL (10 * 60)
 #define AUTH_SOCKET_MAX_DATA_LEN (64 * 1024)
+
+typedef struct {
+    int32_t keepaliveIdle;
+    int32_t keepaliveIntvl;
+    int32_t keepaliveCount;
+    uint32_t userTimeout;
+} TcpKeepaliveOption;
 
 typedef struct {
     int32_t module;
@@ -255,14 +261,14 @@ static bool IsEnhanceP2pModuleId(ListenerModule moduleId)
     return false;
 }
 
-static int32_t OnConnectEvent(ListenerModule module,
-    int32_t cfd, const ConnectOption *clientAddr)
+static int32_t OnConnectEvent(ListenerModule module, int32_t cfd, const ConnectOption *clientAddr)
 {
     if (cfd < 0) {
         AUTH_LOGE(AUTH_CONN, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (ConnSetTcpKeepAlive(cfd, AUTH_KEEP_ALIVE_TIME_INTERVAL) != 0) {
+    if (ConnSetTcpKeepalive(cfd, (int32_t)DEFAULT_FREQ_CYCLE, TCP_KEEPALIVE_INTERVAL, TCP_KEEPALIVE_DEFAULT_COUNT) !=
+        SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "set keepalive fail!");
         ConnShutdownSocket(cfd);
         return SOFTBUS_ERR;
@@ -369,7 +375,8 @@ int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode)
         ConnShutdownSocket(fd);
         return AUTH_INVALID_FD;
     }
-    if (ConnSetTcpKeepAlive(fd, AUTH_KEEP_ALIVE_TIME_INTERVAL) != SOFTBUS_OK) {
+    if (ConnSetTcpKeepalive(fd, (int32_t)DEFAULT_FREQ_CYCLE, TCP_KEEPALIVE_INTERVAL, TCP_KEEPALIVE_DEFAULT_COUNT) !=
+        SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "set tcp keep alive fail.");
         (void)DelTrigger(AUTH, fd, triggerMode);
         ConnShutdownSocket(fd);
@@ -409,7 +416,8 @@ int32_t NipSocketConnectDevice(ListenerModule module,
         ConnShutdownSocket(fd);
         return AUTH_INVALID_FD;
     }
-    if (ConnSetTcpKeepAlive(fd, AUTH_KEEP_ALIVE_TIME_INTERVAL) != SOFTBUS_OK) {
+    if (ConnSetTcpKeepalive(fd, (int32_t)DEFAULT_FREQ_CYCLE, TCP_KEEPALIVE_INTERVAL, TCP_KEEPALIVE_DEFAULT_COUNT) !=
+        SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "set tcp keep alive fail.");
         (void)DelTrigger(module, fd, triggerMode);
         ConnShutdownSocket(fd);
@@ -594,75 +602,64 @@ int32_t AuthPostChannelData(int32_t channelId, const AuthChannelData *data)
     return SocketPostBytes(channelId, &head, data->data);
 }
 
-static int32_t GetTcpKeepAliveOptionByCycle(
-    ModeCycle cycle, int32_t *keepAliveIntvl, int32_t *keepAliveCount, uint32_t *userTimeOut)
+static int32_t GetTcpKeepaliveOptionByCycle(ModeCycle cycle, TcpKeepaliveOption *tcpKeepaliveOption)
 {
-    if (keepAliveIntvl == NULL || keepAliveCount == NULL || userTimeOut == NULL) {
+    if (tcpKeepaliveOption == NULL) {
         AUTH_LOGE(AUTH_CONN, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     switch (cycle) {
         case HIGH_FREQ_CYCLE:
-            *keepAliveIntvl = KEEP_ALIVE_INTERVAL;
-            *keepAliveCount = KEEP_ALIVE_HIGH_COUNT;
-            *userTimeOut = KEEP_ALIVE_HIGH_USER_TIMEOUT;
+            tcpKeepaliveOption->keepaliveCount = TCP_KEEPALIVE_HIGH_COUNT;
+            tcpKeepaliveOption->userTimeout = TCP_KEEPALIVE_HIGH_USER_TIMEOUT;
             break;
         case MID_FREQ_CYCLE:
-            *keepAliveIntvl = KEEP_ALIVE_INTERVAL;
-            *keepAliveCount = KEEP_ALIVE_MID_COUNT;
-            *userTimeOut = KEEP_ALIVE_MID_USER_TIMEOUT;
+            tcpKeepaliveOption->keepaliveCount = TCP_KEEPALIVE_MID_COUNT;
+            tcpKeepaliveOption->userTimeout = TCP_KEEPALIVE_MID_USER_TIMEOUT;
             break;
         case LOW_FREQ_CYCLE:
-            *keepAliveIntvl = KEEP_ALIVE_INTERVAL;
-            *keepAliveCount = KEEP_ALIVE_LOW_COUNT;
-            *userTimeOut = KEEP_ALIVE_LOW_USER_TIMEOUT;
+            tcpKeepaliveOption->keepaliveCount = TCP_KEEPALIVE_LOW_COUNT;
+            tcpKeepaliveOption->userTimeout = TCP_KEEPALIVE_LOW_USER_TIMEOUT;
             break;
-        case DEFT_FREQ_CYCLE:
-            *keepAliveIntvl = KEEP_ALIVE_INTERVAL;
-            *keepAliveCount = KEEP_ALIVE_DEFT_COUNT;
-            *userTimeOut = KEEP_ALIVE_DEFT_USER_TIMEOUT;
+        case DEFAULT_FREQ_CYCLE:
+            tcpKeepaliveOption->keepaliveCount = TCP_KEEPALIVE_DEFAULT_COUNT;
+            tcpKeepaliveOption->userTimeout = TCP_KEEPALIVE_DEFAULT_USER_TIMEOUT;
             break;
         default:
             AUTH_LOGE(AUTH_CONN, "no match cycle, cycle=%{public}d", cycle);
-            break;
-    } 
+            return SOFTBUS_ERR;
+    }
+    tcpKeepaliveOption->keepaliveIdle = (int32_t)cycle;
+    tcpKeepaliveOption->keepaliveIntvl = TCP_KEEPALIVE_INTERVAL;
     return SOFTBUS_OK;
 }
 
-static int32_t SetTcpKeepAliveOption(int32_t fd, ModeCycle cycle)
+int32_t AuthSetTcpKeepaliveOption(int32_t fd, ModeCycle cycle)
 {
-    int32_t keepAliveIntvl = 0;
-    int32_t keepAliveCount = 0;
-    uint32_t userTimeOut = 0;
-
-    if (GetTcpKeepAliveOptionByCycle(cycle, &keepAliveIntvl, &keepAliveCount, &userTimeOut) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get tcp keepAlive option by cycle fail");
-        return SOFTBUS_ERR;
-    }
-    if (ConnSetTcpKeepAliveOption(fd, cycle, keepAliveIntvl, keepAliveCount, userTimeOut) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "conn set tcp keepAlive option fail");
-        return SOFTBUS_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
-int32_t AuthSetTcpKeepAliveOption(int32_t fd, ModeCycle cycle)
-{
-    if (fd < 0 || cycle < HIGH_FREQ_CYCLE || cycle > DEFT_FREQ_CYCLE) {
+    if (fd <= 0 || cycle < HIGH_FREQ_CYCLE || cycle > DEFAULT_FREQ_CYCLE) {
         AUTH_LOGE(AUTH_CONN, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    AUTH_LOGI(AUTH_CONN, "fd=%{public}d, cycle=%{public}d", fd, cycle);
-    if (SetTcpKeepAliveOption(fd, cycle) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "set tcp keepAlive option fail");
+    TcpKeepaliveOption tcpKeepaliveOption = { 0 };
+
+    if (GetTcpKeepaliveOptionByCycle(cycle, &tcpKeepaliveOption) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "get tcp keepalive option by cycle fail");
         return SOFTBUS_ERR;
+    }
+    if (ConnSetTcpUserTimeOut(fd, tcpKeepaliveOption.userTimeout) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "set TCP_USER_TIMEOUT fail, fd=%{public}d", fd);
+        return SOFTBUS_ADAPTER_ERR;
+    }
+    if (ConnSetTcpKeepalive(fd, tcpKeepaliveOption.keepaliveIdle, tcpKeepaliveOption.keepaliveIntvl,
+            tcpKeepaliveOption.keepaliveCount) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "set tcp keepalive fail, fd=%{public}d", fd);
+        return SOFTBUS_ADAPTER_ERR;
     }
 
-    int32_t enable = 1;
-    if (SoftBusSocketSetOpt(fd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_KEEPALIVE, &enable, sizeof(enable)) !=
-        SOFTBUS_ADAPTER_OK) {
-        AUTH_LOGE(AUTH_CONN, "set SO_KEEPALIVE fail");
-        return SOFTBUS_ERR;
-    }
+    AUTH_LOGI(AUTH_CONN,
+        "set tcp keepalive successful, fd=%{public}d, keepaliveIdle=%{public}d, keepaliveIntvl=%{public}d, "
+        "keepaliveCount=%{public}d, userTimeout=%{public}u",
+        fd, tcpKeepaliveOption.keepaliveIdle, tcpKeepaliveOption.keepaliveIntvl, tcpKeepaliveOption.keepaliveCount,
+        tcpKeepaliveOption.userTimeout);
     return SOFTBUS_OK;
 }
