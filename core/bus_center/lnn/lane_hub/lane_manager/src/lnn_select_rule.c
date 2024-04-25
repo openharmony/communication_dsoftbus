@@ -503,19 +503,21 @@ static void DecideOptimalLinks(const char *networkId, const LaneSelectParam *req
     LNN_LOGI(LNN_LANE, "decide optimal links num=%{public}d", *linksNum);
 }
 
-static bool isLaneExist(LaneLinkType *linkList, LaneLinkType laneType)
+static bool isLaneExist(LaneLinkType *linkList, LaneLinkType linkType)
 {
     for (int i = 0; i < LANE_LINK_TYPE_BUTT; i++) {
-        if (linkList[i] == laneType) {
+        if (linkList[i] == linkType) {
             return true;
         }
     }
     return false;
 }
 
-static void GetAllLinksWithBw(const char *networkId, int32_t bandWidthType, const LaneSelectParam *request,
+static void DecideRetryLinks(const char *networkId, const LaneSelectParam *request,
     LaneLinkType *linkList, uint32_t *linksNum)
 {
+    uint32_t minBandWidth = request->qosRequire.minBW;
+    int32_t bandWidthType = GetBwType(minBandWidth);
     for (uint32_t i = 0; i < (LANE_LINK_TYPE_BUTT + 1); i++) {
         if (g_retryLaneList[bandWidthType][i] == LANE_LINK_TYPE_BUTT) {
             break;
@@ -526,14 +528,6 @@ static void GetAllLinksWithBw(const char *networkId, int32_t bandWidthType, cons
             LNN_LOGI(LNN_LANE, "decide retry linkType=%{public}d", g_retryLaneList[bandWidthType][i]);
         }
     }
-}
-
-static void DecideRetryLinks(const char *networkId, const LaneSelectParam *request,
-    LaneLinkType *linkList, uint32_t *linksNum)
-{
-    uint32_t minBandWidth = request->qosRequire.minBW;
-    int32_t bandWidthType = GetBwType(minBandWidth);
-    GetAllLinksWithBw(networkId, bandWidthType, request, linkList, linksNum);
 }
 
 static void UpdataHmlPriority(const char *peerNetWorkId, const LaneSelectParam *request,

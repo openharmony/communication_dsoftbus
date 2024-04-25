@@ -18,7 +18,6 @@
 #include <iostream>
 #include <sstream>
 
-#include "adapter/net_manager_adapter.h"
 #include "conn_log.h"
 #include "net_conn_client.h"
 #include "softbus_error_code.h"
@@ -32,6 +31,7 @@ static constexpr int32_t U_L_BIT = 7;
 static constexpr int32_t GROUP_LENGTH = 4;
 static constexpr int32_t EIGHT = 8;
 static constexpr int32_t TWO_DIVISION = 2;
+static constexpr int32_t IPV6_PREFIX = 64;
 
 static constexpr char HML_IP_PREFIX[] = "172.30.";
 static constexpr char HML_IP_SOURCE_SUFFIX[] = ".2";
@@ -90,7 +90,7 @@ std::string WifiDirectIpManager::ApplySubNet(
     return "";
 }
 
-std::bitset<EUI_64_IDENTIFIER_LEN> WifiDirectIpManager::GetEUI64Identifier(const std::string &mac)
+std::bitset<WifiDirectIpManager::EUI_64_IDENTIFIER_LEN> WifiDirectIpManager::GetEUI64Identifier(const std::string &mac)
 {
     std::bitset<EUI_64_IDENTIFIER_LEN> eui64Bits;
 
@@ -114,6 +114,13 @@ std::string WifiDirectIpManager::BitsetToIPv6(const std::bitset<EUI_64_IDENTIFIE
     ss << std::hex << std::setfill('0') << std::setw(HEXADECIMAL) << std::uppercase << eui64Bits.to_ulong();
     eui64String = ss.str();
     return eui64String;
+}
+
+int32_t WifiDirectIpManager::ConfigIpv6(const std::string &interface, const std::string &ip)
+{
+    auto ret = OHOS::NetManagerStandard::NetConnClient::GetInstance().AddInterfaceAddress(interface, ip, IPV6_PREFIX);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == 0, SOFTBUS_ERR, CONN_WIFI_DIRECT, "add ip failed");
+    return SOFTBUS_OK;
 }
 
 int32_t WifiDirectIpManager::ConfigIpv4(

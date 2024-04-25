@@ -625,7 +625,7 @@ HWTEST_F(LNNLaneMockTest, LANE_RE_ALLOC_Test_002, TestSize.Level1)
     ret = laneManager->lnnReAllocLane(laneReqId, LANE_ID_BASE, &allocInfo, &listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
     std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_FOR_LOOP_COMPLETION_MS));
-    ret = DelLaneResourceByLaneId(LANE_ID_BASE);
+    ret = DelLaneResourceByLaneId(LANE_ID_BASE, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = laneManager->lnnFreeLane(laneReqId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -675,7 +675,7 @@ HWTEST_F(LNNLaneMockTest, LANE_RE_ALLOC_Test_003, TestSize.Level1)
     ret = laneManager->lnnReAllocLane(laneReqId, LANE_ID_BASE, &allocInfo, &listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
     std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_FOR_LOOP_COMPLETION_MS));
-    ret = DelLaneResourceByLaneId(LANE_ID_BASE);
+    ret = DelLaneResourceByLaneId(LANE_ID_BASE, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = laneManager->lnnFreeLane(laneReqId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -717,7 +717,7 @@ HWTEST_F(LNNLaneMockTest, LANE_RE_ALLOC_Test_004, TestSize.Level1)
     ret = laneManager->lnnReAllocLane(laneReqId, LANE_ID_BASE, &allocInfo, &listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
     std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_FOR_LOOP_COMPLETION_MS));
-    ret = DelLaneResourceByLaneId(LANE_ID_BASE);
+    ret = DelLaneResourceByLaneId(LANE_ID_BASE, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = laneManager->lnnFreeLane(laneReqId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -759,7 +759,7 @@ HWTEST_F(LNNLaneMockTest, LANE_RE_ALLOC_Test_005, TestSize.Level1)
     ret = laneManager->lnnReAllocLane(laneReqId, LANE_ID_BASE, &allocInfo, &listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
     std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_FOR_LOOP_COMPLETION_MS));
-    ret = DelLaneResourceByLaneId(LANE_ID_BASE);
+    ret = DelLaneResourceByLaneId(LANE_ID_BASE, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = laneManager->lnnFreeLane(laneReqId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -1975,7 +1975,7 @@ HWTEST_F(LNNLaneMockTest, LANE_FIND_LANERESOURCE_BY_LINKADDR_001, TestSize.Level
     EXPECT_STREQ(laneResourse.link.linkInfo.p2p.connInfo.peerIp, PEER_IP_HML);
     EXPECT_STREQ(laneResourse.link.peerUdid, PEER_UDID);
 
-    DelLaneResourceByLaneId(laneId);
+    DelLaneResourceByLaneId(laneId, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -2028,7 +2028,7 @@ HWTEST_F(LNNLaneMockTest, LANE_FIND_LANERESOURCE_BY_LINKTYPE_001, TestSize.Level
     EXPECT_STREQ(laneResourse.link.linkInfo.p2p.connInfo.peerIp, PEER_IP_HML);
     EXPECT_STREQ(laneResourse.link.peerUdid, PEER_UDID);
 
-    DelLaneResourceByLaneId(laneId);
+    DelLaneResourceByLaneId(laneId, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -2073,7 +2073,7 @@ HWTEST_F(LNNLaneMockTest, LANE_FIND_LANERESOURCE_BY_LANEID_001, TestSize.Level1)
     EXPECT_STREQ(laneResourse.link.linkInfo.p2p.connInfo.peerIp, PEER_IP_HML);
     EXPECT_STREQ(laneResourse.link.peerUdid, PEER_UDID);
 
-    DelLaneResourceByLaneId(laneId);
+    DelLaneResourceByLaneId(laneId, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -2108,7 +2108,7 @@ HWTEST_F(LNNLaneMockTest, LANE_DETECT_RELIABILITY_001, TestSize.Level1)
     ret = LaneDetectReliability(laneReqId, &linkInfo, &cb);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    DelLaneResourceByLaneId(laneId);
+    DelLaneResourceByLaneId(laneId, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -2164,7 +2164,7 @@ HWTEST_F(LNNLaneMockTest, LANE_DETECT_RELIABILITY_002, TestSize.Level1)
     ret = LaneDetectReliability(INVALID_LANE_REQ_ID, &linkInfo, &cb);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = DelLaneResourceByLaneId(laneId);
+    ret = DelLaneResourceByLaneId(laneId, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -2210,7 +2210,7 @@ HWTEST_F(LNNLaneMockTest, LANE_DETECT_RELIABILITY_003, TestSize.Level1)
 
     ret = LaneDetectReliability(laneReqId, &linkInfo, &cb);
     EXPECT_EQ(ret, SOFTBUS_ERR);
-    ret = DelLaneResourceByLaneId(laneId);
+    ret = DelLaneResourceByLaneId(laneId, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -2264,18 +2264,18 @@ HWTEST_F(LNNLaneMockTest, LANE_DEL_AND_ADD_LANERESOURCEITEM_001, TestSize.Level1
     EXPECT_FALSE(laneResourse.isServerSide);
     EXPECT_EQ(laneResourse.clientRef, clientRef);
 
-    ret = DelLaneResourceByLaneId(INVALID_LANE_ID);
+    ret = DelLaneResourceByLaneId(INVALID_LANE_ID, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = FindLaneResourceByLaneId(laneId, &laneResourse);
     EXPECT_EQ(laneResourse.clientRef, clientRef);
 
-    ret = DelLaneResourceByLaneId(laneId);
+    ret = DelLaneResourceByLaneId(laneId, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
     clientRef--;
     ret = FindLaneResourceByLaneId(laneId, &laneResourse);
     EXPECT_EQ(laneResourse.clientRef, clientRef);
 
-    ret = DelLaneResourceByLaneId(laneId);
+    ret = DelLaneResourceByLaneId(laneId, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = FindLaneResourceByLaneId(laneId, &laneResourse);
     EXPECT_EQ(ret, SOFTBUS_ERR);
@@ -2317,7 +2317,7 @@ HWTEST_F(LNNLaneMockTest, LANE_DEL_AND_ADD_LANERESOURCEITEM_002, TestSize.Level1
     EXPECT_TRUE(laneResourse.isServerSide);
     EXPECT_EQ(laneResourse.clientRef, serverRef);
 
-    ret = DelLaneResourceByLaneId(laneId);
+    ret = DelLaneResourceByLaneId(laneId, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = FindLaneResourceByLaneId(laneId, &laneResourse);

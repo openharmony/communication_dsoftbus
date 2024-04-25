@@ -270,7 +270,7 @@ AppInfo *TransCommonGetAppInfo(const SessionParam *param)
     appInfo->myHandleId = -1;
     appInfo->peerHandleId = -1;
     appInfo->timeStart = GetSoftbusRecordTimeMillis();
-    appInfo->firstTokenId = TransACLGetFirstTokenID();
+    appInfo->firstTokenId = TransACLGetCallingTokenID();
     appInfo->isClient = true;
 
     TRANS_LOGD(TRANS_CTRL, "GetAppInfo ok");
@@ -342,7 +342,7 @@ static int32_t CancelWaitLaneState(const char *sessionName, int32_t sessionId)
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         ret == SOFTBUS_OK, TRANS_CTRL, ret, "get socket channel lane info failed, ret=%{public}d", ret);
     TRANS_LOGI(TRANS_CTRL, "wait lane state, sessionId=%{public}d, laneHandle=%{public}u", sessionId, laneHandle);
-    if (isQosLane && laneHandle != 0) {
+    if (isQosLane && laneHandle != INVALID_LANE_REQ_ID) {
         TRANS_CHECK_AND_RETURN_RET_LOGE(
             GetLaneManager() != NULL, SOFTBUS_TRANS_GET_LANE_INFO_ERR, TRANS_CTRL, "GetLaneManager is null");
         TRANS_CHECK_AND_RETURN_RET_LOGE(GetLaneManager()->lnnCancelLane != NULL, SOFTBUS_TRANS_GET_LANE_INFO_ERR,
@@ -354,8 +354,11 @@ static int32_t CancelWaitLaneState(const char *sessionName, int32_t sessionId)
             TransFreeLane(laneHandle, isQosLane);
         }
     }
-    if (!isAsync && laneHandle != 0) {
+    if (!isAsync && laneHandle != INVALID_LANE_REQ_ID) {
         TransCancelLaneItemCondByLaneHandle(laneHandle, false, false, SOFTBUS_TRANS_STOP_BIND_BY_CANCEL);
+    }
+    if (isAsync && laneHandle != INVALID_LANE_REQ_ID) {
+        (void)TransDeleteLaneReqItemByLaneHandle(laneHandle, isAsync);
     }
     (void)TransDeleteSocketChannelInfoBySession(sessionName, sessionId);
     return SOFTBUS_OK;
@@ -476,7 +479,7 @@ void TransFreeAppInfo(AppInfo *appInfo)
 void TransFreeLane(uint32_t laneHandle, bool isQosLane)
 {
     TRANS_LOGI(TRANS_CTRL, "Trans free lane laneHandle=%{public}u, isQosLane=%{public}d", laneHandle, isQosLane);
-    if (laneHandle != 0) {
+    if (laneHandle != INVALID_LANE_REQ_ID) {
         if (isQosLane) {
             TRANS_CHECK_AND_RETURN_LOGE(GetLaneManager() != NULL, TRANS_CTRL, "GetLaneManager is null");
             TRANS_CHECK_AND_RETURN_LOGE(GetLaneManager()->lnnFreeLane != NULL, TRANS_CTRL, "lnnFreeLane is null");

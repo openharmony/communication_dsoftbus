@@ -75,6 +75,8 @@ int32_t BrTransSend(uint32_t connectionId, int32_t socketHandle, uint32_t mtu, c
 int64_t ConnBrPackCtlMessage(BrCtlMessageSerializationContext ctx, uint8_t **outData, uint32_t *outLen);
 int32_t ConnBrPostBytes(
     uint32_t connectionId, uint8_t *data, uint32_t len, int32_t pid, int32_t flag, int32_t module, int64_t seq);
+int32_t ConnBrTransConfigPostLimit(const LimitConfiguration *configuration);
+
 int32_t ConnBrTransMuduleInit(SppSocketDriver *sppDriver, ConnBrTransEventListener *listener);
 
 #ifdef __cplusplus
