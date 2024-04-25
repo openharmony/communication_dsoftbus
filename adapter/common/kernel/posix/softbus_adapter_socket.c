@@ -353,7 +353,7 @@ int32_t SoftBusSocketFcntl(int32_t socketFd, long cmd, long flag)
     return ret;
 }
 
-int32_t SoftBusSocketSend(int32_t socketFd, const void *buf, uint32_t len, int32_t flags)
+int32_t SoftBusSocketSend(int32_t socketFd, const void *buf, uint32_t len, uint32_t flags)
 {
     int32_t wrapperFlag = flags | MSG_NOSIGNAL;
     int32_t ret = send(socketFd, buf, len, wrapperFlag);
