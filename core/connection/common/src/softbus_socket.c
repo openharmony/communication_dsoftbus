@@ -313,55 +313,159 @@ int32_t ConnGetLocalSocketPort(int32_t fd)
 
 int32_t ConnGetPeerSocketAddr(int32_t fd, SocketAddr *socketAddr)
 {
-    SoftBusSockAddrIn addr;
+    SoftBusSockAddr addr;
     if (socketAddr == NULL) {
         CONN_LOGW(CONN_COMMON, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    int rc = SoftBusSocketGetPeerName(fd, (SoftBusSockAddr *)&addr);
+    int rc = SoftBusSocketGetPeerName(fd, &addr);
     if (rc != 0) {
         CONN_LOGE(CONN_COMMON, "GetPeerName fd=%{public}d, rc=%{public}d", fd, rc);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TCP_SOCKET_ERR;
     }
-    if (SoftBusInetNtoP(SOFTBUS_AF_INET, (void *)&addr.sinAddr, socketAddr->addr, sizeof(socketAddr->addr)) == NULL) {
+    if (addr.saFamily == SOFTBUS_AF_INET6) {
+        rc = Ipv6AddrInToAddr((SoftBusSockAddrIn6 *)&addr, socketAddr->addr, sizeof(socketAddr->addr));
+        socketAddr->port = SoftBusNtoHs(((SoftBusSockAddrIn6 *)&addr)->sin6Port);
+        if (rc < 0) {
+            CONN_LOGE(CONN_COMMON, "Ipv6AddrInToAddr fail. fd=%{public}d", fd);
+            return SOFTBUS_SOCKET_ADDR_ERR;
+        }
+        return SOFTBUS_OK;
+    }
+    socketAddr->port = SoftBusNtoHs(((SoftBusSockAddrIn *)&addr)->sinPort);
+    if (SoftBusInetNtoP(SOFTBUS_AF_INET, (void *)&((SoftBusSockAddrIn *)&addr)->sinAddr,
+        socketAddr->addr, sizeof(socketAddr->addr)) == NULL) {
         CONN_LOGE(CONN_COMMON, "InetNtoP fail. fd=%{public}d", fd);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
     }
-    socketAddr->port = SoftBusNtoHs(addr.sinPort);
     return SOFTBUS_OK;
 }
 
-int32_t ConnPreAssignPort(void)
+static int32_t ConnPreAssignPortBind(int32_t socketFd, int32_t domain)
+{
+    int ret = SOFTBUS_TCPCONNECTION_SOCKET_ERR;
+    if (domain == SOFTBUS_AF_INET6) {
+        SoftBusSockAddrIn6 addrIn6 = {0};
+        ret = Ipv6AddrToAddrIn(&addrIn6, "::", 0);
+        if (ret != SOFTBUS_ADAPTER_OK) {
+            CONN_LOGE(CONN_COMMON, "convert address to net order failed");
+            return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
+        }
+        return SoftBusSocketBind(socketFd, (SoftBusSockAddr *)&addrIn6, sizeof(SoftBusSockAddrIn6));
+    }
+    SoftBusSockAddrIn addrIn = {0};
+    ret = Ipv4AddrToAddrIn(&addrIn, "0.0.0.0", 0);
+    if (ret != SOFTBUS_ADAPTER_OK) {
+        CONN_LOGE(CONN_COMMON, "convert address to net order failed");
+        return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
+    }
+    return SoftBusSocketBind(socketFd, (SoftBusSockAddr *)&addrIn, sizeof(SoftBusSockAddrIn));
+}
+
+int32_t ConnPreAssignPort(int32_t domain)
 {
     int socketFd = -1;
-    int ret = SoftBusSocketCreate(SOFTBUS_AF_INET, SOFTBUS_SOCK_STREAM, 0, &socketFd);
+    int ret = SoftBusSocketCreate(domain, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     if (ret < 0) {
         CONN_LOGE(CONN_COMMON, "create socket failed, ret=%{public}d", ret);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
     }
     int reuse = 1;
     ret = SoftBusSocketSetOpt(socketFd, SOL_SOCKET, SO_REUSEPORT, &reuse, sizeof(reuse));
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "set reuse port option failed");
         SoftBusSocketClose(socketFd);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
     }
-    SoftBusSockAddrIn addr = {
-        .sinFamily = SOFTBUS_AF_INET,
-        .sinPort = 0,
-    };
-    ret = SoftBusInetPtoN(SOFTBUS_AF_INET, "0.0.0.0", &addr.sinAddr);
-    if (ret != SOFTBUS_ADAPTER_OK) {
-        SoftBusSocketClose(socketFd);
-        CONN_LOGE(CONN_COMMON, "convert address to net order failed");
-        return SOFTBUS_ERR;
-    }
-
-    ret = SoftBusSocketBind(socketFd, (SoftBusSockAddr *)&addr, sizeof(SoftBusSockAddrIn));
+    ret = ConnPreAssignPortBind(socketFd, domain);
     if (ret != SOFTBUS_ADAPTER_OK) {
         SoftBusSocketClose(socketFd);
         CONN_LOGE(CONN_COMMON, "bind address failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
     }
     return socketFd;
 }
+
+int32_t GetDomainByAddr(const char *addr)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGE(addr != NULL,
+        SOFTBUS_INVALID_PARAM, CONN_COMMON, "invalid param!");
+    if (strchr(addr, ADDR_FEATURE_IPV6) != NULL) {
+        return SOFTBUS_AF_INET6;
+    }
+    return SOFTBUS_AF_INET;
+}
+
+int32_t Ipv6AddrInToAddr(SoftBusSockAddrIn6 *addrIn6, char *addr, int32_t addrLen)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGE(addrIn6 != NULL && addr != NULL && addrLen > 0,
+        SOFTBUS_INVALID_PARAM, CONN_COMMON, "invalid param!");
+    char ip[IP_LEN] = {0};
+    if (SoftBusInetNtoP(SOFTBUS_AF_INET6, &addrIn6->sin6Addr, ip, addrLen) == NULL) {
+        CONN_LOGE(CONN_COMMON, "InetNtoP faild!");
+        return SOFTBUS_SOCKET_ADDR_ERR;
+    }
+    char ifname[IF_NAME_SIZE] = { 0 };
+    int32_t rc = SoftBusIndexToIfName(addrIn6->sin6ScopeId, ifname, IF_NAME_SIZE);
+    if (rc < 0) {
+        if (strcpy_s(addr, IP_LEN, ip) != SOFTBUS_OK) {
+            CONN_LOGE(CONN_COMMON, "strcpy faild!");
+            return SOFTBUS_STRCPY_ERR;
+        }
+        CONN_LOGW(CONN_COMMON, "no ifname or global addr");
+        return SOFTBUS_OK;
+    }
+    rc = sprintf_s(addr, addrLen, "%s%s%s", ip, ADDR_SPLIT_IPV6, ifname);
+    if (rc < 0) {
+        COMM_LOGE(CONN_COMMON, "sprintf_s addr fail");
+        return SOFTBUS_SOCKET_ADDR_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t Ipv6AddrToAddrIn(SoftBusSockAddrIn6 *addrIn6, const char *ip, uint16_t port)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGE(addrIn6 != NULL && ip != NULL, SOFTBUS_INVALID_PARAM,
+        CONN_COMMON, "invalid param!");
+    (void)memset_s(addrIn6, sizeof(addrIn6), 0, sizeof(addrIn6));
+    addrIn6->sin6Family = SOFTBUS_AF_INET6;
+    char *addr = NULL;
+    char *ifName = NULL;
+    char *nextToken = NULL;
+    char tmpIp[IP_LEN] = { 0 };
+    if (strcpy_s(tmpIp, sizeof(tmpIp), ip) != EOK) {
+        CONN_LOGE(CONN_COMMON, "copy local id failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    addr = strtok_s(tmpIp, ADDR_SPLIT_IPV6, &nextToken);
+    if (addr == NULL) {
+        addr = "";
+    }
+    ifName = strtok_s(NULL, ADDR_SPLIT_IPV6, &nextToken);
+    if (ifName != NULL) {
+        addrIn6->sin6ScopeId = SoftBusIfNameToIndex(ifName);
+    }
+    int32_t rc = SoftBusInetPtoN(SOFTBUS_AF_INET6, addr, &addrIn6->sin6Addr);
+    if (rc != SOFTBUS_OK) {
+        CONN_LOGE(CONN_COMMON, "ipv6 SoftBusInetPtoN rc=%{public}d", rc);
+        return SOFTBUS_SOCKET_ADDR_ERR;
+    }
+    addrIn6->sin6Port = SoftBusHtoNs(port);
+    return SOFTBUS_OK;
+}
+
+int32_t Ipv4AddrToAddrIn(SoftBusSockAddrIn *addrIn, const char *ip, uint16_t port)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGE(addrIn != NULL && ip != NULL, SOFTBUS_INVALID_PARAM,
+        CONN_COMMON, "invalid param!");
+    (void)memset_s(addrIn, sizeof(addrIn), 0, sizeof(addrIn));
+    addrIn->sinFamily = SOFTBUS_AF_INET;
+    int32_t rc = SoftBusInetPtoN(SOFTBUS_AF_INET, ip, &addrIn->sinAddr);
+    if (rc != SOFTBUS_OK) {
+        CONN_LOGE(CONN_COMMON, "ipv4 SoftBusInetPtoN rc=%{public}d", rc);
+        return SOFTBUS_SOCKET_ADDR_ERR;
+    }
+    addrIn->sinPort = SoftBusHtoNs(port);
+    return SOFTBUS_OK;
+}
+

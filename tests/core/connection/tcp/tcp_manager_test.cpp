@@ -48,6 +48,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 const char *Ip = "127.0.0.1";
+const char *Ipv6 = "::1%lo";
 const char *g_data = "1234567890";
 
 static uint32_t g_connectionId = 0;
@@ -891,7 +892,7 @@ HWTEST_F(TcpManagerTest, testTcpManager023, TestSize.Level1)
     ConnectOption option = {
         .type = CONNECT_TCP,
         .socketOption = {
-            .addr = {0},
+            .addr = "127.0.0.1",
             .port = CLIENTPORT,
             .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP
@@ -925,7 +926,7 @@ HWTEST_F(TcpManagerTest, testTcpManager024, TestSize.Level1)
     ConnectOption option = {
         .type = CONNECT_TCP,
         .socketOption = {
-            .addr = {0},
+            .addr = "127.0.0.1",
             .port = CLIENTPORT,
             .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP
@@ -956,7 +957,7 @@ HWTEST_F(TcpManagerTest, testTcpManager025, TestSize.Level1)
     ConnectOption option = {
         .type = CONNECT_TCP,
         .socketOption = {
-            .addr = {0},
+            .addr = "127.0.0.1",
             .port = CLIENTPORT,
             .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP
@@ -992,7 +993,7 @@ HWTEST_F(TcpManagerTest, testTcpManager026, TestSize.Level1)
     ConnectOption option = {
         .type = CONNECT_TCP,
         .socketOption = {
-            .addr = {0},
+            .addr = "127.0.0.1",
             .port = CLIENTPORT,
             .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP
@@ -1032,7 +1033,7 @@ HWTEST_F(TcpManagerTest, testTcpManager027, TestSize.Level1)
     ConnectOption option = {
         .type = CONNECT_TCP,
         .socketOption = {
-            .addr = {0},
+            .addr = "127.0.0.1",
             .port = CLIENTPORT,
             .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP
@@ -1381,7 +1382,7 @@ HWTEST_F(TcpManagerTest, testTcpManager039, TestSize.Level1)
     ConnectOption option = {
         .type = CONNECT_TCP,
         .socketOption = {
-            .addr = {0},
+            .addr = "127.0.0.1",
             .port = CLIENTPORT,
             .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP
@@ -1457,7 +1458,7 @@ HWTEST_F(TcpManagerTest, testTcpManager042, TestSize.Level1)
     ConnectOption option = {
         .type = CONNECT_TCP,
         .socketOption = {
-            .addr = "",
+            .addr = "127.0.0.1",
             .port = CLIENTPORT,
             .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP
@@ -1511,7 +1512,7 @@ HWTEST_F(TcpManagerTest, testTcpManager044, TestSize.Level1)
     ConnectOption option = {
         .type = CONNECT_TCP,
         .socketOption = {
-            .addr = {0},
+            .addr = "127.0.0.1",
             .port = CLIENTPORT,
             .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
             .protocol = LNN_PROTOCOL_IP
@@ -1591,6 +1592,168 @@ HWTEST_F(TcpManagerTest, testTcpManager047, TestSize.Level1)
     (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
     int fd = tcp->OpenServerSocket(&info);
     EXPECT_EQ(ConnSetTcpKeepAlive(fd, 100), SOFTBUS_OK);
+};
+
+/*
+* @tc.name: testTcpManager048
+* @tc.desc: Test ipv6 OpenServerSocket and OpenTcpClientSocket Open succeed yes or no.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: Zero
+* @tc.type: FUNC
+* @tc.require: The OpenServerSocket and OpenTcpClientSocket operates normally.
+*/
+HWTEST_F(TcpManagerTest, testTcpManager048, TestSize.Level1)
+{
+    const SocketInterface *tcp = GetTcpProtocol();
+    ASSERT_NE(tcp, nullptr);
+
+    LocalListenerInfo info = {
+        .type = CONNECT_TCP,
+        .socketOption = {
+            .addr = {0},
+            .port = CLIENTPORT,
+            .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
+            .protocol = LNN_PROTOCOL_IP
+        }
+    };
+    (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ipv6);
+
+    int fd = tcp->OpenServerSocket(&info);
+    EXPECT_EQ(SetIpTos(fd, 65535), SOFTBUS_OK);
+
+    ConnectOption option = {
+        .type = CONNECT_TCP,
+        .socketOption = {
+            .addr = "::1%lo",
+            .port = CLIENTPORT,
+            .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
+            .protocol = LNN_PROTOCOL_IP
+        }
+    };
+    (void)strcpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), Ipv6);
+    EXPECT_TRUE(tcp->OpenClientSocket(&option, Ipv6, true) > 0);
+};
+
+/*
+* @tc.name: testTcpManager049
+* @tc.desc: Test the BR and TCP start and stop listeners multiple times.
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(TcpManagerTest, testTcpManager049, TestSize.Level1)
+{
+    int port = CLIENTPORT;
+    LocalListenerInfo info = {};
+    info.type = CONNECT_BR;
+    info.socketOption.port = port;
+    info.socketOption.moduleId = PROXY;
+    (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ipv6);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(nullptr));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, TcpStopListening(nullptr));
+
+    info.type = CONNECT_TCP;
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_EQ(SOFTBUS_ERR, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+    EXPECT_TRUE(SOFTBUS_OK == TcpStopListening(&info));
+};
+
+/*
+* @tc.name: testTcpManager050
+* @tc.desc: test TcpDisconnectDevice
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(TcpManagerTest, testTcpManager050, TestSize.Level1)
+{
+    int port = CLIENTPORT;
+    LocalListenerInfo info = {};
+    info.type = CONNECT_TCP;
+    info.socketOption.port = port;
+    info.socketOption.protocol = LNN_PROTOCOL_IP;
+    (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ipv6);
+
+    uint32_t requestId = 1;
+    ConnectOption option;
+    option.type = CONNECT_TCP;
+    option.socketOption.port = port;
+    option.socketOption.moduleId = PROXY;
+    option.socketOption.protocol = LNN_PROTOCOL_IP;
+    (void)strcpy_s(option.socketOption.addr, sizeof(option.socketOption.addr), Ipv6);
+
+    EXPECT_EQ(port, TcpStartListening(&info));
+    EXPECT_EQ(SOFTBUS_OK, TcpConnectDevice(&option, requestId, &g_result));
+    sleep(1);
+    EXPECT_EQ(2, TcpGetConnNum());
+    EXPECT_EQ(SOFTBUS_OK, TcpDisconnectDevice(g_connectionId));
+    sleep(1);
+    EXPECT_EQ(0, TcpGetConnNum());
+    EXPECT_EQ(SOFTBUS_OK, TcpStopListening(&info));
+}
+
+
+/*
+* @tc.name: testTcpManager051
+* @tc.desc: Test GetTcpSockPort invalid fd.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The GetTcpSockPort operates normally.
+*/
+HWTEST_F(TcpManagerTest, testTcpManager051, TestSize.Level1)
+{
+    const SocketInterface *tcp = GetTcpProtocol();
+    ASSERT_NE(tcp, nullptr);
+    int fd = -1;
+    int port = tcp->GetSockPort(fd);
+    int ret = (port <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+
+    LocalListenerInfo option = {
+        .type = CONNECT_TCP,
+        .socketOption = {
+            .addr = "::1%lo",
+            .port = CLIENTPORT,
+            .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
+            .protocol = LNN_PROTOCOL_IP
+        }
+    };
+
+    fd = tcp->OpenServerSocket(&option);
+    ret = (fd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
+    ASSERT_TRUE(ret == SOFTBUS_OK);
+    port = tcp->GetSockPort(fd);
+    EXPECT_EQ(port, CLIENTPORT);
+    ConnCloseSocket(fd);
+};
+
+/*
+* @tc.name: testTcpManager052
+* @tc.desc: Test SetIpTos invalid fd.
+* @tc.in: Test module, Test number, Test Levels.
+* @tc.out: NonZero
+* @tc.type: FUNC
+* @tc.require: The SetIpTos operates normally.
+*/
+HWTEST_F(TcpManagerTest, testTcpManager052, TestSize.Level1)
+{
+    const SocketInterface *tcp = GetTcpProtocol();
+    ASSERT_NE(tcp, nullptr);
+
+    ConnectOption option = {
+        .type = CONNECT_TCP,
+        .socketOption = {
+            .addr = "::1%lo",
+            .port = CLIENTPORT,
+            .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
+            .protocol = LNN_PROTOCOL_IP
+        }
+    };
+
+    int fd = tcp->OpenClientSocket(&option, "::1%lo", true);
+    EXPECT_EQ(SetIpTos(fd, 2), SOFTBUS_OK);
+    ConnCloseSocket(fd);
 };
 
 /*
