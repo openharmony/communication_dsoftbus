@@ -72,7 +72,7 @@ ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_t len, int32_t time
 ssize_t ConnRecvSocketData(int32_t fd, char *buf, size_t len, int32_t timeout);
 void ConnCloseSocket(int32_t fd);
 void ConnShutdownSocket(int32_t fd);
-int32_t ConnSetTcpKeepAlive(int32_t fd, int32_t seconds);
+int32_t ConnSetTcpKeepalive(int32_t fd, int32_t seconds, int32_t keepAliveIntvl, int32_t keepAliveCount);
 int32_t ConnSetTcpUserTimeOut(int32_t fd, uint32_t millSec);
 
 int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock);

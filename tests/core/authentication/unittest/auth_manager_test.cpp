@@ -426,7 +426,7 @@ HWTEST_F(AuthManagerTest, TRY_GET_BR_CONN_INFO_TEST_001, TestSize.Level1)
     AuthConnInfo connInfo;
     AuthDataHead head;
     uint8_t data[] = "testdata";
-    DeviceMessageParse messageParse = { CODE_VERIFY_DEVICE, DEFT_FREQ_CYCLE };
+    DeviceMessageParse messageParse = { CODE_VERIFY_DEVICE, DEFAULT_FREQ_CYCLE };
     HandleAuthData(&connInfo, &head, data);
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     connInfo.type = AUTH_LINK_TYPE_WIFI;
@@ -613,5 +613,51 @@ HWTEST_F(AuthManagerTest, AUTH_VERIFY_AFTER_NOTIFY_NORMALIZE_TEST_001, TestSize.
     EXPECT_TRUE(LooperInit() == SOFTBUS_OK);
     EXPECT_TRUE(AuthVerifyAfterNotifyNormalize(&request) == SOFTBUS_OK);
     LooperDeinit();
+}
+
+/*
+ * @tc.name: AUTH_GET_LATEST_AUTH_SEQ_LIST_BY_TYPE_TEST_001
+ * @tc.desc: AuthGetLatestAuthSeqListByType test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthManagerTest, AUTH_GET_LATEST_AUTH_SEQ_LIST_BY_TYPE_TEST_001, TestSize.Level1)
+{
+    AuthSessionInfo info;
+    SetAuthSessionInfo(&info, CONN_ID, false, AUTH_LINK_TYPE_BLE);
+    AuthManager *auth = NewAuthManager(AUTH_SEQ, &info);
+    EXPECT_TRUE(auth != nullptr);
+    SessionKey sessionKey = { { 0 }, TEST_DATA_LEN };
+    AddSessionKey(&auth->sessionKeyList, AUTH_SEQ, &sessionKey, AUTH_LINK_TYPE_BLE);
+    SetSessionKeyAvailable(&auth->sessionKeyList, AUTH_SEQ);
+    AuthManagerSetAuthPassed(AUTH_SEQ, &info);
+    auth->lastAuthSeq[AUTH_LINK_TYPE_BLE] = AUTH_SEQ;
+    int64_t authSeq[DISCOVERY_TYPE_COUNT] = { 0 };
+    uint64_t authVerifyTime[2] = { 0 };
+    int32_t ret = AuthGetLatestAuthSeqListByType(nullptr, authSeq, authVerifyTime, DISCOVERY_TYPE_BLE);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    int32_t ret1 = AuthGetLatestAuthSeqListByType("", authSeq, authVerifyTime, DISCOVERY_TYPE_BLE);
+    EXPECT_TRUE(ret1 == SOFTBUS_INVALID_PARAM);
+    int32_t ret2 = AuthGetLatestAuthSeqListByType(UDID_TEST, authSeq, authVerifyTime, DISCOVERY_TYPE_BLE);
+    EXPECT_TRUE(ret2 == SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: AUTH_SET_TCP_KEEPALIVE_BY_CONNINFO_TEST_001
+ * @tc.desc: AuthSetTcpKeepaliveByConnInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthManagerTest, AUTH_SET_TCP_KEEPALIVE_BY_CONNINFO_TEST_001, TestSize.Level1)
+{
+    int32_t ret;
+    AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(connInfo), 0, sizeof(connInfo));
+
+    ret = AuthSetTcpKeepaliveByConnInfo(nullptr, HIGH_FREQ_CYCLE);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    connInfo.type = AUTH_LINK_TYPE_WIFI;
+    ret = AuthSetTcpKeepaliveByConnInfo(&connInfo, HIGH_FREQ_CYCLE);
+    EXPECT_TRUE(ret == SOFTBUS_ERR);
 }
 } // namespace OHOS
