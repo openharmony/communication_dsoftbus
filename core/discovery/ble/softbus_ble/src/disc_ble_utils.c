@@ -217,7 +217,7 @@ static int32_t CalculateMbsTruncateSize(const char *multiByteStr, uint32_t capac
 
     // convert multi byte str to wide str
     wchar_t wideStr[WIDE_STR_MAX_LEN] = {0};
-    int32_t numConverted = mbstowcs(wideStr, multiByteStr, multiByteStrLen);
+    size_t numConverted = mbstowcs(wideStr, multiByteStr, multiByteStrLen);
     if (numConverted <= 0) {
         DISC_LOGE(DISC_BLE, "mbstowcs failed");
         RestoreLocale(localeBefore);
@@ -226,7 +226,7 @@ static int32_t CalculateMbsTruncateSize(const char *multiByteStr, uint32_t capac
 
     // truncate wide str until <= capacity
     uint32_t truncateTotal = 0;
-    int32_t truncateIndex = numConverted - 1;
+    int32_t truncateIndex = (int32_t)numConverted - 1;
     char multiByteChar[WIDE_CHAR_MAX_LEN] = {0};
     while (capacity < multiByteStrLen - truncateTotal && truncateIndex >= 0) {
         int32_t truncateCharLen = wctomb(multiByteChar, wideStr[truncateIndex]);
