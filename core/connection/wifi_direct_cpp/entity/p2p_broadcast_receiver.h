@@ -19,7 +19,7 @@
 #include <memory>
 #include <string>
 
-#include "../kits/c/wifi_p2p.h"
+#include "kits/c/wifi_p2p.h"
 
 #include "adapter/p2p_adapter.h"
 
