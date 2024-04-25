@@ -1255,40 +1255,38 @@ static bool IsSupportProxyNego(const char *networkId)
         ((remote & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) != 0);
 }
 
-static int32_t ConnectWifiDirectWithReuse(const LinkRequest *request, uint32_t laneReqId, const LaneLinkCb *callback)
+static int32_t ConnectWifiDirectWithReuse(const LinkRequest *request,
+    uint32_t laneLinkReqId, const LaneLinkCb *callback)
 {
     struct WifiDirectConnectInfo wifiDirectInfo;
     (void)memset_s(&wifiDirectInfo, sizeof(wifiDirectInfo), 0, sizeof(wifiDirectInfo));
     wifiDirectInfo.requestId = GetWifiDirectManager()->getRequestId();
     wifiDirectInfo.pid = request->pid;
-    if (request->linkType == LANE_HML) {
-        wifiDirectInfo.connectType = GetWifiDirectUtils()->supportHmlTwo() ?
-            WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML : WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML;
-    } else {
-        wifiDirectInfo.connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P;
-    }
+    wifiDirectInfo.connectType = GetWifiDirectUtils()->supportHmlTwo() ?
+        WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML : WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML;
     if (strcpy_s(wifiDirectInfo.remoteNetworkId, NETWORK_ID_BUF_LEN, request->peerNetworkId) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "strcpy fail");
         return SOFTBUS_ERR;
     }
     if (LnnGetRemoteStrInfo(request->peerNetworkId, STRING_KEY_WIFIDIRECT_ADDR,
         wifiDirectInfo.remoteMac, sizeof(wifiDirectInfo.remoteMac)) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get remote mac fail, laneReqId=%{public}u", laneReqId);
+        LNN_LOGE(LNN_LANE, "get remote mac fail, laneReqId=%{public}d", laneLinkReqId);
         return SOFTBUS_ERR;
     }
     wifiDirectInfo.isNetworkDelegate = request->networkDelegate;
-    if (AddP2pLinkReqItem(ASYNC_RESULT_P2P, wifiDirectInfo.requestId, laneReqId, request, callback) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "add p2plinkinfo fail, laneReqId=%{public}u", laneReqId);
+    if (AddP2pLinkReqItem(ASYNC_RESULT_P2P, wifiDirectInfo.requestId, laneLinkReqId,
+        request, callback) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "add p2plinkinfo fail, laneReqId=%{public}d", laneLinkReqId);
         return SOFTBUS_ERR;
     }
     struct WifiDirectConnectCallback cb = {
         .onConnectSuccess = OnWifiDirectConnectSuccess,
         .onConnectFailure = OnWifiDirectConnectFailure,
     };
-    LNN_LOGI(LNN_LANE, "wifidirect reuse connect with p2pRequestId=%{public}d, connectType=%{public}d",
+    LNN_LOGI(LNN_LANE, "wifidirect reuse connect with p2prequest=%{public}d, connectType=%{public}d",
         wifiDirectInfo.requestId, wifiDirectInfo.connectType);
     if (GetWifiDirectManager()->connectDevice(&wifiDirectInfo, &cb) != SOFTBUS_OK) {
-        NotifyLinkFail(ASYNC_RESULT_P2P, wifiDirectInfo.requestId, SOFTBUS_ERR);
+        (void)DelP2pLinkReqByReqId(ASYNC_RESULT_P2P, wifiDirectInfo.requestId);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
