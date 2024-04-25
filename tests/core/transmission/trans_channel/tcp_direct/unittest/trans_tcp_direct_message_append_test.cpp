@@ -186,7 +186,8 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostBytesTest002, TestSize.Lev
     int64_t authId = TEST_AUTHID;
     int bufferLen = AuthGetEncryptSize(packetHead.dataLen) + DC_MSG_PACKET_HEAD_SIZE;
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, GetAuthIdByChanId).WillOnce(Return(authId));
+    ON_CALL(TcpMessageMock, GetAuthHandleByChanId(_, _))
+        .WillByDefault(DoAll(SetArgPointee<1>(AuthHandle{.authId = authId, .type = 1 }), Return(SOFTBUS_OK)));
     EXPECT_CALL(TcpMessageMock, AuthEncrypt).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(&connInfo));
     EXPECT_CALL(TcpMessageMock, ConnSendSocketData).WillOnce(Return(bufferLen));
@@ -216,7 +217,8 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostBytesTest003, TestSize.Lev
     connInfo.appInfo.fd = TEST_FD;
     int64_t authId = TEST_AUTHID;
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, GetAuthIdByChanId).WillOnce(Return(authId));
+    ON_CALL(TcpMessageMock, GetAuthHandleByChanId(_, _))
+        .WillByDefault(DoAll(SetArgPointee<1>(AuthHandle{.authId = authId, .type = 1 }), Return(SOFTBUS_OK)));
     EXPECT_CALL(TcpMessageMock, AuthEncrypt).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(&connInfo));
     EXPECT_CALL(TcpMessageMock, ConnSendSocketData).WillOnce(Return(0));
@@ -242,7 +244,8 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostBytesTest004, TestSize.Lev
     packetHead.module = 10;
     int64_t authId = TEST_AUTHID;
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, GetAuthIdByChanId).WillOnce(Return(authId));
+    ON_CALL(TcpMessageMock, GetAuthHandleByChanId(_, _))
+        .WillByDefault(DoAll(SetArgPointee<1>(AuthHandle{.authId = authId, .type = 1 }), Return(SOFTBUS_OK)));
     EXPECT_CALL(TcpMessageMock, AuthEncrypt).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpMessageMock, GetSessionConnById).WillOnce(Return(nullptr));
     int32_t ret = TransTdcPostBytes(channelId, &packetHead, data);
@@ -267,7 +270,8 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostBytesTest005, TestSize.Lev
     packetHead.module = 10;
     int64_t authId = TEST_AUTHID;
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, GetAuthIdByChanId).WillOnce(Return(authId));
+    ON_CALL(TcpMessageMock, GetAuthHandleByChanId(_, _))
+        .WillByDefault(DoAll(SetArgPointee<1>(AuthHandle{.authId = authId, .type = 1 }), Return(SOFTBUS_OK)));
     EXPECT_CALL(TcpMessageMock, AuthEncrypt).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = TransTdcPostBytes(channelId, &packetHead, data);
     EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
@@ -275,7 +279,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostBytesTest005, TestSize.Lev
 
 /**
  * @tc.name: TransTdcPostBytesTest006
- * @tc.desc: Should return SOFTBUS_ENCRYPT_ERR when GetAuthIdByChanId return AUTH_INVALID_ID.
+ * @tc.desc: Should return SOFTBUS_ENCRYPT_ERR when GetAuthHandleByChanId return AUTH_INVALID_ID.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -290,7 +294,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostBytesTest006, TestSize.Lev
     packetHead.magicNumber = 10;
     packetHead.module = 10;
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, GetAuthIdByChanId).WillOnce(Return(AUTH_INVALID_ID));
+    EXPECT_CALL(TcpMessageMock, GetAuthHandleByChanId).WillOnce(Return(SOFTBUS_ERR));
     int32_t ret = TransTdcPostBytes(channelId, &packetHead, data);
     EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
 }
@@ -869,7 +873,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusRequestTest001, TestSize.Le
 
 /**
  * @tc.name: GetAuthIdByChannelInfoTest001
- * @tc.desc: Should return TEST_AUTHID when GetAuthIdByChanId return TEST_AUTHID.
+ * @tc.desc: Should return TEST_AUTHID when GetAuthHandleByChanId return TEST_AUTHID.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -880,9 +884,11 @@ HWTEST_F(TransTcpDirectMessageAppendTest, GetAuthIdByChannelInfoTest001, TestSiz
     uint32_t cipherFlag = 1;
 
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, GetAuthIdByChanId).WillOnce(Return(TEST_AUTHID));
-    int64_t ret = GetAuthIdByChannelInfo(channelId, seq, cipherFlag);
-    EXPECT_EQ(ret, TEST_AUTHID);
+    ON_CALL(TcpMessageMock, GetAuthHandleByChanId(_, _))
+        .WillByDefault(DoAll(SetArgPointee<1>(AuthHandle{.authId = TEST_AUTHID, .type = 1 }), Return(SOFTBUS_OK)));
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+    (void)GetAuthIdByChannelInfo(channelId, seq, cipherFlag, &authHandle);
+    EXPECT_EQ(authHandle.authId, TEST_AUTHID);
 }
 
 /**
@@ -898,10 +904,11 @@ HWTEST_F(TransTcpDirectMessageAppendTest, GetAuthIdByChannelInfoTest002, TestSiz
     uint32_t cipherFlag = 1;
 
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, GetAuthIdByChanId).WillOnce(Return(AUTH_INVALID_ID));
+    EXPECT_CALL(TcpMessageMock, GetAuthHandleByChanId).WillOnce(Return(SOFTBUS_ERR));
     EXPECT_CALL(TcpMessageMock, GetAppInfoById).WillOnce(Return(SOFTBUS_ERR));
-    int64_t ret = GetAuthIdByChannelInfo(channelId, seq, cipherFlag);
-    EXPECT_EQ(ret, AUTH_INVALID_ID);
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+    (void)GetAuthIdByChannelInfo(channelId, seq, cipherFlag, &authHandle);
+    EXPECT_EQ(authHandle.authId, AUTH_INVALID_ID);
 }
 
 /**
@@ -917,10 +924,11 @@ HWTEST_F(TransTcpDirectMessageAppendTest, GetAuthIdByChannelInfoTest003, TestSiz
     uint32_t cipherFlag = 1;
 
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, GetAuthIdByChanId).WillOnce(Return(AUTH_INVALID_ID));
+    EXPECT_CALL(TcpMessageMock, GetAuthHandleByChanId).WillOnce(Return(SOFTBUS_ERR));
     EXPECT_CALL(TcpMessageMock, GetAppInfoById).WillOnce(Return(SOFTBUS_OK));
-    int64_t ret = GetAuthIdByChannelInfo(channelId, seq, cipherFlag);
-    EXPECT_EQ(ret, AUTH_INVALID_ID);
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+    (void)GetAuthIdByChannelInfo(channelId, seq, cipherFlag, &authHandle);
+    EXPECT_EQ(authHandle.authId, AUTH_INVALID_ID);
 }
 
 /**
@@ -936,11 +944,12 @@ HWTEST_F(TransTcpDirectMessageAppendTest, GetAuthIdByChannelInfoTest004, TestSiz
     uint32_t cipherFlag = 1;
 
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, GetAuthIdByChanId).WillOnce(Return(AUTH_INVALID_ID));
+    EXPECT_CALL(TcpMessageMock, GetAuthHandleByChanId).WillOnce(Return(SOFTBUS_ERR));
     EXPECT_CALL(TcpMessageMock, GetAppInfoById).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpMessageMock, GetRemoteUuidByIp).WillOnce(Return(SOFTBUS_ERR));
-    int64_t ret = GetAuthIdByChannelInfo(channelId, seq, cipherFlag);
-    EXPECT_EQ(ret, AUTH_INVALID_ID);
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+    (void)GetAuthIdByChannelInfo(channelId, seq, cipherFlag, &authHandle);
+    EXPECT_EQ(authHandle.authId, AUTH_INVALID_ID);
 }
 
 /**
@@ -959,8 +968,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, DecryptMessageTest001, TestSize.Level1
     uint32_t outDataLen = 10;
 
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, GetAuthIdByChanId).WillOnce(Return(TEST_AUTHID));
-    EXPECT_CALL(TcpMessageMock, SetAuthIdByChanId).WillOnce(Return(SOFTBUS_OK));
+    ON_CALL(TcpMessageMock, GetAuthHandleByChanId(_, _))
+        .WillByDefault(DoAll(SetArgPointee<1>(AuthHandle{.authId = TEST_AUTHID, .type = 1 }), Return(SOFTBUS_OK)));
+    EXPECT_CALL(TcpMessageMock, SetAuthHandleByChanId).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpMessageMock, AuthDecrypt).WillOnce(Return(SOFTBUS_OK));
     int64_t ret = DecryptMessage(channelId, &pktHead, pktData, &outData, &outDataLen);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -982,8 +992,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, DecryptMessageTest002, TestSize.Level1
     uint32_t outDataLen = 10;
 
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, GetAuthIdByChanId).WillOnce(Return(TEST_AUTHID));
-    EXPECT_CALL(TcpMessageMock, SetAuthIdByChanId).WillOnce(Return(SOFTBUS_OK));
+    ON_CALL(TcpMessageMock, GetAuthHandleByChanId(_, _))
+        .WillByDefault(DoAll(SetArgPointee<1>(AuthHandle{.authId = TEST_AUTHID, .type = 1 }), Return(SOFTBUS_OK)));
+    EXPECT_CALL(TcpMessageMock, SetAuthHandleByChanId).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpMessageMock, AuthDecrypt).WillOnce(Return(SOFTBUS_ERR));
     int64_t ret = DecryptMessage(channelId, &pktHead, pktData, &outData, &outDataLen);
     EXPECT_EQ(ret, SOFTBUS_DECRYPT_ERR);
@@ -991,7 +1002,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, DecryptMessageTest002, TestSize.Level1
 
 /**
  * @tc.name: DecryptMessageTest003
- * @tc.desc: Should return SOFTBUS_ERR when SetAuthIdByChanId return SOFTBUS_ERR.
+ * @tc.desc: Should return SOFTBUS_ERR when SetAuthHandleByChanId return SOFTBUS_ERR.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1005,15 +1016,16 @@ HWTEST_F(TransTcpDirectMessageAppendTest, DecryptMessageTest003, TestSize.Level1
     uint32_t outDataLen = 10;
 
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, GetAuthIdByChanId).WillOnce(Return(TEST_AUTHID));
-    EXPECT_CALL(TcpMessageMock, SetAuthIdByChanId).WillOnce(Return(SOFTBUS_ERR));
+    ON_CALL(TcpMessageMock, GetAuthHandleByChanId(_, _))
+        .WillByDefault(DoAll(SetArgPointee<1>(AuthHandle{.authId = TEST_AUTHID, .type = 1 }), Return(SOFTBUS_OK)));
+    EXPECT_CALL(TcpMessageMock, SetAuthHandleByChanId).WillOnce(Return(SOFTBUS_ERR));
     int64_t ret = DecryptMessage(channelId, &pktHead, pktData, &outData, &outDataLen);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 }
 
 /**
  * @tc.name: DecryptMessageTest004
- * @tc.desc: Should return SOFTBUS_NOT_FIND when GetAuthIdByChanId return AUTH_INVALID_ID.
+ * @tc.desc: Should return SOFTBUS_NOT_FIND when GetAuthHandleByChanId return AUTH_INVALID_ID.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1027,7 +1039,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, DecryptMessageTest004, TestSize.Level1
     uint32_t outDataLen = 10;
 
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, GetAuthIdByChanId).WillOnce(Return(AUTH_INVALID_ID));
+    EXPECT_CALL(TcpMessageMock, GetAuthHandleByChanId).WillOnce(Return(SOFTBUS_ERR));
     int64_t ret = DecryptMessage(channelId, &pktHead, pktData, &outData, &outDataLen);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
@@ -1106,7 +1118,8 @@ HWTEST_F(TransTcpDirectMessageAppendTest, PackBytesTest001, TestSize.Level1)
     char *buffer = static_cast<char *>(SoftBusCalloc(bufferLen));
     EXPECT_TRUE(buffer != nullptr);
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, GetAuthIdByChanId).WillOnce(Return(authId));
+    ON_CALL(TcpMessageMock, GetAuthHandleByChanId(_, _))
+        .WillByDefault(DoAll(SetArgPointee<1>(AuthHandle{.authId = authId, .type = 1 }), Return(SOFTBUS_OK)));
     EXPECT_CALL(TcpMessageMock, AuthEncrypt).WillOnce(Return(SOFTBUS_OK));
     int32_t ret = PackBytes(channelId, data, &packetHead, buffer, bufferLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -1139,7 +1152,8 @@ HWTEST_F(TransTcpDirectMessageAppendTest, PackBytesTest002, TestSize.Level1)
     char *buffer = static_cast<char *>(SoftBusCalloc(bufferLen));
     EXPECT_TRUE(buffer != nullptr);
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, GetAuthIdByChanId).WillOnce(Return(authId));
+    ON_CALL(TcpMessageMock, GetAuthHandleByChanId(_, _))
+        .WillByDefault(DoAll(SetArgPointee<1>(AuthHandle{.authId = authId, .type = 1 }), Return(SOFTBUS_OK)));
     EXPECT_CALL(TcpMessageMock, AuthEncrypt).WillOnce(Return(SOFTBUS_ERR));
     int32_t ret = PackBytes(channelId, data, &packetHead, buffer, bufferLen);
     EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
@@ -1171,7 +1185,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, PackBytesTest003, TestSize.Level1)
     char *buffer = static_cast<char *>(SoftBusCalloc(bufferLen));
     EXPECT_TRUE(buffer != nullptr);
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, GetAuthIdByChanId).WillOnce(Return(AUTH_INVALID_ID));
+    EXPECT_CALL(TcpMessageMock, GetAuthHandleByChanId).WillOnce(Return(SOFTBUS_ERR));
     int32_t ret = PackBytes(channelId, data, &packetHead, buffer, bufferLen);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 
@@ -1190,7 +1204,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransGetLocalConfigTest001, TestSize.L
     int32_t businessType = BUSINESS_TYPE_BYTE;
     uint32_t len = 1;
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, GetAuthIdByChanId).WillRepeatedly(Return(AUTH_INVALID_ID));
+    EXPECT_CALL(TcpMessageMock, GetAuthHandleByChanId).WillRepeatedly(Return(SOFTBUS_ERR));
     int32_t ret = TransGetLocalConfig(channelType, businessType, &len);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }

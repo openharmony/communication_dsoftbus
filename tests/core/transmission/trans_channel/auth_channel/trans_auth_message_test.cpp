@@ -150,7 +150,7 @@ HWTEST_F(TransAuthMessageTest, TransAuthMessageUnpackTest001, TestSize.Level1)
 
     data = cJSON_PrintUnformatted(msg);
     ret = TransAuthChannelMsgUnpack(data, appInfo, sizeof(data));
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
  
     cJSON_free(data);
     cJSON_Delete(msg);
@@ -178,7 +178,7 @@ HWTEST_F(TransAuthMessageTest, TransAuthMessageUnpackTest002, TestSize.Level1)
 
     char *data = cJSON_PrintUnformatted(msg);
     int32_t ret = TransAuthChannelMsgUnpack(data, appInfo, sizeof(data));
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 
     cJSON_free(data);
     cJSON_Delete(msg);

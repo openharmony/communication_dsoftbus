@@ -156,11 +156,11 @@ HWTEST_F(TransClientSessionServiceTest, TransClientSessionServiceTest01, TestSiz
     int32_t ret = QosReport(TRANS_TEST_SESSION_ID, APP_TYPE_AUTH, TRANS_TEST_INVALID_QUALITY);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = QosReport(TRANS_TEST_SESSION_ID, APP_TYPE_AUTH, QOS_IMPROVE);
-    EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
+    EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_GET_CHANNEL_FAILED);
     ret = OpenSessionSync(NULL, g_sessionName, g_networkId, g_groupid, &g_sessionAttr);
-    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret,  SOFTBUS_TRANS_INVALID_SESSION_NAME);
     ret = OpenSessionSync(g_sessionName, NULL, g_networkId, g_groupid, &g_sessionAttr);
-    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret,  SOFTBUS_TRANS_INVALID_SESSION_NAME);
     ret = OpenSessionSync(g_sessionName, g_sessionName, NULL, g_groupid, &g_sessionAttr);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = OpenSessionSync(g_sessionName, g_sessionName, g_networkId, NULL, &g_sessionAttr);
@@ -237,7 +237,7 @@ HWTEST_F(TransClientSessionServiceTest, TransClientSessionServiceTest03, TestSiz
     ret = ClientDeleteSession(sessionId);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = OpenSessionSync(g_sessionName, g_sessionName, g_networkId, g_groupid, &g_sessionAttr);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     SoftBusFree(sessionParam);

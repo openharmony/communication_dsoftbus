@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -184,6 +184,30 @@ extern "C" {
  *
  */
 #define DATA_CHANGE_FLAG_BUF_LEN 2
+
+/**
+ * @brief Indicates the maximum length of the database dynamic level in <b>IDataLevelCb</b>.
+ *
+ */
+#define DATA_DYNAMIC_LEVEL_BUF_LEN 2
+
+/**
+ * @brief Indicates the maximum length of the database static level in <b>IDataLevelCb</b>.
+ *
+ */
+#define DATA_STATIC_LEVEL_BUF_LEN 2
+
+/**
+ * @brief Indicates the maximum length of the database switch level in <b>IDataLevelCb</b>.
+ *
+ */
+#define DATA_SWITCH_LEVEL_BUF_LEN 4
+
+/**
+ * @brief Indicates the maximum length of the database switch length in <b>IDataLevelCb</b>.
+ *
+ */
+#define DATA_SWITCH_LENGTH_BUF_LEN 2
 
 /**
  * @brief Indicates the maximum length of the node address.
@@ -440,6 +464,8 @@ typedef enum {
     MID_FREQ_CYCLE = 60,
     /**< Heartbeat interval 5 * 60 sec */
     LOW_FREQ_CYCLE = 5 * 60,
+    /**< Heartbeat interval 10 * 60 sec */
+    DEFT_FREQ_CYCLE = 10 * 60,
 } ModeCycle;
 
 /**

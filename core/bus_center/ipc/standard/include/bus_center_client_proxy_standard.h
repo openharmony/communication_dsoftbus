@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,6 +50,7 @@ public:
     void OnPublishLNNResult(int32_t publishId, int32_t reason) override;
     void OnRefreshLNNResult(int32_t refreshId, int32_t reason) override;
     void OnRefreshDeviceFound(const void *device, uint32_t deviceLen) override;
+    void OnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo) override;
 
 private:
     static inline BrokerDelegator<BusCenterClientProxy> delegator_;

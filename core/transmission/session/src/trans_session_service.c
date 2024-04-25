@@ -93,15 +93,15 @@ int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, i
     AnonymizeFree(tmpName);
     SessionServer *newNode = (SessionServer *)SoftBusCalloc(sizeof(SessionServer));
     if (newNode == NULL) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     if (strcpy_s(newNode->pkgName, sizeof(newNode->pkgName), pkgName) != EOK) {
         SoftBusFree(newNode);
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     if (strcpy_s(newNode->sessionName, sizeof(newNode->sessionName), sessionName) != EOK) {
         SoftBusFree(newNode);
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     newNode->type = SEC_TYPE_CIPHERTEXT;
     newNode->uid = uid;

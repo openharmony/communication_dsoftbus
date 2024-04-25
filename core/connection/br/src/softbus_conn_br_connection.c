@@ -462,9 +462,9 @@ int32_t ConnBrOnReferenceRequest(ConnBrConnection *connection, const cJSON *json
         if (localRc == 0) {
             ConnPostMsgToLooper(&g_brConnectionAsyncHandler, MSG_CONNECTION_RETRY_NOTIFY_REFERENCE,
                 connection->connectionId, 0, NULL, RETRY_NOTIFY_REFERENCE_DELAY_MILLIS);
+            (void)SoftBusMutexUnlock(&connection->lock);
+            return SOFTBUS_OK;
         }
-        (void)SoftBusMutexUnlock(&connection->lock);
-        return SOFTBUS_OK;
     }
     if (connection->state == BR_CONNECTION_STATE_NEGOTIATION_CLOSING) {
         ConnRemoveMsgFromLooper(&g_brConnectionAsyncHandler, MSG_CONNECTION_WAIT_NEGOTIATION_CLOSING_TIMEOUT,

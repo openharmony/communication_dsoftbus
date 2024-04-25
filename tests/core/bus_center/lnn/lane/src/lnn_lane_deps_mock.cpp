@@ -151,6 +151,17 @@ int32_t LaneDepsInterfaceMock::ActionOfConnOpened(const AuthConnInfo *info, uint
     return SOFTBUS_OK;
 }
 
+int32_t LaneDepsInterfaceMock::ActionOfAddTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
+{
+    (void)trigger;
+    GTEST_LOG_(INFO) << "ActionOfAddTrigger enter";
+    if (g_baseListener.onDataEvent == nullptr) {
+        GTEST_LOG_(INFO) << "invalid lane onDataEvent";
+        return SOFTBUS_OK;
+    }
+    return g_baseListener.onDataEvent(module, SOFTBUS_SOCKET_OUT, fd);
+}
+
 extern "C" {
 int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info)
 {

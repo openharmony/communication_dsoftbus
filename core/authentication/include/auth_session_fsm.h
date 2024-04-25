@@ -69,6 +69,8 @@ typedef struct {
     bool isNeedFastAuth;
     int64_t oldIndex;
     int32_t idType;
+    bool isNeedPackCert;
+    uint64_t sessionKeyRandomNum;
     NormalizedType normalizedType;
     SessionKey *normalizedKey;
     int64_t normalizedIndex;

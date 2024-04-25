@@ -176,6 +176,7 @@ typedef struct {
     uint32_t manufactureDataLength;
     uint8_t *manufactureData;
     uint8_t *manufactureDataMask;
+    bool advIndReport;
 } SoftBusBcScanFilter;
 
 /**

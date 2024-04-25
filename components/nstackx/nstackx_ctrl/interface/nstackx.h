@@ -208,9 +208,9 @@ typedef struct {
     uint8_t businessType;     /* service identify, see enum NSTACKX_BusinessType */
     char *msg;                /* notification data in json format */
     size_t msgLen;            /* strlen of notification data */
-    uint32_t *intervalsMs;    /* pointer to intervals to send notification, first element should be 0 */
-    uint32_t intervalLen;     /* configured number of intervals */
-} NotificationConfig;
+    uint16_t *intervalsMs;    /* pointer to intervals to send notification, first element should be 0 */
+    uint8_t intervalLen;      /* configured number of intervals */
+} NSTACKX_NotificationConfig;
 
 /* Data receive callback type */
 typedef void (*NSTACKX_OnDFinderMsgReceived)(DFinderMsgType msgType);
@@ -218,9 +218,9 @@ typedef void (*NSTACKX_OnDFinderMsgReceived)(DFinderMsgType msgType);
 /**
  * @brief define function pointer type, used to report the notification data received
  *
- * @param [out] element: notification data to report, see struct NotificationReportType
+ * @param [out] element: notification data to report, see struct NSTACKX_NotificationConfig
  */
-typedef void (*NSTACKX_OnNotificationReceived)(const NotificationConfig *notificattion);
+typedef void (*NSTACKX_OnNotificationReceived)(const NSTACKX_NotificationConfig *notification);
 
 /* NSTACKX parameter, which contains callback list */
 typedef struct {
@@ -496,7 +496,7 @@ DFINDER_EXPORT int32_t NSTACKX_SendDiscoveryRsp(const NSTACKX_ResponseSettings *
 /**
  * @brief start sending broadcast notifications
  *
- * @param [in] config: configurable properties to send notification, see struct NotificationConfig
+ * @param [in] config: configurable properties to send notification, see struct NSTACKX_NotificationConfig
  *
  * @return (int32_t)
  *      0                operation success
@@ -507,7 +507,7 @@ DFINDER_EXPORT int32_t NSTACKX_SendDiscoveryRsp(const NSTACKX_ResponseSettings *
  *       2. caller should ensure the consistency of associated data
  * @exception
  */
-DFINDER_EXPORT int32_t NSTACKX_SendNotification(const NotificationConfig *config);
+DFINDER_EXPORT int32_t NSTACKX_SendNotification(const NSTACKX_NotificationConfig *config);
 
 /**
  * @brief stop sending broadcast notifications

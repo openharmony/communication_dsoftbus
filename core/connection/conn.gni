@@ -28,8 +28,10 @@ conn_manager_external_deps =
 conn_manager_common_deps = [ "$dsoftbus_dfx_path/log:softbus_dfx_log" ]
 conn_manager_common_deps += wifi_direct_connection_common_deps
 
-conn_manager_src +=
-    [ "$dsoftbus_root_path/core/connection/manager/softbus_conn_manager.c" ]
+conn_manager_src += [
+  "$dsoftbus_root_path/core/connection/manager/softbus_conn_manager.c",
+  "$dsoftbus_root_path/core/connection/manager/softbus_conn_flow_control.c",
+]
 conn_manager_inc += [
   "$dsoftbus_root_path/core/connection/manager",
   "$dsoftbus_root_path/core/connection/interface",

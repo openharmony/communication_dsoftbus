@@ -602,6 +602,7 @@ static int32_t AddNewP2pLinkedInfo(const P2pLinkReqList *reqInfo, int32_t linkId
     }
     if (LinkLock() != 0) {
         LNN_LOGE(LNN_LANE, "lock fail");
+        SoftBusFree(newNode);
         return SOFTBUS_LOCK_ERR;
     }
     ListTailInsert(g_p2pLinkedList, &newNode->node);
@@ -638,6 +639,35 @@ static void NotifyLinkSucc(AsyncResultType type, int32_t requestId, LaneLinkInfo
     if (reqInfo.proxyChannelInfo.channelId > 0) {
         TransProxyPipelineCloseChannelDelay(reqInfo.proxyChannelInfo.channelId);
     }
+}
+
+static int32_t CreateWDLinkInfo(int32_t p2pRequestId, const struct WifiDirectLink *link, LaneLinkInfo *linkInfo)
+{
+    if (link == NULL || linkInfo == NULL) {
+        return SOFTBUS_ERR;
+    }
+    if (link->linkType == WIFI_DIRECT_LINK_TYPE_HML) {
+        linkInfo->type = LANE_HML;
+    } else {
+        linkInfo->type = LANE_P2P;
+    }
+    linkInfo->linkInfo.p2p.bw = LANE_BW_RANDOM;
+    if (strcpy_s(linkInfo->linkInfo.p2p.connInfo.localIp, IP_LEN, link->localIp) != EOK ||
+        strcpy_s(linkInfo->linkInfo.p2p.connInfo.peerIp, IP_LEN, link->remoteIp) != EOK) {
+        LNN_LOGE(LNN_LANE, "strcpy localIp fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    P2pLinkReqList reqInfo;
+    (void)memset_s(&reqInfo, sizeof(P2pLinkReqList), 0, sizeof(P2pLinkReqList));
+    if (GetP2pLinkReqByReqId(ASYNC_RESULT_P2P, p2pRequestId, &reqInfo) != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    if (LnnGetRemoteStrInfo(reqInfo.laneRequestInfo.networkId, STRING_KEY_DEV_UDID,
+        linkInfo->peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get udid error");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
 }
 
 static int32_t CreateWDLinkInfo(int32_t p2pRequestId, const struct WifiDirectLink *link, LaneLinkInfo *linkInfo)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,8 @@ extern "C" {
 #define ID_MAX_LEN 72
 #define VERSION_MAX_LEN 16
 #define MAC_LEN 18
+#define OH_OS_TYPE 10
+#define HO_OS_TYPE 11
 
 typedef enum {
     STRING_KEY_BEGIN = 0,
@@ -67,6 +69,10 @@ typedef enum {
     NUM_KEY_DISCOVERY_TYPE,
     NUM_KEY_TRANS_PROTOCOLS,
     NUM_KEY_DATA_CHANGE_FLAG,
+    NUM_KEY_DATA_DYNAMIC_LEVEL,
+    NUM_KEY_DATA_STATIC_LEVEL,
+    NUM_KEY_DATA_SWITCH_LEVEL,
+    NUM_KEY_DATA_SWITCH_LENGTH,
     NUM_KEY_ACCOUNT_LONG,
     NUM_KEY_BLE_START_TIME,
     NUM_KEY_STATE_VERSION,

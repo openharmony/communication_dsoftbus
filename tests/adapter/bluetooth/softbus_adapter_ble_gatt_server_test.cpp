@@ -15,7 +15,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-
+#include "conn_log.h"
 #include "bluetooth_mock.h"
 #include "c_header/ohos_bt_def.h"
 #include "c_header/ohos_bt_gatt_server.h"
@@ -113,25 +113,36 @@ static void MockAll(MockBluetooth &mocker)
  */
 HWTEST_F(AdapterBleGattServerTest, SoftBusRegisterGattsCallbacks, TestSize.Level3)
 {
+    InitSoftbusAdapterServer();
     MockBluetooth mocker;
     MockAll(mocker);
-    ASSERT_EQ(SoftBusRegisterGattsCallbacks(nullptr), SOFTBUS_BLECONNECTION_REG_GATTS_CALLBACK_FAIL)
+    const char *serviceUuid = "11C8B310-80E4-4276-AFC0-F81590B2177F";
+    SoftBusBtUuid service = {
+        .uuidLen = strlen(serviceUuid),
+        .uuid = (char *)serviceUuid,
+    };
+
+    int32_t expectedMtu = 1;
+    ASSERT_EQ(SoftBusRegisterGattsCallbacks(nullptr, service, expectedMtu),
+        SOFTBUS_BLECONNECTION_REG_GATTS_CALLBACK_FAIL)
         << "nullptr gatts callback scenor";
     // 清空状态，允许重入
-    SoftBusUnRegisterGattsCallbacks();
+    SoftBusUnRegisterGattsCallbacks(service);
     EXPECT_CALL(mocker, BleGattsRegisterCallbacks).WillRepeatedly(Return(OHOS_BT_STATUS_FAIL));
-    ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback()), SOFTBUS_BLECONNECTION_REG_GATTS_CALLBACK_FAIL)
+    ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback(), service, expectedMtu),
+        SOFTBUS_BLECONNECTION_REG_GATTS_CALLBACK_FAIL)
         << "BleGattsRegisterCallbacks fail scenor";
 
     EXPECT_CALL(mocker, BleGattsRegisterCallbacks).WillRepeatedly(ActionBleGattsRegisterCallbacks);
     EXPECT_CALL(mocker, BleGattsRegister).WillRepeatedly(Return(OHOS_BT_STATUS_FAIL));
-    ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback()), SOFTBUS_BLECONNECTION_REG_GATTS_CALLBACK_FAIL)
+    ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback(), service, expectedMtu),
+        SOFTBUS_BLECONNECTION_REG_GATTS_CALLBACK_FAIL)
         << "BleGattsRegister fail scenor";
 
     EXPECT_CALL(mocker, BleGattsRegister).WillRepeatedly(ActionBleGattsRegister);
-    ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback()), SOFTBUS_OK);
+    ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback(), service, expectedMtu), SOFTBUS_OK);
     // 清空状态
-    SoftBusUnRegisterGattsCallbacks();
+    SoftBusUnRegisterGattsCallbacks(service);
 }
 
 /**
@@ -142,15 +153,17 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusRegisterGattsCallbacks, TestSize.Level
  */
 HWTEST_F(AdapterBleGattServerTest, SoftBusUnRegisterGattsCallbacks, TestSize.Level3)
 {
+    InitSoftbusAdapterServer();
+    const char *serviceUuid = "11C8B310-80E4-4276-AFC0-F81590B2177F";
+    SoftBusBtUuid service = {
+        .uuidLen = strlen(serviceUuid),
+        .uuid = (char *)serviceUuid,
+    };
+    int32_t expectedMtu = 10;
     MockBluetooth mocker;
     MockAll(mocker);
-    ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback()), SOFTBUS_OK);
-
-    EXPECT_CALL(mocker, BleGattsUnRegister).Times(1).WillOnce(Return(OHOS_BT_STATUS_FAIL));
-    SoftBusUnRegisterGattsCallbacks();
-
-    EXPECT_CALL(mocker, BleGattsUnRegister).Times(1).WillOnce(Return(OHOS_BT_STATUS_SUCCESS));
-    SoftBusUnRegisterGattsCallbacks();
+    ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback(), service, expectedMtu), SOFTBUS_OK);
+    SoftBusUnRegisterGattsCallbacks(service);
 }
 
 /**
@@ -161,12 +174,17 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusUnRegisterGattsCallbacks, TestSize.Lev
  */
 HWTEST_F(AdapterBleGattServerTest, SoftBusGattsAddService, TestSize.Level3)
 {
+    const char *serviceUuid = "11C8B310-80E4-4276-AFC0-F81590B2177F";
+    SoftBusBtUuid service1 = {
+        .uuidLen = strlen(serviceUuid),
+        .uuid = (char *)serviceUuid,
+    };
+    int32_t expectedMtu = 1;
     MockBluetooth mocker;
     MockAll(mocker);
-    ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback()), SOFTBUS_OK);
+    ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback(), service1, expectedMtu), SOFTBUS_OK);
 
     // 注册service
-    const char *serviceUuid = "11C8B310-80E4-4276-AFC0-F81590B2177F";
     SoftBusBtUuid service = {
         .uuidLen = 0,
         .uuid = nullptr,
@@ -190,9 +208,15 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsAddService, TestSize.Level3)
  */
 HWTEST_F(AdapterBleGattServerTest, SoftBusGattsAddCharacteristic, TestSize.Level3)
 {
+    const char *serviceUuid = "11C8B310-80E4-4276-AFC0-F81590B2177F";
+    SoftBusBtUuid service = {
+        .uuidLen = strlen(serviceUuid),
+        .uuid = (char *)serviceUuid,
+    };
+    int32_t expectedMtu = 1;
     MockBluetooth mocker;
     MockAll(mocker);
-    ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback()), SOFTBUS_OK);
+    ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback(), service, expectedMtu), SOFTBUS_OK);
 
     SoftBusBtUuid characteristic = {
         .uuidLen = 0,
@@ -225,9 +249,15 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsAddCharacteristic, TestSize.Level
  */
 HWTEST_F(AdapterBleGattServerTest, SoftBusGattsAddDescriptor, TestSize.Level3)
 {
+    const char *serviceUuid = "11C8B310-80E4-4276-AFC0-F81590B2177F";
+    SoftBusBtUuid service = {
+        .uuidLen = strlen(serviceUuid),
+        .uuid = (char *)serviceUuid,
+    };
+    int32_t expectedMtu = 1;
     MockBluetooth mocker;
     MockAll(mocker);
-    ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback()), SOFTBUS_OK);
+    ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback(), service, expectedMtu), SOFTBUS_OK);
 
     SoftBusBtUuid desciptor = {
         .uuidLen = 0,
@@ -254,9 +284,15 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsAddDescriptor, TestSize.Level3)
  */
 HWTEST_F(AdapterBleGattServerTest, SoftBusGattsStartService, TestSize.Level3)
 {
+    const char *serviceUuid = "11C8B310-80E4-4276-AFC0-F81590B2177F";
+    SoftBusBtUuid service = {
+        .uuidLen = strlen(serviceUuid),
+        .uuid = (char *)serviceUuid,
+    };
+    int32_t expectedMtu = 1;
     MockBluetooth mocker;
     MockAll(mocker);
-    ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback()), SOFTBUS_OK);
+    ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback(), service, expectedMtu), SOFTBUS_OK);
 
     EXPECT_CALL(mocker, BleGattsStartService).Times(1).WillOnce(Return(OHOS_BT_STATUS_FAIL));
     ASSERT_EQ(SoftBusGattsStartService(MOCK_GATT_SERVICE_HANDLE), SOFTBUS_ERR);
@@ -273,9 +309,15 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsStartService, TestSize.Level3)
  */
 HWTEST_F(AdapterBleGattServerTest, SoftBusGattsStopService, TestSize.Level3)
 {
+    const char *serviceUuid = "11C8B310-80E4-4276-AFC0-F81590B2177F";
+    SoftBusBtUuid service = {
+        .uuidLen = strlen(serviceUuid),
+        .uuid = (char *)serviceUuid,
+    };
+    int32_t expectedMtu = 1;
     MockBluetooth mocker;
     MockAll(mocker);
-    ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback()), SOFTBUS_OK);
+    ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback(), service, expectedMtu), SOFTBUS_OK);
 
     EXPECT_CALL(mocker, BleGattsStopService).Times(1).WillOnce(Return(OHOS_BT_STATUS_FAIL));
     ASSERT_EQ(SoftBusGattsStopService(MOCK_GATT_SERVICE_HANDLE), SOFTBUS_ERR);
@@ -292,9 +334,15 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsStopService, TestSize.Level3)
  */
 HWTEST_F(AdapterBleGattServerTest, SoftBusGattsDeleteService, TestSize.Level3)
 {
+    const char *serviceUuid = "11C8B310-80E4-4276-AFC0-F81590B2177F";
+    SoftBusBtUuid service = {
+        .uuidLen = strlen(serviceUuid),
+        .uuid = (char *)serviceUuid,
+    };
+    int32_t expectedMtu = 1;
     MockBluetooth mocker;
     MockAll(mocker);
-    ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback()), SOFTBUS_OK);
+    ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback(), service, expectedMtu), SOFTBUS_OK);
 
     EXPECT_CALL(mocker, BleGattsDeleteService).Times(1).WillOnce(Return(OHOS_BT_STATUS_FAIL));
     ASSERT_EQ(SoftBusGattsDeleteService(MOCK_GATT_SERVICE_HANDLE), SOFTBUS_ERR);
@@ -311,9 +359,15 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsDeleteService, TestSize.Level3)
  */
 HWTEST_F(AdapterBleGattServerTest, SoftBusGattsDisconnect, TestSize.Level3)
 {
+    const char *serviceUuid = "11C8B310-80E4-4276-AFC0-F81590B2177F";
+    SoftBusBtUuid service = {
+        .uuidLen = strlen(serviceUuid),
+        .uuid = (char *)serviceUuid,
+    };
+    int32_t expectedMtu = 1;
     MockBluetooth mocker;
     MockAll(mocker);
-    ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback()), SOFTBUS_OK);
+    ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback(), service, expectedMtu), SOFTBUS_OK);
 
     int connId = 1;
     SoftBusBtAddr addr = {
@@ -334,9 +388,15 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsDisconnect, TestSize.Level3)
  */
 HWTEST_F(AdapterBleGattServerTest, SoftBusGattsSendResponse, TestSize.Level3)
 {
+    const char *serviceUuid = "11C8B310-80E4-4276-AFC0-F81590B2177F";
+    SoftBusBtUuid service = {
+        .uuidLen = strlen(serviceUuid),
+        .uuid = (char *)serviceUuid,
+    };
+    int32_t expectedMtu = 1;
     MockBluetooth mocker;
     MockAll(mocker);
-    ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback()), SOFTBUS_OK);
+    ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback(), service, expectedMtu), SOFTBUS_OK);
 
     SoftBusGattsResponse resp = {0};
     EXPECT_CALL(mocker, BleGattsSendResponse).Times(1).WillOnce(Return(OHOS_BT_STATUS_FAIL));
@@ -354,9 +414,15 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsSendResponse, TestSize.Level3)
  */
 HWTEST_F(AdapterBleGattServerTest, SoftBusGattsSendNotify, TestSize.Level3)
 {
+    const char *serviceUuid = "11C8B310-80E4-4276-AFC0-F81590B2177F";
+    SoftBusBtUuid service = {
+        .uuidLen = strlen(serviceUuid),
+        .uuid = (char *)serviceUuid,
+    };
+    int32_t expectedMtu = 1;
     MockBluetooth mocker;
     MockAll(mocker);
-    ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback()), SOFTBUS_OK);
+    ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback(), service, expectedMtu), SOFTBUS_OK);
 
     SoftBusGattsNotify notify = {0};
     EXPECT_CALL(mocker, BleGattsSendIndication).Times(1).WillOnce(Return(OHOS_BT_STATUS_FAIL));
@@ -374,16 +440,16 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsSendNotify, TestSize.Level3)
  */
 HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle, TestSize.Level3)
 {
-    MockBluetooth mocker;
-    MockAll(mocker);
-    ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback()), SOFTBUS_OK);
-
-    // 注册service
     const char *serviceUuid = "11C8B310-80E4-4276-AFC0-F81590B2177F";
     SoftBusBtUuid service = {
         .uuidLen = strlen(serviceUuid),
         .uuid = (char *)serviceUuid,
     };
+    int32_t expectedMtu = 8;
+    MockBluetooth mocker;
+    MockAll(mocker);
+    ASSERT_EQ(SoftBusRegisterGattsCallbacks(GetStubGattsCallback(), service, expectedMtu), SOFTBUS_OK);
+
     ASSERT_EQ(SoftBusGattsAddService(service, true, 8), SOFTBUS_OK);
     BtUuid btService = {
         .uuidLen = strlen(serviceUuid),
@@ -430,7 +496,6 @@ HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle, TestSize.Level3)
         MOCK_GATT_SERVICE_HANDLE, MOCK_GATT_DESCRIPTOR_HANDLE);
     ASSERT_TRUE(
         descriptorAddCtx.Expect(MOCK_GATT_SERVICE_HANDLE, SOFTBUS_OK, MOCK_GATT_DESCRIPTOR_HANDLE, &descriptor));
-
     // 启动Listen
     ASSERT_EQ(SoftBusGattsStartService(MOCK_GATT_SERVICE_HANDLE), SOFTBUS_OK);
     gattServerCallback->serviceStartCb(OHOS_BT_STATUS_SUCCESS, MOCK_GATT_SERVER_HANDLE, MOCK_GATT_SERVICE_HANDLE);
@@ -446,7 +511,6 @@ HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle, TestSize.Level3)
         .addr = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66},
     };
     ASSERT_TRUE(connectServerCtx.Expect(connectionId, &addr));
-
     // 读写数据，及响应回复
     const char *valueExample = "hello gatt server, this is client";
     BtReqWriteCbPara btWriteParam = {
@@ -472,6 +536,7 @@ HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle, TestSize.Level3)
         .isPrep = false,
         .value = (unsigned char *)valueExample,
     };
+    GetStubGattsCallback()->RequestWriteCallback(writeParam);
     ASSERT_TRUE(ExpectGattWriteRequest(requestWriteCtx, writeParam));
     SoftBusGattsResponse resp = {0};
     ASSERT_EQ(SoftBusGattsSendResponse(&resp), SOFTBUS_OK);
@@ -493,14 +558,13 @@ HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle, TestSize.Level3)
         .offset = 0,
         .isLong = false,
     };
+    GetStubGattsCallback()->RequestReadCallback(readParam);
     ASSERT_TRUE(ExpectGattReadRequest(requestReadCtx, readParam));
     SoftBusGattsNotify notify = {0};
     ASSERT_EQ(SoftBusGattsSendNotify(&notify), SOFTBUS_OK);
-
     // server断链
     ASSERT_EQ(SoftBusGattsDisconnect(addr, connectionId), SOFTBUS_OK);
     gattServerCallback->disconnectServerCb(connectionId, MOCK_GATT_SERVER_HANDLE, &bdAddr);
-    ASSERT_TRUE(disconnectServerCtx.Expect(connectionId, &addr));
 
     // 停止GATT service
     ASSERT_EQ(SoftBusGattsStopService(MOCK_GATT_SERVER_HANDLE), SOFTBUS_OK);

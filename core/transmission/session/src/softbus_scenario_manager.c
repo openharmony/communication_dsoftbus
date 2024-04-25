@@ -94,8 +94,8 @@ static void NotifyWifi(const char *ifName, const char *localMac,
 {
     (void)peerMac;
     TRANS_LOGI(TRANS_CTRL,
-        "ifName=%{public}s, localMac=%{public}s, peerMac=%{public}s, finalType=%{public}d, businessType=%{public}d",
-        ifName,  localMac, peerMac, finalType, businessType);
+        "ifName=%{public}s, finalType=%{public}d, businessType=%{public}d",
+        ifName, finalType, businessType);
     Hid2dUpperScene *scene =  NULL;
     scene = (Hid2dUpperScene *)SoftBusCalloc(sizeof(Hid2dUpperScene));
     if (scene == NULL) {
@@ -326,7 +326,7 @@ static void ScenarioManagerDelBusinessType(ScenarioManager *manager,
         default:
             break;
     }
-    if (singleCount == NULL) {
+    if (singleCount == NULL || itemCount == NULL) {
         TRANS_LOGE(TRANS_CTRL, "business type not supported!");
         return;
     }
@@ -587,8 +587,8 @@ static int32_t UpdateOriginalScenario(ScenarioManager *manager, OriginalScenario
     }
     TRANS_LOGI(TRANS_CTRL,
         "UpdateOriginalScenario: "
-        "localMac=%{public}s, peerMac=%{public}s, localPid=%{public}d, businessType=%{public}d, isAdd=%{public}d",
-        info->localMac, info->peerMac, info->localPid, info->businessType, isAdd);
+        "localPid=%{public}d, businessType=%{public}d, isAdd=%{public}d",
+        info->localPid, info->businessType, isAdd);
 
     int ret = isAdd ? AddOriginalScenario(manager, info) : DelOriginalScenario(manager, info);
     if (ret != 0) {

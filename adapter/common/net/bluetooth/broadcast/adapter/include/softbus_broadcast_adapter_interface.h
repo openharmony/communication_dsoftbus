@@ -25,6 +25,7 @@
 #define SOFTBUS_BROADCAST_ADAPTER_INTERFACE_H
 
 #include "softbus_broadcast_adapter_type.h"
+#include "softbus_broadcast_type.h"
 
 #ifdef __cplusplus
 extern "C"{
@@ -80,7 +81,8 @@ typedef struct {
         int32_t filterSize);
     int32_t (*StopScan)(int32_t scannerId);
     bool (*IsLpDeviceAvailable)(void);
-    bool (*SetAdvFilterParam)(const SoftBusLpBroadcastParam *bcParam, const SoftBusLpScanParam *scanParam);
+    bool (*SetAdvFilterParam)(SensorHubServerType type, const SoftBusLpBroadcastParam *bcParam,
+        const SoftBusLpScanParam *scanParam);
     int32_t (*GetBroadcastHandle)(int32_t advId, int32_t *bcHandle);
     int32_t (*EnableSyncDataToLpDevice)(void);
     int32_t (*DisableSyncDataToLpDevice)(void);

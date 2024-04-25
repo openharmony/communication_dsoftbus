@@ -47,8 +47,8 @@ int32_t GetOsAccountId(char *id, uint32_t idLen, uint32_t *len)
     LNN_LOGI(LNN_STATE, "uid=%{public}s, len=%{public}d", accountInfo.second.name_.c_str(), *len);
 
     if (memcmp(DEFAULT_ACCOUNT_NAME, accountInfo.second.name_.c_str(), *len) == 0) {
-        LNN_LOGI(LNN_STATE, "not login account");
-        return SOFTBUS_NOT_LOGIN;
+        LNN_LOGE(LNN_STATE, "not login account");
+        return SOFTBUS_ERR;
     }
     if (memcpy_s(id, idLen, accountInfo.second.name_.c_str(), *len) != EOK) {
         LNN_LOGE(LNN_STATE, "memcpy_s uid failed, idLen=%{public}d, len=%{public}d", idLen, *len);

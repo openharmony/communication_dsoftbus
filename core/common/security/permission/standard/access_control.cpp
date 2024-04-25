@@ -69,12 +69,12 @@ int32_t TransCheckClientAccessControl(const char *peerNetworkId)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    uint32_t firstCallingId = OHOS::IPCSkeleton::GetFirstTokenID();
-    if (firstCallingId == TOKENID_NOT_SET) {
+    uint32_t callingTokenId = OHOS::IPCSkeleton::GetCallingTokenID();
+    if (callingTokenId == TOKENID_NOT_SET) {
         return SOFTBUS_OK;
     }
 
-    auto tokenType = AccessTokenKit::GetTokenTypeFlag((AccessTokenID)firstCallingId);
+    auto tokenType = AccessTokenKit::GetTokenTypeFlag((AccessTokenID)callingTokenId);
     if (tokenType != ATokenTypeEnum::TOKEN_HAP) {
         COMM_LOGI(COMM_PERM, "tokenType=%{public}d, not hap, no verification required", tokenType);
         return SOFTBUS_OK;
@@ -85,12 +85,12 @@ int32_t TransCheckClientAccessControl(const char *peerNetworkId)
     if (ret != SOFTBUS_OK) {
         char *tmpName = nullptr;
         Anonymize(peerNetworkId, &tmpName);
-        COMM_LOGE(COMM_PERM, "get remote udid failed, firstCaller=%{public}u, networkId=%{public}s, ret=%{public}d",
-            firstCallingId, tmpName, ret);
+        COMM_LOGE(COMM_PERM, "get remote udid failed, caller=%{public}u, networkId=%{public}s, ret=%{public}d",
+            callingTokenId, tmpName, ret);
         AnonymizeFree(tmpName);
         return ret;
     }
-    return TransCheckAccessControl(firstCallingId, deviceId);
+    return TransCheckAccessControl(callingTokenId, deviceId);
 }
 
 int32_t TransCheckServerAccessControl(uint32_t firstCallingId)
@@ -117,4 +117,9 @@ int32_t TransCheckServerAccessControl(uint32_t firstCallingId)
 uint32_t TransACLGetFirstTokenID()
 {
     return OHOS::IPCSkeleton::GetFirstTokenID();
+}
+
+uint32_t TransACLGetCallingTokenID()
+{
+    return OHOS::IPCSkeleton::GetCallingTokenID();
 }

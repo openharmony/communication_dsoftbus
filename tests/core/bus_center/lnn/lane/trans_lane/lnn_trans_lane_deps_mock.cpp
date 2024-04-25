@@ -77,10 +77,9 @@ int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, boo
 {
     return GetTransLaneIf()->AddLaneResourceToPool(linkInfo, laneId, isServerSide);
 }
-
-int32_t DelLaneResourceByLaneId(uint64_t laneId)
+int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide)
 {
-    return GetTransLaneIf()->DelLaneResourceByLaneId(laneId);
+    return GetTransLaneIf()->DelLaneResourceByLaneId(laneId, isServerSide);
 }
 
 int32_t FindLaneResourceByLaneId(uint64_t laneId, LaneResource *resourceItem)
@@ -88,9 +87,9 @@ int32_t FindLaneResourceByLaneId(uint64_t laneId, LaneResource *resourceItem)
     return GetTransLaneIf()->FindLaneResourceByLaneId(laneId, resourceItem);
 }
 
-void FreeLaneReqId(uint32_t laneReqId)
+int32_t FindLaneResourceByLaneId(uint64_t laneId, LaneResource *resourceItem)
 {
-    GetTransLaneIf()->FreeLaneReqId(laneReqId);
+    return GetTransLaneIf()->FindLaneResourceByLaneId(laneId, resourceItem);
 }
 
 int32_t SelectExpectLaneByParameter(LanePreferredLinkList *setRecommendLinkList)
@@ -118,9 +117,9 @@ int32_t LaneLinkdownNotify(const char *peerUdid, const LaneLinkInfo *laneLinkInf
     return GetTransLaneIf()->LaneLinkdownNotify(peerUdid, laneLinkInfo);
 }
 
-uint64_t ApplyLaneId(const char *activeUdid, const char *passiveUdid, LaneLinkType linkType)
+uint64_t ApplyLaneId(const char *localUdid, const char *remoteUdid, LaneLinkType linkType)
 {
-    return GetTransLaneIf()->ApplyLaneId(activeUdid, passiveUdid, linkType);
+    return GetTransLaneIf()->ApplyLaneId(localUdid, remoteUdid, linkType);
 }
 }
 } // namespace OHOS

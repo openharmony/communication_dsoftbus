@@ -144,6 +144,21 @@ int32_t ConnBrInitBrPendingPacket(void)
     return GetConnectionBrInterface()->ConnBrInitBrPendingPacket();
 }
 
+uint32_t ConnGetNewRequestId(ConnModule moduleId)
+{
+    return GetConnectionBrInterface()->ConnGetNewRequestId(moduleId);
+}
+
+int32_t ConnBleKeepAlive(uint32_t connectionId, uint32_t requestId, uint32_t time)
+{
+    return GetConnectionBrInterface()->ConnBleKeepAlive(connectionId, requestId, time);
+}
+
+int32_t ConnBleRemoveKeepAlive(uint32_t connectionId, uint32_t requestId)
+{
+    return GetConnectionBrInterface()->ConnBleRemoveKeepAlive(connectionId, requestId);
+}
+
 int32_t SoftBusThreadCreate(
     SoftBusThread *thread, SoftBusThreadAttr *threadAttr, void *(*threadEntry) (void *), void *arg)
 {

@@ -36,6 +36,7 @@
 static void GetFileDefaultLink(LaneLinkType *linkList, uint32_t *listNum)
 {
     linkList[(*listNum)++] = LANE_WLAN_5G;
+    linkList[(*listNum)++] = LANE_HML;
     linkList[(*listNum)++] = LANE_P2P;
     linkList[(*listNum)++] = LANE_WLAN_2P4G;
     linkList[(*listNum)++] = LANE_BR;
@@ -44,6 +45,7 @@ static void GetFileDefaultLink(LaneLinkType *linkList, uint32_t *listNum)
 static void GetStreamDefaultLink(LaneLinkType *linkList, uint32_t *listNum)
 {
     linkList[(*listNum)++] = LANE_WLAN_5G;
+    linkList[(*listNum)++] = LANE_HML;
     linkList[(*listNum)++] = LANE_P2P;
     linkList[(*listNum)++] = LANE_WLAN_2P4G;
 }
@@ -182,7 +184,6 @@ static void SelectByPreferredLink(const char *networkId, const LaneSelectParam *
     }
     return;
 }
-
 static void SelectByDefaultLink(const char *networkId, const LaneSelectParam *request,
     LaneLinkType *resList, uint32_t *resNum)
 {
@@ -419,6 +420,24 @@ int32_t SelectExpectLaneByParameter(LanePreferredLinkList *setRecommendLinkList)
     }
 }
 
+static void SelectRttLinks(const char *networkId, LaneLinkType *resList, uint32_t *resNum)
+{
+    LaneLinkType optionalLink[LANE_LINK_TYPE_BUTT];
+    (void)memset_s(optionalLink, sizeof(optionalLink), 0, sizeof(optionalLink));
+    uint32_t optLinkNum = 0;
+    optionalLink[optLinkNum++] = LANE_HML;
+    optionalLink[optLinkNum++] = LANE_P2P;
+    optionalLink[optLinkNum++] = LANE_WLAN_5G;
+    optionalLink[optLinkNum++] = LANE_WLAN_2P4G;
+    *resNum = 0;
+    for (uint32_t i = 0; i < optLinkNum; i++) {
+        if (!IsValidLane(networkId, optionalLink[i])) {
+            continue;
+        }
+        resList[(*resNum)++] = optionalLink[i];
+    }
+}
+
 int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *request,
     LanePreferredLinkList *recommendList)
 {
@@ -440,6 +459,9 @@ int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *req
     } else if (request->qosRequire.minBW == MESH_MAGIC_NUMBER) {
         LNN_LOGI(LNN_LANE, "select lane by mesh linkList");
         SelectMeshLinks(networkId, laneLinkList.linkType, &(laneLinkList.linkTypeNum));
+    } else if (request->qosRequire.rttLevel == LANE_RTT_LEVEL_LOW) {
+        LNN_LOGI(LNN_LANE, "select lane by RTT linkList");
+        SelectRttLinks(networkId, laneLinkList.linkType, &(laneLinkList.linkTypeNum));
     } else {
         LNN_LOGI(LNN_LANE, "select lane by qos require");
         if (DecideAvailableLane(networkId, request, &laneLinkList) != SOFTBUS_OK) {
@@ -449,11 +471,8 @@ int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *req
     recommendList->linkTypeNum = 0;
     for (uint32_t i = 0; i < laneLinkList.linkTypeNum; i++) {
         recommendList->linkType[recommendList->linkTypeNum] = laneLinkList.linkType[i];
-        LNN_LOGI(LNN_LANE, "expect linklist linkTypeNum=%{public}u, priorityLinkType=%{public}d",
-            recommendList->linkTypeNum, laneLinkList.linkType[i]);
         recommendList->linkTypeNum++;
     }
-
     if (AdjustLanePriority(networkId, request, recommendList->linkType,
         recommendList->linkTypeNum) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "AdjustLanePriority fail");

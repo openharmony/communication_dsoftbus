@@ -18,8 +18,9 @@
 
 #include "stdbool.h"
 #include "stdint.h"
-#include "softbus_adapter_bt_common.h"
 #include "common_list.h"
+#include "softbus_adapter_bt_common.h"
+#include "softbus_def.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -129,12 +130,17 @@ typedef struct {
 } SoftBusGattsNotify;
 
 typedef struct {
+    int32_t connId;
+    ListNode node;
+} ServerConnection;
+
+typedef struct {
     SoftBusGattsCallback callback;
     ListNode node;
     SoftBusBtUuid serviceUuid;
     int32_t handle; // the id of start server
     int32_t expectedMtu;
-    int32_t connId; // as server connected
+    ListNode connections; // as server connected
 } SoftBusGattsManager;
 
 int SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback, SoftBusBtUuid srvcUuid, int32_t expectedMtu);

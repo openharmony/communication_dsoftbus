@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "anonymizer.h"
 #include "auth_common.h"
 #include "auth_manager.h"
 #include "auth_log.h"
@@ -31,7 +32,10 @@ static uint32_t GetSameRequestNum(char *udidHash)
 {
     uint32_t num = 0;
     NormalizeRequest *item = NULL;
-    AUTH_LOGI(AUTH_HICHAIN, "udidHash=%{public}s", udidHash);
+    char *anonyUdidHash = NULL;
+    Anonymize(udidHash, &anonyUdidHash);
+    AUTH_LOGI(AUTH_HICHAIN, "udidHash=%{public}s", anonyUdidHash);
+    AnonymizeFree(anonyUdidHash);
     LIST_FOR_EACH_ENTRY(item, &g_normalizeRequestList, NormalizeRequest, node) {
         if (strncmp(item->udidHash, udidHash, UDID_SHORT_HASH_STR) != 0) {
             continue;

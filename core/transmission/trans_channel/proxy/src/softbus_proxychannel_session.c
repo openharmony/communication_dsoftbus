@@ -151,19 +151,19 @@ static char *TransProxyPackAppNormalMsg(const ProxyMessageHead *msg, const char 
         return NULL;
     }
     if (memcpy_s(&proxyMessageHead, sizeof(ProxyMessageHead), msg, sizeof(ProxyMessageHead)) != EOK) {
-        TRANS_LOGE(TRANS_MSG, "message copy failed");
+        TRANS_LOGE(TRANS_MSG, "memcpy_s message failed.");
         SoftBusFree(buf);
         return NULL;
     }
     PackProxyMessageHead(&proxyMessageHead);
     if (memcpy_s(buf + connHeadLen, bufLen - connHeadLen, &proxyMessageHead, sizeof(ProxyMessageHead)) != EOK) {
-        TRANS_LOGE(TRANS_MSG, "buf copy failed");
+        TRANS_LOGE(TRANS_MSG, "memcpy_s buf failed.");
         SoftBusFree(buf);
         return NULL;
     }
     dstLen = bufLen - connHeadLen - sizeof(ProxyMessageHead);
     if (memcpy_s(buf + connHeadLen + sizeof(ProxyMessageHead), dstLen, payLoad, datalen) != EOK) {
-        TRANS_LOGE(TRANS_MSG, "buf copy failed");
+        TRANS_LOGE(TRANS_MSG, "memcpy_s buf failed.");
         SoftBusFree(buf);
         return NULL;
     }

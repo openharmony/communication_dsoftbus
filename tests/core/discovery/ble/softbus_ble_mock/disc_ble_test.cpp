@@ -235,8 +235,8 @@ HWTEST_F(DiscBleTest, StartActiveDiscovery002, TestSize.Level1)
     DISC_LOGI(DISC_TEST, "StartActiveDiscovery002 begin ----");
     BleMock bleMock;
     bleMock.SetupSuccessStub();
-    EXPECT_CALL(bleMock, UpdateBroadcasting(_, NotNull(), NotNull()))
-        .WillRepeatedly(BleMock::ActionOfUpdateAdvForActiveDiscovery);
+    EXPECT_CALL(bleMock, SetBroadcastingData(_, NotNull()))
+        .WillRepeatedly(BleMock::ActionOfSetAdvDataForActiveDiscovery);
 
     BusCenterMock busMock;
     busMock.SetupSuccessStub();
@@ -259,8 +259,8 @@ HWTEST_F(DiscBleTest, UpdateLocalDeviceInfo001, TestSize.Level1)
     DISC_LOGI(DISC_TEST, "UpdateLocalDeviceInfo001 begin ----");
     BleMock bleMock;
     bleMock.SetupSuccessStub();
-    EXPECT_CALL(bleMock, UpdateBroadcasting(_, NotNull(), NotNull()))
-        .WillRepeatedly(BleMock::ActionOfUpdateAdvForActiveDiscovery);
+    EXPECT_CALL(bleMock, SetBroadcastingData(_, NotNull()))
+        .WillRepeatedly(BleMock::ActionOfSetAdvDataForActiveDiscovery);
 
     BusCenterMock busMock;
     busMock.SetupSuccessStub();
@@ -306,8 +306,8 @@ HWTEST_F(DiscBleTest, StopActiveDiscovery001, TestSize.Level1)
     DISC_LOGI(DISC_TEST, "StopActiveDiscovery001 begin ----");
     BleMock bleMock;
     bleMock.SetupSuccessStub();
-    EXPECT_CALL(bleMock, UpdateBroadcasting(_, NotNull(), NotNull()))
-        .WillRepeatedly(BleMock::ActionOfUpdateAdvForActiveDiscovery);
+    EXPECT_CALL(bleMock, SetBroadcastingData(_, NotNull()))
+        .WillRepeatedly(BleMock::ActionOfSetAdvDataForActiveDiscovery);
 
     BusCenterMock busMock;
     busMock.SetupSuccessStub();
@@ -450,8 +450,8 @@ HWTEST_F(DiscBleTest, ReceiveActiveDiscoveryPacket001, TestSize.Level1)
     DISC_LOGI(DISC_TEST, "ReceiveActiveDiscoveryPacket001 begin ----");
     BleMock bleMock;
     bleMock.SetupSuccessStub();
-    EXPECT_CALL(bleMock, UpdateBroadcasting(_, NotNull(), NotNull()))
-        .WillRepeatedly(BleMock::ActionOfUpdateAdvForPassivePublish);
+    EXPECT_CALL(bleMock, SetBroadcastingData(_, NotNull()))
+        .WillRepeatedly(BleMock::ActionOfSetAdvDataForPassivePublish);
 
     BusCenterMock busMock;
     busMock.SetupSuccessStub();

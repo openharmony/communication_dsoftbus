@@ -55,6 +55,7 @@ enum BleMgrLooperMsg {
     BLE_MGR_MSG_REUSE_CONNECTION_REQUEST,
     BLE_MGR_MSG_PREVENT_TIMEOUT,
     BLE_MGR_MSG_RESET,
+    BLE_MRG_MSG_KEEP_ALIVE_TIMEOUT,
 };
 
 typedef struct {
@@ -1153,6 +1154,19 @@ static void BleReset(int32_t reason)
     TransitionToState(BLE_MGR_STATE_AVAILABLE);
 }
 
+static void BleKeepAliveTimeout(uint32_t connectionId, uint32_t requestId)
+{
+    ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
+    CONN_CHECK_AND_RETURN_LOGW(connection != NULL, CONN_BLE,
+        "connection not exist, connectionId=%{public}u", connectionId);
+    int32_t status = ConnBleUpdateConnectionRc(connection, 0, -1);
+    if (status != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BLE, "update rc failed, status=%{public}d, connectionId=%{public}u, requestId=%{public}u",
+            status, connectionId, requestId);
+    }
+    ConnBleReturnConnection(&connection);
+}
+
 static uint32_t AllocateConnectionIdUnsafe()
 {
     static uint16_t nextId = 0;
@@ -1408,6 +1422,51 @@ void NotifyReusedConnected(uint32_t connectionId, uint16_t challengeCode)
     g_connectCallback.OnReusedConnected(connectionId, &info);
 }
 
+int32_t ConnBleKeepAlive(uint32_t connectionId, uint32_t requestId, uint32_t time)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGW(time != 0 && time <= BLE_CONNECT_KEEP_ALIVE_TIMEOUT_MILLIS,
+        SOFTBUS_INVALID_PARAM, CONN_BLE, "time is invaliad, time=%{public}u", time);
+    ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
+    CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL, SOFTBUS_ERR, CONN_BLE,
+        "connection not exist, connectionId=%{public}u", connectionId);
+    int32_t status = ConnBleUpdateConnectionRc(connection, 0, 1);
+    if (status != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BLE, "update rc failed, status=%{public}d, connectionId=%{public}u, requestId=%{public}u",
+            status, connectionId, requestId);
+        ConnBleReturnConnection(&connection);
+        return SOFTBUS_ERR;
+    }
+    ConnBleReturnConnection(&connection);
+    ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MRG_MSG_KEEP_ALIVE_TIMEOUT, connectionId, requestId, NULL, time);
+    CONN_LOGI(CONN_BLE, "ble keep alive success, duration time is %{public}u, connId=%{public}u", time, connectionId);
+    return SOFTBUS_OK;
+}
+
+int32_t ConnBleRemoveKeepAlive(uint32_t connectionId, uint32_t requestId)
+{
+    ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
+    CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL, SOFTBUS_ERR, CONN_BLE,
+        "connection not exist, connectionId=%{public}u", connectionId);
+    bool isExist = false;
+    ConnRemoveMsgFromLooper(
+        &g_bleManagerSyncHandler, BLE_MRG_MSG_KEEP_ALIVE_TIMEOUT, connectionId, requestId, &isExist);
+    int32_t status = SOFTBUS_ERR;
+    do {
+        if (!isExist) {
+            status = SOFTBUS_OK;
+            break;
+        }
+        status = ConnBleUpdateConnectionRc(connection, 0, -1);
+        if (status != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BLE, "update rc failed, status=%{public}d, connectionId=%{public}u, requestId=%{public}u",
+                status, connectionId, requestId);
+            break;
+        }
+    } while (false);
+    ConnBleReturnConnection(&connection);
+    return status;
+}
+
 static void TransitionToState(enum BleMgrState target)
 {
     static ConnBleState statesTable[BLE_MGR_STATE_MAX] = {
@@ -1428,6 +1487,7 @@ static void TransitionToState(enum BleMgrState target)
             .reuseConnectionRequest = BleReuseConnectionRequestOnAvailableState,
             .preventTimeout = BlePreventTimeout,
             .reset = BleReset,
+            .keepAliveTimeout = BleKeepAliveTimeout,
         },
         [BLE_MGR_STATE_CONNECTING] = {
             .name = BleNameConnectingState,
@@ -1446,6 +1506,7 @@ static void TransitionToState(enum BleMgrState target)
             .reuseConnectionRequest = BleReuseConnectionRequestOnConnectingState,
             .preventTimeout = BlePreventTimeout,
             .reset = BleReset,
+            .keepAliveTimeout = BleKeepAliveTimeout,
         },
     };
 
@@ -1562,6 +1623,13 @@ static void BleManagerMsgHandler(SoftBusMessage *msg)
             }
             break;
         }
+        case BLE_MRG_MSG_KEEP_ALIVE_TIMEOUT: {
+            if (g_bleManager.state->keepAliveTimeout != NULL) {
+                g_bleManager.state->keepAliveTimeout((uint32_t)msg->arg1, (uint32_t)msg->arg2);
+                return;
+            }
+            break;
+        }
         default:
             CONN_LOGW(CONN_BLE,
                 "ble manager looper receive unexpected msg just ignore, FIX it quickly. what=%{public}d", msg->what);
@@ -1586,6 +1654,13 @@ static int BleCompareManagerLooperEventFunc(const SoftBusMessage *msg, void *arg
         }
         case BLE_MGR_MSG_PREVENT_TIMEOUT: {
             if (memcmp(msg->obj, ctx->obj, UDID_BUF_LEN) == 0) {
+                return COMPARE_SUCCESS;
+            }
+            return COMPARE_FAILED;
+        }
+        case BLE_MRG_MSG_KEEP_ALIVE_TIMEOUT: {
+            if (msg->arg1 == ctx->arg1 && msg->arg2 == ctx->arg2) {
+                *(bool *)ctx->obj = true;
                 return COMPARE_SUCCESS;
             }
             return COMPARE_FAILED;
@@ -2235,6 +2310,7 @@ ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback)
         .CheckActiveConnection = BleCheckActiveConnection,
         .UpdateConnection = BleUpdateConnection,
         .PreventConnection = NULL,
+        .ConfigPostLimit = ConnBleTransConfigPostLimit,
     };
     CONN_LOGI(CONN_INIT, "conn init ble successfully");
     return &bleFuncInterface;

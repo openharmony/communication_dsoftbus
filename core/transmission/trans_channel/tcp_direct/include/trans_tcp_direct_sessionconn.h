@@ -77,8 +77,9 @@ SessionConn *GetSessionConnById(int32_t channelId, SessionConn *conn);
 int32_t SetAppInfoById(int32_t channelId, const AppInfo *appInfo);
 int32_t GetAppInfoById(int32_t channelId, AppInfo *appInfo);
 
-int32_t SetAuthIdByChanId(int32_t channelId, int64_t authId);
+int32_t SetAuthHandleByChanId(int32_t channelId, AuthHandle *authHandle);
 int64_t GetAuthIdByChanId(int32_t channelId);
+int32_t GetAuthHandleByChanId(int32_t channelId, AuthHandle *authHandle);
 
 void TransDelSessionConnById(int32_t channelId);
 
