@@ -87,9 +87,9 @@ int32_t FindLaneResourceByLaneId(uint64_t laneId, LaneResource *resourceItem)
     return GetTransLaneIf()->FindLaneResourceByLaneId(laneId, resourceItem);
 }
 
-int32_t FindLaneResourceByLaneId(uint64_t laneId, LaneResource *resourceItem)
+void FreeLaneReqId(uint32_t laneReqId)
 {
-    return GetTransLaneIf()->FindLaneResourceByLaneId(laneId, resourceItem);
+    GetTransLaneIf()->FreeLaneReqId(laneReqId);
 }
 
 int32_t SelectExpectLaneByParameter(LanePreferredLinkList *setRecommendLinkList)
