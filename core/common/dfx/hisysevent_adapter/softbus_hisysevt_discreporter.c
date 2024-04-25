@@ -504,6 +504,11 @@ int32_t SoftbusRecordDiscBleRssi(int32_t rssi)
                                    "ble rssi range lock fail");
 
     uint32_t rangeId = (uint32_t)((MAX_RANGE_ID - rssi) / INTERVAL_OF_RSSI);
+    if (rangeId >= BLE_RSSI_RANGE_SIZE ) {
+        COMM_LOGE(COMM_EVENT, "range id fail");
+        (void)SoftBusMutexUnlock(&g_bleRssiRangeLock);
+        return SOFTBUS_INVALID_NUM;
+    }
     g_bleRssiRangeId[rangeId] = rangeId;
     g_bleRssiRangeData[rangeId] += 1;
     (void)SoftBusMutexUnlock(&g_bleRssiRangeLock);
