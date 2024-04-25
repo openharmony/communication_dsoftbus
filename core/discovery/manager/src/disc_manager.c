@@ -325,7 +325,8 @@ static bool IsInnerModule(const DiscInfo *infoNode)
 static void InnerDeviceFound(DiscInfo *infoNode, const DeviceInfo *device,
                                                 const InnerDeviceInfoAddtions *additions)
 {
-    if (infoNode->item != NULL && infoNode->item->callback.serverCb.OnServerDeviceFound != NULL && !IsInnerModule(infoNode)) {
+    if (infoNode->item != NULL && infoNode->item->callback.serverCb.OnServerDeviceFound != NULL &&
+        !IsInnerModule(infoNode)) {
         (void)infoNode->item->callback.serverCb.OnServerDeviceFound(infoNode->item->packageName, device, additions);
         return;
     }
