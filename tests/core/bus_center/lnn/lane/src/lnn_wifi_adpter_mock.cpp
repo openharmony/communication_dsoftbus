@@ -108,9 +108,5 @@ int32_t UpdateP2pLinkedInfo(uint32_t laneReqId, uint64_t laneId)
 {
     return GetWifiAdpterInterface()->UpdateP2pLinkedInfo(laneReqId, laneId);
 }
-int32_t UpdateP2pLinkedInfo(uint32_t laneReqId, uint64_t laneId)
-{
-    return GetWifiAdpterInterface()->UpdateP2pLinkedInfo(laneReqId, laneId);
-}
 }
 }
