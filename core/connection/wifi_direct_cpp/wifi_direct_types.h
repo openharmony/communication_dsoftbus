@@ -79,6 +79,7 @@ struct WifiDirectLink {
     int32_t linkId;
     char localIp[IP_STR_MAX_LEN];
     char remoteIp[IP_STR_MAX_LEN];
+    int32_t remotePort;
     enum WifiDirectLinkType linkType;
 };
 
@@ -86,6 +87,8 @@ enum WifiDirectNegoChannelType {
     NEGO_CHANNEL_NULL = 0,
     NEGO_CHANNEL_AUTH = 1,
     NEGO_CHANNEL_COC = 2,
+    NEGO_CHANNEL_ACTION = 3,
+    NEGO_CHANNEL_SHARE = 4,
 };
 
 struct WifiDirectNegotiateChannel {
@@ -93,6 +96,7 @@ struct WifiDirectNegotiateChannel {
     union {
         AuthHandle authHandle;
         int32_t channelId;
+        uint32_t actionAddr;
     } handle;
 };
 
@@ -123,6 +127,7 @@ struct WifiDirectConnectInfo {
     int32_t pid;
     enum WifiDirectConnectType connectType;
     struct WifiDirectNegotiateChannel negoChannel;
+    bool paralle;
     uint32_t expectApiRole;
     bool isStrict;
     char remoteNetworkId[NETWORK_ID_BUF_LEN];
@@ -130,6 +135,8 @@ struct WifiDirectConnectInfo {
     bool isNetworkDelegate;
     uint32_t bandWidth;
     enum IpAddrType ipAddrType;
+    uint32_t custom;
+
     enum StatisticLinkType linkType;
     enum StatisticBootLinkType bootLinkType;
     int renegotiate;

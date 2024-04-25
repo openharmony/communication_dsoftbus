@@ -120,7 +120,7 @@ static SyncChannelInfo *FindSyncChannelInfoByChannelId(int32_t channelId)
 
 static SyncChannelInfo *CreateSyncChannelInfo(const char *networkId)
 {
-    SyncChannelInfo *item = SoftBusMalloc(sizeof(SyncChannelInfo));
+    SyncChannelInfo *item = (SyncChannelInfo *)SoftBusMalloc(sizeof(SyncChannelInfo));
     if (item == NULL) {
         LNN_LOGE(LNN_BUILDER, "malloc sync channel info fail");
         return NULL;
@@ -150,7 +150,7 @@ static SyncInfoMsg *CreateSyncInfoMsg(LnnSyncInfoType type, const uint8_t *msg,
             type, dataLen);
         return NULL;
     }
-    syncMsg = SoftBusMalloc(sizeof(SyncInfoMsg) + dataLen);
+    syncMsg = (SyncInfoMsg *)SoftBusMalloc(sizeof(SyncInfoMsg) + dataLen);
     if (syncMsg == NULL) {
         LNN_LOGE(LNN_BUILDER, "malloc sync info msg fail. type=%{public}d, len=%{public}u",
             type, dataLen);

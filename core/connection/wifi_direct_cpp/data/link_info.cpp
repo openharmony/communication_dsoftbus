@@ -41,7 +41,8 @@ template<> InfoContainer<LinkInfoKey>::KeyTypeTable InfoContainer<LinkInfoKey>::
     { LinkInfoKey::STATUS, Serializable::ValueType::INT },
     { LinkInfoKey::LOCAL_BASE_MAC, Serializable::ValueType::STRING },
     { LinkInfoKey::REMOTE_BASE_MAC, Serializable::ValueType::STRING },
-    { LinkInfoKey::IS_CLIENT, Serializable::ValueType::BOOL },
+    { LinkInfoKey::LOCAL_IPV6, Serializable::ValueType::STRING },
+    { LinkInfoKey::REMOTE_IPV6, Serializable::ValueType::STRING },
 };
 
 LinkInfo::LinkInfo(const std::string &localInterface, const std::string &remoteInterface, LinkMode localMode,
@@ -333,5 +334,25 @@ void LinkInfo::SetIsClient(bool client)
 bool LinkInfo::GetIsClient() const
 {
     return Get(LinkInfoKey::IS_CLIENT, false);
+}
+
+void LinkInfo::SetLocalIpv6(const std::string &value)
+{
+    Set(LinkInfoKey::LOCAL_IPV6, value);
+}
+
+std::string LinkInfo::GetLocalIpv6()
+{
+    return Get(LinkInfoKey::LOCAL_IPV6, std::string());
+}
+
+void LinkInfo::SetRemoteIpv6(const std::string &value)
+{
+    Set(LinkInfoKey::REMOTE_IPV6, value);
+}
+
+std::string LinkInfo::GetRemoteIpv6()
+{
+    return Get(LinkInfoKey::REMOTE_IPV6, std::string());
 }
 }

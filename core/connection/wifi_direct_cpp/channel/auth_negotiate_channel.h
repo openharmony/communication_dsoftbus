@@ -50,7 +50,7 @@ public:
     explicit AuthNegotiateChannel(const AuthHandle &handle);
     AuthNegotiateChannel(const AuthNegotiateChannel &channel) = default;
     ~AuthNegotiateChannel() override;
-    AuthNegotiateChannel& operator=(const AuthNegotiateChannel &channel);
+
     bool operator==(const AuthNegotiateChannel &other) const;
     bool IsMeta() const;
     void SetClose();

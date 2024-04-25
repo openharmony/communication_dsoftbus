@@ -74,6 +74,9 @@ enum class NegotiateMessageType {
     CMD_RENEGOTIATE_REQ = 53,
     CMD_RENEGOTIATE_RESP = 54,
     CMD_AUTH_HAND_SHAKE = 55,
+
+    CMD_V3_REQ = 100,
+    CMD_V3_RSP = 101,
 };
 
 enum class NegotiateMessageKey {

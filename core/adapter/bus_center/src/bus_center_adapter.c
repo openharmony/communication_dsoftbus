@@ -271,7 +271,7 @@ int32_t GetDeviceSecurityLevel(int32_t *level)
         LNN_LOGE(LNN_STATE, "param error");
         return SOFTBUS_INVALID_PARAM;
     }
-    *level = GetIntParameter(OHOS_DEVICE_SECURITY_LEVEL, -1);
+    *level = GetIntParameter(OHOS_DEVICE_SECURITY_LEVEL, 0);
     LNN_LOGI(LNN_STATE, "level=%{public}d", *level);
     if (*level <= 0) {
         LNN_LOGE(LNN_STATE, "getIntParamenter fail.");

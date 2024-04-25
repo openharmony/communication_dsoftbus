@@ -213,6 +213,37 @@ HWTEST_F(SoftbusConnCommonTest, testBaseListener008, TestSize.Level1)
 };
 
 /*
+* @tc.name: testBaseListener009
+* @tc.desc: test GetSoftbusBaseListener and set
+* @tc.type: FUNC
+* @tc.require: I5HSOL
+*/
+HWTEST_F(SoftbusConnCommonTest, testBaseListener009, TestSize.Level1)
+{
+    int i;
+    int port = 6666;
+    SoftbusBaseListener *setListener = (SoftbusBaseListener *)malloc(sizeof(SoftbusBaseListener));
+    ASSERT_TRUE(setListener != nullptr);
+    setListener->onConnectEvent = ConnectEvent;
+    setListener->onDataEvent = DataEvent;
+    for (i = PROXY; i < LISTENER_MODULE_DYNAMIC_START; i++) {
+        LocalListenerInfo info = {
+            .type = CONNECT_TCP,
+            .socketOption = {
+                .addr = "::1%lo",
+                .port = port,
+                .moduleId = static_cast<ListenerModule>(i),
+                .protocol = LNN_PROTOCOL_IP
+            }
+        };
+        EXPECT_EQ(port, StartBaseListener(&info, setListener));
+        ASSERT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(i)));
+        ++port;
+    }
+    free(setListener);
+};
+
+/*
  * @tc.name: testBaseListener016
  * @tc.desc: Test StartBaseClient invalid input param ListenerModule module.
  * @tc.in: Test module, Test number, Test Levels.
@@ -450,6 +481,46 @@ HWTEST_F(SoftbusConnCommonTest, testTcpSocket004, TestSize.Level1)
 };
 
 /*
+* @tc.name: testTcpSocket005
+* @tc.desc: test OpenTcpServerSocket
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftbusConnCommonTest, testTcpSocket006, TestSize.Level1)
+{
+    const SocketInterface *tcp = GetTcpProtocol();
+    ASSERT_NE(tcp, nullptr);
+
+    LocalListenerInfo info = {
+        .type = CONNECT_TCP,
+        .socketOption = {
+            .addr = "::1%lo",
+            .port = g_port,
+            .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
+            .protocol = LNN_PROTOCOL_IP
+        }
+    };
+
+    int fd = tcp->OpenServerSocket(&info);
+    int ret = (fd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
+    ASSERT_TRUE(ret == SOFTBUS_OK);
+    int port = tcp->GetSockPort(fd);
+    EXPECT_EQ(port, g_port);
+    ConnCloseSocket(fd);
+
+    fd = tcp->OpenServerSocket(nullptr);
+    ret = (fd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    ConnCloseSocket(fd);
+
+    info.socketOption.port = -1;
+    fd = tcp->OpenServerSocket(&info);
+    ret = (fd <= 0) ? SOFTBUS_ERR : SOFTBUS_OK;
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+    ConnCloseSocket(fd);
+};
+
+/*
 * @tc.name: testSocket001
 * @tc.desc: test ConnGetLocalSocketPort port
 * @tc.type: FUNC
@@ -475,13 +546,13 @@ HWTEST_F(SoftbusConnCommonTest, testSocket002, TestSize.Level1)
 {
     int ret;
     ret = ConnGetPeerSocketAddr(INVALID_FD, &g_socketAddr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TCP_SOCKET_ERR, ret);
 
     ret = ConnGetPeerSocketAddr(TEST_FD, NULL);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = ConnGetPeerSocketAddr(TEST_FD, &g_socketAddr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TCP_SOCKET_ERR, ret);
 };
 
 /*

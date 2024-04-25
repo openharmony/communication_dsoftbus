@@ -64,6 +64,8 @@ if (dsoftbus_feature_lnn_net) {
       "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_key.c",
       "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_manager.c",
       "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/ccmp/src/ccmp_message.c",
+      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/auth_generate_attest.c",
+      "$dsoftbus_root_path/dsoftbus_enhance/core/authentication/auth_validate_attest.c",
     ]
     auth_server_inc += [
       "$dsoftbus_root_path/adapter/common/include/",
@@ -71,6 +73,7 @@ if (dsoftbus_feature_lnn_net) {
     ]
   } else {
     auth_server_src += [
+      "$authentication_path/src/virtual/auth_attest_virtual.c",
       "$authentication_path/src/virtual/auth_device_common_key_virtual.c",
       "$authentication_path/src/virtual/auth_meta_manager_virtual.c",
       "$authentication_path/src/virtual/customized_security_protocol_virtual.c",

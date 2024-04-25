@@ -62,15 +62,28 @@ static void LaneUnlock(void)
     (void)SoftBusMutexUnlock(&g_laneResource.lock);
 }
 
-uint64_t ApplyLaneId(const char *activeUdid, const char *passiveUdid, LaneLinkType linkType)
+uint64_t ApplyLaneId(const char *localUdid, const char *remoteUdid, LaneLinkType linkType)
 {
+    if (localUdid == NULL || remoteUdid == NULL) {
+        LNN_LOGE(LNN_LANE, "udid is NULL");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    const char *bigUdid = NULL;
+    const char *smallUdid = NULL;
+    if (strcmp(localUdid, remoteUdid) >= 0) {
+        bigUdid = localUdid;
+        smallUdid = remoteUdid;
+    } else {
+        bigUdid = remoteUdid;
+        smallUdid = localUdid;
+    }
     uint8_t laneIdParamBytes[LANE_ID_BUF_LEN];
     (void)memset_s(laneIdParamBytes, sizeof(laneIdParamBytes), 0, sizeof(laneIdParamBytes));
     uint64_t laneId = INVALID_LANE_ID;
     uint16_t type = (uint16_t)linkType;
     // sharded copy, LANE_ID_BUF_LEN = UDID_BUF_LEN + UDID_BUF_LEN + TYPE_BUF_LEN
-    if (memcpy_s(laneIdParamBytes, UDID_BUF_LEN, activeUdid, strlen(activeUdid)) == EOK &&
-        memcpy_s(laneIdParamBytes + UDID_BUF_LEN, UDID_BUF_LEN, passiveUdid, strlen(passiveUdid)) == EOK &&
+    if (memcpy_s(laneIdParamBytes, UDID_BUF_LEN, bigUdid, strlen(bigUdid)) == EOK &&
+        memcpy_s(laneIdParamBytes + UDID_BUF_LEN, UDID_BUF_LEN, smallUdid, strlen(smallUdid)) == EOK &&
         memcpy_s(laneIdParamBytes + UDID_BUF_LEN + UDID_BUF_LEN, TYPE_BUF_LEN, &type, sizeof(type)) == EOK) {
         uint8_t laneIdHash[LANE_ID_HASH_LEN] = {0};
         if (SoftBusGenerateStrHash(laneIdParamBytes, LANE_ID_BUF_LEN, laneIdHash) != SOFTBUS_OK) {
@@ -81,14 +94,14 @@ uint64_t ApplyLaneId(const char *activeUdid, const char *passiveUdid, LaneLinkTy
             LNN_LOGE(LNN_LANE, "memcpy laneId hash fail");
             return INVALID_LANE_ID;
         }
-        char *anonyActiveUdid = NULL;
-        char *anonyPassiveUdid = NULL;
-        Anonymize(activeUdid, &anonyActiveUdid);
-        Anonymize(passiveUdid, &anonyPassiveUdid);
-        LNN_LOGI(LNN_LANE, "apply laneId=%{public}" PRIu64 " with activeUdid=%{public}s,"
-            "passiveUdid=%{public}s, linkType=%{public}d", laneId, anonyActiveUdid, anonyPassiveUdid, linkType);
-        AnonymizeFree(anonyActiveUdid);
-        AnonymizeFree(anonyPassiveUdid);
+        char *anonyLocalUdid = NULL;
+        char *anonyRemoteUdid = NULL;
+        Anonymize(localUdid, &anonyLocalUdid);
+        Anonymize(remoteUdid, &anonyRemoteUdid);
+        LNN_LOGI(LNN_LANE, "apply laneId=%{public}" PRIu64 " with localUdid=%{public}s,"
+            "remoteUdid=%{public}s, linkType=%{public}d", laneId, anonyLocalUdid, anonyRemoteUdid, linkType);
+        AnonymizeFree(anonyLocalUdid);
+        AnonymizeFree(anonyRemoteUdid);
         return laneId;
     }
     LNN_LOGE(LNN_LANE, "memcpy laneId param bytes fail");
@@ -178,7 +191,7 @@ static int32_t CreateNewLaneResource(const LaneLinkInfo *linkInfo, uint64_t lane
     g_laneResource.cnt++;
     LaneUnlock();
     LNN_LOGI(LNN_LANE, "create new laneId=%{public}" PRIu64 " to resource pool succ, isServerSide=%{public}u,"
-        "ref=%{public}u", resourceItem->laneId, isServerSide, resourceItem->clientRef);
+        "clientRef=%{public}u", resourceItem->laneId, isServerSide, resourceItem->clientRef);
     return SOFTBUS_OK;
 }
 
@@ -195,42 +208,92 @@ int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, boo
     LaneResource* resourceItem = GetValidLaneResource(linkInfo);
     if (resourceItem != NULL) {
         if (isServerSide) {
-            LNN_LOGE(LNN_LANE, "laneId=%{public}" PRIu64 " is existed, add server lane resource fail",
-            resourceItem->laneId);
+            if (resourceItem->isServerSide) {
+                LNN_LOGE(LNN_LANE, "server laneId=%{public}" PRIu64 " is existed, add server lane resource fail",
+                resourceItem->laneId);
+                LaneUnlock();
+                return SOFTBUS_LANE_TRIGGER_LINK_FAIL;
+            } else {
+                resourceItem->isServerSide = true;
+                LNN_LOGI(LNN_LANE, "add server laneId=%{public}" PRIu64 " to resource pool succ", resourceItem->laneId);
+                LaneUnlock();
+                return SOFTBUS_OK;
+            }
+        } else {
+            resourceItem->clientRef++;
+            LNN_LOGI(LNN_LANE, "add client laneId=%{public}" PRIu64 " to resource pool succ, clientRef=%{public}u",
+                resourceItem->laneId, resourceItem->clientRef);
             LaneUnlock();
-            return SOFTBUS_LANE_TRIGGER_LINK_FAIL;
+            return SOFTBUS_OK;
         }
-        resourceItem->clientRef++;
-        LNN_LOGI(LNN_LANE, "add laneId=%{public}" PRIu64 " to resource pool succ, ref=%{public}u",
-            resourceItem->laneId, resourceItem->clientRef);
-        LaneUnlock();
-        return SOFTBUS_OK;
     }
     LaneUnlock();
     return CreateNewLaneResource(linkInfo, laneId, isServerSide);
 }
 
-int32_t DelLaneResourceByLaneId(uint64_t laneId)
+int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide)
 {
     if (LaneLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "lane lock fail");
         return SOFTBUS_LOCK_ERR;
     }
-    uint32_t ref = -1;
-    LaneResource *item = NULL;
+    LNN_LOGI(LNN_LANE, "start to del laneId=%{public}" PRIu64 " resource, isServer=%{public}d ",
+            laneId, isServerSide);
+    uint32_t ref = 0;
+    bool isServer = false;
     LaneResource *next = NULL;
+    LaneResource *item = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResource.list, LaneResource, node) {
         if (item->laneId == laneId) {
-            ref = --item->clientRef;
-            if (ref == 0) {
-                ListDelete(&item->node);
-                SoftBusFree(item);
-                g_laneResource.cnt--;
+            if (isServerSide) {
+                ref = item->clientRef;
+                if(item->clientRef == 0) {
+                    ListDelete(&item->node);
+                    SoftBusFree(item);
+                    g_laneResource.cnt--;
+                } else {
+                    item->isServerSide = false;
+                }
+            } else {
+                isServer = item->isServerSide;
+                ref = --item->clientRef;
+                if (!isServer && ref == 0) {
+                    ListDelete(&item->node);
+                    SoftBusFree(item);
+                    g_laneResource.cnt--;
+                }
             }
-            LNN_LOGI(LNN_LANE, " del laneId=%{public}" PRIu64 " resource, ref=%{public}d", laneId, ref);
+            LaneUnlock();
+            LNN_LOGI(LNN_LANE, "del laneId=%{public}" PRIu64 " resource, isServer=%{public}d, clientRef=%{public}u",
+                laneId, isServer, ref);
+            return SOFTBUS_OK;
         }
     }
     LaneUnlock();
+    LNN_LOGI(LNN_LANE, "not found laneId=%{public}" PRIu64 " resource when del", laneId);
+    return SOFTBUS_OK;
+}
+
+int32_t ClearLaneResourceByLaneId(uint64_t laneId)
+{
+    if (LaneLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "lane lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    LaneResource *next = NULL;
+    LaneResource *item = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResource.list, LaneResource, node) {
+        if (item->laneId == laneId) {
+            ListDelete(&item->node);
+            SoftBusFree(item);
+            g_laneResource.cnt--;
+            LaneUnlock();
+            LNN_LOGI(LNN_LANE, "clear laneId=%{public}" PRIu64 " resource succ", laneId);
+            return SOFTBUS_OK;
+        }
+    }
+    LaneUnlock();
+    LNN_LOGI(LNN_LANE, "not found laneId=%{public}" PRIu64 " resource when clear", laneId);
     return SOFTBUS_OK;
 }
 

@@ -19,8 +19,8 @@
 #include "processor_selector_factory.h"
 
 namespace OHOS::SoftBus {
-DisconnectCommand::DisconnectCommand(WifiDirectDisconnectInfo &info, WifiDirectDisconnectCallback &callback) :
-    callback_(callback)
+DisconnectCommand::DisconnectCommand(const WifiDirectDisconnectInfo &info, const WifiDirectDisconnectCallback &callback)
+    : callback_(callback)
 {
     info_.info_ = info;
     auto innerLink = LinkManager::GetInstance().GetLinkById(info_.info_.linkId);
