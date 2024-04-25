@@ -26,9 +26,10 @@ extern "C" {
 typedef struct {
     LaneTransType transType;
     QosInfo qosRequire;
+    LanePreferredLinkList list;
+    uint64_t allocedLaneId;
     //OldInfo
     uint32_t expectedBw;
-    LanePreferredLinkList list;
 } LaneSelectParam;
 
 
@@ -43,4 +44,4 @@ int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *req
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif // LNN_LANE_SELECT_H

@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "anonymizer.h"
+#include "auth_attest_interface.h"
 #include "auth_connection.h"
 #include "auth_device_common_key.h"
 #include "auth_hichain.h"
@@ -338,32 +339,28 @@ static void ReportAuthResultEvt(AuthFsm *authFsm, int32_t result)
     authFsm->statisticData.endAuthTime = LnnUpTimeMs();
     uint64_t costTime = authFsm->statisticData.endAuthTime - authFsm->statisticData.startAuthTime;
     DfxRecordLnnAuthEnd(authFsm, costTime, result);
-    AuthFailStage stage;
-    switch (result) {
-        case SOFTBUS_OK:
-            if (SoftBusRecordAuthResult(linkType, SOFTBUS_OK, costTime, AUTH_STAGE_BUTT) != SOFTBUS_OK) {
-                AUTH_LOGE(AUTH_FSM, "report static auth result fail");
-            }
-            return;
-        case SOFTBUS_AUTH_SYNC_DEVID_FAIL:
-        case SOFTBUS_AUTH_SYNC_DEVINFO_FAIL:
-        case SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL:
-        case SOFTBUS_AUTH_SEND_FAIL:
-            stage = AUTH_EXCHANGE_STAGE;
-            break;
-        case SOFTBUS_AUTH_DEVICE_DISCONNECTED:
-            stage = AUTH_CONNECT_STAGE;
-            break;
-        case SOFTBUS_AUTH_HICHAIN_PROCESS_FAIL:
-        case SOFTBUS_AUTH_HICHAIN_AUTH_ERROR:
-        case SOFTBUS_AUTH_TIMEOUT:
-        case SOFTBUS_AUTH_HICHAIN_NOT_TRUSTED:
-            stage = AUTH_VERIFY_STAGE;
-            break;
-        default:
-            AUTH_LOGE(AUTH_FSM, "unsupport reasn=%{public}d.", result);
-            return;
+    AuthFailStage stage = AUTH_STAGE_BUTT;
+
+    if (result == SOFTBUS_OK) {
+        if (SoftBusRecordAuthResult(linkType, SOFTBUS_OK, costTime, AUTH_STAGE_BUTT) != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_FSM, "report static auth result fail");
+        }
+        return;
+    } else if (result == SOFTBUS_AUTH_SYNC_DEVID_FAIL || result == SOFTBUS_AUTH_SYNC_DEVINFO_FAIL ||
+        result == SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL || result == SOFTBUS_AUTH_SEND_FAIL) {
+        stage = AUTH_EXCHANGE_STAGE;
+    } else if (result == SOFTBUS_AUTH_DEVICE_DISCONNECTED) {
+        stage = AUTH_CONNECT_STAGE;
+    } else if (result == SOFTBUS_AUTH_HICHAIN_PROCESS_FAIL || result == SOFTBUS_AUTH_TIMEOUT ||
+        result == SOFTBUS_AUTH_HICHAIN_NOT_TRUSTED) {
+        stage = AUTH_VERIFY_STAGE;
+    } else if (result >= SOFTBUS_HICHAIN_MIN && result <= SOFTBUS_HICHAIN_MAX) {
+        stage = AUTH_VERIFY_STAGE;
+    } else {
+        AUTH_LOGE(AUTH_FSM, "unsupport result=%{public}d.", result);
+        return;
     }
+
     if (SoftBusRecordAuthResult(linkType, SOFTBUS_ERR, costTime, stage) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "report static auth result fail");
     }
@@ -507,7 +504,8 @@ static int32_t RecoveryNormalizedDeviceKey(AuthFsm *authFsm)
         AUTH_LOGE(AUTH_FSM, "convert bytes to string fail");
         return SOFTBUS_ERR;
     }
-    AuthUpdateNormalizeKeyIndex(udidShortHash, authFsm->info.normalizedIndex, authFsm->info.isServer);
+    AuthUpdateNormalizeKeyIndex(udidShortHash, authFsm->info.normalizedIndex, authFsm->info.connInfo.type,
+        authFsm->info.normalizedKey, authFsm->info.isServer);
     ret = AuthSessionSaveSessionKey(authFsm->authSeq, authFsm->info.normalizedKey->value,
         authFsm->info.normalizedKey->len);
     if (ret != SOFTBUS_OK) {
@@ -648,7 +646,10 @@ static void UpdateUdidHashIfEmpty(AuthFsm *authFsm, AuthSessionInfo *info)
 {
     if (info->connInfo.type == AUTH_LINK_TYPE_BLE && strlen(info->udid) != 0 &&
         authFsm->info.connInfo.info.bleInfo.deviceIdHash[0] == '\0') {
-        AUTH_LOGW(AUTH_FSM, "udidhash is empty");
+        char *anonyUdid = NULL;
+        Anonymize(info->udid, &anonyUdid);
+        AUTH_LOGW(AUTH_FSM, "udidhash is empty, udid=%{public}s", anonyUdid);
+        AnonymizeFree(anonyUdid);
         if (SoftBusGenerateStrHash((unsigned char *)info->udid, strlen(info->udid),
             (unsigned char *)authFsm->info.connInfo.info.bleInfo.deviceIdHash) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_FSM, "generate udidhash fail");
@@ -762,6 +763,8 @@ static void HandleMsgSaveSessionKey(AuthFsm *authFsm, const MessagePara *para)
         AUTH_LOGE(AUTH_FSM, "auth fsm save session key fail. authSeq=%{public}" PRId64 "", authFsm->authSeq);
     }
 
+    (void)CalcHKDF((uint8_t *)(&sessionKey.value), sessionKey.len,
+        (uint8_t *)(&authFsm->info.sessionKeyRandomNum), sizeof(authFsm->info.sessionKeyRandomNum));
     (void)memset_s(&sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
     if (LnnGenerateLocalPtk(authFsm->info.udid, authFsm->info.uuid) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "generate ptk fail");
@@ -786,7 +789,7 @@ static void HandleMsgAuthError(AuthFsm *authFsm, const MessagePara *para)
     int32_t result = *((int32_t *)(para->data));
     AUTH_LOGE(AUTH_FSM,
         "auth fsm handle hichain error, authSeq=%{public}" PRId64", reason=%{public}d", authFsm->authSeq, result);
-    CompleteAuthSession(authFsm, SOFTBUS_AUTH_HICHAIN_AUTH_ERROR);
+    CompleteAuthSession(authFsm, result);
 }
 
 static void HandleMsgRecvDevInfoEarly(AuthFsm *authFsm, const MessagePara *para)

@@ -30,6 +30,7 @@ extern "C" {
 #endif
 
 #define BLE_CONNECT_TIMEOUT_MILLIS (10 * 1000)
+#define BLE_CONNECT_KEEP_ALIVE_TIMEOUT_MILLIS (10 * 1000)
 
 enum ConnBleDeviceState {
     BLE_DEVICE_STATE_INIT,
@@ -112,6 +113,7 @@ typedef struct {
     void (*reuseConnectionRequest)(const ConnBleReuseConnectionContext *ctx);
     void (*preventTimeout)(const char *udid);
     void (*reset)(int32_t reason);
+    void (*keepAliveTimeout)(uint32_t connectionId, uint32_t requestId);
 } ConnBleState;
 
 int32_t ConnBleSaveConnection(ConnBleConnection *connection);
@@ -125,6 +127,8 @@ ConnBleConnection *ConnBleGetConnectionByUdid(const char *addr, const char *udid
 ConnBleConnection *ConnBleGetClientConnectionByUdid(const char *udid, BleProtocolType protocol);
 void ConnBleReturnConnection(ConnBleConnection **connection);
 void NotifyReusedConnected(uint32_t connectionId, uint16_t challengeCode);
+int32_t ConnBleKeepAlive(uint32_t connectionId, uint32_t requestId, uint32_t time);
+int32_t ConnBleRemoveKeepAlive(uint32_t connectionId, uint32_t requestId);
 
 ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback);
 

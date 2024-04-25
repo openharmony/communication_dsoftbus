@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,7 +36,6 @@
 #include "softbus_def.h"
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
-#include "lnn_ohos_account.h"
 
 int32_t LnnInitNetLedger(void)
 {
@@ -157,16 +156,6 @@ static void LnnRestoreLocalDeviceInfo()
     LoadBleBroadcastKey();
     LnnLoadLocalBroadcastCipherKey();
     LNN_LOGI(LNN_LEDGER, "load remote deviceInfo devicekey success");
-}
-
-int32_t LnnInitAccountInfoDelay(void)
-{
-    if (LnnInitOhosAccount() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "init default ohos account failed");
-        return SOFTBUS_ERR;
-    }
-    LNN_LOGI(LNN_LEDGER, "init success");
-    return SOFTBUS_OK;
 }
 
 int32_t LnnInitNetLedgerDelay(void)
@@ -310,6 +299,42 @@ int32_t LnnSetNodeDataChangeFlag(const char *networkId, uint16_t dataChangeFlag)
     }
     LNN_LOGE(LNN_LEDGER, "remote networkId");
     return SOFTBUS_ERR;
+}
+
+int32_t LnnSetDataLevel(const DataLevel *dataLevel)
+{
+    if (dataLevel == NULL) {
+        LNN_LOGE(LNN_LEDGER, "LnnSetDataLevel data level is null");
+        return SOFTBUS_ERR;
+    }
+    LNN_LOGI(LNN_LEDGER, "LnnSetDataLevel, dynamic: %{public}hu, static: %{public}hu, "
+        "switch: %{public}u, switchLen: %{public}hu", dataLevel->dynamicLevel, dataLevel->staticLevel,
+        dataLevel->switchLevel, dataLevel->switchLength);
+    uint16_t dynamicLevel = dataLevel->dynamicLevel;
+    if (LnnSetLocalNumU16Info(NUM_KEY_DATA_DYNAMIC_LEVEL, dynamicLevel) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "Set data dynamic level failed");
+        return SOFTBUS_ERR;
+    }
+
+    uint16_t staticLevel = dataLevel->staticLevel;
+    if (LnnSetLocalNumU16Info(NUM_KEY_DATA_STATIC_LEVEL, staticLevel) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "Set data static level failed");
+        return SOFTBUS_ERR;
+    }
+
+    uint32_t switchLevel = dataLevel->switchLevel;
+    if (LnnSetLocalNumU32Info(NUM_KEY_DATA_SWITCH_LEVEL, switchLevel) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "Set data switch level faield");
+        return SOFTBUS_ERR;
+    }
+
+    uint16_t switchLength = dataLevel->switchLength;
+    if (LnnSetLocalNumU16Info(NUM_KEY_DATA_SWITCH_LENGTH, switchLength) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "Set data switch length failed");
+        return SOFTBUS_ERR;
+    }
+
+    return SOFTBUS_OK;
 }
 
 int32_t LnnGetNodeKeyInfoLen(int32_t key)

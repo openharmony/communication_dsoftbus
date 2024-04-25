@@ -60,7 +60,7 @@ static int32_t StartNewP2pListener(const char *ip, int32_t *port)
 
     if (strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), ip) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "copy addr failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
 
     listenerPort = TransTdcStartSessionListener(DIRECT_CHANNEL_SERVER_P2P, &info);
@@ -83,7 +83,7 @@ static int32_t StartNewHmlListener(const char *ip, int32_t *port, ListenerModule
     info.socketOption.protocol = LNN_PROTOCOL_IP;
     if (strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), ip) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "copy addr failed!");
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     for (int32_t i = DIRECT_CHANNEL_SERVER_HML_START; i <= DIRECT_CHANNEL_SERVER_HML_END; i++) {
         info.socketOption.moduleId = (ListenerModule)i;
@@ -244,7 +244,7 @@ static int32_t StartHmlListener(const char *ip, int32_t *port)
         StopHmlListener(moudleType);
         (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
         TRANS_LOGE(TRANS_CTRL, "HmlListenerInfo malloc fail");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MALLOC_ERR;
     }
     item->myPort = *port;
     item->moudleType = moudleType;
@@ -298,7 +298,7 @@ static int32_t StartP2pListener(const char *ip, int32_t *port)
         TRANS_LOGE(TRANS_CTRL, "strcpy_s fail");
         StopP2pSessionListener();
         (void)SoftBusMutexUnlock(&g_p2pLock);
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     (void)SoftBusMutexUnlock(&g_p2pLock);
     TRANS_LOGI(TRANS_CTRL, "end: port=%{public}d", *port);
@@ -484,13 +484,13 @@ static int32_t SendVerifyP2pRsp(AuthHandle authHandle, int32_t module, int32_t f
         char *sendMsg = (char*)SoftBusCalloc(strLen + sizeof(int64_t) + sizeof(int64_t));
         if (sendMsg == NULL) {
             TRANS_LOGE(TRANS_CTRL, "softbuscalloc fail");
-            return SOFTBUS_ERR;
+            return SOFTBUS_MALLOC_ERR;
         }
         *(int64_t*)sendMsg = P2P_VERIFY_REPLY;
         *(int64_t*)(sendMsg + sizeof(int64_t)) = seq;
         if (strcpy_s(sendMsg  + sizeof(int64_t) + sizeof(int64_t), strLen, reply) != EOK) {
             SoftBusFree(sendMsg);
-            return SOFTBUS_ERR;
+            return SOFTBUS_STRCPY_ERR;
         }
         ret = TransProxyPipelineSendMessage(authHandle.authId, (uint8_t *)sendMsg,
             strLen + sizeof(int64_t) + sizeof(int64_t), MSG_TYPE_IP_PORT_EXCHANGE);
@@ -574,7 +574,7 @@ static int32_t ConnectTcpDirectPeer(const char *addr, int port)
     int32_t ret = strcpy_s(options.socketOption.addr, sizeof(options.socketOption.addr), addr);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "strcpy_s failed! ret=%{public}" PRId32, ret);
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
 
     return ConnOpenClientSocket(&options, BIND_ADDR_ALL, true);
@@ -790,6 +790,23 @@ void OnP2pVerifyChannelClosed(int32_t channelId)
     TRANS_LOGW(TRANS_CTRL, "receive p2p verify close. channelId=%{public}d", channelId);
 }
 
+static int32_t TransProxyGetAuthId(SessionConn *conn)
+{
+    AuthGetLatestIdByUuid(conn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_WIFI, false, &conn->authHandle);
+    if (conn->authHandle.authId == AUTH_INVALID_ID) {
+        //get WIFI authManager failed,retry BLE
+        AuthGetLatestIdByUuid(conn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_BLE, false, &conn->authHandle);
+    }
+    if (conn->authHandle.authId == AUTH_INVALID_ID) {
+        //get WIFI and BLE authManager failed,retry BR
+        AuthGetLatestIdByUuid(conn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_BR, false, &conn->authHandle);
+    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(conn->authHandle.authId != AUTH_INVALID_ID, SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED,
+            TRANS_CTRL, "get authManager failed");
+    return SOFTBUS_OK;
+}
+
+
 static int32_t StartVerifyP2pInfo(const AppInfo *appInfo, SessionConn *conn)
 {
     int32_t ret = SOFTBUS_ERR;
@@ -808,12 +825,8 @@ static int32_t StartVerifyP2pInfo(const AppInfo *appInfo, SessionConn *conn)
             return SOFTBUS_ERR;
         }
         TransProxyPipelineCloseChannelDelay(pipeLineChannelId);
-        AuthGetLatestIdByUuid(conn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_WIFI, false, &conn->authHandle);
-        if (conn->authHandle.authId == AUTH_INVALID_ID) {
-            AuthGetLatestIdByUuid(conn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_BR, false, &conn->authHandle);
-        }
-        TRANS_CHECK_AND_RETURN_RET_LOGW(conn->authHandle.authId != AUTH_INVALID_ID, SOFTBUS_ERR,
-            TRANS_CTRL, "get auth id failed");
+        ret = TransProxyGetAuthId(conn);
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get auth id failed");
         conn->requestId = REQUEST_INVALID;
         char *msg = VerifyP2pPack(conn->appInfo.myData.addr, conn->appInfo.myData.port, NULL);
         if (msg == NULL) {
@@ -824,14 +837,14 @@ static int32_t StartVerifyP2pInfo(const AppInfo *appInfo, SessionConn *conn)
         char *sendMsg = (char*)SoftBusCalloc(strLen + sizeof(int64_t) + sizeof(int64_t));
         if (sendMsg == NULL) {
             cJSON_free(msg);
-            return SOFTBUS_ERR;
+            return SOFTBUS_MALLOC_ERR;
         }
         *(int64_t*)sendMsg = P2P_VERIFY_REQUEST;
         *(int64_t*)(sendMsg + sizeof(int64_t)) = conn->req;
         if (strcpy_s(sendMsg  + sizeof(int64_t) + sizeof(int64_t), strLen, msg) != EOK) {
             cJSON_free(msg);
             SoftBusFree(sendMsg);
-            return SOFTBUS_ERR;
+            return SOFTBUS_STRCPY_ERR;
         }
         ret = TransProxyPipelineSendMessage(pipeLineChannelId, (uint8_t *)sendMsg,
             strLen + sizeof(int64_t) + sizeof(int64_t), MSG_TYPE_IP_PORT_EXCHANGE);

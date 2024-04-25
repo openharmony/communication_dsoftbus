@@ -152,7 +152,7 @@ int32_t ClientIpcSetChannelInfo(
         CallProxySetChannelInfo(clientProxy, sessionName, sessionId, transInfo);
     });
     if (task.wait_for(std::chrono::seconds(IPC_OPT_TIMEOUT_S)) != std::future_status::ready) {
-        char *tmpName = NULL;
+        char *tmpName = nullptr;
         Anonymize(sessionName, &tmpName);
         TRANS_LOGE(TRANS_SDK, "ClientIpcSetChannelInfo timeout!, pkgName=%{public}s sessionName=%{public}s", pkgName,
             tmpName);

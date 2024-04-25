@@ -16,19 +16,22 @@
 #include "softbus_conn_br_trans.h"
 
 #include "securec.h"
+
+#include "conn_event.h"
 #include "conn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_br_pending_packet.h"
 #include "softbus_conn_br_send_queue.h"
 #include "softbus_conn_common.h"
+#include "softbus_conn_flow_control.h"
 #include "softbus_conn_manager.h"
 #include "softbus_datahead_transform.h"
 #include "softbus_def.h"
 #include "softbus_json_utils.h"
-#include "conn_event.h"
 
 static SppSocketDriver *g_sppDriver = NULL;
 static ConnBrTransEventListener g_transEventListener = { 0 };
+static struct ConnSlideWindowController *g_flowController = NULL;
 
 static uint8_t *BrRecvDataParse(uint32_t connectionId, LimitedBuffer *buffer, int32_t *outLen)
 {
@@ -47,7 +50,7 @@ static uint8_t *BrRecvDataParse(uint32_t connectionId, LimitedBuffer *buffer, in
     if (buffer->capacity - pktHeadLen < head->len) {
         buffer->length = 0;
         CONN_LOGE(CONN_BR,
-            "recv data too big: connId=%{public}u, module=%{public}d, seq=%{public}" PRId64", datalen=%{public}d",
+            "recv data too big: connId=%{public}u, module=%{public}d, seq=%{public}" PRId64 ", datalen=%{public}d",
             connectionId, head->module, head->seq, head->len);
         return NULL;
     }
@@ -58,15 +61,15 @@ static uint8_t *BrRecvDataParse(uint32_t connectionId, LimitedBuffer *buffer, in
     }
     uint8_t *dataCopy = (uint8_t *)SoftBusCalloc(packLen);
     if (dataCopy == NULL) {
-        CONN_LOGE(CONN_BR,
-            "parse data failed: calloc failed, retry next time, connId=%{public}u, packLen=%{public}u",
+        CONN_LOGE(CONN_BR, "parse data failed: calloc failed, retry next time, connId=%{public}u, packLen=%{public}u",
             connectionId, packLen);
         return NULL;
     }
     if (memcpy_s(dataCopy, packLen, buffer->buffer, packLen) != EOK) {
         CONN_LOGE(CONN_BR,
             "parse data failed: memcpy_s failed, retry next time, "
-            "connId=%{public}u, packLen=%{public}u, bufferLen=%{public}u", connectionId, packLen, buffer->length);
+            "connId=%{public}u, packLen=%{public}u, bufferLen=%{public}u",
+            connectionId, packLen, buffer->length);
         SoftBusFree(dataCopy);
         return NULL;
     }
@@ -124,13 +127,13 @@ int32_t ConnBrTransReadOneFrame(uint32_t connectionId, int32_t socketHandle, Lim
     }
 }
 
-int32_t BrTransSend(
-    uint32_t connectionId, int32_t socketHandle, uint32_t mtu, const uint8_t *data, uint32_t dataLen)
+int32_t BrTransSend(uint32_t connectionId, int32_t socketHandle, uint32_t mtu, const uint8_t *data, uint32_t dataLen)
 {
     uint32_t waitWriteLen = dataLen;
     while (waitWriteLen > 0) {
-        uint32_t len = waitWriteLen > mtu ? mtu : waitWriteLen;
-        int32_t writeLen = g_sppDriver->Write(socketHandle, data, (int32_t)len);
+        uint32_t expect = waitWriteLen > mtu ? mtu : waitWriteLen;
+        int32_t amount = g_flowController->apply(g_flowController, (int32_t)expect);
+        int32_t writeLen = g_sppDriver->Write(socketHandle, data, amount);
         if (writeLen < 0) {
             CONN_LOGE(CONN_BR,
                 "br send data failed: underlayer bluetooth write failed, connId=%{public}u, "
@@ -270,16 +273,18 @@ int32_t ConnBrPostBytes(
 
     ConnBrConnection *connection = ConnBrGetConnectionById(connectionId);
     if (connection == NULL) {
-        CONN_LOGE(CONN_BR, "br post bytes failed: connection is not exist, connectionId=%{public}u, pid=%{public}d, "
-              "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
+        CONN_LOGE(CONN_BR,
+            "br post bytes failed: connection is not exist, connectionId=%{public}u, pid=%{public}d, "
+            "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
             connectionId, pid, len, flag, module, seq);
         SoftBusFree(data);
         return SOFTBUS_CONN_BR_CONNECTION_NOT_EXIST_ERR;
     }
     int32_t status = SoftBusMutexLock(&connection->lock);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "br post bytes failed: try to lock failed, connectionId=%{public}u, pid=%{public}d, "
-              "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 ", error=%{public}d",
+        CONN_LOGE(CONN_BR,
+            "br post bytes failed: try to lock failed, connectionId=%{public}u, pid=%{public}d, "
+            "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 ", error=%{public}d",
             connectionId, pid, len, flag, module, seq, status);
         ConnBrReturnConnection(&connection);
         SoftBusFree(data);
@@ -299,8 +304,9 @@ int32_t ConnBrPostBytes(
 
     SendBrQueueNode *node = (SendBrQueueNode *)SoftBusCalloc(sizeof(SendBrQueueNode));
     if (node == NULL) {
-        CONN_LOGE(CONN_BR, "br post bytes failed: calloc queue node failed, connectionId=%{public}u, pid=%{public}d, "
-              "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
+        CONN_LOGE(CONN_BR,
+            "br post bytes failed: calloc queue node failed, connectionId=%{public}u, pid=%{public}d, "
+            "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
             connectionId, pid, len, flag, module, seq);
         SoftBusFree(data);
         return SOFTBUS_MEM_ERR;
@@ -322,8 +328,9 @@ int32_t ConnBrPostBytes(
         FreeSendNode(node);
         return status;
     }
-    CONN_LOGI(CONN_BR, "br post bytes: receive post byte request, connId=%{public}u, pid=%{public}d, "
-          "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
+    CONN_LOGI(CONN_BR,
+        "br post bytes: receive post byte request, connId=%{public}u, pid=%{public}d, "
+        "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
         connectionId, pid, len, flag, module, seq);
     return SOFTBUS_OK;
 }
@@ -364,9 +371,8 @@ static int32_t SendAckUnsafe(const ConnBrConnection *connection)
         ConnBrDelBrPendingPacket(connection->connectionId, connection->sequence);
     }
     CONN_LOGI(CONN_BR,
-        "br send ack, connectionId=%{public}u, Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}"
-        PRId64 ", error=%{public}d",
-        connection->connectionId, dataLen, flag, MODULE_CONNECTION, ctrlMsgSeq, status);
+        "br send ack, connectionId=%{public}u, Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64
+        ", error=%{public}d", connection->connectionId, dataLen, flag, MODULE_CONNECTION, ctrlMsgSeq, status);
     SoftBusFree(data);
     return status;
 }
@@ -431,8 +437,8 @@ void *SendHandlerLoop(void *arg)
         }
 
         if (SoftBusMutexLock(&connection->lock) != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BR,
-                "br send data failed: try to lock failed, connectionId=%{public}u", sendNode->connectionId);
+            CONN_LOGE(
+                CONN_BR, "br send data failed: try to lock failed, connectionId=%{public}u", sendNode->connectionId);
             g_transEventListener.onPostByteFinshed(sendNode->connectionId, sendNode->len, sendNode->pid, sendNode->flag,
                 sendNode->module, sendNode->seq, SOFTBUS_LOCK_ERR);
             ConnBrReturnConnection(&connection);
@@ -476,29 +482,52 @@ void *SendHandlerLoop(void *arg)
     return NULL;
 }
 
+int32_t ConnBrTransConfigPostLimit(const LimitConfiguration *configuration)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        configuration != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT, "invalid param, configuration is null");
+    CONN_CHECK_AND_RETURN_RET_LOGW(configuration->type == CONNECT_BR, SOFTBUS_INVALID_PARAM, CONN_INIT,
+        "invalid param, not br type, type=%{public}d", configuration->type);
+    int32_t ret = SOFTBUS_OK;
+    if (!configuration->active) {
+        ret = g_flowController->disable(g_flowController);
+    } else {
+        ret = g_flowController->enable(g_flowController, configuration->windowInMillis, configuration->quotaInBytes);
+    }
+    CONN_LOGI(CONN_BR, "config br post limit, active=%d, windows=%{public}d millis, quota=%{public}d bytes, result=%d",
+        configuration->active, configuration->windowInMillis, configuration->quotaInBytes, ret);
+    return ret;
+}
+
 int32_t ConnBrTransMuduleInit(SppSocketDriver *sppDriver, ConnBrTransEventListener *listener)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(sppDriver != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT,
-        "init br trans module failed: invaliad param, sppDriver is null");
+        "init br trans module failed: invalid param, sppDriver is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(sppDriver->Read != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT,
-        "init br trans module failed: invaliad param, sppDriver->Read is null");
+        "init br trans module failed: invalid param, sppDriver->Read is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(sppDriver->Write != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT,
-        "init br trans module failed: invaliad param, sppDriver->Write is null");
+        "init br trans module failed: invalid param, sppDriver->Write is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(listener != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT,
-        "init br trans module failed: invaliad param, listener is null");
+        "init br trans module failed: invalid param, listener is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(listener->onPostByteFinshed != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT,
-        "init br trans module failed: invaliad param, listener->onPostByteFinshed is null");
+        "init br trans module failed: invalid param, listener->onPostByteFinshed is null");
 
     int32_t status = ConnBrInnerQueueInit();
     CONN_CHECK_AND_RETURN_RET_LOGW(status == SOFTBUS_OK, status, CONN_INIT,
         "init br trans module failed: init br send queue failed, error=%{public}d", status);
 
+    struct ConnSlideWindowController *controller = ConnSlideWindowControllerNew();
+    CONN_CHECK_AND_RETURN_RET_LOGW(
+        controller, SOFTBUS_ERR, CONN_INIT, "init br trans module failed: init flow controller failed");
+
     status = ConnStartActionAsync(NULL, SendHandlerLoop, "BrSend_Tsk");
     if (status != SOFTBUS_OK) {
+        ConnSlideWindowControllerDelete(controller);
         return status;
     }
 
     g_sppDriver = sppDriver;
     g_transEventListener = *listener;
+    g_flowController = controller;
     return SOFTBUS_OK;
 }

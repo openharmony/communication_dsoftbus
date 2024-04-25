@@ -43,8 +43,6 @@
 #define OHOS_TYPE_UNKNOWN   (-1)
 #define API_VERSION_LEN     10
 #define VERSION_SDK_LEN     10
-#define OH_OS_TYPE          10
-#define HO_OS_TYPE          11
 #define SN_LEN              32
 
 typedef struct {
@@ -273,7 +271,7 @@ int32_t GetDeviceSecurityLevel(int32_t *level)
         LNN_LOGE(LNN_STATE, "param error");
         return SOFTBUS_INVALID_PARAM;
     }
-    *level = GetIntParameter(OHOS_DEVICE_SECURITY_LEVEL, -1);
+    *level = GetIntParameter(OHOS_DEVICE_SECURITY_LEVEL, 0);
     LNN_LOGI(LNN_STATE, "level=%{public}d", *level);
     if (*level <= 0) {
         LNN_LOGE(LNN_STATE, "getIntParamenter fail.");

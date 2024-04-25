@@ -26,8 +26,12 @@ extern "C" {
 
 struct WifiDirectStatusListener {
     void (*onLocalRoleChange)(enum WifiDirectRole myRole);
-    void (*onDeviceOnLine)(const char *remoteMac, const char *remoteIp, const char *remoteUuid);
+    void (*onDeviceOnLine)(const char *remoteMac, const char *remoteIp, const char *remoteUuid, bool isSource);
     void (*onDeviceOffLine)(const char *remoteMac, const char *remoteIp, const char *remoteUuid, const char *localIp);
+    void (*onConnectedForSink)(const char *remoteMac, const char *remoteIp, const char *remoteUuid,
+                               enum WifiDirectLinkType type);
+    void (*onDisconnectedForSink)(const char *remoteMac, const char *remoteIp, const char *remoteUuid,
+                                  enum WifiDirectLinkType type);
 };
 
 enum WifiDirectListenerModule {
@@ -51,10 +55,16 @@ struct WifiDirectManager {
     int32_t (*getInterfaceNameByLocalIp)(const char *localIp, char *interfaceName, size_t interfaceNameSize);
     int32_t (*getLocalAndRemoteMacByLocalIp)(const char *localIp,  char *localMac, size_t localMacSize,
                                              char *remoteMac, size_t remoteMacSize);
+    bool (*isNegotiateChannelNeeded)(const char *remoteNetworkId, enum WifiDirectLinkType linkType);
 
     void (*onNegotiateChannelDataReceived)(struct WifiDirectNegotiateChannel *channel, const uint8_t *data, size_t len);
     void (*onNegotiateChannelDisconnected)(struct WifiDirectNegotiateChannel *channel);
     void (*onRemoteP2pDisable)(const char *networkId);
+
+    void (*onConnectedForSink)(const char *remoteMac, const char *remoteIp, const char *remoteUuid,
+                               enum WifiDirectLinkType type);
+    void (*onDisconnectedForSink)(const char *remoteMac, const char *remoteIp, const char *remoteUuid,
+                                  enum WifiDirectLinkType type);
 
     /* private data member */
     int32_t requestId;

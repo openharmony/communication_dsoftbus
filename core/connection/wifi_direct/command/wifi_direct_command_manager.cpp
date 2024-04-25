@@ -36,7 +36,7 @@ static void CommandTimeoutHandler(struct WifiDirectCommand *command)
 
 static void EnqueueCommand(struct WifiDirectCommand *command)
 {
-    if (command->type == COMMAND_TYPE_CONNECT || command->type == COMMAND_TYPE_DISCONNECT) {
+    if (command->type == COMMAND_TYPE_CONNECT) {
         command->timerId = GetWifiDirectTimerList()->startTimer(reinterpret_cast<TimeoutHandler>(CommandTimeoutHandler),
             WIFI_DIRECT_COMMAND_WAIT_TIMEOUT, TIMER_FLAG_ONE_SHOOT, command);
     }
@@ -47,7 +47,7 @@ static void EnqueueCommand(struct WifiDirectCommand *command)
 
 static void EnqueueCommandFront(struct WifiDirectCommand *command)
 {
-    if (command->type == COMMAND_TYPE_CONNECT || command->type == COMMAND_TYPE_DISCONNECT) {
+    if (command->type == COMMAND_TYPE_CONNECT) {
         command->timerId = GetWifiDirectTimerList()->startTimer(reinterpret_cast<TimeoutHandler>(CommandTimeoutHandler),
                                                                 WIFI_DIRECT_COMMAND_WAIT_TIMEOUT, TIMER_FLAG_ONE_SHOOT,
                                                                 command);

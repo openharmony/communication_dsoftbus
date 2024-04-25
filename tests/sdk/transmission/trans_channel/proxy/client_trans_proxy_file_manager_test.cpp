@@ -184,7 +184,7 @@ void ClientTransProxyFileManagerTest::SetUpTestCase(void)
     g_fileSs = fopen(g_testProxyFileList[1], "w+");
     EXPECT_NE(g_fileSs, nullptr);
     ret = fprintf(g_fileSs, "%s", "Hello world!\n");
-    EXPECT_LT(ret, 0);
+    EXPECT_LT(0, ret);
     g_fd = open(TEST_FILE_PATH, O_RDWR | O_CREAT, S_IRWXU);
     EXPECT_NE(g_fd, -1);
     write(g_fd, g_writeData, sizeof(g_writeData));

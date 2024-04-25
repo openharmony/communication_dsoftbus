@@ -48,6 +48,7 @@ typedef struct {
     int32_t (*onReceive)(DeviceInfo *device, int32_t weight, int32_t localMasterWeight,
         LnnHeartbeatType hbType, bool isOnlineDirectly, HbRespData *hbResp);
     int32_t (*onRecvHigherWeight)(const char *udidHash, int32_t weight, ConnectionAddrType type, bool isReElect);
+    void (*onRecvSensorHubInfo)(const char *networkId, uint64_t nowTime);
 } LnnHeartbeatMediumMgrCb;
 
 typedef struct {

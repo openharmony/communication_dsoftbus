@@ -149,16 +149,16 @@ HWTEST_F(TransTcpDirectMessageTest, OpenP2pDirectChannelTest001, TestSize.Level1
     (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     (void)memset_s(connInfo, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     int32_t ret = OpenP2pDirectChannel(nullptr, connInfo, &channelId);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = OpenP2pDirectChannel(appInfo, nullptr, &channelId);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = OpenP2pDirectChannel(appInfo, connInfo, nullptr);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = OpenP2pDirectChannel(appInfo, connInfo, &channelId);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     appInfo->businessType = BUSINESS_TYPE_BYTE;
     appInfo->appType = APP_TYPE_NORMAL;
@@ -171,11 +171,11 @@ HWTEST_F(TransTcpDirectMessageTest, OpenP2pDirectChannelTest001, TestSize.Level1
 
     connInfo->type = CONNECT_P2P;
     ret = OpenP2pDirectChannel(appInfo, connInfo, &channelId);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     connInfo->type = CONNECT_BR;
     ret = OpenP2pDirectChannel(appInfo, connInfo, &channelId);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     StopP2pSessionListener();
     SoftBusFree(appInfo);
@@ -191,7 +191,7 @@ HWTEST_F(TransTcpDirectMessageTest, OpenP2pDirectChannelTest001, TestSize.Level1
 HWTEST_F(TransTcpDirectMessageTest, P2pDirectChannelInitTest002, TestSize.Level1)
 {
     int32_t ret = P2pDirectChannelInit();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
@@ -203,14 +203,14 @@ HWTEST_F(TransTcpDirectMessageTest, P2pDirectChannelInitTest002, TestSize.Level1
 HWTEST_F(TransTcpDirectMessageTest, GenerateTdcChannelIdTest003, TestSize.Level1)
 {
     uint64_t ret = TransTdcGetNewSeqId();
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_TRUE(ret);
 
     int32_t res = GenerateTdcChannelId();
-    EXPECT_TRUE(res != SOFTBUS_OK);
+    EXPECT_TRUE(res);
 
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     ret = TransTcpDirectInit(cb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     res = CreatSessionConnList();
     ASSERT_EQ(res, SOFTBUS_OK);
@@ -219,7 +219,7 @@ HWTEST_F(TransTcpDirectMessageTest, GenerateTdcChannelIdTest003, TestSize.Level1
     EXPECT_TRUE(softbuslist != nullptr);
 
     res = GetSessionConnLock();
-    EXPECT_TRUE(res == SOFTBUS_OK);
+    EXPECT_EQ(res, SOFTBUS_OK);
 
     ReleaseSessonConnLock();
     TransTcpDirectDeinit();
@@ -239,11 +239,11 @@ HWTEST_F(TransTcpDirectMessageTest, GetSessionConnByRequestIdTest004, TestSize.L
 
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t ret = TransTcpDirectInit(cb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     SessionConn *conn = TestSetSessionConn();
     ret = TransTdcAddSessionConn(conn);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     session = GetSessionConnByRequestId(requestId);
     EXPECT_TRUE(session != nullptr);
@@ -269,11 +269,11 @@ HWTEST_F(TransTcpDirectMessageTest, GetSessionConnByReqTest005, TestSize.Level1)
 
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t ret = TransTcpDirectInit(cb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     SessionConn *conn = TestSetSessionConn();
     ret = TransTdcAddSessionConn(conn);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     req = 0;
     session = GetSessionConnByReq(req);
     EXPECT_TRUE(session == nullptr);
@@ -307,11 +307,11 @@ HWTEST_F(TransTcpDirectMessageTest, GetSessionConnByFdTest007, TestSize.Level1)
 
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t ret = TransTcpDirectInit(cb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     SessionConn *con = TestSetSessionConn();
     ret = TransTdcAddSessionConn(con);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     SessionConn *session = GetSessionConnByFd(fd, conn);
     EXPECT_TRUE(session != nullptr);
@@ -357,10 +357,10 @@ HWTEST_F(TransTcpDirectMessageTest, SetAppInfoByIdTest009, TestSize.Level1)
     AppInfo *appInfo = TestSetAppInfo();
 
     int32_t ret = SetAppInfoById(channelId, appInfo);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     channelId = 0;
     ret = SetAppInfoById(channelId, appInfo);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SET_APP_INFO_FAILED);
     SoftBusFree(appInfo);
     appInfo = nullptr;
 }
@@ -376,55 +376,56 @@ HWTEST_F(TransTcpDirectMessageTest, GetAppInfoByIdTest0010, TestSize.Level1)
     int32_t channelId = 1;
     AppInfo *appInfo = TestSetAppInfo();
     int32_t ret = GetAppInfoById(channelId, appInfo);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     channelId = 0;
     ret = GetAppInfoById(channelId, appInfo);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     SoftBusFree(appInfo);
     appInfo = nullptr;
 }
 
 /**
- * @tc.name: SetAuthIdByChanIdTest0011
- * @tc.desc: SetAuthIdByChanId, use the wrong parameter.
+ * @tc.name: SetAuthHandleByChanIdTest0011
+ * @tc.desc: SetAuthHandleByChanId, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectMessageTest, SetAuthIdByChanIdTest0011, TestSize.Level1)
+HWTEST_F(TransTcpDirectMessageTest, SetAuthHandleByChanIdTest0011, TestSize.Level1)
 {
     int32_t channelId = 1;
-    int64_t authId = 1;
-    int32_t ret = SetAuthIdByChanId(channelId, authId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    AuthHandle authHandle = { .authId = 1, .type = 1 };
+    int32_t ret = SetAuthHandleByChanId(channelId, &authHandle);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     channelId = 0;
-    ret = SetAuthIdByChanId(channelId, authId);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    ret = SetAuthHandleByChanId(channelId, &authHandle);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 }
 
 /**
- * @tc.name: GetAuthIdByChanIdTest0012
- * @tc.desc: GetAuthIdByChanId, use the wrong parameter.
+ * @tc.name: GetAuthHandleByChanIdTest0012
+ * @tc.desc: GetAuthHandleByChanId, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectMessageTest, GetAuthIdByChanIdTest0012, TestSize.Level1)
+HWTEST_F(TransTcpDirectMessageTest, GetAuthHandleByChanIdTest0012, TestSize.Level1)
 {
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
     int32_t channelId = 1;
-    int64_t ret = GetAuthIdByChanId(channelId);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    int32_t ret = GetAuthHandleByChanId(channelId, &authHandle);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t res = TransTcpDirectInit(cb);
-    EXPECT_TRUE(res == SOFTBUS_OK);
+    EXPECT_EQ(res, SOFTBUS_OK);
 
     SessionConn *con = TestSetSessionConn();
     res = TransTdcAddSessionConn(con);
-    EXPECT_TRUE(res == SOFTBUS_OK);
+    EXPECT_EQ(res, SOFTBUS_OK);
 
     channelId = 0;
-    ret = GetAuthIdByChanId(channelId);
-    EXPECT_TRUE(ret == AUTH_INVALID_ID);
+    ret = GetAuthHandleByChanId(channelId, &authHandle);
+    EXPECT_EQ(authHandle.authId, AUTH_INVALID_ID);
     TransTcpDirectDeinit();
 }
 
@@ -441,11 +442,11 @@ HWTEST_F(TransTcpDirectMessageTest, GetAuthIdByChanIdTest0013, TestSize.Level1)
 
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t res = TransTcpDirectInit(cb);
-    EXPECT_TRUE(res == SOFTBUS_OK);
+    EXPECT_EQ(res, SOFTBUS_OK);
 
     SessionConn *con = TestSetSessionConn();
     res = TransTdcAddSessionConn(con);
-    EXPECT_TRUE(res == SOFTBUS_OK);
+    EXPECT_EQ(res, SOFTBUS_OK);
     channelId = 0;
     TransDelSessionConnById(channelId);
 
@@ -462,14 +463,14 @@ HWTEST_F(TransTcpDirectMessageTest, TransTdcAddSessionConnTest0014, TestSize.Lev
 {
     SessionConn *con = TestSetSessionConn();
     int32_t ret = TransTdcAddSessionConn(nullptr);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     ret = TransTcpDirectInit(cb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransTdcAddSessionConn(con);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     TransTcpDirectDeinit();
 }
@@ -487,11 +488,11 @@ HWTEST_F(TransTcpDirectMessageTest, SetSessionKeyByChanIdTest0015, TestSize.Leve
     int32_t keyLen = 0;
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t ret = TransTcpDirectInit(cb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     SessionConn *con = TestSetSessionConn();
     ret = TransTdcAddSessionConn(con);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     SetSessionKeyByChanId(channelId, nullptr, keyLen);
     SetSessionKeyByChanId(channelId, sessionKey, keyLen);
@@ -513,18 +514,18 @@ HWTEST_F(TransTcpDirectMessageTest, SetSessionConnStatusByIdTest0016, TestSize.L
     uint32_t status = TCP_DIRECT_CHANNEL_STATUS_CONNECTED;
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t ret = TransTcpDirectInit(cb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     SessionConn *con = TestSetSessionConn();
     ret = TransTdcAddSessionConn(con);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = SetSessionConnStatusById(channelId, status);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     channelId = 0;
     ret = SetSessionConnStatusById(channelId, status);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
     TransTcpDirectDeinit();
 }
 
@@ -540,18 +541,18 @@ HWTEST_F(TransTcpDirectMessageTest, TcpTranGetAppInfobyChannelIdTest0017, TestSi
     AppInfo* appInfo = TestSetAppInfo();
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t ret = TransTcpDirectInit(cb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     SessionConn *con = TestSetSessionConn();
     ret = TransTdcAddSessionConn(con);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TcpTranGetAppInfobyChannelId(channelId, appInfo);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     channelId = 0;
     ret = TcpTranGetAppInfobyChannelId(channelId, appInfo);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
 /**

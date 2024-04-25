@@ -24,15 +24,33 @@
 extern "C" {
 #endif
 
+typedef struct {
+    TransOption info;
+    ILaneListener listener;
+} ExtraReqInfo;
+
+typedef struct {
+    ListNode node;
+    uint32_t laneReqId;
+    uint64_t laneId;
+    LaneAllocInfo allocInfo;
+    LaneAllocListener listener;
+    bool isWithQos;
+    bool isCanceled;
+    bool isNotified;
+    ExtraReqInfo extraInfo;
+} TransReqInfo;
+
 LaneInterface *TransLaneGetInstance(void);
-int32_t GetTransOptionByLaneReqId(uint32_t laneReqId, TransOption *reqInfo);
-int32_t PostDelayDestroyMessage(uint32_t laneReqId, LaneResource *resourceItem, uint64_t delayMillis);
+int32_t GetTransReqInfoByLaneReqId(uint32_t laneReqId, TransReqInfo *reqInfo);
+int32_t PostDelayDestroyMessage(uint32_t laneReqId, uint64_t laneId, uint64_t delayMillis);
 int32_t PostDetectTimeoutMessage(uint32_t detectId, uint64_t delayMillis);
-int32_t PostReliabilityTimeMessage(void);
 void RemoveDetectTimeoutMessage(uint32_t detectId);
 int32_t PostLaneStateChangeMessage(LaneState state, const char *peerUdid, const LaneLinkInfo *laneLinkInfo);
+void RemoveDelayDestroyMessage(uint64_t laneId);
+void DelLogicAndLaneRelationship(uint64_t laneId);
 
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif // LNN_TRANS_LANE_H

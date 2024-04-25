@@ -92,7 +92,7 @@ void SetCoapDiscoverType(CoapBroadcastType type);
 void SetCoapUserDiscoverInfo(uint32_t advCount, uint32_t advDuration);
 int32_t SetCoapDiscConfig(const DFinderDiscConfig *discConfig);
 void SendDiscoveryRsp(const NSTACKX_ResponseSettings *responseSettings);
-int32_t LocalizeNotificationInterval(const uint32_t *intervals, const uint32_t intervalLen);
+int32_t LocalizeNotificationInterval(const uint16_t *intervals, const uint8_t intervalLen);
 void CoapServiceNotificationStop(void);
 
 #ifdef __cplusplus

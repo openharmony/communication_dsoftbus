@@ -25,6 +25,7 @@
 #include "auth_log.h"
 #include "auth_manager.h"
 #include "auth_meta_manager.h"
+#include "auth_tcp_connection.h"
 #include "bus_center_manager.h"
 #include "customized_security_protocol.h"
 #include "lnn_decision_db.h"
@@ -33,6 +34,7 @@
 #include "softbus_def.h"
 
 #define SHORT_ACCOUNT_HASH_LEN 2
+#define AUTH_COUNT             2
 
 typedef struct {
     int32_t module;
@@ -237,6 +239,32 @@ static int32_t FillAuthSessionInfo(AuthSessionInfo *info, const NodeInfo *nodeIn
     return SOFTBUS_OK;
 }
 
+int32_t AuthSetTcpKeepAlive(const AuthConnInfo *connInfo, ModeCycle cycle)
+{
+    if (connInfo == NULL) {
+        AUTH_LOGE(AUTH_CONN, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = SOFTBUS_ERR;
+    AuthManager *auth[AUTH_COUNT] = { NULL, NULL }; /* 2: WiFi * (Client + Server) */
+    auth[0] = GetAuthManagerByConnInfo(connInfo, false);
+    auth[1] = GetAuthManagerByConnInfo(connInfo, true);
+    for (uint32_t i = 0; i < AUTH_COUNT; i++) {
+        if (auth[i] == NULL) {
+            continue;
+        }
+        ret = AuthSetTcpKeepAliveOption(GetFd(auth[i]->connId[AUTH_LINK_TYPE_WIFI]), cycle);
+        if (ret != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_CONN, "auth set tcp keepalive option fail");
+            break;
+        }
+    }
+    DelDupAuthManager(auth[1]);
+    DelDupAuthManager(auth[0]);
+    return ret;
+}
+
 int32_t AuthRestoreAuthManager(const char *udidHash,
     const AuthConnInfo *connInfo, uint32_t requestId, NodeInfo *nodeInfo, int64_t *authId)
 {
@@ -283,26 +311,34 @@ int32_t AuthRestoreAuthManager(const char *udidHash,
     return SOFTBUS_OK;
 }
 
-int32_t AuthEncrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
+int32_t AuthEncrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
     uint32_t *outLen)
 {
-    AuthManager *auth = GetAuthManagerByAuthId(authId);
+    if (authHandle == NULL) {
+        AUTH_LOGE(AUTH_KEY, "authHandle is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    AuthManager *auth = GetAuthManagerByAuthId(authHandle->authId);
     if (auth != NULL) {
         DelDupAuthManager(auth);
-        return AuthDeviceEncrypt(authId, inData, inLen, outData, outLen);
+        return AuthDeviceEncrypt(authHandle, inData, inLen, outData, outLen);
     }
-    return AuthMetaEncrypt(authId, inData, inLen, outData, outLen);
+    return AuthMetaEncrypt(authHandle->authId, inData, inLen, outData, outLen);
 }
 
-int32_t AuthDecrypt(int64_t authId, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
+int32_t AuthDecrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
     uint32_t *outLen)
 {
-    AuthManager *auth = GetAuthManagerByAuthId(authId);
+    if (authHandle == NULL) {
+        AUTH_LOGE(AUTH_KEY, "authHandle is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    AuthManager *auth = GetAuthManagerByAuthId(authHandle->authId);
     if (auth != NULL) {
         DelDupAuthManager(auth);
-        return AuthDeviceDecrypt(authId, inData, inLen, outData, outLen);
+        return AuthDeviceDecrypt(authHandle, inData, inLen, outData, outLen);
     }
-    return AuthMetaDecrypt(authId, inData, inLen, outData, outLen);
+    return AuthMetaDecrypt(authHandle->authId, inData, inLen, outData, outLen);
 }
 
 int32_t AuthSetP2pMac(int64_t authId, const char *p2pMac)

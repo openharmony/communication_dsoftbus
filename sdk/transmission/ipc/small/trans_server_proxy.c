@@ -304,7 +304,7 @@ int32_t ServerIpcReleaseResources(int32_t channelId)
     return ret;
 }
 
-int32_t ServerIpcCloseChannel(int32_t channelId, int32_t channelType)
+int32_t ServerIpcCloseChannel(const char *sessionName, int32_t channelId, int32_t channelType)
 {
     TRANS_LOGD(TRANS_SDK, "enter.");
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
@@ -312,7 +312,9 @@ int32_t ServerIpcCloseChannel(int32_t channelId, int32_t channelType)
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
     WriteInt32(&request, channelId);
     WriteInt32(&request, channelType);
-
+    if (channelType == CHANNEL_TYPE_UNDEFINED) {
+        WriteString(&request, sessionName);
+    }
     int32_t ret = SOFTBUS_ERR;
     /* sync */
     if (g_serverProxy == NULL) {

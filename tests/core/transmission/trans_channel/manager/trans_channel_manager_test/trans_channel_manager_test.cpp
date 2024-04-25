@@ -122,7 +122,7 @@ HWTEST_F(TransChannelManagerTest, CopyAppInfoFromSessionParam001, TestSize.Level
     (void)memcpy_s(appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX, "test", DEVICE_ID_SIZE_MAX);
 
     int32_t ret = CopyAppInfoFromSessionParam(appInfo, sessionParam);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     SoftBusFree(appInfo);
     SoftBusFree(sessionParam);
@@ -140,7 +140,8 @@ HWTEST_F(TransChannelManagerTest, GetAppInfo001, TestSize.Level1)
     SessionParam *param = (SessionParam *)SoftBusMalloc(sizeof(SessionParam));
     ASSERT_TRUE(param != nullptr);
     (void)memset_s(param, sizeof(SessionParam), 0, sizeof(SessionParam));
-
+    param->sessionName = TEST_SESSION_NAME;
+    param->sessionId = 1;
     int tmp = 0;
     param->attr = &g_sessionAttr[tmp];
 
@@ -151,7 +152,7 @@ HWTEST_F(TransChannelManagerTest, GetAppInfo001, TestSize.Level1)
     AppInfo *appInfo = (AppInfo *)SoftBusMalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
     (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
-
+    TransSocketLaneMgrInit();
     int ret = TransOpenChannel(param, transInfo);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
 
@@ -173,6 +174,7 @@ HWTEST_F(TransChannelManagerTest, GetAppInfo001, TestSize.Level1)
     SoftBusFree(param);
     SoftBusFree(transInfo);
     SoftBusFree(appInfo);
+    TransSocketLaneMgrDeinit();
 }
 
 /**
@@ -396,7 +398,7 @@ HWTEST_F(TransChannelManagerTest, TransRippleStats001, TestSize.Level1)
     memset_s(trafficStats, sizeof(TrafficStats), 0, sizeof(TrafficStats));
 
     int32_t ret = TransRippleStats(channelId, channelType, trafficStats);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransRippleStats(channelId, channelType, NULL);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -450,7 +452,7 @@ HWTEST_F(TransChannelManagerTest, TransRequestQos001, TestSize.Level1)
     int32_t quality = 444;
 
     int32_t ret = TransRequestQos(channelId, channelType, appType, quality);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /**
@@ -465,22 +467,22 @@ HWTEST_F(TransChannelManagerTest, TransCloseChannel001, TestSize.Level1)
     int32_t channelType = 222;
 
     channelId++;
-    int32_t ret = TransCloseChannel(channelId, channelType);
+    int32_t ret = TransCloseChannel(NULL, channelId, channelType);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     channelId++;
     channelType = CHANNEL_TYPE_UDP;
-    ret = TransCloseChannel(channelId, channelType);
+    ret = TransCloseChannel(NULL, channelId, channelType);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     channelId++;
     channelType = CHANNEL_TYPE_AUTH;
-    ret = TransCloseChannel(channelId, channelType);
+    ret = TransCloseChannel(NULL, channelId, channelType);
     EXPECT_EQ(SOFTBUS_LOCK_ERR, ret);
 
     channelId++;
     channelType = CHANNEL_TYPE_TCP_DIRECT;
-    ret = TransCloseChannel(channelId, channelType);
+    ret = TransCloseChannel(NULL, channelId, channelType);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 

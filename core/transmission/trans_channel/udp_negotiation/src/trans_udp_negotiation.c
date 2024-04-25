@@ -190,7 +190,7 @@ int32_t NotifyUdpChannelOpenFailed(const AppInfo *info, int32_t errCode)
         .errcode = errCode,
         .result = EVENT_STAGE_RESULT_FAILED
     };
-    if (TransGetUdpChannelById(info->myData.channelId, &channel) == SOFTBUS_OK && channel.clientSide) {
+    if (info->isClient) {
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     } else {
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_OPEN_CHANNEL_END, extra);
@@ -425,11 +425,11 @@ static int32_t SendReplyUdpInfo(AppInfo *appInfo, AuthHandle authHandle, int64_t
 
 static int32_t SetPeerDeviceIdByAuth(AuthHandle authHandle, AppInfo *appInfo)
 {
-    char peerUuid[UUID_BUF_LEN] = {0};
+    char peerUuid[UUID_BUF_LEN] = { 0 };
     int32_t ret = AuthGetDeviceUuid(authHandle.authId, peerUuid, sizeof(peerUuid));
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get peer uuid by auth id failed, ret=%{public}d.", ret);
-        return SOFTBUS_ERR;
+        return ret;
     }
 
     if (memcpy_s(appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId),
@@ -497,8 +497,8 @@ static int32_t ParseRequestAppInfo(AuthHandle authHandle, const cJSON *msg, AppI
         }
     }
     if (strcpy_s(appInfo->myData.addr, sizeof(appInfo->myData.addr), localIp) != EOK) {
-        TRANS_LOGE(TRANS_CTRL, "strcpy_s failed.");
-        return SOFTBUS_ERR;
+        TRANS_LOGE(TRANS_CTRL, "strcpy_s my ip addr failed.");
+        return SOFTBUS_STRCPY_ERR;
     }
 
     return SOFTBUS_OK;
@@ -882,7 +882,7 @@ static int32_t PrepareAppInfoForUdpOpen(const ConnectOption *connOpt, AppInfo *a
 {
     appInfo->peerData.port = connOpt->socketOption.port;
     if (strcpy_s(appInfo->peerData.addr, sizeof(appInfo->peerData.addr), connOpt->socketOption.addr) != EOK) {
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
 
     if (SoftBusGenerateSessionKey(appInfo->sessionKey, sizeof(appInfo->sessionKey)) != SOFTBUS_OK) {
@@ -947,7 +947,6 @@ int32_t TransOpenUdpChannel(AppInfo *appInfo, const ConnectOption *connOpt, int3
     }
     newChannel->seq = GenerateSeq(false);
     newChannel->status = UDP_CHANNEL_STATUS_INIT;
-    newChannel->clientSide = true;
     int32_t ret = SOFTBUS_ERR;
     ret = TransAddUdpChannel(newChannel);
     if (ret != SOFTBUS_OK) {
