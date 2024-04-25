@@ -2161,7 +2161,7 @@ int32_t ClientGetPeerSocketInfoById(int32_t socket, PeerSocketInfo *peerSocketIn
     return SOFTBUS_OK;
 }
 
-bool IsSessionExceedLimit()
+bool IsSessionExceedLimit(void)
 {
     if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != 0) {
         TRANS_LOGE(TRANS_SDK, "lock failed");
