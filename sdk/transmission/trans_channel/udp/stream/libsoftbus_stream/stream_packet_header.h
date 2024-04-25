@@ -133,15 +133,15 @@ public:
         firstLevelHeader.length = ntohs(*tmp++);
 
         if (firstLevelHeader.type & TopMask::EXT_BUF_MASK) {
-            constexpr uint32_t EXT_FILED_NUM = 4;
-            if (size < sizeof(uint16_t) * EXT_FILED_NUM) {
+            constexpr uint32_t extFiledNum = 4;
+            if (size < sizeof(uint16_t) * extFiledNum) {
                 return;
             }
             TypeLength tl;
             tl.type = ntohs(*tmp++);
             tl.length = ntohs(*tmp++);
 
-            if (tl.length == 0 || sizeof(uint16_t) * EXT_FILED_NUM + tl.length > size) {
+            if (tl.length == 0 || sizeof(uint16_t) * extFiledNum + tl.length > size) {
                 return;
             }
             ext_ = std::make_unique<char[]>(tl.length);
