@@ -124,9 +124,9 @@ int32_t DiscCoapParseServiceData(const cJSON *data, DeviceInfo *device)
     char port[MAX_PORT_STR_LEN] = {0};
     int32_t ret = DiscCoapParseKeyValueStr(serviceData, SERVICE_DATA_PORT, port, MAX_PORT_STR_LEN);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, DISC_COAP, "parse service data failed");
-    uint32_t authPort = atoi(port);
-    if (authPort > UINT16_MAX || authPort <= 0) {
-        DISC_LOGE(DISC_COAP, "the auth port is invalid. authPort=%{public}u", authPort);
+    int32_t authPort = atoi(port);
+    if (authPort <= 0 || authPort > UINT16_MAX) {
+        DISC_LOGE(DISC_COAP, "the auth port is invalid. authPort=%{public}d", authPort);
         return SOFTBUS_ERR;
     }
     device->addr[0].info.ip.port = (uint16_t)authPort;
