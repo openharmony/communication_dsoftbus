@@ -1828,7 +1828,7 @@ static int32_t BleStopLocalListening(const LocalListenerInfo *info)
     return ConnBleStopServer();
 }
 
-static bool BleCheckActiveConnection(const ConnectOption *option)
+static bool BleCheckActiveConnection(const ConnectOption *option, bool needOccupy)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(option != NULL, false, CONN_BLE, "invaliad param, option is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(
@@ -1844,7 +1844,9 @@ static bool BleCheckActiveConnection(const ConnectOption *option)
     CONN_CHECK_AND_RETURN_RET_LOGW(
         connection != NULL, false, CONN_BLE, "ble check action connection: connection is not exist");
     bool isActive = (connection->state == BLE_CONNECTION_STATE_EXCHANGED_BASIC_INFO);
-
+    if (isActive && needOccupy) {
+        ConnBleRefreshIdleTimeout(connection);
+    }
     ConnBleReturnConnection(&connection);
     return isActive;
 }
