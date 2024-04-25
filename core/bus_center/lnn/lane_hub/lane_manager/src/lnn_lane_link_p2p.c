@@ -1255,8 +1255,7 @@ static bool IsSupportProxyNego(const char *networkId)
         ((remote & (1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY)) != 0);
 }
 
-static int32_t ConnectWifiDirectWithReuse(const LinkRequest *request,
-    uint32_t laneLinkReqId, const LaneLinkCb *callback)
+static int32_t ConnectWifiDirectWithReuse(const LinkRequest *request, uint32_t laneReqId, const LaneLinkCb *callback)
 {
     struct WifiDirectConnectInfo wifiDirectInfo;
     (void)memset_s(&wifiDirectInfo, sizeof(wifiDirectInfo), 0, sizeof(wifiDirectInfo));
@@ -1270,20 +1269,19 @@ static int32_t ConnectWifiDirectWithReuse(const LinkRequest *request,
     }
     if (LnnGetRemoteStrInfo(request->peerNetworkId, STRING_KEY_WIFIDIRECT_ADDR,
         wifiDirectInfo.remoteMac, sizeof(wifiDirectInfo.remoteMac)) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get remote mac fail, laneReqId=%{public}d", laneLinkReqId);
+        LNN_LOGE(LNN_LANE, "get remote mac fail, laneReqId=%{public}u", laneReqId);
         return SOFTBUS_ERR;
     }
     wifiDirectInfo.isNetworkDelegate = request->networkDelegate;
-    if (AddP2pLinkReqItem(ASYNC_RESULT_P2P, wifiDirectInfo.requestId, laneLinkReqId,
-        request, callback) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "add p2plinkinfo fail, laneReqId=%{public}d", laneLinkReqId);
+    if (AddP2pLinkReqItem(ASYNC_RESULT_P2P, wifiDirectInfo.requestId, laneReqId, request, callback) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "add p2plinkinfo fail, laneReqId=%{public}u", laneReqId);
         return SOFTBUS_ERR;
     }
     struct WifiDirectConnectCallback cb = {
         .onConnectSuccess = OnWifiDirectConnectSuccess,
         .onConnectFailure = OnWifiDirectConnectFailure,
     };
-    LNN_LOGI(LNN_LANE, "wifidirect reuse connect with p2prequest=%{public}d, connectType=%{public}d",
+    LNN_LOGI(LNN_LANE, "wifidirect reuse connect with p2pRequestId=%{public}d, connectType=%{public}d",
         wifiDirectInfo.requestId, wifiDirectInfo.connectType);
     if (GetWifiDirectManager()->connectDevice(&wifiDirectInfo, &cb) != SOFTBUS_OK) {
         (void)DelP2pLinkReqByReqId(ASYNC_RESULT_P2P, wifiDirectInfo.requestId);
@@ -1294,7 +1292,8 @@ static int32_t ConnectWifiDirectWithReuse(const LinkRequest *request,
 
 static int32_t TryWifiDirectReuse(const LinkRequest *request, uint32_t laneReqId, const LaneLinkCb *callback)
 {
-    if (laneReqId != INVALID_LANE_REQ_ID) {
+    if (request->linkType != LANE_HML) {
+        LNN_LOGE(LNN_LANE, "not support wifi direct reuse");
         return SOFTBUS_ERR;
     }
     char peerUdid[UDID_BUF_LEN] = {0};
@@ -1305,6 +1304,11 @@ static int32_t TryWifiDirectReuse(const LinkRequest *request, uint32_t laneReqId
     LaneResource resourceItem;
     (void)memset_s(&resourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
     if (FindLaneResourceByLinkType(peerUdid, request->linkType, &resourceItem) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LANE, "not find lane resource");
+        return SOFTBUS_ERR;
+    }
+    if (GetWifiDirectManager()->isNegotiateChannelNeeded(request->peerNetworkId, WIFI_DIRECT_LINK_TYPE_HML)) {
+        LNN_LOGE(LNN_LANE, "laneId=%{public}" PRIu64 " exist but need nego channel", resourceItem.laneId);
         return SOFTBUS_ERR;
     }
     LNN_LOGI(LNN_LANE, "wifidirect exist reuse link, laneId=%{public}" PRIu64 "", resourceItem.laneId);
