@@ -246,9 +246,10 @@ static void NotifyEvent(const LnnEventBasicInfo *info)
         return;
     }
     uint32_t count = g_eventCtrl.regCnt[info->event];
-    LnnEventHandler *handlesArray = SoftBusMalloc(sizeof(LnnEventHandlerItem) * count);
+    LnnEventHandler *handlesArray = (LnnEventHandler *)SoftBusCalloc(sizeof(LnnEventHandlerItem) * count);
     if (handlesArray == NULL) {
         LNN_LOGE(LNN_EVENT, "malloc failed");
+        (void)SoftBusMutexUnlock(&g_eventCtrl.lock);
         return;
     }
     LIST_FOR_EACH_ENTRY(item, &g_eventCtrl.handlers[info->event], LnnEventHandlerItem, node) {
