@@ -645,10 +645,10 @@ static void NotifyLaneAllocSuccess(uint32_t laneReqId, uint64_t laneId, const La
         "laneId=%{public}" PRIu64 "", laneReqId, info->type, laneId);
     if (reqInfo.isWithQos) {
         connInfo.laneId = laneId;
-        reqInfo.listener.OnLaneAllocSuccess(laneReqId, &connInfo);
+        reqInfo.listener.onLaneAllocSuccess(laneReqId, &connInfo);
     } else {
         connInfo.laneId = INVALID_LANE_ID;
-        reqInfo.extraInfo.listener.OnLaneRequestSuccess(laneReqId, &connInfo);
+        reqInfo.extraInfo.listener.onLaneRequestSuccess(laneReqId, &connInfo);
     }
 }
 
@@ -669,10 +669,10 @@ static void NotifyLaneAllocFail(uint32_t laneReqId, int32_t reason)
     }
     LNN_LOGE(LNN_LANE, "Notify laneAlloc fail, laneReqId=%{public}u, reason=%{public}d", laneReqId, reason);
     if (reqInfo.isWithQos) {
-        reqInfo.listener.OnLaneAllocFail(laneReqId, reason);
+        reqInfo.listener.onLaneAllocFail(laneReqId, reason);
         FreeLaneReqId(laneReqId);
     } else {
-        reqInfo.extraInfo.listener.OnLaneRequestFail(laneReqId, reason);
+        reqInfo.extraInfo.listener.onLaneRequestFail(laneReqId, reason);
     }
     DeleteRequestNode(laneReqId);
 }
@@ -942,13 +942,13 @@ static void Deinit(void)
 }
 
 static LaneInterface g_transLaneObject = {
-    .Init = Init,
-    .Deinit = Deinit,
-    .AllocLane = Alloc,
-    .AllocLaneByQos = AllocLaneByQos,
-    .ReallocLaneByQos = ReallocLaneByQos,
-    .CancelLane = CancelLane,
-    .FreeLane = Free,
+    .init = Init,
+    .deinit = Deinit,
+    .allocLane = Alloc,
+    .allocLaneByQos = AllocLaneByQos,
+    .reallocLaneByQos = ReallocLaneByQos,
+    .cancelLane = CancelLane,
+    .freeLane = Free,
 };
 
 LaneInterface *TransLaneGetInstance(void)

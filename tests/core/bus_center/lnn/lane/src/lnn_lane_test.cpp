@@ -67,8 +67,8 @@ static void OnLaneAllocSuccess(uint32_t laneHandle, const LaneConnInfo *info);
 static void OnLaneAllocFail(uint32_t laneHandle, int32_t errCode);
 
 static LaneAllocListener g_listener = {
-    .OnLaneAllocSuccess = OnLaneAllocSuccess,
-    .OnLaneAllocFail = OnLaneAllocFail,
+    .onLaneAllocSuccess = OnLaneAllocSuccess,
+    .onLaneAllocFail = OnLaneAllocFail,
 };
 
 static NodeInfo g_NodeInfo = {
@@ -606,8 +606,8 @@ HWTEST_F(LNNLaneMockTest, LANE_RE_ALLOC_Test_002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     LaneAllocListener listenerCb = {
-        .OnLaneAllocSuccess = OnLaneAllocSuccessForP2p,
-        .OnLaneAllocFail = OnLaneAllocFail,
+        .onLaneAllocSuccess = OnLaneAllocSuccessForP2p,
+        .onLaneAllocFail = OnLaneAllocFail,
     };
     NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
     wifiMock.SetDefaultResult();
@@ -648,8 +648,8 @@ HWTEST_F(LNNLaneMockTest, LANE_RE_ALLOC_Test_003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     LaneAllocListener listenerCb = {
-        .OnLaneAllocSuccess = OnLaneAllocSuccessForWlan5g,
-        .OnLaneAllocFail = OnLaneAllocFail,
+        .onLaneAllocSuccess = OnLaneAllocSuccessForWlan5g,
+        .onLaneAllocFail = OnLaneAllocFail,
     };
     NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
     wifiMock.SetDefaultResult();
@@ -698,8 +698,8 @@ HWTEST_F(LNNLaneMockTest, LANE_RE_ALLOC_Test_004, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     LaneAllocListener listenerCb = {
-        .OnLaneAllocSuccess = OnLaneAllocSuccessForHml,
-        .OnLaneAllocFail = OnLaneAllocFail,
+        .onLaneAllocSuccess = OnLaneAllocSuccessForHml,
+        .onLaneAllocFail = OnLaneAllocFail,
     };
     NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
     wifiMock.SetDefaultResult();
@@ -740,8 +740,8 @@ HWTEST_F(LNNLaneMockTest, LANE_RE_ALLOC_Test_005, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     LaneAllocListener listenerCb = {
-        .OnLaneAllocSuccess = OnLaneAllocSuccessForBr,
-        .OnLaneAllocFail = OnLaneAllocFail,
+        .onLaneAllocSuccess = OnLaneAllocSuccessForBr,
+        .onLaneAllocFail = OnLaneAllocFail,
     };
     NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
     wifiMock.SetDefaultResult();
@@ -779,8 +779,8 @@ HWTEST_F(LNNLaneMockTest, LANE_CANCEL_Test_001, TestSize.Level1)
     EXPECT_TRUE(laneReqId != INVALID_LANE_REQ_ID);
 
     LaneAllocListener listenerCb = {
-        .OnLaneAllocSuccess = OnLaneAllocSuccessForP2p,
-        .OnLaneAllocFail = OnLaneAllocFail,
+        .onLaneAllocSuccess = OnLaneAllocSuccessForP2p,
+        .onLaneAllocFail = OnLaneAllocFail,
     };
     NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
     wifiMock.SetDefaultResult();
@@ -818,8 +818,8 @@ HWTEST_F(LNNLaneMockTest, LANE_CANCEL_Test_002, TestSize.Level1)
     EXPECT_TRUE(laneReqId != INVALID_LANE_REQ_ID);
 
     LaneAllocListener listenerCb = {
-        .OnLaneAllocSuccess = OnLaneAllocSuccessForP2p,
-        .OnLaneAllocFail = OnLaneAllocFail,
+        .onLaneAllocSuccess = OnLaneAllocSuccessForP2p,
+        .onLaneAllocFail = OnLaneAllocFail,
     };
     NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
     LnnWifiAdpterInterfaceMock::delayNotifyLinkSuccess = true;
@@ -859,8 +859,8 @@ HWTEST_F(LNNLaneMockTest, LANE_CANCEL_Test_003, TestSize.Level1)
     EXPECT_TRUE(laneReqId != INVALID_LANE_REQ_ID);
 
     LaneAllocListener listenerCb = {
-        .OnLaneAllocSuccess = OnLaneAllocSuccessForP2p,
-        .OnLaneAllocFail = OnLaneAllocFail,
+        .onLaneAllocSuccess = OnLaneAllocSuccessForP2p,
+        .onLaneAllocFail = OnLaneAllocFail,
     };
     NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
     wifiMock.SetDefaultResult();

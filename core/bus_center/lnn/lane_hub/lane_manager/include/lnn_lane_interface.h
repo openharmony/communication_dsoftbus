@@ -111,13 +111,13 @@ typedef struct {
 } LaneConnInfo;
 
 typedef struct {
-    void (*OnLaneAllocSuccess)(uint32_t laneHandle, const LaneConnInfo *info);
-    void (*OnLaneAllocFail)(uint32_t laneHandle, int32_t errCode);
+    void (*onLaneAllocSuccess)(uint32_t laneHandle, const LaneConnInfo *info);
+    void (*onLaneAllocFail)(uint32_t laneHandle, int32_t errCode);
 } LaneAllocListener;
 
 typedef struct {
-    void (*OnLaneRequestSuccess)(uint32_t laneReqId, const LaneConnInfo *info);
-    void (*OnLaneRequestFail)(uint32_t laneReqId, int32_t errCode);
+    void (*onLaneRequestSuccess)(uint32_t laneReqId, const LaneConnInfo *info);
+    void (*onLaneRequestFail)(uint32_t laneReqId, int32_t errCode);
 } ILaneListener;
 
 typedef enum {

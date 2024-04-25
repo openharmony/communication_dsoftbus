@@ -209,7 +209,7 @@ static void HbConditionChanged(bool isOnlySetState)
     }
 }
 
-static uint64_t GetDisEnableBleDiscoveryTime(int64_t modeDuration)
+static uint64_t GetDisEnableBleDiscoveryTime(uint64_t modeDuration)
 {
     uint64_t timeout = 0ULL;
     if (modeDuration < MIN_DISABLE_BLE_DISCOVERY_TIME) {
@@ -239,7 +239,7 @@ void LnnRequestBleDiscoveryProcess(int32_t strategy, int64_t timeout)
             LNN_LOGI(LNN_HEART_BEAT, "ble has been requestDisabled, need wait timeout or enabled");
             return;
         }
-        uint64_t time = GetDisEnableBleDiscoveryTime(timeout);
+        uint64_t time = GetDisEnableBleDiscoveryTime((uint64_t)timeout);
         if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), RequestEnableDiscovery, NULL, time) !=
             SOFTBUS_OK) {
             LNN_LOGI(LNN_HEART_BEAT, "ble has been requestDisabled fail, due to async callback fail");
@@ -832,12 +832,8 @@ static void LnnHbUnsubscribeTask(void)
     LnnDcUnsubscribe(&g_dcTask);
 }
 
-int32_t LnnInitHeartbeat(void)
+static int32_t LnnRegisterHeartbeatEvent(void)
 {
-    if (LnnHbStrategyInit() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "strategy module init fail");
-        return SOFTBUS_ERR;
-    }
     if (LnnRegisterEventHandler(LNN_EVENT_IP_ADDR_CHANGED, HbIpAddrChangeEventHandler) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "regist ip addr change evt handler fail");
         return SOFTBUS_ERR;
@@ -880,6 +876,18 @@ int32_t LnnInitHeartbeat(void)
     }
     if (LnnRegisterEventHandler(LNN_EVENT_OOBE_STATE_CHANGED, HbOOBEStateEventHandler) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "regist OOBE state evt handler fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnInitHeartbeat(void)
+{
+    if (LnnHbStrategyInit() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "strategy module init fail");
+        return SOFTBUS_ERR;
+    }
+    if (LnnRegisterHeartbeatEvent() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
     InitHbConditionState();
