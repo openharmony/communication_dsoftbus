@@ -323,6 +323,7 @@ static int32_t GetTcpInfoByFd(int32_t fd, TcpConnInfoNode *tcpInfo)
         if (item->info.socketInfo.fd == fd) {
             if (memcpy_s(tcpInfo, sizeof(TcpConnInfoNode), item, sizeof(TcpConnInfoNode)) != EOK) {
                 CONN_LOGE(CONN_COMMON, "GetTcpInfoByFd:memcpy_s failed");
+                (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
                 return SOFTBUS_ERR;
             }
             (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
