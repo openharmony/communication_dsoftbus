@@ -1844,8 +1844,8 @@ int32_t LnnUpdateGroupType(const NodeInfo *info)
     DoubleHashMap *map = NULL;
     NodeInfo *oldInfo = NULL;
     udid = LnnGetDeviceUdid(info);
-    int32_t groupType = AuthGetGroupType(udid, info->uuid);
-    LNN_LOGI(LNN_LEDGER, "groupType=%{public}d", groupType);
+    uint32_t groupType = AuthGetGroupType(udid, info->uuid);
+    LNN_LOGI(LNN_LEDGER, "groupType=%{public}u", groupType);
     int32_t ret = SOFTBUS_ERR;
     map = &g_distributedNetLedger.distributedInfo;
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {

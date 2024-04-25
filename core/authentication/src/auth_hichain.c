@@ -142,7 +142,7 @@ static void OnFinish(int64_t authSeq, int operationCode, const char *returnData)
     (void)AuthSessionHandleAuthFinish(authSeq);
 }
 
-static void GetSoftbusHichainAuthErrorCode(int32_t hichainErrCode, int32_t *softbusErrCode)
+static void GetSoftbusHichainAuthErrorCode(uint32_t hichainErrCode, uint32_t *softbusErrCode)
 {
     if (hichainErrCode >= HICHAIN_DAS_ERRCODE_MIN && hichainErrCode <= HICHAIN_DAS_ERRCODE_MAX) {
         *softbusErrCode = hichainErrCode & MASK_LOW_16BIT;
@@ -150,7 +150,7 @@ static void GetSoftbusHichainAuthErrorCode(int32_t hichainErrCode, int32_t *soft
             ((AUTH_SUB_MODULE_CODE) << ERRCODE_SHIFT_16BIT) | (*softbusErrCode | ERRCODE_OR_BIT));
     } else if (hichainErrCode >= HICHAIN_COMMON_ERRCODE_MIN && hichainErrCode <= HICHAIN_COMMON_ERRCODE_MAX) {
         uint32_t high4bit = 0;
-        int32_t tempCode = 0;
+        uint32_t tempCode = 0;
         high4bit = hichainErrCode & MASK_HIGH_4BIT;
         high4bit = high4bit >> ERRCODE_SHIFT_12BIT;
         tempCode = hichainErrCode & MASK_LOW_8BIT;
@@ -167,8 +167,8 @@ static void OnError(int64_t authSeq, int operationCode, int errCode, const char 
     (void)operationCode;
     (void)errorReturn;
     DfxRecordLnnEndHichainEnd(authSeq, errCode);
-    int32_t authErrCode = 0;
-    (void)GetSoftbusHichainAuthErrorCode(errCode, &authErrCode);
+    uint32_t authErrCode = 0;
+    (void)GetSoftbusHichainAuthErrorCode((uint32_t)errCode, &authErrCode);
     AUTH_LOGE(AUTH_HICHAIN, "hichain OnError: authSeq=%{public}" PRId64 ", errCode=%{public}d authErrCode=%{public}d",
         authSeq, errCode, authErrCode);
     (void)AuthSessionHandleAuthError(authSeq, authErrCode);
