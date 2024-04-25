@@ -32,3 +32,27 @@ void SendInfoToMlpsBleOfflineProcess(void *para)
     (void)para;
     return;
 }
+
+int32_t GetBurstAdvId(void)
+{
+    return SOFTBUS_ERR;
+}
+
+int32_t SendDeviceInfoToSHByType(SensorHubFeatureType type)
+{
+    (void)type;
+    return SOFTBUS_OK;
+}
+
+int32_t SendAdvInfoToMlps(LpBroadcastParam *lpAdvParam, SensorHubServerType type)
+{
+    (void)lpAdvParam;
+    (void)type;
+    return SOFTBUS_OK;
+}
+
+int32_t SwtichHeartbeatReportChannel(bool isToAP)
+{
+    (void)isToAP;
+    return SOFTBUS_OK;
+}

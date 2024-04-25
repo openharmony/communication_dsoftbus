@@ -365,6 +365,48 @@ int32_t ServerIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkI
     return SOFTBUS_OK;
 }
 
+int32_t ServerIpcRegDataLevelChangeCb(const char *pkgName)
+{
+    if (pkgName == NULL) {
+        LNN_LOGE(LNN_EVENT, "params are nullptr");
+        return SOFTBUS_ERR;
+    }
+    if (g_serverProxy == NULL) {
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
+        return SOFTBUS_ERR;
+    }
+    IpcIo request = {0};
+    return g_serverProxy->Invoke(g_serverProxy, SERVER_REG_DATA_LEVEL_CHANGE_CB, &request, NULL, NULL);
+}
+
+int32_t ServerIpcUnregDataLevelChangeCb(const char *pkgName)
+{
+    if (pkgName == NULL) {
+        LNN_LOGE(LNN_EVENT, "params are nullptr");
+        return SOFTBUS_ERR;
+    }
+    if (g_serverProxy == NULL) {
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
+        return SOFTBUS_ERR;
+    }
+    IpcIo request = {0};
+    return g_serverProxy->Invoke(g_serverProxy, SERVER_UNREG_DATA_LEVEL_CHANGE_CB, &request, NULL, NULL);
+}
+
+int32_t ServerIpcSetDataLevel(const DataLevel *dataLevel)
+{
+    if (dataLevel == NULL) {
+        LNN_LOGE(LNN_EVENT, "params are nullptr");
+        return SOFTBUS_ERR;
+    }
+    if (g_serverProxy == NULL) {
+        LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");
+        return SOFTBUS_ERR;
+    }
+    IpcIo request = {0};
+    return g_serverProxy->Invoke(g_serverProxy, SERVER_SET_DATA_LEVEL, &request, NULL, NULL);
+}
+
 int ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen)
 {
     LNN_LOGD(LNN_EVENT, "join Lnn ipc client push");

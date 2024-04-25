@@ -281,7 +281,7 @@ static int32_t UpdateFileRecvPath(int32_t channelId, FileListener *fileListener,
         if (strcpy_s(fileListener->rootDir, FILE_RECV_ROOT_DIR_SIZE_MAX, absPath) != EOK) {
             TRANS_LOGE(TRANS_SDK, "strcpy rootDir failed");
             SoftBusFree(absPath);
-            return SOFTBUS_ERR;
+            return SOFTBUS_STRCPY_ERR;
         }
         SoftBusFree(absPath);
     }

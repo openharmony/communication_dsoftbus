@@ -38,6 +38,10 @@ constexpr uint8_t MSG[] = "123456BNHFCF";
 constexpr int64_t AUTH_ID = 10;
 constexpr uint32_t REQUEST_ID = 10;
 
+#define SOFTBUS_SUB_SYSTEM 203
+#define SOFTBUS_AUTH_MODULE 3
+#define HICHAIN_ERROR_KEY_NOEXIST (-((SOFTBUS_SUB_SYSTEM << 21) | (SOFTBUS_AUTH_MODULE << 16) | 0x0101))
+
 namespace OHOS {
 using namespace testing::ext;
 
@@ -349,7 +353,7 @@ HWTEST_F(LNNNetBuilderTest, LNN_GET_VERIFY_CALLBACK_TEST_001, TestSize.Level0)
     authVerifyCallback->onVerifyPassed(REQUEST_ID, authHandle, info);
     authVerifyCallback->onVerifyPassed(REQUEST_ID, authHandle, &info1);
     authVerifyCallback->onVerifyFailed(REQUEST_ID, SOFTBUS_OK);
-    authVerifyCallback->onVerifyFailed(REQUEST_ID, SOFTBUS_AUTH_HICHAIN_AUTH_ERROR);
+    authVerifyCallback->onVerifyFailed(REQUEST_ID, HICHAIN_ERROR_KEY_NOEXIST);
 }
 
 /*

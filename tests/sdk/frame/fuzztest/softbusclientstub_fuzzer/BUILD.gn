@@ -35,7 +35,7 @@ common_client_deps += [
   "$dsoftbus_root_path/adapter:softbus_adapter",
   "$dsoftbus_root_path/core/common:softbus_utils",
 ]
-
+common_client_ex_deps = []
 if (defined(ohos_lite)) {
   if (dsoftbus_feature_build_shared_sdk == true) {
     build_type = "shared_library"
@@ -43,12 +43,10 @@ if (defined(ohos_lite)) {
     build_type = "static_library"
   }
   if (ohos_kernel_type != "liteos_m") {
-    common_client_deps +=
-        [ "//third_party/bounds_checking_function:libsec_shared" ]
+    common_client_ex_deps += [ "bounds_checking_function:libsec_shared" ]
   }
 } else {
-  common_client_deps +=
-      [ "//third_party/bounds_checking_function:libsec_shared" ]
+  common_client_ex_deps += [ "bounds_checking_function:libsec_shared" ]
 }
 
 config("dsoftbus_sdk_interface") {
@@ -75,7 +73,9 @@ ohos_static_library("softbus_client_static") {
   sources = common_client_src
   include_dirs = common_client_inc
   deps = common_client_deps
+  external_deps = common_client_ex_deps
   all_dependent_configs = [ ":dsoftbus_sdk_interface" ]
+  public_configs = [ ":dsoftbus_sdk_interface" ]
   defines += TRANS_SDK_DEFINES
 
   if (defined(ohos_lite)) {
@@ -95,7 +95,7 @@ ohos_static_library("softbus_client_static") {
     cflags = [ "-fPIC" ]
     cflags_cc = [ "-std=c++14" ]
     if (is_standard_system) {
-      external_deps = [
+      external_deps += [
         "c_utils:utils",
         "hilog:libhilog",
         "ipc:ipc_single",

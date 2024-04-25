@@ -16,6 +16,7 @@
 #ifndef INTERFACES_INNERKITS_SOFTBUS_CLIENT_H_
 #define INTERFACES_INNERKITS_SOFTBUS_CLIENT_H_
 
+#include "data_level_inner.h"
 #include "discovery_service.h"
 #include "iremote_broker.h"
 #include "iremote_object.h"
@@ -73,6 +74,8 @@ public:
     virtual void OnRefreshLNNResult(int32_t refreshId, int32_t reason);
 
     virtual void OnRefreshDeviceFound(const void *device, uint32_t deviceLen);
+
+    virtual void OnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo);
 
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISoftBusClient");

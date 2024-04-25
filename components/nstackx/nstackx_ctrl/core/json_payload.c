@@ -584,15 +584,15 @@ char *PrepareServiceNotification(void)
 {
     char *str = PrepareServiceNotificationEx();
     if (str == NULL) {
-        ; // record exception here
+        IncStatistics(STATS_PREPARE_SN_MSG_FAILED);
     }
     return str;
 }
 
-int32_t ParseServiceNotification(const uint8_t *buf, NotificationConfig *notificaiton)
+int32_t ParseServiceNotification(const uint8_t *buf, NSTACKX_NotificationConfig *config)
 {
-    if (buf == NULL || notificaiton == NULL) {
-        DFINDER_LOGE(TAG, "buf or notification is null");
+    if (buf == NULL || config == NULL) {
+        DFINDER_LOGE(TAG, "buf or notification config is null");
         return NSTACKX_EINVAL;
     }
     cJSON *data = cJSON_Parse((char *)buf);
@@ -609,12 +609,13 @@ int32_t ParseServiceNotification(const uint8_t *buf, NotificationConfig *notific
         DFINDER_LOGE(TAG, "json notification data not in string format");
         goto LERR;
     }
-    if (item->valuestring == NULL) {
-        DFINDER_LOGE(TAG, "notification data item->valuestring is null");
+    if (item->valuestring == NULL || strlen(item->valuestring) > NSTACKX_MAX_NOTIFICATION_DATA_LEN - 1) {
+        DFINDER_LOGE(TAG, "parsed out illegal notification data len");
         goto LERR;
     }
-    if (strcpy_s(notificaiton->msg, NSTACKX_MAX_NOTIFICATION_DATA_LEN, item->valuestring)) {
-        DFINDER_LOGE(TAG, "parse service notification data fail, value string: %s", item->valuestring);
+    config->msgLen = strlen(item->valuestring);
+    if (strcpy_s(config->msg, NSTACKX_MAX_NOTIFICATION_DATA_LEN, item->valuestring) != EOK) {
+        DFINDER_LOGE(TAG, "copy notification fail, errno: %d, desc: %s", errno, strerror(errno));
         goto LERR;
     }
     cJSON_Delete(data);

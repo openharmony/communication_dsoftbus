@@ -28,6 +28,7 @@ using namespace testing::ext;
 
 #define TRANS_TEST_INVALID_PID (-1)
 #define TRANS_TEST_INVALID_UID (-1)
+#define INVALID_SESSION_ID (-1)
 
 namespace OHOS {
 
@@ -177,7 +178,7 @@ HWTEST_F(TransSessionServiceTest, TransSessionServiceTest05, TestSize.Level1)
     sessionPara.groupId = g_groupid;
     sessionPara.attr = &g_sessionAttr;
     ret = TransOpenSession(&sessionPara, transInfo);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_SESSION_ID);
     ret = TransSessionServerDelItem(g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(transInfo);

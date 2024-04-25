@@ -768,7 +768,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyByteDataTest001, TestSize.Lev
     uint8_t inData = TEST_CHANNEL_IDENTITY_LEN;
 
     int32_t ret = TransProxyMessageData(appInfo, dataInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_MEM_ERR, ret);
 
     dataInfo->inData = &inData;
     appInfo->fastTransDataSize = FAST_TRANS_DATASIZE;

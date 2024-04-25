@@ -27,12 +27,14 @@ extern "C" {
 typedef struct {
     void (*Init)(const ILaneIdStateListener *listener);
     void (*Deinit)(void);
-    int32_t (*AllocLane)(uint32_t laneReqId, const LaneRequestOption *request, const ILaneListener *listener);
-    int32_t (*allocLaneByQos)(uint32_t laneReqId, const LaneRequestOption *request, const ILaneListener *listener);
-    int32_t (*FreeLane)(uint32_t laneReqId);
+    int32_t (*AllocLane)(uint32_t laneHandle, const LaneRequestOption *request, const ILaneListener *listener);
+    int32_t (*AllocLaneByQos)(uint32_t laneHandle, const LaneAllocInfo *allocInfo, const LaneAllocListener *listener);
+    int32_t (*ReallocLaneByQos)(uint32_t laneHandle, uint64_t laneId, const LaneAllocInfo *allocInfo,
+        const LaneAllocListener *listener);
+    int32_t (*CancelLane)(uint32_t laneHandle);
+    int32_t (*FreeLane)(uint32_t laneHandle);
 } LaneInterface;
-
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif // LNN_LANE_ASSIGN_H

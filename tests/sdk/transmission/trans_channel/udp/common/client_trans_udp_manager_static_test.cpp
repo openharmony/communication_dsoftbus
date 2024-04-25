@@ -78,11 +78,11 @@ HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransUdpManagerStaticTest001, Te
     OnQosEvent(TEST_CHANNELID, TEST_EVENT_ID, TEST_COUNT, &tvList);
 
     ret = TransDeleteUdpChannel(TEST_CHANNELID);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     UdpChannel channel;
     ret = TransGetUdpChannel(TEST_CHANNELID, &channel);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     ret = ClosePeerUdpChannel(TEST_CHANNELID);
     EXPECT_EQ(SOFTBUS_ERR, ret);
@@ -112,7 +112,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransUdpManagerStaticTest002, Te
     StreamFrameInfo tmpf = {};
 
     int32_t ret = ClientTransUdpMgrInit(NULL);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     IClientSessionCallBack *cb = GetClientSessionCb();
     ret = ClientTransUdpMgrInit(cb);
@@ -150,7 +150,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransAddUdpChannelTest001, TestS
     ASSERT_EQ(SOFTBUS_OK, ret);
 
     ret = ClientTransAddUdpChannel(&udpChannel);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_CHANNEL_ALREADY_EXIST, ret);
 
     OnUdpChannelOpened(TEST_CHANNELID);
 
@@ -158,7 +158,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransAddUdpChannelTest001, TestS
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransSetUdpChannelEnable(ERR_CHANNELID, false);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND, ret);
 }
 
 /**
@@ -187,6 +187,6 @@ HWTEST_F(ClientTransUdpManagerStaticTest, TransDeleteBusinnessChannelTest001, Te
 
     channel.businessType = TEST_CHANNELID;
     ret = TransDeleteBusinnessChannel(&channel);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH, ret);
 }
 } // namespace OHOS

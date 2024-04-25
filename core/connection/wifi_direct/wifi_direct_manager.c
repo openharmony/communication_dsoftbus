@@ -227,6 +227,25 @@ static int32_t GetLocalAndRemoteMacByLocalIp(const char *localIp,  char *localMa
     return SOFTBUS_OK;
 }
 
+static bool IsNegotiateChannelNeeded(const char *remoteNetworkId, enum WifiDirectLinkType linkType)
+{
+    char uuid[UUID_BUF_LEN] = {0};
+    int32_t ret = LnnGetRemoteStrInfo(remoteNetworkId, STRING_KEY_UUID, uuid, sizeof(uuid));
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, true, CONN_WIFI_DIRECT, "get uuid failed");
+    struct InnerLink *link = GetLinkManager()->getLinkByTypeAndUuid(linkType, uuid);
+    if (link == NULL) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "no inner link");
+        return true;
+    }
+    struct WifiDirectNegotiateChannel *channel = link->getPointer(link, IL_KEY_NEGO_CHANNEL, NULL);
+    if (channel == NULL) {
+        CONN_LOGD(CONN_WIFI_DIRECT, "need negotiate channel");
+        return true;
+    }
+    CONN_LOGD(CONN_WIFI_DIRECT, "no need negotiate channel");
+    return false;
+}
+
 static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *channel, const uint8_t *data, size_t len)
 {
     GetWifiDirectNegotiator()->onNegotiateChannelDataReceived(channel, data, len);
@@ -235,6 +254,28 @@ static void OnNegotiateChannelDataReceived(struct WifiDirectNegotiateChannel *ch
 static void OnNegotiateChannelDisconnected(struct WifiDirectNegotiateChannel *channel)
 {
     GetWifiDirectNegotiator()->onNegotiateChannelDisconnected(channel);
+}
+
+static void OnConnectedForSink(const char *remoteMac, const char *remoteIp, const char *remoteUuid,
+                               enum WifiDirectLinkType type)
+{
+    struct WifiDirectManager *self = GetWifiDirectManager();
+    for (uint32_t index = 0; index < MODULE_TYPE_MAX; index++) {
+        if (self->listeners[index].onConnectedForSink != NULL) {
+            self->listeners[index].onConnectedForSink(remoteMac, remoteIp, remoteUuid, type);
+        }
+    }
+}
+
+static void OnDisconnectedForSink(const char *remoteMac, const char *remoteIp, const char *remoteUuid,
+                                  enum WifiDirectLinkType type)
+{
+    struct WifiDirectManager *self = GetWifiDirectManager();
+    for (uint32_t index = 0; index < MODULE_TYPE_MAX; index++) {
+        if (self->listeners[index].onDisconnectedForSink != NULL) {
+            self->listeners[index].onDisconnectedForSink(remoteMac, remoteIp, remoteUuid, type);
+        }
+    }
 }
 
 /* private method implement */
@@ -251,9 +292,12 @@ static struct WifiDirectManager g_manager = {
     .prejudgeAvailability = PrejudgeAvailability,
     .getInterfaceNameByLocalIp = GetInterfaceNameByLocalIp,
     .getLocalAndRemoteMacByLocalIp = GetLocalAndRemoteMacByLocalIp,
+    .isNegotiateChannelNeeded = IsNegotiateChannelNeeded,
 
     .onNegotiateChannelDataReceived = OnNegotiateChannelDataReceived,
     .onNegotiateChannelDisconnected = OnNegotiateChannelDisconnected,
+    .onConnectedForSink = OnConnectedForSink,
+    .onDisconnectedForSink = OnDisconnectedForSink,
 
     .requestId = REQUEST_ID_INVALID,
     .myRole = WIFI_DIRECT_ROLE_NONE,
@@ -323,6 +367,7 @@ static void OnInnerLinkChange(struct InnerLink *innerLink, bool isStateChange)
     innerLink->getRemoteIpString(innerLink, remoteIp, sizeof(remoteIp));
     innerLink->getLocalIpString(innerLink, localIp, sizeof(localIp));
     const char *remoteUuid = innerLink->getString(innerLink, IL_KEY_DEVICE_ID, "");
+    bool isSource = innerLink->getBoolean(innerLink, IL_KEY_IS_SOURCE, false);
 
     if (!isStateChange) {
         return;
@@ -334,7 +379,7 @@ static void OnInnerLinkChange(struct InnerLink *innerLink, bool isStateChange)
             WifiDirectAnonymizeDeviceId(remoteUuid));
         for (uint32_t index = 0; index < MODULE_TYPE_MAX; index++) {
             if (self->listeners[index].onDeviceOnLine != NULL) {
-                self->listeners[index].onDeviceOnLine(remoteMac, remoteIp, remoteUuid);
+                self->listeners[index].onDeviceOnLine(remoteMac, remoteIp, remoteUuid, isSource);
             }
         }
     } else if (state == INNER_LINK_STATE_DISCONNECTED) {

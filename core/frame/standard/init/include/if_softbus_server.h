@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef INTERFACES_INNERKITS_SOFTBUS_SERVER_H_
 #define INTERFACES_INNERKITS_SOFTBUS_SERVER_H_
 
+#include "data_level.h"
 #include "discovery_service.h"
 #include "iremote_broker.h"
 #include "iremote_object.h"
@@ -40,7 +41,7 @@ public:
     virtual int32_t OpenSession(const SessionParam *param, TransInfo *info) = 0;
     virtual int32_t OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo) = 0;
     virtual int32_t NotifyAuthSuccess(int32_t channelId, int32_t channelType) = 0;
-    virtual int32_t CloseChannel(int32_t channelId, int32_t channelType) = 0;
+    virtual int32_t CloseChannel(const char *sessionName, int32_t channelId, int32_t channelType) = 0;
     virtual int32_t ReleaseResources(int32_t channelId) = 0;
     virtual int32_t SendMessage(int32_t channelId, int32_t channelType,
         const void *data, uint32_t len, int32_t msgType) = 0;
@@ -51,6 +52,9 @@ public:
     virtual int32_t GetNodeKeyInfo(const char *pkgName, const char *networkId, int key, unsigned char *buf,
         uint32_t len) = 0;
     virtual int32_t SetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag) = 0;
+    virtual int32_t RegDataLevelChangeCb(const char *pkgName) = 0;
+    virtual int32_t UnregDataLevelChangeCb(const char *pkgName) = 0;
+    virtual int32_t SetDataLevel(const DataLevel *dataLevel) = 0;
     virtual int32_t StartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy,
         int32_t period) = 0;
     virtual int32_t StopTimeSync(const char *pkgName, const char *targetNetworkId) = 0;

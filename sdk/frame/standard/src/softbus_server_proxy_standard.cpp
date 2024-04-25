@@ -147,8 +147,9 @@ int32_t SoftBusServerProxyFrame::ReleaseResources(int32_t channelId)
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusServerProxyFrame::CloseChannel(int32_t channelId, int32_t channelType)
+int32_t SoftBusServerProxyFrame::CloseChannel(const char *sessionName, int32_t channelId, int32_t channelType)
 {
+    (void)sessionName;
     (void)channelId;
     (void)channelType;
     return SOFTBUS_OK;
@@ -215,6 +216,25 @@ int32_t SoftBusServerProxyFrame::SetNodeDataChangeFlag(const char *pkgName, cons
     (void)pkgName;
     (void)networkId;
     (void)dataChangeFlag;
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerProxyFrame::RegDataLevelChangeCb(const char *pkgName)
+{
+    (void)pkgName;
+    return SOFTBUS_OK;
+}
+
+
+int32_t SoftBusServerProxyFrame::UnregDataLevelChangeCb(const char *pkgName)
+{
+    (void)pkgName;
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerProxyFrame::SetDataLevel(const DataLevel *dataLevel)
+{
+    (void)dataLevel;
     return SOFTBUS_OK;
 }
 

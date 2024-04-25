@@ -33,6 +33,7 @@ typedef struct {
     int32_t sequence;
     SeqVerifyInfo verifyInfo;
     char sessionKey[SESSION_KEY_LENGTH];
+    char myIp[IP_LEN];
     SoftBusList *pendingPacketsList;
 } TcpDirectChannelDetail;
 

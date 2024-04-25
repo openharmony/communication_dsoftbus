@@ -37,6 +37,7 @@ public:
     virtual int32_t AuthPostTransData(AuthHandle authHandle, const AuthTransData *dataInfo) = 0;
     virtual int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer, bool isMeta) = 0;
     virtual int32_t AuthFlushDevice(const char *uuid) = 0;
+    virtual int32_t AuthSendKeepAlive(const char *uuid, ModeCycle cycle) = 0;
 };
 class AuthInterfaceMock : public AuthInterface {
 public:
@@ -54,6 +55,7 @@ public:
     MOCK_METHOD2(AuthPostTransData, int32_t (AuthHandle, const AuthTransData *));
     MOCK_METHOD3(AuthGetIdByConnInfo, int64_t (const AuthConnInfo *, bool, bool));
     MOCK_METHOD1(AuthFlushDevice, int32_t(const char *));
+    MOCK_METHOD2(AuthSendKeepAlive, int32_t(const char *, ModeCycle));
 };
 } // namespace OHOS
 #endif // AUTH_MOCK_H

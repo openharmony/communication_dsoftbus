@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -307,8 +307,9 @@ int32_t DiscServerProxy::ReleaseResources(int32_t channelId)
     return SOFTBUS_OK;
 }
 
-int32_t DiscServerProxy::CloseChannel(int32_t channelId, int32_t channelType)
+int32_t DiscServerProxy::CloseChannel(const char *sessionName, int32_t channelId, int32_t channelType)
 {
+    (void)sessionName;
     (void)channelId;
     (void)channelType;
     return SOFTBUS_OK;
@@ -373,6 +374,24 @@ int32_t DiscServerProxy::SetNodeDataChangeFlag(const char *pkgName, const char *
     (void)pkgName;
     (void)networkId;
     (void)dataChangeFlag;
+    return SOFTBUS_OK;
+}
+
+int32_t DiscServerProxy::RegDataLevelChangeCb(const char *pkgName)
+{
+    (void)pkgName;
+    return SOFTBUS_OK;
+}
+
+int32_t DiscServerProxy::UnregDataLevelChangeCb(const char *pkgName)
+{
+    (void)pkgName;
+    return SOFTBUS_OK;
+}
+
+int32_t DiscServerProxy::SetDataLevel(const DataLevel *dataLevel)
+{
+    (void)dataLevel;
     return SOFTBUS_OK;
 }
 

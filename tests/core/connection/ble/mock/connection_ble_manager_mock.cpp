@@ -76,6 +76,11 @@ int ConnBlePostBytesInner(uint32_t connectionId, uint8_t *data, uint32_t dataLen
         connectionId, data, dataLen, pid, flag, module, seq, postBytesFinishAction);
 }
 
+int32_t ConnBleTransConfigPostLimit(const LimitConfiguration *configuration)
+{
+    return 0;
+}
+
 int32_t LnnGetConnSubFeatureByUdidHashStr(const char *udidHashStr, uint64_t *connSubFeature)
 {
     return GetConnectionBleInterface()->LnnGetConnSubFeatureByUdidHashStr(udidHashStr, connSubFeature);

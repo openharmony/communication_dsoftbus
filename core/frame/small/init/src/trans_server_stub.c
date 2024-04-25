@@ -271,10 +271,18 @@ int32_t ServerCloseChannel(IpcIo *req, IpcIo *reply)
     int32_t ret;
     int32_t channelId = 0;
     int32_t channelType = 0;
+    const char *sessionName = NULL;
+    uint32_t size;
     ReadInt32(req, &channelId);
     ReadInt32(req, &channelType);
-
-    ret = TransCloseChannel(channelId, channelType);
+    if (channelType == CHANNEL_TYPE_UNDEFINED) {
+        sessionName = (const char*)ReadString(req, &size);
+        if (sessionName == NULL) {
+            TRANS_LOGE(TRANS_CTRL, "ServerCloseChannel sessionName is null");
+            return SOFTBUS_IPC_ERR;
+        }
+    }
+    ret = TransCloseChannel(sessionName, channelId, channelType);
 
     WriteInt32(reply, ret);
     return ret;

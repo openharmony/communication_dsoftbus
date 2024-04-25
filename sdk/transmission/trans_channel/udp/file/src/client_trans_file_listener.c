@@ -86,7 +86,7 @@ int32_t TransSetFileReceiveListener(const char *sessionName,
                 recvListener, sizeof(IFileReceiveListener)) != EOK) {
             (void)SoftBusMutexUnlock(&(g_fileListener->lock));
             TRANS_LOGE(TRANS_FILE, "update file receive listener failed");
-            return SOFTBUS_ERR;
+            return SOFTBUS_MEM_ERR;
         }
         (void)SoftBusMutexUnlock(&(g_fileListener->lock));
         TRANS_LOGI(TRANS_FILE, "update file receive listener success");
@@ -105,10 +105,10 @@ int32_t TransSetFileReceiveListener(const char *sessionName,
         TRANS_LOGE(TRANS_FILE, "file node copy failed.");
         SoftBusFree(fileNode);
         (void)SoftBusMutexUnlock(&(g_fileListener->lock));
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     ListAdd(&(g_fileListener->list), &(fileNode->node));
-    TRANS_LOGI(TRANS_FILE, "add sessionName = %{public}s", sessionName);
+    TRANS_LOGI(TRANS_FILE, "add sessionName=%{public}s", sessionName);
     (void)SoftBusMutexUnlock(&(g_fileListener->lock));
     return SOFTBUS_OK;
 }
@@ -135,8 +135,8 @@ int32_t TransSetFileSendListener(const char *sessionName, const IFileSendListene
         if (memcpy_s(&(fileNode->sendListener), sizeof(IFileSendListener),
             sendListener, sizeof(IFileSendListener)) != EOK) {
             (void)SoftBusMutexUnlock(&(g_fileListener->lock));
-            TRANS_LOGE(TRANS_FILE, "update file send listener failed");
-            return SOFTBUS_ERR;
+            TRANS_LOGE(TRANS_FILE, "memcpy_s file send listener failed");
+            return SOFTBUS_MEM_ERR;
         }
         (void)SoftBusMutexUnlock(&(g_fileListener->lock));
         TRANS_LOGE(TRANS_FILE, "update file send listener success");
@@ -154,7 +154,7 @@ int32_t TransSetFileSendListener(const char *sessionName, const IFileSendListene
         TRANS_LOGE(TRANS_FILE, "file node copy failed.");
         SoftBusFree(fileNode);
         (void)SoftBusMutexUnlock(&(g_fileListener->lock));
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     ListAdd(&(g_fileListener->list), &(fileNode->node));
     TRANS_LOGI(TRANS_FILE, "add sessionName = %{public}s", sessionName);
@@ -252,9 +252,9 @@ int32_t TransGetFileListener(const char *sessionName, FileListener *fileListener
     LIST_FOR_EACH_ENTRY(fileNode, &(g_fileListener->list), FileListener, node) {
         if (strcmp(fileNode->mySessionName, sessionName) == 0) {
             if (memcpy_s(fileListener, sizeof(FileListener), fileNode, sizeof(FileListener)) != EOK) {
-                TRANS_LOGE(TRANS_FILE, "memcpy_s failed.");
+                TRANS_LOGE(TRANS_FILE, "memcpy_s file listener failed.");
                 (void)SoftBusMutexUnlock(&(g_fileListener->lock));
-                return SOFTBUS_ERR;
+                return SOFTBUS_MEM_ERR;
             }
             (void)SoftBusMutexUnlock(&(g_fileListener->lock));
             return SOFTBUS_OK;

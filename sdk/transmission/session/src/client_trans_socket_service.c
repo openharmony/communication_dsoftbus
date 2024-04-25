@@ -85,15 +85,15 @@ int32_t Socket(SocketInfo info)
         return ret;
     }
 
-    int32_t secoketFd = INVALID_SESSION_ID;
-    ret = ClientAddSocket(&info, &secoketFd);
+    int32_t socketFd = INVALID_SESSION_ID;
+    ret = ClientAddSocket(&info, &socketFd);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "add socket failed, ret=%{public}d.", ret);
         return ret;
     }
 
-    TRANS_LOGI(TRANS_SDK, "create socket ok, socket=%{public}d", secoketFd);
-    return secoketFd;
+    TRANS_LOGI(TRANS_SDK, "create socket ok, socket=%{public}d", socketFd);
+    return socketFd;
 }
 
 int32_t Listen(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener)

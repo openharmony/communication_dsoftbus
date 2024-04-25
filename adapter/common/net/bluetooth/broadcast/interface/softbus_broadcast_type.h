@@ -86,7 +86,8 @@ typedef enum {
     SRV_TYPE_DIS, // The service type is distributed discovery.
     SRV_TYPE_SHARE, // The service type is share discovery.
     SRV_TYPE_APPROACH, // The service type is approach discovery.
-    SRV_TYPE_SH, // The service type is sensorhub.
+    SRV_TYPE_SH_BURST, // The service type is burst for sensorhub.
+    SRV_TYPE_SH_HB, // The service type is heartbeat for sensorhub.
     SRV_TYPE_FAST_OFFLINE, // The service type is fast offline.
     SRV_TYPE_BUTT,
 } BaseServiceType;
@@ -119,9 +120,22 @@ static const SrvTypeMap g_srvTypeMap[] = {
     {SRV_TYPE_DIS, (char *)"distributed"},
     {SRV_TYPE_SHARE, (char *)"share"},
     {SRV_TYPE_APPROACH, (char *)"approach"},
-    {SRV_TYPE_SH, (char *)"sensorhub"},
+    {SRV_TYPE_SH_BURST, (char *)"sh burst"},
+    {SRV_TYPE_SH_HB, (char *)"sh heartbeat"},
     {SRV_TYPE_FAST_OFFLINE, (char *)"fast offline"},
 };
+
+/**
+ * @brief Defines the broadcast type to sensorhub.
+ *
+ * @since 5.0
+ * @version 1.0
+ */
+typedef enum {
+    SOFTBUS_HEARTBEAT_TYPE = 0,
+    SOFTBUS_BURST_TYPE,
+    SOFTBUS_UNKNOW_TYPE,
+} SensorHubServerType;
 
 /**
  * @brief Defines the broadcast status type.
@@ -393,6 +407,7 @@ typedef struct {
     uint32_t manufactureDataLength;
     uint8_t *manufactureData;
     uint8_t *manufactureDataMask;
+    bool advIndReport;
 } BcScanFilter;
 
 /**

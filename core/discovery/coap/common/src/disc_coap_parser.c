@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -148,14 +148,14 @@ void DiscCoapParseHwAccountHash(const cJSON *data, DeviceInfo *device)
     DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "generate account hash failed, ret=%{public}d", ret);
 }
 
-int32_t DiscCoapFillServiceData(uint32_t capability, const char *capabilityData, uint32_t dataLen, char *outData)
+int32_t DiscCoapFillServiceData(uint32_t capability, const char *capabilityData, uint32_t dataLen, char *outData,
+    uint32_t outDataLen)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(outData != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "out data is NULL");
     if (capability != (1 << CASTPLUS_CAPABILITY_BITMAP)) {
         // only castPlus need add extra service data
         return SOFTBUS_OK;
     }
-    (void)memset_s(outData, sizeof(outData), 0, sizeof(outData));
     if (capabilityData == NULL || dataLen == 0) {
         DISC_LOGI(DISC_COAP, "no capability data, no need to fill service data");
         return SOFTBUS_OK;
@@ -174,7 +174,7 @@ int32_t DiscCoapFillServiceData(uint32_t capability, const char *capabilityData,
         cJSON_Delete(json);
         return SOFTBUS_PARSE_JSON_ERR;
     }
-    if (sprintf_s(outData, MAX_SERVICE_DATA_LEN, "%s:%s", JSON_KEY_CAST_PLUS, jsonStr) < 0) {
+    if (sprintf_s(outData, outDataLen, "%s%s:%s", outData, JSON_KEY_CAST_PLUS, jsonStr) < 0) {
         DISC_LOGE(DISC_COAP, "write cast capability data failed");
         cJSON_Delete(json);
         return SOFTBUS_ERR;

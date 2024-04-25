@@ -213,15 +213,16 @@ static AuthLinkType SwitchCipherTypeToAuthLinkType(uint32_t cipherFlag)
 static int32_t PackBytes(int32_t channelId, const char *data, TdcPacketHead *packetHead,
     char *buffer, uint32_t bufLen)
 {
-    int64_t authId = GetAuthIdByChanId(channelId);
-    if (authId == AUTH_INVALID_ID) {
+    AuthHandle authHandle = { 0 };
+    if (GetAuthHandleByChanId(channelId, &authHandle) != SOFTBUS_OK ||
+        authHandle.authId == AUTH_INVALID_ID) {
         TRANS_LOGE(TRANS_BYTES, "PackBytes get auth id fail");
         return SOFTBUS_NOT_FIND;
     }
 
     uint8_t *encData = (uint8_t *)buffer + DC_MSG_PACKET_HEAD_SIZE;
     uint32_t encDataLen = bufLen - DC_MSG_PACKET_HEAD_SIZE;
-    if (AuthEncrypt(authId, (const uint8_t *)data, packetHead->dataLen, encData, &encDataLen) != SOFTBUS_OK) {
+    if (AuthEncrypt(&authHandle, (const uint8_t *)data, packetHead->dataLen, encData, &encDataLen) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_BYTES, "PackBytes encrypt fail");
         return SOFTBUS_ENCRYPT_ERR;
     }
@@ -232,7 +233,7 @@ static int32_t PackBytes(int32_t channelId, const char *data, TdcPacketHead *pac
 
     PackTdcPacketHead(packetHead);
     if (memcpy_s(buffer, bufLen, packetHead, sizeof(TdcPacketHead)) != EOK) {
-        TRANS_LOGE(TRANS_BYTES, "buffer copy fail");
+        TRANS_LOGE(TRANS_BYTES, "memcpy_s buffer fail");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -326,13 +327,6 @@ static int32_t GetServerSideIpInfo(SessionConn *conn, char *ip, uint32_t len)
             TRANS_LOGE(TRANS_CTRL, "NotifyChannelOpened get local ip fail");
             return SOFTBUS_TRANS_GET_LOCAL_IP_FAILED;
         }
-        if (LnnSetLocalStrInfo(STRING_KEY_WLAN_IP, myIp) != SOFTBUS_OK) {
-            TRANS_LOGW(TRANS_CTRL, "ServerSide wifi set local ip fail");
-        }
-        if (LnnSetDLP2pIp(conn->appInfo.peerData.deviceId, CATEGORY_UUID,
-            conn->appInfo.peerData.addr) != SOFTBUS_OK) {
-            TRANS_LOGW(TRANS_CTRL, "ServerSide wifi set peer ip fail");
-        }
     } else if (conn->appInfo.routeType == WIFI_P2P) {
         struct WifiDirectManager *mgr = GetWifiDirectManager();
         if (mgr == NULL || mgr->getLocalIpByRemoteIp == NULL) {
@@ -356,7 +350,7 @@ static int32_t GetServerSideIpInfo(SessionConn *conn, char *ip, uint32_t len)
     }
     if (strcpy_s(ip, len, myIp)) {
         TRANS_LOGE(TRANS_CTRL, "copy str failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -368,13 +362,6 @@ static int32_t GetClientSideIpInfo(SessionConn *conn, char *ip, uint32_t len)
         if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, myIp, sizeof(myIp)) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "NotifyChannelOpened get local ip fail");
             return SOFTBUS_TRANS_GET_LOCAL_IP_FAILED;
-        }
-        if (LnnSetLocalStrInfo(STRING_KEY_WLAN_IP, myIp) != SOFTBUS_OK) {
-            TRANS_LOGW(TRANS_CTRL, "Client wifi set local ip fail");
-        }
-        if (LnnSetDLP2pIp(conn->appInfo.peerData.deviceId, CATEGORY_UUID,
-            conn->appInfo.peerData.addr) != SOFTBUS_OK) {
-            TRANS_LOGW(TRANS_CTRL, "Client wifi set peer ip fail");
         }
     } else if (conn->appInfo.routeType == WIFI_P2P) {
         struct WifiDirectManager *mgr = GetWifiDirectManager();
@@ -399,7 +386,7 @@ static int32_t GetClientSideIpInfo(SessionConn *conn, char *ip, uint32_t len)
     }
     if (strcpy_s(ip, len, conn->appInfo.myData.addr)) {
         TRANS_LOGE(TRANS_CTRL, "copy str failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -972,17 +959,20 @@ static ServerDataBuf *TransSrvGetDataBufNodeById(int32_t channelId)
     return NULL;
 }
 
-static int64_t GetAuthIdByChannelInfo(int32_t channelId, uint64_t seq, uint32_t cipherFlag)
+static int32_t GetAuthIdByChannelInfo(int32_t channelId, uint64_t seq, uint32_t cipherFlag, AuthHandle *authHandle)
 {
-    int64_t authId = GetAuthIdByChanId(channelId);
-    if (authId != AUTH_INVALID_ID) {
-        TRANS_LOGI(TRANS_CTRL, "authId is not AUTH_INVALID_ID");
-        return authId;
+    if (authHandle == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "authHandle is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (GetAuthHandleByChanId(channelId, authHandle) == SOFTBUS_OK && authHandle->authId != AUTH_INVALID_ID) {
+        TRANS_LOGI(TRANS_CTRL, "authId=%{public}" PRId64 " is not AUTH_INVALID_ID", authHandle->authId);
+        return SOFTBUS_OK;
     }
     AppInfo appInfo;
     if (GetAppInfoById(channelId, &appInfo) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get appInfo fail");
-        return AUTH_INVALID_ID;
+        return SOFTBUS_ERR;
     }
     bool fromAuthServer = ((seq & AUTH_CONN_SERVER_SIDE) != 0);
     char uuid[UUID_BUF_LEN] = {0};
@@ -997,32 +987,37 @@ static int64_t GetAuthIdByChannelInfo(int32_t channelId, uint64_t seq, uint32_t 
         connInfo.type = AUTH_LINK_TYPE_WIFI;
         if (strcpy_s(connInfo.info.ipInfo.ip, IP_LEN, appInfo.peerData.addr) != EOK) {
             TRANS_LOGE(TRANS_CTRL, "copy ip addr fail");
-            return AUTH_INVALID_ID;
+            return SOFTBUS_MEM_ERR;
         }
         TRANS_LOGE(TRANS_CTRL, "get Local Ip fail");
-        return AuthGetIdByConnInfo(&connInfo, !fromAuthServer, false);
+        authHandle->type = connInfo.type;
+        authHandle->authId = AuthGetIdByConnInfo(&connInfo, !fromAuthServer, false);
+        return SOFTBUS_OK;
     }
 
     AuthLinkType linkType = SwitchCipherTypeToAuthLinkType(cipherFlag);
     TRANS_LOGI(TRANS_CTRL, "get auth linkType=%{public}d, flag=0x%{public}x", linkType, cipherFlag);
     bool isAuthMeta = (cipherFlag & FLAG_AUTH_META) ? true : false;
-    return AuthGetIdByUuid(uuid, linkType, !fromAuthServer, isAuthMeta);
+    authHandle->type = linkType;
+    authHandle->authId = AuthGetIdByUuid(uuid, linkType, !fromAuthServer, isAuthMeta);
+    return SOFTBUS_OK;
 }
 
 static int32_t DecryptMessage(int32_t channelId, const TdcPacketHead *pktHead, const uint8_t *pktData,
     uint8_t **outData, uint32_t *outDataLen)
 {
-    int64_t authId = GetAuthIdByChannelInfo(channelId, pktHead->seq, pktHead->flags);
-    if (authId == AUTH_INVALID_ID && pktHead->flags == FLAG_P2P) {
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+    int32_t ret = GetAuthIdByChannelInfo(channelId, pktHead->seq, pktHead->flags, &authHandle);
+    if (ret != SOFTBUS_OK || (authHandle.authId == AUTH_INVALID_ID && pktHead->flags == FLAG_P2P)) {
         TRANS_LOGW(TRANS_CTRL, "get p2p authId fail, peer device may be legacyOs, retry hml");
         // we don't know peer device is legacyOs or not, so retry hml when flag is p2p and get auth failed
-        authId = GetAuthIdByChannelInfo(channelId, pktHead->seq, FLAG_ENHANCE_P2P);
+        ret = GetAuthIdByChannelInfo(channelId, pktHead->seq, FLAG_ENHANCE_P2P, &authHandle);
     }
-    if (authId == AUTH_INVALID_ID) {
+    if (ret != SOFTBUS_OK || authHandle.authId == AUTH_INVALID_ID) {
         TRANS_LOGE(TRANS_CTRL, "srv process recv data: get authId fail.");
         return SOFTBUS_NOT_FIND;
     }
-    if (SetAuthIdByChanId(channelId, authId) != SOFTBUS_OK) {
+    if (SetAuthHandleByChanId(channelId, &authHandle) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "srv process recv data: set authId fail.");
         return SOFTBUS_ERR;
     }
@@ -1033,7 +1028,7 @@ static int32_t DecryptMessage(int32_t channelId, const TdcPacketHead *pktHead, c
         TRANS_LOGE(TRANS_CTRL, "srv process recv data: malloc fail.");
         return SOFTBUS_MALLOC_ERR;
     }
-    if (AuthDecrypt(authId, pktData, pktHead->dataLen, decData, &decDataLen) != SOFTBUS_OK) {
+    if (AuthDecrypt(&authHandle, pktData, pktHead->dataLen, decData, &decDataLen) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "srv process recv data: decrypt fail.");
         SoftBusFree(decData);
         return SOFTBUS_DECRYPT_ERR;
@@ -1170,7 +1165,7 @@ static int32_t TransTdcUpdateDataBufWInfo(int32_t channelId, char *recvBuf, int3
 {
     if (recvBuf == NULL) {
         TRANS_LOGW(TRANS_CTRL, "invalid param.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (g_tcpSrvDataList == NULL) {
         TRANS_LOGE(TRANS_CTRL, "srv data list empty.");
@@ -1178,7 +1173,7 @@ static int32_t TransTdcUpdateDataBufWInfo(int32_t channelId, char *recvBuf, int3
     }
     if (SoftBusMutexLock(&g_tcpSrvDataList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     ServerDataBuf *item = NULL;
     ServerDataBuf *nextItem = NULL;
@@ -1195,8 +1190,8 @@ static int32_t TransTdcUpdateDataBufWInfo(int32_t channelId, char *recvBuf, int3
         }
         if (memcpy_s(item->w, recvLen, recvBuf, recvLen) != EOK) {
             (void)SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
-            TRANS_LOGE(TRANS_CTRL, "trans tdc memcpy failed. channelId=%{public}d", channelId);
-            return SOFTBUS_ERR;
+            TRANS_LOGE(TRANS_CTRL, "memcpy_s trans tdc failed. channelId=%{public}d", channelId);
+            return SOFTBUS_MEM_ERR;
         }
         item->w += recvLen;
         (void)SoftBusMutexUnlock(&g_tcpSrvDataList->lock);

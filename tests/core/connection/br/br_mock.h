@@ -57,6 +57,9 @@ public:
     virtual int32_t ConnBrGetBrPendingPacket(uint32_t id, int64_t seq, uint32_t waitMillis, void **data) = 0;
     virtual int32_t ConnBrInnerQueueInit(void) = 0;
     virtual int32_t ConnBrInitBrPendingPacket(void) = 0;
+    virtual uint32_t ConnGetNewRequestId(ConnModule moduleId) = 0;
+    virtual int32_t ConnBleKeepAlive(uint32_t connectionId, uint32_t requestId, uint32_t time) = 0;
+    virtual int32_t ConnBleRemoveKeepAlive(uint32_t connectionId, uint32_t requestId) = 0;
 };
 
 class ConnectionBrInterfaceMock : public ConnectionBrInterface {
@@ -82,6 +85,9 @@ public:
     MOCK_METHOD4(ConnBrGetBrPendingPacket, int32_t(uint32_t, int64_t, uint32_t, void **));
     MOCK_METHOD0(ConnBrInnerQueueInit, int32_t());
     MOCK_METHOD0(ConnBrInitBrPendingPacket, int32_t());
+    MOCK_METHOD1(ConnGetNewRequestId, uint32_t(ConnModule));
+    MOCK_METHOD3(ConnBleKeepAlive, int32_t(uint32_t, uint32_t, uint32_t));
+    MOCK_METHOD2(ConnBleRemoveKeepAlive, int32_t(uint32_t, uint32_t));
 
     static int32_t ActionOfSoftbusGetConfig1(ConfigType type, unsigned char *val, uint32_t len);
     static int32_t ActionOfSoftbusGetConfig2(ConfigType type, unsigned char *val, uint32_t len);

@@ -25,6 +25,7 @@ if (defined(ohos_lite)) {
       output_dir = "$root_out_dir/test/unittest/dsoftbus"
       sources = [ "disc_sdk_test.cpp" ]
       include_dirs = [
+        "$dsoftbus_root_path/core/common/include",
         "$dsoftbus_root_path/sdk/bus_center/manager/include",
         "$dsoftbus_root_path/interfaces/kits/discovery",
         "$dsoftbus_root_path/interfaces/kits/common",

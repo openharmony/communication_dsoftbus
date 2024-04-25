@@ -63,7 +63,6 @@ static void UpdateInnerLink(struct WifiDirectP2pGroupInfo *groupInfo)
         CONN_LOGI(CONN_WIFI_DIRECT, "remoteMac=%{public}s", WifiDirectAnonymizeMac(clientDevices[i]));
         struct InnerLink newLink;
         InnerLinkConstructorWithArgs(&newLink, WIFI_DIRECT_LINK_TYPE_P2P, IF_NAME_P2P, clientDevices[i]);
-        newLink.putInt(&newLink, IL_KEY_STATE, INNER_LINK_STATE_CONNECTED);
         newLink.putRawData(&newLink, IL_KEY_LOCAL_IPV4, localIpv4, sizeof(*localIpv4));
         newLink.putInt(&newLink, IL_KEY_FREQUENCY, groupInfo->frequency);
         GetLinkManager()->notifyLinkChange(&newLink);
