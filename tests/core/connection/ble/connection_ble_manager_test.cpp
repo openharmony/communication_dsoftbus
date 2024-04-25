@@ -536,7 +536,7 @@ HWTEST_F(ConnectionBleManagerTest, TestBleInterface005, TestSize.Level1)
     EXPECT_EQ(ret, EOK);
 
     EXPECT_CALL(bleMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    bool res = g_bleInterface->CheckActiveConnection(&option);
+    bool res = g_bleInterface->CheckActiveConnection(&option, false);
     EXPECT_EQ(res, true);
 
     UpdateOption options = {

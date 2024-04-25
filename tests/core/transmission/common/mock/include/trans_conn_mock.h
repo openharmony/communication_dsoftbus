@@ -41,7 +41,7 @@ public:
     virtual int32_t ConnDisconnectDeviceAllConn(const ConnectOption *option) = 0;
     virtual int32_t ConnStartLocalListening(const LocalListenerInfo *info) = 0;
     virtual int32_t ConnStopLocalListening(const LocalListenerInfo *info) = 0;
-    virtual bool CheckActiveConnection(const ConnectOption *option) = 0;
+    virtual bool CheckActiveConnection(const ConnectOption *option, bool needOccupy) = 0;
     virtual int32_t ConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback) = 0;
     virtual uint32_t ConnGetHeadSize(void) = 0;
     virtual void NipRecvDataFromBr(uint32_t connId, const char *buf) = 0;
@@ -67,7 +67,7 @@ public:
     MOCK_METHOD1(ConnDisconnectDeviceAllConn, int32_t (const ConnectOption *));
     MOCK_METHOD1(ConnStartLocalListening, int32_t (const LocalListenerInfo *));
     MOCK_METHOD1(ConnStopLocalListening, int32_t (const LocalListenerInfo *));
-    MOCK_METHOD1(CheckActiveConnection, bool (const ConnectOption *));
+    MOCK_METHOD2(CheckActiveConnection, bool (const ConnectOption *, bool));
 
     MOCK_METHOD0(ConnGetHeadSize, uint32_t (void));
     MOCK_METHOD2(ConnSetConnectCallback, int32_t (ConnModule, const ConnectCallback *));

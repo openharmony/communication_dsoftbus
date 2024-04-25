@@ -394,7 +394,7 @@ int32_t ConnBleDirectConnectDevice(const ConnectOption *option, uint32_t request
  */
 bool ConnBleDirectIsEnable(BleProtocolType protocol);
 
-bool CheckActiveConnection(const ConnectOption *option);
+bool CheckActiveConnection(const ConnectOption *option, bool needOccupy);
 
 /**
  * @ingroup Softbus_conn_manager

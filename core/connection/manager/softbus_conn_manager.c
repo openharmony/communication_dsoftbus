@@ -749,7 +749,7 @@ void ConnServerDeinit(void)
     g_isInited = false;
 }
 
-bool CheckActiveConnection(const ConnectOption *info)
+bool CheckActiveConnection(const ConnectOption *info, bool needOccupy)
 {
     if (info == NULL) {
         return false;
@@ -764,7 +764,7 @@ bool CheckActiveConnection(const ConnectOption *info)
         return false;
     }
 
-    return g_connManager[info->type]->CheckActiveConnection(info);
+    return g_connManager[info->type]->CheckActiveConnection(info, needOccupy);
 }
 
 int32_t ConnUpdateConnection(uint32_t connectionId, UpdateOption *option)
