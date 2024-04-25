@@ -526,14 +526,9 @@ static void NotifyLinkFail(AsyncResultType type, int32_t requestId, int32_t reas
 
 static int32_t AddNewP2pLinkedInfo(const P2pLinkReqList *reqInfo, int32_t linkId)
 {
-    if (LinkLock() != 0) {
-        LNN_LOGE(LNN_LANE, "lock fail");
-        return SOFTBUS_LOCK_ERR;
-    }
     P2pLinkedList *newNode = (P2pLinkedList *)SoftBusCalloc(sizeof(P2pLinkedList));
     if (newNode == NULL) {
         LNN_LOGE(LNN_LANE, "malloc fail");
-        LinkUnlock();
         return SOFTBUS_MALLOC_ERR;
     }
     newNode->p2pModuleLinkId = linkId;
@@ -546,8 +541,12 @@ static int32_t AddNewP2pLinkedInfo(const P2pLinkReqList *reqInfo, int32_t linkId
         newNode->remoteMac, sizeof(newNode->remoteMac)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get remote p2p mac fail");
         SoftBusFree(newNode);
-        LinkUnlock();
         return SOFTBUS_ERR;
+    }
+    if (LinkLock() != 0) {
+        LNN_LOGE(LNN_LANE, "lock fail");
+        SoftBusFree(newNode);
+        return SOFTBUS_LOCK_ERR;
     }
     ListTailInsert(g_p2pLinkedList, &newNode->node);
     LinkUnlock();
@@ -1187,12 +1186,8 @@ static int32_t ConnectWifiDirectWithReuse(const LinkRequest *request,
     (void)memset_s(&wifiDirectInfo, sizeof(wifiDirectInfo), 0, sizeof(wifiDirectInfo));
     wifiDirectInfo.requestId = GetWifiDirectManager()->getRequestId();
     wifiDirectInfo.pid = request->pid;
-    if (request->linkType == LANE_HML) {
-        wifiDirectInfo.connectType = GetWifiDirectUtils()->supportHmlTwo() ?
-            WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML : WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML;
-    } else {
-        wifiDirectInfo.connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P;
-    }
+    wifiDirectInfo.connectType = GetWifiDirectUtils()->supportHmlTwo() ?
+        WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML : WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML;
     if (strcpy_s(wifiDirectInfo.remoteNetworkId, NETWORK_ID_BUF_LEN, request->peerNetworkId) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "strcpy fail");
         return SOFTBUS_ERR;
@@ -1215,7 +1210,7 @@ static int32_t ConnectWifiDirectWithReuse(const LinkRequest *request,
     LNN_LOGI(LNN_LANE, "wifidirect reuse connect with p2prequest=%{public}d, connectType=%{public}d",
         wifiDirectInfo.requestId, wifiDirectInfo.connectType);
     if (GetWifiDirectManager()->connectDevice(&wifiDirectInfo, &cb) != SOFTBUS_OK) {
-        NotifyLinkFail(ASYNC_RESULT_P2P, wifiDirectInfo.requestId, SOFTBUS_ERR);
+        (void)DelP2pLinkReqByReqId(ASYNC_RESULT_P2P, wifiDirectInfo.requestId);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -1223,7 +1218,8 @@ static int32_t ConnectWifiDirectWithReuse(const LinkRequest *request,
 
 static int32_t TryWifiDirectReuse(const LinkRequest *request, uint32_t laneLinkReqId, const LaneLinkCb *callback)
 {
-    if (laneLinkReqId != INVALID_LANE_REQ_ID) {
+    if (request->linkType != LANE_HML) {
+        LNN_LOGE(LNN_LANE, "not support wifi direct reuse");
         return SOFTBUS_ERR;
     }
     char peerUdid[UDID_BUF_LEN] = {0};
@@ -1234,6 +1230,11 @@ static int32_t TryWifiDirectReuse(const LinkRequest *request, uint32_t laneLinkR
     LaneResource resourceItem;
     (void)memset_s(&resourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
     if (FindLaneResourceByLinkType(peerUdid, request->linkType, &resourceItem) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LANE, "not find lane resource");
+        return SOFTBUS_ERR;
+    }
+    if (GetWifiDirectManager()->isNegotiateChannelNeeded(request->peerNetworkId, WIFI_DIRECT_LINK_TYPE_HML)) {
+        LNN_LOGE(LNN_LANE, "laneId=%{public}" PRIu64 " exist but need nego channel", resourceItem.laneId);
         return SOFTBUS_ERR;
     }
     LNN_LOGI(LNN_LANE, "wifidirect exist reuse link, laneId=%{public}" PRIu64 "", resourceItem.laneId);

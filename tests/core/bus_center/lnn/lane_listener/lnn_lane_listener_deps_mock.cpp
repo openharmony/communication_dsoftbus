@@ -52,9 +52,9 @@ int32_t FindLaneResourceByLinkAddr(const LaneLinkInfo *infoItem, LaneResource *r
 {
     return GetLaneListenerDepsInterface()->FindLaneResourceByLinkAddr(infoItem, resourceItem);
 }
-uint64_t ApplyLaneId(const char* activeUdid, const char* passiveUdid, LaneLinkType linkType)
+uint64_t ApplyLaneId(const char *localUdid, const char *remoteUdid, LaneLinkType linkType)
 {
-    return GetLaneListenerDepsInterface()->ApplyLaneId(activeUdid, passiveUdid, linkType);
+    return GetLaneListenerDepsInterface()->ApplyLaneId(localUdid, remoteUdid, linkType);
 }
 }
 } // namespace OHOS
