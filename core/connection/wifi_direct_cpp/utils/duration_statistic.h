@@ -20,7 +20,7 @@
 #include <map>
 #include <memory>
 #include <string>
-#include "../wifi_direct_types.h"
+#include "wifi_direct_types.h"
 
 namespace OHOS::SoftBus {
 using DurationStatisticEvent = std::string;

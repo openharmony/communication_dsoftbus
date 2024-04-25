@@ -21,7 +21,7 @@
 #include <string>
 #include <vector>
 
-#include "../kits/c/wifi_p2p.h"
+#include "kits/c/wifi_p2p.h"
 
 #include "adapter/p2p_adapter.h"
 #include "channel/auth_negotiate_channel.h"
