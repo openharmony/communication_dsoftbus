@@ -176,7 +176,7 @@ struct BleDirectOption {
 };
 
 struct SocketOption {
-    char addr[IP_LEN];
+    char addr[IP_LEN]; /* ipv6 addr format: ip%ifname */
     int32_t port;
     int32_t moduleId; /* For details, see {@link ListenerModule}. */
     ProtocolType protocol;

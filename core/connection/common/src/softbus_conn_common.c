@@ -21,6 +21,7 @@
 #include "softbus_adapter_thread.h"
 #include "softbus_common.h"
 #include "softbus_def.h"
+#include "softbus_socket.h"
 #include "softbus_type_def.h"
 
 #define HIGH_PRIORITY_DEFAULT_LIMIT   32
@@ -64,6 +65,30 @@ void ConvertAnonymizeMacAddress(char *outAnomize, uint32_t anomizeLen, const cha
     outAnomize[10] = '*';
 }
 
+static void AnonymizeIpv6(char *outAnomize, uint32_t anomizeLen)
+{
+    uint32_t dotCnt = 0;
+    for (uint32_t i = 0; i < anomizeLen; i++) {
+        if (outAnomize[i] == '\0') {
+            break;
+        }
+        if (outAnomize[i] == ':') {
+            dotCnt += 1;
+        }
+    }
+    uint32_t index = 0;
+    for (uint32_t i = 0; i < anomizeLen; i++) {
+        if (outAnomize[i] == '\0') {
+            break;
+        }
+        if (outAnomize[i] == ':') {
+            index += 1;
+        } else if (index < dotCnt) {
+            outAnomize[i] = '*';
+        }
+    }
+}
+
 void ConvertAnonymizeIpAddress(char *outAnomize, uint32_t anomizeLen, const char *ip, uint32_t ipLen)
 {
     if (anomizeLen < IP_LEN || ipLen != IP_LEN) {
@@ -73,7 +98,11 @@ void ConvertAnonymizeIpAddress(char *outAnomize, uint32_t anomizeLen, const char
     if (strcpy_s(outAnomize, anomizeLen, ip) != EOK) {
         return;
     }
-
+    int32_t domain = GetDomainByAddr(ip);
+    if (domain == SOFTBUS_AF_INET6) {
+        AnonymizeIpv6(outAnomize, anomizeLen);
+        return;
+    }
     uint32_t dotCnt = 0;
     for (uint32_t i = 0; i < anomizeLen; i++) {
         if (outAnomize[i] == '\0') {

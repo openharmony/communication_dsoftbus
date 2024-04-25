@@ -19,6 +19,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <netinet/in.h>
+#include <net/if.h>
 #include <securec.h>
 #include <string.h>
 #include <sys/ioctl.h>
@@ -139,63 +140,16 @@ int32_t SoftBusSocketGetError(int32_t socketFd)
     return err;
 }
 
-static int32_t SoftBusAddrToSysAddr(const SoftBusSockAddr *softbusAddr, struct sockaddr *sysAddr, uint32_t len)
-{
-    if ((softbusAddr == NULL) || (sysAddr == NULL)) {
-        COMM_LOGE(COMM_ADAPTER, "invalid input");
-        return SOFTBUS_ADAPTER_ERR;
-    }
-    if (len < sizeof(softbusAddr->saFamily)) {
-        COMM_LOGE(COMM_ADAPTER, "invalid len");
-        return SOFTBUS_ADAPTER_ERR;
-    }
-    if (memset_s(sysAddr, sizeof(struct sockaddr), 0, sizeof(struct sockaddr)) != EOK) {
-        COMM_LOGE(COMM_ADAPTER, "memset fail");
-        return SOFTBUS_ADAPTER_ERR;
-    }
-    sysAddr->sa_family = softbusAddr->saFamily;
-    if (memcpy_s(sysAddr->sa_data, sizeof(sysAddr->sa_data), softbusAddr->saData,
-            len - sizeof(softbusAddr->saFamily)) != EOK) {
-        COMM_LOGE(COMM_ADAPTER, "memcpy fail");
-        return SOFTBUS_ADAPTER_ERR;
-    }
-    return SOFTBUS_ADAPTER_OK;
-}
-
-static int32_t SysAddrToSoftBusAddr(const struct sockaddr *sysAddr, SoftBusSockAddr *softbusAddr)
-{
-    if (memset_s(softbusAddr, sizeof(SoftBusSockAddr), 0, sizeof(SoftBusSockAddr)) != EOK) {
-        COMM_LOGE(COMM_ADAPTER, "memset fail");
-        return SOFTBUS_ADAPTER_ERR;
-    }
-    softbusAddr->saFamily = sysAddr->sa_family;
-    if (memcpy_s(softbusAddr->saData, sizeof(softbusAddr->saData), sysAddr->sa_data, sizeof(sysAddr->sa_data))
-        != EOK) {
-        COMM_LOGE(COMM_ADAPTER, "memcpy fail");
-        return SOFTBUS_ADAPTER_ERR;
-    }
-    return SOFTBUS_ADAPTER_OK;
-}
-
 int32_t SoftBusSocketGetLocalName(int32_t socketFd, SoftBusSockAddr *addr)
 {
     if (addr == NULL) {
         COMM_LOGE(COMM_ADAPTER, "get local name invalid input");
         return SOFTBUS_ADAPTER_ERR;
     }
-    struct sockaddr sysAddr;
-    uint32_t len = sizeof(struct sockaddr);
-    if (memset_s(&sysAddr, len, 0, len) != EOK) {
-        COMM_LOGE(COMM_ADAPTER, "get local name memset fail");
-        return SOFTBUS_ADAPTER_ERR;
-    }
-    int32_t ret = getsockname(socketFd, &sysAddr, (socklen_t *)&len);
+    uint32_t len = sizeof(*addr);
+    int32_t ret = getsockname(socketFd, (struct sockaddr *)addr, (socklen_t *)&len);
     if (ret != 0) {
         COMM_LOGE(COMM_ADAPTER, "getsockname errno=%{public}s", strerror(errno));
-        return SOFTBUS_ADAPTER_ERR;
-    }
-    if (SysAddrToSoftBusAddr(&sysAddr, addr) != SOFTBUS_ADAPTER_OK) {
-        COMM_LOGE(COMM_ADAPTER, "get local name sys addr to softbus addr failed");
         return SOFTBUS_ADAPTER_ERR;
     }
     return SOFTBUS_ADAPTER_OK;
@@ -207,19 +161,11 @@ int32_t SoftBusSocketGetPeerName(int32_t socketFd, SoftBusSockAddr *addr)
         COMM_LOGE(COMM_ADAPTER, "get peer name invalid input");
         return SOFTBUS_ADAPTER_ERR;
     }
-    struct sockaddr sysAddr;
-    if (memset_s(&sysAddr, sizeof(struct sockaddr), 0, sizeof(struct sockaddr)) != EOK) {
-        COMM_LOGE(COMM_ADAPTER, "get peer name memset fail");
-        return SOFTBUS_ADAPTER_ERR;
-    }
-    uint32_t len = sizeof(sysAddr);
-    int32_t ret = getpeername(socketFd, &sysAddr, (socklen_t *)&len);
+
+    uint32_t len = sizeof(*addr);
+    int32_t ret = getpeername(socketFd, (struct sockaddr *)addr, (socklen_t *)&len);
     if (ret != 0) {
         COMM_LOGE(COMM_ADAPTER, "getpeername errno=%{public}s", strerror(errno));
-        return SOFTBUS_ADAPTER_ERR;
-    }
-    if (SysAddrToSoftBusAddr(&sysAddr, addr) != SOFTBUS_ADAPTER_OK) {
-        COMM_LOGE(COMM_ADAPTER, "get peer name sys addr to softbus addr failed");
         return SOFTBUS_ADAPTER_ERR;
     }
     return SOFTBUS_ADAPTER_OK;
@@ -231,13 +177,8 @@ int32_t SoftBusSocketBind(int32_t socketFd, SoftBusSockAddr *addr, int32_t addrL
         COMM_LOGE(COMM_ADAPTER, "socket bind invalid input");
         return SOFTBUS_ADAPTER_ERR;
     }
-    struct sockaddr sysAddr;
-    uint32_t len = ((uint32_t)addrLen >= sizeof(SoftBusSockAddr)) ? sizeof(SoftBusSockAddr) : (uint32_t)addrLen;
-    if (SoftBusAddrToSysAddr(addr, &sysAddr, len) != SOFTBUS_ADAPTER_OK) {
-        COMM_LOGE(COMM_ADAPTER, "socket bind sys addr to softbus addr failed");
-        return SOFTBUS_ADAPTER_ERR;
-    }
-    int32_t ret = bind(socketFd, &sysAddr, (socklen_t)addrLen);
+
+    int32_t ret = bind(socketFd, (struct sockaddr *)addr, (socklen_t)addrLen);
     if (ret != 0) {
         COMM_LOGE(COMM_ADAPTER, "bind strerror=%{public}s, errno=%{public}d", strerror(errno), errno);
         return GetErrorCode();
@@ -265,39 +206,26 @@ int32_t SoftBusSocketAccept(int32_t socketFd, SoftBusSockAddr *addr, int32_t *ac
         COMM_LOGE(COMM_ADAPTER, "socket accept invalid input");
         return SOFTBUS_ADAPTER_INVALID_PARAM;
     }
-    struct sockaddr sysAddr;
-    uint32_t len = sizeof(sysAddr);
-    if (memset_s(&sysAddr, len, 0, len) != EOK) {
-        COMM_LOGE(COMM_ADAPTER, "memset failed");
-        DfxReportAdapterSocket(EVENT_SCENE_SOCKET_ACCEPT, SOFTBUS_MEM_ERR, socketFd, 0);
-        return SOFTBUS_ADAPTER_ERR;
-    }
-    int32_t ret = accept(socketFd, &sysAddr, (socklen_t *)&len);
+
+    uint32_t len = sizeof(*addr);
+    int32_t ret = accept(socketFd, (struct sockaddr *)addr, (socklen_t *)&len);
     if (ret < 0) {
         COMM_LOGE(COMM_ADAPTER, "accept strerror=%{public}s, errno=%{public}d", strerror(errno), errno);
         DfxReportAdapterSocket(EVENT_SCENE_SOCKET_ACCEPT, SOFTBUS_TCPCONNECTION_SOCKET_ERR, socketFd, 0);
         return GetErrorCode();
-    }
-    if (SysAddrToSoftBusAddr(&sysAddr, addr) != SOFTBUS_ADAPTER_OK) {
-        COMM_LOGE(COMM_ADAPTER, "socket accept sys addr to softbus addr failed");
-        DfxReportAdapterSocket(EVENT_SCENE_SOCKET_ACCEPT, SOFTBUS_INVALID_PARAM, socketFd, ret);
-        return SOFTBUS_ADAPTER_ERR;
     }
     *acceptFd = ret;
     DfxReportAdapterSocket(EVENT_SCENE_SOCKET_ACCEPT, SOFTBUS_OK, socketFd, *acceptFd);
     return SOFTBUS_ADAPTER_OK;
 }
 
-int32_t SoftBusSocketConnect(int32_t socketFd, const SoftBusSockAddr *addr)
+int32_t SoftBusSocketConnect(int32_t socketFd, const SoftBusSockAddr *addr, int32_t addrLen)
 {
-    struct sockaddr sysAddr;
-    if (SoftBusAddrToSysAddr(addr, &sysAddr, sizeof(SoftBusSockAddr)) != SOFTBUS_ADAPTER_OK) {
-        COMM_LOGE(COMM_ADAPTER, "socket connect sys addr to softbus addr failed");
-        DfxReportAdapterSocket(EVENT_SCENE_SOCKET_CONNECT, SOFTBUS_INVALID_PARAM, socketFd, 0);
+    if (addr == NULL || addrLen < 0) {
+        COMM_LOGE(COMM_ADAPTER, "socket connect invalid input");
         return SOFTBUS_ADAPTER_ERR;
     }
-    uint32_t len = sizeof(sysAddr);
-    int32_t ret = connect(socketFd, &sysAddr, (socklen_t)len);
+    int32_t ret = connect(socketFd, (struct sockaddr *)addr, (socklen_t)addrLen);
     if (ret < 0) {
         COMM_LOGE(COMM_ADAPTER, "connect=%{public}s", strerror(errno));
         int32_t result = GetErrorCode();
@@ -444,12 +372,7 @@ int32_t SoftBusSocketSendTo(int32_t socketFd, const void *buf, uint32_t len, int
         COMM_LOGE(COMM_ADAPTER, "toAddr is null or toAddrLen <= 0");
         return SOFTBUS_ADAPTER_ERR;
     }
-    struct sockaddr sysAddr;
-    if (SoftBusAddrToSysAddr(toAddr, &sysAddr, sizeof(SoftBusSockAddr)) != SOFTBUS_ADAPTER_OK) {
-        COMM_LOGE(COMM_ADAPTER, "socket sendto sys addr to softbus addr failed");
-        return SOFTBUS_ADAPTER_ERR;
-    }
-    int32_t ret = sendto(socketFd, buf, len, flags, &sysAddr, toAddrLen);
+    int32_t ret = sendto(socketFd, buf, len, flags, (struct sockaddr *)toAddr, toAddrLen);
     if (ret < 0) {
         COMM_LOGE(COMM_ADAPTER, "sendto errno=%{public}s", strerror(errno));
         return SOFTBUS_ADAPTER_ERR;
@@ -476,12 +399,8 @@ int32_t SoftBusSocketRecvFrom(int32_t socketFd, void *buf, uint32_t len, int32_t
         COMM_LOGE(COMM_ADAPTER, "fromAddr or fromAddrLen is null");
         return SOFTBUS_ADAPTER_ERR;
     }
-    struct sockaddr sysAddr;
-    if (SoftBusAddrToSysAddr(fromAddr, &sysAddr, sizeof(SoftBusSockAddr)) != SOFTBUS_ADAPTER_OK) {
-        COMM_LOGE(COMM_ADAPTER, "socket recvfrom sys addr to softbus addr failed");
-        return SOFTBUS_ADAPTER_ERR;
-    }
-    int32_t ret = recvfrom(socketFd, buf, len, flags, &sysAddr, (socklen_t *)fromAddrLen);
+
+    int32_t ret = recvfrom(socketFd, buf, len, flags, (struct sockaddr *)fromAddr, (socklen_t *)fromAddrLen);
     if (ret < 0) {
         COMM_LOGE(COMM_ADAPTER, "recvfrom errno=%{public}s", strerror(errno));
         return SOFTBUS_ADAPTER_ERR;
@@ -558,6 +477,24 @@ uint16_t SoftBusNtoHs(uint16_t netshort)
 uint32_t SoftBusInetAddr(const char *cp)
 {
     return inet_addr(cp);
+}
+
+uint32_t SoftBusIfNameToIndex(const char *name)
+{
+    return if_nametoindex(name);
+}
+
+int32_t SoftBusIndexToIfName(int32_t index, char *ifname, uint32_t nameLen)
+{
+    if (index < 0 || ifname == NULL || nameLen < IF_NAME_SIZE) {
+        COMM_LOGE(COMM_ADAPTER, "Invalid parm nameLen=%{public}d", nameLen);
+        return SOFTBUS_ADAPTER_ERR;
+    }
+    if (if_indextoname(index, ifname) == NULL) {
+        COMM_LOGE(COMM_ADAPTER, "get ifname faild! errno=%{public}s", strerror(errno));
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return SOFTBUS_ADAPTER_OK;
 }
 
 static bool IsLittleEndian(void)
