@@ -114,14 +114,14 @@ static int32_t GetLaneResource(LaneTransType transType, LaneLinkType *optLink, u
     return SOFTBUS_OK;
 }
 
-static bool GetNetCap(const char *networkId, int32_t *local, int32_t *remote)
+static bool GetNetCap(const char *networkId, uint32_t *local, uint32_t *remote)
 {
-    int32_t ret = LnnGetLocalNumInfo(NUM_KEY_NET_CAP, local);
+    int32_t ret = LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, local);
     if (ret != SOFTBUS_OK || *local < 0) {
         LNN_LOGE(LNN_LANE, "LnnGetLocalNumInfo err, ret=%{public}d, local=%{public}d", ret, *local);
         return false;
     }
-    ret = LnnGetRemoteNumInfo(networkId, NUM_KEY_NET_CAP, remote);
+    ret = LnnGetRemoteNumU32Info(networkId, NUM_KEY_NET_CAP, remote);
     if (ret != SOFTBUS_OK || *remote < 0) {
         LNN_LOGE(LNN_LANE, "LnnGetRemoteNumInfo err, ret=%{public}d, remote=%{public}d", ret, *remote);
         return false;
@@ -131,7 +131,7 @@ static bool GetNetCap(const char *networkId, int32_t *local, int32_t *remote)
 
 static int32_t BrLinkState(const char *networkId)
 {
-    int32_t local, remote;
+    uint32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
         return SOFTBUS_ERR;
@@ -150,7 +150,7 @@ static int32_t BrLinkState(const char *networkId)
 
 static int32_t BleLinkState(const char *networkId)
 {
-    int32_t local, remote;
+    uint32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
         return SOFTBUS_ERR;
@@ -182,7 +182,7 @@ static int32_t WlanLinkState(const char *networkId)
         LNN_LOGE(LNN_LANE, "peer node not wifi online");
         return SOFTBUS_ERR;
     }
-    int32_t local, remote;
+    uint32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
         return SOFTBUS_ERR;
@@ -209,7 +209,7 @@ static int32_t P2pLinkState(const char *networkId)
     if (!SoftBusIsWifiActive()) {
         return SOFTBUS_WIFI_OFF;
     }
-    int32_t local, remote;
+    uint32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
         return SOFTBUS_ERR;

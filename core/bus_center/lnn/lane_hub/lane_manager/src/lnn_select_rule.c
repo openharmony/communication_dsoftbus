@@ -66,14 +66,14 @@ int32_t GetWlanLinkedFrequency(void)
     return info.frequency;
 }
 
-static bool GetNetCap(const char *networkId, int32_t *local, int32_t *remote)
+static bool GetNetCap(const char *networkId, uint32_t *local, uint32_t *remote)
 {
-    int32_t ret = LnnGetLocalNumInfo(NUM_KEY_NET_CAP, local);
+    int32_t ret = LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, local);
     if (ret != SOFTBUS_OK || *local < 0) {
         LNN_LOGE(LNN_LANE, "LnnGetLocalNumInfo err, ret=%{public}d, local=%{public}d", ret, *local);
         return false;
     }
-    ret = LnnGetRemoteNumInfo(networkId, NUM_KEY_NET_CAP, remote);
+    ret = LnnGetRemoteNumU32Info(networkId, NUM_KEY_NET_CAP, remote);
     if (ret != SOFTBUS_OK || *remote < 0) {
         LNN_LOGE(LNN_LANE, "LnnGetRemoteNumInfo err, ret=%{public}d, remote=%{public}d", ret, *remote);
         return false;
@@ -123,7 +123,7 @@ static bool IsEnableWlan2P4G(const char *networkId)
         AnonymizeFree(anonyNetworkId);
         return false;
     }
-    int32_t local, remote;
+    uint32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
         return false;
@@ -161,7 +161,7 @@ static bool IsEnableWlan5G(const char *networkId)
         AnonymizeFree(anonyNetworkId);
         return false;
     }
-    int32_t local, remote;
+    uint32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
         return false;
@@ -177,7 +177,7 @@ static bool IsEnableWlan5G(const char *networkId)
 
 static bool IsEnableBr(const char *networkId)
 {
-    int32_t local, remote;
+    uint32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
         return false;
@@ -191,7 +191,7 @@ static bool IsEnableBr(const char *networkId)
 
 static bool IsEnableP2p(const char *networkId)
 {
-    int32_t local, remote;
+    uint32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
         return false;
@@ -226,7 +226,7 @@ static bool IsEnableP2pReuse(const char *networkId)
     }
     uint64_t local, remote;
     if (!GetFeatureCap(networkId, &local, &remote)) {
-        LNN_LOGE(LNN_LANE, "GetNetCap error");
+        LNN_LOGE(LNN_LANE, "GetFeatureCap error");
         return false;
     }
     if (((local & (1 << BIT_WIFI_P2P_REUSE)) == 0) || ((remote & (1 << BIT_WIFI_P2P_REUSE)) == 0)) {
@@ -239,7 +239,7 @@ static bool IsEnableP2pReuse(const char *networkId)
 
 static bool IsEnableBle(const char *networkId)
 {
-    int32_t local, remote;
+    uint32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
         return false;
