@@ -107,7 +107,7 @@ TcpDirectChannelInfo *TransTdcGetInfoByFd(int32_t fd, TcpDirectChannelInfo *info
 void TransTdcCloseChannel(int32_t channelId)
 {
     TRANS_LOGI(TRANS_SDK, "Close tdc Channel, channelId=%{public}d.", channelId);
-    if (ServerIpcCloseChannel(channelId, CHANNEL_TYPE_TCP_DIRECT) != SOFTBUS_OK) {
+    if (ServerIpcCloseChannel(NULL, channelId, CHANNEL_TYPE_TCP_DIRECT) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "close server tdc channelId=%{public}d err.", channelId);
     }
 
@@ -153,6 +153,11 @@ static TcpDirectChannelInfo *TransGetNewTcpChannel(const ChannelInfo *channel)
         TRANS_LOGE(TRANS_SDK, "sessionKey copy failed");
         return NULL;
     }
+    if (strcpy_s(item->detail.myIp, IP_LEN, channel->myIp) != EOK) {
+        SoftBusFree(item);
+        TRANS_LOGE(TRANS_SDK, "myIp copy failed");
+        return NULL;
+    }
     return item;
 }
 
@@ -160,14 +165,14 @@ static int32_t ClientTransCheckTdcChannelExist(int32_t channelId)
 {
     if (SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "lock failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     TcpDirectChannelInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &(g_tcpDirectChannelInfoList->list), TcpDirectChannelInfo, node) {
         if (item->channelId == channelId) {
             TRANS_LOGE(TRANS_SDK, "tcp direct already exist. channelId=%{public}d", channelId);
             (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
-            return SOFTBUS_ERR;
+            return SOFTBUS_TRANS_TDC_CHANNEL_ALREADY_EXIST;
         }
     }
     (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
@@ -208,7 +213,7 @@ int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo
 {
     if (sessionName == NULL || channel == NULL) {
         TRANS_LOGE(TRANS_SDK, "param invalid");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (ClientTransCheckTdcChannelExist(channel->channelId) != SOFTBUS_OK) {
         return SOFTBUS_ERR;
@@ -216,7 +221,7 @@ int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo
     TcpDirectChannelInfo *item = TransGetNewTcpChannel(channel);
     if (item == NULL) {
         TRANS_LOGE(TRANS_SDK, "get new tcp channel err. channelId=%{public}d", channel->channelId);
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
     if (TransAddDataBufNode(channel->channelId, channel->fd) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK,
@@ -262,15 +267,17 @@ int32_t TransTdcManagerInit(const IClientSessionCallBack *callback)
     g_tcpDirectChannelInfoList = CreateSoftBusList();
     if (g_tcpDirectChannelInfoList == NULL || TransDataListInit() != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "init tcp direct channel fail.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_NO_INIT;
     }
-    if (ClientTransTdcSetCallBack(callback) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_INIT, "ClientTransTdcSetCallBack fail.");
-        return SOFTBUS_ERR;
+    int32_t ret = ClientTransTdcSetCallBack(callback);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_INIT, "ClientTransTdcSetCallBack fail, ret=%{public}d", ret);
+        return ret;
     }
-    if (PendingInit(PENDING_TYPE_DIRECT) == SOFTBUS_ERR) {
-        TRANS_LOGE(TRANS_INIT, "trans direct pending init failed.");
-        return SOFTBUS_ERR;
+    ret = PendingInit(PENDING_TYPE_DIRECT);
+    if (ret == SOFTBUS_ERR) {
+        TRANS_LOGE(TRANS_INIT, "trans direct pending init failed, ret=%{public}d", ret);
+        return SOFTBUS_NO_INIT;
     }
     TRANS_LOGE(TRANS_INIT, "init tcp direct channel success.");
     return SOFTBUS_OK;
@@ -302,7 +309,7 @@ int32_t TransTdcGetSessionKey(int32_t channelId, char *key, unsigned int len)
     TcpDirectChannelInfo channel;
     if (TransTdcGetInfoById(channelId, &channel) == NULL) {
         TRANS_LOGE(TRANS_SDK, "get tdc info failed. channelId=%{public}d", channelId);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
     }
     if (memcpy_s(key, len, channel.detail.sessionKey, SESSION_KEY_LENGTH) != EOK) {
         TRANS_LOGE(TRANS_SDK, "copy session key failed.");
@@ -320,7 +327,7 @@ int32_t TransTdcGetHandle(int32_t channelId, int *handle)
     TcpDirectChannelInfo channel;
     if (TransTdcGetInfoById(channelId, &channel) == NULL) {
         TRANS_LOGE(TRANS_SDK, "get tdc info failed. channelId=%{public}d", channelId);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
     }
     *handle = channel.detail.fd;
     return SOFTBUS_OK;
@@ -331,7 +338,7 @@ int32_t TransDisableSessionListener(int32_t channelId)
     TcpDirectChannelInfo channel;
     if (TransTdcGetInfoById(channelId, &channel) == NULL) {
         TRANS_LOGE(TRANS_SDK, "get tdc info failed. channelId=%{public}d", channelId);
-        return SOFTBUS_ERR;
+        return SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
     }
     if (channel.detail.fd < 0) {
         TRANS_LOGE(TRANS_SDK, "invalid handle.");

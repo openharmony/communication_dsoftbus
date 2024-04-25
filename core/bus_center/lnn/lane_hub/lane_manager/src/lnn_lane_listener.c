@@ -23,6 +23,7 @@
 #include "lnn_log.h"
 #include "lnn_node_info.h"
 #include "lnn_trans_lane.h"
+#include "bus_center_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
 #include "wifi_direct_manager.h"
@@ -34,7 +35,7 @@ const static LaneType SUPPORT_TYPE_LIST[] = {LANE_TYPE_HDLC, LANE_TYPE_TRANS, LA
 typedef struct {
     ListNode node;
     LaneType laneType;
-    LaneLinkInfo laneLinkInfo;
+    uint64_t laneId;
     uint32_t ref;
 } LaneBusinessInfo;
 
@@ -70,25 +71,6 @@ static bool LaneTypeCheck(LaneType type)
     return false;
 }
 
-static bool CompareLaneBusinessLinkInfo(const LaneLinkInfo *laneLinkInfoSrc, const LaneLinkInfo *laneLinkInfoDst)
-{
-    if (laneLinkInfoSrc == NULL || laneLinkInfoDst == NULL) {
-        LNN_LOGE(LNN_LANE, "invalid param");
-        return false;
-    }
-
-    LaneResource laneResourceSrc;
-    (void)memset_s(&laneResourceSrc, sizeof(LaneResource), 0, sizeof(LaneResource));
-    LaneResource laneResourceDst;
-    (void)memset_s(&laneResourceDst, sizeof(LaneResource), 0, sizeof(LaneResource));
-    if (ConvertToLaneResource(laneLinkInfoSrc, &laneResourceSrc) != SOFTBUS_OK ||
-        ConvertToLaneResource(laneLinkInfoDst, &laneResourceDst) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "convert to lane resource fail");
-        return false;
-    }
-    return CompLaneResource(&laneResourceSrc, &laneResourceDst);
-}
-
 static LaneBusinessInfo *GetLaneBusinessInfoWithoutLock(const LaneBusinessInfo *laneBusinessInfo)
 {
     if (laneBusinessInfo == NULL) {
@@ -99,42 +81,24 @@ static LaneBusinessInfo *GetLaneBusinessInfoWithoutLock(const LaneBusinessInfo *
     LaneBusinessInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneBusinessInfoList, LaneBusinessInfo, node) {
         if (laneBusinessInfo->laneType == item->laneType &&
-            laneBusinessInfo->laneLinkInfo.type == item->laneLinkInfo.type &&
-            CompareLaneBusinessLinkInfo(&laneBusinessInfo->laneLinkInfo, &item->laneLinkInfo)) {
+            laneBusinessInfo->laneId == item->laneId) {
             return item;
         }
     }
     return NULL;
 }
 
-static int32_t CreateLaneBusinessInfoItem(LaneType laneType, const LaneLinkInfo *laneLinkInfo,
-    LaneBusinessInfo *laneBusinessInfo)
+int32_t AddLaneBusinessInfoItem(LaneType laneType, uint64_t laneId)
 {
-    if (laneLinkInfo == NULL || laneBusinessInfo == NULL) {
+    if (!LaneTypeCheck(laneType) || laneId == INVALID_LANE_ID) {
         LNN_LOGE(LNN_LANE, "invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (memcpy_s(&(laneBusinessInfo->laneLinkInfo), sizeof(LaneLinkInfo), laneLinkInfo, sizeof(LaneLinkInfo)) != EOK) {
-        LNN_LOGE(LNN_LANE, "memcpy laneLinkInfo fail");
-        return SOFTBUS_MEM_ERR;
-    }
-    laneBusinessInfo->laneType = laneType;
-    laneBusinessInfo->ref = 1;
-    return SOFTBUS_OK;
-}
-
-int32_t AddLaneBusinessInfoItem(LaneType laneType, const LaneLinkInfo *laneLinkInfo)
-{
-    if (!LaneTypeCheck(laneType) || laneLinkInfo == NULL) {
-        LNN_LOGE(LNN_LANE, "[CreateLaneType]invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     LaneBusinessInfo laneBusinessInfo;
     (void)memset_s(&laneBusinessInfo, sizeof(LaneBusinessInfo), 0, sizeof(LaneBusinessInfo));
-    if (CreateLaneBusinessInfoItem(laneType, laneLinkInfo, &laneBusinessInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "create laneBusinessInfo fail");
-        return SOFTBUS_ERR;
-    }
+    laneBusinessInfo.laneId = laneId;
+    laneBusinessInfo.laneType = laneType;
+    laneBusinessInfo.ref = 1;
     if (LaneListenerLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "lane listener lock fail");
         return SOFTBUS_LOCK_ERR;
@@ -142,6 +106,8 @@ int32_t AddLaneBusinessInfoItem(LaneType laneType, const LaneLinkInfo *laneLinkI
     LaneBusinessInfo *item = GetLaneBusinessInfoWithoutLock(&laneBusinessInfo);
     if (item != NULL) {
         item->ref++;
+        LNN_LOGI(LNN_LANE, "add laneBusiness succ, laneType=%{public}d, laneId=%{public}" PRIu64 ", ref=%{public}u",
+            laneType, laneId, item->ref);
         LaneListenerUnlock();
         return SOFTBUS_OK;
     }
@@ -160,33 +126,34 @@ int32_t AddLaneBusinessInfoItem(LaneType laneType, const LaneLinkInfo *laneLinkI
     }
     ListAdd(&g_laneBusinessInfoList, &laneBusinessInfoItem->node);
     LaneListenerUnlock();
+    LNN_LOGI(LNN_LANE, "create new laneBusiness succ, laneType=%{public}d, laneId=%{public}" PRIu64 "",
+            laneType, laneId);
     return SOFTBUS_OK;
 }
 
-int32_t DelLaneBusinessInfoItem(LaneType laneType, const LaneLinkInfo *laneLinkInfo)
+int32_t DelLaneBusinessInfoItem(LaneType laneType, uint64_t laneId)
 {
-    if (!LaneTypeCheck(laneType) || laneLinkInfo == NULL) {
+    if (!LaneTypeCheck(laneType)) {
         LNN_LOGE(LNN_LANE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     LaneBusinessInfo laneBusinessInfo;
     (void)memset_s(&laneBusinessInfo, sizeof(LaneBusinessInfo), 0, sizeof(LaneBusinessInfo));
-    if (CreateLaneBusinessInfoItem(laneType, laneLinkInfo, &laneBusinessInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "create laneBusinessInfo fail");
-        return SOFTBUS_ERR;
-    }
+    laneBusinessInfo.laneId = laneId;
+    laneBusinessInfo.laneType = laneType;
     if (LaneListenerLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "lane listener lock fail");
         return SOFTBUS_LOCK_ERR;
     }
     LaneBusinessInfo *item = GetLaneBusinessInfoWithoutLock(&laneBusinessInfo);
     if (item != NULL) {
-        LNN_LOGI(LNN_LANE, "laneType=%{public}d, linkType=%{public}d, ref=%{public}u",
-            item->laneLinkInfo.type, item->laneType, item->ref);
-        if ((--item->ref) == 0) {
+        uint32_t ref = --item->ref;
+        if (ref == 0) {
             ListDelete(&item->node);
             SoftBusFree(item);
         }
+        LNN_LOGI(LNN_LANE, "del laneBusiness succ, laneType=%{public}d, laneId=%{public}" PRIu64 ", ref=%{public}u",
+            laneType, laneId, ref);
     }
     LaneListenerUnlock();
     return SOFTBUS_OK;
@@ -199,6 +166,12 @@ static int32_t FindLaneBusinessInfoByLinkInfo(const LaneLinkInfo *laneLinkInfo,
         LNN_LOGE(LNN_LANE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
+    char localUdid[UDID_BUF_LEN] = {0};
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get udid fail");
+        return SOFTBUS_ERR;
+    }
+    uint64_t laneId = ApplyLaneId(localUdid, laneLinkInfo->peerUdid, laneLinkInfo->type);
     if (LaneListenerLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "lane listener lock fail");
         return SOFTBUS_LOCK_ERR;
@@ -207,8 +180,7 @@ static int32_t FindLaneBusinessInfoByLinkInfo(const LaneLinkInfo *laneLinkInfo,
     LaneBusinessInfo *item = NULL;
     LaneBusinessInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneBusinessInfoList, LaneBusinessInfo, node) {
-        if (item->laneLinkInfo.type == laneLinkInfo->type &&
-            CompareLaneBusinessLinkInfo(laneLinkInfo, &item->laneLinkInfo)) {
+        if (item->laneId == laneId) {
             if (memcpy_s(&laneBusinessInfo[(*resNum)++], sizeof(LaneBusinessInfo),
                 item, sizeof(LaneBusinessInfo)) != EOK) {
                 LNN_LOGE(LNN_LANE, "memcpy lane bussiness info fail");
@@ -285,10 +257,16 @@ int32_t LaneLinkupNotify(const char *peerUdid, const LaneLinkInfo *laneLinkInfo)
         listenerList[item->type].listener = item->listener;
     }
     LaneListenerUnlock();
+    char localUdid[UDID_BUF_LEN] = {0};
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get udid fail");
+        return SOFTBUS_ERR;
+    }
+    uint64_t laneId = ApplyLaneId(localUdid, peerUdid, laneLinkInfo->type);
     for (uint32_t i = 0; i < LANE_TYPE_BUTT; i++) {
         if (listenerList[i].listener.onLaneLinkup != NULL) {
             LNN_LOGI(LNN_LANE, "notify lane linkup, laneType=%{public}u", i);
-            listenerList[i].listener.onLaneLinkup(INVALID_LANE_ID, peerUdid, &laneConnInfo);
+            listenerList[i].listener.onLaneLinkup(laneId, peerUdid, &laneConnInfo);
         }
     }
     return SOFTBUS_OK;
@@ -299,6 +277,15 @@ int32_t LaneLinkdownNotify(const char *peerUdid, const LaneLinkInfo *laneLinkInf
     if (peerUdid == NULL || laneLinkInfo == NULL) {
         LNN_LOGE(LNN_LANE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
+    }
+    LaneResource resourceItem;
+    (void)memset_s(&resourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
+    if (FindLaneResourceByLinkType(peerUdid, laneLinkInfo->type, &resourceItem) == SOFTBUS_OK) {
+        if (laneLinkInfo->type == LANE_HML) {
+            RemoveDelayDestroyMessage(resourceItem.laneId);
+        }
+        DelLogicAndLaneRelationship(resourceItem.laneId);
+        ClearLaneResourceByLaneId(resourceItem.laneId);
     }
     uint32_t resNum;
     LaneBusinessInfo laneBusinessInfo[LANE_TYPE_BUTT];
@@ -320,20 +307,19 @@ int32_t LaneLinkdownNotify(const char *peerUdid, const LaneLinkInfo *laneLinkInf
             LNN_LOGE(LNN_STATE, "invalid lane status listen");
             continue;
         }
-        if (LaneInfoProcess(&laneBusinessInfo[i].laneLinkInfo, &laneConnInfo, &profile) != SOFTBUS_OK) {
+        if (LaneInfoProcess(laneLinkInfo, &laneConnInfo, &profile) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LANE, "laneInfo proc fail");
             continue;
         }
         LNN_LOGI(LNN_LANE, "notify lane linkdown, laneType=%{public}d", laneListener.type);
-        laneListener.listener.onLaneLinkdown(INVALID_LANE_ID, peerUdid, &laneConnInfo);
+        laneListener.listener.onLaneLinkdown(laneBusinessInfo[i].laneId, peerUdid, &laneConnInfo);
     }
     return SOFTBUS_OK;
 }
 
-static int32_t GetStateNotifyInfo(const char *peerIp, const char *peerUuid, char *peerUdid,
-    LaneLinkInfo *laneLinkInfo)
+static int32_t GetStateNotifyInfo(const char *peerIp, const char *peerUuid, LaneLinkInfo *laneLinkInfo)
 {
-    if (peerIp == NULL || peerUuid == NULL || peerUdid == NULL || laneLinkInfo == NULL) {
+    if (peerIp == NULL || peerUuid == NULL || laneLinkInfo == NULL) {
         LNN_LOGE(LNN_LANE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -352,28 +338,27 @@ static int32_t GetStateNotifyInfo(const char *peerIp, const char *peerUuid, char
         AnonymizeFree(anonyUuid);
         return SOFTBUS_ERR;
     }
-    if (strncpy_s(peerUdid, UDID_BUF_LEN, nodeInfo.masterUdid, UDID_BUF_LEN) != EOK) {
+    if (strncpy_s(laneLinkInfo->peerUdid, UDID_BUF_LEN, nodeInfo.deviceInfo.deviceUdid, UDID_BUF_LEN) != EOK) {
         LNN_LOGE(LNN_STATE, "copy peerudid fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
 }
 
-static void LnnOnWifiDirectDeviceOnline(const char *peerMac, const char *peerIp, const char *peerUuid)
+static void LnnOnWifiDirectDeviceOnline(const char *peerMac, const char *peerIp, const char *peerUuid, bool isSource)
 {
-    LNN_LOGD(LNN_LANE, "lnn wifiDerectDevice online");
+    LNN_LOGI(LNN_LANE, "lnn wifidirect up");
     if (peerMac == NULL || peerUuid == NULL || peerIp == NULL) {
         LNN_LOGE(LNN_LANE, "invalid param");
         return;
     }
-    char peerUdid[UDID_BUF_LEN] = {0};
     LaneLinkInfo laneLinkInfo;
     (void)memset_s(&laneLinkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
-    if (GetStateNotifyInfo(peerIp, peerUuid, peerUdid, &laneLinkInfo) != SOFTBUS_OK) {
+    if (GetStateNotifyInfo(peerIp, peerUuid, &laneLinkInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "get lane state notify info fail");
         return;
     }
-    if (PostLaneStateChangeMessage(LANE_STATE_LINKUP, peerUdid, &laneLinkInfo) != SOFTBUS_OK) {
+    if (PostLaneStateChangeMessage(LANE_STATE_LINKUP, laneLinkInfo.peerUdid, &laneLinkInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "post laneState linkup msg fail");
     }
 }
@@ -381,26 +366,25 @@ static void LnnOnWifiDirectDeviceOnline(const char *peerMac, const char *peerIp,
 static void LnnOnWifiDirectDeviceOffline(const char *peerMac, const char *peerIp, const char *peerUuid,
     const char *localIp)
 {
-    LNN_LOGD(LNN_LANE, "lnn wifiDerectDevice offline");
+    LNN_LOGI(LNN_LANE, "lnn wifidirect down");
     if (peerMac == NULL || peerUuid == NULL || peerIp == NULL) {
         LNN_LOGE(LNN_LANE, "invalid param");
         return;
     }
-    char peerUdid[UDID_BUF_LEN] = {0};
     LaneLinkInfo laneLinkInfo;
     (void)memset_s(&laneLinkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
-    if (GetStateNotifyInfo(peerIp, peerUuid, peerUdid, &laneLinkInfo) != SOFTBUS_OK) {
+    if (GetStateNotifyInfo(peerIp, peerUuid, &laneLinkInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "get lane state notify info fail");
         return;
     }
-    if (PostLaneStateChangeMessage(LANE_STATE_LINKDOWN, peerUdid, &laneLinkInfo) != SOFTBUS_OK) {
+    if (PostLaneStateChangeMessage(LANE_STATE_LINKDOWN, laneLinkInfo.peerUdid, &laneLinkInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "post laneState linkdown msg fail");
     }
 }
 
 static void LnnOnWifiDirectRoleChange(enum WifiDirectRole myRole)
 {
-    LNN_LOGD(LNN_LANE, "lnn wifiDerect roleChange");
+    LNN_LOGD(LNN_LANE, "lnn wifidirect roleChange");
     (void)myRole;
 }
 
@@ -453,12 +437,78 @@ int32_t UnRegisterLaneListener(LaneType type)
     return SOFTBUS_OK;
 }
 
+static void LnnOnWifiDirectConnectedForSink(const char *remoteMac, const char *remoteIp, const char *remoteUuid,
+    enum WifiDirectLinkType type)
+{
+    if (remoteMac == NULL || remoteIp == NULL || remoteUuid == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return;
+    }
+    if (type != WIFI_DIRECT_LINK_TYPE_HML) {
+        LNN_LOGE(LNN_LANE, "on server wifidirect connected not support");
+        return;
+    }
+    LNN_LOGI(LNN_LANE, "on server wifidirect connected");
+    LaneLinkInfo laneLinkInfo;
+    (void)memset_s(&laneLinkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
+    if (GetStateNotifyInfo(remoteIp, remoteUuid, &laneLinkInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "generate link info fail");
+        return;
+    }
+    char localUdid[UDID_BUF_LEN] = {0};
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get local udid fail");
+        return;
+    }
+    laneLinkInfo.type = LANE_HML;
+    uint64_t laneId = ApplyLaneId(localUdid, laneLinkInfo.peerUdid, laneLinkInfo.type);
+    if (laneId == INVALID_LANE_ID) {
+        LNN_LOGE(LNN_LANE, "apply laneid fail");
+        return;
+    }
+    if (AddLaneResourceToPool(&laneLinkInfo, laneId, true) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "add server lane resource fail");
+    }
+}
+
+static void LnnOnWifiDirectDisconnectedForSink(const char *remoteMac, const char *remoteIp, const char *remoteUuid,
+    enum WifiDirectLinkType type)
+{
+    if (remoteMac == NULL || remoteIp == NULL || remoteUuid == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return;
+    }
+    if (type != WIFI_DIRECT_LINK_TYPE_HML) {
+        LNN_LOGE(LNN_LANE, "on server wifidirect disconnected not support");
+        return;
+    }
+    LNN_LOGI(LNN_LANE, "on server wifidirect disconnected");
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(remoteUuid, CATEGORY_UUID, &nodeInfo) != SOFTBUS_OK) {
+        char *anonyUuid = NULL;
+        Anonymize(remoteUuid, &anonyUuid);
+        LNN_LOGE(LNN_STATE, "get remote nodeinfo failed, remoteUuid=%{public}s", anonyUuid);
+        AnonymizeFree(anonyUuid);
+        return;
+    }
+    LaneResource resourceItem;
+    (void)memset_s(&resourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
+    if (FindLaneResourceByLinkType(nodeInfo.deviceInfo.deviceUdid, LANE_HML, &resourceItem) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "find lane resource fail");
+        return;
+    }
+    DelLaneResourceByLaneId(resourceItem.laneId, true);
+}
+
 static void RegisterWifiDirectListener(void)
 {
     struct WifiDirectStatusListener listener = {
         .onDeviceOffLine = LnnOnWifiDirectDeviceOffline,
         .onLocalRoleChange = LnnOnWifiDirectRoleChange,
         .onDeviceOnLine = LnnOnWifiDirectDeviceOnline,
+        .onConnectedForSink = LnnOnWifiDirectConnectedForSink,
+        .onDisconnectedForSink = LnnOnWifiDirectDisconnectedForSink,
     };
     struct WifiDirectManager *mgr = GetWifiDirectManager();
     if (mgr == NULL) {

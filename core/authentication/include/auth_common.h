@@ -47,6 +47,8 @@ typedef enum {
     DATA_TYPE_META_NEGOTIATION = 0xFFFF0006,
     /* data type for decrypt fail */
     DATA_TYPE_DECRYPT_FAIL = 0xFFFF0007,
+    /* data type for info ack */
+    DATA_TYPE_META_DEVICE_INFO_ACK = 0xFFFF0008,
 } AuthDataType;
 
 #define CLIENT_SIDE_FLAG 0
@@ -80,6 +82,11 @@ if (expression) { \
 #define MASK_UINT64_H32 0xFFFFFFFF00000000
 #define AUTH_REQUEST_TIMTOUR 30000
 #define SHORT_HASH_LEN 8
+
+#define SOFTBUS_SUB_SYSTEM 203
+#define SOFTBUS_AUTH_MODULE 3
+#define SOFTBUS_HICHAIN_MAX (-((SOFTBUS_SUB_SYSTEM << 21) | (SOFTBUS_AUTH_MODULE << 16) | 0x0001))
+#define SOFTBUS_HICHAIN_MIN (-((SOFTBUS_SUB_SYSTEM << 21) | (SOFTBUS_AUTH_MODULE << 16) | 0x10FF))
 
 #define TO_INT32(value) ((int32_t)(((uint32_t)(value)) & INT32_MASK))
 #define TO_UINT32(value) ((uint32_t)(((uint32_t)(value)) & INT32_MASK))

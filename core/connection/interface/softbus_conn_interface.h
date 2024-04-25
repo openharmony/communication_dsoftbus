@@ -156,6 +156,7 @@ typedef struct {
 } ConnectResult;
 
 struct BrOption {
+    uint32_t connectionId;
     char brMac[BT_MAC_LEN];
     ConnSideType sideType;
 };
@@ -175,7 +176,7 @@ struct BleDirectOption {
 };
 
 struct SocketOption {
-    char addr[IP_LEN];
+    char addr[IP_LEN]; /* ipv6 addr format: ip%ifname */
     int32_t port;
     int32_t moduleId; /* For details, see {@link ListenerModule}. */
     ProtocolType protocol;
@@ -220,6 +221,13 @@ typedef struct {
         struct ListenerSocketOption socketOption;
     };
 } LocalListenerInfo;
+
+typedef struct {
+    ConnectType type;
+    bool active;
+    int32_t windowInMillis;
+    int32_t quotaInBytes;
+} LimitConfiguration;
 
 /**
  * @ingroup softbus_conn_manager
@@ -414,6 +422,13 @@ int32_t ConnPreventConnection(const ConnectOption *option, uint32_t time);
  * @return <b>SOFTBUS_OK</b> if prevent connect other devices successfully, others if failed.
  */
 int32_t ConnGetTypeByConnectionId(uint32_t connectionId, ConnectType *type);
+
+/**
+ * @ingroup Softbus_conn_manager
+ * @param configuration flow control configuration of posting data
+ * @return <b>SOFTBUS_OK</b> if success, others if failed.
+ */
+int32_t ConnConfigPostLimit(const LimitConfiguration *configuration);
 
 #ifdef __cplusplus
 #if __cplusplus

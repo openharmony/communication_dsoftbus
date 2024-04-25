@@ -440,6 +440,11 @@ int32_t LoadPermissionJson(const char *fileName)
     }
     int index;
     SoftBusPermissionEntry *pe = NULL;
+    if (SoftBusMutexLock(&g_permissionEntryList->lock) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_PERM, "lock fail.");
+        cJSON_Delete(jsonArray);
+        return SOFTBUS_LOCK_ERR;
+    }
     for (index = 0; index < itemNum; index++) {
         cJSON *permissionEntryObeject = cJSON_GetArrayItem(jsonArray, index);
         pe = ProcessPermissionEntry(permissionEntryObeject);
@@ -448,6 +453,7 @@ int32_t LoadPermissionJson(const char *fileName)
             g_permissionEntryList->cnt++;
         }
     }
+    SoftBusMutexUnlock(&g_permissionEntryList->lock);
     cJSON_Delete(jsonArray);
     return SOFTBUS_OK;
 }

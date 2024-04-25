@@ -223,6 +223,14 @@ int SoftBusGetBtState(void)
     return BLE_DISABLE;
 }
 
+int SoftBusGetBrState(void)
+{
+    if (GetBtState() == OHOS_GAP_STATE_TURN_ON) {
+        return BR_ENABLE;
+    }
+    return BR_DISABLE;
+}
+
 int SoftBusGetBtMacAddr(SoftBusBtAddr *mac)
 {
     if (mac == NULL) {
@@ -258,6 +266,8 @@ void SoftBusBtInit(void)
 {
     if (SoftBusGetBtState() == BLE_ENABLE) {
         SoftBusOnBtSateChanged(SOFTBUS_BT_STATE_TURN_ON);
+    }
+    if (SoftBusGetBrState() == BR_ENABLE) {
         SoftBusOnBtSateChanged(SOFTBUS_BR_STATE_TURN_ON);
     }
 }

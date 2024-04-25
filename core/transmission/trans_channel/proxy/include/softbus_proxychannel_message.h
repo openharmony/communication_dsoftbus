@@ -78,7 +78,7 @@ typedef struct {
     int32_t dateLen;
     char *data;
     uint32_t connId;
-    int64_t authId; /* for cipher */
+    AuthHandle authHandle; /* for cipher */
     int32_t keyIndex;
 } ProxyMessage;
 

@@ -77,7 +77,7 @@ HWTEST_F(ClientTransPendingTest, TransPendingTest, TestSize.Level0)
 
     uint32_t waitMillis = TEST_WAIT_ACK_TIME;
     ret = GetPendingPacketData(id, seq, waitMillis, true, nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     TransPendData pendDate = {0};
     ret = GetPendingPacketData(TEST_SESSION_ID_SECOND, TEST_SEQ_SECOND, waitMillis, true, &pendDate);
@@ -96,13 +96,13 @@ HWTEST_F(ClientTransPendingTest, TransPendingTest, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = SetPendingPacketData(TEST_SESSION_ID_SECOND, TEST_SEQ_SECOND, &pendDate);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 
     ret = SetPendingPacketData(TEST_SESSION_ID_SECOND, seq, &pendDate);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 
     ret = SetPendingPacketData(id, TEST_SEQ_SECOND, &pendDate);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 
     ret = GetPendingPacketData(id, seq, waitMillis, false, &pendDate);
     EXPECT_EQ(SOFTBUS_ALREADY_TRIGGERED, ret);

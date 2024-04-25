@@ -18,6 +18,7 @@
 
 #include <stdint.h>
 #include "lnn_lane_def.h"
+#include "bus_center_info_key.h"
 #include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_protocol_def.h"
@@ -70,7 +71,8 @@ typedef struct {
 } BleDirectInfo;
 
 typedef struct {
-    ListNode node;
+    char peerUdid[UDID_BUF_LEN];
+    char netifName[NET_IF_NAME_LEN];
     LaneLinkType type;
     union {
         WlanLinkInfo wlan;
@@ -79,24 +81,16 @@ typedef struct {
         BleLinkInfo ble;
         BleDirectInfo bleDirect;
     } linkInfo;
-    uint32_t laneReqId;
 } LaneLinkInfo;
 
 typedef struct {
     ListNode node;
-    LaneLinkType type;
-    union {
-        WlanLinkInfo wlan;
-        P2pLinkInfo p2p;
-        BrLinkInfo br;
-        BleLinkInfo ble;
-        BleDirectInfo bleDirect;
-    } linkInfo;
-    bool isReliable;
-    uint32_t laneTimeliness;
+    uint64_t laneId;
+    bool isServerSide;
+    LaneLinkInfo link;
     uint32_t laneScore;
     uint32_t laneFload;
-    uint32_t laneRef;
+    uint32_t clientRef;
 } LaneResource;
 
 typedef struct {
@@ -107,7 +101,7 @@ typedef struct {
 int32_t InitLaneLink(void);
 void DeinitLaneLink(void);
 int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *cb);
-void DestroyLink(const char *networkId, uint32_t reqId, LaneLinkType type, int32_t pid);
+void DestroyLink(const char *networkId, uint32_t laneReqId, LaneLinkType type);
 
 void LaneDeleteP2pAddress(const char *networkId, bool isDestroy);
 void LaneAddP2pAddress(const char *networkId, const char *ipAddr, uint16_t port);
@@ -115,17 +109,15 @@ void LaneAddP2pAddress(const char *networkId, const char *ipAddr, uint16_t port)
 void LaneAddP2pAddressByIp(const char *ipAddr, uint16_t port);
 void LaneUpdateP2pAddressByIp(const char *ipAddr, const char *networkId);
 
-int32_t FindLaneResourceByLinkInfo(const LaneLinkInfo *linkInfoItem, LaneResource *laneResourceItem);
-int32_t AddLaneResourceItem(const LaneResource *resourceItem);
-int32_t DelLaneResourceItem(const LaneResource *resourceItem);
-int32_t AddLinkInfoItem(const LaneLinkInfo *linkInfoItem);
-int32_t DelLinkInfoItem(uint32_t laneReqId);
-int32_t FindLaneLinkInfoByLaneReqId(uint32_t laneReqId, LaneLinkInfo *linkInfoitem);
-int32_t ConvertToLaneResource(const LaneLinkInfo *linkInfo, LaneResource *laneResourceInfo);
-int32_t DelLaneResourceItemWithDelay(LaneResource *resourceItem, uint32_t laneReqId, bool *isDelayDestroy);
-void HandleLaneReliabilityTime(void);
+int32_t FindLaneResourceByLinkAddr(const LaneLinkInfo *info, LaneResource *resource);
+int32_t FindLaneResourceByLinkType(const char *peerUdid, LaneLinkType type, LaneResource *resource);
+int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, bool isServerSide);
+int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide);
+int32_t FindLaneResourceByLaneId(uint64_t laneId, LaneResource *resource);
+uint64_t ApplyLaneId(const char *localUdid, const char *remoteUdid, LaneLinkType linkType);
+int32_t ClearLaneResourceByLaneId(uint64_t laneId);
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* LNN_LANE_LINK_H */
+#endif // LNN_LANE_LINK_H

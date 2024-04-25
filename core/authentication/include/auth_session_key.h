@@ -37,31 +37,36 @@ typedef struct {
     uint8_t value[SESSION_KEY_LENGTH];
     uint32_t len;
 } SessionKey;
+
+typedef struct {
+    const uint8_t *inData;
+    uint32_t inLen;
+} InDataInfo;
 typedef ListNode SessionKeyList;
 
 void InitSessionKeyList(SessionKeyList *list);
 void DestroySessionKeyList(SessionKeyList *list);
 int32_t DupSessionKeyList(const SessionKeyList *srcList, SessionKeyList *dstList);
 
-uint64_t GetLatestAvailableSessionKeyTime(const SessionKeyList *list);
+uint64_t GetLatestAvailableSessionKeyTime(const SessionKeyList *list, AuthLinkType type);
 bool HasSessionKey(const SessionKeyList *list);
 int32_t AddSessionKey(SessionKeyList *list, int32_t index, const SessionKey *key, AuthLinkType type);
 int32_t SetSessionKeyAvailable(SessionKeyList *list, int32_t index);
-int32_t GetLatestSessionKey(const SessionKeyList *list, int32_t *index, SessionKey *key);
-int32_t GetSessionKeyByIndex(const SessionKeyList *list, int32_t index, SessionKey *key);
+int32_t GetLatestSessionKey(const SessionKeyList *list, AuthLinkType type, int32_t *index, SessionKey *key);
+int32_t GetSessionKeyByIndex(const SessionKeyList *list, int32_t index, AuthLinkType type, SessionKey *key);
 int32_t SetSessionKeyAuthLinkType(const SessionKeyList *list, int32_t index, AuthLinkType type);
 bool CheckSessionKeyListExistType(const SessionKeyList *list, AuthLinkType type);
 void RemoveSessionkeyByIndex(SessionKeyList *list, int32_t index, AuthLinkType type);
 void ClearSessionkeyByAuthLinkType(int64_t authId, SessionKeyList *list, AuthLinkType type);
 
-int32_t EncryptInner(const SessionKeyList *list, const uint8_t *inData, uint32_t inLen,
+int32_t EncryptInner(const SessionKeyList *list, AuthLinkType type, const InDataInfo *inDataInfo,
     uint8_t **outData, uint32_t *outLen);
-int32_t DecryptInner(const SessionKeyList *list, const uint8_t *inData, uint32_t inLen,
+int32_t DecryptInner(const SessionKeyList *list, AuthLinkType type, const InDataInfo *inDataInfo,
     uint8_t **outData, uint32_t *outLen);
 
-int32_t EncryptData(const SessionKeyList *list, const uint8_t *inData, uint32_t inLen,
+int32_t EncryptData(const SessionKeyList *list, AuthLinkType type, const InDataInfo *inDataInfo,
     uint8_t *outData, uint32_t *outLen);
-int32_t DecryptData(const SessionKeyList *list, const uint8_t *inData, uint32_t inLen,
+int32_t DecryptData(const SessionKeyList *list, AuthLinkType type, const InDataInfo *inDataInfo,
     uint8_t *outData, uint32_t *outLen);
 
 void ScheduleUpdateSessionKey(AuthHandle authHandle, uint64_t delatMs);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include <string.h>
 
 #include "client_bus_center_manager.h"
+#include "data_level.h"
 #include "client_trans_session_manager.h"
 #include "lnn_event.h"
 #include "lnn_log.h"
@@ -28,6 +29,8 @@
 #include "softbus_errcode.h"
 #include "softbus_type_def.h"
 #include "softbus_utils.h"
+
+static const char *g_dbPkgName = "distributeddata-default";
 
 static int32_t CommonInit(const char *pkgName)
 {
@@ -294,6 +297,49 @@ int32_t SetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16
         return ret;
     }
     return SetNodeDataChangeFlagInner(pkgName, networkId, dataChangeFlag);
+}
+
+int32_t RegDataLevelChangeCb(const char *pkgName, IDataLevelCb *callback)
+{
+    if (pkgName == NULL) {
+        LNN_LOGE(LNN_STATE, "pkgName is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strcmp(g_dbPkgName, pkgName) != 0) {
+        LNN_LOGE(LNN_STATE, "pkgName is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = CommonInit(pkgName);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "CommonInit failed");
+        return ret;
+    }
+    return RegDataLevelChangeCbInner(pkgName, callback);
+}
+
+int32_t UnregDataLevelChangeCb(const char *pkgName)
+{
+    if (pkgName == NULL) {
+        LNN_LOGE(LNN_STATE, "pkgName is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strcmp(g_dbPkgName, pkgName) != 0) {
+        LNN_LOGE(LNN_STATE, "pkgName is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return UnregDataLevelChangeCbInner(pkgName);
+}
+
+int32_t SetDataLevel(const DataLevel *dataLevel)
+{
+    if (dataLevel == NULL) {
+        LNN_LOGE(LNN_STATE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    LNN_LOGI(LNN_STATE, "SetDataLevel, dynamic: %{public}hu, static: %{public}hu, "
+        "switch: %{public}u, switchLen: %{public}hu", dataLevel->dynamicLevel, dataLevel->staticLevel,
+        dataLevel->switchLevel, dataLevel->switchLength);
+    return SetDataLevelInner(dataLevel);
 }
 
 int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb)

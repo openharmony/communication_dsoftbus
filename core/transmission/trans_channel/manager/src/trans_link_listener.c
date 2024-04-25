@@ -72,7 +72,7 @@ static void OnWifiDirectRoleChange(enum WifiDirectRole myRole)
     }
 }
 
-static void OnWifiDirectDeviceOnLine(const char *peerMac, const char *peerIp, const char *peerUuid)
+static void OnWifiDirectDeviceOnLine(const char *peerMac, const char *peerIp, const char *peerUuid, bool isSource)
 {
     TRANS_CHECK_AND_RETURN_LOGW(peerMac, TRANS_SVC, "peer mac is null");
     NodeInfo nodeInfo;

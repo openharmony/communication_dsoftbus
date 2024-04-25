@@ -27,6 +27,7 @@
 #include "lnn_log.h"
 #include "lnn_network_id.h"
 #include "lnn_p2p_info.h"
+#include "lnn_connection_addr_utils.h"
 #include "message_handler.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
@@ -259,49 +260,44 @@ static void UpdateBroadcastInfo()
 {
     BroadcastCipherKey broadcastKey;
     (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-    if (LnnGetLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "get local info failed.");
-        return;
-    }
-    if (SoftBusGetSysTimeMs() < broadcastKey.endTime) {
-        (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-        LNN_LOGI(LNN_EVENT, "the broadcastKey don't need to update.");
-        return;
-    }
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, broadcastKey.udid, UDID_BUF_LEN) != SOFTBUS_OK) {
-        (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-        LNN_LOGE(LNN_EVENT, "get udid fail");
-        return;
-    }
-    if (SoftBusGenerateRandomArray(broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
-        (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-        LNN_LOGE(LNN_EVENT, "generate broadcast key error.");
-        return;
-    }
-    if (SoftBusGenerateRandomArray(broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
-        (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-        LNN_LOGE(LNN_EVENT, "generate broadcast iv error.");
-        return;
-    }
-    if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_KEY,
-        broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
-        (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-        LNN_LOGE(LNN_EVENT, "set key error.");
-        return;
-    }
-    if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_IV,
-        broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
-        (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-        LNN_LOGE(LNN_EVENT, "set iv error.");
-        return;
-    }
-    if (LnnUpdateLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
-        (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-        LNN_LOGE(LNN_EVENT, "update local broadcast key failed");
-        return;
-    }
+    do {
+        if (LnnGetLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_EVENT, "get local info failed.");
+            break;
+        }
+        if (SoftBusGetSysTimeMs() < broadcastKey.endTime) {
+            LNN_LOGI(LNN_EVENT, "the broadcastKey don't need to update.");
+            break;
+        }
+        if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, broadcastKey.udid, UDID_BUF_LEN) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_EVENT, "get udid fail");
+            break;
+        }
+        if (SoftBusGenerateRandomArray(broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_EVENT, "generate broadcast key error.");
+            break;
+        }
+        if (SoftBusGenerateRandomArray(broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_EVENT, "generate broadcast iv error.");
+            break;
+        }
+        if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_KEY,
+            broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_EVENT, "set key error.");
+            break;
+        }
+        if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_IV,
+            broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_EVENT, "set iv error.");
+            break;
+        }
+        if (LnnUpdateLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_EVENT, "update local broadcast key failed");
+            break;
+        }
+        LNN_LOGI(LNN_EVENT, "update local broadcast key success!");
+    } while (0);
     (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-    LNN_LOGI(LNN_EVENT, "update local broadcast key success!");
 }
 
 void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info)
@@ -607,6 +603,15 @@ void LnnNotifySingleOffLineEvent(const ConnectionAddr *addr, NodeBasicInfo *basi
     if (addr == NULL || basicInfo == NULL) {
         LNN_LOGW(LNN_EVENT, "addr or basicInfo is null");
         return;
+    }
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(basicInfo->networkId, CATEGORY_NETWORK_ID, &info) == SOFTBUS_OK) {
+        if ((LnnHasDiscoveryType(&info, DISCOVERY_TYPE_WIFI) &&
+            LnnConvAddrTypeToDiscType(addr->type) == DISCOVERY_TYPE_WIFI)) {
+            LNN_LOGI(LNN_EVENT, "Two-way WIFI LNN not completely offline, not need to report offline");
+            return;
+        }
     }
     LnnSingleNetworkOffLineEvent event = {.basic.event = LNN_EVENT_SINGLE_NETWORK_OFFLINE, .type = addr->type};
     event.basic.event = LNN_EVENT_SINGLE_NETWORK_OFFLINE;
