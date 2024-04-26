@@ -248,9 +248,10 @@ static int32_t AdjustLanePriority(const char *networkId, const LaneSelectParam *
 {
     int32_t resListScore[LANE_LINK_TYPE_BUTT];
     (void)memset_s(resListScore, sizeof(resListScore), INVALID_LINK, sizeof(resListScore));
-    if (GetListScore(networkId, request->expectedBw, resList, resListScore, resNum) != SOFTBUS_OK) {
+    int32_t ret = GetListScore(networkId, request->expectedBw, resList, resListScore, resNum);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get linklist score fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
     if ((resListScore[LANE_WLAN_2P4G] == INVALID_LINK && resListScore[LANE_WLAN_5G] == INVALID_LINK) ||
         (resListScore[LANE_P2P] == INVALID_LINK && resListScore[LANE_HML] == INVALID_LINK)) {
@@ -449,7 +450,7 @@ int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *req
         Anonymize(networkId, &anonyNetworkId);
         LNN_LOGE(LNN_LANE, "device not online, cancel selectLane by qos, networkId=%{public}s", anonyNetworkId);
         AnonymizeFree(anonyNetworkId);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_NODE_OFFLINE;
     }
     LanePreferredLinkList laneLinkList = {0};
     if (request->qosRequire.minBW == 0 && request->qosRequire.maxLaneLatency == 0 &&
@@ -465,7 +466,7 @@ int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *req
     } else {
         LNN_LOGI(LNN_LANE, "select lane by qos require");
         if (DecideAvailableLane(networkId, request, &laneLinkList) != SOFTBUS_OK) {
-            return SOFTBUS_ERR;
+            return SOFTBUS_LANE_SELECT_FAIL;
         }
     }
     recommendList->linkTypeNum = 0;
@@ -473,10 +474,10 @@ int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *req
         recommendList->linkType[recommendList->linkTypeNum] = laneLinkList.linkType[i];
         recommendList->linkTypeNum++;
     }
-    if (AdjustLanePriority(networkId, request, recommendList->linkType,
-        recommendList->linkTypeNum) != SOFTBUS_OK) {
+    int32_t ret = AdjustLanePriority(networkId, request, recommendList->linkType, recommendList->linkTypeNum);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "AdjustLanePriority fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
     return SOFTBUS_OK;
 }
