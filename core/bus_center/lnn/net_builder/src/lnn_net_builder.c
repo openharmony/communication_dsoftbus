@@ -2219,7 +2219,7 @@ static void AccountStateChangeHandler(const LnnEventBasicInfo *info)
 static void UpdateLocalNetCapability(void)
 {
     uint32_t netCapability = 0;
-    if (LnnGetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t *)&netCapability) != SOFTBUS_OK) {
+    if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &netCapability) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "get cap from local ledger fail");
         return;
     }

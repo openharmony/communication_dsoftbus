@@ -325,7 +325,7 @@ static void WifiStateEventHandler(const LnnEventBasicInfo *info)
     const LnnMonitorWlanStateChangedEvent *event = (const LnnMonitorWlanStateChangedEvent *)info;
     SoftBusWifiState wifiState = (SoftBusWifiState)event->status;
     uint32_t netCapability = 0;
-    if (LnnGetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t *)&netCapability) != SOFTBUS_OK) {
+    if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &netCapability) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "wifi state handler get capability fail from local.");
         return;
     }
@@ -346,7 +346,7 @@ static void BtStateChangeEventHandler(const LnnEventBasicInfo *info)
         return;
     }
     uint32_t netCapability = 0;
-    if (LnnGetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t *)&netCapability) != SOFTBUS_OK) {
+    if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &netCapability) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get netcap fail");
         return;
     }
