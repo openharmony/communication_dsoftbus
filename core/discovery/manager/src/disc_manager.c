@@ -1091,6 +1091,7 @@ static IdContainer* CreateIdContainer(int32_t id, const char *pkgName)
 
     if (strcpy_s(container->pkgName, nameLen, pkgName) != EOK) {
         DISC_LOGE(DISC_CONTROL, "strcpy_s failed");
+        SoftBusFree(container->pkgName);
         SoftBusFree(container);
         return NULL;
     }
