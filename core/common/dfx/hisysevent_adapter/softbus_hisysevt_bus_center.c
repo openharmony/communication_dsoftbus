@@ -876,10 +876,10 @@ static int32_t SetOnlineInfoMsgParamName(SoftBusEvtReportMsg *msg)
 
 static int32_t SetOnlineInfoMsgParamValve(SoftBusEvtReportMsg *msg, OnlineDeviceInfo *info)
 {
-    msg->paramArray[SOFTBUS_EVT_PARAM_ZERO].paramValue.i32v = info->onlineDevNum;
-    msg->paramArray[SOFTBUS_EVT_PARAM_ONE].paramValue.i32v = info->btOnlineDevNum;
-    msg->paramArray[SOFTBUS_EVT_PARAM_TWO].paramValue.i32v = info->wifiOnlineDevNum;
-    msg->paramArray[SOFTBUS_EVT_PARAM_THREE].paramValue.i32v = info->peerDevType;
+    msg->paramArray[SOFTBUS_EVT_PARAM_ZERO].paramValue.i32v = (int32_t)info->onlineDevNum;
+    msg->paramArray[SOFTBUS_EVT_PARAM_ONE].paramValue.i32v = (int32_t)info->btOnlineDevNum;
+    msg->paramArray[SOFTBUS_EVT_PARAM_TWO].paramValue.i32v = (int32_t)info->wifiOnlineDevNum;
+    msg->paramArray[SOFTBUS_EVT_PARAM_THREE].paramValue.i32v = (int32_t)info->peerDevType;
     msg->paramArray[SOFTBUS_EVT_PARAM_FOUR].paramValue.i32v = info->insertFileResult;
     do {
         if (strcpy_s(msg->paramArray[SOFTBUS_EVT_PARAM_FIVE].paramValue.str, SOFTBUS_HISYSEVT_NAME_LEN,
