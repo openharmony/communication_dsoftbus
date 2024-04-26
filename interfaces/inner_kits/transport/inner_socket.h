@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +36,7 @@
 #ifndef INNER_SOCKET_H
 #define INNER_SOCKET_H
 
+#include "socket.h"
 #include "softbus_common.h"
 
 #ifdef __cplusplus
@@ -82,6 +83,20 @@ int32_t DBinderGrantPermission(int32_t uid, int32_t pid, const char *socketName)
  * @version 1.0
  */
 int32_t DBinderRemovePermission(const char *socketName);
+
+/**
+ * @brief Bind for dfs.
+ *
+ * @param socket Indicates the the unique socket fd.
+ * @param listener Indicates the pointer to the socket callback.
+ * @return Returns <b>SOFTBUS_TRANS_INVALID_PARAM</b> if invalid parameters are detected.
+ * @return Returns <b>INVALID_SOCKET</b> if the operation fails.
+ * @return Returns <b>SOFTBUS_OK</b> if the socket is bind;
+ * returns an error code otherwise.
+ * @since 1.0
+ * @version 1.0
+ */
+int32_t DfsBind(int32_t socket, const ISocketListener *listener);
 #ifdef __cplusplus
 }
 #endif

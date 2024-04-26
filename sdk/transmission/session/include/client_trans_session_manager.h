@@ -209,6 +209,7 @@ int32_t ClientTransSetChannelInfo(const char *sessionName, int32_t sessionId, in
 int32_t GetSessionStateAndSessionNameBySessionId(int32_t sessionId, char *sessionName, SessionState *sessionState);
 
 int32_t SetSessionStateBySessionId(int32_t sessionId, SessionState sessionState);
+int32_t ClientDfsIpcOpenSession(int32_t sessionId, TransInfo *transInfo);
 
 #ifdef __cplusplus
 }

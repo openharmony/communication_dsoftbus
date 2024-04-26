@@ -154,3 +154,8 @@ int32_t DBinderRemovePermission(const char *socketName)
 {
     return ClientRemovePermission(socketName);
 }
+
+int32_t DfsBind(int32_t socket, const ISocketListener *listener)
+{
+    return ClientDfsBind(socket, listener);
+}
