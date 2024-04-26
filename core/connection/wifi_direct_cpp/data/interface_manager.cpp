@@ -36,6 +36,18 @@ int InterfaceManager::ReadInterface(InterfaceInfo::InterfaceType type, const Rea
 
 bool InterfaceManager::IsInterfaceAvailable(InterfaceInfo::InterfaceType type, bool forShare) const
 {
+    auto info = interfaces_[static_cast<int>(type)];
+    if (!info.IsEnable()) {
+        CONN_LOGW(CONN_WIFI_DIRECT, "isEnable=0, interface type=%{public}d", static_cast<int>(type));
+        return false;
+    }
+
+    if (info.GetRole() == LinkInfo::LinkMode::GC) {
+        CONN_LOGW(CONN_WIFI_DIRECT, "already gc");
+        return false;
+    }
+
+    (void)forShare;
     return true;
 }
 
