@@ -288,6 +288,13 @@ static void NotifyRoleChange(enum WifiDirectRole oldRole, enum WifiDirectRole ne
     }
 }
 
+bool IsNegotiateChannelNeeded(const char *remoteNetworkId, enum WifiDirectLinkType linkType)
+{
+    (void)remoteNetworkId;
+    (void)linkType;
+    return false;
+}
+
 static bool SupportHmlTwo()
 {
     return OHOS::SoftBus::WifiDirectUtils::SupportHmlTwo();
@@ -319,6 +326,7 @@ static struct WifiDirectManager g_manager = {
     .registerStatusListener = RegisterStatusListener,
     .prejudgeAvailability = PrejudgeAvailability,
 
+    .isNegotiateChannelNeeded = IsNegotiateChannelNeeded;
     .isDeviceOnline = IsDeviceOnline,
     .getLocalIpByUuid = GetLocalIpByUuid,
     .getLocalIpByRemoteIp = GetLocalIpByRemoteIp,
