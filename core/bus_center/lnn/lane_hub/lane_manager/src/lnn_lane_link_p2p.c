@@ -1070,7 +1070,7 @@ static int32_t GetAuthTriggerLinkReqParamByAuthHandle(uint32_t authRequestId, in
         return SOFTBUS_OK;
     }
     LinkUnlock();
-    LNN_LOGE(LNN_LANE, "request item not found, authRequestId=%{public}d", authRequestId);
+    LNN_LOGE(LNN_LANE, "request item not found, authRequestId=%{public}u", authRequestId);
     return SOFTBUS_LANE_GUIDE_BUILD_FAIL;
 }
 
