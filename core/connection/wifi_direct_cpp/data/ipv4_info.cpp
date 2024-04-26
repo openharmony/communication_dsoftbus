@@ -35,8 +35,9 @@ bool Ipv4Info::operator==(const Ipv4Info &other) const
 
 int Ipv4Info::Marshalling(std::vector<uint8_t> &output) const
 {
-    auto p = (uint8_t *)(&ip_);
-    output.insert(output.begin(), p, p + sizeof(ip_));
+    auto ip = ntohl(ip_);
+    auto p = (uint8_t *)(&ip);
+    output.insert(output.begin(), p, p + sizeof(ip));
     output.push_back(prefixLength_);
     return SOFTBUS_OK;
 }
@@ -50,6 +51,7 @@ int Ipv4Info::Unmarshalling(const uint8_t *input, size_t size)
     auto p = (uint8_t *)(&ip_);
     std::copy(input, input + sizeof(ip_), p);
     prefixLength_ = input[Ipv4InfoSize() - 1];
+    ip_ = htonl(ip_);
     return SOFTBUS_OK;
 }
 
