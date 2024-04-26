@@ -288,7 +288,7 @@ int32_t P2pAdapter::GetGroupInfo(WifiDirectP2pGroupInfo &groupInfoOut)
     for (auto i = 0; i < info.clientDevicesSize; i++) {
         std::vector<uint8_t> clientAddrArray(
             info.clientDevices[i].devAddr, info.clientDevices[i].devAddr + sizeof(info.clientDevices[i].devAddr));
-        groupInfoOut.clientDevices.push_back(WifiDirectUtils::MacArrayToString(devAddrArray));
+        groupInfoOut.clientDevices.push_back(WifiDirectUtils::MacArrayToString(clientAddrArray));
     }
     return SOFTBUS_OK;
 }
