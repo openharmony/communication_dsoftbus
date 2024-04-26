@@ -70,7 +70,6 @@ WifiDirectConnectCallback ConnectCommand::GetConnectCallback() const
 
 void ConnectCommand::OnSuccess(const WifiDirectLink &link) const
 {
-    DfxRecord(true, OK);
     CONN_LOGI(CONN_WIFI_DIRECT,
         "requestId=%{public}u linkId=%{public}d, localIp=%{public}s, remoteIp=%{public}s, remotePort=%{public}d, "
         "linkType=%{public}d",
@@ -81,7 +80,6 @@ void ConnectCommand::OnSuccess(const WifiDirectLink &link) const
 
 void ConnectCommand::OnFailure(WifiDirectErrorCode reason) const
 {
-    DfxRecord(false, reason);
     CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}u, reason=%{public}d", info_.info_.requestId, reason);
     callback_.onConnectFailure(info_.info_.requestId, reason);
 }
