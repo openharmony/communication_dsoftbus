@@ -1071,7 +1071,7 @@ HWTEST_F(TransClientSessionTest, TransClientOpenSessionTestToken, TestSize.Level
 
     SetFirstCallerTokenID(HAP_TOKENID);
     ret = OpenSession(g_sessionName, g_sessionName, g_networkId, g_groupId, &g_sessionAttr);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, TRANS_TEST_INVALID_SESSION_ID);
 
     SetFirstCallerTokenID(NATIVE_TOKENID);
     ret = OpenSession(g_sessionName, g_sessionName, g_networkId, g_groupId, &g_sessionAttr);
