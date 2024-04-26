@@ -80,7 +80,7 @@ void InterfaceManager::InitInterface(InterfaceInfo::InterfaceType type)
         name = HML_IF_NAME;
         capability = static_cast<int32_t>(LinkInfo::LinkMode::HML);
     }
-
+    interfaces_[typr].SetRole(LinkInfo::LinkMode::NONE);
     interfaces_[type].SetName(name);
     interfaces_[type].SetIsEnable(P2pAdapter::IsWifiP2pEnabled());
     interfaces_[type].SetBaseMac(WifiDirectUtils::MacArrayToString(WifiDirectUtils::GetInterfaceMacAddr(name)));
