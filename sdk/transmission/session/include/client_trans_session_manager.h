@@ -192,7 +192,7 @@ int32_t ClientGetSessionCallbackAdapterById(int32_t sessionId, SessionListenerAd
 
 int32_t ClientGetPeerSocketInfoById(int32_t sessionId, PeerSocketInfo *peerSocketInfo);
 
-bool IsSessionExceedLimit();
+bool IsSessionExceedLimit(void);
 
 int32_t ClientResetIdleTimeoutById(int32_t sessionId);
 
