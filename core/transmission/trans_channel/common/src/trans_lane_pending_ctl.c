@@ -885,7 +885,7 @@ static int32_t TransSoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, uint
         TRANS_LOGE(TRANS_SVC, "trans softbus get time failed.");
         return SOFTBUS_ERR;
     }
-    int64_t usTime = now.sec * CONVERSION_BASE * CONVERSION_BASE + now.usec + timeMillis * CONVERSION_BASE;
+    int64_t usTime = now.sec * CONVERSION_BASE * CONVERSION_BASE + now.usec + (int32_t)timeMillis * CONVERSION_BASE;
     SoftBusSysTime tv;
     tv.sec = usTime / CONVERSION_BASE / CONVERSION_BASE;
     tv.usec = usTime % (CONVERSION_BASE * CONVERSION_BASE);
