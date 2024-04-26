@@ -40,7 +40,7 @@ using P2pConnectParam = P2pAdapter::ConnectParam;
 using P2pDestroyGroupParam = P2pAdapter::DestroyGroupParam;
 
 struct ClientJoinEvent {
-    int32_t reason_;
+    int32_t result_;
     std::string remoteDeviceId_;
     std::string remoteMac_;
 };
