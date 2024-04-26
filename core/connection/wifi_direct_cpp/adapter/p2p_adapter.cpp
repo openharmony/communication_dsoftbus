@@ -50,6 +50,16 @@ int32_t P2pAdapter::GetChannel5GListIntArray(std::vector<int> &channels)
     return SOFTBUS_OK;
 }
 
+bool P2pAdapter::IsWifiEnable()
+{
+    return IsWifiActive() == WIFI_STA_ACTIVE;
+}
+
+bool P2pAdapter::IsWifiConnected()
+{
+    return false;
+}
+
 bool P2pAdapter::IsWifiP2pEnabled()
 {
     enum P2pState state;
