@@ -18,9 +18,9 @@
 #include "securec.h"
 #include <memory>
 
-#include "../kits/c/wifi_device.h"
-#include "../kits/c/wifi_hid2d.h"
-#include "../kits/c/wifi_p2p.h"
+#include "kits/c/wifi_device.h"
+#include "kits/c/wifi_hid2d.h"
+#include "kits/c/wifi_p2p.h"
 
 #include "conn_log.h"
 #include "softbus_error_code.h"

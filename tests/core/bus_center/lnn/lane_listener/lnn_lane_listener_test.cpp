@@ -283,6 +283,9 @@ HWTEST_F(LNNLaneListenerTest, LNN_LANE_FIND_BUSINESS_INFO_BY_LANE_INFO_001, Test
     LaneListenerDepsInterfaceMock listenerMock;
     EXPECT_CALL(listenerMock, FindLaneResourceByLinkAddr)
         .WillRepeatedly(DoAll(SetArgPointee<1>(laneResource), Return(SOFTBUS_OK)));
+    EXPECT_CALL(listenerMock, ApplyLaneId).WillRepeatedly(Return(LANE_ID_P2P));
+    LaneDepsInterfaceMock laneMock;
+    EXPECT_CALL(laneMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
 
     int32_t ret = FindLaneBusinessInfoByLinkInfo(nullptr, &resNum, laneBusinessInfo, LANE_TYPE_BUTT);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -385,20 +388,16 @@ HWTEST_F(LNNLaneListenerTest, LNN_LANE_FIND_LANE_LISTENER_INFO_BY_LANE_TYPE_001,
 */
 HWTEST_F(LNNLaneListenerTest, LNN_LANE_GET_STATE_NOTIFY_INFO_001, TestSize.Level1)
 {
-    char peerUdid[UDID_BUF_LEN] = {0};
     LaneLinkInfo laneLinkInfo;
     (void)memset_s(&laneLinkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
 
-    int32_t ret = GetStateNotifyInfo(nullptr, PEER_UUID, peerUdid, &laneLinkInfo);
+    int32_t ret = GetStateNotifyInfo(nullptr, PEER_UUID, &laneLinkInfo);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = GetStateNotifyInfo(PEER_IP_HML, nullptr, peerUdid, &laneLinkInfo);
+    ret = GetStateNotifyInfo(PEER_IP_HML, nullptr, &laneLinkInfo);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = GetStateNotifyInfo(PEER_IP_HML, PEER_UUID, nullptr, &laneLinkInfo);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    ret = GetStateNotifyInfo(PEER_IP_HML, PEER_UUID, peerUdid, nullptr);
+    ret = GetStateNotifyInfo(PEER_IP_HML, PEER_UUID, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     NodeInfo nodeInfo;
@@ -408,13 +407,13 @@ HWTEST_F(LNNLaneListenerTest, LNN_LANE_GET_STATE_NOTIFY_INFO_001, TestSize.Level
     EXPECT_CALL(laneMock, LnnGetRemoteNodeInfoById)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(DoAll(SetArgPointee<2>(nodeInfo), Return(SOFTBUS_OK)));
-    ret = GetStateNotifyInfo(PEER_IP_HML, PEER_UUID, peerUdid, &laneLinkInfo);
+    ret = GetStateNotifyInfo(PEER_IP_HML, PEER_UUID, &laneLinkInfo);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
-    ret = GetStateNotifyInfo(PEER_IP_HML, PEER_UUID, peerUdid, &laneLinkInfo);
+    ret = GetStateNotifyInfo(PEER_IP_HML, PEER_UUID, &laneLinkInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = GetStateNotifyInfo(PEER_IP_P2P, PEER_UUID, peerUdid, &laneLinkInfo);
+    ret = GetStateNotifyInfo(PEER_IP_P2P, PEER_UUID, &laneLinkInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -484,6 +483,9 @@ HWTEST_F(LNNLaneListenerTest, LNN_LANE_LINKDOWN_NOTIFY_001, TestSize.Level1)
     LaneListenerDepsInterfaceMock listenerMock;
     EXPECT_CALL(listenerMock, FindLaneResourceByLinkAddr)
         .WillRepeatedly(DoAll(SetArgPointee<1>(laneResource), Return(SOFTBUS_OK)));
+    EXPECT_CALL(listenerMock, ApplyLaneId).WillRepeatedly(Return(LANE_ID_HML));
+    LaneDepsInterfaceMock laneMock;
+    EXPECT_CALL(laneMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
 
     int32_t ret = LaneLinkdownNotify(nullptr, &linkInfo);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -547,6 +549,9 @@ HWTEST_F(LNNLaneListenerTest, LNN_LANE_LINKDOWN_NOTIFY_002, TestSize.Level1)
     EXPECT_CALL(listenerMock, LaneInfoProcess)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(listenerMock, ApplyLaneId).WillRepeatedly(Return(LANE_ID_HML));
+    LaneDepsInterfaceMock laneMock;
+    EXPECT_CALL(laneMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     LaneLinkInfo linkInfo;
     (void)memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
     linkInfo.type = LANE_HML;

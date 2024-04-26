@@ -19,6 +19,7 @@
 #include "wifi_direct_types.h"
 #include "channel/negotiate_channel.h"
 #include "data/wifi_config_info.h"
+#include "conn_event.h"
 
 namespace OHOS::SoftBus {
 struct ConnectInfo {
@@ -52,6 +53,9 @@ protected:
     WifiDirectConnectCallback callback_;
     mutable std::string remoteDeviceId_;
     bool hasRetried_ = false;
+
+    void DfxRecord(bool isSuccess, WifiDirectErrorCode reason) const;
+    void FillConnEventExtra(ConnEventExtra &extra) const;
 };
 }
 #endif

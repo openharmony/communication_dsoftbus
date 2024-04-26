@@ -88,6 +88,7 @@ enum WifiDirectNegoChannelType {
     NEGO_CHANNEL_AUTH = 1,
     NEGO_CHANNEL_COC = 2,
     NEGO_CHANNEL_ACTION = 3,
+    NEGO_CHANNEL_SHARE = 4,
 };
 
 struct WifiDirectNegotiateChannel {
@@ -152,12 +153,12 @@ struct WifiDirectDisconnectInfo {
 
 struct WifiDirectConnectCallback {
     void (*onConnectSuccess)(uint32_t requestId, const struct WifiDirectLink *link);
-    void (*onConnectFailure)(uint32_t requestId, enum WifiDirectErrorCode reason);
+    void (*onConnectFailure)(uint32_t requestId, int32_t reason);
 };
 
 struct WifiDirectDisconnectCallback {
     void (*onDisconnectSuccess)(uint32_t requestId);
-    void (*onDisconnectFailure)(uint32_t requestId, enum WifiDirectErrorCode reason);
+    void (*onDisconnectFailure)(uint32_t requestId, int32_t reason);
 };
 
 #ifdef __cplusplus

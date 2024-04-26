@@ -282,6 +282,7 @@ static void CloseIpLink(void)
     CloseAuthPort();
     CloseSessionPort();
     CloseProxyPort();
+    LNN_LOGI(LNN_BUILDER, "close port success");
 }
 
 static int32_t GetLocalIpInfo(char *ipAddr, uint32_t ipAddrLen, char *ifName, uint32_t ifNameLen)
