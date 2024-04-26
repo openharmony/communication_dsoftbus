@@ -54,6 +54,7 @@ InfoContainer<InterfaceInfoKey>::KeyTypeTable InfoContainer<InterfaceInfoKey>::k
     { InterfaceInfoKey::IS_AVAILABLE,           Serializable::ValueType::BOOL      },
     { InterfaceInfoKey::COEXIST_RULE,           Serializable::ValueType::BOOL      },
     { InterfaceInfoKey::LINK_MODE,              Serializable::ValueType::INT       },
+    { InterfaceInfoKey::LISTEN_MODULE,          Serializable::ValueType::INT       },
 };
 
 void InterfaceInfo::MarshallingString(
