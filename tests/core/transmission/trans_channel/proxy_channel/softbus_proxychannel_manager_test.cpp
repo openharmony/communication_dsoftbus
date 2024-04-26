@@ -248,19 +248,19 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOpenProxyChannelTest001, Test
 
     connInfo.type = CONNECT_BLE_DIRECT;
     ret = TransProxyOpenProxyChannel(&appInfo, &connInfo, &channelId);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CREATE_CHANNEL_FAILED, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CONN_REPEAT, ret);
 
     connInfo.type = CONNECT_BLE;
     ret = TransProxyOpenProxyChannel(&appInfo, &connInfo, &channelId);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CREATE_CHANNEL_FAILED, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CONN_REPEAT, ret);
 
     connInfo.type = CONNECT_BR;
     ret = TransProxyOpenProxyChannel(&appInfo, &connInfo, &channelId);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CREATE_CHANNEL_FAILED, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CONN_REPEAT, ret);
 
     connInfo.type = CONNECT_TCP;
     ret = TransProxyOpenProxyChannel(&appInfo, &connInfo, &channelId);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CREATE_CHANNEL_FAILED, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CONN_REPEAT, ret);
 }
 
 /**
@@ -1266,27 +1266,18 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyFillDataConfigTest001, TestSi
 }
 
 /**
- * @tc.name: ConvertConnectType2AuthLinkTypeTest001
- * @tc.desc: Should return corresponding link type when given different connect types.
+ * @tc.name: TransProxySetAuthHandleByChanId001
+ * @tc.desc: Should return SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND when given invalid authId.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusProxyChannelManagerTest, ConvertConnectType2AuthLinkTypeTest001, TestSize.Level1)
+HWTEST_F(SoftbusProxyChannelManagerTest, TransProxySetAuthHandleByChanId001, TestSize.Level1)
 {
-    ConnectType type = CONNECT_TCP;
-    AuthLinkType ret = ConvertConnectType2AuthLinkType(type);
-    EXPECT_EQ(ret, AUTH_LINK_TYPE_WIFI);
-    type = CONNECT_BLE;
-    ret = ConvertConnectType2AuthLinkType(type);
-    EXPECT_EQ(ret, AUTH_LINK_TYPE_BLE);
-    type = CONNECT_BLE_DIRECT;
-    ret = ConvertConnectType2AuthLinkType(type);
-    EXPECT_EQ(ret, AUTH_LINK_TYPE_BLE);
-    type = CONNECT_BR;
-    ret = ConvertConnectType2AuthLinkType(type);
-    EXPECT_EQ(ret, AUTH_LINK_TYPE_BR);
-    type = CONNECT_P2P;
-    ret = ConvertConnectType2AuthLinkType(type);
-    EXPECT_EQ(ret, AUTH_LINK_TYPE_P2P);
+    int32_t ret = SOFTBUS_ERR;
+    int32_t channelId = TEST_MESSAGE_CHANNEL_ID;
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_WIFI };
+
+    ret = TransProxySetAuthHandleByChanId(channelId, authHandle);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
 }
 } // namespace OHOS
