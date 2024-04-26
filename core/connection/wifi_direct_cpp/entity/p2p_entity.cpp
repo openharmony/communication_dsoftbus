@@ -128,15 +128,17 @@ int32_t P2pEntity::ReuseLink()
     return ret;
 }
 
-static void SendClientJoinEvent(const std::string &remoteMac, bool result)
+static void SendClientJoinEvent(const std::string &remoteMac, int32_t result)
 {
+    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     std::string remoteDeviceId;
-    LinkManager::GetInstance().ProcessIfPresent(
-        InnerLink::LinkType::P2P, remoteMac, [&remoteDeviceId](InnerLink &link) {
-            remoteDeviceId = link.GetRemoteDeviceId();
-        });
+    auto success = LinkManager::GetInstance().ProcessIfPresent(remoteMac, [&remoteDeviceId](InnerLink &link) {
+        remoteDeviceId = link.GetRemoteDeviceId();
+    });
+    CONN_CHECK_AND_RETURN_LOGW(
+        success, CONN_WIFI_DIRECT, "link not found, remote mac=%{public}s", WifiDirectAnonymizeMac(remoteMac).c_str());
 
-    ClientJoinEvent event { result, remoteMac };
+    ClientJoinEvent event { result, remoteDeviceId, remoteMac };
     WifiDirectSchedulerFactory::GetInstance().GetScheduler().ProcessEvent(remoteDeviceId, event);
 }
 
@@ -153,7 +155,7 @@ void P2pEntity::NotifyNewClientJoining(const std::string &remoteMac)
         [this, remoteMac]() {
             CONN_LOGI(CONN_WIFI_DIRECT, "enter");
             std::lock_guard lock(joiningClientsLock_);
-            SendClientJoinEvent(remoteMac, false);
+            SendClientJoinEvent(remoteMac, V1_ERROR_CONNECT_TIMEOUT);
             joiningClients_.erase(remoteMac);
             if (joiningClients_.empty()) {
                 timer_.Shutdown(false);
@@ -197,7 +199,7 @@ void P2pEntity::RemoveNewClientJoining(const std::string &remoteMac)
         return;
     }
     timer_.Unregister(it->second);
-    SendClientJoinEvent(remoteMac, true);
+    SendClientJoinEvent(remoteMac, SOFTBUS_OK);
     joiningClients_.erase(it);
     if (joiningClients_.empty()) {
         timer_.Shutdown(false);
@@ -213,7 +215,7 @@ void P2pEntity::ClearJoiningClient()
     }
     for (const auto &kv : joiningClients_) {
         timer_.Unregister(kv.second);
-        SendClientJoinEvent(kv.first, false);
+        SendClientJoinEvent(kv.first, SOFTBUS_ERR);
     }
     joiningClients_.clear();
     timer_.Shutdown(false);
@@ -439,11 +441,10 @@ static void UpdateInnerLink(const std::shared_ptr<P2pAdapter::WifiDirectP2pGroup
     if (!groupInfo->isGroupOwner) {
         CONN_LOGI(CONN_WIFI_DIRECT, "not group owner, groupOwnerMac=%{public}s",
             WifiDirectAnonymizeMac(groupInfo->groupOwner).c_str());
-        LinkManager::GetInstance().ProcessIfPresent(
-            InnerLink::LinkType::P2P, groupInfo->groupOwner, [frequency](InnerLink &link) {
-                link.SetState(InnerLink::LinkState::CONNECTED);
-                link.SetFrequency(frequency);
-            });
+        LinkManager::GetInstance().ProcessIfPresent(groupInfo->groupOwner, [frequency](InnerLink &link) {
+            link.SetState(InnerLink::LinkState::CONNECTED);
+            link.SetFrequency(frequency);
+        });
         return;
     }
 
@@ -455,7 +456,7 @@ static void UpdateInnerLink(const std::shared_ptr<P2pAdapter::WifiDirectP2pGroup
 
     for (const auto &client : groupInfo->clientDevices) {
         CONN_LOGI(CONN_WIFI_DIRECT, "remoteMac=%{public}s", WifiDirectAnonymizeMac(client).c_str());
-        LinkManager::GetInstance().ProcessIfPresent(InnerLink::LinkType::P2P, client, [ip, frequency](InnerLink &link) {
+        LinkManager::GetInstance().ProcessIfPresent(client, [ip, frequency](InnerLink &link) {
             link.SetState(InnerLink::LinkState::CONNECTED);
             link.SetFrequency(frequency);
             link.SetLocalIpv4(ip);
