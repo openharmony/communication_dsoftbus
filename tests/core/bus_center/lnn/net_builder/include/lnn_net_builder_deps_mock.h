@@ -73,9 +73,11 @@ public:
     virtual int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info);
     virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len);
     virtual int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info);
+    virtual int32_t LnnGetLocalNumU32Info(InfoKey key, uint32_t *info);
     virtual int32_t LnnGetNetworkIdByUdid(const char *udid, char *buf, uint32_t len);
     virtual int32_t LnnGetRemoteStrInfo(const char *netWorkId, InfoKey key, char *info, uint32_t len);
     virtual int32_t LnnGetRemoteNumInfo(const char *netWorkId, InfoKey key, int32_t *info);
+    virtual int32_t LnnGetRemoteNumU32Info(const char *netWorkId, InfoKey key, uint32_t *info);
     virtual bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2, bool isShort);
     virtual bool LnnConvertAddrToOption(const ConnectionAddr *addr, ConnectOption *option);
     virtual DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type);
@@ -200,9 +202,11 @@ public:
     MOCK_METHOD2(LnnSetLocalNumInfo, int32_t (InfoKey, int32_t));
     MOCK_METHOD3(LnnGetLocalStrInfo, int32_t (InfoKey, char *, uint32_t));
     MOCK_METHOD2(LnnGetLocalNumInfo, int32_t (InfoKey, int32_t *));
+    MOCK_METHOD2(LnnGetLocalNumU32Info, int32_t (InfoKey, uint32_t *));
     MOCK_METHOD3(LnnGetNetworkIdByUdid, int32_t (const char *, char *, uint32_t));
     MOCK_METHOD4(LnnGetRemoteStrInfo, int32_t (const char *, InfoKey, char *, uint32_t));
     MOCK_METHOD3(LnnGetRemoteNumInfo, int32_t (const char *, InfoKey, int32_t *));
+    MOCK_METHOD3(LnnGetRemoteNumU32Info, int32_t (const char *, InfoKey, uint32_t *));
     MOCK_METHOD3(LnnIsSameConnectionAddr, bool (const ConnectionAddr *, const ConnectionAddr *, bool));
     MOCK_METHOD2(LnnConvertAddrToOption, bool (const ConnectionAddr *, ConnectOption *));
     MOCK_METHOD1(LnnConvAddrTypeToDiscType, DiscoveryType (ConnectionAddrType));
