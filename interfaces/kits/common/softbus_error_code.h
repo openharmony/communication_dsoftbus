@@ -124,6 +124,7 @@ enum SoftBusErrNo {
     SOFTBUS_NOT_LOGIN, // not login hw account
     SOFTBUS_NOT_SAME_ACCOUNT, // check whether the accounts are the same
     SOFTBUS_NO_ONLINE_DEVICE, // there is no network online device
+    SOFTBUS_LOOPER_ERR,  // get looper fail
 
     /* errno begin: -((203 << 21) | (5 << 16) | 0xFFFF) */
     SOFTBUS_TRANS_ERR_BASE = SOFTBUS_ERRNO(TRANS_SUB_MODULE_CODE),

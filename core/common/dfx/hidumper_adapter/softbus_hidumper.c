@@ -23,6 +23,7 @@
 #include "softbus_errcode.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_hidumper_bc_mgr.h"
+#include "softbus_hidumper_broadcast.h"
 #include "softbus_hidumper_buscenter.h"
 #include "softbus_hidumper_conn.h"
 #include "softbus_hidumper_disc.h"
@@ -231,6 +232,11 @@ int32_t SoftBusHiDumperModuleInit(void)
         return SOFTBUS_ERR;
     }
 
+    if (SoftBusHiDumperBroadcastInit() != SOFTBUS_OK) {
+        COMM_LOGE(COMM_INIT, "init Broadcast HiDumper fail!");
+        return SOFTBUS_ERR;
+    }
+
     if (SoftBusDiscHiDumperInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_INIT, "init Disc HiDumper fail!");
         return SOFTBUS_ERR;
@@ -261,6 +267,7 @@ int32_t SoftBusHiDumperModuleInit(void)
 void SoftBusHiDumperModuleDeInit(void)
 {
     SoftBusHiDumperBcMgrDeInit();
+    SoftBusHiDumperBroadcastDeInit();
     SoftBusHiDumperDiscDeInit();
     SoftBusHiDumperConnDeInit();
     SoftBusHiDumperBusCenterDeInit();
