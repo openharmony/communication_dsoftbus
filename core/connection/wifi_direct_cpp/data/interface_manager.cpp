@@ -53,6 +53,7 @@ void InterfaceManager::UnlockInterface(InterfaceInfo::InterfaceType type)
     CONN_LOGI(CONN_WIFI_DIRECT, "current owner=%{public}s", exclusives_[static_cast<int>(type)].owner_.c_str());
     // ATTENTION: MUST NOT access interface lock under interface manager lock, otherwise deadlock will happen
     exclusives_[static_cast<int>(type)].lock_.unlock();
+    exclusives_[static_cast<int>(type)].owner_ = "";
 }
 
 void InterfaceManager::InitInterface(InterfaceInfo::InterfaceType type)
