@@ -884,7 +884,7 @@ static int32_t DlGetNetCap(const char *networkId, void *buf, uint32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
-    *((int32_t *)buf) = (int32_t)info->netCapacity;
+    *((uint32_t *)buf) = info->netCapacity;
     return SOFTBUS_OK;
 }
 
