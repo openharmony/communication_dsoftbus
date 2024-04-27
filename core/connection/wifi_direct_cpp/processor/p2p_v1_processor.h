@@ -68,12 +68,14 @@ private:
     void ProcessNegotiateCommandAtWaitingReuseResponseState(std::shared_ptr<NegotiateCommand> &command);
     void ProcessNegotiateCommandAtWaitingAuthHandShakeState(std::shared_ptr<NegotiateCommand> &command);
     void ProcessNegotiateCommandAtWaitingClientJoiningState(std::shared_ptr<NegotiateCommand> &command);
+    int ProcessNegotiateCommandCommon(std::shared_ptr<NegotiateCommand> &command);
 
     void ProcessAuthConnEvent(std::shared_ptr<AuthOpenEvent> &event);
 
     void OnWaitReqResponseTimeoutEvent();
     void OnWaitReuseResponseTimeoutEvent();
     void OnWaitAuthHandShakeTimeoutEvent();
+    void OnWaitRequestTimeoutEvent();
     int OnClientJoinEvent(std::shared_ptr<ClientJoinEvent> &event);
 
     int CreateLink();
@@ -96,16 +98,16 @@ private:
 
     int ProcessAuthHandShakeRequest(std::shared_ptr<NegotiateCommand> &command);
 
-    static int BuildConnectRequestAsNone(WifiDirectRole expectedRole, NegotiateMessage &msgOut);
-    static int BuildConnectRequestAsGo(const std::string &remoteMac, NegotiateMessage &msgOut);
-    static int BuildConnectResponseAsGo(const std::string &remoteMac, NegotiateMessage &msgOut);
-    static int BuildConnectResponseAsNone(const std::string &remoteMac, NegotiateMessage &msgOut);
-    static int BuildReuseRequest(NegotiateMessage &msgOut);
-    static int BuildReuseResponse(int32_t result, NegotiateMessage &msgOut);
-    static int BuildDisconnectRequest(NegotiateMessage &msgOut);
-    static int BuildInterfaceInfoResponse(NegotiateMessage &out);
-    static int BuildNegotiateResult(enum WifiDirectErrorCode reason, NegotiateMessage &msgOut);
-    static int BuildHandShakeMessage(NegotiateMessage &msgOut);
+    static int SendConnectRequestAsNone(const NegotiateChannel &channel, WifiDirectRole expectedRole);
+    static int SendConnectRequestAsGo(const NegotiateChannel &channel, const std::string &remoteMac);
+    static int SendConnectResponseAsGo(const NegotiateChannel &channel, const std::string &remoteMac);
+    static int SendConnectResponseAsNone(const NegotiateChannel &channel, const std::string &remoteMac);
+    static int SendReuseRequest(const NegotiateChannel &channel);
+    static int SendReuseResponse(const NegotiateChannel &channel, int32_t result);
+    static int SendDisconnectRequest(const NegotiateChannel &channel);
+    static int SendInterfaceInfoResponse(const NegotiateChannel &channel);
+    static int SendNegotiateResult(const NegotiateChannel &channel, enum WifiDirectErrorCode reason);
+    static int SendHandShakeMessage(const NegotiateChannel &channel);
 
     int ProcessConnectResponseAtWaitingReqResponseState(std::shared_ptr<NegotiateCommand> &command);
     int ProcessConnectResponseAtWaitingClientJoiningState(std::shared_ptr<NegotiateCommand> &command);
@@ -113,6 +115,7 @@ private:
     int ProcessConnectResponseAsNone(std::shared_ptr<NegotiateCommand> &command);
     int ProcessConnectResponseWithGoInfoAsNone(std::shared_ptr<NegotiateCommand> &command);
     int ProcessConnectResponseWithGcInfoAsNone(std::shared_ptr<NegotiateCommand> &command);
+    int ProcessConnectResponseAtWaitAuthHandShake(std::shared_ptr<NegotiateCommand> &command);
 
     int CreateGroup(const NegotiateMessage &msg);
     int ConnectGroup(const NegotiateMessage &msg, const std::shared_ptr<NegotiateChannel> &channel);

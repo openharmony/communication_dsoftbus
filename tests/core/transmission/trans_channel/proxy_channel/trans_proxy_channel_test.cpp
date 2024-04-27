@@ -34,6 +34,7 @@ namespace OHOS {
 #define TEST_CHANNEL_INDENTITY "12345678"
 #define TEST_PKG_NAME "com.trans.proxy.test.pkgname"
 #define TEST_BUF_LEN 32
+#define TEST_AUTHID 1
 
 static int32_t m_testProxyChannelId = -1;
 
@@ -156,9 +157,15 @@ void TestDelTestProxyChannel(void)
 HWTEST_F(TransProxyChannelTest, SetCipherOfHandshakeMsgTest001, TestSize.Level1)
 {
     TestAddTestProxyChannel();
+    ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
+    chan->myId = m_testProxyChannelId;
+    chan->channelId = m_testProxyChannelId;
+    chan->authHandle.authId = AUTH_INVALID_ID;
+    chan->appInfo.appType = APP_TYPE_NORMAL;
+    chan->status = PROXY_CHANNEL_STATUS_PYH_CONNECTED;
 
-    int32_t ret = SetCipherOfHandshakeMsg(m_testProxyChannelId, NULL);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    int32_t ret = SetCipherOfHandshakeMsg(chan, NULL);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_GET_AUTH_ID_FAILED);
 
     TestDelTestProxyChannel();
 }
@@ -171,10 +178,16 @@ HWTEST_F(TransProxyChannelTest, SetCipherOfHandshakeMsgTest001, TestSize.Level1)
  */
 HWTEST_F(TransProxyChannelTest, SetCipherOfHandshakeMsgTest002, TestSize.Level1)
 {
-    TestAddTestProxyChannel(1);
+    TestAddTestProxyChannel(TEST_AUTHID);
+    ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
+    chan->myId = m_testProxyChannelId;
+    chan->channelId = m_testProxyChannelId;
+    chan->authHandle.authId = TEST_AUTHID;
+    chan->appInfo.appType = APP_TYPE_NORMAL;
+    chan->status = PROXY_CHANNEL_STATUS_PYH_CONNECTED;
 
-    int32_t ret = SetCipherOfHandshakeMsg(m_testProxyChannelId, NULL);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    int32_t ret = SetCipherOfHandshakeMsg(chan, NULL);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_GET_AUTH_ID_FAILED);
 
     TestDelTestProxyChannel();
 }
@@ -496,16 +509,20 @@ HWTEST_F(TransProxyChannelTest, TransProxyCreateChanInfoTest001, TestSize.Level1
     IServerChannelCallBack callBack;
     TransProxyManagerInitInner(&callBack);
 
+    ProxyChannelInfo *normalInfo = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     AppInfo appInfo;
     appInfo.appType = APP_TYPE_NORMAL;
     int32_t ret = TransProxyCreateChanInfo(info, 1, &appInfo);
-    EXPECT_NE(SOFTBUS_OK, ret);
-
-    appInfo.appType = APP_TYPE_AUTH;
-    ret = TransProxyCreateChanInfo(info, 1, &appInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    TransProxyManagerDeinitInner();
+    ProxyChannelInfo *authInfo = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
+    appInfo.appType = APP_TYPE_AUTH;
+    ret = TransProxyCreateChanInfo(info, 2, &appInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    SoftBusFree(info);
+    SoftBusFree(normalInfo);
+    SoftBusFree(authInfo);
 }
 
 /**
@@ -645,4 +662,28 @@ HWTEST_F(TransProxyChannelTest, TransProxySendInnerMessageTest001, TestSize.Leve
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_PACKMSG_ERR, ret);
 }
 
+/**
+ * @tc.name: ConvertConnectType2AuthLinkTypeTest001
+ * @tc.desc: Should return corresponding link type when given different connect types.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProxyChannelTest, ConvertConnectType2AuthLinkTypeTest001, TestSize.Level1)
+{
+    ConnectType type = CONNECT_TCP;
+    AuthLinkType ret = ConvertConnectType2AuthLinkType(type);
+    EXPECT_EQ(ret, AUTH_LINK_TYPE_WIFI);
+    type = CONNECT_BLE;
+    ret = ConvertConnectType2AuthLinkType(type);
+    EXPECT_EQ(ret, AUTH_LINK_TYPE_BLE);
+    type = CONNECT_BLE_DIRECT;
+    ret = ConvertConnectType2AuthLinkType(type);
+    EXPECT_EQ(ret, AUTH_LINK_TYPE_BLE);
+    type = CONNECT_BR;
+    ret = ConvertConnectType2AuthLinkType(type);
+    EXPECT_EQ(ret, AUTH_LINK_TYPE_BR);
+    type = CONNECT_P2P;
+    ret = ConvertConnectType2AuthLinkType(type);
+    EXPECT_EQ(ret, AUTH_LINK_TYPE_P2P);
+}
 } // namespace OHOS

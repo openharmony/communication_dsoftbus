@@ -54,6 +54,7 @@ typedef struct {
     ChannelType channelType;
     void (*OnSessionClosed)(int sessionId);
     void (*OnShutdown)(int32_t socket, ShutdownReason reason);
+    char sessionName[SESSION_NAME_SIZE_MAX];
 } DestroySessionInfo;
 
 int32_t CheckPermissionState(int32_t sessionId)
@@ -198,10 +199,45 @@ NO_SANITIZE("cfi") static DestroySessionInfo *CreateDestroySessionNode(SessionIn
     destroyNode->sessionId = sessionNode->sessionId;
     destroyNode->channelId = sessionNode->channelId;
     destroyNode->channelType = sessionNode->channelType;
+    if (memcpy_s(destroyNode->sessionName, SESSION_NAME_SIZE_MAX, server->sessionName, SESSION_NAME_SIZE_MAX) != EOK) {
+        TRANS_LOGE(TRANS_SDK, "memcpy_s sessionName fail.");
+        return NULL;
+    }
     destroyNode->OnSessionClosed = server->listener.session.OnSessionClosed;
     destroyNode->OnShutdown = sessionNode->isServer ? server->listener.socketServer.OnShutdown :
         server->listener.socketClient.OnShutdown;
     return destroyNode;
+}
+
+static int32_t TryDeleteEmptySessionServer(const char *sessionName)
+{
+    if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    char *tmpName = NULL;
+    Anonymize(sessionName, &tmpName);
+    ClientSessionServer *serverNode = NULL;
+    ClientSessionServer *serverNodeNext = NULL;
+    ListNode destroyList;
+    ListInit(&destroyList);
+    LIST_FOR_EACH_ENTRY_SAFE(
+        serverNode, serverNodeNext, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        if (strcmp(serverNode->sessionName, sessionName) == 0 && IsListEmpty(&serverNode->sessionList)) {
+            ListDelete(&(serverNode->node));
+            SoftBusFree(serverNode);
+            g_clientSessionServerList->cnt--;
+            (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+            TRANS_LOGI(TRANS_SDK, "delete empty session server, sessionName=%{public}s", tmpName);
+            AnonymizeFree(tmpName);
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+    TRANS_LOGE(TRANS_SDK, "not found session server or session list is not empty, sessionName=%{public}s", tmpName);
+    AnonymizeFree(tmpName);
+    return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
 }
 
 NO_SANITIZE("cfi") static void ClientDestroySession(const ListNode *destroyList, ShutdownReason reason)
@@ -221,6 +257,7 @@ NO_SANITIZE("cfi") static void ClientDestroySession(const ListNode *destroyList,
             destroyNode->OnSessionClosed(id);
         } else if (destroyNode->OnShutdown != NULL) {
             destroyNode->OnShutdown(id, reason);
+            (void)TryDeleteEmptySessionServer(destroyNode->sessionName);
         }
         ListDelete(&(destroyNode->node));
         SoftBusFree(destroyNode);
@@ -1625,7 +1662,7 @@ int32_t ClientAddSocketServer(SoftBusSecType type, const char *pkgName, const ch
     return SOFTBUS_OK;
 }
 
-static int32_t DeleteSocketSession(int32_t sessionId, char *pkgName, char *sessionName, bool *isEmptyList)
+static int32_t DeleteSocketSession(int32_t sessionId, char *pkgName, char *sessionName)
 {
     if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != 0) {
         TRANS_LOGE(TRANS_SDK, "lock failed");
@@ -1656,40 +1693,8 @@ static int32_t DeleteSocketSession(int32_t sessionId, char *pkgName, char *sessi
     TRANS_LOGI(TRANS_SDK, "delete session, sessionId=%{public}d", sessionId);
     DestroySessionId();
     SoftBusFree(sessionNode);
-    *isEmptyList = IsListEmpty(&serverNode->sessionList);
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     return SOFTBUS_OK;
-}
-
-static int32_t TryDeleteEmptySessionServer(const char *sessionName)
-{
-    if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != 0) {
-        TRANS_LOGE(TRANS_SDK, "lock failed");
-        return SOFTBUS_LOCK_ERR;
-    }
-
-    char *tmpName = NULL;
-    Anonymize(sessionName, &tmpName);
-    ClientSessionServer *serverNode = NULL;
-    ClientSessionServer *serverNodeNext = NULL;
-    ListNode destroyList;
-    ListInit(&destroyList);
-    LIST_FOR_EACH_ENTRY_SAFE(
-        serverNode, serverNodeNext, &(g_clientSessionServerList->list), ClientSessionServer, node) {
-        if (strcmp(serverNode->sessionName, sessionName) == 0 && IsListEmpty(&serverNode->sessionList)) {
-            ListDelete(&(serverNode->node));
-            SoftBusFree(serverNode);
-            g_clientSessionServerList->cnt--;
-            (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-            TRANS_LOGI(TRANS_SDK, "delete empty session server, sessionName=%{public}s", tmpName);
-            AnonymizeFree(tmpName);
-            return SOFTBUS_OK;
-        }
-    }
-    (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
-    TRANS_LOGE(TRANS_SDK, "not found session server or session list is not empty, sessionName=%{public}s", tmpName);
-    AnonymizeFree(tmpName);
-    return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
 }
 
 int32_t ClientDeleteSocketSession(int32_t sessionId)
@@ -1701,16 +1706,10 @@ int32_t ClientDeleteSocketSession(int32_t sessionId)
 
     char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
     char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
-    bool isEmptyList = false;
-    int32_t ret = DeleteSocketSession(sessionId, pkgName, sessionName, &isEmptyList);
+    int32_t ret = DeleteSocketSession(sessionId, pkgName, sessionName);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "failed delete session");
         return ret;
-    }
-
-    if (!isEmptyList) {
-        TRANS_LOGD(TRANS_SDK, "sessionList is not empty");
-        return SOFTBUS_OK;
     }
 
     ret = TryDeleteEmptySessionServer(sessionName);
