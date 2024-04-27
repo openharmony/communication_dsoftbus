@@ -31,7 +31,7 @@
 #include "softbus_hisysevt_common.h"
 #include "softbus_utils.h"
 #include "trans_session_service.h"
-#include "wifi_direct_initiator.h"
+#include "wifi_direct_manager.h"
 
 static bool g_isInit = false;
 
@@ -92,7 +92,7 @@ static int32_t InitServicesAndModules(void)
         return SOFTBUS_DISCOVER_MANAGER_INIT_FAIL;
     }
 
-    if (WifiDirectInit() != SOFTBUS_OK) {
+    if (GetWifiDirectManager()->init() != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "softbus wifi direct init failed.");
         return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
     }
