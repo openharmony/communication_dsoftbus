@@ -230,15 +230,15 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common:softbus_utils",
       "$dsoftbus_root_path/core/common/dfx/hidumper_adapter:softbus_dfx_dump",
       "$dsoftbus_root_path/sdk:softbus_client",
-      "//third_party/cJSON:cjson",
     ]
+    external_deps = [ "cJSON:cjson" ]
     public_deps = [ "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log" ]
     dsoftbus_server_common_external_deps =
         bus_center_server_external_deps + disc_server_external_deps +
         softbus_permission_external_deps + trans_session_external_deps +
         conn_manager_external_deps
     if (is_standard_system) {
-      external_deps = dsoftbus_server_common_external_deps
+      external_deps += dsoftbus_server_common_external_deps
       external_deps += [
         "access_token:libaccesstoken_sdk",
         "access_token:libprivacy_sdk",
