@@ -385,8 +385,8 @@ static void LnnOnWifiDirectDeviceOffline(const char *peerMac, const char *peerIp
 static void LnnOnWifiDirectRoleChange(enum WifiDirectRole oldRole, enum WifiDirectRole newRole)
 {
     LNN_LOGD(LNN_LANE, "lnn wifidirect roleChange");
-	(void)oldRole;
-	(void)newRole;
+    (void)oldRole;
+    (void)newRole;
 }
 
 int32_t RegisterLaneListener(LaneType type, const LaneStatusListener *listener)
