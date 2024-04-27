@@ -135,7 +135,7 @@ static void ComputeWaitPendTime(uint32_t waitMillis, SoftBusSysTime *outtime)
 {
     SoftBusSysTime now;
     (void)SoftBusGetTime(&now);
-    int64_t time = now.sec * USECTONSEC * USECTONSEC + now.usec + waitMillis * USECTONSEC;
+    int64_t time = now.sec * USECTONSEC * USECTONSEC + now.usec + (int64_t)waitMillis * USECTONSEC;
     outtime->sec = time / USECTONSEC / USECTONSEC;
     outtime->usec = time % (USECTONSEC * USECTONSEC);
 }
