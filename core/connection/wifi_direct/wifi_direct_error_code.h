@@ -216,6 +216,9 @@ enum WifiDirectErrorCode {
     /* Error code representing command wait timeout */
     ERROR_WIFI_DIRECT_COMMAND_WAIT_TIMEOUT = ERROR_BASE - 4022,
 
+    /* Error code representing wait connect reuse response timeout */
+    ERROR_WIFI_DIRECT_WAIT_REUSE_RESPONSE_TIMEOUT = ERROR_BASE - 4023,
+
     /* Error code representing p2p link is used by another service */
     ERROR_P2P_LINK_USED_BY_ANOTHER_SERVICE = ERROR_BASE - 5000,
 
