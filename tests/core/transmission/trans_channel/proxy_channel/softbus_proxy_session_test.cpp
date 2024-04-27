@@ -193,32 +193,32 @@ HWTEST_F(SoftbusProxySessionTest, TransProxyPostSessionDataTest003, TestSize.Lev
     uint32_t len = strlen(data);
 
     ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_MESSAGE);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SENDMSG_ERR, ret);
     ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_MESSAGE);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SENDMSG_ERR, ret);
     ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_MESSAGE);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SENDMSG_ERR, ret);
 
     ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_BYTES);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SENDMSG_ERR, ret);
     ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_FILE_FIRST_FRAME);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SENDMSG_ERR, ret);
     ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_FILE_ONGOINE_FRAME);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SENDMSG_ERR, ret);
     ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_FILE_LAST_FRAME);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SENDMSG_ERR, ret);
     ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_FILE_ONLYONE_FRAME);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SENDMSG_ERR, ret);
     ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_FILE_ALLFILE_SENT);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SENDMSG_ERR, ret);
     ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_FILE_CRC_CHECK_FRAME);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SENDMSG_ERR, ret);
     ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_FILE_ACK_REQUEST_SENT);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SENDMSG_ERR, ret);
     ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_FILE_ACK_RESPONSE_SENT);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SENDMSG_ERR, ret);
     ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_ASYNC_MESSAGE);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SENDMSG_ERR, ret);
 }
 
 /**
