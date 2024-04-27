@@ -124,6 +124,8 @@ ohos_static_library("wifi_direct") {
   } else {
     wifi_direct_connection_src +=
         [ "$wifi_direct_path/wifi_direct_manager_virtual.c" ]
+    wifi_direct_connection_external_deps +=
+        [ "hilog:libhilog" ]
   }
 
   include_dirs = wifi_direct_connection_inc
