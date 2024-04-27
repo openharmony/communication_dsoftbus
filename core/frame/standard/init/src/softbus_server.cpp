@@ -331,7 +331,7 @@ int SoftBusServer::Dump(int fd, const std::vector<std::u16string> &args)
         argsStr.emplace_back(Str16ToStr8(item));
     }
 
-    int argc = argsStr.size();
+    int argc = (int)argsStr.size();
     const char *argv[argc];
 
     for (int i = 0; i < argc; i++) {
