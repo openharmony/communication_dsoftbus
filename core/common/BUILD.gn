@@ -158,6 +158,7 @@ if (defined(ohos_lite)) {
     dfx_source = [
       "dfx/hidumper_adapter/softbus_hidumper.c",
       "dfx/hidumper_adapter/softbus_hidumper_bc_mgr.c",
+      "dfx/hidumper_adapter/softbus_hidumper_broadcast.c",
       "dfx/hidumper_adapter/softbus_hidumper_disc.c",
       "dfx/hidumper_adapter/softbus_hidumper_conn.c",
       "dfx/hidumper_adapter/softbus_hidumper_nstack.c",
