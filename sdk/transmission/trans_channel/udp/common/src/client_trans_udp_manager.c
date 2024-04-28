@@ -28,7 +28,7 @@
 #include "trans_log.h"
 #include "trans_server_proxy.h"
 
-
+#define UDP_MAX_RETRY_GET_CHANNEL_TIMES 5
 static SoftBusList *g_udpChannelMgr = NULL;
 static IClientSessionCallBack *g_sessionCb = NULL;
 
@@ -332,8 +332,14 @@ static int32_t CloseUdpChannel(int32_t channelId, bool isActive, ShutdownReason 
     UdpChannel channel;
     (void)memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
     TRANS_LOGI(TRANS_SDK, "close udp channelId=%{public}d.", channelId);
-    if (TransGetUdpChannel(channelId, &channel) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "get udp channel by channelId=%{public}d failed.", channelId);
+    int count = 0;
+    int32_t ret = TransGetUdpChannel(channelId, &channel);
+    while (ret == SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND && count <= UDP_MAX_RETRY_GET_CHANNEL_TIMES) {
+        SoftBusSleepMs(200); // avoid no channel info when client cancel
+        ret = TransGetUdpChannel(channelId, &channel);
+        count++;
+    }
+    if (ret != SOFTBUS_OK) {
         return SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED;
     }
 

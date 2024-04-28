@@ -1196,7 +1196,7 @@ int32_t TransAsyncGetLaneInfo(const SessionParam *param, uint32_t *laneHandle, u
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = SOFTBUS_OK;
-    if (!(param->isAsync)) {
+    if (!(param->isQosLane)) {
         LaneRequestOption requestOption;
         (void)memset_s(&requestOption, sizeof(LaneRequestOption), 0, sizeof(LaneRequestOption));
         ret = GetRequestOptionBySessionParam(param, &requestOption);
