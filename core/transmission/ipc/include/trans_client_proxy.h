@@ -28,6 +28,7 @@ typedef struct {
     int32_t msgChannelId;
     int32_t msgChannelType;
     int32_t msgPid;
+    int32_t msgMessageType;
     const char *msgPkgName;
     const char *msgUuid;
     const char *msgUdid;
