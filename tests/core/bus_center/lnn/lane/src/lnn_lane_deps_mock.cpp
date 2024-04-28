@@ -326,5 +326,10 @@ ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_t len, int32_t time
 {
     return GetLaneDepsInterface()->ConnSendSocketData(fd, buf, len, timeout);
 }
+
+struct WifiDirectManager* GetWifiDirectManager(void)
+{
+    return GetLaneDepsInterface()->GetWifiDirectManager();
+}
 }
 } // namespace OHOS
