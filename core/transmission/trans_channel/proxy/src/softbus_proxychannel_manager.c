@@ -56,7 +56,6 @@
 #define PROXY_CHANNEL_TCP_IDLE_TIMEOUT 43200 // tcp 24 hour
 #define PROXY_CHANNEL_CLIENT           0
 #define PROXY_CHANNEL_SERVER           1
-#define PROXY_MAX_RETRY_GET_CHANNEL_TIMES 5
 static SoftBusList *g_proxyChannelList = NULL;
 
 typedef struct {
@@ -1454,13 +1453,7 @@ int32_t TransProxyCloseProxyChannel(int32_t channelId)
     if (info == NULL) {
         return SOFTBUS_MALLOC_ERR;
     }
-    TransProxyGetSendMsgChanInfo(channelId, info);
-    int32_t count = 0;
-    while (info->peerId <= 0 && count <= PROXY_MAX_RETRY_GET_CHANNEL_TIMES) {
-        SoftBusSleepMs(200); // avoid no peer id when client cancel
-        TransProxyGetSendMsgChanInfo(channelId, info);
-        count++;
-    }
+
     if (TransProxyDelByChannelId(channelId, info) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "proxy del failed. channelId=%{public}d", channelId);
         SoftBusFree(info);

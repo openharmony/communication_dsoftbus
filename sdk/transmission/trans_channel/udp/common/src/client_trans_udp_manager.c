@@ -18,6 +18,7 @@
 #include <stdbool.h>
 #include "client_trans_file.h"
 #include "client_trans_file_listener.h"
+#include "client_trans_session_manager.h"
 #include "client_trans_stream.h"
 #include "nstackx_dfile.h"
 #include "securec.h"
@@ -26,9 +27,9 @@
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
 #include "trans_log.h"
+#include "trans_pending_pkt.h"
 #include "trans_server_proxy.h"
 
-#define UDP_MAX_RETRY_GET_CHANNEL_TIMES 5
 static SoftBusList *g_udpChannelMgr = NULL;
 static IClientSessionCallBack *g_sessionCb = NULL;
 
@@ -332,14 +333,8 @@ static int32_t CloseUdpChannel(int32_t channelId, bool isActive, ShutdownReason 
     UdpChannel channel;
     (void)memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
     TRANS_LOGI(TRANS_SDK, "close udp channelId=%{public}d.", channelId);
-    int count = 0;
-    int32_t ret = TransGetUdpChannel(channelId, &channel);
-    while (ret == SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND && count <= UDP_MAX_RETRY_GET_CHANNEL_TIMES) {
-        SoftBusSleepMs(200); // avoid no channel info when client cancel
-        ret = TransGetUdpChannel(channelId, &channel);
-        count++;
-    }
-    if (ret != SOFTBUS_OK) {
+    if (TransGetUdpChannel(channelId, &channel) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get udp channel by channelId=%{public}d failed.", channelId);
         return SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED;
     }
 
@@ -388,7 +383,14 @@ int32_t TransOnUdpChannelQosEvent(int32_t channelId, int32_t eventId, int32_t tv
 
 int32_t ClientTransCloseUdpChannel(int32_t channelId, ShutdownReason reason)
 {
-    return CloseUdpChannel(channelId, true, reason);
+    int32_t ret = CloseUdpChannel(channelId, true, reason);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "close udp channel failed, ret=%{public}d", ret);
+        return ret;
+    }
+    ret = ProcPendingPacket(channelId, 0, PENDING_TYPE_UDP);
+    DelSessionStateClosing();
+    return ret;
 }
 
 int32_t TransUdpChannelSendStream(int32_t channelId, const StreamData *data, const StreamData *ext,
@@ -511,6 +513,10 @@ int32_t ClientTransUdpMgrInit(IClientSessionCallBack *callback)
     RegisterStreamCb(&g_udpChannelCb);
     TransFileInit();
     TransFileSchemaInit();
+    if (PendingInit(PENDING_TYPE_UDP) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_INIT, "trans udp pending init failed.");
+        return SOFTBUS_TRANS_SERVER_INIT_FAILED;
+    }
     NSTACKX_DFileRegisterLogCallback(NstackxLogInnerImpl);
     RegisterFileCb(&g_udpChannelCb);
     g_udpChannelMgr = CreateSoftBusList();
@@ -544,6 +550,7 @@ void ClientTransUdpMgrDeinit(void)
     g_udpChannelMgr = NULL;
     TransFileDeinit();
     TransFileSchemaDeinit();
+    PendingDeinit(PENDING_TYPE_UDP);
     TRANS_LOGI(TRANS_INIT, "trans udp channel manager deinit success.");
 }
 
@@ -595,4 +602,9 @@ int32_t TransGetUdpChannelByFileId(int32_t dfileId, UdpChannel *udpChannel)
 void TransUdpDeleteFileListener(const char *sessionName)
 {
     return TransDeleteFileListener(sessionName);
+}
+
+int32_t TransUdpOnCloseAckReceived(int32_t channelId)
+{
+    return SetPendingPacket(channelId, 0, PENDING_TYPE_UDP);
 }

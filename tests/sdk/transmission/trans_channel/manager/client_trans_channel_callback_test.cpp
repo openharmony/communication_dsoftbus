@@ -190,16 +190,18 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelLinkDownTest001, TestSize
 HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelClosedTest001, TestSize.Level0)
 {
     int channelId = 1;
-    int ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_AUTH, SHUTDOWN_REASON_UNKNOWN);
+    int32_t messageType = MESSAGE_TYPE_NOMAL;
+    int32_t udpMessageType = MESSAGE_TYPE_CLOSE_ACK;
+    int ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_AUTH, messageType, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_PROXY, SHUTDOWN_REASON_UNKNOWN);
+    ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_PROXY, messageType, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_UDP, SHUTDOWN_REASON_UNKNOWN);
-    EXPECT_EQ(SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, ret);
+    ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_UDP, udpMessageType, SHUTDOWN_REASON_UNKNOWN);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
 
-    ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_TCP_DIRECT, SHUTDOWN_REASON_UNKNOWN);
+    ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_TCP_DIRECT, messageType, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 

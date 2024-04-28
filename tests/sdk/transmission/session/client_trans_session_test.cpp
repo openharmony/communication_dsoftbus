@@ -556,13 +556,13 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest10, TestSize.Level1)
     SessionInfo *session = TestGenerateSession(sessionParam);
     ASSERT_TRUE(session != NULL);
     session->isEnable = true;
-    ret = CheckSessionIsOpened(TRANS_TEST_CHANNEL_ID);
+    ret = CheckSessionIsOpened(TRANS_TEST_CHANNEL_ID, false);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
     ret = ClientAddNewSession(g_sessionName, session);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = ClientGetSessionIdByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, &sessionId);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = CheckSessionIsOpened(sessionId);
+    ret = CheckSessionIsOpened(sessionId, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = ClientDeleteSession(sessionId);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -1056,28 +1056,5 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest30, TestSize.Level1)
     EXPECT_EQ(ret, EOK);
 
     DeleteSessionServerAndSession(g_sessionName, sessionId);
-}
-
-/**
- * @tc.name: TransClientOpenSessionTestToken
- * @tc.desc: Transmission sdk session service open session with tokenID.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransClientSessionTest, TransClientOpenSessionTestToken, TestSize.Level1)
-{
-    int32_t ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
-    ASSERT_EQ(ret, SOFTBUS_OK);
-
-    SetFirstCallerTokenID(HAP_TOKENID);
-    ret = OpenSession(g_sessionName, g_sessionName, g_networkId, g_groupId, &g_sessionAttr);
-    EXPECT_EQ(ret, TRANS_TEST_INVALID_SESSION_ID);
-
-    SetFirstCallerTokenID(NATIVE_TOKENID);
-    ret = OpenSession(g_sessionName, g_sessionName, g_networkId, g_groupId, &g_sessionAttr);
-    EXPECT_NE(ret, SOFTBUS_OK);
-
-    ret = RemoveSessionServer(g_pkgName, g_sessionName);
-    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 }

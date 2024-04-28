@@ -32,7 +32,7 @@
 
 #define ENFORCING 1
 
-#define PERMISSION_JSON_LEN 10000
+#define PERMISSION_JSON_LEN 20000
 #define TEMP_STR_MAX_LEN 128
 
 /* permission entry key */
