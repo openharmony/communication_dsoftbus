@@ -691,7 +691,7 @@ static bool PeerDeviceIsLegacyOs(const char *peerNetworkId, const char *sessionN
         TRANS_LOGE(TRANS_SVC, "failed to get auth capacity");
         return false;
     }
-    TRANS_LOGI(TRANS_SVC, "authCapacity=%{public}u", authCapacity);
+    TRANS_LOGD(TRANS_SVC, "authCapacity=%{public}u", authCapacity);
     if (authCapacity == 0 &&
         (strncmp(sessionName, SESSION_NAME_DBD, strlen(SESSION_NAME_DBD)) == 0 ||
         strncmp(sessionName, SESSION_NAME_DSL, strlen(SESSION_NAME_DSL)) == 0)) {

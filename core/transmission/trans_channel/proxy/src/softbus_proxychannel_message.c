@@ -81,14 +81,13 @@ static int32_t GetRemoteUdidByBtMac(const char *peerMac, char *udid, int32_t len
     char networkId[NETWORK_ID_BUF_LEN] = {0};
     char *tmpMac = NULL;
     Anonymize(peerMac, &tmpMac);
-    TRANS_LOGI(TRANS_CTRL, "peerMac=%{public}s", tmpMac);
     AnonymizeFree(tmpMac);
     if (LnnGetNetworkIdByBtMac(peerMac, networkId, sizeof(networkId)) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "LnnGetNetworkIdByBtMac fail");
+        TRANS_LOGE(TRANS_CTRL, "LnnGetNetworkIdByBtMac fail, peerMac=%{public}s", tmpMac);
         return SOFTBUS_NOT_FIND;
     }
     if (LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, udid, len) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "LnnGetRemoteStrInfo UDID fail");
+        TRANS_LOGE(TRANS_CTRL, "LnnGetRemoteStrInfo UDID fail, peerMac=%{public}s", tmpMac);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -190,16 +189,15 @@ static int32_t GetAuthIdByHandshakeMsg(uint32_t connId, uint8_t cipher, AuthHand
         TRANS_LOGE(TRANS_CTRL, "get connInfo fail connId=%{public}d", connId);
         return SOFTBUS_ERR;
     }
-    TRANS_LOGI(TRANS_CTRL, "cipher=%{public}d, connInfoType=%{public}d", cipher, connInfo.type);
     bool isBle = ((cipher & USE_BLE_CIPHER) != 0);
     if (isBle && connInfo.type == AUTH_LINK_TYPE_BR) {
         if (ConvertBrConnInfo2BleConnInfo(&connInfo) != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "ConvertBrConnInfo2BleConnInfo fail");
+            TRANS_LOGE(TRANS_CTRL, "ConvertBrConnInfo2BleConnInfo fail, connInfoType=%{public}d", connInfo.type);
             return SOFTBUS_ERR;
         }
     } else if (!isBle && connInfo.type == AUTH_LINK_TYPE_BLE) {
         if (ConvertBleConnInfo2BrConnInfo(&connInfo) != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "ConvertBleConnInfo2BrConnInfo fail");
+            TRANS_LOGE(TRANS_CTRL, "ConvertBleConnInfo2BrConnInfo fail, connInfoType=%{public}d", connInfo.type);
             return SOFTBUS_ERR;
         }
     }
@@ -240,7 +238,7 @@ int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg)
         int32_t ret;
         AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
         if (msg->msgHead.type == PROXYCHANNEL_MSG_TYPE_HANDSHAKE) {
-            TRANS_LOGI(TRANS_CTRL, "prxoy recv handshake cipher=0x%{public}02x", msg->msgHead.cipher);
+            TRANS_LOGD(TRANS_CTRL, "prxoy recv handshake cipher=0x%{public}02x", msg->msgHead.cipher);
             ret = GetAuthIdByHandshakeMsg(msg->connId, msg->msgHead.cipher, &authHandle);
         } else {
             ret = TransProxyGetAuthId(msg->msgHead.myId, &authHandle);
@@ -615,7 +613,7 @@ int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanI
         return SOFTBUS_PARSE_JSON_ERR;
     }
     if (!GetJsonObjectNumberItem(root, JSON_KEY_MTU_SIZE, (int32_t *)&(appInfo->peerData.dataConfig))) {
-        TRANS_LOGE(TRANS_CTRL, "peer dataconfig is null.");
+        TRANS_LOGD(TRANS_CTRL, "peer dataconfig is null.");
     }
     appInfo->encrypt = APP_INFO_FILE_FEATURES_SUPPORT;
     appInfo->algorithm = APP_INFO_ALGORITHM_AES_GCM_256;

@@ -413,7 +413,7 @@ int32_t SoftBusServerStub::UnpublishServiceInner(MessageParcel &data, MessagePar
 
 int32_t SoftBusServerStub::SoftbusRegisterServiceInner(MessageParcel &data, MessageParcel &reply)
 {
-    COMM_LOGI(COMM_SVC, "enter");
+    COMM_LOGD(COMM_SVC, "enter");
     auto remote = data.ReadRemoteObject();
     if (remote == nullptr) {
         COMM_LOGE(COMM_SVC, "SoftbusRegisterServiceInner read systemAbilityId failed!");
@@ -492,7 +492,7 @@ static int32_t CheckSessionName(const char *sessionName, pid_t callingUid)
 
 int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, MessageParcel &reply)
 {
-    COMM_LOGI(COMM_SVC, "enter");
+    COMM_LOGD(COMM_SVC, "enter");
     int32_t retReply;
     pid_t callingUid;
     pid_t callingPid;
@@ -534,7 +534,7 @@ EXIT:
 
 int32_t SoftBusServerStub::RemoveSessionServerInner(MessageParcel &data, MessageParcel &reply)
 {
-    COMM_LOGI(COMM_SVC, "enter");
+    COMM_LOGD(COMM_SVC, "enter");
     int32_t retReply;
     pid_t callingUid;
     pid_t callingPid;
@@ -650,7 +650,7 @@ static void ReadSessionInfo(MessageParcel &data, SessionParam &param)
 
 int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &reply)
 {
-    COMM_LOGI(COMM_SVC, "enter");
+    COMM_LOGD(COMM_SVC, "enter");
     int32_t retReply;
     SessionParam param;
     SessionAttribute getAttr;
@@ -709,7 +709,7 @@ EXIT:
 
 int32_t SoftBusServerStub::OpenAuthSessionInner(MessageParcel &data, MessageParcel &reply)
 {
-    COMM_LOGI(COMM_SVC, "enter");
+    COMM_LOGD(COMM_SVC, "enter");
     int32_t retReply;
     const char *sessionName = data.ReadCString();
     ConnectionAddr *addrInfo = const_cast<ConnectionAddr *>(
@@ -737,7 +737,7 @@ EXIT:
 
 int32_t SoftBusServerStub::NotifyAuthSuccessInner(MessageParcel &data, MessageParcel &reply)
 {
-    COMM_LOGI(COMM_SVC, "enter");
+    COMM_LOGD(COMM_SVC, "enter");
     int32_t channelId;
     int32_t channelType;
     if (!data.ReadInt32(channelId)) {
@@ -774,7 +774,7 @@ int32_t SoftBusServerStub::ReleaseResourcesInner(MessageParcel &data, MessagePar
 
 int32_t SoftBusServerStub::CloseChannelInner(MessageParcel &data, MessageParcel &reply)
 {
-    COMM_LOGI(COMM_SVC, "enter");
+    COMM_LOGD(COMM_SVC, "enter");
     int32_t channelId;
     if (!data.ReadInt32(channelId)) {
         COMM_LOGE(COMM_SVC, "CloseChannelInner read channel Id failed!");
@@ -859,7 +859,7 @@ int32_t SoftBusServerStub::SendMessageInner(MessageParcel &data, MessageParcel &
 
 int32_t SoftBusServerStub::EvaluateQosInner(MessageParcel &data, MessageParcel &reply)
 {
-    COMM_LOGI(COMM_SVC, "enter");
+    COMM_LOGD(COMM_SVC, "enter");
     const char *peerNetworkId = data.ReadCString();
     if (peerNetworkId == nullptr) {
         COMM_LOGE(COMM_SVC, "EvaluateQos read peerNetworkId failed!");
@@ -908,7 +908,7 @@ int32_t SoftBusServerStub::EvaluateQosInner(MessageParcel &data, MessageParcel &
 
 int32_t SoftBusServerStub::JoinLNNInner(MessageParcel &data, MessageParcel &reply)
 {
-    COMM_LOGI(COMM_SVC, "enter");
+    COMM_LOGD(COMM_SVC, "enter");
     const char *clientName = data.ReadCString();
     if (clientName == nullptr) {
         COMM_LOGE(COMM_SVC, "SoftbusJoinLNNInner read clientName failed!");
@@ -934,7 +934,7 @@ int32_t SoftBusServerStub::JoinLNNInner(MessageParcel &data, MessageParcel &repl
 
 int32_t SoftBusServerStub::LeaveLNNInner(MessageParcel &data, MessageParcel &reply)
 {
-    COMM_LOGI(COMM_SVC, "enter");
+    COMM_LOGD(COMM_SVC, "enter");
     const char *clientName = data.ReadCString();
     if (clientName == nullptr) {
         COMM_LOGE(COMM_SVC, "SoftbusLeaveLNNInner read clientName failed!");
@@ -955,7 +955,7 @@ int32_t SoftBusServerStub::LeaveLNNInner(MessageParcel &data, MessageParcel &rep
 
 int32_t SoftBusServerStub::GetAllOnlineNodeInfoInner(MessageParcel &data, MessageParcel &reply)
 {
-    COMM_LOGI(COMM_SVC, "enter");
+    COMM_LOGD(COMM_SVC, "enter");
     void *nodeInfo = nullptr;
     int32_t infoNum;
     uint32_t infoTypeLen;
@@ -1029,14 +1029,6 @@ int32_t SoftBusServerStub::GetNodeKeyInfoLen(int32_t key)
     return LnnGetNodeKeyInfoLen(key);
 }
 
-static void PrintNetworkId(const char *networkId)
-{
-    char *anonyNetworkId = nullptr;
-    Anonymize(networkId, &anonyNetworkId);
-    COMM_LOGI(COMM_SVC, "networkId=%{public}s", anonyNetworkId);
-    AnonymizeFree(anonyNetworkId);
-}
-
 int32_t SoftBusServerStub::GetNodeKeyInfoInner(MessageParcel &data, MessageParcel &reply)
 {
     const char *clientName = data.ReadCString();
@@ -1045,7 +1037,11 @@ int32_t SoftBusServerStub::GetNodeKeyInfoInner(MessageParcel &data, MessageParce
         COMM_LOGE(COMM_SVC, "read clientName or networkId failed!");
         return SOFTBUS_IPC_ERR;
     }
-    PrintNetworkId(networkId);
+    char *anonyNetworkId = nullptr;
+    Anonymize(networkId, &anonyNetworkId);
+    COMM_LOGD(COMM_SVC, "networkId=%{public}s", anonyNetworkId);
+    AnonymizeFree(anonyNetworkId);
+
     int32_t key;
     READ_PARCEL_WITH_RET(data, Int32, key, SOFTBUS_IPC_ERR);
     int32_t infoLen = GetNodeKeyInfoLen(key);
@@ -1174,7 +1170,7 @@ int32_t SoftBusServerStub::SetDataLevelInner(MessageParcel &data, MessageParcel 
 
 int32_t SoftBusServerStub::StartTimeSyncInner(MessageParcel &data, MessageParcel &reply)
 {
-    COMM_LOGI(COMM_SVC, "enter");
+    COMM_LOGD(COMM_SVC, "enter");
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr) {
         COMM_LOGE(COMM_SVC, "StartTimeSyncInner read pkgName failed!");
@@ -1207,7 +1203,7 @@ int32_t SoftBusServerStub::StartTimeSyncInner(MessageParcel &data, MessageParcel
 
 int32_t SoftBusServerStub::StopTimeSyncInner(MessageParcel &data, MessageParcel &reply)
 {
-    COMM_LOGI(COMM_SVC, "enter");
+    COMM_LOGD(COMM_SVC, "enter");
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr) {
         COMM_LOGE(COMM_SVC, "StopTimeSyncInner read pkgName failed!");
@@ -1230,7 +1226,7 @@ int32_t SoftBusServerStub::StopTimeSyncInner(MessageParcel &data, MessageParcel 
 
 int32_t SoftBusServerStub::QosReportInner(MessageParcel &data, MessageParcel &reply)
 {
-    COMM_LOGI(COMM_SVC, "enter");
+    COMM_LOGD(COMM_SVC, "enter");
     int32_t channelId;
     if (!data.ReadInt32(channelId)) {
         COMM_LOGE(COMM_SVC, "QosReportInner read channel Id failed!");
@@ -1364,7 +1360,7 @@ EXIT:
 
 int32_t SoftBusServerStub::PublishLNNInner(MessageParcel &data, MessageParcel &reply)
 {
-    COMM_LOGI(COMM_SVC, "enter");
+    COMM_LOGD(COMM_SVC, "enter");
     const char *clientName = data.ReadCString();
     COMM_CHECK_AND_RETURN_RET_LOGE(clientName != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read clientName failed");
 
@@ -1406,7 +1402,7 @@ int32_t SoftBusServerStub::PublishLNNInner(MessageParcel &data, MessageParcel &r
 
 int32_t SoftBusServerStub::StopPublishLNNInner(MessageParcel &data, MessageParcel &reply)
 {
-    COMM_LOGI(COMM_SVC, "enter");
+    COMM_LOGD(COMM_SVC, "enter");
     const char *clientName = data.ReadCString();
     COMM_CHECK_AND_RETURN_RET_LOGE(clientName != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read clientName failed");
 
@@ -1420,7 +1416,7 @@ int32_t SoftBusServerStub::StopPublishLNNInner(MessageParcel &data, MessageParce
 
 int32_t SoftBusServerStub::RefreshLNNInner(MessageParcel &data, MessageParcel &reply)
 {
-    COMM_LOGI(COMM_SVC, "enter");
+    COMM_LOGD(COMM_SVC, "enter");
     const char *clientName = data.ReadCString();
     COMM_CHECK_AND_RETURN_RET_LOGE(clientName != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read clientName failed");
 
@@ -1465,7 +1461,7 @@ int32_t SoftBusServerStub::RefreshLNNInner(MessageParcel &data, MessageParcel &r
 
 int32_t SoftBusServerStub::StopRefreshLNNInner(MessageParcel &data, MessageParcel &reply)
 {
-    COMM_LOGI(COMM_SVC, "enter");
+    COMM_LOGD(COMM_SVC, "enter");
     const char *clientName = data.ReadCString();
     COMM_CHECK_AND_RETURN_RET_LOGE(clientName != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read clientName failed");
 
@@ -1479,7 +1475,7 @@ int32_t SoftBusServerStub::StopRefreshLNNInner(MessageParcel &data, MessageParce
 
 int32_t SoftBusServerStub::ActiveMetaNodeInner(MessageParcel &data, MessageParcel &reply)
 {
-    COMM_LOGI(COMM_SVC, "enter");
+    COMM_LOGD(COMM_SVC, "enter");
     MetaNodeConfigInfo *info = const_cast<MetaNodeConfigInfo *>(
         reinterpret_cast<const MetaNodeConfigInfo *>(data.ReadRawData(sizeof(MetaNodeConfigInfo))));
     if (info == nullptr) {
@@ -1499,7 +1495,7 @@ int32_t SoftBusServerStub::ActiveMetaNodeInner(MessageParcel &data, MessageParce
 
 int32_t SoftBusServerStub::DeactiveMetaNodeInner(MessageParcel &data, MessageParcel &reply)
 {
-    COMM_LOGI(COMM_SVC, "enter");
+    COMM_LOGD(COMM_SVC, "enter");
     const char *metaNodeId = reinterpret_cast<const char *>(data.ReadCString());
     if (metaNodeId == nullptr) {
         COMM_LOGE(COMM_SVC, "DeactiveMetaNode read meta node id failed!");
@@ -1513,7 +1509,7 @@ int32_t SoftBusServerStub::DeactiveMetaNodeInner(MessageParcel &data, MessagePar
 
 int32_t SoftBusServerStub::GetAllMetaNodeInfoInner(MessageParcel &data, MessageParcel &reply)
 {
-    COMM_LOGI(COMM_SVC, "enter");
+    COMM_LOGD(COMM_SVC, "enter");
     int32_t infoNum;
     MetaNodeInfo infos[MAX_META_NODE_NUM];
 
@@ -1537,7 +1533,7 @@ int32_t SoftBusServerStub::GetAllMetaNodeInfoInner(MessageParcel &data, MessageP
 
 int32_t SoftBusServerStub::ShiftLNNGearInner(MessageParcel &data, MessageParcel &reply)
 {
-    COMM_LOGI(COMM_SVC, "enter");
+    COMM_LOGD(COMM_SVC, "enter");
     const char *targetNetworkId = nullptr;
     const GearMode *mode = nullptr;
 
