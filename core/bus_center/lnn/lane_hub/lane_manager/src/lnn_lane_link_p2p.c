@@ -676,36 +676,6 @@ FAIL:
     NotifyLinkFail(ASYNC_RESULT_P2P, p2pRequestId, ret);
 }
 
-static bool IsBleTriggerGuideType(uint32_t p2pRequestId)
-{
-    P2pLinkReqList p2pLinkReqInfo;
-    (void)memset_s(&p2pLinkReqInfo, sizeof(P2pLinkReqList), 0, sizeof(P2pLinkReqList));
-    if (GetP2pLinkReqByReqId(ASYNC_RESULT_P2P, p2pRequestId, &p2pLinkReqInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get p2p link req fail, p2pRequestId=%{public}u", p2pRequestId);
-        return false;
-    }
-    uint32_t laneReqId = p2pLinkReqInfo.laneRequestInfo.laneReqId;
-    LaneLinkType linkType = p2pLinkReqInfo.laneRequestInfo.laneType;
-    WdGuideInfo guideInfo;
-    (void)memset_s(&guideInfo, sizeof(WdGuideInfo), -1, sizeof(WdGuideInfo));
-    if (GetGuideInfo(laneReqId, linkType, &guideInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get guide channel info fail.");
-        return false;
-    }
-    if (guideInfo.guideIdx >= guideInfo.guideNum) {
-        LNN_LOGE(LNN_LANE, "all guide channel type have been tried.");
-        DelGuideInfoItem(laneReqId, linkType);
-        return false;
-    }
-    WdGuideType guideType = guideInfo.guideList[guideInfo.guideIdx];
-    LNN_LOGI(LNN_LANE, "laneReqId=%{public}u, linkType=%{public}d, guideType=%{public}d.",
-        laneReqId, linkType, guideType);
-    if (guideType == LANE_BLE_TRIGGER) {
-        return true;
-    }
-    return false;
-}
-
 static int32_t PostGuideChannelTriggerMessage(uint32_t laneReqId, LaneLinkType linkType)
 {
     LNN_LOGI(LNN_LANE, "post guide channel trigger msg.");
@@ -764,11 +734,20 @@ FAIL:
 static void OnWifiDirectConnectFailure(uint32_t p2pRequestId, int32_t reason)
 {
     LNN_LOGI(LNN_LANE, "wifidirect conn fail, requestId=%{public}u, reason=%{public}d", p2pRequestId, reason);
-    if (IsBleTriggerGuideType(p2pRequestId) == true) {
+    P2pLinkReqList p2pReq;
+    (void)memset_s(&p2pReq, sizeof(P2pLinkReqList), 0, sizeof(P2pLinkReqList));
+    TransReqInfo tranReq;
+    (void)memset_s(&tranReq, sizeof(TransReqInfo), 0, sizeof(TransReqInfo));
+    if ((reason == ERROR_WIFI_DIRECT_WAIT_REUSE_RESPONSE_TIMEOUT || reason == ERROR_POST_DATA_FAILED) &&
+        GetP2pLinkReqByReqId(ASYNC_RESULT_P2P, p2pRequestId, &p2pReq) == SOFTBUS_OK &&
+        GetTransReqInfoByLaneReqId(p2pReq.laneRequestInfo.laneLinkReqId, &tranReq) == SOFTBUS_OK &&
+        (!tranReq.isWithQos || (tranReq.isWithQos && tranReq.allocInfo.type == LANE_TYPE_TRANS))) {
+        LNN_LOGI(LNN_LANE, "guide channel retry, requestId=%{public}u, reason=%{public}d", p2pRequestId, reason);
         GuideChannelAsyncRetry(ASYNC_RESULT_P2P, p2pRequestId, reason);
-        return;
+    } else {
+        LNN_LOGI(LNN_LANE, "wifidirect conn fail, requestId=%{public}u, reason=%{public}d", p2pRequestId, reason);
+        NotifyLinkFail(ASYNC_RESULT_P2P, p2pRequestId, reason);
     }
-    NotifyLinkFail(ASYNC_RESULT_P2P, p2pRequestId, reason);
 }
 
 static void OnAuthConnOpened(uint32_t authRequestId, AuthHandle authHandle)
