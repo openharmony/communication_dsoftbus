@@ -2077,8 +2077,8 @@ static void OnReceiveNodeAddrChangedMsg(LnnSyncInfoType type, const char *networ
     if (type != LNN_INFO_TYPE_NODE_ADDR) {
         return;
     }
-    size_t addrLen = strnlen((const char *)msg, size);
-    if (addrLen != size - 1 || addrLen == 0) {
+    uint32_t addrLen = (uint32_t)strnlen((const char *)msg, size);
+    if (size == 0 || addrLen != size - 1 || addrLen == 0) {
         return;
     }
     char *anonyNetworkId = NULL;

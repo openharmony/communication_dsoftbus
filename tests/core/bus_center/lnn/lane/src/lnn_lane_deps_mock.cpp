@@ -17,12 +17,11 @@
 #include "softbus_error_code.h"
 #include "softbus_socket.h"
 
-const static uint16_t SHA_HASH_LEN = 32;
-
 using namespace testing::ext;
 using namespace testing;
 
 namespace OHOS {
+const static uint16_t SHA_HASH_LEN = 32;
 void *g_laneDepsInterface;
 static SoftbusBaseListener g_baseListener = {0};
 LaneDepsInterfaceMock::LaneDepsInterfaceMock()
