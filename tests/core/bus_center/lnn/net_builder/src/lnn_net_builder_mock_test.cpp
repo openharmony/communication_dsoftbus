@@ -1551,6 +1551,7 @@ HWTEST_F(LNNNetBuilderMockTest, FIND_NODE_INFO_BY_RQUESTID_TEST_001, TestSize.Le
     connFsm->connInfo.requestId = REQUEST_ID;
     connFsm->isDead = false;
     connFsm->connInfo.nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
+    EXPECT_TRUE(connFsm->connInfo.nodeInfo != nullptr);
     ListAdd(&g_netBuilder.fsmList, &connFsm->node);
 
     ConnectionAddr addr;
