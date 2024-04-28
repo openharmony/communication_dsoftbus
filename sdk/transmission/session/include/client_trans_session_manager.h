@@ -50,6 +50,7 @@ typedef enum {
     SESSION_STATE_OPENED,
     SESSION_STATE_CALLBACK_FINISHED,
     SESSION_STATE_CANCELLING,
+    SESSION_STATE_CLOSING,
     SESSION_STATE_BUTT,
 } SessionState;
 
@@ -209,6 +210,8 @@ int32_t ClientTransSetChannelInfo(const char *sessionName, int32_t sessionId, in
 int32_t GetSessionStateAndSessionNameBySessionId(int32_t sessionId, char *sessionName, SessionState *sessionState);
 
 int32_t SetSessionStateBySessionId(int32_t sessionId, SessionState sessionState);
+
+void DelSessionStateClosing(void);
 
 #ifdef __cplusplus
 }

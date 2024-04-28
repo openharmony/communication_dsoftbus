@@ -186,7 +186,7 @@ static void ReportDeviceOnlineEvt(const char *udid, NodeBasicInfo *peerDevInfo)
         LNN_LOGI(LNN_BUILDER, "report online evt get none online node");
         return;
     }
-    info.onlineDevNum = infoNum;
+    info.onlineDevNum = (uint32_t)infoNum;
     for (int32_t i = 0; i < infoNum; i++) {
         if (LnnGetRemoteNodeInfoById(basic[i].networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
             continue;
@@ -284,7 +284,11 @@ static void ReportLnnResultEvt(LnnConnectionFsm *connFsm, int32_t retCode)
     }
     if (retCode == SOFTBUS_OK) {
         connFsm->statisticData.beginOnlineTime = LnnUpTimeMs();
-        uint64_t constTime = connFsm->statisticData.beginOnlineTime - connFsm->statisticData.beginJoinLnnTime;
+        if (connFsm->statisticData.beginOnlineTime < connFsm->statisticData.beginJoinLnnTime) {
+            LNN_LOGE(LNN_BUILDER, "report static lnn duration fail");
+            return;
+        }
+        uint64_t constTime = (uint64_t)(connFsm->statisticData.beginOnlineTime - connFsm->statisticData.beginJoinLnnTime);
         if (SoftBusRecordBusCenterResult(linkType, constTime) != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "report static lnn duration fail");
         }
@@ -543,7 +547,11 @@ static void ReportLeaveLNNResultEvt(LnnConnectionFsm *connFsm, int32_t retCode)
     LNN_LOGI(LNN_BUILDER, "report leave lnn result evt enter");
     if (retCode == SOFTBUS_OK) {
         connFsm->statisticData.offLineTime = LnnUpTimeMs();
-        uint64_t constTime = connFsm->statisticData.offLineTime - connFsm->statisticData.beginOnlineTime;
+        if (connFsm->statisticData.offLineTime < connFsm->statisticData.beginOnlineTime) {
+            LNN_LOGE(LNN_BUILDER, "report static device online duration fail");
+            return;
+        }
+        uint64_t constTime = (uint64_t)(connFsm->statisticData.offLineTime - connFsm->statisticData.beginOnlineTime);
         if (SoftBusRecordDevOnlineDurResult(constTime) != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "report static device online duration fail");
         }

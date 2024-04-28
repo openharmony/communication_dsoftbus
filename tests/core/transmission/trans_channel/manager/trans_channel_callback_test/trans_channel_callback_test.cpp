@@ -213,7 +213,7 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnChannelClosed, TestSize.Level1)
     int32_t channelId = 12;
     int32_t channelType = CHANNEL_TYPE_UDP;
     int32_t pid = 212;
-    int32_t ret = TransServerGetChannelCb()->OnChannelClosed(NULL, pid, channelId, channelType);
+    int32_t ret = TransServerGetChannelCb()->OnChannelClosed(NULL, pid, channelId, channelType, MESSAGE_TYPE_NOMAL);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 } // OHOS

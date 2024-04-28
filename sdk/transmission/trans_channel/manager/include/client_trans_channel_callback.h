@@ -29,7 +29,7 @@ int32_t TransOnChannelOpenFailed(int32_t channelId, int32_t channelType, int32_t
 
 int32_t TransOnChannelLinkDown(const char *networkId, int32_t routeType);
 
-int32_t TransOnChannelClosed(int32_t channelId, int32_t channelType, ShutdownReason reason);
+int32_t TransOnChannelClosed(int32_t channelId, int32_t channelType, int32_t messageType, ShutdownReason reason);
 
 int32_t TransOnChannelMsgReceived(int32_t channelId, int32_t channelType,
     const void *data, unsigned int len, SessionPktType type);

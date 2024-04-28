@@ -210,8 +210,7 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const C
     GetSessionStateAndSessionNameBySessionId(sessionId, NULL, &sessionState);
     if (sessionState == SESSION_STATE_CANCELLING) {
         TRANS_LOGI(TRANS_SDK, "session is cancelling, no need call back");
-        (void)ClientDeleteSession(sessionId);
-        return SOFTBUS_TRANS_STOP_BIND_BY_CANCEL;
+        return SOFTBUS_OK;
     }
     SetSessionStateBySessionId(sessionId, SESSION_STATE_CALLBACK_FINISHED);
     if (sessionCallback.isSocketListener) {

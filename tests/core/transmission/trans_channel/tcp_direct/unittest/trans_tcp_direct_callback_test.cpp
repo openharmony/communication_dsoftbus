@@ -42,7 +42,8 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
     return SOFTBUS_OK;
 }
 
-static int32_t TransServerOnChannelClosed(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType)
+static int32_t TransServerOnChannelClosed(const char *pkgName, int32_t pid,
+    int32_t channelId, int32_t channelType, int32_t messageType)
 {
     return SOFTBUS_OK;
 }

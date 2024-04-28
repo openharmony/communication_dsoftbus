@@ -25,8 +25,6 @@
 
 using namespace testing::ext;
 
-#define TEST_ERRO_MOUDULE       ((MODULE_LNN) + 3)
-
 namespace OHOS {
 static int32_t g_subscribeId = 0;
 static int32_t g_publishId = 0;
@@ -70,7 +68,7 @@ static int32_t GetPublishId(void)
 
 static SubscribeInfo g_sInfo = {
     .subscribeId = 1,
-    .mode = DISCOVER_MODE_ACTIVE,
+    .mode = DISCOVER_MODE_PASSIVE,
     .medium = COAP,
     .freq = MID,
     .isSameAccount = true,
@@ -82,7 +80,7 @@ static SubscribeInfo g_sInfo = {
 
 static PublishInfo g_pInfo = {
     .publishId = 1,
-    .mode = DISCOVER_MODE_ACTIVE,
+    .mode = DISCOVER_MODE_PASSIVE,
     .medium = COAP,
     .freq = MID,
     .capability = "dvKit",
@@ -92,7 +90,7 @@ static PublishInfo g_pInfo = {
 
 static PublishInfo g_pInfo1 = {
     .publishId = 1,
-    .mode = DISCOVER_MODE_ACTIVE,
+    .mode = DISCOVER_MODE_PASSIVE,
     .medium = COAP,
     .freq = MID,
     .capability = "dvKit",
@@ -102,7 +100,7 @@ static PublishInfo g_pInfo1 = {
 
 static SubscribeInfo g_sInfo1 = {
     .subscribeId = 1,
-    .mode = DISCOVER_MODE_ACTIVE,
+    .mode = DISCOVER_MODE_PASSIVE,
     .medium = COAP,
     .freq = MID,
     .isSameAccount = true,
