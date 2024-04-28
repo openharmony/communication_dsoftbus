@@ -66,6 +66,7 @@ ohos_unittest("HeartBeatMediumTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
   ]
 
   deps = [
@@ -137,6 +138,7 @@ ohos_unittest("HeartBeatFSMTest") {
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
     "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/mlps/include",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
   ]
 
   deps = [
@@ -188,6 +190,8 @@ ohos_unittest("HeartBeatStrategyTest") {
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/tests/core/bus_center/test/mock/include",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
   ]
 
   deps = [
@@ -258,6 +262,7 @@ ohos_unittest("HeartBeatUtilsTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
   ]
 
   deps = [
@@ -334,6 +339,7 @@ ohos_unittest("HeartBeatCtrlTest") {
     "$dsoftbus_root_path/tests/core/bus_center/lnn/net_buscenter",
     "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
   ]
 
   deps = [
@@ -438,6 +444,8 @@ ohos_unittest("BusCenterIpcTest") {
     "$dsoftbus_root_path/core/bus_center/ipc/standard/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/bus_center/lnn/meta_node/include",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
   ]
 
   deps = [
