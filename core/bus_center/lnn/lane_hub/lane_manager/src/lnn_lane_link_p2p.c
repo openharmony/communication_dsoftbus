@@ -369,7 +369,7 @@ static int32_t GetP2pLinkReqParamByChannelRequetId(
     P2pLinkReqList *item = NULL;
     P2pLinkReqList *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, g_p2pLinkList, P2pLinkReqList, node) {
-        if (item->proxyChannelInfo.requestId != channelRequestId) {
+        if (item->proxyChannelInfo.requestId != (uint32_t)channelRequestId) {
             continue;
         }
         if (LnnGetRemoteStrInfo(item->laneRequestInfo.networkId, STRING_KEY_P2P_MAC, wifiDirectInfo->remoteMac,
@@ -848,7 +848,7 @@ static int32_t AddP2pLinkReqItem(AsyncResultType type, uint32_t requestId, uint3
         SoftBusFree(item);
         return SOFTBUS_MEM_ERR;
     }
-    if (updateP2pLinkReq(item, laneReqId) != SOFTBUS_OK) {
+    if (UpdateP2pLinkReq(item, laneReqId) != SOFTBUS_OK) {
         SoftBusFree(item);
         return SOFTBUS_LANE_GUIDE_BUILD_FAIL;
     }
