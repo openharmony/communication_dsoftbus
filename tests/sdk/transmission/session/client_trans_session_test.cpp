@@ -32,6 +32,11 @@
 #include "softbus_common.h"
 #include "token_setproc.h"
 #include "trans_log.h"
+#include "softbus_feature_config.h"
+#include "softbus_conn_interface.h"
+#include "auth_interface.h"
+#include "bus_center_manager.h"
+#include "trans_session_service.h"
 
 #define TRANS_TEST_SESSION_ID 10
 #define TRANS_TEST_CHANNEL_ID 1000
@@ -80,7 +85,11 @@ public:
 
 void TransClientSessionTest::SetUpTestCase(void)
 {
-    InitSoftBusServer();
+    SoftbusConfigInit();
+    ConnServerInit();
+    AuthInit();
+    BusCenterServerInit();
+    TransServerInit();
     SetAceessTokenPermission("dsoftbusTransTest");
     int32_t ret = TransClientInit();
     ASSERT_EQ(ret,  SOFTBUS_OK);
@@ -88,6 +97,10 @@ void TransClientSessionTest::SetUpTestCase(void)
 
 void TransClientSessionTest::TearDownTestCase(void)
 {
+    ConnServerDeinit();
+    AuthDeinit();
+    BusCenterServerDeinit();
+    TransServerDeinit();
 }
 
 static int OnSessionOpened(int sessionId, int result)

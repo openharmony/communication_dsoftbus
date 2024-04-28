@@ -49,6 +49,12 @@
 #include "trans_tcp_direct_listener.h"
 #include "trans_tcp_direct_sessionconn.h"
 #include "trans_tcp_direct_sessionconn.c"
+#include "softbus_feature_config.h"
+#include "trans_session_service.h"
+#include "disc_event_manager.h"
+#include "softbus_conn_ble_direct.h"
+#include "message_handler.h"
+
 
 using namespace testing::ext;
 
@@ -85,11 +91,25 @@ public:
 
 void TransCoreTcpDirectTest::SetUpTestCase(void)
 {
-    InitSoftBusServer();
+    SoftbusConfigInit();
+    LooperInit();
+    ConnServerInit();
+    AuthInit();
+    BusCenterServerInit();
+    TransServerInit();
+    DiscEventManagerInit();
+    TransChannelInit();
 }
 
 void TransCoreTcpDirectTest::TearDownTestCase(void)
-{}
+{
+    LooperDeinit();
+    ConnServerDeinit();
+    AuthDeinit();
+    TransServerDeinit();
+    DiscEventManagerDeinit();
+    TransChannelDeinit();
+}
 
 SessionServer *TestSetPack()
 {
