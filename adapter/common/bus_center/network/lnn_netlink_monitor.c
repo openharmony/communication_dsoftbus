@@ -137,7 +137,7 @@ static void ProcessLinkEvent(struct nlmsghdr *nlh)
     }
     static uint32_t callCount = 0;
     if (type == LNN_NETIF_TYPE_ETH || type == LNN_NETIF_TYPE_WLAN) {
-        LNN_LOGD(LNN_BUILDER, "link status changed, IFLA_IFNAME=%{public}s, netifType=%{public}d, callCount=%{public}u",
+        LNN_LOGW(LNN_BUILDER, "link status changed, IFLA_IFNAME=%{public}s, netifType=%{public}d, callCount=%{public}u",
             (const char *)RTA_DATA(tb[IFLA_IFNAME]), type, callCount++);
         LnnNotifyAddressChangedEvent((const char *)RTA_DATA(tb[IFLA_IFNAME]));
     }
