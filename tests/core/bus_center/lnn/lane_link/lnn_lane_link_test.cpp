@@ -83,49 +83,46 @@ static void OnLaneLinkFail(uint32_t reqId, int32_t reason)
     return;
 }
 
-static bool SupportHmlTwo(void)
-{
-    return true;
-}
-
-static struct WifiDirectUtils g_utils = {
-    .supportHmlTwo = SupportHmlTwo,
-};
-
 static uint32_t GetRequestId(void)
 {
     return 1;
 }
 
-static int32_t ConnectDevice(struct WifiDirectConnectInfo *connectInfo, struct WifiDirectConnectCallback *callback)
+static int32_t ConnectDevice(struct WifiDirectConnectInfo *info, struct WifiDirectConnectCallback *callback)
 {
-    if (connectInfo->pid == SYNCFAIL) {
+    if (info->pid == SYNCFAIL) {
         return SOFTBUS_ERR;
     }
-    if (connectInfo->pid == SYNCSUCC) {
+    if (info->pid == SYNCSUCC) {
         return SOFTBUS_OK;
     }
-    if (connectInfo->pid == ASYNCFAIL) {
-        callback->onConnectFailure(connectInfo->requestId, ERROR_HML_CONNECT_NOTIFY_FAIL);
+    if (info->pid == ASYNCFAIL) {
+        callback->onConnectFailure(info->requestId, ERROR_HML_CONNECT_NOTIFY_FAIL);
         return SOFTBUS_OK;
     }
     struct WifiDirectLink link = {
         .linkId = 1,
         .linkType = WIFI_DIRECT_LINK_TYPE_P2P,
     };
-    callback->onConnectSuccess(connectInfo->requestId, &link);
+    callback->onConnectSuccess(info->requestId, &link);
     return SOFTBUS_OK;
 }
 
-static int32_t DisconnectDevice(struct WifiDirectConnectInfo *connectInfo, struct WifiDirectConnectCallback *callback)
+static int32_t DisconnectDevice(struct WifiDirectDisconnectInfo *info, struct WifiDirectDisconnectCallback *callback)
 {
     return SOFTBUS_OK;
+}
+
+static bool SupportHmlTwo(void)
+{
+    return true;
 }
 
 static struct WifiDirectManager g_manager = {
     .getRequestId = GetRequestId,
     .connectDevice = ConnectDevice,
     .disconnectDevice = DisconnectDevice,
+    .supportHmlTwo = SupportHmlTwo,
 };
 
 /*
@@ -236,7 +233,6 @@ HWTEST_F(LNNLaneLinkTest, LnnConnectP2p_003, TestSize.Level1)
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(laneLinkMock, FindLaneResourceByLinkType).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(laneLinkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
-    EXPECT_CALL(laneLinkMock, GetWifiDirectUtils).WillRepeatedly(Return(&g_utils));
     EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
 
     ret = LnnConnectP2p(&request, laneReqId, &cb);
@@ -531,7 +527,6 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_006, TestSize.Level1)
     EXPECT_CALL(linkMock, LnnGetRemoteNumInfo).WillRepeatedly(DoAll(SetArgPointee<2>(value), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetLocalNumU64Info).WillRepeatedly(DoAll(SetArgPointee<1>(local), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info).WillRepeatedly(DoAll(SetArgPointee<2>(remote), Return(SOFTBUS_OK)));
-    EXPECT_CALL(laneLinkMock, GetWifiDirectUtils).WillRepeatedly(Return(&g_utils));
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND)).WillOnce(Return(SOFTBUS_OK))
         .WillOnce(DoAll(SetArrayArgument<2>(BRMAC, BRMAC + BT_MAC_LEN), Return(SOFTBUS_OK)))
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -581,7 +576,6 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_007, TestSize.Level1)
     EXPECT_CALL(linkMock, LnnGetRemoteNumInfo).WillRepeatedly(DoAll(SetArgPointee<2>(value), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetLocalNumU64Info).WillRepeatedly(DoAll(SetArgPointee<1>(local), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info).WillRepeatedly(DoAll(SetArgPointee<2>(remote), Return(SOFTBUS_OK)));
-    EXPECT_CALL(laneLinkMock, GetWifiDirectUtils).WillRepeatedly(Return(&g_utils));
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND)).WillOnce(Return(SOFTBUS_OK))
         .WillOnce(DoAll(SetArrayArgument<2>(BRMAC, BRMAC + BT_MAC_LEN), Return(SOFTBUS_OK)))
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -631,7 +625,6 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_008, TestSize.Level1)
     EXPECT_CALL(linkMock, LnnGetRemoteNumInfo).WillRepeatedly(DoAll(SetArgPointee<2>(value), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetLocalNumU64Info).WillRepeatedly(DoAll(SetArgPointee<1>(local), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info).WillRepeatedly(DoAll(SetArgPointee<2>(remote), Return(SOFTBUS_OK)));
-    EXPECT_CALL(laneLinkMock, GetWifiDirectUtils).WillRepeatedly(Return(&g_utils));
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND)).WillOnce(Return(SOFTBUS_OK))
         .WillOnce(DoAll(SetArrayArgument<2>(BRMAC, BRMAC + BT_MAC_LEN), Return(SOFTBUS_OK)))
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -680,7 +673,6 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_009, TestSize.Level1)
     EXPECT_CALL(linkMock, LnnGetRemoteNumInfo).WillRepeatedly(DoAll(SetArgPointee<2>(value), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetLocalNumU64Info).WillRepeatedly(DoAll(SetArgPointee<1>(local), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info).WillRepeatedly(DoAll(SetArgPointee<2>(remote), Return(SOFTBUS_OK)));
-    EXPECT_CALL(laneLinkMock, GetWifiDirectUtils).WillRepeatedly(Return(&g_utils));
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND)).WillOnce(Return(SOFTBUS_OK))
         .WillOnce(Return(SOFTBUS_NOT_FIND)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthDeviceCheckConnInfo).WillRepeatedly(Return(true));
@@ -726,7 +718,6 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_010, TestSize.Level1)
     EXPECT_CALL(linkMock, LnnGetRemoteNumInfo).WillRepeatedly(DoAll(SetArgPointee<2>(value), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetLocalNumU64Info).WillRepeatedly(DoAll(SetArgPointee<1>(local), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info).WillRepeatedly(DoAll(SetArgPointee<2>(remote), Return(SOFTBUS_OK)));
-    EXPECT_CALL(laneLinkMock, GetWifiDirectUtils).WillRepeatedly(Return(&g_utils));
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND)).WillOnce(Return(SOFTBUS_NOT_FIND))
         .WillOnce(DoAll(SetArrayArgument<2>(ERRORBRMAC, ERRORBRMAC + BT_MAC_LEN), Return(SOFTBUS_OK)))
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -986,7 +977,6 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_005, TestSize.Level1)
     EXPECT_CALL(linkMock, LnnGetRemoteNumInfo).WillRepeatedly(DoAll(SetArgPointee<2>(value), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetLocalNumU64Info).WillRepeatedly(DoAll(SetArgPointee<1>(local), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info).WillRepeatedly(DoAll(SetArgPointee<2>(remote), Return(SOFTBUS_OK)));
-    EXPECT_CALL(laneLinkMock, GetWifiDirectUtils).WillRepeatedly(Return(&g_utils));
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND)).WillOnce(Return(SOFTBUS_OK))
         .WillOnce(DoAll(SetArrayArgument<2>(BRMAC, BRMAC + BT_MAC_LEN), Return(SOFTBUS_OK)))
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -1037,7 +1027,6 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_006, TestSize.Level1)
     EXPECT_CALL(linkMock, LnnGetRemoteNumInfo).WillRepeatedly(DoAll(SetArgPointee<2>(value), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetLocalNumU64Info).WillRepeatedly(DoAll(SetArgPointee<1>(local), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info).WillRepeatedly(DoAll(SetArgPointee<2>(remote), Return(SOFTBUS_OK)));
-    EXPECT_CALL(laneLinkMock, GetWifiDirectUtils).WillRepeatedly(Return(&g_utils));
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND)).WillOnce(Return(SOFTBUS_OK))
         .WillOnce(DoAll(SetArrayArgument<2>(BRMAC, BRMAC + BT_MAC_LEN), Return(SOFTBUS_OK)))
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -1090,7 +1079,6 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_007, TestSize.Level1)
     EXPECT_CALL(linkMock, LnnGetRemoteNumInfo).WillRepeatedly(DoAll(SetArgPointee<2>(value), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetLocalNumU64Info).WillRepeatedly(DoAll(SetArgPointee<1>(local), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info).WillRepeatedly(DoAll(SetArgPointee<2>(remote), Return(SOFTBUS_OK)));
-    EXPECT_CALL(laneLinkMock, GetWifiDirectUtils).WillRepeatedly(Return(&g_utils));
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND)).WillOnce(Return(SOFTBUS_OK))
         .WillOnce(DoAll(SetArrayArgument<2>(BRMAC, BRMAC + BT_MAC_LEN), Return(SOFTBUS_OK)))
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -1142,7 +1130,6 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_008, TestSize.Level1)
     EXPECT_CALL(linkMock, LnnGetRemoteNumInfo).WillRepeatedly(DoAll(SetArgPointee<2>(value), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetLocalNumU64Info).WillRepeatedly(DoAll(SetArgPointee<1>(local), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info).WillRepeatedly(DoAll(SetArgPointee<2>(remote), Return(SOFTBUS_OK)));
-    EXPECT_CALL(laneLinkMock, GetWifiDirectUtils).WillRepeatedly(Return(&g_utils));
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND)).WillOnce(Return(SOFTBUS_OK))
         .WillOnce(Return(SOFTBUS_NOT_FIND)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthDeviceCheckConnInfo).WillRepeatedly(Return(true));
