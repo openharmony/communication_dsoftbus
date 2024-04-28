@@ -858,6 +858,7 @@ static void BuildAdvParam(BroadcastParam *advParam)
     advParam->peerAddrType = SOFTBUS_BC_PUBLIC_DEVICE_ADDRESS;
     advParam->channelMap = BLE_CHANNLE_MAP;
     advParam->txPower = BLE_ADV_TX_POWER_DEFAULT;
+    (void)memset_s(advParam->localAddr.addr, BC_ADDR_MAC_LEN, 0, BC_ADDR_MAC_LEN);
 }
 
 static void DfxRecordAdevertiserEnd(int32_t adv, int32_t reason)
