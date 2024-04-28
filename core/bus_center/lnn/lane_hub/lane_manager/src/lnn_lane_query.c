@@ -114,16 +114,16 @@ static int32_t GetLaneResource(LaneTransType transType, LaneLinkType *optLink, u
     return SOFTBUS_OK;
 }
 
-static bool GetNetCap(const char *networkId, int32_t *local, int32_t *remote)
+static bool GetNetCap(const char *networkId, uint32_t *local, uint32_t *remote)
 {
-    int32_t ret = LnnGetLocalNumInfo(NUM_KEY_NET_CAP, local);
+    int32_t ret = LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, local);
     if (ret != SOFTBUS_OK || *local < 0) {
-        LNN_LOGE(LNN_LANE, "LnnGetLocalNumInfo err, ret=%{public}d, local=%{public}d", ret, *local);
+        LNN_LOGE(LNN_LANE, "LnnGetLocalNumInfo err, ret=%{public}d, local=%{public}u", ret, *local);
         return false;
     }
-    ret = LnnGetRemoteNumInfo(networkId, NUM_KEY_NET_CAP, remote);
+    ret = LnnGetRemoteNumU32Info(networkId, NUM_KEY_NET_CAP, remote);
     if (ret != SOFTBUS_OK || *remote < 0) {
-        LNN_LOGE(LNN_LANE, "LnnGetRemoteNumInfo err, ret=%{public}d, remote=%{public}d", ret, *remote);
+        LNN_LOGE(LNN_LANE, "LnnGetRemoteNumInfo err, ret=%{public}d, remote=%{public}u", ret, *remote);
         return false;
     }
     return true;
@@ -131,39 +131,39 @@ static bool GetNetCap(const char *networkId, int32_t *local, int32_t *remote)
 
 static int32_t BrLinkState(const char *networkId)
 {
-    int32_t local, remote;
+    uint32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
         return SOFTBUS_ERR;
     }
     if (!(local & (1 << BIT_BR))) {
-        LNN_LOGE(LNN_LANE, "local bluetooth close, local=%{public}d", local);
+        LNN_LOGE(LNN_LANE, "local bluetooth close, local=%{public}u", local);
         return SOFTBUS_BLUETOOTH_OFF;
     }
     if (!(remote & (1 << BIT_BR))) {
-        LNN_LOGE(LNN_LANE, "remote bluetooth close, remote=%{public}d", remote);
+        LNN_LOGE(LNN_LANE, "remote bluetooth close, remote=%{public}u", remote);
         return SOFTBUS_BLUETOOTH_OFF;
     }
-    LNN_LOGI(LNN_LANE, "br link ok, local=%{public}d, remote=%{public}d", local, remote);
+    LNN_LOGI(LNN_LANE, "br link ok, local=%{public}u, remote=%{public}u", local, remote);
     return SOFTBUS_OK;
 }
 
 static int32_t BleLinkState(const char *networkId)
 {
-    int32_t local, remote;
+    uint32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
         return SOFTBUS_ERR;
     }
     if (!(local & (1 << BIT_BLE))) {
-        LNN_LOGE(LNN_LANE, "local bluetooth close, local=%{public}d", local);
+        LNN_LOGE(LNN_LANE, "local bluetooth close, local=%{public}u", local);
         return SOFTBUS_BLUETOOTH_OFF;
     }
     if (!(remote & (1 << BIT_BLE))) {
-        LNN_LOGE(LNN_LANE, "remote bluetooth close, remote=%{public}d", remote);
+        LNN_LOGE(LNN_LANE, "remote bluetooth close, remote=%{public}u", remote);
         return SOFTBUS_BLUETOOTH_OFF;
     }
-    LNN_LOGI(LNN_LANE, "ble link ok, local=%{public}d, remote=%{public}d", local, remote);
+    LNN_LOGI(LNN_LANE, "ble link ok, local=%{public}u, remote=%{public}u", local, remote);
     return SOFTBUS_OK;
 }
 
@@ -182,20 +182,20 @@ static int32_t WlanLinkState(const char *networkId)
         LNN_LOGE(LNN_LANE, "peer node not wifi online");
         return SOFTBUS_ERR;
     }
-    int32_t local, remote;
+    uint32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
         return SOFTBUS_ERR;
     }
     if (!(local & (1 << BIT_WIFI))) {
-        LNN_LOGE(LNN_LANE, "local wifi close, local=%{public}d", local);
+        LNN_LOGE(LNN_LANE, "local wifi close, local=%{public}u", local);
         return SOFTBUS_WIFI_DISCONNECT;
     }
     if (!(remote & (1 << BIT_WIFI))) {
-        LNN_LOGE(LNN_LANE, "remote wifi close, remote=%{public}d", remote);
+        LNN_LOGE(LNN_LANE, "remote wifi close, remote=%{public}u", remote);
         return SOFTBUS_WIFI_DISCONNECT;
     }
-    LNN_LOGI(LNN_LANE, "wifi link ok, local=%{public}d, remote=%{public}d", local, remote);
+    LNN_LOGI(LNN_LANE, "wifi link ok, local=%{public}u, remote=%{public}u", local, remote);
     return SOFTBUS_OK;
 }
 
@@ -209,13 +209,13 @@ static int32_t P2pLinkState(const char *networkId)
     if (!SoftBusIsWifiActive()) {
         return SOFTBUS_WIFI_OFF;
     }
-    int32_t local, remote;
+    uint32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
         return SOFTBUS_ERR;
     }
     if (((local & (1 << BIT_WIFI_P2P)) == 0) || ((remote & (1 << BIT_WIFI_P2P)) == 0)) {
-        LNN_LOGE(LNN_LANE, "p2p capa disable, local=%{public}d, remote=%{public}d", local, remote);
+        LNN_LOGE(LNN_LANE, "p2p capa disable, local=%{public}u, remote=%{public}u", local, remote);
         return SOFTBUS_P2P_NOT_SUPPORT;
     }
 

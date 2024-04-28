@@ -93,7 +93,7 @@ typedef struct {
 } P2pConnInfo;
 
 typedef struct {
-    uint16_t protocol;
+    ProtocolType protocol;
     char addr[MAX_SOCKET_ADDR_LEN];
     uint16_t port;
 } WlanConnInfo;
