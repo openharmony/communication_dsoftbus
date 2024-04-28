@@ -382,10 +382,11 @@ static void LnnOnWifiDirectDeviceOffline(const char *peerMac, const char *peerIp
     }
 }
 
-static void LnnOnWifiDirectRoleChange(enum WifiDirectRole myRole)
+static void LnnOnWifiDirectRoleChange(enum WifiDirectRole oldRole, enum WifiDirectRole newRole)
 {
     LNN_LOGD(LNN_LANE, "lnn wifidirect roleChange");
-    (void)myRole;
+    (void)oldRole;
+    (void)newRole;
 }
 
 int32_t RegisterLaneListener(LaneType type, const LaneStatusListener *listener)
@@ -517,7 +518,7 @@ static void RegisterWifiDirectListener(void)
     }
     if (mgr->registerStatusListener != NULL) {
         LNN_LOGD(LNN_LANE, "regist listener to wifiDirect");
-        mgr->registerStatusListener(LNN_LANE_MODULE, &listener);
+        mgr->registerStatusListener(&listener);
     }
 }
 

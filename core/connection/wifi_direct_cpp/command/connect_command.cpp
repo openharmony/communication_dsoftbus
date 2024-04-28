@@ -14,14 +14,17 @@
  */
 #include "connect_command.h"
 
+#include <cstring>
+
 #include "conn_log.h"
 
 #include "channel/auth_negotiate_channel.h"
 #include "channel/proxy_negotiate_channel.h"
 #include "data/link_manager.h"
 #include "processor_selector_factory.h"
-#include "utils/wifi_direct_utils.h"
 #include "utils/duration_statistic.h"
+#include "utils/wifi_direct_anonymous.h"
+#include "utils/wifi_direct_utils.h"
 
 namespace OHOS::SoftBus {
 ConnectCommand::ConnectCommand(const WifiDirectConnectInfo &info, const WifiDirectConnectCallback &callback)
@@ -55,7 +58,7 @@ std::shared_ptr<WifiDirectProcessor> ConnectCommand::GetProcessor()
     return (*selector)(info_.info_);
 }
 
-ConnectInfo& ConnectCommand::GetConnectInfo()
+ConnectInfo &ConnectCommand::GetConnectInfo()
 {
     return info_;
 }
@@ -67,15 +70,17 @@ WifiDirectConnectCallback ConnectCommand::GetConnectCallback() const
 
 void ConnectCommand::OnSuccess(const WifiDirectLink &link) const
 {
-    DfxRecord(true, OK);
-    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}u linkId=%{public}d", info_.info_.requestId, link.linkId);
+    CONN_LOGI(CONN_WIFI_DIRECT,
+        "requestId=%{public}u linkId=%{public}d, localIp=%{public}s, remoteIp=%{public}s, remotePort=%{public}d, "
+        "linkType=%{public}d",
+        info_.info_.requestId, link.linkId, WifiDirectAnonymizeIp(link.localIp).c_str(),
+        WifiDirectAnonymizeIp(link.remoteIp).c_str(), link.remotePort, link.linkType);
     callback_.onConnectSuccess(info_.info_.requestId, &link);
 }
 
 void ConnectCommand::OnFailure(WifiDirectErrorCode reason) const
 {
-    DfxRecord(false, reason);
-    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}u reason=%{public}d", info_.info_.requestId, reason);
+    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}u, reason=%{public}d", info_.info_.requestId, reason);
     callback_.onConnectFailure(info_.info_.requestId, reason);
 }
 

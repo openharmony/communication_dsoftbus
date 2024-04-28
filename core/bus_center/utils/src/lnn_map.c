@@ -47,14 +47,21 @@ static uint32_t MapHash(const char *key)
     return (hash & 0x7FFFFFFF);
 }
 
-static uint32_t MapHashIdx(const Map *map, uint32_t hash)
+static int32_t MapHashIdx(const Map *map, uint32_t hash)
 {
-    return (hash & (map->bucketSize - 1));
+    if (map->bucketSize < 1) {
+        return -1;
+    }
+    return (int32_t)(hash & (map->bucketSize - 1));
 }
 
 static void MapAddNode(Map *map, MapNode *node)
 {
-    uint32_t idx = MapHashIdx(map, node->hash);
+    int32_t idx = MapHashIdx(map, node->hash);
+    if (idx < 0) {
+        LNN_LOGE(LNN_STATE, "invalid param, get map hash idx failed");
+        return;
+    }
     node->next = map->nodes[idx];
     map->nodes[idx] = node;
 }
@@ -143,7 +150,11 @@ int32_t LnnMapSet(Map *map, const char *key, const void *value, uint32_t valueSi
     }
     uint32_t hash = MapHash(key);
     if (map->nodeSize > 0 && map->nodes != NULL) {
-        uint32_t idx = MapHashIdx(map, hash);
+        int32_t idx = MapHashIdx(map, hash);
+        if (idx < 0) {
+            LNN_LOGE(LNN_STATE, "invalid param, get map hash idx failed");
+            return SOFTBUS_INVALID_PARAM;
+        }
         node = map->nodes[idx];
         while (node != NULL) {
             if (node->hash != hash || node->key == NULL || strcmp(node->key, key) != 0) {
@@ -200,7 +211,11 @@ void* LnnMapGet(const Map *map, const char *key)
     }
 
     uint32_t hash = MapHash(key);
-    uint32_t idx = MapHashIdx(map, hash);
+    int32_t idx = MapHashIdx(map, hash);
+    if (idx < 0) {
+        LNN_LOGE(LNN_STATE, "invalid param, get map hash idx failed");
+        return NULL;
+    }
     MapNode *node = map->nodes[idx];
 
     while (node != NULL) {
@@ -228,7 +243,11 @@ int32_t LnnMapErase(Map *map, const char *key)
     }
 
     uint32_t hash = MapHash(key);
-    uint32_t idx = MapHashIdx(map, hash);
+    int32_t idx = MapHashIdx(map, hash);
+    if (idx < 0) {
+        LNN_LOGE(LNN_STATE, "invalid param, get map hash idx failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
     MapNode *node = map->nodes[idx];
     MapNode *prev = node;
 

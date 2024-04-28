@@ -79,6 +79,8 @@ public:
     static int32_t P2pConfigGcIp(const std::string &interface, const std::string &ip);
     static int32_t SetPeerWifiConfigInfoV2(const uint8_t *cfg, size_t size);
     static bool IsWideBandSupported();
+    static bool IsWifiEnable();
+    static bool IsWifiConnected();
 
 private:
     static constexpr int P2P_GROUP_CONFIG_INDEX_SSID = 0;

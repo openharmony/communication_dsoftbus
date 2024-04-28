@@ -24,12 +24,6 @@
 #include "softbus_common.h"
 #include "softbus_errcode.h"
 
-int32_t LnnInitCipherKeyManager(void)
-{
-    LNN_LOGI(LNN_TEST, "init virtual lnn cipherkey manager");
-    return SOFTBUS_OK;
-}
-
 namespace OHOS {
 using namespace testing::ext;
 constexpr int32_t LOCAL_WEIGHT = 10;

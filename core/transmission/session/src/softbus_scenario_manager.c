@@ -22,7 +22,7 @@
 #include "softbus_errcode.h"
 #include "softbus_utils.h"
 #include "trans_log.h"
-#include "wifi_hid2d.h"
+#include "kits/c/wifi_hid2d.h"
 #include "securec.h"
 
 #include <stdio.h>

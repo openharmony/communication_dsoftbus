@@ -1514,7 +1514,7 @@ static int32_t MatchRecvMessage(const uint32_t *publishInfoMap, uint32_t *capBit
     DISC_LOGI(DISC_BLE, "recv message cnt=%{public}d", g_recvMessageInfo.numNeedResp);
     LIST_FOR_EACH_ENTRY(msg, &g_recvMessageInfo.node, RecvMessage, node) {
         for (uint32_t index = 0; index < len; index++) {
-            capBitMap[index] = msg->capBitMap[index] & publishInfoMap[index];
+            capBitMap[index] |= msg->capBitMap[index] & publishInfoMap[index];
         }
     }
     (void)SoftBusMutexUnlock(&g_recvMessageInfo.lock);

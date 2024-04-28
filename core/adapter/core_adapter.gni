@@ -55,8 +55,10 @@ if (defined(ohos_lite)) {
         [ "$dsoftbus_root_path/core/adapter/huks/src/softbus_rsa_encrypt.c" ]
     bus_center_core_adapter_inc +=
         [ "$dsoftbus_root_path/core/adapter/huks/include" ]
-    bus_center_core_adapter_deps += [ "//third_party/openssl:libcrypto_shared" ]
-    bus_center_core_adapter_external_deps += [ "huks:libhukssdk" ]
+    bus_center_core_adapter_external_deps += [
+      "huks:libhukssdk",
+      "openssl:libcrypto_shared",
+    ]
   }
 } else {
   if (!dsoftbus_get_devicename) {
@@ -108,7 +110,9 @@ if (defined(ohos_lite)) {
         [ "$dsoftbus_root_path/core/adapter/huks/src/softbus_rsa_encrypt.c" ]
     bus_center_core_adapter_inc +=
         [ "$dsoftbus_root_path/core/adapter/huks/include" ]
-    bus_center_core_adapter_deps += [ "//third_party/openssl:libcrypto_shared" ]
-    bus_center_core_adapter_external_deps += [ "huks:libhukssdk" ]
+    bus_center_core_adapter_external_deps += [
+      "huks:libhukssdk",
+      "openssl:libcrypto_shared",
+    ]
   }
 }
