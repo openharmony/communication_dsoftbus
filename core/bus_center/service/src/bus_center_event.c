@@ -260,7 +260,9 @@ static void NotifyEvent(const LnnEventBasicInfo *info)
 
     /* process handles out of lock */
     for (i = 0; i < count; i++) {
-        handlesArray[i](info);
+        if (handlesArray[i] != NULL) {
+            handlesArray[i](info);
+        }
     }
     SoftBusFree(handlesArray);
 }
@@ -730,9 +732,11 @@ void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler)
         if (item->handler == handler) {
             ListDelete(&item->node);
             SoftBusFree(item);
+            if (g_eventCtrl.regCnt[event] > 0) {
+                g_eventCtrl.regCnt[event]--;
+            }
             break;
         }
     }
-    g_eventCtrl.regCnt[event]--;
     (void)SoftBusMutexUnlock(&g_eventCtrl.lock);
 }
