@@ -25,6 +25,15 @@
 #include "trans_udp_negotiation.h"
 #include "client_trans_session_service.h"
 #include "softbus_access_token_test.h"
+#include "softbus_feature_config.h"
+#include "softbus_conn_interface.h"
+#include "auth_interface.h"
+#include "bus_center_manager.h"
+#include "trans_session_service.h"
+#include "trans_channel_manager.h"
+#include "disc_event_manager.h"
+#include "softbus_conn_ble_direct.h"
+#include "message_handler.h"
 
 using namespace testing::ext;
 
@@ -83,12 +92,26 @@ static ISessionListener g_sessionlistener = {
 
 void TransUdpNegotiationTest::SetUpTestCase(void)
 {
-    InitSoftBusServer();
+    SoftbusConfigInit();
+    LooperInit();
+    ConnServerInit();
+    AuthInit();
+    BusCenterServerInit();
+    TransServerInit();
+    DiscEventManagerInit();
+    TransChannelInit();
     SetAceessTokenPermission("dsoftbusTransTest");
 }
 
 void TransUdpNegotiationTest::TearDownTestCase(void)
-{}
+{
+    LooperDeinit();
+    ConnServerDeinit();
+    AuthDeinit();
+    TransServerDeinit();
+    DiscEventManagerDeinit();
+    TransChannelDeinit();
+}
 
 /**
  * @tc.name: TransUdpNegotiationTest01
