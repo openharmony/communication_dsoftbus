@@ -326,7 +326,7 @@ static struct WifiDirectManager g_manager = {
     .registerStatusListener = RegisterStatusListener,
     .prejudgeAvailability = PrejudgeAvailability,
 
-    .isNegotiateChannelNeeded = IsNegotiateChannelNeeded;
+    .isNegotiateChannelNeeded = IsNegotiateChannelNeeded,
     .isDeviceOnline = IsDeviceOnline,
     .getLocalIpByUuid = GetLocalIpByUuid,
     .getLocalIpByRemoteIp = GetLocalIpByRemoteIp,
