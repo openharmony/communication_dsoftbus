@@ -122,7 +122,7 @@ int32_t ClientIpcOnChannelClosed(ChannelMsg *data)
         TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr!");
         return SOFTBUS_ERR;
     }
-    int32_t ret = clientProxy->OnChannelClosed(data->msgChannelId, data->msgChannelType);
+    int32_t ret = clientProxy->OnChannelClosed(data->msgChannelId, data->msgChannelType, data->msgMessageType);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "OnChannelClosed failed, ret=%{public}d", ret);
         return ret;

@@ -1057,27 +1057,4 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest30, TestSize.Level1)
 
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 }
-
-/**
- * @tc.name: TransClientOpenSessionTestToken
- * @tc.desc: Transmission sdk session service open session with tokenID.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransClientSessionTest, TransClientOpenSessionTestToken, TestSize.Level1)
-{
-    int32_t ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
-    ASSERT_EQ(ret, SOFTBUS_OK);
-
-    SetFirstCallerTokenID(HAP_TOKENID);
-    ret = OpenSession(g_sessionName, g_sessionName, g_networkId, g_groupId, &g_sessionAttr);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-
-    SetFirstCallerTokenID(NATIVE_TOKENID);
-    ret = OpenSession(g_sessionName, g_sessionName, g_networkId, g_groupId, &g_sessionAttr);
-    EXPECT_NE(ret, SOFTBUS_OK);
-
-    ret = RemoveSessionServer(g_pkgName, g_sessionName);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-}
 }

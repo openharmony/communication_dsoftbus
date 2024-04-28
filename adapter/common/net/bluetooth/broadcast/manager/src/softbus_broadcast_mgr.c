@@ -86,6 +86,11 @@ static ScanManager g_scanManager[SCAN_NUM_MAX];
 static uint32_t g_interfaceId = BROADCAST_MEDIUM_TYPE_BLE;
 static SoftbusBroadcastMediumInterface *g_interface[MEDIUM_NUM_MAX];
 
+static inline bool CheckMediumIsValid(SoftbusMediumType interfaceId)
+{
+    return interfaceId >= 0 && interfaceId < BROADCAST_MEDIUM_TYPE_BUTT;
+}
+
 int32_t RegisterBroadcastMediumFunction(SoftbusMediumType type, const SoftbusBroadcastMediumInterface *interface)
 {
     DISC_LOGI(DISC_BLE, "enter, register type=%{public}d.", type);
@@ -99,6 +104,7 @@ int32_t RegisterBroadcastMediumFunction(SoftbusMediumType type, const SoftbusBro
 
 static void BcBtStateChanged(int32_t listenerId, int32_t state)
 {
+    DISC_CHECK_AND_RETURN_LOGE(CheckMediumIsValid(g_interfaceId), DISC_BLE, "invalid id!");
     (void)listenerId;
     if (state != SOFTBUS_BC_BT_STATE_TURN_OFF) {
         return;
@@ -175,6 +181,7 @@ int32_t InitBroadcastMgr(void)
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "lock init fail!");
 
     SoftbusBleAdapterInit();
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckMediumIsValid(g_interfaceId), SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid id!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_BC_MGR_NO_FUNC_REGISTERED,
                                    DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->Init != NULL,
@@ -204,6 +211,7 @@ static bool CheckLockIsInit(SoftBusMutex *lock)
 int32_t DeInitBroadcastMgr(void)
 {
     DISC_LOGI(DISC_BLE, "enter.");
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckMediumIsValid(g_interfaceId), SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid id!");
     DISC_CHECK_AND_RETURN_RET_LOGW(g_interface[g_interfaceId] != NULL, SOFTBUS_OK, DISC_BLE, "already deinit!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->DeInit != NULL,
                                    SOFTBUS_BC_MGR_FUNC_NULL, DISC_BLE, "function is null!");
@@ -677,6 +685,7 @@ int32_t RegisterBroadcaster(BaseServiceType srvType, int32_t *bcId, const Broadc
     DISC_CHECK_AND_RETURN_RET_LOGE(IsSrvTypeValid(srvType), SOFTBUS_BC_MGR_INVALID_SRV, DISC_BLE, "srvType invalid!");
     DISC_CHECK_AND_RETURN_RET_LOGE(bcId != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid param bcId!");
     DISC_CHECK_AND_RETURN_RET_LOGE(cb != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid param cb!");
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckMediumIsValid(g_interfaceId), SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid id!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_BC_MGR_NO_FUNC_REGISTERED,
                                    DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->RegisterBroadcaster != NULL,
@@ -733,6 +742,7 @@ static bool CheckBcIdIsValid(int32_t bcId)
 int32_t UnRegisterBroadcaster(int32_t bcId)
 {
     DISC_LOGI(DISC_BLE, "enter.");
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckMediumIsValid(g_interfaceId), SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid id!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_BC_MGR_NO_FUNC_REGISTERED,
                                    DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->UnRegisterBroadcaster != NULL,
@@ -773,6 +783,7 @@ int32_t UnRegisterBroadcaster(int32_t bcId)
 
 static int32_t RegisterScanListenerSub(BaseServiceType srvType, int32_t *adapterScanId, const ScanCallback *cb)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckMediumIsValid(g_interfaceId), SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid id!");
     int32_t ret;
 
     if (srvType == SRV_TYPE_SH_BURST || srvType == SRV_TYPE_SH_HB) {
@@ -825,6 +836,7 @@ int32_t RegisterScanListener(BaseServiceType srvType, int32_t *listenerId, const
     DISC_CHECK_AND_RETURN_RET_LOGE(IsSrvTypeValid(srvType), SOFTBUS_BC_MGR_INVALID_SRV, DISC_BLE, "srvType invalid!");
     DISC_CHECK_AND_RETURN_RET_LOGE(listenerId != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid param listenerId!");
     DISC_CHECK_AND_RETURN_RET_LOGE(cb != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid param cb!");
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckMediumIsValid(g_interfaceId), SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid id!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_BC_MGR_NO_FUNC_REGISTERED,
                                    DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->RegisterScanListener != NULL,
@@ -1065,6 +1077,7 @@ static void CheckScanFreq(int32_t listenerId, SoftBusBcScanParams *adapterParam)
 
 static int32_t CheckAndStopScan(int32_t listenerId)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckMediumIsValid(g_interfaceId), SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid id!");
     int32_t liveListenerId = -1;
     int32_t ret;
     bool needUpdate = CheckNeedUpdateScan(listenerId, &liveListenerId);
@@ -1107,6 +1120,7 @@ static int32_t CheckAndStopScan(int32_t listenerId)
 int32_t UnRegisterScanListener(int32_t listenerId)
 {
     DISC_LOGI(DISC_BLE, "enter. listenerId=%{public}d", listenerId);
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckMediumIsValid(g_interfaceId), SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid id!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_BC_MGR_NO_FUNC_REGISTERED,
                                    DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->UnRegisterScanListener != NULL,
@@ -1273,6 +1287,7 @@ int32_t StartBroadcasting(int32_t bcId, const BroadcastParam *param, const Broad
     DISC_CHECK_AND_RETURN_RET_LOGE(packet != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid param packet!");
     DISC_CHECK_AND_RETURN_RET_LOGE(packet->bcData.payload != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE,
                                    "invalid param payload!");
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckMediumIsValid(g_interfaceId), SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid id!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_BC_MGR_NO_FUNC_REGISTERED,
                                    DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->StartBroadcasting != NULL,
@@ -1335,6 +1350,7 @@ int32_t SetBroadcastingData(int32_t bcId, const BroadcastPacket *packet)
     static uint32_t callCount = 0;
     DISC_LOGI(DISC_BLE, "enter. bcId=%{public}d, callCount=%{public}u", bcId, callCount++);
     DISC_CHECK_AND_RETURN_RET_LOGE(packet != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid param packet!");
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckMediumIsValid(g_interfaceId), SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid id!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_BC_MGR_NO_FUNC_REGISTERED,
                                    DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->SetBroadcastingData != NULL,
@@ -1380,6 +1396,7 @@ int32_t StopBroadcasting(int32_t bcId)
 {
     static uint32_t callCount = 0;
     DISC_LOGI(DISC_BLE, "enter. bcId=%{public}d, callCount=%{public}u", bcId, callCount++);
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckMediumIsValid(g_interfaceId), SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid id!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_BC_MGR_NO_FUNC_REGISTERED,
                                    DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->StopBroadcasting != NULL,
@@ -1435,10 +1452,9 @@ static int32_t GetScanFreq(uint16_t scanInterval, uint16_t scanWindow)
 
 static bool NeedUpdateScan(int32_t listenerId)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_BC_MGR_NO_FUNC_REGISTERED,
-                                   DISC_BLE, "interface is null!");
-    DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->StopScan != NULL,
-                                   SOFTBUS_BC_MGR_FUNC_NULL, DISC_BLE, "function is null!");
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckMediumIsValid(g_interfaceId), false, DISC_BLE, "invalid id!");
+    DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, false, DISC_BLE, "interface is null!");
+    DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->StopScan != NULL, false, DISC_BLE, "function is null!");
     bool isNeedReset = false;
     bool isScanning = false;
     int32_t adapterScanId = g_scanManager[listenerId].adapterScanId;
@@ -1471,6 +1487,7 @@ static bool NeedUpdateScan(int32_t listenerId)
 
 static int32_t StartScanSub(int32_t listenerId)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckMediumIsValid(g_interfaceId), SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid id!");
     static uint32_t callCount = 0;
     SoftBusBcScanParams adapterParam;
     BuildSoftBusBcScanParams(&g_scanManager[listenerId].param, &adapterParam);
@@ -1509,6 +1526,7 @@ int32_t StartScan(int32_t listenerId, const BcScanParams *param)
     static uint32_t callCount = 0;
     DISC_LOGI(DISC_BLE, "enter. listenerId=%{public}d, callCount=%{public}u", listenerId, callCount++);
     DISC_CHECK_AND_RETURN_RET_LOGE(param != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid param!");
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckMediumIsValid(g_interfaceId), SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid id!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_BC_MGR_NO_FUNC_REGISTERED,
                                    DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->StartScan != NULL,
@@ -1543,6 +1561,7 @@ int32_t StopScan(int32_t listenerId)
 {
     static uint32_t callCount = 0;
     DISC_LOGI(DISC_BLE, "enter. listenerId=%{public}d, callCount=%{public}u", listenerId, callCount++);
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckMediumIsValid(g_interfaceId), SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid id!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_BC_MGR_NO_FUNC_REGISTERED,
                                    DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->StopScan != NULL,
@@ -1631,6 +1650,7 @@ int32_t QueryBroadcastStatus(int32_t bcId, int32_t *status)
 bool BroadcastIsLpDeviceAvailable(void)
 {
     DISC_LOGI(DISC_BLE, "enter.");
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckMediumIsValid(g_interfaceId), false, DISC_BLE, "invalid id!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, false, DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->IsLpDeviceAvailable != NULL,
                                    false, DISC_BLE, "function is null!");
@@ -1691,6 +1711,7 @@ bool BroadcastSetAdvDeviceParam(SensorHubServerType type, const LpBroadcastParam
 int32_t BroadcastGetBroadcastHandle(int32_t bcId, int32_t *bcHandle)
 {
     DISC_LOGI(DISC_BLE, "enter.");
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckMediumIsValid(g_interfaceId), SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid id!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_BC_MGR_NO_FUNC_REGISTERED,
                                    DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->GetBroadcastHandle != NULL,
@@ -1707,6 +1728,7 @@ int32_t BroadcastGetBroadcastHandle(int32_t bcId, int32_t *bcHandle)
 int32_t BroadcastEnableSyncDataToLpDevice(void)
 {
     DISC_LOGI(DISC_BLE, "enter.");
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckMediumIsValid(g_interfaceId), SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid id!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_BC_MGR_NO_FUNC_REGISTERED,
                                    DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->EnableSyncDataToLpDevice != NULL,
@@ -1720,6 +1742,7 @@ int32_t BroadcastEnableSyncDataToLpDevice(void)
 
 int32_t BroadcastDisableSyncDataToLpDevice(void)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckMediumIsValid(g_interfaceId), SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid id!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_BC_MGR_NO_FUNC_REGISTERED,
                                    DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->DisableSyncDataToLpDevice != NULL,
@@ -1733,6 +1756,7 @@ int32_t BroadcastDisableSyncDataToLpDevice(void)
 
 int32_t BroadcastSetScanReportChannelToLpDevice(int32_t listenerId, bool enable)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckMediumIsValid(g_interfaceId), SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid id!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_BC_MGR_NO_FUNC_REGISTERED,
                                    DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->SetScanReportChannelToLpDevice != NULL,
@@ -1761,6 +1785,7 @@ int32_t BroadcastSetLpAdvParam(int32_t duration, int32_t maxExtAdvEvents, int32_
                                int32_t interval, int32_t bcHandle)
 {
     DISC_LOGI(DISC_BLE, "enter.");
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckMediumIsValid(g_interfaceId), SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid id!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_BC_MGR_NO_FUNC_REGISTERED,
                                    DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->SetLpDeviceParam != NULL,

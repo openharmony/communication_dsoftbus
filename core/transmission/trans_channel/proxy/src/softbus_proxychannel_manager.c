@@ -93,7 +93,7 @@ static int32_t ResetChanIsEqual(int status, ProxyChannelInfo *a, ProxyChannelInf
 
 int32_t TransProxyGetAppInfoType(int16_t myId, const char *identity)
 {
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
@@ -118,7 +118,7 @@ static int32_t TransProxyUpdateAckInfo(ProxyChannelInfo *info)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return SOFTBUS_LOCK_ERR;
     }
@@ -153,7 +153,7 @@ int32_t TransRefreshProxyTimesNative(int channelId)
         return SOFTBUS_ERR;
     }
 
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
@@ -178,7 +178,7 @@ static int32_t TransProxyAddChanItem(ProxyChannelInfo *chan)
         return SOFTBUS_ERR;
     }
 
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
@@ -241,7 +241,7 @@ int32_t TransProxyGetChanByChanId(int32_t chanId, ProxyChannelInfo *chan)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
@@ -265,7 +265,7 @@ int32_t TransProxyGetChanByReqId(int32_t reqId, ProxyChannelInfo *chan)
         return SOFTBUS_ERR;
     }
 
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
@@ -289,7 +289,7 @@ void TransProxyDelChanByReqId(int32_t reqId, int32_t errCode)
         return;
     }
 
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return;
     }
@@ -317,7 +317,7 @@ void TransProxyDelChanByChanId(int32_t chanlId)
         return;
     }
 
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return;
     }
@@ -343,7 +343,7 @@ void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId)
         return;
     }
 
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return;
     }
@@ -397,7 +397,7 @@ void TransProxyDelByConnId(uint32_t connId)
         return;
     }
 
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return;
     }
@@ -425,7 +425,7 @@ static int32_t TransProxyDelByChannelId(int32_t channelId, ProxyChannelInfo *cha
         return SOFTBUS_ERR;
     }
 
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
@@ -457,7 +457,7 @@ static int32_t TransProxyResetChan(ProxyChannelInfo *chanInfo)
         return SOFTBUS_ERR;
     }
 
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
@@ -487,7 +487,7 @@ static int32_t TransProxyGetRecvMsgChanInfo(int16_t myId, int16_t peerId, ProxyC
         return SOFTBUS_ERR;
     }
 
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
@@ -514,7 +514,7 @@ static int32_t TransProxyKeepAlvieChan(ProxyChannelInfo *chanInfo)
         return SOFTBUS_ERR;
     }
 
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
@@ -542,7 +542,7 @@ int32_t TransProxyGetSendMsgChanInfo(int32_t channelId, ProxyChannelInfo *chanIn
         return SOFTBUS_ERR;
     }
 
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
@@ -570,7 +570,7 @@ int32_t TransProxyGetNewChanSeq(int32_t channelId)
         return seq;
     }
 
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return seq;
     }
@@ -598,7 +598,7 @@ int32_t TransProxyGetAuthId(int32_t channelId, AuthHandle *authHandle)
         return SOFTBUS_ERR;
     }
 
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
@@ -627,7 +627,7 @@ int32_t TransProxyGetSessionKeyByChanId(int32_t channelId, char *sessionKey, uin
     }
 
     ProxyChannelInfo *item = NULL;
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return SOFTBUS_LOCK_ERR;
     }
@@ -674,7 +674,7 @@ static int32_t TransProxyGetAppInfo(int16_t myId, AppInfo *appInfo)
         return SOFTBUS_ERR;
     }
 
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
@@ -908,19 +908,6 @@ static inline int32_t CheckAppTypeAndMsgHead(const ProxyMessageHead *msgHead, co
         return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
     }
     return SOFTBUS_OK;
-}
-
-static inline AuthLinkType ConvertConnectType2AuthLinkType(ConnectType type)
-{
-    if (type == CONNECT_TCP) {
-        return AUTH_LINK_TYPE_WIFI;
-    } else if ((type == CONNECT_BLE) || (type == CONNECT_BLE_DIRECT)) {
-        return AUTH_LINK_TYPE_BLE;
-    } else if (type == CONNECT_BR) {
-        return AUTH_LINK_TYPE_BR;
-    } else {
-        return AUTH_LINK_TYPE_P2P;
-    }
 }
 
 static void ConstructProxyChannelInfo(
@@ -1384,12 +1371,6 @@ int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int32_t channelId, cons
     }
 
     if (appInfo->appType != APP_TYPE_AUTH) {
-        AuthGetLatestIdByUuid(appInfo->peerData.deviceId, ConvertConnectType2AuthLinkType(chan->type),
-            false, &chan->authHandle);
-        if (chan->authHandle.authId == AUTH_INVALID_ID) {
-            TRANS_LOGE(TRANS_CTRL, "get authId for cipher err");
-            return SOFTBUS_ERR;
-        }
         if (SoftBusGenerateRandomArray((unsigned char *)appInfo->sessionKey, sizeof(appInfo->sessionKey)) !=
             SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "GenerateRandomArray err");
@@ -1516,7 +1497,7 @@ void TransProxyTimerProc(void)
     ProxyChannelInfo *nextNode = NULL;
     ListNode proxyProcList;
 
-    if (g_proxyChannelList == 0 || g_proxyChannelList->cnt <= 0 || SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (g_proxyChannelList == 0 || g_proxyChannelList->cnt <= 0 || SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
         return;
     }
 
@@ -1711,9 +1692,13 @@ int32_t TransProxyGetNameByChanId(int32_t chanId, char *pkgName, char *sessionNa
 
 static void TransProxyManagerDeinitInner(void)
 {
+    if (g_proxyChannelList == NULL) {
+        TRANS_LOGW(TRANS_INIT, "g_proxyChannelList is null");
+        return;
+    }
     ProxyChannelInfo *item = NULL;
     ProxyChannelInfo *nextNode = NULL;
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "lock mutex fail!");
         return;
     }
@@ -1763,7 +1748,7 @@ void TransProxyDeathCallback(const char *pkgName, int32_t pid)
     ListInit(&destroyList);
     ProxyChannelInfo *item = NULL;
     ProxyChannelInfo *nextNode = NULL;
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return;
     }
@@ -1794,7 +1779,7 @@ int32_t TransProxyGetAppInfoByChanId(int32_t chanId, AppInfo *appInfo)
         return SOFTBUS_ERR;
     }
 
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
@@ -1821,7 +1806,7 @@ int32_t TransProxyGetConnIdByChanId(int32_t channelId, int32_t *connId)
         return SOFTBUS_ERR;
     }
     ProxyChannelInfo *item = NULL;
-    if (SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
         return SOFTBUS_ERR;
     }
@@ -1863,4 +1848,32 @@ int32_t TransProxyGetConnOptionByChanId(int32_t channelId, ConnectOption *connOp
         return ret;
     }
     return SOFTBUS_OK;
+}
+
+int32_t TransProxySetAuthHandleByChanId(int32_t channelId, AuthHandle authHandle)
+{
+    ProxyChannelInfo *item = NULL;
+    ProxyChannelInfo *nextNode = NULL;
+
+    if (g_proxyChannelList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "trans proxy get channel param nullptr.");
+        return SOFTBUS_NO_INIT;
+    }
+
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock mutex fail.");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextNode, &g_proxyChannelList->list, ProxyChannelInfo, node) {
+        if (item->channelId == channelId) {
+            item->authHandle.authId = authHandle.authId;
+            item->authHandle.type = authHandle.type;
+            (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
+    TRANS_LOGE(TRANS_CTRL, "proxy channel not found by chanId, chanId=%{public}d", channelId);
+    return SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND;
 }

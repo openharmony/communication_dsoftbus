@@ -26,6 +26,8 @@ common_client_inc = bus_center_sdk_inc + disc_sdk_inc +
                     softbus_client_frame_inc + trans_session_manager_sdk_inc
 common_client_deps = bus_center_sdk_deps + trans_session_manager_sdk_deps
 
+common_client_ext_deps = []
+
 common_client_deps += [
   "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
   "$dsoftbus_dfx_path/log:softbus_dfx_log",
@@ -43,8 +45,8 @@ if (defined(ohos_lite)) {
     common_client_deps += [
       "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
       "//foundation/systemabilitymgr/samgr_lite/samgr:samgr",
-      "//third_party/bounds_checking_function:libsec_shared",
     ]
+    common_client_ext_deps += [ "bounds_checking_function:libsec_shared" ]
   }
 } else {
   if (dsoftbus_feature_build_shared_sdk == true) {
@@ -52,8 +54,7 @@ if (defined(ohos_lite)) {
   } else {
     build_type = "ohos_static_library"
   }
-  common_client_deps +=
-      [ "//third_party/bounds_checking_function:libsec_shared" ]
+  common_client_ext_deps += [ "bounds_checking_function:libsec_shared" ]
 }
 
 config("dsoftbus_sdk_interface") {
@@ -85,6 +86,7 @@ target(build_type, "softbus_client") {
   sources = common_client_src
   include_dirs = common_client_inc
   deps = common_client_deps
+  external_deps = common_client_ext_deps + libsoftbus_stream_ext_deps
   all_dependent_configs = [ ":dsoftbus_sdk_interface" ]
   public_configs = [ ":dsoftbus_sdk_interface" ]
   defines += TRANS_SDK_DEFINES
@@ -114,7 +116,7 @@ target(build_type, "softbus_client") {
     cflags = [ "-fPIC" ]
     cflags_cc = [ "-std=c++14" ]
     if (is_standard_system) {
-      external_deps = [
+      external_deps += [
         "c_utils:utils",
         "hilog:libhilog",
         "ipc:ipc_single",

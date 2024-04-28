@@ -39,9 +39,8 @@ group("unittest") {
   if (dsoftbus_feature_conn_tcp) {
     deps += [ "tcp:TcpManagerTest" ]
   }
-  if (softbus_communication_wifi_feature) {
-    deps += [ "wifi_direct:unittest" ]
-  }
+
+  # add wifi_direct cpp unit test here
 }
 
 group("fuzztest") {

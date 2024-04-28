@@ -125,6 +125,13 @@ typedef enum {
 } ChannelType;
 
 typedef enum {
+    MESSAGE_TYPE_UNDEFINED = -1,
+    MESSAGE_TYPE_NOMAL = 0,
+    MESSAGE_TYPE_CLOSE_ACK,
+    MESSAGE_TYPE_BUTT,
+} MessageType;
+
+typedef enum {
     BUSINESS_TYPE_MESSAGE = 1,
     BUSINESS_TYPE_BYTE = 2,
     BUSINESS_TYPE_FILE = 3,

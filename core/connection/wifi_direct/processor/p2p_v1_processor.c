@@ -44,6 +44,7 @@
 #define P2P_VERSION 2
 #define COMMON_BUFFER_LEN 256
 #define P2P_V1_WAITING_RESPONSE_TIME_MS 10000
+#define P2P_V1_WAITING_REUSE_RESPONSE_TIME_MS 2000
 #define P2P_V1_WAITING_REQUEST_TIME_MS 10000
 
 /* private method forward declare */
@@ -163,7 +164,7 @@ static int32_t ReuseLink(struct WifiDirectConnectInfo *connectInfo, struct Inner
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, V1_ERROR_POST_MESSAGE_FAILED, CONN_WIFI_DIRECT,
         "post request failed");
 
-    StartTimer(P2P_V1_WAITING_RESPONSE_TIME_MS);
+    StartTimer(P2P_V1_WAITING_REUSE_RESPONSE_TIME_MS);
     GetP2pV1Processor()->currentState = P2P_V1_PROCESSOR_STATE_WAITING_REUSE_RESPONSE;
     return ret;
 }
@@ -1719,7 +1720,7 @@ static void OnTimeOut(void *data)
         ProcessFailure(ERROR_WIFI_DIRECT_WAIT_CONNECT_RESPONSE_TIMEOUT, false);
     } else if (self->currentState == P2P_V1_PROCESSOR_STATE_WAITING_REUSE_RESPONSE) {
         CONN_LOGI(CONN_WIFI_DIRECT, "wait reuse response timeout");
-        ProcessFailure(ERROR_WIFI_DIRECT_WAIT_CONNECT_REQUEST_TIMEOUT, false);
+        ProcessFailure(ERROR_WIFI_DIRECT_WAIT_REUSE_RESPONSE_TIMEOUT, false);
     } else if (self->currentState == P2P_V1_PROCESSOR_STATE_WAITING_REQUEST) {
         CONN_LOGI(CONN_WIFI_DIRECT, "wait connect request timeout");
         ProcessFailure(ERROR_WIFI_DIRECT_WAIT_CONNECT_REQUEST_TIMEOUT, false);

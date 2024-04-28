@@ -68,6 +68,10 @@ enum DisSubModule {
     DISC_BC_MGR_SUB_MODULE_CODE = 5,
 };
 
+enum LnnSubModule {
+    LNN_LANE_MODULE_CODE = 1,
+};
+
 enum SoftBusErrNo {
     /* errno begin: -((203 << 21) | (10 << 16) | 0xFFFF) */
     SOFTBUS_PUBLIC_ERR_BASE = SOFTBUS_ERRNO(PUBLIC_SUB_MODULE_CODE),
@@ -124,6 +128,7 @@ enum SoftBusErrNo {
     SOFTBUS_NOT_LOGIN, // not login hw account
     SOFTBUS_NOT_SAME_ACCOUNT, // check whether the accounts are the same
     SOFTBUS_NO_ONLINE_DEVICE, // there is no network online device
+    SOFTBUS_LOOPER_ERR,  // get looper fail
 
     /* errno begin: -((203 << 21) | (5 << 16) | 0xFFFF) */
     SOFTBUS_TRANS_ERR_BASE = SOFTBUS_ERRNO(TRANS_SUB_MODULE_CODE),
@@ -252,6 +257,8 @@ enum SoftBusErrNo {
     SOFTBUS_TRANS_TDC_CHANNEL_ALREADY_EXIST, // receive repeat tdc channel open request
     SOFTBUS_TRANS_UDP_SET_CHANNEL_FAILED,
     SOFTBUS_TRANS_STOP_BIND_BY_CANCEL,
+    SOFTBUS_TRANS_INVALID_MESSAGE_TYPE,
+    SOFTBUS_TRANS_PROXY_GET_AUTH_ID_FAILED,
 
     /* errno begin: -((203 << 21) | (3 << 16) | 0xFFFF) */
     SOFTBUS_AUTH_ERR_BASE = SOFTBUS_ERRNO(AUTH_SUB_MODULE_CODE),
@@ -316,6 +323,15 @@ enum SoftBusErrNo {
     SOFTBUS_NETWORK_JOIN_LNN_START_ERR,
     SOFTBUS_NETWORK_LEAVE_LNN_START_ERR,
     SOFTBUS_CENTER_SERVER_INIT_FAILED,
+
+    /* errno begin: -((203 << 21) | (4 << 16) | (1 << 12) | 0x0FFF) */
+    SOFTBUS_LANE_ERR_BASE = SOFTBUS_SUB_ERRNO(LNN_SUB_MODULE_CODE, LNN_LANE_MODULE_CODE),
+    SOFTBUS_LANE_SELECT_FAIL,
+    SOFTBUS_LANE_TRIGGER_LINK_FAIL,
+    SOFTBUS_LANE_GET_LEDGER_INFO_ERR,
+    SOFTBUS_LANE_DETECT_FAIL,
+    SOFTBUS_LANE_ID_GENERATE_FAIL,
+    SOFTBUS_LANE_GUIDE_BUILD_FAIL,
 
     /* errno begin: -((203 << 21) | (2 << 16) | 0xFFFF) */
     SOFTBUS_CONN_ERR_BASE = SOFTBUS_ERRNO(CONN_SUB_MODULE_CODE),

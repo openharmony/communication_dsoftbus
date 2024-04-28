@@ -272,7 +272,7 @@ NO_SANITIZE("cfi") int32_t TransOnSessionClosed(int32_t channelId, int32_t chann
 {
     TRANS_LOGI(TRANS_SDK, "channelId=%{public}d, channelType=%{public}d", channelId, channelType);
     int32_t sessionId = INVALID_SESSION_ID;
-    int32_t ret;
+    int32_t ret = SOFTBUS_ERR;
     SessionListenerAdapter sessionCallback;
     bool isServer = false;
     (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
@@ -284,11 +284,12 @@ NO_SANITIZE("cfi") int32_t TransOnSessionClosed(int32_t channelId, int32_t chann
         if (listener->OnShutdown != NULL) {
             listener->OnShutdown(sessionId, reason);
         }
+        ret = ClientDeleteSocketSession(sessionId);
     } else if (sessionCallback.session.OnSessionClosed != NULL) {
         sessionCallback.session.OnSessionClosed(sessionId);
+        ret = ClientDeleteSession(sessionId);
     }
 
-    ret = ClientDeleteSession(sessionId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "client delete session failed");
         return ret;
