@@ -295,7 +295,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_001, TestSize.Level1)
     int32_t value = 3;
     uint64_t local = 1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY;
     uint64_t remote = 1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY;
-    int32_t requestId = 1;
+    uint32_t requestId = 1;
 
     LaneDepsInterfaceMock linkMock;
     LaneLinkDepsInterfaceMock laneLinkMock;
@@ -343,7 +343,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_002, TestSize.Level1)
     int32_t value = 3;
     uint64_t local = 1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY;
     uint64_t remote = 1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY;
-    int32_t requestId = 1;
+    uint32_t requestId = 1;
 
     LaneDepsInterfaceMock linkMock;
     LaneLinkDepsInterfaceMock laneLinkMock;
@@ -390,7 +390,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_003, TestSize.Level1)
     int32_t value = 3;
     uint64_t local = 1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY;
     uint64_t remote = 1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY;
-    int32_t requestId = 1;
+    uint32_t requestId = 1;
 
     LaneDepsInterfaceMock linkMock;
     LaneLinkDepsInterfaceMock laneLinkMock;
@@ -437,7 +437,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_004, TestSize.Level1)
     int32_t value = 3;
     uint64_t local = 0;
     uint64_t remote = 0;
-    int32_t requestId = 1;
+    uint32_t requestId = 1;
 
     LaneDepsInterfaceMock linkMock;
     LaneLinkDepsInterfaceMock laneLinkMock;
@@ -479,7 +479,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_005, TestSize.Level1)
     int32_t value = 3;
     uint64_t local = 0;
     uint64_t remote = 0;
-    int32_t requestId = 1;
+    uint32_t requestId = 1;
 
     LaneDepsInterfaceMock linkMock;
     LaneLinkDepsInterfaceMock laneLinkMock;
@@ -524,7 +524,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_006, TestSize.Level1)
     int32_t value = 3;
     uint64_t local = 1 << BIT_BLE_TRIGGER_CONNECTION;
     uint64_t remote = 1 << BIT_BLE_TRIGGER_CONNECTION;
-    int32_t requestId = 1;
+    uint32_t requestId = 1;
 
     LaneDepsInterfaceMock linkMock;
     LaneLinkDepsInterfaceMock laneLinkMock;
@@ -574,7 +574,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_007, TestSize.Level1)
     int32_t value = 3;
     uint64_t local = 1 << BIT_BLE_TRIGGER_CONNECTION;
     uint64_t remote = 1 << BIT_BLE_TRIGGER_CONNECTION;
-    int32_t requestId = 1;
+    uint32_t requestId = 1;
 
     LaneDepsInterfaceMock linkMock;
     LaneLinkDepsInterfaceMock laneLinkMock;
@@ -624,7 +624,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_008, TestSize.Level1)
     int32_t value = 3;
     uint64_t local = 1 << BIT_BLE_TRIGGER_CONNECTION;
     uint64_t remote = 1 << BIT_BLE_TRIGGER_CONNECTION;
-    int32_t requestId = 1;
+    uint32_t requestId = 1;
 
     LaneDepsInterfaceMock linkMock;
     LaneLinkDepsInterfaceMock laneLinkMock;
@@ -673,7 +673,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_009, TestSize.Level1)
     int32_t value = 3;
     uint64_t local = 1 << BIT_BLE_TRIGGER_CONNECTION;
     uint64_t remote = 1 << BIT_BLE_TRIGGER_CONNECTION;
-    int32_t requestId = 1;
+    uint32_t requestId = 1;
 
     LaneDepsInterfaceMock linkMock;
     LaneLinkDepsInterfaceMock laneLinkMock;
@@ -764,7 +764,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_001, TestSize.Level1)
     int32_t value = 3;
     uint64_t local = 1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY;
     uint64_t remote = 1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY;
-    int32_t requestId = 1;
+    uint32_t requestId = 1;
 
     LaneDepsInterfaceMock linkMock;
     LaneLinkDepsInterfaceMock laneLinkMock;
@@ -816,7 +816,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_002, TestSize.Level1)
     int32_t value = 3;
     uint64_t local = 1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY;
     uint64_t remote = 1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY;
-    int32_t requestId = 1;
+    uint32_t requestId = 1;
 
     LaneDepsInterfaceMock linkMock;
     LaneLinkDepsInterfaceMock laneLinkMock;
@@ -871,7 +871,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_003, TestSize.Level1)
     int32_t value = 3;
     uint64_t local = 1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY;
     uint64_t remote = 1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY;
-    int32_t requestId = 1;
+    uint32_t requestId = 1;
 
     LaneDepsInterfaceMock linkMock;
     LaneLinkDepsInterfaceMock laneLinkMock;
@@ -925,7 +925,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_004, TestSize.Level1)
     int32_t value = 3;
     uint64_t local = 1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY;
     uint64_t remote = 1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY;
-    int32_t requestId = 1;
+    uint32_t requestId = 1;
 
     LaneDepsInterfaceMock linkMock;
     LaneLinkDepsInterfaceMock laneLinkMock;
@@ -979,7 +979,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_005, TestSize.Level1)
     int32_t value = 3;
     uint64_t local = 1 << BIT_BLE_TRIGGER_CONNECTION;
     uint64_t remote = 1 << BIT_BLE_TRIGGER_CONNECTION;
-    int32_t requestId = 1;
+    uint32_t requestId = 1;
 
     LaneDepsInterfaceMock linkMock;
     LaneLinkDepsInterfaceMock laneLinkMock;
@@ -1030,7 +1030,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_006, TestSize.Level1)
     int32_t value = 3;
     uint64_t local = 1 << BIT_BLE_TRIGGER_CONNECTION;
     uint64_t remote = 1 << BIT_BLE_TRIGGER_CONNECTION;
-    int32_t requestId = 1;
+    uint32_t requestId = 1;
 
     LaneDepsInterfaceMock linkMock;
     LaneLinkDepsInterfaceMock laneLinkMock;
@@ -1083,7 +1083,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_007, TestSize.Level1)
     int32_t value = 3;
     uint64_t local = 1 << BIT_BLE_TRIGGER_CONNECTION;
     uint64_t remote = 1 << BIT_BLE_TRIGGER_CONNECTION;
-    int32_t requestId = 1;
+    uint32_t requestId = 1;
 
     LaneDepsInterfaceMock linkMock;
     LaneLinkDepsInterfaceMock laneLinkMock;
@@ -1135,7 +1135,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_008, TestSize.Level1)
     int32_t value = 3;
     uint64_t local = 1 << BIT_BLE_TRIGGER_CONNECTION;
     uint64_t remote = 1 << BIT_BLE_TRIGGER_CONNECTION;
-    int32_t requestId = 1;
+    uint32_t requestId = 1;
 
     LaneDepsInterfaceMock linkMock;
     LaneLinkDepsInterfaceMock laneLinkMock;
@@ -1186,7 +1186,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetry_001, TestSize.Level1)
     int32_t value = 3;
     uint64_t local = 1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY;
     uint64_t remote = 1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY;
-    int32_t requestId = 1;
+    uint32_t requestId = 1;
 
     LaneDepsInterfaceMock linkMock;
     LaneLinkDepsInterfaceMock laneLinkMock;
@@ -1239,7 +1239,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetry_002, TestSize.Level1)
     int32_t value = 3;
     uint64_t local = 1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY;
     uint64_t remote = 1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY;
-    int32_t requestId = 1;
+    uint32_t requestId = 1;
 
     LaneDepsInterfaceMock linkMock;
     LaneLinkDepsInterfaceMock laneLinkMock;
@@ -1291,7 +1291,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetry_003, TestSize.Level1)
     int32_t value = 3;
     uint64_t local = 1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY;
     uint64_t remote = 1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY;
-    int32_t requestId = 1;
+    uint32_t requestId = 1;
 
     LaneDepsInterfaceMock linkMock;
     LaneLinkDepsInterfaceMock laneLinkMock;
@@ -1344,7 +1344,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetry_004, TestSize.Level1)
     int32_t value = 3;
     uint64_t local = 1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY;
     uint64_t remote = 1 << BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY;
-    int32_t requestId = 1;
+    uint32_t requestId = 1;
 
     LaneDepsInterfaceMock linkMock;
     LaneLinkDepsInterfaceMock laneLinkMock;
