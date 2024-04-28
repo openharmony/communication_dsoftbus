@@ -46,7 +46,7 @@ InfoContainer<InterfaceInfoKey>::KeyTypeTable InfoContainer<InterfaceInfoKey>::k
     { InterfaceInfoKey::CENTER_FREQUENCY1,      Serializable::ValueType::INT       },
     { InterfaceInfoKey::CENTER_FREQUENCY2,      Serializable::ValueType::INT       },
     { InterfaceInfoKey::BANDWIDTH,              Serializable::ValueType::INT       },
-    { InterfaceInfoKey::WIFI_CFG_INFO,          Serializable::ValueType::BYTE_ARRAY},
+    { InterfaceInfoKey::WIFI_CFG_INFO,          Serializable::ValueType::STRING    },
     { InterfaceInfoKey::IS_ENABLE,              Serializable::ValueType::BOOL      },
     { InterfaceInfoKey::CONNECTED_DEVICE_COUNT, Serializable::ValueType::INT       },
     { InterfaceInfoKey::PSK,                    Serializable::ValueType::STRING    },
