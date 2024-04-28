@@ -1708,8 +1708,8 @@ static int32_t TryGetBrConnInfo(const char *uuid, AuthConnInfo *connInfo)
     }
 
     uint32_t local, remote;
-    if (LnnGetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t *)&local) != SOFTBUS_OK ||
-        LnnGetRemoteNumInfo(networkId, NUM_KEY_NET_CAP, (int32_t *)&remote) != SOFTBUS_OK) {
+    if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &local) != SOFTBUS_OK ||
+        LnnGetRemoteNumU32Info(networkId, NUM_KEY_NET_CAP, &remote) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "get NET_CAP fail");
         return SOFTBUS_AUTH_GET_BR_CONN_INFO_FAIL;
     }

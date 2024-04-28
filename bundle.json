@@ -52,6 +52,9 @@
         "bounds_checking_function",
         "bundle_framework",
         "common_event_service",
+        "bounds_checking_function",
+        "cJSON",
+        "openssl",
         "data_share",
         "device_auth",
         "device_info_manager",
@@ -81,11 +84,11 @@
         "libcoap"
       ],
       "third_party": [
-        "bounds_checking_function",
         "cJSON",
         "json",
         "mbedtls",
         "openssl",
+        "bounds_checking_function",
         "sqlite"
       ]
     },

@@ -43,8 +43,7 @@ if (dsoftbus_feature_lnn_net) {
       "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_ptk_info_virtual.c",
       "$dsoftbus_root_path/core/bus_center/utils/src/lnn_secure_storage.c",
     ]
-    bus_center_builder_inc =
-        [ "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single" ]
+    bus_center_builder_inc = []
   } else {
     import(
         "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/net_builder/cipherkey/cipherkey.gni")
@@ -56,17 +55,14 @@ if (dsoftbus_feature_lnn_net) {
       "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/net_builder/fast_online/lnn_device_info_recovery.c",
       "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/net_builder/fast_online/lnn_secure_storage.c",
     ]
-    bus_center_builder_inc = [
-      "$dsoftbus_root_path/dsoftbus_enhance/core/connection/wifi_direct/adapter/single",
-      "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/mlps/include",
-    ]
+    bus_center_builder_inc =
+        [ "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/mlps/include" ]
   }
 } else {
   bus_center_builder_src = [
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_cipherkey_manager_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_ptk_info_virtual.c",
-    "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single/wifi_direct_p2p_adapter_virtual.c",
   ]
 }
 bus_center_builder_inc += [

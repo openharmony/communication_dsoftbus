@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,38 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef TRANS_PENDING_PKT_H
-#define TRANS_PENDING_PKT_H
+#ifndef SOFTBUS_HIDUMPER_BROADCAST_H
+#define SOFTBUS_HIDUMPER_BROADCAST_H
 
-#include <stdint.h>
-
-#include "common_list.h"
-#include "softbus_def.h"
+#include "softbus_hidumper.h"
 
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif
 #endif
+typedef void (*SoftbusBroadcastDumpTask)(void);
 
-enum {
-    PENDING_TYPE_PROXY = 0,
-    PENDING_TYPE_DIRECT,
-    PENDING_TYPE_UDP,
-    PENDING_TYPE_BUTT,
-};
+int32_t SoftbusRegBroadcastDumpTask(const SoftbusBroadcastDumpTask cb, uint64_t delayMillis);
 
-int32_t PendingInit(int type);
-void PendingDeinit(int type);
-int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type);
-int32_t SetPendingPacket(int32_t channelId, int32_t seqNum, int type);
-int32_t DelPendingPacket(int32_t channelId, int type);
+int32_t SoftBusHiDumperBroadcastInit(void);
+int32_t SoftBusRegBroadcastVarDump(const char *dumpVar, const SoftBusVarDumpCb cb);
+void SoftBusHiDumperBroadcastDeInit(void);
 
 #ifdef __cplusplus
 #if __cplusplus
 }
 #endif /* __cplusplus */
 #endif /* __cplusplus */
-
-#endif // TRANS_PENDING_PKT_H
-
+#endif /* SOFTBUS_HIDUMPER_BROADCAST_H */

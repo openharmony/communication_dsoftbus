@@ -123,7 +123,7 @@ typedef struct {
     int64_t connectedStart;
     const uint8_t *fastTransData;
     uint16_t fastTransDataSize;
-    int32_t firstTokenId;
+    uint32_t firstTokenId;
     bool isClient;
 } AppInfo;
 
