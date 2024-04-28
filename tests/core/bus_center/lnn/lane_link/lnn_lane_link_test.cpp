@@ -92,7 +92,7 @@ static struct WifiDirectUtils g_utils = {
     .supportHmlTwo = SupportHmlTwo,
 };
 
-static int32_t GetRequestId(void)
+static uint32_t GetRequestId(void)
 {
     return 1;
 }
@@ -122,19 +122,10 @@ static int32_t DisconnectDevice(struct WifiDirectConnectInfo *connectInfo, struc
     return SOFTBUS_OK;
 }
 
-static bool IsNegotiateChannelNeeded(const char *remoteNetworkId, enum WifiDirectLinkType linkType)
-{
-    if (remoteNetworkId == NULL) {
-        return true;
-    }
-    return false;
-}
-
 static struct WifiDirectManager g_manager = {
     .getRequestId = GetRequestId,
     .connectDevice = ConnectDevice,
     .disconnectDevice = DisconnectDevice,
-    .isNegotiateChannelNeeded = IsNegotiateChannelNeeded,
 };
 
 /*
