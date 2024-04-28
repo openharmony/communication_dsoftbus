@@ -478,18 +478,11 @@ static inline void ClearOpenSessionTime(void)
 static inline int32_t InitOpenSessionEvtMutexLock(void)
 {
     SoftBusMutexAttr mutexAttr = {SOFTBUS_MUTEX_RECURSIVE};
-    if (SoftBusMutexInit(&g_openSessionCnt.lock, &mutexAttr) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+    if (SoftBusMutexInit(&g_openSessionCnt.lock, &mutexAttr) != SOFTBUS_OK ||
+        SoftBusMutexInit(&g_openSessionTime.lock, &mutexAttr) != SOFTBUS_OK ||
+        SoftBusMutexInit(&g_openSessionKpi.lock, &mutexAttr) != SOFTBUS_OK) {
+        return SOFTBUS_DFX_INIT_FAILED;
     }
-
-    if (SoftBusMutexInit(&g_openSessionTime.lock, &mutexAttr) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
-
-    if (SoftBusMutexInit(&g_openSessionKpi.lock, &mutexAttr) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
-
     return SOFTBUS_OK;
 }
 
