@@ -56,16 +56,6 @@ int32_t GetTransReqInfoByLaneReqId(uint32_t laneReqId, TransOption *reqInfo)
     return GetLaneLinkDepsInterface()->GetTransReqInfoByLaneReqId(laneReqId, reqInfo);
 }
 
-struct WifiDirectManager *GetWifiDirectManager(void)
-{
-    return GetLaneLinkDepsInterface()->GetWifiDirectManager();
-}
-
-struct WifiDirectUtils *GetWifiDirectUtils(void)
-{
-    return GetLaneLinkDepsInterface()->GetWifiDirectUtils();
-}
-
 int32_t TransProxyPipelineGenRequestId(void)
 {
     return GetLaneLinkDepsInterface()->TransProxyPipelineGenRequestId();
