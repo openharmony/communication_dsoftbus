@@ -1535,58 +1535,67 @@ static int32_t LnnFirstGetUdid(void)
     return SOFTBUS_OK;
 }
 
-static int32_t LnnGenBroadcastCipherInfo(void)
+static int32_t LnnLoadBroadcastCipherInfo(BroadcastCipherKey *broadcastKey)
 {
-    if (LnnLoadLocalBroadcastCipherKey() == SOFTBUS_OK) {
-        BroadcastCipherKey broadcastKey;
-        (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-        if (LnnGetLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LEDGER, "get local info failed.");
-            return SOFTBUS_ERR;
-        }
-        if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_KEY,
-            broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
-            (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-            LNN_LOGE(LNN_LEDGER, "set key error.");
-            return SOFTBUS_ERR;
-        }
-        if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_IV,
-            broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
-            (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-            LNN_LOGE(LNN_LEDGER, "set iv error.");
-            return SOFTBUS_ERR;
-        }
-        (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-        LNN_LOGI(LNN_LEDGER, "load BroadcastCipherInfo success!");
-        return SOFTBUS_OK;
-    }
-
-    BroadcastCipherKey broadcastKey;
-    (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
-    if (SoftBusGenerateRandomArray(broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "generate broadcast key error.");
+    if (broadcastKey == NULL) {
+        LNN_LOGE(LNN_LEDGER, "broadcastKey is null.");
         return SOFTBUS_ERR;
     }
-    if (SoftBusGenerateRandomArray(broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "generate broadcast iv error.");
+    if (LnnGetLocalBroadcastCipherKey(broadcastKey) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get local info failed.");
         return SOFTBUS_ERR;
     }
     if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_KEY,
-        broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+        broadcastKey->cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "set key error.");
         return SOFTBUS_ERR;
     }
     if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_IV,
-        broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
+        broadcastKey->cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "set iv error.");
         return SOFTBUS_ERR;
     }
-    if (LnnUpdateLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "update local broadcast key failed");
-        return SOFTBUS_ERR;
-    }
-    LNN_LOGI(LNN_LEDGER, "generate BroadcastCipherInfo success!");
+     LNN_LOGI(LNN_LEDGER, "load BroadcastCipherInfo success!");
     return SOFTBUS_OK;
+}
+
+static int32_t LnnGenBroadcastCipherInfo(void)
+{
+    BroadcastCipherKey broadcastKey;
+    int32_t ret = SOFTBUS_ERR;
+    (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
+    do {
+        if (LnnLoadLocalBroadcastCipherKey() == SOFTBUS_OK) {
+            ret = LnnLoadBroadcastCipherInfo(&broadcastKey);
+            break;
+        }
+        if (SoftBusGenerateRandomArray(broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "generate broadcast key error.");
+            break;
+        }
+        if (SoftBusGenerateRandomArray(broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "generate broadcast iv error.");
+            break;
+        }
+        if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_KEY,
+            broadcastKey.cipherInfo.key, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "set key error.");
+            break;
+        }
+        if (LnnSetLocalByteInfo(BYTE_KEY_BROADCAST_CIPHER_IV,
+            broadcastKey.cipherInfo.iv, BROADCAST_IV_LEN) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "set iv error.");
+            break;
+        }
+        if (LnnUpdateLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "update local broadcast key failed");
+            break;
+        }
+        LNN_LOGI(LNN_LEDGER, "generate BroadcastCipherInfo success!");
+        ret = SOFTBUS_OK;
+    } while (0);
+    (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
+    return ret;
 }
 
 int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
