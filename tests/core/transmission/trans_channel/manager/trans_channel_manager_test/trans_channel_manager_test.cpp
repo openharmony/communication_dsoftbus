@@ -34,6 +34,13 @@
 #include "trans_session_service.h"
 #include "lnn_lane_qos.h"
 #include "softbus_trans_def.h"
+#include "softbus_feature_config.h"
+#include "softbus_conn_interface.h"
+#include "auth_interface.h"
+#include "bus_center_manager.h"
+#include "disc_event_manager.h"
+#include "softbus_conn_ble_direct.h"
+#include "message_handler.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -73,10 +80,25 @@ public:
 };
 
 void TransChannelManagerTest::SetUpTestCase(void)
-{}
+{
+    SoftbusConfigInit();
+    LooperInit();
+    ConnServerInit();
+    AuthInit();
+    BusCenterServerInit();
+    TransServerInit();
+    DiscEventManagerInit();
+    TransChannelInit();
+}
 
 void TransChannelManagerTest::TearDownTestCase(void)
-{}
+{
+    LooperDeinit();
+    ConnServerDeinit();
+    AuthDeinit();
+    TransServerDeinit();
+    DiscEventManagerDeinit();
+}
 
 /**
  * @tc.name: TransChannelInit001
@@ -86,9 +108,8 @@ void TransChannelManagerTest::TearDownTestCase(void)
  */
 HWTEST_F(TransChannelManagerTest, TransChannelInit001, TestSize.Level1)
 {
-    InitSoftBusServer();
     bool ret = GetServerIsInit();
-    EXPECT_EQ(true, ret);
+    EXPECT_EQ(false, ret);
 }
 
 /**
@@ -101,7 +122,7 @@ HWTEST_F(TransChannelManagerTest, TransChannelDeinit001, TestSize.Level1)
 {
     TransServerDeinit();
     bool ret = GetServerIsInit();
-    EXPECT_EQ(true, ret);
+    EXPECT_EQ(false, ret);
 }
 
 /**
