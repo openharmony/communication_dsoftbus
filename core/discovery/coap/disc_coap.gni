@@ -14,6 +14,8 @@
 import("../../../dsoftbus.gni")
 import("../../common/dfx/dsoftbus_dfx.gni")
 
+disc_coap_external_deps = []
+
 if (dsoftbus_feature_disc_coap == true) {
   disc_coap_src = [
     "$dsoftbus_root_path/core/discovery/coap/common/src/disc_coap_parser.c",
@@ -35,8 +37,8 @@ disc_coap_inc = [
   "$dsoftbus_root_path/interfaces/kits/discovery",
   "$dsoftbus_root_path/core/common/include",
   "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
-  "//third_party/cJSON",
 ]
+disc_coap_external_deps += [ "cJSON:cjson" ]
 if (dsoftbus_feature_ex_kits) {
   import(
       "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/coap/coap_enhance.gni")
