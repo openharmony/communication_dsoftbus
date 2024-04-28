@@ -275,7 +275,12 @@ static int64_t PackReadFileData(FileFrame *fileFrame, uint64_t readLength, uint6
         (*(uint16_t *)(fileFrame->fileData + dataLen)) = crc;
         info->checkSumCRC += crc;
     } else {
-        fileFrame->frameLength = FRAME_DATA_SEQ_OFFSET + (uint64_t)len;
+        uint64_t tmp = FRAME_DATA_SEQ_OFFSET + (uint64_t)len;
+        if (tmp > UINT32_MAX) {
+            TRANS_LOGE(TRANS_FILE, "Overflow error");
+            return SOFTBUS_INVALID_NUM;
+        }
+        fileFrame->frameLength = (uint32_t)tmp;
         if (fileFrame->frameLength > info->packetSize) {
             TRANS_LOGE(TRANS_FILE, "frameLength invalid. frameLength=%{public}u", fileFrame->frameLength);
             return SOFTBUS_ERR;
@@ -665,7 +670,7 @@ static int32_t PackFileTransStartInfo(
     }
     uint32_t len = strlen(destFile);
     if (info->crc == APP_INFO_FILE_FEATURES_SUPPORT) {
-        uint64_t dataLen = len + FRAME_DATA_SEQ_OFFSET + sizeof(uint64_t);
+        uint64_t dataLen = (uint64_t)len + FRAME_DATA_SEQ_OFFSET + sizeof(uint64_t);
         fileFrame->frameLength = FRAME_HEAD_LEN + dataLen;
         if (fileFrame->frameLength > info->packetSize) {
             TRANS_LOGE(TRANS_FILE, "frameLength overSize");
@@ -1816,7 +1821,7 @@ static int32_t ProcessOneFrameCRC(const FileFrame *frame, uint32_t dataLen, Sing
                 TRANS_FILE, "WriteEmptyFrame bytesToWrite is too large, bytesToWrite=%{public}" PRIu64, bytesToWrite);
             return SOFTBUS_ERR;
         }
-        if (fileInfo->fileOffset > (uint64_t)MAX_FILE_SIZE - bytesToWrite) {
+        if (fileInfo->fileOffset > (uint64_t)MAX_FILE_SIZE - (uint64_t)bytesToWrite) {
             TRANS_LOGE(TRANS_FILE, "file is too large, offset=%{public}" PRIu64, fileInfo->fileOffset + bytesToWrite);
             return SOFTBUS_ERR;
         }
