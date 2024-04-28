@@ -289,6 +289,10 @@ static char *GetApiNameByCode(uint32_t code)
 
 void SoftbusRecordCalledApiInfo(const char *appName, uint32_t code)
 {
+    if (g_calledApiInfoList == NULL) {
+        COMM_LOGE(COMM_EVENT, "g_calledApiInfoList is null");
+        return;
+    }
     if (SoftBusMutexLock(&g_calledApiInfoList->lock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_EVENT, "SoftbusRecordCalledApiInfo lock fail");
         return;
@@ -916,4 +920,6 @@ void DeinitTransStatisticSysEvt(void)
     }
     DestroySoftBusList(g_calledApiInfoList);
     DestroySoftBusList(g_calledApiCntlist);
+    g_calledApiInfoList = NULL;
+    g_calledApiCntlist = NULL;
 }
