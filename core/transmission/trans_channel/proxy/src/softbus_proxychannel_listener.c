@@ -144,7 +144,7 @@ int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned
     } else if (ret != SOFTBUS_OK) {
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     }
-    TRANS_LOGI(TRANS_CTRL, "on open ret=%{public}d", ret);
+    TRANS_LOGI(TRANS_CTRL, "on open, channelId=%{public}d, ret=%{public}d", channelId, ret);
     return ret;
 }
 

@@ -144,7 +144,7 @@ int32_t TransOnChannelMsgReceived(int32_t channelId, int32_t channelType,
         TRANS_LOGE(TRANS_MSG, "param invalid");
         return SOFTBUS_INVALID_PARAM;
     }
-    TRANS_LOGI(TRANS_MSG,
+    TRANS_LOGD(TRANS_MSG,
         "[client]: channelId=%{public}d, channelType=%{public}d", channelId, channelType);
     switch (channelType) {
         case CHANNEL_TYPE_AUTH:
