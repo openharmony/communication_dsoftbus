@@ -26,6 +26,12 @@ ohos_unittest("TransSessionManagerTest") {
     "$dsoftbus_root_path/core/frame/common/include",
     "$dsoftbus_root_path/core/transmission/common/include",
     "$dsoftbus_root_path/core/transmission/session/include",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/discovery/interface",
   ]
 
   deps = [
@@ -56,6 +62,12 @@ ohos_unittest("TransSessionServiceTest") {
     "$dsoftbus_root_path/core/frame/common/include",
     "$dsoftbus_root_path/core/transmission/common/include",
     "$dsoftbus_root_path/core/transmission/session/include",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/discovery/interface",
   ]
 
   deps = [

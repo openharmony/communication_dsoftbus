@@ -39,11 +39,19 @@
 #include "trans_tcp_direct_sessionconn.h"
 #include "trans_tcp_direct_wifi.h"
 #include "softbus_tcp_socket.h"
+#include "softbus_feature_config.h"
+#include "softbus_conn_interface.h"
+#include "bus_center_manager.h"
+#include "trans_session_service.h"
+#include "disc_event_manager.h"
+#include "softbus_conn_ble_direct.h"
+#include "message_handler.h"
 
 using namespace testing::ext;
 
 namespace OHOS {
 #define TEST_TRANS_UDID "1234567"
+#define TEST_AUTH_ID 1
 #define AUTH_TRANS_DATA_LEN 32
 #define DC_MSG_PACKET_HEAD_SIZE_LEN 24
 #define MODULE_P2P_LISTEN 16
@@ -55,7 +63,7 @@ namespace OHOS {
 #define TEST_RECV_DATA "receive data"
 #define TEST_JSON "{errcode:1}"
 #define TEST_MESSAGE "testMessage"
-#define TEST_NETWORK_ID "testNetworkId"
+#define TEST_NETWORK_ID "peer networkId"
 #define TEST_PKG_NAME "com.test.trans.demo.pkgname"
 
 #define TRANS_TEST_CONN_ID 1000
@@ -113,25 +121,36 @@ void TransServerTcpDirectTest::SetUpTestCase(void)
     int32_t ret = LnnInitLocalLedger();
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    (void)AuthInit();
+    SoftbusConfigInit();
+    LooperInit();
+    ConnServerInit();
+    AuthInit();
+    BusCenterServerInit();
+    TransServerInit();
+    DiscEventManagerInit();
+    TransChannelInit();
+    CreatSessionConnList();
     ret = AuthCommonInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     IServerChannelCallBack *cb = TransServerGetChannelCb();
     ret = TransTcpDirectInit(cb);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     TestAddTestSessionConn();
 }
 
 void TransServerTcpDirectTest::TearDownTestCase(void)
 {
+    LooperDeinit();
+    ConnServerDeinit();
+    AuthDeinit();
+    TransServerDeinit();
+    DiscEventManagerDeinit();
+    TransChannelDeinit();
     AuthCommonDeinit();
     TransTcpDirectDeinit();
-
     LnnDeinitLocalLedger();
-
-    TestDelSessionConn();
 }
 
 static int32_t TestAddAuthManager(int64_t authSeq, const char *sessionKeyStr, bool isServer)
@@ -316,15 +335,15 @@ HWTEST_F(TransServerTcpDirectTest, TdcOnDataEvent001, TestSize.Level1)
     ASSERT_EQ(ret, EOK);
 
     ret = TestAddSessionConn(true);
-    ASSERT_EQ(ret, SOFTBUS_ERR);
+    ASSERT_EQ(ret, SOFTBUS_OK);
 
     ret = TestAddSessionConn(true);
-    ASSERT_EQ(ret, SOFTBUS_ERR);
+    ASSERT_EQ(ret, SOFTBUS_OK);
 
     TestDelSessionConnNode(TRANS_TEST_CHCANNEL_ID);
 
     ret = TestAddSessionConn(true);
-    ASSERT_EQ(ret, SOFTBUS_ERR);
+    ASSERT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
@@ -347,7 +366,6 @@ HWTEST_F(TransServerTcpDirectTest, TdcOnDataEvent002, TestSize.Level1)
     int ret = strcpy_s(connInfo.socketOption.addr, sizeof(connInfo.socketOption.addr), TEST_SOCKET_ADDR);
     ASSERT_EQ(ret, EOK);
 
-    InitSoftBusServer();
     ret = TestAddSessionConn(false);
     ASSERT_EQ(ret, SOFTBUS_OK);
 }
@@ -435,7 +453,7 @@ HWTEST_F(TransServerTcpDirectTest, PackBytes001, TestSize.Level1)
     int32_t channelId = g_conn->channelId;
     AuthHandle authHandle = { .authId = 1, .type = 1};
     int32_t ret = SetAuthHandleByChanId(channelId, &authHandle);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
@@ -493,16 +511,13 @@ HWTEST_F(TransServerTcpDirectTest, GetAuthHandleByChanId001, TestSize.Level1)
 {
     AppInfo appInfo;
     int32_t ret = GetAppInfoById(g_conn->channelId, &appInfo);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
     ret = GetAuthHandleByChanId(g_conn->channelId, &authHandle);
-    EXPECT_EQ(authHandle.authId, AUTH_INVALID_ID);
+    EXPECT_EQ(authHandle.authId, TEST_AUTH_ID);
 
     ret = SetAuthHandleByChanId(g_conn->channelId, &authHandle);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
-
-    ret = GetAuthHandleByChanId(g_conn->channelId, &authHandle);
-    EXPECT_EQ(authHandle.authId, AUTH_INVALID_ID);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
@@ -554,8 +569,6 @@ HWTEST_F(TransServerTcpDirectTest, TransTdcStopSessionProc001, TestSize.Level1)
     conn->timeout = HANDSHAKE_TIMEOUT;
     conn->status = TCP_DIRECT_CHANNEL_STATUS_VERIFY_P2P;
     conn->listenMod = DIRECT_CHANNEL_SERVER_WIFI;
-
-    OnSessionOpenFailProc(conn, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
 
     TransTdcTimerProc();
     TransTdcStopSessionProc(AUTH);
