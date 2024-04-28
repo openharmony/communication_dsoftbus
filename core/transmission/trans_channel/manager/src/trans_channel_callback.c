@@ -75,7 +75,8 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
     return ClientIpcOnChannelOpened(pkgName, sessionName, channel, pid);
 }
 
-static int32_t TransServerOnChannelClosed(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType)
+static int32_t TransServerOnChannelClosed(
+    const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType, int32_t messageType)
 {
     if (pkgName == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -89,6 +90,7 @@ static int32_t TransServerOnChannelClosed(const char *pkgName, int32_t pid, int3
         .msgChannelId = channelId,
         .msgChannelType = channelType,
         .msgPid = pid,
+        .msgMessageType = messageType,
         .msgPkgName = pkgName,
         .msgUuid = NULL,
         .msgUdid = NULL

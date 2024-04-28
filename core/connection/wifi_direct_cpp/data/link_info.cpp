@@ -107,9 +107,11 @@ int LinkInfo::Unmarshalling(WifiDirectProtocol &protocol, const std::vector<uint
             case Serializable::ValueType::INT:
                 Set(LinkInfoKey(key), *(int *)(data));
                 break;
-            case Serializable::ValueType::STRING:
-                Set(LinkInfoKey(key), std::string(reinterpret_cast<const char *>(data)));
+            case Serializable::ValueType::STRING: {
+                std::string str(std::string(reinterpret_cast<const char *>(data)), 0, size);
+                Set(LinkInfoKey(key), str);
                 break;
+            }
             case Serializable::ValueType::IPV4_INFO: {
                 Ipv4Info ipv4Info;
                 ipv4Info.Unmarshalling(data, size);

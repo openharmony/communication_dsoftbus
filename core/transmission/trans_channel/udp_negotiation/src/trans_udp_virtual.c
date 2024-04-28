@@ -47,9 +47,10 @@ int32_t NotifyUdpChannelOpenFailed(const AppInfo *info, int32_t errCode)
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
-int32_t NotifyUdpChannelClosed(const AppInfo *info)
+int32_t NotifyUdpChannelClosed(const AppInfo *info, int32_t messageType)
 {
     (void)info;
+    (void)messageType;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
