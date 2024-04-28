@@ -1202,7 +1202,7 @@ static bool IsSupportWifiDirect(const char *networkId)
         LNN_LOGE(LNN_LANE, "GetFeatureCap error");
         return false;
     }
-    return IsSupportHmlTwo(local, remote) && GetWifiDirectUtils()->supportHmlTwo();
+    return IsSupportHmlTwo(local, remote) && GetWifiDirectManager()->supportHmlTwo();
 }
 
 static bool IsHasAuthConnInfo(const char *networkId)
