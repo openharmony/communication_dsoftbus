@@ -30,8 +30,8 @@ public:
     virtual ~LaneLinkDepsInterface() {};
 
     virtual int32_t GetTransReqInfoByLaneReqId(uint32_t laneReqId, TransOption *reqInfo) = 0;
-    virtual struct WifiDirectManager* GetWifiDirectManager(void) = 0;
-    virtual struct WifiDirectUtils* GetWifiDirectUtils(void) = 0;
+    virtual struct WifiDirectManager *GetWifiDirectManager(void) = 0;
+    virtual struct WifiDirectUtils *GetWifiDirectUtils(void) = 0;
     virtual int32_t TransProxyPipelineGenRequestId(void) = 0;
     virtual int32_t TransProxyPipelineOpenChannel(int32_t requestId, const char *networkId,
         const TransProxyPipelineChannelOption *option, const ITransProxyPipelineCallback *callback) = 0;
