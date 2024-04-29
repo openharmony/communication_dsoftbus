@@ -156,7 +156,7 @@ int32_t SoftBusSocketSelect(int32_t nfds, SoftBusFdSet *readFds, SoftBusFdSet *w
 int32_t SoftBusSocketIoctl(int32_t socketFd, long cmd, void *argp);
 int32_t SoftBusSocketFcntl(int32_t socketFd, long cmd, long flag);
 
-int32_t SoftBusSocketSend(int32_t socketFd, const void *buf, uint32_t len, int32_t flags);
+int32_t SoftBusSocketSend(int32_t socketFd, const void *buf, uint32_t len, uint32_t flags);
 int32_t SoftBusSocketSendTo(int32_t socketFd, const void *buf, uint32_t len, int32_t flags,
     const SoftBusSockAddr *toAddr, int32_t toAddrLen);
 
