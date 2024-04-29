@@ -25,7 +25,7 @@ namespace OHOS::SoftBus {
 
 template <>
 InfoContainer<InterfaceInfoKey>::KeyTypeTable InfoContainer<InterfaceInfoKey>::keyTypeTable_ = {
-    {InterfaceInfoKey::DYNAMIC_MAC,             Serializable::ValueType::STRING    },
+    { InterfaceInfoKey::DYNAMIC_MAC,            Serializable::ValueType::STRING    },
     { InterfaceInfoKey::INTERFACE_NAME,         Serializable::ValueType::STRING    },
     { InterfaceInfoKey::CAPABILITY,             Serializable::ValueType::INT       },
     { InterfaceInfoKey::WIFI_DIRECT_ROLE,       Serializable::ValueType::INT       },
@@ -46,7 +46,7 @@ InfoContainer<InterfaceInfoKey>::KeyTypeTable InfoContainer<InterfaceInfoKey>::k
     { InterfaceInfoKey::CENTER_FREQUENCY1,      Serializable::ValueType::INT       },
     { InterfaceInfoKey::CENTER_FREQUENCY2,      Serializable::ValueType::INT       },
     { InterfaceInfoKey::BANDWIDTH,              Serializable::ValueType::INT       },
-    { InterfaceInfoKey::WIFI_CFG_INFO,          Serializable::ValueType::BYTE_ARRAY},
+    { InterfaceInfoKey::WIFI_CFG_INFO,          Serializable::ValueType::STRING    },
     { InterfaceInfoKey::IS_ENABLE,              Serializable::ValueType::BOOL      },
     { InterfaceInfoKey::CONNECTED_DEVICE_COUNT, Serializable::ValueType::INT       },
     { InterfaceInfoKey::PSK,                    Serializable::ValueType::STRING    },
@@ -54,6 +54,7 @@ InfoContainer<InterfaceInfoKey>::KeyTypeTable InfoContainer<InterfaceInfoKey>::k
     { InterfaceInfoKey::IS_AVAILABLE,           Serializable::ValueType::BOOL      },
     { InterfaceInfoKey::COEXIST_RULE,           Serializable::ValueType::BOOL      },
     { InterfaceInfoKey::LINK_MODE,              Serializable::ValueType::INT       },
+    { InterfaceInfoKey::LISTEN_MODULE,          Serializable::ValueType::INT       },
 };
 
 void InterfaceInfo::MarshallingString(
@@ -237,6 +238,13 @@ int InterfaceInfo::GetP2pListenModule() const
 void InterfaceInfo::SetP2pGroupConfig(const std::string &groupConfig)
 {
     Set(InterfaceInfoKey::WIFI_CFG_INFO, groupConfig);
+    auto ret = WifiDirectUtils::SplitString(groupConfig, "\n");
+    Set(InterfaceInfoKey::SSID, ret[P2P_GROUP_CONFIG_INDEX_SSID]);
+    if (!GetDynamicMac().empty()) {
+        Set(InterfaceInfoKey::DYNAMIC_MAC, ret[P2P_GROUP_CONFIG_INDEX_BSSID]);
+    }
+    Set(InterfaceInfoKey::PSK, ret[P2P_GROUP_CONFIG_INDEX_SHARE_KEY]);
+    Set(InterfaceInfoKey::CENTER_20M, std::stoi(ret[P2P_GROUP_CONFIG_INDEX_FREQ]));
 }
 
 std::string InterfaceInfo::GetP2pGroupConfig() const

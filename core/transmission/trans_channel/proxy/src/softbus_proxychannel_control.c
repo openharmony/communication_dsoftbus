@@ -53,24 +53,45 @@ int32_t TransProxySendInnerMessage(ProxyChannelInfo *info, const char *payLoad,
         priority, info->appInfo.myData.pid);
 }
 
-static int32_t SetCipherOfHandshakeMsg(uint32_t channelId, uint8_t *cipher)
+static inline AuthLinkType ConvertConnectType2AuthLinkType(ConnectType type)
 {
-    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
-    if (TransProxyGetAuthId((int32_t)channelId, &authHandle) != SOFTBUS_OK ||
-        authHandle.authId == AUTH_INVALID_ID) {
-        TRANS_LOGE(TRANS_CTRL, "get authHandle fail");
-        return SOFTBUS_ERR;
+    if (type == CONNECT_TCP) {
+        return AUTH_LINK_TYPE_WIFI;
+    } else if ((type == CONNECT_BLE) || (type == CONNECT_BLE_DIRECT)) {
+        return AUTH_LINK_TYPE_BLE;
+    } else if (type == CONNECT_BR) {
+        return AUTH_LINK_TYPE_BR;
+    } else {
+        return AUTH_LINK_TYPE_P2P;
+    }
+}
+
+static int32_t SetCipherOfHandshakeMsg(ProxyChannelInfo *info, uint8_t *cipher)
+{
+    AuthGetLatestIdByUuid(info->appInfo.peerData.deviceId, ConvertConnectType2AuthLinkType(info->type),
+         false, &info->authHandle);
+    if (info->authHandle.authId == AUTH_INVALID_ID) {
+        TRANS_LOGE(TRANS_CTRL, "get authId for cipher err");
+        return SOFTBUS_TRANS_PROXY_GET_AUTH_ID_FAILED;
+    }
+
+    int32_t ret = TransProxySetAuthHandleByChanId((int32_t)info->channelId, info->authHandle);
+    if(ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "set authHandle fail, ret=%{public}d", ret);
+        return ret;
     }
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
-    if (AuthGetConnInfo(authHandle, &connInfo) != SOFTBUS_OK) {
+    ret = AuthGetConnInfo(info->authHandle, &connInfo);
+    if(ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get auth connInfo fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
     bool isAuthServer = false;
-    if (AuthGetServerSide(authHandle.authId, &isAuthServer) != SOFTBUS_OK) {
+    ret = AuthGetServerSide(info->authHandle.authId, &isAuthServer);
+    if(ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get auth server side fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
 
     *cipher |= ENCRYPTED;
@@ -95,15 +116,14 @@ int32_t TransProxyHandshake(ProxyChannelInfo *info)
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
     msgHead.cipher = CS_MODE;
     if (info->appInfo.appType != APP_TYPE_AUTH) {
-        if (SetCipherOfHandshakeMsg(info->channelId, &msgHead.cipher) != SOFTBUS_OK) {
+        if (SetCipherOfHandshakeMsg(info, &msgHead.cipher) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "set cipher fail");
             return SOFTBUS_TRANS_PROXY_SET_CIPHER_FAILED;
         }
     }
     msgHead.myId = info->myId;
     msgHead.peerId = INVALID_CHANNEL_ID;
-    TRANS_LOGI(TRANS_CTRL,
-        "handshake myChannelId=%{public}d, cipher=0x%{public}02x", msgHead.myId, msgHead.cipher);
+    TRANS_LOGI(TRANS_CTRL, "handshake myChannelId=%{public}d, cipher=0x%{public}02x", msgHead.myId, msgHead.cipher);
     payLoad = TransProxyPackHandshakeMsg(info);
     if (payLoad == NULL) {
         TRANS_LOGE(TRANS_CTRL, "pack handshake fail");

@@ -77,6 +77,8 @@ int32_t SoftbusGattcConfigureMtuSize(int32_t clientId, int mtuSize);
 int32_t SoftbusGattcSetFastestConn(int32_t clientId);
 int32_t SoftbusGattcSetPriority(int32_t clientId, SoftBusBtAddr *addr, SoftbusBleGattPriority priority);
 
+bool SoftbusGattcCheckExistConnectionByAddr(const SoftBusBtAddr *btAddr);
+
 int32_t InitSoftbusAdapterClient(void);
 #ifdef __cplusplus
 #if __cplusplus

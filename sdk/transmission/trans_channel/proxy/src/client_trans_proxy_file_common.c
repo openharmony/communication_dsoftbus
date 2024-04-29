@@ -95,7 +95,7 @@ bool CheckDestFilePathValid(const char *destFile)
 
 int32_t FrameIndexToType(uint64_t index, uint64_t frameNumber)
 {
-    if (index == FRAME_NUM_0) {
+    if (index == FRAME_NUM_0 || frameNumber == FRAME_NUM_0) {
         return TRANS_SESSION_FILE_FIRST_FRAME;
     }
     if ((index == FRAME_NUM_1) && (frameNumber == FRAME_NUM_2)) {

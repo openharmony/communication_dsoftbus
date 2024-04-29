@@ -54,7 +54,7 @@ constexpr char UUID_TEST2[UUID_BUF_LEN] = { 0 };
 #define LINK_TYPE          8
 #define CLIENT_PORT        6666
 #define KEEPALIVE_TIME     601
-const char *Ip = "127.0.0.1";
+const char *IP = "127.0.0.1";
 
 class AuthTest : public testing::Test {
 public:
@@ -2092,7 +2092,7 @@ HWTEST_F(AuthTest, AUTH_SET_TCP_KEEPALIVE_OPTION_Test_003, TestSize.Level1)
     info.socketOption.port = port;
     info.socketOption.moduleId = DIRECT_CHANNEL_SERVER_WIFI;
     info.socketOption.protocol = LNN_PROTOCOL_IP;
-    (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), Ip);
+    (void)strcpy_s(info.socketOption.addr, sizeof(info.socketOption.addr), IP);
     int fd = tcp->OpenServerSocket(&info);
 
     int32_t ret = AuthSetTcpKeepAliveOption(fd, HIGH_FREQ_CYCLE);

@@ -858,6 +858,7 @@ static void BuildAdvParam(BroadcastParam *advParam)
     advParam->peerAddrType = SOFTBUS_BC_PUBLIC_DEVICE_ADDRESS;
     advParam->channelMap = BLE_CHANNLE_MAP;
     advParam->txPower = BLE_ADV_TX_POWER_DEFAULT;
+    (void)memset_s(advParam->localAddr.addr, BC_ADDR_MAC_LEN, 0, BC_ADDR_MAC_LEN);
 }
 
 static void DfxRecordAdevertiserEnd(int32_t adv, int32_t reason)
@@ -1514,7 +1515,7 @@ static int32_t MatchRecvMessage(const uint32_t *publishInfoMap, uint32_t *capBit
     DISC_LOGI(DISC_BLE, "recv message cnt=%{public}d", g_recvMessageInfo.numNeedResp);
     LIST_FOR_EACH_ENTRY(msg, &g_recvMessageInfo.node, RecvMessage, node) {
         for (uint32_t index = 0; index < len; index++) {
-            capBitMap[index] = msg->capBitMap[index] & publishInfoMap[index];
+            capBitMap[index] |= msg->capBitMap[index] & publishInfoMap[index];
         }
     }
     (void)SoftBusMutexUnlock(&g_recvMessageInfo.lock);
