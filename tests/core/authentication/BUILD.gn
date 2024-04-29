@@ -165,7 +165,6 @@ ohos_unittest("AuthEnhanceMockTest") {
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/connection/ble/include",
     "$dsoftbus_root_path/core/connection/wifi_direct/utils",
-    "$dsoftbus_root_path/core/connection/wifi_direct",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
   ]
 
@@ -270,7 +269,6 @@ ohos_unittest("AuthTestCallBackTest") {
     "$dsoftbus_root_path/core/adapter/authentication/include",
     "$dsoftbus_root_path/core/connection/ble/include",
     "$dsoftbus_root_path/core/connection/wifi_direct/utils",
-    "$dsoftbus_root_path/core/connection/wifi_direct",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
   ]
 
@@ -338,7 +336,6 @@ ohos_unittest("AuthOtherTest") {
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/adapter/authentication/include",
     "$dsoftbus_root_path/core/connection/wifi_direct/utils",
-    "$dsoftbus_root_path/core/connection/wifi_direct",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
