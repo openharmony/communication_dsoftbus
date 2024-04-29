@@ -187,7 +187,7 @@ int32_t AuthGetServerSide(int64_t authId, bool *isServer);
 int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size);
 int32_t AuthGetVersion(int64_t authId, SoftBusVersion *version);
 int32_t AuthGetMetaType(int64_t authId, bool *isMetaAuth);
-int32_t AuthGetGroupType(const char *udid, const char *uuid);
+uint32_t AuthGetGroupType(const char *udid, const char *uuid);
 bool IsSupportFeatureByCapaBit(uint32_t feature, AuthCapability capaBit);
 
 int32_t AuthAllocConn(const char *networkId, uint32_t authRequestId, AuthConnCallback *callback);

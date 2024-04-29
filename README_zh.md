@@ -78,6 +78,18 @@
         /** Callback for publish result */
         void (*OnPublishResult)(int publishId, PublishResult reason);
     } IPublishCb;
+
+    // 发布信息
+    typedef struct {
+        int publishId;                  // 发现消息Id
+        DiscoverMode mode;              // 发现模式
+        ExchangeMedium medium;          // 发现媒介
+        ExchangeFreq freq;              // 发现频率
+        const char *capability;         // 被发现设备需要具备的能力
+        unsigned char *capabilityData;  // 业务发布的自定义数据
+        unsigned int dataLen;           // 数据长度
+        bool ranging;                   // 是否测距
+    } PublishInfo;
     
     // 发布服务
     int32_t PublishLNN(const char *pkgName, const PublishInfo *info, const IPublishCb *cb);
@@ -231,17 +243,18 @@
         void (*OnStream)(int32_t socket, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param);
         void (*OnFile)(int32_t socket, FileEvent *event);
         void (*OnQos)(int32_t socket, QoSEvent eventId, const QosTV *qos, uint32_t qosCount);
+        void (*OnError)(int32_t socket, int32_t errCode);
     } ISocketListener;
 
     typedef enum {
         QOS_TYPE_MIN_BW,            // 最小带宽
-        QOS_TYPE_MAX_LATENCY,       // 最大建链时延
+        QOS_TYPE_MAX_WAIT_TIMEOUT,  // Bind超时时间
         QOS_TYPE_MIN_LATENCY,       // 最小建链时延
-        QOS_TYPE_MAX_WAIT_TIMEOUT,  // 最大超时时间
-        QOS_TYPE_MAX_BUFFER,        // 最大缓存
-        QOS_TYPE_FIRST_PACKAGE,     // 首包大小
+        QOS_TYPE_RTT_LEVEL,         // 往返时间级别
+        QOS_TYPE_MAX_BUFFER,        // 最大缓存(预留)
+        QOS_TYPE_FIRST_PACKAGE,     // 首包大小(预留)
         QOS_TYPE_MAX_IDLE_TIMEOUT,  // 最大空闲时间
-        QOS_TYPE_TRANS_RELIABILITY, // 传输可靠性
+        QOS_TYPE_TRANS_RELIABILITY, // 传输可靠性(预留)
         QOS_TYPE_BUTT,
     } QosType;
 

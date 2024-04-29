@@ -13,10 +13,6 @@
 
 import("../../dsoftbus.gni")
 import("../common/dfx/dsoftbus_dfx.gni")
-device_profile_common_path =
-    "//foundation/deviceprofile/device_info_manager/common"
-device_profile_interfaces_path =
-    "//foundation/deviceprofile/device_info_manager/interfaces"
 AUTH_SERVER_DEFINES = []
 if (dsoftbus_feature_auth_account == true) {
   AUTH_SERVER_DEFINES += [ "AUTH_ACCOUNT" ]
@@ -96,7 +92,7 @@ auth_server_deps = [
   "$dsoftbus_dfx_path/anonymize:softbus_dfx_anonymizer",
   "$dsoftbus_dfx_path/log:softbus_dfx_log",
 ]
-
+auth_server_ex_deps = []
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
     auth_server_inc += [ "//base/security/device_auth/interfaces/inner_api" ]
@@ -112,13 +108,7 @@ if (defined(ohos_lite)) {
   }
   auth_server_src += [ "$authentication_path/src/virtual/auth_hichain_system_ability_monitor_virtual.c" ]
 } else {
-  auth_server_inc += [
-    "//base/security/device_auth/interfaces/inner_api",
-    "${device_profile_interfaces_path}/innerkits/core/include",
-    "${device_profile_common_path}/include/interfaces/",
-    "${device_profile_common_path}/include/constants",
-    "${device_profile_common_path}include/utils",
-  ]
+  auth_server_ex_deps += [ "device_auth:deviceauth_sdk" ]
   auth_server_src +=
       [ "$authentication_path/src/auth_hichain_system_ability_monitor.cpp" ]
 }

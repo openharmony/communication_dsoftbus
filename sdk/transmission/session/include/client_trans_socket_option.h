@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef LNN_LANE_LINK_P2P_H
-#define LNN_LANE_LINK_P2P_H
+#ifndef CLIENT_TRANS_SOCKET_OPTION_H
+#define CLIENT_TRANS_SOCKET_OPTION_H
 
-#include "lnn_lane_link.h"
+#include <stdint.h>
+#include "trans_type.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int32_t LnnConnectP2p(const LinkRequest *request, uint32_t laneReqId, const LaneLinkCb *callback);
-void LnnDisconnectP2p(const char *networkId, uint32_t laneReqId);
-void LnnDestroyP2p(void);
-
+int32_t SetExtSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t optValueSize);
+int32_t GetExtSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t *optValueSize);
 #ifdef __cplusplus
 }
 #endif
-#endif // LNN_LANE_LINK_P2P_H
+#endif // CLIENT_TRANS_SOCKET_OPTION_H

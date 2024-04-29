@@ -385,7 +385,7 @@ int32_t SoftBusSocketRecv(int32_t socketFd, void *buf, uint32_t len, int32_t fla
 {
     int32_t ret = recv(socketFd, buf, len, flags);
     if (ret < 0) {
-        COMM_LOGE(COMM_ADAPTER, "recv errno=%{public}s", strerror(errno));
+        COMM_LOGE(COMM_ADAPTER, "recv socketFd=%{public}d, errno=%{public}s", socketFd, strerror(errno));
         return GetErrorCode();
     }
 
