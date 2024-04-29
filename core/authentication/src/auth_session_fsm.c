@@ -1146,19 +1146,20 @@ static void SetAuthStartTime(AuthFsm *authFsm)
     authFsm->statisticData.startAuthTime = LnnUpTimeMs();
 }
 
-int32_t AuthSessionStartAuth(int64_t authSeq, uint32_t requestId,
-    uint64_t connId, const AuthConnInfo *connInfo, bool isServer, bool isFastAuth)
+int32_t AuthSessionStartAuth(const AuthParam *authParam, const AuthConnInfo *connInfo)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(connInfo != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "connInfo is NULL");
+    AUTH_CHECK_AND_RETURN_RET_LOGE(authParam != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "authParam is NULL");
     if (!RequireAuthLock()) {
         return SOFTBUS_LOCK_ERR;
     }
-    AuthFsm *authFsm = CreateAuthFsm(authSeq, requestId, connId, connInfo, isServer);
+    AuthFsm *authFsm = CreateAuthFsm(authParam->authSeq, authParam->requestId, authParam->connId,
+                                    connInfo, authParam->isServer);
     if (authFsm == NULL) {
         ReleaseAuthLock();
         return SOFTBUS_MEM_ERR;
     }
-    authFsm->info.isNeedFastAuth = isFastAuth;
+    authFsm->info.isNeedFastAuth = authParam->isFastAuth;
     if (LnnFsmStart(&authFsm->fsm, g_states + STATE_SYNC_DEVICE_ID) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "start auth fsm. authSeq=%{public}" PRId64 "", authFsm->authSeq);
         DestroyAuthFsm(authFsm);

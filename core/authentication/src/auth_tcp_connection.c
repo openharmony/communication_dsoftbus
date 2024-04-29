@@ -625,7 +625,7 @@ static int32_t GetTcpKeepAliveOptionByCycle(
         default:
             AUTH_LOGE(AUTH_CONN, "no match cycle, cycle=%{public}d", cycle);
             break;
-    } 
+    }
     return SOFTBUS_OK;
 }
 
