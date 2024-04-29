@@ -31,8 +31,10 @@ libsoftbus_stream_inc = [
 ]
 
 if (enhanced) {
-  libsoftbus_stream_inc +=
-      [ "$dsoftbus_root_path/components/nstackx_enhanced/fillp/include/" ]
+  libsoftbus_stream_inc += [
+    "$dsoftbus_root_path/components/nstackx_enhanced/fillp/include/",
+    "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_adapter/include/",
+  ]
 } else {
   libsoftbus_stream_inc +=
       [ "$dsoftbus_root_path/components/nstackx/fillp/include/" ]
@@ -49,6 +51,7 @@ libsoftbus_stream_src = [
   "$libsoftbus_stream_sdk_path/vtp_stream_socket.cpp",
 ]
 
+libsoftbus_stream_ext_deps = []
 if (defined(ohos_lite)) {
   if (enhanced) {
     libsoftbus_stream_deps =
@@ -60,15 +63,14 @@ if (defined(ohos_lite)) {
   libsoftbus_stream_deps += [ "//third_party/openssl/ohos_lite:openssl_shared" ]
 } else {
   if (enhanced) {
-    libsoftbus_stream_deps = [
-      "$dsoftbus_root_path/components/nstackx_enhanced/fillp:FillpSo",
-      "//third_party/bounds_checking_function:libsec_shared",
-    ]
+    libsoftbus_stream_src += [ "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_adapter/src/softbus_fillp_inner_api.c" ]
+    libsoftbus_stream_deps =
+        [ "$dsoftbus_root_path/components/nstackx_enhanced/fillp:FillpSo" ]
+    libsoftbus_stream_ext_deps += [ "bounds_checking_function:libsec_shared" ]
   } else {
-    libsoftbus_stream_deps = [
-      "$dsoftbus_root_path/components/nstackx/fillp:FillpSo.open",
-      "//third_party/bounds_checking_function:libsec_shared",
-    ]
+    libsoftbus_stream_deps =
+        [ "$dsoftbus_root_path/components/nstackx/fillp:FillpSo.open" ]
+    libsoftbus_stream_ext_deps += [ "bounds_checking_function:libsec_shared" ]
   }
-  libsoftbus_stream_deps += [ "//third_party/openssl:libcrypto_shared" ]
+  libsoftbus_stream_ext_deps += [ "openssl:libcrypto_shared" ]
 }

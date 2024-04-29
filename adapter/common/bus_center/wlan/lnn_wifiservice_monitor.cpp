@@ -28,7 +28,7 @@
 #include "wifi_msg.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
-#include "wifi_event.h"
+#include "kits/c/wifi_p2p.h"
 #include "wifi_ap_msg.h"
 
 static const int32_t DELAY_LEN = 1000;

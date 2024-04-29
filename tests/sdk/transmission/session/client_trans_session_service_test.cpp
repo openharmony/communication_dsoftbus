@@ -26,6 +26,11 @@
 #include "client_trans_session_service.h"
 #include "softbus_config_type.h"
 #include "trans_log.h"
+#include "softbus_feature_config.h"
+#include "softbus_conn_interface.h"
+#include "auth_interface.h"
+#include "bus_center_manager.h"
+#include "trans_session_service.h"
 
 #define TRANS_TEST_SESSION_ID 10
 #define TRANS_TEST_PID 0
@@ -72,11 +77,19 @@ public:
 
 void TransClientSessionServiceTest::SetUpTestCase(void)
 {
-    InitSoftBusServer();
+    SoftbusConfigInit();
+    ConnServerInit();
+    AuthInit();
+    BusCenterServerInit();
+    TransServerInit();
 }
 
 void TransClientSessionServiceTest::TearDownTestCase(void)
 {
+    ConnServerDeinit();
+    AuthDeinit();
+    BusCenterServerDeinit();
+    TransServerDeinit();
 }
 
 static int OnSessionOpened(int sessionId, int result)
@@ -160,7 +173,7 @@ HWTEST_F(TransClientSessionServiceTest, TransClientSessionServiceTest01, TestSiz
     ret = OpenSessionSync(NULL, g_sessionName, g_networkId, g_groupid, &g_sessionAttr);
     EXPECT_EQ(ret,  SOFTBUS_TRANS_INVALID_SESSION_NAME);
     ret = OpenSessionSync(g_sessionName, NULL, g_networkId, g_groupid, &g_sessionAttr);
-    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret,  SOFTBUS_TRANS_INVALID_SESSION_NAME);
     ret = OpenSessionSync(g_sessionName, g_sessionName, NULL, g_groupid, &g_sessionAttr);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = OpenSessionSync(g_sessionName, g_sessionName, g_networkId, NULL, &g_sessionAttr);
@@ -237,7 +250,7 @@ HWTEST_F(TransClientSessionServiceTest, TransClientSessionServiceTest03, TestSiz
     ret = ClientDeleteSession(sessionId);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = OpenSessionSync(g_sessionName, g_sessionName, g_networkId, g_groupid, &g_sessionAttr);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     SoftBusFree(sessionParam);

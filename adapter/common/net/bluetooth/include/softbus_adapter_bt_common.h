@@ -22,20 +22,27 @@
 #include "softbus_type_def.h"
 
 #ifdef __cplusplus
-#if __cplusplus
 extern "C" {
-#endif
 #endif
 
 #define BT_ADDR_LEN 6
 #define BT_UUID_LEN 16
 
-#define BLE_DISABLE 0
-#define BLE_ENABLE 1
-
 #define MAC_FIRST_INDEX 0
 #define MAC_ONE_INDEX 1
 #define MAC_FIVE_INDEX 5
+
+typedef enum {
+    BLE_DISABLE = 0,
+    BLE_ENABLE = 1,
+    BLE_STATE_BUTT,
+} SoftBusBleState;
+
+typedef enum {
+    BR_DISABLE = 0,
+    BR_ENABLE = 1,
+    BR_STATE_BUTT,
+} SoftBusBrState;
 
 typedef enum {
     SOFTBUS_BT_STATUS_SUCCESS = 0x00,
@@ -102,6 +109,8 @@ int SoftBusDisableBt(void);
 
 int SoftBusGetBtState(void);
 
+int SoftBusGetBrState(void);
+
 int SoftBusGetBtMacAddr(SoftBusBtAddr *mac);
 
 int SoftBusGetBtName(unsigned char *name, unsigned int *len);
@@ -115,8 +124,7 @@ int SoftBusRemoveBtStateListener(int listenerId);
 void SoftBusBtInit(void);
 
 #ifdef __cplusplus
-#if __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* __cplusplus */
+
 #endif /* SOFTBUS_ADAPTER_BT_COMMON_H */

@@ -54,6 +54,11 @@ typedef struct {
     ListNode node;
 } AuthManager;
 
+typedef struct {
+    int32_t messageType;
+    ModeCycle cycle;
+} DeviceMessageParse;
+
 int32_t AuthManagerSetSessionKey(int64_t authSeq, AuthSessionInfo *info, const SessionKey *sessionKey,
     bool isConnect);
 int32_t AuthManagerGetSessionKey(int64_t authSeq, const AuthSessionInfo *info, SessionKey *sessionKey);
@@ -102,6 +107,7 @@ int32_t AuthDeviceGetVersion(int64_t authId, SoftBusVersion *version);
 int32_t AuthDeviceGetServerSide(int64_t authId, bool *isServer);
 int32_t AuthDeviceInit(const AuthTransCallback *callback);
 int32_t RegTrustListenerOnHichainSaStart(void);
+int32_t GetHmlOrP2pAuthHandle(AuthHandle **authHandle, int32_t *num);
 void AuthDeviceDeinit(void);
 
 #ifdef __cplusplus

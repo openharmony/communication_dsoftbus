@@ -792,10 +792,11 @@ HWTEST_F(AuthOtherTest, IS_FLUSH_DEVICE_PACKET_TEST_001, TestSize.Level1)
     head->len = strlen(sessionKeyStr);
     const uint8_t data = {0};
     bool isServer = false;
-    bool ret = IsFlushDevicePacket(connInfo, head, &data, isServer);
+    DeviceMessageParse messageParse = { 0 };
+    bool ret = IsDeviceMessagePacket(connInfo, head, &data, isServer, &messageParse);
     EXPECT_TRUE(ret == false);
     connInfo->type = AUTH_LINK_TYPE_WIFI;
-    ret = IsFlushDevicePacket(connInfo, head, &data, isServer);
+    ret = IsDeviceMessagePacket(connInfo, head, &data, isServer, &messageParse);
     EXPECT_TRUE(ret == false);
     SoftBusFree(head);
     SoftBusFree(connInfo);

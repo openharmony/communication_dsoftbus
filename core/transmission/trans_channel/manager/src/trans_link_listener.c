@@ -61,9 +61,9 @@ static void OnWifiDirectDeviceOffLine(const char *peerMac, const char *peerIp, c
     TRANS_LOGI(TRANS_SVC, "Notify Degrade MigrateEvents success");
 }
 
-static void OnWifiDirectRoleChange(enum WifiDirectRole myRole)
+static void OnWifiDirectRoleChange(enum WifiDirectRole oldRole, enum WifiDirectRole newRole)
 {
-    if (myRole == WIFI_DIRECT_ROLE_NONE) {
+    if (newRole == WIFI_DIRECT_ROLE_NONE) {
         TRANS_LOGI(TRANS_SVC, "my role change to NONE");
         StopP2pSessionListener();
         for (int i = DIRECT_CHANNEL_SERVER_HML_START; i <= DIRECT_CHANNEL_SERVER_HML_END; i++) {
@@ -72,7 +72,7 @@ static void OnWifiDirectRoleChange(enum WifiDirectRole myRole)
     }
 }
 
-static void OnWifiDirectDeviceOnLine(const char *peerMac, const char *peerIp, const char *peerUuid)
+static void OnWifiDirectDeviceOnLine(const char *peerMac, const char *peerIp, const char *peerUuid, bool isSource)
 {
     TRANS_CHECK_AND_RETURN_LOGW(peerMac, TRANS_SVC, "peer mac is null");
     NodeInfo nodeInfo;
@@ -96,6 +96,6 @@ void ReqLinkListener(void)
     };
     struct WifiDirectManager *mgr = GetWifiDirectManager();
     if (mgr != NULL && mgr->registerStatusListener != NULL) {
-        mgr->registerStatusListener(TRANS_LINK_MODULE, &listener);
+        mgr->registerStatusListener(&listener);
     }
 }

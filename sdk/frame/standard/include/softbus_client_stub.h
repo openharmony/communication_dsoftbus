@@ -35,7 +35,7 @@ public:
     int32_t OnChannelOpened(const char *sessionName, const ChannelInfo *info) override;
     int32_t OnChannelOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode) override;
     int32_t OnChannelLinkDown(const char *networkId, int32_t routeType) override;
-    int32_t OnChannelClosed(int32_t channelId, int32_t channelType) override;
+    int32_t OnChannelClosed(int32_t channelId, int32_t channelType, int32_t messageType) override;
     int32_t OnChannelMsgReceived(int32_t channelId, int32_t channelType, const void *data,
         uint32_t len, int32_t type) override;
     int32_t OnChannelQosEvent(int32_t channelId, int32_t channelType, int32_t eventId, int32_t tvCount,
@@ -49,6 +49,7 @@ public:
     void OnPublishLNNResult(int32_t publishId, int32_t reason) override;
     void OnRefreshLNNResult(int32_t refreshId, int32_t reason) override;
     void OnRefreshDeviceFound(const void *device, uint32_t deviceLen) override;
+    void OnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo) override;
 
 private:
     int32_t OnDeviceFoundInner(MessageParcel &data, MessageParcel &reply);
@@ -72,6 +73,7 @@ private:
     int32_t OnRefreshLNNResultInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnRefreshDeviceFoundInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnClientPermissonChangeInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnDataLevelChangedInner(MessageParcel &data, MessageParcel &reply);
 
     using SoftBusClientStubFunc =
         int32_t (SoftBusClientStub::*)(MessageParcel &data, MessageParcel &reply);

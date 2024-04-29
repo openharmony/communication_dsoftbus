@@ -52,6 +52,7 @@ static int32_t AcceptSessionAsServer(const char *sessionName, const ChannelInfo 
     session->crc = channel->crc;
     session->dataConfig = channel->dataConfig;
     session->isAsync = false;
+    session->sessionState = SESSION_STATE_OPENED;
     if (strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, channel->peerSessionName) != EOK ||
         strcpy_s(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX, channel->peerDeviceId) != EOK ||
         strcpy_s(session->info.groupId, GROUP_ID_SIZE_MAX, channel->groupId) != EOK) {
@@ -143,7 +144,7 @@ static int32_t TransOnBindFailed(int32_t sessionId, const ISocketListener *socke
     return SOFTBUS_OK;
 }
 
-static int32_t handelOnBindSuccess(int32_t sessionId, SessionListenerAdapter sessionCallback, bool isServer)
+static int32_t HandleOnBindSuccess(int32_t sessionId, SessionListenerAdapter sessionCallback, bool isServer)
 {
     // async bind call back client and server， sync bind only call back server.
     bool isAsync = true;
@@ -164,12 +165,8 @@ static int32_t handelOnBindSuccess(int32_t sessionId, SessionListenerAdapter ses
     return ret;
 }
 
-NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel, SessionType flag)
+static void AnonymizeLogTransOnSessionOpenedInfo(const char *sessionName, const ChannelInfo *channel, SessionType flag)
 {
-    if ((sessionName == NULL) || (channel == NULL)) {
-        TRANS_LOGW(TRANS_SDK, "Invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
     char *tmpName = NULL;
     Anonymize(sessionName, &tmpName);
     TRANS_LOGI(TRANS_SDK,
@@ -177,7 +174,15 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const C
         "isServer=%{public}d, type=%{public}d, crc=%{public}d",
         tmpName, channel->channelId, channel->channelType, flag, channel->isServer, channel->routeType, channel->crc);
     AnonymizeFree(tmpName);
+}
 
+NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel, SessionType flag)
+{
+    if ((sessionName == NULL) || (channel == NULL)) {
+        TRANS_LOGW(TRANS_SDK, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    AnonymizeLogTransOnSessionOpenedInfo(sessionName, channel, flag);
     SessionListenerAdapter sessionCallback;
     (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
     int32_t ret = ClientGetSessionCallbackAdapterByName(sessionName, &sessionCallback);
@@ -201,9 +206,16 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const C
         TRANS_LOGE(TRANS_SDK, "accept session failed, ret=%{public}d", ret);
         return ret;
     }
-
+    SessionState sessionState = SESSION_STATE_INIT;
+    GetSessionStateAndSessionNameBySessionId(sessionId, NULL, &sessionState);
+    if (sessionState == SESSION_STATE_CANCELLING) {
+        TRANS_LOGI(TRANS_SDK, "session is cancelling, no need call back");
+        (void)ClientDeleteSession(sessionId);
+        return SOFTBUS_TRANS_STOP_BIND_BY_CANCEL;
+    }
+    SetSessionStateBySessionId(sessionId, SESSION_STATE_CALLBACK_FINISHED);
     if (sessionCallback.isSocketListener) {
-        return handelOnBindSuccess(sessionId, sessionCallback, channel->isServer);
+        return HandleOnBindSuccess(sessionId, sessionCallback, channel->isServer);
     }
     TRANS_LOGI(TRANS_SDK, "trigger session open callback");
     if ((sessionCallback.session.OnSessionOpened == NULL) ||
@@ -260,7 +272,7 @@ NO_SANITIZE("cfi") int32_t TransOnSessionClosed(int32_t channelId, int32_t chann
 {
     TRANS_LOGI(TRANS_SDK, "channelId=%{public}d, channelType=%{public}d", channelId, channelType);
     int32_t sessionId = INVALID_SESSION_ID;
-    int32_t ret;
+    int32_t ret = SOFTBUS_ERR;
     SessionListenerAdapter sessionCallback;
     bool isServer = false;
     (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
@@ -272,11 +284,12 @@ NO_SANITIZE("cfi") int32_t TransOnSessionClosed(int32_t channelId, int32_t chann
         if (listener->OnShutdown != NULL) {
             listener->OnShutdown(sessionId, reason);
         }
+        ret = ClientDeleteSocketSession(sessionId);
     } else if (sessionCallback.session.OnSessionClosed != NULL) {
         sessionCallback.session.OnSessionClosed(sessionId);
+        ret = ClientDeleteSession(sessionId);
     }
 
-    ret = ClientDeleteSession(sessionId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "client delete session failed");
         return ret;

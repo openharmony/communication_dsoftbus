@@ -79,7 +79,7 @@ int32_t DiscCoapProcessDeviceInfo(const NSTACKX_DeviceInfo *nstackxInfo, DeviceI
     return SOFTBUS_OK;
 }
 
-void DiscCoapReportNotification(const NotificationConfig *notification)
+void DiscCoapReportNotification(const NSTACKX_NotificationConfig *notification)
 {
     (void)notification;
 }

@@ -182,6 +182,7 @@ int32_t ClientIpcOnChannelClosed(ChannelMsg *data)
     IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN, 0);
     WriteInt32(&io, data->msgChannelId);
     WriteInt32(&io, data->msgChannelType);
+    WriteInt32(&io, data->msgMessageType);
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(data->msgPkgName, &svc) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "OnChannelOpenClosed get svc failed.");

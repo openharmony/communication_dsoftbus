@@ -75,6 +75,8 @@ SoftBusClientStub::SoftBusClientStub()
         &SoftBusClientStub::OnClientPermissonChangeInner;
     memberFuncMap_[CLIENT_SET_CHANNEL_INFO] =
         &SoftBusClientStub::SetChannelInfoInner;
+    memberFuncMap_[CLIENT_ON_DATA_LEVEL_CHANGED] =
+        &SoftBusClientStub::OnDataLevelChangedInner;
 }
 
 int32_t SoftBusClientStub::OnRemoteRequest(uint32_t code,
@@ -196,9 +198,9 @@ int32_t SoftBusClientStub::OnChannelLinkDown(const char *networkId, int32_t rout
     return TransOnChannelLinkDown(networkId, routeType);
 }
 
-int32_t SoftBusClientStub::OnChannelClosed(int32_t channelId, int32_t channelType)
+int32_t SoftBusClientStub::OnChannelClosed(int32_t channelId, int32_t channelType, int32_t messageType)
 {
-    return TransOnChannelClosed(channelId, channelType, SHUTDOWN_REASON_PEER);
+    return TransOnChannelClosed(channelId, channelType, messageType, SHUTDOWN_REASON_PEER);
 }
 
 int32_t SoftBusClientStub::OnChannelMsgReceived(int32_t channelId, int32_t channelType, const void *data,
@@ -238,6 +240,11 @@ int32_t SoftBusClientStub::OnChannelOpenedInner(MessageParcel &data, MessageParc
     }
     if (channel.channelType == CHANNEL_TYPE_TCP_DIRECT) {
         channel.fd = data.ReadFileDescriptor();
+        channel.myIp = (char *)data.ReadCString();
+        if (channel.myIp == nullptr) {
+            COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read myIp failed!");
+            return SOFTBUS_IPC_ERR;
+        }
     }
     if (!data.ReadBool(channel.isServer)) {
         COMM_LOGE(COMM_SDK, "OnChannelOpenedInner read retCode failed!");
@@ -371,21 +378,25 @@ int32_t SoftBusClientStub::OnChannelClosedInner(MessageParcel &data, MessageParc
 {
     int32_t channelId;
     if (!data.ReadInt32(channelId)) {
-        COMM_LOGE(COMM_SDK, "OnChannelClosedInner read channel id failed!");
-        return SOFTBUS_ERR;
+        COMM_LOGE(COMM_SDK, "read channel id failed!");
+        return SOFTBUS_IPC_ERR;
     }
 
     int32_t channelType;
     if (!data.ReadInt32(channelType)) {
-        COMM_LOGE(COMM_SDK, "OnChannelOpenFailedInner read channel type failed!");
-        return SOFTBUS_ERR;
+        COMM_LOGE(COMM_SDK, "read channel type failed!");
+        return SOFTBUS_IPC_ERR;
     }
 
-    int ret = OnChannelClosed(channelId, channelType);
-    bool res = reply.WriteInt32(ret);
-    if (!res) {
-        COMM_LOGE(COMM_SDK, "OnChannelClosedInner write reply failed!");
-        return SOFTBUS_ERR;
+    int32_t messageType;
+    if (!data.ReadInt32(messageType)) {
+        COMM_LOGE(COMM_SDK, "read messageType type failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t ret = OnChannelClosed(channelId, channelType, messageType);
+    if (!reply.WriteInt32(ret)) {
+        COMM_LOGE(COMM_SDK, "write reply failed!");
+        return SOFTBUS_IPC_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -689,6 +700,23 @@ int32_t SoftBusClientStub::OnRefreshDeviceFoundInner(MessageParcel &data, Messag
     return SOFTBUS_OK;
 }
 
+int32_t SoftBusClientStub::OnDataLevelChangedInner(MessageParcel &data, MessageParcel &reply)
+{
+    const char *networkId = data.ReadCString();
+    if (networkId == nullptr || strlen(networkId) == 0) {
+        COMM_LOGE(COMM_SDK, "Invalid network, or length is zero");
+        return SOFTBUS_ERR;
+    }
+
+    DataLevelInfo *info = (DataLevelInfo *)data.ReadRawData(sizeof(DataLevelInfo));
+    if (info == nullptr) {
+        COMM_LOGE(COMM_SDK, "OnDataLevelChangedInner read data level chagne info failed");
+        return SOFTBUS_ERR;
+    }
+    OnDataLevelChanged(networkId, info);
+    return SOFTBUS_OK;
+}
+
 int32_t SoftBusClientStub::OnJoinLNNResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode)
 {
     (void)addrTypeLen;
@@ -733,5 +761,10 @@ void SoftBusClientStub::OnRefreshDeviceFound(const void *device, uint32_t device
 {
     (void)deviceLen;
     LnnOnRefreshDeviceFound(device);
+}
+
+void SoftBusClientStub::OnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo)
+{
+    LnnOnDataLevelChanged(networkId, dataLevelInfo);
 }
 } // namespace OHOS

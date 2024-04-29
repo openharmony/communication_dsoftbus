@@ -122,7 +122,7 @@ int32_t ClientIpcOnChannelClosed(ChannelMsg *data)
         TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr!");
         return SOFTBUS_ERR;
     }
-    int32_t ret = clientProxy->OnChannelClosed(data->msgChannelId, data->msgChannelType);
+    int32_t ret = clientProxy->OnChannelClosed(data->msgChannelId, data->msgChannelType, data->msgMessageType);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "OnChannelClosed failed, ret=%{public}d", ret);
         return ret;
@@ -152,7 +152,7 @@ int32_t ClientIpcSetChannelInfo(
         CallProxySetChannelInfo(clientProxy, sessionName, sessionId, transInfo);
     });
     if (task.wait_for(std::chrono::seconds(IPC_OPT_TIMEOUT_S)) != std::future_status::ready) {
-        char *tmpName = NULL;
+        char *tmpName = nullptr;
         Anonymize(sessionName, &tmpName);
         TRANS_LOGE(TRANS_SDK, "ClientIpcSetChannelInfo timeout!, pkgName=%{public}s sessionName=%{public}s", pkgName,
             tmpName);

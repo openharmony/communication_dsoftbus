@@ -99,12 +99,14 @@ int32_t TestOnChannelOpened(const char *pkgName, int32_t pid, const char *sessio
     return SOFTBUS_OK;
 }
 
-int32_t TestOnChannelClosed(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType)
+int32_t TestOnChannelClosed(const char *pkgName, int32_t pid,
+    int32_t channelId, int32_t channelType, int32_t messageType)
 {
     (void)pkgName;
     (void)pid;
     (void)channelId;
     (void)channelType;
+    (void)messageType;
     g_testProxyChannelClosedFlag = true;
     printf("TestOnChannelClosed enter.\n");
     return SOFTBUS_OK;
@@ -196,7 +198,7 @@ void TestTransProxyAddAuthChannel(int32_t channelId, const char *identity, Proxy
     chan->status = status;
     appInfo.appType = APP_TYPE_AUTH;
     int32_t ret = TransProxyCreateChanInfo(chan, chan->channelId, &appInfo);
-    ASSERT_TRUE(SOFTBUS_OK == ret);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 void TestTransProxyAddNormalChannel(int32_t channelId, const char *identity, ProxyChannelStatus status)
@@ -224,7 +226,7 @@ void TestTransProxyAddNormalChannel(int32_t channelId, const char *identity, Pro
     chan->status = status;
     appInfo.appType = APP_TYPE_NORMAL;
     int32_t ret = TransProxyCreateChanInfo(chan, chan->channelId, &appInfo);
-    ASSERT_TRUE(SOFTBUS_OK == ret);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
@@ -538,7 +540,7 @@ HWTEST_F(TransProxyManagerTest, TransProxyGetConnOptionByChanIdTest001, TestSize
     chan->status = PROXY_CHANNEL_STATUS_KEEPLIVEING;
     appInfo.appType = APP_TYPE_AUTH;
     ret = TransProxyCreateChanInfo(chan, chan->channelId, &appInfo);
-    ASSERT_TRUE(SOFTBUS_OK == ret);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ConnectionInfo tcpInfo;
     tcpInfo.type = CONNECT_TCP;

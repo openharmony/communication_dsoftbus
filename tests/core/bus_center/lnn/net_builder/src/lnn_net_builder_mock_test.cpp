@@ -24,12 +24,6 @@
 #include "softbus_common.h"
 #include "softbus_errcode.h"
 
-int32_t LnnInitCipherKeyManager(void)
-{
-    LNN_LOGI(LNN_TEST, "init virtual lnn cipherkey manager");
-    return SOFTBUS_OK;
-}
-
 namespace OHOS {
 using namespace testing::ext;
 constexpr int32_t LOCAL_WEIGHT = 10;
@@ -1557,6 +1551,7 @@ HWTEST_F(LNNNetBuilderMockTest, FIND_NODE_INFO_BY_RQUESTID_TEST_001, TestSize.Le
     connFsm->connInfo.requestId = REQUEST_ID;
     connFsm->isDead = false;
     connFsm->connInfo.nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
+    EXPECT_TRUE(connFsm->connInfo.nodeInfo != nullptr);
     ListAdd(&g_netBuilder.fsmList, &connFsm->node);
 
     ConnectionAddr addr;

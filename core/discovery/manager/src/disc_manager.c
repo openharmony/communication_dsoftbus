@@ -325,13 +325,14 @@ static bool IsInnerModule(const DiscInfo *infoNode)
 static void InnerDeviceFound(DiscInfo *infoNode, const DeviceInfo *device,
                                                 const InnerDeviceInfoAddtions *additions)
 {
-    if (IsInnerModule(infoNode) == false) {
+    if (infoNode->item != NULL && infoNode->item->callback.serverCb.OnServerDeviceFound != NULL &&
+        !IsInnerModule(infoNode)) {
         (void)infoNode->item->callback.serverCb.OnServerDeviceFound(infoNode->item->packageName, device, additions);
         return;
     }
 
     DISC_LOGD(DISC_CONTROL, "call from inner module.");
-    if (infoNode->item->callback.innerCb.OnDeviceFound != NULL) {
+    if (infoNode->item != NULL && infoNode->item->callback.innerCb.OnDeviceFound != NULL) {
         DfxRecordDeviceFound(infoNode, device, additions);
         infoNode->item->callback.innerCb.OnDeviceFound(device, additions);
     }
@@ -445,7 +446,7 @@ static int32_t CheckSubscribeInfo(const SubscribeInfo *info)
 
 static void SetDiscItemCallback(DiscItem *itemNode, const InnerCallback *cb, const ServiceType type)
 {
-    if ((type != SUBSCRIBE_INNER_SERVICE) && (type != SUBSCRIBE_SERVICE)) {
+    if ((type != SUBSCRIBE_INNER_SERVICE && type != SUBSCRIBE_SERVICE) || cb == NULL) {
         return;
     }
     if (type == SUBSCRIBE_SERVICE) {
@@ -1090,6 +1091,7 @@ static IdContainer* CreateIdContainer(int32_t id, const char *pkgName)
 
     if (strcpy_s(container->pkgName, nameLen, pkgName) != EOK) {
         DISC_LOGE(DISC_CONTROL, "strcpy_s failed");
+        SoftBusFree(container->pkgName);
         SoftBusFree(container);
         return NULL;
     }
@@ -1213,8 +1215,12 @@ int32_t DiscMgrInit(void)
     DISC_CHECK_AND_RETURN_RET_LOGE(g_publishInfoList != NULL, SOFTBUS_DISCOVER_MANAGER_INIT_FAIL, DISC_INIT,
         "init publish info list failed");
     g_discoveryInfoList = CreateSoftBusList();
-    DISC_CHECK_AND_RETURN_RET_LOGE(g_discoveryInfoList != NULL, SOFTBUS_DISCOVER_MANAGER_INIT_FAIL, DISC_INIT,
-        "init discovery info list failed");
+    if (g_discoveryInfoList == NULL) {
+       DISC_LOGE(DISC_INIT, "init discovery Info List failed");
+       DestroySoftBusList(g_publishInfoList);
+       g_publishInfoList = NULL;
+       return SOFTBUS_DISCOVER_MANAGER_INIT_FAIL;
+    }
 
     for (int32_t i = 0; i < CAPABILITY_MAX_BITNUM; i++) {
         ListInit(&g_capabilityList[i]);

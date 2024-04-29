@@ -24,6 +24,11 @@
 #include "softbus_adapter_mem.h"
 #include "client_trans_session_manager.h"
 #include "trans_log.h"
+#include "softbus_feature_config.h"
+#include "softbus_conn_interface.h"
+#include "auth_interface.h"
+#include "bus_center_manager.h"
+#include "trans_session_service.h"
 
 #define TRANS_TEST_SESSION_ID 10
 #define TRANS_TEST_PID 0
@@ -68,11 +73,19 @@ public:
 
 void TransClientSessionManagerTest::SetUpTestCase(void)
 {
-    InitSoftBusServer();
+    SoftbusConfigInit();
+    ConnServerInit();
+    AuthInit();
+    BusCenterServerInit();
+    TransServerInit();
 }
 
 void TransClientSessionManagerTest::TearDownTestCase(void)
 {
+    ConnServerDeinit();
+    AuthDeinit();
+    BusCenterServerDeinit();
+    TransServerDeinit();
 }
 
 static int OnSessionOpened(int sessionId, int result)
@@ -817,7 +830,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest23, TestSiz
     ret = ClientGrantPermission(TRANS_TEST_UID, TRANS_TEST_PID, NULL);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
     ret = ClientRemovePermission(NULL);
-    EXPECT_EQ(ret,  SOFTBUS_ERR);
+    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
 }
 
 /**
@@ -1050,6 +1063,16 @@ HWTEST_F(TransClientSessionManagerTest, ClientTransSetChannelInfoTest01, TestSiz
     ClientGetChannelBySessionId(1, &channelId, &ChannelType, NULL);
     ASSERT_EQ(channelId, 11);
     ASSERT_EQ(ChannelType, CHANNEL_TYPE_TCP_DIRECT);
+    char sessionName[SESSION_NAME_SIZE_MAX];
+    SessionState state;
+    ret = GetSessionStateAndSessionNameBySessionId(1, sessionName, &state);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ASSERT_EQ(state, SESSION_STATE_OPENED);
+    ret = SetSessionStateBySessionId(1, SESSION_STATE_CANCELLING);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = GetSessionStateAndSessionNameBySessionId(1, sessionName, &state);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ASSERT_EQ(state, SESSION_STATE_CANCELLING);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(sessionParam);

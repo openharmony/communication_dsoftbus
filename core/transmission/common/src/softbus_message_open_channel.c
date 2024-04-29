@@ -122,7 +122,7 @@ static int32_t JsonObjectPackRequestEx(const AppInfo *appInfo, cJSON *json, unsi
     (void)AddNumberToJsonObject(json, TRANS_FLAGS, TRANS_FLAG_HAS_CHANNEL_AUTH);
     (void)AddNumberToJsonObject(json, MY_HANDLE_ID, appInfo->myHandleId);
     (void)AddNumberToJsonObject(json, PEER_HANDLE_ID, appInfo->peerHandleId);
-    (void)AddNumberToJsonObject(json, JSON_KEY_FIRST_TOKEN_ID, appInfo->firstTokenId);
+    (void)AddNumberToJsonObject(json, JSON_KEY_FIRST_TOKEN_ID, (int32_t)appInfo->firstTokenId);
 
     return SOFTBUS_OK;
 }
@@ -276,7 +276,7 @@ int32_t UnpackRequest(const cJSON *msg, AppInfo *appInfo)
     }
     int32_t routeType = WIFI_STA;
     if (GetJsonObjectNumberItem(msg, MSG_ROUTE_TYPE, &routeType) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "Failed to get route type");
+        TRANS_LOGW(TRANS_CTRL, "Failed to get route type");
     }
     appInfo->routeType = (RouteType)routeType;
 
@@ -286,7 +286,7 @@ int32_t UnpackRequest(const cJSON *msg, AppInfo *appInfo)
     int32_t transFlag = TRANS_FLAG_HAS_CHANNEL_AUTH;
     (void)GetJsonObjectNumberItem(msg, AUTO_CLOSE_TIME, (int32_t *)&appInfo->autoCloseTime);
     (void)GetJsonObjectNumberItem(msg, TRANS_FLAGS, &transFlag);
-    if (!GetJsonObjectNumberItem(msg, JSON_KEY_FIRST_TOKEN_ID, &appInfo->firstTokenId)) {
+    if (!GetJsonObjectNumberItem(msg, JSON_KEY_FIRST_TOKEN_ID, (int32_t *)&appInfo->firstTokenId)) {
         appInfo->firstTokenId = 0;
     }
     return SOFTBUS_OK;
@@ -295,77 +295,77 @@ int32_t UnpackRequest(const cJSON *msg, AppInfo *appInfo)
 char *PackReply(const AppInfo *appInfo)
 {
     if (appInfo == NULL) {
-        TRANS_LOGW(TRANS_CTRL, "invalid param");
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
         return NULL;
     }
-    cJSON *json =  cJSON_CreateObject();
+    cJSON *json = cJSON_CreateObject();
     if (json == NULL) {
         return NULL;
     }
+    char *data = NULL;
     if (!AddNumberToJsonObject(json, CODE, CODE_OPEN_CHANNEL) ||
         !AddNumberToJsonObject(json, API_VERSION, appInfo->myData.apiVersion) ||
         !AddStringToJsonObject(json, DEVICE_ID, appInfo->myData.deviceId) ||
         !AddNumberToJsonObject(json, UID, appInfo->myData.uid) ||
         !AddNumberToJsonObject(json, PID, appInfo->myData.pid)) {
         TRANS_LOGE(TRANS_CTRL, "Failed to add items");
-        cJSON_Delete(json);
-        return NULL;
+        goto EXIT_FAIL;
     }
     if (appInfo->peerData.dataConfig != 0) {
         if (!AddNumberToJsonObject(json, MTU_SIZE, appInfo->myData.dataConfig)) {
-            cJSON_Delete(json);
-            return NULL;
+            goto EXIT_FAIL;
         }
     }
     if (!AddNumber16ToJsonObject(json, FIRST_DATA_SIZE, appInfo->fastTransDataSize)) {
         TRANS_LOGE(TRANS_CTRL, "Failed to add trans data size");
-        cJSON_Delete(json);
-        return NULL;
+        goto EXIT_FAIL;
     }
     if (appInfo->myData.apiVersion != API_V1) {
         char *authState = (char *)appInfo->myData.authState;
         if (!AddStringToJsonObject(json, PKG_NAME, appInfo->myData.pkgName) ||
             !AddStringToJsonObject(json, AUTH_STATE, authState)) {
             TRANS_LOGE(TRANS_CTRL, "Failed to add pkgName or authState");
-            cJSON_Delete(json);
-            return NULL;
+            goto EXIT_FAIL;
         }
     }
     if (!AddNumberToJsonObject(json, MY_HANDLE_ID, appInfo->myHandleId) ||
         !AddNumberToJsonObject(json, PEER_HANDLE_ID, appInfo->peerHandleId)) {
         TRANS_LOGE(TRANS_CTRL, "Failed to add items");
-        cJSON_Delete(json);
-        return NULL;
+        goto EXIT_FAIL;
     }
-    char *data = cJSON_PrintUnformatted(json);
+    data = cJSON_PrintUnformatted(json);
     if (data == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "cJSON_PrintUnformatted failed");
+        TRANS_LOGW(TRANS_CTRL, "cJSON_PrintUnformatted failed");
     }
     cJSON_Delete(json);
     return data;
+
+EXIT_FAIL:
+    cJSON_Delete(json);
+    return NULL;
 }
 
-int UnpackReply(const cJSON *msg, AppInfo *appInfo, uint16_t *fastDataSize)
+int32_t UnpackReply(const cJSON *msg, AppInfo *appInfo, uint16_t *fastDataSize)
 {
     if (msg == NULL || appInfo == NULL) {
         TRANS_LOGW(TRANS_CTRL, "invalid param");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
-    char uuid[DEVICE_ID_SIZE_MAX] = {0};
+    char uuid[DEVICE_ID_SIZE_MAX] = { 0 };
     if (!GetJsonObjectStringItem(msg, DEVICE_ID, uuid, DEVICE_ID_SIZE_MAX)) {
         TRANS_LOGE(TRANS_CTRL, "Failed to get uuid");
-        return SOFTBUS_ERR;
+        return SOFTBUS_PARSE_JSON_ERR;
     }
     if (strcmp(uuid, appInfo->peerData.deviceId) != 0) {
         TRANS_LOGE(TRANS_CTRL, "Invalid uuid");
         return SOFTBUS_ERR;
     }
     if (!GetJsonObjectNumber16Item(msg, FIRST_DATA_SIZE, fastDataSize)) {
-        TRANS_LOGE(TRANS_CTRL, "Failed to get fast data size");
+        TRANS_LOGW(TRANS_CTRL, "Failed to get fast data size");
     }
 
-    int apiVersion = API_V1;
+    int32_t apiVersion = API_V1;
     (void)GetJsonObjectNumberItem(msg, API_VERSION, &apiVersion);
     appInfo->peerData.apiVersion = (ApiVersion)apiVersion;
     appInfo->peerData.uid = -1;
@@ -378,13 +378,13 @@ int UnpackReply(const cJSON *msg, AppInfo *appInfo, uint16_t *fastDataSize)
             appInfo->peerHandleId = -1;
     }
     if (!GetJsonObjectNumberItem(msg, MTU_SIZE, (int32_t *)&(appInfo->peerData.dataConfig))) {
-        TRANS_LOGE(TRANS_CTRL, "peer dataconfig is null.");
+        TRANS_LOGW(TRANS_CTRL, "peer dataconfig is null.");
     }
     if (apiVersion != API_V1) {
         if (!GetJsonObjectStringItem(msg, PKG_NAME, (appInfo->peerData.pkgName), PKG_NAME_SIZE_MAX) ||
             !GetJsonObjectStringItem(msg, AUTH_STATE, (appInfo->peerData.authState), AUTH_STATE_SIZE_MAX)) {
             TRANS_LOGE(TRANS_CTRL, "Failed to get pkgName or authState");
-            return SOFTBUS_ERR;
+            return SOFTBUS_PARSE_JSON_ERR;
         }
     }
     return SOFTBUS_OK;

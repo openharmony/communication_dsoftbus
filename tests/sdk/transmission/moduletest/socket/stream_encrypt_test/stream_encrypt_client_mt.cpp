@@ -116,6 +116,7 @@ HWTEST_F(StreamEncryptClientMt, RawStreamEncryptTest001, TestSize.Level1)
         {.qos = QOS_TYPE_MIN_BW,       .value = 80  },
         { .qos = QOS_TYPE_MAX_LATENCY, .value = 4000},
         { .qos = QOS_TYPE_MIN_LATENCY, .value = 2000},
+        { .qos = QOS_TYPE_RTT_LEVEL, .value = RTT_LEVEL_LOW},
     };
     int32_t ret = Bind(socket, qosInfo, sizeof(qosInfo) / sizeof(qosInfo[0]), &g_listener);
     ASSERT_EQ(ret, SOFTBUS_OK);

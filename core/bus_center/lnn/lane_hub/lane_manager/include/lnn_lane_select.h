@@ -47,4 +47,4 @@ int32_t SelectAuthLane(const char *networkId, LanePreferredLinkList *request,
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif // LNN_LANE_SELECT_H

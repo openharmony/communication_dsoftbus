@@ -23,8 +23,12 @@ if (defined(ohos_lite)) {
     unittest("DiscSdkTest") {
       output_extension = "bin"
       output_dir = "$root_out_dir/test/unittest/dsoftbus"
-      sources = [ "disc_sdk_test.cpp" ]
+      sources = [
+        "disc_sdk_test.cpp",
+        "disc_sdk_test_bt_status_virtual.c",
+      ]
       include_dirs = [
+        "$dsoftbus_root_path/core/common/include",
         "$dsoftbus_root_path/sdk/bus_center/manager/include",
         "$dsoftbus_root_path/interfaces/kits/discovery",
         "$dsoftbus_root_path/interfaces/kits/common",
@@ -60,17 +64,10 @@ if (defined(ohos_lite)) {
       "//third_party/bounds_checking_function:libsec_static",
       "//third_party/googletest:gtest_main",
     ]
-    if (is_standard_system) {
-      external_deps = [
-        "c_utils:utils",
-        "hilog:libhilog",
-      ]
-    } else {
-      external_deps = [
-        "c_utils:utils",
-        "hilog:libhilog",
-      ]
-    }
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
   }
 
   ohos_unittest("DiscSdkTest") {
@@ -95,16 +92,16 @@ if (defined(ohos_lite)) {
       "//third_party/bounds_checking_function:libsec_static",
       "//third_party/googletest:gtest_main",
     ]
-    if (is_standard_system) {
-      external_deps = [
-        "c_utils:utils",
-        "hilog:libhilog",
-      ]
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+    if (support_bluetooth &&
+        (dsoftbus_feature_conn_br || dsoftbus_feature_conn_ble)) {
+      sources += [ "disc_sdk_test_bt_status.c" ]
+      external_deps += [ "bluetooth:btframework" ]
     } else {
-      external_deps = [
-        "c_utils:utils",
-        "hilog:libhilog",
-      ]
+      sources += [ "disc_sdk_test_bt_status_virtual.c" ]
     }
   }
 
@@ -128,16 +125,16 @@ if (defined(ohos_lite)) {
       "//third_party/bounds_checking_function:libsec_static",
       "//third_party/googletest:gtest_main",
     ]
-    if (is_standard_system) {
-      external_deps = [
-        "c_utils:utils",
-        "hilog:libhilog",
-      ]
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+    if (support_bluetooth &&
+        (dsoftbus_feature_conn_br || dsoftbus_feature_conn_ble)) {
+      sources += [ "disc_sdk_test_bt_status.c" ]
+      external_deps += [ "bluetooth:btframework" ]
     } else {
-      external_deps = [
-        "c_utils:utils",
-        "hilog:libhilog",
-      ]
+      sources += [ "disc_sdk_test_bt_status_virtual.c" ]
     }
   }
 

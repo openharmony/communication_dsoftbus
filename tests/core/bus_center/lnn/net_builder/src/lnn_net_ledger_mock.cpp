@@ -26,7 +26,10 @@ using namespace testing::ext;
 
 #define LNN_RELATION_JOIN_THREAD 1
 #define LNN_MOCK_ONLINE_NODE_CNT 2
-
+constexpr int64_t SEQ_LIST_1 = 1;
+constexpr int64_t SEQ_LIST_2 = 2;
+constexpr uint64_t AUTH_VERIFY_TIME_1 = 1000;
+constexpr uint64_t AUTH_VERIFY_TIME_2 = 1001;
 namespace OHOS {
 
 void *g_netLedgerinterface;
@@ -198,6 +201,33 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalStrInfo2(InfoKey key, cha
         return SOFTBUS_OK;
     }
     return SOFTBUS_ERR;
+}
+
+int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAuthHandle(const char *uuid, AuthLinkType type,
+    AuthHandle *authHandle)
+{
+    (void)uuid;
+    if (authHandle == NULL) {
+        LNN_LOGW(LNN_TEST, "invalid para");
+        return SOFTBUS_ERR;
+    }
+    authHandle->authId = 1;
+    authHandle->type = AUTH_LINK_TYPE_BLE;
+    return SOFTBUS_OK;
+}
+
+int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAuthSeqList(const char *udid, int64_t *seqList,
+    uint64_t *authVerifyTime, DiscoveryType type)
+{
+    (void)udid;
+    (void)type;
+    seqList[0] = SEQ_LIST_1;
+    seqList[1] = SEQ_LIST_2;
+
+    authVerifyTime[0] = AUTH_VERIFY_TIME_1;
+    authVerifyTime[1] = AUTH_VERIFY_TIME_2;
+
+    return SOFTBUS_OK;
 }
 
 extern "C" {
@@ -485,6 +515,17 @@ bool IsActiveOsAccountUnlocked(void)
 int32_t GetActiveOsAccountIds(void)
 {
     return GetNetLedgerInterface()->GetActiveOsAccountIds();
+}
+
+int32_t AuthDeviceGetLatestIdByUuid(const char *uuid, AuthLinkType type, AuthHandle *authHandle)
+{
+    return GetNetLedgerInterface()->AuthDeviceGetLatestIdByUuid(uuid, type, authHandle);
+}
+
+int32_t AuthGetLatestAuthSeqListByType(const char *udid, int64_t *seqList, uint64_t *authVerifyTime,
+    DiscoveryType type)
+{
+    return GetNetLedgerInterface()->AuthGetLatestAuthSeqListByType(udid, seqList, authVerifyTime, type);
 }
 }
 }

@@ -44,6 +44,16 @@ typedef enum {
     SESSION_ROLE_BUTT,
 } SessionRole;
 
+typedef enum {
+    SESSION_STATE_INIT,
+    SESSION_STATE_OPENING,
+    SESSION_STATE_OPENED,
+    SESSION_STATE_CALLBACK_FINISHED,
+    SESSION_STATE_CANCELLING,
+    SESSION_STATE_CLOSING,
+    SESSION_STATE_BUTT,
+} SessionState;
+
 typedef struct {
     ListNode node;
     int32_t sessionId;
@@ -67,6 +77,7 @@ typedef struct {
     uint32_t dataConfig;
     bool isEncyptedRawStream;
     bool isAsync;
+    SessionState sessionState;
 } SessionInfo;
 
 typedef struct {
@@ -182,7 +193,7 @@ int32_t ClientGetSessionCallbackAdapterById(int32_t sessionId, SessionListenerAd
 
 int32_t ClientGetPeerSocketInfoById(int32_t sessionId, PeerSocketInfo *peerSocketInfo);
 
-bool IsSessionExceedLimit();
+bool IsSessionExceedLimit(void);
 
 int32_t ClientResetIdleTimeoutById(int32_t sessionId);
 
@@ -195,6 +206,12 @@ int32_t ClientRawStreamEncryptOptGet(int32_t channelId, int32_t channelType, boo
 int32_t SetSessionIsAsyncById(int32_t sessionId, bool isAsync);
 
 int32_t ClientTransSetChannelInfo(const char *sessionName, int32_t sessionId, int32_t channelId, int32_t channelType);
+
+int32_t GetSessionStateAndSessionNameBySessionId(int32_t sessionId, char *sessionName, SessionState *sessionState);
+
+int32_t SetSessionStateBySessionId(int32_t sessionId, SessionState sessionState);
+
+void DelSessionStateClosing(void);
 
 #ifdef __cplusplus
 }

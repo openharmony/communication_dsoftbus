@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include <stdint.h>
 
 #include "softbus_common.h"
+#include "data_level_inner.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,7 +51,7 @@ extern "C" {
 #define HB_SEND_EACH_SEPARATELY_LEN (2 * HB_TIME_FACTOR) // Split and send a single heartbeat
 #define HB_SEND_SEPARATELY_CNT (HB_SEND_ONCE_LEN / HB_SEND_EACH_SEPARATELY_LEN)
 
-#define HB_MAX_TYPE_COUNT 5
+#define HB_MAX_TYPE_COUNT 6
 
 // heartbeat type
 #define HEARTBEAT_TYPE_MIN              (0x1L)
@@ -59,7 +60,8 @@ extern "C" {
 #define HEARTBEAT_TYPE_BLE_V1           (0x1L << 2)
 #define HEARTBEAT_TYPE_TCP_FLUSH        (0x1L << 3)
 #define HEARTBEAT_TYPE_BLE_V3           (0x1L << 4)
-#define HEARTBEAT_TYPE_MAX              (0x1L << 5)
+#define HEARTBEAT_TYPE_BLE_V4           (0x1L << 5) // for heartbeat to sh
+#define HEARTBEAT_TYPE_MAX              (0x1L << 6)
 
 #define NORMAL_STRATEGY 1
 #define HIGH_PERFORMANCE_STRATEGY 2
@@ -102,12 +104,19 @@ typedef enum {
 typedef struct {
     uint8_t capabiltiy;
     int16_t stateVersion;
+    uint16_t staticLevel;
+    uint16_t switchLength;
+    uint32_t switchLevel;
 } HbRespData;
 #define STATE_VERSION_INVALID (-1)
 #define ENABLE_COC_CAP (1 << 0)
 #define P2P_GO (1 << 1)
 #define P2P_GC (1 << 2)
 #define ENABLE_WIFI_CAP (1 << 3)
+
+typedef struct {
+    int32_t (*OnDataLevelChanged)(const char *networkId, const DataLevelInfo *dataLevelInfo);
+} IDataLevelChangeCallback;
 
 typedef bool (*VisitHbTypeCb)(LnnHeartbeatType *typeSet, LnnHeartbeatType eachType, void *data);
 bool LnnVisitHbTypeSet(VisitHbTypeCb callback, LnnHeartbeatType *typeSet, void *data);
@@ -121,6 +130,7 @@ int32_t LnnGetShortAccountHash(uint8_t *accountHash, uint32_t len);
 int32_t LnnGenerateHexStringHash(const unsigned char *str, char *hashStr, uint32_t len);
 int32_t LnnGenerateBtMacHash(const char *btMac, int32_t brMacLen, char *brMacHash, int32_t hashLen);
 bool LnnIsSupportBurstFeature(const char *networkId);
+bool LnnIsLocalSupportBurstFeature(void);
 void LnnDumpLocalBasicInfo(void);
 
 #ifdef __cplusplus

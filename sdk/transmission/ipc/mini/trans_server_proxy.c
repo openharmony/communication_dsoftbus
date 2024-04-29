@@ -65,9 +65,9 @@ int32_t ServerIpcNotifyAuthSuccess(int32_t channelId, int32_t channelType)
     return TransNotifyAuthSuccess(channelId, channelType);
 }
 
-int32_t ServerIpcCloseChannel(int32_t channelId, int32_t channelType)
+int32_t ServerIpcCloseChannel(const char *sessionName, int32_t channelId, int32_t channelType)
 {
-    return TransCloseChannel(channelId, channelType);
+    return TransCloseChannel(sessionName, channelId, channelType);
 }
 
 int32_t ServerIpcReleaseResources(int32_t channelId)

@@ -85,5 +85,9 @@ int32_t AuthFlushDevice(const char *uuid)
 {
     return GetAuthInterface()->AuthFlushDevice(uuid);
 }
+int32_t AuthSendKeepAlive(const char *uuid, ModeCycle cycle)
+{
+    return GetAuthInterface()->AuthSendKeepAlive(uuid, cycle);
+}
 }
 }

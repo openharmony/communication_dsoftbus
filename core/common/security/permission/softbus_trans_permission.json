@@ -432,6 +432,19 @@
     ]
   },
   {
+    "SESSION_NAME": "com.huawei.nearby.MsgMiddleware",
+    "REGEXP": "false",
+    "DEVID": "NETWORKID",
+    "SEC_LEVEL": "public",
+    "APP_INFO": [
+      {
+        "PKG_NAME": "com.huawei.nearby",
+        "TYPE": "self_app",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
     "SESSION_NAME": "ohos.dstb.tee.*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
@@ -439,6 +452,19 @@
     "APP_INFO": [
       {
         "PKG_NAME": "ohos.dstb.tee",
+        "TYPE": "native_app",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
+    "SESSION_NAME": "ohos.useriam.*",
+    "REGEXP": "true",
+    "DEVID": "NETWORKID",
+    "SEC_LEVEL": "public",
+    "APP_INFO": [
+      {
+        "PKG_NAME": "ohos.useriam",
         "TYPE": "native_app",
         "ACTIONS": "create,open"
       }

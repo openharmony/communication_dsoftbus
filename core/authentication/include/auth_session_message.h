@@ -36,8 +36,10 @@ typedef struct {
     SoftBusVersion version;
 } DevInfoData;
 
-char *PackDeviceInfoMessage(int32_t linkType, SoftBusVersion version, bool isMetaAuth, const char *remoteUuid);
-int32_t UnpackDeviceInfoMessage(const DevInfoData *devInfo, NodeInfo *nodeInfo, bool isMetaAuth);
+char *PackDeviceInfoMessage(int32_t linkType, SoftBusVersion version, bool isMetaAuth, const char *remoteUuid,
+    const AuthSessionInfo *info);
+int32_t UnpackDeviceInfoMessage(const DevInfoData *devInfo, NodeInfo *nodeInfo, bool isMetaAuth,
+    const AuthSessionInfo *info);
 
 int32_t PostDeviceIdMessage(int64_t authSeq, const AuthSessionInfo *info);
 int32_t ProcessDeviceIdMessage(AuthSessionInfo *info, const uint8_t *data, uint32_t len);
@@ -47,8 +49,10 @@ int32_t ProcessDeviceInfoMessage(int64_t authSeq, AuthSessionInfo *info, const u
 
 int32_t PostCloseAckMessage(int64_t authSeq, const AuthSessionInfo *info);
 int32_t PostHichainAuthMessage(int64_t authSeq, const AuthSessionInfo *info, const uint8_t *data, uint32_t len);
-int32_t PostVerifyDeviceMessage(const AuthManager *auth, int32_t flagRelay, AuthLinkType type);
-bool IsFlushDevicePacket(const AuthConnInfo *connInfo, const AuthDataHead *head, const uint8_t *data, bool isServer);
+int32_t PostDeviceMessage(
+    const AuthManager *auth, int32_t flagRelay, AuthLinkType type, const DeviceMessageParse *messageParse);
+bool IsDeviceMessagePacket(const AuthConnInfo *connInfo, const AuthDataHead *head, const uint8_t *data, bool isServer,
+    DeviceMessageParse *messageParse);
 
 #ifdef __cplusplus
 #if __cplusplus

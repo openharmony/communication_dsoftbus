@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -203,7 +203,7 @@ static int32_t LnnGetNodeKeyInfoLocal(const char *networkId, int key, uint8_t *i
         case NODE_KEY_BLE_OFFLINE_CODE:
             return LnnGetLocalStrInfo(STRING_KEY_OFFLINE_CODE, (char *)info, infoLen);
         case NODE_KEY_NETWORK_CAPABILITY:
-            return LnnGetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t *)info);
+            return LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, (uint32_t *)info);
         case NODE_KEY_NETWORK_TYPE:
             return LnnGetLocalNumInfo(NUM_KEY_DISCOVERY_TYPE, (int32_t *)info);
         case NODE_KEY_DATA_CHANGE_FLAG:
@@ -240,7 +240,7 @@ static int32_t LnnGetNodeKeyInfoRemote(const char *networkId, int key, uint8_t *
         case NODE_KEY_BLE_OFFLINE_CODE:
             return LnnGetRemoteStrInfo(networkId, STRING_KEY_OFFLINE_CODE, (char *)info, infoLen);
         case NODE_KEY_NETWORK_CAPABILITY:
-            return LnnGetRemoteNumInfo(networkId, NUM_KEY_NET_CAP, (int32_t *)info);
+            return LnnGetRemoteNumU32Info(networkId, NUM_KEY_NET_CAP, (uint32_t *)info);
         case NODE_KEY_NETWORK_TYPE:
             return LnnGetRemoteNumInfo(networkId, NUM_KEY_DISCOVERY_TYPE, (int32_t *)info);
         case NODE_KEY_DATA_CHANGE_FLAG:
@@ -299,6 +299,42 @@ int32_t LnnSetNodeDataChangeFlag(const char *networkId, uint16_t dataChangeFlag)
     }
     LNN_LOGE(LNN_LEDGER, "remote networkId");
     return SOFTBUS_ERR;
+}
+
+int32_t LnnSetDataLevel(const DataLevel *dataLevel)
+{
+    if (dataLevel == NULL) {
+        LNN_LOGE(LNN_LEDGER, "LnnSetDataLevel data level is null");
+        return SOFTBUS_ERR;
+    }
+    LNN_LOGI(LNN_LEDGER, "LnnSetDataLevel, dynamic: %{public}hu, static: %{public}hu, "
+        "switch: %{public}u, switchLen: %{public}hu", dataLevel->dynamicLevel, dataLevel->staticLevel,
+        dataLevel->switchLevel, dataLevel->switchLength);
+    uint16_t dynamicLevel = dataLevel->dynamicLevel;
+    if (LnnSetLocalNumU16Info(NUM_KEY_DATA_DYNAMIC_LEVEL, dynamicLevel) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "Set data dynamic level failed");
+        return SOFTBUS_ERR;
+    }
+
+    uint16_t staticLevel = dataLevel->staticLevel;
+    if (LnnSetLocalNumU16Info(NUM_KEY_DATA_STATIC_LEVEL, staticLevel) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "Set data static level failed");
+        return SOFTBUS_ERR;
+    }
+
+    uint32_t switchLevel = dataLevel->switchLevel;
+    if (LnnSetLocalNumU32Info(NUM_KEY_DATA_SWITCH_LEVEL, switchLevel) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "Set data switch level faield");
+        return SOFTBUS_ERR;
+    }
+
+    uint16_t switchLength = dataLevel->switchLength;
+    if (LnnSetLocalNumU16Info(NUM_KEY_DATA_SWITCH_LENGTH, switchLength) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "Set data switch length failed");
+        return SOFTBUS_ERR;
+    }
+
+    return SOFTBUS_OK;
 }
 
 int32_t LnnGetNodeKeyInfoLen(int32_t key)
