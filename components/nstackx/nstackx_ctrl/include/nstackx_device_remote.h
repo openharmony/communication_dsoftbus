@@ -30,7 +30,7 @@ void BackupRemoteDeviceList(void);
 void DestroyRxIfaceByIfname(const char *ifName);
 const struct in_addr *GetRemoteDeviceIp(const char *deviceId);
 int32_t UpdateRemoteNodeByDeviceInfo(const char *deviceId, const NSTACKX_InterfaceInfo *interfaceInfo,
-    const struct in_addr *remoteIp, const DeviceInfo *deviceInfo, uint8_t *updated);
+    const struct in_addr *remoteIp, const DeviceInfo *deviceInfo, int8_t *updated);
 
 void GetDeviceList(NSTACKX_DeviceInfo *deviceList, uint32_t *deviceCountPtr, bool doFilter);
 void SetDeviceListAgingTime(uint32_t agingTime);
