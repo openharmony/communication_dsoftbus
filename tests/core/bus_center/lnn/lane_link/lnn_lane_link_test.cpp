@@ -124,7 +124,7 @@ static bool SupportHmlTwo(void)
 }
 
 static struct WifiDirectManager g_manager = {
-    .isNegotiateChannelNeeded= IsNegotiateChannelNeeded
+    .isNegotiateChannelNeeded= IsNegotiateChannelNeeded,
     .getRequestId = GetRequestId,
     .connectDevice = ConnectDevice,
     .disconnectDevice = DisconnectDevice,
