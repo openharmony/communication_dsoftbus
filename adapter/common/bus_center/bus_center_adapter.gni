@@ -90,14 +90,20 @@ if (defined(ohos_lite)) {
 } else {
   bus_center_adapter_external_deps = []
   if (has_ces_part) {
-    bus_center_adapter_src +=
-        [ "$adapter_bus_center_path/common_event/lnn_common_event_monitor.cpp" ]
+    bus_center_adapter_src += [
+      "$adapter_bus_center_path/boot_event/lnn_boot_event_monitor.cpp",
+      "$adapter_bus_center_path/common_event/lnn_common_event_monitor.cpp",
+      ]
     bus_center_adapter_external_deps += [
       "ability_base:want",
       "common_event_service:cesfwk_innerkits",
+      "init:libbeget_proxy",
     ]
   } else {
-    bus_center_adapter_src += [ "$adapter_bus_center_path/common_event/lnn_common_event_monitor_virtual.cpp" ]
+    bus_center_adapter_src += [
+      "$adapter_bus_center_path/boot_event/lnn_boot_event_monitor_virtual.cpp",
+      "$adapter_bus_center_path/common_event/lnn_common_event_monitor_virtual.cpp",
+      ]
   }
   if (dsoftbus_feature_lnn_net) {
     bus_center_adapter_src += [
