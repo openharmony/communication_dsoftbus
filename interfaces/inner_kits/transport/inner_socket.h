@@ -37,6 +37,7 @@
 #define INNER_SOCKET_H
 
 #include "softbus_common.h"
+#include "trans_type.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -82,6 +83,38 @@ int32_t DBinderGrantPermission(int32_t uid, int32_t pid, const char *socketName)
  * @version 1.0
  */
 int32_t DBinderRemovePermission(const char *socketName);
+
+/**
+ * @brief Set socket option.
+ *
+ * @param socket Indicates the unique socket fd.
+ * @param level Indicates the level of option.
+ * @param optType Indicates the type of option.
+ * @param optValue Indicates the pointer to the option value to set, which cannot be <b>NULL</b>.
+ * @param optValueSize Indicates the length of the option value to set.
+ *
+ * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if <b>optValue</b> is <b>NULL</b> or <b>optValueSize</b> is zero.
+ * @return Returns <b>SOFTBUS_OK</b> if the operation is successful; returns an error code otherwise.
+ * @since 2.0
+ * @version 2.0
+ */
+int32_t SetSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t optValueSize);
+
+/**
+ * @brief Get socket option.
+ *
+ * @param socket Indicates the unique socket fd.
+ * @param level Indicates the level of option.
+ * @param optType Indicates the type of option.
+ * @param optValue Indicates the pointer to the option value to get, which cannot be <b>NULL</b>.
+ * @param optValueSize Indicates the pointer to the optValue size to get, which cannot be <b>NULL</b>.
+ *
+ * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if <b>optValue</b> is <b>NULL</b> or <b>optValueSize</b> is <b>NULL</b>.
+ * @return Returns <b>SOFTBUS_OK</b> if the operation is successful; returns an error code otherwise.
+ * @since 2.0
+ * @version 2.0
+ */
+int32_t GetSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t *optValueSize);
 #ifdef __cplusplus
 }
 #endif
