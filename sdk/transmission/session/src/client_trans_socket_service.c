@@ -93,13 +93,13 @@ int32_t Socket(SocketInfo info)
         return ret;
     }
 
-    TRANS_LOGI(TRANS_SDK, "create socket ok, socket=%{public}d", socketFd);
+    TRANS_LOGD(TRANS_SDK, "create socket ok, socket=%{public}d", socketFd);
     return socketFd;
 }
 
 int32_t Listen(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener)
 {
-    TRANS_LOGI(TRANS_SDK, "Listen: socket=%{public}d", socket);
+    TRANS_LOGD(TRANS_SDK, "Listen: socket=%{public}d", socket);
     return ClientListen(socket, qos, qosCount, listener);
 }
 

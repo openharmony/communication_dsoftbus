@@ -172,7 +172,7 @@ int32_t TransRefreshProxyTimesNative(int channelId)
 
 static int32_t TransProxyAddChanItem(ProxyChannelInfo *chan)
 {
-    TRANS_LOGI(TRANS_CTRL, "enter.");
+    TRANS_LOGD(TRANS_CTRL, "enter.");
     if ((chan == NULL) || (g_proxyChannelList == NULL)) {
         TRANS_LOGE(TRANS_CTRL, "trans proxy add channel param nullptr!");
         return SOFTBUS_ERR;
@@ -1722,7 +1722,7 @@ void TransProxyManagerDeinit(void)
 
 static void TransProxyDestroyChannelList(const ListNode *destroyList)
 {
-    TRANS_LOGI(TRANS_CTRL, "enter.");
+    TRANS_LOGD(TRANS_CTRL, "enter.");
     if ((destroyList == NULL) || IsListEmpty(destroyList)) {
         return;
     }
