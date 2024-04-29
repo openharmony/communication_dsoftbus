@@ -1307,7 +1307,6 @@ ohos_unittest("LNNLaneMockTest") {
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_async_callback_utils.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_map.c",
     "$dsoftbus_root_path/core/connection/wifi_direct/utils/wifi_direct_utils_virtual.c",
-    "$dsoftbus_root_path/core/connection/wifi_direct/wifi_direct_manager_virtual.c",
     "lane/src/lnn_lane_deps_mock.cpp",
     "lane/src/lnn_lane_test.cpp",
     "lane/src/lnn_link_enabled_mock.cpp",
@@ -1337,7 +1336,6 @@ ohos_unittest("LNNLaneMockTest") {
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/connection/p2p/interface",
     "$dsoftbus_root_path/core/connection/p2p/common/include",
-    "$dsoftbus_root_path/core/connection/wifi_direct",
     "$dsoftbus_root_path/core/connection/wifi_direct/utils",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/interface",
@@ -1352,7 +1350,6 @@ ohos_unittest("LNNLaneMockTest") {
     "//third_party/cJSON",
     "unittest/common/",
     "$dsoftbus_root_path/core/connection/ble/include",
-    "$dsoftbus_root_path/core/connection/wifi_direct",
     "$dsoftbus_root_path/core/connection/wifi_direct/utils",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
   ]
