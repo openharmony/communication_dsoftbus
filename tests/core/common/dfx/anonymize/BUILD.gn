@@ -18,5 +18,5 @@ group("unittest") {
 
 group("fuzztest") {
   testonly = true
-  deps = [ "fuzztest:SoftBusDfxAnonymizeFuzzTest" ]
+  deps = [ "fuzztest/softbusdfxanonymize_fuzzer:SoftBusDfxAnonymizeFuzzTest" ]
 }
