@@ -35,6 +35,14 @@ void Anonymize(const char *plainStr, char **anonymizedStr);
  */
 void AnonymizeFree(char *anonymizedStr);
 
+/**
+ * Return the anonymized string if anonymizedStr is not null,
+ * else return "NULL"
+ *
+ * @param anonymizedStr The anonymized string.
+ */
+const char *AnonymizeWrapper(const char *anonymizedStr);
+
 #ifdef __cplusplus
 }
 #endif

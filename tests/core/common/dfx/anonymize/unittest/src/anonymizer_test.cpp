@@ -198,4 +198,32 @@ HWTEST_F(AnonymizerTest, AnonymizeTest009, TestSize.Level0)
     EXPECT_STREQ(TEST_ANONYMIZED_IP_THREE, anonymizedStr);
     AnonymizeFree(anonymizedStr);
 }
+
+/**
+ * @tc.name: AnonymizeTest010
+ * @tc.desc: Should return "NULL" when anonymizedStr is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I8DW1W
+ */
+HWTEST_F(AnonymizerTest, AnonymizeTest010, TestSize.Level0)
+{
+    const char *anonymizedStr = nullptr;
+
+    const char *ret = AnonymizeWrapper(anonymizedStr);
+    EXPECT_STREQ(ret, "NULL");
+}
+
+/**
+ * @tc.name: AnonymizeTest011
+ * @tc.desc: Should return anonymizedStr when anonymizedStr is not nullptr
+ * @tc.type: FUNC
+ * @tc.require: I8DW1W
+ */
+HWTEST_F(AnonymizerTest, AnonymizeTest011, TestSize.Level0)
+{
+    const char *anonymizedStr = TEST_ANONYMIZED_UDID;
+
+    const char *ret = AnonymizeWrapper(anonymizedStr);
+    EXPECT_STREQ(ret, anonymizedStr);
+}
 } // namespace OHOS

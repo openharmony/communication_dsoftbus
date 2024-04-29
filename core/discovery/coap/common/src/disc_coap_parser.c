@@ -44,7 +44,7 @@ int32_t DiscCoapParseDeviceUdid(const char *raw, DeviceInfo *device)
     }
     char *anonymizedStr;
     Anonymize(tmpUdid, &anonymizedStr);
-    DISC_LOGI(DISC_COAP, "devId=%{public}s", anonymizedStr);
+    DISC_LOGI(DISC_COAP, "devId=%{public}s", AnonymizeWrapper(anonymizedStr));
     AnonymizeFree(anonymizedStr);
     cJSON_Delete(udidJson);
 
@@ -66,7 +66,7 @@ void DiscCoapParseWifiIpAddr(const cJSON *data, DeviceInfo *device)
     device->addrNum = 1;
     char *anonymizedStr;
     Anonymize(device->addr[0].info.ip.ip, &anonymizedStr);
-    DISC_LOGD(DISC_COAP, "ip=%{public}s", anonymizedStr);
+    DISC_LOGD(DISC_COAP, "ip=%{public}s", AnonymizeWrapper(anonymizedStr));
     AnonymizeFree(anonymizedStr);
 }
 

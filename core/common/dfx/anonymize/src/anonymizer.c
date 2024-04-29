@@ -291,3 +291,8 @@ void AnonymizeFree(char *anonymizedStr)
     }
     free(anonymizedStr);
 }
+
+const char *AnonymizeWrapper(const char *anonymizedStr)
+{
+    return anonymizedStr ? anonymizedStr : "NULL";
+}
