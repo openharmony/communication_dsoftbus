@@ -1457,7 +1457,7 @@ int32_t TransProxyCloseProxyChannel(int32_t channelId)
     if (TransProxyDelByChannelId(channelId, info) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "proxy del failed. channelId=%{public}d", channelId);
         SoftBusFree(info);
-        return SOFTBUS_TRANS_PROXY_DEL_CHANNELID_INVALID;
+        return SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID;
     }
 
     TransProxyCloseProxyOtherRes(channelId, info);

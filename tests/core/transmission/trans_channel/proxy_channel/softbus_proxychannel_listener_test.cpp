@@ -366,6 +366,6 @@ HWTEST_F(SoftbusProxyChannelListenerTest, TransSendNetworkingMessageTest001, Tes
     strcpy_s(sendData, SESSIONKEYSIZE, VALID_SESSIONNAME);
 
     int32_t ret = TransSendNetworkingMessage(TEST_NUMBER_25, sendData, PROXY_CHANNEL_BT_IDLE_TIMEOUT, CONN_HIGH);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SEND_CHANNELID_INVALID, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID, ret);
 }
 } // namespace OHOS
