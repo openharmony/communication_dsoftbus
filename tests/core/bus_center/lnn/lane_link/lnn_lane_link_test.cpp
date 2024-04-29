@@ -102,7 +102,7 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *info, struct WifiDire
         return SOFTBUS_OK;
     }
     if (info->pid == ASYNCFAIL) {
-        callback->onConnectFailure(info->requestId, ERROR_WIFI_DIRECT_WAIT_REUSE_RESPONSE_TIMEOUT );
+        callback->onConnectFailure(info->requestId, ERROR_WIFI_DIRECT_WAIT_REUSE_RESPONSE_TIMEOUT);
         return SOFTBUS_OK;
     }
     struct WifiDirectLink link = {
