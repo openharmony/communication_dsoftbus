@@ -164,7 +164,7 @@ static int32_t StartDelayInit(void)
     return ret;
 }
 
-int32_t BusCenterServerInit(void)
+static int32_t BusCenterServerInitFirstStep(void)
 {
     if (LnnInitNetLedger() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
@@ -197,6 +197,11 @@ int32_t BusCenterServerInit(void)
         LNN_LOGE(LNN_INIT, "init meta node fail");
         return SOFTBUS_ERR;
     }
+    return SOFTBUS_OK;
+}
+
+static int32_t BusCenterServerInitSecondStep(void)
+{
     SoftBusRunPeriodicalTask(WATCHDOG_TASK_NAME, WatchdogProcess, WATCHDOG_INTERVAL_TIME, WATCHDOG_DELAY_TIME);
     if (LnnInitLaneHub() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init lane hub fail");
@@ -218,8 +223,16 @@ int32_t BusCenterServerInit(void)
         LNN_LOGE(LNN_INIT, "initDecisionCenter fail");
         return SOFTBUS_ERR;
     }
-    if (LnnInitDecisionCenter(DC_VERSION_1_0) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "init bus center decision center fail");
+    return SOFTBUS_OK;
+}
+
+
+int32_t BusCenterServerInit(void)
+{
+    if (BusCenterServerInitFirstStep() != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
+    if (BusCenterServerInitSecondStep() != SOFTBUS_OK) {
         return SOFTBUS_ERR;
     }
     LNN_LOGI(LNN_INIT, "bus center server init ok");
