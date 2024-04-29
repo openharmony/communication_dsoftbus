@@ -35,6 +35,7 @@ auth_server_inc = [
   "$dsoftbus_root_path/core/common/dfx/interface/include",
   "$dsoftbus_root_path/core/adapter/authentication/include",
   "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+  "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
   "$dsoftbus_root_path/core/adapter/bus_center/include",
   "$dsoftbus_root_path/core/bus_center/utils/include/",
 ]

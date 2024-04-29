@@ -2148,6 +2148,35 @@ int64_t AuthDeviceGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer
     return authId;
 }
 
+int32_t AuthDeviceGetAuthHandleByIndex(const char *udid, bool isServer, int32_t index, AuthHandle *authHandle)
+{
+    if (udid == NULL || authHandle == NULL) {
+        AUTH_LOGE(AUTH_FSM, "param error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!RequireAuthLock()) {
+        AUTH_LOGE(AUTH_CONN, "RequireAuthLock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    AuthManager *auth = FindNormalizedKeyAuthManagerByUdid(udid, isServer);
+    if (auth == NULL) {
+        AUTH_LOGE(AUTH_CONN, "not found auth manager, side=%{public}s", GetAuthSideStr(isServer));
+        ReleaseAuthLock();
+        return SOFTBUS_AUTH_NOT_FOUND;
+    }
+    AuthLinkType type = GetSessionKeyTypeByIndex(&auth->sessionKeyList, index);
+    ReleaseAuthLock();
+    if (type == AUTH_LINK_TYPE_MAX || type < AUTH_LINK_TYPE_WIFI) {
+        AUTH_LOGE(AUTH_CONN, "auth type error");
+        return SOFTBUS_AUTH_NOT_FOUND;
+    }
+    authHandle->authId = auth->authId;
+    authHandle->type = type;
+    AUTH_LOGI(AUTH_CONN, "found auth manager, side=%{public}s, type=%{public}d, authId=%{public}" PRId64,
+        GetAuthSideStr(isServer), type, auth->authId);
+    return SOFTBUS_OK;
+}
+
 uint32_t AuthGetEncryptSize(uint32_t inLen)
 {
     return inLen + ENCRYPT_OVER_HEAD_LEN;

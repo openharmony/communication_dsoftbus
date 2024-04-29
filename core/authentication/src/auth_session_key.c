@@ -153,6 +153,29 @@ bool HasSessionKey(const SessionKeyList *list)
     return !IsListEmpty(list);
 }
 
+AuthLinkType GetSessionKeyTypeByIndex(const SessionKeyList *list, int32_t index)
+{
+    CHECK_NULL_PTR_RETURN_VALUE(list, AUTH_LINK_TYPE_MAX);
+    SessionKeyItem *item = NULL;
+    uint32_t type = 0;
+    LIST_FOR_EACH_ENTRY(item, (const ListNode *)list, SessionKeyItem, node) {
+        if (item->index == index) {
+            type = item->type;
+            break;
+        }
+    }
+    if (type == 0) {
+        return AUTH_LINK_TYPE_MAX;
+    }
+    for (uint32_t i = AUTH_LINK_TYPE_WIFI; i < AUTH_LINK_TYPE_MAX; i++) {
+        if (SessionKeyHasAuthLinkType(type, (AuthLinkType)i)) {
+            AUTH_LOGI(AUTH_FSM, "auth link type=%{public}d", i);
+            return (AuthLinkType)i;
+        }
+    }
+    return AUTH_LINK_TYPE_MAX;
+}
+
 uint64_t GetLatestAvailableSessionKeyTime(const SessionKeyList *list, AuthLinkType type)
 {
     CHECK_NULL_PTR_RETURN_VALUE(list, 0);
