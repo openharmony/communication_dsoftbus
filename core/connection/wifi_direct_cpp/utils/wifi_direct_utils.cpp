@@ -348,7 +348,7 @@ std::string WifiDirectUtils::ChannelListToString(const std::vector<int> &channel
         if (i != 0) {
             stringChannels += "##";
         }
-        stringChannels += channels[i];
+        stringChannels += std::to_string(channels[i]);
     }
     return stringChannels;
 }

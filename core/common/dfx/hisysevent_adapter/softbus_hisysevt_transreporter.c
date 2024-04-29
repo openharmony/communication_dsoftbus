@@ -289,6 +289,10 @@ static char *GetApiNameByCode(uint32_t code)
 
 void SoftbusRecordCalledApiInfo(const char *appName, uint32_t code)
 {
+    if (g_calledApiInfoList == NULL) {
+        COMM_LOGE(COMM_EVENT, "g_calledApiInfoList is null");
+        return;
+    }
     if (SoftBusMutexLock(&g_calledApiInfoList->lock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_EVENT, "SoftbusRecordCalledApiInfo lock fail");
         return;
@@ -349,6 +353,10 @@ void SoftbusRecordCalledApiInfo(const char *appName, uint32_t code)
 
 void SoftbusRecordCalledApiCnt(uint32_t code)
 {
+    if (g_calledApiCntlist == NULL) {
+        COMM_LOGE(COMM_EVENT, "g_calledApiCntlist is null");
+        return;
+    }
     if (SoftBusMutexLock(&g_calledApiCntlist->lock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_EVENT, "SoftbusRecordCalledApiCnt lock fail");
         return;
@@ -478,18 +486,11 @@ static inline void ClearOpenSessionTime(void)
 static inline int32_t InitOpenSessionEvtMutexLock(void)
 {
     SoftBusMutexAttr mutexAttr = {SOFTBUS_MUTEX_RECURSIVE};
-    if (SoftBusMutexInit(&g_openSessionCnt.lock, &mutexAttr) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
+    if (SoftBusMutexInit(&g_openSessionCnt.lock, &mutexAttr) != SOFTBUS_OK ||
+        SoftBusMutexInit(&g_openSessionTime.lock, &mutexAttr) != SOFTBUS_OK ||
+        SoftBusMutexInit(&g_openSessionKpi.lock, &mutexAttr) != SOFTBUS_OK) {
+        return SOFTBUS_DFX_INIT_FAILED;
     }
-
-    if (SoftBusMutexInit(&g_openSessionTime.lock, &mutexAttr) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
-
-    if (SoftBusMutexInit(&g_openSessionKpi.lock, &mutexAttr) != SOFTBUS_OK) {
-        return SOFTBUS_ERR;
-    }
-
     return SOFTBUS_OK;
 }
 
@@ -665,6 +666,10 @@ static int32_t SoftbusReportCalledAPIEvt(void)
         COMM_LOGE(COMM_EVENT, "Alloc EvtReport Msg Fail!");
         return SOFTBUS_ERR;
     }
+    if (g_calledApiInfoList == NULL) {
+        COMM_LOGE(COMM_EVENT, "g_calledApiInfoList is null");
+        return SOFTBUS_NO_INIT;
+    }
     if (SoftBusMutexLock(&g_calledApiInfoList->lock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_EVENT, "SoftbusReportCalledAPIEvt lock fail");
         SoftbusFreeEvtReportMsg(msg);
@@ -701,6 +706,10 @@ static int32_t SoftbusReportCalledAPICntEvt(void)
     if (msg == NULL) {
         COMM_LOGE(COMM_EVENT, "Alloc EvtReport Msg Fail!");
         return SOFTBUS_ERR;
+    }
+    if (g_calledApiCntlist == NULL) {
+        COMM_LOGE(COMM_EVENT, "g_calledApiCntlist is null");
+        return SOFTBUS_NO_INIT;
     }
     if (SoftBusMutexLock(&g_calledApiCntlist->lock) != SOFTBUS_OK) {
         SoftbusFreeEvtReportMsg(msg);
@@ -916,4 +925,6 @@ void DeinitTransStatisticSysEvt(void)
     }
     DestroySoftBusList(g_calledApiInfoList);
     DestroySoftBusList(g_calledApiCntlist);
+    g_calledApiInfoList = NULL;
+    g_calledApiCntlist = NULL;
 }

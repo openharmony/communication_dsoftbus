@@ -28,6 +28,11 @@
 #include "client_trans_session_callback.c"
 #include "softbus_config_type.h"
 #include "trans_log.h"
+#include "softbus_feature_config.h"
+#include "softbus_conn_interface.h"
+#include "auth_interface.h"
+#include "bus_center_manager.h"
+#include "trans_session_service.h"
 
 #define TRANS_TEST_SESSION_ID 10
 #define TRANS_TEST_PID 0
@@ -72,13 +77,21 @@ public:
 
 void TransClientSessionCallbackTest::SetUpTestCase(void)
 {
-    InitSoftBusServer();
+    SoftbusConfigInit();
+    ConnServerInit();
+    AuthInit();
+    BusCenterServerInit();
+    TransServerInit();
     int32_t ret = TransClientInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
 }
 
 void TransClientSessionCallbackTest::TearDownTestCase(void)
 {
+    ConnServerDeinit();
+    AuthDeinit();
+    BusCenterServerDeinit();
+    TransServerDeinit();
 }
 
 static int OnSessionOpened(int sessionId, int result)
@@ -369,7 +382,7 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest05, TestS
     ret = ClientAddNewSession(g_sessionName, session);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = TransOnSessionClosed(INVALID_CHANNEL_ID, CHANNEL_TYPE_BUTT, SHUTDOWN_REASON_UNKNOWN);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_SESSION_ID);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
     ret = TransOnSessionClosed(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);

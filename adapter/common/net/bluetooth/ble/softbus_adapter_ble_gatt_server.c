@@ -28,6 +28,7 @@
 #include "softbus_utils.h"
 
 #include "conn_log.h"
+#include "softbus_adapter_ble_gatt_client.h"
 
 #define WAIT_HAL_REG_TIME_MS 5 // ms
 #define WAIT_HAL_REG_RETRY 3
@@ -338,6 +339,11 @@ static void BleConnectServerCallback(int connId, int serverId, const BdAddr *bdA
 {
     if (bdAddr == NULL) {
         CONN_LOGE(CONN_BLE, "invalid param");
+        return;
+    }
+
+    if (SoftbusGattcCheckExistConnectionByAddr((SoftBusBtAddr *)bdAddr)) {
+        CONN_LOGW(CONN_BLE, "ble client exist connection by addr.");
         return;
     }
 

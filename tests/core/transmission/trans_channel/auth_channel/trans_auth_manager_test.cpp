@@ -25,6 +25,9 @@
 #include "trans_session_service.h"
 #include "trans_channel_callback.h"
 #include "softbus_conn_interface.h"
+#include "softbus_feature_config.h"
+#include "auth_interface.h"
+#include "bus_center_manager.h"
 
 using namespace testing::ext;
 
@@ -51,12 +54,21 @@ public:
 
 void TransAuthManagerTest::SetUpTestCase(void)
 {
-    InitSoftBusServer();
+    SoftbusConfigInit();
+    ConnServerInit();
+    AuthInit();
+    BusCenterServerInit();
+    TransServerInit();
     cb = TransServerGetChannelCb();
 }
 
 void TransAuthManagerTest::TearDownTestCase(void)
-{}
+{
+    ConnServerDeinit();
+    AuthDeinit();
+    BusCenterServerDeinit();
+    TransServerDeinit();
+}
 
 /**
  * @tc.name: TransAuthManagerTest01

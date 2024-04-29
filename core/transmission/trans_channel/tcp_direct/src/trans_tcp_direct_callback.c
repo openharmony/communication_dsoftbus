@@ -39,7 +39,7 @@ int32_t TransTdcOnChannelOpened(const char *pkgName, int32_t pid, const char *se
 
 int32_t TransTdcOnChannelClosed(const char *pkgName, int32_t pid, int32_t channelId)
 {
-    return g_channelCb.OnChannelClosed(pkgName, pid, channelId, CHANNEL_TYPE_TCP_DIRECT);
+    return g_channelCb.OnChannelClosed(pkgName, pid, channelId, MESSAGE_TYPE_NOMAL, CHANNEL_TYPE_TCP_DIRECT);
 }
 
 int32_t TransTdcOnChannelOpenFailed(const char *pkgName, int32_t pid, int32_t channelId,

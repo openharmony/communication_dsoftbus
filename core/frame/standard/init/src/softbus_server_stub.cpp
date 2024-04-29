@@ -265,13 +265,13 @@ int32_t SoftBusServerStub::OnRemoteRequest(
             COMM_LOGE(COMM_SVC, "access token permission denied! permission=%{public}s", permission);
             pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
             TransAlarmExtra extra = {
+                .callerPid = (int32_t)callingPid,
+                .methodId = (int32_t)code,
                 .conflictName = NULL,
                 .conflictedName = NULL,
                 .occupyedName = NULL,
-                .sessionName = NULL,
-                .callerPid = (int32_t)callingPid,
-                .methodId = (int32_t)code,
                 .permissionName = permission,
+                .sessionName = NULL,
             };
             TRANS_ALARM(NO_PERMISSION_ALARM, CONTROL_ALARM_TYPE, extra);
             return SOFTBUS_ACCESS_TOKEN_DENIED;
@@ -584,14 +584,17 @@ static void ReadSessionAttrs(MessageParcel &data, SessionAttribute *getAttr)
     getAttr->dataType = data.ReadInt32();
     getAttr->linkTypeNum = data.ReadInt32();
 
-    if (getAttr->linkTypeNum > 0) {
+    if (getAttr->linkTypeNum > 0 && getAttr->linkTypeNum <= LINK_TYPE_MAX) {
         pGetArr = const_cast<LinkType *>(
             reinterpret_cast<const LinkType *>(data.ReadBuffer(sizeof(LinkType) * getAttr->linkTypeNum)));
     }
 
-    if (pGetArr != nullptr && getAttr->linkTypeNum <= LINK_TYPE_MAX) {
-        (void)memcpy_s(
-            getAttr->linkType, sizeof(LinkType) * LINK_TYPE_MAX, pGetArr, sizeof(LinkType) * getAttr->linkTypeNum);
+    if (pGetArr != nullptr) {
+        if (memcpy_s(getAttr->linkType, sizeof(LinkType) * LINK_TYPE_MAX, pGetArr,
+            sizeof(LinkType) * getAttr->linkTypeNum) != EOK) {
+            COMM_LOGE(COMM_SVC, "LinkType copy failed linkTypeNum = %{public}d, dataType = %{public}d",
+                getAttr->linkTypeNum, getAttr->dataType);
+        }
     }
 
     getAttr->attr.streamAttr.streamType = data.ReadInt32();

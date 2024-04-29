@@ -52,6 +52,11 @@
 #include "lnn_net_builder.h"
 #include "trans_tcp_direct_manager.h"
 #include "trans_tcp_direct_message.c"
+#include "trans_session_service.h"
+#include "disc_event_manager.h"
+#include "softbus_conn_ble_direct.h"
+#include "message_handler.h"
+#include "trans_channel_manager.h"
 
 using namespace testing::ext;
 
@@ -84,11 +89,28 @@ public:
 
 void TransTcpDirectMessageStaticTest::SetUpTestCase(void)
 {
-    InitSoftBusServer();
+    SoftbusConfigInit();
+    LooperInit();
+    ConnServerInit();
+    AuthInit();
+    BusCenterServerInit();
+    TransServerInit();
+    DiscEventManagerInit();
+    TransChannelInit();
+    const IServerChannelCallBack *cb = TransServerGetChannelCb();
+    int32_t ret = TransTdcSetCallBack(cb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 void TransTcpDirectMessageStaticTest::TearDownTestCase(void)
-{}
+{
+    LooperDeinit();
+    ConnServerDeinit();
+    AuthDeinit();
+    TransServerDeinit();
+    DiscEventManagerDeinit();
+    TransChannelDeinit();
+}
 
 SessionConn *TestSetSessionConn()
 {
@@ -367,8 +389,11 @@ HWTEST_F(TransTcpDirectMessageStaticTest, ProcessReceivedData0011, TestSize.Leve
 {
     int32_t channelId = 1;
     int32_t ret;
+    ret = TransSrvDataListInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = ProcessReceivedData(channelId, 0);
     EXPECT_EQ(ret, SOFTBUS_ERR);
+    TransSrvDataListDeinit();
 }
 
 /**
@@ -382,8 +407,11 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcSrvProcData0012, TestSize.Leve
     int32_t channelId = 1;
     int32_t ret;
 
+    ret = TransSrvDataListInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = TransTdcSrvProcData(DIRECT_CHANNEL_SERVER_P2P, channelId, 0);
     EXPECT_EQ(ret, SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED);
+    TransSrvDataListDeinit();
 }
 
 /**

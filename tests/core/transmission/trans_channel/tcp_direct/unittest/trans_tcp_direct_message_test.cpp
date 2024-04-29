@@ -53,6 +53,9 @@
 #include "trans_tcp_direct_sessionconn.h"
 #include "trans_tcp_direct_sessionconn.c"
 #include "trans_tcp_direct_wifi.h"
+#include "softbus_feature_config.h"
+#include "trans_session_service.h"
+#include "softbus_proxychannel_pipeline.h"
 
 using namespace testing::ext;
 
@@ -89,11 +92,21 @@ public:
 
 void TransTcpDirectMessageTest::SetUpTestCase(void)
 {
-    InitSoftBusServer();
+    SoftbusConfigInit();
+    ConnServerInit();
+    AuthInit();
+    BusCenterServerInit();
+    TransServerInit();
+    TransProxyPipelineInit();
 }
 
 void TransTcpDirectMessageTest::TearDownTestCase(void)
-{}
+{
+    ConnServerDeinit();
+    AuthDeinit();
+    BusCenterServerDeinit();
+    TransServerDeinit();
+}
 
 SessionConn *TestSetSessionConn()
 {
