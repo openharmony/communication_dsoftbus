@@ -32,6 +32,7 @@
 #include "softbus_network_utils.h"
 #include "lnn_physical_subnet_manager.h"
 #include "softbus_base_listener.h"
+#include "wifi_direct_manager.h"
 
 namespace OHOS {
 class LaneDepsInterface {
@@ -101,7 +102,7 @@ public:
     MOCK_METHOD2(LnnGetLocalNumInfo, int32_t (InfoKey, int32_t*));
     MOCK_METHOD3(LnnGetRemoteNumInfo, int32_t (const char*, InfoKey, int32_t*));
     MOCK_METHOD2(LnnGetNodeInfoById, NodeInfo* (const char*, IdCategory));
-    MOCK_METHOD0(LnnGetLocalNodeInfo, NodeInfo * ());
+    MOCK_METHOD0(LnnGetLocalNodeInfo, NodeInfo * (void));
     MOCK_METHOD1(AuthCloseConn, void (AuthHandle));
     MOCK_METHOD2(AuthSetP2pMac, int32_t (int64_t, const char*));
     MOCK_METHOD2(LnnVisitPhysicalSubnet, bool (LnnVisitPhysicalSubnetCallback, void*));
@@ -128,7 +129,7 @@ public:
     MOCK_METHOD3(AddTrigger, int32_t (ListenerModule module, int32_t fd, TriggerType trigger));
     MOCK_METHOD2(QueryLaneResource, int32_t (const LaneQueryInfo *, const QosInfo *));
     MOCK_METHOD4(ConnSendSocketData, ssize_t (int32_t fd, const char *buf, size_t len, int32_t timeout));
-    MOCK_METHOD0(GetWifiDirectManager, struct WifiDirectManager* ());
+    MOCK_METHOD0(GetWifiDirectManager, struct WifiDirectManager* (void));
     MOCK_METHOD3(LnnGetRemoteNumU32Info, int32_t (const char *networkId, InfoKey key, uint32_t *info));
     MOCK_METHOD2(LnnGetLocalNumU32Info, int32_t (InfoKey key, uint32_t *info));
     void SetDefaultResult(NodeInfo *info);
