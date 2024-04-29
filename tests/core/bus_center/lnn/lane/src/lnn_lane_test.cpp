@@ -586,7 +586,7 @@ HWTEST_F(LNNLaneMockTest, LANE_RE_ALLOC_Test_001, TestSize.Level1)
     ret = laneManager->lnnReAllocLane(laneReqId, INVALID_LANE_ID, &allocInfo, &g_listener);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 
-    allocInfo.type = LANE_TYPE_CTRL;
+    allocInfo.type = LANE_TYPE_HDLC;
     ret = laneManager->lnnReAllocLane(laneReqId, INVALID_LANE_ID, &allocInfo, &g_listener);
     EXPECT_EQ(ret, SOFTBUS_ERR);
 }
