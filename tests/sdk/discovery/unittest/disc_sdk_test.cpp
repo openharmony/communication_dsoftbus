@@ -20,6 +20,7 @@
 #include <unistd.h>
 
 #include "client_bus_center_manager.h"
+#include "disc_sdk_test_bt_status.h"
 #include "softbus_access_token_test.h"
 #include "softbus_bus_center.h"
 #include "softbus_error_code.h"
@@ -321,28 +322,31 @@ HWTEST_F(DiscSdkTest, PublishLNNTest006, TestSize.Level1)
     g_publishInfo.mode = DISCOVER_MODE_PASSIVE;
     g_publishInfo.medium = BLE;
 
+    bool isBtOn = SoftbusTestGetBtStatus();
+    printf("bt status %s\n", isBtOn ? "on" : "off");
+
     int32_t ret = PublishLNN(g_pkgName, &g_publishInfo, &g_publishCb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = StopPublishLNN(g_pkgName, g_publishInfo.publishId);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     g_publishInfo.freq = MID;
     ret = PublishLNN(g_pkgName, &g_publishInfo, &g_publishCb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = StopPublishLNN(g_pkgName, g_publishInfo.publishId);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     g_publishInfo.freq = HIGH;
     ret = PublishLNN(g_pkgName, &g_publishInfo, &g_publishCb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = StopPublishLNN(g_pkgName, g_publishInfo.publishId);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     g_publishInfo.freq = SUPER_HIGH;
     ret = PublishLNN(g_pkgName, &g_publishInfo, &g_publishCb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = StopPublishLNN(g_pkgName, g_publishInfo.publishId);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 }
 
 /**
@@ -413,23 +417,26 @@ HWTEST_F(DiscSdkTest, PublishLNNTest008, TestSize.Level1)
     g_publishInfo.mode = DISCOVER_MODE_PASSIVE;
     g_publishInfo.medium = BLE;
 
+    bool isBtOn = SoftbusTestGetBtStatus();
+    printf("bt status %s\n", isBtOn ? "on" : "off");
+
     g_publishInfo.capability = "dvKit";
     int32_t ret = PublishLNN(g_pkgName, &g_publishInfo, &g_publishCb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = StopPublishLNN(g_pkgName, g_publishInfo.publishId);
 
     g_publishInfo.capability = "castPlus";
     g_publishInfo.capabilityData = (unsigned char *)"{\"castPlus\":\"capdata2\"}";
     g_publishInfo.dataLen = (unsigned int) strlen("{\"castPlus\":\"capdata2\"}");
     ret = PublishLNN(g_pkgName, &g_publishInfo, &g_publishCb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     g_publishInfo.capabilityData = (unsigned char *)"capdata2";
     g_publishInfo.dataLen = (unsigned int) strlen("capdata2");
     ret = StopPublishLNN(g_pkgName, g_publishInfo.publishId);
 
     g_publishInfo.capability = "osdCapability";
     ret = PublishLNN(g_pkgName, &g_publishInfo, &g_publishCb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = StopPublishLNN(g_pkgName, g_publishInfo.publishId);
 }
 
@@ -590,28 +597,31 @@ HWTEST_F(DiscSdkTest, RefreshLNNTest006, TestSize.Level1)
     g_subscribeInfo.mode = DISCOVER_MODE_PASSIVE;
     g_subscribeInfo.medium = BLE;
 
+    bool isBtOn = SoftbusTestGetBtStatus();
+    printf("bt status %s\n", isBtOn ? "on" : "off");
+
     int32_t ret = RefreshLNN(g_pkgName, &g_subscribeInfo, &g_refreshCb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = StopRefreshLNN(g_pkgName, g_subscribeInfo.subscribeId);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     g_subscribeInfo.freq = MID;
     ret = RefreshLNN(g_pkgName, &g_subscribeInfo, &g_refreshCb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = StopRefreshLNN(g_pkgName, g_subscribeInfo.subscribeId);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     g_subscribeInfo.freq = HIGH;
     ret = RefreshLNN(g_pkgName, &g_subscribeInfo, &g_refreshCb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = StopRefreshLNN(g_pkgName, g_subscribeInfo.subscribeId);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     g_subscribeInfo.freq = SUPER_HIGH;
     ret = RefreshLNN(g_pkgName, &g_subscribeInfo, &g_refreshCb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = StopRefreshLNN(g_pkgName, g_subscribeInfo.subscribeId);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 }
 
 /**
@@ -678,19 +688,22 @@ HWTEST_F(DiscSdkTest, RefreshLNNTest008, TestSize.Level1)
     g_subscribeInfo.mode = DISCOVER_MODE_PASSIVE;
     g_subscribeInfo.medium = BLE;
 
+    bool isBtOn = SoftbusTestGetBtStatus();
+    printf("bt status %s\n", isBtOn ? "on" : "off");
+
     g_subscribeInfo.capability = "dvKit";
     int32_t ret = RefreshLNN(g_pkgName, &g_subscribeInfo, &g_refreshCb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = StopRefreshLNN(g_pkgName, g_subscribeInfo.subscribeId);
 
     g_subscribeInfo.capability = "castPlus";
     ret = RefreshLNN(g_pkgName, &g_subscribeInfo, &g_refreshCb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = StopRefreshLNN(g_pkgName, g_subscribeInfo.subscribeId);
 
     g_subscribeInfo.capability = "osdCapability";
     ret = RefreshLNN(g_pkgName, &g_subscribeInfo, &g_refreshCb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = StopRefreshLNN(g_pkgName, g_subscribeInfo.subscribeId);
 }
 
@@ -795,24 +808,27 @@ HWTEST_F(DiscSdkTest, StopPublishLNNTest005, TestSize.Level1)
     g_publishInfo.mode = DISCOVER_MODE_PASSIVE;
     g_publishInfo.medium = BLE;
 
+    bool isBtOn = SoftbusTestGetBtStatus();
+    printf("bt status %s\n", isBtOn ? "on" : "off");
+
     PublishLNN(g_pkgName, &g_publishInfo, &g_publishCb);
     int32_t ret = StopPublishLNN(g_pkgName, g_publishInfo.publishId);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     g_publishInfo.freq = MID;
     PublishLNN(g_pkgName, &g_publishInfo, &g_publishCb);
     ret = StopPublishLNN(g_pkgName, g_publishInfo.publishId);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     g_publishInfo.freq = HIGH;
     PublishLNN(g_pkgName, &g_publishInfo, &g_publishCb);
     ret = StopPublishLNN(g_pkgName, g_publishInfo.publishId);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     g_publishInfo.freq = SUPER_HIGH;
     PublishLNN(g_pkgName, &g_publishInfo, &g_publishCb);
     ret = StopPublishLNN(g_pkgName, g_publishInfo.publishId);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 }
 
 /**
@@ -915,24 +931,27 @@ HWTEST_F(DiscSdkTest, StopRefreshLNNTest005, TestSize.Level1)
     g_subscribeInfo.mode = DISCOVER_MODE_PASSIVE;
     g_subscribeInfo.medium = BLE;
 
+    bool isBtOn = SoftbusTestGetBtStatus();
+    printf("bt status %s\n", isBtOn ? "on" : "off");
+
     RefreshLNN(g_pkgName, &g_subscribeInfo, &g_refreshCb);
     int32_t ret = StopRefreshLNN(g_pkgName, g_subscribeInfo.subscribeId);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     g_subscribeInfo.freq = MID;
     RefreshLNN(g_pkgName, &g_subscribeInfo, &g_refreshCb);
     ret = StopRefreshLNN(g_pkgName, g_subscribeInfo.subscribeId);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     g_subscribeInfo.freq = HIGH;
     RefreshLNN(g_pkgName, &g_subscribeInfo, &g_refreshCb);
     ret = StopRefreshLNN(g_pkgName, g_subscribeInfo.subscribeId);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     g_subscribeInfo.freq = SUPER_HIGH;
     RefreshLNN(g_pkgName, &g_subscribeInfo, &g_refreshCb);
     ret = StopRefreshLNN(g_pkgName, g_subscribeInfo.subscribeId);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 }
 
 /**
