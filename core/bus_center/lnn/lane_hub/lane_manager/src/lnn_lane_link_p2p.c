@@ -141,22 +141,23 @@ static bool GetChannelAuthType(const char *peerNetWorkId)
 
 static void RecycleLinkedListResource(uint32_t requestId)
 {
-    int64_t authId = INVAILD_AUTH_ID;
     if (LinkLock() != 0) {
         return;
     }
     P2pLinkedList *item = NULL;
+    AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
     LIST_FOR_EACH_ENTRY(item, g_p2pLinkedList, P2pLinkedList, node) {
         if (item->p2pLinkDownReqId == requestId) {
-            authId = item->auth.authHandle.authId;
+            authHandle.authId = item->auth.authHandle.authId;
+            authHandle.type = item->auth.authHandle.type;
             ListDelete(&item->node);
             SoftBusFree(item);
             break;
         }
     }
     LinkUnlock();
-    if (authId != INVAILD_AUTH_ID) {
-        AuthCloseConn(item->auth.authHandle);
+    if (authHandle.authId != INVAILD_AUTH_ID) {
+        AuthCloseConn(authHandle);
     }
 }
 
