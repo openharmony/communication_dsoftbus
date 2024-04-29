@@ -465,6 +465,10 @@
         "SoftBusFtApiEventInfoGet";
         "SoftBusFtSetDfxEventCb";
         "SoftBusFtDfxHiDumper";
+        "SetSocketOpt";
+        "GetSocketOpt";
+        "SetExtSocketOpt";
+        "GetExtSocketOpt";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;
