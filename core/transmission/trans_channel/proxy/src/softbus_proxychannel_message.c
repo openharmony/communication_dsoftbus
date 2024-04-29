@@ -142,7 +142,7 @@ static int32_t TransProxyGetAuthConnInfo(uint32_t connId, AuthConnInfo *connInfo
                 return SOFTBUS_MEM_ERR;
             }
             connInfo->info.bleInfo.protocol = info.bleInfo.protocol;
-            connInfo->info.bleInfo.psm = info.bleInfo.psm;
+            connInfo->info.bleInfo.psm = (int32_t)info.bleInfo.psm;
             break;
         default:
             TRANS_LOGE(TRANS_CTRL, "unexpected conn type=%{public}d.", info.type);
@@ -816,7 +816,7 @@ int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, in
     }
 
     GetJsonObjectNumberItem(root, JSON_KEY_TRANS_FLAGS, &appInfo->transFlag);
-    if ((appInfo->transFlag & TRANS_FLAG_HAS_CHANNEL_AUTH) != 0) {
+    if (((uint32_t)appInfo->transFlag & TRANS_FLAG_HAS_CHANNEL_AUTH) != 0) {
         GetJsonObjectNumber64Item(root, JSON_KEY_AUTH_SEQ, &appInfo->authSeq);
     }
 
