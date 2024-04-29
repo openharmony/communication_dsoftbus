@@ -20,8 +20,6 @@
 
 #include "lnn_lane_link.h"
 #include "softbus_proxychannel_pipeline.h"
-#include "wifi_direct_manager.h"
-#include "wifi_direct_utils.h"
 
 namespace OHOS {
 class LaneLinkDepsInterface {
