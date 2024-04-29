@@ -901,7 +901,7 @@ int32_t TransProxyPackAndSendData(
 
     uint32_t sliceNum = (dataInfo.outLen + (uint32_t)(SLICE_LEN - 1)) / (uint32_t)SLICE_LEN;
     for (int i = 0; i < sliceNum; i++) {
-        uint32_t dataLen = (i == (sliceNum - 1U)) ? (dataInfo.outLen - i * SLICE_LEN) : SLICE_LEN;
+        uint32_t dataLen = ((uint32_t)i == (sliceNum - 1U)) ? (dataInfo.outLen - (uint32_t)i * SLICE_LEN) : SLICE_LEN;
         int32_t offset = (int32_t)(i * SLICE_LEN);
 
         uint8_t *sliceData = (uint8_t *)SoftBusCalloc(dataLen + sizeof(SliceHead));
@@ -911,7 +911,11 @@ int32_t TransProxyPackAndSendData(
         }
         SliceHead *slicehead = (SliceHead *)sliceData;
         slicehead->priority = SessionPktTypeToProxyIndex(pktType);
-        slicehead->sliceNum = sliceNum;
+        if (sliceNum > INT32_MAX) {
+            TRANS_LOGE(TRANS_FILE, "Data overflow");
+            return SOFTBUS_INVALID_NUM;
+        }
+        slicehead->sliceNum = (int32_t)sliceNum;
         slicehead->sliceSeq = i;
         ClientPackSliceHead(slicehead);
         if (memcpy_s(sliceData + sizeof(SliceHead), dataLen, dataInfo.outData + offset, dataLen) != EOK) {
