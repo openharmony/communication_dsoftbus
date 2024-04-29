@@ -32,6 +32,7 @@
 #include "softbus_network_utils.h"
 #include "lnn_physical_subnet_manager.h"
 #include "softbus_base_listener.h"
+#include "wifi_direct_manager.h"
 
 namespace OHOS {
 class LaneDepsInterface {
@@ -101,7 +102,7 @@ public:
     MOCK_METHOD2(LnnGetLocalNumInfo, int32_t (InfoKey, int32_t*));
     MOCK_METHOD3(LnnGetRemoteNumInfo, int32_t (const char*, InfoKey, int32_t*));
     MOCK_METHOD2(LnnGetNodeInfoById, NodeInfo* (const char*, IdCategory));
-    MOCK_METHOD0(LnnGetLocalNodeInfo, NodeInfo * ());
+    MOCK_METHOD0(LnnGetLocalNodeInfo, NodeInfo * (void));
     MOCK_METHOD1(AuthCloseConn, void (AuthHandle));
     MOCK_METHOD2(AuthSetP2pMac, int32_t (int64_t, const char*));
     MOCK_METHOD2(LnnVisitPhysicalSubnet, bool (LnnVisitPhysicalSubnetCallback, void*));
@@ -111,7 +112,7 @@ public:
     MOCK_METHOD3(LnnGetRemoteNumU64Info, int32_t (const char *, InfoKey, uint64_t *));
     MOCK_METHOD3(LnnGetNetworkIdByUdid, int32_t (const char *udid, char *buf, uint32_t len));
     MOCK_METHOD3(AuthDeviceCheckConnInfo, bool (const char *, AuthLinkType, bool));
-    MOCK_METHOD0(AuthGenRequestId, uint32_t ());
+    MOCK_METHOD0(AuthGenRequestId, uint32_t (void));
     MOCK_METHOD2(AuthPostTransData, int32_t (AuthHandle, const AuthTransData *));
     MOCK_METHOD2(AuthGetConnInfo, int32_t (AuthHandle, AuthConnInfo *));
     MOCK_METHOD2(AuthGetMetaType, int32_t (int64_t, bool *));
@@ -128,7 +129,7 @@ public:
     MOCK_METHOD3(AddTrigger, int32_t (ListenerModule module, int32_t fd, TriggerType trigger));
     MOCK_METHOD2(QueryLaneResource, int32_t (const LaneQueryInfo *, const QosInfo *));
     MOCK_METHOD4(ConnSendSocketData, ssize_t (int32_t fd, const char *buf, size_t len, int32_t timeout));
-    MOCK_METHOD0(GetWifiDirectManager, struct WifiDirectManager* ());
+    MOCK_METHOD0(GetWifiDirectManager, struct WifiDirectManager* (void));
     MOCK_METHOD3(LnnGetRemoteNumU32Info, int32_t (const char *networkId, InfoKey key, uint32_t *info));
     MOCK_METHOD2(LnnGetLocalNumU32Info, int32_t (InfoKey key, uint32_t *info));
     void SetDefaultResult(NodeInfo *info);
@@ -138,6 +139,10 @@ public:
     static int32_t ActionOfGetRemoteStrInfo(const char *netWorkId, InfoKey key, char *info, uint32_t len);
     static int32_t ActionOfStartBaseClient(ListenerModule module, const SoftbusBaseListener *listener);
     static int32_t ActionOfAddTrigger(ListenerModule module, int32_t fd, TriggerType trigger);
+    static int32_t ActionOfConnOpenFailed(const AuthConnInfo *info, uint32_t requestId,
+        const AuthConnCallback *callback, bool isMeta);
+    static int32_t ActionOfConnOpened(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback,
+        bool isMeta);
 };
 } // namespace OHOS
 #endif // LNN_LANE_DEPS_MOCK_H

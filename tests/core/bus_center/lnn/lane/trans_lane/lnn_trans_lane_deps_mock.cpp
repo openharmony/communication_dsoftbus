@@ -89,7 +89,7 @@ int32_t FindLaneResourceByLaneId(uint64_t laneId, LaneResource *resourceItem)
 
 void FreeLaneReqId(uint32_t laneReqId)
 {
-    return GetTransLaneIf()->FreeLaneReqId(laneReqId);
+    GetTransLaneIf()->FreeLaneReqId(laneReqId);
 }
 
 int32_t SelectExpectLaneByParameter(LanePreferredLinkList *setRecommendLinkList)
@@ -116,6 +116,7 @@ int32_t LaneLinkdownNotify(const char *peerUdid, const LaneLinkInfo *laneLinkInf
 {
     return GetTransLaneIf()->LaneLinkdownNotify(peerUdid, laneLinkInfo);
 }
+
 uint64_t ApplyLaneId(const char *localUdid, const char *remoteUdid, LaneLinkType linkType)
 {
     return GetTransLaneIf()->ApplyLaneId(localUdid, remoteUdid, linkType);

@@ -31,9 +31,9 @@ public:
     virtual ~TransLaneDepsInterface() {};
 
     virtual int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
-    LanePreferredLinkList *recommendList, uint32_t *listNum);
+        LanePreferredLinkList *recommendList, uint32_t *listNum);
     virtual int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *request,
-    LanePreferredLinkList *recommendList);
+        LanePreferredLinkList *recommendList);
     virtual int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *cb) = 0;
     virtual void DestroyLink(const char *networkId, uint32_t laneReqId, LaneLinkType type) = 0;
     virtual uint32_t GenerateLaneProfileId(const LaneGenerateParam *param) = 0;
