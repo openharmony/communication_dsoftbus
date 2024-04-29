@@ -1797,6 +1797,7 @@ int32_t AuthDeviceOpenConn(const AuthConnInfo *info, uint32_t requestId, const A
             callback->onConnOpened(requestId, authHandle);
             break;
         case AUTH_LINK_TYPE_BR:
+            /* fall-through */
         case AUTH_LINK_TYPE_BLE:
             judgeTimeOut = true;
         case AUTH_LINK_TYPE_P2P:
