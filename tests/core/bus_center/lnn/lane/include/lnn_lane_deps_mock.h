@@ -112,7 +112,7 @@ public:
     MOCK_METHOD3(LnnGetRemoteNumU64Info, int32_t (const char *, InfoKey, uint64_t *));
     MOCK_METHOD3(LnnGetNetworkIdByUdid, int32_t (const char *udid, char *buf, uint32_t len));
     MOCK_METHOD3(AuthDeviceCheckConnInfo, bool (const char *, AuthLinkType, bool));
-    MOCK_METHOD0(AuthGenRequestId, uint32_t ());
+    MOCK_METHOD0(AuthGenRequestId, uint32_t (void));
     MOCK_METHOD2(AuthPostTransData, int32_t (AuthHandle, const AuthTransData *));
     MOCK_METHOD2(AuthGetConnInfo, int32_t (AuthHandle, AuthConnInfo *));
     MOCK_METHOD2(AuthGetMetaType, int32_t (int64_t, bool *));
