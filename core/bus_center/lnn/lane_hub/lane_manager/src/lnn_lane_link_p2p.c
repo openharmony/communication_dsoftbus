@@ -903,8 +903,7 @@ static int32_t OpenAuthToDisconnP2p(const char *networkId, int32_t linkId)
 
 static void OnProxyChannelOpened(int32_t channelRequestId, int32_t channelId)
 {
-    LNN_LOGI(LNN_LANE, "proxy opened. channelRequestId=%{public}d, channelId=%{public}d",
-        channelRequestId, channelId);
+    LNN_LOGI(LNN_LANE, "proxy opened. channelRequestId=%{public}d, channelId=%{public}d", channelRequestId, channelId);
     struct WifiDirectConnectInfo info;
     info.requestId = GetWifiDirectManager()->getRequestId();
     info.connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML;
@@ -1014,7 +1013,7 @@ static int32_t GetAuthTriggerLinkReqParamByAuthHandle(uint32_t authRequestId, ui
         }
         wifiDirectInfo->pid = item->laneRequestInfo.pid;
         int32_t ret = strcpy_s(wifiDirectInfo->remoteNetworkId, sizeof(wifiDirectInfo->remoteNetworkId),
-                               item->laneRequestInfo.networkId);
+            item->laneRequestInfo.networkId);
         if (ret != EOK) {
             LNN_LOGE(LNN_LANE, "copy remote networkId fail");
             LinkUnlock();
@@ -1184,6 +1183,18 @@ static bool IsSupportWifiDirect(const char *networkId)
     return IsSupportHmlTwo(local, remote) && GetWifiDirectManager()->supportHmlTwo();
 }
 
+static bool CheckHasBrConnection(const char *networkId)
+{
+    ConnectOption connOpt;
+    (void)memset_s(&connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    connOpt.type = CONNECT_BR;
+    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_BT_MAC, connOpt.brOption.brMac, BT_MAC_LEN) != SOFTBUS_OK ||
+        connOpt.brOption.brMac[0] == '\0') {
+        return false;
+    }
+    return CheckActiveConnection(&connOpt);
+}
+
 static bool IsHasAuthConnInfo(const char *networkId)
 {
     char uuid[UUID_BUF_LEN] = {0};
@@ -1197,18 +1208,6 @@ static bool IsHasAuthConnInfo(const char *networkId)
         return true;
     }
     return false;
-}
-
-static bool CheckHasBrConnection(const char *networkId)
-{
-    ConnectOption connOpt;
-    (void)memset_s(&connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
-    connOpt.type = CONNECT_BR;
-    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_BT_MAC, connOpt.brOption.brMac, BT_MAC_LEN) != SOFTBUS_OK ||
-        connOpt.brOption.brMac[0] == '\0') {
-        return false;
-    }
-    return CheckActiveConnection(&connOpt);
 }
 
 static bool IsSupportProxyNego(const char *networkId)
