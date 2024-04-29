@@ -46,8 +46,7 @@ public:
     MOCK_METHOD3(LnnConnectP2p, int32_t (const LinkRequest *, uint32_t, const LaneLinkCb *));
     MOCK_METHOD2(UpdateP2pLinkedInfo, int32_t (uint32_t laneReqId, uint64_t laneId));
     void SetDefaultResult(void);
-    static int32_t ActionOfLnnConnectP2p(const LinkRequest *request, uint32_t laneLinkReqId,
-        const LaneLinkCb *callback);
+    static int32_t ActionOfLnnConnectP2p(const LinkRequest *request, uint32_t laneReqId, const LaneLinkCb *callback);
     static bool delayNotifyLinkSuccess;
 };
 
