@@ -1066,7 +1066,7 @@ void TransProxyProcessHandshakeAuthMsg(const ProxyMessage *msg)
     if (TransProxyGetAppInfoByChanId(msg->msgHead.myId, &appInfo) != SOFTBUS_OK) {
         return;
     }
-    if ((appInfo.transFlag & TRANS_FLAG_HAS_CHANNEL_AUTH) == 0) {
+    if (((uint32_t)appInfo.transFlag & TRANS_FLAG_HAS_CHANNEL_AUTH) == 0) {
         return;
     }
     int64_t authSeq = appInfo.authSeq;
@@ -1516,7 +1516,8 @@ void TransProxyTimerProc(void)
     ProxyChannelInfo *nextNode = NULL;
     ListNode proxyProcList;
 
-    if (g_proxyChannelList == 0 || g_proxyChannelList->cnt <= 0 || SoftBusMutexLock(&g_proxyChannelList->lock) != 0) {
+    int32_t ret = SoftBusMutexLock(&g_proxyChannelList->lock);
+    if (g_proxyChannelList == NULL || g_proxyChannelList->cnt <= 0 || ret != SOFTBUS_OK) {
         return;
     }
 

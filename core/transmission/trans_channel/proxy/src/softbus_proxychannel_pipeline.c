@@ -208,7 +208,7 @@ int32_t TransProxyPipelineOpenChannel(int32_t requestId, const char *networkId,
         return SOFTBUS_MALLOC_ERR;
     }
     msg->what = LOOPER_MSG_TYPE_OPEN_CHANNEL;
-    msg->arg1 = requestId;
+    msg->arg1 = (uint64_t)requestId;
     msg->handler = &g_manager.handler;
     msg->FreeMessage = TransProxyPipelineFreeMessage;
 
@@ -334,7 +334,7 @@ int32_t TransProxyPipelineCloseChannelDelay(int32_t channelId)
         return SOFTBUS_MALLOC_ERR;
     }
     msg->what = LOOPER_MSG_TYPE_DELEY_CLOSE_CHANNEL;
-    msg->arg1 = channelId;
+    msg->arg1 = (uint64_t)channelId;
     msg->handler = &g_manager.handler;
     msg->FreeMessage = TransProxyPipelineFreeMessage;
     g_manager.looper->PostMessageDelay(g_manager.looper, msg, DELAY_CLOSE_CHANNEL_MS);
@@ -388,7 +388,7 @@ static int TransProxyPipelineOnChannelOpened(int32_t channelId, const char *uuid
         return SOFTBUS_MALLOC_ERR;
     }
     msg->what = LOOPER_MSG_TYPE_ON_CHANNEL_OPENED;
-    msg->arg1 = channelId;
+    msg->arg1 = (uint64_t)channelId;
     msg->arg2 = isServer;
     msg->obj = clone;
     msg->handler = &g_manager.handler;
@@ -456,7 +456,7 @@ static void TransProxyPipelineOnChannelOpenFailed(int32_t channelId, const char 
         return;
     }
     msg->what = LOOPER_MSG_TYPE_ON_CHANNEL_OPEN_FAILED;
-    msg->arg1 = channelId;
+    msg->arg1 = (uint64_t)channelId;
     msg->handler = &g_manager.handler;
     msg->FreeMessage = TransProxyPipelineFreeMessage;
     g_manager.looper->PostMessage(g_manager.looper, msg);
