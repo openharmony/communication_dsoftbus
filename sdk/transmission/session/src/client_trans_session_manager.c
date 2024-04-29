@@ -2553,3 +2553,73 @@ int32_t SetSessionStateBySessionId(int32_t sessionId, SessionState sessionState)
     (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
     return SOFTBUS_OK;
 }
+
+static void FillDsfSocketParam(
+    SessionParam *param, SessionAttribute *tmpAttr, ClientSessionServer *serverNode, SessionInfo *sessionNode)
+{
+    tmpAttr->fastTransData = NULL;
+    tmpAttr->fastTransDataSize = 0;
+    tmpAttr->dataType = sessionNode->info.flag;
+    tmpAttr->attr.streamAttr.streamType = sessionNode->info.streamType;
+    tmpAttr->linkTypeNum = 2;
+    tmpAttr->linkType[0] = LINK_TYPE_WIFI_WLAN_5G;
+    tmpAttr->linkType[1] = LINK_TYPE_WIFI_WLAN_2G;
+    param->sessionName = serverNode->sessionName;
+    param->peerSessionName = sessionNode->info.peerSessionName;
+    param->peerDeviceId = sessionNode->info.peerDeviceId;
+    param->groupId = "reserved";
+    param->attr = tmpAttr;
+    param->isQosLane = false;
+    param->qosCount = 0;
+    (void)memset_s(param->qos, sizeof(param->qos), 0, sizeof(param->qos));
+    param->isAsync = false;
+}
+
+int32_t ClientDfsIpcOpenSession(int32_t sessionId, TransInfo *transInfo)
+{
+    if (sessionId < 0 || transInfo == NULL) {
+        TRANS_LOGE(TRANS_SDK, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (g_clientSessionServerList == NULL) {
+        TRANS_LOGE(TRANS_SDK, "not init");
+        return SOFTBUS_TRANS_SESSION_SERVER_NOINIT;
+    }
+
+    if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != 0) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    if (GetSessionById(sessionId, &serverNode, &sessionNode) != SOFTBUS_OK) {
+        (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+        TRANS_LOGE(TRANS_SDK, "session not found. sessionId=%{public}d", sessionId);
+        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+    }
+    int32_t ret = CheckBindSocketInfo(sessionNode);
+    if (ret != SOFTBUS_OK) {
+        (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+        TRANS_LOGE(TRANS_SDK, "check socekt info failed, ret=%{public}d", ret);
+        return ret;
+    }
+
+    SessionAttribute tmpAttr;
+    (void)memset_s(&tmpAttr, sizeof(SessionAttribute), 0, sizeof(SessionAttribute));
+    SessionParam param;
+    FillDsfSocketParam(&param, &tmpAttr, serverNode, sessionNode);
+    (void)SoftBusMutexUnlock(&(g_clientSessionServerList->lock));
+
+    param.sessionId = sessionId;
+    ret = SetSessionStateBySessionId(param.sessionId, SESSION_STATE_OPENING);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, TRANS_SDK, "set session state failed, maybe cancel, ret=%{public}d", ret);
+    ret = ServerIpcOpenSession(&param, transInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "open session ipc err: ret=%{public}d", ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
