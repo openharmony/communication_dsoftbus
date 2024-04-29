@@ -740,7 +740,7 @@ static void OnWifiDirectConnectFailure(uint32_t p2pRequestId, int32_t reason)
     (void)memset_s(&tranReq, sizeof(TransReqInfo), 0, sizeof(TransReqInfo));
     if ((reason == ERROR_WIFI_DIRECT_WAIT_REUSE_RESPONSE_TIMEOUT || reason == ERROR_POST_DATA_FAILED) &&
         GetP2pLinkReqByReqId(ASYNC_RESULT_P2P, p2pRequestId, &p2pReq) == SOFTBUS_OK &&
-        GetTransReqInfoByLaneReqId(p2pReq.laneRequestInfo.laneLinkReqId, &tranReq) == SOFTBUS_OK &&
+        GetTransReqInfoByLaneReqId(p2pReq.laneRequestInfo.laneReqId, &tranReq) == SOFTBUS_OK &&
         (!tranReq.isWithQos || (tranReq.isWithQos && tranReq.allocInfo.type == LANE_TYPE_TRANS))) {
         LNN_LOGI(LNN_LANE, "guide channel retry, requestId=%{public}u, reason=%{public}d", p2pRequestId, reason);
         GuideChannelAsyncRetry(ASYNC_RESULT_P2P, p2pRequestId, reason);
