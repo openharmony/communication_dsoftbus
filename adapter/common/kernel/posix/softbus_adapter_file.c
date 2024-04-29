@@ -11,24 +11,32 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ */ 
 
 #include "softbus_adapter_file.h"
 
 #include <errno.h>
 #include <fcntl.h>
+#include <limits.h>
 #include <securec.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-
+#include <stdbool.h>
+ 
 #include "comm_log.h"
 #include "softbus_adapter_errcode.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
+
+static bool CheckRealPath(const char *path);
 
 static int32_t SoftBusCreateFile(const char *fileName)
 {
     if (fileName == NULL) {
+        return SOFTBUS_FILE_ERR;
+    }
+    if (!CheckRealPath(fileName)) {
         return SOFTBUS_FILE_ERR;
     }
     char dirPath[SOFTBUS_MAX_PATH_LEN] = {0};
@@ -82,7 +90,9 @@ static int32_t ReadFullFile(const char *fileName, char *readBuf, uint32_t maxLen
         COMM_LOGE(COMM_ADAPTER, "ReadFile fail param is invalid");
         return SOFTBUS_FILE_ERR;
     }
-
+    if (!CheckRealPath(fileName)) {
+        return SOFTBUS_FILE_ERR;
+    }
     int32_t fd = open(fileName, O_RDONLY, S_IRUSR | S_IWUSR);
     if (fd < 0) {
         COMM_LOGE(COMM_ADAPTER, "ReadFile open file fail");
@@ -128,6 +138,9 @@ int32_t SoftBusWriteFile(const char *fileName, const char *writeBuf, uint32_t le
         COMM_LOGE(COMM_ADAPTER, "softbus write file para is invalid");
         return SOFTBUS_FILE_ERR;
     }
+    if (!CheckRealPath(fileName)) {
+        return SOFTBUS_FILE_ERR;
+    }
     if (access(fileName, F_OK) != 0 && SoftBusCreateFile(fileName) != SOFTBUS_OK) {
         COMM_LOGE(COMM_ADAPTER, "create file fail");
         return SOFTBUS_FILE_ERR;
@@ -167,6 +180,9 @@ int32_t SoftBusOpenFile(const char *fileName, int32_t flags)
         COMM_LOGE(COMM_ADAPTER, "softbus open file [fileName is null]");
         return SOFTBUS_INVALID_FD;
     }
+    if (!CheckRealPath(fileName)) {
+        return SOFTBUS_INVALID_FD;
+    }
     int32_t fd = open(fileName, flags);
     if (fd < 0) {
         COMM_LOGE(COMM_ADAPTER, "softbus open file [open fail], errno=%{public}s", strerror(errno));
@@ -179,6 +195,9 @@ int32_t SoftBusOpenFileWithPerms(const char *fileName, int32_t flags, int32_t pe
 {
     if (fileName == NULL) {
         COMM_LOGE(COMM_ADAPTER, "softbus open with perms file [fileName is null]");
+        return SOFTBUS_INVALID_FD;
+    }
+    if (!CheckRealPath(fileName)) {
         return SOFTBUS_INVALID_FD;
     }
     int32_t fd = open(fileName, flags, perms);
@@ -303,4 +322,24 @@ char *SoftBusRealPath(const char *path, char *absPath)
         realPath = absPath;
     }
     return realPath;
+}
+
+static bool CheckRealPath(const char *path)
+{
+    if (path == NULL) {
+        COMM_LOGE(COMM_ADAPTER, "check realpath [path is null]");
+        return false;
+    }
+    char *absFullPath = (char *)SoftBusCalloc(PATH_MAX + 1);
+    if (absFullPath == NULL) {
+        COMM_LOGE(COMM_ADAPTER, "callo absFullPath failed");
+        return false;
+    }
+    if (SoftBusRealPath(path, absFullPath) == NULL) {
+        SoftBusFree(absFullPath);
+        COMM_LOGE(COMM_ADAPTER, "softbus realpath failed");
+        return false;
+    }
+    SoftBusFree(absFullPath);
+    return true;
 }
