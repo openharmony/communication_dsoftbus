@@ -482,7 +482,7 @@ static int32_t CheckSessionIsOpened(int32_t sessionId)
             return SOFTBUS_TRANS_SESSION_GET_CHANNEL_FAILED;
         }
         if (isEnable == true) {
-            TRANS_LOGI(TRANS_SDK, "session is enable");
+            TRANS_LOGD(TRANS_SDK, "session is enable");
             return SOFTBUS_OK;
         }
         usleep(SESSION_CHECK_PERIOD);
@@ -895,7 +895,7 @@ int CreateSocket(const char *pkgName, const char *sessionName)
 
     int ret = ClientAddSocketServer(SEC_TYPE_CIPHERTEXT, pkgName, sessionName);
     if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
-        TRANS_LOGW(TRANS_SDK, "SocketServer is already created in client");
+        TRANS_LOGD(TRANS_SDK, "SocketServer is already created in client");
     } else if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "add socket server err, ret=%{public}d.", ret);
         return ret;
@@ -903,14 +903,14 @@ int CreateSocket(const char *pkgName, const char *sessionName)
 
     ret = ServerIpcCreateSessionServer(pkgName, sessionName);
     if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
-        TRANS_LOGI(TRANS_SDK, "ok, SocketServer is already created in server");
+        TRANS_LOGD(TRANS_SDK, "ok, SocketServer is already created in server");
         return SOFTBUS_OK;
     } else if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "createSocketServer failed, ret=%{public}d", ret);
         (void)ClientDeleteSessionServer(SEC_TYPE_CIPHERTEXT, sessionName);
         return ret;
     }
-    TRANS_LOGI(TRANS_SDK, "ok");
+    TRANS_LOGD(TRANS_SDK, "ok");
     return SOFTBUS_OK;
 }
 
@@ -1133,7 +1133,7 @@ int32_t ClientListen(int32_t socket, const QosTV qos[], uint32_t qosCount, const
         return ret;
     }
 
-    TRANS_LOGI(TRANS_SDK, "Listen ok: socket=%{public}d", socket);
+    TRANS_LOGD(TRANS_SDK, "Listen ok: socket=%{public}d", socket);
     return SOFTBUS_OK;
 }
 
