@@ -30,6 +30,7 @@
 #include "softbus_qos.h"
 #include "softbus_server_death_recipient.h"
 #include "softbus_server_frame.h"
+#include "softbus_utils.h"
 #include "system_ability_definition.h"
 #include "trans_channel_manager.h"
 #include "trans_session_service.h"
@@ -187,9 +188,9 @@ int32_t SoftBusServer::ReleaseResources(int32_t channelId)
     return TransReleaseUdpResources(channelId);
 }
 
-int32_t SoftBusServer::CloseChannel(int32_t channelId, int32_t channelType)
+int32_t SoftBusServer::CloseChannel(const char *sessionName, int32_t channelId, int32_t channelType)
 {
-    return TransCloseChannel(channelId, channelType);
+    return TransCloseChannel(sessionName, channelId, channelType);
 }
 
 int32_t SoftBusServer::SendMessage(int32_t channelId, int32_t channelType, const void *data,
@@ -229,6 +230,23 @@ int32_t SoftBusServer::GetNodeKeyInfo(const char *pkgName, const char *networkId
 int32_t SoftBusServer::SetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag)
 {
     return LnnIpcSetNodeDataChangeFlag(pkgName, networkId, dataChangeFlag);
+}
+
+int32_t SoftBusServer::RegDataLevelChangeCb(const char *pkgName)
+{
+    int32_t callingPid = (int32_t)OHOS::IPCSkeleton::GetCallingPid();
+    return LnnIpcRegDataLevelChangeCb(pkgName, callingPid);
+}
+
+int32_t SoftBusServer::UnregDataLevelChangeCb(const char *pkgName)
+{
+    int32_t callingPid = (int32_t)OHOS::IPCSkeleton::GetCallingPid();
+    return LnnIpcUnregDataLevelChangeCb(pkgName, callingPid);
+}
+
+int32_t SoftBusServer::SetDataLevel(const DataLevel *dataLevel)
+{
+    return LnnIpcSetDataLevel(dataLevel);
 }
 
 int32_t SoftBusServer::StartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy,
@@ -313,7 +331,7 @@ int SoftBusServer::Dump(int fd, const std::vector<std::u16string> &args)
         argsStr.emplace_back(Str16ToStr8(item));
     }
 
-    int argc = argsStr.size();
+    int argc = (int)argsStr.size();
     const char *argv[argc];
 
     for (int i = 0; i < argc; i++) {
@@ -403,14 +421,18 @@ static void ConvertQosInfo(const QosTV *qos, uint32_t qosCount, QosInfo *qosInfo
 int32_t SoftBusServer::EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos,
     uint32_t qosCount)
 {
-    if (peerNetworkId == NULL || dataType >= DATA_TYPE_BUTT || qosCount > QOS_TYPE_BUTT) {
+    if (!IsValidString(peerNetworkId, NETWORK_ID_BUF_LEN - 1) || dataType >= DATA_TYPE_BUTT
+        || qosCount > QOS_TYPE_BUTT) {
         COMM_LOGE(COMM_SVC, "SoftBusServer invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
     LaneQueryInfo info;
     (void)memset_s(&info, sizeof(LaneQueryInfo), 0, sizeof(LaneQueryInfo));
-    (void)memcpy_s(info.networkId, NETWORK_ID_BUF_LEN, peerNetworkId, NETWORK_ID_BUF_LEN);
+    if (strcpy_s(info.networkId, NETWORK_ID_BUF_LEN, peerNetworkId) != EOK) {
+        COMM_LOGE(COMM_SVC, "STRCPY fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
     info.transType = ConvertTransType(dataType);
 
     QosInfo qosInfo;

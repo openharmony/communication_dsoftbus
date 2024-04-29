@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,10 @@
 #include "trans_channel_manager.h"
 #include "trans_lane_pending_ctl.c"
 #include "trans_session_manager.h"
+#include "softbus_feature_config.h"
+#include "softbus_conn_interface.h"
+#include "bus_center_manager.h"
+#include "trans_session_service.h"
 
 using namespace testing::ext;
 
@@ -71,7 +75,11 @@ public:
 
 void TransLaneTest::SetUpTestCase(void)
 {
-    InitSoftBusServer();
+    SoftbusConfigInit();
+    ConnServerInit();
+    AuthInit();
+    BusCenterServerInit();
+    TransServerInit();
     int32_t ret = TransReqLanePendingInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransSessionMgrInit();
@@ -80,6 +88,10 @@ void TransLaneTest::SetUpTestCase(void)
 
 void TransLaneTest::TearDownTestCase(void)
 {
+    ConnServerDeinit();
+    AuthDeinit();
+    BusCenterServerDeinit();
+    TransServerDeinit();
     TransReqLanePendingDeinit();
 }
 
@@ -178,7 +190,7 @@ HWTEST_F(TransLaneTest, TransLaneTest003, TestSize.Level1)
     (void)TransReqLanePendingInit();
     (void)memset_s(connInfo, sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
     ret = TransAddLaneReqFromPendingList(laneHandle);
-    ASSERT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransGetLaneReqItemByLaneHandle(invalidId, &bSucc, connInfo, &errCode);
     EXPECT_EQ(SOFTBUS_ERR, ret);
@@ -187,7 +199,7 @@ HWTEST_F(TransLaneTest, TransLaneTest003, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransGetLaneReqItemByLaneHandle(laneHandle, &bSucc, NULL, &errCode);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_MEM_ERR, ret);
 
     ret = TransDelLaneReqFromPendingList(laneHandle, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -219,7 +231,7 @@ HWTEST_F(TransLaneTest, TransLaneTest004, TestSize.Level1)
     ASSERT_TRUE(connInfo != nullptr);
     (void)memset_s(connInfo, sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
     int32_t ret = TransAddLaneReqFromPendingList(laneHandle);
-    ASSERT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransUpdateLaneConnInfoByLaneHandle(invalidId, bSucc, connInfo, false, errCode);
     EXPECT_EQ(SOFTBUS_ERR, ret);
@@ -256,7 +268,7 @@ HWTEST_F(TransLaneTest, TransLaneTest005, TestSize.Level1)
     ASSERT_TRUE(connInfo != nullptr);
     (void)memset_s(connInfo, sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
     int32_t ret = TransAddLaneReqFromPendingList(laneHandle);
-    ASSERT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     TransOnLaneRequestSuccess(invalidId, connInfo);
     connInfo->connInfo.p2p.protocol = 1;
@@ -284,7 +296,7 @@ HWTEST_F(TransLaneTest, TransLaneTest006, TestSize.Level1)
     ASSERT_TRUE(connInfo != nullptr);
     (void)memset_s(connInfo, sizeof(LaneConnInfo), 0, sizeof(LaneConnInfo));
     int32_t ret = TransAddLaneReqFromPendingList(laneHandle);
-    ASSERT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     TransOnLaneRequestFail(invalidId, reason);
     connInfo->connInfo.p2p.protocol = 1;
@@ -305,16 +317,16 @@ HWTEST_F(TransLaneTest, TransLaneTest006, TestSize.Level1)
 HWTEST_F(TransLaneTest, TransLaneTest007, TestSize.Level1)
 {
     int32_t ret = GetStreamLaneType(RAW_STREAM);
-    EXPECT_TRUE(ret == LANE_T_RAW_STREAM);
+    EXPECT_EQ(ret, LANE_T_RAW_STREAM);
 
     ret = GetStreamLaneType(COMMON_VIDEO_STREAM);
-    EXPECT_TRUE(ret == LANE_T_COMMON_VIDEO);
+    EXPECT_EQ(ret, LANE_T_COMMON_VIDEO);
 
     ret = GetStreamLaneType(COMMON_AUDIO_STREAM);
-    EXPECT_TRUE(ret == LANE_T_COMMON_VOICE);
+    EXPECT_EQ(ret, LANE_T_COMMON_VOICE);
 
     ret = GetStreamLaneType(LANE_T_BUTT);
-    EXPECT_TRUE(ret == LANE_T_BUTT);
+    EXPECT_EQ(ret, LANE_T_BUTT);
 }
 
 /**
@@ -326,36 +338,36 @@ HWTEST_F(TransLaneTest, TransLaneTest007, TestSize.Level1)
 HWTEST_F(TransLaneTest, TransLaneTest008, TestSize.Level1)
 {
     int32_t ret = TransGetLaneTransTypeBySession(NULL);
-    EXPECT_TRUE(ret == LANE_T_BUTT);
+    EXPECT_EQ(ret, LANE_T_BUTT);
 
     SessionParam* sessionParam = GenerateCommParamTest();
     ASSERT_TRUE(sessionParam != nullptr);
     ret = TransGetLaneTransTypeBySession(sessionParam);
-    EXPECT_TRUE(ret == LANE_T_MSG);
+    EXPECT_EQ(ret, LANE_T_MSG);
     SoftBusFree(sessionParam);
 
     sessionParam = GenerateCommParamTest();
     ASSERT_TRUE(sessionParam != nullptr);
     ret = TransGetLaneTransTypeBySession(sessionParam);
-    EXPECT_TRUE(ret == LANE_T_BYTE);
+    EXPECT_EQ(ret, LANE_T_BYTE);
     SoftBusFree(sessionParam);
 
     sessionParam = GenerateCommParamTest();
     ASSERT_TRUE(sessionParam != nullptr);
     ret = TransGetLaneTransTypeBySession(sessionParam);
-    EXPECT_TRUE(ret == LANE_T_FILE);
+    EXPECT_EQ(ret, LANE_T_FILE);
     SoftBusFree(sessionParam);
 
     sessionParam = GenerateCommParamTest();
     ASSERT_TRUE(sessionParam != nullptr);
     ret = TransGetLaneTransTypeBySession(sessionParam);
-    EXPECT_TRUE(ret == LANE_T_RAW_STREAM);
+    EXPECT_EQ(ret, LANE_T_RAW_STREAM);
     SoftBusFree(sessionParam);
 
     sessionParam = GenerateCommParamTest();
     ASSERT_TRUE(sessionParam != nullptr);
     ret = TransGetLaneTransTypeBySession(sessionParam);
-    EXPECT_TRUE(ret == LANE_T_BUTT);
+    EXPECT_EQ(ret, LANE_T_BUTT);
     SoftBusFree(sessionParam);
 }
 
@@ -370,19 +382,19 @@ HWTEST_F(TransLaneTest, TransLaneTest009, TestSize.Level1)
 {
     LinkType type = (LinkType)LINK_TYPE_WIFI_WLAN_5G;
     LaneLinkType ret = TransGetLaneLinkTypeBySessionLinkType(type);
-    EXPECT_TRUE(ret == LANE_WLAN_5G);
+    EXPECT_EQ(ret, LANE_WLAN_5G);
 
     type = (LinkType)LINK_TYPE_WIFI_WLAN_2G;
     ret = TransGetLaneLinkTypeBySessionLinkType(type);
-    EXPECT_TRUE(ret == LANE_WLAN_2P4G);
+    EXPECT_EQ(ret, LANE_WLAN_2P4G);
 
     type = (LinkType)LINK_TYPE_WIFI_P2P;
     ret = TransGetLaneLinkTypeBySessionLinkType(type);
-    EXPECT_TRUE(ret == LANE_P2P);
+    EXPECT_EQ(ret, LANE_P2P);
 
     type = (LinkType)LINK_TYPE_BR;
     ret = TransGetLaneLinkTypeBySessionLinkType(type);
-    EXPECT_TRUE(ret == LANE_BR);
+    EXPECT_EQ(ret, LANE_BR);
 }
 
 /**
@@ -394,7 +406,7 @@ HWTEST_F(TransLaneTest, TransLaneTest009, TestSize.Level1)
 HWTEST_F(TransLaneTest, TransLaneTest010, TestSize.Level1)
 {
     int32_t ret = TransReqLanePendingInit();
-    ASSERT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     SessionAttribute sessionAttr = {
         .dataType = LANE_T_BUTT,
         .linkTypeNum = 4,
@@ -447,7 +459,7 @@ HWTEST_F(TransLaneTest, TransLaneTest012, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     ret = TransAddLaneReqFromPendingList(laneHandle);
-    ASSERT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransWaitingRequestCallback(invalidId);
     EXPECT_EQ(SOFTBUS_ERR, ret);
@@ -559,7 +571,6 @@ HWTEST_F(TransLaneTest, TransLaneTest015, TestSize.Level1)
 {
     (void)TransReqLanePendingInit();
     uint32_t laneHandle = 1;
-    bool isQosLane = false;
 
     LaneConnInfo connInfo = {
         .type = LANE_P2P,
@@ -572,7 +583,7 @@ HWTEST_F(TransLaneTest, TransLaneTest015, TestSize.Level1)
     (void)memcpy_s((void *)node->sessionName, SESSION_NAME_SIZE_MAX,
         "normal sessionName", strlen("normal sessionName") + 1);
     int32_t ret = TransSessionServerAddItem(node);
-    ASSERT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     SessionAttribute sessionNormalAttr = {
         .dataType = TYPE_MESSAGE,
@@ -580,7 +591,7 @@ HWTEST_F(TransLaneTest, TransLaneTest015, TestSize.Level1)
     };
     SessionParam *sessionParam = GenerateParamTest(&sessionNormalAttr);
     SoftBusFree(sessionParam);
-    ret = TransGetLaneInfo(NULL, &connInfo, &laneHandle, &isQosLane);
+    ret = TransGetLaneInfo(NULL, &connInfo, &laneHandle);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     TransSessionServerDelItem(g_sessionName);
@@ -709,7 +720,7 @@ HWTEST_F(TransLaneTest, TransLaneTest021, TestSize.Level1)
     ret = CheckSessionNameValidOnAuthChannel(invalidName);
     EXPECT_FALSE(ret);
     ret = CheckSessionNameValidOnAuthChannel(sessionName);
-    EXPECT_TRUE(ret == true);
+    EXPECT_TRUE(ret);
 }
 
 /**
@@ -721,7 +732,7 @@ HWTEST_F(TransLaneTest, TransLaneTest021, TestSize.Level1)
 HWTEST_F(TransLaneTest, TransLaneTest022, TestSize.Level1)
 {
     int32_t ret = TransReqLanePendingInit();
-    ASSERT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     SessionAttribute sessionAttr = {
         .dataType = LANE_T_BUTT,
         .linkTypeNum = -1,
@@ -790,5 +801,41 @@ HWTEST_F(TransLaneTest, TransLaneTest024, TestSize.Level1)
 
     SoftBusFree(p2pInfo);
     SoftBusFree(connOpt);
+}
+
+/**
+ * @tc.name: TransLaneTest025
+ * @tc.desc: trans get lane info by Qos.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneTest, TransLaneTest025, TestSize.Level1)
+{
+    (void)TransReqLanePendingInit();
+    uint32_t laneHandle = 1;
+    uint32_t errCode = SOFTBUS_OK;
+    LaneAllocInfo allocInfo = {
+        .type = LANE_TYPE_TRANS,
+    };
+    LaneConnInfo connInfo;
+    int32_t ret = TransGetLaneInfoByQos(NULL, &connInfo, &laneHandle);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = TransGetLaneInfoByQos(&allocInfo, &connInfo, &laneHandle);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    (void)InitLane();
+    ret = TransGetLaneInfoByQos(&allocInfo, &connInfo, &laneHandle);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    ret = TransUpdateLaneConnInfoByLaneHandle(laneHandle, true, &connInfo, false, errCode);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    ret = TransGetLaneInfoByQos(&allocInfo, &connInfo, &laneHandle);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    (void)LnnFreeLane(laneHandle);
+    DeinitLane();
+    TransReqLanePendingDeinit();
 }
 } // namespace OHOS

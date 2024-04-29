@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 #include "softbus_bus_center.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
+#include "softbus_server_frame.h"
 #include "softbus_utils.h"
 #include "client_bus_center_manager.h"
 

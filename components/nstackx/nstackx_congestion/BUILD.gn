@@ -34,7 +34,6 @@ if (defined(ohos_lite)) {
       include_dirs = [
         "$NSTACKX_ROOT/nstackx_util/interface",
         "$NSTACKX_ROOT/nstackx_util/platform/liteos",
-        "//third_party/bounds_checking_function/include/",
         "interface",
         "platform/liteos",
       ]
@@ -43,6 +42,7 @@ if (defined(ohos_lite)) {
         "platform/liteos/sys_congestion.c",
       ]
       deps = [ "$NSTACKX_ROOT/nstackx_util:nstackx_util.open" ]
+      external_deps = [ "bounds_checking_function:libsec_shared" ]
     } else if (ohos_kernel_type == "linux") {
       cflags = [
         "-Wall",
@@ -54,7 +54,6 @@ if (defined(ohos_lite)) {
       include_dirs = [
         "$NSTACKX_ROOT/nstackx_util/interface",
         "$NSTACKX_ROOT/nstackx_util/platform/unix",
-        "//third_party/bounds_checking_function/include/",
         "interface",
         "platform/unix",
       ]
@@ -62,8 +61,8 @@ if (defined(ohos_lite)) {
         "core/nstackx_congestion.c",
         "platform/unix/sys_congestion.c",
       ]
-
       deps = [ "$NSTACKX_ROOT/nstackx_util:nstackx_util.open" ]
+      external_deps = [ "bounds_checking_function:libsec_shared" ]
     }
   }
 } else {
@@ -87,8 +86,6 @@ if (defined(ohos_lite)) {
     include_dirs = [
       "$NSTACKX_ROOT/nstackx_util/interface",
       "$NSTACKX_ROOT/nstackx_util/platform/unix",
-      "//commonlibrary/c_utils/base/include/",
-      "//third_party/bounds_checking_function/include",
       "interface",
       "platform/unix",
     ]
@@ -97,9 +94,10 @@ if (defined(ohos_lite)) {
       "platform/unix/sys_congestion.c",
     ]
 
-    deps = [
-      "$NSTACKX_ROOT/nstackx_util:nstackx_util.open",
-      "//third_party/bounds_checking_function:libsec_shared",
+    deps = [ "$NSTACKX_ROOT/nstackx_util:nstackx_util.open" ]
+    external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "c_utils:utilsbase",
     ]
     innerapi_tags = [ "platformsdk_indirect" ]
     part_name = "dsoftbus"

@@ -392,9 +392,12 @@ HWTEST_F(HeartBeatStrategyTest, PROCESS_SEND_ONCE_STRATEGY_TEST_01, TestSize.Lev
     };
     LnnHeartbeatFsm hbFsm;
     NiceMock<HeartBeatFSMStrategyInterfaceMock> hbMock;
-    EXPECT_CALL(hbMock, GetScreenState)
-        .WillOnce(Return(SOFTBUS_SCREEN_ON))
-        .WillRepeatedly(Return(SOFTBUS_SCREEN_OFF));
+    EXPECT_CALL(hbMock, LnnVisitHbTypeSet).WillRepeatedly(Return(true));
+    EXPECT_CALL(hbMock, LnnRemoveSendEndMsg);
+    EXPECT_CALL(hbMock, LnnFsmRemoveMessage).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbMock, LnnRemoveCheckDevStatusMsg);
+    EXPECT_CALL(hbMock, LnnPostCheckDevStatusMsgToHbFsm).WillRepeatedly(Return(SOFTBUS_OK));
+
     int32_t ret = ProcessSendOnceStrategy(&hbFsm, &msgPara, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = ProcessSendOnceStrategy(&hbFsm, &msgPara, &mode);

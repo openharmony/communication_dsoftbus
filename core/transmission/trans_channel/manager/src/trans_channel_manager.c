@@ -147,6 +147,11 @@ int32_t TransChannelInit(void)
         return SOFTBUS_ERR;
     }
 
+    if (TransSocketLaneMgrInit() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_INIT, "trans socket lane manager init failed.");
+        return SOFTBUS_ERR;
+    }
+
     if (TransAuthInit(cb) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "trans auth init failed.");
         return SOFTBUS_ERR;
@@ -172,6 +177,11 @@ int32_t TransChannelInit(void)
         return SOFTBUS_ERR;
     }
 
+    if (TransAsyncReqLanePendingInit() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_INIT, "trans async req lane pending init failed.");
+        return SOFTBUS_ERR;
+    }
+
     ReqLinkListener();
 
     if (SoftBusMutexInit(&g_myIdLock, NULL) != SOFTBUS_OK) {
@@ -185,11 +195,13 @@ int32_t TransChannelInit(void)
 void TransChannelDeinit(void)
 {
     TransLaneMgrDeinit();
+    TransSocketLaneMgrDeinit();
     TransAuthDeinit();
     TransProxyManagerDeinit();
     TransTcpDirectDeinit();
     TransUdpChannelDeinit();
     TransReqLanePendingDeinit();
+    TransAsyncReqLanePendingDeinit();
     SoftBusMutexDestroy(&g_myIdLock);
 }
 
@@ -202,21 +214,26 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     TRANS_LOGI(TRANS_CTRL, "server TransOpenChannel");
     int32_t ret = INVALID_CHANNEL_ID;
     uint32_t laneHandle = INVALID_LANE_REQ_ID;
-    bool isQosLane = false;
-    // async bind will back after request choose lane
+    char *tmpName = NULL;
+    CoreSessionState state = CORE_SESSION_STATE_INIT;
+    ret = TransAddSocketChannelInfo(
+        param->sessionName, param->sessionId, INVALID_CHANNEL_ID, CHANNEL_TYPE_UNDEFINED, CORE_SESSION_STATE_INIT);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "Add socket channel record failed.");
     if (param->isAsync) {
-        uint32_t firstTokenId = TransACLGetFirstTokenID();
-        ret = TransAsyncGetLaneInfo(param, &laneHandle, firstTokenId, &isQosLane);
+        uint32_t firstTokenId = TransACLGetCallingTokenID();
+        ret = TransAsyncGetLaneInfo(param, &laneHandle, firstTokenId);
         if (ret != SOFTBUS_OK) {
-            char *tmpSessionName = NULL;
-            Anonymize(param->sessionName, &tmpSessionName);
+            Anonymize(param->sessionName, &tmpName);
             TRANS_LOGE(TRANS_CTRL, "Async get Lane failed, sessionName=%{public}s, sessionId=%{public}d",
-                tmpSessionName, param->sessionId);
-            AnonymizeFree(tmpSessionName);
+                tmpName, param->sessionId);
+            AnonymizeFree(tmpName);
+            if (ret != SOFTBUS_TRANS_STOP_BIND_BY_CANCEL) {
+                TransFreeLane(laneHandle, param->isQosLane);
+            }
+            (void)TransDeleteSocketChannelInfoBySession(param->sessionName, param->sessionId);
         }
         return ret;
     }
-    int32_t errCode = INVALID_CHANNEL_ID;
     int64_t timeStart = GetSoftbusRecordTimeMillis();
     transInfo->channelId = INVALID_CHANNEL_ID;
     transInfo->channelType = CHANNEL_TYPE_BUTT;
@@ -228,42 +245,21 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     int32_t peerRet = LnnGetRemoteNodeInfoById(appInfo->peerNetWorkId, CATEGORY_NETWORK_ID, &nodeInfo);
-    TransEventExtra extra = {
-        .calleePkg = NULL,
-        .callerPkg = appInfo->myData.pkgName,
-        .socketName = appInfo->myData.sessionName,
-        .dataType = appInfo->businessType,
-        .peerNetworkId = appInfo->peerNetWorkId,
-        .peerUdid = peerRet == SOFTBUS_OK ? nodeInfo.deviceInfo.deviceUdid : NULL,
-        .peerDevVer = peerRet == SOFTBUS_OK ? nodeInfo.deviceInfo.deviceVersion : NULL,
-        .result = EVENT_STAGE_RESULT_OK
-    };
+    TransEventExtra extra;
+    TransBuildTransOpenChannelStartEvent(&extra, appInfo, &nodeInfo, peerRet);
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_START, extra);
-    errCode = TransGetLaneInfo(param, &connInfo, &laneHandle, &isQosLane);
-    char *tmpName = NULL;
-    if (errCode != SOFTBUS_OK) {
+    ret = TransGetLaneInfo(param, &connInfo, &laneHandle);
+    if (ret != SOFTBUS_OK) {
         SoftbusReportTransErrorEvt(SOFTBUS_TRANS_GET_LANE_INFO_ERR);
-        if (!isQosLane) {
-            goto EXIT_ERR;
-        }
-        ReportTransOpenChannelEndEvent(extra, transInfo, timeStart, ret);
-        ReportTransAlarmEvent(appInfo, ret);
-        if (appInfo->fastTransData != NULL) {
-            SoftBusFree((void*)appInfo->fastTransData);
-        }
-        SoftBusFree(appInfo);
-        ret = errCode;
-        TRANS_LOGE(TRANS_CTRL, "server TransOpenChannel err, ret=%{public}d", ret);
-        return ret;
+        goto EXIT_ERR;
     }
     Anonymize(param->sessionName, &tmpName);
     TRANS_LOGI(TRANS_CTRL,
         "sessionName=%{public}s, laneHandle=%{public}u, linkType=%{public}u.",
         tmpName, laneHandle, connInfo.type);
     AnonymizeFree(tmpName);
-    errCode = TransGetConnectOptByConnInfo(&connInfo, &connOpt);
-    if (errCode != SOFTBUS_OK) {
-        ret = errCode;
+    ret = TransGetConnectOptByConnInfo(&connInfo, &connOpt);
+    if (ret != SOFTBUS_OK) {
         SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName, connInfo.type,
             SOFTBUS_EVT_OPEN_SESSION_FAIL, GetSoftbusRecordTimeMillis() - timeStart);
         goto EXIT_ERR;
@@ -273,52 +269,62 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     FillAppInfo(appInfo, param, transInfo, &connInfo);
     TransOpenChannelSetModule(transInfo->channelType, &connOpt);
     TRANS_LOGI(TRANS_CTRL, "laneHandle=%{public}u, channelType=%{public}u", laneHandle, transInfo->channelType);
-    errCode = TransOpenChannelProc((ChannelType)transInfo->channelType, appInfo, &connOpt,
+    TransGetSocketChannelStateBySession(param->sessionName, param->sessionId, &state);
+    if (state == CORE_SESSION_STATE_CANCELLING) {
+        goto EXIT_CANCEL;
+    }
+    TransSetSocketChannelStateBySession(param->sessionName, param->sessionId, CORE_SESSION_STATE_LAN_COMPLETE);
+    ret = TransOpenChannelProc((ChannelType)transInfo->channelType, appInfo, &connOpt,
         &(transInfo->channelId));
-    if (errCode != SOFTBUS_OK) {
-        ret = errCode;
+    if (ret != SOFTBUS_OK) {
         SoftbusReportTransErrorEvt(SOFTBUS_TRANS_CREATE_CHANNEL_ERR);
         SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName,
             appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, GetSoftbusRecordTimeMillis() - timeStart);
         goto EXIT_ERR;
     }
+    TransUpdateSocketChannelInfoBySession(
+        param->sessionName, param->sessionId, transInfo->channelId, transInfo->channelType);
+    TransGetSocketChannelStateBySession(param->sessionName, param->sessionId, &state);
+    if (state == CORE_SESSION_STATE_CANCELLING) {
+        TransCloseChannel(NULL, transInfo->channelId, transInfo->channelType);
+        goto EXIT_CANCEL;
+    }
+    TransSetSocketChannelStateByChannel(
+        transInfo->channelId, transInfo->channelType, CORE_SESSION_STATE_CHANNEL_OPENED);
     if (((ChannelType)transInfo->channelType == CHANNEL_TYPE_TCP_DIRECT) && (connOpt.type != CONNECT_P2P)) {
-        if (isQosLane) {
-            GetLaneManager()->lnnFreeLane(laneHandle);
-        } else {
-            LnnFreeLane(laneHandle);
-        }
+        TransFreeLane(laneHandle, param->isQosLane);
     } else if (TransLaneMgrAddLane(transInfo->channelId, transInfo->channelType, &connInfo,
-        laneHandle, isQosLane, &appInfo->myData) != SOFTBUS_OK) {
+        laneHandle, param->isQosLane, &appInfo->myData) != SOFTBUS_OK) {
         SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName,
             appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, GetSoftbusRecordTimeMillis() - timeStart);
-        TransCloseChannel(transInfo->channelId, transInfo->channelType);
+        TransCloseChannel(NULL, transInfo->channelId, transInfo->channelType);
         goto EXIT_ERR;
     }
-
-    if (appInfo->fastTransData != NULL) {
-        SoftBusFree((void*)appInfo->fastTransData);
-    }
-    SoftBusFree(appInfo);
+    TransFreeAppInfo(appInfo);
     TRANS_LOGI(TRANS_CTRL, "server TransOpenChannel ok: channelId=%{public}d, channelType=%{public}d",
         transInfo->channelId, transInfo->channelType);
     return SOFTBUS_OK;
 EXIT_ERR:
-    ReportTransOpenChannelEndEvent(extra, transInfo, timeStart, ret);
-    ReportTransAlarmEvent(appInfo, ret);
-    if (appInfo->fastTransData != NULL) {
-        SoftBusFree((void*)appInfo->fastTransData);
+    TransBuildTransOpenChannelEndEvent(&extra, transInfo, timeStart, ret);
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
+    TransAlarmExtra extraAlarm;
+    TransBuildTransAlarmEvent(&extraAlarm, appInfo, ret);
+    TRANS_ALARM(OPEN_SESSION_FAIL_ALARM, CONTROL_ALARM_TYPE, extraAlarm);
+    TransFreeAppInfo(appInfo);
+    if (ret != SOFTBUS_TRANS_STOP_BIND_BY_CANCEL) {
+        TransFreeLane(laneHandle, param->isQosLane);
     }
-    SoftBusFree(appInfo);
-    if (laneHandle != 0) {
-        if (isQosLane) {
-            GetLaneManager()->lnnFreeLane(laneHandle);
-        } else {
-            LnnFreeLane(laneHandle);
-        }
-    }
-    TRANS_LOGE(TRANS_CTRL, "server TransOpenChannel err");
+    (void)TransDeleteSocketChannelInfoBySession(param->sessionName, param->sessionId);
+    TRANS_LOGE(TRANS_SVC, "server TransOpenChannel err, ret=%{public}d", ret);
     return ret;
+EXIT_CANCEL:
+    TransBuildTransOpenChannelCancelEvent(&extra, transInfo, timeStart, SOFTBUS_TRANS_STOP_BIND_BY_CANCEL);
+    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
+    TransFreeAppInfo(appInfo);
+    TransFreeLane(laneHandle, param->isQosLane);
+    (void)TransDeleteSocketChannelInfoBySession(param->sessionName, param->sessionId);
+    TRANS_LOGE(TRANS_SVC, "server open channel cancel");
+    return SOFTBUS_TRANS_STOP_BIND_BY_CANCEL;
 }
 
 static AppInfo *GetAuthAppInfo(const char *mySessionName)
@@ -334,6 +340,7 @@ static AppInfo *GetAuthAppInfo(const char *mySessionName)
     appInfo->businessType = BUSINESS_TYPE_BYTE;
     appInfo->channelType = CHANNEL_TYPE_AUTH;
     appInfo->timeStart = GetSoftbusRecordTimeMillis();
+    appInfo->isClient = true;
     if (TransGetUidAndPid(mySessionName, &appInfo->myData.uid, &appInfo->myData.pid) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "GetAuthAppInfo GetUidAndPid failed");
         goto EXIT_ERR;
@@ -514,8 +521,8 @@ int32_t TransRippleStats(int32_t channelId, int32_t channelType, const TrafficSt
     uint32_t laneHandle;
     int32_t ret = TransGetLaneHandleByChannelId(channelId, &laneHandle);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get laneHandle fail, streamStatsInfo cannot be processed");
-        return SOFTBUS_ERR;
+        TRANS_LOGE(TRANS_CTRL, "get laneHandle fail, streamStatsInfo cannot be processed, ret=%{public}d", ret);
+        return ret;
     }
     TRANS_LOGI(TRANS_CTRL, "transRippleStats channelId=%{public}d, laneHandle=0x%{public}x", channelId, laneHandle);
     LnnRippleData rptdata;
@@ -557,14 +564,15 @@ int32_t TransNotifyAuthSuccess(int32_t channelId, int32_t channelType)
 int32_t TransReleaseUdpResources(int32_t channelId)
 {
     TRANS_LOGI(TRANS_CTRL, "release Udp channel resources: channelId=%{public}d", channelId);
+    NotifyQosChannelClosed(channelId, CHANNEL_TYPE_UDP);
     (void)TransLaneMgrDelLane(channelId, CHANNEL_TYPE_UDP);
     (void)TransDelUdpChannel(channelId);
     return SOFTBUS_OK;
 }
 
-int32_t TransCloseChannel(int32_t channelId, int32_t channelType)
+int32_t TransCloseChannel(const char *sessionName, int32_t channelId, int32_t channelType)
 {
-    return TransCommonCloseChannel(channelId, channelType);
+    return TransCommonCloseChannel(sessionName, channelId, channelType);
 }
 
 int32_t TransSendMsg(int32_t channelId, int32_t channelType, const void *data, uint32_t len,
@@ -634,6 +642,23 @@ int32_t TransGetAndComparePid(pid_t pid, int32_t channelId, int32_t channelType)
         return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }
     TRANS_LOGI(TRANS_CTRL, "callingPid check success. callingPid=%{public}d !", curChannelPid);
+    return SOFTBUS_OK;
+}
+
+int32_t TransGetAndComparePidBySession(pid_t pid, const char *sessionName, int32_t sessionlId)
+{
+    pid_t curSessionPid;
+    int32_t ret = TransGetPidFromSocketChannelInfoBySession(sessionName, sessionlId, &curSessionPid);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get pid by session failed, ret = %{public}d", ret);
+        return ret;
+    }
+    if (pid != curSessionPid) {
+        TRANS_LOGE(TRANS_CTRL, "callingPid not equal curSessionPid, callingPid=%{public}d, pid=%{public}d",
+            pid, curSessionPid);
+        return SOFTBUS_TRANS_CHECK_PID_ERROR;
+    }
+    TRANS_LOGI(TRANS_CTRL, "callingPid check success. callingPid=%{public}d !", pid);
     return SOFTBUS_OK;
 }
 

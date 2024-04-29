@@ -133,14 +133,16 @@ static int32_t GetLaneDetectInfoByWlanFd(uint32_t fd, LaneDetectInfo *infoItem)
 
 static int32_t AddLaneTriggerAndTimeOut(int32_t fd, uint32_t detectId)
 {
-    if (PostDetectTimeoutMessage(detectId, WLAN_DETECT_TIMEOUT)) {
+    int32_t ret = PostDetectTimeoutMessage(detectId, WLAN_DETECT_TIMEOUT);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "wlan detect post timeout message fail, detectId=%{public}u", detectId);
-        return SOFTBUS_ERR;
+        return ret;
     }
-    if (AddTrigger(LANE, fd, WRITE_TRIGGER) != SOFTBUS_OK) {
+    ret = AddTrigger(LANE, fd, WRITE_TRIGGER);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "wlan detect add trigger fail, detectId=%{public}u, fd=%{public}d", detectId, fd);
         RemoveDetectTimeoutMessage(detectId);
-        return SOFTBUS_ERR;
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -171,7 +173,7 @@ static int32_t WlanDetectReliability(uint32_t laneReqId, const LaneLinkInfo *lan
         return SOFTBUS_MEM_ERR;
     }
     if (GetSameLaneDetectInfo(infoItem) == SOFTBUS_OK) {
-        LNN_LOGI(LNN_LANE, "wlan reuse detect=%{public}u, laneReqId=%{public}u", infoItem->laneDetectId,
+        LNN_LOGI(LNN_LANE, "wlan reuse detectId=%{public}u, laneReqId=%{public}u", infoItem->laneDetectId,
             infoItem->laneReqId);
         return SOFTBUS_OK;
     }
@@ -180,7 +182,7 @@ static int32_t WlanDetectReliability(uint32_t laneReqId, const LaneLinkInfo *lan
         LNN_LOGE(LNN_LANE, "wlan detect connect fail, port=%{public}d, laneReqId=%{public}u",
             infoItem->link.linkInfo.wlan.connInfo.port, infoItem->laneReqId);
         SoftBusFree(infoItem);
-        return SOFTBUS_ERR;
+        return fd;
     }
     infoItem->connId.wlanFd = fd;
     if (SoftBusMutexLock(&g_laneDetectList.lock) != SOFTBUS_OK) {
@@ -191,14 +193,15 @@ static int32_t WlanDetectReliability(uint32_t laneReqId, const LaneLinkInfo *lan
     infoItem->laneDetectId = GetLaneDetectIdWithoutLock();
     ListTailInsert(&g_laneDetectList.list, &infoItem->node);
     SoftBusMutexUnlock(&g_laneDetectList.lock);
-    if (AddLaneTriggerAndTimeOut(fd, infoItem->laneDetectId) != SOFTBUS_OK) {
+    int32_t ret = AddLaneTriggerAndTimeOut(fd, infoItem->laneDetectId);
+    if (ret != SOFTBUS_OK) {
         ConnShutdownSocket(fd);
         DelLaneDetectInfo(infoItem->laneDetectId);
         LNN_LOGI(LNN_LANE, "wlan add trigger and timrout msg fail, laneReqId=%{public}u", infoItem->laneDetectId);
-        return SOFTBUS_ERR;
+        return ret;
     }
-    LNN_LOGI(LNN_LANE, "wlan first detect=%{public}u, fd=%{public}d, laneReqId=%{public}u", infoItem->laneDetectId, fd,
-        infoItem->laneReqId);
+    LNN_LOGI(LNN_LANE, "wlan first detectId=%{public}u, fd=%{public}d, laneReqId=%{public}u",
+        infoItem->laneDetectId, fd, infoItem->laneReqId);
     return SOFTBUS_OK;
 }
 
@@ -238,15 +241,16 @@ static int32_t NotifyWlanDetectResult(LaneDetectInfo *requestItem, bool isSendSu
 {
     ListNode detectInfoList;
     ListInit(&detectInfoList);
-    if (GetAllDetectInfoWithDetectId(requestItem->laneDetectId, &detectInfoList) != SOFTBUS_OK) {
+    int32_t ret = GetAllDetectInfoWithDetectId(requestItem->laneDetectId, &detectInfoList);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get all detect info fail, laneDetectId=%{public}u", requestItem->laneDetectId);
-        return SOFTBUS_ERR;
+        return ret;
     }
     LaneDetectInfo *item = NULL;
     LaneDetectInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &detectInfoList, LaneDetectInfo, node) {
         if (!isSendSuc) {
-            LNN_LOGI(LNN_LANE, "Detect failed, wlan=%{public}d, laneReqId=%{public}u, detect=%{public}u",
+            LNN_LOGI(LNN_LANE, "Detect failed, wlan=%{public}d, laneReqId=%{public}u, detectId=%{public}u",
                 item->link.type, item->laneReqId, requestItem->laneDetectId);
             item->cb.OnLaneLinkFail(item->laneReqId, SOFTBUS_CONN_FAIL);
         } else {
@@ -258,7 +262,7 @@ static int32_t NotifyWlanDetectResult(LaneDetectInfo *requestItem, bool isSendSu
                 SoftBusFree(item);
                 continue;
             }
-            LNN_LOGI(LNN_LANE, "Detect sueccess, wlan=%{public}d, laneReqId=%{public}u, detect=%{public}u",
+            LNN_LOGI(LNN_LANE, "Detect success, wlan=%{public}d, laneReqId=%{public}u, detectId=%{public}u",
                 item->link.type, item->laneReqId, requestItem->laneDetectId);
             item->cb.OnLaneLinkSuccess(item->laneReqId, &laneInfo);
         }
@@ -271,7 +275,7 @@ static int32_t NotifyWlanDetectResult(LaneDetectInfo *requestItem, bool isSendSu
 static int32_t LaneDetectOnDataEvent(ListenerModule module, int32_t events, int32_t fd)
 {
     if (module != LANE) {
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (events == SOFTBUS_SOCKET_OUT) {
         LaneDetectInfo requestItem;
@@ -280,18 +284,19 @@ static int32_t LaneDetectOnDataEvent(ListenerModule module, int32_t events, int3
             LNN_LOGE(LNN_LANE, "wlan detect info not found by fd=%{public}d", fd);
             (void)DelTrigger(LANE, fd, WRITE_TRIGGER);
             ConnShutdownSocket(fd);
-            return SOFTBUS_ERR;
+            return SOFTBUS_NOT_FIND;
         }
-        LNN_LOGI(LNN_LANE, "wlan connect sueccess, detect=%{public}u, fd=%{public}d", requestItem.laneDetectId, fd);
+        LNN_LOGI(LNN_LANE, "wlan connect success, detectId=%{public}u, fd=%{public}d", requestItem.laneDetectId, fd);
         (void)DelTrigger(LANE, fd, WRITE_TRIGGER);
         char buf[] = "lanedetect";
-        ssize_t ret = ConnSendSocketData(fd, buf, sizeof(buf), 0);
-        bool isSendSuc = (ret == sizeof(buf)) ? true : false;
+        ssize_t len = ConnSendSocketData(fd, buf, sizeof(buf), 0);
+        bool isSendSuc = (len == sizeof(buf)) ? true : false;
         ConnShutdownSocket(fd);
         RemoveDetectTimeoutMessage(requestItem.laneDetectId);
-        if (NotifyWlanDetectResult(&requestItem, isSendSuc) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LANE, "wlan notify detect result fail, detect=%{public}u", requestItem.laneDetectId);
-            return SOFTBUS_ERR;
+        int32_t ret = NotifyWlanDetectResult(&requestItem, isSendSuc);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LANE, "wlan notify detect result fail, detectId=%{public}u", requestItem.laneDetectId);
+            return ret;
         }
     } else if (events == SOFTBUS_SOCKET_EXCEPTION) {
         LNN_LOGE(LNN_LANE, "wlan detect socket exception, fd=%{public}d", fd);
@@ -325,15 +330,15 @@ void NotifyDetectTimeout(uint32_t detectId)
     ListNode detectInfoList;
     ListInit(&detectInfoList);
     if (GetAllDetectInfoWithDetectId(detectId, &detectInfoList) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get all detect info fail, detect=%{public}u", detectId);
+        LNN_LOGE(LNN_LANE, "get all detect info fail, detectId=%{public}u", detectId);
         return;
     }
     LaneDetectInfo *item = NULL;
     LaneDetectInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &detectInfoList, LaneDetectInfo, node) {
-        LNN_LOGI(LNN_LANE, "Detect time out, link=%{public}d, laneReqId=%{public}u, detect=%{public}u",
+        LNN_LOGI(LNN_LANE, "Detect time out, link=%{public}d, laneReqId=%{public}u, detectId=%{public}u",
             item->link.type, item->laneReqId, item->laneDetectId);
-        item->cb.OnLaneLinkFail(item->laneReqId, SOFTBUS_CONN_FAIL);
+        item->cb.OnLaneLinkFail(item->laneReqId, SOFTBUS_LANE_DETECT_FAIL);
         ListDelete(&item->node);
         SoftBusFree(item);
     }

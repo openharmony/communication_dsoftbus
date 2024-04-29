@@ -142,6 +142,8 @@ static int32_t ServerProxyInit(void)
 
 static RestartEventCallback g_restartEventCallback = nullptr;
 
+static RestartEventCallback g_restartMetaCallback = nullptr;
+
 static void RestartEventNotify(void)
 {
     if (g_restartEventCallback == nullptr) {
@@ -154,6 +156,20 @@ static void RestartEventNotify(void)
         return;
     }
     COMM_LOGI(COMM_SDK, "Restart event notify success!\n");
+}
+
+static void RestartMetaNotify(void)
+{
+    if (g_restartMetaCallback == nullptr) {
+        COMM_LOGI(COMM_SDK, "Restart meta notify is not used!\n");
+        return;
+    }
+    if (g_restartMetaCallback() != SOFTBUS_OK) {
+        RestartMetaCallbackUnregister();
+        COMM_LOGE(COMM_SDK, "Restart meta notify failed!\n");\
+        return;
+    }
+    COMM_LOGI(COMM_SDK, "Restart meta notify success!\n");
 }
 
 void ClientDeathProcTask(void)
@@ -182,6 +198,7 @@ void ClientDeathProcTask(void)
     BusCenterServerProxyInit();
     InnerRegisterService();
     RestartEventNotify();
+    RestartMetaNotify();
     DiscRecoveryPublish();
     DiscRecoverySubscribe();
     DiscRecoveryPolicy();
@@ -190,6 +207,11 @@ void ClientDeathProcTask(void)
 void RestartEventCallbackUnregister(void)
 {
     g_restartEventCallback = nullptr;
+}
+
+void RestartMetaCallbackUnregister(void)
+{
+    g_restartMetaCallback = nullptr;
 }
 
 int32_t RestartEventCallbackRegister(RestartEventCallback callback)
@@ -203,11 +225,26 @@ int32_t RestartEventCallbackRegister(RestartEventCallback callback)
     return SOFTBUS_OK;
 }
 
+int32_t RestartMetaCallbackRegister(RestartEventCallback callback)
+{
+    if (callback == nullptr) {
+        COMM_LOGE(COMM_SDK, "Restart meta callback register param is invalid!\n");
+        return SOFTBUS_ERR;
+    }
+    g_restartMetaCallback = callback;
+    COMM_LOGI(COMM_SDK, "Restart meta callback register success!\n");
+    return SOFTBUS_OK;
+}
+
+static bool g_deathRecipientFlag = true;
+void SetDeathRecipientFlag(bool flag)
+{
+    g_deathRecipientFlag = flag;
+}
+
 int32_t ClientStubInit(void)
 {
-    int32_t callingPid = (int32_t)(OHOS::IPCSkeleton::GetCallingPid());
-    int32_t selfPid = (int32_t)getpid();
-    if (callingPid == selfPid) {
+    if (!g_deathRecipientFlag) {
         g_serverProxy = g_serverProxy == nullptr ? GetSystemAbility() : g_serverProxy;
         return SOFTBUS_OK;
     }

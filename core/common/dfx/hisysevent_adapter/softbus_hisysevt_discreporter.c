@@ -193,7 +193,7 @@ static int32_t SoftBusCreateFirstDiscDurMsg(SoftBusEvtReportMsg *msg, uint32_t m
     return SOFTBUS_OK;
 }
 
-static inline void ClearDiscDetails()
+static inline void ClearDiscDetails(void)
 {
     DiscDetailNode *item = NULL;
     DiscDetailNode *next = NULL;
@@ -503,7 +503,12 @@ int32_t SoftbusRecordDiscBleRssi(int32_t rssi)
     COMM_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_bleRssiRangeLock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, COMM_EVENT,
                                    "ble rssi range lock fail");
 
-    size_t rangeId = (MAX_RANGE_ID - rssi) / INTERVAL_OF_RSSI;
+    uint32_t rangeId = (uint32_t)((MAX_RANGE_ID - rssi) / INTERVAL_OF_RSSI);
+    if (rangeId >= BLE_RSSI_RANGE_SIZE ) {
+        COMM_LOGE(COMM_EVENT, "range id fail");
+        (void)SoftBusMutexUnlock(&g_bleRssiRangeLock);
+        return SOFTBUS_INVALID_NUM;
+    }
     g_bleRssiRangeId[rangeId] = rangeId;
     g_bleRssiRangeData[rangeId] += 1;
     (void)SoftBusMutexUnlock(&g_bleRssiRangeLock);
@@ -575,7 +580,7 @@ int32_t InitDiscStatisticSysEvt(void)
     SetStatisticEvtReportFunc(SOFTBUS_STATISTIC_EVT_FIRST_DISC_DURATION, SoftBusReportFirstDiscDurationEvt);
     return SOFTBUS_OK;
 }
-static void DestroyMutex()
+static void DestroyMutex(void)
 {
     SoftBusMutexDestroy(&g_discDetailLock);
     SoftBusMutexDestroy(&g_bleRssiRangeLock);

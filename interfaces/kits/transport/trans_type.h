@@ -90,6 +90,17 @@ typedef enum {
 } ShutdownReason;
 
 /**
+ * @brief Enumerates of the level of Round Trip Time.
+ *
+ * @since 2.0
+ * @version 2.0
+ */
+typedef enum {
+    RTT_LEVEL_DEFAULT = 0, /**< Default RTT level */
+    RTT_LEVEL_LOW,     /**< Low RTT level, perfer low round trip time. */
+} QosRttLevel;
+
+/**
  * @brief Enumerates the Qos transform reliability.
  *
  * @since 2.0
@@ -113,6 +124,7 @@ typedef enum {
     QOS_TYPE_MAX_WAIT_TIMEOUT = 1,  /**< Maximum timeout of Bind. */
     QOS_TYPE_MAX_LATENCY = 1,       /**< Maximum latency. */
     QOS_TYPE_MIN_LATENCY,       /**< Minimum latency. */
+    QOS_TYPE_RTT_LEVEL,         /**< Level of round trip time. */
     QOS_TYPE_MAX_BUFFER,        /**< @reserved Maximum cache. */
     QOS_TYPE_FIRST_PACKAGE,     /**< @reserved First packet size. */
     QOS_TYPE_MAX_IDLE_TIMEOUT,  /**< Maximum idle time. */

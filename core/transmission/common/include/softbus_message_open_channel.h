@@ -76,7 +76,7 @@ int32_t UnpackRequest(const cJSON *msg, AppInfo *appInfo);
 
 char *PackReply(const AppInfo *appInfo);
 
-int UnpackReply(const cJSON *msg, AppInfo *appInfo, uint16_t *fastDataSize);
+int32_t UnpackReply(const cJSON *msg, AppInfo *appInfo, uint16_t *fastDataSize);
 
 char *PackError(int errCode, const char *errDesc);
 

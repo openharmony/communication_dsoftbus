@@ -798,3 +798,19 @@ int32_t ConnPreventConnection(const ConnectOption *option, uint32_t time)
     }
     return g_connManager[option->type]->PreventConnection(option, time);
 }
+
+int32_t ConnConfigPostLimit(const LimitConfiguration *configuration)
+{
+    if (configuration == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (ConnTypeCheck(configuration->type) != SOFTBUS_OK) {
+        return SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT;
+    }
+
+    if (g_connManager[configuration->type]->ConfigPostLimit == NULL) {
+        return SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT;
+    }
+    return g_connManager[configuration->type]->ConfigPostLimit(configuration);
+}

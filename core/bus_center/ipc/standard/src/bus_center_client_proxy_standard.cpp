@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,7 +36,7 @@ int32_t BusCenterClientProxy::OnChannelLinkDown(const char *networkId, int32_t r
     return SOFTBUS_OK;
 }
 
-int32_t BusCenterClientProxy::OnChannelClosed(int32_t channelId, int32_t channelType)
+int32_t BusCenterClientProxy::OnChannelClosed(int32_t channelId, int32_t channelType, int32_t messageType)
 {
     return SOFTBUS_OK;
 }
@@ -455,6 +455,35 @@ void BusCenterClientProxy::OnRefreshDeviceFound(const void *device, uint32_t dev
     MessageParcel reply;
     MessageOption option;
     int ret = remote->SendRequest(CLIENT_ON_REFRESH_DEVICE_FOUND, data, reply, option);
+    if (ret != 0) {
+        LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
+    }
+}
+
+void BusCenterClientProxy::OnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+        return;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed");
+        return;
+    }
+    if (!data.WriteCString(networkId)) {
+        LNN_LOGE(LNN_EVENT, "write networkId failed");
+        return;
+    }
+    if (!data.WriteRawData(dataLevelInfo, sizeof(DataLevelInfo))) {
+        LNN_LOGE(LNN_EVENT, "write data level info failed");
+        return;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int ret = remote->SendRequest(CLIENT_ON_DATA_LEVEL_CHANGED, data, reply, option);
     if (ret != 0) {
         LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
     }

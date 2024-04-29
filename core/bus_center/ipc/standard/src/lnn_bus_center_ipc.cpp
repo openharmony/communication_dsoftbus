@@ -51,16 +51,28 @@ struct LeaveLnnRequestInfo {
     char networkId[NETWORK_ID_BUF_LEN];
 };
 
+struct DataLevelChangeReqInfo {
+    char pkgName[PKG_NAME_SIZE_MAX];
+    int32_t pid;
+};
+
 static std::mutex g_lock;
 static std::vector<JoinLnnRequestInfo *> g_joinLNNRequestInfo;
 static std::vector<LeaveLnnRequestInfo *> g_leaveLNNRequestInfo;
 static std::vector<RefreshLnnRequestInfo *> g_refreshLnnRequestInfo;
+static std::vector<DataLevelChangeReqInfo *> g_dataLevelChangeRequestInfo;
 
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
     const InnerDeviceInfoAddtions *addtions);
 
 static IServerDiscInnerCallback g_discInnerCb = {
     .OnServerDeviceFound = OnRefreshDeviceFound,
+};
+
+static int32_t OnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo);
+
+static IDataLevelChangeCallback g_dataLevelChangeCb = {
+    .OnDataLevelChanged = OnDataLevelChanged,
 };
 
 static bool IsRepeatJoinLNNRequest(const char *pkgName, int32_t callingPid, const ConnectionAddr *addr)
@@ -152,6 +164,19 @@ static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *devic
     return SOFTBUS_OK;
 }
 
+static int32_t OnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo)
+{
+    std::lock_guard<std::mutex> autoLock(g_lock);
+    const char *dbPkgName = "distributeddata-default";
+    for (const auto &iter : g_dataLevelChangeRequestInfo) {
+        if (strcmp(dbPkgName, iter->pkgName) != 0) {
+            continue;
+        }
+        (void)ClientOnDataLevelChanged(dbPkgName, iter->pid, networkId, dataLevelInfo);
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, uint32_t addrTypeLen)
 {
     ConnectionAddr *connAddr = reinterpret_cast<ConnectionAddr *>(addr);
@@ -221,6 +246,57 @@ int32_t LnnIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkId,
 {
     (void)pkgName;
     return LnnSetNodeDataChangeFlag(networkId, dataChangeFlag);
+}
+
+int32_t LnnIpcRegDataLevelChangeCb(const char *pkgName, int32_t callingPid)
+{
+    // register data level change callback to heartbeat
+    std::lock_guard<std::mutex> autoLock(g_lock);
+    DataLevelChangeReqInfo *info = new (std::nothrow) DataLevelChangeReqInfo();
+    if (info == nullptr) {
+        COMM_LOGE(COMM_SVC, "DataLevelChangeReqInfo object is nullptr");
+        return SOFTBUS_ERR;
+    }
+    if (strcpy_s(info->pkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
+        LNN_LOGE(LNN_EVENT, "copy pkgName fail");
+        delete info;
+        return SOFTBUS_MEM_ERR;
+    }
+    info->pid = callingPid;
+    g_dataLevelChangeRequestInfo.push_back(info);
+    LnnRegDataLevelChangeCb(&g_dataLevelChangeCb);
+    return SOFTBUS_OK;
+}
+
+int32_t LnnIpcUnregDataLevelChangeCb(const char *pkgName, int32_t callingPid)
+{
+    // unregister data level chagne callback to heartbeta
+    std::lock_guard<std::mutex> autoLock(g_lock);
+    std::vector<DataLevelChangeReqInfo *>::iterator iter;
+    for (iter = g_dataLevelChangeRequestInfo.begin(); iter != g_dataLevelChangeRequestInfo.end();) {
+        if (strcmp(pkgName, (*iter)->pkgName) == 0 && callingPid == (*iter)->pid) {
+            delete *iter;
+            g_dataLevelChangeRequestInfo.erase(iter);
+            break;
+        }
+    }
+    LnnUnregDataLevelChangeCb();
+    return SOFTBUS_OK;
+}
+
+int32_t LnnIpcSetDataLevel(const DataLevel *dataLevel)
+{
+    int32_t ret = LnnSetDataLevel(dataLevel);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "Set Data Level failed, ret=%{public}d", ret);
+        return ret;
+    }
+    ret = LnnTriggerDataLevelHeartBeat();
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "Set Data Level but trigger heartbeat failed, ret=%{public}d", ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
 }
 
 int32_t LnnIpcStartTimeSync(const char *pkgName,  int32_t callingPid, const char *targetNetworkId,

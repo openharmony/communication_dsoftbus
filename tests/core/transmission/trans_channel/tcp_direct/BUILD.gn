@@ -67,13 +67,16 @@ ohos_unittest("TransServerTcpDirectTest") {
     "$dsoftbus_root_path/interfaces/kits",
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/connection/p2p/common/include",
-    "$dsoftbus_root_path/core/connection/wifi_direct",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
     "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/src",
     "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/auth/include",
     "$dsoftbus_root_path/core/frame/common/include",
     "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/discovery/event_manager/include",
+    "$dsoftbus_root_path/core/connection/wifi_direct",
+    "$dsoftbus_root_path/core/connection/ble/include",
   ]
 
   deps = [
@@ -145,6 +148,9 @@ ohos_unittest("TransCoreTcpDirectTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/auth/include",
     "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/core/discovery/event_manager/include",
+    "$dsoftbus_root_path/core/connection/wifi_direct",
+    "$dsoftbus_root_path/core/connection/ble/include",
   ]
 
   deps = [
@@ -176,7 +182,7 @@ ohos_unittest("TransTcpDirectMessageTest") {
     "$dsoftbus_root_path/core/common/security/permission/include",
     "$dsoftbus_root_path/core/adapter/common/include",
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/connection/wifi_direct",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/interfaces/kits/discovery",
 
@@ -267,7 +273,7 @@ ohos_unittest("TransTcpDirectMessageAppendTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/include",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
-    "$dsoftbus_root_path/core/connection/wifi_direct",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/adapter/transmission/include",
@@ -321,7 +327,7 @@ ohos_unittest("TransTcpDirectP2pTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/core/transmission/pending_packet/include",
     "$dsoftbus_root_path/core/connection/p2p/interface",
-    "$dsoftbus_root_path/core/connection/wifi_direct",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
     "//commonlibrary/c_utils/base/include",
     "unittest/common/",
 
@@ -383,7 +389,7 @@ ohos_unittest("TransTcpDirectMessageStaticTest") {
     "$dsoftbus_root_path/core/adapter/common/include",
     "$dsoftbus_root_path/core/common/security/permission/include",
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/connection/wifi_direct",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/interfaces/kits/discovery",
 
@@ -431,6 +437,9 @@ ohos_unittest("TransTcpDirectMessageStaticTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/auth/include",
     "$dsoftbus_root_path/core/frame/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
+    "$dsoftbus_root_path/core/discovery/event_manager/include",
+    "$dsoftbus_root_path/core/connection/wifi_direct",
+    "$dsoftbus_root_path/core/connection/ble/include",
   ]
 
   deps = [
@@ -550,7 +559,7 @@ ohos_unittest("TransTcpDirectWifiTest") {
     "$dsoftbus_root_path/core/adapter/transmission/include",
     "$dsoftbus_root_path/core/adapter/common/include",
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/connection/wifi_direct",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/interfaces/kits/discovery",
 

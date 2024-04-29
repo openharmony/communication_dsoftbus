@@ -25,7 +25,11 @@ extern "C" {
 #endif
 #endif
 
-#define SA_DATA_SIZE (14)
+#define SA_DATA_SIZE (26)
+#define ADDR_IN6_8_SIZE (16)
+#define ADDR_IN6_16_SIZE (8)
+#define ADDR_IN6_32_SIZE (4)
+#define IF_NAME_SIZE (16)
 
 #if defined(__aarch64__) || defined(__x86_64__) || (defined(__riscv) && (__riscv_xlen == 64))
 #define ADDR_IN_RESER_SIZE (4)
@@ -39,6 +43,9 @@ extern "C" {
 
 #define SOFTBUS_PF_INET SOFTBUS_PF_INET_
 #define SOFTBUS_AF_INET SOFTBUS_AF_INET_
+
+#define SOFTBUS_PF_INET6 SOFTBUS_PF_INET6_
+#define SOFTBUS_AF_INET6 SOFTBUS_AF_INET6_
 
 #define SOFTBUS_PF_NETLINK SOFTBUS_PF_NETLINK_
 #define SOFTBUS_AF_NETLINK SOFTBUS_AF_NETLINK_
@@ -105,6 +112,22 @@ typedef struct {
     SoftBusInAddr sinAddr; /* Internet address */
     unsigned char sinZero[ADDR_IN_RESER_SIZE]; /* Same size as struct sockaddr */
 } SoftBusSockAddrIn;
+
+typedef struct {
+    union {
+        uint8_t sA6ddr8[ADDR_IN6_8_SIZE];
+        uint8_t sA6ddr16[ADDR_IN6_16_SIZE];
+        uint8_t sA6ddr32[ADDR_IN6_32_SIZE];
+    } sA6ddr;
+} SoftBusIn6Addr;
+
+typedef struct {
+    uint16_t sin6Family; /* Ipv6 address family */
+    uint16_t sin6Port; /* Ipv6 Port number */
+    uint32_t sin6FlowInfo; /* Ipv6 flow info */
+    SoftBusIn6Addr sin6Addr; /* Ipv6 address */
+    uint32_t sin6ScopeId; /* Ipv6 scope id */
+} SoftBusSockAddrIn6;
 #pragma pack ()
 
 typedef struct {
@@ -121,7 +144,7 @@ int32_t SoftBusSocketGetPeerName(int32_t socketFd, SoftBusSockAddr *addr);
 int32_t SoftBusSocketBind(int32_t socketFd, SoftBusSockAddr *addr, int32_t addrLen);
 int32_t SoftBusSocketListen(int32_t socketFd, int32_t backLog);
 int32_t SoftBusSocketAccept(int32_t socketFd, SoftBusSockAddr *addr, int32_t *acceptFd);
-int32_t SoftBusSocketConnect(int32_t socketFd, const SoftBusSockAddr *addr);
+int32_t SoftBusSocketConnect(int32_t socketFd, const SoftBusSockAddr *addr, int32_t addrLen);
 
 void SoftBusSocketFdZero(SoftBusFdSet *set);
 void SoftBusSocketFdSet(int32_t socketFd, SoftBusFdSet *set);
@@ -133,7 +156,7 @@ int32_t SoftBusSocketSelect(int32_t nfds, SoftBusFdSet *readFds, SoftBusFdSet *w
 int32_t SoftBusSocketIoctl(int32_t socketFd, long cmd, void *argp);
 int32_t SoftBusSocketFcntl(int32_t socketFd, long cmd, long flag);
 
-int32_t SoftBusSocketSend(int32_t socketFd, const void *buf, uint32_t len, int32_t flags);
+int32_t SoftBusSocketSend(int32_t socketFd, const void *buf, uint32_t len, uint32_t flags);
 int32_t SoftBusSocketSendTo(int32_t socketFd, const void *buf, uint32_t len, int32_t flags,
     const SoftBusSockAddr *toAddr, int32_t toAddrLen);
 
@@ -165,6 +188,8 @@ uint16_t SoftBusLEtoBEs(uint16_t value);
 uint16_t SoftBusBEtoLEs(uint16_t value);
 
 uint32_t SoftBusInetAddr(const char *cp);
+uint32_t SoftBusIfNameToIndex(const char *name);
+int32_t SoftBusIndexToIfName(int32_t index, char *ifname, uint32_t nameLen);
 
 int32_t SoftBusSocketGetError(int32_t socketFd);
 

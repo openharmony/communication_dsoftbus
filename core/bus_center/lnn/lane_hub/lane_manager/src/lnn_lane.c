@@ -299,11 +299,11 @@ static int32_t LnnAllocLane(uint32_t laneReqId, const LaneAllocInfo *allocInfo, 
 {
     if (!AllocInfoCheck(allocInfo, listener)) {
         LNN_LOGE(LNN_LANE, "lane alloc info invalid");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (g_laneObject[allocInfo->type] == NULL) {
         LNN_LOGE(LNN_LANE, "laneType is not supported. laneType=%{public}d", allocInfo->type);
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     LNN_LOGI(LNN_LANE, "alloc lane enter, laneReqId=%{public}u, laneType=%{public}d, transType=%{public}d, "
         "minBW=%{public}u, maxLaneLatency=%{public}u, minLaneLatency=%{public}u",
@@ -311,10 +311,10 @@ static int32_t LnnAllocLane(uint32_t laneReqId, const LaneAllocInfo *allocInfo, 
         allocInfo->qosRequire.minBW,
         allocInfo->qosRequire.maxLaneLatency,
         allocInfo->qosRequire.minLaneLatency);
-    int32_t result = g_laneObject[allocInfo->type]->AllocLaneByQos(laneReqId, allocInfo, listener);
+    int32_t result = g_laneObject[allocInfo->type]->allocLaneByQos(laneReqId, allocInfo, listener);
     if (result != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "alloc lane fail, laneReqId=%{public}u, result=%{public}d", laneReqId, result);
-        return SOFTBUS_ERR;
+        return result;
     }
     return SOFTBUS_OK;
 }
@@ -336,7 +336,7 @@ static int32_t LnnReAllocLane(uint32_t laneReqId, uint64_t laneId, const LaneAll
         allocInfo->qosRequire.minBW,
         allocInfo->qosRequire.maxLaneLatency,
         allocInfo->qosRequire.minLaneLatency);
-    int32_t result = g_laneObject[allocInfo->type]->ReallocLaneByQos(laneReqId, laneId, allocInfo, listener);
+    int32_t result = g_laneObject[allocInfo->type]->reallocLaneByQos(laneReqId, laneId, allocInfo, listener);
     if (result != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "realloc lane fail, laneReqId=%{public}u, result=%{public}d", laneReqId, result);
         return SOFTBUS_ERR;
@@ -355,7 +355,7 @@ static int32_t LnnCancelLane(uint32_t laneReqId)
         return SOFTBUS_ERR;
     }
     LNN_LOGD(LNN_LANE, "cancel lane enter, laneReqId=%{public}u", laneReqId);
-    int32_t result = g_laneObject[type]->CancelLane(laneReqId);
+    int32_t result = g_laneObject[type]->cancelLane(laneReqId);
     if (result != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "freeLane fail, result=%{public}d", result);
         return SOFTBUS_ERR;
@@ -374,7 +374,7 @@ static int32_t LnnFreeLink(uint32_t laneReqId)
         return SOFTBUS_ERR;
     }
     LNN_LOGD(LNN_LANE, "free lane enter, laneReqId=%{public}u", laneReqId);
-    int32_t result = g_laneObject[type]->FreeLane(laneReqId);
+    int32_t result = g_laneObject[type]->freeLane(laneReqId);
     if (result != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "freeLane fail, result=%{public}d", result);
         return SOFTBUS_ERR;
@@ -416,7 +416,7 @@ int32_t LnnRequestLane(uint32_t laneReqId, const LaneRequestOption *request,
         LNN_LOGI(LNN_LANE, "laneRequest assign the priority=%{public}u, link=%{public}d",
             i, request->requestInfo.trans.expectedLink.linkType[i]);
     }
-    result = g_laneObject[request->type]->AllocLane(laneReqId, request, listener);
+    result = g_laneObject[request->type]->allocLane(laneReqId, request, listener);
     if (result != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "alloc lane fail, result=%{public}d", result);
         return SOFTBUS_ERR;
@@ -436,7 +436,7 @@ int32_t LnnFreeLane(uint32_t laneReqId)
         return SOFTBUS_ERR;
     }
     LNN_LOGD(LNN_LANE, "free lane enter, laneReqId=%{public}u", laneReqId);
-    int32_t result = g_laneObject[type]->FreeLane(laneReqId);
+    int32_t result = g_laneObject[type]->freeLane(laneReqId);
     if (result != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "freeLane fail, result=%{public}d", result);
         return SOFTBUS_ERR;
@@ -513,7 +513,7 @@ int32_t InitLane(void)
     g_laneObject[LANE_TYPE_TRANS] = TransLaneGetInstance();
     if (g_laneObject[LANE_TYPE_TRANS] != NULL) {
         LNN_LOGI(LNN_LANE, "transLane get instance succ");
-        g_laneObject[LANE_TYPE_TRANS]->Init(&g_laneIdListener);
+        g_laneObject[LANE_TYPE_TRANS]->init(&g_laneIdListener);
     }
     g_laneObject[LANE_TYPE_CTRL] = CtrlLaneGetInstance();
     if (g_laneObject[LANE_TYPE_CTRL] != NULL) {
@@ -531,7 +531,7 @@ void DeinitLane(void)
     LnnDeinitScore();
     LnnDeinitLaneLooper();
     if (g_laneObject[LANE_TYPE_TRANS] != NULL) {
-        g_laneObject[LANE_TYPE_TRANS]->Deinit();
+        g_laneObject[LANE_TYPE_TRANS]->deinit();
     }
     (void)SoftBusMutexDestroy(&g_laneMutex);
 }

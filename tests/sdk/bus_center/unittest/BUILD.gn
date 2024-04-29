@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -42,6 +42,7 @@ bus_center_sdk_test_inc = [
   "$dsoftbus_root_path/sdk/bus_center/manager/include",
   "$dsoftbus_root_path/sdk/bus_center/ipc/standard/include",
   "$dsoftbus_root_path/sdk/bus_center/ipc/include",
+  "$dsoftbus_root_path/core/frame/common/include",
   "$dsoftbus_root_path/core/frame/standard/init/include",
   "$dsoftbus_root_path/core/transmission/common/include",
 ]
@@ -77,6 +78,7 @@ client_bus_center_manager_test_inc = [
   "$dsoftbus_root_path/core/common/include",
   "$dsoftbus_root_path/core/discovery/interface",
   "$dsoftbus_root_path/core/discovery/manager/include",
+  "$dsoftbus_root_path/interfaces/inner_kits/lnn",
   "$dsoftbus_root_path/interfaces/kits/bus_center",
   "$dsoftbus_root_path/interfaces/kits/common",
   "$dsoftbus_root_path/tests/sdk/common/include",

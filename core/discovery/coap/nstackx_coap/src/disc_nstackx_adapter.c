@@ -39,6 +39,7 @@
 
 #define WLAN_IFACE_NAME_PREFIX "wlan"
 #define INVALID_IP_ADDR        "0.0.0.0"
+#define LOOPBACK_IP_ADDR       "127.0.0.1"
 #define DISC_FREQ_COUNT_MASK   0xFFFF
 #define DISC_FREQ_DURATION_BIT 16
 #define DISC_USECOND           1000
@@ -50,7 +51,6 @@
 
 static NSTACKX_LocalDeviceInfo *g_localDeviceInfo = NULL;
 static DiscInnerCallback *g_discCoapInnerCb = NULL;
-static char *g_capabilityData = NULL;
 static int32_t NstackxLocalDevInfoDump(int fd);
 
 static int32_t FillRspSettings(NSTACKX_ResponseSettings *settings, const DeviceInfo *deviceInfo, uint8_t bType)
@@ -74,8 +74,6 @@ static int32_t FillRspSettings(NSTACKX_ResponseSettings *settings, const DeviceI
     }
     return SOFTBUS_OK;
 EXIT:
-    SoftBusFree(settings->businessData);
-    settings->businessData = NULL;
     return SOFTBUS_STRCPY_ERR;
 }
 
@@ -96,8 +94,6 @@ int32_t DiscCoapSendRsp(const DeviceInfo *deviceInfo, uint8_t bType)
     if (ret != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "disc send response failed, ret=%{public}d", ret);
     }
-    SoftBusFree(settings->businessData);
-    settings->businessData = NULL;
     SoftBusFree(settings);
     return ret;
 }
@@ -180,7 +176,7 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
     SoftBusFree(discDeviceInfo);
 }
 
-static void OnNotificationReceived(const NotificationConfig *notification)
+static void OnNotificationReceived(const NSTACKX_NotificationConfig *notification)
 {
     DiscCoapReportNotification(notification);
 }
@@ -231,9 +227,6 @@ int32_t DiscCoapSetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capab
 
 int32_t DiscCoapRegisterServiceData(const unsigned char *capabilityData, uint32_t dataLen, uint32_t capability)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGE(g_capabilityData != NULL, SOFTBUS_DISCOVER_COAP_INIT_FAIL,
-        DISC_COAP, "g_capabilityData=NULL");
-
     int32_t authPort = 0;
     int32_t ret = LnnGetLocalNumInfo(NUM_KEY_AUTH_PORT, &authPort);
     if (ret != SOFTBUS_OK) {
@@ -246,15 +239,10 @@ int32_t DiscCoapRegisterServiceData(const unsigned char *capabilityData, uint32_
         return SOFTBUS_ERR;
     }
     // capabilityData can be NULL, it will be check in this func
-    ret = DiscCoapFillServiceData(capability, (const char *)capabilityData, dataLen, g_capabilityData);
+    ret = DiscCoapFillServiceData(capability, (const char *)capabilityData, dataLen, serviceData,
+        NSTACKX_MAX_SERVICE_DATA_LEN);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, DISC_COAP,
         "fill service data failed. ret=%{public}d", ret);
-
-    if (strlen(g_capabilityData) != 0 &&
-        sprintf_s(serviceData, NSTACKX_MAX_SERVICE_DATA_LEN, "%s%s", serviceData, g_capabilityData) < 0) {
-        DISC_LOGE(DISC_COAP, "write capability data to service data failed.");
-        return SOFTBUS_ERR;
-    }
 
     ret = NSTACKX_RegisterServiceData(serviceData);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, DISC_COAP,
@@ -291,6 +279,22 @@ int32_t DiscCoapRegisterCapabilityData(const unsigned char *capabilityData, uint
     DISC_LOGI(DISC_COAP, "register extend service data to nstackx succ. registerCapaData=%{public}s", registerCapaData);
     SoftBusFree(registerCapaData);
     return SOFTBUS_OK;
+}
+
+static bool IsNetworkValid(void)
+{
+    char localIp[IP_LEN] = {0};
+    if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, IP_LEN) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_COAP, "get local ip failed");
+        return false;
+    }
+    if (strcmp(localIp, LOOPBACK_IP_ADDR) == 0 ||
+        strcmp(localIp, INVALID_IP_ADDR) == 0 ||
+        strcmp(localIp, "") == 0) {
+        DISC_LOGE(DISC_COAP, "invalid localIp: loopback or null");
+        return false;
+    }
+    return true;
 }
 
 static int32_t GetDiscFreq(int32_t freq, uint32_t *discFreq)
@@ -337,6 +341,7 @@ int32_t DiscCoapStartDiscovery(DiscCoapOption *option)
         SOFTBUS_INVALID_PARAM, DISC_COAP, "option->mode is invalid");
     DISC_CHECK_AND_RETURN_RET_LOGE(LOW <= option->freq && option->freq < FREQ_BUTT, SOFTBUS_INVALID_PARAM,
         DISC_COAP, "invalid freq. freq=%{public}d", option->freq);
+    DISC_CHECK_AND_RETURN_RET_LOGE(IsNetworkValid(), SOFTBUS_NETWORK_NOT_FOUND, DISC_COAP, "netif not works");
 
     NSTACKX_DiscoverySettings *discSet = (NSTACKX_DiscoverySettings *)SoftBusCalloc(sizeof(NSTACKX_DiscoverySettings));
     DISC_CHECK_AND_RETURN_RET_LOGE(discSet != NULL, SOFTBUS_MEM_ERR, DISC_COAP, "malloc disc settings failed");
@@ -488,14 +493,14 @@ static int32_t CalculateMbsTruncateSize(const char *multiByteStr, uint32_t capac
     // convert multi byte str to wide str
     wchar_t wideStr[MAX_WIDE_STR_LEN] = {0};
     size_t numConverted = mbstowcs(wideStr, multiByteStr, multiByteStrLen);
-    if (numConverted <= 0) {
+    if (numConverted <= 0 || numConverted > INT32_MAX) {
         DISC_LOGE(DISC_COAP, "mbstowcs failed");
         RestoreLocale(localeBefore);
         return SOFTBUS_ERR;
     }
 
     uint32_t truncateTotal = 0;
-    int32_t truncateIndex = numConverted - 1;
+    int32_t truncateIndex = (int32_t)numConverted - 1;
     char multiByteChar[MULTI_BYTE_CHAR_LEN] = {0};
     while (capacity < multiByteStrLen - truncateTotal && truncateIndex >= 0) {
         int32_t truncateCharLen = wctomb(multiByteChar, wideStr[truncateIndex]);
@@ -543,11 +548,6 @@ static void DeinitLocalInfo(void)
         g_localDeviceInfo = NULL;
     }
 
-    if (g_capabilityData != NULL) {
-        SoftBusFree(g_capabilityData);
-        g_capabilityData = NULL;
-    }
-
     if (g_discCoapInnerCb != NULL) {
         SoftBusFree(g_discCoapInnerCb);
         g_discCoapInnerCb = NULL;
@@ -559,13 +559,6 @@ static int32_t InitLocalInfo(void)
     if (g_localDeviceInfo == NULL) {
         g_localDeviceInfo = (NSTACKX_LocalDeviceInfo *)SoftBusCalloc(sizeof(NSTACKX_LocalDeviceInfo));
         if (g_localDeviceInfo == NULL) {
-            return SOFTBUS_MEM_ERR;
-        }
-    }
-    if (g_capabilityData == NULL) {
-        g_capabilityData = (char *)SoftBusCalloc(NSTACKX_MAX_SERVICE_DATA_LEN);
-        if (g_capabilityData == NULL) {
-            DeinitLocalInfo();
             return SOFTBUS_MEM_ERR;
         }
     }
@@ -608,31 +601,17 @@ void DiscNstackxDeinit(void)
 static int32_t NstackxLocalDevInfoDump(int fd)
 {
     char deviceId[NSTACKX_MAX_DEVICE_ID_LEN] = {0};
-    char btMacAddr[NSTACKX_MAX_MAC_STRING_LEN] = {0};
-    char wifiMacAddr[NSTACKX_MAX_MAC_STRING_LEN] = {0};
-    char ip[NSTACKX_MAX_IP_STRING_LEN] = {0};
-    char networkIpAddr[NSTACKX_MAX_IP_STRING_LEN] = {0};
     SOFTBUS_DPRINTF(fd, "\n-----------------NstackxLocalDevInfo-------------------\n");
     SOFTBUS_DPRINTF(fd, "name                                : %s\n", g_localDeviceInfo->name);
     DataMasking(g_localDeviceInfo->deviceId, NSTACKX_MAX_DEVICE_ID_LEN, ID_DELIMITER, deviceId);
     SOFTBUS_DPRINTF(fd, "deviceId                            : %s\n", deviceId);
-    DataMasking(g_localDeviceInfo->btMacAddr, NSTACKX_MAX_MAC_STRING_LEN, MAC_DELIMITER, btMacAddr);
-    SOFTBUS_DPRINTF(fd, "btMacAddr                           : %s\n", btMacAddr);
-    DataMasking(g_localDeviceInfo->wifiMacAddr, NSTACKX_MAX_MAC_STRING_LEN, MAC_DELIMITER, wifiMacAddr);
-    SOFTBUS_DPRINTF(fd, "wifiMacAddr                         : %s\n", wifiMacAddr);
     SOFTBUS_DPRINTF(fd, "localIfInfo networkName             : %s\n", g_localDeviceInfo->localIfInfo->networkName);
-    DataMasking(g_localDeviceInfo->localIfInfo->networkIpAddr, NSTACKX_MAX_IP_STRING_LEN, IP_DELIMITER, ip);
-    SOFTBUS_DPRINTF(fd, "localIfInfo networkIpAddr           : %s\n", ip);
     SOFTBUS_DPRINTF(fd, "ifNums                              : %d\n", g_localDeviceInfo->ifNums);
-    DataMasking(g_localDeviceInfo->networkIpAddr, NSTACKX_MAX_IP_STRING_LEN, IP_DELIMITER, networkIpAddr);
-    SOFTBUS_DPRINTF(fd, "networkIpAddr                       : %s\n", networkIpAddr);
     SOFTBUS_DPRINTF(fd, "networkName                         : %s\n", g_localDeviceInfo->networkName);
     SOFTBUS_DPRINTF(fd, "is5GHzBandSupported                 : %d\n", g_localDeviceInfo->is5GHzBandSupported);
     SOFTBUS_DPRINTF(fd, "deviceType                          : %d\n", g_localDeviceInfo->deviceType);
     SOFTBUS_DPRINTF(fd, "version                             : %s\n", g_localDeviceInfo->version);
     SOFTBUS_DPRINTF(fd, "businessType                        : %d\n", g_localDeviceInfo->businessType);
-    SOFTBUS_DPRINTF(fd, "\n-----------------NstackxCapDataInfo-------------------\n");
-    SOFTBUS_DPRINTF(fd, "capabilityData                      : %s\n", g_capabilityData);
 
     return SOFTBUS_OK;
 }

@@ -30,7 +30,7 @@ int32_t DiscCoapAssembleCapData(uint32_t capability, const char *capabilityData,
 void DiscFillBtype(uint32_t capability, uint32_t allCap, NSTACKX_DiscoverySettings *discSet);
 int32_t DiscCoapProcessDeviceInfo(const NSTACKX_DeviceInfo *nstackxInfo, DeviceInfo *devInfo,
     const DiscInnerCallback *discCb);
-void DiscCoapReportNotification(const NotificationConfig *notification);
+void DiscCoapReportNotification(const NSTACKX_NotificationConfig *notification);
 
 #ifdef __cplusplus
 }

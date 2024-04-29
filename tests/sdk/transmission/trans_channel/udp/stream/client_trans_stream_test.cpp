@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,7 +67,7 @@ HWTEST_F(ClientTransStreamTest, RegisterStreamCb001, TestSize.Level0)
 
     IClientSessionCallBack *cb = GetClientSessionCb();
     int32_t ret = ClientTransUdpMgrInit(cb);
-    ASSERT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     RegisterStreamCb(streamCb);
     SetStreamChannelStatus(channelId, status);
 
@@ -119,7 +119,7 @@ HWTEST_F(ClientTransStreamTest, OnQosEvent001, TestSize.Level0)
 
     IClientSessionCallBack *cb = GetClientSessionCb();
     int32_t ret = ClientTransUdpMgrInit(cb);
-    ASSERT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     OnQosEvent(channelId, eventId, tvCount, tvList);
 
     ClientTransUdpMgrDeinit();
@@ -153,7 +153,7 @@ HWTEST_F(ClientTransStreamTest, OnFrameStats001, TestSize.Level0)
     
     IClientSessionCallBack *cb = GetClientSessionCb();
     int32_t ret = ClientTransUdpMgrInit(cb);
-    ASSERT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     RegisterStreamCb(streamCb);
  
     OnFrameStats(channelId, dataStreamSendStats);
@@ -194,7 +194,7 @@ HWTEST_F(ClientTransStreamTest, TransSendStream001, TestSize.Level0)
 
     int32_t channelId = 12;
     int ret = TransSendStream(channelId, dataStreamData, extStreamData, paramStreamFrameInfo);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     if (dataStreamData != nullptr) {
         SoftBusFree(dataStreamData);

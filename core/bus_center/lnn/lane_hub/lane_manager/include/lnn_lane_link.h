@@ -112,11 +112,12 @@ void LaneUpdateP2pAddressByIp(const char *ipAddr, const char *networkId);
 int32_t FindLaneResourceByLinkAddr(const LaneLinkInfo *info, LaneResource *resource);
 int32_t FindLaneResourceByLinkType(const char *peerUdid, LaneLinkType type, LaneResource *resource);
 int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, bool isServerSide);
-int32_t DelLaneResourceByLaneId(uint64_t laneId);
+int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide);
 int32_t FindLaneResourceByLaneId(uint64_t laneId, LaneResource *resource);
-uint64_t ApplyLaneId(const char *activeUdid, const char *passiveUdid, LaneLinkType linkType);
+uint64_t ApplyLaneId(const char *localUdid, const char *remoteUdid, LaneLinkType linkType);
+int32_t ClearLaneResourceByLaneId(uint64_t laneId);
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* LNN_LANE_LINK_H */
+#endif // LNN_LANE_LINK_H

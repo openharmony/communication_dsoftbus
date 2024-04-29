@@ -32,7 +32,7 @@ int32_t TransOpenUdpChannel(AppInfo* appInfo, const ConnectOption *connOpt, int3
 int32_t TransCloseUdpChannel(int32_t channelId);
 
 int32_t NotifyUdpChannelOpenFailed(const AppInfo *info, int32_t errCode);
-int32_t NotifyUdpChannelClosed(const AppInfo *info);
+int32_t NotifyUdpChannelClosed(const AppInfo *info, int32_t messageType);
 int32_t NotifyUdpQosEvent(const AppInfo *info, int32_t eventId, int32_t tvCount, const QosTv *tvList);
 
 void ReleaseUdpChannelId(int32_t channelId);

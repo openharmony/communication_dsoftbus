@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 #include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "lnn_async_callback_utils.h"
+#include "lnn_ble_heartbeat.h"
 #include "lnn_common_utils.h"
 #include "lnn_decision_center.h"
 #include "lnn_distributed_net_ledger.h"
@@ -208,7 +209,7 @@ static void HbConditionChanged(bool isOnlySetState)
     }
 }
 
-static uint64_t GetDisEnableBleDiscoveryTime(int64_t modeDuration)
+static uint64_t GetDisEnableBleDiscoveryTime(uint64_t modeDuration)
 {
     uint64_t timeout = 0ULL;
     if (modeDuration < MIN_DISABLE_BLE_DISCOVERY_TIME) {
@@ -238,7 +239,7 @@ void LnnRequestBleDiscoveryProcess(int32_t strategy, int64_t timeout)
             LNN_LOGI(LNN_HEART_BEAT, "ble has been requestDisabled, need wait timeout or enabled");
             return;
         }
-        uint64_t time = GetDisEnableBleDiscoveryTime(timeout);
+        uint64_t time = GetDisEnableBleDiscoveryTime((uint64_t)timeout);
         if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), RequestEnableDiscovery, NULL, time) !=
             SOFTBUS_OK) {
             LNN_LOGI(LNN_HEART_BEAT, "ble has been requestDisabled fail, due to async callback fail");
@@ -688,10 +689,19 @@ int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *t
         LNN_LOGD(LNN_HEART_BEAT, "target is offline, networkId=%{public}s", anonyNetworkId);
     }
     LNN_LOGD(LNN_HEART_BEAT, "shift lnn gear mode, callerId=%{public}s, networkId=%{public}s, cycle=%{public}d, "
-        "duration=%{public}d, wakeupFlag=%{public}d", callerId,
+        "duration=%{public}d, wakeupFlag=%{public}d, action=%{public}d", callerId,
         targetNetworkId != NULL ? anonyNetworkId : "",
-        mode->cycle, mode->duration, mode->wakeupFlag);
+        mode->cycle, mode->duration, mode->wakeupFlag, mode->action);
     AnonymizeFree(anonyNetworkId);
+    char uuid[UUID_BUF_LEN] = {0};
+    (void)LnnConvertDlId(targetNetworkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN);
+    if (mode->action == CHANGE_TCP_KEEPALIVE) {
+        if (AuthSendKeepAlive(uuid, mode->cycle) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_HEART_BEAT, "auth send keepalive fail");
+            return SOFTBUS_ERR;
+        }
+        return SOFTBUS_OK;
+    }
     if (LnnSetGearModeBySpecificType(callerId, mode, HEARTBEAT_TYPE_BLE_V0) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "ctrl reset medium mode fail");
         return SOFTBUS_ERR;
@@ -700,8 +710,6 @@ int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *t
         LNN_LOGE(LNN_HEART_BEAT, "ctrl start adjustable ble heatbeat fail");
         return SOFTBUS_ERR;
     }
-    char uuid[UUID_BUF_LEN] = {0};
-    (void)LnnConvertDlId(targetNetworkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN);
     int32_t ret = AuthFlushDevice(uuid);
     if (ret != SOFTBUS_OK && ret != SOFTBUS_INVALID_PARAM) {
         LNN_LOGI(LNN_HEART_BEAT, "tcp flush failed, wifi will offline");
@@ -824,12 +832,8 @@ static void LnnHbUnsubscribeTask(void)
     LnnDcUnsubscribe(&g_dcTask);
 }
 
-int32_t LnnInitHeartbeat(void)
+static int32_t LnnRegisterHeartbeatEvent(void)
 {
-    if (LnnHbStrategyInit() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "strategy module init fail");
-        return SOFTBUS_ERR;
-    }
     if (LnnRegisterEventHandler(LNN_EVENT_IP_ADDR_CHANGED, HbIpAddrChangeEventHandler) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "regist ip addr change evt handler fail");
         return SOFTBUS_ERR;
@@ -874,6 +878,18 @@ int32_t LnnInitHeartbeat(void)
         LNN_LOGE(LNN_INIT, "regist OOBE state evt handler fail");
         return SOFTBUS_ERR;
     }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnInitHeartbeat(void)
+{
+    if (LnnHbStrategyInit() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "strategy module init fail");
+        return SOFTBUS_ERR;
+    }
+    if (LnnRegisterHeartbeatEvent() != SOFTBUS_OK) {
+        return SOFTBUS_ERR;
+    }
     InitHbConditionState();
     InitHbSpecificConditionState();
     if (LnnHbSubscribeTask() != SOFTBUS_OK) {
@@ -900,4 +916,24 @@ void LnnDeinitHeartbeat(void)
     LnnUnregisterEventHandler(LNN_EVENT_USER_STATE_CHANGED, HbUserBackgroundEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_NIGHT_MODE_CHANGED, HbNightModeStateEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_OOBE_STATE_CHANGED, HbOOBEStateEventHandler);
+}
+
+int32_t LnnTriggerDataLevelHeartBeat()
+{
+    LNN_LOGD(LNN_HEART_BEAT, "LnnTriggerDataLevelHeartBeat");
+    if (LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V1, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "ctrl start single ble heartbeat fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+void LnnRegDataLevelChangeCb(const IDataLevelChangeCallback *callback)
+{
+    LnnBleHbRegDataLevelChangeCb(callback);
+}
+
+void LnnUnregDataLevelChangeCb()
+{
+    LnnBleHbUnregDataLevelChangeCb();
 }

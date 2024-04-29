@@ -96,19 +96,19 @@ HWTEST_F(TransIpcStandardTest, SoftbusRegisterServiceTest001, TestSize.Level0)
     TransServerProxy transServerProxy(nullptr);
 
     int32_t ret = transServerProxy.StartDiscovery(g_pkgName, subInfo);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = transServerProxy.StopDiscovery(g_pkgName, subscribeId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = transServerProxy.PublishService(g_pkgName, pubInfo);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = transServerProxy.UnPublishService(g_pkgName, publishId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = transServerProxy.SoftbusRegisterService(g_pkgName, nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(subInfo);
     SoftBusFree(pubInfo);
 }
@@ -133,28 +133,28 @@ HWTEST_F(TransIpcStandardTest, SoftbusRegisterServiceTest002, TestSize.Level0)
     TransServerProxy transServerProxy(nullptr);
 
     int32_t ret = transServerProxy.JoinLNN(g_pkgName, (void *)g_addr, addrTypeLen);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = transServerProxy.LeaveLNN(g_pkgName, g_networkId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = transServerProxy.GetAllOnlineNodeInfo(g_pkgName, &info, infoTypeLen, &infoNum);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = transServerProxy.GetLocalDeviceInfo(g_pkgName, info, infoTypeLen);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = transServerProxy.GetNodeKeyInfo(g_pkgName, g_networkId, key, buf, infoTypeLen);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = transServerProxy.SetNodeDataChangeFlag(g_pkgName, g_networkId, dataChangeFlag);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = transServerProxy.StartTimeSync(g_pkgName, g_networkId,  accuracy, period);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = transServerProxy.StopTimeSync(g_pkgName, g_networkId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
@@ -167,13 +167,13 @@ HWTEST_F(TransIpcStandardTest, CreateSessionServerTest001, TestSize.Level0)
 {
     TransServerProxy transServerProxy(nullptr);
     int32_t ret = transServerProxy.CreateSessionServer(nullptr, g_sessionName);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = transServerProxy.CreateSessionServer(g_pkgName, nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = transServerProxy.CreateSessionServer(g_pkgName, g_sessionName);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 }
 
 /**
@@ -186,13 +186,13 @@ HWTEST_F(TransIpcStandardTest, RemoveSessionServerTest001, TestSize.Level0)
 {
     TransServerProxy transServerProxy(nullptr);
     int32_t ret = transServerProxy.RemoveSessionServer(nullptr, g_sessionName);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = transServerProxy.RemoveSessionServer(g_pkgName, nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = transServerProxy.RemoveSessionServer(g_pkgName, g_sessionName);
-    EXPECT_TRUE(ret == SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
 }
 
 /**
@@ -216,30 +216,30 @@ HWTEST_F(TransIpcStandardTest, OpenSessionTest001, TestSize.Level0)
     param->groupId = nullptr;
 
     int32_t ret = transServerProxy.OpenSession(param, info);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     param->sessionName = g_sessionName;
     ret = transServerProxy.OpenSession(param, info);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     param->peerSessionName = g_peerSessionName;
     ret = transServerProxy.OpenSession(param, info);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     param->peerDeviceId = g_peerDeviceId;
     ret = transServerProxy.OpenSession(param, info);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     param->groupId = g_groupId;
     ret = transServerProxy.OpenSession(param, info);
-    EXPECT_TRUE(ret == SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED);
 
     SessionAttribute sessionAttribute;
     sessionAttribute.dataType = 1;
     sessionAttribute.linkTypeNum= 1;
     param->attr = &sessionAttribute;
     ret = transServerProxy.OpenSession(param, info);
-    EXPECT_TRUE(ret == SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
     SoftBusFree(param);
     SoftBusFree(info);
 }
@@ -260,13 +260,13 @@ HWTEST_F(TransIpcStandardTest, OpenAuthSessionTest001, TestSize.Level0)
     (void)memcpy_s(addrInfo->info.ip.ip, strlen(addrInfo->info.ip.ip), g_addr, strlen(g_addr));
     addrInfo->info.ip.port = PORT;
     int32_t ret = transServerProxy.OpenAuthSession(nullptr, addrInfo);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = transServerProxy.OpenAuthSession(g_sessionName, nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = transServerProxy.OpenAuthSession(g_sessionName, addrInfo);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
     SoftBusFree(addrInfo);
 }
 
@@ -282,11 +282,11 @@ HWTEST_F(TransIpcStandardTest, NotifyAuthSuccessTest001, TestSize.Level0)
     int32_t channelId = 0;
     int32_t channelType = CHANNEL_TYPE_AUTH;
     int32_t ret = transServerProxy.NotifyAuthSuccess(channelId, channelType);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     channelId = INVALID_VALUE;
     ret = transServerProxy.NotifyAuthSuccess(channelId, channelType);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 }
 
 /**
@@ -300,8 +300,8 @@ HWTEST_F(TransIpcStandardTest, CloseChannelTest001, TestSize.Level0)
     TransServerProxy transServerProxy(nullptr);
     int32_t channelId = -1;
     int32_t channelType = CHANNEL_TYPE_AUTH;
-    int32_t ret = transServerProxy.CloseChannel(channelId, channelType);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    int32_t ret = transServerProxy.CloseChannel(nullptr, channelId, channelType);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 }
 
 /**
@@ -319,10 +319,10 @@ HWTEST_F(TransIpcStandardTest, SendMessageTest001, TestSize.Level0)
     uint32_t len = LEN;
     int32_t msgType = TRANS_SESSION_BYTES;
     int32_t ret = transServerProxy.SendMessage(channelId, channelType, (const void *)dataInfo, len, msgType);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = transServerProxy.SendMessage(channelId, channelType, nullptr, len, msgType);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 }
 
 /**
@@ -339,11 +339,11 @@ HWTEST_F(TransIpcStandardTest, QosReportTest001, TestSize.Level0)
     int32_t appType = 0;
     int32_t quality = QOS_IMPROVE;
     int32_t ret = transServerProxy.QosReport(channelId, channelType, appType, quality);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     channelId = INVALID_VALUE;
     ret = transServerProxy.QosReport(channelId, channelType, appType, quality);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 }
 
 /**
@@ -362,11 +362,11 @@ HWTEST_F(TransIpcStandardTest, StreamStatsTest001, TestSize.Level0)
     (void)memset_s(statsData, sizeof(StreamSendStats), 0, sizeof(StreamSendStats));
 
     int32_t ret = transServerProxy.StreamStats(channelId, channelType, nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     channelId = INVALID_VALUE;
     ret = transServerProxy.StreamStats(channelId, channelType, statsData);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
     SoftBusFree(statsData);
 }
 
@@ -386,11 +386,11 @@ HWTEST_F(TransIpcStandardTest, RippleStatsTest0011, TestSize.Level0)
     (void)memset_s(statsData, sizeof(TrafficStats), 0, sizeof(TrafficStats));
 
     int32_t ret = transServerProxy.RippleStats(channelId, channelType, nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     channelId = INVALID_VALUE;
     ret = transServerProxy.RippleStats(channelId, channelType, statsData);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
     SoftBusFree(statsData);
 }
 
@@ -404,10 +404,10 @@ HWTEST_F(TransIpcStandardTest, GrantPermissionTest001, TestSize.Level0)
 {
     TransServerProxy transServerProxy(nullptr);
     int32_t ret = transServerProxy.GrantPermission(UUID, PID, nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = transServerProxy.GrantPermission(UUID, PID, g_sessionName);
-    EXPECT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
 }
 
 /**
@@ -452,19 +452,19 @@ HWTEST_F(TransIpcStandardTest, TransServerProxyInitTest001, TestSize.Level0)
 HWTEST_F(TransIpcStandardTest, ServerIpcCreateSessionServerTest001, TestSize.Level0)
 {
     int32_t ret = ServerIpcCreateSessionServer(g_pkgName, g_sessionName);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = TransServerProxyInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
 
     ret = ServerIpcCreateSessionServer(nullptr, g_sessionName);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = ServerIpcCreateSessionServer(g_pkgName, nullptr);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = ServerIpcCreateSessionServer(g_pkgName, g_sessionName);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     TransClientDeinit();
 }
@@ -478,19 +478,19 @@ HWTEST_F(TransIpcStandardTest, ServerIpcCreateSessionServerTest001, TestSize.Lev
 HWTEST_F(TransIpcStandardTest, ServerIpcRemoveSessionServerTest001, TestSize.Level0)
 {
     int32_t ret = ServerIpcRemoveSessionServer(g_pkgName, g_sessionName);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
 
     ret = TransServerProxyInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
 
     ret = ServerIpcRemoveSessionServer(nullptr, g_sessionName);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = ServerIpcRemoveSessionServer(g_pkgName, nullptr);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = ServerIpcRemoveSessionServer(g_pkgName, g_sessionName);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
 
     TransClientDeinit();
 }
@@ -517,7 +517,7 @@ HWTEST_F(TransIpcStandardTest, ServerIpcOpenSessionTest001, TestSize.Level0)
 
     int32_t sessionId = INVALID_SESSION_ID;
     int32_t ret = ServerIpcOpenSession(param, info);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     TransClientDeinit();
     ret = TransServerProxyInit();
@@ -525,22 +525,22 @@ HWTEST_F(TransIpcStandardTest, ServerIpcOpenSessionTest001, TestSize.Level0)
 
     param->sessionName = g_sessionName;
     ret = ServerIpcOpenSession(param, info);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     (void)ClientDeleteSession(sessionId);
 
     param->peerSessionName = g_peerSessionName;
     ret = ServerIpcOpenSession(param, info);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     (void)ClientDeleteSession(sessionId);
 
     param->peerDeviceId = g_peerDeviceId;
     ret = ServerIpcOpenSession(param, info);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     (void)ClientDeleteSession(sessionId);
 
     param->groupId = g_groupId;
     ret = ServerIpcOpenSession(param, info);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     (void)ClientDeleteSession(sessionId);
 
     SessionAttribute sessionAttribute;
@@ -548,7 +548,7 @@ HWTEST_F(TransIpcStandardTest, ServerIpcOpenSessionTest001, TestSize.Level0)
     sessionAttribute.linkTypeNum = 1;
     param->attr = &sessionAttribute;
     ret = ServerIpcOpenSession(param, info);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED);
     (void)ClientDeleteSession(sessionId);
 
     TransClientDeinit();
@@ -569,19 +569,19 @@ HWTEST_F(TransIpcStandardTest, ServerIpcOpenAuthSessionTest001, TestSize.Level0)
     (void)memset_s(addrInfo, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
     addrInfo->type = CONNECTION_ADDR_BR;
     int32_t ret = ServerIpcOpenAuthSession(g_sessionName, addrInfo);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = TransServerProxyInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
 
     ret = ServerIpcOpenAuthSession(nullptr, addrInfo);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = ServerIpcOpenAuthSession(g_sessionName, nullptr);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = ServerIpcOpenAuthSession(g_sessionName, addrInfo);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     TransClientDeinit();
     SoftBusFree(addrInfo);
@@ -601,7 +601,7 @@ HWTEST_F(TransIpcStandardTest, ServerIpcNotifyAuthSuccessTest001, TestSize.Level
     int32_t channelId = 0;
     int32_t channelType = CHANNEL_TYPE_AUTH;
     ret = ServerIpcNotifyAuthSuccess(channelId, channelType);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
     TransClientDeinit();
 }
 
@@ -615,17 +615,17 @@ HWTEST_F(TransIpcStandardTest, ServerIpcCloseChannelTest001, TestSize.Level0)
 {
     int32_t channelId = 0;
     int32_t chanType = CHANNEL_TYPE_AUTH;
-    int32_t ret = ServerIpcCloseChannel(channelId, chanType);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    int32_t ret = ServerIpcCloseChannel(nullptr, channelId, chanType);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = TransServerProxyInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
 
-    ret = ServerIpcCloseChannel(-1, chanType);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    ret = ServerIpcCloseChannel(nullptr, -1, chanType);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
-    ret = ServerIpcCloseChannel(channelId, chanType);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    ret = ServerIpcCloseChannel(nullptr, channelId, chanType);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     TransClientDeinit();
 }
@@ -641,13 +641,13 @@ HWTEST_F(TransIpcStandardTest, ServerIpcSendMessageTest001, TestSize.Level0)
     int32_t channelId = 0;
     int32_t chanType = CHANNEL_TYPE_AUTH;
     int32_t ret = ServerIpcSendMessage(channelId, chanType, nullptr, 0, 0);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = TransServerProxyInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
 
     ret = ServerIpcSendMessage(channelId, chanType, nullptr, 0, 0);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     TransClientDeinit();
 }
@@ -665,13 +665,13 @@ HWTEST_F(TransIpcStandardTest, ServerIpcQosReportTest001, TestSize.Level0)
     int32_t appType = 0;
     int32_t quality = QOS_IMPROVE;
     int32_t ret = ServerIpcQosReport(channelId, chanType, appType, quality);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = TransServerProxyInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
 
     ret = ServerIpcQosReport(channelId, chanType, appType, quality);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     TransClientDeinit();
 }
@@ -687,13 +687,13 @@ HWTEST_F(TransIpcStandardTest, ServerIpcStreamStatsTest001, TestSize.Level0)
     int32_t channelId = 0;
     int32_t chanType = CHANNEL_TYPE_AUTH;
     int32_t ret = ServerIpcStreamStats(channelId, chanType, nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = TransServerProxyInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
 
     ret = ServerIpcStreamStats(channelId, chanType, nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     TransClientDeinit();
 }
@@ -709,13 +709,13 @@ HWTEST_F(TransIpcStandardTest, ServerIpcRippleStatsTest001, TestSize.Level0)
     int32_t channelId = 0;
     int32_t chanType = CHANNEL_TYPE_AUTH;
     int32_t ret = ServerIpcRippleStats(channelId, chanType, nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = TransServerProxyInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
 
     ret = ServerIpcRippleStats(channelId, chanType, nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     TransClientDeinit();
 }
@@ -731,13 +731,13 @@ HWTEST_F(TransIpcStandardTest, ServerIpcGrantPermissionTest001, TestSize.Level0)
     int uid = 1;
     int pid = 1;
     int32_t ret = ServerIpcGrantPermission(uid, pid, nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = TransServerProxyInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
 
     ret = ServerIpcGrantPermission(uid, pid, nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = ServerIpcGrantPermission(uid, pid, g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
@@ -754,13 +754,13 @@ HWTEST_F(TransIpcStandardTest, ServerIpcGrantPermissionTest001, TestSize.Level0)
 HWTEST_F(TransIpcStandardTest, ServerIpcRemovePermissionTest001, TestSize.Level0)
 {
     int32_t ret = ServerIpcRemovePermission(nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = TransServerProxyInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
 
     ret = ServerIpcRemovePermission(nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
 
     ret = ServerIpcRemovePermission(g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
