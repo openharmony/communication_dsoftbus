@@ -263,7 +263,10 @@ enum SoftBusErrNo {
     SOFTBUS_TRANS_MSG_INVALID_EVENT_TYPE, // invalid event type
     SOFTBUS_TRANS_MSG_INVALID_CMD, // invalid cmd
     SOFTBUS_TRANS_MSG_GET_LOCAL_CHIPHERKEY_FAIL, // get local chipherkey fail
+    SOFTBUS_TRANS_MSG_START_ADV_FAIL, // start adv fail
     SOFTBUS_TRANS_MSG_STOP_ADV_FAIL, // stop adv fail
+    SOFTBUS_TRANS_MSG_START_SCAN_FAIL, // start scan fail
+    SOFTBUS_TRANS_MSG_STOP_SCAN_FAIL, // stop scan fail
     SOFTBUS_TRANS_MSG_EMPTY_LIST, // list is empty
 
     /* errno begin: -((203 << 21) | (3 << 16) | 0xFFFF) */
