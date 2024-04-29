@@ -347,7 +347,7 @@ static void TransListDelete(ListNode *sessionServerList)
 
 static int32_t TransListCopy(ListNode *sessionServerList)
 {
-    TRANS_LOGI(TRANS_CTRL, "enter.");
+    TRANS_LOGD(TRANS_CTRL, "enter.");
     if (sessionServerList == NULL) {
         return SOFTBUS_ERR;
     }

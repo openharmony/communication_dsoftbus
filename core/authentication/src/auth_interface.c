@@ -244,7 +244,7 @@ static int32_t FillAuthSessionInfo(AuthSessionInfo *info, const NodeInfo *nodeIn
     bool isSupportNormalizedKey = IsSupportFeatureByCapaBit(nodeInfo->authCapacity, BIT_SUPPORT_NORMALIZED_LINK);
     info->requestId = requestId;
     info->isServer = keyInfo->isServerSide;
-    info->connId = keyInfo->keyIndex;
+    info->connId = (uint64_t)keyInfo->keyIndex;
     info->connInfo = *connInfo;
     info->version = SOFTBUS_NEW_V2;
     info->normalizedType = isSupportNormalizedKey ? NORMALIZED_SUPPORT : NORMALIZED_NOT_SUPPORT;
@@ -424,9 +424,9 @@ int32_t AuthGetMetaType(int64_t authId, bool *isMetaAuth)
     return SOFTBUS_OK;
 }
 
-int32_t AuthGetGroupType(const char *udid, const char *uuid)
+uint32_t AuthGetGroupType(const char *udid, const char *uuid)
 {
-    int32_t type = 0;
+    uint32_t type = 0;
     if (udid == NULL || uuid == NULL) {
         AUTH_LOGW(AUTH_HICHAIN, "udid or uuid is null");
         return type;

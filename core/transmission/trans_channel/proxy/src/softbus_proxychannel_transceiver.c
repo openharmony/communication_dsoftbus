@@ -811,7 +811,7 @@ static int32_t TransProxySendBadKeyMessage(ProxyMessage *msg)
 {
     ProxyDataInfo dataInfo;
     dataInfo.inData = (uint8_t *)msg->data;
-    dataInfo.inLen = msg->dateLen;
+    dataInfo.inLen = (uint32_t)msg->dateLen;
     dataInfo.outData = NULL;
     dataInfo.outLen = 0;
 

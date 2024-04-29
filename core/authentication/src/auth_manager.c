@@ -1219,8 +1219,14 @@ int32_t AuthVerifyAfterNotifyNormalize(NormalizeRequest *request)
         AUTH_LOGE(AUTH_CONN, "normalize request is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t ret = AuthSessionStartAuth(request->authSeq, request->requestId, request->connId, &request->connInfo,
-        false, request->isFastAuth);
+    AuthParam authInfo = {
+        .authSeq = request->authSeq,
+        .requestId = request->requestId,
+        .connId = request->connId,
+        .isServer = false,
+        .isFastAuth = request->isFastAuth,
+    };
+    int32_t ret = AuthSessionStartAuth(&authInfo, &request->connInfo);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "start auth session fail=%{public}d, requestId=%{public}u", ret, request->requestId);
         DisconnectAuthDevice(&request->connId);
@@ -1258,12 +1264,11 @@ static void OnConnectResult(uint32_t requestId, uint64_t connId, int32_t result,
         return;
     }
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)request.traceId);
-    if (request.type == REQUEST_TYPE_RECONNECT) {
+    if (request.type == REQUEST_TYPE_RECONNECT && connInfo != NULL) {
         HandleReconnectResult(&request, connId, result, connInfo->type);
         SoftbusHitraceStop();
         return;
     }
-
     if (result != SOFTBUS_OK) {
         ReportAuthRequestFailed(requestId, result);
         SoftbusHitraceStop();
@@ -1277,13 +1282,19 @@ static void OnConnectResult(uint32_t requestId, uint64_t connId, int32_t result,
             return;
         }
     }
-
     uint32_t num = AddConcurrentAuthRequest(&request.connInfo, &request, connId);
     if (num > 1) {
         SoftbusHitraceStop();
         return;
     }
-    int32_t ret = AuthSessionStartAuth(request.traceId, requestId, connId, connInfo, false, request.isFastAuth);
+    AuthParam authInfo = {
+        .authSeq = request.traceId,
+        .requestId = requestId,
+        .connId = connId,
+        .isServer = false,
+        .isFastAuth = request.isFastAuth,
+    };
+    int32_t ret = AuthSessionStartAuth(&authInfo, connInfo);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "start auth session fail=%{public}d, requestId=%{public}u", ret, requestId);
         DisconnectAuthDevice(&connId);
@@ -1325,7 +1336,14 @@ static void HandleDeviceIdData(
             return;
         }
         ReleaseAuthLock();
-        ret = AuthSessionStartAuth(head->seq, AuthGenRequestId(), connId, connInfo, true, true);
+        AuthParam authInfo = {
+            .authSeq = head->seq,
+            .requestId = AuthGenRequestId(),
+            .connId = connId,
+            .isServer = true,
+            .isFastAuth = true,
+        };
+        ret = AuthSessionStartAuth(&authInfo, connInfo);
         if (ret != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_FSM,
                 "perform auth session start auth fail. seq=%{public}" PRId64 ", ret=%{public}d", head->seq, ret);

@@ -1228,6 +1228,69 @@ HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_003, TestSize.Level1)
 }
 
 /*
+* @tc.name: LNN_SELECT_LANE_004
+* @tc.desc: SelectLane, HmlIsExist == true
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_004, TestSize.Level1)
+{
+    LaneSelectParam request;
+    (void)memset_s(&request, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
+    request.transType = LANE_T_FILE;
+    request.list.linkTypeNum = 0;
+    request.list.linkType[(request.list.linkTypeNum)++] = LANE_BR;
+    request.list.linkType[(request.list.linkTypeNum)++] = LANE_BLE;
+    request.list.linkType[(request.list.linkTypeNum)++] = LANE_P2P;
+    request.list.linkType[(request.list.linkTypeNum)++] = LANE_HML;
+
+    LanePreferredLinkList recommendList;
+    (void)memset_s(&recommendList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
+    uint32_t listNum = 0;
+
+    NiceMock<LaneDepsInterfaceMock> linkMock;
+    EXPECT_CALL(linkMock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
+    EXPECT_CALL(linkMock, LnnGetLocalNumInfo).WillRepeatedly(DoAll(SetArgPointee<1>(11), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, LnnGetRemoteNumInfo).WillRepeatedly(DoAll(SetArgPointee<2>(11), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, LnnGetLocalNumU64Info).WillRepeatedly(DoAll(SetArgPointee<1>(8), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info).WillRepeatedly(DoAll(SetArgPointee<2>(8), Return(SOFTBUS_OK)));
+
+    int32_t ret = SelectLane(NODE_NETWORK_ID, &request, &recommendList, &listNum);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: LNN_SELECT_LANE_005
+* @tc.desc: SelectLane, HmlIsExist == false && LaneAddHml
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneMockTest, LNN_SELECT_LANE_005, TestSize.Level1)
+{
+    LaneSelectParam request;
+    (void)memset_s(&request, sizeof(LaneSelectParam), 0, sizeof(LaneSelectParam));
+    request.transType = LANE_T_FILE;
+    request.list.linkTypeNum = 0;
+    request.list.linkType[(request.list.linkTypeNum)++] = LANE_BR;
+    request.list.linkType[(request.list.linkTypeNum)++] = LANE_BLE;
+    request.list.linkType[(request.list.linkTypeNum)++] = LANE_P2P;
+
+    LanePreferredLinkList recommendList;
+    (void)memset_s(&recommendList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
+    uint32_t listNum = 0;
+
+    NiceMock<LaneDepsInterfaceMock> linkMock;
+    EXPECT_CALL(linkMock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
+    EXPECT_CALL(linkMock, LnnGetLocalNumInfo).WillRepeatedly(DoAll(SetArgPointee<1>(11), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, LnnGetRemoteNumInfo).WillRepeatedly(DoAll(SetArgPointee<2>(11), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, LnnGetLocalNumU64Info).WillRepeatedly(DoAll(SetArgPointee<1>(8), Return(SOFTBUS_OK)));
+    EXPECT_CALL(linkMock, LnnGetRemoteNumU64Info).WillRepeatedly(DoAll(SetArgPointee<2>(8), Return(SOFTBUS_OK)));
+
+    int32_t ret = SelectLane(NODE_NETWORK_ID, &request, &recommendList, &listNum);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
 * @tc.name: LNN_BUILD_LINK_001
 * @tc.desc: BUILDLINK
 * @tc.type: FUNC

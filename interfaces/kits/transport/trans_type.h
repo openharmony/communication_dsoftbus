@@ -209,6 +209,30 @@ typedef struct {
     char *buf;  /**< Pointer to the buffer for storing the stream data */
     int bufLen; /**< Length of the buffer */
 } StreamData;
+
+/**
+ * @brief Enumerates the socket option types.
+ *
+ * @since 2.0
+ * @version 2.0
+ */
+typedef enum {
+    OPT_TYPE_MAX_BUFFER,       /**< @reserved Maximum cache. */
+    OPT_TYPE_FIRST_PACKAGE,    /**< @reserved First packet size. */
+    OPT_TYPE_MAX_IDLE_TIMEOUT, /**< @reserved Maximum idle time. */
+} OptType;
+
+/**
+ * @brief Enumerates the socket option level types.
+ *
+ * @since 2.0
+ * @version 2.0
+ */
+typedef enum {
+    OPT_LEVEL_KERNEL,  /**< @reserved Kernel level option. */
+    OPT_LEVEL_SOFTBUS, /**< @reserved Softbus level option. */
+    OPT_LEVEL_BUTT,
+} OptLevel;
 #ifdef __cplusplus
 }
 #endif

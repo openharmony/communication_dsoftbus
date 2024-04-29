@@ -87,8 +87,15 @@ typedef struct {
     bool isDead;
 } AuthFsm;
 
-int32_t AuthSessionStartAuth(int64_t authSeq, uint32_t requestId,
-    uint64_t connId, const AuthConnInfo *connInfo, bool isServer, bool isFastAuth);
+typedef struct {
+    int64_t authSeq;
+    uint32_t requestId;
+    uint64_t connId;
+    bool isServer;
+    bool isFastAuth;
+} AuthParam;
+
+int32_t AuthSessionStartAuth(const AuthParam *authParam, const AuthConnInfo *connInfo);
 int32_t AuthSessionProcessDevIdData(int64_t authSeq, const uint8_t *data, uint32_t len);
 int32_t AuthSessionPostAuthData(int64_t authSeq, const uint8_t *data, uint32_t len);
 int32_t AuthSessionProcessAuthData(int64_t authSeq, const uint8_t *data, uint32_t len);
