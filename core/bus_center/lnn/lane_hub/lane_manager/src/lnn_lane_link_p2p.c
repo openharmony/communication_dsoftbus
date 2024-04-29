@@ -1157,7 +1157,7 @@ static int32_t OpenBleTriggerToConn(const LinkRequest *request, uint32_t laneReq
     ret = GetWifiDirectManager()->connectDevice(&wifiDirectInfo, &cb);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "ble trigger connect device err");
-        NotifyLinkFail(ASYNC_RESULT_P2P, wifiDirectInfo.requestId, ret);
+        (void)DelP2pLinkReqByReqId(ASYNC_RESULT_P2P, wifiDirectInfo.requestId);
         return ret;
     }
     return SOFTBUS_OK;
