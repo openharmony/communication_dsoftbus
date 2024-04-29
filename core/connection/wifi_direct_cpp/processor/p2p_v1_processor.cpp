@@ -1630,7 +1630,6 @@ int P2pV1Processor::OpenAuthConnection(const NegotiateMessage &msg, const std::s
 
 int P2pV1Processor::RemoveLink(const std::string &remoteDeviceId)
 {
-    LinkManager::GetInstance().RemoveLink(InnerLink::LinkType::P2P, remoteDeviceId);
     P2pEntity::GetInstance().CancelNewClientJoining(clientJoiningMac_);
     int reuseCount = 0;
     auto ret = InterfaceManager::GetInstance().ReadInterface(
