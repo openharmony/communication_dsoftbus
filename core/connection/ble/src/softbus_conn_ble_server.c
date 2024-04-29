@@ -677,9 +677,6 @@ static void BleServerWaitMtuTimeoutHandler(uint32_t connectionId)
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
     CONN_CHECK_AND_RETURN_LOGE(connection != NULL, CONN_BLE, "ble server wait mtu timeout handle failed:connection "
         "not exist, connId=%{public}u", connectionId);
-    int32_t status = ConnGattServerDisconnect(connection);
-    CONN_LOGI(CONN_BLE, "ble server wait mtu timeout, disconnect connection, connId=%{public}u, status=%{public}d",
-        connectionId, status);
     ConnBleReturnConnection(&connection);
 }
 
