@@ -1218,3 +1218,42 @@ int32_t GetSocketMtuSize(int32_t socket, uint32_t *mtuSize)
     TRANS_LOGI(TRANS_SDK, "get mtuSize success, socket=%{public}d, mtu=%{public}" PRIu32, socket, *mtuSize);
     return SOFTBUS_OK;
 }
+
+int32_t ClientDfsBind(int32_t socket, const ISocketListener *listener)
+{
+    if (!IsValidSessionId(socket) || !IsValidSocketListener(listener, false)) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = ClientSetListenerBySessionId(socket, listener, false);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "set listener by socket=%{public}d failed, ret=%{public}d", socket, ret);
+        return ret;
+    }
+
+    ret = SetSessionIsAsyncById(socket, false);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, TRANS_SDK, "set session is async failed, ret=%{public}d", ret);
+    TransInfo transInfo;
+    ret = ClientDfsIpcOpenSession(socket, &transInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "open session failed, ret=%{public}d", ret);
+        return ret;
+    }
+
+    ret = ClientSetChannelBySessionId(socket, &transInfo);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, TRANS_SDK, "set channel by socket=%{public}d failed, ret=%{public}d", socket, ret);
+    ret = SetSessionStateBySessionId(socket, SESSION_STATE_OPENED);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, TRANS_SDK, "set session state failed socket=%{public}d, ret=%{public}d", socket, ret);
+    ret = CheckSessionIsOpened(socket);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "CheckSessionIsOpened err, ret=%{public}d", ret);
+
+    ret = ClientSetSocketState(socket, 0, SESSION_ROLE_CLIENT);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "set session role failed, ret=%{public}d", ret);
+    TRANS_LOGI(TRANS_SDK, "DfsBind ok: socket=%{public}d, channelId=%{public}d, channelType=%{public}d", socket,
+        transInfo.channelId, transInfo.channelType);
+    return SOFTBUS_OK;
+}

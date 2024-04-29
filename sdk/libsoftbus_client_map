@@ -405,6 +405,7 @@
         "GetMtuSize";
         "DBinderGrantPermission";
         "DBinderRemovePermission";
+        "DfsBind";
         "ClientAddPolicyReportCallback";
         "ClientDeletePolicyReportCallback";
         "ServerEnableDiscoveryPolicy";
