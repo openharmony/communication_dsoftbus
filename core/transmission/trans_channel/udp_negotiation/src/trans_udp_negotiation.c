@@ -730,7 +730,7 @@ static void UdpOnAuthConnOpened(uint32_t requestId, AuthHandle authHandle)
     return;
 EXIT_ERR:
     extra.channelType = CHANNEL_TYPE_UDP;
-    extra.requestId = requestId;
+    extra.requestId = (int32_t)requestId;
     extra.authId = authHandle.authId;
     extra.errcode = ret;
     extra.result = EVENT_STAGE_RESULT_FAILED;
