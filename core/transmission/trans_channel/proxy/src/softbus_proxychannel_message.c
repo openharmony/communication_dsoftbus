@@ -182,7 +182,7 @@ static int32_t ConvertBleConnInfo2BrConnInfo(AuthConnInfo *connInfo)
     return SOFTBUS_OK;
 }
 
-static int32_t GetAuthIdByHandshakeMsg(uint32_t connId, uint8_t cipher, AuthHandle *authHandle)
+static int32_t GetAuthIdByHandshakeMsg(uint32_t connId, uint8_t cipher, AuthHandle *authHandle, int32_t index)
 {
     AuthConnInfo connInfo;
     if (TransProxyGetAuthConnInfo(connId, &connInfo) != SOFTBUS_OK) {
@@ -204,7 +204,32 @@ static int32_t GetAuthIdByHandshakeMsg(uint32_t connId, uint8_t cipher, AuthHand
     bool isAuthServer = !((cipher & AUTH_SERVER_SIDE) != 0);
     authHandle->type = connInfo.type;
     authHandle->authId = AuthGetIdByConnInfo(&connInfo, isAuthServer, false);
+    if (authHandle->authId == AUTH_INVALID_ID) {
+        if (AuthGetAuthHandleByIndex(&connInfo, isAuthServer, index, authHandle) != SOFTBUS_OK &&
+            AuthGetAuthHandleByIndex(&connInfo, !isAuthServer, index, authHandle) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get auth handle fail");
+            return SOFTBUS_NOT_FIND;
+        }
+    }
     return SOFTBUS_OK;
+}
+
+static int32_t GetAuthIdReDecrypt(AuthHandle *authHandle, ProxyMessage *msg, uint8_t *decData, uint32_t *decDataLen)
+{
+    AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    int32_t ret = TransProxyGetAuthConnInfo(msg->connId, &connInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get connInfo fail connId=%{public}d", msg->connId);
+        return ret;
+    }
+    int32_t index = (int32_t)SoftBusLtoHl(*(uint32_t *)msg->data);
+    if (AuthGetAuthHandleByIndex(&connInfo, false, index, authHandle) != SOFTBUS_OK &&
+        AuthGetAuthHandleByIndex(&connInfo, true, index, authHandle) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get auth handle fail");
+        return SOFTBUS_NOT_FIND;
+    }
+    return AuthDecrypt(authHandle, (uint8_t *)msg->data, (uint32_t)msg->dateLen, decData, decDataLen);
 }
 
 int32_t GetBrMacFromConnInfo(uint32_t connId, char *peerBrMac, uint32_t len)
@@ -236,27 +261,28 @@ int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg)
     }
     if ((msg->msgHead.cipher & ENCRYPTED) != 0) {
         int32_t ret;
-        AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+        AuthHandle auth = { .authId = AUTH_INVALID_ID };
         if (msg->msgHead.type == PROXYCHANNEL_MSG_TYPE_HANDSHAKE) {
             TRANS_LOGD(TRANS_CTRL, "prxoy recv handshake cipher=0x%{public}02x", msg->msgHead.cipher);
-            ret = GetAuthIdByHandshakeMsg(msg->connId, msg->msgHead.cipher, &authHandle);
+            ret = GetAuthIdByHandshakeMsg(msg->connId, msg->msgHead.cipher, &auth,
+                (int32_t)SoftBusLtoHl(*(uint32_t *)msg->data));
         } else {
-            ret = TransProxyGetAuthId(msg->msgHead.myId, &authHandle);
+            ret = TransProxyGetAuthId(msg->msgHead.myId, &auth);
         }
-        if (ret != SOFTBUS_OK || authHandle.authId == AUTH_INVALID_ID) {
+        if (ret != SOFTBUS_OK || auth.authId == AUTH_INVALID_ID) {
             TRANS_LOGE(TRANS_CTRL, "get authId fail, connId=%{public}d, myChannelId=%{public}d, type=%{public}d",
                 msg->connId, msg->msgHead.myId, msg->msgHead.type);
             return SOFTBUS_AUTH_NOT_FOUND;
         }
-        msg->authHandle = authHandle;
+        msg->authHandle = auth;
         uint32_t decDataLen = AuthGetDecryptSize((uint32_t)msg->dateLen);
         uint8_t *decData = (uint8_t *)SoftBusCalloc(decDataLen);
         if (decData == NULL) {
             return SOFTBUS_MALLOC_ERR;
         }
         msg->keyIndex = (int32_t)SoftBusLtoHl(*(uint32_t *)msg->data);
-        if (AuthDecrypt(&authHandle, (uint8_t *)msg->data, (uint32_t)msg->dateLen,
-            decData, &decDataLen) != SOFTBUS_OK) {
+        if (AuthDecrypt(&auth, (uint8_t *)msg->data, (uint32_t)msg->dateLen, decData, &decDataLen) != SOFTBUS_OK &&
+            GetAuthIdReDecrypt(&auth, msg, decData, &decDataLen) != SOFTBUS_OK) {
             SoftBusFree(decData);
             TRANS_LOGE(TRANS_CTRL, "parse msg decrypt fail");
             return SOFTBUS_DECRYPT_ERR;
