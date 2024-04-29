@@ -27,6 +27,10 @@ struct WifiDirectStatusListener {
     void (*onLocalRoleChange)(enum WifiDirectRole oldRole, enum WifiDirectRole newRole);
     void (*onDeviceOnLine)(const char *remoteMac, const char *remoteIp, const char *remoteUuid, bool isSource);
     void (*onDeviceOffLine)(const char *remoteMac, const char *remoteIp, const char *remoteUuid, const char *localIp);
+    void (*onConnectedForSink)(const char *remoteMac, const char *remoteIp, const char *remoteUuid,
+        enum WifiDirectLinkType type);
+    void (*onDisconnectedForSink)(const char *remoteMac, const char *remoteIp, const char *remoteUuid,
+        enum WifiDirectLinkType type);
 };
 
 struct WifiDirectManager {
@@ -39,6 +43,7 @@ struct WifiDirectManager {
     void (*registerStatusListener)(struct WifiDirectStatusListener *listener);
     int32_t (*prejudgeAvailability)(const char *remoteNetworkId, enum WifiDirectLinkType linkType);
 
+    bool (*isNegotiateChannelNeeded)(const char *remoteNetworkId, enum WifiDirectLinkType linkType);
     bool (*isDeviceOnline)(const char *remoteMac);
     int32_t (*getLocalIpByUuid)(const char *uuid, char *localIp, int32_t localIpSize);
     int32_t (*getLocalIpByRemoteIp)(const char *remoteIp, char *localIp, int32_t localIpSize);

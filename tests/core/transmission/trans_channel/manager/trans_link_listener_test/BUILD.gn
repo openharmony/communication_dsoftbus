@@ -66,7 +66,7 @@ ohos_unittest("TransLinkListenerTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/src",
     "$dsoftbus_root_path/core/transmission/ipc/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/qos/interface",
-    "$dsoftbus_root_path/core/connection/wifi_direct",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
     "$dsoftbus_root_path/core/connection/p2p/interface",
     "$dsoftbus_root_path/core/connection/p2p/common/include",
   ]

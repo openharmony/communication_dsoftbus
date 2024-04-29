@@ -66,6 +66,9 @@ ohos_unittest("TransAuthChannelTest") {
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/interfaces/kits",
     "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/core/discovery/event_manager/include",
+    "$dsoftbus_root_path/core/connection/wifi_direct",
+    "$dsoftbus_root_path/core/connection/ble/include",
   ]
 
   deps = [
@@ -98,6 +101,12 @@ ohos_unittest("TransAuthManagerTest") {
     "$dsoftbus_root_path/core/transmission/session/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/auth/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/discovery/interface",
   ]
 
   deps = [

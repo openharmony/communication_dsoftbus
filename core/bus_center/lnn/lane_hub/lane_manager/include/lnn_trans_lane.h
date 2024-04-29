@@ -47,6 +47,8 @@ int32_t PostDelayDestroyMessage(uint32_t laneReqId, uint64_t laneId, uint64_t de
 int32_t PostDetectTimeoutMessage(uint32_t detectId, uint64_t delayMillis);
 void RemoveDetectTimeoutMessage(uint32_t detectId);
 int32_t PostLaneStateChangeMessage(LaneState state, const char *peerUdid, const LaneLinkInfo *laneLinkInfo);
+void RemoveDelayDestroyMessage(uint64_t laneId);
+void DelLogicAndLaneRelationship(uint64_t laneId);
 
 #ifdef __cplusplus
 }

@@ -15,7 +15,7 @@
 #ifndef P2P_ENTITY_STATE_H
 #define P2P_ENTITY_STATE_H
 
-#include "../kits/c/wifi_p2p.h"
+#include "kits/c/wifi_p2p.h"
 
 #include "adapter/p2p_adapter.h"
 #include "p2p_operation.h"

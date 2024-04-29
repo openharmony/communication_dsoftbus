@@ -49,6 +49,12 @@
 #include "trans_tcp_direct_listener.h"
 #include "trans_tcp_direct_sessionconn.h"
 #include "trans_tcp_direct_sessionconn.c"
+#include "softbus_feature_config.h"
+#include "trans_session_service.h"
+#include "disc_event_manager.h"
+#include "softbus_conn_ble_direct.h"
+#include "message_handler.h"
+
 
 using namespace testing::ext;
 
@@ -85,11 +91,25 @@ public:
 
 void TransCoreTcpDirectTest::SetUpTestCase(void)
 {
-    InitSoftBusServer();
+    SoftbusConfigInit();
+    LooperInit();
+    ConnServerInit();
+    AuthInit();
+    BusCenterServerInit();
+    TransServerInit();
+    DiscEventManagerInit();
+    TransChannelInit();
 }
 
 void TransCoreTcpDirectTest::TearDownTestCase(void)
-{}
+{
+    LooperDeinit();
+    ConnServerDeinit();
+    AuthDeinit();
+    TransServerDeinit();
+    DiscEventManagerDeinit();
+    TransChannelDeinit();
+}
 
 SessionServer *TestSetPack()
 {
@@ -220,7 +240,6 @@ HWTEST_F(TransCoreTcpDirectTest, TransOpenDirectChannelTest003, TestSize.Level1)
     int32_t channelId = 0;
     (void)memset_s(&connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     uint32_t laneHandle = 1;
-    bool isQosLane = false;
     attr.dataType = 1;
     attr.linkTypeNum = 0;
     SessionParam param = {
@@ -241,7 +260,7 @@ HWTEST_F(TransCoreTcpDirectTest, TransOpenDirectChannelTest003, TestSize.Level1)
     appInfo->crc = APP_INFO_FILE_FEATURES_SUPPORT;
     (void)memcpy_s(appInfo->myData.addr, IP_LEN, g_ip, strlen(g_ip));
 
-    int32_t ret = TransGetLaneInfo(&param, &connInfo, &laneHandle, &isQosLane);
+    int32_t ret = TransGetLaneInfo(&param, &connInfo, &laneHandle);
     EXPECT_EQ(ret, SOFTBUS_TRANS_GET_PID_FAILED);
 
     ret = TransGetConnectOptByConnInfo(&connInfo, &connOpt);

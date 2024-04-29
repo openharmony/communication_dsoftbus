@@ -18,9 +18,9 @@
 #include "securec.h"
 #include <memory>
 
-#include "../kits/c/wifi_device.h"
-#include "../kits/c/wifi_hid2d.h"
-#include "../kits/c/wifi_p2p.h"
+#include "kits/c/wifi_device.h"
+#include "kits/c/wifi_hid2d.h"
+#include "kits/c/wifi_p2p.h"
 
 #include "conn_log.h"
 #include "softbus_error_code.h"
@@ -48,6 +48,16 @@ int32_t P2pAdapter::GetChannel5GListIntArray(std::vector<int> &channels)
     }
 
     return SOFTBUS_OK;
+}
+
+bool P2pAdapter::IsWifiEnable()
+{
+    return IsWifiActive() == WIFI_STA_ACTIVE;
+}
+
+bool P2pAdapter::IsWifiConnected()
+{
+    return false;
 }
 
 bool P2pAdapter::IsWifiP2pEnabled()
@@ -288,7 +298,7 @@ int32_t P2pAdapter::GetGroupInfo(WifiDirectP2pGroupInfo &groupInfoOut)
     for (auto i = 0; i < info.clientDevicesSize; i++) {
         std::vector<uint8_t> clientAddrArray(
             info.clientDevices[i].devAddr, info.clientDevices[i].devAddr + sizeof(info.clientDevices[i].devAddr));
-        groupInfoOut.clientDevices.push_back(WifiDirectUtils::MacArrayToString(devAddrArray));
+        groupInfoOut.clientDevices.push_back(WifiDirectUtils::MacArrayToString(clientAddrArray));
     }
     return SOFTBUS_OK;
 }

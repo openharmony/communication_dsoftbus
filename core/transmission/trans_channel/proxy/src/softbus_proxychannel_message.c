@@ -142,7 +142,7 @@ static int32_t TransProxyGetAuthConnInfo(uint32_t connId, AuthConnInfo *connInfo
                 return SOFTBUS_MEM_ERR;
             }
             connInfo->info.bleInfo.protocol = info.bleInfo.protocol;
-            connInfo->info.bleInfo.psm = info.bleInfo.psm;
+            connInfo->info.bleInfo.psm = (int32_t)info.bleInfo.psm;
             break;
         default:
             TRANS_LOGE(TRANS_CTRL, "unexpected conn type=%{public}d.", info.type);
@@ -423,7 +423,7 @@ static int32_t PackHandshakeMsgForNormal(SessionKeyBase64 *sessionBase64, AppInf
     (void)AddNumberToJsonObject(root, JSON_KEY_TRANS_FLAGS, TRANS_FLAG_HAS_CHANNEL_AUTH);
     (void)AddNumberToJsonObject(root, JSON_KEY_MY_HANDLE_ID, appInfo->myHandleId);
     (void)AddNumberToJsonObject(root, JSON_KEY_PEER_HANDLE_ID, appInfo->peerHandleId);
-    (void)AddNumberToJsonObject(root, JSON_KEY_FIRST_TOKEN_ID, appInfo->firstTokenId);
+    (void)AddNumberToJsonObject(root, JSON_KEY_FIRST_TOKEN_ID, (int32_t)appInfo->firstTokenId);
     return SOFTBUS_OK;
 }
 
@@ -734,7 +734,7 @@ static int32_t TransProxyUnpackNormalHandshakeMsg(cJSON *root, AppInfo *appInfo,
         TRANS_LOGE(TRANS_CTRL, "unpack fast data failed");
         return SOFTBUS_TRANS_PROXY_UNPACK_FAST_DATA_FAILED;
     }
-    if (!GetJsonObjectNumberItem(root, JSON_KEY_FIRST_TOKEN_ID, &appInfo->firstTokenId)) {
+    if (!GetJsonObjectNumberItem(root, JSON_KEY_FIRST_TOKEN_ID, (int32_t *)&appInfo->firstTokenId)) {
         appInfo->firstTokenId = 0;
     }
     return SOFTBUS_OK;
@@ -816,7 +816,7 @@ int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, in
     }
 
     GetJsonObjectNumberItem(root, JSON_KEY_TRANS_FLAGS, &appInfo->transFlag);
-    if ((appInfo->transFlag & TRANS_FLAG_HAS_CHANNEL_AUTH) != 0) {
+    if (((uint32_t)appInfo->transFlag & TRANS_FLAG_HAS_CHANNEL_AUTH) != 0) {
         GetJsonObjectNumber64Item(root, JSON_KEY_AUTH_SEQ, &appInfo->authSeq);
     }
 

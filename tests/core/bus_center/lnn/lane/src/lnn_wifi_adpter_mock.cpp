@@ -62,6 +62,14 @@ int32_t LnnWifiAdpterInterfaceMock::ActionOfLnnConnectP2p(const LinkRequest *req
         return SOFTBUS_MEM_ERR;
     }
     linkInfo.type = request->linkType;
+    char peerIp[] = "127.1.1.1";
+    char peerUdid[] = "222222222222222222";
+    if (strncpy_s(linkInfo.linkInfo.p2p.connInfo.peerIp, IP_LEN, peerIp, strlen(peerIp)) != EOK) {
+        return SOFTBUS_STRCPY_ERR;
+    }
+    if (strncpy_s(linkInfo.peerUdid, UDID_BUF_LEN, peerUdid, strlen(peerUdid)) != EOK) {
+        return SOFTBUS_STRCPY_ERR;
+    }
     if (delayNotifyLinkSuccess) {
         GTEST_LOG_(INFO) << "delay notify laneLinkSuccess after 50ms";
         std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_FOR_LOOP_COMPLETION_MS));

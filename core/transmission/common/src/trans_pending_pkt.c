@@ -22,6 +22,7 @@
 #include "trans_log.h"
 
 #define TIME_OUT 20
+#define UDP_TIMEOUT_US (150 * 1000)
 
 typedef struct {
     ListNode node;
@@ -148,8 +149,13 @@ int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int type)
     SoftBusSysTime outtime;
     SoftBusSysTime now;
     SoftBusGetTime(&now);
-    outtime.sec = now.sec + TIME_OUT;
-    outtime.usec = now.usec;
+    if (type == PENDING_TYPE_UDP) {
+        outtime.sec = now.sec;
+        outtime.usec = now.usec + UDP_TIMEOUT_US;
+    } else {
+        outtime.sec = now.sec + TIME_OUT;
+        outtime.usec = now.usec;
+    }
     SoftBusMutexLock(&item->lock);
     while (item->status == PACKAGE_STATUS_PENDING && TimeBefore(&outtime)) {
         SoftBusCondWait(&item->cond, &item->lock, &outtime);

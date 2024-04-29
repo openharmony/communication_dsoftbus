@@ -21,9 +21,9 @@
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_errcode.h"
-#include "wifi_device.h"
-#include "wifi_hid2d.h"
-#include "wifi_p2p.h"
+#include "kits/c/wifi_device.h"
+#include "kits/c/wifi_hid2d.h"
+#include "kits/c/wifi_p2p.h"
 
 static int32_t ConvertSoftBusWifiConfFromWifiDev(const WifiDeviceConfig *sourceWifiConf, SoftBusWifiDevConf *wifiConf)
 {

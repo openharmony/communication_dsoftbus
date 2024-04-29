@@ -26,20 +26,20 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
-void *g_IpNetworkImplInterface;
+void *g_ipNetworkImplInterface;
 LnnIpNetworkImplInterfaceMock::LnnIpNetworkImplInterfaceMock()
 {
-    g_IpNetworkImplInterface = reinterpret_cast<void *>(this);
+    g_ipNetworkImplInterface = reinterpret_cast<void *>(this);
 }
 
 LnnIpNetworkImplInterfaceMock::~LnnIpNetworkImplInterfaceMock()
 {
-    g_IpNetworkImplInterface = nullptr;
+    g_ipNetworkImplInterface = nullptr;
 }
 
 static LnnIpNetworkImplInterface *GetLnnIpNetworkImplInterface()
 {
-    return reinterpret_cast<LnnIpNetworkImplInterface *>(g_IpNetworkImplInterface);
+    return reinterpret_cast<LnnIpNetworkImplInterface *>(g_ipNetworkImplInterface);
 }
 
 int32_t LnnIpNetworkImplInterfaceMock::ActionOfGetNetworkIpByIfName(
