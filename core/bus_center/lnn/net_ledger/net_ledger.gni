@@ -40,10 +40,9 @@ bus_center_ledger_inc = [
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
   "$dsoftbus_root_path/core/bus_center/utils/include",
-  "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
 ]
 bus_center_ledger_deps = []
-bus_center_ledger_external_deps = []
+bus_center_ledger_external_deps = [ "huks:libhukssdk" ]
 
 net_ledger_native_source_path = rebase_path("$dsoftbus_root_path")
 net_ledger_dep_dir = "dsoftbus_enhance/core/bus_center/lnn/lane_hub"
@@ -56,6 +55,8 @@ net_ledger_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
 
 if (defined(ohos_lite)) {
   bus_center_ledger_src += [ "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/src/lnn_decision_db_virtual.c" ]
+  bus_center_ledger_inc +=
+      [ "//base/security/huks/interfaces/inner_api/huks_standard/main/include" ]
   if (ohos_kernel_type != "liteos_m") {
     bus_center_ledger_deps +=
         [ "//base/security/huks/interfaces/inner_api/huks_lite:huks_3.0_sdk" ]
@@ -66,5 +67,4 @@ if (defined(ohos_lite)) {
   } else {
     bus_center_ledger_src += [ "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/src/lnn_decision_db_virtual.c" ]
   }
-  bus_center_ledger_external_deps += [ "huks:libhukssdk" ]
 }
