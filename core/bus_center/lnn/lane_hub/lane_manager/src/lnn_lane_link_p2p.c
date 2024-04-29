@@ -373,7 +373,7 @@ static int32_t GetP2pLinkReqParamByChannelRequetId(
             continue;
         }
         if (LnnGetRemoteStrInfo(item->laneRequestInfo.networkId, STRING_KEY_P2P_MAC, wifiDirectInfo->remoteMac,
-                                sizeof(wifiDirectInfo->remoteMac)) != SOFTBUS_OK) {
+            sizeof(wifiDirectInfo->remoteMac)) != SOFTBUS_OK) {
             LinkUnlock();
             LNN_LOGE(LNN_LANE, "get remote p2p mac fail");
             return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
@@ -475,7 +475,7 @@ static int32_t DelP2pLinkReqByReqId(AsyncResultType type, uint32_t requestId)
     P2pLinkReqList *item = NULL;
     P2pLinkReqList *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, g_p2pLinkList, P2pLinkReqList, node) {
-        if ((type == ASYNC_RESULT_AUTH && item->auth.requestId == (uint32_t)requestId) ||
+        if ((type == ASYNC_RESULT_AUTH && item->auth.requestId == requestId) ||
             (type == ASYNC_RESULT_P2P && item->p2pInfo.p2pRequestId == requestId) ||
             (type == ASYNC_RESULT_CHANNEL && item->proxyChannelInfo.requestId == requestId)) {
             ListDelete(&item->node);
