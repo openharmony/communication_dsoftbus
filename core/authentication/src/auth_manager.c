@@ -1986,6 +1986,76 @@ int32_t AuthGetLatestAuthSeqList(const char *udid, int64_t *seqList, uint32_t nu
     return SOFTBUS_OK;
 }
 
+static void FillAuthHandleList(ListNode *list, AuthHandle *handle, int32_t *num, int32_t count)
+{
+    AuthManager *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, list, AuthManager, node) {
+        if (item->connInfo[AUTH_LINK_TYPE_ENHANCED_P2P].type == AUTH_LINK_TYPE_ENHANCED_P2P &&
+            item->hasAuthPassed) {
+            handle[*num].authId = item->authId;
+            handle[*num].type = AUTH_LINK_TYPE_ENHANCED_P2P;
+            (*num)++;
+        } else if (item->connInfo[AUTH_LINK_TYPE_P2P].type == AUTH_LINK_TYPE_P2P && item->hasAuthPassed) {
+            handle[*num].authId = item->authId;
+            handle[*num].type = AUTH_LINK_TYPE_P2P;
+            (*num)++;
+        }
+        if (*num == count) {
+            break;
+        }
+    }
+}
+
+static uint32_t GetAllHmlOrP2pAuthHandleNum(void)
+{
+    uint32_t count = 0;
+    AuthManager *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_authServerList, AuthManager, node) {
+        if ((item->connInfo[AUTH_LINK_TYPE_ENHANCED_P2P].type == AUTH_LINK_TYPE_ENHANCED_P2P ||
+            item->connInfo[AUTH_LINK_TYPE_P2P].type == AUTH_LINK_TYPE_P2P) && item->hasAuthPassed) {
+            count++;
+        }
+    }
+    LIST_FOR_EACH_ENTRY(item, &g_authClientList, AuthManager, node) {
+        if ((item->connInfo[AUTH_LINK_TYPE_ENHANCED_P2P].type == AUTH_LINK_TYPE_ENHANCED_P2P ||
+            item->connInfo[AUTH_LINK_TYPE_P2P].type == AUTH_LINK_TYPE_P2P) && item->hasAuthPassed) {
+            count++;
+        }
+    }
+    return count;
+}
+
+int32_t GetHmlOrP2pAuthHandle(AuthHandle **authHandle, int32_t *num)
+{
+    if (authHandle == NULL || num == NULL) {
+        AUTH_LOGE(AUTH_CONN, "authHandle is empty");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!RequireAuthLock()) {
+        AUTH_LOGE(AUTH_CONN, "get auth lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    uint32_t count = GetAllHmlOrP2pAuthHandleNum();
+    if (count <= 0) {
+        AUTH_LOGE(AUTH_CONN, "not found hml or p2p authHandle");
+        ReleaseAuthLock();
+        return SOFTBUS_AUTH_NOT_FOUND;
+    }
+    AuthHandle *handle = (AuthHandle *)SoftBusCalloc(sizeof(AuthHandle) * count);
+    if (handle == NULL) {
+        AUTH_LOGE(AUTH_CONN, "authHandle calloc fail");
+        ReleaseAuthLock();
+        return SOFTBUS_MALLOC_ERR;
+    }
+    *num = 0;
+    FillAuthHandleList(&g_authServerList, handle, num, count);
+    FillAuthHandleList(&g_authClientList, handle, num, count);
+
+    *authHandle = handle;
+    ReleaseAuthLock();
+    return SOFTBUS_OK;
+}
+
 void AuthDeviceGetLatestIdByUuid(const char *uuid, AuthLinkType type, AuthHandle *authHandle)
 {
     if (uuid == NULL || uuid[0] == '\0' || authHandle == NULL) {
