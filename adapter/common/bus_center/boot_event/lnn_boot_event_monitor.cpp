@@ -25,6 +25,7 @@
 #include "parameter.h"
 
 #define BOOTEVENT_ACCOUNT_READY "bootevent.account.ready"
+
 static void AccountBootEventCb(const char *key, const char *value, void *context)
 {
     (void)context;
@@ -38,6 +39,7 @@ static void AccountBootEventCb(const char *key, const char *value, void *context
         LnnStartHeartbeat(0);
     }
 }
+
 int32_t LnnInitBootEventMonitorImpl(void)
 {
     int32_t ret = -1;
