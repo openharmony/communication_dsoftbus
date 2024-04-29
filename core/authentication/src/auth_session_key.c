@@ -506,8 +506,14 @@ static void HandleUpdateSessionKeyEvent(const void *obj)
     if (auth == NULL) {
         return;
     }
-    if (AuthSessionStartAuth(GenSeq(false), AuthGenRequestId(),
-        auth->connId[authHandle.type], &auth->connInfo[authHandle.type], false, false) != SOFTBUS_OK) {
+    AuthParam authInfo = {
+        .authSeq = GenSeq(false),
+        .requestId = AuthGenRequestId(),
+        .connId = auth->connId[authHandle.type],
+        .isServer = false,
+        .isFastAuth = false,
+    };
+    if (AuthSessionStartAuth(&authInfo, &auth->connInfo[authHandle.type]) != SOFTBUS_OK) {
         AUTH_LOGI(AUTH_FSM, "start auth session to update session key fail, authId=%{public}" PRId64,
             authHandle.authId);
     }
