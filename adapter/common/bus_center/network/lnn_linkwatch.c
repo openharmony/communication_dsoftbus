@@ -36,10 +36,10 @@
 
 #define NETLINK_BUF_LEN 1024
 
-static int32_t AddAttr(struct nlmsghdr *nlMsgHdr, uint32_t maxLen, int32_t type,
-    const uint8_t *data, uint32_t attrLen)
+static int32_t AddAttr(struct nlmsghdr *nlMsgHdr, uint32_t maxLen, uint16_t type,
+    const uint8_t *data, uint16_t attrLen)
 {
-    int32_t len = RTA_LENGTH(attrLen);
+    uint16_t len = RTA_LENGTH(attrLen);
     struct rtattr *rta = NULL;
 
     if (NLMSG_ALIGN(nlMsgHdr->nlmsg_len) + RTA_ALIGN(len) > maxLen) {
@@ -47,8 +47,8 @@ static int32_t AddAttr(struct nlmsghdr *nlMsgHdr, uint32_t maxLen, int32_t type,
         return SOFTBUS_ERR;
     }
     rta = ((struct rtattr *) (((uint8_t *) (nlMsgHdr)) + NLMSG_ALIGN((nlMsgHdr)->nlmsg_len)));
-    rta->rta_type = (uint16_t)type;
-    rta->rta_len = (uint16_t)len;
+    rta->rta_type = type;
+    rta->rta_len = len;
     if (memcpy_s(RTA_DATA(rta), rta->rta_len, data, attrLen) != EOK) {
         LNN_LOGE(LNN_BUILDER, "memcpy attr failed");
         return SOFTBUS_MEM_ERR;
@@ -169,7 +169,8 @@ bool LnnIsLinkReady(const char *iface)
     }
     req.hdr.nlmsg_seq = ++seq;
     (void)memset_s(&answer, sizeof(answer), 0, sizeof(answer));
-    if (AddAttr(&req.hdr, sizeof(req), IFLA_IFNAME, (const uint8_t *)iface, strlen(iface) + 1) != SOFTBUS_OK) {
+    uint16_t len = (uint16_t)strlen(iface) + 1;
+    if (AddAttr(&req.hdr, sizeof(req), IFLA_IFNAME, (const uint8_t *)iface, len) != SOFTBUS_OK) {
         return false;
     }
     if (RtNetlinkTalk(&req.hdr, &answer.hdr, sizeof(answer)) != SOFTBUS_OK) {

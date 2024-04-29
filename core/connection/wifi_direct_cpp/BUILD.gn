@@ -30,11 +30,6 @@ ohos_static_library("wifi_direct") {
   wifi_direct_connection_src = []
 
   wifi_direct_connection_inc = [
-    "//third_party/cJSON",
-    "//third_party/json/include",
-    "//third_party/googletest/googletest/include",
-    "//third_party/googletest/googletest/src",
-    "//third_party/bounds_checking_function/include",
     "$dsoftbus_root_path/adapter/common/net/wifi/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
@@ -53,6 +48,7 @@ ohos_static_library("wifi_direct") {
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
@@ -113,29 +109,23 @@ ohos_static_library("wifi_direct") {
       wifi_direct_connection_src += wifi_direct_connection_enhance_src
       wifi_direct_connection_external_deps +=
           wifi_direct_connection_enhance_external_deps
-    } else {
-      wifi_direct_connection_inc += [ "$wifi_direct_path/adapter" ]
-      wifi_direct_connection_src +=
-          [ "$wifi_direct_path/adapter/net_manager_adapter.cpp" ]
     }
 
     wifi_direct_connection_external_deps += [
+      "bounds_checking_function:libsec_shared",
+      "cJSON:cjson",
       "c_utils:utils",
+      "hilog:libhilog",
       "hitrace:libhitracechain",
       "init:libbegetutil",
+      "json:nlohmann_json_static",
       "netmanager_base:net_conn_manager_if",
       "wifi:wifi_sdk",
     ]
   } else {
-    wifi_direct_connection_src += [
-      "$dsoftbus_root_path/core/connection/wifi_direct/wifi_direct_initiator_virtual.c",
-      "$dsoftbus_root_path/core/connection/wifi_direct/wifi_direct_manager_virtual.c",
-      "$dsoftbus_root_path/core/connection/wifi_direct/channel/default_negotiate_channel_virtual.c",
-      "$dsoftbus_root_path/core/connection/wifi_direct/channel/fast_connect_negotiate_channel_virtual.c",
-      "$dsoftbus_root_path/core/connection/wifi_direct/utils/wifi_direct_utils_virtual.c",
-      "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single/net_manager_adapter.cpp",
-      "$dsoftbus_root_path/core/connection/wifi_direct/adapter/single/wifi_direct_p2p_adapter_virtual.c",
-    ]
+    wifi_direct_connection_src +=
+        [ "$wifi_direct_path/wifi_direct_manager_virtual.c" ]
+    wifi_direct_connection_external_deps += [ "hilog:libhilog" ]
   }
 
   include_dirs = wifi_direct_connection_inc

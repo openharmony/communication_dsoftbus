@@ -43,6 +43,7 @@ typedef struct {
 
 typedef struct {
     ListNode handlers[LNN_EVENT_TYPE_MAX];
+    uint32_t regCnt[LNN_EVENT_TYPE_MAX];
     SoftBusMutex lock;
 } BusCenterEventCtrl;
 
@@ -238,15 +239,32 @@ static LnnEventHandlerItem *CreateEventHandlerItem(LnnEventHandler handler)
 static void NotifyEvent(const LnnEventBasicInfo *info)
 {
     LnnEventHandlerItem *item = NULL;
+    uint32_t i = 0;
 
     if (SoftBusMutexLock(&g_eventCtrl.lock) != 0) {
         LNN_LOGE(LNN_EVENT, "lock failed in notify event");
         return;
     }
+    uint32_t count = g_eventCtrl.regCnt[info->event];
+    LnnEventHandler *handlesArray = (LnnEventHandler *)SoftBusCalloc(sizeof(LnnEventHandlerItem) * count);
+    if (handlesArray == NULL) {
+        LNN_LOGE(LNN_EVENT, "malloc failed");
+        (void)SoftBusMutexUnlock(&g_eventCtrl.lock);
+        return;
+    }
     LIST_FOR_EACH_ENTRY(item, &g_eventCtrl.handlers[info->event], LnnEventHandlerItem, node) {
-        item->handler(info);
+        handlesArray[i] = item->handler;
+        i++;
     }
     (void)SoftBusMutexUnlock(&g_eventCtrl.lock);
+
+    /* process handles out of lock */
+    for (i = 0; i < count; i++) {
+        if (handlesArray[i] != NULL) {
+            handlesArray[i](info);
+        }
+    }
+    SoftBusFree(handlesArray);
 }
 
 void LnnNotifyDeviceVerified(const char *udid)
@@ -653,6 +671,7 @@ int32_t LnnInitBusCenterEvent(void)
     SoftBusMutexInit(&g_eventCtrl.lock, &mutexAttr);
     for (i = 0; i < LNN_EVENT_TYPE_MAX; ++i) {
         ListInit(&g_eventCtrl.handlers[i]);
+        g_eventCtrl.regCnt[i] = 0;
     }
     return SOFTBUS_OK;
 }
@@ -691,6 +710,7 @@ int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler)
         return SOFTBUS_MEM_ERR;
     }
     ListAdd(&g_eventCtrl.handlers[event], &item->node);
+    g_eventCtrl.regCnt[event]++;
     (void)SoftBusMutexUnlock(&g_eventCtrl.lock);
     return SOFTBUS_OK;
 }
@@ -712,6 +732,9 @@ void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler)
         if (item->handler == handler) {
             ListDelete(&item->node);
             SoftBusFree(item);
+            if (g_eventCtrl.regCnt[event] > 0) {
+                g_eventCtrl.regCnt[event]--;
+            }
             break;
         }
     }

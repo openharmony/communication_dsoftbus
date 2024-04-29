@@ -130,6 +130,7 @@ ohos_unittest("BrConnectionTest") {
     "$dsoftbus_root_path/core/connection/br/src/softbus_conn_br_connection.c",
     "$dsoftbus_root_path/core/connection/br/src/softbus_conn_br_manager.c",
     "$dsoftbus_root_path/core/connection/br/src/softbus_conn_br_trans.c",
+    "$dsoftbus_root_path/core/connection/manager/softbus_conn_flow_control.c",
     "br_connection_test.cpp",
     "br_mock.cpp",
   ]

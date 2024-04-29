@@ -114,12 +114,14 @@ int32_t TestOnChannelOpened(const char *pkgName, int32_t pid, const char *sessio
     return SOFTBUS_OK;
 }
 
-int32_t TestOnChannelClosed(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType)
+int32_t TestOnChannelClosed(const char *pkgName, int32_t pid,
+    int32_t channelId, int32_t channelType, int32_t messageType)
 {
     (void)pkgName;
     (void)pid;
     (void)channelId;
     (void)channelType;
+    (void)messageType;
     g_testProxyChannelClosedFlag = true;
     return SOFTBUS_OK;
 }

@@ -17,6 +17,7 @@
 #include "softbus_error_code.h"
 #include "conn_log.h"
 #include "command/connect_command.h"
+#include "command/command_factory.h"
 #include "command/disconnect_command.h"
 #include "command/negotiate_command.h"
 
@@ -29,7 +30,7 @@ int WifiDirectScheduler::ConnectDevice(const WifiDirectConnectInfo &info, const 
               info.requestId, info.pid, info.connectType, WifiDirectAnonymizeDeviceId(info.remoteNetworkId).c_str(),
               WifiDirectAnonymizeDeviceId(WifiDirectUtils::NetworkIdToUuid(info.remoteNetworkId)).c_str());
 
-    auto command = std::make_shared<ConnectCommand>(info, callback);
+    auto command = CommandFactory::GetInstance().CreateConnectCommand(info, callback);
     command->SetRetried(markRetried);
     std::shared_ptr<WifiDirectExecutor> executor;
     auto ret = ScheduleActiveCommand(command, executor);
@@ -47,7 +48,7 @@ int WifiDirectScheduler::ConnectDevice(const std::shared_ptr<ConnectCommand> &co
 
 int WifiDirectScheduler::DisconnectDevice(WifiDirectDisconnectInfo &info, WifiDirectDisconnectCallback &callback)
 {
-    auto command = std::make_shared<DisconnectCommand>(info, callback);
+    auto command = CommandFactory::GetInstance().CreateDisconnectCommand(info, callback);
     CONN_LOGI(CONN_WIFI_DIRECT,
               "requestId=%{public}d pid=%{public}d linkId=%{public}d networkId=%{public}s remoteUuid=%{public}s",
               info.requestId, info.pid, info.linkId,

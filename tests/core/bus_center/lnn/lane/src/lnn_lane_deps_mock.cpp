@@ -17,12 +17,11 @@
 #include "softbus_error_code.h"
 #include "softbus_socket.h"
 
-const static uint16_t SHA_HASH_LEN = 32;
-
 using namespace testing::ext;
 using namespace testing;
 
 namespace OHOS {
+const static uint16_t SHA_HASH_LEN = 32;
 void *g_laneDepsInterface;
 static SoftbusBaseListener g_baseListener = {0};
 LaneDepsInterfaceMock::LaneDepsInterfaceMock()
@@ -55,6 +54,8 @@ void LaneDepsInterfaceMock::SetDefaultResult(NodeInfo *info)
     ON_CALL(*this, AddTrigger).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(*this, LnnGetLocalNumU64Info).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(*this, LnnGetRemoteNumU64Info).WillByDefault(Return(SOFTBUS_OK));
+    ON_CALL(*this, LnnGetLocalNumU32Info).WillByDefault(Return(SOFTBUS_OK));
+    ON_CALL(*this, LnnGetRemoteNumU32Info).WillByDefault(Return(SOFTBUS_OK));
 }
 
 void LaneDepsInterfaceMock::SetDefaultResultForAlloc(int32_t localNetCap, int32_t remoteNetCap,
@@ -63,6 +64,10 @@ void LaneDepsInterfaceMock::SetDefaultResultForAlloc(int32_t localNetCap, int32_
     EXPECT_CALL(*this, LnnGetLocalNumInfo)
         .WillRepeatedly(DoAll(SetArgPointee<1>(localNetCap), Return(SOFTBUS_OK)));
     EXPECT_CALL(*this, LnnGetRemoteNumInfo)
+        .WillRepeatedly(DoAll(SetArgPointee<2>(remoteNetCap), Return(SOFTBUS_OK)));
+    EXPECT_CALL(*this, LnnGetLocalNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(localNetCap), Return(SOFTBUS_OK)));
+    EXPECT_CALL(*this, LnnGetRemoteNumU32Info)
         .WillRepeatedly(DoAll(SetArgPointee<2>(remoteNetCap), Return(SOFTBUS_OK)));
     EXPECT_CALL(*this, LnnGetLocalNumU64Info)
         .WillRepeatedly(DoAll(SetArgPointee<1>(localFeatureCap), Return(SOFTBUS_OK)));
@@ -188,6 +193,16 @@ int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
 int32_t LnnGetRemoteNumInfo(const char *netWorkId, InfoKey key, int32_t *info)
 {
     return GetLaneDepsInterface()->LnnGetRemoteNumInfo(netWorkId, key, info);
+}
+
+int32_t LnnGetLocalNumU32Info(InfoKey key, uint32_t *info)
+{
+    return GetLaneDepsInterface()->LnnGetLocalNumU32Info(key, info);
+}
+
+int32_t LnnGetRemoteNumU32Info(const char *netWorkId, InfoKey key, uint32_t *info)
+{
+    return GetLaneDepsInterface()->LnnGetRemoteNumU32Info(netWorkId, key, info);
 }
 
 NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type)
@@ -325,6 +340,11 @@ int32_t QueryLaneResource(const LaneQueryInfo *queryInfo, const QosInfo *qosInfo
 ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_t len, int32_t timeout)
 {
     return GetLaneDepsInterface()->ConnSendSocketData(fd, buf, len, timeout);
+}
+
+struct WifiDirectManager* GetWifiDirectManager(void)
+{
+    return GetLaneDepsInterface()->GetWifiDirectManager();
 }
 }
 } // namespace OHOS

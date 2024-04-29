@@ -60,22 +60,22 @@ int32_t GetWlanLinkedFrequency(void)
     int32_t ret = LnnGetWlanLinkedInfo(&info);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get linked info fail, reason=%{public}d", ret);
-        return SOFTBUS_ERR;
+        return ret;
     }
     LNN_LOGI(LNN_LANE, "wlan linked frequency=%{public}d", info.frequency);
     return info.frequency;
 }
 
-static bool GetNetCap(const char *networkId, int32_t *local, int32_t *remote)
+static bool GetNetCap(const char *networkId, uint32_t *local, uint32_t *remote)
 {
-    int32_t ret = LnnGetLocalNumInfo(NUM_KEY_NET_CAP, local);
+    int32_t ret = LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, local);
     if (ret != SOFTBUS_OK || *local < 0) {
-        LNN_LOGE(LNN_LANE, "LnnGetLocalNumInfo err, ret=%{public}d, local=%{public}d", ret, *local);
+        LNN_LOGE(LNN_LANE, "LnnGetLocalNumInfo err, ret=%{public}d, local=%{public}u", ret, *local);
         return false;
     }
-    ret = LnnGetRemoteNumInfo(networkId, NUM_KEY_NET_CAP, remote);
+    ret = LnnGetRemoteNumU32Info(networkId, NUM_KEY_NET_CAP, remote);
     if (ret != SOFTBUS_OK || *remote < 0) {
-        LNN_LOGE(LNN_LANE, "LnnGetRemoteNumInfo err, ret=%{public}d, remote=%{public}d", ret, *remote);
+        LNN_LOGE(LNN_LANE, "LnnGetRemoteNumInfo err, ret=%{public}d, remote=%{public}u", ret, *remote);
         return false;
     }
     return true;
@@ -123,7 +123,7 @@ static bool IsEnableWlan2P4G(const char *networkId)
         AnonymizeFree(anonyNetworkId);
         return false;
     }
-    int32_t local, remote;
+    uint32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
         return false;
@@ -133,7 +133,7 @@ static bool IsEnableWlan2P4G(const char *networkId)
         (remote & (1 << BIT_WIFI_5G)) || (local & (1 << BIT_WIFI_5G)))) {
         return true;
     }
-    LNN_LOGE(LNN_LANE, "2.4G capa disable, local=%{public}d, remote=%{public}d", local, remote);
+    LNN_LOGE(LNN_LANE, "2.4G capa disable, local=%{public}u, remote=%{public}u", local, remote);
     return false;
 }
 
@@ -161,7 +161,7 @@ static bool IsEnableWlan5G(const char *networkId)
         AnonymizeFree(anonyNetworkId);
         return false;
     }
-    int32_t local, remote;
+    uint32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
         return false;
@@ -171,13 +171,13 @@ static bool IsEnableWlan5G(const char *networkId)
         (remote & (1 << BIT_WIFI_24G)) || (local & (1 << BIT_WIFI_24G)))) {
         return true;
     }
-    LNN_LOGE(LNN_LANE, "5G capa disable, local=%{public}d, remote=%{public}d", local, remote);
+    LNN_LOGE(LNN_LANE, "5G capa disable, local=%{public}u, remote=%{public}u", local, remote);
     return false;
 }
 
 static bool IsEnableBr(const char *networkId)
 {
-    int32_t local, remote;
+    uint32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
         return false;
@@ -185,19 +185,19 @@ static bool IsEnableBr(const char *networkId)
     if ((local & (1 << BIT_BR)) && (remote & (1 << BIT_BR))) {
         return true;
     }
-    LNN_LOGE(LNN_LANE, "BR capa disable, local=%{public}d, remote=%{public}d", local, remote);
+    LNN_LOGE(LNN_LANE, "BR capa disable, local=%{public}u, remote=%{public}u", local, remote);
     return false;
 }
 
 static bool IsEnableP2p(const char *networkId)
 {
-    int32_t local, remote;
+    uint32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
         return false;
     }
     if (((local & (1 << BIT_WIFI_P2P)) == 0) || ((remote & (1 << BIT_WIFI_P2P)) == 0)) {
-        LNN_LOGE(LNN_LANE, "p2p capa disable, local=%{public}d, remote=%{public}d", local, remote);
+        LNN_LOGE(LNN_LANE, "p2p capa disable, local=%{public}u, remote=%{public}u", local, remote);
         return false;
     }
     return true;
@@ -226,7 +226,7 @@ static bool IsEnableP2pReuse(const char *networkId)
     }
     uint64_t local, remote;
     if (!GetFeatureCap(networkId, &local, &remote)) {
-        LNN_LOGE(LNN_LANE, "GetNetCap error");
+        LNN_LOGE(LNN_LANE, "GetFeatureCap error");
         return false;
     }
     if (((local & (1 << BIT_WIFI_P2P_REUSE)) == 0) || ((remote & (1 << BIT_WIFI_P2P_REUSE)) == 0)) {
@@ -239,7 +239,7 @@ static bool IsEnableP2pReuse(const char *networkId)
 
 static bool IsEnableBle(const char *networkId)
 {
-    int32_t local, remote;
+    uint32_t local, remote;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
         return false;
@@ -503,19 +503,21 @@ static void DecideOptimalLinks(const char *networkId, const LaneSelectParam *req
     LNN_LOGI(LNN_LANE, "decide optimal links num=%{public}d", *linksNum);
 }
 
-static bool isLaneExist(LaneLinkType *linkList, LaneLinkType laneType)
+static bool isLaneExist(LaneLinkType *linkList, LaneLinkType linkType)
 {
     for (int i = 0; i < LANE_LINK_TYPE_BUTT; i++) {
-        if (linkList[i] == laneType) {
+        if (linkList[i] == linkType) {
             return true;
         }
     }
     return false;
 }
 
-static void GetAllLinksWithBw(const char *networkId, int32_t bandWidthType, const LaneSelectParam *request,
+static void DecideRetryLinks(const char *networkId, const LaneSelectParam *request,
     LaneLinkType *linkList, uint32_t *linksNum)
 {
+    uint32_t minBandWidth = request->qosRequire.minBW;
+    int32_t bandWidthType = GetBwType(minBandWidth);
     for (uint32_t i = 0; i < (LANE_LINK_TYPE_BUTT + 1); i++) {
         if (g_retryLaneList[bandWidthType][i] == LANE_LINK_TYPE_BUTT) {
             break;
@@ -526,14 +528,6 @@ static void GetAllLinksWithBw(const char *networkId, int32_t bandWidthType, cons
             LNN_LOGI(LNN_LANE, "decide retry linkType=%{public}d", g_retryLaneList[bandWidthType][i]);
         }
     }
-}
-
-static void DecideRetryLinks(const char *networkId, const LaneSelectParam *request,
-    LaneLinkType *linkList, uint32_t *linksNum)
-{
-    uint32_t minBandWidth = request->qosRequire.minBW;
-    int32_t bandWidthType = GetBwType(minBandWidth);
-    GetAllLinksWithBw(networkId, bandWidthType, request, linkList, linksNum);
 }
 
 static void UpdataHmlPriority(const char *peerNetWorkId, const LaneSelectParam *request,
