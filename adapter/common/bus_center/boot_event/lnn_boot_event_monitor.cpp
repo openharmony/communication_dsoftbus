@@ -29,7 +29,7 @@
 
 static void ProcessBootEvent(void *para)
 {
-    para(void);
+    (void)para;
     LNN_LOGI(LNN_EVENT, "start process boot event");
     LnnUpdateOhosAccount();
     if (LnnIsDefaultOhosAccount() && !IsAuthHasTrustedRelation()) {
