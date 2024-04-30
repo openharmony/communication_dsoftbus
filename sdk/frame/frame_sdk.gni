@@ -45,7 +45,6 @@ if (defined(ohos_lite)) {
   softbus_client_frame_inc += [
     "$dsoftbus_root_path/sdk/frame/common/include",
     "$dsoftbus_root_path/sdk/frame/$os_type/include",
-    "//utils/system/safwk/native/include",
   ]
 
   softbus_client_frame_src = [
