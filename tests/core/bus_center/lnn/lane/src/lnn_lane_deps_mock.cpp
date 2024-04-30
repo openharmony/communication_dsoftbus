@@ -157,6 +157,16 @@ int32_t LaneDepsInterfaceMock::ActionOfConnOpened(const AuthConnInfo *info, uint
 }
 
 extern "C" {
+int32_t GetAuthLinkTypeList(const char *networkId, AuthLinkTypeList *linkTypeList)
+{
+    return GetLaneDepsInterface()->GetAuthLinkTypeList(networkId, linkTypeList);
+}
+
+int32_t AuthAllocConn(const char *networkId, uint32_t authRequestId, AuthConnCallback *callback)
+{
+    return GetLaneDepsInterface()->AuthAllocConn(networkId, authRequestId, callback);
+}
+
 int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info)
 {
     return GetLaneDepsInterface()->LnnGetRemoteNodeInfoById(id, type, info);
