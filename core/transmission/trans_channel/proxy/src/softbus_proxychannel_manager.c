@@ -1498,7 +1498,13 @@ void TransProxyTimerProc(void)
     ListNode proxyProcList;
 
     int32_t ret = SoftBusMutexLock(&g_proxyChannelList->lock);
-    if (g_proxyChannelList == NULL || g_proxyChannelList->cnt <= 0 || ret != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_INIT,"lock mutex fail");
+        return;
+    }
+    if (g_proxyChannelList == NULL || g_proxyChannelList->cnt <= 0) {
+        TRANS_LOGW(TRANS_INIT,"g_proxyChannelList is null or empty");
+        (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
         return;
     }
 
