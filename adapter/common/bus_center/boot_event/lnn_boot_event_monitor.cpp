@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include <string.h>
+#include <cstring>
 
 #include "auth_interface.h"
 #include "lnn_async_callback_utils.h"
@@ -55,7 +55,7 @@ int32_t LnnInitBootEventMonitorImpl(void)
     int32_t ret = -1;
     ret = WatchParameter("bootevent.account.ready", AccountBootEventCb, NULL);
     if (ret != 0) {
-        LNN_LOGE(LNN_EVENT,"watch account server fail");
+        LNN_LOGE(LNN_EVENT, "watch account server fail");
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
