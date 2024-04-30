@@ -65,9 +65,10 @@ void OnGroupCreatedTest(const char *groupId, int32_t groupType)
     (void)groupType;
 }
 
-void OnGroupDeletedTest(const char *groupId)
+void OnGroupDeletedTest(const char *groupId, int32_t groupType)
 {
     (void)groupId;
+    (void)groupType;
 }
 /*
  * @tc.name: ON_DEVICE_NOT_TRUSTED_TEST_001

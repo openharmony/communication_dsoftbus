@@ -83,9 +83,10 @@ static void OnGroupCreated(const char *groupId, int32_t groupType)
     return;
 }
 
-static void OnGroupDeleted(const char *groupId)
+static void OnGroupDeleted(const char *groupId, int32_t groupType)
 {
     (void)groupId;
+    (void)groupType;
     return;
 }
 

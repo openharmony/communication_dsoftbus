@@ -796,10 +796,10 @@ static void OnGroupCreated(const char *groupId, int32_t groupType)
     }
 }
 
-static void OnGroupDeleted(const char *groupId)
+static void OnGroupDeleted(const char *groupId, int32_t groupType)
 {
     if (g_groupChangeListener.onGroupDeleted != NULL) {
-        g_groupChangeListener.onGroupDeleted(groupId);
+        g_groupChangeListener.onGroupDeleted(groupId, groupType);
     }
 }
 
