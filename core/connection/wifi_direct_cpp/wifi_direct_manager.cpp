@@ -18,9 +18,7 @@
 #include <mutex>
 #include <securec.h>
 #include "wifi_direct_manager.h"
-#include "bus_center_info_key.h"
 #include "conn_log.h"
-#include "lnn_distributed_net_ledger.h"
 #include "softbus_error_code.h"
 #include "wifi_direct_initiator.h"
 #include "wifi_direct_scheduler_factory.h"
