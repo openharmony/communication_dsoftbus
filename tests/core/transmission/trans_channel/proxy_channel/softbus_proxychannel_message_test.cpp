@@ -976,7 +976,8 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyGetAuthIdTest001, TestSize.Le
     msg.connId = 1;
     msg.msgHead.cipher = 1;
     AuthHandle authHandle = { 0 };
-    int32_t ret = GetAuthIdByHandshakeMsg(msg.connId, msg.msgHead.cipher, &authHandle);
+    int32_t index = 1;
+    int32_t ret = GetAuthIdByHandshakeMsg(msg.connId, msg.msgHead.cipher, &authHandle, index);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 

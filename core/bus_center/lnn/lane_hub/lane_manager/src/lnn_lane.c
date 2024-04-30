@@ -21,6 +21,7 @@
 #include "anonymizer.h"
 #include "common_list.h"
 #include "lnn_async_callback_utils.h"
+#include "lnn_ctrl_lane.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_assign.h"
 #include "lnn_lane_common.h"
@@ -513,6 +514,10 @@ int32_t InitLane(void)
     if (g_laneObject[LANE_TYPE_TRANS] != NULL) {
         LNN_LOGI(LNN_LANE, "transLane get instance succ");
         g_laneObject[LANE_TYPE_TRANS]->init(&g_laneIdListener);
+    }
+    g_laneObject[LANE_TYPE_CTRL] = CtrlLaneGetInstance();
+    if (g_laneObject[LANE_TYPE_CTRL] != NULL) {
+        LNN_LOGI(LNN_LANE, "ctrl get instance succ");
     }
     ListInit(&g_laneListenerList.list);
     g_laneListenerList.cnt = 0;

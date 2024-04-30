@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef LNN_LANE_LINK_P2P_H
-#define LNN_LANE_LINK_P2P_H
+#include "lnn_event_monitor_impl.h"
 
-#include "lnn_lane_link.h"
+#include "softbus_errcode.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-int32_t LnnConnectP2p(const LinkRequest *request, uint32_t laneReqId, const LaneLinkCb *callback);
-void LnnDisconnectP2p(const char *networkId, uint32_t laneReqId);
-void LnnDestroyP2p(void);
-
-#ifdef __cplusplus
+int32_t LnnInitBootEventMonitorImpl(void)
+{
+    return SOFTBUS_OK;
 }
-#endif
-#endif // LNN_LANE_LINK_P2P_H

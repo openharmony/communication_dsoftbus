@@ -54,15 +54,6 @@ void CommonEventMonitor::OnReceiveEvent(const CommonEventData &data)
     std::string action = data.GetWant().GetAction();
     LNN_LOGI(LNN_EVENT, "notify common event=%{public}s", action.c_str());
 
-    if (action == CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED) {
-        LnnUpdateOhosAccount();
-        if (LnnIsDefaultOhosAccount() && !IsAuthHasTrustedRelation()) {
-            LNN_LOGE(LNN_EVENT, "not trusted releation, heartbeat(HB) process start later");
-            return;
-        }
-        LnnStartHeartbeat(0);
-    }
-
     SoftBusScreenState screenState = SOFTBUS_SCREEN_UNKNOWN;
     if (action == CommonEventSupport::COMMON_EVENT_SCREEN_OFF) {
         screenState = SOFTBUS_SCREEN_OFF;
@@ -103,7 +94,6 @@ int32_t SubscribeEvent::SubscribeCommonEvent()
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGIN);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOUT);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOFF);
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_USER_UNLOCKED);
     CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     subscriber_ = std::make_shared<CommonEventMonitor>(subscriberInfo);
