@@ -260,7 +260,9 @@ static void NotifyEvent(const LnnEventBasicInfo *info)
 
     /* process handles out of lock */
     for (i = 0; i < count; i++) {
-        handlesArray[i](info);
+        if (handlesArray[i] != NULL) {
+            handlesArray[i](info);
+        }
     }
     SoftBusFree(handlesArray);
 }
@@ -638,6 +640,16 @@ void LnnNotifySingleOffLineEvent(const ConnectionAddr *addr, NodeBasicInfo *basi
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
+void LnnNotifyLpReportEvent(SoftBusLpEventType type)
+{
+    if (type < SOFTBUS_MSDP_MOVEMENT_AND_STATIONARY || type >= SOFTBUS_LP_EVENT_UNKNOWN) {
+        LNN_LOGW(LNN_EVENT, "bad lp event type = %{public}d", type);
+        return;
+    }
+    LnnLpReportEvent event = {.basic.event = LNN_EVENT_LP_EVENT_REPORT, .type = type};
+    NotifyEvent((const LnnEventBasicInfo *) &event);
+}
+
 void LnnNotifyNetworkIdChangeEvent(const char *networkId)
 {
     if (networkId == NULL) {
@@ -730,9 +742,11 @@ void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler)
         if (item->handler == handler) {
             ListDelete(&item->node);
             SoftBusFree(item);
+            if (g_eventCtrl.regCnt[event] > 0) {
+                g_eventCtrl.regCnt[event]--;
+            }
             break;
         }
     }
-    g_eventCtrl.regCnt[event]--;
     (void)SoftBusMutexUnlock(&g_eventCtrl.lock);
 }

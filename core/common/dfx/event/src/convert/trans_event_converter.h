@@ -58,8 +58,8 @@ TRANS_ASSIGNER(String, PeerDevVer, peerDevVer)
 TRANS_ASSIGNER(String, CallerPkg, callerPkg)
 TRANS_ASSIGNER(String, CalleePkg, calleePkg)
 
-#define TRANS_ASSIGNER_SIZE 23 // Size of g_transAssigners
-static const HiSysEventParamAssigner g_transAssigners[] = {
+#define TRANS_ASSIGNER_SIZE 23 // Size of TRANS_ASSIGNERS
+static const HiSysEventParamAssigner TRANS_ASSIGNERS[] = {
     { "STAGE_RES",        HISYSEVENT_INT32,  TransAssignerResult        },
     { "ERROR_CODE",       HISYSEVENT_INT32,  TransAssignerErrcode       },
     { "SOCKET_NAME",      HISYSEVENT_STRING, TransAssignerSocketName    },
@@ -151,7 +151,7 @@ static inline size_t ConvertTransForm2Param(HiSysEventParam params[], size_t siz
         return validSize;
     }
     for (size_t i = 0; i < size; ++i) {
-        HiSysEventParamAssigner assigner = g_transAssigners[i];
+        HiSysEventParamAssigner assigner = TRANS_ASSIGNERS[i];
         if (assigner.Assign(assigner.name, assigner.type, form, &params[validSize])) {
             ++validSize;
         }

@@ -1194,6 +1194,11 @@ static void ConvertBcParams(const BroadcastParam *srcParam, SoftbusBroadcastPara
         DISC_LOGE(DISC_BLE, "memcpy ownUdidHash fail");
         return;
     }
+    if (memcpy_s(dstParam->localAddr.addr, BC_ADDR_MAC_LEN, srcParam->localAddr.addr,
+        BC_ADDR_MAC_LEN) != EOK) {
+        DISC_LOGE(DISC_BLE, "memcpy localAddr fail");
+        return;
+    }
 }
 
 static void DumpBroadcastPacket(const BroadcastPayload *bcData, const BroadcastPayload *rspData)

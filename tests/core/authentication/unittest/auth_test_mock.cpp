@@ -175,7 +175,14 @@ void ClientFSMCreate(MockInterfaces *mockInterface, GroupAuthManager &authManage
     ret = AuthStartVerify(&g_connInfo, REQUEST_ID, &callBack, true);
 
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    AuthSessionStartAuth(SEQ_SERVER, REQUEST_ID, g_connId, &g_connInfo, isServer, false);
+    AuthParam authInfo = {
+        .authSeq = SEQ_SERVER,
+        .requestId = REQUEST_ID,
+        .connId = g_connId,
+        .isServer = isServer,
+        .isFastAuth = false,
+    };
+    AuthSessionStartAuth(&authInfo, &g_connInfo);
     SoftBusSleepMs(DELAY_TIME);
 }
 

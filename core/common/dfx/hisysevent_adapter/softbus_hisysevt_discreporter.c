@@ -193,7 +193,7 @@ static int32_t SoftBusCreateFirstDiscDurMsg(SoftBusEvtReportMsg *msg, uint32_t m
     return SOFTBUS_OK;
 }
 
-static inline void ClearDiscDetails()
+static inline void ClearDiscDetails(void)
 {
     DiscDetailNode *item = NULL;
     DiscDetailNode *next = NULL;
@@ -580,7 +580,7 @@ int32_t InitDiscStatisticSysEvt(void)
     SetStatisticEvtReportFunc(SOFTBUS_STATISTIC_EVT_FIRST_DISC_DURATION, SoftBusReportFirstDiscDurationEvt);
     return SOFTBUS_OK;
 }
-static void DestroyMutex()
+static void DestroyMutex(void)
 {
     SoftBusMutexDestroy(&g_discDetailLock);
     SoftBusMutexDestroy(&g_bleRssiRangeLock);

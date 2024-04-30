@@ -68,7 +68,7 @@ static int32_t AcceptSessionAsServer(const char *sessionName, const ChannelInfo 
         return ret;
     }
     *sessionId = session->sessionId;
-    TRANS_LOGE(TRANS_SDK, "ok");
+    TRANS_LOGD(TRANS_SDK, "ok");
     return SOFTBUS_OK;
 }
 
@@ -216,7 +216,7 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const C
     if (sessionCallback.isSocketListener) {
         return HandleOnBindSuccess(sessionId, sessionCallback, channel->isServer);
     }
-    TRANS_LOGI(TRANS_SDK, "trigger session open callback");
+    TRANS_LOGD(TRANS_SDK, "trigger session open callback");
     if ((sessionCallback.session.OnSessionOpened == NULL) ||
         (sessionCallback.session.OnSessionOpened(sessionId, SOFTBUS_OK) != SOFTBUS_OK)) {
         TRANS_LOGE(TRANS_SDK, "OnSessionOpened failed");
@@ -229,8 +229,6 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpened(const char *sessionName, const C
 
 NO_SANITIZE("cfi") int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t channelType, int32_t errCode)
 {
-    TRANS_LOGI(TRANS_SDK, "trigger session open failed callback, channelId=%{public}d, channelType=%{public}d",
-        channelId, channelType);
     int32_t sessionId = INVALID_SESSION_ID;
     SessionListenerAdapter sessionCallback;
     (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
@@ -243,6 +241,8 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t c
         (void)ClientDeleteSession(sessionId);
         return SOFTBUS_OK;
     }
+    TRANS_LOGI(TRANS_SDK, "trigger session open failed callback, channelId=%{public}d, channelType=%{public}d",
+        channelId, channelType);
     bool isServer = false;
     (void)GetSocketCallbackAdapterByChannelId(channelId, channelType, &sessionId, &sessionCallback, &isServer);
     if (sessionCallback.isSocketListener) {

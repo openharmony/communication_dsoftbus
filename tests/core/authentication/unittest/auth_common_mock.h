@@ -24,6 +24,7 @@
 #include "lnn_async_callback_utils.h"
 #include "lnn_common_utils.h"
 #include "lnn_feature_capability.h"
+#include "lnn_lane_interface.h"
 #include "lnn_ohos_account_adapter.h"
 #include "lnn_node_info.h"
 
@@ -48,11 +49,13 @@ public:
     virtual int32_t LnnSetLocalStrInfo(InfoKey key, const char *info) = 0;
     virtual int32_t LnnNotifyEmptySessionKey(int64_t authId) = 0;
     virtual int32_t LnnNotifyLeaveLnnByAuthHandle(AuthHandle *authHandle);
+    virtual int32_t LnnGetRemoteNumU64Info(const char *networkId, InfoKey key, uint64_t *info) = 0;
 };
 class AuthCommonInterfaceMock : public AuthCommonInterface {
 public:
     AuthCommonInterfaceMock();
     ~AuthCommonInterfaceMock() override;
+    MOCK_METHOD3(LnnGetRemoteNumU64Info, int32_t(const char *, InfoKey, uint64_t *));
     MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t (SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
     MOCK_METHOD2(LnnGetLocalNumU64Info, int32_t (InfoKey, uint64_t *));
     MOCK_METHOD0(SoftBusGetBtState, int (void));

@@ -1630,7 +1630,6 @@ int P2pV1Processor::OpenAuthConnection(const NegotiateMessage &msg, const std::s
 
 int P2pV1Processor::RemoveLink(const std::string &remoteDeviceId)
 {
-    LinkManager::GetInstance().RemoveLink(InnerLink::LinkType::P2P, remoteDeviceId);
     P2pEntity::GetInstance().CancelNewClientJoining(clientJoiningMac_);
     int reuseCount = 0;
     auto ret = InterfaceManager::GetInstance().ReadInterface(
@@ -1717,7 +1716,7 @@ int P2pV1Processor::GetFinalRoleAsGc(
     WifiDirectRole peerRole, WifiDirectRole expectedRole, const std::string &localGoMac, const std::string &remoteGoMac)
 {
     if (peerRole == WifiDirectRole::WIFI_DIRECT_ROLE_GO) {
-        if (localGoMac.empty() && WifiDirectUtils::CompareIgnoreCase(localGoMac, remoteGoMac) == 0) {
+        if (!localGoMac.empty() && WifiDirectUtils::CompareIgnoreCase(localGoMac, remoteGoMac) == 0) {
             return WifiDirectRole::WIFI_DIRECT_ROLE_GC;
         }
         CONN_LOGE(CONN_WIFI_DIRECT, "ERROR_P2P_GC_CONNECTED_TO_ANOTHER_DEVICE");
