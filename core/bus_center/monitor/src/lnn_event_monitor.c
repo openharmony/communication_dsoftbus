@@ -33,6 +33,7 @@ typedef enum {
     MONITOR_IMPL_DRIVER_TYPE,
     MONITOR_IMPL_SCREENSTATE_TYPE,
     MONITOR_IMPL_DEVICENAME_TYPE,
+    MONITOR_IMPL_BOOT_EVENT_TYPE,
     MONITOR_IMPL_MAX_TYPE,
 } MonitorImplType;
 
@@ -45,6 +46,7 @@ static LnnInitEventMonitorImpl g_monitorImplInit[MONITOR_IMPL_MAX_TYPE] = {
     LnnInitDriverMonitorImpl,
     LnnInitCommonEventMonitorImpl,
     LnnInitDeviceNameMonitorImpl,
+    LnnInitBootEventMonitorImpl,
 };
 
 static LnnDeinitEventMonitorImpl g_monitorImplDeinit[MONITOR_IMPL_MAX_TYPE] = {
