@@ -190,6 +190,24 @@ std::shared_ptr<InnerLink> LinkManager::GetReuseLink(
     return iterator->second;
 }
 
+std::shared_ptr<InnerLink> LinkManager::GetReuseLink(
+    WifiDirectLinkType wifiDirectLinkType, const std::string &remoteDeviceId)
+{
+    InnerLink::LinkType linkType { InnerLink::LinkType::INVALID_TYPE };
+    if (wifiDirectLinkType == WIFI_DIRECT_LINK_TYPE_HML) {
+        linkType = InnerLink::LinkType::HML;
+    }
+    if (wifiDirectLinkType == WIFI_DIRECT_LINK_TYPE_P2P) {
+        linkType = InnerLink::LinkType::P2P;
+    }
+    std::lock_guard lock(lock_);
+    auto iterator = links_.find({linkType, remoteDeviceId});
+    if (iterator == links_.end() || iterator->second->GetState() != InnerLink::LinkState::CONNECTED) {
+        return nullptr;
+    }
+    return iterator->second;
+}
+
 void LinkManager::Dump() const
 {
     std::lock_guard lock(lock_);
