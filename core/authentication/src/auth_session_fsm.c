@@ -262,7 +262,8 @@ static void DestroyAuthFsm(AuthFsm *authFsm)
 
 static void AuthFsmDeinitCallback(FsmStateMachine *fsm)
 {
-    AUTH_LOGI(AUTH_FSM, "auth fsm deinit callback enter");
+    static uint32_t callCount = 0;
+    AUTH_LOGI(AUTH_FSM, "auth fsm deinit callback enter, callCount=%{public}u", callCount++);
     if (fsm == NULL) {
         AUTH_LOGE(AUTH_FSM, "fsm is null");
         return;
