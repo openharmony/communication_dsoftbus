@@ -38,6 +38,8 @@ int32_t LnnInitDriverMonitorImpl(void);
 
 int32_t LnnInitCommonEventMonitorImpl(void);
 
+int32_t LnnInitBootEventMonitorImpl(void);
+
 int32_t LnnInitBtStateMonitorImpl(void);
 
 void LnnDeinitBtStateMonitorImpl(void);

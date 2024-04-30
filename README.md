@@ -270,6 +270,44 @@ The DSoftBus directory structure is as follows:
     void Shutdown(int32_t socket);
     ```
 
+**4. Device Management**
+
+-   **Choose the Wi-Fi keepalive mode.**
+
+1. Call **ShiftLNNGear** on the DSoftBus client to invoke the server **ShiftLNNGear** through an IPC interface. The policy management module adjusts the keepalive attributes of the long-lived TCP connection based on the policy.
+
+    ```C
+    typedef struct {
+        ModeCycle cycle;        // Interval for detecting whether the Wi-Fi connection is alive.
+        ModeDuration duration;  // Heartbeat mode duration.
+        bool wakeupFlag;        // Whether to wake up the peer device.
+        ModeAction action;      // Mode to select.
+    } GearMode;
+    
+    typedef enum {
+        /**< The heartbeat interval is 30 seconds. */
+        HIGH_FREQ_CYCLE = 30,
+        /**< The heartbeat interval is 60 seconds. */
+        MID_FREQ_CYCLE = 60,
+        /**< The heartbeat interval is 5 minutes. */
+        LOW_FREQ_CYCLE = 5 * 60,
+        /**< The heartbeat interval is 10 minutes. */
+        DEFAULT_FREQ_CYCLE = 10 * 60,
+    } ModeCycle;
+
+    // Adjust the keepalive parameters of the long-lived TCP connection based on the policy.
+    int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode);
+    ```
+
+2.  Set **ModeCycle** for the service, which determines the TCP keepalive duration for the device.
+
+    ```C
+    If HIGH_FREQ_CYCLE is used, the TCP keepalive duration is within 40 seconds.
+    If MID_FREQ_CYCLE is used, the actual TCP keepalive duration is within 70 seconds.
+    If LOW_FREQ_CYCLE is used, the TCP keepalive duration is within 315 seconds.
+    If DEFAULT_FREQ_CYCLE is used, the TCP keepalive duration is within 615 seconds.
+    ```
+
 ## Repositories Involved
 
 [DSoftBus](https://gitee.com/openharmony/docs/blob/master/en/readme/dsoftbus.md)

@@ -42,6 +42,11 @@ int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc 
     return GetCommonInterface()->LnnAsyncCallbackDelayHelper(looper, callback, para, delayMillis);
 }
 
+int32_t LnnGetRemoteNumU64Info(const char *networkId, InfoKey key, uint64_t *info)
+{
+    return GetCommonInterface()->LnnGetRemoteNumU64Info(networkId, key, info);
+}
+
 int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info)
 {
     return GetCommonInterface()->LnnGetLocalNumU64Info(key, info);

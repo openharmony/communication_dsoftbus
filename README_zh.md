@@ -290,6 +290,40 @@
     void Shutdown(int32_t socket);
     ```
 
+**4、设备管理相关**
+
+-   **选择Wi-Fi保活模式**
+
+1.  业务在软总线客户端调用ShiftLNNGear，通过IPC接口调用到服务端ShiftLNNGear，策略管理模块按照策略对TCP长连接的keepalive属性进行调整。
+
+    ```C
+    typedef struct {
+        ModeCycle cycle;              // 保活探测间隔
+        ModeDuration duration;        // 心跳模式持续时间
+        bool wakeupFlag;              // 是否心跳唤醒对端设备
+        ModeAction action;            // 选择模式动作
+    } GearMode;
+    
+    typedef enum {
+        HIGH_FREQ_CYCLE = 30,         // 心跳间隔30s
+        MID_FREQ_CYCLE = 60,          // 心跳间隔60s
+        LOW_FREQ_CYCLE = 5 * 60,      // 心跳间隔5min
+        DEFAULT_FREQ_CYCLE = 10 * 60, // 心跳间隔10min
+    } ModeCycle;
+
+    // 按照策略对TCP长连接的keepalive参数进行调整
+    int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode);
+    ```
+
+2.  业务指定不同的保活探测间隔，对应不同的TCP保活时长。
+
+    ```C
+    HIGH_FREQ_CYCLE = 30，代表TCP保活时长在40s以内；
+    MID_FREQ_CYCLE = 60，代表TCP保活时长在70s以内；
+    LOW_FREQ_CYCLE = 5*60，代表TCP保活时长在315s以内；
+    DEFAULT_FREQ_CYCLE = 10*60，代表TCP保活时长在615s以内。
+    ```
+
 ## 相关仓<a name="section1371113476307"></a>
 
 [分布式软总线子系统](https://gitee.com/openharmony/docs/blob/master/zh-cn/readme/%E5%88%86%E5%B8%83%E5%BC%8F%E8%BD%AF%E6%80%BB%E7%BA%BF%E5%AD%90%E7%B3%BB%E7%BB%9F.md)
