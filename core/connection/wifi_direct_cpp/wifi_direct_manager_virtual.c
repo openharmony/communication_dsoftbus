@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 #include "wifi_direct_manager.h"
-
-#include "conn_log.h"
 #include "softbus_error_code.h"
 
 static uint32_t GetRequestId()
@@ -22,12 +20,12 @@ static uint32_t GetRequestId()
     return 0;
 }
 
-static ListenerModule AllocateListenerModuleId(void)
+static int32_t AllocateListenerModuleId(void)
 {
-    return UNUSE_BUTT;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
-static void FreeListenerModuleId(ListenerModule moduleId)
+static void FreeListenerModuleId(int32_t moduleId)
 {
     (void)moduleId;
 }
