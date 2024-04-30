@@ -18,23 +18,18 @@ import("../../../../../dsoftbus.gni")
 ##############################fuzztest##########################################
 dsoftbus_root_path = "../../../../.."
 
-ohos_fuzztest("UnpackAuthDataFuzzTest") {
+ohos_fuzztest("busCenterEventFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
-  fuzz_config_file = "$dsoftbus_root_path/tests/core/authentication/fuzztest/unpackauthdata_fuzzer"
+  fuzz_config_file =
+      "$dsoftbus_root_path/tests/core/service/fuzztest/buscenterevent_fuzzer"
   include_dirs = [
-    "$dsoftbus_root_path/adapter/common/include/",
-    "$dsoftbus_root_path/core/authentication/include",
-    "$dsoftbus_root_path/core/authentication/interface",
-    "$dsoftbus_root_path/core/authentication/src",
-    "$dsoftbus_root_path/core/bus_center/interface",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/common/message_handler/include",
-    "$dsoftbus_root_path/core/connection/interface",
-    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/tests/sdk/common/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
   ]
 
   cflags = [
@@ -44,9 +39,10 @@ ohos_fuzztest("UnpackAuthDataFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
 
-  sources = [ "unpackauthdata_fuzzer.cpp" ]
+  sources = [ "buscenterevent_fuzz.cpp" ]
 
   deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
   ]

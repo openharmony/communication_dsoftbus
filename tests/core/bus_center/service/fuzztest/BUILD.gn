@@ -13,8 +13,5 @@
 
 group("fuzztest") {
   testonly = true
-  deps = [
-    "authdata_fuzzer:AuthDataFuzzTest",
-    "unpackauthdata_fuzzer:UnpackAuthDataFuzzTest",
-  ]
+  deps = [ "buscenterevent_fuzzer:busCenterEventFuzzTest" ]
 }

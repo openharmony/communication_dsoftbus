@@ -14,7 +14,8 @@
 group("fuzztest") {
   testonly = true
   deps = [
-    "authdata_fuzzer:AuthDataFuzzTest",
-    "unpackauthdata_fuzzer:UnpackAuthDataFuzzTest",
+    "lnnfastoffline_fuzzer:LnnSendNotTrustedInfoFuzzTest",
+    "lnnnetbuilder_fuzzer:LnnNotifyDiscoveryDeviceFuzzTest",
+    "lnnsyninfomanager_fuzzer:LnnSyncInfoMsgFuzzTest",
   ]
 }
