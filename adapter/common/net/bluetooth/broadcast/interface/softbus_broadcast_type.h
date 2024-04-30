@@ -388,6 +388,7 @@ typedef struct {
     bool isSupportRpa;
     uint8_t ownIrk[BC_IRK_LEN];
     uint8_t ownUdidHash[BC_UDID_HASH_LEN];
+    BcMacAddr localAddr;
 } BroadcastParam;
 
 /**

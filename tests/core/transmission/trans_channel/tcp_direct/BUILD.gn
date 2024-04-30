@@ -74,6 +74,9 @@ ohos_unittest("TransServerTcpDirectTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/auth/include",
     "$dsoftbus_root_path/core/frame/common/include",
     "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/discovery/event_manager/include",
+    "$dsoftbus_root_path/core/connection/wifi_direct",
+    "$dsoftbus_root_path/core/connection/ble/include",
   ]
 
   deps = [
@@ -145,6 +148,9 @@ ohos_unittest("TransCoreTcpDirectTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/auth/include",
     "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/core/discovery/event_manager/include",
+    "$dsoftbus_root_path/core/connection/wifi_direct",
+    "$dsoftbus_root_path/core/connection/ble/include",
   ]
 
   deps = [
@@ -431,6 +437,9 @@ ohos_unittest("TransTcpDirectMessageStaticTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/auth/include",
     "$dsoftbus_root_path/core/frame/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
+    "$dsoftbus_root_path/core/discovery/event_manager/include",
+    "$dsoftbus_root_path/core/connection/wifi_direct",
+    "$dsoftbus_root_path/core/connection/ble/include",
   ]
 
   deps = [

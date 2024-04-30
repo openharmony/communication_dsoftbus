@@ -131,8 +131,8 @@ if (dsoftbus_feature_lnn_net) {
     bus_center_adapter_inc += [
       "$softbus_adapter_common/net/bluetooth/include",
       "$dsoftbus_root_path/core/common/dfx/interface/include",
-      "//foundation/communication/wifi/wifi/frameworks/native/interfaces",
     ]
+    bus_center_adapter_external_deps += [ "wifi:wifi_sdk" ]
     bus_center_adapter_deps +=
         [ "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log" ]
   } else {

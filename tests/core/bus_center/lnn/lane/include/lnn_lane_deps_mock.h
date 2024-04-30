@@ -20,7 +20,9 @@
 #include <mutex>
 
 #include "auth_interface.h"
+#include "auth_manager.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_lane.h"
 #include "lnn_lane_link.h"
 #include "lnn_lane_query.h"
 #include "lnn_lane_score.h"
@@ -32,6 +34,7 @@
 #include "softbus_network_utils.h"
 #include "lnn_physical_subnet_manager.h"
 #include "softbus_base_listener.h"
+#include "wifi_direct_manager.h"
 
 namespace OHOS {
 class LaneDepsInterface {
@@ -39,6 +42,8 @@ public:
     LaneDepsInterface() {};
     virtual ~LaneDepsInterface() {};
 
+    virtual int32_t AuthAllocConn(const char *networkId, uint32_t authRequestId, AuthConnCallback *callback) = 0;
+    virtual int32_t GetAuthLinkTypeList(const char *networkId, AuthLinkTypeList *linkTypeList) = 0;
     virtual int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info) = 0;
     virtual bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type) = 0;
     virtual bool LnnGetOnlineStateById(const char *id, IdCategory type) = 0;
@@ -89,6 +94,8 @@ class LaneDepsInterfaceMock : public LaneDepsInterface {
 public:
     LaneDepsInterfaceMock();
     ~LaneDepsInterfaceMock() override;
+    MOCK_METHOD2(GetAuthLinkTypeList, int32_t (const char*, AuthLinkTypeList *));
+    MOCK_METHOD3(AuthAllocConn, int32_t (const char *networkId, uint32_t authRequestId, AuthConnCallback *callback));
     MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t (const char*, IdCategory, NodeInfo *));
     MOCK_METHOD2(LnnHasDiscoveryType, bool (const NodeInfo *, DiscoveryType));
     MOCK_METHOD2(LnnGetOnlineStateById, bool (const char*, IdCategory));
@@ -101,7 +108,7 @@ public:
     MOCK_METHOD2(LnnGetLocalNumInfo, int32_t (InfoKey, int32_t*));
     MOCK_METHOD3(LnnGetRemoteNumInfo, int32_t (const char*, InfoKey, int32_t*));
     MOCK_METHOD2(LnnGetNodeInfoById, NodeInfo* (const char*, IdCategory));
-    MOCK_METHOD0(LnnGetLocalNodeInfo, NodeInfo * ());
+    MOCK_METHOD0(LnnGetLocalNodeInfo, NodeInfo * (void));
     MOCK_METHOD1(AuthCloseConn, void (AuthHandle));
     MOCK_METHOD2(AuthSetP2pMac, int32_t (int64_t, const char*));
     MOCK_METHOD2(LnnVisitPhysicalSubnet, bool (LnnVisitPhysicalSubnetCallback, void*));
@@ -111,7 +118,7 @@ public:
     MOCK_METHOD3(LnnGetRemoteNumU64Info, int32_t (const char *, InfoKey, uint64_t *));
     MOCK_METHOD3(LnnGetNetworkIdByUdid, int32_t (const char *udid, char *buf, uint32_t len));
     MOCK_METHOD3(AuthDeviceCheckConnInfo, bool (const char *, AuthLinkType, bool));
-    MOCK_METHOD0(AuthGenRequestId, uint32_t ());
+    MOCK_METHOD0(AuthGenRequestId, uint32_t (void));
     MOCK_METHOD2(AuthPostTransData, int32_t (AuthHandle, const AuthTransData *));
     MOCK_METHOD2(AuthGetConnInfo, int32_t (AuthHandle, AuthConnInfo *));
     MOCK_METHOD2(AuthGetMetaType, int32_t (int64_t, bool *));
@@ -128,7 +135,7 @@ public:
     MOCK_METHOD3(AddTrigger, int32_t (ListenerModule module, int32_t fd, TriggerType trigger));
     MOCK_METHOD2(QueryLaneResource, int32_t (const LaneQueryInfo *, const QosInfo *));
     MOCK_METHOD4(ConnSendSocketData, ssize_t (int32_t fd, const char *buf, size_t len, int32_t timeout));
-    MOCK_METHOD0(GetWifiDirectManager, struct WifiDirectManager* ());
+    MOCK_METHOD0(GetWifiDirectManager, struct WifiDirectManager* (void));
     MOCK_METHOD3(LnnGetRemoteNumU32Info, int32_t (const char *networkId, InfoKey key, uint32_t *info));
     MOCK_METHOD2(LnnGetLocalNumU32Info, int32_t (InfoKey key, uint32_t *info));
     void SetDefaultResult(NodeInfo *info);
@@ -138,6 +145,10 @@ public:
     static int32_t ActionOfGetRemoteStrInfo(const char *netWorkId, InfoKey key, char *info, uint32_t len);
     static int32_t ActionOfStartBaseClient(ListenerModule module, const SoftbusBaseListener *listener);
     static int32_t ActionOfAddTrigger(ListenerModule module, int32_t fd, TriggerType trigger);
+    static int32_t ActionOfConnOpenFailed(const AuthConnInfo *info, uint32_t requestId,
+        const AuthConnCallback *callback, bool isMeta);
+    static int32_t ActionOfConnOpened(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback,
+        bool isMeta);
 };
 } // namespace OHOS
 #endif // LNN_LANE_DEPS_MOCK_H

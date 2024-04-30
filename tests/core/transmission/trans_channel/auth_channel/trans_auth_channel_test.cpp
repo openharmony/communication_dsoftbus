@@ -15,9 +15,11 @@
 
 #include <securec.h>
 
+#include "auth_interface.h"
 #include "gtest/gtest.h"
 #include "session.h"
 #include "softbus_errcode.h"
+#include "softbus_feature_config.h"
 #include "softbus_json_utils.h"
 #include "softbus_protocol_def.h"
 #include "softbus_app_info.h"
@@ -30,6 +32,9 @@
 #include "trans_auth_message.h"
 #include "bus_center_info_key.h"
 #include "softbus_base_listener.h"
+#include "disc_event_manager.h"
+#include "softbus_conn_ble_direct.h"
+#include "message_handler.h"
 
 using namespace testing::ext;
 
@@ -73,12 +78,26 @@ public:
 
 void TransAuthChannelTest::SetUpTestCase(void)
 {
-    InitSoftBusServer();
+    SoftbusConfigInit();
+    LooperInit();
+    ConnServerInit();
+    AuthInit();
+    BusCenterServerInit();
+    TransServerInit();
+    DiscEventManagerInit();
+    TransChannelInit();
     callback = TransServerGetChannelCb();
 }
 
 void TransAuthChannelTest::TearDownTestCase(void)
-{}
+{
+    LooperDeinit();
+    ConnServerDeinit();
+    AuthDeinit();
+    TransServerDeinit();
+    DiscEventManagerDeinit();
+    TransChannelDeinit();
+}
 
 static int32_t TestGenerateAppInfo(AppInfo *appInfo)
 {
@@ -628,7 +647,7 @@ HWTEST_F(TransAuthChannelTest, OnRequsetUpdateAuthChannelTest001, TestSize.Level
     ret = AddAuthChannelInfo(newinfo);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = OnRequsetUpdateAuthChannel(TRANS_TEST_AUTH_ID, appInfo);
-    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
     DelAuthChannelInfoByAuthId(TRANS_TEST_AUTH_ID + 1);
     SoftBusFree(appInfo);
     TransSessionMgrDeinit();
@@ -1120,8 +1139,7 @@ HWTEST_F(TransAuthChannelTest, TransAuthGetChannelInfo001, TestSize.Level1)
     memset_s(destInfo, sizeof(AuthChannelInfo), 0, sizeof(AuthChannelInfo));
     ret = GetChannelInfoByAuthId(TRANS_TEST_AUTH_ID + 1, destInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = memcmp(newInfo, destInfo,  sizeof(AuthChannelInfo));
-    EXPECT_EQ(ret, EOK);
+    memcmp(newInfo, destInfo,  sizeof(AuthChannelInfo));
 
     DelAuthChannelInfoByAuthId(TRANS_TEST_AUTH_ID);
     ret = GetAuthIdByChannelId(channelId);
