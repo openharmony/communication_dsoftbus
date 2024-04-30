@@ -110,8 +110,9 @@ static void OnReceiveDeviceName(LnnSyncInfoType type, const char *networkId, con
         LNN_LOGE(LNN_BUILDER, "invalid param, SyncInfoType=%{public}d", type);
         return;
     }
-    if (strnlen((char *)msg, len) == len) {
-        LNN_LOGE(LNN_BUILDER, "invalid msg");
+    char deviceName[DEVICE_NAME_BUF_LEN + 1] = {0};
+    if (memcpy_s(deviceName, DEVICE_NAME_BUF_LEN, msg, len) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "memcpy fail");
         return;
     }
     char *anonyNetworkId = NULL;
@@ -123,7 +124,7 @@ static void OnReceiveDeviceName(LnnSyncInfoType type, const char *networkId, con
         LNN_LOGE(LNN_BUILDER, "convert networkId to udid fail");
         return;
     }
-    if (!LnnSetDLDeviceInfoName(udid, (char *)msg)) {
+    if (!LnnSetDLDeviceInfoName(udid, deviceName)) {
         LNN_LOGE(LNN_BUILDER, "set peer device name fail");
     }
     (void)memset_s(&basic, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));

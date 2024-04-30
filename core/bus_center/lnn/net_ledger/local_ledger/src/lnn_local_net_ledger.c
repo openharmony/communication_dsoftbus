@@ -32,6 +32,7 @@
 #include "lnn_p2p_info.h"
 #include "lnn_feature_capability.h"
 #include "lnn_settingdata_event_monitor.h"
+#include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
@@ -383,6 +384,26 @@ static int32_t LlGetNickName(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static void UpdateBrMac(void)
+{
+    char brMac[BT_MAC_LEN] = {0};
+    SoftBusBtAddr mac = {0};
+    int32_t ret = 0;
+    ret = SoftBusGetBtMacAddr(&mac);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get bt mac addr fail");
+        return;
+    }
+    ret = ConvertBtMacToStr(brMac, BT_MAC_LEN, mac.addr, sizeof(mac.addr));
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert bt mac to str fail");
+        return;
+    }
+    if (strcpy_s(g_localNetLedger.localInfo.connectInfo.macAddr, MAC_LEN, brMac) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "str copy error!");
+    }
+}
+
 static int32_t LlGetBtMac(void *buf, uint32_t len)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
@@ -395,7 +416,11 @@ static int32_t LlGetBtMac(void *buf, uint32_t len)
         LNN_LOGE(LNN_LEDGER, "get bt mac fail.");
         return SOFTBUS_ERR;
     }
-    if (strncpy_s((char *)buf, len, mac, strlen(mac)) != EOK) {
+    if (SoftBusGetBtState() == BLE_ENABLE && mac[0] == '\0') {
+        LNN_LOGE(LNN_LEDGER, "bt status is on update brmac");
+        UpdateBrMac();
+    }
+    if (strcpy_s((char *)buf, len, mac) != EOK) {
         LNN_LOGE(LNN_LEDGER, "STR COPY ERROR!");
         return SOFTBUS_MEM_ERR;
     }
