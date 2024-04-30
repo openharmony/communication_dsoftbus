@@ -85,6 +85,7 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common:softbus_utils",
         "$dsoftbus_root_path/core/common/dfx/hidumper_adapter:softbus_dfx_dump",
+        "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
         "//build/lite/config/component/cJSON:cjson_static",
       ]
       external_deps = [ "device_auth:deviceauth_sdk" ]
@@ -141,6 +142,7 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common:softbus_utils",
         "$dsoftbus_root_path/core/common/dfx/hidumper_adapter:softbus_dfx_dump",
+        "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
         "//build/lite/config/component/cJSON:cjson_shared",
         "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
         "//foundation/systemabilitymgr/samgr_lite/samgr:samgr",
