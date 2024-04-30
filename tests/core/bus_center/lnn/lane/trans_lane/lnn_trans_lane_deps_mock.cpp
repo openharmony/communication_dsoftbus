@@ -36,6 +36,12 @@ static TransLaneDepsInterface *GetTransLaneIf()
 }
 
 extern "C" {
+int32_t SelectAuthLane(const char *networkId, LanePreferredLinkList *recommendList,
+    LanePreferredLinkList *request)
+{
+    return GetTransLaneIf()->SelectAuthLane(networkId, recommendList, request);
+}
+
 int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
     LanePreferredLinkList *recommendList, uint32_t *listNum)
 {

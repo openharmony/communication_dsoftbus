@@ -30,6 +30,8 @@ public:
     TransLaneDepsInterface() {};
     virtual ~TransLaneDepsInterface() {};
 
+    virtual int32_t SelectAuthLane(const char *networkId, LanePreferredLinkList *recommendList,
+        LanePreferredLinkList *request) = 0;
     virtual int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
         LanePreferredLinkList *recommendList, uint32_t *listNum);
     virtual int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *request,
@@ -55,6 +57,7 @@ class TransLaneDepsInterfaceMock : public TransLaneDepsInterface {
 public:
     TransLaneDepsInterfaceMock();
     ~TransLaneDepsInterfaceMock() override;
+    MOCK_METHOD3(SelectAuthLane, int32_t (const char *, LanePreferredLinkList *, LanePreferredLinkList *));
     MOCK_METHOD4(SelectLane, int32_t (const char*, const LaneSelectParam *, LanePreferredLinkList *, uint32_t *));
     MOCK_METHOD3(SelectExpectLanesByQos, int32_t (const char*, const LaneSelectParam *, LanePreferredLinkList *));
     MOCK_METHOD3(BuildLink, int32_t (const LinkRequest *, uint32_t, const LaneLinkCb *));
