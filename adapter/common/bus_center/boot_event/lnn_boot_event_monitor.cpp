@@ -16,6 +16,7 @@
 #include <string.h>
 
 #include "auth_interface.h"
+#include "lnn_async_callback_utils.h"
 #include "lnn_event_monitor_impl.h"
 #include "lnn_fast_offline.h"
 #include "lnn_heartbeat_strategy.h"
@@ -26,17 +27,26 @@
 
 #define BOOTEVENT_ACCOUNT_READY "bootevent.account.ready"
 
+static void ProcessBootEvent(void *para)
+{
+    para(void);
+    LNN_LOGI(LNN_EVENT, "start process boot event");
+    LnnUpdateOhosAccount();
+    if (LnnIsDefaultOhosAccount() && !IsAuthHasTrustedRelation()) {
+        LNN_LOGE(LNN_EVENT, "not trusted releation, heartbeat(HB) process start later");
+        return;
+    }
+    EhLoginEventHandler();
+    LnnStartHeartbeat(0);
+}
+
 static void AccountBootEventCb(const char *key, const char *value, void *context)
 {
     (void)context;
     if (strcmp(key, BOOTEVENT_ACCOUNT_READY) == 0 && strcmp(value, "true") == 0) {
-        LnnUpdateOhosAccount();
-        if (LnnIsDefaultOhosAccount() && !IsAuthHasTrustedRelation()) {
-            LNN_LOGE(LNN_EVENT, "not trusted releation, heartbeat(HB) process start later");
-            return;
+        if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), ProcessBootEvent, NULL, 0) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_EVENT, "async call boot event fail");
         }
-        EhLoginEventHandler();
-        LnnStartHeartbeat(0);
     }
 }
 
