@@ -18,7 +18,9 @@
 #include <mutex>
 #include <securec.h>
 #include "wifi_direct_manager.h"
+#include "bus_center_info_key.h"
 #include "conn_log.h"
+#include "lnn_distributed_net_ledger.h"
 #include "softbus_error_code.h"
 #include "wifi_direct_initiator.h"
 #include "wifi_direct_scheduler_factory.h"
@@ -288,10 +290,44 @@ static void NotifyRoleChange(enum WifiDirectRole oldRole, enum WifiDirectRole ne
     }
 }
 
+static void NotifyConnectedForSink(
+    const char *remoteMac, const char *remoteIp, const char *remoteUuid, enum WifiDirectLinkType type)
+{
+    std::lock_guard lock(g_listenerLock);
+    for (auto listener : g_listeners) {
+        if (listener.onConnectedForSink != nullptr) {
+            listener.onConnectedForSink(remoteMac, remoteIp, remoteUuid, type);
+        }
+    }
+}
+
+static void NotifyDisconnectedForSink(
+    const char *remoteMac, const char *remoteIp, const char *remoteUuid, enum WifiDirectLinkType type)
+{
+    std::lock_guard lock(g_listenerLock);
+    for (auto listener : g_listeners) {
+        if (listener.onDisconnectedForSink != nullptr) {
+            listener.onDisconnectedForSink(remoteMac, remoteIp, remoteUuid, type);
+        }
+    }
+}
+
 bool IsNegotiateChannelNeeded(const char *remoteNetworkId, enum WifiDirectLinkType linkType)
 {
-    (void)remoteNetworkId;
-    (void)linkType;
+    CONN_CHECK_AND_RETURN_RET_LOGE(remoteNetworkId != NULL, true, CONN_WIFI_DIRECT, "remote networkid is null");
+    auto remoteUuid = OHOS::SoftBus::WifiDirectUtils::NetworkIdToUuid(remoteNetworkId);
+    CONN_CHECK_AND_RETURN_RET_LOGE(!remoteUuid.empty(), true, CONN_WIFI_DIRECT, "get remote uuid failed");
+
+    auto link = OHOS::SoftBus::LinkManager::GetInstance().GetReuseLink(linkType, remoteUuid);
+    if (link == nullptr) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "no inner link");
+        return true;
+    }
+    if (link->GetNegotiateChannel() == nullptr) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "need negotiate channel");
+        return true;
+    }
+    CONN_LOGI(CONN_WIFI_DIRECT, "no need negotiate channel");
     return false;
 }
 
@@ -340,6 +376,8 @@ static struct WifiDirectManager g_manager = {
     .notifyOnline = NotifyOnline,
     .notifyOffline = NotifyOffline,
     .notifyRoleChange = NotifyRoleChange,
+    .notifyConnectedForSink = NotifyConnectedForSink,
+    .notifyDisconnectedForSink = NotifyDisconnectedForSink,
 };
 
 struct WifiDirectManager *GetWifiDirectManager(void)

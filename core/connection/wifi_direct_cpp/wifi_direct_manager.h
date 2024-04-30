@@ -59,6 +59,10 @@ struct WifiDirectManager {
     void (*notifyOnline)(const char *remoteMac, const char *remoteIp, const char *remoteUuid, bool isSource);
     void (*notifyOffline)(const char *remoteMac, const char *remoteIp, const char *remoteUuid, const char *localIp);
     void (*notifyRoleChange)(enum WifiDirectRole oldRole, enum WifiDirectRole newRole);
+    void (*notifyConnectedForSink)(
+        const char *remoteMac, const char *remoteIp, const char *remoteUuid, enum WifiDirectLinkType type);
+    void (*notifyDisconnectedForSink)(
+        const char *remoteMac, const char *remoteIp, const char *remoteUuid, enum WifiDirectLinkType type);
 };
 
 /* singleton */
