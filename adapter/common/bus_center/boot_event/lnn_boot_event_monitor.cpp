@@ -52,11 +52,9 @@ static void AccountBootEventCb(const char *key, const char *value, void *context
 
 int32_t LnnInitBootEventMonitorImpl(void)
 {
-    int32_t ret = -1;
-    ret = WatchParameter("bootevent.account.ready", AccountBootEventCb, NULL);
+    int32_t ret = WatchParameter("bootevent.account.ready", AccountBootEventCb, NULL);
     if (ret != 0) {
         LNN_LOGE(LNN_EVENT, "watch account server fail");
-        return SOFTBUS_ERR;
     }
-    return SOFTBUS_OK;
+    return ret;
 }
