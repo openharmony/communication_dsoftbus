@@ -135,7 +135,7 @@ static inline size_t ConvertDiscForm2Param(HiSysEventParam params[], size_t size
 }
 
 static inline size_t ConvertDiscAlarmForm2Param(HiSysEventParam params[], size_t size, SoftbusEventForm *form)
-{ 
+{
     size_t validSize = 0;
     COMM_CHECK_AND_RETURN_RET_LOGE(form != NULL && form->discAlarmExtra != NULL, validSize, COMM_DFX, "invalid param");
     for (size_t i = 0; i < size; ++i) {
