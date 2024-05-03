@@ -16,6 +16,7 @@
 #ifndef DISC_EVENT_CONVERTER_H
 #define DISC_EVENT_CONVERTER_H
 
+#include "comm_log.h"
 #include "softbus_event_converter.h"
 
 #ifdef __cplusplus
@@ -123,9 +124,7 @@ static const HiSysEventParamAssigner g_discAlarmAssigners[] = {
 static inline size_t ConvertDiscForm2Param(HiSysEventParam params[], size_t size, SoftbusEventForm *form)
 {
     size_t validSize = 0;
-    if (form == NULL || form->discExtra == NULL) {
-        return validSize;
-    }
+    COMM_CHECK_AND_RETURN_RET_LOGE(form != NULL && form->discExtra != NULL, validSize, COMM_DFX, "invalid param");
     for (size_t i = 0; i < size; ++i) {
         HiSysEventParamAssigner assigner = g_discAssigners[i];
         if (assigner.Assign(assigner.name, assigner.type, form, &params[validSize])) {
@@ -136,11 +135,9 @@ static inline size_t ConvertDiscForm2Param(HiSysEventParam params[], size_t size
 }
 
 static inline size_t ConvertDiscAlarmForm2Param(HiSysEventParam params[], size_t size, SoftbusEventForm *form)
-{
+{ 
     size_t validSize = 0;
-    if (form == NULL || form->discAlarmExtra == NULL) {
-        return validSize;
-    }
+    COMM_CHECK_AND_RETURN_RET_LOGE(form != NULL && form->discAlarmExtra != NULL, validSize, COMM_DFX, "invalid param");
     for (size_t i = 0; i < size; ++i) {
         HiSysEventParamAssigner assigner = g_discAlarmAssigners[i];
         if (assigner.Assign(assigner.name, assigner.type, form, &params[validSize])) {
