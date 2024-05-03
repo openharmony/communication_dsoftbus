@@ -1312,13 +1312,6 @@ static int32_t ClientTransGetUdpIp(int32_t channelId, char *myIp, int32_t ipLen)
 // determine connection type based on IP
 static bool ClientTransCheckHmlIp(const char *ip)
 {
-    char ipSeg[NETWORK_ID_LEN] = {0};
-    if (strncpy_s(ipSeg, sizeof(ipSeg), ip, sizeof(ipSeg) - 1) == EOK) {
-        TRANS_LOGI(TRANS_SDK, "ipSeg=%{public}s", ipSeg);
-    } else {
-        TRANS_LOGW(TRANS_SDK, "strncpy_s ipSeg failed");
-    }
-
     if (strncmp(ip, HML_IP_PREFIX, NETWORK_ID_LEN) == 0) {
         return true;
     }

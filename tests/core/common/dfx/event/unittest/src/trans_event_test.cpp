@@ -82,6 +82,9 @@ HWTEST_F(TransEventTest, TransEventTest002, TestSize.Level0)
         .peerDevVer = "NOH-AN00 peer_device_version",
         .callerPkg = "testCallerPkg",
         .calleePkg = "testCalleePkg",
+        .firstTokenName = "testfirstToken",
+        .firstTokenId = 0,
+        .firstTokenType = 0,
     };
     constexpr int32_t VALID_EXTRA_SIZE = TRANS_ASSIGNER_SIZE;
 
@@ -125,6 +128,9 @@ HWTEST_F(TransEventTest, TransEventTest003, TestSize.Level0)
         .peerDevVer = "",
         .callerPkg = "\0",
         .calleePkg = nullptr,
+        .firstTokenName = "",
+        .firstTokenId = 0,
+        .firstTokenType = 0,
     };
     constexpr int32_t VALID_EXTRA_SIZE = 2; // result, errcode is valid
 
