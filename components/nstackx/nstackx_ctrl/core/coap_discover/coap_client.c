@@ -55,22 +55,20 @@ int32_t CoapResolveAddress(const coap_str_const_t *server, struct sockaddr *dst)
     struct addrinfo *ainfo = NULL;
     struct addrinfo hints;
     char addrstr[DEFAULT_COAP_BUFFER_LENGTH]; /* Get a char array with length 256 to save host name. */
-    int error;
-    int32_t len = -1;
 
     if (server == NULL || server->s == NULL || dst == NULL) {
-        return len;
+        return NSTACKX_EINVAL;
     }
     (void)memset_s(addrstr, sizeof(addrstr), 0, sizeof(addrstr));
     if (server->length) {
         if (memcpy_s(addrstr, sizeof(addrstr), server->s, server->length) != EOK) {
             DFINDER_LOGD(TAG, "addrstr copy error");
-            return len;
+            return NSTACKX_EFAILED;
         }
     } else {
         if (memcpy_s(addrstr, sizeof(addrstr), "localhost", strlen("localhost")) != EOK) {
             DFINDER_LOGD(TAG, "addrstr copy error");
-            return len;
+            return NSTACKX_EFAILED;
         }
     }
 
@@ -78,24 +76,25 @@ int32_t CoapResolveAddress(const coap_str_const_t *server, struct sockaddr *dst)
     hints.ai_socktype = SOCK_DGRAM;
     hints.ai_family = AF_UNSPEC;
 
-    error = getaddrinfo(addrstr, NULL, &hints, &res);
+    int32_t error = getaddrinfo(addrstr, NULL, &hints, &res);
     if (error != 0) {
         DFINDER_LOGE(TAG, "getaddrinfo error");
         return error;
     }
 
+    socklen_t len = 0;
     for (ainfo = res; ainfo != NULL; ainfo = ainfo->ai_next) {
         switch (ainfo->ai_family) {
             case AF_INET6:
                 /* fall-through */
             case AF_INET:
                 len = ainfo->ai_addrlen;
-                if (memcpy_s(dst, sizeof(struct sockaddr), ainfo->ai_addr, len) != EOK) {
+                if (memcpy_s(dst, sizeof(struct sockaddr), ainfo->ai_addr, (size_t)len) != EOK) {
                     DFINDER_LOGE(TAG, "ai_addr copy error");
-                    len = -1;
-                    break;
+                    error = NSTACKX_EFAILED;
+                    goto finish;
                 }
-                goto finish;
+                break;
             default:
                 break;
         }
@@ -103,7 +102,7 @@ int32_t CoapResolveAddress(const coap_str_const_t *server, struct sockaddr *dst)
 
 finish:
     freeaddrinfo(res);
-    return len;
+    return (error == NSTACKX_EFAILED) ? error : (int32_t)len;
 }
 
 coap_response_t CoapMessageHandler(coap_session_t *session,
