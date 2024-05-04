@@ -38,6 +38,12 @@ public:
     void TearDown() override {}
 };
 
+/*
+ * @tc.name: DiscCoapRegisterServiceData002
+ * @tc.desc: Test DiscCoapRegisterServiceData use mock NSTACKX_RegisterServiceData to return error
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(NstackxAdapterTest, DiscCoapRegisterServiceData002, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscCoapRegisterServiceData002 begin ----");
@@ -46,10 +52,11 @@ HWTEST_F(NstackxAdapterTest, DiscCoapRegisterServiceData002, TestSize.Level1)
     DISC_LOGI(DISC_TEST, "LnnInitLocalLedger called  ret=%{public}d", ret);
 
     AdapterMock adapterMock;
-    EXPECT_CALL(adapterMock, NSTACKX_RegisterServiceData(NotNull())).WillRepeatedly(Return(!SOFTBUS_OK));
+    EXPECT_CALL(adapterMock, NSTACKX_RegisterServiceData(NotNull()))
+        .WillRepeatedly(Return(SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL));
 
     uint32_t dataLen = 0;
-    EXPECT_EQ(DiscCoapRegisterServiceData(nullptr, dataLen, 0), SOFTBUS_ERR);
+    EXPECT_EQ(DiscCoapRegisterServiceData(nullptr, dataLen, 0), SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL);
     DISC_LOGI(DISC_TEST, "DiscCoapRegisterServiceData002 end ----");
 }
 }

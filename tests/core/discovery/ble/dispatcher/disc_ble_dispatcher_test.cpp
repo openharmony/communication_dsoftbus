@@ -739,7 +739,7 @@ HWTEST_F(DiscBleDispatcherTest, BleDispatchPublishOption001, TestSize.Level1)
     DISC_LOGI(DISC_TEST, "BleDispatchPublishOption001");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
     int32_t ret = interface->Publish(&g_pOption0);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_DISCOVER_BLE_DISPATCHER_FAIL, ret);
 }
 
 /*
@@ -753,7 +753,7 @@ HWTEST_F(DiscBleDispatcherTest, BleDispatchSubscribeOption001, TestSize.Level1)
     DISC_LOGI(DISC_TEST, "BleDispatchSubscribeOption001");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
     int32_t ret = interface->StartAdvertise(&g_sOption0);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_DISCOVER_BLE_DISPATCHER_FAIL, ret);
 }
 
 /*
