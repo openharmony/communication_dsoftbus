@@ -1108,7 +1108,7 @@ static void DestroyIdContainer(IdContainer* container)
 static void CleanupPublishDiscovery(ListNode *ids, ServiceType type)
 {
     IdContainer *it = NULL;
-    int32_t ret = SOFTBUS_ERR;
+    int32_t ret = SOFTBUS_DISCOVER_MANAGER_INFO_NOT_DELETE;
 
     LIST_FOR_EACH_ENTRY(it, ids, IdContainer, node) {
         if (type == PUBLISH_SERVICE) {

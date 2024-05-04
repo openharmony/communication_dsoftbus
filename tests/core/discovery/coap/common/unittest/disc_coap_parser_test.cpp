@@ -63,7 +63,7 @@ HWTEST_F(DiscCoapParserTest, DiscCoapParseDeviceUdid001, TestSize.Level1)
 
     jsonStr = R"({"UDID":""})";
     ret = DiscCoapParseDeviceUdid(jsonStr.c_str(), &deviceInfo);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     jsonStr = R"({"key":"value"})";
     ret = DiscCoapParseDeviceUdid(jsonStr.c_str(), &deviceInfo);
@@ -128,7 +128,7 @@ HWTEST_F(DiscCoapParserTest, DiscCoapParseKeyValueStr001, TestSize.Level1)
 
     srcTest = "serviceDataTest";
     ret = DiscCoapParseKeyValueStr(srcTest.c_str(), SERVICE_DATA_PORT, outValueTest, MAX_PORT_STR_LEN);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_PARSE_DATA_FAIL);
 }
 
 /*
@@ -168,17 +168,17 @@ HWTEST_F(DiscCoapParserTest, DiscCoapParseServiceData001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = DiscCoapParseServiceData(dataJson, &deviceInfo);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 
     dataStr = R"({"serviceData":"serviceDataTest"})";
     dataJson  = cJSON_Parse(dataStr.c_str());
     ret = DiscCoapParseServiceData(dataJson, &deviceInfo);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_PARSE_DATA_FAIL);
 
     dataStr = R"({"serviceData":"port:0"})";
     dataJson  = cJSON_Parse(dataStr.c_str());
     ret = DiscCoapParseServiceData(dataJson, &deviceInfo);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_PARSE_DATA_FAIL);
 }
 
 /*
