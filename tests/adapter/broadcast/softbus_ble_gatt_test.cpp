@@ -139,7 +139,7 @@ SoftbusBroadcastCallback *GetStubAdvCallback()
 static testing::AssertionResult PrepareScanListener(int *scannerId)
 {
     int32_t ret = MockBluetooth::interface->RegisterScanListener(scannerId, GetStubScanListener());
-    if (ret == SOFTBUS_ERR) {
+    if (ret != SOFTBUS_OK) {
         return testing::AssertionFailure() << "RegisterScanListener failed";
     }
     if (MockBluetooth::bleScanCallback == nullptr) {
@@ -151,7 +151,7 @@ static testing::AssertionResult PrepareScanListener(int *scannerId)
 static testing::AssertionResult PrepareAdvCallback(int *advId)
 {
     auto ret = MockBluetooth::interface->RegisterBroadcaster(advId, GetStubAdvCallback());
-    if (ret == SOFTBUS_ERR) {
+    if (ret != SOFTBUS_OK) {
         return testing::AssertionFailure() << "RegisterBroadcaster failed";
     }
     if (MockBluetooth::btGattCallback == nullptr) {
@@ -198,7 +198,7 @@ HWTEST_F(SoftbusBleGattTest, RegisterScanListener, TestSize.Level3)
 {
     MockBluetooth mocker;
     int scannerId = -1;
-    ASSERT_EQ(MockBluetooth::interface->RegisterScanListener(&scannerId, nullptr), SOFTBUS_ERR);
+    ASSERT_EQ(MockBluetooth::interface->RegisterScanListener(&scannerId, nullptr), SOFTBUS_INVALID_PARAM);
     int32_t scanListerIds[GATT_SCAN_MAX_NUM] = {};
     int32_t ret = SOFTBUS_ERR;
     for (size_t i = 0; i < GATT_SCAN_MAX_NUM; i++) {
@@ -206,7 +206,8 @@ HWTEST_F(SoftbusBleGattTest, RegisterScanListener, TestSize.Level3)
         ASSERT_EQ(ret, SOFTBUS_OK);
     }
 
-    ASSERT_EQ(MockBluetooth::interface->RegisterScanListener(&scannerId, GetStubScanListener()), SOFTBUS_ERR);
+    ASSERT_EQ(MockBluetooth::interface->RegisterScanListener(&scannerId, GetStubScanListener()),
+        SOFTBUS_DISCOVER_BLE_NO_AVAILABLE_CHANNEL_FAIL);
 
     for (size_t i = 0; i < GATT_SCAN_MAX_NUM; i++) {
         ASSERT_EQ(MockBluetooth::interface->UnRegisterScanListener(scanListerIds[i]), SOFTBUS_OK);
@@ -394,7 +395,8 @@ HWTEST_F(SoftbusBleGattTest, RegisterBroadcaster, TestSize.Level3)
     for (size_t i = 0; i < GATT_ADV_MAX_NUM; i++) {
         ASSERT_EQ(MockBluetooth::interface->RegisterBroadcaster(&advIds[i], GetStubAdvCallback()), SOFTBUS_OK);
     }
-    ASSERT_EQ(MockBluetooth::interface->RegisterBroadcaster(&advId, GetStubAdvCallback()), SOFTBUS_ERR);
+    ASSERT_EQ(MockBluetooth::interface->RegisterBroadcaster(&advId, GetStubAdvCallback()),
+        SOFTBUS_DISCOVER_BLE_NO_AVAILABLE_CHANNEL_FAIL);
     for (size_t i = 0; i < GATT_ADV_MAX_NUM; i++) {
         ASSERT_EQ(MockBluetooth::interface->UnRegisterBroadcaster(advIds[i]), SOFTBUS_OK);
     }
