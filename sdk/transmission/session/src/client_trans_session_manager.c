@@ -2179,7 +2179,7 @@ bool IsSessionExceedLimit(void)
     return false;
 }
 
-NO_SANITIZE("cfi") static void ClientCleanUpTimeoutSession(const ListNode *destroyList)
+static void ClientCleanUpTimeoutSession(const ListNode *destroyList)
 {
     if (IsListEmpty(destroyList)) {
         TRANS_LOGD(TRANS_SDK, "destroyList is empty.");
