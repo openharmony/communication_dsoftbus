@@ -30,6 +30,7 @@ extern "C" {
 enum {
     PENDING_TYPE_PROXY = 0,
     PENDING_TYPE_DIRECT,
+    PENDING_TYPE_UDP,
     PENDING_TYPE_BUTT,
 };
 

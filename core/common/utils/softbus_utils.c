@@ -527,7 +527,7 @@ void IpInstead(char *data, uint32_t length, char delimiter)
 
 void IdInstead(char *data, uint32_t length)
 {
-    if (length > MAX_ID_LEN) {
+    if (length < 1 || length > MAX_ID_LEN) {
         COMM_LOGE(COMM_UTILS, "IdInstead len is invalid");
         return;
     }

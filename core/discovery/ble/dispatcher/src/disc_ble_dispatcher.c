@@ -43,7 +43,7 @@ static DiscoveryFuncInterface *FindDiscoveryFuncInterface(uint32_t capability)
 static int32_t BleDispatchPublishOption(const PublishOption *option, DiscoverMode mode,
     InterfaceFuncType type)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGW(option != NULL, SOFTBUS_ERR, DISC_BLE, "option is null");
+    DISC_CHECK_AND_RETURN_RET_LOGW(option != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "option is null");
     DiscoveryFuncInterface *interface = FindDiscoveryFuncInterface(option->capabilityBitmap[0]);
     if (interface == NULL) {
         DISC_LOGE(DISC_BLE,
@@ -51,14 +51,14 @@ static int32_t BleDispatchPublishOption(const PublishOption *option, DiscoverMod
             option->capabilityBitmap[0]);
         DiscAuditExtra extra = {
             .result = DISC_AUDIT_DISCONTINUE,
-            .errcode = SOFTBUS_ERR,
+            .errcode = SOFTBUS_DISCOVER_BLE_DISPATCHER_FAIL,
             .auditType = AUDIT_EVENT_MSG_ERROR,
             .discMode = mode,
             .broadcastFreq = option->freq,
             .localCapabilityBitmap = option->capabilityBitmap[0],
         };
         DISC_AUDIT(AUDIT_SCENE_BLE_PUBLISH, extra);
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_BLE_DISPATCHER_FAIL;
     }
     switch (type) {
         case PUBLISH_FUNC:
@@ -76,21 +76,21 @@ static int32_t BleDispatchPublishOption(const PublishOption *option, DiscoverMod
 static int32_t BleDispatchSubscribeOption(const SubscribeOption *option, DiscoverMode mode,
     InterfaceFuncType type)
 {
-    DISC_CHECK_AND_RETURN_RET_LOGW(option != NULL, SOFTBUS_ERR, DISC_BLE, "option is null");
+    DISC_CHECK_AND_RETURN_RET_LOGW(option != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "option is null");
     DiscoveryFuncInterface *interface = FindDiscoveryFuncInterface(option->capabilityBitmap[0]);
     if (interface == NULL) {
         DISC_LOGE(DISC_BLE, "dispatch subcribe action failed: no implement support capability. capability=%{public}u",
             option->capabilityBitmap[0]);
         DiscAuditExtra extra = {
             .result = DISC_AUDIT_DISCONTINUE,
-            .errcode = SOFTBUS_ERR,
+            .errcode = SOFTBUS_DISCOVER_BLE_DISPATCHER_FAIL,
             .auditType = AUDIT_EVENT_MSG_ERROR,
             .discMode = mode,
             .broadcastFreq = option->freq,
             .localCapabilityBitmap = option->capabilityBitmap[0],
         };
         DISC_AUDIT(AUDIT_SCENE_BLE_SUBSCRIBE, extra);
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_BLE_DISPATCHER_FAIL;
     }
     switch (type) {
         case STARTDISCOVERTY_FUNC:

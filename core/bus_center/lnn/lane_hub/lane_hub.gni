@@ -40,6 +40,7 @@ bus_center_hub_deps =
 if (dsoftbus_feature_lnn_net) {
   bus_center_hub_src = [
     "$core_lane_hub_path/common/src/lnn_lane_hub.c",
+    "$core_lane_hub_path/lane_manager/src/lnn_ctrl_lane.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane_link.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane_common.c",
@@ -116,10 +117,7 @@ if (dsoftbus_feature_lnn_net) {
       "$core_lane_hub_path/heartbeat/src/lnn_heartbeat_utils_virtual.c",
     ]
   }
-  bus_center_hub_inc += [
-    "$dsoftbus_core_path/connection/wifi_direct",
-    "$dsoftbus_core_path/connection/wifi_direct/channel",
-  ]
+  bus_center_hub_inc += [ "$dsoftbus_core_path/connection/wifi_direct_cpp" ]
 } else {
   bus_center_hub_src = [
     "$core_lane_hub_path/common/src/lnn_lane_hub_virtual.c",

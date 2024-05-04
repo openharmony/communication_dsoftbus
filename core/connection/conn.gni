@@ -14,19 +14,15 @@
 import("../../core/common/dfx/dsoftbus_dfx.gni")
 import("../../core/connection/ble/conn_ble.gni")
 import("../../core/connection/br/conn_br.gni")
-import("../../core/connection/wifi_direct/wifi_direct.gni")
 import("../../dsoftbus.gni")
 
 #import("//foundation/communication/dsoftbus/core/connection/common/conn_common.gni")
 import("../../core/connection/tcp/conn_tcp.gni")
-conn_manager_src = ble_connection_src + br_connection_src + tcp_connection_src +
-                   wifi_direct_connection_src
-conn_manager_inc = ble_connection_inc + br_connection_inc + tcp_connection_inc +
-                   wifi_direct_connection_inc
+conn_manager_src = ble_connection_src + br_connection_src + tcp_connection_src
+conn_manager_inc = ble_connection_inc + br_connection_inc + tcp_connection_inc
 conn_manager_external_deps =
-    wifi_direct_connection_external_deps + ble_connection_external_deps
+    ble_connection_external_deps + br_connection_external_deps
 conn_manager_common_deps = [ "$dsoftbus_dfx_path/log:softbus_dfx_log" ]
-conn_manager_common_deps += wifi_direct_connection_common_deps
 
 conn_manager_src += [
   "$dsoftbus_root_path/core/connection/manager/softbus_conn_manager.c",
@@ -38,3 +34,22 @@ conn_manager_inc += [
   "$dsoftbus_root_path/core/common/include",
   "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
 ]
+if (dsoftbus_feature_ex_kits == true) {
+  import(
+      "$dsoftbus_root_path/dsoftbus_enhance/core/connection/coap/conn_coap.gni")
+
+  conn_manager_inc += conn_coap_inc
+  conn_manager_src += conn_coap_src
+  conn_manager_common_deps += conn_coap_common_deps
+  conn_manager_external_deps += conn_coap_external_deps
+
+  import(
+      "$dsoftbus_root_path/dsoftbus_enhance/core/connection/legacy/legacy.gni")
+
+  conn_manager_inc += legacy_connection_inc
+  conn_manager_src += legacy_connection_src
+  conn_manager_common_deps += legacy_connection_common_deps
+  conn_manager_external_deps += legacy_connection_external_deps
+} else {
+  conn_manager_src += [ "$dsoftbus_root_path/adapter/common/net/bluetooth/ble/softbus_adapter_ble_conflict_virtual.c" ]
+}

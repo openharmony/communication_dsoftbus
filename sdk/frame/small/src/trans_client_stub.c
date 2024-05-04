@@ -94,9 +94,11 @@ int32_t ClientOnChannelClosed(IpcIo *data, IpcIo *reply)
     }
     int32_t channelId = 0;
     int32_t channelType = 0;
+    int32_t messageType = 0;
     ReadInt32(data, &channelId);
     ReadInt32(data, &channelType);
-    (void)TransOnChannelClosed(channelId, channelType, SHUTDOWN_REASON_PEER);
+    ReadInt32(data, &messageType);
+    (void)TransOnChannelClosed(channelId, channelType, messageType, SHUTDOWN_REASON_PEER);
     return SOFTBUS_OK;
 }
 

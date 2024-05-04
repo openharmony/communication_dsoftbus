@@ -305,7 +305,7 @@ int32_t TransOpenDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, 
     if (GetSessionConnById(*channelId, &conn) != NULL) {
         extra.authId = conn.authHandle.authId;
         extra.socketFd = conn.appInfo.fd;
-        extra.requestId = conn.requestId;
+        extra.requestId = (int32_t)conn.requestId;
     };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, extra);
     return ret;

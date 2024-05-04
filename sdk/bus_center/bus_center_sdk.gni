@@ -63,7 +63,6 @@ if (defined(ohos_lite)) {
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/transport",
-    "//utils/system/safwk/native/include",
   ]
   bus_center_manager_sdk_src += [
     "$dsoftbus_root_path/sdk/bus_center/ipc/$os_type/src/bus_center_server_proxy.cpp",

@@ -50,7 +50,7 @@ int32_t DiscCoapParseDeviceUdid(const char *raw, DeviceInfo *device)
 
     int32_t ret = GenerateStrHashAndConvertToHexString((const unsigned char *)tmpUdid, HEX_HASH_LEN,
         (unsigned char *)device->devId, HEX_HASH_LEN + 1);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, DISC_COAP,
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_COAP,
         "generate udid hex hash failed, ret=%{public}d", ret);
     return SOFTBUS_OK;
 }
@@ -109,7 +109,7 @@ int32_t DiscCoapParseKeyValueStr(const char *src, const char *key, char *outValu
         return SOFTBUS_OK;
     }
     DISC_LOGE(DISC_COAP, "cannot find the key: key=%{public}s", key);
-    return SOFTBUS_ERR;
+    return SOFTBUS_DISCOVER_COAP_PARSE_DATA_FAIL;
 }
 
 int32_t DiscCoapParseServiceData(const cJSON *data, DeviceInfo *device)
@@ -119,15 +119,15 @@ int32_t DiscCoapParseServiceData(const cJSON *data, DeviceInfo *device)
     char serviceData[MAX_SERVICE_DATA_LEN] = {0};
     if (!GetJsonObjectStringItem(data, JSON_SERVICE_DATA, serviceData, sizeof(serviceData))) {
         DISC_LOGD(DISC_COAP, "parse service data failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_PARSE_JSON_ERR;
     }
     char port[MAX_PORT_STR_LEN] = {0};
     int32_t ret = DiscCoapParseKeyValueStr(serviceData, SERVICE_DATA_PORT, port, MAX_PORT_STR_LEN);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, DISC_COAP, "parse service data failed");
-    uint32_t authPort = atoi(port);
-    if (authPort > UINT16_MAX || authPort <= 0) {
-        DISC_LOGE(DISC_COAP, "the auth port is invalid. authPort=%{public}u", authPort);
-        return SOFTBUS_ERR;
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_COAP, "parse service data failed");
+    int32_t authPort = atoi(port);
+    if (authPort <= 0 || authPort > UINT16_MAX) {
+        DISC_LOGE(DISC_COAP, "the auth port is invalid. authPort=%{public}d", authPort);
+        return SOFTBUS_DISCOVER_COAP_PARSE_DATA_FAIL;
     }
     device->addr[0].info.ip.port = (uint16_t)authPort;
     return SOFTBUS_OK;
@@ -177,7 +177,7 @@ int32_t DiscCoapFillServiceData(uint32_t capability, const char *capabilityData,
     if (sprintf_s(outData, outDataLen, "%s%s:%s", outData, JSON_KEY_CAST_PLUS, jsonStr) < 0) {
         DISC_LOGE(DISC_COAP, "write cast capability data failed");
         cJSON_Delete(json);
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     cJSON_Delete(json);
     return SOFTBUS_OK;

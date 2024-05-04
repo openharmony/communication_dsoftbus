@@ -545,7 +545,7 @@ static int32_t LlGetNetCap(void *buf, uint32_t len)
     if (buf == NULL || len != LNN_COMMON_LEN) {
         return SOFTBUS_INVALID_PARAM;
     }
-    *((int32_t *)buf) = (int32_t)info->netCapacity;
+    *((uint32_t *)buf) = info->netCapacity;
     return SOFTBUS_OK;
 }
 

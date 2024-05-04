@@ -216,8 +216,8 @@ static int32_t ConnectSoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, ui
         CONN_LOGE(CONN_COMMON, "BrSoftBusCondWait SoftBusGetTime failed");
         return SOFTBUS_ERR;
     }
-    now.sec += (now.usec + (timeMillis * USECTONSEC)) / MICROSECONDS;
-    now.usec = (now.usec + (timeMillis * USECTONSEC)) % MICROSECONDS;
+    now.sec += (now.usec + ((int32_t)timeMillis * USECTONSEC)) / MICROSECONDS;
+    now.usec = (now.usec + ((int32_t)timeMillis * USECTONSEC)) % MICROSECONDS;
 
     return SoftBusCondWait(cond, mutex, &now);
 }

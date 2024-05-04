@@ -482,7 +482,7 @@ static int32_t CheckSessionIsOpened(int32_t sessionId)
             return SOFTBUS_TRANS_SESSION_GET_CHANNEL_FAILED;
         }
         if (isEnable == true) {
-            TRANS_LOGI(TRANS_SDK, "session is enable");
+            TRANS_LOGD(TRANS_SDK, "session is enable");
             return SOFTBUS_OK;
         }
         usleep(SESSION_CHECK_PERIOD);
@@ -568,6 +568,7 @@ void CloseSession(int sessionId)
         TRANS_LOGE(TRANS_SDK, "get channel by sessionId=%{public}d, ret=%{public}d", sessionId, ret);
         return;
     }
+    SetSessionStateBySessionId(sessionId, SESSION_STATE_CLOSING);
     ret = ClientTransCloseChannel(channelId, type);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "close channel err: ret=%{public}d, channelId=%{public}d, channelType=%{public}d",
@@ -894,7 +895,7 @@ int CreateSocket(const char *pkgName, const char *sessionName)
 
     int ret = ClientAddSocketServer(SEC_TYPE_CIPHERTEXT, pkgName, sessionName);
     if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
-        TRANS_LOGW(TRANS_SDK, "SocketServer is already created in client");
+        TRANS_LOGD(TRANS_SDK, "SocketServer is already created in client");
     } else if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "add socket server err, ret=%{public}d.", ret);
         return ret;
@@ -902,14 +903,14 @@ int CreateSocket(const char *pkgName, const char *sessionName)
 
     ret = ServerIpcCreateSessionServer(pkgName, sessionName);
     if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
-        TRANS_LOGI(TRANS_SDK, "ok, SocketServer is already created in server");
+        TRANS_LOGD(TRANS_SDK, "ok, SocketServer is already created in server");
         return SOFTBUS_OK;
     } else if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "createSocketServer failed, ret=%{public}d", ret);
         (void)ClientDeleteSessionServer(SEC_TYPE_CIPHERTEXT, sessionName);
         return ret;
     }
-    TRANS_LOGI(TRANS_SDK, "ok");
+    TRANS_LOGD(TRANS_SDK, "ok");
     return SOFTBUS_OK;
 }
 
@@ -1132,7 +1133,7 @@ int32_t ClientListen(int32_t socket, const QosTV qos[], uint32_t qosCount, const
         return ret;
     }
 
-    TRANS_LOGI(TRANS_SDK, "Listen ok: socket=%{public}d", socket);
+    TRANS_LOGD(TRANS_SDK, "Listen ok: socket=%{public}d", socket);
     return SOFTBUS_OK;
 }
 
@@ -1172,7 +1173,7 @@ void ClientShutdown(int32_t socket)
             TRANS_LOGE(TRANS_SDK, "get channel by socket=%{public}d failed, ret=%{public}d", socket, ret);
             return;
         }
-
+        SetSessionStateBySessionId(socket, SESSION_STATE_CLOSING);
         ret = ClientTransCloseChannel(channelId, type);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_SDK, "close channel err: ret=%{public}d, channelId=%{public}d, channeType=%{public}d", ret,
@@ -1215,5 +1216,44 @@ int32_t GetSocketMtuSize(int32_t socket, uint32_t *mtuSize)
 
     *mtuSize = dataConfig;
     TRANS_LOGI(TRANS_SDK, "get mtuSize success, socket=%{public}d, mtu=%{public}" PRIu32, socket, *mtuSize);
+    return SOFTBUS_OK;
+}
+
+int32_t ClientDfsBind(int32_t socket, const ISocketListener *listener)
+{
+    if (!IsValidSessionId(socket) || !IsValidSocketListener(listener, false)) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = ClientSetListenerBySessionId(socket, listener, false);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "set listener by socket=%{public}d failed, ret=%{public}d", socket, ret);
+        return ret;
+    }
+
+    ret = SetSessionIsAsyncById(socket, false);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, TRANS_SDK, "set session is async failed, ret=%{public}d", ret);
+    TransInfo transInfo;
+    ret = ClientDfsIpcOpenSession(socket, &transInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "open session failed, ret=%{public}d", ret);
+        return ret;
+    }
+
+    ret = ClientSetChannelBySessionId(socket, &transInfo);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, TRANS_SDK, "set channel by socket=%{public}d failed, ret=%{public}d", socket, ret);
+    ret = SetSessionStateBySessionId(socket, SESSION_STATE_OPENED);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, TRANS_SDK, "set session state failed socket=%{public}d, ret=%{public}d", socket, ret);
+    ret = CheckSessionIsOpened(socket);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "CheckSessionIsOpened err, ret=%{public}d", ret);
+
+    ret = ClientSetSocketState(socket, 0, SESSION_ROLE_CLIENT);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "set session role failed, ret=%{public}d", ret);
+    TRANS_LOGI(TRANS_SDK, "DfsBind ok: socket=%{public}d, channelId=%{public}d, channelType=%{public}d", socket,
+        transInfo.channelId, transInfo.channelType);
     return SOFTBUS_OK;
 }

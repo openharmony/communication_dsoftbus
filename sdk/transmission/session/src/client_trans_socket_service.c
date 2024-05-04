@@ -17,6 +17,7 @@
 #include "anonymizer.h"
 #include "client_trans_session_adapter.h"
 #include "client_trans_session_manager.h"
+#include "client_trans_socket_option.h"
 #include "inner_socket.h"
 #include "socket.h"
 #include "softbus_adapter_mem.h"
@@ -92,13 +93,13 @@ int32_t Socket(SocketInfo info)
         return ret;
     }
 
-    TRANS_LOGI(TRANS_SDK, "create socket ok, socket=%{public}d", socketFd);
+    TRANS_LOGD(TRANS_SDK, "create socket ok, socket=%{public}d", socketFd);
     return socketFd;
 }
 
 int32_t Listen(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener)
 {
-    TRANS_LOGI(TRANS_SDK, "Listen: socket=%{public}d", socket);
+    TRANS_LOGD(TRANS_SDK, "Listen: socket=%{public}d", socket);
     return ClientListen(socket, qos, qosCount, listener);
 }
 
@@ -153,4 +154,72 @@ int32_t DBinderGrantPermission(int32_t uid, int32_t pid, const char *socketName)
 int32_t DBinderRemovePermission(const char *socketName)
 {
     return ClientRemovePermission(socketName);
+}
+
+int32_t DfsBind(int32_t socket, const ISocketListener *listener)
+{
+    return ClientDfsBind(socket, listener);
+}
+
+static int32_t CheckSocketOptParam(OptLevel level, OptType optType, void *optValue)
+{
+    if (level < 0 || level >= OPT_LEVEL_BUTT) {
+        TRANS_LOGE(TRANS_SDK, "invalid level.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (optType < 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid optType.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (optValue == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid optValue.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SetSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t optValueSize)
+{
+    int32_t ret = CheckSocketOptParam(level, optType, optValue);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    if (optValueSize <= 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid optValueSize.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    switch (level) {
+        case OPT_TYPE_MAX_BUFFER:
+        case OPT_TYPE_FIRST_PACKAGE:
+        case OPT_TYPE_MAX_IDLE_TIMEOUT:
+            ret = SOFTBUS_NOT_IMPLEMENT;
+            break;
+        default:
+            ret = SetExtSocketOpt(socket, level, optType, optValue, optValueSize);
+            break;
+    }
+    return ret;
+}
+
+int32_t GetSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t *optValueSize)
+{
+    int32_t ret = CheckSocketOptParam(level, optType, optValue);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    if (optValueSize == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid optValueSize.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    switch (level) {
+        case OPT_TYPE_MAX_BUFFER:
+        case OPT_TYPE_FIRST_PACKAGE:
+        case OPT_TYPE_MAX_IDLE_TIMEOUT:
+            ret = SOFTBUS_NOT_IMPLEMENT;
+            break;
+        default:
+            ret = GetExtSocketOpt(socket, level, optType, optValue, optValueSize);
+            break;
+    }
+    return ret;
 }

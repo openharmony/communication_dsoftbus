@@ -20,42 +20,42 @@
 
 static int32_t Publish(const PublishOption *option)
 {
-    return SOFTBUS_ERR;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 static int32_t StartScan(const PublishOption *option)
 {
-    return SOFTBUS_ERR;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 static int32_t Unpublish(const PublishOption *option)
 {
-    return SOFTBUS_ERR;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 static int32_t StopScan(const PublishOption *option)
 {
-    return SOFTBUS_ERR;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 static int32_t StartAdvertise(const SubscribeOption *option)
 {
-    return SOFTBUS_ERR;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 static int32_t Subscribe(const SubscribeOption *option)
 {
-    return SOFTBUS_ERR;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 static int32_t Unsubscribe(const SubscribeOption *option)
 {
-    return SOFTBUS_ERR;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 static int32_t StopAdvertise(const SubscribeOption *option)
 {
-    return SOFTBUS_ERR;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 static void LinkStatusChanged(LinkStatus status)

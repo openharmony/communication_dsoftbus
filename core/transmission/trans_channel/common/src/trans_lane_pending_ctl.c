@@ -691,7 +691,7 @@ static bool PeerDeviceIsLegacyOs(const char *peerNetworkId, const char *sessionN
         TRANS_LOGE(TRANS_SVC, "failed to get auth capacity");
         return false;
     }
-    TRANS_LOGI(TRANS_SVC, "authCapacity=%{public}u", authCapacity);
+    TRANS_LOGD(TRANS_SVC, "authCapacity=%{public}u", authCapacity);
     if (authCapacity == 0 &&
         (strncmp(sessionName, SESSION_NAME_DBD, strlen(SESSION_NAME_DBD)) == 0 ||
         strncmp(sessionName, SESSION_NAME_DSL, strlen(SESSION_NAME_DSL)) == 0)) {
@@ -885,7 +885,7 @@ static int32_t TransSoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, uint
         TRANS_LOGE(TRANS_SVC, "trans softbus get time failed.");
         return SOFTBUS_ERR;
     }
-    int64_t usTime = now.sec * CONVERSION_BASE * CONVERSION_BASE + now.usec + timeMillis * CONVERSION_BASE;
+    int64_t usTime = now.sec * CONVERSION_BASE * CONVERSION_BASE + now.usec + (int32_t)timeMillis * CONVERSION_BASE;
     SoftBusSysTime tv;
     tv.sec = usTime / CONVERSION_BASE / CONVERSION_BASE;
     tv.usec = usTime % (CONVERSION_BASE * CONVERSION_BASE);
@@ -938,8 +938,8 @@ static int32_t TransAddLaneReqToPendingAndWaiting(uint32_t laneHandle, const Lan
         return ret;
     }
     ILaneListener listener;
-    listener.OnLaneRequestSuccess = TransOnLaneRequestSuccess;
-    listener.OnLaneRequestFail = TransOnLaneRequestFail;
+    listener.onLaneRequestSuccess = TransOnLaneRequestSuccess;
+    listener.onLaneRequestFail = TransOnLaneRequestFail;
     ret = LnnRequestLane(laneHandle, requestOption, &listener);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "trans request lane failed. ret=%{public}d", ret);
@@ -964,8 +964,8 @@ static int32_t TransAddLaneAllocToPendingAndWaiting(uint32_t laneHandle, const L
         return ret;
     }
     LaneAllocListener allocListener;
-    allocListener.OnLaneAllocSuccess = TransOnLaneRequestSuccess;
-    allocListener.OnLaneAllocFail = TransOnLaneRequestFail;
+    allocListener.onLaneAllocSuccess = TransOnLaneRequestSuccess;
+    allocListener.onLaneAllocFail = TransOnLaneRequestFail;
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         GetLaneManager() != NULL, SOFTBUS_TRANS_GET_LANE_INFO_ERR, TRANS_SVC, "GetLaneManager is null");
     TRANS_CHECK_AND_RETURN_RET_LOGE(GetLaneManager()->lnnAllocLane != NULL, SOFTBUS_TRANS_GET_LANE_INFO_ERR,
@@ -1127,8 +1127,8 @@ int32_t TransAsyncGetLaneInfoByOption(const SessionParam *param, const LaneReque
         return ret;
     }
     ILaneListener listener;
-    listener.OnLaneRequestSuccess = TransOnAsyncLaneSuccess;
-    listener.OnLaneRequestFail = TransOnAsyncLaneFail;
+    listener.onLaneRequestSuccess = TransOnAsyncLaneSuccess;
+    listener.onLaneRequestFail = TransOnAsyncLaneFail;
     ret = LnnRequestLane(*laneHandle, requestOption, &listener);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "trans request lane failed, ret=%{public}d", ret);
@@ -1168,8 +1168,8 @@ int32_t TransAsyncGetLaneInfoByQos(const SessionParam *param, const LaneAllocInf
         return ret;
     }
     LaneAllocListener allocListener;
-    allocListener.OnLaneAllocSuccess = TransOnAsyncLaneSuccess;
-    allocListener.OnLaneAllocFail = TransOnAsyncLaneFail;
+    allocListener.onLaneAllocSuccess = TransOnAsyncLaneSuccess;
+    allocListener.onLaneAllocFail = TransOnAsyncLaneFail;
     TRANS_CHECK_AND_RETURN_RET_LOGE(GetLaneManager()->lnnAllocLane != NULL, SOFTBUS_TRANS_GET_LANE_INFO_ERR,
         TRANS_SVC, "lnnAllocLane is null");
     ret = GetLaneManager()->lnnAllocLane(*laneHandle, allocInfo, &allocListener);

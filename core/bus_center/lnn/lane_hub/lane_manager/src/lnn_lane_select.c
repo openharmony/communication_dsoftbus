@@ -248,9 +248,10 @@ static int32_t AdjustLanePriority(const char *networkId, const LaneSelectParam *
 {
     int32_t resListScore[LANE_LINK_TYPE_BUTT];
     (void)memset_s(resListScore, sizeof(resListScore), INVALID_LINK, sizeof(resListScore));
-    if (GetListScore(networkId, request->expectedBw, resList, resListScore, resNum) != SOFTBUS_OK) {
+    int32_t ret = GetListScore(networkId, request->expectedBw, resList, resListScore, resNum);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get linklist score fail");
-        return SOFTBUS_ERR;
+        return ret;
     }
     if ((resListScore[LANE_WLAN_2P4G] == INVALID_LINK && resListScore[LANE_WLAN_5G] == INVALID_LINK) ||
         (resListScore[LANE_P2P] == INVALID_LINK && resListScore[LANE_HML] == INVALID_LINK)) {
@@ -284,6 +285,35 @@ static int32_t AdjustLanePriority(const char *networkId, const LaneSelectParam *
     return SOFTBUS_OK;
 }
 
+static bool HmlIsExist(LaneLinkType *resList, uint32_t resNum)
+{
+    for (uint32_t i = 0; i < resNum; i++) {
+        if (resList[i] == LANE_HML) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static int32_t LaneAddHml(const char *networkId, LaneLinkType *resList, uint32_t *resNum)
+{
+    LaneLinkType laneList[LANE_LINK_TYPE_BUTT];
+    (void)memset_s(laneList, sizeof(laneList), -1, sizeof(laneList));
+    uint32_t laneNum = 0;
+    for (uint32_t i = 0; i < *resNum; i++) {
+        if (resList[i] == LANE_P2P && IsValidLane(networkId, LANE_HML)) {
+            laneList[laneNum++] = LANE_HML;
+        }
+        laneList[laneNum++] = resList[i];
+    }
+    if (memcpy_s(resList, sizeof(laneList), laneList, sizeof(laneList)) != EOK) {
+        LNN_LOGE(LNN_LANE, "resList memcpy fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    *resNum = laneNum;
+    return SOFTBUS_OK;
+}
+
 int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
     LanePreferredLinkList *recommendList, uint32_t *listNum)
 {
@@ -306,6 +336,10 @@ int32_t SelectLane(const char *networkId, const LaneSelectParam *request,
     if (resNum == 0) {
         LNN_LOGE(LNN_LANE, "there is none linkResource can be used");
         *listNum = 0;
+        return SOFTBUS_ERR;
+    }
+    if (!HmlIsExist(resList, resNum) && LaneAddHml(networkId, resList, &resNum) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "LaneAddHml fail");
         return SOFTBUS_ERR;
     }
     if (AdjustLanePriority(networkId, request, resList, resNum) != SOFTBUS_OK) {
@@ -416,7 +450,7 @@ int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *req
         Anonymize(networkId, &anonyNetworkId);
         LNN_LOGE(LNN_LANE, "device not online, cancel selectLane by qos, networkId=%{public}s", anonyNetworkId);
         AnonymizeFree(anonyNetworkId);
-        return SOFTBUS_ERR;
+        return SOFTBUS_NETWORK_NODE_OFFLINE;
     }
     LanePreferredLinkList laneLinkList = {0};
     if (request->qosRequire.minBW == 0 && request->qosRequire.maxLaneLatency == 0 &&
@@ -432,7 +466,7 @@ int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *req
     } else {
         LNN_LOGI(LNN_LANE, "select lane by qos require");
         if (DecideAvailableLane(networkId, request, &laneLinkList) != SOFTBUS_OK) {
-            return SOFTBUS_ERR;
+            return SOFTBUS_LANE_SELECT_FAIL;
         }
     }
     recommendList->linkTypeNum = 0;
@@ -440,10 +474,26 @@ int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *req
         recommendList->linkType[recommendList->linkTypeNum] = laneLinkList.linkType[i];
         recommendList->linkTypeNum++;
     }
-    if (AdjustLanePriority(networkId, request, recommendList->linkType,
-        recommendList->linkTypeNum) != SOFTBUS_OK) {
+    int32_t ret = AdjustLanePriority(networkId, request, recommendList->linkType, recommendList->linkTypeNum);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "AdjustLanePriority fail");
-        return SOFTBUS_ERR;
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SelectAuthLane(const char *networkId, LanePreferredLinkList *request,
+    LanePreferredLinkList *recommendList)
+{
+    if ((networkId == NULL) || (request == NULL) || (recommendList == NULL)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    recommendList->linkTypeNum = 0;
+    for (uint32_t i = 0; i < request->linkTypeNum; ++i) {
+        if (IsValidLane(networkId, request->linkType[i])) {
+            recommendList->linkType[recommendList->linkTypeNum] = request->linkType[i];
+            recommendList->linkTypeNum++;
+        }
     }
     return SOFTBUS_OK;
 }

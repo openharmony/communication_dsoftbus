@@ -1104,6 +1104,7 @@ static void *SelectTask(void *arg)
 {
     static int32_t wakeupTraceIdGenerator = 0;
 
+    CONN_CHECK_AND_RETURN_RET_LOGW(arg != NULL, NULL, CONN_COMMON, "invalid param");
     SelectThreadState *selectState = (SelectThreadState *)arg;
     CONN_LOGI(CONN_COMMON, "select task start, selectTrace=%{public}d, ctrlRfd=%{public}d, ctrlWfd=%{public}d",
         selectState->traceId, selectState->ctrlRfd, selectState->ctrlWfd);
