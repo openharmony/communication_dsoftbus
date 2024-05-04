@@ -478,6 +478,11 @@ void DeinitPermissionJson(void)
     SoftBusMutexLock(&g_permissionEntryList->lock);
     while (!IsListEmpty(&g_permissionEntryList->list)) {
         SoftBusPermissionEntry *item = LIST_ENTRY((&g_permissionEntryList->list)->next, SoftBusPermissionEntry, node);
+        if (item == NULL) {
+            SoftBusMutexUnlock(&g_permissionEntryList->lock);
+            COMM_LOGE(COMM_PERM, "get item is NULL");
+            return;
+        }
         ClearAppInfo(&item->appInfo);
         ListDelete(&item->node);
         SoftBusFree(item);
