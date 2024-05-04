@@ -268,6 +268,7 @@ enum SoftBusErrNo {
     SOFTBUS_TRANS_MSG_START_SCAN_FAIL, // start scan fail
     SOFTBUS_TRANS_MSG_STOP_SCAN_FAIL, // stop scan fail
     SOFTBUS_TRANS_MSG_EMPTY_LIST, // list is empty
+    SOFTBUS_TRANS_MSG_NOT_SET_SCREEN_OFF, // send broadcast failed when screen flag is false
 
     /* errno begin: -((203 << 21) | (3 << 16) | 0xFFFF) */
     SOFTBUS_AUTH_ERR_BASE = SOFTBUS_ERRNO(AUTH_SUB_MODULE_CODE),
