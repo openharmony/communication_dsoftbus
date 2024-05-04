@@ -83,14 +83,15 @@ int32_t DiscCoapSendRsp(const DeviceInfo *deviceInfo, uint8_t bType)
     NSTACKX_ResponseSettings *settings = (NSTACKX_ResponseSettings *)SoftBusCalloc(sizeof(NSTACKX_ResponseSettings));
     DISC_CHECK_AND_RETURN_RET_LOGE(settings, SOFTBUS_MALLOC_ERR, DISC_COAP, "malloc disc response settings failed");
 
-    if (FillRspSettings(settings, deviceInfo, bType) != SOFTBUS_OK) {
+    int32_t ret = FillRspSettings(settings, deviceInfo, bType);
+    if (ret != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "fill nstackx response settings failed");
         SoftBusFree(settings);
-        return SOFTBUS_ERR;
+        return ret;
     }
 
     DISC_LOGI(DISC_COAP, "send rsp with bType=%{public}u", bType);
-    int32_t ret = NSTACKX_SendDiscoveryRsp(settings);
+    ret = NSTACKX_SendDiscoveryRsp(settings);
     if (ret != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "disc send response failed, ret=%{public}d", ret);
     }
@@ -119,7 +120,7 @@ static int32_t ParseDiscDevInfo(const NSTACKX_DeviceInfo *nstackxDevInfo, Device
         memcpy_s(discDevInfo->capabilityBitmap, sizeof(discDevInfo->capabilityBitmap),
                  nstackxDevInfo->capabilityBitmap, sizeof(nstackxDevInfo->capabilityBitmap)) != EOK) {
         DISC_LOGE(DISC_COAP, "strcpy_s devName or memcpy_s capabilityBitmap failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_MEM_ERR;
     }
 
     discDevInfo->devType = (DeviceType)nstackxDevInfo->deviceType;
@@ -131,14 +132,16 @@ static int32_t ParseDiscDevInfo(const NSTACKX_DeviceInfo *nstackxDevInfo, Device
         discDevInfo->addr[0].type = CONNECTION_ADDR_ETH;
     }
 
-    if (DiscCoapParseDeviceUdid(nstackxDevInfo->deviceId, discDevInfo) != SOFTBUS_OK) {
+    int32_t ret = DiscCoapParseDeviceUdid(nstackxDevInfo->deviceId, discDevInfo);
+    if (ret != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "parse device udid failed.");
-        return SOFTBUS_ERR;
+        return ret;
     }
 
-    if (ParseReservedInfo(nstackxDevInfo, discDevInfo) != SOFTBUS_OK) {
+    ret = ParseReservedInfo(nstackxDevInfo, discDevInfo);
+    if (ret != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "parse reserve information failed.");
-        return SOFTBUS_ERR;
+        return ret;
     }
     // coap not support range now, just assign -1 as unknown
     discDevInfo->range = -1;
@@ -153,6 +156,7 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
     DeviceInfo *discDeviceInfo = (DeviceInfo *)SoftBusCalloc(sizeof(DeviceInfo));
     DISC_CHECK_AND_RETURN_LOGE(discDeviceInfo != NULL, DISC_COAP, "malloc device info failed.");
 
+    int32_t ret;
     for (uint32_t i = 0; i < deviceCount; i++) {
         const NSTACKX_DeviceInfo *nstackxDeviceInfo = deviceList + i;
         DISC_CHECK_AND_RETURN_LOGE(nstackxDeviceInfo, DISC_COAP, "device count from nstackx is invalid");
@@ -163,13 +167,14 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
             continue;
         }
         (void)memset_s(discDeviceInfo, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
-        if (ParseDiscDevInfo(nstackxDeviceInfo, discDeviceInfo) != SOFTBUS_OK) {
+        ret = ParseDiscDevInfo(nstackxDeviceInfo, discDeviceInfo);
+        if (ret != SOFTBUS_OK) {
             DISC_LOGW(DISC_COAP, "parse discovery device info failed.");
             continue;
         }
-
-        if (DiscCoapProcessDeviceInfo(nstackxDeviceInfo, discDeviceInfo, g_discCoapInnerCb) != SOFTBUS_OK) {
-            DISC_LOGD(DISC_COAP, "DiscRecv: process device info failed");
+        ret = DiscCoapProcessDeviceInfo(nstackxDeviceInfo, discDeviceInfo, g_discCoapInnerCb);
+        if (ret != SOFTBUS_OK) {
+            DISC_LOGD(DISC_COAP, "DiscRecv: process device info failed, ret=%{public}d", ret);
         }
     }
 
@@ -236,16 +241,15 @@ int32_t DiscCoapRegisterServiceData(const unsigned char *capabilityData, uint32_
     char serviceData[NSTACKX_MAX_SERVICE_DATA_LEN] = {0};
     if (sprintf_s(serviceData, NSTACKX_MAX_SERVICE_DATA_LEN, "port:%d,", authPort) == -1) {
         DISC_LOGE(DISC_COAP, "write auth port to service data failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     // capabilityData can be NULL, it will be check in this func
     ret = DiscCoapFillServiceData(capability, (const char *)capabilityData, dataLen, serviceData,
         NSTACKX_MAX_SERVICE_DATA_LEN);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, DISC_COAP,
-        "fill service data failed. ret=%{public}d", ret);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_COAP, "fill service data failed. ret=%{public}d", ret);
 
     ret = NSTACKX_RegisterServiceData(serviceData);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, DISC_COAP,
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_COAP,
         "register service data to nstackx failed. ret=%{public}d", ret);
     return SOFTBUS_OK;
 }
@@ -268,13 +272,13 @@ int32_t DiscCoapRegisterCapabilityData(const unsigned char *capabilityData, uint
     if (ret != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "assemble the data of capability failed. capability=%{public}u", capability);
         SoftBusFree(registerCapaData);
-        return SOFTBUS_ERR;
+        return ret;
     }
 
     if (NSTACKX_RegisterExtendServiceData(registerCapaData) != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "register extend service data to nstackx failed");
         SoftBusFree(registerCapaData);
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_COAP_REGISTER_CAP_DATA_FAIL;
     }
     DISC_LOGI(DISC_COAP, "register extend service data to nstackx succ. registerCapaData=%{public}s", registerCapaData);
     SoftBusFree(registerCapaData);
@@ -300,9 +304,10 @@ static bool IsNetworkValid(void)
 static int32_t GetDiscFreq(int32_t freq, uint32_t *discFreq)
 {
     uint32_t arrayFreq[FREQ_BUTT] = {0};
-    if (SoftbusGetConfig(SOFTBUS_INT_DISC_FREQ, (unsigned char *)arrayFreq, sizeof(arrayFreq)) != SOFTBUS_OK) {
+    int32_t ret = SoftbusGetConfig(SOFTBUS_INT_DISC_FREQ, (unsigned char *)arrayFreq, sizeof(arrayFreq));
+    if (ret != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "disc get freq failed");
-        return SOFTBUS_ERR;
+        return ret;
     }
     *discFreq = arrayFreq[freq];
     return SOFTBUS_OK;
@@ -316,9 +321,10 @@ static int32_t ConvertDiscoverySettings(NSTACKX_DiscoverySettings *discSet, cons
         discSet->discoveryMode = DISCOVER_MODE;
     }
     uint32_t discFreq;
-    if (GetDiscFreq(option->freq, &discFreq) != SOFTBUS_OK) {
+    int32_t ret = GetDiscFreq(option->freq, &discFreq);
+    if (ret != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "get discovery freq config failed");
-        return SOFTBUS_ERR;
+        return ret;
     }
     discSet->advertiseCount = discFreq & DISC_FREQ_COUNT_MASK;
     discSet->advertiseDuration = (discFreq >> DISC_FREQ_DURATION_BIT) * DISC_USECOND;
@@ -346,10 +352,11 @@ int32_t DiscCoapStartDiscovery(DiscCoapOption *option)
     NSTACKX_DiscoverySettings *discSet = (NSTACKX_DiscoverySettings *)SoftBusCalloc(sizeof(NSTACKX_DiscoverySettings));
     DISC_CHECK_AND_RETURN_RET_LOGE(discSet != NULL, SOFTBUS_MEM_ERR, DISC_COAP, "malloc disc settings failed");
 
-    if (ConvertDiscoverySettings(discSet, option) != SOFTBUS_OK) {
+    int32_t ret = ConvertDiscoverySettings(discSet, option);
+    if (ret != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "set discovery settings failed");
         FreeDiscSet(discSet);
-        return SOFTBUS_ERR;
+        return ret;
     }
     if (NSTACKX_StartDeviceDiscovery(discSet) != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "start device discovery failed");
@@ -375,8 +382,9 @@ static char *GetDeviceId(void)
 {
     char *formatString = NULL;
     char udid[UDID_BUF_LEN] = {0};
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, sizeof(udid)) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_COAP, "get udid failed.");
+    int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, sizeof(udid));
+    if (ret != SOFTBUS_OK) {
+        DISC_LOGE(DISC_COAP, "get udid failed, ret=%{public}d", ret);
         return NULL;
     }
     cJSON *deviceId = cJSON_CreateObject();
@@ -408,13 +416,14 @@ static int32_t SetLocalDeviceInfo(void)
     if (strcpy_s(g_localDeviceInfo->deviceId, sizeof(g_localDeviceInfo->deviceId), deviceIdStr) != EOK) {
         cJSON_free(deviceIdStr);
         DISC_LOGE(DISC_COAP, "strcpy_s deviceId failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     cJSON_free(deviceIdStr);
     int32_t deviceType = 0;
-    if (LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &deviceType) != SOFTBUS_OK) {
+    int32_t ret = LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &deviceType);
+    if (ret != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "get local device type failed.");
-        return SOFTBUS_ERR;
+        return ret;
     }
     g_localDeviceInfo->deviceType = (uint32_t)deviceType;
     g_localDeviceInfo->businessType = (uint8_t)NSTACKX_BUSINESS_TYPE_NULL;
@@ -425,7 +434,7 @@ static int32_t SetLocalDeviceInfo(void)
         LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, g_localDeviceInfo->localIfInfo[0].networkName,
             sizeof(g_localDeviceInfo->localIfInfo[0].networkName)) != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "get local device info from lnn failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_GET_LOCAL_STR_FAILED;
     }
     g_localDeviceInfo->ifNums = 1;
 
@@ -466,7 +475,7 @@ static int32_t SetLocale(char **localeBefore)
     }
 
     char *localeAfter = setlocale(LC_CTYPE, "C.UTF-8");
-    return (localeAfter != NULL) ? SOFTBUS_OK : SOFTBUS_ERR;
+    return (localeAfter != NULL) ? SOFTBUS_OK : SOFTBUS_DISCOVER_SET_LOCALE_FAILED;
 }
 
 static void RestoreLocale(const char *localeBefore)
@@ -488,7 +497,7 @@ static int32_t CalculateMbsTruncateSize(const char *multiByteStr, uint32_t capac
 
     char *localeBefore = NULL;
     int32_t ret = SetLocale(&localeBefore);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_ERR, DISC_COAP, "set locale failed");
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_COAP, "set locale failed");
 
     // convert multi byte str to wide str
     wchar_t wideStr[MAX_WIDE_STR_LEN] = {0};
@@ -496,7 +505,7 @@ static int32_t CalculateMbsTruncateSize(const char *multiByteStr, uint32_t capac
     if (numConverted <= 0 || numConverted > INT32_MAX) {
         DISC_LOGE(DISC_COAP, "mbstowcs failed");
         RestoreLocale(localeBefore);
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_CHAR_CONVERT_FAILED;
     }
 
     uint32_t truncateTotal = 0;
@@ -507,7 +516,7 @@ static int32_t CalculateMbsTruncateSize(const char *multiByteStr, uint32_t capac
         if (truncateCharLen <= 0) {
             DISC_LOGE(DISC_COAP, "wctomb failed");
             RestoreLocale(localeBefore);
-            return SOFTBUS_ERR;
+            return SOFTBUS_DISCOVER_CHAR_CONVERT_FAILED;
         }
         truncateTotal += (uint32_t)truncateCharLen;
         truncateIndex--;
