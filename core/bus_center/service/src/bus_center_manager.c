@@ -223,6 +223,10 @@ static int32_t BusCenterServerInitSecondStep(void)
         LNN_LOGE(LNN_INIT, "initDecisionCenter fail");
         return SOFTBUS_ERR;
     }
+    if (LnnInitDecisionCenter(DC_VERSION_1_0) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "init bus center decision center fail");
+        return SOFTBUS_ERR;
+    }
     return SOFTBUS_OK;
 }
 
