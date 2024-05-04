@@ -27,7 +27,7 @@ extern "C" {
  * this interface is only called once when the softbus service is created.
  * @see {@link DiscClientDeinit}
  * @return <b>SOFTBUS_MALLOC_ERR</b> Failed to allocate space for global variable of discovery information.
- * @return <b>SOFTBUS_ERR</b> Failed to initialize the server agent on the discovery side.
+ * @return <b>SOFTBUS_DISC_SERVER_INIT_FAILED</b> Failed to initialize the server agent on the discovery side.
  * @return <b>SOFTBUS_OK</b> The discoverer client was initialized successfully.
  */
 int32_t DiscClientInit(void);
@@ -50,7 +50,7 @@ void DiscClientDeinit(void);
  * @param[in] cb Indicates the pointer to the callback of the publishing function,
  * which is used to notify itself whether the publishing of its
  * own information is successful after the publishing function is triggered. For details, see {@link IPublishCallback}.
- * @return <b>SOFTBUS_ERR</b> Failed to publish internal information function.
+ * @return <b>SOFTBUS_NO_INIT</b> Failed to publish internal information function.
  * @return <b>SOFTBUS_OK</b> The function of internal publishing self information was published successfully.
  */
 int32_t PublishServiceInner(const char *packageName, const PublishInfo *info, const IPublishCallback *cb);
@@ -62,7 +62,7 @@ int32_t PublishServiceInner(const char *packageName, const PublishInfo *info, co
  * @param[in] packageName Indicates the pointer to the package name,
  * and the name of the relevant package carrying its own capabilities.
  * @param[in] publishId ID of the internal release information to be cancelled this time.
- * @return <b>SOFTBUS_ERR</b> Internal unpublishing function failed. Other devices can still find the device.
+ * @return <b>SOFTBUS_NO_INIT</b> Internal unpublishing function failed. Other devices can still find the device.
  * @return <b>SOFTBUS_OK</b> The internal unpublishing function is successful,
  * and the party cannot publish its own information.
  */
@@ -78,7 +78,7 @@ int32_t UnpublishServiceInner(const char *packageName, int32_t publishId);
  * @param[in] cb Indicates the pointer to the discovery callback, It is used to inform yourself,
  * Whether the discovery capability is successfully started after the discovery function is triggered.
  * For more information, see {@link IDiscoveryCallback}.
- * @return <b>SOFTBUS_ERR</b> The internal start Discovery Function failed to start. No other devices can be found.
+ * @return <b>SOFTBUS_NO_INIT</b> The internal start Discovery Function failed to start. No other devices can be found.
  * @return <b>SOFTBUS_OK</b> The internal start discovery function is started successfully.
  * You can discover specific capability devices.
  */
@@ -91,7 +91,7 @@ int32_t StartDiscoveryInner(const char *packageName, const SubscribeInfo *info, 
  * @param[in] packageName Indicates the pointer to the package name,
  * and the name of the relevant package carrying its own capabilities.
  * @param[in] subscribeId ID to stop discovery this time.
- * @return <b>SOFTBUS_ERR</b> The internal stop discovery function cannot be started. Other devices can still be found.
+ * @return <b>SOFTBUS_NO_INIT</b> The internal stop discovery function cannot be started. Other devices can still be found.
  * @return <b>SOFTBUS_OK</b> Internal stop discovery function started successfully.
  * You cannot discover devices with specific functions.
  */

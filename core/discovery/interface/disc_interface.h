@@ -61,7 +61,7 @@ typedef struct {
  * @brief Initialization of discovery management. Set the necessary environment for the discovery side.
  * This interface is only called once when the softbus service is created.
  * @see {@link DiscMgrDeinit}
- * @return <b>SOFTBUS_ERR</b> Create Softbus list failed.
+ * @return <b>SOFTBUS_DISCOVER_MANAGER_INIT_FAIL</b> Create Softbus list failed.
  * @return <b>SOFTBUS_OK</b> Manager is Successfully inited
  */
 int32_t DiscMgrInit(void);
