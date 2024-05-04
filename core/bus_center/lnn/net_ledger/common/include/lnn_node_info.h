@@ -169,7 +169,7 @@ typedef struct {
     int32_t brBuffSize;
     int32_t stateVersion;
     int32_t localStateVersion;
-    int32_t groupType;
+    uint32_t groupType;
     bool initPreventFlag;
     int64_t networkIdTimestamp;
     RpaInfo rpaInfo;

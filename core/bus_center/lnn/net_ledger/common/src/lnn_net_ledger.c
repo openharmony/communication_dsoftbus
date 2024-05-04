@@ -74,14 +74,15 @@ static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
     char softBusVersion[VERSION_MAX_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_HICE_VERSION, softBusVersion, sizeof(softBusVersion)) == SOFTBUS_OK) {
         if (strcmp(softBusVersion, info->softBusVersion) != 0) {
-            LNN_LOGW(LNN_LEDGER, "softbus version change, version:%s", softBusVersion);
+            LNN_LOGW(LNN_LEDGER, "softbus version change, version:%{public}s", softBusVersion);
             return true;
         }
     }
     uint64_t softbusFeature = 0;
     if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &softbusFeature) == SOFTBUS_OK) {
         if (softbusFeature != info->feature) {
-            LNN_LOGW(LNN_LEDGER, "feature change, old:%" PRIu64 ", new:%" PRIu64, info->feature, softbusFeature);
+            LNN_LOGW(LNN_LEDGER, "feature change, old:%{public}" PRIu64 ", new:%{public}" PRIu64,
+                info->feature, softbusFeature);
             return true;
         }
     }
@@ -95,14 +96,15 @@ static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
     int32_t osType = 0;
     if (LnnGetLocalNumInfo(NUM_KEY_OS_TYPE, &osType) == SOFTBUS_OK) {
         if (osType != info->deviceInfo.osType) {
-            LNN_LOGW(LNN_LEDGER, "osType change, old:%d, new:%d", info->deviceInfo.osType, osType);
+            LNN_LOGW(LNN_LEDGER, "osType change, old:%{public}d, new:%{public}d", info->deviceInfo.osType, osType);
             return true;
         }
     }
     uint32_t authCapacity = 0;
     if (LnnGetLocalNumInfo(NUM_KEY_AUTH_CAP, (int32_t *)&authCapacity) == SOFTBUS_OK) {
         if (authCapacity != info->authCapacity) {
-            LNN_LOGW(LNN_LEDGER, "authCapacity change, old:%d, new:%d", info->authCapacity, authCapacity);
+            LNN_LOGW(LNN_LEDGER, "authCapacity change, old:%{public}d, new:%{public}d",
+                info->authCapacity, authCapacity);
             return true;
         }
     }
@@ -203,7 +205,7 @@ static int32_t LnnGetNodeKeyInfoLocal(const char *networkId, int key, uint8_t *i
         case NODE_KEY_BLE_OFFLINE_CODE:
             return LnnGetLocalStrInfo(STRING_KEY_OFFLINE_CODE, (char *)info, infoLen);
         case NODE_KEY_NETWORK_CAPABILITY:
-            return LnnGetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t *)info);
+            return LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, (uint32_t *)info);
         case NODE_KEY_NETWORK_TYPE:
             return LnnGetLocalNumInfo(NUM_KEY_DISCOVERY_TYPE, (int32_t *)info);
         case NODE_KEY_DATA_CHANGE_FLAG:
@@ -240,7 +242,7 @@ static int32_t LnnGetNodeKeyInfoRemote(const char *networkId, int key, uint8_t *
         case NODE_KEY_BLE_OFFLINE_CODE:
             return LnnGetRemoteStrInfo(networkId, STRING_KEY_OFFLINE_CODE, (char *)info, infoLen);
         case NODE_KEY_NETWORK_CAPABILITY:
-            return LnnGetRemoteNumInfo(networkId, NUM_KEY_NET_CAP, (int32_t *)info);
+            return LnnGetRemoteNumU32Info(networkId, NUM_KEY_NET_CAP, (uint32_t *)info);
         case NODE_KEY_NETWORK_TYPE:
             return LnnGetRemoteNumInfo(networkId, NUM_KEY_DISCOVERY_TYPE, (int32_t *)info);
         case NODE_KEY_DATA_CHANGE_FLAG:

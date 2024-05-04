@@ -323,6 +323,7 @@ static int32_t GetTcpInfoByFd(int32_t fd, TcpConnInfoNode *tcpInfo)
         if (item->info.socketInfo.fd == fd) {
             if (memcpy_s(tcpInfo, sizeof(TcpConnInfoNode), item, sizeof(TcpConnInfoNode)) != EOK) {
                 CONN_LOGE(CONN_COMMON, "GetTcpInfoByFd:memcpy_s failed");
+                (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
                 return SOFTBUS_ERR;
             }
             (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
@@ -648,9 +649,9 @@ int32_t TcpPostBytes(
         CONN_LOGE(CONN_COMMON, "TcpPostBytes failed, connectionId not found. connectionId=%{public}08x", connectionId);
         return SOFTBUS_ERR;
     }
-    uint32_t bytes = ConnSendSocketData(fd, (const char *)data, len, flag);
+    ssize_t bytes = ConnSendSocketData(fd, (const char *)data, len, flag);
     SoftBusFree(data);
-    if (bytes != len) {
+    if (bytes != (ssize_t)len) {
         CONN_LOGE(CONN_COMMON, "socket send data is mismatched");
         return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
     }

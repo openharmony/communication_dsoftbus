@@ -618,6 +618,7 @@ int32_t ConnBrOnReferenceRequest(ConnBrConnection *connection, const cJSON *json
 
 int32_t ConnBrOnReferenceResponse(ConnBrConnection *connection, const cJSON *json)
 {
+    CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, SOFTBUS_INVALID_PARAM, CONN_BR, "invalid param");
     int32_t peerRc = 0;
     if (!GetJsonObjectSignedNumberItem(json, KEY_REFERENCE_NUM, &peerRc)) {
         CONN_LOGE(CONN_BR, "parse delta or ref failed. connectionId=%{public}u", connection->connectionId);
@@ -646,6 +647,7 @@ int32_t ConnBrOnReferenceResponse(ConnBrConnection *connection, const cJSON *jso
 static void *ListenTask(void *arg)
 {
 #define BR_ACCEPET_WAIT_TIME 1000
+    CONN_CHECK_AND_RETURN_RET_LOGW(arg != NULL, NULL, CONN_BR, "invalid param");
     ServerState *serverState = (ServerState *)arg;
     CONN_LOGI(CONN_BR, "traceId=%{public}u", serverState->traceId);
     const char *name = "BrManagerInsecure";

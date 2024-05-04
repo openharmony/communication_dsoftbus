@@ -33,6 +33,10 @@
 #include "trans_channel_manager.h"
 #include "trans_lane_pending_ctl.c"
 #include "trans_session_manager.h"
+#include "softbus_feature_config.h"
+#include "softbus_conn_interface.h"
+#include "bus_center_manager.h"
+#include "trans_session_service.h"
 
 using namespace testing::ext;
 
@@ -71,7 +75,11 @@ public:
 
 void TransLaneTest::SetUpTestCase(void)
 {
-    InitSoftBusServer();
+    SoftbusConfigInit();
+    ConnServerInit();
+    AuthInit();
+    BusCenterServerInit();
+    TransServerInit();
     int32_t ret = TransReqLanePendingInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransSessionMgrInit();
@@ -80,6 +88,10 @@ void TransLaneTest::SetUpTestCase(void)
 
 void TransLaneTest::TearDownTestCase(void)
 {
+    ConnServerDeinit();
+    AuthDeinit();
+    BusCenterServerDeinit();
+    TransServerDeinit();
     TransReqLanePendingDeinit();
 }
 

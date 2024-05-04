@@ -166,7 +166,7 @@ struct BleOption {
     char bleMac[BT_MAC_LEN];
     char deviceIdHash[UDID_HASH_LEN];
     bool fastestConnectEnable;
-    int32_t psm;
+    uint32_t psm;
     uint16_t challengeCode;
 };
 

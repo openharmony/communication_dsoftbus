@@ -583,20 +583,9 @@ static void NetAccountStateChangeEventHandler(const LnnEventBasicInfo *info)
     }
 }
 
-int32_t LnnInitNetworkManager(void)
+static int32_t RegistProtocolManager(void)
 {
-    RegistNetIfMgr(LNN_ETH_TYPE, CreateNetifMgr);
-    RegistNetIfMgr(LNN_WLAN_TYPE, CreateNetifMgr);
-    RegistNetIfMgr(LNN_BR_TYPE, CreateNetifMgr);
-    RegistNetIfMgr(LNN_BLE_TYPE, CreateNetifMgr);
-
-    int32_t ret = LnnInitManagerByConfig();
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "Read net config failed, ret=%{public}d", ret);
-        return ret;
-    }
-    // Regist default protocols
-    ret = RegistIPProtocolManager();
+    int32_t ret = RegistIPProtocolManager();
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "regist ip protocol manager failed, ret=%{public}d", ret);
         return ret;
@@ -611,6 +600,28 @@ int32_t LnnInitNetworkManager(void)
     ret = RegistNewIPProtocolManager();
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "regist newip protocol manager failed, ret=%{public}d", ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+
+int32_t LnnInitNetworkManager(void)
+{
+    RegistNetIfMgr(LNN_ETH_TYPE, CreateNetifMgr);
+    RegistNetIfMgr(LNN_WLAN_TYPE, CreateNetifMgr);
+    RegistNetIfMgr(LNN_BR_TYPE, CreateNetifMgr);
+    RegistNetIfMgr(LNN_BLE_TYPE, CreateNetifMgr);
+
+    int32_t ret = LnnInitManagerByConfig();
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "Read net config failed, ret=%{public}d", ret);
+        return ret;
+    }
+    // Regist default protocols
+    ret = RegistProtocolManager();
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "regist default protocol manager failed, ret=%{public}d", ret);
         return ret;
     }
     ret = RegGroupChangeListener(&g_groupChangeListener);
