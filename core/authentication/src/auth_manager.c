@@ -566,8 +566,16 @@ static int64_t GetActiveAuthIdByConnInfo(const AuthConnInfo *connInfo, bool judg
     auth[num++] = FindAuthManagerByConnInfo(connInfo, true);
     /* Check auth valid period */
     uint64_t currentTime = GetCurrentTimeMs();
-    for (uint32_t i = 0; i < num && judgeTimeOut; i++) {
-        if (auth[i] != NULL && (currentTime - auth[i]->lastActiveTime >= MAX_AUTH_VALID_PERIOD)) {
+    for (uint32_t i = 0; i < num; i++) {
+        if (auth[i] != NULL && !auth[i]->hasAuthPassed) {
+            AUTH_LOGI(AUTH_CONN, "auth manager has not auth pass. authId=%{public}" PRId64, auth[i]->authId);
+            auth[i] = NULL;
+        }
+        if (auth[i] != NULL && GetLatestAvailableSessionKeyTime(&auth[i]->sessionKeyList, connInfo->type) == 0) {
+            AUTH_LOGI(AUTH_CONN, "auth manager has not available key. authId=%{public}" PRId64, auth[i]->authId);
+            auth[i] = NULL;
+        }
+        if (auth[i] != NULL && (currentTime - auth[i]->lastActiveTime >= MAX_AUTH_VALID_PERIOD) && judgeTimeOut) {
             AUTH_LOGI(AUTH_CONN, "auth manager timeout. authId=%{public}" PRId64, auth[i]->authId);
             auth[i] = NULL;
         }
