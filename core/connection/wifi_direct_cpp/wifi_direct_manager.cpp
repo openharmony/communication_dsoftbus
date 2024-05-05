@@ -62,7 +62,7 @@ static void SetElementType(struct WifiDirectConnectInfo *info)
     }
 }
 
-static ListenerModule AllocateListenerModuleId()
+static int32_t AllocateListenerModuleId()
 {
     std::lock_guard lock(g_listenerModuleIdLock);
     ListenerModule moduleId = UNUSE_BUTT;
@@ -84,12 +84,12 @@ static ListenerModule AllocateListenerModuleId()
     return moduleId;
 }
 
-static bool IsEnhanceP2pModuleId(ListenerModule moduleId)
+static bool IsEnhanceP2pModuleId(int32_t moduleId)
 {
     return moduleId >= AUTH_ENHANCED_P2P_START && moduleId <= AUTH_ENHANCED_P2P_END;
 }
 
-static void FreeListenerModuleId(ListenerModule moduleId)
+static void FreeListenerModuleId(int32_t moduleId)
 {
     std::lock_guard lock(g_listenerModuleIdLock);
     if (IsEnhanceP2pModuleId(moduleId)) {

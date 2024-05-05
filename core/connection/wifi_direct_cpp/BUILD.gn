@@ -20,12 +20,6 @@ ohos_static_library("wifi_direct") {
     defines += [ "ASAN_BUILD" ]
   }
 
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
-
   wifi_direct_path = "$dsoftbus_root_path/core/connection/wifi_direct_cpp"
   wifi_direct_connection_src = []
 
@@ -60,6 +54,12 @@ ohos_static_library("wifi_direct") {
 
   if (dsoftbus_feature_conn_p2p == true &&
       softbus_communication_wifi_feature == true) {
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
+
     wifi_direct_connection_src += [
       "$wifi_direct_path/adapter/p2p_adapter.cpp",
       "$wifi_direct_path/channel/auth_negotiate_channel.cpp",
@@ -123,25 +123,24 @@ ohos_static_library("wifi_direct") {
       "netmanager_base:net_conn_manager_if",
       "wifi:wifi_sdk",
     ]
+
+    remove_configs = [
+      "//build/config/compiler:no_rtti",
+      "//build/config/compiler:no_exceptions",
+    ]
+
+    configs = [
+      "//build/config/compiler:rtti",
+      "//build/config/compiler:exceptions",
+    ]
   } else {
     wifi_direct_connection_src +=
         [ "$wifi_direct_path/wifi_direct_manager_virtual.c" ]
-    wifi_direct_connection_external_deps += [ "hilog:libhilog" ]
   }
 
   include_dirs = wifi_direct_connection_inc
   sources = wifi_direct_connection_src
   external_deps = wifi_direct_connection_external_deps
-
-  remove_configs = [
-    "//build/config/compiler:no_rtti",
-    "//build/config/compiler:no_exceptions",
-  ]
-
-  configs = [
-    "//build/config/compiler:rtti",
-    "//build/config/compiler:exceptions",
-  ]
 
   part_name = "dsoftbus"
   subsystem_name = "communication"
