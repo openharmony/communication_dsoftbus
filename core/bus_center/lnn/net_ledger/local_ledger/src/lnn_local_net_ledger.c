@@ -60,7 +60,7 @@ typedef struct {
 } LocalNetLedger;
 
 static LocalNetLedger g_localNetLedger;
-static int64_t memAccount;
+static int64_t g_memAccount;
 
 static void UpdateStateVersionAndStore(void)
 {
@@ -342,7 +342,7 @@ static int32_t LocalUpdateNodeAccountId(const void *buf)
         }
         LNN_LOGI(LNN_LEDGER, "accountid login");
         info->accountId = *((int64_t *)buf);
-        if (memAccount != 0 && memAccount != *((int64_t *)buf)) {
+        if (g_memAccount != 0 && g_memAccount != *((int64_t *)buf)) {
             LNN_LOGI(LNN_LEDGER, "accountid change");
             info->stateVersion++;
             if (info->stateVersion > MAX_STATE_VERSION) {
@@ -365,7 +365,7 @@ static int32_t LocalUpdateNodeAccountId(const void *buf)
             LNN_LOGE(LNN_LEDGER, "lnn clear local cache fail");
             return SOFTBUS_MEM_ERR;
         }
-        memAccount = info->accountId;
+        g_memAccount = info->accountId;
         info->accountId = *((int64_t *)buf);
         LnnSaveLocalDeviceInfo(info);
         return SOFTBUS_OK;
