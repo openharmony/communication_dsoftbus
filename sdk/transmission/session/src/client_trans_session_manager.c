@@ -2194,6 +2194,7 @@ NO_SANITIZE("cfi") static void ClientCleanUpTimeoutSession(const ListNode *destr
         TRANS_LOGI(TRANS_SDK, "session is idle, sessionId=%{public}d", id);
         if (destroyNode->OnShutdown != NULL) {
             destroyNode->OnShutdown(id, SHUTDOWN_REASON_TIMEOUT);
+            (void)TryDeleteEmptySessionServer(destroyNode->sessionName);
         }
         ListDelete(&(destroyNode->node));
         SoftBusFree(destroyNode);

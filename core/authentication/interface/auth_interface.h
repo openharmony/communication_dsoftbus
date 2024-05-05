@@ -120,7 +120,7 @@ void AuthServerDeathCallback(const char *pkgName, int32_t pid);
 
 typedef struct {
     void (*onGroupCreated)(const char *groupId, int32_t groupType);
-    void (*onGroupDeleted)(const char *groupId);
+    void (*onGroupDeleted)(const char *groupId, int32_t groupType);
     void (*onDeviceBound)(const char *udid, const char *groupInfo);
 } GroupChangeListener;
 

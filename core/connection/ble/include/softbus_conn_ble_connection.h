@@ -100,7 +100,7 @@ typedef struct {
     bool fastestConnectEnable;
     char addr[BT_MAC_LEN];
     union {
-        int32_t psm;
+        uint32_t psm;
     };
     // sequence is only read and modify in send thread, no need lock
     uint32_t sequence;

@@ -48,9 +48,7 @@ if (defined(ohos_lite)) {
     "$dsoftbus_root_path/core/discovery/ipc/$os_type/src/disc_client_proxy.cpp",
     "$dsoftbus_root_path/core/discovery/ipc/$os_type/src/disc_client_proxy_standard.cpp",
   ]
-  disc_server_inc += [
-    "$dsoftbus_root_path/core/discovery/ipc/$os_type/include",
-    "//utils/system/safwk/native/include",
-  ]
+  disc_server_inc +=
+      [ "$dsoftbus_root_path/core/discovery/ipc/$os_type/include" ]
   disc_server_external_deps += [ "c_utils:utils" ]
 }

@@ -160,7 +160,7 @@ static int32_t HandleOnBindSuccess(int32_t sessionId, SessionListenerAdapter ses
     }
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "OnBind failed, ret=%{public}d", ret);
-        (void)ClientDeleteSession(sessionId);
+        (void)ClientDeleteSocketSession(sessionId);
     }
     return ret;
 }
@@ -238,7 +238,7 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t c
         bool tmpIsServer = false;
         ClientGetSessionCallbackAdapterById(sessionId, &sessionCallback, &tmpIsServer);
         (void)TransOnBindFailed(sessionId, &sessionCallback.socketClient, errCode);
-        (void)ClientDeleteSession(sessionId);
+        (void)ClientDeleteSocketSession(sessionId);
         return SOFTBUS_OK;
     }
     TRANS_LOGI(TRANS_SDK, "trigger session open failed callback, channelId=%{public}d, channelType=%{public}d",
@@ -255,7 +255,7 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t c
         if (!isServer && isAsync) {
             (void)TransOnBindFailed(sessionId, &sessionCallback.socketClient, errCode);
         }
-        (void)ClientDeleteSession(sessionId);
+        (void)ClientDeleteSocketSession(sessionId);
         TRANS_LOGI(TRANS_SDK, "ok, sessionid=%{public}d", sessionId);
         return SOFTBUS_OK;
     }
