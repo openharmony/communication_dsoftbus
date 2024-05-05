@@ -1060,10 +1060,11 @@ HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLDeviceBroadcastCipherIv_Test_001, Te
  */
 HWTEST_F(LNNDisctributedLedgerTest, LnnUpdateDistributedNodeInfo_Test_001, TestSize.Level1)
 {
-    NodeInfo newInfo = {0};
+    NodeInfo newInfo;
+    memset_s(&newInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     const char *udid = NULL;
     newInfo.accountId = 18390933952;
-    bool ret = LnnUpdateDistributedNodeInfo(&newInfo, udid);
+    int32_t ret = LnnUpdateDistributedNodeInfo(&newInfo, udid);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     const char *devUdid = "123456789";
     ret = LnnUpdateDistributedNodeInfo(&newInfo, devUdid);
