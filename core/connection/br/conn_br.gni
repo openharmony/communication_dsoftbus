@@ -15,14 +15,15 @@ import("../../../core/adapter/core_adapter.gni")
 import("../../../dsoftbus.gni")
 
 br_connection_inc = br_adapter_inc
+br_connection_external_deps = []
 if (!support_bluetooth) {
   br_connection_src =
       [ "$dsoftbus_root_path/core/connection/br/src/softbus_conn_br_virtual.c" ]
   br_connection_inc += [
     "$dsoftbus_root_path/core/connection/br/include",
     "$dsoftbus_root_path/core/common/include",
-    "//third_party/cJSON",
   ]
+  br_connection_external_deps += [ "cJSON:cjson" ]
 } else {
   if (!dsoftbus_feature_conn_br) {
     br_connection_src = [
@@ -31,8 +32,8 @@ if (!support_bluetooth) {
     br_connection_inc += [
       "$dsoftbus_root_path/core/connection/br/include",
       "$dsoftbus_root_path/core/common/include",
-      "//third_party/cJSON",
     ]
+    br_connection_external_deps += [ "cJSON:cjson" ]
   } else {
     br_connection_src = br_adapter_src
     br_connection_src += [
@@ -45,7 +46,7 @@ if (!support_bluetooth) {
     br_connection_inc += [
       "$dsoftbus_root_path/core/connection/br/include",
       "$dsoftbus_root_path/core/common/include",
-      "//third_party/cJSON",
     ]
+    br_connection_external_deps += [ "cJSON:cjson" ]
   }
 }

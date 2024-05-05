@@ -48,7 +48,7 @@ public:
     virtual int32_t OnChannelMsgReceived(int32_t channelId, int32_t channelType, const void *data,
                                          uint32_t len, int32_t type);
 
-    virtual int32_t OnChannelClosed(int32_t channelId, int32_t channelType);
+    virtual int32_t OnChannelClosed(int32_t channelId, int32_t channelType, int32_t messageType);
 
     virtual int32_t OnChannelQosEvent(int32_t channelId, int32_t channelType, int32_t eventId, int32_t tvCount,
                                       const QosTv *tvList);

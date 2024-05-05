@@ -113,6 +113,7 @@ ohos_fuzztest("SoftbusClientStubFuzzTest") {
       "$dsoftbus_root_path/tests/sdk/frame/fuzztest/softbusclientstub_fuzzer"
   include_dirs = [
     "../../../../../adapter/common/include",
+    "../../../../../core/common/dfx/interface/include",
     "../../../../../core/common/include",
     "../../../../../core/common/inner_communication",
     "../../../../../interfaces/kits/common",

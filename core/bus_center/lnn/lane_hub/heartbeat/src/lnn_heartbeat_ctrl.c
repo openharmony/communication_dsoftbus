@@ -209,7 +209,7 @@ static void HbConditionChanged(bool isOnlySetState)
     }
 }
 
-static uint64_t GetDisEnableBleDiscoveryTime(int64_t modeDuration)
+static uint64_t GetDisEnableBleDiscoveryTime(uint64_t modeDuration)
 {
     uint64_t timeout = 0ULL;
     if (modeDuration < MIN_DISABLE_BLE_DISCOVERY_TIME) {
@@ -239,7 +239,7 @@ void LnnRequestBleDiscoveryProcess(int32_t strategy, int64_t timeout)
             LNN_LOGI(LNN_HEART_BEAT, "ble has been requestDisabled, need wait timeout or enabled");
             return;
         }
-        uint64_t time = GetDisEnableBleDiscoveryTime(timeout);
+        uint64_t time = GetDisEnableBleDiscoveryTime((uint64_t)timeout);
         if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), RequestEnableDiscovery, NULL, time) !=
             SOFTBUS_OK) {
             LNN_LOGI(LNN_HEART_BEAT, "ble has been requestDisabled fail, due to async callback fail");
@@ -554,6 +554,28 @@ static void HbOOBEStateEventHandler(const LnnEventBasicInfo *info)
     }
 }
 
+static void HbLpEventHandler(const LnnEventBasicInfo *info)
+{
+    if (info == NULL || info->event != LNN_EVENT_LP_EVENT_REPORT) {
+        LNN_LOGE(LNN_HEART_BEAT, "lp report evt handler get invalid param");
+        return;
+    }
+    const LnnLpReportEvent *event = (const LnnLpReportEvent *)info;
+    SoftBusLpEventType type = (SoftBusLpEventType)event->type;
+    switch (type) {
+        case SOFTBUS_MSDP_MOVEMENT_AND_STATIONARY:
+            LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_MSDP_MOVEMENT_AND_STATIONARY");
+            int32_t ret = LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false);
+            if (ret != SOFTBUS_OK) {
+                LNN_LOGE(LNN_HEART_BEAT, "start ble heartbeat failed, ret=%{public}d", ret);
+                return;
+            }
+            break;
+        default:
+            LNN_LOGE(LNN_HEART_BEAT, "lp evt handler get invalid type = %{public}d", type);
+    }
+}
+
 static void HbTryRecoveryNetwork(void)
 {
     if (SoftBusGetBtState() == BLE_ENABLE) {
@@ -832,12 +854,29 @@ static void LnnHbUnsubscribeTask(void)
     LnnDcUnsubscribe(&g_dcTask);
 }
 
-int32_t LnnInitHeartbeat(void)
+static int32_t LnnRegisterCommonEvent(void)
 {
-    if (LnnHbStrategyInit() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "strategy module init fail");
+    if (LnnRegisterEventHandler(LNN_EVENT_SCREEN_STATE_CHANGED, HbScreenStateChangeEventHandler) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "regist screen state change evt handler fail");
         return SOFTBUS_ERR;
     }
+    if (LnnRegisterEventHandler(LNN_EVENT_SCREEN_LOCK_CHANGED, HbScreenLockChangeEventHandler) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "regist screen lock state change evt handler fail");
+        return SOFTBUS_ERR;
+    }
+    if (LnnRegisterEventHandler(LNN_EVENT_NIGHT_MODE_CHANGED, HbNightModeStateEventHandler) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "regist night mode state evt handler fail");
+        return SOFTBUS_ERR;
+    }
+    if (LnnRegisterEventHandler(LNN_EVENT_OOBE_STATE_CHANGED, HbOOBEStateEventHandler) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "regist OOBE state evt handler fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t LnnRegisterNetworkEvent(void)
+{
     if (LnnRegisterEventHandler(LNN_EVENT_IP_ADDR_CHANGED, HbIpAddrChangeEventHandler) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "regist ip addr change evt handler fail");
         return SOFTBUS_ERR;
@@ -846,20 +885,17 @@ int32_t LnnInitHeartbeat(void)
         LNN_LOGE(LNN_INIT, "regist bt state change evt handler fail");
         return SOFTBUS_ERR;
     }
+    return SOFTBUS_OK;
+}
+
+static int32_t LnnRegisterHeartbeatEvent(void)
+{
     if (LnnRegisterEventHandler(LNN_EVENT_NODE_MASTER_STATE_CHANGED, HbMasterNodeChangeEventHandler) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "regist node state change evt handler fail");
         return SOFTBUS_ERR;
     }
-    if (LnnRegisterEventHandler(LNN_EVENT_SCREEN_STATE_CHANGED, HbScreenStateChangeEventHandler) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "regist screen state change evt handler fail");
-        return SOFTBUS_ERR;
-    }
     if (LnnRegisterEventHandler(LNN_EVENT_HOME_GROUP_CHANGED, HbHomeGroupStateChangeEventHandler) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "regist homeGroup state change evt handler fail");
-        return SOFTBUS_ERR;
-    }
-    if (LnnRegisterEventHandler(LNN_EVENT_SCREEN_LOCK_CHANGED, HbScreenLockChangeEventHandler) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "regist screen lock state change evt handler fail");
         return SOFTBUS_ERR;
     }
     if (LnnRegisterEventHandler(LNN_EVENT_ACCOUNT_CHANGED, HbAccountStateChangeEventHandler) != SOFTBUS_OK) {
@@ -874,12 +910,29 @@ int32_t LnnInitHeartbeat(void)
         LNN_LOGE(LNN_INIT, "regist user background evt handler fail");
         return SOFTBUS_ERR;
     }
-    if (LnnRegisterEventHandler(LNN_EVENT_NIGHT_MODE_CHANGED, HbNightModeStateEventHandler) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "regist night mode state evt handler fail");
+    if (LnnRegisterEventHandler(LNN_EVENT_LP_EVENT_REPORT, HbLpEventHandler) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "regist lp report evt handler fail");
         return SOFTBUS_ERR;
     }
-    if (LnnRegisterEventHandler(LNN_EVENT_OOBE_STATE_CHANGED, HbOOBEStateEventHandler) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_INIT, "regist OOBE state evt handler fail");
+    return SOFTBUS_OK;
+}
+
+int32_t LnnInitHeartbeat(void)
+{
+    if (LnnHbStrategyInit() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "strategy module init fail");
+        return SOFTBUS_ERR;
+    }
+    if (LnnRegisterCommonEvent() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "regist common event handler fail");
+        return SOFTBUS_ERR;
+    }
+    if (LnnRegisterNetworkEvent() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "regist network event handler fail");
+        return SOFTBUS_ERR;
+    }
+    if (LnnRegisterHeartbeatEvent() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "regist heartbeat event handler fail");
         return SOFTBUS_ERR;
     }
     InitHbConditionState();
@@ -908,6 +961,7 @@ void LnnDeinitHeartbeat(void)
     LnnUnregisterEventHandler(LNN_EVENT_USER_STATE_CHANGED, HbUserBackgroundEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_NIGHT_MODE_CHANGED, HbNightModeStateEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_OOBE_STATE_CHANGED, HbOOBEStateEventHandler);
+    LnnUnregisterEventHandler(LNN_EVENT_LP_EVENT_REPORT, HbLpEventHandler);
 }
 
 int32_t LnnTriggerDataLevelHeartBeat()

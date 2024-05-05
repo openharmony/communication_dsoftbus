@@ -81,14 +81,13 @@ static int32_t GetRemoteUdidByBtMac(const char *peerMac, char *udid, int32_t len
     char networkId[NETWORK_ID_BUF_LEN] = {0};
     char *tmpMac = NULL;
     Anonymize(peerMac, &tmpMac);
-    TRANS_LOGI(TRANS_CTRL, "peerMac=%{public}s", tmpMac);
     AnonymizeFree(tmpMac);
     if (LnnGetNetworkIdByBtMac(peerMac, networkId, sizeof(networkId)) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "LnnGetNetworkIdByBtMac fail");
+        TRANS_LOGE(TRANS_CTRL, "LnnGetNetworkIdByBtMac fail, peerMac=%{public}s", tmpMac);
         return SOFTBUS_NOT_FIND;
     }
     if (LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, udid, len) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "LnnGetRemoteStrInfo UDID fail");
+        TRANS_LOGE(TRANS_CTRL, "LnnGetRemoteStrInfo UDID fail, peerMac=%{public}s", tmpMac);
         return SOFTBUS_ERR;
     }
     return SOFTBUS_OK;
@@ -142,7 +141,7 @@ static int32_t TransProxyGetAuthConnInfo(uint32_t connId, AuthConnInfo *connInfo
                 return SOFTBUS_MEM_ERR;
             }
             connInfo->info.bleInfo.protocol = info.bleInfo.protocol;
-            connInfo->info.bleInfo.psm = info.bleInfo.psm;
+            connInfo->info.bleInfo.psm = (int32_t)info.bleInfo.psm;
             break;
         default:
             TRANS_LOGE(TRANS_CTRL, "unexpected conn type=%{public}d.", info.type);
@@ -183,30 +182,54 @@ static int32_t ConvertBleConnInfo2BrConnInfo(AuthConnInfo *connInfo)
     return SOFTBUS_OK;
 }
 
-static int32_t GetAuthIdByHandshakeMsg(uint32_t connId, uint8_t cipher, AuthHandle *authHandle)
+static int32_t GetAuthIdByHandshakeMsg(uint32_t connId, uint8_t cipher, AuthHandle *authHandle, int32_t index)
 {
     AuthConnInfo connInfo;
     if (TransProxyGetAuthConnInfo(connId, &connInfo) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get connInfo fail connId=%{public}d", connId);
         return SOFTBUS_ERR;
     }
-    TRANS_LOGI(TRANS_CTRL, "cipher=%{public}d, connInfoType=%{public}d", cipher, connInfo.type);
     bool isBle = ((cipher & USE_BLE_CIPHER) != 0);
     if (isBle && connInfo.type == AUTH_LINK_TYPE_BR) {
         if (ConvertBrConnInfo2BleConnInfo(&connInfo) != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "ConvertBrConnInfo2BleConnInfo fail");
+            TRANS_LOGE(TRANS_CTRL, "ConvertBrConnInfo2BleConnInfo fail, connInfoType=%{public}d", connInfo.type);
             return SOFTBUS_ERR;
         }
     } else if (!isBle && connInfo.type == AUTH_LINK_TYPE_BLE) {
         if (ConvertBleConnInfo2BrConnInfo(&connInfo) != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "ConvertBleConnInfo2BrConnInfo fail");
+            TRANS_LOGE(TRANS_CTRL, "ConvertBleConnInfo2BrConnInfo fail, connInfoType=%{public}d", connInfo.type);
             return SOFTBUS_ERR;
         }
     }
     bool isAuthServer = !((cipher & AUTH_SERVER_SIDE) != 0);
     authHandle->type = connInfo.type;
     authHandle->authId = AuthGetIdByConnInfo(&connInfo, isAuthServer, false);
+    if (authHandle->authId == AUTH_INVALID_ID) {
+        if (AuthGetAuthHandleByIndex(&connInfo, isAuthServer, index, authHandle) != SOFTBUS_OK &&
+            AuthGetAuthHandleByIndex(&connInfo, !isAuthServer, index, authHandle) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get auth handle fail");
+            return SOFTBUS_NOT_FIND;
+        }
+    }
     return SOFTBUS_OK;
+}
+
+static int32_t GetAuthIdReDecrypt(AuthHandle *authHandle, ProxyMessage *msg, uint8_t *decData, uint32_t *decDataLen)
+{
+    AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    int32_t ret = TransProxyGetAuthConnInfo(msg->connId, &connInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get connInfo fail connId=%{public}d", msg->connId);
+        return ret;
+    }
+    int32_t index = (int32_t)SoftBusLtoHl(*(uint32_t *)msg->data);
+    if (AuthGetAuthHandleByIndex(&connInfo, false, index, authHandle) != SOFTBUS_OK &&
+        AuthGetAuthHandleByIndex(&connInfo, true, index, authHandle) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get auth handle fail");
+        return SOFTBUS_NOT_FIND;
+    }
+    return AuthDecrypt(authHandle, (uint8_t *)msg->data, (uint32_t)msg->dateLen, decData, decDataLen);
 }
 
 int32_t GetBrMacFromConnInfo(uint32_t connId, char *peerBrMac, uint32_t len)
@@ -238,27 +261,28 @@ int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg)
     }
     if ((msg->msgHead.cipher & ENCRYPTED) != 0) {
         int32_t ret;
-        AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
+        AuthHandle auth = { .authId = AUTH_INVALID_ID };
         if (msg->msgHead.type == PROXYCHANNEL_MSG_TYPE_HANDSHAKE) {
-            TRANS_LOGI(TRANS_CTRL, "prxoy recv handshake cipher=0x%{public}02x", msg->msgHead.cipher);
-            ret = GetAuthIdByHandshakeMsg(msg->connId, msg->msgHead.cipher, &authHandle);
+            TRANS_LOGD(TRANS_CTRL, "prxoy recv handshake cipher=0x%{public}02x", msg->msgHead.cipher);
+            ret = GetAuthIdByHandshakeMsg(msg->connId, msg->msgHead.cipher, &auth,
+                (int32_t)SoftBusLtoHl(*(uint32_t *)msg->data));
         } else {
-            ret = TransProxyGetAuthId(msg->msgHead.myId, &authHandle);
+            ret = TransProxyGetAuthId(msg->msgHead.myId, &auth);
         }
-        if (ret != SOFTBUS_OK || authHandle.authId == AUTH_INVALID_ID) {
+        if (ret != SOFTBUS_OK || auth.authId == AUTH_INVALID_ID) {
             TRANS_LOGE(TRANS_CTRL, "get authId fail, connId=%{public}d, myChannelId=%{public}d, type=%{public}d",
                 msg->connId, msg->msgHead.myId, msg->msgHead.type);
             return SOFTBUS_AUTH_NOT_FOUND;
         }
-        msg->authHandle = authHandle;
+        msg->authHandle = auth;
         uint32_t decDataLen = AuthGetDecryptSize((uint32_t)msg->dateLen);
         uint8_t *decData = (uint8_t *)SoftBusCalloc(decDataLen);
         if (decData == NULL) {
             return SOFTBUS_MALLOC_ERR;
         }
         msg->keyIndex = (int32_t)SoftBusLtoHl(*(uint32_t *)msg->data);
-        if (AuthDecrypt(&authHandle, (uint8_t *)msg->data, (uint32_t)msg->dateLen,
-            decData, &decDataLen) != SOFTBUS_OK) {
+        if (AuthDecrypt(&auth, (uint8_t *)msg->data, (uint32_t)msg->dateLen, decData, &decDataLen) != SOFTBUS_OK &&
+            GetAuthIdReDecrypt(&auth, msg, decData, &decDataLen) != SOFTBUS_OK) {
             SoftBusFree(decData);
             TRANS_LOGE(TRANS_CTRL, "parse msg decrypt fail");
             return SOFTBUS_DECRYPT_ERR;
@@ -423,7 +447,7 @@ static int32_t PackHandshakeMsgForNormal(SessionKeyBase64 *sessionBase64, AppInf
     (void)AddNumberToJsonObject(root, JSON_KEY_TRANS_FLAGS, TRANS_FLAG_HAS_CHANNEL_AUTH);
     (void)AddNumberToJsonObject(root, JSON_KEY_MY_HANDLE_ID, appInfo->myHandleId);
     (void)AddNumberToJsonObject(root, JSON_KEY_PEER_HANDLE_ID, appInfo->peerHandleId);
-    (void)AddNumberToJsonObject(root, JSON_KEY_FIRST_TOKEN_ID, appInfo->firstTokenId);
+    (void)AddNumberToJsonObject(root, JSON_KEY_FIRST_TOKEN_ID, (int32_t)appInfo->firstTokenId);
     return SOFTBUS_OK;
 }
 
@@ -615,7 +639,7 @@ int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanI
         return SOFTBUS_PARSE_JSON_ERR;
     }
     if (!GetJsonObjectNumberItem(root, JSON_KEY_MTU_SIZE, (int32_t *)&(appInfo->peerData.dataConfig))) {
-        TRANS_LOGE(TRANS_CTRL, "peer dataconfig is null.");
+        TRANS_LOGD(TRANS_CTRL, "peer dataconfig is null.");
     }
     appInfo->encrypt = APP_INFO_FILE_FEATURES_SUPPORT;
     appInfo->algorithm = APP_INFO_ALGORITHM_AES_GCM_256;
@@ -734,7 +758,7 @@ static int32_t TransProxyUnpackNormalHandshakeMsg(cJSON *root, AppInfo *appInfo,
         TRANS_LOGE(TRANS_CTRL, "unpack fast data failed");
         return SOFTBUS_TRANS_PROXY_UNPACK_FAST_DATA_FAILED;
     }
-    if (!GetJsonObjectNumberItem(root, JSON_KEY_FIRST_TOKEN_ID, &appInfo->firstTokenId)) {
+    if (!GetJsonObjectNumberItem(root, JSON_KEY_FIRST_TOKEN_ID, (int32_t *)&appInfo->firstTokenId)) {
         appInfo->firstTokenId = 0;
     }
     return SOFTBUS_OK;
@@ -816,7 +840,7 @@ int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, in
     }
 
     GetJsonObjectNumberItem(root, JSON_KEY_TRANS_FLAGS, &appInfo->transFlag);
-    if ((appInfo->transFlag & TRANS_FLAG_HAS_CHANNEL_AUTH) != 0) {
+    if (((uint32_t)appInfo->transFlag & TRANS_FLAG_HAS_CHANNEL_AUTH) != 0) {
         GetJsonObjectNumber64Item(root, JSON_KEY_AUTH_SEQ, &appInfo->authSeq);
     }
 

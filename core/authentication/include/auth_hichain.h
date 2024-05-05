@@ -32,7 +32,7 @@ extern "C" {
 
 typedef struct {
     void (*onGroupCreated)(const char *groupId, int32_t groupType);
-    void (*onGroupDeleted)(const char *groupId);
+    void (*onGroupDeleted)(const char *groupId, int32_t groupType);
     void (*onDeviceNotTrusted)(const char *udid);
     void (*onDeviceBound)(const char *udid, const char *groupInfo);
 } TrustDataChangeListener;

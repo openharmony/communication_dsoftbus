@@ -404,7 +404,7 @@ HWTEST_F(LedgerLaneHubTest, LEDGER_GetDistributedLedgerInfo_Test_001, TestSize.L
     EXPECT_TRUE(strcmp(macAddr, NODE1_BT_MAC) == 0);
 
     // NUM_KEY_NET_CAP
-    ret = LnnGetRemoteNumInfo(NODE1_NETWORK_ID, NUM_KEY_NET_CAP, (int32_t *)&cap);
+    ret = LnnGetRemoteNumU32Info(NODE1_NETWORK_ID, NUM_KEY_NET_CAP, &cap);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     EXPECT_TRUE((cap & (1 << BIT_BR)) != 0);
 

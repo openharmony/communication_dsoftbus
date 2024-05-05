@@ -387,8 +387,8 @@ HWTEST_F(LaneTest, TRANS_LANE_ALLOC_Test_001, TestSize.Level1)
     allocInfo.qosRequire.maxLaneLatency = DEFAULT_QOSINFO_MAX_LATENCY;
     allocInfo.qosRequire.minLaneLatency = DEFAULT_QOSINFO_MIN_LATENCY;
     LaneAllocListener listener = {
-        .OnLaneAllocSuccess = OnLaneRequestSuccess,
-        .OnLaneAllocFail = OnLaneRequestFail,
+        .onLaneAllocSuccess = OnLaneRequestSuccess,
+        .onLaneAllocFail = OnLaneRequestFail,
     };
     ret = laneManager->lnnAllocLane(laneReqId, &allocInfo, &listener);
     EXPECT_TRUE(ret == SOFTBUS_OK);

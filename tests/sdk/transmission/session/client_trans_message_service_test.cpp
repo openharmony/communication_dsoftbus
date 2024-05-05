@@ -29,6 +29,11 @@
 #include "client_trans_session_manager.h"
 #include "softbus_common.h"
 #include "trans_log.h"
+#include "softbus_feature_config.h"
+#include "softbus_conn_interface.h"
+#include "auth_interface.h"
+#include "bus_center_manager.h"
+#include "trans_session_service.h"
 
 
 #define TRANS_TEST_SESSION_ID 10
@@ -75,13 +80,21 @@ public:
 
 void TransClientMsgServiceTest::SetUpTestCase(void)
 {
-    InitSoftBusServer();
+    SoftbusConfigInit();
+    ConnServerInit();
+    AuthInit();
+    BusCenterServerInit();
+    TransServerInit();
     int32_t ret = TransClientInit();
     ASSERT_EQ(ret,  SOFTBUS_OK);
 }
 
 void TransClientMsgServiceTest::TearDownTestCase(void)
 {
+    ConnServerDeinit();
+    AuthDeinit();
+    BusCenterServerDeinit();
+    TransServerDeinit();
 }
 
 static int OnSessionOpened(int sessionId, int result)

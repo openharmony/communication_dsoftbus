@@ -393,14 +393,17 @@ static void BleDisconnectServerCallback(int connId, int serverId, const BdAddr *
         return;
     }
 
-    SoftBusGattsCallback callback = { 0 };
-    FindCallbackByConnId(connId, &callback);
-    if (callback.DisconnectServerCallback == NULL) {
-        CONN_LOGI(CONN_BLE, "find callback by connId %{public}d failed", connId);
+    SoftBusGattsManager *nodes = NULL;
+    int num = GetAllManager(&nodes);
+    if (num == 0 || nodes == NULL) {
+        CONN_LOGE(CONN_BLE, "get manager failed");
         return;
     }
+    for (int i = 0; i < num; i++) {
+        nodes[i].callback.DisconnectServerCallback(connId, (SoftBusBtAddr *)bdAddr);
+    }
+    SoftBusFree(nodes);
     RemoveConnId(connId);
-    callback.DisconnectServerCallback(connId, (SoftBusBtAddr *)bdAddr);
 }
 
 static void BleServiceAddCallback(int status, int serverId, BtUuid *uuid, int srvcHandle)

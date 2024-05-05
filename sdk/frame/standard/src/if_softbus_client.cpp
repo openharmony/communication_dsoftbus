@@ -67,7 +67,7 @@ int32_t ISoftBusClient::OnChannelMsgReceived(int32_t channelId, int32_t channelT
     return SOFTBUS_OK;
 }
 
-int32_t ISoftBusClient::OnChannelClosed(int32_t channelId, int32_t channelType)
+int32_t ISoftBusClient::OnChannelClosed(int32_t channelId, int32_t channelType, int32_t messageType)
 {
     COMM_LOGI(COMM_EVENT, "ipc default impl");
     return SOFTBUS_OK;

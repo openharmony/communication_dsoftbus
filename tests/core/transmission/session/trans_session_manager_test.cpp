@@ -22,6 +22,11 @@
 #include "softbus_server_frame.h"
 #include "softbus_adapter_mem.h"
 #include "trans_session_manager.h"
+#include "softbus_feature_config.h"
+#include "softbus_conn_interface.h"
+#include "auth_interface.h"
+#include "bus_center_manager.h"
+#include "trans_session_service.h"
 
 #define TRANS_TEST_INVALID_PID (-1)
 #define TRANS_TEST_INVALID_UID (-1)
@@ -51,11 +56,19 @@ public:
 
 void TransSessionManagerTest::SetUpTestCase(void)
 {
-    InitSoftBusServer();
+    SoftbusConfigInit();
+    ConnServerInit();
+    AuthInit();
+    BusCenterServerInit();
+    TransServerInit();
 }
 
 void TransSessionManagerTest::TearDownTestCase(void)
 {
+    ConnServerDeinit();
+    AuthDeinit();
+    BusCenterServerDeinit();
+    TransServerDeinit();
 }
 
 /**

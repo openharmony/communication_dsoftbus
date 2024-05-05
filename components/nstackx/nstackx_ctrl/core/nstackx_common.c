@@ -1402,8 +1402,7 @@ static int32_t NSTACKX_SendMsgParamCheck(const char *moduleName, const char *dev
     return NSTACKX_EOK;
 }
 
-static int MsgCtxInit(MsgCtx *msg, const char *moduleName, const char *deviceId,
-    const uint8_t *data, uint32_t len, uint8_t type)
+static int MsgCtxInit(MsgCtx *msg, const char *moduleName, const char *deviceId, const uint8_t *data, uint32_t len)
 {
     if (SemInit(&msg->wait, 0, 0)) {
         DFINDER_LOGE(TAG, "sem init fail");
@@ -1414,7 +1413,6 @@ static int MsgCtxInit(MsgCtx *msg, const char *moduleName, const char *deviceId,
     msg->moduleName = moduleName;
     msg->data = data;
     msg->len = len;
-    msg->type = type;
     msg->err = NSTACKX_EOK;
 
     return NSTACKX_EOK;
@@ -1451,8 +1449,8 @@ int32_t NSTACKX_SendMsgDirect(const char *moduleName, const char *deviceId, cons
         return NSTACKX_EINVAL;
     }
     directMsg.ipStr = ipaddr;
-
-    if (MsgCtxInit(&directMsg.msg, moduleName, deviceId, data, len, type) != NSTACKX_EOK) {
+    directMsg.msg.type = type;
+    if (MsgCtxInit(&directMsg.msg, moduleName, deviceId, data, len) != NSTACKX_EOK) {
         return NSTACKX_EFAILED;
     }
 
@@ -1516,7 +1514,8 @@ int32_t NSTACKX_SendMsg(const char *moduleName, const char *deviceId, const uint
     }
 
     MsgCtx msg;
-    if (MsgCtxInit(&msg, moduleName, deviceId, data, len, INVALID_TYPE) != NSTACKX_EOK) {
+    msg.type = INVALID_TYPE;
+    if (MsgCtxInit(&msg, moduleName, deviceId, data, len) != NSTACKX_EOK) {
         return NSTACKX_EFAILED;
     }
 

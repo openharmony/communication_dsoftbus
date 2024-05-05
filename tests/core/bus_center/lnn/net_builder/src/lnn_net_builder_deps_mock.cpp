@@ -118,6 +118,11 @@ int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
     return GetNetBuilderDepsInterface()->LnnGetLocalNumInfo(key, info);
 }
 
+int32_t LnnGetLocalNumU32Info(InfoKey key, uint32_t *info)
+{
+    return GetNetBuilderDepsInterface()->LnnGetLocalNumU32Info(key, info);
+}
+
 int32_t LnnGetNetworkIdByUdid(const char *udid, char *buf, uint32_t len)
 {
     return GetNetBuilderDepsInterface()->LnnGetNetworkIdByUdid(udid, buf, len);
@@ -131,6 +136,11 @@ int32_t LnnGetRemoteStrInfo(const char *netWorkId, InfoKey key, char *info, uint
 int32_t LnnGetRemoteNumInfo(const char *netWorkId, InfoKey key, int32_t *info)
 {
     return GetNetBuilderDepsInterface()->LnnGetRemoteNumInfo(netWorkId, key, info);
+}
+
+int32_t LnnGetRemoteNumU32Info(const char *netWorkId, InfoKey key, uint32_t *info)
+{
+    return GetNetBuilderDepsInterface()->LnnGetRemoteNumU32Info(netWorkId, key, info);
 }
 
 bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2, bool isShort)

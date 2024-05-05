@@ -34,8 +34,7 @@
 #include "softbus_wifi_api_adapter.h"
 #include "softbus_json_utils.h"
 #include "softbus_def.h"
-#include "wifi_direct_types.h"
-#include "wifi_direct_p2p_adapter.h"
+#include "wifi_direct_manager.h"
 
 #define MSG_LEN 10
 #define BITS 8
@@ -290,7 +289,7 @@ static void GetNetworkCapability(SoftBusWifiState wifiState, uint32_t *capabilit
             g_isWifiEnable = false;
             if (!g_isApEnable) {
                 LnnClearNetworkCapability(capability);
-                if (!GetWifiDirectP2pAdapter()->isWifiP2pEnabled()) {
+                if (!GetWifiDirectManager()->isWifiP2pEnabled()) {
                     (void)LnnClearNetCapability(capability, BIT_WIFI_P2P);
                 }
             }
@@ -325,7 +324,7 @@ static void WifiStateEventHandler(const LnnEventBasicInfo *info)
     const LnnMonitorWlanStateChangedEvent *event = (const LnnMonitorWlanStateChangedEvent *)info;
     SoftBusWifiState wifiState = (SoftBusWifiState)event->status;
     uint32_t netCapability = 0;
-    if (LnnGetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t *)&netCapability) != SOFTBUS_OK) {
+    if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &netCapability) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "wifi state handler get capability fail from local.");
         return;
     }
@@ -346,7 +345,7 @@ static void BtStateChangeEventHandler(const LnnEventBasicInfo *info)
         return;
     }
     uint32_t netCapability = 0;
-    if (LnnGetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t *)&netCapability) != SOFTBUS_OK) {
+    if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &netCapability) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get netcap fail");
         return;
     }
