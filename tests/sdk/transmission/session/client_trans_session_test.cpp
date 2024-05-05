@@ -230,7 +230,7 @@ static SessionInfo *TestGenerateSession(const SessionParam *param)
     session->algorithm = TRANS_TEST_ALGORITHM;
     session->fileEncrypt = TRANS_TEST_FILE_ENCRYPT;
     session->crc = TRANS_TEST_CRC;
-    session->sessionState = SESSION_STATE_INIT;
+    session->lifecycle.sessionState = SESSION_STATE_INIT;
     return session;
 }
 
