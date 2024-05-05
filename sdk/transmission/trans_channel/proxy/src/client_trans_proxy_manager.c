@@ -900,7 +900,7 @@ int32_t TransProxyPackAndSendData(
     }
 
     uint32_t sliceNum = (dataInfo.outLen + (uint32_t)(SLICE_LEN - 1)) / (uint32_t)SLICE_LEN;
-    for (int i = 0; i < sliceNum; i++) {
+    for (uint32_t i = 0; i < sliceNum; i++) {
         uint32_t dataLen = (i == (sliceNum - 1U)) ? (dataInfo.outLen - i * SLICE_LEN) : SLICE_LEN;
         int32_t offset = (int32_t)(i * SLICE_LEN);
 
