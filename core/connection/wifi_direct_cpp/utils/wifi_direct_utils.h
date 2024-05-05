@@ -58,6 +58,7 @@ public:
     static std::vector<uint8_t> GetLocalPtk(const std::string &remoteNetworkId);
     static std::vector<uint8_t> GetRemotePtk(const std::string &remoteNetworkId);
     static bool IsRemoteSupportTlv(const std::string &remoteDeviceId);
+    static bool IsLocalSupportTlv();
 
     static std::vector<uint8_t> MacStringToArray(const std::string &macString);
     static std::string MacArrayToString(const std::vector<uint8_t> &macArray);

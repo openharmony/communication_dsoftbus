@@ -104,6 +104,10 @@ void JsonProtocol::SetInput(const std::vector<uint8_t> &input)
     inputString.insert(inputString.end(), input.begin(), input.end());
     jsonObject_ = nlohmann::json::parse(inputString, nullptr, false, false);
     readPos_ = jsonObject_.begin();
+    if (jsonObject_.is_discarded()) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "parse json failed");
+        readPos_ = jsonObject_.end();
+    }
 }
 
 void JsonProtocol::GetOutput(std::vector<uint8_t> &output)
