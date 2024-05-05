@@ -424,7 +424,7 @@ static int32_t NotifyUpdateConnectionRc(uint32_t connectionId, int32_t delta)
         CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_UPDATE_CONNECTION_RC, extra);
         return (int32_t)seq;
     }
-    extra.errcode = ConnBrPostBytes(connectionId, data, dataLen, 0, flag, MODULE_CONNECTION, seq);
+    extra.errcode = ConnBrPostBytes(connectionId, data, dataLen, 0, ctx.flag, MODULE_CONNECTION, seq);
     extra.result = extra.errcode == SOFTBUS_OK ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_UPDATE_CONNECTION_RC, extra);
     return extra.errcode;
