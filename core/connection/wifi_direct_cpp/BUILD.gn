@@ -98,6 +98,7 @@ ohos_static_library("wifi_direct") {
       "$wifi_direct_path/wifi_direct_initiator.cpp",
       "$wifi_direct_path/wifi_direct_ip_manager.cpp",
       "$wifi_direct_path/wifi_direct_manager.cpp",
+      "$wifi_direct_path/wifi_direct_role_option.cpp",
       "$wifi_direct_path/wifi_direct_scheduler.cpp",
     ]
 
