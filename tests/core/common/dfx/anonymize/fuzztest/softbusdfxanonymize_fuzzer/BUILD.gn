@@ -15,17 +15,17 @@
 import("//build/config/features.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
-import("../../../../../../core/common/dfx/dsoftbus_dfx.gni")
+import("../../../../../../../core/common/dfx/dsoftbus_dfx.gni")
 
 ##############################fuzztest##########################################
 
-dsoftbus_root_path = "../../../../../.."
+dsoftbus_root_path = "../../../../../../.."
 
 ohos_fuzztest("SoftBusDfxAnonymizeFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
 
   fuzz_config_file =
-      "$dsoftbus_root_path/tests/core/common/dfx/anonymize/fuzztest"
+      "$dsoftbus_root_path/tests/core/common/dfx/anonymize/fuzztest/softbusdfxanonymize_fuzzer"
 
   sources = [ "softbusdfxanonymize_fuzzer.cpp" ]
 
