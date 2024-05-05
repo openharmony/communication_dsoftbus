@@ -39,7 +39,7 @@ static void OnDataReceived(int32_t channelId, const char *data, uint32_t len)
     ProtocolType type { ProtocolType::JSON };
     auto channel = std::make_shared<CoCProxyNegotiateChannel>(channelId);
     auto remoteDeviceId = channel->GetRemoteDeviceId();
-    if (WifiDirectUtils::IsRemoteSupportTlv(remoteDeviceId)) {
+    if (WifiDirectUtils::IsLocalSupportTlv() && WifiDirectUtils::IsRemoteSupportTlv(remoteDeviceId)) {
         type = ProtocolType::TLV;
     }
 
@@ -100,7 +100,7 @@ int CoCProxyNegotiateChannel::SendMessage(const NegotiateMessage &msg) const
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "msgType=%{public}s", msg.MessageTypeToString().c_str());
     ProtocolType type { ProtocolType::JSON };
-    if (WifiDirectUtils::IsRemoteSupportTlv(remoteDeviceId_)) {
+    if (WifiDirectUtils::IsLocalSupportTlv() && WifiDirectUtils::IsRemoteSupportTlv(remoteDeviceId_)) {
         type = ProtocolType::TLV;
     }
     auto *protocol = WifiDirectProtocolFactory::CreateProtocol(type);
