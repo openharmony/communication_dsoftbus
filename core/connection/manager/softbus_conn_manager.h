@@ -96,7 +96,7 @@ typedef struct {
      * @return <b>SOFTBUS_OK</b> if local listeners start successfully.
      */
     int32_t (*StopLocalListening)(const LocalListenerInfo *info);
-    bool (*CheckActiveConnection)(const ConnectOption *info);
+    bool (*CheckActiveConnection)(const ConnectOption *info, bool needOccupy);
     int32_t (*UpdateConnection)(uint32_t connectionId, UpdateOption *option);
 
     /**

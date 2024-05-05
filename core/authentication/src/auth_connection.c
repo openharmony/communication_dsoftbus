@@ -720,7 +720,7 @@ bool CheckActiveAuthConnection(const AuthConnInfo *connInfo)
     {
         connOpt.bleOption.protocol = BLE_PROTOCOL_ANY;
     }
-    return CheckActiveConnection(&connOpt);
+    return CheckActiveConnection(&connOpt, true);
 }
 
 int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port)
