@@ -29,6 +29,7 @@ declare_args() {
   dsoftbus_get_devicename = true
   softbus_communication_wifi_feature = true
   softbus_os_account = true
+  dsoftbus_feature_lnn_cloud_sync = true
 }
 
 if (defined(global_parts_info) &&
@@ -72,4 +73,11 @@ if (defined(ohos_lite)) {
   import("//build/ohos.gni")
   import(
       "$dsoftbus_feature_product_config_path/feature_config/standard/config.gni")
+}
+
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.distributeddatamgr_kv_store)) {
+  dsoftbus_feature_lnn_cloud_sync = false
+} else {
+  dsoftbus_feature_lnn_cloud_sync = true
 }
