@@ -18,7 +18,6 @@
 
 #include "lnn_data_cloud_sync.h"
 #ifdef __cplusplus
-#include "lnn_kv_adapter.h"
 
 extern "C" {
 #endif

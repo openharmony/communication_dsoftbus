@@ -12,66 +12,58 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "lnn_data_cloud_sync.h"
 
-#include "lnn_log.h"
 #include "softbus_errcode.h"
 
 void LnnInitCloudSyncModule(void)
 {
-    LNN_LOGI(LNN_BUILDER, "LnnInitCloudSyncModule not supported");
     return;
 }
 
 void LnnDeInitCloudSyncModule(void)
 {
-    LNN_LOGI(LNN_BUILDER, "LnnDeInitCloudSyncModule not supported");
     return;
 }
 
 int32_t LnnLedgerAllDataSyncToDB(const NodeInfo *info)
 {
-    (void) info;
-    LNN_LOGI(LNN_BUILDER, "LnnLedgerAllDataSyncToDB not supported");
+    (void)info;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t LnnLedgerDataChangeSyncToDB(const char *key, const char *value, size_t valueLength)
 {
-    (void) key;
-    (void) value;
-    (void) valueLength;
-    LNN_LOGI(LNN_BUILDER, "LnnLedgerDataChangeSyncToDB not supported");
+    (void)key;
+    (void)value;
+    (void)valueLength;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t LnnDeleteSyncToDB(void)
 {
-    LNN_LOGI(LNN_BUILDER, "LnnDeleteSyncToDB not supported");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t LnnDBDataChangeSyncToCache(const char *key, const char *value, ChangeType changeType)
 {
-    (void) key;
-    (void) value;
-    (void) changeType;
-    LNN_LOGI(LNN_BUILDER, "LnnDBDataChangeSyncToCache not supported");
+    (void)key;
+    (void)value;
+    (void)changeType;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t LnnDBDataAddChangeSyncToCache(const char **key, const char **value, int32_t keySize)
 {
-    (void) key;
-    (void) value;
-    (void) keySize;
-    LNN_LOGI(LNN_BUILDER, "LnnDBDataAddChangeSyncToCache not supported");
+    (void)key;
+    (void)value;
+    (void)keySize;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t LnnGetAccountIdfromLocalCache(int64_t *buf)
 {
-    (void) buf;
-    LNN_LOGI(LNN_BUILDER, "LnnGetAccountIdfromLocalCache not supported");
+    (void)buf;
     return SOFTBUS_NOT_IMPLEMENT;
 }

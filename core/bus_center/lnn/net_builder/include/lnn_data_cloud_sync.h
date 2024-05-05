@@ -32,14 +32,14 @@ typedef struct {
     char nickName[DEVICE_NAME_BUF_LEN];
     uint16_t deviceTypeId;
     char deviceUdid[UDID_BUF_LEN];
-    char uuid[UUID_BUF_LEN]; // compatible nearby
+    char uuid[UUID_BUF_LEN];
     char softBusVersion[VERSION_MAX_LEN];
-    bool isBleP2p; // true: this device support connect p2p via ble connection
+    bool isBleP2p;
     uint64_t supportedProtocols;
     char pkgVersion[VERSION_MAX_LEN];
     int64_t wifiVersion;
     int64_t bleVersion;
-    char macAddr[MAC_LEN]; // BT_MAC
+    char macAddr[MAC_LEN];
     int64_t accountId;
     uint64_t feature;
     uint64_t connSubFeature;
@@ -49,7 +49,7 @@ typedef struct {
     int32_t stateVersion;
     char p2pMac[MAC_LEN];
     uint8_t peerIrk[LFINDER_IRK_LEN];
-    unsigned char publicAddress[LFINDER_MAC_ADDR_LEN]; // PUB_MAC
+    unsigned char publicAddress[LFINDER_MAC_ADDR_LEN];
     char remotePtk[PTK_DEFAULT_LEN];
     char tableMain[BLE_BROADCAST_IV_LEN + 1];
     int64_t lifeTotal;
@@ -58,7 +58,7 @@ typedef struct {
     unsigned char cipherKey[SESSION_KEY_LENGTH];
     unsigned char cipherIv[BROADCAST_IV_LEN];
     bool distributedSwitch;
-} CloudSyncInfo; // CLOUD_SYNC_DATA
+} CloudSyncInfo;
 
 typedef enum {
     DB_ADD = 0,
@@ -79,4 +79,4 @@ int32_t LnnGetAccountIdfromLocalCache(int64_t *buf);
 }
 #endif
 
-#endif /* LNN_DATA_CLOUD_SYNC_H */
+#endif // LNN_DATA_CLOUD_SYNC_H
