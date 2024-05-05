@@ -103,6 +103,24 @@ int32_t Listen(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISock
     return ClientListen(socket, qos, qosCount, listener);
 }
 
+static int32_t StartBindWaitTimer(int32_t socket, const QosTV qos[], uint32_t qosCount)
+{
+#define DEFAULT_MAX_WAIT_TIMEOUT 30000 // 30s
+    int32_t maxWaitTime;
+    int32_t ret = GetQosValue(qos, qosCount, QOS_TYPE_MAX_WAIT_TIMEOUT, &maxWaitTime, DEFAULT_MAX_WAIT_TIMEOUT);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get max wait timeout fail ret=%{public}d", ret);
+        return ret;
+    }
+
+    if (maxWaitTime <= 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid max wait timeout. maxWaitTime=%{public}d", maxWaitTime);
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    return ClientHandleBindWaitTimer(socket, (uint32_t)maxWaitTime, TIMER_ACTION_START);
+}
+
 int32_t Bind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener)
 {
     TRANS_LOGI(TRANS_SDK, "Bind: socket=%{public}d", socket);
@@ -110,7 +128,16 @@ int32_t Bind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocket
         TRANS_LOGE(TRANS_SDK, "Bind failed, over session num limit");
         return SOFTBUS_TRANS_SESSION_CNT_EXCEEDS_LIMIT;
     }
-    return ClientBind(socket, qos, qosCount, listener, false);
+    int32_t ret = StartBindWaitTimer(socket, qos, qosCount);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "Start timer failed, ret=%{public}d", ret);
+        return ret;
+    }
+
+    ret = ClientBind(socket, qos, qosCount, listener, false);
+    TRANS_LOGI(TRANS_SDK, "Bind end, stop timer, socket=%{public}d", socket);
+    (void)ClientHandleBindWaitTimer(socket, 0, TIMER_ACTION_STOP);
+    return ret;
 }
 
 int32_t BindAsync(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener)
@@ -120,13 +147,26 @@ int32_t BindAsync(int32_t socket, const QosTV qos[], uint32_t qosCount, const IS
         TRANS_LOGE(TRANS_SDK, "Bind async failed, over session num limit");
         return SOFTBUS_TRANS_SESSION_CNT_EXCEEDS_LIMIT;
     }
-    return ClientBind(socket, qos, qosCount, listener, true);
+
+    int32_t ret = StartBindWaitTimer(socket, qos, qosCount);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "Start timer failed, ret=%{public}d, socket=%{public}d", ret, socket);
+        return ret;
+    }
+
+    ret = ClientBind(socket, qos, qosCount, listener, true);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "BindAsync fail, stop timer, ret=%{public}d, socket=%{public}d", ret, socket);
+        (void)ClientHandleBindWaitTimer(socket, 0, TIMER_ACTION_STOP);
+    }
+    return ret;
 }
 
 void Shutdown(int32_t socket)
 {
     TRANS_LOGI(TRANS_SDK, "Shutdown: socket=%{public}d", socket);
-    ClientShutdown(socket);
+    (void)ClientHandleBindWaitTimer(socket, 0, TIMER_ACTION_STOP);
+    ClientShutdown(socket, SOFTBUS_TRANS_STOP_BIND_BY_CANCEL);
 }
 
 int32_t EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos, uint32_t qosCount)

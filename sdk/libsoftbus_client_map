@@ -398,7 +398,9 @@
         "TransSetChannelInfo";
         "ClientTransSetChannelInfo";
         "ClientGetSessionIsAsyncBySessionId";
-        "GetSessionStateAndSessionNameBySessionId";
+        "GetSocketLifecycleAndSessionNameBySessionId";
+        "ClientHandleBindWaitTimer";
+        "ClientSignalSyncBind";
         "DelSessionStateClosing";
         "SetSessionStateBySessionId";
         "EvaluateQos";
