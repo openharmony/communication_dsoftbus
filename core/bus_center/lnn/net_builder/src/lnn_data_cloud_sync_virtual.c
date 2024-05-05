@@ -23,6 +23,12 @@ void LnnInitCloudSyncModule(void)
     return;
 }
 
+void LnnDeInitCloudSyncModule(void)
+{
+    LNN_LOGI(LNN_BUILDER, "LnnDeInitCloudSyncModule not supported");
+    return;
+}
+
 int32_t LnnLedgerAllDataSyncToDB(const NodeInfo *info)
 {
     (void) info;
@@ -51,6 +57,15 @@ int32_t LnnDBDataChangeSyncToCache(const char *key, const char *value, ChangeTyp
     (void) value;
     (void) changeType;
     LNN_LOGI(LNN_BUILDER, "LnnDBDataChangeSyncToCache not supported");
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnDBDataAddChangeSyncToCache(const char **key, const char **value, int32_t keySize)
+{
+    (void) key;
+    (void) value;
+    (void) keySize;
+    LNN_LOGI(LNN_BUILDER, "LnnDBDataAddChangeSyncToCache not supported");
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
