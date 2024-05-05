@@ -314,8 +314,6 @@ int32_t StartBaseClient(ListenerModule module, const SoftbusBaseListener *listen
     CONN_CHECK_AND_RETURN_RET_LOGW(listener->onDataEvent != NULL, SOFTBUS_INVALID_PARAM, CONN_COMMON,
         "listener onDataEvent is null, module=%{public}d", module);
 
-    CONN_LOGI(CONN_COMMON, "receive request, module=%{public}d", module);
-
     SoftbusListenerNode *node = GetOrCreateListenerNode(module);
     CONN_CHECK_AND_RETURN_RET_LOGW(
         node != NULL, SOFTBUS_NOT_FIND, CONN_COMMON, "get listener node failed, module=%{public}d", module);
@@ -443,7 +441,6 @@ int32_t StartBaseListener(const LocalListenerInfo *info, const SoftbusBaseListen
         "listener onDataEvent is null, module=%{public}d", info->socketOption.moduleId);
 
     ListenerModule module = info->socketOption.moduleId;
-    CONN_LOGI(CONN_COMMON, "receive request, module=%{public}d", module);
     SoftbusListenerNode *node = GetOrCreateListenerNode(module);
     CONN_CHECK_AND_RETURN_RET_LOGW(
         node != NULL, SOFTBUS_NOT_FIND, CONN_COMMON, "get listener node failed, module=%{public}d", module);
@@ -595,8 +592,6 @@ int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
     CONN_CHECK_AND_RETURN_RET_LOGW(IsValidTriggerType(trigger), SOFTBUS_INVALID_PARAM, CONN_COMMON,
         "invalid trigger, module=%{public}d, fd=%{public}d, trigger=%{public}d", module, fd, trigger);
 
-    CONN_LOGI(CONN_COMMON,
-        "receive request, module=%{public}d, fd=%{public}d, trigger=%{public}d", module, fd, trigger);
     SoftbusListenerNode *node = GetListenerNode(module);
     CONN_CHECK_AND_RETURN_RET_LOGW(node != NULL, SOFTBUS_NOT_FIND, CONN_COMMON,
         "listener node not exist, module=%{public}d, fd=%{public}d, trigger=%{public}d", module, fd, trigger);
@@ -685,8 +680,6 @@ int32_t DelTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
     CONN_CHECK_AND_RETURN_RET_LOGW(IsValidTriggerType(trigger), SOFTBUS_INVALID_PARAM, CONN_COMMON,
         "invalid trigger, module=%{public}d, fd=%{public}d, trigger=%{public}d", module, fd, trigger);
 
-    CONN_LOGI(CONN_COMMON,
-        "receive request, module=%{public}d, fd=%{public}d, trigger=%{public}d", module, fd, trigger);
     SoftbusListenerNode *node = GetListenerNode(module);
     CONN_CHECK_AND_RETURN_RET_LOGW(node != NULL, SOFTBUS_NOT_FIND, CONN_COMMON,
         "listener node not exist, module=%{public}d, fd=%{public}d, trigger=%{public}d", module, fd, trigger);
@@ -1106,8 +1099,6 @@ static void *SelectTask(void *arg)
 
     CONN_CHECK_AND_RETURN_RET_LOGW(arg != NULL, NULL, CONN_COMMON, "invalid param");
     SelectThreadState *selectState = (SelectThreadState *)arg;
-    CONN_LOGI(CONN_COMMON, "select task start, selectTrace=%{public}d, ctrlRfd=%{public}d, ctrlWfd=%{public}d",
-        selectState->traceId, selectState->ctrlRfd, selectState->ctrlWfd);
     while (true) {
         int status = SoftBusMutexLock(&selectState->lock);
         if (status != SOFTBUS_OK) {
@@ -1255,7 +1246,7 @@ static int32_t StopSelectThread(void)
         int32_t referenceCount = g_selectThreadState->referenceCount;
         (void)SoftBusMutexUnlock(&g_selectThreadState->lock);
         if (referenceCount <= 0) {
-            CONN_LOGI(CONN_COMMON, "select thread is not used by other module any more, notify "
+            CONN_LOGW(CONN_COMMON, "select thread is not used by other module any more, notify "
                 "exit, thread reference count=%{public}d", referenceCount);
             WakeupSelectThread();
             g_selectThreadState = NULL;

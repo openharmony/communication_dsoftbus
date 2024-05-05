@@ -175,7 +175,7 @@ static int32_t ConnTypeCheck(ConnectType type)
     }
 
     if (g_connManager[type] == NULL) {
-        CONN_LOGE(CONN_COMMON, "type=%{public}d", type);
+        CONN_LOGD(CONN_COMMON, "type=%{public}d", type);
         return SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT;
     }
     return SOFTBUS_OK;
@@ -694,20 +694,20 @@ int32_t ConnServerInit(void)
         connectObj = ConnInitTcp(&g_connManagerCb);
         if (connectObj != NULL) {
             g_connManager[CONNECT_TCP] = connectObj;
-            CONN_LOGI(CONN_COMMON, "init tcp ok");
+            CONN_LOGD(CONN_COMMON, "init tcp ok");
         }
     }
 
     connectObj = ConnInitBr(&g_connManagerCb);
     if (connectObj != NULL) {
         g_connManager[CONNECT_BR] = connectObj;
-        CONN_LOGI(CONN_COMMON, "init br ok");
+        CONN_LOGD(CONN_COMMON, "init br ok");
     }
 
     connectObj = ConnInitBle(&g_connManagerCb);
     if (connectObj != NULL) {
         g_connManager[CONNECT_BLE] = connectObj;
-        CONN_LOGI(CONN_COMMON, "init ble ok");
+        CONN_LOGD(CONN_COMMON, "init ble ok");
     }
 
     if (g_listenerList == NULL) {
