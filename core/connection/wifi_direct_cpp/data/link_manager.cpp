@@ -175,15 +175,28 @@ void LinkManager::RemoveLinks(InnerLink::LinkType type)
 std::shared_ptr<InnerLink> LinkManager::GetReuseLink(
     WifiDirectConnectType connectType, const std::string &remoteDeviceId)
 {
-    InnerLink::LinkType linkType { InnerLink::LinkType::P2P };
+    WifiDirectLinkType linkType = WIFI_DIRECT_LINK_TYPE_P2P;
     if (connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML ||
         connectType == WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML ||
         connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML) {
-        linkType = InnerLink::LinkType::HML;
+        linkType = WIFI_DIRECT_LINK_TYPE_HML;
     }
 
+    return GetReuseLink(linkType, remoteDeviceId);
+}
+
+std::shared_ptr<InnerLink> LinkManager::GetReuseLink(
+    WifiDirectLinkType wifiDirectLinkType, const std::string &remoteDeviceId)
+{
+    InnerLink::LinkType linkType { InnerLink::LinkType::INVALID_TYPE };
+    if (wifiDirectLinkType == WIFI_DIRECT_LINK_TYPE_HML) {
+        linkType = InnerLink::LinkType::HML;
+    }
+    if (wifiDirectLinkType == WIFI_DIRECT_LINK_TYPE_P2P) {
+        linkType = InnerLink::LinkType::P2P;
+    }
     std::lock_guard lock(lock_);
-    auto iterator = links_.find({ linkType, remoteDeviceId });
+    auto iterator = links_.find({linkType, remoteDeviceId});
     if (iterator == links_.end() || iterator->second->GetState() != InnerLink::LinkState::CONNECTED) {
         return nullptr;
     }
