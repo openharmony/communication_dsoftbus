@@ -1067,8 +1067,8 @@ ohos_unittest("LNNLedgerMockTest") {
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/core/common/dfx/log:softbus_dfx_log",
+    "$dsoftbus_root_path/core/frame:softbus_server",
     "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
   ]
@@ -1783,9 +1783,7 @@ if (!defined(ohos_lite) && enhanced_test) {
 
 ohos_unittest("LNNDataCloudSyncTest") {
   module_out_path = module_output_path
-  sources = [
-    "net_builder/src/lnn_data_cloud_sync_test.cpp",
-  ]
+  sources = [ "net_builder/src/lnn_data_cloud_sync_test.cpp" ]
 
   include_dirs = [
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",

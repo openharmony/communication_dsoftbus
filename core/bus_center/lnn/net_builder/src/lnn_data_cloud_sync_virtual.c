@@ -60,12 +60,3 @@ int32_t LnnGetAccountIdfromLocalCache(int64_t *buf)
     LNN_LOGI(LNN_BUILDER, "LnnGetAccountIdfromLocalCache not supported");
     return SOFTBUS_NOT_IMPLEMENT;
 }
-
-bool JudgeDifferenceBetweenLedgerAndCache(const char *fieldName, const char *value, int32_t valueLength)
-{
-    (void) fieldName;
-    (void) value;
-    (void) valueLength;
-    LNN_LOGI(LNN_BUILDER, "JudgeDifferenceBetweenLedgerAndCache not supported");
-    return SOFTBUS_NOT_IMPLEMENT;
-}

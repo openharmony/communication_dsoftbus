@@ -1044,7 +1044,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLDeviceBroadcastCipherKey_Test_001, T
 HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLDeviceBroadcastCipherIv_Test_001, TestSize.Level1)
 {
     char *udid = NULL;
-    const char *cipherIv= "qqqqqqqqqqqq";
+    const char *cipherIv = "qqqqqqqqqqqq";
     bool ret = LnnSetDLDeviceBroadcastCipherIv(udid, cipherIv);
     EXPECT_TRUE(ret == false);
     const char *devUdid = "123456789";
