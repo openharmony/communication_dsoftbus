@@ -53,10 +53,10 @@ void TransPermissionDeinit(void)
     DeinitPermissionJson();
 }
 
-int32_t CalcPermType(pid_t callingUid, pid_t callingPid)
+static int32_t CalcPermType(pid_t callingUid, pid_t callingPid)
 {
     using namespace AccessToken;
-    if (callingUid == (pid_t)getuid() && callingPid == getpid()) {
+    if (callingUid == static_cast<pid_t>(getuid()) && callingPid == getpid()) {
         COMM_LOGI(COMM_PERM, "self app");
         return SELF_APP;
     }

@@ -17,11 +17,11 @@
 
 #include <securec.h>
 
-#include "lnn_trans_lane.h"
 #include "anonymizer.h"
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane.h"
+#include "lnn_lane_common.h"
 #include "lnn_lane_def.h"
 #include "lnn_lane_score.h"
 #include "lnn_lane_link_p2p.h"
@@ -32,7 +32,7 @@
 #include "lnn_network_manager.h"
 #include "lnn_node_info.h"
 #include "lnn_physical_subnet_manager.h"
-#include "lnn_lane_common.h"
+#include "lnn_trans_lane.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_conn_ble_connection.h"
@@ -231,6 +231,36 @@ int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, boo
     return CreateNewLaneResource(linkInfo, laneId, isServerSide);
 }
 
+static bool IsNeedDelResource(uint64_t laneId, bool isServerSide, LaneResource *item)
+{
+    if (item->laneId != laneId) {
+        return false;
+    }
+    uint32_t ref = 0;
+    bool isServer = false;
+    if (isServerSide) {
+        ref = item->clientRef;
+        if (item->clientRef == 0) {
+            ListDelete(&item->node);
+            SoftBusFree(item);
+            g_laneResource.cnt--;
+        } else {
+            item->isServerSide = false;
+        }
+    } else {
+        isServer = item->isServerSide;
+        ref = --item->clientRef;
+        if (!isServer && ref == 0) {
+            ListDelete(&item->node);
+            SoftBusFree(item);
+            g_laneResource.cnt--;
+        }
+    }
+    LNN_LOGI(LNN_LANE, "del laneId=%{public}" PRIu64 " resource, isServer=%{public}d, clientRef=%{public}u",
+        laneId, isServer, ref);
+    return true;
+}
+
 int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide)
 {
     if (LaneLock() != SOFTBUS_OK) {
@@ -239,33 +269,11 @@ int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide)
     }
     LNN_LOGI(LNN_LANE, "start to del laneId=%{public}" PRIu64 " resource, isServer=%{public}d ",
             laneId, isServerSide);
-    uint32_t ref = 0;
-    bool isServer = false;
     LaneResource *next = NULL;
     LaneResource *item = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResource.list, LaneResource, node) {
-        if (item->laneId == laneId) {
-            if (isServerSide) {
-                ref = item->clientRef;
-                if(item->clientRef == 0) {
-                    ListDelete(&item->node);
-                    SoftBusFree(item);
-                    g_laneResource.cnt--;
-                } else {
-                    item->isServerSide = false;
-                }
-            } else {
-                isServer = item->isServerSide;
-                ref = --item->clientRef;
-                if (!isServer && ref == 0) {
-                    ListDelete(&item->node);
-                    SoftBusFree(item);
-                    g_laneResource.cnt--;
-                }
-            }
+        if (IsNeedDelResource(laneId, isServerSide, item)) {
             LaneUnlock();
-            LNN_LOGI(LNN_LANE, "del laneId=%{public}" PRIu64 " resource, isServer=%{public}d, clientRef=%{public}u",
-                laneId, isServer, ref);
             return SOFTBUS_OK;
         }
     }

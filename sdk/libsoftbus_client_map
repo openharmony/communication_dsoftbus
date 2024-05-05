@@ -399,11 +399,13 @@
         "ClientTransSetChannelInfo";
         "ClientGetSessionIsAsyncBySessionId";
         "GetSessionStateAndSessionNameBySessionId";
+        "DelSessionStateClosing";
         "SetSessionStateBySessionId";
         "EvaluateQos";
         "GetMtuSize";
         "DBinderGrantPermission";
         "DBinderRemovePermission";
+        "DfsBind";
         "ClientAddPolicyReportCallback";
         "ClientDeletePolicyReportCallback";
         "ServerEnableDiscoveryPolicy";
@@ -464,6 +466,10 @@
         "SoftBusFtApiEventInfoGet";
         "SoftBusFtSetDfxEventCb";
         "SoftBusFtDfxHiDumper";
+        "SetSocketOpt";
+        "GetSocketOpt";
+        "SetExtSocketOpt";
+        "GetExtSocketOpt";
         extern "C++" {
             OHOS::StreamAdaptor*;
             Communication::SoftBus*;
@@ -507,7 +513,7 @@
             "guard variable for OHOS::SoftBusServerProxyFrame::delegator_";
             "guard variable for OHOS::TransServerProxy::delegator_";
             "non-virtual thunk to OHOS::IRemoteStub<OHOS::ISoftBusClient>::AsObject(void)";
-            "non-virtual thunk to OHOS::SoftBusClientStub::OnChannelClosed(int, int)";
+            "non-virtual thunk to OHOS::SoftBusClientStub::OnChannelClosed(int, int, int)";
             "non-virtual thunk to OHOS::SoftBusClientStub::OnChannelLinkDown(char const*, int)";
             "non-virtual thunk to OHOS::SoftBusClientStub::OnChannelMsgReceived(int, int, void const*, unsigned int, int)";
             "non-virtual thunk to OHOS::SoftBusClientStub::OnChannelOpenFailed(int, int, int)";

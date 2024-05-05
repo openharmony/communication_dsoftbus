@@ -36,17 +36,18 @@ if (defined(ohos_lite)) {
     ]
   }
 } else {
-  softbus_permission_inc = [
-    "$dsoftbus_core_path/common/security/permission/include",
-    "//utils/system/safwk/native/include",
-  ]
+  softbus_permission_inc =
+      [ "$dsoftbus_core_path/common/security/permission/include" ]
   softbus_permission_src = [
     "$dsoftbus_core_path/common/security/permission/common/permission_entry.c",
     "$dsoftbus_core_path/common/security/permission/$os_type/permission_utils.cpp",
     "$dsoftbus_core_path/common/security/permission/$os_type/softbus_permission.cpp",
   ]
-  softbus_permission_deps = [ "//third_party/cJSON:cjson" ]
-  softbus_permission_external_deps += [ "c_utils:utils" ]
+  softbus_permission_deps = []
+  softbus_permission_external_deps += [
+    "cJSON:cjson",
+    "c_utils:utils",
+  ]
   if (!defined(global_parts_info) ||
       defined(global_parts_info.deviceprofile_device_info_manager)) {
     softbus_permission_external_deps += [

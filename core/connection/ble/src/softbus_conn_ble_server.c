@@ -992,6 +992,7 @@ static void BleDisconnectServerCallback(int32_t underlayerHandle, const SoftBusB
         "address=%{public}02X:*:*:*:%{public}02X:%{public}02X",
         underlayerHandle, btAddr->addr[0], btAddr->addr[4], btAddr->addr[5]);
     uint32_t connectionId = connection->connectionId;
+    ConnRemoveMsgFromLooper(&g_bleGattServerAsyncHandler, MSG_SERVER_WAIT_MTU_TIMEOUT, connectionId, 0, NULL);
     ConnRemoveMsgFromLooper(&g_bleGattServerAsyncHandler, MSG_SERVER_WAIT_DICONNECT_TIMEOUT, connectionId, 0, NULL);
     ConnBleReturnConnection(&connection);
     g_serverEventListener.onServerConnectionClosed(connectionId, SOFTBUS_OK);

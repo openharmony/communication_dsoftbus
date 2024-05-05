@@ -53,7 +53,8 @@ public:
     {
         return SOFTBUS_OK;
     }
-    int32_t OnChannelClosed([[maybe_unused]] int32_t channelId, [[maybe_unused]] int32_t channelType) override
+    int32_t OnChannelClosed([[maybe_unused]] int32_t channelId, [[maybe_unused]] int32_t channelType,
+        [[maybe_unused]] int32_t messageType) override
     {
         return SOFTBUS_OK;
     }
@@ -440,14 +441,14 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnChannelClosedInnerTest, TestSize.Level1)
     ASSERT_TRUE(g_stub != nullptr);
     MessageParcel data;
     MessageParcel reply;
-    EXPECT_EQ(g_stub->OnChannelClosedInner(data, reply), SOFTBUS_ERR);
+    EXPECT_EQ(g_stub->OnChannelClosedInner(data, reply), SOFTBUS_IPC_ERR);
 
     data.WriteInt32(0);
-    EXPECT_EQ(g_stub->OnChannelClosedInner(data, reply), SOFTBUS_ERR);
+    EXPECT_EQ(g_stub->OnChannelClosedInner(data, reply), SOFTBUS_IPC_ERR);
 
     data.WriteInt32(0);
     data.WriteInt32(0);
-    EXPECT_EQ(g_stub->OnChannelClosedInner(data, reply), SOFTBUS_OK);
+    EXPECT_EQ(g_stub->OnChannelClosedInner(data, reply), SOFTBUS_IPC_ERR);
 }
 
 /**

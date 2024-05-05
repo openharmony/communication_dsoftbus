@@ -107,12 +107,26 @@ static void RemovePassiveCommand()
     }
 }
 
+static struct WifiDirectCommand *Find(bool(*checker)(struct WifiDirectCommand *))
+{
+    std::lock_guard lockGuard(g_mutex);
+    for (auto command = g_commandQueue.begin(); command != g_commandQueue.end(); command++) {
+        if (checker(*command)) {
+            struct WifiDirectCommand *retCommand = *command;
+            g_commandQueue.erase(command);
+            return retCommand;
+        }
+    }
+    return nullptr;
+}
+
 static struct WifiDirectCommandManager g_manager = {
     .allocateCommandId = AllocateCommandId,
     .enqueueCommand = EnqueueCommand,
     .enqueueCommandFront = EnqueueCommandFront,
     .dequeueCommand = DequeueCommand,
     .removePassiveCommand = RemovePassiveCommand,
+    .find = Find,
 };
 
 struct WifiDirectCommandManager* GetWifiDirectCommandManager(void)

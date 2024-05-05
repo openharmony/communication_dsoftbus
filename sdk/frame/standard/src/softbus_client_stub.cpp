@@ -198,9 +198,9 @@ int32_t SoftBusClientStub::OnChannelLinkDown(const char *networkId, int32_t rout
     return TransOnChannelLinkDown(networkId, routeType);
 }
 
-int32_t SoftBusClientStub::OnChannelClosed(int32_t channelId, int32_t channelType)
+int32_t SoftBusClientStub::OnChannelClosed(int32_t channelId, int32_t channelType, int32_t messageType)
 {
-    return TransOnChannelClosed(channelId, channelType, SHUTDOWN_REASON_PEER);
+    return TransOnChannelClosed(channelId, channelType, messageType, SHUTDOWN_REASON_PEER);
 }
 
 int32_t SoftBusClientStub::OnChannelMsgReceived(int32_t channelId, int32_t channelType, const void *data,
@@ -378,21 +378,25 @@ int32_t SoftBusClientStub::OnChannelClosedInner(MessageParcel &data, MessageParc
 {
     int32_t channelId;
     if (!data.ReadInt32(channelId)) {
-        COMM_LOGE(COMM_SDK, "OnChannelClosedInner read channel id failed!");
-        return SOFTBUS_ERR;
+        COMM_LOGE(COMM_SDK, "read channel id failed!");
+        return SOFTBUS_IPC_ERR;
     }
 
     int32_t channelType;
     if (!data.ReadInt32(channelType)) {
-        COMM_LOGE(COMM_SDK, "OnChannelOpenFailedInner read channel type failed!");
-        return SOFTBUS_ERR;
+        COMM_LOGE(COMM_SDK, "read channel type failed!");
+        return SOFTBUS_IPC_ERR;
     }
 
-    int ret = OnChannelClosed(channelId, channelType);
-    bool res = reply.WriteInt32(ret);
-    if (!res) {
-        COMM_LOGE(COMM_SDK, "OnChannelClosedInner write reply failed!");
-        return SOFTBUS_ERR;
+    int32_t messageType;
+    if (!data.ReadInt32(messageType)) {
+        COMM_LOGE(COMM_SDK, "read messageType type failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t ret = OnChannelClosed(channelId, channelType, messageType);
+    if (!reply.WriteInt32(ret)) {
+        COMM_LOGE(COMM_SDK, "write reply failed!");
+        return SOFTBUS_IPC_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -601,7 +605,7 @@ int32_t SoftBusClientStub::OnNodeBasicInfoChangedInner(MessageParcel &data, Mess
         COMM_LOGE(COMM_SDK, "OnNodeBasicInfoChangedInner read type failed!");
         return SOFTBUS_ERR;
     }
-    COMM_LOGI(COMM_SDK, "OnNodeBasicInfoChangedInner type. type=%{public}d", type);
+    COMM_LOGD(COMM_SDK, "OnNodeBasicInfoChangedInner type. type=%{public}d", type);
     uint32_t infoTypeLen;
     if (!data.ReadUint32(infoTypeLen) || infoTypeLen != sizeof(NodeBasicInfo)) {
         COMM_LOGE(COMM_SDK, "OnNodeBasicInfoChangedInner read failed! infoTypeLen=%{public}d", infoTypeLen);
