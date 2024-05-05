@@ -149,6 +149,10 @@ public:
         const AuthConnCallback *callback, bool isMeta);
     static int32_t ActionOfConnOpened(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback,
         bool isMeta);
+    static int32_t ActionOfAllocConnOpenFailed(const char *networkId, uint32_t authRequestId,
+        AuthConnCallback *callback);
+    static int32_t ActionOfAllocConnOpened(const char *networkId, uint32_t authRequestId,
+        AuthConnCallback *callback);
 };
 } // namespace OHOS
 #endif // LNN_LANE_DEPS_MOCK_H
