@@ -17,6 +17,7 @@
 #include "bus_center_manager.h"
 #include "conn_log.h"
 #include "lnn_p2p_info.h"
+#include "lnn_feature_capability.h"
 #include "securec.h"
 #include "softbus_error_code.h"
 #include "syspara/parameters.h"
@@ -192,6 +193,12 @@ bool WifiDirectUtils::IsRemoteSupportTlv(const std::string &remoteDeviceId)
     auto ret = LnnGetRemoteBoolInfo(networkId.c_str(), BOOL_KEY_TLV_NEGOTIATION, &result);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, true, CONN_WIFI_DIRECT, "get tlv feature failed");
     return result;
+}
+
+bool WifiDirectUtils::IsLocalSupportTlv()
+{
+    uint64_t capability = LnnGetFeatureCapabilty();
+    return IsFeatureSupport(capability, BIT_WIFI_DIRECT_TLV_NEGOTIATION);
 }
 
 static constexpr int MAC_BYTE_HEX_SIZE = 4;
