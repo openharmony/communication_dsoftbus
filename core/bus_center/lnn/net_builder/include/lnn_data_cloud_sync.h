@@ -12,18 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #ifndef LNN_DATA_CLOUD_SYNC_H
 #define LNN_DATA_CLOUD_SYNC_H
- 
+
 #include <stdint.h>
 #include "lnn_node_info.h"
 #include "softbus_adapter_crypto.h"
- 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
- 
+
 typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];
     char deviceName[DEVICE_NAME_BUF_LEN];
@@ -59,14 +59,14 @@ typedef struct {
     unsigned char cipherIv[BROADCAST_IV_LEN];
     bool distributedSwitch;
 } CloudSyncInfo; // CLOUD_SYNC_DATA
- 
+
 typedef enum {
     DB_ADD = 0,
     DB_UPDATE = 1,
     DB_DELETE = 2,
     DB_CHANGE_TYPE_MAX,
 } ChangeType;
- 
+
 void LnnInitCloudSyncModule(void);
 void LnnDeInitCloudSyncModule(void);
 int32_t LnnLedgerAllDataSyncToDB(const NodeInfo *info);
@@ -78,5 +78,5 @@ int32_t LnnGetAccountIdfromLocalCache(int64_t *buf);
 #ifdef __cplusplus
 }
 #endif
- 
+
 #endif /* LNN_DATA_CLOUD_SYNC_H */

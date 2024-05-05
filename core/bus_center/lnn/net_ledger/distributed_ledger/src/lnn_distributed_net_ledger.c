@@ -2168,7 +2168,7 @@ bool LnnSetDLUnifiedDeviceName(const char *udid, const char *name)
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return true;
 EXIT:
-    (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return false;
 }
 
@@ -2201,7 +2201,7 @@ bool LnnSetDLUnifiedDefaultDeviceName(const char *udid, const char *name)
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return true;
 EXIT:
-    (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return false;
 }
 
@@ -2234,7 +2234,7 @@ bool LnnSetDLDeviceNickNameByUdid(const char *udid, const char *name)
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return true;
 EXIT:
-    (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return false;
 }
 
@@ -2264,7 +2264,7 @@ bool LnnSetDLDeviceStateVersion(const char *udid, int32_t stateVersion)
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return true;
 EXIT:
-    (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return false;
 }
 
@@ -2272,7 +2272,7 @@ bool LnnSetDLDeviceBroadcastCipherKey(const char *udid, const char *cipherKey)
 {
     DoubleHashMap *map = &g_distributedNetLedger.distributedInfo;
     NodeInfo *info = NULL;
-    if (udid == NULL || name == NULL) {
+    if (udid == NULL) {
         LNN_LOGE(LNN_LEDGER, "param error");
         return false;
     }
@@ -2292,7 +2292,7 @@ bool LnnSetDLDeviceBroadcastCipherKey(const char *udid, const char *cipherKey)
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return true;
 EXIT:
-    (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return false;
 }
 
@@ -2300,7 +2300,7 @@ bool LnnSetDLDeviceBroadcastCipherIv(const char *udid, const char *cipherIv)
 {
     DoubleHashMap *map = &g_distributedNetLedger.distributedInfo;
     NodeInfo *info = NULL;
-    if (udid == NULL || name == NULL) {
+    if (udid == NULL) {
         LNN_LOGE(LNN_LEDGER, "param error");
         return false;
     }
@@ -2320,7 +2320,7 @@ bool LnnSetDLDeviceBroadcastCipherIv(const char *udid, const char *cipherIv)
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return true;
 EXIT:
-    (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return false;
 }
 
@@ -2328,7 +2328,7 @@ static void UpdateDistributedLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
 {
     if (newInfo == NULL || oldInfo == NULL) {
         LNN_LOGE(LNN_LEDGER, "param error");
-        return SOFTBUS_INVALID_PARAM;
+        return;
     }
     (void)strcpy_s(oldInfo->networkId, NETWORK_ID_BUF_LEN, newInfo->networkId);
     (void)strcpy_s(oldInfo->deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, newInfo->deviceInfo.deviceName);
