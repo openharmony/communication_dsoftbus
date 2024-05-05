@@ -1187,7 +1187,7 @@ static bool CheckHasBrConnection(const char *networkId)
         connOpt.brOption.brMac[0] == '\0') {
         return false;
     }
-    return CheckActiveConnection(&connOpt);
+    return CheckActiveConnection(&connOpt, true);
 }
 
 static bool IsHasAuthConnInfo(const char *networkId)

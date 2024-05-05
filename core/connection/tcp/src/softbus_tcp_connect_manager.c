@@ -746,9 +746,10 @@ static int32_t InitProperty(void)
     return SOFTBUS_OK;
 }
 
-static bool TcpCheckActiveConnection(const ConnectOption *info)
+static bool TcpCheckActiveConnection(const ConnectOption *info, bool needOccupy)
 {
     (void)info;
+    (void)needOccupy;
     return false;
 }
 

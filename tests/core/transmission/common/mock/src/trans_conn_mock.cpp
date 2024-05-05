@@ -83,9 +83,9 @@ int32_t ConnStopLocalListening(const LocalListenerInfo *info)
     return GetConnectInterface()->ConnStopLocalListening(info);
 }
 
-bool CheckActiveConnection(const ConnectOption *option)
+bool CheckActiveConnection(const ConnectOption *option, bool needOccupy)
 {
-    return GetConnectInterface()->CheckActiveConnection(option);
+    return GetConnectInterface()->CheckActiveConnection(option, needOccupy);
 }
 
 uint32_t ConnGetHeadSize(void)
