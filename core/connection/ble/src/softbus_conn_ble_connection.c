@@ -334,7 +334,7 @@ int32_t ConnBleUpdateConnectionRc(ConnBleConnection *connection, uint16_t challe
 
 int32_t ConnBleOnReferenceRequest(ConnBleConnection *connection, const cJSON *json)
 {
-    CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, SOFTBUS_INVALID_PARAM, CONN_COMMON, "invalid param");
+    CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "invalid param");
     int32_t delta = 0;
     int32_t peerRc = 0;
     uint16_t challengeCode = 0;
