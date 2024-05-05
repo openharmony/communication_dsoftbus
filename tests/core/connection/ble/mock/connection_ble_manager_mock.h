@@ -66,10 +66,10 @@ public:
         ConnBleConnection *connection, const uint8_t *data, uint32_t dataLen, int32_t module) = 0;
     virtual int32_t ConnGattServerConnect(ConnBleConnection *connection) = 0;
     virtual int32_t ConnGattServerDisconnect(ConnBleConnection *connection) = 0;
-    virtual int32_t ConnGattInitClientModule(
-        SoftBusLooper *looper, const ConnBleClientEventListener *listener) = 0;
-    virtual int32_t ConnGattInitServerModule(
-        SoftBusLooper *looper, const ConnBleServerEventListener *listener) = 0;
+    virtual int32_t ConnGattInitClientModule(SoftBusLooper *looper, const ConnBleClientEventListener *listener) = 0;
+    virtual int32_t ConnGattInitServerModule(SoftBusLooper *looper, const ConnBleServerEventListener *listener) = 0;
+    virtual bool GetJsonObjectSignedNumberItem(const cJSON *json, const char * const str, int32_t *target) = 0;
+    virtual bool GetJsonObjectNumber16Item(const cJSON *json, const char * const str, uint16_t *target) = 0;
 };
 
 class ConnectionBleManagerInterfaceMock : public ConnectionBleManagerInterface {
@@ -116,6 +116,14 @@ public:
         (SoftBusLooper *, const ConnBleClientEventListener *), (override));
     MOCK_METHOD(int32_t, ConnGattInitServerModule,
         (SoftBusLooper *, const ConnBleServerEventListener *), (override));
+    MOCK_METHOD(bool, GetJsonObjectSignedNumberItem, (const cJSON *json, const char * const str, int32_t *target),
+        (override));
+    MOCK_METHOD(
+        bool, GetJsonObjectNumber16Item, (const cJSON *json, const char * const str, uint16_t *target), (override));
+
+    static bool ActionOfGetdelta(const cJSON *json, const char * const str, int32_t *target);
+    static bool ActionOfGetPeerRc1(const cJSON *json, const char * const str, int32_t *target);
+    static bool ActionOfGetPeerRc0(const cJSON *json, const char * const str, int32_t *target);
 };
 } // namespace OHOS
 #endif // CONNECTION_BLE_MANAGER_MOCK_H

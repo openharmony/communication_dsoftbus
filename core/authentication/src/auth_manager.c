@@ -440,11 +440,15 @@ static int32_t GetAuthConnInfoByUuid(const char *uuid, AuthLinkType type, AuthCo
     if (auth == NULL) {
         auth = FindAuthManagerByUuid(uuid, type, true);
     }
+    char *anonyUuid = NULL;
+    Anonymize(uuid, &anonyUuid);
     if (auth == NULL) {
-        AUTH_LOGI(AUTH_CONN, "auth not found by uuid, connType=%{public}d", type);
+        AUTH_LOGI(AUTH_CONN, "auth not found by uuid, connType=%{public}d, uuid=%{public}s", type, anonyUuid);
+        AnonymizeFree(anonyUuid);
         ReleaseAuthLock();
         return SOFTBUS_AUTH_NOT_FOUND;
     }
+    AnonymizeFree(anonyUuid);
     *connInfo = auth->connInfo[type];
     ReleaseAuthLock();
     return SOFTBUS_OK;
@@ -796,10 +800,10 @@ static void OnGroupCreated(const char *groupId, int32_t groupType)
     }
 }
 
-static void OnGroupDeleted(const char *groupId)
+static void OnGroupDeleted(const char *groupId, int32_t groupType)
 {
     if (g_groupChangeListener.onGroupDeleted != NULL) {
-        g_groupChangeListener.onGroupDeleted(groupId);
+        g_groupChangeListener.onGroupDeleted(groupId, groupType);
     }
 }
 
@@ -1911,6 +1915,7 @@ int32_t AuthDeviceOpenConn(const AuthConnInfo *info, uint32_t requestId, const A
             callback->onConnOpened(requestId, authHandle);
             break;
         case AUTH_LINK_TYPE_BR:
+            /* fall-through */
         case AUTH_LINK_TYPE_BLE:
             judgeTimeOut = true;
         case AUTH_LINK_TYPE_P2P:
@@ -2324,7 +2329,7 @@ int32_t AuthDeviceDecrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_
     InDataInfo inDataInfo = { .inData = inData, .inLen = inLen };
     if (DecryptData(&auth->sessionKeyList, (AuthLinkType)authHandle->type, &inDataInfo, outData,
         outLen) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_KEY, "auth decrypt fail");
+        AUTH_LOGE(AUTH_KEY, "auth decrypt fail, authId=%{public}" PRId64, authHandle->authId);
         DelDupAuthManager(auth);
         return SOFTBUS_ENCRYPT_ERR;
     }

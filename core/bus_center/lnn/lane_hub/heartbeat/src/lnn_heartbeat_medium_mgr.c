@@ -56,7 +56,7 @@ typedef struct {
 } LnnHeartbeatRecvInfo;
 
 static void HbMediumMgrRelayProcess(const char *udidHash, ConnectionAddrType type, LnnHeartbeatType hbType);
-static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, int32_t weight, int32_t masterWeight,
+static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, const LnnHeartbeatWeight *mediumWeight,
     LnnHeartbeatType hbType, bool isOnlineDirectly, HbRespData *hbResp);
 static int32_t HbMediumMgrRecvHigherWeight(const char *udidHash, int32_t weight, ConnectionAddrType type,
     bool isReElect);
@@ -114,7 +114,14 @@ static int32_t HbSaveRecvTimeToRemoveRepeat(LnnHeartbeatRecvInfo *storedInfo, De
         storedInfo->masterWeight = masterWeight;
         return SOFTBUS_OK;
     }
-    return HbFirstSaveRecvTime(storedInfo, device, weight, masterWeight, recvTime);
+    int32_t ret = HbFirstSaveRecvTime(storedInfo, device, weight, masterWeight, recvTime);
+    if (ret != SOFTBUS_OK) {
+        char *anonyUdid = NULL;
+        Anonymize(device->devId, &anonyUdid);
+        LNN_LOGE(LNN_HEART_BEAT, "save recv time fail, udidHash=%{public}s", anonyUdid);
+        AnonymizeFree(anonyUdid);
+    }
+    return ret;
 }
 
 static uint64_t HbGetRepeatThresholdByType(LnnHeartbeatType hbType)
@@ -420,6 +427,12 @@ static uint64_t GetNowTime()
 
 static int32_t SoftBusNetNodeResult(DeviceInfo *device, bool isConnect)
 {
+    char *anonyUdid = NULL;
+    Anonymize(device->devId, &anonyUdid);
+    LNN_LOGI(LNN_HEART_BEAT,
+        "heartbeat(HB) find device, udidHash=%{public}s, ConnectionAddrType=%{public}02X, isConnect=%{public}d",
+        anonyUdid, device->addr[0].type, isConnect);
+    AnonymizeFree(anonyUdid);
     if (LnnNotifyDiscoveryDevice(device->addr, isConnect) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "mgr recv process notify device found fail");
         return SOFTBUS_ERR;
@@ -448,10 +461,26 @@ static void DfxRecordHeartBeatAuthStart(const AuthConnInfo *connInfo, const char
     LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH, extra);
 }
 
-static int32_t HbNotifyReceiveDevice(DeviceInfo *device, int32_t weight,
-    int32_t masterWeight, LnnHeartbeatType hbType, bool isOnlineDirectly, HbRespData *hbResp)
+static int32_t HbOnlineNodeAuth(DeviceInfo *device, LnnHeartbeatRecvInfo *storedInfo, uint64_t nowTime)
 {
-    char *anonyUdid = NULL;
+    if (HbIsRepeatedReAuthRequest(storedInfo, nowTime)) {
+        LNN_LOGE(LNN_HEART_BEAT, "reauth request repeated");
+        return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
+    }
+    AuthConnInfo authConn;
+    uint32_t requestId = AuthGenRequestId();
+    (void)LnnConvertAddrToAuthConnInfo(device->addr, &authConn);
+    DfxRecordHeartBeatAuthStart(&authConn, LNN_DEFAULT_PKG_NAME, requestId);
+    if (AuthStartVerify(&authConn, requestId, LnnGetReAuthVerifyCallback(), false) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_HEART_BEAT, "AuthStartVerify error");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeight *mediumWeight,
+    LnnHeartbeatType hbType, bool isOnlineDirectly, HbRespData *hbResp)
+{
     uint64_t nowTime = GetNowTime();
     if (SoftBusMutexLock(&g_hbRecvList->lock) != 0) {
         LNN_LOGE(LNN_HEART_BEAT, "mgr lock recv info list fail");
@@ -462,10 +491,8 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, int32_t weight,
         (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
         return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
     }
-    if (HbSaveRecvTimeToRemoveRepeat(storedInfo, device, weight, masterWeight, nowTime) != SOFTBUS_OK) {
-        Anonymize(device->devId, &anonyUdid);
-        LNN_LOGE(LNN_HEART_BEAT, "save recv time fail, udidHash=%{public}s", anonyUdid);
-        AnonymizeFree(anonyUdid);
+    if (HbSaveRecvTimeToRemoveRepeat(storedInfo, device,
+        mediumWeight->weight, mediumWeight->localMasterWeight, nowTime) != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
         return SOFTBUS_ERR;
     }
@@ -474,7 +501,7 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, int32_t weight,
         (void)HbUpdateOfflineTimingByRecvInfo(device->devId, device->addr[0].type, hbType, nowTime);
         return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
     }
-    HbDumpRecvDeviceInfo(device, weight, masterWeight, hbType, nowTime);
+    HbDumpRecvDeviceInfo(device, mediumWeight->weight, mediumWeight->localMasterWeight, hbType, nowTime);
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (HbGetOnlineNodeByRecvInfo(device->devId, device->addr[0].type, &nodeInfo, hbResp) == SOFTBUS_OK) {
@@ -482,24 +509,12 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, int32_t weight,
             (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
             return HbUpdateOfflineTimingByRecvInfo(nodeInfo.networkId, device->addr[0].type, hbType, nowTime);
         }
-        if (HbIsRepeatedReAuthRequest(storedInfo, nowTime)) {
-            LNN_LOGE(LNN_HEART_BEAT, "reauth request repeated");
-            (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
-            return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
-        }
-        AuthConnInfo authConn;
-        uint32_t requestId = AuthGenRequestId();
-        (void)LnnConvertAddrToAuthConnInfo(device->addr, &authConn);
-        DfxRecordHeartBeatAuthStart(&authConn, LNN_DEFAULT_PKG_NAME, requestId);
-        if (AuthStartVerify(&authConn, requestId, LnnGetReAuthVerifyCallback(), false) != SOFTBUS_OK) {
-            LNN_LOGI(LNN_HEART_BEAT, "AuthStartVerify error");
-            (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
-            return SOFTBUS_ERR;
-        }
+        int32_t ret = HbOnlineNodeAuth(device, storedInfo, nowTime);
         (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
-        return SOFTBUS_OK;
+        return ret;
     }
     if (HbIsRepeatedJoinLnnRequest(storedInfo, nowTime)) {
+        char *anonyUdid = NULL;
         Anonymize(device->devId, &anonyUdid);
         LNN_LOGD(LNN_HEART_BEAT, "recv but ignore repeated join lnn request, udidHash=%{public}s", anonyUdid);
         AnonymizeFree(anonyUdid);
@@ -512,18 +527,13 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, int32_t weight,
         LNN_LOGD(LNN_HEART_BEAT, "ignore lnn request, not support connect");
         return SOFTBUS_NETWORK_NOT_CONNECTABLE;
     }
-    Anonymize(device->devId, &anonyUdid);
-    LNN_LOGI(LNN_HEART_BEAT,
-        "heartbeat(HB) find device, udidHash=%{public}s, ConnectionAddrType=%{public}02X, isConnect=%{public}d",
-        anonyUdid, device->addr[0].type, isConnect);
-    AnonymizeFree(anonyUdid);
     return SoftBusNetNodeResult(device, isConnect);
 }
 
-static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, int32_t weight,
-    int32_t masterWeight, LnnHeartbeatType hbType, bool isOnlineDirectly, HbRespData *hbResp)
+static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, const LnnHeartbeatWeight *mediumWeight,
+    LnnHeartbeatType hbType, bool isOnlineDirectly, HbRespData *hbResp)
 {
-    if (device == NULL) {
+    if (device == NULL || mediumWeight == NULL) {
         LNN_LOGE(LNN_HEART_BEAT, "mgr recv process get invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -536,7 +546,7 @@ static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, int32_t weight,
         AnonymizeFree(anonyUdid);
         return SOFTBUS_NETWORK_HEARTBEAT_UNTRUSTED;
     }
-    return HbNotifyReceiveDevice(device, weight, masterWeight, hbType, isOnlineDirectly, hbResp);
+    return HbNotifyReceiveDevice(device, mediumWeight, hbType, isOnlineDirectly, hbResp);
 }
 
 static int32_t HbMediumMgrRecvHigherWeight(const char *udidHash, int32_t weight, ConnectionAddrType type,
