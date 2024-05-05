@@ -334,7 +334,7 @@ void ConnBrOccupy(ConnBrConnection *connection)
     int32_t res = ConnPostMsgToLooper(&g_brConnectionAsyncHandler,
         MSG_CONNECTION_OCCUPY_RELEASE, connection->connectionId, 0, NULL, WAIT_TIMEOUT_OCCUPY);
     if (res != SOFTBUS_OK) {
-        CONN_LOGW(CONN_BLE,"post msg failed, connId=%{public}u, err=%{public}d", connection->connectionId, res);
+        CONN_LOGW(CONN_BR, "post msg failed, connId=%{public}u, err=%{public}d", connection->connectionId, res);
         (void)SoftBusMutexUnlock(&connection->lock);
         return;
     }
@@ -389,29 +389,27 @@ static int32_t NotifyUpdateConnectionRc(uint32_t connectionId, int32_t delta)
         return SOFTBUS_LOCK_ERR;
     }
     connection->connectionRc += delta;
-    int32_t localRc = connection->connectionRc;
     CONN_LOGI(CONN_BR, "connId=%{public}u, side=%{public}d, delta=%{public}d, newRef=%{public}d", connectionId,
-        connection->side, delta, localRc);
-    if (localRc <= 0) {
+        connection->side, delta, connection->connectionRc);
+    if (connection->connectionRc <= 0) {
         connection->state = BR_CONNECTION_STATE_NEGOTIATION_CLOSING;
         ConnPostMsgToLooper(&g_brConnectionAsyncHandler, MSG_CONNECTION_WAIT_NEGOTIATION_CLOSING_TIMEOUT, connectionId,
             0, NULL, WAIT_BR_NEGOTIATION_CLOSING_TIMEOUT_MILLIS);
     }
     (void)SoftBusMutexUnlock(&connection->lock);
-    int32_t flag = delta >= 0 ? CONN_HIGH : CONN_LOW;
     BrCtlMessageSerializationContext ctx = {
         .connectionId = connectionId,
-        .flag = flag,
+        .flag = delta >= 0 ? CONN_HIGH : CONN_LOW,
         .method = BR_METHOD_NOTIFY_REQUEST,
         .referenceRequest = {
             .delta = delta,
-            .referenceNumber = localRc,
+            .referenceNumber = connection->connectionRc,
         },
     };
     ConnEventExtra extra = {
         .connectionId = (int32_t)connectionId,
         .connRcDelta = delta,
-        .connRc = localRc,
+        .connRc = connection->connectionRc,
         .peerBrMac = connection->addr,
         .linkType = CONNECT_BR,
     };
@@ -426,7 +424,7 @@ static int32_t NotifyUpdateConnectionRc(uint32_t connectionId, int32_t delta)
         CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_UPDATE_CONNECTION_RC, extra);
         return (int32_t)seq;
     }
-    extra.errcode = ConnBrPostBytes(connectionId, data, dataLen, 0, flag, MODULE_CONNECTION, seq);
+    extra.errcode = ConnBrPostBytes(connectionId, data, dataLen, 0, ctx.flag, MODULE_CONNECTION, seq);
     extra.result = extra.errcode == SOFTBUS_OK ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_UPDATE_CONNECTION_RC, extra);
     return extra.errcode;
@@ -450,8 +448,8 @@ static int32_t BrUpdateConnectionRc(uint32_t connectionId, int32_t delta)
 
     if (delta < 0 && isOccupied) {
         CONN_LOGI(CONN_BR, "is occupied, process later, connId=%{public}u", connectionId);
-        status = ConnPostMsgToLooper(
-            &g_brConnectionAsyncHandler, MSG_CONNECTION_UPDATE_LOCAL_RC, connectionId, delta, NULL, WAIT_TIMEOUT_TRY_AGAIN);
+        status = ConnPostMsgToLooper(&g_brConnectionAsyncHandler, MSG_CONNECTION_UPDATE_LOCAL_RC, connectionId, delta,
+            NULL, WAIT_TIMEOUT_TRY_AGAIN);
         if (status != SOFTBUS_OK) {
             CONN_LOGE(CONN_BR, "post msg failed, connectionId=%{public}u, error=%{public}d", connectionId, status);
             return status;
@@ -505,7 +503,8 @@ static int32_t BrPostReplyMessage(uint32_t connectionId, int32_t localRc)
 static int32_t NotifyReferenceRequest(uint32_t connectionId, int32_t delta, int32_t peerRc)
 {
     ConnBrConnection *connection = ConnBrGetConnectionById(connectionId);
-    CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL, SOFTBUS_INVALID_PARAM, CONN_BR, "conn not exist, id=%{public}u", connectionId);
+    CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL,
+        SOFTBUS_INVALID_PARAM, CONN_BR, "conn not exist, id=%{public}u", connectionId);
     int32_t status = SoftBusMutexLock(&connection->lock);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BR, "lock failed, connectionId=%{public}u, error=%{public}d", connectionId, status);
@@ -524,7 +523,6 @@ static int32_t NotifyReferenceRequest(uint32_t connectionId, int32_t delta, int3
             ConnBrReturnConnection(&connection);
             return SOFTBUS_OK;
         }
-
     }
     if (connection->state == BR_CONNECTION_STATE_NEGOTIATION_CLOSING) {
         ConnRemoveMsgFromLooper(
@@ -587,8 +585,8 @@ static int32_t BrOnReferenceRequest(uint32_t connectionId, ReferenceCount *refer
         referenceParam->delta = delta;
         referenceParam->peerRc = peerRc;
 
-        int32_t res = ConnPostMsgToLooper(&g_brConnectionAsyncHandler, MSG_CONNECTION_UPDATE_PEER_RC, connectionId, 0, referenceParam,
-            WAIT_TIMEOUT_TRY_AGAIN);
+        int32_t res = ConnPostMsgToLooper(&g_brConnectionAsyncHandler, MSG_CONNECTION_UPDATE_PEER_RC,
+            connectionId, 0, referenceParam, WAIT_TIMEOUT_TRY_AGAIN);
         if (res != SOFTBUS_OK) {
             CONN_LOGE(CONN_BR, "post msg failed, connectionId=%{public}u, error=%{public}d", connectionId, res);
             SoftBusFree(referenceParam);
@@ -861,7 +859,7 @@ static int BrCompareConnectionLooperEventFunc(const SoftBusMessage *msg, void *a
     switch (ctx->what) {
         case MSG_CONNECTION_WAIT_NEGOTIATION_CLOSING_TIMEOUT:
         case MSG_CONNECTION_UPDATE_PEER_RC:
-        case MSG_CONNECTION_OCCUPY_RELEASE: 
+        case MSG_CONNECTION_OCCUPY_RELEASE:
         case MSG_CONNECTION_UPDATE_LOCAL_RC: {
             if (msg->arg1 == ctx->arg1) {
                 return COMPARE_SUCCESS;
