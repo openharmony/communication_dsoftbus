@@ -180,7 +180,7 @@ static int32_t SslAesGcmDecrypt(const AesGcmCipherKey *cipherkey, const unsigned
         return SOFTBUS_INVALID_PARAM;
     }
 
-    int32_t outlen = 0;
+    int32_t outLen = 0;
     EVP_CIPHER_CTX *ctx = NULL;
     int32_t ret = OpensslEvpInit(&ctx, cipherkey, false);
     if (ret != SOFTBUS_OK) {
@@ -190,31 +190,38 @@ static int32_t SslAesGcmDecrypt(const AesGcmCipherKey *cipherkey, const unsigned
     ret = EVP_DecryptInit_ex(ctx, NULL, NULL, cipherkey->key, cipherkey->iv);
     if (ret != 1) {
         COMM_LOGE(COMM_ADAPTER, "EVP_EncryptInit_ex fail.");
-        EVP_CIPHER_CTX_free(ctx);
-        return SOFTBUS_DECRYPT_ERR;
+        goto EXIT;
     }
     ret = EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, TAG_LEN, (void *)(cipherText + (cipherTextSize - TAG_LEN)));
     if (ret != 1) {
         COMM_LOGE(COMM_ADAPTER, "EVP_DecryptUpdate fail.");
-        EVP_CIPHER_CTX_free(ctx);
-        return SOFTBUS_DECRYPT_ERR;
+        goto EXIT;
     }
     ret = EVP_DecryptUpdate(ctx, plain, (int32_t *)&plainLen, cipherText + GCM_IV_LEN, cipherTextSize - OVERHEAD_LEN);
     if (ret != 1) {
         COMM_LOGE(COMM_ADAPTER, "EVP_DecryptUpdate fail.");
-        EVP_CIPHER_CTX_free(ctx);
-        return SOFTBUS_DECRYPT_ERR;
+        goto EXIT;
     }
-    outlen += plainLen;
+    if (plainLen > INT32_MAX) {
+        COMM_LOGE(COMM_ADAPTER, "PlainLen convert overflow.");
+        goto EXIT;
+    }
+    outLen += (int32_t)plainLen;
     ret = EVP_DecryptFinal_ex(ctx, plain + plainLen, (int32_t *)&plainLen);
     if (ret != 1) {
         COMM_LOGE(COMM_ADAPTER, "EVP_DecryptFinal_ex fail.");
-        EVP_CIPHER_CTX_free(ctx);
-        return SOFTBUS_DECRYPT_ERR;
+        goto EXIT;
     }
-    outlen += plainLen;
+    if (plainLen > INT32_MAX - outLen) {
+        COMM_LOGE(COMM_ADAPTER, "outLen convert overflow.");
+        goto EXIT;
+    }
+    outLen += (int32_t)plainLen;
     EVP_CIPHER_CTX_free(ctx);
-    return outlen;
+    return outLen;
+EXIT:
+    EVP_CIPHER_CTX_free(ctx);
+    return SOFTBUS_DECRYPT_ERR;
 }
 
 static int32_t HandleError(EVP_CIPHER_CTX *ctx, const char *buf)

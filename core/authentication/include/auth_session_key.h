@@ -50,6 +50,7 @@ int32_t DupSessionKeyList(const SessionKeyList *srcList, SessionKeyList *dstList
 
 uint64_t GetLatestAvailableSessionKeyTime(const SessionKeyList *list, AuthLinkType type);
 bool HasSessionKey(const SessionKeyList *list);
+AuthLinkType GetSessionKeyTypeByIndex(const SessionKeyList *list, int32_t index);
 int32_t AddSessionKey(SessionKeyList *list, int32_t index, const SessionKey *key, AuthLinkType type);
 int32_t SetSessionKeyAvailable(SessionKeyList *list, int32_t index);
 int32_t GetLatestSessionKey(const SessionKeyList *list, AuthLinkType type, int32_t *index, SessionKey *key);

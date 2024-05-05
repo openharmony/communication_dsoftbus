@@ -116,7 +116,7 @@ static bool MatchIpAddr(const char *str, uint32_t len)
         }
         posPrevDot = posNextDot;
     }
-    numLen = len - posPrevDot - 1;
+    numLen = (int32_t)len - posPrevDot - 1;
     if (numLen < NUM_LEN_MIN || numLen > NUM_LEN_MAX) {
         return false;
     }
@@ -290,4 +290,9 @@ void AnonymizeFree(char *anonymizedStr)
         return;
     }
     free(anonymizedStr);
+}
+
+const char *AnonymizeWrapper(const char *anonymizedStr)
+{
+    return anonymizedStr ? anonymizedStr : "NULL";
 }

@@ -190,7 +190,7 @@ static int DumpStatistics(char *buf, uint32_t size)
 
 int DFinderDumpIface(char *buf, int size, const char *ifname, const struct in_addr *ip, uint8_t state)
 {
-    int index = 0;
+    uint32_t index = 0;
     int ret;
     DUMP_MSG_ADD_CHECK(ret, buf, index, size, "network name:%s"CRLF, ifname);
     DUMP_MSG_ADD_CHECK(ret, buf, index, size, "if state:%hhu"CRLF, state);
@@ -213,9 +213,9 @@ int DFinderDumpIface(char *buf, int size, const char *ifname, const struct in_ad
 #define DFINDER_DEVICE_ID_ANONY_REMOTE_LEN 15
 int DumpDeviceInfo(const DeviceInfo *info, char *buf, int size, uint8_t remote)
 {
-    int index = 0;
     int ret;
     int i;
+    uint32_t index = 0;
     size_t len;
     char deviceid[DFINDER_DEVICE_ID_ANONY_REMOTE_LEN + 1] = {0};
     DUMP_MSG_ADD_CHECK(ret, buf, index, size, "device name:%s"CRLF, info->deviceName);
@@ -295,8 +295,8 @@ static int DumpRemoteDeviceInfo(char *buf, uint32_t size)
 static int DumpCapFilterInfoImp(char *buf, uint32_t size)
 {
     int i;
-    int index = 0;
     int ret;
+    uint32_t index = 0;
     uint32_t bitmapNum;
     uint32_t *bitmap = GetFilterCapability(&bitmapNum);
 
@@ -323,7 +323,7 @@ static int DumpCapFilterInfo(char *buf, uint32_t size)
 static int DumpHelp(char *buf, uint32_t size)
 {
     int ret;
-    int index = 0;
+    uint32_t index = 0;
     DUMP_MSG_ADD_CHECK(ret, buf, index, size, CRLF"Usage: dfinder <opt>"CRLF);
     DUMP_MSG_ADD_CHECK(ret, buf, index, size, "       -h         show this help"CRLF);
     DUMP_MSG_ADD_CHECK(ret, buf, index, size, "       -l         show local device info"CRLF);

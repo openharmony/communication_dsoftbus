@@ -119,7 +119,7 @@ typedef struct DeviceInfo {
     char deviceId[NSTACKX_MAX_DEVICE_ID_LEN];
     char deviceName[NSTACKX_MAX_DEVICE_NAME_LEN];
 #ifdef DFINDER_SAVE_DEVICE_LIST
-    uint8_t update : 1;
+    int8_t update : 1;
     uint8_t reserved : 7;
 #endif
     uint32_t deviceType;
@@ -171,7 +171,7 @@ uint32_t GetMaxDeviceNum(void);
 uint32_t *GetFilterCapability(uint32_t *capabilityBitmapNum);
 void IncreaseSequenceNumber(uint8_t sendBcast);
 uint16_t GetSequenceNumber(uint8_t sendBcast);
-void ResetSequenceNumber();
+void ResetSequenceNumber(void);
 
 int32_t RegisterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[]);
 int32_t SetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[]);

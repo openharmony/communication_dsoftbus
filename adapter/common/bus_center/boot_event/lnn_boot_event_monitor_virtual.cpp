@@ -13,17 +13,11 @@
  * limitations under the License.
  */
 
-#include "softbusdfxanonymize_fuzzer.h"
+#include "lnn_event_monitor_impl.h"
 
-#include <string>
-#include "anonymizer.h"
+#include "softbus_errcode.h"
 
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+int32_t LnnInitBootEventMonitorImpl(void)
 {
-    std::string str(reinterpret_cast<const char *>(data), size);
-
-    char *anonymized = nullptr;
-    Anonymize(str.c_str(), &anonymized);
-    AnonymizeFree(anonymized);
-    return 0;
+    return SOFTBUS_OK;
 }

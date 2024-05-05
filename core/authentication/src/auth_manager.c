@@ -29,11 +29,15 @@
 #include "auth_session_message.h"
 #include "bus_center_manager.h"
 #include "device_profile_listener.h"
+#include "lnn_ctrl_lane.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_app_bind_interface.h"
 #include "lnn_decision_db.h"
 #include "lnn_device_info.h"
 #include "lnn_event.h"
+#include "lnn_lane_interface.h"
+#include "lnn_lane_link.h"
+#include "lnn_local_net_ledger.h"
 #include "lnn_feature_capability.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_net_builder.h"
@@ -60,6 +64,18 @@ static AuthVerifyListener g_verifyListener = { 0 };
 static GroupChangeListener g_groupChangeListener = { 0 };
 static AuthTransCallback g_transCallback = { 0 };
 static bool g_regDataChangeListener = false;
+static SoftBusList *g_authReqList;
+
+typedef struct {
+    ListNode node;
+    uint32_t laneHandle;
+    uint64_t laneId;
+    uint32_t authRequestId;
+    int64_t authId;
+    uint32_t authLinkType;
+    char networkId[NETWORK_ID_BUF_LEN];
+    AuthConnCallback callback;
+} AuthReqInfo;
 
 static bool CheckAuthConnInfoType(const AuthConnInfo *connInfo)
 {
@@ -424,11 +440,15 @@ static int32_t GetAuthConnInfoByUuid(const char *uuid, AuthLinkType type, AuthCo
     if (auth == NULL) {
         auth = FindAuthManagerByUuid(uuid, type, true);
     }
+    char *anonyUuid = NULL;
+    Anonymize(uuid, &anonyUuid);
     if (auth == NULL) {
-        AUTH_LOGI(AUTH_CONN, "auth not found by uuid, connType=%{public}d", type);
+        AUTH_LOGI(AUTH_CONN, "auth not found by uuid, connType=%{public}d, uuid=%{public}s", type, anonyUuid);
+        AnonymizeFree(anonyUuid);
         ReleaseAuthLock();
         return SOFTBUS_AUTH_NOT_FOUND;
     }
+    AnonymizeFree(anonyUuid);
     *connInfo = auth->connInfo[type];
     ReleaseAuthLock();
     return SOFTBUS_OK;
@@ -780,10 +800,10 @@ static void OnGroupCreated(const char *groupId, int32_t groupType)
     }
 }
 
-static void OnGroupDeleted(const char *groupId)
+static void OnGroupDeleted(const char *groupId, int32_t groupType)
 {
     if (g_groupChangeListener.onGroupDeleted != NULL) {
-        g_groupChangeListener.onGroupDeleted(groupId);
+        g_groupChangeListener.onGroupDeleted(groupId, groupType);
     }
 }
 
@@ -1203,8 +1223,14 @@ int32_t AuthVerifyAfterNotifyNormalize(NormalizeRequest *request)
         AUTH_LOGE(AUTH_CONN, "normalize request is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t ret = AuthSessionStartAuth(request->authSeq, request->requestId, request->connId, &request->connInfo,
-        false, request->isFastAuth);
+    AuthParam authInfo = {
+        .authSeq = request->authSeq,
+        .requestId = request->requestId,
+        .connId = request->connId,
+        .isServer = false,
+        .isFastAuth = request->isFastAuth,
+    };
+    int32_t ret = AuthSessionStartAuth(&authInfo, &request->connInfo);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "start auth session fail=%{public}d, requestId=%{public}u", ret, request->requestId);
         DisconnectAuthDevice(&request->connId);
@@ -1242,12 +1268,11 @@ static void OnConnectResult(uint32_t requestId, uint64_t connId, int32_t result,
         return;
     }
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)request.traceId);
-    if (request.type == REQUEST_TYPE_RECONNECT) {
+    if (request.type == REQUEST_TYPE_RECONNECT && connInfo != NULL) {
         HandleReconnectResult(&request, connId, result, connInfo->type);
         SoftbusHitraceStop();
         return;
     }
-
     if (result != SOFTBUS_OK) {
         ReportAuthRequestFailed(requestId, result);
         SoftbusHitraceStop();
@@ -1261,13 +1286,19 @@ static void OnConnectResult(uint32_t requestId, uint64_t connId, int32_t result,
             return;
         }
     }
-
     uint32_t num = AddConcurrentAuthRequest(&request.connInfo, &request, connId);
     if (num > 1) {
         SoftbusHitraceStop();
         return;
     }
-    int32_t ret = AuthSessionStartAuth(request.traceId, requestId, connId, connInfo, false, request.isFastAuth);
+    AuthParam authInfo = {
+        .authSeq = request.traceId,
+        .requestId = requestId,
+        .connId = connId,
+        .isServer = false,
+        .isFastAuth = request.isFastAuth,
+    };
+    int32_t ret = AuthSessionStartAuth(&authInfo, connInfo);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "start auth session fail=%{public}d, requestId=%{public}u", ret, requestId);
         DisconnectAuthDevice(&connId);
@@ -1309,7 +1340,14 @@ static void HandleDeviceIdData(
             return;
         }
         ReleaseAuthLock();
-        ret = AuthSessionStartAuth(head->seq, AuthGenRequestId(), connId, connInfo, true, true);
+        AuthParam authInfo = {
+            .authSeq = head->seq,
+            .requestId = AuthGenRequestId(),
+            .connId = connId,
+            .isServer = true,
+            .isFastAuth = true,
+        };
+        ret = AuthSessionStartAuth(&authInfo, connInfo);
         if (ret != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_FSM,
                 "perform auth session start auth fail. seq=%{public}" PRId64 ", ret=%{public}d", head->seq, ret);
@@ -1623,6 +1661,7 @@ void AuthHandleLeaveLNN(AuthHandle authHandle)
         DisconnectAuthDevice(&auth->connId[authHandle.type]);
     }
     DelAuthManager(auth, authHandle.type);
+    AuthFreeConn(&authHandle);
     ReleaseAuthLock();
 }
 
@@ -1751,6 +1790,85 @@ int32_t AuthDeviceGetPreferConnInfo(const char *uuid, AuthConnInfo *connInfo)
     return TryGetBrConnInfo(uuid, connInfo);
 }
 
+int32_t GetAuthConn(const char *uuid, LaneLinkType laneType, AuthConnInfo *connInfo)
+{
+    if (uuid == NULL || connInfo == NULL) {
+        AUTH_LOGE(AUTH_CONN, "param invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    AuthLinkType authType = AUTH_LINK_TYPE_MAX;
+    switch (laneType) {
+        case LANE_BR:
+            authType = AUTH_LINK_TYPE_BR;
+            break;
+        case LANE_BLE:
+            authType = AUTH_LINK_TYPE_BLE;
+            break;
+        case LANE_P2P:
+            authType = AUTH_LINK_TYPE_P2P;
+            break;
+        case LANE_HML:
+            authType = AUTH_LINK_TYPE_ENHANCED_P2P;
+            break;
+        case LANE_WLAN_2P4G:
+        case LANE_WLAN_5G:
+            authType = AUTH_LINK_TYPE_WIFI;
+            break;
+        default:
+            return SOFTBUS_ERR;
+    }
+    AUTH_LOGI(AUTH_CONN, "convert authType=%{public}d", authType);
+    return GetAuthConnInfoByUuid(uuid, authType, connInfo);
+}
+
+int32_t GetAuthLinkTypeList(const char *networkId, AuthLinkTypeList *linkTypeList)
+{
+    if (networkId == NULL || linkTypeList == NULL) {
+        AUTH_LOGE(AUTH_CONN, "param invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    char uuid[UUID_BUF_LEN] = {0};
+    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_UUID, uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "get peer uuid fail");
+        return SOFTBUS_ERR;
+    }
+    char udid[UDID_BUF_LEN] = {0};
+    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "get peer udid fail");
+        return SOFTBUS_ERR;
+    }
+    AuthLinkType linkList[] = {AUTH_LINK_TYPE_ENHANCED_P2P, AUTH_LINK_TYPE_WIFI,
+        AUTH_LINK_TYPE_P2P, AUTH_LINK_TYPE_BR, AUTH_LINK_TYPE_BLE};
+    AuthConnInfo connInfo;
+    if (memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo)) != EOK) {
+        AUTH_LOGE(AUTH_CONN, "memset_s AuthConnInfo fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    linkTypeList->linkTypeNum = 0;
+    for (uint32_t i = 0; i < sizeof(linkList) / sizeof(linkList[0]); ++i) {
+        if (GetAuthConnInfoByUuid(uuid, linkList[i], &connInfo) != SOFTBUS_OK) {
+            continue;
+        }
+        if (linkList[i] == AUTH_LINK_TYPE_ENHANCED_P2P || linkList[i] == AUTH_LINK_TYPE_P2P) {
+            if (!IsAuthReuseP2p(networkId, udid, linkList[i])) {
+                continue;
+            }
+        }
+        if (linkList[i] == AUTH_LINK_TYPE_BLE && !CheckActiveAuthConnection(&connInfo)) {
+            AUTH_LOGI(AUTH_CONN, "auth ble connection not active");
+            continue;
+        }
+        AUTH_LOGI(AUTH_CONN, "select auth type. i=%{public}d, authLinkType=%{public}d", i, linkList[i]);
+        linkTypeList->linkType[linkTypeList->linkTypeNum] = linkList[i];
+        linkTypeList->linkTypeNum++;
+    }
+    if (linkTypeList->linkTypeNum == 0) {
+        AUTH_LOGE(AUTH_CONN, "no available auth link");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t AuthDeviceGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo)
 {
     if (uuid == NULL || uuid[0] == '\0' || connInfo == NULL) {
@@ -1797,6 +1915,7 @@ int32_t AuthDeviceOpenConn(const AuthConnInfo *info, uint32_t requestId, const A
             callback->onConnOpened(requestId, authHandle);
             break;
         case AUTH_LINK_TYPE_BR:
+            /* fall-through */
         case AUTH_LINK_TYPE_BLE:
             judgeTimeOut = true;
         case AUTH_LINK_TYPE_P2P:
@@ -2130,6 +2249,35 @@ int64_t AuthDeviceGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer
     return authId;
 }
 
+int32_t AuthDeviceGetAuthHandleByIndex(const char *udid, bool isServer, int32_t index, AuthHandle *authHandle)
+{
+    if (udid == NULL || authHandle == NULL) {
+        AUTH_LOGE(AUTH_FSM, "param error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!RequireAuthLock()) {
+        AUTH_LOGE(AUTH_CONN, "RequireAuthLock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    AuthManager *auth = FindNormalizedKeyAuthManagerByUdid(udid, isServer);
+    if (auth == NULL) {
+        AUTH_LOGE(AUTH_CONN, "not found auth manager, side=%{public}s", GetAuthSideStr(isServer));
+        ReleaseAuthLock();
+        return SOFTBUS_AUTH_NOT_FOUND;
+    }
+    AuthLinkType type = GetSessionKeyTypeByIndex(&auth->sessionKeyList, index);
+    ReleaseAuthLock();
+    if (type == AUTH_LINK_TYPE_MAX || type < AUTH_LINK_TYPE_WIFI) {
+        AUTH_LOGE(AUTH_CONN, "auth type error");
+        return SOFTBUS_AUTH_NOT_FOUND;
+    }
+    authHandle->authId = auth->authId;
+    authHandle->type = type;
+    AUTH_LOGI(AUTH_CONN, "found auth manager, side=%{public}s, type=%{public}d, authId=%{public}" PRId64,
+        GetAuthSideStr(isServer), type, auth->authId);
+    return SOFTBUS_OK;
+}
+
 uint32_t AuthGetEncryptSize(uint32_t inLen)
 {
     return inLen + ENCRYPT_OVER_HEAD_LEN;
@@ -2181,7 +2329,7 @@ int32_t AuthDeviceDecrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_
     InDataInfo inDataInfo = { .inData = inData, .inLen = inLen };
     if (DecryptData(&auth->sessionKeyList, (AuthLinkType)authHandle->type, &inDataInfo, outData,
         outLen) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_KEY, "auth decrypt fail");
+        AUTH_LOGE(AUTH_KEY, "auth decrypt fail, authId=%{public}" PRId64, authHandle->authId);
         DelDupAuthManager(auth);
         return SOFTBUS_ENCRYPT_ERR;
     }
@@ -2280,6 +2428,40 @@ static void RegisterToDpDelay(void *para)
     RegisterToDp(&deviceProfileChangeListener);
 }
 
+static void InitAuthReqInfo(void)
+{
+    if (g_authReqList == NULL) {
+        g_authReqList = CreateSoftBusList();
+        if (g_authReqList == NULL) {
+            AUTH_LOGE(AUTH_CONN, "create g_authReqList fail");
+            return;
+        }
+    }
+    AUTH_LOGI(AUTH_CONN, "g_authReqList init success");
+}
+
+static void DeInitAuthReqInfo(void)
+{
+    if (g_authReqList == NULL) {
+        AUTH_LOGE(AUTH_CONN, "g_authReqList is NULL");
+        return;
+    }
+    AuthReqInfo *item = NULL;
+    AuthReqInfo *next = NULL;
+    if (SoftBusMutexLock(&g_authReqList->lock) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "get lock fail");
+        return;
+    }
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_authReqList->list, AuthReqInfo, node) {
+        ListDelete(&item->node);
+        SoftBusFree(item);
+    }
+    (void)SoftBusMutexUnlock(&g_authReqList->lock);
+    DestroySoftBusList(g_authReqList);
+    g_authReqList = NULL;
+    AUTH_LOGI(AUTH_CONN, "g_authReqList deinit success");
+}
+
 int32_t AuthDeviceInit(const AuthTransCallback *callback)
 {
     AUTH_LOGI(AUTH_INIT, "auth init enter");
@@ -2294,6 +2476,7 @@ int32_t AuthDeviceInit(const AuthTransCallback *callback)
         AUTH_LOGE(AUTH_INIT, "AuthCommonInit fail");
         return SOFTBUS_ERR;
     }
+    InitAuthReqInfo();
 
     AuthConnListener connListener = {
         .onConnectResult = OnConnectResult,
@@ -2341,6 +2524,306 @@ void AuthDeviceDeinit(void)
     ClearAuthRequest();
     AuthConnDeinit();
     AuthSessionFsmExit();
+    DeInitAuthReqInfo();
     AuthCommonDeinit();
     AUTH_LOGI(AUTH_INIT, "auth deinit succ");
+}
+
+static int32_t AddAuthReqNode(const char *networkId, uint32_t laneHandle, uint32_t authRequestId,
+    AuthConnCallback *callback)
+{
+    if (networkId == NULL || laneHandle == INVALID_LANE_REQ_ID || callback == NULL) {
+        AUTH_LOGE(AUTH_CONN, "param invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    AuthReqInfo *newItem = (AuthReqInfo *)SoftBusCalloc(sizeof(AuthReqInfo));
+    if (newItem == NULL) {
+        AUTH_LOGE(AUTH_CONN, "AuthReqInfo calloc fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    newItem->callback = *callback;
+    if (memcpy_s(&newItem->networkId, NETWORK_ID_BUF_LEN, networkId, NETWORK_ID_BUF_LEN) != EOK) {
+        AUTH_LOGE(AUTH_CONN, "memcpy_s networkId fail");
+        SoftBusFree(newItem);
+        return SOFTBUS_MEM_ERR;
+    }
+    newItem->laneHandle = laneHandle;
+    newItem->authRequestId = authRequestId;
+    ListInit(&newItem->node);
+
+    if (SoftBusMutexLock(&g_authReqList->lock) != SOFTBUS_OK) {
+        AUTH_LOGI(AUTH_CONN, "get lock fail");
+        SoftBusFree(newItem);
+        return SOFTBUS_LOCK_ERR;
+    }
+    ListTailInsert(&g_authReqList->list, &newItem->node);
+    (void)SoftBusMutexUnlock(&g_authReqList->lock);
+    return SOFTBUS_OK;
+}
+
+int32_t DelAuthReqInfoByAuthHandle(const AuthHandle *authHandle)
+{
+    if (authHandle == NULL) {
+        AUTH_LOGE(AUTH_CONN, "authHandle is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    AUTH_LOGI(AUTH_CONN, "delete authReqInfo by authId=%{public}" PRId64, authHandle->authId);
+    AuthReqInfo *item = NULL;
+    AuthReqInfo *next = NULL;
+    if (SoftBusMutexLock(&g_authReqList->lock) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "get lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_authReqList->list, AuthReqInfo, node) {
+        if (item->authId == authHandle->authId && item->authLinkType == authHandle->type) {
+            ListDelete(&item->node);
+            SoftBusFree(item);
+            break;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_authReqList->lock);
+    return SOFTBUS_OK;
+}
+
+void AuthFreeLane(const AuthHandle *authHandle)
+{
+    uint32_t laneHandle = INVALID_LANE_REQ_ID;
+    AuthReqInfo *item = NULL;
+    AuthReqInfo *next = NULL;
+    if (SoftBusMutexLock(&g_authReqList->lock) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "get lock fail");
+        return;
+    }
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_authReqList->list, AuthReqInfo, node) {
+        if (item->authId == authHandle->authId && item->authLinkType == authHandle->type) {
+            laneHandle = item->laneHandle;
+            break;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_authReqList->lock);
+
+    if (laneHandle != INVALID_LANE_REQ_ID) {
+        GetLaneManager()->lnnFreeLane(laneHandle);
+        AUTH_LOGI(AUTH_CONN, "auth free lane, laneHandle=%{public}u", laneHandle);
+    }
+}
+
+static void DelAuthRequestItem(uint32_t laneHandle)
+{
+    AuthReqInfo *item = NULL;
+    AuthReqInfo *next = NULL;
+    if (SoftBusMutexLock(&g_authReqList->lock) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "get lock fail");
+        return;
+    }
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_authReqList->list, AuthReqInfo, node) {
+        if (item->laneHandle == laneHandle) {
+            ListDelete(&item->node);
+            SoftBusFree(item);
+            break;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_authReqList->lock);
+}
+
+static void OnAuthConnOpenedSucc(uint32_t authRequestId, AuthHandle authHandle)
+{
+    AUTH_LOGI(AUTH_CONN, "open auth success with authRequestId=%{public}u", authRequestId);
+    AuthConnCallback cb;
+    cb.onConnOpened = NULL;
+    AuthReqInfo *item = NULL;
+    AuthReqInfo *next = NULL;
+    if (SoftBusMutexLock(&g_authReqList->lock) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "get lock fail");
+        return;
+    }
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_authReqList->list, AuthReqInfo, node) {
+        if (item->authRequestId == authRequestId) {
+            item->authId = authHandle.authId;
+            item->authLinkType = authHandle.type;
+            cb.onConnOpened = item->callback.onConnOpened;
+            break;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_authReqList->lock);
+    if (cb.onConnOpened != NULL) {
+        cb.onConnOpened(authRequestId, authHandle);
+    }
+}
+
+static void OnAuthConnOpenedFail(uint32_t authRequestId, int32_t reason)
+{
+    AUTH_LOGI(AUTH_CONN, "open auth fail with authRequestId=%{public}u", authRequestId);
+    uint32_t laneHandle = 0;
+    AuthConnCallback cb;
+    cb.onConnOpenFailed = NULL;
+    AuthReqInfo *item = NULL;
+    AuthReqInfo *next = NULL;
+    if (SoftBusMutexLock(&g_authReqList->lock) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "get lock fail");
+        return;
+    }
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_authReqList->list, AuthReqInfo, node) {
+        if (item->authRequestId == authRequestId) {
+            laneHandle = item->laneHandle;
+            cb.onConnOpenFailed = item->callback.onConnOpenFailed;
+            ListDelete(&item->node);
+            SoftBusFree(item);
+            break;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_authReqList->lock);
+    if (cb.onConnOpenFailed != NULL) {
+        cb.onConnOpenFailed(authRequestId, reason);
+    }
+    GetLaneManager()->lnnFreeLane(laneHandle);
+}
+
+static void AuthOnLaneAllocSuccess(uint32_t laneHandle, const LaneConnInfo *laneConnInfo)
+{
+    AUTH_LOGI(AUTH_CONN, "auth request success, laneHandle=%{public}u", laneHandle);
+    AuthReqInfo *item = NULL;
+    AuthReqInfo *next = NULL;
+    uint32_t authRequestId = 0;
+    if (SoftBusMutexLock(&g_authReqList->lock) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "get lock fail");
+        return;
+    }
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_authReqList->list, AuthReqInfo, node) {
+        if (item->laneHandle == laneHandle) {
+            authRequestId = item->authRequestId;
+            item->laneId = laneConnInfo->laneId;
+            break;
+        }
+    }
+    char uuid[UUID_BUF_LEN] = {0};
+    if (LnnGetRemoteStrInfo(item->networkId, STRING_KEY_UUID, uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "get peer uuid fail");
+        (void)SoftBusMutexUnlock(&g_authReqList->lock);
+        return;
+    }
+    (void)SoftBusMutexUnlock(&g_authReqList->lock);
+    AuthConnInfo authConnInfo;
+    if (memset_s(&authConnInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo)) != EOK) {
+        AUTH_LOGE(AUTH_CONN, "memset_s authConnInfo fail");
+        return;
+    }
+    if (GetAuthConn(uuid, laneConnInfo->type, &authConnInfo) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "GetAuthConn fail");
+        return;
+    }
+
+    AuthConnCallback cb = {
+        .onConnOpened = OnAuthConnOpenedSucc,
+        .onConnOpenFailed = OnAuthConnOpenedFail,
+    };
+    AUTH_LOGI(AUTH_CONN, "open auth with authRequestId=%{public}u", authRequestId);
+    if (AuthOpenConn(&authConnInfo, authRequestId, &cb, false) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "open auth conn fail");
+        DelAuthRequestItem(laneHandle);
+    }
+}
+
+static void AuthOnLaneAllocFail(uint32_t laneHandle, int32_t reason)
+{
+    AUTH_LOGI(AUTH_CONN, "auth request failed, laneHandle=%{public}u, reason=%{public}d", laneHandle, reason);
+    AuthConnCallback cb;
+    cb.onConnOpenFailed = NULL;
+    AuthReqInfo *item = NULL;
+    AuthReqInfo *next = NULL;
+    uint32_t authRequestId = 0;
+    if (SoftBusMutexLock(&g_authReqList->lock) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "get lock fail");
+        return;
+    }
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_authReqList->list, AuthReqInfo, node) {
+        if (item->laneHandle == laneHandle) {
+            authRequestId = item->authRequestId;
+            cb.onConnOpenFailed = item->callback.onConnOpenFailed;
+            ListDelete(&item->node);
+            SoftBusFree(item);
+            break;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_authReqList->lock);
+    if (cb.onConnOpenFailed != NULL) {
+        cb.onConnOpenFailed(authRequestId, reason);
+    }
+}
+
+static int32_t AuthGetRequestOption(const char *networkId, LaneAllocInfo *allocInfo)
+{
+    if (networkId == NULL || allocInfo == NULL) {
+        AUTH_LOGE(AUTH_CONN, "param invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (memcpy_s(allocInfo->networkId, NETWORK_ID_BUF_LEN, networkId, NETWORK_ID_BUF_LEN) != EOK) {
+        AUTH_LOGE(AUTH_CONN, "networkId memcpy_s fail");
+        return SOFTBUS_MEM_ERR;
+    }
+
+#define DEFAULT_PID 0
+    allocInfo->type = LANE_TYPE_CTRL;
+    allocInfo->pid = DEFAULT_PID;
+    allocInfo->extendInfo.networkDelegate = false;
+    allocInfo->transType = LANE_T_MSG;
+    allocInfo->acceptableProtocols = LNN_PROTOCOL_ALL ^ LNN_PROTOCOL_NIP;
+    allocInfo->qosRequire.maxLaneLatency = 0;
+    allocInfo->qosRequire.minBW = 0;
+    allocInfo->qosRequire.minLaneLatency = 0;
+    char uuid[UUID_BUF_LEN] = {0};
+    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_UUID, uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "get peer uuid fail");
+        return SOFTBUS_ERR;
+    }
+    AuthConnInfo connInfo;
+    if (memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo)) != EOK) {
+        AUTH_LOGE(AUTH_CONN, "memset_s AuthConnInfo fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (GetAuthConnInfoByUuid(uuid, AUTH_LINK_TYPE_BLE, &connInfo) == SOFTBUS_OK &&
+        CheckActiveAuthConnection(&connInfo)) {
+        if (memcpy_s(allocInfo->extendInfo.peerBleMac, BT_MAC_LEN, connInfo.info.bleInfo.bleMac, BT_MAC_LEN) != EOK) {
+            AUTH_LOGE(AUTH_CONN, "memcpy_s fail");
+            return SOFTBUS_MEM_ERR;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t AuthAllocLane(const char *networkId, uint32_t authRequestId, AuthConnCallback *callback)
+{
+    if (networkId == NULL || callback == NULL) {
+        AUTH_LOGE(AUTH_CONN, "param invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint32_t laneHandle = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_CTRL);
+    if (AddAuthReqNode(networkId, laneHandle, authRequestId, callback) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "add auth request node fail");
+        GetLaneManager()->lnnFreeLane(laneHandle);
+        return SOFTBUS_ERR;
+    }
+
+    LaneAllocInfo allocInfo;
+    if (memset_s(&allocInfo, sizeof(LaneAllocInfo), 0, sizeof(LaneAllocInfo) != EOK)) {
+        AUTH_LOGE(AUTH_CONN, "LaneRequestOption memset_s fail");
+        GetLaneManager()->lnnFreeLane(laneHandle);
+        return SOFTBUS_MEM_ERR;
+    }
+
+    if (AuthGetRequestOption(networkId, &allocInfo) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "auth get requestOption fail");
+        GetLaneManager()->lnnFreeLane(laneHandle);
+        return SOFTBUS_ERR;
+    }
+
+    LaneAllocListener listener;
+    listener.onLaneAllocSuccess = AuthOnLaneAllocSuccess;
+    listener.onLaneAllocFail = AuthOnLaneAllocFail;
+    AUTH_LOGI(AUTH_CONN, "auth alloc lane, laneHandle=%{public}u, authRequestId=%{public}u", laneHandle, authRequestId);
+    if (GetLaneManager()->lnnAllocLane(laneHandle, &allocInfo, &listener) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "auth alloc lane fail");
+        return SOFTBUS_ERR;
+    }
+    return SOFTBUS_OK;
 }

@@ -78,6 +78,18 @@
         /** Callback for publish result */
         void (*OnPublishResult)(int publishId, PublishResult reason);
     } IPublishCb;
+
+    // 发布信息
+    typedef struct {
+        int publishId;                  // 发现消息Id
+        DiscoverMode mode;              // 发现模式
+        ExchangeMedium medium;          // 发现媒介
+        ExchangeFreq freq;              // 发现频率
+        const char *capability;         // 被发现设备需要具备的能力
+        unsigned char *capabilityData;  // 业务发布的自定义数据
+        unsigned int dataLen;           // 数据长度
+        bool ranging;                   // 是否测距
+    } PublishInfo;
     
     // 发布服务
     int32_t PublishLNN(const char *pkgName, const PublishInfo *info, const IPublishCb *cb);
@@ -231,17 +243,18 @@
         void (*OnStream)(int32_t socket, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param);
         void (*OnFile)(int32_t socket, FileEvent *event);
         void (*OnQos)(int32_t socket, QoSEvent eventId, const QosTV *qos, uint32_t qosCount);
+        void (*OnError)(int32_t socket, int32_t errCode);
     } ISocketListener;
 
     typedef enum {
         QOS_TYPE_MIN_BW,            // 最小带宽
-        QOS_TYPE_MAX_LATENCY,       // 最大建链时延
+        QOS_TYPE_MAX_WAIT_TIMEOUT,  // Bind超时时间
         QOS_TYPE_MIN_LATENCY,       // 最小建链时延
-        QOS_TYPE_MAX_WAIT_TIMEOUT,  // 最大超时时间
-        QOS_TYPE_MAX_BUFFER,        // 最大缓存
-        QOS_TYPE_FIRST_PACKAGE,     // 首包大小
+        QOS_TYPE_RTT_LEVEL,         // 往返时间级别
+        QOS_TYPE_MAX_BUFFER,        // 最大缓存(预留)
+        QOS_TYPE_FIRST_PACKAGE,     // 首包大小(预留)
         QOS_TYPE_MAX_IDLE_TIMEOUT,  // 最大空闲时间
-        QOS_TYPE_TRANS_RELIABILITY, // 传输可靠性
+        QOS_TYPE_TRANS_RELIABILITY, // 传输可靠性(预留)
         QOS_TYPE_BUTT,
     } QosType;
 
@@ -275,6 +288,40 @@
     ```C
     // 关闭Socket
     void Shutdown(int32_t socket);
+    ```
+
+**4、设备管理相关**
+
+-   **选择Wi-Fi保活模式**
+
+1.  业务在软总线客户端调用ShiftLNNGear，通过IPC接口调用到服务端ShiftLNNGear，策略管理模块按照策略对TCP长连接的keepalive属性进行调整。
+
+    ```C
+    typedef struct {
+        ModeCycle cycle;              // 保活探测间隔
+        ModeDuration duration;        // 心跳模式持续时间
+        bool wakeupFlag;              // 是否心跳唤醒对端设备
+        ModeAction action;            // 选择模式动作
+    } GearMode;
+    
+    typedef enum {
+        HIGH_FREQ_CYCLE = 30,         // 心跳间隔30s
+        MID_FREQ_CYCLE = 60,          // 心跳间隔60s
+        LOW_FREQ_CYCLE = 5 * 60,      // 心跳间隔5min
+        DEFAULT_FREQ_CYCLE = 10 * 60, // 心跳间隔10min
+    } ModeCycle;
+
+    // 按照策略对TCP长连接的keepalive参数进行调整
+    int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode);
+    ```
+
+2.  业务指定不同的保活探测间隔，对应不同的TCP保活时长。
+
+    ```C
+    HIGH_FREQ_CYCLE = 30，代表TCP保活时长在40s以内；
+    MID_FREQ_CYCLE = 60，代表TCP保活时长在70s以内；
+    LOW_FREQ_CYCLE = 5*60，代表TCP保活时长在315s以内；
+    DEFAULT_FREQ_CYCLE = 10*60，代表TCP保活时长在615s以内。
     ```
 
 ## 相关仓<a name="section1371113476307"></a>

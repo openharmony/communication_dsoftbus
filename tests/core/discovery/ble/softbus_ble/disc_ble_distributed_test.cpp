@@ -323,7 +323,8 @@ HWTEST_F(DiscDistributedBleTest, TestRangeDevice001, TestSize.Level1)
 
 /*
  * @tc.name: TestGetConDeviceInfo001
- * @tc.desc: Test GetConDeviceInfo should return SOFTBUS_ERR when given 0x0 g_bleInfoManager[2].capBitMap[0]
+ * @tc.desc: Test GetConDeviceInfo should return SOFTBUS_DISCOVER_BLE_GET_DEVICE_INFO_FAIL
+ *           when given 0x0 g_bleInfoManager[2].capBitMap[0]
  *           should return SOFTBUS_OK when given 0x1 g_bleInfoManager[2].capBitMap[0]
  * @tc.type: FUNC
  * @tc.require:
@@ -337,7 +338,7 @@ HWTEST_F(DiscDistributedBleTest, TestGetConDeviceInfo001, TestSize.Level1)
     g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].capBitMap[0] = 0x0;
     DeviceInfo foundInfoTest;
     int32_t ret = GetConDeviceInfo(&foundInfoTest);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_BLE_GET_DEVICE_INFO_FAIL);
 
     g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].capBitMap[0] = 0x1;
     ret = GetConDeviceInfo(&foundInfoTest);
@@ -349,7 +350,8 @@ HWTEST_F(DiscDistributedBleTest, TestGetConDeviceInfo001, TestSize.Level1)
 
 /*
  * @tc.name: TestGetNonDeviceInfo001
- * @tc.desc: Test GetNonDeviceInfo should return SOFTBUS_ERR when given 0x0 g_bleInfoManager[0].capBitMap[0]
+ * @tc.desc: Test GetNonDeviceInfo should return SOFTBUS_DISCOVER_BLE_GET_DEVICE_INFO_FAIL
+ *           when given 0x0 g_bleInfoManager[0].capBitMap[0]
  *           should return SOFTBUS_OK when given 0x1 g_bleInfoManager[0].capBitMap[0]
  * @tc.type: FUNC
  * @tc.require:
@@ -363,7 +365,7 @@ HWTEST_F(DiscDistributedBleTest, TestGetNonDeviceInfo001, TestSize.Level1)
     DeviceInfo foundInfoTest;
     g_bleInfoManager[BLE_PUBLISH | BLE_ACTIVE].capBitMap[0] = 0x0;
     int32_t ret = GetNonDeviceInfo(&foundInfoTest);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_BLE_GET_DEVICE_INFO_FAIL);
 
     g_bleInfoManager[BLE_PUBLISH | BLE_ACTIVE].capBitMap[0] = 0x1;
     ret = GetNonDeviceInfo(&foundInfoTest);

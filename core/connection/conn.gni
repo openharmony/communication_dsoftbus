@@ -20,7 +20,8 @@ import("../../dsoftbus.gni")
 import("../../core/connection/tcp/conn_tcp.gni")
 conn_manager_src = ble_connection_src + br_connection_src + tcp_connection_src
 conn_manager_inc = ble_connection_inc + br_connection_inc + tcp_connection_inc
-conn_manager_external_deps = ble_connection_external_deps
+conn_manager_external_deps =
+    ble_connection_external_deps + br_connection_external_deps
 conn_manager_common_deps = [ "$dsoftbus_dfx_path/log:softbus_dfx_log" ]
 
 conn_manager_src += [

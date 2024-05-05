@@ -680,7 +680,7 @@ static void OnCompleteAlarm(int32_t reason, int32_t total)
 static void SoftBusEventQueryInfo(int time, HiSysEventQueryParam* queryParam)
 {
     HiSysEventQueryArg queryArg;
-    queryArg.endTime = SoftBusGetSysTimeMs();
+    queryArg.endTime = (int64_t)SoftBusGetSysTimeMs();
     queryArg.beginTime = queryArg.endTime - time * MINUTE_TIME;
     queryArg.maxEvents = queryParam->dataSize;
     

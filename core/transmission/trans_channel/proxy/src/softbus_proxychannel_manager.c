@@ -172,7 +172,7 @@ int32_t TransRefreshProxyTimesNative(int channelId)
 
 static int32_t TransProxyAddChanItem(ProxyChannelInfo *chan)
 {
-    TRANS_LOGI(TRANS_CTRL, "enter.");
+    TRANS_LOGD(TRANS_CTRL, "enter.");
     if ((chan == NULL) || (g_proxyChannelList == NULL)) {
         TRANS_LOGE(TRANS_CTRL, "trans proxy add channel param nullptr!");
         return SOFTBUS_ERR;
@@ -1053,7 +1053,7 @@ void TransProxyProcessHandshakeAuthMsg(const ProxyMessage *msg)
     if (TransProxyGetAppInfoByChanId(msg->msgHead.myId, &appInfo) != SOFTBUS_OK) {
         return;
     }
-    if ((appInfo.transFlag & TRANS_FLAG_HAS_CHANNEL_AUTH) == 0) {
+    if (((uint32_t)appInfo.transFlag & TRANS_FLAG_HAS_CHANNEL_AUTH) == 0) {
         return;
     }
     int64_t authSeq = appInfo.authSeq;
@@ -1497,7 +1497,14 @@ void TransProxyTimerProc(void)
     ProxyChannelInfo *nextNode = NULL;
     ListNode proxyProcList;
 
-    if (g_proxyChannelList == 0 || g_proxyChannelList->cnt <= 0 || SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
+    int32_t ret = SoftBusMutexLock(&g_proxyChannelList->lock);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_INIT,"lock mutex fail");
+        return;
+    }
+    if (g_proxyChannelList == NULL || g_proxyChannelList->cnt <= 0) {
+        TRANS_LOGW(TRANS_INIT,"g_proxyChannelList is null or empty");
+        (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
         return;
     }
 
@@ -1721,7 +1728,7 @@ void TransProxyManagerDeinit(void)
 
 static void TransProxyDestroyChannelList(const ListNode *destroyList)
 {
-    TRANS_LOGI(TRANS_CTRL, "enter.");
+    TRANS_LOGD(TRANS_CTRL, "enter.");
     if ((destroyList == NULL) || IsListEmpty(destroyList)) {
         return;
     }

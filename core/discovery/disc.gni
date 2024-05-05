@@ -19,7 +19,7 @@ import("../../dsoftbus.gni")
 disc_server_src = ble_discovery_src + disc_coap_src + disc_event_manager_src
 disc_server_inc = ble_discovery_inc + disc_coap_inc + disc_event_manager_inc
 disc_server_deps = ble_discovery_deps + disc_coap_deps + disc_event_manager_deps
-disc_server_external_deps = []
+disc_server_external_deps = disc_coap_external_deps
 disc_server_src += [
   "$dsoftbus_root_path/core/discovery/manager/src/disc_manager.c",
   "$dsoftbus_root_path/core/discovery/manager/src/softbus_disc_server.c",
@@ -48,9 +48,7 @@ if (defined(ohos_lite)) {
     "$dsoftbus_root_path/core/discovery/ipc/$os_type/src/disc_client_proxy.cpp",
     "$dsoftbus_root_path/core/discovery/ipc/$os_type/src/disc_client_proxy_standard.cpp",
   ]
-  disc_server_inc += [
-    "$dsoftbus_root_path/core/discovery/ipc/$os_type/include",
-    "//utils/system/safwk/native/include",
-  ]
+  disc_server_inc +=
+      [ "$dsoftbus_root_path/core/discovery/ipc/$os_type/include" ]
   disc_server_external_deps += [ "c_utils:utils" ]
 }

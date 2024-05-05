@@ -102,8 +102,8 @@ typedef struct {
 } AppDiscNode;
 
 typedef struct {
-    int64_t startAuthTime;
-    int64_t endAuthTime;
+    uint64_t startAuthTime;
+    uint64_t endAuthTime;
 } AuthStatisticData;
 
 typedef struct {
