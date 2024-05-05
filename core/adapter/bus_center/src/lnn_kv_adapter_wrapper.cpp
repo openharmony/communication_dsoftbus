@@ -18,6 +18,7 @@
 #include "lnn_kv_adapter_wrapper.h"
 #include "lnn_log.h"
 #include "softbus_errcode.h"
+#include "lnn_kv_adapter.h"
 #include "lnn_kv_data_change_listener.h"
 #include "lnn_device_info_recovery.h"
 
@@ -252,7 +253,7 @@ void BasicCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::strin
 {
     std::string keyPrefix = std::to_string(localInfo->accountId) + SEPARATOR + localInfo->deviceUdid + SEPARATOR;
     std::string stateVersionStr = SEPARATOR + std::to_string(localInfo->stateVersion);
-    
+
     values[keyPrefix + DEVICE_INFO_NETWORK_ID] = localInfo->networkId + stateVersionStr;
     values[keyPrefix + DEVICE_INFO_DEVICE_NAME] = localInfo->deviceName + stateVersionStr;
     values[keyPrefix + DEVICE_INFO_UNIFIED_DEVICE_NAME] = localInfo->unifiedName + stateVersionStr;
@@ -283,7 +284,7 @@ void ComplexCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::str
 {
     std::string keyPrefix = std::to_string(localInfo->accountId) + SEPARATOR + localInfo->deviceUdid + SEPARATOR;
     std::string stateVersionStr = SEPARATOR + std::to_string(localInfo->stateVersion);
-    
+
     char peerIrkStr[LFINDER_IRK_LEN];
     for (int32_t i = 0; i < LFINDER_IRK_LEN; i++) {
         peerIrkStr[i] = static_cast<char>(localInfo->peerIrk[i]);
