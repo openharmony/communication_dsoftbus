@@ -484,8 +484,14 @@ UdpChannelInfo *TransGetChannelObj(int32_t channelId)
 
 int32_t TransGetUdpAppInfoByChannelId(int32_t channelId, AppInfo *appInfo)
 {
-    if ((g_udpChannelMgr == NULL) && (appInfo == NULL)) {
-        return SOFTBUS_ERR;
+    if (appInfo == NULL) {
+        TRANS_LOGE(TRANS_INIT, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (g_udpChannelMgr == NULL) {
+        TRANS_LOGE(TRANS_INIT, "udp channel manager hasn't init.");
+        return SOFTBUS_NO_INIT;
     }
 
     if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != 0) {

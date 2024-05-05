@@ -911,7 +911,11 @@ int32_t TransProxyPackAndSendData(
         }
         SliceHead *slicehead = (SliceHead *)sliceData;
         slicehead->priority = SessionPktTypeToProxyIndex(pktType);
-        slicehead->sliceNum = sliceNum;
+        if (sliceNum > INT32_MAX) {
+            TRANS_LOGE(TRANS_FILE, "Data overflow");
+            return SOFTBUS_INVALID_NUM;
+        }
+        slicehead->sliceNum = (int32_t)sliceNum;
         slicehead->sliceSeq = i;
         ClientPackSliceHead(slicehead);
         if (memcpy_s(sliceData + sizeof(SliceHead), dataLen, dataInfo.outData + offset, dataLen) != EOK) {
