@@ -16,7 +16,6 @@
 #define WIFI_DIRECT_MANAGER_H
 
 #include "common_list.h"
-#include "softbus_base_listener.h"
 #include "wifi_direct_types.h"
 
 #ifdef __cplusplus
@@ -35,8 +34,8 @@ struct WifiDirectStatusListener {
 
 struct WifiDirectManager {
     uint32_t (*getRequestId)(void);
-    ListenerModule (*allocateListenerModuleId)(void);
-    void (*freeListenerModuleId)(ListenerModule moduleId);
+    int32_t (*allocateListenerModuleId)(void);
+    void (*freeListenerModuleId)(int32_t moduleId);
 
     int32_t (*connectDevice)(struct WifiDirectConnectInfo *info, struct WifiDirectConnectCallback *callback);
     int32_t (*disconnectDevice)(struct WifiDirectDisconnectInfo *info, struct WifiDirectDisconnectCallback *callback);

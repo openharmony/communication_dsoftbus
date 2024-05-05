@@ -783,7 +783,7 @@ int32_t AuthStartListeningForWifiDirect(AuthLinkType type, const char *ip, int32
     if (type == AUTH_LINK_TYPE_P2P) {
         local.socketOption.moduleId = AUTH_P2P;
     } else if (type == AUTH_LINK_TYPE_ENHANCED_P2P) {
-        local.socketOption.moduleId = GetWifiDirectManager()->allocateListenerModuleId();
+        local.socketOption.moduleId = (ListenerModule)(GetWifiDirectManager()->allocateListenerModuleId());
         AUTH_CHECK_AND_RETURN_RET_LOGE(local.socketOption.moduleId < UNUSE_BUTT, SOFTBUS_ERR, AUTH_CONN,
                                        "alloc listener module id failed");
     } else {
