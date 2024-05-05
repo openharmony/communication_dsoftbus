@@ -187,7 +187,7 @@ HWTEST_F(DiscCoapTest, TestCoapPublish004, TestSize.Level1)
     ret = g_discCoapFuncInterface->Publish(&g_testPubOption);
     EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL);
     ret = g_discCoapFuncInterface->Unpublish(&g_testPubOption);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL);
 
     DiscCoapDeinit();
     g_discCoapFuncInterface = nullptr;
@@ -278,7 +278,7 @@ HWTEST_F(DiscCoapTest, TestCoapStartScan003, TestSize.Level1)
     ret = g_discCoapFuncInterface->StartScan(&g_testPubOption);
     EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL);
     ret = g_discCoapFuncInterface->StopScan(&g_testPubOption);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL);
 
     DiscCoapDeinit();
     g_discCoapFuncInterface = nullptr;

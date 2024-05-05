@@ -579,13 +579,16 @@ int32_t TransCloseChannel(const char *sessionName, int32_t channelId, int32_t ch
 int32_t TransSendMsg(int32_t channelId, int32_t channelType, const void *data, uint32_t len,
     int32_t msgType)
 {
-    TRANS_LOGI(TRANS_MSG, "send msg: channelId=%{public}d, channelType=%{public}d", channelId, channelType);
     int32_t ret = SOFTBUS_OK;
     switch (channelType) {
         case CHANNEL_TYPE_AUTH:
+            TRANS_LOGI(TRANS_MSG,
+                "send msg auth channelType. channelId=%{public}d, channelType=%{public}d", channelId, channelType);
             ret = TransSendAuthMsg(channelId, (char*)data, (int32_t)len);
             break;
         case CHANNEL_TYPE_PROXY:
+            TRANS_LOGI(TRANS_MSG,
+                "send msg proxy channelType. channelId=%{public}d, channelType=%{public}d", channelId, channelType);
             ret = TransProxyPostSessionData(channelId, (unsigned char*)data, len, (SessionPktType)msgType);
             break;
         default:

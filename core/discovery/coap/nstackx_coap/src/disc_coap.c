@@ -302,7 +302,7 @@ static int32_t UnPublish(const PublishOption *option, bool isActive)
         (void)SoftBusMutexUnlock(&(g_publishMgr->lock));
         DfxRecordRegisterEnd(curCap, SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL);
         DISC_LOGE(DISC_COAP, "register service data to dfinder failed.");
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL;
     }
     if (isActive && g_publishMgr->isEmpty) {
         if (DiscCoapStopDiscovery() != SOFTBUS_OK) {

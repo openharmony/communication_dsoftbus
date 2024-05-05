@@ -378,8 +378,8 @@ static int32_t BuildDiscPublishMsg(DiscPublishMsg **msgNode, const PublishInfo *
             LNN_LOGE(LNN_STATE, "calloc failed");
             return SOFTBUS_MALLOC_ERR;
         }
-        if (memcpy_s((*msgNode)->info->capabilityData, info->dataLen + 1,
-            info->capabilityData, info->dataLen + 1) != EOK) {
+        if (strcpy_s((char *)(*msgNode)->info->capabilityData, info->dataLen + 1,
+            (const char *)info->capabilityData) != EOK) {
             FreeDiscPublishMsg(msgNode);
             LNN_LOGE(LNN_STATE, "copy capabilityData failed");
             return SOFTBUS_ERR;
@@ -425,8 +425,8 @@ static int32_t BuildDiscSubscribeMsg(DiscSubscribeMsg **msgNode, const Subscribe
             LNN_LOGE(LNN_STATE, "calloc failed");
             return SOFTBUS_MALLOC_ERR;
         }
-        if (memcpy_s((*msgNode)->info->capabilityData, info->dataLen + 1,
-            info->capabilityData, info->dataLen + 1) != EOK) {
+        if (strcpy_s((char *)(*msgNode)->info->capabilityData, info->dataLen + 1,
+            (const char *)info->capabilityData) != EOK) {
             FreeDiscSubscribeMsg(msgNode);
             LNN_LOGE(LNN_STATE, "copy capabilityData failed");
             return SOFTBUS_ERR;
@@ -443,9 +443,8 @@ static int32_t AddDiscPublishMsg(const char *pkgName, const PublishInfo *info)
 
     DiscPublishMsg *msgNode = NULL;
     LIST_FOR_EACH_ENTRY(msgNode, &(g_publishMsgList->list), DiscPublishMsg, node) {
-        if (msgNode->info->publishId == info->publishId
-            && strcmp(msgNode->info->capability, info->capability) == 0
-            && strcmp(msgNode->pkgName, pkgName) == 0) {
+        if (msgNode->info->publishId == info->publishId &&
+            strcmp(msgNode->info->capability, info->capability) == 0 && strcmp(msgNode->pkgName, pkgName) == 0) {
             (void)SoftBusMutexUnlock(&(g_publishMsgList->lock));
             return SOFTBUS_OK;
         }
@@ -488,9 +487,8 @@ static int32_t AddDiscSubscribeMsg(const char *pkgName, const SubscribeInfo *inf
 
     DiscSubscribeMsg *msgNode = NULL;
     LIST_FOR_EACH_ENTRY(msgNode, &(g_discoveryMsgList->list), DiscSubscribeMsg, node) {
-        if (msgNode->info->subscribeId == info->subscribeId
-            && strcmp(msgNode->info->capability, info->capability) == 0
-            && strcmp(msgNode->pkgName, pkgName) == 0) {
+        if (msgNode->info->subscribeId == info->subscribeId &&
+            strcmp(msgNode->info->capability, info->capability) == 0 && strcmp(msgNode->pkgName, pkgName) == 0) {
             (void)SoftBusMutexUnlock(&(g_discoveryMsgList->lock));
             return SOFTBUS_OK;
         }
@@ -533,21 +531,26 @@ static int32_t DiscoveryMsgListInit()
     }
     LNN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexInit(&g_isInitedLock, NULL) == SOFTBUS_OK,
         SOFTBUS_LOCK_ERR, LNN_STATE, "lock init failed");
-    LNN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_isInitedLock) == SOFTBUS_OK,
-        SOFTBUS_LOCK_ERR, LNN_STATE, "lock failed");
-
+    if (SoftBusMutexLock(&g_isInitedLock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "lock failed");
+        (void)SoftBusMutexDestroy(&g_isInitedLock);
+        return SOFTBUS_LOCK_ERR;
+    }
     g_publishMsgList = CreateSoftBusList();
     g_discoveryMsgList = CreateSoftBusList();
     if (g_publishMsgList == NULL || g_discoveryMsgList == NULL) {
         LNN_LOGE(LNN_STATE, "init disc msg list failed");
         DestroySoftBusList(g_publishMsgList);
         DestroySoftBusList(g_discoveryMsgList);
+        g_publishMsgList = NULL;
+        g_discoveryMsgList = NULL;
         (void)SoftBusMutexUnlock(&g_isInitedLock);
         return SOFTBUS_ERR;
     }
     g_isInited = true;
     (void)SoftBusMutexUnlock(&g_isInitedLock);
-    LNN_LOGI(LNN_STATE, "disc list init success");
+    static uint32_t callCount = 0;
+    LNN_LOGI(LNN_STATE, "disc list init success, callCount=%{public}u", callCount++);
     return SOFTBUS_OK;
 }
 
@@ -576,6 +579,7 @@ void BusCenterClientDeinit(void)
     }
     if (DiscoveryMsgListDeInit() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "DiscoveryMsgListDeInit fail");
+        (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
         return;
     }
     ClearJoinLNNList();

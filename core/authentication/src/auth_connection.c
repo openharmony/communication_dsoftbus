@@ -792,7 +792,13 @@ int32_t AuthStartListeningForWifiDirect(AuthLinkType type, const char *ip, int32
     }
 
     int32_t realPort = ConnStartLocalListening(&local);
-    AUTH_CHECK_AND_RETURN_RET_LOGE(realPort > 0, SOFTBUS_ERR, AUTH_CONN, "start local listening failed");
+    if (realPort <= 0) {
+        if (type == AUTH_LINK_TYPE_ENHANCED_P2P) {
+            GetWifiDirectManager()->freeListenerModuleId(local.socketOption.moduleId);
+        }
+        AUTH_LOGE(AUTH_CONN, "start local listening failed");
+        return SOFTBUS_ERR;
+    }
     AUTH_LOGI(AUTH_CONN, "moduleId=%{public}u, port=%{public}d", local.socketOption.moduleId, realPort);
     *moduleId = local.socketOption.moduleId;
     return realPort;
