@@ -326,7 +326,7 @@ static int32_t GetAllManager(SoftBusGattsManager **node)
     SoftBusGattsManager *it = NULL;
     LIST_FOR_EACH_ENTRY(it, &g_softBusGattsManager->list, SoftBusGattsManager, node) {
         if (memcpy_s(*node + i, sizeof(SoftBusGattsManager), it, sizeof(SoftBusGattsManager)) != EOK) {
-            CONN_LOGE(CONN_COMMON, "mem error");
+            CONN_LOGE(CONN_BLE, "mem error");
             continue;
         }
         i++;

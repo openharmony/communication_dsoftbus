@@ -1523,8 +1523,10 @@ static void TransitionToState(enum BleMgrState target)
 
 static void BleManagerMsgHandler(SoftBusMessage *msg)
 {
-    CONN_LOGI(CONN_BLE, "ble manager looper recieve msg. msg=%{public}d, currentState=%{public}s", msg->what,
-        g_bleManager.state->name());
+    if (msg->what != BLE_MGR_MSG_DATA_RECEIVED) {
+        CONN_LOGI(CONN_BLE, "ble msg looper recv msg=%{public}d, curState=%{public}s",
+            msg->what, g_bleManager.state->name());
+    }
     switch (msg->what) {
         case BLE_MGR_MSG_NEXT_CMD: {
             if (g_bleManager.state->handlePendingRequest != NULL) {
