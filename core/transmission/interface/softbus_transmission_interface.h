@@ -80,7 +80,6 @@ int TransOpenNetWorkingChannel(
  * @see {@link TransOpenNetWorkingChannel}
  * @param[in] channelId indicates the opened ChannelId.
  * @return <b>SOFTBUS_MALLOC_ERR</b> Failed to allocate space for global variable of information.
- * @return <b>SOFTBUS_TRANS_PROXY_DEL_CHANNELID_INVALID</b> Failed to delete channel info.
  * @return <b>SOFTBUS_OK</b> Success to close this proxy channel, returns other internal error codes otherwise.
  */
 int TransCloseNetWorkingChannel(int32_t channelId);
@@ -94,7 +93,6 @@ int TransCloseNetWorkingChannel(int32_t channelId);
  * @param[in] dataLen indicates the message data of len.
  * @param[in] priority indicates the message send priority.
  * @return <b>SOFTBUS_MALLOC_ERR</b> Failed to allocate space for global variable of information.
- * @return <b>SOFTBUS_TRANS_PROXY_SEND_CHANNELID_INVALID</b> Failed to get channel info.
  * @return <b>SOFTBUS_TRANS_PROXY_CHANNLE_STATUS_INVALID</b> the channel status is abnormal.
  * @return <b>SOFTBUS_TRANS_PROXY_PACKMSG_ERR</b> Failed to packaged the message data.
  * @return <b>SOFTBUS_OK</b> Success to send message to the channel, returns other internal error codes otherwise.
