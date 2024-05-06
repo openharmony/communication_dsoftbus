@@ -120,6 +120,12 @@ MATCHER_P2(TransValidParamArrayMatcher, inExtra, validSize, "trans valid param a
     ++index;
     EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
     EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
+    Anonymize(extra.localUdid, &anonyStr);
+    EXPECT_STREQ(params[index].v.s, anonyStr);
+    AnonymizeFree(anonyStr);
+    ++index;
+    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
+    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
     EXPECT_STREQ(params[index].v.s, extra.callerPkg);
     ++index;
     EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);

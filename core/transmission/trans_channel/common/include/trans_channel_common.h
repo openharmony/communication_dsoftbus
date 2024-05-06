@@ -41,6 +41,9 @@ void TransOpenChannelSetModule(int32_t channelType, ConnectOption *connOpt);
 void TransBuildTransOpenChannelStartEvent(
     TransEventExtra *extra, AppInfo *appInfo, NodeInfo *nodeInfo, int32_t peerRet);
 
+void TransBuildOpenAuthChannelStartEvent(
+    TransEventExtra *extra, const char *sessionName, const ConnectOption *connOpt, char *localUdid, char *callerPkg);
+
 void TransBuildTransOpenChannelEndEvent(TransEventExtra *extra, TransInfo *transInfo, int64_t timeStart, int32_t ret);
 
 void TransBuildTransOpenChannelCancelEvent(

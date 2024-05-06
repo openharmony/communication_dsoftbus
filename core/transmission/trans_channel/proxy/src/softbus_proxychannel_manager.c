@@ -1131,6 +1131,9 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
         .channelType = chan->appInfo.appType == APP_TYPE_AUTH ? CHANNEL_TYPE_AUTH : CHANNEL_TYPE_PROXY,
         .linkType = chan->type
     };
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, nodeInfo.masterUdid, UDID_BUF_LEN) == SOFTBUS_OK) {
+        extra.localUdid = nodeInfo.masterUdid;
+    }
     if (ret != SOFTBUS_OK) {
         ReleaseProxyChannelId(chan->channelId);
         SoftBusFree(chan);
