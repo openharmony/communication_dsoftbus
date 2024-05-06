@@ -22,7 +22,7 @@
 extern "C" {
 #endif
 
-#define DSOFTBUS_STATS(scene, extra) StatsEventInner(scene, __FUNCTION__, __LINE__, &extra)
+#define DSOFTBUS_STATS(scene, extra) StatsEventInner(scene, __FUNCTION__, __LINE__, &(extra))
 
 /* For inner use only */
 void StatsEventInner(int32_t scene, const char *func, int32_t line, StatsEventExtra *extra);

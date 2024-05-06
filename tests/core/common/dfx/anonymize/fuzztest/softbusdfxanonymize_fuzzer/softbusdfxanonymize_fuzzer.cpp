@@ -24,6 +24,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 
     char *anonymized = nullptr;
     Anonymize(str.c_str(), &anonymized);
+    AnonymizeWrapper(anonymized);
     AnonymizeFree(anonymized);
     return 0;
 }

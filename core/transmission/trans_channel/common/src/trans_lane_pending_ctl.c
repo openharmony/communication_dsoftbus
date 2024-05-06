@@ -732,6 +732,7 @@ static void TransGetQosInfo(const SessionParam *param, QosInfo *qosInfo)
                 break;
             case QOS_TYPE_RTT_LEVEL:
                 qosInfo->rttLevel = (LaneRttLevel)((param->qos[i].value > 0) ? param->qos[i].value : 0);
+                break;
             default:
                 break;
         }

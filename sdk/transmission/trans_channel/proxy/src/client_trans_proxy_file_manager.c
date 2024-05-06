@@ -1815,7 +1815,11 @@ static int32_t ProcessOneFrameCRC(const FileFrame *frame, uint32_t dataLen, Sing
     if (seq >= fileInfo->startSeq) {
         int32_t seqDiff = (int32_t)(seq - fileInfo->seq - 1);
 
-        int64_t bytesToWrite = (int64_t)(seqDiff * fileInfo->oneFrameLen);
+        if (fileInfo->oneFrameLen > INT64_MAX || seqDiff * fileInfo->oneFrameLen > INT64_MAX) {
+            TRANS_LOGE(TRANS_FILE, "Data overflow");
+            return SOFTBUS_INVALID_NUM;
+        }
+        int64_t bytesToWrite = (int64_t)seqDiff * (int64_t)fileInfo->oneFrameLen;
         if (MAX_FILE_SIZE < bytesToWrite) {
             TRANS_LOGE(
                 TRANS_FILE, "WriteEmptyFrame bytesToWrite is too large, bytesToWrite=%{public}" PRIu64, bytesToWrite);

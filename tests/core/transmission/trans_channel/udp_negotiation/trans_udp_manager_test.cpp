@@ -610,7 +610,7 @@ HWTEST_F(TransUdpManagerTest, TransUdpManagerTest019, TestSize.Level1)
     ret = TransGetUdpAppInfoByChannelId(channelId, appInfo);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
     ret = TransGetUdpAppInfoByChannelId(channelId, NULL);
-    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     TransUdpChannelMgrDeinit();
     SoftBusFree(appInfo);
 }

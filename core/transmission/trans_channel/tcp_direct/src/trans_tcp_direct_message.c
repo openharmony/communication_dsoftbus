@@ -1089,6 +1089,10 @@ static int32_t ProcessReceivedData(int32_t channelId, int32_t type)
 
 static int32_t TransTdcSrvProcData(ListenerModule module, int32_t channelId, int32_t type)
 {
+    if (g_tcpSrvDataList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "g_tcpSrvDataList is NULL");
+        return SOFTBUS_NO_INIT;
+    }
     if (SoftBusMutexLock(&g_tcpSrvDataList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "lock failed.");
         return SOFTBUS_LOCK_ERR;
