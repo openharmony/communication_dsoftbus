@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,117 +14,117 @@
  */
 
 [Arch]
-adapter/default_config/     zhangchunxin@huawei.com
-BUILD.gn        zhangchunxin@huawei.com
-bundle.json     zhangchunxin@huawei.com
-config.py       zhangchunxin@huawei.com
-dsoftbus.gni    zhangchunxin@huawei.com
-Kconfig         zhangchunxin@huawei.com
+adapter/default_config/     liufeihu@huawei.com
+BUILD.gn        liufeihu@huawei.com
+bundle.json     liufeihu@huawei.com
+config.py       liufeihu@huawei.com
+dsoftbus.gni    liufeihu@huawei.com
+Kconfig         liufeihu@huawei.com
 
 [Misc]
-figures/            zhangchunxin@huawei.com
-.clang-format       zhangchunxin@huawei.com
-.gitignore          zhangchunxin@huawei.com
-CODEOWNERS          zhangchunxin@huawei.com
-hisysevent.yaml     zhangchunxin@huawei.com
-OAT.xml             zhangchunxin@huawei.com
-README.md           zhangchunxin@huawei.com
-README_zh.md        zhangchunxin@huawei.com
-
+CODEOWNERS      zhangchunxin@huawei.com
 
 [Conn]
-adapter/common/net/bluetooth/   songzhengteng@huawei.com
-core/adapter/br/                songzhengteng@huawei.com
+adapter/common/net/bluetooth/   wangjingen1@huawei.com
+core/adapter/br/                wangjingen1@huawei.com
 core/connection/                songzhengteng@huawei.com
-tests/adapter/bluetooth/        songzhengteng@huawei.com
+core/connection/ble/            wangjingen1@huawei.com
+core/connection/br/             wangjingen1@huawei.com
+core/connection/wifi_direct/                wuchunbo1@huawei.com
+core/connection/wifi_direct_cpp/            wuchunbo1@huawei.com
+tests/adapter/bluetooth/        wangjingen1@huawei.com
 tests/adapter/fuzztest/softbussocketrecv_fuzzer/    songzhengteng@huawei.com
 tests/adapter/unittest/softbus_wifi_api_test.cpp    songzhengteng@huawei.com
 tests/adapter/unittest/softbus_socket_test.cpp      songzhengteng@huawei.com
-tests/core/connection/                              songzhengteng@huawei.com
+tests/core/connection/          songzhengteng@huawei.com
+tests/core/connection/ble/      wangjingen1@huawei.com
+tests/core/connection/br/       wangjingen1@huawei.com
+tests/core/connection/wifi_direct/            wuchunbo1@huawei.com
+tests/core/connection/wifi_direct_cpp/        wuchunbo1@huawei.com
 
 [Disc]
-adapter/common/range/   liufeihu@huawei.com
-core/discovery/         liufeihu@huawei.com
-sdk/discovery/          liufeihu@huawei.com
-tests/adapter/fuzztest/softbusadapterrange_fuzzer/      liufeihu@huawei.com
-tests/adapter/unittest/softbus_adapter_range_test.cpp   liufeihu@huawei.com
-tests/core/discovery/   liufeihu@huawei.com
-tests/sdk/discovery/    liufeihu@huawei.com
+adapter/common/range/   fanjingya1@huawei.com
+core/discovery/         fanjingya1@huawei.com
+sdk/discovery/          fanjingya1@huawei.com
+tests/adapter/fuzztest/softbusadapterrange_fuzzer/      fanjingya1@huawei.com
+tests/adapter/unittest/softbus_adapter_range_test.cpp   fanjingya1@huawei.com
+tests/core/discovery/   fanjingya1@huawei.com
+tests/sdk/discovery/    fanjingya1@huawei.com
 
 [DiscInterface]
-interfaces/kits/discovery/  liufeihu@huawei.com
+interfaces/kits/discovery/  fanjingya1@huawei.com
 
 [Lnn]
 adapter/common/bus_center/      zhangshaojie3@huawei.com
-adapter/common/net/hdi/         zhangshaojie3@huawei.com
-adapter/common/net/wifi/        zhangshaojie3@huawei.com
-adapter/common/perf/            zhangshaojie3@huawei.com
-core/adapter/authentication/    zhangshaojie3@huawei.com
+adapter/common/net/hdi/         fengyonghui@huawei.com
+adapter/common/net/wifi/        fengyonghui@huawei.com
+adapter/common/perf/            fengyonghui@huawei.com
+core/adapter/authentication/    chenbotong1@huawei.com
 core/adapter/bus_center/        zhangshaojie3@huawei.com
-core/authentication/            zhangshaojie3@huawei.com
+core/authentication/            chenbotong1@huawei.com
 core/bus_center/                zhangshaojie3@huawei.com
-sdk/bus_center/                 zhangshaojie3@huawei.com
-tests/adapter/unittest/softbus_adapter_wlan_extend_test.cpp         zhangshaojie3@huawei.com
+sdk/bus_center/                 fengyonghui@huawei.com
+tests/adapter/unittest/softbus_adapter_wlan_extend_test.cpp         fengyonghui@huawei.com
 tests/core/adapter/unittest/bus_center_adapter_test.cpp             zhangshaojie3@huawei.com
 tests/core/adapter/unittest/lnn_settingdata_event_monitor_test.cpp  zhangshaojie3@huawei.com
-tests/core/authentication/      zhangshaojie3@huawei.com
+tests/core/authentication/      chenbotong1@huawei.com
 tests/core/bus_center/          zhangshaojie3@huawei.com
-tests/sdk/bus_center/           zhangshaojie3@huawei.com
+tests/sdk/bus_center/           fengyonghui@huawei.com
 
 [LnnInterface]
 interfaces/kits/bus_center/     zhangshaojie3@huawei.com
 
 [Trans]
-core/adapter/transmission/      zhangchunxin@huawei.com
-core/transmission/              zhangchunxin@huawei.com
-sdk/transmission/               zhangchunxin@huawei.com
-tests/core/transmission/        zhangchunxin@huawei.com
-tests/sdk/transmission/         zhangchunxin@huawei.com
+core/adapter/transmission/      jiazhenyu1@huawei.com
+core/transmission/              jiazhenyu1@huawei.com
+sdk/transmission/               jiazhenyu1@huawei.com
+tests/core/transmission/        jiazhenyu1@huawei.com
+tests/sdk/transmission/         jiazhenyu1@huawei.com
 
 [TransInterface]
-interfaces/inner_kits/transport/    zhangchunxin@huawei.com
-interfaces/kits/transport/          zhangchunxin@huawei.com
+interfaces/inner_kits/transport/    wuchengwen4@huawei.com
+interfaces/kits/transport/          wuchengwen4@huawei.com
 
 [Comm]
-adapter/common/dfx/         zhangchunxin@huawei.com
-adapter/common/include/     zhangchunxin@huawei.com
-adapter/common/json/        zhangchunxin@huawei.com
-adapter/common/kernel/      zhangchunxin@huawei.com
-adapter/common/log/         zhangchunxin@huawei.com
-tests/adapter/fuzztest/softbusadapterhisysevent_fuzzer/ zhangchunxin@huawei.com
-tests/adapter/unittest/     zhangchunxin@huawei.com
-tests/core/common/          zhangchunxin@huawei.com
-tests/sdk/common/           zhangchunxin@huawei.com
-tests/utils/                zhangchunxin@huawei.com
+adapter/common/include/     zhusiyuan2@huawei.com
+adapter/common/json/        zhusiyuan2@huawei.com
+adapter/common/kernel/      zhusiyuan2@huawei.com
+core/common/                zhusiyuan2@huawei.com
+tests/core/common/          zhusiyuan2@huawei.com
 
 [CommInterface]
-interfaces/kits/common/     zhangchunxin@huawei.com
+interfaces/kits/common/softbus_common.h     zhusiyuan2@huawei.com
+
+[DFX]
+adapter/common/dfx/         zhusiyuan2@huawei.com
+core/common/dfx/            zhusiyuan2@huawei.com
+tests/core/common/dfx       zhusiyuan2@huawei.com
+
+[DFXInterface]
+hisysevent.yaml             litongxin3@huawei.com
+interfaces/kits/common/softbus_error_code.h     litongxin3@huawei.com
 
 [Framework]
-core/frame/                 zhangshaojie3@huawei.com
-sdk/frame/                  zhangshaojie3@huawei.com
-sdk/BUILD.gn                zhangshaojie3@huawei.com
-sdk/libsoftbus_client_map   zhangshaojie3@huawei.com
-tests/core/frame/           zhangshaojie3@huawei.com
-tests/sdk/frame/            zhangshaojie3@huawei.com
+core/frame/                 zhangfengxi@huawei.com
+sdk/frame/                  zhangfengxi@huawei.com
+sdk/BUILD.gn                zhangfengxi@huawei.com
+sdk/libsoftbus_client_map   zhangfengxi@huawei.com
+tests/core/frame/           zhangfengxi@huawei.com
+tests/sdk/frame/            zhangfengxi@huawei.com
 
 [Permission]
-core/common/security/permission/        zhangchunxin@huawei.com
-tests/core/common/security/permission/  zhangchunxin@huawei.com
+core/common/security/permission/        liubao6@huawei.com
+tests/core/common/security/permission/  liubao6@huawei.com
 
 [Crypto]
-adapter/common/mbedtls/     zhangshaojie3@huawei.com
-adapter/common/openssl/     zhangshaojie3@huawei.com
-components/mbedtls/         zhangshaojie3@huawei.com
-core/adapter/huks/          zhangshaojie3@huawei.com
-tests/adapter/fuzztest/softbusdecryptdata_fuzzer/           zhangshaojie3@huawei.com
-tests/adapter/unittest/dsoftbus_aes_crypto_test.cpp         zhangshaojie3@huawei.com
-tests/adapter/unittest/dsoftbus_crypto_test.cpp             zhangshaojie3@huawei.com
-tests/core/adapter/unittest/dsoftbus_rsa_crypto_test.cpp    zhangshaojie3@huawei.com
+adapter/common/mbedtls/     chenbotong1@huawei.com
+adapter/common/openssl/     chenbotong1@huawei.com
+components/mbedtls/         chenbotong1@huawei.com
+core/adapter/huks/          chenbotong1@huawei.com
 
 [2nd-Party]
-components/nstackx/         zhangchunxin@huawei.com
+components/nstackx/         libing3@huawei.com xuxiaoqing16@huawei.com
 
 [InterfaceCode]
 # any change to core/common/include/softbus_server_ipc_interface_code.h needs to be reviewed by @leonchan5
-core/common/include/softbus_server_ipc_interface_code.h @leonchan5 zhangchunxin@huawei.com zhangshaojie3@huawei.com
+core/common/include/softbus_server_ipc_interface_code.h @leonchan5 liubao6@huawei.com
