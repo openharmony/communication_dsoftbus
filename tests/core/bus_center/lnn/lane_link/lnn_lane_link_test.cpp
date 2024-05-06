@@ -543,7 +543,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_006, TestSize.Level1)
     EXPECT_CALL(linkMock, AuthGetPreferConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthGenRequestId).WillRepeatedly(Return(requestId));
-    EXPECT_CALL(linkMock, AuthAllocConn).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(linkMock, AuthOpenConn).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
 
     ret = LnnConnectP2p(&request, laneReqId, &cb);
@@ -591,7 +591,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_007, TestSize.Level1)
     EXPECT_CALL(linkMock, AuthGetPreferConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthGenRequestId).WillRepeatedly(Return(requestId));
-    EXPECT_CALL(linkMock, AuthAllocConn).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, AuthOpenConn).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
 
     ret = LnnConnectP2p(&request, laneReqId, &cb);
@@ -640,7 +640,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_008, TestSize.Level1)
     EXPECT_CALL(linkMock, AuthGetPreferConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthGenRequestId).WillRepeatedly(Return(requestId));
-    EXPECT_CALL(linkMock, AuthAllocConn).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, AuthOpenConn).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
 
     ret = LnnConnectP2p(&request, laneReqId, &cb);
@@ -686,7 +686,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfSync_009, TestSize.Level1)
     EXPECT_CALL(linkMock, AuthGetPreferConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthGenRequestId).WillRepeatedly(Return(requestId));
-    EXPECT_CALL(linkMock, AuthAllocConn).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(linkMock, AuthOpenConn).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
 
     ret = LnnConnectP2p(&request, laneReqId, &cb);
@@ -992,7 +992,7 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_005, TestSize.Level1)
     EXPECT_CALL(linkMock, AuthGetPreferConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthGenRequestId).WillRepeatedly(Return(requestId));
-    EXPECT_CALL(linkMock, AuthAllocConn(_, requestId, NotNull())).WillRepeatedly(linkMock.ActionOfAllocConnOpenFailed);
+    EXPECT_CALL(linkMock, AuthOpenConn(_, requestId, NotNull(), _)).WillRepeatedly(linkMock.ActionOfConnOpenFailed);
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
 
     ret = LnnConnectP2p(&request, laneReqId, &cb);
@@ -1042,8 +1042,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_006, TestSize.Level1)
     EXPECT_CALL(linkMock, AuthGetPreferConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthGenRequestId).WillRepeatedly(Return(requestId));
-    EXPECT_CALL(linkMock, AuthAllocConn(_, requestId, NotNull())).WillOnce(linkMock.ActionOfAllocConnOpenFailed)
-        .WillRepeatedly(linkMock.ActionOfAllocConnOpened);
+    EXPECT_CALL(linkMock, AuthOpenConn(_, requestId, NotNull(), _)).WillOnce(linkMock.ActionOfConnOpenFailed)
+        .WillRepeatedly(linkMock.ActionOfConnOpened);
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
     EXPECT_CALL(linkMock, AuthCloseConn).WillRepeatedly(Return());
 
@@ -1094,8 +1094,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_007, TestSize.Level1)
     EXPECT_CALL(linkMock, AuthGetPreferConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthGenRequestId).WillRepeatedly(Return(requestId));
-    EXPECT_CALL(linkMock, AuthAllocConn(_, requestId, NotNull())).WillOnce(linkMock.ActionOfAllocConnOpenFailed)
-        .WillRepeatedly(linkMock.ActionOfAllocConnOpened);
+    EXPECT_CALL(linkMock, AuthOpenConn(_, requestId, NotNull(), _)).WillOnce(linkMock.ActionOfConnOpenFailed)
+        .WillRepeatedly(linkMock.ActionOfConnOpened);
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
     EXPECT_CALL(linkMock, AuthCloseConn).WillRepeatedly(Return());
 
@@ -1143,7 +1143,8 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_008, TestSize.Level1)
     EXPECT_CALL(linkMock, AuthGetPreferConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthGenRequestId).WillRepeatedly(Return(requestId));
-    EXPECT_CALL(linkMock, AuthAllocConn(_, requestId, NotNull())).WillRepeatedly(linkMock.ActionOfAllocConnOpenFailed);
+    EXPECT_CALL(linkMock, AuthOpenConn(_, requestId, NotNull(), _)).WillRepeatedly(linkMock.ActionOfConnOpenFailed)
+        .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
     EXPECT_CALL(linkMock, AuthGetP2pConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthOpenConn).WillRepeatedly(Return(SOFTBUS_OK));
