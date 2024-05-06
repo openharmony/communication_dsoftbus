@@ -121,6 +121,12 @@ typedef enum {
     TIMER_ACTION_BUTT
 } TimerAction;
 
+typedef struct {
+    ListNode node;
+    char pkgName[PKG_NAME_SIZE_MAX];
+    char sessionName[SESSION_NAME_SIZE_MAX];
+} SessionServerInfo;
+
 int32_t ClientAddNewSession(const char *sessionName, SessionInfo *session);
 
 /**
@@ -175,12 +181,12 @@ int32_t ClientGetFileConfigInfoById(int32_t sessionId, int32_t *fileEncrypt, int
 int TransClientInit(void);
 void TransClientDeinit(void);
 
-int32_t ReCreateSessionServerToServer(void);
+int32_t ReCreateSessionServerToServer(ListNode *sessionServerInfoList);
 void ClientTransRegLnnOffline(void);
 
 void ClientTransOnLinkDown(const char *networkId, int32_t routeType);
 
-void ClientCleanAllSessionWhenServerDeath(void);
+void ClientCleanAllSessionWhenServerDeath(ListNode *sessionServerInfoList);
 
 int32_t CheckPermissionState(int32_t sessionId);
 

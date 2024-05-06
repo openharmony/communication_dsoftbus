@@ -1442,29 +1442,27 @@ static INodeStateCb g_transLnnCb = {
     .onNodeOffline = ClientTransLnnOfflineProc,
 };
 
-int32_t ReCreateSessionServerToServer(void)
+int32_t ReCreateSessionServerToServer(ListNode *sessionServerInfoList)
 {
     TRANS_LOGD(TRANS_SDK, "enter.");
-    if (g_clientSessionServerList == NULL) {
+    if (sessionServerInfoList == NULL) {
         TRANS_LOGE(TRANS_INIT, "session server list not init");
-        return SOFTBUS_TRANS_SESSION_SERVER_NOINIT;
-    }
-    if (SoftBusMutexLock(&(g_clientSessionServerList->lock)) != 0) {
-        TRANS_LOGE(TRANS_SDK, "lock failed");
-        return SOFTBUS_LOCK_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
 
-    ClientSessionServer *serverNode = NULL;
+    SessionServerInfo *infoNode = NULL;
+    SessionServerInfo *infoNodeNext = NULL;
     char *tmpName = NULL;
-    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
-        int32_t ret = ServerIpcCreateSessionServer(serverNode->pkgName, serverNode->sessionName);
-        Anonymize(serverNode->sessionName, &tmpName);
+    LIST_FOR_EACH_ENTRY_SAFE(infoNode, infoNodeNext, sessionServerInfoList, SessionServerInfo, node) {
+        int32_t ret = ServerIpcCreateSessionServer(infoNode->pkgName, infoNode->sessionName);
+        Anonymize(infoNode->sessionName, &tmpName);
         TRANS_LOGI(TRANS_SDK, "sessionName=%{public}s, pkgName=%{public}s, ret=%{public}d",
-            tmpName, serverNode->pkgName, ret);
+            tmpName, infoNode->pkgName, ret);
         AnonymizeFree(tmpName);
+        ListDelete(&infoNode->node);
+        SoftBusFree(infoNode);
     }
 
-    (void)SoftBusMutexUnlock(&g_clientSessionServerList->lock);
     TRANS_LOGI(TRANS_SDK, "ok");
     return SOFTBUS_OK;
 }
@@ -1568,8 +1566,41 @@ int32_t ClientGetFileConfigInfoById(int32_t sessionId, int32_t *fileEncrypt, int
     return SOFTBUS_OK;
 }
 
-void ClientCleanAllSessionWhenServerDeath(void)
+static SessionServerInfo *CreateSessionServerInfoNode(const ClientSessionServer *clientSessionServer)
 {
+    if (clientSessionServer == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param.");
+        return NULL;
+    }
+
+    SessionServerInfo *infoNode = (SessionServerInfo *)SoftBusCalloc(sizeof(SessionServerInfo));
+    if (infoNode == NULL) {
+        TRANS_LOGE(TRANS_SDK, "failed to malloc SessionServerInfo.");
+        return NULL;
+    }
+
+    if (strcpy_s(infoNode->pkgName, SESSION_NAME_SIZE_MAX, clientSessionServer->pkgName) != EOK) {
+        SoftBusFree(infoNode);
+        TRANS_LOGE(TRANS_SDK, "failed to strcpy pkgName.");
+        return NULL;
+    }
+
+    if (strcpy_s(infoNode->sessionName, SESSION_NAME_SIZE_MAX, clientSessionServer->sessionName) != EOK) {
+        SoftBusFree(infoNode);
+        TRANS_LOGE(TRANS_SDK, "failed to strcpy sessionName.");
+        return NULL;
+    }
+
+    return infoNode;
+}
+
+void ClientCleanAllSessionWhenServerDeath(ListNode *sessionServerInfoList)
+{
+    if (sessionServerInfoList == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param.");
+        return;
+    }
+
     if (g_clientSessionServerList == NULL) {
         TRANS_LOGE(TRANS_SDK, "client session server list not init.");
         return;
@@ -1585,6 +1616,10 @@ void ClientCleanAllSessionWhenServerDeath(void)
     SessionInfo *sessionNode = NULL;
     SessionInfo *nextSessionNode = NULL;
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        SessionServerInfo * info = CreateSessionServerInfoNode(serverNode);
+        if (info != NULL) {
+            ListAdd(sessionServerInfoList, &info->node);
+        }
         if (IsListEmpty(&serverNode->sessionList)) {
             continue;
         }
