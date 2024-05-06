@@ -84,13 +84,17 @@ int32_t LnnDestroyKvAdapter(int32_t dbId)
         LNN_LOGE(LNN_LEDGER, "kvAdapter unInit failed, ret = %{public}d", unInitRet);
         return unInitRet;
     }
-    g_dbID2KvAdapter.erase(dbId);
+    {
+        std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
+        g_dbID2KvAdapter.erase(dbId);
+    }
     LNN_LOGI(LNN_LEDGER, "kvAdapter unInit success, dbId = %{public}d", dbId);
     return SOFTBUS_OK;
 }
 
 std::shared_ptr<KVAdapter> FindKvStorePtr(int32_t &dbId)
 {
+    std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
     auto iter = g_dbID2KvAdapter.find(dbId);
     if (iter == g_dbID2KvAdapter.end()) {
         LNN_LOGE(LNN_LEDGER, "dbID is not exist, dbId = %{public}d", dbId);
