@@ -844,8 +844,8 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
     char *errDesc = NULL;
     int32_t errCode;
     int myHandleId;
-    if (conn->appInfo.firstTokenId != TOKENID_NOT_SET &&
-        TransCheckServerAccessControl(conn->appInfo.firstTokenId) != SOFTBUS_OK) {
+    if (conn->appInfo.callingTokenId != TOKENID_NOT_SET &&
+        TransCheckServerAccessControl(conn->appInfo.callingTokenId) != SOFTBUS_OK) {
         errCode = SOFTBUS_TRANS_CHECK_ACL_FAILED;
         errDesc = (char *)"Server check acl failed";
         goto ERR_EXIT;

@@ -448,7 +448,8 @@ static int32_t ParseRequestAppInfo(AuthHandle authHandle, const cJSON *msg, AppI
         TRANS_LOGE(TRANS_CTRL, "unpack request udp info failed.");
         return SOFTBUS_ERR;
     }
-    if (appInfo->firstTokenId != 0 && TransCheckServerAccessControl(appInfo->firstTokenId) != SOFTBUS_OK) {
+    if (appInfo->callingTokenId != TOKENID_NOT_SET &&
+        TransCheckServerAccessControl(appInfo->callingTokenId) != SOFTBUS_OK) {
         return SOFTBUS_TRANS_CHECK_ACL_FAILED;
     }
     appInfo->myHandleId = -1;
