@@ -66,6 +66,9 @@ HWTEST_F(AuthNormalizeRequestTest, NOTIFY_NORMALIZE_REQUEST_SUCCESS_TEST_001, Te
     request.authSeq = 2;
     ret = AddNormalizeRequest(&request);
     EXPECT_TRUE(ret != 0);
+    request.authSeq = 3;
+    ret = AddNormalizeRequest(&request);
+    EXPECT_TRUE(ret != 0);
     NotifyNormalizeRequestSuccess(authSeq);
     authSeq = 1;
     NotifyNormalizeRequestSuccess(authSeq);
@@ -91,6 +94,9 @@ HWTEST_F(AuthNormalizeRequestTest, NOTIFY_NORMALIZE_REQUEST_FAIL_TEST_001, TestS
     uint32_t ret = AddNormalizeRequest(&request);
     EXPECT_TRUE(ret != 0);
     request.authSeq = 2;
+    ret = AddNormalizeRequest(&request);
+    EXPECT_TRUE(ret != 0);
+    request.authSeq = 3;
     ret = AddNormalizeRequest(&request);
     EXPECT_TRUE(ret != 0);
     NotifyNormalizeRequestFail(authSeq, -1);
