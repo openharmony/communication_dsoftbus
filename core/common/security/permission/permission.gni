@@ -35,6 +35,7 @@ if (defined(ohos_lite)) {
       "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
     ]
   }
+  softbus_permission_src += [ "$dsoftbus_core_path/common/security/permission/standard/access_control_virtual.c" ]
 } else {
   softbus_permission_inc =
       [ "$dsoftbus_core_path/common/security/permission/include" ]
@@ -45,6 +46,7 @@ if (defined(ohos_lite)) {
   ]
   softbus_permission_deps = []
   softbus_permission_external_deps += [
+    "ability_runtime:app_manager",
     "cJSON:cjson",
     "c_utils:utils",
   ]
@@ -56,6 +58,6 @@ if (defined(ohos_lite)) {
     ]
     softbus_permission_src += [ "$dsoftbus_core_path/common/security/permission/standard/access_control.cpp" ]
   } else {
-    softbus_permission_src += [ "$dsoftbus_core_path/common/security/permission/standard/access_control_virtual.cpp" ]
+    softbus_permission_src += [ "$dsoftbus_core_path/common/security/permission/standard/access_control_virtual.c" ]
   }
 }

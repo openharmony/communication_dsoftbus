@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,7 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <cstdint>
+
+#include "stdint.h"
+
 #include "access_control.h"
 #include "softbus_error_code.h"
 
@@ -26,12 +28,20 @@ int32_t TransCheckServerAccessControl(uint32_t firstCallingId)
     (void)firstCallingId;
     return SOFTBUS_OK;
 }
-uint32_t TransACLGetFirstTokenID()
+uint32_t TransACLGetFirstTokenID(void)
 {
-    return SOFTBUS_OK;
+    return TOKENID_NOT_SET;
 }
 
-uint32_t TransACLGetCallingTokenID()
+uint32_t TransACLGetCallingTokenID(void)
 {
-    return SOFTBUS_OK;
+    return TOKENID_NOT_SET;
+}
+
+void TransGetTokenInfo(uint32_t callingId, char *tokenName, int32_t nameLen, int32_t *tokenType)
+{
+    (void)callingId;
+    (void)tokenName;
+    (void)nameLen;
+    (void)tokenType;
 }
