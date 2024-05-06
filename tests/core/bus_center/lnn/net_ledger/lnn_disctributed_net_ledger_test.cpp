@@ -955,8 +955,8 @@ HWTEST_F(LNNDisctributedLedgerTest, DLGET_REMOTE_PTK_Test_001, TestSize.Level1)
  */
 HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLUnifiedDeviceName_Test_001, TestSize.Level1)
 {
-    char *udid = NULL;
-    char *name = NULL;
+    char *udid = nullptr;
+    char *name = nullptr;
     bool ret = LnnSetDLUnifiedDeviceName(udid, name);
     EXPECT_TRUE(ret == false);
     const char *devUdid = "123456789";
@@ -973,8 +973,8 @@ HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLUnifiedDeviceName_Test_001, TestSize
  */
 HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLUnifiedDefaultDeviceName_Test_001, TestSize.Level1)
 {
-    char *udid = NULL;
-    char *name = NULL;
+    char *udid = nullptr;
+    char *name = nullptr;
     bool ret = LnnSetDLUnifiedDefaultDeviceName(udid, name);
     EXPECT_TRUE(ret == false);
     const char *devUdid = "111111111";
@@ -991,8 +991,8 @@ HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLUnifiedDefaultDeviceName_Test_001, T
  */
 HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLDeviceNickNameByUdid_Test_001, TestSize.Level1)
 {
-    char *udid = NULL;
-    char *name = NULL;
+    char *udid = nullptr;
+    char *name = nullptr;
     bool ret = LnnSetDLDeviceNickNameByUdid(udid, name);
     EXPECT_TRUE(ret == false);
     const char *devUdid = "2222222222";
@@ -1009,7 +1009,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLDeviceNickNameByUdid_Test_001, TestS
  */
 HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLDeviceStateVersion_Test_001, TestSize.Level1)
 {
-    char *udid = NULL;
+    char *udid = nullptr;
     int32_t stateVersion = 0;
     bool ret = LnnSetDLDeviceStateVersion(udid, stateVersion);
     EXPECT_TRUE(ret == false);
@@ -1026,7 +1026,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLDeviceStateVersion_Test_001, TestSiz
  */
 HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLDeviceBroadcastCipherKey_Test_001, TestSize.Level1)
 {
-    char *udid = NULL;
+    char *udid = nullptr;
     const char *cipherKey = "qqqqqqqqqqqq";
     bool ret = LnnSetDLDeviceBroadcastCipherKey(udid, cipherKey);
     EXPECT_TRUE(ret == false);
@@ -1043,7 +1043,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLDeviceBroadcastCipherKey_Test_001, T
  */
 HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLDeviceBroadcastCipherIv_Test_001, TestSize.Level1)
 {
-    char *udid = NULL;
+    char *udid = nullptr;
     const char *cipherIv = "qqqqqqqqqqqq";
     bool ret = LnnSetDLDeviceBroadcastCipherIv(udid, cipherIv);
     EXPECT_TRUE(ret == false);
@@ -1062,7 +1062,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LnnUpdateDistributedNodeInfo_Test_001, TestS
 {
     NodeInfo newInfo;
     memset_s(&newInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    const char *udid = NULL;
+    const char *udid = nullptr;
     newInfo.accountId = 18390933952;
     int32_t ret = LnnUpdateDistributedNodeInfo(&newInfo, udid);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);

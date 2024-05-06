@@ -45,12 +45,19 @@ void KVAdapterWrapperTest::SetUpTestCase(void)
     LnnCreateKvAdapter(&dbID, APP_ID.c_str(), APP_ID_LEN, STORE_ID.c_str(), STORE_ID_LEN);
     g_dbId = dbID;
 }
+
 void KVAdapterWrapperTest::TearDownTestCase(void)
 {
     LnnDestroyKvAdapter(g_dbId);
 }
-void KVAdapterWrapperTest::SetUp() { }
-void KVAdapterWrapperTest::TearDown() { }
+
+void KVAdapterWrapperTest::SetUp()
+{
+}
+
+void KVAdapterWrapperTest::TearDown()
+{
+}
 
 /**
  * @tc.name: LnnPutDBData
