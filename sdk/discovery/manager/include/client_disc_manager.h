@@ -91,7 +91,8 @@ int32_t StartDiscoveryInner(const char *packageName, const SubscribeInfo *info, 
  * @param[in] packageName Indicates the pointer to the package name,
  * and the name of the relevant package carrying its own capabilities.
  * @param[in] subscribeId ID to stop discovery this time.
- * @return <b>SOFTBUS_NO_INIT</b> The internal stop discovery function cannot be started. Other devices can still be found.
+ * @return <b>SOFTBUS_NO_INIT</b> The internal stop discovery function cannot be started.
+ * Other devices can still be found.
  * @return <b>SOFTBUS_OK</b> Internal stop discovery function started successfully.
  * You cannot discover devices with specific functions.
  */
