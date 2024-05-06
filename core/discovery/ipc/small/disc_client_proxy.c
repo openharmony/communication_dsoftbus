@@ -50,10 +50,10 @@ int32_t ClientIpcOnDeviceFound(const char *pkgName, const DeviceInfo *device, co
         return SOFTBUS_IPC_ERR;
     }
     SvcIdentity svc = {0};
-    int ret = GetSvcIdentityByPkgName(pkgName, &svc);
-    if (ret != SOFTBUS_OK) {
+    int status = GetSvcIdentityByPkgName(pkgName, &svc);
+    if (status != SOFTBUS_OK) {
         DISC_LOGE(DISC_CONTROL, "ondevice found callback get svc failed.");
-        return ret;
+        return status;
     }
     MessageOption option;
     MessageOptionInit(&option);
@@ -83,10 +83,10 @@ int32_t ClientIpcOnDiscoverFailed(const char *pkgName, int subscribeId, int fail
         return SOFTBUS_IPC_ERR;
     }
     SvcIdentity svc = {0};
-    int ret = GetSvcIdentityByPkgName(pkgName, &svc);
-    if (ret != SOFTBUS_OK) {
+    int status = GetSvcIdentityByPkgName(pkgName, &svc);
+    if (status != SOFTBUS_OK) {
         DISC_LOGE(DISC_CONTROL, "on discovery failed callback get svc failed.");
-        return ret;
+        return status;
     }
     MessageOption option;
     MessageOptionInit(&option);
@@ -111,10 +111,10 @@ int32_t ClientIpcDiscoverySuccess(const char *pkgName, int subscribeId)
         return SOFTBUS_IPC_ERR;
     }
     SvcIdentity svc = {0};
-    int ret = GetSvcIdentityByPkgName(pkgName, &svc);
-    if (ret != SOFTBUS_OK) {
+    int status = GetSvcIdentityByPkgName(pkgName, &svc);
+    if (status != SOFTBUS_OK) {
         DISC_LOGE(DISC_CONTROL, "on discovery success callback get svc failed.");
-        return ret;
+        return status;
     }
     MessageOption option;
     MessageOptionInit(&option);
@@ -139,10 +139,10 @@ int32_t ClientIpcOnPublishSuccess(const char *pkgName, int publishId)
         return SOFTBUS_IPC_ERR;
     }
     SvcIdentity svc = {0};
-    int ret = GetSvcIdentityByPkgName(pkgName, &svc);
-    if (ret != SOFTBUS_OK) {
+    int status = GetSvcIdentityByPkgName(pkgName, &svc);
+    if (status != SOFTBUS_OK) {
         DISC_LOGE(DISC_CONTROL, "on publish success callback get svc failed.");
-        return ret;
+        return status;
     }
     MessageOption option;
     MessageOptionInit(&option);
@@ -172,10 +172,10 @@ int32_t ClientIpcOnPublishFail(const char *pkgName, int publishId, int reason)
         return SOFTBUS_IPC_ERR;
     }
     SvcIdentity svc = {0};
-    int ret = GetSvcIdentityByPkgName(pkgName, &svc);
-    if (ret != SOFTBUS_OK) {
+    int status = GetSvcIdentityByPkgName(pkgName, &svc);
+    if (status != SOFTBUS_OK) {
         DISC_LOGE(DISC_CONTROL, "on publish failed callback get svc failed.");
-        return ret;
+        return status;
     }
     MessageOption option;
     MessageOptionInit(&option);
