@@ -79,7 +79,7 @@ static void UpdateStateVersionAndStore(void)
         LNN_LOGI(LNN_LEDGER, "no account info. no need update to cloud");
         return;
     }
-	char value[STATE_VERSION_VALUE_LENGTH] = {0};
+    char value[STATE_VERSION_VALUE_LENGTH] = {0};
     (void) sprintf_s(value, STATE_VERSION_VALUE_LENGTH, "%d", g_localNetLedger.localInfo.stateVersion);
     if (LnnLedgerDataChangeSyncToDB(DEVICE_INFO_STATE_VERSION, value, strlen(value)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "ledger state version change sync to cloud failed");
