@@ -18,7 +18,6 @@
 
 #include <map>
 #include <memory>
-#include <vector>
 #include <string>
 
 #include "distributed_kv_data_manager.h"
