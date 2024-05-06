@@ -1785,6 +1785,21 @@ static SessionInfo *GetSocketExistSession(const SessionParam *param, bool isEncy
     return NULL;
 }
 
+static void ClientInitSession(SessionInfo *session, const SessionParam *param)
+{
+    session->sessionId = INVALID_SESSION_ID;
+    session->channelId = INVALID_CHANNEL_ID;
+    session->channelType = CHANNEL_TYPE_BUTT;
+    session->isServer = false;
+    session->role = SESSION_ROLE_INIT;
+    session->isEnable = false;
+    session->info.flag = param->attr->dataType;
+    session->info.streamType = param->attr->attr.streamAttr.streamType;
+    session->isEncrypt = true;
+    session->isAsync = false;
+    session->lifecycle.sessionState = SESSION_STATE_INIT;
+}
+
 static SessionInfo *CreateNewSocketSession(const SessionParam *param)
 {
     SessionInfo *session = (SessionInfo *)SoftBusCalloc(sizeof(SessionInfo));
@@ -1829,17 +1844,7 @@ static SessionInfo *CreateNewSocketSession(const SessionParam *param)
         return NULL;
     }
 
-    session->sessionId = INVALID_SESSION_ID;
-    session->channelId = INVALID_CHANNEL_ID;
-    session->channelType = CHANNEL_TYPE_BUTT;
-    session->isServer = false;
-    session->role = SESSION_ROLE_INIT;
-    session->isEnable = false;
-    session->info.flag = param->attr->dataType;
-    session->info.streamType = param->attr->attr.streamAttr.streamType;
-    session->isEncrypt = true;
-    session->isAsync = false;
-    session->lifecycle.sessionState = SESSION_STATE_INIT;
+    ClientInitSession(session, param);
     return session;
 }
 
@@ -2674,8 +2679,8 @@ int32_t SetSessionStateBySessionId(int32_t sessionId, SessionState sessionState,
         return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
     }
 
-    TRANS_LOGI(TRANS_SDK, "socket state change:%{public}d -> %{public}d. socket=%{public}d", sessionNode->lifecycle.sessionState,
-        sessionState, sessionId);
+    TRANS_LOGI(TRANS_SDK, "socket state change:%{public}d -> %{public}d. socket=%{public}d",
+        sessionNode->lifecycle.sessionState, sessionState, sessionId);
     sessionNode->lifecycle.sessionState = sessionState;
     if (sessionState == SESSION_STATE_CANCELLING) {
         TRANS_LOGW(TRANS_SDK, "set socket to cancelling, socket=%{public}d, errCode=%{public}d", sessionId, optional);
