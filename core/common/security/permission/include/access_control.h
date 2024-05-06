@@ -25,10 +25,19 @@ extern "C" {
 // if the upstream module does not set the first caller tokenID, the value is 0
 #define TOKENID_NOT_SET 0
 
+enum FirstTokenType {
+    FOREGROUND_APP_TYPE = 1,
+    BACKGROUND_APP_TYPE = 2,
+    TOKEN_HAP_TYPE = 3,
+    SYSTEM_SA_TYPE = 4,
+    TOKEN_SHELL_TYPE = 5,
+};
+
 int32_t TransCheckClientAccessControl(const char *peerNetworkId);
-int32_t TransCheckServerAccessControl(uint32_t firstCallingId);
-uint32_t TransACLGetFirstTokenID();
-uint32_t TransACLGetCallingTokenID();
+int32_t TransCheckServerAccessControl(uint32_t callingTokenId);
+uint32_t TransACLGetFirstTokenID(void);
+uint32_t TransACLGetCallingTokenID(void);
+void TransGetTokenInfo(uint32_t callingId, char *tokenName, int32_t nameLen, int32_t *tokenType);
 
 #ifdef __cplusplus
 #if __cplusplus

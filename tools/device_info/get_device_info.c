@@ -21,6 +21,28 @@
 
 static char const *g_pkgName = "ohos.dsoftbus.tool";
 
+
+static void PrintNodePropertyNum(const NodeBasicInfo *nodeInfo)
+{
+    NodeDeviceInfoKey key;
+    key = NODE_KEY_NETWORK_CAPABILITY;
+    int32_t netCapacity = 0;
+    if (GetNodeKeyInfo(g_pkgName, nodeInfo->networkId, key,
+    (uint8_t *)&netCapacity, LNN_COMMON_LEN) != 0) {
+        printf("GetNodeKeyInfo Fail!\n");
+    } else {
+        printf("netCapacity = %d\n", netCapacity);
+    }
+    key = NODE_KEY_NETWORK_TYPE;
+    int32_t netType = 0;
+    if (GetNodeKeyInfo(g_pkgName, nodeInfo->networkId, key,
+    (uint8_t *)&netType, LNN_COMMON_LEN) != 0) {
+        printf("GetNodeKeyInfo Fail!\n");
+    } else {
+        printf("netType = %d\n", netType);
+    }
+}
+
 static void PrintNodeProperty(const NodeBasicInfo *nodeInfo)
 {
     printf("DeviceName = %s\n", nodeInfo->deviceName);
@@ -68,26 +90,6 @@ static void PrintNodeProperty(const NodeBasicInfo *nodeInfo)
     }
 }
 
-static void PrintNodePropertyNum(const NodeBasicInfo *nodeInfo)
-{
-    NodeDeviceInfoKey key;
-    key = NODE_KEY_NETWORK_CAPABILITY;
-    int32_t netCapacity = 0;
-    if (GetNodeKeyInfo(g_pkgName, nodeInfo->networkId, key,
-    (uint8_t *)&netCapacity, LNN_COMMON_LEN) != 0) {
-        printf("GetNodeKeyInfo Fail!\n");
-    } else {
-        printf("netCapacity = %d\n", netCapacity);
-    }
-    key = NODE_KEY_NETWORK_TYPE;
-    int32_t netType = 0;
-    if (GetNodeKeyInfo(g_pkgName, nodeInfo->networkId, key,
-    (uint8_t *)&netType, LNN_COMMON_LEN) != 0) {
-        printf("GetNodeKeyInfo Fail!\n");
-    } else {
-        printf("netType = %d\n", netType);
-    }
-}
 
 int main(int argc __attribute__((unused)), char **argv __attribute__((unused)))
 {
