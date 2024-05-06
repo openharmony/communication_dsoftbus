@@ -162,10 +162,11 @@ static void OnLaneAllocFail(uint32_t laneHandle, int32_t errCode)
     CondSignal();
 }
 
-static void OnLaneLinkFail(uint32_t reqId, int32_t reason)
+static void OnLaneLinkFail(uint32_t reqId, int32_t reason, LaneLinkType linkType)
 {
     (void)reqId;
     (void)reason;
+    (void)linkType;
     return;
 }
 
@@ -2465,6 +2466,10 @@ HWTEST_F(LNNLaneMockTest, LNN_AUTH_ALLOC_TEST_001, TestSize.Level1)
     EXPECT_CALL(mock, LnnGetLocalNumInfo)
         .WillRepeatedly(DoAll(SetArgPointee<1>(16), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnGetRemoteNumInfo)
+        .WillRepeatedly(DoAll(SetArgPointee<2>(16), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetLocalNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(16), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetRemoteNumU32Info)
         .WillRepeatedly(DoAll(SetArgPointee<2>(16), Return(SOFTBUS_OK)));
 
     LnnWifiAdpterInterfaceMock wifiMock;

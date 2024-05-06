@@ -48,7 +48,9 @@ def enable_option(file_name):
                     line = str1[0] + '= false\n'
             file_data += line
 
-    with open(file_name, 'w') as gni_file:
+    flags = os.O_WRONLY | os.O_CREAT
+    modes = stat.S_IWUSR | stat.S_IRUSR
+    with os.fdopen(os.open(file_name, flags, modes), 'w')as gni_file
         gni_file.write(file_data)
 
 

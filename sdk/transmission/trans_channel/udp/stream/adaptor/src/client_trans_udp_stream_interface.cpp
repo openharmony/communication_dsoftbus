@@ -269,4 +269,3 @@ int32_t CloseVtpStreamChannel(int32_t channelId, const char *pkgName)
 
     return SOFTBUS_OK;
 }
-

@@ -39,7 +39,7 @@ public:
     virtual int32_t ConnDisconnectDevice(uint32_t connectionId) = 0;
     virtual uint32_t ConnGetHeadSize(void) = 0;
     virtual int32_t ConnPostBytes(uint32_t connectionId, ConnPostData *data) = 0;
-    virtual bool CheckActiveConnection(const ConnectOption *option) = 0;
+    virtual bool CheckActiveConnection(const ConnectOption *option, bool needOccupy) = 0;
     virtual int32_t ConnStartLocalListening(const LocalListenerInfo *info) = 0;
     virtual int32_t ConnStopLocalListening(const LocalListenerInfo *info) = 0;
     virtual uint32_t ConnGetNewRequestId(ConnModule moduleId) = 0;
@@ -57,7 +57,7 @@ public:
     MOCK_METHOD1(ConnDisconnectDevice, int32_t(uint32_t));
     MOCK_METHOD0(ConnGetHeadSize, uint32_t(void));
     MOCK_METHOD2(ConnPostBytes, int32_t(uint32_t, ConnPostData *));
-    MOCK_METHOD1(CheckActiveConnection, bool(const ConnectOption *));
+    MOCK_METHOD2(CheckActiveConnection, bool(const ConnectOption *, bool));
     MOCK_METHOD1(ConnStartLocalListening, int32_t(const LocalListenerInfo *));
     MOCK_METHOD1(ConnStopLocalListening, int32_t(const LocalListenerInfo *));
     MOCK_METHOD1(ConnGetNewRequestId, uint32_t(ConnModule));

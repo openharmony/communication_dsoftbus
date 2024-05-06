@@ -67,6 +67,7 @@ void TransUdpNegoTest::SetUpTestCase(void)
 
 void TransUdpNegoTest::TearDownTestCase(void)
 {
+    AuthCommonDeinit();
     TransUdpChannelDeinit();
     LnnDeinitBusCenterEvent();
 }
@@ -394,6 +395,8 @@ HWTEST_F(TransUdpNegoTest, StartExchangeUdpInfo001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
 
     channel.info.udpChannelOptType = TYPE_UDP_CHANNEL_CLOSE;
+
+    (void)AuthCommonInit();
     ret = StartExchangeUdpInfo(&channel, authHandle, seq);
     EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
 }

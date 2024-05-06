@@ -764,7 +764,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcProcAllDataTest001, TestSize.Level0)
     (void)memset_s(oldBuf, sizeof(ClientDataBuf), 0, sizeof(ClientDataBuf));
 
     int32_t ret = TransTdcProcAllData(channelId);
-    EXPECT_EQ(ret, SOFTBUS_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 
     ret = TransDataListInit();
     ASSERT_EQ(ret, SOFTBUS_OK);

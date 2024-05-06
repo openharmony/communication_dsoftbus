@@ -28,6 +28,7 @@
 #include "adapter/p2p_adapter.h"
 #include "utils/duration_statistic.h"
 #include "conn_event.h"
+#include "wifi_direct_role_option.h"
 
 static std::atomic<uint32_t> g_requestId = 0;
 static std::recursive_mutex g_listenerLock;
@@ -61,7 +62,7 @@ static void SetElementType(struct WifiDirectConnectInfo *info)
     }
 }
 
-static ListenerModule AllocateListenerModuleId()
+static int32_t AllocateListenerModuleId()
 {
     std::lock_guard lock(g_listenerModuleIdLock);
     ListenerModule moduleId = UNUSE_BUTT;
@@ -83,12 +84,12 @@ static ListenerModule AllocateListenerModuleId()
     return moduleId;
 }
 
-static bool IsEnhanceP2pModuleId(ListenerModule moduleId)
+static bool IsEnhanceP2pModuleId(int32_t moduleId)
 {
     return moduleId >= AUTH_ENHANCED_P2P_START && moduleId <= AUTH_ENHANCED_P2P_END;
 }
 
-static void FreeListenerModuleId(ListenerModule moduleId)
+static void FreeListenerModuleId(int32_t moduleId)
 {
     std::lock_guard lock(g_listenerModuleIdLock);
     if (IsEnhanceP2pModuleId(moduleId)) {
@@ -118,8 +119,17 @@ static int32_t ConnectDevice(struct WifiDirectConnectInfo *info, struct WifiDire
         .peerIp = info->remoteMac };
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_START, extra);
     SetElementType(info);
-    int32_t ret =
-        OHOS::SoftBus::WifiDirectSchedulerFactory::GetInstance().GetScheduler().ConnectDevice(*info, *callback);
+
+    int32_t ret = OHOS::SoftBus::WifiDirectRoleOption::GetInstance().GetExpectedRole(
+        info->remoteNetworkId, info->connectType, info->expectApiRole, info->isStrict);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get expected role failed");
+    CONN_LOGI(CONN_WIFI_DIRECT,
+        "requestId=%{public}d, pid=%{public}d, type=%{public}d, expectRole=0x%{public}x",
+        info->requestId,
+        info->pid,
+        info->connectType,
+        info->expectApiRole);
+    ret = OHOS::SoftBus::WifiDirectSchedulerFactory::GetInstance().GetScheduler().ConnectDevice(*info, *callback);
     extra.errcode = ret;
     extra.result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_INVOKE_PROTOCOL, extra);
@@ -288,10 +298,44 @@ static void NotifyRoleChange(enum WifiDirectRole oldRole, enum WifiDirectRole ne
     }
 }
 
+static void NotifyConnectedForSink(
+    const char *remoteMac, const char *remoteIp, const char *remoteUuid, enum WifiDirectLinkType type)
+{
+    std::lock_guard lock(g_listenerLock);
+    for (auto listener : g_listeners) {
+        if (listener.onConnectedForSink != nullptr) {
+            listener.onConnectedForSink(remoteMac, remoteIp, remoteUuid, type);
+        }
+    }
+}
+
+static void NotifyDisconnectedForSink(
+    const char *remoteMac, const char *remoteIp, const char *remoteUuid, enum WifiDirectLinkType type)
+{
+    std::lock_guard lock(g_listenerLock);
+    for (auto listener : g_listeners) {
+        if (listener.onDisconnectedForSink != nullptr) {
+            listener.onDisconnectedForSink(remoteMac, remoteIp, remoteUuid, type);
+        }
+    }
+}
+
 bool IsNegotiateChannelNeeded(const char *remoteNetworkId, enum WifiDirectLinkType linkType)
 {
-    (void)remoteNetworkId;
-    (void)linkType;
+    CONN_CHECK_AND_RETURN_RET_LOGE(remoteNetworkId != NULL, true, CONN_WIFI_DIRECT, "remote networkid is null");
+    auto remoteUuid = OHOS::SoftBus::WifiDirectUtils::NetworkIdToUuid(remoteNetworkId);
+    CONN_CHECK_AND_RETURN_RET_LOGE(!remoteUuid.empty(), true, CONN_WIFI_DIRECT, "get remote uuid failed");
+
+    auto link = OHOS::SoftBus::LinkManager::GetInstance().GetReuseLink(linkType, remoteUuid);
+    if (link == nullptr) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "no inner link");
+        return true;
+    }
+    if (link->GetNegotiateChannel() == nullptr) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "need negotiate channel");
+        return true;
+    }
+    CONN_LOGI(CONN_WIFI_DIRECT, "no need negotiate channel");
     return false;
 }
 
@@ -340,6 +384,8 @@ static struct WifiDirectManager g_manager = {
     .notifyOnline = NotifyOnline,
     .notifyOffline = NotifyOffline,
     .notifyRoleChange = NotifyRoleChange,
+    .notifyConnectedForSink = NotifyConnectedForSink,
+    .notifyDisconnectedForSink = NotifyDisconnectedForSink,
 };
 
 struct WifiDirectManager *GetWifiDirectManager(void)

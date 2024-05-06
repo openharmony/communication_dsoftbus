@@ -80,7 +80,7 @@ public:
     virtual int64_t GetAuthIdByConnInfo(const AuthConnInfo *connInfo) = 0;
     virtual int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash) = 0;
     virtual int32_t StartBaseClient(ListenerModule module, const SoftbusBaseListener *listener) = 0;
-    virtual bool CheckActiveConnection(const ConnectOption *option) = 0;
+    virtual bool CheckActiveConnection(const ConnectOption *option, bool needOccupy) = 0;
     virtual int32_t ConnOpenClientSocket(const ConnectOption *option, const char *bindAddr, bool isNonBlock) = 0;
     virtual int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType trigger) = 0;
     virtual int32_t QueryLaneResource(const LaneQueryInfo *queryInfo, const QosInfo *qosInfo) = 0;
@@ -130,7 +130,7 @@ public:
     MOCK_METHOD1(GetAuthIdByConnInfo, int64_t(const AuthConnInfo *));
     MOCK_METHOD3(SoftBusGenerateStrHash, int32_t (const unsigned char *, uint32_t, unsigned char *));
     MOCK_METHOD2(StartBaseClient, int32_t (ListenerModule module, const SoftbusBaseListener *listener));
-    MOCK_METHOD1(CheckActiveConnection, bool (const ConnectOption *));
+    MOCK_METHOD2(CheckActiveConnection, bool (const ConnectOption *, bool));
     MOCK_METHOD3(ConnOpenClientSocket, int32_t (const ConnectOption *option, const char *bindAddr, bool isNonBlock));
     MOCK_METHOD3(AddTrigger, int32_t (ListenerModule module, int32_t fd, TriggerType trigger));
     MOCK_METHOD2(QueryLaneResource, int32_t (const LaneQueryInfo *, const QosInfo *));
@@ -149,6 +149,10 @@ public:
         const AuthConnCallback *callback, bool isMeta);
     static int32_t ActionOfConnOpened(const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback,
         bool isMeta);
+    static int32_t ActionOfAllocConnOpenFailed(const char *networkId, uint32_t authRequestId,
+        AuthConnCallback *callback);
+    static int32_t ActionOfAllocConnOpened(const char *networkId, uint32_t authRequestId,
+        AuthConnCallback *callback);
 };
 } // namespace OHOS
 #endif // LNN_LANE_DEPS_MOCK_H

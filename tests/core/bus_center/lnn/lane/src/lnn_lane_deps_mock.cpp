@@ -156,6 +156,24 @@ int32_t LaneDepsInterfaceMock::ActionOfConnOpened(const AuthConnInfo *info, uint
     return SOFTBUS_OK;
 }
 
+int32_t LaneDepsInterfaceMock::ActionOfAllocConnOpenFailed(const char *networkId, uint32_t authRequestId,
+    AuthConnCallback *callback)
+{
+    callback->onConnOpenFailed(authRequestId, SOFTBUS_ERR);
+    return SOFTBUS_OK;
+}
+
+int32_t LaneDepsInterfaceMock::ActionOfAllocConnOpened(const char *networkId, uint32_t authRequestId,
+    AuthConnCallback *callback)
+{
+    AuthHandle authHandle = {
+        .authId = 0,
+        .type = AUTH_LINK_TYPE_P2P,
+    };
+    callback->onConnOpened(authRequestId, authHandle);
+    return SOFTBUS_OK;
+}
+
 extern "C" {
 int32_t GetAuthLinkTypeList(const char *networkId, AuthLinkTypeList *linkTypeList)
 {
@@ -345,9 +363,9 @@ int32_t StartBaseClient(ListenerModule module, const SoftbusBaseListener *listen
     return GetLaneDepsInterface()->StartBaseClient(module, listener);
 }
 
-bool CheckActiveConnection(const ConnectOption *option)
+bool CheckActiveConnection(const ConnectOption *option, bool needOccupy)
 {
-    return GetLaneDepsInterface()->CheckActiveConnection(option);
+    return GetLaneDepsInterface()->CheckActiveConnection(option, needOccupy);
 }
 
 int32_t ConnOpenClientSocket(const ConnectOption *option, const char *bindAddr, bool isNonBlock)
