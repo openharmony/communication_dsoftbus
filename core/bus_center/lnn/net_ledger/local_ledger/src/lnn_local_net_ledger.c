@@ -325,16 +325,6 @@ static int32_t LocalUpdateNodeAccountId(const void *buf)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    int64_t accountId = 0;
-    if (LnnGetAccountIdfromLocalCache(&accountId) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "get accountid info from cache fail");
-    }
-    if (accountId == *((int64_t *)buf) && *((int64_t *)buf) != 0) {
-        LNN_LOGI(LNN_LEDGER, "no new accountid login");
-        info->accountId = *((int64_t *)buf);
-        return SOFTBUS_OK;
-    }
-
     if (info->accountId ==  0) {
         if (*((int64_t *)buf) == 0) {
             LNN_LOGI(LNN_LEDGER, "no accountid login, default is 0");
