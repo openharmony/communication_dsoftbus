@@ -24,11 +24,14 @@
 #include "lnn_async_callback_utils.h"
 #include "lnn_ble_heartbeat.h"
 #include "lnn_common_utils.h"
+#include "lnn_data_cloud_sync.h"
 #include "lnn_decision_center.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_device_info_recovery.h"
 #include "lnn_deviceinfo_to_profile.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_heartbeat_utils.h"
+#include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_meta_node_ledger.h"
 #include "lnn_network_manager.h"
@@ -419,6 +422,13 @@ static void HbScreenLockChangeEventHandler(const LnnEventBasicInfo *info)
         case SOFTBUS_SCREEN_UNLOCK:
             LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_SCREEN_UNLOCK");
             LnnUpdateOhosAccount();
+            const NodeInfo *info = LnnGetLocalNodeInfo();
+            if ((LnnSaveLocalDeviceInfo(info)) != SOFTBUS_OK) {
+                LNN_LOGE(LNN_LEDGER, "screen unlocked event, update all ledgerinfo to local store fail");
+            }
+            if (LnnLedgerAllDataSyncToDB(info) != SOFTBUS_OK) {
+                LNN_LOGE(LNN_LEDGER, "screen unlocked event, ledgerinf sync to cloud fail");
+            }
             HbConditionChanged(false);
             break;
         case SOFTBUS_SCREEN_LOCK:

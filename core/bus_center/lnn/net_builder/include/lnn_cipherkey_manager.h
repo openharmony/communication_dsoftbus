@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 
 #include "cJSON.h"
 #include "softbus_common.h"
+#include "lnn_data_cloud_sync.h"
 #include "lnn_node_info.h"
 
 #ifdef __cplusplus
@@ -45,7 +46,7 @@ int32_t LnnLoadLocalBroadcastCipherKey(void);
 int32_t LnnGetLocalBroadcastCipherKey(BroadcastCipherKey *broadcastKey);
 int32_t LnnSaveLocalBroadcastCipherKey(const BroadcastCipherKey *broadcastKey);
 int32_t LnnUpdateLocalBroadcastCipherKey(BroadcastCipherKey *broadcastKey);
-
+int32_t LnnGetLocalBroadcastCipherInfo(CloudSyncInfo *info);
 #ifdef __cplusplus
 }
 #endif
