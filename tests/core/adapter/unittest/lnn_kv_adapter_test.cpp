@@ -40,17 +40,22 @@ protected:
     void SetUp();
     void TearDown();
 };
+
 void KVAdapterTest::SetUpTestCase(void)
 {
     kvStore = make_shared<KVAdapter>(APP_ID, STORE_ID,
         make_shared<KvDataChangeListener>());
 }
-void KVAdapterTest::TearDownTestCase(void) {
+
+void KVAdapterTest::TearDownTestCase(void)
+{
 }
+
 void KVAdapterTest::SetUp()
 {
     kvStore->Init();
 }
+
 void KVAdapterTest::TearDown()
 {
     kvStore->DeInit();
