@@ -64,7 +64,7 @@ void LNNDataCloudSyncTest::TearDown() {}
 HWTEST_F(LNNDataCloudSyncTest, LnnLedgerAllDataSyncToDB_Test_001, TestSize.Level1)
 {
     LnnInitCloudSyncModule();
-    NodeInfo *info = NULL;
+    NodeInfo *info = nullptr;
     int32_t ret = LnnLedgerAllDataSyncToDB(info);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     info = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
@@ -88,8 +88,8 @@ HWTEST_F(LNNDataCloudSyncTest, LnnLedgerAllDataSyncToDB_Test_001, TestSize.Level
 HWTEST_F(LNNDataCloudSyncTest, LnnLedgerDataChangeSyncToDB_Test_001, TestSize.Level1)
 {
     LnnInitCloudSyncModule();
-    char *key = NULL;
-    char *value = NULL;
+    char *key = nullptr;
+    char *value = nullptr;
     int32_t ret = LnnLedgerDataChangeSyncToDB(key, value, strlen(value));
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     LnnDeleteSyncToDB();
@@ -105,8 +105,8 @@ HWTEST_F(LNNDataCloudSyncTest, LnnLedgerDataChangeSyncToDB_Test_001, TestSize.Le
 HWTEST_F(LNNDataCloudSyncTest, LnnDBDataChangeSyncToCache_Test_001, TestSize.Level1)
 {
     LnnInitCloudSyncModule();
-    char *key = NULL;
-    char *value = NULL;
+    char *key = nullptr;
+    char *value = nullptr;
     ChangeType type = DB_UPDATE;
     int32_t ret = LnnDBDataChangeSyncToCache(key, value, type);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -132,8 +132,8 @@ HWTEST_F(LNNDataCloudSyncTest, LnnDBDataChangeSyncToCache_Test_001, TestSize.Lev
 HWTEST_F(LNNDataCloudSyncTest, LnnDBDataAddChangeSyncToCache_Test_001, TestSize.Level1)
 {
     LnnInitCloudSyncModule();
-    const char **key = NULL;
-    const char **value = NULL;
+    const char **key = nullptr;
+    const char **value = nullptr;
     int32_t keySize = 0;
     int32_t ret = LnnDBDataAddChangeSyncToCache(key, value, keySize);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -149,7 +149,7 @@ HWTEST_F(LNNDataCloudSyncTest, LnnDBDataAddChangeSyncToCache_Test_001, TestSize.
 HWTEST_F(LNNDataCloudSyncTest, LnnGetAccountIdfromLocalCache_Test_001, TestSize.Level1)
 {
     LnnInitCloudSyncModule();
-    int64_t *buf = NULL;
+    int64_t *buf = nullptr;
     int32_t ret = LnnGetAccountIdfromLocalCache(buf);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     int64_t buffer = 0;

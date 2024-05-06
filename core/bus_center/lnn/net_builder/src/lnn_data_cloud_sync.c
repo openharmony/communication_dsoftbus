@@ -551,7 +551,7 @@ static int32_t GetInfoFromSplitKey(char splitKey[][SPLIT_MAX_LEN], int64_t *acco
         LNN_LOGE(LNN_BUILDER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (sscanf_s(splitKey[0], "%ld", accountId, sizeof(int64_t)) <= 0) {
+    if (sscanf_s(splitKey[0], "%ld", accountId) <= 0) {
         LNN_LOGE(LNN_BUILDER, "fail:sscanf_s accountId fail.");
         return SOFTBUS_ERR;
     }
