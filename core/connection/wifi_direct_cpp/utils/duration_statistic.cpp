@@ -38,7 +38,9 @@ void DurationStatistic::Record(uint32_t requestId, const DurationStatisticEvent 
 
 void DurationStatistic::End(uint32_t requestId)
 {
-    calculators[requestId]->CalculateAllEvent(requestId, stateTimeMap[requestId]);
+    if (calculators[requestId] != nullptr) {
+        calculators[requestId]->CalculateAllEvent(requestId, stateTimeMap[requestId]);
+    }
 }
 
 void DurationStatistic::Clear(uint32_t requestId)
@@ -61,6 +63,7 @@ void DurationStatisticCalculatorFactory::Register(
 std::shared_ptr<DurationStatisticCalculator> DurationStatisticCalculatorFactory::NewInstance(
     enum WifiDirectConnectType type)
 {
+    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     if (creator_ == nullptr) {
         return std::make_shared<P2pCalculator>(P2pCalculator::GetInstance());
     }

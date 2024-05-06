@@ -75,12 +75,14 @@ void ConnectCommand::OnSuccess(const WifiDirectLink &link) const
         "linkType=%{public}d",
         info_.info_.requestId, link.linkId, WifiDirectAnonymizeIp(link.localIp).c_str(),
         WifiDirectAnonymizeIp(link.remoteIp).c_str(), link.remotePort, link.linkType);
+    DfxRecord(true, OK);
     callback_.onConnectSuccess(info_.info_.requestId, &link);
 }
 
 void ConnectCommand::OnFailure(WifiDirectErrorCode reason) const
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}u, reason=%{public}d", info_.info_.requestId, reason);
+    DfxRecord(false, reason);
     callback_.onConnectFailure(info_.info_.requestId, reason);
 }
 
@@ -120,7 +122,7 @@ void ConnectCommand::DfxRecord(bool isSuccess, WifiDirectErrorCode reason) const
         DurationStatistic::GetInstance().Clear(info_.info_.requestId);
         ConnEventExtra extra = {
             .result = EVENT_STAGE_RESULT_FAILED,
-            .errcode = reason,
+            .errcode = static_cast<int32_t>(reason),
             .requestId = static_cast<int32_t>(info_.info_.requestId),
         };
         FillConnEventExtra(extra);
