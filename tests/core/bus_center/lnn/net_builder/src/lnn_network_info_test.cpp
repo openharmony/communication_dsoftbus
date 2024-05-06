@@ -128,7 +128,6 @@ HWTEST_F(LNNNetworkInfoTest, LNN_BT_STATE_EVENT_HANDLER_TEST_001, TestSize.Level
         WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_EQ(LnnInitNetworkInfo(), SOFTBUS_ERR);
 
-    EXPECT_CALL(netLedgerMock, LnnGetLocalNumInfo).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_EQ(LnnInitNetworkInfo(), SOFTBUS_ERR);
     handler((LnnEventBasicInfo *)&btEvent1);
 
@@ -182,7 +181,6 @@ HWTEST_F(LNNNetworkInfoTest, WIFI_STATE_EVENT_HANDLER_TEST_001, TestSize.Level1)
     };
     handler((LnnEventBasicInfo *)&wifiEvent4);
 
-    EXPECT_CALL(netLedgerMock, LnnGetLocalNumInfo).WillOnce(Return(SOFTBUS_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_EQ(LnnInitNetworkInfo(), SOFTBUS_ERR);
     handler((LnnEventBasicInfo *)&wifiEvent1);
     SoftBusSleepMs(200);
