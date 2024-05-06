@@ -403,6 +403,8 @@
         "ClientSignalSyncBind";
         "DelSessionStateClosing";
         "SetSessionStateBySessionId";
+        "ClientWaitSyncBind";
+        "GetQosValue";
         "EvaluateQos";
         "GetMtuSize";
         "DBinderGrantPermission";

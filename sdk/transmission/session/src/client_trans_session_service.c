@@ -1057,7 +1057,8 @@ int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t qosCount, const I
     int32_t ret = ClientSetSocketState(socket, 0, SESSION_ROLE_INIT);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "init session role failed, ret=%{public}d", ret);
     ret = SetSessionStateBySessionId(socket, SESSION_STATE_INIT, 0);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "init session state failed, ret=%{public}d", ret);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, TRANS_SDK, "init session state failed, ret=%{public}d", ret);
 
     ret = ClientSetListenerBySessionId(socket, listener, false);
     if (ret != SOFTBUS_OK) {

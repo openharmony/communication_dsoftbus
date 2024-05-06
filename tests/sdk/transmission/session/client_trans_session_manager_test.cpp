@@ -42,6 +42,8 @@
 #define TRANS_TEST_ALGORITHM 1
 #define TRANS_TEST_CRC 1
 #define TRANS_TEST_STATE 1
+#define TRANS_TEST_MAX_WAIT_TIMEOUT 9000
+#define TRANS_TEST_DEF_WAIT_TIMEOUT 30000
 
 #define MAX_SESSION_SERVER_NUM 32
 
@@ -1400,5 +1402,106 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest45, TestSiz
     EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
     ret = ClientGetSessionIsAsyncBySessionId(-1, &isAsync);
     EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: TransClientSessionManagerTest46
+ * @tc.desc: Call ClientHandleBindWaitTimer for invalid param.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest46, TestSize.Level1)
+{
+    int32_t ret = ClientHandleBindWaitTimer(-1, 0, TIMER_ACTION_STOP);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = ClientHandleBindWaitTimer(1, 0, TIMER_ACTION_STOP);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
+}
+
+/**
+ * @tc.name: TransClientSessionManagerTest47
+ * @tc.desc: Call GetQosValue SUCCESS.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest47, TestSize.Level1)
+{
+    QosTV qos[] = {
+        {.qos = QOS_TYPE_MAX_WAIT_TIMEOUT, .value = TRANS_TEST_MAX_WAIT_TIMEOUT},
+        {.qos = QOS_TYPE_MAX_IDLE_TIMEOUT, .value = 0},
+    };
+    int32_t maxWaitTimeout = 0;
+    int32_t ret = GetQosValue(
+        qos, sizeof(qos) / sizeof(qos[0]), QOS_TYPE_MAX_WAIT_TIMEOUT, &maxWaitTimeout, TRANS_TEST_DEF_WAIT_TIMEOUT);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(maxWaitTimeout, TRANS_TEST_MAX_WAIT_TIMEOUT);
+}
+
+/**
+ * @tc.name: TransClientSessionManagerTest48
+ * @tc.desc: Call GetQosValue default value.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest48, TestSize.Level1)
+{
+    QosTV qos[] = {
+        { .qos = QOS_TYPE_MAX_IDLE_TIMEOUT, .value = 0                          },
+    };
+    int32_t maxWaitTimeout = 0;
+    int32_t ret = GetQosValue(
+        qos, sizeof(qos) / sizeof(qos[0]), QOS_TYPE_MAX_WAIT_TIMEOUT, &maxWaitTimeout, TRANS_TEST_DEF_WAIT_TIMEOUT);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(maxWaitTimeout, TRANS_TEST_DEF_WAIT_TIMEOUT);
+
+    ret = GetQosValue(
+        NULL, 0, QOS_TYPE_MAX_WAIT_TIMEOUT, &maxWaitTimeout, TRANS_TEST_DEF_WAIT_TIMEOUT);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(maxWaitTimeout, TRANS_TEST_DEF_WAIT_TIMEOUT);
+}
+
+/**
+ * @tc.name: TransClientSessionManagerTest49
+ * @tc.desc: Call GetQosValue FAIL.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest49, TestSize.Level1)
+{
+    int32_t maxWaitTimeout = 0;
+    int32_t ret = GetQosValue(
+        NULL, 1, QOS_TYPE_MAX_WAIT_TIMEOUT, &maxWaitTimeout, TRANS_TEST_DEF_WAIT_TIMEOUT);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: TransClientSessionManagerTest50
+ * @tc.desc: Call ClientWaitSyncBind for invalid param..
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest50, TestSize.Level1)
+{
+    int32_t ret = ClientWaitSyncBind(-1);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_SESSION_ID);
+
+    ret = ClientWaitSyncBind(1);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
+}
+
+/**
+ * @tc.name: TransClientSessionManagerTest51
+ * @tc.desc: Call ClientWaitSyncBind for invalid param..
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest51, TestSize.Level1)
+{
+    int32_t ret = ClientSignalSyncBind(-1, 0);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_SESSION_ID);
+
+    ret = ClientSignalSyncBind(1, 0);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
 }
 }
