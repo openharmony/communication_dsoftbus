@@ -29,7 +29,7 @@ constexpr int32_t MIN_DBID_COUNT = 1;
 constexpr int32_t MAX_STRING_LEN = 4096;
 constexpr int32_t MIN_STRING_LEN = 1;
 const std::string SEPARATOR = "#";
-std::mutex kvAdapterWrapperMutex_;
+std::mutex g_kvAdapterWrapperMutex;
 }
 
 static int32_t g_dbId = 1;
@@ -41,27 +41,26 @@ std::shared_ptr<OHOS::KVAdapter> FindKvStorePtr(int32_t& dbId);
 int32_t LnnCreateKvAdapter(int32_t *dbId, const char *appId, int32_t appIdLen, const char *storeId,
     int32_t storeIdLen)
 {
-    if (appId == nullptr || appIdLen < MIN_STRING_LEN || appIdLen > MAX_STRING_LEN ||
+    if (dbId == nullptr || appId == nullptr || appIdLen < MIN_STRING_LEN || appIdLen > MAX_STRING_LEN ||
         storeId == nullptr || storeIdLen < MIN_STRING_LEN || storeIdLen > MAX_STRING_LEN) {
         return SOFTBUS_INVALID_PARAM;
     }
     std::string appIdStr(appId, appIdLen);
     std::string storeIdStr(storeId, storeIdLen);
     std::shared_ptr<KVAdapter> kvAdapter = nullptr;
-    int32_t initRet;
     {
-        std::lock_guard<std::mutex> lock(kvAdapterWrapperMutex_);
+        std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
         kvAdapter = std::make_shared<KVAdapter>(appIdStr, storeIdStr,
             std::make_shared<KvDataChangeListener>());
-        initRet = kvAdapter->Init();
+        int32_t initRet = kvAdapter->Init();
+        if (initRet != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "kvAdapter init failed, ret = %{public}d", initRet);
+            return initRet;
+        }
+        *dbId = g_dbId;
+        g_dbID2KvAdapter.insert(std::make_pair(g_dbId, kvAdapter));
+        g_dbId++;
     }
-    if (initRet != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "kvAdapter init failed, ret = %{public}d", initRet);
-        return initRet;
-    }
-    *dbId = g_dbId;
-    g_dbID2KvAdapter.insert(std::make_pair(g_dbId, kvAdapter));
-    g_dbId++;
     LNN_LOGI(LNN_LEDGER, "kvAdapter init success, dbId = %{public}d", *dbId);
     return SOFTBUS_OK;
 }
@@ -70,14 +69,14 @@ int32_t LnnDestroyKvAdapter(int32_t dbId)
 {
     int32_t unInitRet;
     {
-        std::lock_guard<std::mutex> lock(kvAdapterWrapperMutex_);
+        std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
         if (dbId < MIN_DBID_COUNT || dbId >= g_dbId) {
             return SOFTBUS_INVALID_PARAM;
         }
         auto kvAdapter = FindKvStorePtr(dbId);
         if (kvAdapter == nullptr) {
             LNN_LOGE(LNN_LEDGER, "kvAdapter is not exist, dbId = %{public}d", dbId);
-            return SOFTBUS_INVALID_PARAM;
+            return SOFTBUS_NOT_FIND;
         }
         unInitRet = kvAdapter->DeInit();
     }
@@ -104,7 +103,7 @@ int32_t LnnPutDBData(int32_t dbId, const char *key, int32_t keyLen, const char *
 {
     int32_t putRet;
     {
-        std::lock_guard<std::mutex> lock(kvAdapterWrapperMutex_);
+        std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
         if (key == nullptr || keyLen < MIN_STRING_LEN || keyLen > MAX_STRING_LEN ||
             value == nullptr || valueLen < MIN_STRING_LEN || valueLen > MAX_STRING_LEN ||
             dbId < MIN_DBID_COUNT || dbId >= g_dbId) {
@@ -115,7 +114,7 @@ int32_t LnnPutDBData(int32_t dbId, const char *key, int32_t keyLen, const char *
         auto kvAdapter = FindKvStorePtr(dbId);
         if (kvAdapter == nullptr) {
             LNN_LOGE(LNN_LEDGER, "kvAdapter is not exist, dbId = %{public}d", dbId);
-            return SOFTBUS_INVALID_PARAM;
+            return SOFTBUS_NOT_FIND;
         }
         putRet = kvAdapter->Put(keyStr, valueStr);
     }
@@ -131,7 +130,7 @@ int32_t LnnDeleteDBData(int32_t dbId, const char *key, int32_t keyLen)
 {
     int32_t deleteRet;
     {
-        std::lock_guard<std::mutex> lock(kvAdapterWrapperMutex_);
+        std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
         if (key == nullptr || keyLen < MIN_STRING_LEN || keyLen > MAX_STRING_LEN ||
             dbId < MIN_DBID_COUNT || dbId >= g_dbId) {
             return SOFTBUS_INVALID_PARAM;
@@ -140,7 +139,7 @@ int32_t LnnDeleteDBData(int32_t dbId, const char *key, int32_t keyLen)
         auto kvAdapter = FindKvStorePtr(dbId);
         if (kvAdapter == nullptr) {
             LNN_LOGE(LNN_LEDGER, "kvAdapter is not exist, dbId = %{public}d", dbId);
-            return SOFTBUS_INVALID_PARAM;
+            return SOFTBUS_NOT_FIND;
         }
         deleteRet = kvAdapter->Delete(keyStr);
     }
@@ -157,8 +156,8 @@ int32_t LnnGetDBData(int32_t dbId, const char *key, int32_t keyLen, char **value
     std::string valueStr;
     int32_t getRet;
     {
-        std::lock_guard<std::mutex> lock(kvAdapterWrapperMutex_);
-        if (key == nullptr || keyLen < MIN_STRING_LEN || keyLen > MAX_STRING_LEN ||
+        std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
+        if (value == nullptr || key == nullptr || keyLen < MIN_STRING_LEN || keyLen > MAX_STRING_LEN ||
             dbId < MIN_DBID_COUNT || dbId >= g_dbId) {
             return SOFTBUS_INVALID_PARAM;
         }
@@ -166,7 +165,7 @@ int32_t LnnGetDBData(int32_t dbId, const char *key, int32_t keyLen, char **value
         auto kvAdapter = FindKvStorePtr(dbId);
         if (kvAdapter == nullptr) {
             LNN_LOGE(LNN_LEDGER, "kvAdapter is not exist, dbId = %{public}d", dbId);
-            return SOFTBUS_INVALID_PARAM;
+            return SOFTBUS_NOT_FIND;
         }
         getRet = kvAdapter->Get(keyStr, valueStr);
     }
@@ -187,7 +186,7 @@ int32_t LnnDeleteDBDataByPrefix(int32_t dbId, const char *keyPrefix, int32_t key
 {
     int32_t deleteRet;
     {
-        std::lock_guard<std::mutex> lock(kvAdapterWrapperMutex_);
+        std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
         if (keyPrefix == nullptr || keyPrefixLen < MIN_STRING_LEN || keyPrefixLen > MAX_STRING_LEN ||
             dbId < MIN_DBID_COUNT || dbId >= g_dbId) {
             return SOFTBUS_INVALID_PARAM;
@@ -196,7 +195,7 @@ int32_t LnnDeleteDBDataByPrefix(int32_t dbId, const char *keyPrefix, int32_t key
         auto kvAdapter = FindKvStorePtr(dbId);
         if (kvAdapter == nullptr) {
             LNN_LOGE(LNN_LEDGER, "kvAdapter is not exist, dbId = %{public}d", dbId);
-            return SOFTBUS_INVALID_PARAM;
+            return SOFTBUS_NOT_FIND;
         }
         deleteRet = kvAdapter->DeleteByPrefix(keyPrefixStr);
     }
@@ -212,7 +211,7 @@ int32_t LnnPutDBDataBatch(int32_t dbId, const CloudSyncInfo *localInfo)
 {
     int32_t putBatchRet;
     {
-        std::lock_guard<std::mutex> lock(kvAdapterWrapperMutex_);
+        std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
         if (localInfo == nullptr || dbId < MIN_DBID_COUNT || dbId >= g_dbId) {
             return SOFTBUS_INVALID_PARAM;
         }
@@ -222,7 +221,7 @@ int32_t LnnPutDBDataBatch(int32_t dbId, const CloudSyncInfo *localInfo)
         auto kvAdapter = FindKvStorePtr(dbId);
         if (kvAdapter == nullptr) {
             LNN_LOGE(LNN_LEDGER, "kvAdapter is not exist, dbId = %{public}d", dbId);
-            return SOFTBUS_INVALID_PARAM;
+            return SOFTBUS_NOT_FIND;
         }
         putBatchRet = kvAdapter->PutBatch(values);
     }
@@ -236,7 +235,7 @@ int32_t LnnPutDBDataBatch(int32_t dbId, const CloudSyncInfo *localInfo)
 
 int32_t LnnCloudSync(int32_t dbId)
 {
-    std::lock_guard<std::mutex> lock(kvAdapterWrapperMutex_);
+    std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
     if (dbId < MIN_DBID_COUNT || dbId >= g_dbId) {
         LNN_LOGI(LNN_LEDGER, "Invalid dbId ");
         return SOFTBUS_INVALID_PARAM;
@@ -244,13 +243,17 @@ int32_t LnnCloudSync(int32_t dbId)
     auto kvAdapter = FindKvStorePtr(dbId);
     if (kvAdapter == nullptr) {
         LNN_LOGE(LNN_LEDGER, "kvAdapter is not exist, dbId = %{public}d", dbId);
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_NOT_FIND;
     }
     return (kvAdapter->CloudSync());
 }
 
 void BasicCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::string, std::string>& values)
 {
+    if (localInfo == nullptr) {
+        LNN_LOGE(LNN_LEDGER, "localInfo is null");
+        return;
+    }
     std::string keyPrefix = std::to_string(localInfo->accountId) + SEPARATOR + localInfo->deviceUdid + SEPARATOR;
     std::string stateVersionStr = SEPARATOR + std::to_string(localInfo->stateVersion);
 
@@ -282,6 +285,10 @@ void BasicCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::strin
 
 void ComplexCloudSyncInfoToMap(const CloudSyncInfo *localInfo, std::map<std::string, std::string>& values)
 {
+    if (localInfo == nullptr) {
+        LNN_LOGE(LNN_LEDGER, "localInfo is null");
+        return;
+    }
     std::string keyPrefix = std::to_string(localInfo->accountId) + SEPARATOR + localInfo->deviceUdid + SEPARATOR;
     std::string stateVersionStr = SEPARATOR + std::to_string(localInfo->stateVersion);
 

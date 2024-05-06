@@ -16,6 +16,7 @@
 #include <cinttypes>
 #include <mutex>
 #include <unistd.h>
+#include <vector>
 
 #include "lnn_kv_adapter.h"
 #include "anonymizer.h"
@@ -149,7 +150,7 @@ int32_t KVAdapter::Put(const std::string& key, const std::string& value)
             char *anonyValue = nullptr;
             Anonymize(key.c_str(), &anonyKey);
             Anonymize(value.c_str(), &anonyValue);
-            LNN_LOGI(LNN_LEDGER, "The key-value pair already exists. key=%{public}s,value=%{public}s",
+            LNN_LOGI(LNN_LEDGER, "The key-value pair already exists. key=%{public}s, value=%{public}s",
                 anonyKey, anonyValue);
             AnonymizeFree(anonyKey);
             AnonymizeFree(anonyValue);
@@ -189,7 +190,7 @@ int32_t KVAdapter::PutBatch(const std::map<std::string, std::string>& values)
                 char *anonyValue = nullptr;
                 Anonymize(item.first.c_str(), &anonyKey);
                 Anonymize(item.second.c_str(), &anonyValue);
-                LNN_LOGI(LNN_LEDGER, "The key-value pair already exists. key=%{public}s,value=%{public}s", anonyKey,
+                LNN_LOGI(LNN_LEDGER, "The key-value pair already exists. key=%{public}s, value=%{public}s", anonyKey,
                     anonyValue);
                 AnonymizeFree(anonyKey);
                 AnonymizeFree(anonyValue);
@@ -344,7 +345,7 @@ int32_t KVAdapter::CloudSync()
     {
         std::lock_guard<std::mutex> lock(kvAdapterMutex_);
         if (kvStorePtr_ == nullptr) {
-            LNN_LOGI(LNN_LEDGER, "kvDBPtr is null!");
+            LNN_LOGE(LNN_LEDGER, "kvDBPtr is null!");
             return SOFTBUS_KV_DB_PTR_NULL;
         }
         status = kvStorePtr_->CloudSync(nullptr);
