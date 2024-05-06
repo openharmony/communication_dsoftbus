@@ -551,7 +551,7 @@ static int32_t GetInfoFromSplitKey(char splitKey[][SPLIT_MAX_LEN], int64_t *acco
         LNN_LOGE(LNN_BUILDER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (sscanf_s(splitKey[0], "%ld", accountId, sizeof(int64_t)) == -1) {
+    if (sscanf_s(splitKey[0], "%ld", accountId, sizeof(int64_t)) <= 0) {
         LNN_LOGE(LNN_BUILDER, "fail:sscanf_s accountId fail.");
         return SOFTBUS_ERR;
     }
@@ -697,7 +697,6 @@ static void UpdateInfoToCacheAndLedger(NodeInfo *cacheInfo, char *deviceUdid, ch
     if (SetDBDataToDistributedLedger(cacheInfo, deviceUdid, strlen(deviceUdid), fieldName) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "set DB data to distributedLedger fail");
     }
-    return;
 }
 
 static int32_t HandleDBUpdateChangeInternal(const char *key, const char *value)
@@ -988,7 +987,6 @@ void LnnInitCloudSyncModule(void)
         return;
     }
     g_dbId = dbId;
-    return;
 }
 
 void LnnDeInitCloudSyncModule(void)
@@ -998,5 +996,4 @@ void LnnDeInitCloudSyncModule(void)
     if (LnnDestroyKvAdapter(dbId) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "DeInit Cloud Sync module fail");
     }
-    return;
 }
