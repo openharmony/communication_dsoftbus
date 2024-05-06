@@ -246,8 +246,8 @@ int32_t ServerNotifyAuthSuccess(IpcIo *req, IpcIo *reply)
     if (TransAuthGetNameByChanId(channelId, pkgName, sessionName,
         PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get session name fail");
-        WriteInt32(reply, SOFTBUS_TRANS_UDP_CLOSE_CHANNELID_INVALID);
-        return SOFTBUS_TRANS_UDP_CLOSE_CHANNELID_INVALID;
+        WriteInt32(reply, SOFTBUS_TRANS_UDP_INVALID_ID);
+        return SOFTBUS_TRANS_UDP_INVALID_ID;
     }
     if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, ACTION_OPEN) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "ServerCloseChannel no permission");

@@ -376,7 +376,7 @@ int32_t TransSendNetworkingMessage(int32_t channelId, const char *data, uint32_t
     if (TransProxyGetSendMsgChanInfo(channelId, info) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_MSG, "get proxy channelId failed. channelId=%{public}d", channelId);
         SoftBusFree(info);
-        return SOFTBUS_TRANS_PROXY_SEND_CHANNELID_INVALID;
+        return SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID;
     }
 
     if (info->status != PROXY_CHANNEL_STATUS_COMPLETED && info->status != PROXY_CHANNEL_STATUS_KEEPLIVEING) {
