@@ -21,8 +21,10 @@
 #include "access_control.h"
 #include "access_control_profile.h"
 #include "anonymizer.h"
+#ifdef SUPPORT_ABILITY_RUNTIME
 #include "app_mgr_interface.h"
 #include "app_mgr_proxy.h"
+#endif
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "comm_log.h"
@@ -129,6 +131,7 @@ uint32_t TransACLGetCallingTokenID(void)
     return OHOS::IPCSkeleton::GetCallingTokenID();
 }
 
+#ifdef SUPPORT_ABILITY_RUNTIME
 static sptr<AppExecFwk::IAppMgr> g_appMgrProxy = nullptr;
 
 namespace OHOS {
@@ -190,6 +193,13 @@ static void GetForegroundApplications(uint32_t firstTokenId, int32_t *tokenType)
     }
     *tokenType = BACKGROUND_APP_TYPE;
 }
+#else
+static void GetForegroundApplications(uint32_t firstTokenId, int32_t *tokenType)
+{
+    (void)firstTokenId;
+    (void)tokenType;
+}
+#endif
 
 void TransGetTokenInfo(uint32_t callingId, char *tokenName, int32_t nameLen, int32_t *tokenType)
 {
