@@ -1168,6 +1168,10 @@ static void HandleWholeProcessTimeout(uint32_t laneReqId)
         return;
     }
     int32_t failReason = nodeInfo->p2pErrCode;
+    if (nodeInfo->p2pErrCode == SOFTBUS_OK) {
+        nodeInfo->p2pErrCode = SOFTBUS_TIMOUT;
+        failReason = SOFTBUS_TIMOUT;
+    }
     bool hasSucc = false;
     for (uint32_t i = 0; i < nodeInfo->listNum; i++) {
         LaneLinkType linkType = nodeInfo->linkList->linkType[i];
