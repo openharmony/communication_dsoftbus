@@ -85,7 +85,7 @@ HWTEST_F(LNNDataCloudSyncTest, LnnLedgerAllDataSyncToDB_Test_001, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
- HWTEST_F(LNNDataCloudSyncTest, LnnLedgerDataChangeSyncToDB_Test_002, TestSize.Level1)
+HWTEST_F(LNNDataCloudSyncTest, LnnLedgerDataChangeSyncToDB_Test_002, TestSize.Level1)
 {
     LnnInitCloudSyncModule();
     char *key = nullptr;
