@@ -728,6 +728,9 @@ static void NotifyLaneAllocSuccess(uint32_t laneReqId, uint64_t laneId, const La
 
 static void NotifyLaneAllocFail(uint32_t laneReqId, int32_t reason)
 {
+    if (reason == SOFTBUS_OK) {
+        reason = SOFTBUS_LANE_SELECT_FAIL;
+    }
     UpdateReqInfoWithLaneReqId(laneReqId, INVALID_LANE_ID);
     TransReqInfo reqInfo;
     (void)memset_s(&reqInfo, sizeof(TransReqInfo), 0, sizeof(TransReqInfo));
