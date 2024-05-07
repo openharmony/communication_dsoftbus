@@ -48,6 +48,7 @@ extern "C" {
 #define SOFTBUS_SUB_SYSTEM 203
 #define SOFTBUS_ERRNO(module) (-(((SOFTBUS_SUB_SYSTEM) << 21) | ((module) << 16) | (0xFFFF)))
 #define SOFTBUS_SUB_ERRNO(module, sub) (-(((SOFTBUS_SUB_SYSTEM) << 21) | ((module) << 16) | ((sub) << 12) | (0x0FFF)))
+#define CHIP_CONFLICT_ERROR_OFFSET 1000
 
 enum SoftBusSubModule {
     DISC_SUB_MODULE_CODE = 1,
