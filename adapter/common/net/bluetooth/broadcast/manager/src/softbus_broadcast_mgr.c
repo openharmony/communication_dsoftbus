@@ -208,6 +208,15 @@ static bool CheckLockIsInit(SoftBusMutex *lock)
     return true;
 }
 
+static int32_t CheckBroadcastingParam(const BroadcastParam *param, const BroadcastPacket *packet)
+{
+    DISC_CHECK_AND_RETURN_RET_LOGE(param != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid param!");
+    DISC_CHECK_AND_RETURN_RET_LOGE(packet != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid param packet!");
+    DISC_CHECK_AND_RETURN_RET_LOGE(packet->bcData.payload != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE,
+                                   "invalid param payload!");
+    return SOFTBUS_OK;
+}
+
 int32_t DeInitBroadcastMgr(void)
 {
     DISC_LOGI(DISC_BLE, "enter.");
@@ -1288,16 +1297,14 @@ int32_t StartBroadcasting(int32_t bcId, const BroadcastParam *param, const Broad
 {
     static uint32_t callCount = 0;
     DISC_LOGI(DISC_BLE, "enter. bcId=%{public}d, callCount=%{public}u", bcId, callCount++);
-    DISC_CHECK_AND_RETURN_RET_LOGE(param != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid param!");
-    DISC_CHECK_AND_RETURN_RET_LOGE(packet != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid param packet!");
-    DISC_CHECK_AND_RETURN_RET_LOGE(packet->bcData.payload != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE,
-                                   "invalid param payload!");
     DISC_CHECK_AND_RETURN_RET_LOGE(CheckMediumIsValid(g_interfaceId), SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid id!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, SOFTBUS_BC_MGR_NO_FUNC_REGISTERED,
                                    DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->StartBroadcasting != NULL,
                                    SOFTBUS_BC_MGR_FUNC_NULL, DISC_BLE, "function is null!");
-    int32_t ret = SoftBusMutexLock(&g_bcLock);
+    int32_t ret = CheckBroadcastingParam(param, packet);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "check param failed!");
+    ret = SoftBusMutexLock(&g_bcLock);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_BLE, "mutex err!");
     if (!CheckBcIdIsValid(bcId)) {
         SoftBusMutexUnlock(&g_bcLock);
@@ -1671,6 +1678,7 @@ bool BroadcastSetAdvDeviceParam(SensorHubServerType type, const LpBroadcastParam
     DISC_CHECK_AND_RETURN_RET_LOGE(scanParam != NULL, false, DISC_BLE, "invalid param scanParam!");
     DISC_CHECK_AND_RETURN_RET_LOGE(type < SOFTBUS_UNKNOW_TYPE && type >= SOFTBUS_HEARTBEAT_TYPE,
         false, DISC_BLE, "invalid app type!");
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckMediumIsValid(g_interfaceId), false, DISC_BLE, "invalid id!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId] != NULL, false, DISC_BLE, "interface is null!");
     DISC_CHECK_AND_RETURN_RET_LOGE(g_interface[g_interfaceId]->SetAdvFilterParam != NULL,
                                    false, DISC_BLE, "function is null!");

@@ -24,6 +24,7 @@
 #include "softbus_adapter_ble_conflict.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_crypto.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_conn_ble_connection.h"
 #include "softbus_conn_ble_manager.h"
 #include "softbus_conn_ble_trans.h"
@@ -536,7 +537,7 @@ HWTEST_F(ConnectionBleManagerTest, TestBleInterface005, TestSize.Level1)
     EXPECT_EQ(ret, EOK);
 
     EXPECT_CALL(bleMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    bool res = g_bleInterface->CheckActiveConnection(&option);
+    bool res = g_bleInterface->CheckActiveConnection(&option, false);
     EXPECT_EQ(res, true);
 
     UpdateOption options = {
@@ -582,8 +583,338 @@ HWTEST_F(ConnectionBleManagerTest, NotifyReusedConnected001, TestSize.Level1)
     EXPECT_EQ(ret, EOK);
     uint16_t challengeCode = 0x12;
     NotifyReusedConnected(bleConnection->connectionId, challengeCode);
-    ret = strncpy_s(bleConnection->networkId, NETWORK_ID_BUF_LEN, networkId, strlen(networkId));
+    ret = strcpy_s(bleConnection->networkId, NETWORK_ID_BUF_LEN, networkId);
     EXPECT_EQ(ret, EOK);
+    ConnBleRemoveConnection(bleConnection);
+    ConnBleRemoveConnection(bleConnection);
 }
 
+/*
+ * @tc.name: OnBtStateChanged001
+ * @tc.desc: Test OnBtStateChanged.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ConnectionBleManagerTest, OnBtStateChanged001, TestSize.Level1)
+{
+    const char *deviceId = "1234567";
+    const char *bleMac = "11:22:33:44:33:00";
+    ConnectOption option = {
+        .type = CONNECT_BLE,
+        .bleOption.bleMac = "",
+        .bleOption.deviceIdHash = "",
+        .bleOption.protocol = BLE_GATT,
+        .bleOption.psm = 5,
+        .bleOption.challengeCode = 0,
+    };
+    int32_t ret = strcpy_s(option.bleOption.bleMac, BT_MAC_LEN, bleMac);
+    ASSERT_EQ(EOK, ret);
+    ret = memcpy_s(option.bleOption.deviceIdHash, UDID_HASH_LEN, deviceId, UDID_HASH_LEN);
+    ASSERT_EQ(EOK, ret);
+    uint32_t requestId = 10;
+    ConnectResult result = {
+        .OnConnectSuccessed = OnConnectSuccessed,
+        .OnConnectFailed = OnConnectFailed,
+    };
+    NiceMock<ConnectionBleManagerInterfaceMock> bleMock;
+    EXPECT_CALL(bleMock, LnnGetConnSubFeatureByUdidHashStr).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = g_bleInterface->ConnectDevice(&option, requestId, &result);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    g_btListener.OnBtStateChanged(g_listenerId, SOFTBUS_BT_STATE_TURN_OFF);
+    SoftBusSleepMs(SLEEP_TIME_MS);
+}
+
+/*
+ * @tc.name: ConnectDevice001
+ * @tc.desc: Test ConnectDevice.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ConnectionBleManagerTest, ConnectDevice001, TestSize.Level1)
+{
+    const char *deviceId = "1234567";
+    const char *bleMac = "11:22:33:44:33:00";
+    ConnectOption option = {
+        .type = CONNECT_BLE,
+        .bleOption.bleMac = "",
+        .bleOption.deviceIdHash = "",
+        .bleOption.protocol = BLE_GATT,
+        .bleOption.psm = 5,
+        .bleOption.challengeCode = 0,
+    };
+    int32_t ret = strcpy_s(option.bleOption.bleMac, BT_MAC_LEN, bleMac);
+    ASSERT_EQ(EOK, ret);
+    ret = memcpy_s(option.bleOption.deviceIdHash, UDID_HASH_LEN, deviceId, UDID_HASH_LEN);
+    ASSERT_EQ(EOK, ret);
+    uint32_t requestId = 10;
+    ConnectResult result = {
+        .OnConnectSuccessed = OnConnectSuccessed,
+        .OnConnectFailed = OnConnectFailed,
+    };
+    NiceMock<ConnectionBleManagerInterfaceMock> bleMock;
+    EXPECT_CALL(bleMock, LnnGetConnSubFeatureByUdidHashStr).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = g_bleInterface->ConnectDevice(&option, requestId, &result);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    g_bleInterface->ConnectDevice(&option, requestId, &result);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusSleepMs(SLEEP_TIME_MS);
+}
+
+/*
+ * @tc.name: ConnectDevice002
+ * @tc.desc: Test ConnectDevice.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ConnectionBleManagerTest, ConnectDevice002, TestSize.Level1)
+{
+    const char *deviceId = "1234568";
+    const char *bleMac = "11:22:33:44:33:56";
+    ConnectOption option = {
+        .type = CONNECT_BLE,
+        .bleOption.bleMac = "",
+        .bleOption.deviceIdHash = "",
+        .bleOption.protocol = BLE_GATT,
+        .bleOption.psm = 5,
+        .bleOption.challengeCode = 0,
+    };
+    int32_t ret = strcpy_s(option.bleOption.bleMac, BT_MAC_LEN, bleMac);
+    ASSERT_EQ(EOK, ret);
+    ret = memcpy_s(option.bleOption.deviceIdHash, UDID_HASH_LEN, deviceId, UDID_HASH_LEN);
+    ASSERT_EQ(EOK, ret);
+    uint32_t requestId = 5;
+    ConnectResult result = {
+        .OnConnectSuccessed = OnConnectSuccessed,
+        .OnConnectFailed = OnConnectFailed,
+    };
+    NiceMock<ConnectionBleManagerInterfaceMock> bleMock;
+    EXPECT_CALL(bleMock, LnnGetConnSubFeatureByUdidHashStr).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(bleMock, ConnGattClientConnect).WillRepeatedly(Return(SOFTBUS_ERR));
+    ret = g_bleInterface->ConnectDevice(&option, requestId, &result);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_CALL(bleMock, ConnGattClientConnect).WillRepeatedly(Return(SOFTBUS_OK));
+    requestId = 6;
+    const char *mac = "11:33:44:22:33:56";
+    const char *bleDeviceId = "1234569";
+    ret = strcpy_s(option.bleOption.bleMac, BT_MAC_LEN, mac);
+    ASSERT_EQ(EOK, ret);
+    ret = memcpy_s(option.bleOption.deviceIdHash, UDID_HASH_LEN, bleDeviceId, UDID_HASH_LEN);
+    ASSERT_EQ(EOK, ret);
+    ret = g_bleInterface->ConnectDevice(&option, requestId, &result);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusSleepMs(SLEEP_TIME_MS);
+}
+
+/*
+ * @tc.name: ConnBleUpdateConnectionRc001
+ * @tc.desc: Test ConnBleUpdateConnectionRc.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ConnectionBleManagerTest, ConnBleUpdateConnectionRc001, TestSize.Level1)
+{
+    ConnBleConnection connection;
+    connection.connectionId = 196600;
+    connection.side = CONN_SIDE_CLIENT;
+    connection.featureBitSet = 0;
+    int32_t ret = SoftBusMutexInit(&connection.lock, NULL);
+    ASSERT_EQ(EOK, ret);
+
+    connection.underlayerHandle = 10;
+    connection.connectionRc = 1;
+    const char *bleMac = "11:22:33:44:33:56";
+    ret = strcpy_s(connection.addr, BT_MAC_LEN, bleMac);
+    ASSERT_EQ(EOK, ret);
+    ret = ConnBleUpdateConnectionRc(&connection, 0, -1);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    connection.connectionId = 196601;
+    connection.featureBitSet = 2;
+    connection.connectionRc = 1;
+    NiceMock<ConnectionBleManagerInterfaceMock> bleMock;
+    EXPECT_CALL(bleMock, ConnBlePackCtlMessage).WillOnce(Return(-1)).WillRepeatedly(Return(100));
+    ret = ConnBleUpdateConnectionRc(&connection, 0, -1);
+    EXPECT_EQ(ret, -1);
+
+    connection.connectionRc = 1;
+    EXPECT_CALL(bleMock, ConnBlePostBytesInner).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = ConnBleUpdateConnectionRc(&connection, 0, -1);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    connection.connectionRc = 2;
+    ret = ConnBleUpdateConnectionRc(&connection, 0, -1);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: ConnBleOnReferenceRequest001
+ * @tc.desc: Test ConnBleOnReferenceRequest.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ConnectionBleManagerTest, ConnBleOnReferenceRequest001, TestSize.Level1)
+{
+    ConnBleConnection connection;
+    int32_t ret = SoftBusMutexInit(&connection.lock, NULL);
+    ASSERT_EQ(EOK, ret);
+    connection.connectionRc = 1;
+    connection.state = BLE_CONNECTION_STATE_NEGOTIATION_CLOSING;
+    cJSON json = { 0 };
+    NiceMock<ConnectionBleManagerInterfaceMock> bleMock;
+    EXPECT_CALL(bleMock, GetJsonObjectSignedNumberItem).WillOnce(Return(false));
+    ret = ConnBleOnReferenceRequest(&connection, &json);
+    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+
+    EXPECT_CALL(bleMock, GetJsonObjectSignedNumberItem).WillOnce(Return(true)).WillOnce(Return(false));
+    ret = ConnBleOnReferenceRequest(&connection, &json);
+    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+}
+
+/*
+ * @tc.name: ConnBleOnReferenceRequest002
+ * @tc.desc: Test ConnBleOnReferenceRequest.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ConnectionBleManagerTest, ConnBleOnReferenceRequest002, TestSize.Level1)
+{
+    ConnBleConnection *connection = (ConnBleConnection *)SoftBusCalloc(sizeof(ConnBleConnection));
+    ASSERT_NE(nullptr, connection);
+    int32_t ret = SoftBusMutexInit(&connection->lock, NULL);
+    ASSERT_EQ(EOK, ret);
+    const char *bleMac = "11:22:33:44:33:56";
+    const char *udid = "1254222233334419";
+    ret = strcpy_s(connection->addr, BT_MAC_LEN, bleMac);
+    ASSERT_EQ(EOK, ret);
+    ret = strcpy_s(connection->udid, UDID_BUF_LEN, udid);
+    EXPECT_EQ(EOK, ret);
+
+    connection->protocol = BLE_GATT;
+    connection->connectionRc = 1;
+    connection->state = BLE_CONNECTION_STATE_NEGOTIATION_CLOSING;
+    connection->side = CONN_SIDE_SERVER;
+    ret = ConnBleSaveConnection(connection);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+    
+    cJSON json = { 0 };
+    NiceMock<ConnectionBleManagerInterfaceMock> bleMock;
+    EXPECT_CALL(bleMock, GetJsonObjectSignedNumberItem)
+        .WillOnce(ConnectionBleManagerInterfaceMock::ActionOfGetdelta)
+        .WillOnce(ConnectionBleManagerInterfaceMock::ActionOfGetPeerRc1);
+    EXPECT_CALL(bleMock, GetJsonObjectNumber16Item).WillOnce(Return(false));
+    ret = ConnBleOnReferenceRequest(connection, &json);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    EXPECT_CALL(bleMock, GetJsonObjectSignedNumberItem)
+        .WillOnce(ConnectionBleManagerInterfaceMock::ActionOfGetdelta)
+        .WillOnce(ConnectionBleManagerInterfaceMock::ActionOfGetPeerRc1);
+    connection->state = BLE_CONNECTION_STATE_EXCHANGED_BASIC_INFO;
+    EXPECT_CALL(bleMock, GetJsonObjectNumber16Item).WillOnce(Return(true));
+    ret = ConnBleOnReferenceRequest(connection, &json);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+ * @tc.name: ConnBleOnReferenceRequest003
+ * @tc.desc: Test ConnBleOnReferenceRequest.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ConnectionBleManagerTest, ConnBleOnReferenceRequest003, TestSize.Level1)
+{
+    ConnBleConnection *connection = (ConnBleConnection *)SoftBusCalloc(sizeof(ConnBleConnection));
+    ASSERT_NE(nullptr, connection);
+    int32_t ret = SoftBusMutexInit(&connection->lock, NULL);
+    ASSERT_EQ(EOK, ret);
+    const char *bleMac = "11:22:33:44:33:56";
+    const char *udid = "1254222233334419";
+    ret = strcpy_s(connection->addr, BT_MAC_LEN, bleMac);
+    ASSERT_EQ(EOK, ret);
+    ret = strcpy_s(connection->udid, UDID_BUF_LEN, udid);
+    EXPECT_EQ(EOK, ret);
+
+    connection->protocol = BLE_GATT;
+    connection->connectionRc = 1;
+    connection->state = BLE_CONNECTION_STATE_NEGOTIATION_CLOSING;
+    connection->side = CONN_SIDE_SERVER;
+    ret = ConnBleSaveConnection(connection);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+    cJSON json = { 0 };
+
+    NiceMock<ConnectionBleManagerInterfaceMock> bleMock;
+    EXPECT_CALL(bleMock, GetJsonObjectSignedNumberItem)
+        .WillOnce(ConnectionBleManagerInterfaceMock::ActionOfGetdelta)
+        .WillOnce(ConnectionBleManagerInterfaceMock::ActionOfGetPeerRc0);
+
+    EXPECT_CALL(bleMock, GetJsonObjectNumber16Item).WillRepeatedly(Return(false));
+    EXPECT_CALL(bleMock, ConnGattServerDisconnect).WillOnce(Return(SOFTBUS_OK));
+
+    ret = ConnBleOnReferenceRequest(connection, &json);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    connection->connectionRc = 3;
+    EXPECT_CALL(bleMock, GetJsonObjectSignedNumberItem)
+        .WillOnce(ConnectionBleManagerInterfaceMock::ActionOfGetdelta)
+        .WillOnce(ConnectionBleManagerInterfaceMock::ActionOfGetPeerRc0);
+    EXPECT_CALL(bleMock, ConnBlePackCtlMessage).WillOnce(Return(SOFTBUS_ERR));
+    ret = ConnBleOnReferenceRequest(connection, &json);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+
+    EXPECT_CALL(bleMock, GetJsonObjectSignedNumberItem)
+        .WillOnce(ConnectionBleManagerInterfaceMock::ActionOfGetdelta)
+        .WillOnce(ConnectionBleManagerInterfaceMock::ActionOfGetPeerRc0);
+    EXPECT_CALL(bleMock, ConnBlePackCtlMessage).WillOnce(Return(100));
+    EXPECT_CALL(bleMock, ConnBlePostBytesInner).WillOnce(Return(SOFTBUS_OK));
+    ret = ConnBleOnReferenceRequest(connection, &json);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+ * @tc.name: ConnBleSend001
+ * @tc.desc: Test ConnBleSend.
+ * @tc.in: Test module, Test number, Test Levels.
+ * @tc.out: Zero
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ConnectionBleManagerTest, ConnBleSend001, TestSize.Level1)
+{
+    ConnBleConnection *connection = (ConnBleConnection *)SoftBusCalloc(sizeof(ConnBleConnection));
+    ASSERT_NE(nullptr, connection);
+    int32_t ret = SoftBusMutexInit(&connection->lock, NULL);
+    ASSERT_EQ(EOK, ret);
+    connection->protocol = BLE_GATT;
+    connection->side = CONN_SIDE_SERVER;
+    uint8_t *data = (uint8_t *)SoftBusMalloc(sizeof(uint8_t));
+    uint32_t dataLen = sizeof(uint8_t);
+
+    NiceMock<ConnectionBleManagerInterfaceMock> bleMock;
+    EXPECT_CALL(bleMock, ConnGattServerSend).WillOnce(Return(SOFTBUS_OK));
+    ret = ConnBleSend(connection, data, dataLen, MODULE_CONNECTION);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    connection->side = CONN_SIDE_CLIENT;
+    EXPECT_CALL(bleMock, ConnGattClientSend).WillOnce(Return(SOFTBUS_OK));
+    ret = ConnBleSend(connection, data, dataLen, MODULE_CONNECTION);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = ConnBleSaveConnection(connection);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+    ConnBleRefreshIdleTimeout(connection);
+    SoftBusSleepMs(CONNECTION_IDLE_DISCONNECT_TIMEOUT_MILLIS); // sleep 60s to call timout event
+}
 } // namespace OHOS

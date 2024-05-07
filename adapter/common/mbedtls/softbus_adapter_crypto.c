@@ -58,6 +58,7 @@
 
 #define EVP_AES_128_KEYLEN 16
 #define EVP_AES_256_KEYLEN 32
+#define BYTES_BIT_NUM 8
 
 static SoftBusMutex g_randomLock;
 
@@ -374,7 +375,7 @@ int32_t SoftBusEncryptDataByCtr(AesCtrCipherKey *key, const unsigned char *input
     if (mbedtls_cipher_setup(&ctx, info) != 0) {
         return HandleError(&ctx, "mbedtls_cipher_setup ctr failed");
     }
-    if (mbedtls_cipher_setkey(&ctx, key->key, key->keyLen * 8, MBEDTLS_ENCRYPT) != 0) {
+    if (mbedtls_cipher_setkey(&ctx, key->key, key->keyLen * BYTES_BIT_NUM, MBEDTLS_ENCRYPT) != 0) {
         return HandleError(&ctx, "mbedtls_cipher_setkey ctr failed");
     }
     if (mbedtls_cipher_set_iv(&ctx, key->iv, BLE_BROADCAST_IV_LEN) != 0) {

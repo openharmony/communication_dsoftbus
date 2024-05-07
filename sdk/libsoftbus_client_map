@@ -398,9 +398,13 @@
         "TransSetChannelInfo";
         "ClientTransSetChannelInfo";
         "ClientGetSessionIsAsyncBySessionId";
-        "GetSessionStateAndSessionNameBySessionId";
+        "GetSocketLifecycleAndSessionNameBySessionId";
+        "ClientHandleBindWaitTimer";
+        "ClientSignalSyncBind";
         "DelSessionStateClosing";
         "SetSessionStateBySessionId";
+        "ClientWaitSyncBind";
+        "GetQosValue";
         "EvaluateQos";
         "GetMtuSize";
         "DBinderGrantPermission";

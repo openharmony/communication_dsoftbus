@@ -671,7 +671,9 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
         COMM_LOGE(COMM_SVC, "failed to read qos info");
         return SOFTBUS_ERR;
     }
-
+#ifdef SUPPORT_BUNDLENAME
+    pid_t callingUid = OHOS::IPCSkeleton::GetCallingUid();
+#endif
     if (param.sessionName == nullptr || param.peerSessionName == nullptr || param.peerDeviceId == nullptr ||
         param.groupId == nullptr) {
         retReply = SOFTBUS_INVALID_PARAM;
@@ -686,8 +688,6 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
         goto EXIT;
     }
 #ifdef SUPPORT_BUNDLENAME
-    pid_t callingUid;
-    callingUid = OHOS::IPCSkeleton::GetCallingUid();
     if (CheckSessionName(param.sessionName, callingUid) != SOFTBUS_OK) {
         retReply = SOFTBUS_PERMISSION_DENIED;
         goto EXIT;

@@ -345,9 +345,9 @@ int32_t StartBaseClient(ListenerModule module, const SoftbusBaseListener *listen
     return GetLaneDepsInterface()->StartBaseClient(module, listener);
 }
 
-bool CheckActiveConnection(const ConnectOption *option)
+bool CheckActiveConnection(const ConnectOption *option, bool needOccupy)
 {
-    return GetLaneDepsInterface()->CheckActiveConnection(option);
+    return GetLaneDepsInterface()->CheckActiveConnection(option, needOccupy);
 }
 
 int32_t ConnOpenClientSocket(const ConnectOption *option, const char *bindAddr, bool isNonBlock)

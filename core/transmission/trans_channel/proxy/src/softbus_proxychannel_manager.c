@@ -1028,8 +1028,8 @@ static int32_t TransProxyFillChannelInfo(const ProxyMessage *msg, ProxyChannelIn
     int16_t newChanId = (int16_t)(GenerateChannelId(false));
     ConstructProxyChannelInfo(chan, msg, newChanId, &info);
 
-    if (chan->appInfo.appType == APP_TYPE_NORMAL && chan->appInfo.firstTokenId != TOKENID_NOT_SET &&
-        TransCheckServerAccessControl(chan->appInfo.firstTokenId) != SOFTBUS_OK) {
+    if (chan->appInfo.appType == APP_TYPE_NORMAL && chan->appInfo.callingTokenId != TOKENID_NOT_SET &&
+        TransCheckServerAccessControl(chan->appInfo.callingTokenId) != SOFTBUS_OK) {
         return SOFTBUS_TRANS_CHECK_ACL_FAILED;
     }
 
@@ -1457,7 +1457,7 @@ int32_t TransProxyCloseProxyChannel(int32_t channelId)
     if (TransProxyDelByChannelId(channelId, info) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "proxy del failed. channelId=%{public}d", channelId);
         SoftBusFree(info);
-        return SOFTBUS_TRANS_PROXY_DEL_CHANNELID_INVALID;
+        return SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID;
     }
 
     TransProxyCloseProxyOtherRes(channelId, info);
@@ -1497,13 +1497,16 @@ void TransProxyTimerProc(void)
     ProxyChannelInfo *nextNode = NULL;
     ListNode proxyProcList;
 
-    int32_t ret = SoftBusMutexLock(&g_proxyChannelList->lock);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_INIT,"lock mutex fail");
+    if (g_proxyChannelList == NULL) {
+        TRANS_LOGE(TRANS_INIT, "g_proxyChannelList is null or empty");
         return;
     }
-    if (g_proxyChannelList == NULL || g_proxyChannelList->cnt <= 0) {
-        TRANS_LOGW(TRANS_INIT,"g_proxyChannelList is null or empty");
+    if (SoftBusMutexLock(&g_proxyChannelList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_INIT, "lock mutex fail");
+        return;
+    }
+    if (g_proxyChannelList->cnt <= 0) {
+        TRANS_LOGW(TRANS_INIT, "g_proxyChannelList count invalid");
         (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
         return;
     }

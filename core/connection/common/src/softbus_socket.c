@@ -101,7 +101,7 @@ int32_t ConnInitSockets(void)
         (void)SoftBusMutexDestroy(&g_socketsMutex);
         return ret;
     }
-    CONN_LOGI(CONN_INIT, "tcp registed!");
+    CONN_LOGD(CONN_INIT, "tcp registed!");
 
     ret = RegistNewIpSocket();
     if (ret != SOFTBUS_OK) {

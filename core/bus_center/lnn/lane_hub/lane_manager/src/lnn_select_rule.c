@@ -45,14 +45,6 @@
 #define LOW_BW                  (384 * 1024)
 #define MID_BW                  (30 * 1024 * 1024)
 #define HIGH_BW                 (160 * 1024 * 1024)
-#define COC_DIRECT_LATENCY      1200
-#define BR_LATENCY              2500
-#define WLAN_LATENCY            800
-#define P2P_LATENCY             1600
-#define BLE_LATENCY             1500
-#define HML_LATENCY             1500
-#define BR_REUSE_LATENCY        1000
-
 
 int32_t GetWlanLinkedFrequency(void)
 {

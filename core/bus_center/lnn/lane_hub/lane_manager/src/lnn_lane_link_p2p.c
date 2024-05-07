@@ -48,7 +48,7 @@ typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];
     uint32_t laneReqId;
     int32_t pid;
-    LaneLinkType laneType;
+    LaneLinkType linkType;
     LaneLinkCb cb;
 } LaneLinkRequestInfo;
 
@@ -388,7 +388,7 @@ static int32_t GetP2pLinkReqParamByChannelRequetId(
             return SOFTBUS_MEM_ERR;
         }
         wifiDirectInfo->isNetworkDelegate = item->p2pInfo.networkDelegate;
-        wifiDirectInfo->connectType = item->laneRequestInfo.laneType == LANE_HML ?
+        wifiDirectInfo->connectType = item->laneRequestInfo.linkType == LANE_HML ?
             WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML : WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P;
         item->p2pInfo.p2pRequestId = p2pRequestId;
         item->proxyChannelInfo.channelId = channelId;
@@ -429,7 +429,7 @@ static int32_t GetP2pLinkReqParamByAuthHandle(uint32_t authRequestId, uint32_t p
         }
         wifiDirectInfo->bandWidth = item->p2pInfo.bandWidth;
         wifiDirectInfo->isNetworkDelegate = item->p2pInfo.networkDelegate;
-        wifiDirectInfo->connectType = item->laneRequestInfo.laneType == LANE_HML ?
+        wifiDirectInfo->connectType = item->laneRequestInfo.linkType == LANE_HML ?
             WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML : WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P;
         item->p2pInfo.p2pRequestId = p2pRequestId;
         item->auth.authHandle = authHandle;
@@ -553,13 +553,14 @@ static void NotifyLinkFail(AsyncResultType type, uint32_t requestId, int32_t rea
         return;
     }
     (void)DelP2pLinkReqByReqId(type, requestId);
-    DelGuideInfoItem(reqInfo.laneRequestInfo.laneReqId, reqInfo.laneRequestInfo.laneType);
+    DelGuideInfoItem(reqInfo.laneRequestInfo.laneReqId, reqInfo.laneRequestInfo.linkType);
     if (reqInfo.laneRequestInfo.cb.OnLaneLinkFail != NULL) {
         LNN_LOGE(LNN_LANE, "wifidirect conn fail, laneReqId=%{public}u ", reqInfo.laneRequestInfo.laneReqId);
-        reqInfo.laneRequestInfo.cb.OnLaneLinkFail(reqInfo.laneRequestInfo.laneReqId, reason);
+        reqInfo.laneRequestInfo.cb.OnLaneLinkFail(reqInfo.laneRequestInfo.laneReqId, reason,
+            reqInfo.laneRequestInfo.linkType);
     }
     if (reqInfo.auth.authHandle.authId != INVAILD_AUTH_ID) {
-        AuthFreeConn(&reqInfo.auth.authHandle);
+        AuthCloseConn(reqInfo.auth.authHandle);
     }
     if (reqInfo.proxyChannelInfo.channelId > 0) {
         TransProxyPipelineCloseChannel(reqInfo.proxyChannelInfo.channelId);
@@ -605,12 +606,13 @@ static void NotifyLinkSucc(AsyncResultType type, uint32_t requestId, LaneLinkInf
         return;
     }
     (void)DelP2pLinkReqByReqId(type, requestId);
-    DelGuideInfoItem(reqInfo.laneRequestInfo.laneReqId, reqInfo.laneRequestInfo.laneType);
+    DelGuideInfoItem(reqInfo.laneRequestInfo.laneReqId, reqInfo.laneRequestInfo.linkType);
     int32_t ret = AddNewP2pLinkedInfo(&reqInfo, linkId);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "add new p2p linked info fail, laneReqId=%{public}u ", reqInfo.laneRequestInfo.laneReqId);
         if (reqInfo.laneRequestInfo.cb.OnLaneLinkFail != NULL) {
-            reqInfo.laneRequestInfo.cb.OnLaneLinkFail(reqInfo.laneRequestInfo.laneReqId, ret);
+            reqInfo.laneRequestInfo.cb.OnLaneLinkFail(reqInfo.laneRequestInfo.laneReqId, ret,
+                reqInfo.laneRequestInfo.linkType);
         }
     } else {
         if (reqInfo.laneRequestInfo.cb.OnLaneLinkSuccess != NULL) {
@@ -620,7 +622,7 @@ static void NotifyLinkSucc(AsyncResultType type, uint32_t requestId, LaneLinkInf
         }
     }
     if (reqInfo.auth.authHandle.authId != INVAILD_AUTH_ID) {
-        AuthFreeConn(&reqInfo.auth.authHandle);
+        AuthCloseConn(reqInfo.auth.authHandle);
     }
     if (reqInfo.proxyChannelInfo.channelId > 0) {
         TransProxyPipelineCloseChannelDelay(reqInfo.proxyChannelInfo.channelId);
@@ -703,7 +705,7 @@ static void GuideChannelAsyncRetry(AsyncResultType type, uint32_t requestId, int
         goto FAIL;
     }
     uint32_t laneReqId = p2pLinkReqInfo.laneRequestInfo.laneReqId;
-    LaneLinkType linkType = p2pLinkReqInfo.laneRequestInfo.laneType;
+    LaneLinkType linkType = p2pLinkReqInfo.laneRequestInfo.linkType;
     if (LinkLock() != 0) {
         LNN_LOGE(LNN_LANE, "lock fail, get guide channel info fail.");
         goto FAIL;
@@ -841,7 +843,7 @@ static int32_t AddP2pLinkReqItem(AsyncResultType type, uint32_t requestId, uint3
     item->p2pInfo.p2pModuleGenId = INVALID_P2P_REQUEST_ID;
     item->p2pInfo.networkDelegate = request->networkDelegate;
     item->p2pInfo.p2pOnly = request->p2pOnly;
-    item->laneRequestInfo.laneType = request->linkType;
+    item->laneRequestInfo.linkType = request->linkType;
     if (LinkLock() != 0) {
         SoftBusFree(item);
         LNN_LOGE(LNN_LANE, "lock fail, add conn request fail");
@@ -1070,8 +1072,16 @@ FAIL:
 
 static int32_t OpenAuthTriggerToConn(const LinkRequest *request, uint32_t laneReqId, const LaneLinkCb *callback)
 {
+    AuthConnInfo connInfo;
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    bool isMetaAuth = GetAuthType(request->peerNetworkId);
+    int32_t ret = GetPreferAuth(request->peerNetworkId, &connInfo, isMetaAuth);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "no auth conn exist");
+        return ret;
+    }
     uint32_t authRequestId = AuthGenRequestId();
-    int32_t ret = AddP2pLinkReqItem(ASYNC_RESULT_AUTH, authRequestId, laneReqId, request, callback);
+    ret = AddP2pLinkReqItem(ASYNC_RESULT_AUTH, authRequestId, laneReqId, request, callback);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "add new connect node failed");
         return ret;
@@ -1081,8 +1091,9 @@ static int32_t OpenAuthTriggerToConn(const LinkRequest *request, uint32_t laneRe
         .onConnOpened = OnAuthTriggerConnOpened,
         .onConnOpenFailed = OnAuthConnOpenFailed,
     };
-    LNN_LOGI(LNN_LANE, "auth alloc conn with authRequestId=%{public}u", authRequestId);
-    if (AuthAllocConn(request->peerNetworkId, authRequestId, &cb) != SOFTBUS_OK) {
+    LNN_LOGI(LNN_LANE, "open auth trigger with authRequestId=%{public}u", authRequestId);
+    ret = AuthOpenConn(&connInfo, authRequestId, &cb, isMetaAuth);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "open auth conn fail");
         (void)DelP2pLinkReqByReqId(ASYNC_RESULT_AUTH, authRequestId);
         return ret;
@@ -1184,7 +1195,7 @@ static bool CheckHasBrConnection(const char *networkId)
         connOpt.brOption.brMac[0] == '\0') {
         return false;
     }
-    return CheckActiveConnection(&connOpt);
+    return CheckActiveConnection(&connOpt, true);
 }
 
 static bool IsHasAuthConnInfo(const char *networkId)
@@ -1404,7 +1415,7 @@ static int32_t GuideChannelSyncRetry(uint32_t laneReqId, LaneLinkType linkType)
     if (guideInfoNode->guideIdx >= guideInfoNode->guideNum) {
         LNN_LOGE(LNN_LANE, "all guide channel type have been tried.");
         if (guideInfoNode->callback.OnLaneLinkFail != NULL) {
-            guideInfoNode->callback.OnLaneLinkFail(laneReqId, SOFTBUS_ERR);
+            guideInfoNode->callback.OnLaneLinkFail(laneReqId, SOFTBUS_LANE_GUIDE_BUILD_FAIL, linkType);
         }
         LinkUnlock();
         DelGuideInfoItem(laneReqId, linkType);

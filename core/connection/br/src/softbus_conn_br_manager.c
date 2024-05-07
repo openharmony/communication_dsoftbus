@@ -644,8 +644,8 @@ static void ProcessConnectError(ConnBrDevice *connectingDevice, ConnBrConnection
             result = it->result;
         }
     }
-    if (result == CONN_BR_CONNECT_UNDERLAYER_ERROR_PAGE_TIMEOUT) {
-        error = SOFTBUS_CONN_BR_UNDERLAY_PAGE_TIMEOUT_ERR;
+    if (result != 0) {
+        error = SOFTBUS_ERRNO(CONN_UNDERLAY_BLUETOOTH_MODULE_CODE) + result;
     }
     NotifyDeviceConnectResult(connectingDevice, NULL, false, error);
 }
@@ -1479,7 +1479,7 @@ static int32_t BrStopLocalListening(const LocalListenerInfo *info)
     return ConnBrStopServer();
 }
 
-static bool BrCheckActiveConnection(const ConnectOption *option)
+static bool BrCheckActiveConnection(const ConnectOption *option, bool needOccupy)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(option != NULL, false, CONN_BR, "BrCheckActiveConnection: option is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(option->type == CONNECT_BR, false, CONN_BR,
@@ -1489,6 +1489,9 @@ static bool BrCheckActiveConnection(const ConnectOption *option)
     CONN_CHECK_AND_RETURN_RET_LOGW(
         connection != NULL, false, CONN_BR, "BrCheckActiveConnection: connection is not exist");
     bool isActive = (connection->state == BR_CONNECTION_STATE_CONNECTED);
+    if (isActive && needOccupy) {
+        ConnBrOccupy(connection);
+    }
     ConnBrReturnConnection(&connection);
     return isActive;
 }

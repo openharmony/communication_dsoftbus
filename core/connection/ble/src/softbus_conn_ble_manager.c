@@ -190,7 +190,8 @@ static void DfxRecordBleConnectFail(
         .costTime = costTime,
         .peerBleMac = device->addr,
         .errcode = reason,
-        .result = EVENT_STAGE_RESULT_FAILED
+        .result = EVENT_STAGE_RESULT_FAILED,
+        .peerUdid = device->udid,
     };
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
     ConnAlarmExtra extraAlarm = {
@@ -1522,8 +1523,10 @@ static void TransitionToState(enum BleMgrState target)
 
 static void BleManagerMsgHandler(SoftBusMessage *msg)
 {
-    CONN_LOGI(CONN_BLE, "ble manager looper recieve msg. msg=%{public}d, currentState=%{public}s", msg->what,
-        g_bleManager.state->name());
+    if (msg->what != BLE_MGR_MSG_DATA_RECEIVED) {
+        CONN_LOGI(CONN_BLE, "ble msg looper recv msg=%{public}d, curState=%{public}s",
+            msg->what, g_bleManager.state->name());
+    }
     switch (msg->what) {
         case BLE_MGR_MSG_NEXT_CMD: {
             if (g_bleManager.state->handlePendingRequest != NULL) {
@@ -1828,7 +1831,7 @@ static int32_t BleStopLocalListening(const LocalListenerInfo *info)
     return ConnBleStopServer();
 }
 
-static bool BleCheckActiveConnection(const ConnectOption *option)
+static bool BleCheckActiveConnection(const ConnectOption *option, bool needOccupy)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(option != NULL, false, CONN_BLE, "invaliad param, option is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(
@@ -1844,7 +1847,9 @@ static bool BleCheckActiveConnection(const ConnectOption *option)
     CONN_CHECK_AND_RETURN_RET_LOGW(
         connection != NULL, false, CONN_BLE, "ble check action connection: connection is not exist");
     bool isActive = (connection->state == BLE_CONNECTION_STATE_EXCHANGED_BASIC_INFO);
-
+    if (isActive && needOccupy) {
+        ConnBleRefreshIdleTimeout(connection);
+    }
     ConnBleReturnConnection(&connection);
     return isActive;
 }

@@ -399,10 +399,9 @@ HWTEST_F(HeartBeatFSMTest, ProcessLostHeartbeatTest_01, TestSize.Level1)
         .WillRepeatedly(Return(SOFTBUS_OK));
     ret = ProcessLostHeartbeat(TEST_NETWORK_ID, HEARTBEAT_TYPE_BLE_V0, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_CALL(heartbeatFsmMock, LnnOfflineTimingByHeartbeat).WillOnce(Return(SOFTBUS_ERR));
     ret = ProcessLostHeartbeat(TEST_NETWORK_ID, HEARTBEAT_TYPE_BLE_V0, false);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
-    ret = ProcessLostHeartbeat(TEST_NETWORK_ID, HEARTBEAT_TYPE_BLE_V0, false);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = ProcessLostHeartbeat(TEST_NETWORK_ID, HEARTBEAT_TYPE_TCP_FLUSH, false);
     EXPECT_TRUE(ret == SOFTBUS_ERR);
     SoftBusSleepMs(20);
@@ -758,6 +757,7 @@ HWTEST_F(HeartBeatFSMTest, RemoveScreenOffCheckStatus_01, TestSize.Level1)
 HWTEST_F(HeartBeatFSMTest, RemoveScreenOffCheckStatus_02, TestSize.Level1)
 {
     int32_t ret;
+    const char *networkId = "123";
     FsmCtrlMsgObj ctrlMsgObj;
     SoftBusMessage delMsg;
     LnnCheckDevStatusMsgPara *msgPara = nullptr;
@@ -767,8 +767,10 @@ HWTEST_F(HeartBeatFSMTest, RemoveScreenOffCheckStatus_02, TestSize.Level1)
     delMsgPara.hasNetworkId = true;
     msgPara->hbType = 0;
     delMsgPara.hbType = 0;
-    strcpy_s((char *)(msgPara->networkId), sizeof(msgPara->networkId), "123");
-    strcpy_s((char *)(delMsgPara.networkId), sizeof(delMsgPara.networkId), "123");
+    ret = strcpy_s((char *)(msgPara->networkId), sizeof(msgPara->networkId), networkId);
+    EXPECT_EQ(ret, EOK);
+    ret = strcpy_s((char *)(delMsgPara.networkId), sizeof(delMsgPara.networkId), networkId);
+    EXPECT_EQ(ret, EOK);
     ctrlMsgObj.obj = reinterpret_cast<void *>(msgPara);
     delMsg.obj = reinterpret_cast<void *>(&delMsgPara);
 
@@ -795,6 +797,10 @@ HWTEST_F(HeartBeatFSMTest, RemoveScreenOffCheckStatus_03, TestSize.Level1)
     delMsgPara.hbType = 0;
     ctrlMsgObj.obj = reinterpret_cast<void *>(msgPara);
     delMsg.obj = reinterpret_cast<void *>(&delMsgPara);
+    ret = strcpy_s((char *)(msgPara->networkId), sizeof(msgPara->networkId), TEST_NETWORK_ID);
+    EXPECT_EQ(ret, EOK);
+    ret = strcpy_s((char *)(delMsgPara.networkId), sizeof(delMsgPara.networkId), TEST_NETWORK_ID2);
+    EXPECT_EQ(ret, EOK);
 
     ret = RemoveScreenOffCheckStatus(&ctrlMsgObj, &delMsg);
     EXPECT_TRUE(ret == SOFTBUS_ERR);

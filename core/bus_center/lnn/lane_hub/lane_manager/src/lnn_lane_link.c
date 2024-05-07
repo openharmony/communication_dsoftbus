@@ -871,11 +871,7 @@ static int32_t FillWlanLinkInfo(ProtocolType protocol, const LinkRequest *reqInf
     if (!isConnected) {
         LNN_LOGE(LNN_LANE, "wlan is disconnected");
     }
-    if (is5GBand) {
-        linkInfo->type = LANE_WLAN_5G;
-    } else {
-        linkInfo->type = LANE_WLAN_2P4G;
-    }
+    linkInfo->type = reqInfo->linkType;
     WlanLinkInfo *wlan = &(linkInfo->linkInfo.wlan);
     wlan->channel = channel;
     wlan->bw = LANE_BW_RANDOM;

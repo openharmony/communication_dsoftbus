@@ -434,11 +434,13 @@ static void OnGroupCreated(const char *groupId, int32_t groupType)
     EhLoginEventHandler();
 }
 
-static void OnGroupDeleted(const char *groupId)
+static void OnGroupDeleted(const char *groupId, int32_t groupType)
 {
     (void)groupId;
     LNN_LOGD(LNN_BUILDER, "wifi handle OnGroupDeleted");
-    LnnOnOhosAccountLogout();
+    if (groupType == AUTH_IDENTICAL_ACCOUNT_GROUP) {
+        LnnOnOhosAccountLogout();
+    }
     LnnHbOnTrustedRelationReduced();
 }
 

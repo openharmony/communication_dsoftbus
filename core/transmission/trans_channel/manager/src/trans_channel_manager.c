@@ -53,6 +53,7 @@
 #define MAX_PROXY_CHANNEL_ID 0x00000800
 #define MAX_TDC_CHANNEL_ID 0x7FFFFFFF
 #define MIN_FD_ID 1025
+#define MAX_FD_ID 2048
 #define MAX_PROXY_CHANNEL_ID_COUNT 1024
 #define ID_NOT_USED 0
 #define ID_USED 1UL
@@ -110,7 +111,7 @@ static int32_t GenerateProxyChannelId()
 
 void ReleaseProxyChannelId(int32_t channelId)
 {
-    if (channelId < MIN_FD_ID) {
+    if (channelId < MIN_FD_ID || channelId > MAX_FD_ID) {
         return;
     }
     if (SoftBusMutexLock(&g_myIdLock) != 0) {
@@ -205,6 +206,16 @@ void TransChannelDeinit(void)
     SoftBusMutexDestroy(&g_myIdLock);
 }
 
+static void TransSetFirstTokenInfo(AppInfo *appInfo, TransEventExtra *event)
+{
+    event->firstTokenId = TransACLGetFirstTokenID();
+    if (event->firstTokenId == TOKENID_NOT_SET) {
+        event->firstTokenId = appInfo->callingTokenId;
+    }
+    TransGetTokenInfo(event->firstTokenId, appInfo->tokenName, sizeof(appInfo->tokenName), &event->firstTokenType);
+    event->firstTokenName = appInfo->tokenName;
+}
+
 int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
 {
     if (param == NULL || transInfo == NULL) {
@@ -220,8 +231,8 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         param->sessionName, param->sessionId, INVALID_CHANNEL_ID, CHANNEL_TYPE_UNDEFINED, CORE_SESSION_STATE_INIT);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "Add socket channel record failed.");
     if (param->isAsync) {
-        uint32_t firstTokenId = TransACLGetCallingTokenID();
-        ret = TransAsyncGetLaneInfo(param, &laneHandle, firstTokenId);
+        uint32_t callingTokenId = TransACLGetCallingTokenID();
+        ret = TransAsyncGetLaneInfo(param, &laneHandle, callingTokenId);
         if (ret != SOFTBUS_OK) {
             Anonymize(param->sessionName, &tmpName);
             TRANS_LOGE(TRANS_CTRL, "Async get Lane failed, sessionName=%{public}s, sessionId=%{public}d",
@@ -247,6 +258,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     int32_t peerRet = LnnGetRemoteNodeInfoById(appInfo->peerNetWorkId, CATEGORY_NETWORK_ID, &nodeInfo);
     TransEventExtra extra;
     TransBuildTransOpenChannelStartEvent(&extra, appInfo, &nodeInfo, peerRet);
+    TransSetFirstTokenInfo(appInfo, &extra);
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_START, extra);
     ret = TransGetLaneInfo(param, &connInfo, &laneHandle);
     if (ret != SOFTBUS_OK) {
