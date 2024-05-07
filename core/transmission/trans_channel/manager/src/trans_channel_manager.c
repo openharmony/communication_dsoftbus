@@ -53,6 +53,7 @@
 #define MAX_PROXY_CHANNEL_ID 0x00000800
 #define MAX_TDC_CHANNEL_ID 0x7FFFFFFF
 #define MIN_FD_ID 1025
+#define MAX_FD_ID 2048
 #define MAX_PROXY_CHANNEL_ID_COUNT 1024
 #define ID_NOT_USED 0
 #define ID_USED 1UL
@@ -110,7 +111,7 @@ static int32_t GenerateProxyChannelId()
 
 void ReleaseProxyChannelId(int32_t channelId)
 {
-    if (channelId < MIN_FD_ID) {
+    if (channelId < MIN_FD_ID || channelId > MAX_FD_ID) {
         return;
     }
     if (SoftBusMutexLock(&g_myIdLock) != 0) {
@@ -205,6 +206,16 @@ void TransChannelDeinit(void)
     SoftBusMutexDestroy(&g_myIdLock);
 }
 
+static void TransSetFirstTokenInfo(AppInfo *appInfo, TransEventExtra *event)
+{
+    event->firstTokenId = TransACLGetFirstTokenID();
+    if (event->firstTokenId == TOKENID_NOT_SET) {
+        event->firstTokenId = appInfo->callingTokenId;
+    }
+    TransGetTokenInfo(event->firstTokenId, appInfo->tokenName, sizeof(appInfo->tokenName), &event->firstTokenType);
+    event->firstTokenName = appInfo->tokenName;
+}
+
 int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
 {
     if (param == NULL || transInfo == NULL) {
@@ -214,20 +225,22 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     TRANS_LOGI(TRANS_CTRL, "server TransOpenChannel");
     int32_t ret = INVALID_CHANNEL_ID;
     uint32_t laneHandle = INVALID_LANE_REQ_ID;
-    bool isQosLane = false;
+    char *tmpName = NULL;
     CoreSessionState state = CORE_SESSION_STATE_INIT;
     ret = TransAddSocketChannelInfo(
         param->sessionName, param->sessionId, INVALID_CHANNEL_ID, CHANNEL_TYPE_UNDEFINED, CORE_SESSION_STATE_INIT);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "Add socket channel record failed.");
     if (param->isAsync) {
-        uint32_t firstTokenId = TransACLGetFirstTokenID();
-        ret = TransAsyncGetLaneInfo(param, &laneHandle, firstTokenId, &isQosLane);
+        uint32_t callingTokenId = TransACLGetCallingTokenID();
+        ret = TransAsyncGetLaneInfo(param, &laneHandle, callingTokenId);
         if (ret != SOFTBUS_OK) {
-            char *tmpSessionName = NULL;
-            Anonymize(param->sessionName, &tmpSessionName);
+            Anonymize(param->sessionName, &tmpName);
             TRANS_LOGE(TRANS_CTRL, "Async get Lane failed, sessionName=%{public}s, sessionId=%{public}d",
-                tmpSessionName, param->sessionId);
-            AnonymizeFree(tmpSessionName);
+                tmpName, param->sessionId);
+            AnonymizeFree(tmpName);
+            if (ret != SOFTBUS_TRANS_STOP_BIND_BY_CANCEL) {
+                TransFreeLane(laneHandle, param->isQosLane);
+            }
             (void)TransDeleteSocketChannelInfoBySession(param->sessionName, param->sessionId);
         }
         return ret;
@@ -245,9 +258,9 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     int32_t peerRet = LnnGetRemoteNodeInfoById(appInfo->peerNetWorkId, CATEGORY_NETWORK_ID, &nodeInfo);
     TransEventExtra extra;
     TransBuildTransOpenChannelStartEvent(&extra, appInfo, &nodeInfo, peerRet);
+    TransSetFirstTokenInfo(appInfo, &extra);
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_START, extra);
-    ret = TransGetLaneInfo(param, &connInfo, &laneHandle, &isQosLane);
-    char *tmpName = NULL;
+    ret = TransGetLaneInfo(param, &connInfo, &laneHandle);
     if (ret != SOFTBUS_OK) {
         SoftbusReportTransErrorEvt(SOFTBUS_TRANS_GET_LANE_INFO_ERR);
         goto EXIT_ERR;
@@ -293,7 +306,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     if (((ChannelType)transInfo->channelType == CHANNEL_TYPE_TCP_DIRECT) && (connOpt.type != CONNECT_P2P)) {
         TransFreeLane(laneHandle, param->isQosLane);
     } else if (TransLaneMgrAddLane(transInfo->channelId, transInfo->channelType, &connInfo,
-        laneHandle, isQosLane, &appInfo->myData) != SOFTBUS_OK) {
+        laneHandle, param->isQosLane, &appInfo->myData) != SOFTBUS_OK) {
         SoftbusRecordOpenSessionKpi(appInfo->myData.pkgName,
             appInfo->linkType, SOFTBUS_EVT_OPEN_SESSION_FAIL, GetSoftbusRecordTimeMillis() - timeStart);
         TransCloseChannel(NULL, transInfo->channelId, transInfo->channelType);
@@ -310,7 +323,9 @@ EXIT_ERR:
     TransBuildTransAlarmEvent(&extraAlarm, appInfo, ret);
     TRANS_ALARM(OPEN_SESSION_FAIL_ALARM, CONTROL_ALARM_TYPE, extraAlarm);
     TransFreeAppInfo(appInfo);
-    TransFreeLane(laneHandle, param->isQosLane);
+    if (ret != SOFTBUS_TRANS_STOP_BIND_BY_CANCEL) {
+        TransFreeLane(laneHandle, param->isQosLane);
+    }
     (void)TransDeleteSocketChannelInfoBySession(param->sessionName, param->sessionId);
     TRANS_LOGE(TRANS_SVC, "server TransOpenChannel err, ret=%{public}d", ret);
     return ret;
@@ -561,6 +576,7 @@ int32_t TransNotifyAuthSuccess(int32_t channelId, int32_t channelType)
 int32_t TransReleaseUdpResources(int32_t channelId)
 {
     TRANS_LOGI(TRANS_CTRL, "release Udp channel resources: channelId=%{public}d", channelId);
+    NotifyQosChannelClosed(channelId, CHANNEL_TYPE_UDP);
     (void)TransLaneMgrDelLane(channelId, CHANNEL_TYPE_UDP);
     (void)TransDelUdpChannel(channelId);
     return SOFTBUS_OK;
@@ -574,13 +590,16 @@ int32_t TransCloseChannel(const char *sessionName, int32_t channelId, int32_t ch
 int32_t TransSendMsg(int32_t channelId, int32_t channelType, const void *data, uint32_t len,
     int32_t msgType)
 {
-    TRANS_LOGI(TRANS_MSG, "send msg: channelId=%{public}d, channelType=%{public}d", channelId, channelType);
     int32_t ret = SOFTBUS_OK;
     switch (channelType) {
         case CHANNEL_TYPE_AUTH:
+            TRANS_LOGI(TRANS_MSG,
+                "send msg auth channelType. channelId=%{public}d, channelType=%{public}d", channelId, channelType);
             ret = TransSendAuthMsg(channelId, (char*)data, (int32_t)len);
             break;
         case CHANNEL_TYPE_PROXY:
+            TRANS_LOGI(TRANS_MSG,
+                "send msg proxy channelType. channelId=%{public}d, channelType=%{public}d", channelId, channelType);
             ret = TransProxyPostSessionData(channelId, (unsigned char*)data, len, (SessionPktType)msgType);
             break;
         default:

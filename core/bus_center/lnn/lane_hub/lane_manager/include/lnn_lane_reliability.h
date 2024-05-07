@@ -30,4 +30,4 @@ void NotifyDetectTimeout(uint32_t detectId);
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif  // LNN_LANE_RELIABILITY_H

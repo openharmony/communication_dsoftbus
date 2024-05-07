@@ -207,7 +207,7 @@ int32_t TransClientProxy::OnChannelLinkDown(const char *networkId, int32_t route
     return SOFTBUS_OK;
 }
 
-int32_t TransClientProxy::OnChannelClosed(int32_t channelId, int32_t channelType)
+int32_t TransClientProxy::OnChannelClosed(int32_t channelId, int32_t channelType, int32_t messageType)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -226,6 +226,10 @@ int32_t TransClientProxy::OnChannelClosed(int32_t channelId, int32_t channelType
     }
     if (!data.WriteInt32(channelType)) {
         TRANS_LOGE(TRANS_CTRL, "write channel type failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!data.WriteInt32(messageType)) {
+        TRANS_LOGE(TRANS_CTRL, "write message type failed");
         return SOFTBUS_IPC_ERR;
     }
     MessageParcel reply;

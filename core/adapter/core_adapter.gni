@@ -29,6 +29,19 @@ bus_center_core_adapter_inc = [ "$dsoftbus_root_path/adapter/common/include" ]
 bus_center_core_adapter_deps = [ "$dsoftbus_dfx_path/log:softbus_dfx_log" ]
 bus_center_core_adapter_external_deps = [ "init:libbegetutil" ]
 
+if (dsoftbus_feature_lnn_cloud_sync) {
+  bus_center_core_adapter_external_deps += [ "kv_store:distributeddata_inner" ]
+  bus_center_core_adapter_src += [
+    "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_kv_adapter_wrapper.cpp",
+    "$dsoftbus_root_path/core/adapter/kv_store/src/lnn_kv_adapter.cpp",
+    "$dsoftbus_root_path/core/adapter/kv_store/src/lnn_kv_data_change_listener.cpp",
+  ]
+  bus_center_core_adapter_inc +=
+      [ "$dsoftbus_root_path/core/adapter/kv_store/include" ]
+} else {
+  bus_center_core_adapter_src += [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_kv_adapter_wrapper_virtual.cpp" ]
+}
+
 if (defined(ohos_lite)) {
   bus_center_core_adapter_src += [
     "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_settingdata_event_monitor_virtual.cpp",
@@ -55,8 +68,10 @@ if (defined(ohos_lite)) {
         [ "$dsoftbus_root_path/core/adapter/huks/src/softbus_rsa_encrypt.c" ]
     bus_center_core_adapter_inc +=
         [ "$dsoftbus_root_path/core/adapter/huks/include" ]
-    bus_center_core_adapter_deps += [ "//third_party/openssl:libcrypto_shared" ]
-    bus_center_core_adapter_external_deps += [ "huks:libhukssdk" ]
+    bus_center_core_adapter_external_deps += [
+      "huks:libhukssdk",
+      "openssl:libcrypto_shared",
+    ]
   }
 } else {
   if (!dsoftbus_get_devicename) {
@@ -108,7 +123,9 @@ if (defined(ohos_lite)) {
         [ "$dsoftbus_root_path/core/adapter/huks/src/softbus_rsa_encrypt.c" ]
     bus_center_core_adapter_inc +=
         [ "$dsoftbus_root_path/core/adapter/huks/include" ]
-    bus_center_core_adapter_deps += [ "//third_party/openssl:libcrypto_shared" ]
-    bus_center_core_adapter_external_deps += [ "huks:libhukssdk" ]
+    bus_center_core_adapter_external_deps += [
+      "huks:libhukssdk",
+      "openssl:libcrypto_shared",
+    ]
   }
 }

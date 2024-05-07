@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,7 +36,9 @@
 #ifndef INNER_SOCKET_H
 #define INNER_SOCKET_H
 
+#include "socket.h"
 #include "softbus_common.h"
+#include "trans_type.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -82,6 +84,52 @@ int32_t DBinderGrantPermission(int32_t uid, int32_t pid, const char *socketName)
  * @version 1.0
  */
 int32_t DBinderRemovePermission(const char *socketName);
+
+/**
+ * @brief Bind for dfs.
+ *
+ * @param socket Indicates the the unique socket fd.
+ * @param listener Indicates the pointer to the socket callback.
+ * @return Returns <b>SOFTBUS_TRANS_INVALID_PARAM</b> if invalid parameters are detected.
+ * @return Returns <b>INVALID_SOCKET</b> if the operation fails.
+ * @return Returns <b>SOFTBUS_OK</b> if the socket is bind;
+ * returns an error code otherwise.
+ * @since 1.0
+ * @version 1.0
+ */
+int32_t DfsBind(int32_t socket, const ISocketListener *listener);
+
+/**
+ * @brief Set socket option.
+ *
+ * @param socket Indicates the unique socket fd.
+ * @param level Indicates the level of option.
+ * @param optType Indicates the type of option.
+ * @param optValue Indicates the pointer to the option value to set, which cannot be <b>NULL</b>.
+ * @param optValueSize Indicates the length of the option value to set.
+ *
+ * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if <b>optValue</b> is <b>NULL</b> or <b>optValueSize</b> is zero.
+ * @return Returns <b>SOFTBUS_OK</b> if the operation is successful; returns an error code otherwise.
+ * @since 2.0
+ * @version 2.0
+ */
+int32_t SetSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t optValueSize);
+
+/**
+ * @brief Get socket option.
+ *
+ * @param socket Indicates the unique socket fd.
+ * @param level Indicates the level of option.
+ * @param optType Indicates the type of option.
+ * @param optValue Indicates the pointer to the option value to get, which cannot be <b>NULL</b>.
+ * @param optValueSize Indicates the pointer to the optValue size to get, which cannot be <b>NULL</b>.
+ *
+ * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if <b>optValue</b> is <b>NULL</b> or <b>optValueSize</b> is <b>NULL</b>.
+ * @return Returns <b>SOFTBUS_OK</b> if the operation is successful; returns an error code otherwise.
+ * @since 2.0
+ * @version 2.0
+ */
+int32_t GetSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t *optValueSize);
 #ifdef __cplusplus
 }
 #endif

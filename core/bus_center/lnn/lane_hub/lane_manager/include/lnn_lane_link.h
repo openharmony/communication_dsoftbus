@@ -27,6 +27,14 @@
 extern "C" {
 #endif
 
+#define COC_DIRECT_LATENCY      1200
+#define BR_LATENCY              2500
+#define WLAN_LATENCY            800
+#define P2P_LATENCY             1600
+#define BLE_LATENCY             1500
+#define HML_LATENCY             1500
+#define BR_REUSE_LATENCY        1000
+
 typedef struct {
     char peerNetworkId[NETWORK_ID_BUF_LEN];
     bool networkDelegate;
@@ -95,7 +103,7 @@ typedef struct {
 
 typedef struct {
     void (*OnLaneLinkSuccess)(uint32_t reqId, const LaneLinkInfo *linkInfo);
-    void (*OnLaneLinkFail)(uint32_t reqId, int32_t reason);
+    void (*OnLaneLinkFail)(uint32_t reqId, int32_t reason, LaneLinkType linkType);
 } LaneLinkCb;
 
 int32_t InitLaneLink(void);
@@ -112,11 +120,12 @@ void LaneUpdateP2pAddressByIp(const char *ipAddr, const char *networkId);
 int32_t FindLaneResourceByLinkAddr(const LaneLinkInfo *info, LaneResource *resource);
 int32_t FindLaneResourceByLinkType(const char *peerUdid, LaneLinkType type, LaneResource *resource);
 int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, bool isServerSide);
-int32_t DelLaneResourceByLaneId(uint64_t laneId);
+int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide);
 int32_t FindLaneResourceByLaneId(uint64_t laneId, LaneResource *resource);
-uint64_t ApplyLaneId(const char *activeUdid, const char *passiveUdid, LaneLinkType linkType);
+uint64_t ApplyLaneId(const char *localUdid, const char *remoteUdid, LaneLinkType linkType);
+int32_t ClearLaneResourceByLaneId(uint64_t laneId);
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* LNN_LANE_LINK_H */
+#endif // LNN_LANE_LINK_H

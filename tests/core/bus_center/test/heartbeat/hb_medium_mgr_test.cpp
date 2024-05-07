@@ -296,23 +296,27 @@ HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvProcessTest_01, TestSize.Level1)
     (void)strcpy_s(device.devId, DISC_MAX_DEVICE_ID_LEN, udidHash);
     device.addr->type = CONNECTION_ADDR_BR;
     device.devType = SMART_PHONE;
-    int32_t weight = TEST_WEIGHT;
-    int32_t masterWeight = TEST_WEIGHT2;
-    int32_t ret1 = HbFirstSaveRecvTime(&storedInfo, &device, weight, masterWeight, TEST_RECVTIME_FIRST);
+    LnnHeartbeatWeight mediumWeight;
+    (void)memset_s(&mediumWeight, sizeof(LnnHeartbeatWeight), 0, sizeof(LnnHeartbeatWeight));
+    mediumWeight.weight = TEST_WEIGHT;
+    mediumWeight.localMasterWeight = TEST_WEIGHT2;
+    int32_t ret1 = HbFirstSaveRecvTime(&storedInfo, &device,
+        mediumWeight.weight, mediumWeight.localMasterWeight, TEST_RECVTIME_FIRST);
     EXPECT_TRUE(ret1 == SOFTBUS_OK);
     ON_CALL(disLedgerMock, LnnSetDLHeartbeatTimestamp).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(hbStrateMock, LnnStopOfflineTimingStrategy).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(hbStrateMock, LnnStartOfflineTimingStrategy).WillByDefault(Return(SOFTBUS_OK));
-    int ret = HbMediumMgrRecvProcess(&device, weight, masterWeight, HEARTBEAT_TYPE_BLE_V1, false, &hbResp);
+    int ret = HbMediumMgrRecvProcess(&device, &mediumWeight, HEARTBEAT_TYPE_BLE_V1, false, &hbResp);
     EXPECT_TRUE(ret == SOFTBUS_NETWORK_HEARTBEAT_REPEATED);
-    HbFirstSaveRecvTime(&storedInfo, &device, weight, masterWeight, TEST_RECVTIME_FIRST);
+    HbFirstSaveRecvTime(&storedInfo, &device,
+        mediumWeight.weight, mediumWeight.localMasterWeight, TEST_RECVTIME_FIRST);
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_ERR));
-    ret = HbMediumMgrRecvProcess(&device, weight, masterWeight, HEARTBEAT_TYPE_BLE_V1, false, &hbResp);
+    ret = HbMediumMgrRecvProcess(&device, &mediumWeight, HEARTBEAT_TYPE_BLE_V1, false, &hbResp);
     EXPECT_TRUE(ret != SOFTBUS_ERR);
-    ret = HbMediumMgrRecvProcess(nullptr, weight, masterWeight, HEARTBEAT_TYPE_BLE_V1, false, &hbResp);
+    ret = HbMediumMgrRecvProcess(nullptr, &mediumWeight, HEARTBEAT_TYPE_BLE_V1, false, &hbResp);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     (void)memset_s(&device, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
-    ret = HbMediumMgrRecvProcess(&device, weight, masterWeight, HEARTBEAT_TYPE_BLE_V1, false, &hbResp);
+    ret = HbMediumMgrRecvProcess(&device, &mediumWeight, HEARTBEAT_TYPE_BLE_V1, false, &hbResp);
     EXPECT_TRUE(ret == SOFTBUS_NETWORK_HEARTBEAT_UNTRUSTED);
     DfxRecordHeartBeatAuthStart(nullptr, "pkgName", 0);
 }

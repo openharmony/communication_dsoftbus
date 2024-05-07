@@ -42,7 +42,8 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
     return SOFTBUS_OK;
 }
 
-static int32_t TransServerOnChannelClosed(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType)
+static int32_t TransServerOnChannelClosed(const char *pkgName, int32_t pid,
+    int32_t channelId, int32_t channelType, int32_t messageType)
 {
     return SOFTBUS_OK;
 }
@@ -86,7 +87,7 @@ public:
         g_channelCallBack.GetPkgNameBySessionName = TransGetPkgNameBySessionName;
         g_channelCallBack.GetUidAndPidBySessionName = TransGetUidAndPid;
         int32_t ret = TransTdcSetCallBack(&g_channelCallBack);
-        EXPECT_TRUE(ret == SOFTBUS_OK);
+        EXPECT_EQ(ret, SOFTBUS_OK);
     }
     ~TransTcpDirectCallbackTest()
     {}

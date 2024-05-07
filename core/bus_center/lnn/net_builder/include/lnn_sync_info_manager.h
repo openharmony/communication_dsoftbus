@@ -58,6 +58,7 @@ int32_t LnnUnregSyncInfoHandler(LnnSyncInfoType type, LnnSyncInfoMsgHandler hand
 int32_t LnnSendSyncInfoMsg(LnnSyncInfoType type, const char *networkId,
     const uint8_t *msg, uint32_t len, LnnSyncInfoMsgComplete complete);
 int32_t LnnSendP2pSyncInfoMsg(const char *networkId, uint32_t netCapability);
+int32_t LnnSendWifiOfflineInfoMsg(void);
 
 #ifdef __cplusplus
 }

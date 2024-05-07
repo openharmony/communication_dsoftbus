@@ -175,7 +175,7 @@ static int32_t ConnTypeCheck(ConnectType type)
     }
 
     if (g_connManager[type] == NULL) {
-        CONN_LOGE(CONN_COMMON, "type=%{public}d", type);
+        CONN_LOGD(CONN_COMMON, "type=%{public}d", type);
         return SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT;
     }
     return SOFTBUS_OK;
@@ -694,20 +694,20 @@ int32_t ConnServerInit(void)
         connectObj = ConnInitTcp(&g_connManagerCb);
         if (connectObj != NULL) {
             g_connManager[CONNECT_TCP] = connectObj;
-            CONN_LOGI(CONN_COMMON, "init tcp ok");
+            CONN_LOGD(CONN_COMMON, "init tcp ok");
         }
     }
 
     connectObj = ConnInitBr(&g_connManagerCb);
     if (connectObj != NULL) {
         g_connManager[CONNECT_BR] = connectObj;
-        CONN_LOGI(CONN_COMMON, "init br ok");
+        CONN_LOGD(CONN_COMMON, "init br ok");
     }
 
     connectObj = ConnInitBle(&g_connManagerCb);
     if (connectObj != NULL) {
         g_connManager[CONNECT_BLE] = connectObj;
-        CONN_LOGI(CONN_COMMON, "init ble ok");
+        CONN_LOGD(CONN_COMMON, "init ble ok");
     }
 
     if (g_listenerList == NULL) {
@@ -749,7 +749,7 @@ void ConnServerDeinit(void)
     g_isInited = false;
 }
 
-bool CheckActiveConnection(const ConnectOption *info)
+bool CheckActiveConnection(const ConnectOption *info, bool needOccupy)
 {
     if (info == NULL) {
         return false;
@@ -764,7 +764,7 @@ bool CheckActiveConnection(const ConnectOption *info)
         return false;
     }
 
-    return g_connManager[info->type]->CheckActiveConnection(info);
+    return g_connManager[info->type]->CheckActiveConnection(info, needOccupy);
 }
 
 int32_t ConnUpdateConnection(uint32_t connectionId, UpdateOption *option)
@@ -797,4 +797,20 @@ int32_t ConnPreventConnection(const ConnectOption *option, uint32_t time)
         return SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT;
     }
     return g_connManager[option->type]->PreventConnection(option, time);
+}
+
+int32_t ConnConfigPostLimit(const LimitConfiguration *configuration)
+{
+    if (configuration == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (ConnTypeCheck(configuration->type) != SOFTBUS_OK) {
+        return SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT;
+    }
+
+    if (g_connManager[configuration->type]->ConfigPostLimit == NULL) {
+        return SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT;
+    }
+    return g_connManager[configuration->type]->ConfigPostLimit(configuration);
 }

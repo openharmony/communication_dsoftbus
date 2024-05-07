@@ -17,7 +17,9 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
+#include "inner_socket.h"
 #include "socket.h"
+#include "inner_socket.h"
 #include "softbus_error_code.h"
 
 #define SOCKET_NAME_MAX_LEN          255
@@ -191,5 +193,100 @@ HWTEST_F(TransClientSocketServiceTest, DataType001, TestSize.Level1)
         int32_t socketId = Socket(info);
         EXPECT_EQ(socketId, SOFTBUS_ERR);
     }
+}
+
+/**
+ * @tc.name: DfsBind001
+ * @tc.desc: call DfsBind function with invalid socket or listener.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSocketServiceTest, DfsBind001, TestSize.Level1)
+{
+    ISocketListener listener;
+    int32_t ret = DfsBind(-1, &listener);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = DfsBind(1, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = DfsBind(1, &listener);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+static void OnShutdown(int32_t socket, ShutdownReason reason)
+{
+    return;
+}
+
+/**
+ * @tc.name: DfsBind002
+ * @tc.desc: call DfsBind function with offline socket.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSocketServiceTest, DfsBind002, TestSize.Level1)
+{
+    ISocketListener listener = { .OnShutdown = OnShutdown };
+    int32_t ret = DfsBind(1, &listener);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+}
+
+/**
+ * @tc.name: SetSocketOpt001
+ * @tc.desc: call SetSocketOpt function with with invalid parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSocketServiceTest, SetSocketOpt001, TestSize.Level1)
+{
+    OptLevel levelInvalid = OPT_LEVEL_BUTT;
+    OptLevel levelValid = OPT_LEVEL_SOFTBUS;
+    OptType optTypeInvalid = (OptType)-1;
+    OptType optTypeValid = OPT_TYPE_MAX_BUFFER;
+    int32_t socket = 1;
+    int32_t optValueValid = 1234;
+    void *temp = &optValueValid;
+    int32_t optValueSizeInvalid = -1;
+    int32_t optValueSizeValid = sizeof(int32_t);
+    int32_t ret = SetSocketOpt(socket, levelInvalid, optTypeInvalid, NULL, optValueSizeInvalid);
+    ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = SetSocketOpt(socket, levelValid, optTypeInvalid, NULL, optValueSizeInvalid);
+    ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = SetSocketOpt(socket, levelValid, optTypeValid, NULL, optValueSizeInvalid);
+    ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = SetSocketOpt(socket, levelValid, optTypeValid, temp, optValueSizeInvalid);
+    ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = SetSocketOpt(socket, levelValid, optTypeValid, temp, optValueSizeValid);
+    ASSERT_NE(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetSocketOpt001
+ * @tc.desc: call GetSocketOpt function with with invalid parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSocketServiceTest, GetSocketOpt001, TestSize.Level1)
+{
+    OptLevel levelInvalid = OPT_LEVEL_BUTT;
+    OptLevel levelValid = OPT_LEVEL_SOFTBUS;
+    OptType optTypeInvalid = (OptType)-1;
+    OptType optTypeValid = OPT_TYPE_MAX_BUFFER;
+    int32_t socket = 1;
+    int32_t optValueValid = 0;
+    void *temp = &optValueValid;
+    int32_t valueSize = 0;
+    int32_t *optValueSizeValid = &valueSize;
+    int32_t ret = GetSocketOpt(socket, levelInvalid, optTypeInvalid, NULL, NULL);
+    ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetSocketOpt(socket, levelValid, optTypeInvalid, NULL, NULL);
+    ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetSocketOpt(socket, levelValid, optTypeValid, NULL, NULL);
+    ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetSocketOpt(socket, levelValid, optTypeValid, temp, NULL);
+    ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetSocketOpt(socket, levelValid, optTypeValid, temp, optValueSizeValid);
+    ASSERT_NE(ret, SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS

@@ -74,12 +74,12 @@ int32_t DiscCoapProcessDeviceInfo(const NSTACKX_DeviceInfo *nstackxInfo, DeviceI
     DISC_LOGI(DISC_COAP, "DiscRecv: broadcast devName=%{public}s, bType=%{public}u", devInfo->devName, bType);
     if (bType != NSTACKX_BUSINESS_TYPE_NULL && DiscCoapSendRsp(devInfo, bType) != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "send response failed");
-        return SOFTBUS_ERR;
+        return SOFTBUS_DISCOVER_COAP_SEND_RSP_FAIL;
     }
     return SOFTBUS_OK;
 }
 
-void DiscCoapReportNotification(const NotificationConfig *notification)
+void DiscCoapReportNotification(const NSTACKX_NotificationConfig *notification)
 {
     (void)notification;
 }

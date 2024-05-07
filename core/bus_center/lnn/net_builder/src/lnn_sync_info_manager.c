@@ -21,6 +21,7 @@
 #include "anonymizer.h"
 #include "auth_manager.h"
 #include "bus_center_event.h"
+#include "bus_center_manager.h"
 #include "common_list.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_distributed_net_ledger.h"
@@ -41,6 +42,12 @@
 #define UNUSED_CHANNEL_CLOSED_DELAY (60 * 1000)
 #define TIME_CONVERSION_UNIT 1000
 #define CHANNEL_NAME "com.huawei.hwddmp.service.DeviceInfoSynchronize"
+#define WIFI_OFFLINE_CODE_LEN 4
+#define NETWORK_SYNC_CONN_CAP "conn_cap_long"
+#define NETWORK_SYNC_TYPE "networking_type"
+#define NETWORK_SYNC_SEQ "auth_seq"
+#define NETWORK_OFFLINE_PORT "offline_port"
+#define NETWORK_OFFLINE_CODE "offline_code"
 
 typedef struct {
     ListNode node;
@@ -120,7 +127,7 @@ static SyncChannelInfo *FindSyncChannelInfoByChannelId(int32_t channelId)
 
 static SyncChannelInfo *CreateSyncChannelInfo(const char *networkId)
 {
-    SyncChannelInfo *item = SoftBusMalloc(sizeof(SyncChannelInfo));
+    SyncChannelInfo *item = (SyncChannelInfo *)SoftBusMalloc(sizeof(SyncChannelInfo));
     if (item == NULL) {
         LNN_LOGE(LNN_BUILDER, "malloc sync channel info fail");
         return NULL;
@@ -150,7 +157,7 @@ static SyncInfoMsg *CreateSyncInfoMsg(LnnSyncInfoType type, const uint8_t *msg,
             type, dataLen);
         return NULL;
     }
-    syncMsg = SoftBusMalloc(sizeof(SyncInfoMsg) + dataLen);
+    syncMsg = (SyncInfoMsg *)SoftBusMalloc(sizeof(SyncInfoMsg) + dataLen);
     if (syncMsg == NULL) {
         LNN_LOGE(LNN_BUILDER, "malloc sync info msg fail. type=%{public}d, len=%{public}u",
             type, dataLen);
@@ -417,11 +424,7 @@ static INetworkingListener g_networkListener = {
     OnMessageReceived,
 };
 
-#define NETWORK_SYNC_CONN_CAP "conn_cap_long"
-#define NETWORK_SYNC_TYPE "networking_type"
-#define NETWORK_SYNC_SEQ "auth_seq"
-
-static char *PackP2pNetworkingMsg(int64_t connCap, int32_t networkType, int64_t authSeq)
+static char *PackBleOfflineMsg(int64_t connCap, int32_t networkType, int64_t authSeq)
 {
     JsonObj *json = JSON_CreateObject();
     if (json == NULL) {
@@ -432,6 +435,25 @@ static char *PackP2pNetworkingMsg(int64_t connCap, int32_t networkType, int64_t 
         !JSON_AddInt32ToObject(json, NETWORK_SYNC_TYPE, networkType) ||
         !JSON_AddInt64ToObject(json, NETWORK_SYNC_SEQ, authSeq)) {
         LNN_LOGE(LNN_BUILDER, "add p2p networking msg to json fail");
+        JSON_Delete(json);
+        return NULL;
+    }
+    char *msg = JSON_PrintUnformatted(json);
+    JSON_Delete(json);
+    return msg;
+}
+
+static char *PackWifiOfflineMsg(int32_t authPort, char *offlineCode)
+{
+    JsonObj *json = JSON_CreateObject();
+    if (json == NULL) {
+        LNN_LOGE(LNN_BUILDER, "create json object fail");
+        return NULL;
+    }
+    if (!JSON_AddInt32ToObject(json, NETWORK_OFFLINE_PORT, authPort) ||
+        !JSON_AddInt32ToObject(json, NETWORK_SYNC_TYPE, DISCOVERY_TYPE_WIFI) ||
+        !JSON_AddStringToObject(json, NETWORK_OFFLINE_CODE, offlineCode)) {
+        LNN_LOGE(LNN_BUILDER, "add wifi offline msg to json fail");
         JSON_Delete(json);
         return NULL;
     }
@@ -466,45 +488,24 @@ static int32_t CheckPeerAuthSeq(const char *uuid, int64_t peerAuthSeq)
     return SOFTBUS_OK;
 }
 
-static int32_t UnPackP2pNetworkingData(const AuthTransData *data, int64_t *peerConnCap, int32_t *peerNetworkType,
-    int64_t *peerAuthSeq)
+static void BleOffLineProcess(const AuthTransData *data, AuthHandle authHandle)
 {
+    int64_t peerConnCap = 0;
+    int64_t peerAuthSeq = 0;
     JsonObj *json = JSON_Parse((const char *)data->data, data->len);
     if (json == NULL) {
         LNN_LOGE(LNN_BUILDER, "json parse fail");
-        return SOFTBUS_ERR;
+        return;
     }
-    if (!JSON_GetInt64FromOject(json, NETWORK_SYNC_CONN_CAP, peerConnCap) ||
-        !JSON_GetInt32FromOject(json, NETWORK_SYNC_TYPE, peerNetworkType) ||
-        !JSON_GetInt64FromOject(json, NETWORK_SYNC_SEQ, peerAuthSeq)) {
-        LNN_LOGE(LNN_BUILDER, "json parse object fail");
+    if (!JSON_GetInt64FromOject(json, NETWORK_SYNC_CONN_CAP, &peerConnCap) ||
+        !JSON_GetInt64FromOject(json, NETWORK_SYNC_SEQ, &peerAuthSeq)) {
+        LNN_LOGE(LNN_BUILDER, "ble json parse object fail");
         JSON_Delete(json);
-        return SOFTBUS_ERR;
+        return;
     }
     JSON_Delete(json);
-    return SOFTBUS_OK;
-}
-
-static void OnP2pNetworkingDataRecv(AuthHandle authHandle, const AuthTransData *data)
-{
-    if (data == NULL || data->data == NULL || data->len ==0) {
-        LNN_LOGE(LNN_BUILDER, "invalid param");
-        return;
-    }
-    LNN_LOGI(LNN_BUILDER, "authId=%{public}" PRId64 ", module=%{public}d, seq=%{public}" PRId64 ", len=%{public}u.",
-        authHandle.authId, data->module, data->seq, data->len);
-    if (data->module != MODULE_P2P_NETWORKING_SYNC) {
-        LNN_LOGE(LNN_BUILDER, "data->module is not MODULE_P2P_NETWORKING_SYNC");
-        return;
-    }
-
-    int64_t peerConnCap = 0;
-    int32_t peerNetworkType = 0;
-    int64_t peerAuthSeq = 0;
-    UnPackP2pNetworkingData(data, &peerConnCap, &peerNetworkType, &peerAuthSeq);
-    if (peerNetworkType != DISCOVERY_TYPE_BLE || LnnHasCapability((uint32_t)peerConnCap, BIT_BLE)) {
-        LNN_LOGE(LNN_BUILDER, "no need to offline, peerNetworkType:%{public}d, peerConnCap:%{public}u",
-            peerNetworkType, (uint32_t)peerConnCap);
+    if (LnnHasCapability((uint32_t)peerConnCap, BIT_BLE)) {
+        LNN_LOGE(LNN_BUILDER, "no need to offline, peerConnCap:%{public}u", (uint32_t)peerConnCap);
         return;
     }
     char uuid[UUID_BUF_LEN] = {0};
@@ -526,6 +527,112 @@ static void OnP2pNetworkingDataRecv(AuthHandle authHandle, const AuthTransData *
         LNN_LOGD(LNN_BUILDER, "offline ble by p2p succ, networkId:%{public}s", anonyNetworkId);
     }
     AnonymizeFree(anonyNetworkId);
+}
+
+static bool CheckWifiOfflineMsgResult(const char *networkId, int32_t authPort, const char *offlineCode)
+{
+    int32_t port = 0;
+    uint8_t remoteOfflineCode[WIFI_OFFLINE_CODE_LEN] = {0};
+    char convertOfflineCode[WIFI_OFFLINE_CODE_LEN * HEXIFY_UNIT_LEN + 1] = {0};
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
+
+    if (LnnGetRemoteNumInfo(networkId, NUM_KEY_AUTH_PORT, &port) != 0) {
+        LNN_LOGE(LNN_BUILDER, "get remote port fail, neteorkId:%{public}s", anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
+        return false;
+    }
+    if (LnnGetNodeKeyInfo(networkId, NODE_KEY_BLE_OFFLINE_CODE, remoteOfflineCode, WIFI_OFFLINE_CODE_LEN) != 0) {
+        LNN_LOGE(LNN_BUILDER, "get remote offlinecode fail, neteorkId:%{public}s", anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
+        return false;
+    }
+    if (ConvertBytesToHexString(convertOfflineCode, WIFI_OFFLINE_CODE_LEN * HEXIFY_UNIT_LEN + 1,
+        (unsigned char *)remoteOfflineCode, WIFI_OFFLINE_CODE_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "coonvert offlinecode fail, neteorkId:%{public}s", anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
+        return false;
+    }
+    if (strcmp(convertOfflineCode, offlineCode) != 0 || port != authPort) {
+        LNN_LOGE(LNN_BUILDER, "check offline msg info fail, neteorkId:%{public}s", anonyNetworkId);
+        AnonymizeFree(anonyNetworkId);
+        return false;
+    }
+    AnonymizeFree(anonyNetworkId);
+    return true;
+}
+
+static void WlanOffLineProcess(const AuthTransData *data, AuthHandle authHandle)
+{
+    char uuid[UUID_BUF_LEN] = {0};
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
+    char *anonyNetworkId = NULL;
+    int32_t authPort = 0;
+    char convertOfflineCode[WIFI_OFFLINE_CODE_LEN * HEXIFY_UNIT_LEN + 1] = {0};
+    JsonObj *json = JSON_Parse((const char *)data->data, data->len);
+    if (json == NULL) {
+        LNN_LOGE(LNN_BUILDER, "json parse fail");
+        return;
+    }
+    if (!JSON_GetInt32FromOject(json, NETWORK_OFFLINE_PORT, &authPort) ||
+        !JSON_GetStringFromOject(json, NETWORK_OFFLINE_CODE, convertOfflineCode,
+            WIFI_OFFLINE_CODE_LEN * HEXIFY_UNIT_LEN + 1)) {
+        LNN_LOGE(LNN_BUILDER, "wifi json parse object fail");
+        JSON_Delete(json);
+        return;
+    }
+    JSON_Delete(json);
+    if (AuthGetDeviceUuid(authHandle.authId, uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
+        char *anonyUuid = NULL;
+        Anonymize(uuid, &anonyUuid);
+        LNN_LOGW(LNN_BUILDER, "device has offline or get authId/authSeq fail, uuid:%{public}s", anonyUuid);
+        AnonymizeFree(anonyUuid);
+        return;
+    }
+    if (LnnConvertDlId(uuid, CATEGORY_UUID, CATEGORY_NETWORK_ID, networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "convert networkid fail");
+        return;
+    }
+    if (CheckWifiOfflineMsgResult(networkId, authPort, convertOfflineCode)) {
+        Anonymize(networkId, &anonyNetworkId);
+        if (LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_WLAN) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "wifi fast offline failed, networkId:%{public}s", anonyNetworkId);
+        } else {
+            LNN_LOGI(LNN_BUILDER, "wifi fast offline success networkId:%{public}s", anonyNetworkId);
+        }
+        AnonymizeFree(anonyNetworkId);
+    }
+}
+
+static void OnP2pNetworkingDataRecv(AuthHandle authHandle, const AuthTransData *data)
+{
+    if (data == NULL || data->data == NULL || data->len ==0) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return;
+    }
+    LNN_LOGI(LNN_BUILDER, "authId=%{public}" PRId64 ", module=%{public}d, seq=%{public}" PRId64 ", len=%{public}u.",
+        authHandle.authId, data->module, data->seq, data->len);
+    if (data->module != MODULE_P2P_NETWORKING_SYNC) {
+        LNN_LOGE(LNN_BUILDER, "data->module is not MODULE_P2P_NETWORKING_SYNC");
+        return;
+    }
+    JsonObj *json = JSON_Parse((const char *)data->data, data->len);
+    if (json == NULL) {
+        LNN_LOGE(LNN_BUILDER, "json parse fail");
+        return;
+    }
+    int32_t peerNetworkType = DISCOVERY_TYPE_UNKNOWN;
+    if (!JSON_GetInt32FromOject(json, NETWORK_SYNC_TYPE, &peerNetworkType)) {
+        LNN_LOGE(LNN_BUILDER, "json parse object fail");
+        JSON_Delete(json);
+        return;
+    }
+    JSON_Delete(json);
+    if (peerNetworkType == DISCOVERY_TYPE_BLE) {
+        BleOffLineProcess(data, authHandle);
+    } else if (peerNetworkType == DISCOVERY_TYPE_WIFI) {
+        WlanOffLineProcess(data, authHandle);
+    }
 }
 
 static void LnnSyncManagerHandleOffline(const char *networkId)
@@ -810,7 +917,7 @@ int32_t LnnSendP2pSyncInfoMsg(const char *networkId, uint32_t netCapability)
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_ERR;
     }
-    char *msg = PackP2pNetworkingMsg((int64_t)netCapability, DISCOVERY_TYPE_BLE,
+    char *msg = PackBleOfflineMsg((int64_t)netCapability, DISCOVERY_TYPE_BLE,
         authVerifyTime[0] > authVerifyTime[1] ? authSeq[0] : authSeq[1]);
     if (msg == NULL) {
         LNN_LOGE(LNN_BUILDER, "pack p2p networking msg fail, networkId:%{public}s", anonyNetworkId);
@@ -834,5 +941,53 @@ int32_t LnnSendP2pSyncInfoMsg(const char *networkId, uint32_t netCapability)
     }
     AnonymizeFree(anonyNetworkId);
     cJSON_free(msg);
+    return SOFTBUS_OK;
+}
+
+int32_t LnnSendWifiOfflineInfoMsg(void)
+{
+    int32_t authPort = 0;
+    char localOfflineCode[WIFI_OFFLINE_CODE_LEN] = {0};
+    if (LnnGetLocalNumInfo(NUM_KEY_AUTH_PORT, &authPort) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get local authPort fail");
+        return SOFTBUS_ERR;
+    }
+    if (LnnGetLocalStrInfo(STRING_KEY_OFFLINE_CODE, localOfflineCode, WIFI_OFFLINE_CODE_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get local offlinecode fail");
+        return SOFTBUS_ERR;
+    }
+    char convertOfflineCode[WIFI_OFFLINE_CODE_LEN * HEXIFY_UNIT_LEN + 1] = {0};
+    if (ConvertBytesToHexString(convertOfflineCode, WIFI_OFFLINE_CODE_LEN * HEXIFY_UNIT_LEN + 1,
+        (unsigned char *)localOfflineCode, WIFI_OFFLINE_CODE_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "coonvert offlinecode fail");
+        return SOFTBUS_ERR;
+    }
+    char *msg = PackWifiOfflineMsg(authPort, convertOfflineCode);
+    if (msg == NULL) {
+        LNN_LOGE(LNN_BUILDER, "pack p2p networking msg fail");
+        return SOFTBUS_ERR;
+    }
+    AuthTransData dataInfo = {0};
+    FillAuthdataInfo(&dataInfo, msg);
+    AuthHandle *authHandle = NULL;
+    int32_t num = 0;
+    if (GetHmlOrP2pAuthHandle(&authHandle, &num) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get authHandle fail");
+        cJSON_free(msg);
+        return SOFTBUS_ERR;
+    }
+    char *anonyOfflineCode = NULL;
+    Anonymize(convertOfflineCode, &anonyOfflineCode);
+    for (int32_t i = 0; i < num; i++) {
+        if (AuthPostTransData(authHandle[i], &dataInfo) == SOFTBUS_OK) {
+            LNN_LOGI(LNN_BUILDER, "send wifi offline msg sucess, authPort:%{public}d, offlineCode:%{public}s,"
+                "authId:%{public}" PRId64, authPort, anonyOfflineCode, authHandle->authId);
+        } else {
+            LNN_LOGE(LNN_BUILDER, "post trans data fail, authId:%{public}" PRId64, authHandle->authId);
+        }
+    }
+    cJSON_free(msg);
+    SoftBusFree(authHandle);
+    AnonymizeFree(anonyOfflineCode);
     return SOFTBUS_OK;
 }

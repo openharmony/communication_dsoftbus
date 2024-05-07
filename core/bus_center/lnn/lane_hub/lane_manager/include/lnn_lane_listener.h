@@ -35,4 +35,4 @@ int32_t LaneLinkdownNotify(const char *peerUdid, const LaneLinkInfo *laneLinkInf
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif // LNN_LANE_LISTENER_H

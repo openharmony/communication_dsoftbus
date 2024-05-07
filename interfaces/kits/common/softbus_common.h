@@ -273,7 +273,7 @@ typedef struct {
             BleProtocolType protocol;
             char bleMac[BT_MAC_LEN];  /**< BLE MAC address in string format */
             uint8_t udidHash[UDID_HASH_LEN];  /**< udid hash value */
-            int32_t psm;
+            uint32_t psm;
         } ble;
         /**< IPv4 or IPv6 address */
         struct IpAddr {

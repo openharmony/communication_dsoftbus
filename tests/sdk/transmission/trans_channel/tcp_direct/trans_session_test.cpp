@@ -19,6 +19,7 @@
 #include "dfs_session.h"
 #include "inner_session.h"
 #include "session.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_errcode.h"
@@ -316,7 +317,15 @@ HWTEST_F(TransSessionTest, QosReportTest001, TestSize.Level0)
  */
 HWTEST_F(TransSessionTest, ClientCleanAllSessionWhenServerDeathTest001, TestSize.Level0)
 {
-    ClientCleanAllSessionWhenServerDeath();
+    ListNode sessionServerList;
+    ListInit(&sessionServerList);
+    ClientCleanAllSessionWhenServerDeath(&sessionServerList);
+    SessionServerInfo *infoNode = NULL;
+    SessionServerInfo *infoNodeNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(infoNode, infoNodeNext, &(sessionServerList), SessionServerInfo, node) {
+        ListDelete(&infoNode->node);
+        SoftBusFree(infoNode);
+    }
 
     char pkgName[TEST_PKG_NAME_LEN] = "com.test.trans.session";
     char mySessionName[TEST_SESSION_NAME_LEN] = "com.test.trans.session.sendfile";
@@ -337,11 +346,16 @@ HWTEST_F(TransSessionTest, ClientCleanAllSessionWhenServerDeathTest001, TestSize
     int32_t sessionId = INVALID_SESSION_ID;
     bool isEnabled = false;
     int32_t ret = ClientAddSessionServer(SEC_TYPE_CIPHERTEXT, pkgName, mySessionName, &g_sessionlistener);
-    EXPECT_TRUE(ret != SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_SERVER_NAME_REPEATED);
     ret = ClientAddSession(&param, &sessionId, &isEnabled);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    ClientCleanAllSessionWhenServerDeath();
-    EXPECT_TRUE(true);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ClientCleanAllSessionWhenServerDeath(&sessionServerList);
+    infoNode = NULL;
+    infoNodeNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(infoNode, infoNodeNext, &(sessionServerList), SessionServerInfo, node) {
+        ListDelete(&infoNode->node);
+        SoftBusFree(infoNode);
+    }
 }
 
 } // namespace OHOS

@@ -41,7 +41,8 @@ int32_t ClientIpcOnChannelLinkDown(ChannelMsg *data, const char *networkId, cons
 
 int32_t ClientIpcOnChannelClosed(ChannelMsg *data)
 {
-    return TransOnChannelClosed(data->msgChannelId, data->msgChannelType, SHUTDOWN_REASON_UNKNOWN);
+    return TransOnChannelClosed(
+        data->msgChannelId, data->msgChannelType, data->msgMessageType, SHUTDOWN_REASON_UNKNOWN);
 }
 
 int32_t ClientIpcOnChannelMsgReceived(ChannelMsg *data, TransReceiveData *receiveData)

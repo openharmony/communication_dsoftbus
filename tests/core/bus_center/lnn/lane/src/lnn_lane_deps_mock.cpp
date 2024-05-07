@@ -17,12 +17,11 @@
 #include "softbus_error_code.h"
 #include "softbus_socket.h"
 
-const static uint16_t SHA_HASH_LEN = 32;
-
 using namespace testing::ext;
 using namespace testing;
 
 namespace OHOS {
+const static uint16_t SHA_HASH_LEN = 32;
 void *g_laneDepsInterface;
 static SoftbusBaseListener g_baseListener = {0};
 LaneDepsInterfaceMock::LaneDepsInterfaceMock()
@@ -55,6 +54,8 @@ void LaneDepsInterfaceMock::SetDefaultResult(NodeInfo *info)
     ON_CALL(*this, AddTrigger).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(*this, LnnGetLocalNumU64Info).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(*this, LnnGetRemoteNumU64Info).WillByDefault(Return(SOFTBUS_OK));
+    ON_CALL(*this, LnnGetLocalNumU32Info).WillByDefault(Return(SOFTBUS_OK));
+    ON_CALL(*this, LnnGetRemoteNumU32Info).WillByDefault(Return(SOFTBUS_OK));
 }
 
 void LaneDepsInterfaceMock::SetDefaultResultForAlloc(int32_t localNetCap, int32_t remoteNetCap,
@@ -63,6 +64,10 @@ void LaneDepsInterfaceMock::SetDefaultResultForAlloc(int32_t localNetCap, int32_
     EXPECT_CALL(*this, LnnGetLocalNumInfo)
         .WillRepeatedly(DoAll(SetArgPointee<1>(localNetCap), Return(SOFTBUS_OK)));
     EXPECT_CALL(*this, LnnGetRemoteNumInfo)
+        .WillRepeatedly(DoAll(SetArgPointee<2>(remoteNetCap), Return(SOFTBUS_OK)));
+    EXPECT_CALL(*this, LnnGetLocalNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(localNetCap), Return(SOFTBUS_OK)));
+    EXPECT_CALL(*this, LnnGetRemoteNumU32Info)
         .WillRepeatedly(DoAll(SetArgPointee<2>(remoteNetCap), Return(SOFTBUS_OK)));
     EXPECT_CALL(*this, LnnGetLocalNumU64Info)
         .WillRepeatedly(DoAll(SetArgPointee<1>(localFeatureCap), Return(SOFTBUS_OK)));
@@ -133,7 +138,35 @@ int32_t LaneDepsInterfaceMock::ActionOfAddTrigger(ListenerModule module, int32_t
     return g_baseListener.onDataEvent(module, SOFTBUS_SOCKET_OUT, fd);
 }
 
+int32_t LaneDepsInterfaceMock::ActionOfConnOpenFailed(const AuthConnInfo *info, uint32_t requestId,
+    const AuthConnCallback *callback, bool isMeta)
+{
+    callback->onConnOpenFailed(requestId, SOFTBUS_ERR);
+    return SOFTBUS_OK;
+}
+
+int32_t LaneDepsInterfaceMock::ActionOfConnOpened(const AuthConnInfo *info, uint32_t requestId,
+    const AuthConnCallback *callback, bool isMeta)
+{
+    AuthHandle authHandle = {
+        .authId = 0,
+        .type = AUTH_LINK_TYPE_P2P,
+    };
+    callback->onConnOpened(requestId, authHandle);
+    return SOFTBUS_OK;
+}
+
 extern "C" {
+int32_t GetAuthLinkTypeList(const char *networkId, AuthLinkTypeList *linkTypeList)
+{
+    return GetLaneDepsInterface()->GetAuthLinkTypeList(networkId, linkTypeList);
+}
+
+int32_t AuthAllocConn(const char *networkId, uint32_t authRequestId, AuthConnCallback *callback)
+{
+    return GetLaneDepsInterface()->AuthAllocConn(networkId, authRequestId, callback);
+}
+
 int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info)
 {
     return GetLaneDepsInterface()->LnnGetRemoteNodeInfoById(id, type, info);
@@ -190,6 +223,16 @@ int32_t LnnGetRemoteNumInfo(const char *netWorkId, InfoKey key, int32_t *info)
     return GetLaneDepsInterface()->LnnGetRemoteNumInfo(netWorkId, key, info);
 }
 
+int32_t LnnGetLocalNumU32Info(InfoKey key, uint32_t *info)
+{
+    return GetLaneDepsInterface()->LnnGetLocalNumU32Info(key, info);
+}
+
+int32_t LnnGetRemoteNumU32Info(const char *netWorkId, InfoKey key, uint32_t *info)
+{
+    return GetLaneDepsInterface()->LnnGetRemoteNumU32Info(netWorkId, key, info);
+}
+
 NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type)
 {
     return GetLaneDepsInterface()->LnnGetNodeInfoById(id, type);
@@ -202,7 +245,7 @@ const NodeInfo *LnnGetLocalNodeInfo(void)
 
 void AuthCloseConn(AuthHandle authHandle)
 {
-    return GetLaneDepsInterface()->AuthCloseConn(authHandle);
+    GetLaneDepsInterface()->AuthCloseConn(authHandle);
 }
 
 int32_t AuthSetP2pMac(int64_t authId, const char *p2pMac)
@@ -270,7 +313,7 @@ ConnBleConnection *ConnBleGetClientConnectionByUdid(const char *udid, BleProtoco
 
 void ConnBleReturnConnection(ConnBleConnection **connection)
 {
-    return GetLaneDepsInterface()->ConnBleReturnConnection(connection);
+    GetLaneDepsInterface()->ConnBleReturnConnection(connection);
 }
 
 bool ConnBleDirectIsEnable(BleProtocolType protocol)
@@ -302,9 +345,9 @@ int32_t StartBaseClient(ListenerModule module, const SoftbusBaseListener *listen
     return GetLaneDepsInterface()->StartBaseClient(module, listener);
 }
 
-bool CheckActiveConnection(const ConnectOption *option)
+bool CheckActiveConnection(const ConnectOption *option, bool needOccupy)
 {
-    return GetLaneDepsInterface()->CheckActiveConnection(option);
+    return GetLaneDepsInterface()->CheckActiveConnection(option, needOccupy);
 }
 
 int32_t ConnOpenClientSocket(const ConnectOption *option, const char *bindAddr, bool isNonBlock)
@@ -325,6 +368,11 @@ int32_t QueryLaneResource(const LaneQueryInfo *queryInfo, const QosInfo *qosInfo
 ssize_t ConnSendSocketData(int32_t fd, const char *buf, size_t len, int32_t timeout)
 {
     return GetLaneDepsInterface()->ConnSendSocketData(fd, buf, len, timeout);
+}
+
+struct WifiDirectManager* GetWifiDirectManager(void)
+{
+    return GetLaneDepsInterface()->GetWifiDirectManager();
 }
 }
 } // namespace OHOS

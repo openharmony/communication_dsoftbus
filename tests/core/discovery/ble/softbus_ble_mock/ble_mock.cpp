@@ -239,6 +239,7 @@ int32_t BleMock::ActionOfStopBroadcasting(int32_t bcId)
         advCallback->OnStopBroadcastingCallback(bcId, SOFTBUS_BT_STATUS_SUCCESS);
     }
     isAdvertising = !isAdvertising;
+    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_LOCK_LOCKED_MS));
     GetMock()->AsyncAdvertiseDone();
     return SOFTBUS_OK;
 }
@@ -279,6 +280,7 @@ int32_t BleMock::ActionOfSetAdvDataForActiveDiscovery(int32_t bcId, const Broadc
         advCallback->OnSetBroadcastingCallback(bcId, SOFTBUS_BT_STATUS_SUCCESS);
     }
 
+    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_LOCK_LOCKED_MS));
     GetMock()->AsyncAdvertiseDone();
     return SOFTBUS_OK;
 }
@@ -299,6 +301,7 @@ int32_t BleMock::ActionOfSetAdvDataForActivePublish(int32_t bcId, const Broadcas
         advCallback->OnSetBroadcastingCallback(bcId, SOFTBUS_BT_STATUS_SUCCESS);
     }
 
+    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_LOCK_LOCKED_MS));
     GetMock()->AsyncAdvertiseDone();
     return SOFTBUS_OK;
 }
@@ -320,6 +323,7 @@ int32_t BleMock::ActionOfSetAdvDataForPassivePublish(int32_t bcId, const Broadca
         advCallback->OnSetBroadcastingCallback(bcId, SOFTBUS_BT_STATUS_SUCCESS);
     }
 
+    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_LOCK_LOCKED_MS));
     GetMock()->AsyncAdvertiseDone();
     return SOFTBUS_OK;
 }
@@ -342,6 +346,7 @@ int32_t BleMock::ActionOfUpdateAdvForPassivePublish(
         advCallback->OnUpdateBroadcastingCallback(bcId, SOFTBUS_BT_STATUS_SUCCESS);
     }
 
+    std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_LOCK_LOCKED_MS));
     GetMock()->AsyncAdvertiseDone();
     return SOFTBUS_OK;
 }

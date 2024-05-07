@@ -12,18 +12,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef PROCESSOR_SELECTOR_FACTORY_H
+#define PROCESSOR_SELECTOR_FACTORY_H
 
-#include "softbusdfxanonymize_fuzzer.h"
+#include <memory>
 
-#include <string>
-#include "anonymizer.h"
+#include "command/processor_selector.h"
 
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
-{
-    std::string str(reinterpret_cast<const char *>(data), size);
+namespace OHOS::SoftBus {
+class ProcessorSelectorFactory {
+public:
+    static ProcessorSelectorFactory& GetInstance()
+    {
+        static ProcessorSelectorFactory instance;
+        return instance;
+    }
 
-    char *anonymized = nullptr;
-    Anonymize(str.c_str(), &anonymized);
-    AnonymizeFree(anonymized);
-    return 0;
+    void Register(const std::shared_ptr<ProcessorSelector> &selector);
+    std::shared_ptr<ProcessorSelector> NewSelector();
+
+private:
+    std::shared_ptr<ProcessorSelector> selector_;
+};
 }
+#endif

@@ -179,7 +179,7 @@ L_COAP_ERR:
     return NSTACKX_EFAILED;
 }
 
-int32_t GetServiceNotificationInfo(const uint8_t *buf, size_t size, NotificationConfig *notification)
+int32_t GetServiceNotificationInfo(const uint8_t *buf, size_t size, NSTACKX_NotificationConfig *notification)
 {
     uint8_t *newBuf = NULL;
     if (buf[size - 1] != '\0') {
@@ -1402,8 +1402,7 @@ static int32_t NSTACKX_SendMsgParamCheck(const char *moduleName, const char *dev
     return NSTACKX_EOK;
 }
 
-static int MsgCtxInit(MsgCtx *msg, const char *moduleName, const char *deviceId,
-    const uint8_t *data, uint32_t len, uint8_t type)
+static int MsgCtxInit(MsgCtx *msg, const char *moduleName, const char *deviceId, const uint8_t *data, uint32_t len)
 {
     if (SemInit(&msg->wait, 0, 0)) {
         DFINDER_LOGE(TAG, "sem init fail");
@@ -1414,7 +1413,6 @@ static int MsgCtxInit(MsgCtx *msg, const char *moduleName, const char *deviceId,
     msg->moduleName = moduleName;
     msg->data = data;
     msg->len = len;
-    msg->type = type;
     msg->err = NSTACKX_EOK;
 
     return NSTACKX_EOK;
@@ -1451,8 +1449,8 @@ int32_t NSTACKX_SendMsgDirect(const char *moduleName, const char *deviceId, cons
         return NSTACKX_EINVAL;
     }
     directMsg.ipStr = ipaddr;
-
-    if (MsgCtxInit(&directMsg.msg, moduleName, deviceId, data, len, type) != NSTACKX_EOK) {
+    directMsg.msg.type = type;
+    if (MsgCtxInit(&directMsg.msg, moduleName, deviceId, data, len) != NSTACKX_EOK) {
         return NSTACKX_EFAILED;
     }
 
@@ -1516,7 +1514,8 @@ int32_t NSTACKX_SendMsg(const char *moduleName, const char *deviceId, const uint
     }
 
     MsgCtx msg;
-    if (MsgCtxInit(&msg, moduleName, deviceId, data, len, INVALID_TYPE) != NSTACKX_EOK) {
+    msg.type = INVALID_TYPE;
+    if (MsgCtxInit(&msg, moduleName, deviceId, data, len) != NSTACKX_EOK) {
         return NSTACKX_EFAILED;
     }
 
@@ -1698,7 +1697,7 @@ void NotifyDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceCoun
     }
 }
 
-void NotificationReceived(const NotificationConfig *notification)
+void NotificationReceived(const NSTACKX_NotificationConfig *notification)
 {
     if (g_parameter.onNotificationReceived != NULL) {
         DFINDER_LOGI(TAG, "notify callback: notification received");
@@ -1831,14 +1830,14 @@ int NSTACKX_DFinderSetEventFunc(void *softobj, DFinderEventFunc func)
     return SetEventFunc(softobj, func);
 }
 
-static int32_t CheckNotificationConfig(const NotificationConfig *config)
+static int32_t CheckNotificationConfig(const NSTACKX_NotificationConfig *config)
 {
     if (config == NULL) {
         DFINDER_LOGE(TAG, "notification config passed in is null");
         return NSTACKX_EINVAL;
     }
     if (config->businessType >= NSTACKX_BUSINESS_TYPE_MAX) {
-        DFINDER_LOGE(TAG, "invalid business type %d in notification config", config->businessType);
+        DFINDER_LOGE(TAG, "invalid business type %hhu in notification config", config->businessType);
         return NSTACKX_EINVAL;
     }
     if (config->msg == NULL) {
@@ -1852,7 +1851,7 @@ static int32_t CheckNotificationConfig(const NotificationConfig *config)
     }
     // advertise count: [0, 100], first interval in intervalMs should be 0
     if (config->intervalLen == 0 || config->intervalLen > NSTACKX_MAX_ADVERTISE_COUNT) {
-        DFINDER_LOGE(TAG, "invalid interval len %u in notification config, max support %d",
+        DFINDER_LOGE(TAG, "invalid interval len %hhu in notification config, max support %d",
             config->intervalLen, NSTACKX_MAX_ADVERTISE_COUNT);
         return NSTACKX_EINVAL;
     }
@@ -1868,7 +1867,7 @@ static int32_t CheckNotificationConfig(const NotificationConfig *config)
     for (size_t i = 1; i < config->intervalLen; ++i) {
         if (config->intervalsMs[i] < NSTACKX_MIN_ADVERTISE_INTERVAL ||
             config->intervalsMs[i] > NSTACKX_MAX_ADVERTISE_INTERVAL) {
-            DFINDER_LOGE(TAG, "invalid interval[%zu] = %u, support max: %d min: %d",
+            DFINDER_LOGE(TAG, "invalid interval[%zu] = %hu, support max: %d min: %d",
                 i, config->intervalsMs[i], NSTACKX_MAX_ADVERTISE_INTERVAL, NSTACKX_MIN_ADVERTISE_INTERVAL);
             return NSTACKX_EINVAL;
         }
@@ -1876,7 +1875,7 @@ static int32_t CheckNotificationConfig(const NotificationConfig *config)
     return NSTACKX_EOK;
 }
 
-static int32_t CopyNotificationConfig(NotificationConfig *dst, const NotificationConfig *src)
+static int32_t CopyNotificationConfig(NSTACKX_NotificationConfig *dst, const NSTACKX_NotificationConfig *src)
 {
     dst->businessType = src->businessType;
     if (strncpy_s(dst->msg, src->msgLen + 1, src->msg, src->msgLen) != EOK) {
@@ -1893,7 +1892,7 @@ static int32_t CopyNotificationConfig(NotificationConfig *dst, const Notificatio
 
 static void NotificationInner(void *argument)
 {
-    NotificationConfig *config = (NotificationConfig *)argument;
+    NSTACKX_NotificationConfig *config = (NSTACKX_NotificationConfig *)argument;
     int32_t retMsg = LocalizeNotificationMsg(config->msg);
     int32_t retInterval = LocalizeNotificationInterval(config->intervalsMs, config->intervalLen);
     free(config->intervalsMs);
@@ -1906,7 +1905,7 @@ static void NotificationInner(void *argument)
     CoapServiceNotification();
 }
 
-int32_t NSTACKX_SendNotification(const NotificationConfig *config)
+int32_t NSTACKX_SendNotification(const NSTACKX_NotificationConfig *config)
 {
     DFINDER_LOGI(TAG, "begin to call NSTACKX_SendNotification");
 
@@ -1917,9 +1916,9 @@ int32_t NSTACKX_SendNotification(const NotificationConfig *config)
     if (CheckNotificationConfig(config) != NSTACKX_EOK) {
         return NSTACKX_EINVAL;
     }
-    NotificationConfig *dupConfig = (NotificationConfig *)malloc(sizeof(NotificationConfig));
+    NSTACKX_NotificationConfig *dupConfig = (NSTACKX_NotificationConfig *)calloc(1, sizeof(NSTACKX_NotificationConfig));
     if (dupConfig == NULL) {
-        DFINDER_LOGE(TAG, "malloc for notification config fail, size wanted: %zu", sizeof(NotificationConfig));
+        DFINDER_LOGE(TAG, "calloc for notification config fail, size wanted: %zu", sizeof(NSTACKX_NotificationConfig));
         return NSTACKX_ENOMEM;
     }
     dupConfig->msg = (char *)calloc((config->msgLen + 1), sizeof(char));
@@ -1928,9 +1927,9 @@ int32_t NSTACKX_SendNotification(const NotificationConfig *config)
         free(dupConfig);
         return NSTACKX_ENOMEM;
     }
-    dupConfig->intervalsMs = (uint32_t *)malloc(sizeof(uint32_t) * (config->intervalLen));
+    dupConfig->intervalsMs = (uint16_t *)calloc(config->intervalLen, sizeof(uint16_t));
     if (dupConfig->intervalsMs == NULL) {
-        DFINDER_LOGE(TAG, "malloc for intervals fail, size wanted: %zu", sizeof(uint32_t) * (config->intervalLen));
+        DFINDER_LOGE(TAG, "calloc for intervals fail, size wanted: %zu", sizeof(uint16_t) * (config->intervalLen));
         free(dupConfig->msg);
         free(dupConfig);
         return NSTACKX_ENOMEM;
@@ -1964,6 +1963,10 @@ int32_t NSTACKX_StopSendNotification(uint8_t businessType)
     if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
         DFINDER_LOGE(TAG, "dfinder not inited");
         return NSTACKX_EFAILED;
+    }
+    if (businessType >= NSTACKX_BUSINESS_TYPE_MAX) {
+        DFINDER_LOGE(TAG, "invalid business type %hhu to stop send notification", businessType);
+        return NSTACKX_EINVAL;
     }
     if (PostEvent(&g_eventNodeChain, g_epollfd, NotificationStop, NULL) != NSTACKX_EOK) {
         DFINDER_LOGE(TAG, "post event failed to run stop device discover");

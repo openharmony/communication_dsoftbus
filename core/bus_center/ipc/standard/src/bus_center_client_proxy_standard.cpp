@@ -36,7 +36,7 @@ int32_t BusCenterClientProxy::OnChannelLinkDown(const char *networkId, int32_t r
     return SOFTBUS_OK;
 }
 
-int32_t BusCenterClientProxy::OnChannelClosed(int32_t channelId, int32_t channelType)
+int32_t BusCenterClientProxy::OnChannelClosed(int32_t channelId, int32_t channelType, int32_t messageType)
 {
     return SOFTBUS_OK;
 }

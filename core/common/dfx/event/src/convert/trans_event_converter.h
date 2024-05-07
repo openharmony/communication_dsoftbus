@@ -57,9 +57,12 @@ TRANS_ASSIGNER(AnonymizeString, PeerUdid, peerUdid)
 TRANS_ASSIGNER(String, PeerDevVer, peerDevVer)
 TRANS_ASSIGNER(String, CallerPkg, callerPkg)
 TRANS_ASSIGNER(String, CalleePkg, calleePkg)
+TRANS_ASSIGNER(String, FirstTokenName, firstTokenName)
+TRANS_ASSIGNER(Uint32, FirstTokenId, firstTokenId)
+TRANS_ASSIGNER(Int32,  FirstTokenType, firstTokenType)
 
-#define TRANS_ASSIGNER_SIZE 23 // Size of g_transAssigners
-static const HiSysEventParamAssigner g_transAssigners[] = {
+#define TRANS_ASSIGNER_SIZE 26 // Size of TRANS_ASSIGNERS
+static const HiSysEventParamAssigner TRANS_ASSIGNERS[] = {
     { "STAGE_RES",        HISYSEVENT_INT32,  TransAssignerResult        },
     { "ERROR_CODE",       HISYSEVENT_INT32,  TransAssignerErrcode       },
     { "SOCKET_NAME",      HISYSEVENT_STRING, TransAssignerSocketName    },
@@ -83,6 +86,9 @@ static const HiSysEventParamAssigner g_transAssigners[] = {
     { "PEER_DEV_VER",     HISYSEVENT_STRING, TransAssignerPeerDevVer    },
     { "HOST_PKG",         HISYSEVENT_STRING, TransAssignerCallerPkg     },
     { "TO_CALL_PKG",      HISYSEVENT_STRING, TransAssignerCalleePkg     },
+    { "FIRST_TOKEN_NAME", HISYSEVENT_STRING, TransAssignerFirstTokenName},
+    { "FIRST_TOKEN_ID",   HISYSEVENT_UINT32, TransAssignerFirstTokenId  },
+    { "FIRST_TOKEN_TYPE", HISYSEVENT_INT32, TransAssignerFirstTokenType },
     // Modification Note: remember updating TRANS_ASSIGNER_SIZE
 };
 
@@ -151,7 +157,7 @@ static inline size_t ConvertTransForm2Param(HiSysEventParam params[], size_t siz
         return validSize;
     }
     for (size_t i = 0; i < size; ++i) {
-        HiSysEventParamAssigner assigner = g_transAssigners[i];
+        HiSysEventParamAssigner assigner = TRANS_ASSIGNERS[i];
         if (assigner.Assign(assigner.name, assigner.type, form, &params[validSize])) {
             ++validSize;
         }

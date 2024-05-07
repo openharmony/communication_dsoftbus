@@ -36,9 +36,7 @@
       "dsoftbus_feature_trans_udp_file",
       "dsoftbus_get_devicename",
       "dsoftbus_feature_product_config_path",
-      "dsoftbus_feature_ifname_prefix",
       "dsoftbus_feature_lnn_wifiservice_dependence",
-      "dsoftbus_standard_feature_dfinder_support_multi_nif",
       "dsoftbus_feature_protocol_newip",
       "dsoftbus_feature_ex_kits",
       "dsoftbus_feature_wifi_notify"
@@ -54,9 +52,14 @@
         "bounds_checking_function",
         "bundle_framework",
         "common_event_service",
+        "bounds_checking_function",
+        "cJSON",
+        "openssl",
         "data_share",
+        "kv_store",
         "device_auth",
         "device_info_manager",
+        "device_certificate_manager",
         "drivers_interface_wlan",
         "json",
         "hicollie",
@@ -82,11 +85,11 @@
         "libcoap"
       ],
       "third_party": [
-        "bounds_checking_function",
         "cJSON",
         "json",
         "mbedtls",
         "openssl",
+        "bounds_checking_function",
         "sqlite"
       ]
     },
@@ -145,6 +148,7 @@
         "//foundation/communication/dsoftbus/tests/sdk/transmission:benchmarktest",
         "//foundation/communication/dsoftbus/tests/sdk/transmission:integration_test",
         "//foundation/communication/dsoftbus/tests/sdk/frame/common:unittest",
+        "//foundation/communication/dsoftbus/tests/core/adapter:unittest",
         "//foundation/communication/dsoftbus/tests/sdk/frame/standard:unittest",
         "//foundation/communication/dsoftbus/tests/sdk/frame:fuzztest"
       ]

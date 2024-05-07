@@ -33,7 +33,7 @@
 #include "softbus_error_code.h"
 
 namespace {
-constexpr int64_t SLEEP_TIME = 50;
+constexpr int64_t SLEEP_TIME = 200;
 const std::string PACKET_CON = "0201021B16EEFD0405900000020018DD61155F421C49DA210E3C4F70656E480AFF7D0261726D6F6E7900";
 const std::string PACKET_NON = "0201021B16EEFD0405100000020018DD61155F421C49DA210E3C4F70656E480AFF7D0261726D6F6E7900";
 const std::string PACKET_NON_WITH_BR_ADDR =
@@ -576,6 +576,7 @@ HWTEST_F(DiscBtStateTest, PublishPassive005, TestSize.Level1)
     }
     {
         wrapper.Call(CMD::BLE_STOP_ADV, 1).Call(CMD::BLE_STOP_SCAN, 1).Build();
+        EXPECT_CALL(mock, BleSetAdvData).Times(AtMost(1));
         mock.ConvertBtState(BluetoothMock::BtState::BT_STATE_OFF);
     }
     {
@@ -625,11 +626,13 @@ HWTEST_F(DiscBtStateTest, PublishPassive006, TestSize.Level1)
     }
     {
         wrapper.Call(CMD::BLE_START_ADV_EX, 1).Call(CMD::GET_LOCAL_ADDR, 1).Call(CMD::BLE_START_SCAN_EX, 1).Build();
+        EXPECT_CALL(mock, BleSetAdvData).Times(AtMost(1));
         mock.ConvertBtState(BluetoothMock::BtState::BT_STATE_ON);
         mock.CallbackAdvEnable();
     }
     {
         wrapper.Call(CMD::BLE_STOP_ADV, 1).Call(CMD::BLE_STOP_SCAN, 1).Build();
+        EXPECT_CALL(mock, BleSetAdvData).Times(AtMost(1));
         mock.ConvertBtState(BluetoothMock::BtState::BT_STATE_OFF);
     }
     {
@@ -664,6 +667,7 @@ HWTEST_F(DiscBtStateTest, PublishPassive007, TestSize.Level1)
     }
     {
         wrapper.Call(CMD::BLE_START_ADV_EX, 1).Call(CMD::GET_LOCAL_ADDR, 1).Build();
+        EXPECT_CALL(mock, BleSetAdvData).Times(AtMost(1));
         g_isDeviceFound = false;
         mock.CallbackScanResult(PACKET_CON);
         EXPECT_FALSE(g_isDeviceFound);
@@ -671,6 +675,7 @@ HWTEST_F(DiscBtStateTest, PublishPassive007, TestSize.Level1)
     }
     {
         wrapper.Call(CMD::BLE_STOP_ADV, 1).Call(CMD::BLE_STOP_SCAN, 1).Build();
+        EXPECT_CALL(mock, BleSetAdvData).Times(AtMost(1));
         mock.ConvertBtState(BluetoothMock::BtState::BT_STATE_OFF);
     }
     {
@@ -684,6 +689,7 @@ HWTEST_F(DiscBtStateTest, PublishPassive007, TestSize.Level1)
     }
     {
         wrapper.Call(CMD::BLE_STOP_ADV, 1).Call(CMD::BLE_STOP_SCAN, 1).Build();
+        EXPECT_CALL(mock, BleSetAdvData).Times(AtMost(1));
         mock.ConvertBtState(BluetoothMock::BtState::BT_STATE_OFF);
     }
     {

@@ -122,7 +122,7 @@ static int32_t JsonObjectPackRequestEx(const AppInfo *appInfo, cJSON *json, unsi
     (void)AddNumberToJsonObject(json, TRANS_FLAGS, TRANS_FLAG_HAS_CHANNEL_AUTH);
     (void)AddNumberToJsonObject(json, MY_HANDLE_ID, appInfo->myHandleId);
     (void)AddNumberToJsonObject(json, PEER_HANDLE_ID, appInfo->peerHandleId);
-    (void)AddNumberToJsonObject(json, JSON_KEY_FIRST_TOKEN_ID, appInfo->firstTokenId);
+    (void)AddNumberToJsonObject(json, JSON_KEY_CALLING_TOKEN_ID, (int32_t)appInfo->callingTokenId);
 
     return SOFTBUS_OK;
 }
@@ -286,8 +286,8 @@ int32_t UnpackRequest(const cJSON *msg, AppInfo *appInfo)
     int32_t transFlag = TRANS_FLAG_HAS_CHANNEL_AUTH;
     (void)GetJsonObjectNumberItem(msg, AUTO_CLOSE_TIME, (int32_t *)&appInfo->autoCloseTime);
     (void)GetJsonObjectNumberItem(msg, TRANS_FLAGS, &transFlag);
-    if (!GetJsonObjectNumberItem(msg, JSON_KEY_FIRST_TOKEN_ID, &appInfo->firstTokenId)) {
-        appInfo->firstTokenId = 0;
+    if (!GetJsonObjectNumberItem(msg, JSON_KEY_CALLING_TOKEN_ID, (int32_t *)&appInfo->callingTokenId)) {
+        appInfo->callingTokenId = TOKENID_NOT_SET;
     }
     return SOFTBUS_OK;
 }

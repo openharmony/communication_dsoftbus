@@ -92,10 +92,8 @@ int32_t TransOnChannelLinkDown(const char *networkId, int32_t routeType)
     return SOFTBUS_OK;
 }
 
-int32_t TransOnChannelClosed(int32_t channelId, int32_t channelType, ShutdownReason reason)
+static int32_t NofifyChannelClosed(int32_t channelId, int32_t channelType, ShutdownReason reason)
 {
-    TRANS_LOGI(TRANS_SDK,
-        "[client]: channelId=%{public}d, channelType=%{public}d", channelId, channelType);
     switch (channelType) {
         case CHANNEL_TYPE_AUTH:
             return ClientTransAuthOnChannelClosed(channelId, reason);
@@ -110,6 +108,35 @@ int32_t TransOnChannelClosed(int32_t channelId, int32_t channelType, ShutdownRea
     }
 }
 
+static int32_t NofifyCloseAckReceived(int32_t channelId, int32_t channelType)
+{
+    switch (channelType) {
+        case CHANNEL_TYPE_UDP:
+            return TransUdpOnCloseAckReceived(channelId);
+        case CHANNEL_TYPE_AUTH:
+        case CHANNEL_TYPE_PROXY:
+        case CHANNEL_TYPE_TCP_DIRECT:
+        default:
+            TRANS_LOGI(TRANS_SDK, "recv unsupport channelType=%{public}d", channelType);
+            return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
+    }
+}
+
+int32_t TransOnChannelClosed(int32_t channelId, int32_t channelType, int32_t messageType, ShutdownReason reason)
+{
+    TRANS_LOGI(TRANS_SDK,
+        "channelId=%{public}d, channelType=%{public}d, messageType=%{public}d", channelId, channelType, messageType);
+    switch (messageType) {
+        case MESSAGE_TYPE_NOMAL:
+            return NofifyChannelClosed(channelId, channelType, reason);
+        case MESSAGE_TYPE_CLOSE_ACK:
+            return NofifyCloseAckReceived(channelId, channelType);
+        default:
+            TRANS_LOGI(TRANS_SDK, "invalid messageType=%{public}d", messageType);
+            return SOFTBUS_TRANS_INVALID_MESSAGE_TYPE;
+    }
+}
+
 int32_t TransOnChannelMsgReceived(int32_t channelId, int32_t channelType,
     const void *data, unsigned int len, SessionPktType type)
 {
@@ -117,7 +144,7 @@ int32_t TransOnChannelMsgReceived(int32_t channelId, int32_t channelType,
         TRANS_LOGE(TRANS_MSG, "param invalid");
         return SOFTBUS_INVALID_PARAM;
     }
-    TRANS_LOGI(TRANS_MSG,
+    TRANS_LOGD(TRANS_MSG,
         "[client]: channelId=%{public}d, channelType=%{public}d", channelId, channelType);
     switch (channelType) {
         case CHANNEL_TYPE_AUTH:

@@ -25,6 +25,7 @@
 #include "auth_session_fsm.h"
 #include "auth_session_key.h"
 #include "common_list.h"
+#include "lnn_lane_interface.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -66,6 +67,12 @@ void AuthManagerSetAuthPassed(int64_t authSeq, const AuthSessionInfo *info);
 void AuthManagerSetAuthFailed(int64_t authSeq, const AuthSessionInfo *info, int32_t reason);
 void AuthManagerSetAuthFinished(int64_t authSeq, const AuthSessionInfo *info);
 
+int32_t DelAuthReqInfoByAuthHandle(const AuthHandle *authHandle);
+void AuthFreeLane(const AuthHandle *authHandle);
+int32_t GetAuthLinkTypeList(const char *networkId, AuthLinkTypeList *linkTypeList);
+int32_t GetAuthConn(const char *uuid, LaneLinkType laneType, AuthConnInfo *connInfo);
+int32_t AuthAllocLane(const char *networkId, uint32_t authRequestId, AuthConnCallback *callback);
+
 /* Note: must call DelAuthManager to free. */
 AuthManager *GetAuthManagerByAuthId(int64_t authId);
 AuthManager *GetAuthManagerByConnInfo(const AuthConnInfo *connInfo, bool isServer);
@@ -85,6 +92,7 @@ bool AuthDeviceCheckConnInfo(const char* uuid, AuthLinkType type, bool checkConn
 void AuthDeviceGetLatestIdByUuid(const char *uuid, AuthLinkType type, AuthHandle *authHandle);
 int64_t AuthDeviceGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer);
 int64_t AuthDeviceGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer);
+int32_t AuthDeviceGetAuthHandleByIndex(const char *udid, bool isServer, int32_t index, AuthHandle *authHandle);
 AuthManager *NewAuthManager(int64_t authSeq, const AuthSessionInfo *info);
 
 int32_t AuthDeviceEncrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
@@ -100,6 +108,7 @@ int32_t AuthDeviceGetVersion(int64_t authId, SoftBusVersion *version);
 int32_t AuthDeviceGetServerSide(int64_t authId, bool *isServer);
 int32_t AuthDeviceInit(const AuthTransCallback *callback);
 int32_t RegTrustListenerOnHichainSaStart(void);
+int32_t GetHmlOrP2pAuthHandle(AuthHandle **authHandle, int32_t *num);
 void AuthDeviceDeinit(void);
 
 #ifdef __cplusplus

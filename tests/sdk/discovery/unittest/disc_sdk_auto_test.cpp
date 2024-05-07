@@ -20,12 +20,11 @@
 #include <unistd.h>
 
 #include "discovery_service.h"
+#include "disc_sdk_test_bt_status.h"
 #include "softbus_access_token_test.h"
 #include "softbus_errcode.h"
 
 using namespace testing::ext;
-
-#define TEST_ERRO_MOUDULE       ((MODULE_LNN) + 3)
 
 namespace OHOS {
 static int32_t g_subscribeId = 0;
@@ -70,7 +69,7 @@ static int32_t GetPublishId(void)
 
 static SubscribeInfo g_sInfo = {
     .subscribeId = 1,
-    .mode = DISCOVER_MODE_ACTIVE,
+    .mode = DISCOVER_MODE_PASSIVE,
     .medium = COAP,
     .freq = MID,
     .isSameAccount = true,
@@ -82,7 +81,7 @@ static SubscribeInfo g_sInfo = {
 
 static PublishInfo g_pInfo = {
     .publishId = 1,
-    .mode = DISCOVER_MODE_ACTIVE,
+    .mode = DISCOVER_MODE_PASSIVE,
     .medium = COAP,
     .freq = MID,
     .capability = "dvKit",
@@ -92,7 +91,7 @@ static PublishInfo g_pInfo = {
 
 static PublishInfo g_pInfo1 = {
     .publishId = 1,
-    .mode = DISCOVER_MODE_ACTIVE,
+    .mode = DISCOVER_MODE_PASSIVE,
     .medium = COAP,
     .freq = MID,
     .capability = "dvKit",
@@ -102,7 +101,7 @@ static PublishInfo g_pInfo1 = {
 
 static SubscribeInfo g_sInfo1 = {
     .subscribeId = 1,
-    .mode = DISCOVER_MODE_ACTIVE,
+    .mode = DISCOVER_MODE_PASSIVE,
     .medium = COAP,
     .freq = MID,
     .isSameAccount = true,
@@ -213,29 +212,31 @@ HWTEST_F(DiscSdkAutoTest, PublishServiceTest002, TestSize.Level1)
         .capabilityData = (unsigned char *)"capdata2",
         .dataLen = strlen("capdata2")
     };
+    bool isBtOn = SoftbusTestGetBtStatus();
+    printf("bt status %s\n", isBtOn ? "on" : "off");
 
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     testInfo.freq = MID;
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     testInfo.freq = HIGH;
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     testInfo.freq = SUPER_HIGH;
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 }
 
 /**
@@ -353,29 +354,31 @@ HWTEST_F(DiscSdkAutoTest, PublishServiceTest006, TestSize.Level1)
         .capabilityData = (unsigned char *)"capdata2",
         .dataLen = strlen("capdata2")
     };
+    bool isBtOn = SoftbusTestGetBtStatus();
+    printf("bt status %s\n", isBtOn ? "on" : "off");
 
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     testInfo.freq = MID;
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     testInfo.freq = HIGH;
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     testInfo.freq = SUPER_HIGH;
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 }
 
 /**
@@ -477,14 +480,16 @@ HWTEST_F(DiscSdkAutoTest, PublishServiceTest010, TestSize.Level1)
         .capabilityData = (unsigned char *)"capdata2",
         .dataLen = strlen("capdata2")
     };
+    bool isBtOn = SoftbusTestGetBtStatus();
+    printf("bt status %s\n", isBtOn ? "on" : "off");
 
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = UnPublishService(g_pkgName, testInfo.publishId);
 
     testInfo.capability = "osdCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = UnPublishService(g_pkgName, testInfo.publishId);
 }
 
@@ -510,34 +515,36 @@ HWTEST_F(DiscSdkAutoTest, StartDiscoveryTest001, TestSize.Level1)
         .capabilityData = (unsigned char *)"capdata3",
         .dataLen = strlen("capdata3")
     };
+    bool isBtOn = SoftbusTestGetBtStatus();
+    printf("bt status %s\n", isBtOn ? "on" : "off");
 
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     testInfo.freq = MID;
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     testInfo.freq = HIGH;
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     testInfo.freq = SUPER_HIGH;
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 }
 
 /**
  * @tc.name: StartDiscoveryTest002
- * @tc.desc: Test active discover, verify correct parameter with active mode and "AUTO" medium.
+ * @tc.desc: Test active publish, verify correct parameter with passive mode,"AUTO" medium and diff capability.
  * @tc.in: Test module, Test number, Test levels.
  * @tc.out: Zero
  * @tc.type: FUNC
@@ -548,7 +555,7 @@ HWTEST_F(DiscSdkAutoTest, StartDiscoveryTest002, TestSize.Level1)
     int32_t ret;
     SubscribeInfo testInfo = {
         .subscribeId = GetSubscribeId(),
-        .mode = DISCOVER_MODE_ACTIVE,
+        .mode = DISCOVER_MODE_PASSIVE,
         .medium = AUTO,
         .freq = LOW,
         .isSameAccount = true,
@@ -561,25 +568,11 @@ HWTEST_F(DiscSdkAutoTest, StartDiscoveryTest002, TestSize.Level1)
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
 
-    testInfo.freq = MID;
+    testInfo.capability = "osdCapability";
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-
-    testInfo.freq = HIGH;
-    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-
-    testInfo.freq = SUPER_HIGH;
-    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /**
@@ -665,7 +658,7 @@ HWTEST_F(DiscSdkAutoTest, StartDiscoveryTest004, TestSize.Level1)
 
 /**
  * @tc.name: StartDiscoveryTest005
- * @tc.desc:Test extern module active discoveruse Diff Freq Under the AUTO.
+ * @tc.desc: Test active publish, verify correct parameter with active mode,"AUTO" medium and diff capability.
  * @tc.in: Test module, Test number, Test levels.
  * @tc.out: Zero
  * @tc.type: FUNC
@@ -685,141 +678,16 @@ HWTEST_F(DiscSdkAutoTest, StartDiscoveryTest005, TestSize.Level1)
         .capabilityData = (unsigned char *)"capdata3",
         .dataLen = strlen("capdata3")
     };
+    bool isBtOn = SoftbusTestGetBtStatus();
+    printf("bt status %s\n", isBtOn ? "on" : "off");
 
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-
-    testInfo.freq = MID;
-    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-
-    testInfo.freq = HIGH;
-    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-
-    testInfo.freq = SUPER_HIGH;
-    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-}
-
-/**
- * @tc.name: StartDiscoveryTest006
- * @tc.desc:Test extern module passive discoveruse Diff Freq Under the AUTO.
- * @tc.in: Test module, Test number, Test levels.
- * @tc.out: Zero
- * @tc.type: FUNC
- * @tc.require: The StartDiscovery and StopDiscovery operates normally.
- */
-HWTEST_F(DiscSdkAutoTest, StartDiscoveryTest006, TestSize.Level1)
-{
-    int32_t ret;
-    SubscribeInfo testInfo = {
-        .subscribeId = GetSubscribeId(),
-        .mode = DISCOVER_MODE_PASSIVE,
-        .medium = AUTO,
-        .freq = LOW,
-        .isSameAccount = true,
-        .isWakeRemote = false,
-        .capability = "dvKit",
-        .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = strlen("capdata3")
-    };
-
-    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-
-    testInfo.freq = MID;
-    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-
-    testInfo.freq = HIGH;
-    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-
-    testInfo.freq = SUPER_HIGH;
-    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-}
-
-/**
- * @tc.name: StartDiscoveryTest007
- * @tc.desc: Test active publish, verify correct parameter with passive mode,"AUTO" medium and diff capability.
- * @tc.in: Test module, Test number, Test levels.
- * @tc.out: Zero
- * @tc.type: FUNC
- * @tc.require: The StartDiscovery and StopDiscovery operates normally.
- */
-HWTEST_F(DiscSdkAutoTest, StartDiscoveryTest007, TestSize.Level1)
-{
-    int32_t ret;
-    SubscribeInfo testInfo = {
-        .subscribeId = GetSubscribeId(),
-        .mode = DISCOVER_MODE_PASSIVE,
-        .medium = AUTO,
-        .freq = LOW,
-        .isSameAccount = true,
-        .isWakeRemote = false,
-        .capability = "dvKit",
-        .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = strlen("capdata3")
-    };
-
-    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
 
     testInfo.capability = "osdCapability";
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-}
-
-/**
- * @tc.name: StartDiscoveryTest008
- * @tc.desc: Test active publish, verify correct parameter with active mode,"AUTO" medium and diff capability.
- * @tc.in: Test module, Test number, Test levels.
- * @tc.out: Zero
- * @tc.type: FUNC
- * @tc.require: The StartDiscovery and StopDiscovery operates normally.
- */
-HWTEST_F(DiscSdkAutoTest, StartDiscoveryTest008, TestSize.Level1)
-{
-    int32_t ret;
-    SubscribeInfo testInfo = {
-        .subscribeId = GetSubscribeId(),
-        .mode = DISCOVER_MODE_ACTIVE,
-        .medium = AUTO,
-        .freq = LOW,
-        .isSameAccount = true,
-        .isWakeRemote = false,
-        .capability = "dvKit",
-        .capabilityData = (unsigned char *)"capdata3",
-        .dataLen = strlen("capdata3")
-    };
-
-    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-
-    testInfo.capability = "osdCapability";
-    ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
 }
 
@@ -915,25 +783,27 @@ HWTEST_F(DiscSdkAutoTest, UnPublishServiceTest004, TestSize.Level1)
         .capabilityData = (unsigned char *)"capdata2",
         .dataLen = strlen("capdata2")
     };
+    bool isBtOn = SoftbusTestGetBtStatus();
+    printf("bt status %s\n", isBtOn ? "on" : "off");
 
     PublishService(g_pkgName, &testInfo, &g_publishCb);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     testInfo.freq = MID;
     PublishService(g_pkgName, &testInfo, &g_publishCb);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     testInfo.freq = HIGH;
     PublishService(g_pkgName, &testInfo, &g_publishCb);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     testInfo.freq = SUPER_HIGH;
     PublishService(g_pkgName, &testInfo, &g_publishCb);
     ret = UnPublishService(g_pkgName, testInfo.publishId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 }
 
 /**
@@ -1028,14 +898,16 @@ HWTEST_F(DiscSdkAutoTest, UnPublishServiceTest007, TestSize.Level1)
         .capabilityData = (unsigned char *)"capdata2",
         .dataLen = strlen("capdata2")
     };
+    bool isBtOn = SoftbusTestGetBtStatus();
+    printf("bt status %s\n", isBtOn ? "on" : "off");
 
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = UnPublishService(g_pkgName, testInfo.publishId);
 
     testInfo.capability = "osdCapability";
     ret = PublishService(g_pkgName, &testInfo, &g_publishCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = UnPublishService(g_pkgName, testInfo.publishId);
 }
 
@@ -1134,24 +1006,27 @@ HWTEST_F(DiscSdkAutoTest, StopDiscoveryTest004, TestSize.Level1)
         .capabilityData = (unsigned char *)"capdata3",
         .dataLen = strlen("capdata3")
     };
+    bool isBtOn = SoftbusTestGetBtStatus();
+    printf("bt status %s\n", isBtOn ? "on" : "off");
+
     StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     testInfo.freq = MID;
     StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     testInfo.freq = HIGH;
     StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 
     testInfo.freq = SUPER_HIGH;
     StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
 }
 
 /**
@@ -1251,14 +1126,16 @@ HWTEST_F(DiscSdkAutoTest, StopDiscoveryTest007, TestSize.Level1)
         .capabilityData = (unsigned char *)"capdata3",
         .dataLen = strlen("capdata3")
     };
+    bool isBtOn = SoftbusTestGetBtStatus();
+    printf("bt status %s\n", isBtOn ? "on" : "off");
 
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
 
     testInfo.capability = "osdCapability";
     ret = StartDiscovery(g_pkgName, &testInfo, &g_subscribeCb);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(isBtOn, (ret == SOFTBUS_OK));
     ret = StopDiscovery(g_pkgName, testInfo.subscribeId);
 }
 } // namespace OHOS

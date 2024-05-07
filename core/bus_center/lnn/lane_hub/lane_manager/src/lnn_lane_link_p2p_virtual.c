@@ -16,10 +16,10 @@
 #include "lnn_lane_link_p2p.h"
 #include "softbus_errcode.h"
 
-int32_t LnnConnectP2p(const LinkRequest *request, uint32_t laneLinkReqId, const LaneLinkCb *callback)
+int32_t LnnConnectP2p(const LinkRequest *request, uint32_t laneReqId, const LaneLinkCb *callback)
 {
     (void)request;
-    (void)laneLinkReqId;
+    (void)laneReqId;
     (void)callback;
     return SOFTBUS_P2P_NOT_SUPPORT;
 }
