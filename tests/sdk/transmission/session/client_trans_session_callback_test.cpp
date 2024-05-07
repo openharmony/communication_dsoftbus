@@ -703,7 +703,7 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest15, TestS
     lifecycle.sessionState = SESSION_STATE_CANCELLING;
     lifecycle.bindErrCode = SOFTBUS_TRANS_STOP_BIND_BY_TIMEOUT;
     int32_t ret = HandleSyncBindSuccess(1, &lifecycle);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_STOP_BIND_BY_TIMEOUT);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     lifecycle.sessionState = SESSION_STATE_INIT;
     ret = HandleSyncBindSuccess(1, &lifecycle);

@@ -1170,6 +1170,7 @@ void ClientShutdown(int32_t socket, int32_t cancelReason)
         if (lifecycle.sessionState == SESSION_STATE_OPENED) {
             (void)ClientSignalSyncBind(socket, cancelReason);
         }
+        SetSessionInitInfoById(socket);
     }
     if (cancelReason == SOFTBUS_TRANS_STOP_BIND_BY_TIMEOUT) {
         TRANS_LOGI(TRANS_SDK, "Bind timeout Shutdown ok, no delete socket: socket=%{public}d", socket);

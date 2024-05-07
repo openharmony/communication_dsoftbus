@@ -191,7 +191,6 @@ static int32_t HandleSyncBindSuccess(int32_t sessionId, const SocketLifecycleDat
     if (lifecycle->sessionState == SESSION_STATE_CANCELLING) {
         TRANS_LOGW(
             TRANS_SDK, "socket=%{public}d is cancelling, bindErrCode=%{public}d", sessionId, lifecycle->bindErrCode);
-        (void)ClientSignalSyncBind(sessionId, SOFTBUS_TRANS_STOP_BIND_BY_CANCEL);
         return SOFTBUS_OK;
     }
 
